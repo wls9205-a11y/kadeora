@@ -75,13 +75,13 @@ async function handler(_req: NextRequest) {
   const sb = getSupabaseAdmin();
 
   // 대상: 재개발/재건축이면서 total_households가 NULL인 건 (우선 대형 순)
-  const { data: targets } = await sb
+  const { data: targets } = await (sb
     .from('apt_subscriptions')
     .select('id, house_nm, region_nm, tot_supply_hshld_co, total_dong_count, max_floor, constructor_nm')
     .in('project_type', ['재개발', '재건축'])
     .is('total_households', null)
     .order('tot_supply_hshld_co', { ascending: false })
-    .limit(15); // rate limit 고려 배치 15건
+    .limit(15) as any); // rate limit 고려 배치 15건
 
   if (!targets?.length) {
     return { processed: 0, created: 0, updated: 0, failed: 0, metadata: { message: 'No targets' } };
@@ -97,7 +97,7 @@ async function handler(_req: NextRequest) {
 
     try {
       // 1. 검색
-      const searchResult = await searchComplex(t.house_nm);
+      let searchResult = await searchComplex(t.house_nm);
       if (!searchResult) {
         // 단지명 축약해서 재시도
         const shortName = t.house_nm.split(' ').slice(0, 2).join(' ');
@@ -107,22 +107,22 @@ async function handler(_req: NextRequest) {
           failed++;
           continue;
         }
-        Object.assign(searchResult!, retry);
+        searchResult = retry;
       }
 
       // 유사도 검증
-      const sim = similarity(t.house_nm, searchResult!.name);
+      const sim = similarity(t.house_nm, searchResult.name);
       if (sim < 0.4) {
-        results.push({ id: t.id, name: t.house_nm, naver: searchResult!.name, sim: sim.toFixed(2), status: 'name_mismatch' });
+        results.push({ id: t.id, name: t.house_nm, naver: searchResult.name, sim: sim.toFixed(2), status: 'name_mismatch' });
         failed++;
         continue;
       }
 
       // 2. 상세 조회
       await new Promise(r => setTimeout(r, 500));
-      const overview = await getComplexOverview(searchResult!.complexNo);
+      const overview = await getComplexOverview(searchResult.complexNo);
       if (!overview || !overview.totalHouseholdCount || overview.totalHouseholdCount <= 0) {
-        results.push({ id: t.id, name: t.house_nm, complexNo: searchResult!.complexNo, status: 'no_household_data' });
+        results.push({ id: t.id, name: t.house_nm, complexNo: searchResult.complexNo, status: 'no_household_data' });
         failed++;
         continue;
       }
@@ -139,13 +139,13 @@ async function handler(_req: NextRequest) {
         total_households: overview.totalHouseholdCount,
       };
       // 동수/최고층/주차 등 보충
-      if (overview.totalDongCount > 0 && (!t.total_dong_count || t.total_dong_count === 0)) {
+      if ((overview.totalDongCount ?? 0) > 0 && (!t.total_dong_count || t.total_dong_count === 0)) {
         updateData.total_dong_count = overview.totalDongCount;
       }
-      if (overview.highFloor && overview.highFloor > 0 && (!t.max_floor || t.max_floor === 0)) {
+      if ((overview.highFloor ?? 0) > 0 && (!t.max_floor || t.max_floor === 0)) {
         updateData.max_floor = overview.highFloor;
       }
-      if (overview.parkingCountByHousehold && overview.parkingCountByHousehold > 0) {
+      if ((overview.parkingCountByHousehold ?? 0) > 0) {
         updateData.parking_ratio = String(overview.parkingCountByHousehold);
       }
 
