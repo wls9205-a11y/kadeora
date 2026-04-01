@@ -554,6 +554,25 @@ export function Navigation() {
                 </Link>
               ))}
             </div>
+            {userId && (
+              <div style={{ marginTop:12, paddingTop:12, borderTop:'1px solid var(--border)', display:'flex', gap: 'var(--sp-sm)' }}>
+                <Link href={`/profile/${userId}`} onClick={() => setMoreOpen(false)} style={{
+                  flex:1, textAlign:'center', padding:'10px 0', borderRadius: 'var(--radius-md)',
+                  background:'var(--bg-hover)', color:'var(--text-primary)',
+                  fontSize:13, fontWeight:600, textDecoration:'none',
+                }}>내 프로필</Link>
+                <Link href="/write" onClick={() => setMoreOpen(false)} style={{
+                  flex:1, textAlign:'center', padding:'10px 0', borderRadius: 'var(--radius-md)',
+                  background:'var(--bg-hover)', color:'var(--text-primary)',
+                  fontSize:13, fontWeight:600, textDecoration:'none',
+                }}>글쓰기</Link>
+                <Link href="/notifications" onClick={() => setMoreOpen(false)} style={{
+                  flex:1, textAlign:'center', padding:'10px 0', borderRadius: 'var(--radius-md)',
+                  background:'var(--bg-hover)', color:'var(--text-primary)',
+                  fontSize:13, fontWeight:600, textDecoration:'none',
+                }}>알림{unread > 0 ? ` (${unread})` : ''}</Link>
+              </div>
+            )}
           </div>
         </div>
       )}
