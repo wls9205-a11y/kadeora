@@ -47,3 +47,6 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json({ ok: true, processed, failed, batch: targets.length, remaining: (count || 0) - targets.length });
 }
+
+// GOD MODE에서 POST로 호출됨
+export async function POST(req: NextRequest) { return GET(req); }

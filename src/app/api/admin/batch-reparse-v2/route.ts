@@ -242,3 +242,8 @@ export async function GET(req: NextRequest) {
     remaining: Math.max(0, (remaining || 0) - targets.length),
   });
 }
+
+// GOD MODE에서 POST로 호출됨
+export async function POST(req: NextRequest) {
+  return GET(req);
+}
