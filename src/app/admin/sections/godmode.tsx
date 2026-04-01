@@ -164,10 +164,10 @@ export default function GodModeSection() {
             style={{ padding: '10px 16px', borderRadius: 'var(--radius-md)', border: `1px solid ${C.green}40`, background: C.card, color: C.green, fontWeight: 700, fontSize: 13, cursor: specialRunning ? 'wait' : 'pointer' }}>
             🏠 K-apt 연동 50건
           </button>
-          <button onClick={() => runSpecial('/api/cron/naver-complex-sync', '네이버 총세대수 교차검증 8건')}
+          <button onClick={() => runSpecial('/api/cron/naver-complex-sync', '네이버 총세대수 교차검증 5건')}
             disabled={specialRunning}
             style={{ padding: '10px 16px', borderRadius: 'var(--radius-md)', border: `1px solid ${C.cyan || '#22D3EE'}40`, background: C.card, color: C.cyan || '#22D3EE', fontWeight: 700, fontSize: 13, cursor: specialRunning ? 'wait' : 'pointer' }}>
-            🔍 네이버 교차검증 8건
+            🔍 네이버 교차검증 5건
           </button>
           <button onClick={() => runSpecial('/api/admin/batch-reparse?token=kd-reparse-2026', 'HTML 재파싱 30건')}
             disabled={specialRunning}
