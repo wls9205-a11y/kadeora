@@ -218,17 +218,7 @@ export default function GodModeSection() {
             style={{ padding: '10px 16px', borderRadius: 'var(--radius-md)', border: `1px solid ${C.green}40`, background: C.card, color: C.green, fontWeight: 700, fontSize: 13, cursor: specialRunning ? 'wait' : 'pointer' }}>
             🏘️ 네이버 단지 싱크
           </button>
-          <button onClick={async () => {
-              if (specialRunning) return;
-              setSpecialRunning(true);
-              setSpecialLog('⏳ 주식 시세 갱신 (네이버+Yahoo) 실행 중...');
-              try {
-                const res = await fetch('/api/stock-refresh', { headers: { 'Authorization': `Bearer ${(window as any).__CRON_SECRET || ''}` } });
-                const data = await res.json();
-                setSpecialLog(`✅ 주식 시세 갱신 완료 — source: ${data.source}, 성공: ${data.success}, 실패: ${data.failed}`);
-              } catch (e: any) { setSpecialLog(`❌ 주식 시세 갱신 실패 — ${errMsg(e)}`); }
-              setSpecialRunning(false);
-            }}
+          <button onClick={() => runSpecial('/api/admin/trigger-stock-refresh', '주식 시세 수동 갱신 (네이버+시총)')}
             disabled={specialRunning}
             style={{ padding: '10px 16px', borderRadius: 'var(--radius-md)', border: `1px solid ${C.brand}40`, background: C.card, color: C.brand, fontWeight: 700, fontSize: 13, cursor: specialRunning ? 'wait' : 'pointer' }}>
             📈 주식 시세 수동 갱신 (네이버+시총)

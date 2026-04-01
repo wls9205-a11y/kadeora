@@ -322,11 +322,32 @@ export function Navigation() {
                     <div style={{
                       position:'absolute', right:0, top:'calc(100% + 6px)',
                       background:'var(--bg-surface)', border:'1px solid var(--border)',
-                      borderRadius: 'var(--radius-sm)', overflow:'hidden', minWidth:168,
+                      borderRadius: 'var(--radius-sm)', overflow:'hidden', minWidth:180,
                       boxShadow:'0 8px 24px rgba(0,0,0,0.15)', zIndex: 60,
                     }}>
+                      {/* 프로필 헤더 — 가장 눈에 띄게 */}
+                      <Link href={`/profile/${userId}`} onClick={()=>setMenuOpen(false)} style={{
+                        display:'flex', alignItems:'center', gap: 10, padding:'12px 16px',
+                        color:'var(--text-primary)', textDecoration:'none',
+                        borderBottom:'1px solid var(--border)',
+                        background:'rgba(59,123,246,0.04)',
+                      }}
+                        onMouseEnter={e=>(e.currentTarget.style.background='rgba(59,123,246,0.08)')}
+                        onMouseLeave={e=>(e.currentTarget.style.background='rgba(59,123,246,0.04)')}
+                      >
+                        {profile?.avatarUrl ? (
+                          <img src={profile.avatarUrl} alt="" style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                        ) : (
+                          <span style={{ width:32, height:32, borderRadius:'50%', background:'var(--brand)', display:'flex', alignItems:'center', justifyContent:'center', fontSize: 14, fontWeight:800, color:'var(--text-inverse)', flexShrink:0 }}>
+                            {(profile?.nickname ?? 'U')[0].toUpperCase()}
+                          </span>
+                        )}
+                        <div style={{ minWidth: 0 }}>
+                          <div style={{ fontSize: 13, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{profile?.nickname ?? '내 프로필'}</div>
+                          <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>프로필 보기</div>
+                        </div>
+                      </Link>
                       {[
-                        { href:`/profile/${userId}`, label:'내 프로필', LIcon: UserIcon },
                         { href:'/write',              label:'글쓰기', LIcon: PenSquare },
                         { href:'/notifications',      label:`알림${unread>0?` (${unread})`:''}`, LIcon: Bell },
                       ].map(item => (
