@@ -157,8 +157,10 @@ async function fetchNaverQuote(symbol: string): Promise<{ price: number; change_
       if (d) {
         const price = parseInt(String(d.closePriceRaw ?? '0'));
         if (price) {
-          // 폴링 API에서 시총(marketCapitalization)도 가져옴
-          const marketCap = marketCapFromOverview || (d.marketCapitalizationRaw ? parseInt(String(d.marketCapitalizationRaw)) : (d.marketCapitalization ? parseInt(String(d.marketCapitalization).replace(/,/g, '')) : undefined));
+          // 폴링 API에서 시총 탐색 (필드명이 버전마다 다름)
+          const pollingCap = d.marketCapitalizationRaw ?? d.marketCapitalization ?? d.marketValueRaw ?? d.marketValue ?? d.totalMarketValueRaw ?? d.totalMarketValue ?? null;
+          const parsedPollingCap = pollingCap ? parseInt(String(pollingCap).replace(/[,\s]/g, '')) : 0;
+          const marketCap = marketCapFromOverview || (parsedPollingCap > 0 ? parsedPollingCap : undefined);
           return {
             price,
             change_amt: parseInt(String(d.compareToPreviousClosePriceRaw ?? '0')),

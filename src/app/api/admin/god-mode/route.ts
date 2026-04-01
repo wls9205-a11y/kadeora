@@ -189,7 +189,7 @@ function fireAndForget(
 
 // Phase별 타임아웃 설정
 const PHASE_TIMEOUTS: Record<string, number> = {
-  data: 120000,    // 120s — crawl-apt-trade 87s, crawl-apt-rent 61s
+  data: 180000,    // 180s — stock-refresh 최대 300s이지만 대부분 120s 내 완료
   process: 120000, // 120s — geocode, pricing 등 오래 걸림
   ai: 0,           // fire-and-forget
   content: 0,      // fire-and-forget
