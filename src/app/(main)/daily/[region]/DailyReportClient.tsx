@@ -1,10 +1,62 @@
 'use client';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import type { DailyReportData } from '@/lib/daily-report-data';
 import { useAuth } from '@/components/AuthProvider';
 import ShareButtons from '@/components/ShareButtons';
+
+// ═══ 오늘의 운세 (띠별) ═══
+const ZA = ['쥐','소','호랑이','토끼','용','뱀','말','양','원숭이','닭','개','돼지'];
+const ZE: Record<string,string> = {'쥐':'🐭','소':'🐮','호랑이':'🐯','토끼':'🐰','용':'🐲','뱀':'🐍','말':'🐴','양':'🐑','원숭이':'🐵','닭':'🐔','개':'🐶','돼지':'🐷'};
+const ZF: Record<string,string[]> = {
+  '쥐': ['금전운이 좋습니다. 소액 투자에 행운이 따르는 날.','인간관계에서 좋은 소식이 올 수 있어요.','새로운 기회를 발견할 수 있는 날입니다.','정보 수집에 집중하면 투자 인사이트를 얻을 수 있어요.'],
+  '소': ['꾸준함이 빛을 발합니다. 장기 투자에 유리한 날.','건강에 신경 쓰면 좋은 하루가 될 거예요.','직장에서 인정받을 기회가 올 수 있습니다.','부동산 관련 정보를 체크해보세요.'],
+  '호랑이': ['과감한 결정이 좋은 결과를 가져올 수 있어요.','운동이나 야외활동이 기운을 충전해줍니다.','리더십을 발휘할 기회가 옵니다.','단기 매매보다 중장기 관점이 유리해요.'],
+  '토끼': ['예술적 감각이 빛나는 날. 창의적 아이디어에 주목하세요.','가족과의 시간이 행복을 가져다줘요.','부동산 관련 좋은 소식이 있을 수 있습니다.','자기계발에 투자하면 나중에 큰 보답이.'],
+  '용': ['대담한 계획을 실행하기 좋은 날입니다.','주변의 도움으로 일이 잘 풀릴 거예요.','재테크에 대한 좋은 영감이 떠오를 수 있어요.','자신감을 가지고 도전해보세요.'],
+  '뱀': ['직감이 날카로운 날. 투자 판단을 믿으세요.','학습이나 자기개발에 좋은 에너지가 있어요.','조용히 정리하는 시간이 필요합니다.','정보를 분석하면 숨은 기회를 발견할 수 있어요.'],
+  '말': ['활발한 에너지가 넘칩니다! 적극적으로 움직이세요.','새로운 사람을 만나면 좋은 인연이 될 수 있어요.','단기 수익 기회를 잘 포착하세요.','네트워킹이 투자에 도움이 되는 날.'],
+  '양': ['온화한 대인관계가 좋은 결과를 가져와요.','작은 기부나 나눔이 큰 행운으로 돌아옵니다.','부동산 시장에 눈여겨볼 물건이 있을 수 있어요.','안정적인 수익을 추구하면 마음이 편해져요.'],
+  '원숭이': ['재치와 유머가 빛나는 날. 소통에 강점이 있어요.','새로운 부업이나 수입원을 찾기 좋은 타이밍.','숫자에 강한 날. 재무 분석이 정확해요.','빠른 판단력이 수익으로 연결될 수 있어요.'],
+  '닭': ['꼼꼼한 분석이 성과를 가져오는 날입니다.','아침 일찍 시작하면 좋은 일이 생겨요.','저축이나 절약 습관이 큰 도움이 되는 날.','디테일에 집중하면 놓친 기회를 찾을 수 있어요.'],
+  '개': ['충성스러운 인간관계가 보답받는 날이에요.','건강검진이나 보험 점검하기 좋은 시기.','안정적인 투자가 마음의 평화를 줍니다.','신뢰를 쌓으면 장기적으로 큰 이득이 와요.'],
+  '돼지': ['풍요로운 에너지가 감도는 날! 맛있는 것도 OK.','예상치 못한 금전운이 있을 수 있어요.','가정의 평화가 모든 것의 기반이에요.','여유를 가지면 좋은 투자 기회가 보입니다.'],
+};
+
+function DailyFortune() {
+  const [year, setYear] = useState<number | null>(null);
+  useEffect(() => { const s = localStorage.getItem('kd_birth_year'); if (s) setYear(parseInt(s)); }, []);
+  const now = new Date();
+  const seed = now.getFullYear() * 366 + (now.getMonth() + 1) * 31 + now.getDate();
+  const getZ = (y: number) => ZA[(y - 4) % 12 >= 0 ? (y - 4) % 12 : (y - 4) % 12 + 12];
+  const getFortune = (animal: string) => (ZF[animal] || ZF['쥐'])[seed % (ZF[animal]?.length || 4)];
+
+  if (!year) return (
+    <div style={{ background: 'var(--bg-surface)', borderRadius: 'var(--radius-card)', border: '1px solid var(--border)', padding: '12px 14px', marginBottom: 8 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <span style={{ fontSize: 11, color: 'var(--text-secondary)', flexShrink: 0 }}>출생연도를 선택하면 오늘의 운세를 확인할 수 있어요</span>
+        <select onChange={e => { const y = parseInt(e.target.value); setYear(y); localStorage.setItem('kd_birth_year', String(y)); }}
+          style={{ flex: 1, padding: '5px 8px', fontSize: 11, background: 'var(--bg-base)', border: '1px solid var(--border)', borderRadius: 6, color: 'var(--text-primary)', cursor: 'pointer' }}>
+          <option value="">연도 선택</option>
+          {Array.from({ length: 60 }, (_, i) => 2006 - i).map(y => <option key={y} value={y}>{y}년 ({ZE[getZ(y)]} {getZ(y)}띠)</option>)}
+        </select>
+      </div>
+    </div>
+  );
+
+  const animal = getZ(year);
+  return (
+    <div style={{ background: 'var(--bg-surface)', borderRadius: 'var(--radius-card)', border: '1px solid var(--border)', padding: '12px 14px', marginBottom: 8 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+        <span style={{ fontSize: 20 }}>{ZE[animal]}</span>
+        <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{animal}띠 ({year}년생)</span>
+        <button onClick={() => { setYear(null); localStorage.removeItem('kd_birth_year'); }} style={{ fontSize: 10, color: 'var(--text-tertiary)', background: 'none', border: 'none', cursor: 'pointer', marginLeft: 'auto' }}>변경</button>
+      </div>
+      <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.7 }}>{getFortune(animal)}</div>
+    </div>
+  );
+}
 
 interface Props {
   data: DailyReportData;
@@ -199,6 +251,15 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
             style={{ fontSize: 12, fontWeight: 700, color: (nextDate || isArchive) ? G.gold : 'var(--text-tertiary)', background: 'none', border: 'none', cursor: (nextDate || isArchive) ? 'pointer' : 'default', padding: '4px 8px' }}
           >{nextDate ? '다음 ▶' : isArchive ? '오늘 ▶' : '최신'}</button>
         </div>
+
+        {/* ═══ AI 투자 브리핑 첫줄 — 300자 요약 ═══ */}
+        {d.aiBriefing && (
+          <div style={{ padding: '12px 14px', borderRadius: 'var(--radius-sm)', background: 'rgba(59,123,246,0.04)', border: '1px solid rgba(59,123,246,0.12)', marginBottom: 8 }}>
+            <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.7 }}>
+              💬 {d.aiBriefing.summary.slice(0, 300)}
+            </div>
+          </div>
+        )}
 
         {/* 어젯밤 달라진 것 — 골드 */}
         <div style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm)', background: G.goldBg, border: `1px solid ${G.goldBorder}`, marginBottom: 'var(--sp-sm)' }}>
@@ -597,6 +658,10 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
           </div>
         </>
       )}
+
+      {/* ═══ NEW: 오늘의 운세 (띠별) ═══ */}
+      <SH icon="🔮" title="오늘의 운세" />
+      <DailyFortune />
 
       {/* ═══ S5: 요약 + 내일 체크포인트 — 회원전용 골드 ═══ */}
       <SH icon="📋" title="오늘의 요약 + 내일 체크포인트" />

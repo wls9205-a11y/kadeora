@@ -403,7 +403,6 @@ export default function FeedClient({
                       <span style={{ fontSize: 10, color: gradeColor(post.profiles?.grade ?? 1) }}>{gradeEmoji}</span>
                       <span style={{ fontSize: 10, padding: '0px 5px', borderRadius: 3, background: cat.bg, color: cat.color, fontWeight: 600 }}>{cat.label}</span>
                       <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{timeAgo(post.created_at)}</span>
-                      {readMin > 0 && <span style={{ fontSize: 9, color: 'var(--text-tertiary)' }}><Clock size={8} /> {readMin}분</span>}
                     </div>
                   </div>
                 </div>
