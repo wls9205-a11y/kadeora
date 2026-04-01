@@ -59,6 +59,9 @@
     },
     "src/app/admin/**/*.tsx": {
       "maxDuration": 30
+    },
+    "src/app/api/cron/naver-complex-sync/*.ts": {
+      "maxDuration": 120
     }
   },
   "crons": [

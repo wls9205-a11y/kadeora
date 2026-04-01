@@ -81,7 +81,7 @@ async function handler(_req: NextRequest) {
     .in('project_type', ['재개발', '재건축'])
     .is('total_households', null)
     .order('tot_supply_hshld_co', { ascending: false })
-    .limit(15) as any); // rate limit 고려 배치 15건
+    .limit(8) as any); // rate limit + timeout 고려 배치 8건
 
   if (!targets?.length) {
     return { processed: 0, created: 0, updated: 0, failed: 0, metadata: { message: 'No targets' } };
