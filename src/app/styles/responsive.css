@@ -586,10 +586,10 @@ html.font-small .kd-list-item { padding: var(--sp-xs) 0; }
     overflow-wrap: break-word;
   }
 
-  /* grid 자식도 min-width: 0 */
-  [style*="display: grid"] > * {
+  /* grid 컨테이너 자식도 min-width: 0 */
+  .kd-grid-4 > *, .kd-index-kpi > *, .kd-kpi-5 > *,
+  .apt-card [style*="grid"] > * {
     min-width: 0;
-    overflow: hidden;
   }
 
   /* 주식 종목명 등 긴 텍스트 자르기 */

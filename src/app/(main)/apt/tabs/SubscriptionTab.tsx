@@ -242,7 +242,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                             <div style={kpiStyle}><div style={kpiLabel}>공급세대</div><div style={kpiVal('var(--brand)')}>{totS > 0 ? totS.toLocaleString() : totalHH.toLocaleString()}</div></div>
                           </>
                         ) : (
-                          <div style={kpiStyle}><div style={kpiLabel}>{isRedevType ? '공급세대' : '공급세대'}</div><div style={kpiVal('var(--brand)')}>{totS > 0 ? totS.toLocaleString() : '-'}</div></div>
+                          <div style={kpiStyle}><div style={kpiLabel}>공급세대</div><div style={kpiVal('var(--brand)')}>{totS > 0 ? totS.toLocaleString() : '-'}</div></div>
                         )}
                         <div style={kpiStyle}><div style={kpiLabel}>일반공급</div><div style={kpiVal('var(--accent-blue-light, #60A5FA)')}>{genT > 0 ? genT.toLocaleString() : '-'}</div></div>
                         <div style={kpiStyle}><div style={kpiLabel}>특별공급</div><div style={kpiVal('var(--accent-purple, #A78BFA)')}>{spcT > 0 ? spcT.toLocaleString() : '-'}</div></div>

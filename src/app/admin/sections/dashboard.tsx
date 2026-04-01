@@ -951,31 +951,23 @@ export default function DashboardSection() {
       {/* ── 최근 릴리즈 내역 ── */}
       <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', marginBottom: 'var(--sp-md)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-          <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>🚀 최근 릴리즈 (세션 66)</span>
-          <span style={{ fontSize: 10, color: C.textDim }}>2026-04-01</span>
+          <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>🚀 최근 릴리즈 (세션 68)</span>
+          <span style={{ fontSize: 10, color: C.textDim }}>2026-04-02</span>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
           {[
-            { tag: 'FIX', label: '주식 등락률 방어', desc: '비정상 +3750% 필터 + 브리핑 크론 ±35% 클램핑', color: C.red, commit: 'c94e04b' },
-            { tag: 'FEAT', label: '오늘의 운세 세밀화', desc: '12띠×4세트 풀운세+DB저장+금전/애정/건강/행운', color: C.purple, commit: '3903d12' },
-            { tag: 'UX', label: '피드 카드 50% 축소', desc: '메타1행·아바타24·제목14·본문12·인터랙션4px', color: C.cyan, commit: '5c1e59e' },
-            { tag: 'FIX', label: '프로필 닉네임 잘림', desc: '닉네임 첫줄+등급/버튼 둘째줄 분리', color: C.red, commit: '863012e' },
-            { tag: 'FIX', label: 'D-day 계산 오류', desc: '입주예정 D-73335490→정상 (YYYYMM 파싱)', color: C.red, commit: 'e423ee6' },
-            { tag: 'UX', label: 'UI 정렬 통일', desc: '태그·KPI·바·타임라인 크기/간격 전면 정규화', color: C.cyan, commit: 'f55c0c3' },
-            { tag: 'FEAT', label: '4탭 카드 리디자인', desc: '재개발·미분양·실거래·주식·청약 KPI+시각화', color: C.brand, commit: '5cf1634' },
-            { tag: 'FEAT', label: '총세대수 자동검증', desc: 'verify-households+naver-complex-sync 크론', color: C.purple, commit: '392a226' },
-            { tag: 'FEAT', label: '피드 크론 v3', desc: '페르소나 8종 말투+뻘글40%+연령별 댓글', color: C.brand, commit: '3ec27dc' },
-            { tag: 'FEAT', label: 'PDF 파싱 강화', desc: 'max_floor 9패턴·parking 8·station 5 신규', color: C.purple, commit: '119e08b' },
-            { tag: 'FEAT', label: '리포트 12섹션', desc: 'AI브리핑+실거래동향+추천블로그 3섹션 추가', color: C.brand, commit: 'd314805' },
-            { tag: 'FIX', label: 'SSR 이벤트핸들러', desc: 'Event handler 에러→KpiCards 클라이언트 분리', color: C.red, commit: '66d209e' },
-            { tag: 'FEAT', label: '단지 규모 섹션', desc: '총세대/공급 분리·비율바·동수/층수/주차', color: C.brand, commit: '66d209e' },
-            { tag: 'UX', label: '관심→등록 스크롤', desc: '❤️ 카드 클릭→InterestRegistration 이동', color: C.cyan, commit: '00a626a' },
-            { tag: 'FEAT', label: '총세대수 표기', desc: '없으면 정보준비중·공급세대와 명확 구분', color: C.purple, commit: '66d209e' },
-            { tag: 'ADMIN', label: '총세대수 커버리지', desc: '건물스펙 9항목 (총세대수 추가) 3×3', color: C.yellow, commit: 'latest' },
-            { tag: 'VIRAL', label: '가입 유도 팝업 2종', desc: '웰컴(첫방문) + 탐색(5페이지) · 카카오 CTA', color: C.brand, commit: '55180bf' },
-            { tag: 'FEAT', label: '팝업 광고 관리', desc: 'DB+API+어드민CRUD+모달/배너/토스트', color: C.purple, commit: '66c38db' },
-            { tag: 'VIRAL', label: '공유 시스템 v2', desc: '밴드+UTM+공유횟수 · 7페이지 CTA', color: C.cyan, commit: '1c75bf6' },
-            { tag: 'FIX', label: 'Search Console', desc: 'image-sitemap 438에러+robots.txt 21→5', color: C.green, commit: 'adbbcc7' },
+            { tag: 'FIX', label: '피드 프로필 사진', desc: '아바타 항상 이니셜→avatar_url 있으면 사진 표시 (피드/상세/댓글)', color: C.red, commit: 'c841ae1' },
+            { tag: 'FIX', label: '총세대수 교정', desc: 'total_households=총세대·tot_supply=공급세대 전수조사 라벨 구분', color: C.red, commit: '8a60d0a' },
+            { tag: 'UX', label: '관심단지 폼 개선', desc: 'minmax 그리드·생년월일 풀폭·시군구 동적2열·체크박스16px', color: C.cyan, commit: '8a60d0a' },
+            { tag: 'FEAT', label: '주식 시세 네이버', desc: 'fetchNaverQuote 시총 추출·integration API·3단 폴백', color: C.brand, commit: '9c673a2' },
+            { tag: 'FEAT', label: 'AI 한줄평 서버렌더링', desc: '탭 위에 signal 색상+200자 미리보기 카드', color: C.purple, commit: '9c673a2' },
+            { tag: 'FEAT', label: '데일리 리포트 강화', desc: '히어로 설명·핵심요약 섹션·grid minmax 방어', color: C.brand, commit: '4dad428' },
+            { tag: 'UX', label: '주식 4열 그리드', desc: '시총/섹터/전일대비/거래량 4열 고정+ellipsis', color: C.cyan, commit: '4dad428' },
+            { tag: 'FIX', label: 'DEMO grade 타입', desc: '문자열(골드)→숫자(4) 통일·등급이모지 매칭 복구', color: C.red, commit: 'c841ae1' },
+            { tag: 'FIX', label: 'pctStr 필드명', desc: 'stockTop10.pct→change_pct 오타 수정', color: C.red, commit: 'c841ae1' },
+            { tag: 'UX', label: '모바일 CSS 방어', desc: 'min-width:0·테이블 스크롤·인터랙션 wrap 60줄+', color: C.cyan, commit: '8a60d0a' },
+            { tag: 'UX', label: '1fr→minmax 전체교정', desc: 'shop/hot/apt/complex+컴포넌트 13파일 그리드 안전화', color: C.cyan, commit: 'f4d8b68' },
+            { tag: 'FEAT', label: '피드 뻘글 확대', desc: 'DEMO 8→15개·자유/로컬/주식/부동산 다양화', color: C.brand, commit: '8a60d0a' },
           ].map(r => (
             <div key={r.commit} style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm)', background: `${r.color}08`, border: `1px solid ${r.color}15` }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>
