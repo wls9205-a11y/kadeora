@@ -220,6 +220,19 @@ export default function ShopPage() {
         </div>
       </div>
 
+      {/* 정책 링크 */}
+      <div style={{ display: 'flex', justifyContent: 'center', gap: 16, padding: '16px 0 8px', borderTop: '1px solid var(--border)', marginTop: 12 }}>
+        <Link href="/terms" style={{ fontSize: 11, color: 'var(--text-tertiary)', textDecoration: 'none' }}>이용약관</Link>
+        <Link href="/refund" style={{ fontSize: 11, color: 'var(--text-tertiary)', textDecoration: 'none' }}>환불정책</Link>
+        <Link href="/privacy" style={{ fontSize: 11, color: 'var(--text-tertiary)', textDecoration: 'none' }}>개인정보처리방침</Link>
+      </div>
+      <div style={{ textAlign: 'center', padding: '4px 0 16px' }}>
+        <p style={{ fontSize: 10, color: 'var(--text-tertiary)', margin: 0, lineHeight: 1.6 }}>
+          상호: 카더라 | 대표: 노영진 | 이메일: kadeora.app@gmail.com<br/>
+          전화: 010-5001-1382 | 결제대행: 토스페이먼츠(주)
+        </p>
+      </div>
+
       {/* JSON-LD */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org', '@type': 'Product',
