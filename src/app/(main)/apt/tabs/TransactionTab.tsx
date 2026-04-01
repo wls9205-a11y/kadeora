@@ -232,29 +232,72 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
             padding: 'var(--card-p) var(--sp-lg)', borderRadius: 'var(--radius-lg)', marginBottom: 'var(--sp-sm)',
             background: isMax ? 'rgba(251,191,36,0.04)' : 'var(--bg-surface)',
             border: isMax ? '1px solid rgba(251,191,36,0.3)' : '1px solid var(--border)',
+            borderLeft: `3px solid ${amt >= 100000 ? 'var(--accent-red)' : amt >= 50000 ? 'var(--accent-orange)' : amt >= 30000 ? 'var(--accent-yellow)' : 'var(--accent-green)'}`,
             cursor: 'pointer',
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 6 }}>
+            {/* 1행: 배지 + 지역 */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4 }}>
               {isNew(t, 'transaction') && <NewBadge />}
               <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '2px 6px', borderRadius: 'var(--radius-xs)', background: 'var(--accent-blue-bg)', color: 'var(--accent-blue-light)' }}>{t.trade_type || '매매'}</span>
               {isMax && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, padding: '2px 8px', borderRadius: 'var(--radius-xs)', background: 'rgba(251,191,36,0.15)', color: 'var(--accent-yellow)' }}>🏆 신고가</span>}
-              {vsMax !== null && !isMax && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, padding: '2px 6px', borderRadius: 'var(--radius-xs)', background: vsMax >= 0 ? 'var(--accent-red-bg)' : 'var(--accent-blue-bg)', color: vsMax >= 0 ? 'var(--accent-red)' : 'var(--accent-blue)' }}>최고가 {vsMax >= 0 ? '+' : ''}{vsMax}%</span>}
+              {vsMax !== null && !isMax && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, padding: '2px 6px', borderRadius: 'var(--radius-xs)', background: vsMax >= 0 ? 'var(--accent-red-bg)' : 'var(--accent-blue-bg)', color: vsMax >= 0 ? 'var(--accent-red)' : 'var(--accent-blue)' }}>전고 {vsMax >= 0 ? '+' : ''}{vsMax}%</span>}
               <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 600 }}>{t.region_nm} {t.sigungu}</span>
               <button onClick={(e) => { e.stopPropagation(); toggleWatchlist('transaction', String(t.id)); }} style={{ fontSize: 'var(--fs-lg)', background: watchlist.has(`transaction:${t.id}`) ? 'var(--accent-yellow-bg)' : 'transparent', border: watchlist.has(`transaction:${t.id}`) ? '1px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '2px 6px', cursor: 'pointer', lineHeight: 1 }}>
                 {watchlist.has(`transaction:${t.id}`) ? '⭐' : '☆'}
               </button>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--sp-md)', marginBottom: 'var(--sp-xs)' }}>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.3, marginBottom: 2 }}>{t.apt_name}</div>
-                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>전용 {t.exclusive_area}㎡ · {t.floor}층{t.built_year ? ` · ${t.built_year}년식` : ''}</div>
+            {/* 단지명 + 가격 */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--sp-md)', marginBottom: 4 }}>
+              <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.3 }}>{t.apt_name}</div>
+              <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: borderColor, flexShrink: 0 }}>{fmtAmount(amt)}</div>
+            </div>
+            {/* KPI 5칸 그리드 */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 3, marginBottom: 6 }}>
+              <div style={{ textAlign: 'center', padding: '4px 1px', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-xs)' }}>
+                <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>전용</div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-primary)' }}>{t.exclusive_area}㎡</div>
               </div>
-              <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: borderColor, lineHeight: 1.2 }}>{fmtAmount(amt)}</div>
-                {t.exclusive_area > 0 && amt > 0 && <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginTop: 1 }}>평당 {fmtAmount(Math.round(amt / (t.exclusive_area / 3.3058)))}</div>}
+              <div style={{ textAlign: 'center', padding: '4px 1px', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-xs)' }}>
+                <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>층</div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-primary)' }}>{t.floor}층</div>
+              </div>
+              <div style={{ textAlign: 'center', padding: '4px 1px', background: 'rgba(59,123,246,0.04)', borderRadius: 'var(--radius-xs)' }}>
+                <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>평당가</div>
+                <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--brand)' }}>{t.exclusive_area > 0 && amt > 0 ? `${Math.round(amt / (t.exclusive_area / 3.3058) / 10000 * 10) / 10}만` : '-'}</div>
+              </div>
+              <div style={{ textAlign: 'center', padding: '4px 1px', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-xs)' }}>
+                <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>연식</div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-primary)' }}>{t.built_year || '-'}</div>
+              </div>
+              <div style={{ textAlign: 'center', padding: '4px 1px', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-xs)' }}>
+                <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>거래일</div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-primary)' }}>{t.deal_date ? t.deal_date.slice(5) : '-'}</div>
               </div>
             </div>
-            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 'var(--sp-xs)', paddingTop: 4, borderTop: '1px solid var(--border)' }}>📅 {t.deal_date}</div>
+            {/* 미니 시세 흐름 (같은 단지 최근 거래) */}
+            {sameApt.length >= 3 && (() => {
+              const prices = sameApt.slice(0, 6).reverse().map(x => x.deal_amount || 0);
+              const maxVal = Math.max(...prices);
+              const minVal = Math.min(...prices);
+              const range = maxVal - minVal || 1;
+              const diff = prices.length >= 2 ? prices[prices.length - 1] - prices[0] : 0;
+              return (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                  <span style={{ fontSize: 9, color: 'var(--text-tertiary)', flexShrink: 0 }}>최근{prices.length}건</span>
+                  <div style={{ display: 'flex', alignItems: 'flex-end', gap: 1, height: 20, flex: 1 }}>
+                    {prices.map((p, pi) => (
+                      <div key={pi} style={{ flex: 1, height: `${Math.max(((p - minVal) / range) * 100, 8)}%`, borderRadius: 1, background: pi === prices.length - 1 ? borderColor : 'rgba(59,123,246,0.3)' }} />
+                    ))}
+                  </div>
+                  {diff !== 0 && <span style={{ fontSize: 10, fontWeight: 700, color: diff > 0 ? 'var(--accent-red)' : 'var(--accent-blue)', flexShrink: 0 }}>{diff > 0 ? '▲' : '▼'} {fmtAmount(Math.abs(diff))}</span>}
+                </div>
+              );
+            })()}
+            {/* 태그 */}
+            <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
+              {t.dong && <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 4, background: 'rgba(255,255,255,0.04)', color: 'var(--text-tertiary)' }}>{t.dong}</span>}
+              {t.built_year && <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 4, background: 'rgba(255,255,255,0.04)', color: 'var(--text-tertiary)' }}>{new Date().getFullYear() - t.built_year}년차</span>}
+            </div>
           </div>
         );
       })}

@@ -191,28 +191,47 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
                     </button>
                   </div>
                   {/* 구역명 */}
-                  <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: (!r.district_name || r.district_name === '미상' || r.district_name === '정보 준비중') ? 'var(--text-tertiary)' : 'var(--text-primary)', marginBottom: 3, lineHeight: 1.3 }}>
+                  <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: (!r.district_name || r.district_name === '미상' || r.district_name === '정보 준비중') ? 'var(--text-tertiary)' : 'var(--text-primary)', marginBottom: 6, lineHeight: 1.3 }}>
                     {r.district_name && r.district_name !== '미상' && r.district_name !== '정보 준비중' ? r.district_name : r.address || r.notes || '📋 정보 준비중'}
                   </div>
-                  {/* 시군구 + 세대수 + 시공사 */}
-                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 2 }}>
-                    {r.sigungu}{r.total_households ? ` · ${r.total_households.toLocaleString()}세대` : (() => {
-                      const stageMsg: Record<string, string> = {
-                        '정비구역지정': ' · 세대수 확인중 (구역지정 단계)',
-                        '조합설립': ' · 세대수 확인중 (조합설립 단계)',
-                        '사업시행인가': ' · 세대수 확인중 (인가 후 확정)',
-                        '관리처분': ' · 관리처분계획 참조',
-                        '착공': ' · 사업시행계획 참조',
-                      };
-                      return stageMsg[r.stage || ''] || ' · 세대수 확인중';
-                    })()}{r.constructor ? ` · ${r.constructor}` : ''}{(r as any).developer && (r as any).developer !== r.constructor ? ` · 시행 ${(r as any).developer}` : ''}
-                  </div>
-                  {/* 비고/예상준공 */}
-                  {(r.notes || r.expected_completion) && (
-                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)' }}>
-                      {r.notes}{r.expected_completion ? (r.notes ? `, ${r.expected_completion}` : r.expected_completion) : ''}
+                  {/* KPI 그리드 */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 3, marginBottom: 8 }}>
+                    <div style={{ textAlign: 'center', padding: '5px 2px', background: 'rgba(59,123,246,0.04)', borderRadius: 'var(--radius-xs)' }}>
+                      <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>총세대</div>
+                      <div style={{ fontSize: 12, fontWeight: 800, color: r.total_households ? 'var(--brand)' : 'var(--text-tertiary)' }}>{r.total_households ? r.total_households.toLocaleString() : '확인중'}</div>
                     </div>
-                  )}
+                    <div style={{ textAlign: 'center', padding: '5px 2px', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-xs)' }}>
+                      <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>시공사</div>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.constructor ? r.constructor.split('(')[0].split('주식')[0].trim().slice(0, 6) : '-'}</div>
+                    </div>
+                    <div style={{ textAlign: 'center', padding: '5px 2px', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-xs)' }}>
+                      <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>시행사</div>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{(r as any).developer ? String((r as any).developer).split('(')[0].trim().slice(0, 6) : '-'}</div>
+                    </div>
+                    <div style={{ textAlign: 'center', padding: '5px 2px', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-xs)' }}>
+                      <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>예상준공</div>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: r.expected_completion ? 'var(--accent-green)' : 'var(--text-tertiary)' }}>{r.expected_completion ? r.expected_completion.replace(/년|예정/g, '').trim().slice(0, 7) : '-'}</div>
+                    </div>
+                  </div>
+                  {/* 5단계 진행 바 */}
+                  <div style={{ marginBottom: 6 }}>
+                    <div style={{ height: 4, borderRadius: 2, background: 'var(--bg-hover)', overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${progress}%`, borderRadius: 2, background: `linear-gradient(90deg, ${sc.border}, var(--brand))`, transition: 'width 0.5s ease' }} />
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
+                      {['구역지정', '조합설립', '인가', '착공', '준공'].map((s, i) => {
+                        const sp = [10, 30, 50, 70, 100];
+                        const active = progress >= sp[i];
+                        return <span key={s} style={{ fontSize: 8, color: active ? sc.color : 'var(--text-tertiary)', fontWeight: active ? 700 : 400 }}>{s}</span>;
+                      })}
+                    </div>
+                  </div>
+                  {/* 위치 태그 */}
+                  <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
+                    {r.sigungu && <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 4, background: 'rgba(59,123,246,0.06)', color: 'var(--brand)', fontWeight: 600 }}>{r.sigungu}</span>}
+                    {r.address && <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 4, background: 'rgba(255,255,255,0.04)', color: 'var(--text-tertiary)' }}>{r.address.split(' ').slice(-2).join(' ').replace(/일원|일대|번지/g, '').trim()}</span>}
+                    {r.notes && !r.expected_completion && <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 4, background: 'rgba(255,255,255,0.04)', color: 'var(--text-secondary)' }}>{String(r.notes).slice(0, 20)}</span>}
+                  </div>
                 </Link>
               );
             })}

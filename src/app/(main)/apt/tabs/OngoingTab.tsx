@@ -179,18 +179,37 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
                   {(o as any).project_type && (o as any).project_type !== '민간' && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '1px 6px', borderRadius: 4, background: (o as any).project_type === '재개발' ? 'rgba(251,146,60,0.1)' : (o as any).project_type === '재건축' ? 'rgba(167,139,250,0.1)' : 'rgba(52,211,153,0.1)', color: (o as any).project_type === '재개발' ? 'var(--accent-orange)' : (o as any).project_type === '재건축' ? 'var(--accent-purple)' : 'var(--accent-green)' }}>{(o as any).project_type}</span>}
                   <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{o.region_nm}</span>
                 </div>
-                <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 2, lineHeight: 1.3 }}>{o.house_nm || '현장명 없음'}</div>
-                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-xs)' }}>
-                  {o.address ? o.address.replace(/^[^\s]+\s/, '').split(' ').slice(0, 3).join(' ') : ''}
-                  {(o.total_supply ?? 0) > 0 ? (() => {
-                    const types = Array.isArray((o as any).house_type_info) ? (o as any).house_type_info : [];
-                    const gen = types.reduce((s: number, t: any) => s + (t.supply || 0), 0);
-                    const spe = types.reduce((s: number, t: any) => s + (t.spsply_hshldco || 0), 0);
-                    return gen > 0 ? ` · 총 ${(o.total_supply ?? 0).toLocaleString()}세대(일반${gen}·특별${spe})` : ` · 총 ${(o.total_supply ?? 0).toLocaleString()}세대`;
-                  })() : ''}
-                  {o.constructor_nm ? ` · ${o.constructor_nm}` : ''}
-                  {(o as any).developer_nm && (o as any).developer_nm !== o.constructor_nm ? ` · 시행 ${(o as any).developer_nm}` : ''}
-                  {priceStr ? ` · ${priceStr}` : ''}
+                <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4, lineHeight: 1.3 }}>{o.house_nm || '현장명 없음'}</div>
+                {/* KPI 4칸 그리드 */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 3, marginBottom: 6 }}>
+                  <div style={{ textAlign: 'center', padding: '4px 2px', background: 'rgba(59,123,246,0.04)', borderRadius: 'var(--radius-xs)' }}>
+                    <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>{priceStr ? '분양가' : '세대수'}</div>
+                    <div style={{ fontSize: 11, fontWeight: 800, color: priceStr ? 'var(--brand)' : 'var(--text-primary)' }}>{priceStr || ((o.total_supply ?? 0) > 0 ? `${(o.total_supply ?? 0).toLocaleString()}` : '-')}</div>
+                  </div>
+                  <div style={{ textAlign: 'center', padding: '4px 2px', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-xs)' }}>
+                    <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>{priceStr ? '세대수' : '일반/특별'}</div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-primary)' }}>
+                      {priceStr ? ((o.total_supply ?? 0) > 0 ? (o.total_supply ?? 0).toLocaleString() : '-') : (() => {
+                        const types = Array.isArray((o as any).house_type_info) ? (o as any).house_type_info : [];
+                        const gen = types.reduce((s: number, t: any) => s + (t.supply || 0), 0);
+                        const spe = types.reduce((s: number, t: any) => s + (t.spsply_hshldco || 0), 0);
+                        return gen > 0 ? `${gen}/${spe}` : '-';
+                      })()}
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'center', padding: '4px 2px', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-xs)' }}>
+                    <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>시공사</div>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{o.constructor_nm ? o.constructor_nm.split('(')[0].split('주식')[0].trim().slice(0, 7) : '-'}</div>
+                  </div>
+                  <div style={{ textAlign: 'center', padding: '4px 2px', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-xs)' }}>
+                    <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>입주</div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: o.mvn_prearnge_ym ? 'var(--accent-green)' : 'var(--text-tertiary)' }}>{o.mvn_prearnge_ym ? `${String(o.mvn_prearnge_ym).slice(2, 4)}.${String(o.mvn_prearnge_ym).slice(4, 6)}` : '-'}</div>
+                  </div>
+                </div>
+                {/* 태그 */}
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3, marginBottom: 4 }}>
+                  {o.address && <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 4, background: 'rgba(255,255,255,0.04)', color: 'var(--text-tertiary)' }}>{o.address.replace(/^[^\s]+\s/, '').split(' ').slice(0, 2).join(' ')}</span>}
+                  {(o as any).developer_nm && (o as any).developer_nm !== o.constructor_nm && <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 4, background: 'rgba(255,255,255,0.04)', color: 'var(--text-tertiary)' }}>시행 {String((o as any).developer_nm).slice(0, 8)}</span>}
                 </div>
                 {/* 중도금 대출 배지 */}
                 {(o as any).loan_rate && (

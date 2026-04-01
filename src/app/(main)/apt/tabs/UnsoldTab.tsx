@@ -235,49 +235,64 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
             borderLeft: `4px solid ${dangerColor}`, cursor: 'pointer',
           }}
           >
-            {/* 줄1: 현장명 + 미분양 배지 + 분양가 */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-xs)', flexWrap: 'wrap' }}>
+            {/* 1행: 현장명 + 미분양 배지 */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', marginBottom: 4, flexWrap: 'wrap' }}>
               <Link href={`/apt/${encodeURIComponent(generateAptSlug(u.house_nm) || String(u.id))}`} style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', textDecoration: 'none' }}>{u.house_nm && u.source !== 'molit_stat' ? u.house_nm : `${u.region_nm} ${u.sigungu_nm || ''} 미분양`}</Link>
               <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 'var(--radius-card)', background: 'var(--accent-red-bg)', color: 'var(--accent-red)', border: '1px solid rgba(248,113,113,0.2)', fontWeight: 700, flexShrink: 0 }}>
-                {unsoldCount >= 1000 ? '🔴' : unsoldCount >= 500 ? '🟠' : unsoldCount >= 100 ? '🟡' : '🟢'} 미분양 {unsoldCount.toLocaleString()}세대
+                {unsoldCount >= 1000 ? '🔴' : unsoldCount >= 500 ? '🟠' : unsoldCount >= 100 ? '🟡' : '🟢'} {rate !== null ? `${rate}%` : `${unsoldCount.toLocaleString()}세대`}
               </span>
               {(u.after_completion_unsold ?? 0) > 0 && <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 6px', borderRadius: 'var(--radius-sm)', background: 'var(--accent-red-bg)', color: 'var(--accent-red)', fontWeight: 600 }}>악성 {u.after_completion_unsold}호</span>}
               {priceStr && <span style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--brand)', marginLeft: 'auto', flexShrink: 0 }}>{priceStr}</span>}
-              <button onClick={(e) => { e.stopPropagation(); toggleWatchlist('unsold', String(u.id)); }} style={{ fontSize: 'var(--fs-xl)', background: watchlist.has(`unsold:${u.id}`) ? 'var(--accent-yellow-bg)' : 'transparent', border: watchlist.has(`unsold:${u.id}`) ? '1px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '2px 6px', cursor: 'pointer', transition: 'transform 0.1s', lineHeight: 1 }}>
+              <button onClick={(e) => { e.stopPropagation(); toggleWatchlist('unsold', String(u.id)); }} style={{ fontSize: 'var(--fs-xl)', background: watchlist.has(`unsold:${u.id}`) ? 'var(--accent-yellow-bg)' : 'transparent', border: watchlist.has(`unsold:${u.id}`) ? '1px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '2px 6px', cursor: 'pointer', lineHeight: 1 }}>
                 {watchlist.has(`unsold:${u.id}`) ? '⭐' : '☆'}
               </button>
             </div>
 
-            {/* 줄2: 지역 + 세대 */}
-            <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 6 }}>
-              {u.region_nm}{u.sigungu_nm ? ` ${u.sigungu_nm}` : ''}
-              {u.tot_supply_hshld_co && <span> · 총 {u.tot_supply_hshld_co.toLocaleString()}세대</span>}
-              {u.completion_ym && <span> · 준공 {u.completion_ym.slice(0, 4)}.{u.completion_ym.slice(4, 6)}</span>}
-              {u.constructor_nm && <span> · {u.constructor_nm}</span>}
+            {/* KPI 그리드 */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 3, marginBottom: 6 }}>
+              <div style={{ textAlign: 'center', padding: '5px 2px', background: 'rgba(248,113,113,0.04)', borderRadius: 'var(--radius-xs)' }}>
+                <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>미분양</div>
+                <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--accent-red)' }}>{unsoldCount.toLocaleString()}</div>
+              </div>
+              <div style={{ textAlign: 'center', padding: '5px 2px', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-xs)' }}>
+                <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>총 공급</div>
+                <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>{u.tot_supply_hshld_co ? u.tot_supply_hshld_co.toLocaleString() : '-'}</div>
+              </div>
+              <div style={{ textAlign: 'center', padding: '5px 2px', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-xs)' }}>
+                <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>준공</div>
+                <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>{u.completion_ym ? `${u.completion_ym.slice(2, 4)}.${u.completion_ym.slice(4, 6)}` : '-'}</div>
+              </div>
+              <div style={{ textAlign: 'center', padding: '5px 2px', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-xs)' }}>
+                <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>평당가</div>
+                <div style={{ fontSize: 12, fontWeight: 700, color: (u as any).price_per_pyeong ? 'var(--brand)' : 'var(--text-tertiary)' }}>{(u as any).price_per_pyeong ? `${Math.round((u as any).price_per_pyeong / 10000 * 10) / 10}만` : '-'}</div>
+              </div>
             </div>
-            {/* 추가 정보 (역세권/할인/시행사) */}
-            {(u.nearest_station || u.discount_info || (u.developer_nm && u.developer_nm !== u.constructor_nm)) && (
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 6 }}>
-                {u.nearest_station && <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 4, background: 'rgba(59,123,246,0.08)', color: 'var(--brand)', fontWeight: 600 }}>🚇 {u.nearest_station}</span>}
-                {u.discount_info && <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 4, background: 'rgba(52,211,153,0.08)', color: 'var(--accent-green)', fontWeight: 600 }}>💰 {u.discount_info}</span>}
-                {u.developer_nm && u.developer_nm !== u.constructor_nm && <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>시행 {u.developer_nm}</span>}
-              </div>
-            )}
 
-            {/* 미분양률 바 */}
+            {/* 미분양률 바 + 세대수 */}
             {rate !== null && (
-              <div style={{ position: 'relative', height: 5, background: 'var(--bg-hover)', borderRadius: 2, marginBottom: 'var(--sp-sm)' }}>
-                <div style={{ height: '100%', borderRadius: 2, width: `${Math.min(rate, 100)}%`, background: rate > 70 ? 'var(--accent-red)' : rate > 40 ? 'var(--accent-orange)' : 'var(--accent-yellow)' }} />
-                <span style={{ position: 'absolute', right: 0, top: -14, fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--accent-red)' }}>{rate}%</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+                <div style={{ flex: 1, height: 5, borderRadius: 3, background: 'var(--bg-hover)', overflow: 'hidden' }}>
+                  <div style={{ height: '100%', borderRadius: 3, width: `${Math.min(rate, 100)}%`, background: rate > 70 ? 'var(--accent-red)' : rate > 40 ? 'var(--accent-orange)' : 'var(--accent-yellow)' }} />
+                </div>
+                <span style={{ fontSize: 10, fontWeight: 700, color: dangerColor, flexShrink: 0 }}>{unsoldCount.toLocaleString()} / {(u.tot_supply_hshld_co || 0).toLocaleString()}</span>
               </div>
             )}
 
-            {/* 분양가 범위 바 (가격 정보 있으면) */}
+            {/* 태그 */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3, marginBottom: 6 }}>
+              {u.constructor_nm && <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 4, background: 'rgba(255,255,255,0.04)', color: 'var(--text-secondary)' }}>{u.constructor_nm}</span>}
+              {u.nearest_station && <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 4, background: 'rgba(59,123,246,0.06)', color: 'var(--brand)', fontWeight: 600 }}>🚇 {u.nearest_station}</span>}
+              {u.discount_info && <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 4, background: 'rgba(52,211,153,0.06)', color: 'var(--accent-green)', fontWeight: 600 }}>💰 {u.discount_info}</span>}
+              {u.region_nm && <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 4, background: 'rgba(255,255,255,0.04)', color: 'var(--text-tertiary)' }}>{u.region_nm}{u.sigungu_nm ? ` ${u.sigungu_nm}` : ''}</span>}
+              {u.developer_nm && u.developer_nm !== u.constructor_nm && <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 4, background: 'rgba(255,255,255,0.04)', color: 'var(--text-tertiary)' }}>시행 {u.developer_nm}</span>}
+            </div>
+
+            {/* 분양가 범위 바 */}
             {pMin && pMax && pMin !== pMax && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', marginBottom: 'var(--sp-sm)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', marginBottom: 6 }}>
                 <span style={{ fontSize: 10, color: 'var(--accent-blue)', fontWeight: 600 }}>{pMin}억</span>
-                <div style={{ flex: 1, height: 6, borderRadius: 3, background: 'linear-gradient(90deg, rgba(96,165,250,0.3), var(--brand), rgba(248,113,113,0.3))', position: 'relative' }}>
-                  <div style={{ position: 'absolute', top: -1, left: '50%', width: 8, height: 8, borderRadius: '50%', background: 'var(--brand)', border: '1.5px solid var(--bg-surface)', transform: 'translateX(-50%)' }} />
+                <div style={{ flex: 1, height: 4, borderRadius: 2, background: 'linear-gradient(90deg, rgba(96,165,250,0.3), var(--brand), rgba(248,113,113,0.3))', position: 'relative' }}>
+                  <div style={{ position: 'absolute', top: -1, left: '50%', width: 6, height: 6, borderRadius: '50%', background: 'var(--brand)', border: '1px solid var(--bg-surface)', transform: 'translateX(-50%)' }} />
                 </div>
                 <span style={{ fontSize: 10, color: 'var(--accent-red)', fontWeight: 600 }}>{pMax}억</span>
               </div>
