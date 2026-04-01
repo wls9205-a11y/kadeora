@@ -157,7 +157,7 @@ function DailyFortune() {
       </div>
 
       {/* 세부 운세 — 4항목 */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 6 }}>
         {[
           { icon: '💰', label: '금전운', text: f.money },
           { icon: '💕', label: '애정운', text: f.love },
@@ -412,6 +412,17 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
           </div>
         </div>
 
+        {/* 리포트 요약 설명 */}
+        <div className="report-summary" style={{ padding: '10px 12px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-surface)', border: '1px solid var(--border)', marginBottom: 8 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>📋 오늘의 핵심 요약</div>
+          <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: 0, lineHeight: 1.7 }}>
+            {d.region} 지역 {d.subCountThisWeek > 0 ? `이번주 청약 ${d.subCountThisWeek}건(${d.subUnitsThisWeek.toLocaleString()}세대)` : '이번주 예정 청약 없음'}
+            {' · '}전국 미분양 {d.unsoldUnits.toLocaleString()}세대
+            {d.redevTotal > 0 ? ` · ${d.region} 재개발 ${d.redevTotal}건 진행중` : ''}
+            {d.stockTop10.length > 0 ? ` · 시총 TOP ${d.stockTop10[0]?.name} ${pctStr(d.stockTop10[0]?.pct)}` : ''}
+          </p>
+        </div>
+
         {/* KPI 스트립 */}
         <div className="kd-kpi-5">
           {[
@@ -648,7 +659,7 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
       )}
 
       {/* ═══ S4: 미분양 + 재개발 ═══ */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 6 }}>
         <div>
           <SH icon="🏚️" title="미분양" />
           <div style={{ background: 'var(--bg-surface)', borderRadius: 'var(--radius-card)', border: '1px solid var(--border)', padding: '14px 16px' }}>
