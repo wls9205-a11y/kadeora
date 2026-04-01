@@ -1,12 +1,31 @@
 # 카더라 STATUS.md — 세션 66 완료 (2026-04-01 09:20 KST)
 
 ## 최신 커밋
-- `68614d5` — kapt-sync 빌드 에러 재수정
-- `d314805` — 데일리 리포트 3개 신규 섹션 + 에러 수정
+- `66ea3f0` — pdf-parse 빌드 에러 수정 + kapt-sync 반환 타입
+- `d314805` — 데일리 리포트 3개 신규 섹션 (AI브리핑/실거래/블로그)
+- `83f4a96` — JSON-LD 오타 수정 (리포트 리포트 → 리포트)
+- `55180bf` — 비로그인 가입 유도 팝업 2종 (SignupNudge)
 - `49e3cad` — 총세대수 100% 달성 + K-apt 연동 크론
-- `66d209e` — SSR 이벤트핸들러 에러 수정 + 단지 규모 섹션 신설
 
 ## 세션 66 전체 성과
+
+### 데일리 리포트 강화 (9→12 섹션) ✅
+- **🤖 AI 시장 브리핑**: 국내/해외 2패널 + 센티먼트(강세/약세/중립) + 요약
+  - 데이터: stock_daily_briefing (KR/US 분리)
+- **🏠 이달의 실거래**: 거래수·평균가·최고가 KPI + 전월 대비 + 고가 거래 TOP 5
+  - 데이터: apt_transactions (497K건 활용)
+- **📰 오늘의 추천 분석**: 최신 블로그 3편 카드 + 카테고리 아이콘 + 링크
+  - 데이터: blog_posts (22.6K건)
+- 쿼리 14→20개 병렬 / 조건부 렌더링 (데이터 없으면 숨김)
+
+### 비로그인 가입 유도 팝업 2종 (SignupNudge)
+- 웰컴 팝업: 첫 방문 1.5초 후 (3대 혜택 + 카카오 CTA)
+- 탐색 팝업: 서로 다른 URL 5개 이상 (KPI + 추가 기능)
+- 24시간 쿨다운 + 세션당 1회 + GuestNudge 병행
+
+### pdf-parse 빌드 에러 수정
+- batch-pdf-parse, batch-total-hh: require() → eval('require')() webpack 우회
+- next.config.ts: serverExternalPackages에 pdf-parse 추가
 
 ### 총세대수 1% → 100% 달성 ✅
 - **1단계**: 민간+공공 2,070건 자동 채움 (공급=총세대)
@@ -37,11 +56,11 @@
 - `/api/cron/kapt-sync` 크론 구축 (단지백과 세대수 정밀화)
 - GOD MODE 🏠 K-apt 연동 / 🏗️ 총세대수 추출 버튼
 
-### 빌드 에러 수정 (5건)
-- kapt-sync: withCronLogging 반환 타입 → NextResponse.json 래핑
-- kapt-sync: handler 내 NextResponse → plain CronResult
-- kapt-sync: 다른 커밋에 의해 되돌려진 수정 재적용
-- 총 6회 빌드 실패 → 최종 성공 `dpl_BZ8WJ2rLaGuz2jGva2Q11AyJsTR4`
+### 빌드 에러 수정 (6건)
+- kapt-sync: withCronLogging 반환 타입 → NextResponse.json 래핑 (3건)
+- pdf-parse: webpack 정적 분석 우회 (eval require + serverExternalPackages)
+- JSON-LD 오타: '리포트 리포트' → '리포트'
+- 총 빌드 실패 → 최종 성공 `dpl_D4m2736Z2uAbpBPsyffhMtVzX564`
 
 ### 어드민
 - 건물스펙 9항목 (총세대수 추가) 3×3 그리드
@@ -51,6 +70,9 @@
 - **런타임 에러: 0건** ✅
 - **빌드: 성공** ✅ (도메인 정상)
 - **Supabase**: apt_transactions 면적 필터 500 1건 (minor — 중복 파라미터)
+
+## 데일리 리포트 섹션 (12개)
+🤖 AI 시장 브리핑 | 📈 국내 TOP 10 | 🗂️ 섹터 히트맵 | 📊 지수 & 환율 | 🌎 글로벌 마켓 | 🏗️ 청약 캘린더 | 🏢 시세 | 🏚️ 미분양 | 🔨 재개발 | 🏠 이달의 실거래 | 📰 추천 분석 | 📋 요약+체크포인트
 
 ## 데이터 현황
 | 항목 | 수치 | 비율 |
