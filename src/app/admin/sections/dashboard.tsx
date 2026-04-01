@@ -956,6 +956,8 @@ export default function DashboardSection() {
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
           {[
+            { tag: 'FEAT', label: '피드 크론 v3', desc: '페르소나 8종 말투+뻘글40%+연령별 댓글', color: C.brand, commit: '3ec27dc' },
+            { tag: 'FEAT', label: 'PDF 파싱 강화', desc: 'max_floor 9패턴·parking 8·station 5 신규', color: C.purple, commit: '119e08b' },
             { tag: 'FEAT', label: '리포트 12섹션', desc: 'AI브리핑+실거래동향+추천블로그 3섹션 추가', color: C.brand, commit: 'd314805' },
             { tag: 'FIX', label: 'SSR 이벤트핸들러', desc: 'Event handler 에러→KpiCards 클라이언트 분리', color: C.red, commit: '66d209e' },
             { tag: 'FEAT', label: '단지 규모 섹션', desc: '총세대/공급 분리·비율바·동수/층수/주차', color: C.brand, commit: '66d209e' },
