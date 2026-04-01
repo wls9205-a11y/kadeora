@@ -80,19 +80,25 @@
 | 총세대수 | 2,695/2,695 | **100%** |
 | PDF 파싱 | 2,485/2,485 | 100% |
 | AI 요약 정확 | 2,695 | 100% |
-| 종목 섹터 | 1,737/1,737 | 100% |
+| 종목 (가격>0) | 1,774 | — |
 | 블로그 전체 | 22,659 | 100% |
+| 단지백과 | 34,500 | — |
+| 실거래 | 496,987 | — |
+| 크론 등록 | 92 | — |
 | 동수 | 2,075/2,695 | 77% |
 | 최고층 | 46/2,695 | 2% |
 | 주차 | 113/2,695 | 4% |
 
 ## PENDING
-- [ ] Anthropic 크레딧 충전 (최우선)
+- [ ] Anthropic 크레딧 충전 (최우선 — AI 블로그 5크론 중단)
 - [ ] apt_transactions 면적 필터 500 에러 수정
 - [ ] 토스페이먼츠 API 키
-- [ ] KIS_APP_KEY 발급
+- [ ] KIS_APP_KEY 발급 (apiportal.koreainvestment.com)
+- [ ] FINNHUB_API_KEY 발급 (finnhub.io)
 - [ ] 통신판매업 신고
-- [ ] Google/Naver 수동 URL 제출
+- [ ] Google/Naver 수동 URL 제출 (주요 20개)
+- [ ] Search Console 오류 사이트맵 수동 삭제 (/feed, /blog/feed, /rss, sitemap/0~2.xml)
+- [ ] image-sitemap.xml Search Console에 다시 제출
 
 ## 아키텍처 규칙 (12개)
 1. 블로그 삭제 금지 2. stockcoin.net 금지 3. 포인트 RPC만 4. CSP middleware.ts 5. 크론 에러 200 6. OG 폰트 Node.js fs 7. PostWithProfile 보호 8. daily_create_limit 80 9. DB트리거 LIMIT 80 10. Supabase RPC try/catch 11. STATUS.md 필수 12. 디자인 토큰 우선
