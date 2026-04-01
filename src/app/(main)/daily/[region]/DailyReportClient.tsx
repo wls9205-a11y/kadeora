@@ -239,6 +239,43 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
         </div>
       </div>
 
+      {/* ═══ NEW: AI 시장 브리핑 ═══ */}
+      {(d.aiBriefing || d.aiBriefingUS) && (
+        <>
+          <SH icon="🤖" title="AI 시장 브리핑" />
+          <div style={{ display: 'grid', gridTemplateColumns: d.aiBriefing && d.aiBriefingUS ? '1fr 1fr' : '1fr', gap: 8, marginBottom: 8 }}>
+            {d.aiBriefing && (
+              <div style={{ background: 'var(--bg-surface)', borderRadius: 'var(--radius-card)', border: '1px solid var(--border)', padding: '14px 16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-primary)' }}>🇰🇷 국내</span>
+                  <span style={{
+                    fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 'var(--radius-xs)',
+                    background: d.aiBriefing.sentiment === 'bullish' ? 'rgba(239,68,68,0.08)' : d.aiBriefing.sentiment === 'bearish' ? 'rgba(59,130,246,0.08)' : G.goldBg,
+                    color: d.aiBriefing.sentiment === 'bullish' ? 'var(--accent-red)' : d.aiBriefing.sentiment === 'bearish' ? 'var(--accent-blue)' : G.gold,
+                  }}>{d.aiBriefing.sentiment === 'bullish' ? '📈 강세' : d.aiBriefing.sentiment === 'bearish' ? '📉 약세' : '➡️ 중립'}</span>
+                </div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>{d.aiBriefing.title}</div>
+                <div style={{ fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.6 }}>{d.aiBriefing.summary.slice(0, 200)}</div>
+              </div>
+            )}
+            {d.aiBriefingUS && (
+              <div style={{ background: 'var(--bg-surface)', borderRadius: 'var(--radius-card)', border: '1px solid var(--border)', padding: '14px 16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-primary)' }}>🇺🇸 해외</span>
+                  <span style={{
+                    fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 'var(--radius-xs)',
+                    background: d.aiBriefingUS.sentiment === 'bullish' ? 'rgba(16,185,129,0.08)' : d.aiBriefingUS.sentiment === 'bearish' ? 'rgba(239,68,68,0.08)' : G.goldBg,
+                    color: d.aiBriefingUS.sentiment === 'bullish' ? 'var(--accent-green)' : d.aiBriefingUS.sentiment === 'bearish' ? 'var(--accent-red)' : G.gold,
+                  }}>{d.aiBriefingUS.sentiment === 'bullish' ? '📈 강세' : d.aiBriefingUS.sentiment === 'bearish' ? '📉 약세' : '➡️ 중립'}</span>
+                </div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>{d.aiBriefingUS.title}</div>
+                <div style={{ fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.6 }}>{d.aiBriefingUS.summary.slice(0, 200)}</div>
+              </div>
+            )}
+          </div>
+        </>
+      )}
+
       {/* ═══ S1: 주식 시장 ═══ */}
       <SH icon="📈" title="국내 시장 · 시총 TOP 10" />
       <div style={{ background: 'var(--bg-surface)', borderRadius: 'var(--radius-card)', border: '1px solid var(--border)', padding: '14px 16px', marginBottom: 8 }}>
@@ -485,6 +522,81 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
           </div>
         </div>
       </div>
+
+      {/* ═══ NEW: 이달의 실거래 동향 ═══ */}
+      {d.tradeTrend && d.tradeTrend.thisMonth.deals > 0 && (
+        <>
+          <SH icon="🏠" title={`${d.region} 이달의 실거래`} />
+          <div style={{ background: 'var(--bg-surface)', borderRadius: 'var(--radius-card)', border: '1px solid var(--border)', padding: '14px 16px', marginBottom: 8 }}>
+            {/* KPI 행 */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginBottom: 12 }}>
+              <div style={{ textAlign: 'center', padding: '8px 4px', borderRadius: 'var(--radius-sm)', background: G.goldBg, border: `1px solid ${G.goldBorder}` }}>
+                <div style={{ fontSize: 16, fontWeight: 800, color: G.goldLight }}>{d.tradeTrend.thisMonth.deals}</div>
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>이달 거래</div>
+                {d.tradeTrend.lastMonth.deals > 0 && (
+                  <div style={{ fontSize: 9, color: d.tradeTrend.thisMonth.deals > d.tradeTrend.lastMonth.deals ? 'var(--accent-red)' : 'var(--accent-blue)', fontWeight: 600 }}>
+                    전월 {d.tradeTrend.lastMonth.deals}건
+                  </div>
+                )}
+              </div>
+              <div style={{ textAlign: 'center', padding: '8px 4px', borderRadius: 'var(--radius-sm)', background: G.goldBg, border: `1px solid ${G.goldBorder}` }}>
+                <div style={{ fontSize: 16, fontWeight: 800, color: G.goldLight }}>{fmt(d.tradeTrend.thisMonth.avgPrice)}</div>
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>평균 매매가</div>
+                {d.tradeTrend.lastMonth.avgPrice > 0 && (() => {
+                  const diff = Math.round((d.tradeTrend!.thisMonth.avgPrice - d.tradeTrend!.lastMonth.avgPrice) / d.tradeTrend!.lastMonth.avgPrice * 100);
+                  return <div style={{ fontSize: 9, color: diff >= 0 ? 'var(--accent-red)' : 'var(--accent-blue)', fontWeight: 600 }}>{diff >= 0 ? '▲' : '▼'}{Math.abs(diff)}%</div>;
+                })()}
+              </div>
+              <div style={{ textAlign: 'center', padding: '8px 4px', borderRadius: 'var(--radius-sm)', background: G.goldBg, border: `1px solid ${G.goldBorder}` }}>
+                <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--accent-red)' }}>{fmt(d.tradeTrend.thisMonth.maxPrice)}</div>
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>최고가</div>
+                {d.tradeTrend.thisMonth.maxAptName && <div style={{ fontSize: 9, color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.tradeTrend.thisMonth.maxAptName}</div>}
+              </div>
+            </div>
+            {/* 최근 고가 거래 */}
+            {d.tradeTrend.hotDeals.length > 0 && (
+              <>
+                <div style={{ fontSize: 11, fontWeight: 700, color: G.gold, marginBottom: 6 }}>🔥 최근 2주 고가 거래</div>
+                {d.tradeTrend.hotDeals.map((deal, i) => (
+                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '5px 0', borderBottom: i < d.tradeTrend!.hotDeals.length - 1 ? '1px solid var(--border)' : 'none' }}>
+                    <div>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>{deal.apt_name}</span>
+                      <span style={{ fontSize: 10, color: 'var(--text-tertiary)', marginLeft: 4 }}>{deal.sigungu} · {Math.round(deal.exclusive_area)}㎡</span>
+                    </div>
+                    <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                      <span style={{ fontSize: 12, fontWeight: 800, color: 'var(--accent-red)' }}>{fmt(deal.deal_amount)}</span>
+                      <span style={{ fontSize: 9, color: 'var(--text-tertiary)', marginLeft: 4 }}>{deal.deal_date.slice(5)}</span>
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
+          </div>
+        </>
+      )}
+
+      {/* ═══ NEW: 추천 분석 블로그 ═══ */}
+      {d.recommendBlogs.length > 0 && (
+        <>
+          <SH icon="📰" title="오늘의 추천 분석" />
+          <div style={{ display: 'grid', gap: 6, marginBottom: 8 }}>
+            {d.recommendBlogs.map(blog => {
+              const catIcon = blog.category === 'stock' ? '📈' : blog.category === 'apt' ? '🏢' : blog.category === 'unsold' ? '🏚️' : '💰';
+              const catLabel = blog.category === 'stock' ? '주식' : blog.category === 'apt' ? '부동산' : blog.category === 'unsold' ? '미분양' : '재테크';
+              return (
+                <Link key={blog.slug} href={`/blog/${blog.slug}`} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px', borderRadius: 'var(--radius-card)', background: 'var(--bg-surface)', border: '1px solid var(--border)', textDecoration: 'none', transition: 'border-color 0.15s' }}>
+                  <span style={{ fontSize: 22, flexShrink: 0 }}>{catIcon}</span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{blog.title}</div>
+                    <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{blog.excerpt || '카더라에서 읽기'}</div>
+                  </div>
+                  <span style={{ fontSize: 9, fontWeight: 600, padding: '2px 6px', borderRadius: 3, background: 'rgba(59,123,246,0.08)', color: 'var(--brand)', flexShrink: 0 }}>{catLabel}</span>
+                </Link>
+              );
+            })}
+          </div>
+        </>
+      )}
 
       {/* ═══ S5: 요약 + 내일 체크포인트 — 회원전용 골드 ═══ */}
       <SH icon="📋" title="오늘의 요약 + 내일 체크포인트" />

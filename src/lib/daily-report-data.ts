@@ -31,6 +31,17 @@ export interface DailyReportData {
   // 지수 & 환율
   indices: { label: string; value: number; change_pct: number }[];
   exchangeRate: number;
+  // ── 신규: AI 브리핑 ──
+  aiBriefing: { market: string; title: string; summary: string; sentiment: string } | null;
+  aiBriefingUS: { market: string; title: string; summary: string; sentiment: string } | null;
+  // ── 신규: 실거래 동향 ──
+  tradeTrend: {
+    thisMonth: { deals: number; avgPrice: number; maxPrice: number; maxAptName: string };
+    lastMonth: { deals: number; avgPrice: number };
+    hotDeals: { apt_name: string; sigungu: string; deal_amount: number; exclusive_area: number; deal_date: string }[];
+  } | null;
+  // ── 신규: 추천 블로그 ──
+  recommendBlogs: { slug: string; title: string; category: string; excerpt: string }[];
   // 메타
   subCountThisWeek: number;
   subUnitsThisWeek: number;
@@ -57,6 +68,7 @@ export async function fetchDailyReportData(region: ReportRegion): Promise<DailyR
   const [
     subsR, unsoldLocalR, unsoldAllR, redevR, redevStagesR, guR, complexR, sitesR,
     stocksR, sectorsR, globalR, subWeekR, indicesR, exchangeR,
+    briefingKR, briefingUSR, tradeThisR, tradeLastR, tradeHotR, blogR,
   ] = await Promise.all([
     // 1. 청약 (이번주 ± 3일)
     sb.from('apt_subscriptions')
@@ -147,6 +159,57 @@ export async function fetchDailyReportData(region: ReportRegion): Promise<DailyR
       .eq('currency_pair', 'USD/KRW')
       .order('recorded_at', { ascending: false })
       .limit(1),
+
+    // ── 신규 15: AI 브리핑 (국내) ──
+    sb.from('stock_daily_briefing')
+      .select('market, title, summary, sentiment')
+      .eq('market', 'KR')
+      .order('briefing_date', { ascending: false })
+      .limit(1),
+
+    // ── 신규 16: AI 브리핑 (해외) ──
+    sb.from('stock_daily_briefing')
+      .select('market, title, summary, sentiment')
+      .eq('market', 'US')
+      .order('briefing_date', { ascending: false })
+      .limit(1),
+
+    // ── 신규 17: 이번 달 실거래 (해당 지역) ──
+    sb.from('apt_transactions')
+      .select('apt_name, sigungu, deal_amount, exclusive_area, deal_date')
+      .eq('region_nm', region)
+      .gte('deal_date', `${dateStr.slice(0, 7)}-01`)
+      .order('deal_date', { ascending: false })
+      .limit(1000),
+
+    // ── 신규 18: 지난 달 실거래 (해당 지역) ──
+    (() => {
+      const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const lastEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+      return sb.from('apt_transactions')
+        .select('deal_amount')
+        .eq('region_nm', region)
+        .gte('deal_date', lastMonth.toISOString().slice(0, 10))
+        .lte('deal_date', lastEnd.toISOString().slice(0, 10))
+        .limit(5000);
+    })(),
+
+    // ── 신규 19: 최근 고가 거래 (핫딜) ──
+    sb.from('apt_transactions')
+      .select('apt_name, sigungu, deal_amount, exclusive_area, deal_date')
+      .eq('region_nm', region)
+      .gte('deal_date', new Date(now.getTime() - 14 * 86400000).toISOString().slice(0, 10))
+      .order('deal_amount', { ascending: false })
+      .limit(5),
+
+    // ── 신규 20: 추천 블로그 ──
+    sb.from('blog_posts')
+      .select('slug, title, category, excerpt')
+      .eq('is_published', true)
+      .not('published_at', 'is', null)
+      .lte('published_at', now.toISOString())
+      .order('published_at', { ascending: false })
+      .limit(3),
   ]);
 
   // 청약 상태 계산
@@ -242,6 +305,43 @@ export async function fetchDailyReportData(region: ReportRegion): Promise<DailyR
   const subCountThisWeek = subWeekData.length;
   const subUnitsThisWeek = subWeekData.reduce((s: number, r: any) => s + (r.tot_supply_hshld_co || 0), 0);
 
+  // ── 신규: AI 브리핑 ──
+  const briefingKRData = briefingKR.data?.[0] || null;
+  const briefingUSData = briefingUSR.data?.[0] || null;
+  const aiBriefing = briefingKRData ? { market: 'KR', title: briefingKRData.title, summary: briefingKRData.summary, sentiment: briefingKRData.sentiment || 'neutral' } : null;
+  const aiBriefingUS = briefingUSData ? { market: 'US', title: briefingUSData.title, summary: briefingUSData.summary, sentiment: briefingUSData.sentiment || 'neutral' } : null;
+
+  // ── 신규: 실거래 동향 ──
+  const tradeThisData = tradeThisR.data || [];
+  const tradeLastData = tradeLastR.data || [];
+  let tradeTrend: DailyReportData['tradeTrend'] = null;
+  if (tradeThisData.length > 0) {
+    const thisAmounts = tradeThisData.map((r: any) => Number(r.deal_amount));
+    const lastAmounts = tradeLastData.map((r: any) => Number(r.deal_amount));
+    const maxIdx = thisAmounts.indexOf(Math.max(...thisAmounts));
+    tradeTrend = {
+      thisMonth: {
+        deals: tradeThisData.length,
+        avgPrice: Math.round(thisAmounts.reduce((a: number, b: number) => a + b, 0) / thisAmounts.length),
+        maxPrice: thisAmounts[maxIdx] || 0,
+        maxAptName: tradeThisData[maxIdx]?.apt_name || '',
+      },
+      lastMonth: {
+        deals: tradeLastData.length,
+        avgPrice: lastAmounts.length > 0 ? Math.round(lastAmounts.reduce((a: number, b: number) => a + b, 0) / lastAmounts.length) : 0,
+      },
+      hotDeals: (tradeHotR.data || []).slice(0, 5).map((r: any) => ({
+        apt_name: r.apt_name, sigungu: r.sigungu, deal_amount: Number(r.deal_amount),
+        exclusive_area: Number(r.exclusive_area), deal_date: r.deal_date,
+      })),
+    };
+  }
+
+  // ── 신규: 추천 블로그 ──
+  const recommendBlogs = (blogR.data || []).map((r: any) => ({
+    slug: r.slug, title: r.title, category: r.category || 'general', excerpt: (r.excerpt || '').slice(0, 80),
+  }));
+
   return {
     region,
     date: dateStr,
@@ -268,6 +368,10 @@ export async function fetchDailyReportData(region: ReportRegion): Promise<DailyR
       return { label: labelMap[r.symbol] || r.symbol, value: Number(r.price), change_pct: Number(r.change_pct || 0) };
     }),
     exchangeRate: Number(exchangeR.data?.[0]?.rate || 0),
+    aiBriefing,
+    aiBriefingUS,
+    tradeTrend,
+    recommendBlogs,
     subCountThisWeek,
     subUnitsThisWeek,
   };

@@ -63,7 +63,7 @@ function nameSimilarity(a: string, b: string): number {
 }
 
 async function handler(_req: NextRequest) {
-  if (!KAPT_KEY) return { processed: 0, updated: 0, failed: 0, metadata: { error: 'KAPT_API_KEY not set' } };
+  if (!KAPT_KEY) return { processed: 0, created: 0, failed: 0, metadata: { error: 'KAPT_API_KEY not set' } };
 
   const sb = getSupabaseAdmin();
 
@@ -142,7 +142,7 @@ async function handler(_req: NextRequest) {
     }
   }
 
-  return { processed, updated, failed, metadata: { results: results.slice(0, 20) } };
+  return { processed, updated, failed, results: results.slice(0, 20) };
 }
 
 export async function GET(req: NextRequest) {
@@ -151,11 +151,9 @@ export async function GET(req: NextRequest) {
   if (token !== process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-  const result = await withCronLogging('kapt-sync', () => handler(req));
-  return NextResponse.json(result);
+  return withCronLogging('kapt-sync', () => handler(req));
 }
 
 export async function POST(req: NextRequest) {
-  const result = await withCronLogging('kapt-sync', () => handler(req));
-  return NextResponse.json(result);
+  return withCronLogging('kapt-sync', () => handler(req));
 }
