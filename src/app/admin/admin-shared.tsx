@@ -54,31 +54,31 @@ const dateStr = (d: string | null) => d ? new Date(d).toLocaleDateString('ko-KR'
 
 // ── Reusable Components ──
 export function Pill({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
-  return <button onClick={onClick} style={{ padding: '6px 14px', borderRadius: 'var(--radius-sm)', border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600, background: active ? C.brand : C.card, color: active ? '#fff' : C.textSec, transition: 'all .15s' }}>{children}</button>;
+  return <button onClick={onClick} style={{ padding: '5px 12px', borderRadius: 'var(--radius-sm)', border: 'none', cursor: 'pointer', fontSize: 11, fontWeight: 600, background: active ? C.brand : C.card, color: active ? '#fff' : C.textSec, transition: 'all .15s', whiteSpace: 'nowrap' }}>{children}</button>;
 }
 export function Badge({ color, children }: { color: string; children: React.ReactNode }) {
-  return <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 'var(--radius-xs)', fontSize: 11, fontWeight: 600, background: `${color}20`, color }}>{children}</span>;
+  return <span style={{ display: 'inline-block', padding: '2px 7px', borderRadius: 'var(--radius-xs)', fontSize: 10, fontWeight: 600, background: `${color}20`, color, whiteSpace: 'nowrap' }}>{children}</span>;
 }
 export function KPICard({ icon, label, value, sub, color }: { icon: string; label: string; value: string | number; sub?: string; color: string }) {
   return (
-    <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-card)', padding: '16px 18px', display: 'flex', gap: 14, alignItems: 'center', transition: 'border-color .15s' }}
+    <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-card)', padding: '12px 14px', display: 'flex', gap: 10, alignItems: 'center', transition: 'border-color .15s', minWidth: 0 }}
       onMouseEnter={e => (e.currentTarget.style.borderColor = color)}
       onMouseLeave={e => (e.currentTarget.style.borderColor = C.border)}>
-      <div style={{ width: 42, height: 42, borderRadius: 'var(--radius-md)', background: `${color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-lg)' }}>{icon}</div>
-      <div>
-        <div style={{ fontSize: 11, color: C.textDim, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase' }}>{label}</div>
-        <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: C.text, lineHeight: 1.2 }}>{typeof value === 'number' ? fmt(value) : value}</div>
-        {sub && <div style={{ fontSize: 11, color: C.textDim, marginTop: 2 }}>{sub}</div>}
+      <div style={{ width: 36, height: 36, borderRadius: 'var(--radius-md)', background: `${color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>{icon}</div>
+      <div style={{ minWidth: 0 }}>
+        <div style={{ fontSize: 10, color: C.textDim, fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</div>
+        <div style={{ fontSize: 18, fontWeight: 800, color: C.text, lineHeight: 1.2 }}>{typeof value === 'number' ? fmt(value) : value}</div>
+        {sub && <div style={{ fontSize: 10, color: C.textDim, marginTop: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{sub}</div>}
       </div>
     </div>
   );
 }
 export function DataTable({ headers, rows, onRowClick }: { headers: string[]; rows: any[][]; onRowClick?: (i: number) => void }) {
   return (
-    <div className="admin-table-wrap" style={{ overflowX: 'auto', borderRadius: 'var(--radius-md)', border: `1px solid ${C.border}` }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+    <div className="admin-table-wrap" style={{ overflowX: 'auto', borderRadius: 'var(--radius-md)', border: `1px solid ${C.border}`, WebkitOverflowScrolling: 'touch' }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12, minWidth: headers.length > 4 ? 600 : 'auto' }}>
         <thead>
-          <tr>{headers.map((h, i) => <th key={i} style={{ padding: '10px 12px', textAlign: 'left', background: C.card, color: C.textDim, fontWeight: 600, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.04em', borderBottom: `1px solid ${C.border}`, position: 'sticky', top: 0 }}>{h}</th>)}</tr>
+          <tr>{headers.map((h, i) => <th key={i} style={{ padding: '8px 10px', textAlign: 'left', background: C.card, color: C.textDim, fontWeight: 600, fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.04em', borderBottom: `1px solid ${C.border}`, position: 'sticky', top: 0, whiteSpace: 'nowrap' }}>{h}</th>)}</tr>
         </thead>
         <tbody>
           {rows.map((row, ri) => (
@@ -86,10 +86,10 @@ export function DataTable({ headers, rows, onRowClick }: { headers: string[]; ro
               style={{ cursor: onRowClick ? 'pointer' : 'default', transition: 'background .1s' }}
               onMouseEnter={e => (e.currentTarget.style.background = C.cardHover)}
               onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
-              {row.map((cell, ci) => <td key={ci} style={{ padding: '10px 12px', borderBottom: `1px solid ${C.border}08`, color: C.text, whiteSpace: 'nowrap' }}>{cell}</td>)}
+              {row.map((cell, ci) => <td key={ci} style={{ padding: '8px 10px', borderBottom: `1px solid ${C.border}08`, color: C.text, whiteSpace: ci === 0 ? 'nowrap' : 'normal', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis' }}>{cell}</td>)}
             </tr>
           ))}
-          {rows.length === 0 && <tr><td colSpan={headers.length} style={{ padding: 30, textAlign: 'center', color: C.textDim }}>데이터 없음</td></tr>}
+          {rows.length === 0 && <tr><td colSpan={headers.length} style={{ padding: 24, textAlign: 'center', color: C.textDim, fontSize: 12 }}>데이터 없음</td></tr>}
         </tbody>
       </table>
     </div>
@@ -137,15 +137,15 @@ export function ProgressBar({ value, max, color, label, sub }: { value: number; 
 
 export function StatBox({ icon, label, value, sub, color, accent }: { icon: string; label: string; value: string | number; sub?: string; color: string; accent?: boolean }) {
   return (
-    <div style={{ background: accent ? `${color}10` : C.card, border: `1px solid ${accent ? color + '30' : C.border}`, borderRadius: 'var(--radius-lg)', padding: 'var(--card-p) var(--sp-lg)', transition: 'border-color .15s' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-sm)' }}>
-        <span style={{ fontSize: 15 }}>{icon}</span>
-        <span style={{ fontSize: 11, color: C.textDim, fontWeight: 600, letterSpacing: '.03em', textTransform: 'uppercase' }}>{label}</span>
+    <div style={{ background: accent ? `${color}10` : C.card, border: `1px solid ${accent ? color + '30' : C.border}`, borderRadius: 'var(--radius-lg)', padding: '12px 14px', transition: 'border-color .15s', minWidth: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+        <span style={{ fontSize: 14 }}>{icon}</span>
+        <span style={{ fontSize: 10, color: C.textDim, fontWeight: 600, letterSpacing: '.03em', textTransform: 'uppercase', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</span>
       </div>
-      <div style={{ fontSize: 26, fontWeight: 800, color: accent ? color : C.text, lineHeight: 1.1, letterSpacing: '-0.02em' }}>
+      <div style={{ fontSize: 22, fontWeight: 800, color: accent ? color : C.text, lineHeight: 1.1, letterSpacing: '-0.02em' }}>
         {typeof value === 'number' ? fmt(value) : value}
       </div>
-      {sub && <div style={{ fontSize: 11, color: C.textDim, marginTop: 'var(--sp-xs)' }}>{sub}</div>}
+      {sub && <div style={{ fontSize: 10, color: C.textDim, marginTop: 4 }}>{sub}</div>}
     </div>
   );
 }

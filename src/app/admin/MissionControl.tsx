@@ -53,18 +53,35 @@ export default function MissionControl() {
     <div style={{ display: 'flex', minHeight: '100vh', background: C.bg, color: C.text, fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif' }}>
       <style>{`
         @keyframes spin { to { transform: rotate(360deg) } }
+
+        /* ── 모바일 반응형 (태블릿) ── */
         @media (max-width: 768px) {
           .admin-mobile-bar { display: flex !important; }
-          .admin-sidebar { position: fixed !important; left: -220px; top: 0; z-index: 95; height: 100vh !important; transition: left 0.25s ease; box-shadow: none; }
-          .admin-sidebar.open { left: 0 !important; box-shadow: 4px 0 20px rgba(0,0,0,0.3); }
+          .admin-sidebar {
+            position: fixed !important; left: -240px; top: 0; z-index: 95;
+            height: 100vh !important; width: 220px !important;
+            transition: left 0.25s ease; box-shadow: none;
+          }
+          .admin-sidebar.open { left: 0 !important; box-shadow: 4px 0 24px rgba(0,0,0,0.4); }
           .admin-sidebar-overlay { display: block !important; }
-          .admin-main { padding: 56px 10px 40px !important; max-width: 100% !important; }
+          .admin-main { padding: 56px 12px 32px !important; max-width: 100% !important; }
           .mc-g2 { grid-template-columns: 1fr !important; }
           .mc-g4, .mc-g6 { grid-template-columns: repeat(2, 1fr) !important; }
+          .mc-g3 { grid-template-columns: 1fr 1fr !important; }
+
+          /* 공유 컴포넌트 모바일 조정 */
+          .admin-table-wrap { font-size: 12px !important; }
+          .admin-table-wrap th, .admin-table-wrap td { padding: 8px 8px !important; }
+          .admin-detail-grid { grid-template-columns: 1fr !important; }
         }
+
+        /* ── 모바일 반응형 (스마트폰) ── */
         @media (max-width: 480px) {
-          .admin-main { padding: 52px 6px 28px !important; }
-          .mc-g4, .mc-g6 { grid-template-columns: 1fr !important; }
+          .admin-main { padding: 50px 8px 24px !important; }
+          .mc-g2, .mc-g3, .mc-g4, .mc-g6 { grid-template-columns: 1fr !important; gap: 6px !important; }
+
+          /* KPICard / StatBox 간격 축소 */
+          .admin-main [class*="kpi"], .admin-main > div > div { }
         }
       `}</style>
 
@@ -72,23 +89,24 @@ export default function MissionControl() {
       {sidebarOpen && <div className="admin-sidebar-overlay" onClick={() => setSidebarOpen(false)} style={{ display: 'none', position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 90 }} />}
 
       {/* 모바일 상단 바 */}
-      <div className="admin-mobile-bar" style={{ display: 'none', position: 'fixed', top: 0, left: 0, right: 0, zIndex: 80, background: C.surface, padding: '10px 16px', borderBottom: `1px solid ${C.border}`, alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ fontSize: 14, fontWeight: 700, color: C.text }}>{SECTIONS.find(s => s.key === section)?.icon} {SECTIONS.find(s => s.key === section)?.label}</span>
-        <button aria-label="닫기" onClick={() => setSidebarOpen(!sidebarOpen)} style={{ background: 'none', border: 'none', color: C.text, fontSize: 'var(--fs-lg)', cursor: 'pointer', padding: '4px 8px' }}>{sidebarOpen ? '✕' : '☰'}</button>
+      <div className="admin-mobile-bar" style={{ display: 'none', position: 'fixed', top: 0, left: 0, right: 0, zIndex: 80, background: 'rgba(11,20,37,0.95)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', padding: '0 16px', height: 48, borderBottom: `1px solid ${C.border}`, alignItems: 'center', justifyContent: 'space-between' }}>
+        <button aria-label="메뉴" onClick={() => setSidebarOpen(!sidebarOpen)} style={{ background: 'none', border: 'none', color: C.text, fontSize: 18, cursor: 'pointer', padding: '6px 8px', borderRadius: 'var(--radius-sm)' }}>{sidebarOpen ? '✕' : '☰'}</button>
+        <span style={{ fontSize: 13, fontWeight: 700, color: C.text, flex: 1, textAlign: 'center' }}>{SECTIONS.find(s => s.key === section)?.icon} {SECTIONS.find(s => s.key === section)?.label}</span>
+        <span style={{ fontSize: 10, color: C.brand, fontWeight: 600 }}>MC</span>
       </div>
 
       {/* 사이드바 */}
-      <aside className={`admin-sidebar${sidebarOpen ? ' open' : ''}`} style={{ width: 200, background: C.surface, borderRight: `1px solid ${C.border}`, padding: '16px 8px', position: 'sticky', top: 0, height: '100vh', overflowY: 'auto', flexShrink: 0 }}>
-        <div style={{ fontSize: 16, fontWeight: 800, color: C.brand, padding: '4px 12px 16px', letterSpacing: '-0.02em' }}>Mission Control</div>
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <aside className={`admin-sidebar${sidebarOpen ? ' open' : ''}`} style={{ width: 200, background: C.surface, borderRight: `1px solid ${C.border}`, padding: '12px 6px', position: 'sticky', top: 0, height: '100vh', overflowY: 'auto', flexShrink: 0 }}>
+        <div style={{ fontSize: 15, fontWeight: 800, color: C.brand, padding: '6px 12px 12px', letterSpacing: '-0.02em', borderBottom: `1px solid ${C.border}`, marginBottom: 8 }}>⚡ Mission Control</div>
+        <nav style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
           {SECTIONS.map(s => (
             <button key={s.key} data-section={s.key} onClick={() => { setSection(s.key); setSidebarOpen(false); }} style={{
-              display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', padding: '8px 12px', borderRadius: 'var(--radius-sm)', border: 'none', cursor: 'pointer', width: '100%',
+              display: 'flex', alignItems: 'center', gap: 8, padding: '7px 10px', borderRadius: 6, border: 'none', cursor: 'pointer', width: '100%',
               background: section === s.key ? C.brandBg : 'transparent',
               color: section === s.key ? C.brand : C.textSec,
-              fontWeight: section === s.key ? 700 : 500, fontSize: 13, textAlign: 'left', transition: 'all 0.15s',
+              fontWeight: section === s.key ? 700 : 500, fontSize: 12, textAlign: 'left', transition: 'all 0.12s',
             }}>
-              <span style={{ fontSize: 15 }}>{s.icon}</span>{s.label}
+              <span style={{ fontSize: 14, width: 20, textAlign: 'center', flexShrink: 0 }}>{s.icon}</span>{s.label}
             </button>
           ))}
         </nav>
