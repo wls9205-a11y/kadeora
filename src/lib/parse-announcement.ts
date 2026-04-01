@@ -51,22 +51,19 @@ export function parseAnnouncementHtml(html: string): Record<string, any> {
     data.regulation_type = r;
   }
 
-  // ══════ 건물 스펙 (PDF에만 있을 수 있음 — text에서 최대한 추출) ══════
-  // 총세대수 추출 — 공급세대수와 명확히 구분해야 함
-  // 모집공고 PDF에서: "총세대수 1,200세대" vs "공급세대수 569세대"
-  // "공급세대수" "금회 공급" 등은 반드시 제외
+  // ══════ 건물 스펙 (HTML + PDF 공통 — 패턴 대폭 강화) ══════
+  // 총세대수 추출 — 공급세대수와 명확히 구분
   const totalHHPatterns = [
-    /총\s*세대\s*수\s*[:\s]*([0-9,]+)\s*세대/i,           // "총세대수: 1,200세대"
-    /총\s*세대\s*수\s*[:\s]*([0-9,]+)/i,                   // "총세대수: 1200"
-    /단지\s*(?:전체)?\s*(?:총)?\s*([0-9,]+)\s*세대/i,      // "단지 전체 1,200세대"
-    /([0-9,]+)\s*세대\s*규모\s*(?:의|인)?\s*(?:단지|아파트)/i, // "1,200세대 규모의 단지"
+    /총\s*세대\s*수\s*[:\s]*([0-9,]+)\s*세대/i,
+    /총\s*세대\s*수\s*[:\s]*([0-9,]+)/i,
+    /단지\s*(?:전체)?\s*(?:총)?\s*([0-9,]+)\s*세대/i,
+    /([0-9,]+)\s*세대\s*규모\s*(?:의|인)?\s*(?:단지|아파트)/i,
+    /총\s*([0-9,]+)\s*세대\s*(?:로|의|중)/i,
   ];
-  // 공급세대수 패턴 — 이건 절대 total_households에 넣으면 안 됨
   const supplyPatterns = /(?:공급|금회|이번|분양)\s*세대/i;
   for (const pat of totalHHPatterns) {
     const m = text.match(pat);
     if (m) {
-      // 매칭된 위치 앞에 "공급" "금회" 등이 있으면 제외
       const idx = text.indexOf(m[0]);
       const before = text.slice(Math.max(0, idx - 20), idx);
       if (!supplyPatterns.test(before)) {
@@ -75,20 +72,97 @@ export function parseAnnouncementHtml(html: string): Record<string, any> {
       }
     }
   }
-  const dongMatch = text.match(/(\d{1,3})\s*개?\s*동\s*[\(（]/i) || text.match(/총\s*(\d{1,3})\s*개?\s*동/i);
-  if (dongMatch) { const v = num(dongMatch[1]); if (v && v <= 200) data.total_dong_count = v; }
-  const floorMatch = text.match(/지상\s*(\d{1,3})\s*층/i);
-  if (floorMatch) data.max_floor = num(floorMatch[1]);
-  const minFloor = text.match(/지하\s*(\d{1,2})\s*층/i);
-  if (minFloor) data.min_floor = num(minFloor[1]);
-  const parkMatch = text.match(/주차\s*대수?\s*[:\s]*([0-9,]+)\s*대/i);
-  if (parkMatch) data.parking_total = num(parkMatch[1]);
-  const heatMatch = text.match(/(개별난방|중앙난방|지역난방)\s*[\(（]?\s*(도시가스|LNG|심야전기|열병합)?/i);
-  if (heatMatch) data.heating_type = [heatMatch[1], heatMatch[2]].filter(Boolean).join(' ');
-  const structMatch = text.match(/(철근콘크리트|RC|벽식|라멘|무량판|철골)/i);
-  if (structMatch) data.structure_type = structMatch[1];
-  const extMatch = text.match(/외장재?\s*[:\s]*([\w가-힣\+·]+(?:타일|석|비트|도장|패널|커튼월)[\w가-힣\+·]*)/i);
-  if (extMatch) data.exterior_finish = extMatch[1].slice(0, 50);
+
+  // ── 동 수 (패턴 확장) ──
+  const dongPatterns = [
+    /(\d{1,3})\s*개?\s*동\s*[\(（,·]/i,
+    /총\s*(\d{1,3})\s*개?\s*동/i,
+    /동\s*수\s*[:\s]*(\d{1,3})\s*개?\s*동?/i,
+    /(\d{1,3})\s*개\s*동\s*(?:규모|으로)/i,
+    /아파트\s*(\d{1,3})\s*개?\s*동/i,
+    /(?:지상|지하)[^.]{0,30}?(\d{1,3})\s*개?\s*동/i,
+  ];
+  for (const pat of dongPatterns) {
+    const m = text.match(pat);
+    if (m) { const v = num(m[1]); if (v && v > 0 && v <= 200) { data.total_dong_count = v; break; } }
+  }
+
+  // ── 최고층 (패턴 대폭 확장 — 0%→목표 80%+) ──
+  const floorPatterns = [
+    /지상\s*(\d{1,3})\s*층\s*~?\s*(?:지상\s*)?(\d{1,3})?\s*층/i,     // "지상 15층~지상 29층" → 29
+    /최고\s*(\d{1,3})\s*층/i,                                         // "최고 35층"
+    /(\d{1,3})\s*층\s*이하/i,                                         // "49층 이하"
+    /지상\s*(\d{1,3})\s*층\s*[\(（]/i,                                // "지상 25층("
+    /지상\s*(\d{1,3})\s*층\s*(?:규모|아파트|건물)/i,                  // "지상 35층 규모"
+    /규모\s*[:\s]*지하\s*\d+\s*층?\s*[~,·/]?\s*지상\s*(\d{1,3})\s*층/i, // "규모: 지하2층~지상29층"
+    /지하\s*\d+\s*층?\s*[~,·/]\s*지상\s*(\d{1,3})\s*층/i,             // "지하2층/지상35층"
+    /(?:아파트|공동주택)\s*(?:\d+동\s*)?\s*지상\s*(\d{1,3})\s*층/i,   // "아파트 지상 29층"
+    /지상\s*(\d{1,3})\s*층/i,                                         // "지상 25층" (기본)
+  ];
+  for (const pat of floorPatterns) {
+    const m = text.match(pat);
+    if (m) {
+      // "지상 15층~지상 29층" 형태는 더 큰 숫자(2번째 캡처)를 사용
+      const v2 = m[2] ? num(m[2]) : null;
+      const v1 = num(m[1]);
+      const v = (v2 && v2 > (v1 || 0)) ? v2 : v1;
+      if (v && v > 0 && v <= 100) { data.max_floor = v; break; }
+    }
+  }
+
+  // ── 지하 층수 ──
+  const minFloorMatch = text.match(/지하\s*(\d{1,2})\s*층/i);
+  if (minFloorMatch) data.min_floor = num(minFloorMatch[1]);
+
+  // ── 주차 대수 (패턴 대폭 확장 — 4%→목표 80%+) ──
+  const parkPatterns = [
+    /주차\s*(?:대수|장|시설)?\s*[:\s]*(?:총\s*)?([0-9,]+)\s*대/i,     // "주차대수: 총 1,500대"
+    /주차\s*(?:대수|장)?\s*[:\s]*([0-9,]+)\s*면/i,                    // "주차장: 1,500면"
+    /([0-9,]+)\s*대\s*\(\s*세대\s*당/i,                                // "1,500대(세대당 1.5대)"
+    /주차\s*([0-9,]+)\s*대/i,                                          // "주차 1500대"
+    /총\s*주차\s*(?:대수)?\s*[:\s]*([0-9,]+)/i,                       // "총 주차대수: 1500"
+    /주차\s*(?:계획|면수)\s*[:\s]*([0-9,]+)/i,                        // "주차계획: 1500"
+    /주차장\s*(?:총)?\s*([0-9,]+)\s*(?:대|면|주)/i,                   // "주차장 총 1500대"
+    /(?:자주식|기계식|자주식\+기계식)\s*(?:합계\s*)?([0-9,]+)\s*대/i,  // "자주식+기계식 합계 1500대"
+  ];
+  for (const pat of parkPatterns) {
+    const m = text.match(pat);
+    if (m) { const v = num(m[1]); if (v && v > 10) { data.parking_total = v; break; } }
+  }
+  // 주차 비율 추출
+  if (!data.parking_total) {
+    const ratioM = text.match(/(?:세대\s*당|세대당)\s*([0-9.]+)\s*대/i) || text.match(/주차\s*비율?\s*[:\s]*(?:세대당\s*)?([0-9.]+)\s*대/i);
+    if (ratioM) data.parking_ratio_raw = parseFloat(ratioM[1]);
+  }
+
+  // ── 최근접 역 (신규 — 0%→목표 50%+) ──
+  const stationPatterns = [
+    /(\S{2,10}역)\s*(?:에서\s*)?(?:도보\s*)?(?:약?\s*)?(\d{1,3})\s*분/i,   // "강남역 도보 5분"
+    /(?:지하철|전철)\s*(\S{2,10}역)\s*(?:도보\s*)?(\d{1,3})\s*분/i,        // "지하철 강남역 도보 5분"
+    /(\S{2,10}역)\s*(?:인접|도보권|역세권)/i,                               // "강남역 인접"
+    /(?:최근접\s*역|인근\s*역)\s*[:\s]*(\S{2,10}역)/i,                     // "최근접 역: 강남역"
+    /(\S{2,8}선)\s*(\S{2,10}역)/i,                                         // "2호선 강남역"
+  ];
+  for (const pat of stationPatterns) {
+    const m = text.match(pat);
+    if (m) {
+      const stName = m[1].replace(/^\s*/, '');
+      // "역" 글자로 끝나는 실제 역 이름만 추출
+      if (/역$/.test(stName) && stName.length >= 3 && stName.length <= 12) {
+        const dist = m[2] ? `${stName} 도보 ${m[2]}분` : stName;
+        data.nearest_station = dist.slice(0, 50);
+        break;
+      }
+    }
+  }
+
+  // ── 난방/구조/외장 ──
+  const heatMatch = text.match(/(개별\s*난방|중앙\s*난방|지역\s*난방)\s*[\(（]?\s*(도시가스|LNG|심야전기|열병합|가스)?/i);
+  if (heatMatch) data.heating_type = [heatMatch[1].replace(/\s/g, ''), heatMatch[2]].filter(Boolean).join(' ');
+  const structMatch = text.match(/(철근\s*콘크리트|철골\s*철근|RC|벽식|라멘|무량판|철골)/i);
+  if (structMatch) data.structure_type = structMatch[1].replace(/\s/g, '');
+  const extMatch = text.match(/외[벽장]재?\s*[:\s]*([\w가-힣\+·\s]+?)(?:\n|\.|,|\d{2,}|㎡|세대)/i);
+  if (extMatch && extMatch[1].length > 2 && extMatch[1].length < 60) data.exterior_finish = extMatch[1].trim();
 
   // ══════ 면적 ══════
   const landMatch = text.match(/대지\s*면적?\s*[:\s]*([\d,.]+)\s*㎡/i);
@@ -259,7 +333,7 @@ export function buildUpdateDict(parsed: Record<string, any>, totSupply?: number)
     'balcony_extension','balcony_extension_cost','loan_available','loan_rate',
     'transfer_limit','resale_restriction_months','residence_obligation','residence_obligation_years',
     'savings_requirement','priority_supply_area','model_house_addr','community_facilities',
-    'business_approval_date','construction_start_date','completion_date','project_type',
+    'business_approval_date','construction_start_date','completion_date','project_type','nearest_station',
   ];
   for (const f of fields) {
     if (parsed[f] != null && parsed[f] !== '') ud[f] = parsed[f];
@@ -293,6 +367,11 @@ export function buildUpdateDict(parsed: Record<string, any>, totSupply?: number)
   // 주차비율
   if (parsed.parking_total && totSupply && totSupply > 0 && !parsed.parking_ratio) {
     ud.parking_ratio = parseFloat((parsed.parking_total / totSupply).toFixed(2));
+  }
+  // 주차 비율(raw)에서 대수 역산
+  if (!ud.parking_total && parsed.parking_ratio_raw && totSupply && totSupply > 0) {
+    ud.parking_total = Math.round(parsed.parking_ratio_raw * totSupply);
+    ud.parking_ratio = parsed.parking_ratio_raw;
   }
   return ud;
 }
