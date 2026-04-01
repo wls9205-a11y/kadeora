@@ -201,7 +201,7 @@ async function fetchViaNaver(supabase: SupabaseClient): Promise<StockResult | nu
             .update({
               price: quote.price,
               change_amt: quote.change_amt,
-              change_pct: quote.change_pct,
+              change_pct: Math.max(-35, Math.min(35, quote.change_pct)),
               volume: quote.volume,
               updated_at: new Date().toISOString(),
             })

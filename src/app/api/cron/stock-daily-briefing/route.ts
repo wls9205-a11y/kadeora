@@ -18,9 +18,14 @@ export async function GET(req: NextRequest) {
       .in('market', ['KOSPI', 'KOSDAQ'])
       .order('change_pct', { ascending: false });
 
-    const allStocks = stocks || [];
-    const topGainers = allStocks.slice(0, 5);
-    const topLosers = [...allStocks].sort((a, b) => (a.change_pct ?? 0) - (b.change_pct ?? 0)).slice(0, 5);
+    const allStocksRaw = stocks || [];
+    // 비정상 등락률 필터 (한국 주식 상한가 30%, 하한가 -30% 초과는 데이터 오류)
+    const allStocks = allStocksRaw.filter(s => {
+      const pct = Number(s.change_pct ?? 0);
+      return pct >= -35 && pct <= 35;
+    });
+    const topGainers = allStocks.filter(s => Number(s.change_pct ?? 0) > 0).slice(0, 5);
+    const topLosers = [...allStocks].filter(s => Number(s.change_pct ?? 0) < 0).sort((a, b) => (a.change_pct ?? 0) - (b.change_pct ?? 0)).slice(0, 5);
 
     // Get theme data
     const { data: themeHistory } = await supabase.from('stock_theme_history')
