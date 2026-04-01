@@ -95,12 +95,12 @@ export default function GodModeSection() {
   };
 
   const modes = [
-    { key: 'full', label: '⚡ 전체 실행', desc: 'Phase 순차 — 80개 전 크론', color: C.brand },
-    { key: 'data', label: '📊 데이터 수집', desc: '청약/실거래/주식/재개발 16개', color: C.green },
-    { key: 'process', label: '⚙️ 데이터 가공', desc: '집계/싱크/테마/검증/좌표 8개', color: C.cyan },
+    { key: 'full', label: '⚡ 전체 실행', desc: 'Phase 순차 — 94개 전 크론', color: C.brand },
+    { key: 'data', label: '📊 데이터 수집', desc: '청약/실거래/주식/재개발 17개', color: C.green },
+    { key: 'process', label: '⚙️ 데이터 가공', desc: '집계/싱크/검증/좌표/K-apt 13개', color: C.cyan },
     { key: 'ai', label: '🤖 AI 생성', desc: '요약/이미지/트렌드 7개 (fire&forget)', color: C.purple },
-    { key: 'content', label: '📝 콘텐츠', desc: '블로그/시드 34개 (fire&forget)', color: C.yellow },
-    { key: 'system', label: '🔧 시스템', desc: '헬스/통계/알림/정리 15개', color: C.textSec },
+    { key: 'content', label: '📝 콘텐츠', desc: '블로그/시드 36개 (fire&forget)', color: C.yellow },
+    { key: 'system', label: '🔧 시스템', desc: '헬스/통계/알림/정리 21개', color: C.textSec },
     { key: 'failed', label: '🔴 실패 재시도', desc: '실패한 것만', color: C.red },
   ];
 
@@ -207,6 +207,11 @@ export default function GodModeSection() {
             disabled={specialRunning}
             style={{ padding: '10px 16px', borderRadius: 'var(--radius-md)', border: `1px solid ${C.purple}40`, background: C.card, color: C.purple, fontWeight: 700, fontSize: 13, cursor: specialRunning ? 'wait' : 'pointer' }}>
             🔄 HTML 재파싱 30건 실행
+          </button>
+          <button onClick={() => runSpecial('/api/cron/naver-complex-sync', '네이버 단지 싱크')}
+            disabled={specialRunning}
+            style={{ padding: '10px 16px', borderRadius: 'var(--radius-md)', border: `1px solid ${C.green}40`, background: C.card, color: C.green, fontWeight: 700, fontSize: 13, cursor: specialRunning ? 'wait' : 'pointer' }}>
+            🏘️ 네이버 단지 싱크
           </button>
         </div>
         {/* 벌크 수집 */}

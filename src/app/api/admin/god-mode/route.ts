@@ -49,6 +49,9 @@ const CRON_GROUPS = {
     '/api/cron/apt-crawl-pricing',
     '/api/cron/apt-price-sync',
     '/api/cron/sync-complex-profiles',
+    '/api/cron/auto-verify-households',
+    '/api/cron/kapt-sync',
+    '/api/cron/naver-complex-sync',
   ],
   ai: [
     '/api/cron/apt-ai-summary',
