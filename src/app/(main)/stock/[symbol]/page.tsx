@@ -122,7 +122,6 @@ export default async function StockDetailPage({ params }: Props) {
 
   const items = [
     { label: '시가총액', value: fmtCap(s.market_cap ? Number(s.market_cap) : null, s.currency ?? undefined) },
-    { label: '거래량', value: s.volume != null && Number(s.volume) > 0 ? Number(s.volume).toLocaleString() : s.volume != null && Number(s.volume) === 0 ? '거래없음' : '-' },
     { label: '섹터', value: s.sector || '-' },
     { label: '전일대비', value: s.change_amt != null ? `${Number(s.change_amt) > 0 ? '+' : ''}${Number(s.change_amt).toLocaleString()}` : '-' },
   ];
@@ -268,11 +267,6 @@ export default async function StockDetailPage({ params }: Props) {
           <div key={label} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '8px 10px', textAlign: 'center' }}>
             <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 2 }}>{label}</div>
             <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{value}</div>
-            {label === '거래량' && s.volume && Number(s.volume) > 0 && (
-              <div style={{ height: 3, borderRadius: 2, background: 'var(--bg-hover)', marginTop: 'var(--sp-xs)', overflow: 'hidden' }}>
-                <div style={{ height: '100%', width: `${Math.min(Math.log10(Number(s.volume)) * 12, 100)}%`, borderRadius: 2, background: 'var(--brand)' }} />
-              </div>
-            )}
           </div>
         ))}
       </div>

@@ -61,17 +61,6 @@ function MiniChart({ data }: { data: { date: string; close_price: number; open_p
           </div>
         );
       })()}
-      {/* Volume bars */}
-      {data.some(d => (d.volume ?? 0) > 0) && (
-        <svg viewBox={`0 0 ${data.length * 6} 40`} style={{ width: '100%', height: 40, display: 'block', marginTop: 2 }}>
-          {data.map((d, i) => {
-            const maxVol = Math.max(...data.map(v => v.volume || 0)) || 1;
-            const h = ((d.volume || 0) / maxVol) * 36;
-            const isUp = (d.close_price || 0) >= (d.open_price || 0);
-            return <rect key={i} x={i * 6} y={40 - h} width={5} height={h} fill={isUp ? 'var(--accent-red)' : 'var(--accent-blue)'} opacity={0.5} rx={1} />;
-          })}
-        </svg>
-      )}
     </div>
   );
 }
@@ -149,7 +138,7 @@ function ChartTab({ priceHistory, currency }: { priceHistory: StockPriceHistory[
             volume: Number(d.volume) || 0,
           }))}
           height={260}
-          showVolume={true}
+          showVolume={false}
           currency={currency}
         />
       ) : (
