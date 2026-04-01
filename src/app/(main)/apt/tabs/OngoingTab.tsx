@@ -180,31 +180,20 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
                   <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{o.region_nm}</span>
                 </div>
                 <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4, lineHeight: 1.3 }}>{o.house_nm || '현장명 없음'}</div>
-                {/* KPI 4칸 그리드 */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 3, marginBottom: 6 }}>
-                  <div style={{ textAlign: 'center', padding: '4px 2px', background: 'rgba(59,123,246,0.04)', borderRadius: 'var(--radius-xs)' }}>
-                    <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>{priceStr ? '분양가' : '세대수'}</div>
-                    <div style={{ fontSize: 11, fontWeight: 800, color: priceStr ? 'var(--brand)' : 'var(--text-primary)' }}>{priceStr || ((o.total_supply ?? 0) > 0 ? `${(o.total_supply ?? 0).toLocaleString()}` : '-')}</div>
-                  </div>
-                  <div style={{ textAlign: 'center', padding: '4px 2px', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-xs)' }}>
-                    <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>{priceStr ? '세대수' : '일반/특별'}</div>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-primary)' }}>
-                      {priceStr ? ((o.total_supply ?? 0) > 0 ? (o.total_supply ?? 0).toLocaleString() : '-') : (() => {
-                        const types = Array.isArray((o as any).house_type_info) ? (o as any).house_type_info : [];
-                        const gen = types.reduce((s: number, t: any) => s + (t.supply || 0), 0);
-                        const spe = types.reduce((s: number, t: any) => s + (t.spsply_hshldco || 0), 0);
-                        return gen > 0 ? `${gen}/${spe}` : '-';
-                      })()}
-                    </div>
-                  </div>
-                  <div style={{ textAlign: 'center', padding: '4px 2px', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-xs)' }}>
-                    <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>시공사</div>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{o.constructor_nm ? o.constructor_nm.split('(')[0].split('주식')[0].trim().slice(0, 7) : '-'}</div>
-                  </div>
-                  <div style={{ textAlign: 'center', padding: '4px 2px', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-xs)' }}>
-                    <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>입주</div>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: o.mvn_prearnge_ym ? 'var(--accent-green)' : 'var(--text-tertiary)' }}>{o.mvn_prearnge_ym ? `${String(o.mvn_prearnge_ym).slice(2, 4)}.${String(o.mvn_prearnge_ym).slice(4, 6)}` : '-'}</div>
-                  </div>
+                {/* KPI 6칸 그리드 (3x2) */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 1, marginBottom: 1, background: 'var(--bg-hover)', borderRadius: '6px 6px 0 0', overflow: 'hidden' }}>
+                  {[
+                    { l: priceStr ? '분양가' : '세대수', v: priceStr || ((o.total_supply ?? 0) > 0 ? (o.total_supply ?? 0).toLocaleString() : '-'), c: priceStr ? 'var(--brand)' : 'var(--text-primary)' },
+                    { l: '세대수', v: (o.total_supply ?? 0) > 0 ? (o.total_supply ?? 0).toLocaleString() : '-', c: 'var(--text-primary)' },
+                    { l: '시공사', v: o.constructor_nm ? o.constructor_nm.split('(')[0].split('주식')[0].trim().slice(0, 6) : '-', c: 'var(--text-primary)' },
+                  ].map((k, ki) => <div key={ki} style={{ textAlign: 'center', padding: '5px 2px', background: 'var(--bg-surface)' }}><div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginBottom: 1 }}>{k.l}</div><div style={{ fontSize: 11, fontWeight: 800, color: k.c, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{k.v}</div></div>)}
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 1, marginBottom: 5, background: 'var(--bg-hover)', borderRadius: '0 0 6px 6px', overflow: 'hidden' }}>
+                  {[
+                    { l: isUnsold ? '미분양' : '경쟁률', v: isUnsold ? `${(o.unsold_count ?? 0).toLocaleString()}호` : (o.competition_rate ? `${o.competition_rate}:1` : '-'), c: isUnsold ? 'var(--accent-red)' : (o.competition_rate ? 'var(--accent-yellow)' : 'var(--text-tertiary)') },
+                    { l: '입주', v: o.mvn_prearnge_ym ? `${String(o.mvn_prearnge_ym).slice(2, 4)}.${String(o.mvn_prearnge_ym).slice(4, 6)}` : '-', c: o.mvn_prearnge_ym ? 'var(--accent-green)' : 'var(--text-tertiary)' },
+                    { l: o.daysToMove ? 'D-입주' : '시행사', v: o.daysToMove ? `D-${o.daysToMove}` : ((o as any).developer_nm ? String((o as any).developer_nm).slice(0, 6) : '-'), c: o.daysToMove ? 'var(--accent-yellow)' : 'var(--text-primary)' },
+                  ].map((k, ki) => <div key={ki} style={{ textAlign: 'center', padding: '5px 2px', background: 'var(--bg-surface)' }}><div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginBottom: 1 }}>{k.l}</div><div style={{ fontSize: 11, fontWeight: 700, color: k.c, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{k.v}</div></div>)}
                 </div>
                 {/* 태그 */}
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3, marginBottom: 4 }}>

@@ -230,80 +230,77 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
 
         return (
           <div key={u.id} className="kd-card-hover" style={{
-            padding: '16px 16px', borderRadius: 'var(--radius-card)', marginBottom: 'var(--sp-sm)',
+            borderRadius: 'var(--radius-card)', marginBottom: 'var(--sp-sm)', overflow: 'hidden',
             background: 'var(--bg-surface)', border: '1px solid var(--border)',
-            borderLeft: `4px solid ${dangerColor}`, cursor: 'pointer',
-          }}
-          >
-            {/* 1행: 현장명 + 미분양 배지 */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', marginBottom: 4, flexWrap: 'wrap' }}>
-              <Link href={`/apt/${encodeURIComponent(generateAptSlug(u.house_nm) || String(u.id))}`} style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', textDecoration: 'none' }}>{u.house_nm && u.source !== 'molit_stat' ? u.house_nm : `${u.region_nm} ${u.sigungu_nm || ''} 미분양`}</Link>
-              <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 'var(--radius-card)', background: 'var(--accent-red-bg)', color: 'var(--accent-red)', border: '1px solid rgba(248,113,113,0.2)', fontWeight: 700, flexShrink: 0 }}>
-                {unsoldCount >= 1000 ? '🔴' : unsoldCount >= 500 ? '🟠' : unsoldCount >= 100 ? '🟡' : '🟢'} {rate !== null ? `${rate}%` : `${unsoldCount.toLocaleString()}세대`}
-              </span>
-              {(u.after_completion_unsold ?? 0) > 0 && <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 6px', borderRadius: 'var(--radius-sm)', background: 'var(--accent-red-bg)', color: 'var(--accent-red)', fontWeight: 600 }}>악성 {u.after_completion_unsold}호</span>}
-              {priceStr && <span style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--brand)', marginLeft: 'auto', flexShrink: 0 }}>{priceStr}</span>}
-              <button onClick={(e) => { e.stopPropagation(); toggleWatchlist('unsold', String(u.id)); }} style={{ fontSize: 'var(--fs-xl)', background: watchlist.has(`unsold:${u.id}`) ? 'var(--accent-yellow-bg)' : 'transparent', border: watchlist.has(`unsold:${u.id}`) ? '1px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '2px 6px', cursor: 'pointer', lineHeight: 1 }}>
-                {watchlist.has(`unsold:${u.id}`) ? '⭐' : '☆'}
-              </button>
-            </div>
+            cursor: 'pointer', display: 'flex',
+          }}>
+            <div style={{ width: 4, background: dangerColor, flexShrink: 0 }} />
+            <div style={{ flex: 1, padding: '10px 12px' }}>
+              {/* 현장명 + 미분양 배지 + 가격 */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 5, flexWrap: 'wrap' }}>
+                <Link href={`/apt/${encodeURIComponent(generateAptSlug(u.house_nm) || String(u.id))}`} style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-primary)', textDecoration: 'none', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>{u.house_nm && u.source !== 'molit_stat' ? u.house_nm : `${u.region_nm} ${u.sigungu_nm || ''} 미분양`}</Link>
+                <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 4, background: 'var(--accent-red-bg)', color: 'var(--accent-red)', border: '1px solid rgba(248,113,113,0.2)', fontWeight: 700, flexShrink: 0 }}>
+                  {unsoldCount >= 1000 ? '🔴' : unsoldCount >= 500 ? '🟠' : unsoldCount >= 100 ? '🟡' : '🟢'} {rate !== null ? `${rate}%` : `${unsoldCount.toLocaleString()}세대`}
+                </span>
+                {(u.after_completion_unsold ?? 0) > 0 && <span style={{ fontSize: 9, padding: '2px 5px', borderRadius: 3, background: 'var(--accent-red-bg)', color: 'var(--accent-red)', fontWeight: 700 }}>악성 {u.after_completion_unsold}호</span>}
+                {priceStr && <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--brand)', flexShrink: 0 }}>{priceStr}</span>}
+                <button aria-label="즐겨찾기" onClick={(e) => { e.stopPropagation(); toggleWatchlist('unsold', String(u.id)); }} style={{ fontSize: 16, background: watchlist.has(`unsold:${u.id}`) ? 'var(--accent-yellow-bg)' : 'transparent', border: watchlist.has(`unsold:${u.id}`) ? '1px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '2px 5px', cursor: 'pointer', lineHeight: 1 }}>
+                  {watchlist.has(`unsold:${u.id}`) ? '⭐' : '☆'}
+                </button>
+              </div>
 
-            {/* KPI 그리드 */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 3, marginBottom: 6 }}>
-              <div style={{ textAlign: 'center', padding: '5px 2px', background: 'rgba(248,113,113,0.04)', borderRadius: 'var(--radius-xs)' }}>
-                <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>미분양</div>
-                <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--accent-red)' }}>{unsoldCount.toLocaleString()}</div>
+              {/* 6열 KPI 그리드 */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 1, marginBottom: 1, background: 'var(--bg-hover)', borderRadius: '6px 6px 0 0', overflow: 'hidden' }}>
+                {[
+                  { l: '미분양', v: unsoldCount.toLocaleString(), c: 'var(--accent-red)' },
+                  { l: '총공급', v: u.tot_supply_hshld_co ? u.tot_supply_hshld_co.toLocaleString() : '-', c: 'var(--text-primary)' },
+                  { l: '준공', v: u.completion_ym ? `${u.completion_ym.slice(2, 4)}.${u.completion_ym.slice(4, 6)}` : '-', c: 'var(--text-primary)' },
+                ].map((k, ki) => <div key={ki} style={{ textAlign: 'center', padding: '5px 2px', background: 'var(--bg-surface)' }}><div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginBottom: 1 }}>{k.l}</div><div style={{ fontSize: 11, fontWeight: 800, color: k.c }}>{k.v}</div></div>)}
               </div>
-              <div style={{ textAlign: 'center', padding: '5px 2px', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-xs)' }}>
-                <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>총 공급</div>
-                <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>{u.tot_supply_hshld_co ? u.tot_supply_hshld_co.toLocaleString() : '-'}</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 1, marginBottom: 5, background: 'var(--bg-hover)', borderRadius: '0 0 6px 6px', overflow: 'hidden' }}>
+                {[
+                  { l: '평당가', v: (u as any).price_per_pyeong ? `${Math.round((u as any).price_per_pyeong / 10000 * 10) / 10}만` : '-', c: (u as any).price_per_pyeong ? 'var(--accent-purple)' : 'var(--text-tertiary)' },
+                  { l: '시공사', v: u.constructor_nm ? u.constructor_nm.split('(')[0].trim().slice(0, 6) : '-', c: 'var(--text-primary)' },
+                  { l: '시행사', v: u.developer_nm && u.developer_nm !== u.constructor_nm ? u.developer_nm.slice(0, 6) : '-', c: 'var(--text-primary)' },
+                ].map((k, ki) => <div key={ki} style={{ textAlign: 'center', padding: '5px 2px', background: 'var(--bg-surface)' }}><div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginBottom: 1 }}>{k.l}</div><div style={{ fontSize: 11, fontWeight: 700, color: k.c, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{k.v}</div></div>)}
               </div>
-              <div style={{ textAlign: 'center', padding: '5px 2px', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-xs)' }}>
-                <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>준공</div>
-                <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>{u.completion_ym ? `${u.completion_ym.slice(2, 4)}.${u.completion_ym.slice(4, 6)}` : '-'}</div>
-              </div>
-              <div style={{ textAlign: 'center', padding: '5px 2px', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-xs)' }}>
-                <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>평당가</div>
-                <div style={{ fontSize: 12, fontWeight: 700, color: (u as any).price_per_pyeong ? 'var(--brand)' : 'var(--text-tertiary)' }}>{(u as any).price_per_pyeong ? `${Math.round((u as any).price_per_pyeong / 10000 * 10) / 10}만` : '-'}</div>
-              </div>
-            </div>
 
-            {/* 미분양률 바 + 세대수 */}
-            {rate !== null && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-                <div style={{ flex: 1, height: 5, borderRadius: 3, background: 'var(--bg-hover)', overflow: 'hidden' }}>
-                  <div style={{ height: '100%', borderRadius: 3, width: `${Math.min(rate, 100)}%`, background: rate > 70 ? 'var(--accent-red)' : rate > 40 ? 'var(--accent-orange)' : 'var(--accent-yellow)' }} />
+              {/* 미분양률 바 */}
+              {rate !== null && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 5 }}>
+                  <div style={{ flex: 1, height: 5, borderRadius: 3, background: 'var(--bg-hover)', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', borderRadius: 3, width: `${Math.min(rate, 100)}%`, background: rate > 70 ? 'var(--accent-red)' : rate > 40 ? 'var(--accent-orange)' : 'var(--accent-yellow)' }} />
+                  </div>
+                  <span style={{ fontSize: 9, fontWeight: 700, color: dangerColor, flexShrink: 0 }}>{unsoldCount.toLocaleString()} / {(u.tot_supply_hshld_co || 0).toLocaleString()}</span>
                 </div>
-                <span style={{ fontSize: 10, fontWeight: 700, color: dangerColor, flexShrink: 0 }}>{unsoldCount.toLocaleString()} / {(u.tot_supply_hshld_co || 0).toLocaleString()}</span>
-              </div>
-            )}
+              )}
 
-            {/* 태그 */}
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3, marginBottom: 6 }}>
-              {u.constructor_nm && <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 4, background: 'rgba(255,255,255,0.04)', color: 'var(--text-secondary)' }}>{u.constructor_nm}</span>}
-              {u.nearest_station && <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 4, background: 'rgba(59,123,246,0.06)', color: 'var(--brand)', fontWeight: 600 }}>🚇 {u.nearest_station}</span>}
-              {u.discount_info && <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 4, background: 'rgba(52,211,153,0.06)', color: 'var(--accent-green)', fontWeight: 600 }}>💰 {u.discount_info}</span>}
-              {u.region_nm && <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 4, background: 'rgba(255,255,255,0.04)', color: 'var(--text-tertiary)' }}>{u.region_nm}{u.sigungu_nm ? ` ${u.sigungu_nm}` : ''}</span>}
-              {u.developer_nm && u.developer_nm !== u.constructor_nm && <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 4, background: 'rgba(255,255,255,0.04)', color: 'var(--text-tertiary)' }}>시행 {u.developer_nm}</span>}
-            </div>
-
-            {/* 분양가 범위 바 */}
-            {pMin && pMax && pMin !== pMax && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', marginBottom: 6 }}>
-                <span style={{ fontSize: 10, color: 'var(--accent-blue)', fontWeight: 600 }}>{pMin}억</span>
-                <div style={{ flex: 1, height: 4, borderRadius: 2, background: 'linear-gradient(90deg, rgba(96,165,250,0.3), var(--brand), rgba(248,113,113,0.3))', position: 'relative' }}>
-                  <div style={{ position: 'absolute', top: -1, left: '50%', width: 6, height: 6, borderRadius: '50%', background: 'var(--brand)', border: '1px solid var(--bg-surface)', transform: 'translateX(-50%)' }} />
+              {/* 분양가 범위 바 */}
+              {pMin && pMax && pMin !== pMax && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 5 }}>
+                  <span style={{ fontSize: 9, color: 'var(--accent-blue)', fontWeight: 600 }}>{pMin}억</span>
+                  <div style={{ flex: 1, height: 4, borderRadius: 2, background: 'linear-gradient(90deg, rgba(96,165,250,0.3), var(--brand), rgba(248,113,113,0.3))', position: 'relative', maxWidth: 120 }}>
+                    <div style={{ position: 'absolute', top: -3, left: '50%', width: 10, height: 10, borderRadius: '50%', background: 'var(--brand)', border: '2px solid var(--bg-surface)', transform: 'translateX(-50%)' }} />
+                  </div>
+                  <span style={{ fontSize: 9, color: 'var(--accent-red)', fontWeight: 600 }}>{pMax}억</span>
                 </div>
-                <span style={{ fontSize: 10, color: 'var(--accent-red)', fontWeight: 600 }}>{pMax}억</span>
-              </div>
-            )}
+              )}
 
-            {/* 줄3: pill 버튼 */}
-            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-              <button onClick={() => setCommentTarget({ houseKey: `unsold_${u.id}`, houseNm: u.house_nm || '미분양', houseType: 'unsold' })}
-                style={{ fontSize: 'var(--fs-xs)', padding: '3px 10px', borderRadius: 'var(--radius-lg)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-secondary)', cursor: 'pointer', fontWeight: 600 }}>✏️ 한줄평</button>
-              <Link href={`/apt/${encodeURIComponent(generateAptSlug(u.house_nm) || String(u.id))}`} style={{ fontSize: 'var(--fs-xs)', padding: '3px 10px', borderRadius: 'var(--radius-lg)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 600 }}>자세히 →</Link>
-              {u.pblanc_url && <a href={u.pblanc_url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 'var(--fs-xs)', padding: '3px 10px', borderRadius: 'var(--radius-lg)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>홈페이지 →</a>}
+              {/* 태그 */}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 2, marginBottom: 5 }}>
+                {u.region_nm && <span style={{ fontSize: 9, padding: '2px 5px', borderRadius: 3, background: 'rgba(255,255,255,0.04)', color: 'var(--text-tertiary)' }}>{u.region_nm}{u.sigungu_nm ? ` ${u.sigungu_nm}` : ''}</span>}
+                {u.nearest_station && <span style={{ fontSize: 9, padding: '2px 5px', borderRadius: 3, background: 'rgba(59,123,246,0.06)', color: 'var(--brand)', fontWeight: 600 }}>🚇 {u.nearest_station}</span>}
+                {u.discount_info && <span style={{ fontSize: 9, padding: '2px 5px', borderRadius: 3, background: 'rgba(52,211,153,0.06)', color: 'var(--accent-green)', fontWeight: 600 }}>💰 {u.discount_info}</span>}
+                {u.developer_nm && u.developer_nm !== u.constructor_nm && <span style={{ fontSize: 9, padding: '2px 5px', borderRadius: 3, background: 'rgba(255,255,255,0.04)', color: 'var(--text-tertiary)' }}>시행 {u.developer_nm}</span>}
+              </div>
+
+              {/* 액션 버튼 */}
+              <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                <button onClick={() => setCommentTarget({ houseKey: `unsold_${u.id}`, houseNm: u.house_nm || '미분양', houseType: 'unsold' })}
+                  style={{ fontSize: 10, padding: '3px 8px', borderRadius: 'var(--radius-lg)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-secondary)', cursor: 'pointer', fontWeight: 600 }}>✏️ 한줄평</button>
+                <Link href={`/apt/${encodeURIComponent(generateAptSlug(u.house_nm) || String(u.id))}`} style={{ fontSize: 10, padding: '3px 8px', borderRadius: 'var(--radius-lg)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 600 }}>자세히 →</Link>
+                {u.pblanc_url && <a href={u.pblanc_url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 10, padding: '3px 8px', borderRadius: 'var(--radius-lg)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>홈페이지 →</a>}
+              </div>
             </div>
           </div>
         );
