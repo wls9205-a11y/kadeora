@@ -14,43 +14,27 @@
 
 ### 템플릿 v3 리디자인 ✅
 **주식 카드 (StockRow + CardView)**
-- 그라데이션 악센트 바 (3px, 등락 색상→투명)
-- 스파크라인 끝점 원형 도트 (현재가 강조)
-- 52주 위치 바 (저점~고점 대비 현재가 %)
-- 섹터 pill 색상 등락 연동
-- 관심 ☆/★ 투명도 변경
-- description 첫 문장 미니 표시
+- 그라데이션 악센트 바 + 스파크라인 끝점 도트
+- 52주 위치 바 + 섹터 pill + 관심 버튼 개선
 
 **주식 상세 수급 섹션**
-- 투자자별 수급: 텍스트→5일 양방향 바 차트
-- 외국인(진하게)/기관(연하게) 시각 구분
-- 순매수 좌측/순매도 우측 중앙 기준선
+- 5일 외국인/기관 양방향 바 차트 시각화
 
 **청약 카드 (SubscriptionTab)**
-- 브랜드 pill (힐스테이트/래미안) 단지명 우측
-- 납부 비율 미니 바 (계약금/중도금/잔금 %)
-- 평형별 미니 태그 (타입·면적·분양가·세대수)
-- 커뮤니티 시설 배지 (피트니스/독서실/키즈카페)
-- 발코니확장 pill
-- 난방방식/주차비율 시공사 라인 추가
-- SSR select: +5필드 (payment_schedule/community_facilities/heating_type/parking_ratio/balcony_extension)
+- 브랜드 pill + 납부 비율 바 + 평형 미니 태그
+- 커뮤니티 배지 + 발코니확장 + 난방/주차
+- SSR select +5필드
 
 **부동산 상세 규제 섹션**
-- 분양가상한제/규제지역/발코니확장 3항목 추가
-- 각 항목 아이콘 + 조건부 컬러
+- 상한제/규제지역/발코니 추가 + 아이콘 컬러
 
 ### 총세대수 1% → 100% ✅
-- 민간+공공 2,070건 + PDF 23건 + fallback 569건
-- ComplexScale 단지 규모 섹션 신설
-
-### 기타 ✅
-- Event handler SSR 에러 수정 (KpiCards 분리)
-- 관심 카드→등록 스크롤
-- K-apt API 연동 크론
-- 코스피 3000 글 20건 삭제 + 크론 템플릿 교체
-- 어드민 게시글 삭제 수정 (action/is_deleted 양쪽 수용)
-- 어드민 모바일 반응형 (사이드바 슬라이드+그리드 반응형)
-- 빌드 에러 6회 수정
+### Event handler SSR 에러 수정 ✅
+### 단지 규모 섹션 (ComplexScale) 신설 ✅
+### K-apt API 연동 크론 ✅
+### 코스피 3000 글 삭제 + 크론 교체 ✅
+### 어드민 게시글 삭제 수정 ✅
+### 어드민 모바일 반응형 ✅
 
 ## 현재 상태
 - **런타임 에러: 0건** ✅
@@ -70,11 +54,8 @@
 - [ ] 주변 실거래 섹션 (regionTrades 렌더링)
 - [ ] 토스페이먼츠 API 키
 - [ ] KIS_APP_KEY 발급
-- [ ] FINNHUB_API_KEY 발급
 - [ ] 통신판매업 신고
 - [ ] Google/Naver 수동 URL 제출
-- [ ] Search Console 오류 사이트맵 수동 삭제
-- [ ] image-sitemap.xml 다시 제출
 
 ## 아키텍처 규칙 (12개)
 1. 블로그 삭제 금지 2. stockcoin.net 금지 3. 포인트 RPC만 4. CSP middleware.ts 5. 크론 에러 200 6. OG 폰트 Node.js fs 7. PostWithProfile 보호 8. daily_create_limit 80 9. DB트리거 LIMIT 80 10. Supabase RPC try/catch 11. STATUS.md 필수 12. 디자인 토큰 우선
