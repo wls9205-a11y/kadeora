@@ -379,6 +379,15 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
           </div>
         )}
 
+        {/* ═══ 오늘의 운세 (히어로 바로 아래) ═══ */}
+        <div style={{ marginBottom: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+            <span style={{ fontSize: 14 }}>🔮</span>
+            <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>오늘의 운세</span>
+          </div>
+          <DailyFortune />
+        </div>
+
         {/* 어젯밤 달라진 것 — 골드 */}
         <div style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm)', background: G.goldBg, border: `1px solid ${G.goldBorder}`, marginBottom: 'var(--sp-sm)' }}>
           <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: G.gold, marginBottom: 'var(--sp-xs)' }}>✦ 어젯밤 달라진 것</div>
@@ -776,10 +785,6 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
           </div>
         </>
       )}
-
-      {/* ═══ NEW: 오늘의 운세 (띠별) ═══ */}
-      <SH icon="🔮" title="오늘의 운세" />
-      <DailyFortune />
 
       {/* ═══ S5: 요약 + 내일 체크포인트 — 회원전용 골드 ═══ */}
       <SH icon="📋" title="오늘의 요약 + 내일 체크포인트" />

@@ -301,12 +301,12 @@ export default async function FeedDetailPage({ params }: Props) {
       }) }} />
 
       {/* Back link */}
-      <div style={{ marginBottom: 'var(--sp-xl)' }}>
-        <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', fontSize: 12, color: 'var(--text-tertiary)' }}>
+      <div style={{ marginBottom: 12 }}>
+        <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-tertiary)', lineHeight: 1 }}>
           <Link href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>홈</Link>
-          <span>›</span>
+          <span style={{ fontSize: 10 }}>›</span>
           <Link href="/feed" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>피드</Link>
-          {post.category && <><span>›</span><span style={{ color: 'var(--text-tertiary)' }}>{CATEGORY_MAP[post.category]?.label || post.category}</span></>}
+          {post.category && <><span style={{ fontSize: 10 }}>›</span><span>{CATEGORY_MAP[post.category]?.label || post.category}</span></>}
         </nav>
       </div>
 

@@ -703,12 +703,12 @@ body {
 .kd-action-btn {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 5px 10px;
+  gap: 3px;
+  padding: 4px 8px;
   border-radius: var(--radius-sm);
   background: var(--bg-elevated);
   border: none;
-  font-size: var(--fs-xs);
+  font-size: 11px;
   font-weight: 600;
   color: var(--text-tertiary);
   cursor: pointer;
@@ -847,8 +847,8 @@ body {
 .kd-interaction-bar {
   display: flex;
   align-items: center;
-  gap: 5px;
-  padding-top: var(--sp-sm);
+  gap: 4px;
+  padding-top: 4px;
   border-top: 1px solid rgba(26,42,74,0.4);
 }
 
