@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { REPORT_REGIONS, type ReportRegion } from '@/lib/daily-report-data';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import Link from 'next/link';
+import ShareButtons from '@/components/ShareButtons';
 
 interface Props { params: Promise<{ region: string }> }
 
@@ -80,6 +81,7 @@ export default async function ArchivePage({ params }: Props) {
         </div>
         <Link href={`/daily/${encodeURIComponent(region)}`} style={{ fontSize: 12, fontWeight: 700, color: 'var(--brand)', textDecoration: 'none' }}>오늘 보기 →</Link>
       </div>
+      <div style={{ marginBottom: 12 }}><ShareButtons title={`${region} 데일리 리포트 아카이브 — 카더라`} postId={`daily-archive-${region}`} /></div>
 
       {reports.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-tertiary)' }}>

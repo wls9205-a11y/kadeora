@@ -13,6 +13,7 @@ import PullToRefresh from '@/components/PullToRefresh';
 import EmptyState from '@/components/EmptyState';
 import { isTossMode } from '@/lib/toss-mode';
 import TossTeaser from '@/components/TossTeaser';
+import SectionShareButton from '@/components/SectionShareButton';
 import AttendanceBanner from '@/components/AttendanceBanner';
 import DailyReportCard from '@/components/DailyReportCard';
 import LiveActivityIndicator from '@/components/LiveActivityIndicator';
@@ -272,6 +273,10 @@ export default function FeedClient({
         </div>
 
         <DailyReportCard />
+
+        <div style={{ marginBottom: 'var(--sp-sm)', display: 'flex', justifyContent: 'flex-end' }}>
+          <SectionShareButton section="feed" label="카더라 커뮤니티 — 주식·부동산·경제 실시간 소식" pagePath="/feed" />
+        </div>
 
         {/* ━━━ 카테고리 탭 ━━━ */}
         <div className="kd-scroll-row" style={{ marginBottom: 'var(--sp-sm)' }}>

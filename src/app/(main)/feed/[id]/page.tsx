@@ -442,20 +442,23 @@ export default async function FeedDetailPage({ params }: Props) {
         </Link>
       )}
 
-      {/* 액션 바 — 본문과 댓글 사이 (인라인) */}
-      {/* 인게이지먼트 미니 대시보드 */}
-      <div style={{ display: 'flex', gap: 6, marginBottom: 'var(--sp-md)' }}>
+      {/* 인게이지먼트 미니 대시보드 — 컴팩트 */}
+      <div style={{ display: 'flex', gap: 4, marginBottom: 'var(--sp-md)' }}>
         {[
           { icon: '👁', label: '조회', value: post.view_count ?? 0, max: 1000, color: 'var(--accent-blue)' },
           { icon: '🤍', label: '좋아요', value: post.likes_count ?? 0, max: 100, color: 'var(--accent-red)' },
           { icon: '💬', label: '댓글', value: comments.length, max: 50, color: 'var(--accent-green)' },
         ].map(s => (
-          <div key={s.label} style={{ flex: 1, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '8px 10px', textAlign: 'center' }}>
-            <div style={{ fontSize: 14 }}>{s.icon}</div>
-            <div style={{ fontSize: 16, fontWeight: 800, color: s.value > 0 ? s.color : 'var(--text-tertiary)' }}>{s.value.toLocaleString()}</div>
-            <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{s.label}</div>
-            <div style={{ height: 3, borderRadius: 2, background: 'var(--bg-hover)', marginTop: 3, overflow: 'hidden' }}>
-              <div style={{ height: '100%', width: `${Math.min((s.value / s.max) * 100, 100)}%`, borderRadius: 2, background: s.color }} />
+          <div key={s.label} style={{ flex: 1, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 6, padding: '6px 8px', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ fontSize: 12 }}>{s.icon}</span>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 3 }}>
+                <span style={{ fontSize: 14, fontWeight: 800, color: s.value > 0 ? s.color : 'var(--text-tertiary)' }}>{s.value.toLocaleString()}</span>
+                <span style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>{s.label}</span>
+              </div>
+              <div style={{ height: 2, borderRadius: 1, background: 'var(--bg-hover)', marginTop: 2, overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${Math.min((s.value / s.max) * 100, 100)}%`, borderRadius: 1, background: s.color }} />
+              </div>
             </div>
           </div>
         ))}

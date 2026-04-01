@@ -4,6 +4,7 @@ import { createSupabaseServer } from '@/lib/supabase-server';
 import Link from 'next/link';
 import { fmtAmount } from '@/lib/format';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
+import ShareButtons from '@/components/ShareButtons';
 
 export const metadata: Metadata = {
   title: '아파트 실거래가 검색',
@@ -78,7 +79,8 @@ export default async function AptSearchPage({ searchParams }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '부동산', item: SITE_URL + '/apt' }, { '@type': 'ListItem', position: 3, name: '실거래 검색' }] }) }} />
       <Link href="/apt" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 부동산</Link>
       <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '8px 0 4px' }}>🔍 실거래가 검색</h1>
-      <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', margin: '0 0 16px' }}>전국 {totalCount.toLocaleString()}건의 실거래 데이터</p>
+      <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', margin: '0 0 8px' }}>전국 {totalCount.toLocaleString()}건의 실거래 데이터</p>
+      <div style={{ marginBottom: 12 }}><ShareButtons title="아파트 실거래가 검색 — 카더라" postId="apt-search" /></div>
 
       {/* 검색 폼 */}
       <form method="GET" action="/apt/search" style={{ display: 'flex', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-lg)' }}>
