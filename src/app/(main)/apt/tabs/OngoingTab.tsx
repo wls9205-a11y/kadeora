@@ -183,7 +183,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
                 {/* KPI 6칸 그리드 (3x2) */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 1, marginBottom: 1, background: 'var(--bg-hover)', borderRadius: '6px 6px 0 0', overflow: 'hidden' }}>
                   {[
-                    { l: priceStr ? '분양가' : '세대수', v: priceStr || ((o.total_supply ?? 0) > 0 ? (o.total_supply ?? 0).toLocaleString() : '-'), c: priceStr ? 'var(--brand)' : 'var(--text-primary)' },
+                    { l: '분양가', v: priceStr || '-', c: priceStr ? 'var(--brand)' : 'var(--text-tertiary)' },
                     { l: '세대수', v: (o.total_supply ?? 0) > 0 ? (o.total_supply ?? 0).toLocaleString() : '-', c: 'var(--text-primary)' },
                     { l: '시공사', v: o.constructor_nm ? o.constructor_nm.split('(')[0].split('주식')[0].trim().slice(0, 6) : '-', c: 'var(--text-primary)' },
                   ].map((k, ki) => <div key={ki} style={{ textAlign: 'center', padding: '5px 2px', background: 'var(--bg-surface)' }}><div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginBottom: 1 }}>{k.l}</div><div style={{ fontSize: 11, fontWeight: 800, color: k.c, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{k.v}</div></div>)}

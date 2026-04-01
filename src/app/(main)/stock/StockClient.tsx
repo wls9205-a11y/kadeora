@@ -262,7 +262,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
         {/* Row 5: Footer */}
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, color: 'var(--text-tertiary)' }}>
           {s.market_cap > 0 && <span>시총 {fmtCap(Number(s.market_cap), s.currency)}</span>}
-          {s.volume > 0 && <span>{(Number(s.volume) / 1000000).toFixed(1)}M</span>}
+          {s.volume > 0 && <span>{Number(s.volume) >= 1000000 ? (Number(s.volume) / 1000000).toFixed(1) + 'M' : Number(s.volume) >= 1000 ? Math.round(Number(s.volume) / 1000) + 'K' : Number(s.volume).toLocaleString()}</span>}
           {s.description && <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 80 }}>{s.description.split('.')[0]}</span>}
         </div>
       </Link>
@@ -1122,7 +1122,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
                         )}
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, color: 'var(--text-tertiary)' }}>
                           {s.market_cap > 0 && <span>시총 {fmtCap(Number(s.market_cap), s.currency)}</span>}
-                          {s.volume > 0 && <span>{(Number(s.volume) / 1000000).toFixed(1)}M</span>}
+                          {s.volume > 0 && <span>{Number(s.volume) >= 1000000 ? (Number(s.volume) / 1000000).toFixed(1) + 'M' : Number(s.volume) >= 1000 ? Math.round(Number(s.volume) / 1000) + 'K' : Number(s.volume).toLocaleString()}</span>}
                         </div>
                       </div>
                     </Link>

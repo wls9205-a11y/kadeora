@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
+import SectionShareButton from '@/components/SectionShareButton';
 import { fmtCap, fmtPrice } from '@/lib/format';
 import Disclaimer from '@/components/Disclaimer';
 
@@ -114,7 +115,8 @@ export default function StockComparePage() {
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
       <Link href="/stock" style={{ fontSize: 12, color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 주식 시세</Link>
-      <h1 style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', margin: '6px 0 12px' }}>종목 비교</h1>
+      <h1 style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', margin: '6px 0 6px' }}>종목 비교</h1>
+      <div style={{ marginBottom: 12 }}><SectionShareButton section="stock-compare" label="종목 비교 — 주가·시총·등락률 비교 분석" pagePath="/stock/compare" /></div>
 
       {/* 종목 선택 */}
       <div style={{ display: 'flex', gap: 10, marginBottom: 'var(--sp-lg)', alignItems: 'flex-start' }}>

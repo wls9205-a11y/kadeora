@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
+import SectionShareButton from '@/components/SectionShareButton';
 
 const CUTLINES: { region: string; avg: number; min: number; max: number }[] = [
   { region: '서울', avg: 62, min: 55, max: 72 },
@@ -53,6 +54,7 @@ export default function DiagnosePage() {
         <Link href="/apt" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 청약 목록</Link>
         <h1 style={{ margin: '8px 0 0', fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>🎯 청약 가점 진단</h1>
         <p style={{ margin: '4px 0 0', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>내 가점을 계산하고 당첨 전략을 확인하세요 (만점 84점)</p>
+        <div style={{ marginTop: 8 }}><SectionShareButton section="apt-diagnose" label="청약 가점 진단 — 내 가점은 몇 점?" pagePath="/apt/diagnose" /></div>
       </div>
 
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 20, marginBottom: 'var(--sp-lg)' }}>
