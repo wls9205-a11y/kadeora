@@ -892,18 +892,21 @@ export default async function AptUnifiedPage({ params }: Props) {
           })()}
 
           {/* 📋 규제/자격 조건 */}
-          {(sub.transfer_limit || sub.residence_obligation || sub.savings_requirement || sub.priority_supply_area) && (
+          {(sub.transfer_limit || sub.residence_obligation || sub.savings_requirement || sub.priority_supply_area || sub.is_price_limit || sub.is_regulated_area || sub.balcony_extension) && (
             <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid var(--border)' }}>
               <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>📋 규제 · 청약자격</div>
               {[
-                sub.transfer_limit && ['전매제한', sub.transfer_limit, sub.resale_restriction_months ? `(${sub.resale_restriction_months}개월)` : ''],
-                sub.residence_obligation && ['거주의무', sub.residence_obligation, sub.residence_obligation_years ? `(${sub.residence_obligation_years}년)` : ''],
-                sub.savings_requirement && ['청약저축', sub.savings_requirement],
-                sub.priority_supply_area && ['우선공급', sub.priority_supply_area],
-              ].filter(Boolean).map(([l, v, extra]: any) => (
-                <div key={l} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: 12, borderBottom: '1px solid var(--border)' }}>
+                sub.is_price_limit !== undefined && ['🏷️ 분양가상한제', sub.is_price_limit ? '적용' : '미적용', sub.is_price_limit ? '#F472B6' : 'var(--accent-green)'],
+                sub.is_regulated_area !== undefined && ['🚫 규제지역', sub.is_regulated_area ? '투기과열/조정대상' : '비규제', sub.is_regulated_area ? 'var(--accent-red)' : 'var(--accent-green)'],
+                sub.transfer_limit && ['🔒 전매제한', `${sub.transfer_limit}${sub.resale_restriction_months ? ` (${sub.resale_restriction_months}개월)` : ''}`, '#FBBF24'],
+                sub.residence_obligation && ['🏠 거주의무', `${sub.residence_obligation}${sub.residence_obligation_years ? ` (${sub.residence_obligation_years}년)` : ''}`, 'var(--accent-red)'],
+                sub.balcony_extension !== undefined && ['🪟 발코니확장', sub.balcony_extension ? '가능' : '불가', sub.balcony_extension ? 'var(--accent-green)' : 'var(--text-tertiary)'],
+                sub.savings_requirement && ['💰 청약저축', sub.savings_requirement, 'var(--brand)'],
+                sub.priority_supply_area && ['📍 우선공급', sub.priority_supply_area, 'var(--accent-purple)'],
+              ].filter(Boolean).map(([l, v, c]: any) => (
+                <div key={l} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '5px 0', fontSize: 12, borderBottom: '1px solid var(--border)' }}>
                   <span style={{ color: 'var(--text-tertiary)' }}>{l}</span>
-                  <span style={{ fontWeight: 600, color: 'var(--text-secondary)', textAlign: 'right', maxWidth: '60%' }}>{v} {extra || ''}</span>
+                  <span style={{ fontWeight: 700, color: c, textAlign: 'right', maxWidth: '60%' }}>{v}</span>
                 </div>
               ))}
             </div>

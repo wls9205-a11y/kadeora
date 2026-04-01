@@ -402,21 +402,41 @@ export default async function StockDetailPage({ params }: Props) {
         </section>
       )}
 
-      {/* 수급 요약 (서버 렌더링) */}
-      {(flowR.data ?? []).length > 0 && (
+      {/* 수급 요약 (서버 렌더링) — 시각적 바 차트 */}
+      {(flowR.data ?? []).length > 0 && (() => {
+        const flows = (flowR.data ?? []).slice(0, 5) as any[];
+        const isKRStock = !s.currency || s.currency === 'KRW';
+        const upC = isKRStock ? 'var(--accent-red)' : 'var(--accent-green)';
+        const downC = isKRStock ? 'var(--accent-blue)' : 'var(--accent-red)';
+        return (
         <section style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--card-p) var(--sp-lg)', marginBottom: 'var(--sp-md)' }}>
-          <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px' }}>📊 {s.name} 투자자별 매매동향</h2>
-          <p style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, wordBreak: 'keep-all' }}>
-            {(() => {
-              const latest = (flowR.data ?? [])[0] as any;
-              if (!latest) return '';
-              const foreignNet = (Number(latest.foreign_buy) || 0) - (Number(latest.foreign_sell) || 0);
-              const instNet = (Number(latest.inst_buy) || 0) - (Number(latest.inst_sell) || 0);
-              return `최근 ${latest.date} 기준, 외국인은 ${foreignNet >= 0 ? '순매수' : '순매도'} ${Math.abs(foreignNet).toLocaleString()}주, 기관은 ${instNet >= 0 ? '순매수' : '순매도'} ${Math.abs(instNet).toLocaleString()}주입니다.`;
-            })()}
-          </p>
+          <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 10px' }}>📊 {s.name} 투자자별 수급 ({flows.length}일)</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {flows.map((f: any) => {
+              const fNet = (Number(f.foreign_buy) || 0) - (Number(f.foreign_sell) || 0);
+              const iNet = (Number(f.inst_buy) || 0) - (Number(f.inst_sell) || 0);
+              const maxVal = Math.max(Math.abs(fNet), Math.abs(iNet), 1);
+              const fmtN = (n: number) => n === 0 ? '-' : `${n > 0 ? '+' : ''}${Math.abs(n) >= 10000 ? `${(n / 10000).toFixed(0)}만` : n.toLocaleString()}`;
+              return (
+                <div key={f.date} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11 }}>
+                  <span style={{ width: 42, color: 'var(--text-tertiary)', fontFamily: 'monospace', flexShrink: 0, fontSize: 10 }}>{f.date?.slice(5)}</span>
+                  <span style={{ width: 48, textAlign: 'right', flexShrink: 0, fontWeight: 700, color: fNet >= 0 ? upC : downC, fontSize: 10 }}>외 {fmtN(fNet)}</span>
+                  <div style={{ flex: 1, height: 16, display: 'flex', alignItems: 'center', position: 'relative' }}>
+                    <div style={{ position: 'absolute', left: '50%', width: 1, height: '100%', background: 'var(--border)' }} />
+                    {fNet !== 0 && <div style={{ position: 'absolute', [fNet > 0 ? 'left' : 'right']: '50%', width: `${Math.min(Math.abs(fNet) / maxVal * 48, 48)}%`, height: 6, borderRadius: 3, background: fNet > 0 ? upC : downC, opacity: 0.6 }} />}
+                    {iNet !== 0 && <div style={{ position: 'absolute', [iNet > 0 ? 'left' : 'right']: '50%', width: `${Math.min(Math.abs(iNet) / maxVal * 48, 48)}%`, height: 6, borderRadius: 3, background: iNet > 0 ? upC : downC, opacity: 0.3, top: 8 }} />}
+                  </div>
+                  <span style={{ width: 48, textAlign: 'left', flexShrink: 0, fontWeight: 700, color: iNet >= 0 ? upC : downC, fontSize: 10 }}>기 {fmtN(iNet)}</span>
+                </div>
+              );
+            })}
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginTop: 8, fontSize: 9, color: 'var(--text-tertiary)' }}>
+            <span>■ 외국인 (진하게)</span><span>□ 기관 (연하게)</span><span style={{ color: upC }}>← 매수</span><span style={{ color: downC }}>매도 →</span>
+          </div>
         </section>
-      )}
+        );
+      })()}
 
       {/* 공시 요약 (서버 렌더링) */}
       {(discR.data ?? []).length > 0 && (
