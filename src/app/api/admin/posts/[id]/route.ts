@@ -8,7 +8,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const { supabase } = auth;
 
   const { id } = await params;
-  const { action } = await req.json();
+  const body = await req.json();
+  const action = body.action || (body.is_deleted === true ? 'hide' : body.is_deleted === false ? 'restore' : null);
 
   if (action === 'hide') {
     await supabase.from('posts').update({ is_deleted: true }).eq('id', Number(id));
