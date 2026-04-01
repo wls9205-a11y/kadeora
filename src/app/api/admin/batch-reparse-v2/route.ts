@@ -179,7 +179,8 @@ export async function GET(req: NextRequest) {
   const isAuthed = token === 'kd-reparse-2026' || token === process.env.CRON_SECRET || authHeader === `Bearer ${process.env.CRON_SECRET}`;
   if (!isAuthed) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const mod = 'pdf-parse' + '/lib/pdf-parse'; const pdfParse = eval('require')(mod);
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const pdfParse = require('pdf-parse');
   const sb = getSupabaseAdmin();
 
   const limit = Math.min(parseInt(req.nextUrl.searchParams.get('limit') || '100'), 300);
