@@ -327,6 +327,9 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
             <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: -0.5 }}>
               {isArchive ? '투자 브리핑 아카이브' : '오늘의 투자 브리핑'}
             </div>
+            <p style={{ fontSize: 11, color: 'var(--text-tertiary)', margin: '4px 0 0', lineHeight: 1.5 }}>
+              매일 아침 {d.region} 부동산(청약·미분양·재개발) + 국내외 주식 시황을 한 장에 정리합니다
+            </p>
           </div>
           <select
             value={d.region}

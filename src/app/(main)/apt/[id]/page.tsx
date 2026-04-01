@@ -306,7 +306,7 @@ export default async function AptUnifiedPage({ params }: Props) {
   const faq: { q: string; a: string }[] = dbFaq.length > 0 ? dbFaq : [
     { q: `${name} 위치가 어디인가요?`, a: `${name}은(는) ${region} ${site?.sigungu || ''} ${site?.dong || site?.address || ''}에 위치해 있습니다. ${site?.nearby_station || sub?.nearest_station ? `최근접 역은 ${site?.nearby_station || sub?.nearest_station}입니다.` : ''}` },
     ...(sub?.rcept_bgnde ? [{ q: `${name} 청약 일정은 언제인가요?`, a: `${name}의 청약 접수 기간은 ${sub.rcept_bgnde} ~ ${sub.rcept_endde || ''}입니다. ${sub.przwner_presnatn_de ? `당첨자 발표일은 ${sub.przwner_presnatn_de}입니다.` : ''} ${sub.mvn_prearnge_ym ? `입주 예정은 ${fmtYM(sub.mvn_prearnge_ym)}입니다.` : ''}` }] : []),
-    { q: `${name} 시공사(건설사)는 어디인가요?`, a: `${name}의 시공사는 ${site?.builder || sub?.constructor_nm || '미정'}입니다. ${site?.developer || sub?.developer_nm ? `시행사는 ${site?.developer || sub?.developer_nm}입니다.` : ''} 총 ${site?.total_units || sub?.tot_supply_hshld_co || '미정'}세대 규모입니다.` },
+    { q: `${name} 시공사(건설사)는 어디인가요?`, a: `${name}의 시공사는 ${site?.builder || sub?.constructor_nm || '미정'}입니다. ${site?.developer || sub?.developer_nm ? `시행사는 ${site?.developer || sub?.developer_nm}입니다.` : ''} ${sub?.total_households ? `총 ${sub.total_households}세대 규모이며, ` : ''}공급 ${site?.total_units || sub?.tot_supply_hshld_co || '미정'}세대입니다.` },
     ...(site?.price_min || site?.price_max ? [{ q: `${name} 분양가는 얼마인가요?`, a: `${name}의 분양가는 ${site?.price_min ? fmtAmount(site.price_min) : ''}${site?.price_min && site?.price_max ? ' ~ ' : ''}${site?.price_max ? fmtAmount(site.price_max) : ''} (최고분양가 기준)입니다. 타입별 상세 분양가는 아래 평형별 공급 테이블에서 확인하세요.` }] : []),
     ...(sub ? [{ q: `${name} 모집공고 핵심 내용은 무엇인가요?`, a: `${name}의 입주자모집공고 핵심 내용: ${sub.is_price_limit ? '분양가상한제 적용, ' : ''}${sub.constructor_nm || site?.builder ? `시공사 ${sub.constructor_nm || site?.builder}, ` : ''}총 ${sub.tot_supply_hshld_co || site?.total_units || '미정'}세대 공급. ${sub.mvn_prearnge_ym ? `입주 예정 ${fmtYM(sub.mvn_prearnge_ym)}.` : ''} 카더라에서 모집공고 핵심 요약을 확인하세요.` }] : []),
     ...(sub?.is_price_limit !== undefined ? [{ q: `${name}은 분양가상한제 적용 현장인가요?`, a: `${name}은(는) 분양가상한제 ${sub.is_price_limit ? '적용 현장입니다. 분양가상한제 적용 시 전매제한 및 거주의무 등의 규제가 적용될 수 있습니다.' : '미적용 현장입니다.'}` }] : []),
@@ -480,7 +480,7 @@ export default async function AptUnifiedPage({ params }: Props) {
         const totalHouseholds = Number(sub?.total_households || 0);
 
         const cards = [
-          { l: '총세대수', v: totalHouseholds > 0 ? `${totalHouseholds.toLocaleString()}세대` : totalUnits > 0 ? `${totalUnits.toLocaleString()}세대` : '🔍 확인중', sub: totalHouseholds > 0 && totalHouseholds !== totalUnits ? `공급 ${totalUnits.toLocaleString()}` : totalHouseholds === 0 && (sub?.project_type === '재개발' || sub?.project_type === '재건축') ? '조합원분양 세대 확인중' : hasBreakdown ? `일반${generalSupply}·특별${specialSupply}` : '', c: totalHouseholds > 0 ? 'var(--text-primary)' : 'var(--text-tertiary)', icon: '🏢', bar: Math.min(((totalHouseholds || totalUnits) / 5000) * 100, 100), barColor: 'var(--brand)', scrollTo: null },
+          { l: totalHouseholds > 0 ? '총세대수' : '공급세대', v: totalHouseholds > 0 ? `${totalHouseholds.toLocaleString()}세대` : totalUnits > 0 ? `${totalUnits.toLocaleString()}세대` : '🔍 확인중', sub: totalHouseholds > 0 && totalHouseholds !== totalUnits && totalUnits > 0 ? `공급 ${totalUnits.toLocaleString()}세대` : totalHouseholds === 0 && (sub?.project_type === '재개발' || sub?.project_type === '재건축') ? '조합원분양 세대 확인중' : hasBreakdown ? `일반${generalSupply}·특별${specialSupply}` : '', c: totalHouseholds > 0 ? 'var(--text-primary)' : 'var(--brand)', icon: '🏢', bar: Math.min(((totalHouseholds || totalUnits) / 5000) * 100, 100), barColor: 'var(--brand)', scrollTo: null },
           { l: sub ? '분양가' : '시세', v: (() => {
             const pMin = site?.price_min || unsold?.sale_price_min || 0;
             const pMax = site?.price_max || 0;
@@ -821,7 +821,7 @@ export default async function AptUnifiedPage({ params }: Props) {
               ['시행사', sub.developer_nm || site?.developer],
               ['브랜드', sub.brand_name],
               ['사업유형', sub.project_type],
-              ['총세대수', sub.total_households ? `${Number(sub.total_households).toLocaleString()}세대 (단지 전체)` : '🔍 확인중'],
+              ['총세대수', sub.total_households ? `${Number(sub.total_households).toLocaleString()}세대 (단지 전체)` : null],
               ['공급세대', sub.tot_supply_hshld_co ? `${Number(sub.tot_supply_hshld_co).toLocaleString()}세대 (일반${sub.general_supply_total || '-'} · 특별${sub.special_supply_total || '-'})` : null],
               ['동수', (sub.total_dong_count || sub.total_dong_co) ? `${sub.total_dong_count || sub.total_dong_co}개 동` : null],
               ['층수', sub.max_floor ? `지상 ${sub.max_floor}층${sub.min_floor ? ` / 지하 ${sub.min_floor}층` : ''}` : null],
@@ -1092,7 +1092,7 @@ export default async function AptUnifiedPage({ params }: Props) {
           <h2 style={ct}>🏚️ 미분양 현황</h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 10, marginBottom: 'var(--sp-sm)' }}>
             <div><div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>미분양</div><div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--accent-red)' }}>{(unsold.tot_unsold_hshld_co || 0).toLocaleString()}호</div></div>
-            <div><div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>총 세대수</div><div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>{unsold.tot_supply_hshld_co ? unsold.tot_supply_hshld_co.toLocaleString() : '-'}</div></div>
+            <div><div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>공급세대</div><div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>{unsold.tot_supply_hshld_co ? unsold.tot_supply_hshld_co.toLocaleString() : '-'}</div></div>
           </div>
           {unsoldRate !== null && <div style={{ position: 'relative', height: 6, background: 'var(--bg-hover)', borderRadius: 3, marginBottom: 6 }}><div style={{ height: '100%', borderRadius: 3, width: `${Math.min(unsoldRate, 100)}%`, background: unsoldRate > 70 ? 'var(--accent-red)' : unsoldRate > 40 ? 'var(--accent-orange)' : 'var(--accent-yellow)' }} /><span style={{ position: 'absolute', right: 0, top: -16, fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--accent-red)' }}>미분양률 {unsoldRate}%</span></div>}
           {unsold.after_completion_unsold > 0 && <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--accent-red)', fontWeight: 600 }}>준공후(악성) 미분양 {unsold.after_completion_unsold}호</div>}

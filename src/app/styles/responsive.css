@@ -558,3 +558,72 @@ html.font-small .kd-list-item { padding: var(--sp-xs) 0; }
   .mc-g4 { grid-template-columns: repeat(2, 1fr) !important; }
   .admin-main { padding: 16px 16px 32px !important; }
 }
+
+/* ========================================
+   모바일 텍스트 깨짐/밀림 방어 — 전역
+   ======================================== */
+
+/* 모든 flex 자식에 min-width: 0 — 텍스트 오버플로우 방지 */
+@media (max-width: 640px) {
+  [style*="display: flex"] > *, [style*="display:flex"] > *,
+  .kd-feed-card > div, .apt-card > div {
+    min-width: 0;
+  }
+
+  /* 테이블 가로 스크롤 보장 */
+  table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table tbody, table thead { display: table; width: 100%; }
+
+  /* 버튼/태그 줄바꿈 방지 */
+  .kd-tab-btn, .kd-sort-btn, .kd-pill {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* 카드 내부 텍스트 강제 줄바꿈 */
+  .apt-card, .kd-feed-card, .kd-card {
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+
+  /* grid 자식도 min-width: 0 */
+  [style*="display: grid"] > * {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  /* 주식 종목명 등 긴 텍스트 자르기 */
+  h1, h2, h3 {
+    overflow-wrap: break-word;
+    word-break: keep-all;
+  }
+
+  /* 브레드크럼 줄바꿈 */
+  nav[aria-label="breadcrumb"] {
+    flex-wrap: wrap;
+    gap: 2px 4px !important;
+  }
+
+  /* 가격/수치 줄바꿈 방지 */
+  [style*="fontWeight: 700"], [style*="fontWeight: 800"], [style*="fontWeight: 900"] {
+    white-space: nowrap;
+  }
+
+  /* select/input 100% 너비 보장 */
+  select.kd-input, input.kd-input {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* 인터랙션 바: 좁은 화면에서 wrap */
+  .kd-interaction-bar {
+    flex-wrap: wrap;
+  }
+
+  /* 공유 버튼 영역 컴팩트 */
+  .kd-action-btn {
+    padding: 4px 6px !important;
+    font-size: 11px !important;
+  }
+}

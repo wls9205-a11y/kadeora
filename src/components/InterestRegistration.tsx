@@ -119,54 +119,56 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
 
   const GuestForm = () => (
     <div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-sm)' }}>
-        <div>
-          <label style={labelStyle}>이름 <span style={{ color: 'var(--error)' }}>*</span></label>
-          <input value={name} onChange={e => setName(e.target.value)} placeholder="홍길동" className="kd-input" />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 10 }}>
+          <div>
+            <label style={labelStyle}>이름 <span style={{ color: 'var(--error)' }}>*</span></label>
+            <input value={name} onChange={e => setName(e.target.value)} placeholder="홍길동" className="kd-input" style={{ width: '100%', boxSizing: 'border-box' }} />
+          </div>
+          <div>
+            <label style={labelStyle}>전화번호 <span style={{ color: 'var(--error)' }}>*</span></label>
+            <input value={phone} onChange={e => setPhone(e.target.value.replace(/[^0-9]/g, ''))} placeholder="01012345678" inputMode="tel" maxLength={11} className="kd-input" style={{ width: '100%', boxSizing: 'border-box' }} />
+          </div>
         </div>
-        <div>
-          <label style={labelStyle}>전화번호 <span style={{ color: 'var(--error)' }}>*</span></label>
-          <input value={phone} onChange={e => setPhone(e.target.value.replace(/[^0-9]/g, ''))} placeholder="01012345678" inputMode="tel" maxLength={11} className="kd-input" />
-        </div>
-      </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-sm)' }}>
         <div>
           <label style={labelStyle}>생년월일 <span style={{ color: 'var(--error)' }}>*</span></label>
-          <input type="date" value={birthDate} onChange={e => setBirthDate(e.target.value)} className="kd-input" />
+          <input type="date" value={birthDate} onChange={e => setBirthDate(e.target.value)} className="kd-input" style={{ width: '100%', boxSizing: 'border-box' }} />
         </div>
-        <div>
-          <label style={labelStyle}>거주 지역 <span style={{ color: 'var(--error)' }}>*</span></label>
-          <select value={city} onChange={e => { setCity(e.target.value); setDistrict(''); }} className="kd-input" style={{ cursor: 'pointer' }}>
-            <option value="">시/도 선택</option>
-            {REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
-          </select>
+        <div style={{ display: 'grid', gridTemplateColumns: city && (SIGUNGU_MAP[city] || []).length > 0 ? 'minmax(0, 1fr) minmax(0, 1fr)' : '1fr', gap: 10 }}>
+          <div>
+            <label style={labelStyle}>거주 시/도 <span style={{ color: 'var(--error)' }}>*</span></label>
+            <select value={city} onChange={e => { setCity(e.target.value); setDistrict(''); }} className="kd-input" style={{ width: '100%', boxSizing: 'border-box', cursor: 'pointer' }}>
+              <option value="">시/도 선택</option>
+              {REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
+            </select>
+          </div>
+          {city && (SIGUNGU_MAP[city] || []).length > 0 && (
+            <div>
+              <label style={labelStyle}>시/군/구 <span style={{ color: 'var(--error)' }}>*</span></label>
+              <select value={district} onChange={e => setDistrict(e.target.value)} className="kd-input" style={{ width: '100%', boxSizing: 'border-box', cursor: 'pointer' }}>
+                <option value="">시/군/구 선택</option>
+                {(SIGUNGU_MAP[city] || []).map(d => <option key={d} value={d}>{d}</option>)}
+              </select>
+            </div>
+          )}
         </div>
       </div>
-      {city && (SIGUNGU_MAP[city] || []).length > 0 && (
-        <div style={{ marginBottom: 'var(--sp-sm)' }}>
-          <label style={labelStyle}>시/군/구 <span style={{ color: 'var(--error)' }}>*</span></label>
-          <select value={district} onChange={e => setDistrict(e.target.value)} className="kd-input" style={{ cursor: 'pointer' }}>
-            <option value="">시/군/구 선택</option>
-            {(SIGUNGU_MAP[city] || []).map(d => <option key={d} value={d}>{d}</option>)}
-          </select>
-        </div>
-      )}
 
       {/* 동의 */}
-      <div style={{ background: 'var(--bg-base)', borderRadius: 'var(--radius-sm)', padding: 10, marginBottom: 10 }}>
-        <label style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--sp-sm)', marginBottom: 6, cursor: 'pointer', fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-          <input type="checkbox" checked={consentCollection} onChange={e => setConsentCollection(e.target.checked)} style={{ marginTop: 2, accentColor: 'var(--brand)' }} />
-          <span><span style={{ color: 'var(--error)' }}>[필수]</span> 개인정보 수집·이용 동의 (이름, 전화번호, 생년월일, 거주지역)</span>
+      <div style={{ background: 'var(--bg-base)', borderRadius: 'var(--radius-sm)', padding: '10px 12px', marginBottom: 12 }}>
+        <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 8, cursor: 'pointer', fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+          <input type="checkbox" checked={consentCollection} onChange={e => setConsentCollection(e.target.checked)} style={{ marginTop: 3, accentColor: 'var(--brand)', flexShrink: 0, width: 16, height: 16 }} />
+          <span><span style={{ color: 'var(--error)', fontWeight: 700 }}>[필수]</span> 개인정보 수집·이용 동의 (이름, 전화번호, 생년월일, 거주지역)</span>
         </label>
-        <label style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--sp-sm)', cursor: 'pointer', fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-          <input type="checkbox" checked={consentMarketing} onChange={e => setConsentMarketing(e.target.checked)} style={{ marginTop: 2, accentColor: 'var(--brand)' }} />
+        <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, cursor: 'pointer', fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+          <input type="checkbox" checked={consentMarketing} onChange={e => setConsentMarketing(e.target.checked)} style={{ marginTop: 3, accentColor: 'var(--brand)', flexShrink: 0, width: 16, height: 16 }} />
           <span>[선택] 마케팅 정보 수신 동의 (신규 분양 현장 안내)</span>
         </label>
-        <a href="/privacy" target="_blank" rel="noopener" style={{ fontSize: 11, color: 'var(--brand)', textDecoration: 'underline', display: 'inline-block', marginTop: 6 }}>개인정보처리방침 보기</a>
+        <a href="/privacy" target="_blank" rel="noopener" style={{ fontSize: 11, color: 'var(--brand)', textDecoration: 'underline', display: 'inline-block', marginTop: 8 }}>개인정보처리방침 보기</a>
       </div>
 
       <button onClick={handleGuestSubmit} disabled={submitting} style={{
-        width: '100%', padding: 13, borderRadius: 'var(--radius-md)', border: 'none',
+        width: '100%', padding: 14, borderRadius: 'var(--radius-md)', border: 'none',
         background: consentCollection ? 'var(--brand)' : 'var(--bg-hover)',
         color: consentCollection ? '#fff' : 'var(--text-tertiary)',
         fontSize: 'var(--fs-base)', fontWeight: 700,

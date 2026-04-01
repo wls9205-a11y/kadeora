@@ -393,9 +393,13 @@ export default function FeedClient({
                 {/* 상단: 아바타 + 메타 */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
                   <Link href={post.is_anonymous ? '#' : `/profile/${post.author_id}`} style={{ textDecoration: 'none', flexShrink: 0 }}>
-                    <div style={{ width: 24, height: 24, borderRadius: '50%', background: getAvatarColor(displayName), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 600, color: 'var(--text-inverse)' }}>
-                      {displayName[0].toUpperCase()}
-                    </div>
+                    {!post.is_anonymous && post.profiles?.avatar_url ? (
+                      <Image src={post.profiles.avatar_url} alt={displayName} width={24} height={24} style={{ width: 24, height: 24, borderRadius: '50%', objectFit: 'cover' }} unoptimized />
+                    ) : (
+                      <div style={{ width: 24, height: 24, borderRadius: '50%', background: getAvatarColor(displayName), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 600, color: 'var(--text-inverse)' }}>
+                        {displayName[0].toUpperCase()}
+                      </div>
+                    )}
                   </Link>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>

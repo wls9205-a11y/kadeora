@@ -68,6 +68,62 @@ export const DEMO_POSTS: any[] = [
     updated_at: new Date().toISOString(),
     profiles: { id: 'demo-8', nickname: '당첨자', avatar_url: null, grade: '골드' }
   },
+  {
+    id: 9, author_id: 'demo-9', category: 'free', title: '직장인 점심값 아끼는 현실적인 꿀팁 공유',
+    content: '도시락 싸기 귀찮은 분들을 위해 제가 쓰는 방법 공유합니다. 신용카드 점심 할인, 배민쿠폰 극대화, 구내식당 없는 회사에서 살아남는 법...',
+    images: null, view_count: 1543, likes_count: 67, comments_count: 28, is_deleted: false,
+    created_at: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
+    updated_at: new Date().toISOString(),
+    profiles: { id: 'demo-9', nickname: '짠테크러', avatar_url: null, grade: 2 }
+  },
+  {
+    id: 10, author_id: 'demo-10', category: 'local', title: '부산 해운대 맛집 추천 받습니다 (데이트 코스)',
+    content: '이번 주말에 여자친구랑 해운대 갈 예정인데 분위기 좋은 레스토랑이나 카페 추천해주세요. 예산은 인당 5만원 정도입니다. 주차 가능한 곳이면 더 좋아요!',
+    images: null, view_count: 892, likes_count: 34, comments_count: 45, is_deleted: false,
+    created_at: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
+    updated_at: new Date().toISOString(),
+    profiles: { id: 'demo-10', nickname: '부산사나이', avatar_url: null, grade: 1 }
+  },
+  {
+    id: 11, author_id: 'demo-11', category: 'stock', title: '배당주 포트폴리오 1년 운영 후기 (실수익률 공개)',
+    content: '작년 초에 배당주 위주로 포트폴리오 짰는데 1년 후 결과 공유합니다. 삼성전자우, KT&G, 맥쿼리인프라, 리얼티인컴 등 보유 중이고 평균 배당수익률 4.2% 나왔어요.',
+    images: null, view_count: 4102, likes_count: 198, comments_count: 72, is_deleted: false,
+    created_at: new Date(Date.now() - 10 * 60 * 60 * 1000).toISOString(),
+    updated_at: new Date().toISOString(),
+    profiles: { id: 'demo-11', nickname: '배당러', avatar_url: null, grade: 4 }
+  },
+  {
+    id: 12, author_id: 'demo-12', category: 'free', title: '월급 300 실수령 기준 적정 월세가 얼마일까요',
+    content: '서울 출퇴근 가능한 곳으로 이사 준비 중인데요. 보증금 1000에 월세 50~60이면 무리 없을까요? 아니면 전세자금대출 받아서 전세 가는 게 나을까요?',
+    images: null, view_count: 2345, likes_count: 87, comments_count: 63, is_deleted: false,
+    created_at: new Date(Date.now() - 14 * 60 * 60 * 1000).toISOString(),
+    updated_at: new Date().toISOString(),
+    profiles: { id: 'demo-12', nickname: '사회초년생', avatar_url: null, grade: 1 }
+  },
+  {
+    id: 13, author_id: 'demo-13', category: 'local', title: '서울 강남역 근처 점심 괜찮은 곳 추천',
+    content: '요즘 강남역 근처로 이직했는데 점심 먹을 곳 찾기가 어렵네요. 가성비 좋고 줄 안 서는 곳 있으면 알려주세요. 한식 위주가 좋아요.',
+    images: null, view_count: 1120, likes_count: 42, comments_count: 31, is_deleted: false,
+    created_at: new Date(Date.now() - 20 * 60 * 60 * 1000).toISOString(),
+    updated_at: new Date().toISOString(),
+    profiles: { id: 'demo-13', nickname: '이직러', avatar_url: null, grade: 1 }
+  },
+  {
+    id: 14, author_id: 'demo-14', category: 'apt', title: '신혼부부 특공 자격요건 총정리 (2026년 기준)',
+    content: '신혼부부 특별공급 준비하면서 정리한 내용 공유합니다. 혼인기간, 소득기준, 자산기준, 무주택 요건 등 헷갈리는 부분 다 정리했어요. 소득 맞벌이 기준이 올해 좀 바뀌었더라고요.',
+    images: null, view_count: 5670, likes_count: 245, comments_count: 89, is_deleted: false,
+    created_at: new Date(Date.now() - 30 * 60 * 60 * 1000).toISOString(),
+    updated_at: new Date().toISOString(),
+    profiles: { id: 'demo-14', nickname: '예비신부', avatar_url: null, grade: 3 }
+  },
+  {
+    id: 15, author_id: 'demo-15', category: 'free', title: '요즘 적금 금리 괜찮은 곳 어디에요?',
+    content: '비상금 좀 모으려고 하는데 CMA나 파킹통장 말고 정기적금 중에 금리 좋은 상품 있을까요? 1년 만기 기준으로 4% 이상 나오는 곳 찾고 있습니다.',
+    images: null, view_count: 1876, likes_count: 55, comments_count: 38, is_deleted: false,
+    created_at: new Date(Date.now() - 42 * 60 * 60 * 1000).toISOString(),
+    updated_at: new Date().toISOString(),
+    profiles: { id: 'demo-15', nickname: '저축왕', avatar_url: null, grade: 2 }
+  },
 ];
 
 

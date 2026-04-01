@@ -124,6 +124,7 @@ export default async function StockDetailPage({ params }: Props) {
     { label: '시가총액', value: fmtCap(s.market_cap ? Number(s.market_cap) : null, s.currency ?? undefined) },
     { label: '섹터', value: s.sector || '-' },
     { label: '전일대비', value: s.change_amt != null ? `${Number(s.change_amt) > 0 ? '+' : ''}${Number(s.change_amt).toLocaleString()}` : '-' },
+    { label: '거래량', value: s.volume ? Number(s.volume) >= 1000000 ? `${(Number(s.volume) / 10000).toFixed(0)}만` : Number(s.volume).toLocaleString() : '-' },
   ];
 
   return (

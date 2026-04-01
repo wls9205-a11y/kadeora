@@ -117,7 +117,7 @@ async function fetchViaKis(supabase: SupabaseClient): Promise<StockResult | null
 }
 
 // Naver Finance API — 국내 주식용 (가장 안정적)
-async function fetchNaverQuote(symbol: string): Promise<{ price: number; change_amt: number; change_pct: number; volume: number } | null> {
+async function fetchNaverQuote(symbol: string): Promise<{ price: number; change_amt: number; change_pct: number; volume: number; market_cap?: number } | null> {
   try {
     // 1순위: Naver 폴링 API
     const ctrl1 = new AbortController();
@@ -136,11 +136,14 @@ async function fetchNaverQuote(symbol: string): Promise<{ price: number; change_
       if (d) {
         const price = parseInt(String(d.closePriceRaw ?? '0'));
         if (price) {
+          // 폴링 API에서 시총(marketCapitalization)도 가져옴
+          const marketCap = d.marketCapitalizationRaw ? parseInt(String(d.marketCapitalizationRaw)) : (d.marketCapitalization ? parseInt(String(d.marketCapitalization).replace(/,/g, '')) : undefined);
           return {
             price,
             change_amt: parseInt(String(d.compareToPreviousClosePriceRaw ?? '0')),
             change_pct: parseFloat(String(d.fluctuationsRatioRaw ?? '0')),
             volume: parseInt(String(d.accumulatedTradingVolumeRaw ?? d.accumulatedTradingVolume ?? '0')),
+            ...(marketCap && marketCap > 0 ? { market_cap: marketCap } : {}),
           };
         }
       }
@@ -148,7 +151,7 @@ async function fetchNaverQuote(symbol: string): Promise<{ price: number; change_
   } catch { /* fallthrough */ }
 
   try {
-    // 2순위: Naver 모바일 API
+    // 2순위: Naver 모바일 API — 시총 포함
     const ctrl2 = new AbortController();
     const t2 = setTimeout(() => ctrl2.abort(), 5000);
     const res = await fetch(`https://m.stock.naver.com/api/stock/${symbol}/basic`, {
@@ -163,11 +166,15 @@ async function fetchNaverQuote(symbol: string): Promise<{ price: number; change_
       const json = await res.json();
       const price = parseInt(String(json?.closePrice ?? '0').replace(/,/g, ''));
       if (price) {
+        // 네이버 모바일 API에서 시총 추출 (marketCap 또는 totalMarketValue)
+        const rawCap = json?.marketCap ?? json?.totalMarketValue ?? json?.marketCapitalization ?? '';
+        const marketCap = parseInt(String(rawCap).replace(/,/g, ''));
         return {
           price,
           change_amt: parseInt(String(json?.compareToPreviousClosePrice ?? '0').replace(/,/g, '')),
           change_pct: parseFloat(String(json?.fluctuationsRatio ?? '0')),
           volume: parseInt(String(json?.accumulatedTradingVolume ?? '0').replace(/,/g, '')),
+          ...(marketCap && marketCap > 0 ? { market_cap: marketCap } : {}),
         };
       }
     }
@@ -203,6 +210,7 @@ async function fetchViaNaver(supabase: SupabaseClient): Promise<StockResult | nu
               change_amt: quote.change_amt,
               change_pct: Math.max(-35, Math.min(35, quote.change_pct)),
               volume: quote.volume,
+              ...(quote.market_cap ? { market_cap: quote.market_cap } : {}),
               updated_at: new Date().toISOString(),
             })
             .eq('symbol', stock.symbol);
