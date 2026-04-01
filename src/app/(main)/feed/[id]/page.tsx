@@ -449,14 +449,14 @@ export default async function FeedDetailPage({ params }: Props) {
           { icon: '🤍', label: '좋아요', value: post.likes_count ?? 0, max: 100, color: 'var(--accent-red)' },
           { icon: '💬', label: '댓글', value: comments.length, max: 50, color: 'var(--accent-green)' },
         ].map(s => (
-          <div key={s.label} style={{ flex: 1, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 6, padding: '6px 8px', display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontSize: 12 }}>{s.icon}</span>
+          <div key={s.label} style={{ flex: 1, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 6, padding: '4px 6px', display: 'flex', alignItems: 'center', gap: 4 }}>
+            <span style={{ fontSize: 11 }}>{s.icon}</span>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 3 }}>
-                <span style={{ fontSize: 14, fontWeight: 800, color: s.value > 0 ? s.color : 'var(--text-tertiary)' }}>{s.value.toLocaleString()}</span>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 2 }}>
+                <span style={{ fontSize: 13, fontWeight: 800, color: s.value > 0 ? s.color : 'var(--text-tertiary)' }}>{s.value.toLocaleString()}</span>
                 <span style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>{s.label}</span>
               </div>
-              <div style={{ height: 2, borderRadius: 1, background: 'var(--bg-hover)', marginTop: 2, overflow: 'hidden' }}>
+              <div style={{ height: 2, borderRadius: 1, background: 'var(--bg-hover)', marginTop: 1, overflow: 'hidden' }}>
                 <div style={{ height: '100%', width: `${Math.min((s.value / s.max) * 100, 100)}%`, borderRadius: 1, background: s.color }} />
               </div>
             </div>

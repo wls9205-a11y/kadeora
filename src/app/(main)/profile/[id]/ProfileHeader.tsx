@@ -178,23 +178,21 @@ export default function ProfileHeader({ profile, isOwner, followersCount, follow
           </div>
         ) : (
           <>
-            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-xs)' }}>
-              <div style={{ minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', flexWrap: 'wrap' }}>
-                  <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>{displayName}</h1>
-                  <span style={{ fontSize: 'var(--fs-sm)', padding: '2px 8px', borderRadius: 'var(--radius-pill)', fontWeight: 700, background: `${gradeColor}20`, color: gradeColor }}>
-                    {gradeEmoji} {gradeTitle} Lv.{gradeNum}
-                  </span>
-                  {profile.is_premium && <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--warning-bg)', color: 'var(--warning)', fontWeight: 700 }}>👑 PREMIUM</span>}
-                </div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 6 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0, flex: 1 }}>
+                <h1 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayName}</h1>
+                <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 12, fontWeight: 700, background: `${gradeColor}20`, color: gradeColor, whiteSpace: 'nowrap', flexShrink: 0 }}>
+                  {gradeEmoji} {gradeTitle} Lv.{gradeNum}
+                </span>
+                {profile.is_premium && <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 12, background: 'var(--warning-bg)', color: 'var(--warning)', fontWeight: 700, whiteSpace: 'nowrap', flexShrink: 0 }}>👑 PREMIUM</span>}
               </div>
               <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
                 {isOwner ? (
-                  <button onClick={() => setEditing(true)} className="kd-btn kd-btn-ghost" style={{ fontSize: 'var(--fs-sm)', padding: '4px 10px' }}>✏️ 수정</button>
+                  <button onClick={() => setEditing(true)} className="kd-btn kd-btn-ghost" style={{ fontSize: 12, padding: '4px 10px' }}>✏️ 수정</button>
                 ) : (
                   <button onClick={handleFollow} disabled={followLoading} aria-pressed={following}
                     className={following ? 'kd-btn kd-btn-ghost' : 'kd-btn kd-btn-primary'}
-                    style={{ fontSize: 'var(--fs-sm)', padding: '4px 12px' }}>
+                    style={{ fontSize: 12, padding: '4px 12px' }}>
                     {followLoading ? '...' : following ? '✓ 팔로잉' : '+ 팔로우'}
                   </button>
                 )}
@@ -204,27 +202,27 @@ export default function ProfileHeader({ profile, isOwner, followersCount, follow
                     try { await navigator.share({ title: `${profile.nickname} — 카더라`, url }); return; } catch {}
                   }
                   navigator.clipboard.writeText(url).then(() => success('프로필 링크가 복사됐어요!'));
-                }} style={{ padding: '4px 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-secondary)', fontSize: 'var(--fs-sm)', cursor: 'pointer', fontWeight: 600 }}>
+                }} style={{ padding: '4px 10px', borderRadius: 6, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-secondary)', fontSize: 12, cursor: 'pointer', fontWeight: 600 }}>
                   공유
                 </button>
               </div>
             </div>
-            <p style={{ margin: '0 0 6px', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+            <p style={{ margin: '0 0 6px', fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
               {profile.bio || (isOwner ? '자기소개를 작성해보세요' : '자기소개가 없습니다')}
             </p>
-            <div style={{ display: 'flex', gap: 'var(--sp-md)', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', flexWrap: 'wrap', marginBottom: 10 }}>
+            <div style={{ display: 'flex', gap: 12, fontSize: 12, color: 'var(--text-tertiary)', flexWrap: 'wrap', marginBottom: 10 }}>
               <span>{joinDate} 가입</span>
               {profile.region_text && <span>📍 {profile.region_text}{profile.residence_district ? ` ${profile.residence_district}` : ''}</span>}
             </div>
-            <div style={{ display: 'flex', flexDirection: 'row', gap: 'var(--sp-lg)', alignItems: 'center' }}>
+            <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <span style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)' }}>{followers}</span>
-                <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>팔로워</span>
+                <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)' }}>{followers}</span>
+                <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>팔로워</span>
               </div>
-              <div style={{ width: 1, height: 24, background: 'var(--border)' }} />
+              <div style={{ width: 1, height: 20, background: 'var(--border)' }} />
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <span style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)' }}>{followingCount}</span>
-                <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>팔로잉</span>
+                <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)' }}>{followingCount}</span>
+                <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>팔로잉</span>
               </div>
             </div>
           </>
