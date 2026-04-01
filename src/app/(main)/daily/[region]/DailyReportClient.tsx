@@ -6,54 +6,172 @@ import type { DailyReportData } from '@/lib/daily-report-data';
 import { useAuth } from '@/components/AuthProvider';
 import ShareButtons from '@/components/ShareButtons';
 
-// ═══ 오늘의 운세 (띠별) ═══
+// ═══ 오늘의 운세 (띠별) — 세밀 버전 + DB 저장 ═══
 const ZA = ['쥐','소','호랑이','토끼','용','뱀','말','양','원숭이','닭','개','돼지'];
 const ZE: Record<string,string> = {'쥐':'🐭','소':'🐮','호랑이':'🐯','토끼':'🐰','용':'🐲','뱀':'🐍','말':'🐴','양':'🐑','원숭이':'🐵','닭':'🐔','개':'🐶','돼지':'🐷'};
-const ZF: Record<string,string[]> = {
-  '쥐': ['금전운이 좋습니다. 소액 투자에 행운이 따르는 날.','인간관계에서 좋은 소식이 올 수 있어요.','새로운 기회를 발견할 수 있는 날입니다.','정보 수집에 집중하면 투자 인사이트를 얻을 수 있어요.'],
-  '소': ['꾸준함이 빛을 발합니다. 장기 투자에 유리한 날.','건강에 신경 쓰면 좋은 하루가 될 거예요.','직장에서 인정받을 기회가 올 수 있습니다.','부동산 관련 정보를 체크해보세요.'],
-  '호랑이': ['과감한 결정이 좋은 결과를 가져올 수 있어요.','운동이나 야외활동이 기운을 충전해줍니다.','리더십을 발휘할 기회가 옵니다.','단기 매매보다 중장기 관점이 유리해요.'],
-  '토끼': ['예술적 감각이 빛나는 날. 창의적 아이디어에 주목하세요.','가족과의 시간이 행복을 가져다줘요.','부동산 관련 좋은 소식이 있을 수 있습니다.','자기계발에 투자하면 나중에 큰 보답이.'],
-  '용': ['대담한 계획을 실행하기 좋은 날입니다.','주변의 도움으로 일이 잘 풀릴 거예요.','재테크에 대한 좋은 영감이 떠오를 수 있어요.','자신감을 가지고 도전해보세요.'],
-  '뱀': ['직감이 날카로운 날. 투자 판단을 믿으세요.','학습이나 자기개발에 좋은 에너지가 있어요.','조용히 정리하는 시간이 필요합니다.','정보를 분석하면 숨은 기회를 발견할 수 있어요.'],
-  '말': ['활발한 에너지가 넘칩니다! 적극적으로 움직이세요.','새로운 사람을 만나면 좋은 인연이 될 수 있어요.','단기 수익 기회를 잘 포착하세요.','네트워킹이 투자에 도움이 되는 날.'],
-  '양': ['온화한 대인관계가 좋은 결과를 가져와요.','작은 기부나 나눔이 큰 행운으로 돌아옵니다.','부동산 시장에 눈여겨볼 물건이 있을 수 있어요.','안정적인 수익을 추구하면 마음이 편해져요.'],
-  '원숭이': ['재치와 유머가 빛나는 날. 소통에 강점이 있어요.','새로운 부업이나 수입원을 찾기 좋은 타이밍.','숫자에 강한 날. 재무 분석이 정확해요.','빠른 판단력이 수익으로 연결될 수 있어요.'],
-  '닭': ['꼼꼼한 분석이 성과를 가져오는 날입니다.','아침 일찍 시작하면 좋은 일이 생겨요.','저축이나 절약 습관이 큰 도움이 되는 날.','디테일에 집중하면 놓친 기회를 찾을 수 있어요.'],
-  '개': ['충성스러운 인간관계가 보답받는 날이에요.','건강검진이나 보험 점검하기 좋은 시기.','안정적인 투자가 마음의 평화를 줍니다.','신뢰를 쌓으면 장기적으로 큰 이득이 와요.'],
-  '돼지': ['풍요로운 에너지가 감도는 날! 맛있는 것도 OK.','예상치 못한 금전운이 있을 수 있어요.','가정의 평화가 모든 것의 기반이에요.','여유를 가지면 좋은 투자 기회가 보입니다.'],
+
+interface FortuneDetail { summary: string; money: string; love: string; health: string; lucky: string; }
+const ZF: Record<string, FortuneDetail[]> = {
+  '쥐': [
+    { summary: '오늘은 정보력이 빛을 발하는 날입니다. 평소 관심 두던 종목이나 매물에 대해 결정적인 뉴스를 접할 수 있어요. 점심 무렵 들어오는 소식에 귀를 기울이세요.', money: '소액 분산투자가 유리합니다. 한 곳에 몰빵하지 마세요.', love: '오래된 인연에게 연락이 올 수 있어요. 반가운 소식과 함께.', health: '눈의 피로에 주의. 30분마다 먼 곳을 바라보세요.', lucky: '행운의 색: 파란색 / 행운의 숫자: 3, 7' },
+    { summary: '주변 사람들과의 대화에서 투자 힌트를 얻을 수 있는 날이에요. 특히 선배나 경험 많은 지인의 조언에 귀 기울여보세요. 저녁에 좋은 기회가 찾아올 수 있습니다.', money: '적금이나 예금 같은 안전자산 점검하기 좋은 날.', love: '가족과의 저녁 식사가 마음을 따뜻하게 해줄 거예요.', health: '소화에 신경 쓰세요. 과식은 금물입니다.', lucky: '행운의 색: 흰색 / 행운의 숫자: 1, 8' },
+    { summary: '새로운 재테크 방법을 알게 되는 날. SNS나 커뮤니티에서 유용한 정보를 발견할 가능성이 높아요. 단, 검증되지 않은 정보에는 신중하게 접근하세요.', money: 'ETF나 인덱스 펀드 같은 분산투자 상품이 눈에 들어올 거예요.', love: '동료와의 협업에서 시너지가 폭발합니다.', health: '가벼운 산책이 컨디션 회복에 도움이 됩니다.', lucky: '행운의 색: 초록색 / 행운의 숫자: 4, 9' },
+    { summary: '조용히 혼자만의 시간을 가지며 포트폴리오를 점검해보세요. 그동안 놓쳤던 비효율적인 부분을 발견하고 정리할 수 있는 좋은 타이밍입니다.', money: '불필요한 구독 서비스나 자동이체를 정리하면 의외의 절약이.', love: '연인이나 배우자와 재무 계획을 함께 세워보세요.', health: '충분한 수면이 내일의 판단력을 좌우합니다.', lucky: '행운의 색: 검정 / 행운의 숫자: 2, 6' },
+  ],
+  '소': [
+    { summary: '꾸준히 지켜온 투자 원칙이 드디어 성과를 보여주는 날이에요. 장기 보유 중인 자산에서 기분 좋은 변화를 확인할 수 있습니다. 조급해하지 말고 원래 계획을 유지하세요.', money: '배당주나 부동산 리츠 등 안정적인 수익형 자산이 유리해요.', love: '묵묵히 곁에 있어준 사람에게 감사 표현을 해보세요.', health: '목과 어깨 스트레칭이 필요한 날. 자세를 점검하세요.', lucky: '행운의 색: 갈색 / 행운의 숫자: 5, 8' },
+    { summary: '부동산 관련 좋은 소식이 들려올 수 있는 날입니다. 전세 시세나 매매가 변동에 주의를 기울이세요. 특히 실거주 목적의 움직임이라면 적극적으로 알아보세요.', money: '월세 수익형 부동산에 대한 정보를 수집하기 좋은 날.', love: '가정의 평화가 모든 성공의 기반이에요. 가족 시간을 늘려보세요.', health: '등산이나 걷기 등 하체 운동이 기운을 북돋아줍니다.', lucky: '행운의 색: 노란색 / 행운의 숫자: 2, 7' },
+    { summary: '직장이나 사업에서 신뢰를 쌓아온 결과가 빛나는 날이에요. 상사나 거래처로부터 긍정적인 피드백을 받을 수 있고, 이것이 간접적으로 재정 상황에도 좋은 영향을 줍니다.', money: '성과급이나 보너스와 관련된 좋은 소식이 있을 수 있어요.', love: '진심 어린 칭찬 한마디가 관계를 깊게 만들어줘요.', health: '규칙적인 식사가 체력 관리의 핵심입니다.', lucky: '행운의 색: 주황색 / 행운의 숫자: 3, 6' },
+    { summary: '저축 습관을 돌아보기 좋은 날이에요. 매달 자동이체 되는 금액을 한번 점검해보세요. 소소한 금액이라도 꾸준히 모이면 큰 목돈이 됩니다. 장기적 안목이 중요해요.', money: '적립식 투자 금액을 소폭 늘려보는 것도 좋은 전략이에요.', love: '오래된 친구와의 만남이 마음에 위안을 줍니다.', health: '비타민이나 영양제 보충이 필요한 시기입니다.', lucky: '행운의 색: 연두 / 행운의 숫자: 1, 4' },
+  ],
+  '호랑이': [
+    { summary: '에너지가 폭발하는 날! 미뤄뒀던 투자 결정을 내리기 좋습니다. 단, 감정적으로 움직이기보다 데이터를 한번 더 확인하고 실행에 옮기세요. 오후 3시 이후가 최적의 타이밍.', money: '성장주나 테마주에서 기회를 포착할 수 있어요. 분할매수 추천.', love: '리더십이 빛나는 날. 주변 사람들이 당신을 따를 거예요.', health: '격한 운동보다 요가나 필라테스가 더 효과적입니다.', lucky: '행운의 색: 빨간색 / 행운의 숫자: 1, 9' },
+    { summary: '새로운 도전을 시작하기 최적의 날이에요. 부업, 사이드 프로젝트, 자격증 공부 등 평소 하고 싶었던 것을 오늘 첫걸음을 떼보세요. 시작이 반입니다.', money: '새로운 수입원을 만드는 것이 최고의 투자입니다.', love: '열정적인 에너지가 주변 사람들에게도 전염돼요.', health: '아침 운동이 하루 컨디션을 좌우합니다.', lucky: '행운의 색: 금색 / 행운의 숫자: 5, 7' },
+    { summary: '경쟁 상황에서 우위를 점할 수 있는 날이에요. 청약이나 입찰 등 경쟁이 필요한 곳에서 좋은 결과를 기대해도 좋습니다. 자신감을 갖되 무모하지는 마세요.', money: '청약 가점 계산을 다시 해보세요. 의외의 결과가 나올 수 있어요.', love: '당당한 모습이 매력적으로 보이는 날이에요.', health: '과로에 주의. 적절한 휴식이 장기적 성과를 만듭니다.', lucky: '행운의 색: 주황 / 행운의 숫자: 3, 8' },
+    { summary: '그동안 준비해온 일이 결실을 맺는 날입니다. 투자든 커리어든, 꾸준히 쌓아온 노력이 인정받는 순간이 올 거예요. 겸손하게 받아들이되 내심 뿌듯해해도 괜찮아요.', money: '수익 실현을 고려해도 좋은 타이밍이에요.', love: '성취를 함께 축하할 사람과의 시간을 만들어보세요.', health: '몸도 마음도 충전이 필요해요. 오늘은 일찍 쉬세요.', lucky: '행운의 색: 보라 / 행운의 숫자: 2, 6' },
+  ],
+  '토끼': [
+    { summary: '감각이 예민해지는 날이에요. 부동산 매물을 직접 보러 다니면 의외로 좋은 물건을 발견할 수 있습니다. 인테리어나 리모델링에 대한 영감도 떠오를 수 있어요.', money: '실거주 목적의 부동산 탐색이 행운을 가져다줘요.', love: '가족을 위한 선물이 큰 감동을 줄 수 있는 날.', health: '알레르기에 주의하세요. 미세먼지 확인 필수.', lucky: '행운의 색: 분홍 / 행운의 숫자: 4, 7' },
+    { summary: '창의적인 아이디어가 샘솟는 날! 투자 포트폴리오를 새로운 시각으로 바라보면 숨겨진 기회를 찾을 수 있어요. 남들과 다른 관점이 오히려 정답일 수 있습니다.', money: '잘 알려지지 않은 우량 중소형주에 주목해보세요.', love: '함께 문화생활을 즐기면 관계가 더 깊어져요.', health: '차 한 잔의 여유가 스트레스를 씻어줍니다.', lucky: '행운의 색: 연보라 / 행운의 숫자: 3, 9' },
+    { summary: '자기계발에 투자하면 10배로 돌아오는 날이에요. 재테크 관련 책을 읽거나, 온라인 강의를 들어보세요. 오늘 배운 지식이 미래의 수익으로 연결됩니다.', money: '금융 문해력을 높이는 것이 최고의 투자입니다.', love: '지적인 대화가 상대방의 마음을 사로잡아요.', health: '눈의 피로를 풀어주세요. 블루라이트 차단 안경 추천.', lucky: '행운의 색: 흰색 / 행운의 숫자: 2, 8' },
+    { summary: '조용히 내면을 들여다보는 시간이 필요한 날이에요. 번잡한 시장 소음에서 벗어나 나만의 투자 철학을 정리해보세요. 기본에 충실한 전략이 결국 승리합니다.', money: '현금 비중을 점검하고 비상자금을 확보해두세요.', love: '혼자만의 시간도 소중해요. 재충전의 시간을 가지세요.', health: '명상이나 심호흡이 정신 건강에 큰 도움이 됩니다.', lucky: '행운의 색: 아이보리 / 행운의 숫자: 1, 6' },
+  ],
+  '용': [
+    { summary: '대범한 결정이 큰 수익으로 연결될 수 있는 날이에요. 하지만 무모한 베팅과 대담한 투자는 다릅니다. 철저한 분석 후 확신이 서면 과감히 움직이세요.', money: '대형 우량주나 글로벌 ETF에서 기회를 찾아보세요.', love: '자신감 넘치는 모습이 주변을 환하게 만들어줘요.', health: '충분한 수분 섭취가 활력의 비결이에요.', lucky: '행운의 색: 금색 / 행운의 숫자: 5, 9' },
+    { summary: '사람들이 당신의 의견에 귀를 기울이는 날이에요. 투자 모임이나 커뮤니티에서 적극적으로 의견을 나눠보세요. 당신의 인사이트가 다른 사람에게도 도움이 됩니다.', money: '집단지성을 활용한 투자 판단이 좋은 결과를 가져와요.', love: '리더십과 포용력이 매력 포인트에요.', health: '성대 관리에 주의. 따뜻한 물을 자주 마시세요.', lucky: '행운의 색: 빨간색 / 행운의 숫자: 1, 8' },
+    { summary: '야심찬 계획을 세우기에 최적의 날이에요. 1년 후, 3년 후의 재무 목표를 구체적으로 설정해보세요. 명확한 목표가 있으면 매일의 투자 결정이 쉬워집니다.', money: '장기 목표 수익률을 계산하고 역으로 필요한 투자액을 산출해보세요.', love: '파트너와 함께 미래를 설계하면 더 든든해요.', health: '체력이 자본! 꾸준한 운동 루틴을 만들어보세요.', lucky: '행운의 색: 보라 / 행운의 숫자: 3, 7' },
+    { summary: '주변의 도움으로 예상치 못한 기회가 찾아오는 날이에요. 네트워킹 자리를 적극 활용하세요. 특히 선배 투자자의 경험담에서 귀중한 교훈을 얻을 수 있습니다.', money: '멘토의 조언을 참고하되 최종 결정은 스스로 내리세요.', love: '고마운 사람에게 진심 어린 감사를 전하세요.', health: '하루 만보 걷기가 최고의 보약이에요.', lucky: '행운의 색: 하늘색 / 행운의 숫자: 4, 6' },
+  ],
+  '뱀': [
+    { summary: '직감이 극도로 날카로운 날이에요. 시장의 미세한 변화를 감지할 수 있는 능력이 최고조입니다. 차트를 분석할 때 평소 놓치던 패턴이 보일 수 있어요.', money: '기술적 분석에 기반한 트레이딩이 유리한 날.', love: '상대방의 진심을 꿰뚫어 볼 수 있는 날이에요.', health: '두뇌 활동이 활발해요. 견과류 등 브레인 푸드를 챙기세요.', lucky: '행운의 색: 검정 / 행운의 숫자: 2, 5' },
+    { summary: '정보의 바다에서 핵심을 건져 올리는 능력이 빛나는 날이에요. 공시자료, 재무제표, 부동산 등기부 등 숫자 뒤에 숨겨진 진실을 찾을 수 있습니다.', money: '재무제표 분석에서 저평가된 기업을 발견할 수 있어요.', love: '깊은 대화가 관계를 한 단계 끌어올려줍니다.', health: '과도한 야근은 금물. 적절한 선에서 끊으세요.', lucky: '행운의 색: 진보라 / 행운의 숫자: 7, 9' },
+    { summary: '조용히 준비하면 큰 성과를 거두는 날이에요. 남들에게 알리지 않고 혼자 리서치하는 시간이 가장 생산적일 겁니다. 시끄러운 시장 소음에 흔들리지 마세요.', money: '가치투자 관점에서 저평가 매물을 찾아보세요.', love: '말보다 행동으로 보여주세요. 진심이 통합니다.', health: '실내 공기 환기가 필요한 날이에요.', lucky: '행운의 색: 회색 / 행운의 숫자: 1, 3' },
+    { summary: '학습과 성장에 최적화된 하루에요. 투자 관련 세미나나 웨비나에 참여하면 좋은 인사이트를 얻을 수 있어요. 새로운 투자 기법을 배워두면 미래에 큰 도움이 됩니다.', money: '세금 절약 전략을 공부하면 실질 수익률이 올라가요.', love: '지적 호기심을 공유할 수 있는 사람을 만나보세요.', health: '스트레칭으로 굳은 몸을 풀어주세요.', lucky: '행운의 색: 남색 / 행운의 숫자: 6, 8' },
+  ],
+  '말': [
+    { summary: '에너지가 넘치고 행동력이 최고조인 날! 발품을 팔면 보상이 따라옵니다. 부동산 임장, 기업 탐방, 시장 조사 등 현장에서 느끼는 감각이 좋은 투자로 연결돼요.', money: '직접 발로 뛰는 투자가 최고의 수익을 가져와요.', love: '활기찬 에너지가 주변에 좋은 영향을 미칩니다.', health: '유산소 운동이 스트레스 해소에 딱이에요.', lucky: '행운의 색: 빨간색 / 행운의 숫자: 3, 5' },
+    { summary: '네트워킹의 힘이 빛나는 날이에요. 다양한 사람들과 만나 정보를 교환하면 놀라운 기회를 발견할 수 있어요. 점심 약속이나 저녁 모임에 적극 참여하세요.', money: '인맥에서 얻는 정보가 수익으로 직결되는 날.', love: '새로운 만남에서 특별한 인연을 만날 수 있어요.', health: '과음 주의! 건강한 음료로 건배하세요.', lucky: '행운의 색: 주황 / 행운의 숫자: 7, 9' },
+    { summary: '빠른 의사결정이 요구되는 상황이 올 수 있어요. 당황하지 말고 평소 세워둔 원칙에 따라 판단하세요. 당신의 순발력이 빛을 발할 겁니다.', money: '단기 트레이딩에서 좋은 수익을 올릴 수 있어요.', love: '스피드 있는 진행이 상대방의 호감을 사요.', health: '관절에 무리가 가지 않도록 주의하세요.', lucky: '행운의 색: 초록 / 행운의 숫자: 1, 4' },
+    { summary: '자유로운 발상이 떠오르는 날이에요. 기존의 틀에서 벗어나 새로운 투자 카테고리를 탐색해보세요. 해외 주식, 암호화폐, 대체 투자 등 시야를 넓혀보세요.', money: '글로벌 분산투자의 매력을 느낄 수 있는 날.', love: '자유를 존중하는 관계가 가장 오래가요.', health: '야외 활동이 비타민D 보충에 좋아요.', lucky: '행운의 색: 하늘색 / 행운의 숫자: 2, 8' },
+  ],
+  '양': [
+    { summary: '따뜻한 마음이 좋은 투자를 만드는 날이에요. ESG 투자나 사회적 기업에 관심을 가져보세요. 착한 투자가 착한 수익으로 돌아옵니다. 주변과 나누는 마음이 중요해요.', money: 'ESG ETF나 친환경 관련주에 주목해보세요.', love: '작은 배려가 큰 감동을 만들어줘요.', health: '명상이나 요가가 마음의 안정을 줍니다.', lucky: '행운의 색: 연분홍 / 행운의 숫자: 2, 6' },
+    { summary: '안정적인 포트폴리오가 마음의 평화를 주는 날이에요. 변동성이 큰 종목보다 꾸준히 배당을 주는 우량주가 더 빛납니다. 마음이 편해야 좋은 판단을 할 수 있어요.', money: '고배당주나 채권형 펀드로 안정적인 수익을 추구하세요.', love: '편안한 대화가 가장 큰 힐링이에요.', health: '따뜻한 차 한 잔이 하루를 마무리해줍니다.', lucky: '행운의 색: 아이보리 / 행운의 숫자: 4, 8' },
+    { summary: '부동산 시장에서 눈여겨볼 물건이 있는 날이에요. 전세 갭이 적은 매물이나 역세권 소형 아파트를 중심으로 탐색해보세요. 실거주와 투자를 겸할 수 있는 기회.', money: '전세가율이 높은 지역의 소형 아파트를 체크해보세요.', love: '가정의 평화가 투자 성과의 기반이에요.', health: '정원 가꾸기나 식물 돌보기가 힐링이 됩니다.', lucky: '행운의 색: 연두 / 행운의 숫자: 3, 7' },
+    { summary: '주변 사람들과 함께 성장하는 날이에요. 투자 스터디나 독서 모임에 참여하면 새로운 관점을 얻을 수 있어요. 혼자보다 함께할 때 더 큰 시너지가 납니다.', money: '투자 스터디 그룹에서 좋은 아이디어를 얻을 수 있어요.', love: '공동의 목표가 관계를 더 단단하게 만들어줘요.', health: '사회적 교류가 정신 건강에 가장 좋은 약이에요.', lucky: '행운의 색: 하늘색 / 행운의 숫자: 5, 9' },
+  ],
+  '원숭이': [
+    { summary: '기발한 아이디어가 쏟아지는 날! 남들이 주목하지 않는 곳에서 기회를 찾을 수 있어요. IT, AI, 핀테크 등 혁신적인 분야의 기업을 눈여겨보세요.', money: 'AI/반도체 관련주에서 단기 기회를 포착할 수 있어요.', love: '유머러스한 대화가 관계의 윤활유가 됩니다.', health: '두뇌 운동이 필요해요. 퍼즐이나 독서를 추천.', lucky: '행운의 색: 노란색 / 행운의 숫자: 1, 5' },
+    { summary: '숫자에 유독 강한 날이에요. 재무 분석이 정확하고 계산이 빠릅니다. 스프레드시트를 펼치고 포트폴리오 수익률을 다시 계산해보세요. 숨겨진 비효율을 발견할 수 있어요.', money: '수수료, 세금 등 숨은 비용을 점검하면 실질 수익률이 올라가요.', love: '센스 있는 서프라이즈가 감동을 선사해요.', health: '손목 스트레칭을 자주 해주세요. 키보드 사용이 많은 날.', lucky: '행운의 색: 주황 / 행운의 숫자: 6, 9' },
+    { summary: '멀티태스킹 능력이 빛나는 날이에요. 여러 가지 투자를 동시에 관리하면서도 실수 없이 처리할 수 있어요. 부업이나 사이드 프로젝트를 추진하기에도 좋은 날.', money: '소규모 부업에서 의외의 수입원을 발견할 수 있어요.', love: '재미있는 대화가 관계를 풍성하게 만들어요.', health: '멀티태스킹에도 에너지 관리가 필요해요. 영양보충 챙기세요.', lucky: '행운의 색: 연두 / 행운의 숫자: 3, 7' },
+    { summary: '변화와 적응의 날이에요. 시장 환경이 바뀌어도 유연하게 대응할 수 있는 능력이 당신의 강점입니다. 고정관념을 버리고 새로운 트렌드에 빠르게 올라타세요.', money: '트렌드를 빨리 읽는 것이 수익의 핵심이에요.', love: '변화를 두려워하지 마세요. 새로운 시작이 기다려요.', health: '스트레칭과 가벼운 운동으로 유연성을 키우세요.', lucky: '행운의 색: 민트 / 행운의 숫자: 2, 8' },
+  ],
+  '닭': [
+    { summary: '꼼꼼한 분석력이 빛나는 날이에요. 다른 사람들이 대충 넘기는 공시자료나 재무제표에서 핵심을 짚어낼 수 있어요. 디테일이 차이를 만드는 법, 오늘 그 진가를 확인하세요.', money: '기업 실적 분석에 시간을 투자하면 큰 보답이 있어요.', love: '세심한 배려가 상대방의 마음을 사로잡아요.', health: '규칙적인 생활이 최고의 건강법이에요.', lucky: '행운의 색: 흰색 / 행운의 숫자: 4, 8' },
+    { summary: '아침형 인간의 이점을 최대한 활용하세요. 장 시작 전 30분의 리서치가 하루 수익을 좌우합니다. 일찍 일어나 차분하게 시장을 분석하고 전략을 세워보세요.', money: '프리마켓 동향 체크가 오늘의 투자 성과를 결정해요.', love: '아침 인사가 하루를 밝게 만들어줘요.', health: '아침 공복 운동이 몸의 리듬을 잡아줍니다.', lucky: '행운의 색: 금색 / 행운의 숫자: 1, 6' },
+    { summary: '절약과 저축의 미덕이 빛나는 날이에요. 불필요한 소비를 줄이고 그 돈을 투자로 돌리는 습관이 장기적으로 엄청난 차이를 만듭니다.', money: '가계부 정리를 해보세요. 새는 돈을 막는 것도 수익이에요.', love: '소박하지만 정성 어린 데이트가 최고에요.', health: '식단 관리가 건강의 기본이에요. 단백질 보충 추천.', lucky: '행운의 색: 갈색 / 행운의 숫자: 3, 5' },
+    { summary: '체계적인 계획 수립이 빛나는 날이에요. 월간/분기별/연간 투자 계획을 세워보세요. 구체적인 목표와 실행 계획이 있으면 흔들리지 않는 투자를 할 수 있습니다.', money: '투자 일지를 작성하면 패턴을 발견할 수 있어요.', love: '약속을 잘 지키는 사람이 가장 매력적이에요.', health: '수면 시간을 일정하게 유지하세요.', lucky: '행운의 색: 베이지 / 행운의 숫자: 7, 9' },
+  ],
+  '개': [
+    { summary: '신뢰가 자산이 되는 날이에요. 오랫동안 거래해 온 증권사 PB나 부동산 중개사에게 연락해보세요. 신뢰 관계에서만 나오는 좋은 매물이나 정보를 얻을 수 있어요.', money: '신뢰할 수 있는 전문가의 조언에 귀 기울이세요.', love: '진심을 다하는 사람에게 좋은 일이 찾아와요.', health: '산책을 하면서 복잡한 생각을 정리해보세요.', lucky: '행운의 색: 갈색 / 행운의 숫자: 2, 5' },
+    { summary: '보험, 연금 등 안전망을 점검하기 좋은 날이에요. 투자에만 집중하다 보면 기본적인 리스크 관리를 소홀히 하기 쉬워요. 오늘 한번 꼼꼼히 체크해보세요.', money: '연금저축이나 IRP 등 절세 상품을 점검하세요.', love: '가족의 건강과 안전이 최우선이에요.', health: '정기 건강검진 날짜를 잡아보세요.', lucky: '행운의 색: 파란색 / 행운의 숫자: 3, 8' },
+    { summary: '안정적인 투자가 마음의 평화를 주는 날이에요. 변동성이 큰 종목에서 스트레스 받기보다 국채, 우량 채권형 펀드 등으로 마음을 편하게 가지세요.', money: '예적금 금리를 비교해보세요. 고금리 특판이 있을 수 있어요.', love: '안정감 있는 사람이 가장 매력적이에요.', health: '따뜻한 목욕이 하루의 피로를 풀어줍니다.', lucky: '행운의 색: 초록 / 행운의 숫자: 1, 7' },
+    { summary: '봉사나 기부를 통해 마음의 풍요를 느낄 수 있는 날이에요. 직접적인 금전 수익은 아니지만, 사회에 환원하는 마음이 장기적으로 더 큰 행운을 가져다 줍니다.', money: '기부금 세액공제를 활용하면 절세 효과도 있어요.', love: '함께 봉사 활동을 하면 관계가 더 깊어져요.', health: '남을 돕는 행위가 자신의 건강에도 긍정적이에요.', lucky: '행운의 색: 노란색 / 행운의 숫자: 4, 9' },
+  ],
+  '돼지': [
+    { summary: '풍요와 행운의 기운이 가득한 날이에요! 평소보다 금전적으로 좋은 일이 생길 수 있어요. 보너스, 환급금, 예상치 못한 수입 등 기분 좋은 소식이 찾아올 수 있습니다.', money: '여윳돈이 생기면 즉시 투자에 활용해보세요.', love: '풍요로운 마음이 주변을 환하게 만들어줘요.', health: '맛있는 음식을 적당히 즐기세요. 과식은 금물!', lucky: '행운의 색: 금색 / 행운의 숫자: 5, 8' },
+    { summary: '가족과 함께 재정 계획을 세우기 좋은 날이에요. 자녀 교육비, 노후 자금, 여행 계획 등을 함께 논의하면 서로의 우선순위를 이해하고 더 나은 계획을 세울 수 있어요.', money: '가족 재정 회의를 열어보세요. 같은 방향을 바라보는 것이 중요해요.', love: '솔직한 대화가 가장 깊은 유대감을 만들어요.', health: '가족과 함께 하는 산책이 최고의 운동이에요.', lucky: '행운의 색: 분홍 / 행운의 숫자: 2, 7' },
+    { summary: '맛있는 음식과 함께 좋은 기운을 충전하는 날이에요. 비즈니스 미팅이나 투자 모임을 식사 자리로 잡으면 더 좋은 결과가 나올 수 있어요. 분위기가 성사율을 높여줍니다.', money: '식사 자리에서 나온 정보가 의외로 가치 있을 수 있어요.', love: '함께 맛집을 찾아다니면 즐거움이 배가 돼요.', health: '과식과 과음에만 주의하면 건강한 하루!', lucky: '행운의 색: 주황 / 행운의 숫자: 3, 6' },
+    { summary: '여유로운 마음으로 투자를 바라보는 날이에요. 조급함을 내려놓고 장기적인 안목으로 시장을 관찰하세요. 여유가 있어야 기회가 보이는 법. 인내가 곧 수익입니다.', money: '급하게 사고팔지 마세요. 기다림의 미학을 실천하세요.', love: '느긋한 시간이 관계에 여유를 줍니다.', health: '온천이나 목욕이 몸과 마음을 충전해줘요.', lucky: '행운의 색: 연보라 / 행운의 숫자: 1, 4' },
+  ],
 };
 
 function DailyFortune() {
   const [year, setYear] = useState<number | null>(null);
+  const [saved, setSaved] = useState(false);
   useEffect(() => { const s = localStorage.getItem('kd_birth_year'); if (s) setYear(parseInt(s)); }, []);
   const now = new Date();
   const seed = now.getFullYear() * 366 + (now.getMonth() + 1) * 31 + now.getDate();
   const getZ = (y: number) => ZA[(y - 4) % 12 >= 0 ? (y - 4) % 12 : (y - 4) % 12 + 12];
-  const getFortune = (animal: string) => (ZF[animal] || ZF['쥐'])[seed % (ZF[animal]?.length || 4)];
+  const getFortune = (animal: string): FortuneDetail => {
+    const arr = ZF[animal] || ZF['쥐'];
+    return arr[seed % arr.length];
+  };
+
+  const handleSelect = (y: number) => {
+    setYear(y);
+    localStorage.setItem('kd_birth_year', String(y));
+    const animal = getZ(y);
+    const fortune = getFortune(animal);
+    // DB 저장 (로그인 유저만 저장됨, 비로그인은 서버에서 무시)
+    fetch('/api/fortune', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ birth_year: y, zodiac_animal: animal, fortune_text: fortune.summary }),
+    }).catch(() => {});
+  };
+
+  // 이미 선택 후 오늘 첫 로드 시 자동 DB 저장
+  useEffect(() => {
+    if (year && !saved) {
+      setSaved(true);
+      const animal = getZ(year);
+      const fortune = getFortune(animal);
+      fetch('/api/fortune', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ birth_year: year, zodiac_animal: animal, fortune_text: fortune.summary }),
+      }).catch(() => {});
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [year]);
 
   if (!year) return (
-    <div style={{ background: 'var(--bg-surface)', borderRadius: 'var(--radius-card)', border: '1px solid var(--border)', padding: '12px 14px', marginBottom: 8 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span style={{ fontSize: 11, color: 'var(--text-secondary)', flexShrink: 0 }}>출생연도를 선택하면 오늘의 운세를 확인할 수 있어요</span>
-        <select onChange={e => { const y = parseInt(e.target.value); setYear(y); localStorage.setItem('kd_birth_year', String(y)); }}
-          style={{ flex: 1, padding: '5px 8px', fontSize: 11, background: 'var(--bg-base)', border: '1px solid var(--border)', borderRadius: 6, color: 'var(--text-primary)', cursor: 'pointer' }}>
-          <option value="">연도 선택</option>
-          {Array.from({ length: 60 }, (_, i) => 2006 - i).map(y => <option key={y} value={y}>{y}년 ({ZE[getZ(y)]} {getZ(y)}띠)</option>)}
-        </select>
-      </div>
+    <div style={{ background: 'var(--bg-surface)', borderRadius: 'var(--radius-card)', border: '1px solid var(--border)', padding: '14px 16px', marginBottom: 10 }}>
+      <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8 }}>출생연도를 선택하면 오늘의 띠별 운세를 확인할 수 있어요</div>
+      <select onChange={e => handleSelect(parseInt(e.target.value))}
+        style={{ width: '100%', padding: '8px 10px', fontSize: 13, background: 'var(--bg-base)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text-primary)', cursor: 'pointer' }}>
+        <option value="">출생연도 선택</option>
+        {Array.from({ length: 60 }, (_, i) => 2006 - i).map(y => <option key={y} value={y}>{y}년 ({ZE[getZ(y)]} {getZ(y)}띠)</option>)}
+      </select>
     </div>
   );
 
   const animal = getZ(year);
+  const f = getFortune(animal);
   return (
-    <div style={{ background: 'var(--bg-surface)', borderRadius: 'var(--radius-card)', border: '1px solid var(--border)', padding: '12px 14px', marginBottom: 8 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-        <span style={{ fontSize: 20 }}>{ZE[animal]}</span>
-        <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{animal}띠 ({year}년생)</span>
-        <button onClick={() => { setYear(null); localStorage.removeItem('kd_birth_year'); }} style={{ fontSize: 10, color: 'var(--text-tertiary)', background: 'none', border: 'none', cursor: 'pointer', marginLeft: 'auto' }}>변경</button>
+    <div style={{ background: 'var(--bg-surface)', borderRadius: 'var(--radius-card)', border: '1px solid var(--border)', padding: '14px 16px', marginBottom: 10 }}>
+      {/* 헤더 */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 24 }}>{ZE[animal]}</span>
+          <div>
+            <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)' }}>{animal}띠 · {year}년생</div>
+            <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{now.getMonth() + 1}월 {now.getDate()}일 운세</div>
+          </div>
+        </div>
+        <button onClick={() => { setYear(null); setSaved(false); localStorage.removeItem('kd_birth_year'); }} style={{ fontSize: 10, color: 'var(--text-tertiary)', background: 'none', border: '1px solid var(--border)', borderRadius: 6, padding: '3px 8px', cursor: 'pointer' }}>변경</button>
       </div>
-      <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.7 }}>{getFortune(animal)}</div>
+
+      {/* 종합 운세 */}
+      <div style={{ fontSize: 13, color: 'var(--text-primary)', lineHeight: 1.8, marginBottom: 12, padding: '10px 12px', background: 'rgba(59,123,246,0.03)', borderRadius: 8, border: '1px solid rgba(59,123,246,0.08)' }}>
+        {f.summary}
+      </div>
+
+      {/* 세부 운세 — 4항목 */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+        {[
+          { icon: '💰', label: '금전운', text: f.money },
+          { icon: '💕', label: '애정운', text: f.love },
+          { icon: '💪', label: '건강운', text: f.health },
+          { icon: '🍀', label: '행운', text: f.lucky },
+        ].map(item => (
+          <div key={item.label} style={{ padding: '8px 10px', borderRadius: 8, background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)' }}>
+            <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 3, display: 'flex', alignItems: 'center', gap: 3 }}>
+              <span>{item.icon}</span> {item.label}
+            </div>
+            <div style={{ fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.6 }}>{item.text}</div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
