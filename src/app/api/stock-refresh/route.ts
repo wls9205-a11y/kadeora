@@ -161,7 +161,7 @@ async function fetchNaverQuote(symbol: string): Promise<{ price: number; change_
         const price = parseInt(String(d.closePriceRaw ?? '0'));
         if (price) {
           // 폴링 API에서 시총(marketCapitalization)도 가져옴
-          const marketCap = d.marketCapitalizationRaw ? parseInt(String(d.marketCapitalizationRaw)) : (d.marketCapitalization ? parseInt(String(d.marketCapitalization).replace(/,/g, '')) : undefined);
+          const marketCap = marketCapFromOverview || (d.marketCapitalizationRaw ? parseInt(String(d.marketCapitalizationRaw)) : (d.marketCapitalization ? parseInt(String(d.marketCapitalization).replace(/,/g, '')) : undefined));
           return {
             price,
             change_amt: parseInt(String(d.compareToPreviousClosePriceRaw ?? '0')),
@@ -192,7 +192,7 @@ async function fetchNaverQuote(symbol: string): Promise<{ price: number; change_
       if (price) {
         // 네이버 모바일 API에서 시총 추출 (marketCap 또는 totalMarketValue)
         const rawCap = json?.marketCap ?? json?.totalMarketValue ?? json?.marketCapitalization ?? '';
-        const marketCap = parseInt(String(rawCap).replace(/,/g, ''));
+        const marketCap = marketCapFromOverview || parseInt(String(rawCap).replace(/,/g, ''));
         return {
           price,
           change_amt: parseInt(String(json?.compareToPreviousClosePrice ?? '0').replace(/,/g, '')),

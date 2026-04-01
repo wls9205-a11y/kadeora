@@ -342,6 +342,29 @@ export default async function StockDetailPage({ params }: Props) {
         )}
       </section>
 
+      {/* AI 한줄평 — 서버 렌더링 (탭 로드 전 즉시 표시) */}
+      {aiR.data && (aiR.data as any).comment && (() => {
+        const ai = aiR.data as any;
+        const signalColor = ai.signal === 'bullish' ? 'var(--accent-green)' : ai.signal === 'bearish' ? 'var(--accent-red)' : 'var(--brand)';
+        const signalLabel = ai.signal === 'bullish' ? '📈 긍정' : ai.signal === 'bearish' ? '📉 부정' : '🤖 중립';
+        return (
+          <div style={{ background: 'linear-gradient(135deg, rgba(59,123,246,0.04), rgba(139,92,246,0.04))', border: '1px solid rgba(59,123,246,0.12)', borderRadius: 'var(--radius-md)', padding: '12px 14px', marginBottom: 'var(--sp-md)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>🤖 AI 한줄평</span>
+              <span style={{ fontSize: 10, fontWeight: 600, color: signalColor, background: `${signalColor}15`, padding: '2px 8px', borderRadius: 4 }}>{signalLabel}</span>
+            </div>
+            <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, wordBreak: 'keep-all' }}>
+              {ai.comment.length > 200 ? ai.comment.slice(0, 200) + '...' : ai.comment}
+            </p>
+            {ai.created_at && (
+              <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 6 }}>
+                {new Date(ai.created_at).toLocaleDateString('ko-KR')} 기준
+              </div>
+            )}
+          </div>
+        );
+      })()}
+
       {/* 탭 콘텐츠 */}
       <StockDetailTabs
         symbol={symbol}

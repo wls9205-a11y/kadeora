@@ -1,74 +1,58 @@
-# 카더라 STATUS.md — 세션 67 최종 (2026-04-01 17:30 KST)
+# 카더라 STATUS.md — 세션 68 최종 (2026-04-02 KST)
 
 ## 최신 커밋
-- `c94e04b` — 비정상 주식 등락률 방어 + 브리핑 데이터 수정
-- `863012e` — 피드 카드 컴팩트 + 브레드크럼 정렬 + 프로필 닉네임 + 운세 상단
-- `3903d12` — 오늘의 운세 세밀 업그레이드 + DB 저장 연동
-- `ddad2e2` — 피드 롤백 + 데일리 리포트에 AI브리핑/운세 추가
-- `5c1e59e` — 피드 공유 상단 + 카드 50% 축소 + AI 브리핑 + 운세
-- `e423ee6` — D-day 오류 수정 (D-73335490)
-- `f55c0c3` — UI 간격/배치/정렬/크기 전면 통일
-- `932b2da` — 총세대수 확인중 제거 + 주식 0값 표시
+- `e477947e` — 피드/댓글 프로필 사진 표시, 네이버 시총 integration API 추가
+- `4dad428c` — 데일리 리포트 핵심요약 섹션, 주식 4열 그리드, grid minmax 방어
+- `8a60d0a8` — 세션68 1차: 8개 작업 병렬처리
 
-## 세션 67 전체 성과
+## 세션 68 전체 성과
 
-### 비정상 주식 데이터 방어 ✅
-- 화승엔터프라이즈 +3750%, 비케이씨 +1774% 등 비정상 4건 리셋
-- stock-daily-briefing: ±35% 필터 추가 (한국 상한가 30% 기준)
-- stock-refresh Naver 경로: 클램핑 누락 수정
+### 피드 프로필 사진 미표시 수정 ✅
+- FeedClient/feed상세/CommentSection: avatar_url 존재 시 Image로 프로필 사진 표시
+- 기존: 항상 이니셜 원만 표시 → 수정: avatar_url 있으면 사진
 
-### 오늘의 운세 세밀 버전 + DB 수집 ✅
-- 12띠 × 4세트 = 48개 풀운세 (종합+금전+애정+건강+행운)
-- DB: profiles.birth_year/zodiac_animal + fortune_views 테이블
-- API: /api/fortune — 로그인 유저 자동 저장 (하루 1회)
-- 데일리 리포트 상단 배치 (히어로 바로 아래)
+### 총세대수 vs 공급세대 전수조사 교정 ✅
+- total_households=단지전체, tot_supply_hshld_co=공급세대 라벨 정확 구분
+- apt/[id], SubscriptionTab, OngoingTab, 미분양섹션, FAQ 전수 교정
 
-### 피드 대폭 개선 ✅
-- 공유/카카오톡 버튼: 하단 → 헤더 오른쪽 통합
-- 게시글 카드 높이 ~50% 축소 (메타 1행, 아바타 24px)
-- LiveActivityIndicator: "1시간 내 N개 새 글" 삭제
-- 시계 읽기시간 삭제
+### 관심단지 등록 폼 디자인 개선 ✅
+- minmax(0,1fr) 그리드, 생년월일 풀폭, 시군구 동적 2열, 체크박스 16px, 간격 통일
 
-### 데일리 리포트 AI 브리핑 300자 ✅
-- 히어로 바로 아래 💬 prefix 블루 배경
-- stock_daily_briefing 최신 KR 브리핑 실시간 조회
+### 주식 상세 페이지 디자인 개선 ✅
+- 4열 고정 그리드(시총/섹터/전일대비/거래량), AI 한줄평 서버렌더링 카드 추가
 
-### UI 전면 정리 ✅
-- 청약 카드: 태그 10~11px, KPI 10/12, 납부비율 16px, 타임라인 10px 통일
-- 프로필: 닉네임 잘림 수정 (닉 첫줄+등급/버튼 둘째줄)
-- 브레드크럼: gap 4px, 구분자 10px 정렬
-- D-day 계산: YYYYMM 파싱 수정
+### 데일리 리포트 설명 + 강화 ✅
+- 히어로 아래 리포트 설명, "오늘의 핵심 요약" 섹션, grid minmax 방어
 
-### 어드민 모바일 반응형 ✅
-- repeat(3/4) 그리드 → 모바일 1~2열 자동 전환
-- 테이블 overflow-x: auto
-- 480px 이하: 전부 1열 + word-break
+### 피드 뻘글 확대 ✅
+- DEMO_POSTS 8→15개 (자유/로컬/주식/부동산 다양화), 라운지 중복 없음 확인
 
-## 데일리 리포트 섹션 (14개)
-💬 AI 브리핑 300자 | ✦ 어젯밤 달라진 것 | 🤖 AI 시장 브리핑 | 📈 TOP 10 | 🗂️ 섹터 | 📊 지수환율 | 🌎 글로벌 | 🏗️ 청약 | 🏢 시세 | 🏚️ 미분양 | 🔨 재개발 | 🏠 실거래 | 📰 추천분석 | 🔮 오늘의 운세 | 📋 요약
+### 모바일 정렬/텍스트 깨짐 방어 ✅
+- responsive.css 60줄+ 전역 방어 (min-width:0, table 스크롤, flex-wrap 등)
+
+### 주식 시세 네이버 기준 시총 동기화 ✅
+- fetchNaverQuote 시총 반환 추가 (integration > polling > mobile API 우선순위)
+- fetchViaNaver에서 market_cap DB 업데이트 포함
 
 ## 데이터 현황
 | 항목 | 수치 |
 |------|------|
-| 총세대수 | 2,695/2,695 (100%) |
 | 블로그 | 22,661 |
 | 종목 | 1,775 |
 | 실거래 | 496,987 |
 | 단지백과 | 34,500 |
 | 분양현장 | 5,517 |
-| 시드 유저 | 100 (20대30/30대36/40대24/50대10) |
 | 피드 게시글 | 4,639 |
 | 크론 | 93 |
 
 ## PENDING
-- [ ] Anthropic 크레딧 충전 (최우선 — AI 블로그+피드 크론)
-- [ ] PDF 재파싱 나머지 ~2,340건 (GOD MODE 🔄)
-- [ ] 운세 DB 연동 완성 (DailyFortune에서 /api/fortune POST 연동)
+- [ ] 네이버 시총 API 필드명 실환경 검증 (stock-refresh 수동 1회 실행)
+- [ ] Anthropic 크레딧 충전 (최우선)
+- [ ] PDF 재파싱 나머지 ~2,340건
 - [ ] apt_transactions 면적 필터 500 에러 수정
-- [ ] 토스페이먼츠 API 키 / KIS_APP_KEY / FINNHUB_API_KEY
+- [ ] KIS_APP_KEY / FINNHUB_API_KEY
 - [ ] 통신판매업 신고
 - [ ] Google/Naver 수동 URL 제출
-- [ ] Search Console 오류 사이트맵 수동 삭제
 
 ## 아키텍처 규칙 (12개)
 1. 블로그 삭제 금지 2. stockcoin.net 금지 3. 포인트 RPC만 4. CSP middleware.ts 5. 크론 에러 200 6. OG 폰트 Node.js fs 7. PostWithProfile 보호 8. daily_create_limit 80 9. DB트리거 LIMIT 80 10. Supabase RPC try/catch 11. STATUS.md 필수 12. 디자인 토큰 우선
