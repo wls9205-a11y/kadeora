@@ -562,7 +562,7 @@ export default async function AptUnifiedPage({ params }: Props) {
               { label: '청약접수', date: sub.rcept_bgnde },
               { label: '당첨발표', date: sub.przwner_presnatn_de },
               { label: '계약시작', date: sub.cntrct_cncls_bgnde },
-              { label: '입주예정', date: sub.mvn_prearnge_ym ? sub.mvn_prearnge_ym + '-01' : null },
+              { label: '입주예정', date: sub.mvn_prearnge_ym ? `${sub.mvn_prearnge_ym.slice(0, 4)}-${sub.mvn_prearnge_ym.slice(4, 6)}-01` : null },
             ].filter(m => m.date);
             const next = milestones.find(m => m.date && new Date(m.date) >= now) || milestones[milestones.length - 1];
             if (!next?.date) return null;
