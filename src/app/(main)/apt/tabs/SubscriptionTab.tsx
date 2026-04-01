@@ -230,8 +230,15 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                         <div style={kpiStyle}><div style={kpiLabel}>분양가(최고)</div><div style={kpiVal(pMax > 0 ? 'var(--brand)' : 'var(--text-tertiary)')}>{pMax > 0 ? fmtP(pMax) : '미정'}</div></div>
                         <div style={kpiStyle}><div style={kpiLabel}>평당가</div><div style={kpiVal(ppAvg > 0 ? 'var(--accent-purple)' : 'var(--text-tertiary)')}>{ppAvg > 0 ? fmtP(ppAvg) : '-'}</div></div>
                         <div style={kpiStyle}><div style={kpiLabel}>입주예정</div><div style={kpiVal(mvnLabel ? 'var(--accent-green)' : 'var(--text-tertiary)')}>{mvnLabel || '-'}</div></div>
-                        <div style={kpiStyle}><div style={kpiLabel}>공급세대</div><div style={kpiVal('var(--text-primary)')}>{totS > 0 ? totS.toLocaleString() : '-'}</div></div>
-                        <div style={kpiStyle}><div style={kpiLabel}>총세대</div><div style={kpiVal('var(--text-primary)')}>{totalHH > 0 ? totalHH.toLocaleString() : totS > 0 ? totS.toLocaleString() : '-'}</div>{isRedevType && totalHH > 0 && totalHH !== totS && <div style={{ fontSize: 8, color: 'var(--accent-green)' }}>공급 {totS.toLocaleString()}</div>}</div>
+                        {/* 총세대: total_households가 있고 totS와 다를 때만 따로 표시, 같으면 총세대 1개만 */}
+                        {totalHH > 0 && totalHH !== totS ? (
+                          <>
+                            <div style={kpiStyle}><div style={kpiLabel}>총세대</div><div style={kpiVal('var(--text-primary)')}>{totalHH.toLocaleString()}</div></div>
+                            <div style={kpiStyle}><div style={kpiLabel}>공급세대</div><div style={kpiVal('var(--brand)')}>{totS > 0 ? totS.toLocaleString() : '-'}</div></div>
+                          </>
+                        ) : (
+                          <div style={kpiStyle}><div style={kpiLabel}>세대수</div><div style={kpiVal('var(--text-primary)')}>{totS > 0 ? totS.toLocaleString() : totalHH > 0 ? totalHH.toLocaleString() : '-'}</div></div>
+                        )}
                         <div style={kpiStyle}><div style={kpiLabel}>일반공급</div><div style={kpiVal('var(--accent-blue-light, #60A5FA)')}>{genT > 0 ? genT.toLocaleString() : '-'}</div></div>
                         <div style={kpiStyle}><div style={kpiLabel}>특별공급</div><div style={kpiVal('var(--accent-purple, #A78BFA)')}>{spcT > 0 ? spcT.toLocaleString() : '-'}</div></div>
                       </div>
