@@ -48,18 +48,28 @@ export default async function ProfilePage({ params }: Props) {
 
   return (
     <>
+    <ProfileClient
+      profile={profile as unknown as React.ComponentProps<typeof ProfileClient>['profile']}
+      posts={posts ?? []}
+      isOwner={isOwner}
+      commentCount={commentCount ?? 0}
+      followersCount={followersCount ?? 0}
+      followingCount={followingCount ?? 0}
+      isFollowing={!!(followCheck as { data: unknown }).data}
+    />
+
     {/* 활동 통계 */}
-    <div style={{ maxWidth: 480, margin: '0 auto', padding: '0 16px 12px' }}>
-      <div className="kd-stats-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px 12px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 4 }}>
         {[
           { label: '게시글', value: profile?.posts_count || posts?.length || 0 },
           { label: '댓글', value: commentCount || 0 },
           { label: '좋아요', value: profile?.likes_count || 0 },
           { label: '출석', value: profile?.streak_days || 0 },
         ].map(s => (
-          <div key={s.label} style={{ textAlign: 'center', padding: 10, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 8 }}>
-            <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)' }}>{s.value}</div>
-            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>{s.label}</div>
+          <div key={s.label} style={{ textAlign: 'center', padding: 8, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 6 }}>
+            <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)' }}>{s.value}</div>
+            <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 1 }}>{s.label}</div>
           </div>
         ))}
       </div>
@@ -67,8 +77,8 @@ export default async function ProfilePage({ params }: Props) {
 
     {/* 최근 활동 타임라인 */}
     {((posts && posts.length > 0) || (recentComments && recentComments.length > 0)) && (
-      <div style={{ maxWidth: 480, margin: '0 auto', padding: '0 16px 16px' }}>
-        <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>최근 활동</div>
+      <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px 16px' }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 6 }}>최근 활동</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 0, position: 'relative', paddingLeft: 16 }}>
           <div style={{ position: 'absolute', left: 5, top: 6, bottom: 6, width: 2, background: 'var(--border)', borderRadius: 1 }} />
           {[
@@ -81,13 +91,13 @@ export default async function ProfilePage({ params }: Props) {
               emoji: '💬',
             })),
           ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 5).map((item, i) => (
-            <a key={i} href={item.href} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '6px 0', textDecoration: 'none', color: 'inherit', position: 'relative' }}>
-              <div style={{ width: 12, height: 12, borderRadius: '50%', background: item.type === 'post' ? 'var(--brand)' : 'var(--accent-green)', border: '2px solid var(--bg-base)', flexShrink: 0, marginTop: 3, position: 'relative', zIndex: 1 }} />
+            <a key={i} href={item.href} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, padding: '4px 0', textDecoration: 'none', color: 'inherit', position: 'relative' }}>
+              <div style={{ width: 10, height: 10, borderRadius: '50%', background: item.type === 'post' ? 'var(--brand)' : 'var(--accent-green)', border: '2px solid var(--bg-base)', flexShrink: 0, marginTop: 3, position: 'relative', zIndex: 1 }} />
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 12, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <div style={{ fontSize: 11, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {item.emoji} {item.title}
                 </div>
-                <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 1 }}>
+                <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginTop: 1 }}>
                   {item.type === 'post' ? '글 작성' : '댓글'} · {new Date(item.date).toLocaleDateString('ko-KR')}
                 </div>
               </div>
@@ -96,16 +106,6 @@ export default async function ProfilePage({ params }: Props) {
         </div>
       </div>
     )}
-
-    <ProfileClient
-      profile={profile as unknown as React.ComponentProps<typeof ProfileClient>['profile']}
-      posts={posts ?? []}
-      isOwner={isOwner}
-      commentCount={commentCount ?? 0}
-      followersCount={followersCount ?? 0}
-      followingCount={followingCount ?? 0}
-      isFollowing={!!(followCheck as { data: unknown }).data}
-    />
       {isOwner && (
         <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px 20px' }}>
           <FeedbackButton />

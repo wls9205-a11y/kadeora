@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { SITE_URL } from '@/lib/constants';
 import GuideInstallButton from '@/components/GuideInstallButton';
 import Link from 'next/link';
+import ShareButtons from '@/components/ShareButtons';
 
 export const revalidate = 3600;
 
@@ -71,6 +72,7 @@ export default function GuidePage() {
       <div style={{ marginBottom: 'var(--sp-xl)' }}>
         <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>📖 카더라 가이드</h1>
         <p style={{ margin: '6px 0 0', fontSize: 'var(--fs-base)', color: 'var(--text-secondary)' }}>카더라를 100% 활용하는 방법</p>
+        <div style={{ marginTop: 8 }}><ShareButtons title="카더라 가이드 — 100% 활용법" postId="guide" /></div>
       </div>
 
       {/* 빠른 시작 3단계 */}

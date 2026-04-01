@@ -3,6 +3,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import PullToRefresh from '@/components/PullToRefresh';
+import SectionShareButton from '@/components/SectionShareButton';
 import type { PostWithProfile } from '@/types/database';
 import { timeAgo } from '@/lib/format';
 
@@ -233,7 +234,10 @@ export default function SearchClient() {
   return (
     <PullToRefresh>
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
-      <h1 style={{ margin: '0 0 20px', fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>🔍 검색</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '0 0 20px' }}>
+        <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>🔍 검색</h1>
+        <SectionShareButton section="search" label="카더라 통합 검색 — 주식·부동산·커뮤니티" pagePath="/search" />
+      </div>
 
       {/* Search input */}
       <div style={{ position: 'relative', marginBottom: 'var(--sp-lg)' }}>

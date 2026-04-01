@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { SITE_URL as SITE } from '@/lib/constants';
 import { PRO_PRICING, PRO_FEATURES } from '@/lib/plan-limits';
+import ShareButtons from '@/components/ShareButtons';
 
 export const metadata: Metadata = {
   title: '카더라 상점 — 프로 멤버십 · 확성기 · 아이템',
@@ -89,6 +90,7 @@ export default function ShopPage() {
             <p style={{ fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.6, margin: '0 0 20px' }}>
               투자에 쓰는 시간을 절반으로<br/>주식 + 부동산 올인원 프리미엄
             </p>
+            <div style={{ marginBottom: 16 }}><ShareButtons title="카더라 프로 멤버십 — 주식+부동산 올인원" postId="shop-pro" /></div>
 
             {/* 가격 카드 2개 */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>

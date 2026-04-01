@@ -99,17 +99,24 @@ export default function ProfileGradeCard({ profileId, isOwner, gradeNum, gradeCo
         </div>
       </div>
 
-      {/* Stats */}
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap', gap: 0, marginTop: 'var(--sp-lg)', background: 'var(--bg-base)', borderRadius: 'var(--radius-card)', border: '1px solid var(--border)', padding: '12px 0' }}>
-        {stats.map((stat, i) => (
-          <div key={stat.label} style={{ display: 'contents' }}>
-            {i > 0 && <div style={{ height: 24, width: 1, background: 'var(--border)' }} />}
-            <div style={{ minWidth: 60, textAlign: 'center', padding: '0 var(--sp-lg)' }}>
+      {/* Stats — 2행 그리드 */}
+      <div style={{ marginTop: 'var(--sp-lg)', background: 'var(--bg-base)', borderRadius: 'var(--radius-card)', border: '1px solid var(--border)', padding: '10px 0', overflow: 'hidden' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 0 }}>
+          {stats.slice(0, 3).map((stat, i) => (
+            <div key={stat.label} style={{ textAlign: 'center', padding: '4px 8px', borderRight: i < 2 ? '1px solid var(--border)' : undefined }}>
               <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)' }}>{(stat.value ?? 0).toLocaleString()}</div>
-              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>{stat.label}</div>
+              <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{stat.label}</div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
+        <div style={{ borderTop: '1px solid var(--border)', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 0 }}>
+          {stats.slice(3).map((stat, i) => (
+            <div key={stat.label} style={{ textAlign: 'center', padding: '6px 8px', borderRight: i === 0 ? '1px solid var(--border)' : undefined }}>
+              <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)' }}>{(stat.value ?? 0).toLocaleString()}</div>
+              <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{stat.label}</div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* 출석 체크 (본인만) */}
