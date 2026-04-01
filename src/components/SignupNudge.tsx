@@ -200,7 +200,7 @@ function ExplorePopup({ pageCount, onClose }: { pageCount: number; onClose: () =
 
           {/* 추가 기능 */}
           <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 8 }}>가입하면 이런 것도 할 수 있어요</div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginBottom: 18 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 6, marginBottom: 18 }}>
             {[
               { icon: '🔔', label: '주가 알림 설정' },
               { icon: '💬', label: '커뮤니티 글쓰기' },

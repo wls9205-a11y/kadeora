@@ -93,7 +93,7 @@ export default function ShopPage() {
             <div style={{ marginBottom: 16 }}><ShareButtons title="카더라 프로 멤버십 — 주식+부동산 올인원" postId="shop-pro" /></div>
 
             {/* 가격 카드 2개 */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 10, marginBottom: 16 }}>
               {/* 월간 */}
               <div style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius-md)', padding: '14px 12px' }}>
                 <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 6 }}>월간</div>
@@ -117,7 +117,7 @@ export default function ShopPage() {
 
         {/* 프로 기능 그리드 */}
         <h2 style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 10 }}>프로가 되면</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 20 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 8, marginBottom: 20 }}>
           {PRO_FEATURES.map(f => (
             <div key={f.title} style={{
               padding: '12px 10px', background: f.highlight ? 'rgba(59,123,246,0.04)' : 'var(--bg-surface)',

@@ -31,7 +31,7 @@ export default function ComplexScale({
       </div>
 
       {/* 총세대수 vs 공급세대수 비교 */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 8, marginBottom: 12 }}>
         {/* 총세대수 */}
         <div style={{
           background: 'rgba(59,123,246,0.06)',

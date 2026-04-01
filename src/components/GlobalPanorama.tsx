@@ -71,7 +71,7 @@ export default function GlobalPanorama({ stocks, exchangeRate, briefingKR, brief
       </div>
 
       {/* 공포탐욕 + VIX */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-sm)', marginBottom: 10 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 'var(--sp-sm)', marginBottom: 10 }}>
         {/* 공포탐욕 */}
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '10px 12px' }}>
           <div style={{ fontSize: 9, color: 'var(--text-tertiary)', fontFamily: 'monospace', marginBottom: 6, display: 'flex', justifyContent: 'space-between' }}>

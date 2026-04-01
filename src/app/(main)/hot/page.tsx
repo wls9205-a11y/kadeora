@@ -153,7 +153,7 @@ export default async function HotPage() {
       })()}
 
       {/* ── 커뮤니티 TOP 5 + 블로그 HOT 5 — 2단 그리드 ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 }} className="mc-g2">
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 10, marginBottom: 14 }} className="mc-g2">
 
         {/* 커뮤니티 TOP 5 */}
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)' }}>

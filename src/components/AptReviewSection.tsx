@@ -141,7 +141,7 @@ export default function AptReviewSection({ aptName, region }: { aptName: string;
             <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginBottom: 'var(--sp-xs)' }}>평점 *</div>
             <StarRating rating={form.rating} size={20} interactive onChange={r => setForm(p => ({ ...p, rating: r }))} />
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginBottom: 6 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 6, marginBottom: 6 }}>
             <input placeholder="👍 장점" value={form.pros}
               onChange={e => setForm(p => ({ ...p, pros: e.target.value }))}
               style={{ padding: '6px 8px', borderRadius: 'var(--radius-xs)', border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-xs)' }} />

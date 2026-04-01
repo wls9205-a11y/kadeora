@@ -305,7 +305,7 @@ export default async function ComplexDetailPage({ params }: Props) {
 
       {/* ═══ 핵심 시세 요약 — 히어로 카드 ═══ */}
       <div style={{
-        display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 'var(--sp-lg)',
+        display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 10, marginBottom: 'var(--sp-lg)',
       }}>
         {/* 매매 메인 카드 */}
         <div style={{

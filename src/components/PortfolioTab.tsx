@@ -170,7 +170,7 @@ export default function PortfolioTab() {
           background: 'var(--bg-surface)', border: '1px solid var(--border)',
           borderRadius: 'var(--radius-card)', padding: 14, marginBottom: 'var(--sp-md)',
         }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-sm)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-sm)' }}>
             <input placeholder="종목코드 (예: 005930)" value={form.symbol}
               onChange={e => setForm(p => ({ ...p, symbol: e.target.value.toUpperCase() }))}
               className="kd-input" style={{ fontSize: 'var(--fs-sm)' }} />
