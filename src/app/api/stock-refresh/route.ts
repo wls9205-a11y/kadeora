@@ -118,6 +118,30 @@ async function fetchViaKis(supabase: SupabaseClient): Promise<StockResult | null
 
 // Naver Finance API — 국내 주식용 (가장 안정적)
 async function fetchNaverQuote(symbol: string): Promise<{ price: number; change_amt: number; change_pct: number; volume: number; market_cap?: number } | null> {
+  let marketCapFromOverview: number | undefined;
+
+  // 0순위: Naver 모바일 overview API — 시총이 가장 정확하게 오는 엔드포인트
+  try {
+    const ctrlOv = new AbortController();
+    const tOv = setTimeout(() => ctrlOv.abort(), 4000);
+    const ovRes = await fetch(`https://m.stock.naver.com/api/stock/${symbol}/integration`, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X)',
+        'Referer': 'https://m.stock.naver.com/',
+      },
+      signal: ctrlOv.signal,
+    });
+    clearTimeout(tOv);
+    if (ovRes.ok) {
+      const ovJson = await ovRes.json();
+      // integration API의 totalInfos 또는 dealTrendInfos에서 시총 추출
+      const total = ovJson?.totalInfos ?? ovJson?.stockEndUrl ?? {};
+      const rawMc = total?.marketCap ?? total?.marketSum ?? ovJson?.marketCap ?? '';
+      const mc = parseInt(String(rawMc).replace(/[,원\s]/g, ''));
+      if (mc > 0) marketCapFromOverview = mc;
+    }
+  } catch { /* fallthrough */ }
+
   try {
     // 1순위: Naver 폴링 API
     const ctrl1 = new AbortController();

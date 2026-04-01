@@ -319,14 +319,18 @@ export default async function FeedDetailPage({ params }: Props) {
 
         {/* Author row */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 'var(--sp-2xl)' }}>
-          <div style={{
-            width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
-            background: getAvatarColor(post.profiles?.nickname ?? '익명'),
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-inverse)',
-          }}>
-            {(post.profiles?.nickname ?? '익')[0].toUpperCase()}
-          </div>
+          {post.profiles?.avatar_url ? (
+            <Image src={post.profiles.avatar_url} alt={post.profiles?.nickname ?? '익명'} width={40} height={40} style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} unoptimized />
+          ) : (
+            <div style={{
+              width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
+              background: getAvatarColor(post.profiles?.nickname ?? '익명'),
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-inverse)',
+            }}>
+              {(post.profiles?.nickname ?? '익')[0].toUpperCase()}
+            </div>
+          )}
           <div style={{ flex: 1, minWidth: 0 }}>
             <span style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>
               {post.profiles?.nickname ?? '익명'}
