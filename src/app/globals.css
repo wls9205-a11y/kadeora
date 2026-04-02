@@ -250,25 +250,40 @@ html.font-large {
 }
 
 /* font-large: 인라인 스타일 강제 오버라이드 */
+html.font-large [style*="font-size: 7px"],
+html.font-large [style*="fontSize:7"] { font-size: 10px !important; }
+
+html.font-large [style*="font-size: 8px"],
+html.font-large [style*="font-size:8px"],
+html.font-large [style*="fontSize:8"] { font-size: 11px !important; }
+
+html.font-large [style*="font-size: 9px"],
+html.font-large [style*="font-size:9px"],
+html.font-large [style*="fontSize:9"] { font-size: 12px !important; }
+
 html.font-large [style*="font-size: 10px"],
 html.font-large [style*="font-size:10px"],
-html.font-large [style*="fontSize:10"] { font-size: 15px !important; }
+html.font-large [style*="fontSize:10"] { font-size: 13px !important; }
 
 html.font-large [style*="font-size: 11px"],
 html.font-large [style*="font-size:11px"],
-html.font-large [style*="fontSize:11"] { font-size: 16px !important; }
+html.font-large [style*="fontSize:11"] { font-size: 14px !important; }
 
 html.font-large [style*="font-size: 12px"],
 html.font-large [style*="font-size:12px"],
-html.font-large [style*="fontSize:12"] { font-size: 17px !important; }
+html.font-large [style*="fontSize:12"] { font-size: 15px !important; }
 
 html.font-large [style*="font-size: 13px"],
 html.font-large [style*="font-size:13px"],
-html.font-large [style*="fontSize:13"] { font-size: 18px !important; }
+html.font-large [style*="fontSize:13"] { font-size: 16px !important; }
 
 html.font-large [style*="font-size: 14px"],
 html.font-large [style*="font-size:14px"],
-html.font-large [style*="fontSize:14"] { font-size: 20px !important; }
+html.font-large [style*="fontSize:14"] { font-size: 17px !important; }
+
+html.font-large [style*="font-size: 16px"],
+html.font-large [style*="font-size:16px"],
+html.font-large [style*="fontSize:16"] { font-size: 19px !important; }
 
 /* font-small: 인라인 스타일 강제 오버라이드 */
 html.font-small [style*="font-size: 14px"],
@@ -283,8 +298,32 @@ html.font-small [style*="font-size: 12px"],
 html.font-small [style*="font-size:12px"],
 html.font-small [style*="fontSize:12"] { font-size: 10px !important; }
 
+html.font-small [style*="font-size: 11px"],
+html.font-small [style*="font-size:11px"],
+html.font-small [style*="fontSize:11"] { font-size: 10px !important; }
+
+html.font-small [style*="font-size: 10px"],
+html.font-small [style*="font-size:10px"],
+html.font-small [style*="fontSize:10"] { font-size: 9px !important; }
+
+html.font-small [style*="font-size: 16px"],
+html.font-small [style*="font-size:16px"],
+html.font-small [style*="fontSize:16"] { font-size: 14px !important; }
+
 /* font-large 레이아웃 보정 */
-html.font-large input, html.font-large textarea { font-size: 20px !important; }
+html.font-large input, html.font-large textarea, html.font-large select { font-size: 18px !important; }
+html.font-small input, html.font-small textarea, html.font-small select { font-size: 14px !important; }
+
+/* font-large: 버튼 패딩 확대 */
+html.font-large button { min-height: var(--touch-min); }
+html.font-large .kd-tab-btn, html.font-large .kd-sort-btn { padding: 6px 12px !important; }
+
+/* font-large: 그리드 카드 오버플로 방어 */
+html.font-large [style*="gridTemplateColumns"] { gap: 2px !important; }
+html.font-large [style*="gridTemplateColumns"] > * { overflow: hidden; text-overflow: ellipsis; }
+
+/* font-small: 컴팩트 패딩 */
+html.font-small button { min-height: 32px; }
 
 /* ========================================
    글씨 크기별 레이아웃 간격 CSS 변수
@@ -329,19 +368,27 @@ html.font-large {
 /* 모바일 + font-large: 간격/글씨 조정 (화면이 좁으니까) */
 @media (max-width: 640px) {
   html.font-large {
-    --fs-xs: 14px;
-    --fs-sm: 16px;
-    --fs-base: 18px;
-    --fs-md: 20px;
-    --fs-lg: 22px;
-    --fs-xl: 26px;
-    --fs-2xl: 32px;
+    --fs-xs: 13px;
+    --fs-sm: 15px;
+    --fs-base: 17px;
+    --fs-md: 18px;
+    --fs-lg: 20px;
+    --fs-xl: 24px;
+    --fs-2xl: 30px;
     --sp-md: 14px;
     --sp-lg: 18px;
     --sp-xl: 22px;
     --sp-2xl: 28px;
     --card-p: 16px;
   }
+  /* 모바일 font-large: 그리드 카드 텍스트 방어 */
+  html.font-large [style*="gridTemplateColumns"] > * {
+    min-width: 0 !important;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+  /* 모바일 font-large: 탭/뱃지 줄바꿈 */
+  html.font-large [style*="flexWrap"] { gap: 4px !important; }
   html.font-small {
     --fs-xs: 10px;
     --fs-sm: 12px;
