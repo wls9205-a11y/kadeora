@@ -14,6 +14,18 @@ export default function GodModeSection() {
   const [verifyItems, setVerifyItems] = useState<any[]>([]);
   const [verifyCount, setVerifyCount] = useState(0);
   const [verifyLoading, setVerifyLoading] = useState(false);
+  const [auditData, setAuditData] = useState<any>(null);
+  const [auditLoading, setAuditLoading] = useState(false);
+
+  const runAudit = async () => {
+    setAuditLoading(true);
+    try {
+      const res = await fetch('/api/admin/audit');
+      const data = await res.json();
+      setAuditData(data);
+    } catch (e: any) { setSpecialLog(`❌ 전수조사 실패 — ${errMsg(e)}`); }
+    setAuditLoading(false);
+  };
 
   const loadVerifyItems = async () => {
     setVerifyLoading(true);
@@ -162,6 +174,134 @@ export default function GodModeSection() {
           />
         </>
       )}
+
+      {/* ━━━ 전수조사 ━━━ */}
+      <div style={{ marginTop: 32, borderTop: `1px solid ${C.border}`, paddingTop: 24 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-lg)' }}>
+          <div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: C.text }}>🔍 전수조사</div>
+            <div style={{ fontSize: 12, color: C.textDim }}>주식 시세 + 부동산 세부정보 데이터 품질 검사</div>
+          </div>
+          <button onClick={runAudit} disabled={auditLoading}
+            style={{ padding: '10px 20px', borderRadius: 'var(--radius-md)', border: `1px solid ${C.brand}40`, background: C.card, color: C.brand, fontWeight: 700, fontSize: 14, cursor: auditLoading ? 'wait' : 'pointer' }}>
+            {auditLoading ? '검사 중...' : '🔍 전수조사 실행'}
+          </button>
+        </div>
+
+        {auditData && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {/* 주식 요약 */}
+            {auditData.stock && (
+              <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 16 }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: C.text, marginBottom: 10 }}>📈 주식 전수조사</div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 8, marginBottom: 12 }}>
+                  <div style={{ textAlign: 'center', padding: 8, background: `${C.green}10`, borderRadius: 6 }}>
+                    <div style={{ fontSize: 18, fontWeight: 800, color: C.green }}>{auditData.stock.total}</div>
+                    <div style={{ fontSize: 10, color: C.textDim }}>활성 종목</div>
+                  </div>
+                  <div style={{ textAlign: 'center', padding: 8, background: `${C.red}10`, borderRadius: 6 }}>
+                    <div style={{ fontSize: 18, fontWeight: 800, color: C.red }}>{auditData.stock.issues_count}</div>
+                    <div style={{ fontSize: 10, color: C.textDim }}>이상 종목</div>
+                  </div>
+                  <div style={{ textAlign: 'center', padding: 8, background: `${C.yellow}10`, borderRadius: 6 }}>
+                    <div style={{ fontSize: 18, fontWeight: 800, color: C.yellow }}>{auditData.stock.price_zero}</div>
+                    <div style={{ fontSize: 10, color: C.textDim }}>가격 0원</div>
+                  </div>
+                  <div style={{ textAlign: 'center', padding: 8, background: `${C.purple}10`, borderRadius: 6 }}>
+                    <div style={{ fontSize: 18, fontWeight: 800, color: C.purple }}>{auditData.stock.stale_3days}</div>
+                    <div style={{ fontSize: 10, color: C.textDim }}>3일+ 미갱신</div>
+                  </div>
+                </div>
+                {/* 시총 TOP 20 */}
+                {auditData.stock.top20 && (
+                  <div style={{ marginBottom: 12 }}>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: C.textSec, marginBottom: 6 }}>시총 TOP 20</div>
+                    <div style={{ maxHeight: 300, overflowY: 'auto', fontSize: 11 }}>
+                      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <thead><tr style={{ borderBottom: `1px solid ${C.border}` }}>
+                          <th style={{ padding: '4px 6px', textAlign: 'left', color: C.textDim }}>#</th>
+                          <th style={{ padding: '4px 6px', textAlign: 'left', color: C.textDim }}>종목</th>
+                          <th style={{ padding: '4px 6px', textAlign: 'right', color: C.textDim }}>현재가</th>
+                          <th style={{ padding: '4px 6px', textAlign: 'right', color: C.textDim }}>시총</th>
+                          <th style={{ padding: '4px 6px', textAlign: 'right', color: C.textDim }}>등락</th>
+                          <th style={{ padding: '4px 6px', textAlign: 'right', color: C.textDim }}>갱신</th>
+                        </tr></thead>
+                        <tbody>{auditData.stock.top20.map((s: any) => (
+                          <tr key={s.symbol} style={{ borderBottom: `1px solid ${C.border}22` }}>
+                            <td style={{ padding: '4px 6px', color: C.textDim }}>{s.rank}</td>
+                            <td style={{ padding: '4px 6px', fontWeight: 600, color: C.text }}>{s.name}<span style={{ color: C.textDim, marginLeft: 4, fontSize: 9 }}>{s.symbol}</span></td>
+                            <td style={{ padding: '4px 6px', textAlign: 'right', color: C.text }}>{s.price}</td>
+                            <td style={{ padding: '4px 6px', textAlign: 'right', color: C.brand, fontWeight: 600 }}>{s.market_cap_display}</td>
+                            <td style={{ padding: '4px 6px', textAlign: 'right', color: s.change_pct > 0 ? C.red : s.change_pct < 0 ? C.cyan : C.textDim, fontWeight: 600 }}>{s.change_pct > 0 ? '+' : ''}{s.change_pct?.toFixed(2)}%</td>
+                            <td style={{ padding: '4px 6px', textAlign: 'right', color: C.textDim, fontSize: 9 }}>{s.updated?.slice(5)}</td>
+                          </tr>
+                        ))}</tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+                {/* 이상 종목 목록 */}
+                {auditData.stock.issues?.length > 0 && (
+                  <div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: C.red, marginBottom: 6 }}>⚠️ 이상 종목 ({auditData.stock.issues_count}건)</div>
+                    <div style={{ maxHeight: 200, overflowY: 'auto', fontSize: 11 }}>
+                      {auditData.stock.issues.map((s: any) => (
+                        <div key={s.symbol} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: `1px solid ${C.border}22` }}>
+                          <span style={{ color: C.text, fontWeight: 600 }}>{s.name} ({s.symbol})</span>
+                          <span style={{ color: C.red, fontSize: 10 }}>{s.issues.join(' · ')}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* 부동산 요약 */}
+            {auditData.apt && (
+              <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 16 }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: C.text, marginBottom: 10 }}>🏢 부동산 전수조사</div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 8, marginBottom: 12 }}>
+                  <div style={{ textAlign: 'center', padding: 8, background: `${C.green}10`, borderRadius: 6 }}>
+                    <div style={{ fontSize: 18, fontWeight: 800, color: C.green }}>{auditData.apt.total_subscriptions}</div>
+                    <div style={{ fontSize: 10, color: C.textDim }}>분양현장</div>
+                  </div>
+                  <div style={{ textAlign: 'center', padding: 8, background: `${C.red}10`, borderRadius: 6 }}>
+                    <div style={{ fontSize: 18, fontWeight: 800, color: C.red }}>{auditData.apt.issues_count}</div>
+                    <div style={{ fontSize: 10, color: C.textDim }}>이상 현장</div>
+                  </div>
+                  <div style={{ textAlign: 'center', padding: 8, background: `${C.yellow}10`, borderRadius: 6 }}>
+                    <div style={{ fontSize: 18, fontWeight: 800, color: C.yellow }}>{auditData.apt.total_households_null}</div>
+                    <div style={{ fontSize: 10, color: C.textDim }}>총세대 미입력</div>
+                  </div>
+                  <div style={{ textAlign: 'center', padding: 8, background: `${C.purple}10`, borderRadius: 6 }}>
+                    <div style={{ fontSize: 18, fontWeight: 800, color: C.purple }}>{auditData.apt.supply_zero}</div>
+                    <div style={{ fontSize: 10, color: C.textDim }}>공급세대 0</div>
+                  </div>
+                </div>
+                {/* 이상 현장 목록 */}
+                {auditData.apt.issues?.length > 0 && (
+                  <div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: C.red, marginBottom: 6 }}>⚠️ 데이터 이상 현장 ({auditData.apt.issues_count}건)</div>
+                    <div style={{ maxHeight: 300, overflowY: 'auto', fontSize: 11 }}>
+                      {auditData.apt.issues.map((a: any) => (
+                        <div key={a.id} style={{ padding: '6px 4px', borderBottom: `1px solid ${C.border}22` }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
+                            <span style={{ fontWeight: 600, color: C.text }}>{a.name}</span>
+                            <span style={{ color: C.textDim, fontSize: 10 }}>{a.region} · {a.project_type || '일반'}</span>
+                          </div>
+                          <div style={{ fontSize: 10, color: C.textDim }}>공급{a.supply} · 총세대{a.total_hh || '-'} · 일반{a.gen} · 특별{a.spe}</div>
+                          <div style={{ fontSize: 10, color: C.red, marginTop: 2 }}>{a.issues.join(' · ')}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* ━━━ 특수 작업 ━━━ */}
       <div style={{ marginTop: 32, borderTop: `1px solid ${C.border}`, paddingTop: 24 }}>
