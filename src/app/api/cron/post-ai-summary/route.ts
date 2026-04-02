@@ -6,9 +6,8 @@ import { withCronLogging } from '@/lib/cron-logger';
 /**
  * 인기 게시글 AI 댓글 요약 크론
  * - 댓글 10개 이상 + 아직 요약 없는 게시글 대상
- * - 하루 1회 실행, 최대 5건 처리
+ * - 하루 1회 실행, 최대 5건
  * - Haiku 4.5로 비용 최소화 (~$0.02/일)
- * - posts.ai_summary 컬럼에 저장
  */
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get('authorization');
@@ -21,25 +20,26 @@ export async function GET(req: NextRequest) {
       return { processed: 0, created: 0, failed: 0, metadata: { reason: 'no_api_key' } };
     }
 
-    const supabase = getSupabaseAdmin();
+    const sb = getSupabaseAdmin();
 
-    // 댓글 10개 이상 + ai_summary 없는 게시글 (ai_summary는 DB에만 존재)
-    const { data: posts } = await (supabase.from('posts')
+    // 댓글 10개 이상인 게시글 조회 후 JS에서 ai_summary null 필터
+    const { data: allPosts } = await sb.from('posts')
       .select('id, title, content, comments_count')
-      .is('ai_summary', null)
       .gte('comments_count', 10)
       .order('comments_count', { ascending: false })
-      .limit(5) as any);
+      .limit(20);
 
-    if (!posts?.length) {
+    // ai_summary가 없는 것만 필터 (타입 우회)
+    const posts = (allPosts || []).filter((p: any) => !(p as any).ai_summary).slice(0, 5);
+
+    if (!posts.length) {
       return { processed: 0, created: 0, failed: 0, metadata: { reason: 'no_targets' } };
     }
 
     let created = 0;
     for (const post of posts) {
       try {
-        // 댓글 조회
-        const { data: comments } = await supabase.from('comments')
+        const { data: comments } = await sb.from('comments')
           .select('content')
           .eq('post_id', post.id)
           .order('likes_count', { ascending: false })
@@ -85,9 +85,8 @@ JSON만: {"summary":"3줄 요약 (줄바꿈 \\n으로 구분)","consensus":"agre
         const match = (data.content?.[0]?.text || '').match(/\{[\s\S]*\}/);
         if (match) {
           const parsed = JSON.parse(match[0]);
-          await (supabase.from('posts').update({
-            ai_summary: parsed.summary || '',
-          } as any).eq('id', post.id) as any);
+          // 타입 없는 컬럼 업데이트
+          await (sb as any).from('posts').update({ ai_summary: parsed.summary || '' }).eq('id', post.id);
           created++;
         }
       } catch { continue; }
