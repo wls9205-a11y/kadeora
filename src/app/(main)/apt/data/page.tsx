@@ -106,6 +106,23 @@ export default async function AptDataPage() {
       {/* 다운로드 카테고리 */}
       <h2 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 14 }}>📥 데이터 카테고리</h2>
 
+      {/* 특별 자료: 부산 분양가 */}
+      <div style={{ marginBottom: 16, padding: 18, borderRadius: 'var(--radius-lg)', background: 'linear-gradient(135deg, var(--accent-orange-bg), var(--accent-yellow-bg))', border: '1px solid var(--accent-orange)', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: -20, right: -10, fontSize: 60, opacity: 0.15 }}>🏗️</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+          <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 4, background: 'var(--accent-orange)', color: '#fff' }}>NEW</span>
+          <span style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)' }}>부산 분양가 현황 (2024~2025)</span>
+        </div>
+        <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: 12 }}>
+          부산 39개 분양단지의 분양가·세대수·규모·입주예정일 비교 데이터
+        </div>
+        <a href="/data/busan-apt-pricing-2024-2025.csv" download style={{
+          display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 18px',
+          borderRadius: 'var(--radius-pill)', background: 'var(--accent-orange)', color: '#fff',
+          fontWeight: 700, fontSize: 13, textDecoration: 'none',
+        }}>📥 CSV 다운로드 (39단지)</a>
+      </div>
+
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 12, marginBottom: 32 }}>
         {[
           { title: '청약 일정 및 분양가', desc: '접수중·예정 청약 현장의 분양가·세대수·일정 데이터', href: '/api/data/apt-subscription', icon: '🏗️', format: 'CSV' },
