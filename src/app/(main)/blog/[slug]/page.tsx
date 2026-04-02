@@ -488,53 +488,27 @@ export default async function BlogDetailPage({ params }: Props) {
           );
         })()}
 
-        {/* 히어로 — 카테고리 + 제목 + 저자 통합 */}
-        <div style={{ borderRadius: 'var(--radius-lg)', padding: '22px 20px 18px', marginBottom: 14, background: `linear-gradient(160deg, var(--bg-surface) 0%, ${catColor}06 50%, var(--bg-surface) 100%)`, border: `1px solid ${catColor}15`, position: 'relative', overflow: 'hidden' }}>
-          {/* 데코 원형 */}
-          <div style={{ position: 'absolute', top: -50, right: -40, width: 160, height: 160, borderRadius: '50%', background: `${catColor}04`, pointerEvents: 'none' }} />
-          <div style={{ position: 'relative' }}>
-            {/* 카테고리 + 시리즈 */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10, flexWrap: 'wrap' }}>
-              <span style={{ fontSize: 10, fontWeight: 800, padding: '3px 10px', borderRadius: 'var(--radius-xs)', background: `${catColor}18`, color: catColor, letterSpacing: '0.3px' }}>
-                {({ stock: '📈', apt: '🏠', unsold: '🏚️', finance: '💰', general: '📝' } as Record<string, string>)[post.category] || '📝'} {({ stock: '주식 분석', apt: '청약 분석', unsold: '미분양 분석', finance: '재테크', general: '생활 정보' } as Record<string, string>)[post.category] || post.category}
-              </span>
-              {(post.view_count ?? 0) >= 100 && <span style={{ fontSize: 9, fontWeight: 600, padding: '2px 6px', borderRadius: 4, background: 'rgba(248,113,113,0.12)', color: 'var(--accent-red)' }}>HOT</span>}
-            </div>
-
-            {/* 제목 */}
-            <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 900, color: 'var(--text-primary)', lineHeight: 1.4, margin: '0 0 14px', wordBreak: 'keep-all', letterSpacing: '-0.5px' }}>{post.title}</h1>
-
-            {/* 저자 바 — 히어로 안 */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 'var(--sp-md) var(--card-p)', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)' }}>
-              <div style={{ width: 32, height: 32, borderRadius: 'var(--radius-md)', background: `linear-gradient(135deg, ${catColor}25, var(--brand, #3B7BF6)15)`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <span style={{ fontSize: 13, fontWeight: 900, color: catColor }}>K</span>
-              </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>{post.author_name || '카더라 데이터팀'}</span>
-                  <span style={{ fontSize: 9, padding: '1px 5px', borderRadius: 4, background: `${catColor}12`, color: catColor, fontWeight: 700 }}>전문가</span>
-                </div>
-                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', marginTop: 2 }}>
-                  <time dateTime={post.published_at || post.created_at || new Date().toISOString()}>{new Date(post.published_at || post.created_at || Date.now()).toLocaleDateString('ko-KR')}</time>
-                  <span>·</span>
-                  <span>👀 {post.view_count ?? 0}</span>
-                  <span>·</span>
-                  <span>📖 {readingTimeMin}분</span>
-                  {post.rewritten_at && (
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, padding: '1px 6px', borderRadius: 4, background: 'var(--accent-green-bg, rgba(52,211,153,0.1))', color: 'var(--accent-green)', fontSize: 10, fontWeight: 600 }}>
-                      🔄 업데이트
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
+        {/* 히어로 — 컴팩트 */}
+        <div style={{ marginBottom: 14 }}>
+          {/* 카테고리 + 메타 1줄 */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8, flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 4, background: `${catColor}15`, color: catColor }}>
+              {({ stock: '주식', apt: '청약', unsold: '미분양', finance: '재테크', general: '생활' } as Record<string, string>)[post.category] || post.category}
+            </span>
+            {(post.view_count ?? 0) >= 100 && <span style={{ fontSize: 9, fontWeight: 700, color: 'var(--accent-red)' }}>HOT</span>}
+            <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
+              {post.author_name || '카더라 데이터팀'} · <time dateTime={post.published_at || post.created_at || new Date().toISOString()}>{new Date(post.published_at || post.created_at || Date.now()).toLocaleDateString('ko-KR')}</time> · 📖 {readingTimeMin}분 · 👀 {post.view_count ?? 0}
+              {post.rewritten_at && <span style={{ marginLeft: 4, padding: '0 4px', borderRadius: 3, background: 'var(--accent-green-bg)', color: 'var(--accent-green)', fontSize: 9, fontWeight: 700 }}>UP</span>}
+            </span>
           </div>
+          {/* 제목 */}
+          <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 900, color: 'var(--text-primary)', lineHeight: 1.4, margin: 0, wordBreak: 'keep-all', letterSpacing: '-0.5px' }}>{post.title}</h1>
         </div>
 
-        {/* 태그 */}
+        {/* 태그 — 컴팩트 인라인 */}
         {(post.tags ?? []).length > 0 && (
-          <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginBottom: 14 }}>
-            {(post.tags ?? []).map((t: string) => <Link key={t} href={`/blog?q=${encodeURIComponent(t)}`} style={{ fontSize: 11, padding: '3px 10px', borderRadius: 'var(--radius-card)', background: 'var(--bg-surface)', border: '1px solid var(--border)', color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500 }}>#{t}</Link>)}
+          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 10 }}>
+            {(post.tags ?? []).map((t: string) => <Link key={t} href={`/blog?q=${encodeURIComponent(t)}`} style={{ fontSize: 10, padding: '2px 8px', borderRadius: 4, background: 'var(--bg-hover)', color: 'var(--text-tertiary)', textDecoration: 'none', fontWeight: 500 }}>#{t}</Link>)}
           </div>
         )}
 
@@ -586,21 +560,19 @@ export default async function BlogDetailPage({ params }: Props) {
         {/* 읽기 완료 메시지 — 로그인 사용자만 */}
         {isLoggedIn && (
         <div style={{
-          textAlign: 'center', padding: '20px 16px', margin: '24px 0',
-          background: 'linear-gradient(135deg, rgba(52,211,153,0.06), rgba(96,165,250,0.06))',
-          borderRadius: 'var(--radius-card)', border: '1px dashed rgba(52,211,153,0.2)',
+          textAlign: 'center', padding: '14px 12px', margin: '16px 0',
+          background: 'linear-gradient(135deg, rgba(52,211,153,0.05), rgba(96,165,250,0.05))',
+          borderRadius: 8, border: '1px dashed rgba(52,211,153,0.15)',
         }}>
-          <div style={{ fontSize: 'var(--fs-xl)', marginBottom: 6 }}>🎉</div>
-          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>
-            약 {readingTimeMin}분 분량을 읽으셨어요!
-          </div>
+          <span style={{ fontSize: 16, marginRight: 6 }}>🎉</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>약 {readingTimeMin}분 읽기 완료</span>
           {related.length > 0 && (
             <Link href={`/blog/${related[0].slug}`} style={{
-              display: 'inline-block', marginTop: 'var(--sp-sm)', padding: '6px 16px', borderRadius: 'var(--radius-sm)',
-              background: 'var(--brand)', color: 'var(--text-inverse)', fontSize: 12,
+              display: 'inline-block', marginLeft: 8, padding: '4px 12px', borderRadius: 4,
+              background: 'var(--brand)', color: '#fff', fontSize: 11,
               fontWeight: 700, textDecoration: 'none',
             }}>
-              다음 추천: {related[0].title?.slice(0, 30)}...
+              다음 → {related[0].title?.slice(0, 25)}...
             </Link>
           )}
         </div>

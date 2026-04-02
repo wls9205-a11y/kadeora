@@ -338,31 +338,7 @@ export default async function BlogPage({ searchParams }: Props) {
         )}
       </div>
 
-      {/* 오늘의 추천 */}
-      {pageNum === 1 && !q && category === 'all' && todayPicks.length > 0 && (
-        <div style={{ marginBottom: 'var(--sp-md)' }}>
-          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>✨ 오늘의 추천</div>
-          <div style={{ display: 'flex', gap: 'var(--sp-sm)', overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 4 }}>
-            {todayPicks.map((p: any) => {
-              const catEmoji: Record<string, string> = { stock: '📈', apt: '🏢', unsold: '🏚️', finance: '💰' };
-              const catLabel: Record<string, string> = { stock: '주식', apt: '청약', unsold: '미분양', finance: '재테크' };
-              return (
-                <Link key={p.id} href={`/blog/${p.slug}`} style={{
-                  flexShrink: 0, width: 180, padding: 'var(--sp-md) var(--card-p)', borderRadius: 'var(--radius-card)',
-                  background: 'var(--bg-surface)', border: '1px solid var(--border)',
-                  textDecoration: 'none', color: 'inherit',
-                }}>
-                  <div style={{ fontSize: 'var(--fs-lg)', marginBottom: 6 }}>{catEmoji[p.category] || '📝'}</div>
-                  <div style={{ fontSize: 10, fontWeight: 600, color: CAT_COLORS[p.category] || 'var(--text-tertiary)', marginBottom: 'var(--sp-xs)' }}>{catLabel[p.category] || p.category}</div>
-                  <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const, lineHeight: 1.35 }}>{p.title}</div>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* 인기글 + 인기태그 — 컴팩트 한 줄 */}
+      {/* 인기글 — 컴팩트 한 줄 */}
       {pageNum === 1 && !q && category === 'all' && (popularPosts ?? []).length > 0 && (
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '10px 12px', marginBottom: 'var(--sp-sm)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
@@ -377,23 +353,6 @@ export default async function BlogPage({ searchParams }: Props) {
                 {CATS.find(c => c.key === p.category)?.label || p.category}
               </span>
               <span style={{ fontSize: 10, color: 'var(--text-tertiary)', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>👀{p.view_count}</span>
-            </Link>
-          ))}
-        </div>
-      )}
-
-      {/* 인기 태그 — 가로 스크롤 1줄 */}
-      {popularTags.length > 0 && pageNum === 1 && !q && (
-        <div className="apt-pill-scroll kd-scroll-row" style={{ display: 'flex', gap: 5, marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 2 }}>
-          {popularTags.slice(0, 12).map((t: any) => (
-            <Link key={t.tag} href={`/blog?q=${encodeURIComponent(t.tag)}`}
-              style={{
-                padding: '3px 10px', borderRadius: 'var(--radius-lg)', flexShrink: 0,
-                background: 'var(--bg-hover)', border: '1px solid var(--border)',
-                color: 'var(--text-secondary)', fontSize: 11,
-                textDecoration: 'none', fontWeight: 500, whiteSpace: 'nowrap',
-              }}>
-              #{t.tag} <span style={{ color: 'var(--text-tertiary)', fontSize: 9 }}>{t.cnt}</span>
             </Link>
           ))}
         </div>
@@ -414,30 +373,42 @@ export default async function BlogPage({ searchParams }: Props) {
           description={q ? '다른 검색어로 시도해보세요' : '곧 새로운 분석이 올라옵니다'}
         />
       ) : (
-        <div className="listing-grid">
-          {(posts ?? []).map((p: any) => {
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          {(posts ?? []).map((p: any, idx: number) => {
             const catColor = CAT_COLORS[p.category] || 'var(--text-tertiary)';
+            const catLabel = CATS.find(c => c.key === p.category)?.label || p.category;
             const readMin = p.reading_time_min || 3;
-            const dateStr = new Date(p.created_at || Date.now()).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' });
+            const d = new Date(p.created_at || Date.now());
+            const now = Date.now();
+            const diff = now - d.getTime();
+            const dateStr = diff < 86400000 ? '오늘' : diff < 172800000 ? '어제' : diff < 604800000 ? `${Math.floor(diff / 86400000)}일 전` : d.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' });
+            const rank = (pageNum - 1) * perPage + idx + 1;
+            const isHot = (p.view_count ?? 0) >= 100;
             return (
-              <Link key={p.id} href={`/blog/${p.slug}`} className="kd-card-hover" style={{
-                display: 'block', padding: '12px', borderRadius: 'var(--radius-card)', textDecoration: 'none', color: 'inherit',
-                background: 'var(--bg-surface)', border: '1px solid var(--border)',
+              <Link key={p.id} href={`/blog/${p.slug}`} className="kd-feed-card" style={{
+                display: 'flex', alignItems: 'flex-start', gap: 8, padding: '9px 6px',
+                textDecoration: 'none', color: 'inherit',
+                borderBottom: '1px solid rgba(30,50,88,0.25)',
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', marginBottom: 'var(--sp-xs)' }}>
-                  <span style={{ fontSize: 9, fontWeight: 600, padding: '1px 6px', borderRadius: 4, background: `${catColor}15`, color: catColor }}>{CATS.find(c => c.key === p.category)?.label || p.category}</span>
-                  {p.view_count >= 100 && <span style={{ fontSize: 9, fontWeight: 600, color: 'var(--accent-red)' }}>HOT</span>}
-                  {p.rewritten_at && <span style={{ fontSize: 8, fontWeight: 700, padding: '0 4px', borderRadius: 3, background: 'var(--accent-green-bg, rgba(52,211,153,0.1))', color: 'var(--accent-green)' }}>UP</span>}
-                  <span style={{ marginLeft: 'auto', fontSize: 10, color: 'var(--text-tertiary)' }}>{dateStr}</span>
+                {/* 순위 */}
+                <span style={{ fontSize: 10, fontWeight: 800, color: isHot ? 'var(--accent-red)' : 'var(--text-tertiary)', width: 18, textAlign: 'center', flexShrink: 0, paddingTop: 2, fontVariantNumeric: 'tabular-nums' }}>{rank}</span>
+                {/* 본문 */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 2 }}>
+                    <span style={{ fontSize: 9, fontWeight: 700, padding: '1px 5px', borderRadius: 3, background: `${catColor}12`, color: catColor, flexShrink: 0 }}>{catLabel}</span>
+                    <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.3 }}>{q ? highlightTitle(p.title, q) : p.title}</span>
+                    {isHot && <span style={{ fontSize: 8, fontWeight: 700, color: 'var(--accent-red)', flexShrink: 0 }}>HOT</span>}
+                  </div>
+                  {p.excerpt && <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.3, marginBottom: 2 }}>{p.excerpt}</div>}
+                  <div style={{ display: 'flex', gap: 8, fontSize: 10, color: 'var(--text-tertiary)' }}>
+                    <span>{readMin}분</span>
+                    <span>👀 {p.view_count > 0 ? p.view_count.toLocaleString() : 0}</span>
+                    {(p.comment_count || 0) > 0 && <span>💬 {p.comment_count}</span>}
+                    {(p.helpful_count || 0) > 0 && <span style={{ color: 'var(--accent-green)' }}>👍 {p.helpful_count}</span>}
+                  </div>
                 </div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.4, marginBottom: 'var(--sp-xs)', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{q ? highlightTitle(p.title, q) : p.title}</div>
-                {p.excerpt && <div style={{ fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.4, marginBottom: 6, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical' as const }}>{p.excerpt}</div>}
-                <div style={{ display: 'flex', gap: 'var(--sp-sm)', fontSize: 10, color: 'var(--text-tertiary)' }}>
-                  <span>📖 {readMin}분</span>
-                  <span>👀 {p.view_count > 0 ? p.view_count.toLocaleString() : 0}</span>
-                  {(p.comment_count || 0) > 0 && <span>💬 {p.comment_count}</span>}
-                  {(p.helpful_count || 0) > 0 && <span>👍 {p.helpful_count}</span>}
-                </div>
+                {/* 날짜 */}
+                <span style={{ fontSize: 10, color: 'var(--text-tertiary)', flexShrink: 0, whiteSpace: 'nowrap', paddingTop: 2 }}>{dateStr}</span>
               </Link>
             );
           })}
@@ -448,28 +419,21 @@ export default async function BlogPage({ searchParams }: Props) {
       {/* 세션70: 블로그 목록 회원가입 유도 */}
       {pageNum === 1 && !q && (
         <div style={{
-          margin: '20px 0', padding: '18px 16px', borderRadius: 'var(--radius-lg)',
+          margin: '12px 0', padding: '10px 14px', borderRadius: 8,
           background: 'linear-gradient(135deg, var(--brand-bg), var(--accent-green-bg))',
           border: '1px solid var(--brand-border)',
-          display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap',
+          display: 'flex', alignItems: 'center', gap: 10,
         }}>
-          <div style={{ fontSize: 28, flexShrink: 0 }}>📬</div>
-          <div style={{ flex: 1, minWidth: 200 }}>
-            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 2 }}>
-              매일 업데이트되는 투자 분석을 받아보세요
-            </div>
-            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)' }}>
-              청약 마감 알림 · 급등주 알림 · 데일리 리포트 · 완전 무료
-            </div>
+          <span style={{ fontSize: 20, flexShrink: 0 }}>📬</span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>매일 투자 분석 받아보기</div>
+            <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>가입하면 전체 글 무제한 · 알림까지 무료</div>
           </div>
           <Link href="/login?redirect=/blog" style={{
-            padding: '8px 20px', borderRadius: 'var(--radius-pill)',
+            padding: '6px 14px', borderRadius: 'var(--radius-pill)',
             background: 'var(--kakao-bg)', color: 'var(--kakao-text)',
-            fontWeight: 700, fontSize: 13, textDecoration: 'none',
-            flexShrink: 0, whiteSpace: 'nowrap',
-          }}>
-            카카오로 3초 가입
-          </Link>
+            fontWeight: 700, fontSize: 12, textDecoration: 'none', flexShrink: 0,
+          }}>가입</Link>
         </div>
       )}
       {topSeries.length > 0 && (
