@@ -108,7 +108,6 @@ ${themeHistory?.length ? `테마: ${themeHistory.map((t: any) => `${t.theme_name
       summary = `상승 ${allStocks.filter(s => Number(s.change_pct ?? 0) > 0).length}종목, 하락 ${allStocks.filter(s => Number(s.change_pct ?? 0) < 0).length}종목.`;
     }
 
-    const today = new Date().toISOString().slice(0, 10);
     const movers = { gainers: topGainers.map(s => ({ symbol: s.symbol, name: s.name, change_pct: s.change_pct })), losers: topLosers.map(s => ({ symbol: s.symbol, name: s.name, change_pct: s.change_pct })) };
 
     await supabase.from('stock_daily_briefing').upsert({
