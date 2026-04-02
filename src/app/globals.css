@@ -622,6 +622,33 @@ html.theme-light .kd-glass {
   background: rgba(255,255,255,0.85);
   border-color: rgba(37,99,235,0.10);
 }
+/* 라이트모드: 스크롤바 */
+html.theme-light ::-webkit-scrollbar-thumb { background: #C8CDD4; }
+html.theme-light ::-webkit-scrollbar-thumb:hover { background: #9CA3AF; }
+/* 라이트모드: dark 클래스 오버라이드 무효화 */
+html.theme-light.dark .bg-white { background-color: #FFFFFF !important; }
+html.theme-light.dark input,
+html.theme-light.dark textarea,
+html.theme-light.dark select {
+  background-color: #FFFFFF !important;
+  color: #111827 !important;
+  border-color: #D4DAE3 !important;
+}
+/* 라이트모드: 블로그 본문 */
+html.theme-light .blog-content p { color: #374151; }
+html.theme-light .blog-content li { color: #374151; }
+html.theme-light .blog-content strong { color: #111827; }
+html.theme-light .blog-content blockquote { background: #EEF2FF; border-color: #2563EB; color: #4B5563; }
+html.theme-light .blog-content code { background: #F3F4F6; color: #7C3AED; border-color: #E5E7EB; }
+html.theme-light .blog-content pre { background: #F9FAFB; border-color: #E5E7EB; }
+html.theme-light .blog-content pre code { color: #111827; }
+html.theme-light .blog-content th { background: #F3F4F6; }
+html.theme-light .blog-content tr:nth-child(even) { background: #F9FAFB; }
+/* 라이트모드: 드롭다운/바텀시트 */
+html.theme-light [style*="boxShadow"] { box-shadow: 0 4px 20px rgba(0,0,0,0.08) !important; }
+/* 라이트모드: 호버 피드백 */
+html.theme-light .kd-feed-card:hover { background: #F3F4F6 !important; }
+html.theme-light .kd-card-hover:hover { border-color: #93C5FD !important; }
 
 /* ========================================
    기본 리셋

@@ -81,6 +81,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Preconnect — 주요 외부 도메인 DNS/TLS 선행 연결 (LCP 개선) */}
         <link rel="preconnect" href="https://tezftxakuwhsclarprlz.supabase.co" />
         <link rel="dns-prefetch" href="https://tezftxakuwhsclarprlz.supabase.co" />
+        <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
         <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
         <link rel="dns-prefetch" href="https://dapi.kakao.com" />

@@ -4,25 +4,38 @@
 
 ## 주요 기능
 
-- **주식**: 실시간 시세, 섹터 히트맵, 테마별 분석, AI 일일 시황, 포트폴리오 관리
-- **부동산**: 청약 일정, 분양 현장, 미분양 현황, 재개발·재건축 진행, 실거래가 조회
-- **블로그**: 15,502편+ 투자 분석 블로그 (부동산, 주식, 재테크)
+- **주식**: 실시간 시세 (KOSPI/KOSDAQ/NYSE/NASDAQ 728종목), 섹터 히트맵, 테마별 분석, AI 일일 시황, 종목 비교, 포트폴리오 시뮬레이터
+- **부동산**: 청약 일정, 분양 현장, 미분양 현황, 재개발·재건축 진행, 실거래가 조회, 단지백과(34,000+ 단지), 가점 진단 계산기
+- **블로그**: 21,900편+ 투자 분석 블로그 (부동산, 주식, 재테크, 미분양)
+- **통계 자료실**: 전국 시군구별 부동산/주식 CSV 데이터 무료 다운로드
 - **커뮤니티**: 피드, 토론방, 댓글, 좋아요, 관심종목/관심단지
+- **데일리 리포트**: 17개 시도별 매일 투자 정보 AI 리포트
+
+## 주요 페이지
+
+- 주식 시세: https://kadeora.app/stock
+- 부동산: https://kadeora.app/apt
+- 블로그: https://kadeora.app/blog
+- 주식 통계 자료실: https://kadeora.app/stock/data
+- 부동산 통계 자료실: https://kadeora.app/apt/data
+- 종목 비교: https://kadeora.app/stock/compare
+- 단지백과: https://kadeora.app/apt/complex
+- 가점 진단: https://kadeora.app/apt/diagnose
+- 데일리 리포트: https://kadeora.app/daily
 
 ## 데이터 출처
 
-- 국토교통부 실거래가 API
+- 국토교통부 실거래가 API, 청약 API, 미분양주택현황
 - 공공데이터포털 청약 API
-- 국토교통부 미분양주택현황
 - 서울시·경기도·부산시 정비사업 데이터
-- 한국투자증권 주식 시세 API
+- 한국투자증권 주식 시세 API, 네이버 부동산 API
 
 ## 기술 스택
 
 - Next.js 15 App Router + React 19
-- Supabase (PostgreSQL + Auth + Storage)
-- Vercel (Hosting + Edge Functions + Cron)
-- Sentry (Error Monitoring)
+- Supabase Pro (PostgreSQL + Auth + Storage)
+- Vercel Pro (Hosting + Edge Functions + 95 Cron Jobs)
+- Sentry (Error Monitoring), Vercel Analytics
 
 ## 연락처
 
