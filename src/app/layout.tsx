@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from 'next';
 import { SITE_URL } from '@/lib/constants';
-import { Inter } from 'next/font/google';
 import './globals.css';
 import './styles/components.css';
 import './styles/blog.css';
@@ -12,8 +11,6 @@ import Script from 'next/script';
 import KakaoInit from '@/components/KakaoInit';
 import TossModeInit from '@/components/TossModeInit';
 import TossBottomBanner from '@/components/TossBottomBanner';
-
-const inter = Inter({ subsets: ['latin'], display: 'swap', preload: true });
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -112,7 +109,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="geo.position" content="37.5665;126.9780" />
         <meta name="ICBM" content="37.5665, 126.9780" />
         {/* 다크모드 강제 적용 */}
-        <script dangerouslySetInnerHTML={{ __html: `(function(){document.documentElement.classList.add('dark');})();` }} />
+        <script dangerouslySetInnerHTML={{ __html: `(function(){var t=localStorage.getItem('kd_theme');if(t==='light'){document.documentElement.classList.add('theme-light');document.documentElement.classList.remove('dark');}else{document.documentElement.classList.add('dark');}})();` }} />
         {/* 글씨크기 SSR 적용 */}
         <script dangerouslySetInnerHTML={{ __html: `try{var fs=localStorage.getItem('kd_font_size');if(fs&&['small','medium','large'].indexOf(fs)>=0){var cl=document.documentElement.classList;cl.remove('font-small','font-medium','font-large');cl.add('font-'+fs);}}catch(e){}` }} />
         {/* Kakao SDK — KakaoInit 컴포넌트에서 next/script로 로드 (중복 방지) */}
@@ -171,7 +168,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           ],
         }) }} />
       </head>
-      <body className={inter.className}>
+      <body>
         {/* 글로벌 PWA 설치 프롬프트 캡처 — 어디서든 window.__pwaPrompt 로 접근 */}
         <script dangerouslySetInnerHTML={{ __html: `window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();window.__pwaPrompt=e;});` }} />
         <ThemeProvider>

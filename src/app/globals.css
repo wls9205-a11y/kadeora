@@ -209,37 +209,8 @@ button, input, select, textarea { font-family: inherit; }
 @media (max-width: 640px) {
   .mc-g2 { grid-template-columns: 1fr !important; }
 }
+/* 세션70: 기본값 = 기존 "크게" 수준으로 상향 */
 :root {
-  --fs-xs: 12px;
-  --fs-sm: 14px;
-  --fs-base: 16px;
-  --fs-md: 17px;
-  --fs-lg: 19px;
-  --fs-xl: 22px;
-  --fs-2xl: 28px;
-}
-
-html.font-small {
-  --fs-xs: 10px;
-  --fs-sm: 12px;
-  --fs-base: 14px;
-  --fs-md: 15px;
-  --fs-lg: 17px;
-  --fs-xl: 20px;
-  --fs-2xl: 24px;
-}
-
-html.font-medium {
-  --fs-xs: 12px;
-  --fs-sm: 14px;
-  --fs-base: 16px;
-  --fs-md: 17px;
-  --fs-lg: 19px;
-  --fs-xl: 22px;
-  --fs-2xl: 28px;
-}
-
-html.font-large {
   --fs-xs: 14px;
   --fs-sm: 16px;
   --fs-base: 18px;
@@ -247,6 +218,36 @@ html.font-large {
   --fs-lg: 21px;
   --fs-xl: 24px;
   --fs-2xl: 32px;
+}
+
+html.font-small {
+  --fs-xs: 12px;
+  --fs-sm: 14px;
+  --fs-base: 16px;
+  --fs-md: 17px;
+  --fs-lg: 19px;
+  --fs-xl: 22px;
+  --fs-2xl: 28px;
+}
+
+html.font-medium {
+  --fs-xs: 14px;
+  --fs-sm: 16px;
+  --fs-base: 18px;
+  --fs-md: 19px;
+  --fs-lg: 21px;
+  --fs-xl: 24px;
+  --fs-2xl: 32px;
+}
+
+html.font-large {
+  --fs-xs: 15px;
+  --fs-sm: 17px;
+  --fs-base: 20px;
+  --fs-md: 21px;
+  --fs-lg: 24px;
+  --fs-xl: 28px;
+  --fs-2xl: 36px;
 }
 
 /* font-large: 인라인 스타일 강제 오버라이드 */
@@ -329,7 +330,20 @@ html.font-small button { min-height: 32px; }
    글씨 크기별 레이아웃 간격 CSS 변수
    글씨가 커지면 간격도 넓어지고, 작아지면 좁아짐
    ======================================== */
+/* 세션70: 간격도 기존 "크게" 수준으로 상향 */
 :root {
+  --sp-xs: 6px;
+  --sp-sm: 10px;
+  --sp-md: 14px;
+  --sp-lg: 18px;
+  --sp-xl: 22px;
+  --sp-2xl: 28px;
+  --btn-h: 46px;
+  --card-p: 16px;
+  --touch-min: 46px;
+}
+
+html.font-small {
   --sp-xs: 4px;
   --sp-sm: 8px;
   --sp-md: 12px;
@@ -341,45 +355,33 @@ html.font-small button { min-height: 32px; }
   --touch-min: 44px;
 }
 
-html.font-small {
-  --sp-xs: 3px;
-  --sp-sm: 6px;
-  --sp-md: 10px;
-  --sp-lg: 14px;
-  --sp-xl: 18px;
-  --sp-2xl: 20px;
-  --btn-h: 36px;
-  --card-p: 12px;
-  --touch-min: 40px;
-}
-
 html.font-large {
-  --sp-xs: 6px;
-  --sp-sm: 10px;
-  --sp-md: 16px;
-  --sp-lg: 20px;
-  --sp-xl: 24px;
-  --sp-2xl: 32px;
-  --btn-h: 48px;
-  --card-p: 18px;
-  --touch-min: 48px;
+  --sp-xs: 8px;
+  --sp-sm: 12px;
+  --sp-md: 18px;
+  --sp-lg: 22px;
+  --sp-xl: 28px;
+  --sp-2xl: 36px;
+  --btn-h: 52px;
+  --card-p: 20px;
+  --touch-min: 52px;
 }
 
 /* 모바일 + font-large: 간격/글씨 조정 (화면이 좁으니까) */
 @media (max-width: 640px) {
   html.font-large {
-    --fs-xs: 13px;
-    --fs-sm: 15px;
-    --fs-base: 17px;
-    --fs-md: 18px;
-    --fs-lg: 20px;
-    --fs-xl: 24px;
-    --fs-2xl: 30px;
-    --sp-md: 14px;
-    --sp-lg: 18px;
-    --sp-xl: 22px;
-    --sp-2xl: 28px;
-    --card-p: 16px;
+    --fs-xs: 14px;
+    --fs-sm: 16px;
+    --fs-base: 19px;
+    --fs-md: 20px;
+    --fs-lg: 22px;
+    --fs-xl: 26px;
+    --fs-2xl: 34px;
+    --sp-md: 16px;
+    --sp-lg: 20px;
+    --sp-xl: 24px;
+    --sp-2xl: 30px;
+    --card-p: 18px;
   }
   /* 모바일 font-large: 그리드 카드 텍스트 방어 */
   html.font-large [style*="gridTemplateColumns"] > * {
@@ -390,21 +392,35 @@ html.font-large {
   /* 모바일 font-large: 탭/뱃지 줄바꿈 */
   html.font-large [style*="flexWrap"] { gap: 4px !important; }
   html.font-small {
-    --fs-xs: 10px;
-    --fs-sm: 12px;
-    --fs-base: 14px;
-    --fs-md: 15px;
-    --fs-lg: 17px;
-    --fs-xl: 20px;
-    --fs-2xl: 24px;
+    --fs-xs: 12px;
+    --fs-sm: 14px;
+    --fs-base: 16px;
+    --fs-md: 17px;
+    --fs-lg: 19px;
+    --fs-xl: 22px;
+    --fs-2xl: 28px;
+  }
+  /* 새 기본값 모바일 보정 */
+  :root {
+    --fs-xs: 13px;
+    --fs-sm: 15px;
+    --fs-base: 17px;
+    --fs-md: 18px;
+    --fs-lg: 20px;
+    --fs-xl: 23px;
+    --fs-2xl: 30px;
+    --card-p: 14px;
   }
 }
 
 /* 데스크탑 + font-large: 넉넉한 간격 */
 @media (min-width: 1024px) {
   html.font-large {
-    --card-p: 20px;
-    --sp-2xl: 36px;
+    --card-p: 22px;
+    --sp-2xl: 40px;
+  }
+  :root {
+    --card-p: 18px;
   }
 }
 
@@ -414,7 +430,7 @@ html.font-large {
    핵심: 배경-카드-인풋 3단계 명도차 + 경계선 + 그림자
    ======================================== */
 
-/* Dark Mode Only — 딥 네이비 다크모드 */
+/* Dark Mode Only — 딥 네이비 다크모드 (세션70: 가독성 대폭 개선) */
 :root {
   --bg-base:       #050A18;
 
@@ -443,60 +459,60 @@ html.font-large {
   --z-toast: 100;
   --z-tooltip: 110;
   --z-overlay: 200;
-  --bg-surface:    #0C1528;
-  --bg-elevated:   #111D35;
+  --bg-surface:    #0D1730;
+  --bg-elevated:   #132040;
   --bg-sunken:     #030710;
-  --bg-hover:      #111D35;
-  --bg-active:     #162444;
-  --border:        #1A2A4A;
-  --border-strong: #243760;
+  --bg-hover:      #132040;
+  --bg-active:     #1A2D52;
+  --border:        #1E3258;
+  --border-strong: #2A4470;
   --border-focus:  #5B93FF;
-  --text-primary:   #E8EDF5;
-  --text-secondary: #94A8C4;
-  --text-tertiary:  #6B82A0;
-  --text-disabled:  #2A3650;
+  --text-primary:   #F2F5FA;
+  --text-secondary: #B8CCDF;
+  --text-tertiary:  #8BA3C0;
+  --text-disabled:  #334466;
   --text-inverse:   #050A18;
-  --text-link:      #6CB4FF;
-  --brand:          #3B7BF6;
-  --brand-hover:    #5B93FF;
-  --brand-light:    #152850;
-  --brand-bg:       rgba(59,123,246,0.10);
-  --brand-border:   rgba(59,123,246,0.20);
-  --accent-blue-light:  #8BB8FF;
-  --accent-orange-light: #FFB06A;
+  --text-link:      #7CC0FF;
+  --brand:          #4A8AF7;
+  --brand-hover:    #6BA2FF;
+  --brand-light:    #182D5C;
+  --brand-bg:       rgba(74,138,247,0.12);
+  --brand-border:   rgba(74,138,247,0.24);
+  --accent-blue-light:  #99C8FF;
+  --accent-orange-light: #FFC07A;
   --brand-dark:     #2556C4;
   --kakao-bg:       #FEE500;
   --kakao-text:     #191919;
-  --success:        #2EE8A5;
-  --success-bg:     #061F18;
-  --warning:        #FFD43B;
-  --warning-bg:     #1A1708;
-  --error:          #FF6B6B;
-  --error-bg:       #250D0D;
-  --info:           #6CB4FF;
-  --info-bg:        #081828;
+  --success:        #36F0B0;
+  --success-bg:     #08241C;
+  --warning:        #FFD94A;
+  --warning-bg:     #1E1B0A;
+  --error:          #FF7878;
+  --error-bg:       #2A1010;
+  --info:           #7CC0FF;
+  --info-bg:        #0B1E30;
   --font-base:      15px;
   /* 주식 시세 */
-  --stock-up:       #FF6B6B;
-  --stock-down:     #6CB4FF;
-  --stock-flat:     #94A8C4;
-  /* 시맨틱 액센트 (카테고리/상태별) */
-  --accent-green:   #2EE8A5;
-  --accent-green-bg: rgba(46,232,165,0.10);
-  --accent-purple:  #B794FF;
-  --accent-purple-bg: rgba(183,148,255,0.10);
-  --accent-orange:  #FF9F43;
-  --accent-orange-bg: rgba(255,159,67,0.10);
-  --accent-yellow:  #FFD43B;
-  --accent-yellow-bg: rgba(255,212,59,0.10);
-  --accent-red:     #FF6B6B;
-  --accent-red-bg:  rgba(255,107,107,0.10);
-  --accent-blue:    #6CB4FF;
-  --accent-blue-bg: rgba(108,180,255,0.10);
+  --stock-up:       #FF7878;
+  --stock-down:     #7CC0FF;
+  --stock-flat:     #B8CCDF;
+  /* 시맨틱 액센트 (카테고리/상태별) — 세션70: 밝기 +10% */
+  --accent-green:   #36F0B0;
+  --accent-green-bg: rgba(54,240,176,0.12);
+  --accent-purple:  #C4A5FF;
+  --accent-purple-bg: rgba(196,165,255,0.12);
+  --accent-orange:  #FFB050;
+  --accent-orange-bg: rgba(255,176,80,0.12);
+  --accent-yellow:  #FFE04A;
+  --accent-yellow-bg: rgba(255,224,74,0.12);
+  --accent-red:     #FF7878;
+  --accent-red-bg:  rgba(255,120,120,0.12);
+  --accent-blue:    #7CC0FF;
+  --accent-blue-bg: rgba(124,192,255,0.12);
   /* 네비게이션 */
-  --nav-bg:         #0C1528;
-  --nav-border:     #1A2A4A;
-  --nav-text:       #E8EDF5;
+  --nav-bg:         #0D1730;
+  --nav-border:     #1E3258;
+  --nav-text:       #F2F5FA;
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.5);
   --shadow-md: 0 2px 8px rgba(0,0,0,0.6);
   --shadow-lg: 0 8px 24px rgba(0,0,0,0.7);
@@ -504,6 +520,108 @@ html.font-large {
 }
 
 /* 다크모드 단일 테마 — 라이트모드 제거됨 */
+
+/* ========================================
+   세션70: 화이트(라이트) 모드 — html.theme-light
+   ======================================== */
+html.theme-light {
+  --bg-base:       #F5F7FA;
+  --bg-surface:    #FFFFFF;
+  --bg-elevated:   #F0F2F5;
+  --bg-sunken:     #E8ECF0;
+  --bg-hover:      #EEF1F5;
+  --bg-active:     #E2E6EC;
+  --border:        #D4DAE3;
+  --border-strong: #B8C2D0;
+  --border-focus:  #4A8AF7;
+  --text-primary:   #111827;
+  --text-secondary: #4B5563;
+  --text-tertiary:  #6B7280;
+  --text-disabled:  #C8CDD4;
+  --text-inverse:   #FFFFFF;
+  --text-link:      #2563EB;
+  --brand:          #2563EB;
+  --brand-hover:    #1D4ED8;
+  --brand-light:    #EBF2FF;
+  --brand-bg:       rgba(37,99,235,0.08);
+  --brand-border:   rgba(37,99,235,0.18);
+  --accent-blue-light:  #60A5FA;
+  --accent-orange-light: #F97316;
+  --brand-dark:     #1E40AF;
+  --success:        #059669;
+  --success-bg:     rgba(5,150,105,0.08);
+  --warning:        #D97706;
+  --warning-bg:     rgba(217,119,6,0.08);
+  --error:          #DC2626;
+  --error-bg:       rgba(220,38,38,0.08);
+  --info:           #2563EB;
+  --info-bg:        rgba(37,99,235,0.08);
+  --stock-up:       #DC2626;
+  --stock-down:     #2563EB;
+  --stock-flat:     #6B7280;
+  --accent-green:   #059669;
+  --accent-green-bg: rgba(5,150,105,0.10);
+  --accent-purple:  #7C3AED;
+  --accent-purple-bg: rgba(124,58,237,0.10);
+  --accent-orange:  #EA580C;
+  --accent-orange-bg: rgba(234,88,12,0.10);
+  --accent-yellow:  #CA8A04;
+  --accent-yellow-bg: rgba(202,138,4,0.10);
+  --accent-red:     #DC2626;
+  --accent-red-bg:  rgba(220,38,38,0.10);
+  --accent-blue:    #2563EB;
+  --accent-blue-bg: rgba(37,99,235,0.10);
+  --nav-bg:         #FFFFFF;
+  --nav-border:     #D4DAE3;
+  --nav-text:       #111827;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md: 0 2px 8px rgba(0,0,0,0.10);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+  --shadow-xl: 0 16px 40px rgba(0,0,0,0.15);
+  color-scheme: light;
+}
+html.theme-light body {
+  background: #F5F7FA !important;
+  color: #111827 !important;
+}
+html.theme-light input,
+html.theme-light textarea,
+html.theme-light select {
+  background-color: #FFFFFF !important;
+  color: #111827 !important;
+  border-color: #D4DAE3 !important;
+}
+html.theme-light input::placeholder,
+html.theme-light textarea::placeholder { color: #9CA3AF !important; }
+html.theme-light input:focus,
+html.theme-light textarea:focus,
+html.theme-light select:focus {
+  border-color: #2563EB !important;
+  outline: 2px solid rgba(37,99,235,0.3);
+  outline-offset: 1px;
+}
+/* 라이트모드 헤더/네비 배경 */
+html.theme-light header {
+  background: rgba(255,255,255,0.92) !important;
+  border-bottom-color: #D4DAE3 !important;
+}
+html.theme-light nav[class*="md:hidden"] {
+  background: rgba(255,255,255,0.95) !important;
+  border-top-color: #D4DAE3 !important;
+}
+/* 라이트모드 카드 그림자 */
+html.theme-light .kd-card,
+html.theme-light .kd-feed-card,
+html.theme-light .apt-card {
+  background: #FFFFFF;
+  border-color: #E5E7EB;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+/* 라이트모드 글래스모피즘 */
+html.theme-light .kd-glass {
+  background: rgba(255,255,255,0.85);
+  border-color: rgba(37,99,235,0.10);
+}
 
 /* ========================================
    기본 리셋

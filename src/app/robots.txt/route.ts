@@ -12,6 +12,8 @@ Allow: /apt/
 Allow: /blog/
 Allow: /daily/
 Allow: /discuss
+Allow: /apt/data
+Allow: /stock/data
 Disallow: /admin/
 Disallow: /payment/
 Disallow: /api/

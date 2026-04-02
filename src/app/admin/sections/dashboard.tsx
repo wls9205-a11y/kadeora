@@ -951,20 +951,20 @@ export default function DashboardSection() {
       {/* ── 최근 릴리즈 내역 ── */}
       <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', marginBottom: 'var(--sp-md)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-          <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>🚀 최근 릴리즈 (세션 69)</span>
-          <span style={{ fontSize: 10, color: C.textDim }}>2026-04-02</span>
+          <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>🚀 최근 릴리즈 (세션 70)</span>
+          <span style={{ fontSize: 10, color: C.textDim }}>2026-04-03</span>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
           {[
-            { tag: 'COST', label: 'API 비용 75% 절감', desc: 'Sonnet→Haiku 전환 11파일, seed-posts/news/flow AI 제거, 스케줄 축소 (월$15→$4)', color: C.green, commit: '5770201' },
-            { tag: 'FEAT', label: '프로 AI 종목분석', desc: 'POST /api/stock/ai-analysis — 프로회원 주5건, 24h캐싱, 4섹션 심층분석', color: C.purple, commit: '83eb43d' },
-            { tag: 'FEAT', label: 'AI 댓글 요약', desc: '댓글10개+ 인기글 자동요약 크론 (매일 22:00, 최대5건, Haiku)', color: C.purple, commit: '0882b71' },
-            { tag: 'FEAT', label: '블로그 내부링크', desc: '태그/카테고리/키워드 매칭 자동연결 (API비용 0원, 주1회)', color: C.brand, commit: '0882b71' },
-            { tag: 'COST', label: 'max_tokens 최적화', desc: '블로그 크론 5000/4096→3000 토큰 절감 (7파일)', color: C.green, commit: '5770201' },
-            { tag: 'COST', label: '브리핑 캐시 가드', desc: 'stock-daily-briefing 당일 중복호출 방지 early return', color: C.green, commit: '83eb43d' },
-            { tag: 'TOSS', label: '심사 서류 준비', desc: 'shop 공개 전환, 정책 푸터, 환불정책 업데이트, PDF 생성', color: C.yellow, commit: '36a783a' },
-            { tag: 'TOSS', label: '환불정책 강화', desc: '프로멤버십 상품추가, 7일 전액환불, 연간 중도해지 특칙', color: C.yellow, commit: '36a783a' },
-            { tag: 'DB', label: 'stock_ai_analysis', desc: '프로 AI 분석 결과 저장 + 사용량 추적 테이블 + RLS', color: C.cyan, commit: '83eb43d' },
+            { tag: 'UX', label: '글씨 크기 상향', desc: '기본값을 기존 크게로 상향. 전체 스케일+간격 리셋.', color: C.brand, commit: 's70-font' },
+            { tag: 'UX', label: '가독성 대폭 개선', desc: 'text-primary/secondary/tertiary 밝기 +20%, border 가시성 강화', color: C.brand, commit: 's70-read' },
+            { tag: 'FEAT', label: '화이트 모드 추가', desc: 'html.theme-light CSS 변수 + ThemeProvider 토글 + localStorage 영속', color: C.purple, commit: 's70-lite' },
+            { tag: 'FEAT', label: '블로그 가입 CTA 3종', desc: '상단배너 + 본문중간 카테고리별 + 스크롤 플로팅 (비로그인)', color: C.green, commit: 's70-cta' },
+            { tag: 'FEAT', label: '통계 자료실 신규', desc: '/apt/data + /stock/data — CSV 6종, DataCatalog JSON-LD', color: C.purple, commit: 's70-data' },
+            { tag: 'UX', label: '더보기 메뉴 재설계', desc: '4개 카테고리 그룹 + 테마전환 + 통계자료실 링크', color: C.brand, commit: 's70-more' },
+            { tag: 'SEO', label: 'Sitemap/Robots 갱신', desc: 'data 페이지 추가, robots.txt Allow 갱신', color: C.cyan, commit: 's70-seo' },
+            { tag: 'PERF', label: 'Google Font 제거', desc: 'Inter 폰트 제거 → Pretendard CDN 단일화. 번들 최적화', color: C.green, commit: 's70-perf' },
+            { tag: 'CVR', label: '회원 전환 극대화', desc: '블로그 CTA 3종 + 통계 자료실 유도 + 콘텐츠 잠금 유지', color: C.yellow, commit: 's70-cvr' },
           ].map(r => (
             <div key={r.commit} style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm)', background: `${r.color}08`, border: `1px solid ${r.color}15` }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>

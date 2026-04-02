@@ -61,6 +61,7 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
       '', '/feed', '/hot', '/stock', '/apt', '/discuss', '/blog',
       '/guide', '/search', '/faq', '/terms', '/privacy', '/refund', 
       '/grades', '/daily', '/apt/map', '/apt/diagnose', '/apt/search', '/apt/complex', '/stock/compare', '/blog/series',
+      '/apt/data', '/stock/data',
     ];
     const entries: SitemapEntry[] = [
       ...staticPaths.map(path => ({

@@ -21,6 +21,7 @@ import { enhanceBlogVisuals } from '@/lib/blog-visual-enhancer';
 import ReadingProgress from '@/components/ReadingProgress';
 import NextArticleFloat from '@/components/NextArticleFloat';
 import BlogTossGate from '@/components/BlogTossGate';
+import { BlogTopBanner, BlogMidCTA, BlogFloatingCTA } from '@/components/BlogSignupCTA';
 
 // marked heading에 id 자동 부여 (TOC 앵커용)
 const slugify = (text: string) => text.replace(/<[^>]+>/g, '').replace(/[^\w가-힣ㄱ-ㅎㅏ-ㅣ]+/g, '-').replace(/^-+|-+$/g, '').toLowerCase();
@@ -462,6 +463,9 @@ export default async function BlogDetailPage({ params }: Props) {
         <span style={{ color: 'var(--text-primary)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 200 }}>{post.title.slice(0, 30)}</span>
       </nav>
 
+      {/* 세션70: 상단 회원가입 유도 배너 */}
+      <BlogTopBanner slug={slug} />
+
       <article style={{ paddingBottom: 40 }}>
         {/* ImageGallery JSON-LD (유지 — 포털 이미지 탭) */}
         {post.cover_image && (() => {
@@ -577,6 +581,9 @@ export default async function BlogDetailPage({ params }: Props) {
         {/* FAQ 아코디언 */}
         {showFaq && <BlogFaqAccordion items={faqItems} />}
 
+        {/* 세션70: 본문 중간 회원가입 유도 */}
+        <BlogMidCTA slug={slug} category={post.category} />
+
         {/* 읽기 완료 메시지 — 로그인 사용자만 */}
         {isLoggedIn && (
         <div style={{
@@ -670,6 +677,9 @@ export default async function BlogDetailPage({ params }: Props) {
 
       {/* 9. 다음글 플로팅 카드 (스크롤 60% 도달 시) */}
       {nextPost && <NextArticleFloat nextSlug={nextPost.slug} nextTitle={nextPost.title} category={post.category} />}
+
+      {/* 세션70: 플로팅 가입 배너 */}
+      <BlogFloatingCTA slug={slug} />
 
       {/* 프로 업셀 배너 — 결제 시스템 출시 전까지 비공개 */}
       {false && !isPremiumUser && (
