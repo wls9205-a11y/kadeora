@@ -1003,3 +1003,48 @@ body {
 /* SignupNudge 팝업 애니메이션 */
 @keyframes kd-fade-in { from { opacity: 0; } to { opacity: 1; } }
 @keyframes kd-slide-up { from { transform: translateY(20px) scale(0.96); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+
+/* ═══ 글씨 크기별 레이아웃 방어 ═══ */
+
+/* font-large: 버튼/패딩/카드 확대 */
+html.font-large button,
+html.font-large [role="button"],
+html.font-large a[style*="padding"] {
+  min-height: 36px;
+}
+html.font-large .kd-input,
+html.font-large input[style],
+html.font-large select[style] {
+  min-height: 38px;
+  font-size: 16px !important;
+}
+
+/* font-small: 여백 축소로 밀도 높임 */
+html.font-small button,
+html.font-small [role="button"] {
+  min-height: 28px;
+}
+html.font-small .kd-input,
+html.font-small input[style],
+html.font-small select[style] {
+  min-height: 32px;
+}
+
+/* 글씨 크기 변경 시 그리드 오버플로우 방지 */
+html.font-large [style*="gridTemplateColumns"] > * {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* font-large: KPI 그리드 모바일에서 2열로 전환 */
+@media (max-width: 420px) {
+  html.font-large [style*="repeat(4"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+/* 공통: 글씨 크기 변경 시 트랜지션 */
+* {
+  transition: font-size 0.15s ease;
+}

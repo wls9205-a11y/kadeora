@@ -368,7 +368,7 @@ export function Navigation() {
                         <div style={{ display:'flex', gap: 'var(--sp-xs)' }}>
                           {([['small','작게'],['medium','보통'],['large','크게']] as const).map(([val, label]) => (
                             <button key={val} onClick={() => handleFontSize(val)} aria-label={`글씨 크기 ${label}`} aria-pressed={fontSize === val} style={{
-                              flex:1, padding:'4px 0', borderRadius: 'var(--radius-xs)', fontSize: val === 'small' ? 11 : val === 'large' ? 15 : 13,
+                              flex:1, padding:'4px 0', borderRadius: 'var(--radius-xs)', fontSize: val === 'small' ? 12 : val === 'large' ? 16 : 14,
                               fontWeight: fontSize === val ? 700 : 400, border:'none', cursor:'pointer',
                               background: fontSize === val ? 'var(--brand)' : 'var(--bg-hover)',
                               color: fontSize === val ? 'var(--text-inverse)' : 'var(--text-secondary)',

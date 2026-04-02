@@ -622,3 +622,33 @@ html.font-small .kd-list-item { padding: var(--sp-xs) 0; }
     font-size: 11px !important;
   }
 }
+
+/* ═══ 글씨 크기별 모바일 방어 ═══ */
+@media (max-width: 480px) {
+  /* font-large: 탭바 아이콘/텍스트 안 깨지게 */
+  html.font-large nav[style*="fixed"] span {
+    font-size: 10px !important;
+  }
+
+  /* font-large: 인터랙션 바 버튼 wrap */
+  html.font-large .kd-interaction-bar {
+    gap: 4px !important;
+  }
+  html.font-large .kd-interaction-bar button,
+  html.font-large .kd-interaction-bar a {
+    padding: 4px 8px !important;
+    font-size: 12px !important;
+  }
+
+  /* font-large: 카드 내부 패딩 유지 */
+  html.font-large .apt-card,
+  html.font-large .kd-card {
+    padding: 12px 10px !important;
+  }
+
+  /* font-small: 모바일에서 더 컴팩트 */
+  html.font-small .apt-card,
+  html.font-small .kd-card {
+    padding: 8px !important;
+  }
+}
