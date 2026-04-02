@@ -11,6 +11,14 @@ export async function GET(req: NextRequest) {
 
   const result = await withCronLogging('stock-daily-briefing', async () => {
     const supabase = getSupabaseAdmin();
+    const today = new Date().toISOString().slice(0, 10);
+
+    // 캐시 체크: 오늘 이미 AI 브리핑이 있으면 스킵 (중복 호출 방지)
+    const { data: existing } = await supabase.from('stock_daily_briefing')
+      .select('id').eq('briefing_date', today).eq('market', 'KR').limit(1);
+    if (existing?.length) {
+      return { processed: 0, created: 0, failed: 0, metadata: { reason: 'already_exists', cached: true } };
+    }
 
     // Get today's top movers
     const { data: stocks } = await supabase.from('stock_quotes')
