@@ -1218,19 +1218,6 @@ export default async function AptUnifiedPage({ params }: Props) {
         </div>
       )}
 
-      {/* 위치 정보 + 지도 링크 */}
-      {(site?.latitude && site?.longitude) && (
-        <div className="apt-card">
-          <h2 style={ct}>📍 위치</h2>
-          <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', margin: '0 0 8px' }}>{site?.address || `${region} ${site?.sigungu || ''} ${site?.dong || ''}`}{site?.nearby_station ? ` · 최근접 역 ${site.nearby_station}` : ''}</p>
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-            <a href={`https://map.kakao.com/?q=${encodeURIComponent(name)}`} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--sp-xs)', padding: '8px 14px', borderRadius: 'var(--radius-sm)', background: 'rgba(254,229,0,0.1)', border: '1px solid rgba(254,229,0,0.3)', color: '#FEE500', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>🗺️ 카카오맵</a>
-            <a href={`https://map.naver.com/v5/search/${encodeURIComponent(name)}`} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--sp-xs)', padding: '8px 14px', borderRadius: 'var(--radius-sm)', background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.2)', color: 'var(--accent-green)', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>🗺️ 네이버지도</a>
-            <a href={`https://www.google.com/maps?q=${site.latitude},${site.longitude}`} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--sp-xs)', padding: '8px 14px', borderRadius: 'var(--radius-sm)', background: 'rgba(96,165,250,0.08)', border: '1px solid rgba(96,165,250,0.2)', color: 'var(--accent-blue)', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>🗺️ 구글맵</a>
-          </div>
-        </div>
-      )}
-
       {/* 주변 시설 (nearby_facilities) — 크롤러 가시적 텍스트 */}
       {site?.nearby_facilities && Object.keys(site.nearby_facilities as Record<string, number>).length > 0 && (() => {
         const facilityLabels: Record<string, string> = { mart: '마트', park: '공원', school: '학교', subway: '지하철', hospital: '병원', bank: '은행', pharmacy: '약국', convenience: '편의점', library: '도서관', gym: '체육관' };

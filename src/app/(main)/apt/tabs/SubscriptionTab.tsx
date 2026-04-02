@@ -220,12 +220,12 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                   const totalHH = (apt as any).total_households || 0;
                   const isRedevType = (apt as any).project_type === '재개발' || (apt as any).project_type === '재건축';
                   const genPct = totS > 0 ? Math.round((genT / totS) * 100) : 0;
-                  const kpiStyle = { textAlign: 'center' as const, padding: '5px 2px', background: 'var(--bg-surface)' };
-                  const kpiLabel = { fontSize: 9, color: 'var(--text-tertiary)', marginBottom: 1 };
-                  const kpiVal = (c: string) => ({ fontSize: 11, fontWeight: 800 as const, color: c, lineHeight: '14px' });
+                  const kpiStyle = { textAlign: 'center' as const, padding: '6px 4px', background: 'var(--bg-surface)', borderRadius: 2 };
+                  const kpiLabel = { fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 2, fontWeight: 500 as const };
+                  const kpiVal = (c: string) => ({ fontSize: 'var(--fs-sm)', fontWeight: 800 as const, color: c, lineHeight: 1.3 });
                   return (
                     <>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 1, margin: '0 10px 6px', background: 'var(--bg-hover)', borderRadius: 6, overflow: 'hidden' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 1, margin: '0 10px 8px', background: 'var(--border)', borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border)' }}>
                         <div style={kpiStyle}><div style={kpiLabel}>분양가(최저)</div><div style={kpiVal(pMin > 0 ? 'var(--accent-blue-light, #93C5FD)' : 'var(--text-tertiary)')}>{pMin > 0 ? fmtP(pMin) : '미정'}</div></div>
                         <div style={kpiStyle}><div style={kpiLabel}>분양가(최고)</div><div style={kpiVal(pMax > 0 ? 'var(--brand)' : 'var(--text-tertiary)')}>{pMax > 0 ? fmtP(pMax) : '미정'}</div></div>
                         <div style={kpiStyle}><div style={kpiLabel}>평당가</div><div style={kpiVal(ppAvg > 0 ? 'var(--accent-purple)' : 'var(--text-tertiary)')}>{ppAvg > 0 ? fmtP(ppAvg) : '-'}</div></div>
