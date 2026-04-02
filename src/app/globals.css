@@ -312,8 +312,8 @@ html.font-small [style*="font-size:16px"],
 html.font-small [style*="fontSize:16"] { font-size: 14px !important; }
 
 /* font-large 레이아웃 보정 */
-html.font-large input, html.font-large textarea, html.font-large select { font-size: 18px !important; }
-html.font-small input, html.font-small textarea, html.font-small select { font-size: 14px !important; }
+html.font-large input, html.font-large textarea, html.font-large select { font-size: 20px !important; }
+html.font-small input, html.font-small textarea, html.font-small select { font-size: 16px !important; }
 
 /* font-large: 버튼 패딩 확대 */
 html.font-large button { min-height: var(--touch-min); }

@@ -445,6 +445,33 @@ export default async function BlogPage({ searchParams }: Props) {
       )}
 
       {/* 인기 시리즈 (SEO 내부링크) */}
+      {/* 세션70: 블로그 목록 회원가입 유도 */}
+      {pageNum === 1 && !q && (
+        <div style={{
+          margin: '20px 0', padding: '18px 16px', borderRadius: 'var(--radius-lg)',
+          background: 'linear-gradient(135deg, var(--brand-bg), var(--accent-green-bg))',
+          border: '1px solid var(--brand-border)',
+          display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap',
+        }}>
+          <div style={{ fontSize: 28, flexShrink: 0 }}>📬</div>
+          <div style={{ flex: 1, minWidth: 200 }}>
+            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 2 }}>
+              매일 업데이트되는 투자 분석을 받아보세요
+            </div>
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)' }}>
+              청약 마감 알림 · 급등주 알림 · 데일리 리포트 · 완전 무료
+            </div>
+          </div>
+          <Link href="/login?redirect=/blog" style={{
+            padding: '8px 20px', borderRadius: 'var(--radius-pill)',
+            background: 'var(--kakao-bg)', color: 'var(--kakao-text)',
+            fontWeight: 700, fontSize: 13, textDecoration: 'none',
+            flexShrink: 0, whiteSpace: 'nowrap',
+          }}>
+            카카오로 3초 가입
+          </Link>
+        </div>
+      )}
       {topSeries.length > 0 && (
         <div style={{ marginTop: 'var(--sp-2xl)', padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-sm)' }}>
