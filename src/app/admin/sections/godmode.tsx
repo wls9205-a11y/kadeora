@@ -160,12 +160,12 @@ export default function GodModeSection() {
   };
 
   const modes = [
-    { key: 'full', label: '⚡ 전체 실행', desc: 'Phase 순차 — 95개 크론 (종목발굴+시세+부동산+검증)', color: C.brand },
+    { key: 'full', label: '⚡ 전체 실행', desc: 'Phase 순차 — 93개 크론 (종목발굴+시세+부동산+검증)', color: C.brand },
     { key: 'data', label: '📊 데이터 수집', desc: '청약/실거래/종목발굴/재개발 16개', color: C.green },
     { key: 'process', label: '⚙️ 데이터 가공', desc: '집계/싱크/총세대수검증/K-apt/네이버단지 13개', color: C.cyan },
-    { key: 'ai', label: '🤖 AI 생성', desc: '요약/이미지/트렌드 7개 (fire&forget)', color: C.purple },
+    { key: 'ai', label: '🤖 AI 생성', desc: '요약/이미지/AI댓글요약 8개 (fire&forget)', color: C.purple },
     { key: 'content', label: '📝 콘텐츠', desc: '블로그/시드 36개 (fire&forget)', color: C.yellow },
-    { key: 'system', label: '🔧 시스템', desc: '헬스/통계/알림/정리 21개', color: C.textSec },
+    { key: 'system', label: '🔧 시스템', desc: '헬스/통계/알림/내부링크 20개', color: C.textSec },
     { key: 'failed', label: '🔴 실패 재시도', desc: '실패한 것만', color: C.red },
   ];
 

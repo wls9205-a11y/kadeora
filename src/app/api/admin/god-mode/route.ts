@@ -60,6 +60,7 @@ const CRON_GROUPS = {
     '/api/cron/collect-site-trends',
     '/api/cron/collect-site-facilities',
     '/api/cron/blog-rewrite',
+    '/api/cron/post-ai-summary',
   ],
   content: [
     '/api/cron/seed-posts',
@@ -120,6 +121,7 @@ const CRON_GROUPS = {
     '/api/cron/premium-expire',
     '/api/cron/refresh-mv',
     '/api/cron/stock-naver-sync',
+    '/api/cron/blog-internal-links',
   ],
 };
 
