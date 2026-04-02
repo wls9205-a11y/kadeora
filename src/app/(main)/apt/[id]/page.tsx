@@ -451,7 +451,14 @@ export default async function AptUnifiedPage({ params }: Props) {
           {sub?.competition_rate_1st && Number(sub.competition_rate_1st) > 0 && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--accent-purple)', background: 'rgba(99,102,241,0.1)', padding: '2px 8px', borderRadius: 'var(--radius-md)' }}>{Number(sub.competition_rate_1st).toFixed(1)}:1</span>}
         </div>
         <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '6px 0 2px', lineHeight: 1.3, wordBreak: 'keep-all', overflowWrap: 'break-word' }}>{name}</h1>
-        <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', margin: '0 0 8px' }}>{[region, site?.sigungu, site?.dong].filter(Boolean).join(' ') || sub?.hssply_adres || ''}{(site?.builder || sub?.constructor_nm) ? ` · ${site?.builder || sub?.constructor_nm} 시공` : ''}{(site?.developer || sub?.developer_nm) ? ` · ${site?.developer || sub?.developer_nm} 시행` : ''}</p>
+
+        {/* 위치 + 시공사 통합 카드 */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8, fontSize: 12 }}>
+          <span style={{ color: 'var(--text-tertiary)' }}>📍 {[region, site?.sigungu, site?.dong].filter(Boolean).join(' ') || sub?.hssply_adres || ''}</span>
+          {(site?.builder || sub?.constructor_nm) && <span style={{ color: 'var(--text-tertiary)' }}>🏗️ {site?.builder || sub?.constructor_nm}</span>}
+          {(site?.developer || sub?.developer_nm) && <span style={{ color: 'var(--text-tertiary)' }}>🏢 {site?.developer || sub?.developer_nm}</span>}
+          {(site?.nearby_station || sub?.nearest_station) && <span style={{ color: 'var(--accent-blue)' }}>🚇 {site?.nearby_station || sub?.nearest_station}</span>}
+        </div>
         {(sub?.ai_summary || site?.description) && (
           <div style={{ padding: 'var(--sp-md) var(--card-p)', borderRadius: 'var(--radius-md)', background: 'linear-gradient(135deg, var(--brand-bg), rgba(139,92,246,0.06))', border: '1px solid var(--brand-border)' }}>
             <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--brand)', marginBottom: 3 }}>🤖 AI 분석</div>

@@ -365,6 +365,29 @@ export default async function StockDetailPage({ params }: Props) {
         );
       })()}
 
+      {/* 수급 요약 — 최근 외국인/기관 매매 동향 */}
+      {(flowR.data ?? []).length > 0 && (() => {
+        const flows = (flowR.data ?? []).slice(0, 5) as any[];
+        const totalForeignNet = flows.reduce((s: number, f: any) => s + (Number(f.foreign_buy || 0) - Number(f.foreign_sell || 0)), 0);
+        const totalInstNet = flows.reduce((s: number, f: any) => s + (Number(f.inst_buy || 0) - Number(f.inst_sell || 0)), 0);
+        const fColor = totalForeignNet > 0 ? 'var(--accent-red)' : totalForeignNet < 0 ? 'var(--accent-blue)' : 'var(--text-tertiary)';
+        const iColor = totalInstNet > 0 ? 'var(--accent-red)' : totalInstNet < 0 ? 'var(--accent-blue)' : 'var(--text-tertiary)';
+        return (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginBottom: 'var(--sp-md)' }}>
+            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '10px 12px' }}>
+              <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 4 }}>🌍 외국인 5일 순매매</div>
+              <div style={{ fontSize: 15, fontWeight: 800, color: fColor }}>{totalForeignNet > 0 ? '+' : ''}{(totalForeignNet / 100000000).toFixed(1)}억</div>
+              <div style={{ fontSize: 10, color: fColor }}>{totalForeignNet > 0 ? '순매수' : totalForeignNet < 0 ? '순매도' : '보합'}</div>
+            </div>
+            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '10px 12px' }}>
+              <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 4 }}>🏦 기관 5일 순매매</div>
+              <div style={{ fontSize: 15, fontWeight: 800, color: iColor }}>{totalInstNet > 0 ? '+' : ''}{(totalInstNet / 100000000).toFixed(1)}억</div>
+              <div style={{ fontSize: 10, color: iColor }}>{totalInstNet > 0 ? '순매수' : totalInstNet < 0 ? '순매도' : '보합'}</div>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* 탭 콘텐츠 */}
       <StockDetailTabs
         symbol={symbol}
