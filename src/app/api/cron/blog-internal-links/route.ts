@@ -19,13 +19,13 @@ export async function GET(req: NextRequest) {
   const result = await withCronLogging('blog-internal-links', async () => {
     const supabase = getSupabaseAdmin();
 
-    // related_slugs가 비어있는 게시글 100건
-    const { data: targets } = await supabase.from('blog_posts')
+    // related_slugs가 비어있는 게시글 100건 (타입 우회 — DB에만 존재하는 컬럼)
+    const { data: targets } = await (supabase.from('blog_posts')
       .select('id, slug, category, tags, title')
       .eq('is_published', true)
       .or('related_slugs.is.null,related_slugs.eq.{}')
       .order('created_at', { ascending: false })
-      .limit(100);
+      .limit(100) as any);
 
     if (!targets?.length) {
       return { processed: 0, created: 0, failed: 0, metadata: { reason: 'no_targets' } };
@@ -66,9 +66,9 @@ export async function GET(req: NextRequest) {
 
         const relatedSlugs = scored.map(s => s.slug);
 
-        const { error } = await supabase.from('blog_posts')
-          .update({ related_slugs: relatedSlugs })
-          .eq('id', post.id);
+        const { error } = await (supabase.from('blog_posts')
+          .update({ related_slugs: relatedSlugs } as any)
+          .eq('id', post.id) as any);
 
         if (!error) updated++;
       } catch { continue; }

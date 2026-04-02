@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
     monday.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
     monday.setHours(0, 0, 0, 0);
 
-    const { count } = await supabase.from('stock_ai_analysis')
+    const { count } = await (supabase.from('stock_ai_analysis') as any)
       .select('id', { count: 'exact', head: true })
       .eq('user_id', user.id)
       .gte('created_at', monday.toISOString());
@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
 
     // 24시간 캐시 확인 (같은 종목)
     const cacheKey = `${symbol}_${now.toISOString().slice(0, 10)}`;
-    const { data: cached } = await supabase.from('stock_ai_analysis')
+    const { data: cached } = await (supabase.from('stock_ai_analysis') as any)
       .select('id, analysis, created_at')
       .eq('symbol', symbol.toUpperCase())
       .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
@@ -172,7 +172,7 @@ score: 1~10 투자매력도, risk: low/medium/high`;
     const analysis = JSON.parse(match[0]);
 
     // DB 저장 (사용량 추적 + 캐싱)
-    await supabase.from('stock_ai_analysis').insert({
+    await (supabase.from('stock_ai_analysis') as any).insert({
       user_id: user.id,
       symbol: stock.symbol,
       stock_name: stock.name,

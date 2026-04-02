@@ -23,13 +23,13 @@ export async function GET(req: NextRequest) {
 
     const supabase = getSupabaseAdmin();
 
-    // 댓글 10개 이상 + ai_summary 없는 게시글
-    const { data: posts } = await supabase.from('posts')
+    // 댓글 10개 이상 + ai_summary 없는 게시글 (ai_summary는 DB에만 존재)
+    const { data: posts } = await (supabase.from('posts')
       .select('id, title, content, comments_count')
       .is('ai_summary', null)
       .gte('comments_count', 10)
       .order('comments_count', { ascending: false })
-      .limit(5);
+      .limit(5) as any);
 
     if (!posts?.length) {
       return { processed: 0, created: 0, failed: 0, metadata: { reason: 'no_targets' } };
@@ -85,9 +85,9 @@ JSON만: {"summary":"3줄 요약 (줄바꿈 \\n으로 구분)","consensus":"agre
         const match = (data.content?.[0]?.text || '').match(/\{[\s\S]*\}/);
         if (match) {
           const parsed = JSON.parse(match[0]);
-          await supabase.from('posts').update({
+          await (supabase.from('posts').update({
             ai_summary: parsed.summary || '',
-          }).eq('id', post.id);
+          } as any).eq('id', post.id) as any);
           created++;
         }
       } catch { continue; }
