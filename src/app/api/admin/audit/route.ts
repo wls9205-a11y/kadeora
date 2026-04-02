@@ -225,5 +225,83 @@ export async function GET(req: NextRequest) {
     };
   }
 
+  // ═══ 3. 크론 실행 로그 전수조사 ═══
+  if (type === 'all' || type === 'cron') {
+    const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const since7d = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+
+    // 최근 24시간 크론 로그
+    const { data: logs24 } = await (sb as any).from('cron_logs')
+      .select('cron_name, status, records_processed, records_updated, records_failed, duration_ms, created_at, metadata')
+      .gte('created_at', since24h)
+      .order('created_at', { ascending: false })
+      .limit(500);
+
+    // 최근 7일 크론 로그 (고유 크론 이름별 마지막 실행)
+    const { data: logs7d } = await (sb as any).from('cron_logs')
+      .select('cron_name, status, created_at, duration_ms')
+      .gte('created_at', since7d)
+      .order('created_at', { ascending: false })
+      .limit(2000);
+
+    const cronStats: Record<string, { runs: number; success: number; failed: number; lastRun: string; lastStatus: string; avgDuration: number; totalProcessed: number; totalUpdated: number }> = {};
+
+    for (const log of (logs24 || [])) {
+      if (!cronStats[log.cron_name]) {
+        cronStats[log.cron_name] = { runs: 0, success: 0, failed: 0, lastRun: log.created_at, lastStatus: log.status, avgDuration: 0, totalProcessed: 0, totalUpdated: 0 };
+      }
+      const s = cronStats[log.cron_name];
+      s.runs++;
+      if (log.status === 'success') s.success++;
+      else s.failed++;
+      s.avgDuration += (log.duration_ms || 0);
+      s.totalProcessed += (log.records_processed || 0);
+      s.totalUpdated += (log.records_updated || 0);
+    }
+
+    // 평균 duration 계산
+    for (const key of Object.keys(cronStats)) {
+      const s = cronStats[key];
+      s.avgDuration = s.runs > 0 ? Math.round(s.avgDuration / s.runs) : 0;
+    }
+
+    // 7일간 실행 안 된 크론 찾기
+    const allCronNames = new Set((logs7d || []).map((l: any) => l.cron_name));
+    const expectedCrons = [
+      'stock-naver-sync', 'stock-crawl', 'stock-discover', 'stock-news-crawl', 'stock-flow-crawl',
+      'crawl-apt-subscription', 'crawl-apt-trade', 'crawl-unsold-molit',
+      'auto-verify-households', 'kapt-sync', 'sync-apt-sites',
+      'daily-stats', 'health-check', 'seed-posts', 'blog-daily',
+    ];
+    const neverRun = expectedCrons.filter(c => !allCronNames.has(c));
+
+    // 실패율 높은 크론
+    const failHeavy = Object.entries(cronStats)
+      .filter(([, s]) => s.failed > 0 && s.failed / s.runs > 0.3)
+      .map(([name, s]) => ({ name, runs: s.runs, failed: s.failed, rate: Math.round(s.failed / s.runs * 100) }))
+      .sort((a, b) => b.rate - a.rate);
+
+    // GOD MODE 최근 실행 확인
+    const godModeRuns = (logs24 || []).filter((l: any) => l.cron_name === 'god-mode' || l.metadata?.mode);
+
+    results.cron = {
+      total_runs_24h: (logs24 || []).length,
+      unique_crons_24h: Object.keys(cronStats).length,
+      success_24h: (logs24 || []).filter((l: any) => l.status === 'success').length,
+      failed_24h: (logs24 || []).filter((l: any) => l.status !== 'success').length,
+      never_run_7d: neverRun,
+      fail_heavy: failHeavy.slice(0, 10),
+      top_crons: Object.entries(cronStats)
+        .sort((a, b) => b[1].runs - a[1].runs)
+        .slice(0, 20)
+        .map(([name, s]) => ({
+          name, runs: s.runs, success: s.success, failed: s.failed,
+          lastRun: s.lastRun?.slice(0, 19), lastStatus: s.lastStatus,
+          avgMs: s.avgDuration, processed: s.totalProcessed, updated: s.totalUpdated,
+        })),
+      god_mode_runs: godModeRuns.length,
+    };
+  }
+
   return NextResponse.json(results, { headers: { 'Cache-Control': 'no-store' } });
 }

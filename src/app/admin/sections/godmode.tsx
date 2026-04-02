@@ -447,6 +447,79 @@ export default function GodModeSection() {
             {fixLog}
           </div>
         )}
+
+            {/* 크론 실행 현황 */}
+            {auditData?.cron && (
+              <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 16, marginTop: 16 }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: C.text, marginBottom: 10 }}>⚡ 크론 실행 현황 (24시간)</div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 8, marginBottom: 12 }}>
+                  <div style={{ textAlign: 'center', padding: 8, background: `${C.green}10`, borderRadius: 6 }}>
+                    <div style={{ fontSize: 18, fontWeight: 800, color: C.green }}>{auditData.cron.total_runs_24h}</div>
+                    <div style={{ fontSize: 10, color: C.textDim }}>총 실행</div>
+                  </div>
+                  <div style={{ textAlign: 'center', padding: 8, background: `${C.brand}10`, borderRadius: 6 }}>
+                    <div style={{ fontSize: 18, fontWeight: 800, color: C.brand }}>{auditData.cron.unique_crons_24h}</div>
+                    <div style={{ fontSize: 10, color: C.textDim }}>고유 크론</div>
+                  </div>
+                  <div style={{ textAlign: 'center', padding: 8, background: `${C.green}10`, borderRadius: 6 }}>
+                    <div style={{ fontSize: 18, fontWeight: 800, color: C.green }}>{auditData.cron.success_24h}</div>
+                    <div style={{ fontSize: 10, color: C.textDim }}>성공</div>
+                  </div>
+                  <div style={{ textAlign: 'center', padding: 8, background: `${C.red}10`, borderRadius: 6 }}>
+                    <div style={{ fontSize: 18, fontWeight: 800, color: auditData.cron.failed_24h > 0 ? C.red : C.green }}>{auditData.cron.failed_24h}</div>
+                    <div style={{ fontSize: 10, color: C.textDim }}>실패</div>
+                  </div>
+                </div>
+                {/* 실행 빈도 TOP 크론 */}
+                {auditData.cron.top_crons?.length > 0 && (
+                  <div style={{ marginBottom: 10 }}>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: C.textSec, marginBottom: 6 }}>실행 현황 TOP 20</div>
+                    <div style={{ maxHeight: 280, overflowY: 'auto', fontSize: 11 }}>
+                      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <thead><tr style={{ borderBottom: `1px solid ${C.border}` }}>
+                          <th style={{ padding: '4px 6px', textAlign: 'left', color: C.textDim }}>크론</th>
+                          <th style={{ padding: '4px 4px', textAlign: 'right', color: C.textDim }}>실행</th>
+                          <th style={{ padding: '4px 4px', textAlign: 'right', color: C.textDim }}>성공</th>
+                          <th style={{ padding: '4px 4px', textAlign: 'right', color: C.textDim }}>실패</th>
+                          <th style={{ padding: '4px 4px', textAlign: 'right', color: C.textDim }}>처리</th>
+                          <th style={{ padding: '4px 4px', textAlign: 'right', color: C.textDim }}>갱신</th>
+                          <th style={{ padding: '4px 6px', textAlign: 'right', color: C.textDim }}>소요</th>
+                        </tr></thead>
+                        <tbody>{auditData.cron.top_crons.map((c: any) => (
+                          <tr key={c.name} style={{ borderBottom: `1px solid ${C.border}22` }}>
+                            <td style={{ padding: '4px 6px', fontWeight: 600, color: C.text, maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</td>
+                            <td style={{ padding: '4px 4px', textAlign: 'right', color: C.textSec }}>{c.runs}</td>
+                            <td style={{ padding: '4px 4px', textAlign: 'right', color: C.green }}>{c.success}</td>
+                            <td style={{ padding: '4px 4px', textAlign: 'right', color: c.failed > 0 ? C.red : C.textDim }}>{c.failed}</td>
+                            <td style={{ padding: '4px 4px', textAlign: 'right', color: C.textSec }}>{c.processed > 0 ? c.processed : '-'}</td>
+                            <td style={{ padding: '4px 4px', textAlign: 'right', color: c.updated > 0 ? C.green : C.textDim }}>{c.updated > 0 ? c.updated : '-'}</td>
+                            <td style={{ padding: '4px 6px', textAlign: 'right', color: C.textDim, fontSize: 9 }}>{c.avgMs > 0 ? `${(c.avgMs / 1000).toFixed(1)}s` : '-'}</td>
+                          </tr>
+                        ))}</tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+                {/* 실패율 높은 크론 */}
+                {auditData.cron.fail_heavy?.length > 0 && (
+                  <div style={{ padding: 8, background: `${C.red}08`, borderRadius: 6, marginBottom: 8 }}>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: C.red, marginBottom: 4 }}>⚠️ 실패율 높은 크론</div>
+                    {auditData.cron.fail_heavy.map((c: any) => (
+                      <div key={c.name} style={{ fontSize: 10, color: C.textSec, padding: '2px 0' }}>
+                        <b style={{ color: C.text }}>{c.name}</b> — {c.runs}회 중 {c.failed}회 실패 ({c.rate}%)
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {/* 7일간 미실행 크론 */}
+                {auditData.cron.never_run_7d?.length > 0 && (
+                  <div style={{ padding: 8, background: `${C.yellow}08`, borderRadius: 6 }}>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: C.yellow, marginBottom: 4 }}>🔕 7일간 미실행 크론</div>
+                    <div style={{ fontSize: 10, color: C.textSec }}>{auditData.cron.never_run_7d.join(', ')}</div>
+                  </div>
+                )}
+              </div>
+            )}
       </div>
 
       {/* ━━━ 특수 작업 ━━━ */}
