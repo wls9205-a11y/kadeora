@@ -154,7 +154,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                 background: 'var(--bg-surface)',
                 border: st === 'open' ? '1.5px solid rgba(96,165,250,0.35)' : '1px solid var(--border)',
                 boxShadow: st === 'open' ? '0 0 16px rgba(59,123,246,0.08)' : undefined,
-                opacity: st === 'closed' ? 0.75 : 1,
+                opacity: 1,
                 textDecoration: 'none', color: 'inherit',
               }}>
                 {/* ① 헤더: 배지 + 경쟁률 링 */}
