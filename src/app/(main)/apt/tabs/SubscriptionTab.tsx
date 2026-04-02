@@ -154,7 +154,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                 background: 'var(--bg-surface)',
                 border: st === 'open' ? '1.5px solid rgba(96,165,250,0.35)' : '1px solid var(--border)',
                 boxShadow: st === 'open' ? '0 0 16px rgba(59,123,246,0.08)' : undefined,
-                opacity: st === 'closed' ? 0.55 : 1,
+                opacity: st === 'closed' ? 0.65 : 1,
                 textDecoration: 'none', color: 'inherit',
               }}>
                 {/* ① 헤더: 배지 + 경쟁률 링 */}
@@ -162,7 +162,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                   <div style={{ flex: 1, minWidth: 0 }}>
                     {/* 배지 행 */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: 3, marginBottom: 5, flexWrap: 'wrap' }}>
-                      {isNew(apt, 'subscription') && <NewBadge />}
+                      {st !== 'closed' && isNew(apt, 'subscription') && <NewBadge />}
                       <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 4, background: bd.bg, color: bd.color, border: `1px solid ${bd.border}`, lineHeight: '14px' }}>{bd.label}</span>
                       {dday !== null && dday >= 0 && st !== 'closed' && (
                         <span style={{ fontSize: 9, fontWeight: 800, padding: '2px 6px', borderRadius: 3, background: dday <= 2 ? 'rgba(248,113,113,0.15)' : dday <= 6 ? 'var(--accent-yellow-bg)' : 'rgba(148,163,184,0.1)', color: dday <= 2 ? 'var(--accent-red)' : dday <= 6 ? 'var(--accent-yellow)' : 'var(--text-secondary)', lineHeight: '14px' }}>
@@ -234,7 +234,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                         {totalHH > 0 && totalHH !== totS ? (
                           <>
                             <div style={kpiStyle}><div style={kpiLabel}>총세대수</div><div style={kpiVal('var(--text-primary)')}>{totalHH.toLocaleString()}</div></div>
-                            <div style={kpiStyle}><div style={kpiLabel}>공급세대</div><div style={kpiVal('var(--brand)')}>{totS > 0 ? totS.toLocaleString() : '-'}</div></div>
+                            <div style={kpiStyle}><div style={kpiLabel}>공급세대</div><div style={kpiVal('var(--brand)')}>{totS > 0 ? totS.toLocaleString() : <span style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>준비중</span>}</div></div>
                           </>
                         ) : totalHH > 0 ? (
                           <>
@@ -242,10 +242,10 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                             <div style={kpiStyle}><div style={kpiLabel}>공급세대</div><div style={kpiVal('var(--brand)')}>{totS > 0 ? totS.toLocaleString() : totalHH.toLocaleString()}</div></div>
                           </>
                         ) : (
-                          <div style={kpiStyle}><div style={kpiLabel}>공급세대</div><div style={kpiVal('var(--brand)')}>{totS > 0 ? totS.toLocaleString() : '-'}</div></div>
+                          <div style={kpiStyle}><div style={kpiLabel}>공급세대</div><div style={kpiVal('var(--brand)')}>{totS > 0 ? totS.toLocaleString() : <span style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>준비중</span>}</div></div>
                         )}
-                        <div style={kpiStyle}><div style={kpiLabel}>일반공급</div><div style={kpiVal('var(--accent-blue-light, #60A5FA)')}>{genT > 0 ? genT.toLocaleString() : '-'}</div></div>
-                        <div style={kpiStyle}><div style={kpiLabel}>특별공급</div><div style={kpiVal('var(--accent-purple, #A78BFA)')}>{spcT > 0 ? spcT.toLocaleString() : '-'}</div></div>
+                        <div style={kpiStyle}><div style={kpiLabel}>일반공급</div><div style={kpiVal('var(--accent-blue-light, #60A5FA)')}>{genT > 0 ? genT.toLocaleString() : <span style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>준비중</span>}</div></div>
+                        <div style={kpiStyle}><div style={kpiLabel}>특별공급</div><div style={kpiVal('var(--accent-purple, #A78BFA)')}>{spcT > 0 ? spcT.toLocaleString() : <span style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>준비중</span>}</div></div>
                       </div>
 
                       {/* 일반/특별 비율 바 */}

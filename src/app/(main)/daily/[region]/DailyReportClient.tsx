@@ -240,54 +240,114 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
     if (e.target.value) goToDate(e.target.value);
   };
 
-  // ═══ 회원전용 게이트 (SSR은 유지 → SEO 노출, 클라이언트만 차단) ═══
-  const isGated = !authLoading && (!userId || !profile?.regionText);
-  const gateReason = !userId ? 'login' : 'region';
+  // ═══ 공유 1회 게이트 (공유 완료 시 영구 무료 열람) ═══
+  const [shareUnlocked, setShareUnlocked] = useState(false);
+  const [shareLoading, setShareLoading] = useState(false);
+
+  useEffect(() => {
+    // localStorage에서 공유 완료 여부 확인
+    try {
+      const unlocked = localStorage.getItem('kd_report_unlocked');
+      if (unlocked === 'true') setShareUnlocked(true);
+    } catch {}
+  }, []);
+
+  const handleShareUnlock = async () => {
+    setShareLoading(true);
+    const shareUrl = `${window.location.origin}/daily/${encodeURIComponent(d.region)}`;
+    const shareTitle = `카더라 데일리 리포트 — ${d.region} 투자 브리핑`;
+    const shareText = `${d.region} 부동산·주식 시황을 매일 한 장에 정리! 청약 ${d.subCountThisWeek}건 · 미분양 ${d.unsoldUnits.toLocaleString()}세대`;
+
+    let shared = false;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: shareTitle, text: shareText, url: shareUrl });
+        shared = true;
+      } catch { /* 사용자가 취소해도 OK */ }
+    }
+    if (!shared) {
+      try {
+        await navigator.clipboard.writeText(`${shareTitle}\n${shareUrl}`);
+        shared = true;
+      } catch {}
+    }
+
+    if (shared) {
+      setShareUnlocked(true);
+      try { localStorage.setItem('kd_report_unlocked', 'true'); } catch {}
+      // DB 기록 (로그인 유저)
+      if (userId) {
+        fetch('/api/share', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ post_id: `daily-${d.region}`, platform: typeof navigator.share === 'function' ? 'native' : 'clipboard' }),
+        }).catch(() => {});
+      }
+    }
+    setShareLoading(false);
+  };
+
+  const isGated = !shareUnlocked && !authLoading;
+  const gateReason = !userId ? 'login' : 'share';
 
   if (isGated) {
     return (
       <div>
-        {/* 게이트 카드 */}
+        {/* 공유 1회 게이트 */}
         <div style={{
-          padding: '24px 20px', borderRadius: 'var(--radius-card)',
+          padding: '28px 20px', borderRadius: 'var(--radius-card)',
           background: G.gradientHero, border: `1.5px solid ${G.goldBorder}`,
           position: 'relative', overflow: 'hidden', textAlign: 'center',
         }}>
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${G.goldDark}, ${G.gold}, ${G.goldLight}, ${G.gold}, ${G.goldDark})` }} />
 
-          {/* 골드 로고 */}
-          <div style={{ margin: '0 auto 14px', width: 40, height: 40 }}>
-            <svg width="40" height="40" viewBox="0 0 72 72"><defs><linearGradient id="rg3" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#0F1B3E"/><stop offset="100%" stopColor="#2563EB"/></linearGradient></defs><rect x="2" y="2" width="68" height="68" rx="16" fill="url(#rg3)" stroke="#D4A853" strokeWidth="4"/><circle cx="18" cy="36" r="6" fill="white"/><circle cx="36" cy="36" r="6" fill="white"/><circle cx="54" cy="36" r="6" fill="white"/></svg>
+          {/* 아이콘 */}
+          <div style={{ fontSize: 48, marginBottom: 12 }}>📊</div>
+
+          <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 8 }}>
+            카더라 데일리 리포트
           </div>
 
-          <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 6 }}>
-            {gateReason === 'login' ? '회원 전용 리포트입니다' : '거주지 등록이 필요합니다'}
+          <div style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.7, marginBottom: 20, maxWidth: 320, margin: '0 auto 20px' }}>
+            매일 아침 <b style={{ color: G.gold }}>{d.region}</b> 부동산·주식 시황을 한 장에 정리한 투자 브리핑입니다.
           </div>
-          <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.7, marginBottom: 16 }}>
-            {gateReason === 'login'
-              ? '카더라 데일리 리포트는 회원만 열람할 수 있습니다.\n3초 가입 후 매일 아침 투자 브리핑을 받아보세요.'
-              : '내 지역 맞춤 리포트를 받으려면 거주지를 등록해 주세요.\n프로필에서 시/도, 시/군/구를 선택하면 바로 읽을 수 있습니다.'}
-          </div>
-          {gateReason === 'login' ? (
-            <Link href={`/login?redirect=${encodeURIComponent(`/daily/${encodeURIComponent(d.region)}`)}`} style={{
-              display: 'inline-block', padding: '12px 32px', borderRadius: 'var(--radius-xl)',
-              background: `linear-gradient(135deg, ${G.gold}, ${G.goldDark})`, color: '#fff',
-              fontSize: 'var(--fs-base)', fontWeight: 700, textDecoration: 'none',
-              boxShadow: `0 2px 12px rgba(212,168,83,0.4)`,
-            }}>카카오로 3초 가입</Link>
-          ) : (
-            <Link href={`/profile/${userId}`} style={{
-              display: 'inline-block', padding: '12px 32px', borderRadius: 'var(--radius-xl)',
-              background: `linear-gradient(135deg, ${G.gold}, ${G.goldDark})`, color: '#fff',
-              fontSize: 'var(--fs-base)', fontWeight: 700, textDecoration: 'none',
-              boxShadow: `0 2px 12px rgba(212,168,83,0.4)`,
-            }}>거주지 등록하기</Link>
-          )}
 
-          {/* 리포트 미리보기 힌트 */}
-          <div style={{ marginTop: 20, padding: '10px 14px', borderRadius: 'var(--radius-sm)', background: G.goldBg, border: `1px solid ${G.goldBorder}` }}>
-            <div style={{ fontSize: 'var(--fs-xs)', color: G.gold, fontWeight: 600, marginBottom: 4 }}>✦ 오늘 리포트 미리보기</div>
-            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', lineHeight: 1.6 }}>
+          {/* 공유 혜택 설명 */}
+          <div style={{ padding: '14px 16px', borderRadius: 'var(--radius-md)', background: G.goldBg, border: `1px solid ${G.goldBorder}`, marginBottom: 16, textAlign: 'left' }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: G.gold, marginBottom: 8, textAlign: 'center' }}>🔓 리포트 무료 열람 방법</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                <span style={{ fontSize: 14, flexShrink: 0, marginTop: 1 }}>1️⃣</span>
+                <span style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5 }}>아래 <b style={{ color: 'var(--text-primary)' }}>공유하기</b> 버튼을 눌러 카카오톡, 밴드 등 아무 곳에나 <b style={{ color: G.gold }}>1회</b> 공유해 주세요</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                <span style={{ fontSize: 14, flexShrink: 0, marginTop: 1 }}>2️⃣</span>
+                <span style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5 }}>공유 완료 즉시 리포트가 열리며, <b style={{ color: 'var(--accent-green)' }}>앞으로 영구 무료</b>로 매일 읽을 수 있어요</span>
+              </div>
+            </div>
+          </div>
+
+          {/* 공유 버튼 */}
+          <button
+            onClick={handleShareUnlock}
+            disabled={shareLoading}
+            style={{
+              width: '100%', padding: '14px 0', borderRadius: 'var(--radius-xl)', border: 'none',
+              background: `linear-gradient(135deg, ${G.gold}, ${G.goldDark})`, color: '#fff',
+              fontSize: 'var(--fs-base)', fontWeight: 800, cursor: shareLoading ? 'wait' : 'pointer',
+              boxShadow: `0 4px 16px rgba(212,168,83,0.35)`,
+              opacity: shareLoading ? 0.7 : 1, transition: 'opacity 0.15s',
+            }}
+          >
+            {shareLoading ? '공유 중...' : '📤 공유하고 리포트 보기'}
+          </button>
+
+          <p style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 12, marginBottom: 0, lineHeight: 1.5 }}>
+            ✦ 단 1번 공유로 평생 무료 · 공유 대상은 자유 · 나에게 보내기도 OK
+          </p>
+
+          {/* 미리보기 힌트 */}
+          <div style={{ marginTop: 16, padding: '10px 14px', borderRadius: 'var(--radius-sm)', background: 'rgba(255,255,255,0.02)', border: `1px solid ${G.goldBorder}` }}>
+            <div style={{ fontSize: 11, color: G.gold, fontWeight: 600, marginBottom: 4 }}>✦ 오늘 리포트 미리보기</div>
+            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', lineHeight: 1.6 }}>
               {dateLabel} · #{d.issueNo}호 · {d.region} 투자 브리핑<br/>
               시총 TOP 10 · 섹터 히트맵 · 청약 {d.subCountThisWeek}건 · 미분양 {d.unsoldUnits.toLocaleString()}세대
             </div>
