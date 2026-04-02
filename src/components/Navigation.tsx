@@ -530,6 +530,17 @@ export function Navigation() {
             borderRadius: 'var(--radius-lg)', padding:16, boxShadow:'0 -8px 32px rgba(0,0,0,0.3)',
             maxHeight:'70vh', overflowY:'auto',
           }}>
+            {/* 뒤로가기 헤더 */}
+            <div style={{ display:'flex', alignItems:'center', marginBottom: 14 }}>
+              <button onClick={() => setMoreOpen(false)} style={{
+                display:'flex', alignItems:'center', gap: 4, background:'none', border:'none',
+                color:'var(--text-secondary)', cursor:'pointer', padding:'4px 8px 4px 0', fontSize:'var(--fs-sm)',
+              }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                <span style={{ fontWeight: 600 }}>뒤로</span>
+              </button>
+              <span style={{ marginLeft:'auto', fontSize:'var(--fs-sm)', fontWeight:800, color:'var(--text-primary)' }}>더보기</span>
+            </div>
             {(['투자 정보','주식','부동산','설정'] as const).map(group => {
               const items = MORE_ITEMS.filter(i => i.group === group);
               return (

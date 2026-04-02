@@ -226,15 +226,6 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
                 <div style={{ fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600 }}>단지백과</div>
                 {barStyle(100, 'var(--border)')}
               </div>
-              {/* 분양사이트 */}
-              <div style={cardStyle('#22D3EE')} onClick={() => { router.push('/apt/sites'); }} onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                  <span style={{ fontSize: 14, fontWeight: 700, color: '#22D3EE', fontVariantNumeric: 'tabular-nums' }}>5,522</span>
-                  <span style={{ fontSize: 9, color: 'var(--text-tertiary)', opacity: 0.6 }}>→</span>
-                </div>
-                <div style={{ fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600 }}>분양사이트</div>
-                {barStyle(Math.round(5522 / maxVal * 100), '#22D3EE')}
-              </div>
               {/* 부동산 지도 */}
               <div style={cardStyle('#FBB724')} onClick={() => { router.push('/apt/map'); }} onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>

@@ -1183,3 +1183,22 @@ html.theme-light [style*="box-shadow: 0 8px 32px rgba(0,0,0,0.3)"] {
 /* 라이트모드: 주식 시세 색상 대비 강화 */
 html.theme-light .stock-up { color: #DC2626 !important; }
 html.theme-light .stock-down { color: #2563EB !important; }
+
+/* 라이트모드: 메가폰/NoticeBanner 가시성 보정 */
+html.theme-light [style*="background: linear-gradient(90deg, #050A18"] {
+  background: linear-gradient(90deg, #FFF8E1 0%, #FFFBF0 50%, #FFF8E1 100%) !important;
+}
+html.theme-light [style*="background: linear-gradient(90deg, #120E16"] {
+  background: linear-gradient(90deg, #FFF0F0 0%, #FFF5F5 50%, #FFF0F0 100%) !important;
+}
+html.theme-light [style*="linear-gradient(to right, #050A18"],
+html.theme-light [style*="linear-gradient(to left, #050A18"] {
+  background: linear-gradient(to right, #FFF8E1, transparent) !important;
+}
+html.theme-light [style*="linear-gradient(to right, #120E16"],
+html.theme-light [style*="linear-gradient(to left, #120E16"] {
+  background: linear-gradient(to right, #FFF0F0, transparent) !important;
+}
+/* 라이트모드: 메가폰 텍스트 가시성 */
+html.theme-light [style*="rgba(251,191,36"] { color: #B45309 !important; }
+html.theme-light [style*="rgba(248,113,113"] { color: #DC2626 !important; }

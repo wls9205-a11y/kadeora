@@ -293,9 +293,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
               </span>
             );
           })()}
-          <Link href="/stock/compare" style={{ fontSize: 11, color: 'var(--text-secondary)', textDecoration: 'none', padding: '3px 8px', borderRadius: 12, border: '1px solid var(--border)' }}>비교</Link>
           <SectionShareButton section={isDomestic ? 'stock-kr' : 'stock-us'} label="주식 시황 한눈에 보기!" pagePath="/stock" />
-          <button onClick={() => refresh()} aria-label="새로고침" style={{ width: 28, height: 28, borderRadius: '50%', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12 }} title="시세 새로고침">↻</button>
         </div>
       </div>
 

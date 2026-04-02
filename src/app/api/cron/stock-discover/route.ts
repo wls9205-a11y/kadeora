@@ -196,7 +196,7 @@ async function handler() {
 
   // ═══ 2단계: 네이버 시총순 크롤링 (신규 종목 발굴) ═══
   for (const market of ['kospi', 'kosdaq'] as const) {
-    const discovered = await fetchNaverMarketCap(market, 2); // 2페이지 = ~100종목
+    const discovered = await fetchNaverMarketCap(market, 4); // 4페이지 = ~200종목 (시총 100위 확실 커버)
     for (const s of discovered) {
       if (!existingSet.has(s.symbol)) {
         newStocks.push({
