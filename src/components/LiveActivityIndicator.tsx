@@ -16,7 +16,7 @@ export default function LiveActivityIndicator() {
     const sb = createSupabaseBrowser() as any;
 
     const fetchActivity = async () => {
-      const v = await sb.rpc('get_active_visitors', { minutes: 30 }).then((r: any) => r.data ?? 0).catch(() => 0);
+      const v = await sb.rpc('get_active_visitors', { minutes: 60 }).then((r: any) => r.data ?? 0).catch(() => 0);
       setActiveVisitors(v);
     };
 
