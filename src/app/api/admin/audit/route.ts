@@ -117,10 +117,21 @@ export async function GET(req: NextRequest) {
   // ═══ 2. 부동산 전수조사 ═══
   if (type === 'all' || type === 'apt') {
     // 2a. apt_subscriptions — 총세대수/공급세대 체크
-    const { data: subs } = await (sb as any).from('apt_subscriptions')
-      .select('id, house_nm, region_nm, tot_supply_hshld_co, total_households, general_supply_total, special_supply_total, house_type_info, constructor_nm, developer_nm, rcept_bgnde, mvn_prearnge_ym, project_type')
-      .order('id', { ascending: false })
-      .limit(500);
+    let subs: any[] | null = null;
+    try {
+      const { data } = await (sb as any).from('apt_subscriptions')
+        .select('id, house_nm, region_nm, tot_supply_hshld_co, total_households, general_supply_total, special_supply_total, house_type_info, constructor_nm, developer_nm, rcept_bgnde, mvn_prearnge_ym, project_type')
+        .order('id', { ascending: false })
+        .limit(500);
+      subs = data;
+    } catch {
+      // project_type 컬럼 없을 경우 폴백
+      const { data } = await (sb as any).from('apt_subscriptions')
+        .select('id, house_nm, region_nm, tot_supply_hshld_co, total_households, general_supply_total, special_supply_total, house_type_info, constructor_nm, developer_nm, rcept_bgnde, mvn_prearnge_ym')
+        .order('id', { ascending: false })
+        .limit(500);
+      subs = data;
+    }
 
     const aptIssues: any[] = [];
 

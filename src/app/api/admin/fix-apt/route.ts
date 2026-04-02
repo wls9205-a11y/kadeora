@@ -77,11 +77,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true, checked: (mismatched || []).length, fixed });
   }
 
-  // K-apt 자동검증 일괄 실행 (50건)
+  // K-apt 자동검증 일괄 실행
   if (action === 'verify_batch') {
     try {
       const cronSecret = process.env.CRON_SECRET;
-      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
+      const requestUrl = new URL(req.url);
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || `${requestUrl.protocol}//${requestUrl.host}`;
       const res = await fetch(`${baseUrl}/api/cron/auto-verify-households`, {
         headers: cronSecret ? { 'Authorization': `Bearer ${cronSecret}` } : {},
         signal: AbortSignal.timeout(60000),

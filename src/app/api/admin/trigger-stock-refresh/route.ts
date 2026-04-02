@@ -19,7 +19,8 @@ export async function POST(req: NextRequest) {
   if (!cronSecret) return NextResponse.json({ error: 'CRON_SECRET not set' }, { status: 500 });
 
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
+    const requestUrl = new URL(req.url);
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || `${requestUrl.protocol}//${requestUrl.host}`;
     const res = await fetch(`${baseUrl}/api/stock-refresh`, {
       headers: { 'Authorization': `Bearer ${cronSecret}` },
       signal: AbortSignal.timeout(290000), // 290초 (maxDuration 300초 이내)

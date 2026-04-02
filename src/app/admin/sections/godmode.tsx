@@ -26,19 +26,34 @@ export default function GodModeSection() {
         body: JSON.stringify({ action, ...extra }),
       });
       const data = await res.json();
-      setFixLog(`✅ ${action} — ${JSON.stringify(data).slice(0, 200)}`);
-      // 수정 후 전수조사 자동 재실행
-      setTimeout(() => runAudit(), 1000);
+      if (!res.ok || data.error) {
+        setFixLog(`❌ ${action} 실패 — ${data.error || `HTTP ${res.status}`}`);
+      } else {
+        setFixLog(`✅ ${action} — ${JSON.stringify(data).slice(0, 200)}`);
+        setTimeout(() => runAudit(), 1500);
+      }
+    } catch (e: any) { setFixLog(`❌ ${action} 실패 — ${errMsg(e)}`); }
+  };
     } catch (e: any) { setFixLog(`❌ ${action} 실패 — ${errMsg(e)}`); }
   };
 
   const runAudit = async () => {
     setAuditLoading(true);
+    setFixLog('');
     try {
       const res = await fetch('/api/admin/audit');
       const data = await res.json();
-      setAuditData(data);
-    } catch (e: any) { setSpecialLog(`❌ 전수조사 실패 — ${errMsg(e)}`); }
+      if (data.error) {
+        setFixLog(`❌ 전수조사 실패 — ${data.error}`);
+        setAuditData(null);
+      } else {
+        setAuditData(data);
+        setFixLog('✅ 전수조사 완료');
+      }
+    } catch (e: any) {
+      setFixLog(`❌ 전수조사 실패 — ${errMsg(e)}`);
+      setAuditData(null);
+    }
     setAuditLoading(false);
   };
 
@@ -85,6 +100,31 @@ export default function GodModeSection() {
       });
       const data = await res.json();
       setSpecialLog(`✅ ${label} 완료 — ${JSON.stringify(data).slice(0, 200)}`);
+    } catch (e: unknown) {
+      setSpecialLog(`❌ ${label} 실패 — ${errMsg(e)}`);
+    } finally {
+      setSpecialRunning(false);
+    }
+  };
+
+  // 크론 엔드포인트를 god-mode single 모드로 실행 (CRON_SECRET 인증 자동)
+  const runCronSingle = async (cronPath: string, label: string) => {
+    if (specialRunning) return;
+    setSpecialRunning(true);
+    setSpecialLog(`⏳ ${label} 실행 중...`);
+    try {
+      const res = await fetch('/api/admin/god-mode', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode: 'single', endpoint: cronPath }),
+      });
+      const data = await res.json();
+      const r = data.results?.[0];
+      if (r?.ok) {
+        setSpecialLog(`✅ ${label} 완료 — HTTP ${r.status} (${(r.duration / 1000).toFixed(1)}s)`);
+      } else {
+        setSpecialLog(`❌ ${label} 실패 — ${r?.error || `HTTP ${r?.status}`}`);
+      }
     } catch (e: unknown) {
       setSpecialLog(`❌ ${label} 실패 — ${errMsg(e)}`);
     } finally {
@@ -292,7 +332,7 @@ export default function GodModeSection() {
                     style={{ padding: '5px 10px', borderRadius: 4, border: `1px solid ${C.brand}40`, background: 'transparent', color: C.brand, fontSize: 10, fontWeight: 700, cursor: 'pointer' }}>
                     📊 시총0 갱신(50건)
                   </button>
-                  <button onClick={() => runSpecial('/api/cron/stock-naver-sync', '네이버 전체 시세 동기화')}
+                  <button onClick={() => runCronSingle('/api/cron/stock-naver-sync', '네이버 전체 시세 동기화')}
                     disabled={specialRunning}
                     style={{ padding: '5px 10px', borderRadius: 4, border: `1px solid ${C.green}40`, background: 'transparent', color: C.green, fontSize: 10, fontWeight: 700, cursor: 'pointer' }}>
                     🔄 전체 네이버 동기화
@@ -313,7 +353,7 @@ export default function GodModeSection() {
                   <div style={{ marginTop: 10, padding: 10, background: `${C.yellow}08`, border: `1px solid ${C.yellow}20`, borderRadius: 6 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
                       <span style={{ fontSize: 12, fontWeight: 600, color: C.yellow }}>📋 주요 종목 누락 ({auditData.stock.missing_count}건)</span>
-                      <button onClick={() => runSpecial('/api/cron/stock-discover', '누락 종목 자동 추가')}
+                      <button onClick={() => runCronSingle('/api/cron/stock-discover', '누락 종목 자동 추가')}
                         disabled={specialRunning}
                         style={{ padding: '4px 10px', borderRadius: 4, border: `1px solid ${C.yellow}40`, background: 'transparent', color: C.yellow, fontWeight: 700, fontSize: 11, cursor: 'pointer' }}>
                         🔄 자동 추가
@@ -394,7 +434,7 @@ export default function GodModeSection() {
                     style={{ padding: '5px 10px', borderRadius: 4, border: `1px solid ${C.cyan || '#22D3EE'}40`, background: 'transparent', color: C.cyan || '#22D3EE', fontSize: 10, fontWeight: 700, cursor: 'pointer' }}>
                     🤖 K-apt 자동검증
                   </button>
-                  <button onClick={() => runSpecial('/api/cron/auto-verify-households', 'K-apt 자동검증 10건')}
+                  <button onClick={() => runCronSingle('/api/cron/auto-verify-households', 'K-apt 자동검증 10건')}
                     disabled={specialRunning}
                     style={{ padding: '5px 10px', borderRadius: 4, border: `1px solid ${C.green}40`, background: 'transparent', color: C.green, fontSize: 10, fontWeight: 700, cursor: 'pointer' }}>
                     🏠 총세대 추출 크론
@@ -446,12 +486,12 @@ export default function GodModeSection() {
             style={{ padding: '10px 16px', borderRadius: 'var(--radius-md)', border: `1px solid ${C.cyan}40`, background: C.card, color: C.cyan, fontWeight: 700, fontSize: 13, cursor: specialRunning ? 'wait' : 'pointer' }}>
             🏗️ 총세대수 추출 100건
           </button>
-          <button onClick={() => runSpecial('/api/cron/kapt-sync', 'K-apt 세대수 연동 50건')}
+          <button onClick={() => runCronSingle('/api/cron/kapt-sync', 'K-apt 세대수 연동 50건')}
             disabled={specialRunning}
             style={{ padding: '10px 16px', borderRadius: 'var(--radius-md)', border: `1px solid ${C.green}40`, background: C.card, color: C.green, fontWeight: 700, fontSize: 13, cursor: specialRunning ? 'wait' : 'pointer' }}>
             🏠 K-apt 연동 50건
           </button>
-          <button onClick={() => runSpecial('/api/cron/auto-verify-households', 'K-apt 자동검증 10건')}
+          <button onClick={() => runCronSingle('/api/cron/auto-verify-households', 'K-apt 자동검증 10건')}
             disabled={specialRunning}
             style={{ padding: '10px 16px', borderRadius: 'var(--radius-md)', border: `1px solid ${C.cyan || '#22D3EE'}40`, background: C.card, color: C.cyan || '#22D3EE', fontWeight: 700, fontSize: 13, cursor: specialRunning ? 'wait' : 'pointer' }}>
             🤖 K-apt 자동검증 10건
@@ -461,7 +501,7 @@ export default function GodModeSection() {
             style={{ padding: '10px 16px', borderRadius: 'var(--radius-md)', border: `1px solid ${C.purple}40`, background: C.card, color: C.purple, fontWeight: 700, fontSize: 13, cursor: specialRunning ? 'wait' : 'pointer' }}>
             🔄 HTML 재파싱 30건 실행
           </button>
-          <button onClick={() => runSpecial('/api/cron/naver-complex-sync', '네이버 단지 싱크')}
+          <button onClick={() => runCronSingle('/api/cron/naver-complex-sync', '네이버 단지 싱크')}
             disabled={specialRunning}
             style={{ padding: '10px 16px', borderRadius: 'var(--radius-md)', border: `1px solid ${C.green}40`, background: C.card, color: C.green, fontWeight: 700, fontSize: 13, cursor: specialRunning ? 'wait' : 'pointer' }}>
             🏘️ 네이버 단지 싱크
@@ -471,7 +511,7 @@ export default function GodModeSection() {
             style={{ padding: '10px 16px', borderRadius: 'var(--radius-md)', border: `1px solid ${C.brand}40`, background: C.card, color: C.brand, fontWeight: 700, fontSize: 13, cursor: specialRunning ? 'wait' : 'pointer' }}>
             📈 주식 시세 수동 갱신 (네이버+시총)
           </button>
-          <button onClick={() => runSpecial('/api/cron/stock-discover', '누락 종목 자동 발굴+추가')}
+          <button onClick={() => runCronSingle('/api/cron/stock-discover', '누락 종목 자동 발굴+추가')}
             disabled={specialRunning}
             style={{ padding: '10px 16px', borderRadius: 'var(--radius-md)', border: `1px solid ${C.yellow}40`, background: C.card, color: C.yellow, fontWeight: 700, fontSize: 13, cursor: specialRunning ? 'wait' : 'pointer' }}>
             🔍 누락 종목 자동 발굴
@@ -500,7 +540,7 @@ export default function GodModeSection() {
         <div style={{ fontSize: 14, fontWeight: 700, color: C.text, marginTop: 20, marginBottom: 'var(--sp-sm)' }}>🤖 총세대수 자동검증</div>
         <div style={{ fontSize: 11, color: C.textDim, marginBottom: 10 }}>K-apt 공공데이터 API 기반 자동 교차검증 · 매 6시간 자동 실행 · 확인중 {verifyCount > 0 ? `${verifyCount}건` : ''}</div>
         <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
-          <button onClick={() => runSpecial('/api/cron/auto-verify-households', 'K-apt 자동검증 10건')}
+          <button onClick={() => runCronSingle('/api/cron/auto-verify-households', 'K-apt 자동검증 10건')}
             disabled={specialRunning}
             style={{ padding: '8px 14px', borderRadius: 'var(--radius-sm)', border: `1px solid ${C.cyan || '#22D3EE'}40`, background: C.card, color: C.cyan || '#22D3EE', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>
             🤖 자동검증 실행
