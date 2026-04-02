@@ -956,15 +956,15 @@ export default function DashboardSection() {
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
           {[
-            { tag: 'UX', label: '글씨 크기 상향', desc: '기본값을 기존 크게로 상향. 전체 스케일+간격 리셋.', color: C.brand, commit: 's70-font' },
-            { tag: 'UX', label: '가독성 대폭 개선', desc: 'text-primary/secondary/tertiary 밝기 +20%, border 가시성 강화', color: C.brand, commit: 's70-read' },
-            { tag: 'FEAT', label: '화이트 모드 추가', desc: 'html.theme-light CSS 변수 + ThemeProvider 토글 + localStorage 영속', color: C.purple, commit: 's70-lite' },
-            { tag: 'FEAT', label: '블로그 가입 CTA 3종', desc: '상단배너 + 본문중간 카테고리별 + 스크롤 플로팅 (비로그인)', color: C.green, commit: 's70-cta' },
-            { tag: 'FEAT', label: '통계 자료실 신규', desc: '/apt/data + /stock/data — CSV 6종, DataCatalog JSON-LD', color: C.purple, commit: 's70-data' },
-            { tag: 'UX', label: '더보기 메뉴 재설계', desc: '4개 카테고리 그룹 + 테마전환 + 통계자료실 링크', color: C.brand, commit: 's70-more' },
-            { tag: 'SEO', label: 'Sitemap/Robots 갱신', desc: 'data 페이지 추가, robots.txt Allow 갱신', color: C.cyan, commit: 's70-seo' },
-            { tag: 'PERF', label: 'Google Font 제거', desc: 'Inter 폰트 제거 → Pretendard CDN 단일화. 번들 최적화', color: C.green, commit: 's70-perf' },
-            { tag: 'CVR', label: '회원 전환 극대화', desc: '블로그 CTA 3종 + 통계 자료실 유도 + 콘텐츠 잠금 유지', color: C.yellow, commit: 's70-cvr' },
+            { tag: 'UX', label: '글씨 크기 상향', desc: '기본값 크게로 상향. ROOT 인라인 스케일링 + CSS버그 수정.', color: C.brand, commit: 's70-font' },
+            { tag: 'UX', label: '가독성+라이트모드', desc: 'text 밝기+20%, 화이트모드 60+변수, 메가폰 색상 보정', color: C.brand, commit: 's70-lite' },
+            { tag: 'FEAT', label: 'Excel/CSV 다운로드', desc: 'xlsx 패키지, API 6종 ?format=xlsx|csv, 듀얼 버튼 UI', color: C.purple, commit: 's70-xlsx' },
+            { tag: 'UX', label: '블로그 컴팩트 리디자인', desc: '카드→리스트(밀도2배), 히어로 슬림화, 오늘추천/태그중복 제거', color: C.green, commit: 's70-blog' },
+            { tag: 'CVR', label: '블로그 CTA 5종', desc: '상단/중간/플로팅 + 읽기게이트(3편) + 목록배너', color: C.yellow, commit: 's70-cta' },
+            { tag: 'FEAT', label: '통계 자료실', desc: '/apt/data + /stock/data — Excel/CSV 듀얼 다운로드', color: C.purple, commit: 's70-data' },
+            { tag: 'UX', label: 'UI 정리', desc: '주식 비교/새로고침 삭제, 분양사이트 삭제, 더보기 뒤로가기', color: C.brand, commit: 's70-ui' },
+            { tag: 'SEO', label: 'SEO/성능', desc: 'sitemap/robots/llms.txt, preconnect, Google Font 제거', color: C.cyan, commit: 's70-seo' },
+            { tag: 'DATA', label: '시총 크롤링 확대', desc: 'stock-discover 2→4페이지 (200종목/마켓, 100위 확실 커버)', color: C.green, commit: 's70-stk' },
           ].map(r => (
             <div key={r.commit} style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm)', background: `${r.color}08`, border: `1px solid ${r.color}15` }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>
