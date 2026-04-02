@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
 
-const TIMEOUT_MS = 8000;
+const TIMEOUT_MS = 5000;
 
 async function fetchT(url: string, headers: Record<string, string>): Promise<Response | null> {
   const ctrl = new AbortController();
@@ -70,7 +70,7 @@ async function handler(_req: NextRequest) {
   const { data: targets } = await (sb.from('apt_subscriptions')
     .select('id, house_nm, region_nm, tot_supply_hshld_co, total_dong_count, max_floor')
     .in('project_type', ['재개발', '재건축']).is('total_households', null)
-    .order('tot_supply_hshld_co', { ascending: false }).limit(5) as any);
+    .order('tot_supply_hshld_co', { ascending: false }).limit(3) as any);
 
   if (!targets?.length) return { processed: 0, created: 0, updated: 0, failed: 0, metadata: { message: 'No targets' } };
   console.log(`[naver] ${targets.length} targets (top: ${targets[0].house_nm})`);
@@ -79,7 +79,7 @@ async function handler(_req: NextRequest) {
   const results: any[] = [];
 
   for (const t of targets) {
-    await new Promise(r => setTimeout(r, 1500));
+    await new Promise(r => setTimeout(r, 800));
     try {
       let sr = await searchComplex(t.house_nm);
       if (!sr) { const short = t.house_nm.split(' ').slice(0, 2).join(' '); sr = short !== t.house_nm ? await searchComplex(short) : null; }
@@ -87,7 +87,7 @@ async function handler(_req: NextRequest) {
 
       if (sim(t.house_nm, sr.name) < 0.4) { results.push({ name: t.house_nm, naver: sr.name, status: 'mismatch' }); failed++; continue; }
 
-      await new Promise(r => setTimeout(r, 1000));
+      await new Promise(r => setTimeout(r, 500));
       const d = await getDetail(sr.complexNo);
       if (!d || d.hh <= 0) { results.push({ name: t.house_nm, status: 'no_data' }); failed++; continue; }
       if (d.hh < t.tot_supply_hshld_co) { results.push({ name: t.house_nm, naver_hh: d.hh, supply: t.tot_supply_hshld_co, status: 'hh<supply' }); failed++; continue; }
@@ -123,6 +123,10 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const auth = req.headers.get('authorization');
+  if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
   const result = await withCronLogging('naver-complex-sync', () => handler(req));
   return NextResponse.json(result);
 }
