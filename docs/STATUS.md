@@ -44,7 +44,7 @@
 - 종합 심사서류 PDF (10페이지) 생성
 - 이메일 답문 초안 작성
 
-## 크론 현황 (총 97개)
+## 크론 현황 (총 95+2 신규 = 97개)
 | 신규 | post-ai-summary (매일 22:00), blog-internal-links (일 03:00) |
 | 변경 | stock-desc-gen (4회→1회), blog-rewrite (매일→월,목) |
 
