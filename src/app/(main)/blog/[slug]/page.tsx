@@ -146,7 +146,7 @@ export async function generateMetadata({ params }: Props) {
   const { slug: rawSlug } = await params;
   const slug = decodeURIComponent(rawSlug);
   const sb = await createSupabaseServer();
-  const { data: post } = await sb.from('blog_posts').select('id,title,slug,content,excerpt,category,sub_category,cover_image,image_alt,tags,meta_description,meta_keywords,author_name,author_role,reading_time_min,view_count,comment_count,helpful_count,published_at,created_at,updated_at,series_id,series_order,source_type,source_ref,data_date,rewritten_at,related_slugs').eq('slug', slug).eq('is_published', true).maybeSingle();
+  const { data: post } = await sb.from('blog_posts').select('id,title,slug,content,excerpt,category,sub_category,cover_image,image_alt,tags,meta_description,meta_keywords,author_name,author_role,reading_time_min,view_count,comment_count,helpful_count,published_at,created_at,updated_at,series_id,series_order,source_type,source_ref,data_date,rewritten_at').eq('slug', slug).eq('is_published', true).maybeSingle();
   if (!post) return {};
     const ogImage = post.cover_image || `${SITE}/api/og?title=${encodeURIComponent(post.title)}&category=${post.category}&author=${encodeURIComponent(post.author_name || '카더라 데이터팀')}&design=2`;
     const ogSquare = `${SITE}/api/og-square?title=${encodeURIComponent(post.title)}&category=${post.category}&author=${encodeURIComponent(post.author_name || '카더라 데이터팀')}`;
@@ -204,7 +204,7 @@ export default async function BlogDetailPage({ params }: Props) {
   const slug = decodeURIComponent(rawSlug);
   const sb = await createSupabaseServer();
 
-  const { data: post } = await sb.from('blog_posts').select('id,title,slug,content,excerpt,category,sub_category,cover_image,image_alt,tags,meta_description,meta_keywords,author_name,author_role,reading_time_min,view_count,comment_count,helpful_count,published_at,created_at,updated_at,series_id,series_order,source_type,source_ref,data_date,rewritten_at,related_slugs').eq('slug', slug).eq('is_published', true).maybeSingle();
+  const { data: post } = await sb.from('blog_posts').select('id,title,slug,content,excerpt,category,sub_category,cover_image,image_alt,tags,meta_description,meta_keywords,author_name,author_role,reading_time_min,view_count,comment_count,helpful_count,published_at,created_at,updated_at,series_id,series_order,source_type,source_ref,data_date,rewritten_at').eq('slug', slug).eq('is_published', true).maybeSingle();
   if (!post) return notFound();
 
   // 뷰카운트 atomic 증가 — RPC로 race condition 방지
@@ -224,8 +224,12 @@ export default async function BlogDetailPage({ params }: Props) {
   // 관련 글 추천 (pre-computed related_slugs 우선 → 태그 유사도 → 카테고리 폴백)
   let related: Record<string, any>[] = [];
   try {
-    // 1순위: 크론으로 미리 계산된 related_slugs
-    const precomputed: string[] = (post as any).related_slugs || [];
+    // 1순위: 크론으로 미리 계산된 related_slugs (별도 쿼리 — 타입 안전)
+    let precomputed: string[] = [];
+    try {
+      const { data: relData } = await sb.from('blog_posts').select('related_slugs' as any).eq('id', post.id).single();
+      precomputed = (relData as any)?.related_slugs || [];
+    } catch { /* 컬럼 없을 수 있음 */ }
     if (precomputed.length > 0) {
       const { data: preRelated } = await sb.from('blog_posts')
         .select('slug, title, view_count').in('slug', precomputed).eq('is_published', true).limit(5);
