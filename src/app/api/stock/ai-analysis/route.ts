@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 종목 데이터 조회
-    const { data: stock } = await supabase.from('stock_quotes')
+    const { data: stock } = await (supabase as any).from('stock_quotes')
       .select('symbol, name, price, change_pct, change_amt, volume, market_cap, sector, market, high_52w, low_52w, per, pbr, dividend_yield, description')
       .eq('symbol', symbol.toUpperCase())
       .single();
@@ -89,14 +89,14 @@ export async function POST(req: NextRequest) {
     if (!stock) return NextResponse.json({ error: '종목을 찾을 수 없습니다' }, { status: 404 });
 
     // 최근 가격 히스토리
-    const { data: priceHistory } = await supabase.from('stock_price_history')
+    const { data: priceHistory } = await (supabase as any).from('stock_price_history')
       .select('date, close, volume')
       .eq('symbol', symbol.toUpperCase())
       .order('date', { ascending: false })
       .limit(30);
 
     // 최근 뉴스
-    const { data: news } = await supabase.from('stock_news')
+    const { data: news } = await (supabase as any).from('stock_news')
       .select('title, ai_summary, sentiment')
       .eq('symbol', symbol.toUpperCase())
       .order('published_at', { ascending: false })
