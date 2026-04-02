@@ -106,43 +106,35 @@ export default async function AptDataPage() {
       {/* 다운로드 카테고리 */}
       <h2 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 14 }}>📥 데이터 카테고리</h2>
 
-      {/* 특별 자료: 부산 분양가 */}
-      <div style={{ marginBottom: 16, padding: 18, borderRadius: 'var(--radius-lg)', background: 'linear-gradient(135deg, var(--accent-orange-bg), var(--accent-yellow-bg))', border: '1px solid var(--accent-orange)', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: -20, right: -10, fontSize: 60, opacity: 0.15 }}>🏗️</div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-          <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 4, background: 'var(--accent-orange)', color: '#fff' }}>NEW</span>
-          <span style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)' }}>부산 분양가 현황 (2024~2025)</span>
-        </div>
-        <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: 12 }}>
-          부산 39개 분양단지의 분양가·세대수·규모·입주예정일 비교 데이터
-        </div>
-        <a href="/data/busan-apt-pricing-2024-2025.csv" download style={{
-          display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 18px',
-          borderRadius: 'var(--radius-pill)', background: 'var(--accent-orange)', color: '#fff',
-          fontWeight: 700, fontSize: 13, textDecoration: 'none',
-        }}>📥 CSV 다운로드 (39단지)</a>
-      </div>
-
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 12, marginBottom: 32 }}>
         {[
-          { title: '청약 일정 및 분양가', desc: '접수중·예정 청약 현장의 분양가·세대수·일정 데이터', href: '/api/data/apt-subscription', icon: '🏗️', format: 'CSV' },
-          { title: '미분양 현황', desc: '전국 시도별·시군구별 미분양 아파트 현황 데이터', href: '/api/data/apt-unsold', icon: '🏚️', format: 'CSV' },
-          { title: '단지백과 기본 정보', desc: '전국 34,000+ 아파트 단지의 기본 정보·세대수·준공일', href: '/api/data/apt-complex', icon: '🏢', format: 'CSV' },
+          { title: '청약 일정 및 분양가', desc: '접수중·예정 청약 현장의 분양가·세대수·일정 데이터', icon: '🏗️',
+            links: [{ href: '/api/data/apt-subscription?format=xlsx', label: 'Excel', color: 'var(--accent-green)' }, { href: '/api/data/apt-subscription?format=csv', label: 'CSV', color: 'var(--accent-blue)' }] },
+          { title: '미분양 현황', desc: '전국 시도별·시군구별 미분양 아파트 현황 데이터', icon: '🏚️',
+            links: [{ href: '/api/data/apt-unsold?format=xlsx', label: 'Excel', color: 'var(--accent-green)' }, { href: '/api/data/apt-unsold?format=csv', label: 'CSV', color: 'var(--accent-blue)' }] },
+          { title: '단지백과 기본 정보', desc: '전국 34,000+ 아파트 단지의 기본 정보·세대수·준공일', icon: '🏢',
+            links: [{ href: '/api/data/apt-complex?format=xlsx', label: 'Excel', color: 'var(--accent-green)' }, { href: '/api/data/apt-complex?format=csv', label: 'CSV', color: 'var(--accent-blue)' }] },
         ].map(item => (
-          <a key={item.title} href={item.href} download style={{
-            display: 'block', padding: 18, borderRadius: 'var(--radius-lg)',
+          <div key={item.title} style={{
+            padding: 18, borderRadius: 'var(--radius-lg)',
             background: 'var(--bg-surface)', border: '1px solid var(--border)',
-            textDecoration: 'none', transition: 'border-color 0.15s',
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
               <span style={{ fontSize: 28 }}>{item.icon}</span>
-              <div>
-                <div style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)' }}>{item.title}</div>
-                <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 6px', borderRadius: 4, background: 'var(--accent-green-bg)', color: 'var(--accent-green)' }}>{item.format}</span>
-              </div>
+              <div style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)' }}>{item.title}</div>
             </div>
-            <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.5 }}>{item.desc}</div>
-          </a>
+            <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: 12 }}>{item.desc}</div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              {item.links.map(l => (
+                <a key={l.label} href={l.href} download style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 4, padding: '6px 14px',
+                  borderRadius: 'var(--radius-pill)', fontSize: 'var(--fs-xs)', fontWeight: 700,
+                  textDecoration: 'none', background: `color-mix(in srgb, ${l.color} 15%, transparent)`,
+                  color: l.color, border: `1px solid color-mix(in srgb, ${l.color} 30%, transparent)`,
+                }}>📥 {l.label}</a>
+              ))}
+            </div>
+          </div>
         ))}
       </div>
 
