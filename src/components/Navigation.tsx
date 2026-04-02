@@ -190,7 +190,7 @@ export function Navigation() {
           {/* 로고 */}
           <Link href="/feed" style={{ display:'flex', alignItems:'center', gap:6, textDecoration:'none', flexShrink:0, marginRight:2 }}>
             <KadeoraLogo size={26} />
-            <span style={{ fontWeight:800, fontSize:15, color:'var(--brand)', letterSpacing:-0.5 }}>
+            <span style={{ fontWeight:800, fontSize:'var(--fs-sm)', color:'var(--brand)', letterSpacing:-0.5 }}>
               카더라
             </span>
           </Link>
@@ -427,7 +427,7 @@ export function Navigation() {
                   border:'1px solid var(--brand)',
                   color:'var(--brand)', background:'transparent',
                   display:'flex', alignItems:'center',
-                  textDecoration:'none', fontSize:13, fontWeight:700,
+                  textDecoration:'none', fontSize:'var(--fs-xs)', fontWeight:700,
                   transition:'border-color 0.12s',
                 }}
                   onMouseEnter={e=>(e.currentTarget.style.borderColor='var(--border-strong)')}
@@ -436,7 +436,7 @@ export function Navigation() {
                 <Link href={`/login?redirect=${encodeURIComponent(pathname)}`} className="hidden md:flex" style={{
                   height:34, padding:'0 14px', borderRadius:17,
                   background:'var(--brand)', color:'var(--text-inverse, #fff)',
-                  alignItems:'center', textDecoration:'none', fontSize:13, fontWeight:700,
+                  alignItems:'center', textDecoration:'none', fontSize:'var(--fs-xs)', fontWeight:700,
                 }}>회원가입</Link>
               </>
             )}
@@ -572,13 +572,13 @@ export function Navigation() {
                   <Link href={`/profile/${userId}`} onClick={() => setMoreOpen(false)} style={{
                     flex:1, textAlign:'center', padding:'10px 0', borderRadius: 'var(--radius-md)',
                     background:'var(--bg-hover)', color:'var(--text-primary)',
-                    fontSize:13, fontWeight:600, textDecoration:'none',
+                    fontSize:'var(--fs-xs)', fontWeight:600, textDecoration:'none',
                     display:'flex', alignItems:'center', justifyContent:'center',
                   }}>내 프로필</Link>
                   <Link href="/notifications" onClick={() => setMoreOpen(false)} style={{
                     flex:1, textAlign:'center', padding:'10px 0', borderRadius: 'var(--radius-md)',
                     background:'var(--bg-hover)', color:'var(--text-primary)',
-                    fontSize:13, fontWeight:600, textDecoration:'none',
+                    fontSize:'var(--fs-xs)', fontWeight:600, textDecoration:'none',
                     display:'flex', alignItems:'center', justifyContent:'center',
                   }}>알림{unread > 0 ? ` (${unread})` : ''}</Link>
                 </>
@@ -635,19 +635,19 @@ export function Navigation() {
                   <Link href={`/profile/${userId}`} onClick={() => setMoreOpen(false)} style={{
                     flex:1, textAlign:'center', padding:'10px 0', borderRadius: 'var(--radius-md)',
                     background:'var(--bg-hover)', color:'var(--text-primary)',
-                    fontSize:13, fontWeight:600, textDecoration:'none',
+                    fontSize:'var(--fs-xs)', fontWeight:600, textDecoration:'none',
                     display:'flex', alignItems:'center', justifyContent:'center',
                   }}>내 프로필</Link>
                   <Link href="/write" onClick={() => setMoreOpen(false)} style={{
                     flex:1, textAlign:'center', padding:'10px 0', borderRadius: 'var(--radius-md)',
                     background:'var(--bg-hover)', color:'var(--text-primary)',
-                    fontSize:13, fontWeight:600, textDecoration:'none',
+                    fontSize:'var(--fs-xs)', fontWeight:600, textDecoration:'none',
                     display:'flex', alignItems:'center', justifyContent:'center',
                   }}>글쓰기</Link>
                   <Link href="/notifications" onClick={() => setMoreOpen(false)} style={{
                     flex:1, textAlign:'center', padding:'10px 0', borderRadius: 'var(--radius-md)',
                     background:'var(--bg-hover)', color:'var(--text-primary)',
-                    fontSize:13, fontWeight:600, textDecoration:'none',
+                    fontSize:'var(--fs-xs)', fontWeight:600, textDecoration:'none',
                     display:'flex', alignItems:'center', justifyContent:'center',
                   }}>알림{unread > 0 ? ` (${unread})` : ''}</Link>
                 </>

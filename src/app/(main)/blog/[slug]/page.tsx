@@ -502,7 +502,7 @@ export default async function BlogDetailPage({ params }: Props) {
             </div>
 
             {/* 제목 */}
-            <h1 style={{ fontSize: 21, fontWeight: 900, color: 'var(--text-primary)', lineHeight: 1.4, margin: '0 0 14px', wordBreak: 'keep-all', letterSpacing: '-0.5px' }}>{post.title}</h1>
+            <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 900, color: 'var(--text-primary)', lineHeight: 1.4, margin: '0 0 14px', wordBreak: 'keep-all', letterSpacing: '-0.5px' }}>{post.title}</h1>
 
             {/* 저자 바 — 히어로 안 */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 'var(--sp-md) var(--card-p)', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)' }}>

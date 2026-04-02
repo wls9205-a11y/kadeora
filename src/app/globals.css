@@ -250,34 +250,38 @@ html.font-large {
   --fs-2xl: 36px;
 }
 
-/* 세션70: 인라인 font-size 강제 스케일링 — 기본값이 커졌으므로 root도 오버라이드 */
+/* 세션70: 인라인 font-size 강제 스케일링
+   React renders: style="font-size: 13px" (with space after colon)
+   SSR HTML may have: fontSize:13 (camelCase)
+   Both patterns must be matched */
 
-/* ── ROOT (기본값 = 기존 크게 수준): 작은 인라인 사이즈 끌어올리기 ── */
-:root [style*="fontSize:9"],  :root [style*="font-size:9px"]  { font-size: 11px !important; }
-:root [style*="fontSize:10"], :root [style*="font-size:10px"] { font-size: 12px !important; }
-:root [style*="fontSize:11"], :root [style*="font-size:11px"] { font-size: 13px !important; }
-:root [style*="fontSize:12"], :root [style*="font-size:12px"] { font-size: 14px !important; }
-:root [style*="fontSize:13"], :root [style*="font-size:13px"] { font-size: 15px !important; }
-:root [style*="fontSize:14"], :root [style*="font-size:14px"] { font-size: 16px !important; }
-:root [style*="fontSize:15"], :root [style*="font-size:15px"] { font-size: 16px !important; }
+/* ── ROOT: 작은 인라인 사이즈 끌어올리기 ── */
+[style*="font-size: 9px"]  { font-size: 11px !important; }
+[style*="font-size: 10px"] { font-size: 12px !important; }
+[style*="font-size: 11px"] { font-size: 13px !important; }
+[style*="font-size: 12px"] { font-size: 14px !important; }
+[style*="font-size: 13px"] { font-size: 15px !important; }
+[style*="font-size: 14px"] { font-size: 16px !important; }
+[style*="font-size: 15px"] { font-size: 16px !important; }
 
-/* ── font-large: 더 크게 (기본값보다 +2~3px) ── */
-html.font-large [style*="fontSize:9"],  html.font-large [style*="font-size:9px"]  { font-size: 13px !important; }
-html.font-large [style*="fontSize:10"], html.font-large [style*="font-size:10px"] { font-size: 14px !important; }
-html.font-large [style*="fontSize:11"], html.font-large [style*="font-size:11px"] { font-size: 15px !important; }
-html.font-large [style*="fontSize:12"], html.font-large [style*="font-size:12px"] { font-size: 16px !important; }
-html.font-large [style*="fontSize:13"], html.font-large [style*="font-size:13px"] { font-size: 17px !important; }
-html.font-large [style*="fontSize:14"], html.font-large [style*="font-size:14px"] { font-size: 18px !important; }
-html.font-large [style*="fontSize:15"], html.font-large [style*="font-size:15px"] { font-size: 19px !important; }
-html.font-large [style*="fontSize:16"], html.font-large [style*="font-size:16px"] { font-size: 20px !important; }
+/* ── font-large: 더 크게 ── */
+html.font-large [style*="font-size: 9px"]  { font-size: 13px !important; }
+html.font-large [style*="font-size: 10px"] { font-size: 14px !important; }
+html.font-large [style*="font-size: 11px"] { font-size: 15px !important; }
+html.font-large [style*="font-size: 12px"] { font-size: 16px !important; }
+html.font-large [style*="font-size: 13px"] { font-size: 17px !important; }
+html.font-large [style*="font-size: 14px"] { font-size: 18px !important; }
+html.font-large [style*="font-size: 15px"] { font-size: 19px !important; }
+html.font-large [style*="font-size: 16px"] { font-size: 20px !important; }
 
-/* ── font-small: 기존 보통 수준 (인라인 사이즈 그대로 유지 or 축소) ── */
-html.font-small [style*="fontSize:16"], html.font-small [style*="font-size:16px"] { font-size: 14px !important; }
-html.font-small [style*="fontSize:15"], html.font-small [style*="font-size:15px"] { font-size: 13px !important; }
-html.font-small [style*="fontSize:14"], html.font-small [style*="font-size:14px"] { font-size: 12px !important; }
-html.font-small [style*="fontSize:13"], html.font-small [style*="font-size:13px"] { font-size: 12px !important; }
-html.font-small [style*="fontSize:12"], html.font-small [style*="font-size:12px"] { font-size: 11px !important; }
-html.font-small [style*="fontSize:11"], html.font-small [style*="font-size:11px"] { font-size: 10px !important; }
+/* ── font-small: 축소 ── */
+html.font-small [style*="font-size: 16px"] { font-size: 14px !important; }
+html.font-small [style*="font-size: 15px"] { font-size: 13px !important; }
+html.font-small [style*="font-size: 14px"] { font-size: 12px !important; }
+html.font-small [style*="font-size: 13px"] { font-size: 12px !important; }
+html.font-small [style*="font-size: 12px"] { font-size: 11px !important; }
+html.font-small [style*="font-size: 11px"] { font-size: 10px !important; }
+html.font-small [style*="font-size: 10px"] { font-size: 10px !important; }
 
 /* font-large/small 레이아웃 보정 */
 html.font-large input, html.font-large textarea, html.font-large select { font-size: 20px !important; }
@@ -1161,3 +1165,21 @@ html.font-large [style*="gridTemplateColumns"] > * {
 * {
   transition: font-size 0.15s ease;
 }
+
+/* 세션70: 라이트모드 오버레이/배경 보정 */
+html.theme-light [style*="rgba(0,0,0,0.5)"],
+html.theme-light [style*="rgba(0, 0, 0, 0.5)"] {
+  background-color: rgba(0,0,0,0.25) !important;
+}
+/* 라이트모드: 네비 드롭다운/바텀시트 그림자 강화 */
+html.theme-light [style*="boxShadow: 0 8px"],
+html.theme-light [style*="box-shadow: 0 8px"] {
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12) !important;
+}
+/* 라이트모드: 플로팅 CTA 배경 */
+html.theme-light [style*="box-shadow: 0 8px 32px rgba(0,0,0,0.3)"] {
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12) !important;
+}
+/* 라이트모드: 주식 시세 색상 대비 강화 */
+html.theme-light .stock-up { color: #DC2626 !important; }
+html.theme-light .stock-down { color: #2563EB !important; }
