@@ -34,8 +34,6 @@ export default function GodModeSection() {
       }
     } catch (e: any) { setFixLog(`❌ ${action} 실패 — ${errMsg(e)}`); }
   };
-    } catch (e: any) { setFixLog(`❌ ${action} 실패 — ${errMsg(e)}`); }
-  };
 
   const runAudit = async () => {
     setAuditLoading(true);
