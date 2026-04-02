@@ -29,13 +29,11 @@ const CRON_GROUPS = {
     '/api/cron/crawl-busan-redev',
     '/api/cron/crawl-gyeonggi-redev',
     '/api/cron/crawl-nationwide-redev',
-    '/api/stock-refresh',
     '/api/cron/stock-crawl',
     '/api/cron/stock-discover',
     '/api/cron/exchange-rate',
     '/api/cron/stock-news-crawl',
     '/api/cron/stock-flow-crawl',
-    '/api/cron/stock-price',
     '/api/cron/invest-calendar-refresh',
     '/api/cron/crawl-apt-rent',
   ],
@@ -122,7 +120,6 @@ const CRON_GROUPS = {
     '/api/cron/premium-expire',
     '/api/cron/refresh-mv',
     '/api/cron/stock-naver-sync',
-    '/api/admin/batch-pdf-parse',
   ],
 };
 
