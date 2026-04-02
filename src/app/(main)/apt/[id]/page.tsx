@@ -786,19 +786,17 @@ export default async function AptUnifiedPage({ params }: Props) {
             })()}
           </div>
 
-          {/* 시행사 유형 + 공급 주소 */}
+          {/* 시행 유형 뱃지 */}
           {(() => {
             const dev = sub.developer_nm || site?.developer || '';
             const isJohap = dev.includes('조합') || dev.includes('정비');
             const isPublic = dev.includes('공사') || dev.includes('LH') || dev.includes('SH');
-            const devType = isJohap ? { label: '재개발/재건축 조합', icon: '🔄', color: '#FB923C' } : isPublic ? { label: '공공 시행', icon: '🏛️', color: 'var(--accent-green)' } : dev ? { label: '민간 시행', icon: '🏢', color: 'var(--brand)' } : null;
+            const devType = isJohap ? { label: '재개발/재건축 조합', icon: '🔄', color: '#FB923C' } : isPublic ? { label: '공공 시행', icon: '🏛️', color: 'var(--accent-green)' } : null;
             if (!devType) return null;
             return (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 'var(--sp-md)', padding: '6px 10px', borderRadius: 'var(--radius-xs)', background: 'var(--bg-hover)', fontSize: 11 }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, marginBottom: 'var(--sp-sm)', padding: '4px 10px', borderRadius: 'var(--radius-xs)', background: `${devType.color}12`, fontSize: 11 }}>
                 <span>{devType.icon}</span>
                 <span style={{ color: devType.color, fontWeight: 700 }}>{devType.label}</span>
-                <span style={{ color: 'var(--text-tertiary)' }}>·</span>
-                <span style={{ color: 'var(--text-tertiary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{dev}</span>
               </div>
             );
           })()}
@@ -821,13 +819,11 @@ export default async function AptUnifiedPage({ params }: Props) {
             </div>
           </div>
 
-          {/* 단지 개요 행 — 모집공고 파싱 데이터 전체 표시 */}
+          {/* 단지 개요 행 — 건물 스펙 (시공사/시행사는 상단 헤더에 표시) */}
           {(() => {
             const rows = [
-              ['시공사', sub.constructor_nm || site?.builder],
-              ['시행사', sub.developer_nm || site?.developer],
               ['브랜드', sub.brand_name],
-              ['사업유형', sub.project_type],
+              ['사업유형', (sub as any).project_type],
               ['총세대수', sub.total_households ? `${Number(sub.total_households).toLocaleString()}세대 (단지 전체)` : null],
               ['공급세대', sub.tot_supply_hshld_co ? `${Number(sub.tot_supply_hshld_co).toLocaleString()}세대 (일반${sub.general_supply_total || '-'} · 특별${sub.special_supply_total || '-'})` : null],
               ['동수', (sub.total_dong_count || sub.total_dong_co) ? `${sub.total_dong_count || sub.total_dong_co}개 동` : null],
@@ -1331,23 +1327,9 @@ export default async function AptUnifiedPage({ params }: Props) {
 
       {/* Location */}
       <div className="apt-card"><h2 style={ct}>📍 위치 정보</h2>
-        {((site?.nearby_station || sub?.nearest_station) || (site?.school_district || sub?.nearest_school)) && (
-          <div style={{ display: 'flex', gap: 'var(--sp-sm)', flexWrap: 'wrap', marginBottom: 'var(--sp-md)' }}>
-            {(site?.nearby_station || sub?.nearest_station) && (
-              <span style={{ fontSize: 12, padding: '4px 10px', borderRadius: 'var(--radius-xs)', background: 'rgba(96,165,250,0.1)', color: 'var(--accent-blue)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)' }}>
-                🚇 {site?.nearby_station || sub?.nearest_station}
-              </span>
-            )}
-            {(site?.school_district || sub?.nearest_school) && (
-              <span style={{ fontSize: 12, padding: '4px 10px', borderRadius: 'var(--radius-xs)', background: 'rgba(52,211,153,0.1)', color: 'var(--accent-green)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)' }}>
-                🏫 {site?.school_district || sub?.nearest_school}
-              </span>
-            )}
-          </div>
-        )}
         {(site?.address || sub?.hssply_adres || redev?.address) && <div style={rw}><span style={rl}>주소</span><span style={{ ...rv, fontSize: 'var(--fs-xs)', maxWidth: '70%' }}>{site?.address || sub?.hssply_adres || redev?.address}</span></div>}
         {(site?.nearby_station || sub?.nearest_station) && <div style={rw}><span style={rl}>최근접역</span><span style={{ ...rv, color: 'var(--accent-green)' }}>{site?.nearby_station || sub?.nearest_station}</span></div>}
-        {(site?.school_district || sub?.nearest_school) && <div style={{ ...rw, borderBottom: 'none' }}><span style={rl}>학군</span><span style={rv}>{site?.school_district || sub?.nearest_school}</span></div>}
+        {(site?.school_district || sub?.nearest_school) && <div style={{ ...rw, borderBottom: redev?.notes ? undefined : 'none' }}><span style={rl}>학군</span><span style={rv}>{site?.school_district || sub?.nearest_school}</span></div>}
         {redev?.notes && <div style={{ ...rw, borderBottom: 'none' }}><span style={rl}>비고</span><span style={rv}>{redev.notes}</span></div>}
         <div style={{ display: 'flex', gap: 6, marginTop: 10 }}>
           <a href={`https://map.kakao.com/?q=${encodeURIComponent(site?.address || sub?.hssply_adres || redev?.address || name)}`} target="_blank" rel="noopener noreferrer" style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>🗺️ 카카오맵</a>
