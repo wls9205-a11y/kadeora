@@ -107,8 +107,8 @@ export default function GodModeSection() {
   };
 
   const modes = [
-    { key: 'full', label: '⚡ 전체 실행', desc: 'Phase 순차 — 94개 전 크론 (주식+부동산+검증 포함)', color: C.brand },
-    { key: 'data', label: '📊 데이터 수집', desc: '청약/실거래/주식시세(네이버)/재개발 17개', color: C.green },
+    { key: 'full', label: '⚡ 전체 실행', desc: 'Phase 순차 — 95개 전 크론 (종목발굴+시세+부동산+검증)', color: C.brand },
+    { key: 'data', label: '📊 데이터 수집', desc: '청약/실거래/주식시세/종목발굴/재개발 18개', color: C.green },
     { key: 'process', label: '⚙️ 데이터 가공', desc: '집계/싱크/총세대수검증/K-apt/네이버단지 13개', color: C.cyan },
     { key: 'ai', label: '🤖 AI 생성', desc: '요약/이미지/트렌드 7개 (fire&forget)', color: C.purple },
     { key: 'content', label: '📝 콘텐츠', desc: '블로그/시드 36개 (fire&forget)', color: C.yellow },
@@ -254,6 +254,39 @@ export default function GodModeSection() {
                     </div>
                   </div>
                 )}
+                {/* 시장별 종목 수 */}
+                {auditData.stock.by_market && (
+                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 10, marginBottom: 6 }}>
+                    {Object.entries(auditData.stock.by_market).map(([m, c]: any) => (
+                      <span key={m} style={{ fontSize: 11, padding: '3px 8px', borderRadius: 4, background: `${C.brand}10`, color: C.brand, fontWeight: 600 }}>
+                        {m}: {c}개
+                      </span>
+                    ))}
+                  </div>
+                )}
+                {/* 누락 종목 */}
+                {(auditData.stock.missing_count > 0) && (
+                  <div style={{ marginTop: 10, padding: 10, background: `${C.yellow}08`, border: `1px solid ${C.yellow}20`, borderRadius: 6 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                      <span style={{ fontSize: 12, fontWeight: 600, color: C.yellow }}>📋 주요 종목 누락 ({auditData.stock.missing_count}건)</span>
+                      <button onClick={() => runSpecial('/api/cron/stock-discover', '누락 종목 자동 추가')}
+                        disabled={specialRunning}
+                        style={{ padding: '4px 10px', borderRadius: 4, border: `1px solid ${C.yellow}40`, background: 'transparent', color: C.yellow, fontWeight: 700, fontSize: 11, cursor: 'pointer' }}>
+                        🔄 자동 추가
+                      </button>
+                    </div>
+                    {auditData.stock.missing_kr_top30?.length > 0 && (
+                      <div style={{ fontSize: 10, color: C.textSec, marginBottom: 2 }}>
+                        한국 누락: {auditData.stock.missing_kr_top30.join(', ')}
+                      </div>
+                    )}
+                    {auditData.stock.missing_us_top30?.length > 0 && (
+                      <div style={{ fontSize: 10, color: C.textSec }}>
+                        해외 누락: {auditData.stock.missing_us_top30.join(', ')}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 
@@ -362,6 +395,11 @@ export default function GodModeSection() {
             disabled={specialRunning}
             style={{ padding: '10px 16px', borderRadius: 'var(--radius-md)', border: `1px solid ${C.brand}40`, background: C.card, color: C.brand, fontWeight: 700, fontSize: 13, cursor: specialRunning ? 'wait' : 'pointer' }}>
             📈 주식 시세 수동 갱신 (네이버+시총)
+          </button>
+          <button onClick={() => runSpecial('/api/cron/stock-discover', '누락 종목 자동 발굴+추가')}
+            disabled={specialRunning}
+            style={{ padding: '10px 16px', borderRadius: 'var(--radius-md)', border: `1px solid ${C.yellow}40`, background: C.card, color: C.yellow, fontWeight: 700, fontSize: 13, cursor: specialRunning ? 'wait' : 'pointer' }}>
+            🔍 누락 종목 자동 발굴
           </button>
         </div>
         {/* 벌크 수집 */}

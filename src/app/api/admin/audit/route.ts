@@ -56,6 +56,14 @@ export async function GET(req: NextRequest) {
       }
     }
 
+    // 시장별 종목 수 통계
+    const stockSet = new Set((stocks || []).map(s => s.symbol));
+    const marketCounts: Record<string, number> = {};
+    for (const s of (stocks || [])) {
+      const m = s.market || 'UNKNOWN';
+      marketCounts[m] = (marketCounts[m] || 0) + 1;
+    }
+
     // 시총 TOP 20 확인
     const top20 = (stocks || []).slice(0, 20).map(s => ({
       rank: (stocks || []).indexOf(s) + 1,
@@ -71,8 +79,26 @@ export async function GET(req: NextRequest) {
       updated: s.updated_at?.slice(0, 16),
     }));
 
+    // 네이버 시총 TOP 30 대비 누락 체크 (한국 주요 종목)
+    const naverTop30KR = [
+      '005930','000660','373220','005490','035420','035720','051910',
+      '006400','028260','207940','003550','105560','055550','066570',
+      '096770','032830','000270','012330','034730','015760','003670',
+      '030200','086790','316140','047050','259960','011200','010130',
+      '033780','009150'
+    ];
+    const naverTop30US = [
+      'AAPL','MSFT','GOOGL','AMZN','NVDA','META','TSLA','BRK-B',
+      'UNH','JNJ','JPM','V','PG','MA','HD','XOM','LLY','AVGO',
+      'COST','MRK','ABBV','PEP','KO','WMT','TMO','CSCO','CRM','ACN',
+      'ADBE','NFLX'
+    ];
+    const missingKR = naverTop30KR.filter(s => !stockSet.has(s));
+    const missingUS = naverTop30US.filter(s => !stockSet.has(s));
+
     results.stock = {
       total: (stocks || []).length,
+      by_market: marketCounts,
       issues_count: stockIssues.length,
       issues: stockIssues.slice(0, 50),
       top20,
@@ -82,6 +108,9 @@ export async function GET(req: NextRequest) {
         const u = s.updated_at ? new Date(s.updated_at).getTime() : 0;
         return (now - u) > 3 * 86400000;
       }).length,
+      missing_kr_top30: missingKR,
+      missing_us_top30: missingUS,
+      missing_count: missingKR.length + missingUS.length,
     };
   }
 

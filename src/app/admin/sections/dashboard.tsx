@@ -968,6 +968,8 @@ export default function DashboardSection() {
             { tag: 'UX', label: '모바일 CSS 방어', desc: 'min-width:0·테이블 스크롤·인터랙션 wrap 60줄+', color: C.cyan, commit: '8a60d0a' },
             { tag: 'UX', label: '1fr→minmax 전체교정', desc: 'shop/hot/apt/complex+컴포넌트 13파일 그리드 안전화', color: C.cyan, commit: 'f4d8b68' },
             { tag: 'FEAT', label: '피드 뻘글 확대', desc: 'DEMO 8→15개·자유/로컬/주식/부동산 다양화', color: C.brand, commit: '8a60d0a' },
+            { tag: 'FEAT', label: '종목 자동 발굴', desc: '네이버 시총TOP 크롤링→미등록 종목 자동 추가 크론', color: C.purple, commit: 'latest' },
+            { tag: 'FEAT', label: '전수조사 시스템', desc: '주식시총TOP20+이상종목+누락종목+부동산 데이터 검사', color: C.green, commit: 'latest' },
           ].map(r => (
             <div key={r.commit} style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm)', background: `${r.color}08`, border: `1px solid ${r.color}15` }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>

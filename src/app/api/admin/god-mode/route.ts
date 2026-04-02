@@ -31,6 +31,7 @@ const CRON_GROUPS = {
     '/api/cron/crawl-nationwide-redev',
     '/api/stock-refresh',
     '/api/cron/stock-crawl',
+    '/api/cron/stock-discover',
     '/api/cron/exchange-rate',
     '/api/cron/stock-news-crawl',
     '/api/cron/stock-flow-crawl',
