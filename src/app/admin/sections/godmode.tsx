@@ -16,6 +16,21 @@ export default function GodModeSection() {
   const [verifyLoading, setVerifyLoading] = useState(false);
   const [auditData, setAuditData] = useState<any>(null);
   const [auditLoading, setAuditLoading] = useState(false);
+  const [fixLog, setFixLog] = useState('');
+
+  const runFix = async (endpoint: string, action: string, extra?: Record<string, any>) => {
+    setFixLog(`⏳ ${action}...`);
+    try {
+      const res = await fetch(endpoint, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, ...extra }),
+      });
+      const data = await res.json();
+      setFixLog(`✅ ${action} — ${JSON.stringify(data).slice(0, 200)}`);
+      // 수정 후 전수조사 자동 재실행
+      setTimeout(() => runAudit(), 1000);
+    } catch (e: any) { setFixLog(`❌ ${action} 실패 — ${errMsg(e)}`); }
+  };
 
   const runAudit = async () => {
     setAuditLoading(true);
@@ -225,6 +240,7 @@ export default function GodModeSection() {
                           <th style={{ padding: '4px 6px', textAlign: 'right', color: C.textDim }}>시총</th>
                           <th style={{ padding: '4px 6px', textAlign: 'right', color: C.textDim }}>등락</th>
                           <th style={{ padding: '4px 6px', textAlign: 'right', color: C.textDim }}>갱신</th>
+                          <th style={{ padding: '4px 6px', textAlign: 'center', color: C.textDim }}>액션</th>
                         </tr></thead>
                         <tbody>{auditData.stock.top20.map((s: any) => (
                           <tr key={s.symbol} style={{ borderBottom: `1px solid ${C.border}22` }}>
@@ -234,6 +250,10 @@ export default function GodModeSection() {
                             <td style={{ padding: '4px 6px', textAlign: 'right', color: C.brand, fontWeight: 600 }}>{s.market_cap_display}</td>
                             <td style={{ padding: '4px 6px', textAlign: 'right', color: s.change_pct > 0 ? C.red : s.change_pct < 0 ? C.cyan : C.textDim, fontWeight: 600 }}>{s.change_pct > 0 ? '+' : ''}{s.change_pct?.toFixed(2)}%</td>
                             <td style={{ padding: '4px 6px', textAlign: 'right', color: C.textDim, fontSize: 9 }}>{s.updated?.slice(5)}</td>
+                            <td style={{ padding: '4px 4px', textAlign: 'center' }}>
+                              <button onClick={() => runFix('/api/admin/fix-stock', 'refresh_single', { symbol: s.symbol })}
+                                style={{ padding: '2px 6px', borderRadius: 3, border: 'none', background: `${C.brand}20`, color: C.brand, fontSize: 9, fontWeight: 700, cursor: 'pointer' }}>↻</button>
+                            </td>
                           </tr>
                         ))}</tbody>
                       </table>
@@ -246,14 +266,38 @@ export default function GodModeSection() {
                     <div style={{ fontSize: 12, fontWeight: 600, color: C.red, marginBottom: 6 }}>⚠️ 이상 종목 ({auditData.stock.issues_count}건)</div>
                     <div style={{ maxHeight: 200, overflowY: 'auto', fontSize: 11 }}>
                       {auditData.stock.issues.map((s: any) => (
-                        <div key={s.symbol} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: `1px solid ${C.border}22` }}>
-                          <span style={{ color: C.text, fontWeight: 600 }}>{s.name} ({s.symbol})</span>
-                          <span style={{ color: C.red, fontSize: 10 }}>{s.issues.join(' · ')}</span>
+                        <div key={s.symbol} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 0', borderBottom: `1px solid ${C.border}22` }}>
+                          <span style={{ color: C.text, fontWeight: 600, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name} ({s.symbol})</span>
+                          <span style={{ color: C.red, fontSize: 9, flexShrink: 0, maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.issues.join('·')}</span>
+                          <button onClick={() => runFix('/api/admin/fix-stock', 'refresh_single', { symbol: s.symbol })}
+                            style={{ padding: '2px 6px', borderRadius: 3, border: 'none', background: `${C.brand}20`, color: C.brand, fontSize: 9, fontWeight: 700, cursor: 'pointer', flexShrink: 0 }}>갱신</button>
+                          <button onClick={() => runFix('/api/admin/fix-stock', 'deactivate', { symbol: s.symbol })}
+                            style={{ padding: '2px 6px', borderRadius: 3, border: 'none', background: `${C.red}20`, color: C.red, fontSize: 9, fontWeight: 700, cursor: 'pointer', flexShrink: 0 }}>비활성</button>
                         </div>
                       ))}
                     </div>
                   </div>
                 )}
+                {/* 일괄 수정 버튼 */}
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 10, paddingTop: 10, borderTop: `1px solid ${C.border}` }}>
+                  <button onClick={() => runFix('/api/admin/fix-stock', 'refresh_stale')}
+                    style={{ padding: '5px 10px', borderRadius: 4, border: `1px solid ${C.yellow}40`, background: 'transparent', color: C.yellow, fontSize: 10, fontWeight: 700, cursor: 'pointer' }}>
+                    ⏰ 미갱신 일괄갱신
+                  </button>
+                  <button onClick={() => runFix('/api/admin/fix-stock', 'fix_zero_price')}
+                    style={{ padding: '5px 10px', borderRadius: 4, border: `1px solid ${C.red}40`, background: 'transparent', color: C.red, fontSize: 10, fontWeight: 700, cursor: 'pointer' }}>
+                    🗑 가격0 비활성화
+                  </button>
+                  <button onClick={() => runFix('/api/admin/fix-stock', 'refresh_market_cap')}
+                    style={{ padding: '5px 10px', borderRadius: 4, border: `1px solid ${C.brand}40`, background: 'transparent', color: C.brand, fontSize: 10, fontWeight: 700, cursor: 'pointer' }}>
+                    📊 시총0 갱신(50건)
+                  </button>
+                  <button onClick={() => runSpecial('/api/cron/stock-naver-sync', '네이버 전체 시세 동기화')}
+                    disabled={specialRunning}
+                    style={{ padding: '5px 10px', borderRadius: 4, border: `1px solid ${C.green}40`, background: 'transparent', color: C.green, fontSize: 10, fontWeight: 700, cursor: 'pointer' }}>
+                    🔄 전체 네이버 동기화
+                  </button>
+                </div>
                 {/* 시장별 종목 수 */}
                 {auditData.stock.by_market && (
                   <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 10, marginBottom: 6 }}>
@@ -319,19 +363,50 @@ export default function GodModeSection() {
                     <div style={{ maxHeight: 300, overflowY: 'auto', fontSize: 11 }}>
                       {auditData.apt.issues.map((a: any) => (
                         <div key={a.id} style={{ padding: '6px 4px', borderBottom: `1px solid ${C.border}22` }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
-                            <span style={{ fontWeight: 600, color: C.text }}>{a.name}</span>
-                            <span style={{ color: C.textDim, fontSize: 10 }}>{a.region} · {a.project_type || '일반'}</span>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                            <span style={{ fontWeight: 600, color: C.text, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.name}</span>
+                            <span style={{ color: C.textDim, fontSize: 9, flexShrink: 0 }}>{a.region}</span>
                           </div>
                           <div style={{ fontSize: 10, color: C.textDim }}>공급{a.supply} · 총세대{a.total_hh || '-'} · 일반{a.gen} · 특별{a.spe}</div>
-                          <div style={{ fontSize: 10, color: C.red, marginTop: 2 }}>{a.issues.join(' · ')}</div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 3 }}>
+                            <span style={{ fontSize: 9, color: C.red, flex: 1, minWidth: 0 }}>{a.issues.join(' · ')}</span>
+                            <input type="number" placeholder="총세대" style={{ width: 60, padding: '2px 4px', borderRadius: 3, border: `1px solid ${C.border}`, background: 'rgba(255,255,255,0.05)', color: C.text, fontSize: 10 }}
+                              onKeyDown={e => { if (e.key === 'Enter') runFix('/api/admin/fix-apt', 'update_household', { id: a.id, value: (e.target as HTMLInputElement).value }); }} />
+                            <button onClick={e => { const inp = (e.currentTarget.previousSibling as HTMLInputElement); if (inp?.value) runFix('/api/admin/fix-apt', 'update_household', { id: a.id, value: inp.value }); }}
+                              style={{ padding: '2px 6px', borderRadius: 3, border: 'none', background: `${C.green}20`, color: C.green, fontSize: 9, fontWeight: 700, cursor: 'pointer', flexShrink: 0 }}>저장</button>
+                          </div>
                         </div>
                       ))}
                     </div>
                   </div>
                 )}
+                {/* 일괄 수정 버튼 */}
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 10, paddingTop: 10, borderTop: `1px solid ${C.border}` }}>
+                  <button onClick={() => runFix('/api/admin/fix-apt', 'recalc_supply')}
+                    style={{ padding: '5px 10px', borderRadius: 4, border: `1px solid ${C.brand}40`, background: 'transparent', color: C.brand, fontSize: 10, fontWeight: 700, cursor: 'pointer' }}>
+                    🔢 공급세대 재계산
+                  </button>
+                  <button onClick={() => runFix('/api/admin/fix-apt', 'fix_supply_mismatch')}
+                    style={{ padding: '5px 10px', borderRadius: 4, border: `1px solid ${C.red}40`, background: 'transparent', color: C.red, fontSize: 10, fontWeight: 700, cursor: 'pointer' }}>
+                    🔄 총세대&lt;공급 리셋
+                  </button>
+                  <button onClick={() => runFix('/api/admin/fix-apt', 'verify_batch')}
+                    style={{ padding: '5px 10px', borderRadius: 4, border: `1px solid ${C.cyan || '#22D3EE'}40`, background: 'transparent', color: C.cyan || '#22D3EE', fontSize: 10, fontWeight: 700, cursor: 'pointer' }}>
+                    🤖 K-apt 자동검증
+                  </button>
+                  <button onClick={() => runSpecial('/api/cron/auto-verify-households', 'K-apt 자동검증 10건')}
+                    disabled={specialRunning}
+                    style={{ padding: '5px 10px', borderRadius: 4, border: `1px solid ${C.green}40`, background: 'transparent', color: C.green, fontSize: 10, fontWeight: 700, cursor: 'pointer' }}>
+                    🏠 총세대 추출 크론
+                  </button>
+                </div>
               </div>
             )}
+          </div>
+        )}
+        {fixLog && (
+          <div style={{ marginTop: 12, padding: '8px 12px', borderRadius: 'var(--radius-sm)', background: C.card, border: `1px solid ${fixLog.startsWith('✅') ? C.green : fixLog.startsWith('❌') ? C.red : C.brand}30`, fontSize: 11, color: fixLog.startsWith('✅') ? C.green : fixLog.startsWith('❌') ? C.red : C.textSec, fontFamily: 'monospace', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+            {fixLog}
           </div>
         )}
       </div>
