@@ -105,6 +105,14 @@
       "schedule": "0 9 * * *"
     },
     {
+      "path": "/api/cron/post-ai-summary",
+      "schedule": "0 22 * * *"
+    },
+    {
+      "path": "/api/cron/blog-internal-links",
+      "schedule": "0 3 * * 0"
+    },
+    {
       "path": "/api/cron/blog-series-assign",
       "schedule": "30 3 * * *"
     },

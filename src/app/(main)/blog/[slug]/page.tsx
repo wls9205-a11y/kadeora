@@ -146,7 +146,7 @@ export async function generateMetadata({ params }: Props) {
   const { slug: rawSlug } = await params;
   const slug = decodeURIComponent(rawSlug);
   const sb = await createSupabaseServer();
-  const { data: post } = await sb.from('blog_posts').select('id,title,slug,content,excerpt,category,sub_category,cover_image,image_alt,tags,meta_description,meta_keywords,author_name,author_role,reading_time_min,view_count,comment_count,helpful_count,published_at,created_at,updated_at,series_id,series_order,source_type,source_ref,data_date,rewritten_at').eq('slug', slug).eq('is_published', true).maybeSingle();
+  const { data: post } = await sb.from('blog_posts').select('id,title,slug,content,excerpt,category,sub_category,cover_image,image_alt,tags,meta_description,meta_keywords,author_name,author_role,reading_time_min,view_count,comment_count,helpful_count,published_at,created_at,updated_at,series_id,series_order,source_type,source_ref,data_date,rewritten_at,related_slugs').eq('slug', slug).eq('is_published', true).maybeSingle();
   if (!post) return {};
     const ogImage = post.cover_image || `${SITE}/api/og?title=${encodeURIComponent(post.title)}&category=${post.category}&author=${encodeURIComponent(post.author_name || '카더라 데이터팀')}&design=2`;
     const ogSquare = `${SITE}/api/og-square?title=${encodeURIComponent(post.title)}&category=${post.category}&author=${encodeURIComponent(post.author_name || '카더라 데이터팀')}`;
@@ -204,7 +204,7 @@ export default async function BlogDetailPage({ params }: Props) {
   const slug = decodeURIComponent(rawSlug);
   const sb = await createSupabaseServer();
 
-  const { data: post } = await sb.from('blog_posts').select('id,title,slug,content,excerpt,category,sub_category,cover_image,image_alt,tags,meta_description,meta_keywords,author_name,author_role,reading_time_min,view_count,comment_count,helpful_count,published_at,created_at,updated_at,series_id,series_order,source_type,source_ref,data_date,rewritten_at').eq('slug', slug).eq('is_published', true).maybeSingle();
+  const { data: post } = await sb.from('blog_posts').select('id,title,slug,content,excerpt,category,sub_category,cover_image,image_alt,tags,meta_description,meta_keywords,author_name,author_role,reading_time_min,view_count,comment_count,helpful_count,published_at,created_at,updated_at,series_id,series_order,source_type,source_ref,data_date,rewritten_at,related_slugs').eq('slug', slug).eq('is_published', true).maybeSingle();
   if (!post) return notFound();
 
   // 뷰카운트 atomic 증가 — RPC로 race condition 방지
@@ -221,27 +221,40 @@ export default async function BlogDetailPage({ params }: Props) {
     }
   } catch { /* 비로그인/만료 세션 */ }
 
-  // 관련 글 추천 (태그 유사도 → 같은 카테고리 인기순 폴백)
+  // 관련 글 추천 (pre-computed related_slugs 우선 → 태그 유사도 → 카테고리 폴백)
   let related: Record<string, any>[] = [];
   try {
-    const postTags = post.tags || [];
-    if (postTags.length > 0) {
-      // 태그 기반 추천 (첫 2개 태그로 검색)
-      const tagQueries = postTags.slice(0, 2).map((t: string) => `tags.cs.{${t}}`).join(',');
-      const { data: tagRelated } = await sb.from('blog_posts')
-        .select('slug, title, view_count').eq('category', post.category).eq('is_published', true)
-        .neq('id', post.id).or(tagQueries)
-        .order('view_count', { ascending: false }).limit(5);
-      related = tagRelated || [];
+    // 1순위: 크론으로 미리 계산된 related_slugs
+    const precomputed: string[] = (post as any).related_slugs || [];
+    if (precomputed.length > 0) {
+      const { data: preRelated } = await sb.from('blog_posts')
+        .select('slug, title, view_count').in('slug', precomputed).eq('is_published', true).limit(5);
+      related = preRelated || [];
     }
-    // 태그 추천 부족하면 같은 카테고리 인기순으로 보충
+
+    // 2순위: 태그 기반 추천
     if (related.length < 3) {
-      const existingSlugs = related.map((r: any) => r.slug);
+      const postTags = post.tags || [];
+      if (postTags.length > 0) {
+        const existingSlugs = new Set(related.map((r: any) => r.slug));
+        const tagQueries = postTags.slice(0, 2).map((t: string) => `tags.cs.{${t}}`).join(',');
+        const { data: tagRelated } = await sb.from('blog_posts')
+          .select('slug, title, view_count').eq('category', post.category).eq('is_published', true)
+          .neq('id', post.id).or(tagQueries)
+          .order('view_count', { ascending: false }).limit(5);
+        const extra = (tagRelated || []).filter((r: any) => !existingSlugs.has(r.slug));
+        related = [...related, ...extra].slice(0, 5);
+      }
+    }
+
+    // 3순위: 같은 카테고리 인기순 보충
+    if (related.length < 3) {
+      const existingSlugs = new Set(related.map((r: any) => r.slug));
       const { data: catRelated } = await sb.from('blog_posts')
         .select('slug, title, view_count').eq('category', post.category).eq('is_published', true)
         .neq('id', post.id).not('published_at', 'is', null)
         .order('view_count', { ascending: false }).limit(5 - related.length);
-      const extra = (catRelated || []).filter((r: any) => !existingSlugs.includes(r.slug));
+      const extra = (catRelated || []).filter((r: any) => !existingSlugs.has(r.slug));
       related = [...related, ...extra].slice(0, 5);
     }
   } catch { }
