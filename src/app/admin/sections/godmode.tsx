@@ -160,7 +160,7 @@ export default function GodModeSection() {
   };
 
   const modes = [
-    { key: 'full', label: '⚡ 전체 실행', desc: 'Phase 순차 — 92개 크론 (종목발굴+시세+부동산+검증)', color: C.brand },
+    { key: 'full', label: '⚡ 전체 실행', desc: 'Phase 순차 — 97개 크론 (종목발굴+시세+부동산+검증)', color: C.brand },
     { key: 'data', label: '📊 데이터 수집', desc: '청약/실거래/종목발굴/재개발 16개', color: C.green },
     { key: 'process', label: '⚙️ 데이터 가공', desc: '집계/싱크/총세대수검증/K-apt/네이버단지 13개', color: C.cyan },
     { key: 'ai', label: '🤖 AI 생성', desc: '요약/이미지/트렌드 7개 (fire&forget)', color: C.purple },
@@ -586,6 +586,31 @@ export default function GodModeSection() {
             disabled={specialRunning}
             style={{ padding: '10px 16px', borderRadius: 'var(--radius-md)', border: `1px solid ${C.yellow}40`, background: C.card, color: C.yellow, fontWeight: 700, fontSize: 13, cursor: specialRunning ? 'wait' : 'pointer' }}>
             🔍 누락 종목 자동 발굴
+          </button>
+        </div>
+        {/* AI 크론 관리 */}
+        <div style={{ fontSize: 14, fontWeight: 700, color: C.text, marginTop: 20, marginBottom: 'var(--sp-sm)' }}>🤖 AI 크론 (Haiku 4.5)</div>
+        <div style={{ fontSize: 11, color: C.textDim, marginBottom: 10 }}>AI 댓글 요약 · 블로그 내부링크 · 종목 설명 생성</div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
+          <button onClick={() => runCronSingle('/api/cron/post-ai-summary', 'AI 댓글 요약')}
+            disabled={specialRunning}
+            style={{ padding: '8px 14px', borderRadius: 'var(--radius-sm)', border: `1px solid ${C.purple}40`, background: C.card, color: C.purple, fontWeight: 700, fontSize: 12, cursor: specialRunning ? 'wait' : 'pointer' }}>
+            💬 AI 댓글 요약
+          </button>
+          <button onClick={() => runCronSingle('/api/cron/blog-internal-links', '블로그 내부링크')}
+            disabled={specialRunning}
+            style={{ padding: '8px 14px', borderRadius: 'var(--radius-sm)', border: `1px solid ${C.green}40`, background: C.card, color: C.green, fontWeight: 700, fontSize: 12, cursor: specialRunning ? 'wait' : 'pointer' }}>
+            🔗 블로그 내부링크
+          </button>
+          <button onClick={() => runCronSingle('/api/cron/stock-desc-gen', '종목 설명 생성')}
+            disabled={specialRunning}
+            style={{ padding: '8px 14px', borderRadius: 'var(--radius-sm)', border: `1px solid ${C.brand}40`, background: C.card, color: C.brand, fontWeight: 700, fontSize: 12, cursor: specialRunning ? 'wait' : 'pointer' }}>
+            📝 종목 설명 생성
+          </button>
+          <button onClick={() => runCronSingle('/api/cron/stock-daily-briefing', 'AI 시장 브리핑')}
+            disabled={specialRunning}
+            style={{ padding: '8px 14px', borderRadius: 'var(--radius-sm)', border: `1px solid ${C.yellow}40`, background: C.card, color: C.yellow, fontWeight: 700, fontSize: 12, cursor: specialRunning ? 'wait' : 'pointer' }}>
+            📊 AI 시장 브리핑
           </button>
         </div>
         {/* 벌크 수집 */}

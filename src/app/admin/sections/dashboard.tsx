@@ -908,7 +908,7 @@ export default function DashboardSection() {
             <span style={{ color: C.textDim }}>총 <strong style={{ color: C.text }}>{fmt(kpi.blogs)}</strong>편</span>
           </div>
           {cron.anthropicCreditWarning && (
-            <a href="https://console.anthropic.com" target="_blank" rel="noopener noreferrer" style={{ fontSize: 9, color: '#FF6B1A', fontWeight: 700, textDecoration: 'none', padding: '2px 6px', background: '#FF6B1A15', borderRadius: 4, border: '1px solid #FF6B1A30' }}>
+            <a href="https://platform.claude.com/settings/billing" target="_blank" rel="noopener noreferrer" style={{ fontSize: 9, color: '#FF6B1A', fontWeight: 700, textDecoration: 'none', padding: '2px 6px', background: '#FF6B1A15', borderRadius: 4, border: '1px solid #FF6B1A30' }}>
               ⚠️ AI 크레딧 충전 필요
             </a>
           )}
@@ -951,25 +951,20 @@ export default function DashboardSection() {
       {/* ── 최근 릴리즈 내역 ── */}
       <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', marginBottom: 'var(--sp-md)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-          <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>🚀 최근 릴리즈 (세션 68)</span>
+          <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>🚀 최근 릴리즈 (세션 69)</span>
           <span style={{ fontSize: 10, color: C.textDim }}>2026-04-02</span>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
           {[
-            { tag: 'FIX', label: '피드 프로필 사진', desc: '아바타 항상 이니셜→avatar_url 있으면 사진 표시 (피드/상세/댓글)', color: C.red, commit: 'c841ae1' },
-            { tag: 'FIX', label: '총세대수 교정', desc: 'total_households=총세대·tot_supply=공급세대 전수조사 라벨 구분', color: C.red, commit: '8a60d0a' },
-            { tag: 'UX', label: '관심단지 폼 개선', desc: 'minmax 그리드·생년월일 풀폭·시군구 동적2열·체크박스16px', color: C.cyan, commit: '8a60d0a' },
-            { tag: 'FEAT', label: '주식 시세 네이버', desc: 'fetchNaverQuote 시총 추출·integration API·3단 폴백', color: C.brand, commit: '9c673a2' },
-            { tag: 'FEAT', label: 'AI 한줄평 서버렌더링', desc: '탭 위에 signal 색상+200자 미리보기 카드', color: C.purple, commit: '9c673a2' },
-            { tag: 'FEAT', label: '데일리 리포트 강화', desc: '히어로 설명·핵심요약 섹션·grid minmax 방어', color: C.brand, commit: '4dad428' },
-            { tag: 'UX', label: '주식 4열 그리드', desc: '시총/섹터/전일대비/거래량 4열 고정+ellipsis', color: C.cyan, commit: '4dad428' },
-            { tag: 'FIX', label: 'DEMO grade 타입', desc: '문자열(골드)→숫자(4) 통일·등급이모지 매칭 복구', color: C.red, commit: 'c841ae1' },
-            { tag: 'FIX', label: 'pctStr 필드명', desc: 'stockTop10.pct→change_pct 오타 수정', color: C.red, commit: 'c841ae1' },
-            { tag: 'UX', label: '모바일 CSS 방어', desc: 'min-width:0·테이블 스크롤·인터랙션 wrap 60줄+', color: C.cyan, commit: '8a60d0a' },
-            { tag: 'UX', label: '1fr→minmax 전체교정', desc: 'shop/hot/apt/complex+컴포넌트 13파일 그리드 안전화', color: C.cyan, commit: 'f4d8b68' },
-            { tag: 'FEAT', label: '피드 뻘글 확대', desc: 'DEMO 8→15개·자유/로컬/주식/부동산 다양화', color: C.brand, commit: '8a60d0a' },
-            { tag: 'FEAT', label: '종목 자동 발굴', desc: '네이버 시총TOP 크롤링→미등록 종목 자동 추가 크론', color: C.purple, commit: 'latest' },
-            { tag: 'FEAT', label: '전수조사 시스템', desc: '주식시총TOP20+이상종목+누락종목+부동산 데이터 검사', color: C.green, commit: 'latest' },
+            { tag: 'COST', label: 'API 비용 75% 절감', desc: 'Sonnet→Haiku 전환 11파일, seed-posts/news/flow AI 제거, 스케줄 축소 (월$15→$4)', color: C.green, commit: '5770201' },
+            { tag: 'FEAT', label: '프로 AI 종목분석', desc: 'POST /api/stock/ai-analysis — 프로회원 주5건, 24h캐싱, 4섹션 심층분석', color: C.purple, commit: '83eb43d' },
+            { tag: 'FEAT', label: 'AI 댓글 요약', desc: '댓글10개+ 인기글 자동요약 크론 (매일 22:00, 최대5건, Haiku)', color: C.purple, commit: '0882b71' },
+            { tag: 'FEAT', label: '블로그 내부링크', desc: '태그/카테고리/키워드 매칭 자동연결 (API비용 0원, 주1회)', color: C.brand, commit: '0882b71' },
+            { tag: 'COST', label: 'max_tokens 최적화', desc: '블로그 크론 5000/4096→3000 토큰 절감 (7파일)', color: C.green, commit: '5770201' },
+            { tag: 'COST', label: '브리핑 캐시 가드', desc: 'stock-daily-briefing 당일 중복호출 방지 early return', color: C.green, commit: '83eb43d' },
+            { tag: 'TOSS', label: '심사 서류 준비', desc: 'shop 공개 전환, 정책 푸터, 환불정책 업데이트, PDF 생성', color: C.yellow, commit: '36a783a' },
+            { tag: 'TOSS', label: '환불정책 강화', desc: '프로멤버십 상품추가, 7일 전액환불, 연간 중도해지 특칙', color: C.yellow, commit: '36a783a' },
+            { tag: 'DB', label: 'stock_ai_analysis', desc: '프로 AI 분석 결과 저장 + 사용량 추적 테이블 + RLS', color: C.cyan, commit: '83eb43d' },
           ].map(r => (
             <div key={r.commit} style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm)', background: `${r.color}08`, border: `1px solid ${r.color}15` }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>
@@ -1081,7 +1076,7 @@ export default function DashboardSection() {
         <QuickAction label="🔥 HOT" href="/hot" external />
         <QuickAction label="🛒 상점" href="/shop" external />
         <QuickAction label="⭐ 프로" href="/shop" external />
-        <QuickAction label="🔑 Anthropic" href="https://console.anthropic.com" external />
+        <QuickAction label="🔑 Anthropic" href="https://platform.claude.com/settings/billing" external />
         <QuickAction label="📊 Vercel" href="https://vercel.com/wls9205-5665s-projects/kadeora" external />
         <QuickAction label="🔍 SearchConsole" href="https://search.google.com/search-console" external />
         <QuickAction label="🇰🇷 서치어드바이저" href="https://searchadvisor.naver.com" external />
