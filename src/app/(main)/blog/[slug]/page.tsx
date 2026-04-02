@@ -1,6 +1,7 @@
 import { createSupabaseServer } from '@/lib/supabase-server';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { headers } from 'next/headers';
 import { marked } from 'marked';
 import { sanitizeHtml } from '@/lib/sanitize-html';
 import { injectInternalLinks } from '@/lib/blog-auto-link';
@@ -22,6 +23,7 @@ import ReadingProgress from '@/components/ReadingProgress';
 import NextArticleFloat from '@/components/NextArticleFloat';
 import BlogTossGate from '@/components/BlogTossGate';
 import { BlogTopBanner, BlogMidCTA, BlogFloatingCTA } from '@/components/BlogSignupCTA';
+import BlogReadGate from '@/components/BlogReadGate';
 
 // marked heading에 id 자동 부여 (TOC 앵커용)
 const slugify = (text: string) => text.replace(/<[^>]+>/g, '').replace(/[^\w가-힣ㄱ-ㅎㅏ-ㅣ]+/g, '-').replace(/^-+|-+$/g, '').toLowerCase();
@@ -221,6 +223,11 @@ export default async function BlogDetailPage({ params }: Props) {
       isPremiumUser = !!(prof?.is_premium && prof?.premium_expires_at && new Date(prof.premium_expires_at) > new Date());
     }
   } catch { /* 비로그인/만료 세션 */ }
+
+  // 봇 감지 — SEO 크롤러에게는 전체 본문 제공
+  const headersList = await headers();
+  const ua = headersList.get('user-agent') || '';
+  const isBot = /googlebot|bingbot|yandex|baiduspider|naverbot|daumoa|slurp|msnbot|ahrefsbot|semrushbot|dotbot|petalbot|facebot|twitterbot|linkedinbot|kakaotalk-scrap/i.test(ua);
 
   // 관련 글 추천 (pre-computed related_slugs 우선 → 태그 유사도 → 카테고리 폴백)
   let related: Record<string, any>[] = [];
@@ -561,21 +568,13 @@ export default async function BlogDetailPage({ params }: Props) {
           {toc.length >= 3 && <BlogToc toc={toc} />}
         </div>
 
-        {/* 본문 — 마크다운 렌더링 */}
-        {isLoggedIn ? (
+        {/* 본문 — 봇: 전체, 로그인: TossGate, 비로그인: 3편 게이트 */}
+        {isBot ? (
+          <div className="blog-content" itemProp="articleBody" dangerouslySetInnerHTML={{ __html: htmlFull }} />
+        ) : isLoggedIn ? (
           <BlogTossGate htmlFull={htmlFull} htmlShort={htmlTossShort} slug={slug} title={post.title} />
         ) : (
-          <div style={{ position: 'relative' }}>
-            <div className="blog-content" itemProp="articleBody" style={{ maxHeight: 'clamp(400px, 60vh, 800px)', overflow: 'hidden' }} dangerouslySetInnerHTML={{ __html: htmlTruncated }} />
-            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 80, background: 'linear-gradient(transparent, var(--bg-base))' }} />
-            <div style={{ textAlign: 'center', padding: '20px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', marginTop: -8, position: 'relative' }}>
-              <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 'var(--sp-xs)' }}>전체 글을 보려면 로그인하세요</div>
-              <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 10 }}>청약 마감 알림도 받을 수 있어요</div>
-              <Link href={`/login?redirect=/blog/${slug}`} style={{ display: 'inline-block', padding: '10px 28px', borderRadius: 'var(--radius-card)', background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)', fontWeight: 700, fontSize: 'var(--fs-base)', textDecoration: 'none' }}>
-                카카오로 가입
-              </Link>
-            </div>
-          </div>
+          <BlogReadGate htmlFull={htmlFull} htmlTruncated={htmlTruncated} slug={slug} category={post.category} />
         )}
 
         {/* FAQ 아코디언 */}
