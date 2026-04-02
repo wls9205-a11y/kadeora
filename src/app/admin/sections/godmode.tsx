@@ -160,7 +160,7 @@ export default function GodModeSection() {
   };
 
   const modes = [
-    { key: 'full', label: '⚡ 전체 실행', desc: 'Phase 순차 — 97개 크론 (종목발굴+시세+부동산+검증)', color: C.brand },
+    { key: 'full', label: '⚡ 전체 실행', desc: 'Phase 순차 — 95개 크론 (종목발굴+시세+부동산+검증)', color: C.brand },
     { key: 'data', label: '📊 데이터 수집', desc: '청약/실거래/종목발굴/재개발 16개', color: C.green },
     { key: 'process', label: '⚙️ 데이터 가공', desc: '집계/싱크/총세대수검증/K-apt/네이버단지 13개', color: C.cyan },
     { key: 'ai', label: '🤖 AI 생성', desc: '요약/이미지/트렌드 7개 (fire&forget)', color: C.purple },
