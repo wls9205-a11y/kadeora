@@ -63,27 +63,8 @@ export async function GET(req: NextRequest) {
     let flows: any[] = [];
     let mode = 'data';
 
-    // AI 시도
-    if (process.env.ANTHROPIC_API_KEY) {
-      try {
-        const prompt = `오늘(${today}) 한국 증시 주요 종목:\n${targets.map((s: any) => `${s.name}(${s.symbol}): ${Number(s.change_pct ?? 0) > 0 ? '+' : ''}${Number(s.change_pct ?? 0).toFixed(2)}%, 거래량 ${(s.volume || 0).toLocaleString()}, 시총 ${s.market_cap ? (s.market_cap / 1e8).toFixed(0) + '억' : '-'}`).join('\n')}\n\n외국인/기관 순매수 추정(백만원). JSON만: [{"symbol":"코드","foreign_buy":N,"foreign_sell":N,"inst_buy":N,"inst_sell":N}]`;
-        const res = await fetch('https://api.anthropic.com/v1/messages', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
-          body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 1500, messages: [{ role: 'user', content: prompt }] }),
-          signal: AbortSignal.timeout(30000),
-        });
-        if (res.ok) {
-          const text = ((await res.json())?.content?.[0]?.text || '').match(/\[[\s\S]*\]/);
-          if (text) { flows = JSON.parse(text[0]); mode = 'ai'; }
-        }
-      } catch { /* AI 실패 → 폴백 */ }
-    }
-
-    // AI 없거나 실패 → 데이터 기반 추정
-    if (!flows.length) {
-      flows = targets.map((s: any) => ({ symbol: s.symbol, ...estimateFlow(s) }));
-    }
+    // 데이터 기반 추정 (AI 제거 — 비용 절감)
+    flows = targets.map((s: any) => ({ symbol: s.symbol, ...estimateFlow(s) }));
 
     let created = 0;
     for (const flow of flows) {

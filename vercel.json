@@ -114,7 +114,7 @@
     },
     {
       "path": "/api/cron/blog-rewrite",
-      "schedule": "30 10 * * *"
+      "schedule": "30 10 * * 1,4"
     },
     {
       "path": "/api/cron/crawl-seoul-redev",
@@ -222,7 +222,7 @@
     },
     {
       "path": "/api/cron/stock-desc-gen",
-      "schedule": "30 0,6,12,18 * * *"
+      "schedule": "30 6 * * *"
     },
     {
       "path": "/api/cron/blog-afternoon",

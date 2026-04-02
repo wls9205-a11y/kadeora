@@ -60,8 +60,8 @@ export async function GET(req: NextRequest) {
             'anthropic-version': '2023-06-01',
           },
           body: JSON.stringify({
-            model: 'claude-sonnet-4-20250514',
-            max_tokens: 4096,
+            model: 'claude-haiku-4-5-20251001',
+            max_tokens: 3000,
             messages: [{
               role: 'user',
               content: diversifyPrompt(`한국 금융·부동산 전문 블로그 작가로서 아래 글을 리라이팅하세요.

@@ -119,31 +119,10 @@ export async function GET(req: NextRequest) {
       const fallback = filtered.length > 0 ? pick(filtered) : pick(TEMPLATES.filter(t => t.category === category));
       let title = fallback.title, content = fallback.content;
 
-      // AI 생성 시도
-      if (process.env.ANTHROPIC_API_KEY) {
-        try {
-          const catDesc = category === 'stock' ? '주식/투자' : category === 'apt' ? '부동산/청약' : category === 'local' ? `${user.region_text} 동네 이야기` : '일상 잡담/뻘글';
-          const prompt = `한국 커뮤니티 "카더라"에 올릴 게시글 1개 작성.
-작성자: ${user.age_group} ${user.gender === 'female' ? '여성' : '남성'}, ${user.region_text}, 닉네임 "${user.nickname}", ${user.bio}
-카테고리: ${catDesc} | 날짜: ${dateTag} (${dayName})
-말투: ${tone}
-규칙: AI 티 나면 안 됨. ${category === 'free' ? '가벼운 일상/뻘글. 재테크 얘기 X' : ''} 한국 커뮤니티 실제 유저처럼. 맞춤법 약간 틀려도 OK. 제목 20자이내 내용 50~150자.
-JSON만: {"title":"제목","content":"내용"}`;
-
-          const res = await fetch('https://api.anthropic.com/v1/messages', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
-            body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 300, messages: [{ role: 'user', content: prompt }] }),
-            signal: AbortSignal.timeout(10000),
-          });
-          if (!res.ok && (res.status === 529 || res.status === 402)) { creditExhausted = true; }
-          else if (res.ok) {
-            const data = await res.json();
-            const match = (data.content?.[0]?.text || '').match(/\{[\s\S]*\}/);
-            if (match) { const p = JSON.parse(match[0]); if (p.title && p.content) { title = p.title; content = p.content.replace(/\\n/g, '\n'); } }
-          }
-        } catch { /* 폴백 */ }
-      }
+      // 템플릿 변형 (AI 제거 — 비용 절감, 템플릿 풀 충분)
+      // 날짜/요일 변수 치환으로 자연스러움 유지
+      title = title.replace(/4월/g, `${new Date().getMonth() + 1}월`);
+      if (content.includes(dateTag)) content = content.replace(dateTag, new Date().toLocaleDateString('ko-KR'));
 
       // 중복 체크
       const { data: dup } = await admin.from('posts').select('id').eq('title', title).gte('created_at', new Date(Date.now() - 21600000).toISOString()).limit(1);
