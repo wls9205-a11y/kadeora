@@ -394,9 +394,9 @@ export default function FeedClient({
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
                   <Link href={post.is_anonymous ? '#' : `/profile/${post.author_id}`} style={{ textDecoration: 'none', flexShrink: 0 }}>
                     {!post.is_anonymous && post.profiles?.avatar_url ? (
-                      <Image src={post.profiles.avatar_url} alt={displayName} width={28} height={28} style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} unoptimized={!post.profiles.avatar_url.includes('supabase.co')} />
+                      <img src={post.profiles.avatar_url} alt={displayName} style={{ width: 28, height: 28, minWidth: 28, minHeight: 28, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, display: 'block' }} />
                     ) : (
-                      <div style={{ width: 28, height: 28, borderRadius: '50%', background: getAvatarColor(displayName), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 600, color: 'var(--text-inverse)', flexShrink: 0 }}>
+                      <div style={{ width: 28, height: 28, minWidth: 28, minHeight: 28, borderRadius: '50%', background: getAvatarColor(displayName), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 600, color: 'var(--text-inverse)', flexShrink: 0 }}>
                         {displayName[0].toUpperCase()}
                       </div>
                     )}
