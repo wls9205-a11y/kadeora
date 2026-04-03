@@ -46,7 +46,11 @@ function extractToc(html: string): { level: number; text: string; id: string }[]
   const items: { level: number; text: string; id: string }[] = [];
   let match;
   while ((match = regex.exec(html)) !== null) {
-    items.push({ level: parseInt(match[1]), text: match[3].replace(/<[^>]+>/g, ''), id: match[2] });
+    const cleanText = match[3]
+      .replace(/<[^>]+>/g, '')  // HTML 태그 제거
+      .replace(/\*\*/g, '')     // 남은 ** 제거
+      .trim();
+    if (cleanText) items.push({ level: parseInt(match[1]), text: cleanText, id: match[2] });
   }
   return items;
 }
@@ -66,7 +70,17 @@ function sanitizeBlogContent(raw: string): string {
     .replace(/\\t/g, '\t')     // 리터럴 \\t → 실제 탭
     .replace(/\\r/g, '')       // 리터럴 \\r 제거
     .replace(/\r\n/g, '\n')   // Windows 줄바꿈 통일
-    .replace(/\n{4,}/g, '\n\n\n'); // 과도한 빈줄(4+) → 3줄로 축소
+    .replace(/\n{4,}/g, '\n\n\n') // 과도한 빈줄(4+) → 3줄로 축소
+    // ── 코드 노출 방지 ──
+    // H2/H3 안의 **볼드** 마크다운 제거 (이미 CSS로 볼드)
+    .replace(/^(#{1,6}\s+.*?)\*\*([^*\n]+)\*\*(.*?)$/gm, '$1$2$3')
+    // 숫자~숫자 패턴 — ~가 취소선으로 변환되는 것 방지
+    .replace(/(\d)~(\d)/g, '$1～$2')
+    // Q. / Q: 로 시작하는 ## → ### 로 다운그레이드 (H2 과다 방지)
+    .replace(/^## (Q[.:])/gm, '### $1')
+    .replace(/^## (A[.:])/gm, '### $1')
+    // **Q. / **Q: 패턴도 처리
+    .replace(/^\*\*(Q[.:]\s)/gm, '**$1');
 }
 
 
@@ -419,9 +433,23 @@ export default async function BlogDetailPage({ params }: Props) {
     ],
   };
 
-  // 본문 전처리 (\\n 리터럴 등 정리) → 마크다운 → HTML
+  // 본문 전처리 (\\n 리터럴 등 정리) → 마크다운 → HTML → 후처리
   const cleanContent = sanitizeBlogContent(post.content);
-  const htmlRaw = injectInternalLinks(sanitizeHtml(marked(normalizeMarkdownHeadings(cleanContent)) as string));
+  let htmlRaw = sanitizeHtml(marked(normalizeMarkdownHeadings(cleanContent)) as string);
+  
+  // ── HTML 후처리: 코드 노출 및 가독성 문제 수정 ──
+  htmlRaw = htmlRaw
+    // H태그 안에 남은 ** 제거
+    .replace(/<(h[1-6])([^>]*)>\s*\*\*([^*]+)\*\*\s*<\/\1>/g, '<$1$2>$3</$1>')
+    .replace(/(<h[1-6][^>]*>)(.*?)\*\*(.*?)\*\*(.*?)(<\/h[1-6]>)/g, '$1$2$3$4$5')
+    // <del> 태그가 숫자 사이에 있으면 취소선 아닌 범위 표시로 복원
+    .replace(/(\d+)<del>(\d+[^<]*)<\/del>/g, '$1~$2')
+    // 빈 <p></p> 제거
+    .replace(/<p>\s*<\/p>/g, '')
+    // 연속 <br> 정리
+    .replace(/(<br\s*\/?>){3,}/g, '<br><br>');
+  
+  htmlRaw = injectInternalLinks(htmlRaw);
   const htmlFull = enhanceBlogVisuals(htmlRaw, {
     excerpt: post.excerpt,
     coverImage: post.cover_image,
