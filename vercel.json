@@ -122,7 +122,7 @@
     },
     {
       "path": "/api/cron/blog-rewrite",
-      "schedule": "30 10 * * *"
+      "schedule": "30 2,6,10,14,18,22 * * *"
     },
     {
       "path": "/api/cron/crawl-seoul-redev",
