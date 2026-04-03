@@ -447,6 +447,14 @@
     {
       "path": "/api/cron/auto-verify-households",
       "schedule": "0 */6 * * *"
+    },
+    {
+      "path": "/api/cron/blog-stock-v2",
+      "schedule": "0 7 * * *"
+    },
+    {
+      "path": "/api/cron/blog-apt-v2",
+      "schedule": "0 8 * * *"
     }
   ]
 }

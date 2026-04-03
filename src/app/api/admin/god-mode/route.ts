@@ -99,6 +99,8 @@ const CRON_GROUPS = {
     '/api/cron/blog-exchange-rate',
     '/api/cron/blog-unsold-trend',
     '/api/cron/blog-builder-analysis',
+    '/api/cron/blog-stock-v2',
+    '/api/cron/blog-apt-v2',
   ],
   system: [
     '/api/cron/health-check',
