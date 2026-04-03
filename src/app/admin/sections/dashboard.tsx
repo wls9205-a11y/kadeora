@@ -951,20 +951,23 @@ export default function DashboardSection() {
       {/* ── 최근 릴리즈 내역 ── */}
       <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', marginBottom: 'var(--sp-md)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-          <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>🚀 최근 릴리즈 (세션 70)</span>
+          <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>🚀 최근 릴리즈 (세션 69~70)</span>
           <span style={{ fontSize: 10, color: C.textDim }}>2026-04-03</span>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
           {[
+            { tag: 'BLOG', label: '블로그 V2 크론', desc: '주식+청약 고품질 분석. 네이버 교차검증, 섹터비교, 주변시세, AI분석. 편당 3000자+', color: C.purple, commit: 'v2-cron' },
+            { tag: 'CVR', label: '3편 읽기 게이트', desc: '비로그인 하루3편→가입CTA. 봇 전체본문(SEO). 전환율 개선 기대', color: C.yellow, commit: 'readgate' },
+            { tag: 'COST', label: 'API 비용 75%↓', desc: '$15.6→$4/월. Sonnet→Haiku 11파일, seed-posts AI 제거, 스케줄 축소', color: C.green, commit: 's69-cost' },
             { tag: 'UX', label: '글씨 크기 상향', desc: '기본값 크게로 상향. ROOT 인라인 스케일링 + CSS버그 수정.', color: C.brand, commit: 's70-font' },
             { tag: 'UX', label: '가독성+라이트모드', desc: 'text 밝기+20%, 화이트모드 60+변수, 메가폰 색상 보정', color: C.brand, commit: 's70-lite' },
             { tag: 'FEAT', label: 'Excel/CSV 다운로드', desc: 'xlsx 패키지, API 6종 ?format=xlsx|csv, 듀얼 버튼 UI', color: C.purple, commit: 's70-xlsx' },
             { tag: 'UX', label: '블로그 컴팩트 리디자인', desc: '카드→리스트(밀도2배), 히어로 슬림화, 오늘추천/태그중복 제거', color: C.green, commit: 's70-blog' },
             { tag: 'CVR', label: '블로그 CTA 5종', desc: '상단/중간/플로팅 + 읽기게이트(3편) + 목록배너', color: C.yellow, commit: 's70-cta' },
             { tag: 'FEAT', label: '통계 자료실', desc: '/apt/data + /stock/data — Excel/CSV 듀얼 다운로드', color: C.purple, commit: 's70-data' },
-            { tag: 'UX', label: 'UI 정리', desc: '주식 비교/새로고침 삭제, 분양사이트 삭제, 더보기 뒤로가기', color: C.brand, commit: 's70-ui' },
-            { tag: 'SEO', label: 'SEO/성능', desc: 'sitemap/robots/llms.txt, preconnect, Google Font 제거', color: C.cyan, commit: 's70-seo' },
             { tag: 'DATA', label: '시총 크롤링 확대', desc: 'stock-discover 2→4페이지 (200종목/마켓, 100위 확실 커버)', color: C.green, commit: 's70-stk' },
+            { tag: 'SEO', label: 'SEO+블로그가독성', desc: 'H2정리/FAQ H3/목차제거/본문 line-height 2.0 + sitemap/robots', color: C.cyan, commit: 's70-seo' },
+            { tag: 'FEAT', label: 'AI 종목분석+댓글요약', desc: '프로 회원 AI분석 API + 댓글요약 크론 + 내부링크 자동연결', color: C.purple, commit: 's69-ai' },
           ].map(r => (
             <div key={r.commit} style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm)', background: `${r.color}08`, border: `1px solid ${r.color}15` }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>

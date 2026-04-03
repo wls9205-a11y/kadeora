@@ -1,53 +1,44 @@
-# 카더라 STATUS.md — 세션 70 최종 (2026-04-03 KST)
+# 카더라 STATUS.md — 세션 69-70 연결 (2026-04-03 KST)
 
-## 최신 커밋 (20건)
-- `82a72e46` — fix: Q&A H2→H3 다운그레이드 완전 수정
-- `54b25d84` — fix: '## 목차' H2 제거 + 중복 H1 숨김 + 번호목차 정리
-- `e4cba649` — 세션70-15: 블로그 가독성 전면 개선 + 코드 노출 수정
-- `1bc5e881` — 세션70-14: 블로그 분양 템플릿 DB 풀스택 (모든 컬럼 총동원)
-- `27bfa257` — 세션70-13: 리라이팅 가속 6회/일 + Sonnet 모델
-- `60a492ba` — 세션70-12: 블로그 SEO 풀스택 — 내부링크 86+ 키워드
-- `b46c3171` — 세션70-11: 분양/미분양 템플릿 2000자+ 개선
-- `277a0a2e` — fix: 데스크탑 드롭다운 z-index 버그 수정
-- `9cc8f2a0` — 세션70-10: 어드민 관심단지 관리 개선
-- `4e6b92a5` — 세션70-8: 블로그 목록+상세 컴팩트 리디자인
-- 세션70-7~1: 글씨크기/가독성/라이트모드/CTA/통계자료실/Excel/CSV
+## 최신 커밋
+- `e0a4ab6d` — V2 크론 빌드 에러 수정 (READY)
+- `49d94d8a` — 블로그 V2 크론 (주식/부동산 고품질 + 네이버 교차검증)
+- `06e4bfdc` — 블로그 3편 읽기 게이트 (SEO 봇 전체본문)
 
-## 블로그 가독성 개선 (세션 70 후반)
-### 코드 노출 수정
-1. H2 안의 **볼드** → sanitize 파이프라인에서 제거
-2. 60~70% → <del> 취소선 변환 → 숫자~숫자 이스케이프
-3. TOC에 ** 노출 → extractToc 클린업
-4. ## 목차 제거 (19,678편 SEO 가치 없는 H2)
-5. Q&A H2→H3 다운그레이드 (normalizeMarkdownHeadings + HTML 후처리)
-6. 중복 H1 숨김 (CSS first-child)
+## 이번 세션 작업 (세션 69 후반 ~ 세션 70 연결)
 
-### CSS 가독성 개선
-- line-height: 2.0 / opacity: 0.93
-- H2 margin 36px / H3 margin 28px
-- 테이블: 패딩 증가, td:first-child 볼드, hover
-- 인용문: padding/margin 증가
-- 라이트모드: 본문 #1a1a1a / 테이블·인용·코드 대비 강화
-- 모바일 480px 최적화
-- FAQ H3: 파란 좌측선+배경
+### 블로그 V2 크론 — 고품질 데이터 기반 ✅
+- **blog-stock-v2** (매일 07:00, 5종목/회): 네이버 교차검증 + DB price_history 추이 + 섹터 비교 + AI 분석. 편당 2,500~3,500자
+- **blog-apt-v2** (매일 08:00, 5현장/회): 청약 일정 전수 + 주변 실거래 시세 + 미분양 컨텍스트 + 입지 정보 + AI 분석. 편당 3,000~4,000자
+- 대상: 주식 미커버 799종목 + 청약 미커버 2,150현장
+- vercel.json 크론 2개 추가 (총 97개), GOD MODE Content Phase 등록
 
-### blog-rewrite 프롬프트 강화
-- "## 목차" 생성 금지
-- ## 안에 ** 사용 금지
-- 숫자~숫자 사용 금지
-- FAQ → ### 형식 명시
+### 블로그 3편 읽기 게이트 ✅
+- BlogReadGate: 비로그인 하루 3편 전체 → 4편째 가입 CTA
+- SSR 봇 감지 → Googlebot/Naverbot 전체 본문 100% (SEO 보존)
+- localStorage `kd_blog_reads` 일별 리셋
+- 기존 무조건 70% 잘림 → 3편까지 전체 보기로 개선
 
-## SQL 즉시 재작성 결과 (4,175편)
-- apt-announcement 495편 → apt_subscriptions JOIN
-- stock-bulk 1,044편 → stock_quotes JOIN
-- stock-dividend 726편, stock-outlook 726편
-- station-apt/region/school 670편, redev/builder/sector 514편
-- apt_sites 이미지/FAQ/특장점 주입: 1,090편
+### 트래픽/전환율 분석 ✅
+- UV: 3/24 UV18 → 3/30 UV3,935 (80배 성장)
+- 전환율: 초기 14% → 폭증 후 0.15% (트래픽 유형 변화)
+- 97.6% 1페이지 이탈, 블로그→로그인 0명
+- 활동 중 표시 기준 30분→60분 변경
 
-## 블로그 현황
-- 전체: 22,663편
-- 재작성 완료: 17,659편 (77.9%)
-- Sonnet 리라이팅 대기: 5,004편 (54건/일, 93일 후 완료)
-- 이미지 포함: 1,090편, FAQ 포함: 21,527편 (95%)
+### API 비용 최적화 ✅
+- 월 $15.6 → $4 (75% 절감)
+- Sonnet→Haiku 11파일, seed-posts/news/flow AI 제거
 
-## 크론 95개 | 빌드 READY | TS 에러 0 | 런타임 에러 0
+### 신규 기능 ✅
+- 프로 AI 종목 분석 API + stock_ai_analysis 테이블
+- AI 댓글 요약 크론 (매일 22:00)
+- 블로그 내부링크 자동 연결 (일 03:00)
+- 토스페이먼츠 심사 준비 (shop 공개 + PDF)
+- naver-complex-sync 보안 수정
+
+## 크론 현황
+- vercel.json: 97개
+- GOD MODE CRON_GROUPS: 95개 (data16 + process13 + ai8 + content38 + system20)
+
+## 아키텍처 규칙 (13개)
+1. 블로그 삭제 금지 2. stockcoin.net 금지 3. 포인트 RPC만 4. CSP middleware.ts 5. 크론 에러 200 6. OG 폰트 Node.js fs 7. PostWithProfile 보호 8. daily_create_limit 80 9. DB트리거 LIMIT 80 10. Supabase RPC try/catch 11. STATUS.md 필수 12. 디자인 토큰 우선 13. DB 신규 컬럼 접근 시 (sb as any).from() 패턴 필수
