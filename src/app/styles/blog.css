@@ -17,6 +17,8 @@
 
 /* ── 제목 ── */
 .blog-content h1 { font-size: var(--fs-2xl, 22px); font-weight: 900; margin: 28px 0 16px; color: var(--text-primary); word-break: keep-all; letter-spacing: -0.5px; line-height: 1.4; }
+/* 첫 H1은 숨김 (페이지 상단에 이미 제목 표시) */
+.blog-content > h1:first-child { display: none; }
 .blog-content h2 { font-size: var(--fs-xl, 18px); font-weight: 800; margin: 36px 0 14px; color: var(--text-primary); border-left: 3px solid var(--brand); padding-left: 12px; word-break: keep-all; letter-spacing: -0.3px; line-height: 1.45; }
 .blog-content h3 { font-size: var(--fs-lg, 16px); font-weight: 700; margin: 28px 0 10px; color: var(--text-primary); border-left: 2px solid var(--border); padding-left: 10px; word-break: keep-all; letter-spacing: -0.2px; line-height: 1.45; }
 /* 첫 h2는 상단 margin 축소 */

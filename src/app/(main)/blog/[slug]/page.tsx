@@ -71,6 +71,11 @@ function sanitizeBlogContent(raw: string): string {
     .replace(/\\r/g, '')       // 리터럴 \\r 제거
     .replace(/\r\n/g, '\n')   // Windows 줄바꿈 통일
     .replace(/\n{4,}/g, '\n\n\n') // 과도한 빈줄(4+) → 3줄로 축소
+    // ── 구조 개선 ──
+    // "## 목차" 제거 (SEO 가치 없음, 이미 TOC 컴포넌트가 있음)
+    .replace(/^## 목차\s*$/gm, '')
+    // "1. 섹터 개요 2. 주요 종목..." 같은 번호 목차 줄 제거
+    .replace(/^\d+\.\s+\S+\s+\d+\.\s+\S+\s+\d+\.\s+\S+.*$/gm, '')
     // ── 코드 노출 방지 ──
     // H2/H3 안의 **볼드** 마크다운 제거 (이미 CSS로 볼드)
     .replace(/^(#{1,6}\s+.*?)\*\*([^*\n]+)\*\*(.*?)$/gm, '$1$2$3')
