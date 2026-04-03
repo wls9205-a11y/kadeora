@@ -112,6 +112,8 @@ function InterestManager() {
   const [details, setDetails] = useState<InterestRow[]>([]);
   const [detailLoading, setDetailLoading] = useState(false);
   const [search, setSearch] = useState('');
+  const [phoneMask, setPhoneMask] = useState(true);
+  const [period, setPeriod] = useState<'all' | '7d' | '30d'>('all');
 
   useEffect(() => {
     fetch('/api/admin/interests?group_by=site')
@@ -133,14 +135,15 @@ function InterestManager() {
 
   const downloadCSV = useCallback(() => {
     if (!selected || !details.length) return;
-    const rows = details.map((d, i) => {
+    const rows = filteredDetails.map((d, i) => {
       if (d.is_member) {
         const p = d.profiles;
-        return [i + 1, '회원', p?.nickname || '-', p?.residence_city || '-', p?.residence_district || '-', '-', '-', new Date(d.created_at).toLocaleDateString('ko-KR')].join(',');
+        return [i + 1, '회원', p?.nickname || '-', p?.residence_city || '-', p?.residence_district || '-', p?.phone || '-', '-', new Date(d.created_at).toLocaleDateString('ko-KR')].join(',');
       }
-      return [i + 1, '비회원', d.guest_name || '-', d.guest_city || '-', d.guest_district || '-', d.guest_phone_last4 ? `***${d.guest_phone_last4}` : '-', d.guest_birth_date?.slice(0, 4) || '-', new Date(d.created_at).toLocaleDateString('ko-KR')].join(',');
+      const phone = phoneMask ? (d.guest_phone_last4 ? `***${d.guest_phone_last4}` : '-') : (d.guest_phone || (d.guest_phone_last4 ? `***${d.guest_phone_last4}` : '-'));
+      return [i + 1, '비회원', d.guest_name || '-', d.guest_city || '-', d.guest_district || '-', phone, d.guest_birth_date || '-', new Date(d.created_at).toLocaleDateString('ko-KR')].join(',');
     });
-    const csv = '\uFEFF' + ['#,구분,이름/닉네임,시도,시군구,연락처,생년,등록일'].concat(rows).join('\n');
+    const csv = '\uFEFF' + ['#,구분,이름/닉네임,시도,시군구,연락처,생년월일,등록일'].concat(rows).join('\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -148,16 +151,43 @@ function InterestManager() {
     a.download = `관심단지_${selected.name}_${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-  }, [selected, details]);
+  }, [selected, details, phoneMask, period]);
 
   const filtered = search
     ? groups.filter(g => g.name.includes(search) || g.region.includes(search) || g.sigungu.includes(search))
     : groups;
 
+  // 기간 필터링된 상세 데이터
+  const filteredDetails = details.filter(d => {
+    if (period === 'all') return true;
+    const days = period === '7d' ? 7 : 30;
+    return Date.now() - new Date(d.created_at).getTime() < days * 86400000;
+  });
+
+  const totalAll = groups.reduce((s, g) => s + g.count, 0);
+  const totalMembers = groups.reduce((s, g) => s + g.members, 0);
+  const totalGuests = groups.reduce((s, g) => s + g.guests, 0);
+
   if (loading) return <Spinner />;
 
   return (
     <div style={{ display: 'flex', gap: 'var(--sp-lg)', flexDirection: 'column' }}>
+      {/* 요약 통계 */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+        {[
+          { label: '총 등록', value: totalAll, color: C.brand, icon: '❤️' },
+          { label: '회원', value: totalMembers, color: C.green, icon: '👤' },
+          { label: '비회원', value: totalGuests, color: C.yellow, icon: '📝' },
+          { label: '관심 현장', value: groups.length, color: C.cyan, icon: '🏢' },
+        ].map(s => (
+          <div key={s.label} style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-sm)', padding: '10px 12px', textAlign: 'center' }}>
+            <div style={{ fontSize: 16, marginBottom: 2 }}>{s.icon}</div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: s.color }}>{s.value}</div>
+            <div style={{ fontSize: 10, color: C.textDim }}>{s.label}</div>
+          </div>
+        ))}
+      </div>
+
       {/* 단지 목록 */}
       <div>
         <input
@@ -165,7 +195,7 @@ function InterestManager() {
           placeholder="단지명/지역 검색..."
           style={{ width: '100%', maxWidth: 300, padding: '8px 12px', borderRadius: 'var(--radius-sm)', border: `1px solid ${C.border}`, background: C.surface, color: C.text, fontSize: 13, marginBottom: 10, boxSizing: 'border-box' }}
         />
-        <div style={{ display: 'grid', gap: 6 }}>
+        <div style={{ display: 'grid', gap: 4 }}>
           {filtered.length === 0 && <div style={{ color: C.textDim, fontSize: 13, padding: 16 }}>등록된 관심단지가 없습니다</div>}
           {filtered.map(g => (
             <button
@@ -173,18 +203,18 @@ function InterestManager() {
               onClick={() => selectSite(g)}
               style={{
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--sp-sm)',
-                padding: 'var(--sp-md) var(--card-p)', borderRadius: 'var(--radius-md)', border: `1px solid ${selected?.site_id === g.site_id ? C.brand : C.border}`,
+                padding: '10px 14px', borderRadius: 'var(--radius-sm)', border: `1px solid ${selected?.site_id === g.site_id ? C.brand : C.border}`,
                 background: selected?.site_id === g.site_id ? `${C.brand}10` : C.surface,
                 cursor: 'pointer', textAlign: 'left', width: '100%',
               }}
             >
               <div>
-                <div style={{ fontWeight: 700, fontSize: 14, color: C.text }}>{g.name}</div>
-                <div style={{ fontSize: 12, color: C.textDim }}>{g.region} {g.sigungu}</div>
+                <div style={{ fontWeight: 700, fontSize: 13, color: C.text }}>{g.name}</div>
+                <div style={{ fontSize: 11, color: C.textDim }}>{g.region} {g.sigungu}</div>
               </div>
               <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                <div style={{ fontWeight: 800, fontSize: 16, color: C.brand }}>{g.count}명</div>
-                <div style={{ fontSize: 11, color: C.textDim }}>회원 {g.members} · 비회원 {g.guests}</div>
+                <div style={{ fontWeight: 800, fontSize: 15, color: C.brand }}>{g.count}<span style={{ fontSize: 10, color: C.textDim, fontWeight: 500 }}>명</span></div>
+                <div style={{ fontSize: 10, color: C.textDim }}>회원{g.members} · 비회원{g.guests}</div>
               </div>
             </button>
           ))}
@@ -193,38 +223,55 @@ function InterestManager() {
 
       {/* 선택된 단지 상세 */}
       {selected && (
-        <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-card)', padding: 16 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+        <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-card)', padding: 14 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexWrap: 'wrap', gap: 8 }}>
             <div>
-              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: C.text }}>{selected.name}</h3>
-              <span style={{ fontSize: 12, color: C.textDim }}>{selected.region} {selected.sigungu} — 총 {selected.count}명</span>
+              <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: C.text }}>{selected.name}</h3>
+              <span style={{ fontSize: 11, color: C.textDim }}>{selected.region} {selected.sigungu} — {filteredDetails.length}명</span>
             </div>
-            <button onClick={downloadCSV} style={{
-              padding: '6px 14px', borderRadius: 'var(--radius-sm)', border: `1px solid ${C.border}`,
-              background: C.surface, color: C.text, fontSize: 12, fontWeight: 600, cursor: 'pointer',
-            }}>
-              CSV 다운로드
-            </button>
+            <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+              {/* 기간 필터 */}
+              {(['all', '30d', '7d'] as const).map(p => (
+                <button key={p} onClick={() => setPeriod(p)} style={{
+                  padding: '4px 10px', borderRadius: 4, border: `1px solid ${period === p ? C.brand : C.border}`,
+                  background: period === p ? `${C.brand}15` : 'transparent',
+                  color: period === p ? C.brand : C.textDim, fontSize: 11, fontWeight: 600, cursor: 'pointer',
+                }}>{{ all: '전체', '30d': '30일', '7d': '7일' }[p]}</button>
+              ))}
+              {/* 마스킹 토글 */}
+              <button onClick={() => setPhoneMask(!phoneMask)} style={{
+                padding: '4px 10px', borderRadius: 4, border: `1px solid ${C.border}`,
+                background: phoneMask ? 'transparent' : `${C.yellow}15`,
+                color: phoneMask ? C.textDim : C.yellow, fontSize: 11, fontWeight: 600, cursor: 'pointer',
+              }}>{phoneMask ? '🔒 마스킹' : '🔓 전체보기'}</button>
+              {/* CSV 다운로드 */}
+              <button onClick={downloadCSV} style={{
+                padding: '4px 10px', borderRadius: 4, border: `1px solid ${C.green}40`,
+                background: `${C.green}10`, color: C.green, fontSize: 11, fontWeight: 600, cursor: 'pointer',
+              }}>📥 CSV</button>
+            </div>
           </div>
 
           {detailLoading ? <Spinner /> : (
             <>
               {/* 회원 테이블 */}
               {(() => {
-                const members = details.filter(d => d.is_member);
+                const members = filteredDetails.filter(d => d.is_member);
                 if (!members.length) return null;
                 return (
                   <>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: C.text, marginBottom: 6 }}>회원 ({members.length}명)</div>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: C.green, marginBottom: 4 }}>👤 회원 ({members.length}명)</div>
                     <DataTable
-                      headers={['#', '닉네임', '거주지', '등록일']}
+                      headers={['#', '닉네임', '거주지', '연락처', '등록일']}
                       rows={members.map((m, i) => {
                         const p = m.profiles;
                         const loc = [p?.residence_city, p?.residence_district].filter(Boolean).join(' ') || '-';
+                        const phone = phoneMask ? (p?.phone ? `***${p.phone.slice(-4)}` : '-') : (p?.phone || '-');
                         return [
                           i + 1,
-                          p?.nickname || '-',
+                          <span key="n" style={{ fontWeight: 600 }}>{p?.nickname || '-'}</span>,
                           loc,
+                          phone,
                           new Date(m.created_at).toLocaleDateString('ko-KR'),
                         ];
                       })}
@@ -235,22 +282,23 @@ function InterestManager() {
 
               {/* 비회원 테이블 */}
               {(() => {
-                const guests = details.filter(d => !d.is_member);
+                const guests = filteredDetails.filter(d => !d.is_member);
                 if (!guests.length) return null;
                 return (
                   <>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: C.text, margin: '14px 0 6px' }}>비회원 ({guests.length}명)</div>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: C.yellow, margin: '12px 0 4px' }}>📝 비회원 ({guests.length}명)</div>
                     <DataTable
-                      headers={['#', '이름', '거주지', '연락처', '생년', '등록일']}
+                      headers={['#', '이름', '거주지', '연락처', '생년월일', '등록일']}
                       rows={guests.map((g, i) => {
                         const loc = [g.guest_city, g.guest_district].filter(Boolean).join(' ') || '-';
-                        const name = g.guest_name ? g.guest_name.slice(0, 1) + '**' : '-';
+                        const name = phoneMask ? (g.guest_name ? g.guest_name.slice(0, 1) + '**' : '-') : (g.guest_name || '-');
+                        const phone = phoneMask ? (g.guest_phone_last4 ? `***${g.guest_phone_last4}` : '-') : (g.guest_phone || (g.guest_phone_last4 ? `***${g.guest_phone_last4}` : '-'));
                         return [
                           i + 1,
-                          name,
+                          <span key="n" style={{ fontWeight: 600 }}>{name}</span>,
                           loc,
-                          g.guest_phone_last4 ? `***${g.guest_phone_last4}` : '-',
-                          g.guest_birth_date?.slice(0, 4) ? `${g.guest_birth_date.slice(0, 4)}년` : '-',
+                          phone,
+                          g.guest_birth_date || '-',
                           new Date(g.created_at).toLocaleDateString('ko-KR'),
                         ];
                       })}
@@ -259,7 +307,7 @@ function InterestManager() {
                 );
               })()}
 
-              {details.length === 0 && <div style={{ color: C.textDim, fontSize: 13, textAlign: 'center', padding: 24 }}>등록된 관심 고객이 없습니다</div>}
+              {filteredDetails.length === 0 && <div style={{ color: C.textDim, fontSize: 13, textAlign: 'center', padding: 20 }}>해당 기간에 등록된 관심 고객이 없습니다</div>}
             </>
           )}
         </div>
