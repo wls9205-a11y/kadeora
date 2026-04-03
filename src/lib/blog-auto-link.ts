@@ -62,16 +62,32 @@ const FEATURE_KEYWORDS: [string, string][] = [
   ['부동산 지도', '/apt/map'],
   ['투자 캘린더', '/stock'], ['포트폴리오', '/stock'],
   ['부동산 진단', '/apt/diagnose'],
-  // 추가 내부 링크
   ['실거래가', '/apt?tab=trade'],
   ['청약 경쟁률', '/apt/diagnose'],
   ['청약 가점', '/apt/diagnose'],
   ['청약 진단', '/apt/diagnose'],
   ['미분양 현황', '/apt?tab=unsold'],
   ['재개발 현황', '/apt?tab=redev'],
-  ['테마주', '/stock'],
-  ['배당주', '/stock'],
-  ['환율', '/stock'],
+  ['테마주', '/stock'], ['배당주', '/stock'], ['환율', '/stock'],
+  // 세션70 추가
+  ['통계 자료실', '/stock/data'],
+  ['데일리 리포트', '/daily'],
+  ['단지백과', '/apt/complex'],
+  ['가점 계산기', '/apt/diagnose'],
+  ['아파트 시세', '/apt/complex'],
+  ['분양가 상한제', '/blog?q=분양가+상한제'],
+  ['전세가율', '/apt/complex'],
+  ['주택담보대출', '/blog?q=주택담보대출'],
+  ['DSR', '/blog?q=DSR'],
+  ['LTV', '/blog?q=LTV'],
+  ['금리 인하', '/blog?q=금리'],
+  ['금리 인상', '/blog?q=금리'],
+  ['PER', '/stock/compare'],
+  ['PBR', '/stock/compare'],
+  ['시가총액', '/stock'],
+  ['섹터 분석', '/stock'],
+  ['급등주', '/stock'],
+  ['급락주', '/stock'],
 ];
 
 // 재테크·금융 블로그 내부링크 (finance/general 카테고리)
@@ -141,7 +157,7 @@ export function injectInternalLinks(html: string): string {
       linked.add(keyword);
     }
 
-    if (linked.size >= 7) break;
+    if (linked.size >= 10) break;
   }
 
   // External links — 사전 컴파일된 정규식 사용

@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
       .eq('is_published', true)
       .is('rewritten_at', null)
       .order('created_at', { ascending: true })
-      .limit(10);
+      .limit(15);
 
     if (!posts || posts.length === 0) {
       return NextResponse.json({ ok: true, rewritten: 0, reason: 'all_done' });
@@ -68,13 +68,20 @@ export async function GET(req: NextRequest) {
 
 스타일: ${style}
 
-규칙:
+핵심 규칙:
 - 반드시 3000자 이상 작성 (핵심 요구사항)
 - 서론/본론/결론 구조로 깊이 있게 다루기
-- 수치 데이터 유지 / 마크다운 형식 유지 / 내부 링크 유지
-- 소제목(##) 3~5개 포함
-- 각 섹션에 구체적 예시·수치·비교 포함
-- 면책 문구 포함 / 마크다운만 출력
+- 소제목(##) 4~6개, 각 섹션에 구체적 예시·수치·비교 포함
+- 수치 데이터 유지 / 마크다운 형식 / 면책 문구
+
+SEO·내부링크 규칙 (매우 중요):
+- FAQ 섹션 필수 (Q&A 3~5개) — "### ❓ 자주 묻는 질문" 형식
+- 카더라 내부 페이지 링크 5개 이상 자연스럽게 삽입:
+  * 주식 관련: [실시간 시세 보기 →](/stock), [종목 비교 →](/stock/compare)
+  * 부동산 관련: [청약 일정 →](/apt), [청약 가점 계산 →](/apt/diagnose), [미분양 현황 →](/apt?tab=unsold)
+  * 공통: [카더라 블로그 →](/blog), [커뮤니티 토론 →](/feed)
+- 관련 키워드를 앵커 텍스트로 활용 (예: "**코스피** 시장은..." → "[코스피](/stock?market=KOSPI) 시장은...")
+- 글 끝에 "### 🔗 관련 정보" 섹션 추가 (내부 링크 5~7개)
 
 카테고리: ${post.category}
 
