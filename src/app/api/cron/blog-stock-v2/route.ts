@@ -198,11 +198,8 @@ ${naver ? `> 가격 정보는 네이버 금융과 교차 검증 완료 (${today}
         const ok = await safeBlogInsert(sb, {
           slug, title, content: c,
           excerpt: `${stock.name}(${stock.symbol}) ${stock.market} ${stock.sector||''} 종목 분석. 현재가 ${priceStr}원, PER ${per>0?per.toFixed(1):'—'}, 섹터 비교, 가격 추이 (${today}).`,
-          category: 'stock', sub_category: '종목분석', tags,
-          author_name: '카더라 데이터팀', author_role: 'AI 분석',
+          category: 'stock', tags,
           source_type: 'auto', source_ref: stock.symbol, data_date: today,
-          reading_time_min: Math.max(5, Math.ceil(c.length / 500)),
-          cover_image: `https://kadeora.app/api/og?title=${encodeURIComponent(title)}&category=stock&author=${encodeURIComponent('카더라 데이터팀')}&design=2`,
         });
         if (ok) created++;
       } catch { continue; }

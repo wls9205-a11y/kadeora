@@ -229,11 +229,8 @@ ${apt.heating_type ? `| **난방** | ${apt.heating_type} |\n` : ''}${apt.parking
         const ok = await safeBlogInsert(sb, {
           slug, title, content: c,
           excerpt: `${apt.house_nm} ${region} ${units}세대 청약 분석. ${constructor} 시공, ${ppyeong > 0 ? '평당 '+ppyeong.toLocaleString()+'만원' : ''} 분양가, 일정, 주변 시세 비교 (${today}).`,
-          category: 'apt', sub_category: '청약·분양', tags,
-          author_name: '카더라 데이터팀', author_role: 'AI 분석',
+          category: 'apt', tags,
           source_type: 'auto', source_ref: apt.house_manage_no, data_date: today,
-          reading_time_min: Math.max(5, Math.ceil(c.length / 500)),
-          cover_image: `https://kadeora.app/api/og?title=${encodeURIComponent(title)}&category=apt&author=${encodeURIComponent('카더라 데이터팀')}&design=2`,
         });
         if (ok) created++;
       } catch { continue; }
