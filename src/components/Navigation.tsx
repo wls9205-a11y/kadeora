@@ -668,7 +668,7 @@ export function Navigation() {
         </div>
       )}
 
-      {menuOpen && <div className="hidden md:block" style={{ position:'fixed', inset:0, zIndex: 9998 }} onClick={()=>setMenuOpen(false)} />}
+      {menuOpen && <div className="hidden md:block" style={{ position:'fixed', inset:0, zIndex: 99 }} onClick={()=>setMenuOpen(false)} />}
     </>
   );
 }
