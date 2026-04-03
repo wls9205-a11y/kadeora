@@ -59,7 +59,12 @@ function extractToc(html: string): { level: number; text: string; id: string }[]
 function normalizeMarkdownHeadings(md: string): string {
   return md.replace(
     /^(\*\*|__)([^*_\n]{2,60})\1\s*$/gm,
-    (_match, _marker, text) => `## ${text.trim()}`
+    (_match, _marker, text) => {
+      const t = text.trim();
+      // Q&A 패턴은 H3으로 (H2 과다 방지)
+      if (/^[QA][.:]\s/.test(t)) return `### ${t}`;
+      return `## ${t}`;
+    }
   );
 }
 
@@ -447,6 +452,9 @@ export default async function BlogDetailPage({ params }: Props) {
     // H태그 안에 남은 ** 제거
     .replace(/<(h[1-6])([^>]*)>\s*\*\*([^*]+)\*\*\s*<\/\1>/g, '<$1$2>$3</$1>')
     .replace(/(<h[1-6][^>]*>)(.*?)\*\*(.*?)\*\*(.*?)(<\/h[1-6]>)/g, '$1$2$3$4$5')
+    // Q&A H2 → H3 다운그레이드 (HTML 레벨 — normalizeMarkdownHeadings 이후에도 처리)
+    .replace(/<h2([^>]*)>(Q[.:]\s[^<]*)<\/h2>/g, '<h3$1>$2</h3>')
+    .replace(/<h2([^>]*)>(A[.:]\s[^<]*)<\/h2>/g, '<h3$1>$2</h3>')
     // <del> 태그가 숫자 사이에 있으면 취소선 아닌 범위 표시로 복원
     .replace(/(\d+)<del>(\d+[^<]*)<\/del>/g, '$1~$2')
     // 빈 <p></p> 제거
