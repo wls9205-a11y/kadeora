@@ -951,23 +951,23 @@ export default function DashboardSection() {
       {/* ── 최근 릴리즈 내역 ── */}
       <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', marginBottom: 'var(--sp-md)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-          <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>🚀 최근 릴리즈 (세션 69~70)</span>
-          <span style={{ fontSize: 10, color: C.textDim }}>2026-04-03</span>
+          <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>🚀 최근 릴리즈 (세션 70)</span>
+          <span style={{ fontSize: 10, color: C.textDim }}>2026-04-04</span>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
           {[
-            { tag: 'BLOG', label: '블로그 V2 크론', desc: '주식+청약 고품질 분석. 네이버 교차검증, 섹터비교, 주변시세, AI분석. 편당 3000자+', color: C.purple, commit: 'v2-cron' },
-            { tag: 'CVR', label: '3편 읽기 게이트', desc: '비로그인 하루3편→가입CTA. 봇 전체본문(SEO). 전환율 개선 기대', color: C.yellow, commit: 'readgate' },
-            { tag: 'COST', label: 'API 비용 75%↓', desc: '$15.6→$4/월. Sonnet→Haiku 11파일, seed-posts AI 제거, 스케줄 축소', color: C.green, commit: 's69-cost' },
-            { tag: 'UX', label: '글씨 크기 상향', desc: '기본값 크게로 상향. ROOT 인라인 스케일링 + CSS버그 수정.', color: C.brand, commit: 's70-font' },
-            { tag: 'UX', label: '가독성+라이트모드', desc: 'text 밝기+20%, 화이트모드 60+변수, 메가폰 색상 보정', color: C.brand, commit: 's70-lite' },
-            { tag: 'FEAT', label: 'Excel/CSV 다운로드', desc: 'xlsx 패키지, API 6종 ?format=xlsx|csv, 듀얼 버튼 UI', color: C.purple, commit: 's70-xlsx' },
-            { tag: 'UX', label: '블로그 컴팩트 리디자인', desc: '카드→리스트(밀도2배), 히어로 슬림화, 오늘추천/태그중복 제거', color: C.green, commit: 's70-blog' },
-            { tag: 'CVR', label: '블로그 CTA 5종', desc: '상단/중간/플로팅 + 읽기게이트(3편) + 목록배너', color: C.yellow, commit: 's70-cta' },
+            { tag: 'DATA', label: '정보력 8대 강화', desc: 'RPC 10개+API 10개+컴포넌트 7개. price_change_1y 2,291단지 계산', color: C.purple, commit: 's70-16' },
+            { tag: 'FEAT', label: '아파트 랭킹', desc: '상승/하락/거래량/전세가율/최고가 TOP10. 5종 탭 전환', color: C.brand, commit: 's70-rank' },
+            { tag: 'FEAT', label: '이동평균선 차트', desc: 'MA5/20/60 토글. stock_price_history 31K OHLCV 활용', color: C.cyan, commit: 's70-ma' },
+            { tag: 'FEAT', label: '주변 단지 비교', desc: '단지백과 같은 시군구 거래활발 TOP5 비교 테이블', color: C.green, commit: 's70-near' },
+            { tag: 'FEAT', label: '미분양 추이 차트', desc: 'unsold_apts_history 179건 → 월별 증감 바차트', color: C.yellow, commit: 's70-unsold' },
+            { tag: 'FEAT', label: '환율+랜드마크', desc: 'USD/KRW 스파크라인. 17개 시도 대장 아파트 시세 카드', color: C.green, commit: 's70-fx' },
+            { tag: 'DATA', label: '전월세 API 209만건', desc: 'search_rent_transactions RPC + rent-search API 라이브', color: C.purple, commit: 's70-rent' },
+            { tag: 'SEO', label: 'SEO 전수 감사', desc: '전 페이지 meta/jsonld/og/naver/faq/breadcrumb 확인. 통계자료실 보강', color: C.cyan, commit: 's70-seo2' },
+            { tag: 'BLOG', label: '가독성 전면 개선', desc: 'H2 ** 제거, ~취소선 방지, ## 목차 삭제, Q&A H3, CSS 전면 개선', color: C.brand, commit: 's70-read' },
+            { tag: 'CRON', label: 'price_change 크론', desc: '매일 04:30 UTC price_change_1y 자동 재계산 (97개)', color: C.green, commit: 's70-cron' },
             { tag: 'FEAT', label: '통계 자료실', desc: '/apt/data + /stock/data — Excel/CSV 듀얼 다운로드', color: C.purple, commit: 's70-data' },
-            { tag: 'DATA', label: '시총 크롤링 확대', desc: 'stock-discover 2→4페이지 (200종목/마켓, 100위 확실 커버)', color: C.green, commit: 's70-stk' },
-            { tag: 'SEO', label: 'SEO+블로그가독성', desc: 'H2정리/FAQ H3/목차제거/본문 line-height 2.0 + sitemap/robots', color: C.cyan, commit: 's70-seo' },
-            { tag: 'FEAT', label: 'AI 종목분석+댓글요약', desc: '프로 회원 AI분석 API + 댓글요약 크론 + 내부링크 자동연결', color: C.purple, commit: 's69-ai' },
+            { tag: 'COST', label: 'API 비용 75%↓', desc: '$15.6→$4/월. Sonnet→Haiku, seed-posts AI 제거, 스케줄 축소', color: C.yellow, commit: 's69-cost' },
           ].map(r => (
             <div key={r.commit} style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm)', background: `${r.color}08`, border: `1px solid ${r.color}15` }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>

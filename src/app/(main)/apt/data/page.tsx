@@ -11,9 +11,18 @@ export const metadata: Metadata = {
     title: '부동산 통계 자료실 — 카더라',
     description: '전국 시군구별 청약·분양·미분양·실거래 데이터 무료 다운로드',
     url: `${SITE}/apt/data`,
+    siteName: '카더라', locale: 'ko_KR', type: 'website',
     images: [{ url: `${SITE}/api/og?title=${encodeURIComponent('부동산 통계 자료실')}&category=apt&design=2`, width: 1200, height: 630 }],
   },
   alternates: { canonical: `${SITE}/apt/data` },
+  other: {
+    'naver:author': '카더라 부동산팀',
+    'naver:written_time': '2026-01-15T00:00:00Z',
+    'naver:updated_time': new Date().toISOString(),
+    'naver:site_name': '카더라',
+    'article:section': '부동산',
+    'article:tag': '부동산통계,청약통계,분양가,미분양,실거래데이터',
+  },
 };
 
 export const revalidate = 3600;
@@ -68,6 +77,8 @@ export default async function AptDataPage() {
   return (
     <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 16px 80px' }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"카더라","item":SITE},{"@type":"ListItem","position":2,"name":"부동산","item":`${SITE}/apt`},{"@type":"ListItem","position":3,"name":"통계 자료실"}]}) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"부동산 통계 자료는 어디서 확인하나요?","acceptedAnswer":{"@type":"Answer","text":"카더라 부동산 통계 자료실에서 전국 시군구별 청약·분양·미분양·실거래 데이터를 무료로 확인할 수 있습니다."}},{"@type":"Question","name":"실거래가 데이터는 얼마나 자주 업데이트되나요?","acceptedAnswer":{"@type":"Answer","text":"카더라의 실거래가 데이터는 국토교통부 실거래가 공개시스템과 연동되어 매일 자동 업데이트됩니다."}}]}) }} />
 
       {/* 헤더 */}
       <div style={{ padding: '24px 0 16px' }}>

@@ -11,9 +11,18 @@ export const metadata: Metadata = {
     title: '주식 통계 자료실 — 카더라',
     description: '국내외 주식 종목별·섹터별 시세 데이터 무료 다운로드',
     url: `${SITE}/stock/data`,
+    siteName: '카더라', locale: 'ko_KR', type: 'website',
     images: [{ url: `${SITE}/api/og?title=${encodeURIComponent('주식 통계 자료실')}&category=stock&design=2`, width: 1200, height: 630 }],
   },
   alternates: { canonical: `${SITE}/stock/data` },
+  other: {
+    'naver:author': '카더라',
+    'naver:written_time': '2026-01-15T00:00:00Z',
+    'naver:updated_time': new Date().toISOString(),
+    'naver:site_name': '카더라',
+    'article:section': '주식',
+    'article:tag': '주식통계,종목데이터,코스피,코스닥,시가총액순위',
+  },
 };
 
 export const revalidate = 3600;
@@ -47,6 +56,8 @@ export default async function StockDataPage() {
   return (
     <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 16px 80px' }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"카더라","item":SITE},{"@type":"ListItem","position":2,"name":"주식","item":`${SITE}/stock`},{"@type":"ListItem","position":3,"name":"통계 자료실"}]}) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"주식 통계 데이터는 어디서 확인하나요?","acceptedAnswer":{"@type":"Answer","text":"카더라 주식 통계 자료실에서 국내외 종목별 시세, 시가총액, 거래량, 섹터 통계를 무료로 확인할 수 있습니다."}},{"@type":"Question","name":"어떤 시장 데이터를 제공하나요?","acceptedAnswer":{"@type":"Answer","text":"KOSPI, KOSDAQ, NYSE, NASDAQ 4개 시장의 728개 종목에 대한 일별 시세, OHLCV, 이동평균선, 52주 최고/최저 데이터를 제공합니다."}}]}) }} />
 
       <div style={{ padding: '24px 0 16px' }}>
         <nav style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 12, display: 'flex', gap: 4 }}>
