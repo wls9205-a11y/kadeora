@@ -401,6 +401,24 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
         );
       })()}
 
+      {/* 관련 서비스 (내부 링크 — SEO 교차 참조) */}
+      <div style={{ marginTop: 'var(--sp-md)', padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)' }}>
+        <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>🔗 함께 보면 좋은 서비스</div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+          {[
+            { href: '/stock', label: '📈 주식 시세', desc: '실시간 코스피·코스닥·나스닥' },
+            { href: '/apt/complex', label: '📖 단지백과', desc: '34,500 아파트 실거래가 비교' },
+            { href: '/apt/diagnose', label: '🎯 가점 계산기', desc: '내 청약 가점 자동 계산' },
+            { href: '/blog', label: '📝 투자 블로그', desc: '부동산·주식 데이터 분석' },
+            { href: '/daily/서울', label: '📰 데일리 리포트', desc: '오늘의 시장 브리핑' },
+          ].map(l => (
+            <Link key={l.href} href={l.href} style={{ padding: '6px 12px', borderRadius: 'var(--radius-xs)', fontSize: 'var(--fs-xs)', fontWeight: 500, background: 'var(--bg-hover)', color: 'var(--text-secondary)', textDecoration: 'none', border: '1px solid var(--border)' }}>
+              {l.label}
+            </Link>
+          ))}
+        </div>
+      </div>
+
       {/* 토스 모드: 부동산 전체보기 CTA */}
       {typeof window !== 'undefined' && isTossMode() && (
         <TossTeaser

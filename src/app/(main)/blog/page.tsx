@@ -473,6 +473,25 @@ export default async function BlogPage({ searchParams }: Props) {
         </div>
       )}
 
+      {/* 관련 서비스 (내부 링크 — SEO 교차 참조) */}
+      <div style={{ padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', marginTop: 'var(--sp-md)' }}>
+        <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>🔗 카더라 서비스</div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+          {[
+            { href: '/apt', label: '🏠 부동산 청약' },
+            { href: '/stock', label: '📈 주식 시세' },
+            { href: '/apt/complex', label: '📖 단지백과' },
+            { href: '/stock/compare', label: '⚖️ 종목 비교' },
+            { href: '/daily/서울', label: '📰 데일리 리포트' },
+            { href: '/apt/diagnose', label: '🎯 가점 계산기' },
+          ].map(l => (
+            <Link key={l.href} href={l.href} style={{ padding: '5px 10px', borderRadius: 'var(--radius-xs)', fontSize: 'var(--fs-xs)', fontWeight: 500, background: 'var(--bg-hover)', color: 'var(--text-secondary)', textDecoration: 'none', border: '1px solid var(--border)' }}>
+              {l.label}
+            </Link>
+          ))}
+        </div>
+      </div>
+
       {/* 페이지네이션 */}
       <div style={{ display: 'flex', justifyContent: 'center', gap: 'var(--sp-sm)', marginTop: 'var(--sp-xl)', marginBottom: 'var(--sp-xl)' }}>
         {pageNum > 1 && (

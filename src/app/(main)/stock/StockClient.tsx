@@ -1252,6 +1252,25 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
       {/* 면책 */}
       {/* 환율 추이 미니 차트 */}
       <div style={{ margin: '12px 0' }}><ExchangeRateMiniChart /></div>
+
+      {/* 관련 서비스 (내부 링크 — SEO 교차 참조) */}
+      <div style={{ padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', marginBottom: 12 }}>
+        <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>🔗 함께 보면 좋은 서비스</div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+          {[
+            { href: '/apt', label: '🏠 부동산 청약', desc: '전국 청약·분양·미분양' },
+            { href: '/stock/compare', label: '⚖️ 종목 비교', desc: '핵심 지표 나란히 비교' },
+            { href: '/stock/data', label: '📊 주식 통계', desc: '종목별 데이터 다운로드' },
+            { href: '/blog', label: '📝 투자 블로그', desc: '주식·부동산 데이터 분석' },
+            { href: '/daily/서울', label: '📰 데일리 리포트', desc: '오늘의 시장 브리핑' },
+          ].map(l => (
+            <Link key={l.href} href={l.href} style={{ padding: '6px 12px', borderRadius: 'var(--radius-xs)', fontSize: 'var(--fs-xs)', fontWeight: 500, background: 'var(--bg-hover)', color: 'var(--text-secondary)', textDecoration: 'none', border: '1px solid var(--border)' }}>
+              {l.label}
+            </Link>
+          ))}
+        </div>
+      </div>
+
       <Disclaimer type="stock" compact />
 
       {/* 종목 모달 */}
