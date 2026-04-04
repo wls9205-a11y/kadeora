@@ -44,5 +44,11 @@ export function sanitizeHtml(html: string): string {
   // 4. data: URI 제거 (href, action에서만)
   clean = clean.replace(DATA_URI, '$1=""');
   
+  // 5. 외부 링크에 nofollow 추가 (kadeora.app 제외)
+  clean = clean.replace(/<a\s([^>]*href\s*=\s*"https?:\/\/(?!kadeora\.app)[^"]*"[^>]*)>/gi, (match, attrs) => {
+    if (/rel\s*=/.test(attrs)) return match; // 이미 rel 있으면 스킵
+    return `<a ${attrs} rel="nofollow noopener noreferrer" target="_blank">`;
+  });
+  
   return clean;
 }

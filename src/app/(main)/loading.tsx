@@ -1,12 +1,8 @@
-/** Kent: "loading.tsx 라우트별로 생성하여 로딩 UI 통일" */
+/** 라우트별 로딩 UI — 스켈레톤만 표시 (크롤러에 텍스트 노출 방지) */
 export default function MainLoading() {
   return (
-    <div style={{ paddingBottom: 80 }}>
-      <div style={{textAlign:'center', padding:'60px 20px'}}>
-        <div style={{fontSize:48, marginBottom:16}}>📡</div>
-        <p style={{color:'var(--text-secondary)', fontSize:14}}>잠시만요...</p>
-      </div>
-      <div style={{ height: 16, width: 100, borderRadius: 'var(--radius-sm)', background: "var(--bg-surface)", marginBottom: 'var(--sp-lg)' }} />
+    <div style={{ paddingBottom: 80 }} aria-busy="true" aria-label="로딩 중">
+      <div style={{ height: 16, width: 100, borderRadius: 'var(--radius-sm)', background: "var(--bg-surface)", marginBottom: 'var(--sp-lg)', marginTop: 60 }} />
       <div style={{ height: 72, borderRadius: 'var(--radius-card)', background: "var(--bg-surface)", marginBottom: 18, animation: "pulse 2s infinite" }} />
       <div style={{ display: "flex", gap: 'var(--sp-sm)', marginBottom: 14 }}>
         {[1, 2, 3, 4, 5].map((i) => (

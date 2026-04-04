@@ -122,6 +122,7 @@ export default function WeeklyPrediction() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
           <span style={{ fontSize: 14 }}>🎯</span>
           <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--accent-yellow)' }}>이번주 코스피 예측</span>
+          <span style={{ fontSize: 9, color: 'var(--text-tertiary)', marginLeft: 4 }}>(KODEX200 기준)</span>
         </div>
         <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>D-{data.daysLeft} 마감</span>
       </div>
