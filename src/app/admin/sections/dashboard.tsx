@@ -951,23 +951,23 @@ export default function DashboardSection() {
       {/* ── 최근 릴리즈 내역 ── */}
       <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', marginBottom: 'var(--sp-md)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-          <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>🚀 최근 릴리즈 (세션 71)</span>
-          <span style={{ fontSize: 10, color: C.textDim }}>2026-04-05</span>
+          <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>🚀 최근 릴리즈 (세션 70~71)</span>
+          <span style={{ fontSize: 10, color: C.textDim }}>2026-04-04 ~ 05</span>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
           {[
-            { tag: 'UX', label: '전수감사 25건', desc: '등급통일, 가점계산기, 탈퇴버그, 세법3건, 군위군 대구, 데이터출처', color: C.brand, commit: 's71-audit' },
-            { tag: 'UX', label: '바텀네비 블로그', desc: '모바일 바텀네비 블로그 탭 추가. 21K 콘텐츠 접근성 향상', color: C.cyan, commit: 's71-nav' },
-            { tag: 'FIX', label: '피드 자동발행', desc: '라운드로빈, 7일 중복체크, 뻘글 55%, 48템플릿, 이모지 제거', color: C.green, commit: 's71-seed' },
-            { tag: 'UX', label: '가점 진단 공유', desc: '카카오톡/Web Share/클립보드 공유. 바이럴 채널 추가', color: C.purple, commit: 's71-diag' },
-            { tag: 'SEO', label: '크롤러 텍스트 제거', desc: 'loading.tsx 텍스트 제거, 외부링크 nofollow, KODEX200 명시', color: C.yellow, commit: 's71-seo' },
-            { tag: 'FIX', label: '시리즈 카테고리 필터', desc: '아파트비교를 종목비교로 오분류 방지. 카테고리 기반 매칭', color: C.brand, commit: 's71-series' },
-            { tag: 'UX', label: '토론 종목방 연결', desc: '주식 상세에서 주식방 직접 연결. URL ?tab=stock 지원', color: C.cyan, commit: 's71-disc' },
-            { tag: 'FIX', label: '저자명 통일 15곳', desc: '부동산팀/데이터팀/블로그팀 전부 카더라로 통일', color: C.green, commit: 's71-author' },
-            { tag: 'UX', label: 'daily 유저지역', desc: '서울 하드코딩 제거. localStorage daily_region 반영', color: C.purple, commit: 's71-daily' },
-            { tag: 'HOST', label: '팝업 v2 111사이트', desc: '분양가 제거, 오늘하루 보지않기, 전국구/지역 분기 적용', color: C.yellow, commit: 's71-popup' },
-            { tag: 'FEAT', label: '광고판 배너', desc: 'AdBanner 카카오톡 스타일. 유료AD/청약 D-Day 자동전환', color: C.brand, commit: 's71-ad' },
-            { tag: 'FIX', label: '글쓰기 카테고리 6개', desc: '정보/재테크 추가. consultant 준비중 차단. 등급 GRADE_MAP', color: C.cyan, commit: 's71-write' },
+            { tag: 'DATA', label: '블로그 59,401편', desc: '주식 1,803 + 단지백과 34,500 + 재개발 217 + 미분양 204 대량 생성', color: C.brand, commit: 's70-blog' },
+            { tag: 'SEO', label: '사이트맵 수정', desc: '23,967편 누락 해결. SITEMAP_IDS 17~22 추가. 65K편 커버', color: C.green, commit: 's70-sitemap' },
+            { tag: 'SEO', label: '전수 스팸 점검', desc: '타이틀 4,138편 유니크화. 조사 교체. 내부링크 22+. 출처/면책', color: C.yellow, commit: 's70-spam' },
+            { tag: 'FEAT', label: '광고판 AdBanner', desc: '카카오톡 스타일. D-Day 뱃지 + 지역 17색 + 개별 현장 링크', color: C.brand, commit: 's71-ad' },
+            { tag: 'UX', label: '인기검색어 헤더', desc: '모바일+데스크탑 헤더 통합. TrendingTicker 별도 줄 제거', color: C.cyan, commit: 's71-ticker' },
+            { tag: 'AUDIT', label: '전수감사 25건', desc: '등급통일, 가점계산기, 탈퇴, 세법3건, 군위군, 데이터출처', color: C.purple, commit: 's71-audit' },
+            { tag: 'UX', label: '바텀네비+글쓰기', desc: '블로그탭 추가. 카테고리 6개. 좋아요 로그인. 등급 GRADE_MAP', color: C.cyan, commit: 's71-ux' },
+            { tag: 'FIX', label: '피드 자동발행', desc: '라운드로빈, 7일중복, 뻘글55%, 48템플릿, 이모지제거', color: C.green, commit: 's71-seed' },
+            { tag: 'DATA', label: '정보력 RPC 10개', desc: 'nearby_complexes, MA이동평균선, PER/PBR/배당/52주 KPI', color: C.yellow, commit: 's70-rpc' },
+            { tag: 'HOST', label: '111사이트 팝업v2', desc: '분양가 제거, 오늘하루 보지않기, 전국구/지역 분기', color: C.purple, commit: 's71-host' },
+            { tag: 'UX', label: '가점 진단 공유', desc: '카카오톡/Web Share/클립보드. consultant 준비중 교체', color: C.brand, commit: 's71-diag' },
+            { tag: 'FIX', label: '시리즈+토론 연결', desc: '카테고리 필터링 오분류방지. 주식방 직접연결. URL ?tab', color: C.cyan, commit: 's71-series' },
           ].map(r => (
             <div key={r.commit} style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm)', background: `${r.color}08`, border: `1px solid ${r.color}15` }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>
