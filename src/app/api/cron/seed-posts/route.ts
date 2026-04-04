@@ -105,9 +105,31 @@ export async function GET(req: NextRequest) {
     const results: { title: string; user: string; age: string; category: string }[] = [];
     let creditExhausted = false;
 
+    // ── 라운드 로빈: 최근 게시한 시드 유저 제외 ──
+    const { data: recentPosts } = await admin.from('posts')
+      .select('author_id')
+      .in('author_id', seedUsers.map(u => u.id))
+      .order('created_at', { ascending: false })
+      .limit(postCount + 2);
+    const recentAuthorIds = new Set((recentPosts || []).map(p => p.author_id));
+    // 최근 쓰지 않은 유저를 우선, 없으면 전체에서 선택
+    const availableUsers = seedUsers.filter(u => !recentAuthorIds.has(u.id));
+    const userPool = availableUsers.length >= postCount ? availableUsers : seedUsers;
+    // 셔플해서 순서대로 사용 (같은 유저 연속 방지)
+    const shuffledUsers = [...userPool].sort(() => Math.random() - 0.5);
+
+    // ── 7일 중복 체크용 기존 제목 가져오기 ──
+    const sevenDaysAgo = new Date(Date.now() - 7 * 86400000).toISOString();
+    const { data: existingPosts } = await admin.from('posts')
+      .select('title')
+      .in('author_id', seedUsers.map(u => u.id))
+      .gte('created_at', sevenDaysAgo);
+    const usedTitles = new Set((existingPosts || []).map(p => p.title));
+
     for (let i = 0; i < postCount; i++) {
       if (creditExhausted) break;
-      const user = pick(seedUsers);
+      // 라운드 로빈 유저 선택
+      const user = shuffledUsers[i % shuffledUsers.length];
       const toneKey = `${user.age_group}_${user.gender === 'female' ? 'female' : 'male'}`;
       const tone = TONE_GUIDE[toneKey] || TONE_GUIDE['30대_male'];
 
@@ -117,16 +139,27 @@ export async function GET(req: NextRequest) {
 
       const filtered = TEMPLATES.filter(t => t.category === category && (!t.age || t.age === user.age_group));
       const fallback = filtered.length > 0 ? pick(filtered) : pick(TEMPLATES.filter(t => t.category === category));
-      let title = fallback.title, content = fallback.content;
 
-      // 템플릿 변형 (AI 제거 — 비용 절감, 템플릿 풀 충분)
-      // 날짜/요일 변수 치환으로 자연스러움 유지
+      // ── 동적 변형: 매번 다른 제목/내용 생성 ──
+      const hour = new Date().getHours();
+      const timeSuffix = hour < 12 ? '오전' : hour < 18 ? '오후' : '저녁';
+      const variations = [
+        `(${dateTag})`, `[${timeSuffix}]`, `— ${dayName}요일`, '',
+        `(${user.region_text})`, `${dateTag} ver.`, `#${Math.floor(Math.random() * 99) + 1}`,
+      ];
+      let title = fallback.title;
+      let content = fallback.content;
+
+      // 기본 치환
       title = title.replace(/4월/g, `${new Date().getMonth() + 1}월`);
-      if (content.includes(dateTag)) content = content.replace(dateTag, new Date().toLocaleDateString('ko-KR'));
 
-      // 중복 체크
-      const { data: dup } = await admin.from('posts').select('id').eq('title', title).gte('created_at', new Date(Date.now() - 21600000).toISOString()).limit(1);
-      if (dup && dup.length > 0) continue;
+      // 제목에 변형 추가 (7일 내 같은 제목 방지)
+      if (usedTitles.has(title)) {
+        const v = pick(variations.filter(x => x !== ''));
+        title = `${title} ${v}`;
+      }
+      // 그래도 중복이면 스킵
+      if (usedTitles.has(title)) continue;
 
       const finalRegion = category === 'local' ? user.region_text : 'all';
       const postCreatedAt = new Date(Date.now() - randInt(0, 30) * 60000).toISOString();
@@ -138,6 +171,7 @@ export async function GET(req: NextRequest) {
       }).select('id').single();
       if (postError || !postData) continue;
       const postId = postData.id;
+      usedTitles.add(title); // 이번 실행에서도 중복 방지
       await admin.from('posts').update({ slug: `${slugBase}-${postId}` }).eq('id', postId);
 
       // 댓글 0~5개 (연령대별)
