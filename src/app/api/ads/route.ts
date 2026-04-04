@@ -23,12 +23,13 @@ export async function GET() {
         .order('priority', { ascending: false }).limit(3);
       paid = (data || []).map((a: R) => ({
         id: `paid-${a.id}`, title: a.title, subtitle: a.content || '',
-        badge: 'AD', badgeColor: '#FBBF24', region: '',
-        link: a.link_url || '/apt', imageUrl: a.image_url || undefined, isPaid: true,
+        badge: 'AD', badgeType: 'ad' as const,
+        region: '', link: a.link_url || '/apt',
+        imageUrl: a.image_url || undefined, isPaid: true,
       }));
-    } catch { /* popup_ads 조회 실패해도 무방 */ }
+    } catch { /* 무시 */ }
 
-    // 2) 청약 예정 현장 (14일 이내)
+    // 2) 청약 예정 현장 + apt_sites slug JOIN
     const { data: subs } = await (admin as any)
       .from('apt_subscriptions')
       .select('house_manage_no, house_nm, region_nm, rcept_bgnde, tot_supply_hshld_co, constructor_nm')
@@ -36,6 +37,16 @@ export async function GET() {
       .lte('rcept_bgnde', twoWeeks)
       .order('rcept_bgnde', { ascending: true })
       .limit(8);
+
+    // apt_sites에서 slug 매칭
+    const names = (subs || []).map((s: R) => s.house_nm);
+    let slugMap: Record<string, string> = {};
+    if (names.length) {
+      const { data: sites } = await (admin as any)
+        .from('apt_sites').select('name, slug')
+        .in('name', names);
+      slugMap = Object.fromEntries((sites || []).map((s: R) => [s.name, s.slug]));
+    }
 
     const free = (subs || []).map((s: R) => {
       const bgnDate = new Date(s.rcept_bgnde);
@@ -45,12 +56,15 @@ export async function GET() {
       const builder = s.constructor_nm ? String(s.constructor_nm).replace(/\(주\)|주식회사| /g, '').slice(0, 6) : '';
       const dateStr = String(s.rcept_bgnde).slice(5).replace('-', '/');
       const parts = [units, `${dateStr} 접수`, builder].filter(Boolean).join(' · ');
+      const slug = slugMap[s.house_nm];
 
       return {
         id: `sub-${s.house_manage_no}`, title: s.house_nm,
-        subtitle: parts, badge: `청약 ${dDay}`,
-        badgeColor: diffDays <= 1 ? '#EF4444' : '#3B7BF6',
-        region: s.region_nm || '', link: '/apt?tab=subscription',
+        subtitle: parts,
+        badge: `청약 ${dDay}`,
+        badgeType: diffDays <= 1 ? 'urgent' : 'upcoming' as string,
+        region: s.region_nm || '',
+        link: slug ? `/apt/${slug}` : '/apt?tab=subscription',
         imageUrl: undefined, isPaid: false,
       };
     });

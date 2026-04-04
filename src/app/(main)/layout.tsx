@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { headers } from 'next/headers';
 import { Navigation } from '@/components/Navigation';
-import TrendingTicker from '@/components/TrendingTicker';
 import AdBanner from '@/components/AdBanner';
 import { ToastProvider } from '@/components/Toast';
 import ErrorBoundary from '@/components/ErrorBoundary';
@@ -28,7 +27,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
       <TopLoadingBar />
       <Navigation />
       <NoticeBanner />
-      <TrendingTicker />
+      {/* TrendingTicker 제거됨 — 인기검색어는 Navigation 헤더에 통합 */}
       <AdBanner />
       <div style={{ display: 'flex', maxWidth: 1340, margin: '0 auto', gap: 24, padding: '0 clamp(12px, 3vw, 24px)', alignItems: 'flex-start' }}>
         <div className="sidebar-wrapper">
