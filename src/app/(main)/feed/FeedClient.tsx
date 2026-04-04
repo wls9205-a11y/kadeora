@@ -506,7 +506,7 @@ export default function FeedClient({
             );
 
             const nodes: React.ReactNode[] = [card];
-            if (i === 2 && currentUserId) nodes.push(<AttendanceBanner key="attend" />);
+            if (i === 0 && currentUserId) nodes.push(<AttendanceBanner key="attend" />);
             if (i === 4 && !currentUserId) {
               nodes.push(
                 <div key="signup-cta" className="kd-card-glow" data-nudge="context-cta" style={{ padding: '24px 18px', margin: '6px 0' }}>

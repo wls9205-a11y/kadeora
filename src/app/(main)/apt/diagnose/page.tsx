@@ -102,6 +102,28 @@ export default function DiagnosePage() {
           <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '8px 14px', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>부양가족 {familyScore}/35</div>
           <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '8px 14px', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>통장 {bankScore}/17</div>
         </div>
+
+        {/* 결과 공유 */}
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: 16 }}>
+          <button onClick={() => {
+            const text = `🎯 내 청약 가점: ${total}점/84점 (${grade.label})\n무주택 ${housingScore}/32 · 부양가족 ${familyScore}/35 · 통장 ${bankScore}/17\n추천전략: ${strategy.type}\n\n카더라에서 내 가점 진단해보기 👉`;
+            const url = 'https://kadeora.app/apt/diagnose';
+            if (typeof window !== 'undefined' && window.Kakao?.Share) {
+              window.Kakao.Share.sendDefault({ objectType: 'text', text, link: { mobileWebUrl: url, webUrl: url }, buttons: [{ title: '가점 진단하기', link: { mobileWebUrl: url, webUrl: url } }] });
+            } else if (navigator.share) {
+              navigator.share({ title: '청약 가점 진단 결과', text, url }).catch(() => {});
+            } else {
+              navigator.clipboard.writeText(text + '\n' + url).then(() => alert('결과가 복사되었습니다!')).catch(() => {});
+            }
+          }} style={{ padding: '10px 20px', borderRadius: 'var(--radius-md)', border: 'none', cursor: 'pointer', background: 'var(--brand)', color: '#fff', fontSize: 'var(--fs-sm)', fontWeight: 700 }}>
+            📤 결과 공유하기
+          </button>
+          <button onClick={() => {
+            navigator.clipboard.writeText(`내 청약 가점: ${total}점/84점 (무주택 ${housingScore} + 부양가족 ${familyScore} + 통장 ${bankScore})`).then(() => alert('복사되었습니다!')).catch(() => {});
+          }} style={{ padding: '10px 20px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', cursor: 'pointer', background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>
+            📋 결과 복사
+          </button>
+        </div>
       </div>
 
       {/* 전략 추천 */}
