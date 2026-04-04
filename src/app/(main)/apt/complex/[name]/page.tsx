@@ -7,6 +7,7 @@ import { fmtAmount } from '@/lib/format';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
 import dynamic from 'next/dynamic';
 import ShareButtons from '@/components/ShareButtons';
+import AptNearbyCompare from '@/components/AptNearbyCompare';
 
 const AptPriceTrendChart = dynamic(() => import('@/components/charts/AptPriceTrendChart'));
 const AptReviewSection = dynamic(() => import('@/components/AptReviewSection'));
@@ -416,6 +417,9 @@ export default async function ComplexDetailPage({ params }: Props) {
           </div>
         );
       })()}
+
+      {/* 🏘️ 주변 단지 비교 */}
+      <AptNearbyCompare aptName={decoded} sigungu={sigungu} />
 
       {/* 📐 면적별 비교 — 그라데이션 바 + 카드 */}
       {areaStats.length > 1 && (() => {

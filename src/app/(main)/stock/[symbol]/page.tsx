@@ -13,6 +13,7 @@ import StockDetailTabs from './StockDetailTabs';
 import StockAlertButton from '@/components/StockAlertButton';
 import { fmtPrice, fmtCap } from '@/lib/format';
 import Disclaimer from '@/components/Disclaimer';
+import StockMAOverlay from '@/components/StockMAOverlay';
 
 interface Props { params: Promise<{ symbol: string }> }
 
@@ -325,6 +326,9 @@ export default async function StockDetailPage({ params }: Props) {
           </div>
         </div>
       )}
+
+      {/* 이동평균선 차트 */}
+      <StockMAOverlay symbol={symbol} currency={s.currency ?? undefined} />
 
       {/* 투자 요약 (네이버 크롤러 가시적 텍스트) */}
       <section className="stock-investment-summary" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--card-p) var(--sp-lg)', marginBottom: 'var(--sp-md)' }}>
