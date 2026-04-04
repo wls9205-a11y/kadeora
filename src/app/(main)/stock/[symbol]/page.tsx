@@ -604,8 +604,8 @@ export default async function StockDetailPage({ params }: Props) {
         <Link href={`/stock/compare?a=${encodeURIComponent(symbol)}`} style={{ flex: 1, textAlign: 'center', padding: 12, background: 'linear-gradient(135deg, var(--bg-surface), var(--bg-hover))', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', textDecoration: 'none', fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
           ⚔️ 다른 종목과 비교
         </Link>
-        <Link href="/discuss" style={{ flex: 1, textAlign: 'center', padding: 12, background: 'var(--brand)', borderRadius: 'var(--radius-md)', textDecoration: 'none', fontSize: 13, fontWeight: 700, color: '#fff' }}>
-          💬 라운지 토론 참여
+        <Link href="/discuss?tab=stock" style={{ flex: 1, textAlign: 'center', padding: 12, background: 'var(--brand)', borderRadius: 'var(--radius-md)', textDecoration: 'none', fontSize: 13, fontWeight: 700, color: '#fff' }}>
+          💬 주식방 토론 참여
         </Link>
       </div>
     </article>

@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import SectionShareButton from '@/components/SectionShareButton';
 import { useToast } from '@/components/Toast';
@@ -92,8 +92,10 @@ const POLL_CATS = [
 ];
 
 export default function DiscussClient() {
+  const searchParams = useSearchParams();
+  const initialTab = searchParams.get('tab') || 'lounge';
   const [user, setUser] = useState<User | null>(null);
-  const [tab, setTab] = useState('lounge');
+  const [tab, setTab] = useState(TABS.some(t => t.key === initialTab) ? initialTab : 'lounge');
   const [topics, setTopics] = useState<Topic[]>([]);
   const [pollCat, setPollCat] = useState('all');
   const [loading, setLoading] = useState(false);
