@@ -56,7 +56,7 @@ export async function GET(req: NextRequest) {
  const { data: seedUsers } = await admin.rpc('get_seed_users');
  const userId = seedUsers?.[Math.floor(Math.random() * (seedUsers?.length || 1))]?.id
  || SEED_USERS[Math.floor(Math.random() * SEED_USERS.length)];
- const pool = COMMENT_BY_CAT[post.category] ? GENERIC;
+ const pool = COMMENT_BY_CAT[post.category] ?? GENERIC;
  const content = pool[Math.floor(Math.random() * pool.length)];
 
  const { error } = await admin.from('comments').insert({
@@ -70,7 +70,7 @@ export async function GET(req: NextRequest) {
 
  // Update comment count directly
  const { count } = await admin.from('comments').select('id', { count: 'exact', head: true }).eq('post_id', post.id);
- await admin.from('posts').update({ comments_count: count ? 0 }).eq('id', post.id);
+ await admin.from('posts').update({ comments_count: count ?? 0 }).eq('id', post.id);
 
  return NextResponse.json({ ok: true, post_id: post.id });
  } catch (err) {
