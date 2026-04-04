@@ -46,7 +46,7 @@ const TEMPLATES: Template[] = [
   { category: 'apt', title: '청약 가점 낮으면 어디를', content: '40점대인데 수도권 당첨 가능할까요?' },
   { category: 'apt', title: '이번 달 입주 물량 체크', content: '입주 물량 많으면 전세가 하락 가능성 있으니 참고하세요' },
   { category: 'apt', title: '분양권 전매 고민', content: '프리미엄이 좀 붙었는데 지금 팔아야 할지 입주까지 기다려야 할지' },
-  // 뻘글 (대폭 확대)
+  // 뻘글 (대폭 확대 — 55%)
   { category: 'free', title: '아 배고프다', content: '점심 뭐 먹을지 고민인데 추천 좀요 ㅋㅋ', age: '20대' },
   { category: 'free', title: '오늘 날씨 실화??', content: '아침에 반팔 입고 나왔는데 저녁에 패딩이 필요함 ㅋㅋㅋ', age: '20대' },
   { category: 'free', title: '월요일이 왜 이렇게 길어', content: '아직 화요일도 안 됐는데 벌써 지침...', age: '20대' },
@@ -67,6 +67,35 @@ const TEMPLATES: Template[] = [
   { category: 'free', title: '비상금 얼마나 갖고 계세요?', content: '갑자기 궁금해졌는데 비상금 보통 월급의 몇 배 정도?' },
   { category: 'free', title: '보험 정리 좀 해야겠어요', content: '보험료가 월 25만원 넘는데 진짜 다 필요한 건지 모르겠어요' },
   { category: 'free', title: '카드 혜택 추천 부탁', content: '신용카드 바꾸려고 하는데 요즘 혜택 좋은 카드 추천해주세요' },
+  // ── 뻘글 추가분 ──
+  { category: 'free', title: '알바 뛸까 투자할까', content: '용돈이 부족한데 알바를 뛰는 게 나을까 그 시간에 공부를 할까', age: '20대' },
+  { category: 'free', title: '오늘 카페 어디 감?', content: '작업할 카페 추천해주세요. 콘센트 많은 곳으로 ㅎ', age: '20대' },
+  { category: 'free', title: '중고거래 사기 당할 뻔', content: '당근에서 직거래 했는데 진짜 아슬아슬했음;; 조심하세요 ㅋ', age: '20대' },
+  { category: 'free', title: '자취 꿀팁 공유', content: '자취 3년차인데 가성비 좋은 생활 꿀팁 있으면 같이 공유해요!', age: '20대' },
+  { category: 'free', title: '요즘 물가 체감이 어때요?', content: '편의점 삼각김밥도 2천원 넘는 세상... 다들 장 어디서 보세요?', age: '20대' },
+  { category: 'free', title: '쿠팡 와우 해지할까 말까', content: '한달에 4,990원인데 로켓배송 없으면 못 살 것 같기도 하고', age: '20대' },
+  { category: 'free', title: '이직 고민 중', content: '연봉은 비슷한데 워라밸이 좋은 회사 vs 연봉 500 더 주는 회사', age: '30대' },
+  { category: 'free', title: '아이한테 용돈 얼마 주세요?', content: '초등학생 아이 용돈 기준이 궁금해요. 다들 얼마 정도?', age: '30대' },
+  { category: 'free', title: '출퇴근 시간이 아깝다', content: '왕복 2시간인데... 이 시간에 뭐라도 하고 싶은데 항상 폰만 봄', age: '30대' },
+  { category: 'free', title: '점심값 만원 시대', content: '구내식당 없는 회사는 점심이 전쟁이에요. 김밥천국도 8천원;', age: '30대' },
+  { category: 'free', title: '요즘 좋았던 유튜브 채널', content: '재테크 관련 유튜브 채널 추천해주세요! 자극적이지 않은 걸로', age: '30대' },
+  { category: 'free', title: '연말정산 미리 준비하시나요?', content: '매년 토해내기만 하는데 올해는 좀 돌려받고 싶어요', age: '30대' },
+  { category: 'free', title: '집 정리가 안 된다', content: '미니멀리즘 도전 3일차에 포기... 버리는 것도 기술이에요', age: '30대' },
+  { category: 'free', title: '아침에 일어나기 힘든 계절', content: '이불 밖은 위험해... 알람 5번 맞추는 사람 모여', age: '20대' },
+  { category: 'free', title: '반려동물 키우시는 분', content: '고양이 키우고 싶은데 자취방에서 가능할까요? 경험담 부탁', age: '20대' },
+  { category: 'free', title: '운동 뭐 하세요?', content: '헬스 갈까 필라테스 갈까 수영 갈까... 결정장애 ㅠ', age: '30대' },
+  { category: 'free', title: '차 살까 안 살까', content: '서울인데 차가 필요한지 모르겠어요. 유지비만 생각하면 ㄷㄷ', age: '30대' },
+  { category: 'free', title: '연금저축 하고 계세요?', content: 'IRP vs 연금저축펀드 뭐가 나을지 아직도 모르겠음', age: '30대' },
+  { category: 'free', title: '부모님 용돈 얼마 드려요?', content: '매달 드리고 싶은데 현실적으로 고민이에요. 다들 어느 정도?', age: '30대' },
+  { category: 'free', title: '캠핑 다녀왔습니다', content: '날씨 좋아서 가족 캠핑 다녀왔어요. 근데 장비 사는 데 돈이... ㅎ', age: '40대' },
+  { category: 'free', title: '은퇴 후 뭐 하고 싶으세요?', content: '요즘 은퇴 후 계획을 세워보는데 막상 뭘 할지 모르겠어요', age: '40대' },
+  { category: 'free', title: '아파트 관리비가 폭탄', content: '여름 전기세 합치면 40만원 넘는데 다들 비슷한가요?', age: '40대' },
+  { category: 'free', title: '맥주 추천 좀', content: '편의점 맥주 중에 가성비 좋은 거 추천해주세요. 오늘 퇴근 후 한잔', age: '30대' },
+  { category: 'free', title: '로또 이번 주 사셨나요', content: '매주 5천원씩 사는데 당첨은 5등이 최고 ㅋㅋ', age: '30대' },
+  { category: 'free', title: '통신비 절약 팁', content: '알뜰폰으로 바꾸니까 월 2만원대면 충분하더라고요. 추천', age: '30대' },
+  { category: 'free', title: '짠테크 고수 모여라', content: '가계부 쓰시는 분? 앱 추천이랑 절약 팁 공유해요', age: '30대' },
+  { category: 'free', title: '퇴사 후기 들려드림', content: '3년 다닌 회사 퇴사하고 3개월 차. 솔직한 후기', age: '30대' },
+  { category: 'free', title: '오늘 하루 감사한 것 3가지', content: '1. 출근 안 하는 주말 2. 따뜻한 커피 3. 카더라 피드 ㅎ' },
   // 동네
   { category: 'local', title: '우리 동네 개발 소식', content: '교통이나 재개발 관련 호재 있으면 공유해주세요!' },
   { category: 'local', title: '동네 맛집 추천', content: '이번 주말에 맛있는 거 먹으러 갈 건데 추천 좀요!' },
@@ -133,9 +162,9 @@ export async function GET(req: NextRequest) {
       const toneKey = `${user.age_group}_${user.gender === 'female' ? 'female' : 'male'}`;
       const tone = TONE_GUIDE[toneKey] || TONE_GUIDE['30대_male'];
 
-      // 카테고리 — 뻘글 40%, 주식 25%, 부동산 20%, 동네 15%
+      // 카테고리 — 뻘글 55%, 주식 18%, 부동산 15%, 동네 12%
       const r = Math.random();
-      const category = r < 0.40 ? 'free' : r < 0.65 ? 'stock' : r < 0.85 ? 'apt' : 'local';
+      const category = r < 0.55 ? 'free' : r < 0.73 ? 'stock' : r < 0.88 ? 'apt' : 'local';
 
       const filtered = TEMPLATES.filter(t => t.category === category && (!t.age || t.age === user.age_group));
       const fallback = filtered.length > 0 ? pick(filtered) : pick(TEMPLATES.filter(t => t.category === category));
