@@ -236,7 +236,8 @@ export default function WriteClient() {
         onChange={e => setTitle(e.target.value)}
         placeholder="제목을 입력하세요"
         aria-label="게시글 제목"
-        maxLength={100}
+        maxLength={150}
+        className="kd-write-title"
         style={{
           width: '100%', fontSize: 'var(--fs-lg)', fontWeight: 800, padding: '12px 16px',
           border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', background: 'var(--bg-surface)',
@@ -259,12 +260,13 @@ export default function WriteClient() {
         aria-label="게시글 내용"
         maxLength={5000}
         autoFocus
+        className="kd-write-body"
         style={{
           width: '100%', background: 'var(--bg-surface)', border: '1px solid var(--border)',
-          borderRadius: 'var(--radius-card)', color: 'var(--text-primary)', padding: '12px 16px', marginTop: 'var(--sp-sm)',
-          fontSize: 'var(--fs-md)', resize: 'none',
-          lineHeight: 1.8, boxSizing: 'border-box', minHeight: 200, outline: 'none',
-          transition: 'border-color var(--transition-normal)',
+          borderRadius: 'var(--radius-card)', color: 'var(--text-primary)', padding: '14px 16px', marginTop: 'var(--sp-sm)',
+          fontSize: '15px', resize: 'none',
+          lineHeight: 1.82, boxSizing: 'border-box', minHeight: 220, outline: 'none',
+          transition: 'border-color var(--transition-normal)', letterSpacing: '-0.2px',
         }}
         onFocus={e => (e.currentTarget.style.borderColor = 'var(--brand)')}
         onBlur={e => (e.currentTarget.style.borderColor = 'var(--border)')}
