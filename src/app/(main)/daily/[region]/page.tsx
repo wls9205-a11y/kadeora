@@ -144,6 +144,20 @@ export default async function DailyReportPage({ params }: Props) {
       }) }} />
 
       <DailyReportClient data={data} regions={[...REPORT_REGIONS]} prevDate={prevDate} />
+      {/* 관련 서비스 (내부 링크 — SEO 교차 참조) */}
+      <nav style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 16, padding: '12px 16px', background: 'var(--bg-surface)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
+        {[
+          { href: '/apt', label: '🏠 부동산 청약' },
+          { href: '/stock', label: '📈 주식 시세' },
+          { href: '/blog', label: '📝 투자 블로그' },
+          { href: '/apt/complex', label: '📖 단지백과' },
+          { href: '/stock/compare', label: '⚖️ 종목 비교' },
+        ].map(l => (
+          <a key={l.href} href={l.href} style={{ padding: '4px 10px', borderRadius: 4, fontSize: 12, fontWeight: 500, background: 'var(--bg-hover)', color: 'var(--text-secondary)', textDecoration: 'none', border: '1px solid var(--border)' }}>
+            {l.label}
+          </a>
+        ))}
+      </nav>
     </div>
   );
 }
