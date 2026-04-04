@@ -38,7 +38,7 @@ export default function TrendingTicker() {
   const current = keywords[index];
 
   return (
-    <div style={{ background:'var(--bg-surface)', borderBottom:'1px solid var(--border)', padding:'2px 0', overflow:'hidden' }}>
+    <div className="md:hidden" style={{ background:'var(--bg-surface)', borderBottom:'1px solid var(--border)', padding:'2px 0', overflow:'hidden' }}>
       <div style={{ maxWidth:1200, margin:'0 auto', padding:'0 14px', display:'flex', alignItems:'center', justifyContent:'center', gap:6, height: 22 }}>
         <span style={{ fontSize:9, fontWeight:800, color:'var(--brand)', padding:'1px 5px', borderRadius:3, border:'1px solid var(--brand)', flexShrink:0, letterSpacing:'0.5px' }}>인기</span>
         <div style={{ flex:1, overflow:'hidden', height:18, position:'relative' }}>

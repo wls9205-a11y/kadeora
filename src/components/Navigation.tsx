@@ -68,6 +68,23 @@ export function Navigation() {
   const [unread, setUnread]     = useState(0);
   const [fontSize, setFontSize] = useState('medium');
   const [tossMode, setTossModeState] = useState(false);
+  const [trendingKw, setTrendingKw] = useState('');
+
+  // 인기검색어 — 헤더 검색바에 통합 표시
+  useEffect(() => {
+    let kws: string[] = [];
+    let idx = 0;
+    let timer: ReturnType<typeof setInterval>;
+    fetch('/api/search/trending').then(r => r.json()).then(d => {
+      const arr = d?.keywords || d || [];
+      kws = Array.isArray(arr) ? arr.slice(0, 8).map((k: { keyword?: string } | string) => typeof k === 'string' ? k : k.keyword || '') : [];
+      if (kws.length) setTrendingKw(kws[0]);
+      if (kws.length > 1) {
+        timer = setInterval(() => { idx = (idx + 1) % kws.length; setTrendingKw(kws[idx]); }, 3500);
+      }
+    }).catch(() => {});
+    return () => clearInterval(timer);
+  }, []);
   const { theme, toggleTheme } = useTheme();
 
   // 초기화: 토스 모드 + 폰트 사이즈 (1회)
@@ -196,7 +213,7 @@ export function Navigation() {
             </span>
           </Link>
 
-          {/* 검색바 (데스크탑) */}
+          {/* 검색바 (데스크탑) — 인기검색어 통합 */}
           <Link href="/search" className="hidden md:flex" style={{
             flex:1, maxWidth:360, minWidth:160, height:34,
             background:'var(--bg-hover)',
@@ -208,9 +225,16 @@ export function Navigation() {
             onMouseEnter={e=>(e.currentTarget.style.borderColor='var(--border-strong)')}
             onMouseLeave={e=>(e.currentTarget.style.borderColor='var(--border)')}
           >
-            <div style={{ display:'flex', alignItems:'center', gap:6 }}>
-              <Search size={13} color="var(--text-tertiary)" />
-              <span style={{ fontSize:12, color:'var(--text-tertiary)' }}>종목, 청약, 블로그 검색...</span>
+            <div style={{ display:'flex', alignItems:'center', gap:6, overflow:'hidden', flex:1 }}>
+              <Search size={13} color="var(--text-tertiary)" style={{ flexShrink:0 }} />
+              {trendingKw ? (
+                <span style={{ fontSize:12, color:'var(--text-secondary)', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', display:'flex', alignItems:'center', gap:4 }}>
+                  <span style={{ fontSize:9, fontWeight:700, color:'var(--brand)', padding:'0px 4px', borderRadius:3, border:'1px solid var(--brand)', lineHeight:'14px', flexShrink:0 }}>인기</span>
+                  {trendingKw}
+                </span>
+              ) : (
+                <span style={{ fontSize:12, color:'var(--text-tertiary)' }}>종목, 청약, 블로그 검색...</span>
+              )}
             </div>
             <kbd style={{ fontSize:10, fontWeight:600, color:'var(--text-tertiary)', background:'var(--bg-base)', padding:'1px 5px', borderRadius:4, border:'1px solid var(--border)', fontFamily:'monospace', lineHeight:1.5 }}>/</kbd>
           </Link>

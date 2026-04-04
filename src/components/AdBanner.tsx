@@ -45,7 +45,7 @@ export default function AdBanner() {
   const ad = ads[index];
 
   return (
-    <div style={{ padding: '6px 8px 2px' }}>
+    <div style={{ padding: '6px 8px 2px', maxWidth: 680, margin: '0 auto' }}>
       <Link href={ad.link} style={{ textDecoration: 'none', display: 'block' }}>
         <div style={{
           background: 'var(--bg-surface, #0F1D35)',
