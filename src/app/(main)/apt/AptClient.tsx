@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
+import SearchInput from '@/components/SearchInput';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import AptCommentSheet from '@/components/AptCommentSheet';
 import { haptic } from '@/lib/haptic';
@@ -150,29 +151,18 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
             <option key={r} value={r}>{r}</option>
           ))}
         </select>
-        <div style={{ position: 'relative', flex: 1 }}>
-          <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', fontSize: 14, color: 'var(--text-tertiary)', pointerEvents: 'none' }}>🔍</span>
-          <input
-            value={globalSearch}
-            onChange={e => setGlobalSearch(e.target.value)}
-            placeholder="단지명, 시공사, 지역 통합 검색..."
-            aria-label="부동산 통합 검색"
-            className="kd-search-input"
-            style={{ paddingLeft: 34, width: '100%', boxSizing: 'border-box' }}
-          />
-          {globalSearch && (
-            <button onClick={() => setGlobalSearch('')} style={{
-              position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
-              background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: '50%',
-              width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 11, padding: 0, lineHeight: 1,
-            }} aria-label="검색어 지우기">✕</button>
-          )}
-        </div>
+        <SearchInput
+          value={globalSearch}
+          onChange={setGlobalSearch}
+          placeholder="단지명, 시공사, 지역 검색"
+          size="sm"
+          debounceMs={200}
+          style={{ flex: 1 }}
+        />
       </div>
       {globalSearch && (
-        <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-sm)', marginTop: -6 }}>
-          🔍 &quot;{globalSearch}&quot; — 현재 탭에서 필터링 중
+        <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', marginBottom: 'var(--sp-sm)', marginTop: -6, fontWeight: 600 }}>
+          &quot;{globalSearch}&quot; 필터링 중
         </div>
       )}
 

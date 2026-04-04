@@ -241,23 +241,29 @@ export default function SearchClient() {
 
       {/* Search input */}
       <div style={{ position: 'relative', marginBottom: 'var(--sp-lg)' }}>
+        <svg style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: inputVal ? 'var(--brand)' : 'var(--text-tertiary)', transition: 'color 0.15s' }} width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <input
           ref={inputRef}
           type="text"
           value={inputVal}
           onChange={e => handleInputChange(e.target.value)}
           onFocus={() => { if (inputVal.length >= 2) setAcOpen(true); }}
-          placeholder="검색어를 입력하세요 (2글자 이상)"
-          className="kd-input"
-          style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box', paddingLeft: 44, fontSize: 'var(--fs-base)', padding: '14px 14px 14px 44px' }}
+          placeholder="종목, 청약, 단지명 검색"
+          style={{
+            width: '100%', height: 48, padding: '0 44px 0 46px',
+            fontSize: 15, fontWeight: 500, borderRadius: 14,
+            border: '1px solid var(--border)', background: 'var(--bg-surface)',
+            color: 'var(--text-primary)', boxSizing: 'border-box', outline: 'none',
+            transition: 'border-color 0.15s, box-shadow 0.15s',
+          }}
+          onBlurCapture={e => { if (!e.relatedTarget) setTimeout(() => setAcOpen(false), 200); }}
           autoFocus
         />
-        <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', fontSize: 'var(--fs-lg)', pointerEvents: 'none' }}>🔍</span>
         {inputVal && (
           <button
             onClick={() => { setInputVal(''); setResults([]); setTotal(0); setAcOpen(false); setAcStocks([]); setAcApts([]); setAcPosts([]); setAcBlogs([]); setAcRedevs([]); setAcUnsolds([]); setAcTrades([]); setAcDiscuss([]); }}
             aria-label="검색어 지우기"
-            style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 'var(--fs-lg)' }}
+            style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', width: 24, height: 24, borderRadius: '50%', background: 'var(--bg-hover)', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           >✕</button>
         )}
 

@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
+import SearchInput from '@/components/SearchInput';
 import dynamic from 'next/dynamic';
 
 const PortfolioTab = dynamic(() => import('@/components/PortfolioTab'), { ssr: false });
@@ -893,12 +894,13 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
       {currentTab !== 'calendar' && currentTab !== 'themes' && currentTab !== 'm7' && currentTab !== 'sector' && currentTab !== 'news' && currentTab !== 'portfolio' && currentTab !== 'watchlist' && (
         <div style={{ display: 'flex', gap: 6, marginBottom: 10, alignItems: 'center' }}>
           {/* 검색 */}
-          <div style={{ position: 'relative', flex: 1 }}>
-            <input value={search} onChange={e => { setSearch(e.target.value); setStockListLimit(30); }}
-              placeholder="종목명·코드 검색" aria-label="종목 검색" className="kd-search-input"
-              style={{ paddingRight: search ? 28 : 10, width: '100%', boxSizing: 'border-box' }} />
-            {search && <button onClick={() => setSearch('')} style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 12, padding: 2 }} aria-label="닫기">✕</button>}
-          </div>
+          <SearchInput
+            value={search}
+            onChange={v => { setSearch(v); setStockListLimit(30); }}
+            placeholder="종목명, 코드 검색"
+            size="sm"
+            style={{ flex: 1 }}
+          />
           {/* 시장 (국내만) */}
           {isDomestic && currentTab === 'ranking' && (
             <select value={domesticMarket} onChange={e => setDomesticMarket(e.target.value as typeof domesticMarket)} style={{

@@ -2,6 +2,7 @@
 import { useState, useMemo, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { fmtAmount } from '@/lib/format';
+import SearchInput from '@/components/SearchInput';
 
 interface Complex {
   aptName: string; sigungu: string; region: string; dong: string;
@@ -171,16 +172,15 @@ export default function ComplexClient({ complexes, ageGroups, regions, initialRe
 
       {/* 검색 + 카운트 */}
       <div style={{ display: 'flex', gap: 'var(--sp-sm)', marginBottom: 14, alignItems: 'center' }}>
-        <div style={{ position: 'relative', flex: '1 1 200px' }}>
-          <input type="text" value={searchQuery} onChange={(e: any) => handleSearch(e.target.value)}
-            placeholder="🔍 단지명 검색..."
-            className="kd-search-input"
-            style={{ width: '100%', boxSizing: 'border-box' }}
-          />
-          {searching && <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: 10, color: 'var(--text-tertiary)' }}>...</span>}
-          {searchResults && !searching && <span onClick={() => { setSearchQuery(''); setSearchResults(null); }} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: 10, color: 'var(--brand)', cursor: 'pointer', fontWeight: 700 }}>✕</span>}
-        </div>
-        <span style={{ fontSize: 12, color: 'var(--text-tertiary)', fontWeight: 700 }}>
+        <SearchInput
+          value={searchQuery}
+          onChange={v => handleSearch(v)}
+          placeholder="단지명 검색"
+          size="sm"
+          loading={searching}
+          style={{ flex: '1 1 200px' }}
+        />
+        <span style={{ fontSize: 12, color: 'var(--text-tertiary)', fontWeight: 700, flexShrink: 0 }}>
           <span style={{ color: 'var(--brand)', fontWeight: 900 }}>{filtered.length}</span>개
         </span>
       </div>

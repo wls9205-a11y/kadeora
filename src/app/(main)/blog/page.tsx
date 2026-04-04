@@ -249,10 +249,10 @@ export default async function BlogPage({ searchParams }: Props) {
       <form action="/blog" method="GET" style={{ marginBottom: 'var(--sp-md)', position: 'relative' }}>
         {category !== 'all' && <input type="hidden" name="category" value={category} />}
         {sort !== 'latest' && <input type="hidden" name="sort" value={sort} />}
-        <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', fontSize: 14, color: 'var(--text-tertiary)', pointerEvents: 'none' }}>🔍</span>
-        <input name="q" defaultValue={q} placeholder="주식, 청약, 미분양 검색..." style={{
-          width: '100%', padding: '10px 14px 10px 36px', fontSize: 13, borderRadius: 'var(--radius-card)',
-          border: '1px solid var(--border)', background: 'var(--bg-surface)',
+        <svg style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--text-tertiary)' }} width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input name="q" defaultValue={q} placeholder="블로그 검색" style={{
+          width: '100%', height: 40, padding: '0 12px 0 38px', fontSize: 13, fontWeight: 500,
+          borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-surface)',
           color: 'var(--text-primary)', boxSizing: 'border-box', outline: 'none',
         }} />
       </form>
