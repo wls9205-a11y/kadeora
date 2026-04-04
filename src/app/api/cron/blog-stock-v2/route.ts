@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
     const { data: allStocks } = await (sb as any).from('stock_quotes')
       .select('symbol, name, price, change_pct, change_amt, market_cap, sector, market, volume, per, pbr, dividend_yield, high_52w, low_52w, description')
       .eq('is_active', true).gt('price', 0)
-      .in('market', ['KOSPI', 'KOSDAQ'])
+      .in('market', ['KOSPI', 'KOSDAQ', 'NYSE', 'NASDAQ'])
       .order('market_cap', { ascending: false })
       .limit(300);
 

@@ -31,27 +31,8 @@ function enrichContent(content: string, category: string, title: string): string
     });
   }
 
-  // 1. TOC 자동 생성 — h2 헤더 추출 → ## 목차 섹션 삽입
-  const h2Matches = enriched.match(/^## .+$/gm);
-  if (!enriched.includes('## 목차')) {
-    if (h2Matches && h2Matches.length >= 2) {
-      const tocLines = h2Matches.map((h, i) => {
-        const text = h.replace(/^## /, '').trim();
-        return `${i + 1}. ${text}`;
-      });
-      const tocSection = `## 목차\n\n${tocLines.join('\n')}\n\n`;
-      const firstH2Idx = enriched.indexOf(h2Matches[0]);
-      if (firstH2Idx > 0) {
-        enriched = enriched.slice(0, firstH2Idx) + tocSection + enriched.slice(firstH2Idx);
-      } else {
-        enriched = tocSection + enriched;
-      }
-    } else {
-      // h2가 여전히 부족하면 최소 TOC 삽입 (품질 게이트 통과)
-      const minToc = `## 목차\n\n1. 본문\n2. 자주 묻는 질문\n\n`;
-      enriched = minToc + enriched;
-    }
-  }
+  // 1. TOC는 프론트엔드 extractToc()에서 자동 생성 → 콘텐츠에 삽입하지 않음
+  // (세션70에서 ## 목차 H2 제거/숨김 처리 완료)
 
   // 2. 내부 링크 자동 삽입 — 카테고리별 관련 페이지 링크
   const hasInternalLink = /\]\(\/(stock|apt|feed|blog)/.test(enriched) || /href="\/(stock|apt)/.test(enriched);
