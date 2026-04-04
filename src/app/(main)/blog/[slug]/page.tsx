@@ -70,27 +70,34 @@ function normalizeMarkdownHeadings(md: string): string {
 
 // 블로그 본문 전처리: 이스케이프된 문자열 정리
 function sanitizeBlogContent(raw: string): string {
-  return raw
-    .replace(/\\n/g, '\n')     // 리터럴 \\n → 실제 줄바꿈
-    .replace(/\\t/g, '\t')     // 리터럴 \\t → 실제 탭
-    .replace(/\\r/g, '')       // 리터럴 \\r 제거
-    .replace(/\r\n/g, '\n')   // Windows 줄바꿈 통일
-    .replace(/\n{4,}/g, '\n\n\n') // 과도한 빈줄(4+) → 3줄로 축소
+  let out = raw
+    .replace(/\\n/g, '\n')
+    .replace(/\\t/g, '\t')
+    .replace(/\\r/g, '')
+    .replace(/\r\n/g, '\n')
+    .replace(/\n{4,}/g, '\n\n\n')
+    // ── 중복 H1 제거 (페이지 타이틀이 이미 H1) ──
+    .replace(/^# [^\n]+\n+/, '')
     // ── 구조 개선 ──
-    // "## 목차" 제거 (SEO 가치 없음, 이미 TOC 컴포넌트가 있음)
     .replace(/^## 목차\s*$/gm, '')
-    // "1. 섹터 개요 2. 주요 종목..." 같은 번호 목차 줄 제거
     .replace(/^\d+\.\s+\S+\s+\d+\.\s+\S+\s+\d+\.\s+\S+.*$/gm, '')
     // ── 코드 노출 방지 ──
-    // H2/H3 안의 **볼드** 마크다운 제거 (이미 CSS로 볼드)
     .replace(/^(#{1,6}\s+.*?)\*\*([^*\n]+)\*\*(.*?)$/gm, '$1$2$3')
     // 숫자~숫자 패턴 — ~가 취소선으로 변환되는 것 방지
     .replace(/(\d)~(\d)/g, '$1～$2')
-    // Q. / Q: 로 시작하는 ## → ### 로 다운그레이드 (H2 과다 방지)
+    // Q. / Q: 로 시작하는 ## → ### 로 다운그레이드
     .replace(/^## (Q[.:])/gm, '### $1')
     .replace(/^## (A[.:])/gm, '### $1')
-    // **Q. / **Q: 패턴도 처리
     .replace(/^\*\*(Q[.:]\s)/gm, '**$1');
+
+  // ── H2 과다 제어: 8개 초과 시 이후 ## → ### 다운그레이드 ──
+  let h2Count = 0;
+  out = out.replace(/^## /gm, () => {
+    h2Count++;
+    return h2Count > 8 ? '### ' : '## ';
+  });
+
+  return out;
 }
 
 
