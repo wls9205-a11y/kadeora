@@ -19,6 +19,7 @@ import SectionShareButton from '@/components/SectionShareButton';
 import AptRankingCard from '@/components/AptRankingCard';
 import UnsoldTrendMini from '@/components/UnsoldTrendMini';
 import LandmarkAptCards from '@/components/LandmarkAptCards';
+import TrendingKeywords from '@/components/TrendingKeywords';
 import { isTossMode } from '@/lib/toss-mode';
 import TossTeaser from '@/components/TossTeaser';
 
@@ -368,6 +369,9 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           ))}
         </div>
       </div>
+
+      {/* 실시간 트렌드 */}
+      <TrendingKeywords />
 
       {/* 아파트 랭킹 */}
       <AptRankingCard />

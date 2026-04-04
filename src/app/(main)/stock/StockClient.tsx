@@ -15,6 +15,7 @@ import { fmtCap, stockColor, fmt } from '@/lib/format';
 import Disclaimer from '@/components/Disclaimer';
 import SectionShareButton from '@/components/SectionShareButton';
 import ExchangeRateMiniChart from '@/components/ExchangeRateMiniChart';
+import TrendingKeywords from '@/components/TrendingKeywords';
 import { isTossMode } from '@/lib/toss-mode';
 import TossTeaser from '@/components/TossTeaser';
 
@@ -1250,6 +1251,9 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
       })()}
 
       {/* 면책 */}
+      {/* 실시간 트렌드 */}
+      <TrendingKeywords />
+
       {/* 환율 추이 미니 차트 */}
       <div style={{ margin: '12px 0' }}><ExchangeRateMiniChart /></div>
 

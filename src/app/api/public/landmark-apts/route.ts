@@ -1,4 +1,5 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { checkRateLimit } from '@/lib/rate-limit';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 export const dynamic = 'force-dynamic';
 export const revalidate = 3600;

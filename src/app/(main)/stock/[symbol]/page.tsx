@@ -89,7 +89,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function StockDetailPage({ params }: Props) {
   const { symbol } = await params;
   const sb = await createSupabaseServer();
-  const { data: s } = await sb.from('stock_quotes').select('symbol,name,market,price,change_amt,change_pct,volume,market_cap,sector,currency,description,website,ticker,updated_at').eq('symbol', symbol).single();
+  const { data: s } = await (sb as any).from('stock_quotes').select('symbol,name,market,price,change_amt,change_pct,volume,market_cap,sector,currency,description,website,ticker,updated_at,per,pbr,dividend_yield,high_52w,low_52w,eps,roe').eq('symbol', symbol).single();
   if (!s) notFound();
 
   const changePct = Number(s.change_pct);
@@ -126,6 +126,10 @@ export default async function StockDetailPage({ params }: Props) {
     { label: '섹터', value: s.sector || '-' },
     { label: '전일대비', value: s.change_amt != null ? `${Number(s.change_amt) > 0 ? '+' : ''}${Number(s.change_amt).toLocaleString()}` : '-' },
     { label: '거래량', value: s.volume ? Number(s.volume) >= 1000000 ? `${(Number(s.volume) / 10000).toFixed(0)}만` : Number(s.volume).toLocaleString() : '-' },
+    ...((s as any).per > 0 ? [{ label: 'PER', value: `${Number((s as any).per).toFixed(1)}배` }] : []),
+    ...((s as any).pbr > 0 ? [{ label: 'PBR', value: `${Number((s as any).pbr).toFixed(2)}배` }] : []),
+    ...((s as any).dividend_yield > 0 ? [{ label: '배당률', value: `${Number((s as any).dividend_yield).toFixed(2)}%` }] : []),
+    ...((s as any).roe > 0 ? [{ label: 'ROE', value: `${Number((s as any).roe).toFixed(1)}%` }] : []),
   ];
 
   return (
