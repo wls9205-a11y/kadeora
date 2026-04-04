@@ -951,23 +951,23 @@ export default function DashboardSection() {
       {/* ── 최근 릴리즈 내역 ── */}
       <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', marginBottom: 'var(--sp-md)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-          <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>🚀 최근 릴리즈 (세션 70)</span>
-          <span style={{ fontSize: 10, color: C.textDim }}>2026-04-04</span>
+          <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>🚀 최근 릴리즈 (세션 71)</span>
+          <span style={{ fontSize: 10, color: C.textDim }}>2026-04-05</span>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
           {[
-            { tag: 'DATA', label: '정보력 8대 강화', desc: 'RPC 10개+API 10개+컴포넌트 7개. price_change_1y 2,291단지 계산', color: C.purple, commit: 's70-16' },
-            { tag: 'FEAT', label: '아파트 랭킹', desc: '상승/하락/거래량/전세가율/최고가 TOP10. 5종 탭 전환', color: C.brand, commit: 's70-rank' },
-            { tag: 'FEAT', label: '이동평균선 차트', desc: 'MA5/20/60 토글. stock_price_history 31K OHLCV 활용', color: C.cyan, commit: 's70-ma' },
-            { tag: 'FEAT', label: '주변 단지 비교', desc: '단지백과 같은 시군구 거래활발 TOP5 비교 테이블', color: C.green, commit: 's70-near' },
-            { tag: 'FEAT', label: '미분양 추이 차트', desc: 'unsold_apts_history 179건 → 월별 증감 바차트', color: C.yellow, commit: 's70-unsold' },
-            { tag: 'FEAT', label: '환율+랜드마크', desc: 'USD/KRW 스파크라인. 17개 시도 대장 아파트 시세 카드', color: C.green, commit: 's70-fx' },
-            { tag: 'DATA', label: '전월세 API 209만건', desc: 'search_rent_transactions RPC + rent-search API 라이브', color: C.purple, commit: 's70-rent' },
-            { tag: 'SEO', label: 'SEO 전수 감사', desc: '전 페이지 meta/jsonld/og/naver/faq/breadcrumb 확인. 통계자료실 보강', color: C.cyan, commit: 's70-seo2' },
-            { tag: 'BLOG', label: '가독성 전면 개선', desc: 'H2 ** 제거, ~취소선 방지, ## 목차 삭제, Q&A H3, CSS 전면 개선', color: C.brand, commit: 's70-read' },
-            { tag: 'CRON', label: 'price_change 크론', desc: '매일 04:30 UTC price_change_1y 자동 재계산 (97개)', color: C.green, commit: 's70-cron' },
-            { tag: 'FEAT', label: '통계 자료실', desc: '/apt/data + /stock/data — Excel/CSV 듀얼 다운로드', color: C.purple, commit: 's70-data' },
-            { tag: 'COST', label: 'API 비용 75%↓', desc: '$15.6→$4/월. Sonnet→Haiku, seed-posts AI 제거, 스케줄 축소', color: C.yellow, commit: 's69-cost' },
+            { tag: 'UX', label: '전수감사 25건', desc: '등급통일, 가점계산기, 탈퇴버그, 세법3건, 군위군 대구, 데이터출처', color: C.brand, commit: 's71-audit' },
+            { tag: 'UX', label: '바텀네비 블로그', desc: '모바일 바텀네비 블로그 탭 추가. 21K 콘텐츠 접근성 향상', color: C.cyan, commit: 's71-nav' },
+            { tag: 'FIX', label: '피드 자동발행', desc: '라운드로빈, 7일 중복체크, 뻘글 55%, 48템플릿, 이모지 제거', color: C.green, commit: 's71-seed' },
+            { tag: 'UX', label: '가점 진단 공유', desc: '카카오톡/Web Share/클립보드 공유. 바이럴 채널 추가', color: C.purple, commit: 's71-diag' },
+            { tag: 'SEO', label: '크롤러 텍스트 제거', desc: 'loading.tsx 텍스트 제거, 외부링크 nofollow, KODEX200 명시', color: C.yellow, commit: 's71-seo' },
+            { tag: 'FIX', label: '시리즈 카테고리 필터', desc: '아파트비교를 종목비교로 오분류 방지. 카테고리 기반 매칭', color: C.brand, commit: 's71-series' },
+            { tag: 'UX', label: '토론 종목방 연결', desc: '주식 상세에서 주식방 직접 연결. URL ?tab=stock 지원', color: C.cyan, commit: 's71-disc' },
+            { tag: 'FIX', label: '저자명 통일 15곳', desc: '부동산팀/데이터팀/블로그팀 전부 카더라로 통일', color: C.green, commit: 's71-author' },
+            { tag: 'UX', label: 'daily 유저지역', desc: '서울 하드코딩 제거. localStorage daily_region 반영', color: C.purple, commit: 's71-daily' },
+            { tag: 'HOST', label: '팝업 v2 111사이트', desc: '분양가 제거, 오늘하루 보지않기, 전국구/지역 분기 적용', color: C.yellow, commit: 's71-popup' },
+            { tag: 'FEAT', label: '광고판 배너', desc: 'AdBanner 카카오톡 스타일. 유료AD/청약 D-Day 자동전환', color: C.brand, commit: 's71-ad' },
+            { tag: 'FIX', label: '글쓰기 카테고리 6개', desc: '정보/재테크 추가. consultant 준비중 차단. 등급 GRADE_MAP', color: C.cyan, commit: 's71-write' },
           ].map(r => (
             <div key={r.commit} style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm)', background: `${r.color}08`, border: `1px solid ${r.color}15` }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>
