@@ -1,44 +1,36 @@
-# 카더라 STATUS.md — 세션 69-70 연결 (2026-04-03 KST)
+# 카더라 STATUS.md — 세션 70 최종 (2026-04-04 KST)
 
 ## 최신 커밋
-- `e0a4ab6d` — V2 크론 빌드 에러 수정 (READY)
-- `49d94d8a` — 블로그 V2 크론 (주식/부동산 고품질 + 네이버 교차검증)
-- `06e4bfdc` — 블로그 3편 읽기 게이트 (SEO 봇 전체본문)
+- `4aa2811d` — 세션70-16: 정보력 대폭 강화 — DB 데이터 총활용 8대 개선
+- `82a72e46` — fix: Q&A H2→H3 다운그레이드 완전 수정
+- `e4cba649` — 세션70-15: 블로그 가독성 전면 개선 + 코드 노출 수정
+- `1bc5e881` — 세션70-14: 블로그 분양 템플릿 DB 풀스택
+- `27bfa257` — 세션70-13: 리라이팅 가속 6회/일 + Sonnet 모델
+- 세션70-12~1: SEO 풀스택, 리디자인, 가독성, CTA, 통계자료실 등
 
-## 이번 세션 작업 (세션 69 후반 ~ 세션 70 연결)
+## 세션 70 정보력 강화 (신규)
+### DB 작업
+- price_change_1y: 2,291단지 가격변동률 계산 (상승1,247 / 하락1,029)
+- RPC 7개 신규: get_apt_rankings, search_rent_transactions, get_rent_stats, get_stock_52w_range, get_unsold_trend, get_exchange_rate_trend, apt-price-change 크론
+### API 엔드포인트 6개
+- /api/public/apt-rankings — 단지 랭킹 5종 (상승/하락/거래량/전세가율/최고가)
+- /api/public/rent-search — 전월세 209만건 검색
+- /api/public/unsold-trend — 미분양 추이
+- /api/public/exchange-trend — 환율 추이
+- /api/public/stock-52w — 52주 범위
+- /api/public/landmark-apts — 대장 아파트
+### 컴포넌트 5개
+- AptRankingCard: 5종 랭킹 TOP 10
+- LandmarkAptCards: 대장 아파트 시세
+- UnsoldTrendMini: 미분양 추이 바차트
+- Stock52WeekBar: 52주 가격범위
+- ExchangeRateMiniChart: 환율 스파크라인
 
-### 블로그 V2 크론 — 고품질 데이터 기반 ✅
-- **blog-stock-v2** (매일 07:00, 5종목/회): 네이버 교차검증 + DB price_history 추이 + 섹터 비교 + AI 분석. 편당 2,500~3,500자
-- **blog-apt-v2** (매일 08:00, 5현장/회): 청약 일정 전수 + 주변 실거래 시세 + 미분양 컨텍스트 + 입지 정보 + AI 분석. 편당 3,000~4,000자
-- 대상: 주식 미커버 799종목 + 청약 미커버 2,150현장
-- vercel.json 크론 2개 추가 (총 97개), GOD MODE Content Phase 등록
+## 블로그 가독성 개선
+- H2 안 ** 제거 / 숫자~숫자 취소선 방지 / ## 목차 제거 / Q&A H3 다운그레이드
+- CSS: line-height 2.0 / 라이트모드 대비 / 테이블 hover / 모바일 최적화
 
-### 블로그 3편 읽기 게이트 ✅
-- BlogReadGate: 비로그인 하루 3편 전체 → 4편째 가입 CTA
-- SSR 봇 감지 → Googlebot/Naverbot 전체 본문 100% (SEO 보존)
-- localStorage `kd_blog_reads` 일별 리셋
-- 기존 무조건 70% 잘림 → 3편까지 전체 보기로 개선
+## SQL 즉시 재작성 (4,175편)
+- 1,500자 미만 → 0편 달성
 
-### 트래픽/전환율 분석 ✅
-- UV: 3/24 UV18 → 3/30 UV3,935 (80배 성장)
-- 전환율: 초기 14% → 폭증 후 0.15% (트래픽 유형 변화)
-- 97.6% 1페이지 이탈, 블로그→로그인 0명
-- 활동 중 표시 기준 30분→60분 변경
-
-### API 비용 최적화 ✅
-- 월 $15.6 → $4 (75% 절감)
-- Sonnet→Haiku 11파일, seed-posts/news/flow AI 제거
-
-### 신규 기능 ✅
-- 프로 AI 종목 분석 API + stock_ai_analysis 테이블
-- AI 댓글 요약 크론 (매일 22:00)
-- 블로그 내부링크 자동 연결 (일 03:00)
-- 토스페이먼츠 심사 준비 (shop 공개 + PDF)
-- naver-complex-sync 보안 수정
-
-## 크론 현황
-- vercel.json: 97개
-- GOD MODE CRON_GROUPS: 95개 (data16 + process13 + ai8 + content38 + system20)
-
-## 아키텍처 규칙 (13개)
-1. 블로그 삭제 금지 2. stockcoin.net 금지 3. 포인트 RPC만 4. CSP middleware.ts 5. 크론 에러 200 6. OG 폰트 Node.js fs 7. PostWithProfile 보호 8. daily_create_limit 80 9. DB트리거 LIMIT 80 10. Supabase RPC try/catch 11. STATUS.md 필수 12. 디자인 토큰 우선 13. DB 신규 컬럼 접근 시 (sb as any).from() 패턴 필수
+## 블로그: 22,663편 / 크론 96개 / TS 에러 0 / 빌드 READY

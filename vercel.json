@@ -285,6 +285,10 @@
       "schedule": "0 3 * * *"
     },
     {
+      "path": "/api/cron/apt-price-change",
+      "schedule": "30 4 * * *"
+    },
+    {
       "path": "/api/cron/crawl-nationwide-redev",
       "schedule": "0 7 * * 1"
     },
