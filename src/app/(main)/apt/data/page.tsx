@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   },
   alternates: { canonical: `${SITE}/apt/data` },
   other: {
-    'naver:author': '카더라 부동산팀',
+    'naver:author': '카더라',
     'naver:written_time': '2026-01-15T00:00:00Z',
     'naver:updated_time': new Date().toISOString(),
     'naver:site_name': '카더라',

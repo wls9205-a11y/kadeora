@@ -20,6 +20,7 @@ const MOBILE_TABS = [
   { href: '/feed',    label: '피드',   Icon: Home },
   { href: '/stock',   label: '주식',   Icon: TrendingUp },
   { href: '/apt',     label: '부동산', Icon: Building2 },
+  { href: '/blog',    label: '블로그', Icon: FileText },
 ];
 
 const MORE_ITEMS = [

@@ -15,6 +15,8 @@ const CATEGORIES = [
   { value: 'stock', label: '📊 주식' },
   { value: 'apt', label: '🏢 부동산' },
   { value: 'local', label: '📍 우리동네' },
+  { value: 'general', label: '💡 정보' },
+  { value: 'finance', label: '💰 재테크' },
 ];
 
 export default function WriteClient() {

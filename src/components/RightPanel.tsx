@@ -3,20 +3,15 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
-import { GRADE_EMOJI, gradeTitle } from '@/lib/constants';
+import { GRADE_EMOJI, GRADE_MAP, gradeTitle } from '@/lib/constants';
 import { getAvatarColor } from '@/lib/avatar';
 import { useAuth } from '@/components/AuthProvider';
 import dynamic from 'next/dynamic';
 
 const MiniLounge = dynamic(() => import('@/components/MiniLounge'), { ssr: false });
 
-const GRADES = [
-  { emoji: '🌱', title: '새싹', pts: '0' }, { emoji: '📡', title: '정보통', pts: '100' },
-  { emoji: '🏘️', title: '동네어른', pts: '500' }, { emoji: '🏠', title: '소문난집', pts: '1.5K' },
-  { emoji: '⚡', title: '인플루언서', pts: '3K' }, { emoji: '🔥', title: '빅마우스', pts: '6K' },
-  { emoji: '💎', title: '찐고수', pts: '15K' }, { emoji: '🌟', title: '전설', pts: '30K' },
-  { emoji: '👑', title: '신의경지', pts: '60K' }, { emoji: '🚀', title: '카더라신', pts: '∞' },
-];
+const GRADE_PTS = ['0', '100', '300', '600', '1K', '2K', '5K', '10K', '30K', '100K'];
+const GRADES = Object.entries(GRADE_MAP).map(([k, v]) => ({ emoji: v.emoji, title: v.title, pts: GRADE_PTS[Number(k) - 1] || '0' }));
 
 const FALLBACK = ['삼성전자', 'AI 반도체', '청약 경쟁률', '엔비디아', '기준금리', '아파트 실거래', 'KOSPI', '전세가율', '미분양', 'ETF 비교'];
 

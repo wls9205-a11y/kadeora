@@ -95,7 +95,7 @@ function enrichContent(content: string, category: string, title: string): string
       apt: '\n\n---\n\n**데이터 출처:** 국토교통부 실거래가 공개시스템, 한국부동산원, 카더라 자체 수집 데이터 | **기준일:** ' + new Date().toISOString().slice(0, 10),
       unsold: '\n\n---\n\n**데이터 출처:** 국토교통부 미분양 현황, 한국부동산원, 카더라 자체 수집 데이터 | **기준일:** ' + new Date().toISOString().slice(0, 10),
       finance: '\n\n---\n\n**데이터 출처:** 한국은행, 금융감독원, 카더라 자체 수집 데이터 | **기준일:** ' + new Date().toISOString().slice(0, 10),
-      general: '\n\n---\n\n**출처:** 카더라(kadeora.app) 데이터팀',
+      general: '\n\n---\n\n**출처:** 카더라(kadeora.app)',
     };
     enriched += sourceMap[category] || sourceMap.general;
   }

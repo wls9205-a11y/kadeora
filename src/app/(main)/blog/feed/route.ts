@@ -26,7 +26,7 @@ export async function GET() {
       <pubDate>${pubDateStr}</pubDate>
       <category>${catLabel}</category>
 ${tagItems}
-      <author>${p.author_name || '카더라 데이터팀'}</author>
+      <author>${p.author_name || '카더라'}</author>
       <guid isPermaLink="true">${SITE_URL}/blog/${p.slug}</guid>
       <media:content url="${imgUrl}" medium="image" width="1200" height="630">
         <media:title><![CDATA[${p.image_alt || p.title}]]></media:title>
@@ -47,7 +47,7 @@ ${tagItems}
     <description>매일 업데이트되는 주식 시황, 청약 일정, 실거래가 분석</description>
     <language>ko</language>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
-    <managingEditor>kadeora.app@gmail.com (카더라 데이터팀)</managingEditor>
+    <managingEditor>kadeora.app@gmail.com (카더라)</managingEditor>
     <webMaster>kadeora.app@gmail.com (카더라)</webMaster>
     <copyright>Copyright 2026 카더라. All rights reserved.</copyright>
     <ttl>60</ttl>

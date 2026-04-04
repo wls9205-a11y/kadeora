@@ -41,7 +41,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     other: {
       'naver:written_time': s.created_at || '2026-01-15T00:00:00Z',
       'naver:updated_time': s.created_at || new Date().toISOString(),
-      'naver:author': '카더라 블로그팀',
+      'naver:author': '카더라',
       'article:section': '블로그',
       'article:tag': `${s.title},시리즈,카더라`,
       'article:published_time': s.created_at || '2026-01-15T00:00:00Z',

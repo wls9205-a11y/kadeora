@@ -3,6 +3,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useToast } from '@/components/Toast';
 import { ReportModal } from '@/components/modals/ReportModal';
+import { GRADE_MAP } from '@/lib/constants';
 import EmptyState from '@/components/EmptyState';
 import type { User } from '@supabase/supabase-js';
 import { getAvatarColor } from '@/lib/avatar';
@@ -20,13 +21,7 @@ interface ChatMsg {
 
 const PAGE_SIZE = 100;
 // DB grade_definitions 기준
-const GRADE_INFO: Record<number, { title: string; emoji: string; color: string }> = {
-  1:{title:'새싹',emoji:'🌱',color:'var(--accent-green)'},2:{title:'정보통',emoji:'📡',color:'var(--accent-blue)'},
-  3:{title:'동네어른',emoji:'🏘️',color:'var(--accent-purple)'},4:{title:'소문난집',emoji:'🏠',color:'var(--accent-yellow)'},
-  5:{title:'인플루언서',emoji:'⚡',color:'var(--accent-red)'},6:{title:'빅마우스',emoji:'🔥',color:'#FB7185'},
-  7:{title:'찐고수',emoji:'💎',color:'#22D3EE'},8:{title:'전설',emoji:'🌟',color:'var(--accent-yellow)'},
-  9:{title:'신의경지',emoji:'👑',color:'var(--accent-purple)'},10:{title:'카더라신',emoji:'🚀',color:'#C084FC'},
-};
+const GRADE_INFO = GRADE_MAP;
 function avc(uid: string | null) { return getAvatarColor(uid ?? ''); }
 function renderContent(text: string) { return text.split(/(@\S+)/g).map((p, i) => p.startsWith('@') ? <span key={i} style={{ color: 'var(--brand)', fontWeight: 700 }}>{p}</span> : p); }
 

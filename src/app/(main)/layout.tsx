@@ -32,7 +32,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
         <div className="sidebar-wrapper">
           <Sidebar />
         </div>
-        <main style={{
+        <main id="main-content" style={{
           flex: 1, minWidth: 0,
           paddingTop: 'clamp(12px,3vw,20px)',
           paddingBottom: 72,

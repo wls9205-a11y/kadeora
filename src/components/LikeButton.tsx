@@ -29,7 +29,7 @@ export function LikeButton({ postId, initialCount, initialLiked = false }: LikeB
   const toggle = async (e?: React.MouseEvent) => {
     e?.stopPropagation?.();
     try { if ('vibrate' in navigator) navigator.vibrate(10); } catch {}
-    if (!userId) { info('로그인하면 좋아요를 누를 수 있어요'); return; }
+    if (!userId) { info('로그인하면 좋아요를 누를 수 있어요'); window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`; return; }
     if (loading) return;
     setLoading(true);
 

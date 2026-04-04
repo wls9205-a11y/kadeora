@@ -311,7 +311,7 @@ function D5(C: typeof CAT[string], title: string, sub: string, author: string, f
               <div style={{ width:22, height:22, borderRadius:'50%', background:`${C.a}20`, border:`1px solid ${C.a}40`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:900, color:C.a }}>{author[0].toUpperCase()}</div>
               <span style={{ fontSize:12, color:'#4b5563' }}>{author}</span>
             </div>
-          : <span style={{ fontSize:12, color:'#1f2937' }}>카더라 데이터팀</span>
+          : <span style={{ fontSize:12, color:'#1f2937' }}>카더라</span>
         }
         <div style={{ flex:1 }} />
         <span style={{ fontSize:11, color:'rgba(255,255,255,.15)', fontWeight:700 }}>kadeora.app</span>
@@ -357,7 +357,7 @@ function D6(C: typeof CAT[string], title: string, sub: string, author: string, f
               <div style={{ width:24, height:24, borderRadius:'50%', background:'rgba(255,255,255,.2)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:11, fontWeight:900, color:'#fff' }}>{author[0].toUpperCase()}</div>
               <span style={{ fontSize:13, color:'rgba(255,255,255,.5)' }}>{author}</span>
             </div>
-          : <span style={{ fontSize:12, color:'rgba(255,255,255,.35)' }}>카더라 데이터팀</span>
+          : <span style={{ fontSize:12, color:'rgba(255,255,255,.35)' }}>카더라</span>
         }
         <span style={{ fontSize:12, color:'rgba(255,255,255,.25)', fontWeight:700 }}>kadeora.app</span>
       </div>

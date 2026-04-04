@@ -175,8 +175,8 @@ export async function generateMetadata({ params }: Props) {
   const sb = await createSupabaseServer();
   const { data: post } = await sb.from('blog_posts').select('id,title,slug,content,excerpt,category,sub_category,cover_image,image_alt,tags,meta_description,meta_keywords,author_name,author_role,reading_time_min,view_count,comment_count,helpful_count,published_at,created_at,updated_at,series_id,series_order,source_type,source_ref,data_date,rewritten_at').eq('slug', slug).eq('is_published', true).maybeSingle();
   if (!post) return {};
-    const ogImage = post.cover_image || `${SITE}/api/og?title=${encodeURIComponent(post.title)}&category=${post.category}&author=${encodeURIComponent(post.author_name || '카더라 데이터팀')}&design=2`;
-    const ogSquare = `${SITE}/api/og-square?title=${encodeURIComponent(post.title)}&category=${post.category}&author=${encodeURIComponent(post.author_name || '카더라 데이터팀')}`;
+    const ogImage = post.cover_image || `${SITE}/api/og?title=${encodeURIComponent(post.title)}&category=${post.category}&author=${encodeURIComponent(post.author_name || '카더라')}&design=2`;
+    const ogSquare = `${SITE}/api/og-square?title=${encodeURIComponent(post.title)}&category=${post.category}&author=${encodeURIComponent(post.author_name || '카더라')}`;
   return {
     title: `${post.title} | 블로그`,
     description: post.meta_description || post.excerpt || post.title,
@@ -187,7 +187,7 @@ export async function generateMetadata({ params }: Props) {
       siteName: '카더라', locale: 'ko_KR',
       publishedTime: post.published_at || post.created_at,
       modifiedTime: post.updated_at || post.rewritten_at || post.published_at || post.created_at,
-      authors: [post.author_name || '카더라 데이터팀'],
+      authors: [post.author_name || '카더라'],
       tags: post.tags ?? [],
       section: post.category === 'stock' ? '주식' : post.category === 'apt' ? '부동산' : post.category === 'unsold' ? '미분양' : '재테크',
       url: `${SITE}/blog/${slug}`,
@@ -220,7 +220,7 @@ export async function generateMetadata({ params }: Props) {
         'article:tag': (post.tags ?? []).slice(0, 5).join(',') || section,
         'article:published_time': post.published_at || post.created_at,
         'article:modified_time': post.updated_at || post.published_at || post.created_at,
-        'article:author': post.author_name || '카더라 데이터팀',
+        'article:author': post.author_name || '카더라',
       };
     })(),
   };
@@ -384,7 +384,7 @@ export default async function BlogDetailPage({ params }: Props) {
     timeRequired: `PT${readingTimeMin}M`,
     author: {
       '@type': 'Person',
-      name: post.author_name || '카더라 데이터팀',
+      name: post.author_name || '카더라',
       jobTitle: post.author_role || '금융·부동산 데이터 분석',
       url: `${SITE}/about`,
       worksFor: { '@type': 'Organization', name: '카더라', url: SITE },
@@ -538,7 +538,7 @@ export default async function BlogDetailPage({ params }: Props) {
             </span>
             {(post.view_count ?? 0) >= 100 && <span style={{ fontSize: 9, fontWeight: 700, color: 'var(--accent-red)' }}>HOT</span>}
             <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
-              {post.author_name || '카더라 데이터팀'} · <time dateTime={post.published_at || post.created_at || new Date().toISOString()}>{new Date(post.published_at || post.created_at || Date.now()).toLocaleDateString('ko-KR')}</time> · 📖 {readingTimeMin}분 · 👀 {post.view_count ?? 0}
+              {post.author_name || '카더라'} · <time dateTime={post.published_at || post.created_at || new Date().toISOString()}>{new Date(post.published_at || post.created_at || Date.now()).toLocaleDateString('ko-KR')}</time> · 📖 {readingTimeMin}분 · 👀 {post.view_count ?? 0}
               {post.rewritten_at && <span style={{ marginLeft: 4, padding: '0 4px', borderRadius: 3, background: 'var(--accent-green-bg)', color: 'var(--accent-green)', fontSize: 9, fontWeight: 700 }}>UP</span>}
             </span>
           </div>

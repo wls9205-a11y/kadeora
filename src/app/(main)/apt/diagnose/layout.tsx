@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   },
   twitter: { card: 'summary_large_image' as const, title: '청약 가점 계산기', description: '무주택기간·부양가족·청약통장 가점 자동 계산' },
   other: {
-    'naver:author': '카더라 부동산팀',
+    'naver:author': '카더라',
     'naver:written_time': '2026-01-15T00:00:00Z',
     'naver:updated_time': new Date().toISOString(),
     'dg:plink': `${SITE_URL}/apt/diagnose`,
