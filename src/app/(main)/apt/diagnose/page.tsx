@@ -28,8 +28,8 @@ export default function DiagnosePage() {
   const [family, setFamily] = useState(2);
   const [bankYears, setBankYears] = useState(5);
 
-  const housingScore = Math.min(32, years * 2);
-  const familyScore = Math.min(35, family * 5);
+  const housingScore = Math.min(32, (years + 1) * 2);
+  const familyScore = Math.min(35, (family + 1) * 5);
   const bankScore = Math.min(17, bankYears <= 0 ? 0 : bankYears < 1 ? 2 : bankYears < 2 ? 4 : bankYears < 3 ? 6 : bankYears < 4 ? 8 : bankYears < 5 ? 10 : bankYears < 6 ? 11 : bankYears < 7 ? 12 : bankYears < 8 ? 13 : bankYears < 9 ? 14 : bankYears < 10 ? 15 : bankYears < 11 ? 16 : 17);
   const total = housingScore + familyScore + bankScore;
   const pct = Math.round((total / 84) * 100);
@@ -174,7 +174,7 @@ export default function DiagnosePage() {
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 20, marginBottom: 'var(--sp-lg)' }}>
         <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 'var(--sp-md)' }}>💡 가점 올리는 팁</div>
         {[
-          { condition: housingScore < 32, tip: `무주택기간을 늘리세요. 현재 ${years}년 → ${Math.min(15, years + 3)}년이면 +${Math.min(32, (years + 3) * 2) - housingScore}점 추가` },
+          { condition: housingScore < 32, tip: `무주택기간을 늘리세요. 현재 ${years}년 → ${Math.min(15, years + 3)}년이면 +${Math.min(32, (years + 3 + 1) * 2) - housingScore}점 추가` },
           { condition: familyScore < 35, tip: '부양가족 등록을 확인하세요. 배우자 포함 직계 존비속이 모두 무주택이면 가족 수에 포함됩니다' },
           { condition: bankScore < 17, tip: `청약통장은 유지만 하면 기간이 늘어납니다. ${15 - bankYears}년 후 만점(17점)` },
           { condition: total < 40, tip: '85㎡ 초과 주택은 추첨제 40%가 적용되므로 가점 낮아도 당첨 가능성이 있습니다' },

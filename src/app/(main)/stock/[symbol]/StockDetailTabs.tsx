@@ -22,14 +22,14 @@ interface Props {
   currency: string;
 }
 
-function MiniChart({ data }: { data: { date: string; close_price: number; open_price?: number | null; volume?: number | null }[] }) {
+function MiniChart({ data, isKR = true }: { data: { date: string; close_price: number; open_price?: number | null; volume?: number | null }[]; isKR?: boolean }) {
   if (!data || data.length < 2) return null;
   const prices = data.map(d => Number(d.close_price));
   const min = Math.min(...prices); const max = Math.max(...prices);
   const range = max - min || 1; const W = 300; const H = 80; const P = 4;
   const points = prices.map((p, i) => `${P + (i / (prices.length - 1)) * (W - P * 2)},${H - P - ((p - min) / range) * (H - P * 2)}`).join(' ');
   const isUp = prices[prices.length - 1] >= prices[0];
-  const color = isUp ? 'var(--accent-red)' : 'var(--accent-blue)';
+  const color = isUp ? (isKR ? 'var(--accent-red)' : 'var(--accent-green)') : (isKR ? 'var(--accent-blue)' : 'var(--accent-red)');
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-sm)' }}>
@@ -142,7 +142,7 @@ function ChartTab({ priceHistory, currency }: { priceHistory: StockPriceHistory[
           currency={currency}
         />
       ) : (
-        <MiniChart data={slicedData} />
+        <MiniChart data={slicedData} isKR={currency !== 'USD'} />
       )}
 
       {/* 변동 요약 */}
@@ -158,19 +158,19 @@ function ChartTab({ priceHistory, currency }: { priceHistory: StockPriceHistory[
           <div style={{ display: 'flex', gap: 'var(--sp-sm)', marginTop: 'var(--sp-md)', flexWrap: 'wrap' }}>
             <div style={{ flex: 1, minWidth: 80, background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '8px 10px', textAlign: 'center' }}>
               <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>기간 변동</div>
-              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: isUp ? 'var(--accent-red)' : 'var(--accent-blue)', marginTop: 2 }}>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: isUp ? (currency !== 'USD' ? 'var(--accent-red)' : 'var(--accent-green)') : (currency !== 'USD' ? 'var(--accent-blue)' : 'var(--accent-red)'), marginTop: 2 }}>
                 {isUp ? '+' : ''}{changePct.toFixed(2)}%
               </div>
             </div>
             <div style={{ flex: 1, minWidth: 80, background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '8px 10px', textAlign: 'center' }}>
               <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>최고가</div>
-              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--accent-red)', marginTop: 2 }}>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: currency !== 'USD' ? 'var(--accent-red)' : 'var(--accent-green)', marginTop: 2 }}>
                 {currency === 'USD' ? `$${high.toFixed(2)}` : `₩${high.toLocaleString()}`}
               </div>
             </div>
             <div style={{ flex: 1, minWidth: 80, background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '8px 10px', textAlign: 'center' }}>
               <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>최저가</div>
-              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--accent-blue)', marginTop: 2 }}>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: currency !== 'USD' ? 'var(--accent-blue)' : 'var(--accent-red)', marginTop: 2 }}>
                 {currency === 'USD' ? `$${low.toFixed(2)}` : `₩${low.toLocaleString()}`}
               </div>
             </div>
@@ -227,7 +227,7 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
           {/* 미니 차트 (개요 상단) */}
           {priceHistory.length >= 2 && (
             <div className="kd-card">
-              <MiniChart data={priceHistory} />
+              <MiniChart data={priceHistory} isKR={currency !== 'USD'} />
             </div>
           )}
           {aiComment && (() => {

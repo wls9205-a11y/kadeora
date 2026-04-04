@@ -10,7 +10,7 @@ export async function DELETE(req: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 });
     const body = await req.json();
-    if (body.confirmation !== '계정을 삭제합니다') return NextResponse.json({ error: '확인 문구가 일치하지 않습니다.' }, { status: 400 });
+    if (body.confirmation !== '탈퇴하겠습니다') return NextResponse.json({ error: '확인 문구가 일치하지 않습니다.' }, { status: 400 });
     const { error: pErr } = await supabase.from('profiles').update({ nickname: '탈퇴한 사용자', avatar_url: null, bio: null, is_deleted: true, deleted_at: new Date().toISOString() }).eq('id', user.id);
     if (pErr) { console.error('[Account DEL]', pErr); return NextResponse.json({ error: '계정 삭제 처리 중 오류' }, { status: 500 }); }
     const sb = getSupabaseAdmin();

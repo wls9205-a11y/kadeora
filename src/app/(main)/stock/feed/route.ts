@@ -31,7 +31,7 @@ export async function GET() {
   <channel>
     <title>카더라 주식 RSS</title>
     <link>${SITE_URL}/stock</link>
-    <description>최근 업데이트된 종목 200개 실시간 시세 — 국내외 1,700+ 종목</description>
+    <description>최근 업데이트된 종목 200개 실시간 시세 — 국내외 주요 종목</description>
     <language>ko</language>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
     <atom:link href="${SITE_URL}/stock/feed" rel="self" type="application/rss+xml" />

@@ -216,7 +216,7 @@ export default function ShopPage() {
       {/* 포인트 안내 */}
       <div style={{ padding: '12px 14px', background: 'var(--bg-hover)', borderRadius: 'var(--radius-card)', textAlign: 'center', marginBottom: 20 }}>
         <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-          💡 포인트 적립: 출석(10P) · 글쓰기(20P) · 댓글(5P) · 좋아요 받기(3P)
+          💡 포인트 적립: 출석(10P) · 글쓰기(10P) · 댓글(5P) · 공유(5P)
         </div>
       </div>
 

@@ -14,7 +14,7 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
   const { section } = await searchParams;
   const s = section ? SECTION_META[section] : null;
   const title = s?.title || '실시간 주식 시세';
-  const desc = s?.desc || '국내외 1,700+ 종목 실시간 시세와 등락률. KOSPI, KOSDAQ, NYSE, NASDAQ. AI시황, 섹터분석, 포트폴리오 시뮬레이터.';
+  const desc = s?.desc || '국내외 주요 종목 실시간 시세와 등락률. KOSPI, KOSDAQ, NYSE, NASDAQ. AI시황, 섹터분석, 포트폴리오 시뮬레이터.';
   const ogImg = section ? `${SITE_URL}/api/og?section=${section}&design=2` : `${SITE_URL}/api/og?title=${encodeURIComponent('실시간 주식 시세')}&subtitle=${encodeURIComponent('KOSPI·KOSDAQ·해외주식')}&category=stock`;
 
   return {
@@ -156,7 +156,7 @@ export default async function StockPage() {
         "@context": "https://schema.org", "@type": "FAQPage",
         "mainEntity": [
           { "@type": "Question", "name": "카더라에서 어떤 주식을 볼 수 있나요?", "acceptedAnswer": { "@type": "Answer", "text": "KOSPI, KOSDAQ, NYSE, NASDAQ 등 국내외 주요 종목의 실시간 시세를 제공합니다. 테마별 동향, 섹터 히트맵, AI 종목 분석, 투자자 매매동향까지 확인 가능합니다." } },
-          { "@type": "Question", "name": "주식 시세는 얼마나 자주 업데이트되나요?", "acceptedAnswer": { "@type": "Answer", "text": "장중에는 15분 간격으로 실시간 시세가 업데이트됩니다. 장 마감 후에도 종가 기준 데이터를 제공합니다." } },
+          { "@type": "Question", "name": "주식 시세는 얼마나 자주 업데이트되나요?", "acceptedAnswer": { "@type": "Answer", "text": "장중에는 5~10분 간격으로 시세가 업데이트됩니다. 장 마감 후에도 종가 기준 데이터를 제공합니다." } },
           { "@type": "Question", "name": "카더라 주식 서비스는 무료인가요?", "acceptedAnswer": { "@type": "Answer", "text": "네, 카더라의 모든 주식 시세 조회, 차트, 수급 분석, AI 한줄평, 종목 토론 기능은 완전 무료입니다. 카카오 로그인으로 관심종목 등록, 가격 알림도 무료로 사용할 수 있습니다." } },
         ],
       }) }} />

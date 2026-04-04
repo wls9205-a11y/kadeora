@@ -50,9 +50,9 @@ export default async function GradesPage() {
         '@context': 'https://schema.org', '@type': 'FAQPage',
         mainEntity: [
           { '@type': 'Question', name: '카더라 등급은 어떻게 결정되나요?', acceptedAnswer: { '@type': 'Answer', text: '활동 포인트(글 작성 +10P, 댓글 +5P, 출석 +10P 등)를 기준으로 자동 등급이 부여됩니다. 매일 새벽 자동 갱신됩니다.' } },
-          { '@type': 'Question', name: '최고 등급은 무엇인가요?', acceptedAnswer: { '@type': 'Answer', text: '카더라신(10단계)이 최고 등급입니다. 새싹→풀잎→클로버→벚꽃→해바라기→스타→파이어→다이아→왕관→카더라신 순서입니다.' } },
+          { '@type': 'Question', name: '최고 등급은 무엇인가요?', acceptedAnswer: { '@type': 'Answer', text: '카더라신(10단계)이 최고 등급입니다. 새싹→정보통→동네어른→소문난집→인플루언서→빅마우스→찐고수→전설→신의경지→카더라신 순서입니다.' } },
           { '@type': 'Question', name: '등급별 혜택이 있나요?', acceptedAnswer: { '@type': 'Answer', text: '높은 등급일수록 프로필 뱃지, 커뮤니티 신뢰도 표시, 향후 프리미엄 기능 우선 접근 등의 혜택이 제공됩니다.' } },
-          { '@type': 'Question', name: '포인트는 어떻게 획득하나요?', acceptedAnswer: { '@type': 'Answer', text: '글 작성(+10P), 댓글(+5P), 출석체크(+10P), 좋아요 받기(+2P), 초대(+50P) 등 다양한 활동으로 포인트를 적립할 수 있습니다.' } },
+          { '@type': 'Question', name: '포인트는 어떻게 획득하나요?', acceptedAnswer: { '@type': 'Answer', text: '글 작성(+10P), 댓글(+5P), 출석체크(+10P), 공유(+5P), 관심단지 등록(+50P) 등 다양한 활동으로 포인트를 적립할 수 있습니다.' } },
         ],
       }) }} />
       {/* 헤더 */}
@@ -103,11 +103,11 @@ export default async function GradesPage() {
         <p className="text-sm font-semibold mb-2" style={{ color: 'var(--brand)' }}>📈 점수 획득 방법</p>
         <ul className="text-xs space-y-1" style={{ color: 'var(--text-secondary)' }}>
           <li>• 게시글 작성 +10점</li>
-          <li>• 게시글에 좋아요 받기 +2점</li>
-          <li>• 댓글 작성 +3점</li>
-          <li>• 팔로워 획득 +5점</li>
-          <li>• 매가폰 사용 +20점</li>
-          <li>• 출석 체크 +1점/일</li>
+          <li>• 게시글에 좋아요 받기 — 준비 중</li>
+          <li>• 댓글 작성 +5점</li>
+          <li>• 공유 +5점</li>
+          <li>• 관심단지 등록 +50점</li>
+          <li>• 출석 체크 +10점/일</li>
         </ul>
       </div>
 

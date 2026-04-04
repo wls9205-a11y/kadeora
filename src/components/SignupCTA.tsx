@@ -85,9 +85,9 @@ export default function SignupCTA() {
         borderTop: '1px solid var(--border)',
       }}>
         {[
-          { num: '22,600+', label: '블로그 글' },
+          { num: '20,000+', label: '블로그 글' },
           { num: '5,500+', label: '분양 현장' },
-          { num: '1,700+', label: '주식 종목' },
+          { num: '700+', label: '주식 종목' },
         ].map(s => (
           <div key={s.label} style={{ textAlign: 'center' }}>
             <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-primary)' }}>{s.num}</div>

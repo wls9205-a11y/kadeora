@@ -43,7 +43,7 @@ export default function PrivacyPage() {
         </p>
         <ul style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.8, paddingLeft: 20, marginTop: 8 }}>
           <li>전자상거래 등에서의 소비자 보호에 관한 법률: 계약·청약철회 기록 5년</li>
-          <li>통신비밀보호법: 통신사실확인자료 3개월</li>
+          <li>통신비밀보호법: 인터넷 로그기록자료 3개월</li>
           <li>관심단지 등록 정보: 동의 철회 시 또는 수집 목적 달성 후 5일 이내 파기</li>
           <li>개인정보 동의 이력: 동의 증빙을 위해 동의 철회 후 3년 보관</li>
         </ul>
@@ -70,7 +70,7 @@ export default function PrivacyPage() {
       <section style={{ marginBottom: 32 }}>
         <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, marginBottom: 'var(--sp-sm)', color: 'var(--text-primary)' }}>6. 개인정보의 안전성 확보 조치</h2>
         <ul style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.8, paddingLeft: 20 }}>
-          <li>전화번호는 AES-256 암호화하여 저장합니다.</li>
+          <li>전화번호는 AES-256-GCM 암호화하여 저장합니다.</li>
           <li>HTTPS 암호화 통신을 사용합니다.</li>
           <li>데이터베이스 접근 권한을 최소화하여 관리합니다. (RLS 적용)</li>
           <li>관리자 페이지에서 전화번호 원본 열람은 불가합니다 (마스킹 처리).</li>

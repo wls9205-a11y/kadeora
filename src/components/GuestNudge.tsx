@@ -160,7 +160,7 @@ export default function GuestNudge() {
     <div style={{ position:'fixed', bottom:'calc(56px + env(safe-area-inset-bottom,0px))', left:0, right:0, zIndex:95, padding:'0 12px' }}>
       <div style={{ background:'var(--bg-surface)', border:'1px solid var(--brand-border,rgba(59,123,246,.3))', borderRadius:'var(--radius-card)', padding:'12px 14px', display:'flex', alignItems:'center', gap:'var(--sp-sm)', boxShadow:'0 4px 16px rgba(0,0,0,.25)' }}>
         <div style={{ flex:1, minWidth:0 }}>
-          <div style={{ fontSize:13, fontWeight:700, color:'var(--text-primary)' }}>1,700+ 종목 알림 · 청약 마감 알림</div>
+          <div style={{ fontSize:13, fontWeight:700, color:'var(--text-primary)' }}>주식 종목 알림 · 청약 마감 알림</div>
           <div style={{ fontSize:11, color:'var(--text-tertiary)', marginTop:2 }}>카카오로 3초 무료 가입</div>
         </div>
         <Link href={url} onClick={onClick} style={{ background:'var(--brand)', color:'#fff', padding:'7px 16px', borderRadius:'var(--radius-sm)', fontSize:12, fontWeight:700, textDecoration:'none', whiteSpace:'nowrap' }}>가입</Link>

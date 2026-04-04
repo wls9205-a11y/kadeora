@@ -22,7 +22,7 @@ export default function TossBottomBanner() {
   const getCtaInfo = () => {
     if (pathname.startsWith('/stock')) return {
       label: '전체 종목 보기',
-      sub: '1,700+ 종목 실시간 시세',
+      sub: '국내외 주요 종목 실시간 시세',
       path: '/stock',
     };
     if (pathname.startsWith('/apt')) return {
@@ -32,7 +32,7 @@ export default function TossBottomBanner() {
     };
     if (pathname.startsWith('/blog')) return {
       label: '블로그 전체 보기',
-      sub: '22,000편+ 투자 정보',
+      sub: '투자 정보 블로그',
       path: pathname,
     };
     if (pathname.startsWith('/feed')) return {

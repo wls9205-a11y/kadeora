@@ -14,7 +14,7 @@ export function DeleteAccountSection() {
     if (inputVal !== '탈퇴하겠습니다') return;
     setLoading(true);
     try {
-      await fetch('/api/account/delete', { method: 'DELETE' });
+      await fetch('/api/account/delete', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ confirmation: '탈퇴하겠습니다' }) });
       await supabase.auth.signOut();
       router.push('/');
     } catch {
@@ -42,7 +42,7 @@ export function DeleteAccountSection() {
       <div className="mt-8 p-4 rounded-xl" style={{ backgroundColor: 'var(--error-bg)', border: '1px solid var(--error)' }}>
         <p className="font-semibold text-sm mb-2" style={{ color: 'var(--error)' }}>정말 탈퇴하시겠습니까?</p>
         <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
-          탈퇴 시 모든 게시글, 댓글, 포인트가 삭제되며 복구할 수 없습니다.
+          탈퇴 시 프로필이 익명화되며 복구할 수 없습니다. 작성한 글과 댓글은 익명 처리됩니다.
         </p>
         <div className="flex gap-2">
           <button

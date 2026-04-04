@@ -71,7 +71,7 @@ export default function BlogTossGate({
           전체 글 읽기
         </button>
         <div style={{ marginTop: 8, fontSize: 11, color: '#B0B8C1' }}>
-          카더라 블로그 · 22,000편+ 무료
+          카더라 블로그 · 전편 무료
         </div>
       </div>
     </div>

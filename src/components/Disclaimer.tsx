@@ -7,7 +7,7 @@
 const TEXTS: Record<string, { disclaimer: string; source?: string }> = {
   stock: {
     disclaimer: '본 서비스의 주식 정보는 투자 참고용이며 투자 권유가 아닙니다. 투자 손실에 대한 책임은 투자자 본인에게 있습니다.',
-    source: '주식: 금융위원회 공공데이터 API',
+    source: '주식: 금융위원회 공공데이터 API · 해외시세: Yahoo Finance',
   },
   apt: {
     disclaimer: '본 정보는 참고용이며 투자 권유가 아닙니다. 투자에 따른 손익은 투자자 본인에게 귀속됩니다.',
@@ -30,7 +30,7 @@ const TEXTS: Record<string, { disclaimer: string; source?: string }> = {
   },
   general: {
     disclaimer: '본 서비스의 정보는 투자 권유가 아니며, 투자 손실에 대한 책임은 투자자 본인에게 있습니다.',
-    source: '청약: 공공데이터포털 · 미분양: 국토교통부 · 실거래: 국토교통부 · 주식: 금융위원회 · 재개발: 서울시·경기도·부산시',
+    source: '청약: 공공데이터포털 · 미분양: 국토교통부 · 실거래: 국토교통부 · 주식: 금융위원회 · 해외시세: Yahoo Finance · 재개발: 서울시·경기도·부산시',
   },
 };
 

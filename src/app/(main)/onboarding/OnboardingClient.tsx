@@ -9,7 +9,7 @@ import { REGIONS, SIGUNGU_MAP } from '@/lib/regions';
 const INTERESTS = [
   { key: 'stock',   label: '📈 주식' },
   { key: 'apt',     label: '🏠 청약/부동산' },
-  { key: 'crypto',  label: '🪙 코인' },
+  { key: 'redev',    label: '🏗️ 재개발/재건축' },
   { key: 'fund',    label: '💼 펀드/ETF' },
   { key: 'saving',  label: '💰 저축/예금' },
   { key: 'tax',     label: '🧾 세금/절세' },

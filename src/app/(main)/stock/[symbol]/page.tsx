@@ -298,7 +298,7 @@ export default async function StockDetailPage({ params }: Props) {
             <div style={{ height: '100%', borderRadius: 2, background: 'var(--brand)', width: `${s.market_cap ? Math.min(Math.log10(Number(s.market_cap) / 1e8) * 15, 100) : 10}%` }} />
           </div>
           <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}>
-            {Number(s.market_cap) >= 1e13 ? '초대형주' : Number(s.market_cap) >= 1e12 ? '대형주' : Number(s.market_cap) >= 1e11 ? '중형주' : '소형주'}
+            {(() => { const mc = Number(s.market_cap); if (!mc) return ''; if (s.currency === 'USD') return mc >= 1e12 ? '초대형주' : mc >= 1e11 ? '대형주' : mc >= 1e10 ? '중형주' : '소형주'; return mc >= 1e13 ? '초대형주' : mc >= 1e12 ? '대형주' : mc >= 1e11 ? '중형주' : '소형주'; })()}
           </div>
         </div>
       </div>

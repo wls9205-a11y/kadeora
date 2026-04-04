@@ -92,7 +92,7 @@ export default function TossTeaser({
           전체 콘텐츠는 카더라에서
         </div>
         <div style={{ fontSize: 13, color: '#8B95A1', marginBottom: 16, lineHeight: 1.5 }}>
-          {subtitle || '22,000편+ 블로그, 1,700+ 종목 시세\n무료 가입하고 전부 확인하세요'}
+          {subtitle || '투자 정보 블로그, 실시간 종목 시세\n무료 가입하고 전부 확인하세요'}
         </div>
         <button
           onClick={handleOpen}

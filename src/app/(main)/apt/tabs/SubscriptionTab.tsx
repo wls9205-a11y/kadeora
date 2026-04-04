@@ -455,7 +455,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
           </div>
 
           <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 'var(--sp-md)', textAlign: 'center' }}>
-            📊 청약홈·공공데이터포털 API 기준{freshDate ? ` · ${freshDate} 수집` : ''} · 매일 06시 자동 갱신
+            📊 청약홈·공공데이터포털 API 기준{freshDate ? ` · ${freshDate} 수집` : ''} · 매일 자동 갱신
           </p>
         </div>
 

@@ -117,7 +117,7 @@ function WelcomePopup({ onClose }: { onClose: () => void }) {
         <div style={{ padding: '16px 20px' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
             {[
-              { icon: '📈', title: '실시간 주식 시세', desc: '1,700+ 종목 시세 · 차트 · AI 분석' },
+              { icon: '📈', title: '실시간 주식 시세', desc: '주요 종목 시세 · 차트 · AI 분석' },
               { icon: '🏢', title: '청약·분양 알림', desc: '마감 D-day 알림 · 가점 계산기' },
               { icon: '📊', title: '매일 투자 리포트', desc: '데일리 브리핑 · 섹터 동향 · 환율' },
             ].map(item => (
