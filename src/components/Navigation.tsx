@@ -557,145 +557,147 @@ export function Navigation() {
       {moreOpen && (
         <div style={{ position:'fixed', inset:0, zIndex: 9999 }}>
           <div style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.5)' }} onClick={() => setMoreOpen(false)} />
-          {/* 모바일: 바텀 시트 — 카테고리별 그룹 */}
+          {/* 모바일: 바텀 시트 — 리디자인 */}
           <div className="md:hidden" style={{
-            position:'absolute', bottom:60, left:12, right:12,
-            maxWidth: 420, marginLeft: 'auto', marginRight: 'auto',
+            position:'absolute', bottom:60, left:8, right:8,
+            maxWidth: 400, marginLeft: 'auto', marginRight: 'auto',
             background:'var(--bg-surface)', border:'1px solid var(--border)',
-            borderRadius: 'var(--radius-lg)', padding:16, boxShadow:'0 -8px 32px rgba(0,0,0,0.3)',
-            maxHeight:'70vh', overflowY:'auto',
+            borderRadius: 16, padding:'16px 14px 12px', boxShadow:'0 -8px 32px rgba(0,0,0,0.3)',
+            maxHeight:'72vh', overflowY:'auto',
           }}>
-            {/* 뒤로가기 헤더 */}
-            <div style={{ display:'flex', alignItems:'center', marginBottom: 14 }}>
+            {/* 헤더 */}
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom: 16 }}>
+              <span style={{ fontSize:15, fontWeight:800, color:'var(--text-primary)', letterSpacing:'-0.3px' }}>더보기</span>
               <button onClick={() => setMoreOpen(false)} style={{
-                display:'flex', alignItems:'center', gap: 4, background:'none', border:'none',
-                color:'var(--text-secondary)', cursor:'pointer', padding:'4px 8px 4px 0', fontSize:'var(--fs-sm)',
+                width:28, height:28, borderRadius:'50%', background:'var(--bg-hover)', border:'none',
+                color:'var(--text-tertiary)', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center',
               }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-                <span style={{ fontWeight: 600 }}>뒤로</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
               </button>
-              <span style={{ marginLeft:'auto', fontSize:'var(--fs-sm)', fontWeight:800, color:'var(--text-primary)' }}>더보기</span>
             </div>
-            {(['투자 정보','주식','부동산','설정'] as const).map(group => {
+            {(['투자 정보','주식','부동산','설정'] as const).map((group, gi) => {
               const items = MORE_ITEMS.filter(i => i.group === group);
               return (
-                <div key={group} style={{ marginBottom: 14 }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5, paddingLeft: 4 }}>{group}</div>
-                  <div style={{ display:'grid', gridTemplateColumns:'repeat(4, 1fr)', gap: 6 }}>
+                <div key={group} style={{ marginBottom: gi < 3 ? 12 : 0 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary)', marginBottom: 8, paddingLeft: 2 }}>{group}</div>
+                  <div style={{ display:'grid', gridTemplateColumns:'repeat(4, 1fr)', gap: 4 }}>
                     {items.map(item => (
                       <Link key={item.href} href={item.href} onClick={() => setMoreOpen(false)} style={{
-                        display:'flex', flexDirection:'column', alignItems:'center', gap: 4,
-                        padding:'10px 4px', borderRadius: 'var(--radius-card)', textDecoration:'none',
-                        color:'var(--text-primary)', position:'relative',
+                        display:'flex', flexDirection:'column', alignItems:'center', gap: 5,
+                        padding:'12px 4px 10px', borderRadius: 12, textDecoration:'none',
+                        color:'var(--text-primary)', position:'relative', background:'var(--bg-hover)',
                       }}
-                        onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-hover)')}
-                        onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                        onMouseEnter={e => (e.currentTarget.style.background = 'var(--border)')}
+                        onMouseLeave={e => (e.currentTarget.style.background = 'var(--bg-hover)')}
                       >
-                        <span style={{ fontSize: 20 }}>{item.emoji}</span>
-                        <span style={{ fontSize: 11, fontWeight:600, textAlign:'center', lineHeight: 1.3 }}>{item.label}</span>
+                        <span style={{ fontSize: 22, lineHeight:1 }}>{item.emoji}</span>
+                        <span style={{ fontSize: 11, fontWeight:600, textAlign:'center', lineHeight: 1.25, color:'var(--text-secondary)', wordBreak:'keep-all' }}>{item.label}</span>
                         {item.emoji === '🔔' && unread > 0 && (
-                          <span style={{ position: 'absolute', top: -2, right: -2, minWidth: 16, height: 16, borderRadius: 'var(--radius-sm)', background: 'var(--accent-red)', color: '#fff', fontSize: 10, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px' }}>{unread > 9 ? '9+' : unread}</span>
+                          <span style={{ position: 'absolute', top: 4, right: 4, minWidth: 16, height: 16, borderRadius: 8, background: 'var(--accent-red)', color: '#fff', fontSize: 9, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px' }}>{unread > 9 ? '9+' : unread}</span>
                         )}
                       </Link>
                     ))}
                   </div>
+                  {gi < 3 && <div style={{ height:1, background:'var(--border)', margin:'12px 0 0', opacity:0.5 }} />}
                 </div>
               );
             })}
-            {/* 테마 전환 */}
-            <div style={{ paddingTop: 10, borderTop:'1px solid var(--border)', display:'flex', gap: 'var(--sp-sm)' }}>
+            {/* 하단 액션 바 */}
+            <div style={{ paddingTop: 12, display:'flex', gap: 6 }}>
               <button onClick={toggleTheme} style={{
-                flex:1, textAlign:'center', padding:'10px 0', borderRadius: 'var(--radius-md)',
+                flex:1, padding:'10px 0', borderRadius: 10,
                 background:'var(--bg-hover)', color:'var(--text-primary)',
-                fontSize:13, fontWeight:600, border:'none', cursor:'pointer',
-                display:'flex', alignItems:'center', justifyContent:'center', gap: 6,
+                fontSize:12, fontWeight:600, border:'1px solid var(--border)', cursor:'pointer',
+                display:'flex', alignItems:'center', justifyContent:'center', gap: 5,
               }}>
-                {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
-                {theme === 'dark' ? '라이트 모드' : '다크 모드'}
+                {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
+                {theme === 'dark' ? '라이트' : '다크'}
               </button>
               {userId && (
                 <>
                   <Link href={`/profile/${userId}`} onClick={() => setMoreOpen(false)} style={{
-                    flex:1, textAlign:'center', padding:'10px 0', borderRadius: 'var(--radius-md)',
+                    flex:1, padding:'10px 0', borderRadius: 10,
                     background:'var(--bg-hover)', color:'var(--text-primary)',
-                    fontSize:'var(--fs-xs)', fontWeight:600, textDecoration:'none',
+                    fontSize:12, fontWeight:600, textDecoration:'none', border:'1px solid var(--border)',
                     display:'flex', alignItems:'center', justifyContent:'center',
                   }}>내 프로필</Link>
                   <Link href="/notifications" onClick={() => setMoreOpen(false)} style={{
-                    flex:1, textAlign:'center', padding:'10px 0', borderRadius: 'var(--radius-md)',
-                    background:'var(--bg-hover)', color:'var(--text-primary)',
-                    fontSize:'var(--fs-xs)', fontWeight:600, textDecoration:'none',
+                    flex:1, padding:'10px 0', borderRadius: 10,
+                    background: unread > 0 ? 'var(--brand)' : 'var(--bg-hover)',
+                    color: unread > 0 ? '#fff' : 'var(--text-primary)',
+                    fontSize:12, fontWeight:600, textDecoration:'none', border: unread > 0 ? 'none' : '1px solid var(--border)',
                     display:'flex', alignItems:'center', justifyContent:'center',
-                  }}>알림{unread > 0 ? ` (${unread})` : ''}</Link>
+                  }}>알림{unread > 0 ? ` ${unread}` : ''}</Link>
                 </>
               )}
             </div>
           </div>
-          {/* 데스크탑: 상단 드롭다운 — 카테고리 그룹 */}
+          {/* 데스크탑: 상단 드롭다운 — 리디자인 */}
           <div className="hidden md:block" style={{
             position:'absolute', top:52, right:16,
-            width: 440,
+            width: 420,
             background:'var(--bg-surface)', border:'1px solid var(--border)',
-            borderRadius: 'var(--radius-card)', padding:18, boxShadow:'0 8px 32px rgba(0,0,0,0.25)',
+            borderRadius: 14, padding:'16px 14px', boxShadow:'0 8px 32px rgba(0,0,0,0.25)',
             maxHeight:'75vh', overflowY:'auto',
           }}>
-            {(['투자 정보','주식','부동산','설정'] as const).map(group => {
+            {(['투자 정보','주식','부동산','설정'] as const).map((group, gi) => {
               const items = MORE_ITEMS.filter(i => i.group === group);
               return (
-                <div key={group} style={{ marginBottom: 14 }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5, paddingLeft: 4 }}>{group}</div>
-                  <div style={{ display:'grid', gridTemplateColumns:'repeat(4, 1fr)', gap: 6 }}>
+                <div key={group} style={{ marginBottom: gi < 3 ? 12 : 0 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary)', marginBottom: 8, paddingLeft: 2 }}>{group}</div>
+                  <div style={{ display:'grid', gridTemplateColumns:'repeat(4, 1fr)', gap: 4 }}>
                     {items.map(item => (
                       <Link key={item.href + '-d'} href={item.href} onClick={() => setMoreOpen(false)} style={{
-                        display:'flex', flexDirection:'column', alignItems:'center', gap: 4,
-                        padding:'12px 4px', borderRadius: 'var(--radius-card)', textDecoration:'none',
-                        color:'var(--text-primary)', position:'relative',
+                        display:'flex', flexDirection:'column', alignItems:'center', gap: 5,
+                        padding:'12px 4px 10px', borderRadius: 12, textDecoration:'none',
+                        color:'var(--text-primary)', position:'relative', background:'var(--bg-hover)',
                       }}
-                        onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-hover)')}
-                        onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                        onMouseEnter={e => (e.currentTarget.style.background = 'var(--border)')}
+                        onMouseLeave={e => (e.currentTarget.style.background = 'var(--bg-hover)')}
                       >
-                        <span style={{ fontSize: 22 }}>{item.emoji}</span>
-                        <span style={{ fontSize: 12, fontWeight:600, textAlign:'center', lineHeight: 1.3 }}>{item.label}</span>
+                        <span style={{ fontSize: 22, lineHeight:1 }}>{item.emoji}</span>
+                        <span style={{ fontSize: 12, fontWeight:600, textAlign:'center', lineHeight: 1.25, color:'var(--text-secondary)' }}>{item.label}</span>
                         {item.emoji === '🔔' && unread > 0 && (
-                          <span style={{ position: 'absolute', top: -2, right: -2, minWidth: 16, height: 16, borderRadius: 'var(--radius-sm)', background: 'var(--accent-red)', color: '#fff', fontSize: 10, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px' }}>{unread > 9 ? '9+' : unread}</span>
+                          <span style={{ position: 'absolute', top: 4, right: 4, minWidth: 16, height: 16, borderRadius: 8, background: 'var(--accent-red)', color: '#fff', fontSize: 9, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px' }}>{unread > 9 ? '9+' : unread}</span>
                         )}
                       </Link>
                     ))}
                   </div>
+                  {gi < 3 && <div style={{ height:1, background:'var(--border)', margin:'12px 0 0', opacity:0.5 }} />}
                 </div>
               );
             })}
-            {/* 테마 전환 + 유저 액션 */}
-            <div style={{ paddingTop: 12, borderTop:'1px solid var(--border)', display:'flex', gap: 'var(--sp-sm)' }}>
+            <div style={{ paddingTop: 12, display:'flex', gap: 6 }}>
               <button onClick={toggleTheme} style={{
-                flex:1, textAlign:'center', padding:'10px 0', borderRadius: 'var(--radius-md)',
+                flex:1, padding:'10px 0', borderRadius: 10,
                 background:'var(--bg-hover)', color:'var(--text-primary)',
-                fontSize:13, fontWeight:600, border:'none', cursor:'pointer',
-                display:'flex', alignItems:'center', justifyContent:'center', gap: 6,
+                fontSize:12, fontWeight:600, border:'1px solid var(--border)', cursor:'pointer',
+                display:'flex', alignItems:'center', justifyContent:'center', gap: 5,
               }}>
-                {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
-                {theme === 'dark' ? '라이트 모드' : '다크 모드'}
+                {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
+                {theme === 'dark' ? '라이트' : '다크'}
               </button>
               {userId && (
                 <>
                   <Link href={`/profile/${userId}`} onClick={() => setMoreOpen(false)} style={{
-                    flex:1, textAlign:'center', padding:'10px 0', borderRadius: 'var(--radius-md)',
+                    flex:1, padding:'10px 0', borderRadius: 10,
                     background:'var(--bg-hover)', color:'var(--text-primary)',
-                    fontSize:'var(--fs-xs)', fontWeight:600, textDecoration:'none',
+                    fontSize:12, fontWeight:600, textDecoration:'none', border:'1px solid var(--border)',
                     display:'flex', alignItems:'center', justifyContent:'center',
                   }}>내 프로필</Link>
                   <Link href="/write" onClick={() => setMoreOpen(false)} style={{
-                    flex:1, textAlign:'center', padding:'10px 0', borderRadius: 'var(--radius-md)',
+                    flex:1, padding:'10px 0', borderRadius: 10,
                     background:'var(--bg-hover)', color:'var(--text-primary)',
-                    fontSize:'var(--fs-xs)', fontWeight:600, textDecoration:'none',
+                    fontSize:12, fontWeight:600, textDecoration:'none', border:'1px solid var(--border)',
                     display:'flex', alignItems:'center', justifyContent:'center',
                   }}>글쓰기</Link>
                   <Link href="/notifications" onClick={() => setMoreOpen(false)} style={{
-                    flex:1, textAlign:'center', padding:'10px 0', borderRadius: 'var(--radius-md)',
-                    background:'var(--bg-hover)', color:'var(--text-primary)',
-                    fontSize:'var(--fs-xs)', fontWeight:600, textDecoration:'none',
+                    flex:1, padding:'10px 0', borderRadius: 10,
+                    background: unread > 0 ? 'var(--brand)' : 'var(--bg-hover)',
+                    color: unread > 0 ? '#fff' : 'var(--text-primary)',
+                    fontSize:12, fontWeight:600, textDecoration:'none', border: unread > 0 ? 'none' : '1px solid var(--border)',
                     display:'flex', alignItems:'center', justifyContent:'center',
-                  }}>알림{unread > 0 ? ` (${unread})` : ''}</Link>
+                  }}>알림{unread > 0 ? ` ${unread}` : ''}</Link>
                 </>
               )}
             </div>
