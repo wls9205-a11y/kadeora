@@ -6,8 +6,12 @@ import { z } from 'zod';
 
 const PatchSchema = z.object({
   category: z.enum(['apt', 'stock', 'free', 'local']),
-  title: z.string().min(1).max(100),
+  title: z.string().min(1).max(150),
   content: z.string().min(1).max(5000),
+  images: z.array(z.string().url()).max(5).optional(),
+  tags: z.array(z.string().max(30)).max(5).optional(),
+  is_anonymous: z.boolean().optional(),
+  region_id: z.string().max(50).optional(),
 });
 
 interface Params {

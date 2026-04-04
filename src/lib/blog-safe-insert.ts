@@ -79,7 +79,6 @@ function enrichContent(content: string, category: string, title: string): string
 
   // 4. 지도 링크 자동 삽입 — 부동산 카테고리 필수
   if ((category === 'apt' || category === 'unsold') && !enriched.includes('map.kakao') && !enriched.includes('map.naver')) {
-    // 제목에서 지역명 추출 시도
     const mapLink = `\n\n> 🗺️ [네이버 지도에서 위치 확인](https://map.naver.com/v5/search/${encodeURIComponent(title.replace(/\d{4}|추천|분석|현황|리포트/g, '').trim())})`;
     const faqIdx = enriched.indexOf('## 자주 묻는 질문');
     if (faqIdx > 0) {
@@ -87,6 +86,23 @@ function enrichContent(content: string, category: string, title: string): string
     } else {
       enriched += mapLink;
     }
+  }
+
+  // 5. 데이터 출처 블록 — E-E-A-T 신뢰성 + YMYL 필수
+  if (!enriched.includes('데이터 출처') && !enriched.includes('출처:')) {
+    const sourceMap: Record<string, string> = {
+      stock: '\n\n---\n\n**데이터 출처:** 한국거래소(KRX), 금융감독원 전자공시시스템(DART), 카더라 자체 수집 데이터 | **기준일:** ' + new Date().toISOString().slice(0, 10),
+      apt: '\n\n---\n\n**데이터 출처:** 국토교통부 실거래가 공개시스템, 한국부동산원, 카더라 자체 수집 데이터 | **기준일:** ' + new Date().toISOString().slice(0, 10),
+      unsold: '\n\n---\n\n**데이터 출처:** 국토교통부 미분양 현황, 한국부동산원, 카더라 자체 수집 데이터 | **기준일:** ' + new Date().toISOString().slice(0, 10),
+      finance: '\n\n---\n\n**데이터 출처:** 한국은행, 금융감독원, 카더라 자체 수집 데이터 | **기준일:** ' + new Date().toISOString().slice(0, 10),
+      general: '\n\n---\n\n**출처:** 카더라(kadeora.app) 데이터팀',
+    };
+    enriched += sourceMap[category] || sourceMap.general;
+  }
+
+  // 6. 투자 면책 조항 — YMYL 금융 콘텐츠 필수
+  if (!enriched.includes('투자 권유') && !enriched.includes('면책') && (category === 'stock' || category === 'apt' || category === 'unsold' || category === 'finance')) {
+    enriched += '\n\n> ⚠️ 본 콘텐츠는 투자 참고 자료이며, 특정 금융상품의 매수·매도를 권유하지 않습니다. 투자 판단은 본인의 책임이며, 반드시 전문가 상담 후 결정하시기 바랍니다.';
   }
 
   return enriched;

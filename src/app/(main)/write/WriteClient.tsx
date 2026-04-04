@@ -118,7 +118,7 @@ export default function WriteClient() {
     if (!userId) { error('로그인이 필요합니다'); return; }
     if (!content.trim()) { error('내용을 입력해주세요'); return; }
     if (content.length > 5000) { error('내용은 5000자 이하로 입력해주세요'); return; }
-    if (title && title.length > 100) { error('제목은 100자 이하로 입력해주세요'); return; }
+    if (title && title.length > 150) { error('제목은 150자 이하로 입력해주세요'); return; }
     const contentCheck = filterContent(content);
     if (contentCheck.isBlocked) { error(contentCheck.reason ?? '내용을 확인해주세요'); return; }
     if (title) {
