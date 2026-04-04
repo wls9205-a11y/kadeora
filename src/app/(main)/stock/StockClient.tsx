@@ -14,6 +14,7 @@ import MiniSparkline from '@/components/MiniSparkline';
 import { fmtCap, stockColor, fmt } from '@/lib/format';
 import Disclaimer from '@/components/Disclaimer';
 import SectionShareButton from '@/components/SectionShareButton';
+import ExchangeRateMiniChart from '@/components/ExchangeRateMiniChart';
 import { isTossMode } from '@/lib/toss-mode';
 import TossTeaser from '@/components/TossTeaser';
 
@@ -1249,6 +1250,8 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
       })()}
 
       {/* 면책 */}
+      {/* 환율 추이 미니 차트 */}
+      <div style={{ margin: '12px 0' }}><ExchangeRateMiniChart /></div>
       <Disclaimer type="stock" compact />
 
       {/* 종목 모달 */}

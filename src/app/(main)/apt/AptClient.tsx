@@ -16,6 +16,9 @@ import { SkeletonList } from '@/components/Skeleton';
 import { isNew } from './tabs/apt-utils';
 import { useToast } from '@/components/Toast';
 import SectionShareButton from '@/components/SectionShareButton';
+import AptRankingCard from '@/components/AptRankingCard';
+import UnsoldTrendMini from '@/components/UnsoldTrendMini';
+import LandmarkAptCards from '@/components/LandmarkAptCards';
 import { isTossMode } from '@/lib/toss-mode';
 import TossTeaser from '@/components/TossTeaser';
 
@@ -365,6 +368,15 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           ))}
         </div>
       </div>
+
+      {/* 아파트 랭킹 */}
+      <AptRankingCard />
+
+      {/* 지역 대장 아파트 */}
+      <LandmarkAptCards />
+
+      {/* 미분양 추이 */}
+      <UnsoldTrendMini />
 
       {/* 인기 분양 현장 */}
       {(() => {
