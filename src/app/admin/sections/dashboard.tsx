@@ -951,11 +951,17 @@ export default function DashboardSection() {
       {/* ── 최근 릴리즈 내역 ── */}
       <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', marginBottom: 'var(--sp-md)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-          <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>🚀 최근 릴리즈 (세션 70~71)</span>
+          <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>🚀 최근 릴리즈 (세션 70~72)</span>
           <span style={{ fontSize: 10, color: C.textDim }}>2026-04-04 ~ 05</span>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
           {[
+            { tag: '⭐NEW', label: 'PDF 전수 파싱', desc: '2,392건 완료. 취득세2,235 전매789 커뮤니티647 가격183', color: C.brand, commit: 's72-pdf' },
+            { tag: 'FEAT', label: '총비용 시뮬레이터', desc: '타입/층/발코니/옵션/취득세 → 실입주 총비용 계산', color: C.green, commit: 's72-sim' },
+            { tag: 'FEAT', label: '규제 신호등', desc: '전매/거주/재당첨 빨강/노랑/초록 뱃지+해제예정일', color: C.yellow, commit: 's72-reg' },
+            { tag: 'UX', label: '이미지 Lightbox', desc: '풀스크린 확대 + 스와이프 + ESC + 도트네비', color: C.cyan, commit: 's72-light' },
+            { tag: 'UX', label: '관심 허수 카운트', desc: '공급세대×0.5 기본표시. 초과시 실데이터 전환', color: C.purple, commit: 's72-interest' },
+            { tag: 'UX', label: '카카오 공유+대시보드', desc: '상단 카카오톡 직접공유. 실유저37명만 카운트', color: C.brand, commit: 's72-kakao' },
             { tag: 'DATA', label: '블로그 59,401편', desc: '주식 1,803 + 단지백과 34,500 + 재개발 217 + 미분양 204 대량 생성', color: C.brand, commit: 's70-blog' },
             { tag: 'SEO', label: '사이트맵 수정', desc: '23,967편 누락 해결. SITEMAP_IDS 17~22 추가. 65K편 커버', color: C.green, commit: 's70-sitemap' },
             { tag: 'SEO', label: '전수 스팸 점검', desc: '타이틀 4,138편 유니크화. 조사 교체. 내부링크 22+. 출처/면책', color: C.yellow, commit: 's70-spam' },
