@@ -213,28 +213,37 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                   const fmtP = (n: number) => n >= 10000 ? `${(n / 10000).toFixed(1)}억` : `${n.toLocaleString()}만`;
                   const mvnYm = apt.mvn_prearnge_ym;
                   const mvnLabel = mvnYm ? `${mvnYm.slice(0, 4)}.${parseInt(mvnYm.slice(4, 6))}` : ((apt as any).move_in_month || null);
-                  const ppAvg = (apt as any).price_per_pyeong_avg;
+                  // 평당가: DB 우선, 없으면 house_type_info에서 계산
+                  const dbPpAvg = (apt as any).price_per_pyeong_avg;
+                  const ppAvg = dbPpAvg || (() => {
+                    const ht = Array.isArray(hti) ? hti.filter((t: any) => t.lttot_top_amount > 0 && t.type) : [];
+                    if (ht.length === 0) return 0;
+                    const s = ht.reduce((acc: number, t: any) => { const a = parseFloat(String(t.type).replace(/[A-Za-z]/g, '')) || 84; return acc + (t.lttot_top_amount / (a / 3.3058)); }, 0);
+                    return Math.round(s / ht.length);
+                  })();
                   const genT = (apt as any).general_supply_total || 0;
                   const spcT = (apt as any).special_supply_total || 0;
                   const totS = apt.tot_supply_hshld_co || 0;
                   const totalHH = (apt as any).total_households || 0;
                   const isRedevType = (apt as any).project_type === '재개발' || (apt as any).project_type === '재건축';
                   const genPct = totS > 0 ? Math.round((genT / totS) * 100) : 0;
+                  const hasAnnouncement = !!(apt.rcept_bgnde);
+                  const pendingLabel = hasAnnouncement ? '공고확인' : '공고전';
                   const kpiStyle = { textAlign: 'center' as const, padding: '6px 4px', background: 'var(--bg-surface)', borderRadius: 2 };
                   const kpiLabel = { fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 2, fontWeight: 500 as const };
                   const kpiVal = (c: string) => ({ fontSize: 'var(--fs-sm)', fontWeight: 800 as const, color: c, lineHeight: 1.3 });
                   return (
                     <>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 1, margin: '0 10px 8px', background: 'var(--border)', borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border)' }}>
-                        <div style={kpiStyle}><div style={kpiLabel}>분양가(최저)</div><div style={kpiVal(pMin > 0 ? 'var(--accent-blue-light, #93C5FD)' : 'var(--text-tertiary)')}>{pMin > 0 ? fmtP(pMin) : '미정'}</div></div>
-                        <div style={kpiStyle}><div style={kpiLabel}>분양가(최고)</div><div style={kpiVal(pMax > 0 ? 'var(--brand)' : 'var(--text-tertiary)')}>{pMax > 0 ? fmtP(pMax) : '미정'}</div></div>
-                        <div style={kpiStyle}><div style={kpiLabel}>평당가</div><div style={kpiVal(ppAvg > 0 ? 'var(--accent-purple)' : 'var(--text-tertiary)')}>{ppAvg > 0 ? fmtP(ppAvg) : '-'}</div></div>
-                        <div style={kpiStyle}><div style={kpiLabel}>입주예정</div><div style={kpiVal(mvnLabel ? 'var(--accent-green)' : 'var(--text-tertiary)')}>{mvnLabel || '-'}</div></div>
+                        <div style={kpiStyle}><div style={kpiLabel}>분양가(최저)</div><div style={kpiVal(pMin > 0 ? 'var(--accent-blue-light, #93C5FD)' : 'var(--text-tertiary)')}>{pMin > 0 ? fmtP(pMin) : pendingLabel}</div></div>
+                        <div style={kpiStyle}><div style={kpiLabel}>분양가(최고)</div><div style={kpiVal(pMax > 0 ? 'var(--brand)' : 'var(--text-tertiary)')}>{pMax > 0 ? fmtP(pMax) : pendingLabel}</div></div>
+                        <div style={kpiStyle}><div style={kpiLabel}>평당가</div><div style={kpiVal(ppAvg > 0 ? 'var(--accent-purple)' : 'var(--text-tertiary)')}>{ppAvg > 0 ? fmtP(ppAvg) : (pMin > 0 ? '계산중' : pendingLabel)}</div></div>
+                        <div style={kpiStyle}><div style={kpiLabel}>입주예정</div><div style={kpiVal(mvnLabel ? 'var(--accent-green)' : 'var(--text-tertiary)')}>{mvnLabel || '미정'}</div></div>
                         {/* 총세대: total_households가 있고 totS와 다를 때만 따로 표시 */}
                         {totalHH > 0 && totalHH !== totS ? (
                           <>
                             <div style={kpiStyle}><div style={kpiLabel}>총세대수</div><div style={kpiVal('var(--text-primary)')}>{totalHH.toLocaleString()}</div></div>
-                            <div style={kpiStyle}><div style={kpiLabel}>공급세대</div><div style={kpiVal('var(--brand)')}>{totS > 0 ? totS.toLocaleString() : <span style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>준비중</span>}</div></div>
+                            <div style={kpiStyle}><div style={kpiLabel}>공급세대</div><div style={kpiVal('var(--brand)')}>{totS > 0 ? totS.toLocaleString() : <span style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>{pendingLabel}</span>}</div></div>
                           </>
                         ) : totalHH > 0 ? (
                           <>
@@ -243,12 +252,12 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                           </>
                         ) : (
                           <>
-                            <div style={kpiStyle}><div style={kpiLabel}>공급세대</div><div style={kpiVal('var(--brand)')}>{totS > 0 ? totS.toLocaleString() : <span style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>준비중</span>}</div></div>
-                            <div style={kpiStyle}><div style={kpiLabel}>총세대수</div><div style={kpiVal('var(--text-tertiary)')}><span style={{ fontSize: 9 }}>준비중</span></div></div>
+                            <div style={kpiStyle}><div style={kpiLabel}>공급세대</div><div style={kpiVal(totS > 0 ? 'var(--brand)' : 'var(--text-tertiary)')}>{totS > 0 ? totS.toLocaleString() : <span style={{ fontSize: 9 }}>{pendingLabel}</span>}</div></div>
+                            <div style={kpiStyle}><div style={kpiLabel}>시공사</div><div style={kpiVal('var(--text-primary)')}>{(apt as any).constructor_nm ? (apt as any).constructor_nm.split('(')[0].trim().slice(0, 6) : '미공개'}</div></div>
                           </>
                         )}
-                        <div style={kpiStyle}><div style={kpiLabel}>일반공급</div><div style={kpiVal('var(--accent-blue-light, #60A5FA)')}>{genT > 0 ? genT.toLocaleString() : <span style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>준비중</span>}</div></div>
-                        <div style={kpiStyle}><div style={kpiLabel}>특별공급</div><div style={kpiVal('var(--accent-purple, #A78BFA)')}>{spcT > 0 ? spcT.toLocaleString() : <span style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>준비중</span>}</div></div>
+                        <div style={kpiStyle}><div style={kpiLabel}>일반공급</div><div style={kpiVal(genT > 0 ? 'var(--accent-blue-light, #60A5FA)' : 'var(--text-tertiary)')}>{genT > 0 ? genT.toLocaleString() : <span style={{ fontSize: 9 }}>{pendingLabel}</span>}</div></div>
+                        <div style={kpiStyle}><div style={kpiLabel}>특별공급</div><div style={kpiVal(spcT > 0 ? 'var(--accent-purple, #A78BFA)' : 'var(--text-tertiary)')}>{spcT > 0 ? spcT.toLocaleString() : <span style={{ fontSize: 9 }}>{pendingLabel}</span>}</div></div>
                       </div>
 
                       {/* 일반/특별 비율 바 */}

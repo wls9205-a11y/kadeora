@@ -160,7 +160,14 @@ async function fetchAptData() {
       if (mvn && mvn < thisMonth) return false;
       return true;
     })
-    .map((a: Record<string, any>) => ({
+    .map((a: Record<string, any>) => {
+      // house_type_info에서 분양가 추출
+      const hti = Array.isArray(a.house_type_info) ? a.house_type_info : [];
+      const amounts = hti.map((t: any) => t.lttot_top_amount).filter((v: any) => v > 0);
+      const minAmounts = hti.map((t: any) => t.lttot_min_amount || t.lttot_top_amount).filter((v: any) => v > 0);
+      const extractedMax = amounts.length > 0 ? Math.max(...amounts) : null;
+      const extractedMin = minAmounts.length > 0 ? Math.min(...minAmounts) : null;
+      return {
       id: `sub_${a.id}`,
       source: 'subscription' as const,
       house_nm: a.house_nm || '',
@@ -169,8 +176,8 @@ async function fetchAptData() {
       house_type_info: a.house_type_info || null,
       unsold_count: null as number | null,
       mvn_prearnge_ym: a.mvn_prearnge_ym || null,
-      sale_price_min: null as number | null,
-      sale_price_max: null as number | null,
+      sale_price_min: extractedMin,
+      sale_price_max: extractedMax,
       constructor_nm: a.constructor_nm || a.mdatrgbn_nm || null,
       pblanc_url: a.pblanc_url || null,
       contact_tel: null as string | null,
@@ -178,7 +185,7 @@ async function fetchAptData() {
       link_type: 'apt' as const,
       created_at: a.fetched_at || a.created_at || null,
       // 강화 필드
-      competition_rate: competitionMap[a.house_manage_no] || null,
+      competition_rate: competitionMap[a.house_manage_no] || a.competition_rate_1st || null,
       rcept_bgnde: a.rcept_bgnde || null,
       rcept_endde: a.rcept_endde || null,
       przwner_presnatn_de: a.przwner_presnatn_de || null,
@@ -186,14 +193,21 @@ async function fetchAptData() {
       cntrct_cncls_endde: a.cntrct_cncls_endde || null,
       nearby_avg_price: regionAvgPriceMap[normalizeRegion(a.region_nm || '')] || null,
       // PDF 파싱 + 데이터 강화 필드
+      price_per_pyeong_avg: a.price_per_pyeong_avg || null,
+      acquisition_tax_est: a.acquisition_tax_est || null,
+      down_payment_pct: a.down_payment_pct || null,
+      general_supply_total: a.general_supply_total || null,
+      special_supply_total: a.special_supply_total || null,
       brand_name: a.brand_name || null,
       project_type: a.project_type || null,
       developer_nm: a.developer_nm || null,
       loan_rate: a.loan_rate || null,
       is_regulated_area: a.is_regulated_area || false,
       total_households: a.total_households || null,
+      transfer_limit_years: a.transfer_limit_years || null,
       address: a.hssply_adres || a.supply_addr || '',
-    }));
+    };
+    });
 
   // 소스2: 미분양 (준공 후 포함)
   // 소스2: 미분양 (개별 단지만 — "OO시 미분양" 같은 시군구 통계는 제외)

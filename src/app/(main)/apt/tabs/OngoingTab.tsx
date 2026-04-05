@@ -158,7 +158,19 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
         const isPremium = !!premiumMatch;
 
         const linkH = `/apt/${encodeURIComponent(generateAptSlug(o.house_nm) || String(o.link_id))}`;
-        const ppAvg = (o as any).price_per_pyeong_avg;
+        // 평당가: DB 값 우선, 없으면 house_type_info에서 계산
+        const dbPpAvg = (o as any).price_per_pyeong_avg;
+        const ppAvg = dbPpAvg || (() => {
+          const hti = Array.isArray(o.house_type_info) ? o.house_type_info : [];
+          const valid = hti.filter((t: any) => t.lttot_top_amount > 0 && t.type);
+          if (valid.length === 0) return null;
+          const sum = valid.reduce((s: number, t: any) => {
+            const area = parseFloat(String(t.type).replace(/[A-Za-z]/g, '')) || 84;
+            const pyeong = area / 3.3058;
+            return s + (t.lttot_top_amount / pyeong);
+          }, 0);
+          return Math.round(sum / valid.length);
+        })();
         const taxEst = (o as any).acquisition_tax_est;
         const downPct = (o as any).down_payment_pct;
         const mvnYm = o.mvn_prearnge_ym;
@@ -192,14 +204,14 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
               </div>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 1, margin: '0 10px 8px', background: 'var(--border)', borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border)' }}>
-              <div style={kS}><div style={kL}>분양가</div><div style={kV(priceStr ? 'var(--brand)' : 'var(--text-tertiary)')}>{priceStr || '미정'}</div></div>
-              <div style={kS}><div style={kL}>평당가</div><div style={kV(ppAvg ? 'var(--accent-purple)' : 'var(--text-tertiary)')}>{ppAvg ? fmtP(ppAvg) : '-'}</div></div>
-              <div style={kS}><div style={kL}>{taxEst ? '취득세' : '세대수'}</div><div style={kV(taxEst ? 'var(--accent-yellow)' : 'var(--text-primary)')}>{taxEst ? `~${fmtP(taxEst)}` : (o.total_supply || '-')}</div></div>
-              <div style={kS}><div style={kL}>입주예정</div><div style={kV(mvnLabel ? 'var(--accent-green)' : 'var(--text-tertiary)')}>{mvnLabel || '-'}</div></div>
-              <div style={kS}><div style={kL}>세대수</div><div style={kV('var(--text-primary)')}>{(o.total_supply || 0) > 0 ? o.total_supply!.toLocaleString() : '확인중'}</div></div>
+              <div style={kS}><div style={kL}>분양가</div><div style={kV(priceStr ? 'var(--brand)' : 'var(--text-tertiary)')}>{priceStr || (isUnsold ? '문의' : '공고확인')}</div></div>
+              <div style={kS}><div style={kL}>평당가</div><div style={kV(ppAvg ? 'var(--accent-purple)' : 'var(--text-tertiary)')}>{ppAvg ? fmtP(ppAvg) : (priceStr ? '계산중' : '공고확인')}</div></div>
+              <div style={kS}><div style={kL}>{taxEst ? '취득세' : '세대수'}</div><div style={kV(taxEst ? 'var(--accent-yellow)' : 'var(--text-primary)')}>{taxEst ? `~${fmtP(taxEst)}` : ((o.total_supply || 0) > 0 ? o.total_supply!.toLocaleString() : '공고확인')}</div></div>
+              <div style={kS}><div style={kL}>입주예정</div><div style={kV(mvnLabel ? 'var(--accent-green)' : 'var(--text-tertiary)')}>{mvnLabel || '미정'}</div></div>
+              <div style={kS}><div style={kL}>세대수</div><div style={kV('var(--text-primary)')}>{(o.total_supply || 0) > 0 ? o.total_supply!.toLocaleString() : '공고확인'}</div></div>
               <div style={kS}><div style={kL}>계약금</div><div style={kV('var(--text-primary)')}>{downPct ? `${downPct}%` : '10%'}</div></div>
-              <div style={kS}><div style={kL}>시공사</div><div style={kV('var(--text-primary)')}>{o.constructor_nm ? o.constructor_nm.split('(')[0].trim().slice(0, 6) : '-'}</div></div>
-              <div style={kS}><div style={kL}>{o.daysToMove ? 'D-입주' : '경쟁률'}</div><div style={kV(o.daysToMove ? 'var(--accent-yellow)' : 'var(--text-tertiary)')}>{o.daysToMove ? `D-${o.daysToMove}` : (o.competition_rate ? `${o.competition_rate}:1` : '-')}</div></div>
+              <div style={kS}><div style={kL}>시공사</div><div style={kV('var(--text-primary)')}>{o.constructor_nm ? o.constructor_nm.split('(')[0].trim().slice(0, 6) : '미공개'}</div></div>
+              <div style={kS}><div style={kL}>{o.daysToMove ? 'D-입주' : o.competition_rate ? '경쟁률' : o.rcept_bgnde ? 'D-접수' : '경쟁률'}</div><div style={kV(o.daysToMove ? 'var(--accent-yellow)' : o.competition_rate ? 'var(--accent-green)' : o.rcept_bgnde ? 'var(--brand)' : 'var(--text-tertiary)')}>{o.daysToMove ? `D-${o.daysToMove}` : o.competition_rate ? `${o.competition_rate}:1` : (() => { if (!o.rcept_bgnde) return '접수전'; const diff = Math.ceil((new Date(o.rcept_bgnde).getTime() - Date.now()) / 86400000); return diff > 0 ? `D-${diff}` : '마감'; })()}</div></div>
             </div>
             <div style={{ padding: '6px 12px 10px', borderTop: '1px solid var(--border)', marginTop: 2 }}>
               <div style={{ display: 'flex', position: 'relative' }}>
