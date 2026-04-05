@@ -1,7 +1,9 @@
 'use client';
 import { useState, useMemo, useCallback } from 'react';
+import Link from 'next/link';
 import type { CalcMeta, CalcInput } from '@/lib/calc/registry';
 import { FORMULAS, type CalcResult } from '@/lib/calc/formulas';
+import { useAuth } from '@/components/AuthProvider';
 
 const card: React.CSSProperties = { background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20, marginBottom: 14 };
 const label: React.CSSProperties = { fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', display: 'block', marginBottom: 6 };
@@ -104,6 +106,7 @@ function InputField({ input, value, onChange, values }: { input: CalcInput; valu
 }
 
 export default function CalcEngine({ calc }: { calc: CalcMeta }) {
+  const { userId } = useAuth();
   const [values, setValues] = useState<Record<string, number | string>>(() => {
     const init: Record<string, number | string> = {};
     for (const input of calc.inputs) init[input.id] = input.default;
@@ -165,6 +168,31 @@ export default function CalcEngine({ calc }: { calc: CalcMeta }) {
               결과 복사
             </button>
           </div>
+        </div>
+      )}
+
+      {/* 비로그인 회원가입 유도 CTA */}
+      {result && !userId && (
+        <div data-nudge="context-cta" style={{
+          background: 'linear-gradient(135deg, rgba(59,123,246,0.08), rgba(59,123,246,0.03))',
+          border: '1px solid rgba(59,123,246,0.2)', borderRadius: 12, padding: '16px 20px', marginBottom: 14,
+          display: 'flex', alignItems: 'center', gap: 14,
+        }}>
+          <div style={{ fontSize: 28, flexShrink: 0 }}>📊</div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 3 }}>
+              계산 결과를 저장하고 비교해보세요
+            </div>
+            <div style={{ fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+              회원가입하면 계산 이력 관리, 맞춤 계산기 추천, 부동산·주식 실시간 정보를 받을 수 있어요.
+            </div>
+          </div>
+          <Link href={`/login?redirect=/calc/${calc.category}/${calc.slug}`} style={{
+            padding: '8px 16px', borderRadius: 8, background: 'var(--brand)', color: '#fff',
+            fontSize: 12, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0,
+          }}>
+            3초 가입
+          </Link>
         </div>
       )}
 

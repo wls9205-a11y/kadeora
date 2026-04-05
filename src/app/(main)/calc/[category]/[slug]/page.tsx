@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { CALC_REGISTRY, CATEGORIES, findCalc, getCategoryLabel } from '@/lib/calc/registry';
 import CalcEngine from '@/components/calc/CalcEngine';
+import CalcSignupCTA from '@/components/calc/CalcSignupCTA';
 import type { Metadata } from 'next';
 import { SITE_URL } from '@/lib/constants';
 import { notFound } from 'next/navigation';
@@ -149,6 +150,9 @@ export default async function CalcPage({ params }: { params: Promise<{ category:
           </div>
         </div>
       )}
+
+      {/* 회원가입 유도 CTA */}
+      <CalcSignupCTA calcSlug={calc.slug} category={category} />
 
       {/* 면책 + 출처 */}
       <div style={{ fontSize: 11, color: 'var(--text-tertiary)', textAlign: 'center', lineHeight: 1.6, marginTop: 16, paddingBottom: 40 }}>
