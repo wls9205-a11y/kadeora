@@ -137,3 +137,27 @@
 | 분양사이트 | 5,738 |
 | 단지백과 | 34,500 |
 
+
+## 세션 72 보안 전수 수정 — 34파일 102줄 변경
+
+### Phase 1: Critical 보안 (완료)
+| # | 항목 | Before | After |
+|---|------|--------|-------|
+| 1-1 | 무인증 Admin API | 2개 (blog-enrich, verify-households) | **requireAdmin 적용** |
+| 1-2 | 하드코딩 토큰 | kd-reparse-2026 (5개 API) | **완전 제거 (0건)** |
+| 1-3 | RLS 미적용 | 5개 테이블 | **136/136 (100%)** |
+| 1-4 | is_admin 미확인 | 14개 admin API | **49/54 보호 (나머지 5 CRON_SECRET)** |
+| 1-5 | sanitizeHtml | regex 기반 | **img/svg/주석 패턴 추가 강화** |
+
+### Phase 2: High 우선순위 (완료)
+| # | 항목 | Before | After |
+|---|------|--------|-------|
+| 2-1 | sanitize 미적용 | 10개 API | **타입강제+sanitizeText+sanitizeId** |
+| 2-2 | rate limit 없음 | blog/bookmark, blog/helpful | **rateLimit 적용** |
+| 2-3 | maxDuration 없음 | naver-complex-sync 504 | **120초 설정** |
+| 2-5 | 중복 크론 | 99개 (2개 중복) | **97개 (중복 제거)** |
+| 2-7 | error.message 노출 | 3개 API | **일반 메시지로 교체** |
+
+### 추가 개선 (선조치)
+- 프로필 페이지: is_admin, is_banned, is_seed 필드 노출 제거
+- popup-ads: 복잡한 인증 로직 → requireAdmin 단일화
