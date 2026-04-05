@@ -198,9 +198,9 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                       </div>
                     ) : null}
                     {apt.competition_rate_2nd != null && Number(apt.competition_rate_2nd) > 0 && <span style={{ fontSize: 8, color: 'var(--text-tertiary)' }}>2순위 {Number(apt.competition_rate_2nd).toFixed(1)}:1</span>}
-                    <button aria-label="즐겨찾기" onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleWatchlist('subscription', String(apt.id)); }} style={{ fontSize: 16, background: watchlist.has(`subscription:${apt.id}`) ? 'var(--accent-yellow-bg)' : 'transparent', border: watchlist.has(`subscription:${apt.id}`) ? '1px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '2px 5px', cursor: 'pointer', lineHeight: 1 }}>
-                      {watchlist.has(`subscription:${apt.id}`) ? '⭐' : '☆'}
-                    </button>
+                    <a aria-label="관심등록" href={`/apt/${encodeURIComponent(generateAptSlug(apt.house_nm) || apt.house_manage_no || String(apt.id))}#interest-section`} onClick={(e) => { e.stopPropagation(); }} style={{ fontSize: 16, background: 'transparent', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '2px 5px', cursor: 'pointer', lineHeight: 1, textDecoration: 'none' }}>
+                      ☆
+                    </a>
                   </div>
                 </div>
 
