@@ -62,7 +62,6 @@ export default async function CalcPage({ params }: { params: Promise<{ category:
         description: calc.description, datePublished: '2026-01-15', dateModified: calc.lastUpdated,
         provider: { '@type': 'Organization', name: '카더라', url: SITE_URL },
         offers: { '@type': 'Offer', price: '0', priceCurrency: 'KRW' },
-        aggregateRating: { '@type': 'AggregateRating', ratingValue: '4.8', ratingCount: '127', bestRating: '5' },
       })}} />
       {/* JSON-LD: FAQPage */}
       {calc.faqs.length > 0 && (

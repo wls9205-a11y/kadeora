@@ -540,7 +540,7 @@ export default function DashboardSection() {
             <div style={{ borderTop: `1px solid ${C.border}`, paddingTop: 8, marginTop: 8, display: 'flex', flexDirection: 'column', gap: 'var(--sp-xs)' }}>
               {[
                 { label: 'JSON-LD', val: '4종 (WebApp+FAQ+HowTo+Breadcrumb)', ok: true },
-                { label: 'AggregateRating', val: '4.8/5 (127건)', ok: true },
+                { label: 'AggregateRating', val: '제거됨 (스팸 방지)', ok: true },
                 { label: '회원가입 CTA', val: '결과CTA + 하단배너 (비로그인)', ok: true },
                 { label: 'OG 이미지', val: '이모지 포함 1200×630 + 630×630', ok: true },
               ].map(r => (

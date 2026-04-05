@@ -10,6 +10,7 @@ Allow: /feed/
 Allow: /stock/
 Allow: /apt/
 Allow: /blog/
+Allow: /calc/
 Allow: /daily/
 Allow: /discuss
 Allow: /apt/data
@@ -31,6 +32,7 @@ User-agent: Googlebot
 Allow: /
 Allow: /apt/
 Allow: /blog/
+Allow: /calc/
 Allow: /api/og
 Allow: /images/
 Crawl-delay: 0
@@ -49,6 +51,7 @@ User-agent: Yeti
 Allow: /
 Allow: /apt/
 Allow: /blog/
+Allow: /calc/
 Allow: /feed.xml
 Allow: /api/og
 Allow: /api/og-square
@@ -63,6 +66,7 @@ User-agent: Bingbot
 Allow: /
 Allow: /apt/
 Allow: /blog/
+Allow: /calc/
 Allow: /api/og
 Allow: /api/og-square
 Allow: /images/
@@ -76,6 +80,7 @@ User-agent: DaumCrawler
 Allow: /
 Allow: /apt/
 Allow: /blog/
+Allow: /calc/
 Allow: /api/og
 Allow: /images/
 Crawl-delay: 1
@@ -88,6 +93,7 @@ User-agent: ZumBot
 Allow: /
 Allow: /apt/
 Allow: /blog/
+Allow: /calc/
 Crawl-delay: 2
 Disallow: /admin/
 Disallow: /api/
@@ -96,18 +102,21 @@ Disallow: /api/
 User-agent: GPTBot
 Allow: /apt/
 Allow: /blog/
+Allow: /calc/
 Disallow: /admin/
 Disallow: /api/
 
 User-agent: Claude-Web
 Allow: /apt/
 Allow: /blog/
+Allow: /calc/
 Disallow: /admin/
 Disallow: /api/
 
 User-agent: PerplexityBot
 Allow: /apt/
 Allow: /blog/
+Allow: /calc/
 Disallow: /admin/
 Disallow: /api/
 

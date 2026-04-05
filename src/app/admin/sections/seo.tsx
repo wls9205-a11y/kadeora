@@ -105,7 +105,7 @@ export default function SEOSection() {
                 { label: 'JSON-LD FAQPage', val: `${total}/${total}`, ok: true },
                 { label: 'JSON-LD HowTo (3단계)', val: `${total}/${total}`, ok: true },
                 { label: 'JSON-LD BreadcrumbList', val: `${total}/${total}`, ok: true },
-                { label: 'AggregateRating 4.8/5', val: `${total}/${total}`, ok: true },
+                { label: 'AggregateRating', val: '제거 (실리뷰 필요)', ok: true },
                 { label: 'OG 이미지 이모지 (1200×630+630×630)', val: `${withEmoji}/${total}`, ok: withEmoji === total },
                 { label: 'Meta desc "무료·회원가입 불필요"', val: `${total}/${total}`, ok: true },
                 { label: 'naver:written_time + daum:site_name', val: `${total}/${total}`, ok: true },
