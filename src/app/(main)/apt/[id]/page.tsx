@@ -490,6 +490,18 @@ export default async function AptUnifiedPage({ params }: Props) {
         </a>
         <ShareButtons title={`${name} ${tLabel[sType]} — 분양가·청약일정·모집공고 한눈에`} postId={slug} />
         {sub && <AptBookmarkButton aptId={sub.id} isLoggedIn={!!aptUser} />}
+        <a
+          href="#interest-section"
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: 4,
+            padding: '6px 12px', borderRadius: 'var(--radius-sm)',
+            background: 'rgba(239,68,68,0.08)', color: '#EF4444', textDecoration: 'none',
+            fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap', flexShrink: 0,
+            height: 32, border: '1px solid rgba(239,68,68,0.2)',
+          }}
+        >
+          ❤️ 관심등록
+        </a>
         <div style={{ flex: 1 }} />
         <span style={{ fontSize: 10, color: 'var(--text-tertiary)', whiteSpace: 'nowrap' }}>공유 +5P</span>
       </div>
@@ -1543,7 +1555,7 @@ export default async function AptUnifiedPage({ params }: Props) {
       </div>
 
       {/* 관심단지 등록 CTA */}
-      <div id="interest-section">
+      <div id="interest-section" style={{ scrollMarginTop: 60 }}>
         {site?.id && <InterestRegistration siteId={site.id} siteName={name} interestCount={site.interest_count || 0} slug={slug} totalSupply={site?.total_units || sub?.tot_supply_hshld_co || null} />}
       </div>
 
