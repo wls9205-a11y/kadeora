@@ -1245,3 +1245,291 @@ export function burdenGift(v: V): CalcResult {
   const cgt = Math.round(calcProgressiveTax(cgtBase, INCOME_TAX_BRACKETS));
   return { main: { label: '세금 합계', value: fmt(Math.max(0, giftTaxAmt) + Math.max(0, cgt)) }, details: [{ label: '증여세', value: fmt(Math.max(0, giftTaxAmt)) }, { label: '양도소득세 (채무 비율)', value: fmt(Math.max(0, cgt)) }, { label: '증여 부분', value: fmt(giftPortion) }, { label: '양도 부분 (채무)', value: fmt(debt) }] };
 }
+
+// ═══ 4차 최종 배치 공식 ═══
+
+export function capitalGainsRights(v: V): CalcResult {
+  const gain = n(v.sellPrice) - n(v.buyPrice);
+  if (gain <= 0) return { main: { label: '양도소득세', value: '0원' }, details: [] };
+  const hold = n(v.holdYears);
+  const rate = hold < 1 ? 0.70 : hold < 2 ? 0.60 : 0;
+  const taxBase = Math.max(0, gain - 2500000);
+  const tax = rate > 0 ? Math.round(taxBase * rate) : Math.round(calcProgressiveTax(taxBase, INCOME_TAX_BRACKETS));
+  return { main: { label: '양도소득세', value: fmt(Math.round(tax * 1.1)) }, details: [{ label: '양도차익', value: fmt(gain) }, { label: '적용세율', value: rate > 0 ? pct(rate) + ' (단기)' : '누진세율' }] };
+}
+export function registrationLicenseTax(v: V): CalcResult {
+  const price = n(v.price);
+  const rate = v.type === 'transfer' ? 0.02 : 0.002;
+  const tax = Math.round(price * rate);
+  const edu = Math.round(tax * 0.2);
+  return { main: { label: '등록면허세', value: fmt(tax + edu) }, details: [{ label: '등록면허세', value: fmt(tax) }, { label: '교육세', value: fmt(edu) }] };
+}
+export function deemedRent(v: V): CalcResult {
+  const deposit = n(v.deposit); const threshold = n(v.threshold);
+  const excess = Math.max(0, deposit - threshold);
+  const deemed = Math.round(excess * 0.021); // 정기예금 이자율 (2.1%)
+  return { main: { label: '간주임대료', value: fmt(deemed) }, details: [{ label: '3억 초과 보증금', value: fmt(excess) }, { label: '적용이자율', value: '2.1%' }] };
+}
+export function oneHouseCheck(v: V): CalcResult {
+  const houses = n(v.houseCount); const hold = n(v.holdYears); const live = n(v.liveYears);
+  const price = n(v.sellPrice); const regulated = v.regulated === 'yes';
+  if (houses > 1) return { main: { label: '비과세 불가', value: '다주택 보유', color: 'var(--accent-red)' }, details: [{ label: '보유 주택수', value: `${houses}채` }] };
+  const holdOk = hold >= 2; const liveOk = regulated ? live >= 2 : true; const priceOk = price <= 1200000000;
+  const exempt = holdOk && liveOk;
+  return {
+    main: { label: exempt ? '비과세 해당' : '비과세 불가', value: exempt ? (priceOk ? '전액 비과세' : '12억 초과분 과세') : '요건 미충족', color: exempt ? 'var(--accent-green)' : 'var(--accent-red)' },
+    details: [{ label: '보유 2년+', value: holdOk ? '충족' : '미충족' }, { label: '거주 2년+ (조정지역)', value: regulated ? (liveOk ? '충족' : '미충족') : '해당없음' }, { label: '양도가 12억 이하', value: priceOk ? '충족' : '초과' }],
+  };
+}
+export function businessIncomeTax(v: V): CalcResult {
+  const income = n(v.revenue) - n(v.expenses);
+  const taxBase = Math.max(0, income - 5000000);
+  const tax = Math.round(calcProgressiveTax(taxBase, INCOME_TAX_BRACKETS));
+  return { main: { label: '사업소득세', value: fmt(Math.round(tax * 1.1)) }, details: [{ label: '사업소득', value: fmt(income) }, { label: '과세표준', value: fmt(taxBase) }] };
+}
+export function pensionIncomeTax(v: V): CalcResult {
+  const annual = n(v.annualPension); const age = n(v.age);
+  if (v.type === 'private') {
+    const rate = age >= 80 ? 0.033 : age >= 70 ? 0.044 : 0.055;
+    const tax = Math.round(annual * rate);
+    return { main: { label: '연금소득세', value: fmt(tax) }, details: [{ label: '적용세율', value: pct(rate) }] };
+  }
+  const deduction = Math.min(annual * 0.4, 9000000);
+  const taxBase = Math.max(0, annual - deduction - 5000000);
+  const tax = Math.round(calcProgressiveTax(taxBase, INCOME_TAX_BRACKETS));
+  return { main: { label: '연금소득세', value: fmt(tax) }, details: [{ label: '연금소득공제', value: fmt(Math.round(deduction)) }] };
+}
+export function dividendIncomeTax(v: V): CalcResult {
+  const div = n(v.dividend);
+  const rate = v.market === 'kr' ? 0.154 : 0.15;
+  const tax = Math.round(div * rate);
+  return { main: { label: '배당소득세', value: fmt(tax) }, details: [{ label: '세후 수령', value: fmt(div - tax) }, { label: '세율', value: pct(rate) }] };
+}
+export function majorShareholderCgt(v: V): CalcResult {
+  const profit = n(v.profit); const amount = n(v.amount);
+  const shortRate = v.holdPeriod === 'short' ? 0.33 : 0;
+  if (shortRate > 0) { const tax = Math.round(profit * shortRate); return { main: { label: '양도소득세', value: fmt(Math.round(tax * 1.1)) }, details: [{ label: '세율', value: '33% (1년 미만)' }] }; }
+  const base300 = Math.min(profit, 300000000);
+  const over300 = Math.max(0, profit - 300000000);
+  const tax = Math.round(base300 * 0.22 + over300 * 0.275);
+  return { main: { label: '양도소득세', value: fmt(Math.round(tax * 1.1)) }, details: [{ label: '3억 이하', value: `${fmt(base300)} × 22%` }, { label: '3억 초과', value: `${fmt(over300)} × 27.5%` }] };
+}
+export function foreignDividendCredit(v: V): CalcResult {
+  const foreign = n(v.foreignTax); const domestic = n(v.domesticTax);
+  const credit = Math.min(foreign, domestic);
+  return { main: { label: '외국납부세액공제', value: fmt(credit) }, details: [{ label: '외국 원천세', value: fmt(foreign) }, { label: '국내 산출세액', value: fmt(domestic) }, { label: '한도', value: '국내 산출세액 이내' }] };
+}
+export function fisTaxSim(v: V): CalcResult {
+  const profit = n(v.profit);
+  const base = Math.max(0, profit - 50000000);
+  const tax300 = Math.min(base, 300000000) * 0.22;
+  const taxOver = Math.max(0, base - 300000000) * 0.275;
+  const total = Math.round((tax300 + taxOver) * 1.1);
+  return { main: { label: '금투세 (시뮬)', value: profit <= 50000000 ? '0원 (비과세)' : fmt(total) }, details: [{ label: '5천만원 공제 후', value: fmt(base) }, { label: '참고', value: '시행 유예 중' }] };
+}
+export function familyBusiness(v: V): CalcResult {
+  const value = n(v.businessValue); const years = n(v.years);
+  const maxDeduction = years >= 30 ? 60000000000 : years >= 20 ? 40000000000 : years >= 15 ? 30000000000 : 20000000000;
+  const deduction = Math.min(value, maxDeduction);
+  let normalTax = 0;
+  for (const b of GIFT_TAX_BRACKETS) { if (value <= b.max) { normalTax = Math.round(value * b.rate - b.deduction); break; } }
+  let reducedTax = 0;
+  const reducedBase = Math.max(0, value - deduction);
+  for (const b of GIFT_TAX_BRACKETS) { if (reducedBase <= b.max) { reducedTax = Math.round(reducedBase * b.rate - b.deduction); break; } }
+  return { main: { label: '상속세 절감', value: fmt(Math.max(0, normalTax - reducedTax)) }, details: [{ label: '가업상속공제', value: fmt(deduction) }, { label: '공제 후 상속세', value: fmt(Math.max(0, reducedTax)) }] };
+}
+export function generationSkip(v: V): CalcResult {
+  const amount = n(v.amount);
+  const exemption = 50000000;
+  const taxBase = Math.max(0, amount - exemption);
+  let baseTax = 0;
+  for (const b of GIFT_TAX_BRACKETS) { if (taxBase <= b.max) { baseTax = taxBase * b.rate - b.deduction; break; } }
+  const surcharged = Math.round(baseTax * 1.3);
+  return { main: { label: '증여세 (할증)', value: fmt(Math.max(0, surcharged)) }, details: [{ label: '기본 증여세', value: fmt(Math.round(Math.max(0, baseTax))) }, { label: '30% 할증', value: fmt(Math.round(Math.max(0, surcharged - baseTax))) }] };
+}
+export function withholdingCalc(v: V): CalcResult {
+  const amount = n(v.amount);
+  const rates: Record<string, { rate: number; label: string }> = { salary: { rate: 0, label: '간이세액표 적용' }, business: { rate: 0.033, label: '3.3%' }, other: { rate: 0.088, label: '8.8%' }, interest: { rate: 0.154, label: '15.4%' } };
+  const r = rates[v.type as string] || rates.business;
+  if (v.type === 'salary') return { main: { label: '원천징수세액', value: '간이세액표 참조' }, details: [{ label: '계산기 이용', value: '근로소득세 계산기 참조' }] };
+  const tax = Math.round(amount * r.rate);
+  return { main: { label: '원천징수세액', value: fmt(tax) }, details: [{ label: '세율', value: r.label }, { label: '세후 수령', value: fmt(amount - tax) }] };
+}
+export function stampTax(v: V): CalcResult {
+  const amount = n(v.contractAmount);
+  const tax = amount > 1000000000 ? 350000 : amount > 500000000 ? 150000 : amount > 100000000 ? 70000 : amount > 50000000 ? 40000 : amount > 10000000 ? 20000 : 0;
+  return { main: { label: '인지세', value: fmt(tax) }, details: [{ label: '계약금액', value: fmt(amount) }] };
+}
+export function simpleBookkeeping(v: V): CalcResult {
+  const income = n(v.revenue) - n(v.expenses);
+  return { main: { label: '소득금액', value: fmt(Math.max(0, income)) }, details: [{ label: '총수입', value: fmt(n(v.revenue)) }, { label: '필요경비', value: fmt(n(v.expenses)) }] };
+}
+export function ltvCalc(v: V): CalcResult {
+  const price = n(v.housePrice); const ltv = Number(v.ltv) / 100; const existing = n(v.existingLoan);
+  const maxLoan = Math.max(0, Math.round(price * ltv - existing));
+  return { main: { label: '대출 가능액', value: fmt(maxLoan) }, details: [{ label: 'LTV', value: pct(ltv) }, { label: '기존 대출 차감', value: fmt(existing) }] };
+}
+export function housingBond(v: V): CalcResult {
+  const price = n(v.housePrice);
+  const rate = v.region === 'metro' ? 0.05 : 0.03;
+  const bondAmount = Math.round(price * rate);
+  const discountRate = 0.04; // 채권 할인율 약 4%
+  const actualCost = Math.round(bondAmount * discountRate);
+  return { main: { label: '채권 매입 비용', value: fmt(actualCost) }, details: [{ label: '채권 매입액', value: fmt(bondAmount) }, { label: '할인율', value: pct(discountRate) }] };
+}
+export function farBcr(v: V): CalcResult {
+  const land = n(v.landArea); const building = n(v.buildingArea); const total = n(v.totalFloorArea);
+  const bcr = land > 0 ? (building / land) * 100 : 0;
+  const far = land > 0 ? (total / land) * 100 : 0;
+  return { main: { label: '건폐율 / 용적률', value: `${bcr.toFixed(1)}% / ${far.toFixed(1)}%` }, details: [{ label: '건폐율', value: `${bcr.toFixed(1)}%` }, { label: '용적률', value: `${far.toFixed(1)}%` }] };
+}
+export function auctionProfit(v: V): CalcResult {
+  const appraisal = n(v.appraisal); const bid = n(v.bidPrice); const repair = n(v.repairCost);
+  const totalCost = bid + repair + Math.round(bid * 0.05); // 취득세 등 5%
+  const profit = appraisal - totalCost;
+  const roi = totalCost > 0 ? (profit / totalCost) * 100 : 0;
+  return { main: { label: '예상 수익률', value: `${roi.toFixed(1)}%` }, details: [{ label: '총 투자비', value: fmt(totalCost) }, { label: '예상 수익', value: fmt(profit) }, { label: '낙찰가율', value: `${((bid / appraisal) * 100).toFixed(1)}%` }] };
+}
+export function dripSim(v: V): CalcResult {
+  const inv = n(v.investment); const yr = n(v.yieldRate) / 100; const gr = n(v.growthRate) / 100;
+  const years = n(v.years);
+  let assets = inv; let currentYield = yr;
+  const data: number[] = [];
+  for (let i = 1; i <= years; i++) {
+    const dividend = assets * currentYield;
+    assets += dividend; // 재투자
+    currentYield *= (1 + gr);
+    data.push(Math.round(assets));
+  }
+  const totalInvested = inv;
+  return { main: { label: '최종 자산', value: fmt(Math.round(assets)) }, details: [{ label: '원금', value: fmt(totalInvested) }, { label: '수익', value: fmt(Math.round(assets - totalInvested)) }, { label: `${years}년 후 배당수익률`, value: pct(currentYield) }] };
+}
+export function shortSelling(v: V): CalcResult {
+  const sell = n(v.sellPrice); const buy = n(v.buyPrice); const qty = n(v.quantity);
+  const borrow = n(v.borrowFee) / 100; const days = n(v.days);
+  const gross = (sell - buy) * qty;
+  const fee = Math.round(sell * qty * borrow * days / 365);
+  const commission = Math.round((sell + buy) * qty * 0.00015);
+  return { main: { label: '공매도 순수익', value: fmt(gross - fee - commission) }, details: [{ label: '매도차익', value: fmt(gross) }, { label: '대차료', value: fmt(fee) }, { label: '수수료', value: fmt(commission) }] };
+}
+export function rebalanceCalc(v: V): CalcResult {
+  const total = n(v.totalAsset);
+  const stockCurrent = total * n(v.stock) / 100;
+  const stockTarget = total * n(v.stockTarget) / 100;
+  const bondCurrent = total * n(v.bond) / 100;
+  const bondTarget = total * n(v.bondTarget) / 100;
+  const stockDiff = stockTarget - stockCurrent;
+  const bondDiff = bondTarget - bondCurrent;
+  return { main: { label: '리밸런싱 필요', value: stockDiff > 0 ? `주식 ${fmt(Math.round(stockDiff))} 매수` : `주식 ${fmt(Math.round(Math.abs(stockDiff)))} 매도` }, details: [{ label: '주식 조정', value: `${stockDiff > 0 ? '+' : ''}${fmt(Math.round(stockDiff))}` }, { label: '채권 조정', value: `${bondDiff > 0 ? '+' : ''}${fmt(Math.round(bondDiff))}` }] };
+}
+export function severanceCalc(v: V): CalcResult {
+  return { main: { label: '해고예고수당', value: fmt(n(v.monthlySalary)) }, details: [{ label: '30일분 통상임금', value: fmt(n(v.monthlySalary)) }] };
+}
+export function minimumWage(v: V): CalcResult {
+  const minWage = 10360; // 2026 예상
+  const hours = n(v.weeklyHours);
+  const weeklyPaidHours = v.includeHoliday === 'yes' ? hours + hours / 5 : hours;
+  const monthlyHours = weeklyPaidHours * 52 / 12;
+  const monthly = Math.round(minWage * monthlyHours);
+  return { main: { label: '최저월급', value: fmt(monthly) }, details: [{ label: '최저시급', value: fmt(minWage) }, { label: '월 유급시간', value: `${monthlyHours.toFixed(1)}시간` }, { label: '연봉', value: fmt(monthly * 12) }] };
+}
+export function jeonseLoan(v: V): CalcResult {
+  const amount = n(v.loanAmount); const rate = n(v.rate) / 100;
+  const monthlyInterest = Math.round(amount * rate / 12);
+  return { main: { label: '월 이자', value: fmt(monthlyInterest) }, details: [{ label: '연 이자', value: fmt(Math.round(amount * rate)) }] };
+}
+export function refinanceCompare(v: V): CalcResult {
+  const bal = n(v.balance); const curr = n(v.currentRate) / 100; const newR = n(v.newRate) / 100;
+  const fee = n(v.refinanceFee);
+  const annualSaving = Math.round(bal * (curr - newR));
+  const breakEvenMonths = annualSaving > 0 ? Math.ceil(fee / (annualSaving / 12)) : 999;
+  return { main: { label: '연간 이자 절감', value: fmt(annualSaving) }, details: [{ label: '대환 수수료', value: fmt(fee) }, { label: '손익분기', value: `${breakEvenMonths}개월` }] };
+}
+export function creditLoanEst(v: V): CalcResult {
+  const income = n(v.annualIncome);
+  const multiplier: Record<string, number> = { '1': 3.0, '3': 2.5, '5': 2.0, '7': 1.0 };
+  const mult = multiplier[v.creditGrade as string] || 2.0;
+  const limit = Math.round(income * mult);
+  return { main: { label: '추정 한도', value: fmt(limit) }, details: [{ label: '연소득 대비', value: `${mult}배` }, { label: '참고', value: '실제 한도는 은행 심사 기준에 따라 다름' }] };
+}
+export function retirementExpense(v: V): CalcResult {
+  const monthly = n(v.monthlyExpense); const retire = n(v.retireAge);
+  const life = n(v.lifeExpectancy); const inf = n(v.inflation) / 100;
+  const years = life - retire;
+  let total = 0;
+  for (let i = 0; i < years; i++) total += monthly * 12 * Math.pow(1 + inf, i);
+  return { main: { label: '총 필요자금', value: fmt(Math.round(total)) }, details: [{ label: '은퇴 후 기간', value: `${years}년` }, { label: '월 생활비 (현재)', value: fmt(monthly) }, { label: `${years}년 후 월 생활비`, value: fmt(Math.round(monthly * Math.pow(1 + inf, years))) }] };
+}
+export function pensionVsLump(v: V): CalcResult {
+  const total = n(v.totalAmount); const years = n(v.pensionYears); const ret = n(v.investReturn) / 100;
+  const monthlyPension = total / (years * 12);
+  const totalPension = monthlyPension * 12 * years;
+  const lumpInvested = total * Math.pow(1 + ret, years);
+  return { main: { label: lumpInvested > totalPension ? '일시금+투자 유리' : '연금 수령 유리', value: fmt(Math.round(Math.abs(lumpInvested - totalPension))) + ' 차이' }, details: [{ label: '연금 총 수령', value: fmt(Math.round(totalPension)) }, { label: '일시금 투자 후', value: fmt(Math.round(lumpInvested)) }] };
+}
+export function isaConversion(v: V): CalcResult {
+  const transfer = Math.min(n(v.transferAmount), n(v.isaBalance));
+  const credit = Math.min(Math.round(transfer * 0.1), 3000000);
+  return { main: { label: '추가 세액공제', value: fmt(credit) }, details: [{ label: '전환 금액', value: fmt(transfer) }, { label: '한도', value: '전환액의 10%, 최대 300만원' }] };
+}
+export function carInsuranceEst(v: V): CalcResult {
+  const carAge = n(v.carAge); const age = n(v.driverAge); const price = n(v.carPrice); const safe = n(v.accidentFree);
+  const base = price * 0.035;
+  const ageFactor = age < 26 ? 1.5 : age < 30 ? 1.2 : age > 65 ? 1.3 : 1.0;
+  const carFactor = Math.max(0.5, 1 - carAge * 0.05);
+  const safeFactor = Math.max(0.7, 1 - safe * 0.05);
+  const est = Math.round(base * ageFactor * carFactor * safeFactor);
+  return { main: { label: '추정 보험료', value: fmt(est) }, details: [{ label: '참고', value: '실제 보험료는 보험사 견적 참조' }] };
+}
+export function fuelSaving(v: V): CalcResult {
+  const dist = n(v.distance); const eff1 = n(v.eff1); const eff2 = n(v.eff2); const price = n(v.fuelPrice);
+  const cost1 = Math.round(dist / eff1 * price);
+  const cost2 = Math.round(dist / eff2 * price);
+  return { main: { label: '연간 절감액', value: fmt(Math.abs(cost1 - cost2)) }, details: [{ label: '차량A 유류비', value: fmt(cost1) }, { label: '차량B 유류비', value: fmt(cost2) }] };
+}
+export function inflationCalc(v: V): CalcResult {
+  const amount = n(v.amount); const years = n(v.years); const inf = n(v.inflationRate) / 100;
+  const realValue = Math.round(amount / Math.pow(1 + inf, years));
+  return { main: { label: `${years}년 후 실질 가치`, value: fmt(realValue) }, details: [{ label: '명목 금액', value: fmt(amount) }, { label: '구매력 감소', value: fmt(amount - realValue) }] };
+}
+export function consolationMoney(v: V): CalcResult {
+  const years = n(v.marriageYears); const income = n(v.income);
+  const base: Record<string, number> = { low: 10000000, medium: 30000000, high: 50000000 };
+  const amount = Math.round((base[v.faultDegree as string] || 30000000) * (1 + years * 0.05) * Math.min(2, income / 50000000));
+  return { main: { label: '예상 위자료', value: fmt(amount) }, details: [{ label: '참고', value: '법원 판례 기반 추정치, 실제와 다를 수 있음' }] };
+}
+export function propertyDivision(v: V): CalcResult {
+  const total = n(v.totalAssets); const ratio = n(v.ratio) / 100;
+  return { main: { label: '분할 금액', value: fmt(Math.round(total * ratio)) }, details: [{ label: '공동재산', value: fmt(total) }, { label: '분할 비율', value: pct(ratio) }] };
+}
+export function statuteOfLimitations(v: V): CalcResult {
+  const start = v.startDate as string; const years = Number(v.type);
+  if (!start) return { main: { label: '소멸시효', value: '날짜 입력 필요' }, details: [] };
+  const d = new Date(start); d.setFullYear(d.getFullYear() + years);
+  const today = new Date(); const remain = Math.ceil((d.getTime() - today.getTime()) / 86400000);
+  return { main: { label: '소멸시효 만료', value: `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}` }, details: [{ label: '시효 기간', value: `${years}년` }, { label: '잔여', value: remain > 0 ? `${remain}일` : '만료됨' }] };
+}
+export function industrialAccident(v: V): CalcResult {
+  const wage = n(v.dailyWage); const days = n(v.restDays); const grade = Number(v.disabilityGrade);
+  const restPay = Math.round(wage * 0.7 * days);
+  const gradeMultiplier: Record<number, number> = { 0: 0, 14: 55, 12: 99, 10: 154, 7: 297, 4: 616, 1: 1474 };
+  const disabilityPay = Math.round(wage * (gradeMultiplier[grade] || 0));
+  return { main: { label: '보상금 추정', value: fmt(restPay + disabilityPay) }, details: [{ label: '휴업급여 (70%)', value: fmt(restPay) }, { label: '장해급여', value: fmt(disabilityPay) }] };
+}
+export function csatGrade(v: V): CalcResult {
+  const score = n(v.score);
+  // 영어는 절대등급
+  if (v.subject === 'english') {
+    const grades = [90, 80, 70, 60, 50, 40, 30, 20];
+    let grade = 9;
+    for (let i = 0; i < grades.length; i++) { if (score >= grades[i]) { grade = i + 1; break; } }
+    return { main: { label: '영어 등급', value: `${grade}등급` }, details: [{ label: '원점수', value: `${score}점` }] };
+  }
+  // 상대평가 근사
+  const grade = score >= 92 ? 1 : score >= 85 ? 2 : score >= 77 ? 3 : score >= 67 ? 4 : score >= 55 ? 5 : score >= 43 ? 6 : score >= 30 ? 7 : score >= 18 ? 8 : 9;
+  return { main: { label: '예상 등급', value: `${grade}등급` }, details: [{ label: '원점수', value: `${score}점` }, { label: '참고', value: '실제 등급컷은 시험별 상이' }] };
+}
+export function pointConvert(v: V): CalcResult {
+  const points = n(v.points); const ratio = n(v.ratio);
+  return { main: { label: '현금 가치', value: fmt(Math.round(points * ratio)) }, details: [{ label: '포인트', value: `${points.toLocaleString()}P` }, { label: '환산 비율', value: `1P = ${ratio}원` }] };
+}
