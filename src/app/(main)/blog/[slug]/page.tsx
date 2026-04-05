@@ -469,7 +469,16 @@ export default async function BlogDetailPage({ params }: Props) {
     // 빈 <p></p> 제거
     .replace(/<p>\s*<\/p>/g, '')
     // 연속 <br> 정리
-    .replace(/(<br\s*\/?>){3,}/g, '<br><br>');
+    .replace(/(<br\s*\/?>){3,}/g, '<br><br>')
+    // ── 다크모드 보호: 인라인 color/background-color 제거 ──
+    // AI 생성 콘텐츠에 style="color:#333" 같은 하드코딩 색상이 포함되면
+    // 다크모드(#050A18 배경)에서 텍스트가 보이지 않음
+    .replace(/\bcolor\s*:\s*#[0-9a-fA-F]{3,8}\s*;?/gi, '')
+    .replace(/\bcolor\s*:\s*(black|white|gray|grey|rgb\([^)]*\))\s*;?/gi, '')
+    .replace(/\bbackground-color\s*:\s*#[0-9a-fA-F]{3,8}\s*;?/gi, '')
+    .replace(/\bbackground-color\s*:\s*(white|black|gray|grey|rgb\([^)]*\))\s*;?/gi, '')
+    // style="" 빈 속성 정리
+    .replace(/\sstyle\s*=\s*"[\s;]*"/gi, '');
   
   htmlRaw = injectInternalLinks(htmlRaw);
   const htmlFull = enhanceBlogVisuals(htmlRaw, {

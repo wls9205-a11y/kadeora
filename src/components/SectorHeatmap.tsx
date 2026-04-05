@@ -12,7 +12,7 @@ interface Stock {
 }
 
 function getColor(pct: number, isKR: boolean): string {
-  if (pct === 0) return '#374151';
+  if (pct === 0) return '#6B7280';
   if (isKR) {
     if (pct >= 3) return 'var(--accent-red)';
     if (pct >= 1) return '#EF4444';
@@ -101,7 +101,7 @@ export default function SectorHeatmap({ stocks, isKR }: { stocks: Stock[]; isKR:
           {isKR ? '상승' : 'Up'}
         </span>
         <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-          <span style={{ width: 10, height: 10, borderRadius: 2, background: '#374151' }} />
+          <span style={{ width: 10, height: 10, borderRadius: 2, background: '#6B7280' }} />
           보합
         </span>
         <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
