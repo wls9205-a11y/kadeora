@@ -637,46 +637,7 @@ export default async function AptUnifiedPage({ params }: Props) {
         </div>
       )}
 
-      {/* 💳 납부 일정 타임라인 */}
-      {sub && (sub.down_payment_pct || sub.interim_count) && (() => {
-        const down = sub.down_payment_pct || 10;
-        const interim = sub.interim_count || 6;
-        const interimPct = sub.balance_pct ? (100 - down - sub.balance_pct) : 60;
-        const balance = sub.balance_pct || (100 - down - interimPct);
-        const steps = [
-          { label: '계약금', pct: down, color: '#3B82F6', icon: '📝', desc: '당첨 후 납부' },
-          { label: '중도금', pct: interimPct, color: '#8B5CF6', icon: '🏗️', desc: `${interim}회 분할` },
-          { label: '잔금', pct: balance, color: '#22C55E', icon: '🔑', desc: '입주 시 납부' },
-        ];
-        return (
-          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '14px 16px', marginBottom: 14 }}>
-            <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 12 }}>💳 납부 일정</div>
-            {/* 비율 바 */}
-            <div style={{ display: 'flex', height: 28, borderRadius: 6, overflow: 'hidden', marginBottom: 10 }}>
-              {steps.map((s, i) => (
-                <div key={i} style={{ flex: s.pct, background: s.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, color: '#fff', fontWeight: 700, borderRight: i < 2 ? '2px solid var(--bg-surface)' : 'none' }}>
-                  {s.pct}%
-                </div>
-              ))}
-            </div>
-            {/* 스텝 카드 */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
-              {steps.map((s, i) => (
-                <div key={i} style={{ textAlign: 'center', padding: '8px 4px', borderRadius: 'var(--radius-sm)', background: `${s.color}08`, border: `1px solid ${s.color}20` }}>
-                  <div style={{ fontSize: 16, marginBottom: 2 }}>{s.icon}</div>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: s.color }}>{s.label} {s.pct}%</div>
-                  <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginTop: 2 }}>{s.desc}</div>
-                </div>
-              ))}
-            </div>
-            {sub.loan_rate && (
-              <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 8, padding: '6px 8px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)' }}>
-                💡 중도금 대출: {sub.loan_rate}
-              </div>
-            )}
-          </div>
-        );
-      })()}
+      {/* 납부 일정 — 모집공고 핵심 요약 섹션 내부로 통합 (중복 제거) */}
 
       {/* 🏫 입지 분석 — 학군·교통 */}
       {sub && ((Array.isArray(sub.schools) && sub.schools.length > 0) || (Array.isArray(sub.stations) && sub.stations.length > 0) || sub.nearest_school || sub.nearest_station) && (
@@ -937,23 +898,7 @@ export default async function AptUnifiedPage({ params }: Props) {
             );
           })()}
 
-          {/* 분양 조건 체크리스트 */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)', gap: 6, marginBottom: 'var(--sp-md)' }}>
-            <div style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm)', background: sub.is_price_limit ? 'rgba(139,92,246,0.08)' : 'var(--bg-hover)', textAlign: 'center', border: `1px solid ${sub.is_price_limit ? 'rgba(139,92,246,0.2)' : 'var(--border)'}` }}>
-              <div style={{ fontSize: 16, marginBottom: 2 }}>{sub.is_price_limit ? '✓' : '✗'}</div>
-              <div style={{ fontSize: 10, fontWeight: 600, color: sub.is_price_limit ? '#8B5CF6' : 'var(--text-tertiary)' }}>분양가상한제</div>
-            </div>
-            <div style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm)', background: sub.transfer_limit ? 'rgba(251,191,36,0.08)' : 'var(--bg-hover)', textAlign: 'center', border: `1px solid ${sub.transfer_limit ? 'rgba(251,191,36,0.2)' : 'var(--border)'}` }}>
-              <div style={{ fontSize: 16, marginBottom: 2 }}>{sub.transfer_limit ? '✓' : '✗'}</div>
-              <div style={{ fontSize: 10, fontWeight: 600, color: sub.transfer_limit ? '#FBBF24' : 'var(--text-tertiary)' }}>전매제한</div>
-              {sub.transfer_limit && <div style={{ fontSize: 9, color: '#FBBF24', marginTop: 1 }}>{sub.transfer_limit}</div>}
-            </div>
-            <div style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm)', background: sub.residence_obligation ? 'rgba(248,113,113,0.08)' : 'var(--bg-hover)', textAlign: 'center', border: `1px solid ${sub.residence_obligation ? 'rgba(248,113,113,0.2)' : 'var(--border)'}` }}>
-              <div style={{ fontSize: 16, marginBottom: 2 }}>{sub.residence_obligation ? '✓' : '✗'}</div>
-              <div style={{ fontSize: 10, fontWeight: 600, color: sub.residence_obligation ? '#F87171' : 'var(--text-tertiary)' }}>거주의무</div>
-              {sub.residence_obligation && <div style={{ fontSize: 9, color: 'var(--accent-red)', marginTop: 1 }}>{sub.residence_obligation}</div>}
-            </div>
-          </div>
+          {/* 분양 조건 — RegulationBadges 컴포넌트로 상단에 표시 (중복 제거) */}
 
           {/* 단지 개요 행 — 건물 스펙 (시공사/시행사는 상단 헤더에 표시) */}
           {(() => {
@@ -992,53 +937,63 @@ export default async function AptUnifiedPage({ params }: Props) {
             </div>
           )}
 
-          {/* 💰 납부일정 + 대출 */}
-          {sub.payment_schedule && (() => {
-            const ps = typeof sub.payment_schedule === 'string' ? JSON.parse(sub.payment_schedule) : sub.payment_schedule;
+          {/* 💰 납부일정 — 통합 (payment_schedule 우선, down_payment_pct 폴백) */}
+          {(sub.payment_schedule || sub.down_payment_pct || sub.interim_count) && (() => {
             const fmtA = (n: number) => n >= 10000 ? `${(n / 10000).toFixed(1)}억` : `${n.toLocaleString()}만`;
+            const colors: Record<string, string> = { deposit: '#3B82F6', interim: '#8B5CF6', balance: '#22C55E' };
+            let steps: { key: string; label: string; pct: number; amount?: number; loan?: string }[] = [];
+
+            if (sub.payment_schedule) {
+              const ps = typeof sub.payment_schedule === 'string' ? JSON.parse(sub.payment_schedule) : sub.payment_schedule;
+              steps = ['deposit', 'interim', 'balance'].map(k => ps[k] ? { key: k, label: ps[k].label, pct: ps[k].pct, amount: ps[k].amount, loan: ps[k].loan } : null).filter(Boolean) as typeof steps;
+            } else {
+              const down = sub.down_payment_pct || 10;
+              const interim = sub.interim_count || 6;
+              const interimPct = sub.balance_pct ? (100 - down - sub.balance_pct) : 60;
+              const balance = sub.balance_pct || (100 - down - interimPct);
+              steps = [
+                { key: 'deposit', label: '계약금', pct: down },
+                { key: 'interim', label: `중도금 (${interim}회)`, pct: interimPct },
+                { key: 'balance', label: '잔금', pct: balance },
+              ];
+            }
+            if (steps.length === 0) return null;
             return (
               <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid var(--border)' }}>
-                <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>💰 납부일정 (최고 분양가 기준)</div>
-                {['deposit', 'interim', 'balance'].map(k => {
-                  const item = ps[k];
-                  if (!item) return null;
-                  const colors: Record<string, string> = { deposit: 'var(--brand)', interim: 'var(--accent-yellow)', balance: 'var(--accent-green)' };
-                  return (
-                    <div key={k} style={{ marginBottom: 6 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, marginBottom: 2 }}>
-                        <span style={{ color: 'var(--text-tertiary)' }}>{item.label} ({item.pct}%){k === 'interim' && item.loan ? ` — ${item.loan}` : ''}</span>
-                        <span style={{ fontWeight: 700, color: colors[k] }}>{fmtA(item.amount)}</span>
-                      </div>
-                      <div style={{ height: 4, borderRadius: 2, background: 'var(--bg-hover)', overflow: 'hidden' }}>
-                        <div style={{ height: '100%', width: `${item.pct}%`, background: colors[k], borderRadius: 2 }} />
-                      </div>
+                <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>💰 납부일정{sub.payment_schedule ? ' (최고 분양가 기준)' : ''}</div>
+                <div style={{ display: 'flex', height: 22, borderRadius: 4, overflow: 'hidden', marginBottom: 8 }}>
+                  {steps.map((s, i) => (
+                    <div key={s.key} style={{ flex: s.pct, background: colors[s.key] || '#888', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, color: '#fff', fontWeight: 700, borderRight: i < steps.length - 1 ? '2px solid var(--bg-surface)' : 'none' }}>
+                      {s.pct}%
                     </div>
-                  );
-                })}
+                  ))}
+                </div>
+                {steps.map(s => (
+                  <div key={s.key} style={{ marginBottom: 4 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, marginBottom: 2 }}>
+                      <span style={{ color: 'var(--text-tertiary)' }}>{s.label} ({s.pct}%){s.loan ? ` — ${s.loan}` : ''}</span>
+                      {s.amount && <span style={{ fontWeight: 700, color: colors[s.key] || 'var(--text-primary)' }}>{fmtA(s.amount)}</span>}
+                    </div>
+                    <div style={{ height: 3, borderRadius: 2, background: 'var(--bg-hover)', overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${s.pct}%`, background: colors[s.key] || '#888', borderRadius: 2 }} />
+                    </div>
+                  </div>
+                ))}
                 {sub.acquisition_tax_estimate > 0 && (
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, marginTop: 4, padding: '4px 0', borderTop: '1px solid var(--border)' }}>
                     <span style={{ color: 'var(--text-tertiary)' }}>예상 취득세</span>
                     <span style={{ fontWeight: 700, color: 'var(--accent-red)' }}>약 {fmtA(sub.acquisition_tax_estimate)}</span>
                   </div>
                 )}
-                {sub.loan_rate && (
-                  <div style={{ fontSize: 10, padding: '4px 8px', borderRadius: 'var(--radius-xs)', background: sub.loan_rate.includes('무이자') ? 'rgba(52,211,153,0.08)' : 'rgba(251,191,36,0.08)', color: sub.loan_rate.includes('무이자') ? 'var(--accent-green)' : 'var(--accent-yellow)', fontWeight: 600, marginTop: 4, display: 'inline-block' }}>
-                    🏦 중도금 {sub.loan_rate}
-                  </div>
-                )}
               </div>
             );
           })()}
 
-          {/* 📋 규제/자격 조건 */}
-          {(sub.transfer_limit || sub.residence_obligation || sub.savings_requirement || sub.priority_supply_area || sub.is_price_limit || sub.is_regulated_area || sub.balcony_extension) && (
+          {/* 📋 청약 조건 (RegulationBadges에 없는 고유 항목만 표시) */}
+          {(sub.savings_requirement || sub.priority_supply_area || sub.balcony_extension !== undefined) && (
             <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid var(--border)' }}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>📋 규제 · 청약자격</div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>📋 청약 조건</div>
               {[
-                sub.is_price_limit !== undefined && ['🏷️ 분양가상한제', sub.is_price_limit ? '적용' : '미적용', sub.is_price_limit ? '#F472B6' : 'var(--accent-green)'],
-                sub.is_regulated_area !== undefined && ['🚫 규제지역', sub.is_regulated_area ? '투기과열/조정대상' : '비규제', sub.is_regulated_area ? 'var(--accent-red)' : 'var(--accent-green)'],
-                sub.transfer_limit && ['🔒 전매제한', `${sub.transfer_limit}${sub.resale_restriction_months ? ` (${sub.resale_restriction_months}개월)` : ''}`, '#FBBF24'],
-                sub.residence_obligation && ['🏠 거주의무', `${sub.residence_obligation}${sub.residence_obligation_years ? ` (${sub.residence_obligation_years}년)` : ''}`, 'var(--accent-red)'],
                 sub.balcony_extension !== undefined && ['🪟 발코니확장', sub.balcony_extension ? '가능' : '불가', sub.balcony_extension ? 'var(--accent-green)' : 'var(--text-tertiary)'],
                 sub.savings_requirement && ['💰 청약저축', sub.savings_requirement, 'var(--brand)'],
                 sub.priority_supply_area && ['📍 우선공급', sub.priority_supply_area, 'var(--accent-purple)'],
