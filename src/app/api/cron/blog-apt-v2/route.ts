@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
 
     // 1. 블로그 없는 청약 현장 (최신순)
     const { data: allApts } = await (sb as any).from('apt_subscriptions')
-      .select('id, house_manage_no, house_nm, region_nm, supply_addr, hssply_adres, tot_supply_hshld_co, rcept_bgnde, rcept_endde, przwner_presnatn_de, cntrct_cncls_bgnde, cntrct_cncls_endde, mdatrgbn_nm, mvn_prearnge_ym, constructor_nm, developer_nm, is_price_limit, brand_name, project_type, price_per_pyeong_avg, house_type_info, general_supply_total, special_supply_total, ai_summary, community_facilities, heating_type, parking_ratio, balcony_extension, loan_rate, is_regulated_area, nearest_station, nearest_school, competition_rate_1st, total_households, move_in_month, announcement_pdf_url')
+      .select('id, house_manage_no, house_nm, region_nm, supply_addr, hssply_adres, tot_supply_hshld_co, rcept_bgnde, rcept_endde, przwner_presnatn_de, cntrct_cncls_bgnde, cntrct_cncls_endde, mdatrgbn_nm, mvn_prearnge_ym, constructor_nm, developer_nm, is_price_limit, brand_name, project_type, price_per_pyeong_avg, price_per_pyeong_min, price_per_pyeong_max, house_type_info, general_supply_total, special_supply_total, ai_summary, community_facilities, heating_type, parking_ratio, balcony_extension, loan_rate, is_regulated_area, nearest_station, nearest_school, competition_rate_1st, total_households, move_in_month, announcement_pdf_url, transfer_limit_years, residence_obligation_years')
       .order('rcept_bgnde', { ascending: false })
       .limit(200);
 
@@ -45,6 +45,8 @@ export async function GET(req: NextRequest) {
         const genSupply = Number(apt.general_supply_total || 0);
         const specSupply = Number(apt.special_supply_total || 0);
         const ppyeong = apt.price_per_pyeong_avg ? Number(apt.price_per_pyeong_avg) : 0;
+        const ppMin = apt.price_per_pyeong_min ? Number(apt.price_per_pyeong_min) : 0;
+        const ppMax = apt.price_per_pyeong_max ? Number(apt.price_per_pyeong_max) : 0;
         const constructor = apt.constructor_nm || '';
         const developer = apt.developer_nm || '';
         const brand = apt.brand_name || '';
@@ -81,7 +83,7 @@ export async function GET(req: NextRequest) {
           try {
             const prompt = `한국 아파트 청약 "${apt.house_nm}" 분석.
 위치: ${addr}, 세대수: ${units}, 시공사: ${constructor}, 시행사: ${developer}
-분양가: ${ppyeong > 0 ? '평당 '+ppyeong.toLocaleString()+'만원' : '미공개'}
+분양가: ${ppMin > 0 && ppMax > 0 ? '평당 '+ppMin.toLocaleString()+'~'+ppMax.toLocaleString()+'만원 (평균 '+ppyeong.toLocaleString()+'만원)' : ppyeong > 0 ? '평당 '+ppyeong.toLocaleString()+'만원' : '미공개'}
 분양가상한제: ${isLimit ? '적용' : '미적용'}, 규제지역: ${isRegulated ? '규제' : '비규제'}
 입주예정: ${moveIn}, 경쟁률: ${apt.competition_rate_1st || '미발표'}
 

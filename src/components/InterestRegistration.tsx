@@ -4,20 +4,22 @@ import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useAuth } from '@/components/AuthProvider';
 import { REGIONS, SIGUNGU_MAP } from '@/lib/regions';
 import Link from 'next/link';
+import { getDisplayInterestCount } from '@/lib/interest-utils';
 
 interface Props {
   siteId: string;
   siteName: string;
   interestCount: number;
   slug: string;
+  totalSupply?: number | null;
 }
 
-export default function InterestRegistration({ siteId, siteName, interestCount, slug }: Props) {
+export default function InterestRegistration({ siteId, siteName, interestCount, slug, totalSupply }: Props) {
   const { userId, loading } = useAuth();
   const [registered, setRegistered] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState('');
-  const [count, setCount] = useState(interestCount);
+  const [count, setCount] = useState(getDisplayInterestCount(interestCount, totalSupply));
   const [showForm, setShowForm] = useState(false);
 
   const [name, setName] = useState('');

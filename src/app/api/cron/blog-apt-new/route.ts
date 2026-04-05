@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
         rcept_bgnde, rcept_endde, przwner_presnatn_de, spsply_rcept_bgnde, spsply_rcept_endde,
         cntrct_cncls_bgnde, cntrct_cncls_endde, mdatrgbn_nm, mvn_prearnge_ym, supply_addr,
         constructor_nm, developer_nm, brand_name, is_price_limit, general_supply_total,
-        special_supply_total, price_per_pyeong_avg, house_type_info, heating_type,
+        special_supply_total, price_per_pyeong_avg, price_per_pyeong_min, price_per_pyeong_max, house_type_info, heating_type,
         parking_ratio, balcony_extension, project_type, total_households, is_regulated_area,
         loan_rate, move_in_month, competition_rate_1st, total_apply_count,
         ai_summary, supply_price_info, announcement_pdf_url, acquisition_tax_estimate,
@@ -69,7 +69,9 @@ export async function GET(req: NextRequest) {
       const dev = apt.developer_nm ?? '';
       const brand = apt.brand_name ?? '';
       const dd = dDay(apt.rcept_endde);
-      const ppa = apt.price_per_pyeong_avg ? `평당 약 ${Math.round(apt.price_per_pyeong_avg).toLocaleString()}만원` : '';
+      const ppa = apt.price_per_pyeong_min && apt.price_per_pyeong_max
+        ? `평당 약 ${Math.round(apt.price_per_pyeong_min).toLocaleString()}~${Math.round(apt.price_per_pyeong_max).toLocaleString()}만원 (평균 ${Math.round(apt.price_per_pyeong_avg || apt.price_per_pyeong_min).toLocaleString()}만원)`
+        : apt.price_per_pyeong_avg ? `평당 약 ${Math.round(apt.price_per_pyeong_avg).toLocaleString()}만원` : '';
       const parking = apt.parking_ratio ?? apt.parking_total ? `${apt.parking_ratio || Math.round((apt.parking_total || 0) / units * 100)}%` : '';
       const heating = apt.heating_type ?? '';
       const projectType = apt.project_type ?? '';

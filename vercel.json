@@ -281,6 +281,10 @@
       "schedule": "0 * * * *"
     },
     {
+      "path": "/api/cron/apt-parse-pdf-pricing",
+      "schedule": "0 */6 * * *"
+    },
+    {
       "path": "/api/cron/apt-price-sync",
       "schedule": "0 3 * * *"
     },

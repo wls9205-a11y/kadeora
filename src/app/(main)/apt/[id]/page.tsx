@@ -13,11 +13,14 @@ import AptBookmarkButton from '@/components/AptBookmarkButton';
 import Disclaimer from '@/components/Disclaimer';
 import AptImageGallery from '@/components/AptImageGallery';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
+import { getDisplayInterestCount } from '@/lib/interest-utils';
 
 const AptPriceTrendChart = dynamic(() => import('@/components/charts/AptPriceTrendChart'));
 const AptReviewSection = dynamic(() => import('@/components/AptReviewSection'));
 const InterestRegistration = dynamic(() => import('@/components/InterestRegistration'));
 const SignupCTA = dynamic(() => import('@/components/SignupCTA'));
+const RegulationBadges = dynamic(() => import('@/components/RegulationBadges'));
+const CostSimulator = dynamic(() => import('@/components/CostSimulator'));
 const KpiCards = dynamic(() => import('@/components/apt/KpiCards'));
 const ComplexScale = dynamic(() => import('@/components/apt/ComplexScale'));
 
@@ -332,7 +335,7 @@ export default async function AptUnifiedPage({ params }: Props) {
       {noindex && <meta name="robots" content="noindex,follow" />}
 
       {/* JSON-LD 1: RealEstateListing */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': ['ApartmentComplex', 'RealEstateListing'], name, description: site?.description || `${region} ${name}`, url: `${SITE_URL}/apt/${slug}`, address: { '@type': 'PostalAddress', addressRegion: region, addressLocality: site?.sigungu || '', streetAddress: site?.address || sub?.hssply_adres || '', addressCountry: 'KR' }, ...(site?.total_units || sub?.tot_supply_hshld_co ? { numberOfRooms: site?.total_units || sub?.tot_supply_hshld_co } : {}), ...(site?.latitude && site?.longitude ? { geo: { '@type': 'GeoCoordinates', latitude: site.latitude, longitude: site.longitude } } : {}), ...(site?.builder || sub?.constructor_nm ? { brand: { '@type': 'Organization', name: site?.builder || sub?.constructor_nm } } : {}), ...(site?.price_min || site?.price_max ? { offers: { '@type': 'AggregateOffer', priceCurrency: 'KRW', ...(site?.price_min ? { lowPrice: site.price_min } : {}), ...(site?.price_max ? { highPrice: site.price_max } : {}), offerCount: site?.total_units || 1 } } : {}), ...((site?.interest_count ?? 0) > 0 ? { aggregateRating: { '@type': 'AggregateRating', ratingValue: Math.min(4.5 + ((site!.interest_count ?? 0) / 100), 5.0).toFixed(1), ratingCount: Math.max(site!.interest_count ?? 1, 1), bestRating: '5' } } : {}) }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': ['ApartmentComplex', 'RealEstateListing'], name, description: site?.description || `${region} ${name}`, url: `${SITE_URL}/apt/${slug}`, address: { '@type': 'PostalAddress', addressRegion: region, addressLocality: site?.sigungu || '', streetAddress: site?.address || sub?.hssply_adres || '', addressCountry: 'KR' }, ...(site?.total_units || sub?.tot_supply_hshld_co ? { numberOfRooms: site?.total_units || sub?.tot_supply_hshld_co } : {}), ...(site?.latitude && site?.longitude ? { geo: { '@type': 'GeoCoordinates', latitude: site.latitude, longitude: site.longitude } } : {}), ...(site?.builder || sub?.constructor_nm ? { brand: { '@type': 'Organization', name: site?.builder || sub?.constructor_nm } } : {}), ...(site?.price_min || site?.price_max ? { offers: { '@type': 'AggregateOffer', priceCurrency: 'KRW', ...(site?.price_min ? { lowPrice: site.price_min } : {}), ...(site?.price_max ? { highPrice: site.price_max } : {}), offerCount: site?.total_units || 1 } } : {}), ...((site?.interest_count ?? 0) > 0 || (site?.total_units ?? 0) > 0 ? { aggregateRating: { '@type': 'AggregateRating', ratingValue: Math.min(4.5 + (getDisplayInterestCount(site?.interest_count ?? 0, site?.total_units) / 100), 5.0).toFixed(1), ratingCount: Math.max(getDisplayInterestCount(site?.interest_count ?? 0, site?.total_units), 1), bestRating: '5' } } : {}) }) }} />
 
       {/* JSON-LD 2: FAQ */}
       {faq.length > 0 && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faq.map(f => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) }) }} />}
@@ -469,8 +472,31 @@ export default async function AptUnifiedPage({ params }: Props) {
 
 
       {/* Share + Bookmark — 바이럴 액션 바 */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 'var(--sp-md)', padding: '8px 12px', borderRadius: 'var(--radius-md)', background: 'linear-gradient(135deg, rgba(59,123,246,0.04), rgba(139,92,246,0.04))', border: '1px solid rgba(59,123,246,0.1)' }}>
-        <span style={{ fontSize: 11, color: 'var(--text-tertiary)', marginRight: 2 }}>📢</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 'var(--sp-md)', padding: '8px 12px', borderRadius: 'var(--radius-md)', background: 'linear-gradient(135deg, rgba(59,123,246,0.04), rgba(139,92,246,0.04))', border: '1px solid rgba(59,123,246,0.1)' }}>
+        {/* 카카오톡 직접 공유 */}
+        <a
+          href={`https://sharer.kakao.com/talk/friends/picker/link?app_key=javascript&url=${encodeURIComponent(`${SITE_URL}/apt/${slug}?utm_source=kakao&utm_medium=share`)}&text=${encodeURIComponent(`${name} ${tLabel[sType]} — 분양가·청약일정·모집공고 한눈에`)}`}
+          onClick={(e) => {
+            e.preventDefault();
+            const shareUrl = `${SITE_URL}/apt/${slug}?utm_source=kakao&utm_medium=share`;
+            const kakaoUrl = `https://story.kakao.com/share?url=${encodeURIComponent(shareUrl)}`;
+            if (typeof window !== 'undefined' && /Mobi|Android/i.test(navigator.userAgent)) {
+              window.location.href = `kakaotalk://msg/text?text=${encodeURIComponent(`${name} ${tLabel[sType]} — 분양가·청약일정·모집공고 한눈에\n${shareUrl}`)}`;
+              setTimeout(() => { window.open(kakaoUrl, '_blank'); }, 1500);
+            } else {
+              window.open(kakaoUrl, '_blank', 'width=600,height=500');
+            }
+          }}
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: 4,
+            padding: '6px 12px', borderRadius: 'var(--radius-sm)',
+            background: '#FEE500', color: '#191919', textDecoration: 'none',
+            fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap', flexShrink: 0,
+            height: 32,
+          }}
+        >
+          💬 카카오
+        </a>
         <ShareButtons title={`${name} ${tLabel[sType]} — 분양가·청약일정·모집공고 한눈에`} postId={slug} />
         {sub && <AptBookmarkButton aptId={sub.id} isLoggedIn={!!aptUser} />}
         <div style={{ flex: 1 }} />
@@ -506,7 +532,7 @@ export default async function AptUnifiedPage({ params }: Props) {
             const y = Math.floor(diffM / 12); const m = diffM % 12;
             return y > 0 ? `약 ${y}년${m > 0 ? ` ${m}개월` : ''} 후` : `약 ${m}개월 후`;
           })(), c: 'var(--accent-green)', icon: '📅', bar: 0, barColor: 'var(--accent-green)', scrollTo: null },
-          { l: unsold ? '미분양' : '관심', v: unsold ? `${(unsold.tot_unsold_hshld_co || 0).toLocaleString()}호` : `${site?.interest_count || 0}명`, sub: unsold ? '' : '클릭하여 등록', c: unsold ? 'var(--accent-red)' : '#FFD43B', icon: unsold ? '⚠️' : '❤️', bar: unsold ? Math.min((unsold.tot_unsold_hshld_co || 0) / 500 * 100, 100) : Math.min((site?.interest_count || 0) / 50 * 100, 100), barColor: unsold ? 'var(--accent-red)' : '#FFD43B', scrollTo: unsold ? null : 'interest-section' },
+          { l: unsold ? '미분양' : '관심', v: unsold ? `${(unsold.tot_unsold_hshld_co || 0).toLocaleString()}호` : `${getDisplayInterestCount(site?.interest_count || 0, site?.total_units || sub?.tot_supply_hshld_co).toLocaleString()}명`, sub: unsold ? '' : '클릭하여 등록', c: unsold ? 'var(--accent-red)' : '#FFD43B', icon: unsold ? '⚠️' : '❤️', bar: unsold ? Math.min((unsold.tot_unsold_hshld_co || 0) / 500 * 100, 100) : Math.min(getDisplayInterestCount(site?.interest_count || 0, site?.total_units || sub?.tot_supply_hshld_co) / (Math.max(site?.total_units || sub?.tot_supply_hshld_co || 100, 100)) * 100, 100), barColor: unsold ? 'var(--accent-red)' : '#FFD43B', scrollTo: unsold ? null : 'interest-section' },
         ];
 
         return (
@@ -536,8 +562,10 @@ export default async function AptUnifiedPage({ params }: Props) {
             const pMin = site.price_min;
             const pMax = site.price_max;
             const pAvg = Math.round((pMin + pMax) / 2);
-            // 전용면적 기반 평당가 추정 (34평 기준)
+            // 전용면적 기반 평당가 추정
             const pyeongPrice = sub?.price_per_pyeong_avg || Math.round(pAvg / 34);
+            const ppMin = sub?.price_per_pyeong_min || 0;
+            const ppMax = sub?.price_per_pyeong_max || 0;
             // 가격 등급 (만원 단위)
             const tier = pAvg >= 120000 ? { label: '12억+', color: '#FF6B6B', emoji: '💎' } : pAvg >= 90000 ? { label: '9억대', color: '#FB923C', emoji: '🏅' } : pAvg >= 60000 ? { label: '6억대', color: '#FBBF24', emoji: '✨' } : pAvg >= 30000 ? { label: '3억대', color: 'var(--brand)', emoji: '🏠' } : { label: '3억 미만', color: 'var(--accent-green)', emoji: '🌱' };
             return (
@@ -557,7 +585,7 @@ export default async function AptUnifiedPage({ params }: Props) {
                 {/* 평균 + 평당가 */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10 }}>
                   <span style={{ color: 'var(--text-tertiary)' }}>평균 <strong style={{ color: 'var(--text-primary)' }}>{fmtAmount(pAvg)}</strong></span>
-                  {pyeongPrice > 0 && <span style={{ color: 'var(--accent-purple)' }}>평당 <strong>{pyeongPrice.toLocaleString()}만</strong></span>}
+                  {pyeongPrice > 0 && <span style={{ color: 'var(--accent-purple)' }}>평당 <strong>{ppMin > 0 && ppMax > 0 ? `${ppMin.toLocaleString()}~${ppMax.toLocaleString()}만` : `${pyeongPrice.toLocaleString()}만`}</strong>{ppMin > 0 && ppMax > 0 && <span style={{ fontSize: 9, color: 'var(--text-tertiary)', marginLeft: 3 }}>(평균 {pyeongPrice.toLocaleString()}만)</span>}</span>}
                 </div>
               </div>
             );
@@ -584,6 +612,33 @@ export default async function AptUnifiedPage({ params }: Props) {
               </div>
             );
           })()}
+        </div>
+      )}
+
+      {/* 규제 요약 — 전매/거주/재당첨 신호등 */}
+      {sub && (sub.transfer_limit_years || sub.residence_obligation_years || sub.rewin_limit_years || sub.is_price_limit || sub.loan_rate) && (
+        <div style={{ marginBottom: 14 }}>
+          <RegulationBadges
+            transferLimitYears={sub.transfer_limit_years}
+            residenceYears={sub.residence_obligation_years}
+            rewinLimitYears={sub.rewin_limit_years}
+            isSpeculativeZone={sub.is_speculative_zone}
+            isRegulatedArea={sub.is_regulated_area}
+            isPriceLimit={sub.is_price_limit}
+            loanRate={sub.loan_rate}
+            contractDate={sub.cntrct_cncls_bgnde}
+          />
+        </div>
+      )}
+
+      {/* 실입주 총비용 시뮬레이터 */}
+      {sub && Array.isArray(sub.house_type_info) && sub.house_type_info.length > 0 && sub.house_type_info.some((t: any) => t.lttot_top_amount > 0) && (
+        <div style={{ marginBottom: 14 }}>
+          <CostSimulator
+            types={sub.house_type_info}
+            options={Array.isArray(sub.options_list) ? sub.options_list : []}
+            siteName={name}
+          />
         </div>
       )}
 
@@ -986,7 +1041,10 @@ export default async function AptUnifiedPage({ params }: Props) {
                         const spsply = Number(t.spsply_hshldco || 0);
                         const total = supply + spsply;
                         const price = Number(t.lttot_top_amount || 0);
-                        const ppyeong = price > 0 && exclusiveArea > 10 ? Math.round(price / (exclusiveArea / 3.3058)) : 0;
+                        const priceMin = Number(t.lttot_min_amount || 0);
+                        const priceAvg = Number(t.lttot_avg_amount || 0);
+                        const displayPrice = priceAvg || price;
+                        const ppyeong = displayPrice > 0 && exclusiveArea > 10 ? Math.round(displayPrice / (exclusiveArea / 3.3058)) : 0;
                         const useRate = exclusiveArea > 0 && supplyArea > 0 ? Math.round(exclusiveArea / supplyArea * 100) : 0;
                         return (
                           <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
@@ -997,8 +1055,8 @@ export default async function AptUnifiedPage({ params }: Props) {
                             <td style={{ padding: '6px', textAlign: 'right', color: 'var(--accent-purple)' }}>{spsply}</td>
                             <td style={{ padding: '6px', textAlign: 'right', fontWeight: 700, color: 'var(--text-primary)' }}>{total}</td>
                             {hasPrice && <td style={{ padding: '6px', textAlign: 'right' }}>
-                              <div style={{ fontWeight: 700, color: 'var(--accent-blue)' }}>{price >= 10000 ? `${(price / 10000).toFixed(1)}억` : `${price.toLocaleString()}만`}</div>
-                              {ppyeong > 0 && <div style={{ fontSize: 9, color: 'var(--accent-purple)' }}>평당 {ppyeong.toLocaleString()}만</div>}
+                              <div style={{ fontWeight: 700, color: 'var(--accent-blue)' }}>{priceMin > 0 && priceMin !== price ? <><span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{priceMin >= 10000 ? `${(priceMin / 10000).toFixed(1)}억` : `${priceMin.toLocaleString()}`}~</span>{price >= 10000 ? `${(price / 10000).toFixed(1)}억` : `${price.toLocaleString()}만`}</> : price >= 10000 ? `${(price / 10000).toFixed(1)}억` : `${price.toLocaleString()}만`}</div>
+                              {ppyeong > 0 && <div style={{ fontSize: 9, color: 'var(--accent-purple)' }}>평당 {ppyeong.toLocaleString()}만{priceAvg > 0 ? ' (평균)' : ''}</div>}
                             </td>}
                           </tr>
                         );
@@ -1118,7 +1176,7 @@ export default async function AptUnifiedPage({ params }: Props) {
         const avgJeonse = complexProfiles.filter((c: any) => c.jeonse_ratio && Number(c.jeonse_ratio) > 0);
         const avgJeonseRatio = avgJeonse.length > 0 ? Math.round(avgJeonse.reduce((s: number, c: any) => s + Number(c.jeonse_ratio), 0) / avgJeonse.length) : 0;
         const myPriceMax = site?.price_max || 0;
-        const myPpyeong = (() => { const t = Array.isArray(sub?.house_type_info) ? sub.house_type_info : []; if (!t.length) return 0; const p = t[0]; const ea = parseFloat((p.type || '0').replace(/[A-Za-z]/g, '')); return p.lttot_top_amount > 0 && ea > 10 ? Math.round(p.lttot_top_amount / (ea / 3.3058)) : 0; })();
+        const myPpyeong = (() => { const t = Array.isArray(sub?.house_type_info) ? sub.house_type_info : []; if (!t.length) return 0; const p = t[0]; const ea = parseFloat((p.type || '0').replace(/[A-Za-z]/g, '')); const usePrice = p.lttot_avg_amount || p.lttot_top_amount || 0; return usePrice > 0 && ea > 10 ? Math.round(usePrice / (ea / 3.3058)) : 0; })();
         return (
         <div className="apt-card">
           <h2 style={ct}>📊 {sigungu || region} 아파트 시세 비교</h2>
@@ -1326,7 +1384,7 @@ export default async function AptUnifiedPage({ params }: Props) {
 
       {/* 관심단지 등록 CTA */}
       <div id="interest-section">
-        {site?.id && <InterestRegistration siteId={site.id} siteName={name} interestCount={site.interest_count || 0} slug={slug} />}
+        {site?.id && <InterestRegistration siteId={site.id} siteName={name} interestCount={site.interest_count || 0} slug={slug} totalSupply={site?.total_units || sub?.tot_supply_hshld_co || null} />}
       </div>
 
       {/* 비로그인 가입 유도 CTA */}

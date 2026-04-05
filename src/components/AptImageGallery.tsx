@@ -1,5 +1,6 @@
 'use client';
 import { useState, useRef, useCallback } from 'react';
+import ImageLightbox from '@/components/ImageLightbox';
 
 interface AptImage {
   url: string;
@@ -178,72 +179,13 @@ export default function AptImageGallery({ images, name, region, badges }: {
         </div>
       </div>
 
-      {/* 라이트박스 — 클릭 시 전체화면 뷰어 */}
+      {/* 라이트박스 — 풀스크린 뷰어 (스와이프/키보드/핀치줌 지원) */}
       {lightbox !== null && (
-        <div
-          style={{
-            position: 'fixed', inset: 0, zIndex: 100,
-            background: '#000',
-            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-          }}
-          onClick={() => setLightbox(null)}
-        >
-          <button
-aria-label="닫기"             onClick={() => setLightbox(null)}
-            style={{
-              position: 'absolute', top: 16, right: 16, zIndex: 10,
-              width: 40, height: 40, borderRadius: '50%',
-              background: 'rgba(255,255,255,0.15)', border: 'none',
-              color: '#fff', fontSize: 'var(--fs-lg)', cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}
-          >✕</button>
-
-          <div style={{
-            position: 'absolute', top: 20, left: '50%', transform: 'translateX(-50%)',
-            color: 'rgba(255,255,255,0.6)', fontSize: 14, fontWeight: 600,
-          }}>{lightbox + 1} / {total}</div>
-
-          <div onClick={(e: React.MouseEvent) => e.stopPropagation()} style={{ position: 'relative', maxWidth: '90vw', maxHeight: '80vh' }}>
-            <img
-              src={visibleImages[lightbox]?.url}
-              alt={visibleImages[lightbox]?.caption || `${name} 사진 ${lightbox + 1}`}
-              style={{ maxWidth: '90vw', maxHeight: '80vh', objectFit: 'contain', borderRadius: 8 }}
-              referrerPolicy="no-referrer"
-            />
-            <Watermark />
-            <WatermarkSm />
-          </div>
-
-          {visibleImages[lightbox]?.caption && (
-            <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: 13, marginTop: 'var(--sp-md)', textAlign: 'center', maxWidth: '80vw' }}>
-              {visibleImages[lightbox].caption}
-            </div>
-          )}
-
-          {lightbox > 0 && (
-            <button
-              onClick={(e: React.MouseEvent) => { e.stopPropagation(); setLightbox(lightbox - 1); }}
-              style={{
-                position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)',
-                width: 44, height: 44, borderRadius: '50%',
-                background: 'rgba(255,255,255,0.15)', border: 'none',
-                color: '#fff', fontSize: 'var(--fs-xl)', cursor: 'pointer',
-              }}
-            >‹</button>
-          )}
-          {lightbox < total - 1 && (
-            <button
-              onClick={(e: React.MouseEvent) => { e.stopPropagation(); setLightbox(lightbox + 1); }}
-              style={{
-                position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
-                width: 44, height: 44, borderRadius: '50%',
-                background: 'rgba(255,255,255,0.15)', border: 'none',
-                color: '#fff', fontSize: 'var(--fs-xl)', cursor: 'pointer',
-              }}
-            >›</button>
-          )}
-        </div>
+        <ImageLightbox
+          images={visibleImages.map((img, i) => ({ url: img.url, caption: img.caption || `${name} 사진 ${i + 1}` }))}
+          initialIndex={lightbox}
+          onClose={() => setLightbox(null)}
+        />
       )}
     </>
   );
