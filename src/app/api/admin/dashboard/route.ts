@@ -36,7 +36,7 @@ export async function GET(req: Request) {
         unsoldR, redevR, tradeR, paymentsR, reportsR, dailyR,
         newUsersWeekR, activeUsersR, discussR, cronR, shareWeekR,
       ] = await Promise.all([
-        sb.from('profiles').select('id', { count: 'exact', head: true }),
+        sb.from('profiles').select('id', { count: 'exact', head: true }).neq('is_seed', true).neq('is_ghost', true).neq('is_deleted', true).neq('is_banned', true),
         sb.from('posts').select('id', { count: 'exact', head: true }).eq('is_deleted', false),
         sb.from('blog_posts').select('id', { count: 'exact', head: true }).eq('is_published', true),
         sb.from('stock_quotes').select('symbol', { count: 'exact', head: true }),
@@ -49,8 +49,8 @@ export async function GET(req: Request) {
         sb.from('payments').select('id, amount, status, created_at').order('created_at', { ascending: false }).limit(10),
         sb.from('reports').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
         sb.from('daily_stats').select('*').order('stat_date', { ascending: false }).limit(14),
-        sb.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', weekAgo),
-        sb.from('profiles').select('id', { count: 'exact', head: true }).gte('last_active_at', weekAgo),
+        sb.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', weekAgo).neq('is_seed', true),
+        sb.from('profiles').select('id', { count: 'exact', head: true }).gte('last_active_at', weekAgo).neq('is_seed', true),
         sb.from('discussion_topics').select('id', { count: 'exact', head: true }),
         sb.from('cron_logs').select('cron_name, status, duration_ms, created_at')
           .gte('created_at', new Date(Date.now() - 24 * 3600000).toISOString())
@@ -280,7 +280,7 @@ export async function GET(req: Request) {
         sb.from('page_views').select('id', { count: 'exact', head: true }).gte('created_at', yesterdayStart).lt('created_at', yesterdayEnd),
         sb.from('posts').select('id', { count: 'exact', head: true }).eq('is_deleted', false).gte('created_at', yesterdayStart).lt('created_at', yesterdayEnd),
         sb.from('comments').select('id', { count: 'exact', head: true }).eq('is_deleted', false).gte('created_at', yesterdayStart).lt('created_at', yesterdayEnd),
-        sb.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', yesterdayStart).lt('created_at', yesterdayEnd),
+        sb.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', yesterdayStart).lt('created_at', yesterdayEnd).neq('is_seed', true),
       ]);
 
       // 인기 페이지 TOP 5

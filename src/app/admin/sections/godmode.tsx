@@ -552,7 +552,7 @@ export default function GodModeSection() {
             style={{ padding: '10px 16px', borderRadius: 'var(--radius-md)', border: `1px solid ${C.yellow}40`, background: C.card, color: C.yellow, fontWeight: 700, fontSize: 13, cursor: specialRunning ? 'wait' : 'pointer' }}>
             🔄 PDF 재파싱 v2 50건
           </button>
-          <button onClick={() => runSpecial('/api/cron/apt-parse-pdf-pricing', '⭐ PDF 가격 전수 파싱 1000건 (최저/평균/최고/규제/시설)')}
+          <button onClick={() => runCronSingle('/api/cron/apt-parse-pdf-pricing', '⭐ PDF 가격 전수 파싱 1000건 (최저/평균/최고/규제/시설)')}
             disabled={specialRunning}
             style={{ padding: '12px 16px', borderRadius: 'var(--radius-md)', border: `2px solid ${C.brand}80`, background: `${C.brand}15`, color: C.brand, fontWeight: 800, fontSize: 14, cursor: specialRunning ? 'wait' : 'pointer' }}>
             ⭐ PDF 가격 전수 파싱 1,000건
