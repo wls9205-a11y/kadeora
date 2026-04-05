@@ -24,6 +24,7 @@
 
 ### 추가 수정 (세션 후반)
 - **apt/[id] 중복 5건 제거** (-45줄, 1646→1601): 납부일정 2곳→1곳 통합(payment_schedule 우선, down_payment_pct 폴백), 분양조건 체크리스트 제거(RegulationBadges 중복), 규제·청약자격 중복 4항목 제거(발코니확장/청약저축/우선공급만 유지), loan_rate 3곳→1곳(RegulationBadges만)
+- **카드 빈칸 채우기** (5파일): 렌더타임 평당가 계산(house_type_info→area/price), 분양가 추출(null→실데이터), 맥락형 대체텍스트(미정→공고확인, 준비중→공고전, -→접수전/D-접수/미공개/집계중/미확정), 크론 불필요
 - **blog-rewrite 504 수정**: 배치 9→3건 (6회/일 × 3건 = 18건/일, Vercel 런타임 로그 확인)
 - **push-content-alert 크론** (신규): 매일 KST 20:00 푸시 구독자에게 인기 블로그 알림
 - **전환 이벤트 추적**: conversion_events 테이블 + /api/track + beacon API 유틸 + 4개 CTA 추적 삽입
