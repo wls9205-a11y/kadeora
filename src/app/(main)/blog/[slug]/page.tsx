@@ -696,6 +696,9 @@ export default async function BlogDetailPage({ params }: Props) {
         </div>
       </article>
 
+      {/* 세션74: Two-Step 마이크로 커밋먼트 CTA */}
+      <TwoStepCTA category={post.category} />
+
       {/* 9. 다음글 플로팅 카드 (스크롤 60% 도달 시) */}
       {nextPost && <NextArticleFloat nextSlug={nextPost.slug} nextTitle={nextPost.title} category={post.category} />}
 
@@ -855,6 +858,35 @@ export default async function BlogDetailPage({ params }: Props) {
           </div>
         </div>
       )}
+
+
+      {/* 세션74: 유용한 도구 + 뉴스레터 */}
+      <div style={{ marginBottom: 'var(--sp-xl)' }}>
+        <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>🛠️ 유용한 도구</div>
+        <div style={{ display: 'flex', gap: 'var(--sp-sm)', flexWrap: 'wrap' }}>
+          {(post.category === 'apt' || post.category === 'unsold') && (
+            <Link href="/apt/diagnose" style={{ flex: '1 1 calc(50% - 4px)', minWidth: 140, padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--brand-border)', background: 'var(--bg-surface)', textDecoration: 'none' }}>
+              <div style={{ fontSize: 14, marginBottom: 4 }}>🎯</div>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>청약 가점 계산기</div>
+              <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>무주택·부양가족·청약통장 가점 자동 계산</div>
+            </Link>
+          )}
+          {post.category === 'stock' && (
+            <Link href="/stock/compare" style={{ flex: '1 1 calc(50% - 4px)', minWidth: 140, padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--brand-border)', background: 'var(--bg-surface)', textDecoration: 'none' }}>
+              <div style={{ fontSize: 14, marginBottom: 4 }}>⚖️</div>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>종목 비교</div>
+              <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>국내외 종목 핵심 지표 비교</div>
+            </Link>
+          )}
+          <Link href="/apt/complex" style={{ flex: '1 1 calc(50% - 4px)', minWidth: 140, padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-surface)', textDecoration: 'none' }}>
+            <div style={{ fontSize: 14, marginBottom: 4 }}>🏘️</div>
+            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>단지백과</div>
+            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>전국 34,500+ 아파트 시세 검색</div>
+          </Link>
+        </div>
+      </div>
+
+      <NewsletterSubscribe category={post.category} />
 
       {/* 관련 종목 (내부 링크 SEO) */}
       {relatedStocks.length > 0 && (
