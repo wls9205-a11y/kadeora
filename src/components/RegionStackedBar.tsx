@@ -157,16 +157,21 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 4 }}>
             {([
-              { v: exp.sub, l: '청약', c: 'var(--accent-blue, #3B82F6)' },
-              { v: exp.ongoing, l: '분양', c: 'var(--accent-green, #22C55E)' },
-              { v: exp.unsold, l: '미분양', c: 'var(--accent-red, #EF4444)' },
-              { v: exp.redev, l: '재건축', c: 'var(--accent-purple, #8B5CF6)' },
-              { v: exp.trade, l: '실거래', c: 'var(--accent-yellow, #F59E0B)' },
+              { v: exp.sub, l: '청약', c: 'var(--accent-blue, #3B82F6)', tab: 'sub' },
+              { v: exp.ongoing, l: '분양', c: 'var(--accent-green, #22C55E)', tab: 'ongoing' },
+              { v: exp.unsold, l: '미분양', c: 'var(--accent-red, #EF4444)', tab: 'unsold' },
+              { v: exp.redev, l: '재건축', c: 'var(--accent-purple, #8B5CF6)', tab: 'redev' },
+              { v: exp.trade, l: '실거래', c: 'var(--accent-yellow, #F59E0B)', tab: 'trade' },
             ] as const).map((item, idx) => (
-              <div key={idx} style={{ textAlign: 'center', padding: '3px 2px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)' }}>
+              <button key={idx} onClick={() => onTabChange?.(item.tab)} style={{
+                textAlign: 'center', padding: '3px 2px', borderRadius: 'var(--radius-sm)',
+                background: activeTab === item.tab ? 'var(--bg-hover)' : 'var(--bg-hover)',
+                border: activeTab === item.tab ? '1px solid var(--brand)' : '1px solid transparent',
+                cursor: 'pointer', transition: 'all 0.12s',
+              }}>
                 <div style={{ fontSize: 13, fontWeight: 700, color: item.c }}>{item.v.toLocaleString()}</div>
                 <div style={{ fontSize: 9, color: 'var(--text-secondary)' }}>{item.l}</div>
-              </div>
+              </button>
             ))}
           </div>
         </div>
