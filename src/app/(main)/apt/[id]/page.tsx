@@ -475,18 +475,9 @@ export default async function AptUnifiedPage({ params }: Props) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 'var(--sp-md)', padding: '8px 12px', borderRadius: 'var(--radius-md)', background: 'linear-gradient(135deg, rgba(59,123,246,0.04), rgba(139,92,246,0.04))', border: '1px solid rgba(59,123,246,0.1)' }}>
         {/* 카카오톡 직접 공유 */}
         <a
-          href={`https://sharer.kakao.com/talk/friends/picker/link?app_key=javascript&url=${encodeURIComponent(`${SITE_URL}/apt/${slug}?utm_source=kakao&utm_medium=share`)}&text=${encodeURIComponent(`${name} ${tLabel[sType]} — 분양가·청약일정·모집공고 한눈에`)}`}
-          onClick={(e) => {
-            e.preventDefault();
-            const shareUrl = `${SITE_URL}/apt/${slug}?utm_source=kakao&utm_medium=share`;
-            const kakaoUrl = `https://story.kakao.com/share?url=${encodeURIComponent(shareUrl)}`;
-            if (typeof window !== 'undefined' && /Mobi|Android/i.test(navigator.userAgent)) {
-              window.location.href = `kakaotalk://msg/text?text=${encodeURIComponent(`${name} ${tLabel[sType]} — 분양가·청약일정·모집공고 한눈에\n${shareUrl}`)}`;
-              setTimeout(() => { window.open(kakaoUrl, '_blank'); }, 1500);
-            } else {
-              window.open(kakaoUrl, '_blank', 'width=600,height=500');
-            }
-          }}
+          href={`https://story.kakao.com/share?url=${encodeURIComponent(`${SITE_URL}/apt/${slug}?utm_source=kakao&utm_medium=share`)}`}
+          target="_blank"
+          rel="noopener noreferrer"
           style={{
             display: 'inline-flex', alignItems: 'center', gap: 4,
             padding: '6px 12px', borderRadius: 'var(--radius-sm)',
