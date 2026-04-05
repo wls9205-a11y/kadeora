@@ -1,221 +1,87 @@
-'use client';
-import { useState } from 'react';
-import Link from 'next/link';
-import SectionShareButton from '@/components/SectionShareButton';
-
-const CUTLINES: { region: string; avg: number; min: number; max: number }[] = [
-  { region: '서울', avg: 62, min: 55, max: 72 },
-  { region: '경기', avg: 56, min: 48, max: 67 },
-  { region: '인천', avg: 50, min: 40, max: 60 },
-  { region: '부산', avg: 48, min: 38, max: 58 },
-  { region: '대구', avg: 45, min: 35, max: 55 },
-  { region: '대전', avg: 44, min: 34, max: 54 },
-  { region: '광주', avg: 42, min: 32, max: 52 },
-  { region: '울산', avg: 40, min: 30, max: 50 },
-  { region: '세종', avg: 52, min: 42, max: 62 },
-  { region: '강원', avg: 35, min: 25, max: 45 },
-  { region: '충북', avg: 36, min: 26, max: 46 },
-  { region: '충남', avg: 38, min: 28, max: 48 },
-  { region: '전북', avg: 34, min: 24, max: 44 },
-  { region: '전남', avg: 32, min: 22, max: 42 },
-  { region: '경북', avg: 36, min: 26, max: 46 },
-  { region: '경남', avg: 38, min: 28, max: 48 },
-  { region: '제주', avg: 40, min: 30, max: 50 },
-];
+import DiagnoseClient from './DiagnoseClient';
 
 export default function DiagnosePage() {
-  const [years, setYears] = useState(5);
-  const [family, setFamily] = useState(2);
-  const [bankYears, setBankYears] = useState(5);
-
-  const housingScore = Math.min(32, (years + 1) * 2);
-  const familyScore = Math.min(35, (family + 1) * 5);
-  const bankScore = Math.min(17, bankYears <= 0 ? 0 : bankYears < 1 ? 2 : bankYears < 2 ? 4 : bankYears < 3 ? 6 : bankYears < 4 ? 8 : bankYears < 5 ? 10 : bankYears < 6 ? 11 : bankYears < 7 ? 12 : bankYears < 8 ? 13 : bankYears < 9 ? 14 : bankYears < 10 ? 15 : bankYears < 11 ? 16 : 17);
-  const total = housingScore + familyScore + bankScore;
-  const pct = Math.round((total / 84) * 100);
-  const grade = total >= 51 ? { label: '높음', color: 'var(--accent-green)', emoji: '🟢' }
-    : total >= 31 ? { label: '보통', color: 'var(--accent-yellow)', emoji: '🟡' }
-    : { label: '낮음', color: 'var(--accent-red)', emoji: '🔴' };
-
-  const strategy = total >= 55
-    ? { type: '가점제', desc: '서울·수도권 인기 단지에서도 가점제로 당첨 가능성이 높습니다. 1순위 가점제에 집중하세요.' }
-    : total >= 40
-    ? { type: '가점+추첨 병행', desc: '수도권 외곽이나 지방 광역시에서는 가점제, 인기 단지에서는 추첨제(85㎡ 초과)를 노려보세요.' }
-    : total >= 25
-    ? { type: '추첨제 위주', desc: '가점이 낮아 가점제 당첨은 어렵습니다. 85㎡ 초과 추첨제나 신혼특공·생애최초특공을 추천합니다.' }
-    : { type: '특별공급 집중', desc: '신혼부부·생애최초·다자녀 특별공급 자격을 먼저 확인하세요. 일반공급보다 유리할 수 있습니다.' };
-
-  const possibleRegions = CUTLINES.filter(c => total >= c.min).sort((a, b) => a.avg - b.avg);
-  const hardRegions = CUTLINES.filter(c => total < c.min);
-
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
-      <div style={{ marginBottom: 'var(--sp-xl)' }}>
-        <Link href="/apt" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 청약 목록</Link>
-        <h1 style={{ margin: '8px 0 0', fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>🎯 청약 가점 진단</h1>
-        <p style={{ margin: '4px 0 0', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>내 가점을 계산하고 당첨 전략을 확인하세요 (만점 84점)</p>
-        <div style={{ marginTop: 8 }}><SectionShareButton section="apt-diagnose" label="청약 가점 진단 — 내 가점은 몇 점?" pagePath="/apt/diagnose" /></div>
+      {/* SEO H1 — 크롤러 필수 */}
+      <div style={{ marginBottom: 20 }}>
+        <h1 style={{ margin: '0 0 4px', fontSize: 'var(--fs-xl)', fontWeight: 900, letterSpacing: '-0.5px', color: 'var(--text-primary)' }}>
+          2026 청약 가점 계산기
+        </h1>
+        <p style={{ margin: 0, fontSize: 13, color: 'var(--text-tertiary)' }}>
+          주택공급에 관한 규칙 별표1 기준 · 만점 84점 · 배우자 통장 합산 지원
+        </p>
       </div>
 
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 20, marginBottom: 'var(--sp-lg)' }}>
-        <div style={{ marginBottom: 'var(--sp-xl)' }}>
-          <label style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 'var(--sp-sm)' }}>무주택기간 (만점 32점)</label>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-md)' }}>
-            <input type="range" min={0} max={15} value={years} onChange={e => setYears(Number(e.target.value))} style={{ flex: 1, accentColor: 'var(--brand)' }} />
-            <span style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', minWidth: 50 }}>{years}년</span>
-            <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--brand)', fontWeight: 600 }}>{housingScore}점</span>
-          </div>
-        </div>
-        <div style={{ marginBottom: 'var(--sp-xl)' }}>
-          <label style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 'var(--sp-sm)' }}>부양가족 수 (만점 35점)</label>
-          <div style={{ display: 'flex', gap: 6 }}>
-            {[0, 1, 2, 3, 4, 5, 6].map(n => (
-              <button key={n} onClick={() => setFamily(n)} style={{
-                flex: 1, padding: '8px 0', borderRadius: 'var(--radius-sm)', border: 'none', cursor: 'pointer',
-                background: family === n ? 'var(--brand)' : 'var(--bg-hover)',
-                color: family === n ? 'var(--text-inverse)' : 'var(--text-secondary)', fontSize: 'var(--fs-sm)', fontWeight: 600,
-              }}>{n}명</button>
-            ))}
-          </div>
-          <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--brand)', fontWeight: 600, textAlign: 'right', marginTop: 'var(--sp-xs)' }}>{familyScore}점</div>
-        </div>
-        <div>
-          <label style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 'var(--sp-sm)' }}>청약통장 가입기간 (만점 17점)</label>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-md)' }}>
-            <input type="range" min={0} max={15} value={bankYears} onChange={e => setBankYears(Number(e.target.value))} style={{ flex: 1, accentColor: 'var(--brand)' }} />
-            <span style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', minWidth: 50 }}>{bankYears}년</span>
-            <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--brand)', fontWeight: 600 }}>{bankScore}점</span>
-          </div>
-        </div>
+      {/* 인터랙티브 계산기 (클라이언트) */}
+      <DiagnoseClient />
+
+      {/* ═══ SEO 정적 콘텐츠 (서버 렌더 — 크롤러 인덱싱) ═══ */}
+      <div className="blog-content" style={{ marginTop: 32 }}>
+        <h2>청약 가점제란?</h2>
+        <p>청약 가점제는 민영주택 일반공급에서 동일 순위 내 경쟁이 발생했을 때, 신청자의 조건을 점수화하여 총점이 높은 순서대로 당첨자를 선정하는 제도입니다. 주택공급에 관한 규칙 제28조 및 별표1에 의거하여 무주택기간(최대 32점), 부양가족 수(최대 35점), 청약통장 가입기간(최대 17점) 세 가지 항목으로 구성되며, 총 84점 만점입니다.</p>
+
+        <h2>가점 항목별 산정 기준 (2026년)</h2>
+
+        <h3>1. 무주택기간 (만점 32점)</h3>
+        <p>무주택기간은 청약신청자 및 배우자를 기준으로 산정합니다. 만 30세부터 산정이 시작되며, 만 30세 이전에 혼인한 경우 혼인신고일부터 계산합니다. 만 30세 미만의 미혼자는 무주택기간이 인정되지 않아 0점을 받게 됩니다.</p>
+        <table>
+          <thead><tr><th>무주택기간</th><th>점수</th><th>무주택기간</th><th>점수</th></tr></thead>
+          <tbody>
+            <tr><td>1년 미만</td><td>2점</td><td>8년~9년</td><td>18점</td></tr>
+            <tr><td>1년~2년</td><td>4점</td><td>9년~10년</td><td>20점</td></tr>
+            <tr><td>2년~3년</td><td>6점</td><td>10년~11년</td><td>22점</td></tr>
+            <tr><td>3년~4년</td><td>8점</td><td>11년~12년</td><td>24점</td></tr>
+            <tr><td>4년~5년</td><td>10점</td><td>12년~13년</td><td>26점</td></tr>
+            <tr><td>5년~6년</td><td>12점</td><td>13년~14년</td><td>28점</td></tr>
+            <tr><td>6년~7년</td><td>14점</td><td>14년~15년</td><td>30점</td></tr>
+            <tr><td>7년~8년</td><td>16점</td><td>15년 이상</td><td>32점</td></tr>
+          </tbody>
+        </table>
+
+        <h3>2. 부양가족 수 (만점 35점)</h3>
+        <p>부양가족은 입주자모집공고일 현재 청약통장 가입자의 주민등록등본에 등재된 세대원 중 본인을 제외한 배우자, 직계존속(3년 이상 동일 등본 등재, 무주택), 직계비속(미혼 자녀), 미혼 형제자매(부모 사망 시)가 해당됩니다. 0명 5점, 1명당 5점씩 추가되어 최대 6명 이상 35점입니다.</p>
+
+        <h3>3. 청약통장 가입기간 (만점 17점)</h3>
+        <p>주택청약종합저축, 청약저축, 청약예금, 청약부금의 최초 가입일 기준으로 산정합니다. 6개월 미만 1점부터 시작하여 15년 이상이면 만점 17점입니다. 2026년부터는 배우자의 청약통장 가입기간도 50%까지 인정되며, 최대 3점까지 합산 가능합니다(본인과 배우자 합산 최대 17점).</p>
+
+        <h2>청약 가점 올리는 방법</h2>
+        <p>무주택기간은 시간이 지나면 자동으로 쌓이므로, 주택을 매수하지 않고 유지하는 것이 핵심입니다. 부양가족 점수를 높이려면 부모님(직계존속)을 3년 이상 동일 주민등록등본에 등재하고, 가족 전원이 무주택 상태를 유지해야 합니다. 청약통장은 해지하지 않고 유지만 하면 매년 1점씩 자동 가산됩니다.</p>
+
+        <h2>가점제 vs 추첨제 — 어떤 전략이 유리할까?</h2>
+        <p>민영주택 85㎡ 이하는 가점제 100%(투기과열지구) 또는 75%(조정대상지역)가 적용됩니다. 85㎡ 초과는 추첨제 40% 이상이 적용되므로, 가점이 낮은 경우 85㎡ 초과 물량의 추첨제를 노리는 것이 효과적입니다. 공공분양은 가점제가 아닌 소득·자산 기준으로 선정되므로, 특별공급(신혼부부·생애최초·다자녀) 자격을 먼저 확인하는 것을 권장합니다.</p>
+
+        <h2>자주 묻는 질문 (FAQ)</h2>
+
+        <h3>Q. 청약 가점 만점은 몇 점인가요?</h3>
+        <p>청약 가점 만점은 84점입니다. 무주택기간 32점 + 부양가족 35점 + 통장기간 17점으로 구성됩니다. 실질적으로 4인 가족(배우자 + 자녀 2명) 기준 도달 가능한 최고 점수는 약 69~72점 수준입니다.</p>
+
+        <h3>Q. 만 30세 미만 미혼인데 청약 가능한가요?</h3>
+        <p>가능합니다. 다만 만 30세 미만 미혼자는 무주택기간 0점이 적용되어 가점이 낮습니다. 이 경우 85㎡ 초과 추첨제나 생애최초 특별공급을 활용하는 것이 유리합니다.</p>
+
+        <h3>Q. 배우자 청약통장도 합산되나요?</h3>
+        <p>네, 2024년부터 배우자의 청약통장 가입기간이 50%까지 인정되며, 최대 3점까지 합산됩니다. 단, 본인과 배우자의 합산 점수는 최대 17점(만점)을 초과할 수 없습니다.</p>
+
+        <h3>Q. 부양가족에 누가 포함되나요?</h3>
+        <p>배우자(분리세대 포함), 직계존속(3년 이상 동일 등본, 무주택), 미혼 직계비속(자녀), 미혼 형제자매(부모 사망 시)가 포함됩니다. 손자·손녀는 원칙적으로 제외되지만, 부모가 사망한 경우 예외적으로 인정됩니다.</p>
+
+        <h3>Q. 오피스텔 소유자도 무주택자인가요?</h3>
+        <p>네, 오피스텔은 건축법상 업무시설로 분류되므로 주택으로 간주되지 않습니다. 오피스텔을 소유하고 있어도 청약에서는 무주택자로 인정됩니다.</p>
+
+        <h3>Q. 가점을 잘못 입력하면 어떻게 되나요?</h3>
+        <p>가점을 잘못 입력하여 당첨된 경우, 당첨 취소는 물론 최대 1년간 다른 청약을 신청할 수 없는 불이익이 발생합니다. 국토교통부 자료에 따르면 부적격 당첨 중 46.3%가 가점 입력 오류로 인한 것이므로, 반드시 정확하게 입력해야 합니다.</p>
+
+        <h3>Q. 청약 당첨 후 통장은 어떻게 되나요?</h3>
+        <p>청약에 당첨되면 사용한 통장은 효력을 상실합니다. 재당첨 제한(수도권 과밀억제권역 5년, 투기과열지구 10년)이 적용되며, 새로운 청약통장을 개설하여 처음부터 가입기간을 다시 쌓아야 합니다.</p>
+
+        <h3>Q. 분양권도 주택으로 보나요?</h3>
+        <p>네, 분양권 및 입주권은 주택으로 간주됩니다. 분양권을 보유한 세대원이 있으면 무주택 세대 구성원 자격을 상실하게 됩니다. 단, 상속 후 3개월 이내에 지분을 처분하는 경우는 예외적으로 무주택으로 인정됩니다.</p>
       </div>
 
-      {/* 결과 */}
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 24, textAlign: 'center', marginBottom: 'var(--sp-lg)' }}>
-        <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-sm)' }}>내 청약 가점</div>
-        <div style={{ fontSize: 48, fontWeight: 900, color: grade.color }}>{total}<span style={{ fontSize: 'var(--fs-xl)' }}>점</span></div>
-        <div style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: grade.color, marginBottom: 14 }}>{grade.emoji} {grade.label} (상위 {Math.max(1, 100 - pct)}%)</div>
-        <div style={{ position: 'relative', height: 12, background: 'var(--bg-hover)', borderRadius: 'var(--radius-xs)', overflow: 'hidden', marginBottom: 'var(--sp-lg)' }}>
-          <div style={{ height: '100%', width: `${pct}%`, background: `linear-gradient(90deg, var(--accent-blue), ${grade.color})`, borderRadius: 'var(--radius-xs)', transition: 'width 0.3s' }} />
-        </div>
-        <div style={{ display: 'flex', gap: 'var(--sp-sm)', justifyContent: 'center', flexWrap: 'wrap' }}>
-          <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '8px 14px', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>무주택 {housingScore}/32</div>
-          <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '8px 14px', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>부양가족 {familyScore}/35</div>
-          <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '8px 14px', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>통장 {bankScore}/17</div>
-        </div>
-
-        {/* 결과 공유 */}
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: 16 }}>
-          <button onClick={() => {
-            const text = `🎯 내 청약 가점: ${total}점/84점 (${grade.label})\n무주택 ${housingScore}/32 · 부양가족 ${familyScore}/35 · 통장 ${bankScore}/17\n추천전략: ${strategy.type}\n\n카더라에서 내 가점 진단해보기 👉`;
-            const url = 'https://kadeora.app/apt/diagnose';
-            if (typeof window !== 'undefined' && window.Kakao?.Share) {
-              window.Kakao.Share.sendDefault({ objectType: 'text', text, link: { mobileWebUrl: url, webUrl: url }, buttons: [{ title: '가점 진단하기', link: { mobileWebUrl: url, webUrl: url } }] });
-            } else if (navigator.share) {
-              navigator.share({ title: '청약 가점 진단 결과', text, url }).catch(() => {});
-            } else {
-              navigator.clipboard.writeText(text + '\n' + url).then(() => alert('결과가 복사되었습니다!')).catch(() => {});
-            }
-          }} style={{ padding: '10px 20px', borderRadius: 'var(--radius-md)', border: 'none', cursor: 'pointer', background: 'var(--brand)', color: '#fff', fontSize: 'var(--fs-sm)', fontWeight: 700 }}>
-            📤 결과 공유하기
-          </button>
-          <button onClick={() => {
-            navigator.clipboard.writeText(`내 청약 가점: ${total}점/84점 (무주택 ${housingScore} + 부양가족 ${familyScore} + 통장 ${bankScore})`).then(() => alert('복사되었습니다!')).catch(() => {});
-          }} style={{ padding: '10px 20px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', cursor: 'pointer', background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>
-            📋 결과 복사
-          </button>
-        </div>
-      </div>
-
-      {/* 전략 추천 */}
-      <div style={{ background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 'var(--radius-card)', padding: 20, marginBottom: 'var(--sp-lg)' }}>
-        <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>📋 추천 전략: {strategy.type}</div>
-        <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.7 }}>{strategy.desc}</div>
-      </div>
-
-      {/* 지역별 커트라인 */}
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 20, marginBottom: 'var(--sp-lg)' }}>
-        <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 'var(--sp-xs)' }}>📊 지역별 커트라인 비교</div>
-        <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-md)' }}>최근 청약 실적 기반 추정치 · 단지별로 차이가 클 수 있습니다</div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 6 }}>
-          {CUTLINES.map(c => {
-            const canWin = total >= c.avg;
-            const possible = total >= c.min;
-            return (
-              <div key={c.region} style={{
-                padding: '10px 12px', borderRadius: 'var(--radius-sm)',
-                background: canWin ? 'rgba(52,211,153,0.06)' : possible ? 'rgba(251,191,36,0.06)' : 'var(--bg-hover)',
-                border: `1px solid ${canWin ? 'rgba(52,211,153,0.2)' : possible ? 'rgba(251,191,36,0.2)' : 'var(--border)'}`,
-              }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-xs)' }}>
-                  <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>{c.region}</span>
-                  <span style={{ fontSize: 10, fontWeight: 600, color: canWin ? 'var(--accent-green)' : possible ? 'var(--accent-yellow)' : 'var(--accent-red)' }}>
-                    {canWin ? '✅ 유리' : possible ? '⚠️ 가능' : '❌ 어려움'}
-                  </span>
-                </div>
-                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>평균 {c.avg}점 ({c.min}~{c.max})</div>
-                <div style={{ position: 'relative', height: 4, background: 'var(--bg-hover)', borderRadius: 2, marginTop: 6 }}>
-                  <div style={{ position: 'absolute', left: `${Math.min(100, Math.max(0, ((total - c.min) / (c.max - c.min)) * 100))}%`, top: -2, width: 8, height: 8, borderRadius: '50%', background: canWin ? 'var(--accent-green)' : 'var(--accent-red)', transform: 'translateX(-50%)' }} />
-                </div>
-              </div>
-            );
-          })}
-        </div>
-        {possibleRegions.length > 0 && (
-          <div style={{ marginTop: 'var(--sp-md)', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>
-            🎯 당첨 가능 지역: <strong style={{ color: 'var(--text-primary)' }}>{possibleRegions.map(r => r.region).join(', ')}</strong>
-            {hardRegions.length > 0 && <span> · 도전 필요: {hardRegions.map(r => r.region).join(', ')}</span>}
-          </div>
-        )}
-      </div>
-
-      {/* 노릴 수 있는 청약 */}
-      {total > 0 && (
-        <div style={{ marginTop: 'var(--sp-lg)', padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', marginBottom: 'var(--sp-lg)' }}>
-          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>🎯 내 가점으로 노릴 수 있는 청약</div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-            {CUTLINES.filter(c => total >= c.avg).map(c => (
-              <Link key={c.region} href={`/apt?tab=sub`} style={{
-                padding: '6px 12px', borderRadius: 'var(--radius-sm)', textDecoration: 'none', fontSize: 12, fontWeight: 600,
-                background: total >= c.max ? 'rgba(52,211,153,0.1)' : total >= c.avg ? 'rgba(96,165,250,0.1)' : 'var(--bg-hover)',
-                color: total >= c.max ? 'var(--accent-green)' : total >= c.avg ? 'var(--accent-blue)' : 'var(--text-tertiary)',
-                border: `1px solid ${total >= c.max ? 'rgba(52,211,153,0.3)' : total >= c.avg ? 'rgba(96,165,250,0.3)' : 'var(--border)'}`,
-                display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)',
-              }}>
-                {c.region}
-                <span style={{ fontSize: 10, opacity: 0.7 }}>{total >= c.max ? '높음' : '보통'}</span>
-              </Link>
-            ))}
-          </div>
-          {CUTLINES.filter(c => total >= c.avg).length === 0 && (
-            <div style={{ fontSize: 12, color: 'var(--text-tertiary)', padding: 8 }}>가점을 더 쌓으면 더 많은 지역에 도전할 수 있어요</div>
-          )}
-        </div>
-      )}
-
-      {/* 팁 */}
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 20, marginBottom: 'var(--sp-lg)' }}>
-        <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 'var(--sp-md)' }}>💡 가점 올리는 팁</div>
-        {[
-          { condition: housingScore < 32, tip: `무주택기간을 늘리세요. 현재 ${years}년 → ${Math.min(15, years + 3)}년이면 +${Math.min(32, (years + 3 + 1) * 2) - housingScore}점 추가` },
-          { condition: familyScore < 35, tip: '부양가족 등록을 확인하세요. 배우자 포함 직계 존비속이 모두 무주택이면 가족 수에 포함됩니다' },
-          { condition: bankScore < 17, tip: `청약통장은 유지만 하면 기간이 늘어납니다. ${15 - bankYears}년 후 만점(17점)` },
-          { condition: total < 40, tip: '85㎡ 초과 주택은 추첨제 40%가 적용되므로 가점 낮아도 당첨 가능성이 있습니다' },
-          { condition: true, tip: '신혼부부·생애최초 특별공급은 가점과 무관하게 소득·자산 기준으로 선정됩니다' },
-        ].filter(t => t.condition).slice(0, 4).map((t, i) => (
-          <div key={i} style={{ display: 'flex', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-sm)', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-            <span style={{ flexShrink: 0 }}>•</span>
-            <span>{t.tip}</span>
-          </div>
-        ))}
-      </div>
-
-      <div style={{ display: 'flex', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-2xl)' }}>
-        <Link href="/apt" style={{ flex: 1, display: 'block', textAlign: 'center', padding: '12px 0', background: 'var(--brand)', color: 'var(--text-inverse)', borderRadius: 'var(--radius-md)', fontSize: 'var(--fs-base)', fontWeight: 700, textDecoration: 'none' }}>
-          청약 일정 보러가기 →
-        </Link>
-        <Link href="/apt?tab=ongoing" style={{ flex: 1, display: 'block', textAlign: 'center', padding: '12px 0', background: 'var(--bg-surface)', color: 'var(--text-primary)', borderRadius: 'var(--radius-md)', fontSize: 'var(--fs-base)', fontWeight: 700, textDecoration: 'none', border: '1px solid var(--border)' }}>
-          분양중 현장 보기
-        </Link>
+      <div style={{ marginTop: 16, fontSize: 11, color: 'var(--text-tertiary)', textAlign: 'center', lineHeight: 1.6, paddingBottom: 40 }}>
+        본 계산기는 주택공급에 관한 규칙 제28조 및 별표1(가점 산정 기준표)에 의거하여 설계되었습니다.
+        실제 청약 시 주택 유형, 공급 지역, 세부 자격 요건에 따라 결과가 달라질 수 있습니다.
+        정확한 자격은 <a href="https://www.applyhome.co.kr" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--brand)' }}>청약홈(applyhome.co.kr)</a>에서 확인하세요.
       </div>
     </div>
   );
