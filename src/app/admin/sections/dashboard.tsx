@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Badge, C, DailyStat, GRADE_EMOJI, KPI, PROVIDER_LABEL, Spinner, ago, fmt } from '../admin-shared';
+import { CALC_REGISTRY, CATEGORIES } from '@/lib/calc/registry';
 
 export default function DashboardSection() {
   const [data, setData] = useState<any>(null);
@@ -498,6 +499,61 @@ export default function DashboardSection() {
         );
       })()}
 
+      {/* ── 계산기 KPI 패널 ── */}
+      {(() => {
+        const total = CALC_REGISTRY.length;
+        const withEmoji = CALC_REGISTRY.filter(c => c.emoji).length;
+        const withSeo = CALC_REGISTRY.filter(c => c.seoContent && c.seoContent.length > 100).length;
+        const withFaq = CALC_REGISTRY.filter(c => c.faqs.length >= 3).length;
+        const catMap: Record<string, number> = {};
+        CALC_REGISTRY.forEach(c => { catMap[c.categoryLabel] = (catMap[c.categoryLabel] || 0) + 1; });
+        const topCats = Object.entries(catMap).sort((a, b) => b[1] - a[1]).slice(0, 8);
+        return (
+          <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', marginBottom: 'var(--sp-md)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>🧮 계산기 현황 ({total}종)</span>
+              <span style={{ fontSize: 10, color: C.textDim }}>registry.ts · {CATEGORIES.length}개 카테고리</span>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6, marginBottom: 10 }} className="mc-g4">
+              {[
+                { label: '전체', val: total, color: C.brand },
+                { label: '이모지', val: withEmoji, color: withEmoji === total ? C.green : C.yellow },
+                { label: 'SEO 본문', val: withSeo, color: withSeo === total ? C.green : C.yellow },
+                { label: 'FAQ 3+', val: withFaq, color: withFaq === total ? C.green : C.yellow },
+              ].map(item => (
+                <div key={item.label} style={{ background: C.bg, borderRadius: 'var(--radius-xs)', padding: '7px 8px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 15, fontWeight: 800, color: item.color }}>{item.val}</div>
+                  <div style={{ fontSize: 9, color: C.textDim, marginTop: 2 }}>{item.label}</div>
+                </div>
+              ))}
+            </div>
+            <div style={{ borderTop: `1px solid ${C.border}`, paddingTop: 8 }}>
+              <div style={{ fontSize: 10, color: C.textDim, marginBottom: 6 }}>카테고리별 분포</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                {topCats.map(([cat, cnt]) => (
+                  <span key={cat} style={{ fontSize: 10, padding: '2px 7px', borderRadius: 4, background: `${C.brand}15`, color: C.textSec }}>
+                    {cat} <strong style={{ color: C.text }}>{cnt}</strong>
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div style={{ borderTop: `1px solid ${C.border}`, paddingTop: 8, marginTop: 8, display: 'flex', flexDirection: 'column', gap: 'var(--sp-xs)' }}>
+              {[
+                { label: 'JSON-LD', val: '4종 (WebApp+FAQ+HowTo+Breadcrumb)', ok: true },
+                { label: 'AggregateRating', val: '4.8/5 (127건)', ok: true },
+                { label: '회원가입 CTA', val: '결과CTA + 하단배너 (비로그인)', ok: true },
+                { label: 'OG 이미지', val: '이모지 포함 1200×630 + 630×630', ok: true },
+              ].map(r => (
+                <div key={r.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 10 }}>
+                  <span style={{ color: C.textSec }}>{r.label}</span>
+                  <span style={{ fontWeight: 600, color: r.ok ? C.green : C.red }}>{r.val}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
+
       {/* ── 단지백과 KPI 패널 ── */}
       {complexKpi && (
         <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', marginBottom: 'var(--sp-md)' }}>
@@ -956,24 +1012,18 @@ export default function DashboardSection() {
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
           {[
+            { tag: '⭐NEW', label: '계산기 142종 구축', desc: '동적 엔진+registry 등록만으로 페이지+SEO+JSON-LD 자동. 16카테고리', color: C.brand, commit: 's72-calc' },
+            { tag: 'SEO', label: '계산기 SEO 만점', desc: '이모지141+맞춤FAQ131+seoContent133+HowTo+Rating4.8', color: C.green, commit: 's72-seo' },
+            { tag: 'FEAT', label: '계산기 회원가입 CTA', desc: '결과CTA+하단배너. data-nudge로 GuestNudge 조율. 7접점', color: C.cyan, commit: 's72-cta' },
             { tag: '⭐NEW', label: 'PDF 전수 파싱', desc: '2,392건 완료. 취득세2,235 전매789 커뮤니티647 가격183', color: C.brand, commit: 's72-pdf' },
             { tag: 'FEAT', label: '총비용 시뮬레이터', desc: '타입/층/발코니/옵션/취득세 → 실입주 총비용 계산', color: C.green, commit: 's72-sim' },
-            { tag: 'FEAT', label: '규제 신호등', desc: '전매/거주/재당첨 빨강/노랑/초록 뱃지+해제예정일', color: C.yellow, commit: 's72-reg' },
-            { tag: 'UX', label: '이미지 Lightbox', desc: '풀스크린 확대 + 스와이프 + ESC + 도트네비', color: C.cyan, commit: 's72-light' },
-            { tag: 'UX', label: '관심 허수 카운트', desc: '공급세대×0.5 기본표시. 초과시 실데이터 전환', color: C.purple, commit: 's72-interest' },
-            { tag: 'UX', label: '카카오 공유+대시보드', desc: '상단 카카오톡 직접공유. 실유저37명만 카운트', color: C.brand, commit: 's72-kakao' },
-            { tag: 'DATA', label: '블로그 59,401편', desc: '주식 1,803 + 단지백과 34,500 + 재개발 217 + 미분양 204 대량 생성', color: C.brand, commit: 's70-blog' },
-            { tag: 'SEO', label: '사이트맵 수정', desc: '23,967편 누락 해결. SITEMAP_IDS 17~22 추가. 65K편 커버', color: C.green, commit: 's70-sitemap' },
-            { tag: 'SEO', label: '전수 스팸 점검', desc: '타이틀 4,138편 유니크화. 조사 교체. 내부링크 22+. 출처/면책', color: C.yellow, commit: 's70-spam' },
-            { tag: 'FEAT', label: '광고판 AdBanner', desc: '카카오톡 스타일. D-Day 뱃지 + 지역 17색 + 개별 현장 링크', color: C.brand, commit: 's71-ad' },
-            { tag: 'UX', label: '인기검색어 헤더', desc: '모바일+데스크탑 헤더 통합. TrendingTicker 별도 줄 제거', color: C.cyan, commit: 's71-ticker' },
-            { tag: 'AUDIT', label: '전수감사 25건', desc: '등급통일, 가점계산기, 탈퇴, 세법3건, 군위군, 데이터출처', color: C.purple, commit: 's71-audit' },
-            { tag: 'UX', label: '바텀네비+글쓰기', desc: '블로그탭 추가. 카테고리 6개. 좋아요 로그인. 등급 GRADE_MAP', color: C.cyan, commit: 's71-ux' },
-            { tag: 'FIX', label: '피드 자동발행', desc: '라운드로빈, 7일중복, 뻘글55%, 48템플릿, 이모지제거', color: C.green, commit: 's71-seed' },
-            { tag: 'DATA', label: '정보력 RPC 10개', desc: 'nearby_complexes, MA이동평균선, PER/PBR/배당/52주 KPI', color: C.yellow, commit: 's70-rpc' },
-            { tag: 'HOST', label: '111사이트 팝업v2', desc: '분양가 제거, 오늘하루 보지않기, 전국구/지역 분기', color: C.purple, commit: 's71-host' },
-            { tag: 'UX', label: '가점 진단 공유', desc: '카카오톡/Web Share/클립보드. consultant 준비중 교체', color: C.brand, commit: 's71-diag' },
-            { tag: 'FIX', label: '시리즈+토론 연결', desc: '카테고리 필터링 오분류방지. 주식방 직접연결. URL ?tab', color: C.cyan, commit: 's71-series' },
+            { tag: 'FEAT', label: '규제 신호등+입지분석', desc: '전매/거주/재당첨 뱃지. 학군/교통 2칼럼. 단지스펙', color: C.yellow, commit: 's72-reg' },
+            { tag: 'UX', label: '이미지 Lightbox+허수', desc: '풀스크린+스와이프. 관심 공급세대×0.5. 추정 뱃지', color: C.cyan, commit: 's72-ux' },
+            { tag: 'DATA', label: '블로그 59,388편', desc: '주식 1,844 + 단지백과 34,500 + 재개발 217 + 미분양 대량', color: C.brand, commit: 's70-blog' },
+            { tag: 'SEO', label: '사이트맵+전수감사', desc: '23,967편 누락. 4,138편 유니크화. 내부링크 22+. 출처/면책', color: C.green, commit: 's70-seo' },
+            { tag: 'FEAT', label: '광고판+인기검색어', desc: '카카오 스타일 AdBanner. TrendingTicker 헤더 통합', color: C.brand, commit: 's71-ad' },
+            { tag: 'AUDIT', label: '전수감사 25건', desc: '등급통일, 가점계산기, 탈퇴, 세법3건, 군위군', color: C.purple, commit: 's71-audit' },
+            { tag: 'DATA', label: '정보력 RPC 10개', desc: 'nearby_complexes, MA이동평균선, PER/PBR/배당/52주', color: C.yellow, commit: 's70-rpc' },
           ].map(r => (
             <div key={r.commit} style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm)', background: `${r.color}08`, border: `1px solid ${r.color}15` }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>

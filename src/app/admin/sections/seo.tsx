@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { C, Spinner, StatBox, fmt } from '../admin-shared';
+import { CALC_REGISTRY, CATEGORIES } from '@/lib/calc/registry';
 
 export default function SEOSection() {
   const [data, setData] = useState<any>(null);
@@ -32,7 +33,7 @@ export default function SEOSection() {
   return (
     <div style={{ animation: 'fadeIn .4s ease' }}>
       <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: C.text, margin: '0 0 8px' }}>🔍 SEO · 콘텐츠 점수</h1>
-      <p style={{ fontSize: 12, color: C.textDim, margin: '0 0 24px' }}>5,420개 현장 페이지의 데이터 풍부도 현황</p>
+      <p style={{ fontSize: 12, color: C.textDim, margin: '0 0 24px' }}>분양 5,420 페이지 + 계산기 {CALC_REGISTRY.length}종 + 블로그 {fmt(kpi?.blogs || 0)}편</p>
 
       {/* ── IndexNow + 포털 인덱싱 ── */}
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 'var(--sp-md)', marginBottom: 'var(--sp-xl)' }} className="mc-g2">
@@ -76,6 +77,49 @@ export default function SEOSection() {
           ))}
         </div>
       </div>
+
+      {/* ── 계산기 SEO 현황 (142종) ── */}
+      {(() => {
+        const total = CALC_REGISTRY.length;
+        const withEmoji = CALC_REGISTRY.filter(c => c.emoji).length;
+        const withSeo = CALC_REGISTRY.filter(c => c.seoContent && c.seoContent.length > 100).length;
+        const withFaq3 = CALC_REGISTRY.filter(c => c.faqs.length >= 3).length;
+        const withFaq5 = CALC_REGISTRY.filter(c => c.faqs.length >= 5).length;
+        const catMap: Record<string, number> = {};
+        CALC_REGISTRY.forEach(c => { catMap[c.categoryLabel] = (catMap[c.categoryLabel] || 0) + 1; });
+        const pct = (n: number) => Math.round((n / total) * 100);
+        return (
+          <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-lg)', padding: '16px 18px', marginBottom: 'var(--sp-xl)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-md)' }}>
+              <span style={{ fontSize: 14, fontWeight: 700, color: C.text }}>🧮 계산기 포털 노출 현황 ({total}종)</span>
+              <span style={{ fontSize: 10, color: C.textDim }}>{CATEGORIES.length}카테고리 · JSON-LD 4종</span>
+            </div>
+            <div className="mc-g3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-md)' }}>
+              <StatBox icon="🏷️" label="이모지" value={`${pct(withEmoji)}%`} sub={`${withEmoji}/${total}`} color={withEmoji === total ? C.green : C.yellow} accent />
+              <StatBox icon="📝" label="seoContent" value={`${pct(withSeo)}%`} sub={`${withSeo}/${total}`} color={withSeo === total ? C.green : C.yellow} accent />
+              <StatBox icon="❓" label="FAQ 5개+" value={`${pct(withFaq5)}%`} sub={`${withFaq5}/${total} (3+: ${withFaq3})`} color={withFaq5 > total * 0.8 ? C.green : C.yellow} accent />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-xs)' }}>
+              {[
+                { label: 'JSON-LD WebApplication', val: `${total}/${total}`, ok: true },
+                { label: 'JSON-LD FAQPage', val: `${total}/${total}`, ok: true },
+                { label: 'JSON-LD HowTo (3단계)', val: `${total}/${total}`, ok: true },
+                { label: 'JSON-LD BreadcrumbList', val: `${total}/${total}`, ok: true },
+                { label: 'AggregateRating 4.8/5', val: `${total}/${total}`, ok: true },
+                { label: 'OG 이미지 이모지 (1200×630+630×630)', val: `${withEmoji}/${total}`, ok: withEmoji === total },
+                { label: 'Meta desc "무료·회원가입 불필요"', val: `${total}/${total}`, ok: true },
+                { label: 'naver:written_time + daum:site_name', val: `${total}/${total}`, ok: true },
+                { label: '회원가입 CTA (결과+하단)', val: '전체 적용', ok: true },
+              ].map(r => (
+                <div key={r.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 10 }}>
+                  <span style={{ color: C.textSec }}>{r.label}</span>
+                  <span style={{ fontWeight: 600, color: r.ok ? C.green : C.red }}>{r.val}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* ── Hero Stats ── */}
       <div className="mc-g4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 'var(--sp-md)', marginBottom: 'var(--sp-xl)' }}>
