@@ -13,14 +13,22 @@
 | 청약 | 2,701 |
 | 미분양 | 204 |
 | 재개발 | 217 |
-| 크론 | **82** (97→82, 월간 블로그 16→1 디스패처) |
+| 크론 | **83** (97→83, 월간 블로그 16→1 디스패처 + push-content-alert) |
 | TS 에러 | 0 |
 | 빌드 | READY |
 | 이메일 구독자 | 0 (테이블 생성 완료) |
 | 푸시 구독자 | 0 (AutoPushPrompt v2 배포) |
-| RLS | 137/137 (email_subscribers 추가) |
+| RLS | 138/138 (email_subscribers + conversion_events 추가) |
 
 ## 세션 74: 전환율 2%+ 성장 루프 설계 + Layer 1 구현 + 크론 정리
+
+### 추가 수정 (세션 후반)
+- **blog-rewrite 504 수정**: 배치 9→3건 (6회/일 × 3건 = 18건/일, Vercel 런타임 로그 확인)
+- **push-content-alert 크론** (신규): 매일 KST 20:00 푸시 구독자에게 인기 블로그 알림
+- **전환 이벤트 추적**: conversion_events 테이블 + /api/track + beacon API 유틸 + 4개 CTA 추적 삽입
+- **sync-complex-profiles NULL 수정**: RPC에 `AND t.sigungu IS NOT NULL` 필터 (13건/일 실패 해결)
+- **admin/dashboard conversion 섹션**: CTA 이벤트 통계 + 이메일/푸시 구독자 수
+- **Anthropic API 크레딧 충전 확인**: 모든 AI 크론 정상 작동 (blog-stock-v2, blog-apt-v2, apt-ai-summary 등)
 
 ### 전환율 전방위 분석
 | 지표 | 7일 | 30일 |
