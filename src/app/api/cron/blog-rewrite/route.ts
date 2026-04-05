@@ -8,8 +8,8 @@ export const maxDuration = 300;
  * 블로그 자동 리라이팅 크론
  * 
  * vercel.json에서 하루 3회 호출
- * 각 호출 시 10건씩 리라이팅 (하루 최대 30건)
- * 13,778건 ÷ 9건/일 = ~1,531일 (자동)
+ * 각 호출 시 3건씩 리라이팅 (하루 최대 18건, 504 타임아웃 해결)
+ * 504 fix: 배치 9→3건. 6회/일 × 3건 = 18건/일
  * 어드민에서 수동으로 추가 실행 가능
  */
 
@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
       .eq('is_published', true)
       .is('rewritten_at', null)
       .order('created_at', { ascending: true })
-      .limit(9);
+      .limit(3);
 
     if (!posts || posts.length === 0) {
       return NextResponse.json({ ok: true, rewritten: 0, reason: 'all_done' });
