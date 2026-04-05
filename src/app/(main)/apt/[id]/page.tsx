@@ -1312,12 +1312,23 @@ export default async function AptUnifiedPage({ params }: Props) {
       {unsold && (
         <div className="apt-card" style={{ borderLeft: '4px solid var(--accent-red)', borderRadius: 0 }}>
           <h2 style={ct}>🏚️ 미분양 현황</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 10, marginBottom: 'var(--sp-sm)' }}>
-            <div><div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>미분양</div><div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--accent-red)' }}>{(unsold.tot_unsold_hshld_co || 0).toLocaleString()}호</div></div>
-            <div><div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>공급세대</div><div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>{unsold.tot_supply_hshld_co ? unsold.tot_supply_hshld_co.toLocaleString() : '-'}</div></div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 6, marginBottom: 'var(--sp-sm)' }}>
+            <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '8px', textAlign: 'center' }}>
+              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>미분양</div>
+              <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--accent-red)' }}>{(unsold.tot_unsold_hshld_co || 0).toLocaleString()}호</div>
+            </div>
+            <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '8px', textAlign: 'center' }}>
+              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>공급세대</div>
+              <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>{unsold.tot_supply_hshld_co ? unsold.tot_supply_hshld_co.toLocaleString() : '-'}</div>
+            </div>
+            <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '8px', textAlign: 'center' }}>
+              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>미분양률</div>
+              <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: unsoldRate && unsoldRate > 50 ? 'var(--accent-red)' : 'var(--accent-yellow)' }}>{unsoldRate !== null ? `${unsoldRate}%` : '-'}</div>
+            </div>
           </div>
-          {unsoldRate !== null && <div style={{ position: 'relative', height: 6, background: 'var(--bg-hover)', borderRadius: 3, marginBottom: 6 }}><div style={{ height: '100%', borderRadius: 3, width: `${Math.min(unsoldRate, 100)}%`, background: unsoldRate > 70 ? 'var(--accent-red)' : unsoldRate > 40 ? 'var(--accent-orange)' : 'var(--accent-yellow)' }} /><span style={{ position: 'absolute', right: 0, top: -16, fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--accent-red)' }}>미분양률 {unsoldRate}%</span></div>}
-          {unsold.after_completion_unsold > 0 && <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--accent-red)', fontWeight: 600 }}>준공후(악성) 미분양 {unsold.after_completion_unsold}호</div>}
+          {unsoldRate !== null && <div style={{ height: 6, background: 'var(--bg-hover)', borderRadius: 3, marginBottom: 6, overflow: 'hidden' }}><div style={{ height: '100%', borderRadius: 3, width: `${Math.min(unsoldRate, 100)}%`, background: unsoldRate > 70 ? 'var(--accent-red)' : unsoldRate > 40 ? 'var(--accent-orange)' : 'var(--accent-yellow)' }} /></div>}
+          {unsold.after_completion_unsold > 0 && <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--accent-red)', fontWeight: 600, marginBottom: 4 }}>준공후(악성) 미분양 {unsold.after_completion_unsold}호</div>}
+          {(unsold as any).ai_summary && <div style={{ padding: '6px 8px', borderLeft: '2px solid rgba(59,123,246,0.25)', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.5, marginTop: 6 }}>{(unsold as any).ai_summary}</div>}
         </div>
       )}
 
@@ -1328,7 +1339,8 @@ export default async function AptUnifiedPage({ params }: Props) {
           <div style={{ height: 8, background: 'var(--border)', borderRadius: 4, overflow: 'hidden', marginBottom: 6 }}><div style={{ height: '100%', width: `${pct}%`, borderRadius: 4, background: '#B794FF' }} /></div>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}><span>구역지정</span><span style={{ color: '#B794FF', fontWeight: 700 }}>{redevStage} ({pct}%)</span><span>준공</span></div>
           {redev.ai_summary && <div style={{ marginTop: 10, padding: 'var(--sp-md) var(--card-p)', borderRadius: 'var(--radius-md)', background: 'linear-gradient(135deg, var(--accent-blue-bg), rgba(52,211,153,0.06))', border: '1px solid rgba(96,165,250,0.15)' }}><div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--accent-blue)', marginBottom: 3 }}>🤖 AI 분석</div><div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', lineHeight: 1.5 }}>{redev.ai_summary}</div></div>}
-          {[redev.constructor && ['🏗️ 시공사', redev.constructor], redev.developer && ['🏢 시행사', redev.developer], redev.total_households && ['👥 세대수', `${redev.total_households.toLocaleString()}세대`]].filter(Boolean).map(([l, v]: [string, string]) => <div key={l} style={{ ...rw, borderBottom: 'none' }}><span style={rl}>{l}</span><span style={rv}>{v}</span></div>)}
+          {[redev.constructor && ['🏗️ 시공사', redev.constructor], redev.developer && ['🏢 시행사', redev.developer], redev.total_households && ['👥 세대수', `${redev.total_households.toLocaleString()}세대`], (redev as any).area_sqm && ['📐 면적', `${((redev as any).area_sqm / 1000).toFixed(0)}천m²`]].filter(Boolean).map(([l, v]: [string, string]) => <div key={l} style={{ ...rw, borderBottom: 'none' }}><span style={rl}>{l}</span><span style={rv}>{v}</span></div>)}
+          {redev.notes && !redev.ai_summary && <div style={{ padding: '6px 8px', borderLeft: '2px solid rgba(183,148,255,0.25)', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.5, marginTop: 6 }}>{redev.notes}</div>}
         </div>); })()}
 
       {/* 주변 아파트 시세 비교 (단지백과 데이터) */}
@@ -1505,6 +1517,37 @@ export default async function AptUnifiedPage({ params }: Props) {
                     <div style={{ fontSize: 8, color: 'var(--text-tertiary)' }}>{s.label}</div>
                   </div>
                 ))}
+              </div>
+            );
+          })()}
+          {/* 층별 · 면적별 분석 */}
+          {trades.length >= 5 && (() => {
+            const vt = trades.filter((t: any) => Number(t.deal_amount) > 0 && Number(t.exclusive_area) > 0);
+            if (vt.length < 5) return null;
+            const fg: Record<string, any[]> = { '저층(1~5)': vt.filter((t: any) => t.floor >= 1 && t.floor <= 5), '중층(6~15)': vt.filter((t: any) => t.floor >= 6 && t.floor <= 15), '고층(16+)': vt.filter((t: any) => t.floor >= 16) };
+            const ag: Record<string, any[]> = {};
+            vt.forEach((t: any) => { const a = Number(t.exclusive_area); const k = a < 60 ? '소형(~59m²)' : a < 85 ? '중형(60~84)' : '대형(85+)'; if (!ag[k]) ag[k] = []; ag[k].push(t); });
+            const avg = (arr: any[]) => arr.length > 0 ? Math.round(arr.reduce((s: number, t: any) => s + Number(t.deal_amount), 0) / arr.length) : 0;
+            return (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginBottom: 10 }}>
+                <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '8px' }}>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 4 }}>층별 평균</div>
+                  {Object.entries(fg).filter(([, a]) => a.length > 0).map(([k, arr]) => (
+                    <div key={k} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, padding: '2px 0' }}>
+                      <span style={{ color: 'var(--text-tertiary)' }}>{k}</span>
+                      <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{fmtAmount(avg(arr))}</span>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '8px' }}>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 4 }}>면적별 평균</div>
+                  {Object.entries(ag).filter(([, a]) => a.length > 0).map(([k, arr]) => (
+                    <div key={k} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, padding: '2px 0' }}>
+                      <span style={{ color: 'var(--text-tertiary)' }}>{k}</span>
+                      <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{fmtAmount(avg(arr))}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             );
           })()}

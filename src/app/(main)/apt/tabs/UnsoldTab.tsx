@@ -185,20 +185,13 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
                 </a>
               </div>
 
-              {/* 6열 KPI 그리드 */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 1, marginBottom: 1, background: 'var(--bg-hover)', borderRadius: '6px 6px 0 0', overflow: 'hidden' }}>
+              {/* 3열 KPI 그리드 */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 1, marginBottom: 5, background: 'var(--bg-hover)', borderRadius: '6px', overflow: 'hidden' }}>
                 {[
-                  { l: '미분양', v: unsoldCount.toLocaleString(), c: 'var(--accent-red)' },
+                  { l: '미분양', v: unsoldCount.toLocaleString() + '호', c: 'var(--accent-red)' },
                   { l: '총공급', v: u.tot_supply_hshld_co ? u.tot_supply_hshld_co.toLocaleString() : '-', c: 'var(--text-primary)' },
-                  { l: '준공', v: u.completion_ym ? `${u.completion_ym.slice(2, 4)}.${u.completion_ym.slice(4, 6)}` : '-', c: 'var(--text-primary)' },
+                  { l: '전월비', v: (() => { const sa = surgeAlerts.find(a => a.region_nm === u.region_nm); return sa ? `${sa.change_pct > 0 ? '+' : ''}${sa.change_pct}%` : '-'; })(), c: (() => { const sa = surgeAlerts.find(a => a.region_nm === u.region_nm); return sa && sa.change_pct > 0 ? 'var(--accent-red)' : sa && sa.change_pct < 0 ? 'var(--accent-green)' : 'var(--text-tertiary)'; })() },
                 ].map((k, ki) => <div key={ki} style={{ textAlign: 'center', padding: '5px 2px', background: 'var(--bg-surface)' }}><div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginBottom: 1 }}>{k.l}</div><div style={{ fontSize: 11, fontWeight: 800, color: k.c }}>{k.v}</div></div>)}
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 1, marginBottom: 5, background: 'var(--bg-hover)', borderRadius: '0 0 6px 6px', overflow: 'hidden' }}>
-                {[
-                  { l: '평당가', v: (u as any).price_per_pyeong ? `${Math.round((u as any).price_per_pyeong / 10000 * 10) / 10}만` : '-', c: (u as any).price_per_pyeong ? 'var(--accent-purple)' : 'var(--text-tertiary)' },
-                  { l: '시공사', v: u.constructor_nm ? u.constructor_nm.split('(')[0].trim().slice(0, 6) : '-', c: 'var(--text-primary)' },
-                  { l: '시행사', v: u.developer_nm && u.developer_nm !== u.constructor_nm ? u.developer_nm.slice(0, 6) : '-', c: 'var(--text-primary)' },
-                ].map((k, ki) => <div key={ki} style={{ textAlign: 'center', padding: '5px 2px', background: 'var(--bg-surface)' }}><div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginBottom: 1 }}>{k.l}</div><div style={{ fontSize: 11, fontWeight: 700, color: k.c, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{k.v}</div></div>)}
               </div>
 
               {/* 미분양률 바 */}
@@ -211,22 +204,10 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
                 </div>
               )}
 
-              {/* 분양가 범위 바 */}
-              {pMin && pMax && pMin !== pMax && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 5 }}>
-                  <span style={{ fontSize: 9, color: 'var(--accent-blue)', fontWeight: 600 }}>{pMin}억</span>
-                  <div style={{ flex: 1, height: 4, borderRadius: 2, background: 'linear-gradient(90deg, rgba(96,165,250,0.3), var(--brand), rgba(248,113,113,0.3))', position: 'relative', maxWidth: 120 }}>
-                    <div style={{ position: 'absolute', top: -3, left: '50%', width: 10, height: 10, borderRadius: '50%', background: 'var(--brand)', border: '2px solid var(--bg-surface)', transform: 'translateX(-50%)' }} />
-                  </div>
-                  <span style={{ fontSize: 9, color: 'var(--accent-red)', fontWeight: 600 }}>{pMax}억</span>
-                </div>
+              {/* AI 요약 (34%) */}
+              {(u as any).ai_summary && (
+                <div style={{ padding: '4px 7px', borderLeft: '2px solid rgba(59,123,246,0.25)', fontSize: 10, color: 'var(--text-secondary)', lineHeight: 1.4, marginBottom: 5, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{(u as any).ai_summary}</div>
               )}
-
-              {/* 태그 */}
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 2, marginBottom: 5 }}>
-                {u.region_nm && <span style={{ fontSize: 9, padding: '2px 5px', borderRadius: 3, background: 'rgba(255,255,255,0.04)', color: 'var(--text-tertiary)' }}>{u.region_nm}{u.sigungu_nm ? ` ${u.sigungu_nm}` : ''}</span>}
-                {u.discount_info && <span style={{ fontSize: 9, padding: '2px 5px', borderRadius: 3, background: 'rgba(52,211,153,0.06)', color: 'var(--accent-green)', fontWeight: 600 }}>💰 {u.discount_info}</span>}
-              </div>
 
               {/* 액션 버튼 */}
               <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>

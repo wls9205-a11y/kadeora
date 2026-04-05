@@ -195,22 +195,14 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
                     </div>
                     <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 6 }}>{r.address || ''}</div>
 
-                    {/* 7열 KPI 그리드 (모바일 4+3) */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 1, marginBottom: 1, background: 'var(--bg-hover)', borderRadius: '6px 6px 0 0', overflow: 'hidden' }}>
+                    {/* 4열 KPI 그리드 (실제 데이터만) */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 1, marginBottom: 6, background: 'var(--bg-hover)', borderRadius: '6px', overflow: 'hidden' }}>
                       {[
-                        { l: '총세대', v: r.total_households ? r.total_households.toLocaleString() : '확인중', c: r.total_households ? 'var(--brand)' : 'var(--text-tertiary)' },
-                        { l: '시공사', v: r.constructor ? r.constructor.split('(')[0].split('주식')[0].trim().slice(0, 6) : '-', c: 'var(--text-primary)' },
-                        { l: '시행사', v: (r as any).developer ? String((r as any).developer).split('(')[0].trim().slice(0, 6) : '-', c: 'var(--text-primary)' },
-                        { l: '예상준공', v: r.expected_completion ? r.expected_completion.replace(/년|예정/g, '').trim().slice(0, 7) : '-', c: r.expected_completion ? 'var(--accent-green)' : 'var(--text-tertiary)' },
+                        { l: '세대수', v: r.total_households ? r.total_households.toLocaleString() : '-', c: r.total_households ? 'var(--brand)' : 'var(--text-tertiary)' },
+                        { l: '유형', v: r.project_type || '-', c: 'var(--accent-yellow)' },
+                        { l: '면적', v: (r as any).area_sqm ? `${((r as any).area_sqm / 1000).toFixed(0)}천m2` : '-', c: (r as any).area_sqm ? 'var(--text-primary)' : 'var(--text-tertiary)' },
+                        { l: '진행률', v: `${progress}%`, c: sc.color },
                       ].map((k, ki) => <div key={ki} style={{ textAlign: 'center', padding: '5px 2px', background: 'var(--bg-surface)' }}><div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginBottom: 1 }}>{k.l}</div><div style={{ fontSize: 11, fontWeight: 800, color: k.c, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{k.v}</div></div>)}
-                    </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 1, marginBottom: 6, background: 'var(--bg-hover)', borderRadius: '0 0 6px 6px', overflow: 'hidden' }}>
-                      {[
-                        { l: '대지면적', v: r.land_area ? `${(r.land_area / 1000).toFixed(0)}천㎡` : '-', c: 'var(--text-primary)' },
-                        { l: '용적률', v: r.floor_area_ratio ? `${r.floor_area_ratio}%` : '-', c: 'var(--accent-purple)' },
-                        { l: '건폐율', v: r.building_coverage ? `${r.building_coverage}%` : '-', c: 'var(--text-primary)' },
-                        { l: '최고층', v: r.max_floor ? `${r.max_floor}F` : '-', c: r.max_floor ? 'var(--accent-yellow)' : 'var(--text-tertiary)' },
-                      ].map((k, ki) => <div key={ki} style={{ textAlign: 'center', padding: '5px 2px', background: 'var(--bg-surface)' }}><div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginBottom: 1 }}>{k.l}</div><div style={{ fontSize: 11, fontWeight: 800, color: k.c }}>{k.v}</div></div>)}
                     </div>
 
                     {/* 6단계 진행 바 */}

@@ -180,19 +180,21 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
                   <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{o.region_nm}</span>
                 </div>
                 <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4, lineHeight: 1.3 }}>{o.house_nm || '현장명 없음'}</div>
-                {/* KPI 6칸 그리드 (3x2) */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 1, marginBottom: 1, background: 'var(--bg-hover)', borderRadius: '6px 6px 0 0', overflow: 'hidden' }}>
+                {/* KPI 8칸 그리드 (4x2) */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 1, marginBottom: 1, background: 'var(--bg-hover)', borderRadius: '6px 6px 0 0', overflow: 'hidden' }}>
                   {[
                     { l: '분양가', v: priceStr || '-', c: priceStr ? 'var(--brand)' : 'var(--text-tertiary)' },
-                    { l: '공급세대', v: (o.total_supply ?? 0) > 0 ? (o.total_supply ?? 0).toLocaleString() : '-', c: 'var(--text-primary)' },
-                    { l: '시공사', v: o.constructor_nm ? o.constructor_nm.split('(')[0].split('주식')[0].trim().slice(0, 6) : '-', c: 'var(--text-primary)' },
+                    { l: '평당가', v: (o as any).price_per_pyeong_avg ? `${Math.round((o as any).price_per_pyeong_avg).toLocaleString()}만` : '-', c: (o as any).price_per_pyeong_avg ? 'var(--accent-purple)' : 'var(--text-tertiary)' },
+                    { l: '세대수', v: (o.total_supply ?? 0) > 0 ? (o.total_supply ?? 0).toLocaleString() : '-', c: 'var(--text-primary)' },
+                    { l: '입주', v: o.mvn_prearnge_ym ? `${String(o.mvn_prearnge_ym).slice(2, 4)}.${String(o.mvn_prearnge_ym).slice(4, 6)}` : '-', c: o.mvn_prearnge_ym ? 'var(--accent-green)' : 'var(--text-tertiary)' },
                   ].map((k, ki) => <div key={ki} style={{ textAlign: 'center', padding: '5px 2px', background: 'var(--bg-surface)' }}><div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginBottom: 1 }}>{k.l}</div><div style={{ fontSize: 11, fontWeight: 800, color: k.c, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{k.v}</div></div>)}
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 1, marginBottom: 5, background: 'var(--bg-hover)', borderRadius: '0 0 6px 6px', overflow: 'hidden' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 1, marginBottom: 5, background: 'var(--bg-hover)', borderRadius: '0 0 6px 6px', overflow: 'hidden' }}>
                   {[
-                    { l: isUnsold ? '미분양' : '경쟁률', v: isUnsold ? `${(o.unsold_count ?? 0).toLocaleString()}호` : (o.competition_rate ? `${o.competition_rate}:1` : '-'), c: isUnsold ? 'var(--accent-red)' : (o.competition_rate ? 'var(--accent-yellow)' : 'var(--text-tertiary)') },
-                    { l: '입주', v: o.mvn_prearnge_ym ? `${String(o.mvn_prearnge_ym).slice(2, 4)}.${String(o.mvn_prearnge_ym).slice(4, 6)}` : '-', c: o.mvn_prearnge_ym ? 'var(--accent-green)' : 'var(--text-tertiary)' },
-                    { l: o.daysToMove ? 'D-입주' : '시행사', v: o.daysToMove ? `D-${o.daysToMove}` : ((o as any).developer_nm ? String((o as any).developer_nm).slice(0, 6) : '-'), c: o.daysToMove ? 'var(--accent-yellow)' : 'var(--text-primary)' },
+                    { l: isUnsold ? '미분양' : '취득세', v: isUnsold ? `${(o.unsold_count ?? 0).toLocaleString()}호` : ((o as any).acquisition_tax_est ? `~${Math.round((o as any).acquisition_tax_est / 10000).toLocaleString()}만` : '-'), c: isUnsold ? 'var(--accent-red)' : ((o as any).acquisition_tax_est ? 'var(--accent-yellow)' : 'var(--text-tertiary)') },
+                    { l: '계약금', v: (o as any).down_payment_pct ? `${(o as any).down_payment_pct}%` : '-', c: 'var(--text-primary)' },
+                    { l: '시공사', v: o.constructor_nm ? o.constructor_nm.split('(')[0].split('주식')[0].trim().slice(0, 6) : '-', c: 'var(--text-primary)' },
+                    { l: o.daysToMove ? 'D-입주' : '경쟁률', v: o.daysToMove ? `D-${o.daysToMove}` : (o.competition_rate ? `${o.competition_rate}:1` : '-'), c: o.daysToMove ? 'var(--accent-yellow)' : (o.competition_rate ? 'var(--accent-yellow)' : 'var(--text-tertiary)') },
                   ].map((k, ki) => <div key={ki} style={{ textAlign: 'center', padding: '5px 2px', background: 'var(--bg-surface)' }}><div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginBottom: 1 }}>{k.l}</div><div style={{ fontSize: 11, fontWeight: 700, color: k.c, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{k.v}</div></div>)}
                 </div>
                 {/* 중도금 대출 배지 */}
