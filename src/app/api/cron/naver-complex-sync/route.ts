@@ -5,6 +5,7 @@ import { withCronLogging } from '@/lib/cron-logger';
 export const maxDuration = 120;
 
 const TIMEOUT_MS = 5000;
+const GLOBAL_TIMEOUT_MS = 100_000; // 100초 (maxDuration 120초 - 20초 여유)
 
 async function fetchT(url: string, headers: Record<string, string>): Promise<Response | null> {
   const ctrl = new AbortController();
@@ -120,7 +121,12 @@ export async function GET(req: NextRequest) {
   if (token !== process.env.CRON_SECRET && auth !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-  const result = await withCronLogging('naver-complex-sync', () => handler(req));
+  const result = await withCronLogging('naver-complex-sync', () =>
+      Promise.race([
+        handler(req),
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Global timeout 100s')), GLOBAL_TIMEOUT_MS))
+      ])
+    );
   return NextResponse.json(result);
 }
 
@@ -129,6 +135,11 @@ export async function POST(req: NextRequest) {
   if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-  const result = await withCronLogging('naver-complex-sync', () => handler(req));
+  const result = await withCronLogging('naver-complex-sync', () =>
+      Promise.race([
+        handler(req),
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Global timeout 100s')), GLOBAL_TIMEOUT_MS))
+      ])
+    );
   return NextResponse.json(result);
 }

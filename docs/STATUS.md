@@ -29,6 +29,7 @@
 - **전환 이벤트 추적**: conversion_events 테이블 + /api/track + beacon API 유틸 + 4개 CTA 추적 삽입
 - **sync-complex-profiles NULL 수정**: RPC에 `AND t.sigungu IS NOT NULL` 필터 (13건/일 실패 해결)
 - **admin/dashboard conversion 섹션**: CTA 이벤트 통계 + 이메일/푸시 구독자 수
+- **naver-complex-sync stuck 수정**: 전역 100초 타임아웃 추가 (stuck in running 해결)
 - **Anthropic API 크레딧 충전 확인**: 모든 AI 크론 정상 작동 (blog-stock-v2, blog-apt-v2, apt-ai-summary 등)
 
 ### 전환율 전방위 분석
