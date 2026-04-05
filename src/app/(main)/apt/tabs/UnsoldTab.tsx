@@ -76,104 +76,40 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
 
     return (
      <div>
-      {/* 미분양 현황 헤더 */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-sm)' }}>
-        <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)' }}>미분양 현황</span>
-        <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--accent-red)' }}>총 {total.toLocaleString()}세대</span>
-      </div>
 
-      {/* 미분양 급증 경고 배너 — 지역별 현황 아래 */}
-      {surgeAlerts.length > 0 && (
-        <div style={{
-          marginBottom: 'var(--sp-md)', padding: '12px 16px', borderRadius: 'var(--radius-card)',
-          background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 'var(--sp-sm)' }}>
-            <span style={{ fontSize: 16 }}>⚠️</span>
-            <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--accent-red)' }}>미분양 급증 감지</span>
-            <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>전월 대비 20%+ 증가</span>
-          </div>
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-            {surgeAlerts.map(a => (
-              <button key={a.region_nm} onClick={() => setUnsoldRegion(a.region_nm)} style={{
-                padding: '4px 10px', borderRadius: 'var(--radius-xs)', fontSize: 'var(--fs-xs)', fontWeight: 600,
-                background: unsoldRegion === a.region_nm ? 'var(--accent-red)' : 'rgba(239,68,68,0.12)',
-                color: unsoldRegion === a.region_nm ? 'var(--text-inverse)' : 'var(--accent-red)',
-                border: 'none', cursor: 'pointer',
-              }}>
-                {a.region_nm} <span style={{ fontWeight: 800 }}>+{a.change_pct}%</span> <span style={{ fontSize: 'var(--fs-xs)', opacity: 0.8 }}>{(a.prev_count || 0).toLocaleString()} <span style={{ color: a.change_pct > 0 ? 'var(--accent-red)' : 'var(--accent-green)' }}>→</span> {a.current_count.toLocaleString()}세대</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* 종합 현황판 */}
-      {(() => {
+      {/* 미분양 현황 — 컴팩트 지역 비율 바 */}
+      {unsoldRegionStats.length > 0 && (() => {
         const filteredTotal = fu.reduce((s: number, u: any) => s + (u.tot_unsold_hshld_co || 0), 0);
-        const filteredAfterCompletion = fu.reduce((s: number, u: any) => s + (u.after_completion_unsold || 0), 0);
-        const capitalR = ['서울', '경기', '인천'];
-        const filteredCapital = fu.filter((u: Record<string, any>) => capitalR.some(c => (u.region_nm || '').includes(c))).reduce((s: number, u: any) => s + (u.tot_unsold_hshld_co || 0), 0);
-        const filteredLocal = filteredTotal - filteredCapital;
+        const top5 = unsoldRegionStats.slice(0, 5);
+        const top5Total = top5.reduce((s, r) => s + r.unitCount, 0);
+        const restTotal = filteredTotal - top5Total;
+        const barColors = ['var(--accent-red)', 'var(--accent-orange, #F97316)', 'var(--accent-yellow)', 'var(--accent-blue)', 'var(--accent-purple)'];
         return (
-        <div className="kd-card" style={{ marginBottom: 'var(--sp-md)' }}>
-          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>📊 {unsoldRegion !== '전체' ? `${unsoldRegion} ` : ''}미분양 현황</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 10 }}>
-            <div>
-              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{unsoldRegion !== '전체' ? unsoldRegion : '전국'}</div>
-              <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--brand)' }}>{filteredTotal.toLocaleString()}호</div>
+          <div style={{ marginBottom: 10, padding: '8px 10px', borderRadius: 'var(--radius-md)', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)' }}>미분양 {filteredTotal.toLocaleString()}호</span>
+              <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{fu.length}곳{freshDate ? ` · ${freshDate}` : ''}</span>
             </div>
-            <div>
-              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>준공후(악성)</div>
-              <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--accent-red)' }}>{filteredAfterCompletion.toLocaleString()}호</div>
+            {/* 비율 바 */}
+            <div style={{ display: 'flex', height: 6, borderRadius: 3, overflow: 'hidden', marginBottom: 5 }}>
+              {top5.map((r, i) => (
+                <div key={r.name} style={{ flex: r.unitCount, background: barColors[i], transition: 'flex 0.3s' }} />
+              ))}
+              {restTotal > 0 && <div style={{ flex: restTotal, background: 'var(--bg-hover)' }} />}
             </div>
-            <div>
-              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>단지 수</div>
-              <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)' }}>{fu.length}곳</div>
-            </div>
-            <div>
-              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>평균 미분양</div>
-              <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)' }}>{fu.length > 0 ? Math.round(filteredTotal / fu.length).toLocaleString() : 0}호</div>
+            {/* 범례 */}
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              {top5.map((r, i) => (
+                <button key={r.name} onClick={() => { setUnsoldRegion(unsoldRegion === r.name ? '전체' : r.name); setUnsoldPage(1); }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 10, color: unsoldRegion === r.name ? barColors[i] : 'var(--text-tertiary)', fontWeight: unsoldRegion === r.name ? 700 : 400, background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
+                  <span style={{ width: 6, height: 6, borderRadius: 1, background: barColors[i], flexShrink: 0 }} />
+                  {r.name} {r.unitCount.toLocaleString()}
+                </button>
+              ))}
             </div>
           </div>
-          {/* 준공후 미분양 비율 게이지 */}
-          {filteredTotal > 0 && filteredAfterCompletion > 0 && (
-            <div style={{ marginTop: 10, paddingTop: 8, borderTop: '1px solid var(--border)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--sp-xs)' }}>
-                <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>준공후 미분양(악성) 비율</span>
-                <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, color: Math.round(filteredAfterCompletion / filteredTotal * 100) > 30 ? 'var(--accent-red)' : 'var(--accent-yellow)' }}>{Math.round(filteredAfterCompletion / filteredTotal * 100)}%</span>
-              </div>
-              <div style={{ height: 8, borderRadius: 4, background: 'var(--bg-hover)', overflow: 'hidden' }}>
-                <div style={{ height: '100%', borderRadius: 4, background: Math.round(filteredAfterCompletion / filteredTotal * 100) > 30 ? 'var(--accent-red)' : 'var(--accent-yellow)', width: `${Math.round(filteredAfterCompletion / filteredTotal * 100)}%`, transition: 'width 0.6s' }} />
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
-                <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>일반 미분양 {(filteredTotal - filteredAfterCompletion).toLocaleString()}호</span>
-                <span style={{ fontSize: 10, color: 'var(--accent-red)' }}>준공후 {filteredAfterCompletion.toLocaleString()}호</span>
-              </div>
-            </div>
-          )}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'var(--sp-sm)' }}>
-            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>국토교통부 통계누리 기준{freshDate ? ` · ${freshDate} 수집` : ''}</div>
-            <SectionShareButton section="apt-unsold" label="미분양 아파트 현황 — 지역별 미분양 세대수" pagePath="/apt?tab=unsold" />
-          </div>
-        </div>
         );
       })()}
-
-      {/* 미분양 지역별 TOP5 */}
-      {unsoldRegionStats.length > 0 && (
-        <div className="kd-card" style={{ marginBottom: 'var(--sp-md)' }}>
-          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>🏚️ 미분양 많은 지역 TOP5</div>
-          {unsoldRegionStats.slice(0, 5).map((r, i) => (
-            <div key={r.name} style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', padding: '6px 0', borderBottom: i < 4 ? '1px solid var(--border)' : 'none' }}>
-              <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: i < 3 ? 'var(--brand)' : 'var(--text-tertiary)', width: 20 }}>{i + 1}</span>
-              <span style={{ flex: 1, fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{r.name}</span>
-              <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--accent-red)' }}>{r.unitCount.toLocaleString()}호</span>
-              <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{r.siteCount}곳</span>
-            </div>
-          ))}
-        </div>
-      )}
 
       {/* 미분양 추이 차트 */}
       {unsoldMonthly.length > 0 && (
