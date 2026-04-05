@@ -92,6 +92,11 @@ export default async function CalcPage({ params }: { params: Promise<{ category:
       {/* 계산기 엔진 */}
       {calc.inputs.length > 0 && <CalcEngine calc={calc} />}
 
+      {/* SEO 콘텐츠: 본문 (seoContent) */}
+      {calc.seoContent && (
+        <div className="blog-content" style={{ marginTop: 28 }} dangerouslySetInnerHTML={{ __html: calc.seoContent }} />
+      )}
+
       {/* SEO 콘텐츠: FAQ */}
       {calc.faqs.length > 0 && (
         <div className="blog-content" style={{ marginTop: 28 }}>
