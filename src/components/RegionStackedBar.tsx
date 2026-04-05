@@ -44,19 +44,27 @@ const KPI_CFG = [
   { key: 'complex', label: '단지백과', c: 'var(--brand, #3B7BF6)' },
 ] as const;
 
-const DC = ['var(--accent-blue, #3B82F6)', 'var(--accent-green, #22C55E)', 'var(--accent-red, #EF4444)', 'var(--accent-purple, #8B5CF6)'];
+const DONUT_COLORS = ['#3B82F6', '#22C55E', '#EF4444', '#8B5CF6'];
 
-function MiniDonut({ sub, ongoing, unsold, redev, size = 34 }: { sub: number; ongoing: number; unsold: number; redev: number; size?: number }) {
-  const tot = sub + ongoing + unsold + redev;
-  const r = size * 0.38, sw = size * 0.13, cx = size / 2, ci = 2 * Math.PI * r;
-  if (tot <= 0) return <svg width={size} height={size}><circle cx={cx} cy={cx} r={r} fill="none" stroke="var(--border)" strokeWidth={sw} opacity={0.3} /></svg>;
-  const colors = ['#3B82F6', '#22C55E', '#EF4444', '#8B5CF6'];
-  const pcts = [sub / tot, ongoing / tot, unsold / tot, redev / tot];
+function MiniDonut({ sub, ongoing, unsold, redev, name, total, size = 34, active = false }: { sub: number; ongoing: number; unsold: number; redev: number; name: string; total: number; size?: number; active?: boolean }) {
+  const catTotal = sub + ongoing + unsold + redev;
+  const r = size * 0.4, sw = size * 0.11, cx = size / 2, ci = 2 * Math.PI * r;
+  const colors = DONUT_COLORS;
+  const pcts = catTotal > 0 ? [sub / catTotal, ongoing / catTotal, unsold / catTotal, redev / catTotal] : [0, 0, 0, 0];
   let off = 0;
+
   return (
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
       <circle cx={cx} cy={cx} r={r} fill="none" stroke="var(--border)" strokeWidth={sw} opacity={0.2} />
-      {pcts.map((p, i) => { const len = p * ci; if (len < 0.5) { off += len; return null; } const el = <circle key={i} cx={cx} cy={cx} r={r} fill="none" stroke={colors[i]} strokeWidth={sw} strokeDasharray={`${len} ${ci - len}`} strokeDashoffset={-off} transform={`rotate(-90 ${cx} ${cx})`} />; off += len; return el; })}
+      {catTotal > 0 && pcts.map((p, i) => {
+        const len = p * ci;
+        if (len < 0.5) { off += len; return null; }
+        const el = <circle key={i} cx={cx} cy={cx} r={r} fill="none" stroke={colors[i]} strokeWidth={sw} strokeDasharray={`${len} ${ci - len}`} strokeDashoffset={-off} transform={`rotate(-90 ${cx} ${cx})`} />;
+        off += len;
+        return el;
+      })}
+      <text x={cx} y={cx - 3} textAnchor="middle" style={{ fontSize: size * 0.21, fill: active ? 'var(--brand)' : 'var(--text-secondary)', fontWeight: 500 }}>{name}</text>
+      <text x={cx} y={cx + size * 0.18} textAnchor="middle" style={{ fontSize: size * 0.24, fill: 'var(--text-primary)', fontWeight: 800 }}>{total >= 10000 ? Math.round(total / 1000) + 'K' : total.toLocaleString()}</text>
     </svg>
   );
 }
@@ -114,26 +122,24 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
         })}
       </div>
 
-      {/* ── 지역별 미니 도넛 그리드 ── */}
+      {/* ── 지역별 미니 도넛 그리드 (도넛 내부에 지역명+숫자) ── */}
       <div className="kd-region-grid" style={{
         display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 3,
         background: 'var(--bg-surface)', border: '1px solid var(--border)',
-        borderRadius: 'var(--radius-md)', padding: '8px 4px',
+        borderRadius: 'var(--radius-md)', padding: '6px 4px',
       }}>
-        {regions.map((r, i) => {
+        {regions.map((r) => {
           const isAct = activeRegion === r.name;
           return (
             <button key={r.name} onClick={() => { onRegionClick?.(isAct ? '전체' : r.name); setExpRegion(expRegion === r.name ? null : r.name); }}
               style={{
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
-                padding: '5px 2px', borderRadius: 'var(--radius-sm)', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                padding: '3px 0', borderRadius: 'var(--radius-sm)', cursor: 'pointer',
                 background: isAct ? 'var(--bg-hover)' : 'transparent',
                 border: `1px solid ${isAct ? 'var(--brand)' : 'transparent'}`,
                 transition: 'all 0.15s',
               }}>
-              <MiniDonut sub={r.sub} ongoing={r.ongoing} unsold={r.unsold} redev={r.redev} size={34} />
-              <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>{r.total.toLocaleString()}</span>
-              <span style={{ fontSize: 11, color: 'var(--text-secondary)', fontWeight: 500 }}>{r.name}</span>
+              <MiniDonut sub={r.sub} ongoing={r.ongoing} unsold={r.unsold} redev={r.redev} name={r.name} total={r.total} size={42} active={isAct} />
             </button>
           );
         })}
@@ -171,7 +177,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
       )}
 
       <style>{`@keyframes kd-fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
-@media(max-width:640px){.kd-region-kpi{grid-template-columns:repeat(3,minmax(0,1fr))!important}.kd-region-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}}`}</style>
+@media(max-width:640px){.kd-region-kpi{grid-template-columns:repeat(3,minmax(0,1fr))!important}.kd-region-grid{grid-template-columns:repeat(5,minmax(0,1fr))!important}}`}</style>
     </div>
   );
 }
