@@ -14,20 +14,17 @@ export function GuestGate({ children, isLoggedIn }: { children: React.ReactNode;
     if (isTossMode()) return;
     if (isLoggedIn || userId) return;
 
-    // 이전에 닫은 적 있으면 3일간 안 보여줌
+    // 이전에 닫은 적 있으면 1일간 안 보여줌
     const dismissed = localStorage.getItem('kd_gate_dismissed');
-    if (dismissed && Date.now() - Number(dismissed) < 3 * 24 * 60 * 60 * 1000) return;
+    if (dismissed && Date.now() - Number(dismissed) < 1 * 24 * 60 * 60 * 1000) return;
 
-    // 방문 횟수 카운터 — 5회차부터 게이트 표시
+    // 방문 횟수 카운터 — 3회차부터 게이트 표시
     const visitCount = parseInt(localStorage.getItem('kd_visit_count') || '0') + 1;
     localStorage.setItem('kd_visit_count', String(visitCount));
 
-    if (visitCount < 5) return;
+    if (visitCount < 3) return;
 
-    const timer = setTimeout(() => {
-      setShowGate(true);
-    }, 30000);
-    return () => clearTimeout(timer);
+    setShowGate(true);
   }, [isLoggedIn, userId]);
 
   const handleDismiss = () => {

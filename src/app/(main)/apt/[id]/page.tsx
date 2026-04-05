@@ -20,6 +20,7 @@ const InterestRegistration = dynamic(() => import('@/components/InterestRegistra
 const SignupCTA = dynamic(() => import('@/components/SignupCTA'));
 const RegulationBadges = dynamic(() => import('@/components/RegulationBadges'));
 const CostSimulator = dynamic(() => import('@/components/CostSimulator'));
+const ContentLock = dynamic(() => import("@/components/ContentLock"));
 const KpiCards = dynamic(() => import('@/components/apt/KpiCards'));
 const ComplexScale = dynamic(() => import('@/components/apt/ComplexScale'));
 
@@ -624,12 +625,14 @@ export default async function AptUnifiedPage({ params }: Props) {
       {/* 실입주 총비용 시뮬레이터 */}
       {sub && Array.isArray(sub.house_type_info) && sub.house_type_info.length > 0 && sub.house_type_info.some((t: any) => t.lttot_top_amount > 0) && (
         <div style={{ marginBottom: 14 }}>
-          <CostSimulator
-            types={sub.house_type_info}
-            options={Array.isArray(sub.options_list) ? sub.options_list : []}
-            siteName={name}
-            priceSource={sub.price_source}
-          />
+          <ContentLock title="실입주 비용 시뮬레이터" description="가입하면 총비용·취득세 계산을 무료로 이용할 수 있어요">
+            <CostSimulator
+              types={sub.house_type_info}
+              options={Array.isArray(sub.options_list) ? sub.options_list : []}
+              siteName={name}
+              priceSource={sub.price_source}
+            />
+          </ContentLock>
         </div>
       )}
 
@@ -1552,7 +1555,7 @@ export default async function AptUnifiedPage({ params }: Props) {
       <AptReviewSection aptName={name} region={region} />
 
       {/* Comments */}
-      {sub && <div className="apt-card"><AptCommentInline houseKey={sub.house_manage_no || String(sub.id)} houseNm={name} houseType="sub" /></div>}
+      {sub && <div className="apt-card"><ContentLock title="한줄평 보기" description="가입하면 다른 사람들의 한줄평을 볼 수 있어요"><AptCommentInline houseKey={sub.house_manage_no || String(sub.id)} houseNm={name} houseType="sub" /></ContentLock></div>}
 
       {/* Related posts */}
       {relatedPosts.length > 0 && <div className="apt-card"><h2 style={ct}>💬 커뮤니티 게시글</h2>{relatedPosts.map((p: Record<string, any>) => <Link key={p.id} href={`/feed/${p.id}`} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none', color: 'inherit', fontSize: 'var(--fs-sm)' }}><span style={{ color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</span><span style={{ color: 'var(--text-tertiary)', flexShrink: 0, marginLeft: 8, fontSize: 'var(--fs-xs)' }}>댓글 {p.comments_count || 0}</span></Link>)}</div>}

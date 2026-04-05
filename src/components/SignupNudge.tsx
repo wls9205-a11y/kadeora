@@ -30,7 +30,7 @@ export default function SignupNudge() {
   // 팝업 닫기
   const dismiss = useCallback((type: 'welcome' | 'explore') => {
     const key = type === 'welcome' ? LS.welcomeDismissed : LS.exploreDismissed;
-    localStorage.setItem(key, String(Date.now() + 24 * 3600000));
+    localStorage.setItem(key, String(Date.now() + 6 * 3600000));
     setPopup(null);
   }, []);
 
