@@ -36,6 +36,7 @@ const MORE_ITEMS = [
   { href: '/apt/search',      emoji: '🔍', label: '실거래 검색', group: '부동산' },
   { href: '/apt/map',         emoji: '🗺️', label: '부동산 지도', group: '부동산' },
   { href: '/apt/diagnose',    emoji: '🎯', label: '가점 진단', group: '부동산' },
+  { href: '/calc',            emoji: '🧮', label: '계산기', group: '투자 정보' },
   { href: '/apt/data',        emoji: '📥', label: '부동산 통계 자료', group: '부동산' },
   // 설정
   { href: '/notifications/settings', emoji: '🔔', label: '알림 설정', group: '설정' },

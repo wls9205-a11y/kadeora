@@ -61,14 +61,29 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
       '', '/feed', '/hot', '/stock', '/apt', '/discuss', '/blog',
       '/guide', '/search', '/faq', '/terms', '/privacy', '/refund', 
       '/grades', '/daily', '/apt/map', '/apt/diagnose', '/apt/search', '/apt/complex', '/stock/compare', '/blog/series',
-      '/apt/data', '/stock/data',
+      '/apt/data', '/stock/data', '/calc',
     ];
+    // 계산기 동적 URL
+    let calcPaths: string[] = [];
+    try {
+      const { CALC_REGISTRY, CATEGORIES } = await import('@/lib/calc/registry');
+      calcPaths = [
+        ...CATEGORIES.map(c => `/calc/${c.id}`),
+        ...CALC_REGISTRY.map(c => `/calc/${c.category}/${c.slug}`),
+      ];
+    } catch {}
     const entries: SitemapEntry[] = [
       ...staticPaths.map(path => ({
         url: `${BASE}${path}`,
         lastModified: now,
         changeFrequency: path === '' ? 'daily' : 'weekly',
         priority: path === '' ? 1 : ['/feed', '/stock', '/apt'].includes(path) ? 0.9 : 0.7,
+      })),
+      ...calcPaths.map(path => ({
+        url: `${BASE}${path}`,
+        lastModified: now,
+        changeFrequency: 'monthly' as string,
+        priority: path === '/calc' ? 0.9 : 0.8,
       })),
       ...REGIONS.map(r => ({
         url: `${BASE}/apt/region/${encodeURIComponent(r)}`,
