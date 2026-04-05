@@ -1,4 +1,4 @@
-# 카더라 STATUS.md — 세션 74 최종 (2026-04-05 22:00 KST)
+# 카더라 STATUS.md — 세션 74 최종 (2026-04-06 01:00 KST)
 
 ## 인프라 총괄
 | 항목 | 수량 |
@@ -23,6 +23,7 @@
 ## 세션 74: 전환율 2%+ 성장 루프 설계 + Layer 1 구현 + 크론 정리
 
 ### 추가 수정 (세션 후반)
+- **apt/[id] 중복 5건 제거** (-45줄, 1646→1601): 납부일정 2곳→1곳 통합(payment_schedule 우선, down_payment_pct 폴백), 분양조건 체크리스트 제거(RegulationBadges 중복), 규제·청약자격 중복 4항목 제거(발코니확장/청약저축/우선공급만 유지), loan_rate 3곳→1곳(RegulationBadges만)
 - **blog-rewrite 504 수정**: 배치 9→3건 (6회/일 × 3건 = 18건/일, Vercel 런타임 로그 확인)
 - **push-content-alert 크론** (신규): 매일 KST 20:00 푸시 구독자에게 인기 블로그 알림
 - **전환 이벤트 추적**: conversion_events 테이블 + /api/track + beacon API 유틸 + 4개 CTA 추적 삽입
