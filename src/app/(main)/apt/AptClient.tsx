@@ -190,20 +190,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
         shareButton={null}
       />
 
-      {/* 지역 필터 활성 배지 */}
-      {selectedRegion !== '전체' && (
-        <div style={{
-          display: 'inline-flex', alignItems: 'center', gap: 'var(--sp-sm)', marginBottom: 10,
-          padding: '5px 12px', borderRadius: 'var(--radius-xl)', background: 'var(--brand-bg)',
-          border: '1px solid var(--brand-border)', fontSize: 12, fontWeight: 600, color: 'var(--brand)',
-        }}>
-          📍 {selectedRegion} 필터 적용 중
-          <button onClick={() => setSelectedRegion('전체')} style={{
-            background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)',
-            fontSize: 14, padding: 0, lineHeight: 1, marginLeft: 2,
-          }} aria-label="필터 해제">✕</button>
-        </div>
-      )}
+
 
       {/* ━━━ 청약 일정 탭 ━━━ */}
       {activeTab === 'sub' && (

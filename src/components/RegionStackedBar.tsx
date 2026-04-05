@@ -63,8 +63,7 @@ function MiniDonut({ sub, ongoing, unsold, redev, name, total, size = 34, active
         off += len;
         return el;
       })}
-      <text x={cx} y={cx - 3} textAnchor="middle" style={{ fontSize: size * 0.21, fill: active ? 'var(--brand)' : 'var(--text-secondary)', fontWeight: 500 }}>{name}</text>
-      <text x={cx} y={cx + size * 0.18} textAnchor="middle" style={{ fontSize: size * 0.24, fill: 'var(--text-primary)', fontWeight: 800 }}>{total >= 10000 ? Math.round(total / 1000) + 'K' : total.toLocaleString()}</text>
+      <text x={cx} y={cx + size * 0.08} textAnchor="middle" style={{ fontSize: size * 0.28, fill: active ? 'var(--brand)' : 'var(--text-primary)', fontWeight: 600 }}>{name}</text>
     </svg>
   );
 }
@@ -126,7 +125,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
       <div className="kd-region-grid" style={{
         display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 3,
         background: 'var(--bg-surface)', border: '1px solid var(--border)',
-        borderRadius: 'var(--radius-md)', padding: '6px 4px',
+        borderRadius: 'var(--radius-md)', padding: '4px 3px',
       }}>
         {regions.map((r) => {
           const isAct = activeRegion === r.name;
@@ -134,12 +133,12 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
             <button key={r.name} onClick={() => { onRegionClick?.(isAct ? '전체' : r.name); setExpRegion(expRegion === r.name ? null : r.name); }}
               style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                padding: '3px 0', borderRadius: 'var(--radius-sm)', cursor: 'pointer',
+                padding: '2px 0', borderRadius: 'var(--radius-sm)', cursor: 'pointer',
                 background: isAct ? 'var(--bg-hover)' : 'transparent',
                 border: `1px solid ${isAct ? 'var(--brand)' : 'transparent'}`,
                 transition: 'all 0.15s',
               }}>
-              <MiniDonut sub={r.sub} ongoing={r.ongoing} unsold={r.unsold} redev={r.redev} name={r.name} total={r.total} size={42} active={isAct} />
+              <MiniDonut sub={r.sub} ongoing={r.ongoing} unsold={r.unsold} redev={r.redev} name={r.name} total={r.total} size={36} active={isAct} />
             </button>
           );
         })}
@@ -148,15 +147,15 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
       {/* ── 상세 패널 ── */}
       {exp && (
         <div style={{
-          marginTop: 6, padding: '10px 12px', borderRadius: 'var(--radius-md)',
+          marginTop: 4, padding: '6px 10px', borderRadius: 'var(--radius-sm)',
           background: 'var(--bg-surface)', border: '1px solid var(--border)',
           animation: 'kd-fadeIn 0.2s ease',
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-            <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{exp.name}</span>
-            <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>총 {exp.total.toLocaleString()}건</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+            <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{exp.name}</span>
+            <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>총 {exp.total.toLocaleString()}건</span>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 6 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 4 }}>
             {([
               { v: exp.sub, l: '청약', c: 'var(--accent-blue, #3B82F6)' },
               { v: exp.ongoing, l: '분양', c: 'var(--accent-green, #22C55E)' },
@@ -164,12 +163,9 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
               { v: exp.redev, l: '재건축', c: 'var(--accent-purple, #8B5CF6)' },
               { v: exp.trade, l: '실거래', c: 'var(--accent-yellow, #F59E0B)' },
             ] as const).map((item, idx) => (
-              <div key={idx} style={{
-                textAlign: 'center', padding: '6px 4px', borderRadius: 'var(--radius-sm)',
-                background: 'var(--bg-hover)', border: '1px solid var(--border)',
-              }}>
-                <div style={{ fontSize: 15, fontWeight: 700, color: item.c }}>{item.v.toLocaleString()}</div>
-                <div style={{ fontSize: 10, color: 'var(--text-secondary)', fontWeight: 500, marginTop: 2 }}>{item.l}</div>
+              <div key={idx} style={{ textAlign: 'center', padding: '3px 2px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)' }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: item.c }}>{item.v.toLocaleString()}</div>
+                <div style={{ fontSize: 9, color: 'var(--text-secondary)' }}>{item.l}</div>
               </div>
             ))}
           </div>
