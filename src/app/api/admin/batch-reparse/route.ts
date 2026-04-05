@@ -6,7 +6,7 @@ export const maxDuration = 300;
 
 export async function GET(req: NextRequest) {
   const token = req.nextUrl.searchParams.get('token');
-  if (token !== process.env.CRON_SECRET && token !== 'kd-reparse-2026') {
+  if (token !== process.env.CRON_SECRET) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

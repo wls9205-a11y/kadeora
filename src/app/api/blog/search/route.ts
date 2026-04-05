@@ -28,6 +28,6 @@ export async function GET(req: NextRequest) {
       headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300' },
     });
   } catch (e: any) {
-    return NextResponse.json({ posts: [], total: 0, error: e.message }, { status: 200 });
+    return NextResponse.json({ posts: [], total: 0, error: '검색 오류' }, { status: 200 });
   }
 }

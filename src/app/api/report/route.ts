@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { sanitizeText } from '@/lib/sanitize';
 import { rateLimit, rateLimitResponse } from '@/lib/rate-limit'
 import { createSupabaseServer } from '@/lib/supabase-server';
 

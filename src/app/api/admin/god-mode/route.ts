@@ -1,6 +1,7 @@
 import { errMsg } from '@/lib/error-utils';
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase-server';
+import { requireAdmin } from '@/lib/admin-auth';
 
 export const maxDuration = 300; // 5분
 
@@ -238,6 +239,8 @@ async function runPhase(
 }
 
 export async function POST(req: NextRequest) {
+  const auth = await requireAdmin();
+  if ('error' in auth) return auth.error;
   const startTime = Date.now();
 
   try {
@@ -358,6 +361,8 @@ export async function POST(req: NextRequest) {
 
 // GET: 현재 상태 조회
 export async function GET(req: NextRequest) {
+  const auth = await requireAdmin();
+  if ('error' in auth) return auth.error;
   try {
     const supabase = await createSupabaseServer();
     const { data: { user } } = await supabase.auth.getUser();

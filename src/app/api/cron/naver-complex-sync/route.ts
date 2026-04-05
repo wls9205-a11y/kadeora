@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
 
+export const maxDuration = 120;
+
 const TIMEOUT_MS = 5000;
 
 async function fetchT(url: string, headers: Record<string, string>): Promise<Response | null> {

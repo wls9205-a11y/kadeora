@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { sanitizeText } from '@/lib/sanitize';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
@@ -8,7 +9,7 @@ export async function POST(req: NextRequest) {
   if (!(await rateLimit(req, 'auth'))) return rateLimitResponse();
 
   try {
-    const { message, category, rating } = await req.json();
+    const body = await req.json(); const message = sanitizeText(body.message, 1000); const category = sanitizeText(body.category, 50); const rating = Number(body.rating) || 0;
     if (!message?.trim()) return NextResponse.json({ error: '내용을 입력해주세요' }, { status: 400 });
     if (message.trim().length > 2000) return NextResponse.json({ error: '2000자 이하로 입력해주세요' }, { status: 400 });
 

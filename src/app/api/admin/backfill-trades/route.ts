@@ -1,5 +1,6 @@
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { createSupabaseServer } from '@/lib/supabase-server';
+import { requireAdmin } from '@/lib/admin-auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { withCronLogging } from '@/lib/cron-logger';
 import { LAWD_CODES, parseXmlItems, parseRegionSigungu } from '@/lib/lawd-codes';
@@ -17,6 +18,8 @@ export const maxDuration = 300;
 ═══════════════════════════════════════════════════════════ */
 
 export async function POST(req: NextRequest) {
+  const auth = await requireAdmin();
+  if ('error' in auth) return auth.error;
   // 관리자 인증 (세션 기반)
   const authSb = await createSupabaseServer();
   const { data: { user } } = await authSb.auth.getUser();

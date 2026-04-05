@@ -115,7 +115,7 @@ async function parseSinglePdf(
 export async function GET(req: NextRequest) {
   const token = req.nextUrl.searchParams.get('token');
   const authHeader = req.headers.get('authorization');
-  const isAuthed = token === 'kd-reparse-2026' || token === process.env.CRON_SECRET || authHeader === `Bearer ${process.env.CRON_SECRET}`;
+  const isAuthed = token === process.env.CRON_SECRET || authHeader === `Bearer ${process.env.CRON_SECRET}`;
   if (!isAuthed) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   // eslint-disable-next-line @typescript-eslint/no-require-imports

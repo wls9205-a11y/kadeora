@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase-server';
+import { requireAdmin } from '@/lib/admin-auth';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 export const maxDuration = 120;
 
 // GET /api/admin/audit — 주식 시세 + 부동산 세부정보 전수조사
 export async function GET(req: NextRequest) {
+  const auth = await requireAdmin();
+  if ('error' in auth) return auth.error;
   const sbServer = await createSupabaseServer();
   const { data: { user } } = await sbServer.auth.getUser();
   if (!user) return NextResponse.json({ error: 'login required' }, { status: 401 });

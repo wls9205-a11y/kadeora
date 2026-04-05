@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdmin } from '@/lib/admin-auth';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 export async function GET() {
-  const sb = getSupabaseAdmin();
+  const auth = await requireAdmin();
+  if ('error' in auth) return auth.error;
+  const sb = auth.admin;
   const { data } = await (sb.from('apt_subscriptions')
     .select('id, house_nm, region_nm, project_type, tot_supply_hshld_co, total_households, constructor_nm')
     .in('project_type', ['재개발', '재건축'])
@@ -22,7 +25,9 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const sb = getSupabaseAdmin();
+  const auth = await requireAdmin();
+  if ('error' in auth) return auth.error;
+  const sb = auth.admin;
   const body = await req.json();
   const { id, total_households, dong_count, max_floor } = body;
 

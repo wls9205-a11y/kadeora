@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase-server';
+import { requireAdmin } from '@/lib/admin-auth';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 export const maxDuration = 300;
 
 export async function POST(req: NextRequest) {
+  const auth = await requireAdmin();
+  if ('error' in auth) return auth.error;
   // 관리자 인증
   const sbServer = await createSupabaseServer();
   const { data: { user } } = await sbServer.auth.getUser();

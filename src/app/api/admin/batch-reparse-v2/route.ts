@@ -11,7 +11,7 @@ export const runtime = 'nodejs';
  * 추출: max_floor, parking_total, nearest_station, total_dong_count, min_floor,
  *       heating_type, structure_type, exterior_finish, announcement_raw_text
  * 
- * 호출: GET /api/admin/batch-reparse-v2?token=kd-reparse-2026
+ * 호출: GET /api/admin/batch-reparse-v2?token=CRON_SECRET
  * GOD MODE에서 실행 가능
  */
 
@@ -184,7 +184,7 @@ async function reparseSingle(
 export async function GET(req: NextRequest) {
   const token = req.nextUrl.searchParams.get('token');
   const authHeader = req.headers.get('authorization');
-  const isAuthed = token === 'kd-reparse-2026' || token === process.env.CRON_SECRET || authHeader === `Bearer ${process.env.CRON_SECRET}`;
+  const isAuthed = token === process.env.CRON_SECRET || authHeader === `Bearer ${process.env.CRON_SECRET}`;
   if (!isAuthed) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   // eslint-disable-next-line @typescript-eslint/no-require-imports

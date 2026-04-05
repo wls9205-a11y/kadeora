@@ -1,6 +1,7 @@
 import { errMsg } from '@/lib/error-utils';
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase-server';
+import { requireAdmin } from '@/lib/admin-auth';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { decrypt, hasEncryptionKey } from '@/lib/encryption';
 
@@ -14,6 +15,8 @@ import { decrypt, hasEncryptionKey } from '@/lib/encryption';
  * - IP 주소
  */
 export async function POST(req: NextRequest) {
+  const auth = await requireAdmin();
+  if ('error' in auth) return auth.error;
   try {
     // 1. 어드민 인증
     const supabase = await createSupabaseServer();

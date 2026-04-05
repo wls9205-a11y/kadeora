@@ -24,6 +24,12 @@ const EVENT_HANDLERS = /\s+on\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi;
 // javascript: 프로토콜 제거
 const JS_PROTOCOL = /(href|src|action)\s*=\s*(?:"javascript:[^"]*"|'javascript:[^']*')/gi;
 
+
+// 추가 위험 패턴: img/svg 이벤트 핸들러
+const IMG_EVENT = /<(img|svg|video|audio|source|details|marquee)\s+[^>]*on\w+/gi;
+
+// HTML 주석 내 위험 코드 제거
+const COMMENT_DANGER = /<!--[\s\S]*?(script|javascript|on\w+\s*=)[\s\S]*?-->/gi;
 // data: URI 제거 (이미지 제외)
 const DATA_URI = /(href|action)\s*=\s*(?:"data:[^"]*"|'data:[^']*')/gi;
 
@@ -41,6 +47,12 @@ export function sanitizeHtml(html: string): string {
   // 3. javascript: 프로토콜 제거
   clean = clean.replace(JS_PROTOCOL, '$1=""');
   
+  // 3.5 img/svg 이벤트 핸들러 제거
+  clean = clean.replace(IMG_EVENT, (m) => m.replace(/on\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, ''));
+
+  // 3.6 HTML 주석 내 위험 코드 제거
+  clean = clean.replace(COMMENT_DANGER, '');
+
   // 4. data: URI 제거 (href, action에서만)
   clean = clean.replace(DATA_URI, '$1=""');
   

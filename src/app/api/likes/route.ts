@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const postId = body.post_id;
+    const postId = Number(body.post_id); if (!postId || isNaN(postId)) return NextResponse.json({ error: "잘못된 요청" }, { status: 400 });
     if (!postId) return NextResponse.json({ error: '게시글 ID가 필요합니다.' }, { status: 400 });
 
     // DB 작업: service_role로 RLS 우회 (유저 검증은 위에서 완료)

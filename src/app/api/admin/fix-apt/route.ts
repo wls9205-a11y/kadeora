@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase-server';
+import { requireAdmin } from '@/lib/admin-auth';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 export const maxDuration = 30;
@@ -7,6 +8,8 @@ export const maxDuration = 30;
 // POST /api/admin/fix-apt
 // actions: fix_supply_mismatch, recalc_supply, verify_batch, update_household
 export async function POST(req: NextRequest) {
+  const auth = await requireAdmin();
+  if ('error' in auth) return auth.error;
   const sbServer = await createSupabaseServer();
   const { data: { user } } = await sbServer.auth.getUser();
   if (!user) return NextResponse.json({ error: 'login required' }, { status: 401 });

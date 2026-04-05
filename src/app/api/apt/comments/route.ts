@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     const { house_key, house_nm, house_type, content } = await req.json();
     if (!content || content.length > 200) return NextResponse.json({ error: '200자 이내' }, { status: 400 });
     const { data, error } = await sb.from('apt_comments').insert({ house_key, house_nm, house_type, author_id: user.id, content }).select('id, content, created_at').single();
-    if (error) return NextResponse.json({ error: error.message }, { status: 503 });
+    if (error) return NextResponse.json({ error: '서비스 일시 오류입니다' }, { status: 503 });
     const { data: profile } = await sb.from('profiles').select('nickname').eq('id', user.id).single();
     return NextResponse.json({ comment: { ...data, nickname: profile?.nickname ?? '익명' } }, { status: 201 });
   } catch { return NextResponse.json({ error: '서버 오류' }, { status: 500 }); }

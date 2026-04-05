@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdmin } from '@/lib/admin-auth';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 export const dynamic = 'force-dynamic';
@@ -342,13 +343,12 @@ ${s.description ? s.description.slice(0, 150) + '...' : `${s.market} 상장. 현
 }
 
 export async function POST(req: NextRequest) {
-  const token = new URL(req.url).searchParams.get('token');
-  if (token !== 'kd-reparse-2026') {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  const auth = await requireAdmin();
+  if ('error' in auth) return auth.error;
+  const admin = auth.admin;
 
   const limit = parseInt(new URL(req.url).searchParams.get('limit') || '20');
-  const admin = getSupabaseAdmin();
+  const _ = getSupabaseAdmin();
 
   const { data: thinPosts } = await (admin as any).rpc('get_thin_blog_posts', { max_len: 800, lim: limit });
 
@@ -394,5 +394,7 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
+  const auth = await requireAdmin();
+  if ('error' in auth) return auth.error;
   return POST(req);
 }

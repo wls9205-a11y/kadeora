@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) return NextResponse.json({ error: '로그인 필요' }, { status: 401 });
 
-    const { postId } = await request.json();
+    const body = await request.json(); const postId = Number(body.postId); if (!postId || isNaN(postId)) return NextResponse.json({ error: "잘못된 요청" }, { status: 400 });
     if (!postId) return NextResponse.json({ error: 'postId 필요' }, { status: 400 });
 
     const admin = getSupabaseAdmin();

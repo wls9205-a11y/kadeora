@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { sanitizeId } from '@/lib/sanitize';
 import { createSupabaseServer } from '@/lib/supabase-server';
 
 const recentActions = new Map<string, number>();
 
 export async function GET(req: NextRequest) {
+  if (!(await rateLimit(req, "api"))) return rateLimitResponse();
   const blogPostId = req.nextUrl.searchParams.get('blogPostId');
   if (!blogPostId) return NextResponse.json({ error: 'Missing blogPostId' }, { status: 400 });
 
@@ -22,6 +25,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  if (!(await rateLimit(req, "api"))) return rateLimitResponse();
   const sb = await createSupabaseServer();
   const { data: { user } } = await sb.auth.getUser();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

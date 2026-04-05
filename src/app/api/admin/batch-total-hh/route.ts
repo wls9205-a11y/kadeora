@@ -114,7 +114,7 @@ async function extractTotalHH(
 export async function GET(req: NextRequest) {
   const token = req.nextUrl.searchParams.get('token');
   const authHeader = req.headers.get('authorization');
-  const isAuthed = token === process.env.CRON_SECRET || token === 'kd-reparse-2026' || authHeader === `Bearer ${process.env.CRON_SECRET}`;
+  const isAuthed = token === process.env.CRON_SECRET || authHeader === `Bearer ${process.env.CRON_SECRET}`;
   if (!isAuthed) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   return runExtraction();
 }

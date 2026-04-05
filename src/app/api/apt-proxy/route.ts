@@ -74,6 +74,6 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: false, error: 'Invalid action' }, { status: 400 });
   } catch (err) {
-    return NextResponse.json({ success: false, error: err instanceof Error ? err.message : 'Unknown error' }, { status: 500 });
+    return NextResponse.json({ success: false, error: '프록시 요청 실패' }, { status: 500 });
   }
 }

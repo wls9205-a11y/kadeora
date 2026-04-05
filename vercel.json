@@ -201,10 +201,6 @@
       "schedule": "10 0 * * *"
     },
     {
-      "path": "/api/cron/stock-price",
-      "schedule": "*/15 0-6 * * 1-5"
-    },
-    {
       "path": "/api/cron/blog-weekly-market",
       "schedule": "0 1 * * 1"
     },
@@ -219,10 +215,6 @@
     {
       "path": "/api/stock-refresh",
       "schedule": "*/5 0-7 * * 1-5"
-    },
-    {
-      "path": "/api/stock-refresh",
-      "schedule": "0 14,16,18,20,22 * * 1-5"
     },
     {
       "path": "/api/cron/stock-naver-sync",

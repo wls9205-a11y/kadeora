@@ -1,6 +1,7 @@
 import { errMsg } from '@/lib/error-utils';
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase-server';
+import { requireAdmin } from '@/lib/admin-auth';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 export const maxDuration = 300;
@@ -68,6 +69,8 @@ const BATCH_PRESETS: Record<string, { label: string; endpoints: string[] }> = {
 };
 
 export async function POST(req: NextRequest) {
+  const auth = await requireAdmin();
+  if ('error' in auth) return auth.error;
   try {
     // 관리자 인증
     const sb = await createSupabaseServer();
@@ -138,6 +141,8 @@ export async function POST(req: NextRequest) {
 
 // GET: 프리셋 목록 반환
 export async function GET() {
+  const auth = await requireAdmin();
+  if ('error' in auth) return auth.error;
   return NextResponse.json({
     presets: Object.entries(BATCH_PRESETS).map(([key, val]) => ({
       key, label: val.label, count: val.endpoints.length,

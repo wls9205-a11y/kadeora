@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase-server';
+import { requireAdmin } from '@/lib/admin-auth';
 
 export const maxDuration = 60;
 
@@ -9,6 +10,8 @@ export const maxDuration = 60;
  * body: { endpoint: "/api/cron/crawl-unsold-molit" }
  */
 export async function POST(req: NextRequest) {
+  const auth = await requireAdmin();
+  if ('error' in auth) return auth.error;
   try {
     // 1. 관리자 인증
     const supabase = await createSupabaseServer();

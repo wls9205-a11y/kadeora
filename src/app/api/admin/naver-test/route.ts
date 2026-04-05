@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { createSupabaseServer } from '@/lib/supabase-server';
+import { requireAdmin } from '@/lib/admin-auth';
 
 // 네이버 API 응답 구조 확인용 테스트 엔드포인트
 // GET /api/admin/naver-test?symbol=005930
 export async function GET(req: NextRequest) {
+  const auth = await requireAdmin();
+  if ('error' in auth) return auth.error;
   const sb = getSupabaseAdmin();
   const sbServer = await createSupabaseServer();
   const { data: { user } } = await sbServer.auth.getUser();
