@@ -256,7 +256,7 @@ export async function POST(req: NextRequest) {
 
     if (mode === 'single' && endpoint) {
       // 단일 크론
-      const result = await runCron(endpoint, baseUrl, cronSecret, 180000, 'single');
+      const result = await runCron(endpoint, baseUrl, cronSecret, 290000, 'single');
       allResults = [result];
     } else if (mode === 'failed' && failedOnly.length > 0) {
       // 실패 재시도

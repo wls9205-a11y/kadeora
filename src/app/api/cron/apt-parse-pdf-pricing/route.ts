@@ -362,8 +362,10 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
     const pdfParse = require('pdf-parse');
     const sb = getSupabaseAdmin();
 
-    const BATCH_SIZE = 1000;
-    const CONCURRENCY = 30;
+    const BATCH_SIZE = 200;
+    const CONCURRENCY = 10;
+    const START_TIME = Date.now();
+    const MAX_RUNTIME_MS = 250000; // 250초 (300초 제한에서 50초 여유)
 
     // pdf_parse_version이 0 또는 null인 레코드 (미파싱)
     const { data: targets } = await (sb as any).from('apt_subscriptions')
@@ -385,6 +387,9 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
     let processed = 0, failed = 0, priceFound = 0, fieldsTotal = 0;
 
     for (let i = 0; i < targets.length; i += CONCURRENCY) {
+      // 시간 초과 안전장치 — 250초 넘으면 중단
+      if (Date.now() - START_TIME > MAX_RUNTIME_MS) break;
+
       const chunk = targets.slice(i, i + CONCURRENCY);
       const results = await Promise.allSettled(
         chunk.map((apt: any) => parsePdfPricing(apt, pdfParse, sb).catch(() => ({ ok: false, fields: 0, priceOk: false })))
