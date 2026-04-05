@@ -566,6 +566,7 @@ export default async function AptUnifiedPage({ params }: Props) {
             const pyeongPrice = sub?.price_per_pyeong_avg || Math.round(pAvg / 34);
             const ppMin = sub?.price_per_pyeong_min || 0;
             const ppMax = sub?.price_per_pyeong_max || 0;
+            const isEstimated = sub?.price_source === 'estimated';
             // 가격 등급 (만원 단위)
             const tier = pAvg >= 120000 ? { label: '12억+', color: '#FF6B6B', emoji: '💎' } : pAvg >= 90000 ? { label: '9억대', color: '#FB923C', emoji: '🏅' } : pAvg >= 60000 ? { label: '6억대', color: '#FBBF24', emoji: '✨' } : pAvg >= 30000 ? { label: '3억대', color: 'var(--brand)', emoji: '🏠' } : { label: '3억 미만', color: 'var(--accent-green)', emoji: '🌱' };
             return (
@@ -585,7 +586,7 @@ export default async function AptUnifiedPage({ params }: Props) {
                 {/* 평균 + 평당가 */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10 }}>
                   <span style={{ color: 'var(--text-tertiary)' }}>평균 <strong style={{ color: 'var(--text-primary)' }}>{fmtAmount(pAvg)}</strong></span>
-                  {pyeongPrice > 0 && <span style={{ color: 'var(--accent-purple)' }}>평당 <strong>{ppMin > 0 && ppMax > 0 ? `${ppMin.toLocaleString()}~${ppMax.toLocaleString()}만` : `${pyeongPrice.toLocaleString()}만`}</strong>{ppMin > 0 && ppMax > 0 && <span style={{ fontSize: 9, color: 'var(--text-tertiary)', marginLeft: 3 }}>(평균 {pyeongPrice.toLocaleString()}만)</span>}</span>}
+                  {pyeongPrice > 0 && <span style={{ color: 'var(--accent-purple)' }}>평당 <strong>{ppMin > 0 && ppMax > 0 ? `${ppMin.toLocaleString()}~${ppMax.toLocaleString()}만` : `${pyeongPrice.toLocaleString()}만`}</strong>{ppMin > 0 && ppMax > 0 && <span style={{ fontSize: 9, color: 'var(--text-tertiary)', marginLeft: 3 }}>(평균 {pyeongPrice.toLocaleString()}만)</span>}{isEstimated && <span style={{ fontSize: 8, marginLeft: 4, padding: '1px 4px', borderRadius: 3, background: 'rgba(245,158,11,0.15)', color: '#F59E0B', fontWeight: 600 }}>추정</span>}</span>}
                 </div>
               </div>
             );
@@ -638,6 +639,7 @@ export default async function AptUnifiedPage({ params }: Props) {
             types={sub.house_type_info}
             options={Array.isArray(sub.options_list) ? sub.options_list : []}
             siteName={name}
+            priceSource={sub.price_source}
           />
         </div>
       )}
@@ -1045,6 +1047,7 @@ export default async function AptUnifiedPage({ params }: Props) {
                         const priceAvg = Number(t.lttot_avg_amount || 0);
                         const displayPrice = priceAvg || price;
                         const ppyeong = displayPrice > 0 && exclusiveArea > 10 ? Math.round(displayPrice / (exclusiveArea / 3.3058)) : 0;
+                        const typeEstimated = !t.price_source || t.price_source !== 'regex';
                         const useRate = exclusiveArea > 0 && supplyArea > 0 ? Math.round(exclusiveArea / supplyArea * 100) : 0;
                         return (
                           <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
@@ -1056,7 +1059,7 @@ export default async function AptUnifiedPage({ params }: Props) {
                             <td style={{ padding: '6px', textAlign: 'right', fontWeight: 700, color: 'var(--text-primary)' }}>{total}</td>
                             {hasPrice && <td style={{ padding: '6px', textAlign: 'right' }}>
                               <div style={{ fontWeight: 700, color: 'var(--accent-blue)' }}>{priceMin > 0 && priceMin !== price ? <><span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{priceMin >= 10000 ? `${(priceMin / 10000).toFixed(1)}억` : `${priceMin.toLocaleString()}`}~</span>{price >= 10000 ? `${(price / 10000).toFixed(1)}억` : `${price.toLocaleString()}만`}</> : price >= 10000 ? `${(price / 10000).toFixed(1)}억` : `${price.toLocaleString()}만`}</div>
-                              {ppyeong > 0 && <div style={{ fontSize: 9, color: 'var(--accent-purple)' }}>평당 {ppyeong.toLocaleString()}만{priceAvg > 0 ? ' (평균)' : ''}</div>}
+                              {ppyeong > 0 && <div style={{ fontSize: 9, color: 'var(--accent-purple)' }}>평당 {ppyeong.toLocaleString()}만{priceAvg > 0 ? ' (평균)' : ''}{priceMin > 0 && typeEstimated && sub?.price_source === 'estimated' ? <span style={{ fontSize: 7, marginLeft: 3, padding: '0px 3px', borderRadius: 2, background: 'rgba(245,158,11,0.15)', color: '#F59E0B', fontWeight: 600 }}>추정</span> : null}</div>}
                             </td>}
                           </tr>
                         );
@@ -1189,7 +1192,7 @@ export default async function AptUnifiedPage({ params }: Props) {
               <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>기존 아파트</div>
             </div>
             <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '8px', textAlign: 'center' }}>
-              <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>이 분양 평당가</div>
+              <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>이 분양 평당가{sub?.price_source === 'estimated' ? <span style={{ fontSize: 7, marginLeft: 2, padding: '0px 3px', borderRadius: 2, background: 'rgba(245,158,11,0.15)', color: '#F59E0B', fontWeight: 600 }}>추정</span> : null}</div>
               <div style={{ fontSize: 14, fontWeight: 800, color: myPpyeong > avgPyeong ? 'var(--accent-red)' : 'var(--accent-green)' }}>{myPpyeong > 0 ? `${myPpyeong.toLocaleString()}만` : '-'}</div>
               <div style={{ fontSize: 9, color: myPpyeong > avgPyeong ? 'var(--accent-red)' : 'var(--accent-green)' }}>{avgPyeong > 0 && myPpyeong > 0 ? (myPpyeong > avgPyeong ? `+${Math.round((myPpyeong - avgPyeong) / avgPyeong * 100)}%` : `${Math.round((myPpyeong - avgPyeong) / avgPyeong * 100)}%`) : ''}</div>
             </div>

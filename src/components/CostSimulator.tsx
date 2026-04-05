@@ -16,9 +16,10 @@ interface Props {
   types: TypeInfo[];
   options?: { name: string; price: number }[];
   siteName: string;
+  priceSource?: string;
 }
 
-export default function CostSimulator({ types, options = [], siteName }: Props) {
+export default function CostSimulator({ types, options = [], siteName, priceSource }: Props) {
   const validTypes = types.filter(t => t.lttot_top_amount > 0 || (t.lttot_avg_amount && t.lttot_avg_amount > 0));
   const [selectedType, setSelectedType] = useState(0);
   const [selectedFloor, setSelectedFloor] = useState('avg');
@@ -65,8 +66,9 @@ export default function CostSimulator({ types, options = [], siteName }: Props) 
 
   return (
     <div style={{ padding: '16px', borderRadius: 'var(--radius-lg)', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
-      <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 14, color: 'var(--text-primary)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 800, marginBottom: 14, color: 'var(--text-primary)' }}>
         실입주 총비용 시뮬레이터
+        {priceSource === 'estimated' && <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: 'rgba(245,158,11,0.12)', color: '#F59E0B', fontWeight: 600 }}>추정치 기반</span>}
       </div>
 
       {/* 선택 영역 */}
