@@ -70,7 +70,7 @@
   "crons": [
     {
       "path": "/api/cron/seed-posts",
-      "schedule": "*/30 * * * *"
+      "schedule": "0 */2 * * *"
     },
     {
       "path": "/api/cron/cleanup",
@@ -322,7 +322,7 @@
     },
     {
       "path": "/api/cron/collect-site-images",
-      "schedule": "30 0,3,6,9,12,15,18,21 * * *"
+      "schedule": "30 0,6,12,18 * * *"
     },
     {
       "path": "/api/cron/collect-site-trends",
@@ -337,72 +337,8 @@
       "schedule": "30 6 * * *"
     },
     {
-      "path": "/api/cron/blog-trade-trend",
-      "schedule": "0 2 1 * *"
-    },
-    {
-      "path": "/api/cron/blog-stock-deep",
-      "schedule": "0 2 2 * *"
-    },
-    {
-      "path": "/api/cron/blog-etf-compare",
-      "schedule": "0 3 2 * *"
-    },
-    {
-      "path": "/api/cron/blog-adr-compare",
-      "schedule": "0 4 2 * *"
-    },
-    {
       "path": "/api/cron/blog-sector-rotation",
       "schedule": "10 2 * * 1"
-    },
-    {
-      "path": "/api/cron/blog-redev-summary",
-      "schedule": "0 2 3 * *"
-    },
-    {
-      "path": "/api/cron/blog-theme-stocks",
-      "schedule": "0 2 4 * *"
-    },
-    {
-      "path": "/api/cron/blog-invest-calendar",
-      "schedule": "0 2 5 * *"
-    },
-    {
-      "path": "/api/cron/blog-comparison",
-      "schedule": "0 2 6 * *"
-    },
-    {
-      "path": "/api/cron/blog-life-guide",
-      "schedule": "0 2 7 * *"
-    },
-    {
-      "path": "/api/cron/blog-district-guide",
-      "schedule": "0 2 8 * *"
-    },
-    {
-      "path": "/api/cron/blog-competition-rate",
-      "schedule": "0 2 9 * *"
-    },
-    {
-      "path": "/api/cron/blog-investor-flow",
-      "schedule": "0 2 10 * *"
-    },
-    {
-      "path": "/api/cron/blog-disclosure",
-      "schedule": "0 2 11 * *"
-    },
-    {
-      "path": "/api/cron/blog-exchange-rate",
-      "schedule": "0 2 12 * *"
-    },
-    {
-      "path": "/api/cron/blog-unsold-trend",
-      "schedule": "0 2 13 * *"
-    },
-    {
-      "path": "/api/cron/blog-builder-analysis",
-      "schedule": "0 2 14 * *"
     },
     {
       "path": "/api/cron/blog-monthly",
@@ -422,7 +358,7 @@
     },
     {
       "path": "/api/cron/invite-reward",
-      "schedule": "*/15 * * * *"
+      "schedule": "*/30 * * * *"
     },
     {
       "path": "/api/cron/indexnow-mass",
@@ -455,6 +391,10 @@
     {
       "path": "/api/cron/blog-apt-v2",
       "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/cron/blog-monthly-topics",
+      "schedule": "0 2 * * *"
     }
   ]
 }
