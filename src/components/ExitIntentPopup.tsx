@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
+import { trackConversion } from '@/lib/track-conversion';
 
 /**
  * Exit Intent 팝업 — 이탈 직전 마지막 전환 기회

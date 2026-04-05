@@ -1,3 +1,4 @@
+import { trackConversion } from '@/lib/track-conversion';
 'use client';
 import Link from 'next/link';
 import { useAuth } from '@/components/AuthProvider';

@@ -2,6 +2,7 @@
 import { isTossMode } from '@/lib/toss-mode';
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/components/AuthProvider';
+import { trackConversion } from '@/lib/track-conversion';
 import { usePathname } from 'next/navigation';
 
 /**
@@ -106,6 +107,7 @@ export default function AutoPushPrompt() {
 
       setShow(false);
       localStorage.setItem('kd-push-subscribed', '1');
+      trackConversion('cta_complete', 'push_prompt');
     } catch {
       setShow(false);
     } finally {
