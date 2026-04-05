@@ -161,7 +161,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
         // 평당가: DB 값 우선, 없으면 house_type_info에서 계산
         const dbPpAvg = (o as any).price_per_pyeong_avg;
         const ppAvg = dbPpAvg || (() => {
-          const hti = Array.isArray(o.house_type_info) ? o.house_type_info : [];
+          const hti = Array.isArray((o as any).house_type_info) ? (o as any).house_type_info : [];
           const valid = hti.filter((t: any) => t.lttot_top_amount > 0 && t.type);
           if (valid.length === 0) return null;
           const sum = valid.reduce((s: number, t: any) => {
