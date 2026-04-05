@@ -185,9 +185,9 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
                       <span style={{ fontSize: 9, fontWeight: 600, padding: '2px 6px', borderRadius: 4, background: r.project_type === '재개발' ? 'rgba(96,165,250,0.1)' : 'rgba(251,146,60,0.1)', color: r.project_type === '재개발' ? 'var(--accent-blue-light)' : 'var(--accent-orange-light)' }}>{r.project_type}</span>
                       <span style={{ fontSize: 10, fontWeight: 800, color: sc.color }}>{progress}%</span>
                       <span style={{ marginLeft: 'auto', fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 600 }}>{r.region}</span>
-                      <button aria-label="즐겨찾기" onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleWatchlist('redev', String(r.id)); }} style={{ fontSize: 16, background: watchlist.has(`redev:${r.id}`) ? 'var(--accent-yellow-bg)' : 'transparent', border: watchlist.has(`redev:${r.id}`) ? '1px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '2px 5px', cursor: 'pointer', lineHeight: 1 }}>
-                        {watchlist.has(`redev:${r.id}`) ? '⭐' : '☆'}
-                      </button>
+                      <a href={`/apt/${encodeURIComponent(redevSlug)}#interest-section`} aria-label="관심등록" onClick={(e) => e.stopPropagation()} style={{ fontSize: 16, background: 'transparent', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '2px 5px', lineHeight: 1, textDecoration: 'none', color: 'var(--text-tertiary)' }}>
+                        ☆
+                      </a>
                     </div>
                     {/* 구역명 */}
                     <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: (!r.district_name || r.district_name === '미상' || r.district_name === '정보 준비중') ? 'var(--text-tertiary)' : 'var(--text-primary)', marginBottom: 2, lineHeight: 1.3 }}>

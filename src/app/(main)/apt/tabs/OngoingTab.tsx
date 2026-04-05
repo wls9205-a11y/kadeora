@@ -195,11 +195,6 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
                     { l: o.daysToMove ? 'D-입주' : '시행사', v: o.daysToMove ? `D-${o.daysToMove}` : ((o as any).developer_nm ? String((o as any).developer_nm).slice(0, 6) : '-'), c: o.daysToMove ? 'var(--accent-yellow)' : 'var(--text-primary)' },
                   ].map((k, ki) => <div key={ki} style={{ textAlign: 'center', padding: '5px 2px', background: 'var(--bg-surface)' }}><div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginBottom: 1 }}>{k.l}</div><div style={{ fontSize: 11, fontWeight: 700, color: k.c, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{k.v}</div></div>)}
                 </div>
-                {/* 태그 */}
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3, marginBottom: 4 }}>
-                  {o.address && <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 4, background: 'rgba(255,255,255,0.04)', color: 'var(--text-tertiary)' }}>{o.address.replace(/^[^\s]+\s/, '').split(' ').slice(0, 2).join(' ')}</span>}
-                  {(o as any).developer_nm && (o as any).developer_nm !== o.constructor_nm && <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 4, background: 'rgba(255,255,255,0.04)', color: 'var(--text-tertiary)' }}>시행 {String((o as any).developer_nm).slice(0, 8)}</span>}
-                </div>
                 {/* 중도금 대출 배지 */}
                 {(o as any).loan_rate && (
                   <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: (o as any).loan_rate.includes('무이자') ? 'rgba(52,211,153,0.08)' : 'rgba(251,191,36,0.08)', color: (o as any).loan_rate.includes('무이자') ? 'var(--accent-green)' : 'var(--accent-yellow)', fontWeight: 600, marginBottom: 4, display: 'inline-block' }}>
@@ -275,11 +270,12 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
                   </div>
                 )}
               </div>
-              <button onClick={(e) => { e.stopPropagation(); toggleWatchlist(isUnsold ? 'unsold' : 'sub', String(o.link_id)); }} style={{
-                fontSize: 'var(--fs-lg)', background: isWatched ? 'var(--accent-yellow-bg)' : 'transparent',
-                border: isWatched ? '1px solid rgba(251,191,36,0.4)' : '1px solid var(--border)',
+              <a href={`${linkH}#interest-section`} onClick={(e) => e.stopPropagation()} aria-label="관심등록" style={{
+                fontSize: 'var(--fs-lg)', background: 'transparent',
+                border: '1px solid var(--border)',
                 borderRadius: 'var(--radius-sm)', padding: '2px 6px', cursor: 'pointer', lineHeight: 1,
-              }}>{isWatched ? '⭐' : '☆'}</button>
+                textDecoration: 'none', color: 'var(--text-tertiary)',
+              }}>☆</a>
             </div>
           </Link>
         );
@@ -440,7 +436,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
                 {o.pblanc_url && <a href={o.pblanc_url} target="_blank" rel="noopener noreferrer" style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>공고 보기</a>}
               </div>
               <div style={{ display: 'flex', gap: 'var(--sp-sm)' }}>
-                <button onClick={() => { setSelectedOngoing(null); toggleWatchlist(isU ? 'unsold' : 'sub', String(o.link_id)); }} style={{ flex: 1, padding: '10px 0', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer' }}>⭐ 관심단지</button>
+                <a href={`${linkH}#interest-section`} style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-secondary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>☆ 관심등록</a>
                 <button onClick={() => { setSelectedOngoing(null); setCommentTarget({ houseKey: isU ? `unsold_${o.link_id}` : `sub_${o.link_id}`, houseNm: o.house_nm || '현장', houseType: isU ? 'unsold' : 'sub' }); }} style={{ flex: 1, padding: '10px 0', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer' }}>💬 한줄평</button>
               </div>
               {/* 지도 버튼 */}

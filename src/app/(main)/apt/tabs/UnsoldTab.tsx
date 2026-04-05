@@ -244,9 +244,9 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
                 </span>
                 {(u.after_completion_unsold ?? 0) > 0 && <span style={{ fontSize: 9, padding: '2px 5px', borderRadius: 3, background: 'var(--accent-red-bg)', color: 'var(--accent-red)', fontWeight: 700 }}>악성 {u.after_completion_unsold}호</span>}
                 {priceStr && <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--brand)', flexShrink: 0 }}>{priceStr}</span>}
-                <button aria-label="즐겨찾기" onClick={(e) => { e.stopPropagation(); toggleWatchlist('unsold', String(u.id)); }} style={{ fontSize: 16, background: watchlist.has(`unsold:${u.id}`) ? 'var(--accent-yellow-bg)' : 'transparent', border: watchlist.has(`unsold:${u.id}`) ? '1px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '2px 5px', cursor: 'pointer', lineHeight: 1 }}>
-                  {watchlist.has(`unsold:${u.id}`) ? '⭐' : '☆'}
-                </button>
+                <a href={`/apt/${encodeURIComponent(generateAptSlug(u.house_nm) || String(u.id))}#interest-section`} aria-label="관심등록" onClick={(e) => e.stopPropagation()} style={{ fontSize: 16, background: 'transparent', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '2px 5px', cursor: 'pointer', lineHeight: 1, textDecoration: 'none', color: 'var(--text-tertiary)' }}>
+                  ☆
+                </a>
               </div>
 
               {/* 6열 KPI 그리드 */}
@@ -289,9 +289,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
               {/* 태그 */}
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 2, marginBottom: 5 }}>
                 {u.region_nm && <span style={{ fontSize: 9, padding: '2px 5px', borderRadius: 3, background: 'rgba(255,255,255,0.04)', color: 'var(--text-tertiary)' }}>{u.region_nm}{u.sigungu_nm ? ` ${u.sigungu_nm}` : ''}</span>}
-                {u.nearest_station && <span style={{ fontSize: 9, padding: '2px 5px', borderRadius: 3, background: 'rgba(59,123,246,0.06)', color: 'var(--brand)', fontWeight: 600 }}>🚇 {u.nearest_station}</span>}
                 {u.discount_info && <span style={{ fontSize: 9, padding: '2px 5px', borderRadius: 3, background: 'rgba(52,211,153,0.06)', color: 'var(--accent-green)', fontWeight: 600 }}>💰 {u.discount_info}</span>}
-                {u.developer_nm && u.developer_nm !== u.constructor_nm && <span style={{ fontSize: 9, padding: '2px 5px', borderRadius: 3, background: 'rgba(255,255,255,0.04)', color: 'var(--text-tertiary)' }}>시행 {u.developer_nm}</span>}
               </div>
 
               {/* 액션 버튼 */}

@@ -243,9 +243,9 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
                 {isMax && <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 7px', borderRadius: 4, background: 'rgba(251,191,36,0.15)', color: 'var(--accent-yellow)' }}>🏆 신고가</span>}
                 {vsMax !== null && !isMax && <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 6px', borderRadius: 4, background: vsMax >= 0 ? 'var(--accent-red-bg)' : 'var(--accent-blue-bg)', color: vsMax >= 0 ? 'var(--accent-red)' : 'var(--accent-blue)' }}>전고 {vsMax >= 0 ? '+' : ''}{vsMax}%</span>}
                 <span style={{ marginLeft: 'auto', fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 600 }}>{t.region_nm} {t.sigungu}</span>
-                <button aria-label="즐겨찾기" onClick={(e) => { e.stopPropagation(); toggleWatchlist('transaction', String(t.id)); }} style={{ fontSize: 16, background: watchlist.has(`transaction:${t.id}`) ? 'var(--accent-yellow-bg)' : 'transparent', border: watchlist.has(`transaction:${t.id}`) ? '1px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '2px 5px', cursor: 'pointer', lineHeight: 1 }}>
-                  {watchlist.has(`transaction:${t.id}`) ? '⭐' : '☆'}
-                </button>
+                <a href={`/apt/complex/${encodeURIComponent(t.apt_name)}`} aria-label="단지 상세" onClick={(e) => e.stopPropagation()} style={{ fontSize: 16, background: 'transparent', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '2px 5px', lineHeight: 1, textDecoration: 'none', color: 'var(--text-tertiary)' }}>
+                  ☆
+                </a>
               </div>
               {/* 단지명 + 가격 */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8, marginBottom: 5 }}>
@@ -286,12 +286,6 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
                   </div>
                 );
               })()}
-              {/* 태그 */}
-              <div style={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                {t.dong && <span style={{ fontSize: 9, padding: '2px 5px', borderRadius: 3, background: 'rgba(255,255,255,0.04)', color: 'var(--text-tertiary)' }}>{t.dong}</span>}
-                {t.built_year && <span style={{ fontSize: 9, padding: '2px 5px', borderRadius: 3, background: 'rgba(255,255,255,0.04)', color: 'var(--text-tertiary)' }}>{new Date().getFullYear() - t.built_year}년차</span>}
-                {t.exclusive_area > 0 && <span style={{ fontSize: 9, padding: '2px 5px', borderRadius: 3, background: 'rgba(255,255,255,0.04)', color: 'var(--text-tertiary)' }}>{t.floor}층/{t.exclusive_area}㎡</span>}
-              </div>
             </div>
           </div>
         );
