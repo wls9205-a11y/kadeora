@@ -1158,3 +1158,90 @@ export function annualLeavePay(v: V): CalcResult {
   const pay = Math.round(dailyWage * days);
   return { main: { label: '연차수당', value: fmt(pay) }, details: [{ label: '1일 통상임금', value: fmt(Math.round(dailyWage)) }, { label: '미사용 연차', value: `${days}일` }] };
 }
+
+// ═══ 3차 배치 공식 ═══
+
+export function capitalGainsLand(v: V): CalcResult {
+  const gain = n(v.sellPrice) - n(v.buyPrice) - n(v.expenses);
+  if (gain <= 0) return { main: { label: '양도소득세', value: '0원' }, details: [] };
+  let ltdRate = 0;
+  for (const r of CAPITAL_GAINS_TAX.longTermDeduction) { if (n(v.holdYears) >= r.years) ltdRate = r.rate; }
+  const taxableGain = Math.round(gain * (1 - ltdRate));
+  const taxBase = Math.max(0, taxableGain - 2500000);
+  let tax = Math.round(calcProgressiveTax(taxBase, INCOME_TAX_BRACKETS));
+  if (v.nonBusiness === 'yes') tax = Math.round(tax * 1.1); // 비사업용 10% 추가
+  const local = Math.round(tax * 0.1);
+  return { main: { label: '양도소득세', value: fmt(tax + local) }, details: [{ label: '양도차익', value: fmt(gain) }, { label: '장특공제', value: pct(ltdRate) }, { label: '소득세', value: fmt(tax) }] };
+}
+export function multiHouseSim(v: V): CalcResult {
+  const houses = n(v.houseCount);
+  const price = n(v.price); const buyPrice = n(v.buyPrice);
+  const regulated = v.regulated === 'yes';
+  const acqRate = houses >= 3 ? (regulated ? 0.12 : 0.04) : houses === 2 ? (regulated ? 0.08 : 0.01) : 0.01;
+  const acqTax = Math.round(price * acqRate);
+  const gain = price - buyPrice;
+  const addRate = houses >= 3 ? 0.30 : houses === 2 ? 0.20 : 0;
+  const cgtRate = regulated ? addRate : 0;
+  const cgt = gain > 0 ? Math.round(gain * (0.24 + cgtRate)) : 0; // 근사
+  return { main: { label: '중과세 합계', value: fmt(acqTax + cgt) }, details: [{ label: '취득세', value: fmt(acqTax) + ` (${pct(acqRate)})` }, { label: '양도세 추정', value: fmt(cgt) }, { label: '양도세 중과', value: regulated ? `+${pct(cgtRate)}` : '없음' }] };
+}
+export function investmentTypeTest(v: V): CalcResult {
+  const score = Number(v.q1) + Number(v.q2) + Number(v.q3);
+  const type = score <= 4 ? '안전형' : score <= 6 ? '안정추구형' : score <= 8 ? '위험중립형' : '적극투자형';
+  const allocation = score <= 4 ? '예금 70% + 채권 20% + 주식 10%' : score <= 6 ? '예금 40% + 채권 30% + 주식 30%' : score <= 8 ? '예금 20% + 채권 20% + 주식 60%' : '주식 80% + 대안투자 20%';
+  return { main: { label: '투자 성향', value: type }, details: [{ label: '추천 포트폴리오', value: allocation }, { label: '점수', value: `${score}/9점` }] };
+}
+export function dailyWorkerTax(v: V): CalcResult {
+  const daily = n(v.dailyWage);
+  const taxable = Math.max(0, daily - 150000);
+  const tax = Math.round(taxable * 0.06 * 0.45); // 6% × (1-55% 세액공제)
+  const local = Math.round(tax * 0.1);
+  return { main: { label: '원천징수세액', value: fmt(tax + local) }, details: [{ label: '비과세 (15만원)', value: fmt(150000) }, { label: '과세 대상', value: fmt(taxable) }, { label: '실수령', value: fmt(daily - tax - local) }] };
+}
+export function freelancerTax(v: V): CalcResult {
+  const rev = n(v.annualRevenue); const rate = n(v.expenseRate) / 100;
+  const income = rev * (1 - rate);
+  const taxBase = Math.max(0, income - 5000000); // 기본공제 근사
+  const tax = Math.round(calcProgressiveTax(taxBase, INCOME_TAX_BRACKETS));
+  const local = Math.round(tax * 0.1);
+  const withheld = n(v.withheld);
+  const refund = withheld - tax - local;
+  return { main: { label: refund >= 0 ? '예상 환급' : '추가 납부', value: fmt(Math.abs(Math.round(refund))), color: refund >= 0 ? 'var(--accent-green)' : 'var(--accent-red)' }, details: [{ label: '종합소득세', value: fmt(tax) }, { label: '지방소득세', value: fmt(local) }, { label: '기납부 (3.3%)', value: fmt(withheld) }] };
+}
+export function telecomCompare(v: V): CalcResult {
+  const current = n(v.currentPlan); const newPlan = n(v.newPlan);
+  const monthSave = current - newPlan;
+  return { main: { label: '연간 절약액', value: fmt(monthSave * 12) }, details: [{ label: '월 절약', value: fmt(monthSave) }, { label: '2년 절약', value: fmt(monthSave * 24) }] };
+}
+export function graduationYear(v: V): CalcResult {
+  const y = n(v.birthYear); const m = n(v.birthMonth);
+  const earlyBirth = m <= 2;
+  const elemEntry = earlyBirth ? y + 6 : y + 7;
+  const elemGrad = elemEntry + 5; const midGrad = elemGrad + 3; const highGrad = midGrad + 3;
+  const uniGrad = highGrad + 4;
+  return { main: { label: '대학 졸업 (예상)', value: `${uniGrad}년 2월` }, details: [{ label: '초등 입학', value: `${elemEntry}년` }, { label: '중학 졸업', value: `${midGrad + 1}년` }, { label: '고등 졸업', value: `${highGrad + 1}년` }, { label: '군 전역 (육군)', value: `${uniGrad - 2 + 2}년` }] };
+}
+export function giftExemptionLookup(v: V): CalcResult {
+  const rel = v.relationship as string;
+  const limits: Record<string, { label: string; amount: number }> = {
+    spouse: { label: '배우자', amount: 600000000 },
+    adultChild: { label: '성년 자녀', amount: 50000000 },
+    minorChild: { label: '미성년 자녀', amount: 20000000 },
+    otherRelative: { label: '기타 친족', amount: 10000000 },
+  };
+  const info = limits[rel] || limits.otherRelative;
+  return { main: { label: '증여 면제한도', value: fmt(info.amount) }, details: [{ label: '관계', value: info.label }, { label: '기간', value: '10년간 합산' }] };
+}
+export function burdenGift(v: V): CalcResult {
+  const value = n(v.propertyValue); const debt = n(v.debt);
+  const buyPrice = n(v.buyPrice); const rel = v.relationship as string;
+  const giftPortion = value - debt;
+  const exemption = rel === 'spouse' ? 600000000 : rel === 'adultChild' ? 50000000 : 20000000;
+  const giftBase = Math.max(0, giftPortion - exemption);
+  let giftTaxAmt = 0;
+  for (const b of GIFT_TAX_BRACKETS) { if (giftBase <= b.max) { giftTaxAmt = Math.round(giftBase * b.rate - b.deduction); break; } }
+  const cgtGain = Math.round(debt * (value - buyPrice) / value);
+  const cgtBase = Math.max(0, cgtGain - 2500000);
+  const cgt = Math.round(calcProgressiveTax(cgtBase, INCOME_TAX_BRACKETS));
+  return { main: { label: '세금 합계', value: fmt(Math.max(0, giftTaxAmt) + Math.max(0, cgt)) }, details: [{ label: '증여세', value: fmt(Math.max(0, giftTaxAmt)) }, { label: '양도소득세 (채무 비율)', value: fmt(Math.max(0, cgt)) }, { label: '증여 부분', value: fmt(giftPortion) }, { label: '양도 부분 (채무)', value: fmt(debt) }] };
+}
