@@ -721,10 +721,14 @@ export default async function BlogDetailPage({ params }: Props) {
       </div>
       )}
 
-      {/* 댓글 섹션 */}
+      {/* 댓글 섹션 — D안 컴팩트 리스트 */}
       <BlogCommentCTA commentCount={comments.length} />
       <div id="blog-comments" style={{ marginBottom: 'var(--sp-xl)' }}>
-        <h3 style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 4px' }}>의견 {comments.length}개</h3>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)' }}>댓글</span>
+          <span style={{ fontSize: 13, color: 'var(--text-tertiary)' }}>{comments.length}</span>
+        </div>
         <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', margin: '0 0 16px' }}>
           {CTA_BY_CAT[post.category] ?? CTA_BY_CAT.general}
         </p>
@@ -733,33 +737,31 @@ export default async function BlogDetailPage({ params }: Props) {
         {isLoggedIn ? (
           <BlogCommentInput blogPostId={post.id} />
         ) : (
-          <div style={{ padding: 'var(--card-p) var(--sp-lg)', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', textAlign: 'center', marginBottom: 'var(--sp-lg)', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>
+          <div style={{ padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, textAlign: 'center', marginBottom: 'var(--sp-lg)', fontSize: 14, color: 'var(--text-secondary)' }}>
             <Link href={`/login?redirect=/blog/${slug}`} style={{ color: 'var(--brand)', fontWeight: 700, textDecoration: 'none' }}>로그인</Link>하면 의견을 남길 수 있어요
           </div>
         )}
 
         {/* 댓글 목록 */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-md)' }}>
+        <div>
           {comments.map((c: Record<string, any>) => {
             const nick = c.author_name || c.profiles?.nickname || '사용자';
             return (
-              <div key={c.id} style={{ display: 'flex', gap: 10 }}>
-                <div style={{ width: 32, height: 32, borderRadius: '50%', flexShrink: 0, background: getAvatarColor(nick), display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-inverse)', fontSize: 'var(--fs-sm)', fontWeight: 700 }}>
+              <div key={c.id} style={{ display: 'flex', gap: 10, padding: '12px 0', borderBottom: '1px solid var(--border)' }}>
+                <div style={{ width: 30, height: 30, borderRadius: '50%', flexShrink: 0, background: getAvatarColor(nick), display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 12, fontWeight: 700 }}>
                   {nick[0].toUpperCase()}
                 </div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 2 }}>
-                    <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{nick}</span>
-                    <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{timeAgo(c.created_at)}</span>
-                  </div>
-                  <div style={{ fontSize: 'var(--fs-base)', color: 'var(--text-primary)', lineHeight: 1.5 }}>{c.content}</div>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{nick}</span>
+                  <span style={{ fontSize: 12, color: 'var(--text-tertiary)', marginLeft: 6 }}>{timeAgo(c.created_at)}</span>
+                  <div style={{ fontSize: 14, color: 'var(--text-primary)', lineHeight: 1.6, marginTop: 3 }}>{c.content}</div>
                 </div>
               </div>
             );
           })}
           {comments.length === 0 && (
-            <div style={{ textAlign: 'center', padding: '20px 0', color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)' }}>
-              아직 의견이 없어요. 첫 의견을 남겨보세요!
+            <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-tertiary)', fontSize: 14 }}>
+              아직 댓글이 없어요. 첫 의견을 남겨보세요!
             </div>
           )}
         </div>

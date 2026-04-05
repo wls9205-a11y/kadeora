@@ -1,6 +1,6 @@
 'use client';
 import { errMsg } from '@/lib/error-utils';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useToast } from '@/components/Toast';
@@ -8,7 +8,7 @@ import { ConfirmModal } from '@/components/ConfirmModal';
 import { useAuth } from '@/components/AuthProvider';
 import type { CommentWithProfile } from '@/types/database';
 import ReportButton from '@/components/ReportButton';
-import { gradeEmoji, gradeTitle, gradeColor } from '@/lib/constants';
+import { gradeTitle, gradeColor } from '@/lib/constants';
 import { getAvatarColor } from '@/lib/avatar';
 import { timeAgo } from '@/lib/format';
 
@@ -26,6 +26,7 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
   const [likingIds, setLikingIds] = useState<Set<number>>(new Set());
   const [replyTo, setReplyTo] = useState<{ id: number; nickname: string } | null>(null);
+  const [sort, setSort] = useState<'latest' | 'popular'>('latest');
   const { success, error, info } = useToast();
 
   const handleSubmit = async () => {
@@ -89,9 +90,24 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
 
   return (
     <div style={{ marginTop: 'var(--sp-sm)' }}>
-      <h3 style={{ color: 'var(--text-primary)', fontSize: 'var(--fs-md)', fontWeight: 800, margin: '0 0 12px', display: 'flex', alignItems: 'center', gap: 6 }}>
-        💬 대화 {comments.length > 0 && <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', fontWeight: 500 }}>{comments.length}개</span>}
-      </h3>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)' }}>댓글</span>
+          {comments.length > 0 && <span style={{ fontSize: 13, color: 'var(--text-tertiary)' }}>{comments.length}</span>}
+        </div>
+        {comments.length > 1 && (
+          <div style={{ display: 'flex', gap: 2, background: 'var(--bg-surface)', borderRadius: 8, padding: 2 }}>
+            {(['latest', 'popular'] as const).map(s => (
+              <button key={s} onClick={() => setSort(s)} style={{
+                padding: '4px 10px', borderRadius: 6, border: 'none', fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                color: sort === s ? '#fff' : 'var(--text-tertiary)',
+                background: sort === s ? 'var(--brand)' : 'transparent',
+              }}>{s === 'latest' ? '최신순' : '인기순'}</button>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* 댓글 입력 — 채팅 스타일 */}
       <div style={{ marginBottom: 'var(--sp-xl)' }}>
@@ -140,11 +156,11 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
         )}
       </div>
 
-      {/* 댓글 목록 — 대화 스레드 (대댓글 지원) */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      {/* 댓글 목록 — D안 컴팩트 리스트 */}
+      <div>
         {comments.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)' }}>
-            아직 대화가 없어요. 첫 의견을 남겨보세요!
+          <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-tertiary)', fontSize: 14 }}>
+            아직 댓글이 없어요. 첫 의견을 남겨보세요!
           </div>
         ) : (() => {
           const rootComments = comments.filter(c => !c.parent_id);
@@ -154,52 +170,65 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
             if (!replyMap.has(pid)) replyMap.set(pid, []);
             replyMap.get(pid)!.push(r);
           });
+          const sorted = sort === 'popular'
+            ? [...rootComments].sort((a, b) => (b.likes_count ?? 0) - (a.likes_count ?? 0))
+            : rootComments;
 
-          const renderComment = (comment: CommentWithProfile, isReply = false) => (
-            <div key={comment.id} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', padding: '10px 0', marginLeft: isReply ? 42 : 0 }}>
-              <Link href={`/profile/${comment.profiles?.id || comment.author_id}`} style={{ textDecoration: 'none', flexShrink: 0 }}>
-                {comment.profiles?.avatar_url ? (
-                  <img src={comment.profiles.avatar_url} alt={comment.profiles?.nickname ?? 'U'} style={{ width: isReply ? 26 : 32, height: isReply ? 26 : 32, borderRadius: '50%', objectFit: 'cover' }} />
-                ) : (
-                  <div style={{ width: isReply ? 26 : 32, height: isReply ? 26 : 32, borderRadius: '50%', background: getAvatarColor(comment.profiles?.nickname ?? 'U'), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: isReply ? 10 : 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-inverse)' }}>
-                    {(comment.profiles?.nickname ?? 'U')[0].toUpperCase()}
+          const renderItem = (comment: CommentWithProfile, isReply = false) => {
+            const nick = comment.profiles?.nickname ?? '익명';
+            const grade = comment.profiles?.grade ?? null;
+            const likes = comment.likes_count ?? 0;
+            const replies = replyMap.get(comment.id) || [];
+            const avSize = isReply ? 24 : 30;
+            return (
+              <div key={comment.id} style={{ padding: isReply ? '8px 0' : '12px 0', borderBottom: isReply ? 'none' : '1px solid var(--border)' }}>
+                <div style={{ display: 'flex', gap: 10, marginLeft: isReply ? 40 : 0 }}>
+                  <Link href={`/profile/${comment.profiles?.id || comment.author_id}`} style={{ textDecoration: 'none', flexShrink: 0 }}>
+                    {comment.profiles?.avatar_url ? (
+                      <img src={comment.profiles.avatar_url} alt={nick} style={{ width: avSize, height: avSize, borderRadius: '50%', objectFit: 'cover' }} />
+                    ) : (
+                      <div style={{ width: avSize, height: avSize, borderRadius: '50%', background: getAvatarColor(nick), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: isReply ? 10 : 12, fontWeight: 700, color: '#fff' }}>
+                        {nick[0].toUpperCase()}
+                      </div>
+                    )}
+                  </Link>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{nick}</span>
+                    {grade !== null && grade >= 2 && (
+                      <span style={{ fontSize: 10, fontWeight: 600, padding: '1px 5px', borderRadius: 3, marginLeft: 6, background: `${gradeColor(grade)}14`, color: gradeColor(grade) }}>
+                        {gradeTitle(grade)}
+                      </span>
+                    )}
+                    <span style={{ fontSize: 12, color: 'var(--text-tertiary)', marginLeft: 6 }}>{timeAgo(comment.created_at)}</span>
+                    <div style={{ fontSize: 14, color: 'var(--text-primary)', lineHeight: 1.6, marginTop: 3, wordBreak: 'break-word' as const }}>{comment.content}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 6, fontSize: 12, color: 'var(--text-tertiary)' }}>
+                      <button onClick={() => handleCommentLike(comment.id, likes)} disabled={likingIds.has(comment.id)} aria-label="좋아요"
+                        style={{ display: 'flex', alignItems: 'center', gap: 3, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 12, padding: 0, opacity: likingIds.has(comment.id) ? 0.5 : 1 }}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z"/></svg>
+                        {likes > 0 && likes}
+                      </button>
+                      {!isReply && userId && (
+                        <button onClick={() => setReplyTo({ id: comment.id, nickname: nick })}
+                          style={{ display: 'flex', alignItems: 'center', gap: 3, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 12, padding: 0 }}>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                          {replies.length > 0 && replies.length}
+                        </button>
+                      )}
+                      {userId === comment.author_id && (
+                        <button onClick={() => setDeleteTarget(comment.id)} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', fontSize: 12, cursor: 'pointer', padding: 0 }}>삭제</button>
+                      )}
+                      <ReportButton commentId={comment.id} />
+                    </div>
                   </div>
+                </div>
+                {!isReply && replies.length > 0 && (
+                  <div>{replies.map(r => renderItem(r, true))}</div>
                 )}
-              </Link>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ background: isReply ? 'var(--bg-hover)' : 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: isReply ? '4px 12px 12px 12px' : '4px 14px 14px 14px', padding: 'var(--sp-md) var(--card-p)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 'var(--sp-xs)' }}>
-                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-primary)' }}>{comment.profiles?.nickname ?? '익명'}</span>
-                    <span style={{ fontSize: 'var(--fs-xs)', color: gradeColor(comment.profiles?.grade ?? null) }}>{gradeEmoji(comment.profiles?.grade ?? null)} {gradeTitle(comment.profiles?.grade ?? null)}</span>
-                  </div>
-                  <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', lineHeight: 1.55, wordBreak: 'break-word' }}>{comment.content}</div>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-md)', marginTop: 'var(--sp-xs)', paddingLeft: 4 }}>
-                  <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{timeAgo(comment.created_at)}</span>
-                  <button onClick={() => handleCommentLike(comment.id, comment.likes_count ?? 0)} disabled={likingIds.has(comment.id)} aria-label="좋아요"
-                    style={{ display: 'flex', alignItems: 'center', gap: 3, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)', padding: 0, opacity: likingIds.has(comment.id) ? 0.5 : 1 }}>
-                    ♡ {(comment.likes_count ?? 0) > 0 ? comment.likes_count : ''}
-                  </button>
-                  {!isReply && userId && (
-                    <button onClick={() => setReplyTo({ id: comment.id, nickname: comment.profiles?.nickname ?? '익명' })}
-                      style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)', cursor: 'pointer', padding: 0 }}>답글</button>
-                  )}
-                  {userId === comment.author_id && (
-                    <button onClick={() => setDeleteTarget(comment.id)} aria-label="삭제"
-                      style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)', cursor: 'pointer', padding: 0 }}>삭제</button>
-                  )}
-                  <ReportButton commentId={comment.id} />
-                </div>
               </div>
-            </div>
-          );
+            );
+          };
 
-          return rootComments.map(c => (
-            <div key={c.id}>
-              {renderComment(c)}
-              {(replyMap.get(c.id) || []).map(r => renderComment(r, true))}
-            </div>
-          ));
+          return sorted.map(c => renderItem(c));
         })()}
       </div>
 

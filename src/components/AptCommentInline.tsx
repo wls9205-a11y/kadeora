@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useAuth } from '@/components/AuthProvider';
 import { timeAgo } from '@/lib/format';
+import { getAvatarColor } from '@/lib/avatar';
 
 export default function AptCommentInline({ houseKey, houseNm, houseType }: { houseKey: string; houseNm: string; houseType: 'sub' | 'unsold' }) {
   const pathname = usePathname();
@@ -34,7 +35,11 @@ export default function AptCommentInline({ houseKey, houseNm, houseType }: { hou
 
   return (
     <div>
-      <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 'var(--sp-md)' }}>✏️ 한줄평 <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', fontWeight: 400 }}>{comments.length}</span></div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 'var(--sp-md)' }}>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)' }}>한줄평</span>
+        <span style={{ fontSize: 13, color: 'var(--text-tertiary)' }}>{comments.length}</span>
+      </div>
       {userId ? (
         <div style={{ marginBottom: 'var(--sp-md)' }}>
           <div style={{ position: 'relative' }}>
@@ -49,15 +54,18 @@ export default function AptCommentInline({ houseKey, houseNm, houseType }: { hou
       ) : (
         <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-md)' }}><a href={`/login?redirect=${encodeURIComponent(pathname)}`} style={{ color: 'var(--brand)' }}>로그인</a> 후 한줄평을 남길 수 있어요</div>
       )}
-      <div style={{ maxHeight: 300, overflowY: 'auto' }}>
-        {comments.length === 0 && <div style={{ textAlign: 'center', padding: 24, color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)' }}>첫 한줄평을 남겨보세요! 👋</div>}
+      <div>
+        {comments.length === 0 && <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-tertiary)', fontSize: 14 }}>첫 한줄평을 남겨보세요!</div>}
         {comments.map((c: Record<string, any>) => (
-          <div key={c.id} style={{ padding: '8px 0', borderBottom: '1px solid var(--border)' }}>
-            <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 2 }}>
-              <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--brand)' }}>{c.nickname}</span>
-              <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{timeAgo(c.created_at)}</span>
+          <div key={c.id} style={{ display: 'flex', gap: 10, padding: '10px 0', borderBottom: '1px solid var(--border)' }}>
+            <div style={{ width: 28, height: 28, borderRadius: '50%', flexShrink: 0, background: getAvatarColor(c.nickname || '사용자'), display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 11, fontWeight: 700 }}>
+              {(c.nickname || '사')[0].toUpperCase()}
             </div>
-            <div style={{ fontSize: 'var(--fs-base)', color: 'var(--text-primary)', lineHeight: 1.5 }}>{c.content}</div>
+            <div style={{ flex: 1 }}>
+              <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{c.nickname || '사용자'}</span>
+              <span style={{ fontSize: 12, color: 'var(--text-tertiary)', marginLeft: 6 }}>{timeAgo(c.created_at)}</span>
+              <div style={{ fontSize: 14, color: 'var(--text-primary)', lineHeight: 1.6, marginTop: 3 }}>{c.content}</div>
+            </div>
           </div>
         ))}
       </div>
