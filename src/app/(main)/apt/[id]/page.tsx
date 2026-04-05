@@ -9,7 +9,6 @@ import dynamic from 'next/dynamic';
 import AptCommentInline from '@/components/AptCommentInline';
 import ShareButtons from '@/components/ShareButtons';
 import SectionShareButton from '@/components/SectionShareButton';
-import AptBookmarkButton from '@/components/AptBookmarkButton';
 import Disclaimer from '@/components/Disclaimer';
 import AptImageGallery from '@/components/AptImageGallery';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
@@ -489,7 +488,6 @@ export default async function AptUnifiedPage({ params }: Props) {
           💬 카카오
         </a>
         <ShareButtons title={`${name} ${tLabel[sType]} — 분양가·청약일정·모집공고 한눈에`} postId={slug} />
-        {sub && <AptBookmarkButton aptId={sub.id} isLoggedIn={!!aptUser} />}
         <div style={{ flex: 1 }} />
         <span style={{ fontSize: 10, color: 'var(--text-tertiary)', whiteSpace: 'nowrap' }}>공유 +5P</span>
       </div>
