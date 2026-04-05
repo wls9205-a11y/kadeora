@@ -31,75 +31,117 @@ interface PriceResult {
 }
 
 function parsePriceTable(text: string, typeStr: string, apiMax: number): PriceResult | null {
-  const typeClean = typeStr.replace(/[A-Za-z]/g, '').trim();
-  if (!typeClean) return null;
-
-  // 해당 타입 주변 텍스트 찾기
-  const typePatterns = [
-    new RegExp(`${typeClean}[A-Za-z]?[\\s\\S]{0,20}?((?:[\\d,]+\\s*){2,8})`, 'i'),
-    new RegExp(`(?:전용|주택형).*?${typeClean}[\\s\\S]{0,200}?((?:[\\d,]{4,}[\\s]+){2,})`, 'i'),
-  ];
+  if (apiMax <= 0) return null;
 
   const prices: number[] = [];
+  const apiMaxStr = apiMax.toLocaleString(); // "47,000" 형태
+  const apiMaxRaw = String(apiMax); // "47000" 형태
 
-  // 패턴 1: 타입 뒤 연속 숫자
-  for (const pat of typePatterns) {
-    const m = text.match(pat);
-    if (m && m[1]) {
-      const nums = m[1].match(/[\d,]{4,}/g);
-      if (nums) {
-        for (const n of nums) {
-          const v = num(n);
-          if (v >= 5000 && v <= 500000) prices.push(v); // 5천만~50억 범위
-        }
-      }
-      if (prices.length >= 2) break;
-    }
-  }
-
-  // 패턴 2: 공급금액 테이블 구조 (층별)
-  if (prices.length < 2) {
-    const tableMatch = text.match(/공급금액[\s\S]{0,500}/i);
-    if (tableMatch) {
-      const section = tableMatch[0];
-      const allNums = section.match(/[\d,]{4,}/g);
-      if (allNums) {
-        for (const n of allNums) {
-          const v = num(n);
-          if (v >= 5000 && v <= 500000 && !prices.includes(v)) prices.push(v);
-        }
+  // 전략 1: API 최고가 값을 PDF 텍스트에서 직접 찾고, 주변 ±500자에서 같은 범위 숫자 추출
+  const maxIdx = text.indexOf(apiMaxStr) !== -1 ? text.indexOf(apiMaxStr) : text.indexOf(apiMaxRaw);
+  if (maxIdx !== -1) {
+    const around = text.slice(Math.max(0, maxIdx - 300), maxIdx + 300);
+    const nums = around.match(/[\d,]{4,}/g);
+    if (nums) {
+      for (const n of nums) {
+        const v = num(n);
+        // API 최고가의 60~105% 범위 (저층은 최고가의 60% 이상)
+        if (v >= apiMax * 0.6 && v <= apiMax * 1.05 && !prices.includes(v)) prices.push(v);
       }
     }
   }
 
-  // 패턴 3: "최저" / "최고" 키워드
+  // 전략 2: "공급금액" / "분양가격" / "공급가격" 섹션에서 가격 범위 숫자 추출
   if (prices.length < 2) {
-    const minM = text.match(/최저[^\d]*?([\d,]+)\s*만/i);
-    const maxM = text.match(/최고[^\d]*?([\d,]+)\s*만/i);
-    if (minM) prices.push(num(minM[1]));
-    if (maxM) prices.push(num(maxM[1]));
+    const sectionPats = [/공급금액[\s\S]{0,800}/i, /분양가격[\s\S]{0,800}/i, /공급가격[\s\S]{0,800}/i, /층별\s*금액[\s\S]{0,800}/i];
+    for (const sp of sectionPats) {
+      const m = text.match(sp);
+      if (m) {
+        const nums = m[0].match(/[\d,]{4,}/g);
+        if (nums) {
+          for (const n of nums) {
+            const v = num(n);
+            if (v >= apiMax * 0.6 && v <= apiMax * 1.05 && !prices.includes(v)) prices.push(v);
+          }
+        }
+        if (prices.length >= 2) break;
+      }
+    }
   }
+
+  // 전략 3: 타입 축약형 (84, 59, 74 등)으로 찾기
+  if (prices.length < 2) {
+    const typeShort = typeStr.replace(/[A-Za-z\s]/g, '').split('.')[0].replace(/^0+/, '');
+    if (typeShort.length >= 2) {
+      // "84" 또는 "084" 뒤 200자 내 가격 숫자
+      const pat = new RegExp(`(?:${typeShort}|0${typeShort})[\\s\\S]{0,200}`, 'g');
+      let tm;
+      while ((tm = pat.exec(text)) !== null) {
+        const nums = tm[0].match(/[\d,]{4,}/g);
+        if (nums) {
+          for (const n of nums) {
+            const v = num(n);
+            if (v >= apiMax * 0.6 && v <= apiMax * 1.05 && !prices.includes(v)) prices.push(v);
+          }
+        }
+        if (prices.length >= 2) break;
+      }
+    }
+  }
+
+  // 전략 4: "최저" / "최고" 키워드
+  if (prices.length < 2) {
+    const minM = text.match(/최저[^\d]{0,20}?([\d,]{4,})/i);
+    const maxM = text.match(/최고[^\d]{0,20}?([\d,]{4,})/i);
+    if (minM) { const v = num(minM[1]); if (v >= 5000 && v <= 500000) prices.push(v); }
+    if (maxM) { const v = num(maxM[1]); if (v >= 5000 && v <= 500000) prices.push(v); }
+  }
+
+  // 전략 5: 전체 텍스트에서 apiMax ± 20% 범위 숫자 전수 추출
+  if (prices.length < 2) {
+    const allNums = text.match(/[\d,]{4,}/g);
+    if (allNums) {
+      for (const n of allNums) {
+        const v = num(n);
+        if (v >= apiMax * 0.8 && v <= apiMax * 1.02 && v !== apiMax && !prices.includes(v)) {
+          prices.push(v);
+          if (prices.length >= 5) break; // 너무 많으면 중단
+        }
+      }
+      // API 최고가도 포함
+      if (!prices.includes(apiMax)) prices.push(apiMax);
+    }
+  }
+
+  // API 최고가가 빠져있으면 추가
+  if (prices.length > 0 && !prices.includes(apiMax)) prices.push(apiMax);
 
   if (prices.length < 2) return null;
 
-  // 정렬 후 min/max 추출
-  prices.sort((a, b) => a - b);
-  const min = prices[0];
-  const max = prices[prices.length - 1];
-  const avg = Math.round(prices.reduce((s, p) => s + p, 0) / prices.length);
+  // 중복 제거 + 정렬
+  const unique = [...new Set(prices)].sort((a, b) => a - b);
+  const min = unique[0];
+  const max = unique[unique.length - 1];
+  const avg = Math.round(unique.reduce((s, p) => s + p, 0) / unique.length);
 
-  // 교차검증: API 최고가와 ±15% 이내
-  if (apiMax > 0 && Math.abs(max - apiMax) / apiMax > 0.15) return null;
+  // 교차검증: max가 API 최고가와 ±20% 이내
+  if (Math.abs(max - apiMax) / apiMax > 0.20) return null;
+  // min이 max보다 크면 오류
+  if (min >= max) return null;
+  // min이 max의 50% 미만이면 오류 (비현실적 차이)
+  if (min < max * 0.5) return null;
 
-  // floor_prices 구성
   const floor_prices: FloorPrice[] = [];
-  if (prices.length === 2) {
-    floor_prices.push({ range: '저층', price: prices[0] }, { range: '고층', price: prices[1] });
-  } else if (prices.length === 3) {
-    floor_prices.push({ range: '저층', price: prices[0] }, { range: '중층', price: prices[1] }, { range: '고층', price: prices[2] });
-  } else {
-    prices.forEach((p, i) => floor_prices.push({ range: `구간${i + 1}`, price: p }));
+  if (unique.length === 2) {
+    floor_prices.push({ range: '저층', price: unique[0] }, { range: '고층', price: unique[1] });
+  } else if (unique.length === 3) {
+    floor_prices.push({ range: '저층', price: unique[0] }, { range: '중층', price: unique[1] }, { range: '고층', price: unique[2] });
+  } else if (unique.length >= 4) {
+    unique.forEach((p, i) => floor_prices.push({ range: `${i + 1}구간`, price: p }));
   }
+
+  return { min, avg, max, floor_prices, source: 'regex' };
+}
 
   return { min, avg, max, floor_prices, source: 'regex' };
 }
