@@ -24,6 +24,8 @@ import NextArticleFloat from '@/components/NextArticleFloat';
 import BlogTossGate from '@/components/BlogTossGate';
 import { BlogTopBanner, BlogMidCTA, BlogFloatingCTA } from '@/components/BlogSignupCTA';
 import BlogReadGate from '@/components/BlogReadGate';
+import TwoStepCTA from '@/components/TwoStepCTA';
+import NewsletterSubscribe from '@/components/NewsletterSubscribe';
 
 // marked heading에 id 자동 부여 (TOC 앵커용)
 const slugify = (text: string) => text.replace(/<[^>]+>/g, '').replace(/[^\w가-힣ㄱ-ㅎㅏ-ㅣ]+/g, '-').replace(/^-+|-+$/g, '').toLowerCase();

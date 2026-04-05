@@ -18,6 +18,7 @@ const AptPriceTrendChart = dynamic(() => import('@/components/charts/AptPriceTre
 const AptReviewSection = dynamic(() => import('@/components/AptReviewSection'));
 const InterestRegistration = dynamic(() => import('@/components/InterestRegistration'));
 const SignupCTA = dynamic(() => import('@/components/SignupCTA'));
+const TwoStepCTA = dynamic(() => import('@/components/TwoStepCTA'));
 const RegulationBadges = dynamic(() => import('@/components/RegulationBadges'));
 const CostSimulator = dynamic(() => import('@/components/CostSimulator'));
 const ContentLock = dynamic(() => import("@/components/ContentLock"));
@@ -1592,7 +1593,7 @@ export default async function AptUnifiedPage({ params }: Props) {
       </div>
 
       {/* 비로그인 가입 유도 CTA */}
-      {!aptUser && <SignupCTA />}
+      {!aptUser && <><TwoStepCTA category="apt" contextName={name} /><SignupCTA /></>}
 
       {/* Reviews */}
       <AptReviewSection aptName={name} region={region} />

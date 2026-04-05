@@ -52,7 +52,7 @@ export default function GuestCTA() {
         boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
       }}>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>댓글·좋아요·알림 받기 <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-tertiary)' }}>3초 가입</span></div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>관심 정보 맞춤 알림 받기 <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-tertiary)' }}>무료</span></div>
         </div>
         <Link href={`/login?redirect=${encodeURIComponent(pathname)}`} style={{
           background: 'var(--brand)', color: '#fff', padding: '6px 14px', borderRadius: 'var(--radius-sm)',

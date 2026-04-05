@@ -4,7 +4,7 @@ import { Navigation } from '@/components/Navigation';
 import AdBanner from '@/components/AdBanner';
 import { ToastProvider } from '@/components/Toast';
 import ErrorBoundary from '@/components/ErrorBoundary';
-import { Sidebar, RightPanel, InstallBanner, PWAInstallTracker, NoticeBanner, PageViewTracker, AutoPushPrompt, PromoSheet, GuestNudge, ExitIntentPopup, ScrollDepthGate, PopupAdManager, SignupNudge } from '@/components/ClientDynamics';
+import { Sidebar, RightPanel, InstallBanner, PWAInstallTracker, NoticeBanner, PageViewTracker, AutoPushPrompt, PromoSheet, GuestNudge, ExitIntentPopup, ScrollDepthGate, PopupAdManager, SignupNudge, ReturnVisitorBanner } from '@/components/ClientDynamics';
 import TopLoadingBar from '@/components/TopLoadingBar';
 import ScrollToTop from '@/components/ScrollToTop';
 import { AuthProvider } from '@/components/AuthProvider';
@@ -58,6 +58,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
       <SignupNudge />
       <PromoSheet />
       <PopupAdManager />
+      <ReturnVisitorBanner />
       <AutoPushPrompt />
       <PageViewTracker />
       <ScrollToTop />

@@ -24,10 +24,10 @@ export function BlogTopBanner({ slug }: { slug: string }) {
       <div style={{ fontSize: 28, flexShrink: 0 }}>🎯</div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 2 }}>
-          무료 가입하고 매일 AI 투자 분석 받아보세요
+          관심 종목·단지 가격 변동 알림을 무료로 받아보세요
         </div>
         <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
-          청약 마감 알림 · 급등주 알림 · 데일리 리포트 · 모든 콘텐츠 무료
+          실거래가 변동 · 청약 마감 D-7 · 급등/급락 알림 · 완전 무료
         </div>
       </div>
       <Link href={`/login?redirect=/blog/${slug}`} style={{
@@ -53,11 +53,11 @@ export function BlogMidCTA({ slug, category }: { slug: string; category: string 
   if (userId) return null;
 
   const ctaTexts: Record<string, { title: string; desc: string }> = {
-    stock: { title: '이 종목 분석이 도움이 됐다면?', desc: '매일 AI가 분석한 종목 리포트를 무료로 받아보세요' },
-    apt: { title: '청약 정보, 놓치지 마세요', desc: '접수 마감 전 알림을 무료로 받을 수 있어요' },
-    unsold: { title: '미분양 정보를 먼저 받아보세요', desc: '전국 미분양 업데이트 알림 · 완전 무료' },
-    finance: { title: '재테크 정보 매일 받아보기', desc: '투자 트렌드와 수익률 분석을 매일 받아보세요' },
-    general: { title: '유용한 정보를 놓치지 마세요', desc: '카더라 가입하고 매일 새로운 정보를 받아보세요' },
+    stock: { title: '이 종목 급등/급락 알림 받기', desc: '시세가 크게 변동하면 바로 알림을 보내드립니다' },
+    apt: { title: '이 단지 가격 변동 알림 받기', desc: '실거래가가 변동하면 바로 알려드립니다' },
+    unsold: { title: '이 지역 미분양 감소 알림', desc: '미분양이 줄어들기 시작하면 바로 알려드립니다' },
+    finance: { title: '맞춤 재테크 알림 받기', desc: '관심 분야의 새 분석이 올라오면 알려드립니다' },
+    general: { title: '관심 분야 업데이트 알림 받기', desc: '새 분석이 올라오면 알림으로 바로 확인하세요' },
   };
   const cta = ctaTexts[category] || ctaTexts.general;
 
@@ -110,8 +110,8 @@ export function BlogFloatingCTA({ slug }: { slug: string }) {
     }}>
       <span style={{ fontSize: 24 }}>🚀</span>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>회원가입하면 전체 글 열람!</div>
-        <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>카카오로 3초 · 완전 무료</div>
+        <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>이 글 관련 알림 받기</div>
+        <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>가격 변동 · 새 분석 · 무료</div>
       </div>
       <Link href={`/login?redirect=/blog/${slug}`} style={{
         padding: '8px 16px', borderRadius: 'var(--radius-pill)',

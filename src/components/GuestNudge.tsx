@@ -6,11 +6,11 @@ import { useAuth } from '@/components/AuthProvider';
 import { isTossMode } from '@/lib/toss-mode';
 
 /**
- * 통합 GuestNudge v3 — 페이지뷰 기반 단계적 회원가입 유도
+ * 통합 GuestNudge v4 — 재방문자 전용 (첫 방문자 비활성)
  * 
  * ── 카운트 기준: 페이지뷰 (세션 내 누적) ──
  * 1~2페이지: 없음
- * 3~4페이지: 토스트 (5초 자동 소멸, 세션당 1회)
+ * 재방문자만: 2~3PV → 토스트, 4~5PV → 배너, 6PV+ → 모달
  * 5~7페이지: 하단 배너 (닫기 → 1일 쿨다운)
  * 8페이지~: 소프트 모달 (닫기 → 6시간 쿨다운, 평생 20회 캡)
  * 
@@ -66,9 +66,15 @@ function track(action: 'impression' | 'click' | 'dismiss', type: NudgeType) {
 }
 
 function getNudgeType(pv: number, detail: boolean): NudgeType {
-  if (pv < 3) return 'none';
-  if (pv <= 4) return 'toast';
-  if (pv <= 7) return detail ? 'toast' : 'banner';
+  // v4: 첫 방문자에게는 토스트/배너/모달 표시 안 함
+  // 재방문자(이전 세션 이력 있음)에게만 표시
+  const sessions = typeof window !== 'undefined' ? localStorage.getItem('kd_visit_sessions') : null;
+  const isReturnVisitor = sessions ? JSON.parse(sessions).length >= 2 : false;
+  if (!isReturnVisitor) return 'none';
+  
+  if (pv < 2) return 'none';
+  if (pv <= 3) return 'toast';
+  if (pv <= 5) return detail ? 'toast' : 'banner';
   return detail ? 'toast' : 'modal';
 }
 
