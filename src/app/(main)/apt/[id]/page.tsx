@@ -644,6 +644,92 @@ export default async function AptUnifiedPage({ params }: Props) {
         </div>
       )}
 
+      {/* 💳 납부 일정 타임라인 */}
+      {sub && (sub.down_payment_pct || sub.interim_count) && (() => {
+        const down = sub.down_payment_pct || 10;
+        const interim = sub.interim_count || 6;
+        const interimPct = sub.balance_pct ? (100 - down - sub.balance_pct) : 60;
+        const balance = sub.balance_pct || (100 - down - interimPct);
+        const steps = [
+          { label: '계약금', pct: down, color: '#3B82F6', icon: '📝', desc: '당첨 후 납부' },
+          { label: '중도금', pct: interimPct, color: '#8B5CF6', icon: '🏗️', desc: `${interim}회 분할` },
+          { label: '잔금', pct: balance, color: '#22C55E', icon: '🔑', desc: '입주 시 납부' },
+        ];
+        return (
+          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '14px 16px', marginBottom: 14 }}>
+            <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 12 }}>💳 납부 일정</div>
+            {/* 비율 바 */}
+            <div style={{ display: 'flex', height: 28, borderRadius: 6, overflow: 'hidden', marginBottom: 10 }}>
+              {steps.map((s, i) => (
+                <div key={i} style={{ flex: s.pct, background: s.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, color: '#fff', fontWeight: 700, borderRight: i < 2 ? '2px solid var(--bg-surface)' : 'none' }}>
+                  {s.pct}%
+                </div>
+              ))}
+            </div>
+            {/* 스텝 카드 */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
+              {steps.map((s, i) => (
+                <div key={i} style={{ textAlign: 'center', padding: '8px 4px', borderRadius: 'var(--radius-sm)', background: `${s.color}08`, border: `1px solid ${s.color}20` }}>
+                  <div style={{ fontSize: 16, marginBottom: 2 }}>{s.icon}</div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: s.color }}>{s.label} {s.pct}%</div>
+                  <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginTop: 2 }}>{s.desc}</div>
+                </div>
+              ))}
+            </div>
+            {sub.loan_rate && (
+              <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 8, padding: '6px 8px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)' }}>
+                💡 중도금 대출: {sub.loan_rate}
+              </div>
+            )}
+          </div>
+        );
+      })()}
+
+      {/* 🏫 입지 분석 — 학군·교통 */}
+      {sub && ((Array.isArray(sub.schools) && sub.schools.length > 0) || (Array.isArray(sub.stations) && sub.stations.length > 0) || sub.nearest_school || sub.nearest_station) && (
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '14px 16px', marginBottom: 14 }}>
+          <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 10 }}>🏫 입지 분석</div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+            {/* 학군 */}
+            <div style={{ padding: '10px', borderRadius: 'var(--radius-sm)', background: 'rgba(59,130,246,0.04)', border: '1px solid rgba(59,130,246,0.1)' }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#3B82F6', marginBottom: 6 }}>🎒 학군</div>
+              {Array.isArray(sub.schools) && sub.schools.length > 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  {(sub.schools as { name: string; distance?: string }[]).slice(0, 3).map((s, i) => (
+                    <div key={i} style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
+                      <span style={{ fontWeight: 600 }}>{s.name}</span>
+                      {s.distance && <span style={{ color: 'var(--text-tertiary)', marginLeft: 4 }}>{s.distance}</span>}
+                    </div>
+                  ))}
+                </div>
+              ) : sub.nearest_school ? (
+                <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{sub.nearest_school}</div>
+              ) : (
+                <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>정보 없음</div>
+              )}
+            </div>
+            {/* 교통 */}
+            <div style={{ padding: '10px', borderRadius: 'var(--radius-sm)', background: 'rgba(34,197,94,0.04)', border: '1px solid rgba(34,197,94,0.1)' }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#22C55E', marginBottom: 6 }}>🚇 교통</div>
+              {Array.isArray(sub.stations) && sub.stations.length > 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  {(sub.stations as { name: string; walk_min?: number }[]).slice(0, 3).map((s, i) => (
+                    <div key={i} style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
+                      <span style={{ fontWeight: 600 }}>{s.name}</span>
+                      {s.walk_min && <span style={{ color: 'var(--text-tertiary)', marginLeft: 4 }}>도보 {s.walk_min}분</span>}
+                    </div>
+                  ))}
+                </div>
+              ) : sub.nearest_station ? (
+                <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{sub.nearest_station}</div>
+              ) : (
+                <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>정보 없음</div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 📍 지역 시세 비교 — 이 현장이 지역에서 어디 위치하는지 */}
       {regionBenchmark && (site?.price_min || site?.price_max || trades.length > 0) && (() => {
         const myPrice = site?.price_min && site?.price_max 
@@ -990,21 +1076,101 @@ export default async function AptUnifiedPage({ params }: Props) {
           )}
 
           {/* 🏊 커뮤니티 시설 */}
-          {sub.community_facilities?.length > 0 && (
-            <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid var(--border)' }}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>🏊 커뮤니티 시설</div>
-              <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                {sub.community_facilities.map((f: string) => (
-                  <span key={f} style={{ fontSize: 11, padding: '3px 8px', borderRadius: 'var(--radius-xs)', background: 'var(--bg-hover)', color: 'var(--text-secondary)' }}>{f}</span>
-                ))}
+          {(sub.community_facilities?.length > 0 || (Array.isArray(sub.community_list) && sub.community_list.length > 0)) && (() => {
+            const categoryIcons: Record<string, string> = { fitness: '💪', sports: '⛳', kids: '👶', senior: '👴', common: '🏠' };
+            const categoryLabels: Record<string, string> = { fitness: '피트니스', sports: '스포츠', kids: '키즈', senior: '경로', common: '공용' };
+            const pdfList = Array.isArray(sub.community_list) ? sub.community_list as { name: string; category: string }[] : [];
+            const oldList = sub.community_facilities || [];
+            return (
+              <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid var(--border)' }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>🏊 커뮤니티 시설</div>
+                {pdfList.length > 0 ? (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))', gap: 4 }}>
+                    {pdfList.map((f, i) => (
+                      <div key={i} style={{ padding: '6px 8px', borderRadius: 'var(--radius-sm)', background: f.category === 'fitness' ? 'rgba(239,68,68,0.06)' : f.category === 'kids' ? 'rgba(245,158,11,0.06)' : f.category === 'sports' ? 'rgba(34,197,94,0.06)' : 'var(--bg-hover)', border: '1px solid var(--border)', textAlign: 'center' }}>
+                        <div style={{ fontSize: 14, marginBottom: 2 }}>{categoryIcons[f.category] || '🏠'}</div>
+                        <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-secondary)' }}>{f.name}</div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                    {oldList.map((f: string) => (
+                      <span key={f} style={{ fontSize: 11, padding: '3px 8px', borderRadius: 'var(--radius-xs)', background: 'var(--bg-hover)', color: 'var(--text-secondary)' }}>{f}</span>
+                    ))}
+                  </div>
+                )}
+                {/* 핵심 시설 요약 뱃지 */}
+                {(sub.has_fitness || sub.has_daycare) && (
+                  <div style={{ display: 'flex', gap: 4, marginTop: 6 }}>
+                    {sub.has_fitness && <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 4, background: 'rgba(239,68,68,0.08)', color: '#EF4444', fontWeight: 600 }}>💪 피트니스 있음</span>}
+                    {sub.has_daycare && <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 4, background: 'rgba(245,158,11,0.08)', color: '#F59E0B', fontWeight: 600 }}>👶 어린이집 있음</span>}
+                  </div>
+                )}
               </div>
-            </div>
-          )}
+            );
+          })()}
 
           {/* 견본주택 */}
           {sub.model_house_addr && (
             <div style={{ marginTop: 'var(--sp-sm)', padding: '8px 10px', borderRadius: 'var(--radius-xs)', background: 'var(--bg-hover)', fontSize: 12, color: 'var(--text-secondary)', wordBreak: 'keep-all' }}>
               🏠 견본주택: {sub.model_house_addr}
+            </div>
+          )}
+
+          {/* 🏗️ 단지 스펙 */}
+          {(sub.architect || sub.energy_grade || sub.ceiling_height || sub.entrance_type || sub.elevator_count || sub.estimated_mgmt_fee || sub.special_features || sub.landscape_designer) && (
+            <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid var(--border)' }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>🏗️ 단지 스펙</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: 6 }}>
+                {sub.architect && (
+                  <div style={{ padding: '8px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)' }}>
+                    <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>설계</div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-primary)', marginTop: 2 }}>{sub.architect}</div>
+                  </div>
+                )}
+                {sub.landscape_designer && (
+                  <div style={{ padding: '8px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)' }}>
+                    <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>조경</div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-primary)', marginTop: 2 }}>{sub.landscape_designer}</div>
+                  </div>
+                )}
+                {sub.ceiling_height && (
+                  <div style={{ padding: '8px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)' }}>
+                    <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>천장고</div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: Number(sub.ceiling_height) >= 2.4 ? 'var(--accent-green)' : 'var(--text-primary)', marginTop: 2 }}>{sub.ceiling_height}m{Number(sub.ceiling_height) >= 2.5 ? ' 🎯' : ''}</div>
+                  </div>
+                )}
+                {sub.entrance_type && (
+                  <div style={{ padding: '8px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)' }}>
+                    <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>현관 구조</div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: sub.entrance_type === '계단식' ? 'var(--accent-green)' : 'var(--text-primary)', marginTop: 2 }}>{sub.entrance_type}</div>
+                  </div>
+                )}
+                {sub.energy_grade && (
+                  <div style={{ padding: '8px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)' }}>
+                    <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>에너지 효율</div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: '#22C55E', marginTop: 2 }}>{sub.energy_grade}</div>
+                  </div>
+                )}
+                {sub.zero_energy_cert && (
+                  <div style={{ padding: '8px', borderRadius: 'var(--radius-sm)', background: 'rgba(34,197,94,0.04)', border: '1px solid rgba(34,197,94,0.15)' }}>
+                    <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>제로에너지</div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: '#22C55E', marginTop: 2 }}>🌿 {sub.zero_energy_cert}</div>
+                  </div>
+                )}
+                {sub.estimated_mgmt_fee && (
+                  <div style={{ padding: '8px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)' }}>
+                    <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>예상 관리비</div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-primary)', marginTop: 2 }}>{Number(sub.estimated_mgmt_fee).toLocaleString()}원/월</div>
+                  </div>
+                )}
+              </div>
+              {sub.special_features && (
+                <div style={{ marginTop: 6, fontSize: 11, color: 'var(--accent-purple)', padding: '4px 8px', borderRadius: 'var(--radius-sm)', background: 'rgba(139,92,246,0.06)' }}>
+                  ✨ 특화설계: {sub.special_features}
+                </div>
+              )}
             </div>
           )}
 
