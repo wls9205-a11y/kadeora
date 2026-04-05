@@ -11,6 +11,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
+import { trackConversion } from '@/lib/track-conversion';
 
 interface TwoStepCTAProps {
   category?: string;
@@ -64,12 +65,12 @@ export default function TwoStepCTA({ category, contextName }: TwoStepCTAProps) {
           {question}
         </div>
         <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
-          <button onClick={() => setStep('signup')} style={{
+          <button onClick={() => { setStep('signup'); trackConversion('cta_click', 'two_step', { category }); }} style={{
             padding: '12px 28px', borderRadius: 'var(--radius-pill)',
             background: 'var(--brand)', color: '#fff',
             fontWeight: 700, fontSize: 'var(--fs-base)', border: 'none', cursor: 'pointer',
           }}>네, 받을래요</button>
-          <button onClick={() => setStep('dismissed')} style={{
+          <button onClick={() => { setStep('dismissed'); trackConversion('cta_click', 'two_step_dismiss', { category }); }} style={{
             padding: '12px 20px', borderRadius: 'var(--radius-pill)',
             background: 'transparent', color: 'var(--text-tertiary)',
             fontWeight: 500, fontSize: 'var(--fs-sm)', border: '1px solid var(--border)', cursor: 'pointer',

@@ -6,6 +6,7 @@
  * 정보통신망법 제50조: 수신 동의 필수
  */
 import { useState } from 'react';
+import { trackConversion } from '@/lib/track-conversion';
 
 export default function NewsletterSubscribe({ category }: { category?: string }) {
   const [email, setEmail] = useState('');
@@ -37,6 +38,7 @@ export default function NewsletterSubscribe({ category }: { category?: string })
       });
       if (res.ok) {
         setStatus('success');
+        trackConversion('cta_complete', 'newsletter', { category });
         localStorage.setItem('kd_newsletter_subscribed', '1');
       } else {
         setStatus('error');

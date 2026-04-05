@@ -10,6 +10,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
+import { trackConversion } from '@/lib/track-conversion';
 
 export default function ReturnVisitorBanner() {
   const { userId, loading } = useAuth();
@@ -43,7 +44,7 @@ export default function ReturnVisitorBanner() {
 
       // 2회차 이상 재방문 시 배너 표시
       if (sessions.length >= 2) {
-        setTimeout(() => setShow(true), 3000); // 3초 후 표시
+        setTimeout(() => { setShow(true); trackConversion('cta_view', 'return_banner'); }, 3000); // 3초 후 표시
       }
     } else {
       // 같은 세션 → 기록 업데이트만

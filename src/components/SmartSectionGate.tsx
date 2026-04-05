@@ -10,6 +10,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
+import { trackConversion } from '@/lib/track-conversion';
 
 const GATE_HEADINGS = [
   '향후 시세 전망', '향후 전망', '시세 전망', '투자 전망',
@@ -77,7 +78,7 @@ export default function SmartSectionGate({ htmlContent, slug, category }: SmartS
             display: 'inline-block', padding: '10px 28px', borderRadius: 'var(--radius-pill)',
             background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)',
             fontWeight: 700, fontSize: 'var(--fs-sm)', textDecoration: 'none',
-          }}>무료 가입하고 전문 분석 보기</Link>
+          }} onClick={() => trackConversion('cta_click', 'smart_gate', { category })}>무료 가입하고 전문 분석 보기</Link>
           <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 8 }}>
             ✓ 카카오 3초 · ✓ 무료 · ✓ 위 내용은 모두 무료로 제공됩니다
           </div>
