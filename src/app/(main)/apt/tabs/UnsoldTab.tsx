@@ -1,9 +1,9 @@
 'use client';
+import Link from 'next/link';
 import SectionShareButton from '@/components/SectionShareButton';
 import type { UnsoldApt } from '@/types/apt';
 import { useState, useEffect } from 'react';
-import { type SharedTabProps, generateAptSlug } from './apt-utils';
-import Link from 'next/link';
+import { type SharedTabProps, generateAptSlug, isNew, NewBadge } from './apt-utils';
 import dynamic from 'next/dynamic';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 
@@ -165,59 +165,52 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
         const dangerColor = unsoldCount >= 1000 ? 'var(--accent-red)' : unsoldCount >= 500 ? 'var(--accent-orange)' : unsoldCount >= 100 ? 'var(--accent-yellow)' : 'var(--accent-green)';
 
         return (
-          <div key={u.id} className="kd-card-hover" style={{
-            borderRadius: 'var(--radius-card)', marginBottom: 'var(--sp-sm)', overflow: 'hidden',
-            background: 'var(--bg-surface)', border: '1px solid var(--border)',
-            cursor: 'pointer', display: 'flex',
-          }}>
-            <div style={{ width: 4, background: dangerColor, flexShrink: 0 }} />
-            <div style={{ flex: 1, padding: '10px 12px' }}>
-              {/* 현장명 + 미분양 배지 + 가격 */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 5, flexWrap: 'wrap' }}>
-                <Link href={`/apt/${encodeURIComponent(generateAptSlug(u.house_nm) || String(u.id))}`} style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-primary)', textDecoration: 'none', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>{u.house_nm && u.source !== 'molit_stat' ? u.house_nm : `${u.region_nm} ${u.sigungu_nm || ''} 미분양`}</Link>
-                <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 4, background: 'var(--accent-red-bg)', color: 'var(--accent-red)', border: '1px solid rgba(248,113,113,0.2)', fontWeight: 700, flexShrink: 0 }}>
-                  {unsoldCount >= 1000 ? '🔴' : unsoldCount >= 500 ? '🟠' : unsoldCount >= 100 ? '🟡' : '🟢'} {rate !== null ? `${rate}%` : `${unsoldCount.toLocaleString()}세대`}
-                </span>
-                {(u.after_completion_unsold ?? 0) > 0 && <span style={{ fontSize: 9, padding: '2px 5px', borderRadius: 3, background: 'var(--accent-red-bg)', color: 'var(--accent-red)', fontWeight: 700 }}>악성 {u.after_completion_unsold}호</span>}
-                {priceStr && <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--brand)', flexShrink: 0 }}>{priceStr}</span>}
-                <a href={`/apt/${encodeURIComponent(generateAptSlug(u.house_nm) || String(u.id))}#interest-section`} aria-label="관심등록" onClick={(e) => e.stopPropagation()} style={{ fontSize: 16, background: 'transparent', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '2px 5px', cursor: 'pointer', lineHeight: 1, textDecoration: 'none', color: 'var(--text-tertiary)' }}>
-                  ☆
-                </a>
-              </div>
-
-              {/* 3열 KPI 그리드 */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 1, marginBottom: 5, background: 'var(--bg-hover)', borderRadius: '6px', overflow: 'hidden' }}>
-                {[
-                  { l: '미분양', v: unsoldCount.toLocaleString() + '호', c: 'var(--accent-red)' },
-                  { l: '총공급', v: u.tot_supply_hshld_co ? u.tot_supply_hshld_co.toLocaleString() : '-', c: 'var(--text-primary)' },
-                  { l: '전월비', v: (() => { const sa = surgeAlerts.find(a => a.region_nm === u.region_nm); return sa ? `${sa.change_pct > 0 ? '+' : ''}${sa.change_pct}%` : '-'; })(), c: (() => { const sa = surgeAlerts.find(a => a.region_nm === u.region_nm); return sa && sa.change_pct > 0 ? 'var(--accent-red)' : sa && sa.change_pct < 0 ? 'var(--accent-green)' : 'var(--text-tertiary)'; })() },
-                ].map((k, ki) => <div key={ki} style={{ textAlign: 'center', padding: '5px 2px', background: 'var(--bg-surface)' }}><div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginBottom: 1 }}>{k.l}</div><div style={{ fontSize: 11, fontWeight: 800, color: k.c }}>{k.v}</div></div>)}
-              </div>
-
-              {/* 미분양률 바 */}
-              {rate !== null && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 5 }}>
-                  <div style={{ flex: 1, height: 5, borderRadius: 3, background: 'var(--bg-hover)', overflow: 'hidden' }}>
-                    <div style={{ height: '100%', borderRadius: 3, width: `${Math.min(rate, 100)}%`, background: rate > 70 ? 'var(--accent-red)' : rate > 40 ? 'var(--accent-orange)' : 'var(--accent-yellow)' }} />
-                  </div>
-                  <span style={{ fontSize: 9, fontWeight: 700, color: dangerColor, flexShrink: 0 }}>{unsoldCount.toLocaleString()} / {(u.tot_supply_hshld_co || 0).toLocaleString()}</span>
+          <Link key={u.id} href={`/apt/${encodeURIComponent(generateAptSlug(u.house_nm) || String(u.id))}`} className="kd-card-hover" style={{ display: 'block', borderRadius: 'var(--radius-card)', overflow: 'hidden', background: 'var(--bg-surface)', border: '1px solid var(--border)', textDecoration: 'none', color: 'inherit' }}>
+            {/* ① 헤더: 배지 + 이름 + 메타 */}
+            <div style={{ padding: '10px 12px 6px', display: 'flex', gap: 8 }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 3, marginBottom: 5, flexWrap: 'wrap' }}>
+                  {isNew(u, 'unsold') && <NewBadge />}
+                  <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 4, background: 'var(--accent-red-bg)', color: 'var(--accent-red)', border: '1px solid rgba(248,113,113,0.2)', lineHeight: '14px' }}>미분양</span>
+                  <span style={{ fontSize: 10, fontWeight: 800, color: 'var(--accent-red)' }}>{unsoldCount.toLocaleString()}호</span>
+                  {(() => { const sa = surgeAlerts.find(a => a.region_nm === u.region_nm); return sa && sa.change_pct !== 0 ? <span style={{ fontSize: 9, fontWeight: 700, padding: '1px 5px', borderRadius: 10, background: sa.change_pct > 0 ? 'rgba(248,113,113,0.08)' : 'rgba(52,211,153,0.08)', color: sa.change_pct > 0 ? 'var(--accent-red)' : 'var(--accent-green)' }}>{sa.change_pct > 0 ? '+' : ''}{sa.change_pct}%</span> : null; })()}
                 </div>
-              )}
-
-              {/* AI 요약 (34%) */}
-              {(u as any).ai_summary && (
-                <div style={{ padding: '4px 7px', borderLeft: '2px solid rgba(59,123,246,0.25)', fontSize: 10, color: 'var(--text-secondary)', lineHeight: 1.4, marginBottom: 5, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{(u as any).ai_summary}</div>
-              )}
-
-              {/* 액션 버튼 */}
-              <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                <button onClick={() => setCommentTarget({ houseKey: `unsold_${u.id}`, houseNm: u.house_nm || '미분양', houseType: 'unsold' })}
-                  style={{ fontSize: 10, padding: '3px 8px', borderRadius: 'var(--radius-lg)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-secondary)', cursor: 'pointer', fontWeight: 600 }}>✏️ 한줄평</button>
-                <Link href={`/apt/${encodeURIComponent(generateAptSlug(u.house_nm) || String(u.id))}`} style={{ fontSize: 10, padding: '3px 8px', borderRadius: 'var(--radius-lg)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 600 }}>자세히 →</Link>
-                {u.pblanc_url && <a href={u.pblanc_url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 10, padding: '3px 8px', borderRadius: 'var(--radius-lg)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>홈페이지 →</a>}
+                <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 2 }}>{u.house_nm || '미분양'}</div>
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)', lineHeight: 1.5 }}>{u.region_nm}{u.sigungu_nm ? ` ${u.sigungu_nm}` : ''}</div>
+              </div>
+              <div style={{ flexShrink: 0 }}>
+                <a href={`/apt/${encodeURIComponent(generateAptSlug(u.house_nm) || String(u.id))}#interest-section`} aria-label="관심등록" onClick={(e) => e.stopPropagation()} style={{ fontSize: 16, background: 'transparent', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '2px 6px', lineHeight: 1, textDecoration: 'none', color: 'var(--text-tertiary)' }}>☆</a>
               </div>
             </div>
-          </div>
+
+            {/* ② 3열 KPI 그리드 */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 1, margin: '0 10px 8px', background: 'var(--border)', borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border)' }}>
+              <div style={{ textAlign: 'center', padding: '6px 4px', background: 'var(--bg-surface)' }}><div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 2 }}>미분양</div><div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--accent-red)' }}>{unsoldCount.toLocaleString()}호</div></div>
+              <div style={{ textAlign: 'center', padding: '6px 4px', background: 'var(--bg-surface)' }}><div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 2 }}>전월대비</div><div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: (() => { const sa = surgeAlerts.find(a => a.region_nm === u.region_nm); return sa && sa.change_pct > 0 ? 'var(--accent-red)' : sa && sa.change_pct < 0 ? 'var(--accent-green)' : 'var(--text-tertiary)'; })() }}>{(() => { const sa = surgeAlerts.find(a => a.region_nm === u.region_nm); return sa ? `${sa.change_pct > 0 ? '+' : ''}${sa.change_pct}%` : '-'; })()}</div></div>
+              <div style={{ textAlign: 'center', padding: '6px 4px', background: 'var(--bg-surface)' }}><div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 2 }}>총공급</div><div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--text-primary)' }}>{u.tot_supply_hshld_co ? u.tot_supply_hshld_co.toLocaleString() : '-'}</div></div>
+            </div>
+
+            {/* ③ 미분양률 바 */}
+            {rate !== null && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '0 12px', marginBottom: 6 }}>
+                <div style={{ flex: 1, height: 5, borderRadius: 3, background: 'var(--bg-hover)', overflow: 'hidden' }}>
+                  <div style={{ height: '100%', borderRadius: 3, width: `${Math.min(rate, 100)}%`, background: rate > 70 ? 'var(--accent-red)' : rate > 40 ? 'var(--accent-orange)' : 'var(--accent-yellow)' }} />
+                </div>
+                <span style={{ fontSize: 10, fontWeight: 700, color: dangerColor, flexShrink: 0 }}>{rate}%</span>
+              </div>
+            )}
+
+            {/* ④ AI 요약 */}
+            {(u as any).ai_summary && (
+              <div style={{ padding: '4px 12px 8px' }}><div style={{ padding: '4px 7px', borderLeft: '2px solid rgba(59,123,246,0.25)', fontSize: 10, color: 'var(--text-secondary)', lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{(u as any).ai_summary}</div></div>
+            )}
+
+            {/* ⑤ 액션 */}
+            <div style={{ padding: '6px 12px 10px', borderTop: '1px solid var(--border)', display: 'flex', gap: 4 }}>
+              <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setCommentTarget({ houseKey: `unsold_${u.id}`, houseNm: u.house_nm || '미분양', houseType: 'unsold' }); }} style={{ fontSize: 10, padding: '3px 8px', borderRadius: 'var(--radius-lg)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-secondary)', cursor: 'pointer', fontWeight: 600 }}>✏️ 한줄평</button>
+              {u.pblanc_url && <a href={u.pblanc_url} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} style={{ fontSize: 10, padding: '3px 8px', borderRadius: 'var(--radius-lg)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>홈페이지 →</a>}
+            </div>
+          </Link>
         );
       })}
 

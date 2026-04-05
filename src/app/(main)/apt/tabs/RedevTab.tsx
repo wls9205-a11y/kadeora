@@ -168,72 +168,42 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
               const progress = stageIdx >= 0 ? Math.round(((stageIdx + 1) / STAGE_ORDER.length) * 100) : 0;
               const redevSlug = generateAptSlug(r.district_name || r.address || r.notes || `redev-${r.id}`);
               return (
-                <Link key={r.id} href={`/apt/${encodeURIComponent(redevSlug)}`} className="kd-card-hover" style={{
-                  display: 'block', textDecoration: 'none', color: 'inherit',
-                  borderRadius: 'var(--radius-card)', overflow: 'hidden',
-                  background: 'var(--bg-surface)', border: '1px solid var(--border)',
-                  cursor: 'pointer', position: 'relative',
-                }}>
-                  {/* 상단 진행률 바 */}
-                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'var(--bg-hover)' }}>
-                    <div style={{ height: '100%', width: `${progress}%`, background: `linear-gradient(90deg, ${sc.border}, var(--brand))` }} />
-                  </div>
-                  <div style={{ padding: '14px 12px 8px' }}>
-                    {/* 배지 행 */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 5, flexWrap: 'wrap' }}>
-                      <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 4, background: sc.bg, color: sc.color }}>{r.stage}</span>
-                      <span style={{ fontSize: 9, fontWeight: 600, padding: '2px 6px', borderRadius: 4, background: r.project_type === '재개발' ? 'rgba(96,165,250,0.1)' : 'rgba(251,146,60,0.1)', color: r.project_type === '재개발' ? 'var(--accent-blue-light)' : 'var(--accent-orange-light)' }}>{r.project_type}</span>
-                      <span style={{ fontSize: 10, fontWeight: 800, color: sc.color }}>{progress}%</span>
-                      <span style={{ marginLeft: 'auto', fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 600 }}>{r.region}</span>
-                      <a href={`/apt/${encodeURIComponent(redevSlug)}#interest-section`} aria-label="관심등록" onClick={(e) => e.stopPropagation()} style={{ fontSize: 16, background: 'transparent', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '2px 5px', lineHeight: 1, textDecoration: 'none', color: 'var(--text-tertiary)' }}>
-                        ☆
-                      </a>
-                    </div>
-                    {/* 구역명 */}
-                    <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: (!r.district_name || r.district_name === '미상' || r.district_name === '정보 준비중') ? 'var(--text-tertiary)' : 'var(--text-primary)', marginBottom: 2, lineHeight: 1.3 }}>
-                      {r.district_name && r.district_name !== '미상' && r.district_name !== '정보 준비중' ? r.district_name : r.address || r.notes || '📋 정보 준비중'}
-                    </div>
-                    <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 6 }}>{r.address || ''}</div>
-
-                    {/* 4열 KPI 그리드 (실제 데이터만) */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 1, marginBottom: 6, background: 'var(--bg-hover)', borderRadius: '6px', overflow: 'hidden' }}>
-                      {[
-                        { l: '세대수', v: r.total_households ? r.total_households.toLocaleString() : '-', c: r.total_households ? 'var(--brand)' : 'var(--text-tertiary)' },
-                        { l: '유형', v: r.project_type || '-', c: 'var(--accent-yellow)' },
-                        { l: '면적', v: (r as any).area_sqm ? `${((r as any).area_sqm / 1000).toFixed(0)}천m2` : '-', c: (r as any).area_sqm ? 'var(--text-primary)' : 'var(--text-tertiary)' },
-                        { l: '진행률', v: `${progress}%`, c: sc.color },
-                      ].map((k, ki) => <div key={ki} style={{ textAlign: 'center', padding: '5px 2px', background: 'var(--bg-surface)' }}><div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginBottom: 1 }}>{k.l}</div><div style={{ fontSize: 11, fontWeight: 800, color: k.c, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{k.v}</div></div>)}
-                    </div>
-
-                    {/* 6단계 진행 바 */}
-                    <div style={{ marginBottom: 6 }}>
-                      <div style={{ height: 4, borderRadius: 2, background: 'var(--bg-hover)', overflow: 'hidden' }}>
-                        <div style={{ height: '100%', width: `${progress}%`, borderRadius: 2, background: `linear-gradient(90deg, ${sc.border}, var(--brand))` }} />
+                <Link key={r.id} href={`/apt/${encodeURIComponent(redevSlug)}`} className="kd-card-hover" style={{ display: 'block', textDecoration: 'none', color: 'inherit', borderRadius: 'var(--radius-card)', overflow: 'hidden', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
+                  {/* ① 헤더: 배지 + 이름 + 메타 */}
+                  <div style={{ padding: '10px 12px 6px', display: 'flex', gap: 8 }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 3, marginBottom: 5, flexWrap: 'wrap' }}>
+                        <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 4, background: r.project_type === '재건축' ? 'rgba(245,158,11,0.1)' : 'rgba(139,92,246,0.1)', color: r.project_type === '재건축' ? 'var(--accent-yellow)' : 'var(--accent-purple)', border: `1px solid ${r.project_type === '재건축' ? 'rgba(245,158,11,0.2)' : 'rgba(139,92,246,0.2)'}`, lineHeight: '14px' }}>{r.project_type || '재개발'}</span>
+                        <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 4, background: `${sc.bg}`, color: sc.color, lineHeight: '14px' }}>{r.stage || '진행중'}</span>
+                        <span style={{ fontSize: 9, fontWeight: 700, color: sc.color }}>{progress}%</span>
                       </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
-                        {['구역지정', '조합설립', '사업인가', '관리처분', '착공', '준공'].map((s, i) => {
-                          const sp = [10, 25, 45, 65, 85, 100];
-                          const isActive = progress >= sp[i];
-                          return <span key={s} style={{ fontSize: 8, color: isActive ? sc.color : 'var(--text-tertiary)', fontWeight: isActive ? 700 : 400 }}>{s}</span>;
-                        })}
-                      </div>
+                      <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 2 }}>{r.district_name && r.district_name !== '미상' && r.district_name !== '정보 준비중' ? r.district_name : r.address || r.notes || '정보 준비중'}</div>
+                      <div style={{ fontSize: 10, color: 'var(--text-tertiary)', lineHeight: 1.5 }}>{r.region || ''}{r.sigungu ? ` ${r.sigungu}` : ''}{r.total_households ? ` · ${r.total_households.toLocaleString()}세대` : ''}{(r as any).area_sqm ? ` · ${((r as any).area_sqm / 1000).toFixed(0)}천m²` : ''}</div>
                     </div>
-
-                    {/* AI 요약 */}
-                    {r.ai_summary && (
-                      <div style={{ fontSize: 10, color: 'var(--text-secondary)', lineHeight: 1.5, padding: '5px 7px', background: 'var(--bg-hover)', borderRadius: 5, borderLeft: `2px solid ${sc.border}`, marginBottom: 6, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{r.ai_summary}</div>
-                    )}
-
-                    {/* 위치/특징 배지 */}
-                    <div style={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                      {r.sigungu && <span style={{ fontSize: 9, padding: '2px 5px', borderRadius: 3, background: 'rgba(59,123,246,0.06)', color: 'var(--brand)', fontWeight: 600 }}>{r.sigungu}</span>}
-                      {r.nearest_station && <span style={{ fontSize: 9, padding: '2px 5px', borderRadius: 3, background: 'rgba(59,123,246,0.08)', color: 'var(--brand)', fontWeight: 700 }}>🚇 {r.nearest_station}</span>}
-                      {r.nearest_school && <span style={{ fontSize: 9, padding: '2px 5px', borderRadius: 3, background: 'rgba(52,211,153,0.06)', color: 'var(--accent-green)', fontWeight: 600 }}>🏫 {r.nearest_school}</span>}
-                      {r.key_features && String(r.key_features).split(',').slice(0, 3).map((f: string) => <span key={f} style={{ fontSize: 9, padding: '2px 5px', borderRadius: 3, background: 'rgba(167,139,250,0.06)', color: 'var(--accent-purple)' }}>{f.trim()}</span>)}
-                      {r.address && !r.sigungu && <span style={{ fontSize: 9, padding: '2px 5px', borderRadius: 3, background: 'rgba(255,255,255,0.04)', color: 'var(--text-tertiary)' }}>{r.address.split(' ').slice(-2).join(' ').replace(/일원|일대|번지/g, '').trim()}</span>}
-                      {r.notes && !r.expected_completion && <span style={{ fontSize: 9, padding: '2px 5px', borderRadius: 3, background: 'rgba(255,255,255,0.04)', color: 'var(--text-secondary)' }}>{String(r.notes).slice(0, 20)}</span>}
+                    <div style={{ flexShrink: 0 }}>
+                      <a href={`/apt/${encodeURIComponent(redevSlug)}#interest-section`} onClick={(e) => e.stopPropagation()} aria-label="관심등록" style={{ fontSize: 16, background: 'transparent', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '2px 6px', lineHeight: 1, textDecoration: 'none', color: 'var(--text-tertiary)' }}>☆</a>
                     </div>
                   </div>
+
+                  {/* ② 4열 KPI */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 1, margin: '0 10px 8px', background: 'var(--border)', borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border)' }}>
+                    <div style={{ textAlign: 'center', padding: '6px 4px', background: 'var(--bg-surface)' }}><div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 2 }}>세대수</div><div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: r.total_households ? 'var(--brand)' : 'var(--text-tertiary)' }}>{r.total_households ? r.total_households.toLocaleString() : '확인중'}</div></div>
+                    <div style={{ textAlign: 'center', padding: '6px 4px', background: 'var(--bg-surface)' }}><div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 2 }}>유형</div><div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--accent-yellow)' }}>{r.project_type || '-'}</div></div>
+                    <div style={{ textAlign: 'center', padding: '6px 4px', background: 'var(--bg-surface)' }}><div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 2 }}>면적</div><div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: (r as any).area_sqm ? 'var(--text-primary)' : 'var(--text-tertiary)' }}>{(r as any).area_sqm ? `${((r as any).area_sqm / 1000).toFixed(0)}천m²` : '-'}</div></div>
+                    <div style={{ textAlign: 'center', padding: '6px 4px', background: 'var(--bg-surface)' }}><div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 2 }}>진행률</div><div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: sc.color }}>{progress}%</div></div>
+                  </div>
+
+                  {/* ③ 6단계 도트 타임라인 */}
+                  <div style={{ padding: '6px 12px 6px', borderTop: '1px solid var(--border)', marginTop: 2 }}>
+                    <div style={{ display: 'flex', position: 'relative' }}>
+                      {STAGE_ORDER.map((s, si) => { const done = si <= stageIdx; const active = si === stageIdx; const dc = active ? sc.color : done ? 'var(--accent-green)' : 'var(--border)'; const tc = active ? sc.color : done ? 'var(--accent-green)' : 'var(--text-tertiary)'; return (<div key={si} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}><div style={{ width: 8, height: 8, borderRadius: '50%', background: dc, zIndex: 1, border: '2px solid var(--bg-surface)', boxShadow: active ? `0 0 6px ${sc.color}40` : undefined }} />{si < STAGE_ORDER.length - 1 && <div style={{ position: 'absolute', top: 4, left: 'calc(50% + 4px)', width: 'calc(100% - 8px)', height: 2, background: done ? 'rgba(52,211,153,0.3)' : 'var(--border)' }} />}<div style={{ fontSize: 7, color: tc, fontWeight: active ? 700 : 500, marginTop: 3, whiteSpace: 'nowrap' }}>{s.replace('사업시행인가', '인가').replace('정비구역지정', '구역').replace('관리처분인가', '관리')}</div></div>); })}
+                    </div>
+                  </div>
+
+                  {/* ④ AI 요약 */}
+                  {r.ai_summary && (
+                    <div style={{ padding: '4px 12px 8px' }}><div style={{ padding: '4px 7px', borderLeft: `2px solid ${sc.border}`, fontSize: 10, color: 'var(--text-secondary)', lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{r.ai_summary}</div></div>
+                  )}
                 </Link>
               );
             })}

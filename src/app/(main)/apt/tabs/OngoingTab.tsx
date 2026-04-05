@@ -158,127 +158,55 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
         const isPremium = !!premiumMatch;
 
         const linkH = `/apt/${encodeURIComponent(generateAptSlug(o.house_nm) || String(o.link_id))}`;
+        const ppAvg = (o as any).price_per_pyeong_avg;
+        const taxEst = (o as any).acquisition_tax_est;
+        const downPct = (o as any).down_payment_pct;
+        const mvnYm = o.mvn_prearnge_ym;
+        const mvnLabel = mvnYm ? `${String(mvnYm).slice(0, 4)}.${parseInt(String(mvnYm).slice(4, 6))}` : null;
+        const transferLimit = (o as any).transfer_limit_years;
+        const loanRate = (o as any).loan_rate;
+        const fmtP = (n: number) => n >= 10000 ? `${(n / 10000).toFixed(1)}억` : `${n.toLocaleString()}만`;
+        const kS = { textAlign: 'center' as const, padding: '6px 4px', background: 'var(--bg-surface)', borderRadius: 2 };
+        const kL = { fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 2, fontWeight: 500 as const };
+        const kV = (c: string) => ({ fontSize: 'var(--fs-sm)', fontWeight: 800 as const, color: c, lineHeight: 1.3, overflow: 'hidden' as const, textOverflow: 'ellipsis' as const, whiteSpace: 'nowrap' as const });
+        const today = kstToday();
+        const pipeStage = isUnsold ? 2 : (o.mvn_prearnge_ym && String(o.mvn_prearnge_ym) <= today.replace(/-/g, '').slice(0, 6) ? 4 : o.cntrct_cncls_bgnde && String(o.cntrct_cncls_bgnde).slice(0, 10) <= today ? 3 : o.przwner_presnatn_de && String(o.przwner_presnatn_de).slice(0, 10) <= today ? 2 : 1);
+        const stages = ['청약', '당첨', '계약', '공사', '입주'];
         return (
-          <Link key={o.id} href={linkH} className="kd-card-hover" style={{
-            display: 'block', textDecoration: 'none', color: 'inherit',
-            background: isPremium ? 'linear-gradient(135deg, rgba(251,191,36,0.06), rgba(245,158,11,0.03))' : 'var(--bg-surface)',
-            border: isPremium ? '1.5px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 'var(--sp-md) var(--card-p)',
-            borderLeft: `4px solid ${isPremium ? 'var(--accent-yellow)' : accentColor}`,
-            boxShadow: isPremium ? '0 0 12px rgba(251,191,36,0.08)' : undefined,
-          }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 'var(--sp-sm)' }}>
-              <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
-                  {isPremium && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, padding: '1px 5px', borderRadius: 4, background: 'linear-gradient(135deg,#FFD43B,#F59E0B)', color: 'var(--bg-base)', marginRight: 4 }}>PREMIUM</span>}
+          <Link key={o.id} href={linkH} className="kd-card-hover" style={{ display: 'block', borderRadius: 'var(--radius-card)', overflow: 'hidden', background: isPremium ? 'linear-gradient(135deg, rgba(251,191,36,0.04), var(--bg-surface))' : 'var(--bg-surface)', border: isPremium ? '1.5px solid rgba(251,191,36,0.3)' : '1px solid var(--border)', textDecoration: 'none', color: 'inherit' }}>
+            <div style={{ padding: '10px 12px 6px', display: 'flex', gap: 8 }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 3, marginBottom: 5, flexWrap: 'wrap' }}>
                   {isNew(o, 'ongoing') && <NewBadge />}
-                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '1px 6px', borderRadius: 4, background: isUnsold ? 'var(--accent-red-bg)' : 'var(--accent-blue-bg)', color: isUnsold ? 'var(--accent-red)' : 'var(--accent-blue)', border: `1px solid ${isUnsold ? 'rgba(248,113,113,0.25)' : 'rgba(96,165,250,0.25)'}` }}>
-                    {isUnsold ? '미분양' : '분양중'}
-                  </span>
-                  {o.competition_rate && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--accent-yellow)' }}>🔥 {o.competition_rate}:1</span>}
-                  {(o as any).brand_name && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '1px 6px', borderRadius: 4, background: 'rgba(59,123,246,0.08)', color: 'var(--brand)' }}>{(o as any).brand_name}</span>}
-                  {(o as any).project_type && (o as any).project_type !== '민간' && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '1px 6px', borderRadius: 4, background: (o as any).project_type === '재개발' ? 'rgba(251,146,60,0.1)' : (o as any).project_type === '재건축' ? 'rgba(167,139,250,0.1)' : 'rgba(52,211,153,0.1)', color: (o as any).project_type === '재개발' ? 'var(--accent-orange)' : (o as any).project_type === '재건축' ? 'var(--accent-purple)' : 'var(--accent-green)' }}>{(o as any).project_type}</span>}
-                  <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{o.region_nm}</span>
+                  <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 4, background: isUnsold ? 'var(--accent-red-bg)' : 'rgba(34,197,94,0.1)', color: isUnsold ? 'var(--accent-red)' : 'var(--accent-green)', border: `1px solid ${isUnsold ? 'rgba(248,113,113,0.2)' : 'rgba(34,197,94,0.2)'}`, lineHeight: '14px' }}>{isUnsold ? '미분양' : '분양중'}</span>
+                  {isPremium && <span style={{ fontSize: 9, fontWeight: 800, padding: '2px 5px', borderRadius: 3, background: 'linear-gradient(135deg,#FFD43B,#F59E0B)', color: 'var(--bg-base)' }}>PREMIUM</span>}
+                  {transferLimit && <span style={{ fontSize: 9, fontWeight: 600, color: 'var(--accent-red)' }}>전매{transferLimit}년</span>}
+                  {loanRate && <span style={{ fontSize: 9, fontWeight: 600, color: String(loanRate).includes('무이자') ? 'var(--accent-green)' : 'var(--accent-yellow)' }}>{String(loanRate).includes('무이자') ? '무이자' : '중도금'}</span>}
+                  {(o as any).brand_name && <span style={{ fontSize: 9, fontWeight: 600, padding: '2px 5px', borderRadius: 3, background: 'rgba(59,123,246,0.08)', color: 'var(--brand)', lineHeight: '14px' }}>{(o as any).brand_name}</span>}
                 </div>
-                <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4, lineHeight: 1.3 }}>{o.house_nm || '현장명 없음'}</div>
-                {/* KPI 8칸 그리드 (4x2) */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 1, marginBottom: 1, background: 'var(--bg-hover)', borderRadius: '6px 6px 0 0', overflow: 'hidden' }}>
-                  {[
-                    { l: '분양가', v: priceStr || '-', c: priceStr ? 'var(--brand)' : 'var(--text-tertiary)' },
-                    { l: '평당가', v: (o as any).price_per_pyeong_avg ? `${Math.round((o as any).price_per_pyeong_avg).toLocaleString()}만` : '-', c: (o as any).price_per_pyeong_avg ? 'var(--accent-purple)' : 'var(--text-tertiary)' },
-                    { l: '세대수', v: (o.total_supply ?? 0) > 0 ? (o.total_supply ?? 0).toLocaleString() : '-', c: 'var(--text-primary)' },
-                    { l: '입주', v: o.mvn_prearnge_ym ? `${String(o.mvn_prearnge_ym).slice(2, 4)}.${String(o.mvn_prearnge_ym).slice(4, 6)}` : '-', c: o.mvn_prearnge_ym ? 'var(--accent-green)' : 'var(--text-tertiary)' },
-                  ].map((k, ki) => <div key={ki} style={{ textAlign: 'center', padding: '5px 2px', background: 'var(--bg-surface)' }}><div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginBottom: 1 }}>{k.l}</div><div style={{ fontSize: 11, fontWeight: 800, color: k.c, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{k.v}</div></div>)}
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 1, marginBottom: 5, background: 'var(--bg-hover)', borderRadius: '0 0 6px 6px', overflow: 'hidden' }}>
-                  {[
-                    { l: isUnsold ? '미분양' : '취득세', v: isUnsold ? `${(o.unsold_count ?? 0).toLocaleString()}호` : ((o as any).acquisition_tax_est ? `~${Math.round((o as any).acquisition_tax_est / 10000).toLocaleString()}만` : '-'), c: isUnsold ? 'var(--accent-red)' : ((o as any).acquisition_tax_est ? 'var(--accent-yellow)' : 'var(--text-tertiary)') },
-                    { l: '계약금', v: (o as any).down_payment_pct ? `${(o as any).down_payment_pct}%` : '-', c: 'var(--text-primary)' },
-                    { l: '시공사', v: o.constructor_nm ? o.constructor_nm.split('(')[0].split('주식')[0].trim().slice(0, 6) : '-', c: 'var(--text-primary)' },
-                    { l: o.daysToMove ? 'D-입주' : '경쟁률', v: o.daysToMove ? `D-${o.daysToMove}` : (o.competition_rate ? `${o.competition_rate}:1` : '-'), c: o.daysToMove ? 'var(--accent-yellow)' : (o.competition_rate ? 'var(--accent-yellow)' : 'var(--text-tertiary)') },
-                  ].map((k, ki) => <div key={ki} style={{ textAlign: 'center', padding: '5px 2px', background: 'var(--bg-surface)' }}><div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginBottom: 1 }}>{k.l}</div><div style={{ fontSize: 11, fontWeight: 700, color: k.c, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{k.v}</div></div>)}
-                </div>
-                {/* 중도금 대출 배지 */}
-                {(o as any).loan_rate && (
-                  <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: (o as any).loan_rate.includes('무이자') ? 'rgba(52,211,153,0.08)' : 'rgba(251,191,36,0.08)', color: (o as any).loan_rate.includes('무이자') ? 'var(--accent-green)' : 'var(--accent-yellow)', fontWeight: 600, marginBottom: 4, display: 'inline-block' }}>
-                    중도금 {(o as any).loan_rate}
-                  </span>
-                )}
-                {/* 분양가 범위 바 */}
-                {pMin && pMax && pMin !== pMax && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', marginBottom: 'var(--sp-xs)' }}>
-                    <span style={{ fontSize: 10, color: 'var(--accent-blue)', fontWeight: 600 }}>{pMin}억</span>
-                    <div style={{ flex: 1, height: 4, borderRadius: 2, background: 'linear-gradient(90deg, rgba(96,165,250,0.3), var(--brand), rgba(248,113,113,0.3))', position: 'relative', maxWidth: 120 }}>
-                      <div style={{ position: 'absolute', top: -1, left: '50%', width: 6, height: 6, borderRadius: '50%', background: 'var(--brand)', border: '1px solid var(--bg-surface)', transform: 'translateX(-50%)' }} />
-                    </div>
-                    <span style={{ fontSize: 10, color: 'var(--accent-red)', fontWeight: 600 }}>{pMax}억</span>
-                  </div>
-                )}
-                {/* 미분양률 바 */}
-                {isUnsold && (o.unsold_count ?? 0) > 0 && (o.total_supply ?? 0) > 0 && (() => {
-                  const rate = Math.round(((o.unsold_count ?? 0) / (o.total_supply ?? 1)) * 100);
-                  return (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 'var(--sp-xs)' }}>
-                      <div style={{ flex: 1, height: 4, background: 'var(--bg-hover)', borderRadius: 2 }}>
-                        <div style={{ height: '100%', borderRadius: 2, width: `${Math.min(rate, 100)}%`, background: rate > 70 ? 'var(--accent-red)' : rate > 40 ? 'var(--accent-orange)' : 'var(--accent-yellow)' }} />
-                      </div>
-                      <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--accent-red)' }}>미분양 {(o.unsold_count ?? 0).toLocaleString()}호 ({rate}%)</span>
-                    </div>
-                  );
-                })()}
-                {/* 프로그레스바 */}
-                {!isUnsold && (() => {
-                  const stages = [
-                    { key: 'r', label: '접수', date: o.rcept_bgnde },
-                    { key: 'e', label: '마감', date: o.rcept_endde },
-                    { key: 'w', label: '당첨', date: o.przwner_presnatn_de },
-                    { key: 'c', label: '계약', date: o.cntrct_cncls_bgnde },
-                    { key: 'm', label: '입주', date: o.mvn_prearnge_ym },
-                  ];
-                  const td = kstToday();
-                  let ci = 0;
-                  stages.forEach((s, i) => { if (s.date && String(s.date).slice(0, 10) <= td) ci = i + 1; });
-                  ci = Math.min(ci, stages.length - 1);
-                  const pc = Math.min(100, Math.round((ci / (stages.length - 1)) * 100));
-                  return (
-                    <div style={{ marginTop: 2 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
-                        {stages.map((s, i) => <span key={s.key} style={{ fontSize: '8px', color: i <= ci ? 'var(--brand)' : 'var(--text-tertiary)', fontWeight: i === ci ? 800 : 400 }}>{s.label}</span>)}
-                      </div>
-                      <div style={{ height: 3, background: 'var(--bg-hover)', borderRadius: 2 }}>
-                        <div style={{ height: '100%', borderRadius: 2, width: `${pc}%`, background: 'var(--brand)' }} />
-                      </div>
-                    </div>
-                  );
-                })()}
-                {/* 인근 시세 비교 */}
-                {o.nearby_avg_price && o.sale_price_min && (() => {
-                  const diff = Math.round(((o.nearby_avg_price - o.sale_price_min) / o.nearby_avg_price) * 100);
-                  return diff > 0 ? <div style={{ marginTop: 'var(--sp-xs)', fontSize: '10px', color: 'var(--accent-green)', fontWeight: 600 }}>📊 인근 시세 대비 약 {diff}% 저렴</div> : null;
-                })()}
-                {/* 프리미엄 상담사 CTA */}
-                {isPremium && premiumMatch?.consultant && (
-                  <div onClick={(e) => e.stopPropagation()} style={{ marginTop: 6, padding: '6px 10px', borderRadius: 'var(--radius-sm)', background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.2)', display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)' }}>
-                    <span style={{ fontSize: 12, lineHeight: 1 }}>👔</span>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--accent-yellow)' }}>
-                        {premiumMatch.consultant.is_verified && <span style={{ marginRight: 3 }}>✓</span>}
-                        {premiumMatch.consultant.company || '분양 상담사'} · {premiumMatch.consultant.name}
-                      </div>
-                      {premiumMatch.description && <div style={{ fontSize: '10px', color: 'var(--text-secondary)', marginTop: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{premiumMatch.description}</div>}
-                    </div>
-                    {(premiumMatch.cta_phone || premiumMatch.consultant.phone) && (
-                      <a href={`tel:${premiumMatch.cta_phone || premiumMatch.consultant.phone}`} onClick={() => { fetch('/api/consultant/listing', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ listing_id: premiumMatch.id, type: 'phone' }) }).catch(() => {}); }} style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--accent-yellow)', padding: '3px 8px', borderRadius: 'var(--radius-xs)', border: '1px solid rgba(251,191,36,0.3)', textDecoration: 'none', whiteSpace: 'nowrap' }}>📞 상담</a>
-                    )}
-                  </div>
-                )}
+                <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 2 }}>{o.house_nm || '현장명 없음'}</div>
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)', lineHeight: 1.5 }}>{o.region_nm}{o.address ? ` ${o.address.replace(/^[^\s]+\s/, '').split(' ').slice(0, 2).join(' ')}` : ''}{o.constructor_nm ? ` · ${o.constructor_nm.split('(')[0].split('주식')[0].trim()}` : ''}{o.total_supply ? ` · ${o.total_supply.toLocaleString()}세대` : ''}</div>
               </div>
-              <a href={`${linkH}#interest-section`} onClick={(e) => e.stopPropagation()} aria-label="관심등록" style={{
-                fontSize: 'var(--fs-lg)', background: 'transparent',
-                border: '1px solid var(--border)',
-                borderRadius: 'var(--radius-sm)', padding: '2px 6px', cursor: 'pointer', lineHeight: 1,
-                textDecoration: 'none', color: 'var(--text-tertiary)',
-              }}>☆</a>
+              <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+                <a href={`${linkH}#interest-section`} onClick={(e) => e.stopPropagation()} aria-label="관심등록" style={{ fontSize: 16, background: 'transparent', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '2px 6px', lineHeight: 1, textDecoration: 'none', color: 'var(--text-tertiary)' }}>☆</a>
+              </div>
             </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 1, margin: '0 10px 8px', background: 'var(--border)', borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border)' }}>
+              <div style={kS}><div style={kL}>분양가</div><div style={kV(priceStr ? 'var(--brand)' : 'var(--text-tertiary)')}>{priceStr || '미정'}</div></div>
+              <div style={kS}><div style={kL}>평당가</div><div style={kV(ppAvg ? 'var(--accent-purple)' : 'var(--text-tertiary)')}>{ppAvg ? fmtP(ppAvg) : '-'}</div></div>
+              <div style={kS}><div style={kL}>{taxEst ? '취득세' : '세대수'}</div><div style={kV(taxEst ? 'var(--accent-yellow)' : 'var(--text-primary)')}>{taxEst ? `~${fmtP(taxEst)}` : (o.total_supply || '-')}</div></div>
+              <div style={kS}><div style={kL}>입주예정</div><div style={kV(mvnLabel ? 'var(--accent-green)' : 'var(--text-tertiary)')}>{mvnLabel || '-'}</div></div>
+              <div style={kS}><div style={kL}>세대수</div><div style={kV('var(--text-primary)')}>{(o.total_supply || 0) > 0 ? o.total_supply!.toLocaleString() : '확인중'}</div></div>
+              <div style={kS}><div style={kL}>계약금</div><div style={kV('var(--text-primary)')}>{downPct ? `${downPct}%` : '10%'}</div></div>
+              <div style={kS}><div style={kL}>시공사</div><div style={kV('var(--text-primary)')}>{o.constructor_nm ? o.constructor_nm.split('(')[0].trim().slice(0, 6) : '-'}</div></div>
+              <div style={kS}><div style={kL}>{o.daysToMove ? 'D-입주' : '경쟁률'}</div><div style={kV(o.daysToMove ? 'var(--accent-yellow)' : 'var(--text-tertiary)')}>{o.daysToMove ? `D-${o.daysToMove}` : (o.competition_rate ? `${o.competition_rate}:1` : '-')}</div></div>
+            </div>
+            <div style={{ padding: '6px 12px 10px', borderTop: '1px solid var(--border)', marginTop: 2 }}>
+              <div style={{ display: 'flex', position: 'relative' }}>
+                {stages.map((s, si) => { const done = si < pipeStage; const active = si === pipeStage; const dc = active ? 'var(--brand)' : done ? 'var(--accent-green)' : 'var(--border)'; const tc = active ? 'var(--brand)' : done ? 'var(--accent-green)' : 'var(--text-tertiary)'; return (<div key={si} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}><div style={{ width: 8, height: 8, borderRadius: '50%', background: dc, zIndex: 1, border: '2px solid var(--bg-surface)', boxShadow: active ? '0 0 6px rgba(59,123,246,0.5)' : undefined }} />{si < stages.length - 1 && <div style={{ position: 'absolute', top: 4, left: 'calc(50% + 4px)', width: 'calc(100% - 8px)', height: 2, background: done ? 'rgba(52,211,153,0.3)' : 'var(--border)' }} />}<div style={{ fontSize: 8, color: tc, fontWeight: active ? 700 : 500, marginTop: 3, whiteSpace: 'nowrap' }}>{s}</div></div>); })}
+              </div>
+            </div>
+            {isPremium && premiumMatch?.consultant && (<div style={{ padding: '6px 12px 8px', borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 8 }}><div style={{ flex: 1, minWidth: 0 }}><div style={{ fontSize: 10, fontWeight: 600, color: 'var(--accent-yellow)' }}>{premiumMatch.consultant.company || '분양 상담사'} · {premiumMatch.consultant.name}</div></div>{(premiumMatch.cta_phone || premiumMatch.consultant.phone) && (<a href={`tel:${premiumMatch.cta_phone || premiumMatch.consultant.phone}`} onClick={(e) => { e.stopPropagation(); }} style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--accent-yellow)', padding: '3px 8px', borderRadius: 'var(--radius-xs)', border: '1px solid rgba(251,191,36,0.3)', textDecoration: 'none' }}>📞 상담</a>)}</div>)}
           </Link>
         );
       })}
