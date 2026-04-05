@@ -766,6 +766,22 @@ export async function GET(req: Request) {
       return NextResponse.json({ notices: notices || [] });
     }
 
+    if (section === 'conversion') {
+      const sb = getSupabaseAdmin() as any;
+      const since7d = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      const { data: events } = await sb.from('conversion_events')
+        .select('event_type, cta_name').gte('created_at', since7d);
+      const ctaStats: Record<string, Record<string, number>> = {};
+      for (const e of (events || [])) {
+        if (!ctaStats[e.cta_name]) ctaStats[e.cta_name] = {};
+        ctaStats[e.cta_name][e.event_type] = (ctaStats[e.cta_name][e.event_type] || 0) + 1;
+      }
+      const { count: emailSubs } = await sb.from('email_subscribers').select('id', { count: 'exact', head: true }).eq('is_active', true);
+      const { count: pushSubs } = await sb.from('push_subscriptions').select('id', { count: 'exact', head: true });
+      const { count: newUsers } = await sb.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', since7d);
+      return NextResponse.json({ ctaStats, emailSubscribers: emailSubs || 0, pushSubscribers: pushSubs || 0, newUsers7d: newUsers || 0, totalEvents: (events || []).length });
+    }
+
     return NextResponse.json({ error: 'Unknown section' }, { status: 400 });
   } catch (e: unknown) {
     return NextResponse.json({ error: errMsg(e) }, { status: 500 });
