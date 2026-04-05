@@ -143,9 +143,6 @@ function parsePriceTable(text: string, typeStr: string, apiMax: number): PriceRe
   return { min, avg, max, floor_prices, source: 'regex' };
 }
 
-  return { min, avg, max, floor_prices, source: 'regex' };
-}
-
 // ─── 규제 정보 파싱 ───
 
 interface RegulationResult {
