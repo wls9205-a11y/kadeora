@@ -36,27 +36,27 @@ interface Props {
 }
 
 const KPI_CFG = [
-  { key: 'sub', label: '청약', bg: 'rgba(59,123,246,0.1)', bc: 'rgba(59,123,246,0.12)', c: '#60A5FA', glow: '0 0 10px rgba(59,123,246,0.3)' },
-  { key: 'ongoing', label: '분양', bg: 'rgba(34,197,94,0.1)', bc: 'rgba(34,197,94,0.12)', c: '#4ADE80', glow: '0 0 10px rgba(34,197,94,0.3)' },
-  { key: 'unsold', label: '미분양', bg: 'rgba(239,68,68,0.1)', bc: 'rgba(239,68,68,0.12)', c: '#F87171', glow: '0 0 10px rgba(239,68,68,0.3)' },
-  { key: 'redev', label: '재건축', bg: 'rgba(168,85,247,0.1)', bc: 'rgba(168,85,247,0.12)', c: '#C084FC', glow: '0 0 10px rgba(168,85,247,0.3)' },
-  { key: 'trade', label: '실거래', bg: 'rgba(255,255,255,0.02)', bc: 'rgba(255,255,255,0.06)', c: '#FBBF24', glow: 'none' },
-  { key: 'complex', label: '단지백과', bg: 'rgba(255,255,255,0.02)', bc: 'rgba(255,255,255,0.06)', c: '#22D3EE', glow: 'none' },
+  { key: 'sub', label: '청약정보', c: 'var(--accent-blue, #3B82F6)' },
+  { key: 'ongoing', label: '분양중', c: 'var(--accent-green, #22C55E)' },
+  { key: 'unsold', label: '미분양', c: 'var(--accent-red, #EF4444)' },
+  { key: 'redev', label: '재건축', c: 'var(--accent-purple, #8B5CF6)' },
+  { key: 'trade', label: '실거래', c: 'var(--accent-yellow, #F59E0B)' },
+  { key: 'complex', label: '단지백과', c: 'var(--brand, #3B7BF6)' },
 ] as const;
 
-const DC = ['#3B82F6', '#22C55E', '#EF4444', '#A855F7'];
-const RC = ['#3B82F6','#8B5CF6','#06B6D4','#22C55E','#F59E0B','#EF4444','#EC4899','#14B8A6','#F97316','#A855F7','#6366F1','#0EA5E9','#84CC16','#E879F9','#FB923C','#2DD4BF','#818CF8'];
+const DC = ['var(--accent-blue, #3B82F6)', 'var(--accent-green, #22C55E)', 'var(--accent-red, #EF4444)', 'var(--accent-purple, #8B5CF6)'];
 
 function MiniDonut({ sub, ongoing, unsold, redev, size = 34 }: { sub: number; ongoing: number; unsold: number; redev: number; size?: number }) {
   const tot = sub + ongoing + unsold + redev;
   const r = size * 0.38, sw = size * 0.13, cx = size / 2, ci = 2 * Math.PI * r;
   if (tot <= 0) return <svg width={size} height={size}><circle cx={cx} cy={cx} r={r} fill="none" stroke="var(--border)" strokeWidth={sw} opacity={0.3} /></svg>;
+  const colors = ['#3B82F6', '#22C55E', '#EF4444', '#8B5CF6'];
   const pcts = [sub / tot, ongoing / tot, unsold / tot, redev / tot];
   let off = 0;
   return (
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-      <circle cx={cx} cy={cx} r={r} fill="none" stroke="var(--border)" strokeWidth={sw} opacity={0.15} />
-      {pcts.map((p, i) => { const len = p * ci; if (len < 0.5) { off += len; return null; } const el = <circle key={i} cx={cx} cy={cx} r={r} fill="none" stroke={DC[i]} strokeWidth={sw} strokeDasharray={`${len} ${ci - len}`} strokeDashoffset={-off} transform={`rotate(-90 ${cx} ${cx})`} />; off += len; return el; })}
+      <circle cx={cx} cy={cx} r={r} fill="none" stroke="var(--border)" strokeWidth={sw} opacity={0.2} />
+      {pcts.map((p, i) => { const len = p * ci; if (len < 0.5) { off += len; return null; } const el = <circle key={i} cx={cx} cy={cx} r={r} fill="none" stroke={colors[i]} strokeWidth={sw} strokeDasharray={`${len} ${ci - len}`} strokeDashoffset={-off} transform={`rotate(-90 ${cx} ${cx})`} />; off += len; return el; })}
     </svg>
   );
 }
@@ -93,50 +93,77 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
 
   return (
     <div style={{ marginBottom: 'var(--sp-sm)', maxWidth: '100%', overflow: 'hidden' }}>
-      {/* KPI 카드 (클릭 → 탭 전환) */}
+      {/* ── KPI 카드 (클릭 → 탭 전환) ── */}
       <div className="kd-region-kpi" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 4, marginBottom: 6 }}>
         {KPI_CFG.map(k => {
           const isAct = activeTab === k.key;
           return (
             <button key={k.key} onClick={() => k.key === 'complex' ? router.push('/apt/complex') : onTabChange?.(k.key)}
-              style={{ padding: '6px 4px', borderRadius: 8, textAlign: 'center', cursor: 'pointer', background: `linear-gradient(135deg, ${k.bg}, transparent)`, border: `1px solid ${isAct ? k.c + '60' : k.bc}`, transition: 'all 0.15s', transform: isAct ? 'scale(1.03)' : 'none' }}>
-              <div style={{ fontSize: 16, fontWeight: 800, color: k.c, textShadow: k.glow, fontVariantNumeric: 'tabular-nums' }}>
+              style={{
+                padding: '8px 4px', borderRadius: 'var(--radius-sm)', textAlign: 'center', cursor: 'pointer',
+                background: isAct ? 'var(--bg-hover)' : 'var(--bg-surface)',
+                border: `1px solid ${isAct ? 'var(--brand)' : 'var(--border)'}`,
+                transition: 'all 0.15s',
+              }}>
+              <div style={{ fontSize: 16, fontWeight: 800, color: k.c, fontVariantNumeric: 'tabular-nums', lineHeight: 1.2 }}>
                 {typeof kv[k.key] === 'number' ? (kv[k.key] as number).toLocaleString() : kv[k.key]}
               </div>
-              <div style={{ fontSize: 9, color: k.c, opacity: 0.5, marginTop: 1 }}>{k.label}</div>
+              <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 2, fontWeight: 500 }}>{k.label}</div>
             </button>
           );
         })}
       </div>
 
-      {/* 지역별 미니 도넛 그리드 */}
-      <div className="kd-region-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 3 }}>
+      {/* ── 지역별 미니 도넛 그리드 ── */}
+      <div className="kd-region-grid" style={{
+        display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 3,
+        background: 'var(--bg-surface)', border: '1px solid var(--border)',
+        borderRadius: 'var(--radius-md)', padding: '8px 4px',
+      }}>
         {regions.map((r, i) => {
           const isAct = activeRegion === r.name;
-          const isExp = expRegion === r.name;
           return (
-            <button key={r.name} onClick={() => { onRegionClick?.(isAct ? '전체' : r.name); setExpRegion(isExp ? null : r.name); }}
-              style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, padding: '4px 2px', borderRadius: 8, cursor: 'pointer', background: isAct ? 'rgba(59,123,246,0.08)' : 'transparent', border: `1px solid ${isAct ? 'rgba(59,123,246,0.25)' : 'transparent'}`, transition: 'all 0.15s' }}>
+            <button key={r.name} onClick={() => { onRegionClick?.(isAct ? '전체' : r.name); setExpRegion(expRegion === r.name ? null : r.name); }}
+              style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
+                padding: '5px 2px', borderRadius: 'var(--radius-sm)', cursor: 'pointer',
+                background: isAct ? 'var(--bg-hover)' : 'transparent',
+                border: `1px solid ${isAct ? 'var(--brand)' : 'transparent'}`,
+                transition: 'all 0.15s',
+              }}>
               <MiniDonut sub={r.sub} ongoing={r.ongoing} unsold={r.unsold} redev={r.redev} size={34} />
-              <span style={{ fontSize: 12, fontWeight: 700, color: RC[i % RC.length], fontVariantNumeric: 'tabular-nums' }}>{r.total.toLocaleString()}</span>
-              <span style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>{r.name}</span>
+              <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>{r.total.toLocaleString()}</span>
+              <span style={{ fontSize: 11, color: 'var(--text-secondary)', fontWeight: 500 }}>{r.name}</span>
             </button>
           );
         })}
       </div>
 
-      {/* 상세 패널 */}
+      {/* ── 상세 패널 ── */}
       {exp && (
-        <div style={{ marginTop: 6, padding: '8px 10px', borderRadius: 8, background: 'rgba(59,123,246,0.04)', border: '1px solid rgba(59,123,246,0.1)', animation: 'kd-fadeIn 0.2s ease' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-            <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{exp.name}</span>
-            <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{exp.total.toLocaleString()}건</span>
+        <div style={{
+          marginTop: 6, padding: '10px 12px', borderRadius: 'var(--radius-md)',
+          background: 'var(--bg-surface)', border: '1px solid var(--border)',
+          animation: 'kd-fadeIn 0.2s ease',
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+            <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{exp.name}</span>
+            <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>총 {exp.total.toLocaleString()}건</span>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 4 }}>
-            {[{ v: exp.sub, l: '청약', c: '#60A5FA', bg: 'rgba(59,130,246,0.08)' }, { v: exp.ongoing, l: '분양', c: '#4ADE80', bg: 'rgba(34,197,94,0.08)' }, { v: exp.unsold, l: '미분양', c: '#F87171', bg: 'rgba(239,68,68,0.08)' }, { v: exp.redev, l: '재건축', c: '#C084FC', bg: 'rgba(168,85,247,0.08)' }, { v: exp.trade, l: '실거래', c: '#FBBF24', bg: 'rgba(245,158,11,0.08)' }].map((item, idx) => (
-              <div key={idx} style={{ textAlign: 'center', padding: '4px', borderRadius: 6, background: item.bg }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: item.c }}>{item.v.toLocaleString()}</div>
-                <div style={{ fontSize: 8, color: item.c, opacity: 0.6 }}>{item.l}</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 6 }}>
+            {([
+              { v: exp.sub, l: '청약', c: 'var(--accent-blue, #3B82F6)' },
+              { v: exp.ongoing, l: '분양', c: 'var(--accent-green, #22C55E)' },
+              { v: exp.unsold, l: '미분양', c: 'var(--accent-red, #EF4444)' },
+              { v: exp.redev, l: '재건축', c: 'var(--accent-purple, #8B5CF6)' },
+              { v: exp.trade, l: '실거래', c: 'var(--accent-yellow, #F59E0B)' },
+            ] as const).map((item, idx) => (
+              <div key={idx} style={{
+                textAlign: 'center', padding: '6px 4px', borderRadius: 'var(--radius-sm)',
+                background: 'var(--bg-hover)', border: '1px solid var(--border)',
+              }}>
+                <div style={{ fontSize: 15, fontWeight: 700, color: item.c }}>{item.v.toLocaleString()}</div>
+                <div style={{ fontSize: 10, color: 'var(--text-secondary)', fontWeight: 500, marginTop: 2 }}>{item.l}</div>
               </div>
             ))}
           </div>
