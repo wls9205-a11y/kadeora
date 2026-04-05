@@ -1,8 +1,8 @@
 'use client';
 import dynamic from 'next/dynamic';
 
-const MissionControl = dynamic(() => import('./MissionControl'), { ssr: false });
+const AdminShell = dynamic(() => import('./AdminShell'), { ssr: false });
 
 export default function AdminPage() {
-  return <MissionControl />;
+  return <AdminShell />;
 }
