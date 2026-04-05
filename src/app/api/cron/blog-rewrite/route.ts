@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 export const dynamic = 'force-dynamic';
@@ -33,7 +34,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  try {
+  const result = await withCronLogging('blog-rewrite', async () => {
     const admin = getSupabaseAdmin();
 
     // 리라이팅 안 된 글 3건
@@ -45,7 +46,7 @@ export async function GET(req: NextRequest) {
       .limit(3);
 
     if (!posts || posts.length === 0) {
-      return NextResponse.json({ ok: true, rewritten: 0, reason: 'all_done' });
+      return { processed: 0, metadata: { reason: 'all_done' } };
     }
 
     let rewritten = 0;
@@ -122,8 +123,8 @@ ${post.content}`)
       }
     }
 
-    return NextResponse.json({ ok: true, rewritten, total: posts.length });
-  } catch (err: any) {
-    return NextResponse.json({ ok: false, error: err.message }, { status: 200 });
-  }
+    return { processed: rewritten, metadata: { total: posts.length } };
+  });
+
+  return NextResponse.json(result);
 }
