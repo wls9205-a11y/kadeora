@@ -77,11 +77,47 @@ ${imageXml}
   </url>`);
   }
 
-  // ━━━ 주식 종목 — /api/og 동적 URL이라 image-sitemap에서 제외 ━━━
-  // Google Image Search는 동적 OG 이미지를 인덱싱하지 않음
-  // 대신 sitemap.xml의 페이지 URL + OG 메타태그로 자동 수집
+  // ━━━ 주식 og-chart 인포그래픽 (서버 렌더 PNG — 캐시됨, 인덱싱 가능) ━━━
+  const stocksR = await sb.from('stock_quotes')
+    .select('symbol, name, sector')
+    .eq('is_active', true).gt('price', 0)
+    .order('volume', { ascending: false, nullsFirst: false })
+    .limit(500);
+  for (const s of (stocksR.data || [])) {
+    entries.push(`<url>
+  <loc>${BASE}/stock/${escapeXml(s.symbol)}</loc>
+  <image:image>
+    <image:loc>${BASE}/api/og-chart?symbol=${escapeXml(s.symbol)}</image:loc>
+    <image:title>${escapeXml(s.name)} 투자 지표 인포그래픽 2026</image:title>
+    <image:caption>${escapeXml(s.name)}(${escapeXml(s.symbol)}) PER PBR 배당 시총 차트</image:caption>
+  </image:image>
+  <image:image>
+    <image:loc>${BASE}/api/og?title=${encodeURIComponent(`${s.name} (${s.symbol})`)}&amp;design=2&amp;category=stock</image:loc>
+    <image:title>${escapeXml(s.name)} 주식 시세 카더라</image:title>
+  </image:image>
+</url>`);
+  }
 
-  // ━━━ 단지백과 — /api/og 동적 URL이라 image-sitemap에서 제외 ━━━
+  // ━━━ 부동산 og-chart 인포그래픽 ━━━
+  const aptChartR = await (sb as any).from('apt_sites')
+    .select('slug, name, region')
+    .eq('is_active', true).gte('content_score', 25)
+    .order('page_views', { ascending: false, nullsFirst: false })
+    .limit(500);
+  for (const a of (aptChartR.data || [])) {
+    entries.push(`<url>
+  <loc>${BASE}/apt/${escapeXml(a.slug)}</loc>
+  <image:image>
+    <image:loc>${BASE}/api/og-chart?apt=${escapeXml(a.slug)}</image:loc>
+    <image:title>${escapeXml(a.name)} 분양가 인포그래픽</image:title>
+    <image:caption>${escapeXml(a.region)} ${escapeXml(a.name)} 분양가 세대수 입지 분석</image:caption>
+  </image:image>
+  <image:image>
+    <image:loc>${BASE}/api/og?title=${encodeURIComponent(a.name)}&amp;design=2&amp;subtitle=${encodeURIComponent(a.region)}</image:loc>
+    <image:title>${escapeXml(a.name)} 분양 정보 카더라</image:title>
+  </image:image>
+</url>`);
+  }
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"

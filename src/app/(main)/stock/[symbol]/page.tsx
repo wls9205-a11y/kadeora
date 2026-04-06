@@ -215,7 +215,7 @@ export default async function StockDetailPage({ params }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org', '@type': 'ImageGallery', name: `${s.name} (${symbol}) 주식 이미지`,
         about: { '@type': 'FinancialProduct', name: s.name, identifier: symbol },
-        image: [{ '@type': 'ImageObject', url: `${SITE_URL}/api/og?title=${encodeURIComponent(`${s.name} (${symbol})`)}&design=2&category=stock`, name: `${s.name} 주가 시세`, width: 1200, height: 630 }],
+        image: [{ '@type': 'ImageObject', url: `${SITE_URL}/api/og?title=${encodeURIComponent(`${s.name} (${symbol})`)}&design=2&category=stock`, name: `${s.name} 주가 시세`, width: 1200, height: 630 }, { '@type': 'ImageObject', url: `${SITE_URL}/api/og-chart?symbol=${symbol}`, name: `${s.name} 투자 지표 인포그래픽`, width: 1200, height: 630 }],
       })}} />
 
       {/* 히어로 시세 카드 */}
