@@ -52,7 +52,7 @@ export default function BlogSection() {
     { label: '🚀 클러스터 Batch', path: '/api/cron/batch-cluster-submit', icon: '⚡' },
     { label: '📥 클러스터 폴링', path: '/api/cron/batch-cluster-poll', icon: '📦' },
     { label: '📰 발행 큐 (50편)', path: '/api/cron/blog-publish-queue', icon: '📤' },
-    { label: '🔥 전체 실행 (6종)', path: '/api/admin/trigger-all', icon: '⚡', method: 'POST' },
+    { label: '🔥 전체 실행 (6종)', path: '/api/admin/trigger-all', icon: '⚡' },
     { label: '주식 시황 (수동)', path: '/api/cron/blog-daily', icon: '📈', disabled: true },
     { label: '청약 (수동)', path: '/api/cron/blog-apt-new', icon: '🏠', disabled: true },
   ] as const;
