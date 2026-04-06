@@ -19,7 +19,7 @@ import { timeAgo } from '@/lib/format';
 import Disclaimer from '@/components/Disclaimer';
 import ReadingProgress from '@/components/ReadingProgress';
 import PollWidget from '@/components/PollWidget';
-import { renderContent } from '@/lib/content-renderer';
+import { renderContent, type EntityMap } from '@/lib/content-renderer';
 
 
 function parsePostId(param: string): { numId: number; isSlug: boolean } {
@@ -116,6 +116,7 @@ export default async function FeedDetailPage({ params }: Props) {
   let relatedQuote: any = null;
   let relatedAptCount = 0;
   let relatedBlogs: { slug: string; title: string; category: string; view_count: number | null }[] = [];
+  let entityMap: EntityMap = {};
 
   try {
     const sb = await createSupabaseServer();
@@ -211,6 +212,18 @@ export default async function FeedDetailPage({ params }: Props) {
           .eq('is_published', true).eq('category', blogCat)
           .order('view_count', { ascending: false }).limit(3);
         if (blogData?.length) relatedBlogs = blogData;
+      } catch {}
+
+      // 자동 링킹용 엔티티 사전 (인기 종목 + 현장)
+      try {
+        const [{ data: topStocks }, { data: topApts }] = await Promise.all([
+          sb.from('stock_quotes').select('symbol, name').eq('is_active', true).gt('price', 0).order('volume', { ascending: false, nullsFirst: false }).limit(150),
+          sb.from('apt_sites').select('slug, name').eq('is_active', true).gte('content_score', 25).order('page_views', { ascending: false, nullsFirst: false }).limit(150),
+        ]);
+        entityMap = {
+          stocks: (topStocks || []).map((s: any) => ({ name: s.name, symbol: s.symbol })),
+          apts: (topApts || []).map((a: any) => ({ name: a.name, slug: a.slug })),
+        };
       } catch {}
     }
   } catch {
@@ -360,12 +373,12 @@ export default async function FeedDetailPage({ params }: Props) {
         {/* Content body */}
         {currentUserId ? (
           <div className="feed-detail-content" style={{ fontSize: 'var(--content-font-size, 16px)' as React.CSSProperties['fontSize'], color: 'var(--text-primary)', lineHeight: 1.75, whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: '0 0 24px' }}>
-            {renderContent(post.content)}
+            {renderContent(post.content, entityMap)}
           </div>
         ) : (
           <div style={{ position: 'relative', margin: '0 0 24px' }}>
             <div style={{ fontSize: 'var(--fs-base)', color: 'var(--text-primary)', lineHeight: 1.75, whiteSpace: 'pre-wrap', wordBreak: 'break-word', maxHeight: 'clamp(200px, 35vh, 400px)', overflow: 'hidden' }}>
-              {renderContent(post.content)}
+              {renderContent(post.content, entityMap)}
             </div>
             <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 100, background: 'linear-gradient(transparent, var(--bg-base))' }} />
           </div>
