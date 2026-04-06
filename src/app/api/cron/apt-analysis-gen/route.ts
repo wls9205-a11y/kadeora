@@ -14,7 +14,7 @@ export async function GET(_req: NextRequest) {
       .is('analysis_text', null)
       .eq('is_active', true)
       .order('page_views', { ascending: false, nullsFirst: false })
-      .limit(5);
+      .limit(15);
 
     if (!sites || sites.length === 0) return { processed: 0, metadata: { reason: 'all_done' } };
 
@@ -33,7 +33,7 @@ export async function GET(_req: NextRequest) {
           .select('deal_amount, exclusive_area, deal_date, floor')
           .ilike('apt_name', `%${shortName}%`)
           .order('deal_date', { ascending: false })
-          .limit(5);
+          .limit(15);
 
         const prompt = buildPrompt(site, sub, trades || []);
         const res = await fetch('https://api.anthropic.com/v1/messages', {

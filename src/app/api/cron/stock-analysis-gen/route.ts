@@ -14,7 +14,7 @@ export async function GET(_req: NextRequest) {
       .is('analysis_text', null)
       .eq('is_active', true)
       .order('volume', { ascending: false, nullsFirst: false })
-      .limit(5);
+      .limit(15);
 
     if (!stocks || stocks.length === 0) return { processed: 0, metadata: { reason: 'all_done' } };
 
