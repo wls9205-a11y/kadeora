@@ -126,7 +126,7 @@ export default function StockRadarChart({ stocks, isKR }: Props) {
                   <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 5 }}>
                     <div style={{ width: 8, height: 8, borderRadius: 2, background: col }} />
                     <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-primary)' }}>{s.name}</span>
-                    <button onClick={() => toggle(s.symbol)} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 12, marginLeft: 'auto' }}>×</button>
+                    <button onClick={() => toggle(s.symbol)} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 12, marginLeft: 'auto' }} aria-label="종목 제거">×</button>
                   </div>
                   {AXES.map((ax, i) => (
                     <div key={ax} style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 2 }}>

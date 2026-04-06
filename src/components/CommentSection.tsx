@@ -114,7 +114,7 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
         {replyTo && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6, padding: '4px 10px', background: 'rgba(37,99,235,0.06)', borderRadius: 'var(--radius-sm)', fontSize: 12, color: 'var(--brand)' }}>
             ↩ <strong>{replyTo.nickname}</strong>에게 답글
-            <button onClick={() => setReplyTo(null)} style={{ marginLeft: 'auto', background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 14, padding: 0 }}>✕</button>
+            <button onClick={() => setReplyTo(null)} style={{ marginLeft: 'auto', background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 14, padding: 0 }} aria-label="답글 취소">✕</button>
           </div>
         )}
         {userId ? (

@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { CALC_REGISTRY, CATEGORIES, findCalc, getCategoryLabel } from '@/lib/calc/registry';
 import CalcEngine from '@/components/calc/CalcEngine';
+import Disclaimer from '@/components/Disclaimer';
+import ShareButtons from '@/components/ShareButtons';
 import CalcSignupCTA from '@/components/calc/CalcSignupCTA';
 import type { Metadata } from 'next';
 import { SITE_URL } from '@/lib/constants';
@@ -115,6 +117,12 @@ export default async function CalcPage({ params }: { params: Promise<{ category:
       {/* 계산기 엔진 */}
       {calc.inputs.length > 0 && <CalcEngine calc={calc} />}
 
+      {/* 결과 공유 */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 16, marginBottom: 8 }}>
+        <ShareButtons title={`${calc.emoji} ${calc.title} — 카더라 무료 계산기`} postId={`calc-${slug}`} content={calc.description} />
+        <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>계산 결과를 공유해보세요</span>
+      </div>
+
       {/* SEO 콘텐츠: 본문 (seoContent) */}
       {calc.seoContent && (
         <div className="blog-content" style={{ marginTop: 28 }} dangerouslySetInnerHTML={{ __html: calc.seoContent }} />
@@ -153,12 +161,7 @@ export default async function CalcPage({ params }: { params: Promise<{ category:
       {/* 회원가입 유도 CTA */}
       <CalcSignupCTA calcSlug={calc.slug} category={category} />
 
-      {/* 면책 + 출처 */}
-      <div style={{ fontSize: 11, color: 'var(--text-tertiary)', textAlign: 'center', lineHeight: 1.6, marginTop: 16, paddingBottom: 40 }}>
-        본 계산기는 참고용이며 법적 효력이 없습니다. 실제 세금 신고·납부 시 전문가 상담을 권장합니다.
-        {calc.legalBasis && <><br />법적 근거: {calc.legalBasis}</>}
-        <br />버전 {calc.version} · 최종 업데이트 {calc.lastUpdated}
-      </div>
+      <Disclaimer type="calc" compact />
     </div>
   );
 }

@@ -3,8 +3,6 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr';
 
 const PROTECTED_PATHS = ['/write', '/payment', '/profile', '/notifications', '/admin'];
 const PUBLIC_PATHS = ['/login', '/auth', '/onboarding', '/terms', '/privacy', '/faq'];
-const PRIVATE_IP_REGEX = /^(10\.|172\.(1[6-9]|2[0-9]|3[01])\.|192\.168\.|127\.|::1|localhost)/;
-const ALLOWED_APT_DOMAINS = ['applyhome.co.kr', 'land.naver.com', 'hogangnono.com'];
 const BOT_PATHS = ['/wp-admin', '/wp-login.php', '/.env', '/.git', '/phpmyadmin'];
 
 // CSP 정책 (단일 정의 — 중복 방지)
@@ -84,27 +82,11 @@ export async function middleware(request: NextRequest) {
       } catch { /* Redis 장애 시 통과 */ }
     }
 
-    // SSRF 차단 (apt-proxy)
-    if (pathname.startsWith('/api/apt-proxy')) {
-      const url = request.nextUrl.searchParams.get('url');
-      if (url) {
-        try {
-          const parsed = new URL(url);
-          if (PRIVATE_IP_REGEX.test(parsed.hostname))
-            return NextResponse.json({ error: 'SSRF blocked' }, { status: 403 });
-          if (!ALLOWED_APT_DOMAINS.some(d => parsed.hostname.endsWith(d)))
-            return NextResponse.json({ error: 'Domain not allowed' }, { status: 403 });
-        } catch {
-          return NextResponse.json({ error: 'Invalid URL' }, { status: 400 });
-        }
-      }
-    }
-
     // CSRF 방어: POST/PATCH/DELETE API에 Origin 헤더 검증
     const method = request.method;
     if (method === 'POST' || method === 'PATCH' || method === 'DELETE') {
       // 크론/웹훅은 제외 (Authorization 헤더로 인증)
-      const isCron = pathname.startsWith('/api/cron/') || pathname.startsWith('/api/revalidate');
+      const isCron = pathname.startsWith('/api/cron/');
       const hasBearer = request.headers.get('authorization')?.startsWith('Bearer ');
       if (!isCron && !hasBearer) {
         const origin = request.headers.get('origin');

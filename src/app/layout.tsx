@@ -90,9 +90,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="alternate" type="application/rss+xml" title="카더라 주식 RSS" href="/feed.xml?category=stock" />
         <link rel="alternate" type="application/rss+xml" title="카더라 부동산 RSS" href="/feed.xml?category=apt" />
         <link rel="alternate" type="application/rss+xml" title="카더라 재테크 RSS" href="/feed.xml?category=finance" />
-        <link rel="alternate" type="application/rss+xml" title="카더라 블로그" href="/blog/feed" />
-        <link rel="alternate" type="application/rss+xml" title="카더라 주식 종목 RSS" href="/stock/feed" />
-        <link rel="alternate" type="application/rss+xml" title="카더라 부동산 RSS" href="/apt/feed" />
+        <link rel="alternate" type="application/rss+xml" title="카더라 블로그" href="/feed.xml?category=blog" />
+        <link rel="alternate" type="application/rss+xml" title="카더라 주식 종목 RSS" href="/feed.xml?category=stock" />
+        <link rel="alternate" type="application/rss+xml" title="카더라 부동산 RSS" href="/feed.xml?category=apt" />
         <link rel="search" type="application/opensearchdescription+xml" title="카더라 검색" href="/opensearch.xml" />
         <meta name="msvalidate.01" content="BAE0BF3F5071F16E8BAE497D195B2FD6" />
         <meta name="google-adsense-account" content="ca-pub-2356113563328542" />

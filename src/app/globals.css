@@ -1485,3 +1485,7 @@ html.theme-light [style*="linear-gradient(to left, #120E16"] {
 /* 라이트모드: 메가폰 텍스트 가시성 */
 html.theme-light [style*="rgba(251,191,36"] { color: #B45309 !important; }
 html.theme-light [style*="rgba(248,113,113"] { color: #DC2626 !important; }
+
+/* 블로그 테이블 모바일 overflow 글로벌 */
+.blog-content table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.blog-content table table { display: table; } /* 중첩 테이블은 block 해제 */

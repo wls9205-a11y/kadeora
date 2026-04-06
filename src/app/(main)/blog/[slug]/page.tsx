@@ -24,6 +24,7 @@ import NextArticleFloat from '@/components/NextArticleFloat';
 import BlogTossGate from '@/components/BlogTossGate';
 import { BlogTopBanner, BlogMidCTA, BlogFloatingCTA } from '@/components/BlogSignupCTA';
 import BlogReadGate from '@/components/BlogReadGate';
+import Disclaimer from '@/components/Disclaimer';
 import TwoStepCTA from '@/components/TwoStepCTA';
 import NewsletterSubscribe from '@/components/NewsletterSubscribe';
 
@@ -919,6 +920,7 @@ export default async function BlogDetailPage({ params }: Props) {
           </div>
         </div>
       )}
+      <Disclaimer type="blog" compact />
       </div>
     </div>
   );
