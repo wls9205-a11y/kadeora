@@ -11,7 +11,7 @@ export async function GET(_req: NextRequest) {
     const alerts: string[] = [];
 
     // === 주식 품질 점수 일괄 재계산 ===
-    await (admin as any).rpc('recalc_stock_quality_scores').catch(() => {});
+    try { await (admin as any).rpc('recalc_stock_quality_scores'); } catch { /* RPC 없을 수 있음 */ }
 
     // === 이상치 탐지 ===
 
