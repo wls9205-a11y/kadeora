@@ -154,6 +154,7 @@ export async function GET(req: NextRequest) {
  .in('author_id', seedUsers.map(u => u.id))
  .gte('created_at', sevenDaysAgo);
  const usedTitles = new Set((existingPosts || []).map(p => p.title));
+ const usedTemplatesThisRun = new Set<string>();
 
  for (let i = 0; i < postCount; i++) {
  if (creditExhausted) break;
@@ -166,8 +167,8 @@ export async function GET(req: NextRequest) {
  const r = Math.random();
  const category = r < 0.55 ? 'free' : r < 0.73 ? 'stock' : r < 0.88 ? 'apt' : 'local';
 
- const filtered = TEMPLATES.filter(t => t.category === category && (!t.age || t.age === user.age_group));
- const fallback = filtered.length > 0 ? pick(filtered) : pick(TEMPLATES.filter(t => t.category === category));
+ const filtered = TEMPLATES.filter(t => t.category === category && (!t.age || t.age === user.age_group) && !usedTemplatesThisRun.has(t.title));
+ const fallback = filtered.length > 0 ? pick(filtered) : pick(TEMPLATES.filter(t => t.category === category && !usedTemplatesThisRun.has(t.title)));
 
  // ── 동적 변형: 매번 다른 제목/내용 생성 ──
  const hour = new Date().getHours();
@@ -201,6 +202,7 @@ export async function GET(req: NextRequest) {
  if (postError || !postData) continue;
  const postId = postData.id;
  usedTitles.add(title); // 이번 실행에서도 중복 방지
+ usedTemplatesThisRun.add(fallback.title); // 같은 템플릿 재사용 방지
  await admin.from('posts').update({ slug: `${slugBase}-${postId}` }).eq('id', postId);
 
  // 댓글 0~5개 (연령대별)

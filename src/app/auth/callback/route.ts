@@ -26,7 +26,7 @@ export async function GET(request: Request) {
     if (!error && data.user) {
       // 프로필 upsert (신규: insert / 기존: avatar 갱신)
       const meta = data.user.user_metadata;
-      const avatarUrl = meta?.avatar_url || meta?.picture || null;
+      const avatarUrl = (meta?.avatar_url || meta?.picture || null)?.replace('http://', 'https://') ?? null;
       
       // 먼저 기존 프로필 확인
       const { data: existing } = await supabase.from('profiles').select('id, avatar_url').eq('id', data.user.id).maybeSingle();

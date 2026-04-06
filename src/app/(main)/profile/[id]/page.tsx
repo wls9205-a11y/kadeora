@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import ProfileClient from './ProfileClient';
 import { DeleteAccountSection } from '@/components/DeleteAccountSection';
@@ -45,6 +46,8 @@ export default async function ProfilePage({ params }: Props) {
       : Promise.resolve({ data: null }),
     sb.from('comments').select('id,content,created_at,post_id').eq('author_id', id).eq('is_deleted', false).order('created_at', { ascending: false }).limit(5),
   ]);
+
+  if (!profile) notFound();
 
   return (
     <>
