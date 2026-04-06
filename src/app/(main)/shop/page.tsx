@@ -228,7 +228,7 @@ export default function ShopPage() {
       </div>
       <div style={{ textAlign: 'center', padding: '4px 0 16px' }}>
         <p style={{ fontSize: 10, color: 'var(--text-tertiary)', margin: 0, lineHeight: 1.6 }}>
-          상호: 카더라 | 대표: 노영진 | 이메일: {CONTACT_EMAIL, CONTACT_PHONE}<br/>
+          상호: 카더라 | 대표: 노영진 | 이메일: {CONTACT_EMAIL}<br/>
           전화: {CONTACT_PHONE} | 결제대행: 토스페이먼츠(주)
         </p>
       </div>
