@@ -341,3 +341,29 @@
 ### 추가 개선 (선조치)
 - 프로필 페이지: is_admin, is_banned, is_seed 필드 노출 제거
 - popup-ads: 복잡한 인증 로직 → requireAdmin 단일화
+
+## SEO 콘텐츠 리라이트 전략 (2026-04-06 확정)
+> 상세: `docs/SEO_REWRITE_PLAN.md` 참조
+
+### 핵심 현황
+- 전체 59,389편 중 **~44,000편 비공개 전환** 대상 (D/C tier)
+- 리라이트 대상 **~23,318편** (stock 4,248 + apt 상위 + 기존 저품질 재리라이트)
+- 예상 비용: **~$180** (Batch API 50% 할인)
+
+### 5단계 계획
+| Phase | 내용 | 상태 |
+|-------|------|------|
+| 0 | seo_score/seo_tier 컬럼 + rewrite_batches 테이블 | 대기 |
+| 1 | 점진적 비공개 전환 (7일, 일 ~3,500편) | 대기 |
+| 2 | Batch API 리라이트 (submit/poll 크론) | 대기 |
+| 3 | SEO 메타데이터 정비 (naver:written_time 등) | 대기 |
+| 4 | 모니터링 + 월별 재평가 | 대기 |
+
+### 핵심 규칙
+- **네이버:** noindex 대신 is_published=false 비공개 처리 (사이트 단위 판정 대응)
+- **구글:** Helpful Content 기준 충족 위해 4,000자+ 콘텐츠
+- **프롬프트 다양성:** 스타일 8종 x 구조 4종 = 32가지 조합 (AI 패턴 감지 방지)
+- **점진적 변경:** 급격한 사이트맵 축소 방지
+
+### API 키 상태
+- `ANTHROPIC_API_KEY` ✅ (크레딧 소진 — console.anthropic.com에서 $200 충전 필요)
