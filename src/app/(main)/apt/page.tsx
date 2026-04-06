@@ -132,7 +132,7 @@ async function fetchAptData() {
   // 지역별 + 상태별 통계 계산
   const today = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10); // KST
   const thisMonth = today.slice(0, 7).replace('-', ''); // KST 기준 YYYYMM // 202603
-  const normalizeRegion = (name: string) => name.replace(/특별시|광역시|특별자치시|특별자치도|도$/, '').trim();
+  const normalizeRegion = (name: string) => name.replace(/특별시|광역시|특별자치시|특별자치도|도$|시$/, '').trim();
   const regionDetail: Record<string, { total: number; open: number; upcoming: number; closed: number }> = {};
   apts.forEach((a: Record<string, any>) => {
     const r = normalizeRegion(a.region_nm || '') || '기타';

@@ -75,13 +75,13 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
   const regions = useMemo(() => {
     const map: Record<string, RegionData> = {};
     const ensure = (n: string) => { if (!n || n === '기타') return; if (!map[n]) map[n] = { name: n, sub: 0, ongoing: 0, unsold: 0, redev: 0, trade: 0, total: 0 }; };
-    const norm = (n: string) => n.replace(/특별시|광역시|특별자치시|특별자치도|도$/, '').trim();
+    const norm = (n: string) => n.replace(/특별시|광역시|특별자치시|특별자치도|도$|시$/, '').trim();
     apts.forEach((a: Record<string, any>) => { const r = norm(a.region_nm || ''); if (!r) return; ensure(r); if (map[r]) { map[r].sub++; map[r].total++; } });
     ongoingApts.forEach((a: Record<string, any>) => { const r = norm(a.region_nm || ''); if (!r) return; ensure(r); if (map[r]) { map[r].ongoing++; map[r].total++; } });
     unsold.forEach((u: Record<string, any>) => { const r = norm(u.region_nm || ''); if (!r) return; ensure(r); if (map[r]) { map[r].unsold++; map[r].total++; } });
-    if (Object.keys(redevByRegion).length > 0) { Object.entries(redevByRegion).forEach(([r, c]) => { ensure(r); if (map[r]) { map[r].redev = c; map[r].total += c; } }); }
+    if (Object.keys(redevByRegion).length > 0) { Object.entries(redevByRegion).forEach(([r, c]) => { const rn = norm(r); ensure(rn); if (map[rn]) { map[rn].redev = c; map[rn].total += c; } }); }
     else { redevelopment.forEach((rd: Record<string, any>) => { const r = norm(rd.region || rd.region_nm || ''); if (!r) return; ensure(r); if (map[r]) { map[r].redev++; map[r].total++; } }); }
-    if (Object.keys(tradeByRegion).length > 0) { Object.entries(tradeByRegion).forEach(([r, c]) => { ensure(r); if (map[r]) { map[r].trade = c; map[r].total += c; } }); }
+    if (Object.keys(tradeByRegion).length > 0) { Object.entries(tradeByRegion).forEach(([r, c]) => { const rn = norm(r); ensure(rn); if (map[rn]) { map[rn].trade = c; map[rn].total += c; } }); }
     else { const ts: Record<string, Set<string>> = {}; transactions.forEach((t: Record<string, any>) => { let r = norm(t.region_nm || ''); if (!r) r = (t.sigungu_nm || '').slice(0, 2); if (!r) return; ensure(r); if (!ts[r]) ts[r] = new Set(); ts[r].add(t.apt_name || t.id); }); Object.entries(ts).forEach(([r, s]) => { if (map[r]) { map[r].trade = s.size; map[r].total += s.size; } }); }
     return Object.values(map).filter(r => r.total > 0).sort((a, b) => b.total - a.total);
   }, [apts, ongoingApts, unsold, redevelopment, transactions, tradeByRegion, redevByRegion]);
