@@ -79,6 +79,23 @@
 - Satori 호환 JSX (모든 div display:flex), fontOpts() 패턴
 - 200 OK 확인 완료
 
+
+**11. 전수조사 11건 일괄 수정**
+🔴 심각:
+- robots.txt: /api/og-chart Allow 추가 (Googlebot, Yeti, Bingbot, DaumCrawler, Googlebot-Image)
+- JSON-LD lowPrice/highPrice: price_min * 10000 (만원→원 변환) — 5,728현장
+- og:price:amount: price_min * 10000 (만원→원) — 메타태그 정상화
+- AggregateRating 완전 제거 (가짜 별점 getDisplayInterestCount 포함)
+
+🟡 보통:
+- 메타 타이틀: change_pct=0 → 빈문자열 (▲0.00% 제거) — 190건
+- RSS: content fallback 마크다운 태그 스트립 (#, **, []등)
+- Event 스키마: rcept_endde 과거인 경우 미노출
+- Product 스키마 제거 (ApartmentComplex+RealEstateListing으로 대체)
+- 같은 종목 비교 방지 (symbol === target → notFound)
+- robots.txt Sitemap: rss.xml 등록, stock/feed apt/feed 제거
+- 블로그 시리즈 커버 이미지 alt="" → alt={post.title}
+
 ### Pending
 - [ ] 어드민에서 batch-cluster-submit 수동 실행 (최초 1회)
 - [ ] 어드민에서 batch-analysis-submit 수동 실행
