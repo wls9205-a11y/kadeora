@@ -205,7 +205,7 @@ async function fetchUnifiedData(slug: string) {
   // Fire-and-forget: 조회수 증가
   if (site?.id) { void sb.rpc('increment_site_view', { p_site_id: site.id }); }
 
-  return { site, sub, unsold, redev, trades, relatedBlogs, relatedPosts, nearbySites, sameBuilderSites, regionBenchmark, regionTrades, complexProfiles, name, region, sigungu, slug };
+  return { site, sub, unsold, redev, trades, relatedBlogs, relatedPosts, nearbySites, sameBuilderSites, regionBenchmark, regionTrades, complexProfiles, name, region, sigungu, slug, analysisText };
 }
 
 // generateStaticParams 제거 — 전량 ISR on-demand (revalidate=3600)
@@ -310,7 +310,7 @@ export default async function AptUnifiedPage({ params }: Props) {
     notFound();
   }
   if (!d) notFound();
-  const { site, sub, unsold, redev, trades, relatedBlogs, relatedPosts, nearbySites, sameBuilderSites, regionBenchmark, regionTrades, complexProfiles, name, region, sigungu, slug } = d!;
+  const { site, sub, unsold, redev, trades, relatedBlogs, relatedPosts, nearbySites, sameBuilderSites, regionBenchmark, regionTrades, complexProfiles, name, region, sigungu, slug, analysisText } = d!;
   const sType = site?.site_type || (sub ? 'subscription' : unsold ? 'unsold' : redev ? 'redevelopment' : trades.length > 0 ? 'trade' : 'subscription');
   const features = Array.isArray(site?.key_features) ? site.key_features : [];
   const dbFaq = Array.isArray(site?.faq_items) ? site.faq_items as { q: string; a: string }[] : [];
