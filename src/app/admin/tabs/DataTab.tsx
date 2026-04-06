@@ -136,20 +136,39 @@ export default function DataTab({ onNavigate }: { onNavigate: (t: any) => void }
 
       {sub === 'blog' && (
         <>
-          <div className="adm-sec">✍️ 블로그 품질</div>
-          <div className="adm-card" style={{ padding: '8px 14px' }}>
-            <div style={{ display: 'flex', padding: '4px 0', borderBottom: '1px solid var(--border)', fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 600 }}>
-              <span style={{ flex: 1 }}>카테고리</span>
-              <span style={{ width: 55, textAlign: 'right' }}>총수</span>
-              <span style={{ width: 55, textAlign: 'right' }}>리라이팅</span>
-              <span style={{ width: 45, textAlign: 'right' }}>비율</span>
+          {/* 블로그 생산 속도 */}
+          <div className="adm-kpi">
+            <div className="adm-kpi-c">
+              <div className="adm-kpi-v">{fmt(Object.values(blogCategories || []).reduce((s: number, c: any) => s + (c.cnt || 0), 0))}</div>
+              <div className="adm-kpi-l">총 게시</div>
             </div>
+            <div className="adm-kpi-c">
+              <div className="adm-kpi-v">{fmt(Object.values(blogCategories || []).reduce((s: number, c: any) => s + (c.rewritten || 0), 0))}</div>
+              <div className="adm-kpi-l">리라이팅 완료</div>
+            </div>
+            <div className="adm-kpi-c">
+              <div className="adm-kpi-v">{fmt(Object.values(blogCategories || []).reduce((s: number, c: any) => s + (c.cnt || 0) - (c.rewritten || 0), 0))}</div>
+              <div className="adm-kpi-l">대기</div>
+            </div>
+            <div className="adm-kpi-c">
+              <div className="adm-kpi-v">72/일</div>
+              <div className="adm-kpi-l">리라이팅 속도</div>
+              <div className="adm-kpi-d" style={{ color: 'var(--text-tertiary)' }}>Haiku 6건×12회</div>
+            </div>
+          </div>
+
+          {/* 카테고리별 품질 */}
+          <div className="adm-sec">✍️ 카테고리별 리라이팅</div>
+          <div className="adm-card" style={{ padding: '8px 14px' }}>
             {(blogCategories || []).map((c: any, i: number) => (
-              <div key={i} style={{ display: 'flex', padding: '6px 0', borderBottom: '1px solid var(--border)', fontSize: 12 }}>
-                <span style={{ flex: 1, color: 'var(--text-primary)', fontWeight: 600 }}>{c.category}</span>
-                <span style={{ width: 55, textAlign: 'right', color: 'var(--text-secondary)' }}>{fmt(c.cnt)}</span>
-                <span style={{ width: 55, textAlign: 'right', color: 'var(--text-secondary)' }}>{fmt(c.rewritten)}</span>
-                <span style={{ width: 45, textAlign: 'right', fontWeight: 600, color: c.rewrite_pct >= 80 ? '#10B981' : c.rewrite_pct >= 40 ? '#F59E0B' : '#EF4444' }}>{c.rewrite_pct}%</span>
+              <div key={i} style={{ marginBottom: 8 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 2 }}>
+                  <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{c.category}</span>
+                  <span style={{ color: 'var(--text-secondary)' }}>{fmt(c.rewritten)} / {fmt(c.cnt)} ({c.rewrite_pct}%)</span>
+                </div>
+                <div className="adm-bar" style={{ marginBottom: 0 }}>
+                  <div className="adm-bar-fill" style={{ width: `${c.rewrite_pct}%`, background: c.rewrite_pct >= 80 ? '#10B981' : c.rewrite_pct >= 40 ? '#F59E0B' : '#EF4444' }} />
+                </div>
               </div>
             ))}
           </div>

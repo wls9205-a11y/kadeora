@@ -11,7 +11,18 @@ export default function ExecuteTab({ onNavigate }: { onNavigate: (t: any) => voi
   const [totalCrons, setTotalCrons] = useState(0);
   const [completedCrons, setCompletedCrons] = useState(0);
   const [mode, setMode] = useState<string>('');
+  const [lastRun, setLastRun] = useState<{ at: string; ok: number; fail: number } | null>(null);
   const abortRef = useRef(false);
+
+  // 마지막 실행 정보 로드
+  useEffect(() => {
+    fetch('/api/admin/v2?tab=ops').then(r => r.json()).then(d => {
+      if (d?.recentCrons?.length > 0) {
+        const latest = d.recentCrons[0];
+        setLastRun({ at: latest.at, ok: d.totalOk || 0, fail: d.totalFail || 0 });
+      }
+    }).catch(() => {});
+  }, []);
 
   const runGodMode = useCallback(async (selectedMode: string) => {
     if (running) return;
@@ -171,13 +182,20 @@ export default function ExecuteTab({ onNavigate }: { onNavigate: (t: any) => voi
         </div>
       )}
 
-      {/* 빈 상태 */}
+      {/* 빈 상태 + 마지막 실행 정보 */}
       {!running && results.length === 0 && (
-        <div className="adm-card" style={{ textAlign: 'center', padding: 30, color: 'var(--text-tertiary)' }}>
+        <div className="adm-card" style={{ textAlign: 'center', padding: 24 }}>
           <div style={{ fontSize: 36, marginBottom: 8 }}>🚀</div>
-          <div style={{ fontSize: 13 }}>전체 최신화 버튼을 누르면</div>
-          <div style={{ fontSize: 13 }}>83개 크론이 5단계로 순차 실행됩니다</div>
-          <div style={{ fontSize: 11, marginTop: 8 }}>AI 크론은 Fire-and-Forget (백그라운드)</div>
+          <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>전체 최신화 버튼을 누르면</div>
+          <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>83개 크론이 5단계로 순차 실행됩니다</div>
+          <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>AI 크론은 Fire-and-Forget (백그라운드)</div>
+          {lastRun && (
+            <div style={{ marginTop: 14, padding: '10px 0', borderTop: '1px solid var(--border)', fontSize: 11, color: 'var(--text-tertiary)' }}>
+              마지막 크론 활동: {new Date(lastRun.at).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })}
+              <span style={{ marginLeft: 8, color: '#10B981' }}>✓{lastRun.ok}</span>
+              {lastRun.fail > 0 && <span style={{ marginLeft: 4, color: '#EF4444' }}>✗{lastRun.fail}</span>}
+            </div>
+          )}
         </div>
       )}
     </div>
