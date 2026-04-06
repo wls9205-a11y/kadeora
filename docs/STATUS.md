@@ -409,3 +409,23 @@
 
 ### API 키 상태
 - `ANTHROPIC_API_KEY` ✅ (크레딧 소진 — console.anthropic.com에서 $200 충전 필요)
+
+### 전수조사 추가 (코드베이스 + 크론 + pg_cron)
+
+**코드 정리:**
+- Dead code 6개 파일 삭제 (-5,585줄): seed-longtail-80, seed-rooms/stats/delete/discussions/finance-blogs
+- GOD MODE: seed-longtail-80 버튼 제거
+- ago()/fmt() 중복 4개 admin tab → @/lib/format 통합
+- cron_logs TTL: 60일 → 30일
+
+**Vercel 크론 정리 (64 → 58개):**
+- 템플릿 블로그 크론 4개 제거 (스팸 원인)
+- 0건 생산 2개 제거 (seed-comments, health-check)
+- 신규 SEO 크론 5개 maxDuration 추가
+
+**Supabase pg_cron 정리 (14 → 6개):**
+- stock-scheduler 제거 (Vercel cron과 100% 중복)
+- apt-refresh 4개 제거 (100% 500 에러)
+- daily-content 3개 제거 (슬롯 D,E,F 불필요 — 템플릿 3개라 3슬롯이면 충분)
+
+**배포:** dpl_B142FeMKNUZGgPgNMxbAU9RWrCEQ (4b365e3a) — READY ✅
