@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
   const f = font();
 
   if (symbol) {
-    const { data: s } = await sb.from('stock_quotes').select('name, symbol, market, price, change_pct, market_cap, per, pbr, dividend_yield, high_52w, low_52w, sector').eq('symbol', symbol).maybeSingle();
+    const { data: s } = await (sb as any).from('stock_quotes').select('name, symbol, market, price, change_pct, market_cap, per, pbr, dividend_yield, high_52w, low_52w, sector').eq('symbol', symbol).maybeSingle();
     if (!s) return new Response('Not found', { status: 404 });
 
     const isKR = s.market === 'KOSPI' || s.market === 'KOSDAQ';
