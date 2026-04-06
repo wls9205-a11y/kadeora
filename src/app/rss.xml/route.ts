@@ -16,7 +16,7 @@ export async function GET() {
   <title><![CDATA[${p.title}]]></title>
   <link>${SITE}/blog/${p.slug}</link>
   <guid isPermaLink="true">${SITE}/blog/${p.slug}</guid>
-  <pubDate>${new Date(p.published_at).toUTCString()}</pubDate>
+  <pubDate>${new Date(p.published_at || new Date()).toUTCString()}</pubDate>
   <description><![CDATA[${(p.meta_description || p.content || '').slice(0, 200)}]]></description>
   <category>${p.category || 'general'}</category>
 </item>`).join('\n');
