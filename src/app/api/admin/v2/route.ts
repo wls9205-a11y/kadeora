@@ -141,6 +141,41 @@ export async function GET(req: NextRequest) {
           })),
         ].sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime()).slice(0, 8),
         dailyTrend: dailyStats,
+        trafficDetail: await (async () => {
+          const todayStr = now.toISOString().slice(0, 10);
+          const hourAgo = new Date(Date.now() - 3600000).toISOString();
+          const [todayPvR, recentPvR] = await Promise.all([
+            sb.from('page_views').select('path, created_at, referrer, visitor_id').gte('created_at', todayStr).order('created_at', { ascending: false }).limit(500),
+            sb.from('page_views').select('path, created_at, referrer, visitor_id, user_agent').gte('created_at', hourAgo).order('created_at', { ascending: false }).limit(30),
+          ]);
+          // top pages today
+          const pageCounts: Record<string, number> = {};
+          const hourCounts: Record<number, number> = {};
+          const visitors = new Set<string>();
+          for (const r of (todayPvR.data || [])) {
+            const p = r.path || '/';
+            pageCounts[p] = (pageCounts[p] || 0) + 1;
+            const h = new Date(r.created_at).getHours();
+            hourCounts[h] = (hourCounts[h] || 0) + 1;
+            if (r.visitor_id) visitors.add(r.visitor_id);
+          }
+          const topPages = Object.entries(pageCounts)
+            .sort((a, b) => b[1] - a[1]).slice(0, 10)
+            .map(([path, count]) => ({ path, count }));
+          // hourly distribution
+          const hourly = Array.from({ length: 24 }, (_, h) => ({ h, c: hourCounts[h] || 0 }));
+          return {
+            todayTotal: todayPvR.data?.length || 0,
+            todayUV: visitors.size,
+            topPages,
+            hourly,
+            recent: (recentPvR.data || []).slice(0, 15).map((r: any) => ({
+              path: r.path, at: r.created_at,
+              ref: r.referrer ? (r.referrer.includes('google') ? 'Google' : r.referrer.includes('naver') ? 'Naver' : r.referrer.includes('kakao') ? 'Kakao' : 'Other') : 'Direct',
+              device: (r.user_agent || '').includes('Mobile') ? '📱' : '💻',
+            })),
+          };
+        })(),
       });
     }
 

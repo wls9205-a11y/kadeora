@@ -38,7 +38,7 @@ export default function FocusTab({ onNavigate }: { onNavigate: (t: any) => void 
     </div>
   );
 
-  const { healthScore = 0, scoreBreakdown = {}, kpi = {} as any, failedCrons = {}, recentActivity = [], dailyTrend = [] } = data;
+  const { healthScore = 0, scoreBreakdown = {}, kpi = {} as any, failedCrons = {}, recentActivity = [], dailyTrend = [], trafficDetail = {} as any } = data;
   const failCount = Object.keys(failedCrons || {}).length;
   const scoreColor = healthScore >= 71 ? '#10B981' : healthScore >= 41 ? '#F59E0B' : '#EF4444';
   const scoreLabel = healthScore >= 71 ? '양호' : healthScore >= 41 ? '주의' : '위험';
@@ -166,6 +166,93 @@ export default function FocusTab({ onNavigate }: { onNavigate: (t: any) => void 
             <span>오늘</span>
           </div>
         </div>
+      )}
+
+      {/* ═══ 트래픽 실시간 요약 ═══ */}
+      {trafficDetail && (trafficDetail.todayTotal > 0 || (trafficDetail.recent || []).length > 0) && (
+        <>
+          <div className="adm-sec">📊 트래픽 상세 (오늘)</div>
+          {/* PV/UV + 시간대 분포 */}
+          <div className="adm-card" style={{ padding: '10px 14px' }}>
+            <div style={{ display: 'flex', gap: 16, marginBottom: 8 }}>
+              <div>
+                <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-primary)' }}>{trafficDetail.todayTotal || 0}</div>
+                <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>PV 오늘</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--brand)' }}>{trafficDetail.todayUV || 0}</div>
+                <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>UV 오늘</div>
+              </div>
+              <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', fontSize: 9, color: 'var(--text-tertiary)' }}>
+                30초마다 갱신
+              </div>
+            </div>
+            {/* 시간대 막대 */}
+            {(trafficDetail.hourly || []).length > 0 && (() => {
+              const maxH = Math.max(...(trafficDetail.hourly || []).map((h: any) => h.c), 1);
+              const currentHour = new Date().getHours();
+              return (
+                <div>
+                  <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 4 }}>시간대별 PV</div>
+                  <div style={{ display: 'flex', alignItems: 'flex-end', gap: 1, height: 32 }}>
+                    {(trafficDetail.hourly || []).map((h: any) => (
+                      <div key={h.h} style={{
+                        flex: 1, borderRadius: 1, minHeight: 2,
+                        height: `${(h.c / maxH) * 28}px`,
+                        background: h.h === currentHour ? 'var(--brand)' : h.c > 0 ? 'rgba(59,130,246,0.3)' : 'var(--bg-hover)',
+                      }} title={`${h.h}시: ${h.c}건`} />
+                    ))}
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 7, color: 'var(--text-tertiary)', marginTop: 2 }}>
+                    <span>0시</span><span>6</span><span>12</span><span>18</span><span>23시</span>
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+
+          {/* 인기 페이지 TOP 10 */}
+          {(trafficDetail.topPages || []).length > 0 && (
+            <div className="adm-card" style={{ padding: '10px 14px' }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>🔥 인기 페이지 (오늘)</div>
+              {(trafficDetail.topPages || []).map((p: any, i: number) => {
+                const maxC = trafficDetail.topPages[0]?.count || 1;
+                const label = p.path.length > 40 ? p.path.slice(0, 40) + '…' : p.path;
+                return (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
+                    <span style={{ minWidth: 14, fontSize: 9, fontWeight: 700, color: i < 3 ? 'var(--brand)' : 'var(--text-tertiary)', textAlign: 'right' }}>{i + 1}</span>
+                    <div style={{ flex: 1, position: 'relative', height: 18, background: 'var(--bg-hover)', borderRadius: 3, overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${(p.count / maxC) * 100}%`, background: i < 3 ? 'rgba(59,130,246,0.15)' : 'rgba(59,130,246,0.07)', borderRadius: 3 }} />
+                      <span style={{ position: 'absolute', left: 6, top: 2, fontSize: 9, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>{label}</span>
+                    </div>
+                    <span style={{ minWidth: 24, fontSize: 10, fontWeight: 600, color: 'var(--text-primary)', textAlign: 'right' }}>{p.count}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* 최근 조회 내역 (1시간) */}
+          {(trafficDetail.recent || []).length > 0 && (
+            <div className="adm-card" style={{ padding: '6px 14px' }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-primary)', padding: '4px 0 6px' }}>🕐 최근 조회 (1시간)</div>
+              {(trafficDetail.recent || []).map((r: any, i: number) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '3px 0', borderBottom: i < trafficDetail.recent.length - 1 ? '1px solid var(--border)' : 'none', fontSize: 10 }}>
+                  <span style={{ fontSize: 12 }}>{r.device}</span>
+                  <span style={{ minWidth: 36, fontSize: 8, color: 'var(--text-tertiary)' }}>{ago(r.at)}</span>
+                  <span style={{ flex: 1, color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {r.path.length > 35 ? r.path.slice(0, 35) + '…' : r.path}
+                  </span>
+                  <span style={{
+                    fontSize: 8, padding: '1px 4px', borderRadius: 3,
+                    background: r.ref === 'Google' ? '#10B98115' : r.ref === 'Naver' ? '#06B6D415' : r.ref === 'Kakao' ? '#FEE50030' : 'var(--bg-hover)',
+                    color: r.ref === 'Google' ? '#10B981' : r.ref === 'Naver' ? '#06B6D4' : r.ref === 'Kakao' ? '#D97706' : 'var(--text-tertiary)',
+                  }}>{r.ref}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </>
       )}
 
       {/* ═══ 긴급 알림 (컴팩트) ═══ */}
