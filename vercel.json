@@ -70,7 +70,7 @@
   "crons": [
     {
       "path": "/api/cron/seed-posts",
-      "schedule": "0 */2 * * *"
+      "schedule": "0 */4 * * *"
     },
     {
       "path": "/api/cron/cleanup",
@@ -170,7 +170,7 @@
     },
     {
       "path": "/api/cron/check-price-alerts",
-      "schedule": "*/15 9-16 * * 1-5"
+      "schedule": "0 */6 * * *"
     },
     {
       "path": "/api/cron/daily-stats",
@@ -246,7 +246,7 @@
     },
     {
       "path": "/api/cron/seed-comments",
-      "schedule": "30 */4 * * *"
+      "schedule": "30 */8 * * *"
     },
     {
       "path": "/api/cron/blog-seed-comments",
@@ -358,7 +358,7 @@
     },
     {
       "path": "/api/cron/invite-reward",
-      "schedule": "*/30 * * * *"
+      "schedule": "0 */6 * * *"
     },
     {
       "path": "/api/cron/indexnow-mass",
@@ -398,7 +398,7 @@
     },
     {
       "path": "/api/cron/push-content-alert",
-      "schedule": "0 13 * * *"
+      "schedule": "30 13 * * *"
     }
   ]
 }

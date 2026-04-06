@@ -36,7 +36,14 @@
 - **오늘 리라이팅 9건** (3건/회 × 3회), 신규 가입 2명 (139명)
 - **daily_stats PV 정상**: 4/5 1,456뷰 / 4/6 400뷰 (수정 전 0)
 - **push-content-alert 피크 맞춤**: KST 20:00 → 22:00 (피크 23시 대응)
-- **어드민 v2 구현 (14탭→6탭)**: AdminShell + FocusTab(건강점수) + GrowthTab(퍼널+히트맵) + UsersTab(라이프사이클+관심단지) + DataTab(신선도+품질) + OpsTab(크론헬스) + ExecuteTab(🚀전체최신화) + v2 API
+- **알림 시스템 전수 수정 (세션 75+)**:
+  - push-daily-reminder v2: D+1 웰컴 알림(관심지역 기반) + 출석 리마인더(재방문 실유저만, 시드 제외)
+  - push-utils v2: deliverPush 공통 함수 + sendPushBroadcast 비로그인 구독자 포함
+  - quiet_hours 기본값 22:00→23:30 (피크 22~23시 알림 허용)
+  - push_daily_digest 기본값 true (재방문 엔진)
+  - 30일+ 미읽힘 system 알림 정리 (bloat 방지)
+  - 크론 스케줄 최적화: check-price-alerts(32→4회/일), push-content-alert(22→22:30KST), invite-reward(48→4회/일), seed-posts(12→6회/일), seed-comments(6→3회/일)
+- **어드민 v2 구현 (14탭→6탭)**: AdminShell + FocusTab(건강점수) + GrowthTab(퍼널+히트맵) + UsersTab(라이프사이클+관심단지) + DataTab(신선도+품질) + OpsTab(크론헬스) + ExecuteTab(🚀전체최신화) + v2 API (14탭→6탭)**: AdminShell + FocusTab(건강점수) + GrowthTab(퍼널+히트맵) + UsersTab(라이프사이클+관심단지) + DataTab(신선도+품질) + OpsTab(크론헬스) + ExecuteTab(🚀전체최신화) + v2 API
 - **daily_stats 페이지뷰 카운터 수정**: capture_daily_stats RPC에 total_page_views 누락 → 추가 (0→1,388 즉시 반영)
 - **blog-rewrite withCronLogging 추가**: cron_logs 추적 가능 (기존 console.log만 → 성공/실패 기록)
 - **apt_rent_transactions 인덱스**: `idx_rent_created_at` 추가 + sync RPC 타임아웃 90→180초

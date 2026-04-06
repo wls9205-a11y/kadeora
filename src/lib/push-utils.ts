@@ -25,7 +25,6 @@ interface PushPayload {
 
 /**
  * 특정 유저들에게 웹 푸시 발송
- * 크론에서 직접 호출 가능 (인증 불필요)
  */
 export async function sendPushToUsers(
   userIds: string[],
@@ -34,15 +33,44 @@ export async function sendPushToUsers(
   if (!ensureVapid() || userIds.length === 0) return { sent: 0, failed: 0 };
 
   const admin = getSupabaseAdmin();
-
-  // 구독 정보 조회 (배치)
   const { data: subs } = await admin
     .from('push_subscriptions')
     .select('id, endpoint, p256dh, auth, user_id')
     .in('user_id', userIds);
 
   if (!subs || subs.length === 0) return { sent: 0, failed: 0 };
+  return deliverPush(subs, payload);
+}
 
+/**
+ * 전체 구독자에게 웹 푸시 발송 (로그인+비로그인 모두 포함)
+ *
+ * v1 문제: user_id만 필터 → 비로그인 구독자 누락
+ * v2 수정: 전체 push_subscriptions에서 발송
+ */
+export async function sendPushBroadcast(
+  payload: PushPayload
+): Promise<{ sent: number; failed: number }> {
+  if (!ensureVapid()) return { sent: 0, failed: 0 };
+
+  const admin = getSupabaseAdmin();
+  const { data: subs } = await admin
+    .from('push_subscriptions')
+    .select('id, endpoint, p256dh, auth')
+    .limit(500);
+
+  if (!subs || subs.length === 0) return { sent: 0, failed: 0 };
+  return deliverPush(subs, payload);
+}
+
+/**
+ * 실제 푸시 전송 (내부 공통 함수)
+ */
+async function deliverPush(
+  subs: { id: number; endpoint: string; p256dh: string | null; auth: string | null }[],
+  payload: PushPayload
+): Promise<{ sent: number; failed: number }> {
+  const admin = getSupabaseAdmin();
   const message = JSON.stringify({
     title: payload.title,
     body: payload.body,
@@ -59,10 +87,7 @@ export async function sendPushToUsers(
     subs.map(async (sub) => {
       try {
         await webpush.sendNotification(
-          {
-            endpoint: sub.endpoint,
-            keys: { p256dh: sub.p256dh ?? '', auth: sub.auth ?? '' },
-          },
+          { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh ?? '', auth: sub.auth ?? '' } },
           message,
           { TTL: 86400 }
         );
@@ -78,23 +103,4 @@ export async function sendPushToUsers(
   );
 
   return { sent, failed };
-}
-
-/**
- * 전체 유저에게 웹 푸시 발송 (옵트아웃 제외)
- */
-export async function sendPushBroadcast(
-  payload: PushPayload
-): Promise<{ sent: number; failed: number }> {
-  if (!ensureVapid()) return { sent: 0, failed: 0 };
-
-  const admin = getSupabaseAdmin();
-  const { data: subs } = await admin
-    .from('push_subscriptions')
-    .select('id, endpoint, p256dh, auth, user_id');
-
-  if (!subs || subs.length === 0) return { sent: 0, failed: 0 };
-
-  const allUserIds = subs.map(s => s.user_id).filter(Boolean) as string[];
-  return sendPushToUsers(allUserIds, payload);
 }
