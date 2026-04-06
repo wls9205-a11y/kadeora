@@ -317,6 +317,14 @@
     {
       "path": "/api/cron/seo-score-refresh",
       "schedule": "0 2 1 * *"
+    },
+    {
+      "path": "/api/cron/apt-analysis-gen",
+      "schedule": "0 5 * * *"
+    },
+    {
+      "path": "/api/cron/stock-analysis-gen",
+      "schedule": "0 6 * * *"
     }
   ]
 }

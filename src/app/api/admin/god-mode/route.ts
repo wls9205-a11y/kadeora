@@ -52,7 +52,9 @@ const CRON_GROUPS = {
   ],
   ai: [
     '/api/cron/apt-ai-summary',
+    '/api/cron/apt-analysis-gen',
     '/api/cron/stock-daily-briefing',
+    '/api/cron/stock-analysis-gen',
     '/api/cron/stock-desc-gen',
     '/api/cron/blog-rewrite',
     '/api/cron/batch-rewrite-submit',
