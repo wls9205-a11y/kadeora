@@ -3,6 +3,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
 
 export const maxDuration = 300;
+export const dynamic = 'force-dynamic';
 
 async function handler(_req: NextRequest) {
   const admin = getSupabaseAdmin();
@@ -122,5 +123,6 @@ ${discStr ? `\n## 최근 공시\n${discStr}` : ''}
 }
 
 export async function GET(req: NextRequest) {
-  return withCronLogging('stock-analysis-gen', req, handler);
+  const result = await withCronLogging('stock-analysis-gen', req, handler);
+  return NextResponse.json(result);
 }
