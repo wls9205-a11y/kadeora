@@ -12,7 +12,7 @@ export async function GET(_req: NextRequest) {
     const API_KEY = process.env.ANTHROPIC_API_KEY;
     if (!API_KEY) return { processed: 0 };
 
-    const { data: batches } = await admin.from('rewrite_batches')
+    const { data: batches } = await (admin as any).from('rewrite_batches')
       .select('*').eq('category', 'cluster-blog').in('status', ['submitted', 'processing']);
 
     if (!batches?.length) return { processed: 0, metadata: { reason: 'no_batches' } };
@@ -25,7 +25,7 @@ export async function GET(_req: NextRequest) {
       const sd = await sr.json();
 
       if (sd.processing_status === 'in_progress') {
-        await admin.from('rewrite_batches').update({ status: 'processing' }).eq('id', batch.id);
+        await (admin as any).from('rewrite_batches').update({ status: 'processing' }).eq('id', batch.id);
         continue;
       }
       if (sd.processing_status !== 'ended' || !sd.results_url) continue;
@@ -76,7 +76,7 @@ export async function GET(_req: NextRequest) {
         } catch {}
       }
 
-      await admin.from('rewrite_batches').update({ status: 'completed', completed_at: new Date().toISOString() }).eq('id', batch.id);
+      await (admin as any).from('rewrite_batches').update({ status: 'completed', completed_at: new Date().toISOString() }).eq('id', batch.id);
     }
 
     return { processed: totalSaved, metadata: { batches: batches.length } };

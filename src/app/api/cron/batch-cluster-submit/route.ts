@@ -25,7 +25,7 @@ export async function GET(_req: NextRequest) {
     if (!API_KEY) return { processed: 0, metadata: { error: 'no_api_key' } };
 
     // 진행 중인 배치 있으면 스킵
-    const { data: active } = await admin.from('rewrite_batches')
+    const { data: active } = await (admin as any).from('rewrite_batches')
       .select('id').in('status', ['submitted', 'processing'])
       .eq('category', 'cluster-blog').limit(1);
     if (active?.length) return { processed: 0, metadata: { reason: 'batch_in_progress' } };
@@ -111,7 +111,7 @@ export async function GET(_req: NextRequest) {
     const batchData = await batchRes.json();
 
     if (batchData.id) {
-      await admin.from('rewrite_batches').insert({
+      await (admin as any).from('rewrite_batches').insert({
         batch_id: batchData.id, category: 'cluster-blog', status: 'submitted',
         total_requests: requests.length, metadata: { apt: aptSites?.length || 0, stock: stocks?.length || 0 },
       });
