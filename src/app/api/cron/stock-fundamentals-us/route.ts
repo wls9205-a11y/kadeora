@@ -44,6 +44,10 @@ async function fetchYahooFundamentals(symbol: string): Promise<Record<string, an
         if (detail) {
           result.dividend_yield = detail.dividendYield?.raw ? (detail.dividendYield.raw * 100) : null;
           if (!result.per && detail.trailingPE?.raw) result.per = detail.trailingPE.raw;
+          // v8 meta에 없을 수 있는 52주 고저 + 시총 fallback
+          if (!result.high_52w && detail.fiftyTwoWeekHigh?.raw) result.high_52w = detail.fiftyTwoWeekHigh.raw;
+          if (!result.low_52w && detail.fiftyTwoWeekLow?.raw) result.low_52w = detail.fiftyTwoWeekLow.raw;
+          if (!result.market_cap && detail.marketCap?.raw) result.market_cap = detail.marketCap.raw;
         }
       }
     } catch {}

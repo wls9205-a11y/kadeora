@@ -12,7 +12,6 @@ export async function GET(_req: NextRequest) {
     const { data: sites } = await (admin as any).from('apt_sites')
       .select('id, slug, name, region, sigungu, dong, address, builder, developer, total_units, built_year, move_in_date, status, price_min, price_max, nearby_station, school_district, nearby_facilities, transit_score, price_comparison, extension_cost')
       .is('analysis_text', null)
-      .gte('data_quality_score', 0)
       .eq('is_active', true)
       .order('page_views', { ascending: false, nullsFirst: false })
       .limit(15);

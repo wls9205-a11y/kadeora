@@ -244,7 +244,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         // Kakao/Facebook price display
         ...(d.site?.price_min ? { 'og:price:amount': String(d.site.price_min), 'og:price:currency': 'KRW' } : {}),
         // Naver specific
-        'naver:written_time': d.sub?.rcept_bgnde || d.site?.updated_at || d.site?.created_at || '',
+        'naver:written_time': (() => { const d8 = d.sub?.rcept_bgnde; if (d8 && d8.length === 8) return `${d8.slice(0,4)}-${d8.slice(4,6)}-${d8.slice(6,8)}`; return d.site?.updated_at || d.site?.created_at || ''; })(),
         'naver:updated_time': d.site?.updated_at || new Date().toISOString(),
         'naver:author': '카더라',
         'og:updated_time': d.site?.updated_at || new Date().toISOString(),
