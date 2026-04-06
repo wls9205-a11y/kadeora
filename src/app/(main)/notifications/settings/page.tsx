@@ -54,7 +54,7 @@ export default function NotificationSettingsPage() {
       await fetch('/api/push/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ subscription: sub.toJSON() }),
+        body: JSON.stringify({ subscription: sub.toJSON(), visitor_id: localStorage.getItem('kd_visitor_id') }),
       });
 
       // 4. 알림 설정 전부 ON
@@ -63,8 +63,8 @@ export default function NotificationSettingsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           push_comments: true, push_likes: true, push_follows: true,
-          push_apt_deadline: true, push_hot_posts: true, push_stock_alert: true,
-          push_attendance: true, push_marketing: true,
+          push_apt_deadline: true, push_hot_post: true, push_stock_alert: true,
+          push_attendance: true, push_news: true,
         }),
       });
 
@@ -91,8 +91,8 @@ export default function NotificationSettingsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           push_comments: false, push_likes: false, push_follows: false,
-          push_apt_deadline: false, push_hot_posts: false, push_stock_alert: false,
-          push_attendance: false, push_marketing: false,
+          push_apt_deadline: false, push_hot_post: false, push_stock_alert: false,
+          push_attendance: false, push_news: false,
         }),
       });
 

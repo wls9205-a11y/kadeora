@@ -9,10 +9,19 @@ export async function GET(req: NextRequest) {
     const { data: { user } } = await sb.auth.getUser();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { data } = await sb.from('notification_settings').select('user_id,push_apt_deadline,push_attendance,push_comments,push_daily_digest,push_follows,push_hot_post,push_likes,push_news,push_stock_alert,quiet_start,quiet_end,updated_at').eq('user_id', user.id).maybeSingle();
+    const { data } = await sb.from('notification_settings')
+      .select('user_id, push_comments, push_likes, push_follows, push_apt_deadline, push_stock_alert, push_daily_digest, push_attendance, push_hot_post, push_news, quiet_start, quiet_end, updated_at')
+      .eq('user_id', user.id).maybeSingle();
+
     if (!data) {
-      // 기본값으로 생성 (전부 ON — 유저가 개별적으로 끌 수 있음)
-      const defaults = { user_id: user.id, push_comments: true, push_likes: true, push_follows: true, push_apt_deadline: true, push_hot_posts: true, push_stock_alert: true, push_attendance: true, push_marketing: true };
+      // 기본값 생성 — DB 실제 컬럼명 사용
+      const defaults = {
+        user_id: user.id,
+        push_comments: true, push_likes: true, push_follows: true,
+        push_apt_deadline: true, push_stock_alert: true,
+        push_hot_post: true, push_news: true,
+        push_attendance: true, push_daily_digest: true,
+      };
       await sb.from('notification_settings').insert(defaults);
       return NextResponse.json(defaults);
     }
@@ -29,10 +38,25 @@ export async function PATCH(req: NextRequest) {
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await req.json();
-    const allowed = ['push_comments', 'push_likes', 'push_follows', 'push_apt_deadline', 'push_hot_posts', 'push_stock_alert', 'push_attendance', 'push_marketing'];
+
+    // DB 실제 컬럼명 + 프론트엔드 호환 매핑
+    const fieldMap: Record<string, string> = {
+      push_comments: 'push_comments',
+      push_likes: 'push_likes',
+      push_follows: 'push_follows',
+      push_apt_deadline: 'push_apt_deadline',
+      push_stock_alert: 'push_stock_alert',
+      push_hot_post: 'push_hot_post',
+      push_hot_posts: 'push_hot_post',       // 프론트 호환 (s 불일치 수용)
+      push_news: 'push_news',
+      push_marketing: 'push_news',            // 프론트 호환 (이름 매핑)
+      push_attendance: 'push_attendance',
+      push_daily_digest: 'push_daily_digest',
+    };
+
     const update: Record<string, boolean> = {};
-    for (const key of allowed) {
-      if (typeof body[key] === 'boolean') update[key] = body[key];
+    for (const [frontKey, dbKey] of Object.entries(fieldMap)) {
+      if (typeof body[frontKey] === 'boolean') update[dbKey] = body[frontKey];
     }
     if (Object.keys(update).length === 0) return NextResponse.json({ error: 'No valid fields' }, { status: 400 });
 

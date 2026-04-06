@@ -99,8 +99,8 @@ export default function AutoPushPrompt() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             push_comments: true, push_likes: true, push_follows: true,
-            push_apt_deadline: true, push_hot_posts: true,
-            push_stock_alert: true, push_attendance: true, push_marketing: true,
+            push_apt_deadline: true, push_hot_post: true,
+            push_stock_alert: true, push_attendance: true, push_news: true,
           }),
         });
       }
