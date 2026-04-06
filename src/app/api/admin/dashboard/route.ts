@@ -365,6 +365,13 @@ export async function GET(req: Request) {
         apt: aptPulseR,
       };
 
+      // 등급/포인트/전환율 데이터
+      let gradePoints: any = {};
+      try {
+        const gpR = await (sb as any).rpc('admin_grade_stats');
+        gradePoints = gpR.data ?? {};
+      } catch { gradePoints = {}; }
+
       return NextResponse.json({
         kpi: {
           users: usersR.count ?? 0,
@@ -428,6 +435,7 @@ export async function GET(req: Request) {
         cronByCategory,
         dataCoverage,
         sectionPulse,
+        gradePoints,
       });
     }
 

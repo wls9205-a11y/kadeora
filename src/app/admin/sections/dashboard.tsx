@@ -2,6 +2,10 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Badge, C, DailyStat, GRADE_EMOJI, KPI, PROVIDER_LABEL, Spinner, ago, fmt } from '../admin-shared';
 import { CALC_REGISTRY, CATEGORIES } from '@/lib/calc/registry';
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Tooltip, Filler, Legend } from 'chart.js';
+import { Line, Bar } from 'react-chartjs-2';
+
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Tooltip, Filler, Legend);
 
 export default function DashboardSection() {
   const [data, setData] = useState<any>(null);
@@ -61,7 +65,7 @@ export default function DashboardSection() {
   if (loading) return <Spinner />;
   if (!data) return <div style={{ color: C.red }}>로드 실패</div>;
 
-  const { kpi, visitors, yesterday, topPages, categoryDistribution, cronDetail, totalRecordsCreated, recentUsers, recentPosts, recentComments, recentReports, dailyStats, cron, seo, stockKpi, complexKpi, premiumKpi, blogProduction, commentStats, cronByCategory, dataCoverage } = data as any;
+  const { kpi, visitors, yesterday, topPages, categoryDistribution, cronDetail, totalRecordsCreated, recentUsers, recentPosts, recentComments, recentReports, dailyStats, cron, seo, stockKpi, complexKpi, premiumKpi, blogProduction, commentStats, cronByCategory, dataCoverage, gradePoints } = data as any;
   const typeColors: Record<string, string> = { subscription: C.green, trade: C.yellow, redevelopment: C.purple, unsold: C.red, landmark: C.cyan };
   const typeLabels: Record<string, string> = { subscription: '청약', trade: '실거래', redevelopment: '재개발', unsold: '미분양', landmark: '대장' };
   const totalSites = seo?.totalSites || 0;
@@ -412,6 +416,104 @@ export default function DashboardSection() {
           </div>
         );
       })()}
+
+      {/* ── 등급 · 포인트 · 전환율 패널 ── */}
+      {gradePoints && (
+        <div className="mc-g2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-md)' }}>
+          {/* 등급 분포 + 전환율 */}
+          <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>🏆 등급 분포 (실유저)</span>
+              <span style={{ fontSize: 10, color: C.textDim }}>총 {fmt(kpi.users)}명</span>
+            </div>
+            {(gradePoints.gradeDistribution || []).length > 0 ? (() => {
+              const gd = gradePoints.gradeDistribution;
+              const total = gd.reduce((s: number, g: any) => s + g.cnt, 0) || 1;
+              const gradeColors: Record<number, string> = { 1: '#2EE8A5', 2: '#6CB4FF', 3: '#B794FF', 4: '#FFD43B', 5: '#FF6B6B', 6: '#FB7185', 7: '#22D3EE', 8: '#FCD34D', 9: '#818CF8', 10: '#C084FC' };
+              return (
+                <>
+                  <div style={{ display: 'flex', height: 24, borderRadius: 6, overflow: 'hidden', marginBottom: 8 }}>
+                    {gd.map((g: any) => (
+                      <div key={g.grade} style={{ width: `${(g.cnt / total) * 100}%`, background: gradeColors[g.grade] || C.textDim, minWidth: g.cnt > 0 ? 4 : 0 }} title={`${GRADE_EMOJI[g.grade]} Lv.${g.grade}: ${g.cnt}명 (${Math.round((g.cnt / total) * 100)}%)`} />
+                    ))}
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                    {gd.map((g: any) => (
+                      <div key={g.grade} style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 10 }}>
+                        <span>{GRADE_EMOJI[g.grade]}</span>
+                        <span style={{ color: C.textSec }}>Lv.{g.grade}</span>
+                        <span style={{ fontWeight: 700, color: gradeColors[g.grade] }}>{g.cnt}</span>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              );
+            })() : <div style={{ fontSize: 11, color: C.textDim }}>데이터 없음</div>}
+
+            {/* 전환율 */}
+            <div style={{ borderTop: `1px solid ${C.border}`, marginTop: 10, paddingTop: 8 }}>
+              <div style={{ fontSize: 10, color: C.textDim, marginBottom: 6 }}>📊 7일 전환율</div>
+              <div style={{ display: 'flex', gap: 'var(--sp-md)' }}>
+                <div><div style={{ fontSize: 16, fontWeight: 800, color: C.green }}>{gradePoints.conversion7d?.signups ?? kpi.newUsersWeek ?? 0}</div><div style={{ fontSize: 9, color: C.textDim }}>신규 가입</div></div>
+                <div><div style={{ fontSize: 16, fontWeight: 800, color: C.cyan }}>{visitors?.weekUV ?? 0}</div><div style={{ fontSize: 9, color: C.textDim }}>방문자</div></div>
+                <div><div style={{ fontSize: 16, fontWeight: 800, color: (gradePoints.conversion7d?.signups ?? 0) > 0 && (visitors?.weekUV ?? 0) > 0 ? C.yellow : C.textDim }}>{(visitors?.weekUV ?? 0) > 0 ? ((gradePoints.conversion7d?.signups ?? kpi.newUsersWeek ?? 0) / (visitors?.weekUV ?? 1) * 100).toFixed(1) : '0'}%</div><div style={{ fontSize: 9, color: C.textDim }}>전환율</div></div>
+                <div><div style={{ fontSize: 16, fontWeight: 800, color: C.purple }}>{gradePoints.attendance?.unique_users ?? 0}</div><div style={{ fontSize: 9, color: C.textDim }}>출석 유저</div></div>
+              </div>
+            </div>
+          </div>
+
+          {/* 포인트 현황 + 7일 활동 */}
+          <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>💰 포인트 현황</span>
+              <span style={{ fontSize: 10, color: C.textDim }}>총 {fmt(gradePoints.totalPoints ?? 0)}P</span>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, marginBottom: 10 }}>
+              <div style={{ background: C.bg, borderRadius: 'var(--radius-xs)', padding: '7px 8px', textAlign: 'center' }}>
+                <div style={{ fontSize: 16, fontWeight: 800, color: C.yellow }}>{fmt(gradePoints.totalPoints ?? 0)}</div>
+                <div style={{ fontSize: 9, color: C.textDim }}>총 포인트</div>
+              </div>
+              <div style={{ background: C.bg, borderRadius: 'var(--radius-xs)', padding: '7px 8px', textAlign: 'center' }}>
+                <div style={{ fontSize: 16, fontWeight: 800, color: (gradePoints.pointsToday ?? 0) > 0 ? C.green : C.textDim }}>{fmt(gradePoints.pointsToday ?? 0)}</div>
+                <div style={{ fontSize: 9, color: C.textDim }}>오늘 지급</div>
+              </div>
+              <div style={{ background: C.bg, borderRadius: 'var(--radius-xs)', padding: '7px 8px', textAlign: 'center' }}>
+                <div style={{ fontSize: 16, fontWeight: 800, color: C.cyan }}>{gradePoints.attendance?.total_checkins ?? 0}</div>
+                <div style={{ fontSize: 9, color: C.textDim }}>출석 총합</div>
+              </div>
+            </div>
+            {/* 7일 포인트 활동 분포 */}
+            <div style={{ fontSize: 10, color: C.textDim, marginBottom: 6 }}>📋 7일 포인트 활동</div>
+            {(gradePoints.pointStats7d || []).length > 0 ? (() => {
+              const ps = gradePoints.pointStats7d;
+              const maxCnt = Math.max(...ps.map((p: any) => p.cnt || 0), 1);
+              return ps.slice(0, 6).map((p: any) => (
+                <div key={p.reason} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
+                  <span style={{ fontSize: 10, color: C.textSec, width: 70, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flexShrink: 0 }}>{p.reason}</span>
+                  <div style={{ flex: 1, height: 6, borderRadius: 3, background: C.border, overflow: 'hidden' }}>
+                    <div style={{ height: '100%', borderRadius: 3, background: C.brand, width: `${(p.cnt / maxCnt) * 100}%` }} />
+                  </div>
+                  <span style={{ fontSize: 9, fontWeight: 600, color: C.text, minWidth: 28, textAlign: 'right' }}>{p.cnt}건</span>
+                  <span style={{ fontSize: 9, color: C.green, minWidth: 32, textAlign: 'right' }}>+{fmt(p.total)}P</span>
+                </div>
+              ));
+            })() : <div style={{ fontSize: 11, color: C.textDim }}>데이터 없음</div>}
+
+            {/* 포인트 TOP 유저 */}
+            {(gradePoints.topEarners || []).length > 0 && (
+              <div style={{ borderTop: `1px solid ${C.border}`, marginTop: 8, paddingTop: 6 }}>
+                <div style={{ fontSize: 10, color: C.textDim, marginBottom: 4 }}>🥇 포인트 TOP 5</div>
+                {gradePoints.topEarners.map((u: any, i: number) => (
+                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '2px 0', fontSize: 10 }}>
+                    <span style={{ color: C.textSec }}>{GRADE_EMOJI[u.grade]} {u.nickname}</span>
+                    <span style={{ fontWeight: 700, color: [C.yellow, '#C0C0C0', '#CD7F32', C.text, C.text][i] || C.text }}>{fmt(u.points)}P</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* ── 주식 상세 KPI 패널 ── */}
       {stockKpi && (
@@ -1203,29 +1305,47 @@ function QuickAction({ label, href, onClick, external }: { label: string; href: 
 
 function MiniChart({ data }: { data: DailyStat[] }) {
   if (!data.length) return <div style={{ color: C.textDim, fontSize: 12, textAlign: 'center', padding: 20 }}>데이터 없음</div>;
-  const maxPV = Math.max(...data.map(d => d.page_views || 0), 1);
-  const maxUsers = Math.max(...data.map(d => d.new_users || 0), 1);
-  return (
-    <div>
-      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 3, height: 80 }}>
-        {data.map((d, i) => {
-          const h = Math.max(((d.page_views || 0) / maxPV) * 70, 4);
-          const uh = Math.max(((d.new_users || 0) / maxUsers) * 70, 2);
-          return (
-            <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, position: 'relative' }}>
-              <div style={{ width: '100%', height: h, borderRadius: 2, background: C.brand, opacity: .7, transition: 'height .3s' }}
-                title={`${d.date}: PV ${d.page_views || 0} · 신규 ${d.new_users || 0}`} />
-              <div style={{ width: '60%', height: uh, borderRadius: 2, background: C.green, opacity: .8, position: 'absolute', bottom: 0 }} />
-            </div>
-          );
-        })}
-      </div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6 }}>
-        <span style={{ fontSize: 9, color: C.textDim }}>{data[0]?.date?.slice(5)}</span>
-        <span style={{ fontSize: 9, color: C.textDim }}>{data[data.length - 1]?.date?.slice(5)}</span>
-      </div>
-    </div>
-  );
+  const labels = data.map(d => d.date?.slice(5) || '');
+  const chartData = {
+    labels,
+    datasets: [
+      {
+        label: 'PV',
+        data: data.map(d => d.page_views || 0),
+        borderColor: C.brand,
+        backgroundColor: C.brand + '15',
+        fill: true,
+        tension: 0.4,
+        pointRadius: 2,
+        pointHoverRadius: 5,
+        borderWidth: 2,
+      },
+      {
+        label: '신규유저',
+        data: data.map(d => d.new_users || 0),
+        borderColor: C.green,
+        backgroundColor: C.green + '15',
+        fill: true,
+        tension: 0.4,
+        pointRadius: 2,
+        pointHoverRadius: 5,
+        borderWidth: 2,
+        yAxisID: 'y1',
+      },
+    ],
+  };
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index' as const, intersect: false },
+    plugins: { legend: { display: false }, tooltip: { backgroundColor: '#0D1730', titleColor: '#F2F5FA', bodyColor: '#B8CCDF', borderColor: '#1E3258', borderWidth: 1, padding: 8, cornerRadius: 6 } },
+    scales: {
+      x: { grid: { display: false }, ticks: { color: C.textDim, font: { size: 9 } }, border: { display: false } },
+      y: { position: 'left' as const, grid: { color: C.border + '30' }, ticks: { color: C.textDim, font: { size: 9 } }, border: { display: false } },
+      y1: { position: 'right' as const, grid: { display: false }, ticks: { color: C.green, font: { size: 9 } }, border: { display: false } },
+    },
+  };
+  return <div style={{ height: 120 }}><Line data={chartData} options={options} /></div>;
 }
 
 function ActivityFeed({ users, posts, comments, reports }: { users: any[]; posts: any[]; comments: any[]; reports: any[] }) {
