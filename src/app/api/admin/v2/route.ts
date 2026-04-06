@@ -42,9 +42,9 @@ export async function GET(req: NextRequest) {
         sb.from('cron_logs').select('id', { count: 'exact', head: true }).eq('status', 'success').gte('created_at', dayAgo),
         sb.from('cron_logs').select('id', { count: 'exact', head: true }).eq('status', 'failed').gte('created_at', dayAgo),
         sb.from('apt_site_interests').select('id', { count: 'exact', head: true }),
-        (sb as any).from('email_subscribers').select('id', { count: 'exact', head: true }).eq('is_active', true),
-        sb.from('push_subscriptions').select('id', { count: 'exact', head: true }),
-        (sb as any).from('conversion_events').select('id', { count: 'exact', head: true }).gte('created_at', weekAgo),
+        (sb as any).from('email_subscribers').select('id', { count: 'exact', head: true }).eq('is_active', true).catch(() => ({ count: 0 })),
+        sb.from('push_subscriptions').select('id', { count: 'exact', head: true }).catch(() => ({ count: 0 })),
+        (sb as any).from('conversion_events').select('id', { count: 'exact', head: true }).gte('created_at', weekAgo).catch(() => ({ count: 0 })),
         sb.rpc('get_db_size_mb').catch(() => ({ data: null })),
       ]);
 
@@ -147,9 +147,9 @@ export async function GET(req: NextRequest) {
         sb.from('page_views').select('id', { count: 'exact', head: true }).gte('created_at', weekAgo),
         sb.rpc('count_unique_visitors_7d').catch(() => ({ data: 0 })),
         sb.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', weekAgo).neq('is_seed', true),
-        (sb as any).from('conversion_events').select('event_type, cta_name').gte('created_at', weekAgo),
+        (sb as any).from('conversion_events').select('event_type, cta_name').gte('created_at', weekAgo).catch(() => ({ data: [] })),
         sb.from('page_views').select('path').gte('created_at', weekAgo),
-        sb.from('page_views').select('created_at').gte('created_at', weekAgo),
+        sb.from('page_views').select('created_at, user_agent').gte('created_at', weekAgo),
       ]);
 
       // CTA별 집계
@@ -192,7 +192,17 @@ export async function GET(req: NextRequest) {
         { feature: '계산기', path: '/calc', views: Object.entries(pageCounts).filter(([k]) => k.startsWith('/calc')).reduce((s, [, v]) => s + v, 0) },
       ].sort((a, b) => b.views - a.views);
 
+      // 디바이스 분류
+      const deviceCounts: Record<string, number> = { mobile: 0, desktop: 0, bot: 0 };
+      for (const h of (hourlyR.data || [])) {
+        const ua = (h as any).user_agent || '';
+        if (/Mobile|Android|iPhone/i.test(ua)) deviceCounts.mobile++;
+        else if (/bot|crawler|spider|Googlebot|Yeti/i.test(ua)) deviceCounts.bot++;
+        else deviceCounts.desktop++;
+      }
+
       return NextResponse.json({
+        deviceSplit: deviceCounts,
         funnel: {
           pv: pvR.count ?? 0,
           uv: uvR.data ?? 0,
@@ -406,7 +416,8 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ error: 'Unknown tab' }, { status: 400 });
   } catch (e: unknown) {
-    return NextResponse.json({ error: errMsg(e) }, { status: 500 });
+    console.error('[admin-v2]', tab, errMsg(e));
+    return NextResponse.json({ error: errMsg(e), tab }, { status: 500 });
   }
 }
 

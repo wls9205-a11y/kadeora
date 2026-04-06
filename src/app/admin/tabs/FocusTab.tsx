@@ -30,9 +30,18 @@ export default function FocusTab({ onNavigate }: { onNavigate: (t: any) => void 
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [load]);
 
-  if (loading || !data) return <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-secondary)' }}>로딩 중...</div>;
+  if (loading) return <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-secondary)' }}>로딩 중...</div>;
 
-  const { healthScore, kpi, failedCrons, recentActivity, dailyTrend } = data;
+  if (!data || data.error) return (
+    <div className="adm-card" style={{ textAlign: 'center', padding: 30 }}>
+      <div style={{ fontSize: 24, marginBottom: 8 }}>⚠️</div>
+      <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>데이터 로드 실패</div>
+      <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>{data?.error || '서버 응답 없음'}</div>
+      <button className="adm-btn" style={{ marginTop: 12 }} onClick={load}>다시 시도</button>
+    </div>
+  );
+
+  const { healthScore = 0, kpi = {} as any, failedCrons = {}, recentActivity = [], dailyTrend = [] } = data;
   const failCount = Object.keys(failedCrons || {}).length;
 
   // 건강 점수 색상
@@ -153,6 +162,48 @@ export default function FocusTab({ onNavigate }: { onNavigate: (t: any) => void 
         <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
           DB {Math.round(kpi.dbMb / 81.92) / 10}% ({fmt(kpi.dbMb)} MB / 8,192 MB) · 관심등록 {kpi.interests} · 이메일 {kpi.emailSubs} · 푸시 {kpi.pushSubs}
         </div>
+      </div>
+
+      {/* 일일 추이 미니차트 */}
+      {(dailyTrend || []).length > 3 && (() => {
+        const d = (dailyTrend || []).slice(0, 7).reverse();
+        const maxPv = Math.max(...d.map((s: any) => s.total_page_views || s.dau || 1), 1);
+        return (
+          <>
+            <div className="adm-sec">📊 7일 추이</div>
+            <div className="adm-card" style={{ padding: '10px 14px' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, height: 50, marginBottom: 4 }}>
+                {d.map((s: any, i: number) => (
+                  <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <div style={{ width: '100%', height: Math.max(((s.dau || 0) / maxPv) * 40, 3), background: 'var(--brand)', borderRadius: 2, opacity: i === d.length - 1 ? 1 : 0.5 }} />
+                  </div>
+                ))}
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, color: 'var(--text-tertiary)' }}>
+                <span>{d[0]?.stat_date?.slice(5)}</span>
+                <span>DAU</span>
+                <span>{d[d.length - 1]?.stat_date?.slice(5)}</span>
+              </div>
+              <div style={{ display: 'flex', gap: 12, marginTop: 8, fontSize: 11, color: 'var(--text-secondary)' }}>
+                <span>유저 {d[d.length - 1]?.total_users || '?'}</span>
+                <span>블로그 {((d[d.length - 1]?.total_blogs || 0) / 1000).toFixed(1)}K</span>
+                <span>PV {d[d.length - 1]?.total_page_views || 0}</span>
+              </div>
+            </div>
+          </>
+        );
+      })()}
+
+      {/* 💡 자동 인사이트 */}
+      <div className="adm-sec">💡 인사이트</div>
+      <div className="adm-card" style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.7 }}>
+        {kpi.users > 0 && kpi.returnRate === 0 && (
+          <div style={{ marginBottom: 8 }}>📌 실유저 {kpi.users}명 중 재방문자 0명. 가입 직후 이탈률 100%. 가장 시급한 해결 과제는 D+1 웰컴 알림 + 관심 지역 콘텐츠 매칭.</div>
+        )}
+        {kpi.interests <= 1 && (
+          <div style={{ marginBottom: 8 }}>🏢 관심단지 등록 {kpi.interests}건. 청약 {fmt(kpi.apts)}건 현장 중 등록률 {(kpi.interests / Math.max(kpi.apts, 1) * 100).toFixed(3)}%. 상세페이지 CTA 위치/메시지 재점검 필요.</div>
+        )}
+        <div>📈 블로그 14일간 {fmt(kpi.blogs)}편 도달. 리라이팅 {kpi.rewriteRate}% ({fmt(kpi.rewritten)}편). 하루 36건 속도로 {Math.round((kpi.blogs - kpi.rewritten) / 36)}일 후 완료.</div>
       </div>
 
       {/* 최근 활동 */}

@@ -10,7 +10,7 @@ export default function OpsTab({ onNavigate }: { onNavigate: (t: any) => void })
   }, []);
   useEffect(() => { load(); const t = setInterval(load, 30000); return () => clearInterval(t); }, [load]);
 
-  if (loading || !data) return <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-secondary)' }}>로딩 중...</div>;
+  if (loading || !data || data.error) return <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-secondary)' }}>로딩 중...</div>;
 
   const { cronGroups, failedCrons, totalOk, totalFail } = data;
   const totalCron = totalOk + totalFail;

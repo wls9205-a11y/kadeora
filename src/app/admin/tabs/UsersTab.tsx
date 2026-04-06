@@ -18,7 +18,7 @@ export default function UsersTab({ onNavigate }: { onNavigate: (t: any) => void 
   }, []);
   useEffect(() => { load(); }, [load]);
 
-  if (loading || !data) return <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-secondary)' }}>로딩 중...</div>;
+  if (loading || !data || data.error) return <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-secondary)' }}>로딩 중...</div>;
 
   const { users, lifecycle, interests, engagement } = data;
 

@@ -10,9 +10,9 @@ export default function GrowthTab({ onNavigate }: { onNavigate: (t: any) => void
   }, []);
   useEffect(() => { load(); }, [load]);
 
-  if (loading || !data) return <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-secondary)' }}>로딩 중...</div>;
+  if (loading || !data || data.error) return <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-secondary)' }}>로딩 중...</div>;
 
-  const { funnel, ctaStats, topPages, hourlyTraffic, featureUsage } = data;
+  const { funnel, ctaStats, topPages, hourlyTraffic, featureUsage, deviceSplit } = data;
   const maxHour = Math.max(...(hourlyTraffic || []), 1);
   const maxFeature = Math.max(...(featureUsage || []).map((f: any) => f.views), 1);
 
@@ -97,6 +97,32 @@ export default function GrowthTab({ onNavigate }: { onNavigate: (t: any) => void
           피크: {hourlyTraffic.indexOf(Math.max(...hourlyTraffic))}시 ({Math.max(...hourlyTraffic)}뷰)
         </div>
       </div>
+
+      {/* 디바이스 분류 */}
+      {deviceSplit && (
+        <>
+          <div className="adm-sec">📱 디바이스 분류</div>
+          <div className="adm-card" style={{ padding: '10px 14px' }}>
+            <div style={{ display: 'flex', gap: 12 }}>
+              {[
+                { label: '📱 모바일', value: deviceSplit.mobile || 0, color: '#3B82F6' },
+                { label: '💻 데스크탑', value: deviceSplit.desktop || 0, color: '#10B981' },
+                { label: '🤖 봇', value: deviceSplit.bot || 0, color: '#F59E0B' },
+              ].map((d, i) => {
+                const total = (deviceSplit.mobile || 0) + (deviceSplit.desktop || 0) + (deviceSplit.bot || 0);
+                const pct = total > 0 ? Math.round((d.value / total) * 100) : 0;
+                return (
+                  <div key={i} style={{ flex: 1, textAlign: 'center' }}>
+                    <div style={{ fontSize: 18, fontWeight: 700, color: d.color }}>{pct}%</div>
+                    <div style={{ fontSize: 10, color: 'var(--text-secondary)' }}>{d.label}</div>
+                    <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{d.value.toLocaleString()}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </>
+      )}
 
       {/* 인기 페이지 */}
       <div className="adm-sec">📄 인기 페이지 TOP 10</div>

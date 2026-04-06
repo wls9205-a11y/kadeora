@@ -398,7 +398,7 @@
     },
     {
       "path": "/api/cron/push-content-alert",
-      "schedule": "0 11 * * *"
+      "schedule": "0 13 * * *"
     }
   ]
 }
