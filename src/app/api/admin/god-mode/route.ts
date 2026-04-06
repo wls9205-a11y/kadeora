@@ -59,6 +59,8 @@ const CRON_GROUPS = {
     '/api/cron/blog-rewrite',
     '/api/cron/batch-rewrite-submit',
     '/api/cron/batch-rewrite-poll',
+    '/api/cron/batch-analysis-submit',
+    '/api/cron/batch-analysis-poll',
   ],
   content: [
     '/api/cron/seed-posts',
