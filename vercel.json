@@ -345,6 +345,10 @@
     {
       "path": "/api/cron/analysis-refresh",
       "schedule": "0 3 * * 0"
+    },
+    {
+      "path": "/api/cron/indexnow-new-content",
+      "schedule": "0 */6 * * *"
     }
   ]
 }

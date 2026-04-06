@@ -172,7 +172,7 @@ export default function DataTab({ onNavigate }: { onNavigate: (t: any) => void }
           fetch('/api/admin/seo-status').then(r => r.json()).then(d => setSeoData(d)).catch(() => setSeoData({ error: true }));
           return <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-secondary)' }}>SEO 데이터 로딩 중...</div>;
         }
-        const { tierDist = [], batches = [], pruneStatus = {}, analysisStatus = {} } = seoData;
+        const { tierDist = [], batches = [], pruneStatus = {}, analysisStatus = {}, indexnowLogs = [] } = seoData;
         const aptPct = analysisStatus.apt_total > 0 ? Math.round((analysisStatus.apt_done / analysisStatus.apt_total) * 100) : 0;
         const stockPct = analysisStatus.stock_total > 0 ? Math.round((analysisStatus.stock_done / analysisStatus.stock_total) * 100) : 0;
         return (
@@ -191,6 +191,21 @@ export default function DataTab({ onNavigate }: { onNavigate: (t: any) => void }
                 <div style={{ height: 4, borderRadius: 2, background: 'var(--border)', marginTop: 6 }}><div style={{ width: `${stockPct}%`, height: '100%', borderRadius: 2, background: '#10B981', transition: 'width .3s' }} /></div>
                 <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 4 }}>{stockPct}% 완료</div>
               </div>
+            </div>
+
+            
+            <div className="adm-sec">🔗 IndexNow 자동 제출 현황</div>
+            <div className="adm-card" style={{ padding: '8px 14px', marginBottom: 16 }}>
+              {indexnowLogs.length === 0 && <div style={{ fontSize: 12, color: 'var(--text-tertiary)', padding: '8px 0' }}>제출 기록 없음</div>}
+              {indexnowLogs.map((l: any, i: number) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 0', borderBottom: i < indexnowLogs.length - 1 ? '1px solid var(--border)' : 'none', fontSize: 11 }}>
+                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: l.status === 'success' ? '#10B981' : '#EF4444', flexShrink: 0 }} />
+                  <span style={{ color: 'var(--text-secondary)', minWidth: 50 }}>{l.cron_name?.replace('indexnow-', '')}</span>
+                  <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{l.records_processed || 0}건</span>
+                  <span style={{ flex: 1 }} />
+                  <span style={{ color: 'var(--text-tertiary)', fontSize: 10 }}>{new Date(l.created_at).toLocaleString('ko')}</span>
+                </div>
+              ))}
             </div>
 
             <div className="adm-sec">📊 SEO Tier 분포</div>

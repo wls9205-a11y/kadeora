@@ -95,6 +95,7 @@ const CRON_GROUPS = {
     '/api/cron/push-apt-deadline',
     '/api/cron/push-content-alert',
     '/api/cron/indexnow-mass',
+    '/api/cron/indexnow-new-content',
     '/api/cron/blog-internal-links',
     '/api/cron/stock-naver-sync',
   ],
