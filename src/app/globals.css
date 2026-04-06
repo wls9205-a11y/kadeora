@@ -826,41 +826,41 @@ body {
 
 /* ═══ 블로그 본문 — 종합 타이포그래피 시스템 ═══ */
 .blog-content {
-  font-size: 15px;
-  line-height: 1.82;
+  font-size: 16px;
+  line-height: 1.85;
   letter-spacing: -0.2px;
   word-break: keep-all;
   overflow-wrap: break-word;
   color: var(--text-secondary);
 }
 .blog-content p {
-  margin: 0 0 18px;
-  font-size: 15px;
-  line-height: 1.82;
+  margin: 0 0 20px;
+  font-size: 16px;
+  line-height: 1.85;
 }
 .blog-content h2 {
-  font-size: clamp(17px, 4vw, 19px);
+  font-size: 21px;
   font-weight: 700;
   color: var(--text-primary);
-  margin: 36px 0 14px;
+  margin: 40px 0 14px;
   padding-bottom: 8px;
-  border-bottom: 2px solid var(--brand, #3B7BF6);
+  border-bottom: 1px solid var(--border);
   letter-spacing: -0.4px;
   line-height: 1.4;
 }
 .blog-content h3 {
-  font-size: clamp(15px, 3.5vw, 17px);
+  font-size: 18px;
   font-weight: 600;
   color: var(--text-primary);
-  margin: 28px 0 10px;
+  margin: 32px 0 10px;
   letter-spacing: -0.3px;
   line-height: 1.4;
 }
 .blog-content h4 {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--text-primary);
-  margin: 20px 0 8px;
+  margin: 24px 0 8px;
 }
 .blog-content strong, .blog-content b {
   font-weight: 700;
@@ -874,12 +874,12 @@ body {
 .blog-content a:hover { text-decoration-color: var(--brand); }
 
 .blog-content ul, .blog-content ol {
-  margin: 0 0 18px;
+  margin: 0 0 20px;
   padding-left: 22px;
 }
 .blog-content li {
-  font-size: 14px;
-  line-height: 1.75;
+  font-size: 15px;
+  line-height: 1.8;
   margin-bottom: 6px;
   color: var(--text-secondary);
 }
@@ -891,8 +891,8 @@ body {
   border-left: 3px solid var(--brand, #3B7BF6);
   border-radius: 0;
   background: var(--bg-hover, rgba(59,123,246,0.04));
-  font-size: 14px;
-  line-height: 1.7;
+  font-size: 15px;
+  line-height: 1.75;
   color: var(--text-secondary);
 }
 
@@ -971,14 +971,14 @@ body {
 
 /* 모바일 블로그 반응형 */
 @media (max-width: 640px) {
-  .blog-content { font-size: 14.5px; line-height: 1.78; }
-  .blog-content p { margin-bottom: 14px; font-size: 14.5px; }
-  .blog-content h2 { margin-top: 28px; margin-bottom: 10px; font-size: 17px; }
-  .blog-content h3 { margin-top: 22px; font-size: 15px; }
+  .blog-content { font-size: 15px; line-height: 1.8; }
+  .blog-content p { margin-bottom: 16px; font-size: 15px; }
+  .blog-content h2 { margin-top: 32px; margin-bottom: 10px; font-size: 19px; }
+  .blog-content h3 { margin-top: 24px; font-size: 16px; }
   .blog-content table { font-size: 12px; }
   .blog-content th, .blog-content td { padding: 6px 8px; }
-  .blog-content li { font-size: 13.5px; }
-  .blog-content blockquote { padding: 10px 12px; font-size: 13px; }
+  .blog-content li { font-size: 14px; }
+  .blog-content blockquote { padding: 10px 12px; font-size: 14px; }
 }
 
 /* ═══ 피드 게시글 본문 ═══ */
