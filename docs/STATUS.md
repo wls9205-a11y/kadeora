@@ -51,6 +51,16 @@
 - **Welcome Reward**: WelcomeReward.tsx + /api/welcome-bonus. 첫 로그인 감지 → 100P 지급 토스트
 - **BlogSignupCTA 'use client' 위치 버그 수정**: line 2 → line 1
 
+### 글쓰기 리디자인 + 댓글 사진 첨부
+- **WriteClient 컴팩트 리디자인**: 헤더에 카테고리칩 통합 (2줄→1줄) + 보더리스 인풋 + 인라인 태그 + 통합 툴바 + full-width 등록 버튼 삭제
+- **댓글 사진 첨부 (3개 컴포넌트)**: CommentSection + BlogCommentInput + AptCommentInline에 사진 업로드/미리보기/표시 추가. Supabase Storage, 3MB, JPG/PNG/WebP, 1장
+- **DB 마이그레이션**: comments + blog_comments + apt_comments에 image_url 컬럼 추가
+- **API 수정**: /api/comments + /api/apt/comments에 image_url 저장/조회 추가
+
+### llms.txt + 블로그 가독성
+- **llms.txt 생성**: /llms.txt 엔드포인트. 사이트 개요 + 데이터 규모 + 6개 섹션 상세 + 계산기 15카테고리 + 데이터 소스 + 면책 고지
+- **블로그 가독성 개선**: 본문 15→16px, H2 17~19→21px, H3 15~17→18px, li 14→15px. H2 border 2px brand→1px border. 문단/섹션 간격 증가. 모바일 14.5→15px
+
 ## 세션 74: 전환율 2%+ 성장 루프 설계 + Layer 1 구현 + 크론 정리
 
 ### 추가 수정 (세션 후반)
