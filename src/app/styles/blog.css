@@ -114,19 +114,8 @@
   margin: 20px 0 8px;
 }
 
-/* ── 라이트모드 가독성 강화 ── */
-@media (prefers-color-scheme: light) {
-  .blog-content p { color: #374151; }
-  .blog-content li { color: #374151; }
-  .blog-content td { color: #374151; }
-  .blog-content td:first-child { color: #111827; }
-  .blog-content blockquote { background: #f0f4ff; border-left-color: #3b7bf6; color: #4B5563; }
-  .blog-content thead { background: #f5f7fa; }
-  .blog-content tr:nth-child(even) { background: #fafbfc; }
-  .blog-content tr:hover { background: #f0f4ff; }
-  .blog-content code { background: #f3f4f6; color: #7c3aed; border-color: #e5e7eb; }
-  .blog-content h2 { border-bottom-color: #E5E7EB; }
-}
+/* ── 라이트모드: html.theme-light 클래스로 처리 (globals.css) ── */
+/* @media (prefers-color-scheme: light) 사용 금지 — OS 설정과 앱 테마 충돌 */
 
 /* ── 모바일 가독성 ── */
 @media (max-width: 480px) {
