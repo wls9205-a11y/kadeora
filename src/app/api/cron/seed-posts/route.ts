@@ -134,33 +134,48 @@ export async function GET(req: NextRequest) {
  let entityTemplates: Template[] = [];
  try {
    const [{ data: topStocks }, { data: topApts }] = await Promise.all([
-     admin.from('stock_quotes').select('symbol, name, price, change_pct, currency, sector').eq('is_active', true).gt('price', 0).order('volume', { ascending: false, nullsFirst: false }).limit(20),
-     (admin as any).from('apt_sites').select('name, region, sigungu, builder').eq('is_active', true).not('analysis_text', 'is', null).order('page_views', { ascending: false, nullsFirst: false }).limit(20),
+     admin.from('stock_quotes').select('symbol, name, price, change_pct, currency, sector').eq('is_active', true).gt('price', 0).order('volume', { ascending: false, nullsFirst: false }).limit(40),
+     (admin as any).from('apt_sites').select('name, region, sigungu, builder').eq('is_active', true).not('analysis_text', 'is', null).order('page_views', { ascending: false, nullsFirst: false }).limit(40),
    ]);
    const rs = (a: any[]) => a[Math.floor(Math.random() * a.length)];
    if (topStocks?.length) {
-     const s1 = rs(topStocks), s2 = rs(topStocks.filter((s: any) => s.symbol !== s1.symbol));
-     const isUS = s1.currency === 'USD';
-     const p = isUS ? `$${Number(s1.price).toFixed(0)}` : `${Number(s1.price).toLocaleString()}원`;
-     entityTemplates.push(
-       { category: 'stock', title: `${s1.name} 지금 들어가도 될까요?`, content: `${s1.name} 현재가 ${p}인데 여기서 분할매수 시작해도 괜찮을까요? ${s1.sector || ''} 섹터 전망이 어떤지 궁금해요` },
-       { category: 'stock', title: `${s1.name} vs ${s2?.name || '경쟁사'} 어디가 나을까`, content: `${s1.name}이랑 ${s2?.name || '경쟁사'} 중에 장기 투자로 어디가 나을지 고민 중이에요` },
-       { category: 'stock', title: `${s1.name} 실적 어떻게 보세요?`, content: `최근 ${s1.name} 주가가 ${Number(s1.change_pct) >= 0 ? '올랐' : '빠졌'}는데 실적 전망은 어떤가요?` },
-     );
+     // 3~5개 종목을 뽑아서 다양한 패턴 생성
+     const picked = topStocks.sort(() => Math.random() - 0.5).slice(0, 5);
+     for (const s of picked) {
+       const isUS = s.currency === 'USD';
+       const p = isUS ? `$${Number(s.price).toFixed(0)}` : `${Number(s.price).toLocaleString()}원`;
+       const chg = Number(s.change_pct);
+       const s2 = rs(topStocks.filter((x: any) => x.symbol !== s.symbol && x.sector === s.sector));
+       const patterns = [
+         { title: `${s.name} 지금 매수 타이밍일까요?`, content: `${s.name}(${s.symbol}) 현재가 ${p}인데 여기서 분할매수 괜찮을까요? ${s.sector || ''} 섹터 전망이 궁금합니다` },
+         { title: `${s.name} ${chg >= 0 ? '상승' : '하락'} 이유 아시는 분?`, content: `${s.name} 오늘 ${chg >= 0 ? '+' : ''}${chg.toFixed(1)}% ${chg >= 0 ? '올랐는데' : '빠졌는데'} 무슨 뉴스 있나요?` },
+         { title: `${s.name} 장기 보유 vs 단타`, content: `${s.name} 보유 중인데 장기 가져갈지 단기로 수익 실현할지 고민이에요` },
+         { title: `${s.name} 배당은 어떤가요?`, content: `${s.name}(${s.symbol}) 배당 투자 괜찮을까요? 배당 수익률이나 배당 성장률 아시는 분` },
+         ...(s2 ? [{ title: `${s.name} vs ${s2.name} 비교`, content: `같은 ${s.sector || ''} 섹터인데 ${s.name}이랑 ${s2.name} 중에 어디가 더 나을까요? 카더라에서 비교해봤는데 의견 궁금해요` }] : []),
+         { title: `${s.name} 차트 분석 부탁`, content: `${s.name} 기술적 분석 잘하시는 분 계신가요? 지지선 저항선 어디쯤인지 궁금합니다` },
+       ];
+       entityTemplates.push({ category: 'stock', ...rs(patterns) });
+     }
    }
    if (topApts?.length) {
-     const a1 = rs(topApts);
-     entityTemplates.push(
-       { category: 'apt', title: `${a1.name} 청약 넣을지 고민`, content: `${a1.region} ${a1.sigungu || ''} ${a1.name} 관심 있는 분 계신가요? ${a1.builder || '시공사'} 시공이라 기대되는데 경쟁률이 걱정이에요` },
-       { category: 'apt', title: `${a1.name} 살기 어떤가요?`, content: `${a1.name} 주변 환경이나 교통 상황 아시는 분 있으면 정보 공유 부탁드려요` },
-       { category: 'apt', title: `${a1.region} 신축 분양 비교`, content: `${a1.region}에서 요즘 나오는 분양 중에 ${a1.name} 말고 괜찮은 곳 있나요?` },
-     );
+     const picked = topApts.sort(() => Math.random() - 0.5).slice(0, 5);
+     for (const a of picked) {
+       const patterns = [
+         { title: `${a.name} 청약 넣을지 고민`, content: `${a.region} ${a.sigungu || ''} ${a.name} 관심 있는 분? ${a.builder || '시공사'} 시공인데 경쟁률이 걱정이에요` },
+         { title: `${a.name} 분양가 어떻게 보세요?`, content: `${a.name} 분양가가 주변 시세 대비 적정한지 궁금해요. ${a.region} ${a.sigungu || ''} 지역 아시는 분 의견 부탁` },
+         { title: `${a.name} 주변 인프라 어때요?`, content: `${a.name} 근처 학교, 마트, 교통 상황 아시는 분 있으면 정보 부탁드려요` },
+         { title: `${a.region} ${a.sigungu || ''} 부동산 전망`, content: `${a.region} ${a.sigungu || ''} 지역 부동산 분위기 어떤가요? ${a.name} 때문에 관심 갖게 됐는데 투자 가치가 있을까요` },
+         { title: `${a.name} 입주 준비하시는 분?`, content: `${a.name} 계약하신 분 계신가요? 입주 준비 꿀팁이나 인테리어 비용 공유해요` },
+         { title: `${a.builder || '시공사'} 시공 아파트 후기`, content: `${a.builder || '시공사'}에서 시공한 다른 아파트 살아보신 분 있나요? ${a.name} 청약 고민 중이라 시공 품질이 궁금해요` },
+       ];
+       entityTemplates.push({ category: 'apt', ...rs(patterns) });
+     }
    }
  } catch {}
  // 동적 템플릿을 기존 템플릿 풀에 합치기
  const ALL_TEMPLATES = [...TEMPLATES, ...entityTemplates];
 
- const postCount = randInt(2, 4);
+ const postCount = randInt(3, 5);
  const results: { title: string; user: string; age: string; category: string }[] = [];
  let creditExhausted = false;
 
@@ -195,7 +210,7 @@ export async function GET(req: NextRequest) {
 
  // 카테고리 — 뻘글 55%, 주식 18%, 부동산 15%, 동네 12%
  const r = Math.random();
- const category = r < 0.55 ? 'free' : r < 0.73 ? 'stock' : r < 0.88 ? 'apt' : 'local';
+ const category = r < 0.35 ? 'stock' : r < 0.65 ? 'apt' : r < 0.90 ? 'free' : 'local';
 
  const filtered = ALL_TEMPLATES.filter(t => t.category === category && (!t.age || t.age === user.age_group) && !usedTemplatesThisRun.has(t.title));
  const fallback = filtered.length > 0 ? pick(filtered) : pick(ALL_TEMPLATES.filter(t => t.category === category && !usedTemplatesThisRun.has(t.title)));
