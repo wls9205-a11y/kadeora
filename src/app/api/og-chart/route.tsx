@@ -10,8 +10,11 @@ export const maxDuration = 15;
 let _font: ArrayBuffer | null = null;
 function font(): ArrayBuffer | null {
   if (_font) return _font;
-  try { _font = readFileSync(join(process.cwd(), 'public/fonts/NotoSansKR-Bold.otf')).buffer as ArrayBuffer; } catch {}
-  return _font;
+  try {
+    const buf = readFileSync(join(process.cwd(), 'public/fonts/NotoSansKR-Bold.woff'));
+    _font = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
+    return _font;
+  } catch { return null; }
 }
 
 export async function GET(req: NextRequest) {
@@ -71,7 +74,7 @@ export async function GET(req: NextRequest) {
           </div>
         )}
       </div>,
-      { width: 1200, height: 630, fonts: f ? [{ name: 'Noto Sans KR', data: f, style: 'normal' as const, weight: 700 as const }] : [] }
+      { width: 1200, height: 630, ...(f ? { fonts: [{ name: 'Noto Sans KR', data: f, style: 'normal' as const, weight: 700 as const }] } : {}) }
     ).arrayBuffer();
     return new Response(buf, { headers: { 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=3600, s-maxage=3600' } });
   }
@@ -110,7 +113,7 @@ export async function GET(req: NextRequest) {
           ))}
         </div>
       </div>,
-      { width: 1200, height: 630, fonts: f ? [{ name: 'Noto Sans KR', data: f, style: 'normal' as const, weight: 700 as const }] : [] }
+      { width: 1200, height: 630, ...(f ? { fonts: [{ name: 'Noto Sans KR', data: f, style: 'normal' as const, weight: 700 as const }] } : {}) }
     ).arrayBuffer();
     return new Response(buf, { headers: { 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=3600, s-maxage=3600' } });
   }
