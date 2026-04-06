@@ -89,7 +89,7 @@ export default function AutoPushPrompt() {
       await fetch('/api/push/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ subscription: sub.toJSON() }),
+        body: JSON.stringify({ subscription: sub.toJSON(), visitor_id: localStorage.getItem('kd_visitor_id') }),
       });
 
       // 로그인 유저만 notification_settings 생성
