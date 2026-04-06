@@ -13,7 +13,7 @@
 | 청약 | 2,701 |
 | 미분양 | 204 |
 | 재개발 | 217 |
-| 크론 | **83** |
+| 크론 | **89** |
 | 코드 | **~90K줄** 632파일 114컴포넌트 |
 | TS 에러 | 0 |
 | 빌드 | READY |
@@ -23,6 +23,48 @@
 | 전환율 | 0.13% → 목표 3% (SmartSectionGate + 온보딩 스킵 + Orchestrator 배포)
 
 ## 세션 75: 전방위 개선 + 다크모드 수정 + 댓글 리디자인
+
+## 세션 76: SEO 콘텐츠 리라이트 시스템 전체 구현 (2026-04-06)
+
+### DB 변경
+- `blog_posts`: `seo_score smallint`, `seo_tier text` 컬럼 추가 + 인덱스
+- `rewrite_batches` 테이블 생성 (batch_id, status, post_ids, succeeded, failed, cost_estimate)
+- 59,389편 전체 seo_score 일괄 계산: S:1,348 / A:5,765 / B:50,693 / C:1,583
+- `published_at = created_at` 정직한 날짜로 수정 (과거 분산 조작 제거)
+
+### 크론 6개 신규 (총 89개)
+| 크론 | 스케줄 | 역할 |
+|------|--------|------|
+| `batch-rewrite-submit` | 매일 04시 | Batch API 500건/배치 제출 (S/A tier 우선) |
+| `batch-rewrite-poll` | 10분마다 | 배치 결과 수집 + blog_posts UPDATE |
+| `blog-quality-prune` | 매일 03시 | B/C tier 3,500편/일 점진 비공개 |
+| `blog-restore-candidate` | 매주 월 05시 | 비공개 글 복원 후보 자동 선별 (최대 20편/주) |
+| `blog-restore-monitor` | 매주 월 06시 | 복원 후 30일 성과 추적 → 유지/재비공개 |
+| `seo-score-refresh` | 매월 1일 02시 | 전체 seo_score 재계산 |
+
+### 코드 수정
+- `blog-prompt-diversity.ts` v2: 8스타일×4구조 = 32가지 조합, FAQ 40% 확률
+- `blog/[slug]/page.tsx`: `naver:written_time` = `rewritten_at` 우선 적용
+- `DataTab.tsx`: "SEO/리라이트" 서브탭 추가 (tier 분포 + 배치 현황 + 비공개 현황)
+- `api/admin/seo-status/route.ts`: 어드민 SEO 모니터링 API
+- `vercel.json`: 6개 크론 등록
+
+### SEO 전략 핵심
+- **A안 채택**: 비용 ~$56 (Batch API 50% 할인)
+- 59,389편 → S/A tier 7,113편 유지, B/C tier 52,276편 점진 비공개 (7일)
+- 리라이트 대상: stock 4,248 + apt 조회 있는 1,894 + unsold/finance 448 = ~6,590편
+- 자동 복원 루프: 비공개 → 후보 선별 → Batch 리라이트 → 게시 → 30일 성과 추적 → 유지/재비공개
+- 네이버 C-Rank/D.I.A + 구글 Helpful Content 양면 대응
+- `published_at` 조작 제거 (도메인 생성일 이전 날짜 → created_at으로 수정)
+
+### 설계 문서
+- `docs/SEO_REWRITE_PLAN.md`: 5단계 전체 설계안
+- 메모리 #12에 요약 저장
+
+### 배포
+- Vercel: `dpl_Bvf18A5PgWousj9RZPwpk4CX5qrh` (fdc9f58) — READY ✅
+- Anthropic 크레딧 $80 충전 완료
+
 
 ### 전방위 개선 배치 (-1,106줄)
 - **Dead code 정리**: 5 컴포넌트 + 4 API 삭제 + middleware 정리

@@ -12,45 +12,33 @@ export async function GET(req: NextRequest) {
   try {
     const sb = getSupabaseAdmin();
 
-    const [tierRes, batchRes, publishedRes, unpublishedRes, remainingRes] = await Promise.all([
-      (sb as any).from('blog_posts')
-        .select('seo_tier, is_published')
-        .not('seo_tier', 'is', null),
-      (sb as any).from('rewrite_batches')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(10),
-      sb.from('blog_posts')
-        .select('id', { count: 'exact', head: true })
-        .eq('is_published', true),
-      sb.from('blog_posts')
-        .select('id', { count: 'exact', head: true })
-        .eq('is_published', false),
-      (sb as any).from('blog_posts')
-        .select('id', { count: 'exact', head: true })
-        .eq('is_published', true)
-        .in('seo_tier', ['B', 'C']),
+    // Use individual count queries per tier (avoids 1000-row limit)
+    const tiers = ['S', 'A', 'B', 'C', 'D', 'restore_candidate', 'restored', 'cooldown'] as const;
+    const tierPromises = tiers.map(async (tier) => {
+      const [pub, unpub] = await Promise.all([
+        (sb as any).from('blog_posts').select('id', { count: 'exact', head: true }).eq('is_published', true).eq('seo_tier', tier),
+        (sb as any).from('blog_posts').select('id', { count: 'exact', head: true }).eq('is_published', false).eq('seo_tier', tier),
+      ]);
+      return { tier, published: pub.count || 0, unpublished: unpub.count || 0, cnt: (pub.count || 0) + (unpub.count || 0) };
+    });
+
+    const [tierDist, batchRes, publishedRes, unpublishedRes, remainingRes, rewrittenRes] = await Promise.all([
+      Promise.all(tierPromises),
+      (sb as any).from('rewrite_batches').select('*').order('created_at', { ascending: false }).limit(10),
+      sb.from('blog_posts').select('id', { count: 'exact', head: true }).eq('is_published', true),
+      sb.from('blog_posts').select('id', { count: 'exact', head: true }).eq('is_published', false),
+      (sb as any).from('blog_posts').select('id', { count: 'exact', head: true }).eq('is_published', true).in('seo_tier', ['B', 'C']),
+      sb.from('blog_posts').select('id', { count: 'exact', head: true }).not('rewritten_at', 'is', null),
     ]);
 
-    // Aggregate tier distribution
-    const tierMap: Record<string, { published: number; unpublished: number }> = {};
-    for (const row of (tierRes.data || [])) {
-      const t = row.seo_tier || 'unknown';
-      if (!tierMap[t]) tierMap[t] = { published: 0, unpublished: 0 };
-      if (row.is_published) tierMap[t].published++;
-      else tierMap[t].unpublished++;
-    }
-    const tierDist = Object.entries(tierMap)
-      .map(([tier, v]) => ({ tier, cnt: v.published + v.unpublished, published: v.published, unpublished: v.unpublished }))
-      .sort((a, b) => b.cnt - a.cnt);
-
     return NextResponse.json({
-      tierDist,
+      tierDist: tierDist.filter(t => t.cnt > 0).sort((a, b) => b.cnt - a.cnt),
       batches: batchRes.data || [],
       pruneStatus: {
         published: publishedRes.count || 0,
         unpublished: unpublishedRes.count || 0,
         remaining_prune: remainingRes.count || 0,
+        rewritten: rewrittenRes.count || 0,
       },
     });
   } catch (e: any) {
