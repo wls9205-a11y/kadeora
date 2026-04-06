@@ -39,7 +39,7 @@ export async function GET(req: NextRequest) {
       const chg = Number(s.change_pct || 0);
       const chgColor = chg >= 0 ? '#00FF87' : '#FF4444';
       const chgText = `${chg >= 0 ? '+' : ''}${chg.toFixed(2)}%`;
-      const cap = s.market_cap ? (isKR ? `${(Number(s.market_cap) / 1e12).toFixed(1)}조` : `$${(Number(s.market_cap) / 1e9).toFixed(0)}B`) : '-';
+      const cap = Number(s.market_cap) > 0 ? (isKR ? `${(Number(s.market_cap) / 1e12).toFixed(1)}조` : `$${(Number(s.market_cap) / 1e9).toFixed(0)}B`) : '-';
       const per = s.per ? `${Number(s.per).toFixed(1)}배` : '-';
       const pbr = s.pbr ? `${Number(s.pbr).toFixed(2)}배` : '-';
       const dy = s.dividend_yield ? `${Number(s.dividend_yield).toFixed(1)}%` : '-';

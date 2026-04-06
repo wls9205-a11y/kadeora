@@ -190,7 +190,7 @@ export default async function StockDetailPage({ params }: Props) {
           { '@type': 'Question', name: `${s.name} 현재 주가는?`, acceptedAnswer: { '@type': 'Answer', text: `${s.name}(${symbol})의 현재가는 ${fmtPrice(Number(s.price), s.currency ?? undefined)}이며, 전일 대비 ${changePct >= 0 ? '+' : ''}${changePct.toFixed(2)}% 변동했습니다. ${s.market} 상장 종목입니다.` } },
           { '@type': 'Question', name: `${s.name} 어떤 섹터인가요?`, acceptedAnswer: { '@type': 'Answer', text: `${s.name}은(는) ${s.sector || s.market} 섹터에 속하며, ${s.description || `${s.market}에 상장된 종목입니다.`}` } },
           { '@type': 'Question', name: `${s.name} 시세를 어디서 확인하나요?`, acceptedAnswer: { '@type': 'Answer', text: `카더라(kadeora.app)에서 ${s.name}의 실시간 시세, 차트, 수급 분석, AI 한줄평, 관련 뉴스를 무료로 확인할 수 있습니다. 카카오 로그인으로 관심종목 등록, 가격 알림도 설정 가능합니다.` } },
-          { '@type': 'Question', name: `${s.name} 시가총액은 얼마인가요?`, acceptedAnswer: { '@type': 'Answer', text: `${s.name}(${symbol})의 시가총액은 ${s.market_cap ? `약 ${Number(s.market_cap) >= 1e12 ? `${(Number(s.market_cap) / 1e12).toFixed(1)}조원` : Number(s.market_cap) >= 1e8 ? `${Math.round(Number(s.market_cap) / 1e8).toLocaleString()}억원` : `${Number(s.market_cap).toLocaleString()}원`}` : '비공개'}입니다. ${s.market} 상장 종목이며, 카더라에서 섹터 내 시총 순위를 확인할 수 있습니다.` } },
+          { '@type': 'Question', name: `${s.name} 시가총액은 얼마인가요?`, acceptedAnswer: { '@type': 'Answer', text: `${s.name}(${symbol})의 시가총액은 ${Number(s.market_cap) > 0 ? `약 ${Number(s.market_cap) >= 1e12 ? `${(Number(s.market_cap) / 1e12).toFixed(1)}조원` : Number(s.market_cap) >= 1e8 ? `${Math.round(Number(s.market_cap) / 1e8).toLocaleString()}억원` : `${Number(s.market_cap).toLocaleString()}원`}` : '비공개'}입니다. ${s.market} 상장 종목이며, 카더라에서 섹터 내 시총 순위를 확인할 수 있습니다.` } },
         ],
       })}} />
       {/* JSON-LD: Dataset (가격 히스토리 — Google Dataset Search) */}
@@ -243,7 +243,7 @@ export default async function StockDetailPage({ params }: Props) {
         </div>
         {s.updated_at && !s.updated_at.startsWith('2000-01-01') && (
           <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-md)' }}>
-            {new Date(s.updated_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })} 기준 · 시총 {fmtCap(s.market_cap ? Number(s.market_cap) : null, s.currency ?? undefined)}
+            {new Date(s.updated_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })} 기준 · 시총 {fmtCap(Number(s.market_cap) > 0 ? Number(s.market_cap) : null, s.currency ?? undefined)}
           </div>
         )}
         {/* 통합 스파크라인 차트 (90px) */}

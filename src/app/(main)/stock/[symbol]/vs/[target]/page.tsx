@@ -35,7 +35,7 @@ export default async function StockComparePage({ params }: Props) {
   const rows: [string, string, string][] = [
     ['현재가', a.market === 'KOSPI' || a.market === 'KOSDAQ' ? `${fmt(a.price)}원` : `$${Number(a.price).toFixed(2)}`, b.market === 'KOSPI' || b.market === 'KOSDAQ' ? `${fmt(b.price)}원` : `$${Number(b.price).toFixed(2)}`],
     ['변동률', `${Number(a.change_pct) >= 0 ? '+' : ''}${Number(a.change_pct).toFixed(2)}%`, `${Number(b.change_pct) >= 0 ? '+' : ''}${Number(b.change_pct).toFixed(2)}%`],
-    ['시가총액', a.market_cap ? (a.market === 'KOSPI' || a.market === 'KOSDAQ' ? `${(Number(a.market_cap)/1e12).toFixed(1)}조` : `$${(Number(a.market_cap)/1e9).toFixed(0)}B`) : '-', b.market_cap ? (b.market === 'KOSPI' || b.market === 'KOSDAQ' ? `${(Number(b.market_cap)/1e12).toFixed(1)}조` : `$${(Number(b.market_cap)/1e9).toFixed(0)}B`) : '-'],
+    ['시가총액', Number(a.market_cap) > 0 ? (a.market === 'KOSPI' || a.market === 'KOSDAQ' ? `${(Number(a.market_cap)/1e12).toFixed(1)}조` : `$${(Number(a.market_cap)/1e9).toFixed(0)}B`) : '-', Number(b.market_cap) > 0 ? (b.market === 'KOSPI' || b.market === 'KOSDAQ' ? `${(Number(b.market_cap)/1e12).toFixed(1)}조` : `$${(Number(b.market_cap)/1e9).toFixed(0)}B`) : '-'],
     ['PER', a.per ? `${Number(a.per).toFixed(1)}배` : '-', b.per ? `${Number(b.per).toFixed(1)}배` : '-'],
     ['PBR', a.pbr ? `${Number(a.pbr).toFixed(2)}배` : '-', b.pbr ? `${Number(b.pbr).toFixed(2)}배` : '-'],
     ['배당률', a.dividend_yield ? `${Number(a.dividend_yield).toFixed(1)}%` : '-', b.dividend_yield ? `${Number(b.dividend_yield).toFixed(1)}%` : '-'],
