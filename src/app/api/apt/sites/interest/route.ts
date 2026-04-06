@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
       if (insertErr) throw insertErr;
 
       await admin.rpc('increment_site_interest', { p_site_id: parsed.data.site_id });
-      try { await admin.rpc('award_points', { p_user_id: user.id, p_amount: 50, p_reason: '관심단지 등록' }); } catch {}
+      try { await admin.rpc('award_points', { p_user_id: user.id, p_amount: 50, p_reason: '관심단지등록' }); } catch {}
 
       return NextResponse.json({ success: true, message: '관심 등록 완료! +50P 적립' });
 

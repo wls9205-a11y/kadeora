@@ -16,7 +16,7 @@ export async function POST() {
       .from('point_history')
       .select('id')
       .eq('user_id', user.id)
-      .eq('reason', '가입 보너스')
+      .eq('reason', '가입보너스')
       .limit(1)
       .maybeSingle();
 
@@ -26,7 +26,7 @@ export async function POST() {
     await (sb as any).rpc('award_points', {
       p_user_id: user.id,
       p_amount: 100,
-      p_reason: '가입 보너스',
+      p_reason: '가입보너스',
     });
 
     return NextResponse.json({ awarded: true, points: 100 });

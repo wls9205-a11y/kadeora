@@ -105,7 +105,7 @@ export default function WeeklyPrediction() {
 
     // 포인트 지급 (첫 참여 시)
     if (!submitted) {
-      try { await sb.rpc('award_points', { p_user_id: userId, p_amount: 10, p_reason: '코스피 예측 참여' }); } catch {}
+      try { await sb.rpc('award_points', { p_user_id: userId, p_amount: 10, p_reason: '코스피예측참여' }); } catch {}
     }
     setSubmitted(true);
     setSubmitting(false);

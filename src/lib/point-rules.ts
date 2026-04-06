@@ -14,8 +14,9 @@ export interface PointRule {
 }
 
 export const POINT_RULES: Record<string, PointRule> = {
+  welcome:     { amount: 100, label: '가입 보너스',      implemented: true, once: true },
   post:        { amount: 10, label: '게시글 작성',      implemented: true },
-  comment:     { amount: 5,  label: '댓글 작성',        implemented: true, description: '블로그 댓글 포함' },
+  comment:     { amount: 5,  label: '댓글 작성',        implemented: true, description: '블로그/주식/아파트/토론 댓글 포함' },
   attendance:  { amount: 10, label: '출석체크',          implemented: true },
   share:       { amount: 5,  label: '공유',             implemented: true },
   avatar:      { amount: 30, label: '프로필 사진 등록',  implemented: true, once: true },

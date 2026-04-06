@@ -227,10 +227,6 @@
       "schedule": "0 12 * * *"
     },
     {
-      "path": "/api/cron/auto-grade",
-      "schedule": "5 2 * * *"
-    },
-    {
       "path": "/api/cron/apt-ai-summary",
       "schedule": "0 5 * * *"
     },

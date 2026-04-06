@@ -92,7 +92,7 @@ export async function POST(req: NextRequest) {
     if (error) throw error;
 
     // 리뷰 작성 포인트
-    try { await getSupabaseAdmin().rpc('award_points', { p_user_id: user.id, p_amount: 10, p_reason: '아파트 리뷰 작성' }); } catch { }
+    try { await getSupabaseAdmin().rpc('award_points', { p_user_id: user.id, p_amount: 10, p_reason: '아파트리뷰작성' }); } catch { }
 
     return NextResponse.json({ review: data });
   } catch (e: unknown) {

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase-server';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ symbol: string }> }) {
@@ -35,6 +36,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ sym
       .select('*, profiles!stock_comments_author_id_fkey(nickname, grade)')
       .single();
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    try { await getSupabaseAdmin().rpc('award_points', { p_user_id: user.id, p_amount: 5, p_reason: '댓글작성', p_meta: null }); } catch {}
     return NextResponse.json({ comment: data }, { status: 201 });
   } catch { return NextResponse.json({ error: '서버 오류' }, { status: 500 }); }
 }

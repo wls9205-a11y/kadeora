@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase-server';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -42,6 +43,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const { data: topic } = await sb.from('discussion_topics').select('comment_count').eq('id', topicId).single();
     if (topic) await sb.from('discussion_topics').update({ comment_count: (topic.comment_count || 0) + 1 }).eq('id', topicId);
 
+    try { await getSupabaseAdmin().rpc('award_points', { p_user_id: user.id, p_amount: 5, p_reason: '댓글작성', p_meta: null }); } catch {}
     return NextResponse.json({ comment: data }, { status: 201 });
   } catch { return NextResponse.json({ error: '서버 오류' }, { status: 500 }); }
 }
