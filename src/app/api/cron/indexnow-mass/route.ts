@@ -73,7 +73,19 @@ async function handler(_req: NextRequest) {
         }
       } catch {}
 
-      const allUrls = [...staticUrls, ...stockUrls, ...blogUrls];
+      // apt analysis pages
+      let aptUrls: string[] = [];
+      try {
+        const { data: recentApts } = await sb.from('apt_sites')
+          .select('slug')
+          .eq('is_active', true)
+          .not('analysis_text', 'is', null)
+          .order('analysis_generated_at', { ascending: false })
+          .limit(50);
+        if (recentApts) aptUrls = recentApts.map((a: any) => `${SITE_URL}/apt/${a.slug}`);
+      } catch {}
+
+      const allUrls = [...staticUrls, ...stockUrls, ...blogUrls, ...aptUrls];
 
       // 4) IndexNow 전송 (3개 엔드포인트 동시)
       const endpoints = [

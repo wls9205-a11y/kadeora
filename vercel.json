@@ -333,6 +333,10 @@
     {
       "path": "/api/cron/batch-analysis-poll",
       "schedule": "*/10 * * * *"
+    },
+    {
+      "path": "/api/cron/blog-apt-cluster",
+      "schedule": "0 7 * * *"
     }
   ]
 }

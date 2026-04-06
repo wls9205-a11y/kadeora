@@ -70,7 +70,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         'geo.placename': placename,
         'geo.position': `${lat};${lng}`,
         'ICBM': `${lat}, ${lng}`,
-        'naver:written_time': s.updated_at || new Date().toISOString(),
+        'naver:written_time': (s as any).analysis_generated_at || s.updated_at || new Date().toISOString(),
         'naver:updated_time': s.updated_at || new Date().toISOString(),
         'article:published_time': s.updated_at || new Date().toISOString(),
         'article:modified_time': s.updated_at || new Date().toISOString(),

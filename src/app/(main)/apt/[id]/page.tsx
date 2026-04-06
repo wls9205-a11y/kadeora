@@ -245,7 +245,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         // Kakao/Facebook price display
         ...(d.site?.price_min ? { 'og:price:amount': String(d.site.price_min), 'og:price:currency': 'KRW' } : {}),
         // Naver specific
-        'naver:written_time': d.site?.created_at || d.sub?.fetched_at || '',
+        'naver:written_time': d.sub?.rcept_bgnde || d.site?.updated_at || d.site?.created_at || '',
         'naver:updated_time': d.site?.updated_at || new Date().toISOString(),
         'naver:author': '카더라',
         'og:updated_time': d.site?.updated_at || new Date().toISOString(),
