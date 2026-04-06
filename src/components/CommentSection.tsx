@@ -1,6 +1,6 @@
 'use client';
 import { errMsg } from '@/lib/error-utils';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useToast } from '@/components/Toast';
@@ -11,6 +11,7 @@ import ReportButton from '@/components/ReportButton';
 import { gradeTitle, gradeColor } from '@/lib/constants';
 import { getAvatarColor } from '@/lib/avatar';
 import { timeAgo } from '@/lib/format';
+import { createSupabaseBrowser } from '@/lib/supabase-browser';
 
 interface CommentSectionProps {
   postId: number;
@@ -28,6 +29,27 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
   const [replyTo, setReplyTo] = useState<{ id: number; nickname: string } | null>(null);
   const [sort, setSort] = useState<'latest' | 'popular'>('latest');
   const { success, error, info } = useToast();
+  const [commentImage, setCommentImage] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const imgInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !userId) return;
+    if (file.size > 3 * 1024 * 1024) { error('3MB 이하만 가능'); return; }
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) { error('JPG, PNG, WebP만 가능'); return; }
+    setUploadingImage(true);
+    try {
+      const sb = createSupabaseBrowser();
+      const ext = file.name.split('.').pop() || 'jpg';
+      const path = `comments/${userId}/${Date.now()}.${ext}`;
+      const { error: upErr } = await sb.storage.from('images').upload(path, file, { contentType: file.type });
+      if (upErr) throw upErr;
+      const { data: { publicUrl } } = sb.storage.from('images').getPublicUrl(path);
+      setCommentImage(publicUrl);
+    } catch { error('이미지 업로드 실패'); }
+    finally { setUploadingImage(false); if (e.target) e.target.value = ''; }
+  };
 
   const handleSubmit = async () => {
     if (!userId) { error('로그인이 필요합니다'); return; }
@@ -38,6 +60,7 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
     try {
       const body: Record<string, unknown> = { post_id: postId, content: trimmed };
       if (replyTo) body.parent_id = replyTo.id;
+      if (commentImage) body.image_url = commentImage;
       const res = await fetch('/api/comments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -48,6 +71,7 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
       setComments(prev => [{ ...comment, profiles: { id: userId!, nickname: comment.nickname ?? '나', avatar_url: null } }, ...prev]);
       setContent('');
       setReplyTo(null);
+      setCommentImage(null);
       success(replyTo ? '답글이 작성되었습니다' : '댓글이 작성되었습니다');
     } catch (e: unknown) {
       error(e instanceof Error ? errMsg(e) : '댓글 작성 중 오류가 발생했습니다');
@@ -138,15 +162,30 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmit(); } }}
               />
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 6 }}>
-                <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{content.length}/500</span>
-                <button onClick={handleSubmit} disabled={loading || !content.trim()} style={{
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <input ref={imgInputRef} type="file" accept="image/jpeg,image/png,image/webp" style={{ display: 'none' }} onChange={handleImageUpload} />
+                  <button onClick={() => imgInputRef.current?.click()} disabled={uploadingImage || !!commentImage} type="button" aria-label="사진 첨부"
+                    style={{ display: 'flex', alignItems: 'center', background: 'none', border: 'none', cursor: 'pointer', color: commentImage ? 'var(--brand)' : 'var(--text-tertiary)', padding: 0, fontSize: 14 }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+                  </button>
+                  <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{content.length}/500</span>
+                </div>
+                <button onClick={handleSubmit} disabled={loading || (!content.trim() && !commentImage)} style={{
                   padding: '6px 18px', borderRadius: 'var(--radius-xl)', border: 'none',
-                  background: content.trim() ? 'var(--brand)' : 'var(--bg-hover)',
-                  color: content.trim() ? 'white' : 'var(--text-tertiary)',
-                  cursor: content.trim() ? 'pointer' : 'default', fontSize: 'var(--fs-xs)', fontWeight: 600,
+                  background: (content.trim() || commentImage) ? 'var(--brand)' : 'var(--bg-hover)',
+                  color: (content.trim() || commentImage) ? 'white' : 'var(--text-tertiary)',
+                  cursor: (content.trim() || commentImage) ? 'pointer' : 'default', fontSize: 'var(--fs-xs)', fontWeight: 600,
                   transition: 'all var(--transition-fast)',
-                }}>등록</button>
+                }}>{uploadingImage ? '...' : '등록'}</button>
               </div>
+              {/* 이미지 미리보기 */}
+              {commentImage && (
+                <div style={{ marginTop: 6, display: 'inline-flex', position: 'relative' }}>
+                  <img src={commentImage} alt="첨부" style={{ width: 56, height: 56, objectFit: 'cover', borderRadius: 8, border: '1px solid var(--border)' }} />
+                  <button onClick={() => setCommentImage(null)} aria-label="이미지 제거"
+                    style={{ position: 'absolute', top: -6, right: -6, width: 18, height: 18, borderRadius: '50%', background: 'var(--bg-surface)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: 10, color: 'var(--text-tertiary)', padding: 0 }}>✕</button>
+                </div>
+              )}
             </div>
           </div>
         ) : (
@@ -201,6 +240,11 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
                     )}
                     <span style={{ fontSize: 12, color: 'var(--text-tertiary)', marginLeft: 6 }}>{timeAgo(comment.created_at)}</span>
                     <div style={{ fontSize: 14, color: 'var(--text-primary)', lineHeight: 1.6, marginTop: 3, wordBreak: 'break-word' as const }}>{comment.content}</div>
+                    {(comment as any).image_url && (
+                      <a href={(comment as any).image_url} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', marginTop: 4 }}>
+                        <img src={(comment as any).image_url} alt="댓글 이미지" style={{ maxWidth: 180, maxHeight: 120, borderRadius: 8, objectFit: 'cover', border: '1px solid var(--border)' }} />
+                      </a>
+                    )}
                     <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 6, fontSize: 12, color: 'var(--text-tertiary)' }}>
                       <button onClick={() => handleCommentLike(comment.id, likes)} disabled={likingIds.has(comment.id)} aria-label="좋아요"
                         style={{ display: 'flex', alignItems: 'center', gap: 3, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 12, padding: 0, opacity: likingIds.has(comment.id) ? 0.5 : 1 }}>
