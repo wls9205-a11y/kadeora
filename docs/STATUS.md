@@ -1,4 +1,4 @@
-# 카더라 STATUS.md — 세션 75 (2026-04-06 KST)
+# 카더라 STATUS.md — 세션 75 최종 (2026-04-06 KST)
 
 ## 인프라 총괄
 | 항목 | 수량 |
@@ -13,12 +13,14 @@
 | 청약 | 2,701 |
 | 미분양 | 204 |
 | 재개발 | 217 |
-| 크론 | **83** (97→83, 월간 블로그 16→1 디스패처 + push-content-alert) |
+| 크론 | **83** |
+| 코드 | **~90K줄** 632파일 114컴포넌트 |
 | TS 에러 | 0 |
 | 빌드 | READY |
 | 이메일 구독자 | 0 (테이블 생성 완료) |
-| 푸시 구독자 | 0 (AutoPushPrompt v2 배포) |
-| RLS | 138/138 (email_subscribers + conversion_events 추가) |
+| 푸시 구독자 | 0 (AutoPushPrompt v2 + visitor_id 배포) |
+| RLS | 138/138 |
+| 전환율 | 0.13% → 목표 3% (SmartSectionGate + 온보딩 스킵 + Orchestrator 배포)
 
 ## 세션 75: 전방위 개선 + 다크모드 수정 + 댓글 리디자인
 
@@ -243,15 +245,22 @@
 - 부실 블로그 16,018편 보강 → 전편 2,000자+
 
 ## PENDING
-- [ ] Anthropic API 크레딧 충전
-- [ ] KIS_APP_KEY / FINNHUB_API_KEY 등록
-- [ ] 통신판매업 신고
-- [ ] Toss 앱인토스 리뷰
-- [ ] /author/[name] 프로필 페이지 (E-E-A-T)
+- [x] ~~Anthropic API 크레딧 충전~~ (완료 — blog-rewrite Haiku 전환)
+- [x] ~~전환율 설계안 구현~~ (완료 — SmartSectionGate + 온보딩 스킵 + Orchestrator + Welcome Reward)
+- [ ] KIS_APP_KEY / FINNHUB_API_KEY / APT_DATA_API_KEY 등록
+- [ ] 통신판매업 신고 (결제 기능 전제조건)
+- [ ] Toss 앱인토스 리뷰 제출
+- [ ] /author/[name] E-E-A-T 프로필 페이지
 - [ ] 전월세 탭 UI
 - [ ] 블로그 댓글 수정 기능
 - [ ] 프로필 비공개 설정
-- [ ] 전환율 설계안 구현 (BlogReadGate 100% 공개 + 완독 CTA + ConversionOrchestrator)
+- [ ] AdSense 승인 + 배치
+- [ ] 이메일 뉴스레터 발송 시스템 (Resend)
+- [ ] 초대/레퍼럴 시스템
+- [ ] 블로그 카테고리 허브 페이지
+- [ ] Lighthouse 성능 90+
+- [ ] aria-label 150+ 수정
+- [ ] act-first-save-later 패턴 (P3 전환율 Phase 2)
 
 ## 세션 72 후반: 계산기 142종 SEO 만점 + 회원가입 유도
 
