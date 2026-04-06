@@ -1,4 +1,4 @@
-# 카더라 STATUS.md — 세션 74 최종 (2026-04-06 01:00 KST)
+# 카더라 STATUS.md — 세션 75 (2026-04-06 KST)
 
 ## 인프라 총괄
 | 항목 | 수량 |
@@ -19,6 +19,28 @@
 | 이메일 구독자 | 0 (테이블 생성 완료) |
 | 푸시 구독자 | 0 (AutoPushPrompt v2 배포) |
 | RLS | 138/138 (email_subscribers + conversion_events 추가) |
+
+## 세션 75: 전방위 개선 + 다크모드 수정 + 댓글 리디자인
+
+### 전방위 개선 배치 (-1,106줄)
+- **Dead code 정리**: 5 컴포넌트 + 4 API 삭제 + middleware 정리
+- **계산기 142종 공유 버튼**: ShareButtons 추가
+- **블로그 테이블 모바일 overflow**: globals.css 글로벌 적용
+- **RSS 피드 404 수정**: 3곳 경로 수정
+- **Disclaimer blog+calc 타입 추가**: 출처 표시 통합
+- **push-content-alert 리팩토링**: 89→46줄 (sendPushBroadcast)
+
+### 다크모드 컬러 전수 수정
+- 블로그 인라인 색상 스트리핑 (AI 생성 `color:#333` 제거)
+- SectorHeatmap #374151→#6B7280, ComplexClient #050A18→#fff
+
+### 댓글 D안 컴팩트 리스트 (3개 컴포넌트 통일)
+- CommentSection + BlogComment + AptCommentInline → 컴팩트 인라인 + 정렬 토글
+
+### 기타
+- 카카오스토리→카카오톡 교체 (KakaoDirectShare)
+- 카드 빈칸 채우기 (렌더타임 계산 + 맥락형 대체텍스트)
+- apt/[id] 중복 5건 제거 (-45줄)
 
 ## 세션 74: 전환율 2%+ 성장 루프 설계 + Layer 1 구현 + 크론 정리
 
