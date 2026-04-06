@@ -34,7 +34,7 @@ export async function GET(_req: NextRequest) {
       .not('longitude', 'is', null)
       .or('nearby_station.is.null,nearby_station.eq.')
       .order('page_views', { ascending: false, nullsFirst: false })
-      .limit(30);
+      .limit(100);
 
     if (!sites?.length) return { processed: 0, metadata: { reason: 'all_enriched' } };
 

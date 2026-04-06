@@ -361,6 +361,14 @@
     {
       "path": "/api/cron/apt-enrich-location",
       "schedule": "0 10 * * *"
+    },
+    {
+      "path": "/api/cron/batch-cluster-submit",
+      "schedule": "0 5 * * *"
+    },
+    {
+      "path": "/api/cron/batch-cluster-poll",
+      "schedule": "*/10 * * * *"
     }
   ]
 }

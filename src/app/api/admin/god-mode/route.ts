@@ -86,6 +86,9 @@ const CRON_GROUPS = {
     '/api/cron/stock-fundamentals-us',
     '/api/cron/data-quality-monitor',
     '/api/cron/apt-enrich-location',
+    '/api/cron/batch-cluster-submit',
+    '/api/cron/batch-cluster-poll',
+    '/api/cron/blog-publish-queue',
     '/api/cron/seo-score-refresh',
   ],
   system: [

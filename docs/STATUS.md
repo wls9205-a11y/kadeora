@@ -2,7 +2,73 @@
 
 ## 인프라 총괄
 | 항목 | 수량 |
-|------|------|
+|---
+---
+
+## 세션 77 (2026-04-06) — SEO 1페이지 진입 + 데이터 정확성 + SERP 지배
+
+### 완료된 작업
+
+**1. 피드 자동 링킹 시스템**
+- content-renderer.tsx: EntityMap 인터페이스, 종목명/현장명 자동 링크
+- feed/[id]/page.tsx: 인기 종목 150개 + 인기 현장 150개 엔티티 사전
+- 위키피디아 스타일 dashed 밑줄, brand 색상
+
+**2. 피드 자동발행 + 댓글 엔티티 언급**
+- seed-posts: DB에서 인기 종목/현장 조회 → 동적 템플릿 9개 생성
+- seed-comments: 30% 확률로 관련 종목/현장 자연 언급
+
+**3. 데이터 정확성 자동화 시스템**
+- stock-fundamentals-kr 크론 (평일 08:30, 네이버 증권 PER/PBR/배당/52주)
+- stock-fundamentals-us 크론 (매일 07:00, Yahoo Finance PER/PBR/EPS/시총)
+- apt-enrich-location 크론 (매일 10:00, 카카오맵 인근역/학교/편의, 100건/일)
+- data-quality-monitor 크론 (매일 19:00, 이상치 탐지 + 품질 점수)
+- data_quality_score 컬럼 (stock_quotes + apt_sites, 0~100점)
+- recalc_stock_quality_scores() RPC 함수
+
+**4. 클러스터 블로그 Batch 시스템**
+- batch-cluster-submit 크론 (매일 05:00, Sonnet Batch API)
+  → 부동산 50현장 × 3편 + 주식 30종목 × 3편
+- batch-cluster-poll 크론 (10분마다, safeBlogInsert)
+  → is_published=false로 저장 (발행큐 대기)
+- blog-publish-queue 크론 (매일 06:00, 50편/일 점진 발행)
+
+**5. apt/[id] 페이지 개선**
+- AptReviewSection 삭제 (댓글과 중복)
+- InterestRegistration 위치: Location 아래 → AI 분석 바로 아래
+- naver:written_time YYYYMMDD→YYYY-MM-DD 포맷 수정
+
+**6. 코드 리뷰 버그 수정 4건**
+- apt-analysis-gen 무의미한 quality gate 삭제
+- stock-fundamentals-us 52주고저 quoteSummary fallback
+- content-renderer RegExp 정리
+- naver:written_time 날짜 포맷
+
+**7. 설계 문서 3종**
+- docs/DATA_ACCURACY_PLAN.md (데이터 정확성 전방위 설계)
+- docs/SERP_DOMINATION_PLAN.md (노출면적 극대화 전략)
+- docs/SERP_TOTAL_DOMINATION.md (주식+부동산 전체 SERP 지배 설계)
+
+### 크론 현황
+- vercel.json 크론: 71개
+- blog admin 버튼: 23개
+- GOD MODE 크론: 76개
+
+### 현재 베이스라인
+- 주식 품질 70+점: 0건 (PER/PBR 수집 시작 후 1,500+건 예상)
+- 부동산 품질 70+점: 2,566건
+- AI 분석: 부동산 1,476건 / 주식 90건 (Batch 제출 후 전체 완료 예상)
+- 클러스터 블로그: 0건 (Batch 제출 후 4,869편 생성 예상, 50편/일 점진 발행)
+
+### Pending
+- [ ] 어드민에서 batch-cluster-submit 수동 실행 (최초 1회)
+- [ ] 어드민에서 batch-analysis-submit 수동 실행
+- [ ] 네이버/구글 URL 수동 제출 (docs/URL_SUBMIT_LIST.md)
+- [ ] 이미지 인포그래픽 엔드포인트 (og-chart, og-info)
+- [ ] 비교 페이지 자동 생성 (/stock/A/vs/B, /apt/A/vs/B)
+- [ ] 지역/섹터 허브 페이지
+- [ ] RSS 피드 + 네이버 신디케이션
+---|------|
 | 블로그 | **59,401편** (발행 59,388, 전편 2,000자+) |
 | DB 데이터 주입 블로그 | **41,283편** (70%) |
 | 커뮤니티 게시글 | 5,044편 |

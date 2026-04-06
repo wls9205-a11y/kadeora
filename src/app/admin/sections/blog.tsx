@@ -49,6 +49,9 @@ export default function BlogSection() {
     { label: '🇺🇸 US 펀더멘탈', path: '/api/cron/stock-fundamentals-us', icon: '📈' },
     { label: '📍 위치 보강', path: '/api/cron/apt-enrich-location', icon: '🗺️' },
     { label: '🔍 품질 감사', path: '/api/cron/data-quality-monitor', icon: '✅' },
+    { label: '🚀 클러스터 Batch', path: '/api/cron/batch-cluster-submit', icon: '⚡' },
+    { label: '📥 클러스터 폴링', path: '/api/cron/batch-cluster-poll', icon: '📦' },
+    { label: '📰 발행 큐 (50편)', path: '/api/cron/blog-publish-queue', icon: '📤' },
     { label: '주식 시황 (수동)', path: '/api/cron/blog-daily', icon: '📈', disabled: true },
     { label: '청약 (수동)', path: '/api/cron/blog-apt-new', icon: '🏠', disabled: true },
   ] as const;
