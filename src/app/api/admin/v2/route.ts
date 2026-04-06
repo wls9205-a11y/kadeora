@@ -148,7 +148,7 @@ export async function GET(req: NextRequest) {
     if (tab === 'growth') {
       const [pvR, uvR, signupsR, ctaR, topPagesR, hourlyR] = await Promise.all([
         sb.from('page_views').select('id', { count: 'exact', head: true }).gte('created_at', weekAgo),
-        Promise.resolve(sb.rpc('count_unique_visitors_7d')).catch(() => ({ data: 0 })),
+        safe(sb.rpc('count_unique_visitors_7d'), 0),
         sb.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', weekAgo).neq('is_seed', true),
         (sb as any).from('conversion_events').select('event_type, cta_name').gte('created_at', weekAgo),
         sb.from('page_views').select('path').gte('created_at', weekAgo),
@@ -208,7 +208,7 @@ export async function GET(req: NextRequest) {
         deviceSplit: deviceCounts,
         funnel: {
           pv: pvR.count ?? 0,
-          uv: uvR.data ?? 0,
+          uv: uvR ?? 0,
           signups: signupsR.count ?? 0,
           conversionRate: (pvR.count ?? 0) > 0 ? Math.round(((signupsR.count ?? 0) / (pvR.count ?? 0)) * 10000) / 100 : 0,
         },
