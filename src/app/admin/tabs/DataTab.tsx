@@ -172,9 +172,27 @@ export default function DataTab({ onNavigate }: { onNavigate: (t: any) => void }
           fetch('/api/admin/seo-status').then(r => r.json()).then(d => setSeoData(d)).catch(() => setSeoData({ error: true }));
           return <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-secondary)' }}>SEO 데이터 로딩 중...</div>;
         }
-        const { tierDist = [], batches = [], pruneStatus = {} } = seoData;
+        const { tierDist = [], batches = [], pruneStatus = {}, analysisStatus = {} } = seoData;
+        const aptPct = analysisStatus.apt_total > 0 ? Math.round((analysisStatus.apt_done / analysisStatus.apt_total) * 100) : 0;
+        const stockPct = analysisStatus.stock_total > 0 ? Math.round((analysisStatus.stock_done / analysisStatus.stock_total) * 100) : 0;
         return (
           <>
+            <div className="adm-sec">📊 AI 분석 텍스트 생성 현황</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16 }}>
+              <div className="adm-card" style={{ padding: '12px 14px' }}>
+                <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4 }}>🏠 부동산 현장 분석</div>
+                <div style={{ fontSize: 20, fontWeight: 700, color: aptPct === 100 ? '#10B981' : 'var(--brand)' }}>{fmt(analysisStatus.apt_done || 0)} <span style={{ fontSize: 12, fontWeight: 400, color: 'var(--text-tertiary)' }}>/ {fmt(analysisStatus.apt_total || 0)}</span></div>
+                <div style={{ height: 4, borderRadius: 2, background: 'var(--border)', marginTop: 6 }}><div style={{ width: `${aptPct}%`, height: '100%', borderRadius: 2, background: 'var(--brand)', transition: 'width .3s' }} /></div>
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 4 }}>{aptPct}% 완료</div>
+              </div>
+              <div className="adm-card" style={{ padding: '12px 14px' }}>
+                <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4 }}>📈 주식 종목 분석</div>
+                <div style={{ fontSize: 20, fontWeight: 700, color: stockPct === 100 ? '#10B981' : 'var(--brand)' }}>{fmt(analysisStatus.stock_done || 0)} <span style={{ fontSize: 12, fontWeight: 400, color: 'var(--text-tertiary)' }}>/ {fmt(analysisStatus.stock_total || 0)}</span></div>
+                <div style={{ height: 4, borderRadius: 2, background: 'var(--border)', marginTop: 6 }}><div style={{ width: `${stockPct}%`, height: '100%', borderRadius: 2, background: '#10B981', transition: 'width .3s' }} /></div>
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 4 }}>{stockPct}% 완료</div>
+              </div>
+            </div>
+
             <div className="adm-sec">📊 SEO Tier 분포</div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6, marginBottom: 12 }}>
               {tierDist.map((t: any) => (

@@ -22,13 +22,17 @@ export async function GET(req: NextRequest) {
       return { tier, published: pub.count || 0, unpublished: unpub.count || 0, cnt: (pub.count || 0) + (unpub.count || 0) };
     });
 
-    const [tierDist, batchRes, publishedRes, unpublishedRes, remainingRes, rewrittenRes] = await Promise.all([
+    const [tierDist, batchRes, publishedRes, unpublishedRes, remainingRes, rewrittenRes, aptAnalysisRes, aptTotalRes, stockAnalysisRes, stockTotalRes] = await Promise.all([
       Promise.all(tierPromises),
       (sb as any).from('rewrite_batches').select('*').order('created_at', { ascending: false }).limit(10),
       sb.from('blog_posts').select('id', { count: 'exact', head: true }).eq('is_published', true),
       sb.from('blog_posts').select('id', { count: 'exact', head: true }).eq('is_published', false),
       (sb as any).from('blog_posts').select('id', { count: 'exact', head: true }).eq('is_published', true).in('seo_tier', ['B', 'C']),
       sb.from('blog_posts').select('id', { count: 'exact', head: true }).not('rewritten_at', 'is', null),
+      (sb as any).from('apt_sites').select('id', { count: 'exact', head: true }).not('analysis_text', 'is', null),
+      (sb as any).from('apt_sites').select('id', { count: 'exact', head: true }).eq('is_active', true),
+      (sb as any).from('stock_quotes').select('id', { count: 'exact', head: true }).not('analysis_text', 'is', null),
+      (sb as any).from('stock_quotes').select('id', { count: 'exact', head: true }).eq('is_active', true),
     ]);
 
     return NextResponse.json({
@@ -39,6 +43,12 @@ export async function GET(req: NextRequest) {
         unpublished: unpublishedRes.count || 0,
         remaining_prune: remainingRes.count || 0,
         rewritten: rewrittenRes.count || 0,
+      },
+      analysisStatus: {
+        apt_done: aptAnalysisRes.count || 0,
+        apt_total: aptTotalRes.count || 0,
+        stock_done: stockAnalysisRes.count || 0,
+        stock_total: stockTotalRes.count || 0,
       },
     });
   } catch (e: any) {
