@@ -51,7 +51,7 @@ async function resolveParam(rawId: string) {
 
 async function fetchUnifiedData(slug: string) {
   const sb = getSupabaseAdmin();
-  const APT_COLS = 'id,slug,name,site_type,region,sigungu,dong,address,description,seo_title,seo_description,builder,developer,total_units,built_year,move_in_date,status,is_active,content_score,interest_count,page_views,images,key_features,faq_items,nearby_facilities,nearby_station,school_district,price_min,price_max,price_comparison,search_trend,latitude,longitude,source_ids,created_at,updated_at,analysis_text';
+  const APT_COLS = 'id,slug,name,site_type,region,sigungu,dong,address,description,seo_title,seo_description,builder,developer,total_units,built_year,move_in_date,status,is_active,content_score,interest_count,page_views,images,key_features,faq_items,nearby_facilities,nearby_station,school_district,price_min,price_max,price_comparison,search_trend,latitude,longitude,source_ids,created_at,updated_at';
 
   // Phase 1: apt_sites — exact slug → multi-stage fuzzy fallback
   let { data: site } = await sb.from('apt_sites').select(APT_COLS).eq('slug', slug).maybeSingle();
@@ -97,6 +97,13 @@ async function fetchUnifiedData(slug: string) {
     }
   }
   const sourceIds = (site?.source_ids || {}) as Record<string, string>;
+
+  // SEO 분석 텍스트 (database.ts에 없는 컬럼 — as any 패턴)
+  let analysisText: string | null = null;
+  if (site?.id) {
+    const { data: at } = await (sb as any).from('apt_sites').select('analysis_text').eq('id', site.id).maybeSingle();
+    analysisText = at?.analysis_text || null;
+  }
 
   // Phase 2: 소스 데이터 병렬 조회 (sub + unsold + redev 동시)
   const [subResult, unsoldResult, redevResult] = await Promise.allSettled([
@@ -1219,11 +1226,11 @@ export default async function AptUnifiedPage({ params }: Props) {
       {/* Competition rate */}
 
       {/* 📊 AI 종합 분석 — SSR 서버 렌더링 (크롤러 + 사용자 모두 읽음) */}
-      {site?.analysis_text && (
+      {analysisText && (
         <div className="apt-card" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
           <h2 style={ct}>📊 {name} 종합 분석</h2>
           <div className="apt-analysis-content" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.85 }}
-            dangerouslySetInnerHTML={{ __html: (site.analysis_text as string)
+            dangerouslySetInnerHTML={{ __html: (analysisText as string)
               .replace(/^## (.+)$/gm, '<h3 style="font-size:15px;font-weight:700;color:var(--text-primary);margin:18px 0 8px">$1</h3>')
               .replace(/^### (.+)$/gm, '<h4 style="font-size:14px;font-weight:600;color:var(--text-primary);margin:14px 0 6px">$1</h4>')
               .replace(/\*\*(.+?)\*\*/g, '<strong style="color:var(--text-primary)">$1</strong>')

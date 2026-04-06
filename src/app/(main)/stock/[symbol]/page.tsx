@@ -89,8 +89,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function StockDetailPage({ params }: Props) {
   const { symbol } = await params;
   const sb = await createSupabaseServer();
-  const { data: s } = await (sb as any).from('stock_quotes').select('symbol,name,market,price,change_amt,change_pct,volume,market_cap,sector,currency,description,website,ticker,updated_at,per,pbr,dividend_yield,high_52w,low_52w,eps,roe,analysis_text').eq('symbol', symbol).single();
+  const { data: s } = await (sb as any).from('stock_quotes').select('symbol,name,market,price,change_amt,change_pct,volume,market_cap,sector,currency,description,website,ticker,updated_at,per,pbr,dividend_yield,high_52w,low_52w,eps,roe').eq('symbol', symbol).single();
   if (!s) notFound();
+
+  // SEO 분석 텍스트 (database.ts에 없는 컬럼)
+  const { data: _at } = await (sb as any).from('stock_quotes').select('analysis_text').eq('symbol', symbol).maybeSingle();
+  const stockAnalysisText: string | null = _at?.analysis_text || null;
 
   const changePct = Number(s.change_pct);
   const isUp = changePct > 0;
@@ -397,11 +401,11 @@ export default async function StockDetailPage({ params }: Props) {
       })()}
 
       {/* AI 종합 분석 — SSR */}
-      {(s as any).analysis_text && (
+      {stockAnalysisText && (
         <section style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--card-p) var(--sp-lg)', marginBottom: 'var(--sp-md)' }}>
           <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 10px' }}>📊 {s.name} 종합 분석</h2>
           <div style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.85 }}
-            dangerouslySetInnerHTML={{ __html: ((s as any).analysis_text as string)
+            dangerouslySetInnerHTML={{ __html: (stockAnalysisText as string)
               .replace(/^## (.+)$/gm, '<h3 style="font-size:14px;font-weight:700;color:var(--text-primary);margin:16px 0 6px">$1</h3>')
               .replace(/^### (.+)$/gm, '<h4 style="font-size:13px;font-weight:600;color:var(--text-primary);margin:12px 0 4px">$1</h4>')
               .replace(/\*\*(.+?)\*\*/g, '<strong style="color:var(--text-primary)">$1</strong>')
