@@ -32,15 +32,16 @@ export default function BlogSection() {
   const rewritePct = blog.total > 0 ? Math.round((blog.rewritten / blog.total) * 100) : 0;
 
   const CRON_BTNS = [
-    { label: '주식 시황', path: '/api/cron/blog-daily', icon: '📈' },
-    { label: '청약/미분양', path: '/api/cron/blog-apt-new', icon: '🏠' },
-    { label: '대장 아파트', path: '/api/cron/blog-apt-landmark', icon: '🏢' },
-    { label: '재개발', path: '/api/cron/blog-redevelopment', icon: '🏗️' },
-    { label: '가이드', path: '/api/cron/blog-seed-guide', icon: '📖' },
     { label: '리라이트', path: '/api/cron/blog-rewrite', icon: '✨' },
-    { label: '시리즈 배정', path: '/api/cron/blog-series-assign', icon: '📚' },
     { label: '발행 큐', path: '/api/cron/blog-publish-queue', icon: '🚀' },
-  ];
+    { label: '시리즈 배정', path: '/api/cron/blog-series-assign', icon: '📚' },
+    { label: 'SEO 비공개', path: '/api/cron/blog-quality-prune', icon: '🧹' },
+    { label: 'Batch 리라이트', path: '/api/cron/batch-rewrite-submit', icon: '🔄' },
+    { label: 'Batch 폴링', path: '/api/cron/batch-rewrite-poll', icon: '📥' },
+    { label: '복원 후보', path: '/api/cron/blog-restore-candidate', icon: '♻️' },
+    { label: '주식 시황 (수동)', path: '/api/cron/blog-daily', icon: '📈', disabled: true },
+    { label: '청약 (수동)', path: '/api/cron/blog-apt-new', icon: '🏠', disabled: true },
+  ] as const;
 
   return (
     <div style={{ animation: 'fadeIn .4s ease' }}>
@@ -170,7 +171,7 @@ export default function BlogSection() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 'var(--sp-sm)' }}>
           {CRON_BTNS.map(b => (
             <button key={b.path} onClick={() => runCron(b.path, b.label)} disabled={running !== null}
-              style={{ padding: '10px 12px', borderRadius: 'var(--radius-sm)', border: `1px solid ${C.border}`, background: running === b.label ? C.brandBg : C.surface, color: C.text, fontSize: 12, fontWeight: 600, cursor: running ? 'wait' : 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+              style={{ padding: '10px 12px', borderRadius: 'var(--radius-sm)', border: `1px solid ${C.border}`, background: running === b.label ? C.brandBg : C.surface, color: ('disabled' in b && b.disabled) ? C.textDim : C.text, fontSize: 12, fontWeight: 600, cursor: running ? 'wait' : 'pointer', display: 'flex', alignItems: 'center', gap: 6, opacity: ('disabled' in b && b.disabled) ? 0.5 : 1 }}>
               <span>{b.icon}</span> {running === b.label ? '실행중...' : b.label}
             </button>
           ))}
