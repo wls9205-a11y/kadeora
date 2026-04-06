@@ -30,6 +30,12 @@
 - **전환 이벤트 추적**: conversion_events 테이블 + /api/track + beacon API 유틸 + 4개 CTA 추적 삽입
 - **sync-complex-profiles NULL 수정**: RPC에 `AND t.sigungu IS NOT NULL` 필터 (13건/일 실패 해결)
 - **admin/dashboard conversion 섹션**: CTA 이벤트 통계 + 이메일/푸시 구독자 수
+- **blog-rewrite 504 완전 해결 확인**: 8회 연속 성공 (3건/회, ~250초, 300초 내 안전)
+- **크론 성공률 98.4%** (95.4% → 98.4%, 245/249)
+- **디바이스 분류 확인**: 모바일 58.6% / 데스크탑 30% / 봇 11.4% (UA 수집 정상)
+- **오늘 리라이팅 9건** (3건/회 × 3회), 신규 가입 2명 (139명)
+- **daily_stats PV 정상**: 4/5 1,456뷰 / 4/6 400뷰 (수정 전 0)
+- **push-content-alert 피크 맞춤**: KST 20:00 → 22:00 (피크 23시 대응)
 - **어드민 v2 구현 (14탭→6탭)**: AdminShell + FocusTab(건강점수) + GrowthTab(퍼널+히트맵) + UsersTab(라이프사이클+관심단지) + DataTab(신선도+품질) + OpsTab(크론헬스) + ExecuteTab(🚀전체최신화) + v2 API
 - **daily_stats 페이지뷰 카운터 수정**: capture_daily_stats RPC에 total_page_views 누락 → 추가 (0→1,388 즉시 반영)
 - **blog-rewrite withCronLogging 추가**: cron_logs 추적 가능 (기존 console.log만 → 성공/실패 기록)

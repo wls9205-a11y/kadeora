@@ -4,6 +4,14 @@ import { requireAdmin } from '@/lib/admin-auth';
 
 export const maxDuration = 30;
 
+// Supabase query returns PromiseLike (no .catch), wrap safely
+async function safe<T>(p: PromiseLike<{ data: T; error: any }>, fallback: T): Promise<T> {
+  try { const r = await p; return r.error ? fallback : (r.data ?? fallback); } catch { return fallback; }
+}
+async function safeCount(p: PromiseLike<{ count: number | null; error: any }>): Promise<number> {
+  try { const r = await p; return r.error ? 0 : (r.count ?? 0); } catch { return 0; }
+}
+
 /**
  * Admin Dashboard v2 API
  * GET /api/admin/v2?tab=focus|growth|users|data|ops
@@ -27,36 +35,31 @@ export async function GET(req: NextRequest) {
     // 🎯 집중 탭
     // ═══════════════════════════════════════
     if (tab === 'focus') {
-      const [
-        usersR, realUsersR, newUsersR, activeUsersR,
-        blogsR, rewrittenR, cronOkR, cronFailR,
-        interestsR, emailSubsR, pushSubsR,
-        convR, dbSizeR,
-      ] = await Promise.all([
-        sb.from('profiles').select('id', { count: 'exact', head: true }),
-        sb.from('profiles').select('id', { count: 'exact', head: true }).neq('is_seed', true).neq('is_ghost', true).neq('is_deleted', true),
-        sb.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', weekAgo).neq('is_seed', true),
-        sb.from('profiles').select('id', { count: 'exact', head: true }).not('last_active_at', 'is', null).neq('is_seed', true),
-        sb.from('blog_posts').select('id', { count: 'exact', head: true }).eq('is_published', true),
-        sb.from('blog_posts').select('id', { count: 'exact', head: true }).not('rewritten_at', 'is', null),
-        sb.from('cron_logs').select('id', { count: 'exact', head: true }).eq('status', 'success').gte('created_at', dayAgo),
-        sb.from('cron_logs').select('id', { count: 'exact', head: true }).eq('status', 'failed').gte('created_at', dayAgo),
-        sb.from('apt_site_interests').select('id', { count: 'exact', head: true }),
-        (sb as any).from('email_subscribers').select('id', { count: 'exact', head: true }).eq('is_active', true).catch(() => ({ count: 0 })),
-        sb.from('push_subscriptions').select('id', { count: 'exact', head: true }).catch(() => ({ count: 0 })),
-        (sb as any).from('conversion_events').select('id', { count: 'exact', head: true }).gte('created_at', weekAgo).catch(() => ({ count: 0 })),
-        sb.rpc('get_db_size_mb').catch(() => ({ data: null })),
+      const [users, realUsers, newUsers, activeUsers, blogs, rewritten, cronOk, cronFail, interests, emailSubs, pushSubs, convEvents, dbMb] = await Promise.all([
+        safeCount(sb.from('profiles').select('id', { count: 'exact', head: true })),
+        safeCount(sb.from('profiles').select('id', { count: 'exact', head: true }).neq('is_seed', true).neq('is_ghost', true).neq('is_deleted', true)),
+        safeCount(sb.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', weekAgo).neq('is_seed', true)),
+        safeCount(sb.from('profiles').select('id', { count: 'exact', head: true }).not('last_active_at', 'is', null).neq('is_seed', true)),
+        safeCount(sb.from('blog_posts').select('id', { count: 'exact', head: true }).eq('is_published', true)),
+        safeCount(sb.from('blog_posts').select('id', { count: 'exact', head: true }).not('rewritten_at', 'is', null)),
+        safeCount(sb.from('cron_logs').select('id', { count: 'exact', head: true }).eq('status', 'success').gte('created_at', dayAgo)),
+        safeCount(sb.from('cron_logs').select('id', { count: 'exact', head: true }).eq('status', 'failed').gte('created_at', dayAgo)),
+        safeCount(sb.from('apt_site_interests').select('id', { count: 'exact', head: true })),
+        safeCount((sb as any).from('email_subscribers').select('id', { count: 'exact', head: true }).eq('is_active', true)),
+        safeCount(sb.from('push_subscriptions').select('id', { count: 'exact', head: true })),
+        safeCount((sb as any).from('conversion_events').select('id', { count: 'exact', head: true }).gte('created_at', weekAgo)),
+        safe(sb.rpc('get_db_size_mb'), 1852),
       ]);
 
-      const totalCron = (cronOkR.count ?? 0) + (cronFailR.count ?? 0);
-      const cronRate = totalCron > 0 ? (cronOkR.count ?? 0) / totalCron : 1;
-      const realUsers = realUsersR.count ?? 0;
-      const activeUsers = activeUsersR.count ?? 0;
+      const totalCron = cronOk + cronFail;
+      const cronRate = totalCron > 0 ? cronOk / totalCron : 1;
+      
+      
       const returnRate = realUsers > 0 ? activeUsers / realUsers : 0;
-      const blogs = blogsR.count ?? 0;
-      const rewritten = rewrittenR.count ?? 0;
+      
+      
       const rewriteRate = blogs > 0 ? rewritten / blogs : 0;
-      const newUsers = newUsersR.count ?? 0;
+      
 
       // 건강 점수 계산 (100점 만점)
       const scores = {
@@ -65,11 +68,11 @@ export async function GET(req: NextRequest) {
         returnRate: returnRate * 100 * 0.15,
         conversionRate: Math.min(0.13 / 2, 1) * 100 * 0.10,
         rewriteRate: rewriteRate * 100 * 0.10,
-        subscriptions: Math.min(((interestsR.count ?? 0) + (emailSubsR.count ?? 0) + (pushSubsR.count ?? 0)) / 50, 1) * 100 * 0.10,
+        subscriptions: Math.min((interests + emailSubs + pushSubs) / 50, 1) * 100 * 0.10,
         dataFreshness: 80 * 0.10, // 추후 실제 계산
         seoIndex: 50 * 0.05, // 추후 실제 계산
-        errorRate: (1 - Math.min((cronFailR.count ?? 0) / Math.max(totalCron, 1), 1)) * 100 * 0.05,
-        dbHeadroom: Math.min(((8192 - (dbSizeR.data ?? 1852)) / 8192) * 100, 100) * 0.05,
+        errorRate: (1 - Math.min(cronFail / Math.max(totalCron, 1), 1)) * 100 * 0.05,
+        dbHeadroom: Math.min(((8192 - dbMb) / 8192) * 100, 100) * 0.05,
       };
       const healthScore = Math.round(Object.values(scores).reduce((a, b) => a + b, 0));
 
@@ -118,11 +121,11 @@ export async function GET(req: NextRequest) {
           blogs, rewritten, rewriteRate: Math.round(rewriteRate * 100),
           stocks: stockR.count ?? 0, apts: aptR.count ?? 0,
           unsold: unsoldR.count ?? 0, redev: redevR.count ?? 0,
-          interests: interestsR.count ?? 0,
-          emailSubs: emailSubsR.count ?? 0, pushSubs: pushSubsR.count ?? 0,
-          conversions: convR.count ?? 0,
-          cronSuccess: cronOkR.count ?? 0, cronFail: cronFailR.count ?? 0,
-          dbMb: dbSizeR.data ?? 1852,
+          interests,
+          emailSubs, pushSubs,
+          conversions: convEvents,
+          cronSuccess: cronOk, cronFail,
+          dbMb,
         },
         failedCrons: failGroups,
         recentActivity: [
