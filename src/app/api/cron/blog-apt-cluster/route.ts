@@ -32,7 +32,7 @@ export async function GET(_req: NextRequest) {
 
     let created = 0;
     for (const site of sites) {
-      const ids: number[] = [];
+      const ids: any[] = [];
       for (const t of TEMPLATES) {
         try {
           const title = `${site.name} ${t.sfx} 2026`;
