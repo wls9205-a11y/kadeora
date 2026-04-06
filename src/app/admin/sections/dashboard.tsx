@@ -180,6 +180,8 @@ export default function DashboardSection() {
         {dataCoverage?.stockSector && <HealthBadge label="섹터" value={`${dataCoverage.stockSector.pct}%`} ok={dataCoverage.stockSector.pct > 80} />}
         {dataCoverage?.stockRefresh && <HealthBadge label="시세" value={dataCoverage.stockRefresh.ok ? '정상' : '오류'} ok={dataCoverage.stockRefresh.ok} />}
         {dataCoverage?.dbSize && <HealthBadge label="DB" value={dataCoverage.dbSize} ok={true} />}
+        {gradePoints?.totalPoints != null && <HealthBadge label="포인트" value={`오늘+${fmt(gradePoints.pointsToday ?? 0)}P`} ok={(gradePoints.pointsToday ?? 0) > 0} />}
+        {gradePoints?.conversion7d && <HealthBadge label="가입7d" value={`${gradePoints.conversion7d.signups ?? 0}명`} ok={(gradePoints.conversion7d.signups ?? 0) > 0} />}
       </div>
 
       {/* ── Row 2: 핵심 KPI 8카드 + 어제 대비 ── */}
@@ -313,54 +315,63 @@ export default function DashboardSection() {
       {/* ── 섹션별 7일 펄스 ── */}
       {(data as any).sectionPulse && (() => {
         const p = (data as any).sectionPulse;
-        const barW = (v: number, max: number) => max > 0 ? `${Math.max(4, (v / max) * 100)}%` : '4%';
+        const feedLabels = (p.feed || []).map((d: any) => d.d?.slice(5) || '');
+        const blogLabels = (p.blog || []).map((d: any) => d.d?.slice(5) || '');
+        const chartOpts = (max: number) => ({
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false }, tooltip: { backgroundColor: '#0D1730', titleColor: '#F2F5FA', bodyColor: '#B8CCDF', borderColor: '#1E3258', borderWidth: 1, padding: 8, cornerRadius: 6 } },
+          scales: {
+            x: { grid: { display: false }, ticks: { color: C.textDim, font: { size: 9 } }, border: { display: false } },
+            y: { grid: { color: C.border + '30' }, ticks: { color: C.textDim, font: { size: 9 }, stepSize: Math.max(1, Math.ceil(max / 5)) }, border: { display: false }, beginAtZero: true },
+          },
+        });
         return (
           <div className="mc-g2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-md)' }}>
-            {/* 피드 펄스 */}
+            {/* 피드 펄스 — Chart.js Bar */}
             <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)' }}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: C.text, marginBottom: 8 }}>💬 피드 7일 추이</div>
-              {(p.feed || []).map((d: any) => {
-                const maxP = Math.max(...(p.feed || []).map((x: any) => x.posts || 0));
-                return (
-                  <div key={d.d} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
-                    <span style={{ fontSize: 9, color: C.textDim, width: 36, flexShrink: 0 }}>{d.d?.slice(5)}</span>
-                    <div style={{ flex: 1, background: C.bg, borderRadius: 2, height: 14, overflow: 'hidden' }}>
-                      <div style={{ width: barW(d.posts, maxP), height: '100%', background: C.brand, borderRadius: 2, transition: 'width .3s' }} />
-                    </div>
-                    <span style={{ fontSize: 9, color: C.textSec, width: 28, textAlign: 'right', flexShrink: 0 }}>{d.posts}</span>
-                  </div>
-                );
-              })}
-              <div style={{ display: 'flex', gap: 8, marginTop: 6, fontSize: 9, color: C.textDim }}>
-                <span>총 {(p.feed || []).reduce((s: number, d: any) => s + (d.posts || 0), 0)}글</span>
-                <span>♥ {(p.feed || []).reduce((s: number, d: any) => s + (d.likes || 0), 0)}</span>
-                <span>💬 {(p.feed || []).reduce((s: number, d: any) => s + (d.comments || 0), 0)}</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>💬 피드 7일 추이</span>
+                <div style={{ display: 'flex', gap: 8, fontSize: 9 }}>
+                  <span>총 {(p.feed || []).reduce((s: number, d: any) => s + (d.posts || 0), 0)}글</span>
+                  <span>♥ {(p.feed || []).reduce((s: number, d: any) => s + (d.likes || 0), 0)}</span>
+                  <span style={{ color: C.textDim }}>💬 {(p.feed || []).reduce((s: number, d: any) => s + (d.comments || 0), 0)}</span>
+                </div>
+              </div>
+              <div style={{ height: 120 }}>
+                <Bar data={{
+                  labels: feedLabels,
+                  datasets: [{
+                    data: (p.feed || []).map((d: any) => d.posts || 0),
+                    backgroundColor: C.brand + '80',
+                    borderColor: C.brand,
+                    borderWidth: 1,
+                    borderRadius: 3,
+                  }]
+                }} options={chartOpts(Math.max(...(p.feed || []).map((x: any) => x.posts || 0), 1)) as any} />
               </div>
             </div>
 
-            {/* 블로그 펄스 */}
+            {/* 블로그 펄스 — Chart.js Stacked Bar */}
             <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)' }}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: C.text, marginBottom: 8 }}>📝 블로그 7일 생산</div>
-              {(p.blog || []).map((d: any) => {
-                const maxT = Math.max(...(p.blog || []).map((x: any) => x.total || 0));
-                return (
-                  <div key={d.d} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
-                    <span style={{ fontSize: 9, color: C.textDim, width: 36, flexShrink: 0 }}>{d.d?.slice(5)}</span>
-                    <div style={{ flex: 1, background: C.bg, borderRadius: 2, height: 14, overflow: 'hidden', display: 'flex' }}>
-                      {d.stock > 0 && <div style={{ width: barW(d.stock, maxT), height: '100%', background: C.green }} />}
-                      {d.apt > 0 && <div style={{ width: barW(d.apt, maxT), height: '100%', background: C.cyan }} />}
-                      {(d.realestate || 0) > 0 && <div style={{ width: barW(d.realestate, maxT), height: '100%', background: C.purple }} />}
-                      {(d.other || 0) > 0 && <div style={{ width: barW(d.other, maxT), height: '100%', background: C.yellow }} />}
-                    </div>
-                    <span style={{ fontSize: 9, color: C.textSec, width: 28, textAlign: 'right', flexShrink: 0 }}>{d.total}</span>
-                  </div>
-                );
-              })}
-              <div style={{ display: 'flex', gap: 8, marginTop: 6, fontSize: 9 }}>
-                <span style={{ color: C.green }}>■ 주식</span>
-                <span style={{ color: C.cyan }}>■ 청약</span>
-                <span style={{ color: C.purple }}>■ 부동산</span>
-                <span style={{ color: C.yellow }}>■ 기타</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>📝 블로그 7일 생산</span>
+                <div style={{ display: 'flex', gap: 6, fontSize: 9 }}>
+                  <span style={{ color: C.green }}>■ 주식</span>
+                  <span style={{ color: C.cyan }}>■ 청약</span>
+                  <span style={{ color: C.purple }}>■ 부동산</span>
+                  <span style={{ color: C.yellow }}>■ 기타</span>
+                </div>
+              </div>
+              <div style={{ height: 120 }}>
+                <Bar data={{
+                  labels: blogLabels,
+                  datasets: [
+                    { label: '주식', data: (p.blog || []).map((d: any) => d.stock || 0), backgroundColor: C.green + '80', borderColor: C.green, borderWidth: 1, borderRadius: 2 },
+                    { label: '청약', data: (p.blog || []).map((d: any) => d.apt || 0), backgroundColor: C.cyan + '80', borderColor: C.cyan, borderWidth: 1, borderRadius: 2 },
+                    { label: '부동산', data: (p.blog || []).map((d: any) => d.realestate || 0), backgroundColor: C.purple + '80', borderColor: C.purple, borderWidth: 1, borderRadius: 2 },
+                    { label: '기타', data: (p.blog || []).map((d: any) => d.other || 0), backgroundColor: C.yellow + '80', borderColor: C.yellow, borderWidth: 1, borderRadius: 2 },
+                  ]
+                }} options={{ ...chartOpts(Math.max(...(p.blog || []).map((x: any) => x.total || 0), 1)), scales: { ...chartOpts(1).scales, x: { ...chartOpts(1).scales.x, stacked: true }, y: { ...chartOpts(1).scales.y, stacked: true } } } as any} />
               </div>
             </div>
 
@@ -1109,23 +1120,23 @@ export default function DashboardSection() {
       {/* ── 최근 릴리즈 내역 ── */}
       <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', marginBottom: 'var(--sp-md)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-          <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>🚀 최근 릴리즈 (세션 70~72)</span>
-          <span style={{ fontSize: 10, color: C.textDim }}>2026-04-04 ~ 05</span>
+          <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>🚀 최근 릴리즈 (세션 75~77)</span>
+          <span style={{ fontSize: 10, color: C.textDim }}>2026-04-06 ~ 07</span>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
           {[
-            { tag: '⭐NEW', label: '계산기 142종 구축', desc: '동적 엔진+registry 등록만으로 페이지+SEO+JSON-LD 자동. 16카테고리', color: C.brand, commit: 's72-calc' },
-            { tag: 'SEO', label: '계산기 SEO 만점', desc: '이모지141+맞춤FAQ131+seoContent133+HowTo+Rating4.8', color: C.green, commit: 's72-seo' },
-            { tag: 'FEAT', label: '계산기 회원가입 CTA', desc: '결과CTA+하단배너. data-nudge로 GuestNudge 조율. 7접점', color: C.cyan, commit: 's72-cta' },
-            { tag: '⭐NEW', label: 'PDF 전수 파싱', desc: '2,392건 완료. 취득세2,235 전매789 커뮤니티647 가격183', color: C.brand, commit: 's72-pdf' },
-            { tag: 'FEAT', label: '총비용 시뮬레이터', desc: '타입/층/발코니/옵션/취득세 → 실입주 총비용 계산', color: C.green, commit: 's72-sim' },
-            { tag: 'FEAT', label: '규제 신호등+입지분석', desc: '전매/거주/재당첨 뱃지. 학군/교통 2칼럼. 단지스펙', color: C.yellow, commit: 's72-reg' },
-            { tag: 'UX', label: '이미지 Lightbox+허수', desc: '풀스크린+스와이프. 관심 공급세대×0.5. 추정 뱃지', color: C.cyan, commit: 's72-ux' },
-            { tag: 'DATA', label: '블로그 59,388편', desc: '주식 1,844 + 단지백과 34,500 + 재개발 217 + 미분양 대량', color: C.brand, commit: 's70-blog' },
-            { tag: 'SEO', label: '사이트맵+전수감사', desc: '23,967편 누락. 4,138편 유니크화. 내부링크 22+. 출처/면책', color: C.green, commit: 's70-seo' },
-            { tag: 'FEAT', label: '광고판+인기검색어', desc: '카카오 스타일 AdBanner. TrendingTicker 헤더 통합', color: C.brand, commit: 's71-ad' },
-            { tag: 'AUDIT', label: '전수감사 25건', desc: '등급통일, 가점계산기, 탈퇴, 세법3건, 군위군', color: C.purple, commit: 's71-audit' },
-            { tag: 'DATA', label: '정보력 RPC 10개', desc: 'nearby_complexes, MA이동평균선, PER/PBR/배당/52주', color: C.yellow, commit: 's70-rpc' },
+            { tag: 'FIX', label: '등급/포인트 이중 시스템 해결', desc: 'DB트리거 points덮어쓰기 제거. award_points유일소스. enum6개추가. 가입100P소급40명', color: C.red, commit: 's75-grade' },
+            { tag: 'FIX', label: '블로그 글씨 안보이는 버그', desc: 'blog.css prefers-color-scheme충돌. OS라이트+앱다크=투명. 미디어쿼리삭제', color: C.red, commit: 's75-blog' },
+            { tag: '⭐NEW', label: 'Chart.js 대시보드', desc: '트래픽Line+펄스Bar차트. 등급분포+포인트+전환율패널', color: C.brand, commit: 's77-chart' },
+            { tag: 'UX', label: '피드 B-style Social 리디자인', desc: '작성자최상단+카테고리pill+액션바균등4칸. 미니대시보드삭제', color: C.cyan, commit: 's75-feed' },
+            { tag: 'FEAT', label: '댓글 사진 첨부', desc: 'CommentSection+BlogComment+AptComment 3컴포넌트. 3MB/JPG/PNG/WebP', color: C.green, commit: 's75-photo' },
+            { tag: 'FEAT', label: '댓글 포인트 전면 정상화', desc: '블로그/주식/아파트/토론 4종 댓글 5P지급. DB트리거+API추가', color: C.green, commit: 's75-pts' },
+            { tag: 'FIX', label: '첫방문 가입CTA 0개 해결', desc: 'GuestNudge v5: 첫방문2PV부터배너. 재방문+첫방문 모두지원', color: C.red, commit: 's75-cta' },
+            { tag: 'SEO', label: 'llms.txt 생성', desc: 'AI모델용 사이트요약. llmstxt.org스펙. 24h캐시', color: C.green, commit: 's75-llms' },
+            { tag: 'FIX', label: '세종/세종시 중복 지역', desc: 'normalizeRegion시$추가. tradeByRegion키norm()적용', color: C.yellow, commit: 's75-sejong' },
+            { tag: 'SEO', label: 'SERP 지배 설계안', desc: '전종목+전현장 1페이지50%+ 점유. 클러스터+비교+허브', color: C.brand, commit: 's77-serp' },
+            { tag: 'DATA', label: '펀더멘탈 수집 시스템', desc: 'KR네이버+US야후. PER/PBR/EPS/ROE/배당/52주고저/시총', color: C.yellow, commit: 's77-fund' },
+            { tag: 'FEAT', label: '피드 자동 종목/현장 링킹', desc: '본문엔티티자동감지→/stock/TSLA링크. 위키피디아스타일', color: C.cyan, commit: 's76-link' },
           ].map(r => (
             <div key={r.commit} style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm)', background: `${r.color}08`, border: `1px solid ${r.color}15` }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>
