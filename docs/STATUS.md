@@ -429,3 +429,31 @@
 - daily-content 3개 제거 (슬롯 D,E,F 불필요 — 템플릿 3개라 3슬롯이면 충분)
 
 **배포:** dpl_B142FeMKNUZGgPgNMxbAU9RWrCEQ (4b365e3a) — READY ✅
+
+### 세션 76 후반 — SEO 1페이지 진입 시스템 (2026-04-06)
+
+**최종 설계안 작성** (`docs/SEO_FIRST_PAGE_STRATEGY.md`):
+- 16개 섹션 전방위 SEO 전략: 경쟁 분석, 6단계 Phase, 자동화 파이프라인, 리스크 12건, 비용 산출
+- 부동산 블루오션 분석: 현장명 검색 경쟁자 3~5개 → 콘텐츠 1편이면 1페이지 진입 가능
+- 핵심 전략: "데이터 + 분석 + 계산기 142종" 삼각편대
+
+**Phase 0 DB 준비 완료:**
+- `apt_sites`: `analysis_text text`, `analysis_generated_at timestamptz` 컬럼 + 인덱스
+- `stock_quotes`: `analysis_text text`, `analysis_generated_at timestamptz` 컬럼 + 인덱스
+
+**Phase 1 부동산 + Phase 2 주식 크론 구축:**
+- `apt-analysis-gen` 크론 (매일 05시, 5건/일): apt_sites+subscriptions+transactions JOIN → AI 2,000자+ 입지/분양가/청약전략/입주준비/FAQ 분석
+- `stock-analysis-gen` 크론 (매일 06시, 5건/일): stock_quotes+news+disclosures → AI 1,500자+ 기업개요/투자포인트/밸류에이션/FAQ
+- apt/[id] page.tsx: analysis_text SSR 렌더링 추가 (모집공고 하단)
+- stock/[symbol] page.tsx: analysis_text SSR 렌더링 추가 (탭 상단)
+- GOD MODE ai 그룹에 2개 크론 추가
+- vercel.json 크론 60개
+
+**어드민 갱신:**
+- blog admin: SEO 크론 4개 추가, 비활성화 크론 dimmed
+- GOD MODE: 95→58 라벨 수정, 비활성화 28개 제거
+
+**인프라 정리:**
+- pg_cron 14→6개 (stock-scheduler 2중 호출 제거, apt-refresh 500에러 4개 제거)
+- Dead code -5,754줄 (seed-longtail-80 등 6개 파일)
+- vercel.json 크론 64→60개
