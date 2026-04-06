@@ -91,12 +91,6 @@ const CRON_GROUPS = {
     '/api/cron/blog-internal-links',
     '/api/cron/stock-naver-sync',
   ],
-    '/api/cron/indexnow-mass',
-    '/api/cron/premium-expire',
-    '/api/cron/refresh-mv',
-    '/api/cron/stock-naver-sync',
-    '/api/cron/blog-internal-links',
-  ],
 };
 
 const ALL_CRONS = [
