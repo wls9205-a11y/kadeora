@@ -9,6 +9,7 @@ import dynamic from 'next/dynamic';
 import AptCommentInline from '@/components/AptCommentInline';
 import ShareButtons from '@/components/ShareButtons';
 import SectionShareButton from '@/components/SectionShareButton';
+import KakaoDirectShare from '@/components/KakaoDirectShare';
 import Disclaimer from '@/components/Disclaimer';
 import AptImageGallery from '@/components/AptImageGallery';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
@@ -475,20 +476,7 @@ export default async function AptUnifiedPage({ params }: Props) {
       {/* Share + Bookmark — 바이럴 액션 바 */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 'var(--sp-md)', padding: '8px 12px', borderRadius: 'var(--radius-md)', background: 'linear-gradient(135deg, rgba(59,123,246,0.04), rgba(139,92,246,0.04))', border: '1px solid rgba(59,123,246,0.1)' }}>
         {/* 카카오톡 직접 공유 */}
-        <a
-          href={`https://story.kakao.com/share?url=${encodeURIComponent(`${SITE_URL}/apt/${slug}?utm_source=kakao&utm_medium=share`)}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            display: 'inline-flex', alignItems: 'center', gap: 4,
-            padding: '6px 12px', borderRadius: 'var(--radius-sm)',
-            background: '#FEE500', color: '#191919', textDecoration: 'none',
-            fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap', flexShrink: 0,
-            height: 32,
-          }}
-        >
-          💬 카카오
-        </a>
+        <KakaoDirectShare title={`${name} ${tLabel[sType]} — 분양가·청약일정·모집공고 한눈에`} description={`${region} ${name} 상세 정보를 카더라에서 확인하세요`} pagePath={`/apt/${slug}`} />
         <ShareButtons title={`${name} ${tLabel[sType]} — 분양가·청약일정·모집공고 한눈에`} postId={slug} />
         <div style={{ flex: 1 }} />
         <span style={{ fontSize: 10, color: 'var(--text-tertiary)', whiteSpace: 'nowrap' }}>공유 +5P</span>
