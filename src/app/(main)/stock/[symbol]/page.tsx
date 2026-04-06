@@ -400,6 +400,20 @@ export default async function StockDetailPage({ params }: Props) {
         );
       })()}
 
+      {/* 📊 인포그래픽 이미지 — 네이버/구글 이미지 검색 크롤링용 */}
+      <figure style={{ margin: '0 0 var(--sp-md)', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--border)' }}>
+        <img
+          src={`${SITE_URL}/api/og-chart?symbol=${symbol}`}
+          alt={`${s.name} ${symbol} 주가 시세 차트 PER PBR 배당수익률 시가총액 ${s.market} ${s.sector || ''} 투자 지표 인포그래픽 2026`}
+          width={1200} height={630}
+          style={{ width: '100%', height: 'auto', display: 'block' }}
+          loading="lazy"
+        />
+        <figcaption style={{ fontSize: 11, color: 'var(--text-tertiary)', padding: '6px 12px', background: 'var(--bg-surface)', textAlign: 'center' }}>
+          {s.name}({symbol}) 핵심 투자 지표 · 카더라
+        </figcaption>
+      </figure>
+
       {/* AI 종합 분석 — SSR */}
       {stockAnalysisText && (
         <section style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--card-p) var(--sp-lg)', marginBottom: 'var(--sp-md)' }}>

@@ -60,6 +60,25 @@
 - AI 분석: 부동산 1,476건 / 주식 90건 (Batch 제출 후 전체 완료 예상)
 - 클러스터 블로그: 0건 (Batch 제출 후 4,869편 생성 예상, 50편/일 점진 발행)
 
+
+**8. 네이버 이미지 캐러셀 최적화**
+- stock/[symbol] 페이지: og-chart 인포그래픽 <img> 태그 본문 삽입
+  → alt: "{종목명} {심볼} 주가 시세 차트 PER PBR 배당수익률 시가총액 {마켓} {섹터} 투자 지표 인포그래픽 2026"
+- apt/[id] 페이지: og-chart 인포그래픽 <img> 태그 본문 삽입
+  → alt: "{현장명} {지역} 분양가 세대수 시공사 청약 분양 입주 인포그래픽 2026"
+- stock/[symbol]/vs/[target] 비교 페이지: 양쪽 종목 인포그래픽 2장 그리드 삽입
+- 전략: 롱테일 키워드(비교/현장별)에서 이미지 캐러셀 60~80% 독점 목표
+
+**9. RSS 피드 + 트리거 API**
+- /rss.xml: 최신 블로그 50편 RSS 2.0 (네이버 서치어드바이저 등록용)
+- /api/admin/trigger-all: 6개 크론 병렬 실행 (GOD MODE 호환)
+
+**10. og-chart 인포그래픽 엔드포인트**
+- /api/og-chart?symbol=005930 → 주가/PER/PBR/배당/시총 인포그래픽 (1200×630 PNG)
+- /api/og-chart?apt=slug → 분양가/세대수/시공사/입주 인포그래픽
+- Satori 호환 JSX (모든 div display:flex), fontOpts() 패턴
+- 200 OK 확인 완료
+
 ### Pending
 - [ ] 어드민에서 batch-cluster-submit 수동 실행 (최초 1회)
 - [ ] 어드민에서 batch-analysis-submit 수동 실행

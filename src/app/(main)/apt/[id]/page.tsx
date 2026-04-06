@@ -1224,6 +1224,20 @@ export default async function AptUnifiedPage({ params }: Props) {
 
       {/* Competition rate */}
 
+      {/* 📊 인포그래픽 이미지 — 네이버/구글 이미지 검색 크롤링용 */}
+      <figure style={{ margin: '0 0 var(--sp-md)', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--border)' }}>
+        <img
+          src={`${SITE_URL}/api/og-chart?apt=${slug}`}
+          alt={`${name} ${region} ${site?.sigungu || ''} 분양가 ${site?.price_min ? `${(site.price_min/10000).toFixed(1)}억` : ''} ${site?.price_max ? `${(site.price_max/10000).toFixed(1)}억` : ''} 세대수 ${site?.total_units || ''} 시공사 ${site?.builder || ''} 청약 분양 입주 인포그래픽 2026`}
+          width={1200} height={630}
+          style={{ width: '100%', height: 'auto', display: 'block' }}
+          loading="lazy"
+        />
+        <figcaption style={{ fontSize: 11, color: 'var(--text-tertiary)', padding: '6px 12px', background: 'var(--bg-surface)', textAlign: 'center' }}>
+          {name} 분양 핵심 정보 · 카더라
+        </figcaption>
+      </figure>
+
       {/* 📊 AI 종합 분석 — SSR 서버 렌더링 (크롤러 + 사용자 모두 읽음) */}
       {analysisText && (
         <div className="apt-card" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
