@@ -1,16 +1,10 @@
 'use client';
+import { timeAgo as ago } from '@/lib/format';
 import { useState, useEffect, useCallback } from 'react';
 
 const GRADE_LABEL: Record<number, string> = { 1: '새싹', 2: '묘목', 3: '가지', 4: '나무', 5: '숲', 6: '산', 7: '하늘', 8: '별', 9: '은하', 10: '우주' };
 const GRADE_COLOR: Record<number, string> = { 1: '#6B7280', 2: '#10B981', 3: '#3B82F6', 4: '#8B5CF6', 5: '#F59E0B', 6: '#EF4444', 7: '#EC4899', 8: '#F97316', 9: '#06B6D4', 10: '#FFD700' };
 
-function ago(d: string) {
-  const s = Math.floor((Date.now() - new Date(d).getTime()) / 1000);
-  if (s < 60) return '방금';
-  if (s < 3600) return `${Math.floor(s / 60)}분 전`;
-  if (s < 86400) return `${Math.floor(s / 3600)}시간 전`;
-  return `${Math.floor(s / 86400)}일 전`;
-}
 
 export default function UsersTab({ onNavigate }: { onNavigate: (t: any) => void }) {
   const [data, setData] = useState<any>(null);

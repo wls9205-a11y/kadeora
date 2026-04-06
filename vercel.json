@@ -65,6 +65,24 @@
     },
     "src/app/api/cron/auto-verify-households/*.ts": {
       "maxDuration": 120
+    },
+    "src/app/api/cron/batch-rewrite-submit/*.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/cron/batch-rewrite-poll/*.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/cron/blog-quality-prune/*.ts": {
+      "maxDuration": 120
+    },
+    "src/app/api/cron/blog-restore-*/*.ts": {
+      "maxDuration": 120
+    },
+    "src/app/api/cron/blog-restore-candidate/*.ts": {
+      "maxDuration": 120
+    },
+    "src/app/api/cron/blog-restore-monitor/*.ts": {
+      "maxDuration": 120
     }
   },
   "crons": [
@@ -89,36 +107,12 @@
       "schedule": "0 0 * * *"
     },
     {
-      "path": "/api/cron/push-daily-reminder",
-      "schedule": "0 11 * * *"
-    },
-    {
-      "path": "/api/cron/blog-daily",
-      "schedule": "30 7 * * 1-5"
-    },
-    {
-      "path": "/api/cron/blog-apt-new",
-      "schedule": "15 6 * * *"
-    },
-    {
       "path": "/api/cron/blog-publish-queue",
       "schedule": "0 9 * * *"
     },
     {
-      "path": "/api/cron/post-ai-summary",
-      "schedule": "0 22 * * *"
-    },
-    {
       "path": "/api/cron/blog-internal-links",
       "schedule": "0 3 * * 0"
-    },
-    {
-      "path": "/api/cron/blog-series-assign",
-      "schedule": "30 3 * * *"
-    },
-    {
-      "path": "/api/cron/blog-monthly-theme",
-      "schedule": "0 10 1 * *"
     },
     {
       "path": "/api/cron/blog-rewrite",
@@ -137,10 +131,6 @@
       "schedule": "10 6 * * 1"
     },
     {
-      "path": "/api/cron/redev-verify-households",
-      "schedule": "0 4 * * 2"
-    },
-    {
       "path": "/api/cron/redev-geocode",
       "schedule": "15 5,17 * * *"
     },
@@ -157,32 +147,12 @@
       "schedule": "0 9 * * 1-5"
     },
     {
-      "path": "/api/cron/sync-complex-profiles",
-      "schedule": "30 9 * * *"
-    },
-    {
       "path": "/api/cron/crawl-apt-resale",
       "schedule": "0 9 * * 1"
     },
     {
-      "path": "/api/cron/health-check",
-      "schedule": "0 8 * * *"
-    },
-    {
-      "path": "/api/cron/check-price-alerts",
-      "schedule": "0 */6 * * *"
-    },
-    {
       "path": "/api/cron/daily-stats",
       "schedule": "55 14 * * *"
-    },
-    {
-      "path": "/api/cron/portfolio-snapshot",
-      "schedule": "40 6 * * 1-5"
-    },
-    {
-      "path": "/api/cron/daily-reset",
-      "schedule": "5 15 * * *"
     },
     {
       "path": "/api/cron/stock-daily-briefing",
@@ -225,34 +195,6 @@
       "schedule": "30 6 * * *"
     },
     {
-      "path": "/api/cron/blog-afternoon",
-      "schedule": "0 14 * * 1-5"
-    },
-    {
-      "path": "/api/cron/blog-apt-landmark",
-      "schedule": "0 7 * * 3"
-    },
-    {
-      "path": "/api/cron/blog-redevelopment",
-      "schedule": "0 8 * * 4"
-    },
-    {
-      "path": "/api/cron/blog-seed-guide",
-      "schedule": "0 10 * * 2"
-    },
-    {
-      "path": "/api/cron/seed-chat",
-      "schedule": "0 */6 * * *"
-    },
-    {
-      "path": "/api/cron/seed-comments",
-      "schedule": "30 */8 * * *"
-    },
-    {
-      "path": "/api/cron/blog-seed-comments",
-      "schedule": "10 14 * * *"
-    },
-    {
       "path": "/api/cron/crawl-apt-subscription",
       "schedule": "0 6 * * *"
     },
@@ -265,10 +207,6 @@
       "schedule": "0 */4 * * *"
     },
     {
-      "path": "/api/admin/batch-pdf-parse",
-      "schedule": "30 */2 * * *"
-    },
-    {
       "path": "/api/cron/apt-crawl-pricing",
       "schedule": "0 * * * *"
     },
@@ -279,10 +217,6 @@
     {
       "path": "/api/cron/apt-price-sync",
       "schedule": "0 3 * * *"
-    },
-    {
-      "path": "/api/cron/apt-price-change",
-      "schedule": "30 4 * * *"
     },
     {
       "path": "/api/cron/crawl-nationwide-redev",
@@ -313,24 +247,8 @@
       "schedule": "45 7 * * 1-5"
     },
     {
-      "path": "/api/cron/expire-listings",
-      "schedule": "15 3 * * *"
-    },
-    {
       "path": "/api/cron/sync-apt-sites",
       "schedule": "0 4 * * *"
-    },
-    {
-      "path": "/api/cron/collect-site-images",
-      "schedule": "30 0,6,12,18 * * *"
-    },
-    {
-      "path": "/api/cron/collect-site-trends",
-      "schedule": "20 6 * * *"
-    },
-    {
-      "path": "/api/cron/collect-site-facilities",
-      "schedule": "30 5 * * *"
     },
     {
       "path": "/api/cron/purge-withdrawn-consents",
@@ -341,14 +259,6 @@
       "schedule": "10 2 * * 1"
     },
     {
-      "path": "/api/cron/blog-monthly",
-      "schedule": "0 4 1 * *"
-    },
-    {
-      "path": "/api/cron/blog-weekly",
-      "schedule": "0 5 * * 0"
-    },
-    {
       "path": "/api/cron/blog-subscription-strategy",
       "schedule": "0 8 * * 1,4"
     },
@@ -357,16 +267,8 @@
       "schedule": "30 9 * * 1-5"
     },
     {
-      "path": "/api/cron/invite-reward",
-      "schedule": "0 */6 * * *"
-    },
-    {
       "path": "/api/cron/indexnow-mass",
       "schedule": "0 */6 * * *"
-    },
-    {
-      "path": "/api/cron/premium-expire",
-      "schedule": "0 0 * * *"
     },
     {
       "path": "/api/cron/refresh-trending",
@@ -375,10 +277,6 @@
     {
       "path": "/api/cron/refresh-mv",
       "schedule": "0 * * * *"
-    },
-    {
-      "path": "/api/cron/daily-report-snapshot",
-      "schedule": "0 22 * * 0-4"
     },
     {
       "path": "/api/cron/auto-verify-households",
@@ -391,10 +289,6 @@
     {
       "path": "/api/cron/blog-apt-v2",
       "schedule": "0 8 * * *"
-    },
-    {
-      "path": "/api/cron/blog-monthly-topics",
-      "schedule": "0 2 * * *"
     },
     {
       "path": "/api/cron/push-content-alert",

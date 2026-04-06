@@ -1,18 +1,7 @@
 'use client';
+import { timeAgo as ago, fmt } from '@/lib/format';
 import { useState, useEffect, useCallback, useRef } from 'react';
 
-function ago(d: string) {
-  const s = Math.floor((Date.now() - new Date(d).getTime()) / 1000);
-  if (s < 60) return '방금';
-  if (s < 3600) return `${Math.floor(s / 60)}분 전`;
-  if (s < 86400) return `${Math.floor(s / 3600)}시간 전`;
-  return `${Math.floor(s / 86400)}일 전`;
-}
-function fmt(n: number) {
-  if (n >= 10000) return `${(n / 10000).toFixed(1)}만`;
-  if (n >= 1000) return `${(n / 1000).toFixed(1)}K`;
-  return String(n);
-}
 
 export default function FocusTab({ onNavigate }: { onNavigate: (t: any) => void }) {
   const [data, setData] = useState<any>(null);

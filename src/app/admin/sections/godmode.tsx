@@ -527,11 +527,6 @@ export default function GodModeSection() {
         <div style={{ fontSize: 16, fontWeight: 700, color: C.text, marginBottom: 'var(--sp-xs)' }}>🛠 특수 작업</div>
         <div style={{ fontSize: 12, color: C.textDim, marginBottom: 'var(--sp-lg)' }}>크론 외 1회성 관리 작업</div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
-          <button onClick={() => runSpecial('/api/admin/seed-longtail-80', '롱테일 80편 시드')}
-            disabled={specialRunning}
-            style={{ padding: '10px 16px', borderRadius: 'var(--radius-md)', border: `1px solid ${C.yellow}40`, background: C.card, color: C.yellow, fontWeight: 700, fontSize: 13, cursor: specialRunning ? 'wait' : 'pointer' }}>
-            📝 롱테일 80편 시드 생성
-          </button>
           <button onClick={() => runSpecial('/api/admin/blog-limit-reset', 'daily_create_limit 10 원복')}
             disabled={specialRunning}
             style={{ padding: '10px 16px', borderRadius: 'var(--radius-md)', border: `1px solid ${C.cyan}40`, background: C.card, color: C.cyan, fontWeight: 700, fontSize: 13, cursor: specialRunning ? 'wait' : 'pointer' }}>

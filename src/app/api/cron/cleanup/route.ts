@@ -30,11 +30,11 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
       .eq('status', 'running')
       .lt('started_at', new Date(Date.now() - 60 * 60 * 1000).toISOString())
 
-    // 4. cron_logs 60일 이전 삭제 (데이터 적재량 관리)
+    // 4. cron_logs 30일 이전 삭제 (DB 용량 절약)
     const { count: cronLogCount } = await admin
       .from('cron_logs')
       .delete({ count: 'exact' })
-      .lt('started_at', new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString())
+      .lt('started_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
 
     // 5. admin_alerts 30일 이전 + 읽은 것 삭제
     const { count: alertCount } = await admin
