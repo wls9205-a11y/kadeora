@@ -117,6 +117,25 @@ export default function FocusTab({ onNavigate }: { onNavigate: (t: any) => void 
         </div>
       </div>
 
+      {/* 14일 트래픽 미니 차트 */}
+      {dailyTrend && dailyTrend.length > 1 && (() => {
+        const trend = [...dailyTrend].reverse();
+        const maxPv = Math.max(...trend.map((d: any) => d.total_page_views || 0), 1);
+        return (
+          <div className="adm-card" style={{ padding: '8px 14px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 4 }}>
+              <span>일별 PV (14일)</span>
+              <span>오늘 {trend[trend.length - 1]?.total_page_views || 0}</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 2, height: 40 }}>
+              {trend.map((d: any, i: number) => (
+                <div key={i} style={{ flex: 1, height: `${((d.total_page_views || 0) / maxPv) * 35}px`, background: i === trend.length - 1 ? 'var(--brand)' : 'var(--bg-hover)', borderRadius: 2, minHeight: 2 }} />
+              ))}
+            </div>
+          </div>
+        );
+      })()}
+
       {/* 긴급 알림 */}
       {kpi.returnRate === 0 && (
         <div className="adm-alert adm-alert-red">

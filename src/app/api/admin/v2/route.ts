@@ -146,14 +146,53 @@ export async function GET(req: NextRequest) {
     // 📊 성장 탭
     // ═══════════════════════════════════════
     if (tab === 'growth') {
-      const [pvR, uvR, signupsR, ctaR, topPagesR, hourlyR] = await Promise.all([
+      const [pvR, uvR, signupsR, ctaR, topPagesR, hourlyR, dailyPvR, referrerR, signupDailyR] = await Promise.all([
         sb.from('page_views').select('id', { count: 'exact', head: true }).gte('created_at', weekAgo),
         safe(sb.rpc('count_unique_visitors_7d'), 0),
         sb.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', weekAgo).neq('is_seed', true),
         (sb as any).from('conversion_events').select('event_type, cta_name').gte('created_at', weekAgo),
         sb.from('page_views').select('path').gte('created_at', weekAgo),
         sb.from('page_views').select('created_at, user_agent').gte('created_at', weekAgo),
+        // 14일 일별 PV/UV 추이
+        sb.from('page_views').select('created_at, visitor_id').gte('created_at', new Date(Date.now() - 14 * 86400000).toISOString()),
+        // 유입 경로
+        sb.from('page_views').select('referrer').gte('created_at', weekAgo),
+        // 일별 가입자 추이
+        sb.from('profiles').select('created_at').neq('is_seed', true).gte('created_at', new Date(Date.now() - 14 * 86400000).toISOString()),
       ]);
+
+      // 14일 일별 PV/UV
+      const dailyMap: Record<string, { pv: number; visitors: Set<string> }> = {};
+      for (const r of (dailyPvR.data || [])) {
+        const d = new Date(r.created_at).toISOString().slice(0, 10);
+        if (!dailyMap[d]) dailyMap[d] = { pv: 0, visitors: new Set() };
+        dailyMap[d].pv++;
+        if (r.visitor_id) dailyMap[d].visitors.add(r.visitor_id);
+      }
+      const dailyTrend = Object.entries(dailyMap)
+        .map(([date, v]) => ({ date, pv: v.pv, uv: v.visitors.size }))
+        .sort((a, b) => a.date.localeCompare(b.date));
+
+      // 유입 경로 분류
+      const refCounts: Record<string, number> = { direct: 0, google: 0, naver: 0, kakao: 0, other: 0 };
+      for (const r of (referrerR.data || [])) {
+        const ref = (r.referrer || '').toLowerCase();
+        if (!ref) refCounts.direct++;
+        else if (ref.includes('google')) refCounts.google++;
+        else if (ref.includes('naver')) refCounts.naver++;
+        else if (ref.includes('kakao')) refCounts.kakao++;
+        else refCounts.other++;
+      }
+
+      // 일별 가입자 추이
+      const signupMap: Record<string, number> = {};
+      for (const u of (signupDailyR.data || [])) {
+        const d = new Date(u.created_at).toISOString().slice(0, 10);
+        signupMap[d] = (signupMap[d] || 0) + 1;
+      }
+      const signupTrend = Object.entries(signupMap)
+        .map(([date, count]) => ({ date, count }))
+        .sort((a, b) => a.date.localeCompare(b.date));
 
       // CTA별 집계
       const ctaStats: Record<string, Record<string, number>> = {};
@@ -216,6 +255,9 @@ export async function GET(req: NextRequest) {
         topPages,
         hourlyTraffic: hourCounts,
         featureUsage,
+        dailyTrend,
+        referrers: refCounts,
+        signupTrend,
       });
     }
 
@@ -223,11 +265,11 @@ export async function GET(req: NextRequest) {
     // 👤 사용자 탭
     // ═══════════════════════════════════════
     if (tab === 'users') {
-      const [realUsersR, interestsR, bookmarksR, watchlistR, searchesR, sharesR, pwaR] = await Promise.all([
+      const [realUsersR, interestsR, bookmarksR, watchlistR, searchesR, sharesR, pwaR, totalRealR] = await Promise.all([
         sb.from('profiles')
-          .select('nickname, provider, created_at, last_active_at, grade, points, residence_city, onboarded, profile_completed')
+          .select('id, nickname, provider, created_at, last_active_at, grade, points, residence_city, onboarded, profile_completed')
           .neq('is_seed', true).neq('is_ghost', true).neq('is_deleted', true)
-          .order('created_at', { ascending: false }).limit(20),
+          .order('created_at', { ascending: false }).limit(50),
         sb.from('apt_site_interests')
           .select('site_id, guest_name, guest_city, is_member, created_at, notification_enabled')
           .order('created_at', { ascending: false }).limit(10),
@@ -236,6 +278,7 @@ export async function GET(req: NextRequest) {
         sb.from('search_logs').select('id', { count: 'exact', head: true }),
         sb.from('share_logs').select('id', { count: 'exact', head: true }),
         sb.from('pwa_installs').select('id', { count: 'exact', head: true }),
+        sb.from('profiles').select('id', { count: 'exact', head: true }).neq('is_seed', true).neq('is_ghost', true).neq('is_deleted', true),
       ]);
 
       // 관심단지 현장명 조인
@@ -259,15 +302,17 @@ export async function GET(req: NextRequest) {
       }
       const bookmarkUserCount = Object.keys(bmUserCounts).length;
 
-      // 가입 경로 분석
+      // 가입 경로 + 등급 분포 분석
       const providers: Record<string, number> = {};
       const cities: Record<string, number> = {};
+      const grades: Record<number, number> = {};
       let onboardedCount = 0;
       let profileCompleted = 0;
       let returningCount = 0;
       for (const u of (realUsersR.data || [])) {
         providers[u.provider || 'unknown'] = (providers[u.provider || 'unknown'] || 0) + 1;
         if (u.residence_city) cities[u.residence_city] = (cities[u.residence_city] || 0) + 1;
+        grades[u.grade || 1] = (grades[u.grade || 1] || 0) + 1;
         if (u.onboarded) onboardedCount++;
         if (u.profile_completed) profileCompleted++;
         if (u.last_active_at) returningCount++;
@@ -276,12 +321,13 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({
         users: realUsersR.data,
         lifecycle: {
-          total: (realUsersR.data || []).length,
+          total: totalRealR.count ?? (realUsersR.data || []).length,
           onboarded: onboardedCount,
           profileCompleted,
           returning: returningCount,
           providers,
-          cities: Object.entries(cities).sort((a, b) => b[1] - a[1]).slice(0, 5),
+          cities: Object.entries(cities).sort((a, b) => b[1] - a[1]).slice(0, 8),
+          grades: Object.entries(grades).sort((a, b) => Number(a[0]) - Number(b[0])).map(([g, c]) => ({ grade: Number(g), count: c })),
         },
         interests: interests.map((i: any) => ({
           ...i,

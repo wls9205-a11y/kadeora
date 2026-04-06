@@ -10,11 +10,14 @@ export default function GrowthTab({ onNavigate }: { onNavigate: (t: any) => void
   }, []);
   useEffect(() => { load(); }, [load]);
 
-  if (loading || !data || data.error) return <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-secondary)' }}>로딩 중...</div>;
+  if (loading || !data) return <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-secondary)' }}>로딩 중...</div>;
 
-  const { funnel, ctaStats, topPages, hourlyTraffic, featureUsage, deviceSplit } = data;
+  const { funnel, ctaStats, topPages, hourlyTraffic, featureUsage, dailyTrend, referrers, signupTrend, deviceSplit } = data;
   const maxHour = Math.max(...(hourlyTraffic || []), 1);
   const maxFeature = Math.max(...(featureUsage || []).map((f: any) => f.views), 1);
+  const maxDailyPv = Math.max(...(dailyTrend || []).map((d: any) => d.pv), 1);
+  const totalRef = Object.values(referrers || {}).reduce((s: number, v: any) => s + v, 0) as number;
+  const totalDevice = Object.values(deviceSplit || {}).reduce((s: number, v: any) => s + v, 0) as number;
 
   return (
     <div>
@@ -31,7 +34,7 @@ export default function GrowthTab({ onNavigate }: { onNavigate: (t: any) => void
             <div style={{ flex: 1, height: 20, background: 'var(--bg-hover)', borderRadius: 4, overflow: 'hidden' }}>
               <div style={{ height: '100%', width: `${Math.max(s.pct, 0.5)}%`, background: i === 0 ? 'var(--brand)' : i === 1 ? '#8B5CF6' : '#10B981', borderRadius: 4, transition: 'width .6s' }} />
             </div>
-            <span style={{ minWidth: 60, textAlign: 'right', fontSize: 12, fontWeight: 600, color: 'var(--text-primary)' }}>{s.value.toLocaleString()}</span>
+            <span style={{ minWidth: 60, textAlign: 'right', fontSize: 12, fontWeight: 600 }}>{s.value.toLocaleString()}</span>
           </div>
         ))}
         <div style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-tertiary)', marginTop: 4 }}>
@@ -39,7 +42,87 @@ export default function GrowthTab({ onNavigate }: { onNavigate: (t: any) => void
         </div>
       </div>
 
-      {/* CTA별 성과 */}
+      {/* 14일 PV/UV 추이 차트 */}
+      <div className="adm-sec">📊 14일 트래픽 추이</div>
+      <div className="adm-card" style={{ padding: '12px 14px' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 3, height: 100 }}>
+          {(dailyTrend || []).map((d: any, i: number) => (
+            <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+              <div style={{ fontSize: 8, color: 'var(--text-tertiary)' }}>{d.pv}</div>
+              <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 1 }}>
+                <div style={{ height: `${(d.pv / maxDailyPv) * 70}px`, background: 'var(--brand)', borderRadius: 2, minHeight: 2, opacity: 0.3 }} />
+                <div style={{ height: `${(d.uv / maxDailyPv) * 70}px`, background: 'var(--brand)', borderRadius: 2, minHeight: 2 }} />
+              </div>
+            </div>
+          ))}
+        </div>
+        <div style={{ display: 'flex', marginTop: 4 }}>
+          {(dailyTrend || []).map((d: any, i: number) => (
+            <div key={i} style={{ flex: 1, fontSize: 7, color: 'var(--text-tertiary)', textAlign: 'center' }}>
+              {i % 3 === 0 ? d.date?.slice(5) : ''}
+            </div>
+          ))}
+        </div>
+        <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 8, fontSize: 11, color: 'var(--text-tertiary)' }}>
+          <span><span style={{ display: 'inline-block', width: 8, height: 8, background: 'var(--brand)', opacity: 0.3, borderRadius: 2, marginRight: 4 }} />PV</span>
+          <span><span style={{ display: 'inline-block', width: 8, height: 8, background: 'var(--brand)', borderRadius: 2, marginRight: 4 }} />UV</span>
+        </div>
+      </div>
+
+      {/* 유입 경로 + 디바이스 분포 */}
+      <div className="adm-kpi">
+        <div className="adm-kpi-c">
+          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>유입 경로</div>
+          {referrers && Object.entries(referrers).sort((a: any, b: any) => b[1] - a[1]).map(([src, cnt]: [string, any]) => (
+            <div key={src} style={{ marginBottom: 4 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, marginBottom: 2 }}>
+                <span style={{ color: 'var(--text-secondary)' }}>{src}</span>
+                <span style={{ fontWeight: 600 }}>{totalRef > 0 ? Math.round((cnt / totalRef) * 100) : 0}%</span>
+              </div>
+              <div style={{ height: 4, background: 'var(--bg-hover)', borderRadius: 2 }}>
+                <div style={{ height: '100%', width: `${totalRef > 0 ? (cnt / totalRef) * 100 : 0}%`, background: src === 'google' ? '#4285F4' : src === 'naver' ? '#03C75A' : src === 'kakao' ? '#FEE500' : 'var(--brand)', borderRadius: 2 }} />
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="adm-kpi-c">
+          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>디바이스</div>
+          {deviceSplit && Object.entries(deviceSplit).sort((a: any, b: any) => b[1] - a[1]).map(([dev, cnt]: [string, any]) => (
+            <div key={dev} style={{ marginBottom: 4 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, marginBottom: 2 }}>
+                <span style={{ color: 'var(--text-secondary)' }}>{dev === 'mobile' ? '📱 모바일' : dev === 'desktop' ? '🖥️ 데스크탑' : '🤖 봇'}</span>
+                <span style={{ fontWeight: 600 }}>{totalDevice > 0 ? Math.round((cnt / totalDevice) * 100) : 0}%</span>
+              </div>
+              <div style={{ height: 4, background: 'var(--bg-hover)', borderRadius: 2 }}>
+                <div style={{ height: '100%', width: `${totalDevice > 0 ? (cnt / totalDevice) * 100 : 0}%`, background: dev === 'mobile' ? '#10B981' : dev === 'desktop' ? 'var(--brand)' : '#F59E0B', borderRadius: 2 }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 일별 가입자 추이 */}
+      {signupTrend && signupTrend.length > 0 && (
+        <>
+          <div className="adm-sec">👤 일별 가입자 (14일)</div>
+          <div className="adm-card" style={{ padding: '8px 14px' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, height: 50 }}>
+              {signupTrend.map((d: any, i: number) => {
+                const max = Math.max(...signupTrend.map((s: any) => s.count), 1);
+                return (
+                  <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    {d.count > 0 && <div style={{ fontSize: 9, color: '#10B981', fontWeight: 700 }}>{d.count}</div>}
+                    <div style={{ width: '100%', height: `${(d.count / max) * 35}px`, background: '#10B981', borderRadius: 2, minHeight: d.count > 0 ? 4 : 1, opacity: d.count > 0 ? 1 : 0.2 }} />
+                    <div style={{ fontSize: 7, color: 'var(--text-tertiary)', marginTop: 2 }}>{d.date?.slice(5)}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* CTA 성과 */}
       <div className="adm-sec">🎪 CTA 성과</div>
       <div className="adm-card" style={{ padding: '8px 14px' }}>
         <div style={{ display: 'flex', padding: '4px 0', borderBottom: '1px solid var(--border)', fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 600 }}>
@@ -60,7 +143,7 @@ export default function GrowthTab({ onNavigate }: { onNavigate: (t: any) => void
           );
         })}
         {Object.keys(ctaStats || {}).length === 0 && (
-          <div style={{ textAlign: 'center', padding: 12, fontSize: 11, color: 'var(--text-tertiary)' }}>추적 시스템 방금 배포 — 데이터 수집 대기 중</div>
+          <div style={{ textAlign: 'center', padding: 12, fontSize: 11, color: 'var(--text-tertiary)' }}>데이터 수집 중</div>
         )}
       </div>
 
@@ -83,7 +166,7 @@ export default function GrowthTab({ onNavigate }: { onNavigate: (t: any) => void
       <div className="adm-card" style={{ padding: '8px 14px' }}>
         <div style={{ display: 'flex', alignItems: 'flex-end', gap: 2, height: 80 }}>
           {(hourlyTraffic || []).map((cnt: number, hr: number) => (
-            <div key={hr} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+            <div key={hr} style={{ flex: 1 }}>
               <div style={{ width: '100%', height: `${(cnt / maxHour) * 60}px`, background: cnt === Math.max(...hourlyTraffic) ? '#3B82F6' : 'var(--bg-hover)', borderRadius: 2, minHeight: 2 }} />
             </div>
           ))}
@@ -93,44 +176,18 @@ export default function GrowthTab({ onNavigate }: { onNavigate: (t: any) => void
             <span key={h} style={{ flex: 1, fontSize: 9, color: 'var(--text-tertiary)', textAlign: 'center' }}>{h}시</span>
           ))}
         </div>
-        <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 8, textAlign: 'center' }}>
+        <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 6, textAlign: 'center' }}>
           피크: {hourlyTraffic.indexOf(Math.max(...hourlyTraffic))}시 ({Math.max(...hourlyTraffic)}뷰)
         </div>
       </div>
-
-      {/* 디바이스 분류 */}
-      {deviceSplit && (
-        <>
-          <div className="adm-sec">📱 디바이스 분류</div>
-          <div className="adm-card" style={{ padding: '10px 14px' }}>
-            <div style={{ display: 'flex', gap: 12 }}>
-              {[
-                { label: '📱 모바일', value: deviceSplit.mobile || 0, color: '#3B82F6' },
-                { label: '💻 데스크탑', value: deviceSplit.desktop || 0, color: '#10B981' },
-                { label: '🤖 봇', value: deviceSplit.bot || 0, color: '#F59E0B' },
-              ].map((d, i) => {
-                const total = (deviceSplit.mobile || 0) + (deviceSplit.desktop || 0) + (deviceSplit.bot || 0);
-                const pct = total > 0 ? Math.round((d.value / total) * 100) : 0;
-                return (
-                  <div key={i} style={{ flex: 1, textAlign: 'center' }}>
-                    <div style={{ fontSize: 18, fontWeight: 700, color: d.color }}>{pct}%</div>
-                    <div style={{ fontSize: 10, color: 'var(--text-secondary)' }}>{d.label}</div>
-                    <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{d.value.toLocaleString()}</div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </>
-      )}
 
       {/* 인기 페이지 */}
       <div className="adm-sec">📄 인기 페이지 TOP 10</div>
       <div className="adm-card" style={{ padding: '8px 14px' }}>
         {(topPages || []).slice(0, 10).map((p: any, i: number) => (
           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0', borderBottom: i < 9 ? '1px solid var(--border)' : 'none', fontSize: 12 }}>
-            <span style={{ width: 18, color: 'var(--text-tertiary)', fontSize: 10, textAlign: 'center' }}>#{i + 1}</span>
-            <span style={{ flex: 1, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.path}</span>
+            <span style={{ width: 18, color: 'var(--text-tertiary)', fontSize: 10 }}>#{i + 1}</span>
+            <span style={{ flex: 1, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{decodeURIComponent(p.path)}</span>
             <span style={{ color: 'var(--text-secondary)' }}>{p.views}</span>
           </div>
         ))}
