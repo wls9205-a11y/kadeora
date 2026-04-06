@@ -58,6 +58,9 @@
 - **오늘 리라이팅 9건** (3건/회 × 3회), 신규 가입 2명 (139명)
 - **daily_stats PV 정상**: 4/5 1,456뷰 / 4/6 400뷰 (수정 전 0)
 - **push-content-alert 피크 맞춤**: KST 20:00 → 22:00 (피크 23시 대응)
+- **blog-rewrite Haiku 4x 속도**: Sonnet→Haiku 4.5 모델 + 배치 3→6 = 18→72건/일 (41K 대기 578일)
+- **어드민 v2 시각 강화**: 집중탭(점수분해+시스템스트립+6KPI+14일차트) + 성장탭(PV추이+유입경로+디바이스+가입추이) + 사용자탭(등급분포+드릴다운)
+- **알림 설정 컬럼명 수정**: push_hot_posts→push_hot_post, push_marketing→push_news (DB 불일치 해결)
 - **알림 시스템 전수 수정 (세션 75+)**:
   - push-daily-reminder v2: D+1 웰컴 알림(관심지역 기반) + 출석 리마인더(재방문 실유저만, 시드 제외)
   - push-utils v2: deliverPush 공통 함수 + sendPushBroadcast 비로그인 구독자 포함

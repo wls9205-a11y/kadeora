@@ -9,8 +9,8 @@ export const maxDuration = 300;
  * 블로그 자동 리라이팅 크론
  * 
  * vercel.json에서 하루 3회 호출
- * 각 호출 시 3건씩 리라이팅 (하루 최대 18건, 504 타임아웃 해결)
- * 504 fix: 배치 9→3건. 6회/일 × 3건 = 18건/일
+ * 각 호출 시 6건씩 리라이팅 (하루 최대 72건, Haiku 모델로 속도 4x)
+ * v3: Haiku 모델 + 배치 6건. 12회/일 × 6건 = 72건/일 (4x 속도 향상)
  * 어드민에서 수동으로 추가 실행 가능
  */
 
@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
       .eq('is_published', true)
       .is('rewritten_at', null)
       .order('created_at', { ascending: true })
-      .limit(3);
+      .limit(6);
 
     if (!posts || posts.length === 0) {
       return { processed: 0, metadata: { reason: 'all_done' } };
@@ -61,8 +61,8 @@ export async function GET(req: NextRequest) {
             'anthropic-version': '2023-06-01',
           },
           body: JSON.stringify({
-            model: 'claude-sonnet-4-20250514',
-            max_tokens: 5000,
+            model: 'claude-haiku-4-5-20251001',
+            max_tokens: 4000,
             messages: [{
               role: 'user',
               content: diversifyPrompt(`한국 금융·부동산 전문 블로그 작가로서 아래 글을 리라이팅하세요.
