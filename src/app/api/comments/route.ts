@@ -24,10 +24,12 @@ export async function POST(req: NextRequest) {
     if (isBlocked) return NextResponse.json({ error: reason ?? '내용을 다시 확인해주세요' }, { status: 400 });
 
     // 댓글 INSERT (유저 세션 — 본인 데이터)
-    const { data, error } = await supabase.from('comments').insert({
+    const imageUrl = typeof body.image_url === 'string' && body.image_url.startsWith('http') ? body.image_url : null;
+    const { data, error } = await (supabase as any).from('comments').insert({
       content, post_id: postId, author_id: user.id,
       ...(parsed!.parent_id ? { parent_id: parsed!.parent_id } : {}),
-    }).select('id, content, created_at, author_id, parent_id').single();
+      ...(imageUrl ? { image_url: imageUrl } : {}),
+    }).select('id, content, created_at, author_id, parent_id, image_url').single();
     if (error) { console.error('[Comments]', error.message); return NextResponse.json({ error: '댓글 작성에 실패했습니다.' }, { status: 500 }); }
 
     // 알림은 DB 트리거(notify_on_comment)가 자동 처리 — 수동 INSERT 불필요

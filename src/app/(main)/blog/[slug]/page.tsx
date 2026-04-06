@@ -325,7 +325,7 @@ export default async function BlogDetailPage({ params }: Props) {
   let comments: Record<string, any>[] = [];
   try {
     const { data } = await sb.from('blog_comments')
-      .select('id, content, created_at, author_id, author_name, is_seed, profiles!blog_comments_author_id_fkey(nickname)')
+      .select('id, content, created_at, author_id, author_name, is_seed, image_url, profiles!blog_comments_author_id_fkey(nickname)')
       .eq('blog_post_id', post.id).order('created_at', { ascending: true });
     comments = data ?? [];
   } catch {}
@@ -767,6 +767,11 @@ export default async function BlogDetailPage({ params }: Props) {
                   <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{nick}</span>
                   <span style={{ fontSize: 12, color: 'var(--text-tertiary)', marginLeft: 6 }}>{timeAgo(c.created_at)}</span>
                   <div style={{ fontSize: 14, color: 'var(--text-primary)', lineHeight: 1.6, marginTop: 3 }}>{c.content}</div>
+                  {(c as any).image_url && (
+                    <a href={(c as any).image_url} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', marginTop: 4 }}>
+                      <img src={(c as any).image_url} alt="댓글 이미지" style={{ maxWidth: 180, maxHeight: 120, borderRadius: 8, objectFit: 'cover', border: '1px solid var(--border)' }} />
+                    </a>
+                  )}
                 </div>
               </div>
             );
