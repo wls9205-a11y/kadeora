@@ -510,8 +510,14 @@ export default async function BlogDetailPage({ params }: Props) {
     })),
   } : null;
 
-  const catColorMap: Record<string, string> = { stock: '#38BDF8', apt: '#2EE8A5', unsold: '#FF9F43', finance: '#B794FF', general: '#94A8C4' };
-  const catColor = catColorMap[post.category] || '#94A8C4';
+  const catColorMap: Record<string, { color: string; bg: string }> = {
+    stock:   { color: 'var(--accent-blue)',   bg: 'var(--accent-blue-bg)' },
+    apt:     { color: 'var(--accent-green)',  bg: 'var(--accent-green-bg)' },
+    unsold:  { color: 'var(--accent-orange)', bg: 'var(--accent-orange-bg)' },
+    finance: { color: 'var(--accent-purple)', bg: 'var(--accent-purple-bg)' },
+    general: { color: 'var(--text-tertiary)', bg: 'var(--bg-hover)' },
+  };
+  const catStyle = catColorMap[post.category] || catColorMap.general;
 
   return (
     <div className="blog-detail-layout">
@@ -552,7 +558,7 @@ export default async function BlogDetailPage({ params }: Props) {
         <div style={{ marginBottom: 14 }}>
           {/* 카테고리 + 메타 1줄 */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8, flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 4, background: `${catColor}15`, color: catColor }}>
+            <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 4, background: catStyle.bg, color: catStyle.color }}>
               {({ stock: '주식', apt: '청약', unsold: '미분양', finance: '재테크', general: '생활' } as Record<string, string>)[post.category] || post.category}
             </span>
             {(post.view_count ?? 0) >= 100 && <span style={{ fontSize: 9, fontWeight: 700, color: 'var(--accent-red)' }}>HOT</span>}

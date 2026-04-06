@@ -607,21 +607,21 @@ html.theme-light.dark select {
   border-color: #D4DAE3 !important;
 }
 /* 라이트모드: 블로그 본문 */
-html.theme-light .blog-content { color: #4B5563; }
-html.theme-light .blog-content p { color: #4B5563; }
-html.theme-light .blog-content li { color: #4B5563; }
-html.theme-light .blog-content strong { color: #111827; }
-html.theme-light .blog-content h2 { color: #111827; border-color: #2563EB; }
-html.theme-light .blog-content h3 { color: #1F2937; }
-html.theme-light .blog-content blockquote { background: #EEF2FF; border-color: #2563EB; color: #4B5563; }
-html.theme-light .blog-content code { background: #F3F4F6; color: #7C3AED; border-color: #E5E7EB; }
-html.theme-light .blog-content pre { background: #F9FAFB; border-color: #E5E7EB; }
-html.theme-light .blog-content pre code { color: #111827; }
-html.theme-light .blog-content th { background: #F3F4F6; color: #374151; }
-html.theme-light .blog-content td { color: #374151; }
-html.theme-light .blog-content tr:nth-child(even) td { background: #F9FAFB; }
-html.theme-light .blog-content table { border-color: #E5E7EB; }
-html.theme-light .blog-content a { color: #2563EB; }
+html.theme-light .blog-content { color: var(--text-secondary); }
+html.theme-light .blog-content p { color: var(--text-secondary); }
+html.theme-light .blog-content li { color: var(--text-secondary); }
+html.theme-light .blog-content strong { color: var(--text-primary); }
+html.theme-light .blog-content h2 { color: var(--text-primary); border-color: var(--brand); }
+html.theme-light .blog-content h3 { color: var(--text-primary); }
+html.theme-light .blog-content blockquote { background: var(--accent-blue-bg); border-color: var(--brand); color: var(--text-secondary); }
+html.theme-light .blog-content code { background: var(--bg-hover); color: var(--accent-purple); border-color: var(--border); }
+html.theme-light .blog-content pre { background: var(--bg-surface); border-color: var(--border); }
+html.theme-light .blog-content pre code { color: var(--text-primary); }
+html.theme-light .blog-content th { background: var(--bg-hover); color: var(--text-secondary); }
+html.theme-light .blog-content td { color: var(--text-primary); }
+html.theme-light .blog-content tr:nth-child(even) td { background: var(--bg-surface); }
+html.theme-light .blog-content table { border-color: var(--border); }
+html.theme-light .blog-content a { color: var(--brand); }
 /* 라이트모드: 드롭다운/바텀시트 */
 html.theme-light [style*="boxShadow"] { box-shadow: 0 4px 20px rgba(0,0,0,0.08) !important; }
 /* 라이트모드: 호버 피드백 */
