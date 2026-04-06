@@ -337,6 +337,14 @@
     {
       "path": "/api/cron/blog-apt-cluster",
       "schedule": "0 7 * * *"
+    },
+    {
+      "path": "/api/cron/blog-stock-cluster",
+      "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/cron/analysis-refresh",
+      "schedule": "0 3 * * 0"
     }
   ]
 }

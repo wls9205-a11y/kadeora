@@ -80,6 +80,8 @@ const CRON_GROUPS = {
     '/api/cron/blog-restore-candidate',
     '/api/cron/blog-restore-monitor',
     '/api/cron/blog-apt-cluster',
+    '/api/cron/blog-stock-cluster',
+    '/api/cron/analysis-refresh',
     '/api/cron/seo-score-refresh',
   ],
   system: [
