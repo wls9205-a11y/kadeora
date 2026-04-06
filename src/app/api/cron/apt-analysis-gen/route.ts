@@ -32,13 +32,13 @@ async function handler(_req: NextRequest) {
         .maybeSingle();
 
       // 실거래 데이터 조회
-      const { data: trades } = await admin.from('apt_transactions')
-        .select('deal_amount, area_sqm, deal_date, floor')
+      const { data: trades } = await (admin as any).from('apt_transactions')
+        .select('deal_amount, exclusive_area, deal_date, floor')
         .ilike('apt_name', `%${site.name?.replace(/[()（）]/g, '').slice(0, 10)}%`)
         .order('deal_date', { ascending: false })
         .limit(5);
 
-      const prompt = buildAnalysisPrompt(site, sub, trades);
+      const prompt = buildAnalysisPrompt(site, sub, trades || []);
 
       const res = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
@@ -100,7 +100,7 @@ function buildAnalysisPrompt(site: any, sub: any, trades: any[]): string {
   const extCost = site.extension_cost ? `발코니확장비 ${(site.extension_cost / 10000).toFixed(0)}만원` : '';
 
   const tradeInfo = trades && trades.length > 0
-    ? trades.map((t: any) => `${t.deal_date} ${t.area_sqm}㎡ ${t.floor}층 ${(Number(t.deal_amount) / 10000).toFixed(1)}억`).join(' / ')
+    ? trades.map((t: any) => `${t.deal_date} ${t.exclusive_area}㎡ ${t.floor}층 ${(Number(t.deal_amount) / 10000).toFixed(1)}억`).join(' / ')
     : '';
 
   return `한국 부동산 전문 분석가로서 "${name}" 현장에 대한 종합 분석 글을 작성하세요.
