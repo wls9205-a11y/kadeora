@@ -18,7 +18,7 @@ const CAT: Record<string, { a: string; b: string; g: [string,string,string]; L: 
   free:    { a:'#F472B6', b:'rgba(244,114,182,.18)', g:['#080210','#130820','#1E0F30'], L:'자유',        I:'💬', E:'FREE'    },
 };
 
-const SITE = 'https://kadeora.app';
+import { SITE_URL as SITE } from '@/lib/constants';
 
 /* ── 폰트: Node.js fs.readFileSync — 100% 확실 ──
    Edge Runtime의 import.meta.url/fetch 불안정 → Node.js로 전환

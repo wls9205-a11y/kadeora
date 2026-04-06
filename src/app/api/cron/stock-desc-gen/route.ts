@@ -1,3 +1,4 @@
+import { AI_MODEL_HAIKU, ANTHROPIC_VERSION } from '@/lib/constants';
 import { NextRequest, NextResponse } from 'next/server';
 import { withCronAuth } from '@/lib/cron-auth';
 import { withCronLogging } from '@/lib/cron-logger';
@@ -66,8 +67,8 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
         const prompt = `다음 주식 종목들의 한국어 설명을 각각 2~3문장으로. 핵심 사업 위주. JSON만: [{"n":1,"desc":"..."}]\n${stockList}`;
         const res = await fetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'x-api-key': ANTHROPIC_KEY(), 'anthropic-version': '2023-06-01' },
-          body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 3000, messages: [{ role: 'user', content: prompt }] }),
+          headers: { 'Content-Type': 'application/json', 'x-api-key': ANTHROPIC_KEY(), 'anthropic-version': ANTHROPIC_VERSION },
+          body: JSON.stringify({ model: AI_MODEL_HAIKU, max_tokens: 3000, messages: [{ role: 'user', content: prompt }] }),
           signal: AbortSignal.timeout(30000),
         });
         if (res.ok) {

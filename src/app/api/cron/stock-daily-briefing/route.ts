@@ -1,4 +1,5 @@
 export const maxDuration = 60;
+import { AI_MODEL_HAIKU, ANTHROPIC_VERSION } from '@/lib/constants';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
@@ -82,8 +83,8 @@ ${themeHistory?.length ? `테마: ${themeHistory.map((t: any) => `${t.theme_name
 
         const res = await fetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
-          body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 300, messages: [{ role: 'user', content: prompt }] }),
+          headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.ANTHROPIC_API_KEY, 'anthropic-version': ANTHROPIC_VERSION },
+          body: JSON.stringify({ model: AI_MODEL_HAIKU, max_tokens: 300, messages: [{ role: 'user', content: prompt }] }),
           signal: AbortSignal.timeout(15000),
         });
         apiCalls = 1;
@@ -146,8 +147,8 @@ Sectors: ${usSectorPerf.slice(0,5).map(s=>`${s.name}(${s.avg_pct>0?'+':''}${s.av
 한국어로 200자 이내 미국 증시 요약. JSON만: {"title":"제목(20자이내)","summary":"요약","sentiment":"bullish|neutral|bearish"}`;
           const usRes = await fetch('https://api.anthropic.com/v1/messages', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.ANTHROPIC_API_KEY!, 'anthropic-version': '2023-06-01' },
-            body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 300, messages: [{ role: 'user', content: usPrompt }] }),
+            headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.ANTHROPIC_API_KEY!, 'anthropic-version': ANTHROPIC_VERSION },
+            body: JSON.stringify({ model: AI_MODEL_HAIKU, max_tokens: 300, messages: [{ role: 'user', content: usPrompt }] }),
             signal: AbortSignal.timeout(15000),
           });
           if (usRes.ok) {

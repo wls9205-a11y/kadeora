@@ -1,4 +1,5 @@
 'use client';
+import { CONTACT_EMAIL } from '@/lib/constants';
 import { useState, useEffect } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import Link from 'next/link';
@@ -203,7 +204,7 @@ export default function ConsultantRegister() {
               </div>
               <button onClick={() => {
                 // TODO: 토스 결제 연동 후 활성화
-                info(`${tier.name} 요금제 결제 기능은 곧 오픈됩니다. 문의: kadeora.app@gmail.com`);
+                info(`${tier.name} 요금제 결제 기능은 곧 오픈됩니다. 문의: ${CONTACT_EMAIL}`);
               }} style={{
                 width: '100%', padding: '10px 0', borderRadius: 'var(--radius-sm)', border: `1px solid ${tier.color}`, cursor: 'pointer',
                 background: i === 1 ? tier.color : 'transparent',

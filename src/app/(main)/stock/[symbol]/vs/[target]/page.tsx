@@ -3,7 +3,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 
-const SITE_URL = 'https://kadeora.app';
+import { SITE_URL } from '@/lib/constants';
 
 type Props = { params: Promise<{ symbol: string; target: string }> };
 

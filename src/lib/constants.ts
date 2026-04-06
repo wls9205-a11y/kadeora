@@ -1,6 +1,15 @@
 
 /** 사이트 기본 URL — 환경변수 우선, 폴백 production URL */
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
+/** 연락처 */
+export const CONTACT_EMAIL = 'kadeora.app@gmail.com';
+export const CONTACT_PHONE = '010-5001-1382';
+
+/** AI 모델 */
+export const AI_MODEL_HAIKU = 'claude-haiku-4-5-20251001';
+export const AI_MODEL_SONNET = 'claude-sonnet-4-20250514';
+export const ANTHROPIC_VERSION = '2023-06-01';
+
 
 // Demo data uses simplified shapes for SSR fallbacks — typed loosely
 export const DEMO_POSTS: any[] = [

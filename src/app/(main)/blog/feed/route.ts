@@ -1,5 +1,5 @@
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
-import { SITE_URL } from '@/lib/constants';
+import { SITE_URL , CONTACT_EMAIL} from '@/lib/constants';
 
 export const revalidate = 3600;
 
@@ -47,8 +47,8 @@ ${tagItems}
     <description>매일 업데이트되는 주식 시황, 청약 일정, 실거래가 분석</description>
     <language>ko</language>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
-    <managingEditor>kadeora.app@gmail.com (카더라)</managingEditor>
-    <webMaster>kadeora.app@gmail.com (카더라)</webMaster>
+    <managingEditor>${CONTACT_EMAIL} (카더라)</managingEditor>
+    <webMaster>${CONTACT_EMAIL} (카더라)</webMaster>
     <copyright>Copyright 2026 카더라. All rights reserved.</copyright>
     <ttl>60</ttl>
     <image>

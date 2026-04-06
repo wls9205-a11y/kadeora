@@ -49,10 +49,7 @@ function calculateGrade(points: number, postCount: number, commentCount: number)
   return 1;
 }
 
-const GRADE_TITLES: Record<number, string> = {
-  1: '새싹', 2: '정보통', 3: '동네어른', 4: '소문난집', 5: '인플루언서',
-  6: '빅마우스', 7: '찐고수', 8: '전설', 9: '신의경지', 10: '카더라신',
-};
+
 
 export async function GET(req: NextRequest) {
   try {

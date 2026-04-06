@@ -1,4 +1,5 @@
 export const maxDuration = 30;
+import { AI_MODEL_HAIKU, ANTHROPIC_VERSION } from '@/lib/constants';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';
@@ -145,10 +146,10 @@ score: 1~10 투자매력도, risk: low/medium/high`;
       headers: {
         'Content-Type': 'application/json',
         'x-api-key': process.env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
+        'anthropic-version': ANTHROPIC_VERSION,
       },
       body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
+        model: AI_MODEL_HAIKU,
         max_tokens: 1500,
         messages: [{ role: 'user', content: prompt }],
       }),

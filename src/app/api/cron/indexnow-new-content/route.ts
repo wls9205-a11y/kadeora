@@ -5,7 +5,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
-const SITE_URL = 'https://kadeora.app';
+import { SITE_URL } from '@/lib/constants';
 const INDEXNOW_KEY = process.env.INDEXNOW_KEY || '5a7b3c1d2e4f6a8b9c0d1e2f3a4b5c6d';
 
 export async function GET(_req: NextRequest) {

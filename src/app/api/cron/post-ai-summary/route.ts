@@ -1,4 +1,5 @@
 export const maxDuration = 30;
+import { AI_MODEL_HAIKU, ANTHROPIC_VERSION } from '@/lib/constants';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
@@ -64,10 +65,10 @@ JSON만: {"summary":"3줄 요약 (줄바꿈 \\n으로 구분)","consensus":"agre
           headers: {
             'Content-Type': 'application/json',
             'x-api-key': process.env.ANTHROPIC_API_KEY!,
-            'anthropic-version': '2023-06-01',
+            'anthropic-version': ANTHROPIC_VERSION,
           },
           body: JSON.stringify({
-            model: 'claude-haiku-4-5-20251001',
+            model: AI_MODEL_HAIKU,
             max_tokens: 500,
             messages: [{ role: 'user', content: prompt }],
           }),

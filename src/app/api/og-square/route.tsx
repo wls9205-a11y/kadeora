@@ -32,7 +32,7 @@ const CAT_KPI: Record<string, { kw: string; kwv: string }> = {
   free:    { kw: '커뮤니티',   kwv: '실시간' },
 };
 
-const SITE = 'https://kadeora.app';
+import { SITE_URL as SITE } from '@/lib/constants';
 
 /* ── 폰트: Node.js fs.readFileSync — 100% 확실 ── */
 let _fontCache: ArrayBuffer | null = null;

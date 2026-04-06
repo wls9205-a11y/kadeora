@@ -1,3 +1,4 @@
+import { AI_MODEL_HAIKU, ANTHROPIC_VERSION } from '@/lib/constants';
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
@@ -100,8 +101,8 @@ export async function GET(req: NextRequest) {
 
             const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.ANTHROPIC_API_KEY!, 'anthropic-version': '2023-06-01' },
-              body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 600, messages: [{ role: 'user', content: prompt }] }),
+              headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.ANTHROPIC_API_KEY!, 'anthropic-version': ANTHROPIC_VERSION },
+              body: JSON.stringify({ model: AI_MODEL_HAIKU, max_tokens: 600, messages: [{ role: 'user', content: prompt }] }),
               signal: AbortSignal.timeout(15000),
             });
             if (aiRes.ok) {

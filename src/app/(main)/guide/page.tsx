@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { SITE_URL } from '@/lib/constants';
+import { SITE_URL , CONTACT_EMAIL} from '@/lib/constants';
 import GuideInstallButton from '@/components/GuideInstallButton';
 import Link from 'next/link';
 import ShareButtons from '@/components/ShareButtons';
@@ -195,8 +195,8 @@ export default function GuidePage() {
         <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 'var(--sp-md)', lineHeight: 1.6 }}>
           버그 신고, 기능 제안, 문의사항이 있으시면 언제든 연락해주세요.
         </div>
-        <a href="mailto:kadeora.app@gmail.com" style={{ display: 'inline-block', padding: 'var(--sp-md) var(--sp-2xl)', borderRadius: 'var(--radius-md)', background: 'var(--brand)', color: 'var(--text-inverse)', fontSize: 'var(--fs-sm)', fontWeight: 700, textDecoration: 'none' }}>
-          📧 kadeora.app@gmail.com
+        <a href={`mailto:${CONTACT_EMAIL}`} style={{ display: 'inline-block', padding: 'var(--sp-md) var(--sp-2xl)', borderRadius: 'var(--radius-md)', background: 'var(--brand)', color: 'var(--text-inverse)', fontSize: 'var(--fs-sm)', fontWeight: 700, textDecoration: 'none' }}>
+          📧 {CONTACT_EMAIL}
         </a>
       </div>
     </div>

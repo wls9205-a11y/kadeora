@@ -1,3 +1,4 @@
+import { AI_MODEL_SONNET, ANTHROPIC_VERSION } from '@/lib/constants';
 import { NextRequest, NextResponse } from 'next/server';
 import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
@@ -59,7 +60,7 @@ export async function GET(_req: NextRequest) {
         requests.push({
           custom_id: `apt-cluster:${slug}`,
           params: {
-            model: 'claude-sonnet-4-20250514',
+            model: AI_MODEL_SONNET,
             max_tokens: 3000,
             messages: [{ role: 'user', content: `"${title}" 블로그 2500자+.\n${site.name}, ${site.region} ${site.sigungu||''}, 시공=${site.builder||''}, ${site.total_units||'?'}세대, 분양가=${pMin||pMax||'미공개'}, 역=${site.nearby_station||'-'}, 학군=${site.school_district||'-'}, 입주=${site.move_in_date||'미정'}\n키워드: ${t.kw}\n## 4~6개 소제목. 내부링크: [상세→](/apt/${site.slug}) [계산→](/calc) [진단→](/apt/diagnose). FAQ ### Q. 3개. 마크다운,목차금지,##안에볼드금지,면책문구 마지막.` }],
           },
@@ -92,7 +93,7 @@ export async function GET(_req: NextRequest) {
         requests.push({
           custom_id: `stock-cluster:${slug}`,
           params: {
-            model: 'claude-sonnet-4-20250514',
+            model: AI_MODEL_SONNET,
             max_tokens: 3000,
             messages: [{ role: 'user', content: `"${title}" 블로그 2000자+.\n${s.name}(${s.symbol}), ${s.market}, 현재가=${p}, 시총=${s.market_cap?(Number(s.market_cap)/1e8).toFixed(0)+'억':'-'}, 섹터=${s.sector||'-'}, PER=${s.per||'-'}, PBR=${s.pbr||'-'}, 배당=${s.dividend_yield||'-'}%\n키워드: ${t.kw}\n## 4~6개 소제목. 내부링크: [시세→](/stock/${s.symbol}) [블로그→](/blog). FAQ ### Q. 3개. 마크다운,목차금지,##볼드금지,면책.` }],
           },
@@ -105,7 +106,7 @@ export async function GET(_req: NextRequest) {
     // Batch API 제출
     const jsonl = requests.map(r => JSON.stringify(r)).join('\n');
     const batchRes = await fetch('https://api.anthropic.com/v1/messages/batches', {
-      method: 'POST', headers: { 'x-api-key': API_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
+      method: 'POST', headers: { 'x-api-key': API_KEY, 'anthropic-version': ANTHROPIC_VERSION, 'content-type': 'application/json' },
       body: JSON.stringify({ requests: requests.map(r => ({ custom_id: r.custom_id, params: r.params })) }),
     });
     const batchData = await batchRes.json();

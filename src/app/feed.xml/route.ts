@@ -1,3 +1,4 @@
+import { escapeXml } from '@/lib/xml-utils';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -5,9 +6,7 @@ export const revalidate = 1800; // 30분마다 갱신
 
 import { SITE_URL as SITE } from '@/lib/constants';
 
-function escapeXml(s: string): string {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;');
-}
+
 
 const CATEGORY_MAP: Record<string, string> = {
   stock: '주식', apt: '부동산', unsold: '미분양', finance: '재테크',

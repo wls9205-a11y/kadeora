@@ -1,3 +1,4 @@
+import { AI_MODEL_HAIKU, ANTHROPIC_VERSION } from '@/lib/constants';
 import { NextRequest, NextResponse } from 'next/server';
 import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
@@ -58,10 +59,10 @@ export async function GET(req: NextRequest) {
           headers: {
             'Content-Type': 'application/json',
             'x-api-key': process.env.ANTHROPIC_API_KEY!,
-            'anthropic-version': '2023-06-01',
+            'anthropic-version': ANTHROPIC_VERSION,
           },
           body: JSON.stringify({
-            model: 'claude-haiku-4-5-20251001',
+            model: AI_MODEL_HAIKU,
             max_tokens: 4000,
             messages: [{
               role: 'user',

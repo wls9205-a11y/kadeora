@@ -1,3 +1,4 @@
+import { AI_MODEL_HAIKU, ANTHROPIC_VERSION } from '@/lib/constants';
 import { NextRequest, NextResponse } from 'next/server';
 import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
@@ -47,8 +48,8 @@ export async function GET(_req: NextRequest) {
 
           const res = await fetch('https://api.anthropic.com/v1/messages', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.ANTHROPIC_API_KEY!, 'anthropic-version': '2023-06-01' },
-            body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 4000,
+            headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.ANTHROPIC_API_KEY!, 'anthropic-version': ANTHROPIC_VERSION },
+            body: JSON.stringify({ model: AI_MODEL_HAIKU, max_tokens: 4000,
               messages: [{ role: 'user', content: `"${title}" 블로그 2500자+.\n${site.name}, ${site.region} ${site.sigungu||''}, 시공=${site.builder||''}, ${site.total_units||'?'}세대, 분양가=${pMin||pMax||'미공개'}, 역=${site.nearby_station||'-'}, 학군=${site.school_district||'-'}, 입주=${site.move_in_date||'미정'}\n## 4~6개, 내부링크: [상세→](/apt/${site.slug}) [진단→](/apt/diagnose) [계산→](/calc) [블로그→](/blog). FAQ ### Q. 3개. 마크다운,목차금지,##볼드금지,면책.` }],
             }),
           });

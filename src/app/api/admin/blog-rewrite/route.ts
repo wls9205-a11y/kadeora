@@ -1,3 +1,4 @@
+import { AI_MODEL_HAIKU } from '@/lib/constants';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { requireAdmin } from '@/lib/admin-auth';
@@ -70,7 +71,7 @@ export async function POST(req: NextRequest) {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            model: 'claude-haiku-4-5-20251001',
+            model: AI_MODEL_HAIKU,
             max_tokens: 3000,
             messages: [{
               role: 'user',
