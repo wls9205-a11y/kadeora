@@ -61,14 +61,14 @@ export function Badge({ color, children }: { color: string; children: React.Reac
 }
 export function KPICard({ icon, label, value, sub, color }: { icon: string; label: string; value: string | number; sub?: string; color: string }) {
   return (
-    <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-card)', padding: '12px 14px', display: 'flex', gap: 10, alignItems: 'center', transition: 'border-color .15s', minWidth: 0 }}
+    <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 6, padding: '7px 10px', display: 'flex', gap: 7, alignItems: 'center', transition: 'border-color .15s', minWidth: 0 }}
       onMouseEnter={e => (e.currentTarget.style.borderColor = color)}
       onMouseLeave={e => (e.currentTarget.style.borderColor = C.border)}>
-      <div style={{ width: 36, height: 36, borderRadius: 'var(--radius-md)', background: `${color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>{icon}</div>
+      <div style={{ width: 28, height: 28, borderRadius: 6, background: `${color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, flexShrink: 0 }}>{icon}</div>
       <div style={{ minWidth: 0 }}>
-        <div style={{ fontSize: 10, color: C.textDim, fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</div>
-        <div style={{ fontSize: 18, fontWeight: 800, color: C.text, lineHeight: 1.2 }}>{typeof value === 'number' ? fmt(value) : value}</div>
-        {sub && <div style={{ fontSize: 10, color: C.textDim, marginTop: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{sub}</div>}
+        <div style={{ fontSize: 9, color: C.textDim, fontWeight: 600, letterSpacing: '0.04em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</div>
+        <div style={{ fontSize: 15, fontWeight: 800, color: C.text, lineHeight: 1.1 }}>{typeof value === 'number' ? fmt(value) : value}</div>
+        {sub && <div style={{ fontSize: 9, color: C.textDim, marginTop: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{sub}</div>}
       </div>
     </div>
   );
@@ -76,7 +76,7 @@ export function KPICard({ icon, label, value, sub, color }: { icon: string; labe
 export function DataTable({ headers, rows, onRowClick }: { headers: string[]; rows: any[][]; onRowClick?: (i: number) => void }) {
   return (
     <div className="admin-table-wrap" style={{ overflowX: 'auto', borderRadius: 'var(--radius-md)', border: `1px solid ${C.border}`, WebkitOverflowScrolling: 'touch' }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12, minWidth: headers.length > 4 ? 600 : 'auto' }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11, minWidth: headers.length > 4 ? 600 : 'auto' }}>
         <thead>
           <tr>{headers.map((h, i) => <th key={i} style={{ padding: '8px 10px', textAlign: 'left', background: C.card, color: C.textDim, fontWeight: 600, fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.04em', borderBottom: `1px solid ${C.border}`, position: 'sticky', top: 0, whiteSpace: 'nowrap' }}>{h}</th>)}</tr>
         </thead>
@@ -150,5 +150,28 @@ export function StatBox({ icon, label, value, sub, color, accent }: { icon: stri
   );
 }
 
+
+export function MiniKPI({ label, value, color, sub }: { label: string; value: string | number; color: string; sub?: string }) {
+  return (
+    <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 6, padding: '5px 8px', textAlign: 'center', minWidth: 0 }}>
+      <div style={{ fontSize: 14, fontWeight: 800, color, lineHeight: 1.1 }}>{typeof value === 'number' ? fmt(value) : value}</div>
+      <div style={{ fontSize: 8, color: C.textDim, fontWeight: 600, marginTop: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</div>
+      {sub && <div style={{ fontSize: 8, color: C.textSec }}>{sub}</div>}
+    </div>
+  );
+}
+export function Collapsible({ title, icon, defaultOpen, children }: { title: string; icon?: string; defaultOpen?: boolean; children: React.ReactNode }) {
+  const [open, setOpen] = useState(defaultOpen ?? true);
+  return (
+    <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 8, marginBottom: 8, overflow: 'hidden' }}>
+      <div onClick={() => setOpen(!open)} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 12px', cursor: 'pointer', userSelect: 'none' }}>
+        <span style={{ fontSize: 11, transition: 'transform .15s', transform: open ? 'rotate(90deg)' : 'rotate(0deg)', color: C.textDim }}>▶</span>
+        {icon && <span style={{ fontSize: 12 }}>{icon}</span>}
+        <span style={{ fontSize: 12, fontWeight: 700, color: C.text, flex: 1 }}>{title}</span>
+      </div>
+      {open && <div style={{ padding: '0 12px 10px', borderTop: `1px solid ${C.border}` }}>{children}</div>}
+    </div>
+  );
+}
 export { C, GRADE_EMOJI, PROVIDER_LABEL, SECTIONS, ago, fmt, dateStr };
 export type { KPI, DailyStat, UserRow, Section };
