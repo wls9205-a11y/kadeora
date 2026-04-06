@@ -8,7 +8,6 @@ function ago(d: string) {
   if (s < 86400) return `${Math.floor(s / 3600)}시간 전`;
   return `${Math.floor(s / 86400)}일 전`;
 }
-
 function fmt(n: number) {
   if (n >= 10000) return `${(n / 10000).toFixed(1)}만`;
   if (n >= 1000) return `${(n / 1000).toFixed(1)}K`;
@@ -31,217 +30,240 @@ export default function FocusTab({ onNavigate }: { onNavigate: (t: any) => void 
   }, [load]);
 
   if (loading) return <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-secondary)' }}>로딩 중...</div>;
-
   if (!data || data.error) return (
     <div className="adm-card" style={{ textAlign: 'center', padding: 30 }}>
       <div style={{ fontSize: 24, marginBottom: 8 }}>⚠️</div>
       <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>데이터 로드 실패</div>
-      <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>{data?.error || '서버 응답 없음'}</div>
       <button className="adm-btn" style={{ marginTop: 12 }} onClick={load}>다시 시도</button>
     </div>
   );
 
-  const { healthScore = 0, kpi = {} as any, failedCrons = {}, recentActivity = [], dailyTrend = [] } = data;
+  const { healthScore = 0, scoreBreakdown = {}, kpi = {} as any, failedCrons = {}, recentActivity = [], dailyTrend = [] } = data;
   const failCount = Object.keys(failedCrons || {}).length;
-
-  // 건강 점수 색상
   const scoreColor = healthScore >= 71 ? '#10B981' : healthScore >= 41 ? '#F59E0B' : '#EF4444';
   const scoreLabel = healthScore >= 71 ? '양호' : healthScore >= 41 ? '주의' : '위험';
+  const cronRate = Math.round((kpi.cronSuccess / Math.max(kpi.cronSuccess + kpi.cronFail, 1)) * 100);
+  const dbPct = Math.round(kpi.dbMb / 81.92) / 10;
 
-  // 이번 주 할 일 자동 생성
-  const actions: { priority: string; color: string; title: string; desc: string; action?: string }[] = [];
-  if (kpi.returnRate === 0) {
-    actions.push({ priority: '1순위', color: '#EF4444', title: '재방문율 0% 해결', desc: `실유저 ${kpi.users}명 전원 가입 후 재방문 없음. D+1 웰컴 푸시 + 관심 지역 맞춤 알림 필요.`, action: '상세' });
-  }
-  if (kpi.interests <= 1) {
-    actions.push({ priority: actions.length === 0 ? '1순위' : '2순위', color: '#F59E0B', title: `관심단지 등록 ${kpi.interests}건`, desc: `청약 ${fmt(kpi.apts)}건 중 관심등록 ${kpi.interests}건(${(kpi.interests / Math.max(kpi.apts, 1) * 100).toFixed(2)}%). CTA 위치/메시지 재검토.` });
-  }
-  if (kpi.rewriteRate < 50) {
-    actions.push({ priority: actions.length < 2 ? `${actions.length + 1}순위` : '3순위', color: '#3B82F6', title: `블로그 리라이팅 ${kpi.rewriteRate}%`, desc: `${fmt(kpi.blogs - kpi.rewritten)}건 대기. 현재 36건/일 → ${Math.round((kpi.blogs - kpi.rewritten) / 36)}일 소요.` });
-  }
-  if (actions.length < 3 && kpi.emailSubs === 0 && kpi.pushSubs === 0) {
-    actions.push({ priority: `${actions.length + 1}순위`, color: '#8B5CF6', title: '구독자 0명', desc: '이메일 + 푸시 구독 시스템 배포 직후. 첫 구독자 확보가 재방문 엔진의 시작.' });
-  }
+  // 이번 주 할 일
+  const actions: { color: string; title: string; desc: string; tab?: string }[] = [];
+  if (kpi.returnRate === 0) actions.push({ color: '#EF4444', title: '재방문율 0%', desc: `${kpi.users}명 전원 이탈. D+1 웰컴 배포 완료 — 효과 모니터링`, tab: 'users' });
+  if (kpi.interests <= 1) actions.push({ color: '#F59E0B', title: `관심등록 ${kpi.interests}건`, desc: `청약 ${fmt(kpi.apts)}건 중 등록 ${kpi.interests}건. CTA 재검토`, tab: 'users' });
+  if (kpi.rewriteRate < 50) actions.push({ color: '#3B82F6', title: `리라이팅 ${kpi.rewriteRate}%`, desc: `${fmt(kpi.blogs - kpi.rewritten)}건 대기 → ${Math.round((kpi.blogs - kpi.rewritten) / 36)}일`, tab: 'data' });
+  if (kpi.emailSubs + kpi.pushSubs === 0) actions.push({ color: '#8B5CF6', title: '구독자 0명', desc: '이메일+푸시 배포 직후. 첫 구독자 대기', tab: 'growth' });
 
-  // 14일 추이에서 전주 대비
-  const prevWeek = (dailyTrend || [])[7];
-  const thisWeek = (dailyTrend || [])[0];
+  // 14일 트렌드
+  const trend = [...(dailyTrend || [])].reverse();
+  const todayPv = trend.length > 0 ? (trend[trend.length - 1]?.total_page_views || 0) : 0;
+  const maxPv = Math.max(...trend.map((d: any) => d.total_page_views || 0), 1);
+  const todayDau = trend.length > 0 ? (trend[trend.length - 1]?.dau || 0) : 0;
+
+  // 점수 상세 항목
+  const breakdownItems = [
+    { label: '크론', score: scoreBreakdown.cronHealth || 0, max: 15, color: '#10B981' },
+    { label: '신규유저', score: scoreBreakdown.newUsers || 0, max: 15, color: '#3B82F6' },
+    { label: '재방문', score: scoreBreakdown.returnRate || 0, max: 15, color: '#EF4444' },
+    { label: '전환율', score: scoreBreakdown.conversionRate || 0, max: 10, color: '#F59E0B' },
+    { label: '리라이팅', score: scoreBreakdown.rewriteRate || 0, max: 10, color: '#8B5CF6' },
+    { label: '구독', score: scoreBreakdown.subscriptions || 0, max: 10, color: '#EC4899' },
+    { label: '데이터', score: scoreBreakdown.dataFreshness || 0, max: 10, color: '#06B6D4' },
+    { label: 'DB여유', score: scoreBreakdown.dbHeadroom || 0, max: 5, color: '#6B7280' },
+  ];
 
   return (
     <div>
-      {/* 건강 점수 */}
-      <div className="adm-card" style={{ textAlign: 'center', padding: 24 }}>
-        <div style={{ position: 'relative', width: 120, height: 120, margin: '0 auto 12px' }}>
-          <svg viewBox="0 0 120 120" style={{ transform: 'rotate(-90deg)' }}>
-            <circle cx="60" cy="60" r="52" fill="none" stroke="var(--border)" strokeWidth="8" />
-            <circle cx="60" cy="60" r="52" fill="none" stroke={scoreColor} strokeWidth="8"
-              strokeDasharray={`${healthScore * 3.27} 327`} strokeLinecap="round" />
-          </svg>
-          <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ fontSize: 32, fontWeight: 800, color: scoreColor }}>{healthScore}</div>
-            <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>/ 100</div>
+      {/* ═══ 건강 점수 + 점수 분해 ═══ */}
+      <div className="adm-card" style={{ padding: 20 }}>
+        <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
+          {/* 원형 게이지 */}
+          <div style={{ position: 'relative', width: 100, height: 100, flexShrink: 0 }}>
+            <svg viewBox="0 0 100 100" style={{ transform: 'rotate(-90deg)' }}>
+              <circle cx="50" cy="50" r="42" fill="none" stroke="var(--border)" strokeWidth="7" />
+              <circle cx="50" cy="50" r="42" fill="none" stroke={scoreColor} strokeWidth="7"
+                strokeDasharray={`${healthScore * 2.64} 264`} strokeLinecap="round" />
+            </svg>
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ fontSize: 28, fontWeight: 800, color: scoreColor, lineHeight: 1 }}>{healthScore}</div>
+              <div style={{ fontSize: 10, color: scoreColor, fontWeight: 600 }}>{scoreLabel}</div>
+            </div>
+          </div>
+          {/* 점수 분해 바 */}
+          <div style={{ flex: 1 }}>
+            {breakdownItems.map((b, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 3 }}>
+                <span style={{ minWidth: 42, fontSize: 9, color: 'var(--text-tertiary)' }}>{b.label}</span>
+                <div style={{ flex: 1, height: 5, background: 'var(--bg-hover)', borderRadius: 3 }}>
+                  <div style={{ height: '100%', width: `${(b.score / b.max) * 100}%`, background: b.color, borderRadius: 3, transition: 'width .5s' }} />
+                </div>
+                <span style={{ minWidth: 20, fontSize: 9, color: 'var(--text-tertiary)', textAlign: 'right' }}>{Math.round(b.score)}</span>
+              </div>
+            ))}
           </div>
         </div>
-        <div style={{ fontSize: 14, fontWeight: 700, color: scoreColor }}>{scoreLabel}</div>
-        <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>
-          카더라 건강 점수
-          {prevWeek && thisWeek && (
-            <span> · 전주 대비 {thisWeek.total_users > prevWeek.total_users ? '▲' : '▼'}</span>
+      </div>
+
+      {/* ═══ 시스템 상태 스트립 ═══ */}
+      <div style={{ display: 'flex', gap: 6, margin: '8px 0', flexWrap: 'wrap' }}>
+        {[
+          { label: `크론 ${cronRate}%`, ok: cronRate >= 90, warn: cronRate >= 70 },
+          { label: `DB ${dbPct}%`, ok: dbPct < 70, warn: dbPct < 90 },
+          { label: `유저 ${kpi.users}`, ok: kpi.users > 0, warn: true },
+          { label: `재방문 ${kpi.returnRate}%`, ok: kpi.returnRate > 0, warn: false },
+          { label: `푸시 ${kpi.pushSubs}`, ok: kpi.pushSubs > 0, warn: false },
+          { label: `이메일 ${kpi.emailSubs}`, ok: kpi.emailSubs > 0, warn: false },
+        ].map((s, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 6, background: 'var(--bg-surface)', border: '1px solid var(--border)', fontSize: 10, color: 'var(--text-secondary)' }}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: s.ok ? '#10B981' : s.warn ? '#F59E0B' : '#EF4444' }} />
+            {s.label}
+          </div>
+        ))}
+      </div>
+
+      {/* ═══ 6-KPI 그리드 ═══ */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, margin: '8px 0' }}>
+        {[
+          { v: kpi.users, l: '실유저', d: `+${kpi.newUsers} 주간`, c: kpi.newUsers > 0 ? '#10B981' : '' },
+          { v: fmt(kpi.blogs), l: '블로그', d: `RW ${kpi.rewriteRate}%`, c: '#10B981' },
+          { v: `${kpi.returnRate}%`, l: '재방문율', d: kpi.returnRate === 0 ? '위험' : '목표20%', c: kpi.returnRate === 0 ? '#EF4444' : '#10B981' },
+          { v: fmt(kpi.stocks), l: '종목', d: `부동산 ${fmt(kpi.apts)}`, c: '' },
+          { v: todayPv, l: 'PV 오늘', d: `DAU ${todayDau}`, c: todayPv > 0 ? '#10B981' : '' },
+          { v: kpi.interests, l: '관심등록', d: `전환 ${kpi.conversions}`, c: kpi.interests > 0 ? '#10B981' : '#EF4444' },
+        ].map((k, i) => (
+          <div key={i} className="adm-kpi-c" style={{ padding: '10px 12px' }}>
+            <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.2 }}>{k.v}</div>
+            <div style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 2 }}>{k.l}</div>
+            <div style={{ fontSize: 9, color: k.c || 'var(--text-tertiary)', marginTop: 1 }}>{k.d}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* ═══ 14일 트래픽 차트 ═══ */}
+      {trend.length > 1 && (
+        <div className="adm-card" style={{ padding: '10px 14px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 6 }}>
+            <span>14일 PV 추이</span>
+            <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>오늘 {todayPv}</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 2, height: 55 }}>
+            {trend.map((d: any, i: number) => {
+              const pv = d.total_page_views || 0;
+              const isToday = i === trend.length - 1;
+              return (
+                <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  {isToday && <div style={{ fontSize: 8, color: 'var(--brand)', fontWeight: 700, marginBottom: 1 }}>{pv}</div>}
+                  <div style={{
+                    width: '100%', borderRadius: 2, minHeight: 3,
+                    height: `${(pv / maxPv) * 42}px`,
+                    background: isToday ? 'var(--brand)' : pv > 0 ? 'rgba(59,130,246,0.25)' : 'var(--bg-hover)',
+                  }} />
+                </div>
+              );
+            })}
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 8, color: 'var(--text-tertiary)', marginTop: 2 }}>
+            <span>{trend[0]?.stat_date?.slice(5)}</span>
+            <span>{trend[Math.floor(trend.length / 2)]?.stat_date?.slice(5)}</span>
+            <span>오늘</span>
+          </div>
+        </div>
+      )}
+
+      {/* ═══ 긴급 알림 (컴팩트) ═══ */}
+      {(kpi.returnRate === 0 || failCount > 0) && (
+        <div className="adm-card" style={{ padding: '10px 14px' }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>알림</div>
+          {kpi.returnRate === 0 && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 0', fontSize: 11 }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#EF4444', flexShrink: 0 }} />
+              <span style={{ color: 'var(--text-secondary)' }}>재방문율 0% — {kpi.users}명 전원 이탈</span>
+              <span style={{ flex: 1 }} />
+              <button className="adm-btn" style={{ fontSize: 9, padding: '2px 6px' }} onClick={() => onNavigate('users')}>확인</button>
+            </div>
+          )}
+          {failCount > 0 && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 0', fontSize: 11 }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#F59E0B', flexShrink: 0 }} />
+              <span style={{ color: 'var(--text-secondary)' }}>크론 {failCount}개 실패: {Object.keys(failedCrons).slice(0, 2).join(', ')}</span>
+              <span style={{ flex: 1 }} />
+              <button className="adm-btn" style={{ fontSize: 9, padding: '2px 6px' }} onClick={() => onNavigate('ops')}>확인</button>
+            </div>
           )}
         </div>
-      </div>
-
-      {/* 핵심 KPI */}
-      <div className="adm-kpi">
-        <div className="adm-kpi-c">
-          <div className="adm-kpi-v">{kpi.users}</div>
-          <div className="adm-kpi-l">실유저</div>
-          <div className="adm-kpi-d" style={{ color: kpi.newUsers > 0 ? '#10B981' : 'var(--text-tertiary)' }}>+{kpi.newUsers} 이번 주</div>
-        </div>
-        <div className="adm-kpi-c">
-          <div className="adm-kpi-v">{fmt(kpi.blogs)}</div>
-          <div className="adm-kpi-l">블로그</div>
-          <div className="adm-kpi-d" style={{ color: '#10B981' }}>리라이팅 {kpi.rewriteRate}%</div>
-        </div>
-        <div className="adm-kpi-c">
-          <div className="adm-kpi-v">{fmt(kpi.stocks)}</div>
-          <div className="adm-kpi-l">종목</div>
-          <div className="adm-kpi-d" style={{ color: 'var(--text-tertiary)' }}>부동산 {fmt(kpi.apts)}</div>
-        </div>
-        <div className="adm-kpi-c">
-          <div className="adm-kpi-v">{kpi.returnRate}%</div>
-          <div className="adm-kpi-l">재방문율</div>
-          <div className="adm-kpi-d" style={{ color: kpi.returnRate === 0 ? '#EF4444' : '#10B981' }}>
-            {kpi.returnRate === 0 ? '⚠️ 위험' : '목표 20%'}
-          </div>
-        </div>
-      </div>
-
-      {/* 14일 트래픽 미니 차트 */}
-      {dailyTrend && dailyTrend.length > 1 && (() => {
-        const trend = [...dailyTrend].reverse();
-        const maxPv = Math.max(...trend.map((d: any) => d.total_page_views || 0), 1);
-        return (
-          <div className="adm-card" style={{ padding: '8px 14px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 4 }}>
-              <span>일별 PV (14일)</span>
-              <span>오늘 {trend[trend.length - 1]?.total_page_views || 0}</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 2, height: 40 }}>
-              {trend.map((d: any, i: number) => (
-                <div key={i} style={{ flex: 1, height: `${((d.total_page_views || 0) / maxPv) * 35}px`, background: i === trend.length - 1 ? 'var(--brand)' : 'var(--bg-hover)', borderRadius: 2, minHeight: 2 }} />
-              ))}
-            </div>
-          </div>
-        );
-      })()}
-
-      {/* 긴급 알림 */}
-      {kpi.returnRate === 0 && (
-        <div className="adm-alert adm-alert-red">
-          🔴 실유저 {kpi.users}명 전원 가입 후 재방문 0회 (last_active_at = NULL)
-        </div>
-      )}
-      {failCount > 0 && (
-        <div className="adm-alert adm-alert-yellow">
-          ⚠️ 크론 {failCount}개 실패 (24h): {Object.entries(failedCrons).map(([k, v]: [string, any]) => `${k}(${v.count}회)`).join(', ')}
-          <br /><button className="adm-btn" style={{ marginTop: 6, fontSize: 11 }} onClick={() => onNavigate('ops')}>운영 탭에서 확인</button>
-        </div>
-      )}
-      {(kpi.emailSubs + kpi.pushSubs + kpi.conversions) === 0 && (
-        <div className="adm-alert adm-alert-green">
-          ✅ 전환 추적 + 이메일/푸시 구독 시스템 배포 완료 — 데이터 수집 시작 대기 중
-        </div>
       )}
 
-      {/* 이번 주 할 일 */}
+      {/* ═══ 이번 주 집중 ═══ */}
       <div className="adm-sec">🎯 이번 주 집중</div>
       {actions.map((a, i) => (
-        <div key={i} className="adm-card" style={{ borderLeft: `3px solid ${a.color}` }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-            <span style={{ fontSize: 10, fontWeight: 700, color: a.color, background: `${a.color}15`, padding: '2px 6px', borderRadius: 4 }}>{a.priority}</span>
-            <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{a.title}</span>
+        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', marginBottom: 6, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderLeft: `3px solid ${a.color}`, borderRadius: '0 10px 10px 0', cursor: a.tab ? 'pointer' : 'default' }}
+          onClick={() => a.tab && onNavigate(a.tab)}>
+          <div style={{ width: 30, height: 30, borderRadius: 8, background: `${a.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, color: a.color, flexShrink: 0 }}>
+            {i + 1}
           </div>
-          <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>{a.desc}</div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{a.title}</div>
+            <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 1 }}>{a.desc}</div>
+          </div>
+          {a.tab && <span style={{ fontSize: 16, color: 'var(--text-tertiary)' }}>›</span>}
         </div>
       ))}
 
-      {/* 크론 + 리소스 */}
+      {/* ═══ 시스템 요약 ═══ */}
       <div className="adm-sec">🔧 시스템</div>
-      <div className="adm-card">
-        <div style={{ display: 'flex', gap: 16, fontSize: 12, marginBottom: 6 }}>
-          <span><span style={{ color: '#10B981', fontWeight: 700 }}>{kpi.cronSuccess}</span> 성공</span>
-          <span><span style={{ color: '#EF4444', fontWeight: 700 }}>{kpi.cronFail}</span> 실패</span>
-          <span style={{ flex: 1 }} />
-          <span style={{ color: 'var(--text-tertiary)' }}>24시간</span>
+      <div className="adm-card" style={{ padding: '10px 14px' }}>
+        {/* 크론 바 */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+          <span style={{ fontSize: 11, color: 'var(--text-secondary)', minWidth: 32 }}>크론</span>
+          <div style={{ flex: 1, height: 8, background: 'var(--bg-hover)', borderRadius: 4, overflow: 'hidden' }}>
+            <div style={{ height: '100%', width: `${cronRate}%`, background: cronRate >= 95 ? '#10B981' : '#F59E0B', borderRadius: 4 }} />
+          </div>
+          <span style={{ fontSize: 11, fontWeight: 600, color: cronRate >= 95 ? '#10B981' : '#F59E0B', minWidth: 36, textAlign: 'right' }}>{cronRate}%</span>
         </div>
-        <div className="adm-bar">
-          <div className="adm-bar-fill" style={{ width: `${(kpi.cronSuccess / Math.max(kpi.cronSuccess + kpi.cronFail, 1)) * 100}%`, background: '#10B981' }} />
+        {/* DB 바 */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+          <span style={{ fontSize: 11, color: 'var(--text-secondary)', minWidth: 32 }}>DB</span>
+          <div style={{ flex: 1, height: 8, background: 'var(--bg-hover)', borderRadius: 4, overflow: 'hidden' }}>
+            <div style={{ height: '100%', width: `${dbPct}%`, background: dbPct < 50 ? '#10B981' : dbPct < 80 ? '#F59E0B' : '#EF4444', borderRadius: 4 }} />
+          </div>
+          <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)', minWidth: 36, textAlign: 'right' }}>{dbPct}%</span>
         </div>
-        <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
-          DB {Math.round(kpi.dbMb / 81.92) / 10}% ({fmt(kpi.dbMb)} MB / 8,192 MB) · 관심등록 {kpi.interests} · 이메일 {kpi.emailSubs} · 푸시 {kpi.pushSubs}
+        {/* 하단 숫자들 */}
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', fontSize: 10, color: 'var(--text-tertiary)' }}>
+          <span>성공 {kpi.cronSuccess}</span>
+          <span style={{ color: kpi.cronFail > 0 ? '#EF4444' : '' }}>실패 {kpi.cronFail}</span>
+          <span>·</span>
+          <span>{fmt(kpi.dbMb)}MB / 8.2GB</span>
         </div>
       </div>
 
-      {/* 일일 추이 미니차트 */}
-      {(dailyTrend || []).length > 3 && (() => {
-        const d = (dailyTrend || []).slice(0, 7).reverse();
-        const maxPv = Math.max(...d.map((s: any) => s.total_page_views || s.dau || 1), 1);
-        return (
-          <>
-            <div className="adm-sec">📊 7일 추이</div>
-            <div className="adm-card" style={{ padding: '10px 14px' }}>
-              <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, height: 50, marginBottom: 4 }}>
-                {d.map((s: any, i: number) => (
-                  <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <div style={{ width: '100%', height: Math.max(((s.dau || 0) / maxPv) * 40, 3), background: 'var(--brand)', borderRadius: 2, opacity: i === d.length - 1 ? 1 : 0.5 }} />
-                  </div>
-                ))}
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, color: 'var(--text-tertiary)' }}>
-                <span>{d[0]?.stat_date?.slice(5)}</span>
-                <span>DAU</span>
-                <span>{d[d.length - 1]?.stat_date?.slice(5)}</span>
-              </div>
-              <div style={{ display: 'flex', gap: 12, marginTop: 8, fontSize: 11, color: 'var(--text-secondary)' }}>
-                <span>유저 {d[d.length - 1]?.total_users || '?'}</span>
-                <span>블로그 {((d[d.length - 1]?.total_blogs || 0) / 1000).toFixed(1)}K</span>
-                <span>PV {d[d.length - 1]?.total_page_views || 0}</span>
-              </div>
-            </div>
-          </>
-        );
-      })()}
-
-      {/* 💡 자동 인사이트 */}
+      {/* ═══ 인사이트 ═══ */}
       <div className="adm-sec">💡 인사이트</div>
       <div className="adm-card" style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.7 }}>
-        {kpi.users > 0 && kpi.returnRate === 0 && (
-          <div style={{ marginBottom: 8 }}>📌 실유저 {kpi.users}명 중 재방문자 0명. 가입 직후 이탈률 100%. 가장 시급한 해결 과제는 D+1 웰컴 알림 + 관심 지역 콘텐츠 매칭.</div>
+        {kpi.returnRate === 0 && (
+          <div style={{ marginBottom: 6 }}>📌 실유저 {kpi.users}명 전원 이탈 — D+1 웰컴 알림 배포 완료. 내일부터 재방문율 변화 모니터링.</div>
         )}
         {kpi.interests <= 1 && (
-          <div style={{ marginBottom: 8 }}>🏢 관심단지 등록 {kpi.interests}건. 청약 {fmt(kpi.apts)}건 현장 중 등록률 {(kpi.interests / Math.max(kpi.apts, 1) * 100).toFixed(3)}%. 상세페이지 CTA 위치/메시지 재점검 필요.</div>
+          <div style={{ marginBottom: 6 }}>🏢 관심단지 등록 {kpi.interests}건 (청약 {fmt(kpi.apts)}건 중 {(kpi.interests / Math.max(kpi.apts, 1) * 100).toFixed(2)}%). CTA 메시지/위치 재점검.</div>
         )}
-        <div>📈 블로그 14일간 {fmt(kpi.blogs)}편 도달. 리라이팅 {kpi.rewriteRate}% ({fmt(kpi.rewritten)}편). 하루 36건 속도로 {Math.round((kpi.blogs - kpi.rewritten) / 36)}일 후 완료.</div>
+        <div>📈 블로그 {fmt(kpi.blogs)}편 (RW {kpi.rewriteRate}%). 36건/일 속도 → {Math.round((kpi.blogs - kpi.rewritten) / 36)}일 후 완료.</div>
       </div>
 
-      {/* 최근 활동 */}
+      {/* ═══ 최근 활동 ═══ */}
       <div className="adm-sec">🕐 최근 활동</div>
-      <div className="adm-card" style={{ padding: '8px 14px' }}>
+      <div className="adm-card" style={{ padding: '6px 14px' }}>
         {(recentActivity || []).map((a: any, i: number) => (
-          <div key={i} className="adm-feed-i">
-            <span style={{ minWidth: 52, fontSize: 10, color: 'var(--text-tertiary)' }}>{ago(a.at)}</span>
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 0', borderBottom: i < recentActivity.length - 1 ? '1px solid var(--border)' : 'none', fontSize: 11 }}>
+            <span style={{ minWidth: 46, fontSize: 9, color: 'var(--text-tertiary)' }}>{ago(a.at)}</span>
             {a.type === 'cron' ? (
               <>
-                <span style={{ color: a.status === 'success' ? '#10B981' : '#EF4444' }}>{a.status === 'success' ? '✓' : '✗'}</span>
-                <span>{a.name}</span>
-                {a.count > 0 && <span style={{ color: 'var(--text-tertiary)' }}>· {a.count}건</span>}
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: a.status === 'success' ? '#10B981' : '#EF4444', flexShrink: 0 }} />
+                <span style={{ color: 'var(--text-secondary)' }}>{a.name}</span>
+                {a.count > 0 && <span style={{ color: 'var(--text-tertiary)', fontSize: 10 }}>{a.count}건</span>}
               </>
             ) : (
               <>
-                <span style={{ color: 'var(--brand)' }}>●</span>
-                <span>신규 가입: {a.name}</span>
-                {a.city && <span style={{ color: 'var(--text-tertiary)' }}>· {a.city}</span>}
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--brand)', flexShrink: 0 }} />
+                <span style={{ color: 'var(--text-primary)' }}>{a.name}</span>
+                {a.city && <span style={{ color: 'var(--text-tertiary)', fontSize: 10 }}>{a.city}</span>}
               </>
             )}
           </div>
