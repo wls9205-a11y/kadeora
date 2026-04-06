@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
 
     // Find unpublished posts whose related topics are trending
     // Strategy: find source_refs that match published posts with recent views
-    const { data: trendingRefs } = await admin.from('blog_posts')
+    const { data: trendingRefs } = await (admin as any).from('blog_posts')
       .select('source_ref')
       .eq('is_published', true)
       .not('source_ref', 'is', null)
@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
     // Find unpublished candidates matching trending refs
     let candidates: any[] = [];
     if (refs.length > 0) {
-      const { data } = await admin.from('blog_posts')
+      const { data } = await (admin as any).from('blog_posts')
         .select('id, slug, category, seo_score, source_ref')
         .eq('is_published', false)
         .neq('seo_tier', 'restore_candidate') // not already marked
@@ -51,7 +51,7 @@ export async function GET(req: NextRequest) {
     if (candidates.length < WEEKLY_RESTORE_LIMIT) {
       const remaining = WEEKLY_RESTORE_LIMIT - candidates.length;
       const existingIds = candidates.map(c => c.id);
-      const { data: highScore } = await admin.from('blog_posts')
+      const { data: highScore } = await (admin as any).from('blog_posts')
         .select('id, slug, category, seo_score')
         .eq('is_published', false)
         .neq('seo_tier', 'restore_candidate')
@@ -68,7 +68,7 @@ export async function GET(req: NextRequest) {
 
     // Mark as restore candidates
     const ids = candidates.map(c => c.id);
-    await admin.from('blog_posts')
+    await (admin as any).from('blog_posts')
       .update({ seo_tier: 'restore_candidate' })
       .in('id', ids);
 

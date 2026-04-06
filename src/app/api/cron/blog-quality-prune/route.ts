@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
     const admin = getSupabaseAdmin();
 
     // Check remaining count
-    const { count: remaining } = await admin.from('blog_posts')
+    const { count: remaining } = await (admin as any).from('blog_posts')
       .select('id', { count: 'exact', head: true })
       .eq('is_published', true)
       .in('seo_tier', ['B', 'C']);
@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Get today's batch — lowest seo_score first (worst go first)
-    const { data: toPrune } = await admin.from('blog_posts')
+    const { data: toPrune } = await (admin as any).from('blog_posts')
       .select('id')
       .eq('is_published', true)
       .in('seo_tier', ['B', 'C'])
@@ -48,7 +48,7 @@ export async function GET(req: NextRequest) {
     const ids = toPrune.map((p: any) => p.id);
 
     // Unpublish in batch
-    const { error } = await admin.from('blog_posts')
+    const { error } = await (admin as any).from('blog_posts')
       .update({ is_published: false, updated_at: new Date().toISOString() })
       .in('id', ids);
 

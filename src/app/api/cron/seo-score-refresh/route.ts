@@ -59,7 +59,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Count current distribution
-    const { data: dist } = await admin.from('blog_posts')
+    const { data: dist } = await (admin as any).from('blog_posts')
       .select('seo_tier')
       .eq('is_published', true);
 

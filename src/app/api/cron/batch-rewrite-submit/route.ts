@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Priority: stock unrewritten → apt S/A tier unrewritten → apt existing low-quality rewrite → unsold/finance
-    const { data: posts } = await admin.from('blog_posts')
+    const { data: posts } = await (admin as any).from('blog_posts')
       .select('id, title, content, category, slug, seo_score, seo_tier')
       .eq('is_published', true)
       .in('seo_tier', ['S', 'A'])

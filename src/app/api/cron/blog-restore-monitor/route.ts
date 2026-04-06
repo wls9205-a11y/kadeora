@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
 
     // Find posts that were restored (rewritten_at exists, was previously unpublished)
     // and have been published for at least MONITOR_DAYS
-    const { data: toCheck } = await admin.from('blog_posts')
+    const { data: toCheck } = await (admin as any).from('blog_posts')
       .select('id, slug, view_count, rewritten_at, seo_score')
       .eq('is_published', true)
       .eq('seo_tier', 'restored')
@@ -44,13 +44,13 @@ export async function GET(req: NextRequest) {
     for (const post of toCheck) {
       if ((post.view_count || 0) >= MIN_VIEWS) {
         // Keep — upgrade tier
-        await admin.from('blog_posts')
+        await (admin as any).from('blog_posts')
           .update({ seo_tier: 'A' })
           .eq('id', post.id);
         kept++;
       } else {
         // Re-unpublish with cooldown marker
-        await admin.from('blog_posts')
+        await (admin as any).from('blog_posts')
           .update({
             is_published: false,
             seo_tier: 'cooldown',

@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
     const sb = getSupabaseAdmin();
 
     const [tierRes, batchRes, publishedRes, unpublishedRes, remainingRes] = await Promise.all([
-      sb.from('blog_posts')
+      (sb as any).from('blog_posts')
         .select('seo_tier, is_published')
         .not('seo_tier', 'is', null),
       (sb as any).from('rewrite_batches')
@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
       sb.from('blog_posts')
         .select('id', { count: 'exact', head: true })
         .eq('is_published', false),
-      sb.from('blog_posts')
+      (sb as any).from('blog_posts')
         .select('id', { count: 'exact', head: true })
         .eq('is_published', true)
         .in('seo_tier', ['B', 'C']),
