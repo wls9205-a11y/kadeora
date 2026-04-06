@@ -65,6 +65,7 @@ const CRON_GROUPS = {
   content: [
     '/api/cron/seed-posts',
     '/api/cron/blog-publish-queue',
+    '/api/admin/trigger-all',
     '/api/cron/blog-series-assign',
     '/api/cron/blog-stock-v2',
     '/api/cron/blog-apt-v2',
@@ -89,6 +90,7 @@ const CRON_GROUPS = {
     '/api/cron/batch-cluster-submit',
     '/api/cron/batch-cluster-poll',
     '/api/cron/blog-publish-queue',
+    '/api/admin/trigger-all',
     '/api/cron/seo-score-refresh',
   ],
   system: [
