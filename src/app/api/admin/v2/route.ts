@@ -37,9 +37,9 @@ export async function GET(req: NextRequest) {
     if (tab === 'focus') {
       const [users, realUsers, newUsers, activeUsers, blogs, rewritten, cronOk, cronFail, interests, emailSubs, pushSubs, convEvents, dbMb, pvToday] = await Promise.all([
         safeCount(sb.from('profiles').select('id', { count: 'exact', head: true })),
-        safeCount(sb.from('profiles').select('id', { count: 'exact', head: true }).neq('is_seed', true).neq('is_ghost', true).neq('is_deleted', true)),
-        safeCount(sb.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', weekAgo).neq('is_seed', true)),
-        safeCount(sb.from('profiles').select('id', { count: 'exact', head: true }).not('last_active_at', 'is', null).neq('is_seed', true)),
+        safeCount(sb.from('profiles').select('id', { count: 'exact', head: true }).neq('is_ghost', true).neq('is_deleted', true)),
+        safeCount(sb.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', weekAgo)),
+        safeCount(sb.from('profiles').select('id', { count: 'exact', head: true }).not('last_active_at', 'is', null)),
         safeCount(sb.from('blog_posts').select('id', { count: 'exact', head: true }).eq('is_published', true)),
         safeCount(sb.from('blog_posts').select('id', { count: 'exact', head: true }).not('rewritten_at', 'is', null)),
         safeCount(sb.from('cron_logs').select('id', { count: 'exact', head: true }).eq('status', 'success').gte('created_at', dayAgo)),
@@ -84,7 +84,7 @@ export async function GET(req: NextRequest) {
 
       const { data: recentSignups } = await sb.from('profiles')
         .select('nickname, provider, created_at, residence_city')
-        .neq('is_seed', true).order('created_at', { ascending: false }).limit(3);
+        .order('created_at', { ascending: false }).limit(3);
 
       // 실패 크론 목록
       const { data: failedCrons } = await sb.from('cron_logs')
@@ -151,7 +151,7 @@ export async function GET(req: NextRequest) {
       const [pvR, uvR, signupsR, ctaR, topPagesR, hourlyR, dailyPvR, referrerR, signupDailyR] = await Promise.all([
         sb.from('page_views').select('id', { count: 'exact', head: true }).gte('created_at', weekAgo),
         safe(sb.rpc('count_unique_visitors_7d'), 0),
-        sb.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', weekAgo).neq('is_seed', true),
+        sb.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', weekAgo),
         (sb as any).from('conversion_events').select('event_type, cta_name').gte('created_at', weekAgo),
         sb.from('page_views').select('path').gte('created_at', weekAgo),
         sb.from('page_views').select('created_at, user_agent').gte('created_at', weekAgo),
@@ -160,7 +160,7 @@ export async function GET(req: NextRequest) {
         // 유입 경로
         sb.from('page_views').select('referrer').gte('created_at', weekAgo),
         // 일별 가입자 추이
-        sb.from('profiles').select('created_at').neq('is_seed', true).gte('created_at', new Date(Date.now() - 14 * 86400000).toISOString()),
+        sb.from('profiles').select('created_at').gte('created_at', new Date(Date.now() - 14 * 86400000).toISOString()),
       ]);
 
       // 14일 일별 PV/UV
@@ -270,7 +270,7 @@ export async function GET(req: NextRequest) {
       const [realUsersR, interestsR, bookmarksR, watchlistR, searchesR, sharesR, pwaR, totalRealR] = await Promise.all([
         sb.from('profiles')
           .select('id, nickname, provider, created_at, last_active_at, grade, points, residence_city, onboarded, profile_completed')
-          .neq('is_seed', true).neq('is_ghost', true).neq('is_deleted', true)
+          .neq('is_ghost', true).neq('is_deleted', true)
           .order('created_at', { ascending: false }).limit(50),
         sb.from('apt_site_interests')
           .select('site_id, guest_name, guest_city, is_member, created_at, notification_enabled')
@@ -280,7 +280,7 @@ export async function GET(req: NextRequest) {
         sb.from('search_logs').select('id', { count: 'exact', head: true }),
         sb.from('share_logs').select('id', { count: 'exact', head: true }),
         sb.from('pwa_installs').select('id', { count: 'exact', head: true }),
-        sb.from('profiles').select('id', { count: 'exact', head: true }).neq('is_seed', true).neq('is_ghost', true).neq('is_deleted', true),
+        sb.from('profiles').select('id', { count: 'exact', head: true }).neq('is_ghost', true).neq('is_deleted', true),
       ]);
 
       // 관심단지 현장명 조인
