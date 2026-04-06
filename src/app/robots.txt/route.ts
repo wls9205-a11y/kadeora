@@ -34,6 +34,7 @@ Allow: /apt/
 Allow: /blog/
 Allow: /calc/
 Allow: /api/og
+Allow: /api/og-chart
 Allow: /images/
 Crawl-delay: 0
 Disallow: /admin/
@@ -43,6 +44,7 @@ Disallow: /api/admin
 User-agent: Googlebot-Image
 Allow: /api/og
 Allow: /api/og-square
+Allow: /api/og-chart
 Allow: /images/
 Allow: /image-sitemap.xml
 
@@ -55,6 +57,7 @@ Allow: /calc/
 Allow: /feed.xml
 Allow: /api/og
 Allow: /api/og-square
+Allow: /api/og-chart
 Allow: /images/
 Crawl-delay: 1
 Disallow: /admin/
@@ -69,6 +72,7 @@ Allow: /blog/
 Allow: /calc/
 Allow: /api/og
 Allow: /api/og-square
+Allow: /api/og-chart
 Allow: /images/
 Crawl-delay: 0
 Disallow: /admin/
@@ -82,6 +86,7 @@ Allow: /apt/
 Allow: /blog/
 Allow: /calc/
 Allow: /api/og
+Allow: /api/og-chart
 Allow: /images/
 Crawl-delay: 1
 Disallow: /admin/
@@ -124,8 +129,7 @@ Disallow: /api/
 Sitemap: https://kadeora.app/sitemap.xml
 Sitemap: https://kadeora.app/image-sitemap.xml
 Sitemap: https://kadeora.app/feed.xml
-Sitemap: https://kadeora.app/stock/feed
-Sitemap: https://kadeora.app/apt/feed
+Sitemap: https://kadeora.app/rss.xml
 Host: https://kadeora.app
 
 # ===== Daum Verification =====

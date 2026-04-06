@@ -1,5 +1,6 @@
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import Link from 'next/link';
 
 const SITE_URL = 'https://kadeora.app';
@@ -8,6 +9,7 @@ type Props = { params: Promise<{ symbol: string; target: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { symbol, target } = await params;
+  if (symbol.toUpperCase() === target.toUpperCase()) notFound();
   const sb = getSupabaseAdmin();
   const [{ data: a }, { data: b }] = await Promise.all([
     (sb as any).from('stock_quotes').select('name').eq('symbol', symbol.toUpperCase()).maybeSingle(),
@@ -24,6 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function StockComparePage({ params }: Props) {
   const { symbol, target } = await params;
+  if (symbol.toUpperCase() === target.toUpperCase()) notFound();
   const sb = getSupabaseAdmin();
   const [{ data: a }, { data: b }] = await Promise.all([
     (sb as any).from('stock_quotes').select('*').eq('symbol', symbol.toUpperCase()).eq('is_active', true).maybeSingle(),

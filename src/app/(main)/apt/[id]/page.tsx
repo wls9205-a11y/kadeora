@@ -242,7 +242,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         'article:section': '부동산',
         'article:tag': `${d.name},${d.region},${tl[st] || '분양'},청약,분양가,분양가격,아파트,모집공고,입주자모집공고,견본주택,모델하우스`,
         // Kakao/Facebook price display
-        ...(d.site?.price_min ? { 'og:price:amount': String(d.site.price_min), 'og:price:currency': 'KRW' } : {}),
+        ...(d.site?.price_min ? { 'og:price:amount': String(d.site.price_min * 10000), 'og:price:currency': 'KRW' } : {}),
         // Naver specific
         'naver:written_time': (() => { const d8 = d.sub?.rcept_bgnde; if (d8 && d8.length === 8) return `${d8.slice(0,4)}-${d8.slice(4,6)}-${d8.slice(6,8)}`; return d.site?.updated_at || d.site?.created_at || ''; })(),
         'naver:updated_time': d.site?.updated_at || new Date().toISOString(),
@@ -343,7 +343,7 @@ export default async function AptUnifiedPage({ params }: Props) {
       {noindex && <meta name="robots" content="noindex,follow" />}
 
       {/* JSON-LD 1: RealEstateListing */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': ['ApartmentComplex', 'RealEstateListing'], name, description: site?.description || `${region} ${name}`, url: `${SITE_URL}/apt/${slug}`, address: { '@type': 'PostalAddress', addressRegion: region, addressLocality: site?.sigungu || '', streetAddress: site?.address || sub?.hssply_adres || '', addressCountry: 'KR' }, ...(site?.total_units || sub?.tot_supply_hshld_co ? { numberOfRooms: site?.total_units || sub?.tot_supply_hshld_co } : {}), ...(site?.latitude && site?.longitude ? { geo: { '@type': 'GeoCoordinates', latitude: site.latitude, longitude: site.longitude } } : {}), ...(site?.builder || sub?.constructor_nm ? { brand: { '@type': 'Organization', name: site?.builder || sub?.constructor_nm } } : {}), ...(site?.price_min || site?.price_max ? { offers: { '@type': 'AggregateOffer', priceCurrency: 'KRW', ...(site?.price_min ? { lowPrice: site.price_min } : {}), ...(site?.price_max ? { highPrice: site.price_max } : {}), offerCount: site?.total_units || 1 } } : {}), ...((site?.interest_count ?? 0) > 0 || (site?.total_units ?? 0) > 0 ? { aggregateRating: { '@type': 'AggregateRating', ratingValue: Math.min(4.5 + (getDisplayInterestCount(site?.interest_count ?? 0, site?.total_units) / 100), 5.0).toFixed(1), ratingCount: Math.max(getDisplayInterestCount(site?.interest_count ?? 0, site?.total_units), 1), bestRating: '5' } } : {}) }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': ['ApartmentComplex', 'RealEstateListing'], name, description: site?.description || `${region} ${name}`, url: `${SITE_URL}/apt/${slug}`, address: { '@type': 'PostalAddress', addressRegion: region, addressLocality: site?.sigungu || '', streetAddress: site?.address || sub?.hssply_adres || '', addressCountry: 'KR' }, ...(site?.total_units || sub?.tot_supply_hshld_co ? { numberOfRooms: site?.total_units || sub?.tot_supply_hshld_co } : {}), ...(site?.latitude && site?.longitude ? { geo: { '@type': 'GeoCoordinates', latitude: site.latitude, longitude: site.longitude } } : {}), ...(site?.builder || sub?.constructor_nm ? { brand: { '@type': 'Organization', name: site?.builder || sub?.constructor_nm } } : {}), ...(site?.price_min || site?.price_max ? { offers: { '@type': 'AggregateOffer', priceCurrency: 'KRW', ...(site?.price_min ? { lowPrice: site.price_min * 10000 } : {}), ...(site?.price_max ? { highPrice: site.price_max * 10000 } : {}), offerCount: site?.total_units || 1 } } : {}) }) }} />
 
       {/* JSON-LD 2: FAQ */}
       {faq.length > 0 && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faq.map(f => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) }) }} />}
@@ -355,29 +355,13 @@ export default async function AptUnifiedPage({ params }: Props) {
       {(site?.latitude || site?.address) && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'Place', name, address: { '@type': 'PostalAddress', addressRegion: region, addressLocality: site?.sigungu || site?.dong || '', addressCountry: 'KR', streetAddress: site?.address || '' }, ...(site?.latitude && site?.longitude ? { geo: { '@type': 'GeoCoordinates', latitude: site.latitude, longitude: site.longitude } } : {}), ...(site?.nearby_station ? { hasMap: `https://map.naver.com/v5/search/${encodeURIComponent(name)}` } : {}) }) }} />}
 
       {/* JSON-LD 4b: Event */}
-      {sub?.rcept_bgnde && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'Event', name: `${name} 청약 접수`, startDate: sub.rcept_bgnde, endDate: sub.rcept_endde, eventStatus: 'https://schema.org/EventScheduled', eventAttendanceMode: 'https://schema.org/OnlineEventAttendanceMode', location: { '@type': 'VirtualLocation', url: `${SITE_URL}/apt/${slug}` }, organizer: { '@type': 'Organization', name: site?.builder || sub.constructor_nm || '청약홈', url: sub.pblanc_url || SITE_URL }, image: `${SITE_URL}/api/og?title=${encodeURIComponent(name)}&design=2&subtitle=${encodeURIComponent('청약 접수')}` }) }} />}
+      {sub?.rcept_bgnde && new Date(sub.rcept_endde || sub.rcept_bgnde) >= new Date() && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'Event', name: `${name} 청약 접수`, startDate: sub.rcept_bgnde, endDate: sub.rcept_endde, eventStatus: 'https://schema.org/EventScheduled', eventAttendanceMode: 'https://schema.org/OnlineEventAttendanceMode', location: { '@type': 'VirtualLocation', url: `${SITE_URL}/apt/${slug}` }, organizer: { '@type': 'Organization', name: site?.builder || sub.constructor_nm || '청약홈', url: sub.pblanc_url || SITE_URL }, image: `${SITE_URL}/api/og?title=${encodeURIComponent(name)}&design=2&subtitle=${encodeURIComponent('청약 접수')}` }) }} />}
 
       {/* JSON-LD 5: Article + SpeakableSpecification (voice search, Google Discover) */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'Article', headline: `${name} ${tLabel[sType] || '분양'} 정보`, description: site?.description || `${region} ${name}`, url: `${SITE_URL}/apt/${slug}`, datePublished: site?.created_at || sub?.fetched_at || new Date().toISOString(), dateModified: site?.updated_at || new Date().toISOString(), author: { '@type': 'Organization', name: '카더라', url: SITE_URL }, publisher: { '@type': 'Organization', name: '카더라', url: SITE_URL, logo: { '@type': 'ImageObject', url: `${SITE_URL}/icons/icon-192.png`, width: 192, height: 192 } }, image: [{ '@type': 'ImageObject', url: `${SITE_URL}/api/og?title=${encodeURIComponent(name)}&design=2&subtitle=${encodeURIComponent(region)}`, width: 1200, height: 630 }, { '@type': 'ImageObject', url: `${SITE_URL}/api/og-square?title=${encodeURIComponent(name)}&category=apt`, width: 630, height: 630 }, { '@type': 'ImageObject', url: `${SITE_URL}/api/og-chart?apt=${slug}`, width: 1200, height: 630, name: `${name} 분양가 인포그래픽` }], thumbnailUrl: `${SITE_URL}/api/og-square?title=${encodeURIComponent(name)}&category=apt`, mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE_URL}/apt/${slug}` }, speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.site-description'] } }) }} />
 
       {/* JSON-LD 6: Product (price range → Google price chip in SERP) */}
-      {(site?.price_min || site?.price_max || (unsold?.sale_price_min)) && (
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-          '@context': 'https://schema.org', '@type': 'Product',
-          name: `${name} 분양`,
-          description: `${region} ${name} 아파트 분양`,
-          brand: { '@type': 'Organization', name: site?.builder || sub?.constructor_nm || '카더라' },
-          offers: {
-            '@type': 'AggregateOffer',
-            priceCurrency: 'KRW',
-            lowPrice: site?.price_min || unsold?.sale_price_min || 0,
-            ...(site?.price_max ? { highPrice: site.price_max } : {}),
-            offerCount: site?.total_units || sub?.tot_supply_hshld_co || 1,
-            availability: 'https://schema.org/InStock',
-            url: `${SITE_URL}/apt/${slug}`,
-          },
-        }) }} />
-      )}
+      {/* Product 스키마 제거 — ApartmentComplex+RealEstateListing으로 대체됨 */}
 
       {/* JSON-LD 7: HowTo (청약 절차 → Google step-by-step rich results) */}
       {sub && subSt !== 'closed' && (

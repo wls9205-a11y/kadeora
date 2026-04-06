@@ -17,7 +17,7 @@ export async function GET() {
   <link>${SITE}/blog/${p.slug}</link>
   <guid isPermaLink="true">${SITE}/blog/${p.slug}</guid>
   <pubDate>${new Date(p.published_at || new Date()).toUTCString()}</pubDate>
-  <description><![CDATA[${(p.meta_description || p.content || '').slice(0, 200)}]]></description>
+  <description><![CDATA[${(p.meta_description || (p.content || '').replace(/[#*|\[\]`>~_]/g, '').replace(/\n+/g, ' ').trim()).slice(0, 200)}]]></description>
   <category>${p.category || 'general'}</category>
 </item>`).join('\n');
 

@@ -41,7 +41,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { data: s } = await sb.from('stock_quotes').select('name,market,price,currency,change_pct,updated_at').eq('symbol', symbol).single();
   if (!s) return { title: '종목을 찾을 수 없습니다 | 카더라', robots: { index: false } };
   const p = fmtPrice(Number(s.price), s.currency ?? undefined);
-  const ch = `${Number(s.change_pct) >= 0 ? '▲' : '▼'}${Math.abs(Number(s.change_pct)).toFixed(2)}%`;
+  const ch = Number(s.change_pct) === 0 ? '' : `${Number(s.change_pct) > 0 ? '▲' : '▼'}${Math.abs(Number(s.change_pct)).toFixed(2)}%`;
   return {
     title: `${s.name} (${symbol}) 주가`,
     description: `${s.name} 현재가 ${p} ${ch}. ${s.market} 상장. 실시간 시세, 차트, 수급, 뉴스, AI 한줄평을 카더라에서 확인하세요.`,

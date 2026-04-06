@@ -133,7 +133,7 @@ export default async function SeriesDetailPage({ params }: Props) {
 
             {post.cover_image && (
               <div style={{ width: 56, height: 42, borderRadius: 'var(--radius-xs)', overflow: 'hidden', flexShrink: 0, position: 'relative' }}>
-                <Image src={post.cover_image} alt="" fill sizes="56px" style={{ objectFit: 'cover' }} loading="lazy" unoptimized={!post.cover_image.includes('supabase.co')} />
+                <Image src={post.cover_image} alt={post.title || "블로그 커버"} fill sizes="56px" style={{ objectFit: 'cover' }} loading="lazy" unoptimized={!post.cover_image.includes('supabase.co')} />
               </div>
             )}
           </Link>
