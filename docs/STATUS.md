@@ -67,6 +67,7 @@
 - **오늘 리라이팅 9건** (3건/회 × 3회), 신규 가입 2명 (139명)
 - **daily_stats PV 정상**: 4/5 1,456뷰 / 4/6 400뷰 (수정 전 0)
 - **push-content-alert 피크 맞춤**: KST 20:00 → 22:00 (피크 23시 대응)
+- **어드민 v2 추가 개선**: 플로팅 바 건강점수+크론율 라이브 뱃지, OpsTab 원형게이지+DB동적+최근크론이력+API키 뱃지, FocusTab pvToday 추가
 - **blog-rewrite Haiku 4x 속도**: Sonnet→Haiku 4.5 모델 + 배치 3→6 = 18→72건/일 (41K 대기 578일)
 - **어드민 v2 시각 강화**: 집중탭(점수분해+시스템스트립+6KPI+14일차트) + 성장탭(PV추이+유입경로+디바이스+가입추이) + 사용자탭(등급분포+드릴다운)
 - **알림 설정 컬럼명 수정**: push_hot_posts→push_hot_post, push_marketing→push_news (DB 불일치 해결)

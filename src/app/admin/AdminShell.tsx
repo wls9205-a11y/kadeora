@@ -1,5 +1,5 @@
 'use client';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 
 const FocusTab = dynamic(() => import('./tabs/FocusTab'), { loading: () => <Spin /> });
@@ -35,8 +35,28 @@ const TAB_MAP: Record<Tab, React.ComponentType<{ onNavigate: (t: Tab) => void }>
 
 export default function AdminShell() {
   const [tab, setTab] = useState<Tab>('focus');
+  const [status, setStatus] = useState<{ score: number; cronRate: number; pvToday: number } | null>(null);
   const switchTab = useCallback((t: Tab) => setTab(t), []);
   const ActiveTab = TAB_MAP[tab];
+
+  // 플로팅 바 상태 (경량 폴링)
+  useEffect(() => {
+    const load = () => {
+      fetch('/api/admin/v2?tab=focus').then(r => r.json()).then(d => {
+        if (d && d.healthScore != null) {
+          const kpi = d.kpi || {};
+          setStatus({
+            score: d.healthScore,
+            cronRate: Math.round((kpi.cronSuccess / Math.max(kpi.cronSuccess + kpi.cronFail, 1)) * 100),
+            pvToday: kpi.pvToday || 0,
+          });
+        }
+      }).catch(() => {});
+    };
+    load();
+    const t = setInterval(load, 60000);
+    return () => clearInterval(t);
+  }, []);
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 12px 80px', minHeight: '100vh' }}>
@@ -75,8 +95,17 @@ export default function AdminShell() {
           >
             ⚡ 최신화
           </button>
+          {status && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 11, color: status.score >= 71 ? '#10B981' : status.score >= 41 ? '#F59E0B' : '#EF4444' }}>
+                <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'currentColor' }} />
+                {status.score}점
+              </span>
+              <span style={{ fontSize: 11, color: status.cronRate >= 95 ? '#10B981' : '#F59E0B' }}>{status.cronRate}%</span>
+            </div>
+          )}
           <div style={{ flex: 1 }} />
-          <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>카더라 미션 컨트롤</span>
+          <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>미션 컨트롤</span>
         </div>
       </div>
 

@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
     // 🎯 집중 탭
     // ═══════════════════════════════════════
     if (tab === 'focus') {
-      const [users, realUsers, newUsers, activeUsers, blogs, rewritten, cronOk, cronFail, interests, emailSubs, pushSubs, convEvents, dbMb] = await Promise.all([
+      const [users, realUsers, newUsers, activeUsers, blogs, rewritten, cronOk, cronFail, interests, emailSubs, pushSubs, convEvents, dbMb, pvToday] = await Promise.all([
         safeCount(sb.from('profiles').select('id', { count: 'exact', head: true })),
         safeCount(sb.from('profiles').select('id', { count: 'exact', head: true }).neq('is_seed', true).neq('is_ghost', true).neq('is_deleted', true)),
         safeCount(sb.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', weekAgo).neq('is_seed', true)),
@@ -49,6 +49,7 @@ export async function GET(req: NextRequest) {
         safeCount(sb.from('push_subscriptions').select('id', { count: 'exact', head: true })),
         safeCount((sb as any).from('conversion_events').select('id', { count: 'exact', head: true }).gte('created_at', weekAgo)),
         safe(sb.rpc('get_db_size_mb'), 1852),
+        safeCount(sb.from('page_views').select('id', { count: 'exact', head: true }).gte('created_at', now.toISOString().slice(0, 10))),
       ]);
 
       const totalCron = cronOk + cronFail;
@@ -126,6 +127,7 @@ export async function GET(req: NextRequest) {
           conversions: convEvents,
           cronSuccess: cronOk, cronFail,
           dbMb,
+          pvToday,
         },
         failedCrons: failGroups,
         recentActivity: [
@@ -456,11 +458,26 @@ export async function GET(req: NextRequest) {
         }
       }
 
+      // DB 크기
+      const dbMb = await safe(sb.rpc('get_db_size_mb'), 0);
+
+      // 최근 크론 실행 10건
+      const { data: recentCrons } = await sb.from('cron_logs')
+        .select('cron_name, status, duration_ms, records_processed, created_at')
+        .order('created_at', { ascending: false })
+        .limit(10);
+
       return NextResponse.json({
         cronGroups: groupStats,
         failedCrons: failDetails,
         totalOk: (cronLogs || []).filter((l: any) => l.status === 'success').length,
         totalFail: (cronLogs || []).filter((l: any) => l.status === 'failed').length,
+        dbMb,
+        recentCrons: (recentCrons || []).map((c: any) => ({
+          name: c.cron_name, status: c.status,
+          duration: c.duration_ms ? Math.round(c.duration_ms / 1000 * 10) / 10 : null,
+          records: c.records_processed, at: c.created_at,
+        })),
       });
     }
 
