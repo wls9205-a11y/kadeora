@@ -175,7 +175,7 @@ export async function GET(req: NextRequest) {
  // 동적 템플릿을 기존 템플릿 풀에 합치기
  const ALL_TEMPLATES = [...TEMPLATES, ...entityTemplates];
 
- const postCount = randInt(3, 5);
+ const postCount = randInt(4, 7);
  const results: { title: string; user: string; age: string; category: string }[] = [];
  let creditExhausted = false;
 
