@@ -42,6 +42,13 @@
 - 카드 빈칸 채우기 (렌더타임 계산 + 맥락형 대체텍스트)
 - apt/[id] 중복 5건 제거 (-45줄)
 
+### 전환율 설계안 구현 (0.13% → 3% 목표)
+- **SmartSectionGate 연결**: BlogReadGate → SmartSectionGate 교체. 비로그인시 "향후 전망"/"AI 분석" 섹션만 블러(6px), SSR 전체 렌더(SEO 보호)
+- **온보딩 스킵 (4단계→0단계)**: callback에서 onboarded=true 직접 설정 + 기존 미온보딩 유저 자동 완료 + 온보딩 redirect 삭제 → safeRedirect로 원래 페이지 복귀. 코드 감사: interests/age_group API 사용 0건 확인
+- **ConversionOrchestrator (신규 ~100줄)**: React Context Provider + useConversion hook. 최대 2 CTA 동시 + 30분 쿨다운. 연동: TwoStepCTA(P8), BlogFloatingCTA(P6), ExitIntentPopup(P2)
+- **Welcome Reward**: WelcomeReward.tsx + /api/welcome-bonus. 첫 로그인 감지 → 100P 지급 토스트
+- **BlogSignupCTA 'use client' 위치 버그 수정**: line 2 → line 1
+
 ## 세션 74: 전환율 2%+ 성장 루프 설계 + Layer 1 구현 + 크론 정리
 
 ### 추가 수정 (세션 후반)
