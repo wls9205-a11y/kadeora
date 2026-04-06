@@ -19,13 +19,13 @@
 .blog-content h1 { font-size: var(--fs-2xl, 22px); font-weight: 900; margin: 28px 0 16px; color: var(--text-primary); word-break: keep-all; letter-spacing: -0.5px; line-height: 1.4; }
 /* 첫 H1은 숨김 (페이지 상단에 이미 제목 표시) */
 .blog-content > h1:first-child { display: none; }
-.blog-content h2 { font-size: var(--fs-xl, 18px); font-weight: 800; margin: 36px 0 14px; color: var(--text-primary); border-left: 3px solid var(--brand); padding-left: 12px; word-break: keep-all; letter-spacing: -0.3px; line-height: 1.45; }
-.blog-content h3 { font-size: var(--fs-lg, 16px); font-weight: 700; margin: 28px 0 10px; color: var(--text-primary); border-left: 2px solid var(--border); padding-left: 10px; word-break: keep-all; letter-spacing: -0.2px; line-height: 1.45; }
+.blog-content h2 { font-size: 21px; font-weight: 800; margin: 36px 0 14px; color: var(--text-primary); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; word-break: keep-all; letter-spacing: -0.3px; line-height: 1.45; }
+.blog-content h3 { font-size: 18px; font-weight: 700; margin: 28px 0 10px; color: var(--text-primary); word-break: keep-all; letter-spacing: -0.2px; line-height: 1.45; }
 /* 첫 h2는 상단 margin 축소 */
 .blog-content h2:first-child { margin-top: 0; }
 
 /* ── 본문 텍스트 ── */
-.blog-content p { margin: 16px 0; line-height: 2.0; overflow-wrap: break-word; word-break: break-word; color: var(--text-primary); font-size: var(--fs-base, 15px); opacity: 0.93; letter-spacing: -0.1px; }
+.blog-content p { margin: 16px 0; line-height: 1.9; overflow-wrap: break-word; word-break: break-word; color: #D0DAE5; font-size: 16px; letter-spacing: -0.1px; }
 .blog-content strong { color: var(--text-primary); font-weight: 700; }
 .blog-content p:empty { display: none; }
 .blog-content > div:empty { display: none; }
@@ -36,7 +36,7 @@
 
 /* ── 리스트 ── */
 .blog-content ul, .blog-content ol { padding-left: 22px; margin: 14px 0; }
-.blog-content li { margin: 8px 0; line-height: 1.85; color: var(--text-primary); opacity: 0.92; font-size: var(--fs-base, 15px); }
+.blog-content li { margin: 8px 0; line-height: 1.85; color: #D0DAE5; font-size: 15px; }
 .blog-content li::marker { color: var(--brand); }
 
 /* ── 구분선 ── */
@@ -47,7 +47,7 @@
 .blog-content thead { background: var(--bg-surface); }
 .blog-content thead th { font-weight: 700; padding: 12px 14px; border: 1px solid var(--border); text-align: left; word-break: keep-all; color: var(--text-primary); font-size: var(--fs-sm, 14px); white-space: nowrap; }
 .blog-content th { font-weight: 700; padding: 12px 14px; border: 1px solid var(--border); text-align: left; word-break: keep-all; }
-.blog-content td { padding: 12px 14px; border: 1px solid var(--border); word-break: break-word; line-height: 1.6; color: var(--text-secondary); }
+.blog-content td { padding: 12px 14px; border: 1px solid var(--border); word-break: break-word; line-height: 1.6; color: #D0DAE5; }
 .blog-content td:first-child { font-weight: 600; color: var(--text-primary); white-space: nowrap; }
 .blog-content tr:nth-child(even) { background: var(--bg-hover); }
 .blog-content tr:hover { background: rgba(59,123,246,0.03); }
@@ -116,23 +116,24 @@
 
 /* ── 라이트모드 가독성 강화 ── */
 @media (prefers-color-scheme: light) {
-  .blog-content p { opacity: 1; color: #1a1a1a; }
-  .blog-content li { opacity: 1; color: #1a1a1a; }
-  .blog-content td { color: #333; }
-  .blog-content td:first-child { color: #111; }
-  .blog-content blockquote { background: #f0f4ff; border-left-color: #3b7bf6; color: #444; }
+  .blog-content p { color: #374151; }
+  .blog-content li { color: #374151; }
+  .blog-content td { color: #374151; }
+  .blog-content td:first-child { color: #111827; }
+  .blog-content blockquote { background: #f0f4ff; border-left-color: #3b7bf6; color: #4B5563; }
   .blog-content thead { background: #f5f7fa; }
   .blog-content tr:nth-child(even) { background: #fafbfc; }
   .blog-content tr:hover { background: #f0f4ff; }
   .blog-content code { background: #f3f4f6; color: #7c3aed; border-color: #e5e7eb; }
+  .blog-content h2 { border-bottom-color: #E5E7EB; }
 }
 
 /* ── 모바일 가독성 ── */
 @media (max-width: 480px) {
-  .blog-content h2 { font-size: 17px; margin: 28px 0 12px; }
-  .blog-content h3 { font-size: 15px; margin: 22px 0 8px; }
-  .blog-content p { font-size: 14.5px; line-height: 1.95; }
-  .blog-content li { font-size: 14.5px; }
+  .blog-content h2 { font-size: 19px; margin: 28px 0 12px; }
+  .blog-content h3 { font-size: 16px; margin: 22px 0 8px; }
+  .blog-content p { font-size: 15px; line-height: 1.85; }
+  .blog-content li { font-size: 14px; }
   .blog-content th, .blog-content td { padding: 8px 10px; font-size: 13px; }
 }
 
