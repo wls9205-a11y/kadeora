@@ -148,9 +148,9 @@ export async function GET(req: NextRequest) {
     if (tab === 'growth') {
       const [pvR, uvR, signupsR, ctaR, topPagesR, hourlyR] = await Promise.all([
         sb.from('page_views').select('id', { count: 'exact', head: true }).gte('created_at', weekAgo),
-        sb.rpc('count_unique_visitors_7d').catch(() => ({ data: 0 })),
+        Promise.resolve(sb.rpc('count_unique_visitors_7d')).catch(() => ({ data: 0 })),
         sb.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', weekAgo).neq('is_seed', true),
-        (sb as any).from('conversion_events').select('event_type, cta_name').gte('created_at', weekAgo).catch(() => ({ data: [] })),
+        (sb as any).from('conversion_events').select('event_type, cta_name').gte('created_at', weekAgo),
         sb.from('page_views').select('path').gte('created_at', weekAgo),
         sb.from('page_views').select('created_at, user_agent').gte('created_at', weekAgo),
       ]);
@@ -318,7 +318,8 @@ export async function GET(req: NextRequest) {
       }
 
       // 블로그 카테고리별 품질
-      const { data: blogCats } = await sb.rpc('blog_category_stats').catch(() => ({ data: null }));
+      let blogCats = null;
+      try { const r = await sb.rpc('blog_category_stats'); blogCats = r.data; } catch { /* ignore */ }
 
       // 주식 데이터 커버리지
       const [stockTotal, stockActive, stockSector, stockDesc] = await Promise.all([
