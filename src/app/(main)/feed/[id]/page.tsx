@@ -14,7 +14,6 @@ import { getAvatarColor } from '@/lib/avatar';
 import { BookmarkButton } from '@/components/BookmarkButton';
 import ReportButton from '@/components/ReportButton';
 import PostActions from '@/components/PostActions';
-import FontSizeControl from '@/components/FontSizeControl';
 import { timeAgo } from '@/lib/format';
 import Disclaimer from '@/components/Disclaimer';
 import ReadingProgress from '@/components/ReadingProgress';
@@ -314,8 +313,8 @@ export default async function FeedDetailPage({ params }: Props) {
       }) }} />
 
       {/* Back link */}
-      <div style={{ marginBottom: 12 }}>
-        <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-tertiary)', lineHeight: 1 }}>
+      <div style={{ marginBottom: 8 }}>
+        <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', lineHeight: 1 }}>
           <Link href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>홈</Link>
           <span style={{ fontSize: 10 }}>›</span>
           <Link href="/feed" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>피드</Link>
@@ -323,15 +322,10 @@ export default async function FeedDetailPage({ params }: Props) {
         </nav>
       </div>
 
-      {/* Post article */}
+      {/* Post article — B-style Social layout */}
       <article style={{ marginBottom: 0 }}>
-        {/* Title */}
-        <h1 style={{ margin: '0 0 16px', fontSize: 'clamp(20px, 5vw, 28px)', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.35, wordBreak: 'keep-all' }}>
-          {post.title}
-        </h1>
-
-        {/* Author row */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 'var(--sp-2xl)' }}>
+        {/* Author row (Social style: avatar + name/grade/time + category) */}
+        <div style={{ display: 'flex', gap: 10, marginBottom: 12 }}>
           {post.profiles?.avatar_url ? (
             <Image src={post.profiles.avatar_url} alt={post.profiles?.nickname ?? '익명'} width={40} height={40} style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} unoptimized={!post.profiles.avatar_url.includes('supabase.co')} />
           ) : (
@@ -345,30 +339,35 @@ export default async function FeedDetailPage({ params }: Props) {
             </div>
           )}
           <div style={{ flex: 1, minWidth: 0 }}>
-            <span style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>
-              {post.profiles?.nickname ?? '익명'}
-            </span>
-            <span style={{ marginLeft: 4 }}>{GRADE_EMOJI[post.profiles?.grade as number] || '🌱'}</span>
-            <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginTop: 2 }}>
-              <time dateTime={post.created_at}>{timeAgo(post.created_at)}</time> · 조회 {(post.view_count ?? 0).toLocaleString()}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <span style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>
+                {post.profiles?.nickname ?? '익명'}
+              </span>
+              <span style={{ fontSize: 14 }}>{GRADE_EMOJI[post.profiles?.grade as number] || '🌱'}</span>
+              <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
+                · <time dateTime={post.created_at}>{timeAgo(post.created_at)}</time>
+              </span>
             </div>
-            {post.content && post.content.length > 500 && (
-              <div style={{ display: 'flex', gap: 'var(--sp-sm)', fontSize: 11, color: 'var(--text-tertiary)', marginTop: 'var(--sp-xs)' }}>
-                <span>📝 {post.content.length.toLocaleString()}자</span>
-                <span>⏱ ~{Math.max(1, Math.round(post.content.length / 500))}분</span>
-              </div>
-            )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 3 }}>
+              {post.category && (() => {
+                const cat = CATEGORY_MAP[post.category];
+                return cat ? (
+                  <span style={{ fontSize: 11, padding: '1px 6px', borderRadius: 4, fontWeight: 600, background: cat.bg, color: cat.color }}>{cat.label}</span>
+                ) : null;
+              })()}
+              <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>조회 {(post.view_count ?? 0).toLocaleString()}</span>
+            </div>
           </div>
-          <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)' }}>
+          <div style={{ flexShrink: 0, display: 'flex', alignItems: 'flex-start', gap: 'var(--sp-xs)' }}>
             <PostActions postId={post.id} isOwner={currentUserId === post.author_id} />
             <ReportButton postId={post.id} style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', background: 'transparent', border: 'none', cursor: 'pointer' }} />
           </div>
         </div>
 
-        {/* 글자 크기 조절 */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 'var(--sp-sm)' }}>
-          <FontSizeControl />
-        </div>
+        {/* Title (below author, Social style) */}
+        <h1 style={{ margin: '0 0 14px', fontSize: 'clamp(18px, 4.5vw, 24px)', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.4, wordBreak: 'keep-all' }}>
+          {post.title}
+        </h1>
 
         {/* Content body */}
         {currentUserId ? (
@@ -459,44 +458,19 @@ export default async function FeedDetailPage({ params }: Props) {
         </Link>
       )}
 
-      {/* 인게이지먼트 미니 대시보드 — 컴팩트 */}
-      <div style={{ display: 'flex', gap: 4, marginBottom: 'var(--sp-md)' }}>
-        {[
-          { icon: '👁', label: '조회', value: post.view_count ?? 0, max: 1000, color: 'var(--accent-blue)' },
-          { icon: '🤍', label: '좋아요', value: post.likes_count ?? 0, max: 100, color: 'var(--accent-red)' },
-          { icon: '💬', label: '댓글', value: comments.length, max: 50, color: 'var(--accent-green)' },
-        ].map(s => (
-          <div key={s.label} style={{ flex: 1, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 6, padding: '4px 6px', display: 'flex', alignItems: 'center', gap: 4 }}>
-            <span style={{ fontSize: 11 }}>{s.icon}</span>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 2 }}>
-                <span style={{ fontSize: 13, fontWeight: 800, color: s.value > 0 ? s.color : 'var(--text-tertiary)' }}>{s.value.toLocaleString()}</span>
-                <span style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>{s.label}</span>
-              </div>
-              <div style={{ height: 2, borderRadius: 1, background: 'var(--bg-hover)', marginTop: 1, overflow: 'hidden' }}>
-                <div style={{ height: '100%', width: `${Math.min((s.value / s.max) * 100, 100)}%`, borderRadius: 1, background: s.color }} />
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
+      {/* Action bar — Social style: evenly spread */}
       <div style={{
-        display: 'flex', alignItems: 'center',
-        padding: '12px 0', borderTop: '1px solid var(--border)',
-        borderBottom: '1px solid var(--border)', margin: '16px 0',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-around',
+        padding: '10px 0', borderTop: '1px solid var(--border)',
+        borderBottom: '1px solid var(--border)', margin: '0 0 16px',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-lg)' }}>
-          <LikeButton postId={post.id} initialCount={post.likes_count ?? 0} />
-          <Link href="#comments" style={{ display: 'flex', alignItems: 'center', gap: 5, textDecoration: 'none', color: 'var(--text-tertiary)', fontSize: 'var(--fs-base)' }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
-            <span style={{ fontWeight: 500 }}>{comments.length}</span>
-          </Link>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-md)', marginLeft: 'auto' }}>
-          <ShareButtons title={post.title} postId={post.id} content={post.content} />
-          <BookmarkButton postId={post.id} />
-        </div>
+        <LikeButton postId={post.id} initialCount={post.likes_count ?? 0} />
+        <Link href="#comments" style={{ display: 'flex', alignItems: 'center', gap: 5, textDecoration: 'none', color: 'var(--text-tertiary)', fontSize: 'var(--fs-base)' }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+          <span style={{ fontWeight: 500 }}>{comments.length}</span>
+        </Link>
+        <ShareButtons title={post.title} postId={post.id} content={post.content} />
+        <BookmarkButton postId={post.id} />
       </div>
 
       {/* 투표 위젯 */}
@@ -507,14 +481,23 @@ export default async function FeedDetailPage({ params }: Props) {
         <CommentSection postId={post.id} initialComments={comments} />
       </div>
 
-      {/* Related posts */}
+      {/* Related posts — Social style */}
       {related.filter((r: Record<string, any>) => !r._type).length > 0 && (
         <div style={{ marginBottom: 'var(--sp-xl)' }}>
-          <h3 style={{ margin: '0 0 10px', fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>더 읽어보기</h3>
+          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 8 }}>관련 게시글</div>
           {related.filter((r: Record<string, any>) => !r._type).map((r: Record<string, any>) => (
-            <Link key={r.id} href={`/feed/${r.slug || r.id}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none' }}>
-              <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, marginRight: 12 }}>{r.title}</span>
-              <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexShrink: 0 }}>🤍 {r.likes_count ?? 0} · 💬 {r.comments_count ?? 0}</span>
+            <Link key={r.id} href={`/feed/${r.slug || r.id}`} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none' }}>
+              <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>{r.title}</span>
+              <div style={{ display: 'flex', gap: 8, flexShrink: 0, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                  {r.likes_count ?? 0}
+                </span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+                  {r.comments_count ?? 0}
+                </span>
+              </div>
             </Link>
           ))}
         </div>
