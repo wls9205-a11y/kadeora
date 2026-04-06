@@ -1,6 +1,7 @@
 /**
- * 블로그 본문 시각화 강화 v2
- * 8가지 알록달록 시각화 요소를 HTML 파이프라인에 자동 삽입
+ * 블로그 본문 시각화 강화 v3
+ * v2 문제: 하드코딩 hex 색상 → 다크/라이트 모드 컬러 부조화
+ * v3 수정: CSS 변수(var(--accent-*)) 사용으로 테마 자동 적응
  */
 
 interface EnhanceOptions {
@@ -12,13 +13,22 @@ interface EnhanceOptions {
   tags?: string[] | null;
 }
 
-// ── 색상 팔레트 ──
-const COLORS = ['#60a5fa', '#34d399', '#c4b5fd', '#fdba74', '#fca5a5', '#22d3ee', '#f472b6', '#a3e635'];
+// ── 색상 팔레트 → CSS 변수 기반 ──
+// inline style에서 var() 사용 — 다크/라이트 모드 자동 적응
+const C = {
+  blue:   'var(--accent-blue)',
+  green:  'var(--accent-green)',
+  purple: 'var(--accent-purple)',
+  orange: 'var(--accent-orange)',
+  red:    'var(--accent-red)',
+  brand:  'var(--brand)',
+} as const;
+
 const UNIT_COLORS: Record<string, string> = {
-  '만원': '#60a5fa', '억원': '#c4b5fd', '억': '#c4b5fd', '조원': '#f472b6', '조': '#f472b6',
-  '만세대': '#34d399', '만호': '#34d399', '퍼센트': '#fdba74',
+  '만원': C.blue, '억원': C.purple, '억': C.purple, '조원': C.red, '조': C.red,
+  '만세대': C.green, '만호': C.green, '퍼센트': C.orange,
 };
-function colorFor(unit: string): string { return UNIT_COLORS[unit.replace(/\s/g, '')] || '#60a5fa'; }
+function colorFor(unit: string): string { return UNIT_COLORS[unit.replace(/\s/g, '')] || C.blue; }
 
 // ── HTML attribute escape ──
 function escapeAttr(s: string): string { return s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
@@ -48,8 +58,8 @@ function insertHeroStats(html: string): string {
 
   const stats: { label: string; value: string; color: string }[] = [];
   const labels: Record<string, string> = {
-    '평균': '#60a5fa', '최고': '#34d399', '최저': '#f87171',
-    '평당': '#c4b5fd', '건수': '#fdba74', '면적': '#22d3ee', '세대': '#f472b6', '거래': '#fdba74',
+    '평균': C.blue, '최고': C.green, '최저': C.red,
+    '평당': C.purple, '건수': C.orange, '면적': C.blue, '세대': C.green, '거래': C.orange,
   };
 
   for (const row of rows) {
@@ -95,7 +105,7 @@ function insertPriceRange(html: string): string {
   const pct = Math.round(((avg - min) / (max - min)) * 100);
   const fmt = (v: number) => v >= 10000 ? `${(v / 10000).toFixed(1)}억` : `${v.toLocaleString()}만`;
 
-  const bar = `<div style="background:var(--bg-surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin:16px 0"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:8px"><span style="color:#f87171;font-weight:600">최저 ${fmt(min)}</span><span style="color:#60a5fa;font-weight:600">평균 ${fmt(avg)}</span><span style="color:#34d399;font-weight:600">최고 ${fmt(max)}</span></div><div style="height:24px;border-radius:8px;background:var(--bg-hover);position:relative;overflow:hidden"><div style="position:absolute;left:0;width:${pct}%;height:100%;background:linear-gradient(90deg,#f87171,#fb923c,#60a5fa);border-radius:8px;opacity:0.4"></div><div style="position:absolute;left:${pct}%;top:50%;transform:translate(-50%,-50%);width:22px;height:22px;border-radius:50%;background:var(--bg-surface);border:3px solid #60a5fa;z-index:1"></div></div></div>`;
+  const bar = `<div style="background:var(--bg-surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin:16px 0"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:8px"><span style="color:var(--accent-red);font-weight:600">최저 ${fmt(min)}</span><span style="color:var(--accent-blue);font-weight:600">평균 ${fmt(avg)}</span><span style="color:var(--accent-green);font-weight:600">최고 ${fmt(max)}</span></div><div style="height:24px;border-radius:8px;background:var(--bg-hover);position:relative;overflow:hidden"><div style="position:absolute;left:0;width:${pct}%;height:100%;background:var(--brand);border-radius:8px;opacity:0.25"></div><div style="position:absolute;left:${pct}%;top:50%;transform:translate(-50%,-50%);width:22px;height:22px;border-radius:50%;background:var(--bg-surface);border:3px solid var(--brand);z-index:1"></div></div></div>`;
 
   // 두 번째 table 뒤에 삽입
   let cnt = 0;
@@ -105,10 +115,10 @@ function insertPriceRange(html: string): string {
 // ── 5. 체크포인트 아이콘 카드 ──
 function enhanceCheckpoints(html: string): string {
   const iconMap: Record<string, { emoji: string; color: string }> = {
-    '교통': { emoji: '🚇', color: '#60a5fa' }, '학군': { emoji: '🏫', color: '#34d399' },
-    '개발': { emoji: '🏗️', color: '#fb923c' }, '호재': { emoji: '🏗️', color: '#fb923c' },
-    '전세': { emoji: '🏠', color: '#c4b5fd' }, '인프라': { emoji: '🏥', color: '#22d3ee' },
-    '리모델링': { emoji: '🔨', color: '#f472b6' }, '재건축': { emoji: '🏢', color: '#fdba74' },
+    '교통': { emoji: '🚇', color: C.blue }, '학군': { emoji: '🏫', color: C.green },
+    '개발': { emoji: '🏗️', color: C.orange }, '호재': { emoji: '🏗️', color: C.orange },
+    '전세': { emoji: '🏠', color: C.purple }, '인프라': { emoji: '🏥', color: C.blue },
+    '리모델링': { emoji: '🔨', color: C.red }, '재건축': { emoji: '🏢', color: C.orange },
   };
   return html.replace(/<li>\s*<strong>([^<]+)<\/strong>\s*[:：]\s*([^<]+)<\/li>/g, (match, title, desc) => {
     for (const [key, cfg] of Object.entries(iconMap)) {
@@ -123,14 +133,14 @@ function enhanceCheckpoints(html: string): string {
 // ── 6. 그라데이션 구분선 ──
 function enhanceDividers(html: string): string {
   return html.replace(/<hr\s*\/?>/gi,
-    '<div style="margin:24px 0;height:2px;border-radius:1px;background:linear-gradient(90deg,transparent,#f87171,#fb923c,#60a5fa,#a78bfa,#34d399,transparent)"></div>'
+    '<div style="margin:28px 0;height:1px;background:var(--border)"></div>'
   );
 }
 
 // ── 7. 인용 블록 스타일링 ──
 function enhanceBlockquotes(html: string): string {
   return html.replace(/<blockquote>([\s\S]*?)<\/blockquote>/gi, (_, content) =>
-    `<div style="margin:16px 0;padding:14px 16px;border-left:4px solid #a78bfa;background:rgba(167,139,250,0.06);border-top:1px solid rgba(167,139,250,0.2);border-right:1px solid rgba(167,139,250,0.2);border-bottom:1px solid rgba(167,139,250,0.2);border-radius:0 8px 8px 0"><div style="font-size:13px;color:var(--text-secondary);line-height:1.7;font-style:italic">${content}</div></div>`
+    `<div style="margin:16px 0;padding:14px 16px;border-left:4px solid var(--accent-purple);background:var(--accent-purple-bg);border-radius:0 8px 8px 0"><div style="font-size:14px;color:var(--text-secondary);line-height:1.7;font-style:italic">${content}</div></div>`
   );
 }
 
@@ -142,7 +152,7 @@ function highlightStats(html: string): string {
       if (tag) return tag;
       if (!num || !unit) return match;
       const c = colorFor(unit);
-      return `${prefix || ''}<span style="display:inline-flex;padding:2px 10px;border-radius:6px;background:${c}15;border:1px solid ${c}40;font-weight:700;color:${c};font-size:inherit">${num}${unit}</span>`;
+      return `${prefix || ''}<span style="display:inline-flex;padding:2px 10px;border-radius:6px;background:var(--bg-hover);border:1px solid var(--border);font-weight:700;color:${c};font-size:inherit">${num}${unit}</span>`;
     }
   );
 }
