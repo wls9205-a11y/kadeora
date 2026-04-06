@@ -91,10 +91,40 @@ export async function GET(req: NextRequest) {
 
     const content = generateComment(post.title || '', post.category || 'free');
 
+    // 30% 확률로 관련 종목/현장 자연스럽게 언급 (자동 링킹 대상)
+    let finalContent = content;
+    try {
+      if (Math.random() < 0.3) {
+        if (post.category === 'stock' || (post.title || '').match(/주식|종목|투자|매수|배당/)) {
+          const { data: rs } = await admin.from('stock_quotes').select('name, symbol').eq('is_active', true).gt('price', 0).order('volume', { ascending: false, nullsFirst: false }).limit(10);
+          if (rs?.length) {
+            const s = rs[Math.floor(Math.random() * rs.length)];
+            const additions = [
+              `\n참고로 ${s.name}도 같이 보고 있어요`,
+              `\n${s.name}은 어떻게 보세요?`,
+              `\n저는 ${s.name}도 관심 목록에 넣어뒀어요`,
+            ];
+            finalContent += additions[Math.floor(Math.random() * additions.length)];
+          }
+        } else if (post.category === 'apt' || (post.title || '').match(/청약|분양|아파트|재개발/)) {
+          const { data: ra } = await (admin as any).from('apt_sites').select('name, region').eq('is_active', true).not('analysis_text', 'is', null).order('page_views', { ascending: false, nullsFirst: false }).limit(10);
+          if (ra?.length) {
+            const a = ra[Math.floor(Math.random() * ra.length)];
+            const additions = [
+              `\n${a.name}도 관심 있어서 같이 알아보는 중이에요`,
+              `\n${a.region} ${a.name}은 어떤지 아시는 분?`,
+              `\n저는 ${a.name}도 비교해보고 있어요`,
+            ];
+            finalContent += additions[Math.floor(Math.random() * additions.length)];
+          }
+        }
+      }
+    } catch {}
+
     const { error } = await admin.from('comments').insert({
       post_id: post.id,
       author_id: userId,
-      content,
+      content: finalContent,
       comment_type: 'comment',
     });
 

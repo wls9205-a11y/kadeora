@@ -130,6 +130,36 @@ export async function GET(req: NextRequest) {
  }));
  if (seedUsers.length === 0) return { processed: 0, created: 0, failed: 0 };
 
+ // ── 엔티티 동적 템플릿: 실제 종목명/현장명 자연스럽게 언급 ──
+ let entityTemplates: Template[] = [];
+ try {
+   const [{ data: topStocks }, { data: topApts }] = await Promise.all([
+     admin.from('stock_quotes').select('symbol, name, price, change_pct, currency, sector').eq('is_active', true).gt('price', 0).order('volume', { ascending: false, nullsFirst: false }).limit(20),
+     (admin as any).from('apt_sites').select('name, region, sigungu, builder').eq('is_active', true).not('analysis_text', 'is', null).order('page_views', { ascending: false, nullsFirst: false }).limit(20),
+   ]);
+   const rs = (a: any[]) => a[Math.floor(Math.random() * a.length)];
+   if (topStocks?.length) {
+     const s1 = rs(topStocks), s2 = rs(topStocks.filter((s: any) => s.symbol !== s1.symbol));
+     const isUS = s1.currency === 'USD';
+     const p = isUS ? `$${Number(s1.price).toFixed(0)}` : `${Number(s1.price).toLocaleString()}원`;
+     entityTemplates.push(
+       { category: 'stock', title: `${s1.name} 지금 들어가도 될까요?`, content: `${s1.name} 현재가 ${p}인데 여기서 분할매수 시작해도 괜찮을까요? ${s1.sector || ''} 섹터 전망이 어떤지 궁금해요` },
+       { category: 'stock', title: `${s1.name} vs ${s2?.name || '경쟁사'} 어디가 나을까`, content: `${s1.name}이랑 ${s2?.name || '경쟁사'} 중에 장기 투자로 어디가 나을지 고민 중이에요` },
+       { category: 'stock', title: `${s1.name} 실적 어떻게 보세요?`, content: `최근 ${s1.name} 주가가 ${Number(s1.change_pct) >= 0 ? '올랐' : '빠졌'}는데 실적 전망은 어떤가요?` },
+     );
+   }
+   if (topApts?.length) {
+     const a1 = rs(topApts);
+     entityTemplates.push(
+       { category: 'apt', title: `${a1.name} 청약 넣을지 고민`, content: `${a1.region} ${a1.sigungu || ''} ${a1.name} 관심 있는 분 계신가요? ${a1.builder || '시공사'} 시공이라 기대되는데 경쟁률이 걱정이에요` },
+       { category: 'apt', title: `${a1.name} 살기 어떤가요?`, content: `${a1.name} 주변 환경이나 교통 상황 아시는 분 있으면 정보 공유 부탁드려요` },
+       { category: 'apt', title: `${a1.region} 신축 분양 비교`, content: `${a1.region}에서 요즘 나오는 분양 중에 ${a1.name} 말고 괜찮은 곳 있나요?` },
+     );
+   }
+ } catch {}
+ // 동적 템플릿을 기존 템플릿 풀에 합치기
+ const ALL_TEMPLATES = [...TEMPLATES, ...entityTemplates];
+
  const postCount = randInt(2, 4);
  const results: { title: string; user: string; age: string; category: string }[] = [];
  let creditExhausted = false;
@@ -167,8 +197,8 @@ export async function GET(req: NextRequest) {
  const r = Math.random();
  const category = r < 0.55 ? 'free' : r < 0.73 ? 'stock' : r < 0.88 ? 'apt' : 'local';
 
- const filtered = TEMPLATES.filter(t => t.category === category && (!t.age || t.age === user.age_group) && !usedTemplatesThisRun.has(t.title));
- const fallback = filtered.length > 0 ? pick(filtered) : pick(TEMPLATES.filter(t => t.category === category && !usedTemplatesThisRun.has(t.title)));
+ const filtered = ALL_TEMPLATES.filter(t => t.category === category && (!t.age || t.age === user.age_group) && !usedTemplatesThisRun.has(t.title));
+ const fallback = filtered.length > 0 ? pick(filtered) : pick(ALL_TEMPLATES.filter(t => t.category === category && !usedTemplatesThisRun.has(t.title)));
 
  // ── 동적 변형: 매번 다른 제목/내용 생성 ──
  const hour = new Date().getHours();
