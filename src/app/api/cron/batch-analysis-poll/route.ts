@@ -5,7 +5,13 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
 
-export async function GET(_req: NextRequest) {
+export async function GET(req: NextRequest) {
+  const authHeader = req.headers.get('authorization');
+  const cronSecret = process.env.CRON_SECRET;
+  if (!cronSecret || authHeader !== \`Bearer \${cronSecret}\`) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const result = await withCronLogging('batch-analysis-poll', async () => {
     const admin = getSupabaseAdmin();
     const { data: batches } = await (admin as any).from('rewrite_batches')
@@ -17,6 +23,7 @@ export async function GET(_req: NextRequest) {
     for (const batch of batches) {
       const sr = await fetch(`https://api.anthropic.com/v1/messages/batches/${batch.batch_id}`, {
         headers: { 'x-api-key': process.env.ANTHROPIC_API_KEY!, 'anthropic-version': '2023-06-01' },
+        signal: AbortSignal.timeout(15000),
       });
       if (!sr.ok) continue;
       const sd = await sr.json();
