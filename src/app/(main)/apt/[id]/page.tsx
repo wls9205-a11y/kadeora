@@ -16,7 +16,6 @@ import { sanitizeSearchQuery } from '@/lib/sanitize';
 import { getDisplayInterestCount } from '@/lib/interest-utils';
 
 const AptPriceTrendChart = dynamic(() => import('@/components/charts/AptPriceTrendChart'));
-const AptReviewSection = dynamic(() => import('@/components/AptReviewSection'));
 const InterestRegistration = dynamic(() => import('@/components/InterestRegistration'));
 const SignupCTA = dynamic(() => import('@/components/SignupCTA'));
 const TwoStepCTA = dynamic(() => import('@/components/TwoStepCTA'));
@@ -1245,6 +1244,11 @@ export default async function AptUnifiedPage({ params }: Props) {
         </div>
       )}
 
+      {/* 관심단지 등록 CTA — AI 분석 바로 아래 (노출 극대화) */}
+      <div id="interest-section" style={{ scrollMarginTop: 60 }}>
+        {site?.id && <InterestRegistration siteId={site.id} siteName={name} interestCount={site.interest_count || 0} slug={slug} totalSupply={site?.total_units || sub?.tot_supply_hshld_co || null} />}
+      </div>
+
       {/* Competition rate */}
       {sub?.competition_rate_1st && Number(sub.competition_rate_1st) > 0 && (
         <div className="apt-card" style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)' }}>
@@ -1559,16 +1563,8 @@ export default async function AptUnifiedPage({ params }: Props) {
         </div>
       </div>
 
-      {/* 관심단지 등록 CTA */}
-      <div id="interest-section" style={{ scrollMarginTop: 60 }}>
-        {site?.id && <InterestRegistration siteId={site.id} siteName={name} interestCount={site.interest_count || 0} slug={slug} totalSupply={site?.total_units || sub?.tot_supply_hshld_co || null} />}
-      </div>
-
       {/* 비로그인 가입 유도 CTA */}
       {!aptUser && <><TwoStepCTA category="apt" contextName={name} /><SignupCTA /></>}
-
-      {/* Reviews */}
-      <AptReviewSection aptName={name} region={region} />
 
       {/* Comments */}
       {sub && <div className="apt-card"><ContentLock title="한줄평 보기" description="가입하면 다른 사람들의 한줄평을 볼 수 있어요"><AptCommentInline houseKey={sub.house_manage_no || String(sub.id)} houseNm={name} houseType="sub" /></ContentLock></div>}
