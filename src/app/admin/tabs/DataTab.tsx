@@ -172,7 +172,7 @@ export default function DataTab({ onNavigate }: { onNavigate: (t: any) => void }
           fetch('/api/admin/seo-status').then(r => r.json()).then(d => setSeoData(d)).catch(() => setSeoData({ error: true }));
           return <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-secondary)' }}>SEO 데이터 로딩 중...</div>;
         }
-        const { tierDist = [], batches = [], pruneStatus = {}, analysisStatus = {}, indexnowLogs = [] } = seoData;
+        const { tierDist = [], batches = [], pruneStatus = {}, analysisStatus = {}, indexnowLogs = [], qualityDist = { high: 0, mid: 0, low: 0 } } = seoData;
         const aptPct = analysisStatus.apt_total > 0 ? Math.round((analysisStatus.apt_done / analysisStatus.apt_total) * 100) : 0;
         const stockPct = analysisStatus.stock_total > 0 ? Math.round((analysisStatus.stock_done / analysisStatus.stock_total) * 100) : 0;
         return (
@@ -194,6 +194,23 @@ export default function DataTab({ onNavigate }: { onNavigate: (t: any) => void }
             </div>
 
             
+            
+            <div className="adm-sec">🔍 데이터 품질 점수 분포 (주식)</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 6, marginBottom: 16 }}>
+              <div className="adm-card" style={{ padding: '10px 12px', textAlign: 'center' }}>
+                <div style={{ fontSize: 18, fontWeight: 700, color: '#10B981' }}>{fmt(qualityDist.high)}</div>
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>70+점 (양호)</div>
+              </div>
+              <div className="adm-card" style={{ padding: '10px 12px', textAlign: 'center' }}>
+                <div style={{ fontSize: 18, fontWeight: 700, color: '#F59E0B' }}>{fmt(qualityDist.mid)}</div>
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>50-69점 (보통)</div>
+              </div>
+              <div className="adm-card" style={{ padding: '10px 12px', textAlign: 'center' }}>
+                <div style={{ fontSize: 18, fontWeight: 700, color: '#EF4444' }}>{fmt(qualityDist.low)}</div>
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>50미만 (부족)</div>
+              </div>
+            </div>
+
             <div className="adm-sec">🔗 IndexNow 자동 제출 현황</div>
             <div className="adm-card" style={{ padding: '8px 14px', marginBottom: 16 }}>
               {indexnowLogs.length === 0 && <div style={{ fontSize: 12, color: 'var(--text-tertiary)', padding: '8px 0' }}>제출 기록 없음</div>}

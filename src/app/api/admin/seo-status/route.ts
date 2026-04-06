@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
       return { tier, published: pub.count || 0, unpublished: unpub.count || 0, cnt: (pub.count || 0) + (unpub.count || 0) };
     });
 
-    const [tierDist, batchRes, publishedRes, unpublishedRes, remainingRes, rewrittenRes, aptAnalysisRes, aptTotalRes, stockAnalysisRes, stockTotalRes, indexnowLogsRes] = await Promise.all([
+    const [tierDist, batchRes, publishedRes, unpublishedRes, remainingRes, rewrittenRes, aptAnalysisRes, aptTotalRes, stockAnalysisRes, stockTotalRes, indexnowLogsRes, qualityHighRes, qualityMidRes, qualityLowRes] = await Promise.all([
       Promise.all(tierPromises),
       (sb as any).from('rewrite_batches').select('*').order('created_at', { ascending: false }).limit(10),
       sb.from('blog_posts').select('id', { count: 'exact', head: true }).eq('is_published', true),
@@ -34,6 +34,9 @@ export async function GET(req: NextRequest) {
       (sb as any).from('stock_quotes').select('id', { count: 'exact', head: true }).not('analysis_text', 'is', null),
       (sb as any).from('stock_quotes').select('id', { count: 'exact', head: true }).eq('is_active', true),
       sb.from('cron_logs').select('cron_name, status, records_processed, created_at').in('cron_name', ['indexnow-mass', 'indexnow-new-content']).order('created_at', { ascending: false }).limit(5),
+      (sb as any).from('stock_quotes').select('symbol', { count: 'exact', head: true }).eq('is_active', true).gte('data_quality_score', 70),
+      (sb as any).from('stock_quotes').select('symbol', { count: 'exact', head: true }).eq('is_active', true).gte('data_quality_score', 50).lt('data_quality_score', 70),
+      (sb as any).from('stock_quotes').select('symbol', { count: 'exact', head: true }).eq('is_active', true).lt('data_quality_score', 50),
     ]);
 
     return NextResponse.json({
@@ -46,6 +49,7 @@ export async function GET(req: NextRequest) {
         rewritten: rewrittenRes.count || 0,
       },
       indexnowLogs: (indexnowLogsRes.data || []),
+      qualityDist: { high: qualityHighRes.count || 0, mid: qualityMidRes.count || 0, low: qualityLowRes.count || 0 },
       analysisStatus: {
         apt_done: aptAnalysisRes.count || 0,
         apt_total: aptTotalRes.count || 0,

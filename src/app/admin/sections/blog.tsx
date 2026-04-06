@@ -45,6 +45,10 @@ export default function BlogSection() {
     { label: 'Batch 분석 폴링', path: '/api/cron/batch-analysis-poll', icon: '📥' },
     { label: '🏘️ 현장 클러스터', path: '/api/cron/blog-apt-cluster', icon: '🌐' },
     { label: '📊 종목 클러스터', path: '/api/cron/blog-stock-cluster', icon: '🌐' },
+    { label: '🇰🇷 KR 펀더멘탈', path: '/api/cron/stock-fundamentals-kr', icon: '📈' },
+    { label: '🇺🇸 US 펀더멘탈', path: '/api/cron/stock-fundamentals-us', icon: '📈' },
+    { label: '📍 위치 보강', path: '/api/cron/apt-enrich-location', icon: '🗺️' },
+    { label: '🔍 품질 감사', path: '/api/cron/data-quality-monitor', icon: '✅' },
     { label: '주식 시황 (수동)', path: '/api/cron/blog-daily', icon: '📈', disabled: true },
     { label: '청약 (수동)', path: '/api/cron/blog-apt-new', icon: '🏠', disabled: true },
   ] as const;

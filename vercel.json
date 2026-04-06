@@ -349,6 +349,22 @@
     {
       "path": "/api/cron/indexnow-new-content",
       "schedule": "0 */6 * * *"
+    },
+    {
+      "path": "/api/cron/stock-fundamentals-kr",
+      "schedule": "30 8 * * 1-5"
+    },
+    {
+      "path": "/api/cron/stock-fundamentals-us",
+      "schedule": "0 7 * * *"
+    },
+    {
+      "path": "/api/cron/data-quality-monitor",
+      "schedule": "0 19 * * *"
+    },
+    {
+      "path": "/api/cron/apt-enrich-location",
+      "schedule": "0 10 * * *"
     }
   ]
 }
