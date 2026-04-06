@@ -18,7 +18,8 @@ function fmt(n: number) {
 export default function DataTab({ onNavigate }: { onNavigate: (t: any) => void }) {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [sub, setSub] = useState<'freshness' | 'stock' | 'realestate' | 'blog'>('freshness');
+  const [sub, setSub] = useState<'freshness' | 'stock' | 'realestate' | 'blog' | 'seo'>('freshness');
+  const [seoData, setSeoData] = useState<any>(null);
 
   const load = useCallback(() => {
     fetch('/api/admin/v2?tab=data').then(r => r.json()).then(d => { setData(d); setLoading(false); }).catch(() => setLoading(false));
@@ -45,6 +46,7 @@ export default function DataTab({ onNavigate }: { onNavigate: (t: any) => void }
     { key: 'stock' as const, label: '주식' },
     { key: 'realestate' as const, label: '부동산' },
     { key: 'blog' as const, label: '블로그' },
+    { key: 'seo' as const, label: 'SEO/리라이트' },
   ];
 
   return (
@@ -172,8 +174,64 @@ export default function DataTab({ onNavigate }: { onNavigate: (t: any) => void }
               </div>
             ))}
           </div>
-        </>
+        </> 
       )}
+
+      {sub === 'seo' && (() => {
+        // Load SEO data on first view
+        if (!seoData) {
+          fetch('/api/admin/seo-status').then(r => r.json()).then(d => setSeoData(d)).catch(() => setSeoData({ error: true }));
+          return <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-secondary)' }}>SEO 데이터 로딩 중...</div>;
+        }
+        const { tierDist = [], batches = [], pruneStatus = {} } = seoData;
+        return (
+          <>
+            <div className="adm-sec">📊 SEO Tier 분포</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6, marginBottom: 12 }}>
+              {tierDist.map((t: any) => (
+                <div key={t.tier} className="adm-kpi-c" style={{ padding: '8px 10px' }}>
+                  <div className="adm-kpi-v" style={{ color: t.tier === 'S' ? '#10B981' : t.tier === 'A' ? '#3B82F6' : t.tier === 'B' ? '#F59E0B' : '#EF4444' }}>{fmt(t.cnt)}</div>
+                  <div className="adm-kpi-l">{t.tier} tier</div>
+                  <div className="adm-kpi-d">{t.published ? '게시' : '비공개'}</div>
+                </div>
+              ))}
+            </div>
+
+            <div className="adm-sec">🔄 Batch 리라이트 현황</div>
+            <div className="adm-card" style={{ padding: '8px 14px' }}>
+              {batches.length === 0 && <div style={{ fontSize: 12, color: 'var(--text-tertiary)', padding: '8px 0' }}>배치 기록 없음</div>}
+              {batches.map((b: any, i: number) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', borderBottom: i < batches.length - 1 ? '1px solid var(--border)' : 'none', fontSize: 11 }}>
+                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: b.status === 'ended' ? '#10B981' : b.status === 'failed' ? '#EF4444' : '#F59E0B', flexShrink: 0 }} />
+                  <span style={{ color: 'var(--text-secondary)', minWidth: 60 }}>{ago(b.created_at)}</span>
+                  <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{b.batch_size}건</span>
+                  <span style={{ color: 'var(--text-secondary)' }}>{b.category}</span>
+                  <span style={{ flex: 1 }} />
+                  <span style={{ color: '#10B981', fontSize: 10 }}>✓{b.succeeded}</span>
+                  {b.failed > 0 && <span style={{ color: '#EF4444', fontSize: 10 }}>✗{b.failed}</span>}
+                  <span style={{ color: 'var(--text-tertiary)', fontSize: 10 }}>${b.cost_estimate}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="adm-sec">🗑️ 비공개 전환 현황</div>
+            <div className="adm-card" style={{ padding: '10px 14px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 4 }}>
+                <span style={{ color: 'var(--text-secondary)' }}>게시 중</span>
+                <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{fmt(pruneStatus.published || 0)}편</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 4 }}>
+                <span style={{ color: 'var(--text-secondary)' }}>비공개</span>
+                <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{fmt(pruneStatus.unpublished || 0)}편</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+                <span style={{ color: 'var(--text-secondary)' }}>B/C tier 남은 비공개 대상</span>
+                <span style={{ color: '#F59E0B', fontWeight: 600 }}>{fmt(pruneStatus.remaining_prune || 0)}편</span>
+              </div>
+            </div>
+          </>
+        );
+      })()}
     </div>
   );
 }
