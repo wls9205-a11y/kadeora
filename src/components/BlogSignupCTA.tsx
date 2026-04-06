@@ -1,8 +1,9 @@
-import { trackConversion } from '@/lib/track-conversion';
 'use client';
+import { trackConversion } from '@/lib/track-conversion';
 import Link from 'next/link';
 import { useAuth } from '@/components/AuthProvider';
 import { useState, useEffect } from 'react';
+import { useConversion } from '@/lib/conversion-orchestrator';
 
 /** 블로그 상단 회원가입 유도 배너 */
 export function BlogTopBanner({ slug }: { slug: string }) {
@@ -86,6 +87,7 @@ export function BlogFloatingCTA({ slug }: { slug: string }) {
   const { userId } = useAuth();
   const [visible, setVisible] = useState(false);
   const [dismissed, setDismissed] = useState(false);
+  const { canShow, onDismiss } = useConversion('blog_floating_cta', 6);
 
   useEffect(() => {
     if (userId || dismissed) return;
@@ -97,7 +99,7 @@ export function BlogFloatingCTA({ slug }: { slug: string }) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [userId, dismissed]);
 
-  if (userId || dismissed || !visible) return null;
+  if (userId || dismissed || !visible || !canShow) return null;
 
   return (
     <div style={{
@@ -119,7 +121,7 @@ export function BlogFloatingCTA({ slug }: { slug: string }) {
         background: 'var(--brand)', color: '#fff',
         fontWeight: 700, fontSize: 12, textDecoration: 'none', flexShrink: 0,
       }}>가입하기</Link>
-      <button onClick={() => setDismissed(true)} style={{
+      <button onClick={() => { setDismissed(true); onDismiss(); }} style={{
         background: 'none', border: 'none', cursor: 'pointer',
         color: 'var(--text-tertiary)', fontSize: 14, padding: 2,
       }}>✕</button>

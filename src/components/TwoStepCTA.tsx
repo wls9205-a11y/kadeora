@@ -12,6 +12,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
 import { trackConversion } from '@/lib/track-conversion';
+import { useConversion } from '@/lib/conversion-orchestrator';
 
 interface TwoStepCTAProps {
   category?: string;
@@ -45,9 +46,10 @@ export default function TwoStepCTA({ category, contextName }: TwoStepCTAProps) {
   const { userId, loading } = useAuth();
   const pathname = usePathname();
   const [step, setStep] = useState<'ask' | 'signup' | 'dismissed'>('ask');
+  const { canShow, onShow, onDismiss } = useConversion('two_step_cta', 8);
 
   if (loading || userId) return null;
-  if (step === 'dismissed') return null;
+  if (step === 'dismissed' || !canShow) return null;
 
   const cta = CTA_MAP[category || 'default'] || CTA_MAP.default;
   const question = contextName
@@ -70,7 +72,7 @@ export default function TwoStepCTA({ category, contextName }: TwoStepCTAProps) {
             background: 'var(--brand)', color: '#fff',
             fontWeight: 700, fontSize: 'var(--fs-base)', border: 'none', cursor: 'pointer',
           }}>네, 받을래요</button>
-          <button onClick={() => { setStep('dismissed'); trackConversion('cta_click', 'two_step_dismiss', { category }); }} style={{
+          <button onClick={() => { setStep('dismissed'); onDismiss(); trackConversion('cta_click', 'two_step_dismiss', { category }); }} style={{
             padding: '12px 20px', borderRadius: 'var(--radius-pill)',
             background: 'transparent', color: 'var(--text-tertiary)',
             fontWeight: 500, fontSize: 'var(--fs-sm)', border: '1px solid var(--border)', cursor: 'pointer',

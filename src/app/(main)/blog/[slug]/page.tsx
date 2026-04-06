@@ -23,7 +23,7 @@ import ReadingProgress from '@/components/ReadingProgress';
 import NextArticleFloat from '@/components/NextArticleFloat';
 import BlogTossGate from '@/components/BlogTossGate';
 import { BlogTopBanner, BlogMidCTA, BlogFloatingCTA } from '@/components/BlogSignupCTA';
-import BlogReadGate from '@/components/BlogReadGate';
+import SmartSectionGate from '@/components/SmartSectionGate';
 import Disclaimer from '@/components/Disclaimer';
 import TwoStepCTA from '@/components/TwoStepCTA';
 import NewsletterSubscribe from '@/components/NewsletterSubscribe';
@@ -602,13 +602,15 @@ export default async function BlogDetailPage({ params }: Props) {
           {toc.length >= 3 && <BlogToc toc={toc} />}
         </div>
 
-        {/* 본문 — 봇: 전체, 로그인: TossGate, 비로그인: 3편 게이트 */}
+        {/* 본문 — 봇: 전체, 로그인: TossGate, 비로그인: SmartSectionGate (핵심 섹션만 블러) */}
         {isBot ? (
           <div className="blog-content" itemProp="articleBody" dangerouslySetInnerHTML={{ __html: htmlFull }} />
         ) : isLoggedIn ? (
           <BlogTossGate htmlFull={htmlFull} htmlShort={htmlTossShort} slug={slug} title={post.title} />
         ) : (
-          <BlogReadGate htmlFull={htmlFull} htmlTruncated={htmlTruncated} slug={slug} category={post.category} />
+          <div className="blog-content" itemProp="articleBody">
+            <SmartSectionGate htmlContent={htmlFull} slug={slug} category={post.category} />
+          </div>
         )}
 
         {/* FAQ 아코디언 */}

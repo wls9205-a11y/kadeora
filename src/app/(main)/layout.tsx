@@ -8,6 +8,8 @@ import { Sidebar, RightPanel, InstallBanner, PWAInstallTracker, NoticeBanner, Pa
 import TopLoadingBar from '@/components/TopLoadingBar';
 import ScrollToTop from '@/components/ScrollToTop';
 import { AuthProvider } from '@/components/AuthProvider';
+import { ConversionOrchestratorProvider } from '@/lib/conversion-orchestrator';
+import WelcomeReward from '@/components/WelcomeReward';
 
 export const metadata: Metadata = {
   title: { template: '%s | 카더라', default: '카더라 — 대한민국 소리소문 정보 커뮤니티' },
@@ -24,6 +26,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
   return (
     <ToastProvider>
       <AuthProvider serverLoggedIn={isLoggedIn}>
+      <ConversionOrchestratorProvider>
       <TopLoadingBar />
       <Navigation />
       <NoticeBanner />
@@ -61,6 +64,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
       <ReturnVisitorBanner />
       <AutoPushPrompt />
       <PageViewTracker />
+      <WelcomeReward />
       <ScrollToTop />
       <footer className="hidden md:block" style={{
         maxWidth: 1200, margin: '0 auto', padding: '0 24px 40px',
@@ -73,6 +77,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
           <p style={{marginTop:4}}>© 2026 카더라. All rights reserved.</p>
         </div>
       </footer>
+      </ConversionOrchestratorProvider>
       </AuthProvider>
     </ToastProvider>
   );

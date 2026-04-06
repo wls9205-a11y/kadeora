@@ -4,17 +4,20 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
 import { trackConversion } from '@/lib/track-conversion';
+import { useConversion } from '@/lib/conversion-orchestrator';
 
 /**
  * Exit Intent 팝업 — 이탈 직전 마지막 전환 기회
  * - 데스크탑: 마우스가 브라우저 상단으로 이동 시
  * - 모바일: 뒤로가기(popstate) 시
  * - 세션당 1회, 닫으면 24시간 쿨다운
+ * - ConversionOrchestrator 연동: 다른 CTA 2개 이미 표시 중이면 억제
  */
 export default function ExitIntentPopup() {
   const [show, setShow] = useState(false);
   const { userId, loading } = useAuth();
   const pathname = usePathname();
+  const { canShow, onDismiss } = useConversion('exit_intent', 2);
 
   useEffect(() => {
     if (typeof window === 'undefined' || loading || userId) return;
@@ -58,7 +61,7 @@ export default function ExitIntentPopup() {
     };
   }, [pathname, userId, loading]);
 
-  if (!show) return null;
+  if (!show || !canShow) return null;
 
   const url = `/login?redirect=${encodeURIComponent(pathname)}`;
   const isApt = pathname.startsWith('/apt');
@@ -73,7 +76,7 @@ export default function ExitIntentPopup() {
         <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 6 }}>{title}</div>
         <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: 18 }}>{desc}</div>
         <Link href={url} onClick={() => { localStorage.setItem('kd_exit_dismissed', String(Date.now())); }} style={{ display: 'block', padding: '12px 0', borderRadius: 'var(--radius-card)', background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)', fontWeight: 700, fontSize: 'var(--fs-md)', textDecoration: 'none', marginBottom: 8 }}>카카오로 3초 가입</Link>
-        <button onClick={() => { setShow(false); localStorage.setItem('kd_exit_dismissed', String(Date.now())); }} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)', cursor: 'pointer', padding: '6px 0' }}>괜찮아요</button>
+        <button onClick={() => { setShow(false); onDismiss(); localStorage.setItem('kd_exit_dismissed', String(Date.now())); }} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)', cursor: 'pointer', padding: '6px 0' }}>괜찮아요</button>
       </div>
     </div>
   );
