@@ -52,14 +52,14 @@ export default async function AptDataPage() {
   const sb = await createSupabaseServer();
 
   // 청약 통계 집계
-  const { count: totalSites } = await (sb as any).from('subscription_sites').select('id', { count: 'exact', head: true });
-  const { count: totalUnsold } = await (sb as any).from('unsold_apartments').select('id', { count: 'exact', head: true });
+  const { count: totalSites } = await (sb as any).from('apt_subscriptions').select('id', { count: 'exact', head: true });
+  const { count: totalUnsold } = await (sb as any).from('unsold_apts').select('id', { count: 'exact', head: true }).eq('is_active', true);
 
   // 지역별 청약 건수
-  const { data: regionStats } = await (sb as any).from('subscription_sites').select('region').order('region');
+  const { data: regionStats } = await (sb as any).from('apt_subscriptions').select('region_nm').order('region_nm');
   const regionCounts: Record<string, number> = {};
   (regionStats ?? []).forEach((r: any) => {
-    const key = r.region?.slice(0, 2) || '기타';
+    const key = r.region_nm?.slice(0, 2) || '기타';
     regionCounts[key] = (regionCounts[key] || 0) + 1;
   });
 
@@ -125,6 +125,10 @@ export default async function AptDataPage() {
             links: [{ href: '/api/data/apt-unsold?format=xlsx', label: 'Excel', color: 'var(--accent-green)' }, { href: '/api/data/apt-unsold?format=csv', label: 'CSV', color: 'var(--accent-blue)' }] },
           { title: '단지백과 기본 정보', desc: '전국 34,000+ 아파트 단지의 기본 정보·세대수·준공일', icon: '🏢',
             links: [{ href: '/api/data/apt-complex?format=xlsx', label: 'Excel', color: 'var(--accent-green)' }, { href: '/api/data/apt-complex?format=csv', label: 'CSV', color: 'var(--accent-blue)' }] },
+          { title: '주식 전종목 시세', desc: '국내외 728종목 현재가·등락률·시가총액·거래량', icon: '📈',
+            links: [{ href: '/api/data/stock-prices?format=xlsx', label: 'Excel', color: 'var(--accent-green)' }, { href: '/api/data/stock-prices?format=csv', label: 'CSV', color: 'var(--accent-blue)' }] },
+          { title: '섹터별 종목 분석', desc: '반도체·바이오·2차전지 등 섹터별 종목 데이터', icon: '🏭',
+            links: [{ href: '/api/data/stock-sectors?format=xlsx', label: 'Excel', color: 'var(--accent-green)' }, { href: '/api/data/stock-sectors?format=csv', label: 'CSV', color: 'var(--accent-blue)' }] },
         ].map(item => (
           <div key={item.title} style={{
             padding: 18, borderRadius: 'var(--radius-lg)',
@@ -189,27 +193,7 @@ export default async function AptDataPage() {
         </Link>
       </div>
     
-      {/* CSV 다운로드 섹션 */}
-      <section style={{ marginTop: 'var(--sp-xl)', marginBottom: 'var(--sp-xl)' }}>
-        <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, marginBottom: 12 }}>📥 데이터 다운로드 (CSV)</h2>
-        <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 12 }}>
-          카더라의 부동산 데이터를 CSV 파일로 다운로드하세요. 출처 표기(카더라, kadeora.app)를 부탁드립니다.
-        </p>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 8 }}>
-          <a href="/api/data-export?type=unsold" download style={{ display: 'block', padding: '14px 16px', borderRadius: 'var(--radius-card)', background: 'var(--bg-surface)', border: '1px solid var(--border)', textDecoration: 'none', color: 'var(--text-primary)' }}>
-            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700 }}>🏗️ 미분양 현황</div>
-            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>전국 미분양 아파트 목록</div>
-          </a>
-          <a href="/api/data-export?type=trade" download style={{ display: 'block', padding: '14px 16px', borderRadius: 'var(--radius-card)', background: 'var(--bg-surface)', border: '1px solid var(--border)', textDecoration: 'none', color: 'var(--text-primary)' }}>
-            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700 }}>📊 실거래가</div>
-            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>최근 아파트 매매 거래 내역</div>
-          </a>
-          <a href="/api/data-export?type=stock" download style={{ display: 'block', padding: '14px 16px', borderRadius: 'var(--radius-card)', background: 'var(--bg-surface)', border: '1px solid var(--border)', textDecoration: 'none', color: 'var(--text-primary)' }}>
-            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700 }}>📈 주식 종목 데이터</div>
-            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>국내외 728종목 시세</div>
-          </a>
-        </div>
-      </section>
+      
 </div>
   );
 }
