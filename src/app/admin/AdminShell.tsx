@@ -2,125 +2,72 @@
 import { useState, useCallback, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 
-const FocusTab = dynamic(() => import('./tabs/FocusTab'), { loading: () => <Spin /> });
-const GrowthTab = dynamic(() => import('./tabs/GrowthTab'), { loading: () => <Spin /> });
-const UsersTab = dynamic(() => import('./tabs/UsersTab'), { loading: () => <Spin /> });
-const DataTab = dynamic(() => import('./tabs/DataTab'), { loading: () => <Spin /> });
-const OpsTab = dynamic(() => import('./tabs/OpsTab'), { loading: () => <Spin /> });
-const ExecuteTab = dynamic(() => import('./tabs/ExecuteTab'), { loading: () => <Spin /> });
+const tabs = ['focus','growth','users','data','ops','execute'] as const;
+type T = typeof tabs[number];
+const icons: Record<T,string> = { focus:'📊', growth:'📈', users:'👤', data:'🗄️', ops:'🔧', execute:'⚡' };
+const labels: Record<T,string> = { focus:'대시보드', growth:'성장', users:'유저', data:'데이터', ops:'크론', execute:'실행' };
 
-function Spin() {
-  return (
-    <div style={{ display: 'flex', justifyContent: 'center', padding: 60 }}>
-      <div style={{ width: 28, height: 28, border: '3px solid var(--border)', borderTopColor: 'var(--brand)', borderRadius: '50%', animation: 'spin .6s linear infinite' }} />
-    </div>
-  );
-}
-
-type Tab = 'focus' | 'growth' | 'users' | 'data' | 'ops' | 'execute';
-
-const TABS: { key: Tab; icon: string; label: string }[] = [
-  { key: 'focus', icon: '🎯', label: '집중' },
-  { key: 'growth', icon: '📊', label: '성장' },
-  { key: 'users', icon: '👤', label: '사용자' },
-  { key: 'data', icon: '🗄️', label: '데이터' },
-  { key: 'ops', icon: '🔧', label: '운영' },
-  { key: 'execute', icon: '⚡', label: '실행' },
-];
-
-const TAB_MAP: Record<Tab, React.ComponentType<{ onNavigate: (t: Tab) => void }>> = {
-  focus: FocusTab, growth: GrowthTab, users: UsersTab,
-  data: DataTab, ops: OpsTab, execute: ExecuteTab,
+const Spin = () => <div style={{display:'flex',justifyContent:'center',padding:60}}><div style={{width:24,height:24,border:'3px solid rgba(255,255,255,0.1)',borderTopColor:'#3B7BF6',borderRadius:'50%',animation:'spin .5s linear infinite'}}/></div>;
+const C: Record<T, React.ComponentType<{onNavigate:(t:T)=>void}>> = {
+  focus: dynamic(()=>import('./tabs/FocusTab'),{loading:Spin}),
+  growth: dynamic(()=>import('./tabs/GrowthTab'),{loading:Spin}),
+  users: dynamic(()=>import('./tabs/UsersTab'),{loading:Spin}),
+  data: dynamic(()=>import('./tabs/DataTab'),{loading:Spin}),
+  ops: dynamic(()=>import('./tabs/OpsTab'),{loading:Spin}),
+  execute: dynamic(()=>import('./tabs/ExecuteTab'),{loading:Spin}),
 };
 
 export default function AdminShell() {
-  const [tab, setTab] = useState<Tab>('focus');
-  const [status, setStatus] = useState<{ score: number; cronRate: number; pvToday: number } | null>(null);
-  const switchTab = useCallback((t: Tab) => setTab(t), []);
-  const ActiveTab = TAB_MAP[tab];
+  const [tab, setTab] = useState<T>('focus');
+  const [hp, setHp] = useState<{s:number;cr:number;pv:number}|null>(null);
+  const sw = useCallback((t:T)=>setTab(t),[]);
+  const Tab = C[tab];
 
-  // 플로팅 바 상태 (경량 폴링)
-  useEffect(() => {
-    const load = () => {
-      fetch('/api/admin/v2?tab=focus').then(r => r.json()).then(d => {
-        if (d && d.healthScore != null) {
-          const kpi = d.kpi || {};
-          setStatus({
-            score: d.healthScore,
-            cronRate: Math.round((kpi.cronSuccess / Math.max(kpi.cronSuccess + kpi.cronFail, 1)) * 100),
-            pvToday: kpi.pvToday || 0,
-          });
-        }
-      }).catch(() => {});
-    };
-    load();
-    const t = setInterval(load, 60000);
-    return () => clearInterval(t);
-  }, []);
+  useEffect(()=>{
+    const ld=()=>fetch('/api/admin/v2?tab=focus').then(r=>r.json()).then(d=>{
+      if(d?.healthScore!=null){const k=d.kpi||{};setHp({s:d.healthScore,cr:Math.round(k.cronSuccess/Math.max(k.cronSuccess+k.cronFail,1)*100),pv:k.pvToday||0});}
+    }).catch(()=>{});
+    ld(); const t=setInterval(ld,60000); return()=>clearInterval(t);
+  },[]);
+
+  const sc = hp ? hp.s>=71?'#10B981':hp.s>=41?'#F59E0B':'#EF4444' : '#666';
 
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 12px 80px', minHeight: '100vh' }}>
+    <div style={{maxWidth:640,margin:'0 auto',padding:'0 10px 80px',minHeight:'100vh'}}>
       <style>{`
-        @keyframes spin { to { transform: rotate(360deg) } }
-        @keyframes pulse-glow { 0%,100% { opacity: 1 } 50% { opacity: .6 } }
-        .adm-tab { flex: 1; padding: 10px 0; text-align: center; font-size: 11px; color: var(--text-secondary); cursor: pointer; border-bottom: 2px solid transparent; transition: all .15s; background: none; border-top: none; border-left: none; border-right: none; }
-        .adm-tab.on { color: var(--brand); border-bottom-color: var(--brand); font-weight: 700; }
-        .adm-tab:hover { color: var(--text-primary); }
-        .adm-card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-card, 12px); padding: 14px; margin-bottom: 10px; }
-        .adm-kpi { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0; }
-        .adm-kpi-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px; margin: 10px 0; }
-        .adm-kpi-c { background: var(--bg-surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px; }
-        .adm-kpi-v { font-size: 22px; font-weight: 700; color: var(--text-primary); }
-        .adm-kpi-l { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
-        .adm-kpi-d { font-size: 10px; margin-top: 3px; }
-        .adm-btn { background: var(--bg-surface); border: 1px solid var(--border); border-radius: 8px; padding: 6px 14px; font-size: 12px; color: var(--text-secondary); cursor: pointer; transition: border-color .15s; }
-        .adm-btn:hover { border-color: var(--brand); color: var(--brand); }
-        .adm-sec { font-size: 14px; font-weight: 700; color: var(--text-primary); margin: 18px 0 8px; display: flex; align-items: center; gap: 6px; }
-        .adm-bar { height: 8px; border-radius: 4px; background: var(--bg-hover); overflow: hidden; margin: 4px 0 8px; }
-        .adm-bar-fill { height: 100%; border-radius: 4px; transition: width .6s; }
-        .adm-feed-i { display: flex; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 12px; color: var(--text-secondary); }
-        .adm-feed-i:last-child { border: none; }
-        .adm-alert { border-radius: 10px; padding: 12px; margin: 8px 0; font-size: 12px; }
-        .adm-alert-red { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); color: #EF4444; }
-        .adm-alert-yellow { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); color: #F59E0B; }
-        .adm-alert-green { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.2); color: #10B981; }
+        @keyframes spin{to{transform:rotate(360deg)}}
+        .at{flex:1;padding:8px 0;text-align:center;font-size:10px;color:rgba(255,255,255,0.35);cursor:pointer;border:none;background:none;transition:all .15s;letter-spacing:-0.3px}
+        .at.on{color:#3B7BF6;font-weight:800}
+        .at:hover{color:rgba(255,255,255,0.7)}
+        .ac{background:rgba(12,21,40,0.8);border:1px solid rgba(255,255,255,0.05);border-radius:10px;padding:10px 12px;margin-bottom:6px;backdrop-filter:blur(8px)}
       `}</style>
 
-      {/* 플로팅 상단 바 */}
-      <div style={{ position: 'sticky', top: 44, zIndex: 50, background: 'rgba(5,10,24,0.92)', backdropFilter: 'blur(12px)', padding: '8px 0', marginBottom: 8, borderBottom: '1px solid var(--border)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <button
-            onClick={() => switchTab('execute')}
-            style={{ background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: 8, padding: '7px 16px', fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}
-          >
-            ⚡ 최신화
-          </button>
-          {status && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 11, color: status.score >= 71 ? '#10B981' : status.score >= 41 ? '#F59E0B' : '#EF4444' }}>
-                <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'currentColor' }} />
-                {status.score}점
-              </span>
-              <span style={{ fontSize: 11, color: status.cronRate >= 95 ? '#10B981' : '#F59E0B' }}>{status.cronRate}%</span>
-            </div>
-          )}
-          <div style={{ flex: 1 }} />
-          <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>미션 컨트롤</span>
+      {/* ── 헤더 ── */}
+      <div style={{position:'sticky',top:44,zIndex:50,background:'rgba(5,10,24,0.95)',backdropFilter:'blur(16px)',padding:'6px 0',marginBottom:4,borderBottom:'1px solid rgba(255,255,255,0.04)'}}>
+        <div style={{display:'flex',alignItems:'center',gap:8}}>
+          {/* 헬스 뱃지 */}
+          <div style={{width:28,height:28,borderRadius:'50%',border:`2px solid ${sc}`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,fontWeight:900,color:sc}}>{hp?.s??'—'}</div>
+          {hp && <>
+            <span style={{fontSize:10,color:hp.cr>=95?'#10B981':'#F59E0B',fontWeight:600}}>크론 {hp.cr}%</span>
+            <span style={{fontSize:10,color:'rgba(255,255,255,0.3)'}}>·</span>
+            <span style={{fontSize:10,color:'rgba(255,255,255,0.4)'}}>PV {hp.pv}</span>
+          </>}
+          <div style={{flex:1}}/>
+          <span style={{fontSize:9,color:'rgba(255,255,255,0.2)',letterSpacing:1,textTransform:'uppercase'}}>Mission Control</span>
         </div>
       </div>
 
-      {/* 탭 네비게이션 */}
-      <div style={{ display: 'flex', borderBottom: '1px solid var(--border)', marginBottom: 16, position: 'sticky', top: 88, zIndex: 49, background: 'var(--bg-base)' }}>
-        {TABS.map(t => (
-          <button key={t.key} className={`adm-tab${tab === t.key ? ' on' : ''}`} onClick={() => switchTab(t.key)}>
-            <div style={{ fontSize: 16, marginBottom: 2 }}>{t.icon}</div>
-            {t.label}
+      {/* ── 탭 바 ── */}
+      <div style={{display:'flex',marginBottom:10,position:'sticky',top:80,zIndex:49,background:'rgba(5,10,24,0.98)',padding:'2px 0',borderBottom:'1px solid rgba(255,255,255,0.03)'}}>
+        {tabs.map(t=>(
+          <button key={t} className={`at${tab===t?' on':''}`} onClick={()=>sw(t)}>
+            <div style={{fontSize:14,marginBottom:1,opacity:tab===t?1:0.5}}>{icons[t]}</div>
+            {labels[t]}
           </button>
         ))}
       </div>
 
-      {/* 활성 탭 */}
-      <ActiveTab onNavigate={switchTab} />
+      <Tab onNavigate={sw}/>
     </div>
   );
 }
