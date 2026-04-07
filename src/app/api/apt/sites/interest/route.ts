@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
     try {
       const missionUserId = user.id;
       if (missionUserId) {
-        const { data: prof } = await admin.from('profiles').select('first_mission_completed, first_mission_progress').eq('id', missionUserId).single();
+        const { data: prof } = await (admin as any).from('profiles').select('first_mission_completed, first_mission_progress').eq('id', missionUserId).single();
         if (prof && !prof.first_mission_completed) {
           const prog = (prof as any).first_mission_progress || {};
           if (!prog.interest) {

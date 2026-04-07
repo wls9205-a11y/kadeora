@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
     await sb.from('stock_watchlist').insert({ user_id: user.id, symbol });
     // 첫 미션: 관심 종목 등록 (직접 DB 업데이트)
     try {
-      const { data: prof } = await sb.from('profiles').select('first_mission_completed, first_mission_progress').eq('id', user.id).single();
+      const { data: prof } = await (sb as any).from('profiles').select('first_mission_completed, first_mission_progress').eq('id', user.id).single();
       if (prof && !prof.first_mission_completed) {
         const prog = prof.first_mission_progress || {};
         if (!prog.watchlist) {
