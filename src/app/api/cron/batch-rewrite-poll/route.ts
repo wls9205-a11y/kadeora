@@ -102,8 +102,6 @@ export async function GET(req: NextRequest) {
             const clean = newContent.replace(/[#|*\n\r\-\[\]\(\)/]/g, ' ').replace(/\s+/g, ' ').trim();
             const now = new Date().toISOString();
 
-            const newContent = r.result?.message?.content?.[0]?.text || '';
-            if (!newContent || newContent.length < 200) { skipped++; continue; }
             
             await admin.from('blog_posts').update({
               content: newContent,
