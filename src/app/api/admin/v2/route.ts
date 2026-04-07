@@ -63,16 +63,16 @@ export async function GET(req: NextRequest) {
         safeCount(sb.from('posts').select('id', { count: 'exact', head: true })),
         safeCount(sb.from('comments').select('id', { count: 'exact', head: true })),
         safeCount(sb.from('blog_posts').select('id', { count: 'exact', head: true }).eq('is_published', true).gt('view_count', 50)),
-        safeCount(sb.from('blog_posts').select('id', { count: 'exact', head: true }).gte('created_at', todayStr)),
+        safeCount(sb.from('blog_posts').select('id', { count: 'exact', head: true }).gte('created_at', new Date().toISOString().slice(0,10))),
         safeCount(sb.from('apt_sites').select('id', { count: 'exact', head: true })),
-        safeCount(sb.from('apt_subscriptions').select('id', { count: 'exact', head: true }).gte('rcept_endde', todayStr).lte('rcept_endde', new Date(Date.now()+7*86400000).toISOString().slice(0,10))),
-        safeCount((sb as any).from('conversion_events').select('id', { count: 'exact', head: true }).eq('event_type', 'cta_view').gte('created_at', todayStr)),
-        safeCount((sb as any).from('conversion_events').select('id', { count: 'exact', head: true }).eq('event_type', 'cta_click').gte('created_at', todayStr)),
-        safeCount(sb.from('notifications').select('id', { count: 'exact', head: true }).gte('created_at', todayStr)),
-        safeCount(sb.from('notifications').select('id', { count: 'exact', head: true }).eq('is_read', true).gte('created_at', todayStr)),
+        safeCount(sb.from('apt_subscriptions').select('id', { count: 'exact', head: true }).gte('rcept_endde', new Date().toISOString().slice(0,10)).lte('rcept_endde', new Date(Date.now()+7*86400000).toISOString().slice(0,10))),
+        safeCount((sb as any).from('conversion_events').select('id', { count: 'exact', head: true }).eq('event_type', 'cta_view').gte('created_at', new Date().toISOString().slice(0,10))),
+        safeCount((sb as any).from('conversion_events').select('id', { count: 'exact', head: true }).eq('event_type', 'cta_click').gte('created_at', new Date().toISOString().slice(0,10))),
+        safeCount(sb.from('notifications').select('id', { count: 'exact', head: true }).gte('created_at', new Date().toISOString().slice(0,10))),
+        safeCount(sb.from('notifications').select('id', { count: 'exact', head: true }).eq('is_read', true).gte('created_at', new Date().toISOString().slice(0,10))),
         safeCount((sb as any).from('profiles').select('id', { count: 'exact', head: true }).filter('is_seed', 'not.is', 'true').not('bio', 'is', null)),
         safeCount((sb as any).from('profiles').select('id', { count: 'exact', head: true }).filter('is_seed', 'not.is', 'true').not('age_group', 'is', null)),
-        safeCount(sb.from('page_views').select('id', { count: 'exact', head: true }).gte('created_at', weekAgo)),
+        safeCount(sb.from('page_views').select('id', { count: 'exact', head: true }).gte('created_at', new Date(Date.now()-7*86400000).toISOString())),
       ]);
 
       const totalCron = cronOk + cronFail;
