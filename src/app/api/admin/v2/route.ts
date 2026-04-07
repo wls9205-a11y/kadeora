@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
     // 🎯 집중 탭
     // ═══════════════════════════════════════
     if (tab === 'focus') {
-      const [users, realUsers, newUsers, activeUsers, blogs, rewritten, cronOk, cronFail, interests, emailSubs, pushSubs, convEvents, dbMb, pvToday, notifRead7d, notifTotal7d, profileCompleted, onboardedCount, ctaViews7d, ctaClicks7d, postsToday, commentsToday] = await Promise.all([
+      const [users, realUsers, newUsers, activeUsers, blogs, rewritten, cronOk, cronFail, interests, emailSubs, pushSubs, convEvents, dbMb, pvToday, notifRead7d, notifTotal7d, profileCompleted, onboardedCount, ctaViews7d, ctaClicks7d, postsToday, commentsToday, totalPosts, totalComments, hotBlogs, newBlogs24, aptSites, aptDeadline7, ctaViews24, ctaClicks24, notifSent24, notifRead24, bioCount, ageCount, pv7d] = await Promise.all([
         safeCount(sb.from('profiles').select('id', { count: 'exact', head: true })),
         safeCount(sb.from('profiles').select('id', { count: 'exact', head: true }).neq('is_ghost', true).neq('is_deleted', true)),
         safeCount(sb.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', weekAgo)),
@@ -59,6 +59,20 @@ export async function GET(req: NextRequest) {
         safeCount((sb as any).from('conversion_events').select('id', { count: 'exact', head: true }).eq('event_type', 'cta_click').gte('created_at', weekAgo)),
         safeCount(sb.from('posts').select('id', { count: 'exact', head: true }).gte('created_at', now.toISOString().slice(0, 10))),
         safeCount(sb.from('comments').select('id', { count: 'exact', head: true }).gte('created_at', now.toISOString().slice(0, 10))),
+        // 확장 쿼리 (13개)
+        safeCount(sb.from('posts').select('id', { count: 'exact', head: true })),
+        safeCount(sb.from('comments').select('id', { count: 'exact', head: true })),
+        safeCount(sb.from('blog_posts').select('id', { count: 'exact', head: true }).eq('is_published', true).gt('view_count', 50)),
+        safeCount(sb.from('blog_posts').select('id', { count: 'exact', head: true }).gte('created_at', todayStr)),
+        safeCount(sb.from('apt_sites').select('id', { count: 'exact', head: true })),
+        safeCount(sb.from('apt_subscriptions').select('id', { count: 'exact', head: true }).gte('rcept_endde', todayStr).lte('rcept_endde', new Date(Date.now()+7*86400000).toISOString().slice(0,10))),
+        safeCount((sb as any).from('conversion_events').select('id', { count: 'exact', head: true }).eq('event_type', 'cta_view').gte('created_at', todayStr)),
+        safeCount((sb as any).from('conversion_events').select('id', { count: 'exact', head: true }).eq('event_type', 'cta_click').gte('created_at', todayStr)),
+        safeCount(sb.from('notifications').select('id', { count: 'exact', head: true }).gte('created_at', todayStr)),
+        safeCount(sb.from('notifications').select('id', { count: 'exact', head: true }).eq('is_read', true).gte('created_at', todayStr)),
+        safeCount((sb as any).from('profiles').select('id', { count: 'exact', head: true }).filter('is_seed', 'not.is', 'true').not('bio', 'is', null)),
+        safeCount((sb as any).from('profiles').select('id', { count: 'exact', head: true }).filter('is_seed', 'not.is', 'true').not('age_group', 'is', null)),
+        safeCount(sb.from('page_views').select('id', { count: 'exact', head: true }).gte('created_at', weekAgo)),
       ]);
 
       const totalCron = cronOk + cronFail;
@@ -157,6 +171,12 @@ export async function GET(req: NextRequest) {
           ctaViews7d, ctaClicks7d,
           ctaCtr: ctaViews7d > 0 ? Math.round(ctaClicks7d / ctaViews7d * 10000) / 100 : 0,
           postsToday, commentsToday,
+        },
+        extended: {
+          totalPosts, totalComments, hotBlogs, newBlogs24, aptSites, aptDeadline7,
+          ctaViews24, ctaClicks24, notifSent24, notifRead24, bioCount, ageCount, pv7d,
+          seeds: (users ?? 0) - realUsers,
+          seoA: 0, seoB: 0, seoC: 0, seoAvg: 0, // placeholder — 카테고리스탯에서 제공
         },
         categoryStats: Object.entries(catMap).map(([k, v]) => ({ category: k, count: v.count, views: v.views, efficiency: v.count > 0 ? Math.round(v.views / v.count) : 0 })).sort((a: any, b: any) => b.efficiency - a.efficiency),
         failedCrons: failGroups,
