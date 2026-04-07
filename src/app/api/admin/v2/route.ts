@@ -109,7 +109,6 @@ export async function GET(req: NextRequest) {
         .eq('status', 'failed').gte('created_at', dayAgo)
         .order('created_at', { ascending: false }).limit(10);
 
-    }
 
     // 실패 크론 그룹핑
       const failGroups: Record<string, { count: number; lastError: string; lastAt: string }> = {};
@@ -513,7 +512,6 @@ export async function GET(req: NextRequest) {
         Object.entries(groups).map(([k, v]) => [k, { ok: v.ok, fail: v.fail, cronCount: v.crons.size }])
       );
 
-    }
 
     // 실패 크론 상세
       const failDetails: Record<string, { count: number; lastError: string; lastAt: string }> = {};
