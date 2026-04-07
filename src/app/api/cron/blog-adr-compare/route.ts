@@ -3,7 +3,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
-import { ensureMinLength } from '@/lib/blog-padding';
 import { generateMetaDesc, generateMetaKeywords } from '@/lib/blog-seo-utils';
 
 export const maxDuration = 300;
@@ -67,7 +66,7 @@ JSON만: {"title":"${target.title}","content":"마크다운본문","excerpt":"�
         if (match) {
           const parsed = JSON.parse(match[0]);
           if (parsed.title && parsed.content) {
-            const body = ensureMinLength(parsed.content, 'stock', 1800);
+            const body = parsed.content;
             const ins = await safeBlogInsert(supabase, {
               title: parsed.title,
               slug: `adr-compare-${target.region.toLowerCase()}-${Date.now().toString(36)}`,

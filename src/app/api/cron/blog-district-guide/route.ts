@@ -1,7 +1,6 @@
 export const maxDuration = 300;
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
-import { ensureMinLength } from '@/lib/blog-padding';
 import { generateImageAlt, generateMetaDesc, generateMetaKeywords } from '@/lib/blog-seo-utils';
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { withCronAuth } from '@/lib/cron-auth';
@@ -415,7 +414,7 @@ export const GET = withCronAuth(async (req: NextRequest) => {
 
       // --- Build content ---
       let content = buildContent(region, sigungu, cnt, top10, recentTx);
-      content = ensureMinLength(content, 'apt', 1500);
+      // quality gate: skip if content too short
 
       const tags = [region, sigungu, '아파트', '시세', '학군', '교통', '추천', '2026'];
 

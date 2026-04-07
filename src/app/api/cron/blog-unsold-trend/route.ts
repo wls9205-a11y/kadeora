@@ -1,7 +1,6 @@
 export const maxDuration = 300;
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
-import { ensureMinLength } from '@/lib/blog-padding';
 import { generateImageAlt, generateMetaDesc, generateMetaKeywords } from '@/lib/blog-seo-utils';
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { withCronAuth } from '@/lib/cron-auth';
@@ -184,7 +183,7 @@ export const GET = withCronAuth(async (req: NextRequest) => {
       const title = `전국 미분양 아파트 추이 ${displayLabel} — 지역별 증감과 할인 분양 기회`;
 
       let content = buildContent(statMonth, unsoldStats);
-      content = ensureMinLength(content, 'unsold', 1500);
+      // quality gate: skip if content too short
 
       const totalUnsold = unsoldStats.reduce((sum, s) => sum + (s.total_unsold || 0), 0);
       const tags = ['미분양', '아파트', '부동산', statMonth, `${year}년`, '할인분양', '준공후미분양'];

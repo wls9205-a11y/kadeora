@@ -4,7 +4,6 @@ import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
-import { ensureMinLength } from '@/lib/blog-padding';
 import { generateImageAlt, generateMetaDesc, generateMetaKeywords } from '@/lib/blog-seo-utils';
 import { SITE_URL , AI_MODEL_HAIKU, ANTHROPIC_VERSION} from '@/lib/constants';
 
@@ -74,7 +73,7 @@ export async function GET(req: NextRequest) {
     const tags = ['월간리뷰', 'market-review', monthKey];
     const _r = await safeBlogInsert(supabase, {
       slug, title,
-      content: ensureMinLength(content, 'stock'),
+      content: content,
       excerpt: `${monthKey} 월간 시장 종합 리뷰`,
       category: 'stock', tags, cron_type: 'monthly-market',
       cover_image: `${SITE_URL}/api/og?title=${encodeURIComponent(title)}&design=2&type=blog`,

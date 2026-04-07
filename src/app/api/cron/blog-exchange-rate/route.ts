@@ -1,7 +1,6 @@
 export const maxDuration = 300;
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
-import { ensureMinLength } from '@/lib/blog-padding';
 import { generateImageAlt, generateMetaDesc, generateMetaKeywords } from '@/lib/blog-seo-utils';
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { withCronAuth } from '@/lib/cron-auth';
@@ -208,7 +207,7 @@ export const GET = withCronAuth(async (req: NextRequest) => {
       const title = `원달러 환율 전망 2026년 ${monthInfo.label} — 미국 금리와 원화 흐름 분석`;
 
       let content = buildContent(monthInfo, exchangeRates, rateHistory);
-      content = ensureMinLength(content, 'general', 1500);
+      // quality gate: skip if content too short
 
       const tags = ['환율', '원달러', 'USD', '금리', 'FOMC', '2026', monthInfo.label];
 

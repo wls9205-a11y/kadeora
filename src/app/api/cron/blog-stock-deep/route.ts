@@ -2,7 +2,6 @@ import { AI_MODEL_HAIKU, ANTHROPIC_VERSION } from '@/lib/constants';
 import { diversifyPrompt } from '@/lib/blog-prompt-diversity';
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
-import { ensureMinLength } from '@/lib/blog-padding';
 import { withCronLogging } from '@/lib/cron-logger';
 import { generateMetaDesc, generateMetaKeywords } from '@/lib/blog-seo-utils';
 import { NextRequest, NextResponse } from 'next/server';
@@ -121,7 +120,7 @@ JSON만 응답:
         const parsed = JSON.parse(match[0]);
         if (!parsed.title || !parsed.content) continue;
 
-        const content = ensureMinLength(parsed.content, 'stock', 2500);
+        const content = parsed.content;
         const stockSlug = isUS ? stock.symbol.toLowerCase() : stock.name.replace(/\s/g, '-').toLowerCase();
         const slug = `${stockSlug}-analysis-${Date.now().toString(36)}`;
 

@@ -1,7 +1,6 @@
 export const maxDuration = 300;
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
-import { ensureMinLength } from '@/lib/blog-padding';
 import { generateImageAlt, generateMetaDesc, generateMetaKeywords } from '@/lib/blog-seo-utils';
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { withCronAuth } from '@/lib/cron-auth';
@@ -215,7 +214,7 @@ export const GET = withCronAuth(async (req: NextRequest) => {
       const result = await safeBlogInsert(admin, {
         slug,
         title,
-        content: ensureMinLength(content, 'stock'),
+        content: content,
         excerpt: `2026년 ${m.label} 실적발표, 청약접수, IPO, 배당락일 등 주요 투자 일정을 캘린더 형식으로 정리합니다.`,
         category: 'stock',
         tags,

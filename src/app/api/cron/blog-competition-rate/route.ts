@@ -1,7 +1,6 @@
 export const maxDuration = 300;
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
-import { ensureMinLength } from '@/lib/blog-padding';
 import { generateImageAlt, generateMetaDesc, generateMetaKeywords } from '@/lib/blog-seo-utils';
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { withCronAuth } from '@/lib/cron-auth';
@@ -179,7 +178,7 @@ ${strategyText}
 
 > 본 콘텐츠는 한국부동산원 청약홈 공공데이터 기반이며, 정확한 경쟁률과 청약 조건은 청약홈(applyhome.co.kr)에서 확인하세요. 투자 권유가 아닙니다.`;
 
-    const finalContent = ensureMinLength(content, 'apt');
+    const finalContent = content;
     const tags = [`${region.name} 청약 경쟁률`, `${region.name} 아파트`, '청약 경쟁률', '1순위 경쟁률', '청약 당첨'];
 
     const result = await safeBlogInsert(admin, {

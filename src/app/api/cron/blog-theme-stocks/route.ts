@@ -1,7 +1,6 @@
 export const maxDuration = 300;
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
-import { ensureMinLength } from '@/lib/blog-padding';
 import { generateImageAlt, generateMetaDesc, generateMetaKeywords } from '@/lib/blog-seo-utils';
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { withCronAuth } from '@/lib/cron-auth';
@@ -178,7 +177,7 @@ export const GET = withCronAuth(async (req: NextRequest) => {
       content += `> **면책고지**: 본 콘텐츠는 정보 제공 목적으로 작성되었으며 투자 권유가 아닙니다. 모든 투자 판단과 손익은 투자자 본인에게 귀속됩니다.`;
 
       // ----- pad & insert -----
-      const finalContent = ensureMinLength(content, 'stock');
+      const finalContent = content;
       const tags = [name, '테마주', '주식', monthSlug];
 
       const result = await safeBlogInsert(admin, {

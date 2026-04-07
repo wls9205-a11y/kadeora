@@ -107,18 +107,6 @@
       "schedule": "0 0 * * *"
     },
     {
-      "path": "/api/cron/blog-publish-queue",
-      "schedule": "0 9 * * *"
-    },
-    {
-      "path": "/api/cron/blog-internal-links",
-      "schedule": "0 3 * * 0"
-    },
-    {
-      "path": "/api/cron/blog-rewrite",
-      "schedule": "30 */2 * * *"
-    },
-    {
       "path": "/api/cron/crawl-seoul-redev",
       "schedule": "0 6 * * 1"
     },
@@ -169,14 +157,6 @@
     {
       "path": "/api/cron/aggregate-trade-stats",
       "schedule": "10 0 * * *"
-    },
-    {
-      "path": "/api/cron/blog-weekly-market",
-      "schedule": "0 1 * * 1"
-    },
-    {
-      "path": "/api/cron/blog-monthly-market",
-      "schedule": "0 1 2 * *"
     },
     {
       "path": "/api/cron/stock-crawl",
@@ -251,18 +231,6 @@
       "schedule": "30 6 * * *"
     },
     {
-      "path": "/api/cron/blog-sector-rotation",
-      "schedule": "10 2 * * 1"
-    },
-    {
-      "path": "/api/cron/blog-subscription-strategy",
-      "schedule": "0 8 * * 1,4"
-    },
-    {
-      "path": "/api/cron/blog-trade-analysis",
-      "schedule": "30 9 * * 1-5"
-    },
-    {
       "path": "/api/cron/indexnow-mass",
       "schedule": "0 */6 * * *"
     },
@@ -279,20 +247,8 @@
       "schedule": "0 */6 * * *"
     },
     {
-      "path": "/api/cron/blog-stock-v2",
-      "schedule": "10 */3 * * *"
-    },
-    {
-      "path": "/api/cron/blog-apt-v2",
-      "schedule": "0 8 * * *"
-    },
-    {
       "path": "/api/cron/push-content-alert",
       "schedule": "30 13 * * *"
-    },
-    {
-      "path": "/api/cron/blog-quality-prune",
-      "schedule": "0 3 * * *"
     },
     {
       "path": "/api/cron/batch-rewrite-submit",
@@ -301,14 +257,6 @@
     {
       "path": "/api/cron/batch-rewrite-poll",
       "schedule": "*/10 * * * *"
-    },
-    {
-      "path": "/api/cron/blog-restore-candidate",
-      "schedule": "0 5 * * 1"
-    },
-    {
-      "path": "/api/cron/blog-restore-monitor",
-      "schedule": "0 6 * * 1"
     },
     {
       "path": "/api/cron/seo-score-refresh",
@@ -329,14 +277,6 @@
     {
       "path": "/api/cron/batch-analysis-poll",
       "schedule": "*/10 * * * *"
-    },
-    {
-      "path": "/api/cron/blog-apt-cluster",
-      "schedule": "0 7 * * *"
-    },
-    {
-      "path": "/api/cron/blog-stock-cluster",
-      "schedule": "20 */4 * * *"
     },
     {
       "path": "/api/cron/analysis-refresh",
@@ -381,6 +321,86 @@
     {
       "path": "/api/cron/seo-title-optimize",
       "schedule": "30 5 * * *"
+    },
+    {
+      "path": "/api/cron/blog-trade-trend",
+      "schedule": "0 14 * * 1"
+    },
+    {
+      "path": "/api/cron/blog-competition-rate",
+      "schedule": "0 10 * * 2"
+    },
+    {
+      "path": "/api/cron/blog-unsold-trend",
+      "schedule": "0 11 * * 5"
+    },
+    {
+      "path": "/api/cron/blog-builder-analysis",
+      "schedule": "0 7 * * 4"
+    },
+    {
+      "path": "/api/cron/blog-district-guide",
+      "schedule": "0 6 * * 3"
+    },
+    {
+      "path": "/api/cron/blog-comparison",
+      "schedule": "0 9 * * 6"
+    },
+    {
+      "path": "/api/cron/blog-theme-stocks",
+      "schedule": "0 10 * * 4"
+    },
+    {
+      "path": "/api/cron/blog-investor-flow",
+      "schedule": "0 16 * * 2"
+    },
+    {
+      "path": "/api/cron/blog-disclosure",
+      "schedule": "0 12 * * 5"
+    },
+    {
+      "path": "/api/cron/blog-exchange-rate",
+      "schedule": "0 15 1 * *"
+    },
+    {
+      "path": "/api/cron/blog-life-guide",
+      "schedule": "0 7 * * 6"
+    },
+    {
+      "path": "/api/cron/blog-market-pulse",
+      "schedule": "0 18 * * 1"
+    },
+    {
+      "path": "/api/cron/blog-weekly-digest",
+      "schedule": "0 8 * * 0"
+    },
+    {
+      "path": "/api/cron/blog-apt-v2",
+      "schedule": "0 8 * * 3,6"
+    },
+    {
+      "path": "/api/cron/blog-stock-v2",
+      "schedule": "0 10 * * 2,5"
+    },
+    {
+      "path": "/api/cron/blog-rewrite",
+      "schedule": "30 */4 * * *"
+    },
+    {
+      "path": "/api/cron/blog-publish-queue",
+      "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/blog-quality-prune",
+      "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/cron/blog-internal-links",
+      "schedule": "0 3 * * 0"
+    },
+    {
+      "path": "/api/cron/blog-series-assign",
+      "schedule": "0 4 * * 0"
     }
   ]
 }

@@ -2,7 +2,6 @@ import { AI_MODEL_HAIKU, ANTHROPIC_VERSION } from '@/lib/constants';
 import { diversifyPrompt } from '@/lib/blog-prompt-diversity';
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
-import { ensureMinLength } from '@/lib/blog-padding';
 import { withCronLogging } from '@/lib/cron-logger';
 import { generateMetaDesc, generateMetaKeywords } from '@/lib/blog-seo-utils';
 import { NextRequest, NextResponse } from 'next/server';
@@ -90,7 +89,7 @@ JSON만 출력: {"title":"제목(40자이내)","content":"마크다운본문","e
         const parsed = JSON.parse(match[0]);
         if (!parsed.title || !parsed.content) continue;
 
-        const content = ensureMinLength(parsed.content, 'apt', 1500);
+        const content = parsed.content;
         const slug = `${region.toLowerCase()}-apt-trade-${monthStr}-${Date.now().toString(36)}`;
 
         const inserted = await safeBlogInsert(supabase, {

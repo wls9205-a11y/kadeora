@@ -1,7 +1,6 @@
 export const maxDuration = 300;
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
-import { ensureMinLength } from '@/lib/blog-padding';
 import { generateImageAlt, generateMetaDesc, generateMetaKeywords } from '@/lib/blog-seo-utils';
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { withCronAuth } from '@/lib/cron-auth';
@@ -214,7 +213,7 @@ export const GET = withCronAuth(async (req: NextRequest) => {
         const result = await safeBlogInsert(admin, {
           slug,
           title,
-          content: ensureMinLength(content, 'stock'),
+          content: content,
           excerpt: `2026년 3월 ${w}주차 자사주매입, 유상증자, 실적발표 등 주요 공시를 호재/악재 분류와 함께 정리합니다.`,
           category: 'stock',
           tags,

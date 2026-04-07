@@ -3,7 +3,6 @@ export const maxDuration = 300;
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
-import { ensureMinLength } from '@/lib/blog-padding';
 import { generateImageAlt, generateMetaDesc, generateMetaKeywords } from '@/lib/blog-seo-utils';
 import { withCronLogging } from '@/lib/cron-logger';
 import { SITE_URL } from '@/lib/constants';
@@ -157,7 +156,7 @@ export async function GET(req: NextRequest) {
 
         const _r = await safeBlogInsert(admin, {
           slug, title,
-          content: ensureMinLength(content, 'apt'),
+          content: content,
           excerpt: `${apt.name} ${apt.region} ${apt.district} 매매 전세 시세 학군 교통 투자전망 2026년 분석`,
           category: 'apt', tags,
           cron_type: 'apt-landmark',

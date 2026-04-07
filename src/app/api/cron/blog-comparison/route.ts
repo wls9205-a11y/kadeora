@@ -1,7 +1,6 @@
 export const maxDuration = 300;
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
-import { ensureMinLength } from '@/lib/blog-padding';
 import { generateImageAlt, generateMetaDesc, generateMetaKeywords } from '@/lib/blog-seo-utils';
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { withCronAuth } from '@/lib/cron-auth';
@@ -374,7 +373,7 @@ export const GET = withCronAuth(async (req: NextRequest) => {
       const result = await safeBlogInsert(admin, {
         slug,
         title,
-        content: ensureMinLength(content, 'apt', 1500),
+        content: content,
         excerpt: `${sigunguA} vs ${sigunguB} 아파트 시세·거래량·학군·교통 비교 분석 2026`,
         category: 'apt',
         tags,
@@ -438,7 +437,7 @@ export const GET = withCronAuth(async (req: NextRequest) => {
       const result = await safeBlogInsert(admin, {
         slug,
         title,
-        content: ensureMinLength(content, 'stock', 1500),
+        content: content,
         excerpt: `${a.name} vs ${b.name} 주식 시세·시총·등락률·섹터 비교 분석 2026`,
         category: 'stock',
         tags,

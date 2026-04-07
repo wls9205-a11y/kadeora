@@ -1,7 +1,6 @@
 export const maxDuration = 300;
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
-import { ensureMinLength } from '@/lib/blog-padding';
 import { generateImageAlt, generateMetaDesc, generateMetaKeywords } from '@/lib/blog-seo-utils';
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { withCronAuth } from '@/lib/cron-auth';
@@ -310,7 +309,7 @@ export const GET = withCronAuth(async (req: NextRequest) => {
       const title = `${brand} 분양 일정 2026 총정리 — ${constructorNm} 신규 단지 분양가와 입지 비교`;
 
       let content = buildContent(constructorNm, brand, subscriptions);
-      content = ensureMinLength(content, 'apt', 1500);
+      // quality gate: skip if content too short
 
       const tags = [brand, constructorNm, '분양', '청약', '아파트', '2026', '분양일정'];
       const totalSupply = subscriptions.reduce((sum, p) => sum + (p.tot_supply_hshld_co || 0), 0);

@@ -1,7 +1,6 @@
 export const maxDuration = 300;
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
-import { ensureMinLength } from '@/lib/blog-padding';
 import { generateImageAlt, generateMetaDesc, generateMetaKeywords } from '@/lib/blog-seo-utils';
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { withCronAuth } from '@/lib/cron-auth';
@@ -169,7 +168,7 @@ export const GET = withCronAuth(async (req: NextRequest) => {
       const result = await safeBlogInsert(admin, {
         slug,
         title,
-        content: ensureMinLength(content, 'apt'),
+        content: content,
         excerpt: `${t.label} 재개발 구역 ${zoneList.length}곳의 단계별 진행 현황과 투자 포인트를 정리합니다.`,
         category: 'apt',
         tags,

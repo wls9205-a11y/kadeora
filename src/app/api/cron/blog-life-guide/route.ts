@@ -1,7 +1,6 @@
 export const maxDuration = 300;
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
-import { ensureMinLength } from '@/lib/blog-padding';
 import { generateImageAlt, generateMetaDesc, generateMetaKeywords } from '@/lib/blog-seo-utils';
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { withCronAuth } from '@/lib/cron-auth';
@@ -1384,7 +1383,7 @@ export const GET = withCronAuth(async (req: NextRequest) => {
 
   for (const guide of targets) {
     const rawContent = guide.content;
-    const content = ensureMinLength(rawContent, guide.category, 1500);
+    const content = rawContent;
 
     const result = await safeBlogInsert(admin, {
       slug: guide.slug,
