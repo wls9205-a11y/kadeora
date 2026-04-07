@@ -70,8 +70,8 @@ export async function GET(req: NextRequest) {
         safeCount((sb as any).from('conversion_events').select('id', { count: 'exact', head: true }).eq('event_type', 'cta_click').gte('created_at', new Date().toISOString().slice(0,10))),
         safeCount(sb.from('notifications').select('id', { count: 'exact', head: true }).gte('created_at', new Date().toISOString().slice(0,10))),
         safeCount(sb.from('notifications').select('id', { count: 'exact', head: true }).eq('is_read', true).gte('created_at', new Date().toISOString().slice(0,10))),
-        safeCount((sb as any).from('profiles').select('id', { count: 'exact', head: true }).filter('is_seed', 'not.is', 'true').not('bio', 'is', null)),
-        safeCount((sb as any).from('profiles').select('id', { count: 'exact', head: true }).filter('is_seed', 'not.is', 'true').not('age_group', 'is', null)),
+        safeCount((sb as any).from('profiles').select('id', { count: 'exact', head: true }).or('is_seed.is.null,is_seed.eq.false').not('bio', 'is', null)),
+        safeCount((sb as any).from('profiles').select('id', { count: 'exact', head: true }).or('is_seed.is.null,is_seed.eq.false').not('age_group', 'is', null)),
         safeCount(sb.from('page_views').select('id', { count: 'exact', head: true }).gte('created_at', new Date(Date.now()-7*86400000).toISOString())),
       ]);
 
@@ -111,7 +111,8 @@ export async function GET(req: NextRequest) {
 
       // 카테고리별 효율
     // 카테고리별 효율 (SQL 집계)
-    const { data: catRaw } = await (sb as any).rpc('exec_sql', { query: "SELECT category, count(*)::int as cnt, coalesce(sum(view_count),0)::int as views FROM blog_posts WHERE is_published GROUP BY category ORDER BY views DESC LIMIT 8" }).catch(() => ({ data: null }));
+    let catRaw: any = null;
+    try { const r = await (sb as any).rpc('exec_sql', { query: "SELECT category, count(*)::int as cnt, coalesce(sum(view_count),0)::int as views FROM blog_posts WHERE is_published GROUP BY category ORDER BY views DESC LIMIT 8" }); catRaw = r.data; } catch {}
     const catMap: Record<string, { count: number; views: number }> = {};
     if (Array.isArray(catRaw)) {
       for (const r of catRaw) { catMap[r.category] = { count: r.cnt, views: r.views }; }
