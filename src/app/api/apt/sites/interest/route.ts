@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
 
       // 첫 미션: 관심 현장 등록 (직접 DB 업데이트)
     try {
-      const missionUserId = userId;
+      const missionUserId = user.id;
       if (missionUserId) {
         const { data: prof } = await admin.from('profiles').select('first_mission_completed, first_mission_progress').eq('id', missionUserId).single();
         if (prof && !prof.first_mission_completed) {
