@@ -32,29 +32,31 @@ export default function BlogSection() {
   const rewritePct = blog.total > 0 ? Math.round((blog.rewritten / blog.total) * 100) : 0;
 
   const CRON_BTNS = [
-    { label: '리라이트', path: '/api/cron/blog-rewrite', icon: '✨' },
-    { label: '발행 큐', path: '/api/cron/blog-publish-queue', icon: '🚀' },
-    { label: '시리즈 배정', path: '/api/cron/blog-series-assign', icon: '📚' },
-    { label: 'SEO 비공개', path: '/api/cron/blog-quality-prune', icon: '🧹' },
-    { label: 'Batch 리라이트', path: '/api/cron/batch-rewrite-submit', icon: '🔄' },
-    { label: 'Batch 폴링', path: '/api/cron/batch-rewrite-poll', icon: '📥' },
-    { label: '복원 후보', path: '/api/cron/blog-restore-candidate', icon: '♻️' },
-    { label: '🏠 현장분석 생성', path: '/api/cron/apt-analysis-gen', icon: '📊' },
-    { label: '📈 종목분석 생성', path: '/api/cron/stock-analysis-gen', icon: '📊' },
-    { label: '🏠 현장분석 Batch', path: '/api/cron/batch-analysis-submit', icon: '⚡' },
-    { label: 'Batch 분석 폴링', path: '/api/cron/batch-analysis-poll', icon: '📥' },
-    { label: '🏘️ 현장 클러스터', path: '/api/cron/blog-apt-cluster', icon: '🌐' },
-    { label: '📊 종목 클러스터', path: '/api/cron/blog-stock-cluster', icon: '🌐' },
-    { label: '🇰🇷 KR 펀더멘탈', path: '/api/cron/stock-fundamentals-kr', icon: '📈' },
-    { label: '🇺🇸 US 펀더멘탈', path: '/api/cron/stock-fundamentals-us', icon: '📈' },
-    { label: '📍 위치 보강', path: '/api/cron/apt-enrich-location', icon: '🗺️' },
-    { label: '🔍 품질 감사', path: '/api/cron/data-quality-monitor', icon: '✅' },
-    { label: '🚀 클러스터 Batch', path: '/api/cron/batch-cluster-submit', icon: '⚡' },
-    { label: '📥 클러스터 폴링', path: '/api/cron/batch-cluster-poll', icon: '📦' },
-    { label: '📰 발행 큐 (50편)', path: '/api/cron/blog-publish-queue', icon: '📤' },
-    { label: '🔥 전체 실행 (6종)', path: '/api/admin/trigger-all', icon: '⚡' },
-    { label: '주식 시황 (수동)', path: '/api/cron/blog-daily', icon: '📈', disabled: true },
-    { label: '청약 (수동)', path: '/api/cron/blog-apt-new', icon: '🏠', disabled: true },
+    // DB전용 콘텐츠 크론
+    { label: '📈 시장 브리핑', path: '/api/cron/blog-market-pulse', icon: '📊' },
+    { label: '🏠 실거래 트렌드', path: '/api/cron/blog-trade-trend', icon: '📈' },
+    { label: '🏗️ 청약 경쟁률', path: '/api/cron/blog-competition-rate', icon: '🔥' },
+    { label: '📉 미분양 트렌드', path: '/api/cron/blog-unsold-trend', icon: '📉' },
+    { label: '🏢 시공사 분석', path: '/api/cron/blog-builder-analysis', icon: '🔨' },
+    { label: '🗺️ 지역 가이드', path: '/api/cron/blog-district-guide', icon: '📍' },
+    { label: '⚖️ 지역 비교', path: '/api/cron/blog-comparison', icon: '🔄' },
+    { label: '🎯 테마주 분석', path: '/api/cron/blog-theme-stocks', icon: '🎯' },
+    { label: '💰 외국인 수급', path: '/api/cron/blog-investor-flow', icon: '💰' },
+    { label: '📋 공시 분석', path: '/api/cron/blog-disclosure', icon: '📋' },
+    { label: '💱 환율 전망', path: '/api/cron/blog-exchange-rate', icon: '💱' },
+    { label: '📚 생활 가이드', path: '/api/cron/blog-life-guide', icon: '📚' },
+    { label: '📰 주간 다이제스트', path: '/api/cron/blog-weekly-digest', icon: '📰' },
+    // AI 크론 (크레딧 필요)
+    { label: '🤖 부동산 AI', path: '/api/cron/blog-apt-v2', icon: '🏠' },
+    { label: '🤖 주식 AI', path: '/api/cron/blog-stock-v2', icon: '📈' },
+    { label: '✨ 리라이트', path: '/api/cron/blog-rewrite', icon: '✨' },
+    // 유틸리티
+    { label: '🚀 발행 큐', path: '/api/cron/blog-publish-queue', icon: '🚀' },
+    { label: '🧹 SEO 비공개', path: '/api/cron/blog-quality-prune', icon: '🧹' },
+    { label: '🔗 내부링크', path: '/api/cron/blog-internal-links', icon: '🔗' },
+    { label: '📚 시리즈 배정', path: '/api/cron/blog-series-assign', icon: '📚' },
+    // 일회성
+    { label: '🧽 패딩 제거', path: '/api/cron/blog-cleanup-padding', icon: '🧽' },
   ] as const;
 
   return (

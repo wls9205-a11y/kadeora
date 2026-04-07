@@ -191,7 +191,7 @@ function buildContent(
 export const GET = withCronAuth(async (req: NextRequest) => {
   const params = req.nextUrl.searchParams;
   const offset = parseInt(params.get('offset') || '0', 10);
-  const limit = parseInt(params.get('limit') || String(REGIONS.length), 10);
+  const limit = parseInt(params.get('limit') || '1', 10);
   const targetRegions = REGIONS.slice(offset, offset + limit);
 
   const admin = getSupabaseAdmin();

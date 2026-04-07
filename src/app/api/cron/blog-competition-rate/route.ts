@@ -41,7 +41,7 @@ interface AptRow {
 export const GET = withCronAuth(async (req: NextRequest) => {
   const url = new URL(req.url);
   const offset = parseInt(url.searchParams.get('offset') ?? '0', 10);
-  const limit = parseInt(url.searchParams.get('limit') ?? '17', 10);
+  const limit = parseInt(url.searchParams.get('limit') ?? '1', 10);
 
   const admin = getSupabaseAdmin();
   const now = new Date();
