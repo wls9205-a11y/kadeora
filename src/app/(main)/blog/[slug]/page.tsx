@@ -422,7 +422,6 @@ export default async function BlogDetailPage({ params }: Props) {
     thumbnailUrl: `${SITE}/api/og-square?title=${encodeURIComponent(post.title)}&category=${post.category}`,
     keywords: (post.tags ?? []).join(', '),
     inLanguage: 'ko-KR',
-    isAccessibleForFree: true,
     articleSection: catSection[post.category] || '정보',
     speakable: {
       '@type': 'SpeakableSpecification',
