@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
     // 🎯 집중 탭
     // ═══════════════════════════════════════
     if (tab === 'focus') {
-      const [users, realUsers, newUsers, activeUsers, blogs, rewritten, cronOk, cronFail, interests, emailSubs, pushSubs, convEvents, dbMb, pvToday] = await Promise.all([
+      const [users, realUsers, newUsers, activeUsers, blogs, rewritten, cronOk, cronFail, interests, emailSubs, pushSubs, convEvents, dbMb, pvToday, notifRead7d, notifTotal7d, profileCompleted, onboardedCount, ctaViews7d, ctaClicks7d, postsToday, commentsToday] = await Promise.all([
         safeCount(sb.from('profiles').select('id', { count: 'exact', head: true })),
         safeCount(sb.from('profiles').select('id', { count: 'exact', head: true }).neq('is_ghost', true).neq('is_deleted', true)),
         safeCount(sb.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', weekAgo)),
@@ -50,6 +50,15 @@ export async function GET(req: NextRequest) {
         safeCount((sb as any).from('conversion_events').select('id', { count: 'exact', head: true }).gte('created_at', weekAgo)),
         safe(sb.rpc('get_db_size_mb'), 1852),
         safeCount(sb.from('page_views').select('id', { count: 'exact', head: true }).gte('created_at', now.toISOString().slice(0, 10))),
+        // 성장 분석 추가 쿼리
+        safeCount(sb.from('notifications').select('id', { count: 'exact', head: true }).eq('is_read', true).gte('created_at', weekAgo)),
+        safeCount(sb.from('notifications').select('id', { count: 'exact', head: true }).gte('created_at', weekAgo)),
+        safeCount(sb.from('profiles').select('id', { count: 'exact', head: true }).eq('profile_completed', true).neq('is_seed', true).neq('is_ghost', true)),
+        safeCount(sb.from('profiles').select('id', { count: 'exact', head: true }).eq('onboarded', true).neq('is_seed', true).neq('is_ghost', true)),
+        safeCount((sb as any).from('conversion_events').select('id', { count: 'exact', head: true }).eq('event_type', 'cta_view').gte('created_at', weekAgo)),
+        safeCount((sb as any).from('conversion_events').select('id', { count: 'exact', head: true }).eq('event_type', 'cta_click').gte('created_at', weekAgo)),
+        safeCount(sb.from('posts').select('id', { count: 'exact', head: true }).gte('created_at', now.toISOString().slice(0, 10))),
+        safeCount(sb.from('comments').select('id', { count: 'exact', head: true }).gte('created_at', now.toISOString().slice(0, 10))),
       ]);
 
       const totalCron = cronOk + cronFail;
@@ -128,6 +137,17 @@ export async function GET(req: NextRequest) {
           cronSuccess: cronOk, cronFail,
           dbMb,
           pvToday,
+        },
+        // 성장 분석
+        growth: {
+          notifReadRate: notifTotal7d > 0 ? Math.round(notifRead7d / notifTotal7d * 100) : 0,
+          notifRead7d, notifTotal7d,
+          profileCompleted, onboardedCount,
+          profileRate: realUsers > 0 ? Math.round(profileCompleted / realUsers * 100) : 0,
+          onboardRate: realUsers > 0 ? Math.round(onboardedCount / realUsers * 100) : 0,
+          ctaViews7d, ctaClicks7d,
+          ctaCtr: ctaViews7d > 0 ? Math.round(ctaClicks7d / ctaViews7d * 10000) / 100 : 0,
+          postsToday, commentsToday,
         },
         failedCrons: failGroups,
         recentActivity: [

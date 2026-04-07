@@ -27,7 +27,7 @@ export default function FocusTab({ onNavigate }: { onNavigate: (t: any) => void 
     </div>
   );
 
-  const { healthScore = 0, scoreBreakdown = {}, kpi = {} as any, failedCrons = {}, recentActivity = [], dailyTrend = [], trafficDetail = {} as any } = data;
+  const { healthScore = 0, scoreBreakdown = {}, kpi = {} as any, failedCrons = {}, recentActivity = [], dailyTrend = [], trafficDetail = {} as any, growth = {} as any } = data;
   const failCount = Object.keys(failedCrons || {}).length;
   const scoreColor = healthScore >= 71 ? '#10B981' : healthScore >= 41 ? '#F59E0B' : '#EF4444';
   const scoreLabel = healthScore >= 71 ? '양호' : healthScore >= 41 ? '주의' : '위험';
@@ -36,10 +36,17 @@ export default function FocusTab({ onNavigate }: { onNavigate: (t: any) => void 
 
   // 이번 주 할 일
   const actions: { color: string; title: string; desc: string; tab?: string }[] = [];
-  if (kpi.returnRate === 0) actions.push({ color: '#EF4444', title: '재방문율 0%', desc: `${kpi.users}명 전원 이탈. D+1 웰컴 배포 완료 — 효과 모니터링`, tab: 'users' });
-  if (kpi.interests <= 1) actions.push({ color: '#F59E0B', title: `관심등록 ${kpi.interests}건`, desc: `청약 ${fmt(kpi.apts)}건 중 등록 ${kpi.interests}건. CTA 재검토`, tab: 'users' });
-  if (kpi.rewriteRate < 50) actions.push({ color: '#3B82F6', title: `리라이팅 ${kpi.rewriteRate}%`, desc: `${fmt(kpi.blogs - kpi.rewritten)}건 대기 → ${Math.round((kpi.blogs - kpi.rewritten) / 36)}일`, tab: 'data' });
-  if (kpi.emailSubs + kpi.pushSubs === 0) actions.push({ color: '#8B5CF6', title: '구독자 0명', desc: '이메일+푸시 배포 직후. 첫 구독자 대기', tab: 'growth' });
+  // 위험 (빨간)
+  if (kpi.returnRate === 0) actions.push({ color: '#EF4444', title: '활동률 0%', desc: `${kpi.users}명 가입, 전원 미활동. 첫 미션 시스템 필요` });
+  if ((growth.notifReadRate ?? 0) === 0 && (growth.notifTotal7d ?? 0) > 100) actions.push({ color: '#EF4444', title: `알림 열람 0%`, desc: `${fmt(growth.notifTotal7d)}건 발송, 0건 열람. 푸시 구독 유도 필요` });
+  if (kpi.cronFail > 10) actions.push({ color: '#EF4444', title: `크론 실패 ${kpi.cronFail}건`, desc: `Anthropic 크레딧 확인 필요`, tab: 'ops' });
+  // 주의 (노란)
+  if (kpi.interests <= 1) actions.push({ color: '#F59E0B', title: `관심등록 ${kpi.interests}건`, desc: `청약 ${fmt(kpi.apts)}건 중 등록 ${kpi.interests}건` });
+  if ((growth.ctaCtr ?? 0) < 1 && (growth.ctaViews7d ?? 0) > 50) actions.push({ color: '#F59E0B', title: `CTA CTR ${growth.ctaCtr}%`, desc: `목표 3.0% 대비 미달. A/B 테스트 필요` });
+  if ((growth.profileRate ?? 0) === 0) actions.push({ color: '#F59E0B', title: '프로필 완성 0%', desc: '프로필 완성 인센티브 구현 필요' });
+  if (kpi.emailSubs + kpi.pushSubs === 0) actions.push({ color: '#8B5CF6', title: '구독자 0명', desc: '푸시+이메일 리텐션 채널 구축 필요', tab: 'growth' });
+  // 긍정 (문제 없으면)
+  if (actions.length === 0) actions.push({ color: '#10B981', title: '시스템 정상', desc: '조치 필요 사항 없음' });
 
   // 14일 트렌드
   const trend = [...(dailyTrend || [])].reverse();
@@ -311,16 +318,79 @@ export default function FocusTab({ onNavigate }: { onNavigate: (t: any) => void 
         </div>
       </div>
 
-      {/* ═══ 인사이트 ═══ */}
-      <div className="adm-sec">💡 인사이트</div>
-      <div className="adm-card" style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.7 }}>
-        {kpi.returnRate === 0 && (
-          <div style={{ marginBottom: 6 }}>📌 실유저 {kpi.users}명 전원 이탈 — D+1 웰컴 알림 배포 완료. 내일부터 재방문율 변화 모니터링.</div>
-        )}
-        {kpi.interests <= 1 && (
-          <div style={{ marginBottom: 6 }}>🏢 관심단지 등록 {kpi.interests}건 (청약 {fmt(kpi.apts)}건 중 {(kpi.interests / Math.max(kpi.apts, 1) * 100).toFixed(2)}%). CTA 메시지/위치 재점검.</div>
-        )}
-        <div>📈 블로그 {fmt(kpi.blogs)}편 (RW {kpi.rewriteRate}%). 36건/일 속도 → {Math.round((kpi.blogs - kpi.rewritten) / 36)}일 후 완료.</div>
+      {/* ═══ 📈 성장 분석 ═══ */}
+      <div className="adm-sec">📈 성장 분석</div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 10 }}>
+        {/* 유저 건강도 */}
+        <div className="adm-card" style={{ padding: '10px 14px' }}>
+          <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 8 }}>👤 유저 건강도</div>
+          {[
+            { l: '가입 후 활동', v: `0/${kpi.users}`, pct: 0, c: '#EF4444' },
+            { l: '프로필 완성', v: `${growth.profileRate ?? 0}%`, pct: growth.profileRate ?? 0, c: (growth.profileRate ?? 0) > 20 ? '#10B981' : '#EF4444' },
+            { l: '온보딩 완료', v: `${growth.onboardRate ?? 0}%`, pct: growth.onboardRate ?? 0, c: (growth.onboardRate ?? 0) > 70 ? '#10B981' : '#F59E0B' },
+          ].map(r => (
+            <div key={r.l} style={{ marginBottom: 6 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11 }}>
+                <span style={{ color: 'var(--text-secondary)' }}>{r.l}</span>
+                <span style={{ fontWeight: 700, color: r.c }}>{r.v}</span>
+              </div>
+              <div className="adm-bar" style={{ margin: '2px 0 0' }}><div className="adm-bar-fill" style={{ width: `${Math.max(r.pct, 1)}%`, background: r.c }} /></div>
+            </div>
+          ))}
+        </div>
+        {/* 리텐션 */}
+        <div className="adm-card" style={{ padding: '10px 14px' }}>
+          <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 8 }}>🔔 리텐션</div>
+          {[
+            { l: '알림 열람률', v: `${growth.notifReadRate ?? 0}%`, sub: `${fmt(growth.notifRead7d ?? 0)}/${fmt(growth.notifTotal7d ?? 0)}`, c: (growth.notifReadRate ?? 0) > 10 ? '#10B981' : '#EF4444' },
+            { l: '푸시 구독', v: `${kpi.pushSubs ?? 0}명`, sub: null, c: (kpi.pushSubs ?? 0) > 0 ? '#10B981' : '#EF4444' },
+            { l: '이메일 구독', v: `${kpi.emailSubs ?? 0}명`, sub: null, c: (kpi.emailSubs ?? 0) > 0 ? '#10B981' : '#EF4444' },
+          ].map(r => (
+            <div key={r.l} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '4px 0', borderBottom: '1px solid var(--border)', fontSize: 11 }}>
+              <span style={{ color: 'var(--text-secondary)' }}>{r.l}</span>
+              <div style={{ textAlign: 'right' }}>
+                <span style={{ fontWeight: 700, color: r.c }}>{r.v}</span>
+                {r.sub && <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>{r.sub}</div>}
+              </div>
+            </div>
+          ))}
+          {/* CTA 퍼널 미니 */}
+          <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 4, fontSize: 10 }}>
+            <div style={{ flex: 1, textAlign: 'center', padding: '4px 0', background: 'rgba(59,130,246,0.08)', borderRadius: 4 }}>
+              <div style={{ fontWeight: 800, color: '#3B82F6' }}>{growth.ctaViews7d ?? 0}</div>
+              <div style={{ fontSize: 8, color: 'var(--text-tertiary)' }}>노출</div>
+            </div>
+            <span style={{ color: 'var(--text-tertiary)' }}>→</span>
+            <div style={{ flex: 1, textAlign: 'center', padding: '4px 0', background: 'rgba(245,158,11,0.08)', borderRadius: 4 }}>
+              <div style={{ fontWeight: 800, color: '#F59E0B' }}>{growth.ctaClicks7d ?? 0}</div>
+              <div style={{ fontSize: 8, color: 'var(--text-tertiary)' }}>클릭</div>
+            </div>
+            <span style={{ color: 'var(--text-tertiary)' }}>→</span>
+            <div style={{ flex: 1, textAlign: 'center', padding: '4px 0', background: 'rgba(16,185,129,0.08)', borderRadius: 4 }}>
+              <div style={{ fontWeight: 800, color: '#10B981' }}>{kpi.newUsers ?? 0}</div>
+              <div style={{ fontSize: 8, color: 'var(--text-tertiary)' }}>가입</div>
+            </div>
+          </div>
+          <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginTop: 2, textAlign: 'right' }}>CTR {growth.ctaCtr ?? 0}% / 목표 3.0%</div>
+        </div>
+      </div>
+
+      {/* 콘텐츠 성과 + 오늘 */}
+      <div className="adm-card" style={{ padding: '10px 14px', marginBottom: 10 }}>
+        <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 6 }}>📊 오늘 성과</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
+          {[
+            { l: '게시글', v: growth.postsToday ?? 0, c: '#8B5CF6' },
+            { l: '댓글', v: growth.commentsToday ?? 0, c: '#06B6D4' },
+            { l: '블로그', v: kpi.blogs ? '총 ' + fmt(kpi.blogs) : '0', c: '#F59E0B' },
+            { l: 'PV', v: fmt(kpi.pvToday ?? 0), c: '#3B82F6' },
+          ].map(r => (
+            <div key={r.l} style={{ textAlign: 'center', padding: '6px 0', background: 'var(--bg-hover)', borderRadius: 8 }}>
+              <div style={{ fontSize: 16, fontWeight: 700, color: r.c }}>{r.v}</div>
+              <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>{r.l}</div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* ═══ 최근 활동 ═══ */}
