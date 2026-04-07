@@ -113,6 +113,13 @@ export async function GET(req: NextRequest) {
     // 카테고리별 효율 (SQL 집계)
     let catRaw: any = null;
     try { const r = await (sb as any).rpc('exec_sql', { query: "SELECT category, count(*)::int as cnt, coalesce(sum(view_count),0)::int as views FROM blog_posts WHERE is_published GROUP BY category ORDER BY views DESC LIMIT 8" }); catRaw = r.data; } catch {}
+
+    // SEO 포털별 준비도
+    let seoPortal: any = { google: 0, naver: 0, both: 0, excerpt: 0, links: 0, title: 0, meta: 0 };
+    try {
+      const { data: seoRaw } = await (sb as any).rpc('exec_sql', { query: "SELECT json_build_object('google', count(*) FILTER (WHERE char_length(title) BETWEEN 20 AND 70 AND meta_description IS NOT NULL AND char_length(meta_description) BETWEEN 60 AND 170 AND char_length(coalesce(content,''))>1500 AND author_name IS NOT NULL AND related_slugs IS NOT NULL AND array_length(related_slugs,1)>=1), 'naver', count(*) FILTER (WHERE char_length(title) BETWEEN 20 AND 70 AND meta_description IS NOT NULL AND char_length(meta_description) BETWEEN 60 AND 170 AND char_length(coalesce(content,''))>3000 AND cover_image IS NOT NULL AND meta_keywords IS NOT NULL AND excerpt IS NOT NULL AND char_length(excerpt)>30), 'excerpt', count(*) FILTER (WHERE excerpt IS NOT NULL AND char_length(excerpt)>=30), 'links', count(*) FILTER (WHERE related_slugs IS NOT NULL AND array_length(related_slugs,1)>0), 'title', count(*) FILTER (WHERE char_length(title) BETWEEN 20 AND 70), 'meta', count(*) FILTER (WHERE meta_description IS NOT NULL AND char_length(meta_description) BETWEEN 60 AND 170)) as r FROM blog_posts WHERE is_published" });
+      if (seoRaw) { try { const parsed = JSON.parse(seoRaw); seoPortal = parsed?.[0]?.r || seoPortal; } catch {} }
+    } catch {}
     const catMap: Record<string, { count: number; views: number }> = {};
     if (Array.isArray(catRaw)) {
       for (const r of catRaw) { catMap[r.category] = { count: r.cnt, views: r.views }; }
@@ -173,13 +180,6 @@ export async function GET(req: NextRequest) {
           ctaCtr: ctaViews7d > 0 ? Math.round(ctaClicks7d / ctaViews7d * 10000) / 100 : 0,
           postsToday, commentsToday,
         },
-        // SEO 포털별 준비도 쿼리
-        let seoPortal: any = { google: 0, naver: 0, both: 0, excerpt: 0, links: 0, title: 0, meta: 0 };
-        try {
-          const { data: seoRaw } = await (sb as any).rpc('exec_sql', { query: "SELECT json_build_object('google', count(*) FILTER (WHERE char_length(title) BETWEEN 20 AND 70 AND meta_description IS NOT NULL AND char_length(meta_description) BETWEEN 60 AND 170 AND char_length(coalesce(content,''))>1500 AND author_name IS NOT NULL AND related_slugs IS NOT NULL AND array_length(related_slugs,1)>=1), 'naver', count(*) FILTER (WHERE char_length(title) BETWEEN 20 AND 70 AND meta_description IS NOT NULL AND char_length(meta_description) BETWEEN 60 AND 170 AND char_length(coalesce(content,''))>3000 AND cover_image IS NOT NULL AND meta_keywords IS NOT NULL AND excerpt IS NOT NULL AND char_length(excerpt)>30), 'both', count(*) FILTER (WHERE char_length(title) BETWEEN 20 AND 70 AND meta_description IS NOT NULL AND char_length(meta_description) BETWEEN 60 AND 170 AND char_length(coalesce(content,''))>3000 AND cover_image IS NOT NULL AND meta_keywords IS NOT NULL AND excerpt IS NOT NULL AND char_length(excerpt)>30 AND author_name IS NOT NULL AND related_slugs IS NOT NULL AND array_length(related_slugs,1)>=1), 'excerpt', count(*) FILTER (WHERE excerpt IS NOT NULL AND char_length(excerpt)>=30), 'links', count(*) FILTER (WHERE related_slugs IS NOT NULL AND array_length(related_slugs,1)>0), 'title', count(*) FILTER (WHERE char_length(title) BETWEEN 20 AND 70), 'meta', count(*) FILTER (WHERE meta_description IS NOT NULL AND char_length(meta_description) BETWEEN 60 AND 170)) as r FROM blog_posts WHERE is_published" });
-          if (seoRaw) { try { const parsed = JSON.parse(seoRaw); seoPortal = parsed?.[0]?.r || seoPortal; } catch {} }
-        } catch {}
-
         extended: {
           totalPosts, totalComments, hotBlogs, newBlogs24, aptSites, aptDeadline7,
           ctaViews24, ctaClicks24, notifSent24, notifRead24, bioCount, ageCount, pv7d,
