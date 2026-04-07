@@ -1590,17 +1590,6 @@ export default async function AptUnifiedPage({ params }: Props) {
       </div>
 
       {/* 프로 업셀 — 결제 시스템 출시 전까지 비공개 */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span style={{ fontSize: 'var(--fs-xl)' }}>🔔</span>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>청약 마감 알림 받아보세요</div>
-            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 1 }}>프로 멤버십 · D-7 사전 알림 + 전세가율 변동</div>
-          </div>
-          <Link href="/shop" style={{ padding: '7px 14px', borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: '#fff', fontSize: 11, fontWeight: 600, textDecoration: 'none', flexShrink: 0 }}>
-            자세히
-          </Link>
-        </div>
-      </div>}
 
       <Disclaimer />
       <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textAlign: 'center', margin: '8px 0 40px', lineHeight: 1.6 }}>📊 데이터 출처: 국토교통부 · 청약홈 · 한국부동산원 · 각 지자체</p>
