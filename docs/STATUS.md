@@ -89,10 +89,10 @@
 - 총 크론: ~79개 (vercel.json)
 - DA: 5~8 (추정)
 - 검색 노출: 43,700/월
-- AI 크레딧: ❌ 소진
+- AI 크레딧: ✅ 정상
 
 ### 주요 API 키 상태
-- ANTHROPIC_API_KEY: ✅ (크레딧 소진 — 충전 필요)
+- ANTHROPIC_API_KEY: ✅ (크레딧 정상)
 - CRON_SECRET: ✅
 - STOCK_DATA_API_KEY: ✅
 - KIS_APP_KEY: ❌
