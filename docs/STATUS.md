@@ -98,3 +98,13 @@ blog-afternoon, blog-daily, blog-monthly, blog-weekly, blog-apt-cluster, blog-st
 - [ ] /stock/movers — 급등락 + 52주 신고가/신저가
 - [ ] /stock/themes — 테마주 독립 페이지
 - [ ] /stock/market/[code] — 시장별 페이지
+
+### 주식 Phase 2 — 신규 하위 페이지 5개
+- /stock/dividend: 고배당주 TOP 30 (국내/해외, 배당수익률순)
+- /stock/movers: 급등락 TOP 20 + 거래량 TOP 20 + 52주 신고가/신저가
+- /stock/themes: 테마주 독립 페이지 (테마별 관련주 + 평균 등락률)
+- /stock/market/[code]: KOSPI/KOSDAQ/NYSE/NASDAQ 시장별 종목 목록 (4페이지)
+- /stock/search: 종목 검색 + 시장/섹터/시총/정렬 필터
+- Sitemap: 신규 8개 URL 추가
+
+주식 라우트: 6개→11개 (부동산 12개에 근접)

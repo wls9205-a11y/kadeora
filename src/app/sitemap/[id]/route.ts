@@ -62,7 +62,9 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
       '', '/feed', '/hot', '/stock', '/apt', '/discuss', '/blog',
       '/guide', '/search', '/faq', '/terms', '/privacy', '/refund', 
       '/grades', '/daily', '/apt/map', '/apt/diagnose', '/apt/search', '/apt/complex', '/stock/compare', '/blog/series',
-      '/apt/data', '/stock/data', '/calc', '/about/team', '/press',
+      '/apt/data', '/stock/data', '/stock/search', '/stock/dividend', '/stock/movers', '/stock/themes',
+      '/stock/market/kospi', '/stock/market/kosdaq', '/stock/market/nyse', '/stock/market/nasdaq',
+      '/calc', '/about/team', '/press',
     ];
     // 계산기 동적 URL
     let calcPaths: string[] = [];
