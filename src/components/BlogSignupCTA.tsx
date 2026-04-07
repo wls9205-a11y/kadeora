@@ -3,7 +3,6 @@ import { trackConversion } from '@/lib/track-conversion';
 import Link from 'next/link';
 import { useAuth } from '@/components/AuthProvider';
 import { useState, useEffect } from 'react';
-import { useConversion } from '@/lib/conversion-orchestrator';
 
 /** 블로그 상단 회원가입 유도 배너 */
 export function BlogTopBanner({ slug }: { slug: string }) {
@@ -87,7 +86,7 @@ export function BlogFloatingCTA({ slug }: { slug: string }) {
   const { userId } = useAuth();
   const [visible, setVisible] = useState(false);
   const [dismissed, setDismissed] = useState(false);
-  const { canShow, onDismiss } = useConversion('blog_floating_cta', 6);
+  const canShow = true; const onDismiss = () => {};
 
   useEffect(() => {
     if (userId || dismissed) return;
