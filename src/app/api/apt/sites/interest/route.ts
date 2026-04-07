@@ -64,7 +64,24 @@ export async function POST(req: NextRequest) {
         .select('residence_city, residence_district')
         .eq('id', user.id).single();
 
-      const { error: insertErr } = await admin.from('apt_site_interests').insert({
+      // 첫 미션: 관심 현장 등록 (직접 DB 업데이트)
+    try {
+      const missionUserId = userId;
+      if (missionUserId) {
+        const { data: prof } = await admin.from('profiles').select('first_mission_completed, first_mission_progress').eq('id', missionUserId).single();
+        if (prof && !prof.first_mission_completed) {
+          const prog = (prof as any).first_mission_progress || {};
+          if (!prog.interest) {
+            prog.interest = true;
+            await admin.rpc('award_points', { p_user_id: missionUserId, p_amount: 50, p_reason: '첫 미션: 관심현장' });
+            const done = Object.values(prog).filter(Boolean).length;
+            if (done >= 2) await admin.rpc('award_points', { p_user_id: missionUserId, p_amount: 200, p_reason: '첫 미션 보너스' });
+            await (admin as any).from('profiles').update({ first_mission_progress: prog, first_mission_completed: done >= 2 }).eq('id', missionUserId);
+          }
+        }
+      }
+    } catch {}
+    const { error: insertErr } = await admin.from('apt_site_interests').insert({
         site_id: parsed.data.site_id,
         user_id: user.id,
         is_member: true,

@@ -17,7 +17,14 @@ const MESSAGES: Record<string, { icon: string; title: (n?: string) => string; su
   stock: {
     icon: 'bell',
     title: (n) => `${n || '종목'} 가격 변동 알림`,
-    sub: (p, e) => `현재가 ${p || ''} 기준 ±3% 변동 시 즉시 알림${e ? `\n${e}` : ''}`,
+    sub: (p, e) => {
+      // A/B: visitor_id 해시 기반
+      const vid = typeof window !== 'undefined' ? (document.cookie.match(/kd_vid=([^;]+)/)?.[1] || '') : '';
+      const isB = vid ? parseInt(vid.slice(-2), 16) % 2 === 1 : false;
+      return isB
+        ? `${p ? p + ' · ' : ''}실시간 변동 + AI 투자 의견${e ? '\n' + e : ''}`
+        : `현재가 ${p || ''} 기준 ±3% 변동 시 즉시 알림${e ? '\n' + e : ''}`;
+    },
     btn: '카카오로 무료 시작',
     color: '#3B82F6',
   },
