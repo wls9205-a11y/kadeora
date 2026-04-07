@@ -8,7 +8,6 @@ export const metadata: Metadata = {
   title: '확성기',
   description: '카더라 아이템 샵 — 확성기로 내 글을 돋보이게 하세요. 포인트로 구매 가능.',
   alternates: { canonical: SITE_URL + '/shop/megaphone' },
-  other: { 'naver:author': '카더라', 'naver:written_time': new Date().toISOString(), 'dg:plink': SITE_URL + '/shop/megaphone' },
   openGraph: {
     title: '확성기 아이템 샵',
     description: '포인트로 확성기를 구매하여 내 글을 돋보이게',
@@ -22,6 +21,7 @@ export const metadata: Metadata = {
     ],
   },
   twitter: { card: 'summary_large_image' },
+  other: { 'dg:plink': SITE_URL + '/shop/megaphone', 'naver:author': '카더라', 'naver:written_time': new Date().toISOString() },
 };
 
 export default function ShopPage() {

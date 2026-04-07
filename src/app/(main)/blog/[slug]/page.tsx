@@ -392,7 +392,6 @@ export default async function BlogDetailPage({ params }: Props) {
     dateModified: post.updated_at || post.published_at || post.created_at,
     wordCount,
     timeRequired: `PT${readingTimeMin}M`,
-    isAccessibleForFree: true,
     author: {
       '@type': 'Person',
       name: post.author_name || '카더라',
