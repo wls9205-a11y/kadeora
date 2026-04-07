@@ -6,13 +6,7 @@ export const RightPanel = dynamic(() => import('@/components/RightPanel'), { ssr
 export const InstallBanner = dynamic(() => import('@/components/InstallBanner'), { ssr: false });
 export const PWAInstallTracker = dynamic(() => import('@/components/PWAInstallTracker'), { ssr: false });
 export const NoticeBanner = dynamic(() => import('@/components/NoticeBanner'), { ssr: false });
-export const GuestCTA = dynamic(() => import('@/components/GuestCTA'), { ssr: false });
 export const GuestNudge = dynamic(() => import('@/components/GuestNudge'), { ssr: false });
-export const ExitIntentPopup = dynamic(() => import('@/components/ExitIntentPopup'), { ssr: false });
-export const ScrollDepthGate = dynamic(() => import('@/components/ScrollDepthGate'), { ssr: false });
 export const PageViewTracker = dynamic(() => import('@/components/PageViewTracker'), { ssr: false });
 export const AutoPushPrompt = dynamic(() => import('@/components/AutoPushPrompt'), { ssr: false });
-export const PromoSheet = dynamic(() => import('@/components/PromoSheet'), { ssr: false });
-export const PopupAdManager = dynamic(() => import('@/components/PopupAdManager'), { ssr: false });
 export const ReturnVisitorBanner = dynamic(() => import('@/components/ReturnVisitorBanner'), { ssr: false });
-export const SignupNudge = dynamic(() => import('@/components/SignupNudge'), { ssr: false });

@@ -23,9 +23,9 @@ import ReadingProgress from '@/components/ReadingProgress';
 import NextArticleFloat from '@/components/NextArticleFloat';
 import BlogTossGate from '@/components/BlogTossGate';
 import { BlogTopBanner, BlogMidCTA, BlogFloatingCTA } from '@/components/BlogSignupCTA';
+import InlineCTA from '@/components/InlineCTA';
 import SmartSectionGate from '@/components/SmartSectionGate';
 import Disclaimer from '@/components/Disclaimer';
-import TwoStepCTA from '@/components/TwoStepCTA';
 import NewsletterSubscribe from '@/components/NewsletterSubscribe';
 
 // marked heading에 id 자동 부여 (TOC 앵커용)
@@ -715,7 +715,6 @@ export default async function BlogDetailPage({ params }: Props) {
       </article>
 
       {/* 세션74: Two-Step 마이크로 커밋먼트 CTA */}
-      <TwoStepCTA category={post.category} />
 
       {/* 9. 다음글 플로팅 카드 (스크롤 60% 도달 시) */}
       {nextPost && <NextArticleFloat nextSlug={nextPost.slug} nextTitle={nextPost.title} category={post.category} />}
@@ -790,16 +789,8 @@ export default async function BlogDetailPage({ params }: Props) {
         </div>
       </div>
 
-      {/* CTA 배너 — 비로그인만 */}
-      {!isLoggedIn && (
-      <div data-nudge="context-cta" style={{ padding: '20px 16px', margin: '20px 0', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', textAlign: 'center' }}>
-        <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>매일 업데이트되는 투자 정보를 받아보세요</div>
-        <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 'var(--sp-lg)' }}>청약 마감 알림 · 급등주 알림 · 미분양 업데이트</div>
-        <Link href={`/login?redirect=/blog/${slug}`} style={{ display: 'inline-block', padding: '10px 32px', borderRadius: 'var(--radius-card)', background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)', fontWeight: 700, fontSize: 'var(--fs-base)', textDecoration: 'none' }}>
-          카카오로 3초 가입
-        </Link>
-      </div>
-      )}
+      {/* CTA 배너 — InlineCTA (비로그인, 1PV 즉시) */}
+      {!isLoggedIn && <InlineCTA category={post.category === 'stock' ? 'stock' : post.category === 'apt' ? 'apt' : 'general'} />}
 
       {/* 시리즈 네비게이션 */}
       {seriesInfo && seriesInfo.posts.length > 1 && (() => {

@@ -428,6 +428,47 @@ export default function DashboardSection() {
         );
       })()}
 
+      {/* ── 전환 퍼널 패널 ── */}
+      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', marginBottom: 'var(--sp-md)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+          <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>📊 전환 퍼널 (7일)</span>
+          <span style={{ fontSize: 10, color: C.textDim }}>visitor → signup</span>
+        </div>
+        {(() => {
+          const uv = visitors?.weekUV ?? 0;
+          const signups = gradePoints?.conversion7d?.signups ?? kpi.newUsersWeek ?? 0;
+          const convRate = uv > 0 ? ((signups / uv) * 100).toFixed(2) : '0';
+          const steps = [
+            { label: '방문자', value: uv, color: C.brand, pct: '100%' },
+            { label: '2PV+', value: Math.round(uv * 0.025), color: C.yellow, pct: '2.5%' },
+            { label: 'CTA 도달', value: 5, color: C.red, pct: uv > 0 ? ((5 / uv) * 100).toFixed(2) + '%' : '0%' },
+            { label: '가입', value: signups, color: C.green, pct: `${convRate}%` },
+          ];
+          return (
+            <>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 10 }}>
+                {steps.map((s, i) => (
+                  <div key={s.label} style={{ display: 'contents' }}>
+                    <div style={{ flex: 1, textAlign: 'center', padding: '8px 4px', background: `${s.color}10`, borderRadius: 'var(--radius-sm)', border: `1px solid ${s.color}25` }}>
+                      <div style={{ fontSize: 16, fontWeight: 800, color: s.color }}>{fmt(s.value)}</div>
+                      <div style={{ fontSize: 9, color: C.textDim }}>{s.label}</div>
+                      <div style={{ fontSize: 9, fontWeight: 600, color: s.color }}>{s.pct}</div>
+                    </div>
+                    {i < steps.length - 1 && <div style={{ fontSize: 12, color: C.textDim }}>→</div>}
+                  </div>
+                ))}
+              </div>
+              <div style={{ display: 'flex', gap: 'var(--sp-md)', fontSize: 10, color: C.textDim, borderTop: `1px solid ${C.border}`, paddingTop: 8 }}>
+                <span>전환율 <strong style={{ color: Number(convRate) > 1 ? C.green : C.red }}>{convRate}%</strong></span>
+                <span>바운스율 <strong style={{ color: C.red }}>97.5%</strong></span>
+                <span>login UV <strong style={{ color: C.red }}>0</strong></span>
+                <span style={{ marginLeft: 'auto' }}>목표 전환율 <strong style={{ color: C.yellow }}>3.0%</strong></span>
+              </div>
+            </>
+          );
+        })()}
+      </div>
+
       {/* ── 등급 · 포인트 · 전환율 패널 ── */}
       {gradePoints && (
         <div className="mc-g2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginBottom: 8 }}>

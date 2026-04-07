@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
 import { isTossMode } from '@/lib/toss-mode';
+import { trackConversion } from '@/lib/track-conversion';
 
 /**
  * 통합 GuestNudge v5 — 첫방문 + 재방문 모두 지원
@@ -64,20 +65,18 @@ function track(action: 'impression' | 'click' | 'dismiss', type: NudgeType) {
 }
 
 function getNudgeType(pv: number, detail: boolean): NudgeType {
-  // v5: 첫방문자에게도 배너/모달 표시
+  // v6: 1PV부터 트리거 — 97.5%가 1PV에서 이탈하므로
   const sessions = typeof window !== 'undefined' ? localStorage.getItem('kd_visit_sessions') : null;
   const isReturnVisitor = sessions ? (() => { try { return JSON.parse(sessions).length >= 2; } catch { return false; } })() : false;
 
-  if (pv < 2) return 'none';
-
   if (isReturnVisitor) {
-    // 재방문자: 더 빠르게 에스컬레이션
-    if (pv <= 3) return 'toast';
-    if (pv <= 5) return detail ? 'toast' : 'banner';
+    if (pv <= 2) return 'toast';
+    if (pv <= 4) return detail ? 'toast' : 'banner';
     return detail ? 'toast' : 'modal';
   } else {
-    // 첫방문자: 2PV부터 배너, 5PV부터 모달
-    if (pv <= 4) return detail ? 'none' : 'banner';
+    // 첫방문자: 1PV → 토스트, 2PV → 배너, 4PV+ → 모달
+    if (pv <= 1) return 'toast';
+    if (pv <= 3) return detail ? 'toast' : 'banner';
     return detail ? 'toast' : 'modal';
   }
 }
@@ -124,12 +123,14 @@ export default function GuestNudge() {
       if (parseInt(localStorage.getItem(S.lifetimeModals) || '0') >= 20) return;
     }
 
-    const delay = type === 'toast' ? 2000 : 3000;
+    // v6: 1PV 토스트는 15초 지연 (콘텐츠 읽을 시간), 나머지 기존 유지
+    const delay = type === 'toast' ? (pv <= 1 ? 15000 : 2000) : 3000;
     const timer = setTimeout(() => {
       if (type === 'toast' && isContextCTAVisible()) return;
       setNudge(type);
       setVisible(true);
       track('impression', type);
+      trackConversion('cta_view', `guest_nudge_${type}`);
       if (type === 'toast') {
         sessionStorage.setItem(toastKey, '1');
         setTimeout(() => setVisible(false), 5000);

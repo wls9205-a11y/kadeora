@@ -5,11 +5,10 @@ import { Navigation } from '@/components/Navigation';
 import AdBanner from '@/components/AdBanner';
 import { ToastProvider } from '@/components/Toast';
 import ErrorBoundary from '@/components/ErrorBoundary';
-import { Sidebar, RightPanel, InstallBanner, PWAInstallTracker, NoticeBanner, PageViewTracker, AutoPushPrompt, PromoSheet, GuestNudge, ExitIntentPopup, ScrollDepthGate, PopupAdManager, SignupNudge, ReturnVisitorBanner } from '@/components/ClientDynamics';
+import { Sidebar, RightPanel, InstallBanner, PWAInstallTracker, NoticeBanner, PageViewTracker, AutoPushPrompt, GuestNudge, ReturnVisitorBanner } from '@/components/ClientDynamics';
 import TopLoadingBar from '@/components/TopLoadingBar';
 import ScrollToTop from '@/components/ScrollToTop';
 import { AuthProvider } from '@/components/AuthProvider';
-import { ConversionOrchestratorProvider } from '@/lib/conversion-orchestrator';
 import WelcomeReward from '@/components/WelcomeReward';
 
 export const metadata: Metadata = {
@@ -27,7 +26,6 @@ export default async function MainLayout({ children }: { children: React.ReactNo
   return (
     <ToastProvider>
       <AuthProvider serverLoggedIn={isLoggedIn}>
-      <ConversionOrchestratorProvider>
       <TopLoadingBar />
       <Navigation />
       <NoticeBanner />
@@ -57,11 +55,6 @@ export default async function MainLayout({ children }: { children: React.ReactNo
       <InstallBanner />
       <PWAInstallTracker />
       <GuestNudge />
-      <ExitIntentPopup />
-      <ScrollDepthGate />
-      <SignupNudge />
-      <PromoSheet />
-      <PopupAdManager />
       <ReturnVisitorBanner />
       <AutoPushPrompt />
       <PageViewTracker />
@@ -78,7 +71,6 @@ export default async function MainLayout({ children }: { children: React.ReactNo
           <p style={{marginTop:4}}>© 2026 카더라. All rights reserved.</p>
         </div>
       </footer>
-      </ConversionOrchestratorProvider>
       </AuthProvider>
     </ToastProvider>
   );

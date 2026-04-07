@@ -18,6 +18,7 @@ import { timeAgo } from '@/lib/format';
 import Disclaimer from '@/components/Disclaimer';
 import ReadingProgress from '@/components/ReadingProgress';
 import PollWidget from '@/components/PollWidget';
+import InlineCTA from '@/components/InlineCTA';
 import { renderContent, type EntityMap } from '@/lib/content-renderer';
 
 
@@ -410,15 +411,8 @@ export default async function FeedDetailPage({ params }: Props) {
           </div>
         )}
 
-        {/* 비로그인 가입 유도 — 이미지 아래에 배치 */}
-        {!currentUserId && (
-          <div style={{ textAlign: 'center', padding: '24px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', marginBottom: 'var(--sp-2xl)' }}>
-            <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>전체 글을 보려면 로그인하세요</div>
-            <Link href={`/login?redirect=/feed/${id}`} style={{ display: 'inline-block', padding: '10px 28px', borderRadius: 'var(--radius-card)', background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)', fontWeight: 700, fontSize: 'var(--fs-base)', textDecoration: 'none' }}>
-              카카오로 로그인
-            </Link>
-          </div>
-        )}
+        {/* 비로그인 가입 유도 — InlineCTA */}
+        {!currentUserId && <InlineCTA category={post.category === 'stock' ? 'stock' : post.category === 'apt' ? 'apt' : 'general'} />}
 
         {(post.category === 'apt' || post.category === 'stock') && (
           <Disclaimer type="feed" compact />
