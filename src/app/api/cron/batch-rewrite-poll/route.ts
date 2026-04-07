@@ -102,10 +102,6 @@ export async function GET(req: NextRequest) {
             const clean = newContent.replace(/[#|*\n\r\-\[\]\(\)/]/g, ' ').replace(/\s+/g, ' ').trim();
             const now = new Date().toISOString();
 
-            // 기존 점수 조회 (롤백 판단용)
-            const { data: oldPost } = await admin.from('blog_posts').select('seo_score').eq('id', r.custom_id).single();
-            const oldScore = oldPost?.seo_score || 0;
-            // seo_rollback: 리라이트 후 점수가 기존보다 10점 이상 하락하면 스킵
             const newContent = r.result?.message?.content?.[0]?.text || '';
             if (!newContent || newContent.length < 200) { skipped++; continue; }
             
