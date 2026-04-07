@@ -372,7 +372,21 @@ export async function GET(req: Request) {
         gradePoints = gpR.data ?? {};
       } catch { gradePoints = {}; }
 
+
+        // CTA 통계 (7일)
+        let ctaStats = { views: 0, clicks: 0 };
+        try {
+          const { data: ctaEvents } = await sb.from('conversion_events' as any)
+            .select('event_type')
+            .gte('created_at', new Date(Date.now() - 7 * 86400000).toISOString());
+          if (ctaEvents) {
+            ctaStats.views = ctaEvents.filter((e: any) => e.event_type === 'cta_view').length;
+            ctaStats.clicks = ctaEvents.filter((e: any) => e.event_type === 'cta_click').length;
+          }
+        } catch {}
+
       return NextResponse.json({
+        ctaStats,
         kpi: {
           users: usersR.count ?? 0,
           posts: postsR.count ?? 0,
