@@ -412,7 +412,7 @@ export default async function FeedDetailPage({ params }: Props) {
         )}
 
         {/* 비로그인 가입 유도 — InlineCTA */}
-        {!currentUserId && <InlineCTA category={post.category === 'stock' ? 'stock' : post.category === 'apt' ? 'apt' : 'general'} />}
+        {!currentUserId && <InlineCTA type={post.category === 'stock' ? 'stock' : post.category === 'apt' ? 'apt' : 'feed'} />}
 
         {(post.category === 'apt' || post.category === 'stock') && (
           <Disclaimer type="feed" compact />
