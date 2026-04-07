@@ -71,6 +71,23 @@ export async function GET(request: Request) {
     }
   }
 
+  // Anthropic API 크레딧 체크 (POST 필요)
+  try {
+    const aStart = Date.now();
+    const aRes = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'x-api-key': process.env.ANTHROPIC_API_KEY || '', 'anthropic-version': '2023-06-01', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 10, messages: [{ role: 'user', content: 'ping' }] }),
+      signal: AbortSignal.timeout(8000),
+    });
+    await supabase.from('health_checks').upsert({
+      service_name: 'anthropic_api', status: aRes.ok ? 'ok' : 'error',
+      response_time_ms: Date.now() - aStart, last_checked_at: new Date().toISOString(),
+      error_message: aRes.ok ? null : `HTTP ${aRes.status}`,
+    }, { onConflict: 'service_name' });
+    results.push({ service: 'anthropic_api', status: aRes.ok ? 'ok' : 'error', ms: Date.now() - aStart });
+  } catch { results.push({ service: 'anthropic_api', status: 'error', ms: 0 }); }
+
   await supabase
     .from('health_checks')
     .upsert({

@@ -280,7 +280,7 @@
     },
     {
       "path": "/api/cron/blog-stock-v2",
-      "schedule": "0 7 * * *"
+      "schedule": "10 */3 * * *"
     },
     {
       "path": "/api/cron/blog-apt-v2",
@@ -336,7 +336,7 @@
     },
     {
       "path": "/api/cron/blog-stock-cluster",
-      "schedule": "0 8 * * *"
+      "schedule": "20 */4 * * *"
     },
     {
       "path": "/api/cron/analysis-refresh",
@@ -369,6 +369,10 @@
     {
       "path": "/api/cron/batch-cluster-poll",
       "schedule": "*/10 * * * *"
+    },
+    {
+      "path": "/api/cron/welcome-nudge",
+      "schedule": "0 9 * * *"
     }
   ]
 }
