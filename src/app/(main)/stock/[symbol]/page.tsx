@@ -194,9 +194,6 @@ export default async function StockDetailPage({ params }: Props) {
           { '@type': 'Question', name: `${s.name} 시가총액은 얼마인가요?`, acceptedAnswer: { '@type': 'Answer', text: `${s.name}(${symbol})의 시가총액은 ${Number(s.market_cap) > 0 ? `약 ${Number(s.market_cap) >= 1e12 ? `${(Number(s.market_cap) / 1e12).toFixed(1)}조원` : Number(s.market_cap) >= 1e8 ? `${Math.round(Number(s.market_cap) / 1e8).toLocaleString()}억원` : `${Number(s.market_cap).toLocaleString()}원`}` : '비공개'}입니다. ${s.market} 상장 종목이며, 카더라에서 섹터 내 시총 순위를 확인할 수 있습니다.` } },
         ],
       })}} />
-      {/* JSON-LD: Dataset (가격 히스토리 — Google Dataset Search) */}
-      {/* Dataset schema removed for optimization */}
-      {false && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'Dataset', name: `${s.name} (${symbol}) 주가 데이터`, description: `${s.name} ${s.market} 상장 종목의 실시간 시세, 시가총액, 등락률, 거래량 데이터`, url: `${SITE_URL}/stock/${encodeURIComponent(symbol)}`, creator: { '@type': 'Organization', name: '카더라', url: SITE_URL }, temporalCoverage: '2024/..', variableMeasured: [{ '@type': 'PropertyValue', name: 'price', value: s.price }, { '@type': 'PropertyValue', name: 'change_pct', value: changePct }, { '@type': 'PropertyValue', name: 'market_cap', value: s.market_cap }] }) }} />
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-lg)' }}>
         <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', fontSize: 12, color: 'var(--text-tertiary)' }}>
@@ -213,13 +210,6 @@ export default async function StockDetailPage({ params }: Props) {
         </div>
       </div>
 
-      {/* SEO: ImageGallery JSON-LD (시각적 캐러셀 제거, 메타데이터만 유지) */}
-      {/* ImageGallery schema removed for optimization */}
-      {false && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-        '@context': 'https://schema.org', '@type': 'ImageGallery', name: `${s.name} (${symbol}) 주식 이미지`,
-        about: { '@type': 'FinancialProduct', name: s.name, identifier: symbol },
-        image: [{ '@type': 'ImageObject', url: `${SITE_URL}/api/og?title=${encodeURIComponent(`${s.name} (${symbol})`)}&design=2&category=stock`, name: `${s.name} 주가 시세`, width: 1200, height: 630 }, { '@type': 'ImageObject', url: `${SITE_URL}/api/og-chart?symbol=${symbol}`, name: `${s.name} 투자 지표 인포그래픽`, width: 1200, height: 630 }],
-      })}} />
 
       {/* 히어로 시세 카드 */}
       <div className="stock-price-header" style={{
