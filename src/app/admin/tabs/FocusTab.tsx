@@ -5,171 +5,273 @@ const f=(n:number)=>n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e4?(n/1e3).toFixed(0)+'K':
 const pct=(a:number,b:number)=>b>0?Math.round(a/b*100):0;
 const ago=(d:string)=>{const s=Math.floor((Date.now()-new Date(d).getTime())/1000);return s<60?'방금':s<3600?Math.floor(s/60)+'분':s<86400?Math.floor(s/3600)+'시':Math.floor(s/86400)+'일';};
 
+const Ring=({value,max=100,size=44,stroke=4,color,children}:{value:number;max?:number;size?:number;stroke?:number;color:string;children?:any})=>{
+  const r=(size-stroke)/2,circ=2*Math.PI*r,off=circ-(Math.min(value,max)/max)*circ;
+  return <svg width={size} height={size} style={{transform:'rotate(-90deg)'}}>
+    <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={stroke}/>
+    <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={color} strokeWidth={stroke} strokeDasharray={circ} strokeDashoffset={off} strokeLinecap="round" style={{transition:'stroke-dashoffset 1s'}}/>
+    <g style={{transform:'rotate(90deg)',transformOrigin:'center'}}>{children}</g>
+  </svg>;
+};
+const Spark=({data,h=28,color='#3B7BF6'}:{data:number[];h?:number;color?:string})=>{
+  const mx=Math.max(...data,1),w=560;
+  const pts=data.map((v,i)=>`${(i/(data.length-1))*w},${h-(v/mx)*h}`).join(' ');
+  return <svg width="100%" viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" style={{display:'block'}}>
+    <defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={color} stopOpacity="0.3"/><stop offset="100%" stopColor={color} stopOpacity="0"/></linearGradient></defs>
+    <polygon points={`0,${h} ${pts} ${w},${h}`} fill="url(#sg)"/><polyline points={pts} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <circle cx={w} cy={h-(data[data.length-1]/mx)*h} r="2.5" fill={color}/>
+  </svg>;
+};
+const Dot=({ok,size=6}:{ok:boolean;size?:number})=><span style={{width:size,height:size,borderRadius:'50%',background:ok?'#10B981':'#EF4444',display:'inline-block',flexShrink:0,boxShadow:ok?'0 0 6px rgba(16,185,129,0.4)':'0 0 6px rgba(239,68,68,0.4)'}}/>;
+const HBar=({value,max=100,color,h=4}:{value:number;max?:number;color:string;h?:number})=><div style={{height:h,borderRadius:h/2,background:'rgba(255,255,255,0.06)',overflow:'hidden'}}><div style={{height:'100%',width:`${Math.max(Math.min(value/max*100,100),2)}%`,background:color,borderRadius:h/2,transition:'width 0.8s'}}/></div>;
+
 export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
   const [d,setD]=useState<any>(null);
   const [ld,setLd]=useState(true);
-  const [god,setGod]=useState(false);
+  const [pulse,setPulse]=useState(true);
   const ref=useRef<any>(null);
   const load=useCallback(()=>{fetch('/api/admin/v2?tab=focus').then(r=>r.json()).then(v=>{setD(v);setLd(false);}).catch(()=>setLd(false));},[]);
   useEffect(()=>{load();ref.current=setInterval(load,30000);return()=>clearInterval(ref.current);},[load]);
-  const runGod=async()=>{if(!confirm('전체 크론 실행?'))return;setGod(true);try{await fetch('/api/admin/god-mode',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'all'})});load();}catch{}setGod(false);};
+  useEffect(()=>{const i=setInterval(()=>setPulse(p=>!p),1500);return()=>clearInterval(i);},[]);
 
   if(ld)return<div style={{textAlign:'center',padding:80,color:'rgba(255,255,255,0.3)',fontSize:12}}>불러오는 중...</div>;
   if(!d)return<div style={{textAlign:'center',padding:80}}>⚠️ 로드 실패</div>;
 
-  const{healthScore:hs=0,kpi:k={} as any,growth:g={} as any,extended:x={} as any,failedCrons:fc={},recentActivity:ra=[],dailyTrend:dt=[],categoryStats:cs=[]}=d;
+  const{healthScore:hs=0,kpi:k={} as any,growth:g={} as any,extended:x={} as any,failedCrons:fc={},recentActivity:ra=[],dailyTrend:dt=[],categoryStats:cs=[],trafficDetail:td={} as any}=d;
   const sc=hs>=71?'#10B981':hs>=41?'#F59E0B':'#EF4444';
   const fcn=Object.keys(fc||{}).length;
   const cr=pct(k.cronSuccess,k.cronSuccess+k.cronFail);
-  const ctr=k.conversions>0||g.ctaViews7d>0?((g.ctaClicks7d||0)/Math.max(g.ctaViews7d||1,1)*100).toFixed(1):'0';
+  const ctr=(g.ctaViews7d||0)>0?((g.ctaClicks7d||0)/(g.ctaViews7d||1)*100).toFixed(1):'0';
   const nr=pct(g.notifRead7d||0,g.notifTotal7d||1);
-  const mx=dt?.length>0?Math.max(...dt.slice(-14).map((v:any)=>v.pv||0),1):1;
+  const dbPct=pct(k.dbMb||0,8400);
+  const rwPct=k.rewriteRate||0;
 
   const warns:string[]=[];
   if((g.profileRate??0)===0&&k.users>0)warns.push('프로필 0%');
-  if((k.pushSubs??0)+(k.emailSubs??0)===0)warns.push('구독 0명');
   if(parseFloat(ctr)<1&&(g.ctaViews7d??0)>10)warns.push(`CTR ${ctr}%`);
   if(fcn>0)warns.push(`크론실패 ${fcn}`);
 
-  const C=({children,style={}}:{children:any;style?:React.CSSProperties})=><div style={{background:'rgba(12,21,40,0.7)',border:'1px solid rgba(255,255,255,0.04)',borderRadius:8,padding:'8px 10px',marginBottom:5,...style}}>{children}</div>;
-  const L=({children}:{children:any})=><div style={{fontSize:9,fontWeight:700,color:'rgba(255,255,255,0.35)',marginBottom:4,textTransform:'uppercase' as const,letterSpacing:0.5}}>{children}</div>;
-  const R=({l,v,c='rgba(255,255,255,0.5)',s=''}:{l:string;v:any;c?:string;s?:string})=>(
-    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'2px 0',fontSize:10}}>
-      <span style={{color:'rgba(255,255,255,0.35)'}}>{l}</span>
-      <span style={{display:'flex',alignItems:'center',gap:4}}>
-        {s&&<span style={{fontSize:8,color:'rgba(255,255,255,0.2)'}}>{s}</span>}
-        <span style={{fontWeight:700,color:c,minWidth:28,textAlign:'right' as const}}>{v}</span>
-      </span>
-    </div>
-  );
-  const M=({l,v,c,s=''}:{l:string;v:any;c:string;s?:string})=>(
-    <div style={{textAlign:'center',padding:'6px 2px'}}>
-      <div style={{fontSize:16,fontWeight:800,color:c,lineHeight:1,letterSpacing:-0.5}}>{v}</div>
-      <div style={{fontSize:8,color:'rgba(255,255,255,0.4)',marginTop:2}}>{l}</div>
-      {s&&<div style={{fontSize:7,color:'rgba(255,255,255,0.2)'}}>{s}</div>}
-    </div>
-  );
+  const CS={card:{background:'rgba(12,21,40,0.65)',border:'1px solid rgba(255,255,255,0.04)',borderRadius:10,padding:'10px 12px',backdropFilter:'blur(8px)'}};
+
+  // 시간대별 PV (trafficDetail에서 추출)
+  const hourly=td?.hourlyPv||[];
+  const hmx=hourly.length>0?Math.max(...hourly.map((h:any)=>h.count||0),1):1;
+  const topPages=td?.topPages||[];
+  const refSources=td?.referrerBreakdown||[];
+  const refTotal=refSources.reduce((a:number,r:any)=>a+(r.count||0),0)||1;
 
   return (
     <div>
-      {/* 위험 신호 */}
+      {/* ═══ 실시간 트래픽 ═══ */}
+      <div style={{...CS.card,marginBottom:6,background:'linear-gradient(135deg,rgba(6,182,212,0.06),rgba(12,21,40,0.65))'}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}>
+          <div style={{display:'flex',alignItems:'center',gap:6}}>
+            <span style={{width:8,height:8,borderRadius:'50%',background:'#10B981',boxShadow:'0 0 8px rgba(16,185,129,0.5)',opacity:pulse?1:0.4,transition:'opacity 0.3s'}}/>
+            <span style={{fontSize:11,fontWeight:800,color:'#E2E8F0'}}>실시간 트래픽</span>
+          </div>
+          <span style={{fontSize:9,color:'rgba(255,255,255,0.25)'}}>30초 갱신</span>
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:6,marginBottom:8}}>
+          {[{l:'접속 (5분)',v:td?.recentVisitors?.length||0,c:'#10B981'},{l:'UV (1시간)',v:td?.uniqueVisitors||0,c:'#06B6D4'},{l:'PV (오늘)',v:k.pvToday||0,c:'#3B7BF6'},{l:'PV (7일)',v:f(x.pv7d||0),c:'#8B5CF6'}].map(kk=>(
+            <div key={kk.l} style={{textAlign:'center'}}>
+              <div style={{fontSize:18,fontWeight:900,color:kk.c,lineHeight:1}}>{kk.v}</div>
+              <div style={{fontSize:7,color:'rgba(255,255,255,0.3)',marginTop:2}}>{kk.l}</div>
+            </div>
+          ))}
+        </div>
+        {hourly.length>0&&<>
+          <div style={{fontSize:8,color:'rgba(255,255,255,0.2)',marginBottom:3}}>시간대별 PV (24h)</div>
+          <div style={{display:'flex',gap:1,height:24,alignItems:'flex-end'}}>
+            {hourly.map((v:any,i:number)=>{const now=new Date().getHours();return <div key={i} style={{flex:1,height:Math.max(((v.count||0)/hmx)*20,2),borderRadius:2,background:v.hour===now?'#10B981':(v.count||0)>40?'rgba(59,123,246,0.5)':'rgba(59,123,246,0.15)'}}/>;
+            })}
+          </div>
+        </>}
+      </div>
+
+      {/* ═══ 인기 페이지 + 유입 경로 ═══ */}
+      {(topPages.length>0||refSources.length>0)&&<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:5,marginBottom:6}}>
+        <div style={CS.card}>
+          <div style={{fontSize:9,fontWeight:700,color:'rgba(255,255,255,0.35)',marginBottom:5}}>🔥 인기 페이지</div>
+          {topPages.slice(0,5).map((p:any,i:number)=>(
+            <div key={i} style={{display:'flex',alignItems:'center',gap:4,padding:'2px 0',fontSize:9}}>
+              <span style={{width:14,height:14,borderRadius:4,background:i<3?['#3B7BF6','#06B6D4','#8B5CF6'][i]:'rgba(255,255,255,0.06)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:7,fontWeight:800,color:i<3?'#fff':'rgba(255,255,255,0.25)',flexShrink:0}}>{i+1}</span>
+              <span style={{flex:1,color:'rgba(255,255,255,0.4)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' as const}}>{p.path}</span>
+              <span style={{fontWeight:700,color:'rgba(255,255,255,0.5)',fontSize:10}}>{p.count}</span>
+            </div>
+          ))}
+        </div>
+        <div style={CS.card}>
+          <div style={{fontSize:9,fontWeight:700,color:'rgba(255,255,255,0.35)',marginBottom:5}}>🌐 유입 경로</div>
+          {refSources.slice(0,5).map((r:any)=>{const w=pct(r.count||0,refTotal);const clr:any={direct:'#3B7BF6',google:'#10B981',naver:'#00C73C',daum:'#F59E0B',kakao:'#FEE500'}; return <div key={r.source} style={{marginBottom:3}}>
+            <div style={{display:'flex',justifyContent:'space-between',fontSize:9,marginBottom:1}}>
+              <span style={{color:'rgba(255,255,255,0.4)'}}>{r.source}</span>
+              <span style={{fontWeight:600,color:'rgba(255,255,255,0.5)'}}>{r.count} <span style={{fontSize:7,color:'rgba(255,255,255,0.15)'}}>({w}%)</span></span>
+            </div>
+            <HBar value={w} color={clr[r.source?.toLowerCase()]||'rgba(255,255,255,0.2)'} h={3}/>
+          </div>;})}
+        </div>
+      </div>}
+
+      {/* ═══ 위험 신호 ═══ */}
       {warns.length>0&&<div style={{display:'flex',gap:4,marginBottom:6,flexWrap:'wrap'}}>{warns.map((w,i)=><span key={i} style={{fontSize:9,fontWeight:600,color:'#EF4444',background:'rgba(239,68,68,0.08)',border:'1px solid rgba(239,68,68,0.12)',padding:'2px 8px',borderRadius:12}}>⚠ {w}</span>)}</div>}
 
-      {/* KPI 2행 */}
-      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:4,marginBottom:4}}>
-        <C><M l="유저" v={k.users} c="#3B7BF6" s={`+${k.newUsers}/7d`}/></C>
-        <C><M l="PV/일" v={f(k.pvToday)} c="#06B6D4" s={`${f(x.pv7d||0)}/7d`}/></C>
-        <C><M l="블로그" v={f(k.blogs)} c="#8B5CF6" s={`${f(x.hotBlogs||0)}핫`}/></C>
-        <C><M l="크론" v={`${cr}%`} c={cr>=95?'#10B981':'#EF4444'} s={`${k.cronFail}실패`}/></C>
+      {/* ═══ KPI 링 4칸 ═══ */}
+      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:5,marginBottom:5}}>
+        {[
+          {l:'유저',v:k.users,c:'#3B7BF6',sub:`+${k.newUsers}/7d`,ring:pct(g.onboardRate||0,100)},
+          {l:'블로그',v:f(k.blogs),c:'#8B5CF6',sub:`${f(x.hotBlogs||0)}핫`,ring:Math.min(pct(x.hotBlogs||0,k.blogs||1)*10,100)},
+          {l:'크론',v:`${cr}%`,c:cr>=95?'#10B981':'#EF4444',sub:`${k.cronFail}실패`,ring:cr},
+          {l:'DB',v:`${((k.dbMb||0)/1024).toFixed(1)}G`,c:dbPct<50?'#10B981':'#F59E0B',sub:'/8.4G',ring:dbPct},
+        ].map(kk=>(
+          <div key={kk.l} style={{...CS.card,textAlign:'center',padding:'8px 4px'}}>
+            <div style={{display:'flex',justifyContent:'center',marginBottom:3}}>
+              <Ring value={kk.ring} size={36} stroke={3} color={kk.c}>
+                <text x="18" y="16" textAnchor="middle" dominantBaseline="central" fill={kk.c} fontSize="10" fontWeight="800">{kk.v}</text>
+              </Ring>
+            </div>
+            <div style={{fontSize:8,color:'rgba(255,255,255,0.4)'}}>{kk.l}</div>
+            <div style={{fontSize:7,color:'rgba(255,255,255,0.2)'}}>{kk.sub}</div>
+          </div>
+        ))}
       </div>
-      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:4,marginBottom:6}}>
-        <C><M l="청약" v={f(k.apts)} c="#10B981" s={`D-7:${x.aptDeadline7||0}`}/></C>
-        <C><M l="종목" v={f(k.stocks)} c="#F59E0B" s={`미분양${f(k.unsold)}`}/></C>
-        <C><M l="단지" v={f(x.aptSites||0)} c="#14B8A6" s={`관심${k.interests}`}/></C>
-        <C><M l="DB" v={`${((k.dbMb||0)/1024).toFixed(1)}G`} c={(k.dbMb||0)<4000?'#10B981':'#F59E0B'} s="/8.4G"/></C>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:5,marginBottom:6}}>
+        {[{l:'청약',v:f(k.apts),c:'#10B981',i:'🏠'},{l:'종목',v:f(k.stocks),c:'#F59E0B',i:'📈'},{l:'단지',v:f(x.aptSites||0),c:'#14B8A6',i:'🏢'},{l:'미분양',v:f(k.unsold),c:'#F97316',i:'🏚️'}].map(kk=>(
+          <div key={kk.l} style={{...CS.card,textAlign:'center',padding:'5px 4px'}}>
+            <div style={{fontSize:11,opacity:0.5}}>{kk.i}</div>
+            <div style={{fontSize:14,fontWeight:800,color:kk.c,lineHeight:1}}>{kk.v}</div>
+            <div style={{fontSize:7,color:'rgba(255,255,255,0.25)',marginTop:1}}>{kk.l}</div>
+          </div>
+        ))}
       </div>
 
-      {/* 3열: 유저 | 콘텐츠 | 리텐션 */}
+      {/* ═══ 14일 PV 스파크라인 ═══ */}
+      {dt?.length>0&&<div style={{...CS.card,marginBottom:6,padding:'8px 12px'}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:4}}>
+          <span style={{fontSize:9,fontWeight:700,color:'rgba(255,255,255,0.35)'}}>📈 14일 PV</span>
+          <span style={{fontSize:10,fontWeight:700,color:'#06B6D4'}}>{k.pvToday}<span style={{fontSize:8,color:'rgba(255,255,255,0.2)'}}> /오늘</span></span>
+        </div>
+        <Spark data={dt.slice(-14).map((v:any)=>v.pv||0)} h={36}/>
+      </div>}
+
+      {/* ═══ 리라이팅 현황 ═══ */}
+      <div style={{...CS.card,marginBottom:6,background:'linear-gradient(135deg,rgba(139,92,246,0.06),rgba(12,21,40,0.65))',borderLeft:'3px solid #8B5CF6'}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6}}>
+          <span style={{fontSize:11,fontWeight:800,color:'#E2E8F0'}}>✍️ SEO 리라이팅</span>
+          <span style={{fontSize:9,color:'rgba(255,255,255,0.25)'}}>RW {rwPct}%</span>
+        </div>
+        <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:8}}>
+          <Ring value={rwPct} size={50} stroke={5} color="#8B5CF6">
+            <text x="25" y="22" textAnchor="middle" dominantBaseline="central" fill="#8B5CF6" fontSize="13" fontWeight="900">{rwPct}%</text>
+            <text x="25" y="34" textAnchor="middle" dominantBaseline="central" fill="rgba(255,255,255,0.2)" fontSize="7">완료</text>
+          </Ring>
+          <div style={{flex:1}}>
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:4,marginBottom:4}}>
+              {[{l:'완료',v:f(k.rewritten||0),c:'#10B981'},{l:'잔여',v:f((k.blogs||0)-(k.rewritten||0)),c:'#F59E0B'},{l:'오늘',v:x.newBlogs24||0,c:'#06B6D4'}].map(kk=>(
+                <div key={kk.l} style={{textAlign:'center'}}>
+                  <div style={{fontSize:13,fontWeight:800,color:kk.c,lineHeight:1}}>{kk.v}</div>
+                  <div style={{fontSize:7,color:'rgba(255,255,255,0.25)',marginTop:1}}>{kk.l}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        {/* 카테고리 효율 */}
+        {(cs||[]).length>0&&<>
+          <div style={{fontSize:8,color:'rgba(255,255,255,0.25)',marginBottom:3}}>콘텐츠 효율 (views/post)</div>
+          {cs.slice(0,4).map((c:any)=>(
+            <div key={c.category} style={{display:'flex',alignItems:'center',gap:4,marginBottom:2}}>
+              <span style={{width:36,fontSize:8,color:'rgba(255,255,255,0.3)'}}>{c.category}</span>
+              <div style={{flex:1}}><HBar value={c.efficiency||0} max={200} color={(c.efficiency||0)>50?'#10B981':(c.efficiency||0)>15?'#F59E0B':'#EF4444'} h={4}/></div>
+              <span style={{width:22,fontSize:9,fontWeight:700,textAlign:'right' as const,color:(c.efficiency||0)>50?'#10B981':'rgba(255,255,255,0.3)'}}>{c.efficiency||0}</span>
+            </div>
+          ))}
+        </>}
+      </div>
+
+      {/* ═══ 3열: 유저 | CTA | 리텐션 ═══ */}
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:5,marginBottom:6}}>
-        <C><L>👤 유저</L>
-          <R l="온보딩" v={`${g.onboardRate??0}%`} c={(g.onboardRate??0)>70?'#10B981':'#F59E0B'}/>
-          <R l="프로필" v={`${g.profileRate??0}%`} c={(g.profileRate??0)>20?'#10B981':'#EF4444'}/>
-          <R l="지역" v={`${pct(29,k.users)}%`} c={pct(29,k.users)>50?'#10B981':'#F59E0B'}/>
-          <R l="연령" v={`${pct(x.ageCount||0,k.users)}%`} c={pct(x.ageCount||0,k.users)>50?'#10B981':'#F59E0B'}/>
-          <R l="시드" v={x.seeds||0} c="rgba(255,255,255,0.2)"/>
-        </C>
-        <C><L>📝 콘텐츠</L>
-          <R l="게시글" v={f(x.totalPosts||0)} s={`+${g.postsToday||0}/d`}/>
-          <R l="댓글" v={f(x.totalComments||0)} s={`+${g.commentsToday||0}/d`}/>
-          <R l="실유저" v={f(k.activeUsers||0)} c="#3B7BF6"/>
-          <R l="블로그/d" v={x.newBlogs24||0}/>
-        </C>
-        <C><L>🔔 리텐션</L>
-          <R l="알림열람" v={`${nr}%`} c={nr>10?'#10B981':'#EF4444'}/>
-          <R l="오늘발송" v={x.notifSent24||0} s={`열람${x.notifRead24||0}`}/>
-          <R l="푸시" v={k.pushSubs??0} c={(k.pushSubs??0)>0?'#10B981':'#EF4444'}/>
-          <R l="이메일" v={k.emailSubs??0} c={(k.emailSubs??0)>0?'#10B981':'#EF4444'}/>
-        </C>
-      </div>
-
-      {/* 2열: SEO | CTA */}
-      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:5,marginBottom:6}}>
-        <C><L>🔍 SEO</L>
-          <R l="평균" v={41} c={41>50?'#10B981':'#EF4444'}/>
-          <R l="리라이트" v={`${k.rewriteRate}%`} s={f(k.rewritten)}/>
-          <R l="핫(50+)" v={f(x.hotBlogs||0)} c="#8B5CF6"/>
-          <R l="카테고리" v={5}/>
-        </C>
-        <C><L>📊 CTA 퍼널</L>
-          <div style={{display:'flex',gap:2,marginBottom:4}}>
-            {[{v:g.ctaViews7d||0,l:'노출',c:'#3B7BF6'},{v:g.ctaClicks7d||0,l:'클릭',c:'#F59E0B'},{v:k.newUsers||0,l:'가입',c:'#10B981'}].map((z,i)=>(
-              <div key={z.l} style={{display:'flex',alignItems:'center',gap:2,flex:1}}>
-                {i>0&&<span style={{color:'rgba(255,255,255,0.1)',fontSize:8}}>→</span>}
-                <div style={{flex:1,textAlign:'center',padding:'3px 0',background:`${z.c}0D`,borderRadius:4}}>
-                  <div style={{fontSize:11,fontWeight:800,color:z.c}}>{z.v}</div>
-                  <div style={{fontSize:7,color:'rgba(255,255,255,0.2)'}}>{z.l}</div>
+        <div style={CS.card}>
+          <div style={{fontSize:9,fontWeight:700,color:'rgba(255,255,255,0.35)',marginBottom:5}}>👤 유저</div>
+          {[{l:'온보딩',v:g.onboardRate??0,bar:true,c:(g.onboardRate??0)>70?'#10B981':'#F59E0B'},{l:'프로필',v:g.profileRate??0,bar:true,c:(g.profileRate??0)>20?'#10B981':'#EF4444'},{l:'게시글',v:f(x.totalPosts||0),c:'rgba(255,255,255,0.5)'},{l:'댓글',v:f(x.totalComments||0),c:'rgba(255,255,255,0.5)'}].map(r=>(
+            <div key={r.l} style={{marginBottom:3}}><div style={{display:'flex',justifyContent:'space-between',fontSize:9,marginBottom:1}}><span style={{color:'rgba(255,255,255,0.3)'}}>{r.l}</span><span style={{fontWeight:700,color:r.c}}>{r.bar?r.v+'%':r.v}</span></div>{r.bar&&<HBar value={r.v} color={r.c}/>}</div>
+          ))}
+        </div>
+        <div style={CS.card}>
+          <div style={{fontSize:9,fontWeight:700,color:'rgba(255,255,255,0.35)',marginBottom:5}}>📊 CTA</div>
+          <div style={{display:'flex',flexDirection:'column',gap:3,marginBottom:4}}>
+            {[{v:g.ctaViews7d||0,l:'노출',c:'#3B7BF6',w:100},{v:g.ctaClicks7d||0,l:'클릭',c:'#F59E0B',w:Math.max((g.ctaClicks7d||0)/Math.max(g.ctaViews7d||1,1)*100,10)},{v:k.newUsers||0,l:'가입',c:'#10B981',w:Math.max((k.newUsers||0)/Math.max(g.ctaViews7d||1,1)*100,15)}].map(xx=>(
+              <div key={xx.l} style={{display:'flex',alignItems:'center',gap:3}}>
+                <span style={{fontSize:7,color:'rgba(255,255,255,0.2)',width:18}}>{xx.l}</span>
+                <div style={{flex:1,height:10,background:'rgba(255,255,255,0.04)',borderRadius:3,overflow:'hidden'}}>
+                  <div style={{height:'100%',width:`${xx.w}%`,background:`linear-gradient(90deg,${xx.c},${xx.c}88)`,borderRadius:3,display:'flex',alignItems:'center',justifyContent:'flex-end',paddingRight:3}}>
+                    <span style={{fontSize:7,fontWeight:700,color:'#fff'}}>{xx.v}</span>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
-          <R l="CTR" v={`${ctr}%`} c={parseFloat(ctr)>2?'#10B981':'#EF4444'}/>
-          <R l="오늘" v={x.ctaViews24||0} s={`클릭${x.ctaClicks24||0}`}/>
-        </C>
-      </div>
-
-      {/* 2열: PV차트 | 효율 */}
-      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:5,marginBottom:6}}>
-        <C>{dt?.length>0&&<><L>📈 14일 PV</L><div style={{display:'flex',alignItems:'flex-end',gap:2,height:32}}>{dt.slice(-14).map((v:any,i:number)=><div key={i} style={{flex:1,height:Math.max(((v.pv||0)/mx)*28,2),borderRadius:2,background:i===dt.slice(-14).length-1?'#3B7BF6':'rgba(59,123,246,0.2)'}}/>)}</div></>}</C>
-        <C><L>📊 효율 (v/p)</L>
-          {(cs||[]).slice(0,4).map((c:any)=>(
-            <div key={c.category} style={{display:'flex',alignItems:'center',gap:4,padding:'2px 0',fontSize:9}}>
-              <span style={{width:36,color:'rgba(255,255,255,0.35)'}}>{c.category}</span>
-              <div style={{flex:1,height:3,background:'rgba(255,255,255,0.05)',borderRadius:2,overflow:'hidden'}}><div style={{height:'100%',width:`${Math.min((c.efficiency||0)/2,100)}%`,background:(c.efficiency||0)>50?'#10B981':(c.efficiency||0)>10?'#F59E0B':'#EF4444',borderRadius:2}}/></div>
-              <span style={{width:24,textAlign:'right' as const,fontWeight:700,color:(c.efficiency||0)>50?'#10B981':'rgba(255,255,255,0.3)',fontSize:9}}>{c.efficiency||0}</span>
+          <div style={{textAlign:'center',fontSize:11,fontWeight:800,color:parseFloat(ctr)>2?'#10B981':'#EF4444'}}>CTR {ctr}%</div>
+        </div>
+        <div style={CS.card}>
+          <div style={{fontSize:9,fontWeight:700,color:'rgba(255,255,255,0.35)',marginBottom:5}}>🔔 리텐션</div>
+          <div style={{display:'flex',justifyContent:'center',marginBottom:4}}>
+            <Ring value={nr} size={38} stroke={3} color={nr>10?'#10B981':'#EF4444'}>
+              <text x="19" y="17" textAnchor="middle" dominantBaseline="central" fill={nr>10?'#10B981':'#EF4444'} fontSize="10" fontWeight="800">{nr}%</text>
+            </Ring>
+          </div>
+          <div style={{fontSize:7,color:'rgba(255,255,255,0.2)',textAlign:'center',marginBottom:3}}>알림 열람률</div>
+          {[{l:'발송',v:f(g.notifTotal7d||0)},{l:'열람',v:f(g.notifRead7d||0),c:'#10B981'}].map(r=>(
+            <div key={r.l} style={{display:'flex',justifyContent:'space-between',fontSize:9,padding:'1px 0'}}>
+              <span style={{color:'rgba(255,255,255,0.3)'}}>{r.l}</span>
+              <span style={{fontWeight:600,color:r.c||'rgba(255,255,255,0.4)'}}>{r.v}</span>
             </div>
           ))}
-        </C>
+        </div>
       </div>
 
-      {/* 3열: 시스템 | 부동산 | 실패크론 */}
-      <div style={{display:'grid',gridTemplateColumns:fcn>0?'1fr 1fr 1fr':'1fr 1fr',gap:5,marginBottom:6}}>
-        <C><L>🔧 시스템</L>
-          <R l="크론/일" v={k.cronSuccess+k.cronFail} s={`${68}종`}/>
-          <R l="성공" v={k.cronSuccess} c="#10B981"/>
-          <R l="DB" v={`${((k.dbMb||0)/1024).toFixed(1)}G`} c={(k.dbMb||0)<4000?'#10B981':'#F59E0B'}/>
-        </C>
-        <C><L>🏠 부동산</L>
-          <R l="청약" v={f(k.apts)}/>
-          <R l="단지" v={f(x.aptSites||0)}/>
-          <R l="D-7마감" v={x.aptDeadline7||0} c={(x.aptDeadline7||0)>0?'#F59E0B':'rgba(255,255,255,0.3)'}/>
-          <R l="관심" v={k.interests} c={k.interests>0?'#10B981':'#EF4444'}/>
-        </C>
-        {fcn>0&&<C style={{borderLeft:'2px solid #EF4444'}}><L>❌ 실패 ({fcn})</L>
+      {/* ═══ 시스템 + 실패크론 ═══ */}
+      <div style={{display:'grid',gridTemplateColumns:fcn>0?'1fr 1fr':'1fr',gap:5,marginBottom:6}}>
+        <div style={CS.card}>
+          <div style={{fontSize:9,fontWeight:700,color:'rgba(255,255,255,0.35)',marginBottom:5}}>🔧 시스템</div>
+          <div style={{marginBottom:4}}>
+            <div style={{display:'flex',justifyContent:'space-between',fontSize:8,marginBottom:2}}>
+              <span style={{color:'rgba(255,255,255,0.3)'}}>DB</span>
+              <span style={{color:dbPct<50?'#10B981':'#F59E0B'}}>{((k.dbMb||0)/1024).toFixed(1)}G / 8.4G</span>
+            </div>
+            <HBar value={dbPct} color={dbPct<50?'#10B981':'#F59E0B'} h={5}/>
+          </div>
+          <div style={{display:'flex',justifyContent:'space-between',fontSize:9,padding:'2px 0'}}>
+            <span style={{color:'rgba(255,255,255,0.3)'}}>크론/일</span>
+            <span style={{fontWeight:700,color:'rgba(255,255,255,0.5)'}}>{k.cronSuccess+k.cronFail}</span>
+          </div>
+        </div>
+        {fcn>0&&<div style={{...CS.card,borderLeft:'2px solid #EF4444'}}>
+          <div style={{fontSize:9,fontWeight:700,color:'#EF4444',marginBottom:3}}>❌ 실패 ({fcn})</div>
           {Object.entries(fc||{}).slice(0,4).map(([n,info]:any)=>(
             <div key={n} style={{display:'flex',justifyContent:'space-between',fontSize:8,padding:'1px 0',color:'rgba(255,255,255,0.35)'}}>
               <span>{n.replace(/^(blog-|cron-|apt-|stock-)/,'')}</span>
               <span style={{color:'#EF4444',fontWeight:600}}>{info.count}</span>
             </div>
           ))}
-        </C>}
+        </div>}
       </div>
 
-      {/* 최근 활동 */}
-      <C><L>🕐 최근 활동</L>
+      {/* ═══ 최근 활동 ═══ */}
+      <div style={{...CS.card,marginBottom:6}}>
+        <div style={{fontSize:9,fontWeight:700,color:'rgba(255,255,255,0.35)',marginBottom:4}}>🕐 최근 활동</div>
         {(ra||[]).slice(0,6).map((a:any,i:number)=>(
-          <div key={i} style={{display:'flex',alignItems:'center',gap:5,padding:'3px 0',borderBottom:i<Math.min(ra.length,6)-1?'1px solid rgba(255,255,255,0.03)':'none',fontSize:9}}>
-            <span style={{width:24,color:'rgba(255,255,255,0.2)',flexShrink:0}}>{ago(a.at)}</span>
-            <span style={{width:5,height:5,borderRadius:'50%',flexShrink:0,background:a.type==='cron'?(a.status==='success'?'#10B981':'#EF4444'):'#3B7BF6'}}/>
-            <span style={{color:'rgba(255,255,255,0.45)',flex:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' as const}}>{a.name}</span>
-            {a.count>0&&<span style={{color:'rgba(255,255,255,0.2)',fontSize:8}}>{a.count}</span>}
+          <div key={i} style={{display:'flex',alignItems:'center',gap:6,padding:'3px 0',borderBottom:i<Math.min(ra.length,6)-1?'1px solid rgba(255,255,255,0.03)':'none'}}>
+            <span style={{width:30,fontSize:8,color:'rgba(255,255,255,0.2)',flexShrink:0}}>{ago(a.at)}</span>
+            <Dot ok={a.type==='cron'?a.status==='success':true} size={5}/>
+            <span style={{fontSize:9,color:'rgba(255,255,255,0.45)',flex:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' as const}}>{a.name}</span>
           </div>
         ))}
-      </C>
+      </div>
 
-      {/* 네비 */}
-      <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:3,marginTop:4}}>
+      {/* ═══ 5버튼 ═══ */}
+      <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:3}}>
         {([['📈','성장','growth'],['👤','유저','users'],['🔧','크론','ops'],['🗄️','데이터','data'],['⚡','실행','execute']] as const).map(([i,l,t])=>(
-          <button key={t} onClick={()=>onNavigate(t)} style={{padding:'6px 0',background:'rgba(12,21,40,0.5)',border:'1px solid rgba(255,255,255,0.04)',borderRadius:6,cursor:'pointer',textAlign:'center',fontSize:8,color:'rgba(255,255,255,0.25)'}}>
+          <button key={t} onClick={()=>onNavigate(t)} style={{padding:'7px 0',background:'rgba(12,21,40,0.5)',border:'1px solid rgba(255,255,255,0.04)',borderRadius:8,cursor:'pointer',textAlign:'center',fontSize:8,color:'rgba(255,255,255,0.25)'}}>
             <div style={{fontSize:13,opacity:0.4}}>{i}</div>{l}
           </button>
         ))}

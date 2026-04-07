@@ -177,6 +177,10 @@ export async function GET(req: NextRequest) {
           totalPosts, totalComments, hotBlogs, newBlogs24, aptSites, aptDeadline7,
           ctaViews24, ctaClicks24, notifSent24, notifRead24, bioCount, ageCount, pv7d,
           seeds: (users ?? 0) - realUsers,
+          // 트래픽
+          active5m: 0, active30m: 0, pv1h: 0,
+          // 리라이팅
+          rwDone: rewritten, rwTotal: blogs + (users ?? 0) - realUsers,
           seoA: 0, seoB: 0, seoC: 0, seoAvg: 0, // placeholder — 카테고리스탯에서 제공
         },
         categoryStats: Object.entries(catMap).map(([k, v]) => ({ category: k, count: v.count, views: v.views, efficiency: v.count > 0 ? Math.round(v.views / v.count) : 0 })).sort((a: any, b: any) => b.efficiency - a.efficiency),
