@@ -14,6 +14,7 @@ import StockDetailTabs from './StockDetailTabs';
 import StockAlertButton from '@/components/StockAlertButton';
 import { fmtPrice, fmtCap } from '@/lib/format';
 import Disclaimer from '@/components/Disclaimer';
+import SectionShareButton from '@/components/SectionShareButton';
 import StockMAOverlay from '@/components/StockMAOverlay';
 
 interface Props { params: Promise<{ symbol: string }> }
@@ -105,12 +106,12 @@ export default async function StockDetailPage({ params }: Props) {
 
   // Parallel fetch all data (필요 컬럼만 select)
   const [histR, aiR, newsR, flowR, discR, similarR, relatedBlogsR, sectorCountR] = await Promise.all([
-    sb.from('stock_price_history').select('date, close_price, open_price, high_price, low_price, volume, change_pct').eq('symbol', symbol).order('date', { ascending: true }).limit(60),
+    sb.from('stock_price_history').select('date, close_price, open_price, high_price, low_price, volume, change_pct').eq('symbol', symbol).order('date', { ascending: true }).limit(365),
     sb.from('stock_ai_comments').select('id, symbol, comment, signal, created_at').eq('symbol', symbol).order('created_at', { ascending: false }).limit(1).maybeSingle(),
     sb.from('stock_news').select('id, title, url, source, published_at, sentiment, sentiment_label, sentiment_score, ai_summary').eq('symbol', symbol).order('published_at', { ascending: false }).limit(10),
-    sb.from('stock_investor_flow').select('id, date, foreign_buy, foreign_sell, inst_buy, inst_sell').eq('symbol', symbol).order('date', { ascending: false }).limit(5),
+    sb.from('stock_investor_flow').select('id, date, foreign_buy, foreign_sell, inst_buy, inst_sell').eq('symbol', symbol).order('date', { ascending: false }).limit(20),
     sb.from('stock_disclosures').select('id, title, disclosure_type, source, published_at, created_at').eq('symbol', symbol).order('published_at', { ascending: false }).limit(10),
-    s.sector ? sb.from('stock_quotes').select('symbol, name, price, change_pct, market_cap, currency').eq('sector', s.sector).neq('symbol', symbol).gt('price', 0).order('market_cap', { ascending: false }).limit(5) : Promise.resolve({ data: [] }),
+    s.sector ? sb.from('stock_quotes').select('symbol, name, price, change_pct, market_cap, currency, per, pbr, dividend_yield').eq('sector', s.sector).neq('symbol', symbol).gt('price', 0).order('market_cap', { ascending: false }).limit(10) : Promise.resolve({ data: [] }),
     // 관련 블로그 (종목명으로 검색)
     sb.from('blog_posts').select('slug, title, category, view_count, published_at').eq('is_published', true).or(`title.ilike.%${s.name}%,title.ilike.%${symbol}%`).order('published_at', { ascending: false }).limit(5),
     // 섹터 내 순위 계산
@@ -304,29 +305,39 @@ export default async function StockDetailPage({ params }: Props) {
         </div>
       </div>
 
-      {/* 52주 가격 범위 바 */}
-      {high52 && low52 && high52 > 0 && low52 > 0 && high52 !== low52 && (
+      {/* 52주 가격 범위 바 — 항상 표시 */}
+      {(() => {
+        const h = high52 && high52 > 0 ? high52 : Number(s.price) * 1.1;
+        const l = low52 && low52 > 0 ? low52 : Number(s.price) * 0.9;
+        const range = h - l || 1;
+        const pct = Math.min(Math.max(((Number(s.price) - l) / range) * 100, 2), 98);
+        const cur = s.currency === 'USD' ? '$' : '₩';
+        return (
         <div style={{ marginBottom: 'var(--sp-md)', padding: 'var(--sp-md) var(--card-p)', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)' }}>
-          <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 6 }}>가격 범위 (기간)</div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+            <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>52주 가격 범위</span>
+            <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)' }}>상위 {Math.round(pct)}%</span>
+          </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)' }}>
-            <span style={{ fontSize: 12, color: 'var(--accent-blue)', fontWeight: 600 }}>
-              {s.currency === 'USD' ? '$' : '₩'}{low52.toLocaleString()}
+            <span style={{ fontSize: 12, color: 'var(--accent-blue)', fontWeight: 600, minWidth: 60 }}>
+              {cur}{l.toLocaleString()}
             </span>
             <div style={{ flex: 1, height: 8, background: 'linear-gradient(90deg, var(--accent-blue), var(--accent-green), var(--accent-red))', borderRadius: 4, position: 'relative' }}>
               <div style={{
                 position: 'absolute', top: -3,
-                left: `${Math.min(Math.max(((Number(s.price) - low52) / (high52 - low52)) * 100, 2), 98)}%`,
+                left: `${pct}%`,
                 width: 14, height: 14, borderRadius: '50%',
                 background: 'var(--text-primary)', border: '3px solid var(--bg-surface)',
                 transform: 'translateX(-50%)',
               }} />
             </div>
-            <span style={{ fontSize: 12, color: 'var(--accent-red)', fontWeight: 600 }}>
-              {s.currency === 'USD' ? '$' : '₩'}{high52.toLocaleString()}
+            <span style={{ fontSize: 12, color: 'var(--accent-red)', fontWeight: 600, minWidth: 60, textAlign: 'right' }}>
+              {cur}{h.toLocaleString()}
             </span>
           </div>
         </div>
-      )}
+        );
+      })()}
 
       {/* 이동평균선 차트 */}
       <StockMAOverlay symbol={symbol} currency={s.currency ?? undefined} />
@@ -345,6 +356,7 @@ export default async function StockDetailPage({ params }: Props) {
             {s.description.length > 200 ? s.description.slice(0, 200) + '...' : s.description}
           </p>
         )}
+      <SectionShareButton section="stock-summary" label={`\${s.name} 종목 요약`} text={`\${s.name} (\${symbol}) — 현재가 \${fmtPrice(s.price, s.currency)}, PER \${s.per || '-'}, 배당 \${s.dividend_yield || '-'}%`} pagePath={`/stock/\${symbol}`} />
       </section>
 
       {/* AI 한줄평 — 서버 렌더링 (탭 로드 전 즉시 표시) */}
@@ -426,6 +438,7 @@ export default async function StockDetailPage({ params }: Props) {
           <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 10, paddingTop: 6, borderTop: '1px solid var(--border)' }}>
             ※ 본 분석은 데이터 기반 자동 생성된 참고 자료이며, 투자 판단은 본인 책임입니다
           </div>
+          <SectionShareButton section="stock-ai-analysis" label={`\${s.name} AI 분석`} text={`\${s.name} AI 종합 분석 — 카더라에서 확인하세요`} pagePath={`/stock/\${symbol}`} />
         </section>
       )}
 
@@ -536,7 +549,10 @@ export default async function StockDetailPage({ params }: Props) {
       {/* 비슷한 종목 */}
       {(similarR.data ?? []).length > 0 && (
         <div className="kd-card">
-          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>📊 같은 섹터 종목 ({s.sector})</div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>📊 같은 섹터 종목 ({s.sector})</div>
+            <SectionShareButton section="stock-sector" label={`\${s.sector} 섹터 종목 비교`} pagePath={`/stock/\${symbol}`} />
+          </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-sm)' }}>
             {(similarR.data ?? []).map((sim: any) => {
               const simPct = Number(sim.change_pct) || 0;
@@ -563,7 +579,7 @@ export default async function StockDetailPage({ params }: Props) {
         </div>
       )}
 
-      {/* 관련 블로그 */}
+      {/* 관련 블로그 — with share */}
       {(relatedBlogsR.data ?? []).length > 0 && (
         <div className="kd-card">
           <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>📰 {s.name} 관련 분석</div>

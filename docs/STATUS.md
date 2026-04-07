@@ -73,3 +73,28 @@ blog-afternoon, blog-daily, blog-monthly, blog-weekly, blog-apt-cluster, blog-st
 - [ ] 리라이트 진행률 모니터링
 - [ ] Phase 2 크론 활성화 검토 (redev-summary, subscription-calendar 등)
 - [ ] 전국 종합 1편 리팩토링 (trade-trend/competition-rate)
+
+## 세션 79 추가 — 주식 페이지 Phase 1 강화
+
+### 종목 상세 (/stock/[symbol]) 강화
+- 52주 가격 바: 조건부→항상 표시 + "상위 N%" 위치 표시
+- 동종업종 비교: 5개→10개 + PER/PBR/배당 데이터 추가
+- SectionShareButton 3곳 추가 (종목요약, AI분석, 섹터비교)
+- 수급 데이터: 5일→20일
+- 차트 데이터: 60일→365일
+- 차트 기간 탭: +6개월, +1년
+
+### 인프라 정리
+- ghost cron 제거: stock-refresh (라우트 파일 없음, 404 반환)
+- 실패 크론 제거: apt-crawl-pricing, apt-backfill-details (APT_DATA_API_KEY 미설정)
+- Vercel 크론: 79→76개 (한도 100개 확인 — 안전)
+
+### 버그 수정
+- stock/data: stock_symbols → stock_quotes 테이블명 수정
+
+### 다음 작업 (Phase 2)
+- [ ] /stock/search — 종목 검색 전용 페이지
+- [ ] /stock/dividend — 배당주 TOP 30
+- [ ] /stock/movers — 급등락 + 52주 신고가/신저가
+- [ ] /stock/themes — 테마주 독립 페이지
+- [ ] /stock/market/[code] — 시장별 페이지

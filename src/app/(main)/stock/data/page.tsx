@@ -31,11 +31,11 @@ export default async function StockDataPage() {
   const sb = await createSupabaseServer();
 
   // 통계 집계
-  const { count: totalSymbols } = await (sb as any).from('stock_symbols').select('id', { count: 'exact', head: true });
+  const { count: totalSymbols } = await (sb as any).from('stock_quotes').select('id', { count: 'exact', head: true });
   const { count: totalPrices } = await (sb as any).from('stock_price_history').select('id', { count: 'exact', head: true });
 
   // 마켓별 종목수
-  const { data: marketStats } = await (sb as any).from('stock_symbols').select('market');
+  const { data: marketStats } = await (sb as any).from('stock_quotes').select('market');
   const marketCounts: Record<string, number> = {};
   (marketStats ?? []).forEach((r: any) => {
     const m = r.market || '기타';
