@@ -381,11 +381,15 @@
     },
     {
       "path": "/api/cron/blog-internal-links",
-      "schedule": "0 3 * * 0"
+      "schedule": "0 4 * * *"
     },
     {
       "path": "/api/cron/blog-series-assign",
       "schedule": "0 4 * * 0"
+    },
+    {
+      "path": "/api/cron/seo-excerpt-fill",
+      "schedule": "30 4 * * *"
     }
   ]
 }
