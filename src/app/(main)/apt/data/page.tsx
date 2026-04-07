@@ -188,6 +188,28 @@ export default async function AptDataPage() {
           카카오로 3초 가입
         </Link>
       </div>
-    </div>
+    
+      {/* CSV 다운로드 섹션 */}
+      <section style={{ marginTop: 'var(--sp-xl)', marginBottom: 'var(--sp-xl)' }}>
+        <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, marginBottom: 12 }}>📥 데이터 다운로드 (CSV)</h2>
+        <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 12 }}>
+          카더라의 부동산 데이터를 CSV 파일로 다운로드하세요. 출처 표기(카더라, kadeora.app)를 부탁드립니다.
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 8 }}>
+          <a href="/api/data-export?type=unsold" download style={{ display: 'block', padding: '14px 16px', borderRadius: 'var(--radius-card)', background: 'var(--bg-surface)', border: '1px solid var(--border)', textDecoration: 'none', color: 'var(--text-primary)' }}>
+            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700 }}>🏗️ 미분양 현황</div>
+            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>전국 미분양 아파트 목록</div>
+          </a>
+          <a href="/api/data-export?type=trade" download style={{ display: 'block', padding: '14px 16px', borderRadius: 'var(--radius-card)', background: 'var(--bg-surface)', border: '1px solid var(--border)', textDecoration: 'none', color: 'var(--text-primary)' }}>
+            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700 }}>📊 실거래가</div>
+            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>최근 아파트 매매 거래 내역</div>
+          </a>
+          <a href="/api/data-export?type=stock" download style={{ display: 'block', padding: '14px 16px', borderRadius: 'var(--radius-card)', background: 'var(--bg-surface)', border: '1px solid var(--border)', textDecoration: 'none', color: 'var(--text-primary)' }}>
+            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700 }}>📈 주식 종목 데이터</div>
+            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>국내외 728종목 시세</div>
+          </a>
+        </div>
+      </section>
+</div>
   );
 }
