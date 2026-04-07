@@ -1,5 +1,7 @@
 'use client';
 import InlineCTA from '@/components/InlineCTA';
+import FirstMissionBanner from '@/components/FirstMissionBanner';
+import ProfileCompletionBar from '@/components/ProfileCompletionBar';
 import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -363,6 +365,8 @@ export default function FeedClient({
         )}
 
         {/* ━━━ 게시글 목록 ━━━ */}
+        <FirstMissionBanner />
+        <ProfileCompletionBar />
         <div className="listing-grid">
           {visiblePosts.map((post: PostWithProfile, i: number) => {
             const postExt = post;

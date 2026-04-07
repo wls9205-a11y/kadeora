@@ -1,4 +1,5 @@
 'use client';
+import ProfileCompletionBar from '@/components/ProfileCompletionBar';
 import { useState, useRef } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';

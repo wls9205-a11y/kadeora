@@ -70,6 +70,12 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
       const { comment } = await res.json();
       setComments(prev => [{ ...comment, profiles: { id: userId!, nickname: comment.nickname ?? '나', avatar_url: null } }, ...prev]);
       setContent('');
+      // 첫 댓글 미션 완료 체크
+      fetch('/api/profile/mission', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mission: 'comment' }),
+      }).catch(() => {});
       setReplyTo(null);
       setCommentImage(null);
       success(replyTo ? '답글이 작성되었습니다' : '댓글이 작성되었습니다');

@@ -143,7 +143,13 @@ export default function WriteClient() {
         const res = await fetch(`/api/posts/${editId}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
         if (!res.ok) throw new Error((await res.json()).error ?? '수정 실패');
         const { post: updated } = await res.json();
-        success('수정되었습니다'); clearDraft(); router.push(`/feed/${updated?.slug || editId}`);
+        success('수정되었습니다'); clearDraft(); // 첫 게시글 미션 완료 체크
+      fetch('/api/profile/mission', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mission: 'post' }),
+      }).catch(() => {});
+      router.push(`/feed/${updated?.slug || editId}`);
       } else {
         const res = await fetch('/api/posts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
         if (!res.ok) throw new Error((await res.json()).error ?? '작성 실패');
