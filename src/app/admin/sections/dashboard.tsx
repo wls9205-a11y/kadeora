@@ -459,20 +459,20 @@ export default function DashboardSection() {
                 ))}
               </div>
               <div style={{ display: 'flex', gap: 'var(--sp-md)', fontSize: 10, color: C.textDim, borderTop: `1px solid ${C.border}`, paddingTop: 8 }}>
-                <span>전환율 <strong style={{ color: Number(convRate) > 1 ? C.green : C.red }}>{convRate}%</strong></span>
+                <span>가입률 <strong style={{ color: Number(convRate) > 1 ? C.green : C.red }}>{convRate}%</strong></span>
                 <span>바운스율 <strong style={{ color: C.red }}>97.5%</strong></span>
                 <span>login UV <strong style={{ color: C.red }}>0</strong></span>
-                <span style={{ marginLeft: 'auto' }}>목표 전환율 <strong style={{ color: C.yellow }}>3.0%</strong></span>
+                <span style={{ marginLeft: 'auto' }}>목표 가입률 <strong style={{ color: C.yellow }}>3.0%</strong></span>
               </div>
             </>
           );
         })()}
       </div>
 
-      {/* ── 등급 · 포인트 · 전환율 패널 ── */}
+      {/* ── 등급 · 포인트 · CTA 퍼널 ── */}
       {gradePoints && (
         <div className="mc-g2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginBottom: 8 }}>
-          {/* 등급 분포 + 전환율 */}
+          {/* 등급 분포 + CTA 퍼널 */}
           <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: '8px 10px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
               <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>🏆 등급 분포 (실유저)</span>
@@ -504,7 +504,7 @@ export default function DashboardSection() {
 
             {/* 전환율 */}
             <div style={{ borderTop: `1px solid ${C.border}`, marginTop: 10, paddingTop: 8 }}>
-              <div style={{ fontSize: 10, color: C.textDim, marginBottom: 6 }}>📊 7일 전환율</div>
+              <div style={{ fontSize: 10, color: C.textDim, marginBottom: 6 }}>📊 CTA 퍼널 (7일)</div>
               <div style={{ display: 'flex', gap: 8 }}>
                 <div><div style={{ fontSize: 16, fontWeight: 800, color: C.green }}>{gradePoints.conversion7d?.signups ?? kpi.newUsersWeek ?? 0}</div><div style={{ fontSize: 9, color: C.textDim }}>신규 가입</div></div>
                 <div><div style={{ fontSize: 16, fontWeight: 800, color: C.cyan }}>{visitors?.weekUV ?? 0}</div><div style={{ fontSize: 9, color: C.textDim }}>방문자</div></div>

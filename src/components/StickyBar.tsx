@@ -8,13 +8,15 @@ import { trackConversion } from '@/lib/track-conversion';
 const EXCLUDED = ['/', '/login', '/auth', '/onboarding', '/admin', '/terms', '/privacy', '/signup'];
 
 function getMessage(path: string): { text: string; icon: string } | null {
-  // 페이지 맥락에서 메시지 동적 생성
+  // document.title에서 엔티티명 추출 (SSR 후 hydration 시점)
+  const title = typeof document !== 'undefined' ? document.title : '';
+  const entityName = title.split(' ')[0]?.replace(/[|·—-]/g, '').trim();
+
   if (path.startsWith('/stock/')) {
-    const symbol = decodeURIComponent(path.split('/')[2] || '');
-    return { text: `${symbol} 알림 받기`, icon: 'bell' };
+    return { text: `${entityName || '종목'} 알림 받기`, icon: 'bell' };
   }
   if (path.startsWith('/apt/')) {
-    return { text: '청약 알림 받기', icon: 'home' };
+    return { text: `${entityName || '단지'} 청약 알림`, icon: 'home' };
   }
   if (path.startsWith('/blog/')) {
     return { text: '이 분석 저장 + 알림', icon: 'bookmark' };

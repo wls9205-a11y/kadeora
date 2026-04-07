@@ -116,7 +116,7 @@ export default function FocusTab({ onNavigate }: { onNavigate: (t: any) => void 
           { v: `${kpi.returnRate}%`, l: '재방문율', d: kpi.returnRate === 0 ? '위험' : '목표20%', c: kpi.returnRate === 0 ? '#EF4444' : '#10B981' },
           { v: fmt(kpi.stocks), l: '종목', d: `부동산 ${fmt(kpi.apts)}`, c: '' },
           { v: todayPv, l: 'PV 오늘', d: `DAU ${todayDau}`, c: todayPv > 0 ? '#10B981' : '' },
-          { v: kpi.interests, l: '관심등록', d: `전환 ${kpi.conversions}`, c: kpi.interests > 0 ? '#10B981' : '#EF4444' },
+          { v: kpi.interests, l: '관심등록', d: `CTA ${kpi.conversions}`, c: kpi.interests > 0 ? '#10B981' : '#EF4444' },
         ].map((k, i) => (
           <div key={i} className="adm-kpi-c" style={{ padding: '10px 12px' }}>
             <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.2 }}>{k.v}</div>
