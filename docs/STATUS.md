@@ -1,110 +1,77 @@
-# 카더라 STATUS.md
-> 세션 79 | 2026-04-08
+# 카더라 STATUS — 세션 80 (2026-04-08)
 
-## 세션 79 완료
+## 최종 배포
+- 커밋: 세션 80 최종
+- Vercel: `prj_2nDcTjEcgAEew1wYdvVF57VljxJQ`
+- Supabase: `tezftxakuwhsclarprlz`
 
-### 1. 통계 자료실 정상화
-- 6개 다운로드 API 테이블명 수정 (subscription_sites→apt_subscriptions, unsold_apartments→unsold_apts, naver_complexes→apt_sites, stock_symbols→stock_quotes)
-- apt/data 페이지 KPI·지역별 건수 정상 연결
-- 주식 다운로드 카드 2종 추가, 중복 /api/data-export 삭제
+## 세션 80 완료 작업
 
-### 2. 블로그 크론 v2 전면 재설계
+### 어드민 대시보드 v5 (전면 재설계)
+- 실시간 트래픽: 접속자/UV/PV + 24시간 히트맵 + 인기페이지 + 유입경로
+- SVG Ring 게이지: KPI 4칸 (유저/블로그/크론/DB)
+- 14일 PV 스파크라인
+- 리라이팅 현황: 진행률 링 + 카테고리 효율
+- CTA 비주얼 퍼널 + 리텐션 링
+- **포털별 SEO 준비도**: Google/Naver 분리 카드 + 요소별 체크
 
-**삭제 12개 (-1,856줄):**
-blog-afternoon, blog-daily, blog-monthly, blog-weekly, blog-apt-cluster, blog-stock-cluster, blog-apt-new, blog-redevelopment, blog-monthly-theme, blog-seed-comments, blog-monthly-topics, blog-seed-guide
+### SEO Phase 1 — 즉시 효과
+- **내부링크**: 0.9% (320편) → **100%** (37,394편) ✅
+- **요약문(excerpt)**: 49% → **100%** (37,394편) ✅
+- **Google 준비도**: 0% → **38.5%** (14,410편)
+- **Naver 준비도**: 9.6% (3,600편)
+- **Both 준비도**: 0% → **9.6%** (3,599편)
+- bulk_fill_related_slugs() + bulk_fill_excerpts() SECURITY DEFINER 함수
 
-**ensureMinLength 완전 제거 (22개 크론):**
-카테고리별 동일 보일러플레이트(600~700자) 삽입 방지 → 스팸 리스크 해소
+### 신규 크론 (2개)
+- `blog-internal-links` v2: 2,000건/배치, region+태그 매칭, 매일 04:00
+- `seo-excerpt-fill`: excerpt 자동생성 500건/일, AI비용 0원, 매일 04:30
 
-**신규 크론 2개:**
-- blog-market-pulse: 주간 시장 브리핑 (stock_quotes+exchange_rates+unsold_apts)
-- blog-weekly-digest: 주간 종합 뉴스레터 (인기글+시장+청약일정)
+### CTA 강화 (CTR 0.5% → 3% 목표)
+- 주식 '±3% 변동 시 즉시 알림'
+- 부동산 '청약 마감 전 알림 받기'
+- 블로그 '무료로 전체 분석 보기'
+- 프로필 '자기소개 작성하면 +200P'
 
-**볼륨 제한:**
-- trade-trend: default limit 17→1 (1지역/run)
-- competition-rate: default limit 17→1 (1지역/run)
-- 일 평균 발행: 1.7건 (구글/네이버 안전 범위)
+### 수익화/상점 전략 수립
+- 최종 상점 계획안: shop-plan.md
+  - 단건: AI 단지 리포트 2,900원 / 종목 리포트 1,900원
+  - 구독: 프로 멤버십 24,900→9,900원/월 인하
+  - 확성기 4종 + 닉네임 변경권 폐지
+- SEO 만점 계획안: seo-100-plan.md
 
-**패딩 제거 도구:** blog-cleanup-padding 크론 생성 (어드민에서 수동 실행)
+## 핵심 수치
+- 실유저: 42명 (7일 신규 15명)
+- PV: 772/일 (7일 9,176)
+- 블로그: 발행 37,394편 / 총 59,401편 / 조회 612K
+- 리라이트: 18,035편 (30%) / 잔여 41,366편
+- 크론: 77개 / 성공률 100%
+- DB: 1.97GB / 8.4GB
 
-### 3. 어드민 갱신
-- 블로그 크론 버튼 전면 교체 (삭제 크론 제거, v2 크론 20개 배치)
-- 패딩 제거 버튼 추가
+## SEO 포털별 현황
+| 항목 | Google | Naver |
+|------|--------|-------|
+| 준비 완료 | 14,410 (38.5%) | 3,600 (9.6%) |
+| 7일 유입 | 398건 (4.3%) | 18건 (0.2%) |
+| 내부링크 | 100% ✅ | n/a |
+| E-E-A-T | 100% ✅ | 100% ✅ |
+| OG이미지 | 100% ✅ | 100% ✅ |
+| 요약문 | n/a | 100% ✅ |
+| 제목 | 47% 🟡 | 47% 🟡 |
+| 메타설명 | 42% 🔴 | 42% 🔴 |
+| 병목 | 제목+메타 | 제목+메타+도메인연령 |
 
-### 블로그 크론 스케줄 (v2 최종)
+## API 키 상태
+- ANTHROPIC_API_KEY ✅ (크레딧 정상)
+- CRON_SECRET ✅
+- STOCK_DATA_API_KEY ✅
+- KIS_APP_KEY ❌
+- FINNHUB_API_KEY ❌
+- APT_DATA_API_KEY ❌
 
-| 요일 | 크론 | 카테고리 |
-|------|------|---------|
-| 월 | blog-market-pulse, blog-trade-trend | stock, apt |
-| 화 | blog-investor-flow, blog-competition-rate | stock, apt |
-| 수 | blog-district-guide | apt |
-| 목 | blog-builder-analysis, blog-theme-stocks | apt, stock |
-| 금 | blog-unsold-trend, blog-disclosure | unsold, stock |
-| 토 | blog-comparison, blog-life-guide | apt, finance |
-| 일 | blog-weekly-digest | all |
-| 월1일 | blog-exchange-rate | finance |
-| 수,토 | blog-apt-v2 (AI) | apt |
-| 화,금 | blog-stock-v2 (AI) | stock |
-| 4h | blog-rewrite (AI) | all |
-
-### 리라이트 현황
-- blog-rewrite: 4시간마다 6건 (Haiku)
-- batch-rewrite-submit: 일 500건 (Batch API)
-- batch-rewrite-poll: 10분마다 결과 수집
-- Anthropic 크레딧: ✅ 정상
-- 리라이트 완료: ~17,800편 / 미완료: ~41,200편 / 예상 완료: ~2.5주
-
-### 현재 수치
-- 블로그 크론: 파일 33개 / 활성 20개
-- 총 블로그: ~59,000편 (공개 ~21,000)
-- 총 크론: 79개 (vercel.json)
-- 검색 노출: 43,700/월, CTR 0.6%, 평균순위 7.7
-
-### API 키 상태
-- ANTHROPIC_API_KEY: ✅ (크레딧 정상)
-- CRON_SECRET: ✅
-- STOCK_DATA_API_KEY: ✅
-- KIS_APP_KEY: ❌
-- FINNHUB_API_KEY: ❌
-- APT_DATA_API_KEY: ❌
-
-### 다음 작업
-- [ ] 어드민에서 패딩 제거 버튼 실행 (기존 글 보일러플레이트 일괄 제거)
-- [ ] 리라이트 진행률 모니터링
-- [ ] Phase 2 크론 활성화 검토 (redev-summary, subscription-calendar 등)
-- [ ] 전국 종합 1편 리팩토링 (trade-trend/competition-rate)
-
-## 세션 79 추가 — 주식 페이지 Phase 1 강화
-
-### 종목 상세 (/stock/[symbol]) 강화
-- 52주 가격 바: 조건부→항상 표시 + "상위 N%" 위치 표시
-- 동종업종 비교: 5개→10개 + PER/PBR/배당 데이터 추가
-- SectionShareButton 3곳 추가 (종목요약, AI분석, 섹터비교)
-- 수급 데이터: 5일→20일
-- 차트 데이터: 60일→365일
-- 차트 기간 탭: +6개월, +1년
-
-### 인프라 정리
-- ghost cron 제거: stock-refresh (라우트 파일 없음, 404 반환)
-- 실패 크론 제거: apt-crawl-pricing, apt-backfill-details (APT_DATA_API_KEY 미설정)
-- Vercel 크론: 79→76개 (한도 100개 확인 — 안전)
-
-### 버그 수정
-- stock/data: stock_symbols → stock_quotes 테이블명 수정
-
-### 다음 작업 (Phase 2)
-- [ ] /stock/search — 종목 검색 전용 페이지
-- [ ] /stock/dividend — 배당주 TOP 30
-- [ ] /stock/movers — 급등락 + 52주 신고가/신저가
-- [ ] /stock/themes — 테마주 독립 페이지
-- [ ] /stock/market/[code] — 시장별 페이지
-
-### 주식 Phase 2 — 신규 하위 페이지 5개
-- /stock/dividend: 고배당주 TOP 30 (국내/해외, 배당수익률순)
-- /stock/movers: 급등락 TOP 20 + 거래량 TOP 20 + 52주 신고가/신저가
-- /stock/themes: 테마주 독립 페이지 (테마별 관련주 + 평균 등락률)
-- /stock/market/[code]: KOSPI/KOSDAQ/NYSE/NASDAQ 시장별 종목 목록 (4페이지)
-- /stock/search: 종목 검색 + 시장/섹터/시총/정렬 필터
-- Sitemap: 신규 8개 URL 추가
-
-주식 라우트: 6개→11개 (부동산 12개에 근접)
+## 다음 작업
+- [ ] SEO Phase 2: 리라이트 가속 (제목/메타 47%→95%) — 크론 자동 진행 중
+- [ ] SEO Phase 3: Naver IndexNow 확장
+- [ ] 상점 구현: AI 리포트 단건 판매 (1순위)
+- [ ] 프로 멤버십 가격 인하 (24,900→9,900원)
+- [ ] Toss 앱인토스 제출

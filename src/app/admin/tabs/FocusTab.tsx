@@ -188,6 +188,46 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
         </>}
       </div>
 
+      {/* ═══ 포털별 SEO 준비도 ═══ */}
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:5,marginBottom:6}}>
+        <div style={{...CS.card,borderLeft:'3px solid #4285F4',background:'linear-gradient(135deg,rgba(66,133,244,0.04),rgba(12,21,40,0.65))'}}>
+          <div style={{display:'flex',alignItems:'center',gap:5,marginBottom:5}}>
+            <svg width="12" height="12" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.07 5.07 0 01-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/></svg>
+            <span style={{fontSize:9,fontWeight:800,color:'#E2E8F0'}}>Google</span>
+            <div style={{flex:1}}/>
+            <Ring value={pct(x.googleReady||0,k.blogs||1)} size={28} stroke={3} color="#4285F4">
+              <text x="14" y="14" textAnchor="middle" dominantBaseline="central" fill="#4285F4" fontSize="8" fontWeight="800">{pct(x.googleReady||0,k.blogs||1)}%</text>
+            </Ring>
+          </div>
+          {[{l:'내부링크',v:pct(x.linksOk||0,k.blogs||1)},{l:'E-E-A-T',v:100},{l:'제목',v:pct(x.titleGood||0,k.blogs||1)},{l:'메타설명',v:pct(x.metaGood||0,k.blogs||1)}].map(r=>(
+            <div key={r.l} style={{display:'flex',alignItems:'center',gap:3,marginBottom:2}}>
+              <span style={{width:8,height:8,borderRadius:'50%',background:r.v>=80?'rgba(16,185,129,0.15)':r.v>=30?'rgba(245,158,11,0.15)':'rgba(239,68,68,0.15)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:5,flexShrink:0,color:r.v>=80?'#10B981':r.v>=30?'#F59E0B':'#EF4444'}}>{r.v>=80?'✓':r.v>=30?'△':'✗'}</span>
+              <span style={{flex:1,fontSize:7,color:'rgba(255,255,255,0.3)'}}>{r.l}</span>
+              <span style={{fontSize:8,fontWeight:700,color:r.v>=80?'#10B981':r.v>=30?'#F59E0B':'#EF4444'}}>{r.v}%</span>
+            </div>
+          ))}
+          <div style={{fontSize:8,fontWeight:700,color:'#4285F4',textAlign:'center',marginTop:3}}>{f(x.googleReady||0)}편 준비</div>
+        </div>
+        <div style={{...CS.card,borderLeft:'3px solid #00C73C',background:'linear-gradient(135deg,rgba(0,199,60,0.04),rgba(12,21,40,0.65))'}}>
+          <div style={{display:'flex',alignItems:'center',gap:5,marginBottom:5}}>
+            <div style={{width:12,height:12,borderRadius:2,background:'#00C73C',display:'flex',alignItems:'center',justifyContent:'center',fontSize:8,fontWeight:900,color:'#fff'}}>N</div>
+            <span style={{fontSize:9,fontWeight:800,color:'#E2E8F0'}}>Naver</span>
+            <div style={{flex:1}}/>
+            <Ring value={pct(x.naverReady||0,k.blogs||1)} size={28} stroke={3} color="#00C73C">
+              <text x="14" y="14" textAnchor="middle" dominantBaseline="central" fill="#00C73C" fontSize="8" fontWeight="800">{pct(x.naverReady||0,k.blogs||1)}%</text>
+            </Ring>
+          </div>
+          {[{l:'OG이미지',v:100},{l:'요약문',v:pct(x.excerptOk||0,k.blogs||1)},{l:'제목',v:pct(x.titleGood||0,k.blogs||1)},{l:'메타설명',v:pct(x.metaGood||0,k.blogs||1)}].map(r=>(
+            <div key={r.l} style={{display:'flex',alignItems:'center',gap:3,marginBottom:2}}>
+              <span style={{width:8,height:8,borderRadius:'50%',background:r.v>=80?'rgba(16,185,129,0.15)':r.v>=30?'rgba(245,158,11,0.15)':'rgba(239,68,68,0.15)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:5,flexShrink:0,color:r.v>=80?'#10B981':r.v>=30?'#F59E0B':'#EF4444'}}>{r.v>=80?'✓':r.v>=30?'△':'✗'}</span>
+              <span style={{flex:1,fontSize:7,color:'rgba(255,255,255,0.3)'}}>{r.l}</span>
+              <span style={{fontSize:8,fontWeight:700,color:r.v>=80?'#10B981':r.v>=30?'#F59E0B':'#EF4444'}}>{r.v}%</span>
+            </div>
+          ))}
+          <div style={{fontSize:8,fontWeight:700,color:'#00C73C',textAlign:'center',marginTop:3}}>{f(x.naverReady||0)}편 준비</div>
+        </div>
+      </div>
+
       {/* ═══ 3열: 유저 | CTA | 리텐션 ═══ */}
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:5,marginBottom:6}}>
         <div style={CS.card}>
