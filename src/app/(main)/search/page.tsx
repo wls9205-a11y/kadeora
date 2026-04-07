@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   },
   twitter: { card: 'summary_large_image' },
   robots: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' as const },
-  other: { 'dg:plink': SITE_URL + '/search', 'naver:author': '카더라', 'og:updated_time': new Date().toISOString(), 'naver:written_time': '2026-01-15T00:00:00Z', 'naver:updated_time': new Date().toISOString(), 'article:section': '검색', 'article:tag': '검색,통합검색,주식,부동산,청약,블로그' },
+  other: { 'dg:plink': SITE_URL + '/search', 'naver:author': '카더라', 'og:updated_time': new Date().toISOString(), 'naver:written_time': new Date().toISOString(), 'naver:updated_time': new Date().toISOString(), 'article:section': '검색', 'article:tag': '검색,통합검색,주식,부동산,청약,블로그' },
 };
 
 export default function SearchPage() {

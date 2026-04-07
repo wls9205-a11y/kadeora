@@ -118,7 +118,6 @@ const nextConfig: NextConfig = {
           { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(self)" },
           { key: "X-Permitted-Cross-Domain-Policies", value: "none" },
-          { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
           { key: "Cross-Origin-Resource-Policy", value: "same-origin" },
           // CSP는 middleware.ts에서 관리 (여기서 설정하면 충돌)
         ],

@@ -43,7 +43,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
     twitter: { card: 'summary_large_image' as const, title: `${decoded} 부동산`, description: `청약·실거래·재개발·미분양 종합 정보` },
     other: {
-      'naver:written_time': '2026-01-15T00:00:00Z',
+      'naver:written_time': new Date().toISOString(),
       'naver:updated_time': new Date().toISOString(),
       'naver:author': '카더라',
       'og:updated_time': new Date().toISOString(),

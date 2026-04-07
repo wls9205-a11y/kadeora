@@ -17,9 +17,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   ]);
   const t = `${a?.name || symbol} vs ${b?.name || target} 비교 분석`;
   return {
-    title: `${t} | 카더라`, description: `${a?.name || symbol}과 ${b?.name || target}의 가격, PER, PBR, 배당, 시총 비교.`,
+    title: t, description: `${a?.name || symbol}과 ${b?.name || target}의 가격, PER, PBR, 배당, 시총 비교.`,
     alternates: { canonical: `${SITE_URL}/stock/${symbol}/vs/${target}` },
-    openGraph: { title: `${t} | 카더라`, url: `${SITE_URL}/stock/${symbol}/vs/${target}`, images: [`${SITE_URL}/api/og?title=${encodeURIComponent(t)}&design=2&category=stock`] },
+    openGraph: { title: t, url: `${SITE_URL}/stock/${symbol}/vs/${target}`, images: [`${SITE_URL}/api/og?title=${encodeURIComponent(t)}&design=2&category=stock`] },
     other: { 'naver:written_time': new Date().toISOString() },
   };
 }

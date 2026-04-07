@@ -40,6 +40,7 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
   const { id: rawId } = await props.params;
   const id = Number(rawId.replace('.xml', ''));
   const now = new Date().toISOString();
+  const buildDate = '2026-04-08T00:00:00Z'; // Static pages: fixed lastmod
 
   // ── 0: static + region + sector ──
   if (id === 0) {
@@ -75,7 +76,7 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
     const entries: SitemapEntry[] = [
       ...staticPaths.map(path => ({
         url: `${BASE}${path}`,
-        lastModified: now,
+        lastModified: buildDate,
         changeFrequency: path === '' ? 'daily' : 'weekly',
         priority: path === '' ? 1 : ['/feed', '/stock', '/apt'].includes(path) ? 0.9 : 0.7,
       })),
@@ -198,11 +199,11 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
     } catch { return xmlResponse([]); }
   }
 
-  // ── 10+: blog chunks (image 사이트맵 포함) ──
-  if (id >= 10) {
+  // ── 8+: blog chunks (image 사이트맵 포함) ──
+  if (id >= 8) {
     try {
       const sb = getSupabaseAdmin();
-      const chunk = id - 10;
+      const chunk = id - 8;
       const offset = chunk * BLOG_PER_SITEMAP;
       const { data } = await sb.from('blog_posts')
         .select('slug, title, updated_at, published_at, cover_image, image_alt, category')

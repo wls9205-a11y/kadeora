@@ -28,7 +28,7 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
       ],
     },
     twitter: { card: 'summary_large_image', title, description: desc, images: [ogImg] },
-    other: { 'article:section': '부동산', 'article:tag': '부동산,청약,분양,미분양,재개발,실거래가,아파트', 'naver:written_time': '2026-01-15T00:00:00Z', 'naver:updated_time': new Date().toISOString(), 'naver:author': '카더라', 'og:updated_time': new Date().toISOString(), 'dg:plink': SITE_URL + '/apt' },
+    other: { 'article:section': '부동산', 'article:tag': '부동산,청약,분양,미분양,재개발,실거래가,아파트', 'naver:written_time': new Date().toISOString(), 'naver:updated_time': new Date().toISOString(), 'naver:author': '카더라', 'og:updated_time': new Date().toISOString(), 'dg:plink': SITE_URL + '/apt' },
   };
 }
 // Cache: 3600s — 청약 정보 (하루 1회 갱신)

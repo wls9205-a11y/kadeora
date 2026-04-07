@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     ],
   },
   twitter: { card: 'summary_large_image' },
-  other: { 'naver:written_time': '2026-01-15T00:00:00Z', 'naver:updated_time': new Date().toISOString(), 'dg:plink': SITE_URL + '/hot', 'naver:author': '카더라', 'og:updated_time': new Date().toISOString(), 'article:section': '커뮤니티', 'article:tag': '인기글,HOT,추천,커뮤니티,주식,부동산' },
+  other: { 'naver:written_time': new Date().toISOString(), 'naver:updated_time': new Date().toISOString(), 'dg:plink': SITE_URL + '/hot', 'naver:author': '카더라', 'og:updated_time': new Date().toISOString(), 'article:section': '커뮤니티', 'article:tag': '인기글,HOT,추천,커뮤니티,주식,부동산' },
 };
 
 export const revalidate = 60;
@@ -105,7 +105,7 @@ export default async function HotPage() {
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"HOT 게시글은 어떤 기준으로 선정되나요?","acceptedAnswer":{"@type":"Answer","text":"카더라 HOT 게시글은 최근 7일간 좋아요, 댓글, 조회수를 종합하여 가장 인기 있는 글을 자동으로 선정합니다."}},{"@type":"Question","name":"카더라 커뮤니티에서 어떤 글을 쓸 수 있나요?","acceptedAnswer":{"@type":"Answer","text":"주식 종목 분석, 부동산 청약 후기, 재테크 정보, 자유 토론 등 투자와 관련된 다양한 주제의 글을 자유롭게 작성할 수 있습니다."}}]}) }} />
     {/* SEO 전용 히어로 이미지 — 시각적으로 숨김, 크롤러 인식용 */}
     {/* eslint-disable-next-line @next/next/no-img-element */}
-    <img src={`/api/og?title=${encodeURIComponent('이번 주 HOT 게시글')}&design=2&category=free&subtitle=${encodeURIComponent('카더라 커뮤니티 인기글 TOP')}`} alt="카더라 이번 주 HOT 인기 게시글 — 주식 부동산 커뮤니티" width={1200} height={630} style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0,0,0,0)' }} loading="lazy" />
+    
     <article style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
 
       {/* ── 헤더 ── */}

@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: { params: Promise<{ category:
   const calc = findCalc(slug);
   if (!calc || calc.category !== category) return {};
   const url = `${SITE_URL}/calc/${category}/${slug}`;
-  const ogTitle = `${calc.emoji} ${calc.title} — 카더라 | 무료 온라인 계산기`;
+  const ogTitle = `${calc.emoji} ${calc.title} — 무료 온라인 계산기`;
   const metaDesc = `${calc.description} 2026년 최신 기준 반영. 무료·회원가입 불필요.`;
   return {
     title: ogTitle,
@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: { params: Promise<{ category:
     twitter: { card: 'summary_large_image', title: ogTitle, description: metaDesc },
     other: {
       'naver:author': '카더라', 'naver:site_name': '카더라', 'daum:site_name': '카더라',
-      'naver:written_time': '2026-01-15T00:00:00Z',
+      'naver:written_time': new Date().toISOString(),
       'naver:updated_time': calc.lastUpdated + 'T00:00:00Z',
       'og:updated_time': calc.lastUpdated + 'T00:00:00Z',
       'article:section': calc.categoryLabel,

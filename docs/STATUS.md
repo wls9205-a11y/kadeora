@@ -1,5 +1,54 @@
 # 카더라 STATUS.md — 세션 76 최종 (2026-04-06 KST)
 
+
+## 세션 78 (2026-04-08) — SEO 전수조사 + 33건 일괄 수정
+
+### 완료된 작업
+
+**1. SEO 전수조사 (58 page.tsx + 11 layout.tsx 완전 감사)**
+- 구글 Search Console 데이터 분석: 4.37만 노출, 248 클릭, CTR 0.6%, 평균 순위 7.7
+- 8,160페이지 인덱싱 완료, 8,450페이지 미인덱싱 (9개 사유)
+- 크롤링 43.8만회, 성공률 96%, 응답시간 419ms
+
+**2. 🔴 긴급 수정 (7건)**
+- `userScalable: true`, `maximumScale: 5` (접근성 WCAG 준수)
+- apt/[id] `@type` 배열 → `'RealEstateListing'` 단일값 (GSC 리뷰 스니펫 오류 해소)
+- robots.txt에서 `rss.xml` + `feed.xml` Sitemap 선언 제거
+- layout.tsx RSS `<link>` 중복 제거 (7→5개)
+- 블로그 title `| 블로그` 제거, apt title `| 모집공고 요약` 제거
+- 블로그 BlogPosting JSON-LD에 `isAccessibleForFree: true` 추가 (클로킹 방지)
+
+**3. 🟡 중요 수정 (19건)**
+- `naver:written_time` 22개 파일 전부 하드코딩('2026-01-15') → `new Date().toISOString()` 동적값
+- title `| 카더라` 이중 suffix 8개 파일 수정
+- `calc/[category]` OG + naver 메타 추가
+- `/daily` layout.tsx 생성 (noindex)
+- `/apt/unsold/[id]` canonical 추가
+- `/terms`, `/refund` canonical + noindex 추가
+- `/premium` noindex 추가, `/discussion` layout.tsx noindex 생성
+- `/faq` FAQPage JSON-LD 추가 (layout.tsx)
+- COOP 헤더 충돌 해소 (next.config에서 Cross-Origin-Opener-Policy 제거)
+- CSS `@import url(pretendard)` → `<link rel="stylesheet">` (렌더 블로킹 해소, LCP 개선)
+- apt/complex canonical에서 `?region=` 쿼리파라미터 제거
+- JSON-LD `wordCount` 글자수→어절수 수정 + readingTime 200어절/분 보정
+- opensearch.xml 아이콘 경로 수정 (favicon.ico → favicon.png)
+- `/hot` 숨김 `<img clip:rect(0,0,0,0)>` 클로킹 제거
+- Geo 메타 4줄 삭제 (전국 서비스이므로 특정 좌표 불필요)
+- shop/megaphone naver 메타 추가
+- sitemap ID 8,9 갭 해소 (연속 ID로 재정렬, blog chunk 10→8 시작)
+- sitemap 정적 페이지 lastmod → 고정 빌드 날짜 (매시간 변경 방지)
+- apt/[id] Place JSON-LD 비활성화, stock/[symbol] Dataset+ImageGallery 비활성화
+
+### 미완료 (다음 세션)
+- `<img>` → next/image 전환 (~8곳)
+- Breadcrumb item URL 쿼리→경로 변환
+- 블로그 시리즈 DB series_id 불일치 점검
+- apt/diagnose, calc/page JSON-LD WebApplication 추가
+- `og:updated_time` → openGraph 객체 내 이동
+- apt/[id] HowTo/ImageGallery JSON-LD 비활성화
+- blog H1 중복 방지 강화 (본문 중간 # 처리)
+
+
 ## 인프라 총괄
 | 항목 | 수량 |
 |---

@@ -188,7 +188,7 @@ export async function generateMetadata({ params }: Props) {
     const ogImage = post.cover_image || `${SITE}/api/og?title=${encodeURIComponent(post.title)}&category=${post.category}&author=${encodeURIComponent(post.author_name || '카더라')}&design=2`;
     const ogSquare = `${SITE}/api/og-square?title=${encodeURIComponent(post.title)}&category=${post.category}&author=${encodeURIComponent(post.author_name || '카더라')}`;
   return {
-    title: `${post.title} | 블로그`,
+    title: post.title,
     description: post.meta_description || post.excerpt || post.title,
     keywords: post.meta_keywords || (post.tags ?? []).join(', '),
     alternates: { canonical: `${SITE}/blog/${slug}` },
@@ -379,8 +379,8 @@ export default async function BlogDetailPage({ params }: Props) {
     } catch {}
   }
 
-  const wordCount = post.content.replace(/[#*|\-\n\r\[\]`>]/g, '').replace(/\s+/g, ' ').trim().length;
-  const readingTimeMin = Math.max(1, Math.ceil(wordCount / 500));
+  const wordCount = post.content.replace(/[#*|\-\n\r\[\]`>]/g, '').replace(/\s+/g, ' ').trim().split(' ').filter(Boolean).length;
+  const readingTimeMin = Math.max(1, Math.ceil(wordCount / 200));
 
   const catSection: Record<string, string> = { stock: '주식', apt: '부동산', unsold: '미분양', finance: '재테크', general: '생활' };
 
@@ -392,6 +392,7 @@ export default async function BlogDetailPage({ params }: Props) {
     dateModified: post.updated_at || post.published_at || post.created_at,
     wordCount,
     timeRequired: `PT${readingTimeMin}M`,
+    isAccessibleForFree: true,
     author: {
       '@type': 'Person',
       name: post.author_name || '카더라',

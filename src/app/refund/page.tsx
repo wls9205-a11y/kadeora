@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
+  alternates: { canonical: SITE_URL + '/refund' },
+  robots: { index: false, follow: true },
   title: '환불정책',
   description: '카더라 환불 및 청약철회 정책',
 };

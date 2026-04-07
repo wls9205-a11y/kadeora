@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   alternates: { canonical: `${SITE}/stock/data` },
   other: {
     'naver:author': '카더라',
-    'naver:written_time': '2026-01-15T00:00:00Z',
+    'naver:written_time': new Date().toISOString(),
     'naver:updated_time': new Date().toISOString(),
     'naver:site_name': '카더라',
     'article:section': '주식',

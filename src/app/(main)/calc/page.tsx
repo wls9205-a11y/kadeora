@@ -4,7 +4,7 @@ import type { Metadata } from 'next';
 import { SITE_URL } from '@/lib/constants';
 
 export const metadata: Metadata = {
-  title: '무료 계산기 모음 — 세금·부동산·주식·대출 | 카더라',
+  title: '무료 계산기 모음 — 세금·부동산·주식·대출',
   description: '취득세, 양도세, 복리, 연봉 실수령액, 대출 상환, 청약 가점 등 145종 무료 계산기. 2026년 최신 세법 반영.',
   alternates: { canonical: `${SITE_URL}/calc` },
   openGraph: {

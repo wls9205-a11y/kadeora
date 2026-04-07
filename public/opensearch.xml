@@ -3,7 +3,7 @@
   <ShortName>카더라</ShortName>
   <Description>카더라 — 주식, 부동산, 청약 정보 통합 검색</Description>
   <InputEncoding>UTF-8</InputEncoding>
-  <Image width="16" height="16" type="image/png">https://kadeora.app/favicon.ico</Image>
+  <Image width="16" height="16" type="image/png">https://kadeora.app/favicon.png</Image>
   <Url type="text/html" template="https://kadeora.app/search?q={searchTerms}"/>
   <Url type="application/opensearchdescription+xml" rel="self" template="https://kadeora.app/opensearch.xml"/>
 </OpenSearchDescription>

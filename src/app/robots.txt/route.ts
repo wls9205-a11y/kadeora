@@ -128,8 +128,6 @@ Disallow: /api/
 # ===== Sitemaps =====
 Sitemap: https://kadeora.app/sitemap.xml
 Sitemap: https://kadeora.app/image-sitemap.xml
-Sitemap: https://kadeora.app/feed.xml
-Sitemap: https://kadeora.app/rss.xml
 Host: https://kadeora.app
 
 # ===== Daum Verification =====

@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   twitter: { card: 'summary_large_image', title: '2026 청약 가점 계산기', description: '무주택·부양가족·통장 가점 자동 계산 + 배우자 합산' },
   other: {
     'naver:author': '카더라',
-    'naver:written_time': '2026-01-15T00:00:00Z',
+    'naver:written_time': new Date().toISOString(),
     'naver:updated_time': '2026-04-05T00:00:00Z',
     'og:updated_time': '2026-04-05T00:00:00Z',
     'dg:plink': URL,

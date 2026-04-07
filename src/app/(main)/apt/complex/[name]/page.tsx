@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const salePrice = p?.latest_sale_price ? fmtAmount(p.latest_sale_price) : '';
   const jeonsePrice = p?.latest_jeonse_price ? fmtAmount(p.latest_jeonse_price) : '';
 
-  const title = p?.seo_title || `${decoded} 실거래가·전세·월세 시세 | ${region} ${sigungu} | 카더라`;
+  const title = p?.seo_title || `${decoded} 실거래가·전세·월세 시세 | ${region} ${sigungu}`;
   const description = p?.seo_description || `${decoded} 아파트 실거래가 이력, 전세·월세 시세, 평당가 추이, 면적별 비교. 카더라에서 확인하세요.`;
   const ogSubtitle = salePrice ? `매매 ${salePrice}${jeonsePrice ? ` · 전세 ${jeonsePrice}` : ''}` : '실거래가·시세 분석';
   const ogUrl = `${SITE_URL}/api/og?title=${encodeURIComponent(decoded)}&design=2&category=apt&subtitle=${encodeURIComponent(ogSubtitle)}&author=${encodeURIComponent('카더라')}`;
@@ -50,7 +50,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description,
     alternates: { canonical: `${SITE_URL}/apt/complex/${name}` },
     openGraph: {
-      title: `${decoded} 실거래가·시세 | 카더라`,
+      title: `${decoded} 실거래가·시세`,
       description: ogSubtitle + ` — ${region} ${sigungu}`,
       url: `${SITE_URL}/apt/complex/${name}`,
       siteName: '카더라',

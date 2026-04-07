@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   twitter: { card: 'summary_large_image' as const, title: '종목 비교', description: '시가총액·등락률·거래량 핵심 지표 비교' },
   other: {
     'naver:author': '카더라',
-    'naver:written_time': '2026-01-15T00:00:00Z',
+    'naver:written_time': new Date().toISOString(),
     'naver:updated_time': new Date().toISOString(),
     'dg:plink': `${SITE_URL}/stock/compare`,
     'article:section': '주식',

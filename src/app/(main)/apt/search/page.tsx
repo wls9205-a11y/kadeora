@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   },
   twitter: { card: 'summary_large_image' },
   alternates: { canonical: SITE_URL + '/apt/search' },
-  other: { 'naver:written_time': '2026-01-15T00:00:00Z', 'naver:updated_time': new Date().toISOString(), 'naver:author': '카더라', 'og:updated_time': new Date().toISOString(), 'article:section': '부동산', 'article:tag': '실거래가,아파트,시세,매매,검색,부동산', 'dg:plink': SITE_URL + '/apt/search' },
+  other: { 'naver:written_time': new Date().toISOString(), 'naver:updated_time': new Date().toISOString(), 'naver:author': '카더라', 'og:updated_time': new Date().toISOString(), 'article:section': '부동산', 'article:tag': '실거래가,아파트,시세,매매,검색,부동산', 'dg:plink': SITE_URL + '/apt/search' },
 };
 
 export const revalidate = 300;

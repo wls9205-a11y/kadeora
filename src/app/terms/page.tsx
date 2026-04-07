@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
+  alternates: { canonical: SITE_URL + '/terms' },
+  robots: { index: false, follow: true },
   title: '이용약관',
   description: '카더라 서비스 이용약관',
 };

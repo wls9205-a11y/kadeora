@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { name } = await params;
   const sector = decodeURIComponent(name);
   return {
-    title: `${sector} 섹터 종목 | 카더라`,
+    title: `${sector} 섹터 종목`,
     description: `${sector} 섹터에 속한 주식 종목 목록. 시가총액, 등락률, 거래량 비교. 카더라에서 실시간 시세를 확인하세요.`,
     alternates: { canonical: `${SITE_URL}/stock/sector/${encodeURIComponent(sector)}` },
     openGraph: {
@@ -50,7 +50,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       'geo.placename': '서울',
       'geo.position': '37.5665;126.9780',
       'ICBM': '37.5665, 126.9780',
-      'naver:written_time': '2026-01-15T00:00:00Z',
+      'naver:written_time': new Date().toISOString(),
       'naver:updated_time': new Date().toISOString(),
       'dg:plink': `${SITE_URL}/stock/sector/${encodeURIComponent(sector)}`,
       'article:section': '주식',

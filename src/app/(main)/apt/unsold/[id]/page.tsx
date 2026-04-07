@@ -21,6 +21,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       images: [{ url: `https://kadeora.app/api/og?title=${encodeURIComponent(data.house_nm)}&design=2&category=unsold`, width: 1200, height: 630, alt: title }],
     },
     twitter: { card: 'summary_large_image', title, description: desc },
+    alternates: { canonical: `https://kadeora.app/apt/unsold/${id}` },
     other: {
       'naver:author': '카더라',
       'naver:written_time': new Date().toISOString(),

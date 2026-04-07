@@ -17,6 +17,18 @@ export async function generateMetadata({ params }: { params: Promise<{ category:
     title: `${label} 계산기 모음 — 카더라`,
     description: `${label} 관련 무료 계산기. 2026년 최신 기준 반영.`,
     alternates: { canonical: `${SITE_URL}/calc/${category}` },
+    openGraph: {
+      title: `${label} 계산기 모음`,
+      description: `${label} 관련 무료 계산기. 2026년 최신 기준 반영.`,
+      url: `${SITE_URL}/calc/${category}`,
+      siteName: '카더라', locale: 'ko_KR', type: 'website',
+      images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent(label + ' 계산기')}&design=2&category=calc`, width: 1200, height: 630 }],
+    },
+    other: {
+      'naver:author': '카더라',
+      'naver:written_time': new Date().toISOString(),
+      'naver:updated_time': new Date().toISOString(),
+    },
   };
 }
 
