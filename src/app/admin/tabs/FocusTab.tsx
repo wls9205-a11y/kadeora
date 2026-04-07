@@ -8,6 +8,16 @@ export default function FocusTab({ onNavigate }: { onNavigate: (t: any) => void 
   const [loading, setLoading] = useState(true);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  const handleGodMode = async () => {
+    if (!confirm('전체 크론을 실행하시겠습니까?')) return;
+    try {
+      const r = await fetch('/api/admin/god-mode', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mode: 'all' }) });
+      const d = await r.json();
+      alert(d.success ? '✅ 실행 완료' : '❌ 실행 실패');
+      load();
+    } catch { alert('❌ 실행 에러'); }
+  };
+
   const load = useCallback(() => {
     fetch('/api/admin/v2?tab=focus').then(r => r.json()).then(d => { setData(d); setLoading(false); }).catch(() => setLoading(false));
   }, []);
@@ -392,6 +402,29 @@ export default function FocusTab({ onNavigate }: { onNavigate: (t: any) => void 
           ))}
         </div>
       </div>
+
+      {/* ═══ ⚡ 빠른 실행 ═══ */}
+      <div className="adm-sec">⚡ 빠른 실행</div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginBottom: 10 }}>
+        <button onClick={() => handleGodMode()} className="kd-btn" style={{ padding: '10px', fontSize: 12, fontWeight: 700, background: 'linear-gradient(135deg, #F59E0B, #EF4444)', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer' }}>
+          ⚡ 전체 크론 실행
+        </button>
+        <button onClick={() => onNavigate('ops')} className="kd-btn" style={{ padding: '10px', fontSize: 12, fontWeight: 700, background: 'var(--bg-surface)', color: 'var(--text-primary)', border: '1px solid var(--border)', borderRadius: 8, cursor: 'pointer' }}>
+          🔧 크론 상세 →
+        </button>
+      </div>
+      {/* 실패 크론 목록 */}
+      {Object.keys(failedCrons || {}).length > 0 && (
+        <div className="adm-card" style={{ padding: '8px 12px', marginBottom: 10 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: '#EF4444', marginBottom: 4 }}>❌ 실패 크론 ({Object.keys(failedCrons).length}개)</div>
+          {Object.entries(failedCrons || {}).slice(0, 5).map(([name, info]: [string, any]) => (
+            <div key={name} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '3px 0', fontSize: 10, borderBottom: '1px solid var(--border)' }}>
+              <span style={{ color: 'var(--text-secondary)' }}>{name}</span>
+              <span style={{ color: '#EF4444', fontWeight: 600 }}>{info.count}회</span>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* ═══ 최근 활동 ═══ */}
       <div className="adm-sec">🕐 최근 활동</div>
