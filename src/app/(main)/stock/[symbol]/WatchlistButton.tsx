@@ -35,7 +35,7 @@ export default function StockWatchlistButton({ symbol }: { symbol: string }) {
       fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: loading ? 'not-allowed' : 'pointer',
       opacity: loading ? 0.6 : 1,
     }}>
-      {watched ? '⭐ 관심종목' : '☆ 관심종목 추가'}
+      {watched ? '⭐ 관심종목' : '☆ 관심종목 추가 (+50P)'}
     </button>
   );
 }

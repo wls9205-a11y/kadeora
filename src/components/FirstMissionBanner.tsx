@@ -53,7 +53,7 @@ export default function FirstMissionBanner() {
         🎯 첫 미션 ({done}/{total})
       </div>
       <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 10 }}>
-        미션을 완료하고 포인트를 받아가세요! 2개 이상 완료 시 보너스 200P
+        👇 아래 미션 클릭 → 바로 이동! 2개 완료하면 보너스 200P
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
         {MISSIONS.map(m => (

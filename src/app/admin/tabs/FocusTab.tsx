@@ -162,6 +162,22 @@ export default function FocusTab({ onNavigate }: { onNavigate: (t: any) => void 
         ))}
       </div>
 
+      {/* ── 콘텐츠 효율 ── */}
+      {data.categoryStats && (
+        <div style={card}>
+          <div style={{ fontSize: 11, fontWeight: 700, marginBottom: 6 }}>📊 카테고리별 효율</div>
+          {(data.categoryStats || []).slice(0, 5).map((cat: any) => (
+            <div key={cat.category} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '3px 0', borderBottom: `1px solid ${bdr}`, fontSize: 10 }}>
+              <span style={{ width: 50, color: 'var(--text-tertiary)' }}>{cat.category}</span>
+              <div style={{ flex: 1, height: 4, background: 'rgba(255,255,255,0.04)', borderRadius: 2, overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${Math.min(cat.efficiency * 2, 100)}%`, background: cat.efficiency > 50 ? C.green : cat.efficiency > 20 ? C.amber : C.red, borderRadius: 2 }} />
+              </div>
+              <span style={{ width: 45, textAlign: 'right', fontWeight: 700, color: cat.efficiency > 50 ? C.green : 'var(--text-tertiary)' }}>{cat.efficiency}v/p</span>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* ── 빠른 이동 ── */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 4 }}>
         {[{ l: '성장', i: '📈', t: 'growth' }, { l: '유저', i: '👤', t: 'users' }, { l: '크론', i: '🔧', t: 'ops' }, { l: '데이터', i: '🗄️', t: 'data' }].map(n => (

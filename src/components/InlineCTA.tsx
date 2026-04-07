@@ -16,7 +16,7 @@ interface InlineCTAProps {
 const MESSAGES: Record<string, { icon: string; title: (n?: string) => string; sub: (p?: string, e?: string) => string; btn: string; color: string }> = {
   stock: {
     icon: 'bell',
-    title: (n) => `${n || '종목'} 가격 변동 알림`,
+    title: (n) => `${n || '종목'} ±3% 변동 시 즉시 알림`,
     sub: (p, e) => {
       // A/B: visitor_id 해시 기반
       const vid = typeof window !== 'undefined' ? (document.cookie.match(/kd_vid=([^;]+)/)?.[1] || '') : '';
@@ -30,21 +30,21 @@ const MESSAGES: Record<string, { icon: string; title: (n?: string) => string; su
   },
   apt: {
     icon: 'home',
-    title: (n) => `${n || '단지'} 청약 알림`,
+    title: (n) => `${n || '단지'} 청약 마감 전 알림 받기`,
     sub: (p, e) => `청약 마감 D-7 / 당첨 발표 / 분양가 변동 알림${e ? `\n${e}` : ''}`,
     btn: '카카오로 무료 알림 받기',
     color: '#10B981',
   },
   blog: {
     icon: 'bookmark',
-    title: (n) => n ? `${n} 업데이트 알림` : '이 분석 저장 + 업데이트 알림',
+    title: (n) => n ? `${n} 분석 전문 보기` : '무료로 전체 분석 보기',
     sub: () => '새 분석이 올라오면 알림으로 바로 확인하세요',
     btn: '카카오로 무료 시작',
     color: '#3B82F6',
   },
   feed: {
     icon: 'chat',
-    title: () => '이 토론에 의견을 남겨보세요',
+    title: () => '3초 가입하고 의견 남기기',
     sub: () => '카카오 3초 가입으로 댓글, 좋아요, 알림 이용 가능',
     btn: '참여하기',
     color: '#8B5CF6',

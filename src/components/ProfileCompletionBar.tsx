@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/components/AuthProvider';
 
@@ -48,7 +49,7 @@ export default function ProfileCompletionBar() {
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
         <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>프로필 완성도 {pct}%</span>
-        <span style={{ fontSize: 11, color: '#10B981', fontWeight: 600 }}>완성 시 +200P</span>
+        <span style={{ fontSize: 11, color: '#10B981', fontWeight: 600 }}>자기소개 작성하면 +200P 🎁</span>
       </div>
       <div style={{ height: 6, borderRadius: 3, background: 'var(--bg-hover)', overflow: 'hidden', marginBottom: 8 }}>
         <div style={{ height: '100%', width: `${pct}%`, background: pct === 100 ? '#10B981' : '#3B82F6', borderRadius: 3, transition: 'width 0.5s' }} />
@@ -61,7 +62,7 @@ export default function ProfileCompletionBar() {
             color: s.check(profile) ? '#10B981' : 'var(--text-tertiary)',
             border: `1px solid ${s.check(profile) ? 'rgba(16,185,129,0.2)' : 'transparent'}`,
           }}>
-            {s.check(profile) ? '✓' : '○'} {s.label}
+            {s.check(profile) ? '✓' : '→'} {s.label}
           </span>
         ))}
       </div>

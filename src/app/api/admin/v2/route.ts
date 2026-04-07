@@ -95,13 +95,29 @@ export async function GET(req: NextRequest) {
         .select('nickname, provider, created_at, residence_city')
         .order('created_at', { ascending: false }).limit(3);
 
-      // 실패 크론 목록
+      // 카테고리별 효율
+    // 카테고리별 효율 (SQL 집계)
+    const { data: catRaw } = await (sb as any).rpc('exec_sql', { query: "SELECT category, count(*)::int as cnt, coalesce(sum(view_count),0)::int as views FROM blog_posts WHERE is_published GROUP BY category ORDER BY views DESC LIMIT 8" }).catch(() => ({ data: null }));
+    const catMap: Record<string, { count: number; views: number }> = {};
+    if (Array.isArray(catRaw)) {
+      for (const r of catRaw) { catMap[r.category] = { count: r.cnt, views: r.views }; }
+    }
+
+    // 실패 크론 목록
       const { data: failedCrons } = await sb.from('cron_logs')
         .select('cron_name, error_message, created_at')
         .eq('status', 'failed').gte('created_at', dayAgo)
         .order('created_at', { ascending: false }).limit(10);
 
-      // 실패 크론 그룹핑
+      // 카테고리별 효율
+    // 카테고리별 효율 (SQL 집계)
+    const { data: catRaw } = await (sb as any).rpc('exec_sql', { query: "SELECT category, count(*)::int as cnt, coalesce(sum(view_count),0)::int as views FROM blog_posts WHERE is_published GROUP BY category ORDER BY views DESC LIMIT 8" }).catch(() => ({ data: null }));
+    const catMap: Record<string, { count: number; views: number }> = {};
+    if (Array.isArray(catRaw)) {
+      for (const r of catRaw) { catMap[r.category] = { count: r.cnt, views: r.views }; }
+    }
+
+    // 실패 크론 그룹핑
       const failGroups: Record<string, { count: number; lastError: string; lastAt: string }> = {};
       for (const f of (failedCrons || [])) {
         if (!failGroups[f.cron_name]) {
@@ -149,6 +165,7 @@ export async function GET(req: NextRequest) {
           ctaCtr: ctaViews7d > 0 ? Math.round(ctaClicks7d / ctaViews7d * 10000) / 100 : 0,
           postsToday, commentsToday,
         },
+        categoryStats: Object.entries(catMap).map(([k, v]) => ({ category: k, count: v.count, views: v.views, efficiency: v.count > 0 ? Math.round(v.views / v.count) : 0 })).sort((a: any, b: any) => b.efficiency - a.efficiency),
         failedCrons: failGroups,
         recentActivity: [
           ...(recentCrons || []).map((c: any) => ({
@@ -502,7 +519,15 @@ export async function GET(req: NextRequest) {
         Object.entries(groups).map(([k, v]) => [k, { ok: v.ok, fail: v.fail, cronCount: v.crons.size }])
       );
 
-      // 실패 크론 상세
+      // 카테고리별 효율
+    // 카테고리별 효율 (SQL 집계)
+    const { data: catRaw } = await (sb as any).rpc('exec_sql', { query: "SELECT category, count(*)::int as cnt, coalesce(sum(view_count),0)::int as views FROM blog_posts WHERE is_published GROUP BY category ORDER BY views DESC LIMIT 8" }).catch(() => ({ data: null }));
+    const catMap: Record<string, { count: number; views: number }> = {};
+    if (Array.isArray(catRaw)) {
+      for (const r of catRaw) { catMap[r.category] = { count: r.cnt, views: r.views }; }
+    }
+
+    // 실패 크론 상세
       const failDetails: Record<string, { count: number; lastError: string; lastAt: string }> = {};
       for (const log of (cronLogs || [])) {
         if (log.status === 'failed') {

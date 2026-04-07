@@ -82,7 +82,7 @@ export default function StickyBar() {
           padding: '6px 16px', borderRadius: 16,
           background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)',
           fontSize: 11, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap',
-        }}>무료 가입</Link>
+        }}>3초 무료 가입</Link>
       <button onClick={() => {
         setDismissed(true);
         sessionStorage.setItem('kd_sticky_dismissed', '1');
