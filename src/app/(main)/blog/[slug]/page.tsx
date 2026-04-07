@@ -537,7 +537,6 @@ export default async function BlogDetailPage({ params }: Props) {
       </nav>
 
       {/* 세션70: 상단 회원가입 유도 배너 */}
-      <BlogTopBanner slug={slug} />
 
       <article style={{ paddingBottom: 40 }}>
         {/* ImageGallery JSON-LD (유지 — 포털 이미지 탭) */}
@@ -623,7 +622,6 @@ export default async function BlogDetailPage({ params }: Props) {
         {showFaq && <BlogFaqAccordion items={faqItems} />}
 
         {/* 세션70: 본문 중간 회원가입 유도 */}
-        <BlogMidCTA slug={slug} category={post.category} />
 
         {/* 읽기 완료 메시지 — 로그인 사용자만 */}
         {isLoggedIn && (
@@ -720,7 +718,6 @@ export default async function BlogDetailPage({ params }: Props) {
       {nextPost && <NextArticleFloat nextSlug={nextPost.slug} nextTitle={nextPost.title} category={post.category} />}
 
       {/* 세션70: 플로팅 가입 배너 */}
-      <BlogFloatingCTA slug={slug} />
 
       {/* 프로 업셀 배너 — 결제 시스템 출시 전까지 비공개 */}
       {false && !isPremiumUser && (
@@ -790,7 +787,7 @@ export default async function BlogDetailPage({ params }: Props) {
       </div>
 
       {/* CTA 배너 — InlineCTA (비로그인, 1PV 즉시) */}
-      {!isLoggedIn && <InlineCTA category={post.category === 'stock' ? 'stock' : post.category === 'apt' ? 'apt' : 'general'} />}
+      {!isLoggedIn && <InlineCTA type="blog" />}
 
       {/* 시리즈 네비게이션 */}
       {seriesInfo && seriesInfo.posts.length > 1 && (() => {

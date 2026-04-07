@@ -5,6 +5,7 @@ import { SITE_URL } from '@/lib/constants';
 
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { notFound } from 'next/navigation';
+import InlineCTA from '@/components/InlineCTA';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import ShareButtons from '@/components/ShareButtons';
@@ -399,6 +400,8 @@ export default async function StockDetailPage({ params }: Props) {
           </div>
         );
       })()}
+
+      <InlineCTA type="stock" entityName={s.name} entityId={symbol} price={fmtPrice(Number(s.price), s.currency ?? undefined)} />
 
       {/* 📊 인포그래픽 이미지 — 네이버/구글 이미지 검색 크롤링용 */}
       <figure style={{ margin: '0 0 var(--sp-md)', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--border)' }}>

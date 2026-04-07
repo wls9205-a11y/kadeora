@@ -1,4 +1,5 @@
 'use client';
+import InlineCTA from '@/components/InlineCTA';
 import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -507,36 +508,8 @@ export default function FeedClient({
 
             const nodes: React.ReactNode[] = [card];
             if (i === 0 && currentUserId) nodes.push(<AttendanceBanner key="attend" />);
-            if (i === 4 && !currentUserId) {
-              nodes.push(
-                <div key="signup-cta" className="kd-card-glow" data-nudge="context-cta" style={{ padding: '24px 18px', margin: '6px 0' }}>
-                  <div style={{ position: 'relative', zIndex: 1 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 'var(--sp-lg)' }}>
-                      <div style={{ width: 44, height: 44, borderRadius: 'var(--radius-lg)', background: 'linear-gradient(135deg, var(--brand), #2EE8A5)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-lg)', flexShrink: 0 }}>🚀</div>
-                      <div>
-                        <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-primary)' }}>지금 합류하세요</div>
-                        <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>투자자들의 실시간 대화에 참여</div>
-                      </div>
-                    </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-lg)' }}>
-                      {[
-                        { icon: '📈', text: '관심 종목 알림' },
-                        { icon: '🏠', text: '청약 마감 알림' },
-                        { icon: '💬', text: '실시간 토론' },
-                        { icon: '🎁', text: '포인트 적립' },
-                      ].map(f => (
-                        <div key={f.text} style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', padding: '8px 10px', borderRadius: 'var(--radius-md)', background: 'rgba(59,123,246,0.06)', border: '1px solid rgba(59,123,246,0.08)' }}>
-                          <span style={{ fontSize: 14 }}>{f.icon}</span>
-                          <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', fontWeight: 600 }}>{f.text}</span>
-                        </div>
-                      ))}
-                    </div>
-                    <Link href={`/login?redirect=${encodeURIComponent(pathname)}`} className="kd-btn-glow" style={{ display: 'block', textAlign: 'center', width: '100%', padding: '13px 0', borderRadius: 'var(--radius-card)', fontSize: 'var(--fs-sm)', textDecoration: 'none' }}>
-                      카카오로 3초 가입
-                    </Link>
-                  </div>
-                </div>
-              );
+            if (i === 3 && !currentUserId) {
+              nodes.push(<InlineCTA key="feed-cta" type="feed" />);
             }
             return nodes;
           })}
