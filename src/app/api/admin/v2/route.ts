@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
         safeCount(sb.from('blog_posts').select('id', { count: 'exact', head: true }).eq('is_published', true)),
         safeCount(sb.from('blog_posts').select('id', { count: 'exact', head: true }).not('rewritten_at', 'is', null)),
         safeCount(sb.from('cron_logs').select('id', { count: 'exact', head: true }).eq('status', 'success').gte('created_at', dayAgo)),
-        safeCount(sb.from('cron_logs').select('id', { count: 'exact', head: true }).neq('status', 'success').gte('created_at', dayAgo)),
+        safeCount(sb.from('cron_logs').select('id', { count: 'exact', head: true }).in('status', ['error','failed']).gte('created_at', dayAgo)),
         safeCount(sb.from('apt_site_interests').select('id', { count: 'exact', head: true })),
         safeCount((sb as any).from('email_subscribers').select('id', { count: 'exact', head: true }).eq('is_active', true)),
         safeCount(sb.from('push_subscriptions').select('id', { count: 'exact', head: true })),
