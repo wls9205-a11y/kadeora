@@ -121,7 +121,7 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
           {topPages.slice(0,5).map((p:any,i:number)=>(
             <div key={i} style={{display:'flex',alignItems:'center',gap:5,padding:'3px 0',fontSize:10}}>
               <span style={{width:16,height:16,borderRadius:4,background:i<3?['#3B7BF6','#06B6D4','#8B5CF6'][i]:'rgba(255,255,255,0.06)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:8,fontWeight:800,color:i<3?'#fff':'rgba(255,255,255,0.25)',flexShrink:0}}>{i+1}</span>
-              <span style={{flex:1,color:'rgba(255,255,255,0.45)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' as const,minWidth:0}}>{(() => { try { return decodeURIComponent(p.path).replace(/\(.main\)\//g,'') } catch { return p.path } })().slice(0,30)}</span>
+              <span style={{flex:1,color:'rgba(255,255,255,0.45)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' as const,minWidth:0}}>{(() => { try { return decodeURIComponent(p.path).replace(/\(.main\)\//g,'') } catch { return p.path } })().slice(0,20)}</span>
               <span style={{fontWeight:700,color:'rgba(255,255,255,0.55)',fontSize:11}}>{p.count}</span>
             </div>
           ))}
@@ -172,7 +172,7 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
       </div>
 
       {/* ═══ 14일 PV 스파크라인 ═══ */}
-      {dt?.length>0&&<div style={{...CS.card}}>
+      {dt?.length>0&&<div style={{...CS.card,overflow:'hidden'}}>
         <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6}}>
           <span style={{fontSize:11,fontWeight:700,color:'rgba(255,255,255,0.4)'}}>📈 14일 PV</span>
           <span style={{fontSize:12,fontWeight:700,color:'#06B6D4'}}>{k.pvToday}<span style={{fontSize:10,color:'rgba(255,255,255,0.25)'}}> /오늘</span></span>

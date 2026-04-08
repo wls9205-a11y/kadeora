@@ -33,7 +33,7 @@ export default function AdminShell() {
   const sc = hp ? hp.s>=71?'#10B981':hp.s>=41?'#F59E0B':'#EF4444' : '#666';
 
   return (
-    <div style={{width:'100%',maxWidth:640,margin:'0 auto',boxSizing:'border-box',padding:'0 10px 80px',minHeight:'100vh',overflow:'hidden'}}>
+    <div style={{width:'100%',maxWidth:640,margin:'0 auto',boxSizing:'border-box',padding:'0 10px 80px',minHeight:'100vh',overflowX:'hidden'}}>
       <style>{`
         @keyframes spin{to{transform:rotate(360deg)}}
         *{box-sizing:border-box}
