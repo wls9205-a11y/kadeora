@@ -187,13 +187,20 @@ export async function generateMetadata({ params }: Props) {
   if (!post) return {};
     const ogImage = post.cover_image || `${SITE}/api/og?title=${encodeURIComponent(post.title)}&category=${post.category}&author=${encodeURIComponent(post.author_name || '카더라')}&design=2`;
     const ogSquare = `${SITE}/api/og-square?title=${encodeURIComponent(post.title)}&category=${post.category}&author=${encodeURIComponent(post.author_name || '카더라')}`;
+    // 네이버/구글 통일 설명문 (meta_description > excerpt > title)
+    const desc = (post.meta_description && post.meta_description.length >= 30)
+      ? post.meta_description
+      : (post.excerpt && post.excerpt.length >= 30)
+        ? post.excerpt
+        : post.title;
+    const descClean = desc.replace(/[\n\r#*_|]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160);
   return {
     title: post.title,
-    description: post.meta_description || post.excerpt || post.title,
+    description: descClean,
     keywords: post.meta_keywords || (post.tags ?? []).join(', '),
     alternates: { canonical: `${SITE}/blog/${slug}` },
     openGraph: {
-      title: post.title, description: post.excerpt || post.title, type: 'article',
+      title: post.title, description: descClean, type: 'article',
       siteName: '카더라', locale: 'ko_KR',
       publishedTime: post.published_at || post.created_at,
       modifiedTime: post.updated_at || post.rewritten_at || post.published_at || post.created_at,
@@ -202,8 +209,8 @@ export async function generateMetadata({ params }: Props) {
       section: post.category === 'stock' ? '주식' : post.category === 'apt' ? '부동산' : post.category === 'unsold' ? '미분양' : '재테크',
       url: `${SITE}/blog/${slug}`,
       images: [
-        { url: ogImage, width: 1200, height: 630, alt: post.image_alt || `카더라 — ${post.title}` },
-        { url: ogSquare, width: 630, height: 630, alt: post.image_alt || `카더라 — ${post.title}` },
+        { url: ogImage, width: 1200, height: 630, alt: post.image_alt || descClean || post.title },
+        { url: ogSquare, width: 630, height: 630, alt: post.image_alt || descClean || post.title },
       ],
     },
     twitter: {
@@ -225,9 +232,10 @@ export async function generateMetadata({ params }: Props) {
         'naver:written_time': post.rewritten_at || post.published_at || post.created_at,
         'naver:updated_time': post.rewritten_at || post.updated_at || post.published_at || post.created_at,
         'naver:author': post.author_name || '카더라',
+        'naver:description': descClean,
         'dg:plink': `${SITE}/blog/${slug}`,
         'article:section': section,
-        'article:tag': (post.tags ?? []).slice(0, 5).join(',') || section,
+        'article:tag': [section, ...(post.tags ?? []).slice(0, 5)].join(','),
         'article:published_time': post.published_at || post.created_at,
         'article:modified_time': post.updated_at || post.published_at || post.created_at,
         'article:author': post.author_name || '카더라',
@@ -387,7 +395,7 @@ export default async function BlogDetailPage({ params }: Props) {
   const jsonLd = {
     '@context': 'https://schema.org', '@type': 'BlogPosting',
     headline: post.title,
-    description: (post.meta_description || post.excerpt || '').slice(0, 160),
+    description: descClean,
     datePublished: post.published_at || post.created_at,
     dateModified: post.updated_at || post.published_at || post.created_at,
     wordCount,
