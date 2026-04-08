@@ -73,6 +73,8 @@ export async function GET(req: NextRequest) {
         safeCount((sb as any).from('profiles').select('id', { count: 'exact', head: true }).or('is_seed.is.null,is_seed.eq.false').not('bio', 'is', null)),
         safeCount((sb as any).from('profiles').select('id', { count: 'exact', head: true }).or('is_seed.is.null,is_seed.eq.false').not('age_group', 'is', null)),
         safeCount(sb.from('page_views').select('id', { count: 'exact', head: true }).gte('created_at', new Date(Date.now()-7*86400000).toISOString())),
+        safeCount(sb.from('share_logs').select('id', { count: 'exact', head: true }).gte('created_at', new Date(Date.now()-7*86400000).toISOString())),
+        safe((sb as any).from('share_logs').select('platform').gte('created_at', new Date(Date.now()-7*86400000).toISOString()).limit(500), []),
       ]);
 
       const totalCron = cronOk + cronFail;
