@@ -10,23 +10,40 @@ export function generateImageAlt(category: string, title: string): string {
 }
 
 export function generateMetaDesc(content: string, title?: string, category?: string): string {
-  // 1순위: 첫 번째 h2 이후 첫 문단에서 추출
-  const afterH2 = content.match(/##\s+.+\n+([^#\n][^\n]+)/);
+  // 마크다운/특수문자 정리
+  const clean = (s: string) => s.replace(/[#*\[\]|`>\-_~()\n\r]/g, ' ').replace(/\s+/g, ' ').trim();
+
+  // 1순위: 첫 번째 h2 이후 문단 (본문 핵심 시작점)
+  const afterH2 = content.match(/##\s+.+\n+([^#\n][^\n]{30,})/);
   if (afterH2?.[1]) {
-    const cleaned = afterH2[1].replace(/[#*\[\]|`>\-]/g, '').replace(/\s+/g, ' ').trim();
-    if (cleaned.length >= 40) {
-      return cleaned.slice(0, 155) + (cleaned.length > 155 ? '' : '');
-    }
+    const c = clean(afterH2[1]);
+    if (c.length >= 50) return c.slice(0, 155);
   }
-  // 2순위: 전체 본문에서 추출
-  const cleaned = content
-    .replace(/##?\s+.+/g, '') // 제목 제거
-    .replace(/[#*\[\]|`>\-]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim();
-  const suffix = category === 'stock' ? ' 카더라에서 확인하세요.' : category === 'apt' ? ' 카더라 부동산에서 확인하세요.' : '';
-  const desc = cleaned.slice(0, 145 - suffix.length);
-  return desc + suffix;
+
+  // 2순위: 숫자/데이터 줄 건너뛰고 서술형 문장 찾기
+  const lines = content.split('\n').map(l => clean(l)).filter(l =>
+    l.length >= 30 &&
+    !/^\d+[\s,.]/.test(l) &&           // 숫자 시작 줄 제외
+    !/^[|:]/.test(l) &&                 // 테이블 줄 제외
+    l.split(' ').length >= 5 &&          // 단어 5개 이상 (서술문)
+    !/^(위치|면적|세대|평형|시공|입주|분양)/.test(l)  // 데이터 라벨 제외
+  );
+  if (lines.length > 0) {
+    return lines[0].slice(0, 155);
+  }
+
+  // 3순위: title 기반 생성 (마지막 폴백)
+  if (title) {
+    const catLabel = category === 'stock' ? '주식 투자'
+      : category === 'apt' ? '부동산'
+      : category === 'unsold' ? '미분양'
+      : category === 'finance' ? '재테크' : '투자';
+    return `${title} — 최신 ${catLabel} 데이터와 분석을 카더라에서 확인하세요.`.slice(0, 155);
+  }
+
+  // 최종 폴백: 전체 본문
+  const allClean = clean(content);
+  return allClean.slice(0, 145) + ' — 카더라';
 }
 
 export function generateMetaKeywords(category: string, tags?: string[]): string {
