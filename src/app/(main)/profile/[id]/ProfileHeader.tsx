@@ -1,8 +1,8 @@
 'use client';
 import ProfileCompletionBar from '@/components/ProfileCompletionBar';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useToast } from '@/components/Toast';
 import { REGIONS, GRADE_EMOJI, SITE_URL } from '@/lib/constants';
@@ -14,8 +14,14 @@ interface Profile {
   grade: number | null; grade_title: string | null; points: number | null;
   posts_count: number | null; likes_count: number | null; is_premium: boolean | null;
   created_at: string; provider: string | null; interests: string[] | null; region_text: string | null;
-  residence_city: string | null; residence_district: string | null;
+  residence_city: string | null; residence_district: string | null; age_group: string | null;
 }
+
+const AGE_GROUPS = [
+  { value: '10s', label: '10대' }, { value: '20s', label: '20대' },
+  { value: '30s', label: '30대' }, { value: '40s', label: '40대' },
+  { value: '50s', label: '50대' }, { value: '60+', label: '60대 이상' },
+];
 
 interface Props {
   profile: Profile;
@@ -42,6 +48,12 @@ export default function ProfileHeader({ profile, isOwner, followersCount, follow
   const [regionText, setRegionText] = useState(profile.region_text ?? '');
   const [residenceCity, setResidenceCity] = useState(profile.residence_city ?? '');
   const [residenceDistrict, setResidenceDistrict] = useState(profile.residence_district ?? '');
+  const [ageGroup, setAgeGroup] = useState(profile.age_group ?? '');
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    if (isOwner && searchParams.get('edit') === '1') setEditing(true);
+  }, [isOwner, searchParams]);
   const { success, error } = useToast();
   const router = useRouter();
   const avatarInputRef = useRef<HTMLInputElement>(null);
@@ -87,6 +99,7 @@ export default function ProfileHeader({ profile, isOwner, followersCount, follow
         region_text: regionText || null,
         residence_city: residenceCity || null,
         residence_district: residenceDistrict || null,
+        age_group: ageGroup || null,
         updated_at: new Date().toISOString(),
       }).eq('id', profile.id);
       if (err) throw err;
@@ -172,6 +185,16 @@ export default function ProfileHeader({ profile, isOwner, followersCount, follow
                 </select>
               </div>
             )}
+            <div>
+              <label style={{ display: 'block', fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 'var(--sp-xs)', padding: '0 4px' }}>🎂 연령대</label>
+              <select value={ageGroup} onChange={e => setAgeGroup(e.target.value)}
+                style={{ width: '100%', boxSizing: 'border-box', padding: '10px 16px', fontSize: 'var(--fs-sm)', background: 'var(--bg-base)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', cursor: 'pointer' }}>
+                <option value="">미설정</option>
+                {AGE_GROUPS.map(a => (
+                  <option key={a.value} value={a.value}>{a.label}</option>
+                ))}
+              </select>
+            </div>
             <div style={{ display: 'flex', gap: 'var(--sp-sm)', justifyContent: 'flex-end' }}>
               <button onClick={() => setEditing(false)} className="kd-btn kd-btn-ghost" style={{ fontSize: 'var(--fs-sm)' }}>취소</button>
               <button onClick={handleSave} disabled={saving} className="kd-btn kd-btn-primary" style={{ fontSize: 'var(--fs-sm)' }}>{saving ? '저장 중...' : '저장'}</button>

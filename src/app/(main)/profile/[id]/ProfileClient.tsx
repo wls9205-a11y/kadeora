@@ -10,7 +10,7 @@ interface Profile {
   grade: number | null; grade_title: string | null; points: number | null;
   posts_count: number | null; likes_count: number | null; is_premium: boolean | null;
   created_at: string; provider: string | null; interests: string[] | null; region_text: string | null;
-  residence_city: string | null; residence_district: string | null;
+  residence_city: string | null; residence_district: string | null; age_group: string | null;
 }
 interface PostRow {
   id: number; title: string; category: string; created_at: string;

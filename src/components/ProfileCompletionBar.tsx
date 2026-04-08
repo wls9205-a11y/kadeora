@@ -55,16 +55,27 @@ export default function ProfileCompletionBar() {
         <div style={{ height: '100%', width: `${pct}%`, background: pct === 100 ? '#10B981' : '#3B82F6', borderRadius: 3, transition: 'width 0.5s' }} />
       </div>
       <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-        {STEPS.map(s => (
-          <span key={s.key} style={{
-            padding: '2px 8px', borderRadius: 10, fontSize: 10, fontWeight: 600,
-            background: s.check(profile) ? 'rgba(16,185,129,0.1)' : 'var(--bg-hover)',
-            color: s.check(profile) ? '#10B981' : 'var(--text-tertiary)',
-            border: `1px solid ${s.check(profile) ? 'rgba(16,185,129,0.2)' : 'transparent'}`,
-          }}>
-            {s.check(profile) ? '✓' : '→'} {s.label}
-          </span>
-        ))}
+        {STEPS.map(s => {
+          const isDone = s.check(profile);
+          return isDone ? (
+            <span key={s.key} style={{
+              padding: '2px 8px', borderRadius: 10, fontSize: 10, fontWeight: 600,
+              background: 'rgba(16,185,129,0.1)', color: '#10B981',
+              border: '1px solid rgba(16,185,129,0.2)',
+            }}>
+              ✓ {s.label}
+            </span>
+          ) : (
+            <Link key={s.key} href={`/profile/${userId}?edit=1`} style={{
+              padding: '2px 8px', borderRadius: 10, fontSize: 10, fontWeight: 600,
+              background: 'var(--bg-hover)', color: 'var(--text-tertiary)',
+              border: '1px solid transparent', textDecoration: 'none',
+              cursor: 'pointer',
+            }}>
+              → {s.label}
+            </Link>
+          );
+        })}
       </div>
     </div>
   );

@@ -392,6 +392,11 @@ export default async function BlogDetailPage({ params }: Props) {
 
   const catSection: Record<string, string> = { stock: '주식', apt: '부동산', unsold: '미분양', finance: '재테크', general: '생활' };
 
+  const descClean = ((post.meta_description && post.meta_description.length >= 30)
+    ? post.meta_description
+    : (post.excerpt && post.excerpt.length >= 20 ? post.excerpt : post.title)
+  ).replace(/[\n\r#*_|]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160);
+
   const jsonLd = {
     '@context': 'https://schema.org', '@type': 'BlogPosting',
     headline: post.title,
