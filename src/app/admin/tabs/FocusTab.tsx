@@ -55,6 +55,9 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
   const nr=pct(g.notifRead7d||0,g.notifTotal7d||1);
   const dbPct=pct(k.dbMb||0,8400);
   const rwPct=k.rewriteRate||0;
+  const rwRemain=(k.blogs||0)-(k.rewritten||0);
+  const rwDaily=x.newBlogs24||0;
+  const rwEta=rwDaily>0?Math.ceil(rwRemain/(rwDaily>10?rwDaily:154)):0;
 
   const shareTotal = x.shares7d || 0;
   const sharePlatforms = x.sharesByPlatform || {};
@@ -116,6 +119,18 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
             <span style={{fontSize:8,color:'rgba(255,255,255,0.15)'}}>23시</span>
           </div>
         </>}
+        {/* 최근 접속자 실시간 피드 */}
+        {(td?.recentVisitors||[]).length>0&&<>
+          <div style={{fontSize:10,color:'rgba(255,255,255,0.25)',marginTop:8,marginBottom:4}}>최근 접속 (실시간)</div>
+          {td.recentVisitors.slice(0,8).map((v:any,i:number)=>(
+            <div key={i} style={{display:'flex',alignItems:'center',gap:6,padding:'3px 0',fontSize:10,borderBottom:i<7?'1px solid rgba(255,255,255,0.03)':'none'}}>
+              <span style={{fontSize:12,flexShrink:0}}>{v.device}</span>
+              <span style={{flex:1,color:'rgba(255,255,255,0.4)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' as const,minWidth:0}}>{(() => { try { return decodeURIComponent(v.path||'').replace(/\(main\)\//g,'') } catch { return v.path } })().slice(0,25)}</span>
+              <span style={{fontSize:9,padding:'1px 6px',borderRadius:8,background:v.ref==='Google'?'rgba(66,133,244,0.15)':v.ref==='Naver'?'rgba(0,199,60,0.15)':v.ref==='Kakao'?'rgba(254,229,0,0.15)':'rgba(255,255,255,0.04)',color:v.ref==='Google'?'#4285F4':v.ref==='Naver'?'#00C73C':v.ref==='Kakao'?'#FEE500':'rgba(255,255,255,0.3)',flexShrink:0}}>{v.ref}</span>
+              <span style={{fontSize:9,color:'rgba(255,255,255,0.15)',flexShrink:0,width:24,textAlign:'right' as const}}>{ago(v.at)}</span>
+            </div>
+          ))}
+        </>}
       </div>
 
       {/* ═══ 인기 페이지 + 유입 경로 ═══ */}
@@ -162,9 +177,24 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
         ))}
       </div>
 
-      {/* ═══ 데이터 KPI 2×2 ═══ */}
-      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6}}>
-        {[{l:'청약',v:f(k.apts),c:'#10B981',i:'🏠'},{l:'종목',v:f(k.stocks),c:'#F59E0B',i:'📈'},{l:'단지',v:f(x.aptSites||0),c:'#14B8A6',i:'🏢'},{l:'미분양',v:f(k.unsold),c:'#F97316',i:'🏚️'}].map(kk=>(
+      {/* ═══ 유저·블로그 세부 ═══ */}
+      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:4}}>
+        {[
+          {l:'신규(7d)',v:k.newUsers||0,c:'#10B981'},
+          {l:'활성',v:k.activeUsers||0,c:'#3B7BF6'},
+          {l:'복귀율',v:`${k.returnRate||0}%`,c:'#8B5CF6'},
+          {l:'오늘글',v:g.postsToday||0,c:'#06B6D4'},
+        ].map(kk=>(
+          <div key={kk.l} style={{textAlign:'center',background:'rgba(12,21,40,0.65)',border:'1px solid rgba(255,255,255,0.04)',borderRadius:8,padding:'6px 0'}}>
+            <div style={{fontSize:14,fontWeight:800,color:kk.c,lineHeight:1}}>{kk.v}</div>
+            <div style={{fontSize:8,color:'rgba(255,255,255,0.2)',marginTop:3}}>{kk.l}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* ═══ 데이터 KPI ═══ */}
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:4}}>
+        {[{l:'청약',v:f(k.apts),c:'#10B981',i:'🏠'},{l:'종목',v:f(k.stocks),c:'#F59E0B',i:'📈'},{l:'단지',v:f(x.aptSites||0),c:'#14B8A6',i:'🏢'},{l:'미분양',v:f(k.unsold),c:'#F97316',i:'🏚️'},{l:'재개발',v:f(k.redev||0),c:'#EC4899',i:'🔨'},{l:'관심',v:f(k.interests||0),c:'#6366F1',i:'❤️'}].map(kk=>(
           <div key={kk.l} style={{...CS.card,display:'flex',alignItems:'center',gap:10,padding:'8px 10px'}}>
             <span style={{fontSize:18,opacity:0.6}}>{kk.i}</span>
             <div>
@@ -198,6 +228,15 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
                 <div key={kk.l} style={{textAlign:'center'}}>
                   <div style={{fontSize:15,fontWeight:800,color:kk.c,lineHeight:1}}>{kk.v}</div>
                   <div style={{fontSize:9,color:'rgba(255,255,255,0.3)',marginTop:2}}>{kk.l}</div>
+                </div>
+              ))}
+            </div>
+            {/* 리라이팅 세부 */}
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:4,marginTop:6}}>
+              {[{l:'일처리',v:`${rwDaily>0?rwDaily:'~154'}/일`,c:'#06B6D4'},{l:'ETA',v:rwEta>0?`${rwEta}일`:'—',c:rwEta<14?'#10B981':'#F59E0B'},{l:'발행총',v:f(k.blogs||0),c:'#8B5CF6'}].map(kk=>(
+                <div key={kk.l} style={{textAlign:'center',background:'rgba(255,255,255,0.02)',borderRadius:6,padding:'4px 0'}}>
+                  <div style={{fontSize:12,fontWeight:700,color:kk.c,lineHeight:1}}>{kk.v}</div>
+                  <div style={{fontSize:8,color:'rgba(255,255,255,0.2)',marginTop:2}}>{kk.l}</div>
                 </div>
               ))}
             </div>
@@ -235,7 +274,7 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
               <span style={{fontSize:11,fontWeight:700,color:r.v>=80?'#10B981':r.v>=30?'#F59E0B':'#EF4444'}}>{r.v}%</span>
             </div>
           ))}
-          <div style={{fontSize:10,fontWeight:700,color:'#4285F4',textAlign:'center',marginTop:4}}>{f(x.googleReady||0)}편 준비</div>
+          <div style={{fontSize:10,fontWeight:700,color:'#4285F4',textAlign:'center',marginTop:4}}>{f(x.googleReady||0)}/{f(k.blogs||0)}편</div>
         </div>
         {/* Naver */}
         <div style={{...CS.card,borderLeft:'3px solid #00C73C',background:'linear-gradient(135deg,rgba(0,199,60,0.04),rgba(12,21,40,0.65))'}}>
@@ -254,7 +293,7 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
               <span style={{fontSize:11,fontWeight:700,color:r.v>=80?'#10B981':r.v>=30?'#F59E0B':'#EF4444'}}>{r.v}%</span>
             </div>
           ))}
-          <div style={{fontSize:10,fontWeight:700,color:'#00C73C',textAlign:'center',marginTop:4}}>{f(x.naverReady||0)}편 준비</div>
+          <div style={{fontSize:10,fontWeight:700,color:'#00C73C',textAlign:'center',marginTop:4}}>{f(x.naverReady||0)}/{f(k.blogs||0)}편</div>
         </div>
       </div>
 
@@ -262,7 +301,7 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6}}>
         <div style={CS.card}>
           <div style={{fontSize:10,fontWeight:700,color:'rgba(255,255,255,0.4)',marginBottom:6}}>👤 유저</div>
-          {[{l:'온보딩',v:g.onboardRate??0,bar:true,c:(g.onboardRate??0)>70?'#10B981':'#F59E0B'},{l:'프로필',v:g.profileRate??0,bar:true,c:(g.profileRate??0)>20?'#10B981':'#EF4444'},{l:'게시글',v:f(x.totalPosts||0),c:'rgba(255,255,255,0.5)'},{l:'댓글',v:f(x.totalComments||0),c:'rgba(255,255,255,0.5)'}].map(r=>(
+          {[{l:'온보딩',v:g.onboardRate??0,bar:true,c:(g.onboardRate??0)>70?'#10B981':'#F59E0B'},{l:'프로필',v:g.profileRate??0,bar:true,c:(g.profileRate??0)>20?'#10B981':'#EF4444'},{l:'게시글',v:f(x.totalPosts||0),c:'rgba(255,255,255,0.5)'},{l:'댓글',v:f(x.totalComments||0),c:'rgba(255,255,255,0.5)'},{l:'연령대',v:`${pct(x.ageCount||0,k.users||1)}%`,c:'rgba(255,255,255,0.5)'},{l:'자기소개',v:`${pct(x.bioCount||0,k.users||1)}%`,c:'rgba(255,255,255,0.5)'}].map(r=>(
             <div key={r.l} style={{marginBottom:4}}>
               <div style={{display:'flex',justifyContent:'space-between',fontSize:10,marginBottom:2}}>
                 <span style={{color:'rgba(255,255,255,0.35)'}}>{r.l}</span>
@@ -291,7 +330,7 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
       </div>
 
       {/* ═══ 공유 현황 ═══ */}
-      {shareTotal>0&&<div style={CS.card}>
+      {<div style={CS.card}>
         <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6}}>
           <span style={{fontSize:10,fontWeight:700,color:'rgba(255,255,255,0.4)'}}>📤 공유 (7일)</span>
           <span style={{fontSize:13,fontWeight:700,color:'#06B6D4'}}>{shareTotal}건</span>
@@ -336,7 +375,11 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
             <span style={{color:'rgba(255,255,255,0.35)'}}>크론/일</span>
             <span style={{fontWeight:700,color:'rgba(255,255,255,0.5)'}}>{k.cronSuccess+k.cronFail}</span>
           </div>
-          {fcn>0&&<div style={{marginTop:4,padding:'4px 6px',background:'rgba(239,68,68,0.06)',borderRadius:6,fontSize:10,color:'#EF4444'}}>❌ 실패 {fcn}건</div>}
+          {fcn>0&&<div style={{marginTop:4}}>
+            {Object.entries(fc||{}).slice(0,3).map(([name,info]:any)=>(
+              <div key={name} style={{padding:'3px 6px',background:'rgba(239,68,68,0.06)',borderRadius:4,fontSize:9,color:'#EF4444',marginBottom:2,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' as const}}>❌ {name.replace('cron-','').slice(0,18)}</div>
+            ))}
+          </div>}
         </div>
       </div>
 
