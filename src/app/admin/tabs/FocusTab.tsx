@@ -267,7 +267,16 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
               <text x="15" y="15" textAnchor="middle" dominantBaseline="central" fill="#4285F4" fontSize="9" fontWeight="800">{pct(x.googleReady||0,k.blogs||1)}%</text>
             </Ring>
           </div>
-          {[{l:'내부링크',v:pct(x.linksOk||0,k.blogs||1)},{l:'E-E-A-T',v:100},{l:'제목',v:pct(x.titleGood||0,k.blogs||1)},{l:'메타설명',v:pct(x.metaGood||0,k.blogs||1)}].map(r=>(
+          {[
+            {l:'Sitemap',v:pct(x.indexedOk||0,k.blogs||1)},
+            {l:'내부링크',v:pct(x.linksOk||0,k.blogs||1)},
+            {l:'제목최적화',v:pct(x.titleGood||0,k.blogs||1)},
+            {l:'메타설명',v:pct(x.metaGood||0,k.blogs||1)},
+            {l:'이미지Alt',v:pct(x.imageAltOk||0,k.blogs||1)},
+            {l:'JSON-LD',v:100},
+            {l:'콘텐츠길이',v:pct(x.contentLongOk||0,k.blogs||1)},
+            {l:'리라이트',v:rwPct},
+          ].map(r=>(
             <div key={r.l} style={{display:'flex',alignItems:'center',gap:4,marginBottom:3}}>
               <span style={{width:10,height:10,borderRadius:'50%',background:r.v>=80?'rgba(16,185,129,0.15)':r.v>=30?'rgba(245,158,11,0.15)':'rgba(239,68,68,0.15)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:7,flexShrink:0,color:r.v>=80?'#10B981':r.v>=30?'#F59E0B':'#EF4444'}}>{r.v>=80?'✓':r.v>=30?'△':'✗'}</span>
               <span style={{flex:1,fontSize:10,color:'rgba(255,255,255,0.4)'}}>{r.l}</span>
@@ -286,7 +295,16 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
               <text x="15" y="15" textAnchor="middle" dominantBaseline="central" fill="#00C73C" fontSize="9" fontWeight="800">{pct(x.naverReady||0,k.blogs||1)}%</text>
             </Ring>
           </div>
-          {[{l:'OG이미지',v:100},{l:'요약문',v:pct(x.excerptOk||0,k.blogs||1)},{l:'제목',v:pct(x.titleGood||0,k.blogs||1)},{l:'메타설명',v:pct(x.metaGood||0,k.blogs||1)}].map(r=>(
+          {[
+            {l:'OG이미지',v:100},
+            {l:'요약문',v:pct(x.excerptOk||0,k.blogs||1)},
+            {l:'제목최적화',v:pct(x.titleGood||0,k.blogs||1)},
+            {l:'메타설명',v:pct(x.metaGood||0,k.blogs||1)},
+            {l:'naver:desc',v:100},
+            {l:'해시태그',v:pct(x.tagsOk||0,k.blogs||1)},
+            {l:'키워드',v:pct(x.keywordsOk||0,k.blogs||1)},
+            {l:'시리즈연결',v:pct(x.seriesOk||0,k.blogs||1)},
+          ].map(r=>(
             <div key={r.l} style={{display:'flex',alignItems:'center',gap:4,marginBottom:3}}>
               <span style={{width:10,height:10,borderRadius:'50%',background:r.v>=80?'rgba(16,185,129,0.15)':r.v>=30?'rgba(245,158,11,0.15)':'rgba(239,68,68,0.15)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:7,flexShrink:0,color:r.v>=80?'#10B981':r.v>=30?'#F59E0B':'#EF4444'}}>{r.v>=80?'✓':r.v>=30?'△':'✗'}</span>
               <span style={{flex:1,fontSize:10,color:'rgba(255,255,255,0.4)'}}>{r.l}</span>
@@ -295,6 +313,20 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
           ))}
           <div style={{fontSize:10,fontWeight:700,color:'#00C73C',textAlign:'center',marginTop:4}}>{f(x.naverReady||0)}/{f(k.blogs||0)}편</div>
         </div>
+      </div>
+
+      {/* ═══ SEO 등급 분포 + 콘텐츠 =══ */}
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:4}}>
+        {[
+          {l:'A등급',v:f(x.tierA||0),c:'#10B981',sub:`${pct(x.tierA||0,k.blogs||1)}%`},
+          {l:'B등급',v:f(x.tierB||0),c:'#F59E0B',sub:`${pct(x.tierB||0,k.blogs||1)}%`},
+          {l:'C등급',v:f(x.tierC||0),c:'#EF4444',sub:`${pct(x.tierC||0,k.blogs||1)}%`},
+        ].map(kk=>(
+          <div key={kk.l} style={{textAlign:'center',background:'rgba(12,21,40,0.65)',border:'1px solid rgba(255,255,255,0.04)',borderRadius:8,padding:'6px 0'}}>
+            <div style={{fontSize:14,fontWeight:800,color:kk.c,lineHeight:1}}>{kk.v}</div>
+            <div style={{fontSize:8,color:'rgba(255,255,255,0.2)',marginTop:2}}>{kk.l} ({kk.sub})</div>
+          </div>
+        ))}
       </div>
 
       {/* ═══ 2열: 유저 + CTA ═══ */}

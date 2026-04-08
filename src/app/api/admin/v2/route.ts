@@ -191,6 +191,10 @@ export async function GET(req: NextRequest) {
           // SEO 포털별 준비도
           googleReady: seoPortal.google || 0, naverReady: seoPortal.naver || 0, bothReady: seoPortal.both || 0,
           excerptOk: seoPortal.excerpt || 0, linksOk: seoPortal.links || 0, titleGood: seoPortal.title || 0, metaGood: seoPortal.meta || 0,
+          imageAltOk: seoPortal.imageAlt || 0, tagsOk: seoPortal.tags || 0, keywordsOk: seoPortal.keywords || 0,
+          indexedOk: seoPortal.indexed || 0, contentLongOk: seoPortal.contentLong || 0, authorOk: seoPortal.author || 0,
+          seriesOk: seoPortal.series || 0, tierA: seoPortal.tierA || 0, tierB: seoPortal.tierB || 0, tierC: seoPortal.tierC || 0,
+          avgContentLen: seoPortal.avgContentLen || 0,
           // 트래픽
           active5m: 0, active30m: 0, pv1h: 0,
           // 리라이팅
