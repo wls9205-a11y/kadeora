@@ -36,7 +36,8 @@ export async function POST(req: NextRequest) {
           .eq('user_id', user.id)
           .gte('created_at', `${today}T00:00:00Z`);
         if ((count ?? 0) <= 1) {
-          await admin.rpc('award_points', { p_user_id: user.id, p_amount: 5, p_reason: '공유', p_meta: null });
+          const points = ['naver-blog', 'naver-cafe', 'daum-cafe'].includes(platform) ? 10 : 5;
+          await admin.rpc('award_points', { p_user_id: user.id, p_amount: points, p_reason: platform === 'naver-blog' ? '네이버 블로그 공유' : '공유', p_meta: null });
         }
       } catch (e) { console.error(`[${new URL(req.url).pathname}]`, e); }
     }

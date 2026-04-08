@@ -56,6 +56,10 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
   const dbPct=pct(k.dbMb||0,8400);
   const rwPct=k.rewriteRate||0;
 
+  const shareTotal = x.shares7d || 0;
+  const sharePlatforms = x.sharesByPlatform || {};
+  const topSharePlatform = Object.entries(sharePlatforms).sort((a: any, b: any) => b[1] - a[1])[0];
+
   const warns:string[]=[];
   if((g.profileRate??0)===0&&k.users>0)warns.push('프로필 0%');
   if(parseFloat(ctr)<1&&(g.ctaViews7d??0)>10)warns.push(`CTR ${ctr}%`);
@@ -285,6 +289,20 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
           <div style={{textAlign:'center',fontSize:13,fontWeight:800,color:parseFloat(ctr)>2?'#10B981':'#EF4444'}}>CTR {ctr}%</div>
         </div>
       </div>
+
+      {/* ═══ 공유 현황 ═══ */}
+      {shareTotal>0&&<div style={CS.card}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6}}>
+          <span style={{fontSize:10,fontWeight:700,color:'rgba(255,255,255,0.4)'}}>📤 공유 (7일)</span>
+          <span style={{fontSize:13,fontWeight:700,color:'#06B6D4'}}>{shareTotal}건</span>
+        </div>
+        <div style={{display:'flex',gap:4,flexWrap:'wrap'}}>
+          {Object.entries(sharePlatforms).sort((a:any,b:any)=>b[1]-a[1]).slice(0,6).map(([p,cnt]:any)=>{
+            const clr:any={'kakao':'#FEE500','naver-blog':'#03C75A','naver-cafe':'#1EC800','band':'#06C755','twitter':'#1DA1F2','facebook':'#1877F2','copy':'#888','daum-cafe':'#FF5722'};
+            return <span key={p} style={{fontSize:10,padding:'3px 8px',borderRadius:12,background:clr[p]||'rgba(255,255,255,0.06)',color:clr[p]==='#FEE500'?'#191919':'#fff',fontWeight:600}}>{p.replace('-',' ')} {cnt}</span>;
+          })}
+        </div>
+      </div>}
 
       {/* ═══ 리텐션 + 시스템 ═══ */}
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6}}>

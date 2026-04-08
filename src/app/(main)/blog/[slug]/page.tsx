@@ -701,7 +701,7 @@ export default async function BlogDetailPage({ params }: Props) {
           background: 'linear-gradient(135deg, rgba(37,99,235,0.04) 0%, rgba(167,139,250,0.04) 100%)',
           margin: '28px -16px 0', padding: '16px 16px',
         }}>
-          <ShareButtons title={post.title} postId={slug} content={post.excerpt || post.meta_description || undefined} />
+          <ShareButtons title={post.title} postId={slug} content={post.excerpt || post.meta_description || undefined} category={post.category} />
           <div style={{ flex: 1 }} />
           <BlogActions blogPostId={post.id} initialHelpfulCount={post.helpful_count ?? 0} />
         </div>
@@ -719,7 +719,7 @@ export default async function BlogDetailPage({ params }: Props) {
             주변에 공유하면 포인트 +5P 적립! 카카오톡·밴드로 바로 공유해보세요
           </div>
           <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <ShareButtons title={`${post.title} — 카더라 블로그`} postId={slug} content={post.excerpt || post.meta_description || undefined} />
+            <ShareButtons title={`${post.title} — 카더라 블로그`} postId={slug} content={post.excerpt || post.meta_description || undefined} category={post.category} />
           </div>
         </div>
       </article>
