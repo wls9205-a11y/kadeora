@@ -117,8 +117,18 @@ export async function GET(req: NextRequest) {
     // SEO 포털별 준비도
     let seoPortal: any = { google: 0, naver: 0, both: 0, excerpt: 0, links: 0, title: 0, meta: 0 };
     try {
-      const { data: seoRaw } = await (sb as any).rpc('exec_sql', { query: "SELECT json_build_object('google', count(*) FILTER (WHERE char_length(title) BETWEEN 20 AND 70 AND meta_description IS NOT NULL AND char_length(meta_description) BETWEEN 60 AND 170 AND char_length(coalesce(content,''))>1500 AND author_name IS NOT NULL AND related_slugs IS NOT NULL AND array_length(related_slugs,1)>=1), 'naver', count(*) FILTER (WHERE char_length(title) BETWEEN 20 AND 70 AND meta_description IS NOT NULL AND char_length(meta_description) BETWEEN 60 AND 170 AND char_length(coalesce(content,''))>3000 AND cover_image IS NOT NULL AND meta_keywords IS NOT NULL AND excerpt IS NOT NULL AND char_length(excerpt)>30), 'excerpt', count(*) FILTER (WHERE excerpt IS NOT NULL AND char_length(excerpt)>=30), 'links', count(*) FILTER (WHERE related_slugs IS NOT NULL AND array_length(related_slugs,1)>0), 'title', count(*) FILTER (WHERE char_length(title) BETWEEN 20 AND 70), 'meta', count(*) FILTER (WHERE meta_description IS NOT NULL AND char_length(meta_description) BETWEEN 60 AND 170)) as r FROM blog_posts WHERE is_published" });
-      if (seoRaw) { try { const parsed = JSON.parse(seoRaw); seoPortal = parsed?.[0]?.r || seoPortal; } catch {} }
+      const seoRes = await (sb as any).rpc('exec_sql', { query: "SELECT json_build_object('google', count(*) FILTER (WHERE char_length(title) BETWEEN 20 AND 70 AND meta_description IS NOT NULL AND char_length(meta_description) BETWEEN 60 AND 170 AND char_length(coalesce(content,''))>1500 AND author_name IS NOT NULL AND related_slugs IS NOT NULL AND array_length(related_slugs,1)>=1), 'naver', count(*) FILTER (WHERE char_length(title) BETWEEN 20 AND 70 AND meta_description IS NOT NULL AND char_length(meta_description) BETWEEN 60 AND 170 AND char_length(coalesce(content,''))>3000 AND cover_image IS NOT NULL AND meta_keywords IS NOT NULL AND excerpt IS NOT NULL AND char_length(excerpt)>30), 'excerpt', count(*) FILTER (WHERE excerpt IS NOT NULL AND char_length(excerpt)>=30), 'links', count(*) FILTER (WHERE related_slugs IS NOT NULL AND array_length(related_slugs,1)>0), 'title', count(*) FILTER (WHERE char_length(title) BETWEEN 20 AND 70), 'meta', count(*) FILTER (WHERE meta_description IS NOT NULL AND char_length(meta_description) BETWEEN 60 AND 170)) as r FROM blog_posts WHERE is_published" });
+      const seoRaw = seoRes?.data;
+      if (seoRaw) {
+        // exec_sql returns string or parsed array
+        if (typeof seoRaw === 'string') {
+          try { const p = JSON.parse(seoRaw); seoPortal = p?.[0]?.r || seoPortal; } catch {}
+        } else if (Array.isArray(seoRaw)) {
+          seoPortal = seoRaw?.[0]?.r || seoPortal;
+        } else if (typeof seoRaw === 'object') {
+          seoPortal = seoRaw?.r || seoRaw || seoPortal;
+        }
+      }
     } catch {}
     const catMap: Record<string, { count: number; views: number }> = {};
     if (Array.isArray(catRaw)) {
