@@ -395,7 +395,7 @@ export default async function BlogDetailPage({ params }: Props) {
   const jsonLd = {
     '@context': 'https://schema.org', '@type': 'BlogPosting',
     headline: post.title,
-    description: descClean,
+    description: ((post.meta_description && post.meta_description.length >= 30) ? post.meta_description : (post.excerpt && post.excerpt.length >= 30) ? post.excerpt : post.title).replace(/[\n\r#*_|]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160),
     datePublished: post.published_at || post.created_at,
     dateModified: post.updated_at || post.published_at || post.created_at,
     wordCount,
