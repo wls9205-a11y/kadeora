@@ -82,7 +82,7 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
         <SH icon="⚡" title="실시간 트래픽" right={
           <div style={{display:'flex',alignItems:'center',gap:5,background:'rgba(16,185,129,0.08)',border:'1px solid rgba(16,185,129,0.15)',borderRadius:20,padding:'3px 10px'}}>
             <span style={{width:6,height:6,borderRadius:'50%',background:'#10B981',opacity:pulse?1:0.3,transition:'opacity 0.3s'}}/>
-            <span style={{fontSize:11,fontWeight:700,color:'#10B981'}}>{td?.recentVisitors?.length||0}</span>
+            <span style={{fontSize:11,fontWeight:700,color:'#10B981'}}>{td?.recentVisitors?.length||'—'}</span>
             <span style={{fontSize:9,color:'rgba(16,185,129,0.5)'}}>online</span>
           </div>
         }/>
@@ -115,18 +115,18 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
       </div>
 
       {/* ═══ 인기 페이지 + 유입 경로 ═══ */}
-      {(topPages.length>0||refSources.length>0)&&<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
-        <div style={CS.card}>
+      {(topPages.length>0||refSources.length>0)&&<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,overflow:'hidden'}}>
+        <div style={{...CS.card,minWidth:0,overflow:'hidden'}}>
           <div style={{fontSize:10,fontWeight:700,color:'rgba(255,255,255,0.4)',marginBottom:6}}>🔥 인기 페이지</div>
           {topPages.slice(0,5).map((p:any,i:number)=>(
             <div key={i} style={{display:'flex',alignItems:'center',gap:5,padding:'3px 0',fontSize:10}}>
               <span style={{width:16,height:16,borderRadius:4,background:i<3?['#3B7BF6','#06B6D4','#8B5CF6'][i]:'rgba(255,255,255,0.06)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:8,fontWeight:800,color:i<3?'#fff':'rgba(255,255,255,0.25)',flexShrink:0}}>{i+1}</span>
-              <span style={{flex:1,color:'rgba(255,255,255,0.45)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' as const}}>{p.path}</span>
+              <span style={{flex:1,color:'rgba(255,255,255,0.45)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' as const,minWidth:0}}>{(() => { try { return decodeURIComponent(p.path).replace(/\(.main\)\//g,'') } catch { return p.path } })().slice(0,30)}</span>
               <span style={{fontWeight:700,color:'rgba(255,255,255,0.55)',fontSize:11}}>{p.count}</span>
             </div>
           ))}
         </div>
-        <div style={CS.card}>
+        <div style={{...CS.card,minWidth:0,overflow:'hidden'}}>
           <div style={{fontSize:10,fontWeight:700,color:'rgba(255,255,255,0.4)',marginBottom:6}}>🌐 유입 경로</div>
           {refSources.slice(0,5).map((r:any)=>{const w=pct(r.count||0,refTotal);const clr:any={direct:'#3B7BF6',google:'#10B981',naver:'#00C73C',daum:'#F59E0B',kakao:'#FEE500'}; return <div key={r.source} style={{marginBottom:4}}>
             <div style={{display:'flex',justifyContent:'space-between',fontSize:10,marginBottom:2}}>
