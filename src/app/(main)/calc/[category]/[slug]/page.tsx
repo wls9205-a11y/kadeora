@@ -36,6 +36,7 @@ export async function generateMetadata({ params }: { params: Promise<{ category:
     twitter: { card: 'summary_large_image', title: ogTitle, description: metaDesc },
     other: {
       'naver:author': '카더라', 'naver:site_name': '카더라', 'daum:site_name': '카더라',
+      'naver:description': metaDesc,
       'naver:written_time': new Date().toISOString(),
       'naver:updated_time': calc.lastUpdated + 'T00:00:00Z',
       'og:updated_time': calc.lastUpdated + 'T00:00:00Z',

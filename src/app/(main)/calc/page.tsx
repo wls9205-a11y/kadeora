@@ -13,7 +13,16 @@ export const metadata: Metadata = {
     url: `${SITE_URL}/calc`,
     images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent('무료 계산기 모음')}&design=2&subtitle=${encodeURIComponent('세금·부동산·주식·대출 145종')}`, width: 1200, height: 630 }],
   },
-  other: { 'naver:site_name': '카더라', 'naver:author': '카더라' },
+  keywords: ['계산기', '무료 계산기', '세금 계산기', '대출 계산기', '양도세 계산기', '취득세 계산기', '실수령액 계산기', '카더라'],
+  twitter: { card: 'summary_large_image', title: '무료 계산기 모음 — 카더라', description: '세금·부동산·주식·대출 145종 무료 계산기' },
+  other: {
+    'naver:site_name': '카더라', 'naver:author': '카더라',
+    'naver:description': '취득세, 양도세, 복리, 연봉 실수령액, 대출 상환, 청약 가점 등 145종 무료 계산기. 2026년 최신 세법 반영.',
+    'naver:written_time': '2026-01-15T00:00:00Z',
+    'naver:updated_time': new Date().toISOString(),
+    'article:section': '계산기',
+    'article:tag': '계산기,세금,부동산,주식,대출,무료',
+  },
 };
 
 export default function CalcHubPage() {

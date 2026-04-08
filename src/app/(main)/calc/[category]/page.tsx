@@ -24,10 +24,15 @@ export async function generateMetadata({ params }: { params: Promise<{ category:
       siteName: '카더라', locale: 'ko_KR', type: 'website',
       images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent(label + ' 계산기')}&design=2&category=calc`, width: 1200, height: 630 }],
     },
+    keywords: [label, '계산기', '무료', '카더라', '2026'],
+    twitter: { card: 'summary_large_image', title: `${label} 계산기 모음`, description: `${label} 관련 무료 계산기. 2026년 최신 기준 반영.` },
     other: {
-      'naver:author': '카더라',
-      'naver:written_time': new Date().toISOString(),
+      'naver:author': '카더라', 'naver:site_name': '카더라',
+      'naver:description': `${label} 관련 무료 계산기. 2026년 최신 기준 반영.`,
+      'naver:written_time': '2026-01-15T00:00:00Z',
       'naver:updated_time': new Date().toISOString(),
+      'article:section': label,
+      'article:tag': `${label},계산기,무료,카더라`,
     },
   };
 }
