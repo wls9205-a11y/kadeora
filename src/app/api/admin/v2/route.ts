@@ -228,13 +228,24 @@ export async function GET(req: NextRequest) {
             .sort((a, b) => b[1] - a[1]).slice(0, 10)
             .map(([path, count]) => ({ path, count }));
           // hourly distribution
-          const hourly = Array.from({ length: 24 }, (_, h) => ({ h, c: hourCounts[h] || 0 }));
+          const hourly = Array.from({ length: 24 }, (_, h) => ({ hour: h, count: hourCounts[h] || 0 }));
+          // 유입경로 집계
+          const refMap: Record<string, number> = {};
+          for (const r of (todayPvR.data || [])) {
+            const ref = (r.referrer || '').toLowerCase();
+            const source = !ref || ref === '' ? 'direct' : ref.includes('google') ? 'google' : ref.includes('naver') ? 'naver' : ref.includes('daum') ? 'daum' : ref.includes('kakao') ? 'kakao' : ref.includes('bing') ? 'bing' : 'other';
+            refMap[source] = (refMap[source] || 0) + 1;
+          }
+          const referrerBreakdown = Object.entries(refMap)
+            .sort((a, b) => b[1] - a[1])
+            .map(([source, count]) => ({ source, count }));
           return {
             todayTotal: todayPvR.data?.length || 0,
-            todayUV: visitors.size,
+            uniqueVisitors: visitors.size,
             topPages,
-            hourly,
-            recent: (recentPvR.data || []).slice(0, 15).map((r: any) => ({
+            hourlyPv: hourly,
+            referrerBreakdown,
+            recentVisitors: (recentPvR.data || []).slice(0, 15).map((r: any) => ({
               path: r.path, at: r.created_at,
               ref: r.referrer ? (r.referrer.includes('google') ? 'Google' : r.referrer.includes('naver') ? 'Naver' : r.referrer.includes('kakao') ? 'Kakao' : 'Other') : 'Direct',
               device: (r.user_agent || '').includes('Mobile') ? '📱' : '💻',
