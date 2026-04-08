@@ -112,7 +112,7 @@ export async function GET(req: NextRequest) {
       // 카테고리별 효율
     // 카테고리별 효율 (SQL 집계)
     let catRaw: any = null;
-    try { const r = await (sb as any).rpc('exec_sql', { query: "SELECT category, count(*)::int as cnt, coalesce(sum(view_count),0)::int as views FROM blog_posts WHERE is_published GROUP BY category ORDER BY views DESC LIMIT 8" }); catRaw = r.data; } catch {}
+    try { const { data } = await (sb as any).rpc('get_blog_category_stats'); catRaw = data; } catch {}
 
     // SEO 포털별 준비도 — 전용 RPC 함수
     let seoPortal: any = { google: 0, naver: 0, both: 0, excerpt: 0, links: 0, title: 0, meta: 0 };
