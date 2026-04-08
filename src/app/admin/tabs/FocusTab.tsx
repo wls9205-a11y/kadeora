@@ -5,7 +5,7 @@ const f=(n:number)=>n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e4?(n/1e3).toFixed(0)+'K':
 const pct=(a:number,b:number)=>b>0?Math.round(a/b*100):0;
 const ago=(d:string)=>{const s=Math.floor((Date.now()-new Date(d).getTime())/1000);return s<60?'방금':s<3600?Math.floor(s/60)+'분':s<86400?Math.floor(s/3600)+'시':Math.floor(s/86400)+'일';};
 
-const Ring=({value,max=100,size=44,stroke=4,color,children}:{value:number;max?:number;size?:number;stroke?:number;color:string;children?:any})=>{
+const Ring=({value,max=100,size=44,stroke=4,color,children}:{value:number;max?:number;size?:number;stroke?:number;color:string;children?:React.ReactNode})=>{
   const r=(size-stroke)/2,circ=2*Math.PI*r,off=circ-(Math.min(value,max)/max)*circ;
   return <svg width={size} height={size} style={{transform:'rotate(-90deg)'}}>
     <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={stroke}/>
@@ -13,7 +13,7 @@ const Ring=({value,max=100,size=44,stroke=4,color,children}:{value:number;max?:n
     <g style={{transform:'rotate(90deg)',transformOrigin:'center'}}>{children}</g>
   </svg>;
 };
-const Spark=({data,h=28,color='#3B7BF6'}:{data:number[];h?:number;color?:string})=>{
+const Spark=({data,h=32,color='#3B7BF6'}:{data:number[];h?:number;color?:string})=>{
   const mx=Math.max(...data,1),w=560;
   const pts=data.map((v,i)=>`${(i/(data.length-1))*w},${h-(v/mx)*h}`).join(' ');
   return <svg width="100%" viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" style={{display:'block'}}>
@@ -23,7 +23,18 @@ const Spark=({data,h=28,color='#3B7BF6'}:{data:number[];h?:number;color?:string}
   </svg>;
 };
 const Dot=({ok,size=6}:{ok:boolean;size?:number})=><span style={{width:size,height:size,borderRadius:'50%',background:ok?'#10B981':'#EF4444',display:'inline-block',flexShrink:0,boxShadow:ok?'0 0 6px rgba(16,185,129,0.4)':'0 0 6px rgba(239,68,68,0.4)'}}/>;
-const HBar=({value,max=100,color,h=4}:{value:number;max?:number;color:string;h?:number})=><div style={{height:h,borderRadius:h/2,background:'rgba(255,255,255,0.06)',overflow:'hidden'}}><div style={{height:'100%',width:`${Math.max(Math.min(value/max*100,100),2)}%`,background:color,borderRadius:h/2,transition:'width 0.8s'}}/></div>;
+const HBar=({value,max=100,color,h=5}:{value:number;max?:number;color:string;h?:number})=><div style={{height:h,borderRadius:h/2,background:'rgba(255,255,255,0.06)',overflow:'hidden'}}><div style={{height:'100%',width:`${Math.max(Math.min(value/max*100,100),2)}%`,background:color,borderRadius:h/2,transition:'width 0.8s'}}/></div>;
+
+// 섹션 타이틀
+const SH=({icon,title,right}:{icon:string;title:string;right?:React.ReactNode})=>(
+  <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}>
+    <div style={{display:'flex',alignItems:'center',gap:6}}>
+      <span style={{fontSize:13}}>{icon}</span>
+      <span style={{fontSize:12,fontWeight:800,color:'#E2E8F0'}}>{title}</span>
+    </div>
+    {right}
+  </div>
+);
 
 export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
   const [d,setD]=useState<any>(null);
@@ -34,11 +45,10 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
   useEffect(()=>{load();ref.current=setInterval(load,30000);return()=>clearInterval(ref.current);},[load]);
   useEffect(()=>{const i=setInterval(()=>setPulse(p=>!p),1500);return()=>clearInterval(i);},[]);
 
-  if(ld)return<div style={{textAlign:'center',padding:80,color:'rgba(255,255,255,0.3)',fontSize:12}}>불러오는 중...</div>;
-  if(!d)return<div style={{textAlign:'center',padding:80}}>⚠️ 로드 실패</div>;
+  if(ld)return<div style={{textAlign:'center',padding:80,color:'rgba(255,255,255,0.3)',fontSize:13}}>불러오는 중...</div>;
+  if(!d)return<div style={{textAlign:'center',padding:80,fontSize:13}}>⚠️ 로드 실패</div>;
 
   const{healthScore:hs=0,kpi:k={} as any,growth:g={} as any,extended:x={} as any,failedCrons:fc={},recentActivity:ra=[],dailyTrend:dt=[],categoryStats:cs=[],trafficDetail:td={} as any}=d;
-  const sc=hs>=71?'#10B981':hs>=41?'#F59E0B':'#EF4444';
   const fcn=Object.keys(fc||{}).length;
   const cr=pct(k.cronSuccess,k.cronSuccess+k.cronFail);
   const ctr=(g.ctaViews7d||0)>0?((g.ctaClicks7d||0)/(g.ctaViews7d||1)*100).toFixed(1):'0';
@@ -51,9 +61,8 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
   if(parseFloat(ctr)<1&&(g.ctaViews7d??0)>10)warns.push(`CTR ${ctr}%`);
   if(fcn>0)warns.push(`크론실패 ${fcn}`);
 
-  const CS={card:{background:'rgba(12,21,40,0.65)',border:'1px solid rgba(255,255,255,0.04)',borderRadius:10,padding:'10px 12px',backdropFilter:'blur(8px)'}};
+  const CS={card:{background:'rgba(12,21,40,0.65)',border:'1px solid rgba(255,255,255,0.05)',borderRadius:12,padding:'12px 14px',backdropFilter:'blur(8px)'} as const};
 
-  // 시간대별 PV (trafficDetail에서 추출)
   const hourly=td?.hourlyPv||[];
   const hmx=hourly.length>0?Math.max(...hourly.map((h:any)=>h.count||0),1):1;
   const topPages=td?.topPages||[];
@@ -61,115 +70,130 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
   const refTotal=refSources.reduce((a:number,r:any)=>a+(r.count||0),0)||1;
 
   return (
-    <div>
+    <div style={{display:'flex',flexDirection:'column',gap:8}}>
+
+      {/* ═══ 위험 신호 ═══ */}
+      {warns.length>0&&<div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+        {warns.map((w,i)=><span key={i} style={{fontSize:11,fontWeight:600,color:'#EF4444',background:'rgba(239,68,68,0.08)',border:'1px solid rgba(239,68,68,0.15)',padding:'4px 10px',borderRadius:20}}>⚠ {w}</span>)}
+      </div>}
+
       {/* ═══ 실시간 트래픽 ═══ */}
-      <div style={{...CS.card,marginBottom:6,background:'linear-gradient(135deg,rgba(6,182,212,0.06),rgba(12,21,40,0.65))'}}>
-        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}>
-          <div style={{display:'flex',alignItems:'center',gap:6}}>
-            <span style={{width:8,height:8,borderRadius:'50%',background:'#10B981',boxShadow:'0 0 8px rgba(16,185,129,0.5)',opacity:pulse?1:0.4,transition:'opacity 0.3s'}}/>
-            <span style={{fontSize:11,fontWeight:800,color:'#E2E8F0'}}>실시간 트래픽</span>
+      <div style={{...CS.card,background:'linear-gradient(135deg,rgba(6,182,212,0.06),rgba(12,21,40,0.65))'}}>
+        <SH icon="⚡" title="실시간 트래픽" right={
+          <div style={{display:'flex',alignItems:'center',gap:5,background:'rgba(16,185,129,0.08)',border:'1px solid rgba(16,185,129,0.15)',borderRadius:20,padding:'3px 10px'}}>
+            <span style={{width:6,height:6,borderRadius:'50%',background:'#10B981',opacity:pulse?1:0.3,transition:'opacity 0.3s'}}/>
+            <span style={{fontSize:11,fontWeight:700,color:'#10B981'}}>{td?.recentVisitors?.length||0}</span>
+            <span style={{fontSize:9,color:'rgba(16,185,129,0.5)'}}>online</span>
           </div>
-          <span style={{fontSize:9,color:'rgba(255,255,255,0.25)'}}>30초 갱신</span>
-        </div>
-        <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:6,marginBottom:8}}>
-          {[{l:'접속 (5분)',v:td?.recentVisitors?.length||0,c:'#10B981'},{l:'UV (1시간)',v:td?.uniqueVisitors||0,c:'#06B6D4'},{l:'PV (오늘)',v:k.pvToday||0,c:'#3B7BF6'},{l:'PV (7일)',v:f(x.pv7d||0),c:'#8B5CF6'}].map(kk=>(
-            <div key={kk.l} style={{textAlign:'center'}}>
-              <div style={{fontSize:18,fontWeight:900,color:kk.c,lineHeight:1}}>{kk.v}</div>
-              <div style={{fontSize:7,color:'rgba(255,255,255,0.3)',marginTop:2}}>{kk.l}</div>
+        }/>
+        {/* 2×2 그리드 — 모바일 가독성 */}
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:10}}>
+          {[
+            {l:'접속 (5분)',v:td?.recentVisitors?.length||0,c:'#10B981'},
+            {l:'UV (1시간)',v:td?.uniqueVisitors||0,c:'#06B6D4'},
+            {l:'PV (오늘)',v:k.pvToday||0,c:'#3B7BF6'},
+            {l:'PV (7일)',v:f(x.pv7d||0),c:'#8B5CF6'},
+          ].map(kk=>(
+            <div key={kk.l} style={{textAlign:'center',padding:'6px 0',background:'rgba(255,255,255,0.02)',borderRadius:8}}>
+              <div style={{fontSize:22,fontWeight:900,color:kk.c,lineHeight:1}}>{kk.v}</div>
+              <div style={{fontSize:10,color:'rgba(255,255,255,0.35)',marginTop:4}}>{kk.l}</div>
             </div>
           ))}
         </div>
         {hourly.length>0&&<>
-          <div style={{fontSize:8,color:'rgba(255,255,255,0.2)',marginBottom:3}}>시간대별 PV (24h)</div>
-          <div style={{display:'flex',gap:1,height:24,alignItems:'flex-end'}}>
-            {hourly.map((v:any,i:number)=>{const now=new Date().getHours();return <div key={i} style={{flex:1,height:Math.max(((v.count||0)/hmx)*20,2),borderRadius:2,background:v.hour===now?'#10B981':(v.count||0)>40?'rgba(59,123,246,0.5)':'rgba(59,123,246,0.15)'}}/>;
+          <div style={{fontSize:10,color:'rgba(255,255,255,0.25)',marginBottom:4}}>시간대별 PV (24h)</div>
+          <div style={{display:'flex',gap:1,height:28,alignItems:'flex-end'}}>
+            {hourly.map((v:any,i:number)=>{const now=new Date().getHours();return <div key={i} style={{flex:1,height:Math.max(((v.count||0)/hmx)*24,2),borderRadius:2,background:v.hour===now?'#10B981':(v.count||0)>40?'rgba(59,123,246,0.5)':'rgba(59,123,246,0.15)'}}/>;
             })}
+          </div>
+          <div style={{display:'flex',justifyContent:'space-between',marginTop:3}}>
+            <span style={{fontSize:8,color:'rgba(255,255,255,0.15)'}}>0시</span>
+            <span style={{fontSize:8,color:'rgba(255,255,255,0.15)'}}>12시</span>
+            <span style={{fontSize:8,color:'rgba(255,255,255,0.15)'}}>23시</span>
           </div>
         </>}
       </div>
 
       {/* ═══ 인기 페이지 + 유입 경로 ═══ */}
-      {(topPages.length>0||refSources.length>0)&&<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:5,marginBottom:6}}>
+      {(topPages.length>0||refSources.length>0)&&<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
         <div style={CS.card}>
-          <div style={{fontSize:9,fontWeight:700,color:'rgba(255,255,255,0.35)',marginBottom:5}}>🔥 인기 페이지</div>
+          <div style={{fontSize:10,fontWeight:700,color:'rgba(255,255,255,0.4)',marginBottom:6}}>🔥 인기 페이지</div>
           {topPages.slice(0,5).map((p:any,i:number)=>(
-            <div key={i} style={{display:'flex',alignItems:'center',gap:4,padding:'2px 0',fontSize:9}}>
-              <span style={{width:14,height:14,borderRadius:4,background:i<3?['#3B7BF6','#06B6D4','#8B5CF6'][i]:'rgba(255,255,255,0.06)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:7,fontWeight:800,color:i<3?'#fff':'rgba(255,255,255,0.25)',flexShrink:0}}>{i+1}</span>
-              <span style={{flex:1,color:'rgba(255,255,255,0.4)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' as const}}>{p.path}</span>
-              <span style={{fontWeight:700,color:'rgba(255,255,255,0.5)',fontSize:10}}>{p.count}</span>
+            <div key={i} style={{display:'flex',alignItems:'center',gap:5,padding:'3px 0',fontSize:10}}>
+              <span style={{width:16,height:16,borderRadius:4,background:i<3?['#3B7BF6','#06B6D4','#8B5CF6'][i]:'rgba(255,255,255,0.06)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:8,fontWeight:800,color:i<3?'#fff':'rgba(255,255,255,0.25)',flexShrink:0}}>{i+1}</span>
+              <span style={{flex:1,color:'rgba(255,255,255,0.45)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' as const}}>{p.path}</span>
+              <span style={{fontWeight:700,color:'rgba(255,255,255,0.55)',fontSize:11}}>{p.count}</span>
             </div>
           ))}
         </div>
         <div style={CS.card}>
-          <div style={{fontSize:9,fontWeight:700,color:'rgba(255,255,255,0.35)',marginBottom:5}}>🌐 유입 경로</div>
-          {refSources.slice(0,5).map((r:any)=>{const w=pct(r.count||0,refTotal);const clr:any={direct:'#3B7BF6',google:'#10B981',naver:'#00C73C',daum:'#F59E0B',kakao:'#FEE500'}; return <div key={r.source} style={{marginBottom:3}}>
-            <div style={{display:'flex',justifyContent:'space-between',fontSize:9,marginBottom:1}}>
-              <span style={{color:'rgba(255,255,255,0.4)'}}>{r.source}</span>
-              <span style={{fontWeight:600,color:'rgba(255,255,255,0.5)'}}>{r.count} <span style={{fontSize:7,color:'rgba(255,255,255,0.15)'}}>({w}%)</span></span>
+          <div style={{fontSize:10,fontWeight:700,color:'rgba(255,255,255,0.4)',marginBottom:6}}>🌐 유입 경로</div>
+          {refSources.slice(0,5).map((r:any)=>{const w=pct(r.count||0,refTotal);const clr:any={direct:'#3B7BF6',google:'#10B981',naver:'#00C73C',daum:'#F59E0B',kakao:'#FEE500'}; return <div key={r.source} style={{marginBottom:4}}>
+            <div style={{display:'flex',justifyContent:'space-between',fontSize:10,marginBottom:2}}>
+              <span style={{color:'rgba(255,255,255,0.45)'}}>{r.source}</span>
+              <span style={{fontWeight:600,color:'rgba(255,255,255,0.55)'}}>{r.count} <span style={{fontSize:9,color:'rgba(255,255,255,0.2)'}}>({w}%)</span></span>
             </div>
-            <HBar value={w} color={clr[r.source?.toLowerCase()]||'rgba(255,255,255,0.2)'} h={3}/>
+            <HBar value={w} color={clr[r.source?.toLowerCase()]||'rgba(255,255,255,0.2)'} h={4}/>
           </div>;})}
         </div>
       </div>}
 
-      {/* ═══ 위험 신호 ═══ */}
-      {warns.length>0&&<div style={{display:'flex',gap:4,marginBottom:6,flexWrap:'wrap'}}>{warns.map((w,i)=><span key={i} style={{fontSize:9,fontWeight:600,color:'#EF4444',background:'rgba(239,68,68,0.08)',border:'1px solid rgba(239,68,68,0.12)',padding:'2px 8px',borderRadius:12}}>⚠ {w}</span>)}</div>}
-
-      {/* ═══ KPI 링 4칸 ═══ */}
-      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:5,marginBottom:5}}>
+      {/* ═══ KPI — 2×2 그리드 (모바일 최적화) ═══ */}
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
         {[
           {l:'유저',v:k.users,c:'#3B7BF6',sub:`+${k.newUsers}/7d`,ring:pct(g.onboardRate||0,100)},
           {l:'블로그',v:f(k.blogs),c:'#8B5CF6',sub:`${f(x.hotBlogs||0)}핫`,ring:Math.min(pct(x.hotBlogs||0,k.blogs||1)*10,100)},
           {l:'크론',v:`${cr}%`,c:cr>=95?'#10B981':'#EF4444',sub:`${k.cronFail}실패`,ring:cr},
           {l:'DB',v:`${((k.dbMb||0)/1024).toFixed(1)}G`,c:dbPct<50?'#10B981':'#F59E0B',sub:'/8.4G',ring:dbPct},
         ].map(kk=>(
-          <div key={kk.l} style={{...CS.card,textAlign:'center',padding:'8px 4px'}}>
-            <div style={{display:'flex',justifyContent:'center',marginBottom:3}}>
-              <Ring value={kk.ring} size={36} stroke={3} color={kk.c}>
-                <text x="18" y="16" textAnchor="middle" dominantBaseline="central" fill={kk.c} fontSize="10" fontWeight="800">{kk.v}</text>
-              </Ring>
+          <div key={kk.l} style={{...CS.card,display:'flex',alignItems:'center',gap:12,padding:'10px 14px'}}>
+            <Ring value={kk.ring} size={42} stroke={4} color={kk.c}>
+              <text x="21" y="19" textAnchor="middle" dominantBaseline="central" fill={kk.c} fontSize="11" fontWeight="800">{kk.v}</text>
+            </Ring>
+            <div>
+              <div style={{fontSize:12,fontWeight:700,color:'rgba(255,255,255,0.5)'}}>{kk.l}</div>
+              <div style={{fontSize:10,color:'rgba(255,255,255,0.25)'}}>{kk.sub}</div>
             </div>
-            <div style={{fontSize:8,color:'rgba(255,255,255,0.4)'}}>{kk.l}</div>
-            <div style={{fontSize:7,color:'rgba(255,255,255,0.2)'}}>{kk.sub}</div>
           </div>
         ))}
       </div>
-      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:5,marginBottom:6}}>
+
+      {/* ═══ 데이터 KPI 2×2 ═══ */}
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
         {[{l:'청약',v:f(k.apts),c:'#10B981',i:'🏠'},{l:'종목',v:f(k.stocks),c:'#F59E0B',i:'📈'},{l:'단지',v:f(x.aptSites||0),c:'#14B8A6',i:'🏢'},{l:'미분양',v:f(k.unsold),c:'#F97316',i:'🏚️'}].map(kk=>(
-          <div key={kk.l} style={{...CS.card,textAlign:'center',padding:'5px 4px'}}>
-            <div style={{fontSize:11,opacity:0.5}}>{kk.i}</div>
-            <div style={{fontSize:14,fontWeight:800,color:kk.c,lineHeight:1}}>{kk.v}</div>
-            <div style={{fontSize:7,color:'rgba(255,255,255,0.25)',marginTop:1}}>{kk.l}</div>
+          <div key={kk.l} style={{...CS.card,display:'flex',alignItems:'center',gap:10,padding:'8px 14px'}}>
+            <span style={{fontSize:18,opacity:0.6}}>{kk.i}</span>
+            <div>
+              <div style={{fontSize:16,fontWeight:800,color:kk.c,lineHeight:1}}>{kk.v}</div>
+              <div style={{fontSize:10,color:'rgba(255,255,255,0.3)',marginTop:2}}>{kk.l}</div>
+            </div>
           </div>
         ))}
       </div>
 
       {/* ═══ 14일 PV 스파크라인 ═══ */}
-      {dt?.length>0&&<div style={{...CS.card,marginBottom:6,padding:'8px 12px'}}>
-        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:4}}>
-          <span style={{fontSize:9,fontWeight:700,color:'rgba(255,255,255,0.35)'}}>📈 14일 PV</span>
-          <span style={{fontSize:10,fontWeight:700,color:'#06B6D4'}}>{k.pvToday}<span style={{fontSize:8,color:'rgba(255,255,255,0.2)'}}> /오늘</span></span>
+      {dt?.length>0&&<div style={{...CS.card}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6}}>
+          <span style={{fontSize:11,fontWeight:700,color:'rgba(255,255,255,0.4)'}}>📈 14일 PV</span>
+          <span style={{fontSize:12,fontWeight:700,color:'#06B6D4'}}>{k.pvToday}<span style={{fontSize:10,color:'rgba(255,255,255,0.25)'}}> /오늘</span></span>
         </div>
-        <Spark data={dt.slice(-14).map((v:any)=>v.pv||0)} h={36}/>
+        <Spark data={dt.slice(-14).map((v:any)=>v.pv||0)} h={40}/>
       </div>}
 
       {/* ═══ 리라이팅 현황 ═══ */}
-      <div style={{...CS.card,marginBottom:6,background:'linear-gradient(135deg,rgba(139,92,246,0.06),rgba(12,21,40,0.65))',borderLeft:'3px solid #8B5CF6'}}>
-        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6}}>
-          <span style={{fontSize:11,fontWeight:800,color:'#E2E8F0'}}>✍️ SEO 리라이팅</span>
-          <span style={{fontSize:9,color:'rgba(255,255,255,0.25)'}}>RW {rwPct}%</span>
-        </div>
-        <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:8}}>
-          <Ring value={rwPct} size={50} stroke={5} color="#8B5CF6">
-            <text x="25" y="22" textAnchor="middle" dominantBaseline="central" fill="#8B5CF6" fontSize="13" fontWeight="900">{rwPct}%</text>
-            <text x="25" y="34" textAnchor="middle" dominantBaseline="central" fill="rgba(255,255,255,0.2)" fontSize="7">완료</text>
+      <div style={{...CS.card,background:'linear-gradient(135deg,rgba(139,92,246,0.06),rgba(12,21,40,0.65))',borderLeft:'3px solid #8B5CF6'}}>
+        <SH icon="✍️" title="SEO 리라이팅" right={<span style={{fontSize:11,fontWeight:700,color:'#8B5CF6'}}>{rwPct}%</span>}/>
+        <div style={{display:'flex',alignItems:'center',gap:14,marginBottom:10}}>
+          <Ring value={rwPct} size={52} stroke={5} color="#8B5CF6">
+            <text x="26" y="23" textAnchor="middle" dominantBaseline="central" fill="#8B5CF6" fontSize="14" fontWeight="900">{rwPct}%</text>
+            <text x="26" y="36" textAnchor="middle" dominantBaseline="central" fill="rgba(255,255,255,0.2)" fontSize="8">완료</text>
           </Ring>
           <div style={{flex:1}}>
-            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:4,marginBottom:4}}>
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:6,marginBottom:6}}>
               {[{l:'완료',v:f(k.rewritten||0),c:'#10B981'},{l:'잔여',v:f((k.blogs||0)-(k.rewritten||0)),c:'#F59E0B'},{l:'오늘',v:x.newBlogs24||0,c:'#06B6D4'}].map(kk=>(
                 <div key={kk.l} style={{textAlign:'center'}}>
-                  <div style={{fontSize:13,fontWeight:800,color:kk.c,lineHeight:1}}>{kk.v}</div>
-                  <div style={{fontSize:7,color:'rgba(255,255,255,0.25)',marginTop:1}}>{kk.l}</div>
+                  <div style={{fontSize:15,fontWeight:800,color:kk.c,lineHeight:1}}>{kk.v}</div>
+                  <div style={{fontSize:9,color:'rgba(255,255,255,0.3)',marginTop:2}}>{kk.l}</div>
                 </div>
               ))}
             </div>
@@ -177,142 +201,144 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
         </div>
         {/* 카테고리 효율 */}
         {(cs||[]).length>0&&<>
-          <div style={{fontSize:8,color:'rgba(255,255,255,0.25)',marginBottom:3}}>콘텐츠 효율 (views/post)</div>
+          <div style={{fontSize:10,color:'rgba(255,255,255,0.3)',marginBottom:4}}>콘텐츠 효율 (views/post)</div>
           {cs.slice(0,4).map((c:any)=>(
-            <div key={c.category} style={{display:'flex',alignItems:'center',gap:4,marginBottom:2}}>
-              <span style={{width:36,fontSize:8,color:'rgba(255,255,255,0.3)'}}>{c.category}</span>
-              <div style={{flex:1}}><HBar value={c.efficiency||0} max={200} color={(c.efficiency||0)>50?'#10B981':(c.efficiency||0)>15?'#F59E0B':'#EF4444'} h={4}/></div>
-              <span style={{width:22,fontSize:9,fontWeight:700,textAlign:'right' as const,color:(c.efficiency||0)>50?'#10B981':'rgba(255,255,255,0.3)'}}>{c.efficiency||0}</span>
+            <div key={c.category} style={{display:'flex',alignItems:'center',gap:6,marginBottom:3}}>
+              <span style={{width:44,fontSize:10,color:'rgba(255,255,255,0.35)'}}>{c.category}</span>
+              <div style={{flex:1}}><HBar value={c.efficiency||0} max={200} color={(c.efficiency||0)>50?'#10B981':(c.efficiency||0)>15?'#F59E0B':'#EF4444'}/></div>
+              <span style={{width:24,fontSize:11,fontWeight:700,textAlign:'right' as const,color:(c.efficiency||0)>50?'#10B981':'rgba(255,255,255,0.35)'}}>{c.efficiency||0}</span>
             </div>
           ))}
         </>}
       </div>
 
       {/* ═══ 포털별 SEO 준비도 ═══ */}
-      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:5,marginBottom:6}}>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+        {/* Google */}
         <div style={{...CS.card,borderLeft:'3px solid #4285F4',background:'linear-gradient(135deg,rgba(66,133,244,0.04),rgba(12,21,40,0.65))'}}>
-          <div style={{display:'flex',alignItems:'center',gap:5,marginBottom:5}}>
-            <svg width="12" height="12" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.07 5.07 0 01-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/></svg>
-            <span style={{fontSize:9,fontWeight:800,color:'#E2E8F0'}}>Google</span>
+          <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:8}}>
+            <svg width="14" height="14" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.07 5.07 0 01-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/></svg>
+            <span style={{fontSize:11,fontWeight:800,color:'#E2E8F0'}}>Google</span>
             <div style={{flex:1}}/>
-            <Ring value={pct(x.googleReady||0,k.blogs||1)} size={28} stroke={3} color="#4285F4">
-              <text x="14" y="14" textAnchor="middle" dominantBaseline="central" fill="#4285F4" fontSize="8" fontWeight="800">{pct(x.googleReady||0,k.blogs||1)}%</text>
+            <Ring value={pct(x.googleReady||0,k.blogs||1)} size={30} stroke={3} color="#4285F4">
+              <text x="15" y="15" textAnchor="middle" dominantBaseline="central" fill="#4285F4" fontSize="9" fontWeight="800">{pct(x.googleReady||0,k.blogs||1)}%</text>
             </Ring>
           </div>
           {[{l:'내부링크',v:pct(x.linksOk||0,k.blogs||1)},{l:'E-E-A-T',v:100},{l:'제목',v:pct(x.titleGood||0,k.blogs||1)},{l:'메타설명',v:pct(x.metaGood||0,k.blogs||1)}].map(r=>(
-            <div key={r.l} style={{display:'flex',alignItems:'center',gap:3,marginBottom:2}}>
-              <span style={{width:8,height:8,borderRadius:'50%',background:r.v>=80?'rgba(16,185,129,0.15)':r.v>=30?'rgba(245,158,11,0.15)':'rgba(239,68,68,0.15)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:5,flexShrink:0,color:r.v>=80?'#10B981':r.v>=30?'#F59E0B':'#EF4444'}}>{r.v>=80?'✓':r.v>=30?'△':'✗'}</span>
-              <span style={{flex:1,fontSize:7,color:'rgba(255,255,255,0.3)'}}>{r.l}</span>
-              <span style={{fontSize:8,fontWeight:700,color:r.v>=80?'#10B981':r.v>=30?'#F59E0B':'#EF4444'}}>{r.v}%</span>
+            <div key={r.l} style={{display:'flex',alignItems:'center',gap:4,marginBottom:3}}>
+              <span style={{width:10,height:10,borderRadius:'50%',background:r.v>=80?'rgba(16,185,129,0.15)':r.v>=30?'rgba(245,158,11,0.15)':'rgba(239,68,68,0.15)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:7,flexShrink:0,color:r.v>=80?'#10B981':r.v>=30?'#F59E0B':'#EF4444'}}>{r.v>=80?'✓':r.v>=30?'△':'✗'}</span>
+              <span style={{flex:1,fontSize:10,color:'rgba(255,255,255,0.4)'}}>{r.l}</span>
+              <span style={{fontSize:11,fontWeight:700,color:r.v>=80?'#10B981':r.v>=30?'#F59E0B':'#EF4444'}}>{r.v}%</span>
             </div>
           ))}
-          <div style={{fontSize:8,fontWeight:700,color:'#4285F4',textAlign:'center',marginTop:3}}>{f(x.googleReady||0)}편 준비</div>
+          <div style={{fontSize:10,fontWeight:700,color:'#4285F4',textAlign:'center',marginTop:4}}>{f(x.googleReady||0)}편 준비</div>
         </div>
+        {/* Naver */}
         <div style={{...CS.card,borderLeft:'3px solid #00C73C',background:'linear-gradient(135deg,rgba(0,199,60,0.04),rgba(12,21,40,0.65))'}}>
-          <div style={{display:'flex',alignItems:'center',gap:5,marginBottom:5}}>
-            <div style={{width:12,height:12,borderRadius:2,background:'#00C73C',display:'flex',alignItems:'center',justifyContent:'center',fontSize:8,fontWeight:900,color:'#fff'}}>N</div>
-            <span style={{fontSize:9,fontWeight:800,color:'#E2E8F0'}}>Naver</span>
+          <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:8}}>
+            <div style={{width:14,height:14,borderRadius:3,background:'#00C73C',display:'flex',alignItems:'center',justifyContent:'center',fontSize:9,fontWeight:900,color:'#fff'}}>N</div>
+            <span style={{fontSize:11,fontWeight:800,color:'#E2E8F0'}}>Naver</span>
             <div style={{flex:1}}/>
-            <Ring value={pct(x.naverReady||0,k.blogs||1)} size={28} stroke={3} color="#00C73C">
-              <text x="14" y="14" textAnchor="middle" dominantBaseline="central" fill="#00C73C" fontSize="8" fontWeight="800">{pct(x.naverReady||0,k.blogs||1)}%</text>
+            <Ring value={pct(x.naverReady||0,k.blogs||1)} size={30} stroke={3} color="#00C73C">
+              <text x="15" y="15" textAnchor="middle" dominantBaseline="central" fill="#00C73C" fontSize="9" fontWeight="800">{pct(x.naverReady||0,k.blogs||1)}%</text>
             </Ring>
           </div>
           {[{l:'OG이미지',v:100},{l:'요약문',v:pct(x.excerptOk||0,k.blogs||1)},{l:'제목',v:pct(x.titleGood||0,k.blogs||1)},{l:'메타설명',v:pct(x.metaGood||0,k.blogs||1)}].map(r=>(
-            <div key={r.l} style={{display:'flex',alignItems:'center',gap:3,marginBottom:2}}>
-              <span style={{width:8,height:8,borderRadius:'50%',background:r.v>=80?'rgba(16,185,129,0.15)':r.v>=30?'rgba(245,158,11,0.15)':'rgba(239,68,68,0.15)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:5,flexShrink:0,color:r.v>=80?'#10B981':r.v>=30?'#F59E0B':'#EF4444'}}>{r.v>=80?'✓':r.v>=30?'△':'✗'}</span>
-              <span style={{flex:1,fontSize:7,color:'rgba(255,255,255,0.3)'}}>{r.l}</span>
-              <span style={{fontSize:8,fontWeight:700,color:r.v>=80?'#10B981':r.v>=30?'#F59E0B':'#EF4444'}}>{r.v}%</span>
+            <div key={r.l} style={{display:'flex',alignItems:'center',gap:4,marginBottom:3}}>
+              <span style={{width:10,height:10,borderRadius:'50%',background:r.v>=80?'rgba(16,185,129,0.15)':r.v>=30?'rgba(245,158,11,0.15)':'rgba(239,68,68,0.15)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:7,flexShrink:0,color:r.v>=80?'#10B981':r.v>=30?'#F59E0B':'#EF4444'}}>{r.v>=80?'✓':r.v>=30?'△':'✗'}</span>
+              <span style={{flex:1,fontSize:10,color:'rgba(255,255,255,0.4)'}}>{r.l}</span>
+              <span style={{fontSize:11,fontWeight:700,color:r.v>=80?'#10B981':r.v>=30?'#F59E0B':'#EF4444'}}>{r.v}%</span>
             </div>
           ))}
-          <div style={{fontSize:8,fontWeight:700,color:'#00C73C',textAlign:'center',marginTop:3}}>{f(x.naverReady||0)}편 준비</div>
+          <div style={{fontSize:10,fontWeight:700,color:'#00C73C',textAlign:'center',marginTop:4}}>{f(x.naverReady||0)}편 준비</div>
         </div>
       </div>
 
-      {/* ═══ 3열: 유저 | CTA | 리텐션 ═══ */}
-      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:5,marginBottom:6}}>
+      {/* ═══ 2열: 유저 + CTA ═══ */}
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
         <div style={CS.card}>
-          <div style={{fontSize:9,fontWeight:700,color:'rgba(255,255,255,0.35)',marginBottom:5}}>👤 유저</div>
+          <div style={{fontSize:10,fontWeight:700,color:'rgba(255,255,255,0.4)',marginBottom:6}}>👤 유저</div>
           {[{l:'온보딩',v:g.onboardRate??0,bar:true,c:(g.onboardRate??0)>70?'#10B981':'#F59E0B'},{l:'프로필',v:g.profileRate??0,bar:true,c:(g.profileRate??0)>20?'#10B981':'#EF4444'},{l:'게시글',v:f(x.totalPosts||0),c:'rgba(255,255,255,0.5)'},{l:'댓글',v:f(x.totalComments||0),c:'rgba(255,255,255,0.5)'}].map(r=>(
-            <div key={r.l} style={{marginBottom:3}}><div style={{display:'flex',justifyContent:'space-between',fontSize:9,marginBottom:1}}><span style={{color:'rgba(255,255,255,0.3)'}}>{r.l}</span><span style={{fontWeight:700,color:r.c}}>{r.bar?r.v+'%':r.v}</span></div>{r.bar&&<HBar value={r.v} color={r.c}/>}</div>
+            <div key={r.l} style={{marginBottom:4}}>
+              <div style={{display:'flex',justifyContent:'space-between',fontSize:10,marginBottom:2}}>
+                <span style={{color:'rgba(255,255,255,0.35)'}}>{r.l}</span>
+                <span style={{fontWeight:700,color:r.c}}>{r.bar?r.v+'%':r.v}</span>
+              </div>
+              {r.bar&&<HBar value={r.v} color={r.c}/>}
+            </div>
           ))}
         </div>
         <div style={CS.card}>
-          <div style={{fontSize:9,fontWeight:700,color:'rgba(255,255,255,0.35)',marginBottom:5}}>📊 CTA</div>
-          <div style={{display:'flex',flexDirection:'column',gap:3,marginBottom:4}}>
+          <div style={{fontSize:10,fontWeight:700,color:'rgba(255,255,255,0.4)',marginBottom:6}}>📊 CTA 퍼널</div>
+          <div style={{display:'flex',flexDirection:'column',gap:4,marginBottom:6}}>
             {[{v:g.ctaViews7d||0,l:'노출',c:'#3B7BF6',w:100},{v:g.ctaClicks7d||0,l:'클릭',c:'#F59E0B',w:Math.max((g.ctaClicks7d||0)/Math.max(g.ctaViews7d||1,1)*100,10)},{v:k.newUsers||0,l:'가입',c:'#10B981',w:Math.max((k.newUsers||0)/Math.max(g.ctaViews7d||1,1)*100,15)}].map(xx=>(
-              <div key={xx.l} style={{display:'flex',alignItems:'center',gap:3}}>
-                <span style={{fontSize:7,color:'rgba(255,255,255,0.2)',width:18}}>{xx.l}</span>
-                <div style={{flex:1,height:10,background:'rgba(255,255,255,0.04)',borderRadius:3,overflow:'hidden'}}>
-                  <div style={{height:'100%',width:`${xx.w}%`,background:`linear-gradient(90deg,${xx.c},${xx.c}88)`,borderRadius:3,display:'flex',alignItems:'center',justifyContent:'flex-end',paddingRight:3}}>
-                    <span style={{fontSize:7,fontWeight:700,color:'#fff'}}>{xx.v}</span>
+              <div key={xx.l} style={{display:'flex',alignItems:'center',gap:4}}>
+                <span style={{fontSize:9,color:'rgba(255,255,255,0.25)',width:22}}>{xx.l}</span>
+                <div style={{flex:1,height:12,background:'rgba(255,255,255,0.04)',borderRadius:4,overflow:'hidden'}}>
+                  <div style={{height:'100%',width:`${xx.w}%`,background:`linear-gradient(90deg,${xx.c},${xx.c}88)`,borderRadius:4,display:'flex',alignItems:'center',justifyContent:'flex-end',paddingRight:4}}>
+                    <span style={{fontSize:9,fontWeight:700,color:'#fff'}}>{xx.v}</span>
                   </div>
                 </div>
               </div>
             ))}
           </div>
-          <div style={{textAlign:'center',fontSize:11,fontWeight:800,color:parseFloat(ctr)>2?'#10B981':'#EF4444'}}>CTR {ctr}%</div>
-        </div>
-        <div style={CS.card}>
-          <div style={{fontSize:9,fontWeight:700,color:'rgba(255,255,255,0.35)',marginBottom:5}}>🔔 리텐션</div>
-          <div style={{display:'flex',justifyContent:'center',marginBottom:4}}>
-            <Ring value={nr} size={38} stroke={3} color={nr>10?'#10B981':'#EF4444'}>
-              <text x="19" y="17" textAnchor="middle" dominantBaseline="central" fill={nr>10?'#10B981':'#EF4444'} fontSize="10" fontWeight="800">{nr}%</text>
-            </Ring>
-          </div>
-          <div style={{fontSize:7,color:'rgba(255,255,255,0.2)',textAlign:'center',marginBottom:3}}>알림 열람률</div>
-          {[{l:'발송',v:f(g.notifTotal7d||0)},{l:'열람',v:f(g.notifRead7d||0),c:'#10B981'}].map(r=>(
-            <div key={r.l} style={{display:'flex',justifyContent:'space-between',fontSize:9,padding:'1px 0'}}>
-              <span style={{color:'rgba(255,255,255,0.3)'}}>{r.l}</span>
-              <span style={{fontWeight:600,color:r.c||'rgba(255,255,255,0.4)'}}>{r.v}</span>
-            </div>
-          ))}
+          <div style={{textAlign:'center',fontSize:13,fontWeight:800,color:parseFloat(ctr)>2?'#10B981':'#EF4444'}}>CTR {ctr}%</div>
         </div>
       </div>
 
-      {/* ═══ 시스템 + 실패크론 ═══ */}
-      <div style={{display:'grid',gridTemplateColumns:fcn>0?'1fr 1fr':'1fr',gap:5,marginBottom:6}}>
+      {/* ═══ 리텐션 + 시스템 ═══ */}
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
         <div style={CS.card}>
-          <div style={{fontSize:9,fontWeight:700,color:'rgba(255,255,255,0.35)',marginBottom:5}}>🔧 시스템</div>
-          <div style={{marginBottom:4}}>
-            <div style={{display:'flex',justifyContent:'space-between',fontSize:8,marginBottom:2}}>
-              <span style={{color:'rgba(255,255,255,0.3)'}}>DB</span>
-              <span style={{color:dbPct<50?'#10B981':'#F59E0B'}}>{((k.dbMb||0)/1024).toFixed(1)}G / 8.4G</span>
+          <div style={{fontSize:10,fontWeight:700,color:'rgba(255,255,255,0.4)',marginBottom:6}}>🔔 리텐션</div>
+          <div style={{display:'flex',alignItems:'center',gap:12}}>
+            <Ring value={nr} size={44} stroke={4} color={nr>10?'#10B981':'#EF4444'}>
+              <text x="22" y="20" textAnchor="middle" dominantBaseline="central" fill={nr>10?'#10B981':'#EF4444'} fontSize="12" fontWeight="800">{nr}%</text>
+            </Ring>
+            <div>
+              <div style={{fontSize:9,color:'rgba(255,255,255,0.25)',marginBottom:3}}>알림 열람률</div>
+              {[{l:'발송',v:f(g.notifTotal7d||0)},{l:'열람',v:f(g.notifRead7d||0),c:'#10B981'}].map(r=>(
+                <div key={r.l} style={{display:'flex',justifyContent:'space-between',gap:12,fontSize:10,padding:'1px 0'}}>
+                  <span style={{color:'rgba(255,255,255,0.3)'}}>{r.l}</span>
+                  <span style={{fontWeight:600,color:r.c||'rgba(255,255,255,0.45)'}}>{r.v}</span>
+                </div>
+              ))}
             </div>
-            <HBar value={dbPct} color={dbPct<50?'#10B981':'#F59E0B'} h={5}/>
-          </div>
-          <div style={{display:'flex',justifyContent:'space-between',fontSize:9,padding:'2px 0'}}>
-            <span style={{color:'rgba(255,255,255,0.3)'}}>크론/일</span>
-            <span style={{fontWeight:700,color:'rgba(255,255,255,0.5)'}}>{k.cronSuccess+k.cronFail}</span>
           </div>
         </div>
-        {fcn>0&&<div style={{...CS.card,borderLeft:'2px solid #EF4444'}}>
-          <div style={{fontSize:9,fontWeight:700,color:'#EF4444',marginBottom:3}}>❌ 실패 ({fcn})</div>
-          {Object.entries(fc||{}).slice(0,4).map(([n,info]:any)=>(
-            <div key={n} style={{display:'flex',justifyContent:'space-between',fontSize:8,padding:'1px 0',color:'rgba(255,255,255,0.35)'}}>
-              <span>{n.replace(/^(blog-|cron-|apt-|stock-)/,'')}</span>
-              <span style={{color:'#EF4444',fontWeight:600}}>{info.count}</span>
+        <div style={CS.card}>
+          <div style={{fontSize:10,fontWeight:700,color:'rgba(255,255,255,0.4)',marginBottom:6}}>🔧 시스템</div>
+          <div style={{marginBottom:6}}>
+            <div style={{display:'flex',justifyContent:'space-between',fontSize:10,marginBottom:3}}>
+              <span style={{color:'rgba(255,255,255,0.35)'}}>DB</span>
+              <span style={{color:dbPct<50?'#10B981':'#F59E0B',fontWeight:600}}>{((k.dbMb||0)/1024).toFixed(1)}G / 8.4G</span>
             </div>
-          ))}
-        </div>}
+            <HBar value={dbPct} color={dbPct<50?'#10B981':'#F59E0B'} h={6}/>
+          </div>
+          <div style={{display:'flex',justifyContent:'space-between',fontSize:10,padding:'2px 0'}}>
+            <span style={{color:'rgba(255,255,255,0.35)'}}>크론/일</span>
+            <span style={{fontWeight:700,color:'rgba(255,255,255,0.5)'}}>{k.cronSuccess+k.cronFail}</span>
+          </div>
+          {fcn>0&&<div style={{marginTop:4,padding:'4px 6px',background:'rgba(239,68,68,0.06)',borderRadius:6,fontSize:10,color:'#EF4444'}}>❌ 실패 {fcn}건</div>}
+        </div>
       </div>
 
       {/* ═══ 최근 활동 ═══ */}
-      <div style={{...CS.card,marginBottom:6}}>
-        <div style={{fontSize:9,fontWeight:700,color:'rgba(255,255,255,0.35)',marginBottom:4}}>🕐 최근 활동</div>
+      <div style={CS.card}>
+        <div style={{fontSize:10,fontWeight:700,color:'rgba(255,255,255,0.4)',marginBottom:6}}>🕐 최근 활동</div>
         {(ra||[]).slice(0,6).map((a:any,i:number)=>(
-          <div key={i} style={{display:'flex',alignItems:'center',gap:6,padding:'3px 0',borderBottom:i<Math.min(ra.length,6)-1?'1px solid rgba(255,255,255,0.03)':'none'}}>
-            <span style={{width:30,fontSize:8,color:'rgba(255,255,255,0.2)',flexShrink:0}}>{ago(a.at)}</span>
-            <Dot ok={a.type==='cron'?a.status==='success':true} size={5}/>
-            <span style={{fontSize:9,color:'rgba(255,255,255,0.45)',flex:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' as const}}>{a.name}</span>
+          <div key={i} style={{display:'flex',alignItems:'center',gap:8,padding:'4px 0',borderBottom:i<Math.min(ra.length,6)-1?'1px solid rgba(255,255,255,0.03)':'none'}}>
+            <span style={{width:32,fontSize:10,color:'rgba(255,255,255,0.25)',flexShrink:0}}>{ago(a.at)}</span>
+            <Dot ok={a.type==='cron'?a.status==='success':true} size={6}/>
+            <span style={{fontSize:11,color:'rgba(255,255,255,0.5)',flex:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' as const}}>{a.name}</span>
           </div>
         ))}
       </div>
 
       {/* ═══ 5버튼 ═══ */}
-      <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:3}}>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:4}}>
         {([['📈','성장','growth'],['👤','유저','users'],['🔧','크론','ops'],['🗄️','데이터','data'],['⚡','실행','execute']] as const).map(([i,l,t])=>(
-          <button key={t} onClick={()=>onNavigate(t)} style={{padding:'7px 0',background:'rgba(12,21,40,0.5)',border:'1px solid rgba(255,255,255,0.04)',borderRadius:8,cursor:'pointer',textAlign:'center',fontSize:8,color:'rgba(255,255,255,0.25)'}}>
-            <div style={{fontSize:13,opacity:0.4}}>{i}</div>{l}
+          <button key={t} onClick={()=>onNavigate(t)} style={{padding:'8px 0',background:'rgba(12,21,40,0.5)',border:'1px solid rgba(255,255,255,0.05)',borderRadius:8,cursor:'pointer',textAlign:'center',fontSize:10,color:'rgba(255,255,255,0.3)'}}>
+            <div style={{fontSize:15,opacity:0.5,marginBottom:2}}>{i}</div>{l}
           </button>
         ))}
       </div>
