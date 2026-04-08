@@ -93,8 +93,8 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
         {/* 2×2 그리드 — 모바일 가독성 */}
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:10}}>
           {[
-            {l:'접속 (5분)',v:td?.recentVisitors?.length||0,c:'#10B981'},
-            {l:'UV (1시간)',v:td?.uniqueVisitors||0,c:'#06B6D4'},
+            {l:'접속 (1h)',v:td?.recentVisitors?.length||0,c:'#10B981'},
+            {l:'UV (오늘)',v:td?.uniqueVisitors||0,c:'#06B6D4'},
             {l:'PV (오늘)',v:k.pvToday||0,c:'#3B7BF6'},
             {l:'PV (7일)',v:f(x.pv7d||0),c:'#8B5CF6'},
           ].map(kk=>(

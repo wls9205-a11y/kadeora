@@ -40,6 +40,17 @@ export default function AdminShell() {
         .at{flex:1;padding:8px 0;text-align:center;font-size:11px;color:rgba(255,255,255,0.35);cursor:pointer;border:none;background:none;transition:all .15s;min-width:0}
         .at.on{color:#3B7BF6;font-weight:800}
         .at:hover{color:rgba(255,255,255,0.7)}
+        .adm-sec{font-size:13px;font-weight:800;color:#E2E8F0;margin:16px 0 8px;display:flex;align-items:center;gap:6px}
+        .adm-card{background:rgba(12,21,40,0.65);border:1px solid rgba(255,255,255,0.05);border-radius:12px;padding:12px 14px;margin-bottom:8px;backdrop-filter:blur(8px)}
+        .adm-kpi{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+        .adm-kpi-c{background:rgba(12,21,40,0.65);border:1px solid rgba(255,255,255,0.05);border-radius:12px;padding:12px 14px;backdrop-filter:blur(8px)}
+        .adm-kpi-v{font-size:20px;font-weight:900;color:#3B7BF6;line-height:1}
+        .adm-kpi-l{font-size:10px;color:rgba(255,255,255,0.35);margin-top:4px}
+        .adm-kpi-d{font-size:11px;color:rgba(255,255,255,0.25);margin-top:2px}
+        .adm-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;background:rgba(59,123,246,0.08);border:1px solid rgba(59,123,246,0.2);color:#3B7BF6;cursor:pointer;font-size:12px;font-weight:600;transition:all .15s}
+        .adm-btn:hover{background:rgba(59,123,246,0.15)}
+        .adm-bar{height:6px;border-radius:3px;background:rgba(255,255,255,0.06);overflow:hidden;margin-bottom:4px}
+        .adm-bar-fill{height:100%;border-radius:3px;transition:width .6s}
       `}</style>
 
       {/* 헤더 */}
