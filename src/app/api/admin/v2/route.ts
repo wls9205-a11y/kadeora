@@ -37,13 +37,13 @@ export async function GET(req: NextRequest) {
     if (tab === 'focus') {
       const [users, realUsers, newUsers, activeUsers, blogs, rewritten, cronOk, cronFail, interests, emailSubs, pushSubs, convEvents, dbMb, pvToday, notifRead7d, notifTotal7d, profileCompleted, onboardedCount, ctaViews7d, ctaClicks7d, postsToday, commentsToday, totalPosts, totalComments, hotBlogs, newBlogs24, aptSites, aptDeadline7, ctaViews24, ctaClicks24, notifSent24, notifRead24, bioCount, ageCount, pv7d] = await Promise.all([
         safeCount(sb.from('profiles').select('id', { count: 'exact', head: true })),
-        safeCount(sb.from('profiles').select('id', { count: 'exact', head: true }).neq('is_ghost', true).neq('is_deleted', true)),
-        safeCount(sb.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', weekAgo)),
-        safeCount(sb.from('profiles').select('id', { count: 'exact', head: true }).not('last_active_at', 'is', null)),
+        safeCount((sb as any).from('profiles').select('id', { count: 'exact', head: true }).or('is_seed.is.null,is_seed.eq.false').neq('is_ghost', true).neq('is_deleted', true)),
+        safeCount((sb as any).from('profiles').select('id', { count: 'exact', head: true }).or('is_seed.is.null,is_seed.eq.false').gte('created_at', weekAgo)),
+        safeCount((sb as any).from('profiles').select('id', { count: 'exact', head: true }).or('is_seed.is.null,is_seed.eq.false').not('last_active_at', 'is', null)),
         safeCount(sb.from('blog_posts').select('id', { count: 'exact', head: true }).eq('is_published', true)),
         safeCount(sb.from('blog_posts').select('id', { count: 'exact', head: true }).not('rewritten_at', 'is', null)),
         safeCount(sb.from('cron_logs').select('id', { count: 'exact', head: true }).eq('status', 'success').gte('created_at', dayAgo)),
-        safeCount(sb.from('cron_logs').select('id', { count: 'exact', head: true }).eq('status', 'failed').gte('created_at', dayAgo)),
+        safeCount(sb.from('cron_logs').select('id', { count: 'exact', head: true }).neq('status', 'success').gte('created_at', dayAgo)),
         safeCount(sb.from('apt_site_interests').select('id', { count: 'exact', head: true })),
         safeCount((sb as any).from('email_subscribers').select('id', { count: 'exact', head: true }).eq('is_active', true)),
         safeCount(sb.from('push_subscriptions').select('id', { count: 'exact', head: true })),
