@@ -43,7 +43,7 @@ export default function AdminShell() {
       `}</style>
 
       {/* 헤더 */}
-      <div style={{position:'sticky',top:0,zIndex:50,background:'rgba(5,10,24,0.97)',backdropFilter:'blur(16px)',padding:'8px 0 4px',borderBottom:'1px solid rgba(255,255,255,0.04)'}}>
+      <div style={{position:'sticky',top:0,zIndex:50,background:'rgba(5,10,24,0.97)',backdropFilter:'blur(16px)',padding:'8px 0 4px',width:'100%',maxWidth:'100%',borderBottom:'1px solid rgba(255,255,255,0.04)'}}>
         <div style={{display:'flex',alignItems:'center',gap:8}}>
           <div style={{width:28,height:28,borderRadius:'50%',border:`2px solid ${sc}`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,fontWeight:900,color:sc,flexShrink:0}}>{hp?.s??'—'}</div>
           {hp && <>
@@ -57,7 +57,7 @@ export default function AdminShell() {
       </div>
 
       {/* 탭 바 */}
-      <div style={{display:'flex',position:'sticky',top:40,zIndex:49,background:'rgba(5,10,24,0.98)',padding:'2px 0 4px',marginBottom:8,borderBottom:'1px solid rgba(255,255,255,0.03)'}}>
+      <div style={{display:'flex',position:'sticky',top:40,zIndex:49,background:'rgba(5,10,24,0.98)',padding:'2px 0 4px',width:'100%',maxWidth:'100%',marginBottom:8,borderBottom:'1px solid rgba(255,255,255,0.03)'}}>
         {tabs.map(t=>(
           <button key={t} className={`at${tab===t?' on':''}`} onClick={()=>sw(t)}>
             <div style={{fontSize:14,marginBottom:1,opacity:tab===t?1:0.4}}>{icons[t]}</div>
