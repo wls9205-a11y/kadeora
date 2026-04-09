@@ -95,6 +95,36 @@ export default async function GradesPage() {
         );
       })()}
 
+      {/* 등급별 실질 혜택 */}
+      <div style={{ marginBottom: 24 }}>
+        <h2 className="text-lg font-bold mb-3" style={{ color: 'var(--text-primary)' }}>🎁 등급별 혜택</h2>
+        <div className="space-y-2">
+          {[
+            { emoji: '🌱', grade: 'Lv.1~3', title: '새싹 ~ 동네어른', benefits: ['블로그 전문 열람', '커뮤니티 글·댓글 작성', '청약 가점 계산기', '종목 토론 참여'] },
+            { emoji: '⭐', grade: 'Lv.4~5', title: '소문난집 ~ 인플루언서', benefits: ['AI 종목 분석 월 3회 무료', '주간 리포트 이메일 수신', '프로필 등급 뱃지 표시', '인기글 우선 노출'] },
+            { emoji: '🔥', grade: 'Lv.6~7', title: '빅마우스 ~ 찐고수', benefits: ['AI 종목 분석 월 10회 무료', '광고 50% 감소', '전문가 채팅방 접근', '커뮤니티 이벤트 우선 참여'] },
+            { emoji: '👑', grade: 'Lv.8~10', title: '전설 ~ 카더라신', benefits: ['AI 분석 무제한', '광고 완전 제거', 'Pro 멤버십 기능 무료 체험', '신규 기능 베타 테스터 우선 초대'] },
+          ].map((tier, i) => (
+            <div key={i} style={{ padding: '12px 14px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                <span style={{ fontSize: 20 }}>{tier.emoji}</span>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{tier.title}</div>
+                  <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{tier.grade}</div>
+                </div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 12px' }}>
+                {tier.benefits.map((b, j) => (
+                  <div key={j} style={{ fontSize: 12, color: 'var(--text-secondary)', padding: '2px 0', display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <span style={{ color: 'var(--brand)', fontSize: 10 }}>✓</span> {b}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* 점수 획득 방법 */}
       <div
         className="rounded-xl p-4 mb-6"

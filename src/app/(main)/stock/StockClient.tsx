@@ -300,6 +300,46 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
         </div>
       </div>
 
+      {/* ─ 주말 안내 배너 ─ */}
+      {(() => {
+        const ms = getMarketStatus();
+        if (!ms.label.includes('휴장')) return null;
+        const topPerformers = [...sentimentStocks].filter(s => s.price > 0 && s.change_pct !== 0).sort((a, b) => Math.abs(b.change_pct) - Math.abs(a.change_pct));
+        const topUp = topPerformers.filter(s => s.change_pct > 0).slice(0, 3);
+        const topDown = topPerformers.filter(s => s.change_pct < 0).slice(0, 3);
+        return (
+          <div style={{ borderRadius: 'var(--radius-lg)', padding: '14px 16px', marginBottom: 'var(--sp-md)', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
+              <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-primary)' }}>📅 주말 · 금요일 종가 기준</span>
+              <span style={{ fontSize: 10, color: 'var(--text-tertiary)', marginLeft: 'auto' }}>월요일 09:00 개장</span>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+              <div style={{ padding: '10px', borderRadius: 'var(--radius-md)', background: 'var(--bg-hover)' }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: isDomestic ? 'var(--accent-red)' : 'var(--accent-green)', marginBottom: 6 }}>주간 상승 TOP</div>
+                {topUp.length > 0 ? topUp.map(s => (
+                  <div key={s.symbol} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, padding: '2px 0' }}>
+                    <span style={{ color: 'var(--text-primary)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '60%' }}>{s.name}</span>
+                    <span style={{ color: isDomestic ? 'var(--accent-red)' : 'var(--accent-green)', fontWeight: 700 }}>+{s.change_pct.toFixed(1)}%</span>
+                  </div>
+                )) : <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>데이터 없음</div>}
+              </div>
+              <div style={{ padding: '10px', borderRadius: 'var(--radius-md)', background: 'var(--bg-hover)' }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: isDomestic ? 'var(--accent-blue)' : 'var(--accent-red)', marginBottom: 6 }}>주간 하락 TOP</div>
+                {topDown.length > 0 ? topDown.map(s => (
+                  <div key={s.symbol} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, padding: '2px 0' }}>
+                    <span style={{ color: 'var(--text-primary)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '60%' }}>{s.name}</span>
+                    <span style={{ color: isDomestic ? 'var(--accent-blue)' : 'var(--accent-red)', fontWeight: 700 }}>{s.change_pct.toFixed(1)}%</span>
+                  </div>
+                )) : <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>데이터 없음</div>}
+              </div>
+            </div>
+            <div style={{ marginTop: 10, padding: '8px 10px', borderRadius: 'var(--radius-sm)', background: 'rgba(59,123,246,0.04)', border: '1px solid rgba(59,123,246,0.08)', textAlign: 'center' }}>
+              <span style={{ fontSize: 11, color: 'var(--brand)', fontWeight: 600 }}>💡 주말에도 종목 분석 · 포트폴리오 시뮬레이터를 이용해보세요</span>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* ─ 히어로: AI 시황 카드 (그리드 배경 + KPI 4개) ─ */}
       {briefing && (() => {
         const bull = briefing.sentiment === 'bullish';
@@ -1107,7 +1147,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
                               {s.price === 0 ? '—' : isGlobal ? `$${Number(s.price)?.toLocaleString('en', {minimumFractionDigits:2, maximumFractionDigits:2})}` : `₩${fmt(Number(s.price))}`}
                             </div>
                             <div style={{ fontSize: 12, fontWeight: 800, color: priceColor, display: 'inline-block', padding: '1px 6px', borderRadius: 5, background: `${priceColor}12`, marginTop: 2 }}>
-                              {pct > 0 ? '▲' : pct < 0 ? '▼' : '━'} {Math.abs(pct).toFixed(2)}%
+                              {pct > 0 ? `▲ ${pct.toFixed(2)}%` : pct < 0 ? `▼ ${Math.abs(pct).toFixed(2)}%` : '전일종가'}
                             </div>
                           </div>
                           {sparkEl}

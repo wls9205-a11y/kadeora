@@ -65,6 +65,24 @@ export default function SmartSectionGate({ htmlContent, slug, category }: SmartS
     ? '5,768개 현장 분석 · 입주비용 계산 · 가격 알림'
     : '투자 정보 · AI 분석 · 가입 즉시 100P';
 
+  const VALUE_PROPS = category === 'stock'
+    ? [
+        { emoji: '🤖', title: 'AI 종목 분석', desc: '728개 종목 목표가·투자의견' },
+        { emoji: '🔔', title: '실시간 알림', desc: '관심 종목 급등락 즉시 알림' },
+        { emoji: '📊', title: '포트폴리오 시뮬레이터', desc: '나만의 포트폴리오 수익률 테스트' },
+      ]
+    : category === 'apt' || category === 'unsold'
+    ? [
+        { emoji: '🎯', title: '청약 가점 계산기', desc: '당첨 확률 자동 계산' },
+        { emoji: '📈', title: '시세 전망 리포트', desc: '5,768개 현장 AI 분석' },
+        { emoji: '🏠', title: '입주비용 계산', desc: '취득세·중도금·잔금 한번에' },
+      ]
+    : [
+        { emoji: '🤖', title: 'AI 투자 분석', desc: '주식·부동산 맞춤 인사이트' },
+        { emoji: '💰', title: '가입 즉시 100P', desc: '활동할수록 등급 UP' },
+        { emoji: '📬', title: '주간 리포트', desc: '핵심 시장 동향 이메일 요약' },
+      ];
+
   return (
     <>
       <div dangerouslySetInnerHTML={{ __html: beforeGate }} />
@@ -75,22 +93,56 @@ export default function SmartSectionGate({ htmlContent, slug, category }: SmartS
         }} dangerouslySetInnerHTML={{ __html: gatedSection }} />
         <div data-gate="content" style={{
           position: 'absolute', inset: 0,
-          background: 'linear-gradient(to bottom, transparent 0%, var(--bg-base) 70%)',
+          background: 'linear-gradient(to bottom, transparent 0%, var(--bg-base) 60%)',
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end',
-          paddingBottom: 20,
+          paddingBottom: 16,
         }}>
           <div style={{
-            fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)',
+            fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-primary)',
             marginBottom: 4, textAlign: 'center',
           }}>{ctaText}</div>
-          <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 10 }}>{ctaBenefits}</div>
+          <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 14 }}>가입하면 이 모든 기능을 무료로 이용할 수 있어요</div>
+
+          {/* 가치 제안 카드 3개 */}
+          <div style={{ display: 'flex', gap: 8, marginBottom: 16, width: '100%', maxWidth: 420, padding: '0 8px' }}>
+            {VALUE_PROPS.map((vp, i) => (
+              <div key={i} style={{
+                flex: 1, padding: '10px 8px', borderRadius: 'var(--radius-md)',
+                background: 'var(--bg-surface)', border: '1px solid var(--border)',
+                textAlign: 'center',
+              }}>
+                <div style={{ fontSize: 20, marginBottom: 4 }}>{vp.emoji}</div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 2 }}>{vp.title}</div>
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)', lineHeight: 1.3 }}>{vp.desc}</div>
+              </div>
+            ))}
+          </div>
+
           <Link href={`/login?redirect=${encodeURIComponent(pathname)}&source=smart_gate`} style={{
-            display: 'inline-block', padding: '10px 28px', borderRadius: 'var(--radius-pill)',
+            display: 'inline-block', padding: '12px 36px', borderRadius: 'var(--radius-pill)',
             background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)',
-            fontWeight: 700, fontSize: 'var(--fs-sm)', textDecoration: 'none',
+            fontWeight: 800, fontSize: 'var(--fs-sm)', textDecoration: 'none',
           }} onClick={() => trackConversion('cta_click', 'smart_gate', { category })}>카카오로 3초 가입 (무료)</Link>
           <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 8 }}>
-            스팸 없음 · 가입 즉시 전체 분석 열람
+            스팸 없음 · 광고 없음 · 가입 즉시 전체 열람
+          </div>
+
+          {/* 뉴스레터 대안 경로 */}
+          <div style={{
+            marginTop: 14, padding: '10px 16px', borderRadius: 'var(--radius-md)',
+            background: 'var(--bg-hover)', width: '100%', maxWidth: 360, textAlign: 'center',
+          }}>
+            <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 2 }}>
+              가입은 나중에 하고 싶다면?
+            </div>
+            <Link href="#newsletter" style={{
+              fontSize: 12, fontWeight: 700, color: 'var(--brand)', textDecoration: 'none',
+            }} onClick={(e) => {
+              e.preventDefault();
+              const el = document.querySelector('[data-newsletter]');
+              if (el) el.scrollIntoView({ behavior: 'smooth' });
+              trackConversion('cta_click', 'gate_newsletter_link', { category });
+            }}>📩 주간 리포트만 이메일로 받기 →</Link>
           </div>
         </div>
       </div>
