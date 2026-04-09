@@ -49,7 +49,7 @@ export default function LoungeLivePreview() {
 
       // 해당 방의 최근 메시지 3개
       const { data: msgs } = await (sb as any).from('discussion_messages')
-        .select('id, content, profiles!discussion_messages_user_id_fkey(nickname)')
+        .select('id, content, profiles!discussion_messages_author_id_fkey(nickname)')
         .eq('room_id', topRoomId)
         .order('created_at', { ascending: false })
         .limit(3);
