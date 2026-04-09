@@ -204,7 +204,7 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
             <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>입력없이 원클릭</span>
             <span style={{ color: 'var(--text-tertiary)' }}> + </span>
             <span style={{ fontWeight: 700, color: 'var(--brand)' }}>50P</span>
-            <Link href={`/login?redirect=/apt/${slug}`} style={{ color: 'var(--brand)', fontWeight: 700, marginLeft: 6, textDecoration: 'none' }}>가입→</Link>
+            <Link href={`/login?redirect=/apt/${slug&source=interest_register}`} style={{ color: 'var(--brand)', fontWeight: 700, marginLeft: 6, textDecoration: 'none' }}>가입→</Link>
           </div>
         </>
       )}

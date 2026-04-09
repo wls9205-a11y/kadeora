@@ -6,6 +6,7 @@ import { SITE_URL } from '@/lib/constants';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { notFound } from 'next/navigation';
 import InlineCTA from '@/components/InlineCTA';
+import LoginGate from '@/components/LoginGate';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import ShareButtons from '@/components/ShareButtons';
@@ -421,8 +422,9 @@ export default async function StockDetailPage({ params }: Props) {
         </figcaption>
       </figure>
 
-      {/* AI 종합 분석 — SSR */}
+      {/* AI 종합 분석 — SSR (봇=전체, 비로그인=블러) */}
       {stockAnalysisText && (
+        <LoginGate feature="ai_analysis" title={`${s.name} AI 분석`} description="이 종목의 AI 투자 분석과 전망을 확인하세요">
         <section style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--card-p) var(--sp-lg)', marginBottom: 'var(--sp-md)' }}>
           <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 10px' }}>📊 {s.name} 종합 분석</h2>
           <div style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.85 }}
@@ -440,6 +442,7 @@ export default async function StockDetailPage({ params }: Props) {
           </div>
           <SectionShareButton section="stock-ai-analysis" label={`\${s.name} AI 분석`} text={`\${s.name} AI 종합 분석 — 카더라에서 확인하세요`} pagePath={`/stock/\${symbol}`} />
         </section>
+        </LoginGate>
       )}
 
       {/* 탭 콘텐츠 */}

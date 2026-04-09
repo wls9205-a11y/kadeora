@@ -84,13 +84,13 @@ export default function SmartSectionGate({ htmlContent, slug, category }: SmartS
             marginBottom: 4, textAlign: 'center',
           }}>{ctaText}</div>
           <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 10 }}>{ctaBenefits}</div>
-          <Link href={`/login?redirect=${encodeURIComponent(pathname)}`} style={{
+          <Link href={`/login?redirect=${encodeURIComponent(pathname)}&source=smart_gate`} style={{
             display: 'inline-block', padding: '10px 28px', borderRadius: 'var(--radius-pill)',
             background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)',
             fontWeight: 700, fontSize: 'var(--fs-sm)', textDecoration: 'none',
           }} onClick={() => trackConversion('cta_click', 'smart_gate', { category })}>카카오로 3초 가입 (무료)</Link>
           <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 8 }}>
-            스팸 없음 · 41명의 투자자가 함께하고 있어요
+            스팸 없음 · 가입 즉시 전체 분석 열람
           </div>
         </div>
       </div>

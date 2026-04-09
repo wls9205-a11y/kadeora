@@ -18,6 +18,7 @@ import { getDisplayInterestCount } from '@/lib/interest-utils';
 const AptPriceTrendChart = dynamic(() => import('@/components/charts/AptPriceTrendChart'));
 const InterestRegistration = dynamic(() => import('@/components/InterestRegistration'));
 import InlineCTA from '@/components/InlineCTA';
+import LoginGate from '@/components/LoginGate';
 const RegulationBadges = dynamic(() => import('@/components/RegulationBadges'));
 const CostSimulator = dynamic(() => import('@/components/CostSimulator'));
 const ContentLock = dynamic(() => import("@/components/ContentLock"));
@@ -1220,8 +1221,9 @@ export default async function AptUnifiedPage({ params }: Props) {
         </figcaption>
       </figure>
 
-      {/* 📊 AI 종합 분석 — SSR 서버 렌더링 (크롤러 + 사용자 모두 읽음) */}
+      {/* 📊 AI 종합 분석 — SSR (봇=전체, 비로그인=블러) */}
       {analysisText && (
+        <LoginGate feature="apt_analysis" title={`${name} 종합 분석`} description="이 단지의 시세 전망과 투자 분석을 확인하세요">
         <div className="apt-card" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
           <h2 style={ct}>📊 {name} 종합 분석</h2>
           <div className="apt-analysis-content" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.85 }}
@@ -1238,6 +1240,7 @@ export default async function AptUnifiedPage({ params }: Props) {
             ※ 본 분석은 공공 데이터 기반 자동 생성된 참고 자료입니다
           </div>
         </div>
+        </LoginGate>
       )}
 
       {/* 관심단지 등록 CTA — AI 분석 바로 아래 (노출 극대화) */}

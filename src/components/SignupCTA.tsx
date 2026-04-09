@@ -47,7 +47,7 @@ export default function SignupCTA() {
 
         {/* 카카오 가입 버튼 */}
         <Link
-          href={`/login?redirect=${encodeURIComponent(pathname)}`}
+          href={`/login?redirect=${encodeURIComponent(pathname)&source=signup_cta}`}
           style={{
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
             width: '100%', padding: 15, border: 'none', borderRadius: 'var(--radius-card)',

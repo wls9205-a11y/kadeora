@@ -43,7 +43,7 @@ export default function ContentLock({
           <div style={{ fontSize: 24, marginBottom: 6 }}>🔓</div>
           <div style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>{title}</div>
           <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 12 }}>{description}</div>
-          <Link href={`/login?redirect=${encodeURIComponent(pathname)}`} style={{
+          <Link href={`/login?redirect=${encodeURIComponent(pathname)&source=content_lock}`} style={{
             display: 'inline-block', padding: '8px 24px', borderRadius: 'var(--radius-pill)',
             background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)',
             fontWeight: 700, fontSize: 'var(--fs-sm)', textDecoration: 'none',
