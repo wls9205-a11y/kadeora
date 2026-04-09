@@ -50,7 +50,7 @@ export default function PostReactions({ postId, userId, initialLikes, compact }:
           .select('reaction')
           .eq('post_id', postId)
           .eq('user_id', userId)
-          .single();
+          .maybeSingle();
         if (myRow) setMyReaction(myRow.reaction as ReactionKey);
       }
     };
