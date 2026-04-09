@@ -34,7 +34,7 @@ async function getAutoPublishConfig(sb: any) {
 
 /* ═══════════ AI 기사 생성 ═══════════ */
 
-async function generateArticle(issue: any): Promise<{ title: string; content: string; slug: string; keywords: string[] } | null> {
+async function generateArticle(issue: any): Promise<{ title: string; content: string; slug: string; keywords: string[]; meta_description: string; infographic_data: Record<string, any> } | null> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return null;
 
