@@ -267,6 +267,22 @@ export async function GET(req: NextRequest) {
           aptBookmarks: aptBmR, blogBookmarks: blogBmR, stockWatchlist: stockWlR,
           priceAlerts: alertsR, attendance: attendR, missionCompleted: missionR,
         },
+        // 행동 분석 (user_events 기반)
+        behavior: await (async () => {
+          try {
+            const todayStr = now.toISOString().slice(0, 10);
+            const [eventsToday, scrollR, dwellR] = await Promise.all([
+              safeCount((sb as any).from('user_events').select('id', { count: 'exact', head: true }).gte('created_at', todayStr)),
+              safe((sb as any).from('user_events').select('properties').eq('event_type', 'scroll').gte('created_at', todayStr).limit(200), []),
+              safe((sb as any).from('user_events').select('duration_ms').eq('event_type', 'page_view').eq('event_name', 'leave').gte('created_at', todayStr).not('duration_ms', 'is', null).limit(200), []),
+            ]);
+            const scrollDepths = (scrollR || []).map((r: any) => r.properties?.depth).filter((d: any) => typeof d === 'number');
+            const avgScroll = scrollDepths.length > 0 ? Math.round(scrollDepths.reduce((a: number, b: number) => a + b, 0) / scrollDepths.length) : 0;
+            const dwells = (dwellR || []).map((r: any) => r.duration_ms).filter((d: any) => typeof d === 'number' && d > 0 && d < 600000);
+            const avgDwell = dwells.length > 0 ? Math.round(dwells.reduce((a: number, b: number) => a + b, 0) / dwells.length / 1000) : 0;
+            return { eventsToday, avgScroll, avgDwellSec: avgDwell, scrollSamples: scrollDepths.length, dwellSamples: dwells.length };
+          } catch { return null; }
+        })(),
         trafficDetail: await (async () => {
           const todayStr = now.toISOString().slice(0, 10);
           const hourAgo = new Date(Date.now() - 3600000).toISOString();

@@ -80,7 +80,7 @@ export default function GrowthTab({ onNavigate }: { onNavigate: (t: any) => void
                 <span style={{ fontWeight: 600 }}>{totalRef > 0 ? Math.round((cnt / totalRef) * 100) : 0}%</span>
               </div>
               <div style={{ height: 4, background: 'var(--bg-hover)', borderRadius: 2 }}>
-                <div style={{ height: '100%', width: `${totalRef > 0 ? (cnt / totalRef) * 100 : 0}%`, background: src === 'google' ? '#4285F4' : src === 'naver' ? '#03C75A' : src === 'kakao' ? '#FEE500' : 'var(--brand)', borderRadius: 2 }} />
+                <div style={{ height: '100%', width: `${totalRef > 0 ? (cnt / totalRef) * 100 : 0}%`, background: src.includes('Google') ? '#4285F4' : src.includes('Naver') ? '#03C75A' : src.includes('Kakao') ? '#FEE500' : src.includes('Daum') ? '#F59E0B' : src === 'Direct' ? 'var(--brand)' : src.includes('Bing') ? '#00809D' : src.includes('DCinside') ? '#1E90FF' : src.includes('Instagram') ? '#E1306C' : src.includes('Facebook') ? '#1877F2' : src.includes('YouTube') ? '#FF0000' : src.includes('Zum') ? '#FF6B00' : 'rgba(255,255,255,0.3)', borderRadius: 2 }} />
               </div>
             </div>
           ))}
@@ -129,16 +129,18 @@ export default function GrowthTab({ onNavigate }: { onNavigate: (t: any) => void
           <span style={{ flex: 1 }}>CTA</span>
           <span style={{ width: 45, textAlign: 'right' }}>노출</span>
           <span style={{ width: 45, textAlign: 'right' }}>클릭</span>
-          <span style={{ width: 45, textAlign: 'right' }}>완료</span>
+          <span style={{ width: 45, textAlign: 'right' }}>CTR</span>
         </div>
-        {['two_step', 'smart_gate', 'newsletter', 'exit_intent', 'return_banner', 'push_prompt'].map(name => {
-          const s = (ctaStats || {})[name] || {};
+        {Object.entries(ctaStats || {}).sort((a: any, b: any) => (b[1].cta_view || 0) - (a[1].cta_view || 0)).slice(0, 10).map(([name, events]: [string, any]) => {
+          const views = events.cta_view || 0;
+          const clicks = events.cta_click || 0;
+          const ctr = views > 0 ? (clicks / views * 100).toFixed(1) : '0';
           return (
             <div key={name} style={{ display: 'flex', padding: '6px 0', borderBottom: '1px solid var(--border)', fontSize: 12 }}>
-              <span style={{ flex: 1, color: 'var(--text-primary)' }}>{name}</span>
-              <span style={{ width: 45, textAlign: 'right', color: 'var(--text-secondary)' }}>{s.cta_view || '—'}</span>
-              <span style={{ width: 45, textAlign: 'right', color: 'var(--text-secondary)' }}>{s.cta_click || '—'}</span>
-              <span style={{ width: 45, textAlign: 'right', color: 'var(--text-secondary)' }}>{s.cta_complete || '—'}</span>
+              <span style={{ flex: 1, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</span>
+              <span style={{ width: 45, textAlign: 'right', color: 'var(--text-secondary)' }}>{views || '—'}</span>
+              <span style={{ width: 45, textAlign: 'right', color: 'var(--text-secondary)' }}>{clicks || '—'}</span>
+              <span style={{ width: 45, textAlign: 'right', color: parseFloat(ctr) > 1 ? '#10B981' : '#EF4444', fontWeight: 600 }}>{ctr}%</span>
             </div>
           );
         })}
@@ -228,29 +230,6 @@ export default function GrowthTab({ onNavigate }: { onNavigate: (t: any) => void
               <span style={{ fontSize: 12, fontWeight: 600 }}>{cnt}명</span>
             </div>
           ))}
-        </div>
-      </>)}
-
-      {/* CTA 성과 */}
-      {ctaStats && Object.keys(ctaStats).length > 0 && (<>
-        <div className="adm-sec">📢 CTA 성과 (7일)</div>
-        <div className="adm-card" style={{ padding: '8px 14px' }}>
-          {Object.entries(ctaStats).sort((a: any, b: any) => (b[1].cta_view || 0) - (a[1].cta_view || 0)).map(([name, events]: [string, any], i: number) => {
-            const views = events.cta_view || 0;
-            const clicks = events.cta_click || 0;
-            const ctr = views > 0 ? Math.round((clicks / views) * 1000) / 10 : 0;
-            return (
-              <div key={i} style={{ marginBottom: 6 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 2 }}>
-                  <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{name}</span>
-                  <span style={{ color: 'var(--text-secondary)' }}>{views}뷰 / {clicks}클릭 ({ctr}%)</span>
-                </div>
-                <div style={{ height: 6, background: 'var(--bg-hover)', borderRadius: 3, overflow: 'hidden' }}>
-                  <div style={{ height: '100%', width: `${Math.min(ctr * 10, 100)}%`, background: ctr > 2 ? '#10B981' : ctr > 0.5 ? '#F59E0B' : '#EF4444', borderRadius: 3, minWidth: ctr > 0 ? 4 : 0 }} />
-                </div>
-              </div>
-            );
-          })}
         </div>
       </>)}
     </div>
