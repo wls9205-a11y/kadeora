@@ -8,7 +8,7 @@ import { SkeletonDashboard } from '@/components/Skeleton';
 import { useAuth } from '@/components/AuthProvider';
 
 interface WatchStock { symbol: string; name: string; price: number; change_pct: number; currency?: string; }
-interface FavApt { id: number; house_nm: string; rcept_endde: string; region_nm: string; }
+interface FavApt { id: number; house_nm: string; rcept_endde: string; region_nm: string; isComplex?: boolean; }
 interface Alert { id: string; type: string; content: string; created_at: string; link?: string; }
 interface RecBlog { slug: string; title: string; category: string; view_count: number; }
 
@@ -70,16 +70,31 @@ export default function PersonalDashboard() {
         if (stocks) setWatchStocks(stocks as WatchStock[]);
       }
 
-      // 북마크 → 청약 상세
+      // 북마크 → 단지 상세 (complex_profiles 우선, subscriptions 폴백)
       const bm = bookmarkRes.status === 'fulfilled' ? (bookmarkRes.value.data as Record<string, unknown>[] | null) : null;
       if (bm?.length) {
         const ids = bm.map((b: any) => b.apt_id);
-        const { data: apts } = await sb.from('apt_subscriptions')
-          .select('id,house_nm,rcept_endde,region_nm')
+        // apt_complex_profiles에서 먼저 찾기
+        const { data: complexes } = await (sb as any).from('apt_complex_profiles')
+          .select('id, apt_name, region_nm, sigungu, latest_sale_date')
           .in('id', ids)
-          .order('rcept_endde', { ascending: true })
-          .limit(3);
-        if (apts) setFavApts(apts as FavApt[]);
+          .limit(5);
+        if (complexes?.length) {
+          setFavApts(complexes.map((c: any) => ({
+            id: c.id, house_nm: c.apt_name,
+            rcept_endde: c.latest_sale_date || '2099-12-31',
+            region_nm: `${c.region_nm || ''} ${c.sigungu || ''}`.trim(),
+            isComplex: true,
+          })));
+        } else {
+          // 폴백: apt_subscriptions
+          const { data: apts } = await sb.from('apt_subscriptions')
+            .select('id,house_nm,rcept_endde,region_nm')
+            .in('id', ids)
+            .order('rcept_endde', { ascending: true })
+            .limit(3);
+          if (apts) setFavApts(apts as FavApt[]);
+        }
       }
 
       // 알림
@@ -149,7 +164,7 @@ export default function PersonalDashboard() {
             <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 'var(--card-p)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
                 <Building2 size={14} color="var(--accent-green)" />
-                <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-secondary)' }}>관심 청약</span>
+                <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-secondary)' }}>관심 단지</span>
                 <Link href="/apt" style={{ marginLeft: 'auto', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>더보기 →</Link>
               </div>
               {[...favApts].sort((a, b) => {
@@ -157,7 +172,7 @@ export default function PersonalDashboard() {
                 const db = Math.ceil((new Date(b.rcept_endde).getTime() - Date.now()) / 86400000);
                 return da - db;
               }).map(a => (
-                <Link key={a.id} href={`/apt/${a.id}`} style={{
+                <Link key={a.id} href={a.isComplex ? `/apt/complex/${encodeURIComponent(a.house_nm)}` : `/apt/${a.id}`} style={{
                   display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                   padding: '5px 0', textDecoration: 'none', borderBottom: '1px solid var(--border)',
                 }}>
@@ -167,10 +182,10 @@ export default function PersonalDashboard() {
                   <span style={{
                     fontSize: 'var(--fs-xs)', fontWeight: 600, flexShrink: 0, marginLeft: 8,
                     padding: '2px 6px', borderRadius: 4,
-                    background: dDay(a.rcept_endde).includes('D-') && parseInt(dDay(a.rcept_endde).replace('D-', '')) <= 3 ? 'var(--accent-red)' : 'var(--bg-hover)',
-                    color: dDay(a.rcept_endde).includes('D-') && parseInt(dDay(a.rcept_endde).replace('D-', '')) <= 3 ? 'var(--text-inverse)' : 'var(--text-secondary)',
+                    background: a.isComplex ? 'var(--bg-hover)' : dDay(a.rcept_endde).includes('D-') && parseInt(dDay(a.rcept_endde).replace('D-', '')) <= 3 ? 'var(--accent-red)' : 'var(--bg-hover)',
+                    color: a.isComplex ? 'var(--text-secondary)' : dDay(a.rcept_endde).includes('D-') && parseInt(dDay(a.rcept_endde).replace('D-', '')) <= 3 ? 'var(--text-inverse)' : 'var(--text-secondary)',
                   }}>
-                    {dDay(a.rcept_endde)}
+                    {a.isComplex ? a.region_nm : dDay(a.rcept_endde)}
                   </span>
                 </Link>
               ))}
@@ -182,7 +197,7 @@ export default function PersonalDashboard() {
             <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 'var(--card-p)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
                 <Building2 size={14} color="var(--accent-green)" />
-                <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-secondary)' }}>관심 청약</span>
+                <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-secondary)' }}>관심 단지</span>
               </div>
               <Link href="/apt" style={{ display: 'block', textAlign: 'center', padding: '12px 8px', fontSize: 12, color: 'var(--text-tertiary)', textDecoration: 'none' }}>
                 관심 청약을 등록해보세요 →

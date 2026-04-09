@@ -90,8 +90,18 @@ export default function ProfileTabs({ profileId, posts, isOwner }: Props) {
     const { data: bm } = await sb.from('apt_bookmarks').select('apt_id').eq('user_id', profileId);
     if (bm && bm.length > 0) {
       const ids = bm.map((b: any) => b.apt_id);
-      const { data: apts } = await sb.from('apt_subscriptions').select('id, house_nm, region_nm, rcept_bgnde, rcept_endde, tot_supply_hshld_co').in('id', ids);
-      setWatchApts(apts ?? []);
+      // complex_profiles 우선 → subscriptions 폴백
+      const { data: complexes } = await (sb as any).from('apt_complex_profiles')
+        .select('id, apt_name, region_nm, sigungu').in('id', ids).limit(20);
+      if (complexes?.length) {
+        setWatchApts(complexes.map((c: any) => ({
+          id: c.id, house_nm: c.apt_name, region_nm: `${c.region_nm || ''} ${c.sigungu || ''}`.trim(),
+          rcept_bgnde: null, rcept_endde: null, tot_supply_hshld_co: null,
+        })));
+      } else {
+        const { data: apts } = await sb.from('apt_subscriptions').select('id, house_nm, region_nm, rcept_bgnde, rcept_endde, tot_supply_hshld_co').in('id', ids);
+        setWatchApts(apts ?? []);
+      }
     }
     setWatchAptsLoaded(true);
   };
@@ -274,26 +284,34 @@ export default function ProfileTabs({ profileId, posts, isOwner }: Props) {
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               {watchApts.map((a: any, i: number) => {
+                const isComplex = !a.rcept_bgnde;
                 const today = new Date().toISOString().slice(0, 10);
-                const isOpen = a.rcept_bgnde && a.rcept_endde && today >= a.rcept_bgnde && today <= a.rcept_endde;
-                const isClosed = a.rcept_endde && today > a.rcept_endde;
+                const isOpen = !isComplex && a.rcept_bgnde && a.rcept_endde && today >= a.rcept_bgnde && today <= a.rcept_endde;
+                const isClosed = !isComplex && a.rcept_endde && today > a.rcept_endde;
+                const href = isComplex ? `/apt/complex/${encodeURIComponent(a.house_nm)}` : `/apt/${a.id}`;
                 return (
-                  <Link key={a.id} href={`/apt/${a.id}`} style={{ textDecoration: 'none' }}>
+                  <Link key={a.id} href={href} style={{ textDecoration: 'none' }}>
                     <div style={{ padding: '12px 0', borderBottom: i < watchApts.length - 1 ? '1px solid var(--border)' : 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <div>
                         <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: 'var(--fs-base)' }}>{a.house_nm}</div>
                         <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
-                          {a.region_nm} · {a.tot_supply_hshld_co ? `${Number(a.tot_supply_hshld_co).toLocaleString()}세대` : ''}
+                          {a.region_nm}{a.tot_supply_hshld_co ? ` · ${Number(a.tot_supply_hshld_co).toLocaleString()}세대` : ''}
                         </div>
                       </div>
                       <div style={{ textAlign: 'right' }}>
-                        <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '2px 8px', borderRadius: 'var(--radius-md)', background: isOpen ? 'rgba(52,211,153,0.2)' : isClosed ? 'var(--bg-hover)' : 'rgba(251,191,36,0.15)', color: isOpen ? 'var(--accent-green)' : isClosed ? 'var(--text-tertiary)' : 'var(--accent-yellow)' }}>
-                          {isOpen ? '접수중' : isClosed ? '마감' : '접수예정'}
-                        </span>
-                        {a.rcept_bgnde && (
-                          <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 'var(--sp-xs)' }}>
-                            {a.rcept_bgnde} ~ {a.rcept_endde}
-                          </div>
+                        {isComplex ? (
+                          <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '2px 8px', borderRadius: 'var(--radius-md)', background: 'var(--bg-hover)', color: 'var(--text-secondary)' }}>단지</span>
+                        ) : (
+                          <>
+                            <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '2px 8px', borderRadius: 'var(--radius-md)', background: isOpen ? 'rgba(52,211,153,0.2)' : isClosed ? 'var(--bg-hover)' : 'rgba(251,191,36,0.15)', color: isOpen ? 'var(--accent-green)' : isClosed ? 'var(--text-tertiary)' : 'var(--accent-yellow)' }}>
+                              {isOpen ? '접수중' : isClosed ? '마감' : '접수예정'}
+                            </span>
+                            {a.rcept_bgnde && (
+                              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 'var(--sp-xs)' }}>
+                                {a.rcept_bgnde} ~ {a.rcept_endde}
+                              </div>
+                            )}
+                          </>
                         )}
                       </div>
                     </div>
