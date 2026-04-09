@@ -71,7 +71,6 @@ function MiniDonut({ sub, ongoing, unsold, redev, name, total, size = 34, active
 export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopment, transactions, redevTotalCount, tradeTotalCount, tradeByRegion = {}, redevByRegion = {}, subTotalCount, unsoldTotalCount, ongoingTotalCount, onRegionClick, onTabChange, activeRegion, activeTab }: Props) {
   const router = useRouter();
   const [expRegion, setExpRegion] = useState<string | null>(null);
-  const [showGrid, setShowGrid] = useState(false);
 
   const regions = useMemo(() => {
     const map: Record<string, RegionData> = {};
@@ -123,17 +122,8 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
         })}
       </div>
 
-      {/* ── 지역별 토글 버튼 ── */}
-      <button onClick={() => setShowGrid(!showGrid)} style={{
-        width: '100%', padding: '6px 0', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)',
-        background: 'var(--bg-surface)', cursor: 'pointer', fontSize: 11, color: 'var(--text-secondary)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, marginBottom: 4,
-      }}>
-        🏙️ 지역별 현황 {showGrid ? '접기 ▲' : '펼치기 ▼'}
-      </button>
-
-      {/* ── 지역별 미니 도넛 그리드 (접기식) ── */}
-      {showGrid && <div className="kd-region-grid" style={{
+      {/* ── 지역별 미니 도넛 그리드 (도넛 내부에 지역명+숫자) ── */}
+      <div className="kd-region-grid" style={{
         display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 3,
         background: 'var(--bg-surface)', border: '1px solid var(--border)',
         borderRadius: 'var(--radius-md)', padding: '4px 3px',
@@ -153,10 +143,10 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
             </button>
           );
         })}
-      </div>}
+      </div>
 
       {/* ── 상세 패널 ── */}
-      {showGrid && exp && (
+      {exp && (
         <div style={{
           marginTop: 4, padding: '6px 10px', borderRadius: 'var(--radius-sm)',
           background: 'var(--bg-surface)', border: '1px solid var(--border)',
