@@ -279,7 +279,7 @@ export default async function BlogDetailPage({ params }: Props) {
     // 1순위: 크론으로 미리 계산된 related_slugs (별도 쿼리 — 타입 안전)
     let precomputed: string[] = [];
     try {
-      const { data: relData } = await (sb as any).from('blog_posts').select('related_slugs').eq('id', post.id).single();
+      const { data: relData } = await (sb as any).from('blog_posts').select('related_slugs').eq('id', post.id).maybeSingle();
       precomputed = (relData as any)?.related_slugs || [];
     } catch { /* 컬럼 없을 수 있음 */ }
     if (precomputed.length > 0) {
@@ -319,7 +319,7 @@ export default async function BlogDetailPage({ params }: Props) {
   let seriesInfo: { series: any; posts: Record<string, any>[] } | null = null;
   if (post.series_id) {
     try {
-      const { data: series } = await sb.from('blog_series').select('id,title,slug,description,cover_image,post_count').eq('id', post.series_id).single();
+      const { data: series } = await sb.from('blog_series').select('id,title,slug,description,cover_image,post_count').eq('id', post.series_id).maybeSingle();
       if (series) {
         const { data: seriesPosts } = await sb.from('blog_posts')
           .select('id,title,slug,series_order')

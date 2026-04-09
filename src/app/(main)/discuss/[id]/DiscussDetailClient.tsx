@@ -75,7 +75,7 @@ export default function DiscussDetailClient({ initialTopic, initialComments }: P
         // Revert on failure
         const sb = createSupabaseBrowser();
         const { data: fresh } = await sb.from('discussion_topics')
-          .select('vote_a, vote_b').eq('id', initialTopic.id).single();
+          .select('vote_a, vote_b').eq('id', initialTopic.id).maybeSingle();
         if (fresh) setTopic(t => ({ ...t, vote_a: fresh.vote_a ?? 0, vote_b: fresh.vote_b ?? 0 }));
         setMyVote(prev);
       }

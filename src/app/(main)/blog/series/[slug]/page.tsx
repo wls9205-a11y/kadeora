@@ -19,7 +19,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const { data: s } = await sb().from('blog_series').select('title,description,created_at').eq('slug', slug).single();
+  const { data: s } = await sb().from('blog_series').select('title,description,created_at').eq('slug', slug).maybeSingle();
   if (!s) return { title: '시리즈' };
   return {
     title: `${s.title} — 시리즈`,
@@ -56,7 +56,7 @@ export const revalidate = 3600;
 export default async function SeriesDetailPage({ params }: Props) {
   const { slug } = await params;
   const { data: series } = await sb().from('blog_series')
-    .select('id,title,slug,description,cover_image,category,post_count,is_active').eq('slug', slug).eq('is_active', true).single();
+    .select('id,title,slug,description,cover_image,category,post_count,is_active').eq('slug', slug).eq('is_active', true).maybeSingle();
   if (!series) notFound();
 
   const { data: posts } = await sb().from('blog_posts')

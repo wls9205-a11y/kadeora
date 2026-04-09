@@ -64,7 +64,7 @@ async function fetchBriefing() {
     .eq('market', 'KR')
     .order('briefing_date', { ascending: false })
     .limit(1)
-    .single();
+    .maybeSingle();
   return data ?? null;
 }
 
@@ -76,7 +76,7 @@ async function fetchBriefingUS() {
     .eq('market', 'US')
     .order('briefing_date', { ascending: false })
     .limit(1)
-    .single();
+    .maybeSingle();
   return data ?? null;
 }
 

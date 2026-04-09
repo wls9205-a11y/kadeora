@@ -10,7 +10,7 @@ interface Props { params: Promise<{ id: string }> }
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const sb = await createSupabaseServer();
-  const { data: profile } = await sb.from('profiles').select('nickname').eq('id', id).single();
+  const { data: profile } = await sb.from('profiles').select('nickname').eq('id', id).maybeSingle();
   return {
     title: `${profile?.nickname ?? '프로필'}`,
     robots: { index: false, follow: false },
@@ -36,7 +36,7 @@ export default async function ProfilePage({ params }: Props) {
     followCheck,
     { data: recentComments },
   ] = await Promise.all([
-    sb.from('profiles').select('id,nickname,avatar_url,bio,grade,grade_title,influence_score,points,posts_count,likes_count,followers_count,following_count,streak_days,is_premium,residence_city,residence_district,region_text,age_group,created_at,updated_at,interests').eq('id', id).single(),
+    sb.from('profiles').select('id,nickname,avatar_url,bio,grade,grade_title,influence_score,points,posts_count,likes_count,followers_count,following_count,streak_days,is_premium,residence_city,residence_district,region_text,age_group,created_at,updated_at,interests').eq('id', id).maybeSingle(),
     sb.from('posts').select('id,title,category,created_at,view_count,likes_count,comments_count').eq('author_id', id).eq('is_deleted', false).order('created_at', { ascending: false }).limit(20),
     sb.from('comments').select('*', { count: 'exact', head: true }).eq('author_id', id).eq('is_deleted', false),
     sb.from('follows').select('*', { count: 'exact', head: true }).eq('followee_id', id),

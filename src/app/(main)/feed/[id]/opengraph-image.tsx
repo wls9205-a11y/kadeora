@@ -19,7 +19,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
     .from('posts')
     .select('title,category,likes_count,profiles!posts_author_id_fkey(nickname)')
     .eq('id', id)
-    .single();
+    .maybeSingle();
 
   const title = post?.title ?? '카더라';
   const nickname = ((post?.profiles as unknown) as { nickname: string } | null)?.nickname ?? '익명';

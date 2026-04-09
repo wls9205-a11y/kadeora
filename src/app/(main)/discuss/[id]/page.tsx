@@ -67,7 +67,7 @@ export default async function DiscussDetailPage({ params }: Props) {
   const [topicR, commentsR] = await Promise.all([
     sb.from('discussion_topics')
       .select('id, title, description, category, topic_type, option_a, option_b, vote_a, vote_b, comment_count, view_count, is_hot, created_at')
-      .eq('id', topicId).single(),
+      .eq('id', topicId).maybeSingle(),
     sb.from('discussion_comments')
       .select('id, content, created_at, likes, profiles!discussion_comments_author_id_fkey(nickname, grade)')
       .eq('topic_id', topicId)

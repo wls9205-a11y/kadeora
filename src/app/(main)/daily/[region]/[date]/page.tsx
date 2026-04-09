@@ -62,7 +62,7 @@ export default async function DailyReportDatePage({ params }: Props) {
     .select('data, issue_no')
     .eq('region', region)
     .eq('report_date', dateStr)
-    .single();
+    .maybeSingle();
 
   if (!snapshot?.data) return notFound();
 
@@ -73,7 +73,7 @@ export default async function DailyReportDatePage({ params }: Props) {
     .lt('report_date', dateStr)
     .order('report_date', { ascending: false })
     .limit(1)
-    .single();
+    .maybeSingle();
 
   const { data: nextRow } = await (sb as any).from('daily_reports')
     .select('report_date')
@@ -81,7 +81,7 @@ export default async function DailyReportDatePage({ params }: Props) {
     .gt('report_date', dateStr)
     .order('report_date', { ascending: true })
     .limit(1)
-    .single();
+    .maybeSingle();
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px 40px' }}>
