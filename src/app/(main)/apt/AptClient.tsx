@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
+import { trackTab } from '@/lib/analytics';
 import SearchInput from '@/components/SearchInput';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import AptCommentSheet from '@/components/AptCommentSheet';
@@ -70,6 +71,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
   const handleTabChange = (tab: 'sub' | 'ongoing' | 'unsold' | 'redev' | 'trade') => {
     setActiveTab(tab);
     haptic('light');
+    trackTab(tab, 'apt');
     const url = tab === 'sub' ? '/apt' : `/apt?tab=${tab}`;
     router.replace(url, { scroll: false });
     window.scrollTo({ top: 0, behavior: 'smooth' });

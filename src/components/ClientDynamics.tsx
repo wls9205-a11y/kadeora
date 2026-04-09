@@ -7,3 +7,4 @@ export const InstallBanner = dynamic(() => import('@/components/InstallBanner'),
 export const PWAInstallTracker = dynamic(() => import('@/components/PWAInstallTracker'), { ssr: false });
 export const NoticeBanner = dynamic(() => import('@/components/NoticeBanner'), { ssr: false });
 export const PageViewTracker = dynamic(() => import('@/components/PageViewTracker'), { ssr: false });
+export const BehaviorTracker = dynamic(() => import('@/components/BehaviorTracker'), { ssr: false });

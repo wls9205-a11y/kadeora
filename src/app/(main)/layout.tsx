@@ -8,7 +8,7 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 import StickyBar from '@/components/StickyBar';
 import TopBarCTA from '@/components/TopBarCTA';
 import ScrollToastCTA from '@/components/ScrollToastCTA';
-import { Sidebar, RightPanel, InstallBanner, PWAInstallTracker, NoticeBanner, PageViewTracker } from '@/components/ClientDynamics';
+import { Sidebar, RightPanel, InstallBanner, PWAInstallTracker, NoticeBanner, PageViewTracker, BehaviorTracker } from '@/components/ClientDynamics';
 import TopLoadingBar from '@/components/TopLoadingBar';
 import ScrollToTop from '@/components/ScrollToTop';
 import { AuthProvider } from '@/components/AuthProvider';
@@ -64,6 +64,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
       <StickyBar />
       <ScrollToastCTA />
       <PageViewTracker />
+      <BehaviorTracker />
       <WelcomeReward />
       <ScrollToTop />
       <SmartPushPrompt />
