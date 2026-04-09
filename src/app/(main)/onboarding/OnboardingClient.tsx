@@ -45,6 +45,8 @@ export default function OnboardingClient() {
         updated_at: new Date().toISOString(),
       }).eq('id', user.id);
       trackConversion('cta_complete', 'onboarding_interests', { category: selected.join(',') });
+      // 첫 미션: 관심사 설정 자동 완료
+      fetch('/api/profile/mission', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mission: 'interest' }) }).catch(() => {});
     } catch {}
     
     // Android/Desktop: 바로 push 시도 (거부해도 OK — SmartPushPrompt가 나중에 재시도)

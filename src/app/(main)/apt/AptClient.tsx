@@ -118,6 +118,8 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
         await sb.from('apt_watchlist').insert({ user_id: aptUser.id, item_type: itemType, item_id: itemId, notify_enabled: true });
         showToast('⭐ 관심단지 등록! 새 소식이 있으면 알림을 보내드립니다');
         trackFeature('watchlist_add', { item_type: itemType, item_id: itemId });
+        // 첫 미션: 관심단지 추가 자동 완료
+        fetch('/api/profile/mission', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mission: 'watchlist' }) }).catch(() => {});
       }
       haptic('medium');
       const { data: wl } = await sb.from('apt_watchlist').select('item_type, item_id').eq('user_id', aptUser.id);
