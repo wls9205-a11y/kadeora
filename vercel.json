@@ -434,6 +434,14 @@
     {
       "path": "/api/cron/daily-seed-activity",
       "schedule": "30 4 * * *"
+    },
+    {
+      "path": "/api/cron/check-price-alerts",
+      "schedule": "0 */2 * * *"
+    },
+    {
+      "path": "/api/cron/push-daily-reminder",
+      "schedule": "0 23 * * *"
     }
   ]
 }
