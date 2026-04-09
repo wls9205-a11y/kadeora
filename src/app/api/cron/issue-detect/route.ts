@@ -4,7 +4,6 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronAuth } from '@/lib/cron-auth';
 import { scoreIssue, extractKeywords, detectIssueType, keywordWeight } from '@/lib/issue-scoring';
 import type { IssueCandidate } from '@/lib/issue-scoring';
-import type { IssueCandidate } from '@/lib/issue-scoring';
 
 /**
  * issue-detect 크론 — 부동산+주식 이슈 실시간 탐지
