@@ -97,6 +97,7 @@ const CRON_GROUPS = {
     '/api/cron/seo-score-refresh',
     '/api/cron/feed-buzz-publish',
     '/api/cron/daily-seed-activity',
+    '/api/cron/aggregate-user-events',
     // 누락됐던 블로그 크론 19개
     '/api/cron/blog-builder-analysis',
     '/api/cron/blog-calculator-guide',

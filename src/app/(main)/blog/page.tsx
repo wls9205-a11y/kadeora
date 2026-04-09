@@ -17,6 +17,7 @@ function highlightTitle(title: string, query: string): React.ReactNode {
   );
 }
 
+export const maxDuration = 60;
 export const revalidate = 300;
 
 import { SITE_URL as SITE } from '@/lib/constants';
