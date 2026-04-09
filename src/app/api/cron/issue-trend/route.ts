@@ -55,33 +55,6 @@ async function handler(_req: NextRequest) {
 
   if (!NAVER_CLIENT_ID) {
   
-  // v2: Google Trends RSS 교차 검증
-  let googleTrendingKeywords: string[] = [];
-  try {
-    const gRes = await fetch('https://trends.google.co.kr/trending/rss?geo=KR', { signal: AbortSignal.timeout(8000) });
-    if (gRes.ok) {
-      const gXml = await gRes.text();
-      const titleRegex = /<title>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/title>/g;
-      let gm;
-      while ((gm = titleRegex.exec(gXml)) !== null) {
-        const t = gm[1].trim();
-        if (t && !t.includes('Google') && !t.includes('트렌드')) googleTrendingKeywords.push(t);
-      }
-    }
-  } catch {}
-
-  // Google 급상승과 네이버 스파이크 교차 체크
-  for (const spike of spikeKeywords) {
-    const isGoogleToo = googleTrendingKeywords.some(gt =>
-      gt.includes(spike.keyword) || spike.keyword.includes(gt) ||
-      spike.group.split('').some(ch => gt.includes(ch))
-    );
-    if (isGoogleToo) {
-      spike.ratio = Math.min(spike.ratio * 1.5, 999);
-      (spike as any).portal_cross = true;
-    }
-  }
-
 
   return NextResponse.json({ error: 'NAVER_CLIENT_ID not set', checked: 0 });
   }
@@ -128,6 +101,34 @@ async function handler(_req: NextRequest) {
           }
         }
       } catch {}
+    }
+  }
+
+
+  // v2: Google Trends RSS 교차 검증
+  let googleTrendingKeywords: string[] = [];
+  try {
+    const gRes = await fetch('https://trends.google.co.kr/trending/rss?geo=KR', { signal: AbortSignal.timeout(8000) });
+    if (gRes.ok) {
+      const gXml = await gRes.text();
+      const titleRegex = /<title>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/title>/g;
+      let gm;
+      while ((gm = titleRegex.exec(gXml)) !== null) {
+        const t = gm[1].trim();
+        if (t && !t.includes('Google') && !t.includes('트렌드')) googleTrendingKeywords.push(t);
+      }
+    }
+  } catch {}
+
+  // Google 급상승과 네이버 스파이크 교차 체크
+  for (const spike of spikeKeywords) {
+    const isGoogleToo = googleTrendingKeywords.some(gt =>
+      gt.includes(spike.keyword) || spike.keyword.includes(gt) ||
+      spike.group.split('').some(ch => gt.includes(ch))
+    );
+    if (isGoogleToo) {
+      spike.ratio = Math.min(spike.ratio * 1.5, 999);
+      (spike as any).portal_cross = true;
     }
   }
 
