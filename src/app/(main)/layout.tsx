@@ -14,6 +14,7 @@ import ScrollToTop from '@/components/ScrollToTop';
 import { AuthProvider } from '@/components/AuthProvider';
 import WelcomeReward from '@/components/WelcomeReward';
 import GlobalMissionBar from '@/components/GlobalMissionBar';
+import SmartPushPrompt from '@/components/SmartPushPrompt';
 
 export const metadata: Metadata = {
   title: { template: '%s | 카더라', default: '카더라 — 대한민국 소리소문 정보 커뮤니티' },
@@ -65,6 +66,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
       <PageViewTracker />
       <WelcomeReward />
       <ScrollToTop />
+      <SmartPushPrompt />
       <footer className="hidden md:block" style={{
         maxWidth: 1200, margin: '0 auto', padding: '0 24px 40px',
       }}>
