@@ -16,24 +16,31 @@ export default function ScrollToastCTA() {
   useEffect(() => {
     if (loading || userId) return;
     if (sessionStorage.getItem('kd_toast_dismissed')) return;
+    // StickyBar가 아직 표시 중이면 ScrollToast 안 띄움 (같은 위치 겹침 방지)
+    if (!sessionStorage.getItem('kd_sticky_dismissed')) return;
 
     let triggered = false;
-    const onScroll = () => {
+    const trigger = () => {
       if (triggered) return;
-      const scrollPct = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
-      if (scrollPct > 0.35) {
-        triggered = true;
-        setShow(true);
-        if (!tracked.current) {
-          tracked.current = true;
-          trackConversion('cta_view', 'scroll_toast', { pagePath: pathname });
-        }
-        // 5초 후 미니로 축소
-        setTimeout(() => setMini(true), 5000);
+      triggered = true;
+      setShow(true);
+      if (!tracked.current) {
+        tracked.current = true;
+        trackConversion('cta_view', 'scroll_toast', { pagePath: pathname });
       }
+      setTimeout(() => setMini(true), 5000);
     };
+
+    // 트리거 1: 스크롤 35%
+    const onScroll = () => {
+      const scrollPct = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
+      if (scrollPct > 0.35) trigger();
+    };
+    // 트리거 2: 12초 체류 (스크롤 없어도)
+    const timer = setTimeout(trigger, 12000);
+
     window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    return () => { window.removeEventListener('scroll', onScroll); clearTimeout(timer); };
   }, [pathname, userId, loading]);
 
   if (!show || dismissed || loading || userId) return null;
