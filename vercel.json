@@ -405,7 +405,7 @@
     },
     {
       "path": "/api/cron/blog-loan-guide",
-      "schedule": "0 6 * * *"
+      "schedule": "5 6 * * *"
     },
     {
       "path": "/api/cron/blog-subscription-monthly",
