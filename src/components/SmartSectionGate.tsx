@@ -93,8 +93,8 @@ export default function SmartSectionGate({ htmlContent, slug, category }: Props)
   const vp = VALUE_PROPS[category === 'unsold' ? 'apt' : category || ''] || VALUE_PROPS.default;
   const loginUrl = `/login?redirect=${encodeURIComponent(pathname)}&source=content_gate`;
 
-  // 게이트 노출 추적
-  trackCTA('view', 'content_gate', { category });
+  // 게이트 노출 추적 (1회만)
+  useEffect(() => { trackCTA('view', 'content_gate', { category }); }, [category]);
 
   return (
     <>

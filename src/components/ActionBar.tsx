@@ -55,10 +55,16 @@ export default function ActionBar() {
   const { userId, loading } = useAuth();
   const pathname = usePathname();
 
+  // 페이지 변경 시 리셋 (다른 페이지에서는 다시 보여주기)
+  useEffect(() => {
+    setVisible(false);
+    setDismissed(false);
+    setShowSheet(false);
+  }, [pathname]);
+
   useEffect(() => {
     if (loading || userId) return;
     if (EXCLUDED.includes(pathname)) return;
-    if (sessionStorage.getItem('kd_action_dismissed')) { setDismissed(true); return; }
     const timer = setTimeout(() => {
       setVisible(true);
       const cfg = getAction(pathname);
@@ -66,8 +72,6 @@ export default function ActionBar() {
     }, 3000);
     return () => clearTimeout(timer);
   }, [pathname, userId, loading]);
-
-  useEffect(() => { setShowSheet(false); }, [pathname]);
 
   if (!visible || dismissed || loading || userId) return null;
   const cfg = getAction(pathname);
@@ -98,7 +102,7 @@ export default function ActionBar() {
           }}>
           {cfg.text}
         </button>
-        <button onClick={() => { setDismissed(true); sessionStorage.setItem('kd_action_dismissed', '1'); }}
+        <button onClick={() => setDismissed(true)}
           style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.2)', fontSize: 16, cursor: 'pointer', padding: 4 }}
           aria-label="닫기">×</button>
       </div>

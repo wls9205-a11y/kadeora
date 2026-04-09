@@ -34,7 +34,7 @@ export default function AdBanner() {
 
   useEffect(() => {
     if (ads.length <= 1) return;
-    const id = setInterval(next, 4500);
+    const id = setInterval(next, 8000);
     return () => clearInterval(id);
   }, [ads.length, next]);
 

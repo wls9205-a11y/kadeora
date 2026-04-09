@@ -116,7 +116,7 @@ export default function SmartPushPrompt() {
 
   const cardStyle: React.CSSProperties = {
     position: 'fixed', bottom: 80, left: '50%', transform: 'translateX(-50%)',
-    width: 'calc(100% - 32px)', maxWidth: 400, zIndex: 9999,
+    width: 'calc(100% - 32px)', maxWidth: 400, zIndex: 90,
     background: 'var(--bg-surface)', border: '1px solid var(--border)',
     borderRadius: 16, padding: '16px 18px',
     boxShadow: '0 8px 32px rgba(0,0,0,0.15)',

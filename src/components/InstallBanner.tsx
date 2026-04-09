@@ -1,8 +1,10 @@
 'use client';
 import { isTossMode } from '@/lib/toss-mode';
 import { useState, useEffect } from 'react';
+import { useAuth } from '@/components/AuthProvider';
 
 export default function InstallBanner() {
+  const { userId, loading: authLoading } = useAuth();
   const [show, setShow] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
@@ -10,6 +12,7 @@ export default function InstallBanner() {
 
   useEffect(() => {
     if (isTossMode()) return; // 토스 미니앱에서 숨김
+    if (!userId || authLoading) return; // 비로그인 시 ActionBar와 겹침 방지
     if (typeof window === 'undefined') return;
     if (window.matchMedia('(display-mode: standalone)').matches) return;
     const dismissed = localStorage.getItem('kd_install_dismissed');
@@ -45,7 +48,7 @@ export default function InstallBanner() {
       window.addEventListener('beforeinstallprompt', handler);
       if (ios) setTimeout(() => setShow(true), 4000);
     }
-  }, []);
+  }, [userId, authLoading]);
 
   const hap = (s: 'light' | 'medium' | 'heavy' = 'light') => { try { if ('vibrate' in navigator) navigator.vibrate(s === 'heavy' ? [15, 5, 15] : s === 'medium' ? 12 : 6); } catch {} };
 
