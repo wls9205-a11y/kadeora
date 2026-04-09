@@ -1,163 +1,177 @@
 'use client';
-import { timeAgo as ago } from '@/lib/format';
 import { useState, useEffect, useCallback } from 'react';
 
-const GRADE_LABEL: Record<number, string> = { 1: '새싹', 2: '묘목', 3: '가지', 4: '나무', 5: '숲', 6: '산', 7: '하늘', 8: '별', 9: '은하', 10: '우주' };
-const GRADE_COLOR: Record<number, string> = { 1: '#6B7280', 2: '#10B981', 3: '#3B82F6', 4: '#8B5CF6', 5: '#F59E0B', 6: '#EF4444', 7: '#EC4899', 8: '#F97316', 9: '#06B6D4', 10: '#FFD700' };
+const ago = (d: string) => { const s = Math.floor((Date.now() - new Date(d).getTime()) / 1000); return s < 60 ? '방금' : s < 3600 ? Math.floor(s / 60) + '분' : s < 86400 ? Math.floor(s / 3600) + '시' : Math.floor(s / 86400) + '일'; };
+const fmt = (d: string) => d ? new Date(d).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' }) : '—';
 
+const Badge = ({ ok, label }: { ok: boolean; label: string }) => (
+  <span style={{ fontSize: 9, padding: '2px 6px', borderRadius: 8, fontWeight: 600, background: ok ? 'rgba(16,185,129,0.12)' : 'rgba(255,255,255,0.04)', color: ok ? '#10B981' : 'rgba(255,255,255,0.2)' }}>{ok ? '✓' : '✗'} {label}</span>
+);
+
+const Stat = ({ icon, val, label, warn }: { icon: string; val: number | string; label: string; warn?: boolean }) => (
+  <div style={{ textAlign: 'center', minWidth: 36 }}>
+    <div style={{ fontSize: 10 }}>{icon}</div>
+    <div style={{ fontSize: 13, fontWeight: 800, color: warn && val === 0 ? 'rgba(255,255,255,0.15)' : '#E2E8F0', lineHeight: 1 }}>{val}</div>
+    <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.25)', marginTop: 1 }}>{label}</div>
+  </div>
+);
+
+const providerIcon: Record<string, string> = { kakao: '💬', google: '🔵', naver: '🟢', apple: '🍎', email: '📧' };
+const gradeLabel: Record<number, { name: string; color: string }> = {
+  1: { name: '새싹', color: '#10B981' }, 2: { name: '묘목', color: '#34D399' }, 3: { name: '나무', color: '#06B6D4' },
+  4: { name: '숲', color: '#3B82F6' }, 5: { name: '산', color: '#8B5CF6' }, 6: { name: '달', color: '#F59E0B' },
+  7: { name: '별', color: '#EC4899' }, 8: { name: 'VIP', color: '#EF4444' },
+};
 
 export default function UsersTab({ onNavigate }: { onNavigate: (t: any) => void }) {
-  const [data, setData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [selectedUser, setSelectedUser] = useState<any>(null);
-
+  const [d, setD] = useState<any>(null);
+  const [ld, setLd] = useState(true);
   const load = useCallback(() => {
-    fetch('/api/admin/v2?tab=users').then(r => r.json()).then(d => { setData(d); setLoading(false); }).catch(() => setLoading(false));
+    fetch('/api/admin/v2?tab=users').then(r => r.json()).then(v => { setD(v); setLd(false); }).catch(() => setLd(false));
   }, []);
   useEffect(() => { load(); }, [load]);
 
-  if (loading || !data) return <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-secondary)' }}>로딩 중...</div>;
+  if (ld) return <div style={{ textAlign: 'center', padding: 80, color: 'rgba(255,255,255,0.3)', fontSize: 13 }}>불러오는 중...</div>;
+  if (!d) return <div style={{ textAlign: 'center', padding: 80 }}>⚠️ 로드 실패</div>;
 
-  const { users, lifecycle, interests, engagement } = data;
-  const totalProviders = Object.values(lifecycle.providers || {}).reduce((s: number, v: any) => s + v, 0) as number;
+  const { users = [], lifecycle: lc = {} as any, interests: ints = [], engagement: eng = {} as any } = d;
+  const realUsers = users.filter((u: any) => !u.is_seed);
 
   return (
-    <div>
-      {/* 라이프사이클 퍼널 */}
-      <div className="adm-sec">👤 사용자 라이프사이클</div>
-      <div className="adm-card">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+
+      {/* ═══ 요약 KPI ═══ */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 4 }}>
         {[
-          { label: '가입', value: lifecycle.total, pct: 100, color: 'var(--brand)' },
-          { label: '온보딩', value: lifecycle.onboarded, pct: lifecycle.total > 0 ? (lifecycle.onboarded / lifecycle.total) * 100 : 0, color: '#8B5CF6' },
-          { label: '프로필', value: lifecycle.profileCompleted, pct: lifecycle.total > 0 ? (lifecycle.profileCompleted / lifecycle.total) * 100 : 0, color: '#F59E0B' },
-          { label: '재방문', value: lifecycle.returning, pct: lifecycle.total > 0 ? (lifecycle.returning / lifecycle.total) * 100 : 0, color: lifecycle.returning > 0 ? '#10B981' : '#EF4444' },
-        ].map((s, i) => (
-          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-            <span style={{ minWidth: 50, fontSize: 12, color: 'var(--text-secondary)' }}>{s.label}</span>
-            <div style={{ flex: 1, height: 16, background: 'var(--bg-hover)', borderRadius: 4, overflow: 'hidden' }}>
-              <div style={{ height: '100%', width: `${Math.max(s.pct, 1)}%`, background: s.color, borderRadius: 4 }} />
-            </div>
-            <span style={{ minWidth: 55, textAlign: 'right', fontSize: 12, fontWeight: 600 }}>
-              {s.value}명 <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>({Math.round(s.pct)}%)</span>
-            </span>
-          </div>
-        ))}
-        {lifecycle.returning === 0 && (
-          <div style={{ fontSize: 11, color: '#EF4444', marginTop: 6, textAlign: 'center' }}>
-            ⚠️ 전원 가입 후 재방문 없음
-          </div>
-        )}
-      </div>
-
-      {/* 가입 경로 + 지역 + 등급 */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, margin: '10px 0' }}>
-        {/* 가입 경로 */}
-        <div className="adm-kpi-c">
-          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>가입 경로</div>
-          {Object.entries(lifecycle.providers || {}).sort((a: any, b: any) => b[1] - a[1]).map(([k, v]: [string, any]) => (
-            <div key={k} style={{ marginBottom: 3 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10 }}>
-                <span style={{ color: 'var(--text-secondary)' }}>{k || '?'}</span>
-                <span style={{ fontWeight: 600 }}>{Math.round((v / totalProviders) * 100)}%</span>
-              </div>
-              <div style={{ height: 3, background: 'var(--bg-hover)', borderRadius: 2 }}>
-                <div style={{ height: '100%', width: `${(v / totalProviders) * 100}%`, background: k === 'kakao' ? '#FEE500' : k === 'google' ? '#4285F4' : 'var(--brand)', borderRadius: 2 }} />
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* 지역 분포 */}
-        <div className="adm-kpi-c">
-          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>지역</div>
-          {(lifecycle.cities || []).slice(0, 5).map(([city, cnt]: [string, number]) => (
-            <div key={city} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, padding: '1px 0' }}>
-              <span style={{ color: 'var(--text-secondary)' }}>{city}</span>
-              <span style={{ fontWeight: 600 }}>{cnt}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* 등급 분포 */}
-        <div className="adm-kpi-c">
-          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>등급</div>
-          {(lifecycle.grades || []).map((g: any) => (
-            <div key={g.grade} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '1px 0' }}>
-              <span style={{ width: 8, height: 8, borderRadius: '50%', background: GRADE_COLOR[g.grade] || '#666', display: 'inline-block' }} />
-              <span style={{ flex: 1, fontSize: 10, color: 'var(--text-secondary)' }}>Lv{g.grade} {GRADE_LABEL[g.grade] || ''}</span>
-              <span style={{ fontSize: 10, fontWeight: 600 }}>{g.count}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* 관심단지 등록 현황 */}
-      <div className="adm-sec">🏢 관심단지 등록 현황</div>
-      <div className="adm-card">
-        {(interests || []).length === 0 ? (
-          <div style={{ textAlign: 'center', padding: 16, fontSize: 12, color: 'var(--text-tertiary)' }}>등록 없음</div>
-        ) : (
-          (interests || []).map((i: any, idx: number) => (
-            <div key={idx} style={{ padding: '8px 0', borderBottom: idx < interests.length - 1 ? '1px solid var(--border)' : 'none' }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{i.siteName}</div>
-              <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>
-                {i.siteRegion} · {i.is_member ? '회원' : '비회원'} · {ago(i.created_at)}
-              </div>
-            </div>
-          ))
-        )}
-      </div>
-
-      {/* 참여 지표 */}
-      <div className="adm-sec">💎 사용자 참여</div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, margin: '10px 0' }}>
-        {[
-          { icon: '📌', label: '북마크', value: engagement.bookmarks, sub: `${engagement.bookmarkUsers}명` },
-          { icon: '📈', label: '주식워치', value: engagement.stockWatch, sub: engagement.stockWatch === 0 ? '미사용' : '' },
-          { icon: '🔍', label: '검색', value: engagement.searches },
-          { icon: '🔗', label: '공유', value: engagement.shares },
-          { icon: '📲', label: 'PWA', value: engagement.pwaInstalls },
-        ].map((e, i) => (
-          <div key={i} className="adm-kpi-c" style={{ padding: 10, textAlign: 'center' }}>
-            <div style={{ fontSize: 18, fontWeight: 700, color: e.value === 0 ? 'var(--text-tertiary)' : 'var(--text-primary)' }}>{e.value}</div>
-            <div style={{ fontSize: 10, color: 'var(--text-secondary)' }}>{e.icon} {e.label}</div>
-            {e.sub && <div style={{ fontSize: 9, color: e.value === 0 ? '#EF4444' : 'var(--text-tertiary)' }}>{e.sub}</div>}
+          { l: '전체', v: lc.total || realUsers.length, c: '#3B7BF6' },
+          { l: '온보딩', v: lc.onboarded || 0, c: '#10B981' },
+          { l: '프로필', v: lc.profileCompleted || 0, c: '#8B5CF6' },
+          { l: '재방문', v: lc.returning || 0, c: '#06B6D4' },
+        ].map(k => (
+          <div key={k.l} style={{ textAlign: 'center', background: 'rgba(12,21,40,0.65)', border: '1px solid rgba(255,255,255,0.04)', borderRadius: 8, padding: '8px 0' }}>
+            <div style={{ fontSize: 18, fontWeight: 900, color: k.c, lineHeight: 1 }}>{k.v}</div>
+            <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', marginTop: 3 }}>{k.l}</div>
           </div>
         ))}
       </div>
 
-      {/* 실유저 타임라인 */}
-      <div className="adm-sec">📋 실유저 ({lifecycle.total}명)</div>
-      <div className="adm-card" style={{ padding: '4px 14px', maxHeight: 400, overflowY: 'auto' }}>
-        {(users || []).map((u: any, i: number) => (
-          <div key={i}
-            onClick={() => setSelectedUser(selectedUser?.id === u.id ? null : u)}
-            style={{ padding: '8px 0', borderBottom: '1px solid var(--border)', cursor: 'pointer' }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}>
-              <span style={{ width: 8, height: 8, borderRadius: '50%', background: GRADE_COLOR[u.grade] || '#666' }} />
-              <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{u.nickname || '(없음)'}</span>
-              <span style={{ fontSize: 9, color: 'var(--text-tertiary)', background: 'var(--bg-hover)', padding: '1px 5px', borderRadius: 4 }}>{u.provider}</span>
-              {u.residence_city && <span style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>{u.residence_city}</span>}
-              <span style={{ flex: 1 }} />
-              <span style={{ fontSize: 10, color: u.last_active_at ? '#10B981' : '#EF4444' }}>
-                {u.last_active_at ? '활성' : '이탈'}
-              </span>
+      {/* ═══ 가입경로 + 지역 ═══ */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4 }}>
+        <div style={{ background: 'rgba(12,21,40,0.65)', border: '1px solid rgba(255,255,255,0.04)', borderRadius: 8, padding: '8px 10px' }}>
+          <div style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.3)', marginBottom: 4 }}>가입경로</div>
+          {Object.entries(lc.providers || {}).sort((a: any, b: any) => b[1] - a[1]).map(([p, c]: any) => (
+            <div key={p} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, padding: '1px 0' }}>
+              <span style={{ color: 'rgba(255,255,255,0.4)' }}>{providerIcon[p] || '🔑'} {p}</span>
+              <span style={{ fontWeight: 700, color: '#E2E8F0' }}>{c}</span>
+            </div>
+          ))}
+        </div>
+        <div style={{ background: 'rgba(12,21,40,0.65)', border: '1px solid rgba(255,255,255,0.04)', borderRadius: 8, padding: '8px 10px' }}>
+          <div style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.3)', marginBottom: 4 }}>지역</div>
+          {(lc.cities || []).slice(0, 5).map(([city, cnt]: any) => (
+            <div key={city} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, padding: '1px 0' }}>
+              <span style={{ color: 'rgba(255,255,255,0.4)' }}>{city}</span>
+              <span style={{ fontWeight: 700, color: '#E2E8F0' }}>{cnt}</span>
+            </div>
+          ))}
+          {(lc.cities || []).length === 0 && <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.15)' }}>미설정</div>}
+        </div>
+      </div>
+
+      {/* ═══ 참여 지표 ═══ */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 4 }}>
+        {[
+          { l: '북마크', v: eng.bookmarks, i: '📌' },
+          { l: '관심종목', v: eng.stockWatch, i: '⭐' },
+          { l: '검색', v: eng.searches, i: '🔍' },
+          { l: '공유', v: eng.shares, i: '📤' },
+          { l: 'PWA설치', v: eng.pwaInstalls, i: '📱' },
+          { l: '이메일구독', v: eng.emailSubs || 0, i: '📧' },
+        ].map(k => (
+          <div key={k.l} style={{ textAlign: 'center', background: 'rgba(12,21,40,0.65)', border: '1px solid rgba(255,255,255,0.04)', borderRadius: 6, padding: '5px 0' }}>
+            <div style={{ fontSize: 11 }}>{k.i}</div>
+            <div style={{ fontSize: 14, fontWeight: 800, color: (k.v || 0) > 0 ? '#10B981' : 'rgba(255,255,255,0.12)' }}>{k.v || 0}</div>
+            <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.2)' }}>{k.l}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* ═══ 유저 카드 — 전체 펼침 ═══ */}
+      <div style={{ fontSize: 11, fontWeight: 800, color: '#E2E8F0', display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
+        <span>👤</span> 실 유저 ({realUsers.length}명) — 최근 가입순
+      </div>
+
+      {realUsers.map((u: any) => {
+        const g = gradeLabel[u.grade || 1] || gradeLabel[1];
+        const daysSinceJoin = Math.floor((Date.now() - new Date(u.created_at).getTime()) / 86400000);
+        const isActive = u.last_active_at && daysSinceJoin <= 7;
+
+        return (
+          <div key={u.id} style={{
+            background: 'rgba(12,21,40,0.65)', border: `1px solid ${isActive ? 'rgba(16,185,129,0.15)' : 'rgba(255,255,255,0.04)'}`,
+            borderRadius: 10, padding: '10px 12px',
+          }}>
+            {/* 헤더 */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: isActive ? '#10B981' : 'rgba(255,255,255,0.1)', flexShrink: 0, boxShadow: isActive ? '0 0 6px rgba(16,185,129,0.4)' : 'none' }} />
+              <span style={{ fontSize: 13, fontWeight: 700, color: '#E2E8F0' }}>{u.nickname}</span>
+              <span style={{ fontSize: 9, color: g.color, fontWeight: 600, background: `${g.color}15`, padding: '1px 6px', borderRadius: 8 }}>{g.name}</span>
+              <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)' }}>{providerIcon[u.provider] || '🔑'}</span>
+              <div style={{ flex: 1 }} />
+              <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.2)' }}>{fmt(u.created_at)}</span>
+              {u.last_active_at && <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.15)' }}>→{ago(u.last_active_at)}</span>}
             </div>
 
-            {/* 유저 상세 드릴다운 */}
-            {selectedUser?.id === u.id && (
-              <div style={{ marginTop: 8, padding: 10, background: 'var(--bg-hover)', borderRadius: 8, fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.8 }}>
-                <div>가입: {new Date(u.created_at).toLocaleDateString('ko-KR')}</div>
-                <div>등급: Lv{u.grade} {GRADE_LABEL[u.grade] || ''} · 포인트: {u.points || 0}P</div>
-                <div>온보딩: {u.onboarded ? '✅' : '❌'} · 프로필: {u.profile_completed ? '✅' : '❌'}</div>
-                <div>마지막 활동: {u.last_active_at ? ago(u.last_active_at) : '없음'}</div>
-                <div>가입 후: {Math.floor((Date.now() - new Date(u.created_at).getTime()) / 86400000)}일 경과</div>
+            {/* 상태 뱃지 */}
+            <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 6 }}>
+              <Badge ok={u.onboarded} label="온보딩" />
+              <Badge ok={u.profile_completed} label="프로필" />
+              {u.residence_city && <span style={{ fontSize: 9, padding: '2px 6px', borderRadius: 8, background: 'rgba(59,123,246,0.1)', color: '#3B7BF6' }}>📍 {u.residence_city}</span>}
+              {u.signup_source && <span style={{ fontSize: 9, padding: '2px 6px', borderRadius: 8, background: 'rgba(139,92,246,0.1)', color: '#8B5CF6' }}>🔗 {u.signup_source}</span>}
+            </div>
+
+            {/* 활동 지표 */}
+            <div style={{ display: 'flex', justifyContent: 'space-around', padding: '4px 0', borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+              <Stat icon="📝" val={u.posts_count || 0} label="글" warn />
+              <Stat icon="💬" val={u.comments_count || 0} label="댓글" warn />
+              <Stat icon="⭐" val={u.watchlist_count || 0} label="종목" warn />
+              <Stat icon="🏠" val={u.apt_bm_count || 0} label="단지" warn />
+              <Stat icon="📌" val={u.blog_bm_count || 0} label="저장" warn />
+              <Stat icon="📅" val={u.attendance_count || 0} label="출석" warn />
+              <Stat icon="💰" val={u.points || 0} label="P" />
+            </div>
+
+            {/* 관심사 */}
+            {u.interests && u.interests.length > 0 && (
+              <div style={{ display: 'flex', gap: 3, marginTop: 4 }}>
+                {(u.interests as string[]).map((i: string) => (
+                  <span key={i} style={{ fontSize: 8, padding: '1px 5px', borderRadius: 6, background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.25)' }}>{i}</span>
+                ))}
               </div>
             )}
           </div>
+        );
+      })}
+
+      {/* ═══ 관심 등록 ═══ */}
+      {ints.length > 0 && <>
+        <div style={{ fontSize: 11, fontWeight: 800, color: '#E2E8F0', display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
+          <span>❤️</span> 관심 등록 ({ints.length})
+        </div>
+        {ints.map((i: any, idx: number) => (
+          <div key={idx} style={{ background: 'rgba(12,21,40,0.65)', border: '1px solid rgba(255,255,255,0.04)', borderRadius: 8, padding: '6px 10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 11 }}>
+            <div>
+              <span style={{ color: '#E2E8F0', fontWeight: 600 }}>{i.siteName}</span>
+              <span style={{ color: 'rgba(255,255,255,0.2)', marginLeft: 6 }}>{i.siteRegion}</span>
+            </div>
+            <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+              <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 9 }}>{i.guest_name || '회원'}</span>
+              {i.notification_enabled && <span style={{ fontSize: 9, color: '#10B981' }}>🔔</span>}
+              <span style={{ color: 'rgba(255,255,255,0.15)', fontSize: 9 }}>{ago(i.created_at)}</span>
+            </div>
+          </div>
         ))}
-      </div>
+      </>}
     </div>
   );
 }

@@ -36,6 +36,18 @@ const SH=({icon,title,right}:{icon:string;title:string;right?:React.ReactNode})=
   </div>
 );
 
+const GodBtn=()=>{
+  const [r,setR]=useState(false);const [res,setRes]=useState<{ok:number;fail:number}|null>(null);
+  const run=async()=>{if(r)return;if(!confirm('108개 크론 전체 실행. 계속?'))return;setR(true);setRes(null);
+    try{const d=await(await fetch('/api/admin/god-mode',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'full'})})).json();
+      const ok=(d.results||[]).filter((x:any)=>x.status>=200&&x.status<400).length;const fail=(d.results||[]).length-ok;setRes({ok,fail});
+    }catch{setRes({ok:0,fail:1});}setR(false);};
+  return <button onClick={run} disabled={r} style={{width:'100%',padding:'14px 0',borderRadius:12,border:'none',background:r?'rgba(12,21,40,0.65)':'linear-gradient(135deg,#2563EB,#7C3AED)',color:'#fff',fontSize:15,fontWeight:800,cursor:r?'not-allowed':'pointer',marginBottom:6,position:'relative',overflow:'hidden'}}>
+    {r?<span style={{display:'flex',alignItems:'center',justifyContent:'center',gap:8}}><span style={{width:16,height:16,border:'2px solid rgba(255,255,255,0.2)',borderTopColor:'#fff',borderRadius:'50%',animation:'spin .5s linear infinite',display:'inline-block'}}/>실행 중...</span>
+    :res?`✅ ${res.ok}성공 ${res.fail>0?`· ❌ ${res.fail}실패`:''}`:'🚀 전체 최신화 (108개 크론)'}
+  </button>;
+};
+
 export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
   const [d,setD]=useState<any>(null);
   const [ld,setLd]=useState(true);
@@ -503,6 +515,9 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
           </div>
         ))}
       </div>
+
+      {/* ═══ 🚀 전체 최신화 ═══ */}
+      <GodBtn/>
 
       {/* ═══ 5버튼 ═══ */}
       <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:4}}>

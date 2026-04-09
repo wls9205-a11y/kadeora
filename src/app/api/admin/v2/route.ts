@@ -447,9 +447,9 @@ export async function GET(req: NextRequest) {
     // 👤 사용자 탭
     // ═══════════════════════════════════════
     if (tab === 'users') {
-      const [realUsersR, interestsR, bookmarksR, watchlistR, searchesR, sharesR, pwaR, totalRealR] = await Promise.all([
+      const [realUsersR, interestsR, bookmarksR, watchlistR, searchesR, sharesR, pwaR, totalRealR, emailSubsR] = await Promise.all([
         sb.from('profiles')
-          .select('id, nickname, provider, created_at, last_active_at, grade, points, residence_city, onboarded, profile_completed')
+          .select('id, nickname, provider, created_at, last_active_at, grade, points, residence_city, onboarded, profile_completed, interests, is_seed, first_mission_completed, signup_source')
           .neq('is_ghost', true).neq('is_deleted', true)
           .order('created_at', { ascending: false }).limit(50),
         sb.from('apt_site_interests')
@@ -461,7 +461,47 @@ export async function GET(req: NextRequest) {
         sb.from('share_logs').select('id', { count: 'exact', head: true }),
         sb.from('pwa_installs').select('id', { count: 'exact', head: true }),
         sb.from('profiles').select('id', { count: 'exact', head: true }).neq('is_ghost', true).neq('is_deleted', true),
+        safeCount((sb as any).from('email_subscribers').select('id', { count: 'exact', head: true }).eq('is_active', true)),
       ]);
+
+      // 유저별 활동 카운트 (실유저만)
+      const realUsers = (realUsersR.data || []).filter((u: any) => !u.is_seed);
+      const userIds = realUsers.map((u: any) => u.id);
+      
+      let postsCounts: Record<string, number> = {};
+      let commentsCounts: Record<string, number> = {};
+      let watchlistCounts: Record<string, number> = {};
+      let aptBmCounts: Record<string, number> = {};
+      let blogBmCounts: Record<string, number> = {};
+      let attendCounts: Record<string, number> = {};
+
+      if (userIds.length > 0) {
+        const [postsR, commentsR, wlR, abR, bbR, attR] = await Promise.all([
+          sb.from('posts').select('author_id').in('author_id', userIds).eq('is_deleted', false),
+          sb.from('comments').select('author_id').in('author_id', userIds),
+          sb.from('stock_watchlist').select('user_id').in('user_id', userIds),
+          (sb as any).from('apt_bookmarks').select('user_id').in('user_id', userIds),
+          (sb as any).from('blog_bookmarks').select('user_id').in('user_id', userIds),
+          sb.from('attendance').select('user_id').in('user_id', userIds),
+        ]);
+        for (const r of (postsR.data || [])) postsCounts[r.author_id] = (postsCounts[r.author_id] || 0) + 1;
+        for (const r of (commentsR.data || [])) commentsCounts[r.author_id] = (commentsCounts[r.author_id] || 0) + 1;
+        for (const r of (wlR.data || [])) watchlistCounts[r.user_id] = (watchlistCounts[r.user_id] || 0) + 1;
+        for (const r of (abR.data || [])) aptBmCounts[r.user_id] = (aptBmCounts[r.user_id] || 0) + 1;
+        for (const r of (bbR.data || [])) blogBmCounts[r.user_id] = (blogBmCounts[r.user_id] || 0) + 1;
+        for (const r of (attR.data || [])) attendCounts[r.user_id] = (attendCounts[r.user_id] || 0) + 1;
+      }
+
+      // 유저에 활동 카운트 병합
+      const enrichedUsers = (realUsersR.data || []).map((u: any) => ({
+        ...u,
+        posts_count: postsCounts[u.id] || 0,
+        comments_count: commentsCounts[u.id] || 0,
+        watchlist_count: watchlistCounts[u.id] || 0,
+        apt_bm_count: aptBmCounts[u.id] || 0,
+        blog_bm_count: blogBmCounts[u.id] || 0,
+        attendance_count: attendCounts[u.id] || 0,
+      }));
 
       // 관심단지 현장명 조인
       const interests = interestsR.data || [];
@@ -501,7 +541,7 @@ export async function GET(req: NextRequest) {
       }
 
       return NextResponse.json({
-        users: realUsersR.data,
+        users: enrichedUsers,
         lifecycle: {
           total: totalRealR.count ?? (realUsersR.data || []).length,
           onboarded: onboardedCount,
@@ -523,6 +563,7 @@ export async function GET(req: NextRequest) {
           searches: searchesR.count ?? 0,
           shares: sharesR.count ?? 0,
           pwaInstalls: pwaR.count ?? 0,
+          emailSubs: emailSubsR,
         },
       });
     }
