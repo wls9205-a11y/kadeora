@@ -233,7 +233,7 @@
     },
     {
       "path": "/api/cron/push-content-alert",
-      "schedule": "30 13 * * *"
+      "schedule": "0 11 * * *"
     },
     {
       "path": "/api/cron/batch-rewrite-submit",
@@ -269,7 +269,7 @@
     },
     {
       "path": "/api/cron/indexnow-new-content",
-      "schedule": "0 */6 * * *"
+      "schedule": "0 */4 * * *"
     },
     {
       "path": "/api/cron/stock-fundamentals-kr",
@@ -373,7 +373,7 @@
     },
     {
       "path": "/api/cron/blog-publish-queue",
-      "schedule": "0 9 * * *"
+      "schedule": "0 21,3,10 * * *"
     },
     {
       "path": "/api/cron/blog-quality-prune",
