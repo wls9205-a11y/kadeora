@@ -83,6 +83,20 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
   return (
     <div style={{display:'flex',flexDirection:'column',gap:6}}>
 
+      {/* ═══ 🔥 오늘 핵심 KPI 히어로 ═══ */}
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6}}>
+        <div style={{background:'linear-gradient(135deg,rgba(16,185,129,0.12),rgba(12,21,40,0.8))',border:'1px solid rgba(16,185,129,0.2)',borderRadius:14,padding:'14px 16px',textAlign:'center'}}>
+          <div style={{fontSize:9,fontWeight:700,color:'rgba(16,185,129,0.6)',letterSpacing:1,marginBottom:6}}>오늘 가입자</div>
+          <div style={{fontSize:32,fontWeight:900,color:'#10B981',lineHeight:1}}>{k.newUsersToday??0}</div>
+          <div style={{fontSize:10,color:'rgba(255,255,255,0.3)',marginTop:4}}>+{k.newUsers||0} / 7일</div>
+        </div>
+        <div style={{background:'linear-gradient(135deg,rgba(6,182,212,0.12),rgba(12,21,40,0.8))',border:'1px solid rgba(6,182,212,0.2)',borderRadius:14,padding:'14px 16px',textAlign:'center'}}>
+          <div style={{fontSize:9,fontWeight:700,color:'rgba(6,182,212,0.6)',letterSpacing:1,marginBottom:6}}>오늘 방문자</div>
+          <div style={{fontSize:32,fontWeight:900,color:'#06B6D4',lineHeight:1}}>{td?.uniqueVisitors||0}</div>
+          <div style={{fontSize:10,color:'rgba(255,255,255,0.3)',marginTop:4}}>PV {k.pvToday||0}</div>
+        </div>
+      </div>
+
       {/* ═══ 위험 신호 ═══ */}
       {warns.length>0&&<div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
         {warns.map((w,i)=><span key={i} style={{fontSize:11,fontWeight:600,color:'#EF4444',background:'rgba(239,68,68,0.08)',border:'1px solid rgba(239,68,68,0.15)',padding:'4px 10px',borderRadius:20}}>⚠ {w}</span>)}

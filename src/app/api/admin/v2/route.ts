@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
     // 🎯 집중 탭
     // ═══════════════════════════════════════
     if (tab === 'focus') {
-      const [users, realUsers, newUsers, activeUsers, blogs, rewritten, cronOk, cronFail, interests, emailSubs, pushSubs, convEvents, dbMb, pvToday, notifRead7d, notifTotal7d, profileCompleted, onboardedCount, ctaViews7d, ctaClicks7d, postsToday, commentsToday, totalPosts, totalComments, hotBlogs, newBlogs24, aptSites, aptDeadline7, ctaViews24, ctaClicks24, notifSent24, notifRead24, bioCount, ageCount, pv7d, shares7d, sharesByPlatformRaw] = await Promise.all([
+      const [users, realUsers, newUsers, activeUsers, blogs, rewritten, cronOk, cronFail, interests, emailSubs, pushSubs, convEvents, dbMb, pvToday, notifRead7d, notifTotal7d, profileCompleted, onboardedCount, ctaViews7d, ctaClicks7d, postsToday, commentsToday, totalPosts, totalComments, hotBlogs, newBlogs24, aptSites, aptDeadline7, ctaViews24, ctaClicks24, notifSent24, notifRead24, bioCount, ageCount, pv7d, shares7d, sharesByPlatformRaw, newUsersToday] = await Promise.all([
         safeCount(sb.from('profiles').select('id', { count: 'exact', head: true })),
         safeCount(sb.from('profiles').select('id', { count: 'exact', head: true }).neq('is_ghost', true).neq('is_deleted', true)),
         safeCount(sb.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', weekAgo)),
@@ -75,6 +75,7 @@ export async function GET(req: NextRequest) {
         safeCount(sb.from('page_views').select('id', { count: 'exact', head: true }).gte('created_at', new Date(Date.now()-7*86400000).toISOString())),
         safeCount(sb.from('share_logs').select('id', { count: 'exact', head: true }).gte('created_at', new Date(Date.now()-7*86400000).toISOString())),
         safe((sb as any).from('share_logs').select('platform').gte('created_at', new Date(Date.now()-7*86400000).toISOString()).limit(500), []),
+        safeCount(sb.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', now.toISOString().slice(0, 10)).neq('is_seed', true).neq('is_ghost', true)),
       ]);
 
       const totalCron = cronOk + cronFail;
@@ -208,6 +209,7 @@ export async function GET(req: NextRequest) {
           cronSuccess: cronOk, cronFail,
           dbMb,
           pvToday,
+          newUsersToday,
         },
         // 성장 분석
         growth: {

@@ -113,7 +113,7 @@ async function handler(_req: NextRequest) {
         const targets = recentPosts.sort(() => Math.random() - 0.5).slice(0, likeCount);
         for (const post of targets) {
           await sb.from('post_likes')
-            .insert({ post_id: post.id, user_id: user.id })
+            .upsert({ post_id: post.id, user_id: user.id }, { onConflict: 'post_id,user_id', ignoreDuplicates: true })
             .then(() => {});
         }
         results.push(`${user.nickname}: 좋아요 ${likeCount}개`);

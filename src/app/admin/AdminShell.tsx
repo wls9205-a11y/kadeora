@@ -20,13 +20,13 @@ const C: Record<T, React.ComponentType<{onNavigate:(t:T)=>void}>> = {
 
 export default function AdminShell() {
   const [tab, setTab] = useState<T>('focus');
-  const [hp, setHp] = useState<{s:number;cr:number;pv:number}|null>(null);
+  const [hp, setHp] = useState<{s:number;cr:number;pv:number;nu:number}|null>(null);
   const sw = useCallback((t:T)=>setTab(t),[]);
   const Tab = C[tab];
 
   useEffect(()=>{
     const ld=()=>fetch('/api/admin/v2?tab=focus').then(r=>r.json()).then(d=>{
-      if(d?.healthScore!=null){const k=d.kpi||{};setHp({s:d.healthScore,cr:Math.round(k.cronSuccess/Math.max(k.cronSuccess+k.cronFail,1)*100),pv:k.pvToday||0});}
+      if(d?.healthScore!=null){const k=d.kpi||{};setHp({s:d.healthScore,cr:Math.round(k.cronSuccess/Math.max(k.cronSuccess+k.cronFail,1)*100),pv:k.pvToday||0,nu:k.newUsersToday||0});}
     }).catch(()=>{});
     ld(); const t=setInterval(ld,60000); return()=>clearInterval(t);
   },[]);
@@ -60,6 +60,8 @@ export default function AdminShell() {
           <div style={{width:28,height:28,borderRadius:'50%',border:`2px solid ${sc}`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,fontWeight:900,color:sc,flexShrink:0}}>{hp?.s??'—'}</div>
           {hp && <>
             <span style={{fontSize:10,color:hp.cr>=95?'#10B981':'#F59E0B',fontWeight:600}}>크론 {hp.cr}%</span>
+            <span style={{fontSize:9,color:'rgba(255,255,255,0.12)'}}>·</span>
+            <span style={{fontSize:10,color:'#10B981',fontWeight:600}}>+{hp.nu}명</span>
             <span style={{fontSize:9,color:'rgba(255,255,255,0.12)'}}>·</span>
             <span style={{fontSize:10,color:'rgba(255,255,255,0.4)'}}>PV {hp.pv}</span>
           </>}
