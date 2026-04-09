@@ -316,20 +316,20 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
               <div style={{ padding: '10px', borderRadius: 'var(--radius-md)', background: 'var(--bg-hover)' }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: isDomestic ? 'var(--accent-red)' : 'var(--accent-green)', marginBottom: 6 }}>주간 상승 TOP</div>
+                <div style={{ fontSize: 10, fontWeight: 700, color: stockUpColor(isDomestic), marginBottom: 6 }}>주간 상승 TOP</div>
                 {topUp.length > 0 ? topUp.map(s => (
                   <div key={s.symbol} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, padding: '2px 0' }}>
                     <span style={{ color: 'var(--text-primary)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '60%' }}>{s.name}</span>
-                    <span style={{ color: isDomestic ? 'var(--accent-red)' : 'var(--accent-green)', fontWeight: 700 }}>+{s.change_pct.toFixed(1)}%</span>
+                    <span style={{ color: stockUpColor(isDomestic), fontWeight: 700 }}>+{s.change_pct.toFixed(1)}%</span>
                   </div>
                 )) : <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>데이터 없음</div>}
               </div>
               <div style={{ padding: '10px', borderRadius: 'var(--radius-md)', background: 'var(--bg-hover)' }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: isDomestic ? 'var(--accent-blue)' : 'var(--accent-red)', marginBottom: 6 }}>주간 하락 TOP</div>
+                <div style={{ fontSize: 10, fontWeight: 700, color: stockDownColor(isDomestic), marginBottom: 6 }}>주간 하락 TOP</div>
                 {topDown.length > 0 ? topDown.map(s => (
                   <div key={s.symbol} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, padding: '2px 0' }}>
                     <span style={{ color: 'var(--text-primary)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '60%' }}>{s.name}</span>
-                    <span style={{ color: isDomestic ? 'var(--accent-blue)' : 'var(--accent-red)', fontWeight: 700 }}>{s.change_pct.toFixed(1)}%</span>
+                    <span style={{ color: stockDownColor(isDomestic), fontWeight: 700 }}>{s.change_pct.toFixed(1)}%</span>
                   </div>
                 )) : <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>데이터 없음</div>}
               </div>
