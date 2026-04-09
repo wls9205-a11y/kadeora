@@ -430,6 +430,10 @@
     {
       "path": "/api/cron/feed-buzz-publish",
       "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron/daily-seed-activity",
+      "schedule": "30 4 * * *"
     }
   ]
 }
