@@ -1,33 +1,41 @@
-# 카더라 STATUS — 세션 80 최종 (2026-04-08)
+# 카더라 STATUS — 세션 81 최종 (2026-04-10)
 
 ## 최종 배포
 - Vercel: `prj_2nDcTjEcgAEew1wYdvVF57VljxJQ`
 - Supabase: `tezftxakuwhsclarprlz`
 
-## 세션 80 완료 작업
+## 세션 81 완료 작업
 
-### 어드민 대시보드 v5 (전면 재설계)
-- 실시간 트래픽: 접속자/UV/PV + 24시간 히트맵 + 인기페이지 + 유입경로
-- SVG Ring 게이지: KPI 2×2 그리드 (유저/블로그/크론/DB)
-- 14일 PV 스파크라인 + 데이터 KPI 2×2
-- 리라이팅 현황: 진행률 링 + 카테고리 효율
-- **포털별 SEO 준비도**: Google/Naver 분리 카드 + 요소별 체크마크
-- CTA 비주얼 퍼널 + 리텐션 링 + 시스템 DB 바
-- 모바일 최적화: 4칸→2칸 그리드, 최소폰트 9px, 헤더 오버랩 수정
-- 접속자 0→"—" 표시, URL decodeURI+30자 절삭
-- v2 API: exec_sql(미존재) → 전용 RPC 2개 교체 (get_seo_portal_stats, get_blog_category_stats)
-- cronFail: auto-cleanup 제외 (error/failed만 카운트)
+### 🔍 이슈 선점 자동화 시스템 (신규)
+- **issue-detect** (15분): 부동산+주식 뉴스 RSS 14곳 실시간 탐지, 키워드 매칭, 점수 산정
+- **issue-draft** (20분): AI(Haiku) 기사 자동 생성, score 60+ 자동 발행, 피드 자동 포스트, 뻘글 스케줄링
+- **issue-trend** (1시간): 네이버 데이터랩 검색 트렌드 모니터링, 증폭계수 자동 반영
+- **feed-buzz-publish** (5분): 예약된 뻘글 발행, 6개 페르소나 타입, 24시간 만료 체크
+- **daily-seed-activity** (매일 04:30): 시드 계정 일상 활동 (댓글/좋아요/뻘글/블로그댓글)
+- **issue-scoring.ts**: 부동산+주식 통합 점수 엔진 (기본점수×증폭계수×감점률)
+- **Admin IssueTab**: 이슈 모니터링 대시보드 + 킬스위치(ON/OFF) + 기준점 원격 조정 + 1클릭 발행
+- **Admin API**: /api/admin/issues (목록), /config (킬스위치), /publish (발행), /skip (무시)
+- **판정 기준**: 60+ 자동발행 | 40~59 초안저장 | 25~39 로그 | ~24 무시
+- **안전장치**: 팩트 검증, 금지표현 필터, 중복 이슈 스킵, safeBlogInsert 품질 게이트, 킬스위치
 
-### SEO Phase 1 — 즉시 효과
-- **내부링크**: 0.9% → **100%** (33,394편) ✅
-- **요약문(excerpt)**: 49% → **100%** (33,394편) ✅
-- **Google 준비도**: 0% → **43%** (14,439편)
-- **Naver 준비도**: 9.6% → **11%** (3,690편)
-- bulk_fill_related_slugs() + bulk_fill_excerpts() SECURITY DEFINER 함수
+### 📝 레이카운티 트래픽 선점 콘텐츠
+- **메인 기사**: 레이카운티 무순위 청약 재분양 총정리 (4,000자, FAQ 7개, 즉시 발행)
+- **클러스터 기사**: 불법행위재공급 vs 무순위 청약 차이 총정리 (2,500자, FAQ 5개, 즉시 발행)
+- **피드 포스트 4건**: 공식 속보 1건 + 뻘글 3건 (시드 계정: 부산갈매기/청약당첨꿈꾸는/부산촌놈상경기)
+- **댓글 7건 + 좋아요 13건**: 자연스러운 커뮤니티 활성화
 
-### 네이버 검색 노출 최적화
-- description 3중 통일: meta/og/naver/JSON-LD 전부 descClean
-- naver:description 태그 추가
+### 🗄️ DB 마이그레이션
+- `issue_alerts` 테이블 + 인덱스 5개 (이슈 탐지/점수/발행 관리)
+- `scheduled_feed_posts` 테이블 (뻘글 예약 발행)
+- `blog_publish_config` 킬스위치 컬럼 3개 (auto_publish_enabled, auto_publish_min_score, auto_publish_blocked_categories)
+
+### 🔧 어드민 업데이트
+- AdminShell: 이슈 탭(🔍) 추가 (7번째 탭)
+- GOD MODE: 이슈 크론 5개 phase 배치 (data: issue-detect/issue-trend, ai: issue-draft, content: feed-buzz-publish/daily-seed-activity)
+- 크론 총 수: 88 → 93개
+
+### 버그 수정
+- issue-detect TS 빌드 에러 수정 (`sb.rpc ? undefined : undefined` → 중복 스킵)
 - 30자 미만 meta_description(9,445편) → excerpt 자동 폴백
 - 마크다운 기호 제거 (#*_|) + 160자 절삭
 - article:tag 카테고리 한글명 선두 배치

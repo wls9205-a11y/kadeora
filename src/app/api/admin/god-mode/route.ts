@@ -37,6 +37,8 @@ const CRON_GROUPS = {
     '/api/cron/stock-flow-crawl',
     '/api/cron/invest-calendar-refresh',
     '/api/cron/crawl-apt-rent',
+    '/api/cron/issue-detect',
+    '/api/cron/issue-trend',
   ],
   process: [
     '/api/cron/aggregate-trade-stats',
@@ -61,6 +63,7 @@ const CRON_GROUPS = {
     '/api/cron/batch-rewrite-poll',
     '/api/cron/batch-analysis-submit',
     '/api/cron/batch-analysis-poll',
+    '/api/cron/issue-draft',
   ],
   content: [
     '/api/cron/seed-posts',
@@ -92,6 +95,8 @@ const CRON_GROUPS = {
     '/api/cron/blog-publish-queue',
     '/api/admin/trigger-all',
     '/api/cron/seo-score-refresh',
+    '/api/cron/feed-buzz-publish',
+    '/api/cron/daily-seed-activity',
   ],
   system: [
     '/api/cron/daily-stats',
