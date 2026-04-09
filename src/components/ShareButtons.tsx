@@ -2,6 +2,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import BottomSheet from '@/components/BottomSheet';
 import { useToast } from '@/components/Toast';
+import { track } from '@/lib/analytics';
 
 interface Props { title: string; postId?: number | string; content?: string; compact?: boolean; category?: string; }
 interface Platform { id: string; label: string; emoji: string; bg: string; color: string; isNew?: boolean; }
@@ -223,6 +224,7 @@ export default function ShareButtons({ title, postId, content, compact, category
 
   const trackShare = (platform: string) => {
     setShareCount(c => c + 1);
+    track('share', platform, { post_id: postId });
     fetch('/api/share', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ post_id: postId, platform }) }).catch(() => {});
   };
 

@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useAuth } from '@/components/AuthProvider';
 import { REGIONS, SIGUNGU_MAP } from '@/lib/regions';
+import { trackFeature } from '@/lib/analytics';
 import Link from 'next/link';
 import { getDisplayInterestCount } from '@/lib/interest-utils';
 
@@ -46,7 +47,7 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
         body: JSON.stringify({ site_id: siteId, type: 'member' }),
       });
       const data = await res.json();
-      if (res.ok) { setRegistered(true); setCount(c => c + 1); setMessage('등록 완료! +50P 적립'); }
+      if (res.ok) { setRegistered(true); setCount(c => c + 1); setMessage('등록 완료! +50P 적립'); trackFeature('interest_register', { site_id: siteId, site_name: siteName }); }
       else setMessage(data.error || '등록 실패');
     } catch { setMessage('네트워크 오류'); }
     setSubmitting(false);

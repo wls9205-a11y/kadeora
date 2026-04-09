@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import SectionShareButton from '@/components/SectionShareButton';
+import { trackFeature } from '@/lib/analytics';
 
 const HT = [
   {min:0,max:1,s:2},{min:1,max:2,s:4},{min:2,max:3,s:6},{min:3,max:4,s:8},{min:4,max:5,s:10},{min:5,max:6,s:12},{min:6,max:7,s:14},{min:7,max:8,s:16},
@@ -135,7 +136,7 @@ export default function DiagnoseClient() {
             <div style={{display:'flex',gap:6}}>
               {step>0&&<button onClick={()=>setStep(step-1)} style={{padding:'10px 18px',borderRadius:10,border:'1px solid var(--border)',background:'var(--bg-hover)',color:'var(--text-primary)',cursor:'pointer',fontWeight:600,fontSize:13}}>이전</button>}
               {step<3?<button onClick={()=>setStep(step+1)} style={{padding:'10px 18px',borderRadius:10,border:'none',background:'var(--brand)',color:'var(--text-inverse, #fff)',cursor:'pointer',fontWeight:700,fontSize:13}}>다음</button>
-              :<button onClick={()=>setShowResult(true)} style={{padding:'10px 24px',borderRadius:10,border:'none',background:'var(--brand)',color:'var(--text-inverse, #fff)',cursor:'pointer',fontWeight:700,fontSize:14}}>결과 보기</button>}
+              :<button onClick={()=>{setShowResult(true);trackFeature('calc_result',{calculator:'apt_score',total})}} style={{padding:'10px 24px',borderRadius:10,border:'none',background:'var(--brand)',color:'var(--text-inverse, #fff)',cursor:'pointer',fontWeight:700,fontSize:14}}>결과 보기</button>}
             </div>
           </div>
         </>

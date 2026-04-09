@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { trackTab } from '@/lib/analytics';
+import { trackTab, trackFeature } from '@/lib/analytics';
 import SearchInput from '@/components/SearchInput';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import AptCommentSheet from '@/components/AptCommentSheet';
@@ -113,9 +113,11 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
       if (existing) {
         await sb.from('apt_watchlist').delete().eq('id', existing.id);
         showToast('관심단지에서 해제했습니다');
+        trackFeature('watchlist_remove', { item_type: itemType, item_id: itemId });
       } else {
         await sb.from('apt_watchlist').insert({ user_id: aptUser.id, item_type: itemType, item_id: itemId, notify_enabled: true });
         showToast('⭐ 관심단지 등록! 새 소식이 있으면 알림을 보내드립니다');
+        trackFeature('watchlist_add', { item_type: itemType, item_id: itemId });
       }
       haptic('medium');
       const { data: wl } = await sb.from('apt_watchlist').select('item_type, item_id').eq('user_id', aptUser.id);

@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/components/AuthProvider';
+import { trackFeature } from '@/lib/analytics';
 
 interface Props {
   blogPostId: number;
@@ -51,6 +52,7 @@ export default function BlogActions({ blogPostId, initialHelpfulCount }: Props) 
       });
       const data = await res.json();
       setIsBookmarked(data.isBookmarked);
+      trackFeature(data.isBookmarked ? 'blog_bookmark_add' : 'blog_bookmark_remove', { blogPostId });
     } catch {} finally { setBusy(false); }
   };
 
