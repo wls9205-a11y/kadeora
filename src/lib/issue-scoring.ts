@@ -544,6 +544,7 @@ export function detectIssueType(keywords: string[], category: string): string {
     if (keywords.some(k => ['건강보험료', '4대보험'].includes(k))) return 'insurance';
     return 'life_general';
   }
+  return 'general';
 }
 
 /* ═══════════ AI 기사 템플릿 판별 ═══════════ */
