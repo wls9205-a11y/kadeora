@@ -13,6 +13,7 @@ import TopLoadingBar from '@/components/TopLoadingBar';
 import ScrollToTop from '@/components/ScrollToTop';
 import { AuthProvider } from '@/components/AuthProvider';
 import WelcomeReward from '@/components/WelcomeReward';
+import GlobalMissionBar from '@/components/GlobalMissionBar';
 
 export const metadata: Metadata = {
   title: { template: '%s | 카더라', default: '카더라 — 대한민국 소리소문 정보 커뮤니티' },
@@ -49,6 +50,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
         }}>
           <ErrorBoundary>
               <TopBarCTA />
+              <GlobalMissionBar />
               {children}
           </ErrorBoundary>
         </main>

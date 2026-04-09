@@ -423,7 +423,7 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
         </div>
       ) : (
         <Link
-          href={`/login?redirect=${encodeURIComponent(pathname)}`}
+          href={`/login?redirect=${encodeURIComponent(pathname)}&source=stock_comment`}
           style={{
             display: 'block', textAlign: 'center', padding: '12px 0', marginBottom: 14,
             borderRadius: 'var(--radius-md)', border: '1px dashed var(--border)',

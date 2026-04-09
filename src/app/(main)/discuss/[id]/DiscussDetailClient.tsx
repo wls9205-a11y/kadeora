@@ -164,7 +164,7 @@ export default function DiscussDetailClient({ initialTopic, initialComments }: P
             </>
           ) : (
             <div style={{ flex: 1, textAlign: 'center', padding: 12, color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)' }}>
-              <a href={`/login?redirect=${encodeURIComponent(pathname)}`} style={{ color: 'var(--brand)', textDecoration: 'none' }}>로그인</a>하면 의견을 남길 수 있습니다
+              <a href={`/login?redirect=${encodeURIComponent(pathname)}&source=discuss`} style={{ color: 'var(--brand)', textDecoration: 'none' }}>로그인</a>하면 의견을 남길 수 있습니다
             </div>
           )}
         </div>

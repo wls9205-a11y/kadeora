@@ -187,7 +187,7 @@ export default function CalcEngine({ calc }: { calc: CalcMeta }) {
               회원가입하면 계산 이력 관리, 맞춤 계산기 추천, 부동산·주식 실시간 정보를 받을 수 있어요.
             </div>
           </div>
-          <Link href={`/login?redirect=/calc/${calc.category}/${calc.slug}`} style={{
+          <Link href={`/login?redirect=/calc/${calc.category}/${calc.slug}&source=calc_engine`} style={{
             padding: '8px 16px', borderRadius: 8, background: 'var(--brand)', color: '#fff',
             fontSize: 12, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0,
           }}>

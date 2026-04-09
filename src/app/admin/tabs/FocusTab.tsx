@@ -48,7 +48,7 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
   if(ld)return<div style={{textAlign:'center',padding:80,color:'rgba(255,255,255,0.3)',fontSize:13}}>불러오는 중...</div>;
   if(!d)return<div style={{textAlign:'center',padding:80,fontSize:13}}>⚠️ 로드 실패</div>;
 
-  const{healthScore:hs=0,kpi:k={} as any,growth:g={} as any,extended:x={} as any,failedCrons:fc={},recentActivity:ra=[],dailyTrend:dt=[],categoryStats:cs=[],trafficDetail:td={} as any,ctaBreakdown:cb={} as any,signupSources:ss={} as any,retention:ret=null as any}=d;
+  const{healthScore:hs=0,kpi:k={} as any,growth:g={} as any,extended:x={} as any,failedCrons:fc={},recentActivity:ra=[],dailyTrend:dt=[],categoryStats:cs=[],trafficDetail:td={} as any,ctaBreakdown:cb={} as any,signupSources:ss={} as any,retention:ret=null as any,featureHealth:fh={} as any}=d;
   const fcn=Object.keys(fc||{}).length;
   const cr=pct(k.cronSuccess,k.cronSuccess+k.cronFail);
   const ctr=(g.ctaViews7d||0)>0?((g.ctaClicks7d||0)/(g.ctaViews7d||1)*100).toFixed(1):'0';
@@ -69,6 +69,8 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
   if(fcn>0)warns.push(`크론실패 ${fcn}`);
   if(ret&&ret.d7Rate===0&&ret.size>5)warns.push('D7 리텐션 0%');
   if((k.pushSubs??0)===0)warns.push('푸시 0명');
+  const deadFeatures = ['aptBookmarks','blogBookmarks','stockWatchlist','priceAlerts'].filter(f=>(fh[f]??0)===0).length;
+  if(deadFeatures>=3)warns.push(`죽은기능 ${deadFeatures}개`);
 
   const CS={card:{background:'rgba(12,21,40,0.65)',border:'1px solid rgba(255,255,255,0.05)',borderRadius:12,padding:'10px 12px',backdropFilter:'blur(8px)'} as const};
 
@@ -397,6 +399,26 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
               <span style={{fontSize:9,color:'rgba(255,255,255,0.3)'}}>{ret.size}명 중 {ret.d7}명 복귀</span>
             </div>
           </div>}
+        </div>
+      </div>
+
+      {/* ═══ 기능 건강도 ═══ */}
+      <div style={CS.card}>
+        <div style={{fontSize:10,fontWeight:700,color:'rgba(255,255,255,0.4)',marginBottom:8}}>🔌 핵심 기능 사용 현황</div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:6}}>
+          {[
+            {name:'관심단지',val:fh.aptBookmarks??0,icon:'🏠'},
+            {name:'블로그저장',val:fh.blogBookmarks??0,icon:'📌'},
+            {name:'관심종목',val:fh.stockWatchlist??0,icon:'⭐'},
+            {name:'가격알림',val:fh.priceAlerts??0,icon:'🔔'},
+            {name:'출석체크',val:fh.attendance??0,icon:'📅'},
+            {name:'미션완료',val:fh.missionCompleted??0,icon:'🎯'},
+          ].map(f=>(
+            <div key={f.name} style={{padding:'6px 8px',borderRadius:6,background:f.val>0?'rgba(16,185,129,0.08)':'rgba(239,68,68,0.08)',border:`1px solid ${f.val>0?'rgba(16,185,129,0.15)':'rgba(239,68,68,0.1)'}`}}>
+              <div style={{fontSize:9,color:'rgba(255,255,255,0.4)'}}>{f.icon} {f.name}</div>
+              <div style={{fontSize:16,fontWeight:800,color:f.val>0?'#10B981':'#EF4444'}}>{f.val}</div>
+            </div>
+          ))}
         </div>
       </div>
 

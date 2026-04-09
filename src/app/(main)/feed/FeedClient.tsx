@@ -335,7 +335,7 @@ export default function FeedClient({
             <div style={{ fontSize: 36, marginBottom: 'var(--sp-sm)' }}>👥</div>
             <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-xs)' }}>로그인 후 팔로잉 피드를 볼 수 있어요</div>
             <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-md)' }}>관심 유저를 팔로우하고 맞춤 피드를 만들어 보세요</div>
-            <Link href={`/login?redirect=${encodeURIComponent(pathname)}`} style={{ display: 'inline-block', padding: 'var(--sp-md) var(--sp-2xl)', borderRadius: 'var(--radius-md)', background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)', fontWeight: 700, fontSize: 'var(--fs-sm)', textDecoration: 'none' }}>
+            <Link href={`/login?redirect=${encodeURIComponent(pathname)}&source=feed`} style={{ display: 'inline-block', padding: 'var(--sp-md) var(--sp-2xl)', borderRadius: 'var(--radius-md)', background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)', fontWeight: 700, fontSize: 'var(--fs-sm)', textDecoration: 'none' }}>
               카카오로 로그인
             </Link>
           </div>

@@ -184,6 +184,16 @@ export async function GET(req: NextRequest) {
         .order('cohort_week', { ascending: false }).limit(4);
       const latestRetention = (retentionRaw || []).length > 0 ? retentionRaw[0] : null;
 
+      // 기능 건강도 (핵심 기능 사용 현황)
+      const [aptBmR, blogBmR, stockWlR, alertsR, attendR, missionR] = await Promise.all([
+        safeCount((sb as any).from('apt_bookmarks').select('id', { count: 'exact', head: true })),
+        safeCount((sb as any).from('blog_bookmarks').select('id', { count: 'exact', head: true })),
+        safeCount((sb as any).from('stock_watchlist').select('id', { count: 'exact', head: true })),
+        safeCount((sb as any).from('price_alerts').select('id', { count: 'exact', head: true })),
+        safeCount((sb as any).from('attendance').select('id', { count: 'exact', head: true })),
+        safeCount(sb.from('profiles').select('id', { count: 'exact', head: true }).eq('first_mission_completed', true).neq('is_seed', true)),
+      ]);
+
       return NextResponse.json({
         healthScore,
         scoreBreakdown: scores,
@@ -250,6 +260,10 @@ export async function GET(req: NextRequest) {
           d7: latestRetention.d7_retained,
           d7Rate: latestRetention.cohort_size > 0 ? Math.round(latestRetention.d7_retained / latestRetention.cohort_size * 100) : 0,
         } : null,
+        featureHealth: {
+          aptBookmarks: aptBmR, blogBookmarks: blogBmR, stockWatchlist: stockWlR,
+          priceAlerts: alertsR, attendance: attendR, missionCompleted: missionR,
+        },
         trafficDetail: await (async () => {
           const todayStr = now.toISOString().slice(0, 10);
           const hourAgo = new Date(Date.now() - 3600000).toISOString();

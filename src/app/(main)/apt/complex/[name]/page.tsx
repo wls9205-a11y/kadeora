@@ -8,6 +8,7 @@ import { sanitizeSearchQuery } from '@/lib/sanitize';
 import dynamic from 'next/dynamic';
 import ShareButtons from '@/components/ShareButtons';
 import AptNearbyCompare from '@/components/AptNearbyCompare';
+import AptBookmarkButton from '@/components/AptBookmarkButton';
 
 const AptPriceTrendChart = dynamic(() => import('@/components/charts/AptPriceTrendChart'));
 const AptReviewSection = dynamic(() => import('@/components/AptReviewSection'));
@@ -289,7 +290,8 @@ export default async function ComplexDetailPage({ params }: Props) {
         {builtYear > 0 && <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{builtYear}년 준공</span>}
       </div>
       <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', margin: '0 0 8px' }}>{region} {sigungu} {dong} · 매매 {tradeList.length}건{rentTrades.length > 0 ? ` · 전월세 ${rentTrades.length}건` : ''}</p>
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 'var(--sp-md)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 8, marginBottom: 'var(--sp-md)' }}>
+        {profile?.id && <AptBookmarkButton aptId={String(profile.id)} aptName={decoded} />}
         <ShareButtons title={`${decoded} 아파트 실거래가·시세 — ${region} ${sigungu}`} postId={`complex-${name}`} />
       </div>
 

@@ -90,7 +90,7 @@ export default function AptCommentSheet({ houseKey, houseNm, houseType, open, on
           </div>
         ) : (
           <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textAlign: 'center', padding: 12 }}>
-            <a href={`/login?redirect=${encodeURIComponent(pathname)}`} style={{ color: 'var(--brand)' }}>로그인</a> 후 한줄평을 남길 수 있어요
+            <a href={`/login?redirect=${encodeURIComponent(pathname)}&source=apt_comment`} style={{ color: 'var(--brand)' }}>로그인</a> 후 한줄평을 남길 수 있어요
           </div>
         )}
     </BottomSheet>

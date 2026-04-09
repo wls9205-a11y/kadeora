@@ -11,6 +11,7 @@ import ShareButtons from '@/components/ShareButtons';
 import BlogFaqAccordion from '@/components/BlogFaqAccordion';
 import BlogToc from '@/components/BlogToc';
 import BlogActions from '@/components/BlogActions';
+import BlogBookmarkButton from '@/components/BlogBookmarkButton';
 import { getAvatarColor } from '@/lib/avatar';
 import { parseFaqFromContent } from '@/lib/blog-faq-parser';
 import { timeAgo } from '@/lib/format';
@@ -705,6 +706,7 @@ export default async function BlogDetailPage({ params }: Props) {
         }}>
           <ShareButtons title={post.title} postId={slug} content={post.excerpt || post.meta_description || undefined} category={post.category} />
           <div style={{ flex: 1 }} />
+          <BlogBookmarkButton blogPostId={post.id} />
           <BlogActions blogPostId={post.id} initialHelpfulCount={post.helpful_count ?? 0} />
         </div>
 
@@ -766,7 +768,7 @@ export default async function BlogDetailPage({ params }: Props) {
           <BlogCommentInput blogPostId={post.id} />
         ) : (
           <div style={{ padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, textAlign: 'center', marginBottom: 'var(--sp-lg)', fontSize: 14, color: 'var(--text-secondary)' }}>
-            <Link href={`/login?redirect=/blog/${slug}`} style={{ color: 'var(--brand)', fontWeight: 700, textDecoration: 'none' }}>로그인</Link>하면 의견을 남길 수 있어요
+            <Link href={`/login?redirect=/blog/${slug}&source=blog_comment`} style={{ color: 'var(--brand)', fontWeight: 700, textDecoration: 'none' }}>로그인</Link>하면 의견을 남길 수 있어요
           </div>
         )}
 

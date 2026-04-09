@@ -18,7 +18,7 @@ export default function CalcSignupCTA({ calcSlug, category }: { calcSlug: string
         142종 무료 계산기 · 부동산 청약·분양 알림 · 주식 시세 · 커뮤니티
       </div>
       <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
-        <Link href={`/login?redirect=/calc/${category}/${calcSlug}`} style={{
+        <Link href={`/login?redirect=/calc/${category}/${calcSlug}&source=calc_cta`} style={{
           padding: '10px 24px', borderRadius: 8, background: 'var(--brand)', color: '#fff',
           fontSize: 13, fontWeight: 700, textDecoration: 'none',
         }}>

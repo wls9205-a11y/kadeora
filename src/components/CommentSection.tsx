@@ -196,7 +196,7 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
           </div>
         ) : (
           <div style={{ textAlign: 'center', padding: '16px', background: 'var(--bg-surface)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border)', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>
-            💬 <a href={`/login?redirect=${encodeURIComponent(pathname)}`} style={{ color: 'var(--brand)', textDecoration: 'none', fontWeight: 700 }}>로그인</a>하고 대화에 참여하세요
+            💬 <a href={`/login?redirect=${encodeURIComponent(pathname)}&source=comment`} style={{ color: 'var(--brand)', textDecoration: 'none', fontWeight: 700 }}>로그인</a>하고 대화에 참여하세요
           </div>
         )}
       </div>
