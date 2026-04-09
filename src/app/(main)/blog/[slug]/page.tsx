@@ -536,6 +536,26 @@ export default async function BlogDetailPage({ params }: Props) {
     image: post.cover_image || `${SITE}/api/og?title=${encodeURIComponent(post.title)}&category=${post.category}&design=2`,
   } : null;
 
+  
+  // Dataset JSON-LD (데이터 기반 글 감지)
+  const isDataPost = (post.tags || []).some((t: string) => ['실거래가', '시세', '통계', '현황', '순위', '비교', 'TOP', '데이터'].includes(t))
+    || /실거래|통계|현황|순위|TOP|데이터|트렌드|분석/.test(post.title);
+  const datasetSchema = isDataPost ? {
+    '@context': 'https://schema.org',
+    '@type': 'Dataset',
+    name: post.title,
+    description: descClean,
+    url: `${SITE}/blog/${slug}`,
+    temporalCoverage: post.data_date || new Date().toISOString().slice(0, 7),
+    creator: { '@type': 'Organization', name: '카더라', url: SITE },
+    distribution: {
+      '@type': 'DataDownload',
+      contentUrl: `${SITE}/blog/${slug}`,
+      encodingFormat: 'text/html',
+    },
+    license: 'https://creativecommons.org/licenses/by-nc/4.0/',
+  } : null;
+
     const showFaq = faqItems.length >= 1;  // 1개 이상이면 FAQ 스키마 출력 (JSON-LD 리치스니펫 극대화)
   const faqSchema = showFaq && faqItems.length > 0 ? {
     '@context': 'https://schema.org', '@type': 'FAQPage',
@@ -562,6 +582,7 @@ export default async function BlogDetailPage({ params }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       {faqSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />}
       {howtoSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howtoSchema) }} />}
+      {datasetSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(datasetSchema) }} />}
 
       <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-lg)', flexWrap: 'wrap' }}>
         <Link href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>홈</Link>

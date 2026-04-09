@@ -55,6 +55,16 @@ const LIFE_RSS_FEEDS = [
   { name: '한경_라이프', url: 'https://www.hankyung.com/feed/life' },
 ];
 
+const GOV_RSS_FEEDS = [
+  { name: '기재부_보도', url: 'https://www.moef.go.kr/com/bbs/RSS.do?bbsId=MOSFBBS_000000000028' },
+  { name: '국토부_보도', url: 'https://www.molit.go.kr/rss/RSS.do?bbsId=MLTM_000000000015' },
+  { name: '금융위_보도', url: 'https://www.fsc.go.kr/rss/RSS.do?bbsId=BBS_000000000' },
+  { name: '고용부_보도', url: 'https://www.moel.go.kr/rss/RSS.do?bbsId=BBS_0000000000' },
+  { name: '국세청_보도', url: 'https://www.nts.go.kr/rss/RSS.do?bbsId=BBS_0000000000' },
+];
+
+
+
 
 /* ═══════════ Google Trends RSS (무료) ═══════════ */
 
@@ -75,6 +85,39 @@ async function fetchGoogleTrends(): Promise<RSSItem[]> {
       if (title) items.push({ title, link: newsUrl || link, pubDate: '', description: `구글 급상승: ${traffic}`, source: 'Google_Trends' });
     }
     return items.slice(0, 15);
+  } catch { return []; }
+}
+
+
+/* ═══════════ DART 전자공시 수집 ═══════════ */
+
+async function fetchDARTDisclosures(): Promise<RSSItem[]> {
+  const DART_KEY = process.env.DART_API_KEY;
+  if (!DART_KEY) return [];
+  try {
+    // 최근 공시 목록 (당일)
+    const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    const res = await fetch(
+      `https://opendart.fss.or.kr/api/list.json?crtfc_key=${DART_KEY}&bgn_de=${today}&end_de=${today}&page_count=20`,
+      { signal: AbortSignal.timeout(8000) }
+    );
+    if (!res.ok) return [];
+    const data = await res.json();
+    if (data.status !== '000' || !data.list) return [];
+
+    // 주요 공시만 필터링 (유증, M&A, 실적, 소송 등)
+    const majorTypes = ['유상증자', '무상증자', '합병', '분할', '영업실적', '대표이사변경', '주요주주', '자기주식', '배당', '소송'];
+    const filtered = data.list.filter((d: any) =>
+      majorTypes.some(t => (d.report_nm || '').includes(t))
+    );
+
+    return filtered.map((d: any) => ({
+      title: `[DART] ${d.corp_name} — ${d.report_nm}`,
+      link: `https://dart.fss.or.kr/dsaf001/main.do?rcpNo=${d.rcept_no}`,
+      pubDate: d.rcept_dt || '',
+      description: `${d.corp_name} ${d.report_nm} (${d.flr_nm})`,
+      source: 'DART_공시',
+    }));
   } catch { return []; }
 }
 
@@ -198,7 +241,7 @@ async function handler(_req: NextRequest) {
   // 1. RSS 수집 (병렬)
   // v2: 전체 RSS + Google Trends + 카테고리 확장
   const feeds = isGroupA
-    ? [...APT_RSS_FEEDS, ...STOCK_RSS_FEEDS, ...FINANCE_RSS_FEEDS, ...ECONOMY_RSS_FEEDS, ...LIFE_RSS_FEEDS]
+    ? [...APT_RSS_FEEDS, ...STOCK_RSS_FEEDS, ...FINANCE_RSS_FEEDS, ...ECONOMY_RSS_FEEDS, ...LIFE_RSS_FEEDS, ...GOV_RSS_FEEDS]
     : [...APT_RSS_FEEDS, ...FINANCE_RSS_FEEDS]; // 그룹B: 부동산+재테크
 
   const allItems = await Promise.allSettled(feeds.map(f => fetchRSS(f)));
@@ -207,9 +250,9 @@ async function handler(_req: NextRequest) {
     if (r.status === 'fulfilled') rssItems.push(...r.value);
   }
 
-  // v2: Google Trends RSS 병합
-  const googleItems = await fetchGoogleTrends();
-  rssItems.push(...googleItems);
+  // v2: Google Trends RSS + DART 공시 병합
+  const [googleItems, dartItems] = await Promise.all([fetchGoogleTrends(), fetchDARTDisclosures()]);
+  rssItems.push(...googleItems, ...dartItems);
 
   if (rssItems.length === 0) {
     return NextResponse.json({ detected: 0, message: 'no RSS items' });

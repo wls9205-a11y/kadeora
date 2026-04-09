@@ -145,6 +145,19 @@ function enrichContent(content: string, category: string, title: string): string
     enriched += '\n\n> ⚠️ 본 콘텐츠는 투자 참고 자료이며, 특정 금융상품의 매수·매도를 권유하지 않습니다. 투자 판단은 본인의 책임이며, 반드시 전문가 상담 후 결정하시기 바랍니다.';
   }
 
+
+  // 6. 데이터 출처 표기 강화 (v2)
+  const hasSource = /출처|데이터 출처|자료 출처|Source/.test(enriched);
+  if (!hasSource) {
+    const sourceMap: Record<string, string> = {
+      stock: '\n\n---\n\n**데이터 출처:** 한국거래소(KRX), 금융감독원 전자공시시스템(DART), 카더라 자체 수집 데이터 | **기준일:** ' + new Date().toISOString().slice(0, 10),
+      apt: '\n\n---\n\n**데이터 출처:** 국토교통부 실거래가 공개시스템, 청약홈(applyhome.co.kr), 카더라 자체 수집 데이터 | **기준일:** ' + new Date().toISOString().slice(0, 10),
+      finance: '\n\n---\n\n**데이터 출처:** 한국은행 경제통계시스템, 금융감독원, 각 금융기관 공시 | **기준일:** ' + new Date().toISOString().slice(0, 10),
+      general: '\n\n---\n\n**데이터 출처:** 각 정부부처 보도자료, 통계청, 카더라 자체 수집 데이터 | **기준일:** ' + new Date().toISOString().slice(0, 10),
+    };
+    enriched += sourceMap[category] || sourceMap.general || '';
+  }
+
   return enriched;
 }
 

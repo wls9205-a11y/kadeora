@@ -133,6 +133,36 @@ async function handler(_req: NextRequest) {
     }
   }
 
+
+  // v2: 다음/카카오 뉴스 검색 교차 검증
+  const KAKAO_KEY = process.env.KAKAO_REST_API_KEY || '';
+  let daumTrendingKeywords: string[] = [];
+  if (KAKAO_KEY) {
+    try {
+      // 스파이크 키워드로 다음 웹 검색 → 최근 1시간 내 결과 있으면 트렌딩
+      for (const spike of spikeKeywords.slice(0, 5)) {
+        const dRes = await fetch(
+          `https://dapi.kakao.com/v2/search/web?query=${encodeURIComponent(spike.keyword)}&size=3&sort=recency`,
+          { headers: { Authorization: `KakaoAK ${KAKAO_KEY}` }, signal: AbortSignal.timeout(5000) }
+        );
+        if (dRes.ok) {
+          const dData = await dRes.json();
+          const recentCount = (dData.documents || []).filter((d: any) => {
+            const dt = new Date(d.datetime).getTime();
+            return dt > Date.now() - 3 * 60 * 60 * 1000; // 3시간 이내
+          }).length;
+          if (recentCount >= 2) {
+            daumTrendingKeywords.push(spike.keyword);
+            // portal_cross_count 증가
+            const portalCross = ((spike as any).portal_cross ? 2 : 1) + 1;
+            (spike as any).portal_cross = true;
+            (spike as any).portal_cross_count = portalCross;
+          }
+        }
+      }
+    } catch {}
+  }
+
   // 급상승 키워드와 기존 issue_alerts 매칭 → 증폭계수 업데이트
   let updated = 0;
   for (const spike of spikeKeywords) {
@@ -172,6 +202,7 @@ async function handler(_req: NextRequest) {
     spike_details: spikeKeywords,
     updated_issues: updated,
     google_trends: googleTrendingKeywords.length,
+    daum_trends: daumTrendingKeywords.length,
   });
 }
 

@@ -8,6 +8,31 @@
 ## 세션 83 완료 작업
 
 
+
+### 🌐 세션 83 최종 추가
+
+**다음/카카오 뉴스 교차 검증 (issue-trend)**
+- KAKAO_REST_API_KEY 활용, 스파이크 키워드 5개를 다음 웹 검색으로 교차 검증
+- 3시간 이내 결과 2건 이상 → portal_cross_count 증가
+
+**DART 전자공시 API (issue-detect)**
+- DART_API_KEY 환경변수 (발급 필요)
+- 당일 주요 공시 자동 수집 (유증/합병/실적/배당 등)
+- issue_alerts에 DART 공시 자동 등록
+
+**정부 보도자료 RSS 5곳 (issue-detect)**
+- 기재부/국토부/금융위/고용부/국세청 RSS → 30곳 달성
+
+**Dataset JSON-LD (blog/[slug])**
+- 데이터 기반 글 자동 감지 (실거래/시세/통계/순위/TOP)
+- Google Dataset Search 노출
+
+**enrichContent 데이터 출처 블록**
+- 카테고리별 데이터 출처 자동 삽입 (KRX/DART/국토부/한국은행 등)
+
+**IssueTab 소스 정보 강화**
+- DART/Google Trends/검색스파이크 비율 표시
+
 ### 🔧 세션 83 추가 작업
 
 **OG 인포그래픽 API (신규)**

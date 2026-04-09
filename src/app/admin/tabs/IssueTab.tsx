@@ -235,7 +235,7 @@ export default function IssueTab() {
                     {issue.draft_title || issue.title}
                   </div>
                   <div style={{ fontSize: 11, color: '#64748b', marginTop: 4 }}>
-                    {timeAgo(issue.detected_at)} · {(issue.related_entities || []).join(', ')} · {(issue.detected_keywords || []).slice(0, 3).join(', ')}{(issue as any).raw_data?.portal_cross_count >= 2 ? ` · 🌐${(issue as any).raw_data.portal_cross_count}포털` : ''}
+                    {timeAgo(issue.detected_at)} · {(issue.related_entities || []).join(', ')} · {(issue.detected_keywords || []).slice(0, 3).join(', ')}{(issue as any).raw_data?.portal_cross_count >= 2 ? ` · 🌐${(issue as any).raw_data.portal_cross_count}포털` : ''}{(issue as any).raw_data?.search_spike ? ` · 📈${(issue as any).raw_data.search_spike}%` : ''}{issue.source_urls?.[0]?.includes('dart') ? ' · 📋DART' : ''}{issue.source_urls?.[0]?.includes('trends.google') ? ' · 🔍Google' : ''}
                   </div>
                 </div>
 
