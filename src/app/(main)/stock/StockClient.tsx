@@ -242,9 +242,9 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
           <span style={{ fontSize: 17, fontWeight: 900, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.5px' }}>
             {s.price === 0 ? '—' : isGlobal ? `$${Number(s.price)?.toFixed(2)}` : fmt(Number(s.price))}
           </span>
-          {!isStale && Number(s.price) > 0 && (
-            <span style={{ fontSize: 12, fontWeight: 800, color: stockColor(pct, !isGlobal), padding: '1px 6px', borderRadius: 5, background: `${barColor}12` }}>
-              {pct > 0 ? `▲ ${pct.toFixed(2)}%` : pct < 0 ? `▼ ${Math.abs(pct).toFixed(2)}%` : '전일종가'}
+          {Number(s.price) > 0 && (
+            <span style={{ fontSize: 12, fontWeight: 800, color: isStale ? 'var(--text-tertiary)' : stockColor(pct, !isGlobal), padding: '1px 6px', borderRadius: 5, background: isStale ? 'var(--bg-hover)' : `${barColor}12` }}>
+              {isStale ? '전일종가' : pct > 0 ? `▲ ${pct.toFixed(2)}%` : pct < 0 ? `▼ ${Math.abs(pct).toFixed(2)}%` : '전일종가'}
             </span>
           )}
         </div>
