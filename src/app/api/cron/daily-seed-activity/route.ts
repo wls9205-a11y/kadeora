@@ -148,8 +148,8 @@ async function handler(_req: NextRequest) {
 
       if (recentBlog && recentBlog.length > 0) {
         const blog = pick(recentBlog);
-        await sb.from('blog_comments').insert({
-          blog_id: blog.id,
+        await (sb as any).from('blog_comments').insert({
+          blog_post_id: blog.id,
           user_id: user.id,
           content: pick(comments),
           created_at: new Date(Date.now() - randInt(0, 180) * 60000).toISOString(),
