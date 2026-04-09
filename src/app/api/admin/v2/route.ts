@@ -465,7 +465,7 @@ export async function GET(req: NextRequest) {
     if (tab === 'users') {
       const [realUsersR, interestsR, bookmarksR, watchlistR, searchesR, sharesR, pwaR, totalRealR, emailSubsR] = await Promise.all([
         sb.from('profiles')
-          .select('id, nickname, provider, created_at, last_active_at, grade, points, residence_city, onboarded, profile_completed, interests, is_seed, first_mission_completed, signup_source')
+          .select('id, nickname, provider, created_at, last_active_at, grade, points, residence_city, residence_district, onboarded, profile_completed, interests, is_seed, first_mission_completed, signup_source, gender, age_group, birth_year, marketing_agreed, is_premium, streak_days, influence_score')
           .neq('is_ghost', true).neq('is_deleted', true)
           .order('created_at', { ascending: false }).limit(50),
         sb.from('apt_site_interests')

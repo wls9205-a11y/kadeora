@@ -95,6 +95,9 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
   return (
     <div style={{display:'flex',flexDirection:'column',gap:6}}>
 
+      {/* ═══ 🚀 전체 최신화 — 최상단 ═══ */}
+      <GodBtn/>
+
       {/* ═══ 🔥 오늘 핵심 KPI 히어로 ═══ */}
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6}}>
         <div style={{background:'linear-gradient(135deg,rgba(16,185,129,0.12),rgba(12,21,40,0.8))',border:'1px solid rgba(16,185,129,0.2)',borderRadius:14,padding:'14px 16px',textAlign:'center'}}>
@@ -558,9 +561,6 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
           </div>
         ))}
       </div>
-
-      {/* ═══ 🚀 전체 최신화 ═══ */}
-      <GodBtn/>
 
       {/* ═══ 5버튼 ═══ */}
       <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:4}}>
