@@ -17,7 +17,7 @@ const STEPS = [
   { key: 'nickname', label: '닉네임', check: (p: ProfileData) => !!p.nickname },
   { key: 'region', label: '지역 설정', check: (p: ProfileData) => !!p.region_text },
   { key: 'age', label: '연령대', check: (p: ProfileData) => !!p.age_group },
-  { key: 'bio', label: '자기소개', check: (p: ProfileData) => !!p.bio && p.bio.length > 5 },
+  { key: 'bio', label: '자기소개', check: (p: ProfileData) => !!p.bio && p.bio.length > 1 },
   { key: 'avatar', label: '프로필 사진', check: (p: ProfileData) => !!p.avatar_url },
 ];
 

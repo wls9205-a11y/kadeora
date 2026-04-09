@@ -19,7 +19,7 @@ export async function GET() {
     !!profile.nickname,
     !!profile.region_text,
     !!profile.age_group,
-    !!profile.bio && profile.bio.length > 5,
+    !!profile.bio && profile.bio.length > 1,
     !!profile.avatar_url,
   ];
   const allDone = steps.every(Boolean);
