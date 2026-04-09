@@ -227,19 +227,19 @@ export async function safeBlogInsert(
     const { data: inserted, error } = await admin
       .from('blog_posts')
       .upsert(insertPayload, { onConflict: 'slug', ignoreDuplicates: true })
-      .select('id')
-      .single();
+      .select('id');
 
     if (error) {
-      // ignoreDuplicates=true가 conflict 시 빈 결과 반환 → 에러 아님
-      if (error.code === 'PGRST116') {
-        return { success: false, reason: 'duplicate_slug' };
-      }
       console.error(`[safeBlogInsert] Insert error for "${data.title}" (${data.category}, ${enrichedContent.length}자):`, error.message, '| code:', error.code, '| details:', error.details);
       return { success: false, reason: 'error', message: error.message };
     }
 
-    return { success: true, id: inserted?.id };
+    // ignoreDuplicates=true → 중복 시 빈 배열 반환
+    if (!inserted || inserted.length === 0) {
+      return { success: false, reason: 'duplicate_slug' };
+    }
+
+    return { success: true, id: inserted[0]?.id };
   } catch (err: any) {
     console.error(`[safeBlogInsert] Exception for "${data.title}":`, err.message);
     return { success: false, reason: 'error' };
