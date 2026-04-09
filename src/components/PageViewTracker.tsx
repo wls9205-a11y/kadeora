@@ -25,6 +25,15 @@ export default function PageViewTracker() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ visitor_id: vid, path: pathname, referrer: document.referrer || null }),
       }).catch(() => {});
+
+      // GA4 SPA 페이지뷰 추적
+      const w = window as any;
+      if (typeof w.gtag === 'function') {
+        w.gtag('event', 'page_view', {
+          page_path: pathname,
+          page_location: `https://kadeora.app${pathname}`,
+        });
+      }
     } catch {}
   }, [pathname]);
 

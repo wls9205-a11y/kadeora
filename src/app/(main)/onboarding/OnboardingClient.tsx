@@ -61,6 +61,8 @@ export default function OnboardingClient() {
     }
 
     trackConversion('cta_complete', 'onboarding_finish');
+    // GA4 표준 sign_up 이벤트
+    try { (window as any).gtag?.('event', 'sign_up', { method: 'onboarding' }); } catch {}
     router.replace(returnUrl);
   };
 
