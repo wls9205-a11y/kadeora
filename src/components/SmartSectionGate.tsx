@@ -54,6 +54,10 @@ export default function SmartSectionGate({ htmlContent, slug, category }: Props)
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
 
+  // 게이트 노출 추적 (마운트 후, 비로그인 시에만)
+  const shouldGate = mounted && !loading && !userId;
+  useEffect(() => { if (shouldGate) trackCTA('view', 'content_gate', { category }); }, [shouldGate, category]);
+
   // SSR 또는 로그인 → 전체 표시
   if (!mounted || loading || userId) {
     return <div dangerouslySetInnerHTML={{ __html: htmlContent }} />;
@@ -92,9 +96,6 @@ export default function SmartSectionGate({ htmlContent, slug, category }: Props)
 
   const vp = VALUE_PROPS[category === 'unsold' ? 'apt' : category || ''] || VALUE_PROPS.default;
   const loginUrl = `/login?redirect=${encodeURIComponent(pathname)}&source=content_gate`;
-
-  // 게이트 노출 추적 (1회만)
-  useEffect(() => { trackCTA('view', 'content_gate', { category }); }, [category]);
 
   return (
     <>
