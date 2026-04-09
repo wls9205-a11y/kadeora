@@ -3,7 +3,7 @@ import { withCronAuth } from '@/lib/cron-auth';
 import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
-export const maxDuration = 60;
+export const maxDuration = 120;
 
 /**
  * 가격 데이터 자동 싱크 크론

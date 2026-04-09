@@ -12,6 +12,7 @@ import BlogFaqAccordion from '@/components/BlogFaqAccordion';
 import BlogToc from '@/components/BlogToc';
 import BlogActions from '@/components/BlogActions';
 import BlogBookmarkButton from '@/components/BlogBookmarkButton';
+import BlogServiceWidget from '@/components/BlogServiceWidget';
 import { getAvatarColor } from '@/lib/avatar';
 import { parseFaqFromContent } from '@/lib/blog-faq-parser';
 import { timeAgo } from '@/lib/format';
@@ -726,6 +727,9 @@ export default async function BlogDetailPage({ params }: Props) {
             <ShareButtons title={`${post.title} — 카더라 블로그`} postId={slug} content={post.excerpt || post.meta_description || undefined} category={post.category} />
           </div>
         </div>
+
+        {/* 관련 서비스 크로스링크 */}
+        <BlogServiceWidget category={post.category} tags={post.tags ?? undefined} sourceRef={post.source_ref} />
       </article>
 
       {/* 세션74: Two-Step 마이크로 커밋먼트 CTA */}

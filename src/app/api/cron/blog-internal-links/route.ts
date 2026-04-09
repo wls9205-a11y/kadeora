@@ -17,27 +17,40 @@ export async function GET(req: NextRequest) {
 
   const result = await withCronLogging('blog-internal-links', async () => {
     const sb = getSupabaseAdmin();
-    const BATCH = 2000;
+    const BATCH = 500;
 
-    // related_slugs 없는 게시글 배치
+    // 먼저 related_slugs가 없는 글만 카운트 (빠른 체크)
+    const { count: pendingCount } = await sb.from('blog_posts')
+      .select('id', { count: 'exact', head: true })
+      .eq('is_published', true)
+      .is('related_slugs', null);
+
+    if (!pendingCount || pendingCount === 0) {
+      return { processed: 0, created: 0, failed: 0, metadata: { reason: 'all_linked' } };
+    }
+
+    // 처리할 대상만 로드
+    const { data: targets } = await sb.from('blog_posts')
+      .select('id, slug, category, tags, title, source_ref')
+      .eq('is_published', true)
+      .is('related_slugs', null)
+      .order('view_count', { ascending: false })
+      .limit(BATCH);
+
+    if (!targets?.length) return { processed: 0, created: 0, failed: 0, metadata: { reason: 'all_linked' } };
+
+    // 매칭용 인덱스: 같은 카테고리 글 로드
+    const categories = [...new Set(targets.map((t: any) => t.category))];
     const { data: allPosts } = await sb.from('blog_posts')
       .select('id, slug, category, tags, title, source_ref')
       .eq('is_published', true)
-      .order('view_count', { ascending: false })  // 인기글 우선
-      .limit(BATCH + 500);
-
-    if (!allPosts?.length) return { processed: 0, created: 0, failed: 0 };
-
-    const targets = allPosts.filter((p: any) => {
-      const rs = (p as any).related_slugs;
-      return !rs || (Array.isArray(rs) && rs.length === 0);
-    }).slice(0, BATCH);
-
-    if (!targets.length) return { processed: 0, created: 0, failed: 0, metadata: { reason: 'all_linked' } };
+      .in('category', categories)
+      .order('view_count', { ascending: false })
+      .limit(2000);
 
     // 카테고리별 게시글 인덱스 (성능 최적화)
     const catIndex: Record<string, any[]> = {};
-    for (const p of allPosts) {
+    for (const p of (allPosts || [])) {
       if (!catIndex[p.category]) catIndex[p.category] = [];
       catIndex[p.category].push(p);
     }
