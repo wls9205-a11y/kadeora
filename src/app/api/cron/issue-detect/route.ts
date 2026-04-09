@@ -297,7 +297,7 @@ async function handler(_req: NextRequest) {
     const { items, keywords, category, entities } = group;
 
     // 키워드 가중치 체크: 너무 약한 키워드만 있으면 스킵
-    if (keywordWeight(keywords) < 2) continue;
+    if (keywordWeight(keywords) < 1) continue;
 
     // 중복 체크
     const { isDup, existingId } = await isDuplicate(sb, entities, items[0].title);
