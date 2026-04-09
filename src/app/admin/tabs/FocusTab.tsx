@@ -421,6 +421,8 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
         <div style={{fontSize:10,fontWeight:700,color:'rgba(255,255,255,0.4)',marginBottom:8}}>🔌 핵심 기능 사용 현황</div>
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:6}}>
           {[
+            {name:'푸시구독',val:k.pushSubs??0,icon:'🔔'},
+            {name:'이메일구독',val:k.emailSubs??0,icon:'📧'},
             {name:'관심단지',val:fh.aptBookmarks??0,icon:'🏠'},
             {name:'블로그저장',val:fh.blogBookmarks??0,icon:'📌'},
             {name:'관심종목',val:fh.stockWatchlist??0,icon:'⭐'},
@@ -480,7 +482,7 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
           </div>
           <div style={{display:'flex',justifyContent:'space-between',fontSize:10,padding:'2px 0'}}>
             <span style={{color:'rgba(255,255,255,0.35)'}}>크론/일</span>
-            <span style={{fontWeight:700,color:'rgba(255,255,255,0.5)'}}>{k.cronSuccess+k.cronFail}</span>
+            <span style={{fontWeight:700,color:'rgba(255,255,255,0.5)'}}>{k.cronSuccess+k.cronFail} <span style={{fontSize:8,color:'rgba(255,255,255,0.2)'}}>/ 90개</span></span>
           </div>
           {fcn>0&&<div style={{marginTop:4}}>
             {Object.entries(fc||{}).slice(0,3).map(([name,info]:any)=>(
