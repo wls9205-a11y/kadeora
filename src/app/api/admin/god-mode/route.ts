@@ -51,6 +51,7 @@ const CRON_GROUPS = {
     '/api/cron/apt-price-sync',
     '/api/cron/auto-verify-households',
     '/api/cron/naver-complex-sync',
+    '/api/cron/sync-complex-profiles',
   ],
   ai: [
     '/api/cron/apt-ai-summary',
@@ -108,6 +109,8 @@ const CRON_GROUPS = {
     '/api/cron/refresh-mv',
     '/api/cron/push-apt-deadline',
     '/api/cron/push-content-alert',
+    '/api/cron/push-daily-reminder',
+    '/api/cron/check-price-alerts',
     '/api/cron/indexnow-mass',
     '/api/cron/indexnow-new-content',
     '/api/cron/blog-internal-links',
