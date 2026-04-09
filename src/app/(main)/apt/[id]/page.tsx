@@ -19,6 +19,7 @@ const AptPriceTrendChart = dynamic(() => import('@/components/charts/AptPriceTre
 const InterestRegistration = dynamic(() => import('@/components/InterestRegistration'));
 import InlineCTA from '@/components/InlineCTA';
 import LoginGate from '@/components/LoginGate';
+import AptBookmarkButton from '@/components/AptBookmarkButton';
 const RegulationBadges = dynamic(() => import('@/components/RegulationBadges'));
 const CostSimulator = dynamic(() => import('@/components/CostSimulator'));
 const ContentLock = dynamic(() => import("@/components/ContentLock"));
@@ -468,7 +469,7 @@ export default async function AptUnifiedPage({ params }: Props) {
         <KakaoDirectShare title={`${name} ${tLabel[sType]} — 분양가·청약일정·모집공고 한눈에`} description={`${region} ${name} 상세 정보를 카더라에서 확인하세요`} pagePath={`/apt/${slug}`} />
         <ShareButtons title={`${name} ${tLabel[sType]} — 분양가·청약일정·모집공고 한눈에`} postId={slug} />
         <div style={{ flex: 1 }} />
-        <span style={{ fontSize: 10, color: 'var(--text-tertiary)', whiteSpace: 'nowrap' }}>공유 +5P</span>
+        {sub?.id && <AptBookmarkButton aptId={String(sub.id)} aptName={name} />}
       </div>
 
       {/* Key metrics — 시각 강화 대시보드 */}

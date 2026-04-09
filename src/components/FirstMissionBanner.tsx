@@ -4,6 +4,8 @@ import { useAuth } from '@/components/AuthProvider';
 import Link from 'next/link';
 
 interface MissionProgress {
+  attendance: boolean;
+  bookmark: boolean;
   watchlist: boolean;
   interest: boolean;
   post: boolean;
@@ -11,10 +13,10 @@ interface MissionProgress {
 }
 
 const MISSIONS = [
-  { key: 'watchlist', label: '관심 종목 등록', points: 50, href: '/stock', icon: '📈' },
-  { key: 'interest', label: '관심 현장 등록', points: 50, href: '/apt', icon: '🏠' },
-  { key: 'post', label: '첫 게시글 작성', points: 100, href: '/write', icon: '📝' },
-  { key: 'comment', label: '첫 댓글 남기기', points: 30, href: '/feed', icon: '💬' },
+  { key: 'attendance', label: '출석 체크', points: 10, href: '#', icon: '📅', desc: '상단 배너에서 바로!' },
+  { key: 'bookmark', label: '글 저장하기', points: 10, href: '/blog', icon: '📌', desc: '📌 버튼 클릭' },
+  { key: 'watchlist', label: '관심 종목 등록', points: 50, href: '/stock', icon: '📈', desc: '☆ 버튼 클릭' },
+  { key: 'interest', label: '관심 현장 등록', points: 50, href: '/apt', icon: '🏠', desc: '❤️ 버튼 클릭' },
 ] as const;
 
 export default function FirstMissionBanner() {
@@ -28,7 +30,7 @@ export default function FirstMissionBanner() {
     if (sessionStorage.getItem('kd_mission_dismissed')) { setDismissed(true); return; }
     fetch('/api/profile/mission').then(r => r.json()).then(d => {
       if (d.first_mission_completed) { setCompleted(true); return; }
-      setProgress(d.progress || { watchlist: false, interest: false, post: false, comment: false });
+      setProgress(d.progress || { attendance: false, bookmark: false, watchlist: false, interest: false, post: false, comment: false });
     }).catch(() => {});
   }, [userId]);
 
@@ -69,7 +71,7 @@ export default function FirstMissionBanner() {
             <span style={{ fontSize: 14 }}>{progress[m.key as keyof MissionProgress] ? '✅' : m.icon}</span>
             <div style={{ flex: 1 }}>
               <div style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{m.label}</div>
-              <div style={{ color: 'var(--text-tertiary)', fontSize: 10 }}>+{m.points}P</div>
+              <div style={{ color: 'var(--text-tertiary)', fontSize: 10 }}>{m.desc}</div>
             </div>
           </Link>
         ))}

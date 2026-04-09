@@ -90,6 +90,20 @@ export async function POST(req: NextRequest) {
       await sb.from('notifications').insert({ user_id: user.id, type: 'system', content: msg });
     } catch (e) { console.error(`[${new URL(req.url).pathname}]`, e); }
 
+    // 첫 미션: 출석 체크
+    try {
+      const { data: prof } = await (sb as any).from('profiles').select('first_mission_completed, first_mission_progress').eq('id', user.id).single();
+      if (prof && !prof.first_mission_completed) {
+        const prog = prof.first_mission_progress || {};
+        if (!prog.attendance) {
+          prog.attendance = true;
+          const done = Object.values(prog).filter(Boolean).length;
+          if (done >= 2) await getSupabaseAdmin().rpc('award_points', { p_user_id: user.id, p_amount: 200, p_reason: '첫 미션 보너스' });
+          await (sb as any).from('profiles').update({ first_mission_progress: prog, first_mission_completed: done >= 2 }).eq('id', user.id);
+        }
+      }
+    } catch {}
+
     return NextResponse.json({ streak, total_days: totalDays, points_earned: pointsEarned, bonus });
   } catch {
     return NextResponse.json({ error: '서버 오류' }, { status: 500 });

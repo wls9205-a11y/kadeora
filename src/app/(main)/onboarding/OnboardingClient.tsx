@@ -54,7 +54,7 @@ export default function OnboardingClient() {
           trackConversion('cta_complete', 'onboarding_push');
         }
       }
-    } catch { }
+    } catch (e) { console.error('[onboarding-push]', e); }
     setPushAsked(true);
   };
 

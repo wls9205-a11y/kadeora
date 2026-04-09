@@ -74,6 +74,21 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ isBookmarked: false });
   } else {
     await admin.from('blog_bookmarks').insert({ blog_post_id: blogPostId, user_id: user.id });
+
+    // 첫 미션: 글 저장
+    try {
+      const { data: prof } = await (admin as any).from('profiles').select('first_mission_completed, first_mission_progress').eq('id', user.id).single();
+      if (prof && !prof.first_mission_completed) {
+        const prog = (prof as any).first_mission_progress || {};
+        if (!prog.bookmark) {
+          prog.bookmark = true;
+          const done = Object.values(prog).filter(Boolean).length;
+          if (done >= 2) await (admin as any).rpc('award_points', { p_user_id: user.id, p_amount: 200, p_reason: '첫 미션 보너스' });
+          await (admin as any).from('profiles').update({ first_mission_progress: prog, first_mission_completed: done >= 2 }).eq('id', user.id);
+        }
+      }
+    } catch {}
+
     return NextResponse.json({ isBookmarked: true });
   }
 }
