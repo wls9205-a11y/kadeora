@@ -60,7 +60,7 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
   if(ld)return<div style={{textAlign:'center',padding:80,color:'rgba(255,255,255,0.3)',fontSize:13}}>불러오는 중...</div>;
   if(!d)return<div style={{textAlign:'center',padding:80,fontSize:13}}>⚠️ 로드 실패</div>;
 
-  const{healthScore:hs=0,kpi:k={} as any,growth:g={} as any,extended:x={} as any,failedCrons:fc={},recentActivity:ra=[],dailyTrend:dt=[],categoryStats:cs=[],trafficDetail:td={} as any,ctaBreakdown:cb={} as any,signupSources:ss={} as any,retention:ret=null as any,featureHealth:fh={} as any}=d;
+  const{healthScore:hs=0,kpi:k={} as any,growth:g={} as any,extended:x={} as any,failedCrons:fc={},recentActivity:ra=[],dailyTrend:dt=[],categoryStats:cs=[],trafficDetail:td={} as any,ctaBreakdown:cb={} as any,signupSources:ss={} as any,retention:ret=null as any,featureHealth:fh={} as any,behavior:bv=null as any}=d;
   const fcn=Object.keys(fc||{}).length;
   const cr=pct(k.cronSuccess,k.cronSuccess+k.cronFail);
   const ctr=(g.ctaViews7d||0)>0?((g.ctaClicks7d||0)/(g.ctaViews7d||1)*100).toFixed(1):'0';
@@ -449,6 +449,25 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
           ))}
         </div>
       </div>
+
+      {/* ═══ 행동 분석 (user_events) ═══ */}
+      {bv && (bv.eventsToday > 0 || bv.avgScroll > 0) && <div style={CS.card}>
+        <div style={{fontSize:10,fontWeight:700,color:'rgba(255,255,255,0.4)',marginBottom:8}}>📊 행동 분석 (오늘)</div>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:6}}>
+          {[
+            {l:'이벤트',v:bv.eventsToday||0,c:'#3B7BF6',i:'⚡'},
+            {l:'평균 스크롤',v:bv.avgScroll>0?`${bv.avgScroll}%`:'—',c:bv.avgScroll>=50?'#10B981':bv.avgScroll>=25?'#F59E0B':'#EF4444',i:'📜'},
+            {l:'평균 체류',v:bv.avgDwellSec>0?bv.avgDwellSec>=60?`${Math.floor(bv.avgDwellSec/60)}분${bv.avgDwellSec%60}초`:`${bv.avgDwellSec}초`:'—',c:bv.avgDwellSec>=30?'#10B981':bv.avgDwellSec>=10?'#F59E0B':'#EF4444',i:'⏱️'},
+          ].map(kk=>(
+            <div key={kk.l} style={{textAlign:'center',padding:'8px 0',background:'rgba(255,255,255,0.02)',borderRadius:8}}>
+              <div style={{fontSize:14,marginBottom:2}}>{kk.i}</div>
+              <div style={{fontSize:16,fontWeight:800,color:kk.c,lineHeight:1}}>{kk.v}</div>
+              <div style={{fontSize:8,color:'rgba(255,255,255,0.25)',marginTop:3}}>{kk.l}</div>
+            </div>
+          ))}
+        </div>
+        {(bv.scrollSamples>0||bv.dwellSamples>0)&&<div style={{fontSize:9,color:'rgba(255,255,255,0.15)',marginTop:6,textAlign:'center'}}>스크롤 {bv.scrollSamples}샘플 · 체류 {bv.dwellSamples}샘플</div>}
+      </div>}
 
       {/* ═══ 공유 현황 ═══ */}
       {<div style={CS.card}>
