@@ -7,6 +7,29 @@
 
 ## 세션 83 완료 작업
 
+
+### 🔧 세션 83 추가 작업
+
+**OG 인포그래픽 API (신규)**
+- `/api/og-infographic` — 6카테고리별 인포그래픽 이미지 동적 생성 (800×630)
+- 파라미터: type, title, items, category
+- ImageGallery JSON-LD 3→4장 확장
+
+**HowTo JSON-LD 추가**
+- 가이드 글 자동 감지 (tags/title에 '가이드', '방법', '절차' 등)
+- H2 헤딩에서 단계 자동 추출 → HowTo 스키마 자동 삽입
+
+**Image Sitemap 강화**
+- 포스트당 1장→2장 (커버 + 인포그래픽)
+
+**News Sitemap → robots.txt 추가**
+
+**GOD MODE 업데이트**
+- system 그룹에 blog-fix-existing 추가
+
+**DB 마이그레이션**
+- issue_alerts.infographic_data jsonb 컬럼 추가
+
 ### 🔍 이슈 선점 자동화 v2 전면 개편
 
 **issue-scoring.ts — 6카테고리 확장**

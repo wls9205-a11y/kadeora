@@ -517,7 +517,26 @@ export default async function BlogDetailPage({ params }: Props) {
   // FAQ 파싱
   const faqItems = parseFaqFromContent(cleanContent);
   const isFaq = (post.tags ?? []).some((t: string) => t.toLowerCase().includes('faq') || t === '자주묻는질문');
-  const showFaq = faqItems.length >= 1;  // 1개 이상이면 FAQ 스키마 출력 (JSON-LD 리치스니펫 극대화)
+
+  // HowTo JSON-LD (가이드 글 감지)
+  const isGuide = (post.tags || []).some((t: string) => ['가이드', '방법', '절차', '신청', '계산', '하는법', '설정'].includes(t))
+    || /방법|가이드|하는 법|신청|절차|단계/.test(post.title);
+  const howtoSteps = isGuide ? (post.content || '').match(/^## \d+[.\s].*$/gm)?.map((h: string, i: number) => ({
+    '@type': 'HowToStep' as const,
+    name: h.replace(/^## \d+[.\s]*/, '').trim(),
+    text: h.replace(/^## \d+[.\s]*/, '').trim(),
+    position: i + 1,
+  })) : null;
+  const howtoSchema = howtoSteps && howtoSteps.length >= 2 ? {
+    '@context': 'https://schema.org',
+    '@type': 'HowTo',
+    name: post.title,
+    description: descClean,
+    step: howtoSteps.slice(0, 8),
+    image: ogImage,
+  } : null;
+
+    const showFaq = faqItems.length >= 1;  // 1개 이상이면 FAQ 스키마 출력 (JSON-LD 리치스니펫 극대화)
   const faqSchema = showFaq && faqItems.length > 0 ? {
     '@context': 'https://schema.org', '@type': 'FAQPage',
     mainEntity: faqItems.map(f => ({
@@ -542,6 +561,7 @@ export default async function BlogDetailPage({ params }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       {faqSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />}
+      {howtoSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howtoSchema) }} />}
 
       <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-lg)', flexWrap: 'wrap' }}>
         <Link href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>홈</Link>
@@ -565,6 +585,7 @@ export default async function BlogDetailPage({ params }: Props) {
                 { '@type': 'ImageObject', url: post.cover_image.startsWith('/') ? `${SITE}${post.cover_image}` : post.cover_image, name: post.image_alt || post.title, width: 1200, height: 630, position: 1 },
                 { '@type': 'ImageObject', url: ogSquare, name: `${post.title} — 카더라 블로그`, width: 630, height: 630, position: 2 },
                 { '@type': 'ImageObject', url: `${SITE}/api/og?title=${encodeURIComponent((post.title || '').slice(0, 40))}&category=${post.category}&design=2`, name: `${post.title} 분석`, width: 1200, height: 630, position: 3 },
+                { '@type': 'ImageObject', url: `${SITE}/api/og-infographic?title=${encodeURIComponent((post.title || '').slice(0, 40))}&category=${post.category}&type=summary`, name: `${post.title} 인포그래픽`, width: 800, height: 630, position: 4 },
               ],
             })}} />
           );

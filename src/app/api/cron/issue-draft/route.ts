@@ -255,6 +255,7 @@ async function handler(_req: NextRequest) {
     draft_content: article.content,
     draft_slug: article.slug,
     draft_keywords: article.keywords,
+    infographic_data: article.infographic_data || {},
     draft_template: selectDraftTemplate(issue.category, issue.issue_type),
     fact_check_passed: check.passed,
     fact_check_details: check.details,

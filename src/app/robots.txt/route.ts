@@ -127,6 +127,7 @@ Disallow: /api/
 
 # ===== Sitemaps =====
 Sitemap: https://kadeora.app/sitemap.xml
+Sitemap: https://kadeora.app/news-sitemap.xml
 Sitemap: https://kadeora.app/image-sitemap.xml
 Host: https://kadeora.app
 

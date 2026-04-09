@@ -2,6 +2,7 @@ export const maxDuration = 30;
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronAuth } from '@/lib/cron-auth';
+import { withCronLogging } from '@/lib/cron-logger';
 
 /**
  * issue-trend 크론 — 네이버 검색 트렌드 모니터링

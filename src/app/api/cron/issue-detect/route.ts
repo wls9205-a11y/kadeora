@@ -2,6 +2,7 @@ export const maxDuration = 60;
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronAuth } from '@/lib/cron-auth';
+import { withCronLogging } from '@/lib/cron-logger';
 import { scoreIssue, extractKeywords, detectIssueType, keywordWeight } from '@/lib/issue-scoring';
 import type { IssueCandidate } from '@/lib/issue-scoring';
 

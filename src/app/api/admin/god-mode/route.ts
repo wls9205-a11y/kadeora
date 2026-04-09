@@ -143,6 +143,7 @@ const CRON_GROUPS = {
     '/api/cron/blog-subscription-alert',
     '/api/cron/weekly-digest',
     '/api/cron/welcome-nudge',
+    '/api/cron/blog-fix-existing',
   ],
 };
 

@@ -248,6 +248,11 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
       <image:title>${imgTitle}</image:title>
       <image:caption>${imgAlt}</image:caption>
     </image:image>
+    <image:image>
+      <image:loc>${BASE}/api/og-infographic?title=${encodeURIComponent((b.title || '').slice(0, 40))}&amp;category=${b.category || 'blog'}&amp;type=summary</image:loc>
+      <image:title>${escXml(b.title + ' 인포그래픽')}</image:title>
+      <image:caption>${imgAlt}</image:caption>
+    </image:image>
   </url>`;
       }).join('\n');
 
