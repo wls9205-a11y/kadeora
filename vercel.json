@@ -446,6 +446,22 @@
     {
       "path": "/api/cron/aggregate-user-events",
       "schedule": "0 17 * * *"
+    },
+    {
+      "path": "/api/cron/seo-indexnow-submit",
+      "schedule": "0 21 * * *"
+    },
+    {
+      "path": "/api/cron/seo-content-boost",
+      "schedule": "0 17 * * 0"
+    },
+    {
+      "path": "/api/cron/blog-subscription-alert",
+      "schedule": "0 23 * * *"
+    },
+    {
+      "path": "/api/cron/seo-internal-links",
+      "schedule": "0 18 * * 3"
     }
   ]
 }
