@@ -10,6 +10,7 @@ export const metadata: Metadata = {
   description: DESC,
   keywords: ['청약 가점 계산기', '청약 점수 계산기', '청약 가점 만점', '무주택기간 계산', '부양가족 점수', '청약통장 가입기간', '배우자 통장 합산', '청약 당첨 전략', '2026 청약', '아파트 청약 가점'],
   alternates: { canonical: URL },
+  robots: { index: true, follow: true, 'max-snippet': -1 as const, 'max-image-preview': 'large' as const },
   openGraph: {
     title: '2026 청약 가점 계산기 — 카더라',
     description: '무주택·부양가족·통장 가점 자동 계산 + 지역별 커트라인 + 배우자 통장 합산',

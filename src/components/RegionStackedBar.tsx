@@ -101,11 +101,12 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
   return (
     <div style={{ marginBottom: 'var(--sp-sm)', maxWidth: '100%', overflow: 'hidden' }}>
       {/* ── KPI 카드 (클릭 → 탭 전환) ── */}
-      <div className="kd-region-kpi" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 4, marginBottom: 6 }}>
+      <div className="kd-region-kpi" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 4, marginBottom: 6, position: 'sticky', top: 48, zIndex: 30, background: 'var(--bg-base, #050A18)', paddingTop: 4, paddingBottom: 4 }}>
         {KPI_CFG.map(k => {
           const isAct = activeTab === k.key;
           return (
             <button key={k.key} onClick={() => k.key === 'complex' ? router.push('/apt/complex') : onTabChange?.(k.key)}
+              aria-current={isAct ? 'page' : undefined}
               style={{
                 padding: '8px 4px', borderRadius: 'var(--radius-sm)', textAlign: 'center', cursor: 'pointer',
                 background: isAct ? 'var(--bg-hover)' : 'var(--bg-surface)',

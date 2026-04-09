@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import SearchInput from '@/components/SearchInput';
@@ -26,6 +26,7 @@ import TossTeaser from '@/components/TossTeaser';
 
 export default function AptClient({ apts, unsold = [], redevelopment = [], transactions = [], unsoldSummary, alertCounts = {}, regionStats = [], unsoldMonthly = [], tradeMonthly = [], ongoingApts = [], redevTotalCount = 0, tradeTotalCount = 0, tradeByRegion = {}, redevByRegion = {}, subTotalCount = 0, unsoldTotalCount = 0, ongoingTotalCount = 0, dataFreshness = { sub: '', trade: '', unsold: '', redev: '' }, redevRedevCount = 0, redevRebuildCount = 0 }: { apts: any[]; unsold?: any[]; redevelopment?: any[]; transactions?: any[]; unsoldSummary?: any; alertCounts?: Record<string, number>; lastRefreshed?: string | null; regionStats?: { name: string; total: number; open: number; upcoming: number; closed: number }[]; unsoldMonthly?: any[]; tradeMonthly?: any[]; ongoingApts?: any[]; redevTotalCount?: number; tradeTotalCount?: number; tradeByRegion?: Record<string, number>; redevByRegion?: Record<string, number>; subTotalCount?: number; unsoldTotalCount?: number; ongoingTotalCount?: number; dataFreshness?: { sub: string; trade: string; unsold: string; redev: string }; redevRedevCount?: number; redevRebuildCount?: number }) {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const tabParam = searchParams.get('tab');
   const validTabs = ['sub', 'ongoing', 'unsold', 'redev', 'trade'] as const;
   const initialTab = validTabs.includes(tabParam as typeof validTabs[number]) ? tabParam as typeof validTabs[number] : 'sub';
@@ -69,6 +70,8 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
   const handleTabChange = (tab: 'sub' | 'ongoing' | 'unsold' | 'redev' | 'trade') => {
     setActiveTab(tab);
     haptic('light');
+    const url = tab === 'sub' ? '/apt' : `/apt?tab=${tab}`;
+    router.replace(url, { scroll: false });
     window.scrollTo({ top: 0, behavior: 'smooth' });
     // Lazy fetch on first click
     if (tab === 'unsold' && !lazyUnsold) fetchTabData('unsold');

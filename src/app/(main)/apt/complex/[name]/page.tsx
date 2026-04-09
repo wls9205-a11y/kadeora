@@ -50,6 +50,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title,
     description,
     alternates: { canonical: `${SITE_URL}/apt/complex/${name}` },
+    robots: { index: true, follow: true, 'max-snippet': -1 as const, 'max-image-preview': 'large' as const },
     openGraph: {
       title: `${decoded} 실거래가·시세`,
       description: ogSubtitle + ` — ${region} ${sigungu}`,

@@ -15,6 +15,7 @@ export const metadata: Metadata = {
     images: [{ url: `${SITE}/api/og?title=${encodeURIComponent('부동산 통계 자료실')}&category=apt&design=2`, width: 1200, height: 630 }],
   },
   alternates: { canonical: `${SITE}/apt/data` },
+  robots: { index: true, follow: true, 'max-snippet': -1 as const, 'max-image-preview': 'large' as const },
   other: {
     'naver:author': '카더라',
     'naver:written_time': new Date().toISOString(),

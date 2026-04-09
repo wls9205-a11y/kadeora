@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   title: '부동산 지도',
   description: '전국 청약·분양·재개발·미분양 정보를 지도에서 한눈에 확인하세요. 지역별 시세, 청약 일정, 미분양 현황까지.',
   alternates: { canonical: SITE_URL + '/apt/map' },
+  robots: { index: true, follow: true, 'max-snippet': -1 as const, 'max-image-preview': 'large' as const },
   openGraph: {
     title: '부동산 지도',
     description: '전국 청약·분양·재개발·미분양 지도 보기',
