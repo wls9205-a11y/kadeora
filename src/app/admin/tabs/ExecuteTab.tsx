@@ -26,7 +26,7 @@ export default function ExecuteTab({ onNavigate }: { onNavigate: (t: any) => voi
 
   const runGodMode = useCallback(async (selectedMode: string) => {
     if (running) return;
-    if (!confirm(`${selectedMode === 'full' ? '108개 크론을 5단계로' : selectedMode + ' 그룹을'} 실행합니다. 계속하시겠습니까?`)) return;
+    if (!confirm(`${selectedMode === 'full' ? '91개 크론을 5단계로' : selectedMode + ' 그룹을'} 실행합니다. 계속하시겠습니까?`)) return;
 
     setRunning(true);
     setResults([]);
@@ -105,7 +105,7 @@ export default function ExecuteTab({ onNavigate }: { onNavigate: (t: any) => voi
           <>
             🚀 전체 최신화
             <div style={{ fontSize: 12, fontWeight: 400, opacity: 0.85, marginTop: 6 }}>
-              108개 크론 · 5단계 순차 실행 · 예상 ~5분
+              91개 크론 · 5단계 순차 실행 · 예상 ~5분
             </div>
           </>
         )}
@@ -187,7 +187,7 @@ export default function ExecuteTab({ onNavigate }: { onNavigate: (t: any) => voi
         <div className="adm-card" style={{ textAlign: 'center', padding: 24 }}>
           <div style={{ fontSize: 36, marginBottom: 8 }}>🚀</div>
           <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>전체 최신화 버튼을 누르면</div>
-          <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>108개 크론이 5단계로 순차 실행됩니다</div>
+          <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>91개 크론이 5단계로 순차 실행됩니다</div>
           <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>AI 크론은 Fire-and-Forget (백그라운드)</div>
           {lastRun && (
             <div style={{ marginTop: 14, padding: '10px 0', borderTop: '1px solid var(--border)', fontSize: 11, color: 'var(--text-tertiary)' }}>
