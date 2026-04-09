@@ -52,7 +52,7 @@ export default function NewsletterSubscribe({ category }: { category?: string })
   if (typeof window !== 'undefined' && localStorage.getItem('kd_newsletter_subscribed')) return null;
 
   return (
-    <div style={{
+    <div data-newsletter style={{
       margin: '24px 0', padding: '20px',
       background: 'var(--bg-surface)', border: '1px solid var(--border)',
       borderRadius: 'var(--radius-lg)',

@@ -244,7 +244,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
           </span>
           {!isStale && Number(s.price) > 0 && (
             <span style={{ fontSize: 12, fontWeight: 800, color: stockColor(pct, !isGlobal), padding: '1px 6px', borderRadius: 5, background: `${barColor}12` }}>
-              {pct > 0 ? '▲' : pct < 0 ? '▼' : '━'} {Math.abs(pct).toFixed(2)}%
+              {pct > 0 ? `▲ ${pct.toFixed(2)}%` : pct < 0 ? `▼ ${Math.abs(pct).toFixed(2)}%` : '전일종가'}
             </span>
           )}
         </div>
