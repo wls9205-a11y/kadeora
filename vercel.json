@@ -237,7 +237,7 @@
     },
     {
       "path": "/api/cron/batch-rewrite-submit",
-      "schedule": "0 4 * * *"
+      "schedule": "0 4,12,20 * * *"
     },
     {
       "path": "/api/cron/batch-rewrite-poll",

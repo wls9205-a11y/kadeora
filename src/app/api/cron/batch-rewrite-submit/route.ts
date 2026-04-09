@@ -28,13 +28,13 @@ export async function GET(req: NextRequest) {
       return { processed: 0, metadata: { reason: 'batch_in_progress', active_id: active[0].id } };
     }
 
-    // Priority: stock unrewritten → apt S/A tier unrewritten → apt existing low-quality rewrite → unsold/finance
+    // Priority: unrewritten B/A/S tier → apt re-rewrite
     const { data: posts } = await (admin as any).from('blog_posts')
       .select('id, title, content, category, slug, seo_score, seo_tier')
       .eq('is_published', true)
-      .in('seo_tier', ['S', 'A'])
-      .or('rewritten_at.is.null,and(category.eq.apt,rewritten_at.not.is.null)')
-      .order('seo_score', { ascending: false })
+      .in('seo_tier', ['S', 'A', 'B'])
+      .is('rewritten_at', null)
+      .order('view_count', { ascending: false })
       .limit(BATCH_SIZE);
 
     if (!posts || posts.length === 0) {
