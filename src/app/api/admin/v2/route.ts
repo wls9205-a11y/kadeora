@@ -156,6 +156,34 @@ export async function GET(req: NextRequest) {
         sb.from('redevelopment_projects').select('id', { count: 'exact', head: true }).eq('is_active', true),
       ]);
 
+      // CTA별 성과 (7일)
+      const { data: ctaBreakdownRaw } = await (sb as any).from('conversion_events')
+        .select('cta_name, event_type')
+        .gte('created_at', weekAgo);
+      const ctaBreakdown: Record<string, { views: number; clicks: number }> = {};
+      for (const e of (ctaBreakdownRaw || [])) {
+        if (!ctaBreakdown[e.cta_name]) ctaBreakdown[e.cta_name] = { views: 0, clicks: 0 };
+        if (e.event_type === 'cta_view') ctaBreakdown[e.cta_name].views++;
+        else if (e.event_type === 'cta_click') ctaBreakdown[e.cta_name].clicks++;
+      }
+
+      // 가입 귀속 (signup_source)
+      const { data: signupSourceRaw } = await sb.from('profiles')
+        .select('signup_source')
+        .neq('is_seed', true)
+        .not('signup_source', 'is', null);
+      const signupSources: Record<string, number> = {};
+      for (const p of (signupSourceRaw || [])) {
+        const s = p.signup_source || 'direct';
+        signupSources[s] = (signupSources[s] || 0) + 1;
+      }
+
+      // D7 리텐션 (최근 코호트)
+      const { data: retentionRaw } = await (sb as any).from('retention_cohort')
+        .select('cohort_week, cohort_size, d7_retained')
+        .order('cohort_week', { ascending: false }).limit(4);
+      const latestRetention = (retentionRaw || []).length > 0 ? retentionRaw[0] : null;
+
       return NextResponse.json({
         healthScore,
         scoreBreakdown: scores,
@@ -214,6 +242,14 @@ export async function GET(req: NextRequest) {
           })),
         ].sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime()).slice(0, 8),
         dailyTrend: dailyStats,
+        ctaBreakdown,
+        signupSources,
+        retention: latestRetention ? {
+          cohortWeek: latestRetention.cohort_week,
+          size: latestRetention.cohort_size,
+          d7: latestRetention.d7_retained,
+          d7Rate: latestRetention.cohort_size > 0 ? Math.round(latestRetention.d7_retained / latestRetention.cohort_size * 100) : 0,
+        } : null,
         trafficDetail: await (async () => {
           const todayStr = now.toISOString().slice(0, 10);
           const hourAgo = new Date(Date.now() - 3600000).toISOString();

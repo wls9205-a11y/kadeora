@@ -48,7 +48,7 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
   if(ld)return<div style={{textAlign:'center',padding:80,color:'rgba(255,255,255,0.3)',fontSize:13}}>불러오는 중...</div>;
   if(!d)return<div style={{textAlign:'center',padding:80,fontSize:13}}>⚠️ 로드 실패</div>;
 
-  const{healthScore:hs=0,kpi:k={} as any,growth:g={} as any,extended:x={} as any,failedCrons:fc={},recentActivity:ra=[],dailyTrend:dt=[],categoryStats:cs=[],trafficDetail:td={} as any}=d;
+  const{healthScore:hs=0,kpi:k={} as any,growth:g={} as any,extended:x={} as any,failedCrons:fc={},recentActivity:ra=[],dailyTrend:dt=[],categoryStats:cs=[],trafficDetail:td={} as any,ctaBreakdown:cb={} as any,signupSources:ss={} as any,retention:ret=null as any}=d;
   const fcn=Object.keys(fc||{}).length;
   const cr=pct(k.cronSuccess,k.cronSuccess+k.cronFail);
   const ctr=(g.ctaViews7d||0)>0?((g.ctaClicks7d||0)/(g.ctaViews7d||1)*100).toFixed(1):'0';
@@ -67,6 +67,8 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
   if((g.profileRate??0)===0&&k.users>0)warns.push('프로필 0%');
   if(parseFloat(ctr)<1&&(g.ctaViews7d??0)>10)warns.push(`CTR ${ctr}%`);
   if(fcn>0)warns.push(`크론실패 ${fcn}`);
+  if(ret&&ret.d7Rate===0&&ret.size>5)warns.push('D7 리텐션 0%');
+  if((k.pushSubs??0)===0)warns.push('푸시 0명');
 
   const CS={card:{background:'rgba(12,21,40,0.65)',border:'1px solid rgba(255,255,255,0.05)',borderRadius:12,padding:'10px 12px',backdropFilter:'blur(8px)'} as const};
 
@@ -358,6 +360,43 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
             ))}
           </div>
           <div style={{textAlign:'center',fontSize:13,fontWeight:800,color:parseFloat(ctr)>2?'#10B981':'#EF4444'}}>CTR {ctr}%</div>
+        </div>
+      </div>
+
+      {/* ═══ CTA별 성과 + 가입귀속 + 리텐션 ═══ */}
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6}}>
+        {/* CTA별 성과 */}
+        <div style={CS.card}>
+          <div style={{fontSize:10,fontWeight:700,color:'rgba(255,255,255,0.4)',marginBottom:6}}>🎯 CTA별 성과 (7일)</div>
+          {Object.entries(cb||{}).sort((a:any,b:any)=>(b[1].views||0)-(a[1].views||0)).slice(0,6).map(([name,stat]:any)=>{
+            const v=stat.views||0;const c=stat.clicks||0;const r=v>0?((c/v)*100).toFixed(1):'0';
+            return <div key={name} style={{marginBottom:4}}>
+              <div style={{display:'flex',justifyContent:'space-between',fontSize:9,color:'rgba(255,255,255,0.4)'}}>
+                <span>{name.replace(/_/g,' ')}</span>
+                <span>{v}뷰 {c}클릭 <span style={{color:parseFloat(r)>1?'#10B981':'#EF4444'}}>{r}%</span></span>
+              </div>
+              <div style={{height:4,background:'rgba(255,255,255,0.04)',borderRadius:2,overflow:'hidden',marginTop:2}}>
+                <div style={{height:'100%',width:`${Math.min((v/(Object.values(cb||{}).reduce((s:number,x:any)=>s+(x.views||0),0)||1))*100,100)}%`,background:'#3B7BF6',borderRadius:2,minWidth:v>0?2:0}}/>
+              </div>
+            </div>;
+          })}
+        </div>
+        {/* 가입 귀속 + 리텐션 */}
+        <div style={CS.card}>
+          <div style={{fontSize:10,fontWeight:700,color:'rgba(255,255,255,0.4)',marginBottom:6}}>🔗 가입 귀속</div>
+          {Object.keys(ss||{}).length>0?Object.entries(ss).sort((a:any,b:any)=>b[1]-a[1]).slice(0,5).map(([src,cnt]:any)=>(
+            <div key={src} style={{display:'flex',justifyContent:'space-between',fontSize:10,padding:'2px 0',color:'rgba(255,255,255,0.6)'}}>
+              <span>{src.replace(/_/g,' ')}</span>
+              <span style={{fontWeight:700,color:'#10B981'}}>{cnt}명</span>
+            </div>
+          )):<div style={{fontSize:10,color:'rgba(255,255,255,0.2)'}}>아직 귀속 데이터 없음</div>}
+          {ret&&<div style={{marginTop:8,paddingTop:6,borderTop:'1px solid rgba(255,255,255,0.06)'}}>
+            <div style={{fontSize:10,fontWeight:700,color:'rgba(255,255,255,0.4)',marginBottom:4}}>📈 D7 리텐션</div>
+            <div style={{display:'flex',alignItems:'baseline',gap:4}}>
+              <span style={{fontSize:18,fontWeight:800,color:ret.d7Rate>10?'#10B981':'#EF4444'}}>{ret.d7Rate}%</span>
+              <span style={{fontSize:9,color:'rgba(255,255,255,0.3)'}}>{ret.size}명 중 {ret.d7}명 복귀</span>
+            </div>
+          </div>}
         </div>
       </div>
 
