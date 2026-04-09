@@ -204,10 +204,8 @@ export async function safeBlogInsert(
     const coverImage = data.cover_image || `/api/og?title=${encodeURIComponent(data.title)}&category=${data.category}&author=${author}&design=2`;
     const imageAlt = data.image_alt || `${data.title} — 카더라 ${data.category === 'stock' ? '주식' : data.category === 'apt' ? '부동산' : '정보'} 분석`;
 
-    // 7. INSERT (큐 대기 상태)
-    const { data: inserted, error } = await admin
-      .from('blog_posts')
-      .insert({
+    // 7. INSERT (큐 대기 상태) — ON CONFLICT로 race condition 방지
+    const insertPayload = {
         slug: data.slug,
         title: data.title,
         content: enrichedContent,
@@ -224,11 +222,19 @@ export async function safeBlogInsert(
         meta_keywords: data.meta_keywords,
         is_published: data.is_published ?? false,
         published_at: data.is_published ? new Date().toISOString() : null,
-      })
+    };
+
+    const { data: inserted, error } = await admin
+      .from('blog_posts')
+      .upsert(insertPayload, { onConflict: 'slug', ignoreDuplicates: true })
       .select('id')
       .single();
 
     if (error) {
+      // ignoreDuplicates=true가 conflict 시 빈 결과 반환 → 에러 아님
+      if (error.code === 'PGRST116') {
+        return { success: false, reason: 'duplicate_slug' };
+      }
       console.error(`[safeBlogInsert] Insert error for "${data.title}" (${data.category}, ${enrichedContent.length}자):`, error.message, '| code:', error.code, '| details:', error.details);
       return { success: false, reason: 'error', message: error.message };
     }
