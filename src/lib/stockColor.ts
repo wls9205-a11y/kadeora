@@ -88,3 +88,13 @@ export function sentimentBg(label: string): string {
   if (label === 'negative') return 'var(--stock-negative-bg)';
   return 'var(--stock-neutral-bg)';
 }
+
+// ── Market status ──
+
+export function marketStatusColor(isOpen: boolean): string {
+  return isOpen ? 'var(--stock-market-open)' : 'var(--stock-market-closed)';
+}
+
+export function marketStatusBg(isOpen: boolean): string {
+  return isOpen ? 'var(--stock-market-open-bg)' : 'var(--stock-market-closed-bg)';
+}

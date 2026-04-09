@@ -517,6 +517,11 @@ html.font-large {
   --stock-negative-bg:  rgba(239,83,80,0.10);
   --stock-neutral:      #9E9E9E;
   --stock-neutral-bg:   rgba(158,158,158,0.08);
+  /* Market status */
+  --stock-market-open:  #66BB6A;
+  --stock-market-open-bg: rgba(102,187,106,0.10);
+  --stock-market-closed:#9E9E9E;
+  --stock-market-closed-bg: rgba(158,158,158,0.08);
   /* 네비게이션 */
   --nav-bg:         #0D1730;
   --nav-border:     #1E3258;
@@ -615,6 +620,11 @@ html.theme-light {
   --stock-negative-bg:  rgba(198,40,40,0.06);
   --stock-neutral:      #757575;
   --stock-neutral-bg:   rgba(117,117,117,0.06);
+  /* Market status */
+  --stock-market-open:  #2E7D32;
+  --stock-market-open-bg: rgba(46,125,50,0.06);
+  --stock-market-closed:#757575;
+  --stock-market-closed-bg: rgba(117,117,117,0.06);
   --nav-bg:         #FFFFFF;
   --nav-border:     #D4DAE3;
   --nav-text:       #111827;

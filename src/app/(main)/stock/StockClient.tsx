@@ -49,10 +49,10 @@ function getMarketStatus(): { label: string; color: string } {
   // Weekend
   if (day === 0 || day === 6) return { label: '⏸ 휴장', color: 'var(--text-tertiary)' };
   // KR market: 09:00~15:30 KST
-  if (kstMin >= 540 && kstMin <= 930) return { label: '🟢 장중', color: 'var(--accent-green)' };
+  if (kstMin >= 540 && kstMin <= 930) return { label: '🟢 장중', color: 'var(--stock-market-open)' };
   // US market: 22:30~05:00 KST (next day)
-  if (kstMin >= 1350 || kstMin <= 300) return { label: '🟢 미국장중', color: 'var(--accent-green)' };
-  return { label: '🔴 장마감', color: 'var(--accent-red)' };
+  if (kstMin >= 1350 || kstMin <= 300) return { label: '🟢 미국장중', color: 'var(--stock-market-open)' };
+  return { label: '🔴 장마감', color: 'var(--stock-market-closed)' };
 }
 
 // 한국: 상승=빨강, 하락=파랑 / 해외: 상승=초록, 하락=빨강
@@ -259,7 +259,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
               <span>52주 고</span>
             </div>
             <div style={{ height: 3, borderRadius: 2, background: 'var(--bg-hover)', position: 'relative' }}>
-              <div style={{ height: '100%', width: `${w52pos}%`, borderRadius: 2, background: `linear-gradient(90deg, var(--accent-blue), ${barColor})` }} />
+              <div style={{ height: '100%', width: `${w52pos}%`, borderRadius: 2, background: `linear-gradient(90deg, ${stockDownColor(isDomestic)}, ${barColor})` }} />
             </div>
           </div>
         )}
@@ -1156,7 +1156,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
                         {w52pos !== null && (
                           <div style={{ marginBottom: 4 }}>
                             <div style={{ height: 3, borderRadius: 2, background: 'var(--bg-hover)', position: 'relative' }}>
-                              <div style={{ height: '100%', width: `${w52pos}%`, borderRadius: 2, background: `linear-gradient(90deg, var(--accent-blue), ${priceColor})` }} />
+                              <div style={{ height: '100%', width: `${w52pos}%`, borderRadius: 2, background: `linear-gradient(90deg, ${stockDownColor(isDomestic)}, ${priceColor})` }} />
                             </div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 8, color: 'var(--text-tertiary)', marginTop: 1 }}>
                               <span>52주</span><span>{w52pos}%</span>

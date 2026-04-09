@@ -324,7 +324,7 @@ export default async function StockDetailPage({ params }: Props) {
             <span style={{ fontSize: 12, color: stockDownColor(isKR), fontWeight: 600, minWidth: 60 }}>
               {cur}{l.toLocaleString()}
             </span>
-            <div style={{ flex: 1, height: 8, background: 'linear-gradient(90deg, var(--accent-blue), var(--accent-green), var(--accent-red))', borderRadius: 4, position: 'relative' }}>
+            <div style={{ flex: 1, height: 8, background: `linear-gradient(90deg, ${stockDownColor(isKR)}, var(--stock-flat), ${stockUpColor(isKR)})`, borderRadius: 4, position: 'relative' }}>
               <div style={{
                 position: 'absolute', top: -3,
                 left: `${pct}%`,
