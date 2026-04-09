@@ -47,7 +47,7 @@ export default function WeeklyPrediction() {
 
       // 현재 코스피 (KOSPI 인덱스 또는 대표 ETF)
       const { data: kospiRow } = await sb.from('stock_quotes')
-        .select('price').eq('symbol', 'KODEX200').single();
+        .select('price').eq('symbol', 'KODEX200').maybeSingle();
       const currentKospi = kospiRow ? Math.round(Number(kospiRow.price)) : 2584;
 
       // 이번주 참여자 수 + 평균
@@ -61,7 +61,7 @@ export default function WeeklyPrediction() {
       let myPred: number | null = null;
       if (userId) {
         const { data: myRow } = await (sb as any).from('weekly_predictions')
-          .select('prediction').eq('user_id', userId).eq('week_start', weekStart).single();
+          .select('prediction').eq('user_id', userId).eq('week_start', weekStart).maybeSingle();
         if (myRow) myPred = Number(myRow.prediction);
       }
 

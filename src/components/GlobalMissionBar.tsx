@@ -17,7 +17,7 @@ export default function GlobalMissionBar() {
     (sb as any).from('profiles')
       .select('first_mission_completed, first_mission_progress, last_checked_date')
       .eq('id', userId)
-      .single()
+      .maybeSingle()
       .then(({ data }: any) => {
         if (!data) return;
         if (!data.first_mission_completed) {
