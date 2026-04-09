@@ -9,6 +9,8 @@ const Stat = ({ icon, val, label, warn }: { icon: string; val: number | string; 
 
 const pIcon: Record<string, string> = { kakao: '💬', google: '🔵', naver: '🟢', apple: '🍎' };
 const gLabel: Record<number, { n: string; c: string }> = { 1:{n:'새싹',c:'#10B981'}, 2:{n:'묘목',c:'#34D399'}, 3:{n:'나무',c:'#06B6D4'}, 4:{n:'숲',c:'#3B82F6'}, 5:{n:'산',c:'#8B5CF6'}, 6:{n:'달',c:'#F59E0B'}, 7:{n:'별',c:'#EC4899'}, 8:{n:'VIP',c:'#EF4444'} };
+const iLabel: Record<string, string> = { stock:'📈주식', apt:'🏠부동산', redev:'🏗재개발', news:'📰뉴스', tax:'🧾세금', crypto:'₿암호화폐', side:'💼부업', saving:'🐷저축', finance:'💰재테크' };
+const aLabel: Record<string, string> = { '20s':'20대', '30s':'30대', '40s':'40대', '50s':'50대', '60+':'60대+' };
 
 export default function UsersTab({ onNavigate }: { onNavigate: (t: any) => void }) {
   const [d, setD] = useState<any>(null);
@@ -85,7 +87,7 @@ export default function UsersTab({ onNavigate }: { onNavigate: (t: any) => void 
           <div style={{ fontSize: 8, fontWeight: 700, color: 'rgba(255,255,255,0.3)', marginBottom: 3 }}>나이대</div>
           {sortedEntries(ageMap).length > 0 ? sortedEntries(ageMap).map(([a, n]) => (
             <div key={a} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, padding: '1px 0' }}>
-              <span style={{ color: 'rgba(255,255,255,0.35)' }}>{a}</span>
+              <span style={{ color: 'rgba(255,255,255,0.35)' }}>{aLabel[a]||a}</span>
               <span style={{ fontWeight: 700, color: '#E2E8F0' }}>{n}</span>
             </div>
           )) : <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.12)' }}>미설정</div>}
@@ -108,7 +110,7 @@ export default function UsersTab({ onNavigate }: { onNavigate: (t: any) => void 
           <div style={{ fontSize: 8, fontWeight: 700, color: 'rgba(255,255,255,0.3)', marginBottom: 3 }}>관심사 분포</div>
           {sortedEntries(interestMap).length > 0 ? sortedEntries(interestMap).map(([k, v]) => (
             <div key={k} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, padding: '1px 0' }}>
-              <span style={{ color: 'rgba(255,255,255,0.35)' }}>{k === 'stock' ? '📈주식' : k === 'apt' ? '🏠부동산' : k === 'redev' ? '🏗재개발' : k === 'news' ? '📰뉴스' : k === 'tax' ? '🧾세금' : k === 'crypto' ? '₿암호화폐' : k}</span>
+              <span style={{ color: 'rgba(255,255,255,0.35)' }}>{iLabel[k]||k}</span>
               <span style={{ fontWeight: 700, color: '#E2E8F0' }}>{v}</span>
             </div>
           )) : <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.12)' }}>미설정</div>}
@@ -160,7 +162,7 @@ export default function UsersTab({ onNavigate }: { onNavigate: (t: any) => void 
               <Badge ok={u.marketing_agreed} label="마케팅" />
               {u.is_premium && <Tag text="👑프리미엄" color="#F59E0B" bg="rgba(245,158,11,0.1)" />}
               {u.residence_city && <Tag text={`📍${u.residence_city}${u.residence_district ? ' ' + u.residence_district : ''}`} color="#3B7BF6" bg="rgba(59,123,246,0.08)" />}
-              {u.age_group && <Tag text={u.age_group} color="#8B5CF6" bg="rgba(139,92,246,0.08)" />}
+              {u.age_group && <Tag text={aLabel[u.age_group]||u.age_group} color="#8B5CF6" bg="rgba(139,92,246,0.08)" />}
               {u.gender && <Tag text={u.gender === 'male' ? '♂' : u.gender === 'female' ? '♀' : u.gender} color="#06B6D4" bg="rgba(6,182,212,0.08)" />}
               {u.signup_source && <Tag text={`🔗${u.signup_source}`} color="#8B5CF6" bg="rgba(139,92,246,0.08)" />}
               {u.streak_days > 0 && <Tag text={`🔥${u.streak_days}일연속`} color="#EF4444" bg="rgba(239,68,68,0.08)" />}
@@ -182,7 +184,7 @@ export default function UsersTab({ onNavigate }: { onNavigate: (t: any) => void 
             {u.interests && u.interests.length > 0 && (
               <div style={{ display: 'flex', gap: 3, marginTop: 3 }}>
                 {(u.interests as string[]).map((i: string) => (
-                  <Tag key={i} text={i === 'stock' ? '📈주식' : i === 'apt' ? '🏠부동산' : i === 'redev' ? '🏗재개발' : i === 'news' ? '📰뉴스' : i === 'tax' ? '🧾세금' : i === 'crypto' ? '₿암호화폐' : i} />
+                  <Tag key={i} text={iLabel[i]||i} />
                 ))}
               </div>
             )}
