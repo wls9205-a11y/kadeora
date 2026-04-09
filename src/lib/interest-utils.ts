@@ -1,32 +1,52 @@
 /**
- * 관심단지 등록 카운트 — 소셜프루프 표시 유틸리티
+ * 관심단지 표시 유틸리티 — 정직한 소셜프루프
  * 
- * 원칙: DB에는 실 데이터만 저장. 프론트 표시만 보정.
- * 실 등록이 기본값 초과하면 실 데이터 사용.
+ * 원칙: 허수 없음. 실 데이터만 표시.
+ * - 관심등록 있으면 → 실제 수치 표시
+ * - 관심등록 0이면 → 조회수 또는 행동유도 문구 표시
  */
+
+/** 관심등록 카운트 표시 (허수 없이) */
 export function getDisplayInterestCount(
   realCount: number,
-  totalSupply: number | null | undefined
+  _totalSupply?: number | null
 ): number {
-  if (!totalSupply || totalSupply <= 0) {
-    return Math.max(realCount, 12 + (realCount * 7) % 17);
+  return realCount;
+}
+
+/** 
+ * KPI 카드용: 관심 또는 조회수 중 더 나은 것 표시
+ * 관심 > 0 → "12명이 관심"
+ * 관심 = 0, 조회 > 0 → "32명이 조회" 
+ * 둘 다 0 → "등록하기"
+ */
+export function formatInterestOrViews(
+  interestCount: number,
+  pageViews: number
+): { label: string; value: string; metric: 'interest' | 'views' | 'cta' } {
+  if (interestCount > 0) {
+    return { label: '관심', value: `${interestCount}명`, metric: 'interest' };
   }
-  const virtualBase = Math.round(totalSupply * 0.03) + 8;
-  const capped = Math.min(Math.max(virtualBase, 12), 300);
-  return Math.max(realCount, capped);
+  if (pageViews > 0) {
+    // 조회수는 실 데이터 — 10단위 반올림으로 자연스럽게
+    const rounded = pageViews >= 100 
+      ? `${Math.floor(pageViews / 10) * 10}+` 
+      : String(pageViews);
+    return { label: '조회', value: `${rounded}명`, metric: 'views' };
+  }
+  return { label: '관심', value: '등록하기', metric: 'cta' };
 }
 
 /**
- * 관심등록 수를 사용자 친화적 텍스트로 변환
+ * InterestRegistration용: 0명이면 숫자 대신 행동유도
  */
 export function formatInterestText(
   realCount: number,
-  totalSupply: number | null | undefined
+  _totalSupply?: number | null
 ): string {
-  const display = getDisplayInterestCount(realCount, totalSupply);
-  if (display >= 100) return `${Math.floor(display / 10) * 10}+명이 주목`;
-  if (display >= 30) return `${Math.floor(display / 5) * 5}+명이 관심`;
-  return `${display}명이 관심`;
+  if (realCount >= 100) return `${Math.floor(realCount / 10) * 10}+명이 관심`;
+  if (realCount > 0) return `${realCount}명이 관심`;
+  return '첫 번째로 등록하기';
 }
 
 /**
