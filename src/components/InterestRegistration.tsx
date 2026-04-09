@@ -163,7 +163,7 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
         <div>
           <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)' }}>❤️ 관심단지 등록</span>
-          <span style={{ fontSize: 11, color: 'var(--text-tertiary)', marginLeft: 6 }}>{count}명 관심</span>
+          <span style={{ fontSize: 11, color: 'var(--text-tertiary)', marginLeft: 6 }}>{count >= 30 ? `${Math.floor(count / 5) * 5}+` : count}명이 관심</span>
         </div>
         <div style={{ display: 'flex', gap: 4 }}>
           {['청약일정', '분양가', '입주소식'].map(t => (

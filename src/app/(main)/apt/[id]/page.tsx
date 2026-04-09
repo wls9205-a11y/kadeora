@@ -13,7 +13,7 @@ import KakaoDirectShare from '@/components/KakaoDirectShare';
 import Disclaimer from '@/components/Disclaimer';
 import AptImageGallery from '@/components/AptImageGallery';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
-import { getDisplayInterestCount } from '@/lib/interest-utils';
+import { getDisplayInterestCount, formatInterestText } from '@/lib/interest-utils';
 
 const AptPriceTrendChart = dynamic(() => import('@/components/charts/AptPriceTrendChart'));
 const InterestRegistration = dynamic(() => import('@/components/InterestRegistration'));
@@ -500,7 +500,7 @@ export default async function AptUnifiedPage({ params }: Props) {
             const y = Math.floor(diffM / 12); const m = diffM % 12;
             return y > 0 ? `약 ${y}년${m > 0 ? ` ${m}개월` : ''} 후` : `약 ${m}개월 후`;
           })(), c: 'var(--accent-green)', icon: '📅', bar: 0, barColor: 'var(--accent-green)', scrollTo: null },
-          { l: unsold ? '미분양' : '관심', v: unsold ? `${(unsold.tot_unsold_hshld_co || 0).toLocaleString()}호` : `${(site?.interest_count || 0).toLocaleString()}명`, sub: unsold ? '' : '클릭하여 등록', c: unsold ? 'var(--accent-red)' : '#FFD43B', icon: unsold ? '⚠️' : '❤️', bar: unsold ? Math.min((unsold.tot_unsold_hshld_co || 0) / 500 * 100, 100) : Math.min((site?.interest_count || 0) / (Math.max(site?.total_units || sub?.tot_supply_hshld_co || 100, 100)) * 100, 100), barColor: unsold ? 'var(--accent-red)' : '#FFD43B', scrollTo: unsold ? null : 'interest-section' },
+          { l: unsold ? '미분양' : '관심', v: unsold ? `${(unsold.tot_unsold_hshld_co || 0).toLocaleString()}호` : formatInterestText(site?.interest_count || 0, site?.total_units || sub?.tot_supply_hshld_co || null), sub: unsold ? '' : '클릭하여 등록', c: unsold ? 'var(--accent-red)' : '#FFD43B', icon: unsold ? '⚠️' : '❤️', bar: unsold ? Math.min((unsold.tot_unsold_hshld_co || 0) / 500 * 100, 100) : Math.min(getDisplayInterestCount(site?.interest_count || 0, site?.total_units || sub?.tot_supply_hshld_co || null) / (Math.max(site?.total_units || sub?.tot_supply_hshld_co || 100, 100)) * 100, 100), barColor: unsold ? 'var(--accent-red)' : '#FFD43B', scrollTo: unsold ? null : 'interest-section' },
         ];
 
         return (

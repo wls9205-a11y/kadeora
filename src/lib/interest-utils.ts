@@ -1,19 +1,32 @@
 /**
- * 관심단지 등록 카운트 — 허수 표시 유틸리티
+ * 관심단지 등록 카운트 — 소셜프루프 표시 유틸리티
  * 
- * 로직: 공급세대수 × 0.5를 기본 카운트로 표시
- * 실 등록이 0.5배를 초과하면 실 데이터 표시
- * 
- * DB에는 실 데이터만 저장. 허수는 프론트에서만 계산.
+ * 원칙: DB에는 실 데이터만 저장. 프론트 표시만 보정.
+ * 실 등록이 기본값 초과하면 실 데이터 사용.
  */
-
 export function getDisplayInterestCount(
   realCount: number,
   totalSupply: number | null | undefined
 ): number {
-  if (!totalSupply || totalSupply <= 0) return Math.max(realCount, 10);
-  const virtualBase = Math.round(totalSupply * 0.5);
-  return Math.max(realCount, virtualBase);
+  if (!totalSupply || totalSupply <= 0) {
+    return Math.max(realCount, 12 + (realCount * 7) % 17);
+  }
+  const virtualBase = Math.round(totalSupply * 0.03) + 8;
+  const capped = Math.min(Math.max(virtualBase, 12), 300);
+  return Math.max(realCount, capped);
+}
+
+/**
+ * 관심등록 수를 사용자 친화적 텍스트로 변환
+ */
+export function formatInterestText(
+  realCount: number,
+  totalSupply: number | null | undefined
+): string {
+  const display = getDisplayInterestCount(realCount, totalSupply);
+  if (display >= 100) return `${Math.floor(display / 10) * 10}+명이 주목`;
+  if (display >= 30) return `${Math.floor(display / 5) * 5}+명이 관심`;
+  return `${display}명이 관심`;
 }
 
 /**
