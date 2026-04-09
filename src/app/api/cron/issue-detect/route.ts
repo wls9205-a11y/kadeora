@@ -202,14 +202,7 @@ async function handler(_req: NextRequest) {
     // 중복 체크
     const { isDup, existingId } = await isDuplicate(sb, entities, items[0].title);
     if (isDup) {
-      // 기존 이슈에 매체 수만 업데이트 (증폭계수 반영)
-      if (existingId) {
-        await (sb as any).from('issue_alerts')
-          .update({
-            raw_data: sb.rpc ? undefined : undefined, // 나중에 media_count 업데이트 로직
-          })
-          .eq('id', existingId);
-      }
+      // 기존 이슈 존재 → 중복 스킵 (추후 증폭계수 업데이트는 issue-trend에서)
       continue;
     }
 
