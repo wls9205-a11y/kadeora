@@ -481,6 +481,42 @@ html.font-large {
   --accent-red-bg:  rgba(255,120,120,0.12);
   --accent-blue:    #7CC0FF;
   --accent-blue-bg: rgba(124,192,255,0.12);
+
+  /* Stock colors — KR (빨강↑ 파랑↓) */
+  --stock-kr-up:        #FF5252;
+  --stock-kr-up-bg:     rgba(255,82,82,0.10);
+  --stock-kr-up-strong: #FF8A8A;
+  --stock-kr-down:      #42A5F5;
+  --stock-kr-down-bg:   rgba(66,165,245,0.10);
+  --stock-kr-down-strong:#90CAF9;
+  /* Stock colors — US (초록↑ 빨강↓) */
+  --stock-us-up:        #66BB6A;
+  --stock-us-up-bg:     rgba(102,187,106,0.10);
+  --stock-us-up-strong: #A5D6A7;
+  --stock-us-down:      #EF5350;
+  --stock-us-down-bg:   rgba(239,83,80,0.10);
+  --stock-us-down-strong:#EF9A9A;
+  /* Stock flat */
+  --stock-flat:         #9E9E9E;
+  --stock-flat-bg:      rgba(158,158,158,0.08);
+  /* Investor colors */
+  --stock-foreign:      #FFB74D;
+  --stock-foreign-bg:   rgba(255,183,77,0.10);
+  --stock-inst:         #AB47BC;
+  --stock-inst-bg:      rgba(171,71,188,0.10);
+  --stock-retail:       #26C6DA;
+  --stock-retail-bg:    rgba(38,198,218,0.10);
+  /* AI signal & sentiment */
+  --stock-bullish:      #66BB6A;
+  --stock-bullish-bg:   rgba(102,187,106,0.10);
+  --stock-bearish:      #EF5350;
+  --stock-bearish-bg:   rgba(239,83,80,0.10);
+  --stock-positive:     #66BB6A;
+  --stock-positive-bg:  rgba(102,187,106,0.10);
+  --stock-negative:     #EF5350;
+  --stock-negative-bg:  rgba(239,83,80,0.10);
+  --stock-neutral:      #9E9E9E;
+  --stock-neutral-bg:   rgba(158,158,158,0.08);
   /* 네비게이션 */
   --nav-bg:         #0D1730;
   --nav-border:     #1E3258;
@@ -543,6 +579,42 @@ html.theme-light {
   --accent-red-bg:  rgba(220,38,38,0.10);
   --accent-blue:    #2563EB;
   --accent-blue-bg: rgba(37,99,235,0.10);
+
+  /* Stock colors — KR */
+  --stock-kr-up:        #D32F2F;
+  --stock-kr-up-bg:     rgba(211,47,47,0.08);
+  --stock-kr-up-strong: #C62828;
+  --stock-kr-down:      #1976D2;
+  --stock-kr-down-bg:   rgba(25,118,210,0.08);
+  --stock-kr-down-strong:#1565C0;
+  /* Stock colors — US */
+  --stock-us-up:        #2E7D32;
+  --stock-us-up-bg:     rgba(46,125,50,0.08);
+  --stock-us-up-strong: #1B5E20;
+  --stock-us-down:      #C62828;
+  --stock-us-down-bg:   rgba(198,40,40,0.08);
+  --stock-us-down-strong:#B71C1C;
+  /* Stock flat */
+  --stock-flat:         #757575;
+  --stock-flat-bg:      rgba(117,117,117,0.06);
+  /* Investor colors */
+  --stock-foreign:      #E65100;
+  --stock-foreign-bg:   rgba(230,81,0,0.06);
+  --stock-inst:         #7B1FA2;
+  --stock-inst-bg:      rgba(123,31,162,0.06);
+  --stock-retail:       #00838F;
+  --stock-retail-bg:    rgba(0,131,143,0.06);
+  /* AI signal & sentiment */
+  --stock-bullish:      #2E7D32;
+  --stock-bullish-bg:   rgba(46,125,50,0.06);
+  --stock-bearish:      #C62828;
+  --stock-bearish-bg:   rgba(198,40,40,0.06);
+  --stock-positive:     #2E7D32;
+  --stock-positive-bg:  rgba(46,125,50,0.06);
+  --stock-negative:     #C62828;
+  --stock-negative-bg:  rgba(198,40,40,0.06);
+  --stock-neutral:      #757575;
+  --stock-neutral-bg:   rgba(117,117,117,0.06);
   --nav-bg:         #FFFFFF;
   --nav-border:     #D4DAE3;
   --nav-text:       #111827;

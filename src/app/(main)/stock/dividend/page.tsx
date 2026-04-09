@@ -50,7 +50,7 @@ export default async function DividendPage() {
             <tr key={s.symbol} style={{ background: i % 2 === 0 ? 'var(--bg-base)' : 'var(--bg-surface)' }}>
               <td style={td}>{i + 1}</td>
               <td style={td}><Link href={`/stock/${s.symbol}`} style={{ color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>{s.name}</Link></td>
-              <td style={{ ...td, fontWeight: 700, color: 'var(--accent-green)' }}>{Number(s.dividend_yield).toFixed(1)}%</td>
+              <td style={{ ...td, fontWeight: 700, color: 'var(--stock-positive)' }}>{Number(s.dividend_yield).toFixed(1)}%</td>
               <td style={td}>{fmtPrice(s.price, s.currency)}</td>
               <td style={td}>{s.per ? `${Number(s.per).toFixed(1)}` : '-'}</td>
               <td style={td}>{fmtCap(Number(s.market_cap), s.currency)}</td>

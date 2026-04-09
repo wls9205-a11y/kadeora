@@ -1,3 +1,4 @@
+import { stockColor, stockUpColor, stockDownColor, stockUpHex, stockDownHex, investorColor, signalColor, sentimentColor, sentimentBg, isKRMarket } from '@/lib/stockColor';
 import type { AIComment, StockPriceHistory, StockNews, InvestorFlow, Disclosure } from '@/types/stock';
 export const maxDuration = 30;
 export const revalidate = 300;
@@ -231,7 +232,7 @@ export default async function StockDetailPage({ params }: Props) {
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap', marginBottom: 'var(--sp-xs)' }}>
           <span style={{ fontSize: 'clamp(28px, 8vw, 36px)', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>{fmtPrice(Number(s.price), s.currency ?? undefined)}</span>
           {!isStale && (
-            <span style={{ fontSize: 16, fontWeight: 700, color: isUp ? 'var(--accent-red)' : isDown ? 'var(--accent-blue)' : 'var(--text-tertiary)' }}>
+            <span style={{ fontSize: 16, fontWeight: 700, color: stockColor(changePct, isKR) }}>
               {isUp ? '▲' : isDown ? '▼' : '━'} {isUp ? '+' : ''}{Number(s.change_amt).toLocaleString()} ({Math.abs(changePct).toFixed(2)}%)
             </span>
           )}
@@ -251,7 +252,7 @@ export default async function StockDetailPage({ params }: Props) {
                 const range = max - min || 1;
                 const points = priceHist.map((p, i) => `${i},${68 - ((p - min) / range) * 64}`).join(' ');
                 const fillPoints = `0,72 ${points} ${priceHist.length - 1},72`;
-                const lineColor = priceHist[priceHist.length - 1] >= priceHist[0] ? (isKR ? 'var(--accent-red)' : 'var(--accent-green)') : (isKR ? 'var(--accent-blue)' : 'var(--accent-red)');
+                const lineColor = priceHist[priceHist.length - 1] >= priceHist[0] ? stockUpColor(isKR) : stockDownColor(isKR);
                 const fillColor = priceHist[priceHist.length - 1] >= priceHist[0] ? (isKR ? 'rgba(248,113,113,0.08)' : 'rgba(52,211,153,0.08)') : (isKR ? 'rgba(96,165,250,0.08)' : 'rgba(248,113,113,0.08)');
                 return (<>
                   <polygon points={fillPoints} fill={fillColor} />
@@ -282,11 +283,11 @@ export default async function StockDetailPage({ params }: Props) {
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)' }}>
           <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 6 }}>일간 등락</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)' }}>
-            <div style={{ width: 40, height: 40, borderRadius: '50%', border: `3px solid ${isUp ? 'var(--accent-red)' : isDown ? 'var(--accent-blue)' : 'var(--border)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 800, color: isUp ? 'var(--accent-red)' : isDown ? 'var(--accent-blue)' : 'var(--text-tertiary)' }}>
+            <div style={{ width: 40, height: 40, borderRadius: '50%', border: `3px solid ${stockColor(changePct, isKR)}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 800, color: stockColor(changePct, isKR) }}>
               {isUp ? '▲' : isDown ? '▼' : '━'}
             </div>
             <div>
-              <div style={{ fontSize: 16, fontWeight: 800, color: isUp ? 'var(--accent-red)' : isDown ? 'var(--accent-blue)' : 'var(--text-tertiary)' }}>
+              <div style={{ fontSize: 16, fontWeight: 800, color: stockColor(changePct, isKR) }}>
                 {changePct >= 0 ? '+' : ''}{changePct.toFixed(2)}%
               </div>
               <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{s.change_amt != null ? `${Number(s.change_amt) > 0 ? '+' : ''}${Number(s.change_amt).toLocaleString()}` : ''}</div>
@@ -320,7 +321,7 @@ export default async function StockDetailPage({ params }: Props) {
             <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)' }}>상위 {Math.round(pct)}%</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)' }}>
-            <span style={{ fontSize: 12, color: 'var(--accent-blue)', fontWeight: 600, minWidth: 60 }}>
+            <span style={{ fontSize: 12, color: stockDownColor(isKR), fontWeight: 600, minWidth: 60 }}>
               {cur}{l.toLocaleString()}
             </span>
             <div style={{ flex: 1, height: 8, background: 'linear-gradient(90deg, var(--accent-blue), var(--accent-green), var(--accent-red))', borderRadius: 4, position: 'relative' }}>
@@ -332,7 +333,7 @@ export default async function StockDetailPage({ params }: Props) {
                 transform: 'translateX(-50%)',
               }} />
             </div>
-            <span style={{ fontSize: 12, color: 'var(--accent-red)', fontWeight: 600, minWidth: 60, textAlign: 'right' }}>
+            <span style={{ fontSize: 12, color: stockUpColor(isKR), fontWeight: 600, minWidth: 60, textAlign: 'right' }}>
               {cur}{h.toLocaleString()}
             </span>
           </div>
@@ -363,13 +364,13 @@ export default async function StockDetailPage({ params }: Props) {
       {/* AI 한줄평 — 서버 렌더링 (탭 로드 전 즉시 표시) */}
       {aiR.data && (aiR.data as any).comment && (() => {
         const ai = aiR.data as any;
-        const signalColor = ai.signal === 'bullish' ? 'var(--accent-green)' : ai.signal === 'bearish' ? 'var(--accent-red)' : 'var(--brand)';
+        const sigColor = signalColor(ai.signal || 'neutral');
         const signalLabel = ai.signal === 'bullish' ? '📈 긍정' : ai.signal === 'bearish' ? '📉 부정' : '🤖 중립';
         return (
           <div style={{ background: 'linear-gradient(135deg, rgba(59,123,246,0.04), rgba(139,92,246,0.04))', border: '1px solid rgba(59,123,246,0.12)', borderRadius: 'var(--radius-md)', padding: '12px 14px', marginBottom: 'var(--sp-md)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
               <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>🤖 AI 한줄평</span>
-              <span style={{ fontSize: 10, fontWeight: 600, color: signalColor, background: `${signalColor}15`, padding: '2px 8px', borderRadius: 4 }}>{signalLabel}</span>
+              <span style={{ fontSize: 10, fontWeight: 600, color: sigColor, background: `${sigColor}15`, padding: '2px 8px', borderRadius: 4 }}>{signalLabel}</span>
             </div>
             <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, wordBreak: 'keep-all' }}>
               {ai.comment.length > 200 ? ai.comment.slice(0, 200) + '...' : ai.comment}
@@ -388,8 +389,8 @@ export default async function StockDetailPage({ params }: Props) {
         const flows = (flowR.data ?? []).slice(0, 5) as any[];
         const totalForeignNet = flows.reduce((s: number, f: any) => s + (Number(f.foreign_buy || 0) - Number(f.foreign_sell || 0)), 0);
         const totalInstNet = flows.reduce((s: number, f: any) => s + (Number(f.inst_buy || 0) - Number(f.inst_sell || 0)), 0);
-        const fColor = totalForeignNet > 0 ? 'var(--accent-red)' : totalForeignNet < 0 ? 'var(--accent-blue)' : 'var(--text-tertiary)';
-        const iColor = totalInstNet > 0 ? 'var(--accent-red)' : totalInstNet < 0 ? 'var(--accent-blue)' : 'var(--text-tertiary)';
+        const fColor = investorColor('foreign');
+        const iColor = investorColor('inst');
         return (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginBottom: 'var(--sp-md)' }}>
             <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '10px 12px' }}>
@@ -474,14 +475,14 @@ export default async function StockDetailPage({ params }: Props) {
             return total > 1 ? (
               <div style={{ marginBottom: 10 }}>
                 <div style={{ display: 'flex', height: 6, borderRadius: 3, overflow: 'hidden', gap: 1 }}>
-                  {pos > 0 && <div style={{ flex: pos, background: 'var(--accent-green)', borderRadius: 3 }} />}
+                  {pos > 0 && <div style={{ flex: pos, background: 'var(--stock-positive)', borderRadius: 3 }} />}
                   {neu > 0 && <div style={{ flex: neu, background: 'var(--border)', borderRadius: 3 }} />}
-                  {neg > 0 && <div style={{ flex: neg, background: 'var(--accent-red)', borderRadius: 3 }} />}
+                  {neg > 0 && <div style={{ flex: neg, background: 'var(--stock-negative)', borderRadius: 3 }} />}
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--text-tertiary)', marginTop: 3 }}>
-                  <span style={{ color: 'var(--accent-green)' }}>긍정 {pos}</span>
+                  <span style={{ color: 'var(--stock-positive)' }}>긍정 {pos}</span>
                   <span>중립 {neu}</span>
-                  <span style={{ color: 'var(--accent-red)' }}>부정 {neg}</span>
+                  <span style={{ color: 'var(--stock-negative)' }}>부정 {neg}</span>
                 </div>
               </div>
             ) : null;
@@ -492,7 +493,7 @@ export default async function StockDetailPage({ params }: Props) {
               <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2, display: 'flex', gap: 'var(--sp-sm)' }}>
                 <span>{n.source || '뉴스'}</span>
                 <span>{n.published_at?.slice(0, 10)}</span>
-                {n.sentiment_label && <span style={{ padding: '1px 6px', borderRadius: 4, fontSize: 10, fontWeight: 600, background: n.sentiment_label === 'positive' ? 'rgba(52,211,153,0.15)' : n.sentiment_label === 'negative' ? 'rgba(248,113,113,0.15)' : 'rgba(148,163,184,0.1)', color: n.sentiment_label === 'positive' ? 'var(--accent-green)' : n.sentiment_label === 'negative' ? 'var(--accent-red)' : 'var(--text-tertiary)' }}>{n.sentiment_label === 'positive' ? '긍정' : n.sentiment_label === 'negative' ? '부정' : '중립'}</span>}
+                {n.sentiment_label && <span style={{ padding: '1px 6px', borderRadius: 4, fontSize: 10, fontWeight: 600, background: sentimentBg(n.sentiment_label || 'neutral'), color: sentimentColor(n.sentiment_label || 'neutral') }}>{n.sentiment_label === 'positive' ? '긍정' : n.sentiment_label === 'negative' ? '부정' : '중립'}</span>}
               </div>
               {n.ai_summary && <p style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6, margin: '4px 0 0', wordBreak: 'keep-all' }}>{n.ai_summary.slice(0, 100)}</p>}
             </div>
@@ -504,8 +505,8 @@ export default async function StockDetailPage({ params }: Props) {
       {(flowR.data ?? []).length > 0 && (() => {
         const flows = (flowR.data ?? []).slice(0, 5) as any[];
         const isKRStock = !s.currency || s.currency === 'KRW';
-        const upC = isKRStock ? 'var(--accent-red)' : 'var(--accent-green)';
-        const downC = isKRStock ? 'var(--accent-blue)' : 'var(--accent-red)';
+        const upC = stockUpColor(isKRStock);
+        const downC = stockDownColor(isKRStock);
         return (
         <section style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--card-p) var(--sp-lg)', marginBottom: 'var(--sp-md)' }}>
           <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 10px' }}>📊 {s.name} 투자자별 수급 ({flows.length}일)</h2>
@@ -568,11 +569,11 @@ export default async function StockDetailPage({ params }: Props) {
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
                     <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>{sim.currency === 'USD' ? `$${Number(sim.price).toFixed(2)}` : `₩${Number(sim.price).toLocaleString()}`}</span>
-                    <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, minWidth: 52, textAlign: 'right', color: isKR ? (simPct > 0 ? 'var(--accent-red)' : simPct < 0 ? 'var(--accent-blue)' : 'var(--text-tertiary)') : (simPct > 0 ? 'var(--accent-green)' : simPct < 0 ? 'var(--accent-red)' : 'var(--text-tertiary)') }}>
+                    <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, minWidth: 52, textAlign: 'right', color: stockColor(simPct, isKR) }}>
                       {simPct > 0 ? '+' : ''}{simPct.toFixed(2)}%
                     </span>
                     <div style={{ width: 24, height: 4, borderRadius: 2, background: 'var(--bg-hover)', overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: `${Math.min(Math.abs(simPct) * 10, 100)}%`, borderRadius: 2, background: isKR ? (simPct > 0 ? 'var(--accent-red)' : simPct < 0 ? 'var(--accent-blue)' : 'var(--border)') : (simPct > 0 ? 'var(--accent-green)' : simPct < 0 ? 'var(--accent-red)' : 'var(--border)') }} />
+                      <div style={{ height: '100%', width: `${Math.min(Math.abs(simPct) * 10, 100)}%`, borderRadius: 2, background: simPct !== 0 ? stockColor(simPct, isKR) : 'var(--border)' }} />
                     </div>
                   </div>
                 </Link>

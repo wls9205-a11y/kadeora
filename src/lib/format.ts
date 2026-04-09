@@ -55,9 +55,9 @@ export function numFmt(n: number): string {
 
 /** 주식 등락률 색상 (한국: 빨강=상승, 해외: 초록=상승) */
 export function stockColor(pct: number, isKR: boolean): string {
-  if (pct === 0) return 'var(--text-tertiary)';
-  if (isKR) return pct > 0 ? 'var(--accent-red)' : 'var(--accent-blue)';
-  return pct > 0 ? 'var(--accent-green)' : 'var(--accent-red)';
+  if (pct === 0) return 'var(--stock-flat)';
+  if (isKR) return pct > 0 ? 'var(--stock-kr-up)' : 'var(--stock-kr-down)';
+  return pct > 0 ? 'var(--stock-us-up)' : 'var(--stock-us-down)';
 }
 
 /** 숫자 콤마 포맷 */

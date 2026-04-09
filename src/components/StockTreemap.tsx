@@ -1,3 +1,4 @@
+import { stockUpHex, stockDownHex } from '@/lib/stockColor';
 'use client';
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
@@ -31,8 +32,8 @@ export default function StockTreemap({ stocks, isKR }: Props) {
   }, [stocks]);
 
   const maxTotal = Math.max(...sectors.map(s => s.total), 1);
-  const upC = isKR ? '#FF6B6B' : '#2EE8A5';
-  const dnC = isKR ? '#6CB4FF' : '#FF6B6B';
+  const upC = stockUpHex(isKR);
+  const dnC = stockDownHex(isKR);
 
   const cellColor = (avg: number) => {
     if (Math.abs(avg) < 0.2) return { bg: '#1A2540', border: '#1A2540' };

@@ -1,7 +1,8 @@
 'use client';
+import { stockColor } from '@/lib/stockColor';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { fmtCap, stockColor, fmt } from '@/lib/format';
+import { fmtCap, fmt } from '@/lib/format';
 
 const BottomSheet = dynamic(() => import('@/components/BottomSheet'), { ssr: false });
 

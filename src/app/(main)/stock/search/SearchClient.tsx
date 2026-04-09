@@ -1,4 +1,5 @@
 'use client';
+import { stockColor } from '@/lib/stockColor';
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
@@ -91,7 +92,7 @@ export default function StockSearchClient() {
                 <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{s.symbol} · {s.market} · {s.sector || '-'}</div>
               </div>
               <span style={{ fontSize: 12, fontWeight: 600, minWidth: 70, textAlign: 'right' }}>{fmtPrice(s.price, s.currency)}</span>
-              <span style={{ fontSize: 12, fontWeight: 700, minWidth: 55, textAlign: 'right', color: isKR ? (pct > 0 ? 'var(--accent-red)' : pct < 0 ? 'var(--accent-blue)' : 'var(--text-tertiary)') : (pct > 0 ? 'var(--accent-green)' : pct < 0 ? 'var(--accent-red)' : 'var(--text-tertiary)') }}>
+              <span style={{ fontSize: 12, fontWeight: 700, minWidth: 55, textAlign: 'right', color: stockColor(pct, isKR) }}>
                 {pct > 0 ? '+' : ''}{pct.toFixed(2)}%
               </span>
               <span style={{ fontSize: 10, color: 'var(--text-tertiary)', minWidth: 50, textAlign: 'right' }}>{fmtCap(Number(s.market_cap), s.currency)}</span>

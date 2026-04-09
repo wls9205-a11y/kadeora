@@ -1,9 +1,10 @@
+import { stockColor, stockUpColor, stockDownColor } from '@/lib/stockColor';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { SITE_URL } from '@/lib/constants';
-import { fmtCap, stockColor, fmtPrice } from '@/lib/format';
+import { fmtCap, fmtPrice } from '@/lib/format';
 import Disclaimer from '@/components/Disclaimer';
 import ShareButtons from '@/components/ShareButtons';
 
@@ -177,18 +178,18 @@ export default async function SectorPage({ params }: Props) {
                 return `M${cx + r * Math.cos(s)},${cy + r * Math.sin(s)} A${r},${r} 0 ${large} 1 ${cx + r * Math.cos(e)},${cy + r * Math.sin(e)}`;
               };
               return (<>
-                {upCount > 0 && <path d={arc(0, upDeg)} fill="none" stroke={isKR ? 'var(--accent-red)' : 'var(--accent-green)'} strokeWidth="10" strokeLinecap="round" />}
+                {upCount > 0 && <path d={arc(0, upDeg)} fill="none" stroke={stockUpColor(isKR)} strokeWidth="10" strokeLinecap="round" />}
                 {flat > 0 && <path d={arc(upDeg, flatDeg)} fill="none" stroke="var(--border)" strokeWidth="10" strokeLinecap="round" />}
-                {downCount > 0 && <path d={arc(upDeg + flatDeg, downDeg)} fill="none" stroke={isKR ? 'var(--accent-blue)' : 'var(--accent-red)'} strokeWidth="10" strokeLinecap="round" />}
+                {downCount > 0 && <path d={arc(upDeg + flatDeg, downDeg)} fill="none" stroke={stockDownColor(isKR)} strokeWidth="10" strokeLinecap="round" />}
                 <text x="40" y="37" textAnchor="middle" style={{ fontSize: 14, fontWeight: 800, fill: 'var(--text-primary)' }}>{stocks.length}</text>
                 <text x="40" y="50" textAnchor="middle" style={{ fontSize: 8, fill: 'var(--text-tertiary)' }}>종목</text>
               </>);
             })()}
           </svg>
           <div style={{ display: 'flex', gap: 'var(--sp-sm)', marginTop: 6, fontSize: 10 }}>
-            <span style={{ color: isKR ? 'var(--accent-red)' : 'var(--accent-green)' }}>▲{upCount}</span>
+            <span style={{ color: stockUpColor(isKR) }}>▲{upCount}</span>
             <span style={{ color: 'var(--text-tertiary)' }}>━{stocks.length - upCount - downCount}</span>
-            <span style={{ color: isKR ? 'var(--accent-blue)' : 'var(--accent-red)' }}>▼{downCount}</span>
+            <span style={{ color: stockDownColor(isKR) }}>▼{downCount}</span>
           </div>
         </div>
         {/* KPI 그리드 */}
@@ -199,7 +200,7 @@ export default async function SectorPage({ params }: Props) {
           </div>
           <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '10px 12px' }}>
             <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>평균 등락률</div>
-            <div style={{ fontSize: 14, fontWeight: 800, color: avgPct >= 0 ? (isKR ? 'var(--accent-red)' : 'var(--accent-green)') : (isKR ? 'var(--accent-blue)' : 'var(--accent-red)') }}>
+            <div style={{ fontSize: 14, fontWeight: 800, color: stockColor(avgPct, isKR) }}>
               {avgPct >= 0 ? '+' : ''}{avgPct.toFixed(2)}%
             </div>
           </div>
@@ -211,12 +212,12 @@ export default async function SectorPage({ params }: Props) {
               <div style={{ background: isKR ? 'rgba(248,113,113,0.06)' : 'rgba(52,211,153,0.06)', border: `1px solid ${isKR ? 'rgba(248,113,113,0.2)' : 'rgba(52,211,153,0.2)'}`, borderRadius: 'var(--radius-md)', padding: '10px 12px' }}>
                 <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>🔥 최고 상승</div>
                 <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{gainer.name}</div>
-                <div style={{ fontSize: 12, fontWeight: 800, color: isKR ? 'var(--accent-red)' : 'var(--accent-green)' }}>+{(gainer.change_pct || 0).toFixed(2)}%</div>
+                <div style={{ fontSize: 12, fontWeight: 800, color: stockUpColor(isKR) }}>+{(gainer.change_pct || 0).toFixed(2)}%</div>
               </div>
               <div style={{ background: isKR ? 'rgba(96,165,250,0.06)' : 'rgba(248,113,113,0.06)', border: `1px solid ${isKR ? 'rgba(96,165,250,0.2)' : 'rgba(248,113,113,0.2)'}`, borderRadius: 'var(--radius-md)', padding: '10px 12px' }}>
                 <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>❄️ 최고 하락</div>
                 <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{loser.name}</div>
-                <div style={{ fontSize: 12, fontWeight: 800, color: isKR ? 'var(--accent-blue)' : 'var(--accent-red)' }}>{(loser.change_pct || 0).toFixed(2)}%</div>
+                <div style={{ fontSize: 12, fontWeight: 800, color: stockDownColor(isKR) }}>{(loser.change_pct || 0).toFixed(2)}%</div>
               </div>
             </>);
           })()}

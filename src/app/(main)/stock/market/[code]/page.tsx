@@ -1,3 +1,4 @@
+import { stockColor } from '@/lib/stockColor';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -95,7 +96,7 @@ export default async function MarketPage({ params }: Props) {
                   <td style={{ padding: '7px 10px', fontSize: 12, borderBottom: '1px solid var(--border)', color: 'var(--text-tertiary)' }}>{i + 1}</td>
                   <td style={{ padding: '7px 10px', fontSize: 12, borderBottom: '1px solid var(--border)' }}><Link href={`/stock/${s.symbol}`} style={{ color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>{s.name}</Link></td>
                   <td style={{ padding: '7px 10px', fontSize: 12, borderBottom: '1px solid var(--border)', fontWeight: 600 }}>{fmtPrice(s.price, s.currency)}</td>
-                  <td style={{ padding: '7px 10px', fontSize: 12, borderBottom: '1px solid var(--border)', fontWeight: 700, color: isKR ? (pct > 0 ? 'var(--accent-red)' : pct < 0 ? 'var(--accent-blue)' : 'var(--text-tertiary)') : (pct > 0 ? 'var(--accent-green)' : pct < 0 ? 'var(--accent-red)' : 'var(--text-tertiary)') }}>{pct > 0 ? '+' : ''}{pct.toFixed(2)}%</td>
+                  <td style={{ padding: '7px 10px', fontSize: 12, borderBottom: '1px solid var(--border)', fontWeight: 700, color: stockColor(pct, isKR) }}>{pct > 0 ? '+' : ''}{pct.toFixed(2)}%</td>
                   <td style={{ padding: '7px 10px', fontSize: 12, borderBottom: '1px solid var(--border)' }}>{fmtCap(Number(s.market_cap), s.currency)}</td>
                   <td style={{ padding: '7px 10px', fontSize: 12, borderBottom: '1px solid var(--border)' }}>{s.per ? Number(s.per).toFixed(1) : '-'}</td>
                   <td style={{ padding: '7px 10px', fontSize: 12, borderBottom: '1px solid var(--border)' }}>{s.dividend_yield ? `${Number(s.dividend_yield).toFixed(1)}%` : '-'}</td>

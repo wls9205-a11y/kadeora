@@ -1,3 +1,4 @@
+import { stockColor, isKRMarket } from '@/lib/stockColor';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import Link from 'next/link';
 import type { Metadata } from 'next';
@@ -58,7 +59,7 @@ export default async function ThemesPage() {
                   {theme.description && <p style={{ fontSize: 11, color: 'var(--text-secondary)', margin: '2px 0 0' }}>{theme.description}</p>}
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: avgPct > 0 ? 'var(--accent-red)' : avgPct < 0 ? 'var(--accent-blue)' : 'var(--text-tertiary)' }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: stockColor(avgPct, true) }}>
                     {avgPct > 0 ? '+' : ''}{avgPct.toFixed(2)}%
                   </div>
                   <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{stocks.length}종목</div>
@@ -71,7 +72,7 @@ export default async function ThemesPage() {
                     return (
                       <Link key={q.symbol} href={`/stock/${q.symbol}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 8px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', textDecoration: 'none', fontSize: 11 }}>
                         <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{q.name}</span>
-                        <span style={{ color: pct > 0 ? 'var(--accent-red)' : pct < 0 ? 'var(--accent-blue)' : 'var(--text-tertiary)', fontWeight: 600 }}>
+                        <span style={{ color: stockColor(pct, isKRMarket(q?.market, q?.currency)), fontWeight: 600 }}>
                           {pct > 0 ? '+' : ''}{pct.toFixed(1)}%
                         </span>
                       </Link>

@@ -1,4 +1,5 @@
 'use client';
+import { stockColor, stockUpColor, stockDownColor, sentimentColor } from '@/lib/stockColor';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import SearchInput from '@/components/SearchInput';
@@ -12,7 +13,7 @@ const PortfolioSimulator = dynamic(() => import('@/components/PortfolioSimulator
 const GlobalPanorama = dynamic(() => import('@/components/GlobalPanorama'), { ssr: false });
 const StockRadarChart = dynamic(() => import('@/components/StockRadarChart'), { ssr: false });
 import MiniSparkline from '@/components/MiniSparkline';
-import { fmtCap, stockColor, fmt } from '@/lib/format';
+import { fmtCap, fmt } from '@/lib/format';
 import Disclaimer from '@/components/Disclaimer';
 import SectionShareButton from '@/components/SectionShareButton';
 import ExchangeRateMiniChart from '@/components/ExchangeRateMiniChart';
@@ -191,8 +192,8 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
     const isGlobal = s.currency === 'USD';
     const isWatched = watchlistSymbols.includes(s.symbol);
     const isStale = pct === 0 && (s.change_amt ?? 0) === 0;
-    const upColor = isGlobal ? 'var(--accent-green)' : 'var(--accent-red)';
-    const downColor = isGlobal ? 'var(--accent-red)' : 'var(--accent-blue)';
+    const upColor = stockUpColor(!isGlobal);
+    const downColor = stockDownColor(!isGlobal);
     const barColor = pct > 0 ? upColor : pct < 0 ? downColor : 'var(--border)';
     const pts = sparklines[s.symbol];
     // 52주 위치 계산
@@ -349,14 +350,14 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
         const upRatio = activeStocks.length > 0 ? activeStocks.filter(s => s.change_pct > 0).length / activeStocks.length : 0.5;
         const fgScore = Math.round(upRatio * 100);
         const fgLabel = fgScore >= 75 ? '극단탐욕' : fgScore >= 55 ? '탐욕' : fgScore >= 45 ? '중립' : fgScore >= 25 ? '공포' : '극단공포';
-        const fgColor = fgScore >= 55 ? 'var(--accent-red)' : fgScore >= 45 ? 'var(--text-tertiary)' : 'var(--accent-blue)';
+        const fgColor = fgScore >= 55 ? stockUpColor(isDomestic) : fgScore >= 45 ? 'var(--stock-flat)' : stockDownColor(isDomestic);
         const kospiIdx = indexStocks.find(s => s.symbol === 'KOSPI_IDX' || s.name.includes('KOSPI 지수'));
         const kospiPct = kospiIdx?.change_pct ?? 0;
         return (
           <div style={{ borderRadius: 'var(--radius-lg)', padding: '12px 14px 10px', marginBottom: 'var(--sp-md)', background: 'var(--bg-surface)', border: '1px solid var(--border)', position: 'relative', overflow: 'hidden' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
               <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)' }}>AI 시황</span>
-              <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: bull ? 'rgba(46,232,165,0.08)' : bear ? 'rgba(248,113,113,0.08)' : 'rgba(148,163,184,0.08)', color: bull ? 'var(--accent-green)' : bear ? 'var(--accent-red)' : 'var(--text-tertiary)', fontWeight: 700 }}>
+              <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: bull ? 'var(--stock-bullish-bg)' : bear ? 'var(--stock-bearish-bg)' : 'var(--stock-neutral-bg)', color: bull ? 'var(--stock-bullish)' : bear ? 'var(--stock-bearish)' : 'var(--stock-neutral)', fontWeight: 700 }}>
                 {bull ? '강세' : bear ? '약세' : '보합'}
               </span>
               <span style={{ fontSize: 9, color: 'var(--text-tertiary)', marginLeft: 'auto' }}>
@@ -372,11 +373,11 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
                   <>
                     <div style={{ background: 'var(--bg-hover)', borderRadius: 6, padding: '5px 6px', textAlign: 'center' }}>
                       <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>상승 TOP</div>
-                      <div style={{ fontSize: 11, fontWeight: 700, color: isDomestic ? 'var(--accent-red)' : 'var(--accent-green)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{topUp?.name || '—'}</div>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: stockUpColor(isDomestic), overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{topUp?.name || '—'}</div>
                     </div>
                     <div style={{ background: 'var(--bg-hover)', borderRadius: 6, padding: '5px 6px', textAlign: 'center' }}>
                       <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>하락 TOP</div>
-                      <div style={{ fontSize: 11, fontWeight: 700, color: isDomestic ? 'var(--accent-blue)' : 'var(--accent-red)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{topDn?.name || '—'}</div>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: stockDownColor(isDomestic), overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{topDn?.name || '—'}</div>
                     </div>
                     <div style={{ background: 'var(--bg-hover)', borderRadius: 6, padding: '5px 6px', textAlign: 'center' }}>
                       <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>USD/KRW</div>
@@ -393,8 +394,8 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
       {/* ─ 국내/해외 토글 (평균등락 + 비율바 + 수치) ─ */}
       <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-md)' }}>
         {[
-          { active: isDomestic, flag: '🇰🇷', label: '국내주식', sub: 'KOSPI · KOSDAQ', stocks: domesticStocks, onClick: () => { setMode('domestic'); setSearch(''); setSectorFilter('all'); setStockListLimit(30); }, activeBorder: 'var(--brand)', activeBg: 'rgba(59,123,246,0.06)', activeShadow: '0 0 16px rgba(59,123,246,0.12)', upColor: 'var(--accent-red)', dnColor: 'var(--accent-blue)' },
-          { active: !isDomestic, flag: '🇺🇸', label: '해외주식', sub: 'NYSE · NASDAQ', stocks: globalStocks, onClick: () => { setMode('global'); setSearch(''); setSectorFilter('all'); setStockListLimit(30); }, activeBorder: 'var(--brand)', activeBg: 'rgba(59,123,246,0.06)', activeShadow: '0 0 16px rgba(59,123,246,0.12)', upColor: 'var(--accent-green)', dnColor: 'var(--accent-red)' },
+          { active: isDomestic, flag: '🇰🇷', label: '국내주식', sub: 'KOSPI · KOSDAQ', stocks: domesticStocks, onClick: () => { setMode('domestic'); setSearch(''); setSectorFilter('all'); setStockListLimit(30); }, activeBorder: 'var(--brand)', activeBg: 'rgba(59,123,246,0.06)', activeShadow: '0 0 16px rgba(59,123,246,0.12)', upColor: stockUpColor(true), dnColor: stockDownColor(true) },
+          { active: !isDomestic, flag: '🇺🇸', label: '해외주식', sub: 'NYSE · NASDAQ', stocks: globalStocks, onClick: () => { setMode('global'); setSearch(''); setSectorFilter('all'); setStockListLimit(30); }, activeBorder: 'var(--brand)', activeBg: 'rgba(59,123,246,0.06)', activeShadow: '0 0 16px rgba(59,123,246,0.12)', upColor: stockUpColor(false), dnColor: stockDownColor(false) },
         ].map(({ active, flag, label, sub, stocks: mstocks, onClick, activeBorder, activeBg, activeShadow, upColor, dnColor }) => {
           const actives = mstocks.filter(s => s.price > 0);
           const up = actives.filter(s => (s.change_pct ?? 0) > 0).length;
@@ -450,9 +451,9 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
           ];
           return indicators.map(ind => {
             const color = ind.pct > 0
-              ? (ind.krStyle ? 'var(--accent-red)' : 'var(--accent-green)')
+              ? (ind.krStyle ? stockUpColor(true) : stockUpColor(false))
               : ind.pct < 0
-                ? (ind.krStyle ? 'var(--accent-blue)' : 'var(--accent-red)')
+                ? (ind.krStyle ? stockDownColor(true) : stockDownColor(false))
                 : 'var(--text-tertiary)';
             return (
               <div key={ind.label} style={{ background: 'var(--bg-surface)', padding: '8px 8px', borderLeft: `3px solid ${color}`, borderRadius: 0 }}>
@@ -475,7 +476,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
             </span>
             {pillStocks.map(s => {
               const pct = s.change_pct ?? 0;
-              const color = pct > 0 ? 'var(--accent-green)' : pct < 0 ? 'var(--accent-red)' : 'var(--text-tertiary)';
+              const color = pct > 0 ? stockUpColor(false) : pct < 0 ? stockDownColor(false) : 'var(--stock-flat)';
               const label = s.symbol === 'DIA' ? '다우' : s.symbol === 'USO' ? '원유' : s.symbol === 'TLT' ? '국채' : s.symbol === 'IWM' ? '러셀' : s.symbol;
               return (
                 <span key={s.symbol} style={{ fontSize: 9, padding: '3px 7px', borderRadius: 4, background: 'var(--bg-hover)', color: 'var(--text-secondary)' }}>
@@ -508,8 +509,8 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
         if (sectors.length < 3) return null;
         const top5 = sectors.slice(0, 5);
         const rest = sectors.slice(5, 10);
-        const upColor = isDomestic ? 'var(--accent-red)' : 'var(--accent-green)';
-        const dnColor = isDomestic ? 'var(--accent-blue)' : 'var(--accent-red)';
+        const upColor = stockUpColor(isDomestic);
+        const dnColor = stockDownColor(isDomestic);
         const getColor = (avg: number) => avg > 0 ? upColor : dnColor;
         const getBg = (avg: number) => {
           const intensity = Math.min(Math.abs(avg) / 5, 1);
@@ -550,8 +551,8 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
       {(() => {
         const allMovers = sentimentStocks.filter(s => s.price > 0);
         const isGlobal = !isDomestic;
-        const upColor = isGlobal ? 'var(--accent-green)' : 'var(--accent-red)';
-        const dnColor = isGlobal ? 'var(--accent-red)' : 'var(--accent-blue)';
+        const upColor = stockUpColor(!isGlobal);
+        const dnColor = stockDownColor(!isGlobal);
 
         // 카테고리별 분류
         const surgeUp = allMovers.filter(s => (s.change_pct ?? 0) >= 5).sort((a, b) => (b.change_pct ?? 0) - (a.change_pct ?? 0)).slice(0, 5);
@@ -640,8 +641,8 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
               .filter(s => s.count >= 2)
               .sort((a,b) => b.avg - a.avg);
             const maxAbs = Math.max(...sectorRanking.map(s => Math.abs(s.avg)), 0.1);
-            const upC = isDomestic ? 'var(--accent-red)' : 'var(--accent-green)';
-            const downC = isDomestic ? 'var(--accent-blue)' : 'var(--accent-red)';
+            const upC = stockUpColor(isDomestic);
+            const downC = stockDownColor(isDomestic);
             return (
               <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: '10px 12px', marginBottom: 10 }}>
                 <div style={{ fontSize: 9, fontWeight: 600, color: 'var(--text-tertiary)', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: 'monospace', marginBottom: 'var(--sp-sm)' }}>섹터 등락률</div>
@@ -697,12 +698,12 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
             </div>
           ) : news.map((item: Record<string, any>) => {
             const sent = item.sentiment_label;
-            const sentColor = sent === 'positive' ? 'var(--accent-green)' : sent === 'negative' ? 'var(--accent-red)' : 'var(--text-tertiary)';
+            const sentColor = sentimentColor(sent || 'neutral');
             const sentLabel = sent === 'positive' ? '긍정' : sent === 'negative' ? '부정' : '중립';
             const stock = stocks.find(s => s.symbol === item.symbol);
             return (
               <a key={item.id} href={item.url || '#'} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textDecoration: 'none', marginBottom: 'var(--sp-sm)' }}>
-                <div style={{ padding: 'var(--sp-md) var(--card-p)', borderRadius: 'var(--radius-card)', border: '1px solid var(--border)', background: 'var(--bg-surface)', borderLeft: `3px solid ${sent === 'positive' ? (isDomestic?'var(--accent-red)':'var(--accent-green)') : sent === 'negative' ? (isDomestic?'var(--accent-blue)':'var(--accent-red)') : 'var(--border)'}`, transition: 'border-color var(--transition-fast)' }}>
+                <div style={{ padding: 'var(--sp-md) var(--card-p)', borderRadius: 'var(--radius-card)', border: '1px solid var(--border)', background: 'var(--bg-surface)', borderLeft: `3px solid ${sentimentColor(sent || 'neutral')}`, transition: 'border-color var(--transition-fast)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--sp-sm)', marginBottom: 6 }}>
                     <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.4, flex: 1 }}>{item.title}</div>
                     <span style={{ fontSize: 10, padding: '3px 8px', borderRadius: 'var(--radius-xl)', background: sent === 'positive' ? 'rgba(52,211,153,0.12)' : sent === 'negative' ? 'rgba(248,113,113,0.12)' : 'var(--bg-hover)', color: sentColor, fontWeight: 700, flexShrink: 0 }}>{sentLabel}</span>
@@ -799,7 +800,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
                 return (
                   <div style={{ marginBottom: 'var(--sp-sm)' }}>
                     <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: 30 }}>
-                      <polyline points={points} fill="none" stroke={isUp ? 'var(--accent-red)' : 'var(--accent-blue)'} strokeWidth="1.5" strokeLinecap="round" />
+                      <polyline points={points} fill="none" stroke={stockColor(isUp ? 1 : -1, isDomestic)} strokeWidth="1.5" strokeLinecap="round" />
                     </svg>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
                       <span>{th.history[0]?.date?.slice(5) || ''}</span>
@@ -814,7 +815,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
                     const st = stocks.find(s => s.symbol === sym);
                     if (!st) return null;
                     const rPct = st.change_pct ?? 0;
-                    const rColor = rPct > 0 ? (isDomestic ? 'var(--accent-red)' : 'var(--accent-green)') : rPct < 0 ? (isDomestic ? 'var(--accent-blue)' : 'var(--accent-red)') : 'var(--text-tertiary)';
+                    const rColor = stockColor(rPct, isDomestic);
                     return (
                       <Link key={sym} href={`/stock/${encodeURIComponent(sym)}`} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, padding: '4px 10px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: `1px solid ${rPct !== 0 ? rColor + '40' : 'var(--border)'}`, textDecoration: 'none' }}>
                         <span style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>{st.name}</span>
@@ -843,14 +844,14 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-sm)' }}>
             <div>
               <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)' }}>🏆 Magnificent 7</div>
-              <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 1 }}>합산 시총 {fmtCap(totalCap, 'USD')} · <span style={{ color: 'var(--accent-green)' }}>▲{upCount7}</span> <span style={{ color: 'var(--accent-red)' }}>▼{downCount7}</span></div>
+              <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 1 }}>합산 시총 {fmtCap(totalCap, 'USD')} · <span style={{ color: stockUpColor(false) }}>▲{upCount7}</span> <span style={{ color: stockDownColor(false) }}>▼{downCount7}</span></div>
             </div>
           </div>
           {/* 카드 그리드 */}
           <div className="listing-grid-2col">
             {m7Stocks.sort((a, b) => (b.market_cap || 0) - (a.market_cap || 0)).map((st) => {
               const pct = st.change_pct ?? 0;
-              const color = pct > 0 ? 'var(--accent-green)' : pct < 0 ? 'var(--accent-red)' : 'var(--text-tertiary)';
+              const color = pct > 0 ? stockUpColor(false) : pct < 0 ? stockDownColor(false) : 'var(--stock-flat)';
               const capPct = maxCap > 0 ? ((st.market_cap || 0) / maxCap) * 100 : 0;
               const pts = sparklines[st.symbol];
               return (
@@ -893,7 +894,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
               <button key={k} onClick={() => setMoversTab(k)} style={{
                 flex: 1, padding: '7px 0', borderRadius: 'var(--radius-sm)', fontSize: 12, fontWeight: 700,
                 border: 'none', cursor: 'pointer', whiteSpace: 'nowrap',
-                background: moversTab===k ? (k==='up' ? (isDomestic?'var(--accent-red)':'var(--accent-green)') : k==='down' ? (isDomestic?'var(--accent-blue)':'var(--accent-red)') : 'var(--brand)') : 'transparent',
+                background: moversTab===k ? (k==='up' ? stockUpColor(isDomestic) : k==='down' ? stockDownColor(isDomestic) : 'var(--brand)') : 'transparent',
                 color: moversTab===k ? '#fff' : 'var(--text-tertiary)',
                 transition: 'all var(--transition-fast)',
               }}>{l}</button>
@@ -905,8 +906,8 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
             const limitDown = isDomestic ? targetStocks.filter(s => (s.change_pct ?? 0) <= -29.5).length : 0;
             const up5 = targetStocks.filter(s => (s.change_pct ?? 0) >= 5).length;
             const down5 = targetStocks.filter(s => (s.change_pct ?? 0) <= -5).length;
-            const upColor = isDomestic ? 'var(--accent-red)' : 'var(--accent-green)';
-            const downColor = isDomestic ? 'var(--accent-blue)' : 'var(--accent-red)';
+            const upColor = stockUpColor(isDomestic);
+            const downColor = stockDownColor(isDomestic);
             if (limitUp === 0 && limitDown === 0 && up5 === 0 && down5 === 0) return null;
             return (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 6, marginBottom: 10 }}>
@@ -1019,8 +1020,8 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
           {filteredStocks.slice(0, 3).map((s, i) => {
             const pct = s.change_pct ?? 0;
             const isGlobal = s.currency === 'USD';
-            const upColor = isGlobal ? 'var(--accent-green)' : 'var(--accent-red)';
-            const downColor = isGlobal ? 'var(--accent-red)' : 'var(--accent-blue)';
+            const upColor = stockUpColor(!isGlobal);
+            const downColor = stockDownColor(!isGlobal);
             const color = pct > 0 ? upColor : pct < 0 ? downColor : 'var(--text-tertiary)';
             const medals = ['🥇','🥈','🥉'];
             return (
@@ -1065,7 +1066,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
                     {(isDomestic ? domesticStocks : globalStocks).filter(s => s.price > 0).slice(0, 5).map(s => {
                       const pct = s.change_pct ?? 0;
                       const isGlobal = s.currency === 'USD';
-                      const color = pct > 0 ? (isGlobal ? 'var(--accent-green)' : 'var(--accent-red)') : pct < 0 ? (isGlobal ? 'var(--accent-red)' : 'var(--accent-blue)') : 'var(--text-tertiary)';
+                      const color = stockColor(pct, !isGlobal);
                       return (
                         <div key={s.symbol} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 4px', borderBottom: '1px solid var(--border)' }}>
                           <div style={{ flex: 1, minWidth: 0 }}>
@@ -1098,8 +1099,8 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
                   const pct = s.change_pct ?? 0;
                   const isGlobal = s.currency === 'USD';
                   const isWatched = watchlistSymbols.includes(s.symbol);
-                  const upColor = isGlobal ? 'var(--accent-green)' : 'var(--accent-red)';
-                  const downColor = isGlobal ? 'var(--accent-red)' : 'var(--accent-blue)';
+                  const upColor = stockUpColor(!isGlobal);
+                  const downColor = stockDownColor(!isGlobal);
                   const priceColor = pct > 0 ? upColor : pct < 0 ? downColor : 'var(--text-tertiary)';
                   const pts = sparklines[s.symbol];
                   const w52h = pts?.length >= 2 ? Math.max(...pts) : null;
@@ -1177,8 +1178,8 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
             const up = displayStocks.filter(s => (s.change_pct ?? 0) > 0).length;
             const down = displayStocks.filter(s => (s.change_pct ?? 0) < 0).length;
             const avgPct = displayStocks.filter(s => s.price > 0).reduce((s, st) => s + (st.change_pct ?? 0), 0) / (displayStocks.filter(s => s.price > 0).length || 1);
-            const upC = isDomestic ? 'var(--accent-red)' : 'var(--accent-green)';
-            const downC = isDomestic ? 'var(--accent-blue)' : 'var(--accent-red)';
+            const upC = stockUpColor(isDomestic);
+            const downC = stockDownColor(isDomestic);
             return (
               <div style={{ padding: '12px 0 14px', borderTop: '1px solid var(--border)', marginTop: 'var(--sp-xs)' }}>
                 {/* 오늘 성과 요약 */}

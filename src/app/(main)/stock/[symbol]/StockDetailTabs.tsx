@@ -1,4 +1,5 @@
 'use client';
+import { stockColor, stockUpColor, stockDownColor, investorColor, investorBg, signalColor, signalBg, sentimentColor, sentimentBg, isKRMarket } from '@/lib/stockColor';
 import type { StockPriceHistory, StockNews, InvestorFlow, Disclosure, AIComment } from '@/types/stock';
 import { useState } from 'react';
 import StockComments from '@/components/StockComments';
@@ -29,7 +30,7 @@ function MiniChart({ data, isKR = true }: { data: { date: string; close_price: n
   const range = max - min || 1; const W = 300; const H = 80; const P = 4;
   const points = prices.map((p, i) => `${P + (i / (prices.length - 1)) * (W - P * 2)},${H - P - ((p - min) / range) * (H - P * 2)}`).join(' ');
   const isUp = prices[prices.length - 1] >= prices[0];
-  const color = isUp ? (isKR ? 'var(--accent-red)' : 'var(--accent-green)') : (isKR ? 'var(--accent-blue)' : 'var(--accent-red)');
+  const color = stockColor(isUp ? 1 : -1, isKR);
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-sm)' }}>
@@ -160,19 +161,19 @@ function ChartTab({ priceHistory, currency }: { priceHistory: StockPriceHistory[
           <div style={{ display: 'flex', gap: 'var(--sp-sm)', marginTop: 'var(--sp-md)', flexWrap: 'wrap' }}>
             <div style={{ flex: 1, minWidth: 80, background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '8px 10px', textAlign: 'center' }}>
               <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>기간 변동</div>
-              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: isUp ? (currency !== 'USD' ? 'var(--accent-red)' : 'var(--accent-green)') : (currency !== 'USD' ? 'var(--accent-blue)' : 'var(--accent-red)'), marginTop: 2 }}>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: stockColor(isUp ? 1 : -1, currency !== 'USD'), marginTop: 2 }}>
                 {isUp ? '+' : ''}{changePct.toFixed(2)}%
               </div>
             </div>
             <div style={{ flex: 1, minWidth: 80, background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '8px 10px', textAlign: 'center' }}>
               <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>최고가</div>
-              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: currency !== 'USD' ? 'var(--accent-red)' : 'var(--accent-green)', marginTop: 2 }}>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: stockUpColor(currency !== 'USD'), marginTop: 2 }}>
                 {currency === 'USD' ? `$${high.toFixed(2)}` : `₩${high.toLocaleString()}`}
               </div>
             </div>
             <div style={{ flex: 1, minWidth: 80, background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '8px 10px', textAlign: 'center' }}>
               <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>최저가</div>
-              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: currency !== 'USD' ? 'var(--accent-blue)' : 'var(--accent-red)', marginTop: 2 }}>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: stockDownColor(currency !== 'USD'), marginTop: 2 }}>
                 {currency === 'USD' ? `$${low.toFixed(2)}` : `₩${low.toLocaleString()}`}
               </div>
             </div>
@@ -233,15 +234,15 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
             </div>
           )}
           {aiComment && (() => {
-            const signalColor = aiComment.signal === 'bullish' ? '#059669' : aiComment.signal === 'bearish' ? 'var(--accent-red)' : 'var(--text-tertiary)';
+            const sigColor = signalColor(aiComment.signal || 'neutral');
             const signalLabel = aiComment.signal === 'bullish' ? '🟢 매수 우위' : aiComment.signal === 'bearish' ? '🔴 매도 우위' : '🟡 중립';
-            const signalBg = aiComment.signal === 'bullish' ? 'linear-gradient(135deg, rgba(5,150,105,0.08), rgba(5,150,105,0.02))' : aiComment.signal === 'bearish' ? 'linear-gradient(135deg, rgba(248,113,113,0.08), rgba(248,113,113,0.02))' : 'var(--bg-surface)';
+            const cardBg = aiComment.signal === 'bullish' ? 'linear-gradient(135deg, rgba(5,150,105,0.08), rgba(5,150,105,0.02))' : aiComment.signal === 'bearish' ? 'linear-gradient(135deg, rgba(248,113,113,0.08), rgba(248,113,113,0.02))' : 'var(--bg-surface)';
             const signalBorder = aiComment.signal === 'bullish' ? '1px solid rgba(5,150,105,0.2)' : aiComment.signal === 'bearish' ? '1px solid rgba(248,113,113,0.2)' : '1px solid var(--border)';
             return (
-              <div className="kd-card" style={{ background: signalBg, border: signalBorder }}>
+              <div className="kd-card" style={{ background: cardBg, border: signalBorder }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-sm)' }}>
                   <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>🤖 AI 한줄평</span>
-                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: signalColor, padding: '2px 10px', borderRadius: 'var(--radius-pill)', background: aiComment.signal === 'bullish' ? 'rgba(5,150,105,0.12)' : aiComment.signal === 'bearish' ? 'rgba(248,113,113,0.12)' : 'var(--bg-hover)' }}>{signalLabel}</span>
+                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: sigColor, padding: '2px 10px', borderRadius: 'var(--radius-pill)', background: signalBg(aiComment.signal || 'neutral') }}>{signalLabel}</span>
                 </div>
                 <p style={{ fontSize: 'var(--fs-base)', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.6 }}>{aiComment.comment || aiComment.content}</p>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 'var(--sp-sm)' }}>
@@ -279,11 +280,11 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
               <div style={{ display: 'flex', gap: 'var(--sp-md)', marginBottom: 'var(--sp-md)' }}>
                 <div style={{ flex: 1, background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '8px 12px', textAlign: 'center' }}>
                   <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>외국인 누적</div>
-                  <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: totalForeign >= 0 ? 'var(--accent-blue)' : 'var(--accent-red)', marginTop: 2 }}>{totalForeign >= 0 ? '순매수' : '순매도'} {Math.abs(Math.round(totalForeign / 10000))}만</div>
+                  <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: investorColor('foreign'), marginTop: 2 }}>{totalForeign >= 0 ? '순매수' : '순매도'} {Math.abs(Math.round(totalForeign / 10000))}만</div>
                 </div>
                 <div style={{ flex: 1, background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '8px 12px', textAlign: 'center' }}>
                   <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>기관 누적</div>
-                  <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: totalInst >= 0 ? 'var(--accent-yellow)' : 'var(--accent-red)', marginTop: 2 }}>{totalInst >= 0 ? '순매수' : '순매도'} {Math.abs(Math.round(totalInst / 10000))}만</div>
+                  <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: investorColor('inst'), marginTop: 2 }}>{totalInst >= 0 ? '순매수' : '순매도'} {Math.abs(Math.round(totalInst / 10000))}만</div>
                 </div>
               </div>
             );
@@ -301,18 +302,18 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
                     <span style={{ fontSize: 'var(--fs-xs)', minWidth: 36, color: 'var(--text-tertiary)' }}>외국인</span>
                     <div style={{ flex: 1, height: 12, background: 'var(--bg-hover)', borderRadius: 'var(--radius-xs)', overflow: 'hidden', display: 'flex', justifyContent: foreignNet >= 0 ? 'flex-start' : 'flex-end' }}>
-                      <div style={{ width: `${Math.abs(foreignNet) / maxVal * 100}%`, height: '100%', background: foreignNet >= 0 ? 'var(--accent-blue)' : 'var(--accent-red)', borderRadius: 'var(--radius-xs)', minWidth: 2 }} />
+                      <div style={{ width: `${Math.abs(foreignNet) / maxVal * 100}%`, height: '100%', background: investorColor('foreign'), borderRadius: 'var(--radius-xs)', minWidth: 2 }} />
                     </div>
-                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, minWidth: 50, textAlign: 'right', color: foreignNet >= 0 ? 'var(--accent-blue)' : 'var(--accent-red)' }}>
+                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, minWidth: 50, textAlign: 'right', color: investorColor('foreign') }}>
                       {foreignNet >= 0 ? '+' : ''}{(foreignNet / 10000).toFixed(1)}만
                     </span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <span style={{ fontSize: 'var(--fs-xs)', minWidth: 36, color: 'var(--text-tertiary)' }}>기관</span>
                     <div style={{ flex: 1, height: 12, background: 'var(--bg-hover)', borderRadius: 'var(--radius-xs)', overflow: 'hidden', display: 'flex', justifyContent: instNet >= 0 ? 'flex-start' : 'flex-end' }}>
-                      <div style={{ width: `${Math.abs(instNet) / maxVal * 100}%`, height: '100%', background: instNet >= 0 ? 'var(--accent-yellow)' : 'var(--accent-red)', borderRadius: 'var(--radius-xs)', minWidth: 2 }} />
+                      <div style={{ width: `${Math.abs(instNet) / maxVal * 100}%`, height: '100%', background: investorColor('inst'), borderRadius: 'var(--radius-xs)', minWidth: 2 }} />
                     </div>
-                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, minWidth: 50, textAlign: 'right', color: instNet >= 0 ? 'var(--accent-yellow)' : 'var(--accent-red)' }}>
+                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, minWidth: 50, textAlign: 'right', color: investorColor('inst') }}>
                       {instNet >= 0 ? '+' : ''}{(instNet / 10000).toFixed(1)}만
                     </span>
                   </div>
@@ -334,13 +335,13 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
             const total = news.length || 1;
             return (
               <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-md)', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
-                <span style={{ color: 'var(--accent-red)', fontWeight: 600 }}>긍정 {pos}</span>
+                <span style={{ color: 'var(--stock-positive)', fontWeight: 600 }}>긍정 {pos}</span>
                 <span>중립 {neu}</span>
-                <span style={{ color: 'var(--accent-blue)', fontWeight: 600 }}>부정 {neg}</span>
+                <span style={{ color: 'var(--stock-negative)', fontWeight: 600 }}>부정 {neg}</span>
                 <div style={{ flex: 1, height: 4, borderRadius: 2, overflow: 'hidden', display: 'flex' }}>
-                  <div style={{ width: `${(pos/total)*100}%`, background: 'var(--accent-red)' }} />
+                  <div style={{ width: `${(pos/total)*100}%`, background: 'var(--stock-positive)' }} />
                   <div style={{ width: `${(neu/total)*100}%`, background: 'var(--bg-hover)' }} />
-                  <div style={{ width: `${(neg/total)*100}%`, background: 'var(--accent-blue)' }} />
+                  <div style={{ width: `${(neg/total)*100}%`, background: 'var(--stock-negative)' }} />
                 </div>
               </div>
             );
@@ -355,8 +356,8 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
                 {n.sentiment_label && (
                   <span style={{
                     fontSize: 'var(--fs-xs)', padding: '1px 6px', borderRadius: 'var(--radius-sm)', fontWeight: 700, flexShrink: 0,
-                    background: n.sentiment_label === 'positive' ? 'var(--accent-green-bg)' : n.sentiment_label === 'negative' ? 'rgba(248,113,113,0.15)' : 'rgba(148,163,184,0.1)',
-                    color: n.sentiment_label === 'positive' ? 'var(--accent-red)' : n.sentiment_label === 'negative' ? 'var(--accent-blue)' : 'var(--text-secondary)',
+                    background: sentimentBg(n.sentiment_label || 'neutral'),
+                    color: sentimentColor(n.sentiment_label || 'neutral'),
                   }}>
                     {n.sentiment_label === 'positive' ? '🟢' : n.sentiment_label === 'negative' ? '🔴' : '⚪'}
                     {n.sentiment_score ? ` ${Math.round(n.sentiment_score * 100)}%` : ''}

@@ -1,3 +1,4 @@
+import { stockUpHex, stockDownHex } from '@/lib/stockColor';
 'use client';
 import { useMemo } from 'react';
 
@@ -44,8 +45,8 @@ export default function StockTrendLine({ data, currency, isKR }: Props) {
   const first = sorted[0];
   const totalChange = ((Number(last.close_price) - Number(first.close_price)) / Number(first.close_price)) * 100;
   const isUp = totalChange >= 0;
-  const upC = isKR ? '#FF6B6B' : '#2EE8A5';
-  const dnC = isKR ? '#6CB4FF' : '#FF6B6B';
+  const upC = stockUpHex(isKR);
+  const dnC = stockDownHex(isKR);
   const lineColor = isUp ? upC : dnC;
   const chartW = W - PADDING.left - PADDING.right;
   const chartH = H - PADDING.top - PADDING.bottom;

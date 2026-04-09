@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { TrendingUp, Building2, Bell, ChevronRight, Star } from 'lucide-react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
-import { stockColor } from '@/lib/format';
+import { stockColor } from '@/lib/stockColor';
 import { SkeletonDashboard } from '@/components/Skeleton';
 import { useAuth } from '@/components/AuthProvider';
 

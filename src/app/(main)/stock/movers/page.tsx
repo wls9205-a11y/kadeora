@@ -1,3 +1,4 @@
+import { stockColor, isKRMarket } from '@/lib/stockColor';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import Link from 'next/link';
 import type { Metadata } from 'next';
@@ -54,7 +55,7 @@ export default async function MoversPage() {
             <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-tertiary)', minWidth: 24 }}>{i + 1}</span>
             <span style={{ flex: 1, fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</span>
             <span style={{ fontSize: 12, color: 'var(--text-secondary)', minWidth: 70, textAlign: 'right' }}>{fmtPrice(s.price, s.currency)}</span>
-            {showPct && <span style={{ fontSize: 12, fontWeight: 700, minWidth: 60, textAlign: 'right', color: isUp ? 'var(--accent-red)' : 'var(--accent-blue)' }}>{isUp ? '+' : ''}{pct.toFixed(2)}%</span>}
+            {showPct && <span style={{ fontSize: 12, fontWeight: 700, minWidth: 60, textAlign: 'right', color: stockColor(pct, isKRMarket(s.market, s.currency)) }}>{isUp ? '+' : ''}{pct.toFixed(2)}%</span>}
             {showVol && <span style={{ fontSize: 11, color: 'var(--text-tertiary)', minWidth: 70, textAlign: 'right' }}>{Number(s.volume).toLocaleString()}</span>}
           </Link>
         );

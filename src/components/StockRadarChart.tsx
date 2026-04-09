@@ -37,7 +37,7 @@ export default function StockRadarChart({ stocks, isKR }: Props) {
   };
 
   const selectedStocks = selected.map(sym => stocks.find(s => s.symbol === sym)).filter(Boolean) as Stock[];
-  const COLORS = ['#FF6B6B', '#2EE8A5', '#FFB41E'];
+  const COLORS = ['#42A5F5', '#AB47BC', '#FFB74D'];
 
   const W = 200, H = 200, CX = W / 2, CY = H / 2, R = 75;
   const N = AXES.length;
