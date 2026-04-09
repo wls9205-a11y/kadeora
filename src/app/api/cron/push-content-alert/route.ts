@@ -49,7 +49,7 @@ async function handler(req: NextRequest): Promise<NextResponse> {
 
     // 2. 유저 프로필 (관심사) 조회
     const { data: profiles } = await sb.from('profiles')
-      .select('id, interests').in('id', userIds);
+      .select('id, interests, residence_city').in('id', userIds);
 
     // 3. 카테고리별 그룹 분류
     const groups: Record<string, string[]> = {};
