@@ -195,8 +195,9 @@ export async function generateMetadata({ params }: Props) {
         ? post.excerpt
         : post.title;
     const descClean = desc.replace(/[\n\r#*_|]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160);
+    const brandSuffix = post.category === 'stock' ? '카더라 주식' : post.category === 'apt' ? '카더라 부동산' : post.category === 'unsold' ? '카더라 부동산' : '카더라';
   return {
-    title: post.title,
+    title: { absolute: `${post.title} | ${brandSuffix}` },
     description: descClean,
     keywords: post.meta_keywords || (post.tags ?? []).join(', '),
     alternates: { canonical: `${SITE}/blog/${slug}` },

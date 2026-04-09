@@ -59,7 +59,7 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
     } catch {}
 
     const staticPaths = [
-      '', '/feed', '/hot', '/stock', '/apt', '/discuss', '/blog',
+      '', '/feed', '/hot', '/stock', '/apt', '/discuss', '/blog', '/about',
       '/guide', '/search', '/faq', '/terms', '/privacy', '/refund', 
       '/grades', '/daily', '/apt/map', '/apt/diagnose', '/apt/search', '/apt/complex', '/stock/compare', '/blog/series',
       '/apt/data', '/stock/data', '/stock/search', '/stock/dividend', '/stock/movers', '/stock/themes',

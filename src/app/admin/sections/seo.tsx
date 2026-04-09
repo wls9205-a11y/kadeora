@@ -59,10 +59,11 @@ export default function SEOSection() {
         <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-lg)', padding: '16px 18px' }}>
           <div style={{ fontSize: 14, fontWeight: 700, color: C.text, marginBottom: 'var(--sp-md)' }}>🌐 포털 인덱싱</div>
           {[
-            { name: 'Google', status: '미노출', color: C.red, action: 'Search Console 사이트맵', href: 'https://search.google.com/search-console' },
-            { name: 'Naver', status: '대기', color: C.yellow, action: '서치어드바이저 RSS', href: 'https://searchadvisor.naver.com' },
-            { name: 'Bing', status: '대기', color: C.yellow, action: '웹마스터 사이트맵', href: 'https://www.bing.com/webmasters' },
-            { name: 'Daum', status: '미등록', color: C.red, action: '검색등록', href: 'https://register.search.daum.net' },
+            { name: 'Google', status: '인증완료', color: C.green, action: 'Search Console', href: 'https://search.google.com/search-console' },
+            { name: 'Naver', status: '인증완료', color: C.green, action: '서치어드바이저', href: 'https://searchadvisor.naver.com' },
+            { name: 'Bing', status: '인증완료', color: C.green, action: '웹마스터', href: 'https://www.bing.com/webmasters' },
+            { name: 'Daum', status: '등록 필요', color: C.yellow, action: '검색등록 →', href: 'https://register.search.daum.net' },
+            { name: 'ZUM', status: '등록 필요', color: C.yellow, action: '검색등록 →', href: 'https://zum.com' },
           ].map(p => (
             <div key={p.name} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 0', borderBottom: `1px solid ${C.border}08` }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -78,7 +79,59 @@ export default function SEOSection() {
         </div>
       </div>
 
-      {/* ── 계산기 SEO 현황 (142종) ── */}
+      {/* ── 브랜드 키워드 검색 노출 체크리스트 ── */}
+      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-lg)', padding: '16px 18px', marginBottom: 'var(--sp-xl)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-md)' }}>
+          <span style={{ fontSize: 14, fontWeight: 700, color: C.text }}>🎯 브랜드 키워드 노출 전략</span>
+          <span style={{ fontSize: 10, color: C.textDim }}>목표: &quot;카더라&quot; 검색 시 1위</span>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-md)' }} className="mc-g1">
+          {/* 기술적 SEO */}
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: C.brand, marginBottom: 8 }}>✅ 기술적 SEO (코드)</div>
+            {[
+              { label: 'title에 "카더라" 포함', done: true },
+              { label: 'Organization JSON-LD (독립)', done: true },
+              { label: 'WebSite JSON-LD + SearchAction', done: true },
+              { label: 'alternateName 확장 (부동산/주식/앱)', done: true },
+              { label: '/about 브랜드 앵커 페이지', done: true },
+              { label: '블로그 title "카더라 부동산/주식" 분기', done: true },
+              { label: 'SiteNavigationElement', done: true },
+              { label: 'og:site_name = 카더라', done: true },
+            ].map(r => (
+              <div key={r.label} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '3px 0', fontSize: 10 }}>
+                <span style={{ color: r.done ? C.green : C.red }}>{r.done ? '●' : '○'}</span>
+                <span style={{ color: r.done ? C.textSec : C.text }}>{r.label}</span>
+              </div>
+            ))}
+          </div>
+          {/* 외부 채널 */}
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: C.purple, marginBottom: 8 }}>📡 외부 채널 (수동)</div>
+            {[
+              { label: '네이버 블로그 개설·운영', done: false, href: 'https://section.blog.naver.com' },
+              { label: '네이버 카페 개설·운영', done: false, href: 'https://section.cafe.naver.com' },
+              { label: '네이버 스마트플레이스 등록', done: false, href: 'https://new.smartplace.naver.com' },
+              { label: '구글 비즈니스 프로필 등록', done: false, href: 'https://business.google.com' },
+              { label: '카카오톡 채널 개설', done: false, href: 'https://business.kakao.com' },
+              { label: '나무위키 문서 생성', done: false, href: 'https://namu.wiki' },
+              { label: '프레스 릴리즈 배포', done: false, href: 'https://www.newswire.co.kr' },
+              { label: '네이버 브랜드검색광고', done: false, href: 'https://searchad.naver.com' },
+            ].map(r => (
+              <div key={r.label} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '3px 0', fontSize: 10 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ color: r.done ? C.green : C.red }}>{r.done ? '●' : '○'}</span>
+                  <span style={{ color: r.done ? C.textSec : C.text }}>{r.label}</span>
+                </div>
+                <a href={r.href} target="_blank" rel="noopener noreferrer" style={{ fontSize: 9, color: C.brand, textDecoration: 'none', fontWeight: 600 }}>→</a>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div style={{ marginTop: 12, padding: '8px 10px', background: `${C.brand}10`, borderRadius: 6, fontSize: 10, color: C.textSec, lineHeight: 1.6 }}>
+          💡 <strong style={{ color: C.text }}>핵심:</strong> &quot;카더라&quot;는 일반명사(소문)로 나무위키/위키백과가 장악 중. &quot;카더라 부동산&quot; &quot;카더라 주식&quot; 조합 키워드부터 1위 확보 → 6개월 후 단독 키워드 도전.
+        </div>
+      </div>
       {(() => {
         const total = CALC_REGISTRY.length;
         const withEmoji = CALC_REGISTRY.filter(c => c.emoji).length;

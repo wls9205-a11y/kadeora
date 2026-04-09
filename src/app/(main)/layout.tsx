@@ -17,7 +17,7 @@ import GlobalMissionBar from '@/components/GlobalMissionBar';
 import SmartPushPrompt from '@/components/SmartPushPrompt';
 
 export const metadata: Metadata = {
-  title: { template: '%s | 카더라', default: '카더라 — 대한민국 소리소문 정보 커뮤니티' },
+  title: { template: '%s | 카더라', default: '카더라 — 부동산·주식 정보 플랫폼' },
   description: '대한민국 소리소문 정보 커뮤니티 — 주식 시세, 아파트 청약, 실시간 토론을 하나의 앱에서',
   keywords: ['카더라', '소리소문', '커뮤니티', '주식', '부동산', '청약', '토론'],
   openGraph: { siteName: '카더라', type: 'website', locale: 'ko_KR' },
@@ -76,7 +76,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
           <p>상호명: 카더라 &nbsp;|&nbsp; 대표자: 노영진 &nbsp;|&nbsp; 사업자등록번호: 278-57-00801</p>
           <p>사업장 주소: 부산광역시 연제구 연동로 27, 405호</p>
           <p>전화: {CONTACT_PHONE} &nbsp;|&nbsp; 이메일: {CONTACT_EMAIL}</p>
-          <p style={{marginTop:4}}>© 2026 카더라. All rights reserved.</p>
+          <p style={{marginTop:4}}>© 2026 <a href="/about" style={{color:'var(--text-secondary)',textDecoration:'none',fontWeight:600}}>카더라</a>. All rights reserved.</p>
         </div>
       </footer>
       </AuthProvider>
