@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
     }
 
     const { data: deadlines } = await admin.from('apt_subscriptions')
-      .select('id, house_nm, rcept_endde')
+      .select('id, house_nm, rcept_endde, region_nm')
       .in('rcept_endde', [today, tomorrow])
       .limit(10);
 
@@ -39,16 +39,11 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ sent: 0, message: 'No deadlines today/tomorrow' });
     }
 
-    // 알림 생성 (notification_settings에서 push_apt_deadline = true인 유저)
-    const { data: settings } = await admin.from('notification_settings')
-      .select('user_id')
-      .eq('push_apt_deadline', true);
-    const _optedInIds = new Set((settings ?? []).map(s => s.user_id));
-
-    // notification_settings가 없는 유저는 기본값(true)이므로 전체 유저에서 옵트아웃 제외
+    // 유저별 지역 조회 (개인화 발송용)
     const { data: allUsers } = await admin.from('profiles')
-      .select('id')
-      .eq('is_deleted', false);
+      .select('id, residence_city')
+      .eq('is_deleted', false)
+      .neq('is_seed', true);
 
     const { data: optedOut } = await admin.from('notification_settings')
       .select('user_id')
@@ -61,6 +56,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ sent: 0, message: 'No eligible users' });
     }
 
+    // 유저별 맞춤 알림 생성 (지역 필터링)
     const notifications = [];
     for (const apt of deadlines) {
       const isToday = apt.rcept_endde === today;
@@ -69,6 +65,10 @@ export async function GET(req: NextRequest) {
         : `내일 마감! ${apt.house_nm} 접수가 내일까지에요.`;
 
       for (const u of users) {
+        // 지역 필터: 유저 지역이 설정되어 있으면 해당 지역 청약만 발송
+        if (u.residence_city && apt.region_nm && u.residence_city !== apt.region_nm) {
+          continue; // 내 지역 아님 → 스킵
+        }
         notifications.push({ user_id: u.id, type: 'system', content, link: '/apt' });
       }
     }
