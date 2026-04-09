@@ -144,7 +144,7 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
             <div key={i} style={{display:'flex',alignItems:'center',gap:6,padding:'3px 0',fontSize:10,borderBottom:i<7?'1px solid rgba(255,255,255,0.03)':'none'}}>
               <span style={{fontSize:12,flexShrink:0}}>{v.device}</span>
               <span style={{flex:1,color:'rgba(255,255,255,0.4)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' as const,minWidth:0}}>{(() => { try { return decodeURIComponent(v.path||'').replace(/\(main\)\//g,'') } catch { return v.path } })().slice(0,25)}</span>
-              <span style={{fontSize:9,padding:'1px 6px',borderRadius:8,background:v.ref==='Google'?'rgba(66,133,244,0.15)':v.ref==='Naver'?'rgba(0,199,60,0.15)':v.ref==='Kakao'?'rgba(254,229,0,0.15)':'rgba(255,255,255,0.04)',color:v.ref==='Google'?'#4285F4':v.ref==='Naver'?'#00C73C':v.ref==='Kakao'?'#FEE500':'rgba(255,255,255,0.3)',flexShrink:0}}>{v.ref}</span>
+              <span style={{fontSize:9,padding:'1px 6px',borderRadius:8,background:v.ref.includes('Google')?'rgba(66,133,244,0.15)':v.ref.includes('Naver')?'rgba(0,199,60,0.15)':v.ref.includes('Kakao')?'rgba(254,229,0,0.15)':v.ref.includes('Daum')?'rgba(245,158,11,0.15)':v.ref==='Direct'?'rgba(59,123,246,0.1)':'rgba(255,255,255,0.04)',color:v.ref.includes('Google')?'#4285F4':v.ref.includes('Naver')?'#00C73C':v.ref.includes('Kakao')?'#FEE500':v.ref.includes('Daum')?'#F59E0B':v.ref==='Direct'?'#3B7BF6':'rgba(255,255,255,0.3)',flexShrink:0}}>{v.ref}</span>
               <span style={{fontSize:9,color:'rgba(255,255,255,0.15)',flexShrink:0,width:24,textAlign:'right' as const}}>{ago(v.at)}</span>
             </div>
           ))}
@@ -165,12 +165,12 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
         </div>
         <div style={{...CS.card,minWidth:0,overflow:'hidden'}}>
           <div style={{fontSize:10,fontWeight:700,color:'rgba(255,255,255,0.4)',marginBottom:6}}>🌐 유입 경로</div>
-          {refSources.slice(0,5).map((r:any)=>{const w=pct(r.count||0,refTotal);const clr:any={direct:'#3B7BF6',google:'#10B981',naver:'#00C73C',daum:'#F59E0B',kakao:'#FEE500'}; return <div key={r.source} style={{marginBottom:4}}>
+          {refSources.slice(0,8).map((r:any)=>{const w=pct(r.count||0,refTotal);const clr:any={'Direct':'#3B7BF6','Google':'#4285F4','Naver 검색':'#00C73C','Naver 블로그':'#03C75A','Naver 카페':'#1EC800','Naver 뉴스':'#00B843','Naver':'#00C73C','Daum 검색':'#F59E0B','Daum 카페':'#E68A00','Daum':'#F59E0B','Kakao':'#FEE500','Kakao 채널':'#FFD700','Bing':'#00809D','Zum':'#FF6B00','DCinside':'#1E90FF','Clien':'#4A90D9','FMKorea':'#2DB400','Blind':'#00D1B2','Instagram':'#E1306C','Facebook':'#1877F2','X(Twitter)':'#1DA1F2','YouTube':'#FF0000','Band':'#06C755','Tistory':'#FF5A00','ChatGPT':'#10A37F','Perplexity':'#20B2AA'}; return <div key={r.source} style={{marginBottom:4}}>
             <div style={{display:'flex',justifyContent:'space-between',fontSize:10,marginBottom:2}}>
               <span style={{color:'rgba(255,255,255,0.45)'}}>{r.source}</span>
               <span style={{fontWeight:600,color:'rgba(255,255,255,0.55)'}}>{r.count} <span style={{fontSize:9,color:'rgba(255,255,255,0.2)'}}>({w}%)</span></span>
             </div>
-            <HBar value={w} color={clr[r.source?.toLowerCase()]||'rgba(255,255,255,0.2)'} h={4}/>
+            <HBar value={w} color={clr[r.source]||'rgba(255,255,255,0.2)'} h={4}/>
           </div>;})}
         </div>
       </div>}

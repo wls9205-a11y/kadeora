@@ -1,6 +1,7 @@
 import { errMsg } from '@/lib/error-utils';
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
+import { classifyReferrer } from '@/lib/referrer-classify';
 
 export const maxDuration = 30;
 
@@ -289,12 +290,11 @@ export async function GET(req: NextRequest) {
             .map(([path, count]) => ({ path, count }));
           // hourly distribution
           const hourly = Array.from({ length: 24 }, (_, h) => ({ hour: h, count: hourCounts[h] || 0 }));
-          // 유입경로 집계
+          // 유입경로 집계 (세분화)
           const refMap: Record<string, number> = {};
           for (const r of (todayPvR.data || [])) {
-            const ref = (r.referrer || '').toLowerCase();
-            const source = !ref || ref === '' ? 'direct' : ref.includes('google') ? 'google' : ref.includes('naver') ? 'naver' : ref.includes('daum') ? 'daum' : ref.includes('kakao') ? 'kakao' : ref.includes('bing') ? 'bing' : 'other';
-            refMap[source] = (refMap[source] || 0) + 1;
+            const source = classifyReferrer(r.referrer);
+            if (source !== 'Internal') refMap[source] = (refMap[source] || 0) + 1;
           }
           const referrerBreakdown = Object.entries(refMap)
             .sort((a, b) => b[1] - a[1])
@@ -307,7 +307,7 @@ export async function GET(req: NextRequest) {
             referrerBreakdown,
             recentVisitors: (recentPvR.data || []).slice(0, 15).map((r: any) => ({
               path: r.path, at: r.created_at,
-              ref: r.referrer ? (r.referrer.includes('google') ? 'Google' : r.referrer.includes('naver') ? 'Naver' : r.referrer.includes('kakao') ? 'Kakao' : 'Other') : 'Direct',
+              ref: classifyReferrer(r.referrer),
               device: (r.user_agent || '').includes('Mobile') ? '📱' : '💻',
             })),
           };
@@ -346,15 +346,11 @@ export async function GET(req: NextRequest) {
         .map(([date, v]) => ({ date, pv: v.pv, uv: v.visitors.size }))
         .sort((a, b) => a.date.localeCompare(b.date));
 
-      // 유입 경로 분류
-      const refCounts: Record<string, number> = { direct: 0, google: 0, naver: 0, kakao: 0, other: 0 };
+      // 유입 경로 분류 (세분화)
+      const refCounts: Record<string, number> = {};
       for (const r of (referrerR.data || [])) {
-        const ref = (r.referrer || '').toLowerCase();
-        if (!ref) refCounts.direct++;
-        else if (ref.includes('google')) refCounts.google++;
-        else if (ref.includes('naver')) refCounts.naver++;
-        else if (ref.includes('kakao')) refCounts.kakao++;
-        else refCounts.other++;
+        const source = classifyReferrer(r.referrer);
+        if (source !== 'Internal') refCounts[source] = (refCounts[source] || 0) + 1;
       }
 
       // 일별 가입자 추이
