@@ -93,14 +93,18 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
     console.info(`[redev-geocode] keys: kakao=${kakaoKey ? 'SET' : 'MISSING'} naver=${naverCid ? 'SET' : 'MISSING'}`);
 
     // ━━━ Phase 1: 재개발 프로젝트 좌표 ━━━
-    const { data: projects } = await sb.from('redevelopment_projects')
+    // random() 정렬로 매 실행마다 다른 프로젝트 시도 (실패 재시도 루프 방지)
+    let projects: any[] | null = null;
+    try { const r = await (sb as any).rpc('get_redev_no_coords', { lim: 40 }); projects = r.data; } catch {}
+    // 폴백: RPC 없으면 기존 쿼리
+    const redevTargets = projects || (await sb.from('redevelopment_projects')
       .select('id, district_name, region, sigungu, address')
       .eq('is_active', true)
       .or('latitude.is.null,longitude.is.null')
-      .limit(40);
+      .limit(40)).data || [];
 
     let redevUpdated = 0;
-    for (const p of (projects || [])) {
+    for (const p of redevTargets) {
       let coords = p.address ? await geocodeKakao(p.address) : null;
       if (!coords) {
         const q = `${p.region || ''} ${p.sigungu || ''} ${p.district_name}`;
@@ -162,15 +166,15 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
       await new Promise(r => setTimeout(r, 150));
     }
 
-    console.info(`[redev-geocode] redev=${redevUpdated}/${(projects || []).length} sites=${siteUpdated}/${(sites || []).length} failed=${siteFailed}`);
+    console.info(`[redev-geocode] redev=${redevUpdated}/${redevTargets.length} sites=${siteUpdated}/${(sites || []).length} failed=${siteFailed}`);
 
     return {
-      processed: (projects || []).length + (sites || []).length,
+      processed: redevTargets.length + (sites || []).length,
       created: redevUpdated + siteUpdated,
       updated: redevUpdated + siteUpdated,
       failed: siteFailed,
       metadata: {
-        redev: { scanned: (projects || []).length, updated: redevUpdated },
+        redev: { scanned: redevTargets.length, updated: redevUpdated },
         sites: { scanned: (sites || []).length, updated: siteUpdated, failed: siteFailed },
         firstError: firstError || undefined,
       },
