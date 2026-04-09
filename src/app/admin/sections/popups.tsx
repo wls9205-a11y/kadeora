@@ -165,7 +165,9 @@ export default function PopupsSection() {
         <div style={{ fontSize: 11, fontWeight: 600, color: C.textDim, marginBottom: 6 }}>⚙️ 코드 기반 프로모 시스템</div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
           {[
-            { name: 'GuestNudge', desc: '비로그인 가입 유도', type: '토스트→배너→모달', status: '자동', color: C.cyan },
+            { name: 'TopBarCTA', desc: '페이지 상단 즉시 노출', type: '배너', status: '자동', color: C.cyan },
+            { name: 'ScrollToastCTA', desc: '스크롤 40% 토스트', type: '토스트→미니', status: '자동', color: C.cyan },
+            { name: 'LoginGate', desc: 'AI분석 블러+CTA', type: '블러 오버레이', status: '자동', color: C.cyan },
             { name: 'PromoSheet', desc: 'PWA 설치 유도', type: '바텀시트', status: '로그인+미설치', color: C.purple },
             { name: 'InstallBanner', desc: '홈화면 추가 안내', type: '상단 배너', status: '자동', color: C.green },
             { name: 'NoticeBanner', desc: 'DB 기반 띠 배너', type: '마퀴 배너', status: `${siteNotices.filter((n: any) => n.is_active).length}개 활성`, color: C.yellow },
