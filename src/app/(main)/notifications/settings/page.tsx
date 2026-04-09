@@ -45,9 +45,11 @@ export default function NotificationSettingsPage() {
 
       // 2. 서비스 워커 구독
       const reg = await navigator.serviceWorker.ready;
+      const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+      if (!vapidKey) { console.error('[push] VAPID key missing'); error('푸시 설정 오류 — 관리자에게 문의하세요'); setLoading(false); return; }
       const sub = await reg.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+        applicationServerKey: vapidKey,
       });
 
       // 3. 서버 저장
@@ -70,7 +72,8 @@ export default function NotificationSettingsPage() {
 
       setPushState('on');
       success('알림이 활성화되었습니다!');
-    } catch {
+    } catch (e) {
+      console.error('[push-subscribe]', e);
       error('알림 설정에 실패했습니다');
     } finally {
       setLoading(false);

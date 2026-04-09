@@ -5,6 +5,13 @@ import { usePathname } from 'next/navigation';
 export default function PageViewTracker() {
   const pathname = usePathname();
 
+  // Service Worker 등록 (푸시 알림 전제조건 — 최초 1회)
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
+    }
+  }, []);
+
   useEffect(() => {
     if (!pathname) return;
     try {
