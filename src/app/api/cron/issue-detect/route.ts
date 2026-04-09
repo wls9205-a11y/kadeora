@@ -254,7 +254,8 @@ async function handler(_req: NextRequest) {
   const [googleItems, dartItems] = await Promise.all([fetchGoogleTrends(), fetchDARTDisclosures()]);
   rssItems.push(...googleItems, ...dartItems);
 
-  console.log(`[issue-detect] RSS: ${rssItems.length} items, Google: ${googleItems.length}, DART: ${dartItems.length}`);
+  const sampleTitles = rssItems.slice(0, 5).map(r => r.title.slice(0, 40)).join(' | ');
+  console.log(`[issue-detect] RSS: ${rssItems.length}, Google: ${googleItems.length}, DART: ${dartItems.length} | ${sampleTitles}`);
   if (rssItems.length === 0) {
     return NextResponse.json({ detected: 0, message: 'no RSS items' });
   }
@@ -337,7 +338,7 @@ async function handler(_req: NextRequest) {
     const score = scoreIssue(candidate);
 
     // 25점 미만 무시
-    if (score.final_score < 25) continue;
+    if (score.final_score < 10) continue;
 
     // INSERT
     const { error } = await (sb as any).from('issue_alerts').insert({
