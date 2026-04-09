@@ -98,6 +98,8 @@ JSON만 응답하세요. 다른 텍스트 없이.`;
       content: parsed.content,
       slug: parsed.slug || parsed.title.replace(/[^가-힣a-z0-9\s-]/gi, '').replace(/\s+/g, '-').toLowerCase(),
       keywords: parsed.keywords || issue.detected_keywords || [],
+      meta_description: parsed.meta_description || '',
+      infographic_data: parsed.infographic_data || {},
     };
   } catch (e) {
     console.error('[issue-draft] AI generation failed:', e);
@@ -141,7 +143,8 @@ async function createOfficialFeedPost(sb: any, issue: any, blogSlug: string) {
 
   if (!systemUser) return;
 
-  const prefix = issue.category === 'apt' ? '🏠' : '📊';
+  const prefixMap: Record<string, string> = { apt: '🏠', stock: '📊', finance: '💰', tax: '📋', economy: '🌐', life: '🏃' };
+  const prefix = prefixMap[issue.category] || '📰';
   const entities = (issue.related_entities || []).join(', ');
   const title = issue.title.length > 50 ? issue.title.slice(0, 50) + '...' : issue.title;
 
@@ -151,7 +154,7 @@ async function createOfficialFeedPost(sb: any, issue: any, blogSlug: string) {
     author_id: systemUser.id,
     title: `[속보] ${entities || '이슈'} 분석`,
     content: content.slice(0, 500),
-    category: issue.category === 'apt' ? 'realestate' : 'stock',
+    category: issue.category === 'apt' ? 'realestate' : issue.category === 'stock' ? 'stock' : 'finance',
     is_anonymous: false,
     created_at: new Date().toISOString(),
   });
@@ -220,17 +223,25 @@ async function handler(_req: NextRequest) {
     && !(config.auto_publish_blocked_categories || []).includes(issue.category);
 
   // safeBlogInsert로 발행
+  // v2: 카테고리 매핑 + 커버 이미지 자동 설정
+  const blogCategory = (['apt', 'stock', 'finance', 'general'] as const).includes(issue.category as any)
+    ? issue.category : (issue.category === 'tax' ? 'finance' : issue.category === 'economy' ? 'finance' : 'general');
+  const coverImage = `${SITE_URL}/api/og?title=${encodeURIComponent(article.title)}&category=${blogCategory}&author=${encodeURIComponent('카더라')}&design=2`;
+  const imageAlt = `${article.title} — 카더라 분석`;
+
   const insertResult = await safeBlogInsert(sb, {
     slug: article.slug,
     title: article.title,
     content: article.content,
-    category: issue.category === 'stock' ? 'stock' : 'apt',
+    category: blogCategory as any,
     tags: article.keywords,
     source_type: 'auto_issue',
     cron_type: 'issue-draft',
     source_ref: (issue.source_urls || [])[0],
-    meta_description: (issue.summary || '').slice(0, 160),
+    meta_description: (article as any).meta_description || (issue.summary || '').slice(0, 160),
     meta_keywords: article.keywords.join(','),
+    cover_image: coverImage,
+    image_alt: imageAlt,
     is_published: canAutoPublish,
   });
 

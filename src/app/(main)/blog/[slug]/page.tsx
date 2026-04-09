@@ -237,6 +237,7 @@ export async function generateMetadata({ params }: Props) {
         'naver:description': descClean,
         'dg:plink': `${SITE}/blog/${slug}`,
         'article:section': section,
+        'robots': 'max-image-preview:large, max-snippet:-1, max-video-preview:-1',
         'article:tag': [section, ...(post.tags ?? []).slice(0, 5)].join(','),
         'article:published_time': post.published_at || post.created_at,
         'article:modified_time': post.updated_at || post.published_at || post.created_at,
@@ -399,8 +400,9 @@ export default async function BlogDetailPage({ params }: Props) {
     : (post.excerpt && post.excerpt.length >= 20 ? post.excerpt : post.title)
   ).replace(/[\n\r#*_|]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160);
 
+  const isNewsArticle = post.source_type === 'auto_issue' || post.source_type === 'news_rss';
   const jsonLd = {
-    '@context': 'https://schema.org', '@type': 'BlogPosting',
+    '@context': 'https://schema.org', '@type': isNewsArticle ? 'NewsArticle' : 'BlogPosting',
     headline: post.title,
     description: ((post.meta_description && post.meta_description.length >= 30) ? post.meta_description : (post.excerpt && post.excerpt.length >= 30) ? post.excerpt : post.title).replace(/[\n\r#*_|]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160),
     datePublished: post.published_at || post.created_at,
@@ -562,6 +564,7 @@ export default async function BlogDetailPage({ params }: Props) {
               image: [
                 { '@type': 'ImageObject', url: post.cover_image.startsWith('/') ? `${SITE}${post.cover_image}` : post.cover_image, name: post.image_alt || post.title, width: 1200, height: 630, position: 1 },
                 { '@type': 'ImageObject', url: ogSquare, name: `${post.title} — 카더라 블로그`, width: 630, height: 630, position: 2 },
+                { '@type': 'ImageObject', url: `${SITE}/api/og?title=${encodeURIComponent((post.title || '').slice(0, 40))}&category=${post.category}&design=2`, name: `${post.title} 분석`, width: 1200, height: 630, position: 3 },
               ],
             })}} />
           );

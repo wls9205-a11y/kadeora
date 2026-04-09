@@ -119,7 +119,111 @@ const GUIDE_KEYWORDS: [string, string][] = [
   ['청약통장', '/apt/diagnose'],
 ];
 
-const ALL_KEYWORDS = [...STOCK_KEYWORDS, ...APT_KEYWORDS, ...FINANCE_KEYWORDS, ...FEATURE_KEYWORDS, ...SERIES_KEYWORDS, ...GUIDE_KEYWORDS];
+
+// ═══ 계산기 키워드 (CALC_REGISTRY 기반 주요 142종 → 키워드 매핑) ═══
+const CALC_KEYWORDS: [string, string][] = [
+  // 부동산 세금
+  ['양도소득세 계산', '/calc/property-tax/transfer-tax'],
+  ['양도세 계산기', '/calc/property-tax/transfer-tax'],
+  ['종부세 계산기', '/calc/property-tax/property-holding-tax'],
+  ['종합부동산세 계산', '/calc/property-tax/property-holding-tax'],
+  ['취득세 계산기', '/calc/property-tax/acquisition-tax'],
+  ['취득세 계산', '/calc/property-tax/acquisition-tax'],
+  ['재산세 계산기', '/calc/property-tax/property-tax'],
+  ['임대소득세 계산', '/calc/property-tax/rental-income-tax'],
+  ['부동산 세금', '/calc/property-tax/transfer-tax'],
+  // 소득세
+  ['연봉 실수령액', '/calc/income-tax/net-salary'],
+  ['실수령액 계산기', '/calc/income-tax/net-salary'],
+  ['실수령액 계산', '/calc/income-tax/net-salary'],
+  ['월급 실수령액', '/calc/income-tax/net-salary'],
+  ['퇴직금 계산기', '/calc/salary/severance-pay'],
+  ['퇴직금 계산', '/calc/salary/severance-pay'],
+  ['4대보험 계산기', '/calc/income-tax/social-insurance'],
+  ['4대보험 계산', '/calc/income-tax/social-insurance'],
+  ['종합소득세 계산기', '/calc/income-tax/comprehensive-income-tax'],
+  ['프리랜서 세금 계산', '/calc/income-tax/freelancer-tax'],
+  // 금융/투자 세금
+  ['증권거래세 계산', '/calc/finance-tax/securities-tax'],
+  ['배당소득세 계산', '/calc/finance-tax/dividend-tax'],
+  ['가상자산 세금', '/calc/finance-tax/crypto-tax'],
+  ['해외주식 세금', '/calc/finance-tax/overseas-stock-tax'],
+  // 상속/증여
+  ['증여세 계산기', '/calc/inheritance/gift-tax'],
+  ['증여세 계산', '/calc/inheritance/gift-tax'],
+  ['상속세 계산기', '/calc/inheritance/inheritance-tax'],
+  ['상속세 계산', '/calc/inheritance/inheritance-tax'],
+  // 연말정산
+  ['연말정산 계산기', '/calc/year-end/year-end-tax'],
+  ['연말정산 계산', '/calc/year-end/year-end-tax'],
+  ['소득공제 계산', '/calc/year-end/income-deduction'],
+  ['세액공제 계산', '/calc/year-end/tax-credit'],
+  ['월세 공제 계산', '/calc/year-end/rent-deduction'],
+  // 부동산
+  ['청약 가점 계산기', '/calc/real-estate/subscription-score'],
+  ['청약 가점 계산', '/calc/real-estate/subscription-score'],
+  ['청약가점 계산', '/calc/real-estate/subscription-score'],
+  ['중개수수료 계산기', '/calc/real-estate/brokerage-fee'],
+  ['복비 계산기', '/calc/real-estate/brokerage-fee'],
+  ['중개수수료 계산', '/calc/real-estate/brokerage-fee'],
+  ['전월세 전환 계산기', '/calc/real-estate/jeonse-wolse'],
+  ['전월세 전환 계산', '/calc/real-estate/jeonse-wolse'],
+  ['전세 월세 전환', '/calc/real-estate/jeonse-wolse'],
+  ['DSR 계산기', '/calc/real-estate/dsr-calc'],
+  ['DSR 계산', '/calc/real-estate/dsr-calc'],
+  ['LTV 계산기', '/calc/real-estate/ltv-calc'],
+  ['LTV 계산', '/calc/real-estate/ltv-calc'],
+  ['임대수익률 계산', '/calc/real-estate/rental-yield'],
+  ['평수 계산기', '/calc/real-estate/pyeong-sqm'],
+  ['평수 환산', '/calc/real-estate/pyeong-sqm'],
+  ['전세가율 계산', '/calc/real-estate/jeonse-rate'],
+  // 주식/투자
+  ['복리 계산기', '/calc/investment/compound-interest'],
+  ['복리 계산', '/calc/investment/compound-interest'],
+  ['주식 수익률 계산기', '/calc/investment/stock-roi'],
+  ['주식 수익률 계산', '/calc/investment/stock-roi'],
+  ['배당수익률 계산', '/calc/investment/dividend-yield'],
+  ['적금 이자 계산기', '/calc/investment/savings-interest'],
+  ['적금 이자 계산', '/calc/investment/savings-interest'],
+  ['예금 이자 계산기', '/calc/investment/deposit-interest'],
+  ['예금 이자 계산', '/calc/investment/deposit-interest'],
+  ['ETF 수수료 계산', '/calc/investment/etf-fee'],
+  // 급여/노동
+  ['시급 계산기', '/calc/salary/hourly-wage'],
+  ['시급 계산', '/calc/salary/hourly-wage'],
+  ['연차 계산기', '/calc/salary/annual-leave'],
+  ['연차 계산', '/calc/salary/annual-leave'],
+  ['야근 수당 계산', '/calc/salary/overtime-pay'],
+  ['실업급여 계산기', '/calc/salary/unemployment-benefit'],
+  ['실업급여 계산', '/calc/salary/unemployment-benefit'],
+  ['최저시급 계산', '/calc/salary/minimum-wage'],
+  ['최저임금 계산', '/calc/salary/minimum-wage'],
+  // 대출/예적금
+  ['대출이자 계산기', '/calc/loan/loan-repayment'],
+  ['대출이자 계산', '/calc/loan/loan-repayment'],
+  ['대출 상환 계산', '/calc/loan/loan-repayment'],
+  ['원리금균등 계산', '/calc/loan/loan-repayment'],
+  ['중도상환수수료 계산', '/calc/loan/prepayment-fee'],
+  ['전세대출 계산기', '/calc/loan/jeonse-loan'],
+  ['전세대출 이자', '/calc/loan/jeonse-loan'],
+  // 연금/은퇴
+  ['국민연금 계산기', '/calc/pension/national-pension'],
+  ['국민연금 수령액', '/calc/pension/national-pension'],
+  ['퇴직연금 계산', '/calc/pension/retirement-pension'],
+  ['은퇴자금 계산', '/calc/pension/retirement-fund'],
+  // 자동차
+  ['자동차세 계산기', '/calc/auto/car-tax'],
+  ['자동차세 계산', '/calc/auto/car-tax'],
+  ['전기차 보조금 계산', '/calc/auto/ev-subsidy'],
+  ['자동차 취등록세', '/calc/auto/car-registration-tax'],
+  // 생활/건강
+  ['건강보험료 계산기', '/calc/life/health-insurance'],
+  ['건강보험료 계산', '/calc/life/health-insurance'],
+  ['BMI 계산기', '/calc/life/bmi'],
+  ['칼로리 계산기', '/calc/life/calorie'],
+];
+
+const ALL_KEYWORDS = [...STOCK_KEYWORDS, ...APT_KEYWORDS, ...FINANCE_KEYWORDS, ...FEATURE_KEYWORDS, ...SERIES_KEYWORDS, ...GUIDE_KEYWORDS, ...CALC_KEYWORDS];
 
 // 정규식 사전 컴파일 (모듈 로딩 시 1회) — 블로그 렌더링 성능 최적화
 function buildPattern(keyword: string): RegExp {

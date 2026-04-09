@@ -1,8 +1,65 @@
-# 카더라 STATUS — 세션 82 최종 (2026-04-10)
+# 카더라 STATUS — 세션 83 (2026-04-10)
 
 ## 최종 배포
 - Vercel: `prj_2nDcTjEcgAEew1wYdvVF57VljxJQ`
 - Supabase: `tezftxakuwhsclarprlz`
+
+
+## 세션 83 완료 작업
+
+### 🔍 이슈 선점 자동화 v2 전면 개편
+
+**issue-scoring.ts — 6카테고리 확장**
+- 카테고리: apt, stock → +finance, tax, economy, life (2→6개)
+- 신규 키워드 사전: FINANCE_HOT_KEYWORDS(30), TAX_HOT_KEYWORDS(27), ECONOMY_HOT_KEYWORDS(23), LIFE_HOT_KEYWORDS(25)
+- 신규 스코어러: scoreFinanceEvent(), scoreTaxPolicy(), scoreLifeEvent()
+- 증폭계수 v2: portal_cross_count(2포털×1.5/3포털×1.8), has_calculator(×1.15), is_seasonal_peak(×1.3)
+- detectIssueType() 6카테고리 분기 (finance 5유형, tax 3유형, economy 4유형, life 4유형)
+- selectDraftTemplate() 확장 (24개 템플릿)
+
+**issue-detect v2 — 멀티소스 수집**
+- RSS 14→25곳 (finance 3, economy 3, life 2, stock 추가 2)
+- Google Trends RSS 연동 (https://trends.google.co.kr/trending/rss?geo=KR)
+- 6카테고리 자동 분류 (최다 매칭 카테고리 선택)
+
+**issue-trend v2 — 멀티포털 트렌드**
+- 키워드 그룹 10→25개 (finance 4, tax 3, economy 3, life 3)
+- Google Trends RSS 교차 검증 (네이버+구글 동시 급상승 → ratio×1.5)
+- portal_cross_count 증폭계수 전달
+
+**issue-draft v2 — AI 프롬프트 재설계**
+- 시스템 프롬프트 전면 교체: 분량 3000~4500자, 내부링크 5개+, FAQ 7개, 테이블 2개+
+- 6카테고리별 내부링크 목록 자동 주입
+- cover_image + image_alt 자동 설정 (OG API URL)
+- meta_description + infographic_data 추출
+
+**blog-auto-link.ts — 계산기 키워드 대폭 확장**
+- 계산기 키워드 85개 추가 (총 85→170개)
+- 최대 내부링크 5→7개 확장
+
+**blog-safe-insert.ts — enrichContent 계산기 CTA**
+- 카테고리별 계산기 CTA 블록 자동 삽입 (apt/stock/finance/general)
+- FAQ 앞에 "💡 직접 계산해보세요" 테이블 자동 삽입
+
+**blog/[slug]/page.tsx — SEO 강화**
+- ImageGallery JSON-LD 2→3장 확장
+- NewsArticle JSON-LD 분기 (source_type=auto_issue → NewsArticle)
+- robots: max-image-preview:large 메타태그 추가
+
+**news-sitemap.xml — 신규**
+- 최근 48시간 이내 발행 기사 자동 포함
+- news:publication + image:image 태그
+
+**blog-fix-existing 크론 — 기존 글 일괄 보완**
+- cover_image NULL → OG API URL 자동 설정
+- meta_description 30자 미만 → content에서 150자 추출
+- meta_keywords NULL → tags 기반 생성
+- image_alt NULL → 제목 기반 자동 설정
+
+**IssueTab v2 — 어드민 확장**
+- 6카테고리 아이콘 + 카테고리 필터 추가
+- 카테고리별 통계 표시
+- 포털 교차 정보 (🌐2포털/3포털) 표시
 
 ## 세션 82 완료 작업
 

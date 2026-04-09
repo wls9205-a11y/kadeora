@@ -4,6 +4,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronAuth } from '@/lib/cron-auth';
 import { scoreIssue, extractKeywords, detectIssueType, keywordWeight } from '@/lib/issue-scoring';
 import type { IssueCandidate } from '@/lib/issue-scoring';
+import type { IssueCandidate } from '@/lib/issue-scoring';
 
 /**
  * issue-detect 크론 — 부동산+주식 이슈 실시간 탐지
@@ -33,7 +34,49 @@ const STOCK_RSS_FEEDS = [
   { name: '이데일리_증권', url: 'https://rss.edaily.co.kr/edaily_stock.xml' },
   { name: '머니투데이_증권', url: 'https://rss.mt.co.kr/mt/stock/' },
   { name: '아시아경제_증권', url: 'https://www.asiae.co.kr/rss/stock.xml' },
+  { name: '조선비즈_증권', url: 'https://biz.chosun.com/rss/stock/' },
+  { name: 'SBS비즈_증권', url: 'https://biz.sbs.co.kr/rss/news.xml' },
 ];
+
+const FINANCE_RSS_FEEDS = [
+  { name: '한경_마이머니', url: 'https://www.hankyung.com/feed/money' },
+  { name: '머니투데이_재테크', url: 'https://rss.mt.co.kr/mt/money/' },
+  { name: '조선비즈_금융', url: 'https://biz.chosun.com/rss/finance/' },
+];
+
+const ECONOMY_RSS_FEEDS = [
+  { name: '한경_경제', url: 'https://www.hankyung.com/feed/economy' },
+  { name: '이데일리_경제', url: 'https://rss.edaily.co.kr/edaily_economy.xml' },
+  { name: '서울경제_경제', url: 'https://www.sedaily.com/rss/NewsList/GB' },
+];
+
+const LIFE_RSS_FEEDS = [
+  { name: '머니투데이_생활경제', url: 'https://rss.mt.co.kr/mt/life/' },
+  { name: '한경_라이프', url: 'https://www.hankyung.com/feed/life' },
+];
+
+
+/* ═══════════ Google Trends RSS (무료) ═══════════ */
+
+async function fetchGoogleTrends(): Promise<RSSItem[]> {
+  try {
+    const res = await fetch('https://trends.google.co.kr/trending/rss?geo=KR', { signal: AbortSignal.timeout(8000) });
+    if (!res.ok) return [];
+    const xml = await res.text();
+    const items: RSSItem[] = [];
+    const itemRegex = /<item>([\s\S]*?)<\/item>/gi;
+    let match;
+    while ((match = itemRegex.exec(xml)) !== null) {
+      const block = match[1];
+      const title = block.match(/<title[^>]*>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/title>/)?.[1]?.trim() || '';
+      const link = block.match(/<link>(.*?)<\/link>/)?.[1] || '';
+      const traffic = block.match(/<ht:approx_traffic>(.*?)<\/ht:approx_traffic>/)?.[1] || '';
+      const newsUrl = block.match(/<ht:news_item_url>(.*?)<\/ht:news_item_url>/)?.[1] || link;
+      if (title) items.push({ title, link: newsUrl || link, pubDate: '', description: `구글 급상승: ${traffic}`, source: 'Google_Trends' });
+    }
+    return items.slice(0, 15);
+  } catch { return []; }
+}
 
 /* ═══════════ RSS 파싱 ═══════════ */
 
@@ -153,15 +196,20 @@ async function handler(_req: NextRequest) {
   const isGroupA = minute < 15 || (minute >= 30 && minute < 45); // :00, :30
 
   // 1. RSS 수집 (병렬)
+  // v2: 전체 RSS + Google Trends + 카테고리 확장
   const feeds = isGroupA
-    ? [...APT_RSS_FEEDS, ...STOCK_RSS_FEEDS]
-    : APT_RSS_FEEDS; // 그룹B에서는 부동산만 (주식은 장중 빈도 조절 위해)
+    ? [...APT_RSS_FEEDS, ...STOCK_RSS_FEEDS, ...FINANCE_RSS_FEEDS, ...ECONOMY_RSS_FEEDS, ...LIFE_RSS_FEEDS]
+    : [...APT_RSS_FEEDS, ...FINANCE_RSS_FEEDS]; // 그룹B: 부동산+재테크
 
   const allItems = await Promise.allSettled(feeds.map(f => fetchRSS(f)));
   const rssItems: RSSItem[] = [];
   for (const r of allItems) {
     if (r.status === 'fulfilled') rssItems.push(...r.value);
   }
+
+  // v2: Google Trends RSS 병합
+  const googleItems = await fetchGoogleTrends();
+  rssItems.push(...googleItems);
 
   if (rssItems.length === 0) {
     return NextResponse.json({ detected: 0, message: 'no RSS items' });
@@ -172,12 +220,20 @@ async function handler(_req: NextRequest) {
 
   for (const item of rssItems) {
     const text = `${item.title} ${item.description || ''}`;
-    const { apt: aptKw, stock: stockKw } = extractKeywords(text);
+    const kw = extractKeywords(text);
+    const allKw = [...kw.apt, ...kw.stock, ...kw.finance, ...kw.tax, ...kw.economy, ...kw.life];
 
-    if (aptKw.length === 0 && stockKw.length === 0) continue;
+    if (allKw.length === 0) continue;
 
-    const category: 'apt' | 'stock' = aptKw.length >= stockKw.length ? 'apt' : 'stock';
-    const keywords = category === 'apt' ? aptKw : stockKw;
+    // 최다 매칭 카테고리 선택
+    const catScores: [string, number][] = [
+      ['apt', kw.apt.length], ['stock', kw.stock.length],
+      ['finance', kw.finance.length], ['tax', kw.tax.length],
+      ['economy', kw.economy.length], ['life', kw.life.length],
+    ];
+    catScores.sort((a, b) => b[1] - a[1]);
+    const category = (catScores[0][0] || 'apt') as any;
+    const keywords = (kw as any)[category] as string[];
     const entities = extractEntities(item.title, item.description || '');
 
     // 엔티티 기반 그룹핑 (같은 단지/종목 기사 묶기)

@@ -40,7 +40,7 @@ export default function IssueTab() {
   const [autoEnabled, setAutoEnabled] = useState(true);
   const [minScore, setMinScore] = useState(60);
   const [selectedIssue, setSelectedIssue] = useState<IssueAlert | null>(null);
-  const [filter, setFilter] = useState<'all' | 'pending' | 'published' | 'draft'>('all');
+  const [filter, setFilter] = useState<string>('all');
   const [stats, setStats] = useState({ total: 0, published: 0, draft: 0, pending: 0 });
 
   const fetchIssues = useCallback(async () => {
@@ -121,6 +121,7 @@ export default function IssueTab() {
     if (filter === 'pending') return !i.is_processed;
     if (filter === 'published') return i.is_published;
     if (filter === 'draft') return i.publish_decision === 'draft';
+    if (['apt','stock','finance','tax','economy','life'].includes(filter)) return i.category === filter;
     return true;
   });
 
@@ -143,6 +144,10 @@ export default function IssueTab() {
         <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
           <span style={{ fontSize: 12, color: '#94a3b8' }}>
             전체 {stats.total} | 발행 {stats.published} | 초안 {stats.draft} | 대기 {stats.pending}
+            {' | '}🏠{issues.filter(i => i.category === 'apt').length}
+            {' '}📊{issues.filter(i => i.category === 'stock').length}
+            {' '}💰{issues.filter(i => i.category === 'finance').length}
+            {' '}📋{issues.filter(i => i.category === 'tax').length}
           </span>
         </div>
       </div>
@@ -187,13 +192,13 @@ export default function IssueTab() {
 
       {/* 필터 */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-        {(['all', 'pending', 'published', 'draft'] as const).map(f => (
+        {(['all', 'pending', 'published', 'draft', 'apt', 'stock', 'finance', 'tax', 'economy', 'life'] as const).map(f => (
           <button key={f} onClick={() => setFilter(f)} style={{
             background: filter === f ? '#3b82f6' : '#1e293b',
             color: '#e2e8f0', border: 'none', borderRadius: 6, padding: '4px 12px',
             fontSize: 12, cursor: 'pointer',
           }}>
-            {f === 'all' ? '전체' : f === 'pending' ? '대기중' : f === 'published' ? '발행됨' : '초안'}
+            {({'all':'전체','pending':'대기중','published':'발행됨','draft':'초안','apt':'🏠부동산','stock':'📊주식','finance':'💰재테크','tax':'📋세금','economy':'🌐경제','life':'🏃생활'}[f] || f)}
           </button>
         ))}
       </div>
@@ -222,7 +227,7 @@ export default function IssueTab() {
                       {issue.final_score}점
                     </span>
                     <span style={{ fontSize: 11, color: '#64748b' }}>
-                      {issue.category === 'apt' ? '🏠' : '📊'} {issue.issue_type}
+                      {({'apt':'🏠','stock':'📊','finance':'💰','tax':'📋','economy':'🌐','life':'🏃'}[issue.category] || '📰')} {issue.issue_type}
                     </span>
                     {statusBadge(issue)}
                   </div>
@@ -230,7 +235,7 @@ export default function IssueTab() {
                     {issue.draft_title || issue.title}
                   </div>
                   <div style={{ fontSize: 11, color: '#64748b', marginTop: 4 }}>
-                    {timeAgo(issue.detected_at)} · {(issue.related_entities || []).join(', ')} · {(issue.detected_keywords || []).slice(0, 3).join(', ')}
+                    {timeAgo(issue.detected_at)} · {(issue.related_entities || []).join(', ')} · {(issue.detected_keywords || []).slice(0, 3).join(', ')}{(issue as any).raw_data?.portal_cross_count >= 2 ? ` · 🌐${(issue as any).raw_data.portal_cross_count}포털` : ''}
                   </div>
                 </div>
 

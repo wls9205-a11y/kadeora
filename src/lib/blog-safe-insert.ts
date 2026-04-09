@@ -64,7 +64,47 @@ function enrichContent(content: string, category: string, title: string): string
     }
   }
 
-  // 3. FAQ 자동 삽입 — FAQ 섹션이 없는 경우
+
+  // 4. 계산기 CTA 블록 삽입 (v2)
+  const hasCalcCTA = /calc\/|계산기/.test(enriched);
+  if (!hasCalcCTA) {
+    const calcMap: Record<string, { label: string; url: string; desc: string }[]> = {
+      apt: [
+        { label: '청약 가점 계산기', url: '/calc/real-estate/subscription-score', desc: '내 청약 가점 확인' },
+        { label: '중개수수료 계산기', url: '/calc/real-estate/brokerage-fee', desc: '매매·전세 복비 계산' },
+        { label: 'DSR 계산기', url: '/calc/real-estate/dsr-calc', desc: '대출 한도 확인' },
+      ],
+      stock: [
+        { label: '주식 수익률 계산기', url: '/calc/investment/stock-roi', desc: '매수·매도 수익 계산' },
+        { label: '배당수익률 계산기', url: '/calc/investment/dividend-yield', desc: '배당 수익률 확인' },
+        { label: '복리 계산기', url: '/calc/investment/compound-interest', desc: '장기 투자 수익 시뮬레이션' },
+      ],
+      finance: [
+        { label: '대출이자 계산기', url: '/calc/loan/loan-repayment', desc: '원리금 상환 계산' },
+        { label: '예금이자 계산기', url: '/calc/investment/deposit-interest', desc: '예금 만기 수령액' },
+        { label: '적금이자 계산기', url: '/calc/investment/savings-interest', desc: '적금 만기 수령액' },
+      ],
+      general: [
+        { label: '실수령액 계산기', url: '/calc/income-tax/net-salary', desc: '연봉별 실수령액 확인' },
+        { label: '퇴직금 계산기', url: '/calc/salary/severance-pay', desc: '퇴직금 예상액 계산' },
+      ],
+    };
+    const calcs = calcMap[category] || calcMap.general;
+    if (calcs && calcs.length > 0) {
+      const ctaBlock = '\n\n---\n\n### 💡 직접 계산해보세요\n\n| 계산기 | 용도 |\n|--------|------|\n'
+        + calcs.map(c => `| [${c.label}](${c.url}) | ${c.desc} |`).join('\n')
+        + '\n\n---';
+      // FAQ 앞에 삽입
+      const faqIdx2 = enriched.indexOf('## 자주 묻는 질문');
+      if (faqIdx2 > 0) {
+        enriched = enriched.slice(0, faqIdx2) + ctaBlock + '\n\n' + enriched.slice(faqIdx2);
+      } else {
+        enriched += ctaBlock;
+      }
+    }
+  }
+
+  // 5. FAQ 자동 삽입 — FAQ 섹션이 없는 경우
   const hasFAQ = /FAQ|자주 묻는 질문|Q\.[^]*A\./.test(enriched);
   if (!hasFAQ) {
     const faqMap: Record<string, string> = {

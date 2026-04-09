@@ -10,7 +10,7 @@
 export interface IssueCandidate {
   title: string;
   summary: string;
-  category: 'apt' | 'stock' | 'policy' | 'market';
+  category: 'apt' | 'stock' | 'policy' | 'market' | 'finance' | 'tax' | 'economy' | 'life';
   sub_category?: string;
   issue_type: string;
   source_type: string;
@@ -56,6 +56,42 @@ export const STOCK_HOT_KEYWORDS = [
   'AI', '반도체', '2차전지', '로봇', '바이오', '방산', '원전', '수소', '자율주행',
   // 매크로 (weight 2)
   '금리', '기준금리', '인하', '인상', '환율', '금융위', 'FOMC',
+] as const;
+
+export const FINANCE_HOT_KEYWORDS = [
+  '예금 금리', '적금 금리', '정기예금', '특판', '금리 인상', '금리 인하',
+  '전세대출', '주담대', '신용대출', '학자금대출', '디딤돌', '보금자리론',
+  'ISA', 'ETF', '배당주', '고배당', 'S&P500', 'SCHD', 'VOO',
+  '적립식 투자', '분할매수', '리밸런싱',
+  '국민연금', '퇴직연금', 'IRP', '연금저축', '개인연금',
+  '실손보험', '보험료 인상', '자동차보험',
+] as const;
+
+export const TAX_HOT_KEYWORDS = [
+  '양도소득세', '종합부동산세', '취득세', '재산세', '임대소득세',
+  '종합소득세', '근로소득세', '사업소득세', '프리랜서 세금',
+  '연말정산', '소득공제', '세액공제', '의료비 공제', '교육비 공제',
+  '월세 공제', '기부금 공제', '연금저축 공제',
+  '증여세', '상속세', '증여 공제', '10년 합산',
+  '세제 개편', '세법 개정', '국세청', '세무조사',
+] as const;
+
+export const ECONOMY_HOT_KEYWORDS = [
+  '기준금리', 'FOMC', '연준', '금통위', 'CPI', 'GDP', '고용률',
+  '원달러', '환율', '달러 강세', '엔화', '위안화',
+  '금값', '유가', '국제유가', 'WTI', '원유',
+  '경기침체', '스태그플레이션', '인플레이션', '디플레이션',
+  '무역수지', '경상수지',
+] as const;
+
+export const LIFE_HOT_KEYWORDS = [
+  '최저시급', '최저임금', '주 52시간', '육아휴직', '실업급여',
+  '퇴직금', '연차 수당', '야근 수당',
+  '자동차세', '전기차 보조금', '하이브리드',
+  '건강보험료', '국민연금 인상', '4대보험',
+  '전기요금', '가스요금', '수도요금',
+  '수능', '대입', '학자금', '장학금',
+  '군 복무 기간', '병사 월급',
 ] as const;
 
 const KEYWORD_WEIGHT: Record<string, number> = {
@@ -231,6 +267,54 @@ function scoreMarketWide(data: Record<string, any>): { score: number; breakdown:
   return { score: Math.min(score, 60), breakdown: b };
 }
 
+
+
+/* ═══════════ 재테크 기본점수 ═══════════ */
+
+function scoreFinanceEvent(data: Record<string, any>): { score: number; breakdown: Record<string, number> } {
+  const b: Record<string, number> = {};
+  let score = 0;
+  const changeRate = Math.abs(data.rate_change_bp || 0); // 금리 변동 bp
+  if (changeRate >= 50) { b['금리50bp+'] = 35; score += 35; }
+  else if (changeRate >= 25) { b['금리25bp'] = 25; score += 25; }
+  else if (changeRate >= 10) { b['금리10bp'] = 15; score += 15; }
+  if (data.affects_all_banks) { b['전은행적용'] = 15; score += 15; }
+  if (data.is_new_product) { b['신상품'] = 10; score += 10; }
+  if (data.has_calculator) { b['계산기연동'] = 5; score += 5; }
+  return { score: Math.min(score, 60), breakdown: b };
+}
+
+/* ═══════════ 세금 기본점수 ═══════════ */
+
+function scoreTaxPolicy(data: Record<string, any>): { score: number; breakdown: Record<string, number> } {
+  const b: Record<string, number> = {};
+  let score = 0;
+  if (data.scope === 'national') { b['전국적용'] = 25; score += 25; }
+  else if (data.scope === 'capital') { b['수도권'] = 18; score += 18; }
+  else { b['지역한정'] = 8; score += 8; }
+  const taxType = data.tax_type || '';
+  if (['양도세', '종부세', '취득세'].some(t => taxType.includes(t))) { b['부동산세'] = 25; score += 25; }
+  else if (['소득세', '종합소득세', '연말정산'].some(t => taxType.includes(t))) { b['소득세'] = 20; score += 20; }
+  else if (['증여세', '상속세'].some(t => taxType.includes(t))) { b['상증세'] = 18; score += 18; }
+  else { b['기타세금'] = 10; score += 10; }
+  if (data.is_seasonal) { b['시즌'] = 8; score += 8; }
+  return { score: Math.min(score, 60), breakdown: b };
+}
+
+/* ═══════════ 생활 기본점수 ═══════════ */
+
+function scoreLifeEvent(data: Record<string, any>): { score: number; breakdown: Record<string, number> } {
+  const b: Record<string, number> = {};
+  let score = 0;
+  if (data.affected_population >= 10000000) { b['1천만+영향'] = 30; score += 30; }
+  else if (data.affected_population >= 1000000) { b['백만+영향'] = 22; score += 22; }
+  else { b['일반'] = 10; score += 10; }
+  if (data.effective_soon) { b['즉시시행'] = 15; score += 15; }
+  if (data.has_calculator) { b['계산기연동'] = 8; score += 8; }
+  if (data.is_annual_event) { b['연례행사'] = 10; score += 10; }
+  return { score: Math.min(score, 60), breakdown: b };
+}
+
 /* ═══════════ 증폭계수 ═══════════ */
 
 function calcMultiplier(data: Record<string, any>, category: string): { multiplier: number; breakdown: Record<string, number> } {
@@ -263,6 +347,16 @@ function calcMultiplier(data: Record<string, any>, category: string): { multipli
 
   // 커뮤니티 버즈
   if (data.community_buzz >= 2) { b['커뮤니티버즈'] = 1.15; m *= 1.15; }
+
+  // v2: 교차 포털 검증
+  if (data.portal_cross_count >= 3) { b['3포털동시'] = 1.8; m *= 1.8; }
+  else if (data.portal_cross_count >= 2) { b['2포털동시'] = 1.5; m *= 1.5; }
+
+  // v2: 계산기 존재
+  if (data.has_calculator) { b['계산기연동'] = 1.15; m *= 1.15; }
+
+  // v2: 시즌 피크
+  if (data.is_seasonal_peak) { b['시즌피크'] = 1.3; m *= 1.3; }
 
   // 캡: 최대 ×2.0
   m = Math.min(m, 2.0);
@@ -339,8 +433,14 @@ export function scoreIssue(candidate: IssueCandidate): ScoreResult {
     } else {
       baseResult = { score: 15, breakdown: { 기타: 15 } };
     }
-  } else if (category === 'market') {
+  } else if (category === 'market' || category === 'economy') {
     baseResult = scoreMarketWide(raw_data);
+  } else if (category === 'finance') {
+    baseResult = scoreFinanceEvent(raw_data);
+  } else if (category === 'tax') {
+    baseResult = scoreTaxPolicy(raw_data);
+  } else if (category === 'life') {
+    baseResult = scoreLifeEvent(raw_data);
   } else {
     baseResult = scoreAptPolicy(raw_data); // policy fallback
   }
@@ -383,10 +483,14 @@ export function scoreIssue(candidate: IssueCandidate): ScoreResult {
 
 /* ═══════════ 키워드 매칭 유틸 ═══════════ */
 
-export function extractKeywords(text: string): { apt: string[]; stock: string[] } {
+export function extractKeywords(text: string): { apt: string[]; stock: string[]; finance: string[]; tax: string[]; economy: string[]; life: string[] } {
   const apt = APT_HOT_KEYWORDS.filter(k => text.includes(k));
   const stock = STOCK_HOT_KEYWORDS.filter(k => text.includes(k));
-  return { apt: [...apt], stock: [...stock] };
+  const finance = FINANCE_HOT_KEYWORDS.filter(k => text.includes(k));
+  const tax = TAX_HOT_KEYWORDS.filter(k => text.includes(k));
+  const economy = ECONOMY_HOT_KEYWORDS.filter(k => text.includes(k));
+  const life = LIFE_HOT_KEYWORDS.filter(k => text.includes(k));
+  return { apt: [...apt], stock: [...stock], finance: [...finance], tax: [...tax], economy: [...economy], life: [...life] };
 }
 
 export function keywordWeight(keywords: string[]): number {
@@ -395,7 +499,7 @@ export function keywordWeight(keywords: string[]): number {
 
 /* ═══════════ 이슈 유형 자동 판별 ═══════════ */
 
-export function detectIssueType(keywords: string[], category: 'apt' | 'stock'): string {
+export function detectIssueType(keywords: string[], category: string): string {
   if (category === 'apt') {
     if (keywords.some(k => ['무순위', '줍줍', '로또청약', '불법행위재공급', '재분양'].includes(k))) return 'lotto_cheongak';
     if (keywords.some(k => ['신고가', '급등', '급락', '폭등', '폭락'].includes(k))) return 'price_change';
@@ -405,7 +509,7 @@ export function detectIssueType(keywords: string[], category: 'apt' | 'stock'): 
     if (keywords.some(k => ['미분양'].includes(k))) return 'unsold';
     if (keywords.some(k => ['청약', '분양', '경쟁률'].includes(k))) return 'cheongak';
     return 'apt_general';
-  } else {
+  } else if (category === 'stock') {
     if (keywords.some(k => ['실적', '영업이익', '매출', '서프라이즈', '어닝쇼크'].includes(k))) return 'earnings';
     if (keywords.some(k => ['M&A', '합병', '인수'].includes(k))) return 'ma';
     if (keywords.some(k => ['유상증자'].includes(k))) return 'rights_issue';
@@ -416,6 +520,29 @@ export function detectIssueType(keywords: string[], category: 'apt' | 'stock'): 
     if (keywords.some(k => ['공매도'].includes(k))) return 'short_selling';
     if (keywords.some(k => ['IPO'].includes(k))) return 'ipo';
     return 'stock_general';
+  } else if (category === 'finance') {
+    if (keywords.some(k => ['예금 금리', '적금 금리', '특판', '정기예금'].includes(k))) return 'deposit_rate';
+    if (keywords.some(k => ['전세대출', '주담대', '신용대출', '디딤돌', '보금자리론'].includes(k))) return 'loan_product';
+    if (keywords.some(k => ['ISA', 'ETF', '배당주', '적립식 투자'].includes(k))) return 'investment_product';
+    if (keywords.some(k => ['국민연금', '퇴직연금', 'IRP'].includes(k))) return 'pension';
+    return 'finance_general';
+  } else if (category === 'tax') {
+    if (keywords.some(k => ['양도소득세', '종합부동산세', '취득세', '재산세'].includes(k))) return 'property_tax';
+    if (keywords.some(k => ['종합소득세', '근로소득세', '연말정산'].includes(k))) return 'income_tax';
+    if (keywords.some(k => ['증여세', '상속세'].includes(k))) return 'inheritance_tax';
+    return 'tax_general';
+  } else if (category === 'economy') {
+    if (keywords.some(k => ['기준금리', 'FOMC', '금통위'].includes(k))) return 'rate_decision';
+    if (keywords.some(k => ['환율', '원달러', '달러 강세'].includes(k))) return 'fx_change';
+    if (keywords.some(k => ['금값', '유가', 'WTI'].includes(k))) return 'commodity';
+    if (keywords.some(k => ['CPI', 'GDP', '고용률'].includes(k))) return 'macro_indicator';
+    return 'economy_general';
+  } else if (category === 'life') {
+    if (keywords.some(k => ['최저시급', '최저임금'].includes(k))) return 'minimum_wage';
+    if (keywords.some(k => ['육아휴직', '실업급여', '퇴직금'].includes(k))) return 'labor_benefit';
+    if (keywords.some(k => ['자동차세', '전기차 보조금'].includes(k))) return 'auto_policy';
+    if (keywords.some(k => ['건강보험료', '4대보험'].includes(k))) return 'insurance';
+    return 'life_general';
   }
 }
 
@@ -439,6 +566,25 @@ export function selectDraftTemplate(category: string, issueType: string): string
     },
     market: { '*': 'stock_market' },
     policy: { '*': 'apt_policy' },
+    finance: {
+      deposit_rate: 'finance_rate', loan_product: 'finance_loan',
+      investment_product: 'finance_invest', pension: 'finance_pension',
+      finance_general: 'finance_general', '*': 'finance_general',
+    },
+    tax: {
+      property_tax: 'tax_property', income_tax: 'tax_income',
+      inheritance_tax: 'tax_inheritance', tax_general: 'tax_general', '*': 'tax_general',
+    },
+    economy: {
+      rate_decision: 'economy_rate', fx_change: 'economy_fx',
+      commodity: 'economy_commodity', macro_indicator: 'economy_macro',
+      economy_general: 'economy_general', '*': 'economy_general',
+    },
+    life: {
+      minimum_wage: 'life_wage', labor_benefit: 'life_labor',
+      auto_policy: 'life_auto', insurance: 'life_insurance',
+      life_general: 'life_general', '*': 'life_general',
+    },
   };
   return templates[category]?.[issueType] || templates[category]?.['*'] || 'general';
 }
