@@ -24,7 +24,7 @@ import { enhanceBlogVisuals } from '@/lib/blog-visual-enhancer';
 import ReadingProgress from '@/components/ReadingProgress';
 import NextArticleFloat from '@/components/NextArticleFloat';
 import BlogTossGate from '@/components/BlogTossGate';
-import InlineCTA from '@/components/InlineCTA';
+import RelatedContentCard from '@/components/RelatedContentCard';
 import SmartSectionGate from '@/components/SmartSectionGate';
 import Disclaimer from '@/components/Disclaimer';
 import NewsletterSubscribe from '@/components/NewsletterSubscribe';
@@ -633,7 +633,7 @@ export default async function BlogDetailPage({ params }: Props) {
         )}
 
         {/* CTA — 본문 직후 위치 (비로그인, 스크롤 필요 최소화) */}
-        {!isLoggedIn && <InlineCTA type="blog" />}
+        {!isLoggedIn && <RelatedContentCard type="blog" />}
 
         {/* 뉴스레터 — 본문 직후, 비로그인 유저 대상 (게이트 대안 경로) */}
         {!isLoggedIn && !isBot && <NewsletterSubscribe category={post.category} />}

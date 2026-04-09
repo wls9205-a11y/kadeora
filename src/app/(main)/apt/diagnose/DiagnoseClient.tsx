@@ -3,6 +3,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import SectionShareButton from '@/components/SectionShareButton';
 import { trackFeature } from '@/lib/analytics';
+import { useAuth } from '@/components/AuthProvider';
 
 const HT = [
   {min:0,max:1,s:2},{min:1,max:2,s:4},{min:2,max:3,s:6},{min:3,max:4,s:8},{min:4,max:5,s:10},{min:5,max:6,s:12},{min:6,max:7,s:14},{min:7,max:8,s:16},
@@ -21,6 +22,7 @@ const CUTS = [
 function gs(t:{min:number;max:number;s:number}[],y:number){for(const r of t)if(y>=r.min&&y<r.max)return r.s;return t[t.length-1].s;}
 
 export default function DiagnoseClient() {
+  const { userId } = useAuth();
   const [step,setStep]=useState(0);
   const [age,setAge]=useState(35);
   const [married,setMarried]=useState('yes');
@@ -170,6 +172,7 @@ export default function DiagnoseClient() {
             </div>
           </div>
 
+          {userId ? (<>
           <div style={{...card,borderLeft:'3px solid var(--brand)',borderRadius:'0 12px 12px 0'}}>
             <div style={{fontSize:15,fontWeight:800,marginBottom:8}}>추천 전략: {strategy.t}</div>
             <div style={{fontSize:13,color:'var(--text-secondary)',lineHeight:1.7,marginBottom:12}}>{strategy.d}</div>
@@ -200,6 +203,14 @@ export default function DiagnoseClient() {
               '신혼부부·생애최초 특별공급은 가점 무관, 소득·자산 기준',
             ].filter(Boolean).map((tip,i)=><div key={i} style={{display:'flex',gap:8,marginBottom:8,fontSize:13,color:'var(--text-secondary)',lineHeight:1.6}}><span style={{color:'var(--accent-yellow)',flexShrink:0,fontWeight:700,fontSize:11}}>TIP</span><span>{tip}</span></div>)}
           </div>
+          </>) : (
+          <div style={{...card,textAlign:'center',padding:24,background:'linear-gradient(135deg, rgba(59,123,246,0.06), rgba(139,92,246,0.06))',border:'1px solid rgba(59,123,246,0.15)'}}>
+            <div style={{fontSize:15,fontWeight:800,color:'var(--text-primary)',marginBottom:6}}>🔒 맞춤 전략·지역별 커트라인·가점 올리는 법</div>
+            <div style={{fontSize:12,color:'var(--text-secondary)',marginBottom:16,lineHeight:1.6}}>카카오 가입하면 내 점수에 맞는 추천 전략,<br/>지역별 당첨 가능성, 가점 올리는 꿀팁을 볼 수 있어요</div>
+            <Link href="/login?redirect=/apt/diagnose&source=calc_gate" style={{display:'inline-block',padding:'12px 36px',borderRadius:30,background:'#FEE500',color:'#191919',fontWeight:800,fontSize:14,textDecoration:'none'}}>카카오로 3초 만에 열기</Link>
+            <div style={{fontSize:11,color:'var(--text-tertiary)',marginTop:10}}>가입 즉시 이용 · 스팸 없음</div>
+          </div>
+          )}
 
           <div style={{display:'flex',gap:8,marginBottom:24}}>
             <Link href="/apt" style={{flex:1,display:'block',textAlign:'center',padding:'12px 0',background:'var(--brand)',color:'#fff',borderRadius:10,fontSize:14,fontWeight:700,textDecoration:'none'}}>청약 일정 보기</Link>

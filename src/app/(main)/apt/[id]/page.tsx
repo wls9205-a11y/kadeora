@@ -17,7 +17,7 @@ import { getDisplayInterestCount, formatInterestText, formatInterestOrViews } fr
 
 const AptPriceTrendChart = dynamic(() => import('@/components/charts/AptPriceTrendChart'));
 const InterestRegistration = dynamic(() => import('@/components/InterestRegistration'));
-import InlineCTA from '@/components/InlineCTA';
+import RelatedContentCard from '@/components/RelatedContentCard';
 import LoginGate from '@/components/LoginGate';
 import AptBookmarkButton from '@/components/AptBookmarkButton';
 const RegulationBadges = dynamic(() => import('@/components/RegulationBadges'));
@@ -1564,7 +1564,7 @@ export default async function AptUnifiedPage({ params }: Props) {
       </div>
 
       {/* 비로그인 가입 유도 CTA — InlineCTA */}
-      {!aptUser && <InlineCTA type="apt" entityName={name} />}
+      {!aptUser && <RelatedContentCard type="apt" entityName={name} />}
 
       {/* Comments */}
       {sub && <div className="apt-card"><ContentLock title="한줄평 보기" description="가입하면 다른 사람들의 한줄평을 볼 수 있어요"><AptCommentInline houseKey={sub.house_manage_no || String(sub.id)} houseNm={name} houseType="sub" /></ContentLock></div>}

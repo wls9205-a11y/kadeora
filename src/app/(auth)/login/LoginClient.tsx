@@ -46,9 +46,29 @@ function LoginForm({ redirect }: LoginFormProps) {
 
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 20, padding: '36px 32px', boxShadow: '0 24px 64px rgba(0,0,0,0.4)' }}>
         <h2 style={{ margin: '0 0 8px', fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', textAlign: 'center' }}>로그인</h2>
-        <p style={{ margin: '0 0 32px', color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)', textAlign: 'center', lineHeight: 1.5 }}>
-          소셜 계정으로 간편하게 시작하세요
-        </p>
+        {(() => {
+          const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+          const source = params?.get('source') || '';
+          const action = params?.get('action') || '';
+          const MSG: Record<string, { icon: string; text: string }> = {
+            content_gate: { icon: '📊', text: '가입하면 18,000+ 분석 전문을 무제한 열람할 수 있어요' },
+            action_bar_bookmark: { icon: '📌', text: '가입하면 이 분석을 저장하고 나중에 다시 볼 수 있어요' },
+            action_bar_alert: { icon: '🔔', text: '가입하면 이 단지의 가격 변동 알림을 받을 수 있어요' },
+            action_bar_watchlist: { icon: '⭐', text: '가입하면 관심 종목을 추가하고 시세 알림을 받을 수 있어요' },
+            action_bar_comment: { icon: '💬', text: '가입하면 댓글을 달고 토론에 참여할 수 있어요' },
+            calc_gate: { icon: '🎯', text: '가입하면 맞춤 전략과 지역별 커트라인을 확인할 수 있어요' },
+            smart_gate: { icon: '🔓', text: '가입하면 전체 분석과 AI 투자 의견을 무료로 볼 수 있어요' },
+          };
+          const key = action ? `${source}_${action}` : source;
+          const msg = MSG[key] || MSG[source];
+          if (!msg) return <p style={{ margin: '0 0 32px', color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)', textAlign: 'center', lineHeight: 1.5 }}>소셜 계정으로 간편하게 시작하세요</p>;
+          return (
+            <div style={{ margin: '0 0 24px', padding: '12px 16px', borderRadius: 12, background: 'rgba(59,123,246,0.06)', border: '1px solid rgba(59,123,246,0.1)', textAlign: 'center' }}>
+              <div style={{ fontSize: 20, marginBottom: 4 }}>{msg.icon}</div>
+              <div style={{ fontSize: 13, color: 'var(--text-primary)', fontWeight: 600, lineHeight: 1.5 }}>{msg.text}</div>
+            </div>
+          );
+        })()}
 
         <button
           onClick={() => login('kakao')}

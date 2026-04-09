@@ -18,7 +18,7 @@ import { timeAgo } from '@/lib/format';
 import Disclaimer from '@/components/Disclaimer';
 import ReadingProgress from '@/components/ReadingProgress';
 import PollWidget from '@/components/PollWidget';
-import InlineCTA from '@/components/InlineCTA';
+import RelatedContentCard from '@/components/RelatedContentCard';
 import { renderContent, type EntityMap } from '@/lib/content-renderer';
 
 
@@ -412,7 +412,7 @@ export default async function FeedDetailPage({ params }: Props) {
         )}
 
         {/* 비로그인 가입 유도 — InlineCTA */}
-        {!currentUserId && <InlineCTA type={post.category === 'stock' ? 'stock' : post.category === 'apt' ? 'apt' : 'feed'} />}
+        {!currentUserId && <RelatedContentCard type="feed" />}
 
         {(post.category === 'apt' || post.category === 'stock') && (
           <Disclaimer type="feed" compact />

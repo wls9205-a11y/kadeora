@@ -1,5 +1,5 @@
 'use client';
-import InlineCTA from '@/components/InlineCTA';
+import RelatedContentCard from '@/components/RelatedContentCard';
 import FirstMissionBanner from '@/components/FirstMissionBanner';
 import ProfileCompletionBar from '@/components/ProfileCompletionBar';
 import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
@@ -513,7 +513,7 @@ export default function FeedClient({
             const nodes: React.ReactNode[] = [card];
             if (i === 0 && currentUserId) nodes.push(<AttendanceBanner key="attend" />);
             if (i === 3 && !currentUserId) {
-              nodes.push(<InlineCTA key="feed-cta" type="feed" />);
+              nodes.push(<RelatedContentCard key="feed-cta" type="feed" />);
             }
             return nodes;
           })}

@@ -523,6 +523,30 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
         </div>
       </div>
 
+      {/* ═══ 전환 현황 ═══ */}
+      {Object.keys(cb||{}).length>0&&<div style={CS.card}>
+        <div style={{fontSize:10,fontWeight:700,color:'rgba(255,255,255,0.4)',marginBottom:8}}>🎯 전환 현황 (7일)</div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:4,marginBottom:8}}>
+          {[
+            {l:'CTA 노출',v:Object.values(cb||{}).reduce((s:number,x:any)=>s+(x.views||0),0),c:'#3B7BF6'},
+            {l:'CTA 클릭',v:Object.values(cb||{}).reduce((s:number,x:any)=>s+(x.clicks||0),0),c:'#F59E0B'},
+            {l:'신규 가입',v:k.newUsers||0,c:'#10B981'},
+          ].map(kk=>(
+            <div key={kk.l} style={{textAlign:'center',background:'rgba(255,255,255,0.02)',borderRadius:8,padding:'6px 0'}}>
+              <div style={{fontSize:16,fontWeight:800,color:kk.c,lineHeight:1}}>{kk.v}</div>
+              <div style={{fontSize:8,color:'rgba(255,255,255,0.25)',marginTop:3}}>{kk.l}</div>
+            </div>
+          ))}
+        </div>
+        {Object.entries(cb||{}).sort((a:any,b:any)=>(b[1].views||0)-(a[1].views||0)).slice(0,5).map(([name,stat]:any)=>{
+          const v=stat.views||0;const c=stat.clicks||0;const r=v>0?((c/v)*100).toFixed(1):'0';
+          return <div key={name} style={{display:'flex',justifyContent:'space-between',fontSize:10,padding:'3px 0',borderBottom:'1px solid rgba(255,255,255,0.03)'}}>
+            <span style={{color:'rgba(255,255,255,0.4)'}}>{name.replace(/_/g,' ')}</span>
+            <span style={{fontWeight:600,color:parseFloat(r)>1?'#10B981':'rgba(255,255,255,0.3)'}}>{v}뷰 {c}클릭 <span style={{color:parseFloat(r)>1?'#10B981':'#EF4444'}}>{r}%</span></span>
+          </div>;
+        })}
+      </div>}
+
       {/* ═══ 최근 활동 ═══ */}
       <div style={CS.card}>
         <div style={{fontSize:10,fontWeight:700,color:'rgba(255,255,255,0.4)',marginBottom:6}}>🕐 최근 활동</div>

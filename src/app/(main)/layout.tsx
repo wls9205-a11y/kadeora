@@ -5,9 +5,9 @@ import { Navigation } from '@/components/Navigation';
 import AdBanner from '@/components/AdBanner';
 import { ToastProvider } from '@/components/Toast';
 import ErrorBoundary from '@/components/ErrorBoundary';
-import StickyBar from '@/components/StickyBar';
-import TopBarCTA from '@/components/TopBarCTA';
-import ScrollToastCTA from '@/components/ScrollToastCTA';
+import ActionBar from '@/components/ActionBar';
+
+
 import { Sidebar, RightPanel, InstallBanner, PWAInstallTracker, NoticeBanner, PageViewTracker, BehaviorTracker } from '@/components/ClientDynamics';
 import TopLoadingBar from '@/components/TopLoadingBar';
 import ScrollToTop from '@/components/ScrollToTop';
@@ -50,7 +50,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
           overflowX: 'hidden',
         }}>
           <ErrorBoundary>
-              <TopBarCTA />
+
               <GlobalMissionBar />
               {children}
           </ErrorBoundary>
@@ -61,8 +61,8 @@ export default async function MainLayout({ children }: { children: React.ReactNo
       </div>
       <InstallBanner />
       <PWAInstallTracker />
-      <StickyBar />
-      <ScrollToastCTA />
+      <ActionBar />
+
       <PageViewTracker />
       <BehaviorTracker />
       <WelcomeReward />
