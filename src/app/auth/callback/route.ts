@@ -24,42 +24,41 @@ export async function GET(request: Request) {
 
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error && data.user) {
-      // 프로필 upsert (신규: insert / 기존: avatar 갱신)
       const meta = data.user.user_metadata;
       const avatarUrl = (meta?.avatar_url || meta?.picture || null)?.replace('http://', 'https://') ?? null;
       
-      // 먼저 기존 프로필 확인
-      const { data: existing } = await supabase.from('profiles').select('id, avatar_url').eq('id', data.user.id).maybeSingle();
+      const { data: existing } = await supabase.from('profiles').select('id, interests, onboarded').eq('id', data.user.id).maybeSingle();
       
       if (!existing) {
-        // 신규 유저 — insert (온보딩 스킵: 카카오 닉네임 자동 설정)
+        // 신규 유저 — 프로필 생성 (onboarded=false → 퀵온보딩으로)
         await supabase.from('profiles').insert({
           id: data.user.id,
           nickname: meta?.full_name ?? meta?.name ?? data.user.email?.split('@')[0] ?? '사용자',
           avatar_url: avatarUrl,
           provider: data.user.app_metadata?.provider ?? null,
-          onboarded: true,
+          onboarded: false,
           nickname_set: true,
+          signup_source: new URL(request.url).searchParams.get('source') ?? 'direct',
+          signup_return_url: redirect,
           updated_at: new Date().toISOString(),
         });
-      } else if (avatarUrl && !existing.avatar_url) {
-        // 기존 유저 — avatar 없으면 OAuth 사진으로 채움
-        await supabase.from('profiles').update({ avatar_url: avatarUrl, updated_at: new Date().toISOString() }).eq('id', data.user.id);
+
+        // 신규유저 → 퀵온보딩 (관심사 선택 + 알림 설정) → 원래 페이지로
+        const safeRedirect = redirect.startsWith('/') ? redirect : '/feed';
+        return NextResponse.redirect(`${origin}/onboarding?return=${encodeURIComponent(safeRedirect)}`);
+      } else {
+        // 기존 유저 — avatar 갱신 + 바로 리다이렉트
+        if (avatarUrl && !existing) {
+          await supabase.from('profiles').update({ avatar_url: avatarUrl, updated_at: new Date().toISOString() }).eq('id', data.user.id);
+        }
+        if (!existing.onboarded) {
+          // 미온보딩 기존유저도 퀵온보딩으로
+          const safeRedirect = redirect.startsWith('/') ? redirect : '/feed';
+          return NextResponse.redirect(`${origin}/onboarding?return=${encodeURIComponent(safeRedirect)}`);
+        }
+        const safeRedirect = redirect.startsWith('/') ? redirect : '/feed';
+        return NextResponse.redirect(`${origin}${safeRedirect}`);
       }
-
-      // 기존 미온보딩 유저도 자동 완료 처리
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('onboarded, nickname_set')
-        .eq('id', data.user.id)
-        .single();
-
-      if (profile && (!profile.onboarded || !profile.nickname_set)) {
-        await supabase.from('profiles').update({ onboarded: true, nickname_set: true }).eq('id', data.user.id);
-      }
-
-      const safeRedirect = redirect.startsWith('/') ? redirect : '/feed';
-      return NextResponse.redirect(`${origin}${safeRedirect}`);
     }
   }
 

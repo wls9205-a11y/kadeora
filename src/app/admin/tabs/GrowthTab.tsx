@@ -192,6 +192,67 @@ export default function GrowthTab({ onNavigate }: { onNavigate: (t: any) => void
           </div>
         ))}
       </div>
+
+      {/* 리텐션 코호트 */}
+      {data.retentionCohort && data.retentionCohort.length > 0 && (<>
+        <div className="adm-sec">🔄 리텐션 코호트 (주간)</div>
+        <div className="adm-card" style={{ padding: '8px 14px', overflowX: 'auto' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '90px 50px 50px 50px', gap: 4, fontSize: 11, marginBottom: 6 }}>
+            <span style={{ fontWeight: 700, color: 'var(--text-secondary)' }}>코호트</span>
+            <span style={{ fontWeight: 700, color: 'var(--text-secondary)', textAlign: 'right' }}>가입</span>
+            <span style={{ fontWeight: 700, color: 'var(--text-secondary)', textAlign: 'right' }}>D7</span>
+            <span style={{ fontWeight: 700, color: 'var(--text-secondary)', textAlign: 'right' }}>D30</span>
+          </div>
+          {data.retentionCohort.map((c: any, i: number) => (
+            <div key={i} style={{ display: 'grid', gridTemplateColumns: '90px 50px 50px 50px', gap: 4, fontSize: 11, padding: '3px 0', borderTop: '1px solid var(--border)' }}>
+              <span style={{ color: 'var(--text-tertiary)' }}>{c.cohort_week?.slice(5, 10)}</span>
+              <span style={{ textAlign: 'right', fontWeight: 600 }}>{c.cohort_size}</span>
+              <span style={{ textAlign: 'right', color: c.d7_retained > 0 ? '#10B981' : '#EF4444' }}>
+                {c.cohort_size > 0 ? Math.round((c.d7_retained / c.cohort_size) * 100) : 0}%
+              </span>
+              <span style={{ textAlign: 'right', color: c.d30_retained > 0 ? '#10B981' : '#EF4444' }}>
+                {c.cohort_size > 0 ? Math.round((c.d30_retained / c.cohort_size) * 100) : 0}%
+              </span>
+            </div>
+          ))}
+        </div>
+      </>)}
+
+      {/* 가입 귀속 (CTA별) */}
+      {data.signupSources && Object.keys(data.signupSources).length > 0 && (<>
+        <div className="adm-sec">🎯 가입 귀속 (signup_source)</div>
+        <div className="adm-card" style={{ padding: '8px 14px' }}>
+          {Object.entries(data.signupSources).sort((a: any, b: any) => b[1] - a[1]).map(([src, cnt]: [string, any], i: number) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+              <span style={{ flex: 1, fontSize: 12, color: 'var(--text-secondary)' }}>{src}</span>
+              <span style={{ fontSize: 12, fontWeight: 600 }}>{cnt}명</span>
+            </div>
+          ))}
+        </div>
+      </>)}
+
+      {/* CTA 성과 */}
+      {ctaStats && Object.keys(ctaStats).length > 0 && (<>
+        <div className="adm-sec">📢 CTA 성과 (7일)</div>
+        <div className="adm-card" style={{ padding: '8px 14px' }}>
+          {Object.entries(ctaStats).sort((a: any, b: any) => (b[1].cta_view || 0) - (a[1].cta_view || 0)).map(([name, events]: [string, any], i: number) => {
+            const views = events.cta_view || 0;
+            const clicks = events.cta_click || 0;
+            const ctr = views > 0 ? Math.round((clicks / views) * 1000) / 10 : 0;
+            return (
+              <div key={i} style={{ marginBottom: 6 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 2 }}>
+                  <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{name}</span>
+                  <span style={{ color: 'var(--text-secondary)' }}>{views}뷰 / {clicks}클릭 ({ctr}%)</span>
+                </div>
+                <div style={{ height: 6, background: 'var(--bg-hover)', borderRadius: 3, overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: `${Math.min(ctr * 10, 100)}%`, background: ctr > 2 ? '#10B981' : ctr > 0.5 ? '#F59E0B' : '#EF4444', borderRadius: 3, minWidth: ctr > 0 ? 4 : 0 }} />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </>)}
     </div>
   );
 }

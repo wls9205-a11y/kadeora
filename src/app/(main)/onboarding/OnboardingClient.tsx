@@ -1,247 +1,171 @@
 'use client';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
-import { useToast } from '@/components/Toast';
-import { validateNickname } from '@/lib/nickname-filter';
-import { REGIONS, SIGUNGU_MAP } from '@/lib/regions';
+import { trackConversion } from '@/lib/track-conversion';
 
 const INTERESTS = [
-  { key: 'stock',   label: '📈 주식' },
-  { key: 'apt',     label: '🏠 청약/부동산' },
-  { key: 'redev',    label: '🏗️ 재개발/재건축' },
-  { key: 'fund',    label: '💼 펀드/ETF' },
-  { key: 'saving',  label: '💰 저축/예금' },
-  { key: 'tax',     label: '🧾 세금/절세' },
-  { key: 'side',    label: '🛠 부업/재테크' },
-  { key: 'news',    label: '📰 경제뉴스' },
-];
-
-const AGE_GROUPS = [
-  { value: '20s', label: '20대' },
-  { value: '30s', label: '30대' },
-  { value: '40s', label: '40대' },
-  { value: '50s', label: '50대' },
-  { value: '60+', label: '60대 이상' },
+  { key: 'stock', label: '📈 주식', desc: '실시간 시세·AI 분석' },
+  { key: 'apt', label: '🏠 청약/부동산', desc: '청약일정·시세변동' },
+  { key: 'redev', label: '🏗️ 재개발', desc: '사업진행·조합현황' },
+  { key: 'crypto', label: '₿ 암호화폐', desc: '시세·뉴스' },
+  { key: 'news', label: '📰 경제뉴스', desc: '매일 핵심 요약' },
+  { key: 'tax', label: '🧾 세금/절세', desc: '절세 팁·세법변경' },
 ];
 
 export default function OnboardingClient() {
   const [step, setStep] = useState(1);
-  const [nickname, setNickname] = useState('');
-  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
-  const [region, setRegion] = useState('');
-  const [district, setDistrict] = useState('');
-  const [ageGroup, setAgeGroup] = useState('');
-  const [marketing, setMarketing] = useState(false);
+  const [selected, setSelected] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
+  const [pushAsked, setPushAsked] = useState(false);
   const router = useRouter();
-  const { error, success } = useToast();
+  const params = useSearchParams();
+  const returnUrl = params.get('return') || '/feed';
 
-  const toggleInterest = (key: string) =>
-    setSelectedInterests(prev =>
-      prev.includes(key) ? prev.filter(k => k !== key) : prev.length < 5 ? [...prev, key] : prev
-    );
+  const toggle = (key: string) =>
+    setSelected(prev => prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]);
 
-  const handleComplete = async () => {
-    const nickValidation = validateNickname(nickname);
-    if (!nickValidation.valid) { error(nickValidation.error!); return; }
-    if (!region) { error('지역을 선택해주세요'); return; }
-    if (!ageGroup) { error('연령대를 선택해주세요'); return; }
+  const handleInterests = async () => {
+    if (selected.length === 0) return;
     setSaving(true);
     try {
       const sb = createSupabaseBrowser();
       const { data: { user } } = await sb.auth.getUser();
       if (!user) { router.replace('/login'); return; }
-      const { data: existing } = await sb.from('profiles').select('id').eq('nickname', nickname.trim()).neq('id', user.id).maybeSingle();
-      if (existing) { error('이미 사용 중인 닉네임입니다'); setSaving(false); return; }
-      const fontPref = (ageGroup === '50s' || ageGroup === '60+') ? 'large' : 'medium';
-      const { error: updateErr } = await sb.from('profiles').update({
-        nickname: nickname.trim(), nickname_set: true,
-        interests: selectedInterests, region_text: region || null,
-        residence_city: region || null,
-        residence_district: district || null,
-        age_group: ageGroup, font_size_preference: fontPref,
-        marketing_agreed: marketing, onboarded: true,
+      await sb.from('profiles').update({
+        interests: selected,
+        onboarded: true,
         updated_at: new Date().toISOString(),
       }).eq('id', user.id);
-      if (updateErr) throw updateErr;
-      // Sync font size to localStorage and DOM
-      localStorage.setItem('kd_font_size', fontPref);
-      document.documentElement.classList.remove('font-small', 'font-medium', 'font-large');
-      document.documentElement.classList.add(`font-${fontPref}`);
-      success('환영합니다! 카더라를 시작해볼까요 🎉');
-      try {
-        if ('Notification' in window && Notification.permission === 'default' && 'serviceWorker' in navigator) {
-          const perm = await Notification.requestPermission();
-          if (perm === 'granted') {
-            const reg = await navigator.serviceWorker.ready;
-            const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY });
-            await fetch('/api/push/subscribe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ subscription: sub.toJSON() }) });
-          }
-        }
-      } catch {}
-      router.replace('/feed');
-    } catch { error('설정 저장 중 오류가 발생했습니다'); }
+      trackConversion('cta_complete', 'onboarding_interests', { category: selected.join(',') });
+      setStep(2);
+    } catch { }
     finally { setSaving(false); }
   };
 
-  const TOTAL = 4;
-  const stepLabels = ['닉네임 설정', '관심 분야', '연령대', '지역 & 마케팅'];
+  const requestPush = async () => {
+    try {
+      if ('Notification' in window && Notification.permission === 'default' && 'serviceWorker' in navigator) {
+        const perm = await Notification.requestPermission();
+        if (perm === 'granted') {
+          const reg = await navigator.serviceWorker.ready;
+          const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY });
+          await fetch('/api/push/subscribe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ subscription: sub.toJSON() }) });
+          trackConversion('cta_complete', 'onboarding_push');
+        }
+      }
+    } catch { }
+    setPushAsked(true);
+  };
+
+  const finish = () => {
+    trackConversion('cta_complete', 'onboarding_finish');
+    router.replace(returnUrl);
+  };
 
   return (
-    <div style={{ maxWidth: 480, margin: '40px auto', padding: '0 var(--sp-lg)' }}>
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-xl)', padding: 'clamp(20px, 5vw, 40px) clamp(16px, 4vw, 36px)' }}>
+    <div style={{ maxWidth: 420, margin: '40px auto', padding: '0 16px' }}>
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 16, padding: 'clamp(20px, 5vw, 32px)' }}>
+        
         {/* 진행 바 */}
-        <div style={{ marginBottom: 32 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--sp-sm)' }}>
-            <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>Step {step} / {TOTAL}</span>
-            <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--brand)', fontWeight: 600 }}>{stepLabels[step - 1]}</span>
-          </div>
-          <div style={{ height: 4, background: 'var(--border)', borderRadius: 2 }}>
-            <div style={{ height: '100%', borderRadius: 2, background: 'var(--brand)', width: `${(step / TOTAL) * 100}%`, transition: 'width 0.3s ease' }} />
-          </div>
+        <div style={{ display: 'flex', gap: 6, marginBottom: 28 }}>
+          <div style={{ flex: 1, height: 3, borderRadius: 2, background: 'var(--brand)' }} />
+          <div style={{ flex: 1, height: 3, borderRadius: 2, background: step >= 2 ? 'var(--brand)' : 'var(--border)' }} />
         </div>
 
-        {/* Step 1: 닉네임 */}
         {step === 1 && (
           <div>
-            <h1 style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px' }}>안녕하세요! 👋</h1>
-            <p style={{ fontSize: 'var(--fs-base)', color: 'var(--text-secondary)', margin: '0 0 32px', lineHeight: 1.6 }}>
-              카더라에서 사용할 닉네임을 설정해주세요.<br />닉네임은 나중에 프로필에서 변경할 수 있습니다.
+            <h1 style={{ fontSize: 20, fontWeight: 800, margin: '0 0 4px', color: 'var(--text-primary)' }}>
+              관심 분야를 알려주세요
+            </h1>
+            <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: '0 0 20px', lineHeight: 1.5 }}>
+              선택한 분야의 맞춤 알림과 AI 분석을 받을 수 있어요
             </p>
-            <label style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 'var(--sp-sm)' }}>
-              닉네임 <span style={{ color: 'var(--error)' }}>*</span>
-            </label>
-            <input value={nickname} onChange={e => setNickname(e.target.value)} placeholder="2~20자" maxLength={20}
-              className="kd-input" style={{ fontSize: 'var(--fs-base)', marginBottom: 'var(--sp-sm)' }} autoFocus
-              onKeyDown={e => e.key === 'Enter' && nickname.trim().length >= 2 && setStep(2)} />
-            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textAlign: 'right' }}>{nickname.length}/20</div>
-            <button onClick={() => { const v = validateNickname(nickname); if (!v.valid) { error(v.error!); return; } setStep(2); }}
-              className="kd-btn kd-btn-primary" style={{ width: '100%', marginTop: 'var(--sp-2xl)', padding: '13px', fontSize: 'var(--fs-md)', fontWeight: 800 }}>
-              다음 →
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 24 }}>
+              {INTERESTS.map(({ key, label, desc }) => {
+                const sel = selected.includes(key);
+                return (
+                  <button key={key} onClick={() => toggle(key)} style={{
+                    padding: '12px', borderRadius: 10, cursor: 'pointer', textAlign: 'left',
+                    background: sel ? 'var(--brand-light)' : 'var(--bg-base)',
+                    border: `1.5px solid ${sel ? 'var(--brand)' : 'var(--border)'}`,
+                    transition: 'all 0.15s',
+                  }}>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: sel ? 'var(--brand)' : 'var(--text-primary)', marginBottom: 2 }}>{label}</div>
+                    <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{desc}</div>
+                  </button>
+                );
+              })}
+            </div>
+            <button onClick={handleInterests} disabled={selected.length === 0 || saving}
+              style={{
+                width: '100%', padding: 14, borderRadius: 12, border: 'none', fontSize: 15, fontWeight: 800,
+                background: selected.length > 0 ? 'var(--brand)' : 'var(--border)',
+                color: selected.length > 0 ? '#fff' : 'var(--text-tertiary)',
+                cursor: selected.length > 0 ? 'pointer' : 'not-allowed',
+              }}>
+              {saving ? '저장 중...' : selected.length === 0 ? '1개 이상 선택해주세요' : `${selected.length}개 선택 완료 →`}
+            </button>
+            <button onClick={() => { 
+              // 스킵 — onboarded만 true로
+              const sb = createSupabaseBrowser();
+              sb.auth.getUser().then(({ data }) => {
+                if (data.user) sb.from('profiles').update({ onboarded: true }).eq('id', data.user.id);
+              });
+              router.replace(returnUrl);
+            }}
+              style={{ width: '100%', marginTop: 8, padding: 10, background: 'none', border: 'none', fontSize: 12, color: 'var(--text-tertiary)', cursor: 'pointer' }}>
+              건너뛰기
             </button>
           </div>
         )}
 
-        {/* Step 2: 관심 분야 */}
         {step === 2 && (
           <div>
-            <h1 style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px' }}>관심 분야를 선택해주세요 📊</h1>
-            <p style={{ fontSize: 'var(--fs-base)', color: 'var(--text-secondary)', margin: '0 0 24px', lineHeight: 1.6 }}>최대 5개 선택 ({selectedInterests.length}/5)</p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 10, marginBottom: 'var(--sp-2xl)' }}>
-              {INTERESTS.map(({ key, label }) => {
-                const sel = selectedInterests.includes(key);
-                return (
-                  <button key={key} onClick={() => toggleInterest(key)} style={{
-                    padding: '12px 16px', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontSize: 'var(--fs-base)', fontWeight: 600,
-                    background: sel ? 'var(--brand-light)' : 'var(--bg-base)',
-                    border: `1px solid ${sel ? 'var(--brand)' : 'var(--border)'}`,
-                    color: sel ? 'var(--brand)' : 'var(--text-secondary)',
-                    transition: 'all var(--transition-fast)', textAlign: 'left',
-                  }}>{label}</button>
-                );
-              })}
-            </div>
-            <div style={{ display: 'flex', gap: 10 }}>
-              <button onClick={() => setStep(1)} className="kd-btn kd-btn-ghost" style={{ flex: 1, padding: '13px' }}>← 이전</button>
-              <button onClick={() => setStep(3)} className="kd-btn kd-btn-primary" style={{ flex: 2, padding: '13px', fontSize: 'var(--fs-md)', fontWeight: 800 }}>다음 →</button>
-            </div>
-          </div>
-        )}
-
-        {/* Step 3: 연령대 */}
-        {step === 3 && (
-          <div>
-            <h1 style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px' }}>연령대를 알려주세요 🎂</h1>
-            <p style={{ fontSize: 'var(--fs-base)', color: 'var(--text-secondary)', margin: '0 0 24px', lineHeight: 1.6 }}>
-              맞춤 콘텐츠와 화면 설정에 활용됩니다.
+            <h1 style={{ fontSize: 20, fontWeight: 800, margin: '0 0 4px', color: 'var(--text-primary)' }}>
+              알림을 받아보세요
+            </h1>
+            <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: '0 0 20px', lineHeight: 1.5 }}>
+              관심 종목 급등/급락, 청약 마감 D-7 등을 놓치지 마세요
             </p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 10, marginBottom: 'var(--sp-2xl)' }}>
-              {AGE_GROUPS.map(({ value, label }) => {
-                const sel = ageGroup === value;
-                return (
-                  <button key={value} onClick={() => setAgeGroup(value)} style={{
-                    padding: 'var(--card-p) var(--sp-lg)', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontSize: 'var(--fs-md)', fontWeight: 600,
-                    background: sel ? 'var(--brand-light)' : 'var(--bg-base)',
-                    border: `1px solid ${sel ? 'var(--brand)' : 'var(--border)'}`,
-                    color: sel ? 'var(--brand)' : 'var(--text-secondary)',
-                    transition: 'all var(--transition-fast)', textAlign: 'center',
-                  }}>{label}</button>
-                );
-              })}
-            </div>
-            {(ageGroup === '50s' || ageGroup === '60+') && (
-              <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: 'var(--sp-md) var(--card-p)', marginBottom: 'var(--sp-lg)' }}>
-                💡 글씨 크기가 &apos;크게&apos;로 자동 설정됩니다. 나중에 설정에서 변경할 수 있어요.
-              </div>
-            )}
-            <div style={{ display: 'flex', gap: 10 }}>
-              <button onClick={() => setStep(2)} className="kd-btn kd-btn-ghost" style={{ flex: 1, padding: '13px' }}>← 이전</button>
-              <button onClick={() => ageGroup ? setStep(4) : error('연령대를 선택해주세요')} className="kd-btn kd-btn-primary" style={{ flex: 2, padding: '13px', fontSize: 'var(--fs-md)', fontWeight: 800 }}>다음 →</button>
-            </div>
-          </div>
-        )}
 
-        {/* Step 4: 지역 + 마케팅 */}
-        {step === 4 && (
-          <div>
-            <h1 style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px' }}>거의 다 됐어요! 🎯</h1>
-            <p style={{ fontSize: 'var(--fs-base)', color: 'var(--text-secondary)', margin: '0 0 24px', lineHeight: 1.6 }}>지역 맞춤 청약 정보를 받으려면 거주 지역을 선택해주세요.</p>
-            <label style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 'var(--sp-sm)' }}>
-              거주 지역 <span style={{ color: 'var(--error)' }}>*</span>
-              <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 6px', borderRadius: 4, background: 'var(--error)', color: 'var(--text-inverse)', marginLeft: 6, fontWeight: 700 }}>필수</span>
-            </label>
-            {!region && (
-              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', marginBottom: 6 }}>
-                📍 지역을 선택해야 맞춤 피드를 받을 수 있어요
-              </div>
-            )}
-            <select value={region} onChange={e => { setRegion(e.target.value); setDistrict(''); }} style={{
-              width: '100%', padding: 'var(--sp-md) var(--card-p)', borderRadius: 'var(--radius-sm)', marginBottom: 'var(--sp-sm)',
-              background: 'var(--bg-hover)', border: '1px solid var(--border)',
-              color: region ? 'var(--text-primary)' : 'var(--text-tertiary)', fontSize: 'var(--fs-base)',
-            }}>
-              <option value="">시·도를 선택해주세요</option>
-              {REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
-            </select>
-            {region && SIGUNGU_MAP[region] && (
-              <select value={district} onChange={e => setDistrict(e.target.value)} style={{
-                width: '100%', padding: 'var(--sp-md) var(--card-p)', borderRadius: 'var(--radius-sm)', marginBottom: 'var(--sp-xl)',
-                background: 'var(--bg-hover)', border: '1px solid var(--border)',
-                color: district ? 'var(--text-primary)' : 'var(--text-tertiary)', fontSize: 'var(--fs-base)',
-              }}>
-                <option value="">시·군·구 선택 (선택사항)</option>
-                {SIGUNGU_MAP[region].map(d => <option key={d} value={d}>{d}</option>)}
-              </select>
-            )}
-            {!region && !district && (
-              <div style={{ height: 20, marginBottom: 'var(--sp-xl)' }} />
-            )}
-            <label style={{
-              display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer', padding: '14px',
-              borderRadius: 'var(--radius-md)', marginBottom: 'var(--sp-2xl)',
-              background: marketing ? 'var(--brand-light)' : 'var(--bg-base)',
-              border: `1px solid ${marketing ? 'var(--brand)' : 'var(--border)'}`, transition: 'all var(--transition-fast)',
-            }}>
-              <input type="checkbox" checked={marketing} onChange={e => setMarketing(e.target.checked)}
-                style={{ marginTop: 2, accentColor: 'var(--brand)', flexShrink: 0 }} />
-              <div>
-                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 2 }}>
-                  마케팅 정보 수신 동의 <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 400, color: 'var(--text-tertiary)' }}>(선택)</span>
+            <div style={{ background: 'var(--bg-base)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>받게 될 알림 예시</div>
+              {[
+                { icon: '📈', text: '삼성전자 +3.2% 급등 (52,400원)' },
+                { icon: '🏠', text: '래미안 원베일리 청약 마감 D-3' },
+                { icon: '📊', text: '주간 AI 투자 분석 리포트' },
+              ].map((item, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', fontSize: 12, color: 'var(--text-secondary)' }}>
+                  <span style={{ fontSize: 14 }}>{item.icon}</span>
+                  <span>{item.text}</span>
                 </div>
-                <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.5 }}>새 기능, 이벤트, 투자 인사이트 등을 이메일로 받아보세요</div>
-              </div>
-            </label>
-            <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 'var(--sp-md)', textAlign: 'center' as const }}>
-              🔔 버튼을 누르면 알림 허용 여부를 물어봐요. 허용하면 새 소식을 바로 받을 수 있어요!
-            </p>
-            <div style={{ display: 'flex', gap: 10 }}>
-              <button onClick={() => setStep(3)} className="kd-btn kd-btn-ghost" style={{ flex: 1, padding: '13px' }}>← 이전</button>
-              <button onClick={handleComplete} disabled={saving || !region}
-                style={{ flex: 2, padding: '16px', fontSize: 'var(--fs-base)', fontWeight: 800, border: 'none', borderRadius: 'var(--radius-card)', cursor: (saving || !region) ? 'not-allowed' : 'pointer', color: 'var(--text-inverse)', background: 'linear-gradient(135deg, var(--brand), var(--accent-blue))', boxShadow: '0 4px 16px rgba(37,99,235,0.3)', opacity: (saving || !region) ? 0.5 : 1 }}>
-                {saving ? '저장 중...' : !region ? '지역을 선택해주세요' : '카더라 시작하기 🚀'}
-              </button>
+              ))}
             </div>
+
+            {!pushAsked ? (
+              <button onClick={requestPush}
+                style={{
+                  width: '100%', padding: 14, borderRadius: 12, border: 'none', fontSize: 15, fontWeight: 800,
+                  background: 'var(--brand)', color: '#fff', cursor: 'pointer', marginBottom: 8,
+                }}>
+                🔔 알림 허용하기
+              </button>
+            ) : (
+              <div style={{ textAlign: 'center', padding: 12, fontSize: 13, color: 'var(--text-secondary)', marginBottom: 8 }}>
+                ✅ 알림 설정 완료!
+              </div>
+            )}
+
+            <button onClick={finish}
+              style={{
+                width: '100%', padding: 14, borderRadius: 12, border: 'none', fontSize: 15, fontWeight: 800,
+                background: pushAsked ? 'var(--brand)' : 'none',
+                color: pushAsked ? '#fff' : 'var(--text-secondary)',
+                cursor: 'pointer',
+              }}>
+              {pushAsked ? '카더라 시작하기 🚀' : '나중에 할게요'}
+            </button>
           </div>
         )}
       </div>

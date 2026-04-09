@@ -48,7 +48,7 @@ export default function StickyBar() {
     const timer = setTimeout(() => {
       setVisible(true);
       trackConversion('cta_view', 'sticky_bar', { pagePath: pathname });
-    }, 8000);
+    }, 5000);
     return () => clearTimeout(timer);
   }, [pathname, userId, loading]);
 
@@ -57,7 +57,7 @@ export default function StickyBar() {
   const msg = getMessage(pathname);
   if (!msg) return null;
 
-  const url = `/login?redirect=${encodeURIComponent(pathname)}`;
+  const url = `/login?redirect=${encodeURIComponent(pathname)}&source=sticky_bar`;
 
   return (
     <div style={{

@@ -73,7 +73,7 @@ export default function InlineCTA({ type, entityName, entityId, price, extra }: 
   if (loading || userId) return null;
 
   const m = MESSAGES[type];
-  const url = `/login?redirect=${encodeURIComponent(pathname)}`;
+  const url = `/login?redirect=${encodeURIComponent(pathname)}&source=inline_cta_${type}`;
 
   return (
     <div style={{

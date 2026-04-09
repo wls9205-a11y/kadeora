@@ -6,7 +6,9 @@ import AdBanner from '@/components/AdBanner';
 import { ToastProvider } from '@/components/Toast';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import StickyBar from '@/components/StickyBar';
-import { Sidebar, RightPanel, InstallBanner, PWAInstallTracker, NoticeBanner, PageViewTracker, AutoPushPrompt } from '@/components/ClientDynamics';
+import TopBarCTA from '@/components/TopBarCTA';
+import ScrollToastCTA from '@/components/ScrollToastCTA';
+import { Sidebar, RightPanel, InstallBanner, PWAInstallTracker, NoticeBanner, PageViewTracker } from '@/components/ClientDynamics';
 import TopLoadingBar from '@/components/TopLoadingBar';
 import ScrollToTop from '@/components/ScrollToTop';
 import { AuthProvider } from '@/components/AuthProvider';
@@ -46,6 +48,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
           overflowX: 'hidden',
         }}>
           <ErrorBoundary>
+              <TopBarCTA />
               {children}
           </ErrorBoundary>
         </main>
@@ -56,7 +59,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
       <InstallBanner />
       <PWAInstallTracker />
       <StickyBar />
-      <AutoPushPrompt />
+      <ScrollToastCTA />
       <PageViewTracker />
       <WelcomeReward />
       <ScrollToTop />

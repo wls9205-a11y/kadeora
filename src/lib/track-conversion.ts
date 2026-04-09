@@ -8,6 +8,11 @@ export function trackConversion(
 ) {
   if (typeof window === 'undefined') return;
 
+  // CTA 클릭 시 마지막 클릭 CTA 저장 (가입 귀속용)
+  if (eventType === 'cta_click') {
+    try { localStorage.setItem('kd_last_cta', ctaName); } catch {}
+  }
+
   const body = JSON.stringify({
     event_type: eventType,
     cta_name: ctaName,
@@ -27,4 +32,14 @@ export function trackConversion(
       keepalive: true,
     }).catch(() => {});
   }
+}
+
+/**
+ * 가입 귀속: 마지막 CTA 클릭 정보를 가져와 프로필에 저장
+ */
+export function getSignupSource(): string {
+  if (typeof window === 'undefined') return 'direct';
+  try {
+    return localStorage.getItem('kd_last_cta') || 'direct';
+  } catch { return 'direct'; }
 }

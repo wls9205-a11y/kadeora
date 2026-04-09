@@ -364,6 +364,17 @@ export async function GET(req: NextRequest) {
         else deviceCounts.desktop++;
       }
 
+      // 리텐션 코호트 + 가입 귀속 (signup_source)
+      const [retentionR, signupSourceR] = await Promise.all([
+        (sb as any).from('retention_cohort').select('*').order('cohort_week', { ascending: false }).limit(8),
+        sb.from('profiles').select('signup_source').neq('is_seed', true).not('signup_source', 'is', null),
+      ]);
+      const signupSources: Record<string, number> = {};
+      for (const p of (signupSourceR.data || [])) {
+        const src = p.signup_source || 'direct';
+        signupSources[src] = (signupSources[src] || 0) + 1;
+      }
+
       return NextResponse.json({
         deviceSplit: deviceCounts,
         funnel: {
@@ -379,6 +390,8 @@ export async function GET(req: NextRequest) {
         dailyTrend,
         referrers: refCounts,
         signupTrend,
+        retentionCohort: retentionR.data || [],
+        signupSources,
       });
     }
 

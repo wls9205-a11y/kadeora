@@ -25,7 +25,7 @@ function LoginForm({ redirect }: LoginFormProps) {
       const { error: err } = await sb.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirect)}`,
+          redirectTo: `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirect)}&source=${new URLSearchParams(window.location.search).get('source') || 'direct'}`,
         },
       });
       if (err) throw err;
