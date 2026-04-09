@@ -1,5 +1,5 @@
-import { stockUpHex, stockDownHex } from '@/lib/stockColor';
 'use client';
+import { stockUpHex, stockDownHex } from '@/lib/stockColor';
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 

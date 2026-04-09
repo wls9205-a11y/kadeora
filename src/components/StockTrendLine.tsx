@@ -1,5 +1,5 @@
-import { stockUpHex, stockDownHex } from '@/lib/stockColor';
 'use client';
+import { stockUpHex, stockDownHex } from '@/lib/stockColor';
 import { useMemo } from 'react';
 
 interface PriceHistory { date: string; close_price: number; volume: number; change_pct?: number; }
