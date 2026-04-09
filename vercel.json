@@ -414,6 +414,22 @@
     {
       "path": "/api/cron/blog-dividend-etf",
       "schedule": "30 6 * * 1"
+    },
+    {
+      "path": "/api/cron/issue-detect",
+      "schedule": "*/15 * * * *"
+    },
+    {
+      "path": "/api/cron/issue-draft",
+      "schedule": "2,22,42 * * * *"
+    },
+    {
+      "path": "/api/cron/issue-trend",
+      "schedule": "5 * * * *"
+    },
+    {
+      "path": "/api/cron/feed-buzz-publish",
+      "schedule": "*/5 * * * *"
     }
   ]
 }
