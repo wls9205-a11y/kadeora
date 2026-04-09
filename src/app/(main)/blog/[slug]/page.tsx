@@ -533,7 +533,7 @@ export default async function BlogDetailPage({ params }: Props) {
     name: post.title,
     description: descClean,
     step: howtoSteps.slice(0, 8),
-    image: ogImage,
+    image: post.cover_image || `${SITE}/api/og?title=${encodeURIComponent(post.title)}&category=${post.category}&design=2`,
   } : null;
 
     const showFaq = faqItems.length >= 1;  // 1개 이상이면 FAQ 스키마 출력 (JSON-LD 리치스니펫 극대화)
