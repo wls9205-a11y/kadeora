@@ -254,7 +254,7 @@ async function handler(_req: NextRequest) {
   const [googleItems, dartItems] = await Promise.all([fetchGoogleTrends(), fetchDARTDisclosures()]);
   rssItems.push(...googleItems, ...dartItems);
 
-  console.log(\`[issue-detect] RSS: \${rssItems.length} items, Google: \${googleItems.length}, DART: \${dartItems.length}\`);
+  console.log(`[issue-detect] RSS: ${rssItems.length} items, Google: ${googleItems.length}, DART: ${dartItems.length}`);
   if (rssItems.length === 0) {
     return NextResponse.json({ detected: 0, message: 'no RSS items' });
   }
@@ -373,7 +373,7 @@ async function handler(_req: NextRequest) {
     }
   }
 
-  console.log(\`[issue-detect] detected: \${results.length}, rss_items: \${rssItems.length}, keyword_matches: \${issueMap.size}\`);
+  console.log(`[issue-detect] detected: ${results.length}, rss_items: ${rssItems.length}, keyword_matches: ${issueMap.size}`);
   return NextResponse.json({
     detected: results.length,
     rss_items: rssItems.length,
