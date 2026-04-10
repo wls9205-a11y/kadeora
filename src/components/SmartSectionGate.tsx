@@ -9,7 +9,10 @@ import { useEffect, useState } from 'react';
  */
 
 function trackCTA(action: string, label: string, extra?: Record<string, string>) {
-  try { fetch('/api/analytics/events', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ event: `cta_${action}`, label, ...extra }) }).catch(() => {}); } catch {}
+  try {
+    // conversion_events 테이블에 기록
+    fetch('/api/track', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ event_type: `cta_${action}`, cta_name: label, category: extra?.category || '' }) }).catch(() => {});
+  } catch {}
 }
 
 interface Props { htmlContent: string; slug: string; category: string; }

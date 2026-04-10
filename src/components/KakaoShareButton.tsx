@@ -26,6 +26,9 @@ export default function KakaoShareButton({ title, description, slug, coverImage 
       navigator.clipboard?.writeText(url);
       alert('링크가 복사됐어요! 카카오톡에서 붙여넣기 해주세요');
     }
+    // 공유 추적
+    fetch('/api/share', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ post_id: slug, platform: 'kakao_top' }) }).catch(() => {});
+    fetch('/api/analytics/events', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ event: 'share_click', label: 'kakao_top', post_id: slug }) }).catch(() => {});
   };
 
   return (

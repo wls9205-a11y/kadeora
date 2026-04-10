@@ -947,6 +947,25 @@ export default async function BlogDetailPage({ params }: Props) {
         </div>
       )}
 
+      {/* 이번주 인기글 */}
+      {related.length > 3 && (
+        <div style={{ marginBottom: 'var(--sp-xl)' }}>
+          <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>🔥 이번주 인기글</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {related.slice(0, 3).map((r: any, i: number) => (
+              <Link key={r.slug} href={`/blog/${r.slug}`} style={{
+                display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px',
+                background: 'var(--bg-surface)', border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-md)', textDecoration: 'none', color: 'inherit',
+              }}>
+                <span style={{ fontSize: 18, fontWeight: 700, color: i === 0 ? '#ef4444' : i === 1 ? '#f59e0b' : '#6b7280', minWidth: 24 }}>{i + 1}</span>
+                <span style={{ fontSize: 13, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.title?.slice(0, 40)}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* 관련 글 */}
       {(related ?? []).length > 0 && (
         <div style={{ marginBottom: 'var(--sp-xl)' }}>
