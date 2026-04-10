@@ -674,13 +674,37 @@ export default async function BlogDetailPage({ params }: Props) {
           </div>
         )}
 
-        {/* 상단 공유 바 (본문 전) */}
+        {/* 상단 공유 바 — 카카오톡 단독 + 전체 공유 + 북마크 */}
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           padding: '8px 0', marginBottom: 'var(--sp-sm)', fontSize: 'var(--fs-sm)',
           borderBottom: '1px solid var(--border)',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            {/* 카카오톡 단독 버튼 */}
+            <button
+              onClick={() => {
+                const url = `${typeof window !== 'undefined' ? window.location.origin : ''}/blog/${slug}`;
+                if (typeof window !== 'undefined' && (window as any).Kakao?.Share) {
+                  (window as any).Kakao.Share.sendDefault({
+                    objectType: 'feed',
+                    content: { title: post.title, description: (post.meta_description || post.excerpt || '').slice(0, 100), imageUrl: post.cover_image?.startsWith('/') ? url.split('/blog')[0] + post.cover_image : (post.cover_image || ''), link: { mobileWebUrl: url, webUrl: url } },
+                    buttons: [{ title: '자세히 보기', link: { mobileWebUrl: url, webUrl: url } }],
+                  });
+                } else {
+                  navigator.clipboard?.writeText(url);
+                  alert('링크가 복사됐어요! 카카오톡에서 붙여넣기 해주세요');
+                }
+              }}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                padding: '6px 14px', borderRadius: 20, border: 'none',
+                background: '#FEE500', color: '#191919', fontSize: 13, fontWeight: 700,
+                cursor: 'pointer', whiteSpace: 'nowrap',
+              }}
+            >
+              💬 카카오톡 공유
+            </button>
             <ShareButtons title={post.title} postId={slug} content={post.excerpt || post.meta_description || undefined} category={post.category} />
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -708,10 +732,110 @@ export default async function BlogDetailPage({ params }: Props) {
         )}
 
         {/* CTA — 본문 직후 위치 (비로그인, 스크롤 필요 최소화) */}
+        {/* 청약/부동산 알림 CTA (비로그인 전용) */}
+        {!isLoggedIn && post.category === 'apt' && (
+          <div style={{
+            margin: 'var(--sp-md) 0', padding: '16px 20px', borderRadius: 'var(--radius-card)',
+            background: 'linear-gradient(135deg, rgba(34,197,94,0.06), rgba(59,123,246,0.06))',
+            border: '1px solid rgba(34,197,94,0.15)',
+          }}>
+            <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>
+              🔔 청약 공고 알림 받기
+            </div>
+            <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 12, lineHeight: 1.5 }}>
+              무순위·줍줍·재분양 공고가 뜨면 바로 알림을 받아보세요.<br/>
+              관심 지역 설정하면 내 지역 청약만 골라서 알려드려요.
+            </div>
+            <a
+              href={`/login?redirect=${encodeURIComponent(`/blog/${slug}`)}&source=apt_alert_cta`}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                padding: '8px 20px', borderRadius: 8, border: 'none',
+                background: 'var(--brand)', color: '#fff', fontSize: 14, fontWeight: 700,
+                textDecoration: 'none', cursor: 'pointer',
+              }}
+            >
+              🔔 무료로 알림 설정하기
+            </a>
+          </div>
+        )}
+
+        {/* 주식/재테크 알림 CTA (비로그인 전용) */}
+        {!isLoggedIn && (post.category === 'stock' || post.category === 'finance') && (
+          <div style={{
+            margin: 'var(--sp-md) 0', padding: '16px 20px', borderRadius: 'var(--radius-card)',
+            background: 'linear-gradient(135deg, rgba(59,123,246,0.06), rgba(167,139,250,0.06))',
+            border: '1px solid rgba(59,123,246,0.15)',
+          }}>
+            <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>
+              📊 관심 종목 알림 받기
+            </div>
+            <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 12, lineHeight: 1.5 }}>
+              관심 종목의 급등·실적·공시 소식을 바로 받아보세요.<br/>
+              매일 아침 AI 브리핑도 무료로 제공됩니다.
+            </div>
+            <a
+              href={`/login?redirect=${encodeURIComponent(`/blog/${slug}`)}&source=stock_alert_cta`}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                padding: '8px 20px', borderRadius: 8, border: 'none',
+                background: 'var(--brand)', color: '#fff', fontSize: 14, fontWeight: 700,
+                textDecoration: 'none', cursor: 'pointer',
+              }}
+            >
+              📊 무료로 알림 설정하기
+            </a>
+          </div>
+        )}
+
         {!isLoggedIn && <RelatedContentCard type="blog" />}
 
         {/* 뉴스레터 — 본문 직후, 비로그인 유저 대상 (게이트 대안 경로) */}
         {!isLoggedIn && !isBot && <NewsletterSubscribe category={post.category} />}
+
+        {/* 관련 서비스 CTA (카테고리별) */}
+        {post.category === 'apt' && (
+          <div style={{
+            display: 'flex', gap: 8, margin: 'var(--sp-md) 0', flexWrap: 'wrap',
+          }}>
+            <a href="/apt" style={{
+              flex: 1, minWidth: 140, display: 'flex', alignItems: 'center', gap: 8,
+              padding: '12px 16px', borderRadius: 'var(--radius-md)',
+              background: 'linear-gradient(135deg, rgba(34,197,94,0.08), rgba(34,197,94,0.03))',
+              border: '1px solid rgba(34,197,94,0.15)', textDecoration: 'none', color: 'inherit',
+            }}>
+              <span style={{ fontSize: 20 }}>🏢</span>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 700 }}>청약 일정 보기</div>
+                <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>접수중·예정 전체</div>
+              </div>
+            </a>
+            <a href="/apt/diagnose" style={{
+              flex: 1, minWidth: 140, display: 'flex', alignItems: 'center', gap: 8,
+              padding: '12px 16px', borderRadius: 'var(--radius-md)',
+              background: 'linear-gradient(135deg, rgba(59,123,246,0.08), rgba(59,123,246,0.03))',
+              border: '1px solid rgba(59,123,246,0.15)', textDecoration: 'none', color: 'inherit',
+            }}>
+              <span style={{ fontSize: 20 }}>🎯</span>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 700 }}>청약 가점 계산</div>
+                <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>내 당첨 확률은?</div>
+              </div>
+            </a>
+            <a href="/calc/real-estate/brokerage-fee" style={{
+              flex: 1, minWidth: 140, display: 'flex', alignItems: 'center', gap: 8,
+              padding: '12px 16px', borderRadius: 'var(--radius-md)',
+              background: 'linear-gradient(135deg, rgba(251,191,36,0.08), rgba(251,191,36,0.03))',
+              border: '1px solid rgba(251,191,36,0.15)', textDecoration: 'none', color: 'inherit',
+            }}>
+              <span style={{ fontSize: 20 }}>🧮</span>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 700 }}>중개수수료 계산</div>
+                <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>매매·전세 복비</div>
+              </div>
+            </a>
+          </div>
+        )}
 
         {/* FAQ 아코디언 */}
         {showFaq && <BlogFaqAccordion items={faqItems} />}
