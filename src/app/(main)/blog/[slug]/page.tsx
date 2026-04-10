@@ -499,7 +499,7 @@ export default async function BlogDetailPage({ params }: Props) {
     .replace(/\sstyle\s*=\s*"[\s;]*"/gi, '');
   
   htmlRaw = injectInternalLinks(htmlRaw);
-  const htmlFull = enhanceBlogVisuals(htmlRaw, {
+  let htmlFull = enhanceBlogVisuals(htmlRaw, {
     excerpt: post.excerpt,
     coverImage: post.cover_image,
     imageAlt: post.image_alt,
@@ -507,6 +507,47 @@ export default async function BlogDetailPage({ params }: Props) {
     category: post.category,
     tags: post.tags,
   });
+
+  // 비로그인 유저: 본문 상단(첫 H2 뒤)에 청약/종목 알림 CTA 주입
+  const alertCtaHtml = (() => {
+    if (isBot || isLoggedIn) return '';
+    const isApt = post.category === 'apt';
+    const isStock = post.category === 'stock' || post.category === 'finance';
+    if (!isApt && !isStock) return '';
+    const icon = isApt ? '🔔' : '📊';
+    const title = isApt ? '청약 공고 알림 받기' : '관심 종목 알림 받기';
+    const desc = isApt
+      ? '무순위·줍줍·재분양 공고가 나오면 바로 알림을 드려요. 관심 지역만 골라서 받을 수 있어요.'
+      : '관심 종목의 급등·실적·공시 소식을 바로 받아보세요. 매일 아침 AI 브리핑도 무료.';
+    const tags = isApt ? ['무순위', '줍줍', '재분양'] : ['급등', '공시', '실적'];
+    const src = isApt ? 'apt_alert_cta' : 'stock_alert_cta';
+    const loginUrl = `/login?redirect=${encodeURIComponent(`/blog/${slug}`)}&source=${src}`;
+    return `<div style="margin:20px 0;padding:20px;border-radius:12px;background:linear-gradient(135deg,rgba(20,32,56,0.98),rgba(10,18,34,0.99));border:1px solid rgba(59,123,246,0.2);position:relative;overflow:hidden">` +
+      `<div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,${isApt ? '#3b7bf6,#22c55e' : '#3b7bf6,#a78bfa'})"></div>` +
+      `<div style="position:absolute;top:14px;right:14px;font-size:10px;padding:2px 8px;border-radius:4px;background:rgba(34,197,94,0.12);color:#22c55e;font-weight:600">무료</div>` +
+      `<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">` +
+        `<div style="width:32px;height:32px;border-radius:8px;background:rgba(59,123,246,0.12);display:flex;align-items:center;justify-content:center;font-size:15px">${icon}</div>` +
+        `<div style="font-size:15px;font-weight:600;color:#e8e6e3">${title}</div>` +
+      `</div>` +
+      `<div style="font-size:13px;color:#8b95a5;line-height:1.5;margin-bottom:12px">${desc}</div>` +
+      `<div style="display:flex;gap:5px;margin-bottom:14px;flex-wrap:wrap">` +
+        tags.map(t => `<span style="font-size:11px;padding:3px 7px;border-radius:4px;background:rgba(59,123,246,0.08);color:#6da0f0;border:0.5px solid rgba(59,123,246,0.15)">${t}</span>`).join('') +
+      `</div>` +
+      `<a href="${loginUrl}" style="display:block;width:100%;padding:10px;border-radius:8px;background:#3b7bf6;color:#fff;font-size:13px;font-weight:500;text-decoration:none;text-align:center;box-sizing:border-box">카카오로 3초 만에 시작하기</a>` +
+    `</div>`;
+  })();
+
+  // 첫 H2 뒤에 CTA 삽입
+  if (alertCtaHtml) {
+    const h2Match = htmlFull.match(/<\/h2>/i);
+    if (h2Match && h2Match.index !== undefined) {
+      const insertAt = h2Match.index + 5;
+      // 첫 H2 다음 문단 끝에 삽입
+      const nextP = htmlFull.indexOf('</p>', insertAt);
+      const pos = nextP > 0 ? nextP + 4 : insertAt;
+      htmlFull = htmlFull.slice(0, pos) + alertCtaHtml + htmlFull.slice(pos);
+    }
+  }
   const cutoff = Math.floor(htmlFull.length * 0.7);
   const htmlTruncated = htmlFull.slice(0, cutoff);
   const tossCutoff = Math.floor(htmlFull.length * 0.3);
@@ -711,46 +752,6 @@ export default async function BlogDetailPage({ params }: Props) {
         )}
 
         {/* CTA — 본문 직후 위치 (비로그인, 스크롤 필요 최소화) */}
-        {/* 알림 CTA — 프리미엄 카드 (비로그인 전용, 본문 직후) */}
-        {!isLoggedIn && !isBot && (post.category === 'apt' || post.category === 'stock' || post.category === 'finance') && (
-          <div style={{
-            margin: 'var(--sp-lg) 0', padding: '20px', borderRadius: 12,
-            background: 'linear-gradient(135deg, rgba(26,39,68,0.95) 0%, rgba(13,25,41,0.98) 100%)',
-            border: '1px solid rgba(59,123,246,0.25)',
-            position: 'relative', overflow: 'hidden',
-          }}>
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: post.category === 'apt' ? 'linear-gradient(90deg, #3b7bf6 0%, #22c55e 100%)' : 'linear-gradient(90deg, #3b7bf6 0%, #a78bfa 100%)' }} />
-            <div style={{ position: 'absolute', top: 16, right: 16, fontSize: 10, padding: '2px 8px', borderRadius: 4, background: 'rgba(34,197,94,0.15)', color: '#22c55e', fontWeight: 600 }}>무료</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-              <div style={{ width: 32, height: 32, borderRadius: 8, background: post.category === 'apt' ? 'rgba(59,123,246,0.15)' : 'rgba(167,139,250,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>
-                {post.category === 'apt' ? '🔔' : '📊'}
-              </div>
-              <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)' }}>
-                {post.category === 'apt' ? '청약 공고 알림 받기' : '관심 종목 알림 받기'}
-              </div>
-            </div>
-            <div style={{ fontSize: 13, color: '#9ca3af', lineHeight: 1.5, marginBottom: 14 }}>
-              {post.category === 'apt'
-                ? '무순위·줍줍·재분양 공고가 나오면 바로 알림을 드려요. 관심 지역만 골라서 받을 수 있어요.'
-                : '관심 종목의 급등·실적·공시 소식을 바로 받아보세요. 매일 아침 AI 브리핑도 무료.'}
-            </div>
-            <div style={{ display: 'flex', gap: 6, marginBottom: 14, flexWrap: 'wrap' }}>
-              {(post.category === 'apt' ? ['무순위', '줍줍', '재분양'] : ['급등', '공시', '실적']).map(tag => (
-                <span key={tag} style={{ fontSize: 11, padding: '3px 8px', borderRadius: 4, background: 'rgba(59,123,246,0.1)', color: '#6da0f0', border: '0.5px solid rgba(59,123,246,0.2)' }}>{tag}</span>
-              ))}
-            </div>
-            <a
-              href={`/login?redirect=${encodeURIComponent(`/blog/${slug}`)}&source=${post.category === 'apt' ? 'apt_alert_cta' : 'stock_alert_cta'}`}
-              style={{
-                display: 'block', width: '100%', padding: '10px', borderRadius: 8,
-                background: '#3b7bf6', color: '#fff', fontSize: 14, fontWeight: 600,
-                textDecoration: 'none', textAlign: 'center', boxSizing: 'border-box',
-              }}
-            >
-              카카오로 3초 만에 시작하기
-            </a>
-          </div>
-        )}
 
         {!isLoggedIn && <RelatedContentCard type="blog" />}
 
