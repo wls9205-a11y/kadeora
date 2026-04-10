@@ -288,4 +288,4 @@ async function handler(_req: NextRequest) {
   });
 }
 
-export const GET = withCronAuth(withCronLogging('issue-draft', handler));
+export const GET = withCronAuth(handler);

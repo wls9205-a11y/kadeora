@@ -206,4 +206,4 @@ async function handler(_req: NextRequest) {
   });
 }
 
-export const GET = withCronAuth(withCronLogging('issue-trend', handler));
+export const GET = withCronAuth(handler);

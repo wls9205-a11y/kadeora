@@ -391,4 +391,4 @@ async function handler(_req: NextRequest) {
   });
 }
 
-export const GET = withCronAuth(withCronLogging('issue-detect', handler));
+export const GET = withCronAuth(handler);
