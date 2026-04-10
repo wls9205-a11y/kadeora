@@ -95,7 +95,26 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
   return (
     <div style={{display:'flex',flexDirection:'column',gap:6}}>
 
-      {/* ═══ 🚀 전체 최신화 — 최상단 ═══ */}
+      {/* ═══ 📊 가입 퍼널 — 최상단 ═══ */}
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:6,marginBottom:2}}>
+        <div style={{background:'linear-gradient(135deg,rgba(251,191,36,0.12),rgba(12,21,40,0.8))',border:'1px solid rgba(251,191,36,0.2)',borderRadius:14,padding:'12px 10px',textAlign:'center'}}>
+          <div style={{fontSize:11,fontWeight:700,color:'rgba(251,191,36,0.8)'}}>가입 시도</div>
+          <div style={{fontSize:28,fontWeight:900,color:'#FBBF24',lineHeight:1,marginTop:4}}>{k.signupAttempts??0}</div>
+          <div style={{fontSize:11,color:'rgba(255,255,255,0.45)',marginTop:4}}>{k.signupAttempts7d||0} / 7일</div>
+        </div>
+        <div style={{background:'linear-gradient(135deg,rgba(16,185,129,0.12),rgba(12,21,40,0.8))',border:'1px solid rgba(16,185,129,0.2)',borderRadius:14,padding:'12px 10px',textAlign:'center'}}>
+          <div style={{fontSize:11,fontWeight:700,color:'rgba(16,185,129,0.8)'}}>가입 성공</div>
+          <div style={{fontSize:28,fontWeight:900,color:'#10B981',lineHeight:1,marginTop:4}}>{k.signupSuccess??0}</div>
+          <div style={{fontSize:11,color:'rgba(255,255,255,0.45)',marginTop:4}}>{k.signupAttempts > 0 ? ((k.signupSuccess/k.signupAttempts)*100).toFixed(0) : '\u2014'}% 전환</div>
+        </div>
+        <div style={{background:'linear-gradient(135deg,rgba(239,68,68,0.12),rgba(12,21,40,0.8))',border:'1px solid rgba(239,68,68,0.2)',borderRadius:14,padding:'12px 10px',textAlign:'center'}}>
+          <div style={{fontSize:11,fontWeight:700,color:'rgba(239,68,68,0.8)'}}>가입 실패</div>
+          <div style={{fontSize:28,fontWeight:900,color:'#EF4444',lineHeight:1,marginTop:4}}>{(k.signupAttempts??0)-(k.signupSuccess??0)}</div>
+          <div style={{fontSize:11,color:'rgba(255,255,255,0.45)',marginTop:4}}>에러 체크</div>
+        </div>
+      </div>
+
+      {/* ═══ 🚀 전체 최신화 ═══ */}
       <GodBtn/>
 
       {/* ═══ 🔥 오늘 핵심 KPI 히어로 ═══ */}
