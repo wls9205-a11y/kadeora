@@ -8,6 +8,7 @@ import { injectInternalLinks } from '@/lib/blog-auto-link';
 import BlogCommentInput from '@/components/BlogCommentInput';
 import BlogCommentCTA from '@/components/BlogCommentCTA';
 import ShareButtons from '@/components/ShareButtons';
+import KakaoShareButton from '@/components/KakaoShareButton';
 import BlogFaqAccordion from '@/components/BlogFaqAccordion';
 import BlogToc from '@/components/BlogToc';
 import BlogActions from '@/components/BlogActions';
@@ -682,29 +683,7 @@ export default async function BlogDetailPage({ params }: Props) {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             {/* 카카오톡 단독 버튼 */}
-            <button
-              onClick={() => {
-                const url = `${typeof window !== 'undefined' ? window.location.origin : ''}/blog/${slug}`;
-                if (typeof window !== 'undefined' && (window as any).Kakao?.Share) {
-                  (window as any).Kakao.Share.sendDefault({
-                    objectType: 'feed',
-                    content: { title: post.title, description: (post.meta_description || post.excerpt || '').slice(0, 100), imageUrl: post.cover_image?.startsWith('/') ? url.split('/blog')[0] + post.cover_image : (post.cover_image || ''), link: { mobileWebUrl: url, webUrl: url } },
-                    buttons: [{ title: '자세히 보기', link: { mobileWebUrl: url, webUrl: url } }],
-                  });
-                } else {
-                  navigator.clipboard?.writeText(url);
-                  alert('링크가 복사됐어요! 카카오톡에서 붙여넣기 해주세요');
-                }
-              }}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 6,
-                padding: '6px 14px', borderRadius: 20, border: 'none',
-                background: '#FEE500', color: '#191919', fontSize: 13, fontWeight: 700,
-                cursor: 'pointer', whiteSpace: 'nowrap',
-              }}
-            >
-              💬 카카오톡 공유
-            </button>
+            <KakaoShareButton title={post.title} description={post.meta_description || post.excerpt || ''} slug={slug} coverImage={post.cover_image} />
             <ShareButtons title={post.title} postId={slug} content={post.excerpt || post.meta_description || undefined} category={post.category} />
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
