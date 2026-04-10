@@ -474,7 +474,7 @@ export async function GET(req: NextRequest) {
         sb.from('profiles')
           .select('id, nickname, provider, created_at, last_active_at, grade, points, residence_city, residence_district, onboarded, profile_completed, interests, is_seed, first_mission_completed, signup_source, gender, age_group, birth_year, marketing_agreed, is_premium, streak_days, influence_score')
           .neq('is_ghost', true).neq('is_deleted', true)
-          .order('created_at', { ascending: false }).limit(50),
+          .order('created_at', { ascending: false }).limit(200),
         sb.from('apt_site_interests')
           .select('site_id, guest_name, guest_city, is_member, created_at, notification_enabled')
           .order('created_at', { ascending: false }).limit(10),
