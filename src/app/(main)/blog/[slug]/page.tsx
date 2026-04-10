@@ -847,7 +847,7 @@ export default async function BlogDetailPage({ params }: Props) {
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12,
         }}>
           <BlogActions blogPostId={post.id} initialHelpfulCount={post.helpful_count ?? 0} />
-        </div>}
+        </div>
 
       {/* 댓글 섹션 — D안 컴팩트 리스트 */}
       <BlogCommentCTA commentCount={comments.length} />
