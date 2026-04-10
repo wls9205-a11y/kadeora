@@ -838,90 +838,16 @@ export default async function BlogDetailPage({ params }: Props) {
           </div>
         )}
 
-        {/* 동적 CTA */}
-        {(() => {
-          const ctaMap: Record<string, { href: string; icon: string; title: string; desc: string }> = {
-            stock: { href: '/stock', icon: '📈', title: '실시간 주식 시세 보기', desc: '코스피·코스닥·해외 주식 시세를 확인하세요' },
-            apt: { href: '/apt', icon: '🏢', title: '전국 청약 일정 확인', desc: '접수중·예정 청약 정보를 한눈에' },
-            unsold: { href: '/apt?tab=unsold', icon: '🏚️', title: '미분양 현황 보기', desc: '전국 미분양 아파트를 확인하세요' },
-            finance: { href: '/blog?category=finance', icon: '💰', title: '재테크 정보 더 보기', desc: '투자·재테크 블로그를 확인하세요' },
-          };
-          const cta = ctaMap[post.category];
-          if (!cta) return null;
-          return (
-            <Link href={cta.href} style={{
-              display: 'flex', alignItems: 'center', gap: 'var(--sp-md)', padding: 16, marginBottom: 'var(--sp-lg)',
-              background: 'linear-gradient(135deg, var(--bg-surface), var(--bg-hover))',
-              border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', textDecoration: 'none', color: 'inherit',
-            }}>
-              <span style={{ fontSize: 32, flexShrink: 0 }}>{cta.icon}</span>
-              <div>
-                <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>{cta.title}</div>
-                <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginTop: 2 }}>{cta.desc}</div>
-              </div>
-              <span style={{ marginLeft: 'auto', fontSize: 16, color: 'var(--text-tertiary)', flexShrink: 0 }}>→</span>
-            </Link>
-          );
-        })()}
 
         {/* 관련 종목/현장은 하단 섹션에서만 렌더링 (중복 제거) */}
 
-        {/* 공유 + 도움이됐어요 + 북마크 */}
+        {/* 도움이됐어요 + 북마크 */}
         <div style={{
-          borderTop: '1px solid var(--border)', paddingTop: 20, marginTop: 28,
-          display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap',
-          background: 'linear-gradient(135deg, rgba(37,99,235,0.04) 0%, rgba(167,139,250,0.04) 100%)',
-          margin: '28px -16px 0', padding: '16px 16px',
+          borderTop: '1px solid var(--border)', paddingTop: 16, marginTop: 24,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12,
         }}>
-          <ShareButtons title={post.title} postId={slug} content={post.excerpt || post.meta_description || undefined} category={post.category} />
-          <div style={{ flex: 1 }} />
-          <BlogBookmarkButton blogPostId={post.id} />
           <BlogActions blogPostId={post.id} initialHelpfulCount={post.helpful_count ?? 0} />
-        </div>
-
-        {/* 바이럴 CTA: 공유 유도 */}
-        <div style={{
-          margin: '0 -16px', padding: '20px 16px', borderRadius: '0 0 12px 12px',
-          background: 'linear-gradient(135deg, rgba(59,123,246,0.06) 0%, rgba(46,232,165,0.04) 100%)',
-          textAlign: 'center',
-        }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>
-            이 글이 도움이 됐다면?
-          </div>
-          <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 12, lineHeight: 1.5 }}>
-            주변에 공유하면 포인트 +5P 적립! 카카오톡·밴드로 바로 공유해보세요
-          </div>
-          <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <ShareButtons title={`${post.title} — 카더라 블로그`} postId={slug} content={post.excerpt || post.meta_description || undefined} category={post.category} />
-          </div>
-        </div>
-
-        {/* 관련 서비스 크로스링크 */}
-        <BlogServiceWidget category={post.category} tags={post.tags ?? undefined} sourceRef={post.source_ref} />
-      </article>
-
-      {/* 세션74: Two-Step 마이크로 커밋먼트 CTA */}
-
-      {/* 9. 다음글 플로팅 카드 (스크롤 60% 도달 시) */}
-      {nextPost && <NextArticleFloat nextSlug={nextPost.slug} nextTitle={nextPost.title} category={post.category} />}
-
-      {/* 세션70: 플로팅 가입 배너 */}
-
-      {/* 프로 업셀 배너 — 결제 시스템 출시 전까지 비공개 */}
-      {false && !isPremiumUser && (
-      <div className="kd-card-glow" style={{ padding: '18px 16px', margin: '16px 0', background: 'var(--bg-surface)', borderRadius: 'var(--radius-lg)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-md)' }}>
-          <div style={{ width: 40, height: 40, borderRadius: 'var(--radius-card)', background: 'linear-gradient(135deg, var(--brand), #2EE8A5)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-md)', flexShrink: 0 }}>👑</div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>AI가 분석한 종목 리포트 받아보세요</div>
-            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>프로 멤버십 · 하루 830원</div>
-          </div>
-          <Link href="/shop" style={{ padding: '8px 16px', borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: '#fff', fontSize: 12, fontWeight: 700, textDecoration: 'none', flexShrink: 0, whiteSpace: 'nowrap' }}>
-            자세히
-          </Link>
-        </div>
-      </div>
-      )}
+        </div>}
 
       {/* 댓글 섹션 — D안 컴팩트 리스트 */}
       <BlogCommentCTA commentCount={comments.length} />
@@ -1084,7 +1010,6 @@ export default async function BlogDetailPage({ params }: Props) {
         </div>
       </div>
 
-      <NewsletterSubscribe category={post.category} />
 
       {/* 관련 종목 (내부 링크 SEO) */}
       {relatedStocks.length > 0 && (
