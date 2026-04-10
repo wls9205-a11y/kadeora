@@ -168,7 +168,16 @@ async function fetchRSS(feed: { name: string; url: string }): Promise<RSSItem[]>
 /* ═══════════ 중복 체크 ═══════════ */
 
 async function isDuplicate(sb: any, entities: string[], title: string): Promise<{ isDup: boolean; existingId?: string }> {
-  if (entities.length === 0) return { isDup: false };
+  if (entities.length === 0 && !title) return { isDup: false };
+  // 타이틀 유사도 체크 (24시간 내 동일/유사 타이틀)
+  if (title) {
+    const shortTitle = title.slice(0, 30);
+    const { data: titleMatch } = await sb.from('issue_alerts')
+      .select('id').ilike('title', `%${shortTitle}%`)
+      .gte('detected_at', new Date(Date.now() - 24 * 3600000).toISOString())
+      .limit(1);
+    if (titleMatch && titleMatch.length > 0) return { isDup: true, existingId: titleMatch[0].id };
+  }
 
   // 24시간 내 동일 엔티티 이슈 존재 체크
   const { data } = await (sb as any).from('issue_alerts')
@@ -382,4 +391,4 @@ async function handler(_req: NextRequest) {
   });
 }
 
-export const GET = withCronAuth(handler);
+export const GET = withCronAuth(withCronLogging('issue-detect', handler));

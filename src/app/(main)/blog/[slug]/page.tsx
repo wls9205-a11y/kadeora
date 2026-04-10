@@ -948,7 +948,7 @@ export default async function BlogDetailPage({ params }: Props) {
       )}
 
       {/* 이번주 인기글 */}
-      {related.length > 3 && (
+      {related.length > 0 && (
         <div style={{ marginBottom: 'var(--sp-xl)' }}>
           <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>🔥 이번주 인기글</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>

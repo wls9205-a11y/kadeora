@@ -2,6 +2,7 @@ export const maxDuration = 60;
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronAuth } from '@/lib/cron-auth';
+import { withCronLogging } from '@/lib/cron-logger';
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { submitIndexNow } from '@/lib/indexnow';
 import { selectDraftTemplate } from '@/lib/issue-scoring';
@@ -287,4 +288,4 @@ async function handler(_req: NextRequest) {
   });
 }
 
-export const GET = withCronAuth(handler);
+export const GET = withCronAuth(withCronLogging('issue-draft', handler));

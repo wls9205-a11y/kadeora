@@ -51,24 +51,31 @@ async function handler(req: NextRequest): Promise<NextResponse> {
     const { data: profiles } = await sb.from('profiles')
       .select('id, interests, residence_city').in('id', userIds);
 
-    // 3. 카테고리별 그룹 분류
-    const groups: Record<string, string[]> = {};
+    // 3. 카테고리별 그룹 분류 (apt는 지역별 서브그룹)
+    const groups: Record<string, { uids: string[]; city?: string }> = {};
     for (const p of (profiles || [])) {
       const ints = (p.interests || []) as string[];
       const cat = ints.length > 0 ? (INTEREST_TO_CAT[ints[0]] || 'general') : 'general';
-      if (!groups[cat]) groups[cat] = [];
-      groups[cat].push(p.id);
+      const city = (p as any).residence_city as string | null;
+      // apt 카테고리 + 지역 설정 유저 → 지역별 서브그룹
+      const key = cat === 'apt' && city ? `apt:${city}` : cat;
+      if (!groups[key]) groups[key] = { uids: [], city: cat === 'apt' && city ? city : undefined };
+      groups[key].uids.push(p.id);
     }
 
     // 4. 그룹별 맞춤 발송
     let totalSent = 0, totalFailed = 0;
     const details: Record<string, { slug: string; users: number; sent: number }> = {};
 
-    for (const [cat, uids] of Object.entries(groups)) {
+    for (const [key, group] of Object.entries(groups)) {
+      const cat = key.split(':')[0]; // 'apt:부산' → 'apt'
+      const uids = group.uids;
       let q = sb.from('blog_posts').select('title, slug, category')
         .eq('is_published', true).gte('published_at', since)
         .order('view_count', { ascending: false }).limit(1);
       if (cat !== 'general') q = q.eq('category', cat);
+      // 지역 필터링 (apt 카테고리 + 지역 설정 유저)
+      if (group.city) q = q.ilike('title', `%${group.city}%`);
       const { data: post } = await q.maybeSingle();
       if (!post) continue;
 

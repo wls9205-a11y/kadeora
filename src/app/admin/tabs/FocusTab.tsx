@@ -115,6 +115,11 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
           <div style={{fontSize:32,fontWeight:900,color:'#A855F7',lineHeight:1}}>{k.sharesToday??0}</div>
           <div style={{fontSize:10,color:'rgba(255,255,255,0.3)',marginTop:4}}>{k.shares7d||0} / 7일</div>
         </div>
+        <div style={{flex:1,padding:12,background:'rgba(255,255,255,0.02)',borderRadius:8,border:'1px solid rgba(255,255,255,0.04)'}}>
+          <div style={{fontSize:9,fontWeight:700,color:'rgba(239,68,68,0.6)',letterSpacing:1,marginBottom:6}}>게이트 전환</div>
+          <div style={{fontSize:32,fontWeight:900,color:'#EF4444',lineHeight:1}}>{k.gateClicks??0}</div>
+          <div style={{fontSize:10,color:'rgba(255,255,255,0.3)',marginTop:4}}>{k.gateViews??0}뷰 · {k.gateViews > 0 ? ((k.gateClicks/k.gateViews)*100).toFixed(1) : 0}%</div>
+        </div>
       </div>
 
       {/* ═══ 위험 신호 ═══ */}
