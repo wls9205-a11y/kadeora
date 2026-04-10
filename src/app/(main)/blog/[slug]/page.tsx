@@ -683,7 +683,7 @@ export default async function BlogDetailPage({ params }: Props) {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             {/* 카카오톡 단독 버튼 */}
-            <KakaoShareButton title={post.title} description={post.meta_description || post.excerpt || ''} slug={slug} coverImage={post.cover_image} />
+            <KakaoShareButton title={post.title} description={post.meta_description || post.excerpt || ''} slug={slug} coverImage={post.cover_image || undefined} />
             <ShareButtons title={post.title} postId={slug} content={post.excerpt || post.meta_description || undefined} category={post.category} />
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
