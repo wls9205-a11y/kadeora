@@ -43,6 +43,18 @@ export async function GET(request: Request) {
           updated_at: new Date().toISOString(),
         });
 
+        // 가입 성공 추적
+        try {
+          const { getSupabaseAdmin } = await import('@/lib/supabase-admin');
+          const sbAdmin = getSupabaseAdmin();
+          await (sbAdmin as any).from('signup_attempts').insert({
+            provider: data.user.app_metadata?.provider ?? 'unknown',
+            source: searchParams.get('source') ?? 'direct',
+            redirect_path: redirect,
+            success: true,
+          });
+        } catch {}
+
         // 신규유저 → 퀵온보딩 (관심사 선택 + 알림 설정) → 원래 페이지로
         const safeRedirect = redirect.startsWith('/') ? redirect : '/feed';
         return NextResponse.redirect(`${origin}/onboarding?return=${encodeURIComponent(safeRedirect)}`);

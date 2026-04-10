@@ -20,12 +20,15 @@ function LoginForm({ redirect }: LoginFormProps) {
   const login = async (provider: 'kakao' | 'google') => {
     setLoading(provider);
     setError('');
+    const source = new URLSearchParams(window.location.search).get('source') || 'direct';
+    // 가입 시도 추적
+    fetch('/api/auth/track-attempt', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ provider, source, redirect_path: redirect, success: false }) }).catch(() => {});
     try {
       const sb = createSupabaseBrowser();
       const { error: err } = await sb.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirect)}&source=${new URLSearchParams(window.location.search).get('source') || 'direct'}`,
+          redirectTo: `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirect)}&source=${source}`,
         },
       });
       if (err) throw err;
