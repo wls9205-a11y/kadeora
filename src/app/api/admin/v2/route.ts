@@ -31,6 +31,9 @@ export async function GET(req: NextRequest) {
     const now = new Date();
     const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString();
     const dayAgo = new Date(Date.now() - 86400000).toISOString();
+    // KST 기준 오늘 자정 (UTC 변환) — 어드민 "오늘" 수치는 전부 KST 기준
+    const kstToday = new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10);
+    const todayKST = new Date(kstToday + 'T00:00:00+09:00').toISOString();
 
     // ═══════════════════════════════════════
     // 🎯 집중 탭
@@ -50,7 +53,7 @@ export async function GET(req: NextRequest) {
         safeCount(sb.from('push_subscriptions').select('id', { count: 'exact', head: true })),
         safeCount((sb as any).from('conversion_events').select('id', { count: 'exact', head: true }).gte('created_at', weekAgo)),
         safe(sb.rpc('get_db_size_mb'), 1852),
-        safeCount(sb.from('page_views').select('id', { count: 'exact', head: true }).gte('created_at', now.toISOString().slice(0, 10))),
+        safeCount(sb.from('page_views').select('id', { count: 'exact', head: true }).gte('created_at', todayKST)),
         // 성장 분석 추가 쿼리
         safeCount(sb.from('notifications').select('id', { count: 'exact', head: true }).eq('is_read', true).gte('created_at', weekAgo)),
         safeCount(sb.from('notifications').select('id', { count: 'exact', head: true }).gte('created_at', weekAgo)),
@@ -58,25 +61,25 @@ export async function GET(req: NextRequest) {
         safeCount(sb.from('profiles').select('id', { count: 'exact', head: true }).eq('onboarded', true).neq('is_seed', true).neq('is_ghost', true)),
         safeCount((sb as any).from('conversion_events').select('id', { count: 'exact', head: true }).eq('event_type', 'cta_view').gte('created_at', weekAgo)),
         safeCount((sb as any).from('conversion_events').select('id', { count: 'exact', head: true }).eq('event_type', 'cta_click').gte('created_at', weekAgo)),
-        safeCount(sb.from('posts').select('id', { count: 'exact', head: true }).gte('created_at', now.toISOString().slice(0, 10))),
-        safeCount(sb.from('comments').select('id', { count: 'exact', head: true }).gte('created_at', now.toISOString().slice(0, 10))),
+        safeCount(sb.from('posts').select('id', { count: 'exact', head: true }).gte('created_at', todayKST)),
+        safeCount(sb.from('comments').select('id', { count: 'exact', head: true }).gte('created_at', todayKST)),
         // 확장 쿼리 (13개)
         safeCount(sb.from('posts').select('id', { count: 'exact', head: true })),
         safeCount(sb.from('comments').select('id', { count: 'exact', head: true })),
         safeCount(sb.from('blog_posts').select('id', { count: 'exact', head: true }).eq('is_published', true).gt('view_count', 50)),
-        safeCount(sb.from('blog_posts').select('id', { count: 'exact', head: true }).gte('created_at', new Date().toISOString().slice(0,10))),
+        safeCount(sb.from('blog_posts').select('id', { count: 'exact', head: true }).gte('created_at', todayKST)),
         safeCount(sb.from('apt_sites').select('id', { count: 'exact', head: true })),
-        safeCount(sb.from('apt_subscriptions').select('id', { count: 'exact', head: true }).gte('rcept_endde', new Date().toISOString().slice(0,10)).lte('rcept_endde', new Date(Date.now()+7*86400000).toISOString().slice(0,10))),
-        safeCount((sb as any).from('conversion_events').select('id', { count: 'exact', head: true }).eq('event_type', 'cta_view').gte('created_at', new Date().toISOString().slice(0,10))),
-        safeCount((sb as any).from('conversion_events').select('id', { count: 'exact', head: true }).eq('event_type', 'cta_click').gte('created_at', new Date().toISOString().slice(0,10))),
-        safeCount(sb.from('notifications').select('id', { count: 'exact', head: true }).gte('created_at', new Date().toISOString().slice(0,10))),
-        safeCount(sb.from('notifications').select('id', { count: 'exact', head: true }).eq('is_read', true).gte('created_at', new Date().toISOString().slice(0,10))),
+        safeCount(sb.from('apt_subscriptions').select('id', { count: 'exact', head: true }).gte('rcept_endde', kstToday).lte('rcept_endde', new Date(Date.now()+7*86400000+9*3600000).toISOString().slice(0,10))),
+        safeCount((sb as any).from('conversion_events').select('id', { count: 'exact', head: true }).eq('event_type', 'cta_view').gte('created_at', todayKST)),
+        safeCount((sb as any).from('conversion_events').select('id', { count: 'exact', head: true }).eq('event_type', 'cta_click').gte('created_at', todayKST)),
+        safeCount(sb.from('notifications').select('id', { count: 'exact', head: true }).gte('created_at', todayKST)),
+        safeCount(sb.from('notifications').select('id', { count: 'exact', head: true }).eq('is_read', true).gte('created_at', todayKST)),
         safeCount((sb as any).from('profiles').select('id', { count: 'exact', head: true }).or('is_seed.is.null,is_seed.eq.false').not('bio', 'is', null)),
         safeCount((sb as any).from('profiles').select('id', { count: 'exact', head: true }).or('is_seed.is.null,is_seed.eq.false').not('age_group', 'is', null)),
         safeCount(sb.from('page_views').select('id', { count: 'exact', head: true }).gte('created_at', new Date(Date.now()-7*86400000).toISOString())),
         safeCount(sb.from('share_logs').select('id', { count: 'exact', head: true }).gte('created_at', new Date(Date.now()-7*86400000).toISOString())),
         safe((sb as any).from('share_logs').select('platform').gte('created_at', new Date(Date.now()-7*86400000).toISOString()).limit(500), []),
-        safeCount(sb.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', now.toISOString().slice(0, 10)).neq('is_seed', true).neq('is_ghost', true)),
+        safeCount(sb.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', todayKST).neq('is_seed', true).neq('is_ghost', true)),
       ]);
 
       const totalCron = cronOk + cronFail;
@@ -270,7 +273,7 @@ export async function GET(req: NextRequest) {
         // 행동 분석 (user_events 기반)
         behavior: await (async () => {
           try {
-            const todayStr = now.toISOString().slice(0, 10);
+            const todayStr = todayKST;
             const [eventsToday, scrollR, dwellR] = await Promise.all([
               safeCount((sb as any).from('user_events').select('id', { count: 'exact', head: true }).gte('created_at', todayStr)),
               safe((sb as any).from('user_events').select('properties').eq('event_type', 'scroll').gte('created_at', todayStr).limit(200), []),
@@ -284,10 +287,9 @@ export async function GET(req: NextRequest) {
           } catch { return null; }
         })(),
         trafficDetail: await (async () => {
-          const todayStr = now.toISOString().slice(0, 10);
           const hourAgo = new Date(Date.now() - 3600000).toISOString();
           const [todayPvR, recentPvR] = await Promise.all([
-            sb.from('page_views').select('path, created_at, referrer, visitor_id').gte('created_at', todayStr).order('created_at', { ascending: false }).limit(500),
+            sb.from('page_views').select('path, created_at, referrer, visitor_id').gte('created_at', todayKST).order('created_at', { ascending: false }).limit(3000),
             sb.from('page_views').select('path, created_at, referrer, visitor_id, user_agent').gte('created_at', hourAgo).order('created_at', { ascending: false }).limit(30),
           ]);
           // top pages today
@@ -297,7 +299,7 @@ export async function GET(req: NextRequest) {
           for (const r of (todayPvR.data || [])) {
             const p = r.path || '/';
             pageCounts[p] = (pageCounts[p] || 0) + 1;
-            const h = new Date(r.created_at).getHours();
+            const h = (new Date(r.created_at).getUTCHours() + 9) % 24;
             hourCounts[h] = (hourCounts[h] || 0) + 1;
             if (r.visitor_id) visitors.add(r.visitor_id);
           }
@@ -399,7 +401,7 @@ export async function GET(req: NextRequest) {
       // 시간대별 집계
       const hourCounts = new Array(24).fill(0);
       for (const h of (hourlyR.data || [])) {
-        const hr = new Date(h.created_at).getHours();
+        const hr = (new Date(h.created_at).getUTCHours() + 9) % 24;
         // UTC → KST (+9)
         const kstHr = (hr + 9) % 24;
         hourCounts[kstHr]++;
