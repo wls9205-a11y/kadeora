@@ -99,7 +99,7 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
       <GodBtn/>
 
       {/* ═══ 🔥 오늘 핵심 KPI 히어로 ═══ */}
-      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6}}>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:6}}>
         <div style={{background:'linear-gradient(135deg,rgba(16,185,129,0.12),rgba(12,21,40,0.8))',border:'1px solid rgba(16,185,129,0.2)',borderRadius:14,padding:'14px 16px',textAlign:'center'}}>
           <div style={{fontSize:9,fontWeight:700,color:'rgba(16,185,129,0.6)',letterSpacing:1,marginBottom:6}}>오늘 가입자</div>
           <div style={{fontSize:32,fontWeight:900,color:'#10B981',lineHeight:1}}>{k.newUsersToday??0}</div>
@@ -109,6 +109,11 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
           <div style={{fontSize:9,fontWeight:700,color:'rgba(6,182,212,0.6)',letterSpacing:1,marginBottom:6}}>오늘 방문자</div>
           <div style={{fontSize:32,fontWeight:900,color:'#06B6D4',lineHeight:1}}>{td?.uniqueVisitors||0}</div>
           <div style={{fontSize:10,color:'rgba(255,255,255,0.3)',marginTop:4}}>PV {k.pvToday||0}</div>
+        </div>
+        <div style={{background:'linear-gradient(135deg,rgba(168,85,247,0.12),rgba(12,21,40,0.8))',border:'1px solid rgba(168,85,247,0.2)',borderRadius:14,padding:'14px 16px',textAlign:'center'}}>
+          <div style={{fontSize:9,fontWeight:700,color:'rgba(168,85,247,0.6)',letterSpacing:1,marginBottom:6}}>오늘 공유</div>
+          <div style={{fontSize:32,fontWeight:900,color:'#A855F7',lineHeight:1}}>{k.sharesToday??0}</div>
+          <div style={{fontSize:10,color:'rgba(255,255,255,0.3)',marginTop:4}}>{k.shares7d||0} / 7일</div>
         </div>
       </div>
 
@@ -167,7 +172,7 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
       </div>
 
       {/* ═══ 인기 페이지 + 유입 경로 ═══ */}
-      {(topPages.length>0||refSources.length>0)&&<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6,overflow:'hidden'}}>
+      {(topPages.length>0||refSources.length>0)&&<div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:6,overflow:'hidden'}}>
         <div style={{...CS.card,minWidth:0,overflow:'hidden'}}>
           <div style={{fontSize:10,fontWeight:700,color:'rgba(255,255,255,0.4)',marginBottom:6}}>🔥 인기 페이지</div>
           {topPages.slice(0,5).map((p:any,i:number)=>(
@@ -191,7 +196,7 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
       </div>}
 
       {/* ═══ KPI — 2×2 그리드 (모바일 최적화) ═══ */}
-      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6}}>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:6}}>
         {[
           {l:'유저',v:k.users,c:'#3B7BF6',sub:`+${k.newUsers}/7d`,ring:pct(g.onboardRate||0,100)},
           {l:'블로그',v:f(k.blogs),c:'#8B5CF6',sub:`${f(x.hotBlogs||0)}핫`,ring:Math.min(pct(x.hotBlogs||0,k.blogs||1)*10,100)},
@@ -289,7 +294,7 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
       </div>
 
       {/* ═══ 포털별 SEO 준비도 ═══ */}
-      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6}}>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:6}}>
         {/* Google */}
         <div style={{...CS.card,borderLeft:'3px solid #4285F4',background:'linear-gradient(135deg,rgba(66,133,244,0.04),rgba(12,21,40,0.65))'}}>
           <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:8}}>
@@ -363,7 +368,7 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
       </div>
 
       {/* ═══ 2열: 유저 + CTA ═══ */}
-      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6}}>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:6}}>
         <div style={CS.card}>
           <div style={{fontSize:10,fontWeight:700,color:'rgba(255,255,255,0.4)',marginBottom:6}}>👤 유저</div>
           {[{l:'온보딩',v:g.onboardRate??0,bar:true,c:(g.onboardRate??0)>70?'#10B981':'#F59E0B'},{l:'프로필',v:g.profileRate??0,bar:true,c:(g.profileRate??0)>20?'#10B981':'#EF4444'},{l:'게시글',v:f(x.totalPosts||0),c:'rgba(255,255,255,0.5)'},{l:'댓글',v:f(x.totalComments||0),c:'rgba(255,255,255,0.5)'},{l:'연령대',v:`${pct(x.ageCount||0,k.users||1)}%`,c:'rgba(255,255,255,0.5)'},{l:'자기소개',v:`${pct(x.bioCount||0,k.users||1)}%`,c:'rgba(255,255,255,0.5)'}].map(r=>(
@@ -395,7 +400,7 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
       </div>
 
       {/* ═══ CTA별 성과 + 가입귀속 + 리텐션 ═══ */}
-      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6}}>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:6}}>
         {/* CTA별 성과 */}
         <div style={CS.card}>
           <div style={{fontSize:10,fontWeight:700,color:'rgba(255,255,255,0.4)',marginBottom:6}}>🎯 CTA별 성과 (7일)</div>
@@ -487,7 +492,7 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
       </div>}
 
       {/* ═══ 리텐션 + 시스템 ═══ */}
-      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6}}>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:6}}>
         <div style={CS.card}>
           <div style={{fontSize:10,fontWeight:700,color:'rgba(255,255,255,0.4)',marginBottom:6}}>🔔 리텐션</div>
           <div style={{display:'flex',alignItems:'center',gap:12}}>
