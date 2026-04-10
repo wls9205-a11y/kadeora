@@ -154,7 +154,7 @@ function enrichContent(content: string, category: string, title: string): string
     const thirdH2 = h2Matches[2];
     if (thirdH2 && thirdH2.index !== undefined) {
       const imgAlt = title.slice(0, 40) + ' 분석 차트';
-      const imgUrl = `/api/og-infographic?title=${encodeURIComponent(title.slice(0, 40))}&category=${category}&type=summary`;
+      const imgUrl = `/api/og-infographic?title=${encodeURIComponent(title.slice(0, 40))}&category=${encodeURIComponent(category)}&type=summary`;
       const imgBlock = `\n\n![${imgAlt}](${imgUrl})\n*${imgAlt} — 카더라 분석*\n\n`;
       enriched = enriched.slice(0, thirdH2.index) + imgBlock + enriched.slice(thirdH2.index);
     }

@@ -101,10 +101,17 @@ export default function SmartSectionGate({ htmlContent, slug, category }: Props)
     <>
       <div dangerouslySetInnerHTML={{ __html: beforeGate }} />
       <div style={{ position: 'relative', marginTop: 8 }}>
-        <div style={{
-          filter: 'blur(4px)', pointerEvents: 'none', userSelect: 'none',
-          maxHeight: 80, overflow: 'hidden',
-        }} dangerouslySetInnerHTML={{ __html: gatedSection }} />
+        <div style={{ position: 'relative' }}>
+          <div style={{
+            filter: 'blur(6px)', pointerEvents: 'none', userSelect: 'none',
+            maxHeight: 60, overflow: 'hidden',
+          }} dangerouslySetInnerHTML={{ __html: gatedSection }} />
+          <div style={{
+            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+            background: 'linear-gradient(to bottom, rgba(5,10,24,0.3) 0%, rgba(5,10,24,0.95) 70%, rgba(5,10,24,1) 100%)',
+            pointerEvents: 'none',
+          }} />
+        </div>
         <div style={{
           position: 'absolute', inset: 0,
           background: 'linear-gradient(to bottom, transparent 0%, var(--bg-base) 35%)',

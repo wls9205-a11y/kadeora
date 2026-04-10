@@ -711,58 +711,43 @@ export default async function BlogDetailPage({ params }: Props) {
         )}
 
         {/* CTA — 본문 직후 위치 (비로그인, 스크롤 필요 최소화) */}
-        {/* 청약/부동산 알림 CTA (비로그인 전용) */}
-        {!isLoggedIn && post.category === 'apt' && (
+        {/* 알림 CTA — 프리미엄 카드 (비로그인 전용, 본문 직후) */}
+        {!isLoggedIn && !isBot && (post.category === 'apt' || post.category === 'stock' || post.category === 'finance') && (
           <div style={{
-            margin: 'var(--sp-md) 0', padding: '16px 20px', borderRadius: 'var(--radius-card)',
-            background: 'linear-gradient(135deg, rgba(34,197,94,0.06), rgba(59,123,246,0.06))',
-            border: '1px solid rgba(34,197,94,0.15)',
+            margin: 'var(--sp-lg) 0', padding: '20px', borderRadius: 12,
+            background: 'linear-gradient(135deg, rgba(26,39,68,0.95) 0%, rgba(13,25,41,0.98) 100%)',
+            border: '1px solid rgba(59,123,246,0.25)',
+            position: 'relative', overflow: 'hidden',
           }}>
-            <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>
-              🔔 청약 공고 알림 받기
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: post.category === 'apt' ? 'linear-gradient(90deg, #3b7bf6 0%, #22c55e 100%)' : 'linear-gradient(90deg, #3b7bf6 0%, #a78bfa 100%)' }} />
+            <div style={{ position: 'absolute', top: 16, right: 16, fontSize: 10, padding: '2px 8px', borderRadius: 4, background: 'rgba(34,197,94,0.15)', color: '#22c55e', fontWeight: 600 }}>무료</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+              <div style={{ width: 32, height: 32, borderRadius: 8, background: post.category === 'apt' ? 'rgba(59,123,246,0.15)' : 'rgba(167,139,250,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>
+                {post.category === 'apt' ? '🔔' : '📊'}
+              </div>
+              <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)' }}>
+                {post.category === 'apt' ? '청약 공고 알림 받기' : '관심 종목 알림 받기'}
+              </div>
             </div>
-            <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 12, lineHeight: 1.5 }}>
-              무순위·줍줍·재분양 공고가 뜨면 바로 알림을 받아보세요.<br/>
-              관심 지역 설정하면 내 지역 청약만 골라서 알려드려요.
+            <div style={{ fontSize: 13, color: '#9ca3af', lineHeight: 1.5, marginBottom: 14 }}>
+              {post.category === 'apt'
+                ? '무순위·줍줍·재분양 공고가 나오면 바로 알림을 드려요. 관심 지역만 골라서 받을 수 있어요.'
+                : '관심 종목의 급등·실적·공시 소식을 바로 받아보세요. 매일 아침 AI 브리핑도 무료.'}
+            </div>
+            <div style={{ display: 'flex', gap: 6, marginBottom: 14, flexWrap: 'wrap' }}>
+              {(post.category === 'apt' ? ['무순위', '줍줍', '재분양'] : ['급등', '공시', '실적']).map(tag => (
+                <span key={tag} style={{ fontSize: 11, padding: '3px 8px', borderRadius: 4, background: 'rgba(59,123,246,0.1)', color: '#6da0f0', border: '0.5px solid rgba(59,123,246,0.2)' }}>{tag}</span>
+              ))}
             </div>
             <a
-              href={`/login?redirect=${encodeURIComponent(`/blog/${slug}`)}&source=apt_alert_cta`}
+              href={`/login?redirect=${encodeURIComponent(`/blog/${slug}`)}&source=${post.category === 'apt' ? 'apt_alert_cta' : 'stock_alert_cta'}`}
               style={{
-                display: 'inline-flex', alignItems: 'center', gap: 6,
-                padding: '8px 20px', borderRadius: 8, border: 'none',
-                background: 'var(--brand)', color: '#fff', fontSize: 14, fontWeight: 700,
-                textDecoration: 'none', cursor: 'pointer',
+                display: 'block', width: '100%', padding: '10px', borderRadius: 8,
+                background: '#3b7bf6', color: '#fff', fontSize: 14, fontWeight: 600,
+                textDecoration: 'none', textAlign: 'center', boxSizing: 'border-box',
               }}
             >
-              🔔 무료로 알림 설정하기
-            </a>
-          </div>
-        )}
-
-        {/* 주식/재테크 알림 CTA (비로그인 전용) */}
-        {!isLoggedIn && (post.category === 'stock' || post.category === 'finance') && (
-          <div style={{
-            margin: 'var(--sp-md) 0', padding: '16px 20px', borderRadius: 'var(--radius-card)',
-            background: 'linear-gradient(135deg, rgba(59,123,246,0.06), rgba(167,139,250,0.06))',
-            border: '1px solid rgba(59,123,246,0.15)',
-          }}>
-            <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>
-              📊 관심 종목 알림 받기
-            </div>
-            <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 12, lineHeight: 1.5 }}>
-              관심 종목의 급등·실적·공시 소식을 바로 받아보세요.<br/>
-              매일 아침 AI 브리핑도 무료로 제공됩니다.
-            </div>
-            <a
-              href={`/login?redirect=${encodeURIComponent(`/blog/${slug}`)}&source=stock_alert_cta`}
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 6,
-                padding: '8px 20px', borderRadius: 8, border: 'none',
-                background: 'var(--brand)', color: '#fff', fontSize: 14, fontWeight: 700,
-                textDecoration: 'none', cursor: 'pointer',
-              }}
-            >
-              📊 무료로 알림 설정하기
+              카카오로 3초 만에 시작하기
             </a>
           </div>
         )}
