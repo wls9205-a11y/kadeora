@@ -80,6 +80,7 @@ export async function GET(req: NextRequest) {
         safeCount(sb.from('share_logs').select('id', { count: 'exact', head: true }).gte('created_at', new Date(Date.now()-7*86400000).toISOString())),
         safe((sb as any).from('share_logs').select('platform').gte('created_at', new Date(Date.now()-7*86400000).toISOString()).limit(500), []),
         safeCount(sb.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', todayKST).neq('is_seed', true).neq('is_ghost', true)),
+        safeCount((sb as any).from('share_logs').select('id', { count: 'exact', head: true }).gte('created_at', todayKST)),
       ]);
 
       const totalCron = cronOk + cronFail;
