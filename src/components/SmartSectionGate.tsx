@@ -28,19 +28,19 @@ export default function SmartSectionGate({ htmlContent, slug, category }: Props)
     return <div dangerouslySetInnerHTML={{ __html: htmlContent }} />;
   }
 
-  // 게이트 위치: 첫 H2 이후 콘텐츠 분할
-  const match = htmlContent.match(/<h2[^>]*>.*?<\/h2>/i);
+  // 게이트 위치: 두번째 H2에서 자르기 (CTA 포함)
+  const h2Matches = [...htmlContent.matchAll(/<h2[^>]*>/gi)];
   let visibleSection: string;
-  let gatedExists = true;
 
-  if (match && match.index !== undefined) {
-    const afterH2 = htmlContent.indexOf('</h2>', match.index) + 5;
-    const nextBlock = htmlContent.indexOf('<', afterH2 + 100);
-    const splitAt = nextBlock > 0 ? nextBlock : afterH2 + 200;
-    visibleSection = htmlContent.slice(0, splitAt);
+  if (h2Matches.length >= 2) {
+    // 두번째 H2 앞에서 자르기 → CTA + 첫 섹션까지 보임
+    visibleSection = htmlContent.slice(0, h2Matches[1].index);
+  } else if (h2Matches.length === 1) {
+    // H2 1개만 → 첫 H2 + 200자 후 자르기
+    const afterH2 = htmlContent.indexOf('</h2>', h2Matches[0].index!) + 5;
+    visibleSection = htmlContent.slice(0, Math.min(afterH2 + 200, htmlContent.length));
   } else {
-    const splitAt = Math.min(htmlContent.length, 600);
-    visibleSection = htmlContent.slice(0, splitAt);
+    visibleSection = htmlContent.slice(0, 600);
   }
 
   const loginUrl = `/login?redirect=${encodeURIComponent(pathname)}&source=content_gate`;

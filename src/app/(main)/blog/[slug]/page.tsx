@@ -537,15 +537,11 @@ export default async function BlogDetailPage({ params }: Props) {
     `</div>`;
   })();
 
-  // 첫 H2 뒤에 CTA 삽입
+  // 첫 H2 "앞"에 CTA 삽입 (게이트 전에 보이도록)
   if (alertCtaHtml) {
-    const h2Match = htmlFull.match(/<\/h2>/i);
+    const h2Match = htmlFull.match(/<h2[^>]*>/i);
     if (h2Match && h2Match.index !== undefined) {
-      const insertAt = h2Match.index + 5;
-      // 첫 H2 다음 문단 끝에 삽입
-      const nextP = htmlFull.indexOf('</p>', insertAt);
-      const pos = nextP > 0 ? nextP + 4 : insertAt;
-      htmlFull = htmlFull.slice(0, pos) + alertCtaHtml + htmlFull.slice(pos);
+      htmlFull = htmlFull.slice(0, h2Match.index) + alertCtaHtml + htmlFull.slice(h2Match.index);
     }
   }
   const cutoff = Math.floor(htmlFull.length * 0.7);
