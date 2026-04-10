@@ -706,7 +706,7 @@ export default async function BlogDetailPage({ params }: Props) {
               src={post.cover_image.startsWith('/') ? post.cover_image : post.cover_image}
               alt={post.image_alt || post.title}
               width={1200} height={630}
-              style={{ width: '100%', height: 'auto', display: 'block' }}
+              style={{ width: '100%', height: 'auto', display: 'block', maxHeight: 300 , objectFit: 'cover' }}
               loading="eager"
             />
           </div>
@@ -716,7 +716,7 @@ export default async function BlogDetailPage({ params }: Props) {
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           padding: '8px 0', marginBottom: 'var(--sp-sm)', fontSize: 'var(--fs-sm)',
-          borderBottom: '1px solid var(--border)',
+          borderBottom: '1px solid var(--border)', flexWrap: 'wrap', gap: 6,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             {/* 카카오톡 단독 버튼 */}
@@ -760,7 +760,7 @@ export default async function BlogDetailPage({ params }: Props) {
             display: 'flex', gap: 8, margin: 'var(--sp-md) 0', flexWrap: 'wrap',
           }}>
             <a href="/apt" style={{
-              flex: 1, minWidth: 140, display: 'flex', alignItems: 'center', gap: 8,
+              flex: 1, minWidth: 120, display: 'flex', alignItems: 'center', gap: 8,
               padding: '12px 16px', borderRadius: 'var(--radius-md)',
               background: 'linear-gradient(135deg, rgba(34,197,94,0.08), rgba(34,197,94,0.03))',
               border: '1px solid rgba(34,197,94,0.15)', textDecoration: 'none', color: 'inherit',
@@ -772,7 +772,7 @@ export default async function BlogDetailPage({ params }: Props) {
               </div>
             </a>
             <a href="/apt/diagnose" style={{
-              flex: 1, minWidth: 140, display: 'flex', alignItems: 'center', gap: 8,
+              flex: 1, minWidth: 120, display: 'flex', alignItems: 'center', gap: 8,
               padding: '12px 16px', borderRadius: 'var(--radius-md)',
               background: 'linear-gradient(135deg, rgba(59,123,246,0.08), rgba(59,123,246,0.03))',
               border: '1px solid rgba(59,123,246,0.15)', textDecoration: 'none', color: 'inherit',
@@ -784,7 +784,7 @@ export default async function BlogDetailPage({ params }: Props) {
               </div>
             </a>
             <a href="/calc/real-estate/brokerage-fee" style={{
-              flex: 1, minWidth: 140, display: 'flex', alignItems: 'center', gap: 8,
+              flex: 1, minWidth: 120, display: 'flex', alignItems: 'center', gap: 8,
               padding: '12px 16px', borderRadius: 'var(--radius-md)',
               background: 'linear-gradient(135deg, rgba(251,191,36,0.08), rgba(251,191,36,0.03))',
               border: '1px solid rgba(251,191,36,0.15)', textDecoration: 'none', color: 'inherit',

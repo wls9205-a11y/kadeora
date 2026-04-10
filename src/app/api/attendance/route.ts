@@ -55,8 +55,10 @@ export async function POST(req: NextRequest) {
       totalDays = (existing.total_days ?? 0) + 1;
       streak = existing.last_date === yesterday ? (existing.streak ?? 0) + 1 : 1;
       await sb.from('attendance').update({ streak, total_days: totalDays, last_date: today, updated_at: new Date().toISOString() }).eq('user_id', user.id);
+      await (sb as any).from('profiles').update({ last_checked_date: today }).eq('id', user.id);
     } else {
       await sb.from('attendance').insert({ user_id: user.id, streak: 1, total_days: 1, last_date: today });
+      await (sb as any).from('profiles').update({ last_checked_date: today }).eq('id', user.id);
     }
 
     let pointsEarned = 10;
