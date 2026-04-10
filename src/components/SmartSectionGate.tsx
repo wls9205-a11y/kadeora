@@ -20,7 +20,7 @@ export default function SmartSectionGate({ htmlContent, slug, category }: Props)
 
   useEffect(() => {
     const reads = JSON.parse(localStorage.getItem('kd_free_reads') || '[]') as string[];
-    if (!reads.includes(slug) && reads.length >= 3) setShouldGate(true);
+    if (!reads.includes(slug) && reads.length >= 0) setShouldGate(true);
     if (!reads.includes(slug)) { reads.push(slug); localStorage.setItem('kd_free_reads', JSON.stringify(reads.slice(-10))); }
   }, [slug]);
 
