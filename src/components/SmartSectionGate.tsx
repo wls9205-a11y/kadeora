@@ -102,8 +102,8 @@ export default function SmartSectionGate({ htmlContent, slug, category }: Props)
       <div dangerouslySetInnerHTML={{ __html: beforeGate }} />
       <div style={{ position: 'relative', marginTop: 8 }}>
         <div style={{
-          filter: 'blur(6px)', pointerEvents: 'none', userSelect: 'none',
-          maxHeight: 120, overflow: 'hidden',
+          filter: 'blur(4px)', pointerEvents: 'none', userSelect: 'none',
+          maxHeight: 80, overflow: 'hidden',
         }} dangerouslySetInnerHTML={{ __html: gatedSection }} />
         <div style={{
           position: 'absolute', inset: 0,

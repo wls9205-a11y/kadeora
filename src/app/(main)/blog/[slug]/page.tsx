@@ -661,6 +661,36 @@ export default async function BlogDetailPage({ params }: Props) {
           );
         })()}
 
+        {/* 히어로 이미지 (커버 이미지를 인라인으로 표시) */}
+        {post.cover_image && (
+          <div style={{ marginBottom: 'var(--sp-md)', borderRadius: 'var(--radius-card)', overflow: 'hidden', border: '1px solid var(--border)' }}>
+            <img
+              src={post.cover_image.startsWith('/') ? post.cover_image : post.cover_image}
+              alt={post.image_alt || post.title}
+              width={1200} height={630}
+              style={{ width: '100%', height: 'auto', display: 'block' }}
+              loading="eager"
+            />
+          </div>
+        )}
+
+        {/* 상단 공유 바 (본문 전) */}
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '8px 0', marginBottom: 'var(--sp-sm)', fontSize: 'var(--fs-sm)',
+          borderBottom: '1px solid var(--border)',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <ShareButtons title={post.title} postId={slug} content={post.excerpt || post.meta_description || undefined} category={post.category} />
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <BlogBookmarkButton blogPostId={post.id} />
+            <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
+              👁 {post.view_count?.toLocaleString() || 0}
+            </span>
+          </div>
+        </div>
+
         {/* 목차 (모바일: 인라인, 데스크탑: 사이드바) */}
         <div className="blog-toc-inline">
           {toc.length >= 3 && <BlogToc toc={toc} />}

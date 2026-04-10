@@ -146,6 +146,20 @@ function enrichContent(content: string, category: string, title: string): string
   }
 
 
+
+  // 7. 인라인 이미지 자동 삽입 (H2 섹션 2개마다 인포그래픽 이미지)
+  const h2Matches = [...enriched.matchAll(/^## .+$/gm)];
+  if (h2Matches.length >= 4) {
+    // 3번째 H2 앞에 인포그래픽 이미지 삽입
+    const thirdH2 = h2Matches[2];
+    if (thirdH2 && thirdH2.index !== undefined) {
+      const imgAlt = title.slice(0, 40) + ' 분석 차트';
+      const imgUrl = `/api/og-infographic?title=${encodeURIComponent(title.slice(0, 40))}&category=${category}&type=summary`;
+      const imgBlock = `\n\n![${imgAlt}](${imgUrl})\n*${imgAlt} — 카더라 분석*\n\n`;
+      enriched = enriched.slice(0, thirdH2.index) + imgBlock + enriched.slice(thirdH2.index);
+    }
+  }
+
   // 6. 데이터 출처 표기 강화 (v2)
   const hasSource = /출처|데이터 출처|자료 출처|Source/.test(enriched);
   if (!hasSource) {
