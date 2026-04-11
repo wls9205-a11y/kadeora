@@ -1,0 +1,134 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { withCronLogging } from '@/lib/cron-logger';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
+
+export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
+
+/**
+ * 네이버 카페 자동 발행 크론
+ * 
+ * naver_syndication에서 cafe_status='pending' 건을 가져와
+ * 네이버 카페 API로 자동 발행
+ * 
+ * 필요 환경변수:
+ * - NAVER_CAFE_ACCESS_TOKEN: OAuth access token
+ * - NAVER_CAFE_REFRESH_TOKEN: OAuth refresh token  
+ * - NAVER_CLIENT_ID: 네이버 개발자센터 Client ID
+ * - NAVER_CLIENT_SECRET: 네이버 개발자센터 Client Secret
+ * - NAVER_CAFE_ID: 카페 club ID (숫자)
+ * - NAVER_CAFE_MENU_ID: 게시판 메뉴 ID (숫자)
+ */
+
+const CAFE_ID = process.env.NAVER_CAFE_ID || '';
+const MENU_ID = process.env.NAVER_CAFE_MENU_ID || '';
+const BATCH_SIZE = 2; // 하루 2건씩
+
+async function handler(req: NextRequest) {
+  const accessToken = process.env.NAVER_CAFE_ACCESS_TOKEN;
+  
+  if (!accessToken || !CAFE_ID || !MENU_ID) {
+    return NextResponse.json({ ok: true, message: 'Naver Cafe API not configured. Set NAVER_CAFE_ACCESS_TOKEN, NAVER_CAFE_ID, NAVER_CAFE_MENU_ID env vars.' });
+  }
+
+  const sb = getSupabaseAdmin();
+
+  // pending 건 가져오기
+  const { data: pending } = await (sb as any).from('naver_syndication')
+    .select('*')
+    .eq('cafe_status', 'pending')
+    .order('created_at', { ascending: true })
+    .limit(BATCH_SIZE);
+
+  if (!pending?.length) {
+    return NextResponse.json({ ok: true, message: 'No pending cafe posts', count: 0 });
+  }
+
+  let success = 0;
+  const errors: string[] = [];
+
+  for (const item of pending) {
+    try {
+      // 토큰 갱신 시도
+      let token = accessToken;
+      const refreshToken = process.env.NAVER_CAFE_REFRESH_TOKEN;
+      if (refreshToken) {
+        try {
+          token = await refreshAccessToken(refreshToken) || accessToken;
+        } catch { /* use existing token */ }
+      }
+
+      // 카페에 글 발행
+      const result = await postToCafe(token, item);
+      
+      await (sb as any).from('naver_syndication')
+        .update({ 
+          cafe_status: 'published', 
+          cafe_article_id: result.articleId,
+          published_at: new Date().toISOString(),
+        })
+        .eq('id', item.id);
+
+      success++;
+    } catch (e: any) {
+      errors.push(`${item.blog_slug}: ${e.message}`);
+      await (sb as any).from('naver_syndication')
+        .update({ cafe_status: 'failed' })
+        .eq('id', item.id);
+    }
+  }
+
+  return NextResponse.json({ ok: true, success, errors, total: pending.length });
+}
+
+async function refreshAccessToken(refreshToken: string): Promise<string | null> {
+  const clientId = process.env.NAVER_CLIENT_ID || '';
+  const clientSecret = process.env.NAVER_CLIENT_SECRET || '';
+  
+  const res = await fetch('https://nid.naver.com/oauth2.0/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      grant_type: 'refresh_token',
+      client_id: clientId,
+      client_secret: clientSecret,
+      refresh_token: refreshToken,
+    }),
+  });
+
+  const data = await res.json();
+  return data.access_token || null;
+}
+
+async function postToCafe(accessToken: string, item: any): Promise<{ articleId: string }> {
+  const url = `https://openapi.naver.com/v1/cafe/${CAFE_ID}/menu/${MENU_ID}/articles`;
+  
+  // HTML에서 이미지 URL 추출
+  const imageUrls = (item.naver_html || '').match(/src="([^"]+)"/g)?.map((m: string) => m.replace(/src="|"/g, '')) || [];
+
+  const formData = new URLSearchParams();
+  formData.append('subject', item.naver_title);
+  formData.append('content', item.naver_html);
+  if (item.naver_tags?.length) {
+    formData.append('openyn', 'true');
+  }
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: formData.toString(),
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`Cafe API ${res.status}: ${errText}`);
+  }
+
+  const data = await res.json();
+  return { articleId: data.message?.result?.articleId?.toString() || 'unknown' };
+}
+
+export const GET = (req: NextRequest) => withCronLogging('naver-cafe-publish', () => handler(req));
