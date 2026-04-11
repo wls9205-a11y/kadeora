@@ -107,17 +107,18 @@ async function postToCafe(accessToken: string, item: any): Promise<{ articleId: 
     .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
     .slice(0, 50000);
 
-  // FormData로 전송 — URLSearchParams는 한글 인코딩 깨짐
-  const formData = new FormData();
-  formData.append('subject', (item.naver_title || '제목없음').slice(0, 100));
-  formData.append('content', cleanHtml);
+  const subject = (item.naver_title || '제목없음').slice(0, 100);
+  
+  // encodeURIComponent로 한글을 직접 인코딩
+  const bodyStr = `subject=${encodeURIComponent(subject)}&content=${encodeURIComponent(cleanHtml)}`;
 
   const res = await fetch(url, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${accessToken}`,
+      'Content-Type': 'application/x-www-form-urlencoded',
     },
-    body: formData,
+    body: bodyStr,
   });
 
   const resText = await res.text();
