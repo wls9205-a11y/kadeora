@@ -267,6 +267,21 @@ export async function GET(req: NextRequest) {
         ].sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime()).slice(0, 8),
         dailyTrend: dailyStats,
         ctaBreakdown,
+        // 가입 시도 소스별 분석
+        signupBySource: await (async () => {
+          const { data: attempts } = await (sb as any).from('signup_attempts')
+            .select('source, success, provider')
+            .gte('created_at', new Date(Date.now()-7*86400000).toISOString())
+            .limit(500);
+          const sources: Record<string, { attempts: number; success: number }> = {};
+          for (const a of (attempts || [])) {
+            const src = a.source || 'unknown';
+            if (!sources[src]) sources[src] = { attempts: 0, success: 0 };
+            sources[src].attempts++;
+            if (a.success) sources[src].success++;
+          }
+          return sources;
+        })(),
         signupSources,
         retention: latestRetention ? {
           cohortWeek: latestRetention.cohort_week,

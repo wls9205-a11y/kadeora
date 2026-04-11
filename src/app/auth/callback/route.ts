@@ -27,8 +27,10 @@ export async function GET(request: Request) {
       const meta = data.user.user_metadata;
       const avatarUrl = (meta?.avatar_url || meta?.picture || null)?.replace('http://', 'https://') ?? null;
       
-      const { data: existing } = await supabase.from('profiles').select('id, interests, onboarded').eq('id', data.user.id).maybeSingle();
+      const { data: existing } = await supabase.from('profiles').select('id, interests, onboarded, signup_source').eq('id', data.user.id).maybeSingle();
       
+      const source = searchParams.get('source') ?? 'direct';
+
       if (!existing) {
         // 신규 유저 — 프로필 생성 (onboarded=false → 퀵온보딩으로)
         await supabase.from('profiles').insert({
@@ -38,7 +40,7 @@ export async function GET(request: Request) {
           provider: data.user.app_metadata?.provider ?? null,
           onboarded: false,
           nickname_set: true,
-          signup_source: new URL(request.url).searchParams.get('source') ?? 'direct',
+          signup_source: source,
           signup_return_url: redirect,
           updated_at: new Date().toISOString(),
         });
@@ -59,10 +61,13 @@ export async function GET(request: Request) {
         const safeRedirect = redirect.startsWith('/') ? redirect : '/feed';
         return NextResponse.redirect(`${origin}/onboarding?return=${encodeURIComponent(safeRedirect)}`);
       } else {
-        // 기존 유저 — avatar 갱신 + 바로 리다이렉트
-        if (avatarUrl && !existing) {
-          await supabase.from('profiles').update({ avatar_url: avatarUrl, updated_at: new Date().toISOString() }).eq('id', data.user.id);
+        // 기존 유저 — avatar 갱신 + signup_source 보정
+        const updates: Record<string, string> = { updated_at: new Date().toISOString() };
+        if (avatarUrl) updates.avatar_url = avatarUrl;
+        if (!existing.onboarded && !('signup_source' in existing && existing.signup_source)) {
+          (updates as any).signup_source = source;
         }
+        await supabase.from('profiles').update(updates).eq('id', data.user.id);
         if (!existing.onboarded) {
           // 미온보딩 기존유저도 퀵온보딩으로
           const safeRedirect = redirect.startsWith('/') ? redirect : '/feed';

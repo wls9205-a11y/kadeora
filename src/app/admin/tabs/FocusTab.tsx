@@ -424,6 +424,27 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
         </div>
       </div>
 
+      {/* ═══ 가입 경로 분석 ═══ */}
+      {x.signupBySource && Object.keys(x.signupBySource).length > 0 && (
+        <div style={{...CS.card}}>
+          <SH icon="🔍" title="가입 경로 (7일)" />
+          {Object.entries(x.signupBySource as Record<string, {attempts:number;success:number}>)
+            .sort((a: any, b: any) => b[1].attempts - a[1].attempts)
+            .map(([src, v]: any) => (
+            <div key={src} style={{display:'flex',alignItems:'center',gap:8,padding:'5px 0',borderBottom:'1px solid rgba(255,255,255,0.03)'}}>
+              <span style={{fontSize:11,color:'rgba(255,255,255,0.6)',flex:1,minWidth:0,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' as const}}>
+                {src === 'apt_alert_cta' ? '🔔 청약알림CTA' : src === 'content_gate' ? '🔒 게이트' : src === 'direct' ? '🔗 직접' : src === 'nav' ? '🧭 네비' : src === 'stock_alert_cta' ? '📊 종목알림CTA' : `📌 ${src}`}
+              </span>
+              <span style={{fontSize:13,fontWeight:700,color:'#FBBF24'}}>{v.attempts}</span>
+              <span style={{fontSize:9,color:'rgba(255,255,255,0.3)'}}>시도</span>
+              <span style={{fontSize:13,fontWeight:700,color:'#10B981'}}>{v.success}</span>
+              <span style={{fontSize:9,color:'rgba(255,255,255,0.3)'}}>성공</span>
+              <span style={{fontSize:11,fontWeight:600,color:v.attempts > 0 && v.success/v.attempts > 0.5 ? '#10B981' : '#EF4444'}}>{v.attempts > 0 ? ((v.success/v.attempts)*100).toFixed(0) : 0}%</span>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* ═══ CTA별 성과 + 가입귀속 + 리텐션 ═══ */}
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6}}>
         {/* CTA별 성과 */}
