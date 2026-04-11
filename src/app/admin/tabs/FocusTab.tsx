@@ -322,6 +322,9 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
         </div>} p="8px 10px"/>
       }/>
 
+      {/* ═══ 네이버 발행 ═══ */}
+      <Sec t="🟢 네이버 발행" open={false} ch={<NaverSyndication/>}/>
+
       {/* ═══ 이메일 발송 ═══ */}
       <Sec t={`📧 이메일 발송 (${f(k.emailSubs||0)}명)`} open={false} ch={<EmailSender/>}/>
     </div>
@@ -368,6 +371,93 @@ function EmailSender() {
       {logs?.summary&&<div style={{marginTop:4,fontSize:8,color:'rgba(255,255,255,0.2)'}}>
         {Object.entries(logs.summary).map(([c,s]:[string,any])=><div key={c}>{c}: ✓{s.sent} ✗{s.failed}</div>)}
       </div>}
+    </div>
+  );
+}
+
+function NaverSyndication() {
+  const [items, setItems] = useState<any[]>([]);
+  const [stats, setStats] = useState<any>({});
+  const [loading, setLoading] = useState(true);
+  const [generating, setGenerating] = useState(false);
+  const [copied, setCopied] = useState<number|null>(null);
+  const [htmlView, setHtmlView] = useState<number|null>(null);
+  const [htmlContent, setHtmlContent] = useState('');
+
+  const load = async () => {
+    const r = await fetch('/api/admin/naver-syndication');
+    const d = await r.json();
+    if (d.ok) { setItems(d.items||[]); setStats(d.stats||{}); }
+    setLoading(false);
+  };
+  useEffect(() => { load(); }, []);
+
+  const generate = async () => {
+    setGenerating(true);
+    await fetch('/api/cron/naver-blog-content');
+    await load();
+    setGenerating(false);
+  };
+
+  const markPublished = async (id:number) => {
+    await fetch('/api/admin/naver-syndication', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,action:'mark_blog_published'})});
+    await load();
+  };
+
+  const viewHtml = async (id:number) => {
+    if (htmlView===id) { setHtmlView(null); return; }
+    const r = await fetch(`/api/admin/naver-syndication/${id}`);
+    const d = await r.json();
+    setHtmlContent(d.data?.naver_html||'');
+    setHtmlView(id);
+  };
+
+  const copyHtml = async (id:number) => {
+    const r = await fetch(`/api/admin/naver-syndication/${id}`);
+    const d = await r.json();
+    await navigator.clipboard.writeText(d.data?.naver_html||'');
+    setCopied(id);
+    setTimeout(()=>setCopied(null),2000);
+  };
+
+  if (loading) return <div style={{fontSize:11,color:'rgba(255,255,255,0.3)',padding:8}}>로딩...</div>;
+
+  return (
+    <div style={{padding:'6px 10px'}}>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}>
+        <div style={{display:'flex',gap:12}}>
+          <span style={{fontSize:11}}>📝 대기 <b style={{color:'#F59E0B'}}>{stats.pending||0}</b></span>
+          <span style={{fontSize:11}}>✅ 발행 <b style={{color:'#34D399'}}>{stats.published||0}</b></span>
+          <span style={{fontSize:11}}>📊 전체 <b>{stats.total||0}</b></span>
+        </div>
+        <button onClick={generate} disabled={generating} style={{fontSize:10,padding:'3px 8px',borderRadius:6,border:'1px solid rgba(59,123,246,0.3)',background:'rgba(59,123,246,0.1)',color:'#3B7BF6',cursor:'pointer'}}>
+          {generating?'생성 중...':'🔄 수동 생성'}
+        </button>
+      </div>
+      {items.length===0 && <div style={{fontSize:11,color:'rgba(255,255,255,0.3)',textAlign:'center',padding:12}}>아직 발행 콘텐츠 없음 · 수동 생성 또는 09:00 크론 대기</div>}
+      {items.map((it:any) => (
+        <div key={it.id} style={{padding:'6px 0',borderBottom:'1px solid rgba(255,255,255,0.05)'}}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+            <div style={{flex:1,minWidth:0}}>
+              <div style={{fontSize:12,fontWeight:700,color:'#e0e0e0',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{it.naver_title}</div>
+              <div style={{fontSize:9,color:'rgba(255,255,255,0.25)',marginTop:2}}>
+                {it.category} · 블로그:{it.blog_status==='published'?'✅':'⏳'} · 카페:{it.cafe_status==='published'?'✅':it.cafe_status==='failed'?'❌':'⏳'}
+                {it.naver_tags?.length>0 && <span> · {it.naver_tags.slice(0,3).map((t:string)=>`#${t}`).join(' ')}</span>}
+              </div>
+            </div>
+            <div style={{display:'flex',gap:4,marginLeft:8}}>
+              <button onClick={()=>copyHtml(it.id)} style={{fontSize:9,padding:'2px 6px',borderRadius:4,border:'1px solid rgba(3,199,90,0.3)',background:'rgba(3,199,90,0.1)',color:'#03C75A',cursor:'pointer'}}>
+                {copied===it.id?'✅ 복사됨':'📋 복사'}
+              </button>
+              <button onClick={()=>viewHtml(it.id)} style={{fontSize:9,padding:'2px 6px',borderRadius:4,border:'1px solid rgba(255,255,255,0.1)',background:'rgba(255,255,255,0.05)',color:'rgba(255,255,255,0.5)',cursor:'pointer'}}>
+                {htmlView===it.id?'닫기':'👁 보기'}
+              </button>
+              {it.blog_status==='pending' && <button onClick={()=>markPublished(it.id)} style={{fontSize:9,padding:'2px 6px',borderRadius:4,border:'1px solid rgba(52,211,153,0.3)',background:'rgba(52,211,153,0.1)',color:'#34D399',cursor:'pointer'}}>✓ 발행완료</button>}
+            </div>
+          </div>
+          {htmlView===it.id && <div style={{marginTop:6,padding:8,borderRadius:6,background:'rgba(0,0,0,0.3)',maxHeight:200,overflow:'auto',fontSize:10,color:'rgba(255,255,255,0.5)',whiteSpace:'pre-wrap',wordBreak:'break-all'}}>{htmlContent}</div>}
+        </div>
+      ))}
     </div>
   );
 }
