@@ -103,23 +103,21 @@ async function refreshAccessToken(refreshToken: string): Promise<string | null> 
 async function postToCafe(accessToken: string, item: any): Promise<{ articleId: string }> {
   const url = `https://openapi.naver.com/v1/cafe/${CAFE_ID}/menu/${MENU_ID}/articles`;
   
-  // HTML 본문 정리 — 네이버 카페가 허용하는 형식으로
   const cleanHtml = (item.naver_html || '')
     .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
-    .replace(/style="[^"]*"/gi, '')
-    .slice(0, 50000); // 네이버 카페 본문 길이 제한
+    .slice(0, 50000);
 
-  const body = new URLSearchParams();
-  body.append('subject', (item.naver_title || '제목없음').slice(0, 100));
-  body.append('content', cleanHtml);
+  // FormData로 전송 — URLSearchParams는 한글 인코딩 깨짐
+  const formData = new FormData();
+  formData.append('subject', (item.naver_title || '제목없음').slice(0, 100));
+  formData.append('content', cleanHtml);
 
   const res = await fetch(url, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${accessToken}`,
-      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
     },
-    body: body.toString(),
+    body: formData,
   });
 
   const resText = await res.text();
