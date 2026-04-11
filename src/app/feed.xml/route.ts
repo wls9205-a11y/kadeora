@@ -132,8 +132,8 @@ ${allItems.map(item => `    <item>
       <category>${escapeXml(item.category)}</category>
       <guid isPermaLink="true">${item.guid}</guid>
       <dc:creator>카더라</dc:creator>
-      <content:encoded><![CDATA[${escapeXml(item.content || item.description)}]]></content:encoded>
-      <enclosure url="${item.image || ""}" type="image/jpeg" length="0" />${item.tags.length ? `\n      ${item.tags.map((t: string) => `<category>${escapeXml(t)}</category>`).join('\n      ')}` : ''}
+      <content:encoded><![CDATA[${escapeXml((item as any).content || item.description)}]]></content:encoded>
+      <enclosure url="${((item as any).image || "")}" type="image/jpeg" length="0" />${item.tags.length ? `\n      ${item.tags.map((t: string) => `<category>${escapeXml(t)}</category>`).join('\n      ')}` : ''}
     </item>`).join('\n')}
   </channel>
 </rss>`;
