@@ -161,7 +161,7 @@ export default async function HomePage() {
         itemListElement: SECTIONS.map((s, i) => ({
           '@type': 'SiteNavigationElement',
           position: i + 1,
-          image: s.og,
+          image: s.img,
           name: s.title,
           url: `${SITE}${s.href}`,
           description: s.desc,
