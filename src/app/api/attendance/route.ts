@@ -64,8 +64,10 @@ export async function POST(req: NextRequest) {
     let pointsEarned = 10;
     let bonus = null;
 
-    if (streak === 7) { pointsEarned += 30; bonus = '7일 연속 보너스 +30P'; }
-    if (streak === 30) { pointsEarned += 100; bonus = '30일 연속 보너스 +100P'; }
+    if (streak === 3) { pointsEarned += 15; bonus = '3일 연속 보너스 +15P'; }
+    if (streak === 7) { pointsEarned += 50; bonus = '7일 연속 보너스 +50P'; }
+    if (streak === 14) { pointsEarned += 80; bonus = '14일 연속 보너스 +80P'; }
+    if (streak === 30) { pointsEarned += 150; bonus = '30일 연속 보너스 +150P'; }
 
     // 포인트 이상 감지: 1시간 내 200P 이상 적립 시 차단
     const { data: recentPoints } = await sb

@@ -83,6 +83,7 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
   if((k.pushSubs??0)<=3)warns.push(`푸시 ${k.pushSubs??0}명`);
   if(shareTotal<=1)warns.push('공유 죽음');
   if((k.signupAttempts??0)>10&&(k.signupSuccess??0)===0)warns.push('가입성공 0건');
+  if((k.neverActive??0)>10)warns.push(`미활성 ${k.neverActive}명`);
   const deadFeatures = ['aptBookmarks','blogBookmarks','stockWatchlist','priceAlerts'].filter(f=>(fh[f]??0)===0).length;
   if(deadFeatures>=3)warns.push(`죽은기능 ${deadFeatures}개`);
 

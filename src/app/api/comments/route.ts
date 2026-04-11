@@ -36,7 +36,13 @@ export async function POST(req: NextRequest) {
 
     // 포인트 적립 (award_points RPC — 트리거 바이패스)
     try {
-      await getSupabaseAdmin().rpc('award_points', { p_user_id: user.id, p_amount: 5, p_reason: '댓글작성', p_meta: null });
+      const admin = getSupabaseAdmin();
+      await admin.rpc('award_points', { p_user_id: user.id, p_amount: 5, p_reason: '댓글작성', p_meta: null });
+      // 첫 댓글 보너스 (+20P)
+      const { count } = await (admin as any).from('comments').select('id', { count: 'exact', head: true }).eq('author_id', user.id);
+      if (count === 1) {
+        await admin.rpc('award_points', { p_user_id: user.id, p_amount: 20, p_reason: '첫댓글보너스', p_meta: null });
+      }
     } catch {}
 
     return NextResponse.json({ comment: data }, { status: 201 });

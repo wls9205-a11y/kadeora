@@ -27,6 +27,7 @@ import NextArticleFloat from '@/components/NextArticleFloat';
 import BlogTossGate from '@/components/BlogTossGate';
 import RelatedContentCard from '@/components/RelatedContentCard';
 import SmartSectionGate from '@/components/SmartSectionGate';
+import PushPromptBanner from '@/components/PushPromptBanner';
 import Disclaimer from '@/components/Disclaimer';
 import NewsletterSubscribe from '@/components/NewsletterSubscribe';
 
@@ -1048,6 +1049,7 @@ export default async function BlogDetailPage({ params }: Props) {
         </div>
       )}
       <Disclaimer type="blog" compact />
+      {isLoggedIn && <PushPromptBanner />}
       </div>
     </div>
   );

@@ -215,7 +215,7 @@ export async function GET(req: NextRequest) {
           stocks: stockR.count ?? 0, apts: aptR.count ?? 0,
           unsold: unsoldR.count ?? 0, redev: redevR.count ?? 0,
           interests,
-          emailSubs, pushSubs,
+          emailSubs, pushSubs, neverActive: (realUsers ?? 0) - (activeUsers ?? 0),
           conversions: convEvents,
           cronSuccess: cronOk, cronFail,
           dbMb,

@@ -1,3 +1,4 @@
+import ProfileCompleteBanner from '@/components/ProfileCompleteBanner';
 'use client';
 import RelatedContentCard from '@/components/RelatedContentCard';
 import FirstMissionBanner from '@/components/FirstMissionBanner';
@@ -37,6 +38,8 @@ function BestCommentPreview({ postId }: { postId: number }) {
   }, [postId]);
   if (!best) return null;
   return (
+    <>
+      <ProfileCompleteBanner />
     <div style={{ marginTop: 6, padding: '5px 8px', borderLeft: '2px solid rgba(59,123,246,0.3)', background: 'var(--bg-hover)', borderRadius: 0 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', marginBottom: 2 }}>
         <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--brand)' }}>Best</span>

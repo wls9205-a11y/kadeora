@@ -18,9 +18,14 @@ export async function POST(req: NextRequest) {
 
     const sb = getSupabaseAdmin();
     const { error } = await (sb as any).from('email_subscribers').upsert(
-      { email: email.toLowerCase().trim(), category: category || 'general', consent: true, subscribed_at: new Date().toISOString() },
+      { email: email.toLowerCase().trim(), category: category || 'general', consent: true, is_active: true, subscribed_at: new Date().toISOString() },
       { onConflict: 'email' }
     );
+
+    // 추적
+    await (sb as any).from('conversion_events').insert({
+      event_type: 'cta_complete', cta_name: 'newsletter_subscribe', category: category || 'general',
+    }).catch(() => {});
 
     if (error) {
       console.error('Newsletter subscribe error:', error);

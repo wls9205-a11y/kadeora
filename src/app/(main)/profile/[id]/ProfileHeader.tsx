@@ -94,15 +94,22 @@ export default function ProfileHeader({ profile, isOwner, followersCount, follow
     setSaving(true);
     try {
       const sb = createSupabaseBrowser();
+      const hasBio = bio.trim().length > 0;
       const { error: err } = await sb.from('profiles').update({
         nickname: nickname.trim(), bio: bio.trim(),
         region_text: regionText || null,
         residence_city: residenceCity || null,
         residence_district: residenceDistrict || null,
         age_group: ageGroup || null,
+        profile_completed: hasBio,
         updated_at: new Date().toISOString(),
       }).eq('id', profile.id);
       if (err) throw err;
+      // 프로필 첫 완성 보너스
+      if (hasBio && !profile.profile_completed) {
+        fetch('/api/profile/complete-bonus', { method: 'POST' }).then(r => r.ok ? r.json() : null)
+          .then(d => { if (d?.granted) success('🎉 프로필 완성 보너스 +50P!'); }).catch(() => {});
+      }
       success('프로필이 수정되었습니다'); setEditing(false); router.refresh();
     } catch { error('프로필 수정 중 오류가 발생했습니다'); }
     finally { setSaving(false); }
