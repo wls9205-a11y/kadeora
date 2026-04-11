@@ -318,6 +318,53 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
           ))}
         </div>} p="8px 10px"/>
       }/>
+
+      {/* ═══ 이메일 발송 ═══ */}
+      <Sec t="📧 이메일 발송" open={false} ch={<EmailSender/>}/>
+    </div>
+  );
+}
+
+function EmailSender() {
+  const [sending, setSending] = useState(false);
+  const [result, setResult] = useState<any>(null);
+  const [logs, setLogs] = useState<any>(null);
+
+  const send = async (target: 'test' | 'dormant' | 'all') => {
+    if (sending) return;
+    const msg = target === 'test' ? '테스트 발송 (norich92@gmail.com)' : target === 'dormant' ? '휴면 유저에게 발송' : '전체 유저에게 발송';
+    if (!confirm(`${msg}합니다. 계속?`)) return;
+    setSending(true); setResult(null);
+    try {
+      const r = await fetch('/api/admin/send-email', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ campaign: 're-engagement', target }),
+      });
+      setResult(await r.json());
+    } catch (e: any) { setResult({ error: e.message }); }
+    finally { setSending(false); }
+  };
+
+  const loadLogs = async () => {
+    const r = await fetch('/api/admin/send-email');
+    setLogs(await r.json());
+  };
+
+  return (
+    <div style={{background:'rgba(12,21,40,0.6)',border:'1px solid rgba(255,255,255,0.04)',borderRadius:8,padding:'8px 10px'}}>
+      <div style={{display:'flex',gap:4,marginBottom:6}}>
+        <button onClick={()=>send('test')} disabled={sending} style={{flex:1,padding:'6px',borderRadius:6,border:'1px solid rgba(59,123,246,0.2)',background:'rgba(59,123,246,0.06)',color:'#3B7BF6',cursor:'pointer',fontSize:9,fontWeight:600}}>🧪 테스트</button>
+        <button onClick={()=>send('dormant')} disabled={sending} style={{flex:1,padding:'6px',borderRadius:6,border:'1px solid rgba(245,158,11,0.2)',background:'rgba(245,158,11,0.06)',color:'#F59E0B',cursor:'pointer',fontSize:9,fontWeight:600}}>😴 휴면유저</button>
+        <button onClick={()=>send('all')} disabled={sending} style={{flex:1,padding:'6px',borderRadius:6,border:'1px solid rgba(239,68,68,0.2)',background:'rgba(239,68,68,0.06)',color:'#EF4444',cursor:'pointer',fontSize:9,fontWeight:600}}>📨 전체발송</button>
+      </div>
+      {sending&&<div style={{fontSize:9,color:'rgba(255,255,255,0.3)',textAlign:'center',padding:4}}>발송 중...</div>}
+      {result&&<div style={{fontSize:9,padding:6,borderRadius:6,marginBottom:4,background:result.error?'rgba(239,68,68,0.06)':'rgba(16,185,129,0.06)',color:result.error?'#EF4444':'#10B981'}}>
+        {result.error||`✓ ${result.sent}건 발송 ${result.failed>0?`· ✗ ${result.failed}건 실패`:''}`}
+      </div>}
+      <button onClick={loadLogs} style={{width:'100%',padding:'4px',borderRadius:4,border:'1px solid rgba(255,255,255,0.04)',background:'none',color:'rgba(255,255,255,0.2)',cursor:'pointer',fontSize:8}}>발송 이력 보기</button>
+      {logs?.summary&&<div style={{marginTop:4,fontSize:8,color:'rgba(255,255,255,0.2)'}}>
+        {Object.entries(logs.summary).map(([c,s]:[string,any])=><div key={c}>{c}: ✓{s.sent} ✗{s.failed}</div>)}
+      </div>}
     </div>
   );
 }
