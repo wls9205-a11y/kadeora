@@ -25,7 +25,7 @@ import TossTeaser from '@/components/TossTeaser';
 interface Stock {
   symbol: string; name: string; market: string; price: number; change_amt: number;
   change_pct: number; volume: number; market_cap: number; updated_at: string;
-  currency?: string; sector?: string; description?: string;
+  currency?: string; sector?: string; description?: string; logo_url?: string;
 }
 interface Theme { id: number; theme_name: string; change_pct: number; is_hot: boolean; related_symbols?: string[]; description?: string; }
 interface CalendarEvent { id: number; event_date: string; title: string; category: string; importance: string; description?: string; }
@@ -228,7 +228,9 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
         {/* Row 1: Logo + Name + sector */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center', flex: 1, minWidth: 0 }}>
-            {(() => { const logo = getStockLogo(s.symbol, !isGlobal); return (
+            {(() => { const logo = getStockLogo(s.symbol, !isGlobal); return s.logo_url ? (
+              <img src={s.logo_url} alt="" width={32} height={32} style={{ width: 32, height: 32, borderRadius: 8, objectFit: 'contain', flexShrink: 0, background: '#fff', padding: 2 }} loading="lazy" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; (e.target as HTMLImageElement).nextElementSibling && ((e.target as HTMLImageElement).nextElementSibling as HTMLElement).style.removeProperty('display'); }} />
+            ) : (
               <div style={{ width: 32, height: 32, borderRadius: 8, background: logo.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: logo.initials.length > 2 ? 8 : 11, fontWeight: 800, color: logo.textColor, letterSpacing: '-0.02em' }}>{logo.initials}</div>
             ); })()}
             <div style={{ flex: 1, minWidth: 0 }}>
@@ -1138,7 +1140,9 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
                       <div style={{ padding: '10px 12px 8px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
                           <div style={{ display: 'flex', gap: 8, alignItems: 'center', flex: 1, minWidth: 0 }}>
-                            {(() => { const logo = getStockLogo(s.symbol, !isGlobal); return (
+                            {(() => { const logo = getStockLogo(s.symbol, !isGlobal); return s.logo_url ? (
+                              <img src={s.logo_url} alt="" width={32} height={32} style={{ width: 32, height: 32, borderRadius: 8, objectFit: 'contain', flexShrink: 0, background: '#fff', padding: 2 }} loading="lazy" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; (e.target as HTMLImageElement).nextElementSibling && ((e.target as HTMLImageElement).nextElementSibling as HTMLElement).style.removeProperty('display'); }} />
+                            ) : (
                               <div style={{ width: 32, height: 32, borderRadius: 8, background: logo.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: logo.initials.length > 2 ? 8 : 11, fontWeight: 800, color: logo.textColor, letterSpacing: '-0.02em' }}>{logo.initials}</div>
                             ); })()}
                             <div style={{ flex: 1, minWidth: 0 }}>

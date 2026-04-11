@@ -50,7 +50,7 @@ async function fetchStocks() {
   const sb = await createSupabaseServer();
   const { data } = await sb
     .from('stock_quotes')
-    .select('symbol, name, market, price, change_amt, change_pct, volume, market_cap, currency, sector, updated_at, is_active, description')
+    .select('symbol, name, market, price, change_amt, change_pct, volume, market_cap, currency, sector, updated_at, is_active, description, logo_url')
     .order('market_cap', { ascending: false })
     .limit(2000);
   return data ?? [];

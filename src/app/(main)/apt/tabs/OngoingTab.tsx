@@ -186,12 +186,18 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
         const stages = ['청약', '당첨', '계약', '공사', '입주'];
         return (
           <Link key={o.id} href={linkH} className="kd-card-hover" style={{ display: 'block', borderRadius: 'var(--radius-card)', overflow: 'hidden', background: isPremium ? 'linear-gradient(135deg, rgba(251,191,36,0.04), var(--bg-surface))' : 'var(--bg-surface)', border: isPremium ? '1.5px solid rgba(251,191,36,0.3)' : '1px solid var(--border)', textDecoration: 'none', color: 'inherit' }}>
-            <div style={{ padding: '10px 12px 6px', display: 'flex', gap: 8 }}>
+            {/* OG 이미지 스트립 */}
+            <div style={{ height: 48, background: 'var(--bg-hover)', position: 'relative', overflow: 'hidden' }}>
+              <img src={`/api/og?title=${encodeURIComponent(o.house_nm || '분양중')}&category=apt&design=2`} alt="" width={400} height={48} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', opacity: 0.8 }} loading="lazy" />
+              <div style={{ position: 'absolute', top: 5, left: 8 }}>
+                <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 5, background: isUnsold ? 'rgba(248,113,113,0.9)' : 'rgba(54,240,176,0.9)', color: '#fff' }}>{isUnsold ? '미분양' : '분양중'}</span>
+                {isPremium && <span style={{ fontSize: 9, fontWeight: 800, padding: '2px 5px', borderRadius: 3, background: 'linear-gradient(135deg,#FFD43B,#F59E0B)', color: '#1a1a2e', marginLeft: 3 }}>PREMIUM</span>}
+              </div>
+            </div>
+            <div style={{ padding: '8px 12px 6px', display: 'flex', gap: 8 }}>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 3, marginBottom: 5, flexWrap: 'wrap' }}>
                   {isNew(o, 'ongoing') && <NewBadge />}
-                  <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 4, background: isUnsold ? 'var(--accent-red-bg)' : 'rgba(34,197,94,0.1)', color: isUnsold ? 'var(--accent-red)' : 'var(--accent-green)', border: `1px solid ${isUnsold ? 'rgba(248,113,113,0.2)' : 'rgba(34,197,94,0.2)'}`, lineHeight: '14px' }}>{isUnsold ? '미분양' : '분양중'}</span>
-                  {isPremium && <span style={{ fontSize: 9, fontWeight: 800, padding: '2px 5px', borderRadius: 3, background: 'linear-gradient(135deg,#FFD43B,#F59E0B)', color: 'var(--bg-base)' }}>PREMIUM</span>}
                   {transferLimit && <span style={{ fontSize: 9, fontWeight: 600, color: 'var(--accent-red)' }}>전매{transferLimit}년</span>}
                   {loanRate && <span style={{ fontSize: 9, fontWeight: 600, color: String(loanRate).includes('무이자') ? 'var(--accent-green)' : 'var(--accent-yellow)' }}>{String(loanRate).includes('무이자') ? '무이자' : '중도금'}</span>}
                   {(o as any).brand_name && <span style={{ fontSize: 9, fontWeight: 600, padding: '2px 5px', borderRadius: 3, background: 'rgba(59,123,246,0.08)', color: 'var(--brand)', lineHeight: '14px' }}>{(o as any).brand_name}</span>}

@@ -169,13 +169,18 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
               const redevSlug = generateAptSlug(r.district_name || r.address || r.notes || `redev-${r.id}`);
               return (
                 <Link key={r.id} href={`/apt/${encodeURIComponent(redevSlug)}`} className="kd-card-hover" style={{ display: 'block', textDecoration: 'none', color: 'inherit', borderRadius: 'var(--radius-card)', overflow: 'hidden', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
+                  {/* OG 이미지 스트립 */}
+                  <div style={{ height: 48, background: 'var(--bg-hover)', position: 'relative', overflow: 'hidden' }}>
+                    <img src={`/api/og?title=${encodeURIComponent(r.district_name || r.address || '재개발')}&category=apt&design=2`} alt="" width={400} height={48} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', opacity: 0.8 }} loading="lazy" />
+                    <div style={{ position: 'absolute', top: 5, left: 8, display: 'flex', gap: 4, alignItems: 'center' }}>
+                      <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 5, background: r.project_type === '재건축' ? 'rgba(245,158,11,0.9)' : 'rgba(139,92,246,0.9)', color: '#fff' }}>{r.project_type || '재개발'}</span>
+                      <span style={{ fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 4, background: 'rgba(0,0,0,0.4)', color: '#fff' }}>{r.stage || '진행중'} {progress}%</span>
+                    </div>
+                  </div>
                   {/* ① 헤더: 배지 + 이름 + 메타 */}
-                  <div style={{ padding: '10px 12px 6px', display: 'flex', gap: 8 }}>
+                  <div style={{ padding: '8px 12px 6px', display: 'flex', gap: 8 }}>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 3, marginBottom: 5, flexWrap: 'wrap' }}>
-                        <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 4, background: r.project_type === '재건축' ? 'rgba(245,158,11,0.1)' : 'rgba(139,92,246,0.1)', color: r.project_type === '재건축' ? 'var(--accent-yellow)' : 'var(--accent-purple)', border: `1px solid ${r.project_type === '재건축' ? 'rgba(245,158,11,0.2)' : 'rgba(139,92,246,0.2)'}`, lineHeight: '14px' }}>{r.project_type || '재개발'}</span>
-                        <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 4, background: `${sc.bg}`, color: sc.color, lineHeight: '14px' }}>{r.stage || '진행중'}</span>
-                        <span style={{ fontSize: 9, fontWeight: 700, color: sc.color }}>{progress}%</span>
                       </div>
                       <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 2 }}>{r.district_name && r.district_name !== '미상' && r.district_name !== '정보 준비중' ? r.district_name : r.address || r.notes || '정보 준비중'}</div>
                       <div style={{ fontSize: 10, color: 'var(--text-tertiary)', lineHeight: 1.5 }}>{r.region || ''}{r.sigungu ? ` ${r.sigungu}` : ''}{r.total_households ? ` · ${r.total_households.toLocaleString()}세대` : ''}{(r as any).area_sqm ? ` · ${((r as any).area_sqm / 1000).toFixed(0)}천m²` : ''}</div>

@@ -166,13 +166,19 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
 
         return (
           <Link key={u.id} href={`/apt/${encodeURIComponent(generateAptSlug(u.house_nm) || String(u.id))}`} className="kd-card-hover" style={{ display: 'block', borderRadius: 'var(--radius-card)', overflow: 'hidden', background: 'var(--bg-surface)', border: '1px solid var(--border)', textDecoration: 'none', color: 'inherit' }}>
+            {/* OG 이미지 스트립 */}
+            <div style={{ height: 48, background: 'var(--bg-hover)', position: 'relative', overflow: 'hidden' }}>
+              <img src={`/api/og?title=${encodeURIComponent(u.house_nm || '미분양')}&category=apt&design=2`} alt="" width={400} height={48} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', opacity: 0.8 }} loading="lazy" />
+              <div style={{ position: 'absolute', top: 5, left: 8, display: 'flex', gap: 4, alignItems: 'center' }}>
+                <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 5, background: 'rgba(248,113,113,0.9)', color: '#fff' }}>미분양</span>
+                <span style={{ fontSize: 10, fontWeight: 800, color: '#fff' }}>{unsoldCount.toLocaleString()}호</span>
+              </div>
+            </div>
             {/* ① 헤더: 배지 + 이름 + 메타 */}
-            <div style={{ padding: '10px 12px 6px', display: 'flex', gap: 8 }}>
+            <div style={{ padding: '8px 12px 6px', display: 'flex', gap: 8 }}>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 3, marginBottom: 5, flexWrap: 'wrap' }}>
                   {isNew(u, 'unsold') && <NewBadge />}
-                  <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 4, background: 'var(--accent-red-bg)', color: 'var(--accent-red)', border: '1px solid rgba(248,113,113,0.2)', lineHeight: '14px' }}>미분양</span>
-                  <span style={{ fontSize: 10, fontWeight: 800, color: 'var(--accent-red)' }}>{unsoldCount.toLocaleString()}호</span>
                   {(() => { const sa = surgeAlerts.find(a => a.region_nm === u.region_nm); return sa && sa.change_pct !== 0 ? <span style={{ fontSize: 9, fontWeight: 700, padding: '1px 5px', borderRadius: 10, background: sa.change_pct > 0 ? 'rgba(248,113,113,0.08)' : 'rgba(52,211,153,0.08)', color: sa.change_pct > 0 ? 'var(--accent-red)' : 'var(--accent-green)' }}>{sa.change_pct > 0 ? '+' : ''}{sa.change_pct}%</span> : null; })()}
                 </div>
                 <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 2 }}>{u.house_nm || '미분양'}</div>
