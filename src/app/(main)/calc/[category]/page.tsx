@@ -85,7 +85,6 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
         </div>
       </div>
     </div>
-  );
     </>
   );
 }
