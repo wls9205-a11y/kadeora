@@ -24,11 +24,11 @@ const CAFE_ID = process.env.NAVER_CAFE_ID || '';
 const MENU_ID = process.env.NAVER_CAFE_MENU_ID || '';
 const BATCH_SIZE = 2; // 하루 2건씩
 
-async function handler(req: NextRequest) {
+async function doWork() {
   const accessToken = process.env.NAVER_CAFE_ACCESS_TOKEN;
   
   if (!accessToken || !CAFE_ID || !MENU_ID) {
-    return NextResponse.json({ ok: true, message: 'Naver Cafe API not configured. Set NAVER_CAFE_ACCESS_TOKEN, NAVER_CAFE_ID, NAVER_CAFE_MENU_ID env vars.' });
+    return { processed: 0, metadata: { message: 'Naver Cafe API not configured. Set NAVER_CAFE_ACCESS_TOKEN, NAVER_CAFE_ID, NAVER_CAFE_MENU_ID env vars.' } };
   }
 
   const sb = getSupabaseAdmin();
@@ -41,7 +41,7 @@ async function handler(req: NextRequest) {
     .limit(BATCH_SIZE);
 
   if (!pending?.length) {
-    return NextResponse.json({ ok: true, message: 'No pending cafe posts', count: 0 });
+    return { processed: 0, metadata: { message: 'No pending cafe posts' } };
   }
 
   let success = 0;
@@ -78,7 +78,7 @@ async function handler(req: NextRequest) {
     }
   }
 
-  return NextResponse.json({ ok: true, success, errors, total: pending.length });
+  return { processed: success, metadata: { errors, total: pending.length } };
 }
 
 async function refreshAccessToken(refreshToken: string): Promise<string | null> {
@@ -131,4 +131,7 @@ async function postToCafe(accessToken: string, item: any): Promise<{ articleId: 
   return { articleId: data.message?.result?.articleId?.toString() || 'unknown' };
 }
 
-export const GET = (req: NextRequest) => withCronLogging('naver-cafe-publish', () => handler(req));
+export async function GET(req: NextRequest) {
+  const result = await withCronLogging('naver-cafe-publish', doWork);
+  return NextResponse.json(result);
+}

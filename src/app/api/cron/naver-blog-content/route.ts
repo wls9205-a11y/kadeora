@@ -17,7 +17,7 @@ export const maxDuration = 300;
 
 const BATCH_SIZE = 3;
 
-async function handler(req: NextRequest) {
+async function doWork() {
   const sb = getSupabaseAdmin();
 
   // 이미 발행된 slug 목록
@@ -36,7 +36,7 @@ async function handler(req: NextRequest) {
   const batch = candidates.slice(0, BATCH_SIZE);
 
   if (batch.length === 0) {
-    return NextResponse.json({ ok: true, message: 'No new posts to syndicate', count: 0 });
+    return { processed: 0, metadata: { message: 'No new posts to syndicate' } };
   }
 
   let success = 0;
@@ -65,7 +65,7 @@ async function handler(req: NextRequest) {
     }
   }
 
-  return NextResponse.json({ ok: true, success, errors, total: batch.length });
+  return { processed: success, metadata: { errors, total: batch.length } };
 }
 
 async function generateNaverContent(post: any): Promise<{ title: string; html: string; tags: string[] }> {
@@ -169,4 +169,7 @@ JSON만 출력하세요. 다른 텍스트 없이.`;
   }
 }
 
-export const GET = (req: NextRequest) => withCronLogging('naver-blog-content', () => handler(req));
+export async function GET(req: NextRequest) {
+  const result = await withCronLogging('naver-blog-content', doWork);
+  return NextResponse.json(result);
+}
