@@ -160,6 +160,9 @@ export default async function RegionLandingPage({ params }: Props) {
         {"@type":"Question","name":`${decoded} 재개발 진행 현황은?`,"acceptedAnswer":{"@type":"Answer","text":`${decoded} 지역에서 ${data.redevelopments.length}건의 재개발·재건축 사업이 진행 중입니다. 사업 단계, 조합 현황, 예상 분양 시기를 확인하세요.`}},
         {"@type":"Question","name":`${decoded} 모집공고 확인 방법은?`,"acceptedAnswer":{"@type":"Answer","text":`카더라에서 ${decoded} 지역 아파트 입주자모집공고 핵심 요약, 분양 조건(분양가상한제·전매제한·거주의무), 평형별 공급 정보를 확인할 수 있습니다. 각 현장 상세 페이지에서 모집공고 요약을 제공합니다.`}},
         {"@type":"Question","name":`${decoded} 실거래가 조회 방법은?`,"acceptedAnswer":{"@type":"Answer","text":`카더라에서 ${decoded} 지역 ${data.transactions.length}건의 아파트 실거래가를 조회할 수 있습니다. 단지별, 면적별, 기간별 필터로 원하는 정보를 찾아보세요.`}},
+        {"@type":"Question","name":`${decoded} 아파트 평균 시세는?`,"acceptedAnswer":{"@type":"Answer","text":`${decoded} 지역의 최근 실거래 ${data.transactions.length}건을 기준으로 평균 매매가를 확인할 수 있습니다. 카더라 단지백과에서 단지별 상세 시세를 비교해보세요.`}},
+        {"@type":"Question","name":`${decoded} 분양중인 아파트는?`,"acceptedAnswer":{"@type":"Answer","text":`현재 ${decoded} 지역에서 분양 진행 중인 현장을 카더라 부동산 페이지에서 확인할 수 있습니다. 분양가, 시공사, 입주 예정일까지 한눈에 비교하세요.`}},
+        {"@type":"Question","name":`${decoded} 전세 시세는?`,"acceptedAnswer":{"@type":"Answer","text":`${decoded} 지역 아파트 전세·월세 시세는 카더라 단지백과에서 단지별로 확인할 수 있습니다. 전세가율, 월세 보증금 등 임대차 정보를 제공합니다.`}},
       ]}) }} />
       {/* 헤더 */}
       <div style={{ marginBottom: 'var(--sp-xl)' }}>
@@ -382,6 +385,18 @@ export default async function RegionLandingPage({ params }: Props) {
           ))}
         </section>
       )}
+
+      {/* SSR 지역 분석 텍스트 — Featured Snippet 타겟 */}
+      <section className="region-summary" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', marginBottom: 14 }}>
+        <h2 style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px' }}>{decoded} 부동산 시장 요약</h2>
+        <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0 }}>
+          {decoded} 지역에는 현재 청약 {data.subscriptions.length}건, 실거래 {data.transactions.length}건, 재개발·재건축 {data.redevelopments.length}건, 미분양 {data.unsolds.length}건의 부동산 정보가 등록되어 있습니다.
+          {data.transactions.length > 0 && ` 최근 실거래 기준 평균 매매가는 ${(() => { const avg = Math.round(data.transactions.reduce((s: number, t: any) => s + (t.deal_amount || 0), 0) / data.transactions.length); return avg >= 10000 ? (avg / 10000).toFixed(1) + '억원' : avg.toLocaleString() + '만원'; })()}이며, 가장 최근 거래는 ${data.transactions[0]?.apt_name || ''} 단지입니다.`}
+          {data.redevelopments.length > 0 && ` 재개발·재건축 사업이 ${data.redevelopments.length}건 진행 중이어서 향후 공급 물량이 기대됩니다.`}
+          {data.unsolds.length > 0 && ` 미분양 ${data.unsolds.reduce((s: number, u: any) => s + (u.unsold_count || 0), 0)}세대가 남아 있어 할인 분양 기회를 확인해볼 만합니다.`}
+          {` 카더라에서 ${decoded} 지역 부동산 정보를 실시간으로 확인하세요.`}
+        </p>
+      </section>
 
       {/* CTA */}
       <div style={{ textAlign: 'center', padding: 20 }}>

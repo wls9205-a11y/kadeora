@@ -70,6 +70,19 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
   const avgAmount = totalCount > 0 ? Math.round(filtered.reduce((s: number, t) => s + (t.deal_amount || 0), 0) / totalCount) : 0;
   const maxTrade = filtered.reduce((max: any, t: any) => (!max || (t.deal_amount || 0) > (max.deal_amount || 0)) ? t : max, null as typeof filtered[0] | null);
 
+  // 면적별 통계 카드
+  const areaGroups = [
+    { key: '소형', label: '~59㎡', filter: (a: number) => a > 0 && a <= 60 },
+    { key: '중형', label: '59~84㎡', filter: (a: number) => a > 59 && a <= 85 },
+    { key: '대형', label: '85㎡~', filter: (a: number) => a > 84 },
+  ];
+  const areaStats = areaGroups.map(g => {
+    const items = filtered.filter(t => g.filter(t.exclusive_area || 0));
+    const avg = items.length > 0 ? Math.round(items.reduce((s: number, t) => s + (t.deal_amount || 0), 0) / items.length) : 0;
+    const max = items.length > 0 ? Math.max(...items.map(t => t.deal_amount || 0)) : 0;
+    return { ...g, count: items.length, avg, max };
+  }).filter(a => a.count > 0);
+
   const regStats = regs.filter(r => r !== '전체').map(r => {
     const items = transactions.filter((t) => (t.region_nm || '기타') === r);
     const avg = items.length > 0 ? Math.round(items.reduce((s: number, t) => s + (t.deal_amount || 0), 0) / items.length) : 0;
@@ -220,6 +233,19 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
           {effectiveSearch && <div style={{ fontSize: 'var(--fs-xs)', marginTop: 6 }}>단지명, 법정동, 시군구로 검색해보세요</div>}
         </div>
       )}
+      {/* 면적별 시세 요약 */}
+      {areaStats.length > 0 && (
+        <div style={{ display: 'flex', gap: 6, marginBottom: 10, overflowX: 'auto' }}>
+          {areaStats.map(a => (
+            <div key={a.key} style={{ flex: 1, minWidth: 90, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '8px 10px' }}>
+              <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 600, marginBottom: 4 }}>{a.label}</div>
+              <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1 }}>{fmtAmount(a.avg)}</div>
+              <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginTop: 3 }}>{a.count}건 · 최고 {fmtAmount(a.max)}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
       {paged.map((t, i: number) => {
         const amt = t.deal_amount || 0;
         const borderColor = amt >= 100000 ? 'var(--accent-red)' : amt >= 50000 ? 'var(--accent-orange)' : amt >= 30000 ? 'var(--accent-yellow)' : 'var(--accent-green)';
