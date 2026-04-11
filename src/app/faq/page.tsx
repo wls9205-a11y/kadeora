@@ -28,5 +28,15 @@ export const metadata: Metadata = {
 
 // FAQ JSON-LD is in faq/layout.tsx
 export default function FAQPage() {
-  return <FaqClient />;
+  return <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: '카더라', item: '' },
+          { '@type': 'ListItem', position: 2, name: '자주 묻는 질문' },
+        ],
+      })}} />
+      <h1 style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0,0,0,0)" }}>카더라 자주 묻는 질문</h1>
+      <FaqClient />
+    </>;
 }

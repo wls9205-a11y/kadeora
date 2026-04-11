@@ -62,6 +62,9 @@ export function buildMeta(opts: BuildMetaOptions): Metadata {
     other: {
       'naver:author': author,
       'naver:site_name': '카더라',
+      'naver:description': description.slice(0, 160),
+      'naver:written_time': publishedAt || now,
+      'naver:updated_time': now,
       'og:updated_time': now,
       ...(publishedAt ? { 'article:published_time': publishedAt } : {}),
       ...(section ? { 'article:section': section } : {}),
@@ -72,10 +75,13 @@ export function buildMeta(opts: BuildMetaOptions): Metadata {
 
 /** 공통 other 필드 (페이지가 자체 other를 정의할 때 spread용) */
 export function seoOther(section: string, author = '카더라', path?: string) {
+  const now = new Date().toISOString();
   return {
     'naver:author': author,
     'naver:site_name': '카더라',
-    'og:updated_time': new Date().toISOString(),
+    'naver:written_time': now,
+    'naver:updated_time': now,
+    'og:updated_time': now,
     'article:section': section,
     ...(path ? { 'dg:plink': `${SITE_URL}${path}` } : {}),
   };

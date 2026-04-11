@@ -1,35 +1,55 @@
-# 카더라 STATUS — 세션 85 (2026-04-12 16:05 KST)
+# 카더라 STATUS — 세션 86 (2026-04-12 18:30 KST)
 
 ## 프로덕션
 - 실유저: 66명
 - UV: ~2,000/일 | PV: ~2,800/일
 - DB: 2.0GB/8.4GB
-- 최종 커밋: f782295 (READY)
-- 런타임 에러: 0건 (기존 /daily TypeError 제외)
+- 최종 커밋: (배포 중)
+- 런타임 에러: 0건
 
 ## 이번 세션 완료
 
-### 주식/부동산/블로그 카드 이미지 시스템 전체 구현
+### SEO 대규모 강화 — 네이버 1위 + 이미지 캐러셀 + 노출면적 극대화
 
-**주식 페이지:**
-- `stockLogo.ts` 신규: 국내 40+ 기업 브랜드 컬러 매핑, 해외 50+ 도메인 매핑
-- `stock_quotes.logo_url` 컬럼 추가 + 해외 48종목 Clearbit URL 세팅
-- StockClient: logo_url 이미지 우선 표시, 로드 실패 시 initials fallback (StockRow + 카드뷰 v3)
+**전체 60개 페이지 감사 실시 → 56개 개선 항목 도출 → 코드 수정 가능한 항목 일괄 처리**
 
-**부동산 페이지 (전 탭 이미지 적용):**
-- SubscriptionTab: 56px OG이미지 스트립 + 상태배지/D-day 오버레이
-- OngoingTab: 48px OG이미지 스트립 + 분양중/미분양 배지 오버레이
-- UnsoldTab: 48px OG이미지 스트립 + 미분양/호수 오버레이
-- RedevTab: 48px OG이미지 스트립 + 유형/단계/진행률 오버레이
-- LandmarkAptCards: 48px 이미지 영역 + apt_sites 매칭 이미지
-- `landmark_apts.image_url` 컬럼 추가 + apt_sites에서 satellite_image_url 매칭 완료
+**구조화 데이터 (JSON-LD):**
+- ItemList에 `image` 속성 추가: 블로그 목록, 주식 메인/섹터, 아파트 허브/지역, 홈페이지 — 네이버 캐러셀 이미지 노출 핵심
+- Organization `sameAs` 채움 (기존 빈 배열)
+- Organization `numberOfEmployees`, `areaServed`, `knowsAbout` 확장
+- BlogPosting `isPartOf` 추가 (구글 사이트링크 강화)
+- FAQPage 추가: stock/themes, movers, market/[code], apt/search, apt/map (layout.tsx 경유)
+- BreadcrumbList 추가: calc 허브, calc/[category], faq, shop, press
+- stock/compare, stock/search — layout.tsx 생성으로 SEO 공백 해소
 
-**블로그 페이지:**
-- 리스트 카드에 64x44 cover_image 썸네일 추가 (lazy loading)
+**메타 태그:**
+- `seo.ts` buildMeta/seoOther에 `naver:written_time`, `naver:updated_time`, `naver:description` 자동 포함
+- about/team — naver 메타 추가
+- press — naver 메타 추가
 
-## PENDING
-- [ ] 호스팅어 108개 사이트 CDN Security → Low 일괄 변경
-- [ ] SSH 비밀번호 변경
-- [ ] 네이버 서치어드바이저 사이트맵 재제출
-- [ ] SEO rewrite 재개 (10,400 → 15,000)
-- [ ] /daily 라우트 TypeError 수정
+**H1 태그:**
+- 7개 페이지 H1 추가: /apt, /stock, /feed, /discuss, /search, /faq, /stock/search
+- 서버 컴포넌트는 visible H1, 클라이언트 컴포넌트는 sr-only H1
+
+**RSS:**
+- layout.tsx RSS alternate → /blog/feed (최고 품질 — media:content + enclosure 포함)
+- feed.xml에 content:encoded + enclosure 추가 (기존 xmlns:content 선언만 하고 미사용 수정)
+
+**인프라:**
+- Yeti(네이버) Crawl-delay 1→0 (수집 속도 최대화)
+- Blog series sitemap lastmod: created_at → updated_at (신선도 신호 개선)
+
+**총 변경: 20개 파일 수정 + 4개 신규 layout.tsx 생성**
+
+## PENDING (코드 외 수동 작업)
+- 네이버 블로그 공식 채널 개설 + 주간 요약 발행
+- 네이버 카페 개설
+- 네이버 플레이스 사업체 등록
+- 네이버 서치어드바이저 수집주기 "빠르게" 확인
+- 네이버 서치어드바이저 RSS 제출 URL → /blog/feed 변경
+- 카카오톡 채널 개설/연동
+- 다음 웹마스터도구 등록 확인
+- Zum 웹마스터도구 등록
+- 네이버 인플루언서 등록 검토
+- 네이버TV/유튜브 동영상 채널 개설 검토
+- 백링크 확보 전략 수립

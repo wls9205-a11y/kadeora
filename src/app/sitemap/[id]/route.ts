@@ -217,10 +217,10 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
       let seriesEntries: SitemapEntry[] = [];
       if (chunk === 0) {
         try {
-          const { data: series } = await sb.from('blog_series').select('slug, created_at').eq('is_active', true);
+          const { data: series } = await sb.from('blog_series').select('slug, created_at, updated_at').eq('is_active', true);
           seriesEntries = (series || []).map((s: any) => ({
             url: `${BASE}/blog/series/${s.slug}`,
-            lastModified: s.created_at || now,
+            lastModified: s.updated_at || s.created_at || now,
             changeFrequency: 'weekly',
             priority: 0.7,
           }));

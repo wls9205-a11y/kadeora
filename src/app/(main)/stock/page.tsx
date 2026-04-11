@@ -174,6 +174,7 @@ export default async function StockPage() {
           "url": `${SITE_URL}/stock/${s.symbol}`,
         })),
       }) }} />}
+      <h1 style={{ fontSize: "var(--fs-xl)", fontWeight: 700, margin: "0 0 4px", color: "var(--text-primary)" }}>주식 시세 — 실시간 국내외 종목</h1>
       <StockClient initialStocks={stocks as React.ComponentProps<typeof StockClient>['initialStocks']} briefing={briefing} briefingUS={briefingUS} exchangeHistory={exchangeHistory} themeHistory={themeHistory} />
       <Disclaimer />
     </Suspense>

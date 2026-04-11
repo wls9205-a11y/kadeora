@@ -437,6 +437,7 @@ export default async function BlogDetailPage({ params }: Props) {
       logo: { '@type': 'ImageObject', url: `${SITE}/icons/icon-192.png`, width: 192, height: 192 },
     },
     mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE}/blog/${slug}` },
+    isPartOf: { '@type': 'WebSite', name: '카더라', url: SITE },
     url: `${SITE}/blog/${slug}`,
     image: [
       {

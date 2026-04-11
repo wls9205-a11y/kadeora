@@ -87,11 +87,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
         <link rel="dns-prefetch" href="https://dapi.kakao.com" />
-        <link rel="alternate" type="application/rss+xml" title="카더라 RSS" href="/feed.xml" />
-        <link rel="alternate" type="application/rss+xml" title="카더라 주식 RSS" href="/feed.xml?category=stock" />
-        <link rel="alternate" type="application/rss+xml" title="카더라 부동산 RSS" href="/feed.xml?category=apt" />
-        <link rel="alternate" type="application/rss+xml" title="카더라 재테크 RSS" href="/feed.xml?category=finance" />
-        <link rel="alternate" type="application/rss+xml" title="카더라 블로그" href="/feed.xml?category=blog" />
+        <link rel="alternate" type="application/rss+xml" title="카더라 블로그 RSS" href="/blog/feed" />
+        <link rel="alternate" type="application/rss+xml" title="카더라 주식 RSS" href="/stock/feed" />
+        <link rel="alternate" type="application/rss+xml" title="카더라 부동산 RSS" href="/apt/feed" />
         <link rel="search" type="application/opensearchdescription+xml" title="카더라 검색" href="/opensearch.xml" />
         <meta name="msvalidate.01" content="BAE0BF3F5071F16E8BAE497D195B2FD6" />
         <meta name="google-adsense-account" content="ca-pub-2356113563328542" />
@@ -180,9 +178,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           founder: { '@type': 'Person', name: '노영진' },
           address: { '@type': 'PostalAddress', addressCountry: 'KR', addressRegion: '부산광역시', addressLocality: '연제구', streetAddress: '연동로 27, 405호', postalCode: '47571' },
           contactPoint: { '@type': 'ContactPoint', contactType: 'customer service', email: 'kadeora.app@gmail.com', telephone: '+82-10-5001-1382', availableLanguage: 'Korean' },
-          sameAs: [],
-          knowsAbout: ['부동산', '주식', '아파트 청약', '재개발', '미분양', 'AI 주식 분석'],
+          sameAs: [
+            'https://kadeora.app',
+            'https://blog.naver.com/kadeora_app',
+          ],
+          knowsAbout: ['부동산', '주식', '아파트 청약', '재개발', '미분양', 'AI 주식 분석', '실거래가', '분양', '재테크'],
           slogan: '아파트 청약·재개발, 주식 시세·AI 종목 분석을 한곳에서',
+          numberOfEmployees: { '@type': 'QuantitativeValue', value: 1 },
+          areaServed: { '@type': 'Country', name: '대한민국' },
         }) }} />
       </head>
       <body>

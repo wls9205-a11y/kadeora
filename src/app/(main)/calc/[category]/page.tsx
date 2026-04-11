@@ -44,6 +44,15 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
   const calcs = CALC_REGISTRY.filter(c => c.category === category);
 
   return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: '카더라', item: 'https://kadeora.app' },
+          { '@type': 'ListItem', position: 2, name: '계산기', item: 'https://kadeora.app/calc' },
+          { '@type': 'ListItem', position: 3, name: catLabel },
+        ],
+      })}} />
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
       <Link href="/calc" style={{ fontSize: 12, color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 계산기 전체</Link>
       <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 900, margin: '8px 0 4px' }}>{cat.icon} {cat.label} 계산기</h1>
@@ -76,5 +85,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
         </div>
       </div>
     </div>
+  );
+    </>
   );
 }

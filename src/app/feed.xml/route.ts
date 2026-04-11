@@ -54,6 +54,8 @@ export async function GET(req: NextRequest) {
     title: b.title,
     link: `${SITE}/blog/${b.slug}`,
     description: b.excerpt || b.title,
+    content: (b.excerpt || b.title || "").slice(0, 1000),
+    image: `${SITE}/api/og?title=${encodeURIComponent((b.title || "").slice(0, 50))}&design=2&category=${b.category || "blog"}`,
     pubDate: new Date(b.published_at || b.updated_at).toUTCString(),
     category: CATEGORY_MAP[b.category] || '정보',
     tags: b.tags || [],
@@ -129,7 +131,9 @@ ${allItems.map(item => `    <item>
       <pubDate>${item.pubDate}</pubDate>
       <category>${escapeXml(item.category)}</category>
       <guid isPermaLink="true">${item.guid}</guid>
-      <dc:creator>카더라</dc:creator>${item.tags.length ? `\n      ${item.tags.map((t: string) => `<category>${escapeXml(t)}</category>`).join('\n      ')}` : ''}
+      <dc:creator>카더라</dc:creator>
+      <content:encoded><![CDATA[${escapeXml(item.content || item.description)}]]></content:encoded>
+      <enclosure url="${item.image || ""}" type="image/jpeg" length="0" />${item.tags.length ? `\n      ${item.tags.map((t: string) => `<category>${escapeXml(t)}</category>`).join('\n      ')}` : ''}
     </item>`).join('\n')}
   </channel>
 </rss>`;

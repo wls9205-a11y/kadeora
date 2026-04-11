@@ -76,6 +76,8 @@ export default async function AptSearchPage({ searchParams }: Props) {
   const hasMore = (trades?.length || 0) === perPage;
 
   return (
+    <>      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "FAQPage", mainEntity: [{ "@type": "Question", name: "아파트 청약 검색은 어떻게 하나요?", acceptedAnswer: { "@type": "Answer", text: "카더라 부동산 검색에서 아파트명, 지역, 시공사로 청약 일정을 검색할 수 있습니다." } }] }) }} />
+
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '부동산', item: SITE_URL + '/apt' }, { '@type': 'ListItem', position: 3, name: '실거래 검색' }] }) }} />
       <Link href="/apt" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 부동산</Link>
@@ -223,5 +225,6 @@ export default async function AptSearchPage({ searchParams }: Props) {
         </div>
       </div>
     </div>
-  );
+  
+    </>);
 }

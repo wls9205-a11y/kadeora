@@ -59,7 +59,7 @@ Allow: /api/og
 Allow: /api/og-square
 Allow: /api/og-chart
 Allow: /images/
-Crawl-delay: 1
+Crawl-delay: 0
 Disallow: /admin/
 Disallow: /api/cron
 Disallow: /api/admin

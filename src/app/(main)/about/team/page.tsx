@@ -12,6 +12,12 @@ export const metadata: Metadata = {
     url: `${SITE_URL}/about/team`, siteName: '카더라', locale: 'ko_KR', type: 'profile',
     images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent('카더라 팀')}&design=2`, width: 1200, height: 630 }],
   },
+  other: {
+    'naver:author': '카더라', 'naver:site_name': '카더라',
+    'naver:written_time': '2024-06-01T00:00:00Z',
+    'naver:updated_time': new Date().toISOString(),
+    'og:updated_time': new Date().toISOString(),
+  },
 };
 
 const TEAM = [

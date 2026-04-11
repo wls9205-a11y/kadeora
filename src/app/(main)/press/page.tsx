@@ -19,6 +19,8 @@ const STATS = [
 
 export default function PressPage() {
   return (
+    <>
+
     <article style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
       <nav aria-label="breadcrumb" style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-md)' }}>
         <Link href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>홈</Link>
@@ -84,5 +86,6 @@ export default function PressPage() {
         </div>
       </section>
     </article>
-  );
+  
+    </>);
 }

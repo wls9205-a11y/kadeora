@@ -104,6 +104,7 @@ export default async function SectorPage({ params }: Props) {
         itemListElement: top10.map((s, i) => ({
           '@type': 'ListItem', position: i + 1,
           url: `${SITE_URL}/stock/${encodeURIComponent(s.symbol)}`,
+          image: `${SITE_URL}/api/og?title=${encodeURIComponent(s.name || s.symbol)}&design=2&category=stock`,
           name: `${s.name} (${s.symbol})`,
         })),
       })}} />

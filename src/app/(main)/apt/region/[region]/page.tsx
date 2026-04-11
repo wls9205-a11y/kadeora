@@ -148,6 +148,7 @@ export default async function RegionLandingPage({ params }: Props) {
         numberOfItems: Math.min(data.subscriptions.length, 10),
         itemListElement: data.subscriptions.slice(0, 10).map((s: any, i: number) => ({
           '@type': 'ListItem', position: i + 1,
+          image: `${SITE_URL}/api/og?title=${encodeURIComponent(s.name || '')}&design=2&category=apt`,
           url: `${SITE_URL}/apt/${s.id}`,
           name: s.house_nm,
         })),
