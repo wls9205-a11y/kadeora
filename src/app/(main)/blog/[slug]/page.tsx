@@ -637,13 +637,11 @@ export default async function BlogDetailPage({ params }: Props) {
       {howtoSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howtoSchema) }} />}
       {datasetSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(datasetSchema) }} />}
 
-      <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-lg)', flexWrap: 'wrap' }}>
-        <Link href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>홈</Link>
-        <span>›</span>
-        <Link href="/blog" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>블로그</Link>
-        {post.category && <><span>›</span><Link href={`/blog?category=${post.category}`} style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>{{ stock: '주식', apt: '청약', unsold: '미분양', finance: '재테크', general: '생활' }[post.category] || post.category}</Link></>}
-        <span>›</span>
-        <span style={{ color: 'var(--text-primary)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 200 }}>{post.title.slice(0, 30)}</span>
+      <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 20, flexWrap: 'wrap', letterSpacing: '0.3px' }}>
+        <Link href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)', opacity: 0.7 }}>홈</Link>
+        <span style={{ opacity: 0.3 }}>/</span>
+        <Link href="/blog" style={{ textDecoration: 'none', color: 'var(--text-tertiary)', opacity: 0.7 }}>블로그</Link>
+        {post.category && <><span style={{ opacity: 0.3 }}>/</span><Link href={`/blog?category=${post.category}`} style={{ textDecoration: 'none', color: catStyle.color, fontWeight: 600 }}>{{ stock: '주식', apt: '청약', unsold: '미분양', finance: '재테크', general: '생활' }[post.category] || post.category}</Link></>}
       </nav>
 
       {/* 세션70: 상단 회원가입 유도 배너 */}
@@ -665,27 +663,40 @@ export default async function BlogDetailPage({ params }: Props) {
           );
         })()}
 
-        {/* 히어로 — 컴팩트 */}
-        <div style={{ marginBottom: 14 }}>
-          {/* 카테고리 + 메타 1줄 */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8, flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 4, background: catStyle.bg, color: catStyle.color }}>
-              {({ stock: '주식', apt: '청약', unsold: '미분양', finance: '재테크', general: '생활' } as Record<string, string>)[post.category] || post.category}
+        {/* 히어로 — 프리미엄 */}
+        <div style={{ marginBottom: 20 }}>
+          {/* 카테고리 배지 */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 14 }}>
+            <span style={{ fontSize: 11, fontWeight: 700, padding: '4px 12px', borderRadius: 20, background: catStyle.bg, color: catStyle.color, letterSpacing: '0.3px' }}>
+              {({ stock: '주식 분석', apt: '청약 분석', unsold: '미분양 분석', finance: '재테크', general: '생활' } as Record<string, string>)[post.category] || post.category}
             </span>
-            {(post.view_count ?? 0) >= 100 && <span style={{ fontSize: 9, fontWeight: 700, color: 'var(--accent-red)' }}>HOT</span>}
-            <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
-              {post.author_name || '카더라'} · <time dateTime={post.published_at || post.created_at || new Date().toISOString()}>{new Date(post.published_at || post.created_at || Date.now()).toLocaleDateString('ko-KR')}</time> · 📖 {readingTimeMin}분 · 👀 {post.view_count ?? 0}
-              {post.rewritten_at && <span style={{ marginLeft: 4, padding: '0 4px', borderRadius: 3, background: 'var(--accent-green-bg)', color: 'var(--accent-green)', fontSize: 9, fontWeight: 700 }}>UP</span>}
-            </span>
+            {(post.view_count ?? 0) >= 100 && <span style={{ fontSize: 9, fontWeight: 700, padding: '3px 8px', borderRadius: 20, background: 'var(--error-bg)', color: 'var(--error)' }}>인기</span>}
+            {post.rewritten_at && <span style={{ fontSize: 9, fontWeight: 700, padding: '3px 8px', borderRadius: 20, background: 'var(--success-bg)', color: 'var(--success)' }}>UP</span>}
           </div>
           {/* 제목 */}
-          <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 900, color: 'var(--text-primary)', lineHeight: 1.4, margin: 0, wordBreak: 'keep-all', letterSpacing: '-0.5px' }}>{post.title}</h1>
+          <h1 style={{ fontSize: 26, fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.5, margin: '0 0 18px', wordBreak: 'keep-all', letterSpacing: '-0.8px' }}>{post.title}</h1>
+          {/* 저자 카드 */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', borderRadius: 12, background: 'var(--bg-hover)', border: '1px solid var(--border)' }}>
+            <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--brand-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, color: 'var(--brand)', flexShrink: 0 }}>
+              {(post.author_name || '카더라').charAt(0)}
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>{post.author_name || '카더라 부동산팀'}</div>
+              <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 2 }}>
+                <time dateTime={post.published_at || post.created_at || new Date().toISOString()}>{new Date(post.published_at || post.created_at || Date.now()).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}</time> · {readingTimeMin}분 읽기
+              </div>
+            </div>
+            <div style={{ textAlign: 'right', flexShrink: 0 }}>
+              <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--brand)' }}>{(post.view_count ?? 0).toLocaleString()}</div>
+              <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 1 }}>조회</div>
+            </div>
+          </div>
         </div>
 
-        {/* 태그 — 컴팩트 인라인 */}
+        {/* 태그 — 필 스타일 */}
         {(post.tags ?? []).length > 0 && (
-          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 10 }}>
-            {(post.tags ?? []).map((t: string) => <Link key={t} href={`/blog?q=${encodeURIComponent(t)}`} style={{ fontSize: 10, padding: '2px 8px', borderRadius: 4, background: 'var(--bg-hover)', color: 'var(--text-tertiary)', textDecoration: 'none', fontWeight: 500 }}>#{t}</Link>)}
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 14 }}>
+            {(post.tags ?? []).map((t: string) => <Link key={t} href={`/blog?q=${encodeURIComponent(t)}`} style={{ fontSize: 12, padding: '4px 12px', borderRadius: 20, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-tertiary)', textDecoration: 'none', fontWeight: 400 }}>#{t}</Link>)}
           </div>
         )}
 
@@ -714,35 +725,31 @@ export default async function BlogDetailPage({ params }: Props) {
           );
         })()}
 
-        {/* 히어로 이미지 (커버 이미지를 인라인으로 표시) */}
+        {/* 히어로 이미지 */}
         {post.cover_image && (
-          <div style={{ marginBottom: 'var(--sp-md)', borderRadius: 'var(--radius-card)', overflow: 'hidden', border: '1px solid var(--border)' }}>
+          <div style={{ marginBottom: 20, borderRadius: 14, overflow: 'hidden', border: '1px solid var(--border)' }}>
             <img
               src={post.cover_image.startsWith('/') ? post.cover_image : post.cover_image}
               alt={post.image_alt || post.title}
               width={1200} height={630}
-              style={{ width: '100%', height: 'auto', display: 'block', maxHeight: 300 , objectFit: 'cover' }}
+              style={{ width: '100%', height: 'auto', display: 'block', maxHeight: 340, objectFit: 'cover' }}
               loading="eager"
             />
           </div>
         )}
 
-        {/* 상단 공유 바 — 카카오톡 단독 + 전체 공유 + 북마크 */}
+        {/* 공유 바 */}
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '8px 0', marginBottom: 'var(--sp-sm)', fontSize: 'var(--fs-sm)',
-          borderBottom: '1px solid var(--border)', flexWrap: 'wrap', gap: 6,
+          padding: '10px 0', marginBottom: 24, fontSize: 'var(--fs-sm)',
+          borderBottom: '1px solid var(--border)', flexWrap: 'wrap', gap: 8,
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            {/* 카카오톡 단독 버튼 */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <KakaoShareButton title={post.title} description={post.meta_description || post.excerpt || ''} slug={slug} coverImage={post.cover_image || undefined} />
             <ShareButtons title={post.title} postId={slug} content={post.excerpt || post.meta_description || undefined} category={post.category} />
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <BlogBookmarkButton blogPostId={post.id} />
-            <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
-              👁 {post.view_count?.toLocaleString() || 0}
-            </span>
           </div>
         </div>
 
