@@ -106,7 +106,7 @@ export default function ProfileHeader({ profile, isOwner, followersCount, follow
       }).eq('id', profile.id);
       if (err) throw err;
       // 프로필 첫 완성 보너스
-      if (hasBio && !profile.profile_completed) {
+      if (hasBio && !(profile as any).profile_completed) {
         fetch('/api/profile/complete-bonus', { method: 'POST' }).then(r => r.ok ? r.json() : null)
           .then(d => { if (d?.granted) success('🎉 프로필 완성 보너스 +50P!'); }).catch(() => {});
       }
