@@ -24,12 +24,14 @@ export async function POST(req: NextRequest) {
     const { post_id, platform } = await req.json();
     const sb = await createSupabaseServer();
     const { data: { user } } = await sb.auth.getUser();
-    await sb.from('share_logs').insert({ post_id, platform, user_id: user?.id || null });
+    const admin = getSupabaseAdmin();
+    
+    // admin 클라이언트로 insert (RLS 우회 — 비로그인 유저도 공유 추적 가능)
+    await admin.from('share_logs').insert({ post_id, platform, user_id: user?.id || null });
 
     // 로그인 유저만 공유 포인트 (1일 1회, 최대 5포인트)
     if (user?.id) {
       try {
-        const admin = getSupabaseAdmin();
         const today = new Date().toISOString().slice(0, 10);
         const { count } = await admin.from('share_logs')
           .select('id', { count: 'exact', head: true })
