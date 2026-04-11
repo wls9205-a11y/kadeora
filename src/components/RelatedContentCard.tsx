@@ -13,6 +13,7 @@ import { trackClick } from '@/lib/analytics';
 interface Props {
   type: 'blog' | 'apt' | 'stock' | 'feed';
   entityName?: string;
+  showSignup?: boolean;
 }
 
 const LINKS: Record<string, { icon: string; title: string; href: string; desc: string }[]> = {
@@ -38,7 +39,7 @@ const LINKS: Record<string, { icon: string; title: string; href: string; desc: s
   ],
 };
 
-export default function RelatedContentCard({ type, entityName }: Props) {
+export default function RelatedContentCard({ type, entityName, showSignup }: Props) {
   const pathname = usePathname();
   const links = LINKS[type] || LINKS.blog;
 
@@ -68,6 +69,17 @@ export default function RelatedContentCard({ type, entityName }: Props) {
           </Link>
         ))}
       </div>
+      {showSignup && (
+        <Link href={`/login?redirect=${encodeURIComponent(pathname)}&source=related_card`}
+          style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+            marginTop: 10, padding: '10px', borderRadius: 8,
+            background: 'rgba(59,123,246,0.06)', border: '1px solid rgba(59,123,246,0.12)',
+            fontSize: 12, fontWeight: 700, color: 'var(--brand)', textDecoration: 'none',
+          }}>
+          🔔 무료 가입하고 알림 받기
+        </Link>
+      )}
     </div>
   );
 }

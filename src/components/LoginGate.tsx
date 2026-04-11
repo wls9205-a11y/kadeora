@@ -19,11 +19,11 @@ interface LoginGateProps {
   blurHeight?: number;
 }
 
-const DEFAULTS: Record<string, { title: string; desc: string }> = {
-  ai_analysis: { title: 'AI 투자 분석', desc: '이 종목의 AI 전망과 투자 의견을 확인하세요' },
-  comparison: { title: '맞춤 비교 분석', desc: '관심 종목/단지와 비슷한 항목을 한눈에 비교' },
-  price_alert: { title: '가격 변동 알림', desc: '급등/급락, 청약 마감 등 놓치고 싶지 않은 알림' },
-  apt_analysis: { title: '단지 종합 분석', desc: '이 단지의 시세 전망과 투자 분석을 확인하세요' },
+const DEFAULTS: Record<string, { title: string; desc: string; preview: string }> = {
+  ai_analysis: { title: 'AI 투자 분석 보기', desc: '이 종목의 적정가·리스크·전망을 AI가 분석했어요', preview: '적정가: ???원 | 리스크: ?단계 | 전망: ???' },
+  comparison: { title: '맞춤 비교 분석', desc: '관심 종목/단지와 비슷한 항목을 한눈에 비교', preview: '수익률·시세·거래량 비교표 숨김' },
+  price_alert: { title: '가격 변동 알림 설정', desc: '급등/급락, 청약 마감 소식을 놓치지 마세요', preview: '최근 변동: +?% | 알림 수신 대기' },
+  apt_analysis: { title: '단지 종합 분석 보기', desc: '이 단지의 실거래가 추이와 투자 분석을 확인하세요', preview: '평당가: ???만원 | 전망: ???' },
 };
 
 export default function LoginGate({ children, feature, title, description, blurHeight = 200 }: LoginGateProps) {
@@ -64,8 +64,12 @@ export default function LoginGate({ children, feature, title, description, blurH
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end',
         paddingBottom: 16,
       }}>
+        {/* 미리보기 힌트 */}
+        <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 8, padding: '4px 10px', borderRadius: 6, background: 'var(--bg-hover)', fontFamily: 'monospace' }}>
+          {d.preview}
+        </div>
         <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 3, textAlign: 'center' }}>
-          🔒 {title || d.title}
+          {title || d.title}
         </div>
         <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 12, textAlign: 'center' }}>
           {description || d.desc}

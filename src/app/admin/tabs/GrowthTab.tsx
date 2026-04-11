@@ -123,24 +123,49 @@ export default function GrowthTab({ onNavigate }: { onNavigate: (t: any) => void
       )}
 
       {/* CTA 성과 */}
-      <div className="adm-sec">🎪 CTA 성과</div>
+      <div className="adm-sec">🎪 CTA 성과 (7일)</div>
       <div className="adm-card" style={{ padding: '8px 14px' }}>
+        {/* 요약 메트릭 */}
+        {(() => {
+          const allViews = Object.values(ctaStats || {}).reduce((s: number, e: any) => s + (e.cta_view || 0), 0);
+          const allClicks = Object.values(ctaStats || {}).reduce((s: number, e: any) => s + (e.cta_click || 0), 0);
+          const avgCtr = allViews > 0 ? (allClicks / allViews * 100).toFixed(2) : '0';
+          return (
+            <div style={{ display: 'flex', gap: 12, padding: '8px 0 12px', borderBottom: '1px solid var(--border)', marginBottom: 4 }}>
+              <div style={{ flex: 1, textAlign: 'center' }}>
+                <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)' }}>{allViews.toLocaleString()}</div>
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>총 노출</div>
+              </div>
+              <div style={{ flex: 1, textAlign: 'center' }}>
+                <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)' }}>{allClicks.toLocaleString()}</div>
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>총 클릭</div>
+              </div>
+              <div style={{ flex: 1, textAlign: 'center' }}>
+                <div style={{ fontSize: 18, fontWeight: 800, color: parseFloat(avgCtr) > 1 ? '#10B981' : '#EF4444' }}>{avgCtr}%</div>
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>평균 CTR</div>
+              </div>
+            </div>
+          );
+        })()}
         <div style={{ display: 'flex', padding: '4px 0', borderBottom: '1px solid var(--border)', fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 600 }}>
           <span style={{ flex: 1 }}>CTA</span>
           <span style={{ width: 45, textAlign: 'right' }}>노출</span>
           <span style={{ width: 45, textAlign: 'right' }}>클릭</span>
-          <span style={{ width: 45, textAlign: 'right' }}>CTR</span>
+          <span style={{ width: 55, textAlign: 'right' }}>CTR</span>
+          <span style={{ width: 30, textAlign: 'right' }}>상태</span>
         </div>
-        {Object.entries(ctaStats || {}).sort((a: any, b: any) => (b[1].cta_view || 0) - (a[1].cta_view || 0)).slice(0, 10).map(([name, events]: [string, any]) => {
+        {Object.entries(ctaStats || {}).sort((a: any, b: any) => (b[1].cta_view || 0) - (a[1].cta_view || 0)).slice(0, 15).map(([name, events]: [string, any]) => {
           const views = events.cta_view || 0;
           const clicks = events.cta_click || 0;
-          const ctr = views > 0 ? (clicks / views * 100).toFixed(1) : '0';
+          const ctr = views > 0 ? (clicks / views * 100) : 0;
+          const status = ctr > 2 ? '🟢' : ctr > 0.5 ? '🟡' : views > 0 ? '🔴' : '⚪';
           return (
-            <div key={name} style={{ display: 'flex', padding: '6px 0', borderBottom: '1px solid var(--border)', fontSize: 12 }}>
+            <div key={name} style={{ display: 'flex', padding: '6px 0', borderBottom: '1px solid var(--border)', fontSize: 12, alignItems: 'center' }}>
               <span style={{ flex: 1, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</span>
               <span style={{ width: 45, textAlign: 'right', color: 'var(--text-secondary)' }}>{views || '—'}</span>
               <span style={{ width: 45, textAlign: 'right', color: 'var(--text-secondary)' }}>{clicks || '—'}</span>
-              <span style={{ width: 45, textAlign: 'right', color: parseFloat(ctr) > 1 ? '#10B981' : '#EF4444', fontWeight: 600 }}>{ctr}%</span>
+              <span style={{ width: 55, textAlign: 'right', color: ctr > 1 ? '#10B981' : '#EF4444', fontWeight: 600 }}>{ctr.toFixed(1)}%</span>
+              <span style={{ width: 30, textAlign: 'right', fontSize: 10 }}>{status}</span>
             </div>
           );
         })}

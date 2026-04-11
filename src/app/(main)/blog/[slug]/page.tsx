@@ -764,8 +764,8 @@ export default async function BlogDetailPage({ params }: Props) {
 
         {/* CTA — 본문 직후 위치 (비로그인, 스크롤 필요 최소화) */}
 
-        {isLoggedIn && !isBot && <BlogMidCTA category={post.category} slug={slug} userCount={userCount} />}
-        {!isLoggedIn && <RelatedContentCard type="blog" />}
+        {!isLoggedIn && !isBot && <BlogMidCTA category={post.category} slug={slug} userCount={userCount} />}
+        <RelatedContentCard type="blog" showSignup={!isLoggedIn} />
 
         {/* 뉴스레터 — 본문 직후, 비로그인 유저 대상 (게이트 대안 경로) */}
         {!isLoggedIn && !isBot && <NewsletterSubscribe category={post.category} />}

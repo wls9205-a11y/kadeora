@@ -20,8 +20,8 @@ export default function SmartSectionGate({ htmlContent, slug, category, userCoun
 
   if (!shouldGate) return <div dangerouslySetInnerHTML={{ __html: htmlContent }} />;
 
-  // 게이트 위치: 본문 40% 지점 (충분히 읽혀서 궁금증 유발)
-  const cutPoint = Math.floor(htmlContent.length * 0.4);
+  // 게이트 위치: 본문 55% 지점 (충분히 읽혀서 궁금증 유발)
+  const cutPoint = Math.floor(htmlContent.length * 0.55);
   // H2/H3 태그 경계에서 자르기 (깔끔하게)
   const headingAfterCut = htmlContent.slice(cutPoint).match(/<h[23][^>]*>/i);
   const actualCut = headingAfterCut?.index ? cutPoint + headingAfterCut.index : cutPoint;
@@ -31,10 +31,10 @@ export default function SmartSectionGate({ htmlContent, slug, category, userCoun
 
   // 카테고리별 맞춤 메시지
   const ctaConfig = {
-    apt: { icon: '🏠', title: '청약 분석 전체 보기', desc: '가입하면 청약 알림 + 가점 계산 + 전체 분석 무료', tags: ['청약알림', '가점계산', '실거래가'] },
-    stock: { icon: '📈', title: '종목 분석 전체 보기', desc: '가입하면 종목 알림 + AI 브리핑 + 전체 분석 무료', tags: ['종목알림', 'AI분석', '실시간시세'] },
-    finance: { icon: '💰', title: '재테크 분석 전체 보기', desc: '가입하면 투자 인사이트 + 커뮤니티 전체 무료', tags: ['포트폴리오', '절약팁', '투자전략'] },
-  }[category] || { icon: '📊', title: '전체 분석 보기', desc: '가입하면 모든 분석 + 커뮤니티 무료 이용', tags: ['무료가입', '즉시열람', '스팸없음'] };
+    apt: { icon: '🏠', title: '나머지 분석 이어서 읽기', desc: '무료 가입하면 전체 분석 + 청약 알림까지', tags: ['전체분석', '청약알림', '실거래가'] },
+    stock: { icon: '📈', title: '나머지 분석 이어서 읽기', desc: '무료 가입하면 전체 분석 + AI 브리핑까지', tags: ['전체분석', '종목알림', 'AI분석'] },
+    finance: { icon: '💰', title: '나머지 분석 이어서 읽기', desc: '무료 가입하면 전체 분석 + 투자 인사이트까지', tags: ['전체분석', '계산기', '절세전략'] },
+  }[category] || { icon: '📊', title: '나머지 분석 이어서 읽기', desc: '무료 가입하면 모든 분석 + 커뮤니티 이용 가능', tags: ['전체분석', '무료가입', '3초완료'] };
 
   const handleCopy = () => {
     navigator.clipboard?.writeText(window.location.href);
@@ -96,7 +96,7 @@ export default function SmartSectionGate({ htmlContent, slug, category, userCoun
               }}
             >
               <svg width="18" height="18" viewBox="0 0 512 512" fill="#191919"><path d="M255.5 48C141.1 48 48 126.1 48 222.4c0 62.2 38.7 116.7 97 149.8l-24.1 89.7c-2.1 7.9 6.8 14.4 13.7 9.9l101.2-65.2c7.2 1 14.6 1.5 22.2 1.5 114.4 0 207.5-78.1 207.5-174.4S369.9 48 255.5 48z"/></svg>
-              카카오로 3초 만에 열기
+              카카오로 이어서 읽기
             </a>
 
             {/* 소셜 프루프 */}

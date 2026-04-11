@@ -69,7 +69,7 @@ export default function ActionBar() {
       setVisible(true);
       const cfg = getAction(pathname);
       if (cfg) trackCTA('view', `action_bar_${cfg.action}`);
-    }, 3000);
+    }, 1000);
     return () => clearTimeout(timer);
   }, [pathname, userId, loading]);
 
