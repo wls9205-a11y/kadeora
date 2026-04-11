@@ -82,7 +82,7 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
   if(ret&&ret.d7Rate===0&&ret.size>5)warns.push('D7 리텐션 0%');
   if((k.pushSubs??0)<=3)warns.push(`푸시 ${k.pushSubs??0}명`);
   if(shareTotal<=1)warns.push('공유 죽음');
-  if((k.signupAttempts??0)>10&&(k.signupSuccess??0)===0)warns.push('가입성공 0건');
+  if((x.signupAttempts??0)>10&&(x.signupSuccess??0)===0)warns.push('가입성공 0건');
   if((k.neverActive??0)>10)warns.push(`미활성 ${k.neverActive}명`);
   const deadFeatures = ['aptBookmarks','blogBookmarks','stockWatchlist','priceAlerts'].filter(f=>(fh[f]??0)===0).length;
   if(deadFeatures>=3)warns.push(`죽은기능 ${deadFeatures}개`);
@@ -102,17 +102,17 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:6,marginBottom:2}}>
         <div style={{background:'linear-gradient(135deg,rgba(251,191,36,0.12),rgba(12,21,40,0.8))',border:'1px solid rgba(251,191,36,0.2)',borderRadius:14,padding:'12px 10px',textAlign:'center'}}>
           <div style={{fontSize:11,fontWeight:700,color:'rgba(251,191,36,0.8)'}}>가입 시도</div>
-          <div style={{fontSize:28,fontWeight:900,color:'#FBBF24',lineHeight:1,marginTop:4}}>{k.signupAttempts??0}</div>
-          <div style={{fontSize:11,color:'rgba(255,255,255,0.45)',marginTop:4}}>{k.signupAttempts7d||0} / 7일</div>
+          <div style={{fontSize:28,fontWeight:900,color:'#FBBF24',lineHeight:1,marginTop:4}}>{x.signupAttempts??0}</div>
+          <div style={{fontSize:11,color:'rgba(255,255,255,0.45)',marginTop:4}}>{x.signupAttempts7d||0} / 7일</div>
         </div>
         <div style={{background:'linear-gradient(135deg,rgba(16,185,129,0.12),rgba(12,21,40,0.8))',border:'1px solid rgba(16,185,129,0.2)',borderRadius:14,padding:'12px 10px',textAlign:'center'}}>
           <div style={{fontSize:11,fontWeight:700,color:'rgba(16,185,129,0.8)'}}>가입 성공</div>
-          <div style={{fontSize:28,fontWeight:900,color:'#10B981',lineHeight:1,marginTop:4}}>{k.signupSuccess??0}</div>
-          <div style={{fontSize:11,color:'rgba(255,255,255,0.45)',marginTop:4}}>{k.signupAttempts > 0 ? ((k.signupSuccess/k.signupAttempts)*100).toFixed(0) : '\u2014'}% 전환</div>
+          <div style={{fontSize:28,fontWeight:900,color:'#10B981',lineHeight:1,marginTop:4}}>{x.signupSuccess??0}</div>
+          <div style={{fontSize:11,color:'rgba(255,255,255,0.45)',marginTop:4}}>{x.signupAttempts > 0 ? ((x.signupSuccess/x.signupAttempts)*100).toFixed(0) : '\u2014'}% 전환</div>
         </div>
         <div style={{background:'linear-gradient(135deg,rgba(239,68,68,0.12),rgba(12,21,40,0.8))',border:'1px solid rgba(239,68,68,0.2)',borderRadius:14,padding:'12px 10px',textAlign:'center'}}>
           <div style={{fontSize:11,fontWeight:700,color:'rgba(239,68,68,0.8)'}}>가입 실패</div>
-          <div style={{fontSize:28,fontWeight:900,color:'#EF4444',lineHeight:1,marginTop:4}}>{(k.signupAttempts??0)-(k.signupSuccess??0)}</div>
+          <div style={{fontSize:28,fontWeight:900,color:'#EF4444',lineHeight:1,marginTop:4}}>{(x.signupAttempts??0)-(x.signupSuccess??0)}</div>
           <div style={{fontSize:11,color:'rgba(255,255,255,0.45)',marginTop:4}}>에러 체크</div>
         </div>
       </div>
@@ -134,13 +134,13 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
         </div>
         <div style={{background:'linear-gradient(135deg,rgba(168,85,247,0.12),rgba(12,21,40,0.8))',border:'1px solid rgba(168,85,247,0.2)',borderRadius:14,padding:'14px 16px',textAlign:'center'}}>
           <div style={{fontSize:11,fontWeight:700,color:'rgba(168,85,247,0.8)',letterSpacing:0.5,marginBottom:6}}>오늘 공유</div>
-          <div style={{fontSize:32,fontWeight:900,color:'#A855F7',lineHeight:1}}>{k.sharesToday??0}</div>
-          <div style={{fontSize:11,color:'rgba(255,255,255,0.45)',marginTop:4}}>{k.shares7d||0} / 7일</div>
+          <div style={{fontSize:32,fontWeight:900,color:'#A855F7',lineHeight:1}}>{x.sharesToday??0}</div>
+          <div style={{fontSize:11,color:'rgba(255,255,255,0.45)',marginTop:4}}>{x.shares7d||0} / 7일</div>
         </div>
         <div style={{background:'linear-gradient(135deg,rgba(239,68,68,0.12),rgba(12,21,40,0.8))',border:'1px solid rgba(239,68,68,0.2)',borderRadius:14,padding:'14px 16px',textAlign:'center'}}>
           <div style={{fontSize:11,fontWeight:700,color:'rgba(239,68,68,0.8)',letterSpacing:0.5,marginBottom:6}}>게이트 전환</div>
-          <div style={{fontSize:32,fontWeight:900,color:'#EF4444',lineHeight:1}}>{k.gateClicks??0}</div>
-          <div style={{fontSize:11,color:'rgba(255,255,255,0.45)',marginTop:4}}>{k.gateViews??0}뷰 · {k.gateViews > 0 ? ((k.gateClicks/k.gateViews)*100).toFixed(1) : 0}%</div>
+          <div style={{fontSize:32,fontWeight:900,color:'#EF4444',lineHeight:1}}>{x.gateClicks??0}</div>
+          <div style={{fontSize:11,color:'rgba(255,255,255,0.45)',marginTop:4}}>{x.gateViews??0}뷰 · {x.gateViews > 0 ? ((x.gateClicks/x.gateViews)*100).toFixed(1) : 0}%</div>
         </div>
       </div>
 

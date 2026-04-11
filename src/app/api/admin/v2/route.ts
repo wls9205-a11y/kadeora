@@ -424,9 +424,7 @@ export async function GET(req: NextRequest) {
       // 시간대별 집계
       const hourCounts = new Array(24).fill(0);
       for (const h of (hourlyR.data || [])) {
-        const hr = (new Date(h.created_at).getUTCHours() + 9) % 24;
-        // UTC → KST (+9)
-        const kstHr = (hr + 9) % 24;
+        const kstHr = (new Date(h.created_at).getUTCHours() + 9) % 24;
         hourCounts[kstHr]++;
       }
 
