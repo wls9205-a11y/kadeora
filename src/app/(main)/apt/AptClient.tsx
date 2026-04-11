@@ -25,7 +25,7 @@ import TrendingKeywords from '@/components/TrendingKeywords';
 import { isTossMode } from '@/lib/toss-mode';
 import TossTeaser from '@/components/TossTeaser';
 
-export default function AptClient({ apts, unsold = [], redevelopment = [], transactions = [], unsoldSummary, alertCounts = {}, regionStats = [], unsoldMonthly = [], tradeMonthly = [], ongoingApts = [], redevTotalCount = 0, tradeTotalCount = 0, tradeByRegion = {}, redevByRegion = {}, subTotalCount = 0, unsoldTotalCount = 0, ongoingTotalCount = 0, dataFreshness = { sub: '', trade: '', unsold: '', redev: '' }, redevRedevCount = 0, redevRebuildCount = 0 }: { apts: any[]; unsold?: any[]; redevelopment?: any[]; transactions?: any[]; unsoldSummary?: any; alertCounts?: Record<string, number>; lastRefreshed?: string | null; regionStats?: { name: string; total: number; open: number; upcoming: number; closed: number }[]; unsoldMonthly?: any[]; tradeMonthly?: any[]; ongoingApts?: any[]; redevTotalCount?: number; tradeTotalCount?: number; tradeByRegion?: Record<string, number>; redevByRegion?: Record<string, number>; subTotalCount?: number; unsoldTotalCount?: number; ongoingTotalCount?: number; dataFreshness?: { sub: string; trade: string; unsold: string; redev: string }; redevRedevCount?: number; redevRebuildCount?: number }) {
+export default function AptClient({ apts, unsold = [], redevelopment = [], transactions = [], unsoldSummary, alertCounts = {}, regionStats = [], unsoldMonthly = [], tradeMonthly = [], ongoingApts = [], redevTotalCount = 0, tradeTotalCount = 0, tradeByRegion = {}, redevByRegion = {}, subTotalCount = 0, unsoldTotalCount = 0, ongoingTotalCount = 0, dataFreshness = { sub: '', trade: '', unsold: '', redev: '' }, redevRedevCount = 0, redevRebuildCount = 0, aptImageMap = {} }: { apts: any[]; unsold?: any[]; redevelopment?: any[]; transactions?: any[]; unsoldSummary?: any; alertCounts?: Record<string, number>; lastRefreshed?: string | null; regionStats?: { name: string; total: number; open: number; upcoming: number; closed: number }[]; unsoldMonthly?: any[]; tradeMonthly?: any[]; ongoingApts?: any[]; redevTotalCount?: number; tradeTotalCount?: number; tradeByRegion?: Record<string, number>; redevByRegion?: Record<string, number>; subTotalCount?: number; unsoldTotalCount?: number; ongoingTotalCount?: number; dataFreshness?: { sub: string; trade: string; unsold: string; redev: string }; redevRedevCount?: number; redevRebuildCount?: number; aptImageMap?: Record<string, string> }) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const tabParam = searchParams.get('tab');
@@ -216,6 +216,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           globalSearch={globalSearch}
           subTotalCount={subTotalCount}
           freshDate={dataFreshness?.sub}
+          aptImageMap={aptImageMap}
         />
       )}
 
@@ -231,6 +232,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           globalRegion={selectedRegion !== '전체' ? selectedRegion : undefined}
           globalSearch={globalSearch}
           freshDate={dataFreshness?.sub}
+          aptImageMap={aptImageMap}
         />
       )}
 
@@ -249,6 +251,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           globalRegion={selectedRegion !== '전체' ? selectedRegion : undefined}
           globalSearch={globalSearch}
           freshDate={dataFreshness?.unsold}
+          aptImageMap={aptImageMap}
         />
       )}
 
@@ -264,6 +267,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           globalRegion={selectedRegion !== '전체' ? selectedRegion : undefined}
           globalSearch={globalSearch}
           freshDate={dataFreshness?.redev}
+          aptImageMap={aptImageMap}
         />
       )}
 

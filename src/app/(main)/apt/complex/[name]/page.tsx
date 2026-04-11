@@ -42,7 +42,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const title = p?.seo_title || `${decoded} 실거래가·전세·월세 시세 | ${region} ${sigungu}`;
   const description = p?.seo_description || `${decoded} 아파트 실거래가 이력, 전세·월세 시세, 평당가 추이, 면적별 비교. 카더라에서 확인하세요.`;
   const ogSubtitle = salePrice ? `매매 ${salePrice}${jeonsePrice ? ` · 전세 ${jeonsePrice}` : ''}` : '실거래가·시세 분석';
-  const ogUrl = `${SITE_URL}/api/og?title=${encodeURIComponent(decoded)}&design=2&category=apt&subtitle=${encodeURIComponent(ogSubtitle)}&author=${encodeURIComponent('카더라')}`;
+  // 실제 현장 이미지 조회 (apt_sites에서)
+  let realImg: string | null = null;
+  try {
+    const sb = (await import('@/lib/supabase-server')).createSupabaseServer;
+    const { getSupabaseAdmin } = await import('@/lib/supabase-admin');
+    const admin = getSupabaseAdmin();
+    const { data: siteRow } = await admin.from('apt_sites').select('images').eq('name', decoded).not('images', 'is', null).limit(1).maybeSingle();
+    if (Array.isArray(siteRow?.images) && (siteRow.images[0] as any)?.url) realImg = (siteRow.images[0] as any).thumbnail || (siteRow.images[0] as any).url;
+  } catch {}
+  const ogUrl = realImg || `${SITE_URL}/api/og?title=${encodeURIComponent(decoded)}&design=2&category=apt&subtitle=${encodeURIComponent(ogSubtitle)}&author=${encodeURIComponent('카더라')}`;
   const ogSquareUrl = `${SITE_URL}/api/og-square?title=${encodeURIComponent(decoded)}&category=apt&subtitle=${encodeURIComponent(ogSubtitle)}`;
   const keywords = [decoded, '실거래가', '시세', '아파트', region, sigungu, ageGroup, '전세', '월세', '매매', '시세조회', '평당가'].filter(Boolean);
 

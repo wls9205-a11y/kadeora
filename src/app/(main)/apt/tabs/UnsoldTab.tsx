@@ -16,7 +16,7 @@ interface Props extends SharedTabProps {
   freshDate?: string;
 }
 
-export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUser, watchlist, toggleWatchlist, setCommentTarget, showToast, globalRegion, globalSearch, freshDate }: Props) {
+export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUser, watchlist, toggleWatchlist, setCommentTarget, showToast, globalRegion, globalSearch, freshDate, aptImageMap }: Props) {
   const [unsoldRegion, setUnsoldRegion] = useState(globalRegion || '전체');
   const [unsoldSearch, setUnsoldSearch] = useState('');
   const [unsoldPage, setUnsoldPage] = useState(1);
@@ -168,7 +168,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
           <Link key={u.id} href={`/apt/${encodeURIComponent(generateAptSlug(u.house_nm) || String(u.id))}`} className="kd-card-hover" style={{ display: 'block', borderRadius: 'var(--radius-card)', overflow: 'hidden', background: 'var(--bg-surface)', border: '1px solid var(--border)', textDecoration: 'none', color: 'inherit' }}>
             {/* OG 이미지 스트립 */}
             <div style={{ height: 48, background: 'var(--bg-hover)', position: 'relative', overflow: 'hidden' }}>
-              <img src={`/api/og?title=${encodeURIComponent(u.house_nm || '미분양')}&category=apt&design=2`} alt="" width={400} height={48} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', opacity: 0.8 }} loading="lazy" />
+              <img src={aptImageMap?.[u.house_nm] || `/api/og?title=${encodeURIComponent(u.house_nm || '미분양')}&category=apt&design=2`} alt="" width={400} height={48} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', opacity: 0.8 }} loading="lazy" />
               <div style={{ position: 'absolute', top: 5, left: 8, display: 'flex', gap: 4, alignItems: 'center' }}>
                 <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 5, background: 'rgba(248,113,113,0.9)', color: '#fff' }}>미분양</span>
                 <span style={{ fontSize: 10, fontWeight: 800, color: '#fff' }}>{unsoldCount.toLocaleString()}호</span>

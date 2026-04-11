@@ -107,4 +107,5 @@ export interface SharedTabProps {
   showToast: (msg: string) => void;
   globalRegion?: string;
   globalSearch?: string;
+  aptImageMap?: Record<string, string>;
 }

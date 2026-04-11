@@ -14,7 +14,7 @@ interface Props extends SharedTabProps {
   freshDate?: string;
 }
 
-export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, setCommentTarget, showToast: _showToast, globalRegion, globalSearch, freshDate }: Props) {
+export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, setCommentTarget, showToast: _showToast, globalRegion, globalSearch, freshDate, aptImageMap }: Props) {
   const [redevType, setRedevType] = useState('전체');
   const [redevRegion, setRedevRegion] = useState(globalRegion || '전체');
   const [redevPage, setRedevPage] = useState(1);
@@ -171,7 +171,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
                 <Link key={r.id} href={`/apt/${encodeURIComponent(redevSlug)}`} className="kd-card-hover" style={{ display: 'block', textDecoration: 'none', color: 'inherit', borderRadius: 'var(--radius-card)', overflow: 'hidden', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
                   {/* OG 이미지 스트립 */}
                   <div style={{ height: 48, background: 'var(--bg-hover)', position: 'relative', overflow: 'hidden' }}>
-                    <img src={`/api/og?title=${encodeURIComponent(r.district_name || r.address || '재개발')}&category=apt&design=2`} alt="" width={400} height={48} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', opacity: 0.8 }} loading="lazy" />
+                    <img src={aptImageMap?.[r.district_name] || `/api/og?title=${encodeURIComponent(r.district_name || r.address || '재개발')}&category=apt&design=2`} alt="" width={400} height={48} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', opacity: 0.8 }} loading="lazy" />
                     <div style={{ position: 'absolute', top: 5, left: 8, display: 'flex', gap: 4, alignItems: 'center' }}>
                       <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 5, background: r.project_type === '재건축' ? 'rgba(245,158,11,0.9)' : 'rgba(139,92,246,0.9)', color: '#fff' }}>{r.project_type || '재개발'}</span>
                       <span style={{ fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 4, background: 'rgba(0,0,0,0.4)', color: '#fff' }}>{r.stage || '진행중'} {progress}%</span>

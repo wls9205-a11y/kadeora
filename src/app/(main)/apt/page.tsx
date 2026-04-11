@@ -129,6 +129,19 @@ async function fetchAptData() {
     } catch {}
   } catch {}
 
+  // ━━━ 현장 이미지 맵 (apt_sites.images → 카드 썸네일용) ━━━
+  let aptImageMap: Record<string, string> = {};
+  try {
+    const { getSupabaseAdmin } = await import('@/lib/supabase-admin');
+    const adminSb = getSupabaseAdmin();
+    const { data: imgRows } = await adminSb.from('apt_sites').select('name, images').not('images', 'is', null);
+    for (const row of (imgRows || [])) {
+      if (Array.isArray(row.images) && row.images.length > 0 && (row.images[0] as any)?.url) {
+        aptImageMap[row.name] = (row.images[0] as any).thumbnail || (row.images[0] as any).url;
+      }
+    }
+  } catch {}
+
   // 지역별 + 상태별 통계 계산
   const today = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10); // KST
   const thisMonth = today.slice(0, 7).replace('-', ''); // KST 기준 YYYYMM // 202603
@@ -245,17 +258,17 @@ async function fetchAptData() {
   const dedupedSub = ongoingFromSub.filter(s => !unsoldNames.has(`${s.house_nm}::${s.region_nm}`));
   const ongoingApts = [...ongoingFromUnsold, ...dedupedSub].sort((a, b) => (b.total_supply || 0) - (a.total_supply || 0));
 
-  return { apts, unsold, alertCounts, lastRefreshed, regionStats, ongoingApts, redevTotalCount, tradeTotalCount, tradeByRegion, redevByRegion, subTotalCount, unsoldTotalCount, ongoingTotalCount, dataFreshness, redevRedevCount, redevRebuildCount };
+  return { apts, unsold, alertCounts, lastRefreshed, regionStats, ongoingApts, redevTotalCount, tradeTotalCount, tradeByRegion, redevByRegion, subTotalCount, unsoldTotalCount, ongoingTotalCount, dataFreshness, redevRedevCount, redevRebuildCount, aptImageMap };
 }
 
 export default async function AptPage() {
-  const { apts, unsold, alertCounts, lastRefreshed, regionStats, ongoingApts, redevTotalCount, tradeTotalCount, tradeByRegion, redevByRegion, subTotalCount, unsoldTotalCount, ongoingTotalCount, dataFreshness, redevRedevCount, redevRebuildCount } = await fetchAptData();
+  const { apts, unsold, alertCounts, lastRefreshed, regionStats, ongoingApts, redevTotalCount, tradeTotalCount, tradeByRegion, redevByRegion, subTotalCount, unsoldTotalCount, ongoingTotalCount, dataFreshness, redevRedevCount, redevRebuildCount, aptImageMap } = await fetchAptData();
   // ItemList for Google carousel rich results
   const itemList = apts.slice(0, 10).map((a: any, i: number) => ({
     '@type': 'ListItem',
     position: i + 1,
     name: a.house_nm,
-    image: `${SITE_URL}/api/og?title=${encodeURIComponent(a.house_nm || "")}&design=2&category=apt`,
+    image: aptImageMap[a.house_nm] || `${SITE_URL}/api/og?title=${encodeURIComponent(a.house_nm || "")}&design=2&category=apt`,
     url: `${SITE_URL}/apt/${encodeURIComponent(a.house_nm?.trim().replace(/\s+/g, '-').replace(/[^\w가-힣\-]/g, '').toLowerCase() || a.house_manage_no || a.id)}`,
   }));
 
@@ -271,7 +284,7 @@ export default async function AptPage() {
     {/* speakable */}
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"WebPage","name":"부동산 — 청약·분양·미분양·재개발","speakable":{"@type":"SpeakableSpecification","cssSelector":["h1",".region-summary"]}}) }} />
     <h1 style={{ fontSize: "var(--fs-xl)", fontWeight: 700, margin: "0 0 4px", color: "var(--text-primary)" }}>부동산 — 청약·분양·미분양·재개발</h1>
-    <AptClient apts={apts} unsold={unsold} alertCounts={alertCounts} lastRefreshed={lastRefreshed} regionStats={regionStats} ongoingApts={ongoingApts} redevTotalCount={redevTotalCount} tradeTotalCount={tradeTotalCount} tradeByRegion={tradeByRegion} redevByRegion={redevByRegion} subTotalCount={subTotalCount} unsoldTotalCount={unsoldTotalCount} ongoingTotalCount={ongoingTotalCount} dataFreshness={dataFreshness} redevRedevCount={redevRedevCount} redevRebuildCount={redevRebuildCount} />
+    <AptClient apts={apts} unsold={unsold} alertCounts={alertCounts} lastRefreshed={lastRefreshed} regionStats={regionStats} ongoingApts={ongoingApts} redevTotalCount={redevTotalCount} tradeTotalCount={tradeTotalCount} tradeByRegion={tradeByRegion} redevByRegion={redevByRegion} subTotalCount={subTotalCount} unsoldTotalCount={unsoldTotalCount} ongoingTotalCount={ongoingTotalCount} dataFreshness={dataFreshness} redevRedevCount={redevRedevCount} redevRebuildCount={redevRebuildCount} aptImageMap={aptImageMap} />
     <Disclaimer />
   </Suspense>;
 }
