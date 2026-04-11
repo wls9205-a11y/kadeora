@@ -90,7 +90,7 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
           </div>
         </div>
         <div style={{flex:1,display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:2}}>
-          {[{l:'PV',v:f(k.pvToday||0),c:'#3B7BF6'},{l:'가입',v:`+${k.newUsersToday||0}`,c:'#10B981'},{l:'유저',v:f(k.users||0),c:'#CBD5E1'}].map(s=>
+          {[{l:'PV',v:f(k.pvToday||0),c:'#3B7BF6'},{l:'가입',v:`+${k.newUsersToday||0}`,c:'#10B981'},{l:'유저',v:f((k.users||0)+(x.seeds||0)),c:'#CBD5E1'}].map(s=>
             <div key={s.l} style={{textAlign:'center'}}><div style={{fontSize:14,fontWeight:800,color:s.c,lineHeight:1}}>{s.v}</div><div style={{fontSize:7,color:'rgba(255,255,255,0.15)'}}>{s.l}</div></div>
           )}
         </div>
