@@ -157,18 +157,24 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                 opacity: 1,
                 textDecoration: 'none', color: 'inherit',
               }}>
+                {/* ⓪ OG 이미지 스트립 */}
+                <div style={{ height: 56, background: 'var(--bg-hover)', position: 'relative', overflow: 'hidden' }}>
+                  <img src={`/api/og?title=${encodeURIComponent(apt.house_nm)}&category=apt&design=2`} alt="" width={400} height={56} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', opacity: 0.85 }} loading="lazy" />
+                  <div style={{ position: 'absolute', top: 6, left: 8 }}>
+                    <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 5, background: st === 'open' ? 'rgba(54,240,176,0.9)' : st === 'upcoming' ? 'rgba(74,138,247,0.9)' : 'rgba(148,163,184,0.8)', color: '#fff', lineHeight: '16px' }}>{bd.label}</span>
+                  </div>
+                  {dday !== null && dday >= 0 && st !== 'closed' && (
+                    <div style={{ position: 'absolute', bottom: 5, right: 8, fontSize: 10, fontWeight: 800, color: 'rgba(255,255,255,0.8)' }}>
+                      {st === 'open' ? (dday === 0 ? '오늘 마감' : `D-${dday}`) : `D-${dday}`}
+                    </div>
+                  )}
+                </div>
                 {/* ① 헤더: 배지 + 경쟁률 링 */}
-                <div style={{ padding: '10px 12px 6px', display: 'flex', gap: 8 }}>
+                <div style={{ padding: '8px 12px 6px', display: 'flex', gap: 8 }}>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    {/* 배지 행 */}
+                    {/* 배지 행 (상태+D-day는 이미지 스트립에 표시) */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: 3, marginBottom: 5, flexWrap: 'wrap' }}>
                       {st !== 'closed' && isNew(apt, 'subscription') && <NewBadge />}
-                      <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 4, background: bd.bg, color: bd.color, border: `1px solid ${bd.border}`, lineHeight: '14px' }}>{bd.label}</span>
-                      {dday !== null && dday >= 0 && st !== 'closed' && (
-                        <span style={{ fontSize: 9, fontWeight: 800, padding: '2px 6px', borderRadius: 3, background: dday <= 2 ? 'rgba(248,113,113,0.15)' : dday <= 6 ? 'var(--accent-yellow-bg)' : 'rgba(148,163,184,0.1)', color: dday <= 2 ? 'var(--accent-red)' : dday <= 6 ? 'var(--accent-yellow)' : 'var(--text-secondary)', lineHeight: '14px' }}>
-                          {st === 'open' ? (dday === 0 ? '🔴 오늘 마감' : `⏰ D-${dday}`) : `D-${dday}`}
-                        </span>
-                      )}
                       {((apt as Record<string, any>)['PARCPRC_ULS_AT'] === 'Y' || (apt as Record<string, any>).is_price_limit) && <span style={{ fontSize: 9, fontWeight: 600, padding: '2px 5px', borderRadius: 3, background: 'var(--accent-purple-bg)', color: 'var(--accent-purple)', lineHeight: '14px' }}>상한제</span>}
                       {(apt as any).project_type && (apt as any).project_type !== '민간' && <span style={{ fontSize: 9, fontWeight: 600, padding: '2px 5px', borderRadius: 3, background: (apt as any).project_type === '재개발' ? 'rgba(251,146,60,0.1)' : 'rgba(167,139,250,0.1)', color: (apt as any).project_type === '재개발' ? 'var(--accent-orange)' : 'var(--accent-purple)', lineHeight: '14px' }}>{(apt as any).project_type}</span>}
                       {(apt as any).is_regulated_area && <span style={{ fontSize: 9, fontWeight: 600, padding: '2px 5px', borderRadius: 3, background: 'rgba(239,68,68,0.06)', color: 'var(--accent-red)', lineHeight: '14px' }}>규제</span>}

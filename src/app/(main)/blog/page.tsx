@@ -387,12 +387,18 @@ export default async function BlogPage({ searchParams }: Props) {
             const isHot = (p.view_count ?? 0) >= 100;
             return (
               <Link key={p.id} href={`/blog/${p.slug}`} className="kd-feed-card" style={{
-                display: 'flex', alignItems: 'flex-start', gap: 8, padding: '9px 6px',
+                display: 'flex', alignItems: 'center', gap: 8, padding: '9px 6px',
                 textDecoration: 'none', color: 'inherit',
                 borderBottom: '1px solid rgba(30,50,88,0.25)',
               }}>
                 {/* 순위 */}
-                <span style={{ fontSize: 10, fontWeight: 800, color: isHot ? 'var(--accent-red)' : 'var(--text-tertiary)', width: 18, textAlign: 'center', flexShrink: 0, paddingTop: 2, fontVariantNumeric: 'tabular-nums' }}>{rank}</span>
+                <span style={{ fontSize: 10, fontWeight: 800, color: isHot ? 'var(--accent-red)' : 'var(--text-tertiary)', width: 18, textAlign: 'center', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>{rank}</span>
+                {/* 썸네일 */}
+                {p.cover_image && (
+                  <div style={{ width: 64, height: 44, borderRadius: 6, overflow: 'hidden', flexShrink: 0, background: 'var(--bg-hover)' }}>
+                    <img src={p.cover_image} alt="" width={64} height={44} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} loading="lazy" />
+                  </div>
+                )}
                 {/* 본문 */}
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 2 }}>

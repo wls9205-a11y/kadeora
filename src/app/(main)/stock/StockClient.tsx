@@ -1,5 +1,6 @@
 'use client';
 import { stockColor, stockUpColor, stockDownColor, sentimentColor } from '@/lib/stockColor';
+import { getStockLogo } from '@/lib/stockLogo';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import SearchInput from '@/components/SearchInput';
@@ -224,13 +225,18 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
         textDecoration: 'none', color: 'inherit', position: 'relative', overflow: 'hidden',
       }}>
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${barColor}, ${barColor}40, transparent)` }} />
-        {/* Row 1: Name + sector + description hint */}
+        {/* Row 1: Logo + Name + sector */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', letterSpacing: '-0.02em' }}>{s.name}</div>
-            <div style={{ display: 'flex', gap: 4, alignItems: 'center', marginTop: 2 }}>
-              <span style={{ fontSize: 9, color: 'var(--text-tertiary)', fontFamily: 'monospace' }}>{s.symbol}</span>
-              {s.sector && <span style={{ fontSize: 8, padding: '1px 5px', borderRadius: 3, background: `${barColor}12`, color: barColor, fontWeight: 600 }}>{s.sector}</span>}
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center', flex: 1, minWidth: 0 }}>
+            {(() => { const logo = getStockLogo(s.symbol, !isGlobal); return (
+              <div style={{ width: 32, height: 32, borderRadius: 8, background: logo.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: logo.initials.length > 2 ? 8 : 11, fontWeight: 800, color: logo.textColor, letterSpacing: '-0.02em' }}>{logo.initials}</div>
+            ); })()}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', letterSpacing: '-0.02em' }}>{s.name}</div>
+              <div style={{ display: 'flex', gap: 4, alignItems: 'center', marginTop: 2 }}>
+                <span style={{ fontSize: 9, color: 'var(--text-tertiary)', fontFamily: 'monospace' }}>{s.symbol}</span>
+                {s.sector && <span style={{ fontSize: 8, padding: '1px 5px', borderRadius: 3, background: `${barColor}12`, color: barColor, fontWeight: 600 }}>{s.sector}</span>}
+              </div>
             </div>
           </div>
           <button onClick={e => { e.preventDefault(); e.stopPropagation(); toggleWatchlist(s.symbol); }} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, fontSize: 14, color: isWatched ? 'var(--accent-yellow)' : 'var(--text-tertiary)', flexShrink: 0, opacity: isWatched ? 1 : 0.4 }}>
@@ -1131,11 +1137,16 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
                       <div style={{ height: 3, background: `linear-gradient(90deg, ${priceColor}, ${priceColor}40, transparent)` }} />
                       <div style={{ padding: '10px 12px 8px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', letterSpacing: '-0.02em' }}>{s.name}</div>
-                            <div style={{ display: 'flex', gap: 3, alignItems: 'center', marginTop: 2 }}>
-                              <span style={{ fontSize: 9, color: 'var(--text-tertiary)', fontFamily: 'monospace' }}>{s.symbol}</span>
-                              {s.sector && <span style={{ fontSize: 8, padding: '1px 5px', borderRadius: 3, background: `${priceColor}12`, color: priceColor, fontWeight: 600 }}>{s.sector}</span>}
+                          <div style={{ display: 'flex', gap: 8, alignItems: 'center', flex: 1, minWidth: 0 }}>
+                            {(() => { const logo = getStockLogo(s.symbol, !isGlobal); return (
+                              <div style={{ width: 32, height: 32, borderRadius: 8, background: logo.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: logo.initials.length > 2 ? 8 : 11, fontWeight: 800, color: logo.textColor, letterSpacing: '-0.02em' }}>{logo.initials}</div>
+                            ); })()}
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', letterSpacing: '-0.02em' }}>{s.name}</div>
+                              <div style={{ display: 'flex', gap: 3, alignItems: 'center', marginTop: 2 }}>
+                                <span style={{ fontSize: 9, color: 'var(--text-tertiary)', fontFamily: 'monospace' }}>{s.symbol}</span>
+                                {s.sector && <span style={{ fontSize: 8, padding: '1px 5px', borderRadius: 3, background: `${priceColor}12`, color: priceColor, fontWeight: 600 }}>{s.sector}</span>}
+                              </div>
                             </div>
                           </div>
                           <button onClick={e => { e.preventDefault(); e.stopPropagation(); toggleWatchlist(s.symbol); }} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, fontSize: 14, color: isWatched ? 'var(--accent-yellow)' : 'var(--text-tertiary)', flexShrink: 0, opacity: isWatched ? 1 : 0.4 }}>
