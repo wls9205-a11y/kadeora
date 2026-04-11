@@ -1,4 +1,4 @@
-# 카더라 STATUS — 세션 83+ (2026-04-11 16:13 KST)
+# 카더라 STATUS — 세션 84 (2026-04-11 23:53 KST)
 
 ## 프로덕션
 - 실유저: 66명 (24h +25)
@@ -9,33 +9,28 @@
 
 ## 이번 세션 완료
 
-### CTA 전수조사 + 가입 추적 근본 수정
-- content_gate: 1,343뷰 13클릭 (0.97% CTR) — 유일한 유효 CTA
-- apt_alert_cta: signup_attempts 36건 → 가입 경로 1위
-- login_gate: 97뷰 0클릭 → 개선 필요
-- 죽은 CTA 6개 (guest_nudge/topbar/scroll/return): 이전 세션 제거 확인
-- **signup_success 0건 버그 수정**: handle_new_user 트리거가 profile 먼저 생성 → isNewUser=created_at 60초 판별로 변경
-- **signup_source 전원 null 수정**: 신규/기존 모두 업데이트
-- 어드민 가입 퍼널 + 가입 경로 분석 섹션 추가
+### 호스팅어 사이트 긴급 복구
+- **CDN Security "I'm under attack!" 발견** → 네이버/Google 봇 403 차단의 근본 원인 → Low로 변경하여 해결
+- **분양권실전투자.com wp-login.php 0바이트** 복구 (급매물.com에서 복사)
+- **분양권실전투자.com .htaccess 비어있음** → 워드프레스 rewrite 규칙 복구
+- **4개 추가 사이트 wp-login.php 0바이트** 일괄 복구 (julin2.com, stockcoin.net, xn--6w6btrz4g.com, xn--hc0bu2j9no16cctc.com)
+- **호스팅어 Malware Scanner 오탐** 확인: 2026-04-04에 112개 파일 삭제 (class-wp-image-editor-imagick-hooks.php 등)
+- 108개 사이트 CDN Security level 일괄 Low 변경 필요 → 호스팅어 고객지원에 요청 권장
 
-### 인게이지먼트 강화 (12개 파일)
-- PushPromptBanner: 블로그 하단 푸시 구독 유도 (5초 딜레이)
-- ProfileCompleteBanner: 피드 상단 프로필 완성 유도 (+50P)
-- /api/profile/complete-bonus: 프로필 첫 완성 보너스 +50P
-- 프로필 저장 시 profile_completed 자동 설정
-- 출석 보너스 강화: 3일+15P, 7일+50P, 14일+80P, 30일+150P
-- 첫 댓글 보너스 +20P
-- Newsletter API: is_active + 전환 추적
-- 게이트 내 공유 버튼 추가 (비로그인 공유 가능)
-
-### 어드민 개편
-- 가입 경로 분석 (소스별 시도/성공/전환율)
-- 위험 신호 강화: 공유 죽음, 가입성공 0건, 미활성 유저, 푸시 3명
-- neverActive 메트릭
+### CTA 전면 분석 & 개선 (7개 파일)
+- **BlogMidCTA 타겟 반전**: 로그인 유저 → 비로그인 유저 (기존: 이미 가입한 사람에게 "무료로 시작하기" 노출하는 오류)
+- **BlogMidCTA 리디자인**: 카테고리별 혜택 리스트 + 다크 카드 + trackConversion 적용
+- **ActionBar 딜레이 단축**: 3초 → 1초 (97.5% 바운스율 대응, 이탈 전 노출)
+- **SmartSectionGate 커트 완화**: 40% → 55% (충분히 읽혀야 "더 보고 싶다" 발생) + CTA 문구 "이어서 읽기"로 변경
+- **LoginGate 개선**: 가치 미리보기 텍스트 추가 (적정가: ???원 | 리스크: ?단계) — 0% CTR 대응
+- **RelatedContentCard 가입 CTA 추가**: showSignup prop → 비로그인 시 "🔔 무료 가입하고 알림 받기" 링크 노출
+- **어드민 GrowthTab CTA 대시보드 강화**: 총 노출/클릭/CTR 요약 카드 + 상태 아이콘(🟢>2%/🟡>0.5%/🔴) + 15개까지 확장
 
 ## PENDING
-- [ ] 카카오 채널 메시지에 앱 딥링크 추가
-- [ ] A/B 테스트 (게이트 CTA 문구)
+- [ ] 호스팅어 108개 사이트 CDN Security → Low 일괄 변경 (고객지원 요청)
+- [ ] SSH 비밀번호 변경 (채팅에 노출됨)
+- [ ] 네이버 서치어드바이저 사이트맵 재제출 (CDN 차단 해제 후)
+- [ ] Google Search Console 수동 조치 확인
+- [ ] A/B 테스트 (SmartSectionGate 55% vs 60% 커트포인트)
 - [ ] 블로그 체류시간 추적
 - [ ] SEO rewrite 재개 (10,400 → 15,000)
-- [ ] login_gate 0% CTR 개선
