@@ -179,8 +179,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           address: { '@type': 'PostalAddress', addressCountry: 'KR', addressRegion: '부산광역시', addressLocality: '연제구', streetAddress: '연동로 27, 405호', postalCode: '47571' },
           contactPoint: { '@type': 'ContactPoint', contactType: 'customer service', email: 'kadeora.app@gmail.com', telephone: '+82-10-5001-1382', availableLanguage: 'Korean' },
           sameAs: [
-            'https://kadeora.app',
-            'https://blog.naver.com/kadeora_app',
+            'https://blog.naver.com/silreit',
+            'https://cafe.naver.com/kadeoraapp',
+            'http://pf.kakao.com/_NFxdxhX',
           ],
           knowsAbout: ['부동산', '주식', '아파트 청약', '재개발', '미분양', 'AI 주식 분석', '실거래가', '분양', '재테크'],
           slogan: '아파트 청약·재개발, 주식 시세·AI 종목 분석을 한곳에서',
