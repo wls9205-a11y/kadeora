@@ -1,5 +1,5 @@
-import ProfileCompleteBanner from '@/components/ProfileCompleteBanner';
 'use client';
+import ProfileCompleteBanner from '@/components/ProfileCompleteBanner';
 import RelatedContentCard from '@/components/RelatedContentCard';
 import FirstMissionBanner from '@/components/FirstMissionBanner';
 import ProfileCompletionBar from '@/components/ProfileCompletionBar';
