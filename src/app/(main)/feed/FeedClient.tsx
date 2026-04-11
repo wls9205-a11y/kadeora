@@ -38,8 +38,6 @@ function BestCommentPreview({ postId }: { postId: number }) {
   }, [postId]);
   if (!best) return null;
   return (
-    <>
-      <ProfileCompleteBanner />
     <div style={{ marginTop: 6, padding: '5px 8px', borderLeft: '2px solid rgba(59,123,246,0.3)', background: 'var(--bg-hover)', borderRadius: 0 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', marginBottom: 2 }}>
         <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--brand)' }}>Best</span>
@@ -269,6 +267,8 @@ export default function FeedClient({
   return (
     <PullToRefresh>
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
+
+        <ProfileCompleteBanner />
 
         {/* 헤더 — 카더라 + 공유 + 활동 */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, padding: '4px 0' }}>
