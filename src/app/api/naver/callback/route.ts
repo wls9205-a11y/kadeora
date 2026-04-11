@@ -27,8 +27,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ ok: false, error: 'No authorization code' }, { status: 400 });
   }
 
-  const clientId = process.env.NAVER_CLIENT_ID || '';
-  const clientSecret = process.env.NAVER_CLIENT_SECRET || '';
+  const clientId = process.env.NAVER_CAFE_CLIENT_ID || '';
+  const clientSecret = process.env.NAVER_CAFE_CLIENT_SECRET || '';
   const redirectUri = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app'}/api/naver/callback`;
 
   // Exchange code for tokens

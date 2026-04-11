@@ -82,8 +82,8 @@ async function doWork() {
 }
 
 async function refreshAccessToken(refreshToken: string): Promise<string | null> {
-  const clientId = process.env.NAVER_CLIENT_ID || '';
-  const clientSecret = process.env.NAVER_CLIENT_SECRET || '';
+  const clientId = process.env.NAVER_CAFE_CLIENT_ID || '';
+  const clientSecret = process.env.NAVER_CAFE_CLIENT_SECRET || '';
   
   const res = await fetch('https://nid.naver.com/oauth2.0/token', {
     method: 'POST',
