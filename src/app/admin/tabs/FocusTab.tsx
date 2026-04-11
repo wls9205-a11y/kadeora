@@ -436,7 +436,7 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
             .map(([src, v]: any) => (
             <div key={src} style={{display:'flex',alignItems:'center',gap:8,padding:'5px 0',borderBottom:'1px solid rgba(255,255,255,0.03)'}}>
               <span style={{fontSize:11,color:'rgba(255,255,255,0.6)',flex:1,minWidth:0,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' as const}}>
-                {src === 'apt_alert_cta' ? '🔔 청약알림CTA' : src === 'content_gate' ? '🔒 게이트' : src === 'direct' ? '🔗 직접' : src === 'nav' ? '🧭 네비' : src === 'stock_alert_cta' ? '📊 종목알림CTA' : `📌 ${src}`}
+                {src === 'apt_alert_cta' ? '🔔 청약알림CTA' : src === 'content_gate' ? '🔒 게이트' : src === 'blog_mid_cta' ? '📝 본문중간CTA' : src === 'direct' ? '🔗 직접' : src === 'nav' ? '🧭 네비' : src === 'stock_alert_cta' ? '📊 종목알림CTA' : `📌 ${src}`}
               </span>
               <span style={{fontSize:13,fontWeight:700,color:'#FBBF24'}}>{v.attempts}</span>
               <span style={{fontSize:9,color:'rgba(255,255,255,0.3)'}}>시도</span>
@@ -457,8 +457,8 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
             const v=stat.views||0;const c=stat.clicks||0;const r=v>0?((c/v)*100).toFixed(1):'0';
             return <div key={name} style={{marginBottom:4}}>
               <div style={{display:'flex',justifyContent:'space-between',fontSize:9,color:'rgba(255,255,255,0.4)'}}>
-                <span>{name.replace(/_/g,' ')}</span>
-                <span>{v}뷰 {c}클릭 <span style={{color:parseFloat(r)>1?'#10B981':'#EF4444'}}>{r}%</span></span>
+                <span>{name==='content_gate'?'🔒 콘텐츠 게이트':name==='apt_alert_cta'?'🔔 청약알림':name==='stock_alert_cta'?'📊 종목알림':name==='blog_mid_cta'?'📝 본문중간':name==='newsletter'?'📧 뉴스레터':name.replace(/_/g,' ')}</span>
+                <span>{v}뷰 {c}클릭 <span style={{color:parseFloat(r)>3?'#10B981':parseFloat(r)>1?'#F59E0B':'#EF4444'}}>{r}%</span></span>
               </div>
               <div style={{height:4,background:'rgba(255,255,255,0.04)',borderRadius:2,overflow:'hidden',marginTop:2}}>
                 <div style={{height:'100%',width:`${Math.min((v/(Object.values(cb||{}).reduce((s:number,x:any)=>s+(x.views||0),0)||1))*100,100)}%`,background:'#3B7BF6',borderRadius:2,minWidth:v>0?2:0}}/>
@@ -599,7 +599,7 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
           const v=stat.views||0;const c=stat.clicks||0;const r=v>0?((c/v)*100).toFixed(1):'0';
           return <div key={name} style={{display:'flex',justifyContent:'space-between',fontSize:10,padding:'3px 0',borderBottom:'1px solid rgba(255,255,255,0.03)'}}>
             <span style={{color:'rgba(255,255,255,0.4)'}}>{name.replace(/_/g,' ')}</span>
-            <span style={{fontWeight:600,color:parseFloat(r)>1?'#10B981':'rgba(255,255,255,0.3)'}}>{v}뷰 {c}클릭 <span style={{color:parseFloat(r)>1?'#10B981':'#EF4444'}}>{r}%</span></span>
+            <span style={{fontWeight:600,color:parseFloat(r)>1?'#10B981':'rgba(255,255,255,0.3)'}}>{v}뷰 {c}클릭 <span style={{color:parseFloat(r)>3?'#10B981':parseFloat(r)>1?'#F59E0B':'#EF4444'}}>{r}%</span></span>
           </div>;
         })}
       </div>}

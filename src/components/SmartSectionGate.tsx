@@ -2,104 +2,116 @@
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-/**
- * SmartSectionGate v3 — 완전 불투명 게이트
- * - 본문 1~2줄만 보여주고 → 그라데이션 → 불투명 배경
- * - CTA는 불투명 영역 안에 독립 배치 (겹침 없음)
- */
-
 function trackCTA(action: string, label: string, extra?: Record<string, string>) {
   try {
-    // conversion_events 테이블에 기록
     fetch('/api/track', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ event_type: `cta_${action}`, cta_name: label, category: extra?.category || '' }) }).catch(() => {});
   } catch {}
 }
 
-interface Props { htmlContent: string; slug: string; category: string; }
+interface Props { htmlContent: string; slug: string; category: string; userCount?: number; todaySignups?: number; }
 
-export default function SmartSectionGate({ htmlContent, slug, category }: Props) {
+export default function SmartSectionGate({ htmlContent, slug, category, userCount = 66, todaySignups = 0 }: Props) {
   const pathname = usePathname();
   const [shouldGate, setShouldGate] = useState(false);
+  const [copied, setCopied] = useState(false);
 
-  useEffect(() => {
-    setShouldGate(true);
-  }, [slug]);
-
+  useEffect(() => { setShouldGate(true); }, [slug]);
   useEffect(() => { if (shouldGate) trackCTA('view', 'content_gate', { category }); }, [shouldGate, category]);
 
-  if (!shouldGate) {
-    return <div dangerouslySetInnerHTML={{ __html: htmlContent }} />;
-  }
+  if (!shouldGate) return <div dangerouslySetInnerHTML={{ __html: htmlContent }} />;
 
-  // 게이트 위치: 두번째 H2에서 자르기 (CTA 포함)
-  const h2Matches = [...htmlContent.matchAll(/<h2[^>]*>/gi)];
-  let visibleSection: string;
-
-  if (h2Matches.length >= 2) {
-    // 두번째 H2 앞에서 자르기 → CTA + 첫 섹션까지 보임
-    visibleSection = htmlContent.slice(0, h2Matches[1].index);
-  } else if (h2Matches.length === 1) {
-    // H2 1개만 → 첫 H2 + 200자 후 자르기
-    const afterH2 = htmlContent.indexOf('</h2>', h2Matches[0].index!) + 5;
-    visibleSection = htmlContent.slice(0, Math.min(afterH2 + 200, htmlContent.length));
-  } else {
-    visibleSection = htmlContent.slice(0, 600);
-  }
+  // 게이트 위치: 본문 40% 지점 (충분히 읽혀서 궁금증 유발)
+  const cutPoint = Math.floor(htmlContent.length * 0.4);
+  // H2/H3 태그 경계에서 자르기 (깔끔하게)
+  const headingAfterCut = htmlContent.slice(cutPoint).match(/<h[23][^>]*>/i);
+  const actualCut = headingAfterCut?.index ? cutPoint + headingAfterCut.index : cutPoint;
+  const visibleSection = htmlContent.slice(0, actualCut);
 
   const loginUrl = `/login?redirect=${encodeURIComponent(pathname)}&source=content_gate`;
 
+  // 카테고리별 맞춤 메시지
+  const ctaConfig = {
+    apt: { icon: '🏠', title: '청약 분석 전체 보기', desc: '가입하면 청약 알림 + 가점 계산 + 전체 분석 무료', tags: ['청약알림', '가점계산', '실거래가'] },
+    stock: { icon: '📈', title: '종목 분석 전체 보기', desc: '가입하면 종목 알림 + AI 브리핑 + 전체 분석 무료', tags: ['종목알림', 'AI분석', '실시간시세'] },
+    finance: { icon: '💰', title: '재테크 분석 전체 보기', desc: '가입하면 투자 인사이트 + 커뮤니티 전체 무료', tags: ['포트폴리오', '절약팁', '투자전략'] },
+  }[category] || { icon: '📊', title: '전체 분석 보기', desc: '가입하면 모든 분석 + 커뮤니티 무료 이용', tags: ['무료가입', '즉시열람', '스팸없음'] };
+
+  const handleCopy = () => {
+    navigator.clipboard?.writeText(window.location.href);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <>
-      {/* 보이는 콘텐츠 */}
       <div dangerouslySetInnerHTML={{ __html: visibleSection }} />
 
-      {/* 페이드 → 불투명 → CTA */}
-      <div style={{ position: 'relative', marginTop: -20 }}>
-        {/* 그라데이션 페이드 */}
-        <div style={{
-          height: 40,
-          background: 'linear-gradient(to bottom, rgba(5,10,24,0) 0%, rgba(5,10,24,1) 100%)',
-          pointerEvents: 'none',
-        }} />
+      <div style={{ position: 'relative', marginTop: -30 }}>
+        {/* 그라데이션 페이드 — 더 길게 */}
+        <div style={{ height: 80, background: 'linear-gradient(to bottom, rgba(5,10,24,0) 0%, rgba(5,10,24,1) 100%)', pointerEvents: 'none' }} />
 
-        {/* 불투명 CTA 영역 */}
-        <div style={{
-          background: '#050a18',
-          padding: '24px 20px 20px',
-          textAlign: 'center',
-        }}>
+        {/* 메인 CTA 영역 */}
+        <div style={{ background: '#050a18', padding: '0 16px 24px', textAlign: 'center' }}>
+
+          {/* 프리미엄 카드 */}
           <div style={{
-            width: 44, height: 44, borderRadius: '50%',
-            background: 'rgba(59,123,246,0.1)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 20, margin: '0 auto 12px',
-          }}>🔒</div>
+            maxWidth: 380, margin: '0 auto', padding: '28px 24px 24px',
+            borderRadius: 16, border: '1px solid rgba(59,123,246,0.2)',
+            background: 'linear-gradient(135deg, rgba(12,21,40,0.98), rgba(20,30,50,0.98))',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+            position: 'relative', overflow: 'hidden',
+          }}>
+            {/* 상단 그라데이션 바 */}
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, #3b7bf6, #22c55e)' }} />
 
-          <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>
-            나머지 분석을 확인하세요
-          </div>
-          <div style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 16 }}>
-            가입하면 전체 분석 + 청약 알림까지 무료
-          </div>
+            {/* 아이콘 */}
+            <div style={{ fontSize: 32, marginBottom: 12 }}>{ctaConfig.icon}</div>
 
-          <a
-            href={loginUrl}
-            onClick={() => trackCTA('click', 'content_gate', { category })}
-            style={{
-              display: 'block', width: '100%', padding: '12px', borderRadius: 8,
-              background: '#FEE500', color: '#191919', fontSize: 14, fontWeight: 600,
-              textDecoration: 'none', textAlign: 'center', boxSizing: 'border-box',
-            }}
-          >
-            카카오로 3초 만에 열기
-          </a>
-          <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 8 }}>
-            가입 즉시 전체 열람 · 스팸 없음
-          </div>
+            {/* 제목 */}
+            <div style={{ fontSize: 18, fontWeight: 800, color: '#e8e6e3', marginBottom: 6, lineHeight: 1.3 }}>
+              {ctaConfig.title}
+            </div>
 
-          <div style={{ marginTop: 16, paddingTop: 12, borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'center', gap: 16 }}>
-            <button onClick={() => { navigator.clipboard?.writeText(window.location.href); }} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}>📋 링크 복사</button>
-            <button onClick={() => { const u = window.location.href; navigator.clipboard?.writeText(u); alert('링크가 복사되었어요!'); }} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}>📤 공유</button>
+            {/* 설명 */}
+            <div style={{ fontSize: 13, color: '#8b95a5', lineHeight: 1.6, marginBottom: 14 }}>
+              {ctaConfig.desc}
+            </div>
+
+            {/* 태그 */}
+            <div style={{ display: 'flex', gap: 6, justifyContent: 'center', marginBottom: 18, flexWrap: 'wrap' }}>
+              {ctaConfig.tags.map(t => (
+                <span key={t} style={{ fontSize: 11, padding: '3px 8px', borderRadius: 4, background: 'rgba(59,123,246,0.08)', color: '#6da0f0', border: '0.5px solid rgba(59,123,246,0.15)' }}>{t}</span>
+              ))}
+            </div>
+
+            {/* 카카오 버튼 (원클릭) */}
+            <a
+              href={loginUrl}
+              onClick={() => trackCTA('click', 'content_gate', { category })}
+              style={{
+                display: 'flex', width: '100%', padding: '13px', borderRadius: 10,
+                background: '#FEE500', color: '#191919', fontSize: 15, fontWeight: 700,
+                textDecoration: 'none', textAlign: 'center', boxSizing: 'border-box',
+                alignItems: 'center', justifyContent: 'center', gap: 8,
+              }}
+            >
+              <svg width="18" height="18" viewBox="0 0 512 512" fill="#191919"><path d="M255.5 48C141.1 48 48 126.1 48 222.4c0 62.2 38.7 116.7 97 149.8l-24.1 89.7c-2.1 7.9 6.8 14.4 13.7 9.9l101.2-65.2c7.2 1 14.6 1.5 22.2 1.5 114.4 0 207.5-78.1 207.5-174.4S369.9 48 255.5 48z"/></svg>
+              카카오로 3초 만에 열기
+            </a>
+
+            {/* 소셜 프루프 */}
+            <div style={{ marginTop: 12, fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>
+              ✅ {userCount.toLocaleString()}명의 투자자가 사용 중{todaySignups > 0 ? ` · 오늘 ${todaySignups}명 가입` : ''}
+            </div>
+
+            {/* 하단: 구글 로그인 + 공유 */}
+            <div style={{ marginTop: 14, paddingTop: 12, borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'center', gap: 12, alignItems: 'center' }}>
+              <a href={loginUrl} style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}>Google로 시작</a>
+              <span style={{ color: 'rgba(255,255,255,0.1)' }}>|</span>
+              <button onClick={handleCopy} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: 11, cursor: 'pointer' }}>
+                {copied ? '✅ 복사됨' : '📋 링크복사'}
+              </button>
+            </div>
           </div>
         </div>
       </div>

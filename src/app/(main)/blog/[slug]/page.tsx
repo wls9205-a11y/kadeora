@@ -27,6 +27,7 @@ import NextArticleFloat from '@/components/NextArticleFloat';
 import BlogTossGate from '@/components/BlogTossGate';
 import RelatedContentCard from '@/components/RelatedContentCard';
 import SmartSectionGate from '@/components/SmartSectionGate';
+import BlogMidCTA from '@/components/BlogMidCTA';
 import PushPromptBanner from '@/components/PushPromptBanner';
 import Disclaimer from '@/components/Disclaimer';
 import NewsletterSubscribe from '@/components/NewsletterSubscribe';
@@ -275,6 +276,19 @@ export default async function BlogDetailPage({ params }: Props) {
   const headersList = await headers();
   const ua = headersList.get('user-agent') || '';
   const isBot = /googlebot|bingbot|yandex|baiduspider|naverbot|daumoa|slurp|msnbot|ahrefsbot|semrushbot|dotbot|petalbot|facebot|twitterbot|linkedinbot|kakaotalk-scrap/i.test(ua);
+
+  // CTA 소셜프루프 데이터
+  let userCount = 66;
+  let todaySignups = 0;
+  if (!isBot && !isLoggedIn) {
+    try {
+      const { count: uc } = await sb.from("profiles").select("id", { count: "exact", head: true }).eq("is_seed", false);
+      userCount = uc ?? 66;
+      const todayStart = new Date(); todayStart.setHours(0,0,0,0);
+      const { count: ts } = await sb.from("profiles").select("id", { count: "exact", head: true }).eq("is_seed", false).gte("created_at", todayStart.toISOString());
+      todaySignups = ts ?? 0;
+    } catch {}
+  }
 
   // 관련 글 추천 (pre-computed related_slugs 우선 → 태그 유사도 → 카테고리 폴백)
   let related: Record<string, any>[] = [];
@@ -744,12 +758,13 @@ export default async function BlogDetailPage({ params }: Props) {
           <BlogTossGate htmlFull={htmlFull} htmlShort={htmlTossShort} slug={slug} title={post.title} />
         ) : (
           <div className="blog-content" itemProp="articleBody">
-            <SmartSectionGate htmlContent={htmlFull} slug={slug} category={post.category} />
+            <SmartSectionGate htmlContent={htmlFull} slug={slug} category={post.category} userCount={userCount} todaySignups={todaySignups} />
           </div>
         )}
 
         {/* CTA — 본문 직후 위치 (비로그인, 스크롤 필요 최소화) */}
 
+        {isLoggedIn && !isBot && <BlogMidCTA category={post.category} slug={slug} userCount={userCount} />}
         {!isLoggedIn && <RelatedContentCard type="blog" />}
 
         {/* 뉴스레터 — 본문 직후, 비로그인 유저 대상 (게이트 대안 경로) */}
