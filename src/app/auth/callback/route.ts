@@ -27,52 +27,41 @@ export async function GET(request: Request) {
       const meta = data.user.user_metadata;
       const avatarUrl = (meta?.avatar_url || meta?.picture || null)?.replace('http://', 'https://') ?? null;
       
-      const { data: existing } = await supabase.from('profiles').select('id, interests, onboarded, signup_source').eq('id', data.user.id).maybeSingle();
-      
       const source = searchParams.get('source') ?? 'direct';
+      const provider = data.user.app_metadata?.provider ?? 'unknown';
+      const { data: existing } = await supabase.from('profiles').select('id, interests, onboarded, signup_source, created_at').eq('id', data.user.id).maybeSingle();
+      
+      // 신규 유저 판별: profile이 60초 이내에 생성됐으면 신규 (트리거가 먼저 생성하므로)
+      const isNewUser = existing && (Date.now() - new Date(existing.created_at).getTime() < 60000);
 
-      if (!existing) {
-        // 신규 유저 — 프로필 생성 (onboarded=false → 퀵온보딩으로)
-        await supabase.from('profiles').insert({
-          id: data.user.id,
-          nickname: meta?.full_name ?? meta?.name ?? data.user.email?.split('@')[0] ?? '사용자',
-          avatar_url: avatarUrl,
-          provider: data.user.app_metadata?.provider ?? null,
-          onboarded: false,
-          nickname_set: true,
-          signup_source: source,
-          signup_return_url: redirect,
-          updated_at: new Date().toISOString(),
-        });
+      // signup_source + avatar 업데이트 (신규/기존 모두)
+      const updates: Record<string, any> = { updated_at: new Date().toISOString() };
+      if (avatarUrl) updates.avatar_url = avatarUrl;
+      if (!existing?.signup_source) updates.signup_source = source;
+      if (isNewUser) {
+        updates.provider = provider;
+        updates.nickname = meta?.full_name ?? meta?.name ?? data.user.email?.split('@')[0] ?? '사용자';
+        updates.nickname_set = true;
+        updates.signup_return_url = redirect;
+      }
+      await supabase.from('profiles').update(updates).eq('id', data.user.id);
 
-        // 가입 성공 추적
+      // 가입 성공 추적 (신규만)
+      if (isNewUser) {
         try {
           const { getSupabaseAdmin } = await import('@/lib/supabase-admin');
-          const sbAdmin = getSupabaseAdmin();
-          await (sbAdmin as any).from('signup_attempts').insert({
-            provider: data.user.app_metadata?.provider ?? 'unknown',
-            source: searchParams.get('source') ?? 'direct',
-            redirect_path: redirect,
-            success: true,
+          await (getSupabaseAdmin() as any).from('signup_attempts').insert({
+            provider, source, redirect_path: redirect, success: true,
           });
         } catch {}
+      }
 
-        // 신규유저 → 퀵온보딩 (관심사 선택 + 알림 설정) → 원래 페이지로
+      if (!existing || isNewUser || !existing.onboarded) {
+        // 신규 or 온보딩 미완료 → 퀵온보딩
         const safeRedirect = redirect.startsWith('/') ? redirect : '/feed';
         return NextResponse.redirect(`${origin}/onboarding?return=${encodeURIComponent(safeRedirect)}`);
       } else {
-        // 기존 유저 — avatar 갱신 + signup_source 보정
-        const updates: Record<string, string> = { updated_at: new Date().toISOString() };
-        if (avatarUrl) updates.avatar_url = avatarUrl;
-        if (!existing.onboarded && !('signup_source' in existing && existing.signup_source)) {
-          (updates as any).signup_source = source;
-        }
-        await supabase.from('profiles').update(updates).eq('id', data.user.id);
-        if (!existing.onboarded) {
-          // 미온보딩 기존유저도 퀵온보딩으로
-          const safeRedirect = redirect.startsWith('/') ? redirect : '/feed';
-          return NextResponse.redirect(`${origin}/onboarding?return=${encodeURIComponent(safeRedirect)}`);
-        }
+        // 기존 유저 — 바로 리다이렉트
         const safeRedirect = redirect.startsWith('/') ? redirect : '/feed';
         return NextResponse.redirect(`${origin}${safeRedirect}`);
       }

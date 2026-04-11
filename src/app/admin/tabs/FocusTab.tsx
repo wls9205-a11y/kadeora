@@ -80,7 +80,9 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
   if(parseFloat(ctr)<1&&(g.ctaViews7d??0)>10)warns.push(`CTR ${ctr}%`);
   if(fcn>0)warns.push(`크론실패 ${fcn}`);
   if(ret&&ret.d7Rate===0&&ret.size>5)warns.push('D7 리텐션 0%');
-  if((k.pushSubs??0)===0)warns.push('푸시 0명');
+  if((k.pushSubs??0)<=3)warns.push(`푸시 ${k.pushSubs??0}명`);
+  if(shareTotal<=1)warns.push('공유 죽음');
+  if((k.signupAttempts??0)>10&&(k.signupSuccess??0)===0)warns.push('가입성공 0건');
   const deadFeatures = ['aptBookmarks','blogBookmarks','stockWatchlist','priceAlerts'].filter(f=>(fh[f]??0)===0).length;
   if(deadFeatures>=3)warns.push(`죽은기능 ${deadFeatures}개`);
 

@@ -96,6 +96,11 @@ export default function SmartSectionGate({ htmlContent, slug, category }: Props)
           <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 8 }}>
             가입 즉시 전체 열람 · 스팸 없음
           </div>
+
+          <div style={{ marginTop: 16, paddingTop: 12, borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'center', gap: 16 }}>
+            <button onClick={() => { navigator.clipboard?.writeText(window.location.href); }} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}>📋 링크 복사</button>
+            <button onClick={() => { const u = window.location.href; navigator.clipboard?.writeText(u); alert('링크가 복사되었어요!'); }} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}>📤 공유</button>
+          </div>
         </div>
       </div>
     </>
