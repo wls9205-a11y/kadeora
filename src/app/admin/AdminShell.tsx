@@ -2,10 +2,10 @@
 import { useState, useCallback, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 
-const tabs = ['focus','growth','users','data','ops','execute','issues'] as const;
+const tabs = ['focus','growth','users','data','ops','issues'] as const;
 type T = typeof tabs[number];
-const icons: Record<T,string> = { focus:'📊', growth:'📈', users:'👤', data:'🗄️', ops:'🔧', execute:'⚡', issues:'🔍' };
-const labels: Record<T,string> = { focus:'대시보드', growth:'성장', users:'유저', data:'데이터', ops:'크론', execute:'실행', issues:'이슈' };
+const icons: Record<T,string> = { focus:'📊', growth:'📈', users:'👤', data:'🗄️', ops:'🔧', issues:'🔍' };
+const labels: Record<T,string> = { focus:'대시보드', growth:'성장', users:'유저', data:'데이터', ops:'운영', issues:'이슈' };
 
 const Spin = () => <div style={{display:'flex',justifyContent:'center',padding:60}}><div style={{width:24,height:24,border:'3px solid rgba(255,255,255,0.1)',borderTopColor:'#3B7BF6',borderRadius:'50%',animation:'spin .5s linear infinite'}}/></div>;
 const C: Record<T, React.ComponentType<{onNavigate:(t:T)=>void}>> = {
@@ -14,7 +14,6 @@ const C: Record<T, React.ComponentType<{onNavigate:(t:T)=>void}>> = {
   users: dynamic(()=>import('./tabs/UsersTab'),{loading:Spin}),
   data: dynamic(()=>import('./tabs/DataTab'),{loading:Spin}),
   ops: dynamic(()=>import('./tabs/OpsTab'),{loading:Spin}),
-  execute: dynamic(()=>import('./tabs/ExecuteTab'),{loading:Spin}),
   issues: dynamic(()=>import('./tabs/IssueTab'),{loading:Spin}),
 };
 
