@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase-server';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';
 
 export async function POST(req: NextRequest) {
@@ -10,9 +11,11 @@ export async function POST(req: NextRequest) {
     const { platform } = await req.json();
     const ua = req.headers.get('user-agent') || '';
 
+    const admin = getSupabaseAdmin();
+
     // Deduplicate: if logged-in user already has a record, skip
     if (user?.id) {
-      const { data: existing } = await sb
+      const { data: existing } = await admin
         .from('pwa_installs')
         .select('id')
         .eq('user_id', user.id)
@@ -28,7 +31,7 @@ export async function POST(req: NextRequest) {
       region_text = profile?.region_text || null;
     }
 
-    await sb.from('pwa_installs').insert({
+    await admin.from('pwa_installs').insert({
       user_id: user?.id || null,
       platform: platform || 'unknown',
       user_agent: ua.slice(0, 200),
