@@ -103,31 +103,33 @@ async function refreshAccessToken(refreshToken: string): Promise<string | null> 
 async function postToCafe(accessToken: string, item: any): Promise<{ articleId: string }> {
   const url = `https://openapi.naver.com/v1/cafe/${CAFE_ID}/menu/${MENU_ID}/articles`;
   
-  // HTML에서 이미지 URL 추출
-  const imageUrls = (item.naver_html || '').match(/src="([^"]+)"/g)?.map((m: string) => m.replace(/src="|"/g, '')) || [];
+  // HTML 본문 정리 — 네이버 카페가 허용하는 형식으로
+  const cleanHtml = (item.naver_html || '')
+    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+    .replace(/style="[^"]*"/gi, '')
+    .slice(0, 50000); // 네이버 카페 본문 길이 제한
 
-  const formData = new URLSearchParams();
-  formData.append('subject', item.naver_title);
-  formData.append('content', item.naver_html);
-  if (item.naver_tags?.length) {
-    formData.append('openyn', 'true');
-  }
+  const body = new URLSearchParams();
+  body.append('subject', (item.naver_title || '제목없음').slice(0, 100));
+  body.append('content', cleanHtml);
 
   const res = await fetch(url, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${accessToken}`,
-      'Content-Type': 'application/x-www-form-urlencoded',
+      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
     },
-    body: formData.toString(),
+    body: body.toString(),
   });
 
+  const resText = await res.text();
+  
   if (!res.ok) {
-    const errText = await res.text();
-    throw new Error(`Cafe API ${res.status}: ${errText}`);
+    throw new Error(`Cafe API ${res.status}: ${resText.slice(0, 300)}`);
   }
 
-  const data = await res.json();
+  let data;
+  try { data = JSON.parse(resText); } catch { data = {}; }
   return { articleId: data.message?.result?.articleId?.toString() || 'unknown' };
 }
 
