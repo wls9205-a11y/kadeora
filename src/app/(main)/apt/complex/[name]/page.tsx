@@ -121,7 +121,7 @@ export default async function ComplexDetailPage({ params }: Props) {
 
   // 관련 블로그 + 전월세 + 사이트이미지 — 병렬 조회
   const searchTerm = sanitizeSearchQuery(decoded.length > 4 ? decoded.slice(0, 4) : decoded, 20);
-  const [blogsR, rentR, siteR] = await Promise.allSettled([
+  const [blogsR, rentR, siteR, relatedR] = await Promise.allSettled([
     sb.from('blog_posts').select('slug,title,view_count,published_at')
       .eq('is_published', true).or(`title.ilike.%${searchTerm}%,title.ilike.%${region.slice(0,2)} 부동산%`)
       .order('view_count', { ascending: false }).limit(3),
@@ -132,6 +132,14 @@ export default async function ComplexDetailPage({ params }: Props) {
       .limit(100),
     sb.from('apt_sites').select('slug, images')
       .ilike('name', `%${decoded}%`).eq('is_active', true).limit(1).maybeSingle(),
+    // 같은 지역 관련 단지 (내부 링크 강화)
+    (sb as any).from('apt_complex_profiles')
+      .select('apt_name, latest_sale_price, built_year, total_households')
+      .eq('sigungu', sigungu)
+      .neq('apt_name', decoded)
+      .not('latest_sale_price', 'is', null)
+      .order('sale_count_1y', { ascending: false })
+      .limit(8),
   ]);
 
   const relatedBlogs: Record<string, any>[] = blogsR.status === 'fulfilled' ? (blogsR.value?.data || []) : [];
@@ -145,6 +153,7 @@ export default async function ComplexDetailPage({ params }: Props) {
     }
     if (site?.slug) siteSlug = site.slug;
   }
+  const relatedComplexes: Record<string,any>[] = relatedR.status === 'fulfilled' ? (relatedR.value?.data || []) : [];
 
   // 통계 계산
   const amounts = tradeList.filter(t => t.deal_amount > 0).map(t => t.deal_amount);
@@ -211,6 +220,23 @@ export default async function ComplexDetailPage({ params }: Props) {
         thumbnailUrl: `${SITE_URL}/api/og-square?title=${encodeURIComponent(decoded)}&category=apt`,
       })}} />
 
+      {/* JSON-LD: Product + AggregateOffer (SERP 가격 칩) */}
+      {latestPrice > 0 && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org', '@type': 'Product',
+        name: `${decoded} 아파트`,
+        description: `${region} ${sigungu} ${dong} ${decoded} 아파트 매매·전세 시세 정보`,
+        brand: { '@type': 'Brand', name: region },
+        offers: {
+          '@type': 'AggregateOffer',
+          lowPrice: String(minPrice * 10000),
+          highPrice: String(maxPrice * 10000),
+          priceCurrency: 'KRW',
+          offerCount: tradeList.length,
+          availability: 'https://schema.org/InStock',
+        },
+        ...(areaStats.length > 0 ? { additionalProperty: areaStats.slice(0,3).map(a => ({ '@type': 'PropertyValue', name: `${a.area} 평균 매매가`, value: fmtAmount(a.avg) })) } : {}),
+      }) }} />}
+
       {/* JSON-LD: Dataset (실거래 데이터셋) */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org', '@type': 'Dataset',
@@ -243,6 +269,12 @@ export default async function ComplexDetailPage({ params }: Props) {
         mainEntity: [
           { '@type': 'Question', name: `${decoded} 최근 실거래가는?`, acceptedAnswer: { '@type': 'Answer', text: `${decoded}의 최근 매매가는 ${latestPrice > 0 ? fmtAmount(latestPrice) : '정보 없음'}이며, 평균 ${fmtAmount(avgPrice)}입니다. ${region} ${sigungu} ${dong} 소재${builtYear ? `, ${builtYear}년 준공` : ''}입니다.` } },
           { '@type': 'Question', name: `${decoded} 전세·월세 시세는?`, acceptedAnswer: { '@type': 'Answer', text: `${decoded}의 전세가는 ${latestJeonse ? fmtAmount(latestJeonse.deposit) : '정보 없음'}${jeonseRatio ? ` (전세가율 ${jeonseRatio}%)` : ''}이며, 월세는 ${latestMonthly ? `보증금 ${fmtAmount(latestMonthly.deposit)}/월 ${latestMonthly.monthly_rent}만원` : '정보 없음'}입니다.` } },
+          { '@type': 'Question', name: `${decoded} 평당가는 얼마인가요?`, acceptedAnswer: { '@type': 'Answer', text: `${decoded}의 평당 매매가는 ${profile?.avg_sale_price_pyeong ? fmtAmount(profile.avg_sale_price_pyeong) : fmtAmount(Math.round(avgPrice / (tradeList[0]?.exclusive_area || 84) * 3.3))}입니다.` } },
+          { '@type': 'Question', name: `${decoded} 준공연도와 세대수는?`, acceptedAnswer: { '@type': 'Answer', text: `${decoded}은 ${builtYear ? `${builtYear}년에 준공` : '준공 정보 미상'}되었으며, ${profile?.total_households ? `총 ${profile.total_households.toLocaleString()}세대` : '세대수 정보 미상'}입니다.` } },
+          { '@type': 'Question', name: `${decoded} 전세가율은?`, acceptedAnswer: { '@type': 'Answer', text: `${decoded}의 전세가율은 ${jeonseRatio ? `${jeonseRatio}%` : '정보 없음'}입니다.${jeonseRatio && jeonseRatio > 70 ? ' 전세가율이 높아 갭투자 시 주의가 필요합니다.' : jeonseRatio && jeonseRatio < 50 ? ' 전세가율이 낮아 매매 대비 전세가 저렴한 편입니다.' : ''}` } },
+          { '@type': 'Question', name: `${decoded} 최근 거래량은?`, acceptedAnswer: { '@type': 'Answer', text: `${decoded}의 최근 거래 건수는 총 ${tradeList.length}건이며, 면적별로 ${areaStats.slice(0,3).map(a => `${a.area} ${a.count}건`).join(', ')}입니다.` } },
+          { '@type': 'Question', name: `${decoded} 어떤 면적이 있나요?`, acceptedAnswer: { '@type': 'Answer', text: `${decoded}에는 ${areaStats.map(a => a.area).join(', ')} 면적의 세대가 있으며, 가장 거래가 활발한 면적은 ${areaStats[0]?.area || '정보 없음'}입니다.` } },
+          { '@type': 'Question', name: `${decoded} 가격 추이는?`, acceptedAnswer: { '@type': 'Answer', text: `${decoded}의 ${monthlyTrend.length > 0 ? `최근 ${monthlyTrend.length}개월 추이: 최저 ${fmtAmount(Math.min(...monthlyTrend.map(m => m.avg)))}에서 최고 ${fmtAmount(Math.max(...monthlyTrend.map(m => m.avg)))}` : '가격 추이 정보가 없습니다'}.${profile?.price_change_1y ? ` 1년 변동률 ${Number(profile.price_change_1y) > 0 ? '+' : ''}${profile.price_change_1y}%.` : ''}` } },
           { '@type': 'Question', name: `${decoded} 면적별 평당가는?`, acceptedAnswer: { '@type': 'Answer', text: `${decoded}에는 ${areaStats.length}개 면적 타입이 있으며, 면적별 평당가와 거래 이력을 카더라에서 비교 분석할 수 있습니다.` } },
           { '@type': 'Question', name: `${decoded} 입주 연차는?`, acceptedAnswer: { '@type': 'Answer', text: builtYear ? `${decoded}은 ${builtYear}년 준공으로 현재 ${2026 - builtYear}년차(${profile?.age_group || ''})입니다.` : `${decoded}의 준공 연도 정보는 확인되지 않았습니다.` } },
         ],
@@ -606,6 +638,42 @@ export default async function ComplexDetailPage({ params }: Props) {
       <p style={{ fontSize: 11, color: 'var(--text-tertiary)', textAlign: 'center', margin: '16px 0 8px' }}>
         📊 국토교통부 실거래가 공개시스템 기준 · 카더라 자체 분석
       </p>
+
+      {/* SSR 자동 분석 텍스트 — Featured Snippet / AI Overview 타겟 */}
+      <section className="complex-analysis" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', marginBottom: 14 }}>
+        <h2 style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px' }}>{decoded} 실거래가 분석</h2>
+        <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0 }}>
+          {decoded}은 {region} {sigungu} {dong}에 위치한{builtYear ? ` ${builtYear}년 준공` : ''}{profile?.total_households ? ` ${profile.total_households.toLocaleString()}세대 규모의` : ''} 아파트입니다.
+          {latestPrice > 0 && ` 최근 매매 실거래가는 ${fmtAmount(latestPrice)}이며, 평균 매매가 ${fmtAmount(avgPrice)}, 최고가 ${fmtAmount(maxPrice)}, 최저가 ${fmtAmount(minPrice)}입니다.`}
+          {latestJeonse && ` 전세 시세는 ${fmtAmount(latestJeonse.deposit)}${jeonseRatio ? ` (전세가율 ${jeonseRatio}%)` : ''}이며,`}
+          {latestMonthly && ` 월세는 보증금 ${fmtAmount(latestMonthly.deposit)}/월 ${latestMonthly.monthly_rent}만원입니다.`}
+          {profile?.price_change_1y && ` 최근 1년 가격 변동률은 ${Number(profile.price_change_1y) > 0 ? '+' : ''}${profile.price_change_1y}%입니다.`}
+          {areaStats.length > 0 && ` 거래가 가장 활발한 면적은 ${areaStats[0].area}(${areaStats[0].count}건, 평균 ${fmtAmount(areaStats[0].avg)})입니다.`}
+          {` 총 ${tradeList.length}건의 매매 거래와 ${rentTrades.length}건의 전월세 거래가 기록되어 있습니다.`}
+        </p>
+      </section>
+
+      {/* 관련 단지 — 내부 링크 강화 (크롤링 심도 개선) */}
+      {relatedComplexes.length > 0 && (
+        <section style={{ marginBottom: 14 }}>
+          <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px' }}>{sigungu} 주요 아파트</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 6 }}>
+            {relatedComplexes.slice(0, 6).map((rc: any, i: number) => (
+              <Link key={i} href={`/apt/complex/${encodeURIComponent(rc.apt_name)}`} style={{
+                display: 'block', padding: '10px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-sm)', textDecoration: 'none', transition: 'border-color 0.15s',
+              }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{rc.apt_name}</div>
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}>
+                  {rc.latest_sale_price ? fmtAmount(rc.latest_sale_price) : '시세 미상'}
+                  {rc.built_year ? ` · ${rc.built_year}년` : ''}
+                  {rc.total_households ? ` · ${rc.total_households}세대` : ''}
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* CTA */}
       <Link href={siteSlug ? `/apt/${siteSlug}` : `/apt/search?q=${encodeURIComponent(decoded)}`} style={{
