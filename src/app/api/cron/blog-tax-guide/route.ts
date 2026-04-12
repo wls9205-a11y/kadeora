@@ -4,6 +4,7 @@ import { withCronLogging } from '@/lib/cron-logger';
 import { generateMetaDesc, generateMetaKeywords } from '@/lib/blog-seo-utils';
 import { NextRequest, NextResponse } from 'next/server';
 import { SITE_URL } from '@/lib/constants';
+import { buildFinancePrompt, generateAndValidate } from '@/lib/blog-prompt-templates';
 
 export const maxDuration = 300;
 
@@ -31,56 +32,41 @@ export async function GET(_req: NextRequest) {
 
     for (const topic of TOPICS) {
       if (existingSlugs.has(topic.slug)) continue;
-      const calcUrl = `${SITE_URL}${topic.calc}`;
-      const content = `## ${topic.title.split('—')[0].trim()}
 
-${topic.cat} 분야의 핵심 세금 가이드입니다. 2026년 최신 세법 기준으로 정리했습니다.
+      // AI 생성 (하드코딩 템플릿 → 완성형 콘텐츠)
+      const links = [
+        `[${topic.title.split('—')[0].trim()} 계산기 →](${topic.calc})`,
+        '[무료 계산기 모음 →](/calc)',
+        '[부동산 정보 →](/apt)',
+        '[카더라 블로그 →](/blog?category=finance)',
+        '[커뮤니티 →](/feed)',
+      ];
+      const prompt = buildFinancePrompt(topic.title, 'finance', links);
+      const result = await generateAndValidate(prompt, 'finance');
 
-## 2026년 주요 변경사항
-
-2026년에는 세제 개편이 시행되면서 여러 세율과 공제 기준이 변경되었습니다. 정확한 세금 계산을 위해 최신 기준을 확인하는 것이 중요합니다.
-
-## 카더라 계산기로 간편 계산
-
-복잡한 세금 계산, 카더라 무료 계산기로 1분 만에 확인하세요.
-
-👉 **[${topic.title.split('—')[0].trim()} 계산기 바로가기](${calcUrl})**
-
-- 2026년 최신 세법 반영
-- 회원가입 불필요
-- 모바일에서도 편리하게 이용
-
-## 절세 포인트
-
-1. **공제 항목 꼼꼼히 챙기기** — 놓치기 쉬운 공제 항목을 미리 확인하세요
-2. **시기 조절** — 매도·증여 시기에 따라 세금이 크게 달라질 수 있습니다
-3. **전문가 상담** — 큰 금액이 관련된 경우 세무사 상담을 권장합니다
-
-## 관련 가이드
-
-- [무료 계산기 모음](${SITE_URL}/calc) — 145종 무료 계산기
-- [부동산 정보](${SITE_URL}/apt) — 청약·분양·실거래가
-
----
-
-> 이 글은 2026년 최신 세법을 기준으로 작성되었습니다. 정확한 세금 신고는 전문 세무사와 상담하시기 바랍니다.
-`;
+      if (!result) {
+        console.warn(`[blog-tax-guide] AI generation failed for ${topic.slug}`);
+        continue;
+      }
 
       const res = await safeBlogInsert(sb, {
         slug: topic.slug,
         title: topic.title,
-        content,
+        content: result.content,
         category: 'finance',
+        sub_category: '절세·세금',
         tags: topic.tags,
         source_type: 'tax-guide',
         cron_type: 'blog-tax-guide',
         data_date: today,
-        meta_description: generateMetaDesc(content, topic.title, 'finance'),
+        meta_description: generateMetaDesc(result.content, topic.title, 'finance'),
         meta_keywords: generateMetaKeywords('finance', topic.tags),
+        seo_score: result.score,
+        seo_tier: result.tier,
         is_published: true,
       });
       if (res.success) created++;
-      if (created >= 3) break;
+      if (created >= 2) break; // API 비용 제한
     }
 
     return { created };

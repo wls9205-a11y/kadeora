@@ -1,3 +1,4 @@
+import { buildFinancePrompt, generateAndValidate } from '@/lib/blog-prompt-templates';
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
