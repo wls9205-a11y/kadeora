@@ -1,56 +1,48 @@
-# 카더라 STATUS — 세션 86 (2026-04-12 18:30 KST)
+# 카더라 STATUS — 세션 87 (2026-04-12 12:30 KST)
 
 ## 프로덕션
 - 실유저: 66명
 - UV: ~2,000/일 | PV: ~2,800/일
 - DB: 2.0GB/8.4GB
-- 최종 커밋: (배포 중)
+- 최종 커밋: fix: OG 이미지 카테고리 버그 수정 + 스팸리스크 해소
 - 런타임 에러: 0건
 
 ## 이번 세션 완료
 
-### SEO 대규모 강화 — 네이버 1위 + 이미지 캐러셀 + 노출면적 극대화
+### SEO 정밀 감사 + OG 이미지 치명적 버그 수정 + 스팸리스크 해소
 
-**전체 60개 페이지 감사 실시 → 56개 개선 항목 도출 → 코드 수정 가능한 항목 일괄 처리**
+**CRITICAL 3건:**
+- 18개 크론 cover_image URL `&type=blog` → `&category={정확한값}&author=카더라` 수정
+  - OG 엔드포인트는 `category` 파라미터만 읽으므로 모든 글이 보라색 "블로그" 이미지였음
+  - DB 기존 데이터 2,698건 일괄 수정 (SQL 직접 실행)
+  - 최종 확인: apt 3,311건/stock 3,419건/finance 298건/unsold 546건 정상 매핑
+- RSS enclosure type `image/jpeg` → `image/png` (ImageResponse 실제 포맷)
+- 블로그 목록 OG 이미지 `category=blog` 하드코딩 → 실제 카테고리 반영
 
-**구조화 데이터 (JSON-LD):**
-- ItemList에 `image` 속성 추가: 블로그 목록, 주식 메인/섹터, 아파트 허브/지역, 홈페이지 — 네이버 캐러셀 이미지 노출 핵심
-- Organization `sameAs` 채움 (기존 빈 배열)
-- Organization `numberOfEmployees`, `areaServed`, `knowsAbout` 확장
-- BlogPosting `isPartOf` 추가 (구글 사이트링크 강화)
-- FAQPage 추가: stock/themes, movers, market/[code], apt/search, apt/map (layout.tsx 경유)
-- BreadcrumbList 추가: calc 허브, calc/[category], faq, shop, press
-- stock/compare, stock/search — layout.tsx 생성으로 SEO 공백 해소
+**스팸리스크 해소 2건:**
+- `isAccessibleForFree` + `hasPart` JSON-LD 추가 (Google Paywalled Content 가이드라인 준수)
+  - 봇에게 전문, 비로그인에게 55% 보여주는 게이팅이 클로킹으로 판정되지 않도록
+- Organization `foundingDate: '2024'` → `'2026'` (WHOIS 일치)
 
-**메타 태그:**
-- `seo.ts` buildMeta/seoOther에 `naver:written_time`, `naver:updated_time`, `naver:description` 자동 포함
-- about/team — naver 메타 추가
-- press — naver 메타 추가
+**HIGH 5건:**
+- 7곳 `img alt=""` → 실제 콘텐츠명 (blog/page, StockClient, 4개 apt tabs)
+- 블로그 페이지네이션 `rel=prev/next` 추가
+- `<article itemScope itemType="BlogPosting">` 추가
+- ImageGallery에서 items 없는 빈 `og-infographic` 제거
+- RSS enclosure `length="0"` → `"50000"`
 
-**H1 태그:**
-- 7개 페이지 H1 추가: /apt, /stock, /feed, /discuss, /search, /faq, /stock/search
-- 서버 컴포넌트는 visible H1, 클라이언트 컴포넌트는 sr-only H1
+**MEDIUM 2건:**
+- `naver:written_time` 매 요청 `new Date()` → 안정적 고정 날짜
+- `blog-fix-existing` 크론에 잘못된 cover_image 일괄 수정 로직 추가 (향후 자동 실행용)
 
-**RSS:**
-- layout.tsx RSS alternate → /blog/feed (최고 품질 — media:content + enclosure 포함)
-- feed.xml에 content:encoded + enclosure 추가 (기존 xmlns:content 선언만 하고 미사용 수정)
+### 포털 1위 가능성 진단 결과
+- 기술적 SEO 구현: A+ (JSON-LD 7종, OG 4종, 사이트맵 23개, RSS 3개)
+- 포털 1위 차단 요인: 도메인 나이 2개월, AI 콘텐츠 대량 감지, 사용자 반응 0, 백링크 0, E-E-A-T 경험 부재
+- 결론: 롱테일 키워드에서는 이미 노출 가능, 대형 키워드 1위는 6~12개월 소요
+- 핵심 전략: SEO_REWRITE_PLAN 실행 + 독자적 데이터/경험 콘텐츠 생산
 
-**인프라:**
-- Yeti(네이버) Crawl-delay 1→0 (수집 속도 최대화)
-- Blog series sitemap lastmod: created_at → updated_at (신선도 신호 개선)
-
-**총 변경: 20개 파일 수정 + 4개 신규 layout.tsx 생성**
-
-## PENDING (코드 외 수동 작업)
-- 네이버 블로그 공식 채널 개설 + 주간 요약 발행
-- 네이버 카페 개설
-- 네이버 플레이스 사업체 등록
-- 네이버 서치어드바이저 수집주기 "빠르게" 확인
-- 네이버 서치어드바이저 RSS 제출 URL → /blog/feed 변경
-- 카카오톡 채널 개설/연동
-- 다음 웹마스터도구 등록 확인
-- Zum 웹마스터도구 등록
-- 네이버 인플루언서 등록 검토
-- 네이버TV/유튜브 동영상 채널 개설 검토
-- 백링크 확보 전략 수립
-# env trigger
+## 다음 세션 TODO
+- [ ] SEO_REWRITE_PLAN Phase 실행 (59K→15K편 감축)
+- [ ] blog-fix-existing 크론 vercel.json에 1회성 등록하여 나머지 일괄 수정
+- [ ] 네이버 C-Rank 축적 모니터링
+- [ ] Google Search Console 인덱싱 현황 확인
