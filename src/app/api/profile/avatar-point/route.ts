@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
     await sb.from('notifications').insert({
       user_id: user.id,
       type: 'system',
-      content: '📸 프로필 사진 등록 완료! 30P 지급됐어요.', link: '/profile',
+      content: '📸 프로필 사진 등록 완료! 30P 지급됐어요.',
       link: `/profile/${user.id}`,
     })
 
