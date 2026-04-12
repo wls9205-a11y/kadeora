@@ -472,7 +472,7 @@
     },
     {
       "path": "/api/cron/blog-generate-images",
-      "schedule": "0 5 * * *"
+      "schedule": "0 2,8,14,20 * * *"
     }
   ]
 }
