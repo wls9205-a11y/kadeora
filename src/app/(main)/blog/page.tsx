@@ -72,15 +72,19 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
   return {
     title: `${meta.title}${suffix}${qSuffix}`,
     description: meta.desc,
-    alternates: { canonical },
-    openGraph: { title: meta.title, description: meta.desc, url: canonical, siteName: '카더라', locale: 'ko_KR', type: 'website', images: [{ url: `${SITE}/api/og?title=${encodeURIComponent(meta.title)}&design=2&category=blog`, width: 1200, height: 630, alt: meta.title }, { url: `${SITE}/api/og-square?title=${encodeURIComponent(meta.title)}&category=blog`, width: 630, height: 630, alt: meta.title }] },
+    alternates: {
+      canonical,
+      ...(pageNum > 1 ? { prev: `${SITE}/blog?${category !== 'all' ? `category=${category}&` : ''}page=${pageNum - 1}`.replace(/[&?]page=1$/, '').replace(/&$/, '') } : {}),
+      ...(pageNum < 100 ? { next: `${SITE}/blog?${category !== 'all' ? `category=${category}&` : ''}page=${pageNum + 1}` } : {}),
+    },
+    openGraph: { title: meta.title, description: meta.desc, url: canonical, siteName: '카더라', locale: 'ko_KR', type: 'website', images: [{ url: `${SITE}/api/og?title=${encodeURIComponent(meta.title)}&category=${category === 'all' ? 'blog' : category}&author=${encodeURIComponent('카더라')}&design=2`, width: 1200, height: 630, alt: meta.title }, { url: `${SITE}/api/og-square?title=${encodeURIComponent(meta.title)}&category=${category === 'all' ? 'blog' : category}`, width: 630, height: 630, alt: meta.title }] },
     twitter: { card: 'summary_large_image' as const, title: meta.title, description: meta.desc },
     ...(pageNum > 1 ? { robots: { index: false, follow: true } } : {}),
     other: {
-      'naver:written_time': new Date().toISOString(),
-      'naver:updated_time': new Date().toISOString(),
+      'naver:written_time': '2026-04-01T00:00:00Z',
+      'naver:updated_time': new Date().toISOString().slice(0, 10) + 'T00:00:00Z',
       'naver:author': '카더라',
-      'og:updated_time': new Date().toISOString(),
+      'og:updated_time': new Date().toISOString().slice(0, 10) + 'T00:00:00Z',
       'dg:plink': `${SITE}/blog`,
       'article:section': category === 'all' ? '블로그' : (CAT_META[category]?.title?.split('—')[0]?.trim() || '블로그'),
       'article:tag': '블로그,주식,청약,부동산,미분양,재테크',
@@ -397,7 +401,7 @@ export default async function BlogPage({ searchParams }: Props) {
                 {/* 썸네일 */}
                 {p.cover_image && (
                   <div style={{ width: 64, height: 44, borderRadius: 6, overflow: 'hidden', flexShrink: 0, background: 'var(--bg-hover)' }}>
-                    <img src={p.cover_image} alt="" width={64} height={44} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} loading="lazy" />
+                    <img src={p.cover_image} alt={p.title || "블로그 썸네일"} width={64} height={44} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} loading="lazy" />
                   </div>
                 )}
                 {/* 본문 */}

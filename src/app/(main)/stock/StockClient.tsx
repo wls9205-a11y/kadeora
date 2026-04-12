@@ -229,7 +229,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center', flex: 1, minWidth: 0 }}>
             {(() => { const logo = getStockLogo(s.symbol, !isGlobal); return s.logo_url ? (
-              <img src={s.logo_url} alt="" width={32} height={32} style={{ width: 32, height: 32, borderRadius: 8, objectFit: 'contain', flexShrink: 0, background: '#fff', padding: 2 }} loading="lazy" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; (e.target as HTMLImageElement).nextElementSibling && ((e.target as HTMLImageElement).nextElementSibling as HTMLElement).style.removeProperty('display'); }} />
+              <img src={s.logo_url} alt={`${s.name} 로고`} width={32} height={32} style={{ width: 32, height: 32, borderRadius: 8, objectFit: 'contain', flexShrink: 0, background: '#fff', padding: 2 }} loading="lazy" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; (e.target as HTMLImageElement).nextElementSibling && ((e.target as HTMLImageElement).nextElementSibling as HTMLElement).style.removeProperty('display'); }} />
             ) : (
               <div style={{ width: 32, height: 32, borderRadius: 8, background: logo.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: logo.initials.length > 2 ? 8 : 11, fontWeight: 800, color: logo.textColor, letterSpacing: '-0.02em' }}>{logo.initials}</div>
             ); })()}
@@ -1141,7 +1141,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
                           <div style={{ display: 'flex', gap: 8, alignItems: 'center', flex: 1, minWidth: 0 }}>
                             {(() => { const logo = getStockLogo(s.symbol, !isGlobal); return s.logo_url ? (
-                              <img src={s.logo_url} alt="" width={32} height={32} style={{ width: 32, height: 32, borderRadius: 8, objectFit: 'contain', flexShrink: 0, background: '#fff', padding: 2 }} loading="lazy" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; (e.target as HTMLImageElement).nextElementSibling && ((e.target as HTMLImageElement).nextElementSibling as HTMLElement).style.removeProperty('display'); }} />
+                              <img src={s.logo_url} alt={`${s.name} 로고`} width={32} height={32} style={{ width: 32, height: 32, borderRadius: 8, objectFit: 'contain', flexShrink: 0, background: '#fff', padding: 2 }} loading="lazy" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; (e.target as HTMLImageElement).nextElementSibling && ((e.target as HTMLImageElement).nextElementSibling as HTMLElement).style.removeProperty('display'); }} />
                             ) : (
                               <div style={{ width: 32, height: 32, borderRadius: 8, background: logo.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: logo.initials.length > 2 ? 8 : 11, fontWeight: 800, color: logo.textColor, letterSpacing: '-0.02em' }}>{logo.initials}</div>
                             ); })()}

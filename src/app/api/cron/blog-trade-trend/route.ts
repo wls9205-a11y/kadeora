@@ -329,7 +329,7 @@ async function processRegions(
         cron_type: 'blog-trade-trend',
         data_date: statMonth,
         source_ref: 'apt_trade_monthly_stats',
-        cover_image: `${SITE_URL}/api/og?title=${encodeURIComponent(title)}&design=2&type=blog`,
+        cover_image: `${SITE_URL}/api/og?title=${encodeURIComponent(title)}&category=apt&author=${encodeURIComponent('카더라')}&design=2`,
         image_alt: generateImageAlt('apt', title),
         meta_description: generateMetaDesc(content),
         meta_keywords: generateMetaKeywords('apt', tags),

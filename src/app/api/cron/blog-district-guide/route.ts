@@ -429,7 +429,7 @@ export const GET = withCronAuth(async (req: NextRequest) => {
         cron_type: 'blog-district-guide',
         data_date: yearMonth,
         source_ref: 'apt_sites',
-        cover_image: `${SITE_URL}/api/og?title=${encodeURIComponent(title)}&design=2&type=blog`,
+        cover_image: `${SITE_URL}/api/og?title=${encodeURIComponent(title)}&category=apt&author=${encodeURIComponent('카더라')}&design=2`,
         image_alt: generateImageAlt('apt', title),
         meta_description: generateMetaDesc(content),
         meta_keywords: generateMetaKeywords('apt', tags),

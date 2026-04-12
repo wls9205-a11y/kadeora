@@ -91,12 +91,46 @@ async function handler(_req: NextRequest) {
     fixedAlt++;
   }
 
+  // 5. cover_image에 type=blog 포함된 글 → 올바른 category로 수정
+  const { data: wrongCover } = await sb.from('blog_posts')
+    .select('id, title, category, cover_image')
+    .eq('is_published', true)
+    .like('cover_image', '%type=blog%')
+    .limit(1000);
+
+  let fixedWrongCover = 0;
+  for (const post of (wrongCover || [])) {
+    const cat = post.category || 'blog';
+    const correctUrl = `${SITE_URL}/api/og?title=${encodeURIComponent((post.title || '').slice(0, 60))}&category=${cat}&author=${encodeURIComponent('카더라')}&design=2`;
+    await sb.from('blog_posts').update({ cover_image: correctUrl }).eq('id', post.id);
+    fixedWrongCover++;
+  }
+
+  // 6. cover_image에 category= 파라미터가 없는 글 수정 (design=2만 있고 category 없는 패턴)
+  const { data: noCatCover } = await sb.from('blog_posts')
+    .select('id, title, category, cover_image')
+    .eq('is_published', true)
+    .not('cover_image', 'is', null)
+    .not('cover_image', 'like', '%category=%')
+    .like('cover_image', '%/api/og%')
+    .limit(1000);
+
+  let fixedNoCatCover = 0;
+  for (const post of (noCatCover || [])) {
+    const cat = post.category || 'blog';
+    const correctUrl = `${SITE_URL}/api/og?title=${encodeURIComponent((post.title || '').slice(0, 60))}&category=${cat}&author=${encodeURIComponent('카더라')}&design=2`;
+    await sb.from('blog_posts').update({ cover_image: correctUrl }).eq('id', post.id);
+    fixedNoCatCover++;
+  }
+
   return NextResponse.json({
     fixed_cover_image: fixedCover,
     fixed_meta_description: fixedDesc,
     fixed_meta_keywords: fixedKeywords,
     fixed_image_alt: fixedAlt,
-    total_fixed: fixedCover + fixedDesc + fixedKeywords + fixedAlt,
+    fixed_wrong_cover_category: fixedWrongCover,
+    fixed_no_category_cover: fixedNoCatCover,
+    total_fixed: fixedCover + fixedDesc + fixedKeywords + fixedAlt + fixedWrongCover + fixedNoCatCover,
   });
 }
 

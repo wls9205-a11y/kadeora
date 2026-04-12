@@ -159,7 +159,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
               }}>
                 {/* ⓪ OG 이미지 스트립 */}
                 <div style={{ height: 56, background: 'var(--bg-hover)', position: 'relative', overflow: 'hidden' }}>
-                  <img src={aptImageMap?.[apt.house_nm] || `/api/og?title=${encodeURIComponent(apt.house_nm)}&category=apt&design=2`} alt="" width={400} height={56} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', opacity: 0.85 }} loading="lazy" />
+                  <img src={aptImageMap?.[apt.house_nm] || `/api/og?title=${encodeURIComponent(apt.house_nm)}&category=apt&design=2`} alt={apt.house_nm || "부동산 이미지"} width={400} height={56} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', opacity: 0.85 }} loading="lazy" />
                   <div style={{ position: 'absolute', top: 6, left: 8 }}>
                     <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 5, background: st === 'open' ? 'rgba(54,240,176,0.9)' : st === 'upcoming' ? 'rgba(74,138,247,0.9)' : 'rgba(148,163,184,0.8)', color: '#fff', lineHeight: '16px' }}>{bd.label}</span>
                   </div>

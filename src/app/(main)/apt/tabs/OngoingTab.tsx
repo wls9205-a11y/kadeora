@@ -188,7 +188,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
           <Link key={o.id} href={linkH} className="kd-card-hover" style={{ display: 'block', borderRadius: 'var(--radius-card)', overflow: 'hidden', background: isPremium ? 'linear-gradient(135deg, rgba(251,191,36,0.04), var(--bg-surface))' : 'var(--bg-surface)', border: isPremium ? '1.5px solid rgba(251,191,36,0.3)' : '1px solid var(--border)', textDecoration: 'none', color: 'inherit' }}>
             {/* OG 이미지 스트립 */}
             <div style={{ height: 48, background: 'var(--bg-hover)', position: 'relative', overflow: 'hidden' }}>
-              <img src={aptImageMap?.[o.house_nm] || `/api/og?title=${encodeURIComponent(o.house_nm || '분양중')}&category=apt&design=2`} alt="" width={400} height={48} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', opacity: 0.8 }} loading="lazy" />
+              <img src={aptImageMap?.[o.house_nm] || `/api/og?title=${encodeURIComponent(o.house_nm || '분양중')}&category=apt&design=2`} alt={o.house_nm || "부동산 이미지"} width={400} height={48} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', opacity: 0.8 }} loading="lazy" />
               <div style={{ position: 'absolute', top: 5, left: 8 }}>
                 <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 5, background: isUnsold ? 'rgba(248,113,113,0.9)' : 'rgba(54,240,176,0.9)', color: '#fff' }}>{isUnsold ? '미분양' : '분양중'}</span>
                 {isPremium && <span style={{ fontSize: 9, fontWeight: 800, padding: '2px 5px', borderRadius: 3, background: 'linear-gradient(135deg,#FFD43B,#F59E0B)', color: '#1a1a2e', marginLeft: 3 }}>PREMIUM</span>}

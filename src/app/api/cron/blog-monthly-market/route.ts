@@ -76,7 +76,7 @@ export async function GET(req: NextRequest) {
       content: content,
       excerpt: `${monthKey} 월간 시장 종합 리뷰`,
       category: 'stock', tags, cron_type: 'monthly-market',
-      cover_image: `${SITE_URL}/api/og?title=${encodeURIComponent(title)}&design=2&type=blog`,
+      cover_image: `${SITE_URL}/api/og?title=${encodeURIComponent(title)}&category=stock&author=${encodeURIComponent('카더라')}&design=2`,
       image_alt: generateImageAlt('stock', title),
       meta_description: generateMetaDesc(content),
       meta_keywords: generateMetaKeywords('stock', tags),

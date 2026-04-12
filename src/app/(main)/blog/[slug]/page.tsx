@@ -474,6 +474,15 @@ export default async function BlogDetailPage({ params }: Props) {
       interactionType: 'https://schema.org/ReadAction',
       userInteractionCount: post.view_count ?? 0,
     },
+    // 비로그인 사용자에게 본문 55%만 표시 → Google 구조화데이터 가이드라인 준수
+    isAccessibleForFree: isLoggedIn || isBot,
+    ...(!isLoggedIn && !isBot ? {
+      hasPart: {
+        '@type': 'WebPageElement',
+        isAccessibleForFree: false,
+        cssSelector: '.blog-content',
+      },
+    } : {}),
   };
 
   const breadcrumbLd = {
@@ -647,7 +656,7 @@ export default async function BlogDetailPage({ params }: Props) {
 
       {/* 세션70: 상단 회원가입 유도 배너 */}
 
-      <article style={{ paddingBottom: 40 }}>
+      <article itemScope itemType="https://schema.org/BlogPosting" style={{ paddingBottom: 40 }}>
         {/* ImageGallery JSON-LD (유지 — 포털 이미지 탭) */}
         {post.cover_image && (() => {
           const ogSquare = `${SITE}/api/og-square?title=${encodeURIComponent(post.title)}&category=${post.category}&author=${encodeURIComponent(post.author_name || '카더라')}`;
@@ -658,7 +667,7 @@ export default async function BlogDetailPage({ params }: Props) {
                 { '@type': 'ImageObject', url: post.cover_image.startsWith('/') ? `${SITE}${post.cover_image}` : post.cover_image, name: post.image_alt || post.title, width: 1200, height: 630, position: 1 },
                 { '@type': 'ImageObject', url: ogSquare, name: `${post.title} — 카더라 블로그`, width: 630, height: 630, position: 2 },
                 { '@type': 'ImageObject', url: `${SITE}/api/og?title=${encodeURIComponent((post.title || '').slice(0, 40))}&category=${post.category}&design=2`, name: `${post.title} 분석`, width: 1200, height: 630, position: 3 },
-                { '@type': 'ImageObject', url: `${SITE}/api/og-infographic?title=${encodeURIComponent((post.title || '').slice(0, 40))}&category=${post.category}&type=summary`, name: `${post.title} 인포그래픽`, width: 800, height: 630, position: 4 },
+
               ],
             })}} />
           );

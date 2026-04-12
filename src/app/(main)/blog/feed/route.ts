@@ -32,7 +32,7 @@ ${tagItems}
         <media:title><![CDATA[${p.image_alt || p.title}]]></media:title>
         <media:description><![CDATA[카더라 ${catLabel} — ${p.title}]]></media:description>
       </media:content>
-      <enclosure url="${imgUrl}" type="image/jpeg" length="0" />
+      <enclosure url="${imgUrl}" type="image/png" length="50000" />
     </item>`;
   }).join('\n');
 
