@@ -38,7 +38,7 @@ export default function IssueTab() {
   const [issues, setIssues] = useState<IssueAlert[]>([]);
   const [loading, setLoading] = useState(true);
   const [autoEnabled, setAutoEnabled] = useState(true);
-  const [minScore, setMinScore] = useState(60);
+  const [minScore, setMinScore] = useState(40);
   const [selectedIssue, setSelectedIssue] = useState<IssueAlert | null>(null);
   const [filter, setFilter] = useState<string>('all');
   const [stats, setStats] = useState({ total: 0, published: 0, draft: 0, pending: 0 });
@@ -96,15 +96,15 @@ export default function IssueTab() {
   };
 
   const scoreColor = (score: number) => {
-    if (score >= 80) return '#ef4444';
-    if (score >= 60) return '#f97316';
-    if (score >= 40) return '#eab308';
+    if (score >= 50) return '#ef4444';
+    if (score >= 40) return '#f97316';
+    if (score >= 25) return '#eab308';
     return '#6b7280';
   };
 
   const scoreLabel = (score: number) => {
-    if (score >= 60) return '🔴 자동발행';
-    if (score >= 40) return '🟡 초안대기';
+    if (score >= 40) return '🔴 자동발행';
+    if (score >= 25) return '🟡 초안대기';
     return '🟢 로그';
   };
 
@@ -172,7 +172,7 @@ export default function IssueTab() {
               onChange={e => updateMinScore(Number(e.target.value))}
               style={{ background: '#1e293b', color: '#e2e8f0', border: '1px solid #334155', borderRadius: 6, padding: '4px 8px', fontSize: 12 }}
             >
-              {[50, 55, 60, 65, 70, 75, 80].map(s => (
+              {[30, 35, 40, 45, 50, 55, 60].map(s => (
                 <option key={s} value={s}>{s}점+</option>
               ))}
             </select>
@@ -213,7 +213,7 @@ export default function IssueTab() {
           {filtered.map(issue => (
             <div key={issue.id} style={{
               background: 'var(--surface, #0C1528)', borderRadius: 10, padding: '12px 16px',
-              border: `1px solid ${issue.final_score >= 60 ? '#f9731630' : '#1e293b'}`,
+              border: `1px solid ${issue.final_score >= 40 ? '#f9731630' : '#1e293b'}`,
               cursor: 'pointer',
             }} onClick={() => setSelectedIssue(selectedIssue?.id === issue.id ? null : issue)}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>

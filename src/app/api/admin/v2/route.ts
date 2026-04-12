@@ -206,6 +206,13 @@ export async function GET(req: NextRequest) {
         safeCount(sb.from('profiles').select('id', { count: 'exact', head: true }).eq('first_mission_completed', true).neq('is_seed', true)),
       ]);
 
+      // 이슈 감지 현황
+      const [issuePending, issuePublished, issueTotal] = await Promise.all([
+        safeCount((sb as any).from('issue_alerts').select('id', { count: 'exact', head: true }).eq('is_processed', false)),
+        safeCount((sb as any).from('issue_alerts').select('id', { count: 'exact', head: true }).eq('is_published', true)),
+        safeCount((sb as any).from('issue_alerts').select('id', { count: 'exact', head: true })),
+      ]);
+
       return NextResponse.json({
         healthScore,
         scoreBreakdown: scores,
@@ -221,6 +228,7 @@ export async function GET(req: NextRequest) {
           dbMb,
           pvToday,
           newUsersToday,
+          issuePending, issuePublished, issueTotal,
         },
         // 성장 분석
         growth: {

@@ -12,8 +12,8 @@ import { SITE_URL } from '@/lib/constants';
  * issue-draft 크론 — AI 기사 생성 + 자동 발행 + 피드 포스트
  *
  * 미처리 이슈 1건씩 처리 (안정성)
- * score 60+ AND 킬스위치 ON → 자동 발행
- * score 40~59 → draft 저장
+ * score 40+ AND 킬스위치 ON → 자동 발행
+ * score 25~39 → draft 저장
  * 주기: 매 20분
  */
 
@@ -27,9 +27,9 @@ async function getAutoPublishConfig(sb: any) {
     const { data } = await sb.from('blog_publish_config')
       .select('auto_publish_enabled, auto_publish_min_score, auto_publish_blocked_categories')
       .eq('id', 1).single();
-    return data || { auto_publish_enabled: true, auto_publish_min_score: 60, auto_publish_blocked_categories: [] };
+    return data || { auto_publish_enabled: true, auto_publish_min_score: 40, auto_publish_blocked_categories: [] };
   } catch {
-    return { auto_publish_enabled: true, auto_publish_min_score: 60, auto_publish_blocked_categories: [] };
+    return { auto_publish_enabled: true, auto_publish_min_score: 40, auto_publish_blocked_categories: [] };
   }
 }
 

@@ -2,7 +2,10 @@
  * 이슈 점수 산정 엔진 — 부동산 + 주식 통합
  *
  * 최종점수 = 기본점수 × 증폭계수 × (1 - 감점률)
- * 60+ → 자동 발행 | 40~59 → 초안 저장 | 25~39 → 로그만 | ~24 → 무시
+ * 40+ → 자동 발행 | 25~39 → 초안 저장 | 15~24 → 로그만 | ~14 → 무시
+ *
+ * v2: RSS 헤드라인 전용 scoreHeadline() 폴백 추가
+ *     구조화 데이터 없는 RSS는 키워드 가중치 기반으로 현실적 base score 산출
  */
 
 /* ═══════════ 타입 ═══════════ */
@@ -322,6 +325,75 @@ function scoreLifeEvent(data: Record<string, any>): { score: number; breakdown: 
   return { score: Math.min(score, 60), breakdown: b };
 }
 
+/* ═══════════ 헤드라인 기반 스코어링 (RSS 전용) ═══════════ */
+
+/**
+ * RSS 헤드라인에서 키워드 가중치만으로 base score 산출
+ * 구조화 데이터가 없는 경우 폴백으로 사용
+ * 기존 함수(scoreAptCheongak 등)는 구조화 데이터를 기대하므로
+ * RSS 소스에서는 이 함수가 더 현실적인 점수를 산출
+ */
+function scoreHeadline(
+  keywords: string[],
+  category: string,
+  issueType: string,
+  data: Record<string, any>,
+): { score: number; breakdown: Record<string, number> } {
+  const b: Record<string, number> = {};
+  let score = 0;
+
+  // 1. 키워드 가중치 합산 (최대 25점) — multiplier 5 for RSS headlines
+  const kwWeight = keywords.reduce((sum, k) => sum + (KEYWORD_WEIGHT[k] || 1), 0);
+  const kwScore = Math.min(kwWeight * 5, 25);
+  if (kwScore > 0) { b['키워드가중치'] = kwScore; score += kwScore; }
+
+  // 2. 이슈 유형 가산 (최대 15점)
+  const typeScores: Record<string, number> = {
+    lotto_cheongak: 15, policy_change: 14, regulation: 14, ma: 14,
+    earnings: 12, jeonse_crisis: 13, circuit_breaker: 15, rate_decision: 14,
+    delisting_review: 13, price_surge: 10, price_drop: 10, price_change: 10,
+    redevelopment: 8, cheongak: 8, unsold: 7, rights_issue: 10,
+    property_tax: 12, income_tax: 10, inheritance_tax: 10,
+    deposit_rate: 10, loan_product: 10, fx_change: 10,
+    minimum_wage: 10, labor_benefit: 8,
+  };
+  const ts = typeScores[issueType] || 5;
+  b['유형가산'] = ts; score += ts;
+
+  // 3. 뉴스 소스 품질 가산 (RSS 뉴스 = 신뢰 소스)
+  if (data.source_type === 'news_rss' || data.has_news) {
+    b['뉴스소스'] = 8; score += 8;
+  }
+
+  // 4. 매체 동시 보도 (최대 10점)
+  const mediaCount = data.media_count || 1;
+  if (mediaCount >= 3) { b['3매체+'] = 10; score += 10; }
+  else if (mediaCount >= 2) { b['2매체'] = 6; score += 6; }
+  else { b['단일매체'] = 2; score += 2; }
+
+  // 5. 엔티티 존재 여부 (구체적 종목/단지명 → 5점)
+  const entities = data.related_entities || [];
+  if (entities.length > 0) { b['엔티티매칭'] = 5; score += 5; }
+
+  // 6. Google Trends / DART 가산
+  if (data.source_type === 'Google_Trends') { b['구글트렌드'] = 8; score += 8; }
+  if (data.source_type === 'DART_공시') { b['DART공시'] = 10; score += 10; }
+
+  return { score: Math.min(score, 55), breakdown: b };
+}
+
+/** RSS 소스인지 판단 — 구조화 데이터 필드가 없으면 RSS */
+function isRSSSource(data: Record<string, any>): boolean {
+  // 구조화 데이터 필드가 하나라도 있으면 false
+  const structuredFields = [
+    'price_gap_億', 'change_rate', 'total_units', 'change_pct',
+    'volume_ratio', 'consecutive_days', 'stock_grade', 'event_type',
+    'sector_move_count', 'kospi_change', 'rate_change_bp', 'affected_population',
+    'scope', 'policy_type', 'tax_type',
+  ];
+  return !structuredFields.some(f => data[f] != null);
+}
+
 /* ═══════════ 증폭계수 ═══════════ */
 
 function calcMultiplier(data: Record<string, any>, category: string): { multiplier: number; breakdown: Record<string, number> } {
@@ -404,9 +476,9 @@ function calcPenalty(data: Record<string, any>, category: string): { rate: numbe
     return { rate: 0.5, block_reason: undefined };
   }
 
-  // 단일 소스 + 트렌드 변화 없음
+  // 단일 소스 + 트렌드 변화 없음 (RSS는 기본적으로 단일소스이므로 경미 감점)
   if ((data.media_count || 1) <= 1 && !data.search_spike) {
-    return { rate: 0.3, block_reason: undefined };
+    return { rate: 0.1, block_reason: undefined };
   }
 
   return { rate: 0 };
@@ -417,10 +489,18 @@ function calcPenalty(data: Record<string, any>, category: string): { rate: numbe
 export function scoreIssue(candidate: IssueCandidate): ScoreResult {
   const { category, issue_type, raw_data } = candidate;
 
-  // 1. 기본점수
+  // 1. 기본점수 — RSS 소스면 헤드라인 스코어링 사용
   let baseResult: { score: number; breakdown: Record<string, number> };
 
-  if (category === 'apt') {
+  if (isRSSSource(raw_data)) {
+    // RSS 헤드라인 기반 스코어링 (구조화 데이터 없음)
+    baseResult = scoreHeadline(
+      candidate.detected_keywords,
+      category,
+      issue_type,
+      { ...raw_data, related_entities: candidate.related_entities },
+    );
+  } else if (category === 'apt') {
     if (['lotto_cheongak', 'cheongak', 'resupply'].includes(issue_type)) {
       baseResult = scoreAptCheongak(raw_data);
     } else if (['new_high', 'price_change', 'volume_spike'].includes(issue_type)) {
@@ -482,7 +562,7 @@ export function scoreIssue(candidate: IssueCandidate): ScoreResult {
     multiplier: multResult.multiplier,
     penalty_rate: penalty.rate,
     final_score: finalScore,
-    is_auto_publish: finalScore >= 60 && !penalty.block_reason,
+    is_auto_publish: finalScore >= 40 && !penalty.block_reason,
     breakdown: { ...baseResult.breakdown, ...multResult.breakdown, ...(penalty.rate > 0 ? { [`감점${penalty.rate * 100}%`]: -penalty.rate } : {}) },
     block_reason: penalty.block_reason,
   };
