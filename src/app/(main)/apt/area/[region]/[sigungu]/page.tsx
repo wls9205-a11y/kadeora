@@ -168,6 +168,23 @@ export default async function SigunguHubPage({ params }: Props) {
       {/* 관련 링크 */}
       <section style={{ marginBottom: 20 }}><h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 10px' }}>{region} 다른 지역</h2><div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}><Link href={`/apt/region/${encodeURIComponent(region)}`} style={{ padding: '6px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 20, textDecoration: 'none', fontSize: 12, color: 'var(--text-secondary)' }}>{region} 전체</Link></div></section>
 
+      {/* 테마 분석 내부 링크 */}
+      <section style={{ marginBottom: 20 }}>
+        <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 10px' }}>테마별 분석</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 6 }}>
+          {[
+            { slug: 'price-up', label: '가격 상승 아파트' },
+            { slug: 'price-down', label: '가격 하락 아파트' },
+            { slug: 'low-jeonse-ratio', label: '전세가율 낮은 아파트' },
+            { slug: 'new-built', label: '신축 아파트' },
+            { slug: 'high-trade', label: '거래 활발 단지' },
+            { slug: 'high-jeonse-ratio', label: '전세가율 높은 단지' },
+          ].map(t => (
+            <Link key={t.slug} href={`/apt/theme/${t.slug}?region=${encodeURIComponent(region)}`} style={{ padding: '8px 10px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', textDecoration: 'none', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>{t.label}</Link>
+          ))}
+        </div>
+      </section>
+
       <Link href={`/apt/complex?region=${encodeURIComponent(region)}`} style={{ display: 'block', textAlign: 'center', padding: '14px', marginBottom: 40, borderRadius: 'var(--radius-lg)', fontWeight: 800, textDecoration: 'none', fontSize: 13, background: 'linear-gradient(135deg, #0F1B3E 0%, #2563EB 100%)', color: '#fff' }}>📊 {region} 전체 단지백과 보기 →</Link>
       <footer style={{ fontSize: 10, color: 'var(--text-tertiary)', textAlign: 'center', paddingBottom: 40, lineHeight: 1.5 }}>데이터 출처: 국토교통부 실거래가 공개시스템 · 한국부동산원 · 카더라 자체 분석<br />본 페이지는 공공데이터 기반이며, 투자 판단의 근거로 사용할 수 없습니다.</footer>
     </article>
