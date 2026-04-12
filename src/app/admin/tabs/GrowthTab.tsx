@@ -220,6 +220,42 @@ export default function GrowthTab({ onNavigate }: { onNavigate: (t: any) => void
         ))}
       </div>
 
+      {/* 피드 커뮤니티 참여 */}
+      {data.feedStats && (
+        <>
+          <div className="adm-sec">💬 피드 커뮤니티</div>
+          <div className="adm-card" style={{ padding: '10px 14px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, marginBottom: 10 }}>
+              {[
+                { v: data.feedStats.totalVotes, l: '총 투표', c: '#3B82F6' },
+                { v: data.feedStats.activePolls, l: '활성 투표', c: '#10B981' },
+                { v: data.feedStats.pendingPredicts, l: '미결 예측', c: '#F59E0B' },
+              ].map(s => (
+                <div key={s.l} style={{ textAlign: 'center', padding: 6, background: 'rgba(12,21,40,0.5)', borderRadius: 'var(--radius-sm)' }}>
+                  <div style={{ fontSize: 16, fontWeight: 800, color: s.c }}>{s.v}</div>
+                  <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>{s.l}</div>
+                </div>
+              ))}
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 4 }}>
+              {[
+                { icon: '📊', label: '투표', count: data.feedStats.polls, votes: data.feedStats.pollVotes },
+                { icon: '⚔️', label: 'VS', count: data.feedStats.vs, votes: data.feedStats.vsVotes },
+                { icon: '🔮', label: '예측', count: data.feedStats.predicts, votes: data.feedStats.predictVotes },
+                { icon: '💬', label: '한마디', count: data.feedStats.shorts, votes: null },
+              ].map(f => (
+                <div key={f.label} style={{ textAlign: 'center', padding: '4px', fontSize: 11 }}>
+                  <div>{f.icon}</div>
+                  <div style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{f.count}</div>
+                  <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{f.label}</div>
+                  {f.votes !== null && <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{f.votes}표</div>}
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+
       {/* 리텐션 코호트 */}
       {data.retentionCohort && data.retentionCohort.length > 0 && (<>
         <div className="adm-sec">🔄 리텐션 코호트 (주간)</div>

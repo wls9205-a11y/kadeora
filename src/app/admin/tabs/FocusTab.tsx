@@ -223,6 +223,22 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
         </div>;
       })()}
 
+      {/* ═══ 6.2 피드 커뮤니티 ═══ */}
+      <Sec t="💬 피드 커뮤니티" open={false} ch={
+        <Card ch={<div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:4}}>
+          {[
+            {l:'투표',v:k.postsToday||0,c:'#3B82F6',icon:'📊'},
+            {l:'댓글',v:k.commentsToday||0,c:'#10B981',icon:'💬'},
+            {l:'글',v:x.totalPosts||0,c:'#8B5CF6',icon:'📝'},
+            {l:'댓글합',v:x.totalComments||0,c:'#06B6D4',icon:'💭'},
+          ].map(s=><div key={s.l} style={{textAlign:'center',padding:4}}>
+            <div style={{fontSize:10}}>{s.icon}</div>
+            <div style={{fontSize:12,fontWeight:800,color:s.c}}>{f(s.v)}</div>
+            <div style={{fontSize:10,color:'rgba(255,255,255,0.35)'}}>{s.l}</div>
+          </div>)}
+        </div>} p="6px 8px"/>
+      }/>
+
       {/* ═══ 6.5 데이터 수집률 ═══ */}
       {x.dataCollection && (() => {
         const dc = x.dataCollection;

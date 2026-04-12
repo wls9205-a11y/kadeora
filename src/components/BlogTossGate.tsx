@@ -43,7 +43,7 @@ export default function BlogTossGate({
       {/* 그라디언트 오버레이 */}
       <div style={{
         position: 'absolute', bottom: 0, left: 0, right: 0, height: 120,
-        background: 'linear-gradient(transparent, #F5F6F8)',
+        background: 'linear-gradient(transparent, var(--bg-base, #050A18))',
         pointerEvents: 'none',
       }} />
       {/* CTA */}

@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
 
     const text = content.trim();
     const { data: post, error } = await sb.from('posts').insert({
-      title: '',
+      title: text.slice(0, 30),
       content: text,
       excerpt: text.slice(0, 100),
       category,

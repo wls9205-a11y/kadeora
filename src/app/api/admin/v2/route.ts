@@ -522,6 +522,24 @@ export async function GET(req: NextRequest) {
         signupSources[src] = (signupSources[src] || 0) + 1;
       }
 
+      // 피드 커뮤니티 참여 현황
+      const feedStats = await (async () => {
+        try {
+          const [polls, vs, predicts, shorts, pollVotes, vsVotes, predictVotes, activePolls, pendingPredicts] = await Promise.all([
+            safeCount((sb as any).from('post_polls').select('id', { count: 'exact', head: true })),
+            safeCount((sb as any).from('vs_battles').select('id', { count: 'exact', head: true })),
+            safeCount((sb as any).from('predictions').select('id', { count: 'exact', head: true })),
+            safeCount(sb.from('posts').select('id', { count: 'exact', head: true }).eq('post_type', 'short')),
+            safeCount((sb as any).from('poll_votes').select('id', { count: 'exact', head: true })),
+            safeCount((sb as any).from('vs_votes').select('id', { count: 'exact', head: true })),
+            safeCount((sb as any).from('prediction_votes').select('id', { count: 'exact', head: true })),
+            safeCount((sb as any).from('post_polls').select('id', { count: 'exact', head: true }).gt('expires_at', new Date().toISOString())),
+            safeCount((sb as any).from('predictions').select('id', { count: 'exact', head: true }).eq('resolved', false)),
+          ]);
+          return { polls, vs, predicts, shorts, pollVotes, vsVotes, predictVotes, activePolls, pendingPredicts, totalVotes: pollVotes + vsVotes + predictVotes };
+        } catch { return null; }
+      })();
+
       return NextResponse.json({
         deviceSplit: deviceCounts,
         funnel: {
@@ -539,6 +557,7 @@ export async function GET(req: NextRequest) {
         signupTrend,
         retentionCohort: retentionR.data || [],
         signupSources,
+        feedStats,
       });
     }
 

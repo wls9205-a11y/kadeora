@@ -57,7 +57,7 @@ export default function ActionBar() {
             청약·주식 알림 무료로 받기
           </div>
           <div style={{ fontSize: 10, color: 'rgba(224,232,240,0.3)', marginTop: 2 }}>
-            2,847명이 매일 카더라로 시작합니다
+            스팸 없음 · 3초 가입 · 전체 분석 무료
           </div>
         </div>
 

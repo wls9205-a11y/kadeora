@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import { errMsg } from '@/lib/error-utils';
 import { useState, useEffect } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';

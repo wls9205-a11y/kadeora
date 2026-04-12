@@ -187,6 +187,24 @@ export function trackCTA(action: 'view' | 'click' | 'dismiss', ctaName: string, 
   if (action === 'click' && typeof window !== 'undefined') {
     try { localStorage.setItem('kd_last_cta', ctaName); } catch {}
   }
+  // conversion_events에도 동시 전송 — 어드민 GrowthTab/FocusTab 통합
+  if ((action === 'view' || action === 'click') && typeof window !== 'undefined') {
+    const eventType = action === 'view' ? 'cta_view' : 'cta_click';
+    const body = JSON.stringify({
+      event_type: eventType,
+      cta_name: ctaName,
+      category: properties?.category || null,
+      page_path: window.location.pathname,
+      visitor_id: getVisitorId(),
+    });
+    try {
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon('/api/track', new Blob([body], { type: 'application/json' }));
+      } else {
+        fetch('/api/track', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body, keepalive: true }).catch(() => {});
+      }
+    } catch {}
+  }
 }
 
 /** 기능 사용 추적 */
