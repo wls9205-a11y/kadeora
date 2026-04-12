@@ -6,7 +6,7 @@ async function handler() {
   const sb = getSupabaseAdmin();
 
   // 기한 지난 미판정 예측 조회
-  const { data: expired, error } = await sb
+  const { data: expired, error } = await (sb as any)
     .from('predictions')
     .select('id, post_id, target, direction, deadline, posts!inner(title)')
     .eq('resolved', false)
