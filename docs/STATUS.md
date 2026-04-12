@@ -1,5 +1,28 @@
 # 카더라 STATUS.md
-> 마지막 업데이트: 2026-04-13 01:00 KST (세션 91 후반)
+> 마지막 업데이트: 2026-04-12 23:55 KST (세션 92)
+
+## 세션 92 — 공유 추적 시스템 전면 수정
+
+### 문제 발견
+- `share_logs.post_id`에 `posts` 테이블 FK 제약 → 블로그/주식/계산기 등 공유 전부 insert 실패
+- `SectionShareButton` (8곳 사용) — 추적 코드 아예 없었음
+- `KakaoDirectShare` (apt 페이지) — 추적 코드 없었음
+- `KakaoShareButton` (blog 페이지) — slug(문자열)을 bigint post_id로 전송 → 실패
+- `ShareButtons` 27개 사용처 중 대부분이 문자열 postId 전달 → 전부 실패
+- 실제 작동하던 공유 추적: 커뮤니티 피드 카카오 공유 16건뿐
+
+### 수정 내역 (32 files changed)
+- **DB 마이그레이션**: FK 제거, post_id nullable, `content_type`/`content_ref` 컬럼 추가, 인덱스 3개
+- **API `/api/share`**: content_type/content_ref 기반 조회·저장 + 하위 호환
+- **ShareButtons**: 27개 사용처 전부 `contentType`/`contentRef` props로 전환
+- **SectionShareButton**: `trackShare()` 함수 + `/api/share` POST 추가 (8곳 누락 복구)
+- **KakaoDirectShare**: `trackShare()` 추가 (apt 페이지 누락 복구)
+- **KakaoShareButton**: `post_id: slug` → `content_type: 'blog', content_ref: slug`
+- **Admin v2 API**: `sharesByContentType` 집계 추가
+- **FocusTab**: 공유오늘 KPI 카드 + 플랫폼별/콘텐츠별 분석 패널
+
+### content_type 체계
+post, blog, stock, stock-page, stock-sector, stock-market, calc, apt, apt-region, apt-complex, section, page, daily, discuss, blog-series
 
 ## 세션 91 후반 — 블로그 이미지 전면 개선
 
