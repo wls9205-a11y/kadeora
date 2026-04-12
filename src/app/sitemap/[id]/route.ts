@@ -66,6 +66,9 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
       '/stock/market/kospi', '/stock/market/kosdaq', '/stock/market/nyse', '/stock/market/nasdaq',
       '/calc', '/about/team', '/press',
     ];
+    // 테마 페이지 (투자자 검색 키워드)
+    const THEME_SLUGS = ['low-jeonse-ratio', 'high-jeonse-ratio', 'price-up', 'price-down', 'new-built', 'high-trade'];
+    const THEME_REGIONS = ['서울','부산','대구','인천','광주','대전','울산','세종','경기','강원','충북','충남','전북','전남','경북','경남','제주'];
     // 계산기 동적 URL
     let calcPaths: string[] = [];
     try {
@@ -104,6 +107,11 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
       ...['서울','부산','대구','인천','광주','대전','울산','세종','경기','강원','충북','충남','전북','전남','경북','경남','제주'].flatMap(r => [
         { url: `${BASE}/daily/${encodeURIComponent(r)}`, lastModified: now, changeFrequency: 'daily', priority: 0.85 },
         { url: `${BASE}/daily/${encodeURIComponent(r)}/archive`, lastModified: now, changeFrequency: 'weekly', priority: 0.5 },
+      ]),
+      // 테마 페이지 (투자자 검색 키워드) — 6테마 × (전국 + 17지역) = 108 URL
+      ...THEME_SLUGS.flatMap(t => [
+        { url: `${BASE}/apt/theme/${t}`, lastModified: now, changeFrequency: 'weekly' as string, priority: 0.8 },
+        ...THEME_REGIONS.map(r => ({ url: `${BASE}/apt/theme/${t}?region=${encodeURIComponent(r)}`, lastModified: now, changeFrequency: 'weekly' as string, priority: 0.7 })),
       ]),
     ];
     return xmlResponse(entries);
