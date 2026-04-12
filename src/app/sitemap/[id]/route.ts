@@ -208,7 +208,7 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
       const chunk = id - 8;
       const offset = chunk * BLOG_PER_SITEMAP;
       const { data } = await sb.from('blog_posts')
-        .select('slug, title, updated_at, published_at, cover_image, image_alt, category')
+        .select('slug, title, updated_at, published_at, cover_image, image_alt, category, source_type')
         .eq('is_published', true).not('published_at', 'is', null)
         .lte('published_at', now)
         .order('published_at', { ascending: false })
@@ -233,7 +233,7 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
         const pubDate = new Date(b.published_at || b.updated_at || now);
         const daysSincePub = Math.floor((Date.now() - pubDate.getTime()) / 86400000);
         const freq = daysSincePub <= 7 ? 'daily' : daysSincePub <= 30 ? 'weekly' : 'monthly';
-        const prio = daysSincePub <= 3 ? 0.8 : daysSincePub <= 14 ? 0.7 : daysSincePub <= 60 ? 0.6 : 0.5;
+        const prio = b.source_type === 'upcoming' ? 0.9 : daysSincePub <= 3 ? 0.8 : daysSincePub <= 14 ? 0.7 : daysSincePub <= 60 ? 0.6 : 0.5;
         const lastmod = b.updated_at || b.published_at || now;
         const imgUrl = b.cover_image || `${BASE}/api/og?title=${encodeURIComponent((b.title || '').slice(0, 60))}&category=${b.category || 'blog'}&design=2`;
         const imgAlt = escXml(b.image_alt || b.title || '카더라 블로그');

@@ -455,7 +455,7 @@ export default async function BlogDetailPage({ params }: Props) {
     : (post.excerpt && post.excerpt.length >= 20 ? post.excerpt : post.title)
   ).replace(/[\n\r#*_|]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160);
 
-  const isNewsArticle = post.source_type === 'auto_issue' || post.source_type === 'news_rss';
+  const isNewsArticle = post.source_type === 'auto_issue' || post.source_type === 'news_rss' || post.source_type === 'upcoming';
   const jsonLd = {
     '@context': 'https://schema.org', '@type': isNewsArticle ? 'NewsArticle' : 'BlogPosting',
     headline: post.title,
@@ -695,7 +695,7 @@ export default async function BlogDetailPage({ params }: Props) {
 
       {/* 세션70: 상단 회원가입 유도 배너 */}
 
-      <article itemScope itemType="https://schema.org/BlogPosting" style={{ paddingBottom: 40 }}>
+      <article itemScope itemType={`https://schema.org/${isNewsArticle ? 'NewsArticle' : 'BlogPosting'}`} style={{ paddingBottom: 40 }}>
         {/* ImageGallery JSON-LD (유지 — 포털 이미지 탭) */}
         {post.cover_image && (() => {
           const ogSquare = `${SITE}/api/og-square?title=${encodeURIComponent(post.title)}&category=${post.category}&author=${encodeURIComponent(post.author_name || '카더라')}`;

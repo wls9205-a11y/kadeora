@@ -35,6 +35,7 @@ Allow: /blog/
 Allow: /calc/
 Allow: /api/og
 Allow: /api/og-chart
+Allow: /api/og-infographic
 Allow: /images/
 Crawl-delay: 0
 Disallow: /admin/
@@ -45,6 +46,7 @@ User-agent: Googlebot-Image
 Allow: /api/og
 Allow: /api/og-square
 Allow: /api/og-chart
+Allow: /api/og-infographic
 Allow: /images/
 Allow: /image-sitemap.xml
 
@@ -58,6 +60,7 @@ Allow: /feed.xml
 Allow: /api/og
 Allow: /api/og-square
 Allow: /api/og-chart
+Allow: /api/og-infographic
 Allow: /images/
 Crawl-delay: 0
 Disallow: /admin/
@@ -73,6 +76,7 @@ Allow: /calc/
 Allow: /api/og
 Allow: /api/og-square
 Allow: /api/og-chart
+Allow: /api/og-infographic
 Allow: /images/
 Crawl-delay: 0
 Disallow: /admin/
@@ -87,6 +91,7 @@ Allow: /blog/
 Allow: /calc/
 Allow: /api/og
 Allow: /api/og-chart
+Allow: /api/og-infographic
 Allow: /images/
 Crawl-delay: 1
 Disallow: /admin/

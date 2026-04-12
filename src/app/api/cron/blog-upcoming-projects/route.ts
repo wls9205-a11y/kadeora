@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
       .is('blog_post_id', null)
       .in('status', ['rumor', 'announced'])
       .order('interest_score', { ascending: false })
-      .limit(2);
+      .limit(3);
 
     if (!projects || projects.length === 0) {
       return { processed: 0, metadata: { reason: 'no_upcoming_without_blog' } };
