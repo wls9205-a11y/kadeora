@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     siteName: '카더라',
     locale: 'ko_KR',
     type: 'website',
-    images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent('카더라 소개')}&subtitle=${encodeURIComponent('부동산·주식 정보 플랫폼')}&design=2`, width: 1200, height: 630 }],
+    images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent('카더라 소개')}&subtitle=${encodeURIComponent('부동산·주식 정보 플랫폼')}&design=2`, width: 1200, height: 630 }, { url: `${SITE_URL}/api/og-square?title=${encodeURIComponent('카더라 소개')}&category=blog`, width: 630, height: 630 }],
   },
 };
 

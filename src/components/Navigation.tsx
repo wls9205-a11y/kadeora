@@ -20,28 +20,37 @@ const MOBILE_TABS = [
   { href: '/feed',    label: '피드',   Icon: Home },
   { href: '/stock',   label: '주식',   Icon: TrendingUp },
   { href: '/apt',     label: '부동산', Icon: Building2 },
+  { href: '/blog',    label: '블로그', Icon: FileText },
 ];
 
-const MORE_ITEMS = [
+const MORE_ITEMS: { href: string; emoji: string; label: string; sub?: string; group: string }[] = [
   // 투자 정보
-  { href: '/daily',            emoji: '📊', label: '데일리 리포트', group: '투자 정보' },
-  { href: '/hot',             emoji: '🔥', label: '이번주 HOT', group: '투자 정보' },
-  { href: '/blog',            emoji: '📰', label: '블로그', group: '투자 정보' },
-  { href: '/discuss',         emoji: '💬', label: '라운지 토론', group: '투자 정보' },
+  { href: '/daily',            emoji: '📊', label: '데일리 리포트', sub: '매일 시장 요약', group: '투자 정보' },
+  { href: '/hot',             emoji: '🔥', label: '이번주 HOT', sub: '인기 글 모아보기', group: '투자 정보' },
+  { href: '/blog',            emoji: '📰', label: '블로그', sub: '18,000+ 분석 글', group: '투자 정보' },
+  { href: '/blog/series',     emoji: '📚', label: '시리즈', sub: '주제별 연재 모음', group: '투자 정보' },
+  { href: '/discuss',         emoji: '💬', label: '라운지 토론', sub: 'A vs B 투표·토론', group: '투자 정보' },
   // 주식
-  { href: '/stock/compare',   emoji: '⚖️', label: '종목 비교', group: '주식' },
-  { href: '/stock/data',      emoji: '📥', label: '주식 통계 자료', group: '주식' },
+  { href: '/stock/compare',   emoji: '⚖️', label: '종목 비교', sub: '핵심 지표 비교', group: '주식' },
+  { href: '/stock/search',    emoji: '🔍', label: '종목 검색', sub: '728종목 필터', group: '주식' },
+  { href: '/stock/dividend',  emoji: '💎', label: '배당주 TOP', sub: '고배당 종목 순위', group: '주식' },
+  { href: '/stock/movers',    emoji: '📈', label: '급등락', sub: '실시간 등락률', group: '주식' },
+  { href: '/stock/themes',    emoji: '🎯', label: '테마주', sub: '섹터별 관련주', group: '주식' },
+  { href: '/stock/data',      emoji: '📥', label: '주식 통계', sub: '시장 데이터', group: '주식' },
   // 부동산
-  { href: '/apt/complex',     emoji: '🏢', label: '단지백과', group: '부동산' },
-  { href: '/apt/search',      emoji: '🔍', label: '실거래 검색', group: '부동산' },
-  { href: '/apt/map',         emoji: '🗺️', label: '부동산 지도', group: '부동산' },
-  { href: '/apt/diagnose',    emoji: '🎯', label: '가점 진단', group: '부동산' },
-  { href: '/calc',            emoji: '🧮', label: '계산기', group: '투자 정보' },
-  { href: '/apt/data',        emoji: '📥', label: '부동산 통계 자료', group: '부동산' },
+  { href: '/apt/complex',     emoji: '🏢', label: '단지백과', sub: '34,500+ 단지 시세', group: '부동산' },
+  { href: '/apt/search',      emoji: '🔍', label: '실거래 검색', sub: '전국 실거래가', group: '부동산' },
+  { href: '/apt/map',         emoji: '🗺️', label: '부동산 지도', sub: '지도로 한눈에', group: '부동산' },
+  { href: '/apt/diagnose',    emoji: '🎯', label: '가점 진단', sub: '청약 가점 계산', group: '부동산' },
+  { href: '/apt/data',        emoji: '📥', label: '부동산 통계', sub: '공공 데이터', group: '부동산' },
+  // 도구
+  { href: '/calc',            emoji: '🧮', label: '계산기', sub: '부동산·세금 계산', group: '도구' },
   // 설정
-  { href: '/notifications/settings', emoji: '🔔', label: '알림 설정', group: '설정' },
-  { href: '/guide',           emoji: '📖', label: '가이드북', group: '설정' },
-  { href: '/grades',          emoji: '🏅', label: '등급 안내', group: '설정' },
+  { href: '/notifications/settings', emoji: '🔔', label: '알림 설정', sub: '푸시·관심 설정', group: '설정' },
+  { href: '/guide',           emoji: '📖', label: '가이드북', sub: '이용 방법 안내', group: '설정' },
+  { href: '/grades',          emoji: '🏅', label: '등급 안내', sub: '등급별 혜택', group: '설정' },
+  { href: '/about',           emoji: 'ℹ️', label: '서비스 소개', sub: '카더라 소개', group: '설정' },
+  { href: '/faq',             emoji: '❓', label: 'FAQ', sub: '자주 묻는 질문', group: '설정' },
 ];
 
 const KadeoraLogo = ({ size = 28 }: { size?: number }) => (
@@ -253,7 +262,7 @@ export function Navigation() {
           {/* 데스크탑 네비 */}
           <nav className="hidden md:flex" style={{ gap:0, marginLeft:4 }}>
             {NAV_ITEMS.map(item => (
-              <Link key={item.href} href={item.href}
+              <Link key={item.href} href={item.href} prefetch={true}
                 aria-current={isActive(item.href) ? 'page' : undefined}
                 style={{ ...navItemStyle(isActive(item.href)), gap: 5 }}
                 onMouseEnter={e=>{ if(!isActive(item.href)) (e.currentTarget as HTMLElement).style.color='var(--text-primary)'; }}
@@ -576,7 +585,7 @@ export function Navigation() {
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
               </button>
             </div>
-            {(['투자 정보','주식','부동산','설정'] as const).map((group, gi) => {
+            {(['투자 정보','주식','부동산','도구','설정'] as const).map((group, gi) => {
               const items = MORE_ITEMS.filter(i => i.group === group);
               return (
                 <div key={group} style={{ marginBottom: gi < 3 ? 12 : 0 }}>
@@ -585,14 +594,15 @@ export function Navigation() {
                     {items.map(item => (
                       <Link key={item.href} href={item.href} onClick={() => setMoreOpen(false)} style={{
                         display:'flex', flexDirection:'column', alignItems:'center', gap: 5,
-                        padding:'12px 4px 10px', borderRadius: 12, textDecoration:'none',
+                        padding:'14px 6px 12px', borderRadius: 12, textDecoration:'none',
                         color:'var(--text-primary)', position:'relative', background:'var(--bg-hover)',
                       }}
                         onMouseEnter={e => (e.currentTarget.style.background = 'var(--border)')}
                         onMouseLeave={e => (e.currentTarget.style.background = 'var(--bg-hover)')}
                       >
                         <span style={{ fontSize: 22, lineHeight:1 }}>{item.emoji}</span>
-                        <span style={{ fontSize: 11, fontWeight:600, textAlign:'center', lineHeight: 1.25, color:'var(--text-secondary)', wordBreak:'keep-all' }}>{item.label}</span>
+                        <span style={{ fontSize: 12, fontWeight:600, textAlign:'center', lineHeight: 1.25, color:'var(--text-secondary)', wordBreak:'keep-all' }}>{item.label}</span>
+                        {item.sub && <span style={{ fontSize: 9, color:'var(--text-tertiary)', textAlign:'center', lineHeight:1.2, marginTop: -2 }}>{item.sub}</span>}
                         {item.emoji === '🔔' && unread > 0 && (
                           <span style={{ position: 'absolute', top: 4, right: 4, minWidth: 16, height: 16, borderRadius: 8, background: 'var(--accent-red)', color: '#fff', fontSize: 9, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px' }}>{unread > 9 ? '9+' : unread}</span>
                         )}
@@ -641,7 +651,7 @@ export function Navigation() {
             borderRadius: 14, padding:'16px 14px', boxShadow:'0 8px 32px rgba(0,0,0,0.25)',
             maxHeight:'75vh', overflowY:'auto',
           }}>
-            {(['투자 정보','주식','부동산','설정'] as const).map((group, gi) => {
+            {(['투자 정보','주식','부동산','도구','설정'] as const).map((group, gi) => {
               const items = MORE_ITEMS.filter(i => i.group === group);
               return (
                 <div key={group} style={{ marginBottom: gi < 3 ? 12 : 0 }}>
@@ -650,7 +660,7 @@ export function Navigation() {
                     {items.map(item => (
                       <Link key={item.href + '-d'} href={item.href} onClick={() => setMoreOpen(false)} style={{
                         display:'flex', flexDirection:'column', alignItems:'center', gap: 5,
-                        padding:'12px 4px 10px', borderRadius: 12, textDecoration:'none',
+                        padding:'14px 6px 12px', borderRadius: 12, textDecoration:'none',
                         color:'var(--text-primary)', position:'relative', background:'var(--bg-hover)',
                       }}
                         onMouseEnter={e => (e.currentTarget.style.background = 'var(--border)')}

@@ -1,4 +1,5 @@
 'use client';
+// metadata is in layout or handled by redirect
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';

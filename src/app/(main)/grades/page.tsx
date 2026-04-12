@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     ],
   },
   twitter: { card: 'summary_large_image' },
-  other: { 'naver:author': '카더라', 'naver:written_time': new Date().toISOString(), 'naver:updated_time': new Date().toISOString(), 'dg:plink': SITE_URL + '/grades' },
+  other: { 'naver:author': '카더라', 'naver:written_time': '2026-04-12T00:00:00Z', 'naver:updated_time': '2026-04-12T00:00:00Z', 'dg:plink': SITE_URL + '/grades' },
 };
 
 

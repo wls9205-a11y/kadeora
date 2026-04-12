@@ -2,47 +2,55 @@ import { SITE_URL } from './constants';
 import type { Metadata } from 'next';
 
 /**
- * 카더라 공통 SEO 메타데이터 생성 헬퍼
- * - 모든 페이지에서 import { buildMeta } from '@/lib/seo' 로 사용
- * - naver:author, og:updated_time, canonical, article:section 자동 포함
- * - 미래 신규 페이지에서도 일관된 SEO 보장
+ * 카더라 공통 SEO 메타데이터 생성 헬퍼 v2
+ * - og-square 630×630 자동 포함 (네이버 모바일 1:1 크롭 대응)
+ * - max-image-preview:large, max-snippet:-1 자동 적용
+ * - naver:written_time 안정화 (publishedAt 없으면 고정값)
+ * - article:tag 지원
  */
 
 interface BuildMetaOptions {
   title: string;
   description: string;
-  path: string;               // e.g. '/stock/005930'
-  section?: string;           // e.g. '주식', '부동산', '블로그'
-  author?: string;            // e.g. '카더라 주식팀'
-  ogDesign?: number;          // OG 디자인 번호 (1~6), default 2
-  ogCategory?: string;        // OG 카테고리
+  path: string;
+  section?: string;
+  author?: string;
+  ogDesign?: number;
+  ogCategory?: string;
   ogSubtitle?: string;
   keywords?: string;
+  tags?: string[];
   noindex?: boolean;
   publishedAt?: string;
   type?: 'website' | 'article';
 }
 
+const BUILD_DATE = '2026-04-12T00:00:00Z';
+
 export function buildMeta(opts: BuildMetaOptions): Metadata {
   const {
     title, description, path, section, author = '카더라',
-    ogDesign = 2, ogCategory, ogSubtitle, keywords,
+    ogDesign = 2, ogCategory, ogSubtitle, keywords, tags,
     noindex = false, publishedAt, type = 'website',
   } = opts;
 
   const url = `${SITE_URL}${path}`;
-  const now = new Date().toISOString();
+  const stableDate = publishedAt || BUILD_DATE;
   const ogParams = new URLSearchParams({ title, design: String(ogDesign) });
   if (ogCategory) ogParams.set('category', ogCategory);
   if (ogSubtitle) ogParams.set('subtitle', ogSubtitle);
   if (author !== '카더라') ogParams.set('author', author);
   const ogUrl = `${SITE_URL}/api/og?${ogParams.toString()}`;
+  const ogSquareUrl = `${SITE_URL}/api/og-square?title=${encodeURIComponent(title)}&category=${ogCategory || 'blog'}`;
 
   return {
     title,
     description,
     alternates: { canonical: url },
-    ...(noindex ? { robots: { index: false, follow: false } } : {}),
+    ...(noindex
+      ? { robots: { index: false, follow: false } }
+      : { robots: { index: true, follow: true, 'max-image-preview': 'large' as const, 'max-snippet': -1 as const, 'max-video-preview': -1 as const } }
+    ),
     openGraph: {
       title: `${title} | 카더라`,
       description,
@@ -50,7 +58,10 @@ export function buildMeta(opts: BuildMetaOptions): Metadata {
       siteName: '카더라',
       locale: 'ko_KR',
       type,
-      images: [{ url: ogUrl, width: 1200, height: 630, alt: title }],
+      images: [
+        { url: ogUrl, width: 1200, height: 630, alt: title },
+        { url: ogSquareUrl, width: 630, height: 630, alt: title },
+      ],
     },
     twitter: {
       card: 'summary_large_image',
@@ -63,25 +74,24 @@ export function buildMeta(opts: BuildMetaOptions): Metadata {
       'naver:author': author,
       'naver:site_name': '카더라',
       'naver:description': description.slice(0, 160),
-      'naver:written_time': publishedAt || now,
-      'naver:updated_time': now,
-      'og:updated_time': now,
+      'naver:written_time': stableDate,
+      'naver:updated_time': stableDate,
+      'og:updated_time': stableDate,
       ...(publishedAt ? { 'article:published_time': publishedAt } : {}),
       ...(section ? { 'article:section': section } : {}),
+      ...(tags?.length ? { 'article:tag': tags.join(',') } : {}),
       'dg:plink': url,
     },
   };
 }
 
-/** 공통 other 필드 (페이지가 자체 other를 정의할 때 spread용) */
 export function seoOther(section: string, author = '카더라', path?: string) {
-  const now = new Date().toISOString();
   return {
     'naver:author': author,
     'naver:site_name': '카더라',
-    'naver:written_time': now,
-    'naver:updated_time': now,
-    'og:updated_time': now,
+    'naver:written_time': BUILD_DATE,
+    'naver:updated_time': BUILD_DATE,
+    'og:updated_time': BUILD_DATE,
     'article:section': section,
     ...(path ? { 'dg:plink': `${SITE_URL}${path}` } : {}),
   };

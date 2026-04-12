@@ -15,8 +15,9 @@ export const metadata: Metadata = {
   title: TITLE, description: DESC,
   keywords: ['고배당주', '배당주 추천', '배당수익률', '배당주 순위', '2026 배당주'],
   alternates: { canonical: `${SITE_URL}/stock/dividend` },
-  openGraph: { title: TITLE, description: DESC, url: `${SITE_URL}/stock/dividend`, siteName: '카더라', locale: 'ko_KR', type: 'website', images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent(TITLE)}&category=stock&design=2`, width: 1200, height: 630 }] },
-  other: { 'naver:author': '카더라', 'naver:written_time': new Date().toISOString(), 'article:section': '주식', 'article:tag': '고배당주,배당주순위,배당수익률' },
+  robots: { index: true, follow: true, 'max-image-preview': 'large' as const, 'max-snippet': -1 as const },
+  openGraph: { title: TITLE, description: DESC, url: `${SITE_URL}/stock/dividend`, siteName: '카더라', locale: 'ko_KR', type: 'website', images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent(TITLE)}&category=stock&design=2`, width: 1200, height: 630 }, { url: `${SITE_URL}/api/og-square?title=${encodeURIComponent(TITLE)}&category=stock`, width: 630, height: 630 }] },
+  other: { 'naver:author': '카더라', 'naver:description': DESC.slice(0, 160), 'naver:written_time': '2026-04-12T00:00:00Z', 'article:section': '주식', 'article:tag': '고배당주,배당주순위,배당수익률' },
 };
 
 export default async function DividendPage() {

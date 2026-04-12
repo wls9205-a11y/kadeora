@@ -30,10 +30,10 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
       ],
     },
     other: {
-      'naver:written_time': new Date().toISOString(),
-      'naver:updated_time': new Date().toISOString(),
+      'naver:written_time': '2026-04-12T00:00:00Z',
+      'naver:updated_time': '2026-04-12T00:00:00Z',
       'naver:author': '카더라',
-      'og:updated_time': new Date().toISOString(),
+      'og:updated_time': '2026-04-12T00:00:00Z',
       'dg:plink': SITE_URL + '/stock',
       'article:section': '주식',
       'article:tag': '주식,시세,KOSPI,KOSDAQ,실시간,등락률',

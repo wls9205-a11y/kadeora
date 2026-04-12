@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     ],
   },
   twitter: { card: 'summary_large_image' as const, title: '카더라 프로 멤버십', description: '주식+부동산 올인원 프리미엄' },
-  other: { 'naver:author': '카더라', 'og:updated_time': new Date().toISOString() },
+  other: { 'naver:author': '카더라', 'og:updated_time': '2026-04-12T00:00:00Z' },
 };
 
 const COMPARE = [

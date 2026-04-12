@@ -59,7 +59,7 @@ interface Props {
 }
 
 function readingTime(text: string): number {
-  return Math.max(1, Math.round((text || '').replace(/<[^>]+>/g, '').length / 500));
+  return Math.max(1, Math.round((text || '').replace(/<[^>]+>/g, '').length / 350));
 }
 
 function stripHtml(text: string): string {
@@ -424,24 +424,24 @@ export default function FeedClient({
                   try { const arr = Array.from(nv).slice(-200); localStorage.setItem('kd_visited', JSON.stringify(arr)); } catch {}
                 }} style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}>
                   {post.title && (
-                    <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.4, marginBottom: 2 }}>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.4, marginBottom: 2 }}>
                       {post.title}
                     </div>
                   )}
-                  <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word' }}>
+                  <div style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word' }}>
                     {stripHtml(post.excerpt || post.content).slice(0, 150)}
                   </div>
                   {/* 히어로 이미지 (1장) 또는 갤러리 (2장+) */}
                   {post.images && post.images.length === 1 && (
                     <div className="kd-hero-img">
-                      <Image src={(post.images as string[])[0]} alt="게시글 이미지" fill sizes="(max-width: 780px) 100vw, 600px" style={{ objectFit: 'cover' }} loading="lazy" unoptimized={!(post.images as string[])[0].includes('supabase.co')} />
+                      <Image src={(post.images as string[])[0]} alt={post.title || "게시글 이미지"} fill sizes="(max-width: 780px) 100vw, 600px" style={{ objectFit: 'cover' }} loading="lazy" unoptimized={!(post.images as string[])[0].includes('supabase.co')} />
                     </div>
                   )}
                   {post.images && post.images.length > 1 && (
                     <div style={{ marginTop: 10, display: 'flex', gap: 'var(--sp-sm)', overflowX: 'auto', scrollbarWidth: 'none' }}>
                       {(post.images as string[]).slice(0, 3).map((img, idx) => (
                         <div key={idx} style={{ width: 70, height: 70, borderRadius: 'var(--radius-md)', overflow: 'hidden', flexShrink: 0, background: 'var(--bg-hover)', position: 'relative' }}>
-                          <Image src={img} alt="게시글 이미지" fill sizes="70px" style={{ objectFit: 'cover' }} loading="lazy" unoptimized={!img.includes('supabase.co')} />
+                          <Image src={img} alt={post.title || "게시글 이미지"} fill sizes="70px" style={{ objectFit: 'cover' }} loading="lazy" unoptimized={!img.includes('supabase.co')} />
                         </div>
                       ))}
                       {post.images.length > 3 && (
@@ -470,12 +470,12 @@ export default function FeedClient({
                 {(stockTags.length > 0 || aptTags.length > 0) && (
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--sp-xs)', marginTop: 6 }}>
                     {stockTags.slice(0, 3).map((tag: string) => (
-                      <Link key={`s-${tag}`} href="/stock" className="kd-badge kd-badge-stock" style={{ textDecoration: 'none' }}>
+                      <Link key={`s-${tag}`} href={`/stock/search?q=${encodeURIComponent(tag)}`} className="kd-badge kd-badge-stock" style={{ textDecoration: 'none' }}>
                         📈 {tag}
                       </Link>
                     ))}
                     {aptTags.slice(0, 3).map((tag: string) => (
-                      <Link key={`a-${tag}`} href="/apt" className="kd-badge kd-badge-apt" style={{ textDecoration: 'none' }}>
+                      <Link key={`a-${tag}`} href={`/apt/search?q=${encodeURIComponent(tag)}`} className="kd-badge kd-badge-apt" style={{ textDecoration: 'none' }}>
                         🏢 {tag}
                       </Link>
                     ))}

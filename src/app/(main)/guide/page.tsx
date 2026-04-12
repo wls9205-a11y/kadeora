@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     images: [{ url: SITE_URL + '/images/brand/kadeora-hero.png', alt: '카더라 가이드' }],
   },
   twitter: { card: 'summary_large_image' },
-  other: { 'naver:written_time': new Date().toISOString(), 'naver:updated_time': new Date().toISOString(), 'article:section': '가이드', 'dg:plink': SITE_URL + '/guide', 'naver:author': '카더라', 'og:updated_time': new Date().toISOString() },
+  other: { 'naver:written_time': '2026-04-12T00:00:00Z', 'naver:updated_time': '2026-04-12T00:00:00Z', 'article:section': '가이드', 'dg:plink': SITE_URL + '/guide', 'naver:author': '카더라', 'og:updated_time': '2026-04-12T00:00:00Z' },
 };
 
 const FEATURES = [

@@ -16,8 +16,9 @@ export const metadata: Metadata = {
   title: TITLE, description: DESC,
   keywords: ['급등주', '급락주', '오늘 상한가', '52주 신고가', '거래량 폭발'],
   alternates: { canonical: `${SITE_URL}/stock/movers` },
+  robots: { index: true, follow: true, 'max-image-preview': 'large' as const, 'max-snippet': -1 as const },
   openGraph: { title: TITLE, description: DESC, url: `${SITE_URL}/stock/movers`, siteName: '카더라', locale: 'ko_KR', type: 'website', images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent('급등락 종목')}&category=stock&design=2`, width: 1200, height: 630 }] },
-  other: { 'naver:author': '카더라', 'naver:written_time': new Date().toISOString(), 'article:section': '주식' },
+  other: { 'naver:author': '카더라', 'naver:description': DESC.slice(0, 160), 'naver:written_time': '2026-04-12T00:00:00Z', 'article:section': '주식' },
 };
 
 export default async function MoversPage() {

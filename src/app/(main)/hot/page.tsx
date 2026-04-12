@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   title: '오늘의 HOT',
   description: '오늘 가장 인기있는 카더라 게시글. 실시간 추천수 기반 인기 글을 확인하세요.',
   alternates: { canonical: SITE_URL + '/hot' },
+  robots: { index: true, follow: true, 'max-image-preview': 'large' as const, 'max-snippet': -1 as const },
   openGraph: {
     title: '오늘의 HOT',
     description: '실시간 인기 게시글 TOP',
@@ -22,7 +23,7 @@ export const metadata: Metadata = {
     ],
   },
   twitter: { card: 'summary_large_image' },
-  other: { 'naver:written_time': new Date().toISOString(), 'naver:updated_time': new Date().toISOString(), 'dg:plink': SITE_URL + '/hot', 'naver:author': '카더라', 'og:updated_time': new Date().toISOString(), 'article:section': '커뮤니티', 'article:tag': '인기글,HOT,추천,커뮤니티,주식,부동산' },
+  other: { 'naver:written_time': '2026-04-12T00:00:00Z', 'naver:updated_time': '2026-04-12T00:00:00Z', 'dg:plink': SITE_URL + '/hot', 'naver:author': '카더라', 'og:updated_time': '2026-04-12T00:00:00Z', 'article:section': '커뮤니티', 'article:tag': '인기글,HOT,추천,커뮤니티,주식,부동산' },
 };
 
 export const revalidate = 60;

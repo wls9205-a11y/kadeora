@@ -48,7 +48,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     twitter: { card: 'summary_large_image', title, description: desc, images: [ogImg] },
     other: {
       'naver:written_time': new Date(now.setHours(7, 0, 0, 0)).toISOString(),
-      'naver:updated_time': new Date().toISOString(),
+      'naver:updated_time': '2026-04-12T00:00:00Z',
       'naver:author': '카더라',
       'naver:site_name': '카더라',
       'article:published_time': new Date(now.setHours(7, 0, 0, 0)).toISOString(),
@@ -56,7 +56,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       'article:author': '카더라',
       'article:section': '투자',
       'article:tag': `${region},부동산,주식,투자,청약,미분양,재개발,시세,카더라데일리`,
-      'og:updated_time': new Date().toISOString(),
+      'og:updated_time': '2026-04-12T00:00:00Z',
       'dg:plink': canonical,
     },
   };

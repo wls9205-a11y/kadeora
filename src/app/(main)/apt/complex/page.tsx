@@ -27,7 +27,7 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
         { url: `${SITE_URL}/api/og-square?title=${encodeURIComponent((r || '전국') + ' 단지백과')}&category=apt`, width: 630, height: 630 },
       ] },
     twitter: { card: 'summary_large_image' as const, title: `${r || '전국'} 단지백과`, description: desc },
-    other: { 'naver:author': '카더라', 'og:updated_time': new Date().toISOString(), 'article:section': '부동산' },
+    other: { 'naver:author': '카더라', 'og:updated_time': '2026-04-12T00:00:00Z', 'article:section': '부동산' },
   };
 }
 

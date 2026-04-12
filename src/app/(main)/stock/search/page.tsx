@@ -9,8 +9,8 @@ export const metadata: Metadata = {
   title: TITLE, description: DESC,
   keywords: ['종목 검색', '주식 검색', '코스피 종목', '코스닥 종목', '종목 필터'],
   alternates: { canonical: `${SITE_URL}/stock/search` },
-  openGraph: { title: TITLE, description: DESC, url: `${SITE_URL}/stock/search`, siteName: '카더라', locale: 'ko_KR', type: 'website', images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent('종목 검색')}&category=stock&design=2`, width: 1200, height: 630 }] },
-  other: { 'naver:author': '카더라', 'naver:written_time': new Date().toISOString(), 'article:section': '주식' },
+  openGraph: { title: TITLE, description: DESC, url: `${SITE_URL}/stock/search`, siteName: '카더라', locale: 'ko_KR', type: 'website', images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent('종목 검색')}&category=stock&design=2`, width: 1200, height: 630 }, { url: `${SITE_URL}/api/og-square?title=${encodeURIComponent('종목 검색')}&category=stock`, width: 630, height: 630 }] },
+  other: { 'naver:author': '카더라', 'naver:description': '코스피, 코스닥, NYSE, NASDAQ 전 종목 검색', 'naver:written_time': '2026-04-12T00:00:00Z', 'article:section': '주식' },
 };
 
 export default function StockSearchPage() {

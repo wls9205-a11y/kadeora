@@ -23,13 +23,14 @@ export const metadata: Metadata = {
     ],
   },
   twitter: { card: 'summary_large_image', title: '카더라 토론', description: '주식·부동산·경제 실시간 토론과 투표' },
-  other: { 'naver:written_time': new Date().toISOString(), 'naver:updated_time': new Date().toISOString(), 'article:section': '토론', 'article:tag': '토론,투표,주식,부동산,커뮤니티,실시간', 'dg:plink': SITE_URL + '/discuss', 'naver:author': '카더라', 'og:updated_time': new Date().toISOString() },
+  other: { 'naver:written_time': '2026-04-12T00:00:00Z', 'naver:updated_time': '2026-04-12T00:00:00Z', 'article:section': '토론', 'article:tag': '토론,투표,주식,부동산,커뮤니티,실시간', 'dg:plink': SITE_URL + '/discuss', 'naver:author': '카더라', 'og:updated_time': '2026-04-12T00:00:00Z' },
 };
 
 export default function DiscussPage() {
   return (
     <Suspense>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":SITE_URL},{"@type":"ListItem","position":2,"name":"토론","item":SITE_URL + "/discuss"}]}) }} />
+      <h1 style={{ position:"absolute", width:1, height:1, overflow:"hidden", clip:"rect(0,0,0,0)" }}>카더라 토론 — 주식·부동산·경제 실시간 토론</h1>
       <DiscussClient />
       <Disclaimer />
     </Suspense>

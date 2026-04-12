@@ -43,10 +43,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
     twitter: { card: 'summary_large_image' as const, title: `${decoded} 부동산`, description: `청약·실거래·재개발·미분양 종합 정보` },
     other: {
-      'naver:written_time': new Date().toISOString(),
-      'naver:updated_time': new Date().toISOString(),
+      'naver:written_time': '2026-04-12T00:00:00Z',
+      'naver:updated_time': '2026-04-12T00:00:00Z',
       'naver:author': '카더라',
-      'og:updated_time': new Date().toISOString(),
+      'og:updated_time': '2026-04-12T00:00:00Z',
       'dg:plink': `${SITE_URL}/apt/region/${decoded}`,
       'article:section': '부동산',
       'article:tag': `${decoded},부동산,청약,실거래,재개발,미분양,모집공고,분양가`,
