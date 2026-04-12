@@ -54,15 +54,12 @@ export async function GET(_req: NextRequest) {
         title: topic.title,
         content: result.content,
         category: 'finance',
-        sub_category: '절세·세금',
         tags: topic.tags,
         source_type: 'tax-guide',
         cron_type: 'blog-tax-guide',
         data_date: today,
         meta_description: generateMetaDesc(result.content, topic.title, 'finance'),
         meta_keywords: generateMetaKeywords('finance', topic.tags),
-        seo_score: result.score,
-        seo_tier: result.tier,
         is_published: true,
       });
       if (res.success) created++;

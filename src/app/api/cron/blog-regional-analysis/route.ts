@@ -58,9 +58,6 @@ export async function GET(_req: NextRequest) {
         data_date: today,
         meta_description: generateMetaDesc(aiResult.content, title, 'apt'),
         meta_keywords: generateMetaKeywords('apt', [region, '아파트', '시세']),
-        sub_category: '부동산일반',
-        seo_score: aiResult.score,
-        seo_tier: aiResult.tier,
         is_published: true,
       });
       if (res.success) created++;

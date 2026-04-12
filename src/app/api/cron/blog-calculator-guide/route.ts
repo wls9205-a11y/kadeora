@@ -53,9 +53,6 @@ export async function GET(_req: NextRequest) {
         data_date: today,
         meta_description: generateMetaDesc(aiResult.content, title, 'finance'),
         meta_keywords: generateMetaKeywords('finance', calc.keywords),
-        sub_category: '재테크일반',
-        seo_score: aiResult.score,
-        seo_tier: aiResult.tier,
         is_published: true,
       });
       if (res.success) created++;

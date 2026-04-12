@@ -51,9 +51,6 @@ export async function GET(_req: NextRequest) {
         data_date: today,
         meta_description: generateMetaDesc(aiResult.content, topic.title, 'finance'),
         meta_keywords: generateMetaKeywords('finance', topic.tags),
-        sub_category: '부동산금융',
-        seo_score: aiResult.score,
-        seo_tier: aiResult.tier,
         is_published: true,
       });
       if (res.success) created++;

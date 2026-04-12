@@ -61,9 +61,6 @@ export async function GET(_req: NextRequest) {
           data_date: today,
           meta_description: generateMetaDesc(aiResult.content, title, 'stock'),
           meta_keywords: generateMetaKeywords('stock', ['배당주', '배당수익률']),
-          sub_category: '투자금융',
-        seo_score: aiResult.score,
-        seo_tier: aiResult.tier,
         is_published: true,
         });
         if (res.success) created++;
