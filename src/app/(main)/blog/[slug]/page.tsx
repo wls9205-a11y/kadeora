@@ -23,7 +23,7 @@ export const revalidate = 300;
 import { SITE_URL as SITE } from '@/lib/constants';
 import { enhanceBlogVisuals } from '@/lib/blog-visual-enhancer';
 import ReadingProgress from '@/components/ReadingProgress';
-import BlogSidebar from '@/components/BlogSidebar';
+// BlogSidebar removed — TOC inline + tools/metrics below article
 import BlogMetricCards from '@/components/BlogMetricCards';
 import BlogHeroImage from '@/components/BlogHeroImage';
 import NextArticleFloat from '@/components/NextArticleFloat';
@@ -1131,16 +1131,36 @@ export default async function BlogDetailPage({ params }: Props) {
         </div>
       )}
       {/* Disclaimer는 auto면책 + 본문 출처로 대체됨 — 중복 제거 */}
-      
-      </div>
-      {/* 사이드바 — 데스크탑에서만 노출 */}
-      <div className="blog-detail-side">
-        <BlogSidebar
-          toc={toc}
-          category={post.category}
-          metrics={sidebarMetrics}
-          relatedLinks={sidebarRelatedLinks}
-        />
+
+      {/* 핵심 지표 + 도구 — 본문 하단 인라인 (사이드바 대체) */}
+      {sidebarMetrics.length > 0 && (
+        <div style={{ marginBottom: 16, padding: '12px 14px', borderRadius: 'var(--radius-card)', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>📊 핵심 지표</div>
+          <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(sidebarMetrics.length, 4)}, 1fr)`, gap: 8 }}>
+            {sidebarMetrics.map((m, i) => (
+              <div key={i} style={{ textAlign: 'center', padding: '8px 4px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)' }}>
+                <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 2 }}>{m.label}</div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{m.value}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {sidebarRelatedLinks.length > 0 && (
+        <div style={{ marginBottom: 16, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+          {sidebarRelatedLinks.map((link, i) => (
+            <Link key={i} href={link.href} style={{
+              padding: '5px 12px', borderRadius: 'var(--radius-card)', fontSize: 12, fontWeight: 600,
+              background: 'var(--bg-surface)', border: '1px solid var(--border)',
+              color: 'var(--text-secondary)', textDecoration: 'none',
+            }}>
+              {link.title} →
+            </Link>
+          ))}
+        </div>
+      )}
+
       </div>
     </div>
   );

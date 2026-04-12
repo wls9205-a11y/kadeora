@@ -832,11 +832,9 @@ body {
 .feed-detail-content img { max-width: 100%; max-height: 500px; height: auto; border-radius: var(--radius-sm); object-fit: contain; }
 
 /* ━━━ 블로그 2컬럼 레이아웃 + 가독성 강화 ━━━ */
-.blog-detail-layout { display: flex; gap: 32px; max-width: 1080px; margin: 0 auto; padding: 0 var(--sp-lg); }
-.blog-detail-main { flex: 1; min-width: 0; max-width: 720px; }
-.blog-detail-side { width: 260px; flex-shrink: 0; display: none; }
-@media (min-width: 1024px) { .blog-detail-side { display: block; } }
-@media (max-width: 1023px) { .blog-detail-layout { max-width: 720px; } }
+.blog-detail-layout { max-width: 720px; margin: 0 auto; padding: 0 var(--sp-lg); }
+.blog-detail-main { min-width: 0; }
+.blog-detail-side { display: none; }
 
 /* 블로그 본문 가독성 */
 .blog-content { font-size: 17px; line-height: 1.85; word-break: keep-all; }
@@ -852,7 +850,6 @@ body {
 
 /* 블로그 목차 인라인 (모바일용) — 데스크탑에서는 사이드바 사용 */
 .blog-toc-inline { display: block; }
-@media (min-width: 1024px) { .blog-toc-inline { display: none; } }
 
 /* 블로그 사이드바 스크롤바 */
 .blog-sidebar::-webkit-scrollbar { width: 3px; }
