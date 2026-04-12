@@ -23,6 +23,7 @@ export const revalidate = 300;
 import { SITE_URL as SITE } from '@/lib/constants';
 import { enhanceBlogVisuals } from '@/lib/blog-visual-enhancer';
 import ReadingProgress from '@/components/ReadingProgress';
+import BlogHeroImage from '@/components/BlogHeroImage';
 import NextArticleFloat from '@/components/NextArticleFloat';
 import BlogTossGate from '@/components/BlogTossGate';
 import RelatedContentCard from '@/components/RelatedContentCard';
@@ -385,6 +386,13 @@ export default async function BlogDetailPage({ params }: Props) {
       }
     } catch {}
   }
+
+  // 블로그 인라인 이미지 (blog_post_images 테이블)
+  let postImages: { image_url: string; alt_text: string; caption: string | null; image_type: string; position: number }[] = [];
+  try {
+    const { data: imgs } = await (sb as any).from('blog_post_images').select('image_url, alt_text, caption, image_type, position').eq('post_id', post.id).order('position');
+    postImages = imgs || [];
+  } catch {}
 
   // 이전/다음글 (같은 카테고리 내 시간순)
   let prevPost: { slug: string; title: string } | null = null;
@@ -762,6 +770,26 @@ export default async function BlogDetailPage({ params }: Props) {
             <BlogBookmarkButton blogPostId={post.id} />
           </div>
         </div>
+
+        {/* 히어로 이미지 — 커버 + 데이터 인포그래픽 */}
+        {(() => {
+          const SITE_BASE = 'https://kadeora.app';
+          const heroImages: { url: string; alt: string; caption?: string }[] = [];
+          // 1. 커버 이미지 (OG)
+          const coverUrl = post.cover_image?.startsWith('/') ? `${SITE_BASE}${post.cover_image}` : post.cover_image;
+          if (coverUrl) heroImages.push({ url: coverUrl, alt: post.image_alt || `${post.title} — 카더라 ${catSection[post.category] || ''} 분석` });
+          // 2. DB에 저장된 추가 이미지
+          postImages.forEach((img: any) => heroImages.push({ url: img.image_url, alt: img.alt_text || post.title, caption: img.caption || undefined }));
+          // 3. 인포그래픽 (DB 이미지 없으면 자동 생성)
+          if (postImages.length === 0 && post.category !== 'general') {
+            const infoTitle = (post.title || '').slice(0, 40);
+            const infoUrl = `${SITE_BASE}/api/og?title=${encodeURIComponent(infoTitle)}&category=${post.category}&design=2&subtitle=${encodeURIComponent(catSection[post.category] || '')}`;
+            // cover_image와 다른 이미지만 추가
+            if (coverUrl !== infoUrl) heroImages.push({ url: infoUrl, alt: `${post.title} 인포그래픽` });
+          }
+          if (heroImages.length === 0) return null;
+          return <BlogHeroImage images={heroImages} title={post.title} />;
+        })()}
 
         {/* 목차 (모바일: 인라인, 데스크탑: 사이드바) */}
         <div className="blog-toc-inline">
