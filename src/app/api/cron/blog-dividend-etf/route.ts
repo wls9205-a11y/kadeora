@@ -48,7 +48,7 @@ export async function GET(_req: NextRequest) {
       ];
       const prompt = buildFinancePrompt(topic.title || calc?.title || '', 'finance', links);
       const aiResult = await generateAndValidate(prompt, 'finance');
-      if (!aiResult) continue;
+      if (!aiResult) return;
 
         const res = await safeBlogInsert(sb, {
           slug,

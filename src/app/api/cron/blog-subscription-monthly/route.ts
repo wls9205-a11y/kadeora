@@ -50,7 +50,7 @@ ${s.przwner_presnatn_de ? `- **당첨 발표**: ${s.przwner_presnatn_de.slice(0,
       ];
       const prompt = buildFinancePrompt(topic.title || calc?.title || '', 'apt', links);
       const aiResult = await generateAndValidate(prompt, 'apt');
-      if (!aiResult) continue;
+      if (!aiResult) return;
 
     const res = await safeBlogInsert(sb, {
       slug,
