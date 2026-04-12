@@ -21,6 +21,7 @@
     "@vercel/speed-insights": "^1.1.0",
     "autoprefixer": "^10.4.0",
     "chart.js": "^4.5.1",
+    "iconv-lite": "^0.7.2",
     "lucide-react": "^0.577.0",
     "marked": "^17.0.5",
     "next": "^15.2.4",
