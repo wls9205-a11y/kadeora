@@ -1,5 +1,6 @@
 import { Suspense } from 'react';
 import { SITE_URL } from '@/lib/constants';
+import Link from 'next/link';
 import type { Metadata } from 'next';
 
 const APT_SECTION_META: Record<string, { title: string; desc: string }> = {
@@ -285,6 +286,41 @@ export default async function AptPage() {
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"WebPage","name":"부동산 — 청약·분양·미분양·재개발","speakable":{"@type":"SpeakableSpecification","cssSelector":["h1",".region-summary"]}}) }} />
     <h1 style={{ position:"absolute", width:1, height:1, overflow:"hidden", clip:"rect(0,0,0,0)" }}>부동산 — 청약·분양·미분양·재개발</h1>
     <AptClient apts={apts} unsold={unsold} alertCounts={alertCounts} lastRefreshed={lastRefreshed} regionStats={regionStats} ongoingApts={ongoingApts} redevTotalCount={redevTotalCount} tradeTotalCount={tradeTotalCount} tradeByRegion={tradeByRegion} redevByRegion={redevByRegion} subTotalCount={subTotalCount} unsoldTotalCount={unsoldTotalCount} ongoingTotalCount={ongoingTotalCount} dataFreshness={dataFreshness} redevRedevCount={redevRedevCount} redevRebuildCount={redevRebuildCount} aptImageMap={aptImageMap} />
+
+    {/* SEO 허브 내부 링크 — 크롤 심도 + PageRank 분배 */}
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg) var(--sp-lg)' }}>
+      <section style={{ marginBottom: 14 }}>
+        <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px' }}>지역별 아파트 시세</h2>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          {['서울','경기','부산','대구','인천','광주','대전','울산','세종','강원','충북','충남','전북','전남','경북','경남','제주'].map(r => (
+            <Link key={r} href={`/apt/region/${encodeURIComponent(r)}`} style={{ padding: '5px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 20, textDecoration: 'none', fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600 }}>{r}</Link>
+          ))}
+        </div>
+      </section>
+      <section style={{ marginBottom: 14 }}>
+        <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px' }}>테마별 분석</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
+          {[
+            { s: 'price-up', l: '📈 가격 상승' }, { s: 'price-down', l: '📉 가격 하락' },
+            { s: 'low-jeonse-ratio', l: '🛡️ 전세가율↓' }, { s: 'high-jeonse-ratio', l: '⚠️ 전세가율↑' },
+            { s: 'new-built', l: '🏗️ 신축' }, { s: 'high-trade', l: '🔥 거래활발' },
+          ].map(t => (
+            <Link key={t.s} href={`/apt/theme/${t.s}`} style={{ padding: '8px 10px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', textDecoration: 'none', fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)', textAlign: 'center' }}>{t.l}</Link>
+          ))}
+        </div>
+      </section>
+      <section style={{ marginBottom: 14 }}>
+        <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px' }}>부동산 도구</h2>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          <Link href="/apt/complex" style={{ padding: '5px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 20, textDecoration: 'none', fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600 }}>📊 단지백과 34,537</Link>
+          <Link href="/apt/search" style={{ padding: '5px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 20, textDecoration: 'none', fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600 }}>🔍 실거래 검색</Link>
+          <Link href="/apt/diagnose" style={{ padding: '5px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 20, textDecoration: 'none', fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600 }}>📋 청약 진단</Link>
+          <Link href="/apt/data" style={{ padding: '5px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 20, textDecoration: 'none', fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600 }}>📁 통계 자료실</Link>
+          <Link href="/apt/map" style={{ padding: '5px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 20, textDecoration: 'none', fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600 }}>🗺️ 지도</Link>
+        </div>
+      </section>
+    </div>
+
     <Disclaimer type="apt" />
   </Suspense>;
 }
