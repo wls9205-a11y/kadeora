@@ -53,7 +53,7 @@ export default function AdBanner() {
       <Link href={ad.link} style={{ textDecoration: 'none', display: 'block' }}>
         <div style={{
           background: 'var(--bg-surface)',
-          borderRadius: 10, overflow: 'hidden',
+          borderRadius: 'var(--radius-md)', overflow: 'hidden',
           border: '1px solid var(--border)',
           opacity: visible ? 1 : 0.3,
           transform: visible ? 'translateY(0)' : 'translateY(3px)',
@@ -61,9 +61,9 @@ export default function AdBanner() {
         }}>
           <div style={{ display: 'flex', alignItems: 'stretch', minHeight: 80 }}>
             <div style={{ flex: 1, padding: '10px 12px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 5 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 5 }}>
                 <span style={{
-                  fontSize: 9, fontWeight: 600, borderRadius: 3, padding: '1px 6px', lineHeight: '15px',
+                  fontSize: 10, fontWeight: 600, borderRadius: 4, padding: '1px 6px', lineHeight: '15px',
                   color: bs.color, background: bs.bg,
                 }}>{ad.badge}</span>
                 {ad.region && (
@@ -78,7 +78,7 @@ export default function AdBanner() {
               <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
                 {ad.subtitle.split(' · ').map((s, i) => (
                   <span key={i} style={{
-                    fontSize: 9, padding: '2px 6px', borderRadius: 6, fontWeight: 500,
+                    fontSize: 10, padding: '3px 8px', borderRadius: 'var(--radius-sm)', fontWeight: 500,
                     color: i === 0 ? 'var(--text-info)' : i === 1 ? 'var(--text-success)' : 'var(--text-tertiary)',
                     background: i === 0 ? 'var(--bg-info)' : i === 1 ? 'var(--bg-success)' : 'var(--bg-hover)',
                   }}>{s}</span>

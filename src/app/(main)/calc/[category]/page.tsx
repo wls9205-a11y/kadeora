@@ -61,7 +61,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 8 }}>
         {calcs.map(c => (
           <Link key={c.slug} href={`/calc/${c.category}/${c.slug}`} style={{
-            display: 'block', padding: '14px 16px', borderRadius: 12, textDecoration: 'none',
+            display: 'block', padding: '14px 16px', borderRadius: 'var(--radius-card)', textDecoration: 'none',
             background: 'var(--bg-surface)', border: '1px solid var(--border)',
           }}>
             <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>{c.titleShort}</div>
@@ -76,7 +76,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
           {CATEGORIES.filter(c => c.id !== category).map(c => (
             <Link key={c.id} href={`/calc/${c.id}`} style={{
-              padding: '6px 12px', borderRadius: 8, textDecoration: 'none', fontSize: 12, fontWeight: 600,
+              padding: '6px 12px', borderRadius: 'var(--radius-md)', textDecoration: 'none', fontSize: 12, fontWeight: 600,
               background: 'var(--bg-hover)', color: 'var(--text-secondary)', border: '1px solid var(--border)',
             }}>
               {c.icon} {c.label}

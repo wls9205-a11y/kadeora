@@ -181,7 +181,7 @@ export default function PersonalDashboard() {
                   </span>
                   <span style={{
                     fontSize: 'var(--fs-xs)', fontWeight: 600, flexShrink: 0, marginLeft: 8,
-                    padding: '2px 6px', borderRadius: 4,
+                    padding: '3px 8px', borderRadius: 4,
                     background: a.isComplex ? 'var(--bg-hover)' : dDay(a.rcept_endde).includes('D-') && parseInt(dDay(a.rcept_endde).replace('D-', '')) <= 3 ? 'var(--accent-red)' : 'var(--bg-hover)',
                     color: a.isComplex ? 'var(--text-secondary)' : dDay(a.rcept_endde).includes('D-') && parseInt(dDay(a.rcept_endde).replace('D-', '')) <= 3 ? 'var(--text-inverse)' : 'var(--text-secondary)',
                   }}>

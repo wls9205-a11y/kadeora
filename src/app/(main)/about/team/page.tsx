@@ -72,7 +72,7 @@ export default function TeamPage() {
           <p style={{ fontSize: 'var(--fs-base)', color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0 0 12px' }}>{m.bio}</p>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
             {m.expertise.map(e => (
-              <span key={e} style={{ fontSize: 11, padding: '3px 10px', borderRadius: 20, background: 'var(--accent-blue-bg)', color: 'var(--accent-blue)', fontWeight: 600 }}>{e}</span>
+              <span key={e} style={{ fontSize: 11, padding: '3px 10px', borderRadius: 'var(--radius-xl)', background: 'var(--accent-blue-bg)', color: 'var(--accent-blue)', fontWeight: 600 }}>{e}</span>
             ))}
           </div>
         </div>

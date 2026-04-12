@@ -160,11 +160,11 @@ export default async function DiscussDetailPage({ params }: Props) {
 
       {/* Topic Header — SSR rendered for crawlers */}
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 16 }}>
-        <div style={{ display: 'flex', gap: 5, marginBottom: 6 }}>
+        <div style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
           <span style={{ fontSize: 11, padding: '2px 7px', borderRadius: 4, fontWeight: 700, background: 'var(--bg-hover)', color: 'var(--text-secondary)' }}>
             {CAT_LABEL[topic.category] || topic.category}
           </span>
-          {topic.is_hot && <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, fontWeight: 700, background: 'var(--error)', color: '#fff' }}>HOT</span>}
+          {topic.is_hot && <span style={{ fontSize: 10, padding: '3px 8px', borderRadius: 4, fontWeight: 700, background: 'var(--error)', color: '#fff' }}>HOT</span>}
         </div>
 
         <h1 itemProp="headline" style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 6px', lineHeight: 1.35 }}>

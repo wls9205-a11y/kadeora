@@ -127,10 +127,10 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
           {comments.length > 0 && <span style={{ fontSize: 13, color: 'var(--text-tertiary)' }}>{comments.length}</span>}
         </div>
         {comments.length > 1 && (
-          <div style={{ display: 'flex', gap: 2, background: 'var(--bg-surface)', borderRadius: 8, padding: 2 }}>
+          <div style={{ display: 'flex', gap: 2, background: 'var(--bg-surface)', borderRadius: 'var(--radius-md)', padding: 2 }}>
             {(['latest', 'popular'] as const).map(s => (
               <button key={s} onClick={() => setSort(s)} style={{
-                padding: '4px 10px', borderRadius: 6, border: 'none', fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                padding: '4px 10px', borderRadius: 'var(--radius-sm)', border: 'none', fontSize: 12, fontWeight: 600, cursor: 'pointer',
                 color: sort === s ? '#fff' : 'var(--text-tertiary)',
                 background: sort === s ? 'var(--brand)' : 'transparent',
               }}>{s === 'latest' ? '최신순' : '인기순'}</button>
@@ -187,7 +187,7 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
               {/* 이미지 미리보기 */}
               {commentImage && (
                 <div style={{ marginTop: 6, display: 'inline-flex', position: 'relative' }}>
-                  <img src={commentImage} alt="첨부" style={{ width: 56, height: 56, objectFit: 'cover', borderRadius: 8, border: '1px solid var(--border)' }} />
+                  <img src={commentImage} alt="첨부" style={{ width: 56, height: 56, objectFit: 'cover', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }} />
                   <button onClick={() => setCommentImage(null)} aria-label="이미지 제거"
                     style={{ position: 'absolute', top: -6, right: -6, width: 18, height: 18, borderRadius: '50%', background: 'var(--bg-surface)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: 10, color: 'var(--text-tertiary)', padding: 0 }}>✕</button>
                 </div>
@@ -240,7 +240,7 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{nick}</span>
                     {grade !== null && grade >= 2 && (
-                      <span style={{ fontSize: 10, fontWeight: 600, padding: '1px 5px', borderRadius: 3, marginLeft: 6, background: `${gradeColor(grade)}14`, color: gradeColor(grade) }}>
+                      <span style={{ fontSize: 10, fontWeight: 600, padding: '1px 5px', borderRadius: 4, marginLeft: 6, background: `${gradeColor(grade)}14`, color: gradeColor(grade) }}>
                         {gradeTitle(grade)}
                       </span>
                     )}
@@ -248,18 +248,18 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
                     <div style={{ fontSize: 14, color: 'var(--text-primary)', lineHeight: 1.6, marginTop: 3, wordBreak: 'break-word' as const }}>{comment.content}</div>
                     {(comment as any).image_url && (
                       <a href={(comment as any).image_url} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', marginTop: 4 }}>
-                        <img src={(comment as any).image_url} alt="댓글 이미지" style={{ maxWidth: 180, maxHeight: 120, borderRadius: 8, objectFit: 'cover', border: '1px solid var(--border)' }} />
+                        <img src={(comment as any).image_url} alt="댓글 이미지" style={{ maxWidth: 180, maxHeight: 120, borderRadius: 'var(--radius-md)', objectFit: 'cover', border: '1px solid var(--border)' }} />
                       </a>
                     )}
                     <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 6, fontSize: 12, color: 'var(--text-tertiary)' }}>
                       <button onClick={() => handleCommentLike(comment.id, likes)} disabled={likingIds.has(comment.id)} aria-label="좋아요"
-                        style={{ display: 'flex', alignItems: 'center', gap: 3, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 12, padding: 0, opacity: likingIds.has(comment.id) ? 0.5 : 1 }}>
+                        style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 12, padding: 0, opacity: likingIds.has(comment.id) ? 0.5 : 1 }}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z"/></svg>
                         {likes > 0 && likes}
                       </button>
                       {!isReply && userId && (
                         <button onClick={() => setReplyTo({ id: comment.id, nickname: nick })}
-                          style={{ display: 'flex', alignItems: 'center', gap: 3, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 12, padding: 0 }}>
+                          style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 12, padding: 0 }}>
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                           {replies.length > 0 && replies.length}
                         </button>

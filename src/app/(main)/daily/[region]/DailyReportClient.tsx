@@ -128,7 +128,7 @@ function DailyFortune() {
     <div style={{ background: 'var(--bg-surface)', borderRadius: 'var(--radius-card)', border: '1px solid var(--border)', padding: '14px 16px', marginBottom: 10 }}>
       <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8 }}>출생연도를 선택하면 오늘의 띠별 운세를 확인할 수 있어요</div>
       <select onChange={e => handleSelect(parseInt(e.target.value))}
-        style={{ width: '100%', padding: '8px 10px', fontSize: 13, background: 'var(--bg-base)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text-primary)', cursor: 'pointer' }}>
+        style={{ width: '100%', padding: '8px 10px', fontSize: 13, background: 'var(--bg-base)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', color: 'var(--text-primary)', cursor: 'pointer' }}>
         <option value="">출생연도 선택</option>
         {Array.from({ length: 60 }, (_, i) => 2006 - i).map(y => <option key={y} value={y}>{y}년 ({ZE[getZ(y)]} {getZ(y)}띠)</option>)}
       </select>
@@ -148,11 +148,11 @@ function DailyFortune() {
             <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{now.getMonth() + 1}월 {now.getDate()}일 운세</div>
           </div>
         </div>
-        <button onClick={() => { setYear(null); setSaved(false); localStorage.removeItem('kd_birth_year'); }} style={{ fontSize: 10, color: 'var(--text-tertiary)', background: 'none', border: '1px solid var(--border)', borderRadius: 6, padding: '3px 8px', cursor: 'pointer' }}>변경</button>
+        <button onClick={() => { setYear(null); setSaved(false); localStorage.removeItem('kd_birth_year'); }} style={{ fontSize: 10, color: 'var(--text-tertiary)', background: 'none', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '3px 8px', cursor: 'pointer' }}>변경</button>
       </div>
 
       {/* 종합 운세 */}
-      <div style={{ fontSize: 13, color: 'var(--text-primary)', lineHeight: 1.8, marginBottom: 12, padding: '10px 12px', background: 'rgba(59,123,246,0.03)', borderRadius: 8, border: '1px solid rgba(59,123,246,0.08)' }}>
+      <div style={{ fontSize: 13, color: 'var(--text-primary)', lineHeight: 1.8, marginBottom: 12, padding: '10px 12px', background: 'rgba(59,123,246,0.03)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(59,123,246,0.08)' }}>
         {f.summary}
       </div>
 
@@ -164,8 +164,8 @@ function DailyFortune() {
           { icon: '💪', label: '건강운', text: f.health },
           { icon: '🍀', label: '행운', text: f.lucky },
         ].map(item => (
-          <div key={item.label} style={{ padding: '8px 10px', borderRadius: 8, background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)' }}>
-            <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 3, display: 'flex', alignItems: 'center', gap: 3 }}>
+          <div key={item.label} style={{ padding: '8px 10px', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)' }}>
+            <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 3, display: 'flex', alignItems: 'center', gap: 4 }}>
               <span>{item.icon}</span> {item.label}
             </div>
             <div style={{ fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.6 }}>{item.text}</div>
@@ -203,7 +203,7 @@ const G = {
 
 const SH = ({ icon, title }: { icon: string; title: string }) => (
   <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', margin: '20px 0 10px' }}>
-    <div style={{ width: 3, height: 18, borderRadius: 2, background: `linear-gradient(180deg, ${G.gold} 0%, ${G.goldDark} 100%)` }} />
+    <div style={{ width: 3, height: 18, borderRadius: 4, background: `linear-gradient(180deg, ${G.gold} 0%, ${G.goldDark} 100%)` }} />
     <span style={{ fontSize: 16 }}>{icon}</span>
     <span style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: -0.3 }}>{title}</span>
   </div>
@@ -382,7 +382,7 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
               <span style={{ fontSize: 10, fontWeight: 700, color: G.gold, letterSpacing: 1.5, textTransform: 'uppercase' }}>KADEORA DAILY REPORT</span>
-              <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-tertiary)', background: G.goldBg, padding: '2px 8px', borderRadius: 3, border: `1px solid ${G.goldBorder}` }}>#{d.issueNo}</span>
+              <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-tertiary)', background: G.goldBg, padding: '3px 8px', borderRadius: 4, border: `1px solid ${G.goldBorder}` }}>#{d.issueNo}</span>
             </div>
             <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: -0.5, marginBottom: 4 }}>
               {(() => {
@@ -523,7 +523,7 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
                   <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-primary)' }}>🇰🇷 국내</span>
                   <span style={{
-                    fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 'var(--radius-xs)',
+                    fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 'var(--radius-xs)',
                     background: d.aiBriefing.sentiment === 'bullish' ? 'rgba(239,68,68,0.08)' : d.aiBriefing.sentiment === 'bearish' ? 'rgba(59,130,246,0.08)' : G.goldBg,
                     color: d.aiBriefing.sentiment === 'bullish' ? 'var(--accent-red)' : d.aiBriefing.sentiment === 'bearish' ? 'var(--accent-blue)' : G.gold,
                   }}>{d.aiBriefing.sentiment === 'bullish' ? '📈 강세' : d.aiBriefing.sentiment === 'bearish' ? '📉 약세' : '➡️ 중립'}</span>
@@ -537,7 +537,7 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
                   <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-primary)' }}>🇺🇸 해외</span>
                   <span style={{
-                    fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 'var(--radius-xs)',
+                    fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 'var(--radius-xs)',
                     background: d.aiBriefingUS.sentiment === 'bullish' ? 'rgba(16,185,129,0.08)' : d.aiBriefingUS.sentiment === 'bearish' ? 'rgba(239,68,68,0.08)' : G.goldBg,
                     color: d.aiBriefingUS.sentiment === 'bullish' ? 'var(--accent-green)' : d.aiBriefingUS.sentiment === 'bearish' ? 'var(--accent-red)' : G.gold,
                   }}>{d.aiBriefingUS.sentiment === 'bullish' ? '📈 강세' : d.aiBriefingUS.sentiment === 'bearish' ? '📉 약세' : '➡️ 중립'}</span>
@@ -593,7 +593,7 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
 
       {/* 섹터 히트맵 */}
       <SH icon="🗂️" title={`섹터 히트맵 (${d.sectors.length}개)`} />
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3, marginBottom: 6 }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 6 }}>
         {d.sectors.slice(0, 14).map(s => {
           const isUp = s.avg_pct > 0;
           return (
@@ -622,7 +622,7 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
                 <div key={idx.label} style={{ background: G.goldBg, borderRadius: 'var(--radius-sm)', padding: '6px 4px', textAlign: 'center', border: `1px solid ${G.goldBorder}`, borderLeft: `3px solid ${color}` }}>
                   <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-tertiary)' }}>{idx.label}</div>
                   <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>{idx.label.includes('S&P') || idx.label === 'NASDAQ' ? Number(idx.value).toLocaleString('en', { maximumFractionDigits: 0 }) : fmt(idx.value)}</div>
-                  {idx.change_pct !== 0 && <div style={{ fontSize: 9, color, fontWeight: 700 }}>{idx.change_pct > 0 ? '▲' : '▼'}{Math.abs(idx.change_pct).toFixed(2)}%</div>}
+                  {idx.change_pct !== 0 && <div style={{ fontSize: 10, color, fontWeight: 700 }}>{idx.change_pct > 0 ? '▲' : '▼'}{Math.abs(idx.change_pct).toFixed(2)}%</div>}
                 </div>
               );
             })}
@@ -646,7 +646,7 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
             <div key={s.symbol} style={{ background: G.goldBg, borderRadius: 'var(--radius-sm)', padding: '6px 4px', textAlign: 'center', border: `1px solid ${G.goldBorder}` }}>
               <div style={{ fontSize: 12, fontWeight: 700, color: G.gold }}>{s.symbol}</div>
               <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--text-primary)' }}>${Number(s.price).toFixed(0)}</div>
-              {pct !== 0 && <div style={{ fontSize: 9, color, fontWeight: 700 }}>{pct > 0 ? '+' : ''}{pct.toFixed(2)}%</div>}
+              {pct !== 0 && <div style={{ fontSize: 10, color, fontWeight: 700 }}>{pct > 0 ? '+' : ''}{pct.toFixed(2)}%</div>}
               <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>${fmtB(s.market_cap)}</div>
             </div>
           );
@@ -709,9 +709,9 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
                       <span style={{ color: g.jeonse_ratio >= 68 ? 'var(--accent-green)' : 'var(--text-tertiary)', marginLeft: 4, fontSize: 12 }}>{g.jeonse_ratio}%</span>
                     </span>
                   </div>
-                  <div style={{ height: 4, borderRadius: 2, background: 'var(--bg-hover)', overflow: 'hidden', position: 'relative' }}>
-                    <div style={{ position: 'absolute', height: '100%', width: `${salePct}%`, borderRadius: 2, background: 'rgba(239,68,68,0.25)' }} />
-                    <div style={{ position: 'absolute', height: '100%', width: `${jonsePct}%`, borderRadius: 2, background: 'rgba(59,130,246,0.35)' }} />
+                  <div style={{ height: 4, borderRadius: 4, background: 'var(--bg-hover)', overflow: 'hidden', position: 'relative' }}>
+                    <div style={{ position: 'absolute', height: '100%', width: `${salePct}%`, borderRadius: 4, background: 'rgba(239,68,68,0.25)' }} />
+                    <div style={{ position: 'absolute', height: '100%', width: `${jonsePct}%`, borderRadius: 4, background: 'rgba(59,130,246,0.35)' }} />
                   </div>
                 </div>
               );
@@ -722,8 +722,8 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
               </div>
             )}
             <div style={{ display: 'flex', gap: 'var(--sp-sm)', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 'var(--sp-xs)' }}>
-              <span><span style={{ display: 'inline-block', width: 8, height: 4, borderRadius: 2, background: 'rgba(239,68,68,0.3)', marginRight: 2 }} />매매</span>
-              <span><span style={{ display: 'inline-block', width: 8, height: 4, borderRadius: 2, background: 'rgba(59,130,246,0.4)', marginRight: 2 }} />전세</span>
+              <span><span style={{ display: 'inline-block', width: 8, height: 4, borderRadius: 4, background: 'rgba(239,68,68,0.3)', marginRight: 2 }} />매매</span>
+              <span><span style={{ display: 'inline-block', width: 8, height: 4, borderRadius: 4, background: 'rgba(59,130,246,0.4)', marginRight: 2 }} />전세</span>
               <span>전세율 <span style={{ color: 'var(--accent-green)', fontWeight: 600 }}>68%+</span> = 갭투자 유리</span>
             </div>
           </div>
@@ -749,8 +749,8 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
                     <span style={{ color: r.region_nm === d.region ? 'var(--brand)' : 'var(--text-secondary)', fontWeight: r.region_nm === d.region ? 700 : 400 }}>{r.region_nm}</span>
                     <span style={{ fontWeight: 600, color: i === 0 ? 'var(--accent-red)' : 'var(--text-primary)' }}>{r.units.toLocaleString()}</span>
                   </div>
-                  <div style={{ height: 3, borderRadius: 2, background: 'var(--bg-hover)', overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${Math.round(r.units / mx * 100)}%`, borderRadius: 2, background: r.region_nm === d.region ? 'var(--brand)' : i === 0 ? 'var(--accent-red)' : 'var(--text-tertiary)' }} />
+                  <div style={{ height: 3, borderRadius: 4, background: 'var(--bg-hover)', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${Math.round(r.units / mx * 100)}%`, borderRadius: 4, background: r.region_nm === d.region ? 'var(--brand)' : i === 0 ? 'var(--accent-red)' : 'var(--text-tertiary)' }} />
                   </div>
                 </div>
               );
@@ -776,10 +776,10 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
                   const colors = ['var(--text-tertiary)', 'var(--text-brand)', '#7C3AED', 'var(--accent-yellow)', 'var(--accent-green)', 'var(--accent-green)'];
                   return (
                     <div key={st.stage} style={{
-                      flex: Math.max(st.cnt / total, 0.08), height: 16, borderRadius: 2,
+                      flex: Math.max(st.cnt / total, 0.08), height: 16, borderRadius: 4,
                       background: colors[i] || 'var(--text-tertiary)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: 9, fontWeight: 700, color: '#fff',
+                      fontSize: 10, fontWeight: 700, color: '#fff',
                     }}>{st.cnt}</div>
                   );
                 })}
@@ -808,7 +808,7 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
                 <div style={{ fontSize: 16, fontWeight: 800, color: G.goldLight }}>{d.tradeTrend.thisMonth.deals}</div>
                 <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>이달 거래</div>
                 {d.tradeTrend.lastMonth.deals > 0 && (
-                  <div style={{ fontSize: 9, color: d.tradeTrend.thisMonth.deals > d.tradeTrend.lastMonth.deals ? 'var(--accent-red)' : 'var(--accent-blue)', fontWeight: 600 }}>
+                  <div style={{ fontSize: 10, color: d.tradeTrend.thisMonth.deals > d.tradeTrend.lastMonth.deals ? 'var(--accent-red)' : 'var(--accent-blue)', fontWeight: 600 }}>
                     전월 {d.tradeTrend.lastMonth.deals}건
                   </div>
                 )}
@@ -818,13 +818,13 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
                 <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>평균 매매가</div>
                 {d.tradeTrend.lastMonth.avgPrice > 0 && (() => {
                   const diff = Math.round((d.tradeTrend!.thisMonth.avgPrice - d.tradeTrend!.lastMonth.avgPrice) / d.tradeTrend!.lastMonth.avgPrice * 100);
-                  return <div style={{ fontSize: 9, color: diff >= 0 ? 'var(--accent-red)' : 'var(--accent-blue)', fontWeight: 600 }}>{diff >= 0 ? '▲' : '▼'}{Math.abs(diff)}%</div>;
+                  return <div style={{ fontSize: 10, color: diff >= 0 ? 'var(--accent-red)' : 'var(--accent-blue)', fontWeight: 600 }}>{diff >= 0 ? '▲' : '▼'}{Math.abs(diff)}%</div>;
                 })()}
               </div>
               <div style={{ textAlign: 'center', padding: '8px 4px', borderRadius: 'var(--radius-sm)', background: G.goldBg, border: `1px solid ${G.goldBorder}` }}>
                 <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--accent-red)' }}>{fmt(d.tradeTrend.thisMonth.maxPrice)}</div>
                 <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>최고가</div>
-                {d.tradeTrend.thisMonth.maxAptName && <div style={{ fontSize: 9, color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.tradeTrend.thisMonth.maxAptName}</div>}
+                {d.tradeTrend.thisMonth.maxAptName && <div style={{ fontSize: 10, color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.tradeTrend.thisMonth.maxAptName}</div>}
               </div>
             </div>
             {/* 최근 고가 거래 */}
@@ -839,7 +839,7 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
                     </div>
                     <div style={{ textAlign: 'right', flexShrink: 0 }}>
                       <span style={{ fontSize: 12, fontWeight: 800, color: 'var(--accent-red)' }}>{fmt(deal.deal_amount)}</span>
-                      <span style={{ fontSize: 9, color: 'var(--text-tertiary)', marginLeft: 4 }}>{deal.deal_date.slice(5)}</span>
+                      <span style={{ fontSize: 10, color: 'var(--text-tertiary)', marginLeft: 4 }}>{deal.deal_date.slice(5)}</span>
                     </div>
                   </div>
                 ))}
@@ -864,7 +864,7 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
                     <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{blog.title}</div>
                     <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{blog.excerpt || '카더라에서 읽기'}</div>
                   </div>
-                  <span style={{ fontSize: 9, fontWeight: 600, padding: '2px 6px', borderRadius: 3, background: 'rgba(59,123,246,0.08)', color: 'var(--brand)', flexShrink: 0 }}>{catLabel}</span>
+                  <span style={{ fontSize: 10, fontWeight: 600, padding: '3px 8px', borderRadius: 4, background: 'rgba(59,123,246,0.08)', color: 'var(--brand)', flexShrink: 0 }}>{catLabel}</span>
                 </Link>
               );
             })}

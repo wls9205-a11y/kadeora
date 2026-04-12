@@ -58,7 +58,7 @@ export default function SectorHeatmap({ stocks, isKR }: { stocks: Stock[]; isKR:
       <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-md)' }}>🗺️ 섹터 히트맵</div>
 
       {/* 히트맵 그리드 */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3, marginBottom: 'var(--sp-md)' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 'var(--sp-md)' }}>
         {sectors.map(sec => {
           const widthPct = Math.max(12, (sec.totalCap / totalCap) * 100);
           const topStock = sec.stocks.sort((a, b) => b.market_cap - a.market_cap)[0];
@@ -96,16 +96,16 @@ export default function SectorHeatmap({ stocks, isKR }: { stocks: Stock[]; isKR:
 
       {/* 범례 */}
       <div style={{ display: 'flex', justifyContent: 'center', gap: 'var(--sp-md)', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-          <span style={{ width: 10, height: 10, borderRadius: 2, background: isKR ? 'var(--accent-red)' : '#059669' }} />
+        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <span style={{ width: 10, height: 10, borderRadius: 4, background: isKR ? 'var(--accent-red)' : '#059669' }} />
           {isKR ? '상승' : 'Up'}
         </span>
-        <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-          <span style={{ width: 10, height: 10, borderRadius: 2, background: '#6B7280' }} />
+        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <span style={{ width: 10, height: 10, borderRadius: 4, background: '#6B7280' }} />
           보합
         </span>
-        <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-          <span style={{ width: 10, height: 10, borderRadius: 2, background: isKR ? 'var(--brand)' : '#EF4444' }} />
+        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <span style={{ width: 10, height: 10, borderRadius: 4, background: isKR ? 'var(--brand)' : '#EF4444' }} />
           {isKR ? '하락' : 'Down'}
         </span>
       </div>

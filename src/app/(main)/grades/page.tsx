@@ -81,8 +81,8 @@ export default async function GradesPage() {
               <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{current.emoji} {current.title} (Lv.{current.grade})</span>
               <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>{userPoints}P</span>
             </div>
-            <div style={{ height: 6, borderRadius: 3, background: 'var(--bg-hover)', overflow: 'hidden', marginBottom: 6 }}>
-              <div style={{ height: '100%', width: `${Math.min(progress, 100)}%`, background: 'var(--brand)', borderRadius: 3, transition: 'width 0.3s' }} />
+            <div style={{ height: 6, borderRadius: 4, background: 'var(--bg-hover)', overflow: 'hidden', marginBottom: 6 }}>
+              <div style={{ height: '100%', width: `${Math.min(progress, 100)}%`, background: 'var(--brand)', borderRadius: 4, transition: 'width 0.3s' }} />
             </div>
             {next ? (
               <div style={{ fontSize: 12, color: 'var(--text-tertiary)', textAlign: 'center' }}>

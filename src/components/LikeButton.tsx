@@ -63,7 +63,7 @@ export function LikeButton({ postId, initialCount, initialLiked = false }: LikeB
       aria-label={liked ? '좋아요 취소' : '좋아요'}
       aria-pressed={liked}
       style={{
-        display: 'flex', alignItems: 'center', gap: 5,
+        display: 'flex', alignItems: 'center', gap: 6,
         padding: '6px 14px', borderRadius: 'var(--radius-xl)',
         background: liked ? 'rgba(248,113,113,0.08)' : 'var(--bg-hover)',
         border: `1px solid ${liked ? 'rgba(248,113,113,0.3)' : 'var(--border)'}`,

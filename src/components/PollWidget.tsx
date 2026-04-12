@@ -64,7 +64,7 @@ export default function PollWidget({ postId, isAuthor = false }: Props) {
     <div style={{ marginTop: 10, padding: '10px 12px', background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', opacity: 0.5 }}>
       <div style={{ height: 12, background: 'var(--border)', borderRadius: 'var(--radius-xs)', marginBottom: 'var(--sp-sm)' }} />
       <div style={{ height: 28, background: 'var(--border)', borderRadius: 'var(--radius-xs)', marginBottom: 'var(--sp-xs)' }} />
-      <div style={{ height: 28, background: 'var(--border)', borderRadius: 6 }} />
+      <div style={{ height: 28, background: 'var(--border)', borderRadius: 'var(--radius-sm)' }} />
     </div>
   );
   if (!poll) return null;
@@ -86,7 +86,7 @@ export default function PollWidget({ postId, isAuthor = false }: Props) {
           {poll.question}
         </span>
         {poll.expired && (
-          <span style={{ fontSize: 10, color: 'var(--text-tertiary)', background: 'var(--bg-hover)', padding: '2px 6px', borderRadius: 4 }}>
+          <span style={{ fontSize: 10, color: 'var(--text-tertiary)', background: 'var(--bg-hover)', padding: '3px 8px', borderRadius: 4 }}>
             마감
           </span>
         )}

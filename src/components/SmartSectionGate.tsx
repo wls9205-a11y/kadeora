@@ -41,7 +41,7 @@ export default function SmartSectionGate({ htmlContent, slug, category, userCoun
         <div style={{ background: '#050a18', padding: '0 16px 24px', textAlign: 'center' }}>
           <div style={{
             maxWidth: 400, width: '100%', margin: '0 auto',
-            padding: '20px', borderRadius: 16, boxSizing: 'border-box' as const,
+            padding: '20px', borderRadius: 'var(--radius-lg)', boxSizing: 'border-box' as const,
             borderTop: '2px solid rgba(254,229,0,0.3)',
             background: 'linear-gradient(135deg, rgba(12,21,40,0.98), rgba(20,30,50,0.98))',
           }}>
@@ -55,7 +55,7 @@ export default function SmartSectionGate({ htmlContent, slug, category, userCoun
               onClick={() => trackCTA('click', 'content_gate')}
               style={{
                 display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'center', gap: 8,
-                background: '#FEE500', color: '#191919', borderRadius: 10,
+                background: '#FEE500', color: '#191919', borderRadius: 'var(--radius-md)',
                 padding: '12px 0', fontSize: 14, fontWeight: 700, textDecoration: 'none',
                 boxShadow: '0 0 20px rgba(254,229,0,0.12)', boxSizing: 'border-box' as const,
               }}

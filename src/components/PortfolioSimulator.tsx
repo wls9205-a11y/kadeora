@@ -70,7 +70,7 @@ export default function PortfolioSimulator({ stocks, isKR }: Props) {
           { label: '평균 등락', val: holdings.length ? `${weightedPct > 0 ? '+' : ''}${weightedPct.toFixed(2)}%` : '—', color: profitColor },
         ].map(kpi => (
           <div key={kpi.label} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '8px 10px' }}>
-            <div style={{ fontSize: 9, color: 'var(--text-tertiary)', fontFamily: 'monospace', marginBottom: 3 }}>{kpi.label}</div>
+            <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontFamily: 'monospace', marginBottom: 3 }}>{kpi.label}</div>
             <div style={{ fontSize: 16, fontWeight: 900, color: kpi.color, fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.3px' }}>{kpi.val}</div>
           </div>
         ))}
@@ -104,7 +104,7 @@ export default function PortfolioSimulator({ stocks, isKR }: Props) {
       {/* 빠른 추가 */}
       {!holdings.length && (
         <div style={{ marginBottom: 10 }}>
-          <div style={{ fontSize: 9, color: 'var(--text-tertiary)', fontFamily: 'monospace', marginBottom: 5 }}>시총 상위 빠른 추가</div>
+          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontFamily: 'monospace', marginBottom: 5 }}>시총 상위 빠른 추가</div>
           <div style={{ display: 'flex', gap: 'var(--sp-xs)', flexWrap: 'wrap' }}>
             {quickStocks.map(s => (
               <button key={s.symbol} onClick={() => addHolding(s)} style={{ fontSize: 10, padding: '4px 8px', borderRadius: 'var(--radius-xs)', background: 'var(--bg-surface)', border: '1px solid var(--border)', color: 'var(--text-secondary)', cursor: 'pointer', fontWeight: 600 }}>
@@ -122,12 +122,12 @@ export default function PortfolioSimulator({ stocks, isKR }: Props) {
           <div style={{ height: 20, borderRadius: 'var(--radius-xs)', overflow: 'hidden', display: 'flex', marginBottom: 6 }}>
             {holdings.map((h, i) => (
               <div key={h.stock.symbol} style={{ width: `${h.alloc}%`, background: SEG_COLORS[i % SEG_COLORS.length], display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'width .3s', overflow: 'hidden' }}>
-                {h.alloc > 10 && <span style={{ fontSize: 8, fontWeight: 700, color: 'rgba(255,255,255,0.9)', whiteSpace: 'nowrap' }}>{h.stock.name.slice(0, 4)}</span>}
+                {h.alloc > 10 && <span style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.9)', whiteSpace: 'nowrap' }}>{h.stock.name.slice(0, 4)}</span>}
               </div>
             ))}
           </div>
           {totalAlloc !== 100 && (
-            <div style={{ fontSize: 9, color: 'var(--accent-yellow)', fontFamily: 'monospace', marginBottom: 'var(--sp-xs)' }}>비중 합계 {totalAlloc}% (100% 맞춰주세요)</div>
+            <div style={{ fontSize: 10, color: 'var(--accent-yellow)', fontFamily: 'monospace', marginBottom: 'var(--sp-xs)' }}>비중 합계 {totalAlloc}% (100% 맞춰주세요)</div>
           )}
 
           {/* 종목 리스트 + 슬라이더 */}
@@ -139,14 +139,14 @@ export default function PortfolioSimulator({ stocks, isKR }: Props) {
               return (
                 <div key={h.stock.symbol} style={{ padding: '9px 12px', borderBottom: i < holdings.length - 1 ? '1px solid var(--border)' : 'none' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 5 }}>
-                    <div style={{ width: 8, height: 8, borderRadius: 2, background: seg, flexShrink: 0 }} />
+                    <div style={{ width: 8, height: 8, borderRadius: 4, background: seg, flexShrink: 0 }} />
                     <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', flex: 1 }}>{h.stock.name}</span>
                     <span style={{ fontSize: 10, fontWeight: 600, color: c, fontFamily: 'monospace' }}>{h.stock.pct > 0 ? '+' : ''}{h.stock.pct.toFixed(2)}%</span>
                     <span style={{ fontSize: 10, color: c, fontFamily: 'monospace' }}>→{itemProfit > 0 ? '+' : ''}{fmtAmt(Math.abs(itemProfit / 10000))}</span>
                     <button onClick={() => removeHolding(h.stock.symbol)} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 14, lineHeight: 1, padding: '0 2px' }} aria-label="종목 제거">×</button>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span style={{ fontSize: 9, color: 'var(--text-tertiary)', width: 24, textAlign: 'right', flexShrink: 0 }}>{h.alloc}%</span>
+                    <span style={{ fontSize: 10, color: 'var(--text-tertiary)', width: 24, textAlign: 'right', flexShrink: 0 }}>{h.alloc}%</span>
                     <input type="range" min={0} max={100} step={5} value={h.alloc} onChange={e => setAlloc(h.stock.symbol, +e.target.value)}
                       style={{ flex: 1, accentColor: seg, height: 3, cursor: 'pointer' }} />
                   </div>
@@ -158,7 +158,7 @@ export default function PortfolioSimulator({ stocks, isKR }: Props) {
           {/* 구성 범례 */}
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {holdings.map((h, i) => (
-              <div key={h.stock.symbol} style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 9, color: 'var(--text-tertiary)' }}>
+              <div key={h.stock.symbol} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 10, color: 'var(--text-tertiary)' }}>
                 <div style={{ width: 7, height: 7, borderRadius: 1, background: SEG_COLORS[i % SEG_COLORS.length] }} />
                 {h.stock.name.slice(0, 5)} {h.alloc}%
               </div>

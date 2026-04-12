@@ -84,8 +84,8 @@ export default async function SeriesDetailPage({ params }: Props) {
 
       {/* 시리즈 진행률 바 */}
       <div style={{ marginBottom: 'var(--sp-lg)' }}>
-        <div style={{ height: 4, background: 'var(--bg-hover)', borderRadius: 2, overflow: 'hidden' }}>
-          <div style={{ height: '100%', width: '100%', background: 'var(--brand)', borderRadius: 2 }} />
+        <div style={{ height: 4, background: 'var(--bg-hover)', borderRadius: 4, overflow: 'hidden' }}>
+          <div style={{ height: '100%', width: '100%', background: 'var(--brand)', borderRadius: 4 }} />
         </div>
       </div>
 

@@ -143,9 +143,9 @@ export default async function HotPage() {
               <div key={s.label} style={{ flex: 1, padding: '8px 10px', borderRadius: 'var(--radius-md)', background: 'var(--bg-surface)', border: '1px solid var(--border)', flexShrink: 0, textAlign: 'center', minWidth: 60 }}>
                 <div style={{ fontSize: 12, marginBottom: 2 }}>{s.icon}</div>
                 <div style={{ fontSize: 16, fontWeight: 800, color: s.color }}>{s.value.toLocaleString()}{s.unit}</div>
-                <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginTop: 1 }}>{s.label}</div>
-                <div style={{ height: 3, borderRadius: 2, background: 'var(--bg-hover)', marginTop: 'var(--sp-xs)', overflow: 'hidden' }}>
-                  <div style={{ height: '100%', width: `${Math.min((s.value / s.max) * 100, 100)}%`, borderRadius: 2, background: s.color }} />
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 1 }}>{s.label}</div>
+                <div style={{ height: 3, borderRadius: 4, background: 'var(--bg-hover)', marginTop: 'var(--sp-xs)', overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: `${Math.min((s.value / s.max) * 100, 100)}%`, borderRadius: 4, background: s.color }} />
                 </div>
               </div>
             ))}
@@ -223,7 +223,7 @@ export default async function HotPage() {
                   <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>📍 {region}</div>
                   {posts.map((post: any, i: number) => (
                     <Link key={post.id} href={`/feed/${post.slug || post.id}`} className="kd-feed-card" style={{
-                      textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 5,
+                      textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6,
                       padding: '4px 0', color: 'inherit',
                       borderBottom: i < posts.length - 1 ? '1px solid var(--border)' : 'none',
                     }}>

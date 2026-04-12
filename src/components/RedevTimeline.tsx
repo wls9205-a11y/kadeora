@@ -16,9 +16,9 @@ export default function RedevTimeline({ currentStage }: { currentStage: string }
   return (
     <div style={{ margin: '12px 0 16px', overflow: 'hidden' }}>
       {/* 프로그레스 바 */}
-      <div style={{ position: 'relative', height: 4, background: 'var(--border)', borderRadius: 2, marginBottom: 'var(--sp-sm)' }}>
+      <div style={{ position: 'relative', height: 4, background: 'var(--border)', borderRadius: 4, marginBottom: 'var(--sp-sm)' }}>
         <div style={{
-          position: 'absolute', left: 0, top: 0, height: '100%', borderRadius: 2,
+          position: 'absolute', left: 0, top: 0, height: '100%', borderRadius: 4,
           width: `${((activeIdx + 1) / STAGES.length) * 100}%`,
           background: `linear-gradient(90deg, ${STAGES[0].color}, ${STAGES[activeIdx].color})`,
           transition: 'width 0.5s ease',
@@ -37,7 +37,7 @@ export default function RedevTimeline({ currentStage }: { currentStage: string }
               flex: 1, minWidth: 0,
             }}>
               <div style={{
-                width: 28, height: 28, borderRadius: '50%',
+                width: 32, height: 32, borderRadius: '50%',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 background: isCurrent ? s.color : isPast ? `${s.color}40` : 'var(--bg-hover)',
                 border: isCurrent ? `2px solid ${s.color}` : isPast ? 'none' : '1px solid var(--border)',

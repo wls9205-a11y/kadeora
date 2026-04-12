@@ -61,7 +61,7 @@ export default function FirstMissionBanner() {
         {MISSIONS.map(m => (
           <Link key={m.key} href={m.href} style={{
             display: 'flex', alignItems: 'center', gap: 8,
-            padding: '8px 10px', borderRadius: 8,
+            padding: '8px 10px', borderRadius: 'var(--radius-md)',
             background: progress[m.key as keyof MissionProgress]
               ? 'rgba(16,185,129,0.1)' : 'var(--bg-surface)',
             border: `1px solid ${progress[m.key as keyof MissionProgress] ? 'rgba(16,185,129,0.3)' : 'var(--border)'}`,
@@ -77,7 +77,7 @@ export default function FirstMissionBanner() {
         ))}
       </div>
       {allDone && (
-        <div style={{ marginTop: 8, padding: '6px 10px', borderRadius: 6, background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)', fontSize: 11, color: '#10B981', fontWeight: 600, textAlign: 'center' }}>
+        <div style={{ marginTop: 8, padding: '6px 10px', borderRadius: 'var(--radius-sm)', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)', fontSize: 11, color: '#10B981', fontWeight: 600, textAlign: 'center' }}>
           🎉 보너스 200P 지급 완료!
         </div>
       )}

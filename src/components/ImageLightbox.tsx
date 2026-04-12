@@ -176,7 +176,7 @@ export default function ImageLightbox({ images, initialIndex, onClose }: Props) 
                 key={i}
                 onClick={(e) => { e.stopPropagation(); setIdx(i); }}
                 style={{
-                  width: i === idx ? 20 : 6, height: 6, borderRadius: 3,
+                  width: i === idx ? 20 : 6, height: 6, borderRadius: 4,
                   border: 'none', cursor: 'pointer', padding: 0,
                   background: i === idx ? '#fff' : 'rgba(255,255,255,0.3)',
                   transition: 'all 0.2s',

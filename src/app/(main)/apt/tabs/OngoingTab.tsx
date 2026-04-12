@@ -209,7 +209,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
                 <a href={`${linkH}#interest-section`} onClick={(e) => e.stopPropagation()} aria-label="관심등록" style={{ fontSize: 16, background: 'transparent', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '2px 6px', lineHeight: 1, textDecoration: 'none', color: 'var(--text-tertiary)' }}>☆</a>
               </div>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 1, margin: '0 10px 8px', background: 'var(--border)', borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border)' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 1, margin: '0 10px 8px', background: 'var(--border)', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--border)' }}>
               <div style={kS}><div style={kL}>분양가</div><div style={kV(priceStr ? 'var(--brand)' : 'var(--text-tertiary)')}>{priceStr || (isUnsold ? '문의' : '공고확인')}</div></div>
               <div style={kS}><div style={kL}>평당가</div><div style={kV(ppAvg ? 'var(--accent-purple)' : 'var(--text-tertiary)')}>{ppAvg ? fmtP(ppAvg) : (priceStr ? '계산중' : '공고확인')}</div></div>
               <div style={kS}><div style={kL}>{taxEst ? '취득세' : '세대수'}</div><div style={kV(taxEst ? 'var(--accent-yellow)' : 'var(--text-primary)')}>{taxEst ? `~${fmtP(taxEst)}` : ((o.total_supply || 0) > 0 ? o.total_supply!.toLocaleString() : '공고확인')}</div></div>

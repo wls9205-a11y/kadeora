@@ -16,7 +16,7 @@ export default function KakaoHeroCTA() {
       maxWidth: 440, width: '100%', margin: '0 auto', padding: '0 16px',
     }}>
       <div style={{
-        background: '#050A18', borderRadius: 20, overflow: 'hidden',
+        background: '#050A18', borderRadius: 'var(--radius-xl)', overflow: 'hidden',
         position: 'relative', padding: '28px 24px 24px',
       }}>
         {/* 글로우 */}
@@ -31,7 +31,7 @@ export default function KakaoHeroCTA() {
           <div style={{
             display: 'inline-flex', alignItems: 'center', gap: 6,
             background: 'rgba(52,211,153,0.12)', color: '#34D399',
-            fontSize: 11, fontWeight: 700, padding: '5px 12px', borderRadius: 16,
+            fontSize: 11, fontWeight: 700, padding: '5px 12px', borderRadius: 'var(--radius-lg)',
             marginBottom: 14,
           }}>
             <span style={{
@@ -71,12 +71,12 @@ export default function KakaoHeroCTA() {
               { n: '19,000+', l: '블로그 콘텐츠' },
             ].map(s => (
               <div key={s.l} style={{
-                background: 'rgba(255,255,255,0.04)', borderRadius: 10,
+                background: 'rgba(255,255,255,0.04)', borderRadius: 'var(--radius-md)',
                 padding: '10px 8px', textAlign: 'center',
                 border: '1px solid rgba(255,255,255,0.04)',
               }}>
                 <div style={{ fontSize: 15, fontWeight: 800, color: '#F0F4F8', letterSpacing: '-0.02em' }}>{s.n}</div>
-                <div style={{ fontSize: 9, color: 'rgba(224,232,240,0.3)', marginTop: 2, fontWeight: 500 }}>{s.l}</div>
+                <div style={{ fontSize: 10, color: 'rgba(224,232,240,0.3)', marginTop: 2, fontWeight: 500 }}>{s.l}</div>
               </div>
             ))}
           </div>
@@ -87,7 +87,7 @@ export default function KakaoHeroCTA() {
             onClick={() => trackCTA('click', 'kakao_hero')}
             style={{
               display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'center', gap: 10,
-              background: '#FEE500', color: '#191919', borderRadius: 12,
+              background: '#FEE500', color: '#191919', borderRadius: 'var(--radius-card)',
               padding: '14px 0', fontSize: 15, fontWeight: 700, textDecoration: 'none',
               boxShadow: '0 0 24px rgba(254,229,0,0.15)',
               transition: 'transform 0.15s',

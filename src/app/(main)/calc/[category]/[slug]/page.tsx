@@ -149,7 +149,7 @@ export default async function CalcPage({ params }: { params: Promise<{ category:
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
             {relatedCalcs.map(rc => rc && (
               <Link key={rc.slug} href={`/calc/${rc.category}/${rc.slug}`} style={{
-                padding: '6px 12px', borderRadius: 8, textDecoration: 'none', fontSize: 12, fontWeight: 600,
+                padding: '6px 12px', borderRadius: 'var(--radius-md)', textDecoration: 'none', fontSize: 12, fontWeight: 600,
                 background: 'var(--bg-surface)', color: 'var(--text-secondary)', border: '1px solid var(--border)',
               }}>
                 {rc.emoji} {rc.titleShort}

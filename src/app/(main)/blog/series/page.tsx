@@ -80,8 +80,8 @@ export default async function BlogSeriesPage() {
               </div>
               {/* 진행률 바 */}
               <div style={{ padding: '0 20px 12px' }}>
-                <div style={{ height: 4, borderRadius: 2, background: 'var(--bg-hover)', marginTop: 10, overflow: 'hidden' }}>
-                  <div style={{ height: '100%', width: `${Math.min((s.post_count / 50) * 100, 100)}%`, background: `linear-gradient(90deg, ${catColor}, var(--brand))`, borderRadius: 2 }} />
+                <div style={{ height: 4, borderRadius: 4, background: 'var(--bg-hover)', marginTop: 10, overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: `${Math.min((s.post_count / 50) * 100, 100)}%`, background: `linear-gradient(90deg, ${catColor}, var(--brand))`, borderRadius: 4 }} />
                 </div>
               </div>
             </Link>

@@ -65,12 +65,12 @@ export default function AttendanceBanner() {
         )}
       </div>
       {/* 7일 진행률 */}
-      <div style={{ display: 'flex', gap: 3 }}>
+      <div style={{ display: 'flex', gap: 4 }}>
         {[1,2,3,4,5,6,7].map(d => {
           const filled = d <= weekDay
           return (
             <div key={d} style={{
-              flex: 1, height: 6, borderRadius: 3,
+              flex: 1, height: 6, borderRadius: 4,
               background: filled ? (d === 7 ? 'var(--accent-orange)' : 'var(--accent-green)') : 'var(--bg-hover)',
               transition: 'background 0.2s',
             }} />

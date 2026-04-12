@@ -61,7 +61,7 @@ export default function BlogTossGate({
         <button
           onClick={() => openInBrowser(`/blog/${slug}`)}
           style={{
-            padding: '14px 36px', borderRadius: 12, border: 'none',
+            padding: '14px 36px', borderRadius: 'var(--radius-card)', border: 'none',
             background: 'linear-gradient(135deg, #1B64DA, #3182F6)',
             color: '#fff', fontWeight: 800, fontSize: 15,
             cursor: 'pointer', fontFamily: 'inherit',

@@ -57,7 +57,7 @@ export default function BlogCommentInput({ blogPostId }: { blogPostId: number })
     <div style={{ marginBottom: 'var(--sp-lg)' }}>
       {commentImage && (
         <div style={{ marginBottom: 6, display: 'inline-flex', position: 'relative' }}>
-          <img src={commentImage} alt="첨부" style={{ width: 56, height: 56, objectFit: 'cover', borderRadius: 8, border: '1px solid var(--border)' }} />
+          <img src={commentImage} alt="첨부" style={{ width: 56, height: 56, objectFit: 'cover', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }} />
           <button onClick={() => setCommentImage(null)} aria-label="이미지 제거"
             style={{ position: 'absolute', top: -6, right: -6, width: 18, height: 18, borderRadius: '50%', background: 'var(--bg-surface)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: 10, color: 'var(--text-tertiary)', padding: 0 }}>✕</button>
         </div>

@@ -108,7 +108,7 @@ export default function MiniLounge() {
         borderBottom: '1px solid var(--border)',
         background: 'linear-gradient(135deg, rgba(37,99,235,0.06) 0%, transparent 100%)',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <span style={{
             width: 6, height: 6, borderRadius: '50%', background: '#22C55E',
             boxShadow: '0 0 6px rgba(34,197,94,0.5)',
@@ -116,12 +116,12 @@ export default function MiniLounge() {
           }} />
           <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>라운지</span>
           {msgs.length > 0 && (
-            <span style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>{msgs.length}</span>
+            <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{msgs.length}</span>
           )}
         </div>
         <Link href="/discuss" style={{
-          fontSize: 9, color: 'var(--text-tertiary)', textDecoration: 'none',
-          padding: '2px 6px', borderRadius: 4, background: 'var(--bg-hover)',
+          fontSize: 10, color: 'var(--text-tertiary)', textDecoration: 'none',
+          padding: '3px 8px', borderRadius: 4, background: 'var(--bg-hover)',
         }}>
           전체화면 →
         </Link>
@@ -160,7 +160,7 @@ export default function MiniLounge() {
               background: m.is_mine
                 ? 'linear-gradient(135deg, #2563EB, #3B82F6)'
                 : 'linear-gradient(135deg, #334155, #475569)',
-              color: '#fff', fontSize: 9, fontWeight: 600,
+              color: '#fff', fontSize: 10, fontWeight: 600,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               marginTop: 1,
             }}>
@@ -175,7 +175,7 @@ export default function MiniLounge() {
                 }}>
                   {m.is_mine ? '나' : m.nickname}
                 </span>
-                <span style={{ fontSize: 8, color: 'var(--text-tertiary)' }}>{timeAgo(m.created_at)}</span>
+                <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{timeAgo(m.created_at)}</span>
               </div>
               <div style={{
                 fontSize: 11, lineHeight: 1.4, color: 'var(--text-primary)',
@@ -194,7 +194,7 @@ export default function MiniLounge() {
           borderTop: '1px solid var(--border)',
           padding: '6px 8px',
           display: 'flex',
-          gap: 5,
+          gap: 6,
           alignItems: 'center',
           background: 'var(--bg-hover)',
         }}>
@@ -216,7 +216,7 @@ export default function MiniLounge() {
             onClick={send}
             disabled={!input.trim() || sending}
             style={{
-              width: 28, height: 28, borderRadius: 'var(--radius-sm)', border: 'none',
+              width: 32, height: 32, borderRadius: 'var(--radius-sm)', border: 'none',
               background: input.trim() ? 'var(--brand)' : 'var(--bg-surface)',
               color: input.trim() ? '#fff' : 'var(--text-tertiary)',
               fontSize: 13, fontWeight: 700, cursor: input.trim() ? 'pointer' : 'default',

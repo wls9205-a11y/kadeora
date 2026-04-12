@@ -71,7 +71,7 @@ export default function BottomSheet({ open, onClose, children, maxWidth = 520, t
         }}
       >
         {/* 드래그 핸들 */}
-        <div style={{ width: 40, height: 4, background: 'var(--border-strong)', borderRadius: 2, margin: '0 auto 12px' }} />
+        <div style={{ width: 40, height: 4, background: 'var(--border-strong)', borderRadius: 4, margin: '0 auto 12px' }} />
 
         {/* 제목 + 닫기 */}
         {title && (

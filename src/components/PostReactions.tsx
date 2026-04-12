@@ -86,16 +86,16 @@ export default function PostReactions({ postId, userId, initialLikes, compact }:
   if (compact) {
     // 컴팩트 모드: 미니 리액션 바 + 총 수
     return (
-      <div style={{ display: 'flex', alignItems: 'center', gap: 3, position: 'relative' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 4, position: 'relative' }}>
         <button onClick={e => { e.preventDefault(); e.stopPropagation(); setShowPicker(!showPicker); }}
-          style={{ display: 'flex', alignItems: 'center', gap: 2, background: myReaction ? 'rgba(59,123,246,0.08)' : 'none', border: myReaction ? '1px solid rgba(59,123,246,0.2)' : '1px solid transparent', borderRadius: 99, padding: '2px 6px', cursor: 'pointer', fontSize: 11, color: myReaction ? REACTION_COLORS[myReaction] : 'var(--text-tertiary)' }}>
+          style={{ display: 'flex', alignItems: 'center', gap: 2, background: myReaction ? 'rgba(59,123,246,0.08)' : 'none', border: myReaction ? '1px solid rgba(59,123,246,0.2)' : '1px solid transparent', borderRadius: 99, padding: '3px 8px', cursor: 'pointer', fontSize: 11, color: myReaction ? REACTION_COLORS[myReaction] : 'var(--text-tertiary)' }}>
           <span style={{ fontSize: 13 }}>{myReaction ? REACTIONS.find(r => r.key === myReaction)?.emoji : '👍'}</span>
           {total > 0 && <span>{total}</span>}
         </button>
 
         {/* 미니 리액션 분포 바 */}
         {total > 1 && sorted.length > 1 && (
-          <div style={{ display: 'flex', height: 3, borderRadius: 2, overflow: 'hidden', width: 40 }}>
+          <div style={{ display: 'flex', height: 3, borderRadius: 4, overflow: 'hidden', width: 40 }}>
             {sorted.map(r => (
               <div key={r.key} style={{ flex: counts[r.key] || 0, background: REACTION_COLORS[r.key] }} />
             ))}
@@ -110,7 +110,7 @@ export default function PostReactions({ postId, userId, initialLikes, compact }:
                 title={r.label}
                 style={{ fontSize: 16, background: myReaction === r.key ? 'rgba(59,123,246,0.12)' : 'transparent', border: 'none', borderRadius: 'var(--radius-xs)', padding: '4px 6px', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
                 <span>{r.emoji}</span>
-                {(counts[r.key] || 0) > 0 && <span style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>{counts[r.key]}</span>}
+                {(counts[r.key] || 0) > 0 && <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{counts[r.key]}</span>}
               </button>
             ))}
           </div>

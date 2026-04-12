@@ -52,27 +52,27 @@ export default function DiagnoseClient() {
     :total>=25?{t:'추첨제 + 특별공급',d:'추첨제와 특별공급에 집중하세요.',i:['85㎡ 초과 추첨제 40% 활용','생애최초 특별공급 (소득 기준)','신혼부부 특별공급 (혼인 7년 이내)']}
     :{t:'특별공급 집중',d:'특별공급 자격을 우선 확인하세요.',i:['신혼부부/생애최초/다자녀 특별공급','추첨제 85㎡ 초과 물량','무주택기간·통장 기간 꾸준히 쌓기']};
 
-  const chip=(active:boolean)=>({padding:'9px 0',borderRadius:8,border:'none',cursor:'pointer',fontWeight:600 as const,fontSize:13,background:active?'var(--brand)':'var(--bg-hover)',color:active?'var(--text-inverse, #fff)':'var(--text-secondary)',flex:1,textAlign:'center' as const});
+  const chip=(active:boolean)=>({padding:'9px 0',borderRadius: 'var(--radius-md)',border:'none',cursor:'pointer',fontWeight:600 as const,fontSize:13,background:active?'var(--brand)':'var(--bg-hover)',color:active?'var(--text-inverse, #fff)':'var(--text-secondary)',flex:1,textAlign:'center' as const});
   const steps=['기본 정보','무주택기간','부양가족','통장 기간'];
   const ctr=(n:number,set:(v:number)=>void,min:number,max:number,label:string,sub?:string)=>(
     <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:14}}>
       <div><span style={{fontSize:13,color:'var(--text-primary)'}}>{label}</span>{sub&&<span style={{fontSize:10,color:'var(--text-tertiary)',display:'block'}}>{sub}</span>}</div>
       <div style={{display:'flex',alignItems:'center',gap:8}}>
-        <button onClick={()=>set(Math.max(min,n-1))} style={{width:32,height:32,borderRadius:8,border:'1px solid var(--border)',background:'var(--bg-hover)',color:'var(--text-primary)',cursor:'pointer',fontSize:16}}>-</button>
+        <button onClick={()=>set(Math.max(min,n-1))} style={{width:32,height:32,borderRadius: 'var(--radius-md)',border:'1px solid var(--border)',background:'var(--bg-hover)',color:'var(--text-primary)',cursor:'pointer',fontSize:16}}>-</button>
         <span style={{fontSize:16,fontWeight:800,minWidth:24,textAlign:'center'}}>{n}</span>
-        <button onClick={()=>set(Math.min(max,n+1))} style={{width:32,height:32,borderRadius:8,border:'1px solid var(--border)',background:'var(--bg-hover)',color:'var(--text-primary)',cursor:'pointer',fontSize:16}}>+</button>
+        <button onClick={()=>set(Math.min(max,n+1))} style={{width:32,height:32,borderRadius: 'var(--radius-md)',border:'1px solid var(--border)',background:'var(--bg-hover)',color:'var(--text-primary)',cursor:'pointer',fontSize:16}}>+</button>
       </div>
     </div>
   );
 
-  const card:React.CSSProperties={background:'var(--bg-surface)',border:'1px solid var(--border)',borderRadius:12,padding:20,marginBottom:14};
+  const card:React.CSSProperties={background:'var(--bg-surface)',border:'1px solid var(--border)',borderRadius: 'var(--radius-card)',padding:20,marginBottom:14};
 
   return (
     <div>
       {!showResult&&(
         <>
           <div style={{display:'flex',gap:4,marginBottom:20}}>
-            {steps.map((s,i)=><button key={i} onClick={()=>setStep(i)} style={{flex:1,padding:'8px 0',borderRadius:8,border:'none',cursor:'pointer',background:step===i?'var(--brand)':'var(--bg-hover)',color:step===i?'var(--text-inverse, #fff)':'var(--text-tertiary)',fontSize:11,fontWeight:700}}><span style={{display:'block',fontSize:14,marginBottom:1}}>{i+1}</span>{s}</button>)}
+            {steps.map((s,i)=><button key={i} onClick={()=>setStep(i)} style={{flex:1,padding:'8px 0',borderRadius: 'var(--radius-md)',border:'none',cursor:'pointer',background:step===i?'var(--brand)':'var(--bg-hover)',color:step===i?'var(--text-inverse, #fff)':'var(--text-tertiary)',fontSize:11,fontWeight:700}}><span style={{display:'block',fontSize:14,marginBottom:1}}>{i+1}</span>{s}</button>)}
           </div>
 
           {step===0&&<div style={card}>
@@ -85,7 +85,7 @@ export default function DiagnoseClient() {
             <div style={{display:'flex',gap:6,marginBottom:20}}>
               {[['yes','기혼'],['no','미혼']].map(([v,l])=><button key={v} onClick={()=>setMarried(v)} style={chip(married===v)}>{l}</button>)}
             </div>
-            {!canCount&&<div style={{padding:'10px 12px',borderRadius:8,background:'rgba(239,68,68,0.08)',border:'1px solid rgba(239,68,68,0.2)',fontSize:12,color:'var(--accent-red)',lineHeight:1.6}}>만 30세 미만 미혼자는 무주택기간이 인정되지 않습니다.</div>}
+            {!canCount&&<div style={{padding:'10px 12px',borderRadius: 'var(--radius-md)',background:'rgba(239,68,68,0.08)',border:'1px solid rgba(239,68,68,0.2)',fontSize:12,color:'var(--accent-red)',lineHeight:1.6}}>만 30세 미만 미혼자는 무주택기간이 인정되지 않습니다.</div>}
           </div>}
 
           {step===1&&<div style={card}>
@@ -136,9 +136,9 @@ export default function DiagnoseClient() {
           <div style={{...card,display:'flex',alignItems:'center',justifyContent:'space-between'}}>
             <div><div style={{fontSize:11,color:'var(--text-tertiary)'}}>현재 예상 가점</div><div style={{fontSize:28,fontWeight:900,color:grade.c}}>{total}<span style={{fontSize:14}}>점</span></div></div>
             <div style={{display:'flex',gap:6}}>
-              {step>0&&<button onClick={()=>setStep(step-1)} style={{padding:'10px 18px',borderRadius:10,border:'1px solid var(--border)',background:'var(--bg-hover)',color:'var(--text-primary)',cursor:'pointer',fontWeight:600,fontSize:13}}>이전</button>}
-              {step<3?<button onClick={()=>setStep(step+1)} style={{padding:'10px 18px',borderRadius:10,border:'none',background:'var(--brand)',color:'var(--text-inverse, #fff)',cursor:'pointer',fontWeight:700,fontSize:13}}>다음</button>
-              :<button onClick={()=>{setShowResult(true);trackFeature('calc_result',{calculator:'apt_score',total})}} style={{padding:'10px 24px',borderRadius:10,border:'none',background:'var(--brand)',color:'var(--text-inverse, #fff)',cursor:'pointer',fontWeight:700,fontSize:14}}>결과 보기</button>}
+              {step>0&&<button onClick={()=>setStep(step-1)} style={{padding:'10px 18px',borderRadius: 'var(--radius-md)',border:'1px solid var(--border)',background:'var(--bg-hover)',color:'var(--text-primary)',cursor:'pointer',fontWeight:600,fontSize:13}}>이전</button>}
+              {step<3?<button onClick={()=>setStep(step+1)} style={{padding:'10px 18px',borderRadius: 'var(--radius-md)',border:'none',background:'var(--brand)',color:'var(--text-inverse, #fff)',cursor:'pointer',fontWeight:700,fontSize:13}}>다음</button>
+              :<button onClick={()=>{setShowResult(true);trackFeature('calc_result',{calculator:'apt_score',total})}} style={{padding:'10px 24px',borderRadius: 'var(--radius-md)',border:'none',background:'var(--brand)',color:'var(--text-inverse, #fff)',cursor:'pointer',fontWeight:700,fontSize:14}}>결과 보기</button>}
             </div>
           </div>
         </>
@@ -152,11 +152,11 @@ export default function DiagnoseClient() {
             <div style={{fontSize:14,fontWeight:600,color:grade.c,marginTop:4,marginBottom:16}}>{grade.l} · 상위 {Math.max(1,100-pct)}%</div>
             <div style={{display:'flex',gap:8,justifyContent:'center',marginBottom:16}}>
               {[{l:'무주택',s:hs,m:32,c:'var(--accent-blue, #60A5FA)'},{l:'부양가족',s:fs,m:35,c:'var(--accent-green)'},{l:'통장',s:bs,m:17,c:'var(--accent-yellow)'}].map(i=>(
-                <div key={i.l} style={{flex:1,padding:'10px 8px',borderRadius:10,background:'var(--bg-hover)',border:'1px solid var(--border)'}}>
+                <div key={i.l} style={{flex:1,padding:'10px 8px',borderRadius: 'var(--radius-md)',background:'var(--bg-hover)',border:'1px solid var(--border)'}}>
                   <div style={{fontSize:11,color:'var(--text-tertiary)',marginBottom:4}}>{i.l}</div>
                   <div style={{fontSize:20,fontWeight:800,color:i.c}}>{i.s}</div>
                   <div style={{fontSize:10,color:'var(--text-tertiary)'}}>/ {i.m}점</div>
-                  <div style={{height:3,borderRadius:2,background:'var(--bg-hover)',marginTop:6,overflow:'hidden'}}><div style={{height:'100%',width:`${(i.s/i.m)*100}%`,background:i.c,borderRadius:2}}/></div>
+                  <div style={{height:3,borderRadius: 4,background:'var(--bg-hover)',marginTop:6,overflow:'hidden'}}><div style={{height:'100%',width:`${(i.s/i.m)*100}%`,background:i.c,borderRadius: 4}}/></div>
                 </div>
               ))}
             </div>
@@ -167,8 +167,8 @@ export default function DiagnoseClient() {
                 if(typeof window!=='undefined'&&(window as unknown as Record<string,unknown>).Kakao){try{((window as unknown as Record<string,unknown>).Kakao as Record<string,unknown> as {Share:{sendDefault:(o:unknown)=>void}}).Share.sendDefault({objectType:'feed',content:{title:'청약 가점 진단 결과',description:text.slice(0,100),imageUrl:`${url.replace('/apt/diagnose','')}/api/og?title=${encodeURIComponent('청약 가점 '+total+'점')}`,link:{mobileWebUrl:url,webUrl:url}}});}catch{navigator.share?.({title:'청약 가점 진단',text,url}).catch(()=>{});}}
                 else if(navigator.share)navigator.share({title:'청약 가점 진단 결과',text,url}).catch(()=>{});
                 else navigator.clipboard.writeText(text+'\n'+url).then(()=>alert('복사되었습니다!'));
-              }} style={{padding:'10px 20px',borderRadius:8,border:'none',cursor:'pointer',background:'var(--brand)',color:'#fff',fontSize:13,fontWeight:700}}>결과 공유</button>
-              <button onClick={()=>setShowResult(false)} style={{padding:'10px 20px',borderRadius:8,border:'1px solid var(--border)',cursor:'pointer',background:'var(--bg-hover)',color:'var(--text-secondary)',fontSize:13,fontWeight:600}}>다시 계산</button>
+              }} style={{padding:'10px 20px',borderRadius: 'var(--radius-md)',border:'none',cursor:'pointer',background:'var(--brand)',color:'#fff',fontSize:13,fontWeight:700}}>결과 공유</button>
+              <button onClick={()=>setShowResult(false)} style={{padding:'10px 20px',borderRadius: 'var(--radius-md)',border:'1px solid var(--border)',cursor:'pointer',background:'var(--bg-hover)',color:'var(--text-secondary)',fontSize:13,fontWeight:600}}>다시 계산</button>
             </div>
           </div>
 
@@ -184,10 +184,10 @@ export default function DiagnoseClient() {
             <div style={{fontSize:11,color:'var(--text-tertiary)',marginBottom:14}}>최근 청약 실적 기반 추정 · 단지별 차이 있음</div>
             <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill, minmax(95px, 1fr))',gap:4}}>
               {CUTS.map(c=>{const w=total>=c.avg;const p=total>=c.min;return(
-                <div key={c.r} style={{padding:'8px 10px',borderRadius:8,textAlign:'center',background:w?'rgba(52,211,153,0.06)':p?'rgba(251,191,36,0.06)':'var(--bg-hover)',border:`1px solid ${w?'rgba(52,211,153,0.2)':p?'rgba(251,191,36,0.2)':'var(--border)'}`}}>
+                <div key={c.r} style={{padding:'8px 10px',borderRadius: 'var(--radius-md)',textAlign:'center',background:w?'rgba(52,211,153,0.06)':p?'rgba(251,191,36,0.06)':'var(--bg-hover)',border:`1px solid ${w?'rgba(52,211,153,0.2)':p?'rgba(251,191,36,0.2)':'var(--border)'}`}}>
                   <div style={{fontSize:13,fontWeight:700,marginBottom:2}}>{c.r}</div>
                   <div style={{fontSize:10,color:w?'var(--accent-green)':p?'var(--accent-yellow)':'var(--accent-red)',fontWeight:600}}>{w?'유리':p?'가능':'어려움'}</div>
-                  <div style={{fontSize:9,color:'var(--text-tertiary)'}}>avg {c.avg}점</div>
+                  <div style={{fontSize: 10,color:'var(--text-tertiary)'}}>avg {c.avg}점</div>
                 </div>
               );})}
             </div>
@@ -213,8 +213,8 @@ export default function DiagnoseClient() {
           )}
 
           <div style={{display:'flex',gap:8,marginBottom:24}}>
-            <Link href="/apt" style={{flex:1,display:'block',textAlign:'center',padding:'12px 0',background:'var(--brand)',color:'#fff',borderRadius:10,fontSize:14,fontWeight:700,textDecoration:'none'}}>청약 일정 보기</Link>
-            <Link href="/apt?tab=ongoing" style={{flex:1,display:'block',textAlign:'center',padding:'12px 0',background:'var(--bg-surface)',color:'var(--text-primary)',borderRadius:10,fontSize:14,fontWeight:700,textDecoration:'none',border:'1px solid var(--border)'}}>분양중 현장</Link>
+            <Link href="/apt" style={{flex:1,display:'block',textAlign:'center',padding:'12px 0',background:'var(--brand)',color:'#fff',borderRadius: 'var(--radius-md)',fontSize:14,fontWeight:700,textDecoration:'none'}}>청약 일정 보기</Link>
+            <Link href="/apt?tab=ongoing" style={{flex:1,display:'block',textAlign:'center',padding:'12px 0',background:'var(--bg-surface)',color:'var(--text-primary)',borderRadius: 'var(--radius-md)',fontSize:14,fontWeight:700,textDecoration:'none',border:'1px solid var(--border)'}}>분양중 현장</Link>
           </div>
         </>
       )}

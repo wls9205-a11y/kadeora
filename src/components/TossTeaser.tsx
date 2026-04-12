@@ -85,7 +85,7 @@ export default function TossTeaser({
       <div style={{
         textAlign: 'center', padding: '32px 20px',
         background: 'linear-gradient(180deg, rgba(245,246,248,0) 0%, #F5F6F8 20%)',
-        borderRadius: 16, margin: '0 -4px',
+        borderRadius: 'var(--radius-lg)', margin: '0 -4px',
       }}>
         <div style={{ fontSize: 40, marginBottom: 12 }}>🔒</div>
         <div style={{ fontWeight: 800, fontSize: 16, color: '#191F28', marginBottom: 6 }}>
@@ -97,7 +97,7 @@ export default function TossTeaser({
         <button
           onClick={handleOpen}
           style={{
-            padding: '14px 32px', borderRadius: 12, border: 'none',
+            padding: '14px 32px', borderRadius: 'var(--radius-card)', border: 'none',
             background: 'linear-gradient(135deg, #1B64DA, #3182F6)',
             color: '#fff', fontWeight: 800, fontSize: 15,
             cursor: 'pointer', fontFamily: 'inherit',
@@ -120,7 +120,7 @@ export default function TossTeaser({
       style={{
         width: '100%', display: 'flex', alignItems: 'center',
         justifyContent: 'space-between', gap: 12,
-        padding: '14px 18px', borderRadius: 14,
+        padding: '14px 18px', borderRadius: 'var(--radius-card)',
         background: 'linear-gradient(135deg, rgba(49,130,246,0.06) 0%, rgba(49,130,246,0.02) 100%)',
         border: '1.5px solid rgba(49,130,246,0.15)',
         cursor: 'pointer', fontFamily: 'inherit',

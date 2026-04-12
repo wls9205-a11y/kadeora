@@ -409,7 +409,7 @@ export default async function FeedDetailPage({ params }: Props) {
                   alt={`이미지 ${i + 1}`}
                   fill
                   sizes={post.images!.length === 1 ? '(max-width: 780px) 100vw, 780px' : '(max-width: 780px) 33vw, 260px'}
-                  style={{ objectFit: 'cover', borderRadius: 8 }}
+                  style={{ objectFit: 'cover', borderRadius: 'var(--radius-md)' }}
                   priority={i === 0}
                 />
               </a>
@@ -465,7 +465,7 @@ export default async function FeedDetailPage({ params }: Props) {
         borderBottom: '1px solid var(--border)', margin: '0 0 16px',
       }}>
         <LikeButton postId={post.id} initialCount={post.likes_count ?? 0} />
-        <Link href="#comments" style={{ display: 'flex', alignItems: 'center', gap: 5, textDecoration: 'none', color: 'var(--text-tertiary)', fontSize: 'var(--fs-base)' }}>
+        <Link href="#comments" style={{ display: 'flex', alignItems: 'center', gap: 6, textDecoration: 'none', color: 'var(--text-tertiary)', fontSize: 'var(--fs-base)' }}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
           <span style={{ fontWeight: 500 }}>{comments.length}</span>
         </Link>

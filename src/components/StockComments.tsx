@@ -257,7 +257,7 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
                 onClick={() => toggleLike(c.id)}
                 style={{
                   background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-                  fontSize: 'var(--fs-sm)', color: liked ? 'var(--accent-red)' : 'var(--text-tertiary)', display: 'flex', alignItems: 'center', gap: 3,
+                  fontSize: 'var(--fs-sm)', color: liked ? 'var(--accent-red)' : 'var(--text-tertiary)', display: 'flex', alignItems: 'center', gap: 4,
                 }}
               >
                 {liked ? '❤️' : '🤍'} {c.likes_count > 0 ? c.likes_count : ''}
@@ -267,7 +267,7 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
                   onClick={() => handleExpand(c.id)}
                   style={{
                     background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-                    fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', display: 'flex', alignItems: 'center', gap: 3,
+                    fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', display: 'flex', alignItems: 'center', gap: 4,
                   }}
                 >
                   💬 {c.replies_count > 0 ? c.replies_count : ''}

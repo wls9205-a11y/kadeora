@@ -75,7 +75,7 @@ export default function LoungeLivePreview() {
     <Link href={roomId ? `/discuss/${roomId}` : '/discuss'} style={{ display: 'block', textDecoration: 'none', color: 'inherit', marginBottom: 10 }}>
       <div style={{ background: 'var(--bg-surface)', border: '1px solid rgba(167,139,250,0.15)', borderRadius: 'var(--radius-card)', padding: 12 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--sp-sm)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#A78BFA', display: 'inline-block', animation: 'livePulse 1.5s infinite' }} />
             <span style={{ fontSize: 12, fontWeight: 700, color: '#A78BFA' }}>라운지 LIVE</span>
             <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>· {roomName}</span>
@@ -86,7 +86,7 @@ export default function LoungeLivePreview() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-xs)', marginBottom: 'var(--sp-sm)' }}>
           {messages.map(m => (
             <div key={m.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
-              <div style={{ width: 20, height: 20, borderRadius: '50%', background: m.avatarColor, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 600, color: '#fff', flexShrink: 0 }}>
+              <div style={{ width: 20, height: 20, borderRadius: '50%', background: m.avatarColor, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 600, color: '#fff', flexShrink: 0 }}>
                 {m.nickname[0]}
               </div>
               <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>

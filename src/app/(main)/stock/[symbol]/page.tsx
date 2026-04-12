@@ -221,10 +221,10 @@ export default async function StockDetailPage({ params }: Props) {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6, flexWrap: 'wrap' }}>
           <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>{s.name}</h1>
-          <span style={{ fontSize: 11, background: 'var(--bg-hover)', color: 'var(--text-tertiary)', padding: '2px 8px', borderRadius: 4 }}>{symbol}</span>
-          <span style={{ fontSize: 11, background: 'var(--bg-hover)', color: 'var(--text-tertiary)', padding: '2px 8px', borderRadius: 4 }}>{s.market}</span>
+          <span style={{ fontSize: 11, background: 'var(--bg-hover)', color: 'var(--text-tertiary)', padding: '3px 8px', borderRadius: 4 }}>{symbol}</span>
+          <span style={{ fontSize: 11, background: 'var(--bg-hover)', color: 'var(--text-tertiary)', padding: '3px 8px', borderRadius: 4 }}>{s.market}</span>
           {sectorRank > 0 && sectorTotal > 0 && s.sector && (
-            <span style={{ fontSize: 10, background: 'rgba(99,102,241,0.1)', color: 'var(--accent-purple)', padding: '2px 8px', borderRadius: 4, fontWeight: 700 }}>
+            <span style={{ fontSize: 10, background: 'rgba(99,102,241,0.1)', color: 'var(--accent-purple)', padding: '3px 8px', borderRadius: 4, fontWeight: 700 }}>
               {s.sector} #{sectorRank}/{sectorTotal}
             </span>
           )}
@@ -298,8 +298,8 @@ export default async function StockDetailPage({ params }: Props) {
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)' }}>
           <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 6 }}>시가총액</div>
           <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)' }}>{fmtCap(s.market_cap ? Number(s.market_cap) : null, s.currency ?? undefined)}</div>
-          <div style={{ marginTop: 'var(--sp-xs)', height: 4, borderRadius: 2, background: 'var(--bg-hover)', overflow: 'hidden' }}>
-            <div style={{ height: '100%', borderRadius: 2, background: 'var(--brand)', width: `${s.market_cap ? Math.min(Math.log10(Number(s.market_cap) / 1e8) * 15, 100) : 10}%` }} />
+          <div style={{ marginTop: 'var(--sp-xs)', height: 4, borderRadius: 4, background: 'var(--bg-hover)', overflow: 'hidden' }}>
+            <div style={{ height: '100%', borderRadius: 4, background: 'var(--brand)', width: `${s.market_cap ? Math.min(Math.log10(Number(s.market_cap) / 1e8) * 15, 100) : 10}%` }} />
           </div>
           <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}>
             {(() => { const mc = Number(s.market_cap); if (!mc) return ''; if (s.currency === 'USD') return mc >= 1e12 ? '초대형주' : mc >= 1e11 ? '대형주' : mc >= 1e10 ? '중형주' : '소형주'; return mc >= 1e13 ? '초대형주' : mc >= 1e12 ? '대형주' : mc >= 1e11 ? '중형주' : '소형주'; })()}
@@ -370,7 +370,7 @@ export default async function StockDetailPage({ params }: Props) {
           <div style={{ background: 'linear-gradient(135deg, rgba(59,123,246,0.04), rgba(139,92,246,0.04))', border: '1px solid rgba(59,123,246,0.12)', borderRadius: 'var(--radius-md)', padding: '12px 14px', marginBottom: 'var(--sp-md)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
               <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>🤖 AI 한줄평</span>
-              <span style={{ fontSize: 10, fontWeight: 600, color: sigColor, background: `${sigColor}15`, padding: '2px 8px', borderRadius: 4 }}>{signalLabel}</span>
+              <span style={{ fontSize: 10, fontWeight: 600, color: sigColor, background: `${sigColor}15`, padding: '3px 8px', borderRadius: 4 }}>{signalLabel}</span>
             </div>
             <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, wordBreak: 'keep-all' }}>
               {ai.comment.length > 200 ? ai.comment.slice(0, 200) + '...' : ai.comment}
@@ -474,10 +474,10 @@ export default async function StockDetailPage({ params }: Props) {
             const total = all.length || 1;
             return total > 1 ? (
               <div style={{ marginBottom: 10 }}>
-                <div style={{ display: 'flex', height: 6, borderRadius: 3, overflow: 'hidden', gap: 1 }}>
-                  {pos > 0 && <div style={{ flex: pos, background: 'var(--stock-positive)', borderRadius: 3 }} />}
-                  {neu > 0 && <div style={{ flex: neu, background: 'var(--border)', borderRadius: 3 }} />}
-                  {neg > 0 && <div style={{ flex: neg, background: 'var(--stock-negative)', borderRadius: 3 }} />}
+                <div style={{ display: 'flex', height: 6, borderRadius: 4, overflow: 'hidden', gap: 1 }}>
+                  {pos > 0 && <div style={{ flex: pos, background: 'var(--stock-positive)', borderRadius: 4 }} />}
+                  {neu > 0 && <div style={{ flex: neu, background: 'var(--border)', borderRadius: 4 }} />}
+                  {neg > 0 && <div style={{ flex: neg, background: 'var(--stock-negative)', borderRadius: 4 }} />}
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--text-tertiary)', marginTop: 3 }}>
                   <span style={{ color: 'var(--stock-positive)' }}>긍정 {pos}</span>
@@ -522,15 +522,15 @@ export default async function StockDetailPage({ params }: Props) {
                   <span style={{ width: 48, textAlign: 'right', flexShrink: 0, fontWeight: 700, color: fNet >= 0 ? upC : downC, fontSize: 10 }}>외 {fmtN(fNet)}</span>
                   <div style={{ flex: 1, height: 16, display: 'flex', alignItems: 'center', position: 'relative' }}>
                     <div style={{ position: 'absolute', left: '50%', width: 1, height: '100%', background: 'var(--border)' }} />
-                    {fNet !== 0 && <div style={{ position: 'absolute', [fNet > 0 ? 'left' : 'right']: '50%', width: `${Math.min(Math.abs(fNet) / maxVal * 48, 48)}%`, height: 6, borderRadius: 3, background: fNet > 0 ? upC : downC, opacity: 0.6 }} />}
-                    {iNet !== 0 && <div style={{ position: 'absolute', [iNet > 0 ? 'left' : 'right']: '50%', width: `${Math.min(Math.abs(iNet) / maxVal * 48, 48)}%`, height: 6, borderRadius: 3, background: iNet > 0 ? upC : downC, opacity: 0.3, top: 8 }} />}
+                    {fNet !== 0 && <div style={{ position: 'absolute', [fNet > 0 ? 'left' : 'right']: '50%', width: `${Math.min(Math.abs(fNet) / maxVal * 48, 48)}%`, height: 6, borderRadius: 4, background: fNet > 0 ? upC : downC, opacity: 0.6 }} />}
+                    {iNet !== 0 && <div style={{ position: 'absolute', [iNet > 0 ? 'left' : 'right']: '50%', width: `${Math.min(Math.abs(iNet) / maxVal * 48, 48)}%`, height: 6, borderRadius: 4, background: iNet > 0 ? upC : downC, opacity: 0.3, top: 8 }} />}
                   </div>
                   <span style={{ width: 48, textAlign: 'left', flexShrink: 0, fontWeight: 700, color: iNet >= 0 ? upC : downC, fontSize: 10 }}>기 {fmtN(iNet)}</span>
                 </div>
               );
             })}
           </div>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginTop: 8, fontSize: 9, color: 'var(--text-tertiary)' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginTop: 8, fontSize: 10, color: 'var(--text-tertiary)' }}>
             <span>■ 외국인 (진하게)</span><span>□ 기관 (연하게)</span><span style={{ color: upC }}>← 매수</span><span style={{ color: downC }}>매도 →</span>
           </div>
         </section>
@@ -572,8 +572,8 @@ export default async function StockDetailPage({ params }: Props) {
                     <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, minWidth: 52, textAlign: 'right', color: stockColor(simPct, isKR) }}>
                       {simPct > 0 ? '+' : ''}{simPct.toFixed(2)}%
                     </span>
-                    <div style={{ width: 24, height: 4, borderRadius: 2, background: 'var(--bg-hover)', overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: `${Math.min(Math.abs(simPct) * 10, 100)}%`, borderRadius: 2, background: simPct !== 0 ? stockColor(simPct, isKR) : 'var(--border)' }} />
+                    <div style={{ width: 24, height: 4, borderRadius: 4, background: 'var(--bg-hover)', overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${Math.min(Math.abs(simPct) * 10, 100)}%`, borderRadius: 4, background: simPct !== 0 ? stockColor(simPct, isKR) : 'var(--border)' }} />
                     </div>
                   </div>
                 </Link>
@@ -625,7 +625,7 @@ export default async function StockDetailPage({ params }: Props) {
         </time>
         <div style={{ display: 'flex', gap: 'var(--sp-xs)', flexWrap: 'wrap' }}>
           {[s.market, s.sector, '시세'].filter(Boolean).map(tag => (
-            <Link key={tag} href={`/search?q=${encodeURIComponent(tag!)}`} style={{ padding: '2px 8px', borderRadius: 'var(--radius-card)', background: 'var(--bg-hover)', color: 'var(--text-tertiary)', fontSize: 10, textDecoration: 'none' }}>#{tag}</Link>
+            <Link key={tag} href={`/search?q=${encodeURIComponent(tag!)}`} style={{ padding: '3px 8px', borderRadius: 'var(--radius-card)', background: 'var(--bg-hover)', color: 'var(--text-tertiary)', fontSize: 10, textDecoration: 'none' }}>#{tag}</Link>
           ))}
         </div>
       </div>

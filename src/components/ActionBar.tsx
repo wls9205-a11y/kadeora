@@ -44,7 +44,7 @@ export default function ActionBar() {
         bottom: 'calc(56px + env(safe-area-inset-bottom, 0px))',
         left: 8, right: 8, zIndex: 88,
         background: '#0C1528',
-        borderRadius: 14,
+        borderRadius: 'var(--radius-card)',
         padding: '10px 14px',
         display: 'flex', alignItems: 'center', gap: 10,
         border: '1px solid rgba(254,229,0,0.08)',
@@ -66,8 +66,8 @@ export default function ActionBar() {
           href={loginUrl}
           onClick={() => trackCTA('click', 'action_bar_kakao')}
           style={{
-            display: 'flex', alignItems: 'center', gap: 5,
-            background: '#FEE500', color: '#191919', borderRadius: 8,
+            display: 'flex', alignItems: 'center', gap: 6,
+            background: '#FEE500', color: '#191919', borderRadius: 'var(--radius-md)',
             padding: '8px 14px', fontSize: 12, fontWeight: 700,
             textDecoration: 'none', whiteSpace: 'nowrap',
             boxShadow: '0 0 16px rgba(254,229,0,0.1)',

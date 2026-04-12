@@ -38,7 +38,7 @@ export default function BlogServiceWidget({ category, tags, sourceRef }: Props) 
     <div style={{
       margin: '24px 0 16px',
       padding: '16px',
-      borderRadius: 12,
+      borderRadius: 'var(--radius-card)',
       background: 'linear-gradient(135deg, rgba(59,123,246,0.04), rgba(16,185,129,0.04))',
       border: '1px solid rgba(59,123,246,0.1)',
     }}>
@@ -48,7 +48,7 @@ export default function BlogServiceWidget({ category, tags, sourceRef }: Props) 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
         {widgets.map((w) => (
           <Link key={w.href} href={w.href} style={{
-            display: 'block', padding: '12px', borderRadius: 8,
+            display: 'block', padding: '12px', borderRadius: 'var(--radius-md)',
             background: 'var(--bg-surface)', border: '1px solid var(--border)',
             textDecoration: 'none', transition: 'border-color 0.15s',
           }}

@@ -29,7 +29,7 @@ export default function PushPromptBanner() {
   return (
     <div style={{
       position: 'fixed', bottom: 16, left: 16, right: 16, maxWidth: 400, margin: '0 auto',
-      padding: '14px 16px', borderRadius: 14, zIndex: 999,
+      padding: '14px 16px', borderRadius: 'var(--radius-card)', zIndex: 999,
       background: 'linear-gradient(135deg, rgba(12,21,40,0.98), rgba(20,30,50,0.98))',
       border: '1px solid rgba(59,123,246,0.2)', backdropFilter: 'blur(12px)',
       boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
@@ -46,7 +46,7 @@ export default function PushPromptBanner() {
             <button onClick={dismiss} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', fontSize: 18, cursor: 'pointer', padding: 4 }}>×</button>
           </div>
           <button onClick={handleAllow} style={{
-            width: '100%', marginTop: 10, padding: '10px', borderRadius: 8,
+            width: '100%', marginTop: 10, padding: '10px', borderRadius: 'var(--radius-md)',
             border: 'none', background: '#3B7BF6', color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer',
           }}>알림 허용하기</button>
         </>

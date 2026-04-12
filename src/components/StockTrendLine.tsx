@@ -65,7 +65,7 @@ export default function StockTrendLine({ data, currency, isKR }: Props) {
   return (
     <div style={{ marginTop: 'var(--sp-sm)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-xs)' }}>
-        <span style={{ fontSize: 9, color: 'var(--text-tertiary)', fontFamily: 'monospace' }}>{sorted.length}일 차트 + 트렌드라인</span>
+        <span style={{ fontSize: 10, color: 'var(--text-tertiary)', fontFamily: 'monospace' }}>{sorted.length}일 차트 + 트렌드라인</span>
         <span style={{ fontSize: 11, fontWeight: 600, color: lineColor, fontFamily: 'monospace' }}>
           {totalChange > 0 ? '+' : ''}{totalChange.toFixed(2)}% ({sorted.length}일)
         </span>

@@ -213,10 +213,10 @@ export default function ProfileHeader({ profile, isOwner, followersCount, follow
             <h1 style={{ margin: '0 0 4px', fontSize: 18, fontWeight: 800, color: 'var(--text-primary)' }}>{displayName}</h1>
             {/* 등급 + 버튼 */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6, flexWrap: 'wrap' }}>
-              <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 12, fontWeight: 700, background: `${gradeColor}20`, color: gradeColor, whiteSpace: 'nowrap' }}>
+              <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 'var(--radius-card)', fontWeight: 700, background: `${gradeColor}20`, color: gradeColor, whiteSpace: 'nowrap' }}>
                 {gradeEmoji} {gradeTitle} Lv.{gradeNum}
               </span>
-              {profile.is_premium && <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 12, background: 'var(--warning-bg)', color: 'var(--warning)', fontWeight: 700, whiteSpace: 'nowrap' }}>👑 PREMIUM</span>}
+              {profile.is_premium && <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 'var(--radius-card)', background: 'var(--warning-bg)', color: 'var(--warning)', fontWeight: 700, whiteSpace: 'nowrap' }}>👑 PREMIUM</span>}
               <div style={{ display: 'flex', gap: 6, marginLeft: 'auto' }}>
                 {isOwner ? (
                   <button onClick={() => setEditing(true)} className="kd-btn kd-btn-ghost" style={{ fontSize: 12, padding: '4px 10px' }}>✏️ 수정</button>

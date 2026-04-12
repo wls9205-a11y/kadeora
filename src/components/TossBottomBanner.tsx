@@ -61,7 +61,7 @@ export default function TossBottomBanner() {
       {/* 로고 + 텍스트 */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
         <div style={{
-          width: 34, height: 34, borderRadius: 10,
+          width: 34, height: 34, borderRadius: 'var(--radius-md)',
           background: 'linear-gradient(135deg, #3182F6, #1B64DA)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           fontSize: 16, flexShrink: 0,
@@ -85,7 +85,7 @@ export default function TossBottomBanner() {
       <button
         onClick={() => openInBrowser(cta.path)}
         style={{
-          padding: '10px 18px', borderRadius: 10, border: 'none',
+          padding: '10px 18px', borderRadius: 'var(--radius-md)', border: 'none',
           background: '#3182F6', color: '#fff', fontWeight: 800,
           fontSize: 13, cursor: 'pointer', fontFamily: 'inherit',
           flexShrink: 0, whiteSpace: 'nowrap',

@@ -82,7 +82,7 @@ export default function AboutPage() {
         {/* Stats */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 48 }} className="mc-g2">
           {STATS.map(s => (
-            <div key={s.label} style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12, padding: '20px 12px', textAlign: 'center' }}>
+            <div key={s.label} style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: '20px 12px', textAlign: 'center' }}>
               <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--brand)' }}>{s.value}</div>
               <div style={{ fontSize: 11, color: 'var(--text-dim)', marginTop: 4 }}>{s.label}</div>
             </div>
@@ -93,7 +93,7 @@ export default function AboutPage() {
         <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text)', margin: '0 0 20px' }}>주요 기능</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12, marginBottom: 48 }} className="mc-g1">
           {FEATURES.map(f => (
-            <div key={f.title} style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12, padding: 16 }}>
+            <div key={f.title} style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 16 }}>
               <div style={{ fontSize: 24, marginBottom: 8 }}>{f.icon}</div>
               <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', marginBottom: 4 }}>{f.title}</div>
               <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>{f.desc}</div>
@@ -103,7 +103,7 @@ export default function AboutPage() {
 
         {/* Brand Story */}
         <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text)', margin: '0 0 16px' }}>카더라란?</h2>
-        <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12, padding: 20, marginBottom: 48, fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.8 }}>
+        <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 20, marginBottom: 48, fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.8 }}>
           <p style={{ margin: '0 0 12px' }}>
             &ldquo;~라 카더라&rdquo;는 경상도 방언으로 &ldquo;~라고 하더라&rdquo;의 줄임말입니다.
             사람들 사이에서 자연스럽게 퍼지는 정보, 아는 사람만 아는 소식 — 그것이 카더라의 시작입니다.
@@ -122,13 +122,13 @@ export default function AboutPage() {
 
         {/* CTA */}
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 48 }}>
-          <Link href="/stock" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '12px 24px', background: 'var(--brand)', color: '#fff', borderRadius: 8, fontSize: 14, fontWeight: 700, textDecoration: 'none' }}>
+          <Link href="/stock" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '12px 24px', background: 'var(--brand)', color: '#fff', borderRadius: 'var(--radius-md)', fontSize: 14, fontWeight: 700, textDecoration: 'none' }}>
             📈 주식 시세 보기
           </Link>
-          <Link href="/apt" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '12px 24px', background: 'var(--card)', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, fontWeight: 700, textDecoration: 'none' }}>
+          <Link href="/apt" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '12px 24px', background: 'var(--card)', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', fontSize: 14, fontWeight: 700, textDecoration: 'none' }}>
             🏗️ 부동산 정보 보기
           </Link>
-          <Link href="/blog" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '12px 24px', background: 'var(--card)', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, fontWeight: 700, textDecoration: 'none' }}>
+          <Link href="/blog" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '12px 24px', background: 'var(--card)', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', fontSize: 14, fontWeight: 700, textDecoration: 'none' }}>
             📝 블로그 읽기
           </Link>
         </div>

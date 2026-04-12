@@ -99,7 +99,7 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
 
   if (loading) return null;
 
-  const inp: React.CSSProperties = { width: '100%', boxSizing: 'border-box', padding: '8px 10px', fontSize: 13, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)' };
+  const inp: React.CSSProperties = { width: '100%', boxSizing: 'border-box', padding: '8px 10px', fontSize: 13, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)' };
   const lbl: React.CSSProperties = { fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)', marginBottom: 3, display: 'block' };
 
   const FormFields = () => (
@@ -147,7 +147,7 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
         </label>
       </div>
       <button onClick={handleGuestSubmit} disabled={submitting || !consentCollection} style={{
-        width: '100%', padding: 10, borderRadius: 8, border: 'none',
+        width: '100%', padding: 10, borderRadius: 'var(--radius-md)', border: 'none',
         background: consentCollection ? 'var(--brand)' : 'var(--bg-hover)',
         color: consentCollection ? '#fff' : 'var(--text-tertiary)',
         fontSize: 13, fontWeight: 700, cursor: consentCollection ? 'pointer' : 'not-allowed',
@@ -159,7 +159,7 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
   );
 
   return (
-    <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--brand)', borderRadius: 10, padding: '14px 14px 12px', marginBottom: 12 }}>
+    <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--brand)', borderRadius: 'var(--radius-md)', padding: '14px 14px 12px', marginBottom: 12 }}>
       {/* 헤더 */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
         <div>
@@ -168,7 +168,7 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
         </div>
         <div style={{ display: 'flex', gap: 4 }}>
           {['청약일정', '분양가', '입주소식'].map(t => (
-            <span key={t} style={{ fontSize: 9, padding: '2px 6px', borderRadius: 10, background: 'var(--accent-blue-bg)', color: 'var(--accent-blue)', fontWeight: 600 }}>{t}</span>
+            <span key={t} style={{ fontSize: 10, padding: '3px 8px', borderRadius: 'var(--radius-md)', background: 'var(--accent-blue-bg)', color: 'var(--accent-blue)', fontWeight: 600 }}>{t}</span>
           ))}
         </div>
       </div>
@@ -177,20 +177,20 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
         <>
           {registered ? (
             <button onClick={handleMemberUnregister} disabled={submitting} style={{
-              width: '100%', padding: 10, borderRadius: 8, border: '1px solid var(--border)',
+              width: '100%', padding: 10, borderRadius: 'var(--radius-md)', border: '1px solid var(--border)',
               background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontSize: 13, fontWeight: 600,
               cursor: 'pointer', opacity: submitting ? 0.5 : 1,
             }}>✅ 등록 완료 (탭하여 해제)</button>
           ) : (
             <button onClick={handleMemberRegister} disabled={submitting} style={{
-              width: '100%', padding: 10, borderRadius: 8, border: 'none',
+              width: '100%', padding: 10, borderRadius: 'var(--radius-md)', border: 'none',
               background: 'var(--brand)', color: '#fff', fontSize: 13, fontWeight: 700,
               cursor: 'pointer', opacity: submitting ? 0.5 : 1,
             }}>{submitting ? '등록 중...' : '관심단지 등록하기 (+50P)'}</button>
           )}
           {!showForm ? (
             <button onClick={() => setShowForm(true)} style={{
-              width: '100%', padding: 7, marginTop: 6, borderRadius: 6, border: '1px dashed var(--border)',
+              width: '100%', padding: 7, marginTop: 6, borderRadius: 'var(--radius-sm)', border: '1px dashed var(--border)',
               background: 'transparent', color: 'var(--text-tertiary)', fontSize: 11, cursor: 'pointer',
             }}>정보를 직접 입력하려면 탭 →</button>
           ) : (
@@ -200,7 +200,7 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
       ) : (
         <>
           <FormFields />
-          <div style={{ marginTop: 8, padding: '7px 10px', borderRadius: 6, background: 'var(--bg-base)', textAlign: 'center', fontSize: 11 }}>
+          <div style={{ marginTop: 8, padding: '7px 10px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-base)', textAlign: 'center', fontSize: 11 }}>
             <span style={{ color: 'var(--text-tertiary)' }}>회원은 </span>
             <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>입력없이 원클릭</span>
             <span style={{ color: 'var(--text-tertiary)' }}> + </span>

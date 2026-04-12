@@ -300,7 +300,7 @@ export default function WriteClient() {
                 style={{ fontSize: 11, color: 'var(--brand)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>+ 선택지</button>
             )}
             <input type="date" value={pollEndsAt} onChange={e => setPollEndsAt(e.target.value)} min={new Date().toISOString().slice(0, 10)}
-              style={{ marginLeft: 'auto', fontSize: 11, background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 4, padding: '3px 6px', color: 'var(--text-primary)' }} />
+              style={{ marginLeft: 'auto', fontSize: 11, background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 4, padding: '3px 8px', color: 'var(--text-primary)' }} />
             <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>마감일</span>
           </div>
         </div>
@@ -311,7 +311,7 @@ export default function WriteClient() {
         <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', padding: '6px 0' }}>
           {tags.map(t => (
             <span key={t} style={{
-              fontSize: 12, padding: '2px 8px', borderRadius: 'var(--radius-pill)',
+              fontSize: 12, padding: '3px 8px', borderRadius: 'var(--radius-pill)',
               background: 'var(--bg-hover)', color: 'var(--text-secondary)',
               display: 'inline-flex', alignItems: 'center', gap: 4,
             }}>

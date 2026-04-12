@@ -79,7 +79,7 @@ export default function BlogToc({ toc }: { toc: TocItem[] }) {
         ref={scrollRef}
         className="apt-pill-scroll kd-scroll-row"
         style={{
-          display: 'flex', gap: 5, overflowX: 'auto',
+          display: 'flex', gap: 6, overflowX: 'auto',
           scrollbarWidth: 'none', paddingBottom: 2,
         }}
       >
@@ -101,7 +101,7 @@ export default function BlogToc({ toc }: { toc: TocItem[] }) {
                 transition: 'all var(--transition-fast)',
               }}
             >
-              <span style={{ fontSize: 9, fontWeight: 800, opacity: 0.7 }}>{i + 1}</span>
+              <span style={{ fontSize: 10, fontWeight: 800, opacity: 0.7 }}>{i + 1}</span>
               {cleanText.length > 14 ? cleanText.slice(0, 14) + '\u2026' : cleanText}
             </button>
           );

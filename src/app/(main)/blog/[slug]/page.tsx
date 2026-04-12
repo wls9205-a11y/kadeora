@@ -655,7 +655,7 @@ export default async function BlogDetailPage({ params }: Props) {
       {howtoSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howtoSchema) }} />}
       {datasetSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(datasetSchema) }} />}
 
-      <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 20, flexWrap: 'wrap', letterSpacing: '0.3px' }}>
+      <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 20, flexWrap: 'wrap', letterSpacing: '0.3px' }}>
         <Link href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)', opacity: 0.7 }}>홈</Link>
         <span style={{ opacity: 0.3 }}>/</span>
         <Link href="/blog" style={{ textDecoration: 'none', color: 'var(--text-tertiary)', opacity: 0.7 }}>블로그</Link>
@@ -685,16 +685,16 @@ export default async function BlogDetailPage({ params }: Props) {
         <div style={{ marginBottom: 20 }}>
           {/* 카테고리 배지 */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 14 }}>
-            <span style={{ fontSize: 11, fontWeight: 700, padding: '4px 12px', borderRadius: 20, background: catStyle.bg, color: catStyle.color, letterSpacing: '0.3px' }}>
+            <span style={{ fontSize: 11, fontWeight: 700, padding: '4px 12px', borderRadius: 'var(--radius-xl)', background: catStyle.bg, color: catStyle.color, letterSpacing: '0.3px' }}>
               {({ stock: '주식 분석', apt: '청약 분석', unsold: '미분양 분석', finance: '재테크', general: '생활' } as Record<string, string>)[post.category] || post.category}
             </span>
-            {(post.view_count ?? 0) >= 100 && <span style={{ fontSize: 9, fontWeight: 700, padding: '3px 8px', borderRadius: 20, background: 'var(--error-bg)', color: 'var(--error)' }}>인기</span>}
-            {post.rewritten_at && <span style={{ fontSize: 9, fontWeight: 700, padding: '3px 8px', borderRadius: 20, background: 'var(--success-bg)', color: 'var(--success)' }}>UP</span>}
+            {(post.view_count ?? 0) >= 100 && <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 'var(--radius-xl)', background: 'var(--error-bg)', color: 'var(--error)' }}>인기</span>}
+            {post.rewritten_at && <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 'var(--radius-xl)', background: 'var(--success-bg)', color: 'var(--success)' }}>UP</span>}
           </div>
           {/* 제목 */}
           <h1 style={{ fontSize: 26, fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.5, margin: '0 0 18px', wordBreak: 'keep-all', letterSpacing: '-0.8px' }}>{post.title}</h1>
           {/* 저자 카드 */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', borderRadius: 12, background: 'var(--bg-hover)', border: '1px solid var(--border)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', borderRadius: 'var(--radius-card)', background: 'var(--bg-hover)', border: '1px solid var(--border)' }}>
             <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--brand-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, color: 'var(--brand)', flexShrink: 0 }}>
               {(post.author_name || '카더라').charAt(0)}
             </div>
@@ -714,7 +714,7 @@ export default async function BlogDetailPage({ params }: Props) {
         {/* 태그 — 필 스타일 */}
         {(post.tags ?? []).length > 0 && (
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 14 }}>
-            {(post.tags ?? []).map((t: string) => <Link key={t} href={`/blog?q=${encodeURIComponent(t)}`} style={{ fontSize: 12, padding: '4px 12px', borderRadius: 20, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-tertiary)', textDecoration: 'none', fontWeight: 400 }}>#{t}</Link>)}
+            {(post.tags ?? []).map((t: string) => <Link key={t} href={`/blog?q=${encodeURIComponent(t)}`} style={{ fontSize: 12, padding: '4px 12px', borderRadius: 'var(--radius-xl)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-tertiary)', textDecoration: 'none', fontWeight: 400 }}>#{t}</Link>)}
           </div>
         )}
 
@@ -736,8 +736,8 @@ export default async function BlogDetailPage({ params }: Props) {
                   {currentIdx + 1} / {total}편{isNearEnd && ' · 거의 다 읽었어요!'}
                 </span>
               </div>
-              <div style={{ height: 4, borderRadius: 2, background: 'var(--bg-hover)', overflow: 'hidden' }}>
-                <div style={{ height: '100%', width: `${progress}%`, background: 'var(--brand)', borderRadius: 2, transition: 'width 0.3s' }} />
+              <div style={{ height: 4, borderRadius: 4, background: 'var(--bg-hover)', overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${progress}%`, background: 'var(--brand)', borderRadius: 4, transition: 'width 0.3s' }} />
               </div>
             </div>
           );
@@ -745,7 +745,7 @@ export default async function BlogDetailPage({ params }: Props) {
 
         {/* 히어로 이미지 */}
         {post.cover_image && (
-          <div style={{ marginBottom: 20, borderRadius: 14, overflow: 'hidden', border: '1px solid var(--border)' }}>
+          <div style={{ marginBottom: 20, borderRadius: 'var(--radius-card)', overflow: 'hidden', border: '1px solid var(--border)' }}>
             <img
               src={post.cover_image.startsWith('/') ? post.cover_image : post.cover_image}
               alt={post.image_alt || post.title}
@@ -861,7 +861,7 @@ export default async function BlogDetailPage({ params }: Props) {
         <div style={{
           textAlign: 'center', padding: '14px 12px', margin: '16px 0',
           background: 'linear-gradient(135deg, rgba(52,211,153,0.05), rgba(96,165,250,0.05))',
-          borderRadius: 8, border: '1px dashed rgba(52,211,153,0.15)',
+          borderRadius: 'var(--radius-md)', border: '1px dashed rgba(52,211,153,0.15)',
         }}>
           <span style={{ fontSize: 16, marginRight: 6 }}>🎉</span>
           <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>약 {readingTimeMin}분 읽기 완료</span>
@@ -915,7 +915,7 @@ export default async function BlogDetailPage({ params }: Props) {
         {isLoggedIn ? (
           <BlogCommentInput blogPostId={post.id} />
         ) : (
-          <div style={{ padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, textAlign: 'center', marginBottom: 'var(--sp-lg)', fontSize: 14, color: 'var(--text-secondary)' }}>
+          <div style={{ padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', textAlign: 'center', marginBottom: 'var(--sp-lg)', fontSize: 14, color: 'var(--text-secondary)' }}>
             <Link href={`/login?redirect=/blog/${slug}&source=blog_comment`} style={{ color: 'var(--brand)', fontWeight: 700, textDecoration: 'none' }}>로그인</Link>하면 의견을 남길 수 있어요
           </div>
         )}
@@ -935,7 +935,7 @@ export default async function BlogDetailPage({ params }: Props) {
                   <div style={{ fontSize: 14, color: 'var(--text-primary)', lineHeight: 1.6, marginTop: 3 }}>{c.content}</div>
                   {(c as any).image_url && (
                     <a href={(c as any).image_url} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', marginTop: 4 }}>
-                      <img src={(c as any).image_url} alt="댓글 이미지" style={{ maxWidth: 180, maxHeight: 120, borderRadius: 8, objectFit: 'cover', border: '1px solid var(--border)' }} />
+                      <img src={(c as any).image_url} alt="댓글 이미지" style={{ maxWidth: 180, maxHeight: 120, borderRadius: 'var(--radius-md)', objectFit: 'cover', border: '1px solid var(--border)' }} />
                     </a>
                   )}
                 </div>
@@ -958,7 +958,7 @@ export default async function BlogDetailPage({ params }: Props) {
         return (
           <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 16, marginBottom: 'var(--sp-xl)' }}>
             <Link href={`/blog/series/${seriesInfo.series.slug}`} style={{ display: 'flex', alignItems: 'center', gap: 6, textDecoration: 'none', marginBottom: 10 }}>
-              <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '2px 8px', borderRadius: 4, background: 'var(--accent-blue-bg)', color: 'var(--accent-blue)' }}>📚 시리즈</span>
+              <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '3px 8px', borderRadius: 4, background: 'var(--accent-blue-bg)', color: 'var(--accent-blue)' }}>📚 시리즈</span>
               <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{seriesInfo.series.title}</span>
               <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginLeft: 'auto' }}>{idx + 1}/{seriesInfo.posts.length}</span>
             </Link>

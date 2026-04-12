@@ -118,7 +118,7 @@ export default function SectionShareButton({ section, label, text, pagePath }: P
     <>
       <div style={{ display: 'inline-flex', gap: 4, alignItems: 'center' }}>
         <button onClick={shareKakao} aria-label="카카오톡으로 공유" title="카카오톡으로 공유하기" style={{
-          display: 'inline-flex', alignItems: 'center', gap: 5,
+          display: 'inline-flex', alignItems: 'center', gap: 6,
           padding: '8px 14px', borderRadius: 'var(--radius-md)',
           background: 'var(--kakao-bg, #FEE500)', border: '1px solid rgba(25,25,25,0.1)',
           color: 'var(--kakao-text, #191919)', cursor: 'pointer', fontSize: 13, fontWeight: 700,
@@ -126,7 +126,7 @@ export default function SectionShareButton({ section, label, text, pagePath }: P
           💬 카카오톡
         </button>
         <button onClick={handleShare} aria-label={`${label || '이 섹션'} 공유`} title="다른 곳에 공유하기" style={{
-          display: 'inline-flex', alignItems: 'center', gap: 5,
+          display: 'inline-flex', alignItems: 'center', gap: 6,
           padding: '8px 14px', borderRadius: 'var(--radius-md)',
           background: 'linear-gradient(135deg, rgba(37,99,235,0.08) 0%, rgba(96,165,250,0.08) 100%)',
           border: '1px solid rgba(37,99,235,0.2)', color: 'var(--brand)', cursor: 'pointer', fontSize: 13, fontWeight: 700,

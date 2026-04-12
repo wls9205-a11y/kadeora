@@ -37,7 +37,7 @@ function highlight(text: string, query: string): React.ReactNode {
   const parts = text.split(new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'));
   return parts.map((p, i) =>
     p.toLowerCase() === query.toLowerCase()
-      ? <mark key={i} style={{ background: 'var(--info-bg)', color: 'var(--brand)', borderRadius: 2 }}>{p}</mark>
+      ? <mark key={i} style={{ background: 'var(--info-bg)', color: 'var(--brand)', borderRadius: 4 }}>{p}</mark>
       : p
   );
 }
@@ -251,7 +251,7 @@ export default function SearchClient() {
           placeholder="종목, 청약, 단지명 검색"
           style={{
             width: '100%', height: 48, padding: '0 44px 0 46px',
-            fontSize: 15, fontWeight: 500, borderRadius: 14,
+            fontSize: 15, fontWeight: 500, borderRadius: 'var(--radius-card)',
             border: '1px solid var(--border)', background: 'var(--bg-surface)',
             color: 'var(--text-primary)', boxSizing: 'border-box', outline: 'none',
             transition: 'border-color 0.15s, box-shadow 0.15s',
@@ -309,7 +309,7 @@ export default function SearchClient() {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <div>
                         <span style={{ fontWeight: 600, fontSize: 'var(--fs-base)', color: 'var(--text-primary)' }}>{highlight(stock.name, inputVal)}</span>
-                        {stock.currency === 'USD' && <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 4px', borderRadius: 2, background: 'var(--warning-bg)', color: 'var(--warning)', fontWeight: 700, marginLeft: 4 }}>해외</span>}
+                        {stock.currency === 'USD' && <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 4px', borderRadius: 4, background: 'var(--warning-bg)', color: 'var(--warning)', fontWeight: 700, marginLeft: 4 }}>해외</span>}
                         <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginLeft: 6 }}>{highlight(stock.symbol, inputVal)}</span>
                         <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginLeft: 6 }}>{stock.market}</span>
                       </div>

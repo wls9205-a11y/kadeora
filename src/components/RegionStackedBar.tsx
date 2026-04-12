@@ -124,7 +124,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
 
       {/* ── 지역별 미니 도넛 그리드 (도넛 내부에 지역명+숫자) ── */}
       <div className="kd-region-grid" style={{
-        display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 3,
+        display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 4,
         background: 'var(--bg-surface)', border: '1px solid var(--border)',
         borderRadius: 'var(--radius-md)', padding: '4px 3px',
       }}>
@@ -171,7 +171,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
                 cursor: 'pointer', transition: 'all 0.12s',
               }}>
                 <div style={{ fontSize: 13, fontWeight: 700, color: item.c }}>{item.v.toLocaleString()}</div>
-                <div style={{ fontSize: 9, color: 'var(--text-secondary)' }}>{item.l}</div>
+                <div style={{ fontSize: 10, color: 'var(--text-secondary)' }}>{item.l}</div>
               </button>
             ))}
           </div>

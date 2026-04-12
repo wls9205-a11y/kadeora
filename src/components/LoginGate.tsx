@@ -65,7 +65,7 @@ export default function LoginGate({ children, feature, title, description, blurH
         paddingBottom: 16,
       }}>
         {/* 미리보기 힌트 */}
-        <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 8, padding: '4px 10px', borderRadius: 6, background: 'var(--bg-hover)', fontFamily: 'monospace' }}>
+        <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 8, padding: '4px 10px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', fontFamily: 'monospace' }}>
           {d.preview}
         </div>
         <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 3, textAlign: 'center' }}>
@@ -78,7 +78,7 @@ export default function LoginGate({ children, feature, title, description, blurH
           onClick={() => trackConversion('cta_click', `login_gate_${feature}`, { pagePath: pathname })}
           style={{
             display: 'inline-flex', alignItems: 'center', gap: 6,
-            padding: '10px 24px', borderRadius: 20,
+            padding: '10px 24px', borderRadius: 'var(--radius-xl)',
             background: '#FEE500', color: '#191919',
             fontSize: 13, fontWeight: 700, textDecoration: 'none',
           }}>

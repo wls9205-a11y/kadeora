@@ -144,7 +144,7 @@ export default function ComplexClient({ complexes, ageGroups, regions, initialRe
       {ageChartData && (() => {
         const ageColors: Record<string, string> = { '신축': '#3B7BF6', '5년차': '#22d3ee', '10년차': '#8b5cf6', '15년차': '#f59e0b', '20년차': '#f97316', '25년차': '#ef4444', '30년+': '#dc2626' };
         return (
-        <div style={{ display: 'flex', gap: 3, marginBottom: 14 }}>
+        <div style={{ display: 'flex', gap: 4, marginBottom: 14 }}>
           {ageChartData.map((a: any) => {
             const max = Math.max(...ageChartData.map((x: any) => x.avg));
             const on = selectedAge === a.group;
@@ -156,10 +156,10 @@ export default function ComplexClient({ complexes, ageGroups, regions, initialRe
                 border: on ? `1px solid ${c}60` : '1px solid var(--border)',
                 boxShadow: on ? `0 0 10px ${c}25` : 'none',
               }}>
-                <div style={{ fontSize: 8, color: on ? c : 'var(--text-tertiary)', fontWeight: 600 }}>{a.group}</div>
+                <div style={{ fontSize: 10, color: on ? c : 'var(--text-tertiary)', fontWeight: 600 }}>{a.group}</div>
                 <div style={{ fontSize: 12, fontWeight: 800, color: on ? 'var(--text-primary)' : 'var(--text-secondary)' }}>{a.avg > 0 ? fmtAmount(a.avg) : '—'}</div>
-                <div style={{ height: 4, background: 'var(--border)', borderRadius: 2, margin: '3px 3px 0', overflow: 'hidden' }}>
-                  <div style={{ height: '100%', width: `${max > 0 ? (a.avg / max) * 100 : 0}%`, borderRadius: 2,
+                <div style={{ height: 4, background: 'var(--border)', borderRadius: 4, margin: '3px 3px 0', overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: `${max > 0 ? (a.avg / max) * 100 : 0}%`, borderRadius: 4,
                     background: on ? `linear-gradient(90deg, ${c}, ${c}90)` : `${c}40`,
                   }} />
                 </div>
@@ -213,7 +213,7 @@ export default function ComplexClient({ complexes, ageGroups, regions, initialRe
                 <div style={{
                   position: 'absolute', top: -1, right: 12,
                   background: i === 0 ? '#f59e0b' : i === 1 ? '#94a3b8' : '#cd7f32',
-                  color: '#fff', fontSize: 8, fontWeight: 900, padding: '2px 7px 3px',
+                  color: '#fff', fontSize: 10, fontWeight: 900, padding: '2px 7px 3px',
                   borderRadius: '0 0 5px 5px', letterSpacing: 0.3,
                 }}>TOP {i + 1}</div>
               )}
@@ -224,7 +224,7 @@ export default function ComplexClient({ complexes, ageGroups, regions, initialRe
                   <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.aptName}</div>
                   <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}>
                     {c.region} {c.sigungu}{c.dong ? ` ${c.dong}` : ''} · {c.builtYear > 0 ? `${c.builtYear}년` : ''}
-                    {c.hasCoords && <span style={{ marginLeft: 3, fontSize: 9 }}>📍</span>}
+                    {c.hasCoords && <span style={{ marginLeft: 3, fontSize: 10 }}>📍</span>}
                     <span style={{ marginLeft: 4, color: 'var(--brand)', fontWeight: 600 }}>{c.ageGroup}</span>
                   </div>
                 </div>
@@ -234,7 +234,7 @@ export default function ComplexClient({ complexes, ageGroups, regions, initialRe
               {/* 매매 크게 + 원형 게이지 */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-sm)' }}>
                 <div>
-                  <div style={{ fontSize: 8, color: 'var(--text-tertiary)', fontWeight: 600 }}>매매</div>
+                  <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 600 }}>매매</div>
                   <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: -0.5 }}>{c.lastPrice > 0 ? fmtAmount(c.lastPrice) : '—'}</div>
                 </div>
                 {c.jeonseRatio ? <Gauge ratio={c.jeonseRatio} size={42} /> : null}

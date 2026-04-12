@@ -277,7 +277,7 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
             </div>
 
             {/* ② 4열 KPI */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 1, margin: '0 10px 8px', background: 'var(--border)', borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border)' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 1, margin: '0 10px 8px', background: 'var(--border)', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--border)' }}>
               <div style={{ textAlign: 'center', padding: '6px 4px', background: 'var(--bg-surface)' }}><div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 2 }}>평당가</div><div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--accent-purple)' }}>{(t.exclusive_area || 0) > 0 ? `${Math.round(amt / ((t.exclusive_area || 1) / 3.3058)).toLocaleString()}만` : '-'}</div></div>
               <div style={{ textAlign: 'center', padding: '6px 4px', background: 'var(--bg-surface)' }}><div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 2 }}>거래수</div><div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--brand)' }}>{sameApt.length}건</div></div>
               <div style={{ textAlign: 'center', padding: '6px 4px', background: 'var(--bg-surface)' }}><div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 2 }}>최저</div><div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--accent-cyan, #22D3EE)' }}>{sameApt.length > 1 ? fmtAmount(Math.min(...sameApt.map(x => x.deal_amount || 0))) : fmtAmount(amt)}</div></div>

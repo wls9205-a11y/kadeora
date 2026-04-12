@@ -152,7 +152,7 @@ export default async function ComplexPage({ searchParams }: { searchParams: Prom
           </h1>
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)' }}>
             {selectedRegion && (
-              <Link href="/apt/complex" style={{ fontSize: 10, fontWeight: 600, color: 'var(--brand)', textDecoration: 'none', background: 'rgba(59,123,246,0.15)', padding: '3px 10px', borderRadius: 6 }}>✕ 전체</Link>
+              <Link href="/apt/complex" style={{ fontSize: 10, fontWeight: 600, color: 'var(--brand)', textDecoration: 'none', background: 'rgba(59,123,246,0.15)', padding: '3px 10px', borderRadius: 'var(--radius-sm)' }}>✕ 전체</Link>
             )}
             <span style={{ fontSize: 12, color: 'rgba(232,237,245,0.6)', fontWeight: 600 }}>{displayCount.toLocaleString()}개</span>
           </div>
@@ -176,7 +176,7 @@ export default async function ComplexPage({ searchParams }: { searchParams: Prom
           }}>
             <div style={{ fontSize: 14, marginBottom: 2 }}>{k.icon}</div>
             <div style={{ fontSize: 15, fontWeight: 900, color: k.color || 'var(--text-primary)' }}>{k.value}</div>
-            <div style={{ fontSize: 8, color: 'var(--text-tertiary)', marginTop: 1 }}>{k.label}</div>
+            <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 1 }}>{k.label}</div>
           </div>
         ))}
       </div>
@@ -210,8 +210,8 @@ export default async function ComplexPage({ searchParams }: { searchParams: Prom
           </svg>
 
           {/* 연차 범례 */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 3, flex: 1, minWidth: 80 }}>
-            <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginBottom: 1 }}>연차별 분포 · 총 {donutTotal.toLocaleString()}개</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1, minWidth: 80 }}>
+            <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 1 }}>연차별 분포 · 총 {donutTotal.toLocaleString()}개</div>
             {(() => {
               const ageColors: Record<string, string> = { '신축': '#3B7BF6', '5년차': '#22d3ee', '10년차': '#8b5cf6', '15년차': '#f59e0b', '20년차': '#f97316', '25년차': '#ef4444', '30년+': '#dc2626' };
               return ageDonut.map(a => (
@@ -228,7 +228,7 @@ export default async function ComplexPage({ searchParams }: { searchParams: Prom
         </div>
 
         {/* 지역 타일 그리드 — /apt 스타일 미니 바 */}
-        <div className="grid grid-cols-3 md:grid-cols-5" style={{ gap: 5 }}>
+        <div className="grid grid-cols-3 md:grid-cols-5" style={{ gap: 6 }}>
           {regionData.map(r => {
             const isActive = selectedRegion === r.region;
             const maxCount = Math.max(...regionData.map(x => x.count));
@@ -246,8 +246,8 @@ export default async function ComplexPage({ searchParams }: { searchParams: Prom
                     <span style={{ fontSize: 13, fontWeight: isActive ? 700 : 600, color: isActive ? 'var(--brand)' : 'var(--text-primary)', whiteSpace: 'nowrap' }}>{r.region}</span>
                     <span style={{ fontSize: 12, fontWeight: 700, color: isActive ? 'var(--brand)' : 'var(--text-secondary)', fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}>{r.count.toLocaleString()}</span>
                   </div>
-                  <div style={{ display: 'flex', width: '100%', height: 3, borderRadius: 2, overflow: 'hidden', marginTop: 2, background: 'var(--bg-hover)' }}>
-                    <div style={{ width: `${pct}%`, height: '100%', background: isActive ? 'linear-gradient(90deg, var(--brand), rgba(59,123,246,0.7))' : 'linear-gradient(90deg, rgba(59,123,246,0.5), rgba(59,123,246,0.2))', borderRadius: 2, transition: 'width 0.3s' }} />
+                  <div style={{ display: 'flex', width: '100%', height: 3, borderRadius: 4, overflow: 'hidden', marginTop: 2, background: 'var(--bg-hover)' }}>
+                    <div style={{ width: `${pct}%`, height: '100%', background: isActive ? 'linear-gradient(90deg, var(--brand), rgba(59,123,246,0.7))' : 'linear-gradient(90deg, rgba(59,123,246,0.5), rgba(59,123,246,0.2))', borderRadius: 4, transition: 'width 0.3s' }} />
                   </div>
                 </div>
               </Link>

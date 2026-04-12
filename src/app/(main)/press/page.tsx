@@ -61,7 +61,7 @@ export default function PressPage() {
           <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.8, margin: '0 0 12px' }}>
             카더라의 데이터를 기사, 블로그, 유튜브 등에서 인용하실 때 아래 형식을 사용해 주세요.
           </p>
-          <div style={{ background: 'var(--bg-base)', borderRadius: 8, padding: 14, fontSize: 13, color: 'var(--text-primary)', fontFamily: 'var(--font-mono, monospace)', lineHeight: 1.6 }}>
+          <div style={{ background: 'var(--bg-base)', borderRadius: 'var(--radius-md)', padding: 14, fontSize: 13, color: 'var(--text-primary)', fontFamily: 'var(--font-mono, monospace)', lineHeight: 1.6 }}>
             출처: 카더라(kadeora.app)<br/>
             링크: https://kadeora.app/[해당 페이지 경로]
           </div>

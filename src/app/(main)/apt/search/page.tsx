@@ -90,9 +90,9 @@ export default async function AptSearchPage({ searchParams }: Props) {
         <div style={{ position: 'relative', flex: 1 }}>
           <svg style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--text-tertiary)' }} width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <input name="q" defaultValue={q} placeholder="단지명, 동 검색" aria-label="실거래가 검색"
-            style={{ width: '100%', height: 40, padding: '0 12px 0 38px', fontSize: 13, fontWeight: 500, borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', boxSizing: 'border-box', outline: 'none' }} />
+            style={{ width: '100%', height: 40, padding: '0 12px 0 38px', fontSize: 13, fontWeight: 500, borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', boxSizing: 'border-box', outline: 'none' }} />
         </div>
-        <button type="submit" style={{ padding: '0 20px', height: 40, borderRadius: 10, background: 'var(--brand)', color: '#fff', border: 'none', fontSize: 13, fontWeight: 700, cursor: 'pointer', flexShrink: 0 }}>검색</button>
+        <button type="submit" style={{ padding: '0 20px', height: 40, borderRadius: 'var(--radius-md)', background: 'var(--brand)', color: '#fff', border: 'none', fontSize: 13, fontWeight: 700, cursor: 'pointer', flexShrink: 0 }}>검색</button>
       </form>
 
       {/* 필터 */}
@@ -154,8 +154,8 @@ export default async function AptSearchPage({ searchParams }: Props) {
               </div>
               <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', paddingTop: 4, borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)' }}>
                 <span>📅 {t.deal_date} · {t.trade_type || '매매'}</span>
-                <div style={{ flex: 1, height: 3, borderRadius: 2, background: 'var(--bg-hover)', overflow: 'hidden', maxWidth: 100 }}>
-                  <div style={{ height: '100%', width: `${Math.min(amt / 1500 , 100)}%`, borderRadius: 2, background: color, opacity: 0.6 }} />
+                <div style={{ flex: 1, height: 3, borderRadius: 4, background: 'var(--bg-hover)', overflow: 'hidden', maxWidth: 100 }}>
+                  <div style={{ height: '100%', width: `${Math.min(amt / 1500 , 100)}%`, borderRadius: 4, background: color, opacity: 0.6 }} />
                 </div>
               </div>
             </Link>

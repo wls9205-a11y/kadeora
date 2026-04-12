@@ -36,7 +36,7 @@ export default function KakaoShareButton({ title, description, slug, coverImage 
       onClick={handleShare}
       style={{
         display: 'flex', alignItems: 'center', gap: 6,
-        padding: '6px 14px', borderRadius: 20, border: 'none',
+        padding: '6px 14px', borderRadius: 'var(--radius-xl)', border: 'none',
         background: '#FEE500', color: '#191919', fontSize: 13, fontWeight: 700,
         cursor: 'pointer', whiteSpace: 'nowrap',
       }}

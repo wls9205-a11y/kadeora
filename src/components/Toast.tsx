@@ -65,7 +65,7 @@ function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: (id: string) =
       onClick={handleRemove}
     >
       <span style={{
-        width: 24, height: 24, borderRadius: '50%',
+        width: 28, height: 28, borderRadius: '50%',
         background: c.icon, color: 'var(--text-inverse)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontSize: 'var(--fs-sm)', fontWeight: 700, flexShrink: 0,

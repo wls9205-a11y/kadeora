@@ -85,10 +85,10 @@ export default async function AptMapPage() {
               }}>
                 <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>{r}</div>
                 <div style={{ display: 'flex', gap: 'var(--sp-xs)', flexWrap: 'wrap' }}>
-                  {sub > 0 && <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: 'rgba(52,211,153,0.1)', color: 'var(--accent-green)', fontWeight: 600 }}>청약 {sub}</span>}
-                  {unsold > 0 && <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: 'rgba(255,107,107,0.1)', color: 'var(--accent-red)', fontWeight: 600 }}>미분양 {unsold}</span>}
-                  {redev > 0 && <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: 'rgba(255,159,67,0.1)', color: 'var(--accent-orange)', fontWeight: 600 }}>재개발 {redev}</span>}
-                  {(tradeByRegion[r] || 0) > 0 && <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: 'rgba(96,165,250,0.1)', color: 'var(--accent-blue)', fontWeight: 600 }}>실거래 {tradeByRegion[r]}</span>}
+                  {sub > 0 && <span style={{ fontSize: 10, padding: '3px 8px', borderRadius: 4, background: 'rgba(52,211,153,0.1)', color: 'var(--accent-green)', fontWeight: 600 }}>청약 {sub}</span>}
+                  {unsold > 0 && <span style={{ fontSize: 10, padding: '3px 8px', borderRadius: 4, background: 'rgba(255,107,107,0.1)', color: 'var(--accent-red)', fontWeight: 600 }}>미분양 {unsold}</span>}
+                  {redev > 0 && <span style={{ fontSize: 10, padding: '3px 8px', borderRadius: 4, background: 'rgba(255,159,67,0.1)', color: 'var(--accent-orange)', fontWeight: 600 }}>재개발 {redev}</span>}
+                  {(tradeByRegion[r] || 0) > 0 && <span style={{ fontSize: 10, padding: '3px 8px', borderRadius: 4, background: 'rgba(96,165,250,0.1)', color: 'var(--accent-blue)', fontWeight: 600 }}>실거래 {tradeByRegion[r]}</span>}
                   {sub === 0 && unsold === 0 && redev === 0 && (tradeByRegion[r] || 0) === 0 && <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>데이터 준비 중</span>}
                 </div>
               </Link>

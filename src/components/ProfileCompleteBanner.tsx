@@ -24,7 +24,7 @@ export default function ProfileCompleteBanner() {
 
   return (
     <div style={{
-      margin: '0 0 12px', padding: '12px 14px', borderRadius: 12,
+      margin: '0 0 12px', padding: '12px 14px', borderRadius: 'var(--radius-card)',
       background: 'linear-gradient(135deg, rgba(59,123,246,0.08), rgba(46,232,165,0.06))',
       border: '1px solid rgba(59,123,246,0.15)',
       display: 'flex', alignItems: 'center', gap: 10,
@@ -35,7 +35,7 @@ export default function ProfileCompleteBanner() {
         <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>한 줄 소개만 작성하면 완료!</div>
       </div>
       <Link href={`/profile/${userId}`} style={{
-        padding: '6px 14px', borderRadius: 8, background: 'var(--brand)', color: '#fff',
+        padding: '6px 14px', borderRadius: 'var(--radius-md)', background: 'var(--brand)', color: '#fff',
         fontSize: 12, fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap',
       }}>완성하기</Link>
       <button onClick={() => { sessionStorage.setItem('kd_profile_banner_dismissed', '1'); setShow(false); }}

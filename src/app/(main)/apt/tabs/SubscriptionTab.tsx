@@ -240,7 +240,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                   const kpiVal = (c: string) => ({ fontSize: 'var(--fs-sm)', fontWeight: 800 as const, color: c, lineHeight: 1.3 });
                   return (
                     <>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 1, margin: '0 10px 8px', background: 'var(--border)', borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border)' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 1, margin: '0 10px 8px', background: 'var(--border)', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--border)' }}>
                         <div style={kpiStyle}><div style={kpiLabel}>분양가(최저)</div><div style={kpiVal(pMin > 0 ? 'var(--accent-blue-light, #93C5FD)' : 'var(--text-tertiary)')}>{pMin > 0 ? fmtP(pMin) : pendingLabel}</div></div>
                         <div style={kpiStyle}><div style={kpiLabel}>분양가(최고)</div><div style={kpiVal(pMax > 0 ? 'var(--brand)' : 'var(--text-tertiary)')}>{pMax > 0 ? fmtP(pMax) : pendingLabel}</div></div>
                         <div style={kpiStyle}><div style={kpiLabel}>평당가</div><div style={kpiVal(ppAvg > 0 ? 'var(--accent-purple)' : 'var(--text-tertiary)')}>{ppAvg > 0 ? fmtP(ppAvg) : (pMin > 0 ? '계산중' : pendingLabel)}</div></div>
@@ -454,7 +454,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
             {selectedCalDate && (() => {
               const dayApts = apts.filter(a => selectedCalDate >= String(a.rcept_bgnde || '').slice(0, 10) && selectedCalDate <= String(a.rcept_endde || '').slice(0, 10));
               return dayApts.length > 0 ? (
-                <div style={{ marginTop: 'var(--sp-md)', padding: '12px', background: 'var(--bg-hover)', borderRadius: 8 }}>
+                <div style={{ marginTop: 'var(--sp-md)', padding: '12px', background: 'var(--bg-hover)', borderRadius: 'var(--radius-md)' }}>
                   <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>
                     📅 {selectedCalDate.slice(5).replace('-', '월 ')}일 청약 일정 ({dayApts.length}건)
                   </div>

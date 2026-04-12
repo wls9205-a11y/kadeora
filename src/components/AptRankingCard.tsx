@@ -36,7 +36,7 @@ export default function AptRankingCard() {
       <div className="apt-pill-scroll kd-scroll-row" style={{ display: 'flex', gap: 4, overflowX: 'auto', marginBottom: 12, scrollbarWidth: 'none', paddingBottom: 2 }}>
         {TYPES.map(t => (
           <button key={t.key} onClick={() => setType(t.key)} style={{
-            padding: '5px 10px', borderRadius: 16, fontSize: 11, fontWeight: 600, border: 'none', cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0, fontFamily: 'inherit',
+            padding: '5px 10px', borderRadius: 'var(--radius-lg)', fontSize: 11, fontWeight: 600, border: 'none', cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0, fontFamily: 'inherit',
             background: type === t.key ? t.color + '18' : 'var(--bg-hover)', color: type === t.key ? t.color : 'var(--text-secondary)',
           }}>{t.label}</button>
         ))}
@@ -47,7 +47,7 @@ export default function AptRankingCard() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           {data.map((a, i) => (
             <Link href={`/apt/complex/${encodeURIComponent(a.apt_name)}`} key={i} style={{
-              display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', borderRadius: 8,
+              display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', borderRadius: 'var(--radius-md)',
               background: i < 3 ? (cur?.color || '#3B7BF6') + '06' : 'transparent', textDecoration: 'none', color: 'inherit',
             }}>
               <span style={{ width: 20, fontSize: 12, fontWeight: 800, color: i < 3 ? cur?.color : 'var(--text-tertiary)', textAlign: 'center' }}>{i + 1}</span>

@@ -119,7 +119,7 @@ export default function InstallBanner() {
             position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 90,
             background: 'var(--bg-surface)', borderRadius: '20px 20px 0 0', padding: '20px 24px 40px',
           }}>
-            <div style={{ width: 40, height: 4, background: 'var(--border)', borderRadius: 2, margin: '0 auto 16px' }} />
+            <div style={{ width: 40, height: 4, background: 'var(--border)', borderRadius: 4, margin: '0 auto 16px' }} />
             <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 'var(--sp-xs)' }}>📲 홈화면에 추가하기</div>
             <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 'var(--sp-xl)' }}>Safari에서 아래 순서로 따라하세요</div>
             {[
@@ -128,7 +128,7 @@ export default function InstallBanner() {
               { n: '3', text: '오른쪽 상단 "추가" 탭 — 완료!' },
             ].map(s => (
               <div key={s.n} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 0', borderBottom: '1px solid var(--border)' }}>
-                <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--brand)', color: 'var(--text-inverse)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-sm)', fontWeight: 800, flexShrink: 0 }}>{s.n}</div>
+                <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--brand)', color: 'var(--text-inverse)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-sm)', fontWeight: 800, flexShrink: 0 }}>{s.n}</div>
                 <span style={{ fontSize: 'var(--fs-base)', color: 'var(--text-primary)' }}>{s.text}</span>
               </div>
             ))}

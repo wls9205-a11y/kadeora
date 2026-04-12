@@ -29,13 +29,13 @@ export default function DailyReportCard() {
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-primary)' }}>카더라 데일리 리포트</span>
-            <span style={{ fontSize: 9, fontWeight: 700, color: '#D4A853', background: 'rgba(212,168,83,0.1)', padding: '1px 5px', borderRadius: 3, border: '1px solid rgba(212,168,83,0.2)' }}>회원전용</span>
+            <span style={{ fontSize: 10, fontWeight: 700, color: '#D4A853', background: 'rgba(212,168,83,0.1)', padding: '1px 5px', borderRadius: 4, border: '1px solid rgba(212,168,83,0.2)' }}>회원전용</span>
           </div>
           <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 1 }}>
             {now.getMonth() + 1}/{now.getDate()} {dayNames[now.getDay()]} {isWeekend ? '주말판' : '투자 브리핑'}
           </div>
         </div>
-        <div style={{ padding: '5px 12px', borderRadius: 14, background: 'linear-gradient(135deg, #D4A853, #B8942E)', color: '#fff', fontSize: 11, fontWeight: 700, flexShrink: 0 }}>읽기 →</div>
+        <div style={{ padding: '5px 12px', borderRadius: 'var(--radius-card)', background: 'linear-gradient(135deg, #D4A853, #B8942E)', color: '#fff', fontSize: 11, fontWeight: 700, flexShrink: 0 }}>읽기 →</div>
       </div>
     </Link>
   );

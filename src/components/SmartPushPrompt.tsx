@@ -118,7 +118,7 @@ export default function SmartPushPrompt() {
     position: 'fixed', bottom: 80, left: '50%', transform: 'translateX(-50%)',
     width: 'calc(100% - 32px)', maxWidth: 400, zIndex: 90,
     background: 'var(--bg-surface)', border: '1px solid var(--border)',
-    borderRadius: 16, padding: '16px 18px',
+    borderRadius: 'var(--radius-lg)', padding: '16px 18px',
     boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
     animation: 'slideUp 0.3s ease-out',
   };
@@ -146,7 +146,7 @@ export default function SmartPushPrompt() {
               iPhone에서는 홈 화면에 추가해야 알림을 받을 수 있어요.
             </div>
             <div style={{
-              background: 'var(--bg-base)', borderRadius: 10, padding: '12px 14px',
+              background: 'var(--bg-base)', borderRadius: 'var(--radius-md)', padding: '12px 14px',
               fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.8,
             }}>
               <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>설치 방법 (10초)</div>
@@ -182,7 +182,7 @@ export default function SmartPushPrompt() {
               관심 단지 청약 마감, 종목 급등락, 새 분석 리포트를 실시간으로 받아보세요.
             </div>
             <button onClick={subscribe} disabled={subscribing} style={{
-              width: '100%', padding: '11px 0', borderRadius: 10, border: 'none',
+              width: '100%', padding: '11px 0', borderRadius: 'var(--radius-md)', border: 'none',
               background: 'var(--brand)', color: '#fff',
               fontSize: 14, fontWeight: 700, cursor: subscribing ? 'not-allowed' : 'pointer',
               opacity: subscribing ? 0.6 : 1,

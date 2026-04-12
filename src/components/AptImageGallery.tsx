@@ -115,13 +115,13 @@ export default function AptImageGallery({ images, name, region, badges }: {
             ))}
           </div>
           {total > 1 && (
-            <div style={{ display: 'flex', gap: 5, justifyContent: 'center', padding: '6px 0' }}>
+            <div style={{ display: 'flex', gap: 6, justifyContent: 'center', padding: '6px 0' }}>
               {visibleImages.map((_, i) => (
                 <div
                   key={i}
                   onClick={() => goTo(i)}
                   style={{
-                    width: i === idx ? 16 : 6, height: 6, borderRadius: 3,
+                    width: i === idx ? 16 : 6, height: 6, borderRadius: 4,
                     background: i === idx ? '#fff' : 'rgba(255,255,255,0.25)',
                     transition: 'all var(--transition-normal)', cursor: 'pointer',
                   }}
@@ -137,7 +137,7 @@ export default function AptImageGallery({ images, name, region, badges }: {
             display: 'grid',
             gridTemplateColumns: total >= 3 ? '2fr 1fr' : '1fr',
             gridTemplateRows: total >= 3 ? '1fr 1fr' : 'auto',
-            gap: 3, height: 280,
+            gap: 4, height: 280,
           }}>
             <div
               style={{ position: 'relative', overflow: 'hidden', gridRow: total >= 3 ? '1 / 3' : 'auto', background: '#162035', cursor: 'pointer' }}

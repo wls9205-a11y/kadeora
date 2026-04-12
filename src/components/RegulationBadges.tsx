@@ -87,7 +87,7 @@ export default function RegulationBadges(props: Props) {
             background: 'var(--bg-surface)', border: '1px solid var(--border)',
           }}>
             <span style={{
-              fontSize: 11, padding: '3px 8px', borderRadius: 6, fontWeight: 700,
+              fontSize: 11, padding: '3px 8px', borderRadius: 'var(--radius-sm)', fontWeight: 700,
               background: s.bg, color: s.color, border: `1px solid ${s.border}`,
             }}>
               {item.label}
@@ -102,7 +102,7 @@ export default function RegulationBadges(props: Props) {
         <div style={{ display: 'flex', gap: 4, marginTop: 4, flexWrap: 'wrap' }}>
           {tags.map((tag, i) => (
             <span key={i} style={{
-              fontSize: 11, padding: '3px 10px', borderRadius: 6, fontWeight: 600,
+              fontSize: 11, padding: '3px 10px', borderRadius: 'var(--radius-sm)', fontWeight: 600,
               background: tag.active ? 'rgba(139,92,246,0.1)' : 'var(--bg-hover)',
               color: tag.active ? '#8B5CF6' : 'var(--text-tertiary)',
               border: `1px solid ${tag.active ? 'rgba(139,92,246,0.2)' : 'var(--border)'}`,

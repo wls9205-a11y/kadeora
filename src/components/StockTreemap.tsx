@@ -47,12 +47,12 @@ export default function StockTreemap({ stocks, isKR }: Props) {
 
   return (
     <div style={{ marginBottom: 'var(--sp-md)' }}>
-      <div style={{ fontSize: 9, fontWeight: 600, color: 'var(--text-tertiary)', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: 'monospace', marginBottom: 'var(--sp-sm)' }}>
+      <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-tertiary)', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: 'monospace', marginBottom: 'var(--sp-sm)' }}>
         시총 트리맵 · 크기=시총 · 색상=등락
       </div>
 
       {/* 트리맵 그리드 */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gridAutoRows: '24px', gap: 3, marginBottom: 'var(--sp-sm)' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gridAutoRows: '24px', gap: 4, marginBottom: 'var(--sp-sm)' }}>
         {sectors.map((sec, i) => {
           const capRatio = sec.total / maxTotal;
           const cs = Math.max(2, Math.round(capRatio * 10));
@@ -71,8 +71,8 @@ export default function StockTreemap({ stocks, isKR }: Props) {
               boxShadow: isSelected ? `0 0 0 2px ${col}60` : 'none',
             }}>
               {cs >= 2 && rs >= 2 && <span style={{ fontSize: Math.min(10, 7 + cs), fontWeight: 700, color: '#E0EAFF', lineHeight: 1.1, textAlign: 'center' }}>{sec.name}</span>}
-              {rs >= 2 && <span style={{ fontSize: 9, fontWeight: 600, color: col, fontFamily: 'monospace' }}>{sec.avg > 0 ? '+' : ''}{sec.avg.toFixed(1)}%</span>}
-              {rs >= 3 && cs >= 3 && <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.4)' }}>{fmtCap(sec.total)}</span>}
+              {rs >= 2 && <span style={{ fontSize: 10, fontWeight: 600, color: col, fontFamily: 'monospace' }}>{sec.avg > 0 ? '+' : ''}{sec.avg.toFixed(1)}%</span>}
+              {rs >= 3 && cs >= 3 && <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>{fmtCap(sec.total)}</span>}
             </button>
           );
         })}
@@ -89,7 +89,7 @@ export default function StockTreemap({ stocks, isKR }: Props) {
               </span>
             </div>
             <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>{selected.count}종목 · 시총 {fmtCap(selected.total)}</div>
+              <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{selected.count}종목 · 시총 {fmtCap(selected.total)}</div>
             </div>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-xs)' }}>
@@ -97,7 +97,7 @@ export default function StockTreemap({ stocks, isKR }: Props) {
               const c = s.pct > 0 ? upC : s.pct < 0 ? dnC : 'var(--text-tertiary)';
               return (
                 <Link key={s.symbol} href={`/stock/${encodeURIComponent(s.symbol)}`} style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', textDecoration: 'none', padding: '5px 6px', borderRadius: 'var(--radius-xs)', background: 'var(--bg-hover)' }}>
-                  <div style={{ width: 3, height: 24, borderRadius: 2, background: c, flexShrink: 0 }} />
+                  <div style={{ width: 3, height: 24, borderRadius: 4, background: c, flexShrink: 0 }} />
                   <span style={{ flex: 1, fontSize: 12, fontWeight: 600, color: 'var(--text-primary)' }}>{s.name}</span>
                   <span style={{ fontSize: 10, color: 'var(--text-tertiary)', fontFamily: 'monospace' }}>{s.symbol}</span>
                   <span style={{ fontSize: 11, fontWeight: 800, color: c, fontFamily: 'monospace' }}>{s.pct > 0 ? '+' : ''}{s.pct.toFixed(2)}%</span>
@@ -109,14 +109,14 @@ export default function StockTreemap({ stocks, isKR }: Props) {
       )}
 
       {/* 범례 */}
-      <div style={{ display: 'flex', gap: 'var(--sp-md)', marginTop: 6, fontSize: 9, color: 'var(--text-tertiary)', alignItems: 'center' }}>
+      <div style={{ display: 'flex', gap: 'var(--sp-md)', marginTop: 6, fontSize: 10, color: 'var(--text-tertiary)', alignItems: 'center' }}>
         <span>크기 = 시총</span>
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)' }}>
-          <div style={{ width: 10, height: 10, borderRadius: 2, background: upC, opacity: 0.7 }} />
+          <div style={{ width: 10, height: 10, borderRadius: 4, background: upC, opacity: 0.7 }} />
           <span>{isKR ? '상승' : '상승'}</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)' }}>
-          <div style={{ width: 10, height: 10, borderRadius: 2, background: dnC, opacity: 0.7 }} />
+          <div style={{ width: 10, height: 10, borderRadius: 4, background: dnC, opacity: 0.7 }} />
           <span>{isKR ? '하락' : '하락'}</span>
         </div>
       </div>

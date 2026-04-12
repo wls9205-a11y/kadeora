@@ -15,10 +15,10 @@ export default function TrendingKeywords() {
   return (
     <div style={{ marginBottom: 12 }}>
       <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 6 }}>🔥 실시간 트렌드</div>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
         {keywords.slice(0, 12).map((k, i) => (
           <Link key={i} href={`/search?q=${encodeURIComponent(k.keyword)}`} style={{
-            padding: '4px 10px', borderRadius: 14, fontSize: 11, fontWeight: 600,
+            padding: '4px 10px', borderRadius: 'var(--radius-card)', fontSize: 11, fontWeight: 600,
             background: (catColor[k.category] || '#888') + '12',
             color: catColor[k.category] || 'var(--text-secondary)',
             textDecoration: 'none', border: `1px solid ${(catColor[k.category] || '#888')}20`,

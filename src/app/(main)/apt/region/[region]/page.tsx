@@ -214,7 +214,7 @@ export default async function RegionLandingPage({ params }: Props) {
                   return <circle key={item.label} cx="40" cy="40" r="30" fill="none" stroke={item.color} strokeWidth="10" strokeDasharray={`${dash} ${gap}`} transform={`rotate(${rotation} 40 40)`} />;
                 })}
                 <text x="40" y="37" textAnchor="middle" style={{ fontSize: 14, fontWeight: 800, fill: 'var(--text-primary)' }}>{total}</text>
-                <text x="40" y="50" textAnchor="middle" style={{ fontSize: 8, fill: 'var(--text-tertiary)' }}>현장</text>
+                <text x="40" y="50" textAnchor="middle" style={{ fontSize: 10, fill: 'var(--text-tertiary)' }}>현장</text>
               </svg>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 8px', marginTop: 6, justifyContent: 'center' }}>
                 {items.filter(i => i.count > 0).map(i => (
@@ -236,8 +236,8 @@ export default async function RegionLandingPage({ params }: Props) {
               <div style={{ fontSize: 16, marginBottom: 2 }}>{s.icon}</div>
               <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{s.label}</div>
               <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: s.count > 0 ? s.color : 'var(--text-tertiary)' }}>{s.count}</div>
-              <div style={{ height: 3, borderRadius: 2, background: 'var(--bg-hover)', marginTop: 'var(--sp-xs)', overflow: 'hidden' }}>
-                <div style={{ height: '100%', width: `${Math.min((s.count / s.max) * 100, 100)}%`, borderRadius: 2, background: s.color }} />
+              <div style={{ height: 3, borderRadius: 4, background: 'var(--bg-hover)', marginTop: 'var(--sp-xs)', overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${Math.min((s.count / s.max) * 100, 100)}%`, borderRadius: 4, background: s.color }} />
               </div>
             </div>
           ))}
@@ -256,16 +256,16 @@ export default async function RegionLandingPage({ params }: Props) {
             <div style={{ display: 'grid', gridTemplateColumns: tradeAvg > 0 ? 'repeat(3, minmax(0,1fr))' : 'repeat(2, minmax(0,1fr))', gap: 6 }}>
               <div style={{ background: 'rgba(59,123,246,0.05)', borderRadius: 'var(--radius-sm)', padding: '8px', textAlign: 'center' }}>
                 <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--brand)' }}>{fmtA(ps.avgMin)}</div>
-                <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>평균 최저 분양가</div>
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>평균 최저 분양가</div>
               </div>
               <div style={{ background: 'rgba(248,113,113,0.05)', borderRadius: 'var(--radius-sm)', padding: '8px', textAlign: 'center' }}>
                 <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--accent-red)' }}>{fmtA(ps.avgMax)}</div>
-                <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>평균 최고 분양가</div>
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>평균 최고 분양가</div>
               </div>
               {tradeAvg > 0 && (
                 <div style={{ background: 'rgba(52,211,153,0.05)', borderRadius: 'var(--radius-sm)', padding: '8px', textAlign: 'center' }}>
                   <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--accent-green)' }}>{fmtA(tradeAvg)}</div>
-                  <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>실거래 평균 ({tradeAmts.length}건)</div>
+                  <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>실거래 평균 ({tradeAmts.length}건)</div>
                 </div>
               )}
             </div>
@@ -289,14 +289,14 @@ export default async function RegionLandingPage({ params }: Props) {
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
                 <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.house_nm}</span>
-                {s.is_price_limit && <span style={{ fontSize: 9, fontWeight: 600, padding: '1px 5px', borderRadius: 4, background: 'rgba(139,92,246,0.1)', color: 'var(--accent-purple)', flexShrink: 0 }}>상한제</span>}
-                {s.brand_name && <span style={{ fontSize: 9, fontWeight: 600, padding: '1px 5px', borderRadius: 4, background: 'rgba(59,123,246,0.08)', color: 'var(--brand)', flexShrink: 0 }}>{s.brand_name}</span>}
-                {s.project_type && s.project_type !== '민간' && <span style={{ fontSize: 9, fontWeight: 600, padding: '1px 5px', borderRadius: 4, background: s.project_type === '재개발' ? 'rgba(251,146,60,0.1)' : 'rgba(52,211,153,0.1)', color: s.project_type === '재개발' ? 'var(--accent-orange)' : 'var(--accent-green)', flexShrink: 0 }}>{s.project_type}</span>}
-                {s.is_regulated_area && <span style={{ fontSize: 9, fontWeight: 600, padding: '1px 5px', borderRadius: 4, background: 'rgba(239,68,68,0.08)', color: 'var(--accent-red)', flexShrink: 0 }}>규제</span>}
+                {s.is_price_limit && <span style={{ fontSize: 10, fontWeight: 600, padding: '1px 5px', borderRadius: 4, background: 'rgba(139,92,246,0.1)', color: 'var(--accent-purple)', flexShrink: 0 }}>상한제</span>}
+                {s.brand_name && <span style={{ fontSize: 10, fontWeight: 600, padding: '1px 5px', borderRadius: 4, background: 'rgba(59,123,246,0.08)', color: 'var(--brand)', flexShrink: 0 }}>{s.brand_name}</span>}
+                {s.project_type && s.project_type !== '민간' && <span style={{ fontSize: 10, fontWeight: 600, padding: '1px 5px', borderRadius: 4, background: s.project_type === '재개발' ? 'rgba(251,146,60,0.1)' : 'rgba(52,211,153,0.1)', color: s.project_type === '재개발' ? 'var(--accent-orange)' : 'var(--accent-green)', flexShrink: 0 }}>{s.project_type}</span>}
+                {s.is_regulated_area && <span style={{ fontSize: 10, fontWeight: 600, padding: '1px 5px', borderRadius: 4, background: 'rgba(239,68,68,0.08)', color: 'var(--accent-red)', flexShrink: 0 }}>규제</span>}
               </div>
               <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>
                 {s.constructor_nm ? `${s.constructor_nm} · ` : ''}{s.tot_supply_hshld_co}세대 · ~{s.rcept_endde?.slice(5)}
-                {s.loan_rate && <span style={{ marginLeft: 4, fontSize: 9, fontWeight: 600, padding: '1px 4px', borderRadius: 3, background: s.loan_rate.includes('무이자') ? 'rgba(52,211,153,0.08)' : 'rgba(251,191,36,0.08)', color: s.loan_rate.includes('무이자') ? 'var(--accent-green)' : 'var(--accent-yellow)' }}>중도금 {s.loan_rate}</span>}
+                {s.loan_rate && <span style={{ marginLeft: 4, fontSize: 10, fontWeight: 600, padding: '1px 4px', borderRadius: 4, background: s.loan_rate.includes('무이자') ? 'rgba(52,211,153,0.08)' : 'rgba(251,191,36,0.08)', color: s.loan_rate.includes('무이자') ? 'var(--accent-green)' : 'var(--accent-yellow)' }}>중도금 {s.loan_rate}</span>}
               </div>
               {s.ai_summary && <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>🤖 {s.ai_summary}</div>}
               {/* 분양가 (house_type_info에서 추출) */}
@@ -310,7 +310,7 @@ export default async function RegionLandingPage({ params }: Props) {
                 return (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', marginTop: 'var(--sp-xs)' }}>
                     <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--brand)' }}>💰 {fmtPrice(pMin)}{pMax !== pMin ? `~${fmtPrice(pMax)}` : ''}</span>
-                    {s.price_per_pyeong_avg > 0 && <span style={{ fontSize: 9, color: 'var(--accent-purple)' }}>평당 {s.price_per_pyeong_avg.toLocaleString()}만</span>}
+                    {s.price_per_pyeong_avg > 0 && <span style={{ fontSize: 10, color: 'var(--accent-purple)' }}>평당 {s.price_per_pyeong_avg.toLocaleString()}만</span>}
                   </div>
                 );
               })()}
@@ -336,7 +336,7 @@ export default async function RegionLandingPage({ params }: Props) {
               <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--accent-blue)', textAlign: 'right', minWidth: 50 }}>
                 {fmtPrice(t.deal_amount)}
                 {t.exclusive_area > 0 && t.deal_amount > 0 && (
-                  <div style={{ fontSize: 9, color: 'var(--text-tertiary)', fontWeight: 500 }}>평당 {fmtPrice(Math.round(t.deal_amount / (t.exclusive_area / 3.3058)))}</div>
+                  <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 500 }}>평당 {fmtPrice(Math.round(t.deal_amount / (t.exclusive_area / 3.3058)))}</div>
                 )}
               </div>
             </div>
@@ -359,7 +359,7 @@ export default async function RegionLandingPage({ params }: Props) {
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{r.region}</div>
               </div>
               <span style={{
-                fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 4,
+                fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 4,
                 background: 'var(--bg-hover)', color: 'var(--accent-orange)', fontWeight: 600,
               }}>
                 {r.stage || '진행중'}

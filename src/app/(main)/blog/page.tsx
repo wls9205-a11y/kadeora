@@ -12,7 +12,7 @@ function highlightTitle(title: string, query: string): React.ReactNode {
   const parts = title.split(new RegExp(`(${escaped})`, 'gi'));
   return parts.map((part, i) =>
     part.toLowerCase() === query.toLowerCase()
-      ? <mark key={i} style={{ background: 'rgba(37,99,235,0.15)', color: 'var(--brand)', borderRadius: 2, padding: '0 2px' }}>{part}</mark>
+      ? <mark key={i} style={{ background: 'rgba(37,99,235,0.15)', color: 'var(--brand)', borderRadius: 4, padding: '0 2px' }}>{part}</mark>
       : part
   );
 }
@@ -258,7 +258,7 @@ export default async function BlogPage({ searchParams }: Props) {
         <svg style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--text-tertiary)' }} width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <input name="q" defaultValue={q} placeholder="블로그 검색" style={{
           width: '100%', height: 40, padding: '0 12px 0 38px', fontSize: 13, fontWeight: 500,
-          borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-surface)',
+          borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-surface)',
           color: 'var(--text-primary)', boxSizing: 'border-box', outline: 'none',
         }} />
       </form>
@@ -336,7 +336,7 @@ export default async function BlogPage({ searchParams }: Props) {
           <div style={{ display: 'flex', gap: 'var(--sp-xs)', overflow: 'hidden' }}>
             {popularTags.slice(0, 4).map((t: any) => (
               <Link key={t.tag} href={`/blog?q=${encodeURIComponent(t.tag)}`}
-                style={{ fontSize: 10, color: 'var(--text-tertiary)', padding: '2px 8px', borderRadius: 'var(--radius-md)', background: 'var(--bg-surface)', border: '1px solid var(--border)', whiteSpace: 'nowrap', textDecoration: 'none' }}>
+                style={{ fontSize: 10, color: 'var(--text-tertiary)', padding: '3px 8px', borderRadius: 'var(--radius-md)', background: 'var(--bg-surface)', border: '1px solid var(--border)', whiteSpace: 'nowrap', textDecoration: 'none' }}>
                 #{t.tag}
               </Link>
             ))}
@@ -400,16 +400,16 @@ export default async function BlogPage({ searchParams }: Props) {
                 <span style={{ fontSize: 10, fontWeight: 800, color: isHot ? 'var(--accent-red)' : 'var(--text-tertiary)', width: 18, textAlign: 'center', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>{rank}</span>
                 {/* 썸네일 */}
                 {p.cover_image && (
-                  <div style={{ width: 64, height: 44, borderRadius: 6, overflow: 'hidden', flexShrink: 0, background: 'var(--bg-hover)' }}>
+                  <div style={{ width: 64, height: 44, borderRadius: 'var(--radius-sm)', overflow: 'hidden', flexShrink: 0, background: 'var(--bg-hover)' }}>
                     <img src={p.cover_image} alt={p.title || "블로그 썸네일"} width={64} height={44} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} loading="lazy" />
                   </div>
                 )}
                 {/* 본문 */}
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 2 }}>
-                    <span style={{ fontSize: 9, fontWeight: 700, padding: '1px 5px', borderRadius: 3, background: `${catColor}12`, color: catColor, flexShrink: 0 }}>{catLabel}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                    <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 5px', borderRadius: 4, background: `${catColor}12`, color: catColor, flexShrink: 0 }}>{catLabel}</span>
                     <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.3 }}>{q ? highlightTitle(p.title, q) : p.title}</span>
-                    {isHot && <span style={{ fontSize: 8, fontWeight: 700, color: 'var(--accent-red)', flexShrink: 0 }}>HOT</span>}
+                    {isHot && <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--accent-red)', flexShrink: 0 }}>HOT</span>}
                   </div>
                   {p.excerpt && <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.3, marginBottom: 2 }}>{p.excerpt}</div>}
                   <div style={{ display: 'flex', gap: 8, fontSize: 10, color: 'var(--text-tertiary)' }}>
@@ -431,7 +431,7 @@ export default async function BlogPage({ searchParams }: Props) {
       {/* 세션70: 블로그 목록 회원가입 유도 */}
       {pageNum === 1 && !q && (
         <div style={{
-          margin: '12px 0', padding: '10px 14px', borderRadius: 8,
+          margin: '12px 0', padding: '10px 14px', borderRadius: 'var(--radius-md)',
           background: 'linear-gradient(135deg, var(--brand-bg), var(--accent-green-bg))',
           border: '1px solid var(--brand-border)',
           display: 'flex', alignItems: 'center', gap: 10,

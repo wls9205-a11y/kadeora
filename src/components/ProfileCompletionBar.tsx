@@ -51,15 +51,15 @@ export default function ProfileCompletionBar() {
         <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>프로필 완성도 {pct}%</span>
         <span style={{ fontSize: 11, color: '#10B981', fontWeight: 600 }}>자기소개 작성하면 +200P 🎁</span>
       </div>
-      <div style={{ height: 6, borderRadius: 3, background: 'var(--bg-hover)', overflow: 'hidden', marginBottom: 8 }}>
-        <div style={{ height: '100%', width: `${pct}%`, background: pct === 100 ? '#10B981' : '#3B82F6', borderRadius: 3, transition: 'width 0.5s' }} />
+      <div style={{ height: 6, borderRadius: 4, background: 'var(--bg-hover)', overflow: 'hidden', marginBottom: 8 }}>
+        <div style={{ height: '100%', width: `${pct}%`, background: pct === 100 ? '#10B981' : '#3B82F6', borderRadius: 4, transition: 'width 0.5s' }} />
       </div>
       <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
         {STEPS.map(s => {
           const isDone = s.check(profile);
           return isDone ? (
             <span key={s.key} style={{
-              padding: '2px 8px', borderRadius: 10, fontSize: 10, fontWeight: 600,
+              padding: '3px 8px', borderRadius: 'var(--radius-md)', fontSize: 10, fontWeight: 600,
               background: 'rgba(16,185,129,0.1)', color: '#10B981',
               border: '1px solid rgba(16,185,129,0.2)',
             }}>
@@ -67,7 +67,7 @@ export default function ProfileCompletionBar() {
             </span>
           ) : (
             <Link key={s.key} href={`/profile/${userId}?edit=1`} style={{
-              padding: '2px 8px', borderRadius: 10, fontSize: 10, fontWeight: 600,
+              padding: '3px 8px', borderRadius: 'var(--radius-md)', fontSize: 10, fontWeight: 600,
               background: 'var(--bg-hover)', color: 'var(--text-tertiary)',
               border: '1px solid transparent', textDecoration: 'none',
               cursor: 'pointer',

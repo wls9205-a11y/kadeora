@@ -23,7 +23,7 @@ export default function BlogBookmarkButton({ blogPostId }: { blogPostId: number 
   if (!userId) {
     return (
       <Link href={`/login?redirect=${encodeURIComponent(pathname)}&source=blog_bookmark`} style={{
-        display: 'inline-flex', alignItems: 'center', gap: 5,
+        display: 'inline-flex', alignItems: 'center', gap: 6,
         padding: '6px 12px', borderRadius: 'var(--radius-md)',
         border: '1px solid var(--border)', background: 'var(--bg-surface)',
         color: 'var(--text-secondary)', fontSize: 12, fontWeight: 600,
@@ -52,7 +52,7 @@ export default function BlogBookmarkButton({ blogPostId }: { blogPostId: number 
 
   return (
     <button onClick={toggle} disabled={busy} style={{
-      display: 'inline-flex', alignItems: 'center', gap: 5,
+      display: 'inline-flex', alignItems: 'center', gap: 6,
       padding: '6px 12px', borderRadius: 'var(--radius-md)',
       border: saved ? '1px solid var(--brand)' : '1px solid var(--border)',
       background: saved ? 'rgba(59,123,246,0.08)' : 'var(--bg-surface)',

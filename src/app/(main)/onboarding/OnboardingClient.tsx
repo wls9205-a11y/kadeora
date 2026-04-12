@@ -70,10 +70,10 @@ export default function OnboardingClient() {
 
   return (
     <div style={{ maxWidth: 420, margin: '40px auto', padding: '0 16px' }}>
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 16, padding: 'clamp(20px, 5vw, 32px)' }}>
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: 'clamp(20px, 5vw, 32px)' }}>
         
         {/* 단일 진행 바 */}
-        <div style={{ height: 3, borderRadius: 2, background: 'var(--brand)', marginBottom: 28 }} />
+        <div style={{ height: 3, borderRadius: 4, background: 'var(--brand)', marginBottom: 28 }} />
 
         <h1 style={{ fontSize: 20, fontWeight: 800, margin: '0 0 4px', color: 'var(--text-primary)' }}>
           환영합니다! 🎉
@@ -87,7 +87,7 @@ export default function OnboardingClient() {
             const sel = selected.includes(key);
             return (
               <button key={key} onClick={() => toggle(key)} style={{
-                padding: '12px', borderRadius: 10, cursor: 'pointer', textAlign: 'left',
+                padding: '12px', borderRadius: 'var(--radius-md)', cursor: 'pointer', textAlign: 'left',
                 background: sel ? 'var(--brand-light)' : 'var(--bg-base)',
                 border: `1.5px solid ${sel ? 'var(--brand)' : 'var(--border)'}`,
                 transition: 'all 0.15s',
@@ -103,7 +103,7 @@ export default function OnboardingClient() {
         {isIOS && !isPWA && (
           <div style={{
             background: 'rgba(59,123,246,0.06)', border: '1px solid rgba(59,123,246,0.15)',
-            borderRadius: 10, padding: '12px 14px', marginBottom: 16,
+            borderRadius: 'var(--radius-md)', padding: '12px 14px', marginBottom: 16,
             fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.7,
           }}>
             <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4, fontSize: 13 }}>
@@ -116,7 +116,7 @@ export default function OnboardingClient() {
 
         <button onClick={handleFinish} disabled={saving}
           style={{
-            width: '100%', padding: 14, borderRadius: 12, border: 'none', fontSize: 15, fontWeight: 800,
+            width: '100%', padding: 14, borderRadius: 'var(--radius-card)', border: 'none', fontSize: 15, fontWeight: 800,
             background: 'var(--brand)', color: '#fff',
             cursor: saving ? 'not-allowed' : 'pointer',
             opacity: saving ? 0.7 : 1,

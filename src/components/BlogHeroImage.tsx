@@ -71,7 +71,7 @@ export default function BlogHeroImage({ images, title, priority = true }: Props)
             position: 'absolute', top: 10, right: 10,
             background: 'rgba(0,0,0,0.55)', color: '#fff',
             fontSize: 11, fontWeight: 600, padding: '3px 10px',
-            borderRadius: 12, backdropFilter: 'blur(4px)',
+            borderRadius: 'var(--radius-card)', backdropFilter: 'blur(4px)',
             fontVariantNumeric: 'tabular-nums',
           }}>
             {activeIdx + 1} / {total}

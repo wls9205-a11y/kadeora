@@ -39,7 +39,7 @@ function BestCommentPreview({ postId }: { postId: number }) {
   if (!best) return null;
   return (
     <div style={{ marginTop: 6, padding: '5px 8px', borderLeft: '2px solid rgba(59,123,246,0.3)', background: 'var(--bg-hover)', borderRadius: 0 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', marginBottom: 2 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', marginBottom: 4 }}>
         <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--brand)' }}>Best</span>
         <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{best.nickname} {GRADE_EMOJI[best.grade] ?? '🌱'}</span>
         <span style={{ fontSize: 10, color: 'var(--text-tertiary)', marginLeft: 'auto' }}>♥ {best.likes_count}</span>
@@ -366,7 +366,7 @@ export default function FeedClient({
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', marginBottom: 10, padding: '7px 12px', background: 'var(--brand-bg, rgba(37,99,235,0.08))', borderRadius: 'var(--radius-sm)', border: '1px solid var(--brand-border, rgba(37,99,235,0.15))' }}>
             <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', fontWeight: 700 }}>#{activeTag}</span>
             <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>태그 필터 중</span>
-            <button onClick={() => setActiveTag(null)} style={{ marginLeft: 'auto', background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 'var(--fs-xs)', padding: '2px 6px', borderRadius: 4 }}>
+            <button onClick={() => setActiveTag(null)} style={{ marginLeft: 'auto', background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 4 }}>
               ✕ 해제
             </button>
           </div>
@@ -410,7 +410,7 @@ export default function FeedClient({
                 style={{ padding: '8px 10px', background: 'var(--bg-surface)', border: `1px solid ${isPinned ? 'var(--brand)' : 'var(--border)'}`, borderRadius: 'var(--radius-card)', transition: 'all var(--transition-fast)', position: 'relative' }}>
                 {/* 핀 배지 */}
                 {isPinned && (
-                  <div style={{ position: 'absolute', top: -1, right: 10, background: 'var(--brand)', color: '#fff', fontSize: 9, fontWeight: 600, padding: '1px 6px', borderRadius: '0 0 4px 4px' }}>
+                  <div style={{ position: 'absolute', top: -1, right: 10, background: 'var(--brand)', color: '#fff', fontSize: 10, fontWeight: 600, padding: '1px 6px', borderRadius: '0 0 4px 4px' }}>
                     📌 고정
                   </div>
                 )}
@@ -430,7 +430,7 @@ export default function FeedClient({
                     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                       <span style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: 12 }}>{displayName}</span>
                       <span style={{ fontSize: 10, color: gradeColor(post.profiles?.grade ?? 1) }}>{gradeEmoji}</span>
-                      <span style={{ fontSize: 10, padding: '0px 5px', borderRadius: 3, background: cat.bg, color: cat.color, fontWeight: 600 }}>{cat.label}</span>
+                      <span style={{ fontSize: 10, padding: '0px 5px', borderRadius: 4, background: cat.bg, color: cat.color, fontWeight: 600 }}>{cat.label}</span>
                       <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{timeAgo(post.created_at)}</span>
                     </div>
                   </div>
@@ -447,7 +447,7 @@ export default function FeedClient({
                   try { const arr = Array.from(nv).slice(-200); localStorage.setItem('kd_visited', JSON.stringify(arr)); } catch {}
                 }} style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}>
                   {post.title && (
-                    <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.4, marginBottom: 2 }}>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.4, marginBottom: 4 }}>
                       {post.title}
                     </div>
                   )}
@@ -516,14 +516,14 @@ export default function FeedClient({
                   </button>
                   {/* 북마크 카운트 */}
                   {bookmarksCount > 0 && (
-                    <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 11, color: 'var(--text-tertiary)', padding: '4px 8px' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--text-tertiary)', padding: '4px 8px' }}>
                       🔖 {numFmt(bookmarksCount)}
                     </span>
                   )}
                   {/* 팔로우 힌트 */}
                   {activeCategory !== 'following' && !post.is_anonymous && post.author_id && post.author_id !== currentUserId && (
                     <Link href={`/profile/${post.author_id}`}
-                      style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 3, fontSize: 10, color: 'var(--text-tertiary)', textDecoration: 'none', opacity: 0.6 }}>
+                      style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 4, fontSize: 10, color: 'var(--text-tertiary)', textDecoration: 'none', opacity: 0.6 }}>
                       <Users size={10} /> 팔로우
                     </Link>
                   )}

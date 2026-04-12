@@ -45,7 +45,7 @@ export default function RelatedContentCard({ type, entityName, showSignup }: Pro
 
   return (
     <div style={{
-      marginTop: 16, padding: 14, borderRadius: 12,
+      marginTop: 16, padding: 14, borderRadius: 'var(--radius-card)',
       background: 'var(--bg-surface)', border: '1px solid var(--border)',
     }}>
       <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>
@@ -57,7 +57,7 @@ export default function RelatedContentCard({ type, entityName, showSignup }: Pro
             onClick={() => trackClick('related_content', { from: pathname, to: l.href, type })}
             style={{
               display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px',
-              borderRadius: 10, background: 'var(--bg-hover)', textDecoration: 'none',
+              borderRadius: 'var(--radius-md)', background: 'var(--bg-hover)', textDecoration: 'none',
               border: '1px solid var(--border)', transition: 'border-color 0.15s',
             }}>
             <span style={{ fontSize: 22, flexShrink: 0 }}>{l.icon}</span>
@@ -73,7 +73,7 @@ export default function RelatedContentCard({ type, entityName, showSignup }: Pro
         <Link href={`/login?redirect=${encodeURIComponent(pathname)}&source=related_card`}
           style={{
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-            marginTop: 10, padding: '10px', borderRadius: 8,
+            marginTop: 10, padding: '10px', borderRadius: 'var(--radius-md)',
             background: 'rgba(59,123,246,0.06)', border: '1px solid rgba(59,123,246,0.12)',
             fontSize: 12, fontWeight: 700, color: 'var(--brand)', textDecoration: 'none',
           }}>

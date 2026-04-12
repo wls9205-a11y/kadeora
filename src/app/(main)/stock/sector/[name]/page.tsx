@@ -183,7 +183,7 @@ export default async function SectorPage({ params }: Props) {
                 {flat > 0 && <path d={arc(upDeg, flatDeg)} fill="none" stroke="var(--border)" strokeWidth="10" strokeLinecap="round" />}
                 {downCount > 0 && <path d={arc(upDeg + flatDeg, downDeg)} fill="none" stroke={stockDownColor(isKR)} strokeWidth="10" strokeLinecap="round" />}
                 <text x="40" y="37" textAnchor="middle" style={{ fontSize: 14, fontWeight: 800, fill: 'var(--text-primary)' }}>{stocks.length}</text>
-                <text x="40" y="50" textAnchor="middle" style={{ fontSize: 8, fill: 'var(--text-tertiary)' }}>종목</text>
+                <text x="40" y="50" textAnchor="middle" style={{ fontSize: 10, fill: 'var(--text-tertiary)' }}>종목</text>
               </>);
             })()}
           </svg>
@@ -234,8 +234,8 @@ export default async function SectorPage({ params }: Props) {
             return (
               <div key={s.symbol} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 'var(--sp-xs)' }}>
                 <span style={{ fontSize: 10, color: 'var(--text-tertiary)', minWidth: 50, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</span>
-                <div style={{ flex: 1, height: 6, borderRadius: 3, background: 'var(--bg-hover)', overflow: 'hidden' }}>
-                  <div style={{ height: '100%', width: `${Math.min(pct, 100)}%`, borderRadius: 3, background: `hsl(${220 - i * 20}, 70%, ${50 + i * 5}%)` }} />
+                <div style={{ flex: 1, height: 6, borderRadius: 4, background: 'var(--bg-hover)', overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: `${Math.min(pct, 100)}%`, borderRadius: 4, background: `hsl(${220 - i * 20}, 70%, ${50 + i * 5}%)` }} />
                 </div>
                 <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-secondary)', minWidth: 32, textAlign: 'right' }}>{pct.toFixed(1)}%</span>
               </div>
@@ -267,8 +267,8 @@ export default async function SectorPage({ params }: Props) {
                 <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: stockColor(pct, isKR) }}>
                   {pct > 0 ? '+' : ''}{pct.toFixed(2)}%
                 </div>
-                <div style={{ width: 30, height: 4, borderRadius: 2, background: 'var(--bg-hover)', overflow: 'hidden' }}>
-                  <div style={{ height: '100%', width: `${Math.min(Math.abs(pct) * 10, 100)}%`, borderRadius: 2, background: stockColor(pct, isKR) }} />
+                <div style={{ width: 30, height: 4, borderRadius: 4, background: 'var(--bg-hover)', overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: `${Math.min(Math.abs(pct) * 10, 100)}%`, borderRadius: 4, background: stockColor(pct, isKR) }} />
                 </div>
               </div>
             </Link>

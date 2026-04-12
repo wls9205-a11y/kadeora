@@ -185,7 +185,7 @@ export function Navigation() {
 
   /* 공통 스타일 헬퍼 */
   const navItemStyle = (active: boolean) => ({
-    padding: '0 10px',
+    padding: '0 12px',
     height: 44,
     display: 'flex' as const,
     alignItems: 'center' as const,
@@ -228,7 +228,7 @@ export function Navigation() {
               flex:1, minWidth:0, display:'flex', alignItems:'center', gap:4,
               textDecoration:'none', overflow:'hidden', padding:'0 4px',
             }}>
-              <span style={{ fontSize:8, fontWeight:700, color:'var(--brand)', padding:'1px 4px', borderRadius:3, border:'1px solid var(--brand)', flexShrink:0, lineHeight:'13px' }}>인기</span>
+              <span style={{ fontSize: 10, fontWeight:700, color:'var(--brand)', padding:'1px 4px', borderRadius: 4, border:'1px solid var(--brand)', flexShrink:0, lineHeight:'13px' }}>인기</span>
               <span style={{ fontSize:11, fontWeight:600, color:'var(--text-secondary)', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{trendingKw}</span>
             </Link>
           )}
@@ -238,7 +238,7 @@ export function Navigation() {
             flex:1, maxWidth:360, minWidth:160, height:34,
             background:'var(--bg-hover)',
             border:'1px solid var(--border)',
-            borderRadius:17, alignItems:'center', padding:'0 14px', gap: 'var(--sp-sm)',
+            borderRadius: 'var(--radius-pill)', alignItems:'center', padding:'0 14px', gap: 'var(--sp-sm)',
             textDecoration:'none', transition:'border-color var(--transition-fast)',
             justifyContent:'space-between',
           }}
@@ -249,7 +249,7 @@ export function Navigation() {
               <Search size={13} color="var(--text-tertiary)" style={{ flexShrink:0 }} />
               {trendingKw ? (
                 <span style={{ fontSize:12, color:'var(--text-secondary)', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', display:'flex', alignItems:'center', gap:4 }}>
-                  <span style={{ fontSize:9, fontWeight:700, color:'var(--brand)', padding:'0px 4px', borderRadius:3, border:'1px solid var(--brand)', lineHeight:'14px', flexShrink:0 }}>인기</span>
+                  <span style={{ fontSize: 10, fontWeight:700, color:'var(--brand)', padding:'0px 4px', borderRadius: 4, border:'1px solid var(--brand)', lineHeight:'14px', flexShrink:0 }}>인기</span>
                   {trendingKw}
                 </span>
               ) : (
@@ -264,7 +264,7 @@ export function Navigation() {
             {NAV_ITEMS.map(item => (
               <Link key={item.href} href={item.href} prefetch={true}
                 aria-current={isActive(item.href) ? 'page' : undefined}
-                style={{ ...navItemStyle(isActive(item.href)), gap: 5 }}
+                style={{ ...navItemStyle(isActive(item.href)), gap: 6 }}
                 onMouseEnter={e=>{ if(!isActive(item.href)) (e.currentTarget as HTMLElement).style.color='var(--text-primary)'; }}
                 onMouseLeave={e=>{ if(!isActive(item.href)) (e.currentTarget as HTMLElement).style.color='var(--nav-text)'; }}
               ><item.Icon size={16} />{item.label}</Link>
@@ -331,8 +331,8 @@ export function Navigation() {
                 {/* 유저 메뉴 */}
                 <div style={{ position:'relative' }}>
                   <button onClick={(e) => { e.stopPropagation(); setMenuOpen(!menuOpen); setMoreOpen(false); }} aria-label="사용자 메뉴" style={{
-                    display:'flex', alignItems:'center', gap:5,
-                    height:34, padding:'0 10px', borderRadius:17,
+                    display:'flex', alignItems:'center', gap: 6,
+                    height:34, padding:'0 10px', borderRadius: 'var(--radius-pill)',
                     background:'var(--bg-hover)', border:'1px solid var(--border)',
                     color:'var(--text-primary)', fontSize:13, cursor:'pointer',
                     transition:'border-color 0.12s', position:'relative',
@@ -354,7 +354,7 @@ export function Navigation() {
                     <span className="hidden md:inline" style={{ fontWeight:600, maxWidth:72, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
                       {profile?.nickname ?? '유저'}
                     </span>
-                    {profile?.isPremium && <span style={{ fontSize: 9, padding: '1px 4px', borderRadius: 3, background: 'linear-gradient(135deg, #FFD700, #FFA500)', color: '#000', fontWeight: 800, lineHeight: 1.2 }}>P</span>}
+                    {profile?.isPremium && <span style={{ fontSize: 10, padding: '1px 4px', borderRadius: 4, background: 'linear-gradient(135deg, #FFD700, #FFA500)', color: '#000', fontWeight: 800, lineHeight: 1.2 }}>P</span>}
                     <span style={{ fontSize: 'var(--fs-xs)', color:'var(--text-tertiary)' }}>▼</span>
                     {/* 모바일 알림 뱃지 (아바타에 통합) */}
                     {unread > 0 && (
@@ -468,7 +468,7 @@ export function Navigation() {
                   background:'var(--bg-hover)', border:'1px solid var(--border)',
                 }}><Search size={18} /></Link>
                 <Link href={`/login?redirect=${encodeURIComponent(pathname)}&source=nav`} style={{
-                  height:34, padding:'0 14px', borderRadius:17,
+                  height:34, padding:'0 14px', borderRadius: 'var(--radius-pill)',
                   border:'1px solid var(--brand)',
                   color:'var(--brand)', background:'transparent',
                   display:'flex', alignItems:'center',
@@ -479,7 +479,7 @@ export function Navigation() {
                   onMouseLeave={e=>(e.currentTarget.style.borderColor='var(--border)')}
                 >로그인</Link>
                 <Link href={`/login?redirect=${encodeURIComponent(pathname)}&source=nav`} className="hidden md:flex" style={{
-                  height:34, padding:'0 14px', borderRadius:17,
+                  height:34, padding:'0 14px', borderRadius: 'var(--radius-pill)',
                   background:'var(--brand)', color:'var(--text-inverse, #fff)',
                   alignItems:'center', textDecoration:'none', fontSize:'var(--fs-xs)', fontWeight:700,
                 }}>회원가입</Link>
@@ -509,7 +509,7 @@ export function Navigation() {
               color: active ? 'var(--brand)' : 'var(--text-tertiary)',
               transition:'color var(--transition-fast) ease',
             }}>
-              {active && <span style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:24, height:2.5, borderRadius:2, background:'var(--brand)' }} />}
+              {active && <span style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:24, height:2.5, borderRadius: 4, background:'var(--brand)' }} />}
               <item.Icon size={18} strokeWidth={active ? 2.5 : 1.8} />
               <span style={{ fontSize:10, fontWeight: active ? 700 : 500, lineHeight:1.2 }}>{item.label}</span>
             </Link>
@@ -528,7 +528,7 @@ export function Navigation() {
             background:'none', border:'none', cursor:'pointer',
           }}
         >
-          {moreOpen && <span style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:24, height:2.5, borderRadius:2, background:'var(--brand)' }} />}
+          {moreOpen && <span style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:24, height:2.5, borderRadius: 4, background:'var(--brand)' }} />}
           <MoreHorizontal size={18} strokeWidth={moreOpen ? 2.5 : 1.8} />
           <span style={{ fontSize:10, fontWeight: moreOpen ? 700 : 500, lineHeight:1.2 }}>더보기</span>
         </button>
@@ -554,14 +554,14 @@ export function Navigation() {
             position:'absolute', bottom:60, left:8, right:8,
             maxWidth: 400, marginLeft: 'auto', marginRight: 'auto',
             background:'var(--bg-surface)', border:'1px solid var(--border)',
-            borderRadius: 16, padding:'16px 14px 12px', boxShadow:'0 -8px 32px rgba(0,0,0,0.3)',
+            borderRadius: 'var(--radius-lg)', padding:'16px 14px 12px', boxShadow:'0 -8px 32px rgba(0,0,0,0.3)',
             maxHeight:'72vh', overflowY:'auto',
           }}>
             {/* 헤더 */}
             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom: 16 }}>
               <span style={{ fontSize:15, fontWeight:800, color:'var(--text-primary)', letterSpacing:'-0.3px' }}>더보기</span>
               <button onClick={() => setMoreOpen(false)} style={{
-                width:28, height:28, borderRadius:'50%', background:'var(--bg-hover)', border:'none',
+                width: 32, height: 32, borderRadius:'50%', background:'var(--bg-hover)', border:'none',
                 color:'var(--text-tertiary)', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center',
               }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
@@ -575,8 +575,8 @@ export function Navigation() {
                   <div style={{ display:'grid', gridTemplateColumns:'repeat(4, 1fr)', gap: 4 }}>
                     {items.map(item => (
                       <Link key={item.href} href={item.href} onClick={() => setMoreOpen(false)} style={{
-                        display:'flex', flexDirection:'column', alignItems:'center', gap: 5,
-                        padding:'14px 6px 12px', borderRadius: 12, textDecoration:'none',
+                        display:'flex', flexDirection:'column', alignItems:'center', gap: 6,
+                        padding:'14px 6px 12px', borderRadius: 'var(--radius-card)', textDecoration:'none',
                         color:'var(--text-primary)', position:'relative', background:'var(--bg-hover)',
                       }}
                         onMouseEnter={e => (e.currentTarget.style.background = 'var(--border)')}
@@ -584,9 +584,9 @@ export function Navigation() {
                       >
                         <span style={{ fontSize: 22, lineHeight:1 }}>{item.emoji}</span>
                         <span style={{ fontSize: 12, fontWeight:600, textAlign:'center', lineHeight: 1.25, color:'var(--text-secondary)', wordBreak:'keep-all' }}>{item.label}</span>
-                        {item.sub && <span style={{ fontSize: 9, color:'var(--text-tertiary)', textAlign:'center', lineHeight:1.2, marginTop: -2 }}>{item.sub}</span>}
+                        {item.sub && <span style={{ fontSize: 10, color:'var(--text-tertiary)', textAlign:'center', lineHeight:1.2, marginTop: -2 }}>{item.sub}</span>}
                         {item.emoji === '🔔' && unread > 0 && (
-                          <span style={{ position: 'absolute', top: 4, right: 4, minWidth: 16, height: 16, borderRadius: 8, background: 'var(--accent-red)', color: '#fff', fontSize: 9, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px' }}>{unread > 9 ? '9+' : unread}</span>
+                          <span style={{ position: 'absolute', top: 4, right: 4, minWidth: 16, height: 16, borderRadius: 'var(--radius-md)', background: 'var(--accent-red)', color: '#fff', fontSize: 10, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px' }}>{unread > 9 ? '9+' : unread}</span>
                         )}
                       </Link>
                     ))}
@@ -598,10 +598,10 @@ export function Navigation() {
             {/* 하단 액션 바 */}
             <div style={{ paddingTop: 12, display:'flex', gap: 6 }}>
               <button onClick={toggleTheme} style={{
-                flex:1, padding:'10px 0', borderRadius: 10,
+                flex:1, padding:'10px 0', borderRadius: 'var(--radius-md)',
                 background:'var(--bg-hover)', color:'var(--text-primary)',
                 fontSize:12, fontWeight:600, border:'1px solid var(--border)', cursor:'pointer',
-                display:'flex', alignItems:'center', justifyContent:'center', gap: 5,
+                display:'flex', alignItems:'center', justifyContent:'center', gap: 6,
               }}>
                 {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
                 {theme === 'dark' ? '라이트' : '다크'}
@@ -609,13 +609,13 @@ export function Navigation() {
               {userId && (
                 <>
                   <Link href={`/profile/${userId}`} onClick={() => setMoreOpen(false)} style={{
-                    flex:1, padding:'10px 0', borderRadius: 10,
+                    flex:1, padding:'10px 0', borderRadius: 'var(--radius-md)',
                     background:'var(--bg-hover)', color:'var(--text-primary)',
                     fontSize:12, fontWeight:600, textDecoration:'none', border:'1px solid var(--border)',
                     display:'flex', alignItems:'center', justifyContent:'center',
                   }}>내 프로필</Link>
                   <Link href="/notifications" onClick={() => setMoreOpen(false)} style={{
-                    flex:1, padding:'10px 0', borderRadius: 10,
+                    flex:1, padding:'10px 0', borderRadius: 'var(--radius-md)',
                     background: unread > 0 ? 'var(--brand)' : 'var(--bg-hover)',
                     color: unread > 0 ? '#fff' : 'var(--text-primary)',
                     fontSize:12, fontWeight:600, textDecoration:'none', border: unread > 0 ? 'none' : '1px solid var(--border)',
@@ -630,7 +630,7 @@ export function Navigation() {
             position:'absolute', top:52, right:16,
             width: 420,
             background:'var(--bg-surface)', border:'1px solid var(--border)',
-            borderRadius: 14, padding:'16px 14px', boxShadow:'0 8px 32px rgba(0,0,0,0.25)',
+            borderRadius: 'var(--radius-card)', padding:'16px 14px', boxShadow:'0 8px 32px rgba(0,0,0,0.25)',
             maxHeight:'75vh', overflowY:'auto',
           }}>
             {(['투자 정보','주식','부동산','도구','설정'] as const).map((group, gi) => {
@@ -641,8 +641,8 @@ export function Navigation() {
                   <div style={{ display:'grid', gridTemplateColumns:'repeat(4, 1fr)', gap: 4 }}>
                     {items.map(item => (
                       <Link key={item.href + '-d'} href={item.href} onClick={() => setMoreOpen(false)} style={{
-                        display:'flex', flexDirection:'column', alignItems:'center', gap: 5,
-                        padding:'14px 6px 12px', borderRadius: 12, textDecoration:'none',
+                        display:'flex', flexDirection:'column', alignItems:'center', gap: 6,
+                        padding:'14px 6px 12px', borderRadius: 'var(--radius-card)', textDecoration:'none',
                         color:'var(--text-primary)', position:'relative', background:'var(--bg-hover)',
                       }}
                         onMouseEnter={e => (e.currentTarget.style.background = 'var(--border)')}
@@ -651,7 +651,7 @@ export function Navigation() {
                         <span style={{ fontSize: 22, lineHeight:1 }}>{item.emoji}</span>
                         <span style={{ fontSize: 12, fontWeight:600, textAlign:'center', lineHeight: 1.25, color:'var(--text-secondary)' }}>{item.label}</span>
                         {item.emoji === '🔔' && unread > 0 && (
-                          <span style={{ position: 'absolute', top: 4, right: 4, minWidth: 16, height: 16, borderRadius: 8, background: 'var(--accent-red)', color: '#fff', fontSize: 9, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px' }}>{unread > 9 ? '9+' : unread}</span>
+                          <span style={{ position: 'absolute', top: 4, right: 4, minWidth: 16, height: 16, borderRadius: 'var(--radius-md)', background: 'var(--accent-red)', color: '#fff', fontSize: 10, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px' }}>{unread > 9 ? '9+' : unread}</span>
                         )}
                       </Link>
                     ))}
@@ -662,10 +662,10 @@ export function Navigation() {
             })}
             <div style={{ paddingTop: 12, display:'flex', gap: 6 }}>
               <button onClick={toggleTheme} style={{
-                flex:1, padding:'10px 0', borderRadius: 10,
+                flex:1, padding:'10px 0', borderRadius: 'var(--radius-md)',
                 background:'var(--bg-hover)', color:'var(--text-primary)',
                 fontSize:12, fontWeight:600, border:'1px solid var(--border)', cursor:'pointer',
-                display:'flex', alignItems:'center', justifyContent:'center', gap: 5,
+                display:'flex', alignItems:'center', justifyContent:'center', gap: 6,
               }}>
                 {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
                 {theme === 'dark' ? '라이트' : '다크'}
@@ -673,19 +673,19 @@ export function Navigation() {
               {userId && (
                 <>
                   <Link href={`/profile/${userId}`} onClick={() => setMoreOpen(false)} style={{
-                    flex:1, padding:'10px 0', borderRadius: 10,
+                    flex:1, padding:'10px 0', borderRadius: 'var(--radius-md)',
                     background:'var(--bg-hover)', color:'var(--text-primary)',
                     fontSize:12, fontWeight:600, textDecoration:'none', border:'1px solid var(--border)',
                     display:'flex', alignItems:'center', justifyContent:'center',
                   }}>내 프로필</Link>
                   <Link href="/write" onClick={() => setMoreOpen(false)} style={{
-                    flex:1, padding:'10px 0', borderRadius: 10,
+                    flex:1, padding:'10px 0', borderRadius: 'var(--radius-md)',
                     background:'var(--bg-hover)', color:'var(--text-primary)',
                     fontSize:12, fontWeight:600, textDecoration:'none', border:'1px solid var(--border)',
                     display:'flex', alignItems:'center', justifyContent:'center',
                   }}>글쓰기</Link>
                   <Link href="/notifications" onClick={() => setMoreOpen(false)} style={{
-                    flex:1, padding:'10px 0', borderRadius: 10,
+                    flex:1, padding:'10px 0', borderRadius: 'var(--radius-md)',
                     background: unread > 0 ? 'var(--brand)' : 'var(--bg-hover)',
                     color: unread > 0 ? '#fff' : 'var(--text-primary)',
                     fontSize:12, fontWeight:600, textDecoration:'none', border: unread > 0 ? 'none' : '1px solid var(--border)',

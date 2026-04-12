@@ -38,7 +38,7 @@ export default function BlogMidCTA({ category, slug, userCount = 66 }: Props) {
 
   return (
     <div ref={ref} style={{
-      margin: '24px 0', borderRadius: 14, overflow: 'hidden', position: 'relative',
+      margin: '24px 0', borderRadius: 'var(--radius-card)', overflow: 'hidden', position: 'relative',
       background: 'linear-gradient(135deg, rgba(12,21,40,0.95), rgba(20,30,55,0.95))',
       border: '1px solid rgba(59,123,246,0.15)',
       opacity: visible ? 1 : 0, transform: visible ? 'translateY(0)' : 'translateY(8px)',
@@ -55,7 +55,7 @@ export default function BlogMidCTA({ category, slug, userCount = 66 }: Props) {
           ))}
         </div>
         <a href={loginUrl} onClick={() => trackConversion('cta_click', 'blog_mid_cta', { category })} style={{
-          display: 'flex', width: '100%', padding: '12px', borderRadius: 10,
+          display: 'flex', width: '100%', padding: '12px', borderRadius: 'var(--radius-md)',
           background: '#FEE500', color: '#191919', fontSize: 14, fontWeight: 700,
           textDecoration: 'none', alignItems: 'center', justifyContent: 'center', gap: 8, boxSizing: 'border-box',
         }}>

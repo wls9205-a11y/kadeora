@@ -183,7 +183,7 @@ export default function NoticeBanner() {
 
         {/* 여러 전광판일 때 인디케이터 */}
         {notices.length > 1 && (
-          <div style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', display: 'flex', gap: 3, zIndex: 3 }}>
+          <div style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', display: 'flex', gap: 4, zIndex: 3 }}>
             {notices.map((_, i) => (
               <span key={i} style={{ width: 5, height: 5, borderRadius: '50%', background: i === currentIdx ? textColor : 'rgba(255,255,255,0.2)', transition: 'background 0.3s' }} />
             ))}
@@ -207,7 +207,7 @@ export default function NoticeBanner() {
                 </span>
                 {notice.is_paid && (
                   <span style={{
-                    fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 'var(--radius-md)', fontWeight: 700,
+                    fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 'var(--radius-md)', fontWeight: 700,
                     background: tier === 'urgent' ? 'rgba(248,113,113,0.12)' : tier === 'premium' ? 'rgba(251,191,36,0.12)' : 'rgba(52,211,153,0.12)',
                     color: tier === 'urgent' ? 'var(--accent-red)' : tier === 'premium' ? 'var(--accent-yellow)' : 'var(--accent-green)',
                   }}>
@@ -245,22 +245,22 @@ export default function NoticeBanner() {
             {/* 통계 (유료만) */}
             {notice.is_paid && (
               <div style={{ display: 'flex', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-lg)' }}>
-                <div style={{ flex: 1, textAlign: 'center', padding: '10px 8px', background: 'var(--bg-hover)', borderRadius: 8 }}>
+                <div style={{ flex: 1, textAlign: 'center', padding: '10px 8px', background: 'var(--bg-hover)', borderRadius: 'var(--radius-md)' }}>
                   <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)' }}>{notice.impression_count || 0}</div>
                   <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>노출</div>
                 </div>
-                <div style={{ flex: 1, textAlign: 'center', padding: '10px 8px', background: 'var(--bg-hover)', borderRadius: 8 }}>
+                <div style={{ flex: 1, textAlign: 'center', padding: '10px 8px', background: 'var(--bg-hover)', borderRadius: 'var(--radius-md)' }}>
                   <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)' }}>{notice.click_count || 0}</div>
                   <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>클릭</div>
                 </div>
-                <div style={{ flex: 1, textAlign: 'center', padding: '10px 8px', background: 'var(--bg-hover)', borderRadius: 8 }}>
+                <div style={{ flex: 1, textAlign: 'center', padding: '10px 8px', background: 'var(--bg-hover)', borderRadius: 'var(--radius-md)' }}>
                   <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--brand)' }}>
                     {notice.impression_count ? ((notice.click_count / notice.impression_count) * 100).toFixed(1) : '0.0'}%
                   </div>
                   <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>클릭률</div>
                 </div>
                 {getTimeRemaining() && (
-                  <div style={{ flex: 1, textAlign: 'center', padding: '10px 8px', background: 'var(--bg-hover)', borderRadius: 8 }}>
+                  <div style={{ flex: 1, textAlign: 'center', padding: '10px 8px', background: 'var(--bg-hover)', borderRadius: 'var(--radius-md)' }}>
                     <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--warning)' }}>{getTimeRemaining()}</div>
                     <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>잔여</div>
                   </div>

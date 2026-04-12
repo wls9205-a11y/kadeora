@@ -66,7 +66,7 @@ export default function StockMAOverlay({ symbol, currency }: { symbol: string; c
         <div style={{ display: 'flex', gap: 6 }}>
           {[{ k: 'ma5' as const, l: 'MA5', c: '#F59E0B' }, { k: 'ma20' as const, l: 'MA20', c: '#10B981' }, { k: 'ma60' as const, l: 'MA60', c: '#EF4444' }].map(m => (
             <button key={m.k} onClick={() => setShow(p => ({ ...p, [m.k]: !p[m.k] }))} style={{
-              fontSize: 10, fontWeight: 600, padding: '2px 6px', borderRadius: 4, border: 'none', cursor: 'pointer', fontFamily: 'inherit',
+              fontSize: 10, fontWeight: 600, padding: '3px 8px', borderRadius: 4, border: 'none', cursor: 'pointer', fontFamily: 'inherit',
               background: show[m.k] ? m.c + '20' : 'var(--bg-hover)', color: show[m.k] ? m.c : 'var(--text-tertiary)',
             }}>{m.l}</button>
           ))}

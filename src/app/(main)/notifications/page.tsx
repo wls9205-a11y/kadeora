@@ -145,7 +145,7 @@ export default function NotificationsPage() {
           ))}
         </div>
       ) : notifs.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-tertiary)', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 8 }}>
+        <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-tertiary)', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)' }}>
           <div style={{ fontSize: 40, marginBottom: 10 }}>🔔</div>
           <div style={{ fontSize: 'var(--fs-md)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 'var(--sp-xs)' }}>아직 알림이 없어요</div>
           <div style={{ fontSize: 'var(--fs-sm)' }}>댓글, 좋아요, 팔로우 알림이 여기 표시돼요</div>

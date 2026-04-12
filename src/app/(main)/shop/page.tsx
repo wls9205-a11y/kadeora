@@ -102,7 +102,7 @@ export default function ShopPage() {
               </div>
               {/* 연간 */}
               <div style={{ background: 'rgba(59,123,246,0.08)', border: '1px solid rgba(59,123,246,0.3)', borderRadius: 'var(--radius-md)', padding: '14px 12px', position: 'relative' }}>
-                <div style={{ position: 'absolute', top: -8, right: 8, background: 'var(--brand)', color: '#fff', fontSize: 9, fontWeight: 800, padding: '2px 8px', borderRadius: 10 }}>추천</div>
+                <div style={{ position: 'absolute', top: -8, right: 8, background: 'var(--brand)', color: '#fff', fontSize: 10, fontWeight: 800, padding: '3px 8px', borderRadius: 'var(--radius-md)' }}>추천</div>
                 <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 6 }}>연간</div>
                 <div style={{ fontSize: 24, fontWeight: 900, color: '#E8F2FF', letterSpacing: '-0.5px' }}>₩{fmt(PRO_PRICING.yearly.price)}</div>
                 <div style={{ fontSize: 10, color: 'var(--brand)', marginTop: 2 }}>{PRO_PRICING.yearly.perMonth} · {PRO_PRICING.yearly.discount}</div>
@@ -149,7 +149,7 @@ export default function ShopPage() {
                 {r.free === '❌' ? <Cross /> : r.free === '✅' ? <Check /> : r.free}
               </span>
               <span style={{ fontSize: 11, textAlign: 'center', color: 'var(--brand)', fontWeight: 600 }}>
-                {r.pro === '✅' ? <Check /> : r.pro.startsWith('✅') ? <><Check /> <span style={{ fontSize: 9 }}>{r.pro.replace('✅ ', '')}</span></> : r.pro === '❌' ? <Cross /> : r.pro}
+                {r.pro === '✅' ? <Check /> : r.pro.startsWith('✅') ? <><Check /> <span style={{ fontSize: 10 }}>{r.pro.replace('✅ ', '')}</span></> : r.pro === '❌' ? <Cross /> : r.pro}
               </span>
             </div>
           ))}

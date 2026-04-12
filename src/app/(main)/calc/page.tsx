@@ -63,7 +63,7 @@ export default function CalcHubPage() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 6 }}>
               {calcs.map(c => (
                 <Link key={c.slug} href={`/calc/${c.category}/${c.slug}`} style={{
-                  display: 'block', padding: '10px 12px', borderRadius: 10, textDecoration: 'none',
+                  display: 'block', padding: '10px 12px', borderRadius: 'var(--radius-md)', textDecoration: 'none',
                   background: 'var(--bg-surface)', border: '1px solid var(--border)',
                   fontSize: 13, fontWeight: 600, color: 'var(--text-primary)',
                 }}>

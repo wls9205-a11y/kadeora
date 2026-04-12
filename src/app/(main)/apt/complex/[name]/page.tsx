@@ -571,7 +571,7 @@ export default async function ComplexDetailPage({ params }: Props) {
                 </span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span style={{
-                    padding: '2px 8px', borderRadius: 'var(--radius-xs)', fontSize: 10, fontWeight: 800,
+                    padding: '3px 8px', borderRadius: 'var(--radius-xs)', fontSize: 10, fontWeight: 800,
                     background: isJeonse ? 'rgba(59,130,246,0.1)' : 'rgba(249,115,22,0.1)',
                     color: isJeonse ? '#3b82f6' : '#f97316',
                   }}>{isJeonse ? '전세' : '월세'}</span>
@@ -629,7 +629,7 @@ export default async function ComplexDetailPage({ params }: Props) {
               textDecoration: 'none', color: 'inherit', transition: 'opacity 0.12s',
             }}>
               <span style={{ fontSize: 13, color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 600 }}>{b.title}</span>
-              <span style={{ fontSize: 11, color: 'var(--text-tertiary)', flexShrink: 0, marginLeft: 8, background: 'var(--bg-hover)', padding: '2px 8px', borderRadius: 4 }}>👀 {b.view_count || 0}</span>
+              <span style={{ fontSize: 11, color: 'var(--text-tertiary)', flexShrink: 0, marginLeft: 8, background: 'var(--bg-hover)', padding: '3px 8px', borderRadius: 4 }}>👀 {b.view_count || 0}</span>
             </Link>
           ))}
         </div>

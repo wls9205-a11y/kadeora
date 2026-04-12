@@ -65,9 +65,9 @@ export default function AptCommentInline({ houseKey, houseNm, houseType }: { hou
         <div style={{ marginBottom: 'var(--sp-md)' }}>
           {commentImage && (
             <div style={{ marginBottom: 6, display: 'inline-flex', position: 'relative' }}>
-              <img src={commentImage} alt="첨부" style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 6, border: '1px solid var(--border)' }} />
+              <img src={commentImage} alt="첨부" style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }} />
               <button onClick={() => setCommentImage(null)} aria-label="이미지 제거"
-                style={{ position: 'absolute', top: -6, right: -6, width: 16, height: 16, borderRadius: '50%', background: 'var(--bg-surface)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: 9, color: 'var(--text-tertiary)', padding: 0 }}>✕</button>
+                style={{ position: 'absolute', top: -6, right: -6, width: 16, height: 16, borderRadius: '50%', background: 'var(--bg-surface)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: 10, color: 'var(--text-tertiary)', padding: 0 }}>✕</button>
             </div>
           )}
           <div style={{ position: 'relative' }}>
@@ -94,7 +94,7 @@ export default function AptCommentInline({ houseKey, houseNm, houseType }: { hou
         {comments.length === 0 && <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-tertiary)', fontSize: 14 }}>첫 한줄평을 남겨보세요!</div>}
         {comments.map((c: Record<string, any>) => (
           <div key={c.id} style={{ display: 'flex', gap: 10, padding: '10px 0', borderBottom: '1px solid var(--border)' }}>
-            <div style={{ width: 28, height: 28, borderRadius: '50%', flexShrink: 0, background: getAvatarColor(c.nickname || '사용자'), display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 11, fontWeight: 700 }}>
+            <div style={{ width: 32, height: 32, borderRadius: '50%', flexShrink: 0, background: getAvatarColor(c.nickname || '사용자'), display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 11, fontWeight: 700 }}>
               {(c.nickname || '사')[0].toUpperCase()}
             </div>
             <div style={{ flex: 1 }}>
@@ -103,7 +103,7 @@ export default function AptCommentInline({ houseKey, houseNm, houseType }: { hou
               <div style={{ fontSize: 14, color: 'var(--text-primary)', lineHeight: 1.6, marginTop: 3 }}>{c.content}</div>
               {c.image_url && (
                 <a href={c.image_url} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', marginTop: 4 }}>
-                  <img src={c.image_url} alt="댓글 이미지" style={{ maxWidth: 140, maxHeight: 100, borderRadius: 6, objectFit: 'cover', border: '1px solid var(--border)' }} />
+                  <img src={c.image_url} alt="댓글 이미지" style={{ maxWidth: 140, maxHeight: 100, borderRadius: 'var(--radius-sm)', objectFit: 'cover', border: '1px solid var(--border)' }} />
                 </a>
               )}
             </div>

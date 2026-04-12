@@ -258,7 +258,7 @@ export default function ShareButtons({ title, postId, content, compact, category
   return (
     <>
       <button onClick={() => setOpen(true)} aria-label="공유" style={{
-        display: 'inline-flex', alignItems: 'center', gap: 5,
+        display: 'inline-flex', alignItems: 'center', gap: 6,
         padding: '8px 16px', borderRadius: 'var(--radius-md)',
         background: 'linear-gradient(135deg, rgba(59,123,246,0.08) 0%, rgba(96,165,250,0.08) 100%)',
         border: '1px solid rgba(59,123,246,0.2)',
@@ -286,7 +286,7 @@ function ShareGrid({ platforms, share, copied }: { platforms: Platform[]; share:
             {p.id === 'copy' && copied ? '✓' : p.emoji}
           </div>
           <span style={{ fontSize: 10, color: 'var(--text-secondary)' }}>{p.id === 'copy' && copied ? '복사됨!' : p.label}</span>
-          {p.isNew && <span style={{ position: 'absolute', top: -4, right: -4, fontSize: 8, background: '#EF4444', color: '#fff', padding: '1px 4px', borderRadius: 4, fontWeight: 700 }}>N</span>}
+          {p.isNew && <span style={{ position: 'absolute', top: -4, right: -4, fontSize: 10, background: '#EF4444', color: '#fff', padding: '1px 4px', borderRadius: 4, fontWeight: 700 }}>N</span>}
         </button>
       ))}
     </div>

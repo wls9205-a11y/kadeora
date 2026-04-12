@@ -184,7 +184,7 @@ export default function AptReviewSection({ aptName, region }: { aptName: string;
           <div key={r.id} style={{ padding: '10px 0', borderBottom: '1px solid var(--border)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', marginBottom: 6 }}>
               <div style={{
-                width: 24, height: 24, borderRadius: '50%',
+                width: 28, height: 28, borderRadius: '50%',
                 background: getAvatarColor(r.profiles?.nickname || ''), display: 'flex',
                 alignItems: 'center', justifyContent: 'center',
                 color: 'var(--text-inverse)', fontSize: 'var(--fs-xs)', fontWeight: 600,
@@ -194,7 +194,7 @@ export default function AptReviewSection({ aptName, region }: { aptName: string;
               <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-primary)' }}>{r.profiles?.nickname || '익명'}</span>
               <StarRating rating={r.rating} size={10} />
               {r.is_resident && (
-                <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 4px', borderRadius: 3, background: 'var(--accent-green-bg)', color: 'var(--accent-green)' }}>거주중</span>
+                <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 4px', borderRadius: 4, background: 'var(--accent-green-bg)', color: 'var(--accent-green)' }}>거주중</span>
               )}
               <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginLeft: 'auto' }}>{timeAgo(r.created_at)}</span>
             </div>
@@ -219,7 +219,7 @@ export default function AptReviewSection({ aptName, region }: { aptName: string;
                 {r.likes_count > 0 ? r.likes_count : '좋아요'}
               </button>
               <button aria-label="신고" onClick={() => handleReport(r.id)} style={{
-                display: 'flex', alignItems: 'center', gap: 3, padding: '3px 6px',
+                display: 'flex', alignItems: 'center', gap: 4, padding: '3px 8px',
                 background: 'transparent', border: 'none', cursor: 'pointer',
                 fontSize: 'var(--fs-xs)', color: reportedSet.has(r.id) ? 'var(--accent-red)' : 'var(--text-tertiary)',
                 opacity: reportedSet.has(r.id) ? 0.5 : 1,

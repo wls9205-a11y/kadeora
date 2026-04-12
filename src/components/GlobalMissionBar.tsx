@@ -51,13 +51,13 @@ export default function GlobalMissionBar() {
     return (
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '8px 12px', marginBottom: 8, borderRadius: 8,
+        padding: '8px 12px', marginBottom: 8, borderRadius: 'var(--radius-md)',
         background: 'linear-gradient(135deg, rgba(16,185,129,0.08), rgba(59,123,246,0.06))',
         border: '1px solid rgba(16,185,129,0.15)', fontSize: 13,
       }}>
         <span style={{ color: 'var(--text-secondary)' }}>📅 오늘 출석하고 <strong style={{ color: 'var(--brand)' }}>+10P</strong> 받기</span>
         <button onClick={handleAttend} disabled={checking} style={{
-          padding: '4px 14px', borderRadius: 6, border: 'none',
+          padding: '4px 14px', borderRadius: 'var(--radius-sm)', border: 'none',
           background: 'var(--brand)', color: '#fff', fontSize: 12, fontWeight: 700,
           cursor: checking ? 'not-allowed' : 'pointer', opacity: checking ? 0.6 : 1,
         }}>체크!</button>
@@ -72,7 +72,7 @@ export default function GlobalMissionBar() {
 
     return (
       <div style={{
-        marginBottom: 8, borderRadius: 8,
+        marginBottom: 8, borderRadius: 'var(--radius-md)',
         background: 'linear-gradient(135deg, rgba(251,191,36,0.08), rgba(59,123,246,0.06))',
         border: '1px solid rgba(251,191,36,0.15)', fontSize: 13, overflow: 'hidden',
       }}>
@@ -95,8 +95,8 @@ export default function GlobalMissionBar() {
         {expanded && (
           <div style={{ padding: '0 12px 10px', display: 'flex', flexDirection: 'column', gap: 6 }}>
             {/* 프로그레스 바 */}
-            <div style={{ height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
-              <div style={{ height: '100%', width: `${(done / total) * 100}%`, background: 'var(--brand)', borderRadius: 2, transition: 'width 0.3s' }} />
+            <div style={{ height: 4, borderRadius: 4, background: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
+              <div style={{ height: '100%', width: `${(done / total) * 100}%`, background: 'var(--brand)', borderRadius: 4, transition: 'width 0.3s' }} />
             </div>
 
             {MISSIONS.map(m => {
@@ -108,7 +108,7 @@ export default function GlobalMissionBar() {
                   onClick={e => isDone && e.preventDefault()}
                   style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    padding: '6px 10px', borderRadius: 6,
+                    padding: '6px 10px', borderRadius: 'var(--radius-sm)',
                     background: isDone ? 'rgba(34,197,94,0.06)' : 'rgba(255,255,255,0.03)',
                     border: `1px solid ${isDone ? 'rgba(34,197,94,0.15)' : 'rgba(255,255,255,0.05)'}`,
                     textDecoration: 'none', color: 'inherit',

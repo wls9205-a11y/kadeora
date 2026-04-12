@@ -70,7 +70,7 @@ export default async function ProfilePage({ params }: Props) {
           { label: '좋아요', value: profile?.likes_count || 0 },
           { label: '출석', value: profile?.streak_days || 0 },
         ].map(s => (
-          <div key={s.label} style={{ textAlign: 'center', padding: 8, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 6 }}>
+          <div key={s.label} style={{ textAlign: 'center', padding: 8, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}>
             <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)' }}>{s.value}</div>
             <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 1 }}>{s.label}</div>
           </div>
@@ -100,7 +100,7 @@ export default async function ProfilePage({ params }: Props) {
                 <div style={{ fontSize: 11, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {item.emoji} {item.title}
                 </div>
-                <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginTop: 1 }}>
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 1 }}>
                   {item.type === 'post' ? '글 작성' : '댓글'} · {new Date(item.date).toLocaleDateString('ko-KR')}
                 </div>
               </div>
