@@ -202,7 +202,7 @@ export async function GET(req: NextRequest) {
         safeCount((sb as any).from('blog_bookmarks').select('id', { count: 'exact', head: true })),
         safeCount((sb as any).from('stock_watchlist').select('id', { count: 'exact', head: true })),
         safeCount((sb as any).from('price_alerts').select('id', { count: 'exact', head: true })),
-        safeCount((sb as any).from('attendance').select('id', { count: 'exact', head: true })),
+        safeCount((sb as any).from('attendance').select('user_id', { count: 'exact', head: true })),
         safeCount(sb.from('profiles').select('id', { count: 'exact', head: true }).eq('first_mission_completed', true).neq('is_seed', true)),
       ]);
 

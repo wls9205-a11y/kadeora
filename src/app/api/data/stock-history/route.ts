@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
     const sb = await createSupabaseServer();
     const d30 = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10);
     const { data } = await (sb as any).from('stock_price_history')
-      .select('symbol,date,open,high,low,close,volume')
+      .select('symbol,date,open_price,high_price,low_price,close_price,volume')
       .gte('date', d30)
       .order('date', { ascending: false })
       .limit(10000);

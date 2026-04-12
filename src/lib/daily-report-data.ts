@@ -232,9 +232,8 @@ export async function fetchDailyReportData(region: ReportRegion): Promise<DailyR
 
     // ── 신규 21: 커뮤니티 핫토픽 — 인기 투표 ──
     (sb as any).from('post_polls')
-      .select('id, title, post_id, total_votes, created_at')
-      .gt('total_votes', 0)
-      .order('total_votes', { ascending: false })
+      .select('id, post_id, expires_at')
+      .order('id', { ascending: false })
       .limit(3),
 
     // ── 신규 22: VS 배틀 ──

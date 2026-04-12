@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { SITE_URL } from '@/lib/constants';
 import { buildFinancePrompt, generateAndValidate } from '@/lib/blog-prompt-templates';
 
-export const maxDuration = 300;
+export const maxDuration = 60;
 
 const TOPICS = [
   { slug: 'transfer-tax-guide-2026', title: '2026 양도소득세 완벽 가이드 — 1주택 비과세 조건부터 중과세율까지', tags: ['양도세', '비과세', '1주택', '다주택자', '양도소득세'], calc: '/calc/property-tax/capital-gains-housing', cat: '부동산 세금' },
@@ -30,7 +30,7 @@ export async function GET(_req: NextRequest) {
     const { data: existing } = await sb.from('blog_posts').select('slug').in('slug', TOPICS.map(t => t.slug));
     const existingSlugs = new Set((existing || []).map((r: any) => r.slug));
     let aiCalls = 0;
-    const MAX_AI_CALLS = 3;
+    const MAX_AI_CALLS = 1;
 
     for (const topic of TOPICS) {
       if (created >= 2 || aiCalls >= MAX_AI_CALLS) break;

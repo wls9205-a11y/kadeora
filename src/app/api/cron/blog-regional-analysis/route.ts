@@ -5,7 +5,7 @@ import { withCronLogging } from '@/lib/cron-logger';
 import { generateMetaDesc, generateMetaKeywords } from '@/lib/blog-seo-utils';
 import { NextRequest, NextResponse } from 'next/server';
 
-export const maxDuration = 300;
+export const maxDuration = 60;
 
 const REGIONS = ['서울', '경기', '부산', '대구', '인천', '광주', '대전', '울산', '세종', '강원', '충북', '충남', '경북', '경남', '전북', '전남', '제주'];
 
@@ -16,7 +16,7 @@ export async function GET(_req: NextRequest) {
     const month = new Date().toISOString().slice(0, 7);
     let created = 0;
     let aiCalls = 0;
-    const MAX_AI_CALLS = 3; // 타임아웃 방지: AI 호출 최대 3회
+    const MAX_AI_CALLS = 1; // 타임아웃 완전 방지: 1회로 제한
 
     // 날짜 기반 오프셋 → 매일 다른 지역부터 시작 (17일이면 전체 순환)
     const dayOfMonth = new Date().getDate();

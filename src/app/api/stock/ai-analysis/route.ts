@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
 
     // 최근 가격 히스토리
     const { data: priceHistory } = await (supabase as any).from('stock_price_history')
-      .select('date, close, volume')
+      .select('date, close_price, volume')
       .eq('symbol', symbol.toUpperCase())
       .order('date', { ascending: false })
       .limit(30);
@@ -109,7 +109,7 @@ export async function POST(req: NextRequest) {
     }
 
     const priceData = priceHistory?.slice(0, 20).map((p: any) =>
-      `${p.date}: ${Number(p.close).toLocaleString()}원`
+      `${p.date}: ${Number(p.close_price).toLocaleString()}원`
     ).join(', ') || '없음';
 
     const newsData = news?.map((n: any) =>

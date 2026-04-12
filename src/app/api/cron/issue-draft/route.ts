@@ -217,8 +217,7 @@ async function handler(_req: NextRequest) {
 
   // 자동 발행 판정
   const canAutoPublish = config.auto_publish_enabled
-    && issue.final_score >= (config.auto_publish_min_score || 60)
-    && issue.is_auto_publish
+    && issue.final_score >= (config.auto_publish_min_score ?? 40)
     && !issue.block_reason
     && check.passed
     && !(config.auto_publish_blocked_categories || []).includes(issue.category);

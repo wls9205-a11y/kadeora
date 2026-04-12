@@ -71,11 +71,11 @@ export async function GET(req: NextRequest) {
         let unsoldCount = 0;
         try {
           const { data: unsold } = await (sb as any).from('unsold_apts')
-            .select('unsold_count')
+            .select('tot_unsold_hshld_co')
             .eq('is_active', true)
             .like('sigungu_nm', `%${addr.split(' ')[1] || ''}%`)
             .limit(5);
-          unsoldCount = (unsold || []).reduce((s: number, u: any) => s + Number(u.unsold_count || 0), 0);
+          unsoldCount = (unsold || []).reduce((s: number, u: any) => s + Number(u.tot_unsold_hshld_co || 0), 0);
         } catch { /* skip */ }
 
         // 4. AI 분석 (Haiku)
@@ -186,7 +186,7 @@ ${apt.heating_type ? `| **난방** | ${apt.heating_type} |\n` : ''}${apt.parking
         if (nearbyTrades.length > 0) {
           c += `\n---\n\n## 주변 아파트 실거래 시세\n\n| 단지명 | 거래일 | 전용면적 | 거래가 |\n|---|---|---|---|\n`;
           nearbyTrades.slice(0, 7).forEach((t: any) => {
-            c += `| ${t.apt_name || '—'} | ${t.deal_date || '—'} | ${t.area || '—'}㎡ | ${t.deal_amount ? Number(t.deal_amount).toLocaleString()+'만원' : '—'} |\n`;
+            c += `| ${t.apt_name || '—'} | ${t.deal_date || '—'} | ${t.exclusive_area || '—'}㎡ | ${t.deal_amount ? Number(t.deal_amount).toLocaleString()+'만원' : '—'} |\n`;
           });
           if (ppyeong > 0) {
             const avgTradePrice = nearbyTrades.reduce((s: number, t: any) => s + Number(t.deal_amount || 0), 0) / nearbyTrades.length;

@@ -63,14 +63,14 @@ export async function GET(req: NextRequest) {
 
         // 3. 가격 히스토리
         const { data: hist } = await (sb as any).from('stock_price_history')
-          .select('date, close, volume').eq('symbol', stock.symbol)
+          .select('date, close_price, volume').eq('symbol', stock.symbol)
           .order('date', { ascending: false }).limit(30);
 
         let t30 = 0, t7 = 0, avgVol = 0;
         if (hist?.length >= 2) {
-          const latest = Number(hist[0].close);
-          if (hist.length >= 30) t30 = (latest - Number(hist[29].close)) / Number(hist[29].close) * 100;
-          if (hist.length >= 7) t7 = (latest - Number(hist[6].close)) / Number(hist[6].close) * 100;
+          const latest = Number(hist[0].close_price);
+          if (hist.length >= 30) t30 = (latest - Number(hist[29].close_price)) / Number(hist[29].close_price) * 100;
+          if (hist.length >= 7) t7 = (latest - Number(hist[6].close_price)) / Number(hist[6].close_price) * 100;
           avgVol = hist.reduce((s: number, p: any) => s + Number(p.volume || 0), 0) / hist.length;
         }
 
@@ -158,7 +158,7 @@ ${naver ? `> 가격 정보는 네이버 금융과 교차 검증 완료 (${today}
           if (hist.length >= 30) c += `, 30일 기준 **${t30 > 0 ? '+' : ''}${t30.toFixed(1)}%** ${t30 > 0 ? '상승' : '하락'} 추세`;
           c += `입니다.\n\n| 날짜 | 종가 | 거래량 |\n|---|---|---|\n`;
           hist.slice(0, 7).reverse().forEach((p: any) => {
-            c += `| ${p.date} | ${Number(p.close).toLocaleString()}원 | ${Number(p.volume||0).toLocaleString()} |\n`;
+            c += `| ${p.date} | ${Number(p.close_price).toLocaleString()}원 | ${Number(p.volume||0).toLocaleString()} |\n`;
           });
           if (avgVol > 0 && Number(stock.volume || 0) > 0) {
             const vr = Number(stock.volume) / avgVol;
