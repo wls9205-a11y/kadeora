@@ -256,10 +256,6 @@
       "schedule": "*/10 * * * *"
     },
     {
-      "path": "/api/cron/seo-score-refresh",
-      "schedule": "0 2 1 * *"
-    },
-    {
       "path": "/api/cron/apt-analysis-gen",
       "schedule": "5 * * * *"
     },
@@ -464,20 +460,8 @@
       "schedule": "0 17 * * *"
     },
     {
-      "path": "/api/cron/seo-indexnow-submit",
-      "schedule": "0 21 * * *"
-    },
-    {
-      "path": "/api/cron/seo-content-boost",
-      "schedule": "0 17 * * 0"
-    },
-    {
       "path": "/api/cron/blog-subscription-alert",
       "schedule": "0 23 * * *"
-    },
-    {
-      "path": "/api/cron/seo-internal-links",
-      "schedule": "0 18 * * 3"
     },
     {
       "path": "/api/cron/blog-generate-images",
