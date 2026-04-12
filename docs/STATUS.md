@@ -1,4 +1,32 @@
 # 카더라 STATUS.md
+> 마지막 업데이트: 2026-04-13 (세션 96 — DB 컬럼 전면 수정 + 이슈선점 자동발행 보장 + IssueTab v2)
+
+## 세션 96 — DB 컬럼 버그 전면 수정 + 이슈선점 자동발행 + 어드민 IssueTab v2
+
+### 배포: 1 커밋, 12파일
+
+### 🔴 DB 컬럼 불일치 수정 (크론 실패 근본 원인)
+- **admin/v2**: `attendance.select('id')` → `'user_id'` — 출석 카운트 정상화
+- **blog-stock-v2**: `close` → `close_price` (select + 계산 3곳 + 테이블 출력)
+- **stock/ai-analysis**: `p.close` → `p.close_price`
+- **data/stock-history**: `open,high,low,close` → `open_price,high_price,low_price,close_price`
+- **blog-apt-v2**: `unsold_count` → `tot_unsold_hshld_co`, `t.area` → `t.exclusive_area`
+- **blog-monthly-market**: `u.unsold_count` → `u.total_unsold` (unsold_monthly_stats 테이블)
+- **daily-report-data**: `post_polls.title/total_votes` → 실제 컬럼(id, post_id, expires_at)
+
+### 🟠 polls/route.ts 전면 재설계
+- `post_polls` 실제 스키마로 재작성 — question은 posts.title 조인, options는 poll_options 조인
+
+### 🟡 이슈선점 자동발행 보장
+- `issue.is_auto_publish` 조건 **완전 제거** (항상 null → 자동발행 차단 버그)
+- score threshold `|| 60` → `?? 40` (DB 설정값 반영)
+
+### 🟡 504 타임아웃 방지
+- blog-tax-guide, blog-regional-analysis: maxDuration 300→60, MAX_AI_CALLS 3→1
+
+### 📊 IssueTab v2
+- 파이프라인 시각화, 지금실행 버튼, 조건 명시, 오늘 발행 카운트
+
 > 마지막 업데이트: 2026-04-13 (세션 95 — CTA 통합 + SEO 전방위 감사 + 버그 수정)
 
 ## 세션 95 — CTA 추적 통합 + 다크모드 수정 + 어드민 피드 메트릭 + CTA 최적화
