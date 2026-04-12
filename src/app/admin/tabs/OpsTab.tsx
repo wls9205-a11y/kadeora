@@ -153,7 +153,7 @@ export default function OpsTab({ onNavigate }: { onNavigate: (t: any) => void })
               ].map(s => (
                 <div key={s.l} style={{ background: 'rgba(12,21,40,0.6)', border: '1px solid rgba(255,255,255,0.04)', borderRadius: 'var(--radius-sm)', padding: '5px 3px', textAlign: 'center' }}>
                   <div style={{ fontSize: 12, fontWeight: 800, color: typeof s.c === 'string' ? s.c : '#fff' }}>{s.v}</div>
-                  <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)', marginTop: 1 }}>{s.l}</div>
+                  <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginTop: 1 }}>{s.l}</div>
                 </div>
               ))}
             </div>

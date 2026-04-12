@@ -3,9 +3,9 @@ import { useState, useEffect } from "react";
 
 const ago = (d: string) => { if(!d) return '—'; const s = Math.floor((Date.now() - new Date(d).getTime()) / 1000); return s < 60 ? '방금' : s < 3600 ? Math.floor(s / 60) + '분' : s < 86400 ? Math.floor(s / 3600) + '시간' : Math.floor(s / 86400) + '일'; };
 const fmt = (d: string) => d ? new Date(d).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' }) : '—';
-const Badge = ({ ok, label }: { ok: boolean; label: string }) => <span style={{ fontSize: 10, padding: '1px 5px', borderRadius: 'var(--radius-sm)', fontWeight: 600, background: ok ? 'rgba(16,185,129,0.12)' : 'rgba(255,255,255,0.03)', color: ok ? '#10B981' : 'rgba(255,255,255,0.15)' }}>{ok ? '✓' : '✗'}{label}</span>;
-const Tag = ({ text, color = 'rgba(255,255,255,0.25)', bg = 'rgba(255,255,255,0.04)' }: { text: string; color?: string; bg?: string }) => <span style={{ fontSize: 10, padding: '1px 5px', borderRadius: 'var(--radius-sm)', background: bg, color, whiteSpace: 'nowrap' }}>{text}</span>;
-const Stat = ({ icon, val, label, warn }: { icon: string; val: number | string; label: string; warn?: boolean }) => <div style={{ textAlign: 'center', minWidth: 32 }}><div style={{ fontSize: 10 }}>{icon}</div><div style={{ fontSize: 12, fontWeight: 800, color: warn && val === 0 ? 'rgba(255,255,255,0.12)' : '#E2E8F0', lineHeight: 1 }}>{val}</div><div style={{ fontSize: 7, color: 'rgba(255,255,255,0.2)', marginTop: 1 }}>{label}</div></div>;
+const Badge = ({ ok, label }: { ok: boolean; label: string }) => <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 'var(--radius-sm)', fontWeight: 600, background: ok ? 'rgba(16,185,129,0.12)' : 'rgba(255,255,255,0.03)', color: ok ? '#10B981' : 'rgba(255,255,255,0.15)' }}>{ok ? '✓' : '✗'}{label}</span>;
+const Tag = ({ text, color = 'rgba(255,255,255,0.25)', bg = 'rgba(255,255,255,0.04)' }: { text: string; color?: string; bg?: string }) => <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 'var(--radius-sm)', background: bg, color, whiteSpace: 'nowrap' }}>{text}</span>;
+const Stat = ({ icon, val, label, warn }: { icon: string; val: number | string; label: string; warn?: boolean }) => <div style={{ textAlign: 'center', minWidth: 32 }}><div style={{ fontSize: 10 }}>{icon}</div><div style={{ fontSize: 12, fontWeight: 800, color: warn && val === 0 ? 'rgba(255,255,255,0.12)' : '#E2E8F0', lineHeight: 1 }}>{val}</div><div style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)', marginTop: 1 }}>{label}</div></div>;
 
 const pIcon: Record<string, string> = { kakao: '💬', google: '🔵', naver: '🟢', apple: '🍎' };
 const gLabel: Record<number, { n: string; c: string }> = { 1:{n:'새싹',c:'#10B981'}, 2:{n:'묘목',c:'#34D399'}, 3:{n:'나무',c:'#06B6D4'}, 4:{n:'숲',c:'#3B82F6'}, 5:{n:'산',c:'#8B5CF6'}, 6:{n:'달',c:'#F59E0B'}, 7:{n:'별',c:'#EC4899'}, 8:{n:'VIP',c:'#EF4444'} };
@@ -104,7 +104,7 @@ export default function UsersTab({ onNavigate }: { onNavigate: (t: any) => void 
             <div key={k.l} style={{ textAlign: 'center', background: 'rgba(12,21,40,0.65)', border: '1px solid rgba(255,255,255,0.04)', borderRadius: 'var(--radius-sm)', padding: '5px 0' }}>
               <div style={{ fontSize: 10 }}>{k.i}</div>
               <div style={{ fontSize: 13, fontWeight: 800, color: k.v > 0 ? '#10B981' : 'rgba(255,255,255,0.12)' }}>{k.v}</div>
-              <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.2)' }}>{k.l}</div>
+              <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)' }}>{k.l}</div>
             </div>
           ))}
         </div>

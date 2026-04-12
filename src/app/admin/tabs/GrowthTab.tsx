@@ -58,7 +58,7 @@ export default function GrowthTab({ onNavigate }: { onNavigate: (t: any) => void
         </div>
         <div style={{ display: 'flex', marginTop: 4 }}>
           {(dailyTrend || []).map((d: any, i: number) => (
-            <div key={i} style={{ flex: 1, fontSize: 7, color: 'var(--text-tertiary)', textAlign: 'center' }}>
+            <div key={i} style={{ flex: 1, fontSize: 10, color: 'var(--text-tertiary)', textAlign: 'center' }}>
               {i % 3 === 0 ? d.date?.slice(5) : ''}
             </div>
           ))}
@@ -113,7 +113,7 @@ export default function GrowthTab({ onNavigate }: { onNavigate: (t: any) => void
                   <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     {d.count > 0 && <div style={{ fontSize: 10, color: '#10B981', fontWeight: 700 }}>{d.count}</div>}
                     <div style={{ width: '100%', height: `${(d.count / max) * 35}px`, background: '#10B981', borderRadius: 2, minHeight: d.count > 0 ? 4 : 1, opacity: d.count > 0 ? 1 : 0.2 }} />
-                    <div style={{ fontSize: 7, color: 'var(--text-tertiary)', marginTop: 2 }}>{d.date?.slice(5)}</div>
+                    <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}>{d.date?.slice(5)}</div>
                   </div>
                 );
               })}
@@ -191,14 +191,14 @@ export default function GrowthTab({ onNavigate }: { onNavigate: (t: any) => void
       {/* 시간대별 트래픽 */}
       <div className="adm-sec">🕐 시간대별 트래픽 (KST)</div>
       <div className="adm-card" style={{ padding: '8px 14px' }}>
-        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 2, height: 80 }}>
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, height: 80 }}>
           {(hourlyTraffic || []).map((cnt: number, hr: number) => (
             <div key={hr} style={{ flex: 1 }}>
               <div style={{ width: '100%', height: `${(cnt / maxHour) * 60}px`, background: cnt === Math.max(...hourlyTraffic) ? '#3B82F6' : 'var(--bg-hover)', borderRadius: 2, minHeight: 2 }} />
             </div>
           ))}
         </div>
-        <div style={{ display: 'flex', gap: 2, marginTop: 2 }}>
+        <div style={{ display: 'flex', gap: 4, marginTop: 2 }}>
           {[0, 6, 12, 18, 23].map(h => (
             <span key={h} style={{ flex: 1, fontSize: 10, color: 'var(--text-tertiary)', textAlign: 'center' }}>{h}시</span>
           ))}

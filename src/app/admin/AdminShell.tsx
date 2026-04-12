@@ -53,6 +53,9 @@ export default function AdminShell() {
         .adm-tabs button.active{background:transparent;color:#3B7BF6;border-bottom-color:#3B7BF6}
         .adm-tabs button:not(.active){background:transparent;color:#64748b}
         .adm-tabs button:not(.active):hover{color:#94a3b8;background:rgba(255,255,255,0.03)}
+        .adm-card{background:rgba(12,21,40,0.6);border:1px solid rgba(255,255,255,0.04);border-radius:var(--radius-md);padding:10px 12px}
+        .adm-btn{padding:6px 12px;font-size:12px;font-weight:600;border:1px solid rgba(255,255,255,0.08);border-radius:var(--radius-md);background:transparent;color:rgba(255,255,255,0.45);cursor:pointer;transition:all .15s}
+        .adm-btn:hover{border-color:rgba(255,255,255,0.15);color:rgba(255,255,255,0.6)}
       `}</style>
 
       {/* 헤더 */}
@@ -61,17 +64,17 @@ export default function AdminShell() {
           <div style={{width:32,height:32,borderRadius:'50%',border:`2.5px solid ${sc}`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:900,color:sc,flexShrink:0}}>{hp?.s??'—'}</div>
           {hp && <div style={{display:'flex',alignItems:'center',gap:8,fontSize:12}}>
             <span style={{color:hp.cr>=95?'#10B981':'#F59E0B',fontWeight:700}}>크론 {hp.cr}%</span>
-            <span style={{color:'rgba(255,255,255,0.15)'}}>·</span>
+            <span style={{color:'rgba(255,255,255,0.35)'}}>·</span>
             <span style={{color:'#10B981',fontWeight:700}}>+{hp.nu}명</span>
-            <span style={{color:'rgba(255,255,255,0.15)'}}>·</span>
+            <span style={{color:'rgba(255,255,255,0.35)'}}>·</span>
             <span style={{color:'rgba(255,255,255,0.45)'}}>PV {hp.pv.toLocaleString()}</span>
             {(hp.iss ?? 0) > 0 && <>
-              <span style={{color:'rgba(255,255,255,0.15)'}}>·</span>
+              <span style={{color:'rgba(255,255,255,0.35)'}}>·</span>
               <span style={{color:'#F59E0B',fontWeight:700}}>이슈 {hp.iss}</span>
             </>}
           </div>}
           <div style={{flex:1}}/>
-          <span style={{fontSize: 10,color:'rgba(255,255,255,0.15)',letterSpacing:1,fontWeight:700}}>MISSION CONTROL</span>
+          <span style={{fontSize: 10,color:'rgba(255,255,255,0.35)',letterSpacing:1,fontWeight:700}}>MISSION CONTROL</span>
         </div>
 
         {/* 탭 네비게이션 — 스크롤 가능 */}
