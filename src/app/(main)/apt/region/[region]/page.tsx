@@ -48,8 +48,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { region } = await params;
   const decoded = decodeURIComponent(region);
   return {
-    title: `${decoded} 부동산 정보 — 청약·모집공고·실거래·재개발·미분양`,
-    description: `${decoded} 지역 아파트 청약 일정, 모집공고 요약, 실거래가, 재개발 현황, 미분양 정보를 한눈에. 카더라에서 ${decoded} 부동산 정보를 확인하세요.`,
+    title: `${decoded} 부동산 — 아파트 청약·실거래가·미분양·재개발 ${new Date().getFullYear()} | 카더라`,
+    description: `${decoded} 지역 아파트 청약 일정, 분양가, 실거래가 시세, 재개발 현황, 미분양 정보를 한눈에. 카더라에서 ${decoded} 부동산 데이터를 무료로 확인하세요.`,
     alternates: { canonical: `${SITE_URL}/apt/region/${encodeURIComponent(decoded)}` },
     robots: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' as const },
     openGraph: {
@@ -66,13 +66,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
     twitter: { card: 'summary_large_image' as const, title: `${decoded} 부동산`, description: `청약·실거래·재개발·미분양 종합 정보` },
     other: {
-      'naver:written_time': '2026-04-12T00:00:00Z',
-      'naver:updated_time': '2026-04-12T00:00:00Z',
+      'naver:written_time': new Date().toISOString(),
+      'naver:updated_time': new Date().toISOString(),
       'naver:author': '카더라',
-      'og:updated_time': '2026-04-12T00:00:00Z',
+      'og:updated_time': new Date().toISOString(),
       'dg:plink': `${SITE_URL}/apt/region/${decoded}`,
       'article:section': '부동산',
-      'article:tag': `${decoded},부동산,청약,실거래,재개발,미분양,모집공고,분양가`,
+      'article:tag': `${decoded},부동산,청약,실거래가,재개발,미분양,모집공고,분양가,아파트,시세,전세,매매,학군`,
+      'article:modified_time': new Date().toISOString(),
       'article:published_time': '2026-01-15T00:00:00Z',
       'article:modified_time': new Date().toISOString(),
       ...((() => {

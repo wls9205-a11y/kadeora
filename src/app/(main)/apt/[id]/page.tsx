@@ -233,7 +233,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       ? ` ${d.site.price_min >= 10000 ? `${(d.site.price_min/10000).toFixed(1)}억` : `${d.site.price_min.toLocaleString()}만`}~${d.site.price_max >= 10000 ? `${(d.site.price_max/10000).toFixed(1)}억` : `${d.site.price_max.toLocaleString()}만`}`
       : '';
     return {
-      title: `${title}${priceStr} `, description: desc,
+      title: `${title}${priceStr} — ${d.region} | 카더라`, description: desc,
       alternates: { canonical: `${SITE_URL}/apt/${resolved.slug}` },
       robots: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' as const, 'max-video-preview': -1, googleBot: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' as const } },
       openGraph: { title, description: desc, url: `${SITE_URL}/apt/${resolved.slug}`, siteName: '카더라', locale: 'ko_KR', type: 'article', images: [{ url: ogImg, width: 1200, height: 630, alt: `${d.name} 분양정보` }, { url: `${SITE_URL}/api/og-square?title=${encodeURIComponent(d.name)}&category=apt`, width: 630, height: 630, alt: `${d.name}` }] },
@@ -242,7 +242,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         'article:published_time': d.site?.created_at || d.sub?.fetched_at || '',
         'article:modified_time': d.site?.updated_at || new Date().toISOString(),
         'article:section': '부동산',
-        'article:tag': `${d.name},${d.region},${tl[st] || '분양'},청약,분양가,분양가격,아파트,모집공고,입주자모집공고,견본주택,모델하우스`,
+        'article:tag': `${d.name},${d.region},${d.site?.sigungu || ''},${tl[st] || '분양'},청약,분양가,분양가격,아파트,모집공고,입주자모집공고,견본주택,모델하우스,청약일정,당첨확률,가점,평면도,조감도,입주예정`,
         // Kakao/Facebook price display
         ...(d.site?.price_min ? { 'og:price:amount': String(d.site.price_min * 10000), 'og:price:currency': 'KRW' } : {}),
         // Naver specific

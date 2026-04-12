@@ -42,17 +42,22 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { symbol } = await params;
   const sb = await createSupabaseServer();
-  const { data: s } = await sb.from('stock_quotes').select('name,market,price,currency,change_pct,updated_at').eq('symbol', symbol).maybeSingle();
+  const { data: s } = await sb.from('stock_quotes').select('name,market,price,currency,change_pct,updated_at,per,pbr,dividend_yield,market_cap,sector').eq('symbol', symbol).maybeSingle();
   if (!s) return { title: '종목을 찾을 수 없습니다', robots: { index: false } };
   const p = fmtPrice(Number(s.price), s.currency ?? undefined);
   const ch = Number(s.change_pct) === 0 ? '' : `${Number(s.change_pct) > 0 ? '▲' : '▼'}${Math.abs(Number(s.change_pct)).toFixed(2)}%`;
+  // 롱테일 키워드 메타 구성
+  const perText = Number(s.per) > 0 ? `PER ${Number(s.per).toFixed(1)}배` : '';
+  const divText = Number(s.dividend_yield) > 0 ? `배당수익률 ${Number(s.dividend_yield).toFixed(2)}%` : '';
+  const sectorText = s.sector ? `${s.sector} 섹터` : '';
+  const metaFragments = [perText, divText, sectorText].filter(Boolean).join(' · ');
   return {
-    title: `${s.name} (${symbol}) 주가`,
-    description: `${s.name} 현재가 ${p} ${ch}. ${s.market} 상장. 실시간 시세, 차트, 수급, 뉴스, AI 한줄평을 카더라에서 확인하세요.`,
+    title: `${s.name}(${symbol}) 주가·배당금·실적·AI 분석 — 카더라`,
+    description: `${s.name} 현재가 ${p} ${ch}. ${metaFragments ? metaFragments + '. ' : ''}${s.market} 상장. 실시간 시세, 차트, 수급, 재무제표, 목표가, AI 분석을 카더라에서 무료로 확인하세요.`,
     alternates: { canonical: `${SITE_URL}/stock/${symbol}` },
     openGraph: {
-      title: `${s.name} (${symbol}) ${p} ${ch}`,
-      description: `${s.market} 상장 · 실시간 시세 · 차트 · 수급 분석 · 종목 토론`,
+      title: `${s.name}(${symbol}) ${p} ${ch} — 실시간 주가·배당·분석`,
+      description: `${s.market} 상장 · 실시간 시세 · 차트 · 수급 분석 · 재무제표 · AI 종목 분석 · 종목 토론`,
       url: `${SITE_URL}/stock/${symbol}`,
       siteName: '카더라',
       locale: 'ko_KR',
@@ -62,7 +67,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         { url: `${SITE_URL}/api/og-square?title=${encodeURIComponent(`${s.name} (${symbol})`)}&category=stock`, width: 630, height: 630, alt: `${s.name} 시세` },
       ],
     },
-    twitter: { card: 'summary_large_image', title: `${s.name} ${p} ${ch}`, description: `${s.market} · 실시간 시세 · 차트 · 수급 분석` },
+    twitter: { card: 'summary_large_image', title: `${s.name} ${p} ${ch}`, description: `${s.market} · 시세 · 배당금 · 재무제표 · PER · 차트 · AI 분석` },
     other: (() => {
       const isUS = s.market === 'NYSE' || s.market === 'NASDAQ';
       const lat = isUS ? '40.7128' : '37.5665';
@@ -79,7 +84,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         'article:published_time': s.updated_at || new Date().toISOString(),
         'article:modified_time': s.updated_at || new Date().toISOString(),
         'article:section': '주식',
-        'article:tag': `${s.name},${symbol},${s.market},주식,시세,차트,종목분석,투자,주가`,
+        'article:tag': `${s.name},${symbol},${s.market},주가,시세,배당금,배당수익률,PER,PBR,재무제표,실적,전망,분석,목표가,차트,수급,종목분석,투자`,
         'dg:plink': `${SITE_URL}/stock/${symbol}`,
         'naver:author': '카더라',
         'og:updated_time': s.updated_at || new Date().toISOString(),
@@ -172,8 +177,8 @@ export default async function StockDetailPage({ params }: Props) {
       {/* JSON-LD 3: Article + Speakable (Google Discover + 음성 검색) */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org', '@type': 'Article',
-        headline: `${s.name} (${symbol}) 주가 시세 분석`,
-        description: s.description || `${s.name} ${s.market} 상장 종목 실시간 시세`,
+        headline: `${s.name}(${symbol}) 주가·배당금·PER·실적 분석`,
+        description: s.description || `${s.name} ${s.market} 상장 종목 실시간 시세·재무제표·AI 분석`,
         url: `${SITE_URL}/stock/${symbol}`,
         datePublished: s.updated_at || new Date().toISOString(),
         dateModified: s.updated_at || new Date().toISOString(),
@@ -187,14 +192,30 @@ export default async function StockDetailPage({ params }: Props) {
         mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE_URL}/stock/${symbol}` },
         speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.stock-price-header'] },
       })}} />
-      {/* JSON-LD 4: FAQ (검색결과 아코디언) */}
+      {/* JSON-LD 4: FAQ (검색결과 아코디언 — 8항목, SERP 면적 최대화) */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org', '@type': 'FAQPage',
         mainEntity: [
           { '@type': 'Question', name: `${s.name} 현재 주가는?`, acceptedAnswer: { '@type': 'Answer', text: `${s.name}(${symbol})의 현재가는 ${fmtPrice(Number(s.price), s.currency ?? undefined)}이며, 전일 대비 ${changePct >= 0 ? '+' : ''}${changePct.toFixed(2)}% 변동했습니다. ${s.market} 상장 종목입니다.` } },
+          { '@type': 'Question', name: `${s.name} 배당금은 얼마인가요?`, acceptedAnswer: { '@type': 'Answer', text: Number(s.dividend_yield) > 0 ? `${s.name}의 배당수익률은 ${Number(s.dividend_yield).toFixed(2)}%입니다. 카더라에서 배당금 지급 이력과 배당 성향을 확인할 수 있습니다.` : `${s.name}의 배당 정보는 카더라에서 확인할 수 있습니다. 현재 배당수익률이 공시되지 않았거나 무배당 종목일 수 있습니다.` } },
+          { '@type': 'Question', name: `${s.name} PER은 몇 배인가요?`, acceptedAnswer: { '@type': 'Answer', text: Number(s.per) > 0 ? `${s.name}의 PER은 ${Number(s.per).toFixed(1)}배${Number(s.pbr) > 0 ? `, PBR은 ${Number(s.pbr).toFixed(2)}배` : ''}입니다. ${s.sector || s.market} 섹터 평균 대비 밸류에이션을 카더라에서 비교해 보세요.` : `${s.name}의 PER 정보는 카더라에서 확인할 수 있습니다.` } },
+          { '@type': 'Question', name: `${s.name} 시가총액은 얼마인가요?`, acceptedAnswer: { '@type': 'Answer', text: `${s.name}(${symbol})의 시가총액은 ${Number(s.market_cap) > 0 ? `약 ${Number(s.market_cap) >= 1e12 ? `${(Number(s.market_cap) / 1e12).toFixed(1)}조원` : Number(s.market_cap) >= 1e8 ? `${Math.round(Number(s.market_cap) / 1e8).toLocaleString()}억원` : `${Number(s.market_cap).toLocaleString()}원`}` : '비공개'}입니다.` } },
+          { '@type': 'Question', name: `${s.name} 52주 최고가·최저가는?`, acceptedAnswer: { '@type': 'Answer', text: Number(s.high_52w) > 0 ? `${s.name}의 52주 최고가는 ${fmtPrice(Number(s.high_52w), s.currency ?? undefined)}, 최저가는 ${fmtPrice(Number(s.low_52w), s.currency ?? undefined)}입니다. 현재가 대비 위치를 카더라 차트에서 확인하세요.` : `${s.name}의 52주 고저 정보는 카더라에서 확인할 수 있습니다.` } },
           { '@type': 'Question', name: `${s.name} 어떤 섹터인가요?`, acceptedAnswer: { '@type': 'Answer', text: `${s.name}은(는) ${s.sector || s.market} 섹터에 속하며, ${s.description || `${s.market}에 상장된 종목입니다.`}` } },
-          { '@type': 'Question', name: `${s.name} 시세를 어디서 확인하나요?`, acceptedAnswer: { '@type': 'Answer', text: `카더라(kadeora.app)에서 ${s.name}의 실시간 시세, 차트, 수급 분석, AI 한줄평, 관련 뉴스를 무료로 확인할 수 있습니다. 카카오 로그인으로 관심종목 등록, 가격 알림도 설정 가능합니다.` } },
-          { '@type': 'Question', name: `${s.name} 시가총액은 얼마인가요?`, acceptedAnswer: { '@type': 'Answer', text: `${s.name}(${symbol})의 시가총액은 ${Number(s.market_cap) > 0 ? `약 ${Number(s.market_cap) >= 1e12 ? `${(Number(s.market_cap) / 1e12).toFixed(1)}조원` : Number(s.market_cap) >= 1e8 ? `${Math.round(Number(s.market_cap) / 1e8).toLocaleString()}억원` : `${Number(s.market_cap).toLocaleString()}원`}` : '비공개'}입니다. ${s.market} 상장 종목이며, 카더라에서 섹터 내 시총 순위를 확인할 수 있습니다.` } },
+          { '@type': 'Question', name: `${s.name} 실시간 차트를 볼 수 있나요?`, acceptedAnswer: { '@type': 'Answer', text: `카더라(kadeora.app)에서 ${s.name}의 실시간 시세, 일봉·주봉 차트, 수급 분석, AI 종목 분석, 관련 뉴스를 무료로 확인할 수 있습니다.` } },
+          { '@type': 'Question', name: `${s.name} vs 동종 업종 비교하려면?`, acceptedAnswer: { '@type': 'Answer', text: `카더라의 종목 비교 기능에서 ${s.name}과 동종 업종 종목의 PER, PBR, 배당수익률, 시가총액을 한눈에 비교할 수 있습니다. /stock/compare 페이지를 이용하세요.` } },
+        ],
+      })}} />
+      {/* JSON-LD 5: 이미지 캐러셀 (Google 이미지 검색 + SERP 이미지 팩) */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org', '@type': 'ImageGallery',
+        name: `${s.name}(${symbol}) 주가 차트·시세 이미지`,
+        description: `${s.name} 실시간 주가 차트, 시세 변동, AI 분석 그래프`,
+        url: `${SITE_URL}/stock/${symbol}`,
+        image: [
+          { '@type': 'ImageObject', url: `${SITE_URL}/api/og?title=${encodeURIComponent(`${s.name} (${symbol}) 주가 ${p}`)}&design=2&category=stock`, width: 1200, height: 630, name: `${s.name} 주가 시세`, caption: `${s.name}(${symbol}) 현재가 ${p} ${ch}` },
+          { '@type': 'ImageObject', url: `${SITE_URL}/api/og-chart?symbol=${symbol}&type=price`, width: 1200, height: 630, name: `${s.name} 주가 차트`, caption: `${s.name} 가격 추이 차트` },
+          { '@type': 'ImageObject', url: `${SITE_URL}/api/og-square?title=${encodeURIComponent(`${s.name}`)}&category=stock`, width: 630, height: 630, name: `${s.name} 종목 정보`, caption: `${s.name} ${s.market} 상장 종목` },
         ],
       })}} />
 

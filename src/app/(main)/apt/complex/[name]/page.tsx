@@ -39,8 +39,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const salePrice = p?.latest_sale_price ? fmtAmount(p.latest_sale_price) : '';
   const jeonsePrice = p?.latest_jeonse_price ? fmtAmount(p.latest_jeonse_price) : '';
 
-  const title = p?.seo_title || `${decoded} 실거래가·전세·월세 시세 | ${region} ${sigungu}`;
-  const description = p?.seo_description || `${decoded} 아파트 실거래가 이력, 전세·월세 시세, 평당가 추이, 면적별 비교. 카더라에서 확인하세요.`;
+  const builtYear = p?.built_year;
+  const householdCount = p?.total_households;
+  const pricePerPyeong = p?.avg_sale_price_pyeong ? `평당 ${fmtAmount(p.avg_sale_price_pyeong)}` : '';
+  const jeonseRatio = p?.jeonse_ratio ? `전세가율 ${Number(p.jeonse_ratio).toFixed(0)}%` : '';
+  const yearFragment = builtYear ? `${builtYear}년 준공` : '';
+  const metaParts = [salePrice ? `매매 ${salePrice}` : '', pricePerPyeong, jeonseRatio, yearFragment].filter(Boolean).join(' · ');
+
+  const title = p?.seo_title || `${decoded} 실거래가·시세·전세가율·평당가 ${new Date().getFullYear()} — ${region} ${sigungu} | 카더라`;
+  const description = p?.seo_description || `${decoded} 아파트 ${metaParts ? metaParts + '. ' : ''}실거래가 이력, 전세·월세 시세, 평당가 추이, 면적별 비교, 학군 정보를 카더라에서 무료로 확인하세요.`;
   const ogSubtitle = salePrice ? `매매 ${salePrice}${jeonsePrice ? ` · 전세 ${jeonsePrice}` : ''}` : '실거래가·시세 분석';
   // 실제 현장 이미지 조회 (apt_sites에서)
   let realImg: string | null = null;
@@ -53,7 +60,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   } catch {}
   const ogUrl = realImg || `${SITE_URL}/api/og?title=${encodeURIComponent(decoded)}&design=2&category=apt&subtitle=${encodeURIComponent(ogSubtitle)}&author=${encodeURIComponent('카더라')}`;
   const ogSquareUrl = `${SITE_URL}/api/og-square?title=${encodeURIComponent(decoded)}&category=apt&subtitle=${encodeURIComponent(ogSubtitle)}`;
-  const keywords = [decoded, '실거래가', '시세', '아파트', region, sigungu, ageGroup, '전세', '월세', '매매', '시세조회', '평당가'].filter(Boolean);
+  const keywords = [decoded, '실거래가', '시세', '아파트', region, sigungu, ageGroup, '전세', '월세', '매매', '평당가', '전세가율', '시세조회', '학군', '재건축', '분양가', '입주', '조감도', '평면도'].filter(Boolean);
 
   const meta: Metadata = {
     title,
@@ -61,8 +68,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     alternates: { canonical: `${SITE_URL}/apt/complex/${name}` },
     robots: { index: true, follow: true, 'max-snippet': -1 as const, 'max-image-preview': 'large' as const },
     openGraph: {
-      title: `${decoded} 실거래가·시세`,
-      description: ogSubtitle + ` — ${region} ${sigungu}`,
+      title: `${decoded} 실거래가·시세·평당가 — ${region} ${sigungu}`,
+      description: metaParts ? `${metaParts} — ${region} ${sigungu}` : `실거래가·시세 분석 — ${region} ${sigungu}`,
       url: `${SITE_URL}/apt/complex/${name}`,
       siteName: '카더라',
       locale: 'ko_KR',
@@ -72,7 +79,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         { url: ogSquareUrl, width: 630, height: 630, alt: `${decoded} 실거래가` },
       ],
     },
-    twitter: { card: 'summary_large_image', title: `${decoded} 실거래가·시세`, description: ogSubtitle },
+    twitter: { card: 'summary_large_image', title: `${decoded} 실거래가·시세·전세가율`, description: metaParts || ogSubtitle },
     other: {
       'naver:written_time': p?.created_at || new Date(Date.now() - 86400000 * 7).toISOString(),
       'naver:updated_time': p?.updated_at || new Date().toISOString(),
@@ -288,22 +295,23 @@ export default async function ComplexDetailPage({ params }: Props) {
         ],
       })}} />
 
-      {/* JSON-LD: ImageGallery (이미지 있을 때) */}
-      {siteImages.length > 0 && (
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-          '@context': 'https://schema.org', '@type': 'ImageGallery',
-          name: `${decoded} 아파트 이미지`,
-          description: `${decoded} 아파트 조감도, 투시도, 배치도 등 이미지`,
-          url: `${SITE_URL}/apt/complex/${encodeURIComponent(decoded)}`,
-          image: siteImages.map(url => ({
+      {/* JSON-LD: ImageGallery (이미지 캐러셀 — 항상 노출) */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org', '@type': 'ImageGallery',
+        name: `${decoded} 아파트 이미지·차트`,
+        description: `${decoded} 아파트 실거래가 차트, 조감도, 평면도 등`,
+        url: `${SITE_URL}/apt/complex/${encodeURIComponent(decoded)}`,
+        image: [
+          ...siteImages.map(url => ({
             '@type': 'ImageObject',
             url: url.startsWith('http') ? url : `https:${url}`,
             name: `${decoded} 아파트`,
             description: `${region} ${sigungu} ${decoded} 아파트`,
           })),
-          numberOfItems: siteImages.length,
-        })}} />
-      )}
+          { '@type': 'ImageObject', url: `${SITE_URL}/api/og?title=${encodeURIComponent(decoded)}&design=2&category=apt&subtitle=${encodeURIComponent(ogSubtitle)}`, width: 1200, height: 630, name: `${decoded} 실거래가`, caption: `${decoded} 매매·전세 시세` },
+          { '@type': 'ImageObject', url: `${SITE_URL}/api/og-square?title=${encodeURIComponent(decoded)}&category=apt`, width: 630, height: 630, name: `${decoded} 아파트 정보` },
+        ],
+      })}} />
 
       <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-md)', flexWrap: 'wrap' }}>
         <Link href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>홈</Link>

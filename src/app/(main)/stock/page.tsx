@@ -13,8 +13,8 @@ const SECTION_META: Record<string, { title: string; desc: string }> = {
 export async function generateMetadata({ searchParams }: { searchParams: Promise<{ section?: string }> }): Promise<Metadata> {
   const { section } = await searchParams;
   const s = section ? SECTION_META[section] : null;
-  const title = s?.title || '실시간 주식 시세';
-  const desc = s?.desc || '국내외 주요 종목 실시간 시세와 등락률. KOSPI, KOSDAQ, NYSE, NASDAQ. AI시황, 섹터분석, 포트폴리오 시뮬레이터.';
+  const title = s?.title || '실시간 주식 시세 — KOSPI·KOSDAQ·해외주식';
+  const desc = s?.desc || '국내외 주요 종목 실시간 시세, 등락률, 배당금, PER, 섹터 분석, AI 시황 브리핑, 포트폴리오 시뮬레이터. 카더라에서 무료로 확인하세요.';
   const ogImg = section ? `${SITE_URL}/api/og?section=${section}&design=2` : `${SITE_URL}/api/og?title=${encodeURIComponent('실시간 주식 시세')}&subtitle=${encodeURIComponent('KOSPI·KOSDAQ·해외주식')}&category=stock`;
 
   return {
