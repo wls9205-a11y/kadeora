@@ -50,12 +50,12 @@ ${s.przwner_presnatn_de ? `- **당첨 발표**: ${s.przwner_presnatn_de.slice(0,
       ];
       const prompt = buildFinancePrompt(title, 'apt', links);
       const aiResult = await generateAndValidate(prompt, 'apt');
-      if (!aiResult) return;
+      if (!aiResult) return { created };
 
     const res = await safeBlogInsert(sb, {
       slug,
       title,
-      content,
+      content: aiResult.content,
       category: 'apt',
       tags: ['청약', `${month}월 청약`, '청약 일정', '아파트 분양', '2026'],
       source_type: 'subscription-monthly',
