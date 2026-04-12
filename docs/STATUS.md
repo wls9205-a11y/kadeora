@@ -1,5 +1,5 @@
 # 카더라 STATUS.md
-> 마지막 업데이트: 2026-04-13 (세션 95 — CTA 추적 통합 + 버그 수정 + 어드민 개선)
+> 마지막 업데이트: 2026-04-13 (세션 95 — CTA 통합 + SEO 전방위 감사 + 버그 수정)
 
 ## 세션 95 — CTA 추적 통합 + 다크모드 수정 + 어드민 피드 메트릭 + CTA 최적화
 
@@ -41,6 +41,15 @@
 - 로그인 500 에러: stale build 경로(`build-20260318`) 요청 — BOM 제거 후 해소 여부 확인
 - safeBlogInsert: 크론 품질 게이트 차단 다수 (정상 동작, 에러 로그 noise)
 - Vercel 크론 100개 한도 — 추가 불가
+
+---
+
+### SEO 전방위 감사 & 수정
+- **사이트맵 세그먼트 정리**: 22개→14개 (빈 사이트맵 12~20 제거 → Google 크롤 예산 절약)
+- **사이트맵 12 신규**: `/stock/[symbol]/vs/[target]` 인기 종목 비교 ~200 URL 추가
+- **geo 태그 확장**: `/daily/[region]` 17개 지역 + `/apt/theme/[theme]?region=` 동적 geo
+- **확인 완료**: robots.txt(6봇 분리), news-sitemap(48h), image-sitemap, feed.xml, llms.txt, JSON-LD(59페이지)
+- **미분양 `/apt/unsold/[id]`**: 308 리다이렉트 확인 → 사이트맵 불필요
 
 ---
 
