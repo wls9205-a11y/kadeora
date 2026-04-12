@@ -69,17 +69,16 @@ async function doWork() {
 
       const subject = (item.naver_title || '').replace(/[|~`]/g, '').slice(0, 60);
 
-      const body = new URLSearchParams();
-      body.append('subject', subject);
-      body.append('content', cleanHtml);
+      // encodeURIComponent로 직접 인코딩 (URLSearchParams는 한글 깨짐)
+      const bodyStr = `subject=${encodeURIComponent(subject)}&content=${encodeURIComponent(cleanHtml)}`;
 
       const res = await fetch(url, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+          'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: body.toString(),
+        body: bodyStr,
       });
 
       const resText = await res.text();
