@@ -24,6 +24,11 @@
 ### content_type 체계
 post, blog, stock, stock-page, stock-sector, stock-market, calc, apt, apt-region, apt-complex, section, page, daily, discuss, blog-series
 
+### safeBlogInsert 크론 에러 수정
+- **근본 원인**: blog-stock-v2, blog-apt-v2 등에서 `meta_description`/`meta_keywords` 미제공 → 품질 게이트 트리거(`trg_blog_quality_gate`)가 META_DESC_MISSING/META_KW_MISSING으로 거부
+- **수정**: `safeBlogInsert`에서 미제공 시 `generateMetaDesc()`/`generateMetaKeywords()` 자동 생성
+- **추가**: 트리거 race condition (DUPLICATE_TITLE/DUPLICATE_SLUG) 에러 → 조용히 처리 (console.error 제거)
+
 ## 세션 91 후반 — 블로그 이미지 전면 개선
 
 ### 완료
