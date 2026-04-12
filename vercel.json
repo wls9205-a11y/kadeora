@@ -63,9 +63,6 @@
     "src/app/api/cron/naver-blog-content/*.ts": {
       "maxDuration": 300
     },
-    "src/app/api/cron/naver-cafe-publish/*.ts": {
-      "maxDuration": 60
-    },
     "src/app/api/cron/auto-verify-households/*.ts": {
       "maxDuration": 120
     },
@@ -473,9 +470,6 @@
       "path": "/api/cron/naver-blog-content",
       "schedule": "0 9 * * *"
     },
-    {
-      "path": "/api/cron/naver-cafe-publish",
-      "schedule": "30 9 * * *"
-    }
+    {}
   ]
 }
