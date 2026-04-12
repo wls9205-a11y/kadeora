@@ -164,7 +164,7 @@ async function createOfficialFeedPost(sb: any, issue: any, blogSlug: string) {
 /* ═══════════ 뻘글 스케줄링 ═══════════ */
 
 async function scheduleBuzzPosts(sb: any, issueId: string, score: number) {
-  const buzzCount = score >= 80 ? 3 : score >= 60 ? 2 : 1;
+  const buzzCount = score >= 55 ? 3 : score >= 45 ? 2 : 1;
   const personas = ['curious', 'self_deprecating', 'question', 'calculator', 'sharer', 'realist'];
   const selected = personas.sort(() => Math.random() - 0.5).slice(0, buzzCount);
 
@@ -239,7 +239,10 @@ async function handler(_req: NextRequest) {
     source_type: 'auto_issue',
     cron_type: 'issue-draft',
     source_ref: (issue.source_urls || [])[0],
-    meta_description: (article as any).meta_description || (issue.summary || '').slice(0, 160),
+    meta_description: (() => {
+      const desc = (article as any).meta_description || (issue.summary || '').slice(0, 160);
+      return desc.length >= 20 ? desc : `${desc} — ${article.title}`.slice(0, 160);
+    })(),
     meta_keywords: article.keywords.join(','),
     cover_image: coverImage,
     image_alt: imageAlt,
