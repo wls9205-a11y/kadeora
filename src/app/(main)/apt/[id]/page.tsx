@@ -451,7 +451,7 @@ export default async function AptUnifiedPage({ params }: Props) {
         {/* 위치 + 시공사 통합 카드 */}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8, fontSize: 12 }}>
           <span style={{ color: 'var(--text-tertiary)' }}>📍 {[region, site?.sigungu, site?.dong].filter(Boolean).join(' ') || sub?.hssply_adres || ''}</span>
-          {(site?.builder || sub?.constructor_nm) && <span style={{ color: 'var(--text-tertiary)' }}>🏗️ {site?.builder || sub?.constructor_nm}</span>}
+          {(site?.builder || sub?.constructor_nm) && <Link href={`/apt/builder/${encodeURIComponent(site?.builder || sub?.constructor_nm || '')}`} style={{ color: 'var(--text-tertiary)', textDecoration: 'none' }}>🏗️ {site?.builder || sub?.constructor_nm}</Link>}
           {(site?.developer || sub?.developer_nm) && <span style={{ color: 'var(--text-tertiary)' }}>🏢 {site?.developer || sub?.developer_nm}</span>}
           {(site?.nearby_station || sub?.nearest_station) && <span style={{ color: 'var(--accent-blue)' }}>🚇 {site?.nearby_station || sub?.nearest_station}</span>}
         </div>

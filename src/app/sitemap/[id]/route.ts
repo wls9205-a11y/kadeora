@@ -239,6 +239,11 @@ ${complexXml}
       const dMap = new Map<string, number>();
       for (const r of (dd || [])) { const k = `${r.region_nm}|${r.sigungu}|${r.dong}`; dMap.set(k, (dMap.get(k) || 0) + 1); }
       for (const [k, c] of dMap) { if (c < 5) continue; const [reg, sg, dg] = k.split('|'); if (!reg || !sg || !dg) continue; entries.push({ url: `${BASE}/apt/area/${encodeURIComponent(reg)}/${encodeURIComponent(sg)}/${encodeURIComponent(dg)}`, lastModified: now, changeFrequency: 'monthly', priority: c > 30 ? 0.7 : 0.6 }); }
+      // 건설사 (3개+ 현장만)
+      const { data: bd } = await sb.from('apt_sites').select('builder').eq('is_active', true).not('builder', 'is', null).neq('builder', '');
+      const bMap = new Map<string, number>();
+      for (const r of (bd || [])) { bMap.set(r.builder, (bMap.get(r.builder) || 0) + 1); }
+      for (const [b, c] of bMap) { if (c < 3) continue; entries.push({ url: `${BASE}/apt/builder/${encodeURIComponent(b)}`, lastModified: now, changeFrequency: 'monthly', priority: c > 20 ? 0.75 : 0.6 }); }
       return xmlResponse(entries);
     } catch { return xmlResponse([]); }
   }
