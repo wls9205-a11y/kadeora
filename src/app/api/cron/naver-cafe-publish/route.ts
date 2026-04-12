@@ -1,11 +1,59 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import https from 'https';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
 const BATCH_SIZE = 1;
+
+/** ASCII 특수문자만 이스케이프, 한글은 raw UTF-8 바이트 그대로 유지 */
+function naverSafeEncode(str: string): string {
+  return str
+    .replace(/%/g, '%25')
+    .replace(/&/g, '%26')
+    .replace(/=/g, '%3D')
+    .replace(/\+/g, '%2B')
+    .replace(/#/g, '%23')
+    .replace(/\n/g, '%0A')
+    .replace(/\r/g, '%0D');
+}
+
+function postToNaverCafe(token: string, cafeId: string, menuId: string, subject: string, content: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    // 한글은 인코딩 안 함 — raw UTF-8 바이트로 전송
+    const postBody = 'subject=' + naverSafeEncode(subject) + '&content=' + naverSafeEncode(content);
+    const bodyBuf = Buffer.from(postBody, 'utf8');
+
+    const req = https.request({
+      hostname: 'openapi.naver.com',
+      path: `/v1/cafe/${cafeId}/menu/${menuId}/articles`,
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        'Content-Length': bodyBuf.length,
+      },
+    }, (res) => {
+      let data = '';
+      res.on('data', (chunk: Buffer) => { data += chunk.toString(); });
+      res.on('end', () => {
+        if (res.statusCode && res.statusCode >= 400) {
+          reject(new Error(`${res.statusCode}: ${data.slice(0, 200)}`));
+        } else {
+          try {
+            const parsed = JSON.parse(data);
+            resolve(parsed.message?.result?.articleId?.toString() || 'unknown');
+          } catch { resolve('unknown'); }
+        }
+      });
+    });
+    req.on('error', reject);
+    req.write(bodyBuf);
+    req.end();
+  });
+}
 
 async function doWork() {
   const accessToken = process.env.NAVER_CAFE_ACCESS_TOKEN || '';
@@ -29,7 +77,7 @@ async function doWork() {
       });
       const d = await r.json();
       if (d.access_token) token = d.access_token;
-    } catch { /* use original */ }
+    } catch {}
   }
 
   const sb = getSupabaseAdmin();
@@ -43,7 +91,6 @@ async function doWork() {
 
   for (const item of pending) {
     try {
-      const url = `https://openapi.naver.com/v1/cafe/${cafeId}/menu/${menuId}/articles`;
       const cleanHtml = (item.naver_html || '')
         .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
         .replace(/<img[^>]*>/gi, '')
@@ -51,24 +98,7 @@ async function doWork() {
         .slice(0, 30000);
       const subject = (item.naver_title || '').replace(/[|~`]/g, '').slice(0, 60);
 
-      // URLSearchParams를 body로 직접 전달 — Content-Type 자동 설정 
-      // fetch spec: URLSearchParams body → Content-Type: application/x-www-form-urlencoded;charset=UTF-8
-      const params = new URLSearchParams();
-      params.append('subject', subject);
-      params.append('content', cleanHtml);
-
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` },
-        body: params,
-      });
-
-      const resText = await res.text();
-      if (!res.ok) throw new Error(`${res.status}: ${resText.slice(0, 200)}`);
-
-      let data;
-      try { data = JSON.parse(resText); } catch { data = {}; }
-      const articleId = data.message?.result?.articleId?.toString() || 'unknown';
+      const articleId = await postToNaverCafe(token, cafeId, menuId, subject, cleanHtml);
 
       await (sb as any).from('naver_syndication')
         .update({ cafe_status: 'published', cafe_article_id: articleId, published_at: new Date().toISOString() })
