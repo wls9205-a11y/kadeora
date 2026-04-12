@@ -825,9 +825,11 @@ body {
 .kd-feed-card.visited { opacity: 0.7; }
 .kd-feed-card.visited .kd-card-title { color: var(--text-tertiary) !important; }
 
-/* 피드 카드 히어로 이미지 */
-.kd-hero-img { border-radius: 10px; overflow: hidden; margin-top: 8px; position: relative; aspect-ratio: 16/9; }
+/* 피드 카드 히어로 이미지 — max-height 제한으로 거대 이미지 방지 */
+.kd-hero-img { border-radius: 10px; overflow: hidden; margin-top: 8px; position: relative; aspect-ratio: 16/9; max-height: 280px; }
 .kd-hero-img img { width: 100%; height: 100%; object-fit: cover; }
+/* 피드 상세 본문 내 이미지 제한 */
+.feed-detail-content img { max-width: 100%; max-height: 500px; height: auto; border-radius: var(--radius-sm); object-fit: contain; }
 
 /* 블로그 next-article 플로팅 카드 */
 @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }

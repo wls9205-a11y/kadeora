@@ -7,6 +7,7 @@ import { sanitizePostInput } from '@/lib/sanitize'
 import { containsBannedWord } from '@/lib/nickname-filter'
 import { generateEnglishSlug } from '@/lib/slug-utils'
 import { PostCreateSchema, parseBody } from '@/lib/validations'
+import { containsBlockedUrl } from '@/lib/spam-filter'
 
 export async function GET(req: NextRequest) {
   if (!(await rateLimit(req, 'api'))) return rateLimitResponse();
@@ -37,6 +38,7 @@ export async function POST(req: NextRequest) {
     if (zodErr) return NextResponse.json({ error: zodErr }, { status: 400 });
     const { title, content, category, tag } = sanitizePostInput(parsed!);
     if (containsBannedWord(title) || containsBannedWord(content)) return NextResponse.json({ error: '부적절한 표현이 포함되어 있습니다.' }, { status: 400 });
+    if (containsBlockedUrl(title) || containsBlockedUrl(content)) return NextResponse.json({ error: '허용되지 않는 링크가 포함되어 있습니다. (카카오 오픈채팅, 텔레그램 등 외부 메신저 링크는 게시할 수 없습니다)' }, { status: 400 });
     const regionId = (category === 'local' && parsed!.region_id) ? parsed!.region_id : 'all';
 
     // 게시글 INSERT (유저 세션 — 본인 데이터)

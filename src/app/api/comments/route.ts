@@ -6,6 +6,7 @@ import { sanitizeComment } from '@/lib/sanitize'
 import { filterContent } from '@/lib/filter'
 import { containsBannedWord } from '@/lib/nickname-filter'
 import { CommentCreateSchema, parseBody } from '@/lib/validations'
+import { containsBlockedUrl } from '@/lib/spam-filter'
 
 export async function POST(req: NextRequest) {
   if (!(await rateLimit(req, 'api'))) return rateLimitResponse();
@@ -20,6 +21,7 @@ export async function POST(req: NextRequest) {
     const postId = parsed!.post_id;
     if (!content || content.length < 1) return NextResponse.json({ error: '댓글 내용을 입력해주세요.' }, { status: 400 });
     if (containsBannedWord(content)) return NextResponse.json({ error: '부적절한 표현이 포함되어 있습니다.' }, { status: 400 });
+    if (containsBlockedUrl(content)) return NextResponse.json({ error: '허용되지 않는 링크가 포함되어 있습니다. (카카오 오픈채팅, 텔레그램 등 외부 메신저 링크는 게시할 수 없습니다)' }, { status: 400 });
     const { isBlocked, reason } = filterContent(content);
     if (isBlocked) return NextResponse.json({ error: reason ?? '내용을 다시 확인해주세요' }, { status: 400 });
 

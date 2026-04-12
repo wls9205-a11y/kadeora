@@ -8,6 +8,7 @@ import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useToast } from '@/components/Toast';
 import ImageUpload from '@/components/ImageUpload';
 import { filterContent } from '@/lib/filter';
+import { containsBlockedUrl } from '@/lib/spam-filter';
 import { REGIONS } from '@/lib/constants';
 
 const CATEGORIES = [
@@ -126,6 +127,9 @@ export default function WriteClient() {
     if (title) {
       const titleCheck = filterContent(title);
       if (titleCheck.isBlocked) { error(titleCheck.reason ?? '제목을 확인해주세요'); return; }
+    }
+    if (containsBlockedUrl(title) || containsBlockedUrl(content)) {
+      error('카카오 오픈채팅, 텔레그램 등 외부 메신저 링크는 게시할 수 없습니다'); return;
     }
 
     setLoading(true);

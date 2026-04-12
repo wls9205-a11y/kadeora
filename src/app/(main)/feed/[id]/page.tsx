@@ -1,4 +1,5 @@
 import { createSupabaseServer } from '@/lib/supabase-server';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { DEMO_POSTS, CATEGORY_MAP, GRADE_EMOJI, SITE_URL } from '@/lib/constants';
 
 // Cache: 120s — 게시글 상세
@@ -112,6 +113,7 @@ export default async function FeedDetailPage({ params }: Props) {
   let comments: CommentWithProfile[] = [];
   let related: any[] = [];
   let currentUserId: string | null = null;
+  let isAdmin = false;
   let numId = 0;
   let relatedQuote: any = null;
   let relatedAptCount = 0;
@@ -123,6 +125,10 @@ export default async function FeedDetailPage({ params }: Props) {
     try {
       const { data: { user: authUser } } = await sb.auth.getUser();
       currentUserId = authUser?.id ?? null;
+      if (currentUserId) {
+        const { data: prof } = await getSupabaseAdmin().from('profiles').select('is_admin').eq('id', currentUserId).single();
+        isAdmin = prof?.is_admin === true;
+      }
     } catch { /* 비로그인/만료 세션 — 무시 */ }
 
     numId = await findPostBySlugOrId(sb, id);
@@ -360,7 +366,7 @@ export default async function FeedDetailPage({ params }: Props) {
             </div>
           </div>
           <div style={{ flexShrink: 0, display: 'flex', alignItems: 'flex-start', gap: 'var(--sp-xs)' }}>
-            <PostActions postId={post.id} isOwner={currentUserId === post.author_id} />
+            <PostActions postId={post.id} isOwner={currentUserId === post.author_id} isAdmin={isAdmin} />
             <ReportButton postId={post.id} style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', background: 'transparent', border: 'none', cursor: 'pointer' }} />
           </div>
         </div>

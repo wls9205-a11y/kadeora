@@ -7,7 +7,7 @@ import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter, usePathname } from 'next/navigation';
-import { MessageCircle, Share2, TrendingUp, Clock, Users } from 'lucide-react';
+import { MessageCircle, Share2, TrendingUp, Clock, Users, Trash2 } from 'lucide-react';
 import type { PostWithProfile } from '@/types/database';
 import { REGIONS, GRADE_EMOJI, gradeColor, gradeTitle } from '@/lib/constants';
 import { getAvatarColor } from '@/lib/avatar';
@@ -140,7 +140,7 @@ export default function FeedClient({
     return () => { if (newCheckTimerRef.current) clearInterval(newCheckTimerRef.current); };
   }, [activeCategory]);
 
-  const { userId: authUserId } = useAuth();
+  const { userId: authUserId, isAdmin } = useAuth();
 
   useEffect(() => {
     if (!authUserId) return;
@@ -182,6 +182,22 @@ export default function FeedClient({
       try { await navigator.clipboard.writeText(url); } catch { /* ignore */ }
     }
     fetch('/api/share', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ post_id: post.id, platform }) }).catch(() => { /* ignore */ });
+  };
+
+  const handleAdminDelete = async (e: React.MouseEvent, postId: number) => {
+    e.preventDefault(); e.stopPropagation();
+    const reason = prompt('삭제 사유를 입력해 주세요:', '스팸/광고');
+    if (!reason) return;
+    try {
+      const res = await fetch(`/api/posts/${postId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason }),
+      });
+      if (res.ok) {
+        setPosts((prev: PostWithProfile[]) => prev.filter((p: PostWithProfile) => p.id !== postId));
+      }
+    } catch { /* ignore */ }
   };
 
   const loadMorePosts = useCallback(async () => {
@@ -417,6 +433,12 @@ export default function FeedClient({
                       <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{timeAgo(post.created_at)}</span>
                     </div>
                   </div>
+                  {/* 관리자 빠른 삭제 */}
+                  {isAdmin && (
+                    <button onClick={(e) => handleAdminDelete(e, post.id as number)} title="관리자 삭제" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', padding: '2px 4px', flexShrink: 0, opacity: 0.5, transition: 'opacity 0.15s' }} onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')} onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.5')}>
+                      <Trash2 size={14} />
+                    </button>
+                  )}
                 </div>
 
                 <Link href={postHref} onClick={() => {
