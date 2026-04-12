@@ -264,6 +264,30 @@ export default async function ComplexPage({ searchParams }: { searchParams: Prom
         initialRegion={selectedRegion || null}
         ageChartData={ageChartData}
       />
+
+      {/* SEO 허브 링크 — 크롤 심도 + 롱테일 키워드 */}
+      <div style={{ marginTop: 20 }}>
+        <section style={{ marginBottom: 16 }}>
+          <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px' }}>테마별 분석</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
+            {[
+              { s: 'price-up', l: '📈 가격 상승' }, { s: 'price-down', l: '📉 가격 하락' },
+              { s: 'low-jeonse-ratio', l: '🛡️ 전세가율↓' }, { s: 'high-jeonse-ratio', l: '⚠️ 전세가율↑' },
+              { s: 'new-built', l: '🏗️ 신축' }, { s: 'high-trade', l: '🔥 거래활발' },
+            ].map(t => (
+              <Link key={t.s} href={`/apt/theme/${t.s}${selectedRegion ? `?region=${encodeURIComponent(selectedRegion)}` : ''}`} style={{ padding: '8px 10px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', textDecoration: 'none', fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)', textAlign: 'center' }}>{t.l}</Link>
+            ))}
+          </div>
+        </section>
+        <section style={{ marginBottom: 16 }}>
+          <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px' }}>지역별 시세</h2>
+          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+            {REGIONS.map(r => (
+              <Link key={r} href={`/apt/region/${encodeURIComponent(r)}`} style={{ padding: '4px 10px', borderRadius: 16, fontSize: 11, textDecoration: 'none', fontWeight: 600, background: 'var(--bg-surface)', color: 'var(--text-secondary)', border: '1px solid var(--border)' }}>{r}</Link>
+            ))}
+          </div>
+        </section>
+      </div>
     </article>
   );
 }
