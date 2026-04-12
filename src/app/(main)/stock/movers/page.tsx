@@ -72,7 +72,7 @@ export default async function MoversPage() {
         <Link href="/stock" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>주식</Link>›<span>급등락</span>
       </nav>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebPage', name: TITLE, url: `${SITE_URL}/stock/movers`, speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', 'section'] } }) }} />
-      <div style={ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
         <h1 style={{ fontSize: 'clamp(22px, 5vw, 28px)', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>🔥 급등락 종목</h1>
         <ShareButtons title={TITLE} />
       </div>
