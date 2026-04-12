@@ -42,6 +42,24 @@ export interface DailyReportData {
   } | null;
   // ── 신규: 추천 블로그 ──
   recommendBlogs: { slug: string; title: string; category: string; excerpt: string }[];
+  // ── 신규: 커뮤니티 핫토픽 ──
+  hotTopics: {
+    polls: { title: string; total_votes: number; options: { label: string; pct: number }[] }[];
+    vsBattles: { option_a: string; option_b: string; a_pct: number; b_pct: number; total: number }[];
+    predictions: { title: string; agree_pct: number; total: number }[];
+    hotPosts: { id: number; title: string; like_count: number; comment_count: number }[];
+  };
+  // ── 신규: 가격 변동 TOP ──
+  priceChanges: {
+    aptUp: { name: string; sigungu: string; change_pct: number; price: number }[];
+    aptDown: { name: string; sigungu: string; change_pct: number; price: number }[];
+    stockUp: { name: string; symbol: string; change_pct: number; price: number }[];
+    stockDown: { name: string; symbol: string; change_pct: number; price: number }[];
+  };
+  // ── 신규: 활동 랭킹 ──
+  activityRanking: { nickname: string; posts: number; comments: number; points: number }[];
+  // ── 신규: 시장 심리 ──
+  marketSentiment: { positive: number; negative: number; neutral: number; score: number };
   // 메타
   subCountThisWeek: number;
   subUnitsThisWeek: number;
@@ -69,6 +87,7 @@ export async function fetchDailyReportData(region: ReportRegion): Promise<DailyR
     subsR, unsoldLocalR, unsoldAllR, redevR, redevStagesR, guR, complexR, sitesR,
     stocksR, sectorsR, globalR, subWeekR, indicesR, exchangeR,
     briefingKR, briefingUSR, tradeThisR, tradeLastR, tradeHotR, blogR,
+    pollsR, vsR, predR, hotPostsR, aptUpR, aptDownR, stockUpR, stockDownR, activityR, newsR,
   ] = await Promise.all([
     // 1. 청약 (이번주 ± 3일)
     sb.from('apt_subscriptions')
@@ -210,6 +229,82 @@ export async function fetchDailyReportData(region: ReportRegion): Promise<DailyR
       .lte('published_at', now.toISOString())
       .order('published_at', { ascending: false })
       .limit(3),
+
+    // ── 신규 21: 커뮤니티 핫토픽 — 인기 투표 ──
+    (sb as any).from('post_polls')
+      .select('id, title, post_id, total_votes, created_at')
+      .gt('total_votes', 0)
+      .order('total_votes', { ascending: false })
+      .limit(3),
+
+    // ── 신규 22: VS 배틀 ──
+    (sb as any).from('vs_battles')
+      .select('option_a, option_b, votes_a, votes_b, created_at')
+      .gt('votes_a', 0)
+      .order('created_at', { ascending: false })
+      .limit(3),
+
+    // ── 신규 23: 예측 ──
+    (sb as any).from('predictions')
+      .select('title, agree_count, disagree_count, created_at')
+      .order('created_at', { ascending: false })
+      .limit(3),
+
+    // ── 신규 24: 인기 게시글 (오늘) ──
+    sb.from('posts')
+      .select('id, title, like_count, comment_count')
+      .eq('is_deleted', false)
+      .gte('created_at', new Date(now.getTime() - 24 * 3600000).toISOString())
+      .order('like_count', { ascending: false })
+      .limit(5),
+
+    // ── 신규 25: 가격 변동 TOP (부동산) ──
+    (sb as any).from('apt_complex_profiles')
+      .select('apt_name, sigungu, price_change_1y, latest_sale_price')
+      .eq('region_nm', region)
+      .gt('latest_sale_price', 0)
+      .not('price_change_1y', 'is', null)
+      .order('price_change_1y', { ascending: false })
+      .limit(5),
+
+    // ── 신규 26: 가격 하락 TOP (부동산) ──
+    (sb as any).from('apt_complex_profiles')
+      .select('apt_name, sigungu, price_change_1y, latest_sale_price')
+      .eq('region_nm', region)
+      .gt('latest_sale_price', 0)
+      .not('price_change_1y', 'is', null)
+      .order('price_change_1y', { ascending: true })
+      .limit(5),
+
+    // ── 신규 27: 급등 종목 ──
+    sb.from('stock_quotes')
+      .select('name, symbol, change_pct, price')
+      .in('market', ['KOSPI', 'KOSDAQ'])
+      .gt('price', 0)
+      .order('change_pct', { ascending: false })
+      .limit(5),
+
+    // ── 신규 28: 급락 종목 ──
+    sb.from('stock_quotes')
+      .select('name, symbol, change_pct, price')
+      .in('market', ['KOSPI', 'KOSDAQ'])
+      .gt('price', 0)
+      .order('change_pct', { ascending: true })
+      .limit(5),
+
+    // ── 신규 29: 활동 랭킹 (오늘 활발한 유저) ──
+    sb.from('posts')
+      .select('author_id, profiles!inner(nickname, points)')
+      .eq('is_deleted', false)
+      .gte('created_at', new Date(now.getTime() - 24 * 3600000).toISOString())
+      .limit(200),
+
+    // ── 신규 30: 뉴스 감성 분석 ──
+    sb.from('stock_news')
+      .select('sentiment_label')
+      .gte('published_at', new Date(now.getTime() - 24 * 3600000).toISOString())
+      .not('sentiment_label', 'is', null)
+      .limit(500),
   ]);
 
   // 청약 상태 계산
@@ -342,6 +437,63 @@ export async function fetchDailyReportData(region: ReportRegion): Promise<DailyR
     slug: r.slug, title: r.title, category: r.category || 'general', excerpt: (r.excerpt || '').slice(0, 80),
   }));
 
+  // ── 신규: 커뮤니티 핫토픽 ──
+  const pollsData = (pollsR?.data || []).map((p: any) => ({
+    title: p.title || '투표', total_votes: p.total_votes || 0, options: [] as { label: string; pct: number }[],
+  }));
+  const vsData = (vsR?.data || []).map((v: any) => {
+    const total = (v.votes_a || 0) + (v.votes_b || 0);
+    return {
+      option_a: v.option_a, option_b: v.option_b,
+      a_pct: total > 0 ? Math.round((v.votes_a || 0) / total * 100) : 50,
+      b_pct: total > 0 ? Math.round((v.votes_b || 0) / total * 100) : 50,
+      total,
+    };
+  });
+  const predData = (predR?.data || []).map((p: any) => {
+    const total = (p.agree_count || 0) + (p.disagree_count || 0);
+    return {
+      title: p.title || '예측', agree_pct: total > 0 ? Math.round((p.agree_count || 0) / total * 100) : 50, total,
+    };
+  });
+  const hotPosts = (hotPostsR?.data || []).map((p: any) => ({
+    id: p.id, title: (p.title || '').slice(0, 40), like_count: p.like_count || 0, comment_count: p.comment_count || 0,
+  }));
+
+  // ── 신규: 가격 변동 TOP ──
+  const aptUp = (aptUpR?.data || []).slice(0, 3).map((r: any) => ({
+    name: r.apt_name, sigungu: r.sigungu || '', change_pct: Number(r.price_change_1y || 0), price: Number(r.latest_sale_price || 0),
+  }));
+  const aptDown = (aptDownR?.data || []).slice(0, 3).map((r: any) => ({
+    name: r.apt_name, sigungu: r.sigungu || '', change_pct: Number(r.price_change_1y || 0), price: Number(r.latest_sale_price || 0),
+  }));
+  const stockUpArr = (stockUpR?.data || []).slice(0, 3).map((r: any) => ({
+    name: r.name, symbol: r.symbol, change_pct: Number(r.change_pct || 0), price: Number(r.price || 0),
+  }));
+  const stockDownArr = (stockDownR?.data || []).slice(0, 3).map((r: any) => ({
+    name: r.name, symbol: r.symbol, change_pct: Number(r.change_pct || 0), price: Number(r.price || 0),
+  }));
+
+  // ── 신규: 활동 랭킹 ──
+  const actMap = new Map<string, { nickname: string; posts: number; comments: number; points: number }>();
+  (activityR?.data || []).forEach((r: any) => {
+    const nick = r.profiles?.nickname || '익명';
+    const pts = r.profiles?.points || 0;
+    const ex = actMap.get(nick) || { nickname: nick, posts: 0, comments: 0, points: pts };
+    actMap.set(nick, { ...ex, posts: ex.posts + 1 });
+  });
+  const activityRanking = Array.from(actMap.values())
+    .sort((a, b) => (b.posts + b.comments) - (a.posts + a.comments))
+    .slice(0, 5);
+
+  // ── 신규: 시장 심리 ──
+  const newsData = newsR?.data || [];
+  const positive = newsData.filter((r: any) => r.sentiment_label === 'positive').length;
+  const negative = newsData.filter((r: any) => r.sentiment_label === 'negative').length;
+  const neutral = newsData.filter((r: any) => r.sentiment_label === 'neutral').length;
+  const totalNews = positive + negative + neutral;
+  const sentimentScore = totalNews > 0 ? Math.round((positive - negative) / totalNews * 50 + 50) : 50;
+
   return {
     region,
     date: dateStr,
@@ -372,6 +524,10 @@ export async function fetchDailyReportData(region: ReportRegion): Promise<DailyR
     aiBriefingUS,
     tradeTrend,
     recommendBlogs,
+    hotTopics: { polls: pollsData, vsBattles: vsData, predictions: predData, hotPosts },
+    priceChanges: { aptUp, aptDown, stockUp: stockUpArr, stockDown: stockDownArr },
+    activityRanking,
+    marketSentiment: { positive, negative, neutral, score: sentimentScore },
     subCountThisWeek,
     subUnitsThisWeek,
   };

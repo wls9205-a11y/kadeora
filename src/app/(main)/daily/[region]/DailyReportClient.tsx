@@ -551,6 +551,158 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
         </>
       )}
 
+      {/* ═══ NEW: 시장 심리 지수 ═══ */}
+      {d.marketSentiment && (d.marketSentiment.positive + d.marketSentiment.negative + d.marketSentiment.neutral) > 0 && (
+        <div style={{ background: 'var(--bg-surface)', borderRadius: 'var(--radius-card)', border: '1px solid var(--border)', padding: '16px', marginBottom: 8 }}>
+          <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 10 }}>🌡️ 시장 심리 지수</div>
+          <div style={{ textAlign: 'center', marginBottom: 10 }}>
+            <span style={{ fontSize: 32, fontWeight: 900, color: d.marketSentiment.score >= 60 ? '#22C55E' : d.marketSentiment.score <= 40 ? '#EF4444' : 'var(--text-secondary)' }}>
+              {d.marketSentiment.score}
+            </span>
+            <span style={{ fontSize: 13, color: 'var(--text-secondary)', marginLeft: 4 }}>/ 100</span>
+            <div style={{ fontSize: 12, fontWeight: 700, color: d.marketSentiment.score >= 70 ? '#22C55E' : d.marketSentiment.score >= 55 ? '#86EFAC' : d.marketSentiment.score >= 45 ? 'var(--text-tertiary)' : d.marketSentiment.score >= 30 ? '#FCA5A5' : '#EF4444', marginTop: 4 }}>
+              {d.marketSentiment.score >= 70 ? '🟢 탐욕' : d.marketSentiment.score >= 55 ? '🟡 낙관' : d.marketSentiment.score >= 45 ? '⚪ 중립' : d.marketSentiment.score >= 30 ? '🟠 불안' : '🔴 공포'}
+            </div>
+          </div>
+          <div style={{ height: 8, borderRadius: 4, background: 'var(--bg-hover)', overflow: 'hidden', marginBottom: 6 }}>
+            <div style={{ height: '100%', width: `${d.marketSentiment.score}%`, borderRadius: 4, background: `linear-gradient(90deg, #EF4444, #F59E0B, #22C55E)`, transition: 'width 0.5s' }} />
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--text-tertiary)' }}>
+            <span>극도의 공포</span><span>중립</span><span>극도의 탐욕</span>
+          </div>
+          <div style={{ display: 'flex', gap: 8, marginTop: 10, justifyContent: 'center' }}>
+            <span style={{ fontSize: 11, color: '#22C55E' }}>긍정 {d.marketSentiment.positive}건</span>
+            <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>중립 {d.marketSentiment.neutral}건</span>
+            <span style={{ fontSize: 11, color: '#EF4444' }}>부정 {d.marketSentiment.negative}건</span>
+          </div>
+        </div>
+      )}
+
+      {/* ═══ NEW: 가격 변동 TOP ═══ */}
+      {(d.priceChanges.stockUp.length > 0 || d.priceChanges.aptUp.length > 0) && (
+        <div style={{ background: 'var(--bg-surface)', borderRadius: 'var(--radius-card)', border: '1px solid var(--border)', padding: '16px', marginBottom: 8 }}>
+          <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 10 }}>📊 오늘의 가격 변동 TOP</div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+            {/* 주식 급등 */}
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#EF4444', marginBottom: 6 }}>🔴 급등 종목</div>
+              {d.priceChanges.stockUp.map((s, i) => (
+                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, padding: '3px 0', borderBottom: '1px solid var(--border)' }}>
+                  <span style={{ color: 'var(--text-primary)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '60%' }}>{s.name}</span>
+                  <span style={{ color: '#EF4444', fontWeight: 700 }}>+{s.change_pct.toFixed(1)}%</span>
+                </div>
+              ))}
+            </div>
+            {/* 주식 급락 */}
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#3B82F6', marginBottom: 6 }}>🔵 급락 종목</div>
+              {d.priceChanges.stockDown.map((s, i) => (
+                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, padding: '3px 0', borderBottom: '1px solid var(--border)' }}>
+                  <span style={{ color: 'var(--text-primary)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '60%' }}>{s.name}</span>
+                  <span style={{ color: '#3B82F6', fontWeight: 700 }}>{s.change_pct.toFixed(1)}%</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          {/* 부동산 급등/급락 */}
+          {d.priceChanges.aptUp.length > 0 && (
+            <div style={{ marginTop: 10 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: '#EF4444', marginBottom: 6 }}>🏠 시세 상승 단지</div>
+                  {d.priceChanges.aptUp.map((a, i) => (
+                    <div key={i} style={{ fontSize: 11, padding: '3px 0', borderBottom: '1px solid var(--border)' }}>
+                      <div style={{ fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.name}</div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span style={{ color: 'var(--text-tertiary)' }}>{a.sigungu}</span>
+                        <span style={{ color: '#EF4444', fontWeight: 700 }}>+{a.change_pct.toFixed(1)}%</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: '#3B82F6', marginBottom: 6 }}>🏠 시세 하락 단지</div>
+                  {d.priceChanges.aptDown.map((a, i) => (
+                    <div key={i} style={{ fontSize: 11, padding: '3px 0', borderBottom: '1px solid var(--border)' }}>
+                      <div style={{ fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.name}</div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span style={{ color: 'var(--text-tertiary)' }}>{a.sigungu}</span>
+                        <span style={{ color: '#3B82F6', fontWeight: 700 }}>{a.change_pct.toFixed(1)}%</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ═══ NEW: 커뮤니티 핫토픽 ═══ */}
+      {(d.hotTopics.polls.length > 0 || d.hotTopics.vsBattles.length > 0 || d.hotTopics.hotPosts.length > 0) && (
+        <div style={{ background: 'var(--bg-surface)', borderRadius: 'var(--radius-card)', border: '1px solid var(--border)', padding: '16px', marginBottom: 8 }}>
+          <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 10 }}>🔥 커뮤니티 핫토픽</div>
+          {/* VS 배틀 */}
+          {d.hotTopics.vsBattles.map((v, i) => (
+            <div key={`vs-${i}`} style={{ marginBottom: 8, padding: '8px 10px', borderRadius: 8, background: 'rgba(139,92,246,0.06)', border: '1px solid rgba(139,92,246,0.12)' }}>
+              <div style={{ fontSize: 10, fontWeight: 700, color: '#8B5CF6', marginBottom: 4 }}>⚔️ VS 배틀 ({v.total}명 참여)</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <div style={{ flex: 1, textAlign: 'center' }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>{v.option_a}</div>
+                  <div style={{ fontSize: 16, fontWeight: 900, color: v.a_pct >= v.b_pct ? '#EF4444' : 'var(--text-tertiary)' }}>{v.a_pct}%</div>
+                </div>
+                <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-tertiary)' }}>VS</div>
+                <div style={{ flex: 1, textAlign: 'center' }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>{v.option_b}</div>
+                  <div style={{ fontSize: 16, fontWeight: 900, color: v.b_pct >= v.a_pct ? '#3B82F6' : 'var(--text-tertiary)' }}>{v.b_pct}%</div>
+                </div>
+              </div>
+            </div>
+          ))}
+          {/* 예측 */}
+          {d.hotTopics.predictions.map((p, i) => (
+            <div key={`pred-${i}`} style={{ marginBottom: 8, padding: '8px 10px', borderRadius: 8, background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.12)' }}>
+              <div style={{ fontSize: 10, fontWeight: 700, color: '#F59E0B', marginBottom: 4 }}>🔮 예측 ({p.total}명 참여)</div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)' }}>{p.title}</div>
+              <div style={{ height: 6, borderRadius: 4, background: 'var(--bg-hover)', overflow: 'hidden', marginTop: 6 }}>
+                <div style={{ height: '100%', width: `${p.agree_pct}%`, borderRadius: 4, background: '#F59E0B' }} />
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}>
+                <span>동의 {p.agree_pct}%</span><span>반대 {100 - p.agree_pct}%</span>
+              </div>
+            </div>
+          ))}
+          {/* 인기글 */}
+          {d.hotTopics.hotPosts.length > 0 && (
+            <div style={{ marginTop: 6 }}>
+              <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-tertiary)', marginBottom: 4 }}>🔥 인기글</div>
+              {d.hotTopics.hotPosts.slice(0, 3).map((p, i) => (
+                <a key={p.id} href={`/feed/${p.id}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 12, padding: '4px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none', color: 'inherit' }}>
+                  <span style={{ fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, marginRight: 8 }}>{p.title || '글'}</span>
+                  <span style={{ fontSize: 10, color: 'var(--text-tertiary)', flexShrink: 0 }}>♥{p.like_count} 💬{p.comment_count}</span>
+                </a>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ═══ NEW: 활동 랭킹 ═══ */}
+      {d.activityRanking.length > 0 && (
+        <div style={{ background: 'var(--bg-surface)', borderRadius: 'var(--radius-card)', border: '1px solid var(--border)', padding: '16px', marginBottom: 8 }}>
+          <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 10 }}>🏆 오늘의 활발한 카더라인</div>
+          {d.activityRanking.slice(0, 3).map((u, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', borderBottom: i < 2 ? '1px solid var(--border)' : 'none' }}>
+              <span style={{ fontSize: 16, width: 24, textAlign: 'center' }}>{i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'}</span>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{u.nickname}</div>
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>글 {u.posts}개 · {u.points.toLocaleString()}P</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* ═══ S1: 주식 시장 ═══ */}
       <SH icon="📈" title="국내 시장 · 시총 TOP 10" />
       <div style={{ background: 'var(--bg-surface)', borderRadius: 'var(--radius-card)', border: '1px solid var(--border)', padding: '14px 16px', marginBottom: 8 }}>
