@@ -47,6 +47,7 @@ const MORE_ITEMS: { href: string; emoji: string; label: string; sub?: string; gr
   { href: '/calc',            emoji: '🧮', label: '계산기', sub: '부동산·세금 계산', group: '도구' },
   // 설정
   { href: '/notifications/settings', emoji: '🔔', label: '알림 설정', sub: '푸시·관심 설정', group: '설정' },
+  { href: '/attendance',     emoji: '🌱', label: '출석 체크', sub: '매일 포인트 적립', group: '설정' },
   { href: '/guide',           emoji: '📖', label: '가이드북', sub: '이용 방법 안내', group: '설정' },
   { href: '/grades',          emoji: '🏅', label: '등급 안내', sub: '등급별 혜택', group: '설정' },
   { href: '/about',           emoji: 'ℹ️', label: '서비스 소개', sub: '카더라 소개', group: '설정' },

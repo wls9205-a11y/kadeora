@@ -244,6 +244,18 @@ export async function GET(req: NextRequest) {
         extended: {
           totalPosts, totalComments, hotBlogs, newBlogs24, aptSites, aptDeadline7,
           ctaViews24, ctaClicks24, notifSent24, notifRead24, bioCount, ageCount, pv7d,
+          // 데이터 수집률
+          dataCollection: await (async () => {
+            try {
+              const base = 'is_seed.is.null,is_seed.eq.false';
+              const [city, mkt, phone] = await Promise.all([
+                safeCount((sb as any).from('profiles').select('id', { count: 'exact', head: true }).or(base).not('residence_city', 'is', null)),
+                safeCount((sb as any).from('profiles').select('id', { count: 'exact', head: true }).or(base).eq('marketing_agreed', true)),
+                safeCount((sb as any).from('profiles').select('id', { count: 'exact', head: true }).or(base).not('phone', 'is', null)),
+              ]);
+              return { city, marketing: mkt, phone, bio: bioCount, age: ageCount, total: realUsers };
+            } catch { return { city: 0, marketing: 0, phone: 0, bio: bioCount, age: ageCount, total: realUsers }; }
+          })(),
           shares7d: shares7d ?? 0,
           sharesToday: sharesToday ?? 0, gateViews: gateViews24 ?? 0, gateClicks: gateClicks24 ?? 0, signupAttempts: signupAttempts24 ?? 0, signupSuccess: signupSuccess24 ?? 0, signupAttempts7d: signupAttempts7d ?? 0,
           sharesByPlatform: (() => { const m: Record<string,number> = {}; for (const r of (sharesByPlatformRaw || [])) { const p = (r as any)?.platform || 'unknown'; m[p] = (m[p]||0)+1; } return m; })(),

@@ -40,6 +40,15 @@ export async function GET(req: NextRequest) {
         content: `${u.nickname || '회원'}님, ${region} 지역 청약 소식과 인기 종목 분석이 기다리고 있어요! 첫 미션을 완료하고 300P를 받아가세요 🎁`,
         is_read: false, link: '/feed',
       });
+      // 웹 푸시 발송
+      try {
+        const { sendPushToUsers } = await import('@/lib/push-utils');
+        sendPushToUsers([u.id], {
+          title: '🎁 첫 미션 안내',
+          body: `${region} 지역 청약 소식이 기다리고 있어요!`,
+          url: '/feed', tag: `welcome-d1-${u.id}`,
+        }).catch(() => {});
+      } catch {}
       sent++;
     }
 

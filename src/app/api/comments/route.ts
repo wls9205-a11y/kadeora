@@ -39,15 +39,32 @@ export async function POST(req: NextRequest) {
     try {
       const admin = getSupabaseAdmin();
       const { data: post } = await admin.from('posts').select('author_id, title').eq('id', postId).single();
+      const { sendPushToUsers } = await import('@/lib/push-utils');
+      const { data: myProfile } = await admin.from('profiles').select('nickname').eq('id', user.id).single();
+      const myName = myProfile?.nickname || '누군가';
+
+      // 글 작성자에게 알림
       if (post?.author_id && post.author_id !== user.id) {
-        const { data: profile } = await admin.from('profiles').select('nickname').eq('id', user.id).single();
-        const { sendPushToUsers } = await import('@/lib/push-utils');
         sendPushToUsers([post.author_id], {
-          title: `💬 ${profile?.nickname || '누군가'}님이 댓글을 남겼어요`,
+          title: `💬 ${myName}님이 댓글을 남겼어요`,
           body: content.slice(0, 60),
           url: `/feed/${postId}`,
-          tag: `comment-${postId}`,
+          tag: `comment-${postId}-${Date.now()}`,
         }).catch(() => {});
+      }
+
+      // 대댓글이면 원댓글 작성자에게도 알림
+      if (parsed!.parent_id) {
+        const { data: parentComment } = await (admin as any).from('comments')
+          .select('author_id').eq('id', parsed!.parent_id).single();
+        if (parentComment?.author_id && parentComment.author_id !== user.id && parentComment.author_id !== post?.author_id) {
+          sendPushToUsers([parentComment.author_id], {
+            title: `↩️ ${myName}님이 답글을 남겼어요`,
+            body: content.slice(0, 60),
+            url: `/feed/${postId}`,
+            tag: `reply-${parsed!.parent_id}-${Date.now()}`,
+          }).catch(() => {});
+        }
       }
     } catch {}
 

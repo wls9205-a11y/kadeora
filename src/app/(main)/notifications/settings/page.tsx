@@ -151,18 +151,25 @@ export default function NotificationSettingsPage() {
             <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>활성화된 알림</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
               {[
-                { label: '💬 댓글', group: '커뮤니티' },
-                { label: '❤️ 좋아요', group: '커뮤니티' },
-                { label: '👥 팔로우', group: '커뮤니티' },
-                { label: '🏢 청약마감', group: '부동산' },
-                { label: '🔥 인기글', group: '시스템' },
-                { label: '📈 주식알림', group: '주식' },
-                { label: '📅 출석', group: '시스템' },
+                { label: '💬 댓글' },
+                { label: '❤️ 좋아요' },
+                { label: '👥 팔로우' },
+                { label: '🏢 청약마감' },
+                { label: '🔥 인기글' },
+                { label: '📈 주식알림' },
+                { label: '📅 출석' },
+                { label: '📧 이메일' },
               ].map(n => (
                 <span key={n.label} style={{ fontSize: 11, padding: '3px 8px', borderRadius: 'var(--radius-xs)', background: 'rgba(52,211,153,0.1)', color: 'var(--accent-green)', fontWeight: 600 }}>
                   {n.label}
                 </span>
               ))}
+            </div>
+            <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid var(--border)' }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 6 }}>수신 채널</div>
+              <div style={{ fontSize: 12, color: 'var(--text-tertiary)', lineHeight: 1.6 }}>
+                웹 푸시 (3건/일, 무료) · 이메일 (주간 리포트) · 카카오 알림톡 (긴급만)
+              </div>
             </div>
           </div>
         </div>

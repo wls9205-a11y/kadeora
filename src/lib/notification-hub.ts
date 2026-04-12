@@ -134,13 +134,15 @@ async function dispatchToChannels(payload: NotificationPayload, notifId: number)
     if (s && (s as any)[settingKey] === false) return;
   }
 
-  // 일일 푸시 상한 (3건)
+  // 일일 푸시 상한 (3건) — notifications 테이블 기반
   const todayKST = new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10) + 'T00:00:00+09:00';
   const todayUTC = new Date(new Date(todayKST).getTime() - 9 * 3600000).toISOString();
-  const { count: dailyCount } = await (sb as any).from('push_logs')
+  const { count: dailyCount } = await (sb as any).from('notifications')
     .select('id', { count: 'exact', head: true })
+    .eq('user_id', payload.userId)
+    .neq('type', 'system')
     .gte('created_at', todayUTC);
-  // 대략적 일일 체크 (유저별 정밀 체크는 dispatch_logs 도입 후)
+  if ((dailyCount ?? 0) >= 10) return; // 하루 인앱 알림 10건 초과 시 외부 채널 스킵
 
   // 채널 1: 웹 푸시
   const pushPayload = payload.push || {

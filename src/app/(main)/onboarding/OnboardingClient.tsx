@@ -13,8 +13,15 @@ const INTERESTS = [
   { key: 'tax', label: '🧾 세금/절세', desc: '절세 팁·세법변경' },
 ];
 
+const REGIONS = [
+  '서울','경기','인천','부산','대구','대전','광주','울산','세종',
+  '강원','충북','충남','전북','전남','경북','경남','제주',
+];
+
 export default function OnboardingClient() {
   const [selected, setSelected] = useState<string[]>([]);
+  const [region, setRegion] = useState('');
+  const [marketingAgreed, setMarketingAgreed] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
   const [isPWA, setIsPWA] = useState(false);
@@ -41,6 +48,9 @@ export default function OnboardingClient() {
       if (!user) { router.replace('/login'); return; }
       await sb.from('profiles').update({
         interests: selected.length > 0 ? selected : ['news'],
+        residence_city: region || null,
+        region_text: region || null,
+        marketing_agreed: marketingAgreed,
         onboarded: true,
         updated_at: new Date().toISOString(),
       }).eq('id', user.id);
@@ -82,7 +92,7 @@ export default function OnboardingClient() {
           관심 분야를 선택하면 맞춤 정보를 받을 수 있어요
         </p>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 20 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16 }}>
           {INTERESTS.map(({ key, label, desc }) => {
             const sel = selected.includes(key);
             return (
@@ -98,6 +108,35 @@ export default function OnboardingClient() {
             );
           })}
         </div>
+
+        {/* 거주 지역 */}
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6, display: 'block' }}>
+            📍 거주 지역
+          </label>
+          <select value={region} onChange={e => setRegion(e.target.value)} style={{
+            width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-md)',
+            border: '1.5px solid var(--border)', background: 'var(--bg-base)',
+            color: region ? 'var(--text-primary)' : 'var(--text-tertiary)',
+            fontSize: 14, appearance: 'none',
+            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23999' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E")`,
+            backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center',
+          }}>
+            <option value="">선택 안 함</option>
+            {REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
+          </select>
+          <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>맞춤 청약·시세 알림에 활용돼요</div>
+        </div>
+
+        {/* 마케팅 동의 */}
+        <label style={{
+          display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 20,
+          cursor: 'pointer', fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5,
+        }}>
+          <input type="checkbox" checked={marketingAgreed} onChange={e => setMarketingAgreed(e.target.checked)}
+            style={{ marginTop: 2, accentColor: 'var(--brand)' }} />
+          <span>이메일·카카오톡으로 청약 마감, 종목 알림, 주간 리포트를 받겠습니다. (선택)</span>
+        </label>
 
         {/* iOS Safari (비-PWA): 홈 화면 추가 안내 */}
         {isIOS && !isPWA && (

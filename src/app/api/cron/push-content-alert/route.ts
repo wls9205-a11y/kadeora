@@ -32,6 +32,19 @@ async function handler(req: NextRequest): Promise<NextResponse> {
 
     const userIds = [...new Set((subs || []).map(s => s.user_id).filter(Boolean))] as string[];
 
+    // 시드 유저 제외
+    if (userIds.length > 0) {
+      const { data: seeds } = await sb.from('profiles').select('id').in('id', userIds).eq('is_seed', true);
+      const seedIds = new Set((seeds || []).map((s: any) => s.id));
+      const filtered = userIds.filter(id => !seedIds.has(id));
+      if (filtered.length === 0 && userIds.length > 0) {
+        // 시드만 구독 중 → broadcast로 fallback
+      } else {
+        userIds.length = 0;
+        userIds.push(...filtered);
+      }
+    }
+
     if (userIds.length === 0) {
       // 비로그인 구독자만 있으면 기존 방식 (전체 브로드캐스트)
       const { data: topPost } = await sb.from('blog_posts')
@@ -43,6 +56,7 @@ async function handler(req: NextRequest): Promise<NextResponse> {
       const { sent, failed } = await sendPushBroadcast({
         title: `${icon} ${topPost.title}`.slice(0, 60),
         body: '새 분석이 올라왔어요', url: `/blog/${topPost.slug}`, tag: 'content-alert',
+        image: `https://kadeora.app/api/og?title=${encodeURIComponent(topPost.title)}&category=${topPost.category}&design=2`,
       });
       return { processed: sent, failed, metadata: { mode: 'broadcast', slug: topPost.slug } };
     }

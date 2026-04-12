@@ -187,6 +187,28 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
         ))}
       </div>
 
+      {/* ═══ 6.5 데이터 수집률 ═══ */}
+      {x.dataCollection && (() => {
+        const dc = x.dataCollection;
+        const t = dc.total || 1;
+        const items = [
+          { l: '📍 지역', v: dc.city, p: Math.round(dc.city/t*100) },
+          { l: '🎂 나이', v: dc.age, p: Math.round(dc.age/t*100) },
+          { l: '📧 마케팅', v: dc.marketing, p: Math.round(dc.marketing/t*100) },
+          { l: '📱 푸시', v: k.pushSubs||0, p: Math.round((k.pushSubs||0)/t*100) },
+        ];
+        return <div className="adm-card" style={{padding:'8px 12px',marginBottom:8}}>
+          <div style={{fontSize:11,fontWeight:700,color:'rgba(255,255,255,0.5)',marginBottom:6}}>📊 데이터 수집률 ({t}명)</div>
+          {items.map(s=><div key={s.l} style={{display:'flex',alignItems:'center',gap:6,padding:'3px 0'}}>
+            <span style={{fontSize:11,minWidth:54,color:'rgba(255,255,255,0.5)'}}>{s.l}</span>
+            <div style={{flex:1,height:6,background:'rgba(255,255,255,0.06)',borderRadius:3,overflow:'hidden'}}>
+              <div style={{height:'100%',width:`${s.p}%`,background:s.p>50?'#10B981':s.p>20?'#F59E0B':'#EF4444',borderRadius:3}}/>
+            </div>
+            <span style={{fontSize:11,minWidth:50,textAlign:'right',color:s.p>50?'#10B981':s.p>20?'#F59E0B':'#EF4444',fontWeight:600}}>{s.v}/{t} ({s.p}%)</span>
+          </div>)}
+        </div>;
+      })()}
+
       {/* ═══ 7. 크론 + 데이터 신선도 ═══ */}
       <Sec t="🔧 크론 · 데이터" ch={
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:4}}>

@@ -39,7 +39,18 @@ export async function sendPushToUsers(
     .in('user_id', userIds);
 
   if (!subs || subs.length === 0) return { sent: 0, failed: 0 };
-  return deliverPush(subs, payload);
+  const result = await deliverPush(subs, payload);
+
+  // push_logs 기록 (발송 추적)
+  try {
+    await (admin as any).from('push_logs').insert({
+      title: payload.title, body: payload.body,
+      url: payload.url || '/', target: 'users',
+      sent_count: result.sent,
+    });
+  } catch {}
+
+  return result;
 }
 
 /**
