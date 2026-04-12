@@ -457,7 +457,7 @@ export default async function BlogDetailPage({ params }: Props) {
     if ((post.category === 'apt' || post.category === 'unsold') && post.tags?.length) {
       const aptName = post.tags[0];
       const { data: cp } = await (sb as any).from('apt_complex_profiles')
-        .select('avg_sale_price_pyeong, jeonse_ratio, total_households, built_year, price_change_1y')
+        .select('avg_sale_price_pyeong, jeonse_ratio, total_households, built_year, price_change_1y, region_nm, sigungu')
         .eq('apt_name', aptName).maybeSingle();
       if (cp) {
         if (cp.avg_sale_price_pyeong) sidebarMetrics.push({ label: '평당가', value: `${cp.avg_sale_price_pyeong.toLocaleString()}만원` });
@@ -465,6 +465,9 @@ export default async function BlogDetailPage({ params }: Props) {
         if (cp.total_households) sidebarMetrics.push({ label: '세대수', value: `${cp.total_households.toLocaleString()}세대` });
         if (cp.built_year) sidebarMetrics.push({ label: '연식', value: `${new Date().getFullYear() - cp.built_year}년차` });
         if (cp.price_change_1y !== null) sidebarMetrics.push({ label: '1년 변동', value: `${cp.price_change_1y > 0 ? '+' : ''}${cp.price_change_1y}%` });
+        // 단지백과 + 시군구 허브 내부 링크 (SEO 크로스링크)
+        sidebarRelatedLinks.push({ title: `${aptName} 단지백과`, href: `/apt/complex/${encodeURIComponent(aptName)}` });
+        if (cp.region_nm && cp.sigungu) sidebarRelatedLinks.push({ title: `${cp.sigungu} 아파트 시세`, href: `/apt/area/${encodeURIComponent(cp.region_nm)}/${encodeURIComponent(cp.sigungu)}` });
       }
     }
     if (post.category === 'stock' && relatedStocks.length > 0) {
@@ -474,7 +477,7 @@ export default async function BlogDetailPage({ params }: Props) {
     }
     if (relatedSites.length > 0) {
       relatedSites.forEach((s: any) => {
-        sidebarRelatedLinks.push({ title: s.name, href: `/apt/sites/${s.slug}` });
+        sidebarRelatedLinks.push({ title: s.name, href: `/apt/${s.slug}` });
       });
     }
   } catch {}

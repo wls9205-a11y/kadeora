@@ -1,69 +1,59 @@
 # 카더라 STATUS.md
-> 마지막 업데이트: 2026-04-13 05:00 KST (세션 92)
+> 마지막 업데이트: 2026-04-13 06:00 KST (세션 92)
 
-## 세션 92 — 부동산 SEO 대규모 확장 (PHASE 1~6 완료)
+## 세션 92 — 부동산 SEO 대규모 확장 완료 (PHASE 1~8)
 
-### 배포 완료 (11건 커밋, 에러 0건)
+### 총 배포: 15건 커밋, 에러 0건
 
-#### PHASE 1: 프로그래매틱 SEO 기반 ✅
-- `/apt/area/[region]/[sigungu]` 시군구 허브 (~200 페이지)
-- `/apt/area/[region]/[sigungu]/[dong]` 동 허브 (~1,500 페이지)
-- `robots.txt` 정적 파일 전환
-- 단지백과 사이트맵 `image:image` 태그 (34,537개)
-- 시군구/동/건설사 전용 사이트맵 id=21
-- 내부 링크: apt/[id] + complex/[name] → 허브 pill 링크
-- `llms.txt` URL 패턴 + 핵심 데이터 갱신
+#### 신규 페이지 시스템 (5종)
+| 유형 | URL | 페이지 수 | 안티스팸 |
+|------|-----|----------|---------|
+| 시군구 허브 | /apt/area/{시도}/{시군구} | ~200 | 10개 미만 noindex |
+| 동 허브 | /apt/area/{시도}/{시군구}/{동} | ~1,500 | 5개 미만 noindex |
+| 테마 6종 | /apt/theme/{theme}?region= | 108 | 5개 미만 notFound |
+| 건설사 | /apt/builder/{이름} | ~200 | 3현장 미만 noindex |
+| 단지 비교 | /apt/compare/{A}-vs-{B} | ~200+on-demand | 양쪽 데이터 필수 |
+| **합계** | | **~2,200+** | |
 
-#### PHASE 2: 비교 + 데이터 ✅
-- `/apt/compare/[A-vs-B]` 단지 비교 페이지 (12개 항목 테이블)
-- complex/[name] → "비교하기" CTA
-- `price_change_1y`: 2,291 → 13,460건 (6배)
+#### 인프라 개선
+- robots.txt 정적 전환
+- 단지백과 사이트맵 image:image 태그 (34,537개)
+- 사이트맵 id=21 (시군구+동+건설사+비교 ~200)
+- 테마 108 URL 사이트맵 추가
+- IndexNow 대량 확장 (+176 URL/배치)
+- llms.txt URL 패턴 + 핵심 데이터 수치
 
-#### PHASE 3: 테마 + 크론 ✅
-- `/apt/theme/[theme]` 6종 × 18지역 = 108 URL
-- `price-change-calc` 크론 (매주 월 06:30)
-- 시군구 허브 → 테마 크로스 링크
+#### 내부 링크 메시 (8개 페이지 강화)
+- /apt (메인) → 17지역 + 6테마 + 5도구
+- /apt/region/[region] → 시군구 허브 + 6테마
+- /apt/area/[region]/[sigungu] → 동 + 6테마 + TOP10
+- /apt/complex/[name] → 시군구/동 허브 + 비교 CTA
+- /apt/[id] → 시군구/동 허브 + 건설사 링크
+- /blog/[slug] → 단지백과 + 시군구 허브 (apt 카테고리)
 
-#### PHASE 4: 건설사 + 크론 수정 ✅
-- `/apt/builder/[name]` 건설사 브랜드 페이지 (~200+)
-- apt/[id] 시공사 → 건설사 페이지 클릭 링크
-- `price-change-calc` 크론 RPC 버그 → JS 계산 전면 재작성
-- 건설사 사이트맵 추가
+#### 크론 3개 신규
+| 크론 | 스케줄 | 기능 |
+|------|--------|------|
+| price-change-calc | 매주 월 06:30 | 가격 변동률 자동 계산 |
+| monthly-market-report | 매월 2일 07:00 | 20개 시군구 시황 블로그 |
+| blog-complex-crosslink | 매주 수 05:00 | blog_post_count 업데이트 |
 
-#### PHASE 5: IndexNow + 지역 링크 ✅
-- `indexnow-mass` 크론: 시군구 50 + 테마 6 + 건설사 20 + 단지백과 100 URL 추가
-- region/[region] → SigunguLinks 컴포넌트 + 테마 6종 링크
+#### JSON-LD 구조화 데이터
+- 조건부 AggregateRating (review_count > 0 시만)
+- BreadcrumbList, FAQPage, Dataset, Article+Speakable 전량
 
-#### PHASE 6: 데이터 보강 + 메인 페이지 ✅
-- 좌표: 30,982 → **34,527** (+3,545, **100%**)
-- price_change_1y: 2,291 → **13,460** (+11,169, **39%**)
-- avg_sale_price_pyeong: 26,813 → **27,573** (+760)
-- total_households: 55 → **96** (+41)
-- `/apt` 메인: 지역 17개 + 테마 6종 + 도구 5종 허브 링크
+#### DB 보강 최종
+| 데이터 | 시작 | 현재 | 변화 |
+|--------|------|------|------|
+| 좌표 | 30,982 (89.7%) | **34,527 (100%)** | +3,545 |
+| price_change_1y | 2,291 (6.6%) | **13,460 (39%)** | +11,169 |
+| 평당가 | 26,813 | **27,573** | +760 |
+| total_households | 55 | 96 | +41 |
+| blog_post_count | - | 2,003 | (확인) |
 
-### 안티스팸 7중 안전장치
-1. 시군구 10 / 동 5 / 테마 5 / 건설사 3 / 비교 양쪽 데이터 필수
-2. noindex + notFound() 이중 차단
-3. 데이터 기반 유니크 분석 문단
-4. canonical URL 전량
-5. JSON-LD 4종 (BreadcrumbList, FAQPage, Dataset, Article+Speakable)
-6. 사이트맵 안티스팸 임계값
-7. 공공데이터 출처 명시
-
-### 예상 신규 인덱스 페이지
-| 유형 | 수량 |
-|------|------|
-| 시군구 허브 | ~200 |
-| 동 허브 | ~1,500 |
-| 테마 | 108 |
-| 건설사 | ~200 |
-| 비교 | on-demand |
-| **합계** | **~2,000+** |
-
-### 다음 세션 (PHASE 7)
-- Google Search Console + 네이버 서치어드바이저 사이트맵 재제출
-- total_households kapt-sync 크론 처리량 확대
-- 리뷰/평점 시스템 → AggregateRating JSON-LD
-- 109개 위성 사이트 백링크 전략
-- 가격대별 조합 페이지 (시군구 × 가격 티어)
-- 월간 자동 시황 리포트 크론
+### Node 수동 작업 필요
+1. Google Search Console → sitemap.xml 재제출
+2. 네이버 서치어드바이저 → sitemap.xml + feed.xml 재제출
+3. Google Publisher Center → 뉴스 파트너 신청
+4. Bing 웹마스터 → 사이트맵 확인
+5. 109개 위성 사이트 → kadeora.app 백링크 추가
