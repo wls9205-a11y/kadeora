@@ -74,7 +74,7 @@ export default async function MoversPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebPage', name: TITLE, url: `${SITE_URL}/stock/movers`, speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', 'section'] } }) }} />
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
         <h1 style={{ fontSize: 'clamp(22px, 5vw, 28px)', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>🔥 급등락 종목</h1>
-        <ShareButtons title={TITLE} />
+        <ShareButtons title={TITLE} contentType="stock-page" contentRef="movers" />
       </div>
       <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 20 }}>KOSPI·KOSDAQ 등락률·거래량·52주 신고가/신저가 실시간 업데이트</p>
 

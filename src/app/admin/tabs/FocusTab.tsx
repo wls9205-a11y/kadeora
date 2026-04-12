@@ -176,8 +176,8 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
           {v:f(k.apts||0),l:'분양',c:'#10B981'},
           {v:`${((k.dbMb||0)/1024).toFixed(1)}G`,l:'DB/8.4G',c:gc(BM.db.c(dbP))},
           {v:f(k.emailSubs||0),l:'이메일',c:'#EC4899'},
-          {v:f(k.pushSubs||0),l:'푸시',c:'#F59E0B'},
           {v:f(x.shares7d||0),l:'공유7d',c:'#A855F7'},
+          {v:f(x.sharesToday||0),l:'공유오늘',c:'#D946EF'},
           {v:f(k.interests||0),l:'관심단지',c:'#06B6D4'},
         ].map(s=>(
           <div key={s.l} style={{background:S,border:BD,borderRadius: 'var(--radius-sm)',padding:'6px 6px',textAlign:'center'}}>
@@ -186,6 +186,42 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
           </div>
         ))}
       </div>
+
+      {/* ═══ 6.1 공유 분석 ═══ */}
+      {(x.sharesByPlatform || x.sharesByContentType) && (() => {
+        const bp = x.sharesByPlatform || {};
+        const bc = x.sharesByContentType || {};
+        const pEntries = Object.entries(bp).sort((a,b)=>b[1]-a[1]);
+        const cEntries = Object.entries(bc).sort((a,b)=>b[1]-a[1]);
+        const pTotal = pEntries.reduce((s,e)=>s+e[1],0);
+        const cTotal = cEntries.reduce((s,e)=>s+e[1],0);
+        const pLabel: Record<string,string> = { kakao:'카카오', kakao_top:'카카오(상단)', copy:'링크복사', 'naver-blog':'N블로그', 'naver-cafe':'N카페', 'daum-cafe':'다음카페', band:'밴드', twitter:'X', facebook:'FB', native:'네이티브' };
+        const cLabel: Record<string,string> = { post:'커뮤니티', blog:'블로그', stock:'주식', 'stock-page':'주식페이지', 'stock-sector':'섹터', 'stock-market':'마켓', calc:'계산기', apt:'분양', 'apt-region':'지역', 'apt-complex':'단지', section:'섹션', page:'페이지', daily:'데일리', discuss:'토론', 'blog-series':'시리즈', unknown:'미분류' };
+        if (!pTotal && !cTotal) return null;
+        return <div className="adm-card" style={{padding:'8px 12px',marginBottom:8}}>
+          <div style={{fontSize:11,fontWeight:700,color:'#A855F7',marginBottom:6}}>📊 공유 분석 (7일)</div>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+            <div>
+              <div style={{fontSize:10,color:'rgba(255,255,255,0.4)',marginBottom:4}}>플랫폼별</div>
+              {pEntries.slice(0,6).map(([p,c])=>(
+                <div key={p} style={{display:'flex',justifyContent:'space-between',fontSize:11,marginBottom:2}}>
+                  <span style={{color:'rgba(255,255,255,0.7)'}}>{pLabel[p]||p}</span>
+                  <span style={{fontWeight:700,color:'#A855F7'}}>{c}</span>
+                </div>
+              ))}
+            </div>
+            <div>
+              <div style={{fontSize:10,color:'rgba(255,255,255,0.4)',marginBottom:4}}>콘텐츠별</div>
+              {cEntries.slice(0,6).map(([ct,c])=>(
+                <div key={ct} style={{display:'flex',justifyContent:'space-between',fontSize:11,marginBottom:2}}>
+                  <span style={{color:'rgba(255,255,255,0.7)'}}>{cLabel[ct]||ct}</span>
+                  <span style={{fontWeight:700,color:'#D946EF'}}>{c}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>;
+      })()}
 
       {/* ═══ 6.5 데이터 수집률 ═══ */}
       {x.dataCollection && (() => {

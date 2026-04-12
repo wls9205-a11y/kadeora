@@ -65,7 +65,7 @@ export default async function MarketPage({ params }: Props) {
       </nav>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
         <h1 style={{ fontSize: 'clamp(22px, 5vw, 28px)', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>{m.flag} {m.name} 종목 목록</h1>
-        <ShareButtons title={`${m.name} 종목 목록`} />
+        <ShareButtons title={`${m.name} 종목 목록`} contentType="stock-market" contentRef={code} />
       </div>
       <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 16 }}>
         총 {totalCount?.toLocaleString()}종목 | 상승 {upCount} · 하락 {downCount} · {sectors.length}개 섹터

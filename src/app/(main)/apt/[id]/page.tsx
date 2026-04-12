@@ -468,7 +468,7 @@ export default async function AptUnifiedPage({ params }: Props) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 'var(--sp-md)', padding: '8px 12px', borderRadius: 'var(--radius-md)', background: 'linear-gradient(135deg, rgba(59,123,246,0.04), rgba(139,92,246,0.04))', border: '1px solid rgba(59,123,246,0.1)' }}>
         {/* 카카오톡 직접 공유 */}
         <KakaoDirectShare title={`${name} ${tLabel[sType]} — 분양가·청약일정·모집공고 한눈에`} description={`${region} ${name} 상세 정보를 카더라에서 확인하세요`} pagePath={`/apt/${slug}`} />
-        <ShareButtons title={`${name} ${tLabel[sType]} — 분양가·청약일정·모집공고 한눈에`} postId={slug} />
+        <ShareButtons title={`${name} ${tLabel[sType]} — 분양가·청약일정·모집공고 한눈에`} contentType="apt" contentRef={slug} />
         <div style={{ flex: 1 }} />
         {sub?.id && <AptBookmarkButton aptId={String(sub.id)} aptName={name} />}
       </div>

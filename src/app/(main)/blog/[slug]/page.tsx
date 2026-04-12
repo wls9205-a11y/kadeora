@@ -825,7 +825,7 @@ export default async function BlogDetailPage({ params }: Props) {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <KakaoShareButton title={post.title} description={post.meta_description || post.excerpt || ''} slug={slug} coverImage={post.cover_image || undefined} />
-            <ShareButtons title={post.title} postId={slug} content={post.excerpt || post.meta_description || undefined} category={post.category} />
+            <ShareButtons title={post.title} content={post.excerpt || post.meta_description || undefined} category={post.category} contentType="blog" contentRef={slug} />
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <BlogBookmarkButton blogPostId={post.id} />

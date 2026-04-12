@@ -47,7 +47,7 @@ export default async function BlogSeriesPage() {
         <Link href="/blog" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 블로그</Link>
         <h1 style={{ margin: '8px 0 0', fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>📚 시리즈</h1>
         <p style={{ margin: '4px 0 0', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>주제별로 묶어서 읽는 연재 콘텐츠</p>
-        <div style={{ marginTop: 8 }}><ShareButtons title="카더라 블로그 시리즈 — 주제별 연재 콘텐츠" postId="blog-series" /></div>
+        <div style={{ marginTop: 8 }}><ShareButtons title="카더라 블로그 시리즈 — 주제별 연재 콘텐츠" contentType="page" contentRef="blog-series" /></div>
       </div>
 
       {seriesList.length === 0 ? (

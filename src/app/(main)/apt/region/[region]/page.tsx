@@ -181,7 +181,7 @@ export default async function RegionLandingPage({ params }: Props) {
           청약 {data.subscriptions.length}건 · 실거래 {data.transactions.length}건 · 재개발 {data.redevelopments.length}건 · 미분양 {data.unsolds.length}건
           {(() => { const plc = data.subscriptions.filter((s: any) => s.is_price_limit).length; return plc > 0 ? ` · 분양가상한제 ${plc}건` : ''; })()}
         </p>
-        <div style={{ marginTop: 8 }}><ShareButtons title={`${decoded} 부동산 종합 — 카더라`} postId={`region-${decoded}`} /></div>
+        <div style={{ marginTop: 8 }}><ShareButtons title={`${decoded} 부동산 종합 — 카더라`} contentType="apt-region" contentRef={decoded} /></div>
       </div>
 
       {/* SEO 가시적 텍스트 */}

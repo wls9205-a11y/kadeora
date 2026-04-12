@@ -90,7 +90,7 @@ export default function ShopPage() {
             <p style={{ fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.6, margin: '0 0 20px' }}>
               투자에 쓰는 시간을 절반으로<br/>주식 + 부동산 올인원 프리미엄
             </p>
-            <div style={{ marginBottom: 16 }}><ShareButtons title="카더라 프로 멤버십 — 주식+부동산 올인원" postId="shop-pro" /></div>
+            <div style={{ marginBottom: 16 }}><ShareButtons title="카더라 프로 멤버십 — 주식+부동산 올인원" contentType="page" contentRef="shop" /></div>
 
             {/* 가격 카드 2개 */}
             <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 10, marginBottom: 16 }}>

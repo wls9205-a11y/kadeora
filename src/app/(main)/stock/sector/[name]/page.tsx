@@ -149,7 +149,7 @@ export default async function SectorPage({ params }: Props) {
           {new Date().toLocaleDateString('ko-KR')} 기준
         </time>
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 6 }}>
-          <ShareButtons title={`${sector} 섹터 ${stocks.length}종목 — 시세·등락률 비교`} postId={`sector-${sector}`} />
+          <ShareButtons title={`${sector} 섹터 ${stocks.length}종목 — 시세·등락률 비교`} contentType="stock-sector" contentRef={sector} />
         </div>
       </div>
 

@@ -78,7 +78,7 @@ export async function GET(req: NextRequest) {
         safeCount((sb as any).from('profiles').select('id', { count: 'exact', head: true }).or('is_seed.is.null,is_seed.eq.false').not('age_group', 'is', null)),
         safeCount(sb.from('page_views').select('id', { count: 'exact', head: true }).gte('created_at', new Date(Date.now()-7*86400000).toISOString())),
         safeCount(sb.from('share_logs').select('id', { count: 'exact', head: true }).gte('created_at', new Date(Date.now()-7*86400000).toISOString())),
-        safe((sb as any).from('share_logs').select('platform').gte('created_at', new Date(Date.now()-7*86400000).toISOString()).limit(500), []),
+        safe((sb as any).from('share_logs').select('platform, content_type').gte('created_at', new Date(Date.now()-7*86400000).toISOString()).limit(500), []),
         safeCount(sb.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', todayKST).neq('is_seed', true).neq('is_ghost', true)),
         safeCount((sb as any).from('share_logs').select('id', { count: 'exact', head: true }).gte('created_at', todayKST)),
         safeCount((sb as any).from('conversion_events').select('id', { count: 'exact', head: true }).eq('cta_name', 'content_gate').eq('event_type', 'cta_view').gte('created_at', todayKST)),
@@ -259,6 +259,7 @@ export async function GET(req: NextRequest) {
           shares7d: shares7d ?? 0,
           sharesToday: sharesToday ?? 0, gateViews: gateViews24 ?? 0, gateClicks: gateClicks24 ?? 0, signupAttempts: signupAttempts24 ?? 0, signupSuccess: signupSuccess24 ?? 0, signupAttempts7d: signupAttempts7d ?? 0,
           sharesByPlatform: (() => { const m: Record<string,number> = {}; for (const r of (sharesByPlatformRaw || [])) { const p = (r as any)?.platform || 'unknown'; m[p] = (m[p]||0)+1; } return m; })(),
+          sharesByContentType: (() => { const m: Record<string,number> = {}; for (const r of (sharesByPlatformRaw || [])) { const ct = (r as any)?.content_type || 'unknown'; m[ct] = (m[ct]||0)+1; } return m; })(),
           seeds: (users ?? 0) - realUsers,
           // SEO 포털별 준비도
           googleReady: seoPortal.google || 0, naverReady: seoPortal.naver || 0, bothReady: seoPortal.both || 0,

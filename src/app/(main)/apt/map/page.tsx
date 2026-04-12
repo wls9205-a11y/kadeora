@@ -69,7 +69,7 @@ export default async function AptMapPage() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--sp-md)' }}>
           <h1 style={{ position:"absolute", width:1, height:1, overflow:"hidden", clip:"rect(0,0,0,0)" }}>🗺️ 지역별 부동산 현황</h1>
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)' }}>
-            <ShareButtons title="지역별 부동산 현황 — 청약·미분양·재개발 지도" postId="apt-map" />
+            <ShareButtons title="지역별 부동산 현황 — 청약·미분양·재개발 지도" contentType="page" contentRef="apt-map" />
             <Link href="/apt" style={{ fontSize: 12, color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 부동산</Link>
           </div>
         </div>

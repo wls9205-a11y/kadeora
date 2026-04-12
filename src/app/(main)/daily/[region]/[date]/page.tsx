@@ -121,7 +121,7 @@ export default async function DailyReportDatePage({ params }: Props) {
         nextDate={nextRow?.report_date || null}
       />
       <div style={{ marginTop: 16 }}>
-        <ShareButtons title={`카더라 데일리 리포트 — ${region} ${dateStr}`} postId={`daily-${region}-${dateStr}`} />
+        <ShareButtons title={`카더라 데일리 리포트 — ${region} ${dateStr}`} contentType="daily" contentRef={`${region}-${dateStr}`} />
       </div>
     </div>
   );

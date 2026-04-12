@@ -79,7 +79,7 @@ export default async function SeriesDetailPage({ params }: Props) {
           <p style={{ margin: '6px 0 0', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.6 }}>{series.description}</p>
         )}
         <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 'var(--sp-sm)' }}>총 {posts?.length || 0}편</div>
-        <div style={{ marginTop: 8 }}><ShareButtons title={`${series.title} 시리즈 — 카더라 블로그`} postId={`series-${slug}`} /></div>
+        <div style={{ marginTop: 8 }}><ShareButtons title={`${series.title} 시리즈 — 카더라 블로그`} contentType="blog-series" contentRef={slug} /></div>
       </div>
 
       {/* 시리즈 진행률 바 */}

@@ -83,7 +83,7 @@ export default async function AptSearchPage({ searchParams }: Props) {
       <Link href="/apt" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 부동산</Link>
       <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '8px 0 4px' }}>🔍 실거래가 검색</h1>
       <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', margin: '0 0 8px' }}>전국 {totalCount.toLocaleString()}건의 실거래 데이터</p>
-      <div style={{ marginBottom: 12 }}><ShareButtons title="아파트 실거래가 검색 — 카더라" postId="apt-search" /></div>
+      <div style={{ marginBottom: 12 }}><ShareButtons title="아파트 실거래가 검색 — 카더라" contentType="page" contentRef="apt-search" /></div>
 
       {/* 검색 폼 */}
       <form method="GET" action="/apt/search" style={{ display: 'flex', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-lg)', position: 'relative' }}>

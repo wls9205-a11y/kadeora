@@ -181,7 +181,7 @@ export default async function DiscussDetailPage({ params }: Props) {
         </div>
         {/* 공유 */}
         <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', padding: '10px', background: 'rgba(59,123,246,0.03)', borderRadius: '0 0 10px 10px' }}>
-          <ShareButtons title={`${topic.title} — 투표 참여하기`} postId={id} />
+          <ShareButtons title={`${topic.title} — 투표 참여하기`} postId={Number(id)} contentType="discuss" contentRef={id} />
           <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>투표 {total}명 · 의견 {topic.comment_count || 0}개</span>
         </div>
       </div>

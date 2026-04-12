@@ -81,7 +81,7 @@ export default async function ArchivePage({ params }: Props) {
         </div>
         <Link href={`/daily/${encodeURIComponent(region)}`} style={{ fontSize: 12, fontWeight: 700, color: 'var(--brand)', textDecoration: 'none' }}>오늘 보기 →</Link>
       </div>
-      <div style={{ marginBottom: 12 }}><ShareButtons title={`${region} 데일리 리포트 아카이브 — 카더라`} postId={`daily-archive-${region}`} /></div>
+      <div style={{ marginBottom: 12 }}><ShareButtons title={`${region} 데일리 리포트 아카이브 — 카더라`} contentType="page" contentRef={`daily-archive-${region}`} /></div>
 
       {reports.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-tertiary)' }}>

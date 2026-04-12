@@ -27,7 +27,7 @@ export default function KakaoShareButton({ title, description, slug, coverImage 
       alert('링크가 복사됐어요! 카카오톡에서 붙여넣기 해주세요');
     }
     // 공유 추적
-    fetch('/api/share', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ post_id: slug, platform: 'kakao_top' }) }).catch(() => {});
+    fetch('/api/share', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ platform: 'kakao_top', content_type: 'blog', content_ref: slug }) }).catch(() => {});
     fetch('/api/analytics/events', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ event: 'share_click', label: 'kakao_top', post_id: slug }) }).catch(() => {});
   };
 

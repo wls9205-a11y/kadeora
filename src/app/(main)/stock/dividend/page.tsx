@@ -75,7 +75,7 @@ export default async function DividendPage() {
           <Link href="/stock" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>주식</Link>›
           <span>배당주</span>
         </nav>
-        <ShareButtons title={TITLE} />
+        <ShareButtons title={TITLE} contentType="stock-page" contentRef="dividend" />
       </div>
 
       <h1 style={{ fontSize: 'clamp(22px, 5vw, 30px)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 8 }}>📊 고배당주 순위 2026</h1>

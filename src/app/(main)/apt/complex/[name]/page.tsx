@@ -334,7 +334,7 @@ export default async function ComplexDetailPage({ params }: Props) {
       <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', margin: '0 0 8px' }}>{region} {sigungu} {dong} · 매매 {tradeList.length}건{rentTrades.length > 0 ? ` · 전월세 ${rentTrades.length}건` : ''}</p>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 8, marginBottom: 'var(--sp-md)' }}>
         {profile?.id && <AptBookmarkButton aptId={String(profile.id)} aptName={decoded} />}
-        <ShareButtons title={`${decoded} 아파트 실거래가·시세 — ${region} ${sigungu}`} postId={`complex-${name}`} />
+        <ShareButtons title={`${decoded} 아파트 실거래가·시세 — ${region} ${sigungu}`} contentType="apt-complex" contentRef={name} />
       </div>
 
       {/* SEO 가시적 텍스트 (확장) */}

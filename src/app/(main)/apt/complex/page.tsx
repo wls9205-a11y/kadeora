@@ -158,7 +158,7 @@ export default async function ComplexPage({ searchParams }: { searchParams: Prom
           </div>
         </div>
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 'var(--sp-sm)', position: 'relative' }}>
-          <ShareButtons title={`${selectedRegion || '전국'} 단지백과 — ${displayCount.toLocaleString()}개 아파트 비교`} postId="complex" />
+          <ShareButtons title={`${selectedRegion || '전국'} 단지백과 — ${displayCount.toLocaleString()}개 아파트 비교`} contentType="page" contentRef="apt-complex" />
         </div>
       </div>
 

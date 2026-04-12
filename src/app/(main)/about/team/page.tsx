@@ -89,7 +89,7 @@ export default function TeamPage() {
         </p>
       </div>
 
-      <ShareButtons title="카더라 팀 소개" postId="about-team" />
+      <ShareButtons title="카더라 팀 소개" contentType="page" contentRef="about-team" />
     </article>
   );
 }

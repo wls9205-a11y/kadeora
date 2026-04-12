@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useToast } from '@/components/Toast';
 import { isTossMode, tossShare } from '@/lib/toss-mode';
+import { track } from '@/lib/analytics';
 import dynamic from 'next/dynamic';
 
 const BottomSheet = dynamic(() => import('@/components/BottomSheet'), { ssr: false });
@@ -43,6 +44,11 @@ export default function SectionShareButton({ section, label, text, pagePath }: P
     } catch { return false; }
   };
 
+  const trackShare = (platform: string) => {
+    track('share', platform, { content_type: 'section', content_ref: section });
+    fetch('/api/share', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ platform, content_type: 'section', content_ref: section }) }).catch(() => {});
+  };
+
   const shareKakao = async () => {
     const url = getUrl();
     const shareTitle = label || '카더라';
@@ -56,11 +62,13 @@ export default function SectionShareButton({ section, label, text, pagePath }: P
           content: { title: shareTitle, description: text || '카더라에서 확인하세요', imageUrl: ogImage, link: { mobileWebUrl: url, webUrl: url } },
           buttons: [{ title: '카더라에서 보기', link: { mobileWebUrl: url, webUrl: url } }],
         });
+        trackShare('kakao');
         return;
       } catch { /* fall through */ }
     }
     await navigator.clipboard.writeText(url);
     success('링크가 복사됐어요! 카카오톡에서 붙여넣기 해주세요');
+    trackShare('kakao');
   };
 
   const sharePlatform = async (platform: string) => {
@@ -80,6 +88,7 @@ export default function SectionShareButton({ section, label, text, pagePath }: P
               content: { title: shareTitle, description: text || '카더라에서 확인하세요', imageUrl: ogImage, link: { mobileWebUrl: shareUrl, webUrl: shareUrl } },
               buttons: [{ title: '카더라에서 보기', link: { mobileWebUrl: shareUrl, webUrl: shareUrl } }],
             });
+            trackShare('kakao');
             setOpen(false); return;
           } catch { /* fall through */ }
         }
@@ -100,9 +109,11 @@ export default function SectionShareButton({ section, label, text, pagePath }: P
         setCopied(true);
         success('링크가 복사됐어요!');
         setTimeout(() => setCopied(false), 2000);
+        trackShare('copy');
         return;
     }
     setOpen(false);
+    trackShare(platform);
   };
 
   const handleShare = async () => {

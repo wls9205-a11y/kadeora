@@ -10,6 +10,10 @@ interface Props {
 export default function KakaoDirectShare({ title, description, pagePath }: Props) {
   const { success } = useToast();
 
+  const trackShare = (platform: string) => {
+    fetch('/api/share', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ platform, content_type: 'apt', content_ref: pagePath }) }).catch(() => {});
+  };
+
   const handleShare = async () => {
     const url = typeof window !== 'undefined' ? `${window.location.origin}${pagePath}?utm_source=kakao&utm_medium=share` : '';
     const ogImage = typeof window !== 'undefined' ? `${window.location.origin}/api/og?title=${encodeURIComponent(title)}&design=2` : '';
@@ -27,12 +31,14 @@ export default function KakaoDirectShare({ title, description, pagePath }: Props
             content: { title, description: description || '카더라에서 확인하세요', imageUrl: ogImage, link: { mobileWebUrl: url, webUrl: url } },
             buttons: [{ title: '카더라에서 보기', link: { mobileWebUrl: url, webUrl: url } }],
           });
+          trackShare('kakao');
           return;
         }
       }
     } catch { /* fall through */ }
     await navigator.clipboard.writeText(url);
     success('링크가 복사됐어요! 카카오톡에서 붙여넣기 해주세요');
+    trackShare('kakao');
   };
 
   return (

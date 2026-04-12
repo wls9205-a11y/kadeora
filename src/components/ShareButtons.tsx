@@ -4,7 +4,7 @@ import BottomSheet from '@/components/BottomSheet';
 import { useToast } from '@/components/Toast';
 import { track } from '@/lib/analytics';
 
-interface Props { title: string; postId?: number | string; content?: string; compact?: boolean; category?: string; }
+interface Props { title: string; postId?: number | string; content?: string; compact?: boolean; category?: string; contentType?: string; contentRef?: string; }
 interface Platform { id: string; label: string; emoji: string; bg: string; color: string; isNew?: boolean; }
 
 const BASE_PLATFORMS: Platform[] = [
@@ -83,21 +83,25 @@ ${tags}
   return { html, plain };
 }
 
-export default function ShareButtons({ title, postId, content, compact, category }: Props) {
+export default function ShareButtons({ title, postId, content, compact, category, contentType, contentRef }: Props) {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [shareCount, setShareCount] = useState(0);
   const [supportsNative, setSupportsNative] = useState(false);
   const { success, info } = useToast();
 
+  // 자동 content_type/content_ref 추론
+  const ct = contentType || (typeof postId === 'number' ? 'post' : 'unknown');
+  const cr = contentRef || (postId != null ? String(postId) : undefined);
+
   useEffect(() => {
     const isMobile = /iPhone|iPad|Android/i.test(navigator.userAgent);
     setSupportsNative(isMobile && !!navigator.share);
-    if (postId) {
-      fetch(`/api/share?post_id=${postId}`).then(r => r.ok ? r.json() : null)
+    if (ct && cr) {
+      fetch(`/api/share?content_type=${ct}&content_ref=${encodeURIComponent(cr)}`).then(r => r.ok ? r.json() : null)
         .then(d => { if (d?.count) setShareCount(d.count); }).catch(() => {});
     }
-  }, [postId]);
+  }, [ct, cr]);
 
   const platforms = useMemo<Platform[]>(() => {
     if (!supportsNative) return BASE_PLATFORMS;
@@ -224,8 +228,8 @@ export default function ShareButtons({ title, postId, content, compact, category
 
   const trackShare = (platform: string) => {
     setShareCount(c => c + 1);
-    track('share', platform, { post_id: postId });
-    fetch('/api/share', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ post_id: postId, platform }) }).catch(() => {});
+    track('share', platform, { post_id: postId, content_type: ct, content_ref: cr });
+    fetch('/api/share', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ post_id: typeof postId === 'number' ? postId : undefined, platform, content_type: ct, content_ref: cr }) }).catch(() => {});
   };
 
   const ensureKakaoReady = (): boolean => {

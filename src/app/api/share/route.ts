@@ -3,15 +3,30 @@ import { rateLimit, rateLimitResponse } from '@/lib/rate-limit'
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
-/** GET /api/share?post_id=xxx — 공유 횟수 조회 */
+/** GET /api/share?content_type=blog&content_ref=slug 또는 ?post_id=123 — 공유 횟수 조회 */
 export async function GET(req: NextRequest) {
+  const contentType = req.nextUrl.searchParams.get('content_type');
+  const contentRef = req.nextUrl.searchParams.get('content_ref');
   const postId = req.nextUrl.searchParams.get('post_id');
-  if (!postId) return NextResponse.json({ count: 0 });
+  
   try {
     const sb = getSupabaseAdmin();
-    const { count } = await sb.from('share_logs')
-      .select('id', { count: 'exact', head: true })
-      .eq('post_id', parseInt(postId, 10) || 0);
+    let query = sb.from('share_logs').select('id', { count: 'exact', head: true });
+    
+    if (contentType && contentRef) {
+      query = query.eq('content_type', contentType).eq('content_ref', contentRef);
+    } else if (postId) {
+      const numId = parseInt(postId, 10);
+      if (numId) {
+        query = query.eq('content_type', 'post').eq('content_ref', String(numId));
+      } else {
+        return NextResponse.json({ count: 0 });
+      }
+    } else {
+      return NextResponse.json({ count: 0 });
+    }
+    
+    const { count } = await query;
     return NextResponse.json({ count: count ?? 0 });
   } catch {
     return NextResponse.json({ count: 0 });
@@ -21,15 +36,28 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   if (!(await rateLimit(req, 'api'))) return rateLimitResponse();
   try {
-    const { post_id, platform } = await req.json();
+    const body = await req.json();
+    const { platform, content_type, content_ref, post_id } = body;
+    
+    if (!platform) return NextResponse.json({ ok: false });
+    
+    const ct = content_type || (post_id ? 'post' : 'unknown');
+    const cr = content_ref || (post_id ? String(post_id) : null);
+    const numPostId = typeof post_id === 'number' ? post_id : (typeof post_id === 'string' ? parseInt(post_id, 10) || null : null);
+    
     const sb = await createSupabaseServer();
     const { data: { user } } = await sb.auth.getUser();
     const admin = getSupabaseAdmin();
     
-    // admin 클라이언트로 insert (RLS 우회 — 비로그인 유저도 공유 추적 가능)
-    await admin.from('share_logs').insert({ post_id, platform, user_id: user?.id || null });
+    await (admin as any).from('share_logs').insert({
+      post_id: numPostId,
+      platform,
+      user_id: user?.id || null,
+      content_type: ct,
+      content_ref: cr,
+    });
 
-    // 로그인 유저만 공유 포인트 (1일 1회, 최대 5포인트)
+    // 로그인 유저만 공유 포인트 (1일 1회)
     if (user?.id) {
       try {
         const today = new Date().toISOString().slice(0, 10);

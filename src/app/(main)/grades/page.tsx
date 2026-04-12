@@ -64,7 +64,7 @@ export default async function GradesPage() {
           카더라에서 활동할수록 영향력 점수가 쌓여 등급이 올라갑니다.
           게시글 작성, 댓글, 좋아요를 받을수록 더 빠르게 성장해요!
         </p>
-        <div style={{ marginTop: 8 }}><ShareButtons title="카더라 회원 등급 안내 — 등급별 혜택 확인" postId="grades" /></div>
+        <div style={{ marginTop: 8 }}><ShareButtons title="카더라 회원 등급 안내 — 등급별 혜택 확인" contentType="page" contentRef="grades" /></div>
       </div>
 
       {/* 내 등급 진행률 */}

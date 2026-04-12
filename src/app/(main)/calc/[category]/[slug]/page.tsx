@@ -120,7 +120,7 @@ export default async function CalcPage({ params }: { params: Promise<{ category:
 
       {/* 결과 공유 */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 16, marginBottom: 8 }}>
-        <ShareButtons title={`${calc.emoji} ${calc.title} — 카더라 무료 계산기`} postId={`calc-${slug}`} content={calc.description} />
+        <ShareButtons title={`${calc.emoji} ${calc.title} — 카더라 무료 계산기`} content={calc.description} contentType="calc" contentRef={slug} />
         <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>계산 결과를 공유해보세요</span>
       </div>
 

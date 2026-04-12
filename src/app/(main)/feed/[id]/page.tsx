@@ -469,7 +469,7 @@ export default async function FeedDetailPage({ params }: Props) {
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
           <span style={{ fontWeight: 500 }}>{comments.length}</span>
         </Link>
-        <ShareButtons title={post.title} postId={post.id} content={post.content} />
+        <ShareButtons title={post.title} postId={post.id} content={post.content} contentType="post" contentRef={String(post.id)} />
         <BookmarkButton postId={post.id} />
       </div>
 
@@ -558,7 +558,7 @@ export default async function FeedDetailPage({ params }: Props) {
       <div style={{ padding: '16px', borderRadius: 'var(--radius-card)', background: 'linear-gradient(135deg, rgba(59,123,246,0.05), rgba(46,232,165,0.03))', border: '1px solid rgba(59,123,246,0.08)', textAlign: 'center', marginBottom: 'var(--sp-xl)' }}>
         <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>이 글 어떠셨나요?</div>
         <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 10 }}>공유하면 +5P · 친구 초대하면 +50P!</div>
-        <ShareButtons title={post.title} postId={post.id} content={post.content} />
+        <ShareButtons title={post.title} postId={post.id} content={post.content} contentType="post" contentRef={String(post.id)} />
       </div>
     </div>
   );

@@ -44,7 +44,7 @@ export default async function ThemesPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebPage', name: TITLE, url: `${SITE_URL}/stock/themes`, speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', 'section'] } }) }} />
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
         <h1 style={{ fontSize: 'clamp(22px, 5vw, 28px)', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>🎯 테마주 분석</h1>
-        <ShareButtons title={TITLE} />
+        <ShareButtons title={TITLE} contentType="stock-page" contentRef="themes" />
       </div>
       <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 24 }}>주요 투자 테마별 관련주 목록과 시세를 정리합니다. 총 {(themes ?? []).length}개 테마.</p>
 
