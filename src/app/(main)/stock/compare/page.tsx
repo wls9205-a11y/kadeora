@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import { SITE_URL } from '@/lib/constants';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import CompareClient from './CompareClient';
+import Disclaimer from '@/components/Disclaimer';
 
 export const revalidate = 300;
 
