@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { isNew, NewBadge, kstNow, kstToday, generateAptSlug, type SharedTabProps } from './apt-utils';
 import dynamic from 'next/dynamic';
+import EngageRow from '@/components/EngageRow';
 
 const BottomSheet = dynamic(() => import('@/components/BottomSheet'), { ssr: false });
 
@@ -14,7 +15,7 @@ interface Props extends SharedTabProps {
   freshDate?: string;
 }
 
-export default function OngoingTab({ ongoingApts, premiumListings, watchlist, toggleWatchlist, setCommentTarget, globalRegion, globalSearch, freshDate, aptImageMap }: Props) {
+export default function OngoingTab({ ongoingApts, premiumListings, watchlist, toggleWatchlist, setCommentTarget, globalRegion, globalSearch, freshDate, aptImageMap, aptEngageMap }: Props) {
   const [ongoingRegion, setOngoingRegion] = useState(globalRegion || '전체');
   const [ongoingPage, setOngoingPage] = useState(1);
   const [ongoingSort, setOngoingSort] = useState<'supply'|'unsold'|'price'|'competition'>('supply');
@@ -224,6 +225,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
                 {stages.map((s, si) => { const done = si < pipeStage; const active = si === pipeStage; const dc = active ? 'var(--brand)' : done ? 'var(--accent-green)' : 'var(--border)'; const tc = active ? 'var(--brand)' : done ? 'var(--accent-green)' : 'var(--text-tertiary)'; return (<div key={si} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}><div style={{ width: 8, height: 8, borderRadius: '50%', background: dc, zIndex: 1, border: '2px solid var(--bg-surface)', boxShadow: active ? '0 0 6px rgba(59,123,246,0.5)' : undefined }} />{si < stages.length - 1 && <div style={{ position: 'absolute', top: 4, left: 'calc(50% + 4px)', width: 'calc(100% - 8px)', height: 2, background: done ? 'rgba(52,211,153,0.3)' : 'var(--border)' }} />}<div style={{ fontSize: 10, color: tc, fontWeight: active ? 700 : 500, marginTop: 3, whiteSpace: 'nowrap' }}>{s}</div></div>); })}
               </div>
             </div>
+            <EngageRow views={aptEngageMap?.[o.house_nm]?.views} comments={aptEngageMap?.[o.house_nm]?.comments} interest={aptEngageMap?.[o.house_nm]?.interest} />
             {isPremium && premiumMatch?.consultant && (<div style={{ padding: '6px 12px 8px', borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 8 }}><div style={{ flex: 1, minWidth: 0 }}><div style={{ fontSize: 10, fontWeight: 600, color: 'var(--accent-yellow)' }}>{premiumMatch.consultant.company || '분양 상담사'} · {premiumMatch.consultant.name}</div></div>{(premiumMatch.cta_phone || premiumMatch.consultant.phone) && (<a href={`tel:${premiumMatch.cta_phone || premiumMatch.consultant.phone}`} onClick={(e) => { e.stopPropagation(); }} style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--accent-yellow)', padding: '3px 8px', borderRadius: 'var(--radius-xs)', border: '1px solid rgba(251,191,36,0.3)', textDecoration: 'none' }}>📞 상담</a>)}</div>)}
           </Link>
         );

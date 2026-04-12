@@ -21,11 +21,13 @@ import ExchangeRateMiniChart from '@/components/ExchangeRateMiniChart';
 import TrendingKeywords from '@/components/TrendingKeywords';
 import { isTossMode } from '@/lib/toss-mode';
 import TossTeaser from '@/components/TossTeaser';
+import EngageRow from '@/components/EngageRow';
 
 interface Stock {
   symbol: string; name: string; market: string; price: number; change_amt: number;
   change_pct: number; volume: number; market_cap: number; updated_at: string;
   currency?: string; sector?: string; description?: string; logo_url?: string;
+  page_views?: number; comment_count?: number;
 }
 interface Theme { id: number; theme_name: string; change_pct: number; is_hot: boolean; related_symbols?: string[]; description?: string; }
 interface CalendarEvent { id: number; event_date: string; title: string; category: string; importance: string; description?: string; }
@@ -106,7 +108,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
   const refresh = useCallback(async () => {
     try {
       const sb = (await import('@/lib/supabase-browser')).createSupabaseBrowser();
-      const { data } = await sb.from('stock_quotes').select('symbol, name, market, price, change_amt, change_pct, volume, market_cap, currency, sector, updated_at, is_active').order('market_cap', { ascending: false });
+      const { data } = await sb.from('stock_quotes').select('symbol, name, market, price, change_amt, change_pct, volume, market_cap, currency, sector, updated_at, is_active, page_views, comment_count').order('market_cap', { ascending: false });
       if (data?.length) setStocks(data as unknown as Stock[]);
     } catch (e) { if (process.env.NODE_ENV === 'development') console.warn('[Stock.refresh]', e); }
   }, []);
@@ -277,6 +279,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
           {s.volume > 0 && <span>{Number(s.volume) >= 1000000 ? (Number(s.volume) / 1000000).toFixed(1) + 'M' : Number(s.volume) >= 1000 ? Math.round(Number(s.volume) / 1000) + 'K' : Number(s.volume).toLocaleString()}</span>}
           {s.description && <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 80 }}>{s.description.split('.')[0]}</span>}
         </div>
+        <EngageRow views={s.page_views} comments={s.comment_count} />
       </Link>
     );
   }, [watchlistSymbols, toggleWatchlist, sparklines, exchangeRate]);

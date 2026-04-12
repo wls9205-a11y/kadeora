@@ -108,4 +108,5 @@ export interface SharedTabProps {
   globalRegion?: string;
   globalSearch?: string;
   aptImageMap?: Record<string, string>;
+  aptEngageMap?: Record<string, { views: number; comments: number; interest: number }>;
 }

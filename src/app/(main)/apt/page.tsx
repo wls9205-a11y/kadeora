@@ -155,13 +155,17 @@ async function fetchAptData() {
 
   // ━━━ 현장 이미지 맵 (apt_sites.images → 카드 썸네일용) ━━━
   let aptImageMap: Record<string, string> = {};
+  let aptEngageMap: Record<string, { views: number; comments: number; interest: number }> = {};
   try {
     const { getSupabaseAdmin } = await import('@/lib/supabase-admin');
     const adminSb = getSupabaseAdmin();
-    const { data: imgRows } = await adminSb.from('apt_sites').select('name, images').not('images', 'is', null);
-    for (const row of (imgRows || [])) {
-      if (Array.isArray(row.images) && row.images.length > 0 && (row.images[0] as any)?.url) {
-        aptImageMap[row.name] = (row.images[0] as any).thumbnail || (row.images[0] as any).url;
+    const { data: imgRows } = await (adminSb as any).from('apt_sites').select('name, images, page_views, comment_count, interest_count').not('images', 'is', null);
+    for (const row of (imgRows || []) as any[]) {
+      if (Array.isArray(row.images) && row.images.length > 0 && (row.images[0])?.url) {
+        aptImageMap[row.name] = (row.images[0]).thumbnail || (row.images[0]).url;
+      }
+      if (row.page_views > 0 || row.comment_count > 0 || row.interest_count > 0) {
+        aptEngageMap[row.name] = { views: row.page_views || 0, comments: row.comment_count || 0, interest: row.interest_count || 0 };
       }
     }
   } catch {}
@@ -282,11 +286,11 @@ async function fetchAptData() {
   const dedupedSub = ongoingFromSub.filter(s => !unsoldNames.has(`${s.house_nm}::${s.region_nm}`));
   const ongoingApts = [...ongoingFromUnsold, ...dedupedSub].sort((a, b) => (b.total_supply || 0) - (a.total_supply || 0));
 
-  return { apts, unsold, alertCounts, lastRefreshed, regionStats, ongoingApts, redevTotalCount, tradeTotalCount, tradeByRegion, redevByRegion, subTotalCount, unsoldTotalCount, ongoingTotalCount, dataFreshness, redevRedevCount, redevRebuildCount, aptImageMap };
+  return { apts, unsold, alertCounts, lastRefreshed, regionStats, ongoingApts, redevTotalCount, tradeTotalCount, tradeByRegion, redevByRegion, subTotalCount, unsoldTotalCount, ongoingTotalCount, dataFreshness, redevRedevCount, redevRebuildCount, aptImageMap, aptEngageMap };
 }
 
 export default async function AptPage() {
-  const { apts, unsold, alertCounts, lastRefreshed, regionStats, ongoingApts, redevTotalCount, tradeTotalCount, tradeByRegion, redevByRegion, subTotalCount, unsoldTotalCount, ongoingTotalCount, dataFreshness, redevRedevCount, redevRebuildCount, aptImageMap } = await fetchAptData();
+  const { apts, unsold, alertCounts, lastRefreshed, regionStats, ongoingApts, redevTotalCount, tradeTotalCount, tradeByRegion, redevByRegion, subTotalCount, unsoldTotalCount, ongoingTotalCount, dataFreshness, redevRedevCount, redevRebuildCount, aptImageMap, aptEngageMap } = await fetchAptData();
   // ItemList for Google carousel rich results
   const itemList = apts.slice(0, 10).map((a: any, i: number) => ({
     '@type': 'ListItem',
@@ -308,7 +312,7 @@ export default async function AptPage() {
     {/* speakable */}
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"WebPage","name":"부동산 — 청약·분양·미분양·재개발","speakable":{"@type":"SpeakableSpecification","cssSelector":["h1",".region-summary"]}}) }} />
     <h1 style={{ position:"absolute", width:1, height:1, overflow:"hidden", clip:"rect(0,0,0,0)" }}>부동산 — 청약·분양·미분양·재개발</h1>
-    <AptClient apts={apts} unsold={unsold} alertCounts={alertCounts} lastRefreshed={lastRefreshed} regionStats={regionStats} ongoingApts={ongoingApts} redevTotalCount={redevTotalCount} tradeTotalCount={tradeTotalCount} tradeByRegion={tradeByRegion} redevByRegion={redevByRegion} subTotalCount={subTotalCount} unsoldTotalCount={unsoldTotalCount} ongoingTotalCount={ongoingTotalCount} dataFreshness={dataFreshness} redevRedevCount={redevRedevCount} redevRebuildCount={redevRebuildCount} aptImageMap={aptImageMap} />
+    <AptClient apts={apts} unsold={unsold} alertCounts={alertCounts} lastRefreshed={lastRefreshed} regionStats={regionStats} ongoingApts={ongoingApts} redevTotalCount={redevTotalCount} tradeTotalCount={tradeTotalCount} tradeByRegion={tradeByRegion} redevByRegion={redevByRegion} subTotalCount={subTotalCount} unsoldTotalCount={unsoldTotalCount} ongoingTotalCount={ongoingTotalCount} dataFreshness={dataFreshness} redevRedevCount={redevRedevCount} redevRebuildCount={redevRebuildCount} aptImageMap={aptImageMap} aptEngageMap={aptEngageMap} />
 
     {/* SEO 허브 내부 링크 — 크롤 심도 + PageRank 분배 */}
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg) var(--sp-lg)' }}>

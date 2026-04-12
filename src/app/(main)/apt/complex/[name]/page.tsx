@@ -9,6 +9,7 @@ import dynamic from 'next/dynamic';
 import ShareButtons from '@/components/ShareButtons';
 import AptNearbyCompare from '@/components/AptNearbyCompare';
 import AptBookmarkButton from '@/components/AptBookmarkButton';
+import EngageRow from '@/components/EngageRow';
 
 const AptPriceTrendChart = dynamic(() => import('@/components/charts/AptPriceTrendChart'));
 const AptReviewSection = dynamic(() => import('@/components/AptReviewSection'));
@@ -51,12 +52,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const ogSubtitle = salePrice ? `매매 ${salePrice}${jeonsePrice ? ` · 전세 ${jeonsePrice}` : ''}` : '실거래가·시세 분석';
   // 실제 현장 이미지 조회 (apt_sites에서)
   let realImg: string | null = null;
+  let siteEngage = { views: 0, comments: 0, interest: 0 };
   try {
     const sb = (await import('@/lib/supabase-server')).createSupabaseServer;
     const { getSupabaseAdmin } = await import('@/lib/supabase-admin');
     const admin = getSupabaseAdmin();
-    const { data: siteRow } = await admin.from('apt_sites').select('images').eq('name', decoded).not('images', 'is', null).limit(1).maybeSingle();
+    const { data: siteRow } = await (admin as any).from('apt_sites').select('images, page_views, comment_count, interest_count, slug').eq('name', decoded).not('images', 'is', null).limit(1).maybeSingle();
     if (Array.isArray(siteRow?.images) && (siteRow.images[0] as any)?.url) realImg = (siteRow.images[0] as any).thumbnail || (siteRow.images[0] as any).url;
+    if (siteRow) siteEngage = { views: siteRow.page_views || 0, comments: siteRow.comment_count || 0, interest: siteRow.interest_count || 0 };
   } catch {}
   const ogUrl = realImg || `${SITE_URL}/api/og?title=${encodeURIComponent(decoded)}&design=2&category=apt&subtitle=${encodeURIComponent(ogSubtitle)}&author=${encodeURIComponent('카더라')}`;
   const ogSquareUrl = `${SITE_URL}/api/og-square?title=${encodeURIComponent(decoded)}&category=apt&subtitle=${encodeURIComponent(ogSubtitle)}`;
@@ -137,7 +140,7 @@ export default async function ComplexDetailPage({ params }: Props) {
       .eq('apt_name', decoded)
       .order('deal_date', { ascending: false })
       .limit(100),
-    sb.from('apt_sites').select('slug, images')
+    (sb as any).from('apt_sites').select('slug, images, page_views, comment_count, interest_count')
       .ilike('name', `%${decoded}%`).eq('is_active', true).limit(1).maybeSingle(),
     // 같은 지역 관련 단지 (내부 링크 강화)
     (sb as any).from('apt_complex_profiles')
@@ -160,6 +163,7 @@ export default async function ComplexDetailPage({ params }: Props) {
     }
     if (site?.slug) siteSlug = site.slug;
   }
+  const siteEngage = siteR.status === 'fulfilled' && siteR.value?.data ? { views: siteR.value.data.page_views || 0, comments: siteR.value.data.comment_count || 0, interest: siteR.value.data.interest_count || 0 } : { views: 0, comments: 0, interest: 0 };
   const relatedComplexes: Record<string,any>[] = relatedR.status === 'fulfilled' ? (relatedR.value?.data || []) : [];
 
   // 통계 계산
@@ -633,6 +637,9 @@ export default async function ComplexDetailPage({ params }: Props) {
           );
         })}
       </div>
+
+      {/* 조회·댓글·관심 */}
+      <EngageRow views={siteEngage.views} comments={siteEngage.comments} interest={siteEngage.interest} style={{ borderTop: 'none', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', marginBottom: 'var(--sp-lg)', background: 'var(--bg-surface)' }} />
 
       {/* 📰 관련 분석 */}
       {relatedBlogs.length > 0 && (

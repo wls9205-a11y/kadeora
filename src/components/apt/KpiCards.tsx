@@ -12,8 +12,9 @@ interface KpiCard {
 }
 
 export default function KpiCards({ cards }: { cards: KpiCard[] }) {
+  const cols = cards.length > 4 ? 3 : 4;
   return (
-    <div className="kd-grid-4" style={{ gap: 6, marginBottom: 14 }}>
+    <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: 6, marginBottom: 14 }}>
       {cards.map(s => (
         <div
           key={s.l}
@@ -30,10 +31,16 @@ export default function KpiCards({ cards }: { cards: KpiCard[] }) {
             textAlign: 'center',
             cursor: s.scrollTo ? 'pointer' : 'default',
             transition: 'border-color 0.15s',
+            position: 'relative',
           }}
           onMouseEnter={e => { if (s.scrollTo) e.currentTarget.style.borderColor = s.barColor; }}
           onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; }}
         >
+          {s.scrollTo && (
+            <span style={{ position: 'absolute', top: 4, right: 4, width: 14, height: 14, borderRadius: '50%', background: 'var(--bg-hover)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg width="8" height="8" viewBox="0 0 12 12" fill="none" stroke={s.barColor || 'var(--text-tertiary)'} strokeWidth="2"><path d="M6 2v8M3 7l3 3 3-3"/></svg>
+            </span>
+          )}
           <div style={{ fontSize: 16, marginBottom: 2 }}>{s.icon}</div>
           <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 2 }}>{s.l}</div>
           <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: s.c, lineHeight: 1.2, whiteSpace: 'pre-line' }}>{s.v}</div>

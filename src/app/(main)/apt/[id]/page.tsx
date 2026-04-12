@@ -25,6 +25,7 @@ const CostSimulator = dynamic(() => import('@/components/CostSimulator'));
 const ContentLock = dynamic(() => import("@/components/ContentLock"));
 const KpiCards = dynamic(() => import('@/components/apt/KpiCards'));
 const ComplexScale = dynamic(() => import('@/components/apt/ComplexScale'));
+const AptCommentSection = dynamic(() => import('@/components/apt/AptCommentSection'));
 
 export const revalidate = 3600;
 export const maxDuration = 60;
@@ -51,10 +52,10 @@ async function resolveParam(rawId: string) {
 
 async function fetchUnifiedData(slug: string) {
   const sb = getSupabaseAdmin();
-  const APT_COLS = 'id,slug,name,site_type,region,sigungu,dong,address,description,seo_title,seo_description,builder,developer,total_units,built_year,move_in_date,status,is_active,content_score,interest_count,page_views,images,key_features,faq_items,nearby_facilities,nearby_station,school_district,price_min,price_max,price_comparison,search_trend,latitude,longitude,source_ids,created_at,updated_at';
+  const APT_COLS = 'id,slug,name,site_type,region,sigungu,dong,address,description,seo_title,seo_description,builder,developer,total_units,built_year,move_in_date,status,is_active,content_score,interest_count,page_views,comment_count,images,key_features,faq_items,nearby_facilities,nearby_station,school_district,price_min,price_max,price_comparison,search_trend,latitude,longitude,source_ids,created_at,updated_at';
 
   // Phase 1: apt_sites — exact slug → multi-stage fuzzy fallback
-  let { data: site } = await sb.from('apt_sites').select(APT_COLS).eq('slug', slug).maybeSingle();
+  let { data: site } = await (sb as any).from('apt_sites').select(APT_COLS).eq('slug', slug).maybeSingle();
 
   if (!site && slug.length > 2) {
     // Helper: extract Korean-only portion (remove all latin letters & standalone digits)
@@ -63,7 +64,7 @@ async function fetchUnifiedData(slug: string) {
 
     // Stage 2: slug with letters stripped (a3bl→3, 중흥s-클래스→중흥-클래스)
     if (slugNoAlpha !== slug && slugNoAlpha.length > 3) {
-      const { data } = await sb.from('apt_sites').select(APT_COLS).eq('slug', slugNoAlpha).maybeSingle();
+      const { data } = await (sb as any).from('apt_sites').select(APT_COLS).eq('slug', slugNoAlpha).maybeSingle();
       if (data) site = data;
     }
 
@@ -71,7 +72,7 @@ async function fetchUnifiedData(slug: string) {
     if (!site) {
       const noSuffix = slug.replace(/[a-z0-9]+$/i, '').replace(/-+$/, '');
       if (noSuffix !== slug && noSuffix.length > 3) {
-        const { data } = await sb.from('apt_sites').select(APT_COLS).eq('slug', noSuffix).maybeSingle();
+        const { data } = await (sb as any).from('apt_sites').select(APT_COLS).eq('slug', noSuffix).maybeSingle();
         if (data) site = data;
       }
     }
@@ -79,7 +80,7 @@ async function fetchUnifiedData(slug: string) {
     // Stage 4: Korean-only ilike search on apt_sites.name (min 2 chars)
     if (!site && koreanOnly.length >= 2) {
       const searchTerm = koreanOnly.slice(0, 20);
-      const { data } = await sb.from('apt_sites').select(APT_COLS)
+      const { data } = await (sb as any).from('apt_sites').select(APT_COLS)
         .ilike('name', `%${searchTerm}%`).eq('is_active', true)
         .order('content_score', { ascending: false }).limit(1).maybeSingle();
       if (data) site = data;
@@ -89,7 +90,7 @@ async function fetchUnifiedData(slug: string) {
     if (!site) {
       const slugWords = slug.split('-').filter(w => w.length > 0).join('%');
       if (slugWords.length > 3) {
-        const { data } = await sb.from('apt_sites').select(APT_COLS)
+        const { data } = await (sb as any).from('apt_sites').select(APT_COLS)
           .ilike('slug', `%${slugWords}%`).eq('is_active', true)
           .order('content_score', { ascending: false }).limit(1).maybeSingle();
         if (data) site = data;
@@ -482,8 +483,10 @@ export default async function AptUnifiedPage({ params }: Props) {
         const hasBreakdown = generalSupply > 0 || specialSupply > 0;
         const totalHouseholds = Number(sub?.total_households || 0);
 
+        const commentCount = site?.comment_count || 0;
+        const pageViews = site?.page_views || 0;
         const cards = [
-          { l: totalHouseholds > 0 ? '총세대수' : '공급세대', v: totalHouseholds > 0 ? `${totalHouseholds.toLocaleString()}세대` : totalUnits > 0 ? `${totalUnits.toLocaleString()}세대` : '🔍 확인중', sub: totalHouseholds > 0 && totalHouseholds !== totalUnits && totalUnits > 0 ? `공급 ${totalUnits.toLocaleString()}세대` : totalHouseholds === 0 && (sub?.project_type === '재개발' || sub?.project_type === '재건축') ? '조합원분양 세대 확인중' : hasBreakdown ? `일반${generalSupply}·특별${specialSupply}` : '', c: totalHouseholds > 0 ? 'var(--text-primary)' : 'var(--brand)', icon: '🏢', bar: Math.min(((totalHouseholds || totalUnits) / 5000) * 100, 100), barColor: 'var(--brand)', scrollTo: null },
+          { l: totalHouseholds > 0 ? '총세대수' : '공급세대', v: totalHouseholds > 0 ? `${totalHouseholds.toLocaleString()}세대` : totalUnits > 0 ? `${totalUnits.toLocaleString()}세대` : '🔍 확인중', sub: totalHouseholds > 0 && totalHouseholds !== totalUnits && totalUnits > 0 ? `공급 ${totalUnits.toLocaleString()}세대` : totalHouseholds === 0 && (sub?.project_type === '재개발' || sub?.project_type === '재건축') ? '조합원분양 세대 확인중' : hasBreakdown ? `일반${generalSupply}·특별${specialSupply}` : '', c: totalHouseholds > 0 ? 'var(--text-primary)' : 'var(--brand)', icon: '🏢', bar: Math.min(((totalHouseholds || totalUnits) / 5000) * 100, 100), barColor: 'var(--brand)', scrollTo: 'supply-section' },
           { l: sub ? '분양가' : '시세', v: (() => {
             const pMin = site?.price_min || unsold?.sale_price_min || 0;
             const pMax = site?.price_max || 0;
@@ -491,7 +494,7 @@ export default async function AptUnifiedPage({ params }: Props) {
             const fmt = (n: number) => n >= 10000 ? `${(n / 10000).toFixed(1)}억` : `${n.toLocaleString()}만`;
             if (pMin && pMax && pMin !== pMax) return `${fmt(pMin)}~\n${fmt(pMax)}`;
             return fmt(pMin || pMax);
-          })(), sub: '', c: 'var(--brand)', icon: '💰', bar: 0, barColor: 'var(--brand)', scrollTo: null },
+          })(), sub: '', c: 'var(--brand)', icon: '💰', bar: 0, barColor: 'var(--brand)', scrollTo: 'price-section' },
           { l: '입주예정', v: fmtYM(site?.move_in_date || sub?.mvn_prearnge_ym) || '-', sub: (() => {
             const ym = site?.move_in_date || sub?.mvn_prearnge_ym;
             if (!ym || ym.length < 6) return '';
@@ -501,13 +504,16 @@ export default async function AptUnifiedPage({ params }: Props) {
             if (diffM <= 0) return '';
             const y = Math.floor(diffM / 12); const m = diffM % 12;
             return y > 0 ? `약 ${y}년${m > 0 ? ` ${m}개월` : ''} 후` : `약 ${m}개월 후`;
-          })(), c: 'var(--accent-green)', icon: '📅', bar: 0, barColor: 'var(--accent-green)', scrollTo: null },
-          { l: unsold ? '미분양' : (() => { const r = formatInterestOrViews(site?.interest_count || 0, site?.page_views || 0); return r.metric === 'views' ? '조회' : '관심'; })(), v: unsold ? `${(unsold.tot_unsold_hshld_co || 0).toLocaleString()}호` : formatInterestOrViews(site?.interest_count || 0, site?.page_views || 0).value, sub: unsold ? '' : '클릭하여 등록', c: unsold ? 'var(--accent-red)' : '#FFD43B', icon: unsold ? '⚠️' : '❤️', bar: unsold ? Math.min((unsold.tot_unsold_hshld_co || 0) / 500 * 100, 100) : Math.min((site?.page_views || site?.interest_count || 1) / (Math.max(site?.total_units || sub?.tot_supply_hshld_co || 100, 100)) * 100, 100), barColor: unsold ? 'var(--accent-red)' : '#FFD43B', scrollTo: unsold ? null : 'interest-section' },
+          })(), c: 'var(--accent-green)', icon: '📅', bar: 0, barColor: 'var(--accent-green)', scrollTo: 'movein-section' },
+          { l: '조회수', v: pageViews > 0 ? pageViews.toLocaleString() : '-', sub: '', c: '#22D3EE', icon: '👁️', bar: Math.min(pageViews / 5000 * 100, 100), barColor: '#22D3EE', scrollTo: 'stats-section' },
+          { l: '댓글', v: commentCount > 0 ? `${commentCount}` : '0', sub: '클릭하여 작성', c: '#A78BFA', icon: '💬', bar: Math.min(commentCount / 50 * 100, 100), barColor: '#A78BFA', scrollTo: 'comment-section' },
+          { l: unsold ? '미분양' : '관심', v: unsold ? `${(unsold.tot_unsold_hshld_co || 0).toLocaleString()}호` : formatInterestOrViews(site?.interest_count || 0, pageViews).value, sub: unsold ? '' : '클릭하여 등록', c: unsold ? 'var(--accent-red)' : '#FFD43B', icon: unsold ? '⚠️' : '❤️', bar: unsold ? Math.min((unsold.tot_unsold_hshld_co || 0) / 500 * 100, 100) : Math.min((pageViews || site?.interest_count || 1) / (Math.max(site?.total_units || sub?.tot_supply_hshld_co || 100, 100)) * 100, 100), barColor: unsold ? 'var(--accent-red)' : '#FFD43B', scrollTo: unsold ? null : 'interest-section' },
         ];
 
         return (
           <>
             <KpiCards cards={cards} />
+            <div id="supply-section" style={{ scrollMarginTop: 60 }}>
             <ComplexScale
               totalHouseholds={totalHouseholds}
               supplyUnits={totalUnits}
@@ -517,16 +523,17 @@ export default async function AptUnifiedPage({ params }: Props) {
               maxFloor={Number(sub?.max_floor || 0)}
               parkingCount={Number(sub?.parking_total || sub?.parking_co || 0)}
             />
+            </div>
           </>
         );
       })()}
 
       {/* Features */}
-      {features.length > 0 && <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 14 }}>{features.map((f, i: number) => <span key={i} style={{ padding: '4px 10px', borderRadius: 'var(--radius-lg)', fontSize: 'var(--fs-xs)', fontWeight: 600, background: 'rgba(59,123,246,0.1)', color: '#6CB4FF', border: '1px solid rgba(59,123,246,0.15)' }}>{String(f)}</span>)}</div>}
+      {features.length > 0 && <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 14 }}>{features.map((f: any, i: number) => <span key={i} style={{ padding: '4px 10px', borderRadius: 'var(--radius-lg)', fontSize: 'var(--fs-xs)', fontWeight: 600, background: 'rgba(59,123,246,0.1)', color: '#6CB4FF', border: '1px solid rgba(59,123,246,0.15)' }}>{String(f)}</span>)}</div>}
 
       {/* 분양가 범위 바 + D-day 위젯 */}
       {((site?.price_min && site?.price_max) || sub) && (
-        <div style={{ display: 'grid', gridTemplateColumns: (site?.price_min && site?.price_max && sub) ? 'minmax(0,1fr) minmax(0,1fr)' : '1fr', gap: 6, marginBottom: 14 }}>
+        <div id="price-section" style={{ display: 'grid', gridTemplateColumns: (site?.price_min && site?.price_max && sub) ? 'minmax(0,1fr) minmax(0,1fr)' : '1fr', gap: 6, marginBottom: 14, scrollMarginTop: 60 }}>
           {/* 분양가 범위 바 — 시각 강화 */}
           {site?.price_min && site?.price_max && (() => {
             const pMin = site.price_min;
@@ -729,7 +736,7 @@ export default async function AptUnifiedPage({ params }: Props) {
         const supplyStr = sub.tot_supply_hshld_co ? `${Number(sub.tot_supply_hshld_co).toLocaleString()}세대${gen > 0 ? ` (일반 ${gen} · 특별 ${spe})` : ''}` : null;
         const rows = [['분양유형', sub.mdatrgbn_nm], ['시행사', sub.developer_nm || site?.developer], ['시공사', sub.constructor_nm || site?.builder], ['특별공급', sub.spsply_rcept_bgnde ? `${sub.spsply_rcept_bgnde} ~ ${sub.spsply_rcept_endde || ''}` : null], ['1순위', sub.rcept_bgnde], ['2순위', sub.rcept_endde && sub.rcept_endde !== sub.rcept_bgnde ? sub.rcept_endde : null], ['당첨자발표', sub.przwner_presnatn_de], ['계약', sub.cntrct_cncls_bgnde ? `${sub.cntrct_cncls_bgnde} ~ ${sub.cntrct_cncls_endde}` : null], ['입주예정', fmtYM(sub.mvn_prearnge_ym)], ['총공급', supplyStr], ['분양가상한제', sub.is_price_limit ? '적용' : '미적용']].filter(r => r[1]);
         return (
-          <div className="apt-card">
+          <div className="apt-card" id="movein-section" style={{ scrollMarginTop: 60 }}>
             <h2 style={ct}>📅 분양 일정</h2>
             {/* 비주얼 타임라인 */}
             {steps.length >= 2 && (
@@ -1246,6 +1253,9 @@ export default async function AptUnifiedPage({ params }: Props) {
       )}
 
       {/* 관심단지 등록 CTA — AI 분석 바로 아래 (노출 극대화) */}
+      {/* 댓글 섹션 */}
+      {site?.slug && <AptCommentSection slug={site.slug} siteName={name} />}
+
       <div id="interest-section" style={{ scrollMarginTop: 60 }}>
         {site?.id && <InterestRegistration siteId={site.id} siteName={name} interestCount={site.interest_count || 0} slug={slug} totalSupply={site?.total_units || sub?.tot_supply_hshld_co || null} />}
       </div>
@@ -1574,7 +1584,7 @@ export default async function AptUnifiedPage({ params }: Props) {
       {relatedPosts.length > 0 && <div className="apt-card"><h2 style={ct}>💬 커뮤니티 게시글</h2>{relatedPosts.map((p: Record<string, any>) => <Link key={p.id} href={`/feed/${p.id}`} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none', color: 'inherit', fontSize: 'var(--fs-sm)' }}><span style={{ color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</span><span style={{ color: 'var(--text-tertiary)', flexShrink: 0, marginLeft: 8, fontSize: 'var(--fs-xs)' }}>댓글 {p.comments_count || 0}</span></Link>)}</div>}
 
       {/* Related blogs */}
-      {relatedBlogs.length > 0 && <div className="apt-card"><h2 style={ct}>📰 관련 분석 블로그</h2>{relatedBlogs.map((b: Record<string, any>) => <Link key={b.slug} href={`/blog/${b.slug}`} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none', color: 'inherit', fontSize: 'var(--fs-sm)' }}><span style={{ color: 'var(--text-primary)', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.title}</span><span style={{ color: 'var(--text-tertiary)', flexShrink: 0, marginLeft: 8, fontSize: 'var(--fs-xs)' }}>👀 {(b.view_count || 0).toLocaleString()}</span></Link>)}</div>}
+      {relatedBlogs.length > 0 && <div className="apt-card" id="stats-section" style={{ scrollMarginTop: 60 }}><h2 style={ct}>📰 관련 분석 블로그</h2>{relatedBlogs.map((b: Record<string, any>) => <Link key={b.slug} href={`/blog/${b.slug}`} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none', color: 'inherit', fontSize: 'var(--fs-sm)' }}><span style={{ color: 'var(--text-primary)', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.title}</span><span style={{ color: 'var(--text-tertiary)', flexShrink: 0, marginLeft: 8, fontSize: 'var(--fs-xs)' }}>👀 {(b.view_count || 0).toLocaleString()}</span></Link>)}</div>}
 
       {/* Nearby sites (internal linking SEO) */}
       {nearbySites.length > 0 && <div className="apt-card"><h2 style={ct}>🏗️ {region} 다른 현장</h2><div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 'var(--sp-sm)' }}>{nearbySites.map((ns: Record<string, any>) => <Link key={ns.slug} href={`/apt/${ns.slug}`} className="kd-card" style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: 10, textDecoration: 'none', color: 'inherit', overflow: 'hidden' }}><div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 2 }}>{ns.name}</div><div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ns.sigungu || ns.region} · {ns.total_units ? `${ns.total_units}세대` : ''} · {tLabel[ns.site_type]}</div></Link>)}</div></div>}
