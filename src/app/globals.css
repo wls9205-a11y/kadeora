@@ -1632,3 +1632,230 @@ html.theme-light [style*="rgba(248,113,113"] { color: #DC2626 !important; }
 /* 블로그 테이블 모바일 overflow 글로벌 */
 .blog-content table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .blog-content table table { display: table; } /* 중첩 테이블은 block 해제 */
+
+/* ═══════════════════════════════════════════════════════════
+   📱 모바일 CSS 종합 수정 (세션 94)
+   - body overflow-x 안전장치
+   - 그리드 반응형 전환
+   - 테이블 가로 스크롤
+   - 텍스트 오버플로우 방지
+   - 터치 타겟 최소 크기
+═══════════════════════════════════════════════════════════ */
+
+/* 전역: body 가로 넘침 방지 */
+html, body { overflow-x: hidden; max-width: 100vw; }
+
+/* 전역: 이미지 가로 넘침 방지 */
+img { max-width: 100%; height: auto; }
+
+/* 전역: pre/code 가로 넘침 방지 */
+pre, code { overflow-x: auto; max-width: 100%; word-break: break-all; }
+
+/* 전역: 테이블 기본 반응형 */
+table { max-width: 100%; }
+
+/* 종목 상세: KPI 4열 → 모바일 2열 */
+@media (max-width: 480px) {
+  [style*="grid-template-columns: repeat(4"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+/* 모바일 320px: 3열 그리드도 2열로 */
+@media (max-width: 380px) {
+  [style*="grid-template-columns: repeat(3"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+/* 종목/부동산 상세: flex 아이템 넘침 방지 */
+@media (max-width: 480px) {
+  article { overflow-x: hidden; }
+}
+
+/* FeedStatusBar: 초소형 화면 대응 */
+@media (max-width: 380px) {
+  .feed-status-bar {
+    font-size: 10px !important;
+    gap: 2px !important;
+    padding: 4px !important;
+  }
+  .feed-status-bar > div {
+    gap: 1px !important;
+  }
+}
+
+/* 피드 카드: 투표/VS/예측 카드 패딩 축소 */
+@media (max-width: 420px) {
+  .feed-poll-card, .feed-vs-card, .feed-predict-card {
+    padding: 10px !important;
+  }
+}
+
+/* 주식 히트맵/트리맵: 가로 넘침 방지 */
+@media (max-width: 640px) {
+  .stock-treemap-container, .stock-heatmap-container {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* 프로필/설정 페이지: 그리드 1열 전환 */
+@media (max-width: 480px) {
+  .profile-grid, .settings-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* 네비게이션 하단 바: 아이콘 & 텍스트 크기 */
+@media (max-width: 320px) {
+  .bottom-nav { font-size: 9px !important; }
+  .bottom-nav svg { width: 18px !important; height: 18px !important; }
+}
+
+/* 종목 비교 페이지: 테이블 가로 스크롤 강제 */
+@media (max-width: 640px) {
+  .compare-table-wrap {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* 부동산 카드: KPI 행 초소형 대응 */
+@media (max-width: 320px) {
+  .kpi-row {
+    gap: 2px !important;
+    font-size: 10px !important;
+  }
+  .kpi-row > div {
+    padding: 4px 2px !important;
+    min-width: 0 !important;
+  }
+}
+
+/* 블로그: 제목 줄바꿈 */
+.blog-content h1, .blog-content h2, .blog-content h3 {
+  overflow-wrap: break-word;
+  word-break: keep-all;
+}
+
+/* 블로그: 코드 블록 가로 스크롤 */
+.blog-content pre {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+}
+
+/* 블로그: 이미지 가로 넘침 방지 */
+.blog-content img {
+  max-width: 100% !important;
+  height: auto !important;
+}
+
+/* 댓글: 긴 텍스트 줄바꿈 */
+.kd-comment-body {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+/* 공유 버튼: 초소형 화면 */
+@media (max-width: 320px) {
+  .share-buttons {
+    gap: 2px !important;
+    flex-wrap: wrap !important;
+  }
+  .share-buttons button, .share-buttons a {
+    font-size: 10px !important;
+    padding: 3px 6px !important;
+  }
+}
+
+/* 어드민: 모바일 대응 */
+@media (max-width: 480px) {
+  .adm-card { padding: 10px !important; }
+  .adm-btn { padding: 6px 8px !important; font-size: 11px !important; }
+}
+
+/* 토론방: 메시지 버블 넘침 방지 */
+.discuss-message {
+  overflow-wrap: break-word;
+  word-break: break-word;
+  max-width: 100%;
+}
+
+/* 글로벌: 긴 URL/숫자 줄바꿈 */
+a, span, p, div {
+  overflow-wrap: break-word;
+}
+
+/* 모바일: 카드 내 숫자 텍스트 축소 */
+@media (max-width: 380px) {
+  .kd-counter { font-size: 14px !important; }
+}
+
+/* 모바일: 터치 타겟 최소 크기 보장 */
+@media (max-width: 640px) {
+  button, a, [role="button"] {
+    min-height: 36px;
+  }
+  input, select, textarea {
+    min-height: 40px;
+    font-size: 16px; /* iOS 줌 방지 */
+  }
+}
+
+/* 홈페이지: 섹션 카드 가로 스크롤 */
+@media (max-width: 480px) {
+  .kd-section-card {
+    min-width: 130px !important;
+  }
+}
+
+/* QuickPostBar: 모바일 대응 */
+@media (max-width: 420px) {
+  .quick-post-bar input {
+    font-size: 13px !important;
+  }
+}
+
+/* HotTopicBar: 모바일 pill 크기 */
+@media (max-width: 380px) {
+  .hot-topic-pill {
+    font-size: 11px !important;
+    padding: 4px 8px !important;
+  }
+}
+
+/* 세그먼트 컨트롤: 초소형 화면 */
+@media (max-width: 320px) {
+  .kd-tab-segment > button {
+    font-size: 10px !important;
+    padding: 5px 3px !important;
+    min-width: 0 !important;
+  }
+}
+
+/* 종목 상세: 가격 헤더 모바일 */
+@media (max-width: 420px) {
+  .stock-price-header {
+    font-size: 28px !important;
+  }
+}
+
+/* 부동산 상세: 분양가 테이블 가로 스크롤 */
+@media (max-width: 640px) {
+  .price-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .price-table-wrap table {
+    min-width: 400px;
+  }
+}
+
+/* Safe area: 노치/홈바 대응 */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .bottom-nav {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 4px) !important;
+  }
+}

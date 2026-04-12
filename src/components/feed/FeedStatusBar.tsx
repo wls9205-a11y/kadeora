@@ -38,7 +38,7 @@ export default function FeedStatusBar() {
   const mm = String(now.getMinutes()).padStart(2, '0');
 
   return (
-    <div style={{
+    <div className="feed-status-bar" style={{
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       padding: '5px 6px', background: 'var(--bg-surface)',
       borderRadius: 'var(--radius-sm)', marginBottom: 8,
