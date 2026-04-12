@@ -15,8 +15,16 @@ export async function GET(_req: NextRequest) {
     const today = new Date().toISOString().slice(0, 10);
     const month = new Date().toISOString().slice(0, 7);
     let created = 0;
+    let aiCalls = 0;
+    const MAX_AI_CALLS = 3; // 타임아웃 방지: AI 호출 최대 3회
 
-    for (const region of REGIONS) {
+    // 날짜 기반 오프셋 → 매일 다른 지역부터 시작 (17일이면 전체 순환)
+    const dayOfMonth = new Date().getDate();
+    const offset = dayOfMonth % REGIONS.length;
+
+    for (let i = 0; i < REGIONS.length; i++) {
+      if (created >= 2 || aiCalls >= MAX_AI_CALLS) break;
+      const region = REGIONS[(i + offset) % REGIONS.length];
       const slug = `regional-market-${region}-${month}`;
       const { data: ex } = await sb.from('blog_posts').select('id').eq('slug', slug).maybeSingle();
       if (ex) continue;
@@ -28,6 +36,7 @@ export async function GET(_req: NextRequest) {
         '[커뮤니티 →](/feed)',
       ];
       const prompt = buildFinancePrompt(title, 'apt', links);
+      aiCalls++;
       const aiResult = await generateAndValidate(prompt, 'apt');
       if (!aiResult) continue;
 

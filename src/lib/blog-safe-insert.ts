@@ -287,9 +287,13 @@ export async function safeBlogInsert(
       .select('id');
 
     if (error) {
-      // 트리거 race condition (DUPLICATE_TITLE/DUPLICATE_SLUG) → 경고만, 에러 아님
       const msg = error.message || '';
-      if (msg.includes('DUPLICATE_TITLE') || msg.includes('DUPLICATE_SLUG')) {
+      // 트리거 품질 게이트 OR 중복 → 경고만 (에러 아님)
+      if (msg.includes('DUPLICATE_TITLE') || msg.includes('DUPLICATE_SLUG') || msg.includes('품질 게이트') || msg.includes('DAILY_LIMIT') || msg.includes('HOURLY_LIMIT') || msg.includes('CRON_TYPE_DAILY_LIMIT')) {
+        // 품질 게이트 실패 시 구체적 사유 로깅 (warn 레벨)
+        if (msg.includes('품질 게이트')) {
+          console.warn(`[safeBlogInsert] 품질 게이트 차단: "${data.title?.slice(0, 30)}" → ${msg.match(/\((\d+)건\)/)?.[0] || ''} ${msg.split(': ').slice(1).join(': ').slice(0, 100)}`);
+        }
         return { success: false, reason: 'duplicate_slug', message: msg };
       }
       console.error(`[safeBlogInsert] Insert error for "${data.title}" (${data.category}, ${enrichedContent.length}자):`, msg, '| code:', error.code, '| details:', error.details);

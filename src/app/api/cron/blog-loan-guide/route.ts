@@ -25,8 +25,11 @@ export async function GET(_req: NextRequest) {
 
     const { data: existing } = await sb.from('blog_posts').select('slug').in('slug', TOPICS.map(t => t.slug));
     const existingSlugs = new Set((existing || []).map((r: any) => r.slug));
+    let aiCalls = 0;
+    const MAX_AI_CALLS = 3;
 
     for (const topic of TOPICS) {
+      if (created >= 3 || aiCalls >= MAX_AI_CALLS) break;
       if (existingSlugs.has(topic.slug)) continue;
       // AI 생성 (하드코딩 → 완성형)
       const links = [
@@ -37,6 +40,7 @@ export async function GET(_req: NextRequest) {
         '[커뮤니티 →](/feed)',
       ];
       const prompt = buildFinancePrompt(topic.title, 'finance', links);
+      aiCalls++;
       const aiResult = await generateAndValidate(prompt, 'finance');
       if (!aiResult) continue;
 
