@@ -1,20 +1,20 @@
 # 카더라 STATUS.md
-> 마지막 업데이트: 2026-04-12 23:00 KST (세션 91)
+> 마지막 업데이트: 2026-04-13 00:30 KST (세션 91)
 
-## 세션 91 — 블로그 전천후 설계안 전면 구현
+## 세션 91 — 블로그 전천후 설계안 전면 구현 + 배포 완료
 
 ### 완료 사항
-1. **코어 라이브러리**: blog-data-enrichment.ts (apt 34,537건 + 실거래 497,413건 주입), blog-quality-gate.ts (70점 미만 발행 차단), blog-prompt-templates.ts (공유 프롬프트 + OUTPUT_RULES)
+1. **코어 라이브러리 3개**: blog-data-enrichment.ts (apt 34,537건 + 실거래 497,413건 주입), blog-quality-gate.ts (70점 미만 발행 차단, 10항목 검사), blog-prompt-templates.ts (공유 프롬프트 + OUTPUT_RULES + generateAndValidate)
 2. **신규 크론 3개**: blog-enrich-rewrite (매 3시간, C등급 재생성), blog-upcoming-projects (화·금, 카더라 선점), blog-data-update (주 1회, 시세 갱신)
-3. **크론 AI 전환**: blog-tax-guide, blog-loan-guide, blog-calculator-guide, blog-dividend-etf, blog-subscription-monthly, blog-regional-analysis → 하드코딩 템플릿에서 AI 생성으로 전환
+3. **크론 AI 전환 6개**: blog-tax-guide, blog-loan-guide, blog-calculator-guide, blog-dividend-etf, blog-subscription-monthly, blog-regional-analysis → 하드코딩 템플릿에서 AI 생성(generateAndValidate)으로 전환 완료
 4. **블로그 UI**: BlogSidebar (데스크탑 2컬럼 sticky), BlogMetricCards (지표 카드), blog-detail-layout CSS (1024px+ 2컬럼), 가독성 강화 (17px, 1.85)
-5. **어드민**: DataTab 품질 게이트 현황 (S/A/B/C/F), admin/v2 blogQuality 집계
-6. **DB**: Phase 0 SQL 일괄수정 (영어→한글, 오타), upcoming_projects 테이블 + 8현장 시딩, blog-rewrite 비활성화
-7. **설계문서**: docs/BLOG_REDESIGN_MASTERPLAN.md, docs/BLOG_SYSTEM_STATUS.md
+5. **어드민**: DataTab 품질 게이트 현황 (S/A/B/C/F 등급 분포, 인라인 HTML 건수), admin/v2 blogQuality 집계
+6. **DB**: Phase 0 SQL 일괄수정 (영어→한글, 오타), upcoming_projects 테이블 + 8현장 시딩
+7. **크론 정비**: blog-rewrite 비활성화 → blog-enrich-rewrite 대체, naver-blog-content 제거 (100개 상한), 총 크론 100개
+8. **빌드 에러 수정**: Supabase 타입 재귀, 크론 100개 상한, stock JSX 문법, Disclaimer import, 크론 변수명 불일치, safeBlogInsert 타입, CronResult return type — 전부 해결
+9. **설계문서**: docs/BLOG_REDESIGN_MASTERPLAN.md, docs/BLOG_SYSTEM_STATUS.md
 
-### 미완료 (다음 세션)
-- blog-district-guide (459줄): 이미 데이터 기반이나 AI 산문 미전환
-- blog-life-guide (1,423줄): 대규모 파일 — AI 전환 리스크 높아 보류
+### 배포: dpl_BthxS3c7QWErpSutocepFdNTofFa — READY ✅
 
 ## 세션 90 — 리텐션 시스템 Phase 1+2+3 전체 구현
 
