@@ -36,48 +36,69 @@ async function handler(req: NextRequest) {
       let currentType = type;
 
       if (type === 'all' || type === 'stock') {
-        // 전체 주식 종목 (1,846개 — 한 번에 처리 가능)
-        const { data: stocks } = await sb.from('stock_quotes')
-          .select('symbol')
-          .gt('price', 0)
-          .order('symbol', { ascending: true });
-        if (stocks?.length) {
-          urls.push(...stocks.map((s: any) => `${SITE_URL}/stock/${s.symbol}`));
-          totalAvailable += stocks.length;
+        // 전체 주식 종목 — Supabase 1000행 제한 우회
+        let stockPage = 0;
+        while (true) {
+          const { data: batch } = await sb.from('stock_quotes')
+            .select('symbol')
+            .gt('price', 0)
+            .order('symbol', { ascending: true })
+            .range(stockPage * 1000, (stockPage + 1) * 1000 - 1);
+          if (!batch?.length) break;
+          urls.push(...batch.map((s: any) => `${SITE_URL}/stock/${s.symbol}`));
+          totalAvailable += batch.length;
+          if (batch.length < 1000) break;
+          stockPage++;
         }
         if (type === 'stock') {
-          nextOffset = 0; // 종목은 한 번에 끝남
+          nextOffset = 0;
           currentType = 'stock';
         }
       }
 
       if (type === 'all' || type === 'complex') {
-        // 단지백과 페이지네이션 (34,537개)
-        const { data: complexes, count } = await (sb as any).from('apt_complex_profiles')
-          .select('apt_name', { count: 'exact' })
-          .not('apt_name', 'is', null)
-          .order('apt_name', { ascending: true })
-          .range(offset, offset + BATCH_SIZE - 1);
+        // 단지백과 — Supabase 1000행 제한 우회하여 5000개씩
+        const { count } = await (sb as any).from('apt_complex_profiles')
+          .select('apt_name', { count: 'exact', head: true })
+          .not('apt_name', 'is', null);
+        totalAvailable = count || 0;
         
-        if (complexes?.length) {
-          urls.push(...complexes.map((c: any) => `${SITE_URL}/apt/complex/${encodeURIComponent(c.apt_name)}`));
-          totalAvailable = count || 0;
-          nextOffset = offset + complexes.length;
-          if (nextOffset >= totalAvailable) nextOffset = 0; // 순회 완료 시 리셋
-          currentType = 'complex';
+        let fetched = 0;
+        let subOffset = offset;
+        while (fetched < BATCH_SIZE) {
+          const { data: batch } = await (sb as any).from('apt_complex_profiles')
+            .select('apt_name')
+            .not('apt_name', 'is', null)
+            .order('apt_name', { ascending: true })
+            .range(subOffset, subOffset + 999);
+          if (!batch?.length) break;
+          urls.push(...batch.map((c: any) => `${SITE_URL}/apt/complex/${encodeURIComponent(c.apt_name)}`));
+          fetched += batch.length;
+          subOffset += batch.length;
+          if (batch.length < 1000) break;
         }
+        nextOffset = subOffset;
+        if (nextOffset >= totalAvailable) nextOffset = 0;
+        currentType = 'complex';
       }
 
       if (type === 'all' || type === 'site') {
-        // 청약/분양 현장 (5,783개)
-        const { data: sites } = await sb.from('apt_sites')
-          .select('slug')
-          .eq('is_active', true)
-          .not('slug', 'is', null)
-          .order('slug', { ascending: true })
-          .range(type === 'site' ? offset : 0, type === 'site' ? offset + BATCH_SIZE - 1 : BATCH_SIZE - 1);
-        if (sites?.length) {
-          urls.push(...sites.map((s: any) => `${SITE_URL}/apt/${s.slug}`));
+        // 청약/분양 현장 — Supabase 1000행 제한 우회
+        const siteStart = type === 'site' ? offset : 0;
+        let siteFetched = 0;
+        let siteOff = siteStart;
+        while (siteFetched < BATCH_SIZE) {
+          const { data: batch } = await sb.from('apt_sites')
+            .select('slug')
+            .eq('is_active', true)
+            .not('slug', 'is', null)
+            .order('slug', { ascending: true })
+            .range(siteOff, siteOff + 999);
+          if (!batch?.length) break;
+          urls.push(...batch.map((s: any) => `${SITE_URL}/apt/${s.slug}`));
+          siteFetched += batch.length;
+          siteOff += batch.length;
+          if (batch.length < 1000) break;
         }
       }
 
