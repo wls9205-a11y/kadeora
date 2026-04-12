@@ -30,7 +30,7 @@ import SmartSectionGate from '@/components/SmartSectionGate';
 import BlogMidCTA from '@/components/BlogMidCTA';
 import PushPromptBanner from '@/components/PushPromptBanner';
 import Disclaimer from '@/components/Disclaimer';
-import NewsletterSubscribe from '@/components/NewsletterSubscribe';
+// NewsletterSubscribe 삭제 — 카카오 CTA로 통합
 
 // marked heading에 id 자동 부여 (TOC 앵커용)
 const slugify = (text: string) => text.replace(/<[^>]+>/g, '').replace(/[^\w가-힣ㄱ-ㅎㅏ-ㅣ]+/g, '-').replace(/^-+|-+$/g, '').toLowerCase();
@@ -776,7 +776,7 @@ export default async function BlogDetailPage({ params }: Props) {
         <RelatedContentCard type="blog" showSignup={!isLoggedIn} />
 
         {/* 뉴스레터 — 본문 직후, 비로그인 유저 대상 (게이트 대안 경로) */}
-        {!isLoggedIn && !isBot && <NewsletterSubscribe category={post.category} />}
+        {/* NewsletterSubscribe 삭제 — SmartSectionGate + ActionBar 카카오 CTA로 통합 */}
 
         {/* 관련 서비스 CTA (카테고리별) */}
         {post.category === 'apt' && (

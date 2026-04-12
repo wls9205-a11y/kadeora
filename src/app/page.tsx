@@ -3,6 +3,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
+import KakaoHeroCTA from '@/components/KakaoHeroCTA';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { SITE_URL as SITE , CONTACT_EMAIL} from '@/lib/constants';
 
@@ -513,30 +514,9 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* ━━━ CTA 배너 ━━━ */}
+        {/* ━━━ CTA 배너 — 비로그인 유저 전용 ━━━ */}
         <section style={{ maxWidth: 1200, margin: '0 auto', padding: '0 20px 64px' }}>
-          <div className="kd-card-glow" style={{
-            background: 'linear-gradient(135deg, #152850 0%, #0A1225 100%)',
-            borderRadius: 'var(--radius-xl)', padding: 'clamp(32px, 5vw, 56px)', textAlign: 'center',
-          }}>
-            <h2 style={{ fontSize: 'clamp(20px, 3vw, 28px)', fontWeight: 800, marginBottom: 'var(--sp-md)' }}>
-              지금 바로 시작하세요
-            </h2>
-            <p style={{ color: 'var(--text-secondary)', fontSize: 15, marginBottom: 28, lineHeight: 1.7 }}>
-              카카오 계정으로 3초 만에 가입하고,<br />
-              주식·부동산·커뮤니티 모든 기능을 무료로 이용하세요.
-            </p>
-            <Link href="/login" style={{
-              display: 'inline-flex', alignItems: 'center', gap: 'var(--sp-sm)',
-              padding: '15px 40px', borderRadius: 'var(--radius-lg)', fontSize: 16, fontWeight: 700,
-              background: '#FEE500', color: '#191919', textDecoration: 'none',
-              boxShadow: '0 4px 24px rgba(254,229,0,0.25)',
-              transition: 'transform 0.12s ease, box-shadow 0.2s ease',
-            }}>
-              <svg width={20} height={20} viewBox="0 0 24 24" fill="#191919"><path d="M12 3C6.477 3 2 6.463 2 10.691c0 2.79 1.86 5.234 4.66 6.595-.145.524-.935 3.378-.967 3.595 0 0-.02.164.087.227.107.063.232.03.232.03.306-.043 3.55-2.318 4.107-2.715.59.083 1.2.127 1.82.127h.061c5.523 0 10-3.463 10-7.691 0-4.228-4.477-7.691-10-7.691V3z" /></svg>
-              카카오로 시작하기
-            </Link>
-          </div>
+          <KakaoHeroCTA />
         </section>
 
         {/* ━━━ 푸터 ━━━ */}
