@@ -140,7 +140,8 @@ export default function FeedClient({
     return () => { if (newCheckTimerRef.current) clearInterval(newCheckTimerRef.current); };
   }, [activeCategory]);
 
-  const { userId: authUserId, isAdmin } = useAuth();
+  const { userId: authUserId, profile } = useAuth();
+  const isAdmin = profile?.isAdmin ?? false;
 
   useEffect(() => {
     if (!authUserId) return;
