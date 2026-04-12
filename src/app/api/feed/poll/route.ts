@@ -48,8 +48,8 @@ export async function POST(req: NextRequest) {
     await (sb as any).rpc('award_points', {
       p_user_id: user.id,
       p_amount: 10,
-      p_reason: 'poll_create',
-      p_ref_id: post.id.toString(),
+      p_reason: '투표생성',
+      p_meta: { ref_id: post.id },
     });
 
     return NextResponse.json({ success: true, post_id: post.id, poll_id: poll.id });

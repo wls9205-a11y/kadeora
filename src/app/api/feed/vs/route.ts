@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     if (vsErr) return NextResponse.json({ error: vsErr.message }, { status: 500 });
 
     await (sb as any).rpc('award_points', {
-      p_user_id: user.id, p_amount: 10, p_reason: 'vs_create', p_ref_id: post.id.toString(),
+      p_user_id: user.id, p_amount: 10, p_reason: 'VS생성', p_meta: { ref_id: post.id },
     });
 
     return NextResponse.json({ success: true, post_id: post.id, battle_id: battle.id });

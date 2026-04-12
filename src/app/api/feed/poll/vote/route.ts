@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
 
     // 포인트 지급
     await (sb as any).rpc('award_points', {
-      p_user_id: user.id, p_amount: 5, p_reason: 'poll_vote', p_ref_id: poll_id.toString(),
+      p_user_id: user.id, p_amount: 5, p_reason: '투표참여', p_meta: { ref_id: poll_id },
     });
 
     return NextResponse.json({ success: true });

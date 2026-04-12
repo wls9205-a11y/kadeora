@@ -159,7 +159,7 @@ export default function CommunityTab({ onNavigate }: { onNavigate?: (t: string) 
         if (winners) {
           for (const w of winners) {
             await (sb as any).rpc('award_points', {
-              p_user_id: w.user_id, p_amount: 50, p_reason: 'predict_hit', p_ref_id: predId.toString(),
+              p_user_id: w.user_id, p_amount: 50, p_reason: '예측적중', p_meta: { ref_id: predId },
             });
           }
         }

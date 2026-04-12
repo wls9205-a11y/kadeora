@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
     await (sb as any).rpc('award_points', {
-      p_user_id: user.id, p_amount: 5, p_reason: 'predict_vote', p_ref_id: prediction_id.toString(),
+      p_user_id: user.id, p_amount: 5, p_reason: '예측참여', p_meta: { ref_id: prediction_id },
     });
 
     return NextResponse.json({ success: true });

@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     if (error || !post) return NextResponse.json({ error: error?.message || '작성 실패' }, { status: 500 });
 
     await (sb as any).rpc('award_points', {
-      p_user_id: user.id, p_amount: 5, p_reason: 'short_create', p_ref_id: post.id.toString(),
+      p_user_id: user.id, p_amount: 5, p_reason: '한마디작성', p_meta: { ref_id: post.id },
     });
 
     return NextResponse.json({ success: true, post_id: post.id });

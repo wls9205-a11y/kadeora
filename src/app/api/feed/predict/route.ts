@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     if (predErr) return NextResponse.json({ error: predErr.message }, { status: 500 });
 
     await (sb as any).rpc('award_points', {
-      p_user_id: user.id, p_amount: 10, p_reason: 'predict_create', p_ref_id: post.id.toString(),
+      p_user_id: user.id, p_amount: 10, p_reason: '예측생성', p_meta: { ref_id: post.id },
     });
 
     return NextResponse.json({ success: true, post_id: post.id });
