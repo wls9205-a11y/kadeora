@@ -267,6 +267,43 @@ ${complexXml}
     } catch { return xmlResponse([]); }
   }
 
+  // ── 12: stock-vs 비교 페이지 ──
+  if (id === 12) {
+    try {
+      const sb = getSupabaseAdmin();
+      const entries: SitemapEntry[] = [];
+
+      // 종목 비교 (인기 종목 조합 — 최대 200개)
+      try {
+        const { data: topStocks } = await sb.from('stock_quotes')
+          .select('symbol, name, market')
+          .eq('is_active', true).gt('price', 0)
+          .order('market_cap', { ascending: false }).limit(50);
+        if (topStocks) {
+          const kospi = topStocks.filter((s: any) => s.market === 'KOSPI').slice(0, 15);
+          const kosdaq = topStocks.filter((s: any) => s.market === 'KOSDAQ').slice(0, 10);
+          const groups = [kospi, kosdaq];
+          let vsCount = 0;
+          for (const group of groups) {
+            for (let i = 0; i < group.length && vsCount < 200; i++) {
+              for (let j = i + 1; j < group.length && vsCount < 200; j++) {
+                entries.push({
+                  url: `${BASE}/stock/${group[i].symbol}/vs/${group[j].symbol}`,
+                  lastModified: now,
+                  changeFrequency: 'weekly',
+                  priority: 0.55,
+                });
+                vsCount++;
+              }
+            }
+          }
+        }
+      } catch {}
+
+      return xmlResponse(entries);
+    } catch { return xmlResponse([]); }
+  }
+
   // ── 8+: blog chunks (image 사이트맵 포함) ──
   if (id >= 8) {
     try {

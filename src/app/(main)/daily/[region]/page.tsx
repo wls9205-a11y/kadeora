@@ -58,6 +58,29 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       'article:tag': `${region},부동산,주식,투자,청약,미분양,재개발,시세,카더라데일리`,
       'og:updated_time': '2026-04-12T00:00:00Z',
       'dg:plink': canonical,
+      ...(() => {
+        const GEO: Record<string, { code: string; lat: string; lng: string }> = {
+          '서울': { code: 'KR-11', lat: '37.5665', lng: '126.9780' },
+          '부산': { code: 'KR-26', lat: '35.1796', lng: '129.0756' },
+          '대구': { code: 'KR-27', lat: '35.8714', lng: '128.6014' },
+          '인천': { code: 'KR-28', lat: '37.4563', lng: '126.7052' },
+          '광주': { code: 'KR-29', lat: '35.1595', lng: '126.8526' },
+          '대전': { code: 'KR-30', lat: '36.3504', lng: '127.3845' },
+          '울산': { code: 'KR-31', lat: '35.5384', lng: '129.3114' },
+          '세종': { code: 'KR-36', lat: '36.4800', lng: '127.2600' },
+          '경기': { code: 'KR-41', lat: '37.4138', lng: '127.5183' },
+          '강원': { code: 'KR-42', lat: '37.8228', lng: '128.1555' },
+          '충북': { code: 'KR-43', lat: '36.6357', lng: '127.4917' },
+          '충남': { code: 'KR-44', lat: '36.5184', lng: '126.8000' },
+          '전북': { code: 'KR-45', lat: '35.8203', lng: '127.1088' },
+          '전남': { code: 'KR-46', lat: '34.8161', lng: '126.4629' },
+          '경북': { code: 'KR-47', lat: '36.4919', lng: '128.8889' },
+          '경남': { code: 'KR-48', lat: '35.4606', lng: '128.2132' },
+          '제주': { code: 'KR-50', lat: '33.4996', lng: '126.5312' },
+        };
+        const g = GEO[region];
+        return g ? { 'geo.region': g.code, 'geo.placename': region, 'geo.position': `${g.lat};${g.lng}`, 'ICBM': `${g.lat}, ${g.lng}` } : {};
+      })(),
     },
   };
 }
