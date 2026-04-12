@@ -45,7 +45,20 @@ export async function POST(req: NextRequest) {
       await admin.from('posts').update({ likes_count: count ?? 0 }).eq('id', postId);
 
       // 알림은 DB 트리거(handle_post_like_insert)가 자동 처리
-      // service_role에서는 트리거가 실행되므로 알림도 자동 생성됨
+      // 웹 푸시 발송 (글 작성자에게 실시간 알림)
+      try {
+        const { data: post } = await admin.from('posts').select('author_id, title').eq('id', postId).single();
+        if (post?.author_id && post.author_id !== user.id) {
+          const { data: profile } = await admin.from('profiles').select('nickname').eq('id', user.id).single();
+          const { sendPushToUsers } = await import('@/lib/push-utils');
+          sendPushToUsers([post.author_id], {
+            title: `❤️ ${profile?.nickname || '누군가'}님이 좋아요`,
+            body: (post.title || '게시글').slice(0, 50),
+            url: `/feed/${postId}`,
+            tag: `like-${postId}`, // 같은 글 좋아요는 SW에서 자동 병합
+          }).catch(() => {});
+        }
+      } catch {}
 
       return NextResponse.json({ liked: true });
     }

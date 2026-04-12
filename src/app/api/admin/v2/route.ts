@@ -275,6 +275,30 @@ export async function GET(req: NextRequest) {
               return { ...dist, inlineHtml: inlineHtml.count ?? 0, scored: (tiers || []).length, total: blogs };
             } catch { return { S: 0, A: 0, B: 0, C: 0, F: 0, inlineHtml: 0, scored: 0, total: blogs }; }
           })(),
+          // 푸시 발송 성과
+          pushStats: await (async () => {
+            try {
+              const { data: logs } = await (sb as any).from('push_logs')
+                .select('title, sent_count, click_count, created_at')
+                .order('created_at', { ascending: false })
+                .limit(10);
+              const totalSent = (logs || []).reduce((s: number, l: any) => s + (l.sent_count || 0), 0);
+              const totalClicked = (logs || []).reduce((s: number, l: any) => s + (l.click_count || 0), 0);
+              return {
+                recentLogs: (logs || []).map((l: any) => ({
+                  title: (l.title || '').slice(0, 40),
+                  sent: l.sent_count || 0,
+                  clicked: l.click_count || 0,
+                  ctr: l.sent_count > 0 ? Math.round((l.click_count || 0) / l.sent_count * 1000) / 10 : 0,
+                  ago: l.created_at,
+                })),
+                totalSent, totalClicked,
+                avgCtr: totalSent > 0 ? Math.round(totalClicked / totalSent * 1000) / 10 : 0,
+                pushSubs: pushSubs ?? 0,
+                notifReadRate24: (notifSent24 ?? 0) > 0 ? Math.round((notifRead24 ?? 0) / (notifSent24 ?? 0) * 100) : 0,
+              };
+            } catch { return { recentLogs: [], totalSent: 0, totalClicked: 0, avgCtr: 0, pushSubs: 0, notifReadRate24: 0 }; }
+          })(),
         },
         categoryStats: Object.entries(catMap).map(([k, v]) => ({ category: k, count: v.count, views: v.views, efficiency: v.count > 0 ? Math.round(v.views / v.count) : 0 })).sort((a: any, b: any) => b.efficiency - a.efficiency),
         failedCrons: failGroups,

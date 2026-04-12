@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withCronAuth } from '@/lib/cron-auth';
 import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
-import { sendPushToUsers, sendPushBroadcast } from '@/lib/push-utils';
+import { sendPushToUsers, sendPushBroadcast, filterActiveUsers } from '@/lib/push-utils';
 
 export const maxDuration = 60;
 
@@ -80,10 +80,14 @@ async function handler(req: NextRequest): Promise<NextResponse> {
       if (!post) continue;
 
       const icon = post.category === 'stock' ? '📈' : post.category === 'apt' ? '🏢' : post.category === 'finance' ? '💰' : '📰';
-      const { sent, failed } = await sendPushToUsers(uids, {
+      // 옵트아웃 + Quiet Hours 필터링
+      const activeUids = await filterActiveUsers(uids, 'push_hot_post');
+      if (activeUids.length === 0) continue;
+      const { sent, failed } = await sendPushToUsers(activeUids, {
         title: `${icon} ${post.title}`.slice(0, 60),
         body: '관심 분야 새 분석이 올라왔어요',
         url: `/blog/${post.slug}`, tag: `content-${cat}`,
+        image: `https://kadeora.app/api/og?title=${encodeURIComponent(post.title)}&category=${post.category}&design=2`,
       });
       totalSent += sent; totalFailed += failed;
       details[cat] = { slug: post.slug, users: uids.length, sent };

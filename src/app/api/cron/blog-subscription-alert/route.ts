@@ -48,6 +48,18 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
           image_alt: `${sub.name} 청약 분석`, excerpt: metaDesc.slice(0, 100),
         });
         created++;
+
+        // 푸시 발송 (전체 구독자)
+        try {
+          const { sendPushBroadcast } = await import('@/lib/push-utils');
+          await sendPushBroadcast({
+            title: `🏢 ${sub.name} 청약 분석`,
+            body: `${sub.region} ${sub.supply_count}세대 · 접수 ${sub.rcept_endde}까지`,
+            url: `/blog/${slug}`,
+            tag: `blog-sub-${sub.house_manage_no}`,
+            image: `/api/og?title=${encodeURIComponent(sub.name + ' 청약 분석')}&category=apt&design=2`,
+          });
+        } catch {}
       } catch { failed++; }
     }
 

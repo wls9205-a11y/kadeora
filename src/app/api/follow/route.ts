@@ -61,6 +61,14 @@ export async function POST(request: NextRequest) {
           content: `${profile?.nickname ?? '누군가'}님이 팔로우했어요`,
           link: `/profile/${user.id}`,
         });
+        // 웹 푸시 발송
+        const { sendPushToUsers } = await import('@/lib/push-utils');
+        sendPushToUsers([targetId], {
+          title: `👤 ${profile?.nickname ?? '누군가'}님이 팔로우`,
+          body: '프로필을 확인해보세요',
+          url: `/profile/${user.id}`,
+          tag: `follow-${user.id}`,
+        }).catch(() => {});
       } catch (e) { console.error(`[${new URL(request.url).pathname}]`, e); }
 
       return NextResponse.json({ following: true });

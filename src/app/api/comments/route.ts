@@ -35,6 +35,21 @@ export async function POST(req: NextRequest) {
     if (error) { console.error('[Comments]', error.message); return NextResponse.json({ error: '댓글 작성에 실패했습니다.' }, { status: 500 }); }
 
     // 알림은 DB 트리거(notify_on_comment)가 자동 처리 — 수동 INSERT 불필요
+    // 웹 푸시 발송 (글 작성자에게 실시간 알림)
+    try {
+      const admin = getSupabaseAdmin();
+      const { data: post } = await admin.from('posts').select('author_id, title').eq('id', postId).single();
+      if (post?.author_id && post.author_id !== user.id) {
+        const { data: profile } = await admin.from('profiles').select('nickname').eq('id', user.id).single();
+        const { sendPushToUsers } = await import('@/lib/push-utils');
+        sendPushToUsers([post.author_id], {
+          title: `💬 ${profile?.nickname || '누군가'}님이 댓글을 남겼어요`,
+          body: content.slice(0, 60),
+          url: `/feed/${postId}`,
+          tag: `comment-${postId}`,
+        }).catch(() => {});
+      }
+    } catch {}
 
     // 포인트 적립 (award_points RPC — 트리거 바이패스)
     try {

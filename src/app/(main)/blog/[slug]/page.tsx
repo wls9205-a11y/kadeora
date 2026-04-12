@@ -31,7 +31,7 @@ import BlogTossGate from '@/components/BlogTossGate';
 import RelatedContentCard from '@/components/RelatedContentCard';
 import SmartSectionGate from '@/components/SmartSectionGate';
 import BlogMidCTA from '@/components/BlogMidCTA';
-import PushPromptBanner from '@/components/PushPromptBanner';
+
 import Disclaimer from '@/components/Disclaimer';
 // NewsletterSubscribe 삭제 — 카카오 CTA로 통합
 
@@ -1132,7 +1132,7 @@ export default async function BlogDetailPage({ params }: Props) {
         </div>
       )}
       {/* Disclaimer는 auto면책 + 본문 출처로 대체됨 — 중복 제거 */}
-      {isLoggedIn && <PushPromptBanner />}
+      
       </div>
       {/* 사이드바 — 데스크탑에서만 노출 */}
       <div className="blog-detail-side">

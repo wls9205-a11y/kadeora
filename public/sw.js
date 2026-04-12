@@ -1,5 +1,5 @@
 // Kadeora Service Worker v2
-const CACHE_VERSION = '20260329';
+const CACHE_VERSION = '20260412';
 const CACHE_NAME = 'kadeora-v' + CACHE_VERSION;
 const PRECACHE = ['/feed', '/offline.html', '/icons/icon-192.png', '/blog', '/apt'];
 const OFFLINE_PAGES = ['/feed', '/stock', '/hot', '/apt', '/blog'];
@@ -40,7 +40,9 @@ self.addEventListener('push', e => {
         { action: 'close', title: '닫기' },
       ],
     };
-    e.waitUntil(self.registration.showNotification(data.title || '카더라', options));
+    e.waitUntil(self.registration.showNotification(data.title || '카더라', options)
+      .then(() => { if ('setAppBadge' in navigator) navigator.setAppBadge(); })
+    );
   } catch (err) {
     e.waitUntil(
       self.registration.showNotification('카더라', { body: '새 알림이 있습니다', icon: '/icons/icon-192.png' })
@@ -52,6 +54,7 @@ self.addEventListener('push', e => {
 self.addEventListener('notificationclick', e => {
   e.notification.close();
   if (e.action === 'close') return;
+  if ('clearAppBadge' in navigator) navigator.clearAppBadge();
   const url = e.notification.data?.url || '/';
   const log_id = e.notification.data?.log_id;
   e.waitUntil(

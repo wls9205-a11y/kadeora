@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
     // 알림
     try {
       const msg = bonus ? `출석 체크 완료! +${pointsEarned}P (${bonus})` : `출석 체크 완료! +10P 🌱`;
-      await sb.from('notifications').insert({ user_id: user.id, type: 'system', content: msg });
+      await sb.from('notifications').insert({ user_id: user.id, type: 'system', content: msg, link: '/attendance' });
     } catch (e) { console.error(`[${new URL(req.url).pathname}]`, e); }
 
     // 첫 미션: 출석 체크

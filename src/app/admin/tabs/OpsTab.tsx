@@ -139,6 +139,39 @@ export default function OpsTab({ onNavigate }: { onNavigate: (t: any) => void })
           {dbPct}% 사용 · 여유 {dbMb ? `${((8192-dbMb)/1024).toFixed(1)}GB` : '?'}
         </div>
 
+        {/* 알림 발송 성과 */}
+        {data.extended?.pushStats && (() => {
+          const ps = data.extended.pushStats;
+          return (<>
+            <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6, marginTop: 12 }}>🔔 알림 발송 성과</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 4, marginBottom: 8 }}>
+              {[
+                { v: ps.pushSubs, l: '푸시 구독', c: '#F59E0B' },
+                { v: `${ps.avgCtr}%`, l: '평균 CTR', c: ps.avgCtr > 5 ? '#10B981' : '#F59E0B' },
+                { v: ps.totalSent, l: '발송 10회', c: '#3B7BF6' },
+                { v: `${ps.notifReadRate24}%`, l: '읽음률24h', c: ps.notifReadRate24 > 30 ? '#10B981' : '#EF4444' },
+              ].map(s => (
+                <div key={s.l} style={{ background: 'rgba(12,21,40,0.6)', border: '1px solid rgba(255,255,255,0.04)', borderRadius: 'var(--radius-sm)', padding: '5px 3px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 12, fontWeight: 800, color: typeof s.c === 'string' ? s.c : '#fff' }}>{s.v}</div>
+                  <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)', marginTop: 1 }}>{s.l}</div>
+                </div>
+              ))}
+            </div>
+            {ps.recentLogs?.length > 0 && (
+              <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 8 }}>
+                {ps.recentLogs.slice(0, 3).map((l: any, i: number) => (
+                  <div key={i} style={{ display: 'flex', gap: 6, padding: '2px 0' }}>
+                    <span style={{ color: 'var(--text-secondary)', minWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{l.title}</span>
+                    <span>→ {l.sent}건</span>
+                    <span style={{ color: l.clicked > 0 ? '#10B981' : 'var(--text-tertiary)' }}>{l.clicked}클릭 ({l.ctr}%)</span>
+                    <span style={{ marginLeft: 'auto' }}>{ago(l.ago)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>);
+        })()}
+
         {/* API 키 */}
         <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 4 }}>API 키 상태</div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
@@ -147,6 +180,7 @@ export default function OpsTab({ onNavigate }: { onNavigate: (t: any) => void })
             { name: 'ANTHROPIC', ok: true },
             { name: 'STOCK_DATA', ok: true },
             { name: 'VAPID', ok: true },
+            { name: 'SOLAPI', ok: true },
             { name: 'KIS', ok: false },
             { name: 'APT_DATA', ok: false },
           ].map(k => (

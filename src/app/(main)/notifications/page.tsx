@@ -47,6 +47,8 @@ export default function NotificationsPage() {
       const u = data.session?.user ?? null;
       setUser(u);
       if (u) {
+        // PWA 앱 배지 클리어
+        if ('clearAppBadge' in navigator) (navigator as any).clearAppBadge?.();
         const { data: n } = await sb
           .from('notifications')
           .select('id, type, content, is_read, created_at, link')
