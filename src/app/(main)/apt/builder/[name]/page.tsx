@@ -18,7 +18,7 @@ const fetchBuilder = cache(async (builder: string) => {
     .eq('is_active', true).eq('builder', builder)
     .order('interest_count', { ascending: false }).limit(200);
   return sites || [];
-}
+});
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { name: raw } = await params;

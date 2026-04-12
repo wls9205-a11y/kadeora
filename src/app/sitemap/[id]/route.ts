@@ -242,7 +242,7 @@ ${complexXml}
       // 건설사 (3개+ 현장만)
       const { data: bd } = await sb.from('apt_sites').select('builder').eq('is_active', true).not('builder', 'is', null).neq('builder', '');
       const bMap = new Map<string, number>();
-      for (const r of (bd || [])) { bMap.set(r.builder, (bMap.get(r.builder) || 0) + 1); }
+      for (const r of (bd || [])) { if (r.builder) bMap.set(r.builder, (bMap.get(r.builder) || 0) + 1); }
       for (const [b, c] of bMap) { if (c < 3) continue; entries.push({ url: `${BASE}/apt/builder/${encodeURIComponent(b)}`, lastModified: now, changeFrequency: 'monthly', priority: c > 20 ? 0.75 : 0.6 }); }
       // 비교 페이지 — 인기 시군구 상위 단지 조합 (스팸 방지: 최대 200개)
       try {

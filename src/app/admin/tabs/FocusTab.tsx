@@ -191,8 +191,8 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
       {(x.sharesByPlatform || x.sharesByContentType) && (() => {
         const bp = x.sharesByPlatform || {};
         const bc = x.sharesByContentType || {};
-        const pEntries = Object.entries(bp).sort((a,b)=>b[1]-a[1]);
-        const cEntries = Object.entries(bc).sort((a,b)=>b[1]-a[1]);
+        const pEntries = (Object.entries(bp) as [string, number][]).sort((a,b)=>b[1]-a[1]);
+        const cEntries = (Object.entries(bc) as [string, number][]).sort((a,b)=>b[1]-a[1]);
         const pTotal = pEntries.reduce((s,e)=>s+e[1],0);
         const cTotal = cEntries.reduce((s,e)=>s+e[1],0);
         const pLabel: Record<string,string> = { kakao:'카카오', kakao_top:'카카오(상단)', copy:'링크복사', 'naver-blog':'N블로그', 'naver-cafe':'N카페', 'daum-cafe':'다음카페', band:'밴드', twitter:'X', facebook:'FB', native:'네이티브' };

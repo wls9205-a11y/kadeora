@@ -121,7 +121,7 @@ export default async function SigunguHubPage({ params }: Props) {
       </nav>
 
       <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px', lineHeight: 1.3 }}>{sigungu} 아파트 실거래가·시세<span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-tertiary)', marginLeft: 8 }}>{profiles.length.toLocaleString()}개 단지</span></h1>
-      <ShareButtons title={`${sigungu} 아파트 시세`} tags={[sigungu, region, '아파트']} />
+      <ShareButtons title={`${sigungu} 아파트 시세`} />
 
       {/* KPI */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8, marginBottom: 20 }}>

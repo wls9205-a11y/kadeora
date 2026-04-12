@@ -22,8 +22,8 @@ export async function GET() {
         .gte('deal_date', new Date(Date.now() - 730 * 86400000).toISOString().slice(0, 10));
 
       const pyeongMap = new Map<string, number[]>();
-      for (const t of (txns || [])) {
-        const pyeong = Math.round(t.deal_amount / (t.exclusive_area / 3.3058));
+      for (const t of (txns || []) as any[]) {
+        const pyeong = Math.round((t.deal_amount || 0) / ((t.exclusive_area || 1) / 3.3058));
         if (pyeong > 0 && pyeong < 500000) {
           const arr = pyeongMap.get(t.apt_name) || [];
           arr.push(pyeong);
@@ -50,7 +50,7 @@ export async function GET() {
         .or('jeonse_ratio.is.null,jeonse_ratio.eq.0')
         .limit(1000);
 
-      for (const p of (missing || [])) {
+      for (const p of (missing || []) as any[]) {
         if (p.latest_jeonse_price > p.latest_sale_price) continue;
         const ratio = Math.round(p.latest_jeonse_price / p.latest_sale_price * 1000) / 10;
         if (ratio > 0 && ratio <= 100) {
@@ -71,7 +71,7 @@ export async function GET() {
         .order('deal_date', { ascending: false });
 
       const latestMap = new Map<string, number>();
-      for (const t of (recent || [])) {
+      for (const t of (recent || []) as any[]) {
         if (!latestMap.has(t.apt_name)) latestMap.set(t.apt_name, t.deal_amount);
       }
 
@@ -87,7 +87,7 @@ export async function GET() {
       }
     } catch {}
 
-    return stats;
+    return { processed: stats.pyeong + stats.jeonseRatio + stats.latestPrice, metadata: stats };
   });
 
   return NextResponse.json({ ok: true, ...result });

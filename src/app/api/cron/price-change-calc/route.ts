@@ -76,7 +76,7 @@ export async function GET() {
       updated += results.filter(r => r.status === 'fulfilled').length;
     }
 
-    return { calculated: updates.length, updated, phase1: done.size, phase2: updates.length - done.size };
+    return { processed: updates.length, metadata: { updated, phase1: done.size, phase2: updates.length - done.size } };
   });
 
   return NextResponse.json({ ok: true, ...result });

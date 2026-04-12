@@ -721,7 +721,7 @@ export async function GET(req: NextRequest) {
 
         const { data: bd } = await sb.from('apt_sites').select('builder').eq('is_active', true).not('builder', 'is', null).neq('builder', '');
         const bMap = new Map<string, number>();
-        for (const r of (bd || [])) { bMap.set(r.builder, (bMap.get(r.builder) || 0) + 1); }
+        for (const r of (bd || [])) { if (r.builder) bMap.set(r.builder, (bMap.get(r.builder) || 0) + 1); }
         seoHubs.builder = Array.from(bMap.values()).filter(c => c >= 3).length;
 
         const { data: dq } = await (sb as any).from('apt_complex_profiles')

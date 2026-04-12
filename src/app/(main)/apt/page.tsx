@@ -9,7 +9,7 @@ async function TopBuilders() {
     const sb = getSupabaseAdmin();
     const { data } = await sb.from('apt_sites').select('builder').eq('is_active', true).not('builder', 'is', null).neq('builder', '');
     const map = new Map<string, number>();
-    for (const r of (data || [])) { map.set(r.builder, (map.get(r.builder) || 0) + 1); }
+    for (const r of (data || [])) { if (r.builder) map.set(r.builder, (map.get(r.builder) || 0) + 1); }
     const top = Array.from(map.entries()).filter(([, c]) => c >= 5).sort((a, b) => b[1] - a[1]).slice(0, 10);
     if (top.length === 0) return null;
     const shortName = (s: string) => s.replace(/\(주\)|주식회사| /g, '').slice(0, 12);

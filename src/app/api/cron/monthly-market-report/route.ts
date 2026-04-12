@@ -123,7 +123,7 @@ ${avgJR > 65 ? `${sigungu}의 전세가율이 ${avgJR}%로 높은 편이므로, 
       if (result.success) created++;
     }
 
-    return { created, targetAreas: topAreas.length };
+    return { processed: created, metadata: { targetAreas: topAreas.length } };
   });
 
   return NextResponse.json({ ok: true, ...result });

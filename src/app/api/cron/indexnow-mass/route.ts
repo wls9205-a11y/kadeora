@@ -106,7 +106,7 @@ async function handler(_req: NextRequest) {
         // 건설사 상위 20
         const { data: bd } = await sb.from('apt_sites').select('builder').eq('is_active', true).not('builder', 'is', null).neq('builder', '');
         const bMap = new Map<string, number>();
-        for (const r of (bd || [])) { bMap.set(r.builder, (bMap.get(r.builder) || 0) + 1); }
+        for (const r of (bd || [])) { if (r.builder) bMap.set(r.builder, (bMap.get(r.builder) || 0) + 1); }
         const topBuilders = Array.from(bMap.entries()).sort((a, b) => b[1] - a[1]).slice(0, 20);
         for (const [b] of topBuilders) { seoUrls.push(`${SITE_URL}/apt/builder/${encodeURIComponent(b)}`); }
         // 단지백과 (최근 거래 활발한 100개)
