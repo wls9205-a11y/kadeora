@@ -1,5 +1,48 @@
 # 카더라 STATUS.md
-> 마지막 업데이트: 2026-04-13 (세션 94 — SEO 압도적 1위 전략 + 전 페이지 최적화)
+> 마지막 업데이트: 2026-04-13 (세션 95 — CTA 추적 통합 + 버그 수정 + 어드민 개선)
+
+## 세션 95 — CTA 추적 통합 + 다크모드 수정 + 어드민 피드 메트릭 + CTA 최적화
+
+### 배포: 1 커밋, 10파일, 96줄 추가
+
+### 🔴 Critical Fix
+- **CTA 이중 추적 통합**: `trackCTA()` (analytics.ts) → `user_events`만 전송하던 것을 `conversion_events`에도 동시 전송. SmartSectionGate/ActionBar/KakaoHeroCTA의 어드민 CTA 데이터 단절 해결
+- **로그인 BOM 제거**: `login/page.tsx` + `LoginClient.tsx`에 UTF-8 BOM(EF BB BF) 존재 → 500 에러 원인 가능성 제거
+
+### 🟡 Bug Fix
+- **BlogTossGate 다크모드**: 그라디언트 `#F5F6F8`(라이트) → `var(--bg-base, #050A18)` (다크 호환)
+- **ActionBar 가짜 소셜프루프**: "2,847명이 매일 카더라로 시작합니다" → "스팸 없음 · 3초 가입 · 전체 분석 무료"
+- **한마디(short) 빈 title**: `title: ''` → `title: text.slice(0, 30)` — 검색/목록 표시 정상화
+
+### 📊 어드민 개선
+- **GrowthTab**: 피드 커뮤니티 섹션 추가 (투표/VS/예측/한마디 콘텐츠 수 + 투표 수 + 활성/미결 현황)
+- **FocusTab**: 피드 커뮤니티 4칸 요약 카드 추가 (접힌 상태 기본)
+- **v2 API**: growth 탭에 `feedStats` 쿼리 추가 (9개 병렬 카운트)
+
+### 🎯 CTA 최적화
+- **BlogMidCTA 중복 제거**: 비로그인 블로그에서 SmartSectionGate(CTR 0.86%) 아래 BlogMidCTA(CTR 0.71%, 2클릭) 제거 → CTA 피로도 감소
+- **RelatedContentCard**: `showSignup={false}` — 가입 CTA를 SmartSectionGate + ActionBar에 집중
+
+### CTA 성과 분석 (7일 기준)
+| CTA | 노출 | 클릭 | CTR |
+|-----|------|------|-----|
+| content_gate | 1,632 | 14 | 0.86% |
+| action_bar_kakao | 608 | 10 | 1.64% |
+| inline_cta | 536 | 3 | 0.56% |
+| blog_mid_cta | 281 | 2 | 0.71% |
+| login_gate_apt | 243 | 0 | 0% |
+
+### DB 상태 확인
+- `point_reason` 한글 enum 28개 ✅ 정상 (투표생성/투표참여/VS생성/VS참여/예측생성/예측참여/예측적중/한마디작성 포함)
+- 피드 6개 신규 테이블 ✅ 존재 확인
+- `conversion_events` + `user_events` 양쪽 CTA 데이터 확인
+
+### ⚠️ 모니터링 필요
+- 로그인 500 에러: stale build 경로(`build-20260318`) 요청 — BOM 제거 후 해소 여부 확인
+- safeBlogInsert: 크론 품질 게이트 차단 다수 (정상 동작, 에러 로그 noise)
+- Vercel 크론 100개 한도 — 추가 불가
+
+---
 
 ## 세션 94 — SEO 전 페이지 롱테일 키워드 최적화 + 이미지 캐러셀
 
