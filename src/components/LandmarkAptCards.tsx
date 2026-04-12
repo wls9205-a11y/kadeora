@@ -11,7 +11,7 @@ export default function LandmarkAptCards() {
   }, []);
   if (!apts.length) return null;
   return (
-    <div style={{ marginBottom: 12 }}>
+    <div style={{ marginBottom: 8 }}>
       <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, marginBottom: 8 }}>🏙️ 지역 대장 아파트</div>
       <div className="apt-pill-scroll kd-scroll-row" style={{ display: 'flex', gap: 8, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 4 }}>
         {apts.slice(0, 8).map((a, i) => (

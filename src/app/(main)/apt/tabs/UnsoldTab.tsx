@@ -85,7 +85,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
         const restTotal = filteredTotal - top5Total;
         const barColors = ['var(--accent-red)', 'var(--accent-orange, #F97316)', 'var(--accent-yellow)', 'var(--accent-blue)', 'var(--accent-purple)'];
         return (
-          <div style={{ marginBottom: 10, padding: '8px 10px', borderRadius: 'var(--radius-md)', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
+          <div style={{ marginBottom: 6, padding: '8px 10px', borderRadius: 'var(--radius-md)', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
               <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)' }}>미분양 {filteredTotal.toLocaleString()}호</span>
               <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{fu.length}곳{freshDate ? ` · ${freshDate}` : ''}</span>

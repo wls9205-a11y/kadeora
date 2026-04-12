@@ -99,7 +99,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
   const exp = expRegion ? regions.find(r => r.name === expRegion) : null;
 
   return (
-    <div style={{ marginBottom: 'var(--sp-sm)', maxWidth: '100%', overflow: 'hidden' }}>
+    <div style={{ marginBottom: 6, maxWidth: '100%', overflow: 'hidden' }}>
       {/* ── KPI 카드 (클릭 → 탭 전환) ── */}
       <div className="kd-region-kpi" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 4, marginBottom: 8, paddingTop: 4, paddingBottom: 4 }}>
         {KPI_CFG.map(k => {
@@ -108,7 +108,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
             <button key={k.key} onClick={() => k.key === 'complex' ? router.push('/apt/complex') : onTabChange?.(k.key)}
               aria-current={isAct ? 'page' : undefined}
               style={{
-                padding: '8px 4px', borderRadius: 'var(--radius-sm)', textAlign: 'center', cursor: 'pointer',
+                padding: '6px 4px', borderRadius: 'var(--radius-sm)', textAlign: 'center', cursor: 'pointer',
                 background: isAct ? 'var(--bg-hover)' : 'var(--bg-surface)',
                 border: `1px solid ${isAct ? 'var(--brand)' : 'var(--border)'}`,
                 transition: 'all 0.15s',
@@ -148,7 +148,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
       {/* ── 상세 패널 ── */}
       {exp && (
         <div style={{
-          marginTop: 4, padding: '6px 10px', borderRadius: 'var(--radius-sm)',
+          marginTop: 2, padding: '4px 8px', borderRadius: 'var(--radius-sm)',
           background: 'var(--bg-surface)', border: '1px solid var(--border)',
           animation: 'kd-fadeIn 0.2s ease',
         }}>

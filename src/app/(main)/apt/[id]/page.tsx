@@ -419,7 +419,7 @@ export default async function AptUnifiedPage({ params }: Props) {
                 height: 140,
                 background: 'linear-gradient(135deg, #0c1629 0%, #1a3050 50%, #1e3a8a 100%)',
               }}>
-                <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '16px 18px' }}>
+                <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '12px 14px' }}>
                   <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginBottom: 'var(--sp-xs)' }}>{region} {site?.sigungu || ''}</div>
                   <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 900, color: '#fff', lineHeight: 1.2, wordBreak: 'keep-all' }}>{name}</div>
                   <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginTop: 'var(--sp-xs)' }}>{site?.builder || sub?.constructor_nm || ''}{(() => {
@@ -620,7 +620,7 @@ export default async function AptUnifiedPage({ params }: Props) {
 
       {/* 🏫 입지 분석 — 학군·교통 */}
       {sub && ((Array.isArray(sub.schools) && sub.schools.length > 0) || (Array.isArray(sub.stations) && sub.stations.length > 0) || sub.nearest_school || sub.nearest_station) && (
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '14px 16px', marginBottom: 14 }}>
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '12px 14px', marginBottom: 14 }}>
           <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 10 }}>🏫 입지 분석</div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
             {/* 학군 */}

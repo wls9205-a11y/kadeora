@@ -155,7 +155,7 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
         return (
           <div className="kd-card">
             <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-md)' }}>📊 지역별 평균 거래가 추이</div>
-            <div style={{ display: 'flex', gap: 'var(--sp-xs)', marginBottom: 10, flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: 'var(--sp-xs)', marginBottom: 6, flexWrap: 'wrap' }}>
               {regions.slice(0, 8).map(r => (
                 <button key={r} onClick={() => setChartRegion(r)} style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 'var(--radius-md)', border: (chartRegion || regions[0]) === r ? '1px solid var(--brand)' : 'none', background: (chartRegion || regions[0]) === r ? 'var(--brand)' : 'var(--bg-hover)', color: (chartRegion || regions[0]) === r ? 'var(--text-inverse)' : 'var(--text-secondary)', cursor: 'pointer' }}>{r}</button>
               ))}
@@ -167,7 +167,7 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
       })()}
 
       {/* 면적 필터 + 정렬 한 줄 */}
-      <div style={{ display: 'flex', gap: 6, marginBottom: 10, alignItems: 'center' }}>
+      <div style={{ display: 'flex', gap: 6, marginBottom: 6, alignItems: 'center' }}>
         <select value={sort} onChange={e => { setSort(e.target.value as typeof sort); setPage(1); }} style={{
           padding: '6px 10px', fontSize: 12, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)',
           background: 'var(--bg-surface)', color: 'var(--text-primary)', cursor: 'pointer', flexShrink: 0,
@@ -228,14 +228,14 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
 
       {/* 카드 리스트 */}
       {filtered.length === 0 && (
-        <div style={{ textAlign: 'center', padding: '48px 0', color: 'var(--text-tertiary)' }}>
+        <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text-tertiary)' }}>
           {effectiveSearch ? `"${effectiveSearch}" 검색 결과가 없습니다` : '해당 조건의 실거래 데이터가 없습니다'}
           {effectiveSearch && <div style={{ fontSize: 'var(--fs-xs)', marginTop: 6 }}>단지명, 법정동, 시군구로 검색해보세요</div>}
         </div>
       )}
       {/* 면적별 시세 요약 */}
       {areaStats.length > 0 && (
-        <div style={{ display: 'flex', gap: 6, marginBottom: 10, overflowX: 'auto' }}>
+        <div style={{ display: 'flex', gap: 6, marginBottom: 6, overflowX: 'auto' }}>
           {areaStats.map(a => (
             <div key={a.key} style={{ flex: 1, minWidth: 90, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '8px 10px' }}>
               <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 600, marginBottom: 4 }}>{a.label}</div>

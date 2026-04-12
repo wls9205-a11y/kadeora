@@ -130,7 +130,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
             </div>
           </div>
 
-          {filtered.length === 0 && <div style={{ textAlign: 'center', padding: '48px 0', color: 'var(--text-tertiary)' }}>{effectiveSearch ? `"${effectiveSearch}" 검색 결과가 없습니다` : '조건에 맞는 청약이 없습니다'}{effectiveSearch && <div style={{ fontSize: 'var(--fs-xs)', marginTop: 6 }}>단지명, 지역, 시공사로 검색해보세요</div>}</div>}
+          {filtered.length === 0 && <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text-tertiary)' }}>{effectiveSearch ? `"${effectiveSearch}" 검색 결과가 없습니다` : '조건에 맞는 청약이 없습니다'}{effectiveSearch && <div style={{ fontSize: 'var(--fs-xs)', marginTop: 6 }}>단지명, 지역, 시공사로 검색해보세요</div>}</div>}
 
           <div className="listing-grid">
           {paged.map((apt, i) => {
@@ -170,10 +170,10 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                   )}
                 </div>
                 {/* ① 헤더: 배지 + 경쟁률 링 */}
-                <div style={{ padding: '8px 12px 6px', display: 'flex', gap: 8 }}>
+                <div style={{ padding: '6px 10px 4px', display: 'flex', gap: 8 }}>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     {/* 배지 행 (상태+D-day는 이미지 스트립에 표시) */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 3, marginBottom: 5, flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 3, marginBottom: 3, flexWrap: 'wrap' }}>
                       {st !== 'closed' && isNew(apt, 'subscription') && <NewBadge />}
                       {((apt as Record<string, any>)['PARCPRC_ULS_AT'] === 'Y' || (apt as Record<string, any>).is_price_limit) && <span style={{ fontSize: 9, fontWeight: 600, padding: '2px 5px', borderRadius: 3, background: 'var(--accent-purple-bg)', color: 'var(--accent-purple)', lineHeight: '14px' }}>상한제</span>}
                       {(apt as any).project_type && (apt as any).project_type !== '민간' && <span style={{ fontSize: 9, fontWeight: 600, padding: '2px 5px', borderRadius: 3, background: (apt as any).project_type === '재개발' ? 'rgba(251,146,60,0.1)' : 'rgba(167,139,250,0.1)', color: (apt as any).project_type === '재개발' ? 'var(--accent-orange)' : 'var(--accent-purple)', lineHeight: '14px' }}>{(apt as any).project_type}</span>}
@@ -235,7 +235,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                   const genPct = totS > 0 ? Math.round((genT / totS) * 100) : 0;
                   const hasAnnouncement = !!(apt.rcept_bgnde);
                   const pendingLabel = hasAnnouncement ? '공고확인' : '공고전';
-                  const kpiStyle = { textAlign: 'center' as const, padding: '6px 4px', background: 'var(--bg-surface)', borderRadius: 2 };
+                  const kpiStyle = { textAlign: 'center' as const, padding: '4px 4px', background: 'var(--bg-surface)', borderRadius: 2 };
                   const kpiLabel = { fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 2, fontWeight: 500 as const };
                   const kpiVal = (c: string) => ({ fontSize: 'var(--fs-sm)', fontWeight: 800 as const, color: c, lineHeight: 1.3 });
                   return (

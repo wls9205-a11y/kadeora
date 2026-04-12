@@ -311,11 +311,11 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           .slice(0, 5);
         if (ddayList.length === 0) return null;
         return (
-          <div style={{ marginBottom: 10, padding: 12, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)' }}>
+          <div style={{ marginBottom: 8, padding: 10, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)' }}>
             <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>📅 이번 주 청약 D-day</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
               {ddayList.map((a: any) => (
-                <Link key={a.id} href={`/apt/${a.id}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', textDecoration: 'none', color: 'inherit', padding: '6px 4px', borderRadius: 'var(--radius-xs)', borderBottom: '1px solid var(--border)' }}>
+                <Link key={a.id} href={`/apt/${a.id}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', textDecoration: 'none', color: 'inherit', padding: '5px 4px', borderRadius: 'var(--radius-xs)', borderBottom: '1px solid var(--border)' }}>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.house_nm}</div>
                     <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{a.region_nm} · {a.isOpen ? '접수중' : '접수예정'}</div>
@@ -347,8 +347,8 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
       )}
 
       {/* 지역별 부동산 내부 링크 (SEO) */}
-      <div style={{ marginTop: 'var(--sp-2xl)', padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)' }}>
-        <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>🏙️ 지역별 부동산 정보</div>
+      <div style={{ marginTop: 'var(--sp-md)', padding: 12, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)' }}>
+        <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 6 }}>🏙️ 지역별 부동산 정보</div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
           {['서울','부산','대구','인천','광주','대전','울산','세종','경기','강원','충북','충남','전북','전남','경북','경남','제주'].map(r => (
             <Link key={r} href={`/apt/region/${encodeURIComponent(r)}`} style={{
@@ -377,8 +377,8 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
         const bigApts = apts.filter((a: any) => (a.tot_supply_hshld_co || 0) >= 300).slice(0, 12);
         if (bigApts.length === 0) return null;
         return (
-          <div style={{ marginTop: 'var(--sp-md)', padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)' }}>
-            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>🏗️ 인기 분양 현장</div>
+          <div style={{ marginTop: 'var(--sp-sm)', padding: 12, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)' }}>
+            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 6 }}>🏗️ 인기 분양 현장</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
               {bigApts.map((a: any) => {
                 const slug = (a.house_nm || '').trim().replace(/\s+/g, '-').replace(/[^\w가-힣\-]/g, '').toLowerCase() || a.id;
@@ -396,8 +396,8 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
       })()}
 
       {/* 관련 서비스 (내부 링크 — SEO 교차 참조) */}
-      <div style={{ marginTop: 'var(--sp-md)', padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)' }}>
-        <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>🔗 함께 보면 좋은 서비스</div>
+      <div style={{ marginTop: 'var(--sp-sm)', padding: 12, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)' }}>
+        <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 6 }}>🔗 함께 보면 좋은 서비스</div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
           {[
             { href: '/stock', label: '📈 주식 시세', desc: '실시간 코스피·코스닥·나스닥' },

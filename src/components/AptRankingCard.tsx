@@ -28,7 +28,7 @@ export default function AptRankingCard() {
   const cur = TYPES.find(t => t.key === type);
 
   return (
-    <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 16, marginBottom: 12 }}>
+    <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 12, marginBottom: 12 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
         <span style={{ fontSize: 'var(--fs-md)', fontWeight: 800 }}>🏆 아파트 랭킹</span>
         <Link href="/apt/complex" style={{ fontSize: 11, color: 'var(--text-tertiary)', textDecoration: 'none' }}>전체보기 →</Link>

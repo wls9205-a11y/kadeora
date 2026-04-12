@@ -13,7 +13,7 @@ export default function TrendingKeywords() {
 
   const catColor: Record<string, string> = { stock: '#3B7BF6', apt: '#10B981', general: '#F59E0B' };
   return (
-    <div style={{ marginBottom: 12 }}>
+    <div style={{ marginBottom: 8 }}>
       <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 6 }}>🔥 실시간 트렌드</div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
         {keywords.slice(0, 12).map((k, i) => (
