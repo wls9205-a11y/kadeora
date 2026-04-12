@@ -308,7 +308,7 @@ export default async function ComplexDetailPage({ params }: Props) {
             name: `${decoded} 아파트`,
             description: `${region} ${sigungu} ${decoded} 아파트`,
           })),
-          { '@type': 'ImageObject', url: `${SITE_URL}/api/og?title=${encodeURIComponent(decoded)}&design=2&category=apt&subtitle=${encodeURIComponent(ogSubtitle)}`, width: 1200, height: 630, name: `${decoded} 실거래가`, caption: `${decoded} 매매·전세 시세` },
+          { '@type': 'ImageObject', url: `${SITE_URL}/api/og?title=${encodeURIComponent(decoded)}&design=2&category=apt&subtitle=${encodeURIComponent(latestPrice > 0 ? `매매 ${fmtAmount(latestPrice)}` : '실거래가 분석')}`, width: 1200, height: 630, name: `${decoded} 실거래가`, caption: `${decoded} 매매·전세 시세` },
           { '@type': 'ImageObject', url: `${SITE_URL}/api/og-square?title=${encodeURIComponent(decoded)}&category=apt`, width: 630, height: 630, name: `${decoded} 아파트 정보` },
         ],
       })}} />
