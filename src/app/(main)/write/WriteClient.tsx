@@ -191,7 +191,7 @@ export default function WriteClient() {
         <div style={{ display: 'flex', gap: 4, flex: 1, overflowX: 'auto', scrollbarWidth: 'none' }}>
           {CATEGORIES.map(c => (
             <button key={c.value} onClick={() => setCategory(c.value)} style={{
-              padding: '4px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600,
+              padding: '5px 12px', borderRadius: 'var(--radius-pill)', fontSize: 13, fontWeight: 600,
               cursor: 'pointer', flexShrink: 0, border: 'none', whiteSpace: 'nowrap',
               background: category === c.value ? 'var(--brand)' : 'var(--bg-hover)',
               color: category === c.value ? 'var(--text-inverse)' : 'var(--text-tertiary)',
@@ -210,7 +210,7 @@ export default function WriteClient() {
           )}
         </div>
         <button onClick={handleSubmit} disabled={!canSubmit} style={{
-          padding: '6px 16px', borderRadius: 'var(--radius-pill)', border: 'none', fontSize: 13, fontWeight: 700, flexShrink: 0,
+          padding: '7px 20px', borderRadius: 'var(--radius-pill)', border: 'none', fontSize: 14, fontWeight: 700, flexShrink: 0,
           background: canSubmit ? 'var(--brand)' : 'var(--bg-hover)',
           color: canSubmit ? 'var(--text-inverse)' : 'var(--text-tertiary)',
           cursor: canSubmit ? 'pointer' : 'not-allowed',
@@ -241,7 +241,7 @@ export default function WriteClient() {
         maxLength={150}
         className="kd-write-title"
         style={{
-          width: '100%', fontSize: 17, fontWeight: 700, padding: '8px 4px',
+          width: '100%', fontSize: 20, fontWeight: 800, padding: '12px 4px',
           border: 'none', borderBottom: '1px solid var(--border)', background: 'transparent',
           color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box',
           transition: 'border-color var(--transition-normal)',
@@ -266,8 +266,8 @@ export default function WriteClient() {
         style={{
           width: '100%', background: 'transparent', border: 'none',
           color: 'var(--text-primary)', padding: '10px 4px',
-          fontSize: 15, resize: 'none',
-          lineHeight: 1.8, boxSizing: 'border-box', minHeight: 200, outline: 'none',
+          fontSize: 16, resize: 'none',
+          lineHeight: 1.9, boxSizing: 'border-box', minHeight: 240, outline: 'none',
         }}
       />
 
@@ -343,7 +343,7 @@ export default function WriteClient() {
       <div style={{
         position: 'fixed', bottom: 0, left: 0, right: 0,
         background: 'var(--bg-base)', borderTop: '1px solid var(--border)',
-        padding: '6px 16px', paddingBottom: 'max(6px, env(safe-area-inset-bottom))',
+        padding: '8px 16px', paddingBottom: 'max(8px, env(safe-area-inset-bottom))',
         display: 'flex', alignItems: 'center', gap: 8, zIndex: 50,
       }}>
         <button onClick={() => document.querySelector<HTMLInputElement>('[data-image-input]')?.click()}

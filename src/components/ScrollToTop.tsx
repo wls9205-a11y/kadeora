@@ -17,15 +17,15 @@ export default function ScrollToTop() {
 
   if (!show) return null;
 
-  const r = 18, c = 2 * Math.PI * r;
+  const r = 16, c = 2 * Math.PI * r;
 
   return (
     <button
       onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
       aria-label="맨 위로 스크롤"
       style={{
-        position: 'fixed', bottom: 80, right: 16, zIndex: 100,
-        width: 44, height: 44, borderRadius: '50%',
+        position: 'fixed', bottom: 'calc(130px + env(safe-area-inset-bottom))', right: 16, zIndex: 98,
+        width: 40, height: 40, borderRadius: '50%',
         background: 'var(--bg-elevated)', border: '1px solid var(--border)',
         color: 'var(--text-secondary)', cursor: 'pointer',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -35,9 +35,9 @@ export default function ScrollToTop() {
       }}
     >
       {/* 진행률 링 */}
-      <svg width="44" height="44" style={{ position: 'absolute', transform: 'rotate(-90deg)' }}>
-        <circle cx="22" cy="22" r={r} fill="none" stroke="var(--border)" strokeWidth="2" />
-        <circle cx="22" cy="22" r={r} fill="none" stroke="var(--brand)" strokeWidth="2"
+      <svg width="40" height="40" style={{ position: 'absolute', transform: 'rotate(-90deg)' }}>
+        <circle cx="20" cy="20" r={r} fill="none" stroke="var(--border)" strokeWidth="2" />
+        <circle cx="20" cy="20" r={r} fill="none" stroke="var(--brand)" strokeWidth="2"
           strokeDasharray={c} strokeDashoffset={c * (1 - pct)}
           strokeLinecap="round" style={{ transition: 'stroke-dashoffset 0.15s' }} />
       </svg>
