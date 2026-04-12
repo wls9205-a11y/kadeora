@@ -5,6 +5,29 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import ShareButtons from '@/components/ShareButtons';
 import { notFound } from 'next/navigation';
 
+async function SigunguLinks({ region }: { region: string }) {
+  const sb = getSupabaseAdmin();
+  const { data } = await (sb as any).from('apt_complex_profiles')
+    .select('sigungu').eq('region_nm', region).not('age_group', 'is', null).not('sigungu', 'is', null);
+  const map = new Map<string, number>();
+  for (const r of (data || [])) { if (r.sigungu) map.set(r.sigungu, (map.get(r.sigungu) || 0) + 1); }
+  const items = Array.from(map.entries()).filter(([, c]) => c >= 10).sort((a, b) => b[1] - a[1]);
+  if (items.length === 0) return null;
+  return (
+    <section style={{ marginBottom: 14 }}>
+      <h2 style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px' }}>{region} 시군구별 아파트 시세</h2>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
+        {items.slice(0, 15).map(([sg, cnt]) => (
+          <Link key={sg} href={`/apt/area/${encodeURIComponent(region)}/${encodeURIComponent(sg)}`} style={{ padding: '8px 10px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', textDecoration: 'none', fontSize: 12 }}>
+            <div style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{sg}</div>
+            <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{cnt}개 단지</div>
+          </Link>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 const REGIONS = [
   '서울', '부산', '대구', '인천', '광주', '대전', '울산', '세종',
   '경기', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주',
@@ -396,6 +419,26 @@ export default async function RegionLandingPage({ params }: Props) {
           {data.unsolds.length > 0 && ` 미분양 ${data.unsolds.reduce((s: number, u: any) => s + (u.unsold_count || 0), 0)}세대가 남아 있어 할인 분양 기회를 확인해볼 만합니다.`}
           {` 카더라에서 ${decoded} 지역 부동산 정보를 실시간으로 확인하세요.`}
         </p>
+      </section>
+
+      {/* 시군구별 시세 허브 — 내부 링크 */}
+      <SigunguLinks region={decoded} />
+
+      {/* 테마 분석 */}
+      <section style={{ marginBottom: 14 }}>
+        <h2 style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px' }}>테마별 분석</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 6 }}>
+          {[
+            { slug: 'price-up', label: '가격 상승 아파트' },
+            { slug: 'price-down', label: '가격 하락 아파트' },
+            { slug: 'low-jeonse-ratio', label: '전세가율 낮은 아파트' },
+            { slug: 'new-built', label: '신축 아파트' },
+            { slug: 'high-trade', label: '거래 활발 단지' },
+            { slug: 'high-jeonse-ratio', label: '전세가율 높은 단지' },
+          ].map(t => (
+            <Link key={t.slug} href={`/apt/theme/${t.slug}?region=${encodeURIComponent(decoded)}`} style={{ padding: '8px 10px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', textDecoration: 'none', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>{t.label}</Link>
+          ))}
+        </div>
       </section>
 
       {/* CTA */}

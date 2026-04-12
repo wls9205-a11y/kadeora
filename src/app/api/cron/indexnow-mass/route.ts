@@ -85,7 +85,38 @@ async function handler(_req: NextRequest) {
         if (recentApts) aptUrls = recentApts.map((a: any) => `${SITE_URL}/apt/${a.slug}`);
       } catch {}
 
-      const allUrls = [...staticUrls, ...stockUrls, ...blogUrls, ...aptUrls];
+      // 프로그래매틱 SEO 페이지 — 시군구/동 허브, 테마, 건설사
+      let seoUrls: string[] = [];
+      try {
+        // 시군구 허브 (최근 거래 활발한 시군구 50개)
+        const { data: sgData } = await (sb as any).from('apt_complex_profiles')
+          .select('region_nm, sigungu')
+          .not('age_group', 'is', null).not('sigungu', 'is', null)
+          .gt('sale_count_1y', 0)
+          .order('sale_count_1y', { ascending: false }).limit(500);
+        const sgSet = new Set<string>();
+        for (const r of (sgData || [])) {
+          const key = `${r.region_nm}/${r.sigungu}`;
+          if (!sgSet.has(key) && sgSet.size < 50) { sgSet.add(key); seoUrls.push(`${SITE_URL}/apt/area/${encodeURIComponent(r.region_nm)}/${encodeURIComponent(r.sigungu)}`); }
+        }
+        // 테마 페이지 (6종 × 전국)
+        for (const t of ['low-jeonse-ratio', 'high-jeonse-ratio', 'price-up', 'price-down', 'new-built', 'high-trade']) {
+          seoUrls.push(`${SITE_URL}/apt/theme/${t}`);
+        }
+        // 건설사 상위 20
+        const { data: bd } = await sb.from('apt_sites').select('builder').eq('is_active', true).not('builder', 'is', null).neq('builder', '');
+        const bMap = new Map<string, number>();
+        for (const r of (bd || [])) { bMap.set(r.builder, (bMap.get(r.builder) || 0) + 1); }
+        const topBuilders = Array.from(bMap.entries()).sort((a, b) => b[1] - a[1]).slice(0, 20);
+        for (const [b] of topBuilders) { seoUrls.push(`${SITE_URL}/apt/builder/${encodeURIComponent(b)}`); }
+        // 단지백과 (최근 거래 활발한 100개)
+        const { data: cpData } = await (sb as any).from('apt_complex_profiles')
+          .select('apt_name').not('age_group', 'is', null).gt('sale_count_1y', 5)
+          .order('sale_count_1y', { ascending: false }).limit(100);
+        for (const p of (cpData || [])) { seoUrls.push(`${SITE_URL}/apt/complex/${encodeURIComponent(p.apt_name)}`); }
+      } catch {}
+
+      const allUrls = [...staticUrls, ...stockUrls, ...blogUrls, ...aptUrls, ...seoUrls];
 
       // 4) IndexNow 전송 (3개 엔드포인트 동시)
       const endpoints = [
@@ -135,6 +166,7 @@ async function handler(_req: NextRequest) {
         metadata: {
           totalUrls: allUrls.length,
           blogUrls: blogUrls.length,
+          seoUrls: seoUrls.length,
           endpoints: endpointResults,
         },
       };
