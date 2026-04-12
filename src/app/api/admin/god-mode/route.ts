@@ -144,6 +144,11 @@ const CRON_GROUPS = {
     '/api/cron/weekly-digest',
     '/api/cron/welcome-nudge',
     '/api/cron/blog-fix-existing',
+    // SEO 확장 크론 (세션 92)
+    '/api/cron/price-change-calc',
+    '/api/cron/monthly-market-report',
+    '/api/cron/blog-complex-crosslink',
+    '/api/cron/data-quality-fix',
   ],
 };
 

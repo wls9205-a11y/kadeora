@@ -706,6 +706,36 @@ export async function GET(req: NextRequest) {
         sb.from('apt_complex_profiles').select('apt_name', { count: 'exact', head: true }),
       ]);
 
+      // SEO 허브 페이지 통계
+      let seoHubs = { sigungu: 0, dong: 0, builder: 0, themes: 6, dataQuality: { coords: 0, priceChange: 0, pyeong: 0, blogLink: 0, households: 0 } };
+      try {
+        const { data: sgd } = await (sb as any).from('apt_complex_profiles').select('sigungu').not('age_group', 'is', null).not('sigungu', 'is', null);
+        const sgMap = new Map<string, number>();
+        for (const r of (sgd || [])) { if (r.sigungu) sgMap.set(r.sigungu, (sgMap.get(r.sigungu) || 0) + 1); }
+        seoHubs.sigungu = Array.from(sgMap.values()).filter(c => c >= 10).length;
+
+        const { data: dd } = await (sb as any).from('apt_complex_profiles').select('dong').not('age_group', 'is', null).not('dong', 'is', null).neq('dong', '');
+        const dMap = new Map<string, number>();
+        for (const r of (dd || [])) { if (r.dong) dMap.set(r.dong, (dMap.get(r.dong) || 0) + 1); }
+        seoHubs.dong = Array.from(dMap.values()).filter(c => c >= 5).length;
+
+        const { data: bd } = await sb.from('apt_sites').select('builder').eq('is_active', true).not('builder', 'is', null).neq('builder', '');
+        const bMap = new Map<string, number>();
+        for (const r of (bd || [])) { bMap.set(r.builder, (bMap.get(r.builder) || 0) + 1); }
+        seoHubs.builder = Array.from(bMap.values()).filter(c => c >= 3).length;
+
+        const { data: dq } = await (sb as any).from('apt_complex_profiles')
+          .select('latitude, price_change_1y, avg_sale_price_pyeong, blog_post_count, total_households');
+        const dqArr = dq || [];
+        seoHubs.dataQuality = {
+          coords: dqArr.filter((d: any) => d.latitude != null).length,
+          priceChange: dqArr.filter((d: any) => d.price_change_1y != null).length,
+          pyeong: dqArr.filter((d: any) => d.avg_sale_price_pyeong > 0).length,
+          blogLink: dqArr.filter((d: any) => d.blog_post_count > 0).length,
+          households: dqArr.filter((d: any) => d.total_households > 0).length,
+        };
+      } catch {}
+
       // 선점 콘텐츠 파이프라인
       const upcomingRaw = await (sb as any).from('upcoming_projects')
         .select('status, blog_post_id, region');
@@ -735,6 +765,7 @@ export async function GET(req: NextRequest) {
           transactions: aptTx.count ?? 0,
           rentTransactions: rentTx.count ?? 0,
           complexProfiles: complexR.count ?? 0,
+          seoHubs,
         },
         blogCategories: blogCats,
         upcoming: upStats,

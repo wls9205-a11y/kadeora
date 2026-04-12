@@ -122,6 +122,40 @@ export default function DataTab({ onNavigate }: { onNavigate: (t: any) => void }
               </div>
             ))}
           </div>
+          {/* SEO 허브 페이지 + 데이터 품질 */}
+          {realestate.seoHubs && (
+            <>
+              <div className="adm-sec">📊 SEO 허브 페이지</div>
+              <div className="adm-kpi">
+                {[
+                  { label: '시군구 허브', value: realestate.seoHubs.sigungu },
+                  { label: '동 허브', value: realestate.seoHubs.dong },
+                  { label: '건설사', value: realestate.seoHubs.builder },
+                  { label: '테마', value: realestate.seoHubs.themes },
+                ].map((s, i) => (
+                  <div key={i} className="adm-kpi-c">
+                    <div className="adm-kpi-v">{fmt(s.value)}</div>
+                    <div className="adm-kpi-l">{s.label}</div>
+                  </div>
+                ))}
+              </div>
+              <div className="adm-sec">🔍 데이터 품질 (/{fmt(realestate.complexProfiles)})</div>
+              <div className="adm-kpi">
+                {[
+                  { label: '좌표', value: realestate.seoHubs.dataQuality.coords },
+                  { label: '가격변동', value: realestate.seoHubs.dataQuality.priceChange },
+                  { label: '평당가', value: realestate.seoHubs.dataQuality.pyeong },
+                  { label: '블로그연결', value: realestate.seoHubs.dataQuality.blogLink },
+                  { label: '세대수', value: realestate.seoHubs.dataQuality.households },
+                ].map((s, i) => (
+                  <div key={i} className="adm-kpi-c">
+                    <div className="adm-kpi-v">{fmt(s.value)}</div>
+                    <div className="adm-kpi-l">{s.label}</div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </>
       )}
 
