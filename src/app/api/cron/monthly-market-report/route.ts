@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
+import { safeBlogInsert } from '@/lib/blog-safe-insert';
 
 export const maxDuration = 120;
 
@@ -106,24 +107,20 @@ ${avgJR > 65 ? `${sigungu}의 전세가율이 ${avgJR}%로 높은 편이므로, 
       const tags = [region, sigungu, '아파트', '시황', '실거래가', '전세가율', monthLabel];
       const excerpt = `${monthLabel} ${region} ${sigungu} 아파트 시장 동향. 평균 매매가 ${fmtAmt(avgPrice)}, 전세가율 ${avgJR}%, 거래 ${totalTrades}건.`;
 
-      const { error } = await sb.from('blog_posts').insert({
+      const result = await safeBlogInsert(sb, {
         slug,
         title,
         content: body,
         excerpt,
         category: 'apt',
         tags,
-        is_published: true,
-        published_at: new Date().toISOString(),
         source_type: 'monthly-report',
         cover_image: `https://kadeora.app/api/og?title=${encodeURIComponent(`${monthLabel} ${sigungu} 시황`)}&design=2&subtitle=${encodeURIComponent(`평균 ${fmtAmt(avgPrice)} · 거래 ${totalTrades}건`)}&author=${encodeURIComponent('카더라')}&category=apt`,
         image_alt: `${monthLabel} ${sigungu} 아파트 시장 동향 분석`,
-        meta_description: excerpt,
-        meta_keywords: tags.join(','),
-        seo_score: 85,
+        is_published: true,
       });
 
-      if (!error) created++;
+      if (result.success) created++;
     }
 
     return { created, targetAreas: topAreas.length };
