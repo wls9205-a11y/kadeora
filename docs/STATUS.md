@@ -1,5 +1,29 @@
 # 카더라 STATUS.md
-> 마지막 업데이트: 2026-04-13 23:30 KST (세션 93 최종)
+> 마지막 업데이트: 2026-04-13 (세션 94 — SEO 압도적 1위 전략 + 전 페이지 최적화)
+
+## 세션 94 — SEO 전 페이지 롱테일 키워드 최적화 + 이미지 캐러셀
+
+### 완료된 작업
+| 페이지 | 변경 내용 |
+|--------|----------|
+| 종목 `/stock/[symbol]` | 타이틀 롱테일(주가·배당금·실적·AI 분석), FAQ 4→8개(배당금/PER/52주/비교), ImageGallery JSON-LD, article:tag 17개 |
+| 단지백과 `/apt/complex/[name]` | 타이틀(실거래가·시세·전세가율·평당가 2026), keywords 20개, ImageGallery 항상 노출+OG fallback |
+| 청약 `/apt/[id]` | 타이틀에 지역+브랜드, article:tag 16개 확장 |
+| 지역 허브 `/apt/region/[region]` | 타이틀에 연도+브랜드, 타임스탬프 동적화, 키워드 13개 |
+| 블로그 `/blog/[slug]` | 카테고리별 키워드 자동 추가(주식/부동산) |
+| 주식 메인 `/stock` | 롱테일 타이틀+description 확장 |
+
+### 빌드 에러 수정 3건
+1. complex `ogSubtitle` 스코프 에러 → `latestPrice` + `fmtAmount` 직접 호출
+2. region `article:modified_time` 중복 프로퍼티 → 제거
+3. stock ImageGallery `p` 변수 스코프 에러 → `fmtPrice` 직접 호출
+
+### PENDING (다음 세션)
+- 네이버 서치어드바이저 사이트맵 제출 + RSS 등록
+- Google Search Console 사이트맵 제출
+- IndexNow 전체 URL 대량 제출 (34,537 단지 + 1,846 종목)
+- 109개 워드프레스 → 카더라 백링크 삽입
+- 네이버 신디케이션 API 연동
 
 ## 세션 93 — 피드 리뉴얼 & 참여형 콘텐츠 + 디자인 개선
 
