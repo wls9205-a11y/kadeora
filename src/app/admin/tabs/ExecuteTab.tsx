@@ -127,6 +127,44 @@ export default function ExecuteTab({ onNavigate }: { onNavigate: (t: any) => voi
         </button>
       </div>
 
+      {/* IndexNow 풀스위프 */}
+      <div style={{ marginBottom: 16 }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 6 }}>🔍 SEO 인덱싱 (IndexNow)</div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+          {[
+            { type: 'stock', icon: '📈', label: '종목 전체', desc: '1,846개' },
+            { type: 'complex&offset=0', icon: '🏠', label: '단지 1차', desc: '0~5000' },
+            { type: 'complex&offset=5000', icon: '🏠', label: '단지 2차', desc: '5K~10K' },
+            { type: 'complex&offset=10000', icon: '🏠', label: '단지 3차', desc: '10K~15K' },
+            { type: 'complex&offset=15000', icon: '🏠', label: '단지 4차', desc: '15K~20K' },
+            { type: 'complex&offset=20000', icon: '🏠', label: '단지 5차', desc: '20K~25K' },
+            { type: 'complex&offset=25000', icon: '🏠', label: '단지 6차', desc: '25K~30K' },
+            { type: 'complex&offset=30000', icon: '🏠', label: '단지 7차', desc: '30K~35K' },
+            { type: 'site', icon: '🏗️', label: '현장 전체', desc: '5,783개' },
+            { type: 'all', icon: '🌐', label: '전체', desc: '올인원' },
+          ].map(s => (
+            <button key={s.type} className="adm-btn" disabled={running}
+              onClick={async () => {
+                if (!confirm(`IndexNow ${s.label} (${s.desc}) 제출하시겠습니까?`)) return;
+                setRunning(true); setResults([]);
+                try {
+                  const r = await fetch('/api/admin/god-mode', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ mode: 'single', endpoint: `/api/cron/indexnow-full-sweep?type=${s.type}` }),
+                  });
+                  const d = await r.json();
+                  alert(`✅ ${s.label}: ${d.results?.[0]?.status === 200 ? '성공' : '실패'} (${d.results?.[0]?.duration || 0}ms)`);
+                } catch (e: any) { alert(`❌ ${e.message}`); } finally { setRunning(false); }
+              }}
+              style={{ flex: '1 1 calc(20% - 5px)', minWidth: 70, textAlign: 'center', padding: '6px 4px' }}>
+              <div style={{ fontSize: 14 }}>{s.icon}</div>
+              <div style={{ fontSize: 10, fontWeight: 600 }}>{s.label}</div>
+              <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>{s.desc}</div>
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* 진행 표시 */}
       {(running || results.length > 0) && (
         <div className="adm-card">

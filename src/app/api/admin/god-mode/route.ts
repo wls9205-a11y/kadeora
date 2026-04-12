@@ -133,6 +133,7 @@ const CRON_GROUPS = {
     '/api/cron/check-price-alerts',
     '/api/cron/indexnow-mass',
     '/api/cron/indexnow-new-content',
+    '/api/cron/indexnow-full-sweep',
     '/api/cron/blog-internal-links',
     '/api/cron/stock-naver-sync',
     '/api/cron/seo-excerpt-fill',
