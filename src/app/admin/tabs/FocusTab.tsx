@@ -25,7 +25,7 @@ const gi=(g:G)=>g==='good'?'🟢':g==='warn'?'🟡':'🔴';
 const S='rgba(12,21,40,0.6)';const BD='1px solid rgba(255,255,255,0.04)';
 const Ring=({v,sz=52,c}:{v:number;sz?:number;c:string})=>{const r=(sz-6)/2,ci=2*Math.PI*r;return<svg width={sz} height={sz}><circle cx={sz/2} cy={sz/2} r={r} fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="4"/><circle cx={sz/2} cy={sz/2} r={r} fill="none" stroke={c} strokeWidth="4" strokeDasharray={ci} strokeDashoffset={ci-(Math.min(v,100)/100)*ci} strokeLinecap="round" transform={`rotate(-90 ${sz/2} ${sz/2})`} style={{transition:'all .8s'}}/></svg>;};
 const Bar=({v,mx=100,c}:{v:number;mx?:number;c:string})=><div style={{height:4,borderRadius:2,background:'rgba(255,255,255,0.03)',overflow:'hidden'}}><div style={{height:'100%',width:`${Math.max(Math.min(v/mx*100,100),1)}%`,background:c,borderRadius:2,transition:'width .5s'}}/></div>;
-const Sec=({t,ch,open=true}:{t:string;ch:React.ReactNode;open?:boolean})=>{const[o,setO]=useState(open);return<div style={{marginBottom:4}}><button onClick={()=>setO(!o)} style={{display:'flex',alignItems:'center',gap:4,width:'100%',background:'none',border:'none',padding:'5px 0',cursor:'pointer',fontSize:11,fontWeight:700,color:'#94A3B8'}}><span style={{fontSize:7,transition:'transform .15s',transform:o?'rotate(90deg)':'rotate(0)'}}>▶</span>{t}</button>{o&&ch}</div>;};
+const Sec=({t,ch,open=true}:{t:string;ch:React.ReactNode;open?:boolean})=>{const[o,setO]=useState(open);return<div style={{marginBottom:8}}><button onClick={()=>setO(!o)} style={{display:'flex',alignItems:'center',gap:4,width:'100%',background:'none',border:'none',padding:'5px 0',cursor:'pointer',fontSize:11,fontWeight:700,color:'#94A3B8'}}><span style={{fontSize:11,transition:'transform .15s',transform:o?'rotate(90deg)':'rotate(0)'}}>▶</span>{t}</button>{o&&ch}</div>;};
 const Card=({ch,p='8px 10px',st}:{ch:React.ReactNode;p?:string;st?:React.CSSProperties})=><div style={{background:S,border:BD,borderRadius:8,padding:p,...st}}>{ch}</div>;
 
 export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
@@ -46,7 +46,7 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
   },[]);
   useEffect(()=>{load();ref.current=setInterval(load,30000);return()=>clearInterval(ref.current);},[load]);
 
-  if(ld)return<div style={{textAlign:'center',padding:80,color:'rgba(255,255,255,0.25)',fontSize:12}}>로딩...</div>;
+  if(ld)return<div style={{textAlign:'center',padding:80,color:'rgba(255,255,255,0.4)',fontSize:12}}>로딩...</div>;
   if(!d)return<div style={{textAlign:'center',padding:80,fontSize:12}}>⚠️ 실패</div>;
 
   const{healthScore:hs=0,kpi:k={} as any,growth:g={} as any,extended:x={} as any,failedCrons:fc={},recentActivity:ra=[],dailyTrend:dt=[],ctaBreakdown:cb={},signupSources:ss={},retention:ret=null as any,featureHealth:fh={} as any,trafficDetail:td={} as any}=d;
@@ -91,21 +91,21 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
         </div>
         <div style={{flex:1,display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:2}}>
           {[{l:'PV',v:f(k.pvToday||0),c:'#3B7BF6'},{l:'가입',v:`+${k.newUsersToday||0}`,c:'#10B981'},{l:'유저',v:f((k.users||0)+(x.seeds||0)),c:'#CBD5E1'}].map(s=>
-            <div key={s.l} style={{textAlign:'center'}}><div style={{fontSize:14,fontWeight:800,color:s.c,lineHeight:1}}>{s.v}</div><div style={{fontSize:7,color:'rgba(255,255,255,0.15)'}}>{s.l}</div></div>
+            <div key={s.l} style={{textAlign:'center'}}><div style={{fontSize:14,fontWeight:800,color:s.c,lineHeight:1}}>{s.v}</div><div style={{fontSize:11,color:'rgba(255,255,255,0.15)'}}>{s.l}</div></div>
           )}
         </div>
-        <button onClick={godMode} disabled={gr} style={{padding:'7px 10px',borderRadius:8,border:'none',cursor:'pointer',fontSize:9,fontWeight:700,background:gr?'rgba(255,255,255,0.04)':'linear-gradient(135deg,#3B7BF6,#10B981)',color:'#fff',display:'flex',flexDirection:'column',alignItems:'center',gap:1,flexShrink:0}}>
+        <button onClick={godMode} disabled={gr} style={{padding:'7px 10px',borderRadius:8,border:'none',cursor:'pointer',fontSize:13,fontWeight:700,background:gr?'rgba(255,255,255,0.04)':'linear-gradient(135deg,#3B7BF6,#10B981)',color:'#fff',display:'flex',flexDirection:'column',alignItems:'center',gap:1,flexShrink:0}}>
           <span style={{fontSize:14}}>{gr?'⏳':'🚀'}</span>{gr?'...':'최신화'}
         </button>
       </div>} p="10px 12px"/>
-      {gRes&&<div style={{padding:'3px 8px',borderRadius:6,margin:'4px 0',fontSize:9,fontWeight:600,background:gRes.fail>0?'rgba(239,68,68,0.08)':'rgba(16,185,129,0.08)',color:gRes.fail>0?'#EF4444':'#10B981',textAlign:'center'}}>✓{gRes.ok}{gRes.fail>0&&` ✗${gRes.fail}`}</div>}
-      <div style={{fontSize:7,color:'rgba(255,255,255,0.08)',textAlign:'right',marginBottom:2}}>30초마다 자동 갱신 · {new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})}</div>
+      {gRes&&<div style={{padding:'3px 8px',borderRadius:6,margin:'4px 0',fontSize:13,fontWeight:600,background:gRes.fail>0?'rgba(239,68,68,0.08)':'rgba(16,185,129,0.08)',color:gRes.fail>0?'#EF4444':'#10B981',textAlign:'center'}}>✓{gRes.ok}{gRes.fail>0&&` ✗${gRes.fail}`}</div>}
+      <div style={{fontSize:11,color:'rgba(255,255,255,0.15)',textAlign:'right',marginBottom:2}}>30초마다 자동 갱신 · {new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})}</div>
 
       {/* ═══ 2. 경고 ═══ */}
       {(crits.length>0||staleList.length>0||Object.keys(fc||{}).length>0)&&<div style={{padding:'6px 10px',borderRadius:8,margin:'4px 0',background:'rgba(239,68,68,0.05)',border:'1px solid rgba(239,68,68,0.12)'}}>
-        {crits.map(b=><div key={b.k} style={{fontSize:9,color:'rgba(255,255,255,0.45)',marginBottom:1}}>🔴 {BM[b.k].l} {b.v.toFixed(1)}% (기준 {BM[b.k].g})</div>)}
-        {staleList.length>0&&<div style={{fontSize:9,color:'rgba(255,255,255,0.45)'}}>🟠 {staleList.length}개 크론 6h+ 미실행</div>}
-        {Object.keys(fc||{}).length>0&&<div style={{fontSize:9,color:'rgba(255,255,255,0.45)'}}>🔴 실패 크론 {Object.keys(fc).length}개</div>}
+        {crits.map(b=><div key={b.k} style={{fontSize:13,color:'rgba(255,255,255,0.45)',marginBottom:1}}>🔴 {BM[b.k].l} {b.v.toFixed(1)}% (기준 {BM[b.k].g})</div>)}
+        {staleList.length>0&&<div style={{fontSize:13,color:'rgba(255,255,255,0.45)'}}>🟠 {staleList.length}개 크론 6h+ 미실행</div>}
+        {Object.keys(fc||{}).length>0&&<div style={{fontSize:13,color:'rgba(255,255,255,0.45)'}}>🔴 실패 크론 {Object.keys(fc).length}개</div>}
       </div>}
 
       {/* ═══ 3. 벤치마크 4x2 ═══ */}
@@ -113,20 +113,20 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
         {bm.map(b=>(
           <div key={b.k} style={{background:S,border:BD,borderRadius:6,padding:'5px 3px',textAlign:'center'}}>
             <div style={{fontSize:11,fontWeight:800,color:gc(b.g),lineHeight:1}}>{b.v.toFixed(b.v<10?1:0)}%</div>
-            <div style={{fontSize:7,color:'rgba(255,255,255,0.15)',marginTop:2}}>{BM[b.k].l}</div>
+            <div style={{fontSize:11,color:'rgba(255,255,255,0.15)',marginTop:2}}>{BM[b.k].l}</div>
           </div>
         ))}
       </div>
 
       {/* ═══ 4. 퍼널 + CTA 나란히 ═══ */}
-      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:4,marginBottom:4}}>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:4,marginBottom:8}}>
         <Card ch={<>
-          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:4}}><span style={{fontSize:9,fontWeight:700,color:'rgba(255,255,255,0.25)'}}>🎯 퍼널 7일</span><span style={{fontSize:8,fontWeight:700,color:(x.pv7d||0)>0&&(k.newUsers||0)/(x.pv7d||1)*100>1?'#10B981':'#EF4444'}}>{(x.pv7d||0)>0?((k.newUsers||0)/(x.pv7d||1)*100).toFixed(2):'0'}%</span></div>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}><span style={{fontSize:13,fontWeight:700,color:'rgba(255,255,255,0.4)'}}>🎯 퍼널 7일</span><span style={{fontSize:12,fontWeight:700,color:(x.pv7d||0)>0&&(k.newUsers||0)/(x.pv7d||1)*100>1?'#10B981':'#EF4444'}}>{(x.pv7d||0)>0?((k.newUsers||0)/(x.pv7d||1)*100).toFixed(2):'0'}%</span></div>
           {[{l:'PV',v:x.pv7d||0,c:'#3B7BF6'},{l:'게이트',v:x.gateViews||0,c:'#F59E0B'},{l:'클릭',v:x.gateClicks||0,c:'#EF4444'},{l:'시도',v:x.signupAttempts7d||0,c:'#EC4899'},{l:'가입',v:k.newUsers||0,c:'#10B981'}].map((s,i,a)=>{
             const mx=Math.max(...a.map(x=>x.v),1);
-            return<div key={s.l} style={{marginBottom:3}}>
-              <div style={{display:'flex',justifyContent:'space-between',fontSize:9,marginBottom:1}}>
-                <span style={{color:'rgba(255,255,255,0.3)'}}>{s.l}</span>
+            return<div key={s.l} style={{marginBottom:6}}>
+              <div style={{display:'flex',justifyContent:'space-between',fontSize:13,marginBottom:1}}>
+                <span style={{color:'rgba(255,255,255,0.45)'}}>{s.l}</span>
                 <span style={{fontWeight:700,color:s.c}}>{f(s.v)}</span>
               </div>
               <Bar v={s.v} mx={mx} c={s.c}/>
@@ -134,23 +134,23 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
           })}
         </>} p="6px 8px"/>
         <Card ch={<>
-          <div style={{fontSize:9,fontWeight:700,color:'rgba(255,255,255,0.25)',marginBottom:4}}>🎪 CTA 성과</div>
+          <div style={{fontSize:13,fontWeight:700,color:'rgba(255,255,255,0.4)',marginBottom:8}}>🎪 CTA 성과</div>
           {Object.entries(cb||{}).sort((a:any,b:any)=>(b[1].views||0)-(a[1].views||0)).slice(0,6).map(([n,e]:[string,any])=>{
             const v=e.views||0,cl=e.clicks||0,ctr=v>0?cl/v*100:0;
-            return<div key={n} style={{display:'flex',padding:'2px 0',fontSize:8,alignItems:'center',gap:2}}>
-              <span style={{fontSize:6}}>{gi(BM.ctr.c(ctr))}</span>
-              <span style={{flex:1,color:'rgba(255,255,255,0.35)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{n}</span>
-              <span style={{fontWeight:700,color:gc(BM.ctr.c(ctr)),fontSize:9}}>{ctr.toFixed(1)}%</span>
+            return<div key={n} style={{display:'flex',padding:'3px 0',fontSize:12,alignItems:'center',gap:2}}>
+              <span style={{fontSize:10}}>{gi(BM.ctr.c(ctr))}</span>
+              <span style={{flex:1,color:'rgba(255,255,255,0.5)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{n}</span>
+              <span style={{fontWeight:700,color:gc(BM.ctr.c(ctr)),fontSize:13}}>{ctr.toFixed(1)}%</span>
             </div>;
           })}
-          {Object.keys(cb||{}).length===0&&<div style={{fontSize:8,color:'rgba(255,255,255,0.1)',textAlign:'center',padding:6}}>수집중</div>}
+          {Object.keys(cb||{}).length===0&&<div style={{fontSize:12,color:'rgba(255,255,255,0.2)',textAlign:'center',padding:6}}>수집중</div>}
         </>} p="6px 8px"/>
       </div>
 
       {/* ═══ 5. 트래픽 + 유입 ═══ */}
-      <div style={{display:'grid',gridTemplateColumns:'1.5fr 1fr',gap:4,marginBottom:4}}>
+      <div style={{display:'grid',gridTemplateColumns:'1.5fr 1fr',gap:4,marginBottom:8}}>
         <Card ch={<>
-          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:3}}><span style={{fontSize:9,fontWeight:700,color:'rgba(255,255,255,0.25)'}}>⏰ {f(td?.todayTotal||k.pvToday||0)}PV·{td?.uniqueVisitors||'—'}UV</span>{hourly.length>0&&<span style={{fontSize:7,color:'#10B981'}}>피크 {hourly.reduce((m:any,h:any)=>(h.count||0)>(m.count||0)?h:m,{hour:0,count:0}).hour}시</span>}</div>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6}}><span style={{fontSize:13,fontWeight:700,color:'rgba(255,255,255,0.4)'}}>⏰ {f(td?.todayTotal||k.pvToday||0)}PV·{td?.uniqueVisitors||'—'}UV</span>{hourly.length>0&&<span style={{fontSize:11,color:'#10B981'}}>피크 {hourly.reduce((m:any,h:any)=>(h.count||0)>(m.count||0)?h:m,{hour:0,count:0}).hour}시</span>}</div>
           {hourly.length>0&&<div style={{display:'flex',alignItems:'flex-end',gap:1,height:28}}>
             {hourly.map((v:any,i:number)=>{const mx=Math.max(...hourly.map((h:any)=>h.count||0),1);const now=new Date().getHours();
               return<div key={i} style={{flex:1,height:Math.max(((v.count||0)/mx)*22,1),borderRadius:1,background:v.hour===now?'#10B981':(v.count||0)>20?'rgba(59,123,246,0.4)':'rgba(59,123,246,0.1)'}}/>;
@@ -158,18 +158,18 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
           </div>}
         </>} p="6px 8px"/>
         <Card ch={<>
-          <div style={{fontSize:9,fontWeight:700,color:'rgba(255,255,255,0.25)',marginBottom:3}}>📡 유입</div>
+          <div style={{fontSize:13,fontWeight:700,color:'rgba(255,255,255,0.4)',marginBottom:6}}>📡 유입</div>
           {(td?.referrerBreakdown||[]).slice(0,4).map((r:any,i:number)=>(
-            <div key={i} style={{display:'flex',justifyContent:'space-between',fontSize:8,padding:'1px 0',color:'rgba(255,255,255,0.3)'}}>
+            <div key={i} style={{display:'flex',justifyContent:'space-between',fontSize:12,padding:'3px 0',color:'rgba(255,255,255,0.45)'}}>
               <span style={{overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',flex:1}}>{r.source}</span>
-              <span style={{fontWeight:600,flexShrink:0}}>{r.count}<span style={{fontSize:6,color:'rgba(255,255,255,0.12)',marginLeft:2}}>{(td?.referrerBreakdown||[]).reduce((s:number,x:any)=>s+(x.count||0),0)>0?Math.round(r.count/(td.referrerBreakdown.reduce((s:number,x:any)=>s+(x.count||0),0))*100):0}%</span></span>
+              <span style={{fontWeight:600,flexShrink:0}}>{r.count}<span style={{fontSize:10,color:'rgba(255,255,255,0.4)',marginLeft:2}}>{(td?.referrerBreakdown||[]).reduce((s:number,x:any)=>s+(x.count||0),0)>0?Math.round(r.count/(td.referrerBreakdown.reduce((s:number,x:any)=>s+(x.count||0),0))*100):0}%</span></span>
             </div>
           ))}
         </>} p="6px 8px"/>
       </div>
 
       {/* ═══ 6. KPI 4x2 ═══ */}
-      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:3,marginBottom:4}}>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:3,marginBottom:8}}>
         {[
           {v:f(k.blogs||0),l:'블로그',c:'#8B5CF6'},
           {v:f(k.stocks||0),l:'주식',c:'#3B7BF6'},
@@ -182,7 +182,7 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
         ].map(s=>(
           <div key={s.l} style={{background:S,border:BD,borderRadius:6,padding:'5px 3px',textAlign:'center'}}>
             <div style={{fontSize:12,fontWeight:800,color:s.c,lineHeight:1}}>{s.v}</div>
-            <div style={{fontSize:6,color:'rgba(255,255,255,0.12)',marginTop:2}}>{s.l}</div>
+            <div style={{fontSize:10,color:'rgba(255,255,255,0.4)',marginTop:2}}>{s.l}</div>
           </div>
         ))}
       </div>
@@ -194,57 +194,57 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
             {Object.entries(cg).map(([key,g]:[string,any])=>{
               const t=g.ok+g.fail;const p=t>0?Math.round(g.ok/t*100):100;
               const ic:Record<string,string>={data:'📡',process:'⚙️',ai:'🤖',content:'✍️',system:'🛠️',alert:'🔔'};
-              return<div key={key} style={{display:'flex',alignItems:'center',gap:4,padding:'2px 0'}}>
-                <span style={{fontSize:8}}>{ic[key]||'📦'}</span>
-                <span style={{fontSize:8,color:'rgba(255,255,255,0.3)',minWidth:32}}>{key}</span>
+              return<div key={key} style={{display:'flex',alignItems:'center',gap:4,padding:'3px 0'}}>
+                <span style={{fontSize:12}}>{ic[key]||'📦'}</span>
+                <span style={{fontSize:12,color:'rgba(255,255,255,0.45)',minWidth:32}}>{key}</span>
                 <div style={{flex:1}}><Bar v={p} c={p>=90?'#10B981':p>=70?'#F59E0B':'#EF4444'}/></div>
-                <span style={{fontSize:9,fontWeight:600,color:p>=90?'#10B981':'#F59E0B',minWidth:24,textAlign:'right'}}>{p}%</span>
+                <span style={{fontSize:13,fontWeight:600,color:p>=90?'#10B981':'#F59E0B',minWidth:24,textAlign:'right'}}>{p}%</span>
               </div>;
             })}
             {Object.entries(ops?.failedCrons||{}).slice(0,3).map(([n,info]:[string,any])=>(
-              <div key={n} style={{fontSize:8,color:'#EF4444',marginTop:1}}>✗ {n} ({info.count}회)</div>
+              <div key={n} style={{fontSize:12,color:'#EF4444',marginTop:1}}>✗ {n} ({info.count}회)</div>
             ))}
           </>} p="6px 8px"/>
           <Card ch={<>
-            <div style={{fontSize:8,fontWeight:600,color:'rgba(255,255,255,0.2)',marginBottom:3}}>데이터 신선도</div>
+            <div style={{fontSize:12,fontWeight:600,color:'rgba(255,255,255,0.2)',marginBottom:6}}>데이터 신선도</div>
             {Object.entries(fresh).slice(0,8).map(([name,info]:any)=>{
               const ageMs=Date.now()-new Date(info.at).getTime();
               const c=ageMs<3600000?'#10B981':ageMs<21600000?'#F59E0B':'#EF4444';
-              return<div key={name} style={{display:'flex',alignItems:'center',gap:3,padding:'1px 0',fontSize:8}}>
+              return<div key={name} style={{display:'flex',alignItems:'center',gap:3,padding:'3px 0',fontSize:12}}>
                 <span style={{width:4,height:4,borderRadius:'50%',background:c,flexShrink:0}}/>
-                <span style={{flex:1,color:'rgba(255,255,255,0.3)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{name}</span>
-                <span style={{color:'rgba(255,255,255,0.12)',fontSize:7}}>{ago(info.at)}</span>
+                <span style={{flex:1,color:'rgba(255,255,255,0.45)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{name}</span>
+                <span style={{color:'rgba(255,255,255,0.4)',fontSize:11}}>{ago(info.at)}</span>
               </div>;
             })}
-            {Object.keys(fresh).length>8&&<div style={{fontSize:7,color:'rgba(255,255,255,0.1)',textAlign:'center',marginTop:2}}>+{Object.keys(fresh).length-8}개</div>}
+            {Object.keys(fresh).length>8&&<div style={{fontSize:11,color:'rgba(255,255,255,0.2)',textAlign:'center',marginTop:2}}>+{Object.keys(fresh).length-8}개</div>}
           </>} p="6px 8px"/>
         </div>
       }/>
 
       {/* ═══ 8. 기능 + 가입경로 + 리텐션 ═══ */}
-      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:4,marginBottom:4}}>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:4,marginBottom:8}}>
         <Card ch={<>
-          <div style={{fontSize:8,fontWeight:600,color:'rgba(255,255,255,0.2)',marginBottom:2}}>💪 기능</div>
+          <div style={{fontSize:12,fontWeight:600,color:'rgba(255,255,255,0.2)',marginBottom:2}}>💪 기능</div>
           {[{l:'아파트BM',v:fh.aptBookmarks||0},{l:'블로그BM',v:fh.blogBookmarks||0},{l:'관심종목',v:fh.stockWatchlist||0},{l:'출석',v:fh.attendance||0}].map(feat=>(
-            <div key={feat.l} style={{display:'flex',justifyContent:'space-between',fontSize:8,padding:'1px 0',color:feat.v>0?'rgba(255,255,255,0.35)':'rgba(255,255,255,0.08)'}}>
+            <div key={feat.l} style={{display:'flex',justifyContent:'space-between',fontSize:12,padding:'3px 0',color:feat.v>0?'rgba(255,255,255,0.5)':'rgba(255,255,255,0.15)'}}>
               <span>{feat.v>0?'✓':'✗'}{feat.l}</span><span style={{fontWeight:600}}>{feat.v}</span>
             </div>
           ))}
         </>} p="5px 6px"/>
         <Card ch={<>
-          <div style={{fontSize:8,fontWeight:600,color:'rgba(255,255,255,0.2)',marginBottom:2}}>🎯 가입경로</div>
+          <div style={{fontSize:12,fontWeight:600,color:'rgba(255,255,255,0.2)',marginBottom:2}}>🎯 가입경로</div>
           {Object.entries(ss).sort((a:any,b:any)=>b[1]-a[1]).slice(0,4).map(([src,cnt]:[string,any])=>(
-            <div key={src} style={{display:'flex',justifyContent:'space-between',fontSize:8,padding:'1px 0',color:'rgba(255,255,255,0.35)'}}>
+            <div key={src} style={{display:'flex',justifyContent:'space-between',fontSize:12,padding:'3px 0',color:'rgba(255,255,255,0.5)'}}>
               <span style={{overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',flex:1}}>{src}</span><span style={{fontWeight:600}}>{cnt}</span>
             </div>
           ))}
         </>} p="5px 6px"/>
         <Card ch={<>
-          <div style={{fontSize:8,fontWeight:600,color:'rgba(255,255,255,0.2)',marginBottom:2}}>🔄 리텐션</div>
+          <div style={{fontSize:12,fontWeight:600,color:'rgba(255,255,255,0.2)',marginBottom:2}}>🔄 리텐션</div>
           {ret?<>
             <div style={{fontSize:16,fontWeight:800,color:gc(BM.ret.c(ret.d7Rate||0)),lineHeight:1,textAlign:'center',marginTop:4}}>{ret.d7Rate||0}%</div>
-            <div style={{fontSize:7,color:'rgba(255,255,255,0.12)',textAlign:'center',marginTop:2}}>D7 · {ret.size}→{ret.d7}명</div>
-          </>:<div style={{fontSize:8,color:'rgba(255,255,255,0.08)',textAlign:'center',padding:8}}>—</div>}
+            <div style={{fontSize:11,color:'rgba(255,255,255,0.4)',textAlign:'center',marginTop:2}}>D7 · {ret.size}→{ret.d7}명</div>
+          </>:<div style={{fontSize:12,color:'rgba(255,255,255,0.15)',textAlign:'center',padding:8}}>—</div>}
         </>} p="5px 6px"/>
       </div>
 
@@ -256,8 +256,8 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
               return<div key={i} style={{flex:1}}><div style={{height:`${((d.pv||0)/mx)*32}px`,background:'#3B7BF6',borderRadius:1,minHeight:1,opacity:0.3}}/><div style={{height:`${((d.uv||0)/mx)*32}px`,background:'#3B7BF6',borderRadius:1,minHeight:1,marginTop:1}}/></div>;
             })}
           </div>
-          <div style={{display:'flex',marginTop:2}}>{dt.map((d:any,i:number)=><div key={i} style={{flex:1,fontSize:6,color:'rgba(255,255,255,0.08)',textAlign:'center'}}>{i%4===0?d.date?.slice(5):''}</div>)}</div>
-          <div style={{display:'flex',gap:8,justifyContent:'center',marginTop:3,fontSize:7,color:'rgba(255,255,255,0.1)'}}><span>▓ PV</span><span>█ UV</span></div>
+          <div style={{display:'flex',marginTop:2}}>{dt.map((d:any,i:number)=><div key={i} style={{flex:1,fontSize:10,color:'rgba(255,255,255,0.15)',textAlign:'center'}}>{i%4===0?d.date?.slice(5):''}</div>)}</div>
+          <div style={{display:'flex',gap:8,justifyContent:'center',marginTop:3,fontSize:11,color:'rgba(255,255,255,0.2)'}}><span>▓ PV</span><span>█ UV</span></div>
         </>} p="6px 10px"/>
       }/>}
 
@@ -266,19 +266,19 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:4}}>
           <Card ch={<>
             {ra.slice(0,6).map((a:any,i:number)=>(
-              <div key={i} style={{display:'flex',alignItems:'center',gap:3,padding:'2px 0',fontSize:8,color:'rgba(255,255,255,0.3)'}}>
-                <span style={{fontSize:7}}>{a.type==='cron'?(a.status==='success'?'✅':'❌'):'👤'}</span>
+              <div key={i} style={{display:'flex',alignItems:'center',gap:3,padding:'3px 0',fontSize:12,color:'rgba(255,255,255,0.45)'}}>
+                <span style={{fontSize:11}}>{a.type==='cron'?(a.status==='success'?'✅':'❌'):'👤'}</span>
                 <span style={{flex:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{a.type==='cron'?a.name:`${a.name} 가입`}</span>
-                <span style={{fontSize:7,color:'rgba(255,255,255,0.08)'}}>{ago(a.at)}</span>
+                <span style={{fontSize:11,color:'rgba(255,255,255,0.15)'}}>{ago(a.at)}</span>
               </div>
             ))}
           </>} p="4px 6px"/>
           <Card ch={<>
             {(td?.recentVisitors||[]).slice(0,6).map((v:any,i:number)=>(
-              <div key={i} style={{display:'flex',alignItems:'center',gap:3,padding:'2px 0',fontSize:8,color:'rgba(255,255,255,0.25)'}}>
-                <span style={{fontSize:7}}>{v.device}</span>
+              <div key={i} style={{display:'flex',alignItems:'center',gap:3,padding:'3px 0',fontSize:12,color:'rgba(255,255,255,0.4)'}}>
+                <span style={{fontSize:11}}>{v.device}</span>
                 <span style={{flex:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{decodeURIComponent(v.path)}</span>
-                <span style={{fontSize:6,color:'rgba(255,255,255,0.06)'}}>{v.ref}</span>
+                <span style={{fontSize:10,color:'rgba(255,255,255,0.06)'}}>{v.ref}</span>
               </div>
             ))}
           </>} p="4px 6px"/>
@@ -289,17 +289,17 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
       {df&&<Sec t="🗄️ 데이터 커버리지" open={false} ch={
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:4}}>
           <Card ch={<>
-            <div style={{fontSize:8,fontWeight:600,color:'rgba(255,255,255,0.2)',marginBottom:2}}>📈 주식</div>
+            <div style={{fontSize:12,fontWeight:600,color:'rgba(255,255,255,0.2)',marginBottom:2}}>📈 주식</div>
             {df.stock&&[{l:'종목',v:df.stock.total},{l:'시세有',v:df.stock.active},{l:'섹터',v:df.stock.withSector},{l:'설명',v:df.stock.withDesc}].map(s=>(
-              <div key={s.l} style={{display:'flex',justifyContent:'space-between',fontSize:8,padding:'1px 0',color:'rgba(255,255,255,0.3)'}}>
+              <div key={s.l} style={{display:'flex',justifyContent:'space-between',fontSize:12,padding:'3px 0',color:'rgba(255,255,255,0.45)'}}>
                 <span>{s.l}</span><span style={{fontWeight:600}}>{f(s.v)}/{f(df.stock.total)}</span>
               </div>
             ))}
           </>} p="5px 6px"/>
           <Card ch={<>
-            <div style={{fontSize:8,fontWeight:600,color:'rgba(255,255,255,0.2)',marginBottom:2}}>🏢 부동산</div>
+            <div style={{fontSize:12,fontWeight:600,color:'rgba(255,255,255,0.2)',marginBottom:2}}>🏢 부동산</div>
             {df.realestate&&[{l:'사이트',v:df.realestate.sites},{l:'이미지有',v:df.realestate.withImages},{l:'매매',v:df.realestate.transactions},{l:'단지백과',v:df.realestate.complexProfiles}].map(s=>(
-              <div key={s.l} style={{display:'flex',justifyContent:'space-between',fontSize:8,padding:'1px 0',color:'rgba(255,255,255,0.3)'}}>
+              <div key={s.l} style={{display:'flex',justifyContent:'space-between',fontSize:12,padding:'3px 0',color:'rgba(255,255,255,0.45)'}}>
                 <span>{s.l}</span><span style={{fontWeight:600}}>{f(s.v)}</span>
               </div>
             ))}
@@ -316,7 +316,7 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
           ].map(s=>(
             <div key={s.l} style={{textAlign:'center'}}>
               <div style={{fontSize:12,fontWeight:800,color:s.c as string,lineHeight:1}}>{typeof s.v==='number'?f(s.v):s.v}</div>
-              <div style={{fontSize:7,color:'rgba(255,255,255,0.12)',marginTop:1}}>{s.l}</div>
+              <div style={{fontSize:11,color:'rgba(255,255,255,0.4)',marginTop:1}}>{s.l}</div>
             </div>
           ))}
         </div>} p="8px 10px"/>
@@ -359,16 +359,16 @@ function EmailSender() {
   return (
     <div style={{background:'rgba(12,21,40,0.6)',border:'1px solid rgba(255,255,255,0.04)',borderRadius:8,padding:'8px 10px'}}>
       <div style={{display:'flex',gap:4,marginBottom:6}}>
-        <button onClick={()=>send('test')} disabled={sending} style={{flex:1,padding:'6px',borderRadius:6,border:'1px solid rgba(59,123,246,0.2)',background:'rgba(59,123,246,0.06)',color:'#3B7BF6',cursor:'pointer',fontSize:9,fontWeight:600}}>🧪 테스트</button>
-        <button onClick={()=>send('dormant')} disabled={sending} style={{flex:1,padding:'6px',borderRadius:6,border:'1px solid rgba(245,158,11,0.2)',background:'rgba(245,158,11,0.06)',color:'#F59E0B',cursor:'pointer',fontSize:9,fontWeight:600}}>😴 휴면유저</button>
-        <button onClick={()=>send('all')} disabled={sending} style={{flex:1,padding:'6px',borderRadius:6,border:'1px solid rgba(239,68,68,0.2)',background:'rgba(239,68,68,0.06)',color:'#EF4444',cursor:'pointer',fontSize:9,fontWeight:600}}>📨 전체발송</button>
+        <button onClick={()=>send('test')} disabled={sending} style={{flex:1,padding:'6px',borderRadius:6,border:'1px solid rgba(59,123,246,0.2)',background:'rgba(59,123,246,0.06)',color:'#3B7BF6',cursor:'pointer',fontSize:13,fontWeight:600}}>🧪 테스트</button>
+        <button onClick={()=>send('dormant')} disabled={sending} style={{flex:1,padding:'6px',borderRadius:6,border:'1px solid rgba(245,158,11,0.2)',background:'rgba(245,158,11,0.06)',color:'#F59E0B',cursor:'pointer',fontSize:13,fontWeight:600}}>😴 휴면유저</button>
+        <button onClick={()=>send('all')} disabled={sending} style={{flex:1,padding:'6px',borderRadius:6,border:'1px solid rgba(239,68,68,0.2)',background:'rgba(239,68,68,0.06)',color:'#EF4444',cursor:'pointer',fontSize:13,fontWeight:600}}>📨 전체발송</button>
       </div>
-      {sending&&<div style={{fontSize:9,color:'rgba(255,255,255,0.3)',textAlign:'center',padding:4}}>발송 중...</div>}
-      {result&&<div style={{fontSize:9,padding:6,borderRadius:6,marginBottom:4,background:result.error?'rgba(239,68,68,0.06)':'rgba(16,185,129,0.06)',color:result.error?'#EF4444':'#10B981'}}>
+      {sending&&<div style={{fontSize:13,color:'rgba(255,255,255,0.45)',textAlign:'center',padding:4}}>발송 중...</div>}
+      {result&&<div style={{fontSize:13,padding:6,borderRadius:6,marginBottom:8,background:result.error?'rgba(239,68,68,0.06)':'rgba(16,185,129,0.06)',color:result.error?'#EF4444':'#10B981'}}>
         {result.error||`✓ ${result.sent}건 발송 ${result.failed>0?`· ✗ ${result.failed}건 실패`:''}`}
       </div>}
-      <button onClick={loadLogs} style={{width:'100%',padding:'4px',borderRadius:4,border:'1px solid rgba(255,255,255,0.04)',background:'none',color:'rgba(255,255,255,0.2)',cursor:'pointer',fontSize:8}}>발송 이력 보기</button>
-      {logs?.summary&&<div style={{marginTop:4,fontSize:8,color:'rgba(255,255,255,0.2)'}}>
+      <button onClick={loadLogs} style={{width:'100%',padding:'4px',borderRadius:4,border:'1px solid rgba(255,255,255,0.04)',background:'none',color:'rgba(255,255,255,0.2)',cursor:'pointer',fontSize:12}}>발송 이력 보기</button>
+      {logs?.summary&&<div style={{marginTop:4,fontSize:12,color:'rgba(255,255,255,0.2)'}}>
         {Object.entries(logs.summary).map(([c,s]:[string,any])=><div key={c}>{c}: ✓{s.sent} ✗{s.failed}</div>)}
       </div>}
     </div>
@@ -420,7 +420,7 @@ function NaverSyndication() {
     setTimeout(()=>setCopied(null),2000);
   };
 
-  if (loading) return <div style={{fontSize:11,color:'rgba(255,255,255,0.3)',padding:8}}>로딩...</div>;
+  if (loading) return <div style={{fontSize:11,color:'rgba(255,255,255,0.45)',padding:8}}>로딩...</div>;
 
   return (
     <div style={{padding:'6px 10px'}}>
@@ -430,32 +430,32 @@ function NaverSyndication() {
           <span style={{fontSize:11}}>✅ 발행 <b style={{color:'#34D399'}}>{stats.published||0}</b></span>
           <span style={{fontSize:11}}>📊 전체 <b>{stats.total||0}</b></span>
         </div>
-        <button onClick={generate} disabled={generating} style={{fontSize:10,padding:'3px 8px',borderRadius:6,border:'1px solid rgba(59,123,246,0.3)',background:'rgba(59,123,246,0.1)',color:'#3B7BF6',cursor:'pointer'}}>
+        <button onClick={generate} disabled={generating} style={{fontSize:14,padding:'3px 8px',borderRadius:6,border:'1px solid rgba(59,123,246,0.3)',background:'rgba(59,123,246,0.1)',color:'#3B7BF6',cursor:'pointer'}}>
           {generating?'생성 중...':'🔄 수동 생성'}
         </button>
       </div>
-      {items.length===0 && <div style={{fontSize:11,color:'rgba(255,255,255,0.3)',textAlign:'center',padding:12}}>아직 발행 콘텐츠 없음 · 수동 생성 또는 09:00 크론 대기</div>}
+      {items.length===0 && <div style={{fontSize:11,color:'rgba(255,255,255,0.45)',textAlign:'center',padding:12}}>아직 발행 콘텐츠 없음 · 수동 생성 또는 09:00 크론 대기</div>}
       {items.map((it:any) => (
         <div key={it.id} style={{padding:'6px 0',borderBottom:'1px solid rgba(255,255,255,0.05)'}}>
           <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
             <div style={{flex:1,minWidth:0}}>
               <div style={{fontSize:12,fontWeight:700,color:'#e0e0e0',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{it.naver_title}</div>
-              <div style={{fontSize:9,color:'rgba(255,255,255,0.25)',marginTop:2}}>
+              <div style={{fontSize:13,color:'rgba(255,255,255,0.4)',marginTop:2}}>
                 {it.category} · 블로그:{it.blog_status==='published'?'✅':'⏳'} · 카페:{it.cafe_status==='published'?'✅':it.cafe_status==='failed'?'❌':'⏳'}
                 {it.naver_tags?.length>0 && <span> · {it.naver_tags.slice(0,3).map((t:string)=>`#${t}`).join(' ')}</span>}
               </div>
             </div>
             <div style={{display:'flex',gap:4,marginLeft:8}}>
-              <button onClick={()=>copyHtml(it.id)} style={{fontSize:9,padding:'2px 6px',borderRadius:4,border:'1px solid rgba(3,199,90,0.3)',background:'rgba(3,199,90,0.1)',color:'#03C75A',cursor:'pointer'}}>
+              <button onClick={()=>copyHtml(it.id)} style={{fontSize:13,padding:'2px 6px',borderRadius:4,border:'1px solid rgba(3,199,90,0.3)',background:'rgba(3,199,90,0.1)',color:'#03C75A',cursor:'pointer'}}>
                 {copied===it.id?'✅ 복사됨':'📋 복사'}
               </button>
-              <button onClick={()=>viewHtml(it.id)} style={{fontSize:9,padding:'2px 6px',borderRadius:4,border:'1px solid rgba(255,255,255,0.1)',background:'rgba(255,255,255,0.05)',color:'rgba(255,255,255,0.5)',cursor:'pointer'}}>
+              <button onClick={()=>viewHtml(it.id)} style={{fontSize:13,padding:'2px 6px',borderRadius:4,border:'1px solid rgba(255,255,255,0.2)',background:'rgba(255,255,255,0.05)',color:'rgba(255,255,255,0.5)',cursor:'pointer'}}>
                 {htmlView===it.id?'닫기':'👁 보기'}
               </button>
-              {it.blog_status==='pending' && <button onClick={()=>markPublished(it.id)} style={{fontSize:9,padding:'2px 6px',borderRadius:4,border:'1px solid rgba(52,211,153,0.3)',background:'rgba(52,211,153,0.1)',color:'#34D399',cursor:'pointer'}}>✓ 발행완료</button>}
+              {it.blog_status==='pending' && <button onClick={()=>markPublished(it.id)} style={{fontSize:13,padding:'2px 6px',borderRadius:4,border:'1px solid rgba(52,211,153,0.3)',background:'rgba(52,211,153,0.1)',color:'#34D399',cursor:'pointer'}}>✓ 발행완료</button>}
             </div>
           </div>
-          {htmlView===it.id && <div style={{marginTop:6,padding:8,borderRadius:6,background:'rgba(0,0,0,0.3)',maxHeight:200,overflow:'auto',fontSize:10,color:'rgba(255,255,255,0.5)',whiteSpace:'pre-wrap',wordBreak:'break-all'}}>{htmlContent}</div>}
+          {htmlView===it.id && <div style={{marginTop:6,padding:8,borderRadius:6,background:'rgba(0,0,0,0.3)',maxHeight:200,overflow:'auto',fontSize:14,color:'rgba(255,255,255,0.5)',whiteSpace:'pre-wrap',wordBreak:'break-all'}}>{htmlContent}</div>}
         </div>
       ))}
     </div>
