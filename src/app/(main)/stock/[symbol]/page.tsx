@@ -42,7 +42,7 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { symbol } = await params;
   const sb = await createSupabaseServer();
-  const { data: s } = await sb.from('stock_quotes').select('name,market,price,currency,change_pct,updated_at,per,pbr,dividend_yield,market_cap,sector').eq('symbol', symbol).maybeSingle();
+  const { data: s } = await (sb as any).from('stock_quotes').select('name,market,price,currency,change_pct,updated_at,per,pbr,dividend_yield,market_cap,sector').eq('symbol', symbol).maybeSingle();
   if (!s) return { title: '종목을 찾을 수 없습니다', robots: { index: false } };
   const p = fmtPrice(Number(s.price), s.currency ?? undefined);
   const ch = Number(s.change_pct) === 0 ? '' : `${Number(s.change_pct) > 0 ? '▲' : '▼'}${Math.abs(Number(s.change_pct)).toFixed(2)}%`;
