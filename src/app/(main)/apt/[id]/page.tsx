@@ -1596,13 +1596,8 @@ export default async function AptUnifiedPage({ params }: Props) {
 
       {/* 프로 업셀 — 결제 시스템 출시 전까지 비공개 */}
 
-<<<<<<< Updated upstream
       <Disclaimer type="apt" />
       <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textAlign: 'center', margin: '8px 0 40px', lineHeight: 1.6 }}>📊 데이터 출처: 국토교통부 · 청약홈 · 한국부동산원 · 각 지자체</p>
-=======
-      <Disclaimer />
-
->>>>>>> Stashed changes
     </article>
   );
 }
