@@ -173,18 +173,18 @@ export default function ChatRoom({ user, myNickname, room = 'lounge' }: { user: 
                 onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
                 <div onClick={() => openSheet(p)} style={{ width: 34, height: 34, borderRadius: '50%', background: avc(msg.user_id), color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-sm)', fontWeight: 800, flexShrink: 0, cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }}>{nick[0]}</div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 2 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
                     <span onClick={() => openSheet(p)} style={{ fontWeight: 700, fontSize: 'var(--fs-sm)', cursor: 'pointer', color: 'var(--text-primary)' }}>{nick}</span>
                     <span style={{ fontSize: 'var(--fs-xs)', background: `${g.color}20`, color: g.color, border: `1px solid ${g.color}40`, padding: '1px 5px', borderRadius: 4, fontWeight: 600 }}>{g.emoji} {g.title}</span>
                     <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{timeAgo(msg.created_at)}</span>
                   </div>
                   <p style={{ fontSize: 'var(--fs-base)', color: 'var(--text-primary)', margin: '0 0 5px', lineHeight: 1.5, wordBreak: 'break-word' }}>{renderContent(msg.content)}</p>
                   <div style={{ display: 'flex', gap: 'var(--sp-sm)', alignItems: 'center' }}>
-                    <button onClick={() => toggleLike(msg.id)} style={{ display: 'flex', alignItems: 'center', gap: 3, background: liked ? 'rgba(248,113,113,0.07)' : 'none', border: 'none', cursor: user ? 'pointer' : 'default', color: liked ? 'var(--accent-red)' : 'var(--text-tertiary)', fontSize: 'var(--fs-xs)', padding: '2px 6px', borderRadius: 4, fontWeight: liked ? 700 : 400 }}>
+                    <button onClick={() => toggleLike(msg.id)} style={{ display: 'flex', alignItems: 'center', gap: 4, background: liked ? 'rgba(248,113,113,0.07)' : 'none', border: 'none', cursor: user ? 'pointer' : 'default', color: liked ? 'var(--accent-red)' : 'var(--text-tertiary)', fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 4, fontWeight: liked ? 700 : 400 }}>
                       {liked ? '❤️' : '🤍'} {lc > 0 ? lc : ''}
                     </button>
                     {user && (
-                      <button onClick={() => { setReplyTarget({ id: msg.id, nickname: nick }); document.getElementById('chat-input')?.focus(); }} style={{ display: 'flex', alignItems: 'center', gap: 3, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)', padding: '2px 6px', borderRadius: 4 }}>
+                      <button onClick={() => { setReplyTarget({ id: msg.id, nickname: nick }); document.getElementById('chat-input')?.focus(); }} style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 4 }}>
                         💬 {msg.replies && msg.replies.length > 0 ? `${msg.replies.length}` : '답글'}
                       </button>
                     )}
@@ -210,7 +210,7 @@ export default function ChatRoom({ user, myNickname, room = 'lounge' }: { user: 
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', marginBottom: 1 }}>
                             <span onClick={() => openSheet(rp)} style={{ fontWeight: 700, fontSize: 'var(--fs-sm)', cursor: 'pointer', color: 'var(--text-primary)' }}>{rNick}</span>
-                            <span style={{ fontSize: 'var(--fs-xs)', background: `${rg.color}18`, color: rg.color, padding: '1px 4px', borderRadius: 3, fontWeight: 600 }}>{rg.emoji}</span>
+                            <span style={{ fontSize: 'var(--fs-xs)', background: `${rg.color}18`, color: rg.color, padding: '1px 4px', borderRadius: 4, fontWeight: 600 }}>{rg.emoji}</span>
                             <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{timeAgo(reply.created_at)}</span>
                           </div>
                           <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.4, wordBreak: 'break-word' }}>{renderContent(reply.content)}</p>
@@ -243,7 +243,7 @@ export default function ChatRoom({ user, myNickname, room = 'lounge' }: { user: 
                   <div style={{ position: 'absolute', bottom: '100%', left: 0, right: 0, marginBottom: 'var(--sp-xs)', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', overflow: 'hidden', zIndex: 100, boxShadow: '0 -4px 16px rgba(0,0,0,0.12)' }}>
                     {mentionList.map((u, i) => (
                       <div key={u.id} onClick={() => selectMention(u.nickname ?? '')} style={{ padding: '7px 12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', fontSize: 'var(--fs-sm)', background: i === mentionIndex ? 'var(--bg-hover)' : 'transparent' }}>
-                        <div style={{ width: 22, height: 22, borderRadius: '50%', background: avc(u.id), color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>{(u.nickname ?? '?')[0]}</div>
+                        <div style={{ width: 24, height: 24, borderRadius: '50%', background: avc(u.id), color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>{(u.nickname ?? '?')[0]}</div>
                         <span style={{ fontWeight: 600 }}>@{u.nickname}</span>
                         <span style={{ fontSize: 'var(--fs-xs)', color: (GRADE_INFO[u.grade ?? 1] ?? GRADE_INFO[1]).color, marginLeft: 'auto' }}>{(GRADE_INFO[u.grade ?? 1] ?? GRADE_INFO[1]).emoji}</span>
                       </div>

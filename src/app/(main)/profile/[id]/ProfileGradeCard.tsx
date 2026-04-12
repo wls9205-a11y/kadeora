@@ -81,8 +81,8 @@ export default function ProfileGradeCard({ profileId, isOwner, gradeNum, gradeCo
             {(currentPoints ?? 0).toLocaleString()} / {gradeNum < 10 ? (nextPoints ?? 0).toLocaleString() : '∞'} pts
           </span>
         </div>
-        <div style={{ height: 6, background: 'var(--border)', borderRadius: 3 }}>
-          <div style={{ height: '100%', borderRadius: 3, background: gradeColor, width: `${progress}%`, transition: 'width 0.6s ease' }} />
+        <div style={{ height: 6, background: 'var(--border)', borderRadius: 4 }}>
+          <div style={{ height: '100%', borderRadius: 4, background: gradeColor, width: `${progress}%`, transition: 'width 0.6s ease' }} />
         </div>
         {gradeNum < 10 && (
           <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 6, textAlign: 'right' }}>

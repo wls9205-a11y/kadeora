@@ -86,7 +86,7 @@ export default function LoungeLivePreview() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-xs)', marginBottom: 'var(--sp-sm)' }}>
           {messages.map(m => (
             <div key={m.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
-              <div style={{ width: 20, height: 20, borderRadius: '50%', background: m.avatarColor, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 600, color: '#fff', flexShrink: 0 }}>
+              <div style={{ width: 24, height: 24, borderRadius: '50%', background: m.avatarColor, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 600, color: '#fff', flexShrink: 0 }}>
                 {m.nickname[0]}
               </div>
               <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>

@@ -102,8 +102,8 @@ export default function OpsTab({ onNavigate }: { onNavigate: (t: any) => void })
             <span style={{ fontSize: 14 }}>{info.icon}</span>
             <span style={{ fontSize: 12, color: 'var(--text-primary)', minWidth: 70 }}>{info.label}</span>
             <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>({g.cronCount})</span>
-            <div style={{ flex: 1, height: 6, background: 'var(--bg-hover)', borderRadius: 3, overflow: 'hidden' }}>
-              <div style={{ height: '100%', width: `${pct}%`, background: pct >= 90 ? '#10B981' : pct >= 70 ? '#F59E0B' : '#EF4444', borderRadius: 3 }} />
+            <div style={{ flex: 1, height: 6, background: 'var(--bg-hover)', borderRadius: 4, overflow: 'hidden' }}>
+              <div style={{ height: '100%', width: `${pct}%`, background: pct >= 90 ? '#10B981' : pct >= 70 ? '#F59E0B' : '#EF4444', borderRadius: 4 }} />
             </div>
             <span style={{ fontSize: 11, fontWeight: 600, color: pct >= 90 ? '#10B981' : '#F59E0B', minWidth: 32, textAlign: 'right' }}>{pct}%</span>
           </div>
@@ -150,7 +150,7 @@ export default function OpsTab({ onNavigate }: { onNavigate: (t: any) => void })
             { name: 'KIS', ok: false },
             { name: 'APT_DATA', ok: false },
           ].map(k => (
-            <span key={k.name} style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '2px 6px', borderRadius: 4, fontSize: 10, background: k.ok ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)', color: k.ok ? '#10B981' : '#EF4444' }}>
+            <span key={k.name} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 4, fontSize: 10, background: k.ok ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)', color: k.ok ? '#10B981' : '#EF4444' }}>
               {k.ok ? '✓' : '✗'} {k.name}
             </span>
           ))}

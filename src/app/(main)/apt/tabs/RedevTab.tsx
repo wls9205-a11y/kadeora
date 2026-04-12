@@ -136,7 +136,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
             </div>
 
             {/* 유형 필터 + 검색 */}
-            <div style={{ display: 'flex', gap: 5, marginBottom: 'var(--sp-sm)', flexWrap: 'wrap', alignItems: 'center' }}>
+            <div style={{ display: 'flex', gap: 6, marginBottom: 'var(--sp-sm)', flexWrap: 'wrap', alignItems: 'center' }}>
               {pill('전체', redevType, (v) => { setRedevType(v); setRedevPage(1); })}
               {pill('재개발', redevType, (v) => { setRedevType(v); setRedevPage(1); })}
               {pill('재건축', redevType, (v) => { setRedevType(v); setRedevPage(1); })}
@@ -173,20 +173,20 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
                   <div style={{ height: 48, background: 'var(--bg-hover)', position: 'relative', overflow: 'hidden' }}>
                     <img src={aptImageMap?.[r.district_name] || `/api/og?title=${encodeURIComponent(r.district_name || r.address || '재개발')}&category=apt&design=2`} alt={r.district_name || "부동산 이미지"} width={400} height={48} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', opacity: 0.8 }} loading="lazy" />
                     <div style={{ position: 'absolute', top: 5, left: 8, display: 'flex', gap: 4, alignItems: 'center' }}>
-                      <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 5, background: r.project_type === '재건축' ? 'rgba(245,158,11,0.9)' : 'rgba(139,92,246,0.9)', color: '#fff' }}>{r.project_type || '재개발'}</span>
-                      <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 6px', borderRadius: 4, background: 'rgba(0,0,0,0.4)', color: '#fff' }}>{r.stage || '진행중'} {progress}%</span>
+                      <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 'var(--radius-sm)', background: r.project_type === '재건축' ? 'rgba(245,158,11,0.9)' : 'rgba(139,92,246,0.9)', color: '#fff' }}>{r.project_type || '재개발'}</span>
+                      <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 4, background: 'rgba(0,0,0,0.4)', color: '#fff' }}>{r.stage || '진행중'} {progress}%</span>
                     </div>
                   </div>
                   {/* ① 헤더: 배지 + 이름 + 메타 */}
                   <div style={{ padding: '8px 12px 6px', display: 'flex', gap: 8 }}>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 3, marginBottom: 5, flexWrap: 'wrap' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 5, flexWrap: 'wrap' }}>
                       </div>
                       <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 2 }}>{r.district_name && r.district_name !== '미상' && r.district_name !== '정보 준비중' ? r.district_name : r.address || r.notes || '정보 준비중'}</div>
                       <div style={{ fontSize: 10, color: 'var(--text-tertiary)', lineHeight: 1.5 }}>{r.region || ''}{r.sigungu ? ` ${r.sigungu}` : ''}{r.total_households ? ` · ${r.total_households.toLocaleString()}세대` : ''}{(r as any).area_sqm ? ` · ${((r as any).area_sqm / 1000).toFixed(0)}천m²` : ''}</div>
                     </div>
                     <div style={{ flexShrink: 0 }}>
-                      <a href={`/apt/${encodeURIComponent(redevSlug)}#interest-section`} onClick={(e) => e.stopPropagation()} aria-label="관심등록" style={{ fontSize: 16, background: 'transparent', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '2px 6px', lineHeight: 1, textDecoration: 'none', color: 'var(--text-tertiary)' }}>☆</a>
+                      <a href={`/apt/${encodeURIComponent(redevSlug)}#interest-section`} onClick={(e) => e.stopPropagation()} aria-label="관심등록" style={{ fontSize: 16, background: 'transparent', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '3px 8px', lineHeight: 1, textDecoration: 'none', color: 'var(--text-tertiary)' }}>☆</a>
                     </div>
                   </div>
 

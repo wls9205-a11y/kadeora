@@ -98,7 +98,7 @@ export default function ExecuteTab({ onNavigate }: { onNavigate: (t: any) => voi
       >
         {running ? (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-            <div style={{ width: 20, height: 20, border: '2px solid var(--border)', borderTopColor: 'var(--brand)', borderRadius: '50%', animation: 'spin .6s linear infinite' }} />
+            <div style={{ width: 24, height: 24, border: '2px solid var(--border)', borderTopColor: 'var(--brand)', borderRadius: '50%', animation: 'spin .6s linear infinite' }} />
             실행 중...
           </div>
         ) : (
@@ -173,7 +173,7 @@ export default function ExecuteTab({ onNavigate }: { onNavigate: (t: any) => voi
                     </span>
                     <span style={{ flex: 1, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.cron}</span>
                     <span style={{ color: 'var(--text-tertiary)', minWidth: 40, textAlign: 'right' }}>{r.duration ? `${r.duration.toFixed(1)}s` : '—'}</span>
-                    <span style={{ fontSize: 10, color: 'var(--text-tertiary)', background: 'var(--bg-hover)', padding: '1px 4px', borderRadius: 3, minWidth: 24, textAlign: 'center' }}>{r.status}</span>
+                    <span style={{ fontSize: 10, color: 'var(--text-tertiary)', background: 'var(--bg-hover)', padding: '1px 4px', borderRadius: 4, minWidth: 24, textAlign: 'center' }}>{r.status}</span>
                   </div>
                 ))}
               </div>

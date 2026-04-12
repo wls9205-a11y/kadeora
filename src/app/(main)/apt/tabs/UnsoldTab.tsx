@@ -91,7 +91,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
               <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{fu.length}곳{freshDate ? ` · ${freshDate}` : ''}</span>
             </div>
             {/* 비율 바 */}
-            <div style={{ display: 'flex', height: 6, borderRadius: 3, overflow: 'hidden', marginBottom: 5 }}>
+            <div style={{ display: 'flex', height: 6, borderRadius: 4, overflow: 'hidden', marginBottom: 5 }}>
               {top5.map((r, i) => (
                 <div key={r.name} style={{ flex: r.unitCount, background: barColors[i], transition: 'flex 0.3s' }} />
               ))}
@@ -101,7 +101,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               {top5.map((r, i) => (
                 <button key={r.name} onClick={() => { setUnsoldRegion(unsoldRegion === r.name ? '전체' : r.name); setUnsoldPage(1); }}
-                  style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 10, color: unsoldRegion === r.name ? barColors[i] : 'var(--text-tertiary)', fontWeight: unsoldRegion === r.name ? 700 : 400, background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
+                  style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 10, color: unsoldRegion === r.name ? barColors[i] : 'var(--text-tertiary)', fontWeight: unsoldRegion === r.name ? 700 : 400, background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
                   <span style={{ width: 6, height: 6, borderRadius: 1, background: barColors[i], flexShrink: 0 }} />
                   {r.name} {r.unitCount.toLocaleString()}
                 </button>
@@ -146,7 +146,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
 
       {/* 안내 + 검색 + 필터 */}
       <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-sm)' }}>국토교통부 미분양주택현황 월간 통계 (2~3개월 지연) · 최근 12개월 데이터</div>
-      <div className="apt-pill-scroll kd-scroll-row" style={{ display: 'flex', gap: 5, overflowX: 'auto', scrollbarWidth: 'none', marginBottom: 'var(--sp-sm)', paddingBottom: 2 }}>
+      <div className="apt-pill-scroll kd-scroll-row" style={{ display: 'flex', gap: 6, overflowX: 'auto', scrollbarWidth: 'none', marginBottom: 'var(--sp-sm)', paddingBottom: 2 }}>
         {regs.map(r => pill(r, unsoldRegion, setUnsoldRegion))}
         <div style={{ flexShrink: 0, width: 16 }} aria-hidden />
       </div>
@@ -170,14 +170,14 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
             <div style={{ height: 48, background: 'var(--bg-hover)', position: 'relative', overflow: 'hidden' }}>
               <img src={aptImageMap?.[u.house_nm] || `/api/og?title=${encodeURIComponent(u.house_nm || '미분양')}&category=apt&design=2`} alt={u.house_nm || "부동산 이미지"} width={400} height={48} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', opacity: 0.8 }} loading="lazy" />
               <div style={{ position: 'absolute', top: 5, left: 8, display: 'flex', gap: 4, alignItems: 'center' }}>
-                <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 5, background: 'rgba(248,113,113,0.9)', color: '#fff' }}>미분양</span>
+                <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 'var(--radius-sm)', background: 'rgba(248,113,113,0.9)', color: '#fff' }}>미분양</span>
                 <span style={{ fontSize: 10, fontWeight: 800, color: '#fff' }}>{unsoldCount.toLocaleString()}호</span>
               </div>
             </div>
             {/* ① 헤더: 배지 + 이름 + 메타 */}
             <div style={{ padding: '8px 12px 6px', display: 'flex', gap: 8 }}>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 3, marginBottom: 5, flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 5, flexWrap: 'wrap' }}>
                   {isNew(u, 'unsold') && <NewBadge />}
                   {(() => { const sa = surgeAlerts.find(a => a.region_nm === u.region_nm); return sa && sa.change_pct !== 0 ? <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 5px', borderRadius: 10, background: sa.change_pct > 0 ? 'rgba(248,113,113,0.08)' : 'rgba(52,211,153,0.08)', color: sa.change_pct > 0 ? 'var(--accent-red)' : 'var(--accent-green)' }}>{sa.change_pct > 0 ? '+' : ''}{sa.change_pct}%</span> : null; })()}
                 </div>
@@ -185,7 +185,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
                 <div style={{ fontSize: 10, color: 'var(--text-tertiary)', lineHeight: 1.5 }}>{u.region_nm}{u.sigungu_nm ? ` ${u.sigungu_nm}` : ''}</div>
               </div>
               <div style={{ flexShrink: 0 }}>
-                <a href={`/apt/${encodeURIComponent(generateAptSlug(u.house_nm) || String(u.id))}#interest-section`} aria-label="관심등록" onClick={(e) => e.stopPropagation()} style={{ fontSize: 16, background: 'transparent', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '2px 6px', lineHeight: 1, textDecoration: 'none', color: 'var(--text-tertiary)' }}>☆</a>
+                <a href={`/apt/${encodeURIComponent(generateAptSlug(u.house_nm) || String(u.id))}#interest-section`} aria-label="관심등록" onClick={(e) => e.stopPropagation()} style={{ fontSize: 16, background: 'transparent', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '3px 8px', lineHeight: 1, textDecoration: 'none', color: 'var(--text-tertiary)' }}>☆</a>
               </div>
             </div>
 
@@ -198,9 +198,9 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
 
             {/* ③ 미분양률 바 */}
             {rate !== null && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '0 12px', marginBottom: 6 }}>
-                <div style={{ flex: 1, height: 5, borderRadius: 3, background: 'var(--bg-hover)', overflow: 'hidden' }}>
-                  <div style={{ height: '100%', borderRadius: 3, width: `${Math.min(rate, 100)}%`, background: rate > 70 ? 'var(--accent-red)' : rate > 40 ? 'var(--accent-orange)' : 'var(--accent-yellow)' }} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0 12px', marginBottom: 6 }}>
+                <div style={{ flex: 1, height: 5, borderRadius: 4, background: 'var(--bg-hover)', overflow: 'hidden' }}>
+                  <div style={{ height: '100%', borderRadius: 4, width: `${Math.min(rate, 100)}%`, background: rate > 70 ? 'var(--accent-red)' : rate > 40 ? 'var(--accent-orange)' : 'var(--accent-yellow)' }} />
                 </div>
                 <span style={{ fontSize: 10, fontWeight: 700, color: dangerColor, flexShrink: 0 }}>{rate}%</span>
               </div>

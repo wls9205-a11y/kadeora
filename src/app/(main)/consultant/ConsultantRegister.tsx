@@ -187,7 +187,7 @@ export default function ConsultantRegister() {
               borderWidth: i === 1 ? 2 : 1,
               position: 'relative',
             }}>
-              {i === 1 && <div style={{ position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)', fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '2px 12px', borderRadius: 'var(--radius-md)', background: tier.color, color: 'var(--text-inverse)' }}>인기</div>}
+              {i === 1 && <div style={{ position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)', fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '3px 12px', borderRadius: 'var(--radius-md)', background: tier.color, color: 'var(--text-inverse)' }}>인기</div>}
               <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-md)' }}>
                 <span style={{ fontSize: 'var(--fs-xl)' }}>{tier.icon}</span>
                 <div>

@@ -73,7 +73,7 @@ function D1(C: typeof CAT[string], title: string, sub: string, author: string, f
       {/* 스트라이프2: 메타 바 */}
       <div style={{ background:'#111', height:52, display:'flex', alignItems:'center', padding:'0 48px', gap:16, flexShrink:0, borderBottom:'0.5px solid rgba(255,255,255,.06)' }}>
         {author && <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-          <div style={{ width:22, height:22, borderRadius:'50%', background:`linear-gradient(135deg,${C.a},#2563eb)`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:900, color:'#fff' }}>
+          <div style={{ width: 24, height: 24, borderRadius:'50%', background:`linear-gradient(135deg,${C.a},#2563eb)`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:900, color:'#fff' }}>
             {author[0].toUpperCase()}
           </div>
           <span style={{ fontSize:12, color:'#6b7280' }}>{author}</span>
@@ -83,7 +83,7 @@ function D1(C: typeof CAT[string], title: string, sub: string, author: string, f
           <div style={{ width:5, height:5, borderRadius:'50%', background:'#00FF87', boxShadow:'0 0 5px #00FF87' }} />
           <span style={{ fontSize:11, color:'rgba(255,255,255,.25)', letterSpacing:.5 }}>LIVE</span>
         </div>
-        <span style={{ fontSize:11, fontWeight:700, color:C.a, padding:'3px 12px', borderRadius:6, background:C.b, border:`0.5px solid ${C.a}50` }}>kadeora.app</span>
+        <span style={{ fontSize:11, fontWeight:700, color:C.a, padding:'3px 12px', borderRadius: 'var(--radius-sm)', background:C.b, border:`0.5px solid ${C.a}50` }}>kadeora.app</span>
       </div>
       {/* 스트라이프3: 제목 */}
       <div style={{ flex:1, display:'flex', flexDirection:'column', justifyContent:'center', padding:'0 48px' }}>
@@ -143,7 +143,7 @@ function D2(C: typeof CAT[string], title: string, sub: string, author: string, f
 
         {/* 상단: 카테고리 뱃지 우상단 */}
         <div style={{ display:'flex', justifyContent:'flex-end' }}>
-          <div style={{ display:'flex', alignItems:'center', gap:6, padding:'5px 14px', background:C.b, border:`0.5px solid ${C.a}55`, borderRadius:99 }}>
+          <div style={{ display:'flex', alignItems:'center', gap:6, padding:'5px 14px', background:C.b, border:`0.5px solid ${C.a}55`, borderRadius:'var(--radius-pill)' }}>
             <span style={{ fontSize:14 }}>{C.I}</span>
             <span style={{ fontSize:11, fontWeight:700, color:C.a }}>{C.L}</span>
           </div>
@@ -152,7 +152,7 @@ function D2(C: typeof CAT[string], title: string, sub: string, author: string, f
         {/* 중앙: 컬러 언더라인 + 제목 + 부제 */}
         <div style={{ display:'flex', flexDirection:'column', gap:0 }}>
           {/* 컬러 언더라인 24px */}
-          <div style={{ width:24, height:3, background:C.a, borderRadius:99, marginBottom:18 }} />
+          <div style={{ width:24, height:3, background:C.a, borderRadius:'var(--radius-pill)', marginBottom:18 }} />
           {/* 제목 */}
           <div style={{ fontSize:titleFS, fontWeight:900, color:'#ffffff', lineHeight:1.18, letterSpacing:-0.8, marginBottom:14, wordBreak:'keep-all' }}>
             {title}
@@ -169,7 +169,7 @@ function D2(C: typeof CAT[string], title: string, sub: string, author: string, f
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', paddingTop:14, borderTop:'0.5px solid rgba(255,255,255,0.07)' }}>
           <div style={{ display:'flex', alignItems:'center', gap:8 }}>
             {/* LIVE 도트 */}
-            <div style={{ display:'flex', alignItems:'center', gap:5 }}>
+            <div style={{ display:'flex', alignItems:'center', gap: 6 }}>
               <div style={{ width:6, height:6, borderRadius:'50%', background:'#00FF87' }} />
               <span style={{ fontSize:10, color:'rgba(255,255,255,0.25)', fontWeight:600, letterSpacing:0.5 }}>LIVE</span>
             </div>
@@ -177,7 +177,7 @@ function D2(C: typeof CAT[string], title: string, sub: string, author: string, f
               <>
                 <div style={{ width:1, height:12, background:'rgba(255,255,255,0.12)' }} />
                 <div style={{ display:'flex', alignItems:'center', gap:6 }}>
-                  <div style={{ width:20, height:20, borderRadius:'50%', background:`linear-gradient(135deg,${C.a},#2563EB)`, display:'flex', alignItems:'center', justifyContent:'center', fontSize: 10, fontWeight:900, color:'#fff' }}>
+                  <div style={{ width: 24, height: 24, borderRadius:'50%', background:`linear-gradient(135deg,${C.a},#2563EB)`, display:'flex', alignItems:'center', justifyContent:'center', fontSize: 10, fontWeight:900, color:'#fff' }}>
                     {author[0].toUpperCase()}
                   </div>
                   <span style={{ fontSize:11, color:'rgba(255,255,255,0.35)' }}>{author}</span>
@@ -206,14 +206,14 @@ function D3(C: typeof CAT[string], title: string, sub: string, author: string, f
       {/* 왼쪽 컨텐츠 */}
       <div style={{ position:'absolute', top:0, left:0, width:'42%', height:'100%', display:'flex', flexDirection:'column', justifyContent:'space-between', padding:'32px 28px', zIndex:2 }}>
         <div>
-          <div style={{ display:'flex', alignItems:'center', gap:7, marginBottom:20 }}>
+          <div style={{ display:'flex', alignItems:'center', gap: 8, marginBottom:20 }}>
             {Logo(20)}<span style={{ fontSize:13, fontWeight:900, color:'#000' }}>카더라</span>
           </div>
           <div style={{ fontSize:11, fontWeight:700, color:'rgba(0,0,0,.5)', letterSpacing:2, marginBottom:4 }}>{C.E}</div>
           <div style={{ fontSize: 'var(--fs-base)', fontWeight:900, color:'#000' }}>{C.L}  {C.I}</div>
         </div>
         {author && (
-          <div style={{ display:'flex', alignItems:'center', gap:7 }}>
+          <div style={{ display:'flex', alignItems:'center', gap: 8 }}>
             <div style={{ width:24, height:24, borderRadius:'50%', background:'rgba(0,0,0,.2)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:11, fontWeight:900, color:'#000' }}>{author[0].toUpperCase()}</div>
             <span style={{ fontSize:12, color:'rgba(0,0,0,.55)' }}>{author}</span>
           </div>
@@ -222,7 +222,7 @@ function D3(C: typeof CAT[string], title: string, sub: string, author: string, f
       </div>
       {/* 오른쪽 컨텐츠 */}
       <div style={{ position:'absolute', top:0, right:0, width:'58%', height:'100%', display:'flex', flexDirection:'column', justifyContent:'center', padding:'32px 36px 32px 48px', zIndex:2 }}>
-        <div style={{ width:28, height:2, background:C.a, borderRadius:99, marginBottom:18 }} />
+        <div style={{ width:28, height:2, background:C.a, borderRadius:'var(--radius-pill)', marginBottom:18 }} />
         <div style={{ fontSize:titleFS, fontWeight:900, color:'#fff', lineHeight:1.18, letterSpacing:-1, marginBottom:12 }}>{title}</div>
         {sub && <div style={{ fontSize:14, color:'#4b5563', lineHeight:1.55 }}>{sub}</div>}
         <div style={{ display:'flex', alignItems:'center', gap:6, marginTop:20 }}>
@@ -246,14 +246,14 @@ function D4(C: typeof CAT[string], title: string, sub: string, author: string, f
         <div style={{ position:'absolute', bottom:'-25%', right:'-25%', width:'80%', aspectRatio:'1', borderRadius:'50%', background:'rgba(0,0,0,.12)', display:'flex' }} />
         <div style={{ position:'absolute', top:'-15%', left:'-15%', width:'55%', aspectRatio:'1', borderRadius:'50%', background:'rgba(255,255,255,.15)', display:'flex' }} />
         <div style={{ position:'relative', zIndex:1 }}>
-          <div style={{ display:'flex', alignItems:'center', gap:7, marginBottom:16 }}>
+          <div style={{ display:'flex', alignItems:'center', gap: 8, marginBottom:16 }}>
             {Logo(20)}<span style={{ fontSize:13, fontWeight:900, color:'rgba(0,0,0,.6)' }}>카더라</span>
           </div>
           <div style={{ fontSize:11, fontWeight:700, color:'rgba(0,0,0,.4)', letterSpacing:2 }}>{C.E}</div>
           <div style={{ fontSize: 'var(--fs-md)', fontWeight:900, color:'#000', marginTop:4 }}>{C.L}  {C.I}</div>
         </div>
         {author && (
-          <div style={{ position:'relative', zIndex:1, display:'flex', alignItems:'center', gap:7 }}>
+          <div style={{ position:'relative', zIndex:1, display:'flex', alignItems:'center', gap: 8 }}>
             <div style={{ width:26, height:26, borderRadius:'50%', background:'rgba(0,0,0,.15)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:12, fontWeight:900, color:'#000' }}>{author[0].toUpperCase()}</div>
             <span style={{ fontSize:12, color:'rgba(0,0,0,.55)' }}>{author}</span>
           </div>
@@ -264,7 +264,7 @@ function D4(C: typeof CAT[string], title: string, sub: string, author: string, f
       <div style={{ flex:1, background:'#fff', display:'flex', flexDirection:'column', justifyContent:'space-between', padding:'28px 32px' }}>
         <div style={{ display:'flex', justifyContent:'flex-end' }}>{Logo(20)}</div>
         <div>
-          <div style={{ width:28, height:3, background:C.a, borderRadius:99, marginBottom:16 }} />
+          <div style={{ width:28, height:3, background:C.a, borderRadius:'var(--radius-pill)', marginBottom:16 }} />
           <div style={{ fontSize:titleFS, fontWeight:900, color:'#111', lineHeight:1.18, letterSpacing:-.8, marginBottom:10 }}>{title}</div>
           {sub && <div style={{ fontSize:13, color:'#9ca3af', lineHeight:1.55 }}>{sub}</div>}
         </div>
@@ -300,7 +300,7 @@ function D5(C: typeof CAT[string], title: string, sub: string, author: string, f
       </div>
       {/* 메인: 제목 */}
       <div style={{ flex:1, display:'flex', flexDirection:'column', justifyContent:'center', padding:'0 40px', position:'relative', zIndex:2 }}>
-        <div style={{ width:24, height:2, background:C.a, borderRadius:99, marginBottom:16, boxShadow:`0 0 8px ${C.a}` }} />
+        <div style={{ width:24, height:2, background:C.a, borderRadius:'var(--radius-pill)', marginBottom:16, boxShadow:`0 0 8px ${C.a}` }} />
         <div style={{ fontSize:titleFS, fontWeight:900, color:'#fff', lineHeight:1.14, letterSpacing:-1.2, marginBottom:12 }}>{title}</div>
         {sub && <div style={{ fontSize:15, color:'#374151', lineHeight:1.55 }}>{sub}</div>}
       </div>
@@ -308,7 +308,7 @@ function D5(C: typeof CAT[string], title: string, sub: string, author: string, f
       <div style={{ display:'flex', alignItems:'center', padding:'14px 40px 20px', position:'relative', zIndex:2, borderTop:`0.5px solid ${C.a}20` }}>
         {author
           ? <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-              <div style={{ width:22, height:22, borderRadius:'50%', background:`${C.a}20`, border:`1px solid ${C.a}40`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:900, color:C.a }}>{author[0].toUpperCase()}</div>
+              <div style={{ width: 24, height: 24, borderRadius:'50%', background:`${C.a}20`, border:`1px solid ${C.a}40`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:900, color:C.a }}>{author[0].toUpperCase()}</div>
               <span style={{ fontSize:12, color:'#4b5563' }}>{author}</span>
             </div>
           : <span style={{ fontSize:12, color:'#1f2937' }}>카더라</span>
@@ -337,14 +337,14 @@ function D6(C: typeof CAT[string], title: string, sub: string, author: string, f
         <div style={{ display:'flex', alignItems:'center', gap:8 }}>
           {Logo(24)}<span style={{ fontSize:15, fontWeight:700, color:'rgba(255,255,255,.55)' }}>카더라</span>
         </div>
-        <div style={{ padding:'5px 16px', background:'rgba(255,255,255,.12)', border:'0.5px solid rgba(255,255,255,.25)', borderRadius:99 }}>
+        <div style={{ padding:'5px 16px', background:'rgba(255,255,255,.12)', border:'0.5px solid rgba(255,255,255,.25)', borderRadius:'var(--radius-pill)' }}>
           <span style={{ fontSize:13, fontWeight:700, color:'#fff' }}>{C.I}  {C.L}</span>
         </div>
       </div>
       {/* 메인 */}
       <div style={{ flex:1, display:'flex', flexDirection:'column', justifyContent:'center', padding:'0 44px', position:'relative', zIndex:2 }}>
         <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:14 }}>
-          <div style={{ width:28, height:2, background:'rgba(255,255,255,.6)', borderRadius:99 }} />
+          <div style={{ width:28, height:2, background:'rgba(255,255,255,.6)', borderRadius:'var(--radius-pill)' }} />
           <span style={{ fontSize:12, color:'rgba(255,255,255,.5)', letterSpacing:1.5, fontWeight:700 }}>{C.E}</span>
         </div>
         <div style={{ fontSize:titleFS, fontWeight:900, color:'#fff', lineHeight:1.15, letterSpacing:-1.2, marginBottom:12 }}>{title}</div>

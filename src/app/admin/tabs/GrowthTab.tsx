@@ -45,7 +45,7 @@ export default function GrowthTab({ onNavigate }: { onNavigate: (t: any) => void
       {/* 14일 PV/UV 추이 차트 */}
       <div className="adm-sec">📊 14일 트래픽 추이</div>
       <div className="adm-card" style={{ padding: '12px 14px' }}>
-        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 3, height: 100 }}>
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, height: 100 }}>
           {(dailyTrend || []).map((d: any, i: number) => (
             <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
               <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{d.pv}</div>
@@ -180,8 +180,8 @@ export default function GrowthTab({ onNavigate }: { onNavigate: (t: any) => void
         {(featureUsage || []).map((f: any, i: number) => (
           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0' }}>
             <span style={{ minWidth: 60, fontSize: 12, color: 'var(--text-secondary)' }}>{f.feature}</span>
-            <div style={{ flex: 1, height: 14, background: 'var(--bg-hover)', borderRadius: 3, overflow: 'hidden' }}>
-              <div style={{ height: '100%', width: `${(f.views / maxFeature) * 100}%`, background: f.views > 100 ? '#10B981' : f.views > 20 ? '#F59E0B' : '#EF4444', borderRadius: 3, minWidth: f.views > 0 ? 4 : 0 }} />
+            <div style={{ flex: 1, height: 14, background: 'var(--bg-hover)', borderRadius: 4, overflow: 'hidden' }}>
+              <div style={{ height: '100%', width: `${(f.views / maxFeature) * 100}%`, background: f.views > 100 ? '#10B981' : f.views > 20 ? '#F59E0B' : '#EF4444', borderRadius: 4, minWidth: f.views > 0 ? 4 : 0 }} />
             </div>
             <span style={{ minWidth: 40, textAlign: 'right', fontSize: 11, color: 'var(--text-tertiary)' }}>{f.views}</span>
           </div>

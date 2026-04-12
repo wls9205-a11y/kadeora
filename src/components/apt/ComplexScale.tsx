@@ -76,11 +76,11 @@ export default function ComplexScale({
             <span>공급 비율</span>
             <span>{supplyPct}%</span>
           </div>
-          <div style={{ height: 6, borderRadius: 3, background: 'var(--bg-hover)', overflow: 'hidden' }}>
+          <div style={{ height: 6, borderRadius: 4, background: 'var(--bg-hover)', overflow: 'hidden' }}>
             <div style={{
               height: '100%',
               width: `${Math.min(supplyPct, 100)}%`,
-              borderRadius: 3,
+              borderRadius: 4,
               background: 'linear-gradient(90deg, var(--brand), var(--accent-green))',
               transition: 'width 0.5s ease',
             }} />

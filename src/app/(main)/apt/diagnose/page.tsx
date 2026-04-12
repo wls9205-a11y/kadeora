@@ -5,7 +5,7 @@ export default function DiagnosePage() {
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
       {/* SEO H1 — 크롤러 필수 */}
       <div style={{ marginBottom: 20 }}>
-        <h1 style={{ margin: '0 0 4px', fontSize: 'var(--fs-xl)', fontWeight: 900, letterSpacing: '-0.5px', color: 'var(--text-primary)' }}>
+        <h1 style={{ position:"absolute", width:1, height:1, overflow:"hidden", clip:"rect(0,0,0,0)" }}>
           2026 청약 가점 계산기
         </h1>
         <p style={{ margin: 0, fontSize: 13, color: 'var(--text-tertiary)' }}>

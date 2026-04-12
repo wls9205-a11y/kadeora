@@ -26,7 +26,7 @@ const S='rgba(12,21,40,0.6)';const BD='1px solid rgba(255,255,255,0.04)';
 const Ring=({v,sz=52,c}:{v:number;sz?:number;c:string})=>{const r=(sz-6)/2,ci=2*Math.PI*r;return<svg width={sz} height={sz}><circle cx={sz/2} cy={sz/2} r={r} fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="4"/><circle cx={sz/2} cy={sz/2} r={r} fill="none" stroke={c} strokeWidth="4" strokeDasharray={ci} strokeDashoffset={ci-(Math.min(v,100)/100)*ci} strokeLinecap="round" transform={`rotate(-90 ${sz/2} ${sz/2})`} style={{transition:'all .8s'}}/></svg>;};
 const Bar=({v,mx=100,c}:{v:number;mx?:number;c:string})=><div style={{height:4,borderRadius:2,background:'rgba(255,255,255,0.03)',overflow:'hidden'}}><div style={{height:'100%',width:`${Math.max(Math.min(v/mx*100,100),1)}%`,background:c,borderRadius:2,transition:'width .5s'}}/></div>;
 const Sec=({t,ch,open=true}:{t:string;ch:React.ReactNode;open?:boolean})=>{const[o,setO]=useState(open);return<div style={{marginBottom:8}}><button onClick={()=>setO(!o)} style={{display:'flex',alignItems:'center',gap:4,width:'100%',background:'none',border:'none',padding:'5px 0',cursor:'pointer',fontSize:11,fontWeight:700,color:'#94A3B8'}}><span style={{fontSize:11,transition:'transform .15s',transform:o?'rotate(90deg)':'rotate(0)'}}>▶</span>{t}</button>{o&&ch}</div>;};
-const Card=({ch,p='8px 10px',st}:{ch:React.ReactNode;p?:string;st?:React.CSSProperties})=><div style={{background:S,border:BD,borderRadius:8,padding:p,...st}}>{ch}</div>;
+const Card=({ch,p='8px 10px',st}:{ch:React.ReactNode;p?:string;st?:React.CSSProperties})=><div style={{background:S,border:BD,borderRadius: 'var(--radius-md)',padding:p,...st}}>{ch}</div>;
 
 export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
   const[d,setD]=useState<any>(null);
@@ -94,24 +94,24 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
             <div key={s.l} style={{textAlign:'center'}}><div style={{fontSize:14,fontWeight:800,color:s.c,lineHeight:1}}>{s.v}</div><div style={{fontSize:11,color:'rgba(255,255,255,0.15)'}}>{s.l}</div></div>
           )}
         </div>
-        <button onClick={godMode} disabled={gr} style={{padding:'7px 10px',borderRadius:8,border:'none',cursor:'pointer',fontSize:13,fontWeight:700,background:gr?'rgba(255,255,255,0.04)':'linear-gradient(135deg,#3B7BF6,#10B981)',color:'#fff',display:'flex',flexDirection:'column',alignItems:'center',gap:1,flexShrink:0}}>
+        <button onClick={godMode} disabled={gr} style={{padding:'7px 10px',borderRadius: 'var(--radius-md)',border:'none',cursor:'pointer',fontSize:13,fontWeight:700,background:gr?'rgba(255,255,255,0.04)':'linear-gradient(135deg,#3B7BF6,#10B981)',color:'#fff',display:'flex',flexDirection:'column',alignItems:'center',gap:1,flexShrink:0}}>
           <span style={{fontSize:14}}>{gr?'⏳':'🚀'}</span>{gr?'...':'최신화'}
         </button>
       </div>} p="10px 12px"/>
-      {gRes&&<div style={{padding:'3px 8px',borderRadius:6,margin:'4px 0',fontSize:13,fontWeight:600,background:gRes.fail>0?'rgba(239,68,68,0.08)':'rgba(16,185,129,0.08)',color:gRes.fail>0?'#EF4444':'#10B981',textAlign:'center'}}>✓{gRes.ok}{gRes.fail>0&&` ✗${gRes.fail}`}</div>}
+      {gRes&&<div style={{padding:'3px 8px',borderRadius: 'var(--radius-sm)',margin:'4px 0',fontSize:13,fontWeight:600,background:gRes.fail>0?'rgba(239,68,68,0.08)':'rgba(16,185,129,0.08)',color:gRes.fail>0?'#EF4444':'#10B981',textAlign:'center'}}>✓{gRes.ok}{gRes.fail>0&&` ✗${gRes.fail}`}</div>}
       <div style={{fontSize:11,color:'rgba(255,255,255,0.15)',textAlign:'right',marginBottom:2}}>30초마다 자동 갱신 · {new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})}</div>
 
       {/* ═══ 2. 경고 ═══ */}
-      {(crits.length>0||staleList.length>0||Object.keys(fc||{}).length>0)&&<div style={{padding:'6px 10px',borderRadius:8,margin:'4px 0',background:'rgba(239,68,68,0.05)',border:'1px solid rgba(239,68,68,0.12)'}}>
+      {(crits.length>0||staleList.length>0||Object.keys(fc||{}).length>0)&&<div style={{padding:'6px 10px',borderRadius: 'var(--radius-md)',margin:'4px 0',background:'rgba(239,68,68,0.05)',border:'1px solid rgba(239,68,68,0.12)'}}>
         {crits.map(b=><div key={b.k} style={{fontSize:13,color:'rgba(255,255,255,0.45)',marginBottom:1}}>🔴 {BM[b.k].l} {b.v.toFixed(1)}% (기준 {BM[b.k].g})</div>)}
         {staleList.length>0&&<div style={{fontSize:13,color:'rgba(255,255,255,0.45)'}}>🟠 {staleList.length}개 크론 6h+ 미실행</div>}
         {Object.keys(fc||{}).length>0&&<div style={{fontSize:13,color:'rgba(255,255,255,0.45)'}}>🔴 실패 크론 {Object.keys(fc).length}개</div>}
       </div>}
 
       {/* ═══ 3. 벤치마크 4x2 ═══ */}
-      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:3,margin:'6px 0'}}>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap: 4,margin:'6px 0'}}>
         {bm.map(b=>(
-          <div key={b.k} style={{background:S,border:BD,borderRadius:6,padding:'5px 3px',textAlign:'center'}}>
+          <div key={b.k} style={{background:S,border:BD,borderRadius: 'var(--radius-sm)',padding:'5px 3px',textAlign:'center'}}>
             <div style={{fontSize:11,fontWeight:800,color:gc(b.g),lineHeight:1}}>{b.v.toFixed(b.v<10?1:0)}%</div>
             <div style={{fontSize:11,color:'rgba(255,255,255,0.15)',marginTop:2}}>{BM[b.k].l}</div>
           </div>
@@ -169,7 +169,7 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
       </div>
 
       {/* ═══ 6. KPI 4x2 ═══ */}
-      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:3,marginBottom:8}}>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap: 4,marginBottom:8}}>
         {[
           {v:f(k.blogs||0),l:'블로그',c:'#8B5CF6'},
           {v:f(k.stocks||0),l:'주식',c:'#3B7BF6'},
@@ -180,7 +180,7 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
           {v:f(x.shares7d||0),l:'공유7d',c:'#A855F7'},
           {v:f(k.interests||0),l:'관심단지',c:'#06B6D4'},
         ].map(s=>(
-          <div key={s.l} style={{background:S,border:BD,borderRadius:6,padding:'5px 3px',textAlign:'center'}}>
+          <div key={s.l} style={{background:S,border:BD,borderRadius: 'var(--radius-sm)',padding:'5px 3px',textAlign:'center'}}>
             <div style={{fontSize:12,fontWeight:800,color:s.c,lineHeight:1}}>{s.v}</div>
             <div style={{fontSize:10,color:'rgba(255,255,255,0.4)',marginTop:2}}>{s.l}</div>
           </div>
@@ -210,7 +210,7 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
             {Object.entries(fresh).slice(0,8).map(([name,info]:any)=>{
               const ageMs=Date.now()-new Date(info.at).getTime();
               const c=ageMs<3600000?'#10B981':ageMs<21600000?'#F59E0B':'#EF4444';
-              return<div key={name} style={{display:'flex',alignItems:'center',gap:3,padding:'3px 0',fontSize:12}}>
+              return<div key={name} style={{display:'flex',alignItems:'center',gap: 4,padding:'3px 0',fontSize:12}}>
                 <span style={{width:4,height:4,borderRadius:'50%',background:c,flexShrink:0}}/>
                 <span style={{flex:1,color:'rgba(255,255,255,0.45)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{name}</span>
                 <span style={{color:'rgba(255,255,255,0.4)',fontSize:11}}>{ago(info.at)}</span>
@@ -266,7 +266,7 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:4}}>
           <Card ch={<>
             {ra.slice(0,6).map((a:any,i:number)=>(
-              <div key={i} style={{display:'flex',alignItems:'center',gap:3,padding:'3px 0',fontSize:12,color:'rgba(255,255,255,0.45)'}}>
+              <div key={i} style={{display:'flex',alignItems:'center',gap: 4,padding:'3px 0',fontSize:12,color:'rgba(255,255,255,0.45)'}}>
                 <span style={{fontSize:11}}>{a.type==='cron'?(a.status==='success'?'✅':'❌'):'👤'}</span>
                 <span style={{flex:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{a.type==='cron'?a.name:`${a.name} 가입`}</span>
                 <span style={{fontSize:11,color:'rgba(255,255,255,0.15)'}}>{ago(a.at)}</span>
@@ -275,7 +275,7 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
           </>} p="4px 6px"/>
           <Card ch={<>
             {(td?.recentVisitors||[]).slice(0,6).map((v:any,i:number)=>(
-              <div key={i} style={{display:'flex',alignItems:'center',gap:3,padding:'3px 0',fontSize:12,color:'rgba(255,255,255,0.4)'}}>
+              <div key={i} style={{display:'flex',alignItems:'center',gap: 4,padding:'3px 0',fontSize:12,color:'rgba(255,255,255,0.4)'}}>
                 <span style={{fontSize:11}}>{v.device}</span>
                 <span style={{flex:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{decodeURIComponent(v.path)}</span>
                 <span style={{fontSize:10,color:'rgba(255,255,255,0.06)'}}>{v.ref}</span>
@@ -309,7 +309,7 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
 
       {/* ═══ SEO ═══ */}
       <Sec t="🔍 SEO · 리라이팅" open={false} ch={
-        <Card ch={<div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:3}}>
+        <Card ch={<div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap: 4}}>
           {[
             {l:'Google',v:x.googleReady||0,c:'#4285F4'},{l:'Naver',v:x.naverReady||0,c:'#03C75A'},
             {l:'리라이팅',v:`${pct(k.rewritten||0,k.blogs||1)}%`,c:'#8B5CF6'},{l:'인덱싱',v:x.indexedOk||0,c:'#F59E0B'},
@@ -357,14 +357,14 @@ function EmailSender() {
   };
 
   return (
-    <div style={{background:'rgba(12,21,40,0.6)',border:'1px solid rgba(255,255,255,0.04)',borderRadius:8,padding:'8px 10px'}}>
+    <div style={{background:'rgba(12,21,40,0.6)',border:'1px solid rgba(255,255,255,0.04)',borderRadius: 'var(--radius-md)',padding:'8px 10px'}}>
       <div style={{display:'flex',gap:4,marginBottom:6}}>
-        <button onClick={()=>send('test')} disabled={sending} style={{flex:1,padding:'6px',borderRadius:6,border:'1px solid rgba(59,123,246,0.2)',background:'rgba(59,123,246,0.06)',color:'#3B7BF6',cursor:'pointer',fontSize:13,fontWeight:600}}>🧪 테스트</button>
-        <button onClick={()=>send('dormant')} disabled={sending} style={{flex:1,padding:'6px',borderRadius:6,border:'1px solid rgba(245,158,11,0.2)',background:'rgba(245,158,11,0.06)',color:'#F59E0B',cursor:'pointer',fontSize:13,fontWeight:600}}>😴 휴면유저</button>
-        <button onClick={()=>send('all')} disabled={sending} style={{flex:1,padding:'6px',borderRadius:6,border:'1px solid rgba(239,68,68,0.2)',background:'rgba(239,68,68,0.06)',color:'#EF4444',cursor:'pointer',fontSize:13,fontWeight:600}}>📨 전체발송</button>
+        <button onClick={()=>send('test')} disabled={sending} style={{flex:1,padding:'6px',borderRadius: 'var(--radius-sm)',border:'1px solid rgba(59,123,246,0.2)',background:'rgba(59,123,246,0.06)',color:'#3B7BF6',cursor:'pointer',fontSize:13,fontWeight:600}}>🧪 테스트</button>
+        <button onClick={()=>send('dormant')} disabled={sending} style={{flex:1,padding:'6px',borderRadius: 'var(--radius-sm)',border:'1px solid rgba(245,158,11,0.2)',background:'rgba(245,158,11,0.06)',color:'#F59E0B',cursor:'pointer',fontSize:13,fontWeight:600}}>😴 휴면유저</button>
+        <button onClick={()=>send('all')} disabled={sending} style={{flex:1,padding:'6px',borderRadius: 'var(--radius-sm)',border:'1px solid rgba(239,68,68,0.2)',background:'rgba(239,68,68,0.06)',color:'#EF4444',cursor:'pointer',fontSize:13,fontWeight:600}}>📨 전체발송</button>
       </div>
       {sending&&<div style={{fontSize:13,color:'rgba(255,255,255,0.45)',textAlign:'center',padding:4}}>발송 중...</div>}
-      {result&&<div style={{fontSize:13,padding:6,borderRadius:6,marginBottom:8,background:result.error?'rgba(239,68,68,0.06)':'rgba(16,185,129,0.06)',color:result.error?'#EF4444':'#10B981'}}>
+      {result&&<div style={{fontSize:13,padding:6,borderRadius: 'var(--radius-sm)',marginBottom:8,background:result.error?'rgba(239,68,68,0.06)':'rgba(16,185,129,0.06)',color:result.error?'#EF4444':'#10B981'}}>
         {result.error||`✓ ${result.sent}건 발송 ${result.failed>0?`· ✗ ${result.failed}건 실패`:''}`}
       </div>}
       <button onClick={loadLogs} style={{width:'100%',padding:'4px',borderRadius:4,border:'1px solid rgba(255,255,255,0.04)',background:'none',color:'rgba(255,255,255,0.2)',cursor:'pointer',fontSize:12}}>발송 이력 보기</button>
@@ -430,7 +430,7 @@ function NaverSyndication() {
           <span style={{fontSize:11}}>✅ 발행 <b style={{color:'#34D399'}}>{stats.published||0}</b></span>
           <span style={{fontSize:11}}>📊 전체 <b>{stats.total||0}</b></span>
         </div>
-        <button onClick={generate} disabled={generating} style={{fontSize:14,padding:'3px 8px',borderRadius:6,border:'1px solid rgba(59,123,246,0.3)',background:'rgba(59,123,246,0.1)',color:'#3B7BF6',cursor:'pointer'}}>
+        <button onClick={generate} disabled={generating} style={{fontSize:14,padding:'3px 8px',borderRadius: 'var(--radius-sm)',border:'1px solid rgba(59,123,246,0.3)',background:'rgba(59,123,246,0.1)',color:'#3B7BF6',cursor:'pointer'}}>
           {generating?'생성 중...':'🔄 수동 생성'}
         </button>
       </div>
@@ -455,7 +455,7 @@ function NaverSyndication() {
               {it.blog_status==='pending' && <button onClick={()=>markPublished(it.id)} style={{fontSize:13,padding:'2px 6px',borderRadius:4,border:'1px solid rgba(52,211,153,0.3)',background:'rgba(52,211,153,0.1)',color:'#34D399',cursor:'pointer'}}>✓ 발행완료</button>}
             </div>
           </div>
-          {htmlView===it.id && <div style={{marginTop:6,padding:8,borderRadius:6,background:'rgba(0,0,0,0.3)',maxHeight:200,overflow:'auto',fontSize:14,color:'rgba(255,255,255,0.5)',whiteSpace:'pre-wrap',wordBreak:'break-all'}}>{htmlContent}</div>}
+          {htmlView===it.id && <div style={{marginTop:6,padding:8,borderRadius: 'var(--radius-sm)',background:'rgba(0,0,0,0.3)',maxHeight:200,overflow:'auto',fontSize:14,color:'rgba(255,255,255,0.5)',whiteSpace:'pre-wrap',wordBreak:'break-all'}}>{htmlContent}</div>}
         </div>
       ))}
     </div>

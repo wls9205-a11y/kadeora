@@ -126,7 +126,7 @@ export default function SearchInput({
           aria-label={loading ? '검색 중' : '검색어 지우기'}
           style={{
             position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)',
-            width: 22, height: 22, borderRadius: '50%',
+            width: 24, height: 24, borderRadius: '50%',
             border: 'none', cursor: loading ? 'default' : 'pointer',
             background: 'var(--bg-hover)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',

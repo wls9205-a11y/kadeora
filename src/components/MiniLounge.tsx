@@ -156,7 +156,7 @@ export default function MiniLounge() {
           }}>
             {/* 아바타 이니셜 */}
             <div style={{
-              width: 20, height: 20, borderRadius: '50%', flexShrink: 0,
+              width: 24, height: 24, borderRadius: '50%', flexShrink: 0,
               background: m.is_mine
                 ? 'linear-gradient(135deg, #2563EB, #3B82F6)'
                 : 'linear-gradient(135deg, #334155, #475569)',

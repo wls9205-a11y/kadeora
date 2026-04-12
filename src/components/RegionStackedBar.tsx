@@ -101,7 +101,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
   return (
     <div style={{ marginBottom: 6, maxWidth: '100%', overflow: 'hidden' }}>
       {/* ── KPI 카드 (클릭 → 탭 전환) ── */}
-      <div className="kd-region-kpi" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 3, marginBottom: 6, paddingTop: 2, paddingBottom: 2 }}>
+      <div className="kd-region-kpi" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 4, marginBottom: 6, paddingTop: 2, paddingBottom: 2 }}>
         {KPI_CFG.map(k => {
           const isAct = activeTab === k.key;
           return (

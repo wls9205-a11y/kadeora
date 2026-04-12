@@ -24,9 +24,9 @@ export default function StockDetailSheet({ stock, onClose, isDomestic, isWatched
   return (
     <BottomSheet open={true} onClose={onClose} title={stock.name}>
       <div style={{ display: 'flex', gap: 6, marginBottom: 'var(--sp-lg)' }}>
-        <span style={{ fontSize: 'var(--fs-xs)', background: 'var(--bg-hover)', color: 'var(--text-tertiary)', padding: '2px 8px', borderRadius: 6 }}>{stock.symbol}</span>
-        <span style={{ fontSize: 'var(--fs-xs)', background: 'var(--bg-hover)', color: 'var(--text-tertiary)', padding: '2px 8px', borderRadius: 6 }}>{stock.market}</span>
-        {stock.sector && <span style={{ fontSize: 'var(--fs-xs)', background: 'var(--bg-hover)', color: 'var(--text-tertiary)', padding: '2px 8px', borderRadius: 6 }}>{stock.sector}</span>}
+        <span style={{ fontSize: 'var(--fs-xs)', background: 'var(--bg-hover)', color: 'var(--text-tertiary)', padding: '3px 8px', borderRadius: 'var(--radius-sm)' }}>{stock.symbol}</span>
+        <span style={{ fontSize: 'var(--fs-xs)', background: 'var(--bg-hover)', color: 'var(--text-tertiary)', padding: '3px 8px', borderRadius: 'var(--radius-sm)' }}>{stock.market}</span>
+        {stock.sector && <span style={{ fontSize: 'var(--fs-xs)', background: 'var(--bg-hover)', color: 'var(--text-tertiary)', padding: '3px 8px', borderRadius: 'var(--radius-sm)' }}>{stock.sector}</span>}
       </div>
 
       {/* 가격 + 등락 */}

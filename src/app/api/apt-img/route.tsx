@@ -70,7 +70,7 @@ export async function GET(req: NextRequest) {
               right: 14,
               display: 'flex',
               alignItems: 'center',
-              gap: 5,
+              gap: 6,
               opacity: 0.6,
             }}
           >

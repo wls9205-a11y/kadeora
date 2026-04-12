@@ -54,7 +54,7 @@ function MiniChart({ data, isKR = true }: { data: { date: string; close_price: n
             <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-xs)' }}>가격 범위</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)' }}>
               <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{low.toLocaleString()}</span>
-              <div style={{ flex: 1, height: 6, background: 'var(--bg-hover)', borderRadius: 3, position: 'relative' }}>
+              <div style={{ flex: 1, height: 6, background: 'var(--bg-hover)', borderRadius: 4, position: 'relative' }}>
                 <div style={{ position: 'absolute', left: `calc(${pos}% - 5px)`, top: -2, width: 10, height: 10, borderRadius: '50%', background: 'var(--brand)', border: '2px solid var(--bg-surface)' }} />
               </div>
               <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{high.toLocaleString()}</span>
@@ -105,7 +105,7 @@ function ChartTab({ priceHistory, currency }: { priceHistory: StockPriceHistory[
           <div style={{ display: 'flex', background: 'var(--bg-hover)', borderRadius: 'var(--radius-xs)', padding: 2 }}>
             {(['candle', 'line'] as const).map(t => (
               <button aria-label="닫기" key={t} onClick={() => setChartType(t)} style={{
-                padding: '4px 10px', border: 'none', borderRadius: 5, cursor: 'pointer',
+                padding: '4px 10px', border: 'none', borderRadius: 'var(--radius-sm)', cursor: 'pointer',
                 fontSize: 11, fontWeight: 600,
                 background: chartType === t ? 'var(--brand)' : 'transparent',
                 color: chartType === t ? '#fff' : 'var(--text-tertiary)',
@@ -115,10 +115,10 @@ function ChartTab({ priceHistory, currency }: { priceHistory: StockPriceHistory[
             ))}
           </div>
         )}
-        <div style={{ display: 'flex', gap: 3 }}>
+        <div style={{ display: 'flex', gap: 4 }}>
           {PERIODS.map(p => (
             <button key={p.key} onClick={() => setPeriod(p.key)} style={{
-              padding: '3px 9px', border: 'none', borderRadius: 5, cursor: 'pointer',
+              padding: '3px 9px', border: 'none', borderRadius: 'var(--radius-sm)', cursor: 'pointer',
               fontSize: 11, fontWeight: 600,
               background: period === p.key ? 'var(--brand)' : 'var(--bg-hover)',
               color: period === p.key ? '#fff' : 'var(--text-tertiary)',
@@ -211,7 +211,7 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
       <div style={{ display: 'flex', gap: 4, marginBottom: 'var(--sp-md)', overflowX: 'auto', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' as any }}>
         {TABS.map(t => (
           <button key={t.key} onClick={() => setTab(t.key)} style={{
-            padding: '6px 14px', border: tab === t.key ? 'none' : '1px solid var(--border)', cursor: 'pointer', fontSize: 12, fontWeight: 600, borderRadius: 16, flexShrink: 0, fontFamily: 'inherit',
+            padding: '6px 14px', border: tab === t.key ? 'none' : '1px solid var(--border)', cursor: 'pointer', fontSize: 12, fontWeight: 600, borderRadius: 'var(--radius-lg)', flexShrink: 0, fontFamily: 'inherit',
             background: tab === t.key ? 'var(--brand)' : 'transparent',
             color: tab === t.key ? '#fff' : 'var(--text-secondary)',
             transition: 'all 0.15s',
@@ -390,7 +390,7 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
             return (
               <div key={d.id} style={{ padding: '10px 0', borderBottom: '1px solid var(--border)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 6px', borderRadius: 4, background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontWeight: 600 }}>
+                  <span style={{ fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 4, background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontWeight: 600 }}>
                     {typeMap[d.disclosure_type || ""] || '📋공시'}
                   </span>
                   <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', fontWeight: 500 }}>{d.title}</span>

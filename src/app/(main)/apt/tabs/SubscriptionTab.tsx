@@ -108,7 +108,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
               <option value="competition">경쟁률</option>
               <option value="price">분양가순</option>
             </select>
-            <div style={{ display: 'flex', gap: 3, flex: 1, justifyContent: 'flex-end' }}>
+            <div style={{ display: 'flex', gap: 4, flex: 1, justifyContent: 'flex-end' }}>
               {(['전체', 'open', 'upcoming', 'closed'] as const).map(v => {
                 const labels: Record<string, string> = { '전체': '전체', 'open': '접수중', 'upcoming': '예정', 'closed': '마감' };
                 const counts: Record<string, number> = {
@@ -161,7 +161,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                 <div style={{ height: 56, background: 'var(--bg-hover)', position: 'relative', overflow: 'hidden' }}>
                   <img src={aptImageMap?.[apt.house_nm] || `/api/og?title=${encodeURIComponent(apt.house_nm)}&category=apt&design=2`} alt={apt.house_nm || "부동산 이미지"} width={400} height={56} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', opacity: 0.85 }} loading="lazy" />
                   <div style={{ position: 'absolute', top: 6, left: 8 }}>
-                    <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 'var(--radius-xs)', background: st === 'open' ? 'rgba(54,240,176,0.9)' : st === 'upcoming' ? 'rgba(74,138,247,0.9)' : 'rgba(148,163,184,0.8)', color: '#fff', lineHeight: '16px' }}>{bd.label}</span>
+                    <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 'var(--radius-xs)', background: st === 'open' ? 'rgba(54,240,176,0.9)' : st === 'upcoming' ? 'rgba(74,138,247,0.9)' : 'rgba(148,163,184,0.8)', color: '#fff', lineHeight: '16px' }}>{bd.label}</span>
                   </div>
                   {dday !== null && dday >= 0 && st !== 'closed' && (
                     <div style={{ position: 'absolute', bottom: 5, right: 8, fontSize: 10, fontWeight: 800, color: 'rgba(255,255,255,0.8)' }}>
@@ -173,14 +173,14 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                 <div style={{ padding: '6px 10px 4px', display: 'flex', gap: 8 }}>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     {/* 배지 행 (상태+D-day는 이미지 스트립에 표시) */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 3, marginBottom: 3, flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 3, flexWrap: 'wrap' }}>
                       {st !== 'closed' && isNew(apt, 'subscription') && <NewBadge />}
-                      {((apt as Record<string, any>)['PARCPRC_ULS_AT'] === 'Y' || (apt as Record<string, any>).is_price_limit) && <span style={{ fontSize: 10, fontWeight: 600, padding: '3px 6px', borderRadius: 3, background: 'var(--accent-purple-bg)', color: 'var(--accent-purple)', lineHeight: '14px' }}>상한제</span>}
-                      {(apt as any).project_type && (apt as any).project_type !== '민간' && <span style={{ fontSize: 10, fontWeight: 600, padding: '3px 6px', borderRadius: 3, background: (apt as any).project_type === '재개발' ? 'rgba(251,146,60,0.1)' : 'rgba(167,139,250,0.1)', color: (apt as any).project_type === '재개발' ? 'var(--accent-orange)' : 'var(--accent-purple)', lineHeight: '14px' }}>{(apt as any).project_type}</span>}
-                      {(apt as any).is_regulated_area && <span style={{ fontSize: 10, fontWeight: 600, padding: '3px 6px', borderRadius: 3, background: 'rgba(239,68,68,0.06)', color: 'var(--accent-red)', lineHeight: '14px' }}>규제</span>}
-                      {(apt as Record<string, any>)['SPECLT_RDN_EARTH_AT'] === 'Y' && <span style={{ fontSize: 10, fontWeight: 600, padding: '3px 6px', borderRadius: 3, background: 'var(--accent-red-bg)', color: 'var(--accent-red)', lineHeight: '14px' }}>투기과열</span>}
-                      {(apt as any).brand_name && <span style={{ fontSize: 10, fontWeight: 600, padding: '3px 6px', borderRadius: 3, background: 'rgba(59,123,246,0.08)', color: 'var(--brand)', lineHeight: '14px' }}>{(apt as any).brand_name}</span>}
-                      {(apt as any).balcony_extension && <span style={{ fontSize: 10, fontWeight: 600, padding: '3px 6px', borderRadius: 3, background: 'rgba(34,211,238,0.06)', color: 'var(--accent-cyan, #22D3EE)', lineHeight: '14px' }}>발코니확장</span>}
+                      {((apt as Record<string, any>)['PARCPRC_ULS_AT'] === 'Y' || (apt as Record<string, any>).is_price_limit) && <span style={{ fontSize: 10, fontWeight: 600, padding: '3px 6px', borderRadius: 4, background: 'var(--accent-purple-bg)', color: 'var(--accent-purple)', lineHeight: '14px' }}>상한제</span>}
+                      {(apt as any).project_type && (apt as any).project_type !== '민간' && <span style={{ fontSize: 10, fontWeight: 600, padding: '3px 6px', borderRadius: 4, background: (apt as any).project_type === '재개발' ? 'rgba(251,146,60,0.1)' : 'rgba(167,139,250,0.1)', color: (apt as any).project_type === '재개발' ? 'var(--accent-orange)' : 'var(--accent-purple)', lineHeight: '14px' }}>{(apt as any).project_type}</span>}
+                      {(apt as any).is_regulated_area && <span style={{ fontSize: 10, fontWeight: 600, padding: '3px 6px', borderRadius: 4, background: 'rgba(239,68,68,0.06)', color: 'var(--accent-red)', lineHeight: '14px' }}>규제</span>}
+                      {(apt as Record<string, any>)['SPECLT_RDN_EARTH_AT'] === 'Y' && <span style={{ fontSize: 10, fontWeight: 600, padding: '3px 6px', borderRadius: 4, background: 'var(--accent-red-bg)', color: 'var(--accent-red)', lineHeight: '14px' }}>투기과열</span>}
+                      {(apt as any).brand_name && <span style={{ fontSize: 10, fontWeight: 600, padding: '3px 6px', borderRadius: 4, background: 'rgba(59,123,246,0.08)', color: 'var(--brand)', lineHeight: '14px' }}>{(apt as any).brand_name}</span>}
+                      {(apt as any).balcony_extension && <span style={{ fontSize: 10, fontWeight: 600, padding: '3px 6px', borderRadius: 4, background: 'rgba(34,211,238,0.06)', color: 'var(--accent-cyan, #22D3EE)', lineHeight: '14px' }}>발코니확장</span>}
                     </div>
                     {/* 단지명 */}
                     <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 2 }}>{apt.house_nm}</div>
@@ -190,7 +190,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                     </div>
                   </div>
                   {/* 경쟁률 링 + 즐찾 */}
-                  <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+                  <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
                     {(apt.competition_rate_1st != null && Number(apt.competition_rate_1st) > 0) ? (
                       <div style={{ width: 48, height: 48, position: 'relative' }}>
                         <svg width="48" height="48" viewBox="0 0 48 48">
@@ -268,7 +268,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
 
                       {/* 일반/특별 비율 바 */}
                       {totS > 0 && (genT > 0 || spcT > 0) && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '0 12px', marginBottom: 5 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0 12px', marginBottom: 5 }}>
                           <div style={{ flex: 1, height: 4, borderRadius: 2, overflow: 'hidden', display: 'flex', background: 'var(--bg-hover)' }}>
                             <div style={{ width: `${genPct}%`, height: '100%', background: 'var(--accent-blue-light, #60A5FA)' }} />
                             <div style={{ width: `${100 - genPct}%`, height: '100%', background: 'var(--accent-purple, #A78BFA)' }} />
@@ -290,7 +290,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                   return (
                     <div style={{ padding: '0 12px 5px' }}>
                       <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 3, fontWeight: 600 }}>평형별 분양가 · 공급(일반+특별)</div>
-                      <div style={{ display: 'flex', gap: 3, overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                      <div style={{ display: 'flex', gap: 4, overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
                         {types.map((t: any, idx: number) => {
                           const pctH = Math.round((t.lttot_top_amount / maxP) * 100);
                           return (
@@ -324,9 +324,9 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                   const mid = sched?.interim?.pct || 60;
                   const bal = sched?.balance?.pct || 30;
                   return (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '2px 12px 5px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 12px 5px' }}>
                       {sched && [{l:'계약금',p:dep,c:'var(--brand)'},{l:'중도금',p:mid,c:'var(--accent-purple)'},{l:'잔금',p:bal,c:'var(--accent-orange)'}].map(s => (
-                        <div key={s.l} style={{ flex: s.p, height: 14, borderRadius: 3, background: `${s.c}15`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div key={s.l} style={{ flex: s.p, height: 14, borderRadius: 4, background: `${s.c}15`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           <span style={{ fontSize: 10, color: s.c, fontWeight: 700 }}>{s.l} {s.p}%</span>
                         </div>
                       ))}
@@ -342,7 +342,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                   return (
                     <div style={{ display: 'flex', gap: 2, padding: '0 12px 5px', flexWrap: 'wrap' }}>
                       {comms.slice(0, 5).map((f: string) => (
-                        <span key={f} style={{ fontSize: 10, padding: '1px 5px', borderRadius: 3, background: 'rgba(34,211,238,0.05)', color: 'var(--accent-cyan, #22D3EE)', border: '1px solid rgba(34,211,238,0.08)' }}>{f}</span>
+                        <span key={f} style={{ fontSize: 10, padding: '1px 5px', borderRadius: 4, background: 'rgba(34,211,238,0.05)', color: 'var(--accent-cyan, #22D3EE)', border: '1px solid rgba(34,211,238,0.08)' }}>{f}</span>
                       ))}
                     </div>
                   );

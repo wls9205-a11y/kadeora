@@ -353,7 +353,7 @@ export default async function HomePage() {
                     <Link key={idx.symbol} href="/stock" className="kd-section-card" style={{ flexShrink: 0, minWidth: 150, padding: 'var(--card-p) var(--sp-lg)', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', textDecoration: 'none', color: 'inherit', textAlign: 'center' }}>
                       <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)', letterSpacing: '0.03em' }}>{idx.name}</div>
                       <div style={{ fontSize: 'var(--fs-md)', fontWeight: 900, color: 'var(--text-primary)', marginTop: 'var(--sp-xs)', letterSpacing: '-0.5px' }}>{Number(idx.price).toLocaleString()}</div>
-                      <div style={{ fontSize: 12, fontWeight: 700, color: pct > 0 ? 'var(--accent-red)' : pct < 0 ? 'var(--accent-blue)' : 'var(--text-tertiary)', marginTop: 'var(--sp-xs)', padding: '2px 8px', borderRadius: 'var(--radius-xs)', background: pct > 0 ? 'rgba(255,107,107,0.08)' : pct < 0 ? 'rgba(108,180,255,0.08)' : 'transparent', display: 'inline-block' }}>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: pct > 0 ? 'var(--accent-red)' : pct < 0 ? 'var(--accent-blue)' : 'var(--text-tertiary)', marginTop: 'var(--sp-xs)', padding: '3px 8px', borderRadius: 'var(--radius-xs)', background: pct > 0 ? 'rgba(255,107,107,0.08)' : pct < 0 ? 'rgba(108,180,255,0.08)' : 'transparent', display: 'inline-block' }}>
                         {pct > 0 ? '▲' : pct < 0 ? '▼' : '━'}{pct > 0 ? '+' : ''}{pct.toFixed(2)}%
                       </div>
                     </Link>
@@ -385,13 +385,13 @@ export default async function HomePage() {
           {(todayActivity.posts > 0 || todayActivity.comments > 0 || hotPost) && (
             <div style={{ display: 'flex', gap: 'var(--sp-sm)', justifyContent: 'center', flexWrap: 'wrap', marginTop: 'var(--sp-sm)', marginBottom: 'var(--sp-sm)' }}>
               {todayActivity.posts > 0 && (
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '5px 14px', borderRadius: 'var(--radius-xl)', background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.2)', fontSize: 12, fontWeight: 600, color: 'var(--accent-green)' }}>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 14px', borderRadius: 'var(--radius-xl)', background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.2)', fontSize: 12, fontWeight: 600, color: 'var(--accent-green)' }}>
                   <span className="kd-pulse-dot" style={{ width: 5, height: 5 }} />
                   오늘 {todayActivity.posts}개 글 · {todayActivity.comments}개 댓글
                 </div>
               )}
               {hotPost && (
-                <Link href={`/feed/${hotPost.slug || hotPost.id}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '5px 14px', borderRadius: 'var(--radius-xl)', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', fontSize: 12, fontWeight: 600, color: 'var(--accent-red)', textDecoration: 'none', maxWidth: 280, overflow: 'hidden' }}>
+                <Link href={`/feed/${hotPost.slug || hotPost.id}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 14px', borderRadius: 'var(--radius-xl)', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', fontSize: 12, fontWeight: 600, color: 'var(--accent-red)', textDecoration: 'none', maxWidth: 280, overflow: 'hidden' }}>
                   🔥 {(hotPost.title || '').slice(0, 20)}{(hotPost.title || '').length > 20 ? '…' : ''} · ♥{hotPost.likes_count}
                 </Link>
               )}
@@ -441,7 +441,7 @@ export default async function HomePage() {
                   <div style={{ display: 'flex', gap: 'var(--sp-xs)', flexWrap: 'wrap' }}>
                     {s.tags.map(t => (
                       <span key={t} style={{
-                        fontSize: 10, padding: '2px 7px', borderRadius: 4,
+                        fontSize: 10, padding: '3px 8px', borderRadius: 4,
                         background: 'var(--brand-bg)', color: 'var(--info)', fontWeight: 500,
                       }}>{t}</span>
                     ))}

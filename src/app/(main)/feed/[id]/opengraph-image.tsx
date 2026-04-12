@@ -34,7 +34,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
         fontFamily: 'sans-serif',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 40 }}>
-          <div style={{ display: 'flex', gap: 5 }}>
+          <div style={{ display: 'flex', gap: 6 }}>
             {[0, 1, 2].map(i => (
               <div key={i} style={{ width: 14, height: 14, borderRadius: '50%', background: '#3B7BF6' }} />
             ))}

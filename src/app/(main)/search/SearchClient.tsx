@@ -288,7 +288,7 @@ export default function SearchClient() {
           >
             {acLoading && acStocks.length === 0 && acApts.length === 0 && acPosts.length === 0 && acBlogs.length === 0 && acRedevs.length === 0 && acUnsolds.length === 0 && acTrades.length === 0 && acDiscuss.length === 0 && (
               <div style={{ padding: 20, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                <div style={{ width: 20, height: 20, border: '2px solid var(--border)', borderTopColor: 'var(--brand)', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} />
+                <div style={{ width: 24, height: 24, border: '2px solid var(--border)', borderTopColor: 'var(--brand)', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} />
               </div>
             )}
 

@@ -213,7 +213,7 @@ export default function ComplexClient({ complexes, ageGroups, regions, initialRe
                 <div style={{
                   position: 'absolute', top: -1, right: 12,
                   background: i === 0 ? '#f59e0b' : i === 1 ? '#94a3b8' : '#cd7f32',
-                  color: '#fff', fontSize: 10, fontWeight: 900, padding: '2px 7px 3px',
+                  color: '#fff', fontSize: 10, fontWeight: 900, padding: '3px 8px',
                   borderRadius: '0 0 5px 5px', letterSpacing: 0.3,
                 }}>TOP {i + 1}</div>
               )}

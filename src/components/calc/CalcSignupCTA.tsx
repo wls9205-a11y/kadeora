@@ -19,13 +19,13 @@ export default function CalcSignupCTA({ calcSlug, category }: { calcSlug: string
       </div>
       <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
         <Link href={`/login?redirect=/calc/${category}/${calcSlug}&source=calc_cta`} style={{
-          padding: '10px 24px', borderRadius: 8, background: 'var(--brand)', color: '#fff',
+          padding: '10px 24px', borderRadius: 'var(--radius-md)', background: 'var(--brand)', color: '#fff',
           fontSize: 13, fontWeight: 700, textDecoration: 'none',
         }}>
           카카오로 3초 가입
         </Link>
         <Link href="/calc" style={{
-          padding: '10px 24px', borderRadius: 8, border: '1px solid var(--border)',
+          padding: '10px 24px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)',
           background: 'var(--bg-hover)', color: 'var(--text-secondary)',
           fontSize: 13, fontWeight: 600, textDecoration: 'none',
         }}>

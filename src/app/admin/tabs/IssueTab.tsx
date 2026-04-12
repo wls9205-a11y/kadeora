@@ -170,7 +170,7 @@ export default function IssueTab() {
             <select
               value={minScore}
               onChange={e => updateMinScore(Number(e.target.value))}
-              style={{ background: '#1e293b', color: '#e2e8f0', border: '1px solid #334155', borderRadius: 6, padding: '4px 8px', fontSize: 12 }}
+              style={{ background: '#1e293b', color: '#e2e8f0', border: '1px solid #334155', borderRadius: 'var(--radius-sm)', padding: '4px 8px', fontSize: 12 }}
             >
               {[30, 35, 40, 45, 50, 55, 60].map(s => (
                 <option key={s} value={s}>{s}점+</option>
@@ -180,7 +180,7 @@ export default function IssueTab() {
               onClick={toggleKillSwitch}
               style={{
                 background: autoEnabled ? '#ef4444' : '#22c55e',
-                color: '#fff', border: 'none', borderRadius: 6, padding: '6px 12px',
+                color: '#fff', border: 'none', borderRadius: 'var(--radius-sm)', padding: '6px 12px',
                 fontSize: 12, cursor: 'pointer',
               }}
             >
@@ -195,7 +195,7 @@ export default function IssueTab() {
         {(['all', 'pending', 'published', 'draft', 'apt', 'stock', 'finance', 'tax', 'economy', 'life'] as const).map(f => (
           <button key={f} onClick={() => setFilter(f)} style={{
             background: filter === f ? '#3b82f6' : '#1e293b',
-            color: '#e2e8f0', border: 'none', borderRadius: 6, padding: '4px 12px',
+            color: '#e2e8f0', border: 'none', borderRadius: 'var(--radius-sm)', padding: '4px 12px',
             fontSize: 12, cursor: 'pointer',
           }}>
             {({'all':'전체','pending':'대기중','published':'발행됨','draft':'초안','apt':'🏠부동산','stock':'📊주식','finance':'💰재테크','tax':'📋세금','economy':'🌐경제','life':'🏃생활'}[f] || f)}
@@ -222,7 +222,7 @@ export default function IssueTab() {
                     <span style={{
                       background: scoreColor(issue.final_score) + '20',
                       color: scoreColor(issue.final_score),
-                      fontSize: 11, fontWeight: 700, padding: '2px 6px', borderRadius: 4,
+                      fontSize: 11, fontWeight: 700, padding: '3px 8px', borderRadius: 4,
                     }}>
                       {issue.final_score}점
                     </span>
@@ -243,11 +243,11 @@ export default function IssueTab() {
                 {!issue.is_published && issue.draft_title && (
                   <div style={{ display: 'flex', gap: 4, marginLeft: 8 }} onClick={e => e.stopPropagation()}>
                     <button onClick={() => publishIssue(issue.id)} style={{
-                      background: '#22c55e', color: '#fff', border: 'none', borderRadius: 6,
+                      background: '#22c55e', color: '#fff', border: 'none', borderRadius: 'var(--radius-sm)',
                       padding: '4px 10px', fontSize: 11, cursor: 'pointer',
                     }}>발행</button>
                     <button onClick={() => skipIssue(issue.id)} style={{
-                      background: '#374151', color: '#9ca3af', border: 'none', borderRadius: 6,
+                      background: '#374151', color: '#9ca3af', border: 'none', borderRadius: 'var(--radius-sm)',
                       padding: '4px 10px', fontSize: 11, cursor: 'pointer',
                     }}>무시</button>
                   </div>
@@ -256,7 +256,7 @@ export default function IssueTab() {
 
               {/* 확장: 초안 미리보기 */}
               {selectedIssue?.id === issue.id && issue.draft_title && (
-                <div style={{ marginTop: 12, padding: 12, background: '#0f172a', borderRadius: 8, fontSize: 12, color: '#94a3b8', maxHeight: 300, overflow: 'auto' }}>
+                <div style={{ marginTop: 12, padding: 12, background: '#0f172a', borderRadius: 'var(--radius-md)', fontSize: 12, color: '#94a3b8', maxHeight: 300, overflow: 'auto' }}>
                   <div style={{ fontWeight: 600, color: '#e2e8f0', marginBottom: 8 }}>📝 초안 미리보기</div>
                   <div style={{ fontSize: 11, color: '#64748b', marginBottom: 4 }}>
                     점수 상세: {JSON.stringify(issue)}

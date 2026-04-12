@@ -147,7 +147,7 @@ export default async function ComplexPage({ searchParams }: { searchParams: Prom
           {selectedRegion ? (<><Link href="/apt/complex" style={{ color: 'inherit', textDecoration: 'none' }}>단지백과</Link><span>›</span><span style={{ color: 'rgba(232,237,245,0.9)' }}>{selectedRegion}</span></>) : (<span style={{ color: 'rgba(232,237,245,0.9)' }}>단지백과</span>)}
         </nav>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', position: 'relative' }}>
-          <h1 style={{ fontSize: 'var(--fs-lg)', fontWeight: 900, margin: 0, color: '#E8EDF5' }}>
+          <h1 style={{ position:"absolute", width:1, height:1, overflow:"hidden", clip:"rect(0,0,0,0)" }}>
             🏢 {selectedRegion ? `${selectedRegion} 단지백과` : '단지백과'}
           </h1>
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)' }}>

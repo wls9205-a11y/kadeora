@@ -251,7 +251,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
             {s.price === 0 ? '—' : isGlobal ? `$${Number(s.price)?.toFixed(2)}` : fmt(Number(s.price))}
           </span>
           {Number(s.price) > 0 && (
-            <span style={{ fontSize: 12, fontWeight: 800, color: isStale ? 'var(--text-tertiary)' : stockColor(pct, !isGlobal), padding: '1px 6px', borderRadius: 5, background: isStale ? 'var(--bg-hover)' : `${barColor}12` }}>
+            <span style={{ fontSize: 12, fontWeight: 800, color: isStale ? 'var(--text-tertiary)' : stockColor(pct, !isGlobal), padding: '1px 6px', borderRadius: 'var(--radius-sm)', background: isStale ? 'var(--bg-hover)' : `${barColor}12` }}>
               {isStale ? '전일종가' : pct > 0 ? `▲ ${pct.toFixed(2)}%` : pct < 0 ? `▼ ${Math.abs(pct).toFixed(2)}%` : '전일종가'}
             </span>
           )}
@@ -661,7 +661,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
                     const color = isUp ? upC : downC;
                     const isSelected = sectorFilter === sec.name;
                     return (
-                      <button key={sec.name} onClick={() => { setSectorFilter(isSelected ? 'all' : sec.name); isDomestic ? setDomesticTab('ranking') : setGlobalTab('ranking'); }} style={{ display: 'flex', alignItems: 'center', gap: 7, background: isSelected ? (isUp ? (isDomestic?'rgba(255,107,107,0.06)':'rgba(46,232,165,0.06)') : (isDomestic?'rgba(108,180,255,0.06)':'rgba(248,113,113,0.06)')) : 'transparent', borderRadius: 'var(--radius-xs)', padding: '3px 4px', border: 'none', cursor: 'pointer', textAlign: 'left', width: '100%', transition: 'background 0.15s' }}>
+                      <button key={sec.name} onClick={() => { setSectorFilter(isSelected ? 'all' : sec.name); isDomestic ? setDomesticTab('ranking') : setGlobalTab('ranking'); }} style={{ display: 'flex', alignItems: 'center', gap: 8, background: isSelected ? (isUp ? (isDomestic?'rgba(255,107,107,0.06)':'rgba(46,232,165,0.06)') : (isDomestic?'rgba(108,180,255,0.06)':'rgba(248,113,113,0.06)')) : 'transparent', borderRadius: 'var(--radius-xs)', padding: '3px 4px', border: 'none', cursor: 'pointer', textAlign: 'left', width: '100%', transition: 'background 0.15s' }}>
                         <span style={{ fontSize: 10, color: isSelected ? 'var(--text-primary)' : 'var(--text-tertiary)', minWidth: 52, flexShrink: 0, fontWeight: isSelected ? 700 : 400, textAlign: 'right' }}>{sec.name}</span>
                         <div style={{ flex: 1, height: 5, background: 'var(--bg-hover)', borderRadius: 4, overflow: 'hidden', position: 'relative' }}>
                           {isUp
@@ -1162,7 +1162,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
                             <div style={{ fontSize: 17, fontWeight: 900, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.5px' }}>
                               {s.price === 0 ? '—' : isGlobal ? `$${Number(s.price)?.toLocaleString('en', {minimumFractionDigits:2, maximumFractionDigits:2})}` : `₩${fmt(Number(s.price))}`}
                             </div>
-                            <div style={{ fontSize: 12, fontWeight: 800, color: priceColor, display: 'inline-block', padding: '1px 6px', borderRadius: 5, background: `${priceColor}12`, marginTop: 2 }}>
+                            <div style={{ fontSize: 12, fontWeight: 800, color: priceColor, display: 'inline-block', padding: '1px 6px', borderRadius: 'var(--radius-sm)', background: `${priceColor}12`, marginTop: 2 }}>
                               {pct > 0 ? `▲ ${pct.toFixed(2)}%` : pct < 0 ? `▼ ${Math.abs(pct).toFixed(2)}%` : '전일종가'}
                             </div>
                           </div>

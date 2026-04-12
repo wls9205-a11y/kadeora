@@ -157,7 +157,7 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
             <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-md)' }}>📊 지역별 평균 거래가 추이</div>
             <div style={{ display: 'flex', gap: 'var(--sp-xs)', marginBottom: 6, flexWrap: 'wrap' }}>
               {regions.slice(0, 8).map(r => (
-                <button key={r} onClick={() => setChartRegion(r)} style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 'var(--radius-md)', border: (chartRegion || regions[0]) === r ? '1px solid var(--brand)' : 'none', background: (chartRegion || regions[0]) === r ? 'var(--brand)' : 'var(--bg-hover)', color: (chartRegion || regions[0]) === r ? 'var(--text-inverse)' : 'var(--text-secondary)', cursor: 'pointer' }}>{r}</button>
+                <button key={r} onClick={() => setChartRegion(r)} style={{ fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 'var(--radius-md)', border: (chartRegion || regions[0]) === r ? '1px solid var(--brand)' : 'none', background: (chartRegion || regions[0]) === r ? 'var(--brand)' : 'var(--bg-hover)', color: (chartRegion || regions[0]) === r ? 'var(--text-inverse)' : 'var(--text-secondary)', cursor: 'pointer' }}>{r}</button>
               ))}
             </div>
             <MiniLineChart data={data.map((s) => ({ label: String(s.stat_month).slice(5), value: Math.round((s.avg_price || 0) / 10000) }))} color="var(--accent-green)" showValues={true} height={140} />
@@ -177,7 +177,7 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
           <option value="price_asc">저가순</option>
           <option value="area">면적순</option>
         </select>
-        <div style={{ display: 'flex', gap: 3, flex: 1, justifyContent: 'flex-end' }}>
+        <div style={{ display: 'flex', gap: 4, flex: 1, justifyContent: 'flex-end' }}>
           {([{ key: '전체', label: '전체' }, { key: '~59', label: '~59㎡' }, { key: '59~84', label: '59~84㎡' }, { key: '84~', label: '84㎡~' }] as const).map(a => (
             <button key={a.key} onClick={() => setAreaFilter(a.key)} style={{
               padding: '4px 7px', borderRadius: 'var(--radius-pill)', fontSize: 10, fontWeight: 600, border: 'none', cursor: 'pointer',
@@ -258,10 +258,10 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
             {/* ① 헤더: 배지 + 이름+가격 + 메타 */}
             <div style={{ padding: '10px 12px 6px', display: 'flex', gap: 8 }}>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 3, marginBottom: 5, flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 5, flexWrap: 'wrap' }}>
                   {isNew(t, 'transaction') && <NewBadge />}
-                  <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 4, background: t.trade_type === '매매' ? 'rgba(59,130,246,0.1)' : 'rgba(52,211,153,0.1)', color: t.trade_type === '매매' ? 'var(--brand)' : 'var(--accent-green)', border: `1px solid ${t.trade_type === '매매' ? 'rgba(59,130,246,0.2)' : 'rgba(52,211,153,0.2)'}`, lineHeight: '14px' }}>{t.trade_type || '매매'}</span>
-                  {isMax && <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 6px', borderRadius: 3, background: 'rgba(251,191,36,0.1)', color: 'var(--accent-yellow)', lineHeight: '14px' }}>신고가</span>}
+                  <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 4, background: t.trade_type === '매매' ? 'rgba(59,130,246,0.1)' : 'rgba(52,211,153,0.1)', color: t.trade_type === '매매' ? 'var(--brand)' : 'var(--accent-green)', border: `1px solid ${t.trade_type === '매매' ? 'rgba(59,130,246,0.2)' : 'rgba(52,211,153,0.2)'}`, lineHeight: '14px' }}>{t.trade_type || '매매'}</span>
+                  {isMax && <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 6px', borderRadius: 4, background: 'rgba(251,191,36,0.1)', color: 'var(--accent-yellow)', lineHeight: '14px' }}>신고가</span>}
                   <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{t.deal_date || ''}</span>
                   {vsMax !== null && <span style={{ fontSize: 10, fontWeight: 700, color: vsMax > 0 ? 'var(--accent-green)' : 'var(--accent-red)', marginLeft: 'auto' }}>{vsMax > 0 ? '▲' : '▼'}{vsMax > 0 ? '+' : ''}{vsMax}%</span>}
                 </div>
@@ -272,7 +272,7 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
                 <div style={{ fontSize: 10, color: 'var(--text-tertiary)', lineHeight: 1.5 }}>{t.sigungu || ''}{t.dong ? ` ${t.dong}` : ''} · {t.exclusive_area}m²({Math.round((t.exclusive_area || 0) / 3.3058)}평) · {t.floor}층 · {t.built_year}년</div>
               </div>
               <div style={{ flexShrink: 0 }}>
-                <a href={`/apt/complex/${encodeURIComponent(t.apt_name || '')}#interest-section`} onClick={(e) => e.stopPropagation()} aria-label="관심등록" style={{ fontSize: 16, background: 'transparent', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '2px 6px', lineHeight: 1, textDecoration: 'none', color: 'var(--text-tertiary)' }}>☆</a>
+                <a href={`/apt/complex/${encodeURIComponent(t.apt_name || '')}#interest-section`} onClick={(e) => e.stopPropagation()} aria-label="관심등록" style={{ fontSize: 16, background: 'transparent', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '3px 8px', lineHeight: 1, textDecoration: 'none', color: 'var(--text-tertiary)' }}>☆</a>
               </div>
             </div>
 

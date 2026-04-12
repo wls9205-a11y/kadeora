@@ -118,7 +118,7 @@ export default async function HotPage() {
         </nav>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
-            <h1 style={{ margin: 0, fontSize: 'var(--fs-lg)', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.5px' }}>🔥 이번 주 HOT</h1>
+            <h1 style={{ position:"absolute", width:1, height:1, overflow:"hidden", clip:"rect(0,0,0,0)" }}>🔥 이번 주 HOT</h1>
             <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>
               <time dateTime={new Date().toISOString()}>{dateRange}</time> · 좋아요 기준
             </div>

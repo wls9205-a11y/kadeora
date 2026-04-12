@@ -332,10 +332,10 @@ export function Navigation() {
                     onMouseLeave={e=>(e.currentTarget.style.borderColor='var(--border)')}
                   >
                     {profile?.avatarUrl ? (
-                      <img src={profile.avatarUrl} alt="" style={{ width: 22, height: 22, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                      <img src={profile.avatarUrl} alt="" style={{ width: 24, height: 24, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
                     ) : (
                       <span style={{
-                        width:22, height:22, borderRadius:'50%', background:'var(--brand)',
+                        width: 24, height: 24, borderRadius:'50%', background:'var(--brand)',
                         display:'flex', alignItems:'center', justifyContent:'center',
                         fontSize: 'var(--fs-xs)', fontWeight:800, color:'var(--text-inverse)', flexShrink:0,
                       }}>

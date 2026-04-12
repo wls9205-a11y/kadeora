@@ -126,7 +126,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
           <option value="price">분양가순</option>
           <option value="competition">경쟁률순</option>
         </select>
-        <div style={{ display: 'flex', gap: 3, flex: 1, justifyContent: 'flex-end' }}>
+        <div style={{ display: 'flex', gap: 4, flex: 1, justifyContent: 'flex-end' }}>
           {(['전체', '분양중', '미분양'] as const).map(s => (
             <button key={s} onClick={() => { setOngoingStatus(s); setOngoingPage(1); }} style={{
               padding: '4px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 600, border: 'none', cursor: 'pointer',
@@ -190,23 +190,23 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
             <div style={{ height: 48, background: 'var(--bg-hover)', position: 'relative', overflow: 'hidden' }}>
               <img src={aptImageMap?.[o.house_nm] || `/api/og?title=${encodeURIComponent(o.house_nm || '분양중')}&category=apt&design=2`} alt={o.house_nm || "부동산 이미지"} width={400} height={48} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', opacity: 0.8 }} loading="lazy" />
               <div style={{ position: 'absolute', top: 5, left: 8 }}>
-                <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 5, background: isUnsold ? 'rgba(248,113,113,0.9)' : 'rgba(54,240,176,0.9)', color: '#fff' }}>{isUnsold ? '미분양' : '분양중'}</span>
-                {isPremium && <span style={{ fontSize: 10, fontWeight: 800, padding: '3px 6px', borderRadius: 3, background: 'linear-gradient(135deg,#FFD43B,#F59E0B)', color: '#1a1a2e', marginLeft: 3 }}>PREMIUM</span>}
+                <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 'var(--radius-sm)', background: isUnsold ? 'rgba(248,113,113,0.9)' : 'rgba(54,240,176,0.9)', color: '#fff' }}>{isUnsold ? '미분양' : '분양중'}</span>
+                {isPremium && <span style={{ fontSize: 10, fontWeight: 800, padding: '3px 6px', borderRadius: 4, background: 'linear-gradient(135deg,#FFD43B,#F59E0B)', color: '#1a1a2e', marginLeft: 3 }}>PREMIUM</span>}
               </div>
             </div>
             <div style={{ padding: '8px 12px 6px', display: 'flex', gap: 8 }}>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 3, marginBottom: 5, flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 5, flexWrap: 'wrap' }}>
                   {isNew(o, 'ongoing') && <NewBadge />}
                   {transferLimit && <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--accent-red)' }}>전매{transferLimit}년</span>}
                   {loanRate && <span style={{ fontSize: 10, fontWeight: 600, color: String(loanRate).includes('무이자') ? 'var(--accent-green)' : 'var(--accent-yellow)' }}>{String(loanRate).includes('무이자') ? '무이자' : '중도금'}</span>}
-                  {(o as any).brand_name && <span style={{ fontSize: 10, fontWeight: 600, padding: '3px 6px', borderRadius: 3, background: 'rgba(59,123,246,0.08)', color: 'var(--brand)', lineHeight: '14px' }}>{(o as any).brand_name}</span>}
+                  {(o as any).brand_name && <span style={{ fontSize: 10, fontWeight: 600, padding: '3px 6px', borderRadius: 4, background: 'rgba(59,123,246,0.08)', color: 'var(--brand)', lineHeight: '14px' }}>{(o as any).brand_name}</span>}
                 </div>
                 <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 2 }}>{o.house_nm || '현장명 없음'}</div>
                 <div style={{ fontSize: 10, color: 'var(--text-tertiary)', lineHeight: 1.5 }}>{o.region_nm}{o.address ? ` ${o.address.replace(/^[^\s]+\s/, '').split(' ').slice(0, 2).join(' ')}` : ''}{o.constructor_nm ? ` · ${o.constructor_nm.split('(')[0].split('주식')[0].trim()}` : ''}{o.total_supply ? ` · ${o.total_supply.toLocaleString()}세대` : ''}</div>
               </div>
-              <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
-                <a href={`${linkH}#interest-section`} onClick={(e) => e.stopPropagation()} aria-label="관심등록" style={{ fontSize: 16, background: 'transparent', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '2px 6px', lineHeight: 1, textDecoration: 'none', color: 'var(--text-tertiary)' }}>☆</a>
+              <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                <a href={`${linkH}#interest-section`} onClick={(e) => e.stopPropagation()} aria-label="관심등록" style={{ fontSize: 16, background: 'transparent', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '3px 8px', lineHeight: 1, textDecoration: 'none', color: 'var(--text-tertiary)' }}>☆</a>
               </div>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 1, margin: '0 10px 8px', background: 'var(--border)', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--border)' }}>
@@ -290,7 +290,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
       {/* ③ 단계별 파이프라인 */}
       <div className="kd-card" style={{ marginBottom: 'var(--sp-md)' }}>
         <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>🏗️ 분양 진행 단계</div>
-        <div style={{ display: 'flex', gap: 3, alignItems: 'stretch' }}>
+        <div style={{ display: 'flex', gap: 4, alignItems: 'stretch' }}>
           {pipeStages.map((stage, i) => {
             const count = pipeCounts[stage] || 0;
             const pct = Math.round((count / pipeTotal) * 100);
@@ -344,7 +344,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
         return (
           <BottomSheet open={!!selectedOngoing} onClose={() => setSelectedOngoing(null)} title={o.house_nm}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 'var(--sp-md)' }}>
-                <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '2px 8px', borderRadius: 4, background: isU ? 'var(--accent-red-bg)' : 'var(--accent-green-bg)', color: isU ? 'var(--accent-red)' : 'var(--accent-green)' }}>{isU ? '미분양' : '분양중'}</span>
+                <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '3px 8px', borderRadius: 4, background: isU ? 'var(--accent-red-bg)' : 'var(--accent-green-bg)', color: isU ? 'var(--accent-red)' : 'var(--accent-green)' }}>{isU ? '미분양' : '분양중'}</span>
               </div>
               <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-md)' }}>{o.region_nm}{o.address ? ` · ${o.address}` : ''}</div>
 

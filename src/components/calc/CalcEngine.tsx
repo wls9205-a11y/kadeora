@@ -24,7 +24,7 @@ function InputField({ input, value, onChange, values }: { input: CalcInput; valu
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <input type="text" inputMode="numeric" value={Number(value).toLocaleString('ko-KR')}
               onChange={e => onChange(Number(e.target.value.replace(/[^0-9-]/g, '')) || 0)}
-              style={{ flex: 1, padding: '10px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-primary)', fontSize: 14, fontWeight: 600 }} />
+              style={{ flex: 1, padding: '10px 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-primary)', fontSize: 14, fontWeight: 600 }} />
             <span style={{ fontSize: 12, color: 'var(--text-tertiary)', flexShrink: 0 }}>{input.unit || '원'}</span>
           </div>
           {input.hint && <div style={hint}>{input.hint}</div>}
@@ -37,7 +37,7 @@ function InputField({ input, value, onChange, values }: { input: CalcInput; valu
           <label style={label}>{input.label}</label>
           <input type="number" inputMode="decimal" value={value} min={input.min} max={input.max} step={input.step || 1}
             onChange={e => onChange(Number(e.target.value))}
-            style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-primary)', fontSize: 14, fontWeight: 600 }} />
+            style={{ width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-primary)', fontSize: 14, fontWeight: 600 }} />
           {input.hint && <div style={hint}>{input.hint}</div>}
         </div>
       );
@@ -60,7 +60,7 @@ function InputField({ input, value, onChange, values }: { input: CalcInput; valu
           <div style={{ display: 'flex', gap: 6 }}>
             {input.options?.map(opt => (
               <button key={String(opt.value)} onClick={() => onChange(opt.value)}
-                style={{ flex: 1, padding: '9px 0', borderRadius: 8, border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 13,
+                style={{ flex: 1, padding: '9px 0', borderRadius: 'var(--radius-md)', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 13,
                   background: value === opt.value ? 'var(--brand)' : 'var(--bg-hover)',
                   color: value === opt.value ? 'var(--text-inverse, #fff)' : 'var(--text-secondary)' }}>
                 {opt.label}
@@ -74,7 +74,7 @@ function InputField({ input, value, onChange, values }: { input: CalcInput; valu
         <div style={{ marginBottom: 16 }}>
           <label style={label}>{input.label}</label>
           <select value={String(value)} onChange={e => onChange(e.target.value)}
-            style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-primary)', fontSize: 14 }}>
+            style={{ width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-primary)', fontSize: 14 }}>
             {input.options?.map(opt => <option key={String(opt.value)} value={String(opt.value)}>{opt.label}</option>)}
           </select>
         </div>
@@ -85,10 +85,10 @@ function InputField({ input, value, onChange, values }: { input: CalcInput; valu
           <label style={label}>{input.label}</label>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <button onClick={() => onChange(Math.max(input.min || 0, Number(value) - 1))}
-              style={{ width: 36, height: 36, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: 18 }}>−</button>
+              style={{ width: 36, height: 36, borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: 18 }}>−</button>
             <span style={{ fontSize: 18, fontWeight: 800, minWidth: 30, textAlign: 'center' }}>{value}</span>
             <button onClick={() => onChange(Math.min(input.max || 99, Number(value) + 1))}
-              style={{ width: 36, height: 36, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: 18 }}>+</button>
+              style={{ width: 36, height: 36, borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: 18 }}>+</button>
           </div>
         </div>
       );
@@ -97,7 +97,7 @@ function InputField({ input, value, onChange, values }: { input: CalcInput; valu
         <div style={{ marginBottom: 16 }}>
           <label style={label}>{input.label}</label>
           <input type="date" value={String(value)} onChange={e => onChange(e.target.value)}
-            style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-primary)', fontSize: 14 }} />
+            style={{ width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-primary)', fontSize: 14 }} />
         </div>
       );
     default:
@@ -158,13 +158,13 @@ export default function CalcEngine({ calc }: { calc: CalcMeta }) {
               const url = `https://kadeora.app/calc/${calc.category}/${calc.slug}`;
               if (navigator.share) navigator.share({ title: calc.titleShort, text, url }).catch(() => {});
               else navigator.clipboard.writeText(text + '\n' + url).then(() => alert('복사되었습니다!'));
-            }} style={{ padding: '8px 16px', borderRadius: 8, border: 'none', cursor: 'pointer', background: 'var(--brand)', color: '#fff', fontSize: 12, fontWeight: 700 }}>
+            }} style={{ padding: '8px 16px', borderRadius: 'var(--radius-md)', border: 'none', cursor: 'pointer', background: 'var(--brand)', color: '#fff', fontSize: 12, fontWeight: 700 }}>
               결과 공유
             </button>
             <button onClick={() => {
               const text = `${result.main.label}: ${result.main.value}`;
               navigator.clipboard.writeText(text).then(() => alert('복사되었습니다!'));
-            }} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid var(--border)', cursor: 'pointer', background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontSize: 12, fontWeight: 600 }}>
+            }} style={{ padding: '8px 16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', cursor: 'pointer', background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontSize: 12, fontWeight: 600 }}>
               결과 복사
             </button>
           </div>
@@ -188,7 +188,7 @@ export default function CalcEngine({ calc }: { calc: CalcMeta }) {
             </div>
           </div>
           <Link href={`/login?redirect=/calc/${calc.category}/${calc.slug}&source=calc_engine`} style={{
-            padding: '8px 16px', borderRadius: 8, background: 'var(--brand)', color: '#fff',
+            padding: '8px 16px', borderRadius: 'var(--radius-md)', background: 'var(--brand)', color: '#fff',
             fontSize: 12, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0,
           }}>
             3초 가입
