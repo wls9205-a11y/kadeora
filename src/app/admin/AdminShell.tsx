@@ -11,14 +11,16 @@ const UsersTab = dynamic(() => import('./tabs/UsersTab'), { loading: Loader });
 const DataTab = dynamic(() => import('./tabs/DataTab'), { loading: Loader });
 const OpsTab = dynamic(() => import('./tabs/OpsTab'), { loading: Loader });
 const ExecuteTab = dynamic(() => import('./tabs/ExecuteTab'), { loading: Loader });
+const CommunityTab = dynamic(() => import('./tabs/CommunityTab'), { loading: Loader });
 
-type TabKey = 'focus' | 'issue' | 'growth' | 'users' | 'data' | 'ops' | 'execute';
+type TabKey = 'focus' | 'issue' | 'growth' | 'users' | 'data' | 'ops' | 'execute' | 'community';
 
 const TABS: { key: TabKey; label: string; icon: string }[] = [
   { key: 'focus', label: '대시보드', icon: '📊' },
   { key: 'issue', label: '이슈', icon: '🔍' },
   { key: 'growth', label: '성장', icon: '📈' },
   { key: 'users', label: '유저', icon: '👥' },
+  { key: 'community', label: '커뮤니티', icon: '💬' },
   { key: 'data', label: '데이터', icon: '🗄️' },
   { key: 'ops', label: '운영', icon: '🔧' },
   { key: 'execute', label: '실행', icon: '⚡' },
@@ -102,6 +104,7 @@ export default function AdminShell() {
       {tab === 'data' && <DataTab onNavigate={(t: string) => setTab(t as TabKey)} />}
       {tab === 'ops' && <OpsTab onNavigate={(t: string) => setTab(t as TabKey)} />}
       {tab === 'execute' && <ExecuteTab onNavigate={(t: string) => setTab(t as TabKey)} />}
+      {tab === 'community' && <CommunityTab onNavigate={(t: string) => setTab(t as TabKey)} />}
     </div>
   );
 }

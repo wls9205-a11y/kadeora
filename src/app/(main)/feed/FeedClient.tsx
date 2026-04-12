@@ -357,6 +357,17 @@ export default function FeedClient({
           </div>
         )}
 
+        {/* 우리동네 지역 미설정 안내 */}
+        {activeCategory === 'local' && currentUserId && !profile?.regionText && (
+          <div style={{ padding: '16px', textAlign: 'center', background: 'var(--bg-surface)', border: '1px solid rgba(59,123,246,0.15)', borderRadius: 'var(--radius-card)', marginBottom: 'var(--sp-md)' }}>
+            <div style={{ fontSize: 28, marginBottom: 'var(--sp-xs)' }}>📍</div>
+            <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-xs)', fontSize: 'var(--fs-sm)' }}>우리동네를 설정하면 같은 지역 이웃들의 글을 볼 수 있어요</div>
+            <Link href="/settings/region" style={{ display: 'inline-block', marginTop: 8, padding: '8px 20px', borderRadius: 'var(--radius-md)', background: 'var(--brand)', color: '#fff', fontWeight: 700, fontSize: 13, textDecoration: 'none' }}>
+              동네 설정하기
+            </Link>
+          </div>
+        )}
+
         {/* 팔로잉 비로그인 */}
         {activeCategory === 'following' && !currentUserId && (
           <div style={{ padding: '24px 16px', textAlign: 'center', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', marginBottom: 'var(--sp-md)' }}>
