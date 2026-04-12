@@ -3,6 +3,29 @@ import { SITE_URL } from '@/lib/constants';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 
+async function TopBuilders() {
+  try {
+    const { getSupabaseAdmin } = await import('@/lib/supabase-admin');
+    const sb = getSupabaseAdmin();
+    const { data } = await sb.from('apt_sites').select('builder').eq('is_active', true).not('builder', 'is', null).neq('builder', '');
+    const map = new Map<string, number>();
+    for (const r of (data || [])) { map.set(r.builder, (map.get(r.builder) || 0) + 1); }
+    const top = Array.from(map.entries()).filter(([, c]) => c >= 5).sort((a, b) => b[1] - a[1]).slice(0, 10);
+    if (top.length === 0) return null;
+    const shortName = (s: string) => s.replace(/\(주\)|주식회사| /g, '').slice(0, 12);
+    return (
+      <section style={{ marginBottom: 14 }}>
+        <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px' }}>주요 건설사</h2>
+        <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+          {top.map(([b, c]) => (
+            <Link key={b} href={`/apt/builder/${encodeURIComponent(b)}`} style={{ padding: '4px 10px', borderRadius: 16, fontSize: 11, textDecoration: 'none', fontWeight: 600, background: 'var(--bg-surface)', color: 'var(--text-secondary)', border: '1px solid var(--border)' }}>{shortName(b)} ({c})</Link>
+          ))}
+        </div>
+      </section>
+    );
+  } catch { return null; }
+}
+
 const APT_SECTION_META: Record<string, { title: string; desc: string }> = {
   'apt-region':       { title: '전국 부동산 현황', desc: '지역별 청약·분양·미분양·재개발 현황을 한눈에' },
   'apt-calendar':     { title: '이번 달 청약 캘린더', desc: '접수중·예정 청약 일정 모아보기' },
@@ -319,6 +342,7 @@ export default async function AptPage() {
           <Link href="/apt/map" style={{ padding: '5px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 20, textDecoration: 'none', fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600 }}>🗺️ 지도</Link>
         </div>
       </section>
+      <TopBuilders />
     </div>
 
     <Disclaimer type="apt" />

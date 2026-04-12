@@ -185,6 +185,21 @@ export default async function SigunguHubPage({ params }: Props) {
         </div>
       </section>
 
+      {/* 인기 비교 — 상위 단지 조합 */}
+      {priceTop.length >= 2 && (
+        <section style={{ marginBottom: 20 }}>
+          <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 10px' }}>⚖️ 인기 비교</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {priceTop.slice(0, 3).flatMap((a: any, i: number) => priceTop.slice(i + 1, i + 2).map((b: any) => (
+              <Link key={`${a.apt_name}-${b.apt_name}`} href={`/apt/compare/${encodeURIComponent(a.apt_name)}-vs-${encodeURIComponent(b.apt_name)}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', textDecoration: 'none', fontSize: 12 }}>
+                <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{a.apt_name} <span style={{ color: 'var(--text-tertiary)' }}>vs</span> {b.apt_name}</span>
+                <span style={{ color: 'var(--accent-blue)', fontSize: 11 }}>비교 →</span>
+              </Link>
+            )))}
+          </div>
+        </section>
+      )}
+
       <Link href={`/apt/complex?region=${encodeURIComponent(region)}`} style={{ display: 'block', textAlign: 'center', padding: '14px', marginBottom: 40, borderRadius: 'var(--radius-lg)', fontWeight: 800, textDecoration: 'none', fontSize: 13, background: 'linear-gradient(135deg, #0F1B3E 0%, #2563EB 100%)', color: '#fff' }}>📊 {region} 전체 단지백과 보기 →</Link>
       <footer style={{ fontSize: 10, color: 'var(--text-tertiary)', textAlign: 'center', paddingBottom: 40, lineHeight: 1.5 }}>데이터 출처: 국토교통부 실거래가 공개시스템 · 한국부동산원 · 카더라 자체 분석<br />본 페이지는 공공데이터 기반이며, 투자 판단의 근거로 사용할 수 없습니다.</footer>
     </article>
