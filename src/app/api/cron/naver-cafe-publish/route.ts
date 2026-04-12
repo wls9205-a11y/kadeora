@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
-import iconv from 'iconv-lite';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
-const BATCH_SIZE = 1; // 네이버 카페 API 속도 제한 — 1건씩 처리
+const BATCH_SIZE = 1;
 
 async function doWork() {
   const accessToken = process.env.NAVER_CAFE_ACCESS_TOKEN || '';
@@ -20,17 +19,16 @@ async function doWork() {
     return { processed: 0, metadata: { message: 'Not configured' } };
   }
 
-  // 토큰 갱신
   let token = accessToken;
   if (refreshToken && clientId && clientSecret) {
     try {
-      const refreshRes = await fetch('https://nid.naver.com/oauth2.0/token', {
+      const r = await fetch('https://nid.naver.com/oauth2.0/token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({ grant_type: 'refresh_token', client_id: clientId, client_secret: clientSecret, refresh_token: refreshToken }),
       });
-      const refreshData = await refreshRes.json();
-      if (refreshData.access_token) token = refreshData.access_token;
+      const d = await r.json();
+      if (d.access_token) token = d.access_token;
     } catch { /* use original */ }
   }
 
@@ -53,18 +51,21 @@ async function doWork() {
         .slice(0, 30000);
       const subject = (item.naver_title || '').replace(/[|~`]/g, '').slice(0, 60);
 
-      // EUC-KR로 인코딩하여 전송 (네이버 카페 API는 EUC-KR 기반)
-      const subjectEncoded = eucKrEncode(subject);
-      const contentEncoded = eucKrEncode(cleanHtml);
-      const bodyStr = `subject=${subjectEncoded}&content=${contentEncoded}`;
+      // multipart/form-data 수동 구성 — UTF-8 raw bytes 전송
+      const boundary = '----NaverCafe' + Date.now();
+      const parts: string[] = [];
+      parts.push(`--${boundary}\r\nContent-Disposition: form-data; name="subject"\r\nContent-Type: text/plain; charset=UTF-8\r\n\r\n${subject}`);
+      parts.push(`--${boundary}\r\nContent-Disposition: form-data; name="content"\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n${cleanHtml}`);
+      parts.push(`--${boundary}--`);
+      const body = parts.join('\r\n');
 
       const res = await fetch(url, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Type': `multipart/form-data; boundary=${boundary}`,
         },
-        body: bodyStr,
+        body: body,
       });
 
       const resText = await res.text();
@@ -87,27 +88,6 @@ async function doWork() {
   }
 
   return { processed: success, metadata: { errors, total: pending.length } };
-}
-
-/** 한글 문자열을 EUC-KR 퍼센트 인코딩으로 변환 */
-function eucKrEncode(str: string): string {
-  const buf = iconv.encode(str, 'euc-kr');
-  let result = '';
-  for (let i = 0; i < buf.length; i++) {
-    const byte = buf[i];
-    // 알파벳, 숫자, 일부 특수문자는 그대로
-    if ((byte >= 0x41 && byte <= 0x5A) || (byte >= 0x61 && byte <= 0x7A) ||
-        (byte >= 0x30 && byte <= 0x39) || byte === 0x2D || byte === 0x5F ||
-        byte === 0x2E || byte === 0x21 || byte === 0x7E || byte === 0x2A ||
-        byte === 0x27 || byte === 0x28 || byte === 0x29) {
-      result += String.fromCharCode(byte);
-    } else if (byte === 0x20) {
-      result += '+';
-    } else {
-      result += '%' + byte.toString(16).toUpperCase().padStart(2, '0');
-    }
-  }
-  return result;
 }
 
 export async function GET(req: NextRequest) {
