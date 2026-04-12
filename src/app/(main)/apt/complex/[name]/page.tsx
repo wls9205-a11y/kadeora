@@ -684,6 +684,17 @@ export default async function ComplexDetailPage({ params }: Props) {
         </section>
       )}
 
+      {/* 비교하기 CTA */}
+      {relatedComplexes.length > 0 && relatedComplexes[0]?.apt_name && (
+        <Link href={`/apt/compare/${encodeURIComponent(decoded)}-vs-${encodeURIComponent(relatedComplexes[0].apt_name)}`} style={{
+          display: 'block', textAlign: 'center', padding: '12px', marginBottom: 8,
+          borderRadius: 'var(--radius-sm)', fontWeight: 700, textDecoration: 'none', fontSize: 13,
+          background: 'var(--bg-surface)', border: '1px solid var(--accent-blue)', color: 'var(--accent-blue)',
+        }}>
+          ⚖️ {decoded} vs {relatedComplexes[0].apt_name} 비교
+        </Link>
+      )}
+
       {/* CTA */}
       <Link href={siteSlug ? `/apt/${siteSlug}` : `/apt/search?q=${encodeURIComponent(decoded)}`} style={{
         display: 'block', textAlign: 'center', padding: '16px', marginBottom: 40,
