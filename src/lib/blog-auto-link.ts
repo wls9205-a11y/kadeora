@@ -88,6 +88,23 @@ const FEATURE_KEYWORDS: [string, string][] = [
   ['섹터 분석', '/stock'],
   ['급등주', '/stock'],
   ['급락주', '/stock'],
+  // SEO 확장 페이지 내부 링크 (세션 92)
+  ['가격 상승 아파트', '/apt/theme/price-up'],
+  ['가격 하락 아파트', '/apt/theme/price-down'],
+  ['전세가율 낮은', '/apt/theme/low-jeonse-ratio'],
+  ['전세가율 높은', '/apt/theme/high-jeonse-ratio'],
+  ['신축 아파트', '/apt/theme/new-built'],
+  ['거래 활발', '/apt/theme/high-trade'],
+  ['역세권 아파트', '/apt/theme/high-trade'],
+  ['갭투자', '/apt/theme/high-jeonse-ratio'],
+  ['갭투자 위험', '/apt/theme/high-jeonse-ratio'],
+  ['역전세', '/apt/theme/high-jeonse-ratio'],
+  ['서울 아파트', '/apt/region/서울'],
+  ['부산 아파트', '/apt/region/부산'],
+  ['강남 아파트', '/apt/area/서울/강남구'],
+  ['해운대 아파트', '/apt/area/부산/해운대구'],
+  ['송파 아파트', '/apt/area/서울/송파구'],
+  ['마포 아파트', '/apt/area/서울/마포구'],
 ];
 
 // 재테크·금융 블로그 내부링크 (finance/general 카테고리)

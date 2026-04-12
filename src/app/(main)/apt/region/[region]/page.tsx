@@ -451,14 +451,15 @@ export default async function RegionLandingPage({ params }: Props) {
         </Link>
       </div>
 
-      {/* JSON-LD */}
+      {/* JSON-LD: FAQPage */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'WebPage',
-        name: `${decoded} 부동산 종합 정보`,
-        description: `${decoded} 지역 아파트 청약, 실거래가, 재개발, 미분양 정보`,
-        url: `${SITE_URL}/apt/region/${encodeURIComponent(decoded)}`,
-        isPartOf: { '@type': 'WebSite', name: '카더라', url: SITE_URL },
+        '@context': 'https://schema.org', '@type': 'FAQPage',
+        mainEntity: [
+          { '@type': 'Question', name: `${decoded} 아파트 청약 일정은?`, acceptedAnswer: { '@type': 'Answer', text: `현재 ${decoded} 지역에서 ${data.subscriptions.length}건의 청약이 진행 중입니다. 카더라에서 일정과 경쟁률을 확인하세요.` } },
+          { '@type': 'Question', name: `${decoded} 미분양 현황은?`, acceptedAnswer: { '@type': 'Answer', text: `${decoded} 지역 미분양은 ${data.unsolds.length}개 단지입니다.` } },
+          { '@type': 'Question', name: `${decoded} 재개발 현황은?`, acceptedAnswer: { '@type': 'Answer', text: `${decoded} 지역에서 ${data.redevelopments.length}건의 재개발·재건축이 진행 중입니다.` } },
+          ...(data.priceStats ? [{ '@type': 'Question', name: `${decoded} 평균 분양가는?`, acceptedAnswer: { '@type': 'Answer', text: `${decoded} 지역 평균 분양가는 ${fmtPrice(data.priceStats.avgMin)}~${fmtPrice(data.priceStats.avgMax)} 수준입니다.` } }] : []),
+        ],
       })}} />
     </article>
   );
