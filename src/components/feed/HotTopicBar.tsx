@@ -24,40 +24,38 @@ export default function HotTopicBar() {
 
   return (
     <div style={{ marginBottom: 'var(--sp-md)' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 6 }}>
-        <span style={{ fontSize: 13 }}>🔥</span>
-        <span style={{ color: 'var(--text-primary)', fontSize: 'var(--fs-xs)', fontWeight: 700 }}>핫토픽</span>
-        <span style={{
-          width: 5, height: 5, borderRadius: '50%',
-          background: 'var(--accent-red)',
-          animation: 'kd-pulse 2s infinite',
-        }} />
-      </div>
-      <div className="kd-scroll-row" style={{ gap: 6, paddingBottom: 2 }}>
+      <div style={{ display: 'flex', gap: 6, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 2, alignItems: 'center' }}>
+        <div style={{
+          flexShrink: 0, display: 'flex', alignItems: 'center', gap: 4,
+          padding: '5px 10px', borderRadius: 'var(--radius-xl, 20px)',
+          background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.12)',
+        }}>
+          <span style={{ fontSize: 11 }}>🔥</span>
+          <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--accent-red, #EF4444)' }}>핫토픽</span>
+        </div>
         {topics.map(t => {
           const score = t.comments_count + t.likes_count;
           const isFire = score > 20;
           return (
             <Link key={t.id} href={`/feed/${t.id}`} style={{
-              flexShrink: 0, padding: '8px 12px', borderRadius: 'var(--radius-sm)',
+              flexShrink: 0, display: 'flex', alignItems: 'center', gap: 5,
+              padding: '5px 12px', borderRadius: 'var(--radius-xl, 20px)',
               background: 'var(--bg-surface)', textDecoration: 'none',
-              border: `1px solid ${isFire ? 'rgba(239,68,68,0.15)' : 'var(--border)'}`,
-              minWidth: 130, maxWidth: 180,
+              border: `1px solid ${isFire ? 'rgba(239,68,68,0.1)' : 'var(--border)'}`,
             }}>
-              <div style={{
-                fontSize: 11, color: 'var(--text-primary)', fontWeight: 500, lineHeight: 1.3,
-                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+              <span style={{
+                fontSize: 12, color: 'var(--text-primary)', fontWeight: 500,
+                whiteSpace: 'nowrap', maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis',
               }}>
                 {isFire ? '🔥 ' : ''}{t.title || '(제목없음)'}
-              </div>
-              <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 3 }}>
-                💬{t.comments_count} ❤️{t.likes_count}
-              </div>
+              </span>
+              <span style={{ fontSize: 10, color: 'var(--text-tertiary)', flexShrink: 0 }}>
+                {t.comments_count + t.likes_count}
+              </span>
             </Link>
           );
         })}
       </div>
-      <style>{`@keyframes kd-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }`}</style>
     </div>
   );
 }

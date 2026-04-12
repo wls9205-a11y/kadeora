@@ -27,6 +27,7 @@ import HotTopicBar from '@/components/feed/HotTopicBar';
 import FeedPollCard from '@/components/feed/FeedPollCard';
 import FeedVSCard from '@/components/feed/FeedVSCard';
 import FeedPredictCard from '@/components/feed/FeedPredictCard';
+import FeedStatusBar from '@/components/feed/FeedStatusBar';
 import { timeAgo, numFmt } from '@/lib/format';
 import { useAuth } from '@/components/AuthProvider';
 
@@ -292,44 +293,57 @@ export default function FeedClient({
 
         <ProfileCompleteBanner />
 
-        {/* 헤더 — 카더라 + 공유 + 활동 */}
+        {/* 헤더 — 카더라 + 공유 */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, padding: '4px 0' }}>
           <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 900, color: 'var(--brand)', margin: 0, letterSpacing: -0.5, flexShrink: 0 }}>카더라</h1>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <SectionShareButton section="feed" label="카더라 커뮤니티" pagePath="/feed" />
-            <div style={{ flexShrink: 0 }}>
-              <LiveActivityIndicator />
-            </div>
-          </div>
+          <SectionShareButton section="feed" label="카더라 커뮤니티" pagePath="/feed" />
         </div>
+
+        <FeedStatusBar />
 
         <DailyReportCard />
 
         <QuickPostBar category={activeCategory !== 'all' && activeCategory !== 'following' ? activeCategory : 'free'} regionId={activeRegion} />
         <HotTopicBar />
 
-        {/* ━━━ 카테고리 탭 ━━━ */}
-        <div className="kd-scroll-row" style={{ marginBottom: 'var(--sp-sm)' }}>
+        {/* ━━━ 카테고리 탭 (세그먼트 컨트롤) ━━━ */}
+        <div style={{ display: 'flex', gap: 3, marginBottom: 'var(--sp-sm)', overflowX: 'auto', scrollbarWidth: 'none', padding: 3, background: 'var(--bg-surface)', borderRadius: 'var(--radius-xl, 20px)', border: '1px solid var(--border)' }}>
           {categories.map(cat => {
             const isActive = activeCategory === cat.key;
             return (
               <button key={cat.key} aria-pressed={isActive}
-                className={`kd-tab-btn${isActive ? ' active' : ''}`}
+                style={{
+                  padding: '7px 14px', borderRadius: 18, flexShrink: 0, border: 'none',
+                  background: isActive ? 'var(--bg-hover)' : 'transparent',
+                  color: isActive ? 'var(--text-primary)' : 'var(--text-tertiary)',
+                  fontSize: 12, fontWeight: isActive ? 700 : 400,
+                  cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4,
+                  transition: 'all 0.2s',
+                  boxShadow: isActive ? 'inset 0 0 0 1px var(--border-strong, rgba(255,255,255,0.12))' : 'none',
+                }}
                 onClick={() => router.push(buildUrl({ category: cat.key, region: 'all' }))}>
-                <span style={{ fontSize: 13 }}>{cat.icon}</span> {cat.label}
+                <span style={{ fontSize: 12 }}>{cat.icon}</span> {cat.label}
+                {isActive && <span style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--brand)', marginLeft: 1 }} />}
               </button>
             );
           })}
         </div>
 
-        {/* ━━━ 정렬 옵션 ━━━ */}
+        {/* ━━━ 정렬 옵션 (밑줄 탭) ━━━ */}
         {activeCategory !== 'following' && (
-          <div style={{ display: 'flex', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-md)', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 4, marginBottom: 'var(--sp-md)', alignItems: 'center' }}>
             {sortOptions.map(opt => {
               const isActive = activeSort === opt.key;
               return (
                 <button key={opt.key}
-                  className={`kd-sort-btn${isActive ? ' active' : ''}`}
+                  style={{
+                    padding: '5px 10px 6px', fontSize: 11, border: 'none', borderRadius: 0,
+                    background: 'transparent',
+                    color: isActive ? 'var(--brand)' : 'var(--text-tertiary)',
+                    fontWeight: isActive ? 700 : 400, cursor: 'pointer',
+                    borderBottom: isActive ? '2px solid var(--brand)' : '2px solid transparent',
+                    display: 'flex', alignItems: 'center', gap: 3,
+                  }}
                   onClick={() => router.push(buildUrl({ sort: opt.key }))}>
                   {opt.icon} {opt.label}
                 </button>
