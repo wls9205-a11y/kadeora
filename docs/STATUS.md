@@ -1,36 +1,23 @@
 # 카더라 STATUS.md
-> 마지막 업데이트: 2026-04-12 19:00 KST (세션 89)
+> 마지막 업데이트: 2026-04-12 21:30 KST (세션 90)
 
-## 세션 89 — 블로그 전천후 설계안 v2 구현
+## 세션 90 — 리텐션 시스템 Phase 1
 
 ### 완료
 
-1. **Phase 0 DB 일괄 수정** — 영어→한글 치환(trade/subscription/active/closed), "약 약" 오타, placeholder 제거
-2. **upcoming_projects 테이블** — 카더라 선점 콘텐츠 관리 (rumor→announced→open→closed 상태)
-3. **blog-data-enrichment.ts** — apt_complex_profiles(34,537) + apt_transactions(497,413) + stock_quotes(1,846) 실데이터 주입 함수
-4. **blog-quality-gate.ts** — 70점 미만 발행 차단 (인라인HTML/보일러플레이트/실데이터 유무/내부링크/표 체크)
-5. **blog-enrich-rewrite 크론** — C등급 3,726건 실데이터 기반 재생성 (기존 blog-rewrite 대체)
-6. **BlogSidebar.tsx** — 데스크탑 2컬럼 sticky 사이드바 (TOC+핵심지표+관련링크+도구)
-7. **BlogMetricCards.tsx** — 핵심 지표 카드 (평당가/전세가율/세대수/연식 or 현재가/PER/시총/배당률)
-8. **블로그 상세 페이지** — 사이드바 통합, apt_complex_profiles 메트릭 데이터 페치
-9. **globals.css** — blog-detail-layout 2컬럼(1024px+), blog-content 가독성(17px, 1.85lh, h2 구분선)
-10. **어드민 DataTab** — 블로그 품질 게이트 현황 (S/A/B/C/F 등급 분포, 인라인HTML 건수)
-11. **admin/v2 API** — blogQuality 실시간 집계 추가
-12. **blog-publish-queue** — 발행 시 품질 점수(seo_score/seo_tier) 자동 기록
-13. **vercel.json** — blog-rewrite 제거 → blog-enrich-rewrite 추가 (매 3시간)
-14. **설계 문서** — docs/BLOG_REDESIGN_MASTERPLAN.md + 카더라_블로그_전천후_설계안_v2.md
+1. **소셜 실시간 푸시** — 댓글/좋아요/팔로우 시 상대방에게 웹 푸시 즉시 발송 (리텐션 핵심 루프)
+2. **앱 배지 API** — SW에서 `setAppBadge()`/`clearAppBadge()` 호출 (PWA 아이콘에 미읽음 표시)
+3. **/api/push/click** — 푸시 클릭 추적 엔드포인트 (SW 404 해소 + CTR 측정 기반)
+4. **Quiet Hours** — `isQuietHours()`, `filterActiveUsers()` push-utils에 추가
+5. **push-content-alert** — `notification_settings.push_hot_post` 옵트아웃 체크 + OG 이미지 포함
+6. **PushPromptBanner 삭제** — SmartPushPrompt로 통합 (blog/[slug] 중복 배너 해소)
+7. **출석 알림** — `link: '/attendance'` 추가 (클릭 시 출석 페이지로 이동)
+8. **blog-subscription-alert** — 블로그 생성 후 `sendPushBroadcast()` 추가
+9. **admin OpsTab** — 푸시 발송 성과 대시보드 (CTR/구독수/읽음률/최근 로그)
+10. **admin v2 API** — `pushStats` 통계 (push_logs 기반) + SOLAPI 키 상태
+11. **설계 문서** — `docs/RETENTION_SYSTEM_DESIGN.md` (1,112줄, Phase 1~3 전체 설계)
 
 ### 배포
-- dpl_DSc3ybvW16b5bP4YvaQjt1p7AvFq — **READY** ✅
-
-### 다음 세션 작업
-
-1. **blog-upcoming-projects 크론** — 카더라 선점 콘텐츠 자동 발행 (전국 분양 예정 현장)
-2. **/api/og-infographic** — 시세 차트/비교표 데이터 인포그래픽 자동 생성
-3. **기존 크론 8개 프롬프트 교체** — district-guide, tax-guide, loan-guide, calculator-guide, life-guide, dividend-etf, subscription-monthly, regional-analysis
-4. **Unsplash + 조감도 + 인포그래픽 3층 이미지 시스템** — 시공사 조감도 웹 검색 수집
-5. **blog-data-update 크론** — 주간 조회수 상위 500글 시세 갱신
-6. **불필요 크론 10개 비활성화** — cleanup-padding, fix-existing, restore-candidate, restore-monitor, adr-compare, apt-landmark, etf-compare, invest-calendar, monthly-market, weekly-market
 
 ### 핵심 아키텍처
 - **원칙:** "데이터가 없으면 발행하지 않는다"
@@ -84,3 +71,41 @@
 - Last-Modified 헤더 (middleware)
 - 어드민 FocusTab SEO 위젯
 - SEO_REWRITE_PLAN 실행 (59K→15K)
+- 빌드 대기 중...
+
+### 다음 세션 작업 (리텐션 Phase 2)
+
+1. **[선행] Resend 도메인 DNS 인증** — SPF/DKIM/DMARC (Hostinger DNS)
+2. **DB 마이그레이션** — notification_settings 확장 + notification_dispatch_logs + notifications 보강
+3. **notification-hub.ts** — 중앙 알림 허브 (cascade 레벨 분기: urgent/routine/critical)
+4. **streak-alert 크론** — 21:00 KST 스트릭 위기 알림
+5. **churn-prevention 크론** — D+3 푸시 / D+7 이메일 / D+14 전채널
+6. **email-digest 크론** — weekly-digest 대체 + Resend 실제 이메일 발송
+7. **pending-notification-dispatch 크론** — 2분마다 번들링 ("OO님 외 N명" 합침)
+
+### Phase 1 변경 파일 (15개)
+```
+A  docs/RETENTION_SYSTEM_DESIGN.md
+M  public/sw.js
+M  src/app/(main)/blog/[slug]/page.tsx
+M  src/app/(main)/notifications/page.tsx
+M  src/app/admin/tabs/OpsTab.tsx
+M  src/app/api/admin/v2/route.ts
+M  src/app/api/attendance/route.ts
+M  src/app/api/comments/route.ts
+M  src/app/api/cron/blog-subscription-alert/route.ts
+M  src/app/api/cron/push-content-alert/route.ts
+M  src/app/api/follow/route.ts
+M  src/app/api/likes/route.ts
+A  src/app/api/push/click/route.ts
+D  src/components/PushPromptBanner.tsx
+M  src/lib/push-utils.ts
+```
+
+### 핵심 아키텍처
+- **원칙:** "데이터가 없으면 발행하지 않는다"
+- **품질 게이트:** 70점+ pass, S(90+)/A(80+)/B(70+)/C(50+)/F
+- **크론 정비:** 31개 → 24개 (유지12+교체8+신규4, 비활성화11)
+- **콘텐츠 4타입:** TYPE A(단지분석), TYPE B(종목분석), TYPE C(카더라 선점), TYPE D(재테크 가이드)
+- **이미지 3층:** 자체 인포그래픽 + 공신력 이미지(조감도) + Unsplash
+- **리텐션:** 소셜 실시간 푸시 + 앱 배지 + Quiet Hours + 멀티채널 cascade (Phase 2~3)
