@@ -36,7 +36,7 @@ export async function enrichAptData(aptName: string, sigungu?: string): Promise<
   const admin = getSupabaseAdmin();
 
   // 1. 단지 프로필 조회
-  let q = admin.from('apt_complex_profiles').select('*').eq('apt_name', aptName);
+  let q = (admin as any).from('apt_complex_profiles').select('*').eq('apt_name', aptName);
   if (sigungu) q = q.eq('sigungu', sigungu);
   const { data: complex } = await q.limit(1).maybeSingle();
   if (!complex) return null;
@@ -49,7 +49,7 @@ export async function enrichAptData(aptName: string, sigungu?: string): Promise<
     .limit(3);
 
   // 3. 같은 지역 비교 단지 3곳
-  const { data: comps } = await admin.from('apt_complex_profiles')
+  const { data: comps } = await (admin as any).from('apt_complex_profiles')
     .select('apt_name, avg_sale_price_pyeong, built_year, total_households')
     .eq('dong', complex.dong || complex.sigungu)
     .neq('apt_name', aptName)
