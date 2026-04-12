@@ -54,7 +54,7 @@ async function handler() {
 
 export async function GET() {
   try {
-    const result = await withCronLogging('predict-check', handler)();
+    const result = await withCronLogging('predict-check', handler);
     return NextResponse.json(result, { status: 200 });
   } catch (e: any) {
     return NextResponse.json({ error: e.message, processed: 0 }, { status: 200 });
