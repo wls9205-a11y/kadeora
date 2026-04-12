@@ -400,8 +400,8 @@ export default async function BlogPage({ searchParams }: Props) {
                 <span style={{ fontSize: 10, fontWeight: 800, color: isHot ? 'var(--accent-red)' : 'var(--text-tertiary)', width: 18, textAlign: 'center', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>{rank}</span>
                 {/* 썸네일 */}
                 {p.cover_image && (
-                  <div style={{ width: 64, height: 44, borderRadius: 'var(--radius-sm)', overflow: 'hidden', flexShrink: 0, background: 'var(--bg-hover)' }}>
-                    <img src={p.cover_image} alt={p.title || "블로그 썸네일"} width={64} height={44} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} loading="lazy" />
+                  <div style={{ width: 80, height: 56, borderRadius: 'var(--radius-sm)', overflow: 'hidden', flexShrink: 0, background: 'var(--bg-hover)' }}>
+                    <img src={p.cover_image} alt={p.title || "블로그 썸네일"} width={80} height={56} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} loading="lazy" />
                   </div>
                 )}
                 {/* 본문 */}

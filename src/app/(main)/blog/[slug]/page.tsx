@@ -805,17 +805,16 @@ export default async function BlogDetailPage({ params }: Props) {
           );
         })()}
 
-        {/* 히어로 이미지 */}
-        {post.cover_image && (
-          <div style={{ marginBottom: 20, borderRadius: 'var(--radius-card)', overflow: 'hidden', border: '1px solid var(--border)' }}>
-            <img
-              src={post.cover_image.startsWith('/') ? post.cover_image : post.cover_image}
-              alt={post.image_alt || post.title}
-              width={1200} height={630}
-              style={{ width: '100%', height: 'auto', display: 'block', maxHeight: 340, objectFit: 'cover' }}
-              loading="eager"
-            />
-          </div>
+        {/* 히어로 이미지 캐러셀 (6~7장) */}
+        {postImages.length > 0 && (
+          <BlogHeroImage
+            images={postImages.map((img: any) => ({
+              url: img.image_url,
+              alt: img.alt_text || `${post.title} — 카더라 ${catSection[post.category] || ''} 분석`,
+              caption: img.caption || undefined,
+            }))}
+            title={post.title}
+          />
         )}
 
         {/* 공유 바 */}
@@ -832,18 +831,6 @@ export default async function BlogDetailPage({ params }: Props) {
             <BlogBookmarkButton blogPostId={post.id} />
           </div>
         </div>
-
-        {/* 히어로 이미지 — blog_post_images 테이블에서만 (OG 텍스트카드 제외) */}
-        {postImages.length > 0 && (
-          <BlogHeroImage
-            images={postImages.map((img: any) => ({
-              url: img.image_url,
-              alt: img.alt_text || `${post.title} — 카더라 ${catSection[post.category] || ''} 분석`,
-              caption: img.caption || undefined,
-            }))}
-            title={post.title}
-          />
-        )}
 
         {/* 목차 (모바일: 인라인, 데스크탑: 사이드바) */}
         <div className="blog-toc-inline">
