@@ -17,12 +17,11 @@ export default function FeedStatusBar() {
 
       // 오늘 통계
       const today = new Date().toISOString().split('T')[0];
-      const [postsRes, commentsRes, signupsRes] = await Promise.all([
+      const [postsRes, commentsRes] = await Promise.all([
         sb.from('posts').select('*', { count: 'exact', head: true }).eq('is_deleted', false).gte('created_at', today).then((r: any) => r.count ?? 0).catch(() => 0),
         sb.from('comments').select('*', { count: 'exact', head: true }).gte('created_at', today).then((r: any) => r.count ?? 0).catch(() => 0),
-        sb.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', today).then((r: any) => r.count ?? 0).catch(() => 0),
       ]);
-      setStats({ posts: postsRes, comments: commentsRes, signups: signupsRes });
+      setStats({ posts: postsRes, comments: commentsRes, signups: 0 });
     };
 
     fetchData();
@@ -60,7 +59,6 @@ export default function FeedStatusBar() {
         {[
           { icon: '✏️', val: stats.posts },
           { icon: '💬', val: stats.comments },
-          { icon: '👋', val: stats.signups },
         ].map((s, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 2, padding: '3px 6px' }}>
             <span style={{ fontSize: 10 }}>{s.icon}</span>
