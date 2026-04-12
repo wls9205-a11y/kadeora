@@ -705,6 +705,21 @@ export async function GET(req: NextRequest) {
         sb.from('apt_complex_profiles').select('apt_name', { count: 'exact', head: true }),
       ]);
 
+      // 선점 콘텐츠 파이프라인
+      const upcomingRaw = await (sb as any).from('upcoming_projects')
+        .select('status, blog_post_id, region');
+      const upList = upcomingRaw.data || [];
+      const upStats = {
+        total: upList.length,
+        published: upList.filter((u: any) => u.blog_post_id).length,
+        pending: upList.filter((u: any) => !u.blog_post_id).length,
+        byRegion: {} as Record<string, number>,
+      };
+      for (const u of upList) {
+        const r = u.region || '기타';
+        upStats.byRegion[r] = (upStats.byRegion[r] || 0) + 1;
+      }
+
       return NextResponse.json({
         freshness: lastSuccess,
         stock: {
@@ -721,6 +736,7 @@ export async function GET(req: NextRequest) {
           complexProfiles: complexR.count ?? 0,
         },
         blogCategories: blogCats,
+        upcoming: upStats,
       });
     }
 

@@ -91,6 +91,12 @@ export default function OpsTab({ onNavigate }: { onNavigate: (t: any) => void })
         </>
       )}
 
+      {/* 크론 상한 경고 */}
+      <div style={{ padding: '8px 12px', marginBottom: 8, borderRadius: 'var(--radius-md)', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)' }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: '#EF4444' }}>⚠️ Vercel 크론 100/100 (Pro 상한 도달)</div>
+        <div style={{ fontSize: 11, color: 'rgba(239,68,68,0.6)', marginTop: 2 }}>크론 추가 불가 — 추가 시 빌드 실패. 새 크론 필요 시 기존 크론 비활성화 필수.</div>
+      </div>
+
       {/* 크론 그룹 */}
       <div className="adm-sec">📊 크론 그룹별 현황</div>
       {Object.entries(cronGroups || {}).map(([key, g]: [string, any]) => {
