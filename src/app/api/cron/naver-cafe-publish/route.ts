@@ -51,21 +51,16 @@ async function doWork() {
         .slice(0, 30000);
       const subject = (item.naver_title || '').replace(/[|~`]/g, '').slice(0, 60);
 
-      // multipart/form-data 수동 구성 — UTF-8 raw bytes 전송
-      const boundary = '----NaverCafe' + Date.now();
-      const parts: string[] = [];
-      parts.push(`--${boundary}\r\nContent-Disposition: form-data; name="subject"\r\nContent-Type: text/plain; charset=UTF-8\r\n\r\n${subject}`);
-      parts.push(`--${boundary}\r\nContent-Disposition: form-data; name="content"\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n${cleanHtml}`);
-      parts.push(`--${boundary}--`);
-      const body = parts.join('\r\n');
+      // URLSearchParams를 body로 직접 전달 — Content-Type 자동 설정 
+      // fetch spec: URLSearchParams body → Content-Type: application/x-www-form-urlencoded;charset=UTF-8
+      const params = new URLSearchParams();
+      params.append('subject', subject);
+      params.append('content', cleanHtml);
 
       const res = await fetch(url, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': `multipart/form-data; boundary=${boundary}`,
-        },
-        body: body,
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: params,
       });
 
       const resText = await res.text();
