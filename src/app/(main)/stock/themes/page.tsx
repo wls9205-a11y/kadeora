@@ -37,12 +37,12 @@ export default async function ThemesPage() {
   return (
     <article style={{ maxWidth: 780, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '주식', item: `${SITE_URL}/stock` }, { '@type': 'ListItem', position: 3, name: '테마주' }] }) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'ItemList', name: TITLE, numberOfItems: (themes ?? []).length, itemListElement: (themes ?? []).slice(0, 20).map((t: any, i: number) => ({ '@type': 'ListItem', position: i + 1, name: t.name, url: `${SITE_URL}/stock/themes#${encodeURIComponent(t.name)}` })) }) }} />
       <nav style={{ fontSize: 12, color: 'var(--text-tertiary)', display: 'flex', gap: 4, marginBottom: 8 }}>
         <Link href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>홈</Link>›
         <Link href="/stock" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>주식</Link>›<span>테마주</span>
       </nav>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebPage', name: TITLE, url: `${SITE_URL}/stock/themes`, speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', 'section'] } }) }} />
+      <div style={ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
         <h1 style={{ fontSize: 'clamp(22px, 5vw, 28px)', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>🎯 테마주 분석</h1>
         <ShareButtons title={TITLE} />
       </div>
