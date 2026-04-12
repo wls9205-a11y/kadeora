@@ -222,16 +222,7 @@ export function Navigation() {
             </span>
           </Link>
 
-          {/* 인기검색어 (모바일) — 로고 옆 */}
-          {trendingKw && (
-            <Link href={`/search?q=${encodeURIComponent(trendingKw)}`} className="md:hidden" style={{
-              flex:1, minWidth:0, display:'flex', alignItems:'center', gap:4,
-              textDecoration:'none', overflow:'hidden', padding:'0 4px',
-            }}>
-              <span style={{ fontSize: 10, fontWeight:700, color:'var(--brand)', padding:'1px 4px', borderRadius: 4, border:'1px solid var(--brand)', flexShrink:0, lineHeight:'13px' }}>인기</span>
-              <span style={{ fontSize:11, fontWeight:600, color:'var(--text-secondary)', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{trendingKw}</span>
-            </Link>
-          )}
+
 
           {/* 검색바 (데스크탑) — 인기검색어 통합 */}
           <Link href="/search" className="hidden md:flex" style={{
