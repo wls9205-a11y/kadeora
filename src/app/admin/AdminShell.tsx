@@ -71,7 +71,7 @@ export default function AdminShell() {
             </>}
           </div>}
           <div style={{flex:1}}/>
-          <span style={{fontSize:9,color:'rgba(255,255,255,0.15)',letterSpacing:1,fontWeight:700}}>MISSION CONTROL</span>
+          <span style={{fontSize: 10,color:'rgba(255,255,255,0.15)',letterSpacing:1,fontWeight:700}}>MISSION CONTROL</span>
         </div>
 
         {/* 탭 네비게이션 — 스크롤 가능 */}

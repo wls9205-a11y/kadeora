@@ -20,7 +20,7 @@ export default async function StockComparePage() {
     <>
       {/* SSR H1 + 서술형 텍스트 — 네이버 Yeti가 볼 수 있는 콘텐츠 */}
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
-        <h1 style={{ fontSize: 'clamp(20px, 5vw, 26px)', fontWeight: 800, color: 'var(--text-primary)', margin: '16px 0 8px' }}>
+        <h1 style={{ position:'absolute', width:1, height:1, overflow:'hidden', clip:'rect(0,0,0,0)' }}>
           주식 종목 비교
         </h1>
         <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 16, lineHeight: 1.7 }}>

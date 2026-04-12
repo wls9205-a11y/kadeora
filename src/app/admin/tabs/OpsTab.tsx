@@ -119,7 +119,7 @@ export default function OpsTab({ onNavigate }: { onNavigate: (t: any) => void })
             <span style={{ flex: 1, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</span>
             {c.records > 0 && <span style={{ color: 'var(--text-tertiary)', fontSize: 10 }}>{c.records}건</span>}
             {c.duration && <span style={{ color: 'var(--text-tertiary)', fontSize: 10 }}>{c.duration}s</span>}
-            <span style={{ color: 'var(--text-tertiary)', fontSize: 9, minWidth: 40, textAlign: 'right' }}>{ago(c.at)}</span>
+            <span style={{ color: 'var(--text-tertiary)', fontSize: 10, minWidth: 40, textAlign: 'right' }}>{ago(c.at)}</span>
           </div>
         ))}
       </div>
@@ -150,7 +150,7 @@ export default function OpsTab({ onNavigate }: { onNavigate: (t: any) => void })
             { name: 'KIS', ok: false },
             { name: 'APT_DATA', ok: false },
           ].map(k => (
-            <span key={k.name} style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '2px 6px', borderRadius: 4, fontSize: 9, background: k.ok ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)', color: k.ok ? '#10B981' : '#EF4444' }}>
+            <span key={k.name} style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '2px 6px', borderRadius: 4, fontSize: 10, background: k.ok ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)', color: k.ok ? '#10B981' : '#EF4444' }}>
               {k.ok ? '✓' : '✗'} {k.name}
             </span>
           ))}

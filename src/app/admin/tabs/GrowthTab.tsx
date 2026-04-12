@@ -48,7 +48,7 @@ export default function GrowthTab({ onNavigate }: { onNavigate: (t: any) => void
         <div style={{ display: 'flex', alignItems: 'flex-end', gap: 3, height: 100 }}>
           {(dailyTrend || []).map((d: any, i: number) => (
             <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-              <div style={{ fontSize: 8, color: 'var(--text-tertiary)' }}>{d.pv}</div>
+              <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{d.pv}</div>
               <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 1 }}>
                 <div style={{ height: `${(d.pv / maxDailyPv) * 70}px`, background: 'var(--brand)', borderRadius: 2, minHeight: 2, opacity: 0.3 }} />
                 <div style={{ height: `${(d.uv / maxDailyPv) * 70}px`, background: 'var(--brand)', borderRadius: 2, minHeight: 2 }} />
@@ -111,7 +111,7 @@ export default function GrowthTab({ onNavigate }: { onNavigate: (t: any) => void
                 const max = Math.max(...signupTrend.map((s: any) => s.count), 1);
                 return (
                   <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    {d.count > 0 && <div style={{ fontSize: 9, color: '#10B981', fontWeight: 700 }}>{d.count}</div>}
+                    {d.count > 0 && <div style={{ fontSize: 10, color: '#10B981', fontWeight: 700 }}>{d.count}</div>}
                     <div style={{ width: '100%', height: `${(d.count / max) * 35}px`, background: '#10B981', borderRadius: 2, minHeight: d.count > 0 ? 4 : 1, opacity: d.count > 0 ? 1 : 0.2 }} />
                     <div style={{ fontSize: 7, color: 'var(--text-tertiary)', marginTop: 2 }}>{d.date?.slice(5)}</div>
                   </div>
@@ -200,7 +200,7 @@ export default function GrowthTab({ onNavigate }: { onNavigate: (t: any) => void
         </div>
         <div style={{ display: 'flex', gap: 2, marginTop: 2 }}>
           {[0, 6, 12, 18, 23].map(h => (
-            <span key={h} style={{ flex: 1, fontSize: 9, color: 'var(--text-tertiary)', textAlign: 'center' }}>{h}시</span>
+            <span key={h} style={{ flex: 1, fontSize: 10, color: 'var(--text-tertiary)', textAlign: 'center' }}>{h}시</span>
           ))}
         </div>
         <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 6, textAlign: 'center' }}>

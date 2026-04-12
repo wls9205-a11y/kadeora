@@ -322,7 +322,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   </div>
                   <span style={{
                     fontSize: 'var(--fs-sm)', fontWeight: 800, flexShrink: 0, marginLeft: 8,
-                    padding: '2px 10px', borderRadius: 'var(--radius-xs)',
+                    padding: '3px 10px', borderRadius: 'var(--radius-xs)',
                     color: a.dday <= 1 ? 'var(--accent-red)' : a.dday <= 3 ? 'var(--accent-orange)' : 'var(--brand)',
                     background: a.dday <= 1 ? 'rgba(255,107,107,0.1)' : a.dday <= 3 ? 'rgba(255,159,67,0.1)' : 'var(--brand-bg)',
                   }}>

@@ -189,7 +189,7 @@ export default function ChatRoom({ user, myNickname, room = 'lounge' }: { user: 
                       </button>
                     )}
                     {user && user.id !== msg.user_id && (
-                      <button onClick={() => setReportTarget(msg.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)', padding: '2px 4px', marginLeft: 'auto' }}>신고</button>
+                      <button onClick={() => setReportTarget(msg.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)', padding: '3px 6px', marginLeft: 'auto' }}>신고</button>
                     )}
                   </div>
                 </div>

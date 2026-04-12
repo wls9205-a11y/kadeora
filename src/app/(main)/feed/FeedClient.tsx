@@ -436,7 +436,7 @@ export default function FeedClient({
                   </div>
                   {/* 관리자 빠른 삭제 */}
                   {isAdmin && (
-                    <button onClick={(e) => handleAdminDelete(e, post.id as number)} title="관리자 삭제" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', padding: '2px 4px', flexShrink: 0, opacity: 0.5, transition: 'opacity 0.15s' }} onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')} onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.5')}>
+                    <button onClick={(e) => handleAdminDelete(e, post.id as number)} title="관리자 삭제" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', padding: '3px 6px', flexShrink: 0, opacity: 0.5, transition: 'opacity 0.15s' }} onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')} onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.5')}>
                       <Trash2 size={14} />
                     </button>
                   )}

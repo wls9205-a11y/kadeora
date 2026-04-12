@@ -134,7 +134,7 @@ function D2(C: typeof CAT[string], title: string, sub: string, author: string, f
 
         {/* 하단: kadeora.app */}
         <div style={{ position:'relative', zIndex:1 }}>
-          <div style={{ fontSize:9, fontWeight:700, color:'rgba(0,0,0,0.28)', letterSpacing:0.5 }}>kadeora.app</div>
+          <div style={{ fontSize: 10, fontWeight:700, color:'rgba(0,0,0,0.28)', letterSpacing:0.5 }}>kadeora.app</div>
         </div>
       </div>
 
@@ -177,7 +177,7 @@ function D2(C: typeof CAT[string], title: string, sub: string, author: string, f
               <>
                 <div style={{ width:1, height:12, background:'rgba(255,255,255,0.12)' }} />
                 <div style={{ display:'flex', alignItems:'center', gap:6 }}>
-                  <div style={{ width:20, height:20, borderRadius:'50%', background:`linear-gradient(135deg,${C.a},#2563EB)`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:9, fontWeight:900, color:'#fff' }}>
+                  <div style={{ width:20, height:20, borderRadius:'50%', background:`linear-gradient(135deg,${C.a},#2563EB)`, display:'flex', alignItems:'center', justifyContent:'center', fontSize: 10, fontWeight:900, color:'#fff' }}>
                     {author[0].toUpperCase()}
                   </div>
                   <span style={{ fontSize:11, color:'rgba(255,255,255,0.35)' }}>{author}</span>
@@ -218,7 +218,7 @@ function D3(C: typeof CAT[string], title: string, sub: string, author: string, f
             <span style={{ fontSize:12, color:'rgba(0,0,0,.55)' }}>{author}</span>
           </div>
         )}
-        <div style={{ fontSize:9, color:'rgba(0,0,0,.3)', fontWeight:700 }}>kadeora.app</div>
+        <div style={{ fontSize: 10, color:'rgba(0,0,0,.3)', fontWeight:700 }}>kadeora.app</div>
       </div>
       {/* 오른쪽 컨텐츠 */}
       <div style={{ position:'absolute', top:0, right:0, width:'58%', height:'100%', display:'flex', flexDirection:'column', justifyContent:'center', padding:'32px 36px 32px 48px', zIndex:2 }}>
@@ -258,7 +258,7 @@ function D4(C: typeof CAT[string], title: string, sub: string, author: string, f
             <span style={{ fontSize:12, color:'rgba(0,0,0,.55)' }}>{author}</span>
           </div>
         )}
-        <div style={{ position:'relative', zIndex:1, fontSize:9, color:'rgba(0,0,0,.3)', fontWeight:700 }}>kadeora.app</div>
+        <div style={{ position:'relative', zIndex:1, fontSize: 10, color:'rgba(0,0,0,.3)', fontWeight:700 }}>kadeora.app</div>
       </div>
       {/* 오른쪽 흰 패널 */}
       <div style={{ flex:1, background:'#fff', display:'flex', flexDirection:'column', justifyContent:'space-between', padding:'28px 32px' }}>

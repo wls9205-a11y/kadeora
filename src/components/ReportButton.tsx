@@ -78,7 +78,7 @@ export default function ReportButton({ postId, commentId, messageId, style: cust
           border: 'none',
           cursor: 'pointer',
           color: 'var(--text-tertiary)',
-          padding: '2px 4px',
+          padding: '3px 6px',
           transition: 'opacity 0.15s',
           ...customStyle,
         }}

@@ -240,7 +240,7 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
             <div key={a.key} style={{ flex: 1, minWidth: 90, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '8px 10px' }}>
               <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 600, marginBottom: 4 }}>{a.label}</div>
               <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1 }}>{fmtAmount(a.avg)}</div>
-              <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginTop: 3 }}>{a.count}건 · 최고 {fmtAmount(a.max)}</div>
+              <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 3 }}>{a.count}건 · 최고 {fmtAmount(a.max)}</div>
             </div>
           ))}
         </div>
@@ -261,9 +261,9 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
                 <div style={{ display: 'flex', alignItems: 'center', gap: 3, marginBottom: 5, flexWrap: 'wrap' }}>
                   {isNew(t, 'transaction') && <NewBadge />}
                   <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 4, background: t.trade_type === '매매' ? 'rgba(59,130,246,0.1)' : 'rgba(52,211,153,0.1)', color: t.trade_type === '매매' ? 'var(--brand)' : 'var(--accent-green)', border: `1px solid ${t.trade_type === '매매' ? 'rgba(59,130,246,0.2)' : 'rgba(52,211,153,0.2)'}`, lineHeight: '14px' }}>{t.trade_type || '매매'}</span>
-                  {isMax && <span style={{ fontSize: 9, fontWeight: 700, padding: '2px 5px', borderRadius: 3, background: 'rgba(251,191,36,0.1)', color: 'var(--accent-yellow)', lineHeight: '14px' }}>신고가</span>}
-                  <span style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>{t.deal_date || ''}</span>
-                  {vsMax !== null && <span style={{ fontSize: 9, fontWeight: 700, color: vsMax > 0 ? 'var(--accent-green)' : 'var(--accent-red)', marginLeft: 'auto' }}>{vsMax > 0 ? '▲' : '▼'}{vsMax > 0 ? '+' : ''}{vsMax}%</span>}
+                  {isMax && <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 6px', borderRadius: 3, background: 'rgba(251,191,36,0.1)', color: 'var(--accent-yellow)', lineHeight: '14px' }}>신고가</span>}
+                  <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{t.deal_date || ''}</span>
+                  {vsMax !== null && <span style={{ fontSize: 10, fontWeight: 700, color: vsMax > 0 ? 'var(--accent-green)' : 'var(--accent-red)', marginLeft: 'auto' }}>{vsMax > 0 ? '▲' : '▼'}{vsMax > 0 ? '+' : ''}{vsMax}%</span>}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 2 }}>
                   <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.apt_name || '아파트'}</span>
@@ -293,7 +293,7 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
                   <div style={{ display: 'flex', alignItems: 'flex-end', gap: 2, height: 24 }}>
                     {recent.map((r, ri) => { const pct = mx > 0 ? ((r.deal_amount || 0) / mx) * 100 : 0; const isLast = ri === recent.length - 1; return (<div key={ri} style={{ flex: 1, height: `${Math.max(pct, 8)}%`, background: isLast ? borderColor : `${borderColor}30`, borderRadius: '1px 1px 0 0' }} />); })}
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 8, color: 'var(--text-tertiary)', marginTop: 2 }}><span>{recent.length}건 전</span><span>최근</span></div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}><span>{recent.length}건 전</span><span>최근</span></div>
                 </div>
               );
             })()}

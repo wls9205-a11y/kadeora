@@ -179,7 +179,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 3, marginBottom: 5, flexWrap: 'wrap' }}>
                   {isNew(u, 'unsold') && <NewBadge />}
-                  {(() => { const sa = surgeAlerts.find(a => a.region_nm === u.region_nm); return sa && sa.change_pct !== 0 ? <span style={{ fontSize: 9, fontWeight: 700, padding: '1px 5px', borderRadius: 10, background: sa.change_pct > 0 ? 'rgba(248,113,113,0.08)' : 'rgba(52,211,153,0.08)', color: sa.change_pct > 0 ? 'var(--accent-red)' : 'var(--accent-green)' }}>{sa.change_pct > 0 ? '+' : ''}{sa.change_pct}%</span> : null; })()}
+                  {(() => { const sa = surgeAlerts.find(a => a.region_nm === u.region_nm); return sa && sa.change_pct !== 0 ? <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 5px', borderRadius: 10, background: sa.change_pct > 0 ? 'rgba(248,113,113,0.08)' : 'rgba(52,211,153,0.08)', color: sa.change_pct > 0 ? 'var(--accent-red)' : 'var(--accent-green)' }}>{sa.change_pct > 0 ? '+' : ''}{sa.change_pct}%</span> : null; })()}
                 </div>
                 <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 2 }}>{u.house_nm || '미분양'}</div>
                 <div style={{ fontSize: 10, color: 'var(--text-tertiary)', lineHeight: 1.5 }}>{u.region_nm}{u.sigungu_nm ? ` ${u.sigungu_nm}` : ''}</div>

@@ -173,7 +173,7 @@ export default function ExecuteTab({ onNavigate }: { onNavigate: (t: any) => voi
                     </span>
                     <span style={{ flex: 1, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.cron}</span>
                     <span style={{ color: 'var(--text-tertiary)', minWidth: 40, textAlign: 'right' }}>{r.duration ? `${r.duration.toFixed(1)}s` : '—'}</span>
-                    <span style={{ fontSize: 9, color: 'var(--text-tertiary)', background: 'var(--bg-hover)', padding: '1px 4px', borderRadius: 3, minWidth: 24, textAlign: 'center' }}>{r.status}</span>
+                    <span style={{ fontSize: 10, color: 'var(--text-tertiary)', background: 'var(--bg-hover)', padding: '1px 4px', borderRadius: 3, minWidth: 24, textAlign: 'center' }}>{r.status}</span>
                   </div>
                 ))}
               </div>

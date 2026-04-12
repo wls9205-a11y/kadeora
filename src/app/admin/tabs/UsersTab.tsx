@@ -3,9 +3,9 @@ import { useState, useEffect } from "react";
 
 const ago = (d: string) => { if(!d) return '—'; const s = Math.floor((Date.now() - new Date(d).getTime()) / 1000); return s < 60 ? '방금' : s < 3600 ? Math.floor(s / 60) + '분' : s < 86400 ? Math.floor(s / 3600) + '시간' : Math.floor(s / 86400) + '일'; };
 const fmt = (d: string) => d ? new Date(d).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' }) : '—';
-const Badge = ({ ok, label }: { ok: boolean; label: string }) => <span style={{ fontSize: 9, padding: '1px 5px', borderRadius: 6, fontWeight: 600, background: ok ? 'rgba(16,185,129,0.12)' : 'rgba(255,255,255,0.03)', color: ok ? '#10B981' : 'rgba(255,255,255,0.15)' }}>{ok ? '✓' : '✗'}{label}</span>;
-const Tag = ({ text, color = 'rgba(255,255,255,0.25)', bg = 'rgba(255,255,255,0.04)' }: { text: string; color?: string; bg?: string }) => <span style={{ fontSize: 8, padding: '1px 5px', borderRadius: 5, background: bg, color, whiteSpace: 'nowrap' }}>{text}</span>;
-const Stat = ({ icon, val, label, warn }: { icon: string; val: number | string; label: string; warn?: boolean }) => <div style={{ textAlign: 'center', minWidth: 32 }}><div style={{ fontSize: 9 }}>{icon}</div><div style={{ fontSize: 12, fontWeight: 800, color: warn && val === 0 ? 'rgba(255,255,255,0.12)' : '#E2E8F0', lineHeight: 1 }}>{val}</div><div style={{ fontSize: 7, color: 'rgba(255,255,255,0.2)', marginTop: 1 }}>{label}</div></div>;
+const Badge = ({ ok, label }: { ok: boolean; label: string }) => <span style={{ fontSize: 10, padding: '1px 5px', borderRadius: 6, fontWeight: 600, background: ok ? 'rgba(16,185,129,0.12)' : 'rgba(255,255,255,0.03)', color: ok ? '#10B981' : 'rgba(255,255,255,0.15)' }}>{ok ? '✓' : '✗'}{label}</span>;
+const Tag = ({ text, color = 'rgba(255,255,255,0.25)', bg = 'rgba(255,255,255,0.04)' }: { text: string; color?: string; bg?: string }) => <span style={{ fontSize: 10, padding: '1px 5px', borderRadius: 5, background: bg, color, whiteSpace: 'nowrap' }}>{text}</span>;
+const Stat = ({ icon, val, label, warn }: { icon: string; val: number | string; label: string; warn?: boolean }) => <div style={{ textAlign: 'center', minWidth: 32 }}><div style={{ fontSize: 10 }}>{icon}</div><div style={{ fontSize: 12, fontWeight: 800, color: warn && val === 0 ? 'rgba(255,255,255,0.12)' : '#E2E8F0', lineHeight: 1 }}>{val}</div><div style={{ fontSize: 7, color: 'rgba(255,255,255,0.2)', marginTop: 1 }}>{label}</div></div>;
 
 const pIcon: Record<string, string> = { kakao: '💬', google: '🔵', naver: '🟢', apple: '🍎' };
 const gLabel: Record<number, { n: string; c: string }> = { 1:{n:'새싹',c:'#10B981'}, 2:{n:'묘목',c:'#34D399'}, 3:{n:'나무',c:'#06B6D4'}, 4:{n:'숲',c:'#3B82F6'}, 5:{n:'산',c:'#8B5CF6'}, 6:{n:'달',c:'#F59E0B'}, 7:{n:'별',c:'#EC4899'}, 8:{n:'VIP',c:'#EF4444'} };
@@ -58,7 +58,7 @@ export default function UsersTab({ onNavigate }: { onNavigate: (t: any) => void 
         ].map(k => (
           <div key={k.l} style={{ textAlign: 'center', background: 'rgba(12,21,40,0.65)', border: '1px solid rgba(255,255,255,0.04)', borderRadius: 8, padding: '7px 0' }}>
             <div style={{ fontSize: 17, fontWeight: 900, color: k.c, lineHeight: 1 }}>{k.v}</div>
-            <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>{k.l}</div>
+            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>{k.l}</div>
           </div>
         ))}
       </div>
@@ -72,13 +72,13 @@ export default function UsersTab({ onNavigate }: { onNavigate: (t: any) => void 
           { t: '성별', data: sortedEntries(genderMap), fmt: ([g, n]: any) => ['', g==='male'?'♂남':g==='female'?'♀여':g, n] },
         ].map(sec => (
           <div key={sec.t} style={{ background: 'rgba(12,21,40,0.65)', border: '1px solid rgba(255,255,255,0.04)', borderRadius: 8, padding: '6px 8px' }}>
-            <div style={{ fontSize: 8, fontWeight: 700, color: 'rgba(255,255,255,0.3)', marginBottom: 3 }}>{sec.t}</div>
+            <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.3)', marginBottom: 3 }}>{sec.t}</div>
             {sec.data.length > 0 ? sec.data.map((e: any) => { const [icon, label, val] = sec.fmt(e); return (
               <div key={label} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, padding: '1px 0' }}>
                 <span style={{ color: 'rgba(255,255,255,0.35)' }}>{icon}{label}</span>
                 <span style={{ fontWeight: 700, color: '#E2E8F0' }}>{val}</span>
               </div>
-            );}) : <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.12)' }}>미설정</div>}
+            );}) : <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.12)' }}>미설정</div>}
           </div>
         ))}
       </div>
@@ -86,13 +86,13 @@ export default function UsersTab({ onNavigate }: { onNavigate: (t: any) => void 
       {/* 관심사 + 참여 */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4 }}>
         <div style={{ background: 'rgba(12,21,40,0.65)', border: '1px solid rgba(255,255,255,0.04)', borderRadius: 8, padding: '6px 8px' }}>
-          <div style={{ fontSize: 8, fontWeight: 700, color: 'rgba(255,255,255,0.3)', marginBottom: 3 }}>관심사 분포</div>
+          <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.3)', marginBottom: 3 }}>관심사 분포</div>
           {sortedEntries(interestMap).length > 0 ? sortedEntries(interestMap).map(([k, v]) => (
             <div key={k} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, padding: '1px 0' }}>
               <span style={{ color: 'rgba(255,255,255,0.35)' }}>{iLabel[k]||k}</span>
               <span style={{ fontWeight: 700, color: '#E2E8F0' }}>{v}</span>
             </div>
-          )) : <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.12)' }}>미설정</div>}
+          )) : <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.12)' }}>미설정</div>}
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 4 }}>
           {[
@@ -137,11 +137,11 @@ export default function UsersTab({ onNavigate }: { onNavigate: (t: any) => void 
               <span style={{ width: 5, height: 5, borderRadius: '50%', background: isSeed ? '#6B7280' : isActive ? '#10B981' : 'rgba(255,255,255,0.08)', flexShrink: 0 }} />
               <span style={{ fontSize: 12, fontWeight: 700, color: isSeed ? '#9CA3AF' : '#E2E8F0' }}>{u.nickname}</span>
               {isSeed && <Tag text="🤖시드" color="#EF4444" bg="rgba(239,68,68,0.12)" />}
-              {!isSeed && <span style={{ fontSize: 8, color: g.c, fontWeight: 600, background: `${g.c}15`, padding: '0 5px', borderRadius: 6 }}>{g.n}</span>}
-              <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.2)' }}>{pIcon[u.provider] || '🔑'}</span>
+              {!isSeed && <span style={{ fontSize: 10, color: g.c, fontWeight: 600, background: `${g.c}15`, padding: '0 5px', borderRadius: 6 }}>{g.n}</span>}
+              <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)' }}>{pIcon[u.provider] || '🔑'}</span>
               <div style={{ flex: 1 }} />
-              <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.18)' }}>{fmt(u.created_at)}</span>
-              {u.last_active_at && <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.12)' }}>→{ago(u.last_active_at)}</span>}
+              <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.18)' }}>{fmt(u.created_at)}</span>
+              {u.last_active_at && <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.12)' }}>→{ago(u.last_active_at)}</span>}
             </div>
             {!isSeed && (
               <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap', marginBottom: 4 }}>
@@ -182,8 +182,8 @@ export default function UsersTab({ onNavigate }: { onNavigate: (t: any) => void 
           <div key={idx} style={{ background: 'rgba(12,21,40,0.65)', border: '1px solid rgba(255,255,255,0.04)', borderRadius: 8, padding: '5px 8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 10 }}>
             <div><span style={{ color: '#E2E8F0', fontWeight: 600 }}>{i.siteName}</span><span style={{ color: 'rgba(255,255,255,0.2)', marginLeft: 4 }}>{i.siteRegion}</span></div>
             <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-              {i.notification_enabled && <span style={{ fontSize: 8, color: '#10B981' }}>🔔</span>}
-              <span style={{ color: 'rgba(255,255,255,0.12)', fontSize: 8 }}>{ago(i.created_at)}</span>
+              {i.notification_enabled && <span style={{ fontSize: 10, color: '#10B981' }}>🔔</span>}
+              <span style={{ color: 'rgba(255,255,255,0.12)', fontSize: 10 }}>{ago(i.created_at)}</span>
             </div>
           </div>
         ))}

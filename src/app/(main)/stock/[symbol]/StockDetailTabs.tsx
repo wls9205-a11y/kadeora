@@ -242,7 +242,7 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
               <div className="kd-card" style={{ background: cardBg, border: signalBorder }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-sm)' }}>
                   <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>🤖 AI 한줄평</span>
-                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: sigColor, padding: '2px 10px', borderRadius: 'var(--radius-pill)', background: signalBg(aiComment.signal || 'neutral') }}>{signalLabel}</span>
+                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: sigColor, padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: signalBg(aiComment.signal || 'neutral') }}>{signalLabel}</span>
                 </div>
                 <p style={{ fontSize: 'var(--fs-base)', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.6 }}>{aiComment.comment || aiComment.content}</p>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 'var(--sp-sm)' }}>

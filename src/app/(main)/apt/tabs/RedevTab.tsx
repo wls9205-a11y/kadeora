@@ -124,7 +124,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
                   const sc = STAGE_COLORS[stage] || { bg: 'var(--bg-hover)', color: 'var(--text-tertiary)', border: 'var(--border)' };
                   return (
                     <div key={stage} onClick={() => { setRedevStage(stage === redevStage ? '전체' : stage); setRedevPage(1); }} style={{ flex: Math.max(pct, 8), textAlign: 'center', padding: '10px 4px', borderRadius: 'var(--radius-sm)', background: redevStage === stage ? sc.border : sc.bg, border: `1px solid ${sc.border}`, position: 'relative', minWidth: 50, cursor: 'pointer', opacity: redevStage !== '전체' && redevStage !== stage ? 0.5 : 1 }}>
-                      <div style={{ fontSize: 9, fontWeight: 600, color: sc.color, opacity: 0.6, marginBottom: 2 }}>{i + 1}/{STAGE_ORDER.length}</div>
+                      <div style={{ fontSize: 10, fontWeight: 600, color: sc.color, opacity: 0.6, marginBottom: 2 }}>{i + 1}/{STAGE_ORDER.length}</div>
                       <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: sc.color }}>{stage.replace('인가', '')}</div>
                       <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: sc.color, margin: '4px 0' }}>{count}</div>
                       <div style={{ fontSize: 'var(--fs-xs)', color: sc.color, opacity: 0.7 }}>{pct}%</div>
@@ -174,7 +174,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
                     <img src={aptImageMap?.[r.district_name] || `/api/og?title=${encodeURIComponent(r.district_name || r.address || '재개발')}&category=apt&design=2`} alt={r.district_name || "부동산 이미지"} width={400} height={48} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', opacity: 0.8 }} loading="lazy" />
                     <div style={{ position: 'absolute', top: 5, left: 8, display: 'flex', gap: 4, alignItems: 'center' }}>
                       <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 5, background: r.project_type === '재건축' ? 'rgba(245,158,11,0.9)' : 'rgba(139,92,246,0.9)', color: '#fff' }}>{r.project_type || '재개발'}</span>
-                      <span style={{ fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 4, background: 'rgba(0,0,0,0.4)', color: '#fff' }}>{r.stage || '진행중'} {progress}%</span>
+                      <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 6px', borderRadius: 4, background: 'rgba(0,0,0,0.4)', color: '#fff' }}>{r.stage || '진행중'} {progress}%</span>
                     </div>
                   </div>
                   {/* ① 헤더: 배지 + 이름 + 메타 */}
