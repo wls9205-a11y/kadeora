@@ -1,7 +1,4 @@
-import { NextResponse } from 'next/server';
-
-export function GET() {
-  const body = `# ===== 카더라 (kadeora.app) — Crawl Directives =====
+# ===== 카더라 (kadeora.app) — Crawl Directives =====
 
 # ===== 공통 =====
 User-agent: *
@@ -108,7 +105,7 @@ Crawl-delay: 2
 Disallow: /admin/
 Disallow: /api/
 
-# ===== AI Crawlers (ChatGPT, Claude, Perplexity) =====
+# ===== AI Crawlers =====
 User-agent: GPTBot
 Allow: /apt/
 Allow: /blog/
@@ -138,12 +135,3 @@ Host: https://kadeora.app
 
 # ===== Daum Verification =====
 #DaumWebMasterTool:a1f328fa8487fd3f97d35c70ed840a8d8b26f74e27f5957b99540d4bb1956a83:cSy+fiTk3RyjyaVEHfCydQ==
-`;
-
-  return new NextResponse(body, {
-    headers: {
-      'Content-Type': 'text/plain; charset=utf-8',
-      'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=86400',
-    },
-  });
-}

@@ -177,7 +177,7 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
     } catch { return xmlResponse([]); }
   }
 
-  // ── 5~7: complex profiles (단지백과) ──
+  // ── 5~7: complex profiles (단지백과) + image 태그 ──
   const COMPLEX_PER_SITEMAP = 12000;
   if (id >= 5 && id <= 7) {
     try {
@@ -185,19 +185,53 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
       const chunk = id - 5;
       const offset = chunk * COMPLEX_PER_SITEMAP;
       const { data } = await (sb as any).from('apt_complex_profiles')
-        .select('apt_name, updated_at, sale_count_1y, rent_count_1y')
+        .select('apt_name, region_nm, sigungu, updated_at, sale_count_1y, rent_count_1y')
         .not('age_group', 'is', null)
         .order('sale_count_1y', { ascending: false })
         .range(offset, offset + COMPLEX_PER_SITEMAP - 1);
-      return xmlResponse((data || []).map((p: any) => {
+
+      const esc = (s: string) => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+      const complexXml = (data || []).map((p: any) => {
         const activity = (p.sale_count_1y || 0) + (p.rent_count_1y || 0);
-        return {
-          url: `${BASE}/apt/complex/${encodeURIComponent(p.apt_name)}`,
-          lastModified: p.updated_at || now,
-          changeFrequency: activity > 50 ? 'weekly' : 'monthly',
-          priority: activity > 100 ? 0.8 : activity > 20 ? 0.7 : 0.6,
-        };
-      }));
+        const prio = activity > 100 ? 0.8 : activity > 20 ? 0.7 : 0.6;
+        const freq = activity > 50 ? 'weekly' : 'monthly';
+        return `  <url>
+    <loc>${BASE}/apt/complex/${encodeURIComponent(p.apt_name)}</loc>
+    <lastmod>${p.updated_at || now}</lastmod>
+    <changefreq>${freq}</changefreq>
+    <priority>${prio}</priority>
+    <image:image>
+      <image:loc>${BASE}/api/og?title=${encodeURIComponent(p.apt_name)}&amp;design=2&amp;category=apt</image:loc>
+      <image:title>${esc(p.apt_name)} 아파트 실거래가</image:title>
+      <image:caption>${esc((p.region_nm || '') + ' ' + (p.sigungu || '') + ' ' + p.apt_name)} 시세</image:caption>
+    </image:image>
+  </url>`;
+      }).join('\n');
+
+      return new NextResponse(`<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+${complexXml}
+</urlset>`, { headers: { 'Content-Type': 'application/xml; charset=utf-8', 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400' } });
+    } catch { return xmlResponse([]); }
+  }
+
+  // ── 21: area hubs (시군구 + 동 허브) ──
+  if (id === 21) {
+    try {
+      const sb = getSupabaseAdmin();
+      const entries: SitemapEntry[] = [];
+      // 시군구 (10개+ 단지만)
+      const { data: sgd } = await (sb as any).from('apt_complex_profiles').select('region_nm, sigungu').not('age_group', 'is', null).not('sigungu', 'is', null);
+      const sgMap = new Map<string, number>();
+      for (const r of (sgd || [])) { const k = `${r.region_nm}|${r.sigungu}`; sgMap.set(k, (sgMap.get(k) || 0) + 1); }
+      for (const [k, c] of sgMap) { if (c < 10) continue; const [reg, sg] = k.split('|'); if (!reg || !sg) continue; entries.push({ url: `${BASE}/apt/area/${encodeURIComponent(reg)}/${encodeURIComponent(sg)}`, lastModified: now, changeFrequency: 'weekly', priority: c > 200 ? 0.85 : c > 50 ? 0.75 : 0.65 }); }
+      // 동 (5개+ 단지만)
+      const { data: dd } = await (sb as any).from('apt_complex_profiles').select('region_nm, sigungu, dong').not('age_group', 'is', null).not('dong', 'is', null).neq('dong', '');
+      const dMap = new Map<string, number>();
+      for (const r of (dd || [])) { const k = `${r.region_nm}|${r.sigungu}|${r.dong}`; dMap.set(k, (dMap.get(k) || 0) + 1); }
+      for (const [k, c] of dMap) { if (c < 5) continue; const [reg, sg, dg] = k.split('|'); if (!reg || !sg || !dg) continue; entries.push({ url: `${BASE}/apt/area/${encodeURIComponent(reg)}/${encodeURIComponent(sg)}/${encodeURIComponent(dg)}`, lastModified: now, changeFrequency: 'monthly', priority: c > 30 ? 0.7 : 0.6 }); }
+      return xmlResponse(entries);
     } catch { return xmlResponse([]); }
   }
 

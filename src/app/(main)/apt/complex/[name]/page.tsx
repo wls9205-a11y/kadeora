@@ -653,6 +653,15 @@ export default async function ComplexDetailPage({ params }: Props) {
         </p>
       </section>
 
+      {/* 지역 허브 내부 링크 — SEO 계층 구조 */}
+      {(region || sigungu) && (
+        <section style={{ marginBottom: 14, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          {region && <Link href={`/apt/region/${encodeURIComponent(region)}`} style={{ padding: '6px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 20, textDecoration: 'none', fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600 }}>{region} 부동산</Link>}
+          {region && sigungu && <Link href={`/apt/area/${encodeURIComponent(region)}/${encodeURIComponent(sigungu)}`} style={{ padding: '6px 12px', background: 'var(--bg-surface)', border: '1px solid var(--accent-blue)', borderRadius: 20, textDecoration: 'none', fontSize: 11, color: 'var(--accent-blue)', fontWeight: 600 }}>{sigungu} 시세 분석</Link>}
+          {region && sigungu && dong && <Link href={`/apt/area/${encodeURIComponent(region)}/${encodeURIComponent(sigungu)}/${encodeURIComponent(dong)}`} style={{ padding: '6px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 20, textDecoration: 'none', fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600 }}>{dong} 아파트</Link>}
+        </section>
+      )}
+
       {/* 관련 단지 — 내부 링크 강화 (크롤링 심도 개선) */}
       {relatedComplexes.length > 0 && (
         <section style={{ marginBottom: 14 }}>
