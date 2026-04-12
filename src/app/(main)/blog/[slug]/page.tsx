@@ -30,9 +30,6 @@ import NextArticleFloat from '@/components/NextArticleFloat';
 import BlogTossGate from '@/components/BlogTossGate';
 import RelatedContentCard from '@/components/RelatedContentCard';
 import SmartSectionGate from '@/components/SmartSectionGate';
-import BlogMidCTA from '@/components/BlogMidCTA';
-
-import Disclaimer from '@/components/Disclaimer';
 // NewsletterSubscribe 삭제 — 카카오 CTA로 통합
 
 // marked heading에 id 자동 부여 (TOC 앵커용)
