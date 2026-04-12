@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     description: '전국 시군구별 청약·분양·미분양·실거래 데이터 무료 다운로드',
     url: `${SITE}/apt/data`,
     siteName: '카더라', locale: 'ko_KR', type: 'website',
-    images: [{ url: `${SITE}/api/og?title=${encodeURIComponent('부동산 통계 자료실')}&category=apt&design=2`, width: 1200, height: 630 }, { url: `${SITE}/api/og-square?title=${encodeURIComponent(TITLE)}&category=apt`, width: 630, height: 630 }],
+    images: [{ url: `${SITE}/api/og?title=${encodeURIComponent('부동산 통계 자료실')}&category=apt&design=2`, width: 1200, height: 630 }, { url: `${SITE}/api/og-square?title=${encodeURIComponent('부동산 통계 자료실')}&category=apt`, width: 630, height: 630 }],
   },
   alternates: { canonical: `${SITE}/apt/data` },
   robots: { index: true, follow: true, 'max-snippet': -1 as const, 'max-image-preview': 'large' as const },

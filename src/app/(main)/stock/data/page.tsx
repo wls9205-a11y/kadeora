@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     description: '국내외 주식 종목별·섹터별 시세 데이터 무료 다운로드',
     url: `${SITE}/stock/data`,
     siteName: '카더라', locale: 'ko_KR', type: 'website',
-    images: [{ url: `${SITE}/api/og?title=${encodeURIComponent('주식 통계 자료실')}&category=stock&design=2`, width: 1200, height: 630 }, { url: `${SITE}/api/og-square?title=${encodeURIComponent(TITLE)}&category=stock`, width: 630, height: 630 }],
+    images: [{ url: `${SITE}/api/og?title=${encodeURIComponent('주식 통계 자료실')}&category=stock&design=2`, width: 1200, height: 630 }, { url: `${SITE}/api/og-square?title=${encodeURIComponent('주식 통계 자료실')}&category=stock`, width: 630, height: 630 }],
   },
   alternates: { canonical: `${SITE}/stock/data` },
   other: {
