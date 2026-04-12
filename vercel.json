@@ -469,7 +469,6 @@
     {
       "path": "/api/cron/naver-blog-content",
       "schedule": "0 9 * * *"
-    },
-    {}
+    }
   ]
 }
