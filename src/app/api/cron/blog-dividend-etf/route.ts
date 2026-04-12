@@ -46,7 +46,7 @@ export async function GET(_req: NextRequest) {
         '[커뮤니티 →](/feed)',
         '[주식 시세 →](/stock)',
       ];
-      const prompt = buildFinancePrompt(topic.title || calc?.title || '', 'finance', links);
+      const prompt = buildFinancePrompt(title, 'finance', links);
       const aiResult = await generateAndValidate(prompt, 'finance');
       if (!aiResult) return;
 
@@ -59,7 +59,7 @@ export async function GET(_req: NextRequest) {
           source_type: 'dividend-etf',
           cron_type: 'blog-dividend-etf',
           data_date: today,
-          meta_description: generateMetaDesc(content, title, 'stock'),
+          meta_description: generateMetaDesc(aiResult.content, title, 'stock'),
           meta_keywords: generateMetaKeywords('stock', ['배당주', '배당수익률']),
           sub_category: '투자금융',
         seo_score: aiResult.score,

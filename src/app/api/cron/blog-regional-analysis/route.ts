@@ -43,7 +43,7 @@ export async function GET(_req: NextRequest) {
         '[커뮤니티 →](/feed)',
         '[주식 시세 →](/stock)',
       ];
-      const prompt = buildFinancePrompt(topic.title || calc?.title || '', 'apt', links);
+      const prompt = buildFinancePrompt(title, 'apt', links);
       const aiResult = await generateAndValidate(prompt, 'apt');
       if (!aiResult) continue;
 
@@ -56,7 +56,7 @@ export async function GET(_req: NextRequest) {
         source_type: 'regional-analysis',
         cron_type: 'blog-regional-analysis',
         data_date: today,
-        meta_description: generateMetaDesc(content, title, 'apt'),
+        meta_description: generateMetaDesc(aiResult.content, title, 'apt'),
         meta_keywords: generateMetaKeywords('apt', [region, '아파트', '시세']),
         sub_category: '부동산일반',
         seo_score: aiResult.score,

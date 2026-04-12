@@ -49,7 +49,7 @@ export async function GET(_req: NextRequest) {
         source_type: 'loan-guide',
         cron_type: 'blog-loan-guide',
         data_date: today,
-        meta_description: generateMetaDesc(content, topic.title, 'finance'),
+        meta_description: generateMetaDesc(aiResult.content, topic.title, 'finance'),
         meta_keywords: generateMetaKeywords('finance', topic.tags),
         sub_category: '부동산금융',
         seo_score: aiResult.score,

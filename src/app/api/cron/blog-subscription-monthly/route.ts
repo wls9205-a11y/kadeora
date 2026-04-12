@@ -48,7 +48,7 @@ ${s.przwner_presnatn_de ? `- **당첨 발표**: ${s.przwner_presnatn_de.slice(0,
         '[커뮤니티 →](/feed)',
         '[주식 시세 →](/stock)',
       ];
-      const prompt = buildFinancePrompt(topic.title || calc?.title || '', 'apt', links);
+      const prompt = buildFinancePrompt(title, 'apt', links);
       const aiResult = await generateAndValidate(prompt, 'apt');
       if (!aiResult) return;
 
@@ -61,7 +61,7 @@ ${s.przwner_presnatn_de ? `- **당첨 발표**: ${s.przwner_presnatn_de.slice(0,
       source_type: 'subscription-monthly',
       cron_type: 'blog-subscription-monthly',
       data_date: now.toISOString().slice(0, 10),
-      meta_description: generateMetaDesc(content, title, 'apt'),
+      meta_description: generateMetaDesc(aiResult.content, title, 'apt'),
       meta_keywords: generateMetaKeywords('apt', ['청약', `${month}월`, '일정']),
       is_published: true,
     });

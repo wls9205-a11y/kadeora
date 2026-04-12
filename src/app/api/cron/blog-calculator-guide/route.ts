@@ -38,7 +38,7 @@ export async function GET(_req: NextRequest) {
         '[커뮤니티 →](/feed)',
         '[주식 시세 →](/stock)',
       ];
-      const prompt = buildFinancePrompt(topic.title || calc?.title || '', 'finance', links);
+      const prompt = buildFinancePrompt(calc.title, 'finance', links);
       const aiResult = await generateAndValidate(prompt, 'finance');
       if (!aiResult) continue;
 
@@ -51,7 +51,7 @@ export async function GET(_req: NextRequest) {
         source_type: 'calc-guide',
         cron_type: 'blog-calculator-guide',
         data_date: today,
-        meta_description: generateMetaDesc(content, title, 'finance'),
+        meta_description: generateMetaDesc(aiResult.content, title, 'finance'),
         meta_keywords: generateMetaKeywords('finance', calc.keywords),
         sub_category: '재테크일반',
         seo_score: aiResult.score,
