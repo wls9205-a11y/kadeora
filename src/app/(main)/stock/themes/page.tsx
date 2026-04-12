@@ -92,6 +92,17 @@ export default async function ThemesPage() {
         <Link href="/stock" style={{ flex: 1, textAlign: 'center', padding: 12, borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: '#fff', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>전 종목 시세</Link>
         <Link href="/stock/movers" style={{ flex: 1, textAlign: 'center', padding: 12, borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>급등락 종목</Link>
       </div>
+      {/* SSR 서술형 분석 — Thin Content 해소 */}
+      {(themes ?? []).length > 0 && (
+        <section style={{ marginTop: 24, padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', lineHeight: 1.8, fontSize: 14, color: 'var(--text-secondary)' }}>
+          <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>테마주 투자 가이드</h2>
+          <p>현재 카더라에서 추적 중인 테마는 총 <strong style={{ color: 'var(--text-primary)' }}>{(themes ?? []).length}개</strong>입니다.
+          테마주 투자는 정책 변화, 기술 트렌드, 글로벌 이벤트에 따라 단기간 높은 수익을 기대할 수 있지만, 테마 소멸 시 급격한 하락 위험도 함께 존재합니다.</p>
+          <p style={{ marginTop: 8 }}>각 테마별 대장주와 시가총액 상위 종목을 참고하되, 기업의 실질적인 사업 연관성과 실적 기여도를 반드시 확인해야 합니다.
+          단순 테마 편입만으로는 투자 근거가 될 수 없으며, 재무제표와 밸류에이션을 함께 검토하는 것을 권장합니다.</p>
+        </section>
+      )}
+
       <Disclaimer type="stock" />
     </article>
   );

@@ -95,6 +95,21 @@ export default async function MoversPage() {
         <Link href="/stock" style={{ flex: 1, textAlign: 'center', padding: 12, borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: '#fff', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>전 종목 시세</Link>
         <Link href="/stock/dividend" style={{ flex: 1, textAlign: 'center', padding: 12, borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>배당주 순위</Link>
       </div>
+      {/* SSR 서술형 분석 — Thin Content 해소 */}
+      {(gainers ?? []).length > 0 && (() => {
+        const topG = (gainers ?? []).slice(0, 3);
+        const topL = (losers ?? []).slice(0, 3);
+        return (
+          <section style={{ marginTop: 24, padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', lineHeight: 1.8, fontSize: 14, color: 'var(--text-secondary)' }}>
+            <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>오늘의 시장 동향</h2>
+            <p>오늘 국내 증시에서 가장 큰 상승률을 보인 종목은 <strong style={{ color: 'var(--accent-red)' }}>{topG[0]?.name}</strong>(+{topG[0]?.change_pct?.toFixed(2)}%)입니다.
+            {topG[1]?.name}(+{topG[1]?.change_pct?.toFixed(2)}%), {topG[2]?.name}(+{topG[2]?.change_pct?.toFixed(2)}%)도 강세를 보이고 있습니다.</p>
+            <p style={{ marginTop: 8 }}>반면 하락 종목 중에서는 <strong style={{ color: 'var(--accent-blue)' }}>{topL[0]?.name}</strong>({topL[0]?.change_pct?.toFixed(2)}%)이 가장 큰 낙폭을 기록했습니다.
+            급등락 종목 투자 시에는 단기 변동성이 크므로 거래량, 호가 스프레드, 뉴스 이벤트를 반드시 확인해야 합니다.</p>
+          </section>
+        );
+      })()}
+
       <Disclaimer type="stock" />
     </article>
   );

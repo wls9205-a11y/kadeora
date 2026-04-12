@@ -89,7 +89,24 @@ export default async function DividendPage() {
       <h2 style={ct}>🇺🇸 해외 고배당주 TOP {(usStocks ?? []).length}</h2>
       {renderTable(usStocks, false)}
 
-      <div style={{ marginTop: 32, display: 'flex', gap: 8 }}>
+
+      {/* SSR 서술형 분석 — Thin Content 해소 */}
+      {(krStocks ?? []).length > 0 && (() => {
+        const top3 = (krStocks ?? []).slice(0, 3);
+        const avgYield = ((krStocks ?? []).reduce((s: number, x: any) => s + (x.dividend_yield || 0), 0) / (krStocks ?? []).length).toFixed(2);
+        const sectors = [...new Set((krStocks ?? []).map((s: any) => s.sector).filter(Boolean))].slice(0, 5);
+        return (
+          <section style={{ marginTop: 24, padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', lineHeight: 1.8, fontSize: 14, color: 'var(--text-secondary)' }}>
+            <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>배당주 시장 분석</h2>
+            <p>현재 국내 고배당주 1위는 <strong style={{ color: 'var(--text-primary)' }}>{top3[0]?.name}</strong>으로 배당수익률 {top3[0]?.dividend_yield?.toFixed(2)}%를 기록하고 있습니다.
+            2위 {top3[1]?.name}({top3[1]?.dividend_yield?.toFixed(2)}%), 3위 {top3[2]?.name}({top3[2]?.dividend_yield?.toFixed(2)}%)가 뒤를 잇고 있습니다.</p>
+            <p style={{ marginTop: 8 }}>상위 {(krStocks ?? []).length}개 종목의 평균 배당수익률은 <strong style={{ color: 'var(--text-primary)' }}>{avgYield}%</strong>이며, 주요 업종은 {sectors.join(', ')} 등으로 분포되어 있습니다.
+            고배당주 투자 시에는 배당수익률뿐 아니라 배당 지속성, 재무 건전성, PER·PBR 등 밸류에이션 지표를 종합적으로 검토해야 합니다.</p>
+          </section>
+        );
+      })()}
+
+      <div style={{ marginTop: 24, display: 'flex', gap: 8 }}>
         <Link href="/stock" style={{ flex: 1, textAlign: 'center', padding: 12, borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: '#fff', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>전 종목 시세</Link>
         <Link href="/stock/compare" style={{ flex: 1, textAlign: 'center', padding: 12, borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>종목 비교</Link>
       </div>
