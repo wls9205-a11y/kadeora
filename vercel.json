@@ -86,6 +86,9 @@
     },
     "src/app/api/cron/blog-enrich-rewrite/*.ts": {
       "maxDuration": 300
+    },
+    "src/app/api/cron/blog-upcoming-projects/*.ts": {
+      "maxDuration": 300
     }
   },
   "crons": [
@@ -374,10 +377,6 @@
       "schedule": "0 10 * * 2,5"
     },
     {
-      "path": "/api/cron/blog-rewrite",
-      "schedule": "30 */4 * * *"
-    },
-    {
       "path": "/api/cron/blog-publish-queue",
       "schedule": "0 21,3,10 * * *"
     },
@@ -480,6 +479,10 @@
     {
       "path": "/api/cron/blog-enrich-rewrite",
       "schedule": "0 */3 * * *"
+    },
+    {
+      "path": "/api/cron/blog-upcoming-projects",
+      "schedule": "0 9 * * 2,5"
     }
   ]
 }
