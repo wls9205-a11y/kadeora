@@ -4,6 +4,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
 import { sendPushBroadcast } from '@/lib/push-utils';
 import { submitIndexNow } from '@/lib/indexnow';
+import { checkBlogQuality } from '@/lib/blog-quality-gate';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,14 +41,24 @@ export async function GET(req: NextRequest) {
       throw new Error(publishError.message);
     }
 
-    // 발행 성공 시 푸시 알림
+    // 발행 성공 시 품질 게이트 검증
     const publishedId = (publishResult as Record<string, any>)?.published_id;
     if (publishedId) {
       try {
         const { data: post } = await admin.from('blog_posts')
-          .select('title, slug, category')
+          .select('title, slug, category, content')
           .eq('id', publishedId).single();
         if (post) {
+          // 품질 게이트 체크
+          const quality = checkBlogQuality(post.content, post.category);
+          console.info(`[blog-publish-queue] Quality: ${post.slug} → ${quality.score}점 (${quality.tier}), issues: ${quality.issues.join(', ')}`);
+          
+          // 품질 점수 저장
+          await (admin as any).from('blog_posts').update({
+            seo_score: quality.score,
+            seo_tier: quality.tier,
+          }).eq('id', publishedId);
+
           await sendPushBroadcast({
             title: `📝 ${post.title}`,
             body: '카더라 블로그에 새 글이 올라왔어요',

@@ -831,6 +831,33 @@ body {
 /* 피드 상세 본문 내 이미지 제한 */
 .feed-detail-content img { max-width: 100%; max-height: 500px; height: auto; border-radius: var(--radius-sm); object-fit: contain; }
 
+/* ━━━ 블로그 2컬럼 레이아웃 + 가독성 강화 ━━━ */
+.blog-detail-layout { display: flex; gap: 32px; max-width: 1080px; margin: 0 auto; padding: 0 var(--sp-lg); }
+.blog-detail-main { flex: 1; min-width: 0; max-width: 720px; }
+.blog-detail-side { width: 260px; flex-shrink: 0; display: none; }
+@media (min-width: 1024px) { .blog-detail-side { display: block; } }
+@media (max-width: 1023px) { .blog-detail-layout { max-width: 720px; } }
+
+/* 블로그 본문 가독성 */
+.blog-content { font-size: 17px; line-height: 1.85; word-break: keep-all; }
+.blog-content h2 { margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border); font-size: 22px; }
+.blog-content h3 { font-size: 18px; border-left: 3px solid var(--brand); padding-left: 10px; margin-top: 28px; }
+.blog-content p { margin: 0 0 16px; }
+.blog-content table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; }
+.blog-content th { background: var(--bg-surface); padding: 10px 12px; text-align: left; font-weight: 600; font-size: 13px; border-bottom: 1px solid var(--border); }
+.blog-content td { padding: 8px 12px; border-bottom: 1px solid var(--border); }
+.blog-content tr:last-child td { border-bottom: none; }
+.blog-content blockquote { border-left: 3px solid var(--brand); padding: 12px 16px; margin: 16px 0; background: var(--bg-surface); border-radius: 0 var(--radius-md) var(--radius-md) 0; }
+.blog-content img { max-width: 100%; height: auto; border-radius: var(--radius-md); margin: 12px 0; }
+
+/* 블로그 목차 인라인 (모바일용) — 데스크탑에서는 사이드바 사용 */
+.blog-toc-inline { display: block; }
+@media (min-width: 1024px) { .blog-toc-inline { display: none; } }
+
+/* 블로그 사이드바 스크롤바 */
+.blog-sidebar::-webkit-scrollbar { width: 3px; }
+.blog-sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
 /* 블로그 next-article 플로팅 카드 */
 @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 .kd-next-article { animation: slideUp 0.3s ease-out; }

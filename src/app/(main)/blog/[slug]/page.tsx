@@ -23,6 +23,8 @@ export const revalidate = 300;
 import { SITE_URL as SITE } from '@/lib/constants';
 import { enhanceBlogVisuals } from '@/lib/blog-visual-enhancer';
 import ReadingProgress from '@/components/ReadingProgress';
+import BlogSidebar from '@/components/BlogSidebar';
+import BlogMetricCards from '@/components/BlogMetricCards';
 import BlogHeroImage from '@/components/BlogHeroImage';
 import NextArticleFloat from '@/components/NextArticleFloat';
 import BlogTossGate from '@/components/BlogTossGate';
@@ -416,6 +418,35 @@ export default async function BlogDetailPage({ params }: Props) {
 
   const wordCount = post.content.replace(/[#*|\-\n\r\[\]`>]/g, '').replace(/\s+/g, ' ').trim().split(' ').filter(Boolean).length;
   const readingTimeMin = Math.max(1, Math.ceil(wordCount / 200));
+
+  // 사이드바용 데이터: 단지 프로필 메트릭 (apt 카테고리)
+  let sidebarMetrics: { label: string; value: string }[] = [];
+  let sidebarRelatedLinks: { title: string; href: string }[] = [];
+  try {
+    if ((post.category === 'apt' || post.category === 'unsold') && post.tags?.length) {
+      const aptName = post.tags[0];
+      const { data: cp } = await (sb as any).from('apt_complex_profiles')
+        .select('avg_sale_price_pyeong, jeonse_ratio, total_households, built_year, price_change_1y')
+        .eq('apt_name', aptName).maybeSingle();
+      if (cp) {
+        if (cp.avg_sale_price_pyeong) sidebarMetrics.push({ label: '평당가', value: `${cp.avg_sale_price_pyeong.toLocaleString()}만원` });
+        if (cp.jeonse_ratio) sidebarMetrics.push({ label: '전세가율', value: `${cp.jeonse_ratio}%` });
+        if (cp.total_households) sidebarMetrics.push({ label: '세대수', value: `${cp.total_households.toLocaleString()}세대` });
+        if (cp.built_year) sidebarMetrics.push({ label: '연식', value: `${new Date().getFullYear() - cp.built_year}년차` });
+        if (cp.price_change_1y !== null) sidebarMetrics.push({ label: '1년 변동', value: `${cp.price_change_1y > 0 ? '+' : ''}${cp.price_change_1y}%` });
+      }
+    }
+    if (post.category === 'stock' && relatedStocks.length > 0) {
+      relatedStocks.forEach((s: any) => {
+        sidebarRelatedLinks.push({ title: `${s.name} (${s.symbol})`, href: `/stock/${s.symbol}` });
+      });
+    }
+    if (relatedSites.length > 0) {
+      relatedSites.forEach((s: any) => {
+        sidebarRelatedLinks.push({ title: s.name, href: `/apt/sites/${s.slug}` });
+      });
+    }
+  } catch {}
 
   const catSection: Record<string, string> = { stock: '주식', apt: '부동산', unsold: '미분양', finance: '재테크', general: '생활' };
 
@@ -1102,6 +1133,15 @@ export default async function BlogDetailPage({ params }: Props) {
       )}
       {/* Disclaimer는 auto면책 + 본문 출처로 대체됨 — 중복 제거 */}
       {isLoggedIn && <PushPromptBanner />}
+      </div>
+      {/* 사이드바 — 데스크탑에서만 노출 */}
+      <div className="blog-detail-side">
+        <BlogSidebar
+          toc={toc}
+          category={post.category}
+          metrics={sidebarMetrics}
+          relatedLinks={sidebarRelatedLinks}
+        />
       </div>
     </div>
   );

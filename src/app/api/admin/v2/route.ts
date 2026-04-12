@@ -258,8 +258,23 @@ export async function GET(req: NextRequest) {
           // 트래픽
           active5m: 0, active30m: 0, pv1h: 0,
           // 리라이팅
-          rwDone: rewritten, rwTotal: blogs + (users ?? 0) - realUsers,
-          seoA: 0, seoB: 0, seoC: 0, seoAvg: 0, // placeholder — 카테고리스탯에서 제공
+          rwDone: rewritten, rwTotal: blogs,
+          // 블로그 품질 분포
+          blogQuality: await (async () => {
+            try {
+              const { data: tiers } = await (sb as any).from('blog_posts')
+                .select('seo_tier')
+                .eq('is_published', true)
+                .not('seo_tier', 'is', null);
+              const dist: Record<string, number> = { S: 0, A: 0, B: 0, C: 0, F: 0 };
+              for (const t of (tiers || [])) { if (t.seo_tier && dist[t.seo_tier] !== undefined) dist[t.seo_tier]++; }
+              const inlineHtml = await (sb as any).from('blog_posts')
+                .select('id', { count: 'exact', head: true })
+                .eq('is_published', true)
+                .like('content', '%style=%background:#0f172a%');
+              return { ...dist, inlineHtml: inlineHtml.count ?? 0, scored: (tiers || []).length, total: blogs };
+            } catch { return { S: 0, A: 0, B: 0, C: 0, F: 0, inlineHtml: 0, scored: 0, total: blogs }; }
+          })(),
         },
         categoryStats: Object.entries(catMap).map(([k, v]) => ({ category: k, count: v.count, views: v.views, efficiency: v.count > 0 ? Math.round(v.views / v.count) : 0 })).sort((a: any, b: any) => b.efficiency - a.efficiency),
         failedCrons: failGroups,

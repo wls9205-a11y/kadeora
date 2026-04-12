@@ -163,6 +163,45 @@ export default function DataTab({ onNavigate }: { onNavigate: (t: any) => void }
               </div>
             ))}
           </div>
+
+          {/* 블로그 품질 게이트 현황 */}
+          {data?.extended?.blogQuality && (() => {
+            const q = data.extended.blogQuality;
+            const tiers = [
+              { key: 'S', label: 'S등급', color: '#10B981', desc: '90점+' },
+              { key: 'A', label: 'A등급', color: '#3B82F6', desc: '80점+' },
+              { key: 'B', label: 'B등급', color: '#F59E0B', desc: '70점+' },
+              { key: 'C', label: 'C등급', color: '#EF4444', desc: '50점+' },
+              { key: 'F', label: 'F등급', color: '#6B7280', desc: '50점 미만' },
+            ];
+            return (
+              <>
+                <div className="adm-sec">🛡️ 품질 게이트</div>
+                <div className="adm-kpi">
+                  <div className="adm-kpi-c">
+                    <div className="adm-kpi-v" style={{ color: '#10B981' }}>{fmt(q.scored)}</div>
+                    <div className="adm-kpi-l">검증 완료</div>
+                  </div>
+                  <div className="adm-kpi-c">
+                    <div className="adm-kpi-v" style={{ color: '#EF4444' }}>{fmt(q.inlineHtml)}</div>
+                    <div className="adm-kpi-l">인라인 HTML</div>
+                  </div>
+                  <div className="adm-kpi-c">
+                    <div className="adm-kpi-v">{fmt(q.total)}</div>
+                    <div className="adm-kpi-l">전체 게시</div>
+                  </div>
+                </div>
+                <div className="adm-card" style={{ padding: '8px 14px' }}>
+                  {tiers.map(t => (
+                    <div key={t.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 12, padding: '4px 0', borderBottom: '1px solid var(--border)' }}>
+                      <span style={{ fontWeight: 600, color: t.color }}>{t.label} <span style={{ fontWeight: 400, color: 'var(--text-tertiary)' }}>({t.desc})</span></span>
+                      <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{fmt(q[t.key] || 0)}</span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            );
+          })()}
         </> 
       )}
 
