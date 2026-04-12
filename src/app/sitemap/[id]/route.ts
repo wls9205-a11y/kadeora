@@ -244,6 +244,25 @@ ${complexXml}
       const bMap = new Map<string, number>();
       for (const r of (bd || [])) { bMap.set(r.builder, (bMap.get(r.builder) || 0) + 1); }
       for (const [b, c] of bMap) { if (c < 3) continue; entries.push({ url: `${BASE}/apt/builder/${encodeURIComponent(b)}`, lastModified: now, changeFrequency: 'monthly', priority: c > 20 ? 0.75 : 0.6 }); }
+      // 비교 페이지 — 인기 시군구 상위 단지 조합 (스팸 방지: 최대 200개)
+      try {
+        const { data: topComplexes } = await (sb as any).from('apt_complex_profiles')
+          .select('apt_name, sigungu').not('age_group', 'is', null).gt('sale_count_1y', 20).gt('latest_sale_price', 0)
+          .order('sale_count_1y', { ascending: false }).limit(100);
+        if (topComplexes) {
+          const bySg = new Map<string, string[]>();
+          for (const c of topComplexes) { if (!c.sigungu) continue; const arr = bySg.get(c.sigungu) || []; if (arr.length < 4) arr.push(c.apt_name); bySg.set(c.sigungu, arr); }
+          let compareCount = 0;
+          for (const [, names] of bySg) {
+            for (let i = 0; i < names.length && compareCount < 200; i++) {
+              for (let j = i + 1; j < names.length && compareCount < 200; j++) {
+                entries.push({ url: `${BASE}/apt/compare/${encodeURIComponent(names[i])}-vs-${encodeURIComponent(names[j])}`, lastModified: now, changeFrequency: 'monthly', priority: 0.55 });
+                compareCount++;
+              }
+            }
+          }
+        }
+      } catch {}
       return xmlResponse(entries);
     } catch { return xmlResponse([]); }
   }

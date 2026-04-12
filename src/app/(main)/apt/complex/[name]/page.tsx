@@ -220,7 +220,7 @@ export default async function ComplexDetailPage({ params }: Props) {
         thumbnailUrl: `${SITE_URL}/api/og-square?title=${encodeURIComponent(decoded)}&category=apt`,
       })}} />
 
-      {/* JSON-LD: Product + AggregateOffer (SERP 가격 칩) */}
+      {/* JSON-LD: Product + AggregateOffer (SERP 가격 칩) + 조건부 AggregateRating */}
       {latestPrice > 0 && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org', '@type': 'Product',
         name: `${decoded} 아파트`,
@@ -234,6 +234,14 @@ export default async function ComplexDetailPage({ params }: Props) {
           offerCount: tradeList.length,
           availability: 'https://schema.org/InStock',
         },
+        ...(profile?.review_count > 0 && profile?.avg_rating > 0 ? {
+          aggregateRating: {
+            '@type': 'AggregateRating',
+            ratingValue: String(profile.avg_rating),
+            bestRating: '5',
+            ratingCount: String(profile.review_count),
+          },
+        } : {}),
         ...(areaStats.length > 0 ? { additionalProperty: areaStats.slice(0,3).map(a => ({ '@type': 'PropertyValue', name: `${a.area} 평균 매매가`, value: fmtAmount(a.avg) })) } : {}),
       }) }} />}
 

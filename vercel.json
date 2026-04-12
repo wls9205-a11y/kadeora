@@ -498,6 +498,14 @@
     {
       "path": "/api/cron/price-change-calc",
       "schedule": "30 6 * * 1"
+    },
+    {
+      "path": "/api/cron/monthly-market-report",
+      "schedule": "0 7 2 * *"
+    },
+    {
+      "path": "/api/cron/blog-complex-crosslink",
+      "schedule": "0 5 * * 3"
     }
   ]
 }
