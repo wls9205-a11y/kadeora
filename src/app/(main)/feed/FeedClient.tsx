@@ -22,6 +22,11 @@ import AttendanceBanner from '@/components/AttendanceBanner';
 import DailyReportCard from '@/components/DailyReportCard';
 import LiveActivityIndicator from '@/components/LiveActivityIndicator';
 import PostReactions from '@/components/PostReactions';
+import QuickPostBar from '@/components/feed/QuickPostBar';
+import HotTopicBar from '@/components/feed/HotTopicBar';
+import FeedPollCard from '@/components/feed/FeedPollCard';
+import FeedVSCard from '@/components/feed/FeedVSCard';
+import FeedPredictCard from '@/components/feed/FeedPredictCard';
 import { timeAgo, numFmt } from '@/lib/format';
 import { useAuth } from '@/components/AuthProvider';
 
@@ -210,7 +215,7 @@ export default function FeedClient({
       const cursor = lastPost?.created_at;
       const orderCol = activeSort === 'popular' ? 'likes_count' : activeSort === 'comments' ? 'comments_count' : 'created_at';
       let q = sb.from('posts')
-        .select('id,title,content,category,created_at,likes_count,comments_count,view_count,bookmarks_count,is_pinned,is_anonymous,author_id,region_id,images,slug,excerpt,tags,stock_tags,apt_tags,profiles!posts_author_id_fkey(id,nickname,avatar_url,grade)')
+        .select('id,title,content,category,created_at,likes_count,comments_count,view_count,bookmarks_count,is_pinned,is_anonymous,author_id,region_id,images,slug,excerpt,tags,stock_tags,apt_tags,post_type,profiles!posts_author_id_fkey(id,nickname,avatar_url,grade)')
         .eq('is_deleted', false)
         .order(orderCol, { ascending: false })
         .limit(PAGE_SIZE);
@@ -299,6 +304,9 @@ export default function FeedClient({
         </div>
 
         <DailyReportCard />
+
+        <QuickPostBar category={activeCategory !== 'all' && activeCategory !== 'following' ? activeCategory : 'free'} regionId={activeRegion} />
+        <HotTopicBar />
 
         {/* ━━━ 카테고리 탭 ━━━ */}
         <div className="kd-scroll-row" style={{ marginBottom: 'var(--sp-sm)' }}>
@@ -389,6 +397,22 @@ export default function FeedClient({
         <ProfileCompletionBar />
         <div className="listing-grid">
           {visiblePosts.map((post: PostWithProfile, i: number) => {
+            // ── post_type별 특수 카드 렌더링 ──
+            const postType = post.post_type ?? 'post';
+            if (postType === 'poll') {
+              const nodes: React.ReactNode[] = [<FeedPollCard key={post.id} post={post} />];
+              if (i === 0 && currentUserId) nodes.push(<AttendanceBanner key="attend" />);
+              return nodes;
+            }
+            if (postType === 'vs') {
+              const nodes: React.ReactNode[] = [<FeedVSCard key={post.id} post={post} />];
+              return nodes;
+            }
+            if (postType === 'predict') {
+              const nodes: React.ReactNode[] = [<FeedPredictCard key={post.id} post={post} />];
+              return nodes;
+            }
+
             const postExt = post;
             const displayName = post.is_anonymous ? '익명' : (post.profiles?.nickname ?? '익명');
             const gradeEmoji = GRADE_EMOJI[post.profiles?.grade ?? 1] ?? '🌱';
@@ -431,6 +455,7 @@ export default function FeedClient({
                       <span style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: 12 }}>{displayName}</span>
                       <span style={{ fontSize: 10, color: gradeColor(post.profiles?.grade ?? 1) }}>{gradeEmoji}</span>
                       <span style={{ fontSize: 10, padding: '0px 5px', borderRadius: 4, background: cat.bg, color: cat.color, fontWeight: 600 }}>{cat.label}</span>
+                      {postType === 'short' && <span style={{ fontSize: 9, padding: '1px 4px', borderRadius: 3, background: 'rgba(168,85,247,0.1)', color: '#A855F7', fontWeight: 700 }}>한마디</span>}
                       <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{timeAgo(post.created_at)}</span>
                     </div>
                   </div>

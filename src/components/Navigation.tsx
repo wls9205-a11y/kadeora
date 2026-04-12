@@ -47,6 +47,8 @@ const MORE_ITEMS: { href: string; emoji: string; label: string; sub?: string; gr
   { href: '/calc',            emoji: '🧮', label: '계산기', sub: '부동산·세금 계산', group: '도구' },
   // 설정
   { href: '/notifications/settings', emoji: '🔔', label: '알림 설정', sub: '푸시·관심 설정', group: '설정' },
+  { href: '/settings/region',       emoji: '📍', label: '우리동네 설정', sub: '지역 설정·변경', group: '설정' },
+  { href: '/settings/interests',    emoji: '💡', label: '관심사 설정', sub: '맞춤 피드 설정', group: '설정' },
   { href: '/attendance',     emoji: '🌱', label: '출석 체크', sub: '매일 포인트 적립', group: '설정' },
   { href: '/guide',           emoji: '📖', label: '가이드북', sub: '이용 방법 안내', group: '설정' },
   { href: '/grades',          emoji: '🏅', label: '등급 안내', sub: '등급별 혜택', group: '설정' },

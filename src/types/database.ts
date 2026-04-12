@@ -6637,6 +6637,8 @@ export type PostWithProfile = Database['public']['Tables']['posts']['Row'] & {
   tags?: string[] | null;
   stock_tags?: string[];
   apt_tags?: string[];
+  // 피드 리뉴얼: post_type (migration 후 DB 타입 재생성 전까지)
+  post_type?: 'post' | 'short' | 'poll' | 'vs' | 'predict' | string;
 };
 
 export type CommentWithProfile = Database['public']['Tables']['comments']['Row'] & {

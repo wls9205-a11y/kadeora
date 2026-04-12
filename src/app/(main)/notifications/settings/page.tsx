@@ -157,6 +157,11 @@ export default function NotificationSettingsPage() {
                 { label: '🏢 청약마감' },
                 { label: '🔥 인기글' },
                 { label: '📈 주식알림' },
+                { label: '📊 투표결과' },
+                { label: '🔮 예측적중' },
+                { label: '📍 우리동네' },
+                { label: '⬆️ 등급승급' },
+                { label: '💰 포인트' },
                 { label: '📅 출석' },
                 { label: '📧 이메일' },
               ].map(n => (

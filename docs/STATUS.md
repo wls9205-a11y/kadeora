@@ -1,5 +1,58 @@
 # 카더라 STATUS.md
-> 마지막 업데이트: 2026-04-13 07:00 KST (세션 92 최종)
+> 마지막 업데이트: 2026-04-13 22:00 KST (세션 93)
+
+## 세션 93 — 피드 리뉴얼 & 참여형 콘텐츠 시스템
+
+### 변경 파일 요약
+- **신규 파일 15개**: 마이그레이션 1, API 라우트 7, 컴포넌트 4, 설정 페이지 2, 설계/리스크 문서 2
+- **수정 파일 5개**: FeedClient, feed/page, Navigation, notification settings, database.ts
+
+### DB 마이그레이션 (`supabase/migrations/20260413_feed_renewal.sql`)
+- `posts.post_type` 컬럼 추가 (post/short/poll/vs/predict)
+- 6개 신규 테이블: post_polls, poll_options, poll_votes, vs_battles, vs_votes, predictions, prediction_votes
+- `point_reason` enum 8개 확장 (poll_create/poll_vote/vs_create/vs_vote/predict_create/predict_vote/predict_hit/short_create)
+- `notification_settings` 5개 컬럼 추가 (push_poll_result, push_predict_result, push_local_new, push_grade_up, push_point)
+- RPC 4개: get_poll_results, get_vs_results, get_prediction_results, get_hot_topics
+- RLS 정책 7개 (읽기 전체 허용, 쓰기 auth.uid() 체크)
+
+### API 라우트 (7개)
+- `/api/feed/short` — 한마디 작성 (+5P)
+- `/api/feed/poll` — 투표 생성 (+10P)
+- `/api/feed/poll/vote` — 투표 참여 (+5P, 1인 1투표, 만료 체크)
+- `/api/feed/vs` — VS 대결 생성 (+10P)
+- `/api/feed/vs/vote` — VS 투표 (+5P, 1인 1투표)
+- `/api/feed/predict` — 예측 생성 (+10P)
+- `/api/feed/predict/vote` — 예측 참여 (+5P)
+- `/api/feed/hot-topics` — 핫토픽 (60s 캐시, get_hot_topics RPC)
+
+### 피드 컴포넌트 (`src/components/feed/`)
+- `QuickPostBar` — 인라인 글쓰기 (한마디/투표/예측 모드 전환, 500자 제한)
+- `HotTopicBar` — 실시간 핫토픽 가로 스크롤 (24시간 내 인기글)
+- `FeedPollCard` — 투표 카드 (실시간 결과 바, 퍼센트 표시)
+- `FeedVSCard` — VS 대결 카드 (양자택일)
+- `FeedPredictCard` — 예측 카드 (동의/반대, 적중 시 +50P)
+
+### FeedClient 수정
+- post_type별 카드 분기 렌더링 (poll→FeedPollCard, vs→FeedVSCard, predict→FeedPredictCard)
+- short 타입 "한마디" 뱃지 표시
+- QuickPostBar + HotTopicBar 피드 상단 삽입
+- 모든 쿼리에 post_type 필드 추가 (서버/클라이언트)
+
+### 설정 페이지
+- `/settings/region` — 우리동네 설정 (시/도 → 구/군 2단계, 전국 250+ 지역)
+- `/settings/interests` — 관심사 설정 (9개 카테고리 그리드)
+- 더보기 메뉴에 📍우리동네 설정, 💡관심사 설정 링크 추가
+- 알림 설정에 투표결과/예측적중/우리동네/등급승급/포인트 뱃지 추가
+
+### 타입 확장
+- `PostWithProfile.post_type` optional 필드 추가 (database.ts)
+
+### ⚠️ 배포 전 필수
+1. Supabase SQL Editor에서 마이그레이션 먼저 실행
+2. `update_user_grade()` 트리거 충돌 확인
+3. 상세 리스크: `docs/FEED_RENEWAL_RISK_REVIEW.md`
+
+---
 
 ## 세션 92 — 부동산 SEO 대규모 확장 (전 작업 완료)
 
