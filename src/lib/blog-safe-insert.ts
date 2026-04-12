@@ -1,4 +1,5 @@
 import { SupabaseClient } from '@supabase/supabase-js';
+import { generateMetaDesc, generateMetaKeywords, generateImageAlt } from '@/lib/blog-seo-utils';
 
 /**
  * 블로그 글을 안전하게 INSERT하는 유틸리티 (v3)
@@ -257,6 +258,10 @@ export async function safeBlogInsert(
     const imageAlt = data.image_alt || `${data.title} — 카더라 ${data.category === 'stock' ? '주식' : data.category === 'apt' ? '부동산' : '정보'} 분석`;
 
     // 7. INSERT (큐 대기 상태) — ON CONFLICT로 race condition 방지
+    // meta_description / meta_keywords 자동 생성 (미제공 시)
+    const autoMetaDesc = data.meta_description || generateMetaDesc(enrichedContent, data.title, data.category);
+    const autoMetaKw = data.meta_keywords || generateMetaKeywords(data.category, data.tags);
+
     const insertPayload = {
         slug: data.slug,
         title: data.title,
@@ -270,8 +275,8 @@ export async function safeBlogInsert(
         source_ref: data.source_ref,
         cover_image: coverImage,
         image_alt: imageAlt,
-        meta_description: data.meta_description,
-        meta_keywords: data.meta_keywords,
+        meta_description: autoMetaDesc,
+        meta_keywords: autoMetaKw,
         is_published: data.is_published ?? false,
         published_at: data.is_published ? new Date().toISOString() : null,
     };
@@ -282,8 +287,13 @@ export async function safeBlogInsert(
       .select('id');
 
     if (error) {
-      console.error(`[safeBlogInsert] Insert error for "${data.title}" (${data.category}, ${enrichedContent.length}자):`, error.message, '| code:', error.code, '| details:', error.details);
-      return { success: false, reason: 'error', message: error.message };
+      // 트리거 race condition (DUPLICATE_TITLE/DUPLICATE_SLUG) → 경고만, 에러 아님
+      const msg = error.message || '';
+      if (msg.includes('DUPLICATE_TITLE') || msg.includes('DUPLICATE_SLUG')) {
+        return { success: false, reason: 'duplicate_slug', message: msg };
+      }
+      console.error(`[safeBlogInsert] Insert error for "${data.title}" (${data.category}, ${enrichedContent.length}자):`, msg, '| code:', error.code, '| details:', error.details);
+      return { success: false, reason: 'error', message: msg };
     }
 
     // ignoreDuplicates=true → 중복 시 빈 배열 반환
@@ -293,7 +303,12 @@ export async function safeBlogInsert(
 
     return { success: true, id: inserted[0]?.id };
   } catch (err: any) {
-    console.error(`[safeBlogInsert] Exception for "${data.title}":`, err.message);
+    const msg = err?.message || '';
+    // 트리거 race condition은 조용히 처리
+    if (msg.includes('DUPLICATE') || msg.includes('품질 게이트')) {
+      return { success: false, reason: 'duplicate_slug', message: msg };
+    }
+    console.error(`[safeBlogInsert] Exception for "${data.title}":`, msg);
     return { success: false, reason: 'error' };
   }
 }
