@@ -58,7 +58,7 @@ export default async function StockComparePage() {
       <Suspense fallback={<div style={{ padding: '40px 20px', textAlign: 'center', color: 'var(--text-tertiary)' }}>비교 도구를 불러오는 중...</div>}>
         <CompareClient />
       </Suspense>
-      <Disclaimer />
+      <Disclaimer type="stock" />
     </>
   );
 }

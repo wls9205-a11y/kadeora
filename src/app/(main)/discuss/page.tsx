@@ -32,7 +32,7 @@ export default function DiscussPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":SITE_URL},{"@type":"ListItem","position":2,"name":"토론","item":SITE_URL + "/discuss"}]}) }} />
       <h1 style={{ position:"absolute", width:1, height:1, overflow:"hidden", clip:"rect(0,0,0,0)" }}>카더라 토론 — 주식·부동산·경제 실시간 토론</h1>
       <DiscussClient />
-      <Disclaimer />
+      <Disclaimer type="general" />
     </Suspense>
   );
 }

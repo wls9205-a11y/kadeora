@@ -1239,7 +1239,7 @@ export default async function AptUnifiedPage({ params }: Props) {
             }}
           />
           <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 12, paddingTop: 8, borderTop: '1px solid var(--border)' }}>
-            ※ 본 분석은 공공 데이터 기반 자동 생성된 참고 자료입니다
+            데이터: 국토교통부·청약홈·카더라 자체 수집
           </div>
         </div>
         </LoginGate>
@@ -1596,7 +1596,7 @@ export default async function AptUnifiedPage({ params }: Props) {
 
       {/* 프로 업셀 — 결제 시스템 출시 전까지 비공개 */}
 
-      <Disclaimer />
+      <Disclaimer type="apt" />
       <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textAlign: 'center', margin: '8px 0 40px', lineHeight: 1.6 }}>📊 데이터 출처: 국토교통부 · 청약홈 · 한국부동산원 · 각 지자체</p>
     </article>
   );

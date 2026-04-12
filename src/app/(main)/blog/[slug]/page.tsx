@@ -1100,7 +1100,7 @@ export default async function BlogDetailPage({ params }: Props) {
           </div>
         </div>
       )}
-      <Disclaimer type="blog" compact />
+      {/* Disclaimer는 auto면책 + 본문 출처로 대체됨 — 중복 제거 */}
       {isLoggedIn && <PushPromptBanner />}
       </div>
     </div>

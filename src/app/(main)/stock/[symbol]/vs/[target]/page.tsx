@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 
 import { SITE_URL } from '@/lib/constants';
+import Disclaimer from '@/components/Disclaimer';
 
 type Props = { params: Promise<{ symbol: string; target: string }> };
 

@@ -176,7 +176,7 @@ export default async function StockPage() {
       }) }} />}
       <h1 style={{ fontSize: "var(--fs-xl)", fontWeight: 700, margin: "0 0 4px", color: "var(--text-primary)" }}>주식 시세 — 실시간 국내외 종목</h1>
       <StockClient initialStocks={stocks as React.ComponentProps<typeof StockClient>['initialStocks']} briefing={briefing} briefingUS={briefingUS} exchangeHistory={exchangeHistory} themeHistory={themeHistory} />
-      <Disclaimer />
+      {/* StockClient 내부에 Disclaimer compact 있음 — 중복 제거 */}
     </Suspense>
   );
 }

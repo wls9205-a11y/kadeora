@@ -93,7 +93,7 @@ export default async function DividendPage() {
         <Link href="/stock/compare" style={{ flex: 1, textAlign: 'center', padding: 12, borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>종목 비교</Link>
       </div>
 
-      <Disclaimer />
+      <Disclaimer type="stock" />
     </article>
   );
 }
