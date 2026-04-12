@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useAuth } from '@/components/AuthProvider';
-import PushSubscribeButton from './PushSubscribeButton';
+
 import { useState, useEffect } from 'react';
 
 const MENU = [
@@ -137,7 +137,7 @@ export default function Sidebar() {
       </Link>
 
       <div style={{ padding: '0 8px', marginTop: 'var(--sp-xs)' }}>
-        <PushSubscribeButton />
+        
       </div>
 
       {!userId && (

@@ -174,6 +174,14 @@ async function dispatchToChannels(payload: NotificationPayload, notifId: number)
     } catch {}
   }
 
-  // 채널 3: 카카오 알림톡 (Phase 3 — critical만)
-  // if (cascade === 'critical') { ... }
+  // 채널 3: 카카오 알림톡 (critical만, 일일 1건 상한)
+  if (cascade === 'critical') {
+    try {
+      const { sendAlimtalkToUser } = await import('@/lib/kakao-alimtalk');
+      await sendAlimtalkToUser(payload.userId, 'TPL-004', {
+        '#{닉네임}': pushPayload.title.slice(0, 20),
+        '#{링크}': `https://kadeora.app${payload.link || '/'}`,
+      });
+    } catch {}
+  }
 }

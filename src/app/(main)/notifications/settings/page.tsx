@@ -207,9 +207,12 @@ export default function NotificationSettingsPage() {
         <div style={boxStyle}>
           <div style={{ fontSize: 48, marginBottom: 'var(--sp-md)' }}>📱</div>
           <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 6 }}>앱 설치가 필요해요</div>
-          <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.6 }}>
+          <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.6, marginBottom: 'var(--sp-md)' }}>
             푸시 알림은 홈 화면에 추가한 앱에서만 사용 가능합니다.<br /><br />
             Safari 하단 <strong>공유 버튼(↑)</strong> → <strong>&quot;홈 화면에 추가&quot;</strong>를 눌러주세요.
+          </div>
+          <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', background: 'var(--bg-hover)', borderRadius: 'var(--radius-md)', padding: 12, lineHeight: 1.6 }}>
+            💡 앱 설치가 어려우시면 <strong>이메일 알림</strong>으로 청약 마감·종목 변동을 받아보세요. 가입 이메일로 자동 발송됩니다.
           </div>
         </div>
       )}
