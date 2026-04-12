@@ -1,11 +1,16 @@
 # 카더라 STATUS.md
-> 마지막 업데이트: 2026-04-13 22:00 KST (세션 93)
+> 마지막 업데이트: 2026-04-13 23:30 KST (세션 93 최종)
 
-## 세션 93 — 피드 리뉴얼 & 참여형 콘텐츠 시스템
+## 세션 93 — 피드 리뉴얼 & 참여형 콘텐츠 + 디자인 개선
 
-### 변경 파일 요약
-- **신규 파일 15개**: 마이그레이션 1, API 라우트 7, 컴포넌트 4, 설정 페이지 2, 설계/리스크 문서 2
-- **수정 파일 5개**: FeedClient, feed/page, Navigation, notification settings, database.ts
+### 최종 배포: 6개 커밋, 에러 0건 (수정 2건 포함)
+
+### 디자인 개선 (최종 커밋)
+- `FeedStatusBar` 신규 — 날짜/시간(왼쪽) + 오늘 통계(중앙) + 실시간 활동중(오른쪽) 한 줄 바
+- `HotTopicBar` 리디자인 — 2줄 카드 → 1줄 pill 가로 스크롤 (높이 절반)
+- 카테고리 탭 → 세그먼트 컨트롤 (라운드 바 + 활성 도트)
+- 정렬 버튼 → 밑줄 탭 스타일
+- 헤더 LiveActivityIndicator → FeedStatusBar로 대체
 
 ### DB 마이그레이션 (`supabase/migrations/20260413_feed_renewal.sql`)
 - `posts.post_type` 컬럼 추가 (post/short/poll/vs/predict)
