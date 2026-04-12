@@ -1,179 +1,52 @@
 # 카더라 STATUS.md
-> 마지막 업데이트: 2026-04-12 23:55 KST (세션 92)
+> 마지막 업데이트: 2026-04-13 03:50 KST (세션 92)
 
-## 세션 92 — 공유 추적 시스템 전면 수정
+## 세션 92 — 부동산 SEO 대규모 확장 (PHASE 1+2 배포)
 
-### 문제 발견
-- `share_logs.post_id`에 `posts` 테이블 FK 제약 → 블로그/주식/계산기 등 공유 전부 insert 실패
-- `SectionShareButton` (8곳 사용) — 추적 코드 아예 없었음
-- `KakaoDirectShare` (apt 페이지) — 추적 코드 없었음
-- `KakaoShareButton` (blog 페이지) — slug(문자열)을 bigint post_id로 전송 → 실패
-- `ShareButtons` 27개 사용처 중 대부분이 문자열 postId 전달 → 전부 실패
-- 실제 작동하던 공유 추적: 커뮤니티 피드 카카오 공유 16건뿐
+### 완료 — PHASE 1: 프로그래매틱 SEO 기반 구축
+- **시군구 허브 페이지**: `/apt/area/[region]/[sigungu]` 신규 (260개 시군구, 10개+ 단지 noindex)
+  - KPI 4종, 연차별 분포, 매매가/거래량 TOP 10, 동별 링크, FAQ 8개
+  - JSON-LD 4종 (BreadcrumbList, FAQPage, Dataset, Article+Speakable)
+  - 유니크 분석 문단 (데이터 기반, 템플릿 아님)
+- **동 허브 페이지**: `/apt/area/[region]/[sigungu]/[dong]` 신규 (2,852개 동, 5개+ 단지 noindex)
+  - KPI 3종, 단지 목록, FAQ 3개, JSON-LD 2종
+- **robots.txt 정적 전환**: 동적 라우트 → public/robots.txt
+- **단지백과 사이트맵 image 태그**: sitemap id=5~7에 `<image:image>` 추가
+- **시군구/동 허브 사이트맵**: sitemap id=21 추가 (안티스팸 임계값 적용)
+- **내부 링크 강화**: apt/[id] + complex/[name] → 시군구/동 허브 pill 링크
+- **llms.txt 강화**: URL 패턴 명시, 데이터 수치 갱신, 핵심 부동산 데이터 추가
 
-### 수정 내역 (32 files changed)
-- **DB 마이그레이션**: FK 제거, post_id nullable, `content_type`/`content_ref` 컬럼 추가, 인덱스 3개
-- **API `/api/share`**: content_type/content_ref 기반 조회·저장 + 하위 호환
-- **ShareButtons**: 27개 사용처 전부 `contentType`/`contentRef` props로 전환
-- **SectionShareButton**: `trackShare()` 함수 + `/api/share` POST 추가 (8곳 누락 복구)
-- **KakaoDirectShare**: `trackShare()` 추가 (apt 페이지 누락 복구)
-- **KakaoShareButton**: `post_id: slug` → `content_type: 'blog', content_ref: slug`
-- **Admin v2 API**: `sharesByContentType` 집계 추가
-- **FocusTab**: 공유오늘 KPI 카드 + 플랫폼별/콘텐츠별 분석 패널
+### 완료 — PHASE 2: 비교 페이지 + 데이터 보강
+- **단지 비교 페이지**: `/apt/compare/[slugs]` 신규 (A-vs-B URL 패턴)
+  - 12개 비교 항목 테이블, FAQ 3개, 유니크 분석 문단
+  - complex/[name]에 "비교하기" CTA 추가 (같은 시군구 상위 단지)
+- **price_change_1y 대량 채우기**: 2,291 → **13,460건** (39% 커버리지, 6배 증가)
+  - apt_transactions 기반 자동 계산 (최근 6개월 vs 12~18개월 전)
 
-### content_type 체계
-post, blog, stock, stock-page, stock-sector, stock-market, calc, apt, apt-region, apt-complex, section, page, daily, discuss, blog-series
+### 스팸 리스크 방지 조치 (7중 안전장치)
+1. 시군구 10개 / 동 5개 단지 미만 → `robots: noindex` + `notFound()` 이중 차단
+2. 비교 페이지: 두 단지 모두 데이터 필수, 없으면 noindex
+3. 모든 페이지 데이터 기반 유니크 분석 문단 (템플릿 텍스트 아님)
+4. canonical URL 전량 설정
+5. JSON-LD 구조화 데이터 (FAQ + BreadcrumbList + Dataset + Article)
+6. 사이트맵 안티스팸 임계값 동일 적용
+7. 공공데이터 출처 명시 (국토교통부 실거래가 공개시스템)
 
-### safeBlogInsert 크론 에러 수정
-- **근본 원인**: blog-stock-v2, blog-apt-v2 등에서 `meta_description`/`meta_keywords` 미제공 → 품질 게이트 트리거(`trg_blog_quality_gate`)가 META_DESC_MISSING/META_KW_MISSING으로 거부
-- **수정**: `safeBlogInsert`에서 미제공 시 `generateMetaDesc()`/`generateMetaKeywords()` 자동 생성
-- **추가**: 트리거 race condition (DUPLICATE_TITLE/DUPLICATE_SLUG) 에러 → 조용히 처리 (console.error 제거)
+### 예상 인덱스 페이지 수 증가
+- 시군구 허브: ~200+ 페이지
+- 동 허브: ~1,500+ 페이지
+- 비교 페이지: on-demand ISR (내부 링크 통해 점진적 생성)
+- 합계: 기존 ~42,000 → ~44,000+ 페이지 (비교 페이지 제외)
 
-## 세션 91 후반 — 블로그 이미지 전면 개선
+### DB 변경
+- `apt_complex_profiles.price_change_1y`: 2,291 → 13,460건 UPDATE
 
-### 완료
-- **블로그 레이아웃 Option A**: sidebar 제거, TOC 인라인, 본문 폭 ~400px→~620px
-- **이미지 3→6~7장 확장**: 총 22,809→46,508장 (+23,699)
-- **apt_sites 현장사진 연동**: 1,566건 블로그 pos0을 실제 네이버 뉴스 현장사진으로 교체
-- **동적 apt_sites 폴백**: blog/[slug] 렌더링 시 Unsplash pos0 → apt_sites 사진 자동 교체
-- **cover_image 사진 교체**: 7,612건 OG 텍스트카드 → Unsplash/Naver 실제 사진 (포털 검색 썸네일)
-- **cover_image 중복 제거**: static img + BlogHeroImage 캐러셀 이중 렌더링 → 캐러셀만 유지
-- **BlogHeroImage 위치**: 공유바 아래 → 위로 이동 (제목→캐러셀→공유바→본문)
-- **블로그 목록 썸네일**: 64x44→80x56 확대, 실제 사진으로 교체
-- **http:// Mixed Content 수정**: 1,271건 naver 이미지 http→https
-- **pos0=pos2 중복 제거**: 3,328건→0건
-- **apt_sites 원본 http→https**: 2,847건
-- **짧은 alt_text 보강**: 2,424건 (SEO)
-
-### 이미지 현황
-- 총 이미지: 46,508장 (평균 6.1장/글)
-- 7장 글: 857건 (apt 현장사진 5+)
-- 6장 글: 6,748건
-- 현장사진(site_photo): 5,705장
-- OG 카드: 22,899장
-- OG 인포그래픽: 7,603장
-- Unsplash: 10,301장
-
-## 세션 91 — 블로그 전천후 설계안 전면 구현 + 배포 완료
-
-### 완료 사항
-1. **코어 라이브러리 3개**: blog-data-enrichment.ts (apt 34,537건 + 실거래 497,413건 주입), blog-quality-gate.ts (70점 미만 발행 차단, 10항목 검사), blog-prompt-templates.ts (공유 프롬프트 + OUTPUT_RULES + generateAndValidate)
-2. **신규 크론 3개**: blog-enrich-rewrite (매 3시간, C등급 재생성), blog-upcoming-projects (화·금, 카더라 선점), blog-data-update (주 1회, 시세 갱신)
-3. **크론 AI 전환 6개**: blog-tax-guide, blog-loan-guide, blog-calculator-guide, blog-dividend-etf, blog-subscription-monthly, blog-regional-analysis → 하드코딩 템플릿에서 AI 생성(generateAndValidate)으로 전환 완료
-4. **블로그 UI**: BlogSidebar (데스크탑 2컬럼 sticky), BlogMetricCards (지표 카드), blog-detail-layout CSS (1024px+ 2컬럼), 가독성 강화 (17px, 1.85)
-5. **어드민**: DataTab 품질 게이트 현황 (S/A/B/C/F 등급 분포, 인라인 HTML 건수), admin/v2 blogQuality 집계
-6. **DB**: Phase 0 SQL 일괄수정 (영어→한글, 오타), upcoming_projects 테이블 + 8현장 시딩
-7. **크론 정비**: blog-rewrite 비활성화 → blog-enrich-rewrite 대체, naver-blog-content 제거 (100개 상한), 총 크론 100개
-8. **빌드 에러 수정**: Supabase 타입 재귀, 크론 100개 상한, stock JSX 문법, Disclaimer import, 크론 변수명 불일치, safeBlogInsert 타입, CronResult return type — 전부 해결
-9. **설계문서**: docs/BLOG_REDESIGN_MASTERPLAN.md, docs/BLOG_SYSTEM_STATUS.md
-
-### 배포: dpl_BthxS3c7QWErpSutocepFdNTofFa — READY ✅
-
-## 세션 90 — 리텐션 시스템 Phase 1+2+3 전체 구현
-
-### 완료
-
-1. **소셜 실시간 푸시** — 댓글/좋아요/팔로우 시 상대방에게 웹 푸시 즉시 발송 (리텐션 핵심 루프)
-2. **앱 배지 API** — SW에서 `setAppBadge()`/`clearAppBadge()` 호출 (PWA 아이콘에 미읽음 표시)
-3. **/api/push/click** — 푸시 클릭 추적 엔드포인트 (SW 404 해소 + CTR 측정 기반)
-4. **Quiet Hours** — `isQuietHours()`, `filterActiveUsers()` push-utils에 추가
-5. **push-content-alert** — `notification_settings.push_hot_post` 옵트아웃 체크 + OG 이미지 포함
-6. **PushPromptBanner 삭제** — SmartPushPrompt로 통합 (blog/[slug] 중복 배너 해소)
-7. **출석 알림** — `link: '/attendance'` 추가 (클릭 시 출석 페이지로 이동)
-8. **blog-subscription-alert** — 블로그 생성 후 `sendPushBroadcast()` 추가
-9. **admin OpsTab** — 푸시 발송 성과 대시보드 (CTR/구독수/읽음률/최근 로그)
-10. **admin v2 API** — `pushStats` 통계 (push_logs 기반) + SOLAPI 키 상태
-11. **설계 문서** — `docs/RETENTION_SYSTEM_DESIGN.md` (1,112줄, Phase 1~3 전체 설계)
-
-### 배포
-
-### 핵심 아키텍처
-- **원칙:** "데이터가 없으면 발행하지 않는다"
-- **품질 게이트:** 70점+ pass, S(90+)/A(80+)/B(70+)/C(50+)/F
-- **크론 정비:** 31개 → 24개 (유지12+교체8+신규4, 비활성화11)
-- **콘텐츠 4타입:** TYPE A(단지분석), TYPE B(종목분석), TYPE C(카더라 선점), TYPE D(재테크 가이드)
-- **이미지 3층:** 자체 인포그래픽 + 공신력 이미지(조감도) + Unsplash
-
-### 완료 작업 요약
-
-#### SEO 메타데이터 (36파일)
-- buildMeta v2, og-square 자동, max-image-preview, BUILD_DATE 고정
-- 29개 페이지 og-square/naver:description/timestamp 안정화
-- JSON-LD 추가 (stock/compare, search, press BreadcrumbList)
-- stock/compare SSR 전환 (CompareClient 분리)
-- discuss/search SSR H1, apt/unsold redirect 정리
-
-#### UX 개선
-- 더보기 메뉴 15→22항목, 5그룹, sub 설명, 터치타겟 확대
-- 피드 tag 직접링크, readingTime 350, alt, 폰트 확대
-- 글쓰기 FAB 전환 → 하단탭 5개 균등배치
-- ScrollToTop ↔ FAB 겹침 해결
-- 글쓰기 페이지 디자인 개선 (제목 20px/800, 본문 16px)
-
-#### 블로그 이미지 시스템
-- Unsplash API 통합 (UNSPLASH_ACCESS_KEY 등록)
-- 22,809개 이미지 배치 (7,603개 × 3장 캐러셀)
-  - Position 0: Unsplash 실사진 (카테고리별 8장 라운드로빈)
-  - Position 1: OG 인포그래픽 (데이터 카드)
-  - Position 2: Unsplash 서브 사진
-- BlogHeroImage: 스와이프, 좌우 화살표, 1/3 카운터, 도트 네비
-- 크론: blog-generate-images 하루 4회 (02/08/14/20 UTC)
-- OG 텍스트카드 히어로 제거 → blog_post_images만 렌더
-
-#### UI 전수조사 표준화 (105파일, 518줄)
-- fontSize: 8-9px → 10px (최소 가독성, 62건)
-- borderRadius: 하드코딩 → CSS 변수 (radius-sm/md/card/lg/xl/pill)
-- padding: 2px 6px → 3px 8px (뱃지 최소 크기)
-- gap: 홀수 → 짝수 (3→4, 5→6)
-- 터치 타겟: 24x24→28x28, 28x28→32x32 (접근성)
-- Feed/Blog/Navigation 세부 조정
-
-### 배포
-- ✅ READY (dpl_7VQFEYnuxHEjaTpevTN5vGJiNYPw)
-- 런타임 에러 0건
-
-### 미실행 (다음 세션)
-- /api/blog-chart 데이터 시각화 이미지 (시세 추이, 지역 비교)
-- ItemList/SpeakableSpecification JSON-LD
-- SSR 서술형 분석 텍스트 (Thin Content 해소)
-- Last-Modified 헤더 (middleware)
-- 어드민 FocusTab SEO 위젯
-- SEO_REWRITE_PLAN 실행 (59K→15K)
-
-
-### 다음 세션 작업 (리텐션 Phase 2)
-
-1. **[선행] Resend 도메인 DNS 인증** — SPF/DKIM/DMARC (Hostinger DNS)
-2. **DB 마이그레이션** — notification_settings 확장 + notification_dispatch_logs + notifications 보강
-3. **notification-hub.ts** — 중앙 알림 허브 (cascade 레벨 분기: urgent/routine/critical)
-4. **streak-alert 크론** — 21:00 KST 스트릭 위기 알림
-5. **churn-prevention 크론** — D+3 푸시 / D+7 이메일 / D+14 전채널
-6. **email-digest 크론** — weekly-digest 대체 + Resend 실제 이메일 발송
-7. **pending-notification-dispatch 크론** — 2분마다 번들링 ("OO님 외 N명" 합침)
-
-### Phase 1 변경 파일 (15개)
-```
-A  docs/RETENTION_SYSTEM_DESIGN.md
-M  public/sw.js
-M  src/app/(main)/blog/[slug]/page.tsx
-M  src/app/(main)/notifications/page.tsx
-M  src/app/admin/tabs/OpsTab.tsx
-M  src/app/api/admin/v2/route.ts
-M  src/app/api/attendance/route.ts
-M  src/app/api/comments/route.ts
-M  src/app/api/cron/blog-subscription-alert/route.ts
-M  src/app/api/cron/push-content-alert/route.ts
-M  src/app/api/follow/route.ts
-M  src/app/api/likes/route.ts
-A  src/app/api/push/click/route.ts
-D  src/components/PushPromptBanner.tsx
-M  src/lib/push-utils.ts
-```
-
-### 핵심 아키텍처
-- **원칙:** "데이터가 없으면 발행하지 않는다"
-- **품질 게이트:** 70점+ pass, S(90+)/A(80+)/B(70+)/C(50+)/F
-- **크론 정비:** 31개 → 24개 (유지12+교체8+신규4, 비활성화11)
-- **콘텐츠 4타입:** TYPE A(단지분석), TYPE B(종목분석), TYPE C(카더라 선점), TYPE D(재테크 가이드)
-- **이미지 3층:** 자체 인포그래픽 + 공신력 이미지(조감도) + Unsplash
-- **리텐션:** 소셜 실시간 푸시 + 앱 배지 + Quiet Hours + 멀티채널 cascade (Phase 2~3)
+### 다음 단계 (PHASE 3 예정)
+- 가격대별 조합 페이지 (시군구 × 가격 티어)
+- 연차별 조합 페이지 (시군구 × 연차)
+- 건설사 브랜드 페이지
+- 테마 페이지 (역세권, 학군, 전세가율 TOP/BOTTOM 등)
+- 월간 자동 리포트 크론
+- price_change_1y 자동 갱신 크론 생성
+- total_households KAPT API 확장 (현재 55건)
+- 리뷰/평점 시스템 활성화 → AggregateRating 스키마
