@@ -87,11 +87,11 @@ export default function AdminShell() {
       {/* 탭 콘텐츠 */}
       {tab === 'focus' && <FocusTab onNavigate={(t: string) => setTab(t as TabKey)} />}
       {tab === 'issue' && <IssueTab />}
-      {tab === 'growth' && <GrowthTab />}
-      {tab === 'users' && <UsersTab />}
-      {tab === 'data' && <DataTab />}
-      {tab === 'ops' && <OpsTab />}
-      {tab === 'execute' && <ExecuteTab />}
+      {tab === 'growth' && <GrowthTab onNavigate={(t: string) => setTab(t as TabKey)} />}
+      {tab === 'users' && <UsersTab onNavigate={(t: string) => setTab(t as TabKey)} />}
+      {tab === 'data' && <DataTab onNavigate={(t: string) => setTab(t as TabKey)} />}
+      {tab === 'ops' && <OpsTab onNavigate={(t: string) => setTab(t as TabKey)} />}
+      {tab === 'execute' && <ExecuteTab onNavigate={(t: string) => setTab(t as TabKey)} />}
     </div>
   );
 }
