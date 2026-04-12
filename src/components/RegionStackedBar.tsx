@@ -101,7 +101,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
   return (
     <div style={{ marginBottom: 6, maxWidth: '100%', overflow: 'hidden' }}>
       {/* ── KPI 카드 (클릭 → 탭 전환) ── */}
-      <div className="kd-region-kpi" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 4, marginBottom: 8, paddingTop: 4, paddingBottom: 4 }}>
+      <div className="kd-region-kpi" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 3, marginBottom: 6, paddingTop: 2, paddingBottom: 2 }}>
         {KPI_CFG.map(k => {
           const isAct = activeTab === k.key;
           return (
@@ -110,7 +110,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
               style={{
                 padding: '6px 4px', borderRadius: 'var(--radius-sm)', textAlign: 'center', cursor: 'pointer',
                 background: isAct ? 'var(--bg-hover)' : 'var(--bg-surface)',
-                border: `1px solid ${isAct ? 'var(--brand)' : 'var(--border)'}`,
+                border: `0.5px solid ${isAct ? 'var(--brand)' : 'var(--border)'}`,
                 transition: 'all 0.15s',
               }}>
               <div style={{ fontSize: 16, fontWeight: 800, color: k.c, fontVariantNumeric: 'tabular-nums', lineHeight: 1.2 }}>
@@ -126,7 +126,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
       <div className="kd-region-grid" style={{
         display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 4,
         background: 'var(--bg-surface)', border: '1px solid var(--border)',
-        borderRadius: 'var(--radius-md)', padding: '4px 3px',
+        borderRadius: 'var(--radius-md)', padding: '3px 2px',
       }}>
         {regions.map((r) => {
           const isAct = activeRegion === r.name;

@@ -161,7 +161,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                 <div style={{ height: 56, background: 'var(--bg-hover)', position: 'relative', overflow: 'hidden' }}>
                   <img src={aptImageMap?.[apt.house_nm] || `/api/og?title=${encodeURIComponent(apt.house_nm)}&category=apt&design=2`} alt={apt.house_nm || "부동산 이미지"} width={400} height={56} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', opacity: 0.85 }} loading="lazy" />
                   <div style={{ position: 'absolute', top: 6, left: 8 }}>
-                    <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 5, background: st === 'open' ? 'rgba(54,240,176,0.9)' : st === 'upcoming' ? 'rgba(74,138,247,0.9)' : 'rgba(148,163,184,0.8)', color: '#fff', lineHeight: '16px' }}>{bd.label}</span>
+                    <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 'var(--radius-xs)', background: st === 'open' ? 'rgba(54,240,176,0.9)' : st === 'upcoming' ? 'rgba(74,138,247,0.9)' : 'rgba(148,163,184,0.8)', color: '#fff', lineHeight: '16px' }}>{bd.label}</span>
                   </div>
                   {dday !== null && dday >= 0 && st !== 'closed' && (
                     <div style={{ position: 'absolute', bottom: 5, right: 8, fontSize: 10, fontWeight: 800, color: 'rgba(255,255,255,0.8)' }}>
@@ -235,7 +235,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                   const genPct = totS > 0 ? Math.round((genT / totS) * 100) : 0;
                   const hasAnnouncement = !!(apt.rcept_bgnde);
                   const pendingLabel = hasAnnouncement ? '공고확인' : '공고전';
-                  const kpiStyle = { textAlign: 'center' as const, padding: '4px 4px', background: 'var(--bg-surface)', borderRadius: 2 };
+                  const kpiStyle = { textAlign: 'center' as const, padding: '3px 4px', background: 'var(--bg-surface)', borderRadius: 2 };
                   const kpiLabel = { fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 2, fontWeight: 500 as const };
                   const kpiVal = (c: string) => ({ fontSize: 'var(--fs-sm)', fontWeight: 800 as const, color: c, lineHeight: 1.3 });
                   return (
@@ -294,7 +294,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                         {types.map((t: any, idx: number) => {
                           const pctH = Math.round((t.lttot_top_amount / maxP) * 100);
                           return (
-                            <div key={t.type || idx} style={{ flex: '1 0 0', minWidth: 64, background: 'var(--bg-hover)', borderRadius: 5, padding: '4px 5px', border: '1px solid var(--border)' }}>
+                            <div key={t.type || idx} style={{ flex: '1 0 0', minWidth: 64, background: 'var(--bg-hover)', borderRadius: 'var(--radius-xs)', padding: '4px 5px', border: '1px solid var(--border)' }}>
                               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 3 }}>
                                 <span style={{ fontSize: 10, fontWeight: 800, color: 'var(--text-primary)' }}>{t.type?.split?.('.')?.[0] || t.type}</span>
                                 <span style={{ fontSize: 8, color: 'var(--text-tertiary)' }}>{t.area ? `${Number(t.area).toFixed(0)}㎡` : ''}</span>

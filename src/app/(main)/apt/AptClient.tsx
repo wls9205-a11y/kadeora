@@ -142,7 +142,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--sp-sm)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
         <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>🏢 부동산</h1>
         <div style={{ display: 'flex', gap: 6 }}>
           <SectionShareButton section="apt-main" label="부동산 청약·분양·실거래 정보 한눈에!" pagePath="/apt" />
@@ -150,7 +150,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
       </div>
 
       {/* 통합 검색창 (상단 배치) */}
-      <div style={{ display: 'flex', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-sm)' }}>
+      <div style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
         <select value={selectedRegion} onChange={e => setSelectedRegion(e.target.value)} style={{
           padding: '7px 10px', fontSize: 13, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)',
           background: 'var(--bg-surface)', color: 'var(--text-primary)', cursor: 'pointer', flexShrink: 0,

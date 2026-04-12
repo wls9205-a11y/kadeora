@@ -139,7 +139,7 @@ export default function NoticeBanner() {
         style={{
           ...bgStyle,
           borderBottom: tier === 'urgent' ? '1px solid rgba(248,113,113,0.3)' : tier === 'premium' ? '1px solid rgba(251,191,36,0.2)' : '1px solid var(--border)',
-          height: 45,
+          height: 34,
           display: 'flex',
           alignItems: 'center',
           overflow: 'hidden',
@@ -147,7 +147,7 @@ export default function NoticeBanner() {
           zIndex: 50,
           flexShrink: 0,
           cursor: 'pointer',
-          padding: '6px 0',
+          padding: '4px 0',
         }}
         onClick={handleClick}
       >
@@ -163,7 +163,7 @@ export default function NoticeBanner() {
             whiteSpace: 'nowrap',
             animation: `kd-marquee-v2 ${style.speed}s linear infinite`,
             paddingLeft: '100%',
-            fontSize: 'var(--fs-base)',
+            fontSize: 13,
             fontWeight: 600,
             color: textColor,
             letterSpacing: '0.03em',
@@ -172,7 +172,7 @@ export default function NoticeBanner() {
         >
           {[0, 1, 2].map(i => (
             <span key={i}>
-              {i > 0 && <span style={{ margin: '0 60px', color: 'var(--text-tertiary)', fontSize: 'var(--fs-base)' }}>◆</span>}
+              {i > 0 && <span style={{ margin: '0 40px', color: 'var(--text-tertiary)', fontSize: 'var(--fs-base)' }}>◆</span>}
               <span>{style.icon}&nbsp;{notice.content}</span>
               {notice.is_paid && notice.author?.nickname && (
                 <span style={{ marginLeft: 8, fontSize: 'var(--fs-xs)', opacity: 0.6 }}>— {notice.author.nickname}</span>
