@@ -213,7 +213,7 @@ export default async function StockDetailPage({ params }: Props) {
         description: `${s.name} 실시간 주가 차트, 시세 변동, AI 분석 그래프`,
         url: `${SITE_URL}/stock/${symbol}`,
         image: [
-          { '@type': 'ImageObject', url: `${SITE_URL}/api/og?title=${encodeURIComponent(`${s.name} (${symbol}) 주가 ${p}`)}&design=2&category=stock`, width: 1200, height: 630, name: `${s.name} 주가 시세`, caption: `${s.name}(${symbol}) 현재가 ${p} ${ch}` },
+          { '@type': 'ImageObject', url: `${SITE_URL}/api/og?title=${encodeURIComponent(`${s.name} (${symbol}) 주가`)}&design=2&category=stock`, width: 1200, height: 630, name: `${s.name} 주가 시세`, caption: `${s.name}(${symbol}) 현재가 ${fmtPrice(Number(s.price), s.currency ?? undefined)}` },
           { '@type': 'ImageObject', url: `${SITE_URL}/api/og-chart?symbol=${symbol}&type=price`, width: 1200, height: 630, name: `${s.name} 주가 차트`, caption: `${s.name} 가격 추이 차트` },
           { '@type': 'ImageObject', url: `${SITE_URL}/api/og-square?title=${encodeURIComponent(`${s.name}`)}&category=stock`, width: 630, height: 630, name: `${s.name} 종목 정보`, caption: `${s.name} ${s.market} 상장 종목` },
         ],
