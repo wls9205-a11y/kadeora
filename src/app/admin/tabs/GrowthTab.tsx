@@ -246,6 +246,33 @@ export default function GrowthTab({ onNavigate }: { onNavigate: (t: any) => void
       </>)}
 
       {/* 가입 귀속 (CTA별) */}
+
+      {/* 알림 채널 성과 */}
+      {data.extended?.pushStats && (() => {
+        const ps = data.extended.pushStats;
+        return (<>
+          <div className="adm-sec">🔔 알림 채널 성과</div>
+          <div className="adm-card" style={{ padding: '10px 14px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, marginBottom: 10 }}>
+              {[
+                { v: ps.pushSubs || 0, l: '푸시 구독자', c: '#F59E0B' },
+                { v: `${ps.avgCtr || 0}%`, l: '푸시 CTR', c: (ps.avgCtr || 0) > 5 ? '#10B981' : '#EF4444' },
+                { v: `${ps.notifReadRate24 || 0}%`, l: '알림 읽음률', c: (ps.notifReadRate24 || 0) > 30 ? '#10B981' : '#EF4444' },
+              ].map(s => (
+                <div key={s.l} style={{ textAlign: 'center', padding: 6, background: 'rgba(12,21,40,0.5)', borderRadius: 'var(--radius-sm)' }}>
+                  <div style={{ fontSize: 16, fontWeight: 800, color: s.c }}>{s.v}</div>
+                  <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>{s.l}</div>
+                </div>
+              ))}
+            </div>
+            <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>
+              채널: 웹 푸시(무료 3건/일) · 이메일(무료 1건/일) · 카카오(8.4원 1건/일)
+            </div>
+          </div>
+        </>);
+      })()}
+
+      {/* 가입 귀속 (CTA별) — 원래 위치 */}
       {data.signupSources && Object.keys(data.signupSources).length > 0 && (<>
         <div className="adm-sec">🎯 가입 귀속 (signup_source)</div>
         <div className="adm-card" style={{ padding: '8px 14px' }}>
