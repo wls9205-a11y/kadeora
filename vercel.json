@@ -480,10 +480,6 @@
       "schedule": "0 18 * * 3"
     },
     {
-      "path": "/api/cron/naver-blog-content",
-      "schedule": "0 9 * * *"
-    },
-    {
       "path": "/api/cron/blog-generate-images",
       "schedule": "0 2,8,14,20 * * *"
     },
