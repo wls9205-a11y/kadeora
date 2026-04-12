@@ -499,36 +499,7 @@ export function Navigation() {
         paddingBottom:'max(6px, env(safe-area-inset-bottom))',
         paddingTop:0,
       }} className="md:hidden">
-        {MOBILE_TABS.slice(0, 2).map(item => {
-          const active = isActive(item.href);
-          return (
-            <Link key={item.href} href={item.href} aria-label={item.label} aria-current={active ? 'page' : undefined} style={{
-              display:'flex', flexDirection:'column', alignItems:'center', gap:2,
-              padding:'10px 8px 6px', textDecoration:'none', minHeight:56,
-              justifyContent:'center', flex:1, position:'relative',
-              color: active ? 'var(--brand)' : 'var(--text-tertiary)',
-              transition:'color var(--transition-fast) ease',
-            }}>
-              {active && <span style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:24, height:2.5, borderRadius:2, background:'var(--brand)' }} />}
-              <item.Icon size={18} strokeWidth={active ? 2.5 : 1.8} />
-              <span style={{ fontSize:10, fontWeight: active ? 700 : 500, lineHeight:1.2 }}>{item.label}</span>
-            </Link>
-          );
-        })}
-        {/* 글쓰기 */}
-        <Link key="write" href="/write" aria-label="글쓰기" onClick={() => haptic('medium')} style={{
-          display:'flex', alignItems:'center', justifyContent:'center',
-          width:44, height:44, borderRadius: 'var(--radius-lg)',
-          background:'var(--brand)', color:'var(--text-inverse)',
-          marginTop:-8, flexShrink:0, textDecoration:'none',
-          boxShadow:'0 2px 12px rgba(59,123,246,0.35)',
-          transition:'transform 0.12s ease, box-shadow 0.2s ease',
-        }}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-          </svg>
-        </Link>
-        {MOBILE_TABS.slice(2).map(item => {
+        {MOBILE_TABS.map(item => {
           const active = isActive(item.href);
           return (
             <Link key={item.href} href={item.href} aria-label={item.label} aria-current={active ? 'page' : undefined} style={{
@@ -563,7 +534,18 @@ export function Navigation() {
         </button>
       </nav>
 
-      {/* 더보기 시트 */}
+      {/* FAB 글쓰기 버튼 — 모바일 전용 */}
+      <Link href="/write" aria-label="글쓰기" onClick={() => haptic('medium')} className="md:hidden" style={{
+        position:'fixed', bottom: 'calc(68px + env(safe-area-inset-bottom))', right: 16,
+        zIndex: 99, width: 52, height: 52, borderRadius: '50%',
+        background: 'var(--brand)', color: '#fff',
+        display:'flex', alignItems:'center', justifyContent:'center',
+        boxShadow: '0 4px 16px rgba(59,123,246,0.4)',
+        textDecoration: 'none',
+        transition: 'transform 0.15s ease, box-shadow 0.2s ease',
+      }}>
+        <PenSquare size={22} strokeWidth={2.2} />
+      </Link>
       {moreOpen && (
         <div style={{ position:'fixed', inset:0, zIndex: 9999 }}>
           <div style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.5)' }} onClick={() => setMoreOpen(false)} />
