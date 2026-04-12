@@ -80,7 +80,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         };
         const g = GEO[region];
         return g ? { 'geo.region': g.code, 'geo.placename': region, 'geo.position': `${g.lat};${g.lng}`, 'ICBM': `${g.lat}, ${g.lng}` } : {};
-      })(),
+      })() as Record<string, string>,
     },
   };
 }

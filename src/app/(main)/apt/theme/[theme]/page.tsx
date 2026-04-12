@@ -133,7 +133,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
         if (!region) return {};
         const g = GEO[region];
         return g ? { 'geo.region': g.code, 'geo.placename': region, 'geo.position': `${g.lat};${g.lng}`, 'ICBM': `${g.lat}, ${g.lng}` } : {};
-      })(),
+      })() as Record<string, string>,
     },
   };
 }
