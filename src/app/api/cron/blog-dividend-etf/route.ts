@@ -38,32 +38,22 @@ export async function GET(_req: NextRequest) {
         ).join('\n\n');
 
         const avgYield = (divStocks.slice(0, 10).reduce((a: number, s: any) => a + (s.dividend_yield || 0), 0) / Math.min(divStocks.length, 10)).toFixed(2);
-        const content = `## ${month} 고배당주 순위
-
-배당수익률 기준으로 상위 종목을 정리했습니다. 평균 배당수익률 ${avgYield}%입니다.
-
-## TOP 10 고배당 종목
-
-${stockList}
-
-## 배당 투자 체크리스트
-
-1. **배당수익률만 보지 말 것** — 높은 배당률은 주가 하락의 결과일 수 있습니다
-2. **배당 지속성 확인** — 3년 이상 꾸준히 배당한 종목이 안정적입니다
-3. **배당락일 확인** — 배당을 받으려면 배당락일 전에 매수해야 합니다
-4. **세금 고려** — 배당소득세 15.4%, 연 2천만원 초과 시 종합과세
-
-## 관련 정보
-
-- [배당금 계산기](${SITE_URL}/calc/investment/dividend-calc)
-- [종목 비교](${SITE_URL}/stock/compare)
-- [배당주 페이지](${SITE_URL}/stock/dividend)
-`;
+      // AI 생성 (하드코딩 → 완성형)
+      const links = [
+        '[무료 계산기 모음 →](/calc)',
+        '[부동산 정보 →](/apt)',
+        '[카더라 블로그 →](/blog?category=finance)',
+        '[커뮤니티 →](/feed)',
+        '[주식 시세 →](/stock)',
+      ];
+      const prompt = buildFinancePrompt(topic.title || calc?.title || '', 'finance', links);
+      const aiResult = await generateAndValidate(prompt, 'finance');
+      if (!aiResult) continue;
 
         const res = await safeBlogInsert(sb, {
           slug,
           title,
-          content,
+          content: aiResult.content,
           category: 'stock',
           tags: ['고배당주', '배당수익률', '배당금', '배당투자', month],
           source_type: 'dividend-etf',
@@ -71,7 +61,10 @@ ${stockList}
           data_date: today,
           meta_description: generateMetaDesc(content, title, 'stock'),
           meta_keywords: generateMetaKeywords('stock', ['배당주', '배당수익률']),
-          is_published: true,
+          sub_category: '투자금융',
+        seo_score: aiResult.score,
+        seo_tier: aiResult.tier,
+        is_published: true,
         });
         if (res.success) created++;
       }

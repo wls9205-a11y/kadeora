@@ -4,7 +4,6 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
 import { generateMetaDesc, generateMetaKeywords } from '@/lib/blog-seo-utils';
 import { NextRequest, NextResponse } from 'next/server';
-import { SITE_URL } from '@/lib/constants';
 
 export const maxDuration = 300;
 
@@ -29,46 +28,22 @@ export async function GET(_req: NextRequest) {
 
     for (const topic of TOPICS) {
       if (existingSlugs.has(topic.slug)) continue;
-      const calcUrl = `${SITE_URL}${topic.calc}`;
-      const content = `## ${topic.title.split('—')[0].trim()}
-
-대출과 금리에 관한 핵심 가이드입니다. 2026년 최신 규제와 기준을 반영했습니다.
-
-## 2026년 대출 환경
-
-2026년에는 스트레스 DSR 3단계가 시행되면서 대출 한도가 이전보다 줄어들었습니다. 같은 소득이라도 빌릴 수 있는 금액이 달라졌으므로, 사전에 정확한 계산이 필요합니다.
-
-## 카더라 계산기로 간편 시뮬레이션
-
-👉 **[대출 계산기 바로가기](${calcUrl})**
-
-- 원리금균등/원금균등/만기일시 비교
-- 2026년 스트레스 DSR 반영
-- 무료·모바일 최적화
-
-## 핵심 체크리스트
-
-1. **소득 대비 상환능력** 확인 — DSR 40% 이내인지 미리 계산
-2. **금리 유형** 선택 — 고정/변동/혼합 중 본인에게 유리한 것
-3. **상환 방식** 비교 — 원리금균등이 일반적이지만 원금균등이 이자 총액은 적음
-4. **우대금리 조건** — 급여이체, 카드사용, 신용점수 등
-
-## 관련 계산기
-
-- [대출 상환 계산기](${SITE_URL}/calc/loan/loan-repayment)
-- [DSR 계산기](${SITE_URL}/calc/real-estate/dsr-calc)
-- [전세대출 계산기](${SITE_URL}/calc/loan/jeonse-loan)
-- [LTV 계산기](${SITE_URL}/calc/real-estate/ltv-calc)
-
----
-
-> 이 글은 정보 제공 목적이며, 실제 대출 조건은 금융기관에 따라 다를 수 있습니다.
-`;
+      // AI 생성 (하드코딩 → 완성형)
+      const links = [
+        `[${topic.title.split('—')[0].trim()} 계산기 →](${topic.calc || '/calc'})`,
+        '[무료 계산기 모음 →](/calc)',
+        '[부동산 정보 →](/apt)',
+        '[카더라 블로그 →](/blog?category=finance)',
+        '[커뮤니티 →](/feed)',
+      ];
+      const prompt = buildFinancePrompt(topic.title, 'finance', links);
+      const aiResult = await generateAndValidate(prompt, 'finance');
+      if (!aiResult) continue;
 
       const res = await safeBlogInsert(sb, {
         slug: topic.slug,
         title: topic.title,
-        content,
+        content: aiResult.content,
         category: 'finance',
         tags: topic.tags,
         source_type: 'loan-guide',
@@ -76,6 +51,9 @@ export async function GET(_req: NextRequest) {
         data_date: today,
         meta_description: generateMetaDesc(content, topic.title, 'finance'),
         meta_keywords: generateMetaKeywords('finance', topic.tags),
+        sub_category: '부동산금융',
+        seo_score: aiResult.score,
+        seo_tier: aiResult.tier,
         is_published: true,
       });
       if (res.success) created++;

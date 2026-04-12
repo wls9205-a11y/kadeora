@@ -35,34 +35,22 @@ export async function GET(_req: NextRequest) {
       const totalUnits = sites.reduce((a: number, s: any) => a + (s.total_units || 0), 0);
       const title = `${region} 아파트 시장 현황 ${month} — 주요 단지 분석`;
 
-      const content = `## ${region} 아파트 시장 개요
-
-${region} 지역의 주요 아파트 단지 ${sites.length}곳을 분석합니다. 총 ${totalUnits.toLocaleString()}세대 규모입니다.
-
-## 주요 단지 현황
-
-${sites.map((s: any, i: number) => `### ${i + 1}. ${s.name}
-- **위치**: ${s.address || region}
-- **세대수**: ${(s.total_units || 0).toLocaleString()}세대
-- **시공사**: ${s.builder_name || '미정'}
-${s.move_in_date ? `- **입주 예정**: ${s.move_in_date}` : ''}
-`).join('\n')}
-
-## ${region} 부동산 전망
-
-2026년 ${region} 부동산 시장은 공급 물량과 대출 규제에 따라 지역별로 차별화된 흐름을 보일 것으로 전망됩니다.
-
-## 관련 정보
-
-- [${region} 청약 정보](${SITE_URL}/apt/region/${encodeURIComponent(region)})
-- [전국 아파트 지도](${SITE_URL}/apt/map)
-- [청약 가점 계산기](${SITE_URL}/calc/real-estate/subscription-score)
-`;
+      // AI 생성 (하드코딩 → 완성형)
+      const links = [
+        '[무료 계산기 모음 →](/calc)',
+        '[부동산 정보 →](/apt)',
+        '[카더라 블로그 →](/blog?category=apt)',
+        '[커뮤니티 →](/feed)',
+        '[주식 시세 →](/stock)',
+      ];
+      const prompt = buildFinancePrompt(topic.title || calc?.title || '', 'apt', links);
+      const aiResult = await generateAndValidate(prompt, 'apt');
+      if (!aiResult) continue;
 
       const res = await safeBlogInsert(sb, {
         slug,
         title,
-        content,
+        content: aiResult.content,
         category: 'apt',
         tags: [region, '아파트', '시세', '부동산', '2026'],
         source_type: 'regional-analysis',
@@ -70,6 +58,9 @@ ${s.move_in_date ? `- **입주 예정**: ${s.move_in_date}` : ''}
         data_date: today,
         meta_description: generateMetaDesc(content, title, 'apt'),
         meta_keywords: generateMetaKeywords('apt', [region, '아파트', '시세']),
+        sub_category: '부동산일반',
+        seo_score: aiResult.score,
+        seo_tier: aiResult.tier,
         is_published: true,
       });
       if (res.success) created++;

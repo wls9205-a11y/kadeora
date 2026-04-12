@@ -40,27 +40,17 @@ export async function GET(_req: NextRequest) {
 ${s.przwner_presnatn_de ? `- **당첨 발표**: ${s.przwner_presnatn_de.slice(0,4)}.${s.przwner_presnatn_de.slice(4,6)}.${s.przwner_presnatn_de.slice(6,8)}` : ''}`;
     }).join('\n\n');
 
-    const content = `## ${monthStr} 청약 일정
-
-${monthStr}에 진행되는 주요 아파트 청약 일정을 정리했습니다. 총 ${(subs || []).length}개 단지의 청약이 예정되어 있습니다.
-
-## 주요 청약 단지
-
-${subList || '이번 달 등록된 청약 일정이 없습니다.'}
-
-## 청약 준비 체크리스트
-
-1. **청약통장 가입기간** 확인 — 지역별 최소 가입기간이 다릅니다
-2. **청약 가점** 계산 — [청약 가점 계산기](${SITE_URL}/calc/real-estate/subscription-score)로 미리 확인
-3. **자금 계획** — [취득세 계산기](${SITE_URL}/calc/property-tax/acquisition-tax)로 총 비용 파악
-4. **특별공급 자격** — 신혼부부·다자녀·노부모 등 해당 여부 확인
-
-## 관련 정보
-
-- [전국 청약 정보](${SITE_URL}/apt)
-- [청약 가점 계산기](${SITE_URL}/calc/real-estate/subscription-score)
-- [분양가 분석](${SITE_URL}/blog?category=apt)
-`;
+      // AI 생성 (하드코딩 → 완성형)
+      const links = [
+        '[무료 계산기 모음 →](/calc)',
+        '[부동산 정보 →](/apt)',
+        '[카더라 블로그 →](/blog?category=apt)',
+        '[커뮤니티 →](/feed)',
+        '[주식 시세 →](/stock)',
+      ];
+      const prompt = buildFinancePrompt(topic.title || calc?.title || '', 'apt', links);
+      const aiResult = await generateAndValidate(prompt, 'apt');
+      if (!aiResult) continue;
 
     const res = await safeBlogInsert(sb, {
       slug,

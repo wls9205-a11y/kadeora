@@ -1,3 +1,4 @@
+import { generateAndValidate } from '@/lib/blog-prompt-templates';
 export const maxDuration = 300;
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
