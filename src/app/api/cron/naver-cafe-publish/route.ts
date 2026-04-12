@@ -5,7 +5,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
-const BATCH_SIZE = 2;
+const BATCH_SIZE = 1; // 네이버 카페 API 속도 제한 — 1건씩 처리
 
 async function doWork() {
   // 런타임에서 환경변수 읽기 (cold start 캐시 방지)
