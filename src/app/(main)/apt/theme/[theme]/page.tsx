@@ -127,7 +127,7 @@ export default async function ThemePage({ params, searchParams }: Props) {
   if (!t) return notFound();
 
   const sb = getSupabaseAdmin();
-  const selectedRegion = region && REGIONS.includes(region) ? region : undefined;
+  let selectedRegion: string | undefined = region && REGIONS.includes(region) ? region : undefined;
   const { data: profiles } = await t.query(sb as any, selectedRegion);
 
   // 안티스팸: 결과 10개 미만이면 지역 필터 해제
@@ -136,9 +136,9 @@ export default async function ThemePage({ params, searchParams }: Props) {
     // fallback to all regions
     const { data: fallback } = await t.query(sb as any, undefined);
     if ((fallback || []).length >= 10) {
-      // 리다이렉트 대신 전국 데이터 사용
       items.length = 0;
       items.push(...(fallback || []));
+      selectedRegion = undefined; // 전국 데이터로 전환됨
     }
   }
 
