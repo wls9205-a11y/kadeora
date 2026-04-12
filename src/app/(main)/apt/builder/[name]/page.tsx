@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { SITE_URL } from '@/lib/constants';
 import Link from 'next/link';
@@ -10,7 +11,7 @@ export const maxDuration = 30;
 
 interface Props { params: Promise<{ name: string }> }
 
-async function fetchBuilder(builder: string) {
+const fetchBuilder = cache(async (builder: string) => {
   const sb = getSupabaseAdmin();
   const { data: sites } = await sb.from('apt_sites')
     .select('slug, name, region, sigungu, site_type, total_units, price_min, price_max, built_year, move_in_date, status, interest_count, images')

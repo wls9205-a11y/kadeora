@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { SITE_URL } from '@/lib/constants';
 import Link from 'next/link';
@@ -11,14 +12,14 @@ const MIN_COMPLEXES = 5;
 
 interface Props { params: Promise<{ region: string; sigungu: string; dong: string }> }
 
-async function fetchData(region: string, sigungu: string, dong: string) {
+const fetchData = cache(async (region: string, sigungu: string, dong: string) => {
   const sb = getSupabaseAdmin();
   const { data } = await (sb as any).from('apt_complex_profiles')
     .select('apt_name, age_group, latest_sale_price, latest_jeonse_price, jeonse_ratio, sale_count_1y, rent_count_1y, built_year, avg_sale_price_pyeong, latitude, longitude, price_change_1y')
     .eq('region_nm', region).eq('sigungu', sigungu).eq('dong', dong)
     .not('age_group', 'is', null).order('sale_count_1y', { ascending: false }).limit(500);
   return data || [];
-}
+});
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { region: r, sigungu: s, dong: d } = await params;

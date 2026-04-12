@@ -25,9 +25,14 @@ export async function GET(req: NextRequest) {
   const sp = req.nextUrl.searchParams;
   const symbol = sp.get('symbol');
   const apt = sp.get('apt');
-  const sb = getSupabaseAdmin();
+
+  // 파라미터 없으면 빠른 반환 (DB 호출 불필요)
+  if (!symbol && !apt) {
+    return new Response('?symbol=XXX or ?apt=slug', { status: 400 });
+  }
 
   try {
+  const sb = getSupabaseAdmin();
     if (symbol) {
       const { data: s } = await (sb as any).from('stock_quotes')
         .select('name, symbol, market, price, change_pct, market_cap, per, pbr, dividend_yield, sector')
@@ -59,19 +64,19 @@ export async function GET(req: NextRequest) {
             <div style={{ display: 'flex', fontSize: 28, fontWeight: 700, color: chgColor, marginLeft: 16 }}>{chgText}</div>
           </div>
           <div style={{ display: 'flex', gap: 16, flex: 1 }}>
-            <div style={{ display: 'flex', flexDirection: 'column', flex: 1, background: 'rgba(255,255,255,0.06)', borderRadius: 'var(--radius-lg)', padding: 20, justifyContent: 'center', alignItems: 'center' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', flex: 1, background: 'rgba(255,255,255,0.06)', borderRadius: '12px', padding: 20, justifyContent: 'center', alignItems: 'center' }}>
               <div style={{ display: 'flex', fontSize: 13, color: '#888', marginBottom: 8 }}>시가총액</div>
               <div style={{ display: 'flex', fontSize: 22, fontWeight: 700, color: '#fff' }}>{cap}</div>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', flex: 1, background: 'rgba(255,255,255,0.06)', borderRadius: 'var(--radius-lg)', padding: 20, justifyContent: 'center', alignItems: 'center' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', flex: 1, background: 'rgba(255,255,255,0.06)', borderRadius: '12px', padding: 20, justifyContent: 'center', alignItems: 'center' }}>
               <div style={{ display: 'flex', fontSize: 13, color: '#888', marginBottom: 8 }}>PER</div>
               <div style={{ display: 'flex', fontSize: 22, fontWeight: 700, color: '#fff' }}>{per}</div>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', flex: 1, background: 'rgba(255,255,255,0.06)', borderRadius: 'var(--radius-lg)', padding: 20, justifyContent: 'center', alignItems: 'center' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', flex: 1, background: 'rgba(255,255,255,0.06)', borderRadius: '12px', padding: 20, justifyContent: 'center', alignItems: 'center' }}>
               <div style={{ display: 'flex', fontSize: 13, color: '#888', marginBottom: 8 }}>PBR</div>
               <div style={{ display: 'flex', fontSize: 22, fontWeight: 700, color: '#fff' }}>{pbr}</div>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', flex: 1, background: 'rgba(255,255,255,0.06)', borderRadius: 'var(--radius-lg)', padding: 20, justifyContent: 'center', alignItems: 'center' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', flex: 1, background: 'rgba(255,255,255,0.06)', borderRadius: '12px', padding: 20, justifyContent: 'center', alignItems: 'center' }}>
               <div style={{ display: 'flex', fontSize: 13, color: '#888', marginBottom: 8 }}>배당률</div>
               <div style={{ display: 'flex', fontSize: 22, fontWeight: 700, color: '#fff' }}>{dy}</div>
             </div>
@@ -102,24 +107,24 @@ export async function GET(req: NextRequest) {
           </div>
           <div style={{ display: 'flex', fontSize: 36, fontWeight: 700, color: '#fff', marginBottom: 8 }}>{site.name}</div>
           <div style={{ display: 'flex', fontSize: 18, color: '#888', marginBottom: 32 }}>{builder} | {units} | 입주 {moveIn}</div>
-          <div style={{ display: 'flex', alignItems: 'center', padding: '20px 24px', background: 'rgba(0,255,135,0.08)', borderRadius: 'var(--radius-lg)', marginBottom: 24 }}>
+          <div style={{ display: 'flex', alignItems: 'center', padding: '20px 24px', background: 'rgba(0,255,135,0.08)', borderRadius: '12px', marginBottom: 24 }}>
             <div style={{ display: 'flex', fontSize: 16, color: '#00FF87', marginRight: 16 }}>분양가</div>
             <div style={{ display: 'flex', fontSize: 40, fontWeight: 700, color: '#fff' }}>{pMin} ~ {pMax}</div>
           </div>
           <div style={{ display: 'flex', gap: 16, flex: 1 }}>
-            <div style={{ display: 'flex', flexDirection: 'column', flex: 1, background: 'rgba(255,255,255,0.06)', borderRadius: 'var(--radius-lg)', padding: 20, justifyContent: 'center', alignItems: 'center' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', flex: 1, background: 'rgba(255,255,255,0.06)', borderRadius: '12px', padding: 20, justifyContent: 'center', alignItems: 'center' }}>
               <div style={{ display: 'flex', fontSize: 13, color: '#888', marginBottom: 8 }}>세대수</div>
               <div style={{ display: 'flex', fontSize: 22, fontWeight: 700, color: '#fff' }}>{units}</div>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', flex: 1, background: 'rgba(255,255,255,0.06)', borderRadius: 'var(--radius-lg)', padding: 20, justifyContent: 'center', alignItems: 'center' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', flex: 1, background: 'rgba(255,255,255,0.06)', borderRadius: '12px', padding: 20, justifyContent: 'center', alignItems: 'center' }}>
               <div style={{ display: 'flex', fontSize: 13, color: '#888', marginBottom: 8 }}>시공사</div>
               <div style={{ display: 'flex', fontSize: 18, fontWeight: 700, color: '#fff' }}>{builder}</div>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', flex: 1, background: 'rgba(255,255,255,0.06)', borderRadius: 'var(--radius-lg)', padding: 20, justifyContent: 'center', alignItems: 'center' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', flex: 1, background: 'rgba(255,255,255,0.06)', borderRadius: '12px', padding: 20, justifyContent: 'center', alignItems: 'center' }}>
               <div style={{ display: 'flex', fontSize: 13, color: '#888', marginBottom: 8 }}>입주</div>
               <div style={{ display: 'flex', fontSize: 22, fontWeight: 700, color: '#fff' }}>{moveIn}</div>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', flex: 1, background: 'rgba(255,255,255,0.06)', borderRadius: 'var(--radius-lg)', padding: 20, justifyContent: 'center', alignItems: 'center' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', flex: 1, background: 'rgba(255,255,255,0.06)', borderRadius: '12px', padding: 20, justifyContent: 'center', alignItems: 'center' }}>
               <div style={{ display: 'flex', fontSize: 13, color: '#888', marginBottom: 8 }}>지역</div>
               <div style={{ display: 'flex', fontSize: 18, fontWeight: 700, color: '#fff' }}>{site.region}</div>
             </div>
@@ -132,6 +137,7 @@ export async function GET(req: NextRequest) {
 
     return new Response('?symbol=XXX or ?apt=slug', { status: 400 });
   } catch (e: any) {
+    console.error('[og-chart] Error:', e?.message, e?.stack?.slice(0, 200));
     return new Response(`Error: ${e.message}`, { status: 500 });
   }
 }

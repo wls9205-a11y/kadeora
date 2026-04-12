@@ -5,6 +5,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { fmtAmount } from '@/lib/format';
 import ShareButtons from '@/components/ShareButtons';
+import { cache } from 'react';
 
 export const revalidate = 3600;
 export const maxDuration = 30;
@@ -23,7 +24,7 @@ const GEO: Record<string, { code: string; lat: string; lng: string }> = {
   '제주': { code: 'KR-50', lat: '33.4996', lng: '126.5312' },
 };
 
-async function fetchData(region: string, sigungu: string) {
+const fetchData = cache(async (region: string, sigungu: string) => {
   const sb = getSupabaseAdmin();
   const { data } = await (sb as any).from('apt_complex_profiles')
     .select('apt_name, dong, age_group, latest_sale_price, latest_jeonse_price, jeonse_ratio, sale_count_1y, rent_count_1y, built_year, avg_sale_price_pyeong, latitude, longitude, total_households, price_change_1y')
@@ -31,7 +32,7 @@ async function fetchData(region: string, sigungu: string) {
     .not('age_group', 'is', null)
     .order('sale_count_1y', { ascending: false }).limit(2000);
   return data || [];
-}
+});
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { region: rr, sigungu: rs } = await params;
