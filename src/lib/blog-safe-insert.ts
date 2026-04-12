@@ -288,10 +288,12 @@ export async function safeBlogInsert(
 
     if (error) {
       const msg = error.message || '';
+      const code = error.code || '';
       // 트리거 품질 게이트 OR 중복 → 경고만 (에러 아님)
-      if (msg.includes('DUPLICATE_TITLE') || msg.includes('DUPLICATE_SLUG') || msg.includes('품질 게이트') || msg.includes('DAILY_LIMIT') || msg.includes('HOURLY_LIMIT') || msg.includes('CRON_TYPE_DAILY_LIMIT')) {
+      // P0001 = raise_exception (트리거에서 발생), 23505 = unique_violation
+      if (msg.includes('DUPLICATE_TITLE') || msg.includes('DUPLICATE_SLUG') || msg.includes('품질 게이트') || msg.includes('DAILY_LIMIT') || msg.includes('HOURLY_LIMIT') || msg.includes('CRON_TYPE_DAILY_LIMIT') || code === 'P0001' || code === '23505') {
         // 품질 게이트 실패 시 구체적 사유 로깅 (warn 레벨)
-        if (msg.includes('품질 게이트')) {
+        if (msg.includes('품질 게이트') || code === 'P0001') {
           console.warn(`[safeBlogInsert] 품질 게이트 차단: "${data.title?.slice(0, 30)}" → ${msg.match(/\((\d+)건\)/)?.[0] || ''} ${msg.split(': ').slice(1).join(': ').slice(0, 100)}`);
         }
         return { success: false, reason: 'duplicate_slug', message: msg };
