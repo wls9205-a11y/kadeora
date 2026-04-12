@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import FormData from 'form-data';
 import https from 'https';
 
 export const dynamic = 'force-dynamic';
@@ -8,32 +9,19 @@ export const maxDuration = 60;
 
 const BATCH_SIZE = 1;
 
-/** ASCII 특수문자만 이스케이프, 한글은 raw UTF-8 바이트 그대로 유지 */
-function naverSafeEncode(str: string): string {
-  return str
-    .replace(/%/g, '%25')
-    .replace(/&/g, '%26')
-    .replace(/=/g, '%3D')
-    .replace(/\+/g, '%2B')
-    .replace(/#/g, '%23')
-    .replace(/\n/g, '%0A')
-    .replace(/\r/g, '%0D');
-}
-
 function postToNaverCafe(token: string, cafeId: string, menuId: string, subject: string, content: string): Promise<string> {
   return new Promise((resolve, reject) => {
-    // 한글은 인코딩 안 함 — raw UTF-8 바이트로 전송
-    const postBody = 'subject=' + naverSafeEncode(subject) + '&content=' + naverSafeEncode(content);
-    const bodyBuf = Buffer.from(postBody, 'utf8');
+    const form = new FormData();
+    form.append('subject', subject);
+    form.append('content', content);
 
     const req = https.request({
       hostname: 'openapi.naver.com',
       path: `/v1/cafe/${cafeId}/menu/${menuId}/articles`,
       method: 'POST',
       headers: {
+        ...form.getHeaders(),
         'Authorization': 'Bearer ' + token,
-        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-        'Content-Length': bodyBuf.length,
       },
     }, (res) => {
       let data = '';
@@ -50,8 +38,7 @@ function postToNaverCafe(token: string, cafeId: string, menuId: string, subject:
       });
     });
     req.on('error', reject);
-    req.write(bodyBuf);
-    req.end();
+    form.pipe(req);
   });
 }
 
