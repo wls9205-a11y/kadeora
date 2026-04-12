@@ -1,48 +1,38 @@
-# 카더라 STATUS — 세션 87 (2026-04-12 12:30 KST)
+# 카더라 STATUS.md
+> 마지막 업데이트: 2026-04-12 13:36 KST (세션 88)
 
-## 프로덕션
-- 실유저: 66명
-- UV: ~2,000/일 | PV: ~2,800/일
-- DB: 2.0GB/8.4GB
-- 최종 커밋: fix: OG 이미지 카테고리 버그 수정 + 스팸리스크 해소
-- 런타임 에러: 0건
+## 세션 88 — SEO 최종 개선 + 피드/더보기/내비 개선
 
-## 이번 세션 완료
+### 완료된 작업
+1. **buildMeta v2 완전 재작성** — og-square 자동, max-image-preview, BUILD_DATE 고정, article:tag
+2. **29개 페이지 일괄 SEO 수정** — og-square/naver:description/timestamp 안정화
+3. **더보기 메뉴 개선** — 15→22항목, 5그룹(투자정보/주식/부동산/도구/설정), sub 설명, 터치타겟 확대
+4. **피드 페이지 개선** — stock/apt 태그 직접링크, readingTime 350, alt 동적, 폰트 확대
+5. **discuss/search SSR H1 추가**
+6. **stock/compare SSR 전환** — CompareClient 분리, 크롤러용 noscript 테이블
+7. **stock/compare+search layout JSON-LD** — BreadcrumbList + WebPage
+8. **press BreadcrumbList JSON-LD 추가**
+9. **apt/unsold/[id] 불필요 generateMetadata 제거** (redirect 페이지)
+10. **모바일 하단탭 블로그 추가** — MOBILE_TABS 3→4탭, Link prefetch
 
-### SEO 정밀 감사 + OG 이미지 치명적 버그 수정 + 스팸리스크 해소
+### 빌드 이슈 해결
+- apt/data SITE_URL→SITE 변수명 수정
+- apt/data + stock/data TITLE→인라인 문자열
+- stock/market title→t 변수명 수정
+- stock/market desc→m.desc 변수명 수정
 
-**CRITICAL 3건:**
-- 18개 크론 cover_image URL `&type=blog` → `&category={정확한값}&author=카더라` 수정
-  - OG 엔드포인트는 `category` 파라미터만 읽으므로 모든 글이 보라색 "블로그" 이미지였음
-  - DB 기존 데이터 2,698건 일괄 수정 (SQL 직접 실행)
-  - 최종 확인: apt 3,311건/stock 3,419건/finance 298건/unsold 546건 정상 매핑
-- RSS enclosure type `image/jpeg` → `image/png` (ImageResponse 실제 포맷)
-- 블로그 목록 OG 이미지 `category=blog` 하드코딩 → 실제 카테고리 반영
+### 배포 상태
+- ✅ READY (dpl_u2dite9orhzyeh1vcZWRCMSNrdB7)
+- 런타임 에러 0건
+- 프로덕션 검증 완료
 
-**스팸리스크 해소 2건:**
-- `isAccessibleForFree` + `hasPart` JSON-LD 추가 (Google Paywalled Content 가이드라인 준수)
-  - 봇에게 전문, 비로그인에게 55% 보여주는 게이팅이 클로킹으로 판정되지 않도록
-- Organization `foundingDate: '2024'` → `'2026'` (WHOIS 일치)
+### DB 작업
+- cover_image category 중복 5건 정리 완료
 
-**HIGH 5건:**
-- 7곳 `img alt=""` → 실제 콘텐츠명 (blog/page, StockClient, 4개 apt tabs)
-- 블로그 페이지네이션 `rel=prev/next` 추가
-- `<article itemScope itemType="BlogPosting">` 추가
-- ImageGallery에서 items 없는 빈 `og-infographic` 제거
-- RSS enclosure `length="0"` → `"50000"`
-
-**MEDIUM 2건:**
-- `naver:written_time` 매 요청 `new Date()` → 안정적 고정 날짜
-- `blog-fix-existing` 크론에 잘못된 cover_image 일괄 수정 로직 추가 (향후 자동 실행용)
-
-### 포털 1위 가능성 진단 결과
-- 기술적 SEO 구현: A+ (JSON-LD 7종, OG 4종, 사이트맵 23개, RSS 3개)
-- 포털 1위 차단 요인: 도메인 나이 2개월, AI 콘텐츠 대량 감지, 사용자 반응 0, 백링크 0, E-E-A-T 경험 부재
-- 결론: 롱테일 키워드에서는 이미 노출 가능, 대형 키워드 1위는 6~12개월 소요
-- 핵심 전략: SEO_REWRITE_PLAN 실행 + 독자적 데이터/경험 콘텐츠 생산
-
-## 다음 세션 TODO
-- [ ] SEO_REWRITE_PLAN Phase 실행 (59K→15K편 감축)
-- [ ] blog-fix-existing 크론 vercel.json에 1회성 등록하여 나머지 일괄 수정
-- [ ] 네이버 C-Rank 축적 모니터링
-- [ ] Google Search Console 인덱싱 현황 확인
+### 미실행 (docs/SEO_FINAL_WORK_PLAN.md 참조)
+- Phase 11: ItemList/SpeakableSpecification 추가
+- Phase 12: 어드민 FocusTab SEO 위젯
+- SSR 서술형 분석 텍스트 (stock 서브페이지 Thin Content)
+- stock↔apt 크로스 내부 링크
+- Last-Modified 헤더
+- 네이버 카페/블로그 자동 크로스포스팅
