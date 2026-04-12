@@ -33,6 +33,10 @@ function applySecurityHeaders(response: NextResponse) {
   response.headers.set('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
   response.headers.set('Cross-Origin-Resource-Policy', 'same-origin');
   response.headers.set('X-Permitted-Cross-Domain-Policies', 'none');
+  // Last-Modified: 크롤러 효율성 (If-Modified-Since 지원)
+  if (!response.headers.has('Last-Modified')) {
+    response.headers.set('Last-Modified', new Date().toUTCString());
+  }
 }
 
 export async function middleware(request: NextRequest) {

@@ -2,7 +2,6 @@ import { Suspense } from 'react';
 import { SITE_URL } from '@/lib/constants';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import CompareClient from './CompareClient';
-import Disclaimer from '@/components/Disclaimer';
 
 export const revalidate = 300;
 
@@ -58,7 +57,10 @@ export default async function StockComparePage() {
       <Suspense fallback={<div style={{ padding: '40px 20px', textAlign: 'center', color: 'var(--text-tertiary)' }}>비교 도구를 불러오는 중...</div>}>
         <CompareClient />
       </Suspense>
+<<<<<<< Updated upstream
       <Disclaimer type="stock" />
+=======
+>>>>>>> Stashed changes
     </>
   );
 }

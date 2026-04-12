@@ -85,7 +85,7 @@ export default function TeamPage() {
           국토교통부, 한국부동산원, 청약홈 등 공공 데이터를 실시간 수집·분석하여 누구나 쉽게 접근할 수 있는 데이터 기반 서비스를 제공합니다.
         </p>
         <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginTop: 8 }}>
-          사업자등록번호: 278-57-00801 | 부산광역시 연제구 연동로 27, 405호
+          사업자 정보는 서비스 소개 페이지를 참고하세요.
         </p>
       </div>
 

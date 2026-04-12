@@ -914,7 +914,6 @@ export default async function BlogDetailPage({ params }: Props) {
             <span style={{ fontWeight: 600 }}>ℹ️ 자동 작성 콘텐츠</span> · 이 글은 카더라의 공공 데이터(국토교통부, 금융위원회 등)를 기반으로 자동 작성되었습니다. 
             {post.data_date && <> · 데이터 기준일: {post.data_date}</>}
             {post.source_ref && <> · 출처: {post.source_ref}</>}
-            <br />정확한 투자·거래 판단은 공식 자료를 직접 확인해주세요.
           </div>
         )}
 

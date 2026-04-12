@@ -5,6 +5,7 @@ import Link from 'next/link';
 import type { DailyReportData } from '@/lib/daily-report-data';
 import { useAuth } from '@/components/AuthProvider';
 import ShareButtons from '@/components/ShareButtons';
+import Disclaimer from '@/components/Disclaimer';
 
 // ═══ 오늘의 운세 (띠별) — 세밀 버전 + DB 저장 ═══
 const ZA = ['쥐','소','호랑이','토끼','용','뱀','말','양','원숭이','닭','개','돼지'];
@@ -958,7 +959,7 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
 
       <div style={{ textAlign: 'center', padding: '10px 0', marginTop: 'var(--sp-sm)', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', lineHeight: 1.5 }}>
         <span style={{ color: G.goldDark, fontWeight: 700, letterSpacing: 1 }}>KADEORA DAILY REPORT</span> #{d.issueNo}<br/>
-        본 리포트는 투자 참고 자료이며 투자 권유가 아닙니다 · © 2026 kadeora.app
+        <Disclaimer type="stock" compact />
       </div>
     </div>
   );

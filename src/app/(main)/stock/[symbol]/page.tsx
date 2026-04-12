@@ -438,9 +438,6 @@ export default async function StockDetailPage({ params }: Props) {
               .replace(/\n/g, '<br/>')
             }}
           />
-          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 10, paddingTop: 6, borderTop: '1px solid var(--border)' }}>
-            ※ 본 분석은 데이터 기반 자동 생성된 참고 자료이며, 투자 판단은 본인 책임입니다
-          </div>
           <SectionShareButton section="stock-ai-analysis" label={`\${s.name} AI 분석`} text={`\${s.name} AI 종합 분석 — 카더라에서 확인하세요`} pagePath={`/stock/\${symbol}`} />
         </section>
         </LoginGate>

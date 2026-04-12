@@ -82,7 +82,7 @@ export default async function StockComparePage({ params }: Props) {
         <Link href={`/stock/${a.symbol}`} style={{ flex: 1, textAlign: 'center', padding: '12px 0', borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: '#fff', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>{a.name} 상세</Link>
         <Link href={`/stock/${b.symbol}`} style={{ flex: 1, textAlign: 'center', padding: '12px 0', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>{b.name} 상세</Link>
       </div>
-      <p style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 24, textAlign: 'center' }}>본 비교는 참고용이며 투자 권유가 아닙니다. 투자 결정은 본인 판단에 따라 주세요.</p>
+      <Disclaimer type="stock" compact />
     </article>
   );
 }
