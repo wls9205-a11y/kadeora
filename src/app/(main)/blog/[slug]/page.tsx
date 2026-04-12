@@ -396,6 +396,37 @@ export default async function BlogDetailPage({ params }: Props) {
     postImages = imgs || [];
   } catch {}
 
+  // 동적 apt_sites 이미지 폴백: pos0이 Unsplash면 apt_sites 현장사진으로 대체
+  if (post.category === 'apt' && postImages.length > 0 && postImages[0]?.image_url?.includes('unsplash')) {
+    try {
+      // 제목에서 현장명 추출 시도 (첫 단어~공백/구분자 앞)
+      const titlePart = post.title.split(/[—|\s]/)[0]?.trim();
+      if (titlePart && titlePart.length >= 3) {
+        const { data: sites } = await (sb as any)
+          .from('apt_sites')
+          .select('name, images')
+          .not('images', 'is', null)
+          .ilike('name', `%${titlePart.slice(0, 15)}%`)
+          .limit(5);
+        if (sites) {
+          const match = (sites as any[])
+            .filter((s: any) => s.images?.length > 0 && s.name?.length >= 3 && post.title.includes(s.name))
+            .sort((a: any, b: any) => (b.name?.length || 0) - (a.name?.length || 0))[0];
+          if (match?.images?.[0]?.url) {
+            const siteUrl = (match.images[0].url as string).replace(/^http:\/\//, 'https://');
+            postImages[0] = {
+              ...postImages[0],
+              image_url: siteUrl,
+              alt_text: `${match.name} 현장 사진 — ${match.images[0].caption || post.title}`,
+              image_type: 'site_photo',
+              caption: '출처: 네이버 뉴스',
+            };
+          }
+        }
+      }
+    } catch {}
+  }
+
   // 이전/다음글 (같은 카테고리 내 시간순)
   let prevPost: { slug: string; title: string } | null = null;
   let nextPost: { slug: string; title: string } | null = null;
