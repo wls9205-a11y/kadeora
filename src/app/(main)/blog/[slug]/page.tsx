@@ -771,25 +771,17 @@ export default async function BlogDetailPage({ params }: Props) {
           </div>
         </div>
 
-        {/* 히어로 이미지 — 커버 + 데이터 인포그래픽 */}
-        {(() => {
-          const SITE_BASE = 'https://kadeora.app';
-          const heroImages: { url: string; alt: string; caption?: string }[] = [];
-          // 1. 커버 이미지 (OG)
-          const coverUrl = post.cover_image?.startsWith('/') ? `${SITE_BASE}${post.cover_image}` : post.cover_image;
-          if (coverUrl) heroImages.push({ url: coverUrl, alt: post.image_alt || `${post.title} — 카더라 ${catSection[post.category] || ''} 분석` });
-          // 2. DB에 저장된 추가 이미지
-          postImages.forEach((img: any) => heroImages.push({ url: img.image_url, alt: img.alt_text || post.title, caption: img.caption || undefined }));
-          // 3. 인포그래픽 (DB 이미지 없으면 자동 생성)
-          if (postImages.length === 0 && post.category !== 'general') {
-            const infoTitle = (post.title || '').slice(0, 40);
-            const infoUrl = `${SITE_BASE}/api/og?title=${encodeURIComponent(infoTitle)}&category=${post.category}&design=2&subtitle=${encodeURIComponent(catSection[post.category] || '')}`;
-            // cover_image와 다른 이미지만 추가
-            if (coverUrl !== infoUrl) heroImages.push({ url: infoUrl, alt: `${post.title} 인포그래픽` });
-          }
-          if (heroImages.length === 0) return null;
-          return <BlogHeroImage images={heroImages} title={post.title} />;
-        })()}
+        {/* 히어로 이미지 — blog_post_images 테이블에서만 (OG 텍스트카드 제외) */}
+        {postImages.length > 0 && (
+          <BlogHeroImage
+            images={postImages.map((img: any) => ({
+              url: img.image_url,
+              alt: img.alt_text || `${post.title} — 카더라 ${catSection[post.category] || ''} 분석`,
+              caption: img.caption || undefined,
+            }))}
+            title={post.title}
+          />
+        )}
 
         {/* 목차 (모바일: 인라인, 데스크탑: 사이드바) */}
         <div className="blog-toc-inline">
