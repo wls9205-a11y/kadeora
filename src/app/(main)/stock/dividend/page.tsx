@@ -66,6 +66,7 @@ export default async function DividendPage() {
   return (
     <article style={{ maxWidth: 780, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '주식', item: `${SITE_URL}/stock` }, { '@type': 'ListItem', position: 3, name: '배당주 순위' }] }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'ItemList', name: TITLE, numberOfItems: (krStocks ?? []).length, itemListElement: (krStocks ?? []).slice(0, 20).map((s: any, i: number) => ({ '@type': 'ListItem', position: i + 1, name: `${s.name} (${s.symbol})`, url: `${SITE_URL}/stock/${s.symbol}` })) }) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: [{ '@type': 'Question', name: '고배당주란?', acceptedAnswer: { '@type': 'Answer', text: '배당수익률이 시장 평균보다 높은 종목을 말합니다. 일반적으로 3% 이상이면 고배당주로 분류합니다.' } }, { '@type': 'Question', name: '배당주 투자 시 주의사항은?', acceptedAnswer: { '@type': 'Answer', text: '배당성향, 배당 지속성, 기업의 재무 건전성을 반드시 확인해야 합니다. 높은 배당률만으로 투자하면 위험할 수 있습니다.' } }] }) }} />
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
