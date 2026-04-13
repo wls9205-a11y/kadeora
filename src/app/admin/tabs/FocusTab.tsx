@@ -183,7 +183,7 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
         <Card ch={<>
           <div style={{fontSize:12,fontWeight:700,color:'rgba(255,255,255,0.5)',marginBottom:6}}>📡 가입경로</div>
           {Object.entries(ss||{}).sort((a:any,b:any)=>b[1]-a[1]).slice(0,6).map(([src,cnt]:[string,any],i:number)=>{
-            const srcLabel:Record<string,string>={'kakao':'카카오','google':'구글','apt_alert_cta':'청약알림CTA','action_bar':'액션바','content_gate':'콘텐츠게이트','content_lock':'콘텐츠락','blog_cta':'블로그CTA','nav':'네비','direct':'직접','sidebar':'사이드바'};
+            const srcLabel:Record<string,string>={'kakao':'카카오','google':'구글','apt_alert_cta':'청약알림CTA','action_bar':'액션바','content_gate':'콘텐츠게이트','content_lock':'콘텐츠락','blog_cta':'블로그CTA','blog_inline_cta':'블로그인라인','nav':'네비','direct':'직접','sidebar':'사이드바','blog_comment':'블로그댓글','stock_comment':'종목댓글','kakao_hero':'홈CTA','calc_cta':'계산기CTA'};
             return<div key={i} style={{display:'flex',justifyContent:'space-between',fontSize:11,padding:'2px 0',color:'rgba(255,255,255,0.5)'}}>
               <span>{srcLabel[src]||src}</span>
               <span style={{fontWeight:700,color:'#E2E8F0'}}>{cnt}</span>

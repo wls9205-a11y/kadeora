@@ -12,7 +12,7 @@ export default function GrowthTab({ onNavigate }: { onNavigate: (t: any) => void
 
   if (loading || !data) return <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-secondary)' }}>로딩 중...</div>;
 
-  const { funnel, ctaStats, topPages, hourlyTraffic, featureUsage, dailyTrend, referrers, signupTrend, deviceSplit, conversionMetrics } = data;
+  const { funnel, ctaStats, topPages, hourlyTraffic, featureUsage, dailyTrend, referrers, signupTrend, deviceSplit, conversionMetrics, signupFunnel, deviceConv, ghostCtaCount } = data;
   const maxHour = Math.max(...(hourlyTraffic || []), 1);
   const maxFeature = Math.max(...(featureUsage || []).map((f: any) => f.views), 1);
   const maxDailyPv = Math.max(...(dailyTrend || []).map((d: any) => d.pv), 1);
@@ -24,9 +24,18 @@ export default function GrowthTab({ onNavigate }: { onNavigate: (t: any) => void
   const cgViews = cm.contentGate7d?.cta_view || ctaStats?.content_gate?.cta_view || 0;
   const cgClicks = cm.contentGate7d?.cta_click || ctaStats?.content_gate?.cta_click || 0;
   const cgCtr = cgViews > 0 ? (cgClicks / cgViews * 100) : 0;
-  const acViews = cm.aptAlertCta7d?.views || 0;
-  const acClicks = cm.aptAlertCta7d?.clicks || 0;
-  const acCtr = acViews > 0 ? (acClicks / acViews * 100) : 0;
+  const biViews = cm.blogInlineCta7d?.cta_view || ctaStats?.blog_inline_cta?.cta_view || 0;
+  const biClicks = cm.blogInlineCta7d?.cta_click || ctaStats?.blog_inline_cta?.cta_click || 0;
+  const biCtr = biViews > 0 ? (biClicks / biViews * 100) : 0;
+  // 전체 게이트 CTR (content_gate + blog_inline_cta 합산)
+  const totalGateViews = cgViews + biViews;
+  const totalGateClicks = cgClicks + biClicks;
+  const totalGateCtr = totalGateViews > 0 ? (totalGateClicks / totalGateViews * 100) : 0;
+  // OAuth 완료율 (signup_attempts 기반)
+  const sf = signupFunnel || {};
+  const totalAttempts = Object.values(sf).reduce((s: number, v: any) => s + v.attempts, 0);
+  const totalCompletions = Object.values(sf).reduce((s: number, v: any) => s + v.completions, 0);
+  const oauthRate = totalAttempts > 0 ? Math.round(totalCompletions / totalAttempts * 100) : 0;
 
   return (
     <div>
@@ -36,23 +45,23 @@ export default function GrowthTab({ onNavigate }: { onNavigate: (t: any) => void
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 12 }}>
           {[
             {
-              label: 'content_gate CTR',
-              value: `${cgCtr.toFixed(2)}%`,
-              sub: `노출 ${cgViews} · 클릭 ${cgClicks}`,
-              good: cgCtr >= 2,
-              target: '목표 2%+',
+              label: '게이트 CTR (합산)',
+              value: `${totalGateCtr.toFixed(2)}%`,
+              sub: `게이트 ${cgViews}뷰·${cgClicks}클 + 인라인 ${biViews}뷰·${biClicks}클`,
+              good: totalGateCtr >= 2,
+              target: '목표 3%+',
             },
             {
-              label: 'apt_alert_cta CTR',
-              value: `${acCtr.toFixed(2)}%`,
-              sub: `노출 ${acViews} · 클릭 ${acClicks}`,
-              good: acCtr >= 3,
-              target: '신규 CTA',
+              label: 'OAuth 완료율',
+              value: `${oauthRate}%`,
+              sub: `시도 ${totalAttempts} · 완료 ${totalCompletions}`,
+              good: oauthRate >= 40,
+              target: '목표 40%+',
             },
             {
               label: '온보딩 완료율',
               value: `${cm.onboardRate ?? 0}%`,
-              sub: `지역 설정 ${cm.regionSetRate ?? 0}% · 마케팅 ${cm.marketingRate ?? 0}%`,
+              sub: `지역 ${cm.regionSetRate ?? 0}% · 마케팅 ${cm.marketingRate ?? 0}%`,
               good: (cm.onboardRate ?? 0) >= 80,
               target: '목표 85%+',
             },
@@ -293,6 +302,59 @@ export default function GrowthTab({ onNavigate }: { onNavigate: (t: any) => void
       </div>
 
       {/* 기능 사용 히트맵 */}
+
+      {/* Source별 가입 퍼널 (30일) */}
+      {signupFunnel && Object.keys(signupFunnel).length > 0 && (<>
+        <div className="adm-sec">🎯 Source별 가입 퍼널 (30일)</div>
+        <div className="adm-card" style={{ padding: '8px 14px' }}>
+          <div style={{ display: 'flex', padding: '4px 0', borderBottom: '1px solid var(--border)', fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 600 }}>
+            <span style={{ flex: 1 }}>Source</span>
+            <span style={{ width: 50, textAlign: 'right' }}>시도</span>
+            <span style={{ width: 50, textAlign: 'right' }}>완료</span>
+            <span style={{ width: 55, textAlign: 'right' }}>완료율</span>
+          </div>
+          {Object.entries(signupFunnel).sort((a: any, b: any) => b[1].completions - a[1].completions).map(([src, stats]: [string, any]) => {
+            const rate = stats.attempts > 0 ? Math.round(stats.completions / stats.attempts * 100) : 0;
+            return (
+              <div key={src} style={{ display: 'flex', padding: '5px 0', borderBottom: '1px solid var(--border)', fontSize: 12, alignItems: 'center' }}>
+                <span style={{ flex: 1, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{src}</span>
+                <span style={{ width: 50, textAlign: 'right', color: 'var(--text-secondary)' }}>{stats.attempts}</span>
+                <span style={{ width: 50, textAlign: 'right', color: stats.completions > 0 ? '#10B981' : 'var(--text-tertiary)' }}>{stats.completions}</span>
+                <span style={{ width: 55, textAlign: 'right', fontWeight: 600, color: rate >= 50 ? '#10B981' : rate >= 20 ? '#F59E0B' : '#EF4444' }}>{rate}%</span>
+              </div>
+            );
+          })}
+        </div>
+      </>)}
+
+      {/* Device별 전환 (7일) */}
+      {deviceConv && Object.keys(deviceConv).length > 0 && (<>
+        <div className="adm-sec">📱 Device별 전환 (7일)</div>
+        <div className="adm-card" style={{ padding: '8px 14px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: 8 }}>
+            {Object.entries(deviceConv).sort((a: any, b: any) => b[1].views - a[1].views).map(([dev, stats]: [string, any]) => {
+              const ctr = stats.views > 0 ? (stats.clicks / stats.views * 100) : 0;
+              const icon = dev === 'mobile' ? '📱' : dev === 'desktop' ? '🖥️' : '❓';
+              return (
+                <div key={dev} style={{ textAlign: 'center', padding: '8px 6px', background: 'rgba(12,21,40,0.5)', borderRadius: 8 }}>
+                  <div style={{ fontSize: 18 }}>{icon}</div>
+                  <div style={{ fontSize: 16, fontWeight: 800, color: ctr >= 2 ? '#10B981' : '#EF4444', marginTop: 4 }}>{ctr.toFixed(1)}%</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 2 }}>{dev}</div>
+                  <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{stats.views}뷰 · {stats.clicks}클릭</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </>)}
+
+      {/* Ghost CTA 경고 */}
+      {(ghostCtaCount || 0) > 0 && (
+        <div style={{ padding: '6px 10px', borderRadius: 'var(--radius-md)', margin: '8px 0', background: 'rgba(245,158,11,0.05)', border: '1px solid rgba(245,158,11,0.12)', fontSize: 12, color: '#F59E0B' }}>
+          ⚠ 삭제된 CTA에서 {ghostCtaCount.toLocaleString()}건의 유령 이벤트 감지 (브라우저 캐시)
+        </div>
+      )}
+
       <div className="adm-sec">🗺️ 기능 사용 히트맵</div>
       <div className="adm-card" style={{ padding: '8px 14px' }}>
         {(featureUsage || []).map((f: any, i: number) => (

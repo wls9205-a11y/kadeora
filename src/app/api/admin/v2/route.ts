@@ -618,9 +618,51 @@ export async function GET(req: NextRequest) {
         marketingRate: (totalRealForRate.count ?? 0) > 0
           ? Math.round((marketingCount.count ?? 0) / (totalRealForRate.count ?? 0) * 100) : 0,
         contentGate7d: ctaStats['content_gate'] || { cta_view: 0, cta_click: 0 },
+        blogInlineCta7d: ctaStats['blog_inline_cta'] || { cta_view: 0, cta_click: 0 },
         // Zero-Step 온보딩 분포
         zeroStep: { auto: autoOnboarded, manual: manualOnboarded, skip: skipOnboarded, notOnboarded },
       };
+
+      // ── Source별 가입 퍼널 (30일) ──
+      const { data: signupFunnelRaw } = await (sb as any).from('signup_attempts')
+        .select('source, success')
+        .gte('created_at', new Date(Date.now() - 30 * 86400000).toISOString());
+      const signupFunnel: Record<string, { attempts: number; completions: number }> = {};
+      for (const r of (signupFunnelRaw || [])) {
+        const src = r.source || 'direct';
+        if (!signupFunnel[src]) signupFunnel[src] = { attempts: 0, completions: 0 };
+        signupFunnel[src].attempts++;
+        if (r.success) signupFunnel[src].completions++;
+      }
+
+      // ── Device별 전환 (7일) ──
+      const { data: deviceConvRaw } = await (sb as any).from('conversion_events')
+        .select('device_type, event_type')
+        .gte('created_at', week7Ago)
+        .in('event_type', ['cta_view', 'cta_click']);
+      const deviceConv: Record<string, { views: number; clicks: number }> = {};
+      for (const r of (deviceConvRaw || [])) {
+        const dt = r.device_type || 'unknown';
+        if (!deviceConv[dt]) deviceConv[dt] = { views: 0, clicks: 0 };
+        if (r.event_type === 'cta_view') deviceConv[dt].views++;
+        else if (r.event_type === 'cta_click') deviceConv[dt].clicks++;
+      }
+
+      // ── Ghost CTA 필터링 ──
+      const ACTIVE_CTAS = new Set([
+        'content_gate', 'blog_inline_cta', 'action_bar_kakao',
+        'apt_alert_cta', 'login_gate_apt_analysis', 'login_gate_ai_analysis',
+        'content_lock', 'kakao_hero', 'calc_cta', 'right_panel', 'sidebar',
+      ]);
+      const activeCtaStats: Record<string, Record<string, number>> = {};
+      let ghostCtaCount = 0;
+      for (const [name, events] of Object.entries(ctaStats)) {
+        if (ACTIVE_CTAS.has(name)) {
+          activeCtaStats[name] = events as Record<string, number>;
+        } else {
+          ghostCtaCount += ((events as any).cta_view || 0);
+        }
+      }
 
       return NextResponse.json({
         deviceSplit: deviceCounts,
@@ -632,7 +674,8 @@ export async function GET(req: NextRequest) {
           onboarded: await safeCount(sb.from('profiles').select('id', { count: 'exact', head: true }).eq('onboarded', true).neq('is_seed', true).neq('is_ghost', true)),
           profileCompleted: await safeCount(sb.from('profiles').select('id', { count: 'exact', head: true }).eq('profile_completed', true).neq('is_seed', true).neq('is_ghost', true)),
         },
-        ctaStats,
+        ctaStats: activeCtaStats,
+        ghostCtaCount,
         topPages,
         hourlyTraffic: hourCounts,
         featureUsage,
@@ -643,6 +686,8 @@ export async function GET(req: NextRequest) {
         signupSources,
         feedStats,
         conversionMetrics,
+        signupFunnel,
+        deviceConv,
       });
     }
 
