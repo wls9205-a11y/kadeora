@@ -175,7 +175,7 @@ export default function RightPanel() {
         <Link href="/terms" style={{ color: 'var(--text-tertiary)', textDecoration: 'none' }}>이용약관</Link>
         {' · '}
         <Link href="/privacy" style={{ color: 'var(--text-tertiary)', textDecoration: 'none' }}>개인정보</Link>
-        <div style={{ marginTop: 'var(--sp-xs)' }}>카더라 · 사업자 278-57-00801</div>
+        <div style={{ marginTop: 'var(--sp-xs)' }}>카더라</div>
       </div>
     </div>
   );

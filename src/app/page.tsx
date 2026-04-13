@@ -567,9 +567,9 @@ export default async function HomePage() {
           </div>
           <div style={{ borderTop: '1px solid var(--border)', paddingTop: 20, fontSize: 11, color: 'var(--text-tertiary)', textAlign: 'center', lineHeight: 1.9 }}>
             <p style={{ fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 'var(--sp-xs)' }}>사업자 정보</p>
-            <p>상호명: 카더라 &nbsp;|&nbsp; 대표자: 노영진 &nbsp;|&nbsp; 사업자등록번호: 278-57-00801</p>
+            <p>{BIZ_INFO_LINE}</p>
             <p>사업장 주소: 부산광역시 연제구 연동로 27, 405호</p>
-            <p>전화: 010-5001-1382 &nbsp;|&nbsp; 이메일: ${CONTACT_EMAIL}</p>
+            <p>전화: {CONTACT_PHONE} &nbsp;|&nbsp; 이메일: ${CONTACT_EMAIL}</p>
             <p style={{ marginTop: 'var(--sp-xs)' }}>© 2026 카더라. All rights reserved.</p>
           </div>
         </footer>

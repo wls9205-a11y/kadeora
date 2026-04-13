@@ -12,6 +12,17 @@ export const ANTHROPIC_VERSION = '2023-06-01';
 
 
 // Demo data uses simplified shapes for SSR fallbacks — typed loosely
+
+/** 사업자 정보 — 법적 고지에 사용 */
+export const BIZ_NAME = '카더라';
+export const BIZ_OWNER = '노영진';
+export const BIZ_NUMBER = '278-57-00801';
+export const BIZ_ADDRESS = '부산광역시 연제구 연동로 27, 405호';
+
+/** 사업자 정보 한줄 (footer용) */
+export const BIZ_INFO_LINE = `상호명: ${BIZ_NAME} | 대표자: ${BIZ_OWNER} | 사업자등록번호: ${BIZ_NUMBER}`;
+export const BIZ_ADDRESS_LINE = `사업장 주소: ${BIZ_ADDRESS}`;
+export const BIZ_CONTACT_LINE = `전화: ${CONTACT_PHONE} | 이메일: ${CONTACT_EMAIL}`;
 export const DEMO_POSTS: any[] = [
   {
     id: 1, author_id: 'demo-1', category: 'apt', title: '강동구 둔촌주공 재건축 근황 알아봤습니다',

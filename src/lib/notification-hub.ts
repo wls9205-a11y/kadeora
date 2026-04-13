@@ -161,13 +161,20 @@ async function dispatchToChannels(payload: NotificationPayload, notifId: number)
 
   if (sent > 0) return; // 푸시 성공 → cascade 중단
 
-  // 채널 2: 이메일 (urgent/critical만)
+  // 채널 2: 이메일 (urgent/critical만, 일일 한도 체크)
   if (cascade === 'urgent' || cascade === 'critical') {
     try {
+      // 일일 한도 체크 (100통 중 5통 예비)
+      const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+      const { count: sentToday } = await (sb as any).from('email_send_logs')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'sent').gte('created_at', todayStart.toISOString());
+      if ((sentToday || 0) >= 100) throw new Error('daily_limit');
+
       const { sendNotificationEmail } = await import('@/lib/email-sender');
       const { data: user } = await sb.auth.admin.getUserById(payload.userId);
       if (user?.user?.email) {
-        await sendNotificationEmail(
+        const r = await sendNotificationEmail(
           user.user.email,
           pushPayload.title,
           `<p style="font-size:15px;color:#334155;margin:0 0 16px;line-height:1.7;">${pushPayload.body}</p>
@@ -175,6 +182,17 @@ async function dispatchToChannels(payload: NotificationPayload, notifId: number)
             <a href="https://kadeora.app${payload.link || '/'}" style="display:inline-block;padding:12px 32px;border-radius:10px;background:#3B7BF6;color:#FFFFFF;font-size:14px;font-weight:700;text-decoration:none;">카더라에서 확인하기 →</a>
           </div>`
         );
+        // 발송 로그 기록
+        if (r.ok) {
+          await (sb as any).from('email_send_logs').insert({
+            campaign: 'notification-hub',
+            recipient_email: user.user.email,
+            user_id: payload.userId,
+            subject: pushPayload.title,
+            status: 'sent',
+            resend_id: r.id || null,
+          }).catch(() => {});
+        }
       }
     } catch {}
   }

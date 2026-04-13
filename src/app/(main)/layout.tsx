@@ -1,4 +1,4 @@
-import { CONTACT_EMAIL, CONTACT_PHONE } from '@/lib/constants';
+import { CONTACT_EMAIL, CONTACT_PHONE, BIZ_INFO_LINE, BIZ_ADDRESS_LINE, BIZ_CONTACT_LINE } from '@/lib/constants';
 import type { Metadata } from 'next';
 import { headers } from 'next/headers';
 import { Navigation } from '@/components/Navigation';
@@ -72,9 +72,9 @@ export default async function MainLayout({ children }: { children: React.ReactNo
       }}>
         <div style={{borderTop:'1px solid var(--border)', paddingTop:16, fontSize: 'var(--fs-xs)', color:'var(--text-tertiary)', textAlign:'center', lineHeight:1.9}}>
           <p style={{fontWeight:600, color:'var(--text-secondary)', marginBottom:4}}>사업자 정보</p>
-          <p>상호명: 카더라 &nbsp;|&nbsp; 대표자: 노영진 &nbsp;|&nbsp; 사업자등록번호: 278-57-00801</p>
-          <p>사업장 주소: 부산광역시 연제구 연동로 27, 405호</p>
-          <p>전화: {CONTACT_PHONE} &nbsp;|&nbsp; 이메일: {CONTACT_EMAIL}</p>
+          <p>{BIZ_INFO_LINE}</p>
+          <p>{BIZ_ADDRESS_LINE}</p>
+          <p>{BIZ_CONTACT_LINE}</p>
           <p style={{marginTop:4}}>© 2026 <a href="/about" style={{color:'var(--text-secondary)',textDecoration:'none',fontWeight:600}}>카더라</a>. All rights reserved.</p>
         </div>
       </footer>

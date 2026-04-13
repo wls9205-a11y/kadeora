@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { SITE_URL, CONTACT_EMAIL, CONTACT_PHONE } from '@/lib/constants';
+import { SITE_URL, CONTACT_EMAIL, CONTACT_PHONE, BIZ_NAME, BIZ_OWNER, BIZ_NUMBER, BIZ_ADDRESS } from '@/lib/constants';
 import { fetchSocialProof, fmtSocial } from '@/lib/social-proof';
 
 export const metadata: Metadata = {
@@ -133,7 +133,7 @@ export default async function AboutPage() {
 
         {/* Contact */}
         <div style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-dim)', lineHeight: 1.8 }}>
-          <p style={{ margin: '0 0 4px' }}>상호명: 카더라 | 대표자: 노영진 | 사업자등록번호: 278-57-00801</p>
+          <p style={{ margin: '0 0 4px' }}>상호명: ${BIZ_NAME} | 대표자: ${BIZ_OWNER} | 사업자등록번호: ${BIZ_NUMBER}</p>
           <p style={{ margin: '0 0 4px' }}>사업장: 부산광역시 연제구 연동로 27, 405호</p>
           <p style={{ margin: 0 }}>이메일: {CONTACT_EMAIL} | 전화: {CONTACT_PHONE}</p>
         </div>
