@@ -1,6 +1,6 @@
-## 세션 101 — 전수 코드 검토 + 버그 5건 수정
+## 세션 101 — 전수 코드 검토 + 버그 11건 수정 + 타입 재생성
 
-### 커밋: ef04c2c0
+### 커밋: ef04c2c0 → 3dc9c9c2
 
 ### 검토 범위
 - 최근 3일 50+ 커밋, 80+ 변경 파일 전수 검토
@@ -38,9 +38,27 @@
 - CSP/CSRF/Rate Limiting 정상 적용 확인
 
 ### PENDING (코드 외)
-- Supabase 타입 재생성 (35개 RPC 타입 미등록 — DB에는 존재)
-- Resend 웹훅 서명 검증 추가 권장
-- trigger-cron 이중 admin auth 정리 (requireAdmin 후 수동 체크 중복)
+- Resend Dashboard에서 RESEND_WEBHOOK_SECRET 웹훅 시크릿 발급 → Vercel 환경변수 등록
+
+### 🔵 2차 수정 — 타입 재생성 + 보안 강화 (3dc9c9c2)
+1. **database.ts — Supabase 타입 전면 재생성**
+   - 35개 RPC 타입 누락 → 전부 포함 (increment_stock_view, increment_email_open 등)
+   - 커스텀 타입 (PostWithProfile, CommentWithProfile) 재추가
+
+2. **타입 갱신으로 드러난 기존 버그 4건 수정**
+   - admin/dashboard: `post_id: number|null` null 체크 추가
+   - issues/publish + feed-buzz-publish: posts INSERT에 `region_id: 'all'` 추가
+   - sync-apt-sites: 불필요한 `@ts-expect-error` 제거
+
+3. **trigger-cron 이중 admin auth 제거**
+   - `requireAdmin()` 후 수동 `getUser()+is_admin` 체크 중복 → 단일화
+
+4. **webhook/resend svix 서명 검증 추가**
+   - RESEND_WEBHOOK_SECRET 설정 시 svix-signature 헤더 HMAC-SHA256 검증
+   - 타임스탬프 5분 윈도우 검증
+   - 미설정 시 개발 환경 호환 (스킵)
+
+### TypeScript 빌드: 0 에러 ✅
 
 ## 세션 100 — 주식 페이지 디자인 + SEO + 네이버 1위 전략
 
