@@ -1,4 +1,43 @@
 # 카더라 STATUS.md
+> 마지막 업데이트: 2026-04-13 (세션 98 — 트래픽→가입 전환 집중 개선)
+
+## 세션 98 — 트래픽→가입 전환 3종 개선
+
+### 배포: 1 커밋, 5파일 (412줄 추가)
+
+### 🔴 SmartSectionGate v2
+- cut point 55% → 68% (더 읽힌 후 게이트, engagement 높은 상태에서 가입 결정)
+- 문구 전면 재설계: "잠금 해제" → "무료 알림 + 전체 읽기" 혜택 중심
+- 카테고리별 혜택 bullets (apt: 가격 변동 알림·청약 마감, stock: 목표가 알림, finance: 절세 알림)
+- 소셜프루프 강화: "오늘 N명 가입 · 총 N명 이용 중"
+- source 파라미터: `apt_alert_cta` 통일 (가입 1위 소스 패턴 전체 복제)
+- 목표: content_gate CTR 0.68% → 2%+
+
+### 🟢 BlogAptAlertCTA 신규 컴포넌트
+- apt/unsold 카테고리 블로그 본문 하단 인라인 알림 CTA
+- 비로그인: 가입 유도 (source=apt_alert_cta, 기존 1위 소스 패턴 그대로)
+- 로그인: /api/apt/interest POST → apt_site_interests 직접 등록 + 50P
+- 등록 완료 시 ✅ 상태 전환
+- 삽입 조건: apt/unsold 카테고리 + post.tags[0] 단지명 있을 때 (봇 제외)
+
+### 🟢 POST /api/apt/interest 신규
+- apt_name 또는 site_slug로 apt_sites 조회
+- apt_site_interests INSERT (notification_enabled: true)
+- apt_sites 미등록 단지: price_alerts fallback (apt_name 기반)
+- award_points 50P (관심단지등록)
+
+### 🟡 OnboardingClient v2
+- 지역 선택 "선택사항" 배지 추가 (강제 느낌 제거)
+- 기본 옵션 "선택 안 함 (나중에 설정 가능)" 명확화
+- 시작하기 버튼 하단 선택한 관심사 기반 혜택 텍스트 동적 표시
+- 건너뛰기 → "건너뛰기 (나중에 설정)" 레이블 개선
+
+### 배경 (성장성 분석 기반)
+- 7일 UV ~11,000 → 가입 20명 = 전환율 0.18%
+- apt_alert_cta = 가입 1위 소스 (14/19명)
+- content_gate 노출 2,358회 → 클릭 16회 (0.68%)
+- 온보딩 86명 중 62명만 완료 (72%)
+
 > 마지막 업데이트: 2026-04-13 (세션 97 — 이슈선점 중복 방지 3중 방어)
 
 ## 세션 97 — 이슈선점 자동화 중복 발행 방지
