@@ -60,9 +60,14 @@ export default function OnboardingClient() {
         residence_city: skipRegion ? null : (region || null),
         region_text: skipRegion ? null : (region || null),
         marketing_agreed: marketingAgreed,
+        marketing_agreed_at: marketingAgreed ? new Date().toISOString() : null,
         onboarded: true,
         updated_at: new Date().toISOString(),
       }).eq('id', user.id);
+      // 데일리 리포트 자동 연동
+      if (region && typeof window !== 'undefined') {
+        localStorage.setItem('daily_region', region);
+      }
       trackConversion('cta_complete', 'onboarding_interests', { category: selected.join(',') });
       fetch('/api/profile/mission', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -150,7 +155,7 @@ export default function OnboardingClient() {
             backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23999' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E")`,
             backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center',
           }}>
-            <option value="">선택 안 함 (나중에 설정 가능)</option>
+            <option value="">선택하세요</option>
             {REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
           </select>
           <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>
@@ -165,7 +170,7 @@ export default function OnboardingClient() {
         }}>
           <input type="checkbox" checked={marketingAgreed} onChange={e => setMarketingAgreed(e.target.checked)}
             style={{ marginTop: 2, accentColor: 'var(--brand)' }} />
-          <span>청약 마감·종목 알림·주간 리포트를 카카오톡·이메일로 받겠습니다. (선택)</span>
+          <span>내 지역 청약 마감 알림, 관심 종목 급등/급락, 주간 리포트를 받겠습니다. (선택)</span>
         </label>
 
         {/* iOS 홈화면 추가 안내 */}
@@ -183,19 +188,14 @@ export default function OnboardingClient() {
           </div>
         )}
 
-        {/* 시작 버튼 — 혜택 텍스트 포함 */}
-        <button
-          onClick={() => handleFinish(false)}
-          disabled={saving}
+        <button onClick={() => handleFinish(false)} disabled={saving || !region}
           style={{
-            width: '100%', padding: 14, borderRadius: 'var(--radius-card)', border: 'none',
-            fontSize: 15, fontWeight: 800,
-            background: 'var(--brand)', color: '#fff',
-            cursor: saving ? 'not-allowed' : 'pointer',
+            width: '100%', padding: 14, borderRadius: 'var(--radius-card)', border: 'none', fontSize: 15, fontWeight: 800,
+            background: !region ? 'var(--bg-hover)' : 'var(--brand)', color: !region ? 'var(--text-tertiary)' : '#fff',
+            cursor: saving || !region ? 'not-allowed' : 'pointer',
             opacity: saving ? 0.7 : 1,
-          }}
-        >
-          {saving ? '시작하는 중...' : '카더라 시작하기 🚀'}
+          }}>
+          {!region ? '📍 지역을 선택해주세요' : saving ? '시작하는 중...' : '카더라 시작하기 🚀'}
         </button>
 
         {/* 시작하기 버튼 아래 혜택 요약 */}

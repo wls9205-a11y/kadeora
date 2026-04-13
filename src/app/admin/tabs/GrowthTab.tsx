@@ -42,6 +42,35 @@ export default function GrowthTab({ onNavigate }: { onNavigate: (t: any) => void
         </div>
       </div>
 
+      {/* 프로필 완성 퍼널 */}
+      {data.extended?.dataCollection && (() => {
+        const dc = data.extended.dataCollection;
+        const t = dc.total || 1;
+        const items = [
+          { label: '온보딩 완료', value: funnel.onboarded || 0, color: '#10B981' },
+          { label: '관심사 설정', value: dc.interests || 0, color: '#8B5CF6' },
+          { label: '지역 설정', value: dc.city || 0, color: dc.city / t > 0.5 ? '#10B981' : '#F59E0B' },
+          { label: '마케팅 동의', value: dc.marketing || 0, color: dc.marketing / t > 0.3 ? '#F59E0B' : '#EF4444' },
+          { label: '프로필 완성', value: funnel.profileCompleted || 0, color: '#3B82F6' },
+        ];
+        return (<>
+          <div className="adm-sec">👤 프로필 완성 퍼널 ({t}명)</div>
+          <div className="adm-card">
+            {items.map((s, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                <span style={{ minWidth: 70, fontSize: 12, color: 'var(--text-secondary)' }}>{s.label}</span>
+                <div style={{ flex: 1, height: 18, background: 'var(--bg-hover)', borderRadius: 4, overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: `${Math.max(s.value / t * 100, 0.5)}%`, background: s.color, borderRadius: 4, transition: 'width .6s' }} />
+                </div>
+                <span style={{ minWidth: 70, textAlign: 'right', fontSize: 12, fontWeight: 600, color: s.color }}>
+                  {s.value}/{t} ({Math.round(s.value / t * 100)}%)
+                </span>
+              </div>
+            ))}
+          </div>
+        </>);
+      })()}
+
       {/* 14일 PV/UV 추이 차트 */}
       <div className="adm-sec">📊 14일 트래픽 추이</div>
       <div className="adm-card" style={{ padding: '12px 14px' }}>

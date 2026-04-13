@@ -299,12 +299,21 @@ async function handler(_req: NextRequest) {
     is_published: canAutoPublish,
   });
 
+  // blog_post_id 확보 (safeBlogInsert가 id를 못 반환한 경우 slug으로 조회)
+  let blogPostId = insertResult.id || null;
+  if (!blogPostId && article.slug) {
+    try {
+      const { data: found } = await sb.from('blog_posts')
+        .select('id').eq('slug', article.slug).maybeSingle();
+      if (found) blogPostId = found.id;
+    } catch {}
+  }
+
   // issue_alerts 업데이트
   await (sb as any).from('issue_alerts').update({
-    is_processed: true,
-    is_published: canAutoPublish && insertResult.success,
-    publish_decision: canAutoPublish ? 'auto' : insertResult.success ? 'draft' : 'failed',
-    blog_post_id: insertResult.id || null,
+    is_published: (canAutoPublish && (insertResult.success || !!blogPostId)),
+    publish_decision: canAutoPublish ? 'auto' : (insertResult.success || !!blogPostId) ? 'draft' : 'failed',
+    blog_post_id: blogPostId,
     draft_title: article.title,
     draft_content: article.content,
     draft_slug: article.slug,
@@ -313,8 +322,7 @@ async function handler(_req: NextRequest) {
     draft_template: selectDraftTemplate(issue.category, issue.issue_type),
     fact_check_passed: check.passed,
     fact_check_details: check.details,
-    processed_at: new Date().toISOString(),
-    published_at: canAutoPublish && insertResult.success ? new Date().toISOString() : null,
+    published_at: canAutoPublish && (insertResult.success || !!blogPostId) ? new Date().toISOString() : null,
   }).eq('id', issue.id);
 
   // 자동 발행 성공 시 후속 작업

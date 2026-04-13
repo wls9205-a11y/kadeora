@@ -248,13 +248,14 @@ export async function GET(req: NextRequest) {
           dataCollection: await (async () => {
             try {
               const base = 'is_seed.is.null,is_seed.eq.false';
-              const [city, mkt, phone] = await Promise.all([
+              const [city, mkt, phone, interestsSet] = await Promise.all([
                 safeCount((sb as any).from('profiles').select('id', { count: 'exact', head: true }).or(base).not('residence_city', 'is', null)),
                 safeCount((sb as any).from('profiles').select('id', { count: 'exact', head: true }).or(base).eq('marketing_agreed', true)),
                 safeCount((sb as any).from('profiles').select('id', { count: 'exact', head: true }).or(base).not('phone', 'is', null)),
+                safeCount((sb as any).from('profiles').select('id', { count: 'exact', head: true }).or(base).not('interests', 'eq', '{}')),
               ]);
-              return { city, marketing: mkt, phone, bio: bioCount, age: ageCount, total: realUsers };
-            } catch { return { city: 0, marketing: 0, phone: 0, bio: bioCount, age: ageCount, total: realUsers }; }
+              return { city, marketing: mkt, phone, bio: bioCount, age: ageCount, interests: interestsSet, total: realUsers };
+            } catch { return { city: 0, marketing: 0, phone: 0, bio: bioCount, age: ageCount, interests: 0, total: realUsers }; }
           })(),
           shares7d: shares7d ?? 0,
           sharesToday: sharesToday ?? 0, gateViews: gateViews24 ?? 0, gateClicks: gateClicks24 ?? 0, signupAttempts: signupAttempts24 ?? 0, signupSuccess: signupSuccess24 ?? 0, signupAttempts7d: signupAttempts7d ?? 0,
@@ -547,6 +548,8 @@ export async function GET(req: NextRequest) {
           uv: uvR ?? 0,
           signups: signupsR.count ?? 0,
           conversionRate: (pvR.count ?? 0) > 0 ? Math.round(((signupsR.count ?? 0) / (pvR.count ?? 0)) * 10000) / 100 : 0,
+          onboarded: onboardedCount,
+          profileCompleted: profileCompleted,
         },
         ctaStats,
         topPages,

@@ -40,30 +40,36 @@
 
 > 마지막 업데이트: 2026-04-13 (세션 97 — 이슈선점 중복 방지 3중 방어)
 
-## 세션 97 — 이슈선점 자동화 중복 발행 방지
+## 세션 97 — 이슈선점 중복 방지 + 프로필 완성 + PDF 파싱 복구
 
-### 문제: 오늘 issue-draft 10개 글 중 8개 사실상 중복
-- SMR/소형원전 관련 6개 (같은 뉴스 1건에서 파생)
-- 미-이란 긴장 관련 2개 (같은 토픽)
-- 원인: issue-detect 중복탐지 무력화 (related_entities 전부 빈배열, 타이틀 30자 체크 우회)
+### 배포: 1 커밋, 10+ 파일
 
-### 🔴 issue-detect isDuplicate v2 (3중 방어)
-1. **pg_trgm 제목 유사도**: `check_issue_similarity` RPC (threshold 0.2)
-2. **키워드 2개+ 겹침 차단**: 같은 카테고리 내 24시간 키워드 overlap 체크
-3. **카테고리+issue_type 6시간 제한**: 같은 유형 이슈 6시간 내 1건만 허용
-4. 엔티티 overlap (기존 유지)
+### 🔴 이슈선점 중복 발행 3중 방어
+- **issue-detect isDuplicate v2**: pg_trgm 유사도 + 키워드 2개+ 겹침 차단 + 카테고리+issueType 6시간 제한
+- **issue-draft 사전 대조**: CAS 락(race condition 방지) + blog_posts 키워드/제목 사전 대조
+- **issue-detect 즉시 트리거**: score 50+ 이슈 → issue-draft fire-and-forget 호출 (35분→5분)
+- **issue-draft blog_post_id 추적 수정**: slug fallback 조회로 추적 누락 해결
+- DB: `title_similarity_threshold` 0.4→0.2, `check_issue_similarity` RPC, 인덱스 2개
+- 중복 글 6개 unpublish (SMR 5 + 이란 1)
 
-### 🔴 issue-draft 사전 대조 + Race condition 방지
-- **CAS 락**: `is_processed=false` 조건부 UPDATE로 동시 실행 방지
-- **blog_posts 키워드 대조**: 24시간 내 같은 키워드 2개+ 겹치는 발행글 존재 → AI 생성 스킵
-- **pg_trgm 제목 유사도**: 기존 blog_posts와 유사도 0.2+ → 스킵
+### 🔴 프로필 완성 시스템
+- **/daily 리다이렉트 개선**: 로그인 유저 → DB residence_city 우선 → localStorage 동기화
+- **인라인 지역 선택기**: 지역 미설정 유저가 /daily 방문 시 "어디에 사세요?" 원탭 선택 → DB 저장 + 리포트 즉시 이동
+- **온보딩 지역 필수화**: 지역 선택 없이 "카더라 시작하기" 버튼 비활성 (건너뛰기는 유지)
+- **마케팅 동의 프레이밍 개선**: "마케팅 수신 동의" → "내 지역 청약 마감 알림 받기"
+- **settings/region**: 저장 시 localStorage('daily_region') 자동 동기화
+- **profile_completed 자동 트리거**: DB BEFORE UPDATE 트리거 (nickname_set + residence_city + interests)
+- DB: `marketing_agreed_at` 컬럼 추가, 기존 유저 profile_completed 백필
 
-### 🟡 DB 변경
-- `blog_publish_config.title_similarity_threshold`: 0.4 → **0.2**
-- 중복 글 6개 unpublish (SMR 5개 + 이란 1개)
-- `check_issue_similarity` RPC 생성
-- `idx_issue_alerts_detected_keywords` GIN 인덱스 추가
-- `idx_issue_alerts_cat_subcat_detected` 복합 인덱스 추가
+### 🔴 PDF 파싱 복구
+- **apt-parse-announcement v4**: `withCronLogging` 추가 (7일간 로그 0건 → 추적 가능)
+- **실패 재시도 로직**: fetch 실패 시 `announcement_parsed_at` 세팅 안 함 → 다음 사이클 재시도
+- **3회 실패 포기**: `parse_fail_count` 컬럼으로 영구 실패 URL 자동 스킵
+- DB: `apt_subscriptions.parse_fail_count` 컬럼 추가
+
+### 📊 어드민 업데이트
+- **GrowthTab**: 프로필 완성 퍼널 섹션 추가 (온보딩→관심사→지역→마케팅→프로필 완성)
+- **admin/v2 API**: funnel에 onboarded/profileCompleted, dataCollection에 interests 수집률 추가
 
 ---
 

@@ -428,6 +428,19 @@ async function handler(_req: NextRequest) {
         entities,
         media: items.length,
       });
+
+      // v2: score 50+ → issue-draft 즉시 트리거 (20분 대기 없이 즉시 발행)
+      if (score.final_score >= 50) {
+        try {
+          const draftUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app'}/api/cron/issue-draft`;
+          fetch(draftUrl, {
+            method: 'GET',
+            headers: { Authorization: `Bearer ${process.env.CRON_SECRET}` },
+            signal: AbortSignal.timeout(5000),
+          }).catch(() => {}); // fire-and-forget
+          console.log(`[issue-detect] 🚀 instant trigger: score=${score.final_score} "${candidate.title.slice(0, 30)}"`);
+        } catch {}
+      }
     }
   }
 

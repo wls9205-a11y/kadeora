@@ -59,6 +59,10 @@ export default function RegionSettingsPage() {
         updated_at: new Date().toISOString(),
       }).eq('id', userId);
       setCurrentRegion(regionText);
+      // 데일리 리포트 자동 연동
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('daily_region', city);
+      }
       success('지역 설정 완료!');
     } catch {
       showError('저장 실패');
