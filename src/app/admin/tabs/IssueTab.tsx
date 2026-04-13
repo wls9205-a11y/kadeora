@@ -103,9 +103,17 @@ export default function IssueTab() {
   const runNow = async () => {
     setRunning(true);
     try {
-      await fetch('/api/cron/issue-draft', { headers: { 'x-cron-secret': '' } });
-    } catch {}
-    setTimeout(() => { setRunning(false); fetchIssues(); }, 3000);
+      const res = await fetch('/api/admin/trigger-cron', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ endpoint: '/api/cron/issue-draft' }),
+      });
+      const data = await res.json().catch(() => ({}));
+      console.log('[IssueTab] issue-draft trigger:', data);
+    } catch (e) {
+      console.error('[IssueTab] runNow error:', e);
+    }
+    setTimeout(() => { setRunning(false); fetchIssues(); }, 4000);
   };
 
   const scoreColor = (score: number) => {
