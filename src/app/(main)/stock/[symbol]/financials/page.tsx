@@ -2,7 +2,7 @@ import { SITE_URL } from '@/lib/constants';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { redirect } from 'next/navigation';
 import type { Metadata } from 'next';
-import { fmtPrice, fmtCap } from '@/lib/format';
+import { fmtPrice } from '@/lib/format';
 
 export const revalidate = 3600;
 interface Props { params: Promise<{ symbol: string }> }

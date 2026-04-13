@@ -59,7 +59,7 @@ export default function SmartSectionGate({
   const actualCut = headingAfterCut?.index ? cutPoint + headingAfterCut.index : cutPoint;
   const visibleSection = htmlContent.slice(0, actualCut);
 
-  const loginUrl = `/login?redirect=${encodeURIComponent(pathname)}&source=apt_alert_cta`;
+  const loginUrl = `/login?redirect=${encodeURIComponent(pathname)}&source=content_gate`;
   const benefit = CATEGORY_BENEFITS[category] || DEFAULT_BENEFIT;
 
   /* 소셜프루프 텍스트 */

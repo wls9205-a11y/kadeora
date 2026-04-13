@@ -35,6 +35,9 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
     });
   }, []);
 
+  // 필터 변경 시 1페이지 리셋 (early return 전에 위치 — Rules of Hooks 준수)
+  useEffect(() => { setUnsoldPage(1); }, [unsoldRegion, effectiveSearch]);
+
   const pill = (v: string, sel: string, set: (v: string) => void, label?: string) => (
     <button key={v} onClick={() => set(v)} style={{
       padding: '5px 12px', borderRadius: 'var(--radius-pill)', fontSize: 'var(--fs-xs)', fontWeight: 600,
@@ -57,9 +60,6 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
   const UNSOLD_PER_PAGE = 30;
   const unsoldTotalPages = Math.ceil(fu.length / UNSOLD_PER_PAGE);
   const pagedFu = fu.slice((unsoldPage - 1) * UNSOLD_PER_PAGE, unsoldPage * UNSOLD_PER_PAGE);
-
-  // 필터 변경 시 1페이지 리셋
-  useEffect(() => { setUnsoldPage(1); }, [unsoldRegion, effectiveSearch]);
 
   const usRaw = unsoldSummary;
   const us: any = typeof usRaw === 'string' ? (() => { try { return JSON.parse(usRaw); } catch { return null; } })()
