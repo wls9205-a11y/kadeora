@@ -28,9 +28,8 @@ export async function POST(req: NextRequest) {
     }
 
     // 3. 크론 엔드포인트 호출
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.VERCEL_URL 
-      ? `https://${process.env.VERCEL_URL}` 
-      : 'http://localhost:3000';
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
+      || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
     
     const cronUrl = `${baseUrl}${endpoint}`;
     const cronSecret = process.env.CRON_SECRET;

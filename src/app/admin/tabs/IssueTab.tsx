@@ -87,11 +87,15 @@ export default function IssueTab() {
   };
 
   const publishIssue = async (id: string) => {
-    await fetch('/api/admin/issues/publish', {
+    const res = await fetch('/api/admin/issues/publish', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ issue_id: id }),
     });
+    const d = await res.json().catch(() => ({}));
+    if (!res.ok || d.error) {
+      alert('발행 실패: ' + (d.error || res.status));
+    }
     fetchIssues();
   };
 
