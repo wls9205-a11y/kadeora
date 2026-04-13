@@ -90,31 +90,29 @@ export async function POST(req: NextRequest) {
     const utmCampaign = new Date().toISOString().slice(0, 7).replace('-', '_');
     const results: { email: string; ok: boolean; id?: string; error?: string }[] = [];
 
-    for (let i = 0; i < sendable.length; i += 10) {
-      const batch = sendable.slice(i, i + 10);
-      const batchRes = await Promise.all(batch.map(async (r) => {
-        try {
-          const subject = `${r.nickname}님, 놓치고 있는 투자 정보가 있어요 📊`;
-          const html = reEngagementEmail({ nickname: r.nickname, email: r.email, utmCampaign });
-          const { data, error } = await resend.emails.send({
-            from: '카더라 <noreply@kadeora.app>', to: r.email, subject, html,
-          });
-          await sb.from('email_send_logs').insert({
-            campaign, recipient_email: r.email, user_id: r.userId || null,
-            status: error ? 'failed' : 'sent', resend_id: data?.id || null,
-            error_message: error?.message || null,
-          });
-          return { email: r.email, ok: !error, id: data?.id, error: error?.message };
-        } catch (e: any) {
-          await sb.from('email_send_logs').insert({
-            campaign, recipient_email: r.email, user_id: r.userId || null,
-            status: 'failed', error_message: e?.message || 'unknown',
-          });
-          return { email: r.email, ok: false, error: e?.message };
-        }
-      }));
-      results.push(...batchRes);
-      if (i + 10 < sendable.length) await new Promise(res => setTimeout(res, 1000));
+    // Resend rate limit: 초당 2건 → 1건씩 순차 + 550ms 간격 (안전하게 1.8req/s)
+    for (const r of sendable) {
+      try {
+        const subject = `${r.nickname}님, 놓치고 있는 투자 정보가 있어요 📊`;
+        const html = reEngagementEmail({ nickname: r.nickname, email: r.email, utmCampaign });
+        const { data, error } = await resend.emails.send({
+          from: '카더라 <noreply@kadeora.app>', to: r.email, subject, html,
+        });
+        await sb.from('email_send_logs').insert({
+          campaign, recipient_email: r.email, user_id: r.userId || null,
+          status: error ? 'failed' : 'sent', resend_id: data?.id || null,
+          error_message: error?.message || null,
+        });
+        results.push({ email: r.email, ok: !error, id: data?.id, error: error?.message });
+      } catch (e: any) {
+        await sb.from('email_send_logs').insert({
+          campaign, recipient_email: r.email, user_id: r.userId || null,
+          status: 'failed', error_message: e?.message || 'unknown',
+        });
+        results.push({ email: r.email, ok: false, error: e?.message });
+      }
+      // rate limit 방어: 550ms 대기 (초당 ~1.8건)
+      await new Promise(res => setTimeout(res, 550));
     }
 
     const sentCount = results.filter(r => r.ok).length;
