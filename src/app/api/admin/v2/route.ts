@@ -541,6 +541,39 @@ export async function GET(req: NextRequest) {
         } catch { return null; }
       })();
 
+      // ── 전환 개선 추적 지표 (세션 98) ──
+      const week7Ago = new Date(Date.now() - 7 * 86400000).toISOString();
+      const [aptAlertCta7d, interestNew7d, onboardedTotal, totalRealForRate, regionSetCount, marketingCount] = await Promise.all([
+        // apt_alert_cta 7일 클릭 (BlogAptAlertCTA + SmartSectionGate 통합 소스)
+        (sb as any).from('conversion_events').select('event_type').eq('cta_name', 'apt_alert_cta').gte('created_at', week7Ago),
+        // apt_site_interests 7일 신규 등록 (알림 CTA 효과 측정)
+        (sb as any).from('apt_site_interests').select('id', { count: 'exact', head: true }).gte('created_at', week7Ago),
+        // 온보딩 완료 유저
+        sb.from('profiles').select('id', { count: 'exact', head: true }).eq('onboarded', true).neq('is_seed', true),
+        // 전체 실 유저
+        sb.from('profiles').select('id', { count: 'exact', head: true }).neq('is_seed', true).neq('is_ghost', true).neq('is_deleted', true),
+        // 지역 설정 유저
+        sb.from('profiles').select('id', { count: 'exact', head: true }).not('residence_city', 'is', null).neq('is_seed', true),
+        // 마케팅 동의 유저
+        sb.from('profiles').select('id', { count: 'exact', head: true }).eq('marketing_agreed', true).neq('is_seed', true),
+      ]);
+      const aptAlertCta7dStats = { views: 0, clicks: 0 };
+      for (const e of (aptAlertCta7d.data || [])) {
+        if (e.event_type === 'cta_view') aptAlertCta7dStats.views++;
+        if (e.event_type === 'cta_click') aptAlertCta7dStats.clicks++;
+      }
+      const conversionMetrics = {
+        aptAlertCta7d: aptAlertCta7dStats,
+        interestNew7d: interestNew7d.count ?? 0,
+        onboardRate: (totalRealForRate.count ?? 0) > 0
+          ? Math.round((onboardedTotal.count ?? 0) / (totalRealForRate.count ?? 0) * 100) : 0,
+        regionSetRate: (totalRealForRate.count ?? 0) > 0
+          ? Math.round((regionSetCount.count ?? 0) / (totalRealForRate.count ?? 0) * 100) : 0,
+        marketingRate: (totalRealForRate.count ?? 0) > 0
+          ? Math.round((marketingCount.count ?? 0) / (totalRealForRate.count ?? 0) * 100) : 0,
+        contentGate7d: ctaStats['content_gate'] || { cta_view: 0, cta_click: 0 },
+      };
+
       return NextResponse.json({
         deviceSplit: deviceCounts,
         funnel: {
@@ -561,6 +594,7 @@ export async function GET(req: NextRequest) {
         retentionCohort: retentionR.data || [],
         signupSources,
         feedStats,
+        conversionMetrics,
       });
     }
 

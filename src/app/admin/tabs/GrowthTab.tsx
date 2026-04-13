@@ -12,16 +12,74 @@ export default function GrowthTab({ onNavigate }: { onNavigate: (t: any) => void
 
   if (loading || !data) return <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-secondary)' }}>로딩 중...</div>;
 
-  const { funnel, ctaStats, topPages, hourlyTraffic, featureUsage, dailyTrend, referrers, signupTrend, deviceSplit } = data;
+  const { funnel, ctaStats, topPages, hourlyTraffic, featureUsage, dailyTrend, referrers, signupTrend, deviceSplit, conversionMetrics } = data;
   const maxHour = Math.max(...(hourlyTraffic || []), 1);
   const maxFeature = Math.max(...(featureUsage || []).map((f: any) => f.views), 1);
   const maxDailyPv = Math.max(...(dailyTrend || []).map((d: any) => d.pv), 1);
   const totalRef = Object.values(referrers || {}).reduce((s: number, v: any) => s + v, 0) as number;
   const totalDevice = Object.values(deviceSplit || {}).reduce((s: number, v: any) => s + v, 0) as number;
 
+  /* ── 전환 핵심 지표 계산 ── */
+  const cm = conversionMetrics || {};
+  const cgViews = cm.contentGate7d?.cta_view || ctaStats?.content_gate?.cta_view || 0;
+  const cgClicks = cm.contentGate7d?.cta_click || ctaStats?.content_gate?.cta_click || 0;
+  const cgCtr = cgViews > 0 ? (cgClicks / cgViews * 100) : 0;
+  const acViews = cm.aptAlertCta7d?.views || 0;
+  const acClicks = cm.aptAlertCta7d?.clicks || 0;
+  const acCtr = acViews > 0 ? (acClicks / acViews * 100) : 0;
+
   return (
     <div>
-      {/* 전환 퍼널 */}
+      {/* ── 전환 핵심 지표 (세션 98 개선 모니터링) ── */}
+      <div className="adm-sec">🎯 전환 핵심 지표 (7일)</div>
+      <div className="adm-card" style={{ padding: '10px 14px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 12 }}>
+          {[
+            {
+              label: 'content_gate CTR',
+              value: `${cgCtr.toFixed(2)}%`,
+              sub: `노출 ${cgViews} · 클릭 ${cgClicks}`,
+              good: cgCtr >= 2,
+              target: '목표 2%+',
+            },
+            {
+              label: 'apt_alert_cta CTR',
+              value: `${acCtr.toFixed(2)}%`,
+              sub: `노출 ${acViews} · 클릭 ${acClicks}`,
+              good: acCtr >= 3,
+              target: '신규 CTA',
+            },
+            {
+              label: '온보딩 완료율',
+              value: `${cm.onboardRate ?? 0}%`,
+              sub: `지역 설정 ${cm.regionSetRate ?? 0}% · 마케팅 ${cm.marketingRate ?? 0}%`,
+              good: (cm.onboardRate ?? 0) >= 80,
+              target: '목표 85%+',
+            },
+          ].map((m, i) => (
+            <div key={i} style={{ textAlign: 'center', padding: '8px 6px', background: 'rgba(12,21,40,0.5)', borderRadius: 8 }}>
+              <div style={{ fontSize: 20, fontWeight: 800, color: m.good ? '#10B981' : '#EF4444' }}>{m.value}</div>
+              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)', margin: '2px 0' }}>{m.label}</div>
+              <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', lineHeight: 1.4 }}>{m.sub}</div>
+              <div style={{ fontSize: 10, color: m.good ? '#10B981' : '#F59E0B', marginTop: 3 }}>{m.target}</div>
+            </div>
+          ))}
+        </div>
+        {/* 관심단지 알림 등록 7일 신규 */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0', borderTop: '1px solid var(--border)', fontSize: 12 }}>
+          <span style={{ color: 'var(--text-secondary)' }}>🔔 관심단지 알림 7일 신규 등록</span>
+          <span style={{ fontWeight: 700, color: (cm.interestNew7d || 0) > 0 ? '#10B981' : 'var(--text-tertiary)' }}>
+            {cm.interestNew7d ?? 0}건
+          </span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 0', fontSize: 12 }}>
+          <span style={{ color: 'var(--text-secondary)' }}>📊 UV → 가입 전환율</span>
+          <span style={{ fontWeight: 700, color: funnel?.conversionRate >= 1 ? '#10B981' : '#EF4444' }}>
+            {funnel?.conversionRate ?? 0}%
+            <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginLeft: 4 }}>(기준선 0.18%)</span>
+          </span>
+        </div>
+      </div>
       <div className="adm-sec">📈 전환 퍼널 (7일)</div>
       <div className="adm-card">
         {[
