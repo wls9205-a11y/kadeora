@@ -1,3 +1,47 @@
+## 세션 101 — 전수 코드 검토 + 버그 5건 수정
+
+### 커밋: ef04c2c0
+
+### 검토 범위
+- 최근 3일 50+ 커밋, 80+ 변경 파일 전수 검토
+- TypeScript 빌드 ✅ (에러 0), ESLint 검사, 크론 87개 라우트 검증
+- Supabase RPC 35개 존재 확인 (DB에 모두 존재, 타입 파일만 미갱신)
+
+### 🔴 수정 — 런타임 버그
+1. **UnsoldTab.tsx — React Rules of Hooks 위반**
+   - `useEffect(() => { setUnsoldPage(1) })` 가 `if (!unsold.length) return` 뒤에 위치
+   - early return 전으로 이동하여 Hook 호출 순서 보장
+
+2. **middleware.ts — X-Frame-Options DENY ↔ CSP frame-ancestors 충돌**
+   - CSP: `frame-ancestors 'self' https://*.tossmini.com` vs `X-Frame-Options: DENY`
+   - Toss 앱인토스 iframe 임베딩 차단됨 → `SAMEORIGIN`으로 변경
+
+### 🟠 수정 — 전환율 버그
+3. **SmartSectionGate.tsx — CTA source 불일치**
+   - `source=apt_alert_cta` → LoginClient MSG 맵에 키 없음 → 컨텍스트 전환 메시지 미표시
+   - `source=content_gate`로 변경
+
+4. **LoginClient.tsx — CTA source MSG 맵 7종 추가**
+   - apt_alert_cta, stock_alert_cta, kakao_hero, blog_mid_cta, right_panel, content_gate_email
+   - 모든 CTA 경로에서 맞춤 전환 메시지 표시
+
+### 🟡 수정 — 코드 품질
+5. **stock/financials/page.tsx — 미사용 fmtCap import 제거**
+
+### 검토 결과 — 이상 없음 확인
+- 크론 87개 라우트 파일 전수 매칭 ✅
+- 이메일 스케줄러 월요일 판정 로직 정상 (UTC Sunday 22:00 = KST Monday 07:00)
+- auth callback Zero-Step 온보딩 로직 정상
+- blog safeBlogInsert 품질 게이트 + 팩트체크 정상
+- sanitizeHtml 단일 적용 확인 (bot 경로 이중 적용은 무해)
+- unsubscribe HMAC 토큰 생성/검증 일치 확인
+- CSP/CSRF/Rate Limiting 정상 적용 확인
+
+### PENDING (코드 외)
+- Supabase 타입 재생성 (35개 RPC 타입 미등록 — DB에는 존재)
+- Resend 웹훅 서명 검증 추가 권장
+- trigger-cron 이중 admin auth 정리 (requireAdmin 후 수동 체크 중복)
+
 ## 세션 100 — 주식 페이지 디자인 + SEO + 네이버 1위 전략
 
 ### 커밋: ce9285e9 → 최종
@@ -35,7 +79,7 @@
 - stock-fundamentals-us 크론 3시간마다
 
 # 카더라 STATUS.md
-> 마지막 업데이트: 2026-04-13 세션 98 (Claude)
+> 마지막 업데이트: 2026-04-13 세션 101 (Claude)
 
 ## 최근 배포
 - `dpl_Grsf5KNYLFruTnCcVyw5Km1Q6cNv` — **READY** ✅ (2026-04-13)
