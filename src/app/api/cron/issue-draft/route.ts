@@ -310,11 +310,13 @@ async function handler(_req: NextRequest) {
   }
 
   // issue_alerts 업데이트
+  const insertFailed = !insertResult.success && !blogPostId;
   await (sb as any).from('issue_alerts').update({
     is_published: (canAutoPublish && (insertResult.success || !!blogPostId)),
     publish_decision: canAutoPublish && (insertResult.success || !!blogPostId) ? 'auto'
       : canAutoPublish ? 'auto_failed'
       : (insertResult.success || !!blogPostId) ? 'draft' : 'failed',
+    block_reason: insertFailed ? (insertResult.message || insertResult.reason || 'safeBlogInsert failed') : null,
     blog_post_id: blogPostId,
     draft_title: article.title,
     draft_content: article.content,
