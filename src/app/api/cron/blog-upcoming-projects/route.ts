@@ -174,7 +174,11 @@ ${nearbyData}
         }).select('id').single();
 
         if (insertError || !inserted) {
-          console.error(`[blog-upcoming] Insert error: ${project.project_name}`, insertError?.message);
+          console.warn(`[blog-upcoming] Insert blocked: ${project.project_name}`, insertError?.message);
+          // Mark as attempted (-1) to prevent infinite retry
+          await (admin as any).from('upcoming_projects')
+            .update({ blog_post_id: -1, updated_at: new Date().toISOString() })
+            .eq('id', project.id);
           continue;
         }
 

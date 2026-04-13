@@ -446,3 +446,16 @@
 - ✅ stock/[symbol] stockAnalysisText — sanitizeHtml 적용
 - ✅ blog/[slug] htmlFull — sanitizeHtml 적용
 - ✅ calc/[category]/[slug] seoContent — sanitizeHtml 적용
+
+### 추가 수정 (병렬 3차)
+
+#### 보안
+- ✅ apt-price-change: exec_sql RPC (raw SQL 실행 보안위험) → 전용 recalc_price_change_1y RPC로 교체
+
+#### 크론 안정화
+- ✅ blog-upcoming-projects: 실패 시 blog_post_id=-1 마킹 → 무한 재시도 루프 방지
+- ✅ 기존 stuck 프로젝트 3건 수동 마킹 (둔촌주공, 거제역 동원, 한남3구역)
+
+#### DB
+- ✅ recalc_price_change_1y RPC 생성
+- ✅ auth.users email_change NULL → '' 패치 (GoTrue /admin/users 500 수정)
