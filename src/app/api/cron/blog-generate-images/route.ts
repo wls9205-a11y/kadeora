@@ -193,6 +193,22 @@ export async function GET(req: Request) {
         .from('blog_post_images')
         .upsert(inserts, { onConflict: 'post_id,position', ignoreDuplicates: true });
       if (error) console.error('[blog-generate-images] upsert error:', error);
+
+      // cover_image도 자동 업데이트 — OG 텍스트 배너 → 실제 이미지
+      const coverUpdates = inserts
+        .filter(i => i.position === 0 && i.image_type === 'stock_photo')
+        .map(i => i.post_id);
+      if (coverUpdates.length > 0) {
+        for (const pid of coverUpdates) {
+          const img = inserts.find(i => i.post_id === pid && i.position === 0);
+          if (img) {
+            await sb.from('blog_posts')
+              .update({ cover_image: img.image_url })
+              .eq('id', pid)
+              .like('cover_image', '%/api/og?%'); // OG 배너만 교체
+          }
+        }
+      }
     }
 
     return NextResponse.json({
