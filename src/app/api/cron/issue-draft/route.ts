@@ -305,7 +305,7 @@ async function handler(_req: NextRequest) {
     try {
       const { data: found } = await sb.from('blog_posts')
         .select('id').eq('slug', article.slug).maybeSingle();
-      if (found) blogPostId = found.id;
+      if (found) blogPostId = String(found.id);
     } catch {}
   }
 
