@@ -1,4 +1,31 @@
 # 카더라 STATUS.md
+> 마지막 업데이트: 2026-04-13 (세션 98 최종 — 전수 검토 완료)
+
+## 세션 98 최종 — 전수 검토 버그 수정
+
+### 다른 컴퓨터와의 작업 충돌 수정
+
+**[버그 1] OnboardingClient 지역 필수화 역행**
+- 84c81819 커밋이 세션 98의 "지역 선택사항" 작업을 `disabled={saving || !region}`으로 덮어씀
+- 버튼 텍스트 `'📍 지역을 선택해주세요'`로 변경되어 지역 필수화 상태였음
+- `disabled={saving}`으로 복원 → 지역 없이도 시작 가능
+
+**[버그 2] issue-draft publish_decision 로직**
+- `canAutoPublish=true`이지만 safeBlogInsert 실패 시 'auto'로 표시되어 실패 식별 불가
+- `'auto_failed'`로 구분 → CRON_TYPE_DAILY_LIMIT 등 실패 이슈 어드민에서 식별 가능
+
+### 어드민 IssueTab 대시보드 업데이트
+- 파이프라인 카드: 일간 한도 게이지 (cronLimitUsed/30)
+- 파이프라인 카드: 발행실패(autoFailed) 카운터
+- 통계 바: 40점+ 대기, 오늘 발행, 발행실패 표시
+- 이슈 배지: auto_failed(발행실패), auto 대기중 상태
+- admin/issues API: publishedToday, autoFailed, pending40plus, cronLimitUsed/Max 추가
+
+### issue-draft 발행 차단 원인 해결
+- DB 트리거 `validate_blog_post`: `CRON_TYPE_DAILY_LIMIT` 10→30으로 상향
+- 차단됐던 40점+ 이슈 8건 재처리 리셋
+- 다음 크론 사이클에서 순차 발행 예정
+
 
 
 ## 세션 98 추가 — DB statement timeout 폭발 해결
