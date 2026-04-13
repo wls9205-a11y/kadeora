@@ -1,6 +1,49 @@
 # 카더라 STATUS.md
 > 마지막 업데이트: 2026-04-13 (세션 98 최종 — 전수 검토 완료)
 
+## 세션 99 — 이메일 전체 발송 시스템 전면 개선
+
+### 배포: 1 커밋, 7파일 (DB migration 포함)
+
+### 🔴 Critical 수정
+- **수신거부 URL HMAC 토큰 보안**: `/api/unsubscribe?email=xxx&token=yyy` — HMAC-SHA256 서명 검증 추가, 타인 이메일 강제 수신거부 불가
+- **unsubscribe listUsers perPage 버그**: `perPage:1`로 첫 유저만 가져오던 버그 → `filter: email.eq.${email}` 정확히 조회
+- **churn-prevention D+7 marketing_agreed 미체크**: 마케팅 동의 없는 유저에게 이메일 발송 → `marketing_agreed = true` 필터 추가
+
+### 🟠 High 수정
+- **Resend 100통/일 한도 3경로 공유 문제**: email-digest/churn/어드민 모두 `email_send_logs` 기반 오늘 잔여량 체크 → 초과 시 차단
+- **N+1 auth API 제거 (send-email)**: 수신자마다 개별 auth.admin.listUsers → 페이지네이션으로 배치 Map 구성 후 profiles IN 쿼리 1번
+- **churn D+7 중복방지 로직 강화**: notifications content ilike 의존 → `email_send_logs.campaign='churn-d7'` 기반으로 교체
+- **DB migration**: `email_send_logs`에 `user_id uuid` 컬럼 추가 + 인덱스 3개 (user_id, campaign+status, created_at)
+
+### 🟡 Medium 수정
+- **UTM campaign 하드코딩 제거**: `april_2026` → `new Date().toISOString().slice(0,7)` 동적 처리 (예: `2026_04`)
+- **campaign 로그 target 포함**: `re-engagement` → `re-engagement_all` / `re-engagement_dormant` 구분 기록
+- **휴면 기준 3일 → 30일**: dormant 판별 threshold 3 * 86400000 → 30 * 86400000
+- **email-digest 잔여 한도 체크 + 이번 주 중복 발송 방지**: weekly-digest sent 로그로 중복 스킵
+
+### 어드민 EmailSender UI 개선 (FocusTab)
+- Resend 잔여 한도 실시간 표시 (색상: 초록→노랑→빨강)
+- 테스트 이메일 입력 필드 추가
+- 발송 전 수신자 수 미리보기 (클릭: 카운트, 더블클릭: 발송)
+- 실패 이메일 목록 토글 노출 (어떤 이메일이 왜 실패했는지)
+- 한도 스킵 건수 별도 표시
+
+### 변경 파일
+- `src/app/api/admin/send-email/route.ts` — 전면 재작성
+- `src/app/api/unsubscribe/route.ts` — HMAC 토큰 보안
+- `src/lib/email-templates.ts` — generateUnsubToken/buildUnsubUrl 헬퍼, UTM 동적
+- `src/lib/email-sender.ts` — buildUnsubUrl 적용
+- `src/app/api/cron/email-digest/route.ts` — 한도 체크, 중복 방지, user_id 로그
+- `src/app/api/cron/churn-prevention/route.ts` — marketing_agreed 체크, 중복방지 강화
+- `src/app/admin/tabs/FocusTab.tsx` — EmailSender UI 전면 개선
+
+### Architecture Rules
+- UNSUBSCRIBE_SECRET env var 필요 (없으면 NEXTAUTH_SECRET fallback)
+- email_send_logs.user_id: 모든 발송 경로에서 기록 (어드민/digest/churn)
+- dormant 기준: 30일 (churn-prevention D+7은 별도 로직)
+
+
 ## 세션 98 최종 — 전수 검토 버그 수정
 
 ### 다른 컴퓨터와의 작업 충돌 수정

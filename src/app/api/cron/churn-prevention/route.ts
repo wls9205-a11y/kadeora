@@ -88,11 +88,24 @@ export async function GET(req: NextRequest) {
     // ═══ D+7: 푸시 + 이메일 ═══
     if (d7Users.length > 0) {
       const d7Ids = d7Users.map(u => u.id);
-      const { data: sent } = await (sb as any).from('notifications')
-        .select('user_id').in('user_id', d7Ids)
-        .ilike('content', '%보고 싶었어요%');
-      const sentIds = new Set((sent || []).map((n: any) => n.user_id));
-      const newD7 = d7Users.filter(u => !sentIds.has(u.id));
+      // 중복 방지: email_send_logs 기반 (content text 의존 제거)
+      const { data: sent } = await (sb as any).from('email_send_logs')
+        .select('recipient_email')
+        .eq('campaign', 'churn-d7')
+        .eq('status', 'sent');
+      const sentEmailsD7 = new Set((sent || []).map((n: any) => n.recipient_email));
+      // marketing_agreed + 미발송 필터
+      const d7AuthEmails: Record<string, string> = {};
+      for (const u of d7Users) {
+        try {
+          const { data: au } = await sb.auth.admin.getUserById(u.id);
+          if (au?.user?.email) d7AuthEmails[u.id] = au.user.email;
+        } catch {}
+      }
+      const newD7 = d7Users.filter(u => {
+        const email = d7AuthEmails[u.id];
+        return email && !sentEmailsD7.has(email);
+      });
 
       if (newD7.length > 0) {
         // 알림
@@ -114,23 +127,47 @@ export async function GET(req: NextRequest) {
           });
         }
 
-        // 이메일 (Resend)
+        // 이메일 (Resend) — marketing_agreed 유저만, email_send_logs 기록
         try {
           const { sendNotificationEmail } = await import('@/lib/email-sender');
-          for (const u of newD7.slice(0, 20)) { // 일일 한도 고려, 최대 20명
-            const { data: authUser } = await sb.auth.admin.getUserById(u.id);
-            if (authUser?.user?.email) {
-              await sendNotificationEmail(
-                authUser.user.email,
-                `${u.nickname}님, 놓치고 있는 투자 정보가 있어요 📊`,
-                `<p style="font-size:15px;color:#1E293B;margin:0 0 12px;">${u.nickname}님, 안녕하세요! 👋</p>
-                <p style="font-size:14px;color:#64748B;line-height:1.7;margin:0 0 20px;">카더라에 새로운 분석과 청약 정보가 기다리고 있어요.</p>
-                <div style="text-align:center;margin:20px 0;">
-                  <a href="https://kadeora.app/feed?utm_source=email&utm_medium=churn&utm_campaign=d7" style="display:inline-block;padding:12px 36px;border-radius:10px;background:#3B7BF6;color:#FFFFFF;font-size:15px;font-weight:700;text-decoration:none;">카더라 바로가기 →</a>
-                </div>`
-              );
-              d7Sent++;
-            }
+          // 오늘 잔여 한도 체크
+          const todayStart = new Date(); todayStart.setHours(0,0,0,0);
+          const { count: sentToday } = await (sb as any).from('email_send_logs')
+            .select('id', { count: 'exact', head: true })
+            .eq('status', 'sent').gte('created_at', todayStart.toISOString());
+          const remainingQuota = 100 - (sentToday || 0);
+
+          // marketing_agreed 유저 ID 목록
+          const { data: marketingUsers } = await sb.from('profiles')
+            .select('id').eq('marketing_agreed', true)
+            .in('id', newD7.map((u: any) => u.id));
+          const marketingIds = new Set((marketingUsers || []).map((u: any) => u.id));
+
+          const d7EmailTargets = newD7
+            .filter((u: any) => marketingIds.has(u.id))
+            .slice(0, Math.min(20, remainingQuota));
+
+          for (const u of d7EmailTargets) {
+            const email = d7AuthEmails[u.id];
+            if (!email) continue;
+            const campaign = `${new Date().toISOString().slice(0,7).replace('-','_')}`;
+            const r = await sendNotificationEmail(
+              email,
+              `${u.nickname}님, 놓치고 있는 투자 정보가 있어요 📊`,
+              `<p style="font-size:15px;color:#1E293B;margin:0 0 12px;">${u.nickname}님, 안녕하세요! 👋</p>
+              <p style="font-size:14px;color:#64748B;line-height:1.7;margin:0 0 20px;">카더라에 새로운 분석과 청약 정보가 기다리고 있어요.</p>
+              <div style="text-align:center;margin:20px 0;">
+                <a href="https://kadeora.app/feed?utm_source=email&utm_medium=churn&utm_campaign=${campaign}" style="display:inline-block;padding:12px 36px;border-radius:10px;background:#3B7BF6;color:#FFFFFF;font-size:15px;font-weight:700;text-decoration:none;">카더라 바로가기 →</a>
+              </div>`
+            );
+            await (sb as any).from('email_send_logs').insert({
+              campaign: 'churn-d7',
+              recipient_email: email,
+              user_id: u.id,
+              status: r.ok ? 'sent' : 'failed',
+              resend_id: r.ok ? (r.id || null) : null,
+            }).catch(() => {});
+            if (r.ok) d7Sent++;
           }
         } catch (e) { console.error('[churn-d7-email]', e); }
       }

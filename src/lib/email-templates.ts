@@ -2,11 +2,37 @@
  * 카더라 이메일 템플릿 — 라이트 테마, 모바일 최적화
  */
 
-export function reEngagementEmail({ nickname, email }: { nickname: string; email: string }): string {
-  const utmBase = 'utm_source=email&utm_medium=re-engagement&utm_campaign=april_2026';
+import { createHmac } from 'crypto';
+
+export function generateUnsubToken(email: string): string {
+  const secret = process.env.UNSUBSCRIBE_SECRET || process.env.NEXTAUTH_SECRET || 'kadeora-unsub-secret';
+  return createHmac('sha256', secret).update(email.toLowerCase().trim()).digest('hex');
+}
+
+export function buildUnsubUrl(email: string): string {
+  const token = generateUnsubToken(email);
+  return `https://kadeora.app/api/unsubscribe?email=${encodeURIComponent(email)}&token=${token}`;
+}
+
+/** 현재 연월 기반 UTM campaign 문자열 (예: 2026_04) */
+function currentUtmCampaign(): string {
+  return new Date().toISOString().slice(0, 7).replace('-', '_');
+}
+
+export function reEngagementEmail({
+  nickname,
+  email,
+  utmCampaign,
+}: {
+  nickname: string;
+  email: string;
+  utmCampaign?: string;
+}): string {
+  const campaign = utmCampaign || currentUtmCampaign();
+  const utmBase = `utm_source=email&utm_medium=re-engagement&utm_campaign=${campaign}`;
   const siteUrl = `https://kadeora.app?${utmBase}`;
   const blogUrl = `https://kadeora.app/blog?${utmBase}`;
-  const unsubUrl = `https://kadeora.app/api/unsubscribe?email=${encodeURIComponent(email)}`;
+  const unsubUrl = buildUnsubUrl(email);
 
   const features = [
     { icon: '🏠', title: '청약 마감 알림', desc: '관심 단지 청약 마감 D-day를 놓치지 마세요' },
@@ -118,13 +144,14 @@ export function reEngagementEmail({ nickname, email }: { nickname: string; email
 </html>`;
 }
 
-/** 주간 다이제스트 본문 생성 (wrapEmailTemplate에 감싸져서 발송) */
+/** 주간 다이제스트 본문 생성 */
 export function weeklyDigestBody(data: {
   hotPosts: { title: string; slug: string; likes_count?: number }[];
   deadlines: { house_nm: string; rcept_endde: string }[];
   newBlogs: { title: string; slug: string; category?: string }[];
 }): string {
-  const utmBase = 'utm_source=email&utm_medium=digest&utm_campaign=weekly';
+  const campaign = currentUtmCampaign();
+  const utmBase = `utm_source=email&utm_medium=digest&utm_campaign=${campaign}`;
 
   const hotHtml = data.hotPosts.length > 0
     ? `<div style="margin:0 0 20px;">

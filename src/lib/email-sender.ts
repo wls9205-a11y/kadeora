@@ -2,10 +2,9 @@
  * email-sender.ts — Resend 이메일 발송 래퍼
  * 
  * 무료 한도: 100통/일, 3,000통/월
- * 일일 상한: 1건/유저 (notification-hub에서 관리)
- * 
- * 사전 요구: kadeora.app 도메인 DNS에 SPF/DKIM/DMARC 레코드 등록
  */
+
+import { buildUnsubUrl } from './email-templates';
 
 let resendInstance: any = null;
 
@@ -46,13 +45,10 @@ export async function sendNotificationEmail(
 }
 
 /**
- * 공통 이메일 래퍼 — 라이트 테마, 모바일 최적화
- * 
- * 모든 알림/다이제스트 이메일에 적용
- * reEngagementEmail 등 독립 템플릿은 이 래퍼를 쓰지 않음
+ * 공통 이메일 래퍼 — 라이트 테마, 모바일 최적화, 서명된 수신거부 URL
  */
 function wrapEmailTemplate(to: string, subject: string, body: string): string {
-  const unsubUrl = `https://kadeora.app/api/unsubscribe?email=${encodeURIComponent(to)}`;
+  const unsubUrl = buildUnsubUrl(to);
 
   return `<!DOCTYPE html>
 <html lang="ko">

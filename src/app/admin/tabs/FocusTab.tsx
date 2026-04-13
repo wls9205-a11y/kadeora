@@ -409,38 +409,111 @@ function EmailSender() {
   const [sending, setSending] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [logs, setLogs] = useState<any>(null);
+  const [quota, setQuota] = useState<{sentToday:number;remaining:number}|null>(null);
+  const [preview, setPreview] = useState<{count:number;target:string}|null>(null);
+  const [testEmail, setTestEmail] = useState('');
+  const [showFailed, setShowFailed] = useState(false);
 
-  const send = async (target: 'test' | 'dormant' | 'all') => {
-    if (sending) return;
-    const msg = target === 'test' ? '테스트 발송 (norich92@gmail.com)' : target === 'dormant' ? '휴면 유저에게 발송' : '전체 유저에게 발송';
-    if (!confirm(`${msg}합니다. 계속?`)) return;
-    setSending(true); setResult(null);
-    try {
-      const r = await fetch('/api/admin/send-email', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ campaign: 're-engagement', target }),
-      });
-      setResult(await r.json());
-    } catch (e: any) { setResult({ error: e.message }); }
-    finally { setSending(false); }
-  };
+  useEffect(() => {
+    fetch('/api/admin/send-email').then(r=>r.json()).then(d=>{
+      setLogs(d);
+      if(d.sentToday!=null) setQuota({sentToday:d.sentToday,remaining:d.remaining});
+    });
+  }, []);
 
   const loadLogs = async () => {
-    const r = await fetch('/api/admin/send-email');
-    setLogs(await r.json());
+    const d = await fetch('/api/admin/send-email').then(r=>r.json());
+    setLogs(d);
+    if(d.sentToday!=null) setQuota({sentToday:d.sentToday,remaining:d.remaining});
   };
 
+  const previewCount = async (target: 'dormant'|'all') => {
+    const r = await fetch('/api/admin/send-email',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({target,previewOnly:true}),
+    });
+    const d = await r.json();
+    if(d.count!=null) setPreview({count:d.count,target});
+    else setPreview(null);
+  };
+
+  const send = async (target: 'test'|'dormant'|'all') => {
+    if(sending) return;
+    const label = target==='test'?`테스트 (${testEmail||'norich92@gmail.com'})`:target==='dormant'?`휴면유저 ${preview?.target===target?preview.count+'명':''}`:
+      `전체유저 ${preview?.target===target?preview.count+'명':''}`;
+    if(!confirm(`📧 ${label}에게 발송합니다. 계속?`)) return;
+    setSending(true); setResult(null); setShowFailed(false);
+    try {
+      const r = await fetch('/api/admin/send-email',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({target, testEmail: testEmail||undefined}),
+      });
+      const d = await r.json();
+      setResult(d);
+      loadLogs();
+    } catch(e:any){setResult({error:e.message});}
+    finally{setSending(false);}
+  };
+
+  const quotaColor = quota ? (quota.remaining < 20 ? '#EF4444' : quota.remaining < 50 ? '#F59E0B' : '#10B981') : 'rgba(255,255,255,0.3)';
+
   return (
-    <div style={{background:'rgba(12,21,40,0.6)',border:'1px solid rgba(255,255,255,0.04)',borderRadius: 'var(--radius-md)',padding:'8px 10px'}}>
-      <div style={{display:'flex',gap:4,marginBottom:6}}>
-        <button onClick={()=>send('test')} disabled={sending} style={{flex:1,padding:'6px',borderRadius: 'var(--radius-sm)',border:'1px solid rgba(59,123,246,0.2)',background:'rgba(59,123,246,0.06)',color:'#3B7BF6',cursor:'pointer',fontSize:13,fontWeight:600}}>🧪 테스트</button>
-        <button onClick={()=>send('dormant')} disabled={sending} style={{flex:1,padding:'6px',borderRadius: 'var(--radius-sm)',border:'1px solid rgba(245,158,11,0.2)',background:'rgba(245,158,11,0.06)',color:'#F59E0B',cursor:'pointer',fontSize:13,fontWeight:600}}>😴 휴면유저</button>
-        <button onClick={()=>send('all')} disabled={sending} style={{flex:1,padding:'6px',borderRadius: 'var(--radius-sm)',border:'1px solid rgba(239,68,68,0.2)',background:'rgba(239,68,68,0.06)',color:'#EF4444',cursor:'pointer',fontSize:13,fontWeight:600}}>📨 전체발송</button>
+    <div style={{background:'rgba(12,21,40,0.6)',border:'1px solid rgba(255,255,255,0.04)',borderRadius:'var(--radius-md)',padding:'10px'}}>
+      {/* 잔여 한도 */}
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8,padding:'4px 2px'}}>
+        <span style={{fontSize:11,color:'rgba(255,255,255,0.35)'}}>Resend 일일 한도</span>
+        <span style={{fontSize:12,fontWeight:700,color:quotaColor}}>
+          {quota ? `${quota.sentToday}/100 발송 · 잔여 ${quota.remaining}통` : '—'}
+        </span>
       </div>
-      {sending&&<div style={{fontSize:13,color:'rgba(255,255,255,0.45)',textAlign:'center',padding:4}}>발송 중...</div>}
-      {result&&<div style={{fontSize:13,padding:6,borderRadius: 'var(--radius-sm)',marginBottom:8,background:result.error?'rgba(239,68,68,0.06)':'rgba(16,185,129,0.06)',color:result.error?'#EF4444':'#10B981'}}>
-        {result.error||`✓ ${result.sent}건 발송 ${result.failed>0?`· ✗ ${result.failed}건 실패`:''}`}
+
+      {/* 테스트 이메일 입력 */}
+      <input
+        type="email" placeholder="테스트 이메일 (기본: norich92@gmail.com)"
+        value={testEmail} onChange={e=>setTestEmail(e.target.value)}
+        style={{width:'100%',boxSizing:'border-box',padding:'6px 8px',borderRadius:'var(--radius-sm)',border:'1px solid rgba(255,255,255,0.08)',background:'rgba(255,255,255,0.04)',color:'rgba(255,255,255,0.7)',fontSize:12,marginBottom:6,outline:'none'}}
+      />
+
+      {/* 버튼 3개 */}
+      <div style={{display:'flex',gap:4,marginBottom:6}}>
+        <button onClick={()=>send('test')} disabled={sending} style={{flex:1,padding:'6px',borderRadius:'var(--radius-sm)',border:'1px solid rgba(59,123,246,0.2)',background:'rgba(59,123,246,0.06)',color:'#3B7BF6',cursor:'pointer',fontSize:13,fontWeight:600}}>🧪 테스트</button>
+        <button
+          onClick={()=>{previewCount('dormant');}}
+          onDoubleClick={()=>send('dormant')}
+          disabled={sending}
+          style={{flex:1,padding:'6px',borderRadius:'var(--radius-sm)',border:'1px solid rgba(245,158,11,0.2)',background:'rgba(245,158,11,0.06)',color:'#F59E0B',cursor:'pointer',fontSize:13,fontWeight:600}}
+          title="클릭: 대상 수 미리보기 / 더블클릭: 발송"
+        >😴 휴면{preview?.target==='dormant'?` (${preview.count})`:''}</button>
+        <button
+          onClick={()=>{previewCount('all');}}
+          onDoubleClick={()=>send('all')}
+          disabled={sending}
+          style={{flex:1,padding:'6px',borderRadius:'var(--radius-sm)',border:'1px solid rgba(239,68,68,0.2)',background:'rgba(239,68,68,0.06)',color:'#EF4444',cursor:'pointer',fontSize:13,fontWeight:600}}
+          title="클릭: 대상 수 미리보기 / 더블클릭: 발송"
+        >📨 전체{preview?.target==='all'?` (${preview.count})`:''}</button>
+      </div>
+      {preview&&<div style={{fontSize:11,color:'rgba(255,255,255,0.35)',textAlign:'center',marginBottom:4}}>
+        미리보기: {preview.target==='dormant'?'휴면':'전체'} {preview.count}명 대상 · 더블클릭으로 발송
       </div>}
+
+      {sending&&<div style={{fontSize:13,color:'rgba(255,255,255,0.45)',textAlign:'center',padding:4}}>발송 중... ⏳</div>}
+
+      {result&&<div style={{fontSize:13,padding:6,borderRadius:'var(--radius-sm)',marginBottom:6,background:result.error?'rgba(239,68,68,0.06)':'rgba(16,185,129,0.06)',color:result.error?'#EF4444':'#10B981'}}>
+        {result.error
+          ? `❌ ${result.error}`
+          : <>
+              ✓ {result.sent}건 발송
+              {result.skippedByLimit>0&&<span style={{color:'#F59E0B'}}> · ⚠ 한도로 {result.skippedByLimit}건 스킵</span>}
+              {result.failed>0&&<span style={{color:'#EF4444'}}> · ✗ {result.failed}건 실패 <button onClick={()=>setShowFailed(v=>!v)} style={{background:'none',border:'none',color:'#EF4444',cursor:'pointer',fontSize:11,textDecoration:'underline'}}>{showFailed?'숨기기':'보기'}</button></span>}
+            </>
+        }
+        {showFailed&&result.failedEmails?.length>0&&(
+          <div style={{marginTop:4,fontSize:11,opacity:0.7}}>
+            {result.failedEmails.map((f:any,i:number)=><div key={i}>{f.email}: {f.error}</div>)}
+          </div>
+        )}
+      </div>}
+
       <button onClick={loadLogs} style={{width:'100%',padding:'4px',borderRadius:4,border:'1px solid rgba(255,255,255,0.04)',background:'none',color:'rgba(255,255,255,0.35)',cursor:'pointer',fontSize:12}}>발송 이력 보기</button>
       {logs?.summary&&<div style={{marginTop:4,fontSize:12,color:'rgba(255,255,255,0.35)'}}>
         {Object.entries(logs.summary).map(([c,s]:[string,any])=><div key={c}>{c}: ✓{s.sent} ✗{s.failed}</div>)}

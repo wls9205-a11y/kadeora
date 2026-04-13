@@ -21,6 +21,17 @@ export async function GET(req: NextRequest) {
     const sb = getSupabaseAdmin();
     const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString();
 
+    // 오늘 잔여 한도 체크
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const { count: sentToday } = await (sb as any)
+      .from('email_send_logs')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'sent')
+      .gte('created_at', todayStart.toISOString());
+    const remaining = 100 - (sentToday || 0);
+    if (remaining <= 0) return { processed: 0, metadata: { reason: 'daily_limit_reached', sentToday } };
+
     // 마케팅 동의 실유저
     const { data: users } = await sb.from('profiles')
       .select('id, nickname')
@@ -28,6 +39,14 @@ export async function GET(req: NextRequest) {
       .neq('is_seed', true).neq('is_deleted', true);
 
     if (!users?.length) return { processed: 0, metadata: { reason: 'no_marketing_users' } };
+
+    // 이미 이번 주 digest 보낸 유저 제외
+    const { data: alreadySent } = await (sb as any).from('email_send_logs')
+      .select('recipient_email')
+      .eq('campaign', 'weekly-digest')
+      .eq('status', 'sent')
+      .gte('created_at', weekAgo);
+    const sentEmails = new Set((alreadySent || []).map((r: any) => r.recipient_email));
 
     // 주간 데이터 수집
     const [hotPosts, deadlines, newBlogs] = await Promise.all([
@@ -50,7 +69,7 @@ export async function GET(req: NextRequest) {
     }));
     await (sb as any).from('notifications').insert(notifs);
 
-    // 이메일 발송 (Resend + 새 템플릿)
+    // 이메일 발송 (Resend + 한도 고려)
     let emailSent = 0, emailFailed = 0;
     try {
       const { sendNotificationEmail } = await import('@/lib/email-sender');
@@ -62,30 +81,32 @@ export async function GET(req: NextRequest) {
         newBlogs: (newBlogs.data || []) as any[],
       });
 
+      const maxSend = Math.min(users.length, remaining, 80);
+
       // 배치 발송 (10명씩, 1초 딜레이)
-      for (let i = 0; i < Math.min(users.length, 80); i += 10) {
+      for (let i = 0; i < maxSend; i += 10) {
         const batch = users.slice(i, i + 10);
         await Promise.all(batch.map(async (u) => {
           try {
             const { data: authUser } = await sb.auth.admin.getUserById(u.id);
             const email = authUser?.user?.email;
-            if (!email) return;
+            if (!email || sentEmails.has(email)) return;
 
             const subject = `${u.nickname || '회원'}님의 주간 투자 리포트 📊`;
             const r = await sendNotificationEmail(email, subject, body);
 
-            // email_send_logs 기록
             await (sb as any).from('email_send_logs').insert({
               campaign: 'weekly-digest',
               recipient_email: email,
+              user_id: u.id,
               status: r.ok ? 'sent' : 'failed',
-              resend_id: r.id || null,
+              resend_id: r.ok ? r.id || null : null,
             }).catch(() => {});
 
             if (r.ok) emailSent++; else emailFailed++;
           } catch { emailFailed++; }
         }));
-        if (i + 10 < users.length) await new Promise(r => setTimeout(r, 1000));
+        if (i + 10 < maxSend) await new Promise(r => setTimeout(r, 1000));
       }
     } catch (e) { console.error('[email-digest]', e); }
 
@@ -93,7 +114,7 @@ export async function GET(req: NextRequest) {
       processed: notifs.length,
       created: emailSent,
       failed: emailFailed,
-      metadata: { emailSent, emailFailed, users: users.length, hotPosts: hotPosts.data?.length, deadlines: deadlines.data?.length, newBlogs: newBlogs.data?.length },
+      metadata: { emailSent, emailFailed, users: users.length, remaining, hotPosts: hotPosts.data?.length, deadlines: deadlines.data?.length, newBlogs: newBlogs.data?.length },
     };
   });
 
