@@ -5,12 +5,6 @@ import { reEngagementEmail } from '@/lib/email-templates';
 
 export const maxDuration = 60;
 
-/**
- * POST /api/admin/send-email
- * body: { campaign?: string, target: 'all' | 'dormant' | 'test', testEmail?: string, previewOnly?: boolean }
- *
- * Resend 무료: 100통/일, 3,000통/월
- */
 export async function POST(req: NextRequest) {
   const auth = await requireAdmin();
   if ('error' in auth) return auth.error;
@@ -21,7 +15,6 @@ export async function POST(req: NextRequest) {
 
   const { target = 'test', testEmail, previewOnly = false } = await req.json();
 
-  // campaign 이름에 target 포함 (dormant/all 구분)
   const campaign = target === 'test' ? 're-engagement_test'
     : target === 'dormant' ? 're-engagement_dormant'
     : 're-engagement_all';
@@ -29,133 +22,86 @@ export async function POST(req: NextRequest) {
   const resend = new Resend(apiKey);
 
   try {
-    // ── 오늘 잔여 발송 한도 체크 ──────────────────────────────────
-    const todayStart = new Date();
-    todayStart.setHours(0, 0, 0, 0);
-    const { count: sentToday } = await sb
-      .from('email_send_logs')
+    // 오늘 잔여 한도
+    const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+    const { count: sentToday } = await sb.from('email_send_logs')
       .select('id', { count: 'exact', head: true })
-      .eq('status', 'sent')
-      .gte('created_at', todayStart.toISOString());
+      .eq('status', 'sent').gte('created_at', todayStart.toISOString());
     const remaining = 100 - (sentToday || 0);
-    if (remaining <= 0 && target !== 'test') {
+    if (remaining <= 0 && target !== 'test')
       return NextResponse.json({ error: `오늘 Resend 한도 초과 (100통/일). 내일 다시 시도하세요.` });
-    }
 
-    // ── 대상자 조회 ────────────────────────────────────────────────
+    // 대상자 조회
     let recipients: { email: string; nickname: string; userId?: string }[] = [];
 
     if (target === 'test') {
-      const email = testEmail || 'norich92@gmail.com';
-      recipients = [{ email, nickname: '테스트' }];
+      recipients = [{ email: testEmail || 'norich92@gmail.com', nickname: '테스트' }];
     } else {
-      // 1) email_subscribers 활성 목록
-      const { data: subs } = await sb
-        .from('email_subscribers')
-        .select('email')
-        .eq('is_active', true)
-        .is('unsubscribed_at', null);
-
+      const { data: subs } = await sb.from('email_subscribers')
+        .select('email').eq('is_active', true).is('unsubscribed_at', null);
       if (!subs?.length) return NextResponse.json({ error: '대상자 없음', count: 0 });
 
-      const rawEmails: string[] = subs
-        .map((s: any) => s.email as string)
+      const rawEmails: string[] = subs.map((s: any) => s.email as string)
         .filter((e: string) => !e.includes('kadeora.test') && !e.includes('kadeora.com'));
 
-      // 2) 이미 이 campaign으로 발송된 이메일 제외
-      const { data: sent } = await sb
-        .from('email_send_logs')
-        .select('recipient_email')
-        .eq('campaign', campaign)
-        .eq('status', 'sent');
+      const { data: sent } = await sb.from('email_send_logs')
+        .select('recipient_email').eq('campaign', campaign).eq('status', 'sent');
       const sentSet = new Set((sent || []).map((s: any) => s.recipient_email as string));
       const targetEmails = rawEmails.filter((e: string) => !sentSet.has(e));
-
       if (!targetEmails.length) return NextResponse.json({ error: '발송 대상 없음 (이미 전송 완료)', count: 0 });
 
-      // 3) profiles 배치 조회 (N+1 제거) — auth listUsers 페이지네이션으로 email→id 맵 구성
+      // 배치 auth 조회 (N+1 제거)
       const emailToUserId: Record<string, string> = {};
       let page = 1;
       while (true) {
         const { data: { users }, error } = await sb.auth.admin.listUsers({ page, perPage: 100 });
         if (error || !users?.length) break;
         for (const u of users) {
-          if (u.email && targetEmails.includes(u.email)) {
-            emailToUserId[u.email] = u.id;
-          }
+          if (u.email && targetEmails.includes(u.email)) emailToUserId[u.email] = u.id;
         }
         if (users.length < 100) break;
         page++;
       }
 
-      // 4) profiles IN 쿼리 한 방에 (닉네임 + last_active_at)
       const userIds = Object.values(emailToUserId);
       const profileMap: Record<string, { nickname: string; last_active_at: string | null }> = {};
       if (userIds.length > 0) {
-        const { data: profiles } = await sb
-          .from('profiles')
-          .select('id, nickname, last_active_at')
-          .in('id', userIds);
-        for (const p of (profiles || [])) {
-          profileMap[p.id] = { nickname: p.nickname, last_active_at: p.last_active_at };
-        }
+        const { data: profiles } = await sb.from('profiles')
+          .select('id, nickname, last_active_at').in('id', userIds);
+        for (const p of (profiles || [])) profileMap[p.id] = p;
       }
 
-      // 5) dormant 필터링 (30일 기준)
-      const DORMANT_THRESHOLD_MS = 30 * 86400000;
+      const DORMANT_MS = 30 * 86400000;
       for (const email of targetEmails) {
         const userId = emailToUserId[email];
         const profile = userId ? profileMap[userId] : null;
         const nickname = profile?.nickname || email.split('@')[0];
-
-        if (target === 'dormant') {
-          // 30일 이내 활성 유저는 제외 (프로필 없는 비회원은 dormant로 간주)
-          if (profile?.last_active_at) {
-            const inactive = Date.now() - new Date(profile.last_active_at).getTime();
-            if (inactive < DORMANT_THRESHOLD_MS) continue;
-          }
+        if (target === 'dormant' && profile?.last_active_at) {
+          if (Date.now() - new Date(profile.last_active_at).getTime() < DORMANT_MS) continue;
         }
-
         recipients.push({ email, nickname, userId: userId || undefined });
       }
     }
 
     if (!recipients.length) return NextResponse.json({ error: '발송 대상 없음', count: 0 });
+    if (previewOnly) return NextResponse.json({ ok: true, preview: true, count: recipients.length, remaining });
 
-    // previewOnly: 실제 발송 없이 카운트만 반환
-    if (previewOnly) {
-      return NextResponse.json({ ok: true, preview: true, count: recipients.length, remaining });
-    }
-
-    // 잔여 한도 초과 방지: 발송 수 자르기
     const sendable = target === 'test' ? recipients : recipients.slice(0, remaining);
-    if (sendable.length < recipients.length) {
-      console.warn(`[send-email] 한도로 인해 ${sendable.length}/${recipients.length}만 발송`);
-    }
-
-    // ── 발송 (10개씩 배치, 배치 간 1초) ─────────────────────────
-    const utmCampaign = `${new Date().toISOString().slice(0, 7).replace('-', '_')}`;
+    const utmCampaign = new Date().toISOString().slice(0, 7).replace('-', '_');
     const results: { email: string; ok: boolean; id?: string; error?: string }[] = [];
-    const batchSize = 10;
 
-    for (let i = 0; i < sendable.length; i += batchSize) {
-      const batch = sendable.slice(i, i + batchSize);
+    for (let i = 0; i < sendable.length; i += 10) {
+      const batch = sendable.slice(i, i + 10);
       const batchRes = await Promise.all(batch.map(async (r) => {
         try {
           const subject = `${r.nickname}님, 놓치고 있는 투자 정보가 있어요 📊`;
           const html = reEngagementEmail({ nickname: r.nickname, email: r.email, utmCampaign });
           const { data, error } = await resend.emails.send({
-            from: '카더라 <noreply@kadeora.app>',
-            to: r.email,
-            subject,
-            html,
+            from: '카더라 <noreply@kadeora.app>', to: r.email, subject, html,
           });
           await sb.from('email_send_logs').insert({
-            campaign,
-            recipient_email: r.email,
-            user_id: r.userId || null,
-            status: error ? 'failed' : 'sent',
-            resend_id: data?.id || null,
+            campaign, recipient_email: r.email, user_id: r.userId || null,
+            status: error ? 'failed' : 'sent', resend_id: data?.id || null,
             error_message: error?.message || null,
           });
           return { email: r.email, ok: !error, id: data?.id, error: error?.message };
@@ -168,17 +114,14 @@ export async function POST(req: NextRequest) {
         }
       }));
       results.push(...batchRes);
-      if (i + batchSize < sendable.length) await new Promise(res => setTimeout(res, 1000));
+      if (i + 10 < sendable.length) await new Promise(res => setTimeout(res, 1000));
     }
 
     const sentCount = results.filter(r => r.ok).length;
     const failed = results.filter(r => !r.ok);
-
     return NextResponse.json({
-      ok: true, campaign, target,
-      total: recipients.length,
-      sent: sentCount,
-      failed: failed.length,
+      ok: true, campaign, target, total: recipients.length,
+      sent: sentCount, failed: failed.length,
       failedEmails: failed.map(r => ({ email: r.email, error: r.error })),
       skippedByLimit: recipients.length - sendable.length,
     });
@@ -188,36 +131,60 @@ export async function POST(req: NextRequest) {
 }
 
 /**
- * GET /api/admin/send-email — 발송 이력 + 오늘 잔여 한도
+ * GET /api/admin/send-email
+ * 발송 이력 + 잔여 한도 + 구독자 통계
  */
 export async function GET(req: NextRequest) {
   const auth = await requireAdmin();
   if ('error' in auth) return auth.error;
   const sb = auth.admin as any;
 
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
+  const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+  const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString();
+  const monthAgo = new Date(Date.now() - 30 * 86400000).toISOString();
 
-  const [logsRes, todayRes] = await Promise.all([
+  const [logsRes, todayRes, totalSubsRes, unsubRes, newSubsWeekRes, newSubsMonthRes] = await Promise.all([
     sb.from('email_send_logs')
-      .select('campaign, recipient_email, status, created_at')
-      .order('created_at', { ascending: false })
-      .limit(50),
+      .select('campaign, recipient_email, status, created_at, error_message')
+      .order('created_at', { ascending: false }).limit(20),
     sb.from('email_send_logs')
       .select('id', { count: 'exact', head: true })
-      .eq('status', 'sent')
-      .gte('created_at', todayStart.toISOString()),
+      .eq('status', 'sent').gte('created_at', todayStart.toISOString()),
+    sb.from('email_subscribers')
+      .select('id', { count: 'exact', head: true }).eq('is_active', true),
+    sb.from('email_subscribers')
+      .select('id', { count: 'exact', head: true }).eq('is_active', false),
+    sb.from('email_subscribers')
+      .select('id', { count: 'exact', head: true })
+      .eq('is_active', true).gte('subscribed_at', weekAgo),
+    sb.from('email_subscribers')
+      .select('id', { count: 'exact', head: true })
+      .eq('is_active', true).gte('subscribed_at', monthAgo),
   ]);
 
   const logs = logsRes.data || [];
   const sentToday = todayRes.count || 0;
 
+  // 전체 캠페인별 누적 통계
+  const { data: allLogs } = await sb.from('email_send_logs')
+    .select('campaign, status');
   const summary: Record<string, { sent: number; failed: number }> = {};
-  for (const log of logs) {
+  for (const log of (allLogs || [])) {
     if (!summary[log.campaign]) summary[log.campaign] = { sent: 0, failed: 0 };
     if (log.status === 'sent') summary[log.campaign].sent++;
     else summary[log.campaign].failed++;
   }
 
-  return NextResponse.json({ logs, summary, sentToday, remaining: 100 - sentToday });
+  return NextResponse.json({
+    logs,
+    summary,
+    sentToday,
+    remaining: 100 - sentToday,
+    subscribers: {
+      active: totalSubsRes.count || 0,
+      unsubscribed: unsubRes.count || 0,
+      newThisWeek: newSubsWeekRes.count || 0,
+      newThisMonth: newSubsMonthRes.count || 0,
+    },
+  });
 }
