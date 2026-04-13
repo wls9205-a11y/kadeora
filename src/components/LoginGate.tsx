@@ -9,7 +9,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
 import { useEffect, useRef, useState, ReactNode } from 'react';
-import { trackConversion } from '@/lib/track-conversion';
+import { trackCTA } from '@/lib/analytics';
 
 interface LoginGateProps {
   children: ReactNode;
@@ -38,7 +38,7 @@ export default function LoginGate({ children, feature, title, description, blurH
   useEffect(() => {
     if (!tracked.current && mounted && !userId && !loading) {
       tracked.current = true;
-      trackConversion('cta_view', `login_gate_${feature}`, { pagePath: pathname });
+      trackCTA('view', `login_gate_${feature}`, { page_path: pathname });
     }
   }, [userId, loading, feature, pathname, mounted]);
 
@@ -75,7 +75,7 @@ export default function LoginGate({ children, feature, title, description, blurH
           {description || d.desc}
         </div>
         <Link href={url}
-          onClick={() => trackConversion('cta_click', `login_gate_${feature}`, { pagePath: pathname })}
+          onClick={() => trackCTA('click', `login_gate_${feature}`, { page_path: pathname })}
           style={{
             display: 'inline-flex', alignItems: 'center', gap: 6,
             padding: '10px 24px', borderRadius: 'var(--radius-xl)',
