@@ -201,13 +201,64 @@ async function handler(_req: NextRequest) {
 
   const issue = issues[0];
 
+  // v2: 즉시 is_processed=true 마킹 (동시 실행 race condition 방지)
+  const { data: lockResult } = await (sb as any).from('issue_alerts')
+    .update({ is_processed: true, processed_at: new Date().toISOString() })
+    .eq('id', issue.id)
+    .eq('is_processed', false) // CAS: 아직 미처리인 경우만
+    .select('id');
+  if (!lockResult || lockResult.length === 0) {
+    return NextResponse.json({ processed: 0, message: 'already processing (race)' });
+  }
+
+  // v2: 기존 blog_posts에 같은 토픽 글 있으면 AI 생성 스킵
+  const issueKeywords: string[] = issue.detected_keywords || [];
+  const skipReasons: string[] = [];
+  if (issueKeywords.length >= 1) {
+    // 24시간 내 같은 키워드로 작성된 블로그 검색
+    const since24h = new Date(Date.now() - 24 * 3600000).toISOString();
+    const { data: recentBlogs } = await sb.from('blog_posts')
+      .select('id, title, tags, cron_type')
+      .eq('is_published', true)
+      .eq('category', issue.category === 'economy' ? 'finance' : issue.category)
+      .gte('created_at', since24h)
+      .limit(50);
+    if (recentBlogs) {
+      for (const blog of recentBlogs) {
+        const blogTags: string[] = blog.tags || [];
+        const overlap = issueKeywords.filter((k: string) => blogTags.includes(k) || (blog.title || '').includes(k));
+        if (overlap.length >= 2) {
+          skipReasons.push(`keyword_overlap:${blog.id}:${overlap.join(',')}`);
+          break;
+        }
+      }
+    }
+    // pg_trgm으로 제목 유사도 체크
+    if (skipReasons.length === 0) {
+      try {
+        const { data: simBlogs } = await sb.rpc('check_blog_similarity', {
+          p_title: issue.title,
+          p_threshold: 0.2,
+        });
+        if (simBlogs && simBlogs.length > 0) {
+          skipReasons.push(`title_similar:${simBlogs[0].id}:${simBlogs[0].title?.slice(0, 30)}`);
+        }
+      } catch { /* RPC 없으면 스킵 */ }
+    }
+  }
+  if (skipReasons.length > 0) {
+    await (sb as any).from('issue_alerts').update({
+      publish_decision: 'duplicate_blog',
+      draft_content: skipReasons.join(' | '),
+    }).eq('id', issue.id);
+    return NextResponse.json({ processed: 0, message: 'duplicate_blog', reason: skipReasons[0] });
+  }
+
   // AI 기사 생성
   const article = await generateArticle(issue);
   if (!article) {
     await (sb as any).from('issue_alerts').update({
-      is_processed: true,
       publish_decision: 'ai_failed',
-      processed_at: new Date().toISOString(),
     }).eq('id', issue.id);
     return NextResponse.json({ processed: 0, error: 'AI generation failed' });
   }

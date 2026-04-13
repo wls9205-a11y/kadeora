@@ -1,4 +1,33 @@
 # 카더라 STATUS.md
+> 마지막 업데이트: 2026-04-13 (세션 97 — 이슈선점 중복 방지 3중 방어)
+
+## 세션 97 — 이슈선점 자동화 중복 발행 방지
+
+### 문제: 오늘 issue-draft 10개 글 중 8개 사실상 중복
+- SMR/소형원전 관련 6개 (같은 뉴스 1건에서 파생)
+- 미-이란 긴장 관련 2개 (같은 토픽)
+- 원인: issue-detect 중복탐지 무력화 (related_entities 전부 빈배열, 타이틀 30자 체크 우회)
+
+### 🔴 issue-detect isDuplicate v2 (3중 방어)
+1. **pg_trgm 제목 유사도**: `check_issue_similarity` RPC (threshold 0.2)
+2. **키워드 2개+ 겹침 차단**: 같은 카테고리 내 24시간 키워드 overlap 체크
+3. **카테고리+issue_type 6시간 제한**: 같은 유형 이슈 6시간 내 1건만 허용
+4. 엔티티 overlap (기존 유지)
+
+### 🔴 issue-draft 사전 대조 + Race condition 방지
+- **CAS 락**: `is_processed=false` 조건부 UPDATE로 동시 실행 방지
+- **blog_posts 키워드 대조**: 24시간 내 같은 키워드 2개+ 겹치는 발행글 존재 → AI 생성 스킵
+- **pg_trgm 제목 유사도**: 기존 blog_posts와 유사도 0.2+ → 스킵
+
+### 🟡 DB 변경
+- `blog_publish_config.title_similarity_threshold`: 0.4 → **0.2**
+- 중복 글 6개 unpublish (SMR 5개 + 이란 1개)
+- `check_issue_similarity` RPC 생성
+- `idx_issue_alerts_detected_keywords` GIN 인덱스 추가
+- `idx_issue_alerts_cat_subcat_detected` 복합 인덱스 추가
+
+---
+
 > 마지막 업데이트: 2026-04-13 (세션 96 — DB 컬럼 전면 수정 + 이슈선점 자동발행 보장 + IssueTab v2)
 
 ## 세션 96 — DB 컬럼 버그 전면 수정 + 이슈선점 자동발행 + 어드민 IssueTab v2

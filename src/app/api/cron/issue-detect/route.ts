@@ -165,29 +165,77 @@ async function fetchRSS(feed: { name: string; url: string }): Promise<RSSItem[]>
   }
 }
 
-/* ═══════════ 중복 체크 ═══════════ */
+/* ═══════════ 중복 체크 (v2 — 키워드+카테고리+제목 3중 방어) ═══════════ */
 
-async function isDuplicate(sb: any, entities: string[], title: string): Promise<{ isDup: boolean; existingId?: string }> {
-  if (entities.length === 0 && !title) return { isDup: false };
-  // 타이틀 유사도 체크 (24시간 내 동일/유사 타이틀)
+async function isDuplicate(
+  sb: any,
+  entities: string[],
+  title: string,
+  keywords: string[],
+  category: string,
+  issueType: string,
+): Promise<{ isDup: boolean; existingId?: string }> {
+  if (!title && entities.length === 0 && keywords.length === 0) return { isDup: false };
+  const since = new Date(Date.now() - 24 * 3600000).toISOString();
+
+  // 1) pg_trgm 타이틀 유사도 체크 (similarity > 0.2)
   if (title) {
-    const shortTitle = title.slice(0, 30);
-    const { data: titleMatch } = await sb.from('issue_alerts')
-      .select('id').ilike('title', `%${shortTitle}%`)
-      .gte('detected_at', new Date(Date.now() - 24 * 3600000).toISOString())
-      .limit(1);
-    if (titleMatch && titleMatch.length > 0) return { isDup: true, existingId: titleMatch[0].id };
+    try {
+      const { data: simMatch } = await sb.rpc('check_issue_similarity', {
+        p_title: title,
+        p_threshold: 0.2,
+        p_since: since,
+      });
+      if (simMatch && simMatch.length > 0) return { isDup: true, existingId: simMatch[0].id };
+    } catch {
+      // RPC 미존재 시 fallback: 앞 30자 체크
+      const shortTitle = title.slice(0, 30);
+      const { data: titleMatch } = await sb.from('issue_alerts')
+        .select('id').ilike('title', `%${shortTitle}%`)
+        .gte('detected_at', since).limit(1);
+      if (titleMatch && titleMatch.length > 0) return { isDup: true, existingId: titleMatch[0].id };
+    }
   }
 
-  // 24시간 내 동일 엔티티 이슈 존재 체크
-  const { data } = await (sb as any).from('issue_alerts')
-    .select('id, final_score, title')
-    .overlaps('related_entities', entities)
-    .gte('detected_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
-    .order('final_score', { ascending: false })
-    .limit(1);
+  // 2) 키워드 2개 이상 겹치면 + 같은 카테고리 → 중복
+  if (keywords.length >= 2) {
+    const { data: kwMatch } = await (sb as any).from('issue_alerts')
+      .select('id, detected_keywords')
+      .eq('category', category)
+      .gte('detected_at', since)
+      .limit(50);
+    if (kwMatch) {
+      for (const row of kwMatch) {
+        const existingKw: string[] = row.detected_keywords || [];
+        const overlap = keywords.filter((k: string) => existingKw.includes(k));
+        if (overlap.length >= 2) return { isDup: true, existingId: row.id };
+      }
+    }
+  }
 
-  if (data && data.length > 0) return { isDup: true, existingId: data[0].id };
+  // 3) 같은 카테고리 + 같은 issue_type → 6시간 내 1건만 허용
+  if (issueType && !['apt_general', 'stock_general', 'finance_general', 'economy_general', 'life_general', 'tax_general', 'general'].includes(issueType)) {
+    const sixHoursAgo = new Date(Date.now() - 6 * 3600000).toISOString();
+    const { data: typeMatch } = await (sb as any).from('issue_alerts')
+      .select('id')
+      .eq('category', category)
+      .eq('sub_category', issueType)
+      .gte('detected_at', sixHoursAgo)
+      .limit(1);
+    if (typeMatch && typeMatch.length > 0) return { isDup: true, existingId: typeMatch[0].id };
+  }
+
+  // 4) 엔티티 overlap (기존 로직 유지)
+  if (entities.length > 0) {
+    const { data } = await (sb as any).from('issue_alerts')
+      .select('id, final_score, title')
+      .overlaps('related_entities', entities)
+      .gte('detected_at', since)
+      .order('final_score', { ascending: false })
+      .limit(1);
+    if (data && data.length > 0) return { isDup: true, existingId: data[0].id };
+  }
+
   return { isDup: false };
 }
 
@@ -309,8 +357,11 @@ async function handler(_req: NextRequest) {
     // 키워드 가중치 체크: 너무 약한 키워드만 있으면 스킵
     if (keywordWeight(keywords) < 1) continue;
 
-    // 중복 체크
-    const { isDup, existingId } = await isDuplicate(sb, entities, items[0].title);
+    // 이슈 유형 판별 (중복 체크에서도 사용)
+    const issueType = detectIssueType(keywords, category);
+
+    // 중복 체크 (v2: 키워드+카테고리+제목 3중 방어)
+    const { isDup, existingId } = await isDuplicate(sb, entities, items[0].title, keywords, category, issueType);
     if (isDup) {
       // 기존 이슈 존재 → 중복 스킵 (추후 증폭계수 업데이트는 issue-trend에서)
       continue;
@@ -318,9 +369,6 @@ async function handler(_req: NextRequest) {
 
     // 기존 기사 수 체크
     const existingPosts = await checkExistingPosts(sb, entities);
-
-    // 이슈 유형 판별
-    const issueType = detectIssueType(keywords, category);
 
     // 이슈 후보 구성
     const candidate: IssueCandidate = {
