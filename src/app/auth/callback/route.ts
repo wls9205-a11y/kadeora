@@ -38,11 +38,27 @@ export async function GET(request: Request) {
       const updates: Record<string, any> = { updated_at: new Date().toISOString() };
       if (avatarUrl) updates.avatar_url = avatarUrl;
       if (!existing?.signup_source) updates.signup_source = source;
+
+      // ── Zero-Step 온보딩: CTA 가입자는 온보딩 스킵 ──
+      const DIRECT_SOURCES = ['direct', 'nav', 'signup_cta', 'feed', 'sidebar', 'right_panel'];
+      const isCTA = !DIRECT_SOURCES.includes(source);
+
       if (isNewUser) {
         updates.provider = provider;
         updates.nickname = meta?.full_name ?? meta?.name ?? data.user.email?.split('@')[0] ?? '사용자';
         updates.nickname_set = true;
         updates.signup_return_url = redirect;
+
+        if (isCTA) {
+          // CTA 가입: interests 자동 추론 + 온보딩 즉시 완료
+          const interests: string[] = [];
+          if (redirect.includes('/apt') || source.includes('apt')) interests.push('apt');
+          if (redirect.includes('/stock') || source.includes('stock')) interests.push('stock');
+          if (interests.length === 0) interests.push('news');
+          updates.interests = interests;
+          updates.onboarded = true;
+          updates.onboarding_method = 'auto';
+        }
       }
       await supabase.from('profiles').update(updates).eq('id', data.user.id);
 
@@ -52,19 +68,37 @@ export async function GET(request: Request) {
           const { getSupabaseAdmin } = await import('@/lib/supabase-admin');
           await (getSupabaseAdmin() as any).from('signup_attempts').insert({
             provider, source, redirect_path: redirect, success: true,
+            onboarding_skipped: isCTA,
           });
         } catch {}
       }
 
-      if (!existing || isNewUser || !existing.onboarded) {
-        // 신규 or 온보딩 미완료 → 퀵온보딩
-        const safeRedirect = redirect.startsWith('/') ? redirect : '/feed';
-        return NextResponse.redirect(`${origin}/onboarding?return=${encodeURIComponent(safeRedirect)}`);
-      } else {
-        // 기존 유저 — 바로 리다이렉트
-        const safeRedirect = redirect.startsWith('/') ? redirect : '/feed';
+      // ── 라우팅 분기 ──
+      const safeRedirect = redirect.startsWith('/') ? redirect : '/feed';
+
+      // 1) CTA 신규 가입: 온보딩 스킵 → 바로 콘텐츠
+      if (isNewUser && isCTA) {
         return NextResponse.redirect(`${origin}${safeRedirect}`);
       }
+      // 2) 기존 유저 + 미온보딩 + CTA 재방문: 자동 완료 → 바로 콘텐츠
+      if (existing && !existing.onboarded && isCTA) {
+        const autoFix: Record<string, any> = { onboarded: true, onboarding_method: 'auto', updated_at: new Date().toISOString() };
+        if (!existing.interests || existing.interests.length === 0) {
+          const interests: string[] = [];
+          if (redirect.includes('/apt') || source.includes('apt')) interests.push('apt');
+          if (redirect.includes('/stock') || source.includes('stock')) interests.push('stock');
+          if (interests.length === 0) interests.push('news');
+          autoFix.interests = interests;
+        }
+        await supabase.from('profiles').update(autoFix).eq('id', data.user.id);
+        return NextResponse.redirect(`${origin}${safeRedirect}`);
+      }
+      // 3) direct 신규 or 미온보딩 기존유저 → 온보딩 진행
+      if (!existing || isNewUser || !existing.onboarded) {
+        return NextResponse.redirect(`${origin}/onboarding?return=${encodeURIComponent(safeRedirect)}`);
+      }
+      // 4) 기존 유저, 온보딩 완료 → 바로 리다이렉트
+      return NextResponse.redirect(`${origin}${safeRedirect}`);
     }
   }
 

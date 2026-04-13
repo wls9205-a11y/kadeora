@@ -79,6 +79,37 @@ export default function GrowthTab({ onNavigate }: { onNavigate: (t: any) => void
             <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginLeft: 4 }}>(기준선 0.18%)</span>
           </span>
         </div>
+        {/* ── Zero-Step 온보딩 분포 ── */}
+        {cm.zeroStep && (() => {
+          const zs = cm.zeroStep;
+          const total = (zs.auto || 0) + (zs.manual || 0) + (zs.skip || 0) + (zs.notOnboarded || 0);
+          if (total === 0) return null;
+          const items = [
+            { label: '⚡ 자동 (CTA)', value: zs.auto || 0, color: '#10B981' },
+            { label: '📝 수동 (온보딩)', value: zs.manual || 0, color: '#3B82F6' },
+            { label: '⏭️ 건너뛰기', value: zs.skip || 0, color: '#F59E0B' },
+            { label: '❌ 미완료', value: zs.notOnboarded || 0, color: '#EF4444' },
+          ];
+          return (
+            <div style={{ marginTop: 8, padding: '8px 0', borderTop: '1px solid var(--border)' }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 6 }}>
+                🚀 온보딩 방식 분포 ({total}명)
+              </div>
+              <div style={{ display: 'flex', height: 18, borderRadius: 4, overflow: 'hidden', marginBottom: 4 }}>
+                {items.filter(i => i.value > 0).map((item, i) => (
+                  <div key={i} style={{ width: `${(item.value / total) * 100}%`, background: item.color, minWidth: 2 }} title={`${item.label}: ${item.value}`} />
+                ))}
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 12px', fontSize: 10 }}>
+                {items.map((item, i) => (
+                  <span key={i} style={{ color: item.color, fontWeight: 600 }}>
+                    {item.label} {item.value} ({total > 0 ? Math.round(item.value / total * 100) : 0}%)
+                  </span>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
       </div>
       <div className="adm-sec">📈 전환 퍼널 (7일)</div>
       <div className="adm-card">

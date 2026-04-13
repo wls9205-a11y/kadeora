@@ -543,7 +543,7 @@ export async function GET(req: NextRequest) {
 
       // ── 전환 개선 추적 지표 (세션 98) ──
       const week7Ago = new Date(Date.now() - 7 * 86400000).toISOString();
-      const [aptAlertCta7d, interestNew7d, onboardedTotal, totalRealForRate, regionSetCount, marketingCount] = await Promise.all([
+      const [aptAlertCta7d, interestNew7d, onboardedTotal, totalRealForRate, regionSetCount, marketingCount, autoOnboarded, manualOnboarded, skipOnboarded, notOnboarded] = await Promise.all([
         // apt_alert_cta 7일 클릭 (BlogAptAlertCTA + SmartSectionGate 통합 소스)
         (sb as any).from('conversion_events').select('event_type').eq('cta_name', 'apt_alert_cta').gte('created_at', week7Ago),
         // apt_site_interests 7일 신규 등록 (알림 CTA 효과 측정)
@@ -556,6 +556,14 @@ export async function GET(req: NextRequest) {
         sb.from('profiles').select('id', { count: 'exact', head: true }).not('residence_city', 'is', null).neq('is_seed', true),
         // 마케팅 동의 유저
         sb.from('profiles').select('id', { count: 'exact', head: true }).eq('marketing_agreed', true).neq('is_seed', true),
+        // Zero-Step: 자동 온보딩
+        safeCount(sb.from('profiles').select('id', { count: 'exact', head: true }).eq('onboarding_method', 'auto').neq('is_seed', true)),
+        // 수동 온보딩
+        safeCount(sb.from('profiles').select('id', { count: 'exact', head: true }).eq('onboarding_method', 'manual').neq('is_seed', true)),
+        // 건너뛰기
+        safeCount(sb.from('profiles').select('id', { count: 'exact', head: true }).eq('onboarding_method', 'skip').neq('is_seed', true)),
+        // 미온보딩
+        safeCount(sb.from('profiles').select('id', { count: 'exact', head: true }).eq('onboarded', false).neq('is_seed', true).neq('is_ghost', true)),
       ]);
       const aptAlertCta7dStats = { views: 0, clicks: 0 };
       for (const e of (aptAlertCta7d.data || [])) {
@@ -572,6 +580,8 @@ export async function GET(req: NextRequest) {
         marketingRate: (totalRealForRate.count ?? 0) > 0
           ? Math.round((marketingCount.count ?? 0) / (totalRealForRate.count ?? 0) * 100) : 0,
         contentGate7d: ctaStats['content_gate'] || { cta_view: 0, cta_click: 0 },
+        // Zero-Step 온보딩 분포
+        zeroStep: { auto: autoOnboarded, manual: manualOnboarded, skip: skipOnboarded, notOnboarded },
       };
 
       return NextResponse.json({

@@ -62,6 +62,7 @@ export default function OnboardingClient() {
         marketing_agreed: marketingAgreed,
         marketing_agreed_at: marketingAgreed ? new Date().toISOString() : null,
         onboarded: true,
+        onboarding_method: 'manual',
         updated_at: new Date().toISOString(),
       }).eq('id', user.id);
       // 데일리 리포트 자동 연동
@@ -210,7 +211,7 @@ export default function OnboardingClient() {
           onClick={async () => {
             const sb = createSupabaseBrowser();
             const { data } = await sb.auth.getUser();
-            if (data.user) await sb.from('profiles').update({ onboarded: true }).eq('id', data.user.id);
+            if (data.user) await sb.from('profiles').update({ onboarded: true, onboarding_method: 'skip' }).eq('id', data.user.id);
             router.replace(returnUrl);
           }}
           style={{
