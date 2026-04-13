@@ -30,6 +30,7 @@ import NextArticleFloat from '@/components/NextArticleFloat';
 import BlogTossGate from '@/components/BlogTossGate';
 import RelatedContentCard from '@/components/RelatedContentCard';
 import SmartSectionGate from '@/components/SmartSectionGate';
+import BlogAptAlertCTA from '@/components/BlogAptAlertCTA';
 // NewsletterSubscribe 삭제 — 카카오 CTA로 통합
 
 // marked heading에 id 자동 부여 (TOC 앵커용)
@@ -846,6 +847,16 @@ export default async function BlogDetailPage({ params }: Props) {
           <div className="blog-content" itemProp="articleBody">
             <SmartSectionGate htmlContent={htmlFull} slug={slug} category={post.category} userCount={userCount} todaySignups={todaySignups} />
           </div>
+        )}
+
+        {/* 관심단지 알림 CTA — apt/unsold 카테고리 + 단지명 있을 때 (봇 제외) */}
+        {!isBot && (post.category === 'apt' || post.category === 'unsold') && post.tags?.[0] && (
+          <BlogAptAlertCTA
+            aptName={post.tags[0]}
+            siteSlug={relatedSites?.[0]?.slug}
+            category={post.category}
+            loginUrl={`/login?redirect=${encodeURIComponent(`/blog/${slug}`)}&source=apt_alert_cta`}
+          />
         )}
 
         {/* CTA — SmartSectionGate가 비로그인 전환 전담, BlogMidCTA 중복 제거 */}

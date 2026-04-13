@@ -6,7 +6,7 @@ import { trackConversion } from '@/lib/track-conversion';
 
 const INTERESTS = [
   { key: 'stock', label: '📈 주식', desc: '실시간 시세·AI 분석' },
-  { key: 'apt', label: '🏠 청약/부동산', desc: '청약일정·시세변동' },
+  { key: 'apt', label: '🏠 청약/부동산', desc: '청약일정·가격 알림' },
   { key: 'redev', label: '🏗️ 재개발', desc: '사업진행·조합현황' },
   { key: 'crypto', label: '₿ 암호화폐', desc: '시세·뉴스' },
   { key: 'news', label: '📰 경제뉴스', desc: '매일 핵심 요약' },
@@ -17,6 +17,15 @@ const REGIONS = [
   '서울','경기','인천','부산','대구','대전','광주','울산','세종',
   '강원','충북','충남','전북','전남','경북','경남','제주',
 ];
+
+/* 관심사별 알림 혜택 안내 */
+const INTEREST_BENEFITS: Record<string, string> = {
+  stock: '관심 종목 목표가 알림',
+  apt: '청약 마감·가격 변동 알림',
+  redev: '사업 진행 단계 알림',
+  news: '주간 시황 리포트',
+  tax: '세법 변경 알림',
+};
 
 export default function OnboardingClient() {
   const [selected, setSelected] = useState<string[]>([]);
@@ -40,7 +49,7 @@ export default function OnboardingClient() {
   const toggle = (key: string) =>
     setSelected(prev => prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]);
 
-  const handleFinish = async () => {
+  const handleFinish = async (skipRegion = false) => {
     setSaving(true);
     try {
       const sb = createSupabaseBrowser();
@@ -48,51 +57,66 @@ export default function OnboardingClient() {
       if (!user) { router.replace('/login'); return; }
       await sb.from('profiles').update({
         interests: selected.length > 0 ? selected : ['news'],
-        residence_city: region || null,
-        region_text: region || null,
+        residence_city: skipRegion ? null : (region || null),
+        region_text: skipRegion ? null : (region || null),
         marketing_agreed: marketingAgreed,
         onboarded: true,
         updated_at: new Date().toISOString(),
       }).eq('id', user.id);
       trackConversion('cta_complete', 'onboarding_interests', { category: selected.join(',') });
-      // 첫 미션: 관심사 설정 자동 완료
-      fetch('/api/profile/mission', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mission: 'interest' }) }).catch(() => {});
+      fetch('/api/profile/mission', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mission: 'interest' }),
+      }).catch(() => {});
     } catch {}
-    
-    // Android/Desktop: 바로 push 시도 (거부해도 OK — SmartPushPrompt가 나중에 재시도)
+
+    // Android/Desktop: 푸시 구독 시도
     if (!isIOS && 'Notification' in window && Notification.permission === 'default' && 'serviceWorker' in navigator) {
       try {
         const perm = await Notification.requestPermission();
         if (perm === 'granted') {
           const reg = await navigator.serviceWorker.ready;
-          const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY });
-          await fetch('/api/push/subscribe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ subscription: sub.toJSON() }) });
+          const sub = await reg.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+          });
+          await fetch('/api/push/subscribe', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ subscription: sub.toJSON() }),
+          });
           trackConversion('cta_complete', 'onboarding_push');
         }
       } catch (e) { console.error('[onboarding-push]', e); }
     }
 
     trackConversion('cta_complete', 'onboarding_finish');
-    // GA4 표준 sign_up 이벤트
     try { (window as any).gtag?.('event', 'sign_up', { method: 'onboarding' }); } catch {}
     router.replace(returnUrl);
   };
 
+  /* 선택한 관심사 기반 혜택 텍스트 */
+  const benefitText = selected.length > 0
+    ? selected.slice(0, 2).map(k => INTEREST_BENEFITS[k]).filter(Boolean).join(' · ')
+    : '청약 마감·가격 변동 알림';
+
   return (
     <div style={{ maxWidth: 420, margin: '40px auto', padding: '0 16px' }}>
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: 'clamp(20px, 5vw, 32px)' }}>
-        
-        {/* 단일 진행 바 */}
-        <div style={{ height: 3, borderRadius: 4, background: 'var(--brand)', marginBottom: 28 }} />
+      <div style={{
+        background: 'var(--bg-surface)', border: '1px solid var(--border)',
+        borderRadius: 'var(--radius-lg)', padding: 'clamp(20px, 5vw, 32px)',
+      }}>
+        {/* 진행 바 */}
+        <div style={{ height: 3, borderRadius: 4, background: 'var(--brand)', marginBottom: 24 }} />
 
         <h1 style={{ fontSize: 20, fontWeight: 800, margin: '0 0 4px', color: 'var(--text-primary)' }}>
           환영합니다! 🎉
         </h1>
-        <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: '0 0 20px', lineHeight: 1.5 }}>
-          관심 분야를 선택하면 맞춤 정보를 받을 수 있어요
+        <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: '0 0 18px', lineHeight: 1.5 }}>
+          관심 분야를 고르면 맞춤 알림을 바로 받을 수 있어요
         </p>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16 }}>
+        {/* 관심사 선택 */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 14 }}>
           {INTERESTS.map(({ key, label, desc }) => {
             const sel = selected.includes(key);
             return (
@@ -109,10 +133,14 @@ export default function OnboardingClient() {
           })}
         </div>
 
-        {/* 거주 지역 */}
-        <div style={{ marginBottom: 16 }}>
-          <label style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6, display: 'block' }}>
+        {/* 지역 선택 — 선택사항 강조 */}
+        <div style={{ marginBottom: 14 }}>
+          <label style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
             📍 거주 지역
+            <span style={{
+              fontSize: 10, padding: '2px 6px', borderRadius: 10,
+              background: 'rgba(100,116,139,0.15)', color: 'var(--text-tertiary)',
+            }}>선택사항</span>
           </label>
           <select value={region} onChange={e => setRegion(e.target.value)} style={{
             width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-md)',
@@ -122,27 +150,29 @@ export default function OnboardingClient() {
             backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23999' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E")`,
             backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center',
           }}>
-            <option value="">선택 안 함</option>
+            <option value="">선택 안 함 (나중에 설정 가능)</option>
             {REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
           </select>
-          <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>맞춤 청약·시세 알림에 활용돼요</div>
+          <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>
+            지역 설정 시 더 정확한 청약·시세 알림을 받을 수 있어요
+          </div>
         </div>
 
         {/* 마케팅 동의 */}
         <label style={{
-          display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 20,
+          display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 16,
           cursor: 'pointer', fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5,
         }}>
           <input type="checkbox" checked={marketingAgreed} onChange={e => setMarketingAgreed(e.target.checked)}
             style={{ marginTop: 2, accentColor: 'var(--brand)' }} />
-          <span>이메일·카카오톡으로 청약 마감, 종목 알림, 주간 리포트를 받겠습니다. (선택)</span>
+          <span>청약 마감·종목 알림·주간 리포트를 카카오톡·이메일로 받겠습니다. (선택)</span>
         </label>
 
-        {/* iOS Safari (비-PWA): 홈 화면 추가 안내 */}
+        {/* iOS 홈화면 추가 안내 */}
         {isIOS && !isPWA && (
           <div style={{
             background: 'rgba(59,123,246,0.06)', border: '1px solid rgba(59,123,246,0.15)',
-            borderRadius: 'var(--radius-md)', padding: '12px 14px', marginBottom: 16,
+            borderRadius: 'var(--radius-md)', padding: '12px 14px', marginBottom: 14,
             fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.7,
           }}>
             <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4, fontSize: 13 }}>
@@ -153,25 +183,43 @@ export default function OnboardingClient() {
           </div>
         )}
 
-        <button onClick={handleFinish} disabled={saving}
+        {/* 시작 버튼 — 혜택 텍스트 포함 */}
+        <button
+          onClick={() => handleFinish(false)}
+          disabled={saving}
           style={{
-            width: '100%', padding: 14, borderRadius: 'var(--radius-card)', border: 'none', fontSize: 15, fontWeight: 800,
+            width: '100%', padding: 14, borderRadius: 'var(--radius-card)', border: 'none',
+            fontSize: 15, fontWeight: 800,
             background: 'var(--brand)', color: '#fff',
             cursor: saving ? 'not-allowed' : 'pointer',
             opacity: saving ? 0.7 : 1,
-          }}>
+          }}
+        >
           {saving ? '시작하는 중...' : '카더라 시작하기 🚀'}
         </button>
-        
-        <button onClick={() => {
-          const sb = createSupabaseBrowser();
-          sb.auth.getUser().then(({ data }) => {
-            if (data.user) sb.from('profiles').update({ onboarded: true }).eq('id', data.user.id);
-          });
-          router.replace(returnUrl);
-        }}
-          style={{ width: '100%', marginTop: 8, padding: 10, background: 'none', border: 'none', fontSize: 12, color: 'var(--text-tertiary)', cursor: 'pointer' }}>
-          건너뛰기
+
+        {/* 시작하기 버튼 아래 혜택 요약 */}
+        {!saving && (
+          <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--text-tertiary)', marginTop: 8, lineHeight: 1.5 }}>
+            가입 즉시 <span style={{ color: 'var(--brand)', fontWeight: 700 }}>{benefitText}</span> 시작
+          </div>
+        )}
+
+        {/* 건너뛰기 */}
+        <button
+          onClick={async () => {
+            const sb = createSupabaseBrowser();
+            const { data } = await sb.auth.getUser();
+            if (data.user) await sb.from('profiles').update({ onboarded: true }).eq('id', data.user.id);
+            router.replace(returnUrl);
+          }}
+          style={{
+            width: '100%', marginTop: 10, padding: 8,
+            background: 'none', border: 'none',
+            fontSize: 12, color: 'var(--text-tertiary)', cursor: 'pointer',
+          }}
+        >
+          건너뛰기 (나중에 설정)
         </button>
       </div>
     </div>
