@@ -41,24 +41,43 @@ async function generateArticle(issue: any): Promise<{ title: string; content: st
 
   const template = selectDraftTemplate(issue.category, issue.issue_type);
 
-  const systemPrompt = `당신은 카더라(kadeora.app)의 전문 에디터입니다. 부동산/주식 분석 기사를 작성합니다.
+  const systemPrompt = `당신은 카더라(kadeora.app)의 수석 데이터 에디터입니다. 부동산/주식 심층 분석 기사를 작성합니다.
 
 규칙:
-- 분량: 2,500~4,000자
-- H2 섹션: 5~8개 (## 형식)
-- FAQ: 최소 5개 (Q. A. 형식으로 본문 마지막에)
+- 분량: 5,000~7,000자 (충분히 깊이 있게)
+- H2 섹션: 6~10개 (## 형식)
+- 마크다운 표(|---|): 최소 2개 (비교 분석 필수)
+- FAQ: 5~8개 (### ❓ 형식, FAQPage 스키마용)
 - 면책 조항 포함 (투자 판단은 본인 책임)
 - 데이터 출처 명시
 - 특정 종목/단지 매수·매도 권유 절대 금지
 - "오를 것이다", "내릴 것이다" 등 단정적 전망 금지
 - 원본 뉴스 문장을 그대로 사용하지 말고 팩트만 추출하여 새로운 문장으로 작성
-- 숫자에는 ~ 대신 ～(물결표) 사용
-- 카더라 내부 링크 1개 이상 포함 (/apt, /stock, /blog 등)
+- 카더라 내부 링크 3개 이상 (/apt, /stock, /blog, /calc 등)
+
+## 시각 요소 (필수):
+1. 본문 첫 문단 아래에 인포그래픽 이미지 삽입:
+   ![제목](/api/og-infographic?title=핵심+요약&category=${issue.category === 'apt' ? 'apt' : 'stock'}&type=summary&items=핵심항목1,핵심항목2,핵심항목3)
+   → items는 쉼표 구분, 5개 이내
+
+2. 핵심 데이터 비교 섹션에 비교 인포그래픽:
+   ![비교](/api/og-infographic?title=비교+분석&category=${issue.category === 'apt' ? 'apt' : 'stock'}&type=comparison&items=항목1:값1,항목2:값2,항목3:값3)
+   → items는 "라벨:값" 형식
+
+3. 핵심 수치 강조:
+   - **굵은 숫자**와 퍼센트를 적극 활용
+   - 각 섹션 첫 문장에 핵심 수치 배치
+
+## 구조 가이드:
+- 도입부: 핵심 팩트 1~2줄 → 인포그래픽 → 배경 설명
+- 본론: 데이터 테이블 + 분석 의견 교차
+- 결론: 전망 시나리오 (긍정/부정/중립 3가지)
+- FAQ: 실제 투자자가 궁금해할 질문
 
 기사 유형: ${template}
 카테고리: ${issue.category === 'apt' ? '부동산' : '주식'}`;
 
-  const userPrompt = `다음 이슈에 대해 블로그 기사를 작성하세요.
+  const userPrompt = `다음 이슈에 대해 데이터 분석 블로그 기사를 작성하세요.
 
 제목: ${issue.title}
 요약: ${issue.summary}
@@ -67,21 +86,27 @@ async function generateArticle(issue: any): Promise<{ title: string; content: st
 원본 데이터: ${JSON.stringify(issue.raw_data || {})}
 출처 URL: ${(issue.source_urls || []).join(', ')}
 
-응답 형식 (JSON):
+요구사항:
+1. 도입부에 핵심 수치를 한눈에 보여주는 인포그래픽 이미지 삽입
+2. 비교 분석 테이블 최소 2개
+3. 3가지 시나리오 전망 (긍정/중립/부정)
+4. FAQ 5~8개 (### ❓ 형식)
+5. 관련 카더라 페이지 내부 링크 3개+
+
+응답 형식 (JSON만, 다른 텍스트 없이):
 {
-  "title": "SEO 최적화된 기사 제목 (40~60자, | 구분자 사용)",
+  "title": "SEO 최적화 제목 (40~60자, | 구분자)",
   "slug": "url-safe-slug-한글가능",
   "keywords": ["키워드1", "키워드2", ...],
-  "content": "마크다운 본문 전체"
-}
-
-JSON만 응답하세요. 다른 텍스트 없이.`;
+  "meta_description": "검색 결과에 노출될 설명 (120~160자)",
+  "content": "마크다운 본문 전체 (5000자 이상, 인포그래픽 이미지 포함)"
+}`;
 
   try {
     const res = await fetch(ANTHROPIC_API, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
-      body: JSON.stringify({ model: MODEL, max_tokens: 4096, system: systemPrompt, messages: [{ role: 'user', content: userPrompt }] }),
+      body: JSON.stringify({ model: MODEL, max_tokens: 8192, system: systemPrompt, messages: [{ role: 'user', content: userPrompt }] }),
     });
 
     if (!res.ok) return null;
