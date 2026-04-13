@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   alternates: { canonical: `${SITE_URL}/stock/dividend` },
   robots: { index: true, follow: true, 'max-image-preview': 'large' as const, 'max-snippet': -1 as const },
   openGraph: { title: TITLE, description: DESC, url: `${SITE_URL}/stock/dividend`, siteName: '카더라', locale: 'ko_KR', type: 'website', images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent(TITLE)}&category=stock&design=2`, width: 1200, height: 630 }, { url: `${SITE_URL}/api/og-square?title=${encodeURIComponent(TITLE)}&category=stock`, width: 630, height: 630 }] },
-  other: { 'naver:author': '카더라', 'naver:description': DESC.slice(0, 160), 'naver:written_time': '2026-04-12T00:00:00Z', 'article:section': '주식', 'article:tag': '고배당주,배당주순위,배당수익률' },
+  other: { 'naver:author': '카더라', 'naver:description': DESC.slice(0, 160), 'naver:written_time': new Date().toISOString(), 'article:section': '주식', 'article:tag': '고배당주,배당주순위,배당수익률' },
 };
 
 export default async function DividendPage() {
@@ -66,7 +66,10 @@ export default async function DividendPage() {
   return (
     <article style={{ maxWidth: 780, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '주식', item: `${SITE_URL}/stock` }, { '@type': 'ListItem', position: 3, name: '배당주 순위' }] }) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: [{ '@type': 'Question', name: '고배당주란?', acceptedAnswer: { '@type': 'Answer', text: '배당수익률이 시장 평균보다 높은 종목을 말합니다. 일반적으로 3% 이상이면 고배당주로 분류합니다.' } }, { '@type': 'Question', name: '배당주 투자 시 주의사항은?', acceptedAnswer: { '@type': 'Answer', text: '배당성향, 배당 지속성, 기업의 재무 건전성을 반드시 확인해야 합니다. 높은 배당률만으로 투자하면 위험할 수 있습니다.' } }] }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: [{ '@type': 'Question', name: '고배당주란?', acceptedAnswer: { '@type': 'Answer', text: '배당수익률이 시장 평균보다 높은 종목을 말합니다. 일반적으로 3% 이상이면 고배당주로 분류합니다.' } }, { '@type': 'Question', name: '배당주 투자 시 주의사항은?', acceptedAnswer: { '@type': 'Answer', text: '배당성향, 배당 지속성, 기업의 재무 건전성을 반드시 확인해야 합니다. 높은 배당률만으로 투자하면 위험할 수 있습니다.' } },
+      { '@type': 'Question', name: '2026년 배당주 추천은?', acceptedAnswer: { '@type': 'Answer', text: '카더라에서 KOSPI·KOSDAQ·NYSE·NASDAQ 배당수익률 TOP 종목을 실시간으로 확인할 수 있습니다.' } },
+      { '@type': 'Question', name: '배당금 지급일은 언제인가요?', acceptedAnswer: { '@type': 'Answer', text: '국내 12월 결산법인은 다음 해 3~4월에 배당금이 입금됩니다. 배당기준일 이전에 주식을 보유해야 배당권리가 발생합니다.' } },
+      { '@type': 'Question', name: '배당수익률 계산 방법은?', acceptedAnswer: { '@type': 'Answer', text: '배당수익률 = 주당배당금 ÷ 현재주가 × 100%. 예: 주당 2000원 배당에 주가 40000원이면 배당수익률 5%.' } }] }) }} />
 
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebPage', name: TITLE, url: `${SITE_URL}/stock/dividend`, speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', 'section'] } }) }} />
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>

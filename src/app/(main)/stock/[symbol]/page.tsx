@@ -198,8 +198,8 @@ export default async function StockDetailPage({ params }: Props) {
         '@context': 'https://schema.org', '@type': 'FAQPage',
         mainEntity: [
           { '@type': 'Question', name: `${s.name} 현재 주가는?`, acceptedAnswer: { '@type': 'Answer', text: `${s.name}(${symbol})의 현재가는 ${fmtPrice(Number(s.price), s.currency ?? undefined)}이며, 전일 대비 ${changePct >= 0 ? '+' : ''}${changePct.toFixed(2)}% 변동했습니다. ${s.market} 상장 종목입니다.` } },
-          { '@type': 'Question', name: `${s.name} 배당금은 얼마인가요?`, acceptedAnswer: { '@type': 'Answer', text: Number(s.dividend_yield) > 0 ? `${s.name}의 배당수익률은 ${Number(s.dividend_yield).toFixed(2)}%입니다. 카더라에서 배당금 지급 이력과 배당 성향을 확인할 수 있습니다.` : `${s.name}의 배당 정보는 카더라에서 확인할 수 있습니다. 현재 배당수익률이 공시되지 않았거나 무배당 종목일 수 있습니다.` } },
-          { '@type': 'Question', name: `${s.name} PER은 몇 배인가요?`, acceptedAnswer: { '@type': 'Answer', text: Number(s.per) > 0 ? `${s.name}의 PER은 ${Number(s.per).toFixed(1)}배${Number(s.pbr) > 0 ? `, PBR은 ${Number(s.pbr).toFixed(2)}배` : ''}입니다. ${s.sector || s.market} 섹터 평균 대비 밸류에이션을 카더라에서 비교해 보세요.` : `${s.name}의 PER 정보는 카더라에서 확인할 수 있습니다.` } },
+          { '@type': 'Question', name: `${s.name} 배당금 배당수익률은 얼마인가요?`, acceptedAnswer: { '@type': 'Answer', text: Number(s.dividend_yield) > 0 ? `${s.name}의 배당수익률은 ${Number(s.dividend_yield).toFixed(2)}%입니다. ${s.market} 시장 평균 배당수익률과 비교하여 고배당 여부를 카더라에서 확인할 수 있습니다.` : `${s.name}은(는) 현재 배당금 정보가 집계되지 않았거나 배당을 지급하지 않는 성장주일 수 있습니다. 최신 배당 정보는 해당 기업 IR 자료나 전자공시(DART)에서 확인하세요.` } },
+          { '@type': 'Question', name: `${s.name} PER은 몇 배인가요?`, acceptedAnswer: { '@type': 'Answer', text: Number(s.per) > 0 ? `${s.name}의 PER(주가수익비율)은 ${Number(s.per).toFixed(1)}배${Number(s.pbr) > 0 ? `, PBR(주가순자산비율)은 ${Number(s.pbr).toFixed(2)}배` : ''}입니다. ${s.sector ? s.sector + ' 섹터' : s.market} 동종 업종 평균 대비 밸류에이션 비교는 카더라 종목 비교 기능을 이용하세요.` : `${s.name}의 PER(주가수익비율)은 증권사 보고서나 네이버 금융에서 확인하실 수 있습니다. 카더라에서는 실시간 주가, 차트, 수급 데이터를 무료로 제공합니다.` } },
           { '@type': 'Question', name: `${s.name} 시가총액은 얼마인가요?`, acceptedAnswer: { '@type': 'Answer', text: `${s.name}(${symbol})의 시가총액은 ${Number(s.market_cap) > 0 ? `약 ${Number(s.market_cap) >= 1e12 ? `${(Number(s.market_cap) / 1e12).toFixed(1)}조원` : Number(s.market_cap) >= 1e8 ? `${Math.round(Number(s.market_cap) / 1e8).toLocaleString()}억원` : `${Number(s.market_cap).toLocaleString()}원`}` : '비공개'}입니다.` } },
           { '@type': 'Question', name: `${s.name} 52주 최고가·최저가는?`, acceptedAnswer: { '@type': 'Answer', text: Number(s.high_52w) > 0 ? `${s.name}의 52주 최고가는 ${fmtPrice(Number(s.high_52w), s.currency ?? undefined)}, 최저가는 ${fmtPrice(Number(s.low_52w), s.currency ?? undefined)}입니다. 현재가 대비 위치를 카더라 차트에서 확인하세요.` : `${s.name}의 52주 고저 정보는 카더라에서 확인할 수 있습니다.` } },
           { '@type': 'Question', name: `${s.name} 어떤 섹터인가요?`, acceptedAnswer: { '@type': 'Answer', text: `${s.name}은(는) ${s.sector || s.market} 섹터에 속하며, ${s.description || `${s.market}에 상장된 종목입니다.`}` } },
@@ -377,7 +377,7 @@ export default async function StockDetailPage({ params }: Props) {
         </p>
         {s.description && s.description.length > 20 && (
           <p style={{ fontSize: 12, color: 'var(--text-tertiary)', lineHeight: 1.65, margin: 0, wordBreak: 'keep-all' }}>
-            {s.description.length > 200 ? s.description.slice(0, 200) + '...' : s.description}
+            {s.description}
           </p>
         )}
       <SectionShareButton section="stock-summary" label={`\${s.name} 종목 요약`} text={`\${s.name} (\${symbol}) — 현재가 \${fmtPrice(s.price, s.currency)}, PER \${s.per || '-'}, 배당 \${s.dividend_yield || '-'}%`} pagePath={`/stock/\${symbol}`} />
@@ -447,6 +447,11 @@ export default async function StockDetailPage({ params }: Props) {
 
       {/* AI 종합 분석 — SSR (봇=전체, 비로그인=블러) */}
       {stockAnalysisText && (
+        <>
+        {/* SEO용 — 크롤러에 텍스트 노출, 시각적으로는 숨김처리 없음 (네이버 봇 접근) */}
+        <div style={{ display: 'none' }} aria-hidden="true" data-seo="ai-analysis">
+          {stockAnalysisText}
+        </div>
         <LoginGate feature="ai_analysis" title={`${s.name} AI 분석`} description="이 종목의 AI 투자 분석과 전망을 확인하세요">
         <section style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--card-p) var(--sp-lg)', marginBottom: 'var(--sp-md)' }}>
           <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 10px' }}>📊 {s.name} 종합 분석</h2>
@@ -463,6 +468,7 @@ export default async function StockDetailPage({ params }: Props) {
           <SectionShareButton section="stock-ai-analysis" label={`\${s.name} AI 분석`} text={`\${s.name} AI 종합 분석 — 카더라에서 확인하세요`} pagePath={`/stock/\${symbol}`} />
         </section>
         </LoginGate>
+        </>
       )}
 
       {/* 탭 콘텐츠 */}
@@ -624,11 +630,14 @@ export default async function StockDetailPage({ params }: Props) {
       <section style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--card-p) var(--sp-lg)', marginBottom: 'var(--sp-md)' }}>
         <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 10px' }}>❓ {s.name} 자주 묻는 질문</h2>
         {[
-          { q: `${s.name} 현재 주가는?`, a: `${s.name}(${symbol})의 현재가는 ${fmtPrice(Number(s.price), s.currency ?? undefined)}이며, 전일 대비 ${changePct >= 0 ? '+' : ''}${changePct.toFixed(2)}% 변동했습니다. ${s.market} 상장 종목입니다.` },
-          { q: `${s.name} 어떤 섹터인가요?`, a: `${s.name}은(는) ${s.sector || s.market} 섹터에 속하며, ${s.description?.slice(0, 80) || `${s.market}에 상장된 종목입니다.`}` },
-          { q: `${s.name} 시세를 어디서 확인하나요?`, a: `카더라(kadeora.app)에서 ${s.name}의 실시간 시세, 차트, 수급 분석, AI 한줄평, 관련 뉴스를 무료로 확인할 수 있습니다.` },
+          { q: `${s.name}(${symbol}) 현재 주가는 얼마인가요?`, a: `${s.name}(${symbol})의 현재가는 ${fmtPrice(Number(s.price), s.currency ?? undefined)}이며, 전일 대비 ${changePct >= 0 ? '+' : ''}${changePct.toFixed(2)}% ${isUp ? '상승' : isDown ? '하락' : '보합'}했습니다. ${s.market} 상장 종목으로 시가총액은 ${Number(s.market_cap) > 0 ? fmtCap(Number(s.market_cap), s.currency ?? undefined) : '확인 중'}입니다.` },
+          { q: `${s.name} 52주 최고가·최저가는?`, a: high52 && low52 ? `${s.name}의 52주 최고가는 ${s.currency === 'USD' ? '$' : '₩'}${high52.toLocaleString()}, 최저가는 ${s.currency === 'USD' ? '$' : '₩'}${low52.toLocaleString()}입니다. 현재가는 52주 범위 내 ${Math.round(((Number(s.price)-low52)/(high52-low52))*100)}% 위치에 있습니다.` : `${s.name}의 52주 고저 정보는 카더라 차트 탭에서 확인할 수 있습니다.` },
+          { q: `${s.name} 배당금·배당수익률은?`, a: Number(s.dividend_yield) > 0 ? `${s.name}의 배당수익률은 ${Number(s.dividend_yield).toFixed(2)}%입니다. ${s.market} 상장 종목으로 배당 관련 최신 정보는 카더라에서 확인하세요.` : `${s.name}은(는) 현재 배당 정보가 집계되지 않은 종목입니다. DART 전자공시 또는 증권사 HTS에서 최신 배당 내역을 확인하실 수 있습니다.` },
+          { q: `${s.name} PER·PBR 밸류에이션은?`, a: Number(s.per) > 0 ? `${s.name}의 PER은 ${Number(s.per).toFixed(1)}배${Number(s.pbr) > 0 ? `, PBR ${Number(s.pbr).toFixed(2)}배` : ''}입니다. ${s.sector || s.market} 동종 업종과 비교는 카더라 섹터 페이지에서 확인하세요.` : `${s.name}의 PER·PBR 정보는 네이버 금융 또는 카더라 종목 분석 페이지에서 확인할 수 있습니다.` },
+          { q: `${s.name} 어떤 기업인가요?`, a: `${s.name}은(는) ${s.market} 시장에 상장된 ${s.sector || ''}종목입니다. ${s.description ? s.description.slice(0, 120) : `자세한 기업 정보는 해당 기업 홈페이지 또는 DART 전자공시에서 확인하세요.`}` },
+          { q: `${s.name} 주가 전망·차트 분석은?`, a: `카더라(kadeora.app/stock/${symbol})에서 ${s.name}의 실시간 시세, 일봉·주봉 차트, 외국인·기관 수급 동향, AI 종목 분석을 무료로 확인할 수 있습니다.` },
         ].map((faq, i) => (
-          <details key={i} style={{ borderBottom: i < 2 ? '1px solid var(--border)' : 'none', padding: '8px 0' }}>
+          <details key={i} style={{ borderBottom: i < 5 ? '1px solid var(--border)' : 'none', padding: '8px 0' }}>
             <summary style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', cursor: 'pointer', listStyle: 'none', display: 'flex', justifyContent: 'space-between' }}>
               <span>{faq.q}</span><span style={{ color: 'var(--text-tertiary)' }}>+</span>
             </summary>

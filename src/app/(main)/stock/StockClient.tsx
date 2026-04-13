@@ -63,6 +63,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
   const [stocks, setStocks] = useState<Stock[]>(Array.isArray(initialStocks) ? initialStocks : []);
   const [mode, setMode] = useState<'domestic'|'global'>('domestic');
   const [domesticTab, setDomesticTab] = useState<'ranking'|'movers'|'sector'|'themes'|'news'|'calendar'|'watchlist'|'portfolio'>('ranking');
+  const [isCompact, setIsCompact] = useState(false);
   const [globalTab, setGlobalTab] = useState<'ranking'|'movers'|'sector'|'news'|'m7'|'watchlist'|'portfolio'>('ranking');
   const [domesticMarket, setDomesticMarket] = useState<'ALL'|'KOSPI'|'KOSDAQ'>('ALL');
   const [moversTab, setMoversTab] = useState<'up'|'down'|'volume'>('up');
@@ -206,7 +207,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
     // fill 스파크라인
     const sparkEl = pts?.length >= 2 ? (() => {
       const min = Math.min(...pts); const max = Math.max(...pts); const range = max - min || 1;
-      const W = 160; const H = 20;
+      const W = 160; const H = 36;
       const coords = pts.map((v: number, i: number) => [(i / (pts.length - 1)) * W, H - 2 - ((v - min) / range) * (H - 4)]);
       const line = coords.map(([x,y]: number[]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
       const fillPath = `M${coords[0][0].toFixed(1)},${H} ` + coords.map(([x,y]: number[]) => `L${x.toFixed(1)},${y.toFixed(1)}`).join(' ') + ` L${coords[coords.length-1][0].toFixed(1)},${H}Z`;
@@ -243,7 +244,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
               </div>
             </div>
           </div>
-          <button onClick={e => { e.preventDefault(); e.stopPropagation(); toggleWatchlist(s.symbol); }} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, fontSize: 14, color: isWatched ? 'var(--accent-yellow)' : 'var(--text-tertiary)', flexShrink: 0, opacity: isWatched ? 1 : 0.4 }}>
+          <button onClick={e => { e.preventDefault(); e.stopPropagation(); toggleWatchlist(s.symbol); }} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '8px 6px', fontSize: 16, color: isWatched ? 'var(--accent-yellow)' : 'var(--text-tertiary)', flexShrink: 0, opacity: isWatched ? 1 : 0.5, minWidth: 36, minHeight: 36, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             {isWatched ? '★' : '☆'}
           </button>
         </div>
@@ -283,6 +284,37 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
       </Link>
     );
   }, [watchlistSymbols, toggleWatchlist, sparklines, exchangeRate]);
+
+  // Compact 목록 행 (한 줄)
+  const CompactRow = useCallback(({ s, rank }: { s: Stock; rank: number }) => {
+    const pct = s.change_pct ?? 0;
+    const isGlobal = s.currency === 'USD';
+    const col = pct > 0 ? stockUpColor(!isGlobal) : pct < 0 ? stockDownColor(!isGlobal) : 'var(--stock-flat)';
+    return (
+      <Link href={`/stock/${encodeURIComponent(s.symbol)}`} style={{
+        display: 'flex', alignItems: 'center', gap: 8, padding: '6px 10px',
+        borderBottom: '1px solid var(--border)', textDecoration: 'none',
+        background: 'var(--bg-surface)', transition: 'background .1s',
+      }} className="kd-card-hover">
+        <span style={{ fontSize: 10, color: 'var(--text-tertiary)', minWidth: 20, textAlign: 'right', fontFamily: 'monospace' }}>{rank}</span>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</div>
+          {s.sector && <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{s.sector}</div>}
+        </div>
+        <div style={{ textAlign: 'right', flexShrink: 0, minWidth: 70 }}>
+          <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>
+            {pct === 0 ? '—' : isGlobal ? `$${Number(s.price)?.toFixed(2)}` : fmt(Number(s.price))}
+          </div>
+          <div style={{ fontSize: 11, fontWeight: 700, color: col, fontVariantNumeric: 'tabular-nums' }}>
+            {pct > 0 ? '▲' : pct < 0 ? '▼' : ''}{Math.abs(pct).toFixed(2)}%
+          </div>
+        </div>
+        <div style={{ minWidth: 50, textAlign: 'right', flexShrink: 0 }}>
+          {s.market_cap > 0 && <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{fmtCap(Number(s.market_cap), s.currency)}</div>}
+        </div>
+      </Link>
+    );
+  }, [watchlistSymbols, sparklines, exchangeRate]);
 
   const domesticTabs = [['ranking','시총'],['movers','등락률'],['sector','섹터'],['themes','테마'],['watchlist','관심']] as const;
   const globalTabs = [['ranking','시총'],['movers','등락률'],['sector','섹터'],['m7','M7'],['watchlist','관심']] as const;
@@ -620,7 +652,8 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
       })()}
 
       {/* ─ 서브 탭 ─ */}
-      <div style={{ display: 'flex', gap: 4, marginBottom: 'var(--sp-md)', overflowX: 'auto', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' as any }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 'var(--sp-md)' }}>
+      <div style={{ display: 'flex', gap: 4, flex: 1, overflowX: 'auto', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' as any, maskImage: 'linear-gradient(to right, transparent 0px, black 8px, black calc(100% - 32px), transparent 100%)', WebkitMaskImage: 'linear-gradient(to right, transparent 0px, black 8px, black calc(100% - 32px), transparent 100%)' }}>
         {(isDomestic ? domesticTabs : globalTabs).map(([k, l]) => (
           <button key={k} onClick={() => { isDomestic ? setDomesticTab(k as typeof domesticTab) : setGlobalTab(k as typeof globalTab); }} aria-pressed={currentTab === k} style={{
             padding: '6px 14px', borderRadius: 'var(--radius-lg)', border: currentTab === k ? 'none' : '1px solid var(--border)', cursor: 'pointer', flexShrink: 0, fontWeight: 600, fontSize: 12, whiteSpace: 'nowrap',
@@ -630,6 +663,11 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
             fontFamily: 'inherit',
           }}>{l}</button>
         ))}
+      </div>
+      <button onClick={() => setIsCompact(v => !v)} title={isCompact ? '카드 보기' : '목록 보기'}
+        style={{ flexShrink: 0, background: isCompact ? 'rgba(59,123,246,0.1)' : 'transparent', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '5px 8px', cursor: 'pointer', fontSize: 13, color: isCompact ? 'var(--brand)' : 'var(--text-tertiary)', transition: 'all .15s' }}>
+        {isCompact ? '▦' : '☰'}
+      </button>
       </div>
 
 
@@ -665,7 +703,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
                     const isSelected = sectorFilter === sec.name;
                     return (
                       <button key={sec.name} onClick={() => { setSectorFilter(isSelected ? 'all' : sec.name); isDomestic ? setDomesticTab('ranking') : setGlobalTab('ranking'); }} style={{ display: 'flex', alignItems: 'center', gap: 8, background: isSelected ? (isUp ? (isDomestic?'rgba(255,107,107,0.06)':'rgba(46,232,165,0.06)') : (isDomestic?'rgba(108,180,255,0.06)':'rgba(248,113,113,0.06)')) : 'transparent', borderRadius: 'var(--radius-xs)', padding: '3px 4px', border: 'none', cursor: 'pointer', textAlign: 'left', width: '100%', transition: 'background 0.15s' }}>
-                        <span style={{ fontSize: 10, color: isSelected ? 'var(--text-primary)' : 'var(--text-tertiary)', minWidth: 52, flexShrink: 0, fontWeight: isSelected ? 700 : 400, textAlign: 'right' }}>{sec.name}</span>
+                        <span style={{ fontSize: 10, color: isSelected ? 'var(--text-primary)' : 'var(--text-tertiary)', minWidth: 80, maxWidth: 90, flexShrink: 0, fontWeight: isSelected ? 700 : 400, textAlign: 'right', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{sec.name}</span>
                         <div style={{ flex: 1, height: 5, background: 'var(--bg-hover)', borderRadius: 4, overflow: 'hidden', position: 'relative' }}>
                           {isUp
                             ? <div style={{ position: 'absolute', left: '50%', width: `${barW}%`, height: '100%', background: color, opacity: 0.85 }} />
@@ -1156,7 +1194,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
                               </div>
                             </div>
                           </div>
-                          <button onClick={e => { e.preventDefault(); e.stopPropagation(); toggleWatchlist(s.symbol); }} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, fontSize: 14, color: isWatched ? 'var(--accent-yellow)' : 'var(--text-tertiary)', flexShrink: 0, opacity: isWatched ? 1 : 0.4 }}>
+                          <button onClick={e => { e.preventDefault(); e.stopPropagation(); toggleWatchlist(s.symbol); }} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '8px 6px', fontSize: 16, color: isWatched ? 'var(--accent-yellow)' : 'var(--text-tertiary)', flexShrink: 0, opacity: isWatched ? 1 : 0.5, minWidth: 36, minHeight: 36, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             {isWatched ? '★' : '☆'}
                           </button>
                         </div>
@@ -1190,7 +1228,15 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
                   );
                 })}
               </div>
-            ) : displayStocks.map((s, i) => <StockRow key={s.symbol} s={s} rank={i + 1} />)}
+            ) : isCompact ? (
+              <div style={{ borderRadius: 'var(--radius-card)', overflow: 'hidden', border: '1px solid var(--border)' }}>
+                {displayStocks.map((s, i) => <CompactRow key={s.symbol} s={s} rank={i + 1} />)}
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {displayStocks.map((s, i) => <StockRow key={s.symbol} s={s} rank={i + 1} />)}
+              </div>
+            )}
           {/* 관심종목 탭: 오늘 수익률 요약 + 비교 바로가기 */}
           {currentTab === 'watchlist' && displayStocks.length > 0 && (() => {
             const up = displayStocks.filter(s => (s.change_pct ?? 0) > 0).length;

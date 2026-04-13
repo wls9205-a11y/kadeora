@@ -205,6 +205,16 @@ const TABS = [
 export default function StockDetailTabs({ symbol, stockName, aiComment, priceHistory, news, investorFlow, disclosures, description, currency }: Props) {
   const [tab, setTab] = useState('overview');
 
+  // 조회수 트래킹
+  useEffect(() => {
+    if (!symbol) return;
+    fetch('/api/stock/view', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ symbol }),
+    }).catch(() => {});
+  }, [symbol]);
+
   return (
     <div>
       {/* 탭 */}

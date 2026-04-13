@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   alternates: { canonical: `${SITE_URL}/stock/movers` },
   robots: { index: true, follow: true, 'max-image-preview': 'large' as const, 'max-snippet': -1 as const },
   openGraph: { title: TITLE, description: DESC, url: `${SITE_URL}/stock/movers`, siteName: '카더라', locale: 'ko_KR', type: 'website', images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent('급등락 종목')}&category=stock&design=2`, width: 1200, height: 630 }] },
-  other: { 'naver:author': '카더라', 'naver:description': DESC.slice(0, 160), 'naver:written_time': '2026-04-12T00:00:00Z', 'article:section': '주식' },
+  other: { 'naver:author': '카더라', 'naver:description': DESC.slice(0, 160), 'naver:written_time': new Date().toISOString(), 'article:section': '주식' },
 };
 
 export default async function MoversPage() {
@@ -67,6 +67,12 @@ export default async function MoversPage() {
   return (
     <article style={{ maxWidth: 780, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '주식', item: `${SITE_URL}/stock` }, { '@type': 'ListItem', position: 3, name: '급등락' }] }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: [
+        { '@type': 'Question', name: '오늘 주식 상한가 종목은?', acceptedAnswer: { '@type': 'Answer', text: '카더라 급등락 페이지에서 코스피·코스닥 당일 상한가(+30%), 급등 TOP 20 종목을 실시간으로 확인할 수 있습니다.' } },
+        { '@type': 'Question', name: '오늘 주식 하한가 종목은?', acceptedAnswer: { '@type': 'Answer', text: '카더라에서 당일 하한가(-30%), 급락 TOP 20 종목과 거래량 폭발 종목을 실시간으로 확인할 수 있습니다.' } },
+        { '@type': 'Question', name: '52주 신고가 종목 확인 방법은?', acceptedAnswer: { '@type': 'Answer', text: '카더라 급등락 페이지 하단에서 52주 신고가·신저가 종목 목록을 확인할 수 있습니다. 52주 최고가 갱신 종목은 강세 신호로 해석되기도 합니다.' } },
+        { '@type': 'Question', name: '거래량 폭증 종목이란?', acceptedAnswer: { '@type': 'Answer', text: '평균 거래량 대비 당일 거래량이 급증한 종목입니다. 호재 공시, 테마 편입, 외국인·기관 매수 등의 원인이 있을 수 있으며 카더라에서 실시간으로 확인할 수 있습니다.' } },
+      ]}) }} />
       <nav style={{ fontSize: 12, color: 'var(--text-tertiary)', display: 'flex', gap: 4, marginBottom: 8 }}>
         <Link href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>홈</Link>›
         <Link href="/stock" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>주식</Link>›<span>급등락</span>

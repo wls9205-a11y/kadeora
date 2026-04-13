@@ -277,11 +277,11 @@
     },
     {
       "path": "/api/cron/stock-fundamentals-kr",
-      "schedule": "30 8 * * 1-5"
+      "schedule": "0 */2 * * 1-5"
     },
     {
       "path": "/api/cron/stock-fundamentals-us",
-      "schedule": "0 7 * * *"
+      "schedule": "30 */3 * * *"
     },
     {
       "path": "/api/cron/data-quality-monitor",

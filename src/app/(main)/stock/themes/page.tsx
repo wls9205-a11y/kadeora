@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   alternates: { canonical: `${SITE_URL}/stock/themes` },
   robots: { index: true, follow: true, 'max-image-preview': 'large' as const, 'max-snippet': -1 as const },
   openGraph: { title: TITLE, description: DESC, url: `${SITE_URL}/stock/themes`, siteName: '카더라', locale: 'ko_KR', type: 'website', images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent('테마주 분석')}&category=stock&design=2`, width: 1200, height: 630 }, { url: `${SITE_URL}/api/og-square?title=${encodeURIComponent('테마주 분석')}&category=stock`, width: 630, height: 630 }] },
-  other: { 'naver:author': '카더라', 'naver:description': DESC.slice(0, 160), 'naver:written_time': '2026-04-12T00:00:00Z', 'article:section': '주식' },
+  other: { 'naver:author': '카더라', 'naver:description': DESC.slice(0, 160), 'naver:written_time': new Date().toISOString(), 'article:section': '주식' },
 };
 
 export default async function ThemesPage() {
@@ -34,6 +34,24 @@ export default async function ThemesPage() {
 
   const quoteMap = new Map((quotes ?? []).map((q: any) => [q.symbol, q]));
 
+  const themeLd = JSON.stringify({
+    '@context': 'https://schema.org', '@type': 'ItemList',
+    name: '테마주 분석 2026 — 주요 테마별 관련주',
+    description: '2차전지, 반도체, AI, 방산, 바이오 등 테마별 관련주 분석',
+    numberOfItems: (themes || []).length,
+    itemListElement: (themes || []).slice(0, 10).map((t: any, i: number) => ({
+      '@type': 'ListItem', position: i + 1,
+      name: t.theme_name, url: `https://kadeora.app/stock/themes`,
+    })),
+  });
+  const faqLd = JSON.stringify({
+    '@context': 'https://schema.org', '@type': 'FAQPage',
+    mainEntity: [
+      { '@type': 'Question', name: '테마주란 무엇인가요?', acceptedAnswer: { '@type': 'Answer', text: '특정 사회·경제적 이슈나 트렌드에 연관된 종목들의 집합입니다. 2차전지, AI, 반도체, 방산 등 테마에 따라 주가가 동반 상승하거나 하락하는 특성이 있습니다.' } },
+      { '@type': 'Question', name: '테마주 투자 시 주의사항은?', acceptedAnswer: { '@type': 'Answer', text: '테마주는 단기 급등락이 심해 투자 위험이 높습니다. 실적과 펀더멘털을 반드시 확인하고, 분산 투자를 권장합니다. 카더라에서 테마별 등락률과 종목 정보를 확인하세요.' } },
+      { '@type': 'Question', name: '오늘 주목할 테마는?', acceptedAnswer: { '@type': 'Answer', text: '카더라 테마주 페이지에서 실시간으로 업데이트되는 테마별 등락률과 주목 종목을 확인하세요. 반도체, AI, 2차전지, 바이오 등 주요 테마 동향을 제공합니다.' } },
+    ],
+  });
   return (
     <article style={{ maxWidth: 780, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '주식', item: `${SITE_URL}/stock` }, { '@type': 'ListItem', position: 3, name: '테마주' }] }) }} />

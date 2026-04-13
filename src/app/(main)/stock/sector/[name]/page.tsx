@@ -51,8 +51,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       'geo.placename': '서울',
       'geo.position': '37.5665;126.9780',
       'ICBM': '37.5665, 126.9780',
-      'naver:written_time': '2026-04-12T00:00:00Z',
-      'naver:updated_time': '2026-04-12T00:00:00Z',
+      'naver:written_time': new Date().toISOString(),
+      'naver:updated_time': new Date().toISOString(),
       'dg:plink': `${SITE_URL}/stock/sector/${encodeURIComponent(sector)}`,
       'article:section': '주식',
       'article:tag': `${sector},섹터,주식,시세,등락률,시가총액`,
@@ -108,6 +108,12 @@ export default async function SectorPage({ params }: Props) {
           name: `${s.name} (${s.symbol})`,
         })),
       })}} />
+      {/* JSON-LD: FAQPage */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: [
+        { '@type': 'Question', name: `${decodeURIComponent(sector)} 섹터 대표 종목은?`, acceptedAnswer: { '@type': 'Answer', text: `카더라에서 ${decodeURIComponent(sector)} 섹터에 속하는 종목들의 실시간 시세, 등락률, 시가총액을 확인할 수 있습니다.` } },
+        { '@type': 'Question', name: `${decodeURIComponent(sector)} 섹터 주가 전망은?`, acceptedAnswer: { '@type': 'Answer', text: `${decodeURIComponent(sector)} 섹터의 최신 동향과 등락률은 카더라 섹터 분석 페이지에서 실시간으로 확인하세요. 섹터별 평균 등락률과 상위 종목을 한눈에 비교할 수 있습니다.` } },
+        { '@type': 'Question', name: `${decodeURIComponent(sector)} 관련주 목록은?`, acceptedAnswer: { '@type': 'Answer', text: `카더라에서 ${decodeURIComponent(sector)} 섹터에 속하는 모든 종목의 시가총액, 현재가, 등락률, PER, 배당수익률을 비교할 수 있습니다.` } },
+      ]}) }} />
       {/* JSON-LD: speakable */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebPage', name: `${sector} 섹터 종목`, url: `${SITE_URL}/stock/sector/${encodeURIComponent(sector)}`, mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE_URL}/stock/sector/${encodeURIComponent(sector)}` }, thumbnailUrl: `${SITE_URL}/api/og-square?title=${encodeURIComponent(sector + ' 섹터')}&category=stock`, speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.sector-summary'] } }) }} />
       {/* JSON-LD: FAQPage */}
