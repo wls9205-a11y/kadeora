@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
   const { issue_id } = await req.json();
   if (!issue_id) return NextResponse.json({ error: 'issue_id required' }, { status: 400 });
 
-  const { data: issue } = await (sb as any).from('issue_alerts').select('*').eq('id', issue_id).single();
+  const { data: issue } = await (sb as any).from('issue_alerts').select('*').eq('id', issue_id).maybeSingle();
   if (!issue) return NextResponse.json({ error: 'issue not found' }, { status: 404 });
   if (!issue.draft_title || !issue.draft_content) {
     return NextResponse.json({ error: `draft 콘텐츠 없음 — issue-draft 크론 먼저 실행 필요 (publish_decision: ${issue.publish_decision || '미처리'})` }, { status: 400 });

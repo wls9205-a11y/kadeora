@@ -144,6 +144,8 @@ export default function IssueTab() {
     if (issue.publish_decision === 'skipped') return <span style={{ color: '#6b7280', fontSize: 11 }}>⏭ 무시</span>;
     if (issue.publish_decision === 'ai_failed') return <span style={{ color: '#ef4444', fontSize: 11 }}>⚠ AI실패</span>;
     if (issue.publish_decision === 'failed') return <span style={{ color: '#ef4444', fontSize: 11 }}>❌ 실패</span>;
+    if (issue.publish_decision === 'duplicate_blog') return <span style={{ color: '#8b5cf6', fontSize: 11 }}>🔄 중복블로그</span>;
+    if (issue.publish_decision === 'manual_failed') return <span style={{ color: '#ef4444', fontSize: 11 }}>❌ 수동발행실패</span>;
     if (issue.block_reason) return <span style={{ color: '#ef4444', fontSize: 11 }}>🚫 {issue.block_reason}</span>;
     if (!issue.is_processed) return <span style={{ color: '#3b82f6', fontSize: 11 }}>⏳ 대기</span>;
     return <span style={{ color: '#6b7280', fontSize: 11 }}>—</span>;
@@ -152,7 +154,7 @@ export default function IssueTab() {
   const filtered = issues.filter(i => {
     if (filter === 'pending') return !i.is_processed;
     if (filter === 'published') return i.is_published;
-    if (filter === 'draft') return ['draft', 'draft_saved'].includes(i.publish_decision);
+    if (filter === 'draft') return ['draft', 'draft_saved', 'duplicate_blog'].includes(i.publish_decision);
     if (['apt', 'stock', 'finance', 'tax', 'economy', 'life'].includes(filter)) return i.category === filter;
     return true;
   });
