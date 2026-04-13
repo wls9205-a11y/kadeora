@@ -760,7 +760,7 @@ export async function GET(req: Request) {
 
       // 가장 많이 공유된 글
       const postShareMap = new Map<number, number>();
-      for (const r of shareTopR.data || []) { postShareMap.set(r.post_id, (postShareMap.get(r.post_id) || 0) + 1); }
+      for (const r of shareTopR.data || []) { if (r.post_id != null) postShareMap.set(r.post_id, (postShareMap.get(r.post_id) || 0) + 1); }
       const topShared = [...postShareMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5).map(([post_id, count]) => ({ post_id, count }));
 
       // 초대 현황

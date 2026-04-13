@@ -47,6 +47,36 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_logs: {
+        Row: {
+          action: string
+          admin_id: string
+          created_at: string
+          details: Json | null
+          id: number
+          target_id: string
+          target_type: string
+        }
+        Insert: {
+          action: string
+          admin_id: string
+          created_at?: string
+          details?: Json | null
+          id?: never
+          target_id: string
+          target_type?: string
+        }
+        Update: {
+          action?: string
+          admin_id?: string
+          created_at?: string
+          details?: Json | null
+          id?: never
+          target_id?: string
+          target_type?: string
+        }
+        Relationships: []
+      }
       api_quotas: {
         Row: {
           api_name: string
@@ -192,30 +222,48 @@ export type Database = {
       apt_comments: {
         Row: {
           author_id: string | null
+          author_name: string
           content: string
           created_at: string | null
           house_key: string
           house_nm: string
           house_type: string
           id: number
+          image_url: string | null
+          is_deleted: boolean
+          like_count: number
+          parent_id: number | null
+          updated_at: string
         }
         Insert: {
           author_id?: string | null
+          author_name?: string
           content: string
           created_at?: string | null
           house_key: string
           house_nm: string
           house_type: string
           id?: number
+          image_url?: string | null
+          is_deleted?: boolean
+          like_count?: number
+          parent_id?: number | null
+          updated_at?: string
         }
         Update: {
           author_id?: string | null
+          author_name?: string
           content?: string
           created_at?: string | null
           house_key?: string
           house_nm?: string
           house_type?: string
           id?: number
+          image_url?: string | null
+          is_deleted?: boolean
+          like_count?: number
+          parent_id?: number | null
+          updated_at?: string
         }
         Relationships: [
           {
@@ -274,6 +322,96 @@ export type Database = {
           },
         ]
       }
+      apt_complex_profiles: {
+        Row: {
+          age_group: string | null
+          apt_name: string
+          avg_rating: number | null
+          avg_sale_price_pyeong: number | null
+          blog_post_count: number | null
+          built_year: number | null
+          created_at: string | null
+          dong: string | null
+          id: string
+          jeonse_ratio: number | null
+          latest_jeonse_price: number | null
+          latest_monthly_deposit: number | null
+          latest_monthly_rent: number | null
+          latest_sale_date: string | null
+          latest_sale_price: number | null
+          latitude: number | null
+          longitude: number | null
+          price_change_1y: number | null
+          region_nm: string
+          rent_count_1y: number | null
+          review_count: number | null
+          sale_count_1y: number | null
+          seo_description: string | null
+          seo_title: string | null
+          sigungu: string
+          total_households: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          age_group?: string | null
+          apt_name: string
+          avg_rating?: number | null
+          avg_sale_price_pyeong?: number | null
+          blog_post_count?: number | null
+          built_year?: number | null
+          created_at?: string | null
+          dong?: string | null
+          id?: string
+          jeonse_ratio?: number | null
+          latest_jeonse_price?: number | null
+          latest_monthly_deposit?: number | null
+          latest_monthly_rent?: number | null
+          latest_sale_date?: string | null
+          latest_sale_price?: number | null
+          latitude?: number | null
+          longitude?: number | null
+          price_change_1y?: number | null
+          region_nm: string
+          rent_count_1y?: number | null
+          review_count?: number | null
+          sale_count_1y?: number | null
+          seo_description?: string | null
+          seo_title?: string | null
+          sigungu: string
+          total_households?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          age_group?: string | null
+          apt_name?: string
+          avg_rating?: number | null
+          avg_sale_price_pyeong?: number | null
+          blog_post_count?: number | null
+          built_year?: number | null
+          created_at?: string | null
+          dong?: string | null
+          id?: string
+          jeonse_ratio?: number | null
+          latest_jeonse_price?: number | null
+          latest_monthly_deposit?: number | null
+          latest_monthly_rent?: number | null
+          latest_sale_date?: string | null
+          latest_sale_price?: number | null
+          latitude?: number | null
+          longitude?: number | null
+          price_change_1y?: number | null
+          region_nm?: string
+          rent_count_1y?: number | null
+          review_count?: number | null
+          sale_count_1y?: number | null
+          seo_description?: string | null
+          seo_title?: string | null
+          sigungu?: string
+          total_households?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       apt_notifications: {
         Row: {
           body: string | null
@@ -314,6 +452,63 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      apt_rent_transactions: {
+        Row: {
+          apt_name: string
+          built_year: number | null
+          contract_term: string | null
+          created_at: string | null
+          deal_date: string
+          deposit: number | null
+          dong: string | null
+          exclusive_area: number | null
+          floor: number | null
+          id: string
+          monthly_rent: number | null
+          region_nm: string
+          renewal_right: string | null
+          rent_type: string
+          sigungu: string
+          source: string | null
+        }
+        Insert: {
+          apt_name: string
+          built_year?: number | null
+          contract_term?: string | null
+          created_at?: string | null
+          deal_date: string
+          deposit?: number | null
+          dong?: string | null
+          exclusive_area?: number | null
+          floor?: number | null
+          id?: string
+          monthly_rent?: number | null
+          region_nm: string
+          renewal_right?: string | null
+          rent_type: string
+          sigungu: string
+          source?: string | null
+        }
+        Update: {
+          apt_name?: string
+          built_year?: number | null
+          contract_term?: string | null
+          created_at?: string | null
+          deal_date?: string
+          deposit?: number | null
+          dong?: string | null
+          exclusive_area?: number | null
+          floor?: number | null
+          id?: string
+          monthly_rent?: number | null
+          region_nm?: string
+          renewal_right?: string | null
+          rent_type?: string
+          sigungu?: string
+          source?: string | null
+        }
+        Relationships: []
       }
       apt_resale_rights: {
         Row: {
@@ -521,13 +716,18 @@ export type Database = {
       apt_sites: {
         Row: {
           address: string | null
+          analysis_generated_at: string | null
+          analysis_text: string | null
           builder: string | null
           built_year: number | null
+          comment_count: number
           content_score: number | null
           created_at: string | null
+          data_quality_score: number | null
           description: string | null
           developer: string | null
           dong: string | null
+          extension_cost: number | null
           faq_items: Json | null
           id: string
           images: Json | null
@@ -542,7 +742,9 @@ export type Database = {
           nearby_facilities: Json | null
           nearby_station: string | null
           og_image_url: string | null
+          option_costs: Json | null
           page_views: number | null
+          payment_schedule: Json | null
           price_comparison: Json | null
           price_max: number | null
           price_min: number | null
@@ -564,13 +766,18 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          analysis_generated_at?: string | null
+          analysis_text?: string | null
           builder?: string | null
           built_year?: number | null
+          comment_count?: number
           content_score?: number | null
           created_at?: string | null
+          data_quality_score?: number | null
           description?: string | null
           developer?: string | null
           dong?: string | null
+          extension_cost?: number | null
           faq_items?: Json | null
           id?: string
           images?: Json | null
@@ -585,7 +792,9 @@ export type Database = {
           nearby_facilities?: Json | null
           nearby_station?: string | null
           og_image_url?: string | null
+          option_costs?: Json | null
           page_views?: number | null
+          payment_schedule?: Json | null
           price_comparison?: Json | null
           price_max?: number | null
           price_min?: number | null
@@ -607,13 +816,18 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          analysis_generated_at?: string | null
+          analysis_text?: string | null
           builder?: string | null
           built_year?: number | null
+          comment_count?: number
           content_score?: number | null
           created_at?: string | null
+          data_quality_score?: number | null
           description?: string | null
           developer?: string | null
           dong?: string | null
+          extension_cost?: number | null
           faq_items?: Json | null
           id?: string
           images?: Json | null
@@ -628,7 +842,9 @@ export type Database = {
           nearby_facilities?: Json | null
           nearby_station?: string | null
           og_image_url?: string | null
+          option_costs?: Json | null
           page_views?: number | null
+          payment_schedule?: Json | null
           price_comparison?: Json | null
           price_max?: number | null
           price_min?: number | null
@@ -652,151 +868,388 @@ export type Database = {
       }
       apt_subscriptions: {
         Row: {
+          acquisition_tax_est: number | null
+          acquisition_tax_estimate: number | null
           ai_summary: string | null
+          announcement_parsed_at: string | null
+          announcement_pdf_url: string | null
+          announcement_raw_text: string | null
+          announcement_summary: Json | null
+          architect: string | null
+          balance_pct: number | null
+          balcony_extension: boolean | null
+          balcony_extension_cost: number | null
+          balcony_price: number | null
+          brand_name: string | null
+          building_area: number | null
+          building_coverage: number | null
+          bus_routes: string[] | null
+          business_approval_date: string | null
+          ceiling_height: number | null
           cntrct_cncls_bgnde: string | null
           cntrct_cncls_endde: string | null
+          community_facilities: string[] | null
+          community_list: Json | null
           competition_rate_1st: number | null
           competition_rate_2nd: number | null
           competition_updated_at: string | null
+          completion_date: string | null
+          construction_start_date: string | null
           constructor_nm: string | null
           developer_nm: string | null
+          down_payment_pct: number | null
+          down_payment_schedule: Json | null
+          elevator_count: number | null
+          energy_grade: string | null
+          entrance_type: string | null
+          estimated_maintenance: number | null
+          estimated_mgmt_fee: number | null
+          exclusive_ratio: number | null
+          extension_cost: number | null
+          exterior_finish: string | null
           fetched_at: string
+          floor_area_ratio: number | null
           general_supply_total: number | null
+          has_daycare: boolean | null
+          has_fitness: boolean | null
           heating_type: string | null
           house_manage_no: string
           house_nm: string
           house_type_info: Json | null
           hssply_adres: string | null
           id: number
+          interim_count: number | null
           is_price_limit: boolean | null
+          is_regulated_area: boolean | null
+          is_speculative_zone: boolean | null
+          land_area: number | null
+          landscape_designer: string | null
           latitude: number | null
+          loan_available: boolean | null
+          loan_rate: string | null
           longitude: number | null
           max_floor: number | null
           mdatrgbn_nm: string | null
+          min_floor: number | null
           model_house_addr: string | null
+          move_in_month: string | null
           mvn_prearnge_ym: string | null
+          nearby_facilities: Json | null
           nearest_school: string | null
           nearest_station: string | null
+          option_costs: Json | null
+          option_items: Json | null
+          options_list: Json | null
           parking_co: number | null
+          parking_ratio: number | null
+          parking_total: number | null
+          parse_fail_count: number | null
+          payment_schedule: Json | null
           pblanc_url: string | null
+          pdf_parse_version: number | null
+          price_parsed_at: string | null
           price_per_pyeong: number | null
+          price_per_pyeong_avg: number | null
+          price_per_pyeong_max: number | null
+          price_per_pyeong_min: number | null
+          price_source: string | null
+          priority_supply_area: string | null
+          project_type: string | null
           przwner_presnatn_de: string | null
+          qualification_summary: string | null
           rcept_bgnde: string | null
           rcept_endde: string | null
           region_cd: string | null
           region_nm: string | null
+          resale_restriction_months: number | null
           residence_obligation: string | null
+          residence_obligation_years: number | null
+          rewin_limit_years: number | null
+          savings_requirement: string | null
+          school_district: string | null
+          schools: Json | null
+          special_features: string | null
+          special_supply_detail: Json | null
           special_supply_total: number | null
           spsply_rcept_bgnde: string | null
           spsply_rcept_endde: string | null
+          station_distance: string | null
+          stations: Json | null
           status: string | null
+          structure_type: string | null
           supply_addr: string | null
+          supply_breakdown: Json | null
           supply_count: number | null
+          supply_price_info: Json | null
           tot_supply_hshld_co: number | null
           total_apply_count: number | null
+          total_cost_est: number | null
           total_dong_co: number | null
+          total_dong_count: number | null
           total_households: number | null
+          total_parking: number | null
           transfer_limit: string | null
+          transfer_limit_years: number | null
+          type_detail: Json | null
           updated_at: string
           view_count: number | null
+          zero_energy_cert: string | null
         }
         Insert: {
+          acquisition_tax_est?: number | null
+          acquisition_tax_estimate?: number | null
           ai_summary?: string | null
+          announcement_parsed_at?: string | null
+          announcement_pdf_url?: string | null
+          announcement_raw_text?: string | null
+          announcement_summary?: Json | null
+          architect?: string | null
+          balance_pct?: number | null
+          balcony_extension?: boolean | null
+          balcony_extension_cost?: number | null
+          balcony_price?: number | null
+          brand_name?: string | null
+          building_area?: number | null
+          building_coverage?: number | null
+          bus_routes?: string[] | null
+          business_approval_date?: string | null
+          ceiling_height?: number | null
           cntrct_cncls_bgnde?: string | null
           cntrct_cncls_endde?: string | null
+          community_facilities?: string[] | null
+          community_list?: Json | null
           competition_rate_1st?: number | null
           competition_rate_2nd?: number | null
           competition_updated_at?: string | null
+          completion_date?: string | null
+          construction_start_date?: string | null
           constructor_nm?: string | null
           developer_nm?: string | null
+          down_payment_pct?: number | null
+          down_payment_schedule?: Json | null
+          elevator_count?: number | null
+          energy_grade?: string | null
+          entrance_type?: string | null
+          estimated_maintenance?: number | null
+          estimated_mgmt_fee?: number | null
+          exclusive_ratio?: number | null
+          extension_cost?: number | null
+          exterior_finish?: string | null
           fetched_at?: string
+          floor_area_ratio?: number | null
           general_supply_total?: number | null
+          has_daycare?: boolean | null
+          has_fitness?: boolean | null
           heating_type?: string | null
           house_manage_no: string
           house_nm: string
           house_type_info?: Json | null
           hssply_adres?: string | null
           id?: number
+          interim_count?: number | null
           is_price_limit?: boolean | null
+          is_regulated_area?: boolean | null
+          is_speculative_zone?: boolean | null
+          land_area?: number | null
+          landscape_designer?: string | null
           latitude?: number | null
+          loan_available?: boolean | null
+          loan_rate?: string | null
           longitude?: number | null
           max_floor?: number | null
           mdatrgbn_nm?: string | null
+          min_floor?: number | null
           model_house_addr?: string | null
+          move_in_month?: string | null
           mvn_prearnge_ym?: string | null
+          nearby_facilities?: Json | null
           nearest_school?: string | null
           nearest_station?: string | null
+          option_costs?: Json | null
+          option_items?: Json | null
+          options_list?: Json | null
           parking_co?: number | null
+          parking_ratio?: number | null
+          parking_total?: number | null
+          parse_fail_count?: number | null
+          payment_schedule?: Json | null
           pblanc_url?: string | null
+          pdf_parse_version?: number | null
+          price_parsed_at?: string | null
           price_per_pyeong?: number | null
+          price_per_pyeong_avg?: number | null
+          price_per_pyeong_max?: number | null
+          price_per_pyeong_min?: number | null
+          price_source?: string | null
+          priority_supply_area?: string | null
+          project_type?: string | null
           przwner_presnatn_de?: string | null
+          qualification_summary?: string | null
           rcept_bgnde?: string | null
           rcept_endde?: string | null
           region_cd?: string | null
           region_nm?: string | null
+          resale_restriction_months?: number | null
           residence_obligation?: string | null
+          residence_obligation_years?: number | null
+          rewin_limit_years?: number | null
+          savings_requirement?: string | null
+          school_district?: string | null
+          schools?: Json | null
+          special_features?: string | null
+          special_supply_detail?: Json | null
           special_supply_total?: number | null
           spsply_rcept_bgnde?: string | null
           spsply_rcept_endde?: string | null
+          station_distance?: string | null
+          stations?: Json | null
           status?: string | null
+          structure_type?: string | null
           supply_addr?: string | null
+          supply_breakdown?: Json | null
           supply_count?: number | null
+          supply_price_info?: Json | null
           tot_supply_hshld_co?: number | null
           total_apply_count?: number | null
+          total_cost_est?: number | null
           total_dong_co?: number | null
+          total_dong_count?: number | null
           total_households?: number | null
+          total_parking?: number | null
           transfer_limit?: string | null
+          transfer_limit_years?: number | null
+          type_detail?: Json | null
           updated_at?: string
           view_count?: number | null
+          zero_energy_cert?: string | null
         }
         Update: {
+          acquisition_tax_est?: number | null
+          acquisition_tax_estimate?: number | null
           ai_summary?: string | null
+          announcement_parsed_at?: string | null
+          announcement_pdf_url?: string | null
+          announcement_raw_text?: string | null
+          announcement_summary?: Json | null
+          architect?: string | null
+          balance_pct?: number | null
+          balcony_extension?: boolean | null
+          balcony_extension_cost?: number | null
+          balcony_price?: number | null
+          brand_name?: string | null
+          building_area?: number | null
+          building_coverage?: number | null
+          bus_routes?: string[] | null
+          business_approval_date?: string | null
+          ceiling_height?: number | null
           cntrct_cncls_bgnde?: string | null
           cntrct_cncls_endde?: string | null
+          community_facilities?: string[] | null
+          community_list?: Json | null
           competition_rate_1st?: number | null
           competition_rate_2nd?: number | null
           competition_updated_at?: string | null
+          completion_date?: string | null
+          construction_start_date?: string | null
           constructor_nm?: string | null
           developer_nm?: string | null
+          down_payment_pct?: number | null
+          down_payment_schedule?: Json | null
+          elevator_count?: number | null
+          energy_grade?: string | null
+          entrance_type?: string | null
+          estimated_maintenance?: number | null
+          estimated_mgmt_fee?: number | null
+          exclusive_ratio?: number | null
+          extension_cost?: number | null
+          exterior_finish?: string | null
           fetched_at?: string
+          floor_area_ratio?: number | null
           general_supply_total?: number | null
+          has_daycare?: boolean | null
+          has_fitness?: boolean | null
           heating_type?: string | null
           house_manage_no?: string
           house_nm?: string
           house_type_info?: Json | null
           hssply_adres?: string | null
           id?: number
+          interim_count?: number | null
           is_price_limit?: boolean | null
+          is_regulated_area?: boolean | null
+          is_speculative_zone?: boolean | null
+          land_area?: number | null
+          landscape_designer?: string | null
           latitude?: number | null
+          loan_available?: boolean | null
+          loan_rate?: string | null
           longitude?: number | null
           max_floor?: number | null
           mdatrgbn_nm?: string | null
+          min_floor?: number | null
           model_house_addr?: string | null
+          move_in_month?: string | null
           mvn_prearnge_ym?: string | null
+          nearby_facilities?: Json | null
           nearest_school?: string | null
           nearest_station?: string | null
+          option_costs?: Json | null
+          option_items?: Json | null
+          options_list?: Json | null
           parking_co?: number | null
+          parking_ratio?: number | null
+          parking_total?: number | null
+          parse_fail_count?: number | null
+          payment_schedule?: Json | null
           pblanc_url?: string | null
+          pdf_parse_version?: number | null
+          price_parsed_at?: string | null
           price_per_pyeong?: number | null
+          price_per_pyeong_avg?: number | null
+          price_per_pyeong_max?: number | null
+          price_per_pyeong_min?: number | null
+          price_source?: string | null
+          priority_supply_area?: string | null
+          project_type?: string | null
           przwner_presnatn_de?: string | null
+          qualification_summary?: string | null
           rcept_bgnde?: string | null
           rcept_endde?: string | null
           region_cd?: string | null
           region_nm?: string | null
+          resale_restriction_months?: number | null
           residence_obligation?: string | null
+          residence_obligation_years?: number | null
+          rewin_limit_years?: number | null
+          savings_requirement?: string | null
+          school_district?: string | null
+          schools?: Json | null
+          special_features?: string | null
+          special_supply_detail?: Json | null
           special_supply_total?: number | null
           spsply_rcept_bgnde?: string | null
           spsply_rcept_endde?: string | null
+          station_distance?: string | null
+          stations?: Json | null
           status?: string | null
+          structure_type?: string | null
           supply_addr?: string | null
+          supply_breakdown?: Json | null
           supply_count?: number | null
+          supply_price_info?: Json | null
           tot_supply_hshld_co?: number | null
           total_apply_count?: number | null
+          total_cost_est?: number | null
           total_dong_co?: number | null
+          total_dong_count?: number | null
           total_households?: number | null
+          total_parking?: number | null
           transfer_limit?: string | null
+          transfer_limit_years?: number | null
+          type_detail?: Json | null
           updated_at?: string
           view_count?: number | null
+          zero_energy_cert?: string | null
         }
         Relationships: []
       }
@@ -1169,6 +1622,7 @@ export type Database = {
           content: string
           created_at: string | null
           id: number
+          image_url: string | null
           is_seed: boolean | null
         }
         Insert: {
@@ -1178,6 +1632,7 @@ export type Database = {
           content: string
           created_at?: string | null
           id?: number
+          image_url?: string | null
           is_seed?: boolean | null
         }
         Update: {
@@ -1187,6 +1642,7 @@ export type Database = {
           content?: string
           created_at?: string | null
           id?: number
+          image_url?: string | null
           is_seed?: boolean | null
         }
         Relationships: [
@@ -1242,6 +1698,53 @@ export type Database = {
           },
         ]
       }
+      blog_post_images: {
+        Row: {
+          alt_text: string
+          caption: string | null
+          created_at: string | null
+          height: number | null
+          id: number
+          image_type: string
+          image_url: string
+          position: number
+          post_id: number
+          width: number | null
+        }
+        Insert: {
+          alt_text?: string
+          caption?: string | null
+          created_at?: string | null
+          height?: number | null
+          id?: number
+          image_type?: string
+          image_url: string
+          position?: number
+          post_id: number
+          width?: number | null
+        }
+        Update: {
+          alt_text?: string
+          caption?: string | null
+          created_at?: string | null
+          height?: number | null
+          id?: number
+          image_type?: string
+          image_url?: string
+          position?: number
+          post_id?: number
+          width?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blog_post_images_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "blog_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       blog_posts: {
         Row: {
           author_name: string | null
@@ -1259,13 +1762,17 @@ export type Database = {
           helpful_count: number | null
           id: number
           image_alt: string | null
+          indexed_at: string | null
           is_published: boolean | null
           meta_description: string | null
           meta_keywords: string | null
           metadata: Json | null
           published_at: string | null
           reading_time_min: number | null
+          related_slugs: string[] | null
           rewritten_at: string | null
+          seo_score: number | null
+          seo_tier: string | null
           series_id: string | null
           series_order: number | null
           slug: string
@@ -1293,13 +1800,17 @@ export type Database = {
           helpful_count?: number | null
           id?: number
           image_alt?: string | null
+          indexed_at?: string | null
           is_published?: boolean | null
           meta_description?: string | null
           meta_keywords?: string | null
           metadata?: Json | null
           published_at?: string | null
           reading_time_min?: number | null
+          related_slugs?: string[] | null
           rewritten_at?: string | null
+          seo_score?: number | null
+          seo_tier?: string | null
           series_id?: string | null
           series_order?: number | null
           slug: string
@@ -1327,13 +1838,17 @@ export type Database = {
           helpful_count?: number | null
           id?: number
           image_alt?: string | null
+          indexed_at?: string | null
           is_published?: boolean | null
           meta_description?: string | null
           meta_keywords?: string | null
           metadata?: Json | null
           published_at?: string | null
           reading_time_min?: number | null
+          related_slugs?: string[] | null
           rewritten_at?: string | null
+          seo_score?: number | null
+          seo_tier?: string | null
           series_id?: string | null
           series_order?: number | null
           slug?: string
@@ -1349,7 +1864,9 @@ export type Database = {
       }
       blog_publish_config: {
         Row: {
+          auto_publish_blocked_categories: string[] | null
           auto_publish_enabled: boolean
+          auto_publish_min_score: number | null
           daily_create_limit: number
           daily_publish_limit: number
           id: number
@@ -1359,7 +1876,9 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          auto_publish_blocked_categories?: string[] | null
           auto_publish_enabled?: boolean
+          auto_publish_min_score?: number | null
           daily_create_limit?: number
           daily_publish_limit?: number
           id?: number
@@ -1369,7 +1888,9 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          auto_publish_blocked_categories?: string[] | null
           auto_publish_enabled?: boolean
+          auto_publish_min_score?: number | null
           daily_create_limit?: number
           daily_publish_limit?: number
           id?: number
@@ -1673,6 +2194,7 @@ export type Database = {
           content: string
           created_at: string
           id: number
+          image_url: string | null
           is_anonymous: boolean
           is_deleted: boolean
           likes_count: number
@@ -1685,6 +2207,7 @@ export type Database = {
           content: string
           created_at?: string
           id?: number
+          image_url?: string | null
           is_anonymous?: boolean
           is_deleted?: boolean
           likes_count?: number
@@ -1697,6 +2220,7 @@ export type Database = {
           content?: string
           created_at?: string
           id?: number
+          image_url?: string | null
           is_anonymous?: boolean
           is_deleted?: boolean
           likes_count?: number
@@ -1919,6 +2443,36 @@ export type Database = {
           },
         ]
       }
+      conversion_events: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          cta_name: string
+          event_type: string
+          id: number
+          page_path: string | null
+          visitor_id: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          cta_name: string
+          event_type: string
+          id?: number
+          page_path?: string | null
+          visitor_id?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          cta_name?: string
+          event_type?: string
+          id?: number
+          page_path?: string | null
+          visitor_id?: string | null
+        }
+        Relationships: []
+      }
       cron_logs: {
         Row: {
           created_at: string | null
@@ -1964,6 +2518,33 @@ export type Database = {
           records_updated?: number | null
           started_at?: string | null
           status?: string
+        }
+        Relationships: []
+      }
+      daily_reports: {
+        Row: {
+          created_at: string | null
+          data: Json
+          id: number
+          issue_no: number
+          region: string
+          report_date: string
+        }
+        Insert: {
+          created_at?: string | null
+          data: Json
+          id?: never
+          issue_no: number
+          region: string
+          report_date: string
+        }
+        Update: {
+          created_at?: string | null
+          data?: Json
+          id?: never
+          issue_no?: number
+          region?: string
+          report_date?: string
         }
         Relationships: []
       }
@@ -2296,6 +2877,90 @@ export type Database = {
           },
         ]
       }
+      email_send_logs: {
+        Row: {
+          campaign: string
+          click_count: number | null
+          clicked_at: string | null
+          clicked_url: string | null
+          created_at: string | null
+          error_message: string | null
+          id: string
+          open_count: number | null
+          opened_at: string | null
+          recipient_email: string
+          resend_id: string | null
+          status: string
+          subject: string | null
+          user_id: string | null
+        }
+        Insert: {
+          campaign: string
+          click_count?: number | null
+          clicked_at?: string | null
+          clicked_url?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          open_count?: number | null
+          opened_at?: string | null
+          recipient_email: string
+          resend_id?: string | null
+          status?: string
+          subject?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          campaign?: string
+          click_count?: number | null
+          clicked_at?: string | null
+          clicked_url?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          open_count?: number | null
+          opened_at?: string | null
+          recipient_email?: string
+          resend_id?: string | null
+          status?: string
+          subject?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      email_subscribers: {
+        Row: {
+          category: string | null
+          consent: boolean | null
+          created_at: string | null
+          email: string
+          id: number
+          is_active: boolean | null
+          subscribed_at: string | null
+          unsubscribed_at: string | null
+        }
+        Insert: {
+          category?: string | null
+          consent?: boolean | null
+          created_at?: string | null
+          email: string
+          id?: number
+          is_active?: boolean | null
+          subscribed_at?: string | null
+          unsubscribed_at?: string | null
+        }
+        Update: {
+          category?: string | null
+          consent?: boolean | null
+          created_at?: string | null
+          email?: string
+          id?: number
+          is_active?: boolean | null
+          subscribed_at?: string | null
+          unsubscribed_at?: string | null
+        }
+        Relationships: []
+      }
       exchange_rate_history: {
         Row: {
           currency_pair: string
@@ -2399,6 +3064,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      fortune_views: {
+        Row: {
+          birth_year: number
+          fortune_text: string | null
+          id: number
+          user_id: string | null
+          view_date: string | null
+          viewed_at: string | null
+          zodiac_animal: string
+        }
+        Insert: {
+          birth_year: number
+          fortune_text?: string | null
+          id?: number
+          user_id?: string | null
+          view_date?: string | null
+          viewed_at?: string | null
+          zodiac_animal: string
+        }
+        Update: {
+          birth_year?: number
+          fortune_text?: string | null
+          id?: number
+          user_id?: string | null
+          view_date?: string | null
+          viewed_at?: string | null
+          zodiac_animal?: string
+        }
+        Relationships: []
       }
       grade_definitions: {
         Row: {
@@ -2568,6 +3263,149 @@ export type Database = {
           },
         ]
       }
+      issue_alerts: {
+        Row: {
+          base_score: number | null
+          block_reason: string | null
+          blog_post_id: number | null
+          category: string
+          competition_score: number | null
+          created_at: string | null
+          detected_at: string | null
+          detected_keywords: string[] | null
+          draft_content: string | null
+          draft_keywords: string[] | null
+          draft_slug: string | null
+          draft_template: string | null
+          draft_title: string | null
+          effectiveness_score: number | null
+          fact_check_details: Json | null
+          fact_check_passed: boolean | null
+          feed_post_id: string | null
+          final_score: number | null
+          id: string
+          infographic_data: Json | null
+          is_auto_publish: boolean | null
+          is_processed: boolean | null
+          is_published: boolean | null
+          issue_type: string | null
+          lifecycle_stage: string | null
+          multiplier: number | null
+          parent_issue_id: string | null
+          penalty_rate: number | null
+          post_24h_views: number | null
+          post_7d_views: number | null
+          post_signup_count: number | null
+          processed_at: string | null
+          publish_decision: string | null
+          published_at: string | null
+          raw_data: Json | null
+          related_entities: string[] | null
+          score_breakdown: Json | null
+          source_type: string
+          source_urls: string[] | null
+          sub_category: string | null
+          summary: string | null
+          title: string
+        }
+        Insert: {
+          base_score?: number | null
+          block_reason?: string | null
+          blog_post_id?: number | null
+          category: string
+          competition_score?: number | null
+          created_at?: string | null
+          detected_at?: string | null
+          detected_keywords?: string[] | null
+          draft_content?: string | null
+          draft_keywords?: string[] | null
+          draft_slug?: string | null
+          draft_template?: string | null
+          draft_title?: string | null
+          effectiveness_score?: number | null
+          fact_check_details?: Json | null
+          fact_check_passed?: boolean | null
+          feed_post_id?: string | null
+          final_score?: number | null
+          id?: string
+          infographic_data?: Json | null
+          is_auto_publish?: boolean | null
+          is_processed?: boolean | null
+          is_published?: boolean | null
+          issue_type?: string | null
+          lifecycle_stage?: string | null
+          multiplier?: number | null
+          parent_issue_id?: string | null
+          penalty_rate?: number | null
+          post_24h_views?: number | null
+          post_7d_views?: number | null
+          post_signup_count?: number | null
+          processed_at?: string | null
+          publish_decision?: string | null
+          published_at?: string | null
+          raw_data?: Json | null
+          related_entities?: string[] | null
+          score_breakdown?: Json | null
+          source_type: string
+          source_urls?: string[] | null
+          sub_category?: string | null
+          summary?: string | null
+          title: string
+        }
+        Update: {
+          base_score?: number | null
+          block_reason?: string | null
+          blog_post_id?: number | null
+          category?: string
+          competition_score?: number | null
+          created_at?: string | null
+          detected_at?: string | null
+          detected_keywords?: string[] | null
+          draft_content?: string | null
+          draft_keywords?: string[] | null
+          draft_slug?: string | null
+          draft_template?: string | null
+          draft_title?: string | null
+          effectiveness_score?: number | null
+          fact_check_details?: Json | null
+          fact_check_passed?: boolean | null
+          feed_post_id?: string | null
+          final_score?: number | null
+          id?: string
+          infographic_data?: Json | null
+          is_auto_publish?: boolean | null
+          is_processed?: boolean | null
+          is_published?: boolean | null
+          issue_type?: string | null
+          lifecycle_stage?: string | null
+          multiplier?: number | null
+          parent_issue_id?: string | null
+          penalty_rate?: number | null
+          post_24h_views?: number | null
+          post_7d_views?: number | null
+          post_signup_count?: number | null
+          processed_at?: string | null
+          publish_decision?: string | null
+          published_at?: string | null
+          raw_data?: Json | null
+          related_entities?: string[] | null
+          score_breakdown?: Json | null
+          source_type?: string
+          source_urls?: string[] | null
+          sub_category?: string | null
+          summary?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "issue_alerts_parent_issue_id_fkey"
+            columns: ["parent_issue_id"]
+            isOneToOne: false
+            referencedRelation: "issue_alerts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       landmark_apts: {
         Row: {
           address: string | null
@@ -2581,6 +3419,7 @@ export type Database = {
           description: string | null
           district: string
           id: number
+          image_url: string | null
           latitude: number | null
           longitude: number | null
           name: string
@@ -2602,6 +3441,7 @@ export type Database = {
           description?: string | null
           district: string
           id?: number
+          image_url?: string | null
           latitude?: number | null
           longitude?: number | null
           name: string
@@ -2623,6 +3463,7 @@ export type Database = {
           description?: string | null
           district?: string
           id?: number
+          image_url?: string | null
           latitude?: number | null
           longitude?: number | null
           name?: string
@@ -2631,6 +3472,42 @@ export type Database = {
           school_district?: string | null
           tags?: string[] | null
           total_units?: number | null
+        }
+        Relationships: []
+      }
+      marketing_publish_logs: {
+        Row: {
+          created_at: string | null
+          error_message: string | null
+          external_url: string | null
+          id: number
+          platform: string
+          source_id: string | null
+          source_type: string
+          status: string
+          title: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          error_message?: string | null
+          external_url?: string | null
+          id?: number
+          platform: string
+          source_id?: string | null
+          source_type?: string
+          status?: string
+          title?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string | null
+          external_url?: string | null
+          id?: number
+          platform?: string
+          source_id?: string | null
+          source_type?: string
+          status?: string
+          title?: string | null
         }
         Relationships: []
       }
@@ -2744,52 +3621,138 @@ export type Database = {
           },
         ]
       }
+      naver_syndication: {
+        Row: {
+          blog_post_id: number | null
+          blog_slug: string
+          blog_status: string | null
+          cafe_article_id: string | null
+          cafe_status: string | null
+          category: string | null
+          created_at: string | null
+          id: number
+          naver_html: string
+          naver_tags: string[] | null
+          naver_title: string
+          original_title: string
+          published_at: string | null
+          target: string | null
+        }
+        Insert: {
+          blog_post_id?: number | null
+          blog_slug: string
+          blog_status?: string | null
+          cafe_article_id?: string | null
+          cafe_status?: string | null
+          category?: string | null
+          created_at?: string | null
+          id?: number
+          naver_html: string
+          naver_tags?: string[] | null
+          naver_title: string
+          original_title: string
+          published_at?: string | null
+          target?: string | null
+        }
+        Update: {
+          blog_post_id?: number | null
+          blog_slug?: string
+          blog_status?: string | null
+          cafe_article_id?: string | null
+          cafe_status?: string | null
+          category?: string | null
+          created_at?: string | null
+          id?: number
+          naver_html?: string
+          naver_tags?: string[] | null
+          naver_title?: string
+          original_title?: string
+          published_at?: string | null
+          target?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "naver_syndication_blog_post_id_fkey"
+            columns: ["blog_post_id"]
+            isOneToOne: false
+            referencedRelation: "blog_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_settings: {
         Row: {
           created_at: string | null
+          email_enabled: boolean | null
+          kakao_enabled: boolean | null
           push_apt_deadline: boolean | null
           push_attendance: boolean | null
           push_comments: boolean | null
           push_daily_digest: boolean | null
           push_follows: boolean | null
+          push_grade_up: boolean | null
           push_hot_post: boolean | null
           push_likes: boolean | null
+          push_local_new: boolean | null
+          push_marketing: boolean | null
           push_news: boolean | null
+          push_point: boolean | null
+          push_poll_result: boolean | null
+          push_predict_result: boolean | null
           push_stock_alert: boolean | null
           quiet_end: string | null
           quiet_start: string | null
+          streak_alert: boolean | null
           updated_at: string | null
           user_id: string
         }
         Insert: {
           created_at?: string | null
+          email_enabled?: boolean | null
+          kakao_enabled?: boolean | null
           push_apt_deadline?: boolean | null
           push_attendance?: boolean | null
           push_comments?: boolean | null
           push_daily_digest?: boolean | null
           push_follows?: boolean | null
+          push_grade_up?: boolean | null
           push_hot_post?: boolean | null
           push_likes?: boolean | null
+          push_local_new?: boolean | null
+          push_marketing?: boolean | null
           push_news?: boolean | null
+          push_point?: boolean | null
+          push_poll_result?: boolean | null
+          push_predict_result?: boolean | null
           push_stock_alert?: boolean | null
           quiet_end?: string | null
           quiet_start?: string | null
+          streak_alert?: boolean | null
           updated_at?: string | null
           user_id: string
         }
         Update: {
           created_at?: string | null
+          email_enabled?: boolean | null
+          kakao_enabled?: boolean | null
           push_apt_deadline?: boolean | null
           push_attendance?: boolean | null
           push_comments?: boolean | null
           push_daily_digest?: boolean | null
           push_follows?: boolean | null
+          push_grade_up?: boolean | null
           push_hot_post?: boolean | null
           push_likes?: boolean | null
+          push_local_new?: boolean | null
+          push_marketing?: boolean | null
           push_news?: boolean | null
+          push_point?: boolean | null
+          push_poll_result?: boolean | null
+          push_predict_result?: boolean | null
           push_stock_alert?: boolean | null
           quiet_end?: string | null
           quiet_start?: string | null
+          streak_alert?: boolean | null
           updated_at?: string | null
           user_id?: string
         }
@@ -2809,6 +3772,7 @@ export type Database = {
           created_at: string
           id: number
           is_read: boolean
+          link: string | null
           type: string
           user_id: string
         }
@@ -2817,6 +3781,7 @@ export type Database = {
           created_at?: string
           id?: number
           is_read?: boolean
+          link?: string | null
           type: string
           user_id: string
         }
@@ -2825,6 +3790,7 @@ export type Database = {
           created_at?: string
           id?: number
           is_read?: boolean
+          link?: string | null
           type?: string
           user_id?: string
         }
@@ -3061,32 +4027,47 @@ export type Database = {
       }
       plans: {
         Row: {
+          badge_emoji: string | null
           created_at: string
+          description: string | null
           features: Json
           id: string
+          interval: string
+          interval_count: number
           is_active: boolean
           name: string
           price: number
+          price_krw: number
           slug: string
           sort_order: number
         }
         Insert: {
+          badge_emoji?: string | null
           created_at?: string
+          description?: string | null
           features?: Json
           id?: string
+          interval?: string
+          interval_count?: number
           is_active?: boolean
           name: string
           price?: number
+          price_krw?: number
           slug: string
           sort_order?: number
         }
         Update: {
+          badge_emoji?: string | null
           created_at?: string
+          description?: string | null
           features?: Json
           id?: string
+          interval?: string
+          interval_count?: number
           is_active?: boolean
           name?: string
           price?: number
+          price_krw?: number
           slug?: string
           sort_order?: number
         }
@@ -3126,6 +4107,147 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      poll_options: {
+        Row: {
+          id: number
+          label: string
+          poll_id: number
+          sort_order: number | null
+        }
+        Insert: {
+          id?: number
+          label: string
+          poll_id: number
+          sort_order?: number | null
+        }
+        Update: {
+          id?: number
+          label?: string
+          poll_id?: number
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poll_options_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "post_polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      poll_votes: {
+        Row: {
+          created_at: string | null
+          id: number
+          option_id: number
+          poll_id: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          option_id: number
+          poll_id: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          option_id?: number
+          poll_id?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poll_votes_option_id_fkey"
+            columns: ["option_id"]
+            isOneToOne: false
+            referencedRelation: "poll_options"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "poll_votes_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "post_polls"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "poll_votes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      popup_ads: {
+        Row: {
+          click_count: number | null
+          content: string | null
+          created_at: string | null
+          current_impressions: number | null
+          dismiss_duration_hours: number | null
+          display_type: string | null
+          end_date: string | null
+          id: number
+          image_url: string | null
+          is_active: boolean | null
+          link_label: string | null
+          link_url: string | null
+          max_impressions: number | null
+          position: string | null
+          priority: number | null
+          start_date: string
+          target_pages: string[] | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          click_count?: number | null
+          content?: string | null
+          created_at?: string | null
+          current_impressions?: number | null
+          dismiss_duration_hours?: number | null
+          display_type?: string | null
+          end_date?: string | null
+          id?: number
+          image_url?: string | null
+          is_active?: boolean | null
+          link_label?: string | null
+          link_url?: string | null
+          max_impressions?: number | null
+          position?: string | null
+          priority?: number | null
+          start_date?: string
+          target_pages?: string[] | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          click_count?: number | null
+          content?: string | null
+          created_at?: string | null
+          current_impressions?: number | null
+          dismiss_duration_hours?: number | null
+          display_type?: string | null
+          end_date?: string | null
+          id?: number
+          image_url?: string | null
+          is_active?: boolean | null
+          link_label?: string | null
+          link_url?: string | null
+          max_impressions?: number | null
+          position?: string | null
+          priority?: number | null
+          start_date?: string
+          target_pages?: string[] | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       portfolio_holdings: {
         Row: {
@@ -3326,8 +4448,150 @@ export type Database = {
           },
         ]
       }
+      post_poll_votes: {
+        Row: {
+          created_at: string
+          id: number
+          option_index: number
+          poll_id: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          option_index: number
+          poll_id: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          option_index?: number
+          poll_id?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      post_polls: {
+        Row: {
+          created_at: string | null
+          expires_at: string | null
+          id: number
+          post_id: number
+        }
+        Insert: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: number
+          post_id: number
+        }
+        Update: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: number
+          post_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_polls_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: true
+            referencedRelation: "hot_posts_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_polls_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: true
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_polls_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: true
+            referencedRelation: "posts_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_polls_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: true
+            referencedRelation: "posts_seo_full"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_polls_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: true
+            referencedRelation: "posts_seo_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      post_reactions: {
+        Row: {
+          created_at: string | null
+          id: number
+          post_id: number
+          reaction: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: never
+          post_id: number
+          reaction: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: never
+          post_id?: number
+          reaction?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_reactions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "hot_posts_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_reactions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_reactions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_reactions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts_seo_full"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_reactions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts_seo_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       posts: {
         Row: {
+          ai_summary: string | null
           apt_tags: string[]
           author_id: string | null
           bookmarks_count: number
@@ -3347,6 +4611,7 @@ export type Database = {
           is_hidden: boolean | null
           is_pinned: boolean
           likes_count: number
+          post_type: string | null
           region_id: string
           report_count: number
           room_id: number | null
@@ -3359,9 +4624,10 @@ export type Database = {
           view_count: number
         }
         Insert: {
+          ai_summary?: string | null
           apt_tags?: string[]
-          bookmarks_count?: number
           author_id?: string | null
+          bookmarks_count?: number
           category: string
           city?: string
           comments_count?: number
@@ -3378,6 +4644,8 @@ export type Database = {
           is_hidden?: boolean | null
           is_pinned?: boolean
           likes_count?: number
+          post_type?: string | null
+          region_id: string
           report_count?: number
           room_id?: number | null
           slug?: string | null
@@ -3389,6 +4657,7 @@ export type Database = {
           view_count?: number
         }
         Update: {
+          ai_summary?: string | null
           apt_tags?: string[]
           author_id?: string | null
           bookmarks_count?: number
@@ -3408,6 +4677,7 @@ export type Database = {
           is_hidden?: boolean | null
           is_pinned?: boolean
           likes_count?: number
+          post_type?: string | null
           region_id?: string
           report_count?: number
           room_id?: number | null
@@ -3439,6 +4709,114 @@ export type Database = {
             columns: ["room_id"]
             isOneToOne: false
             referencedRelation: "hot_discussion_rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prediction_votes: {
+        Row: {
+          agree: boolean
+          created_at: string | null
+          id: number
+          prediction_id: number
+          user_id: string
+        }
+        Insert: {
+          agree: boolean
+          created_at?: string | null
+          id?: number
+          prediction_id: number
+          user_id: string
+        }
+        Update: {
+          agree?: boolean
+          created_at?: string | null
+          id?: number
+          prediction_id?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prediction_votes_prediction_id_fkey"
+            columns: ["prediction_id"]
+            isOneToOne: false
+            referencedRelation: "predictions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prediction_votes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      predictions: {
+        Row: {
+          created_at: string | null
+          deadline: string
+          direction: string
+          id: number
+          post_id: number
+          resolved: boolean | null
+          result: boolean | null
+          target: string
+        }
+        Insert: {
+          created_at?: string | null
+          deadline: string
+          direction: string
+          id?: number
+          post_id: number
+          resolved?: boolean | null
+          result?: boolean | null
+          target: string
+        }
+        Update: {
+          created_at?: string | null
+          deadline?: string
+          direction?: string
+          id?: number
+          post_id?: number
+          resolved?: boolean | null
+          result?: boolean | null
+          target?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "predictions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: true
+            referencedRelation: "hot_posts_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "predictions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: true
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "predictions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: true
+            referencedRelation: "posts_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "predictions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: true
+            referencedRelation: "posts_seo_full"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "predictions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: true
+            referencedRelation: "posts_seo_view"
             referencedColumns: ["id"]
           },
         ]
@@ -3695,10 +5073,13 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           birth_date: string | null
+          birth_year: number | null
           consent_analytics: boolean | null
           consent_updated_at: string | null
           created_at: string
           deleted_at: string | null
+          first_mission_completed: boolean | null
+          first_mission_progress: Json | null
           followers_count: number
           following_count: number
           font_size_preference: string | null
@@ -3721,24 +5102,30 @@ export type Database = {
           last_checked_date: string | null
           likes_count: number
           marketing_agreed: boolean | null
+          marketing_agreed_at: string | null
           nickname: string
           nickname_change_count: number
           nickname_change_tickets: number
           nickname_set: boolean
           onboarded: boolean | null
+          onboarding_method: string | null
           phone: string | null
           points: number
           posts_count: number
           premium_expires_at: string | null
           privacy_agreed_at: string | null
           profile_completed: boolean
+          profile_completion_rewarded: boolean | null
           provider: string | null
           region_text: string | null
           residence_city: string | null
           residence_district: string | null
+          signup_return_url: string | null
+          signup_source: string | null
           streak_days: number
           terms_agreed_at: string | null
           updated_at: string
+          zodiac_animal: string | null
         }
         Insert: {
           age_group?: string | null
@@ -3746,10 +5133,13 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           birth_date?: string | null
+          birth_year?: number | null
           consent_analytics?: boolean | null
           consent_updated_at?: string | null
           created_at?: string
           deleted_at?: string | null
+          first_mission_completed?: boolean | null
+          first_mission_progress?: Json | null
           followers_count?: number
           following_count?: number
           font_size_preference?: string | null
@@ -3772,24 +5162,30 @@ export type Database = {
           last_checked_date?: string | null
           likes_count?: number
           marketing_agreed?: boolean | null
+          marketing_agreed_at?: string | null
           nickname: string
           nickname_change_count?: number
           nickname_change_tickets?: number
           nickname_set?: boolean
           onboarded?: boolean | null
+          onboarding_method?: string | null
           phone?: string | null
           points?: number
           posts_count?: number
           premium_expires_at?: string | null
           privacy_agreed_at?: string | null
           profile_completed?: boolean
+          profile_completion_rewarded?: boolean | null
           provider?: string | null
           region_text?: string | null
           residence_city?: string | null
           residence_district?: string | null
+          signup_return_url?: string | null
+          signup_source?: string | null
           streak_days?: number
           terms_agreed_at?: string | null
           updated_at?: string
+          zodiac_animal?: string | null
         }
         Update: {
           age_group?: string | null
@@ -3797,10 +5193,13 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           birth_date?: string | null
+          birth_year?: number | null
           consent_analytics?: boolean | null
           consent_updated_at?: string | null
           created_at?: string
           deleted_at?: string | null
+          first_mission_completed?: boolean | null
+          first_mission_progress?: Json | null
           followers_count?: number
           following_count?: number
           font_size_preference?: string | null
@@ -3823,24 +5222,30 @@ export type Database = {
           last_checked_date?: string | null
           likes_count?: number
           marketing_agreed?: boolean | null
+          marketing_agreed_at?: string | null
           nickname?: string
           nickname_change_count?: number
           nickname_change_tickets?: number
           nickname_set?: boolean
           onboarded?: boolean | null
+          onboarding_method?: string | null
           phone?: string | null
           points?: number
           posts_count?: number
           premium_expires_at?: string | null
           privacy_agreed_at?: string | null
           profile_completed?: boolean
+          profile_completion_rewarded?: boolean | null
           provider?: string | null
           region_text?: string | null
           residence_city?: string | null
           residence_district?: string | null
+          signup_return_url?: string | null
+          signup_source?: string | null
           streak_days?: number
           terms_agreed_at?: string | null
           updated_at?: string
+          zodiac_animal?: string | null
         }
         Relationships: []
       }
@@ -3946,6 +5351,7 @@ export type Database = {
           p256dh: string | null
           updated_at: string | null
           user_id: string
+          visitor_id: string | null
         }
         Insert: {
           auth?: string | null
@@ -3955,6 +5361,7 @@ export type Database = {
           p256dh?: string | null
           updated_at?: string | null
           user_id: string
+          visitor_id?: string | null
         }
         Update: {
           auth?: string | null
@@ -3964,6 +5371,7 @@ export type Database = {
           p256dh?: string | null
           updated_at?: string | null
           user_id?: string
+          visitor_id?: string | null
         }
         Relationships: []
       }
@@ -4319,6 +5727,51 @@ export type Database = {
           },
         ]
       }
+      rewrite_batches: {
+        Row: {
+          batch_id: string
+          batch_size: number | null
+          category: string | null
+          completed_at: string | null
+          cost_estimate: number | null
+          created_at: string | null
+          failed: number | null
+          id: number
+          post_ids: Json
+          result_summary: Json | null
+          status: string | null
+          succeeded: number | null
+        }
+        Insert: {
+          batch_id: string
+          batch_size?: number | null
+          category?: string | null
+          completed_at?: string | null
+          cost_estimate?: number | null
+          created_at?: string | null
+          failed?: number | null
+          id?: number
+          post_ids?: Json
+          result_summary?: Json | null
+          status?: string | null
+          succeeded?: number | null
+        }
+        Update: {
+          batch_id?: string
+          batch_size?: number | null
+          category?: string | null
+          completed_at?: string | null
+          cost_estimate?: number | null
+          created_at?: string | null
+          failed?: number | null
+          id?: number
+          post_ids?: Json
+          result_summary?: Json | null
+          status?: string | null
+          succeeded?: number | null
+        }
+        Relationships: []
+      }
       room_subscriptions: {
         Row: {
           created_at: string
@@ -4355,6 +5808,47 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scheduled_feed_posts: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_published: boolean | null
+          issue_id: string | null
+          persona_type: string
+          persona_user_id: string | null
+          published_post_id: string | null
+          scheduled_at: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_published?: boolean | null
+          issue_id?: string | null
+          persona_type: string
+          persona_user_id?: string | null
+          published_post_id?: string | null
+          scheduled_at: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_published?: boolean | null
+          issue_id?: string | null
+          persona_type?: string
+          persona_user_id?: string | null
+          published_post_id?: string | null
+          scheduled_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scheduled_feed_posts_issue_id_fkey"
+            columns: ["issue_id"]
+            isOneToOne: false
+            referencedRelation: "issue_alerts"
             referencedColumns: ["id"]
           },
         ]
@@ -4396,62 +5890,33 @@ export type Database = {
       }
       share_logs: {
         Row: {
+          content_ref: string | null
+          content_type: string | null
           created_at: string | null
           id: number
           platform: string
-          post_id: number
+          post_id: number | null
           user_id: string | null
         }
         Insert: {
+          content_ref?: string | null
+          content_type?: string | null
           created_at?: string | null
           id?: never
           platform: string
-          post_id: number
+          post_id?: number | null
           user_id?: string | null
         }
         Update: {
+          content_ref?: string | null
+          content_type?: string | null
           created_at?: string | null
           id?: never
           platform?: string
-          post_id?: number
+          post_id?: number | null
           user_id?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "share_logs_post_id_fkey"
-            columns: ["post_id"]
-            isOneToOne: false
-            referencedRelation: "hot_posts_v2"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "share_logs_post_id_fkey"
-            columns: ["post_id"]
-            isOneToOne: false
-            referencedRelation: "posts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "share_logs_post_id_fkey"
-            columns: ["post_id"]
-            isOneToOne: false
-            referencedRelation: "posts_safe"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "share_logs_post_id_fkey"
-            columns: ["post_id"]
-            isOneToOne: false
-            referencedRelation: "posts_seo_full"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "share_logs_post_id_fkey"
-            columns: ["post_id"]
-            isOneToOne: false
-            referencedRelation: "posts_seo_view"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "share_logs_user_id_fkey"
             columns: ["user_id"]
@@ -4553,6 +6018,45 @@ export type Database = {
         }
         Relationships: []
       }
+      signup_attempts: {
+        Row: {
+          created_at: string | null
+          error_message: string | null
+          id: number
+          ip_hash: string | null
+          onboarding_skipped: boolean | null
+          provider: string
+          redirect_path: string | null
+          source: string | null
+          success: boolean | null
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: never
+          ip_hash?: string | null
+          onboarding_skipped?: boolean | null
+          provider: string
+          redirect_path?: string | null
+          source?: string | null
+          success?: boolean | null
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: never
+          ip_hash?: string | null
+          onboarding_skipped?: boolean | null
+          provider?: string
+          redirect_path?: string | null
+          source?: string | null
+          success?: boolean | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       site_notices: {
         Row: {
           author_id: string | null
@@ -4626,6 +6130,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      stock_ai_analysis: {
+        Row: {
+          analysis: Json
+          created_at: string
+          id: number
+          stock_name: string | null
+          symbol: string
+          user_id: string
+        }
+        Insert: {
+          analysis?: Json
+          created_at?: string
+          id?: number
+          stock_name?: string | null
+          symbol: string
+          user_id: string
+        }
+        Update: {
+          analysis?: Json
+          created_at?: string
+          id?: number
+          stock_name?: string | null
+          symbol?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       stock_ai_comments: {
         Row: {
@@ -5000,15 +6531,29 @@ export type Database = {
       }
       stock_quotes: {
         Row: {
+          analysis_generated_at: string | null
+          analysis_text: string | null
           change_amt: number | null
           change_pct: number | null
+          comment_count: number
           currency: string | null
+          data_quality_score: number | null
           description: string | null
+          dividend_yield: number | null
+          eps: number | null
+          fundamentals_updated_at: string | null
+          high_52w: number | null
           is_active: boolean | null
+          logo_url: string | null
+          low_52w: number | null
           market: string
           market_cap: number | null
           name: string
+          page_views: number
+          pbr: number | null
+          per: number | null
           price: number | null
+          roe: number | null
           sector: string | null
           symbol: string
           ticker: string | null
@@ -5017,15 +6562,29 @@ export type Database = {
           website: string | null
         }
         Insert: {
+          analysis_generated_at?: string | null
+          analysis_text?: string | null
           change_amt?: number | null
           change_pct?: number | null
+          comment_count?: number
           currency?: string | null
+          data_quality_score?: number | null
           description?: string | null
+          dividend_yield?: number | null
+          eps?: number | null
+          fundamentals_updated_at?: string | null
+          high_52w?: number | null
           is_active?: boolean | null
+          logo_url?: string | null
+          low_52w?: number | null
           market: string
           market_cap?: number | null
           name: string
+          page_views?: number
+          pbr?: number | null
+          per?: number | null
           price?: number | null
+          roe?: number | null
           sector?: string | null
           symbol: string
           ticker?: string | null
@@ -5034,15 +6593,29 @@ export type Database = {
           website?: string | null
         }
         Update: {
+          analysis_generated_at?: string | null
+          analysis_text?: string | null
           change_amt?: number | null
           change_pct?: number | null
+          comment_count?: number
           currency?: string | null
+          data_quality_score?: number | null
           description?: string | null
+          dividend_yield?: number | null
+          eps?: number | null
+          fundamentals_updated_at?: string | null
+          high_52w?: number | null
           is_active?: boolean | null
+          logo_url?: string | null
+          low_52w?: number | null
           market?: string
           market_cap?: number | null
           name?: string
+          page_views?: number
+          pbr?: number | null
+          per?: number | null
           price?: number | null
+          roe?: number | null
           sector?: string | null
           symbol?: string
           ticker?: string | null
@@ -5446,6 +7019,246 @@ export type Database = {
         }
         Relationships: []
       }
+      upcoming_projects: {
+        Row: {
+          blog_post_id: number | null
+          brand_name: string | null
+          builder: string | null
+          created_at: string | null
+          dong: string | null
+          estimated_launch_date: string | null
+          estimated_price_pyeong: number | null
+          facts: Json | null
+          id: number
+          interest_score: number | null
+          location_full: string
+          project_name: string
+          region: string | null
+          rendering_image_url: string | null
+          rumors: Json | null
+          scale: string | null
+          sigungu: string | null
+          source_urls: string[] | null
+          status: string | null
+          total_units: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          blog_post_id?: number | null
+          brand_name?: string | null
+          builder?: string | null
+          created_at?: string | null
+          dong?: string | null
+          estimated_launch_date?: string | null
+          estimated_price_pyeong?: number | null
+          facts?: Json | null
+          id?: number
+          interest_score?: number | null
+          location_full: string
+          project_name: string
+          region?: string | null
+          rendering_image_url?: string | null
+          rumors?: Json | null
+          scale?: string | null
+          sigungu?: string | null
+          source_urls?: string[] | null
+          status?: string | null
+          total_units?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          blog_post_id?: number | null
+          brand_name?: string | null
+          builder?: string | null
+          created_at?: string | null
+          dong?: string | null
+          estimated_launch_date?: string | null
+          estimated_price_pyeong?: number | null
+          facts?: Json | null
+          id?: number
+          interest_score?: number | null
+          location_full?: string
+          project_name?: string
+          region?: string | null
+          rendering_image_url?: string | null
+          rumors?: Json | null
+          scale?: string | null
+          sigungu?: string | null
+          source_urls?: string[] | null
+          status?: string | null
+          total_units?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      usage_limits: {
+        Row: {
+          ai_analysis: number
+          created_at: string
+          daily_report_count: number
+          export_count: number
+          id: string
+          period: string
+          price_alerts: number
+          updated_at: string
+          user_id: string
+          watchlist_apt: number
+          watchlist_stock: number
+        }
+        Insert: {
+          ai_analysis?: number
+          created_at?: string
+          daily_report_count?: number
+          export_count?: number
+          id?: string
+          period: string
+          price_alerts?: number
+          updated_at?: string
+          user_id: string
+          watchlist_apt?: number
+          watchlist_stock?: number
+        }
+        Update: {
+          ai_analysis?: number
+          created_at?: string
+          daily_report_count?: number
+          export_count?: number
+          id?: string
+          period?: string
+          price_alerts?: number
+          updated_at?: string
+          user_id?: string
+          watchlist_apt?: number
+          watchlist_stock?: number
+        }
+        Relationships: []
+      }
+      user_daily_summary: {
+        Row: {
+          avg_scroll_depth: number | null
+          clicks: number | null
+          created_at: string | null
+          cta_clicks: number | null
+          cta_views: number | null
+          engagement_score: number | null
+          id: number
+          page_views: number | null
+          primary_device: string | null
+          pv_apt: number | null
+          pv_blog: number | null
+          pv_calc: number | null
+          pv_feed: number | null
+          pv_stock: number | null
+          searches: number | null
+          sessions: number | null
+          shares: number | null
+          stat_date: string
+          total_duration_sec: number | null
+          unique_pages: number | null
+          user_id: string | null
+          visitor_id: string
+        }
+        Insert: {
+          avg_scroll_depth?: number | null
+          clicks?: number | null
+          created_at?: string | null
+          cta_clicks?: number | null
+          cta_views?: number | null
+          engagement_score?: number | null
+          id?: never
+          page_views?: number | null
+          primary_device?: string | null
+          pv_apt?: number | null
+          pv_blog?: number | null
+          pv_calc?: number | null
+          pv_feed?: number | null
+          pv_stock?: number | null
+          searches?: number | null
+          sessions?: number | null
+          shares?: number | null
+          stat_date: string
+          total_duration_sec?: number | null
+          unique_pages?: number | null
+          user_id?: string | null
+          visitor_id: string
+        }
+        Update: {
+          avg_scroll_depth?: number | null
+          clicks?: number | null
+          created_at?: string | null
+          cta_clicks?: number | null
+          cta_views?: number | null
+          engagement_score?: number | null
+          id?: never
+          page_views?: number | null
+          primary_device?: string | null
+          pv_apt?: number | null
+          pv_blog?: number | null
+          pv_calc?: number | null
+          pv_feed?: number | null
+          pv_stock?: number | null
+          searches?: number | null
+          sessions?: number | null
+          shares?: number | null
+          stat_date?: string
+          total_duration_sec?: number | null
+          unique_pages?: number | null
+          user_id?: string | null
+          visitor_id?: string
+        }
+        Relationships: []
+      }
+      user_events: {
+        Row: {
+          created_at: string
+          device_type: string | null
+          duration_ms: number | null
+          event_name: string
+          event_type: string
+          id: number
+          page_category: string | null
+          page_path: string | null
+          properties: Json | null
+          referrer: string | null
+          screen_width: number | null
+          session_id: string | null
+          user_id: string | null
+          visitor_id: string
+        }
+        Insert: {
+          created_at?: string
+          device_type?: string | null
+          duration_ms?: number | null
+          event_name: string
+          event_type: string
+          id?: never
+          page_category?: string | null
+          page_path?: string | null
+          properties?: Json | null
+          referrer?: string | null
+          screen_width?: number | null
+          session_id?: string | null
+          user_id?: string | null
+          visitor_id: string
+        }
+        Update: {
+          created_at?: string
+          device_type?: string | null
+          duration_ms?: number | null
+          event_name?: string
+          event_type?: string
+          id?: never
+          page_category?: string | null
+          page_path?: string | null
+          properties?: Json | null
+          referrer?: string | null
+          screen_width?: number | null
+          session_id?: string | null
+          user_id?: string | null
+          visitor_id?: string
+        }
+        Relationships: []
+      }
       user_feedback: {
         Row: {
           category: string | null
@@ -5548,6 +7361,36 @@ export type Database = {
           },
         ]
       }
+      user_watchlist: {
+        Row: {
+          created_at: string | null
+          display_order: number | null
+          id: number
+          item_id: string
+          item_name: string
+          item_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          display_order?: number | null
+          id?: never
+          item_id: string
+          item_name: string
+          item_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          display_order?: number | null
+          id?: never
+          item_id?: string
+          item_name?: string
+          item_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       view_logs: {
         Row: {
           created_at: string | null
@@ -5617,6 +7460,141 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      vs_battles: {
+        Row: {
+          created_at: string | null
+          id: number
+          option_a: string
+          option_b: string
+          post_id: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          option_a: string
+          option_b: string
+          post_id: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          option_a?: string
+          option_b?: string
+          post_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vs_battles_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: true
+            referencedRelation: "hot_posts_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vs_battles_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: true
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vs_battles_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: true
+            referencedRelation: "posts_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vs_battles_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: true
+            referencedRelation: "posts_seo_full"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vs_battles_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: true
+            referencedRelation: "posts_seo_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vs_votes: {
+        Row: {
+          battle_id: number
+          choice: string
+          created_at: string | null
+          id: number
+          user_id: string
+        }
+        Insert: {
+          battle_id: number
+          choice: string
+          created_at?: string | null
+          id?: number
+          user_id: string
+        }
+        Update: {
+          battle_id?: number
+          choice?: string
+          created_at?: string | null
+          id?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vs_votes_battle_id_fkey"
+            columns: ["battle_id"]
+            isOneToOne: false
+            referencedRelation: "vs_battles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vs_votes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      weekly_predictions: {
+        Row: {
+          actual_value: number | null
+          created_at: string | null
+          diff: number | null
+          id: number
+          points_awarded: number | null
+          prediction: number
+          rank: number | null
+          user_id: string
+          week_start: string
+        }
+        Insert: {
+          actual_value?: number | null
+          created_at?: string | null
+          diff?: number | null
+          id?: never
+          points_awarded?: number | null
+          prediction: number
+          rank?: number | null
+          user_id: string
+          week_start: string
+        }
+        Update: {
+          actual_value?: number | null
+          created_at?: string | null
+          diff?: number | null
+          id?: never
+          points_awarded?: number | null
+          prediction?: number
+          rank?: number | null
+          user_id?: string
+          week_start?: string
+        }
+        Relationships: []
       }
     }
     Views: {
@@ -5755,6 +7733,65 @@ export type Database = {
           },
         ]
       }
+      mv_apt_overview: {
+        Row: {
+          closed_count: number | null
+          open_count: number | null
+          region: string | null
+          subscription_count: number | null
+          upcoming_count: number | null
+        }
+        Relationships: []
+      }
+      mv_apt_pulse: {
+        Row: {
+          data: Json | null
+          refreshed_at: string | null
+        }
+        Relationships: []
+      }
+      mv_seo_portal_stats: {
+        Row: {
+          author_ok: number | null
+          avg_content_len: number | null
+          both_ok: number | null
+          content_long_ok: number | null
+          cover_image_ok: number | null
+          excerpt_ok: number | null
+          google: number | null
+          image_alt_ok: number | null
+          indexed_ok: number | null
+          keywords_ok: number | null
+          links_ok: number | null
+          meta_ok: number | null
+          naver: number | null
+          refreshed_at: string | null
+          rewritten_ok: number | null
+          series_ok: number | null
+          tags_ok: number | null
+          tier_a: number | null
+          tier_b: number | null
+          tier_c: number | null
+          title_ok: number | null
+          total: number | null
+        }
+        Relationships: []
+      }
+      mv_trade_region_stats: {
+        Row: {
+          cnt: number | null
+          region_nm: string | null
+        }
+        Relationships: []
+      }
+      mv_unsold_summary: {
+        Row: {
+          region: string | null
+          total_unsold_households: number | null
+          unsold_count: number | null
+        }
+        Relationships: []
+      }
       posts_safe: {
         Row: {
           author_id: string | null
@@ -5862,6 +7899,16 @@ export type Database = {
         }
         Relationships: []
       }
+      retention_cohort: {
+        Row: {
+          cohort_size: number | null
+          cohort_week: string | null
+          d30_retained: number | null
+          d7_retained: number | null
+          signup_source: string | null
+        }
+        Relationships: []
+      }
       v_apt_price_trend: {
         Row: {
           apt_name: string | null
@@ -5873,6 +7920,26 @@ export type Database = {
           min_price: number | null
           region_nm: string | null
           sigungu: string | null
+        }
+        Relationships: []
+      }
+      v_complex_age_stats: {
+        Row: {
+          age_group: string | null
+          avg_jeonse_ratio: number | null
+          avg_sale_price: number | null
+          profile_count: number | null
+          total_rents: number | null
+          total_sales: number | null
+        }
+        Relationships: []
+      }
+      v_complex_region_stats: {
+        Row: {
+          avg_sale_price: number | null
+          profile_count: number | null
+          region_nm: string | null
+          with_jeonse: number | null
         }
         Relationships: []
       }
@@ -5896,6 +7963,8 @@ export type Database = {
       add_map_to_redev_blogs: { Args: never; Returns: number }
       add_map_to_sub_blogs: { Args: never; Returns: number }
       add_map_to_unsold_blogs: { Args: never; Returns: number }
+      add_toc_and_source: { Args: { p_content: string }; Returns: string }
+      admin_grade_stats: { Args: never; Returns: Json }
       admin_set_grade: {
         Args: { p_grade: number; p_grade_title: string; p_user_id: string }
         Returns: undefined
@@ -5929,6 +7998,15 @@ export type Database = {
           cnt: number
         }[]
       }
+      blog_category_stats: {
+        Args: never
+        Returns: {
+          category: string
+          cnt: number
+          rewrite_pct: number
+          rewritten: number
+        }[]
+      }
       blog_category_views: {
         Args: never
         Returns: {
@@ -5951,6 +8029,8 @@ export type Database = {
         Args: { p_house_manage_no: string }
         Returns: number
       }
+      bulk_fill_excerpts: { Args: { batch_size?: number }; Returns: Json }
+      bulk_fill_related_slugs: { Args: { batch_size?: number }; Returns: Json }
       calculate_hot_score: {
         Args: { p_created_at: string; p_downvotes: number; p_upvotes: number }
         Returns: number
@@ -5971,6 +8051,14 @@ export type Database = {
         }[]
       }
       check_in_attendance: { Args: never; Returns: Json }
+      check_issue_similarity: {
+        Args: { p_since?: string; p_threshold?: number; p_title: string }
+        Returns: {
+          id: string
+          sim: number
+          title: string
+        }[]
+      }
       check_nickname_available: {
         Args: { p_nickname: string }
         Returns: boolean
@@ -5992,6 +8080,7 @@ export type Database = {
         Args: { p_amount: number; p_order_id: string; p_payment_key: string }
         Returns: Json
       }
+      count_unique_visitors_7d: { Args: never; Returns: number }
       create_notification: {
         Args: { p_content: string; p_type: string; p_user_id: string }
         Returns: undefined
@@ -6021,6 +8110,60 @@ export type Database = {
           prev_count: number
           region_nm: string
         }[]
+      }
+      fix_short_meta_descriptions: {
+        Args: { batch_size?: number }
+        Returns: Json
+      }
+      full_apt_blog: {
+        Args: {
+          p_chg1y: number
+          p_dong: string
+          p_jeonse: number
+          p_jr: number
+          p_name: string
+          p_pyeong: number
+          p_rc1y: number
+          p_region: string
+          p_sale: number
+          p_sale_date: string
+          p_sc1y: number
+          p_sigungu: string
+          p_tpl: number
+          p_units: number
+          p_year: number
+        }
+        Returns: string
+      }
+      full_stock_blog: {
+        Args: {
+          p_cap: number
+          p_chg: number
+          p_cur: string
+          p_desc: string
+          p_div: number
+          p_h52: number
+          p_l52: number
+          p_mkt: string
+          p_nm: string
+          p_pbr: number
+          p_per: number
+          p_pr: number
+          p_sec: string
+          p_sym: string
+          p_tpl: number
+          p_vol: number
+        }
+        Returns: string
+      }
+      gen_investor_flow: { Args: { p_symbol: string }; Returns: string }
+      gen_rent_table: { Args: { p_apt_name: string }; Returns: string }
+      gen_site_info: { Args: { p_name: string }; Returns: string }
+      gen_stock_history: { Args: { p_symbol: string }; Returns: string }
+      gen_stock_news: { Args: { p_symbol: string }; Returns: string }
+      gen_trade_table: {
+        Args: { p_apt_name: string; p_sigungu?: string }
+        Returns: string
       }
       generate_apt_compare_blog: {
         Args: { p_id1: number; p_id2: number }
@@ -6080,6 +8223,27 @@ export type Database = {
         Args: { p_symbol: string }
         Returns: number
       }
+      generate_stock_blog: {
+        Args: {
+          p_cap: number
+          p_chg: number
+          p_cur: string
+          p_desc: string
+          p_div: number
+          p_h52: number
+          p_l52: number
+          p_mkt: string
+          p_nm: string
+          p_pbr: number
+          p_per: number
+          p_pr: number
+          p_sec: string
+          p_sym: string
+          p_tpl: number
+          p_vol: number
+        }
+        Returns: string
+      }
       generate_stock_compare_blog: {
         Args: { p_sym1: string; p_sym2: string }
         Returns: number
@@ -6115,17 +8279,66 @@ export type Database = {
           tier: string
         }[]
       }
+      get_active_visitors: { Args: { minutes?: number }; Returns: number }
       get_admin_dashboard: { Args: never; Returns: Json }
       get_admin_dashboard_stats: { Args: never; Returns: Json }
       get_apt_dashboard: { Args: never; Returns: Json }
       get_apt_dashboard_stats: { Args: never; Returns: Json }
-      get_apt_price_trend: {
-        Args: { p_apt_name: string; p_region?: string }
+      get_apt_jeonse_trend: {
+        Args: { p_apt_name: string; p_months?: number; p_sigungu?: string }
         Returns: {
-          area: number
-          deal_date: string
-          price: number
-          price_per_pyeong: number
+          avg_jeonse: number
+          avg_sale: number
+          jeonse_ratio: number
+          month: string
+        }[]
+      }
+      get_apt_price_trend:
+        | {
+            Args: { p_apt_name: string; p_region?: string }
+            Returns: {
+              area: number
+              deal_date: string
+              price: number
+              price_per_pyeong: number
+            }[]
+          }
+        | {
+            Args: { p_apt_name: string; p_months?: number; p_sigungu?: string }
+            Returns: {
+              avg_price: number
+              deal_count: number
+              max_price: number
+              min_price: number
+              month: string
+            }[]
+          }
+      get_apt_pulse: { Args: never; Returns: Json }
+      get_apt_rankings: {
+        Args: { p_limit?: number; p_region?: string; p_type?: string }
+        Returns: {
+          apt_name: string
+          avg_sale_price_pyeong: number
+          built_year: number
+          jeonse_ratio: number
+          latest_jeonse_price: number
+          latest_sale_price: number
+          price_change_1y: number
+          region_nm: string
+          rent_count_1y: number
+          sale_count_1y: number
+          sigungu: string
+          total_households: number
+        }[]
+      }
+      get_best_comment: { Args: { p_post_id: number }; Returns: Json }
+      get_blog_category_stats: { Args: never; Returns: Json }
+      get_blog_pulse_7d: { Args: never; Returns: Json }
+      get_blog_stats: {
+        Args: never
+        Returns: {
+          blog_count: number
+          total_views: number
         }[]
       }
       get_cron_summary: {
@@ -6140,7 +8353,17 @@ export type Database = {
           total_runs: number
         }[]
       }
+      get_db_size: { Args: never; Returns: string }
+      get_db_size_mb: { Args: never; Returns: number }
       get_db_stats: { Args: never; Returns: Json }
+      get_exchange_rate_trend: {
+        Args: { p_limit?: number }
+        Returns: {
+          rate: number
+          recorded_date: string
+        }[]
+      }
+      get_feed_pulse_7d: { Args: never; Returns: Json }
       get_hot_posts_by_region: {
         Args: { p_limit?: number; p_region?: string }
         Returns: {
@@ -6154,6 +8377,29 @@ export type Database = {
           view_count: number
         }[]
       }
+      get_hot_topics: {
+        Args: { p_limit?: number }
+        Returns: {
+          category: string
+          comments_count: number
+          id: number
+          likes_count: number
+          post_type: string
+          title: string
+        }[]
+      }
+      get_nearby_apt_compare: {
+        Args: { p_apt_name: string; p_limit?: number; p_sigungu: string }
+        Returns: {
+          apt_name: string
+          avg_sale_price_pyeong: number
+          built_year: number
+          jeonse_ratio: number
+          latest_sale_price: number
+          price_change_1y: number
+          sale_count_1y: number
+        }[]
+      }
       get_next_blog_to_publish: {
         Args: { p_daily_limit?: number }
         Returns: {
@@ -6161,6 +8407,14 @@ export type Database = {
           id: number
           slug: string
           title: string
+        }[]
+      }
+      get_poll_results: {
+        Args: { p_poll_id: number }
+        Returns: {
+          label: string
+          option_id: number
+          vote_count: number
         }[]
       }
       get_portfolio_summary: {
@@ -6178,6 +8432,7 @@ export type Database = {
           symbol: string
         }[]
       }
+      get_post_reactions: { Args: { p_post_id: number }; Returns: Json }
       get_post_seo: {
         Args: { p_id: number }
         Returns: {
@@ -6196,6 +8451,30 @@ export type Database = {
           title: string
         }[]
       }
+      get_prediction_results: {
+        Args: { p_prediction_id: number }
+        Returns: {
+          agree_count: number
+          disagree_count: number
+        }[]
+      }
+      get_redev_count_by_region: {
+        Args: never
+        Returns: {
+          redev_count: number
+          region: string
+        }[]
+      }
+      get_redev_no_coords: {
+        Args: { lim?: number }
+        Returns: {
+          address: string
+          district_name: string
+          id: number
+          region: string
+          sigungu: string
+        }[]
+      }
       get_region_realestate_summary: {
         Args: { p_region: string }
         Returns: {
@@ -6205,6 +8484,17 @@ export type Database = {
           subscription_count: number
           transaction_count: number
           unsold_count: number
+        }[]
+      }
+      get_rent_stats: {
+        Args: { p_months?: number; p_region?: string }
+        Returns: {
+          avg_deposit: number
+          avg_monthly_rent: number
+          deal_count: number
+          month: string
+          region_nm: string
+          rent_type: string
         }[]
       }
       get_seed_stats: {
@@ -6224,10 +8514,13 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           birth_date: string | null
+          birth_year: number | null
           consent_analytics: boolean | null
           consent_updated_at: string | null
           created_at: string
           deleted_at: string | null
+          first_mission_completed: boolean | null
+          first_mission_progress: Json | null
           followers_count: number
           following_count: number
           font_size_preference: string | null
@@ -6250,24 +8543,30 @@ export type Database = {
           last_checked_date: string | null
           likes_count: number
           marketing_agreed: boolean | null
+          marketing_agreed_at: string | null
           nickname: string
           nickname_change_count: number
           nickname_change_tickets: number
           nickname_set: boolean
           onboarded: boolean | null
+          onboarding_method: string | null
           phone: string | null
           points: number
           posts_count: number
           premium_expires_at: string | null
           privacy_agreed_at: string | null
           profile_completed: boolean
+          profile_completion_rewarded: boolean | null
           provider: string | null
           region_text: string | null
           residence_city: string | null
           residence_district: string | null
+          signup_return_url: string | null
+          signup_source: string | null
           streak_days: number
           terms_agreed_at: string | null
           updated_at: string
+          zodiac_animal: string | null
         }[]
         SetofOptions: {
           from: "*"
@@ -6276,9 +8575,51 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      get_seo_portal_stats: { Args: never; Returns: Json }
+      get_stock_52w_range: {
+        Args: { p_symbol: string }
+        Returns: {
+          current_price: number
+          from_high_pct: number
+          from_low_pct: number
+          high_date: string
+          high_price: number
+          low_date: string
+          low_price: number
+        }[]
+      }
       get_stock_dashboard: { Args: never; Returns: Json }
+      get_stock_ma: {
+        Args: { p_days?: number; p_symbol: string }
+        Returns: {
+          close_price: number
+          date: string
+          ma20: number
+          ma5: number
+          ma60: number
+          volume: number
+        }[]
+      }
       get_stock_market_summary: { Args: never; Returns: Json }
+      get_stock_pulse: { Args: never; Returns: Json }
+      get_thin_blog_posts: {
+        Args: { lim?: number; max_len?: number }
+        Returns: {
+          category: string
+          content: string
+          id: number
+          slug: string
+          title: string
+        }[]
+      }
       get_today_blog_publish_count: { Args: never; Returns: number }
+      get_trade_count_by_region: {
+        Args: never
+        Returns: {
+          region: string
+          trade_count: number
+        }[]
+      }
       get_trade_region_stats: {
         Args: never
         Returns: {
@@ -6286,11 +8627,38 @@ export type Database = {
           region_nm: string
         }[]
       }
+      get_trade_sites_for_sync: {
+        Args: { p_limit?: number }
+        Returns: {
+          dong: string
+          id: string
+          name: string
+          region: string
+          sigungu: string
+          slug: string
+        }[]
+      }
       get_trending_searches: {
         Args: never
         Returns: {
           cnt: number
           keyword: string
+        }[]
+      }
+      get_unsold_trend: {
+        Args: { p_limit?: number; p_region?: string }
+        Returns: {
+          change_from_prev: number
+          recorded_month: string
+          region_nm: string
+          total_unsold: number
+        }[]
+      }
+      get_vs_results: {
+        Args: { p_battle_id: number }
+        Returns: {
+          choice: string
+          vote_count: number
         }[]
       }
       get_waiting_megaphones: {
@@ -6320,6 +8688,15 @@ export type Database = {
         Args: { p_notice_id: number }
         Returns: undefined
       }
+      increment_blog_view: { Args: { p_blog_id: number }; Returns: undefined }
+      increment_email_click: {
+        Args: { p_resend_id: string }
+        Returns: undefined
+      }
+      increment_email_open: {
+        Args: { p_resend_id: string }
+        Returns: undefined
+      }
       increment_likes: { Args: { row_id: number }; Returns: undefined }
       increment_listing_click: {
         Args: { p_click_type?: string; p_listing_id: string }
@@ -6329,13 +8706,19 @@ export type Database = {
         Args: { p_listing_id: string }
         Returns: undefined
       }
-      increment_blog_view: { Args: { p_blog_id: number }; Returns: undefined }
+      increment_popup_click: { Args: { popup_id: number }; Returns: undefined }
+      increment_popup_impression: {
+        Args: { popup_id: number }
+        Returns: undefined
+      }
       increment_post_view: { Args: { p_post_id: number }; Returns: undefined }
+      increment_push_click: { Args: { p_log_id: number }; Returns: undefined }
       increment_site_interest: {
         Args: { p_site_id: string }
         Returns: undefined
       }
       increment_site_view: { Args: { p_site_id: string }; Returns: undefined }
+      increment_stock_view: { Args: { p_symbol: string }; Returns: undefined }
       increment_user_likes: {
         Args: { p_amount?: number; p_user_id: string }
         Returns: undefined
@@ -6353,6 +8736,11 @@ export type Database = {
         Args: { p_daily_limit?: number; p_id: number }
         Returns: Json
       }
+      recalc_price_change_1y: { Args: never; Returns: number }
+      recalc_stock_quality_scores: { Args: never; Returns: undefined }
+      refresh_all_site_scores: { Args: never; Returns: undefined }
+      refresh_apt_overview: { Args: never; Returns: undefined }
+      refresh_seo_stats: { Args: never; Returns: undefined }
       refresh_trending_keywords: { Args: never; Returns: undefined }
       reset_daily_api_usage: { Args: never; Returns: undefined }
       reset_monthly_api_usage: { Args: never; Returns: undefined }
@@ -6415,6 +8803,28 @@ export type Database = {
           title: string
         }[]
       }
+      search_rent_transactions: {
+        Args: {
+          p_apt_name?: string
+          p_limit?: number
+          p_region?: string
+          p_rent_type?: string
+          p_sigungu?: string
+        }
+        Returns: {
+          apt_name: string
+          built_year: number
+          deal_date: string
+          deposit: number
+          dong: string
+          exclusive_area: number
+          floor: number
+          monthly_rent: number
+          region_nm: string
+          rent_type: string
+          sigungu: string
+        }[]
+      }
       seed_all_blogs: { Args: never; Returns: Json }
       seed_apt_complex_blogs: { Args: never; Returns: Json }
       seed_apt_trade_blogs: { Args: never; Returns: Json }
@@ -6428,6 +8838,7 @@ export type Database = {
       show_trgm: { Args: { "": string }; Returns: string[] }
       snapshot_daily_stock_prices: { Args: never; Returns: undefined }
       snapshot_monthly_unsold: { Args: never; Returns: undefined }
+      sync_complex_profiles_full: { Args: never; Returns: Json }
       update_series_count: { Args: { p_series_id: string }; Returns: undefined }
       url_encode_korean: { Args: { p_text: string }; Returns: string }
       use_megaphone: {
@@ -6475,6 +8886,21 @@ export type Database = {
         | "관리자조정"
         | "아바타등록"
         | "초대보상"
+        | "공유"
+        | "아파트리뷰작성"
+        | "관심단지등록"
+        | "채팅참여"
+        | "가입보너스"
+        | "코스피예측참여"
+        | "투표생성"
+        | "투표참여"
+        | "VS생성"
+        | "VS참여"
+        | "예측생성"
+        | "예측참여"
+        | "예측적중"
+        | "한마디작성"
+        | "프로필완성보너스"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -6617,13 +9043,25 @@ export const Constants = {
         "관리자조정",
         "아바타등록",
         "초대보상",
+        "공유",
+        "아파트리뷰작성",
+        "관심단지등록",
+        "채팅참여",
+        "가입보너스",
+        "코스피예측참여",
+        "투표생성",
+        "투표참여",
+        "VS생성",
+        "VS참여",
+        "예측생성",
+        "예측참여",
+        "예측적중",
+        "한마디작성",
+        "프로필완성보너스",
       ],
     },
   },
 } as const
-
-// ─── Custom Types (Supabase 타입 재생성 시 유지 필요) ───
-
 export type PostWithProfile = Database['public']['Tables']['posts']['Row'] & {
   profiles?: {
     id?: string;

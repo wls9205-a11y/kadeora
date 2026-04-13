@@ -141,6 +141,7 @@ async function handler(_req: NextRequest) {
       content,
       category,
       is_anonymous: false,
+      region_id: 'all',
       created_at: new Date().toISOString(),
     }).select('id').single();
 

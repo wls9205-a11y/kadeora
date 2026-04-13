@@ -114,7 +114,6 @@ async function handler(_req: NextRequest) {
   let tradeInserted = 0;
   try {
     // 실거래에서 고유 단지별 집계 (apt_sites에 없는 것만)
-    // @ts-expect-error rpc name
     const { data: trades } = await sb.rpc('get_trade_sites_for_sync') as { data: Record<string, any>[] | null };
 
     // RPC 없으면 직접 쿼리 (초기 1회는 직접)
@@ -273,7 +272,6 @@ async function handler(_req: NextRequest) {
   // trade 타입에 맞는 점수 체계 추가
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   try {
-    // @ts-expect-error rpc call
     try { await sb.rpc('refresh_all_site_scores'); } catch {}
 
     const { data: allSites } = await sb.from('apt_sites')

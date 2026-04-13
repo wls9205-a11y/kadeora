@@ -94,6 +94,7 @@ export async function POST(req: NextRequest) {
         content: `${prefix} ${issue.draft_title}\n\n상세 분석 👉 ${SITE_URL}/blog/${issue.draft_slug}`,
         category: issue.category === 'apt' ? 'realestate' : 'stock',
         is_anonymous: false,
+        region_id: 'all',
       });
     } catch { /* 피드 포스트 실패해도 발행은 유지 */ }
   }
