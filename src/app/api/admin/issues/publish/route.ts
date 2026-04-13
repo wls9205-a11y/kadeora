@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
     if (!result.success) {
       insertError = result.message || result.reason || '발행 실패';
     } else {
-      blogId = result.id;
+      blogId = result.id ? Number(result.id) : undefined;
       // slug으로 fallback 조회
       if (!blogId && issue.draft_slug) {
         const { data: found } = await sb.from('blog_posts').select('id').eq('slug', issue.draft_slug).maybeSingle();

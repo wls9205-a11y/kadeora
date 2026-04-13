@@ -238,7 +238,7 @@ async function handler(_req: NextRequest) {
       try {
         const { data: simBlogs } = await sb.rpc('check_blog_similarity', {
           p_title: issue.title,
-          p_threshold: 0.2,
+          p_threshold: 0.35,
         });
         if (simBlogs && simBlogs.length > 0) {
           skipReasons.push(`title_similar:${simBlogs[0].id}:${simBlogs[0].title?.slice(0, 30)}`);
@@ -249,7 +249,8 @@ async function handler(_req: NextRequest) {
   if (skipReasons.length > 0) {
     await (sb as any).from('issue_alerts').update({
       publish_decision: 'duplicate_blog',
-      draft_content: skipReasons.join(' | '),
+      block_reason: skipReasons.join(' | '), // draft_content 덮어쓰지 않음
+      is_processed: true,
     }).eq('id', issue.id);
     return NextResponse.json({ processed: 0, message: 'duplicate_blog', reason: skipReasons[0] });
   }
@@ -300,12 +301,12 @@ async function handler(_req: NextRequest) {
   });
 
   // blog_post_id 확보 (safeBlogInsert가 id를 못 반환한 경우 slug으로 조회)
-  let blogPostId = insertResult.id || null;
+  let blogPostId: number | null = (insertResult.id ? Number(insertResult.id) : null);
   if (!blogPostId && article.slug) {
     try {
       const { data: found } = await sb.from('blog_posts')
         .select('id').eq('slug', article.slug).maybeSingle();
-      if (found) blogPostId = String(found.id);
+      if (found) blogPostId = found.id; // bigint
     } catch {}
   }
 
