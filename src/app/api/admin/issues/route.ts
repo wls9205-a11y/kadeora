@@ -9,7 +9,7 @@ export async function GET() {
   todayStart.setTime(todayStart.getTime() - 9 * 60 * 60 * 1000); // KST 00:00 → UTC
 
   // config 먼저 가져와서 minScore 동적 사용
-  const { data: config } = await sb.from('blog_publish_config')
+  const { data: config } = await (sb as any).from('blog_publish_config')
     .select('auto_publish_enabled,auto_publish_min_score,auto_publish_blocked_categories')
     .eq('id', 1).maybeSingle();
   const minScore = config?.auto_publish_min_score ?? 40;
