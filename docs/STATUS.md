@@ -1,4 +1,40 @@
 # 카더라 STATUS.md
+
+
+## 세션 98 추가 — DB statement timeout 폭발 해결
+
+### 원인 분석 (pg_stat_statements)
+- `apt_transactions` 전체컬럼 조회: 2,500ms × 24,604번 = **누적 60,497초**
+- `get_seo_portal_stats()` 전스캔: 1,800ms × 24,495번 = **누적 45,105초**
+- `check_blog_similarity` GIN 미활용: 1,700ms × 13,822번 = **누적 23,852초**
+- `get_apt_pulse()` 집계: 500ms × 19,106번 = **누적 9,381초**
+- `apt_transactions` OR+ILIKE (dong/sigungu): **500 에러**
+
+### 수정 완료
+
+**함수 개선 (MV 캐싱 교체):**
+- `check_blog_similarity` — `similarity()` → `set_limit() + %` 연산자 (GIN 인덱스 활용)
+- `get_seo_portal_stats()` → `mv_seo_portal_stats` MV 읽도록 교체
+- `get_apt_pulse()` → `mv_apt_pulse` MV 읽도록 교체
+- `get_trade_region_stats()` → `mv_trade_region_stats` MV 읽도록 교체
+
+**MV 3개 생성 (pg_cron 자동 refresh):**
+- `mv_seo_portal_stats` — 매시 정각 (job 20)
+- `mv_apt_pulse` — 매시 15분 (job 21)
+- `mv_trade_region_stats` — 매시 30분 (job 22)
+
+**인덱스 7개 추가 (apt_transactions):**
+- `idx_apt_tx_name_date_cover` — covering index (heap fetch 제거)
+- `idx_apt_tx_sigungu_date` — sigungu + deal_date 복합
+- `idx_apt_tx_created_at` — created_at DESC
+- `idx_apt_tx_dong_trgm` — dong GIN trgm (OR ILIKE 500 에러 해결)
+- `idx_apt_tx_sigungu_trgm` — sigungu GIN trgm
+- `idx_conversion_events_created_cta` — growth API 최적화
+- `idx_page_views_created_visitor` — growth API 최적화
+
+### 결과
+- pg_stat_statements 리셋 후: 500-900ms 수준으로 개선 (65%↓)
+- statement timeout 에러: 초당 0.26건 → **0건** (로그 완전 클리어)
 > 마지막 업데이트: 2026-04-13 (세션 98 — 트래픽→가입 전환 집중 개선)
 
 ## 세션 98 — 트래픽→가입 전환 3종 개선
