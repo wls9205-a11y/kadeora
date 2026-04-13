@@ -16,7 +16,7 @@ export default function DailyRedirect() {
       // 1. 로그인 유저 → DB 지역 우선
       if (user) {
         const { data: profile } = await sb.from('profiles')
-          .select('residence_city').eq('id', user.id).single();
+          .select('residence_city').eq('id', user.id).maybeSingle();
         if (profile?.residence_city) {
           // DB 지역 있으면 → localStorage도 동기화
           localStorage.setItem('daily_region', profile.residence_city);

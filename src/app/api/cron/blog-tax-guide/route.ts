@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { SITE_URL } from '@/lib/constants';
 import { buildFinancePrompt, generateAndValidate } from '@/lib/blog-prompt-templates';
 
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 const TOPICS = [
   { slug: 'transfer-tax-guide-2026', title: '2026 양도소득세 완벽 가이드 — 1주택 비과세 조건부터 중과세율까지', tags: ['양도세', '비과세', '1주택', '다주택자', '양도소득세'], calc: '/calc/property-tax/capital-gains-housing', cat: '부동산 세금' },

@@ -28,7 +28,7 @@ export default function InterestsSettingsPage() {
   useEffect(() => {
     if (!userId) return;
     const sb = createSupabaseBrowser();
-    sb.from('profiles').select('interests').eq('id', userId).single()
+    sb.from('profiles').select('interests').eq('id', userId).maybeSingle()
       .then(({ data }) => {
         if (data?.interests?.length) setSelected(data.interests);
         setLoaded(true);

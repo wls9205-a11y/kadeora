@@ -37,7 +37,7 @@ export default async function GradesPage() {
   try {
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
-      const { data: profile } = await supabase.from('profiles').select('points').eq('id', user.id).single();
+      const { data: profile } = await supabase.from('profiles').select('points').eq('id', user.id).maybeSingle();
       userPoints = profile?.points || 0;
     }
   } catch {}

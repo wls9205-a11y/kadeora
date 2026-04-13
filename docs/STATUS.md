@@ -401,3 +401,30 @@
 3. Google Publisher Center → 뉴스 파트너 신청
 4. Bing 웹마스터 → 사이트맵 확인
 5. 109개 위성 사이트 → 각 사이트에 kadeora.app 백링크 1개씩 추가
+
+---
+
+## 세션 77: 전수 진단 + 일괄 수정 (2026-04-13)
+
+### 발견된 이슈 25건+ → 수정 완료
+
+#### CRITICAL (2건)
+1. ✅ `/login` 500 에러 — 쿠키 파싱 try/catch 추가 (safeCookies 패턴)
+2. ✅ `/api/og-chart` 500 (48건+/일) — 에러 시 1x1 투명 PNG 폴백 반환
+
+#### HIGH (3건)
+3. ✅ 조회수 ISR 언더카운팅 — 서버사이드 RPC → 클라이언트 API 전환
+   - `/api/apt/view` + `/api/blog/view` POST 엔드포인트 생성
+   - `ViewTracker` 클라이언트 컴포넌트 (AptViewTracker, BlogViewTracker)
+   - apt/[id] + blog/[slug] 페이지 적용
+4. ✅ AI 블로그 크론 504 — blog-tax-guide, blog-regional-analysis maxDuration 60→300
+5. ✅ Dead API Key 크론 정리 — stock-price 5분→1일1회, crawl-competition-rate/crawl-apt-subscription 비활성화
+
+#### MEDIUM (3건)
+6. ✅ safeBlogInsert 로그 노이즈 — console.error → console.warn 다운그레이드
+7. ✅ `.single()` → `.maybeSingle()` 7곳 수정 (feed, settings, daily, blog, grades, write)
+8. ✅ 미사용 DB 인덱스 59MB 정리 (20개 DROP)
+
+#### DB 마이그레이션
+- 누락된 RPC 3개 생성 (get_trade_sites_for_sync, refresh_all_site_scores, refresh_seo_stats)
+- 미사용 인덱스 20개 DROP (59MB 절약)

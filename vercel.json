@@ -109,7 +109,7 @@
     },
     {
       "path": "/api/cron/stock-price",
-      "schedule": "*/5 0-7 * * 1-5"
+      "schedule": "0 18 * * 1-5"
     },
     {
       "path": "/api/cron/push-apt-deadline",
@@ -177,7 +177,7 @@
     },
     {
       "path": "/api/cron/crawl-apt-subscription",
-      "schedule": "0 6 * * *"
+      "schedule": "0 0 1 1 *"
     },
     {
       "path": "/api/cron/apt-parse-announcement",
@@ -197,7 +197,7 @@
     },
     {
       "path": "/api/cron/crawl-competition-rate",
-      "schedule": "0 12 * * *"
+      "schedule": "0 0 1 1 *"
     },
     {
       "path": "/api/cron/apt-ai-summary",

@@ -94,7 +94,7 @@ export default function WriteClient() {
       if (!data.session) { router.push('/login?redirect=/write'); return; }
       setUserId(data.session.user.id);
       const { data: profile } = await sb.from('profiles')
-        .select('residence_city, region_text').eq('id', data.session.user.id).single();
+        .select('residence_city, region_text').eq('id', data.session.user.id).maybeSingle();
       if (profile?.residence_city) {
         const matched = REGIONS.find(r => r.value !== 'all' && r.value === profile.residence_city);
         if (matched) { setRegionId(matched.value); if (!editId) setCategory('local'); }

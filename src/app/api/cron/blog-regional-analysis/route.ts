@@ -5,7 +5,7 @@ import { withCronLogging } from '@/lib/cron-logger';
 import { generateMetaDesc, generateMetaKeywords } from '@/lib/blog-seo-utils';
 import { NextRequest, NextResponse } from 'next/server';
 
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 const REGIONS = ['서울', '경기', '부산', '대구', '인천', '광주', '대전', '울산', '세종', '강원', '충북', '충남', '경북', '경남', '전북', '전남', '제주'];
 

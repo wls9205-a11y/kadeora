@@ -137,7 +137,9 @@ export async function GET(req: NextRequest) {
 
     return new Response('?symbol=XXX or ?apt=slug', { status: 400 });
   } catch (e: any) {
-    console.error('[og-chart] Error:', e?.message, e?.stack?.slice(0, 200));
-    return new Response(`Error: ${e.message}`, { status: 500 });
+    console.error("[og-chart]", e?.message, req.nextUrl.searchParams.toString());
+    // Return 1x1 transparent PNG fallback instead of 500
+    const fallback = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64');
+    return new Response(fallback, { headers: { 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=60' } });
   }
 }

@@ -1,3 +1,4 @@
+import { AptViewTracker } from '@/components/ViewTracker';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { SITE_URL } from '@/lib/constants';
@@ -204,7 +205,7 @@ async function fetchUnifiedData(slug: string) {
   })();
 
   // Fire-and-forget: 조회수 증가
-  if (site?.id) { void sb.rpc('increment_site_view', { p_site_id: site.id }); }
+  // view count moved to client-side API call (ViewTracker component)
 
   return { site, sub, unsold, redev, trades, relatedBlogs, relatedPosts, nearbySites, sameBuilderSites, regionBenchmark, regionTrades, complexProfiles, name, region, sigungu, slug, analysisText };
 }
@@ -344,6 +345,7 @@ export default async function AptUnifiedPage({ params }: Props) {
   return (
     <article style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }} itemScope itemType='https://schema.org/ApartmentComplex'>
       {noindex && <meta name="robots" content="noindex,follow" />}
+      {site?.id && <AptViewTracker siteId={site.id} />}
 
       {/* JSON-LD 1: RealEstateListing */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'RealEstateListing', name, description: site?.description || `${region} ${name}`, url: `${SITE_URL}/apt/${slug}`, address: { '@type': 'PostalAddress', addressRegion: region, addressLocality: site?.sigungu || '', streetAddress: site?.address || sub?.hssply_adres || '', addressCountry: 'KR' }, ...(site?.total_units || sub?.tot_supply_hshld_co ? { numberOfRooms: site?.total_units || sub?.tot_supply_hshld_co } : {}), ...(site?.latitude && site?.longitude ? { geo: { '@type': 'GeoCoordinates', latitude: site.latitude, longitude: site.longitude } } : {}), ...(site?.builder || sub?.constructor_nm ? { brand: { '@type': 'Organization', name: site?.builder || sub?.constructor_nm } } : {}), ...(site?.price_min || site?.price_max ? { offers: { '@type': 'AggregateOffer', priceCurrency: 'KRW', ...(site?.price_min ? { lowPrice: site.price_min * 10000 } : {}), ...(site?.price_max ? { highPrice: site.price_max * 10000 } : {}), offerCount: site?.total_units || 1 } } : {}) }) }} />

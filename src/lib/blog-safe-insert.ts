@@ -298,7 +298,7 @@ export async function safeBlogInsert(
         }
         return { success: false, reason: 'duplicate_slug', message: msg };
       }
-      console.error(`[safeBlogInsert] Insert error for "${data.title}" (${data.category}, ${enrichedContent.length}자):`, msg, '| code:', error.code, '| details:', error.details);
+      console.warn(`[safeBlogInsert] Insert blocked for "${data.title}" (${data.category}, ${enrichedContent.length}자):`, msg, '| code:', error.code, '| details:', error.details);
       return { success: false, reason: 'error', message: msg };
     }
 

@@ -126,7 +126,7 @@ export default async function FeedDetailPage({ params }: Props) {
       const { data: { user: authUser } } = await sb.auth.getUser();
       currentUserId = authUser?.id ?? null;
       if (currentUserId) {
-        const { data: prof } = await getSupabaseAdmin().from('profiles').select('is_admin').eq('id', currentUserId).single();
+        const { data: prof } = await getSupabaseAdmin().from('profiles').select('is_admin').eq('id', currentUserId).maybeSingle();
         isAdmin = prof?.is_admin === true;
       }
     } catch { /* 비로그인/만료 세션 — 무시 */ }

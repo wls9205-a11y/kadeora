@@ -21,15 +21,22 @@ export default async function LoginPage({
   searchParams: Promise<{ redirect?: string }>;
 }) {
   const cookieStore = await cookies();
+  const safeCookies = () => { try { return cookieStore.getAll(); } catch { return []; } };
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { cookies: { getAll: () => cookieStore.getAll() } }
+    { cookies: { getAll: safeCookies } }
   );
-  const { data: { user } } = await supabase.auth.getUser();
-  if (user) {
-    const params = await searchParams;
-    redirect(params.redirect ?? '/feed');
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const params = await searchParams;
+      redirect(params.redirect ?? '/feed');
+    }
+  } catch (e: any) {
+    // redirect() throws NEXT_REDIRECT — must re-throw
+    if (e?.digest?.includes('NEXT_REDIRECT')) throw e;
+    // Other errors (cookie parse, network) — render login page
   }
 
   return (

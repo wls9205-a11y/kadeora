@@ -37,7 +37,7 @@ export default function RegionSettingsPage() {
   useEffect(() => {
     if (!userId) return;
     const sb = createSupabaseBrowser();
-    sb.from('profiles').select('residence_city,residence_district,region_text').eq('id', userId).single()
+    sb.from('profiles').select('residence_city,residence_district,region_text').eq('id', userId).maybeSingle()
       .then(({ data }) => {
         if (data?.residence_city) setCity(data.residence_city);
         if (data?.residence_district) setDistrict(data.residence_district);

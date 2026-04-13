@@ -1,3 +1,4 @@
+import { BlogViewTracker } from '@/components/ViewTracker';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -260,7 +261,7 @@ export default async function BlogDetailPage({ params }: Props) {
   if (!post) return notFound();
 
   // 뷰카운트 atomic 증가 — RPC로 race condition 방지
-  sb.rpc('increment_blog_view', { p_blog_id: post.id }).then(() => {});
+  // view count moved to client-side API call (ViewTracker component)
 
   let isLoggedIn = false;
   let isPremiumUser = false;
@@ -268,7 +269,7 @@ export default async function BlogDetailPage({ params }: Props) {
     const { data: { user } } = await sb.auth.getUser();
     isLoggedIn = !!user;
     if (user) {
-      const { data: prof } = await sb.from('profiles').select('is_premium, premium_expires_at').eq('id', user.id).single();
+      const { data: prof } = await sb.from('profiles').select('is_premium, premium_expires_at').eq('id', user.id).maybeSingle();
       isPremiumUser = !!(prof?.is_premium && prof?.premium_expires_at && new Date(prof.premium_expires_at) > new Date());
     }
   } catch { /* 비로그인/만료 세션 */ }
@@ -728,6 +729,7 @@ export default async function BlogDetailPage({ params }: Props) {
       {/* 세션70: 상단 회원가입 유도 배너 */}
 
       <article itemScope itemType={`https://schema.org/${isNewsArticle ? 'NewsArticle' : 'BlogPosting'}`} style={{ paddingBottom: 40 }}>
+        <BlogViewTracker blogId={post.id} />
         {/* ImageGallery JSON-LD (유지 — 포털 이미지 탭) */}
         {post.cover_image && (() => {
           const ogSquare = `${SITE}/api/og-square?title=${encodeURIComponent(post.title)}&category=${post.category}&author=${encodeURIComponent(post.author_name || '카더라')}`;
