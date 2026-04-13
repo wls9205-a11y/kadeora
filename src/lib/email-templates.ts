@@ -205,3 +205,106 @@ export const EMAIL_SUBJECTS: Record<string, string> = {
   're-engagement': '{{nickname}}님, 놓치고 있는 투자 정보가 있어요 📊',
   'weekly-digest': '{{nickname}}님의 주간 투자 리포트 📊',
 };
+
+/** ① 환영 이메일 (P2) — 가입 직후 */
+export function welcomeBody({ nickname }: { nickname: string }): string {
+  const utmBase = 'utm_source=email&utm_medium=welcome&utm_campaign=onboarding';
+  return `
+    <p style="font-size:16px;color:#1E293B;margin:0 0 16px;font-weight:500;">
+      ${nickname}님, 카더라에 오신 걸 환영합니다!
+    </p>
+    <p style="font-size:14px;color:#64748B;line-height:1.7;margin:0 0 20px;">
+      매일 업데이트되는 청약 일정, 실거래가 분석, AI 종목 브리핑을<br>
+      지금 바로 확인해보세요.
+    </p>
+    <div style="margin:0 0 20px;">
+      ${[
+        { icon: '🏠', title: '분양·청약 마감 알림', desc: '관심 단지 등록하면 마감 D-day 알림' },
+        { icon: '📈', title: '주식 실시간 시세', desc: '1,800+ 종목 시세 + AI 분석' },
+        { icon: '🧮', title: '투자 계산기', desc: '청약 가점, 대출, 수익률 등 20종+' },
+      ].map(f => `
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #F1F5F9;">
+          <span style="font-size:20px;">${f.icon}</span>
+          <div>
+            <div style="font-size:14px;font-weight:500;color:#1E293B;">${f.title}</div>
+            <div style="font-size:12px;color:#94A3B8;">${f.desc}</div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+    <div style="text-align:center;margin:24px 0 0;">
+      <a href="https://kadeora.app/feed?${utmBase}" style="display:inline-block;padding:12px 36px;border-radius:10px;background:#3B7BF6;color:#FFFFFF;font-size:15px;font-weight:700;text-decoration:none;">
+        카더라 시작하기 →
+      </a>
+    </div>
+  `;
+}
+
+/** ④ D+3 기능 안내 (P5) */
+export function onboardingGuideBody({ nickname, interests }: { nickname: string; interests: string[] }): string {
+  const utmBase = 'utm_source=email&utm_medium=onboarding_d3&utm_campaign=onboarding';
+  const isApt = interests.includes('apt');
+  const isStock = interests.includes('stock');
+  const tips = [];
+  if (isApt) tips.push({ icon: '🔔', title: '관심단지 알림 설정', desc: '부동산 탭에서 관심 단지를 등록하면 마감·시세 변동 알림을 받아요', link: '/apt' });
+  if (isStock) tips.push({ icon: '⭐', title: '관심종목 추가', desc: '종목 페이지에서 ⭐ 누르면 급등·공시 알림을 받아요', link: '/stock' });
+  tips.push({ icon: '📰', title: '블로그 분석 읽기', desc: '매일 업데이트되는 AI 분석 블로그를 확인해보세요', link: '/blog' });
+  tips.push({ icon: '🌱', title: '출석 체크 +10P', desc: '매일 출석하면 포인트 적립, 7일 연속 시 50P 보너스!', link: '/attendance' });
+
+  return `
+    <p style="font-size:15px;color:#1E293B;margin:0 0 16px;">
+      ${nickname}님, 카더라 잘 쓰고 계신가요?
+    </p>
+    <p style="font-size:14px;color:#64748B;line-height:1.7;margin:0 0 20px;">
+      아직 써보지 못한 기능이 있을 수 있어서, 꿀팁을 정리해봤어요.
+    </p>
+    ${tips.map(t => `
+      <div style="padding:14px;margin:0 0 10px;border-radius:10px;background:#F8FAFC;border:1px solid #E2E8F0;">
+        <div style="display:flex;align-items:center;gap:10px;margin:0 0 6px;">
+          <span style="font-size:18px;">${t.icon}</span>
+          <span style="font-size:14px;font-weight:500;color:#1E293B;">${t.title}</span>
+        </div>
+        <div style="font-size:13px;color:#64748B;line-height:1.6;">${t.desc}</div>
+      </div>
+    `).join('')}
+    <div style="text-align:center;margin:24px 0 0;">
+      <a href="https://kadeora.app/feed?${utmBase}" style="display:inline-block;padding:12px 36px;border-radius:10px;background:#3B7BF6;color:#FFFFFF;font-size:15px;font-weight:700;text-decoration:none;">
+        카더라 둘러보기 →
+      </a>
+    </div>
+  `;
+}
+
+/** ⑨ 콘텐츠 추천 (P9) — 잔여 한도 채우기 */
+export function contentRecommendBody({ nickname, posts }: {
+  nickname: string;
+  posts: { title: string; slug: string; category: string; view_count: number }[];
+}): string {
+  const utmBase = 'utm_source=email&utm_medium=recommend&utm_campaign=content';
+  const catLabel: Record<string, string> = { apt: '🏠 부동산', stock: '📈 주식', finance: '💰 재테크' };
+  return `
+    <p style="font-size:15px;color:#1E293B;margin:0 0 6px;">
+      ${nickname}님을 위한 이번 주 추천
+    </p>
+    <p style="font-size:13px;color:#94A3B8;margin:0 0 20px;">
+      이번 주 가장 많이 읽힌 분석을 모아봤어요
+    </p>
+    ${posts.map((p, i) => `
+      <div style="padding:12px 0;border-bottom:1px solid #F1F5F9;">
+        <div style="display:flex;align-items:center;gap:8px;margin:0 0 4px;">
+          <span style="font-size:14px;font-weight:500;color:#3B7BF6;">${i + 1}.</span>
+          <span style="font-size:11px;color:#94A3B8;">${catLabel[p.category] || '📝 분석'}</span>
+          <span style="font-size:11px;color:#CBD5E1;">조회 ${p.view_count?.toLocaleString()}</span>
+        </div>
+        <a href="https://kadeora.app/blog/${p.slug}?${utmBase}" style="font-size:14px;color:#334155;text-decoration:none;line-height:1.5;font-weight:500;">
+          ${p.title}
+        </a>
+      </div>
+    `).join('')}
+    <div style="text-align:center;margin:24px 0 0;">
+      <a href="https://kadeora.app/blog?${utmBase}" style="display:inline-block;padding:12px 36px;border-radius:10px;background:#3B7BF6;color:#FFFFFF;font-size:15px;font-weight:700;text-decoration:none;">
+        더 많은 분석 보기 →
+      </a>
+    </div>
+  `;
+}
