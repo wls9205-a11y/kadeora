@@ -176,10 +176,6 @@
       "schedule": "*/10 0-6 * * 1-5"
     },
     {
-      "path": "/api/cron/stock-desc-gen",
-      "schedule": "30 6 * * *"
-    },
-    {
       "path": "/api/cron/crawl-apt-subscription",
       "schedule": "0 6 * * *"
     },
@@ -300,20 +296,12 @@
       "schedule": "0 5 * * *"
     },
     {
-      "path": "/api/cron/batch-cluster-poll",
-      "schedule": "*/10 * * * *"
-    },
-    {
       "path": "/api/cron/welcome-nudge",
       "schedule": "0 9 * * *"
     },
     {
       "path": "/api/cron/email-digest",
       "schedule": "0 0 * * 1"
-    },
-    {
-      "path": "/api/cron/streak-alert",
-      "schedule": "0 12 * * *"
     },
     {
       "path": "/api/cron/churn-prevention",
@@ -400,34 +388,6 @@
       "schedule": "0 4 * * 0"
     },
     {
-      "path": "/api/cron/seo-excerpt-fill",
-      "schedule": "30 4 * * *"
-    },
-    {
-      "path": "/api/cron/blog-calculator-guide",
-      "schedule": "15 5 * * *"
-    },
-    {
-      "path": "/api/cron/blog-tax-guide",
-      "schedule": "30 5 * * *"
-    },
-    {
-      "path": "/api/cron/blog-regional-analysis",
-      "schedule": "45 5 * * 1"
-    },
-    {
-      "path": "/api/cron/blog-loan-guide",
-      "schedule": "5 6 * * *"
-    },
-    {
-      "path": "/api/cron/blog-subscription-monthly",
-      "schedule": "0 7 1 * *"
-    },
-    {
-      "path": "/api/cron/blog-dividend-etf",
-      "schedule": "30 6 * * 1"
-    },
-    {
       "path": "/api/cron/issue-detect",
       "schedule": "*/15 * * * *"
     },
@@ -444,20 +404,12 @@
       "schedule": "*/5 * * * *"
     },
     {
-      "path": "/api/cron/daily-seed-activity",
-      "schedule": "30 4 * * *"
-    },
-    {
       "path": "/api/cron/check-price-alerts",
       "schedule": "0 */2 * * *"
     },
     {
       "path": "/api/cron/push-daily-reminder",
       "schedule": "0 23 * * *"
-    },
-    {
-      "path": "/api/cron/aggregate-user-events",
-      "schedule": "0 17 * * *"
     },
     {
       "path": "/api/cron/blog-subscription-alert",
@@ -482,10 +434,6 @@
     {
       "path": "/api/cron/price-change-calc",
       "schedule": "30 6 * * 1"
-    },
-    {
-      "path": "/api/cron/monthly-market-report",
-      "schedule": "0 7 2 * *"
     },
     {
       "path": "/api/cron/blog-complex-crosslink",
