@@ -102,6 +102,7 @@ export async function GET(req: Request) {
         if (!recentTradeMap.has(t.apt_name)) recentTradeMap.set(t.apt_name, t);
       }
       for (const alert of aptNameAlerts) {
+        if (!alert.target_symbol) continue;
         const trade = recentTradeMap.get(alert.target_symbol);
         if (!trade) continue;
         const msg = `${alert.target_symbol} 실거래 신규 — ${Math.round(trade.deal_amount / 10000)}억${Math.round(trade.deal_amount % 10000 / 1000) > 0 ? ` ${Math.round(trade.deal_amount % 10000 / 1000)}천` : ''}만원 (${trade.exclusive_area}㎡)`;
