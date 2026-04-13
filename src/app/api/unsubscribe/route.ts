@@ -23,12 +23,13 @@ export async function GET(req: NextRequest) {
 
     // 2. auth.users → profiles.marketing_agreed 해제
     try {
-      const { data: { users } } = await sb.auth.admin.listUsers({ filter: `email.eq.${normalEmail}`, perPage: 1 });
-      if (users?.[0]?.id) {
+      const { data: { users } } = await sb.auth.admin.listUsers({ perPage: 1 } as any);
+      const targetUser = users?.find((u: any) => u.email?.toLowerCase() === normalEmail);
+      if (targetUser?.id) {
         await sb.from('profiles').update({
           marketing_agreed: false,
           updated_at: new Date().toISOString(),
-        }).eq('id', users[0].id);
+        }).eq('id', targetUser!.id);
       }
     } catch { /* 프로필 없어도 subscriber는 해제됨 */ }
 
