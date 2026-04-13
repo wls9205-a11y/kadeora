@@ -195,3 +195,36 @@ email-digest — vercel.json에서 제거 (P4로 통합)
 - Resend 웹훅 등록: https://resend.com/webhooks → https://kadeora.app/api/webhook/resend
 - 기존 7,625개 블로그 인포그래픽 일괄 추가 (batch rewrite)
 - 이중 수신자 시스템 통합 (email_subscribers vs marketing_agreed)
+
+---
+
+## 세션 102 — 블로그 이미지 시스템 전면 개편 (2026-04-14)
+
+### 완료
+
+**1. 블로그 캐러셀 이미지 정리**
+- og_card 텍스트 배너 23,102건 DB 삭제 (본문 캐러셀에 어두운 배너 노출 문제)
+- blog/[slug]/page.tsx: og_card 타입 이미지 렌더링 필터링 추가
+- Unsplash 중복 이미지 10,114건 삭제 (87개 고유 URL이 116회 반복)
+
+**2. DB 이미지 즉시 적용 (크롤링 불필요)**
+- apt_sites.images → blog_post_images site_photo 일괄 매칭 삽입 (2,167건)
+- 인포그래픽 변형 4종(comparison, timeline, summary, ranking) 일괄 생성
+- 최종 커버리지: 7,606개(99.8%) 5-6장, 17개(0.2%) 3-4장
+
+**3. 블로그 썸네일(cover_image) 전면 교체**
+- Before: 7,623개 전부 OG 텍스트 배너
+- After: 현장사진 1,589 + 인포그래픽 5,564 + 기타 실제 이미지 470 + OG 배너 0
+- landmark_apts, apt_sites 매칭으로 실제 사진 최대한 활용
+- blog-generate-images 크론: Unsplash 이미지 생성 시 cover_image 자동 교체 로직 추가
+
+**4. 이미지 생성 크론 개선**
+- blog-generate-images: 제목 키워드 기반 Unsplash 검색 (카테고리 고정 → 주제 맞춤)
+- 3장→6장 구성: Unsplash 4 + infographic 2
+- BATCH 50→80, maxDuration 60→120, 주기 6h→3h
+- extractKeywords(): 제목에서 한글 명사 추출 + 카테고리 영어 보충
+
+### DB 변경
+- blog_post_images: og_card 23,102건 삭제, stock_photo 10,114건 삭제
+- blog_post_images: site_photo 2,167건 추가, infographic 변형 ~12,000건 추가
+- blog_posts.cover_image: 7,623개 OG배너 → 실제 이미지로 교체
