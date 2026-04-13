@@ -45,7 +45,11 @@ export default function IssueTab() {
   const [minScore, setMinScore] = useState(40);
   const [selectedIssue, setSelectedIssue] = useState<IssueAlert | null>(null);
   const [filter, setFilter] = useState<string>('all');
-  const [stats, setStats] = useState({ total: 0, published: 0, draft: 0, pending: 0 });
+  const [stats, setStats] = useState<{
+    total: number; published: number; draft: number; pending: number;
+    publishedToday?: number; autoFailed?: number; pending40plus?: number;
+    cronLimitUsed?: number; cronLimitMax?: number;
+  }>({ total: 0, published: 0, draft: 0, pending: 0 });
   const [running, setRunning] = useState(false);
 
   const fetchIssues = useCallback(async () => {
