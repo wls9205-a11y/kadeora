@@ -65,6 +65,11 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
   const hsc=hs>=71?'#10B981':hs>=41?'#F59E0B':'#EF4444';
   const hourly=td?.hourlyPv||[];
   const cg=ops?.cronGroups||{};
+  const dash=d.dashboard||{};
+  const rSignups=dash.recentSignups||[];
+  const pIssues=dash.pendingIssues||[];
+  const rPosts=dash.recentPosts||[];
+  const rComments=dash.recentComments||[];
 
   // 데이터 신선도
   const fresh=df?.freshness||{};
@@ -116,6 +121,76 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
             <div style={{fontSize:11,color:'rgba(255,255,255,0.35)',marginTop:2}}>{BM[b.k].l}</div>
           </div>
         ))}
+      </div>
+
+      {/* ═══ 3.5 미니위젯: 가입·이슈·커뮤니티 ═══ */}
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:4,margin:'6px 0'}}>
+        {/* 최근 가입자 */}
+        <Card ch={<>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6}}>
+            <span style={{fontSize:12,fontWeight:700,color:'rgba(255,255,255,0.5)'}}>👤 최근 가입</span>
+            <button onClick={()=>onNavigate('users')} style={{fontSize:10,color:'#3B7BF6',background:'none',border:'none',cursor:'pointer',fontWeight:600}}>더보기→</button>
+          </div>
+          {rSignups.length===0?<div style={{fontSize:11,color:'rgba(255,255,255,0.25)',textAlign:'center',padding:8}}>없음</div>:
+          rSignups.slice(0,5).map((u:any,i:number)=>(
+            <div key={i} style={{display:'flex',alignItems:'center',gap:6,padding:'3px 0',borderBottom:i<4?'1px solid rgba(255,255,255,0.03)':'none'}}>
+              <span style={{fontSize:10,width:14,textAlign:'center'}}>{u.provider==='kakao'?'💛':'🔵'}</span>
+              <span style={{flex:1,fontSize:12,color:'#E2E8F0',fontWeight:600,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{u.nickname}</span>
+              {!u.onboarded&&<span style={{fontSize:9,color:'#F59E0B',background:'rgba(245,158,11,0.1)',padding:'1px 5px',borderRadius:3}}>미온보딩</span>}
+              <span style={{fontSize:10,color:'rgba(255,255,255,0.25)',flexShrink:0}}>{ago(u.at)}</span>
+            </div>
+          ))}
+        </>} p="6px 8px"/>
+
+        {/* 대기 이슈 */}
+        <Card ch={<>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6}}>
+            <span style={{fontSize:12,fontWeight:700,color:'rgba(255,255,255,0.5)'}}>🔍 대기 이슈 <span style={{color:pIssues.length>0?'#F59E0B':'#64748b',fontWeight:800}}>{k.issuePending||pIssues.length}</span></span>
+            <button onClick={()=>onNavigate('issue')} style={{fontSize:10,color:'#3B7BF6',background:'none',border:'none',cursor:'pointer',fontWeight:600}}>더보기→</button>
+          </div>
+          {pIssues.length===0?<div style={{fontSize:11,color:'rgba(255,255,255,0.25)',textAlign:'center',padding:8}}>처리 대기 없음 ✅</div>:
+          pIssues.slice(0,4).map((iss:any,i:number)=>(
+            <div key={i} style={{display:'flex',alignItems:'center',gap:5,padding:'3px 0',borderBottom:i<3?'1px solid rgba(255,255,255,0.03)':'none'}}>
+              <span style={{fontSize:10,fontWeight:800,color:iss.score>=50?'#EF4444':iss.score>=40?'#F59E0B':'#64748b',background:iss.score>=40?'rgba(245,158,11,0.1)':'rgba(100,116,139,0.1)',padding:'1px 5px',borderRadius:3,flexShrink:0}}>{iss.score}</span>
+              <span style={{flex:1,fontSize:11,color:'rgba(255,255,255,0.6)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{iss.title}</span>
+              <span style={{fontSize:10,color:'rgba(255,255,255,0.2)',flexShrink:0}}>{ago(iss.at)}</span>
+            </div>
+          ))}
+        </>} p="6px 8px"/>
+      </div>
+
+      {/* 커뮤니티 + 가입경로 */}
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:4,marginBottom:6}}>
+        {/* 커뮤니티 */}
+        <Card ch={<>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6}}>
+            <span style={{fontSize:12,fontWeight:700,color:'rgba(255,255,255,0.5)'}}>💬 커뮤니티</span>
+            <button onClick={()=>onNavigate('community')} style={{fontSize:10,color:'#3B7BF6',background:'none',border:'none',cursor:'pointer',fontWeight:600}}>더보기→</button>
+          </div>
+          <div style={{display:'flex',gap:8,marginBottom:6}}>
+            <div style={{textAlign:'center',flex:1}}><div style={{fontSize:14,fontWeight:800,color:'#8B5CF6'}}>{g.postsToday||0}</div><div style={{fontSize:10,color:'rgba(255,255,255,0.3)'}}>글 오늘</div></div>
+            <div style={{textAlign:'center',flex:1}}><div style={{fontSize:14,fontWeight:800,color:'#06B6D4'}}>{g.commentsToday||0}</div><div style={{fontSize:10,color:'rgba(255,255,255,0.3)'}}>댓글</div></div>
+            <div style={{textAlign:'center',flex:1}}><div style={{fontSize:14,fontWeight:800,color:'#A855F7'}}>{f(x.totalPosts||0)}</div><div style={{fontSize:10,color:'rgba(255,255,255,0.3)'}}>총 글</div></div>
+          </div>
+          {rPosts.slice(0,3).map((p:any,i:number)=>(
+            <div key={i} style={{fontSize:11,color:'rgba(255,255,255,0.5)',padding:'2px 0',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>
+              {({'realestate':'🏠','stock':'📊','free':'💬','news':'📰'}[p.category as string])||'📝'} {p.title||'(제목없음)'} <span style={{color:'rgba(255,255,255,0.2)'}}>·{ago(p.at)}</span>
+            </div>
+          ))}
+        </>} p="6px 8px"/>
+
+        {/* 가입경로 분석 */}
+        <Card ch={<>
+          <div style={{fontSize:12,fontWeight:700,color:'rgba(255,255,255,0.5)',marginBottom:6}}>📡 가입경로</div>
+          {Object.entries(ss||{}).sort((a:any,b:any)=>b[1]-a[1]).slice(0,6).map(([src,cnt]:[string,any],i:number)=>{
+            const srcLabel:Record<string,string>={'kakao':'카카오','google':'구글','apt_alert_cta':'청약알림CTA','action_bar':'액션바','content_gate':'콘텐츠게이트','content_lock':'콘텐츠락','blog_cta':'블로그CTA','nav':'네비','direct':'직접','sidebar':'사이드바'};
+            return<div key={i} style={{display:'flex',justifyContent:'space-between',fontSize:11,padding:'2px 0',color:'rgba(255,255,255,0.5)'}}>
+              <span>{srcLabel[src]||src}</span>
+              <span style={{fontWeight:700,color:'#E2E8F0'}}>{cnt}</span>
+            </div>;
+          })}
+          {Object.keys(ss||{}).length===0&&<div style={{fontSize:11,color:'rgba(255,255,255,0.25)',textAlign:'center',padding:8}}>수집중</div>}
+        </>} p="6px 8px"/>
       </div>
 
       {/* ═══ 4. 퍼널 + CTA 나란히 ═══ */}

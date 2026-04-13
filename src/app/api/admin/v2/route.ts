@@ -213,6 +213,26 @@ export async function GET(req: NextRequest) {
         safeCount((sb as any).from('issue_alerts').select('id', { count: 'exact', head: true })),
       ]);
 
+      // ── 대시보드 미니위젯용 상세 데이터 ──
+      const [recentSignupsR, pendingIssuesR, recentPostsR, recentCommentsR] = await Promise.all([
+        (sb as any).from('profiles')
+          .select('id, nickname, provider, signup_source, onboarded, created_at, points')
+          .neq('is_seed', true).neq('is_ghost', true).neq('is_deleted', true)
+          .order('created_at', { ascending: false }).limit(8),
+        (sb as any).from('issue_alerts')
+          .select('id, title, category, final_score, is_processed, publish_decision, detected_at')
+          .eq('is_processed', false)
+          .order('final_score', { ascending: false }).limit(5),
+        sb.from('posts')
+          .select('id, title, category, created_at, likes_count')
+          .eq('is_deleted', false)
+          .order('created_at', { ascending: false }).limit(5),
+        sb.from('comments')
+          .select('id, content, created_at')
+          .eq('is_deleted', false)
+          .order('created_at', { ascending: false }).limit(3),
+      ]);
+
       return NextResponse.json({
         healthScore,
         scoreBreakdown: scores,
@@ -414,6 +434,24 @@ export async function GET(req: NextRequest) {
             })),
           };
         })(),
+        // ── 대시보드 미니위젯 데이터 ──
+        dashboard: {
+          recentSignups: (recentSignupsR.data || []).map((u: any) => ({
+            nickname: u.nickname, provider: u.provider, source: u.signup_source,
+            onboarded: u.onboarded, points: u.points, at: u.created_at,
+          })),
+          pendingIssues: (pendingIssuesR.data || []).map((i: any) => ({
+            id: i.id, title: i.title, category: i.category,
+            score: i.final_score, decision: i.publish_decision, at: i.detected_at,
+          })),
+          recentPosts: (recentPostsR.data || []).map((p: any) => ({
+            id: p.id, title: p.title, category: p.category,
+            likes: p.likes_count, at: p.created_at,
+          })),
+          recentComments: (recentCommentsR.data || []).slice(0, 3).map((c: any) => ({
+            content: (c.content || '').slice(0, 60), at: c.created_at,
+          })),
+        },
       });
     }
 
