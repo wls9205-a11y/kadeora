@@ -10,7 +10,7 @@ const CONFIGS: Record<string, { icon: string; hook: string; benefits: string[] }
   finance: { icon: '💰', hook: '맞춤 재테크 정보를 받아보세요', benefits: ['세금 계산기 무제한', '대출 비교 분석', '절세 전략 리포트'] },
 };
 
-export default function BlogMidCTA({ category, slug, userCount = 66 }: Props) {
+export default function BlogMidCTA({ category, slug, userCount = 80 }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
   const [dismissed, setDismissed] = useState(false);

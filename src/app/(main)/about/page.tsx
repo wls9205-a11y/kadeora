@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { SITE_URL, CONTACT_EMAIL, CONTACT_PHONE } from '@/lib/constants';
+import { fetchSocialProof, fmtSocial } from '@/lib/social-proof';
 
 export const metadata: Metadata = {
   title: '카더라 소개 — 부동산·주식 정보 플랫폼',
@@ -17,25 +18,22 @@ export const metadata: Metadata = {
   },
 };
 
-const FEATURES = [
-  { icon: '📈', title: '실시간 주식 시세', desc: 'KOSPI·KOSDAQ·NYSE·NASDAQ 728개 종목 실시간 시세, 섹터 히트맵, AI 시황 브리핑' },
-  { icon: '🏗️', title: '아파트 청약·재개발', desc: '전국 청약 일정, 재개발·재건축 현황, 미분양 추적, 분양 컨설턴트 연결' },
-  { icon: '🏘️', title: '단지백과', desc: '전국 34,500+ 아파트 단지별 연차 실거래가 비교, 시세 추이 분석' },
-  { icon: '🤖', title: 'AI 종목 분석', desc: 'Claude AI 기반 주식 종목 심층 분석 리포트 (Pro 회원)' },
-  { icon: '📝', title: '데이터 블로그', desc: '18,000+ 편의 부동산·주식 데이터 분석 블로그, 종목/아파트 비교 시리즈' },
-  { icon: '💬', title: '투자 커뮤니티', desc: '실시간 피드, 종목 토론방, 지역별 부동산 정보 공유' },
-  { icon: '🧮', title: '투자 계산기', desc: '청약 가점, 대출 이자, 수익률, 세금 등 20+ 종 금융 계산기' },
-  { icon: '🔔', title: '실시간 알림', desc: '청약 마감, 급등주, 미분양 업데이트 카카오톡·푸시 알림' },
-];
 
-const STATS = [
-  { value: '18,000+', label: '블로그 포스트' },
-  { value: '728', label: '추적 종목 수' },
-  { value: '34,500+', label: '아파트 단지' },
-  { value: '95+', label: '자동화 크론' },
-];
-
-export default function AboutPage() {
+export default async function AboutPage() {
+  const sp = await fetchSocialProof();
+  const FEATURES = [
+    { icon: '🏠', title: '청약·분양 정보', desc: `전국 ${fmtSocial(sp.subscriptionCount)}개 분양단지 정보, 청약 일정, 경쟁률, 미분양 현황을 한눈에` },
+    { icon: '📈', title: '실시간 주식 시세', desc: `KOSPI·KOSDAQ·NYSE·NASDAQ ${fmtSocial(sp.stockCount)}개 종목 실시간 시세, 섹터 히트맵, AI 시황 브리핑` },
+    { icon: '💰', title: '실거래가·시세', desc: `${fmtSocial(sp.tradeDataCount, 'approx')} 실거래·전세 데이터로 아파트 시세 추이 분석` },
+    { icon: '🏘️', title: '단지백과', desc: `전국 ${fmtSocial(sp.complexCount)}+ 아파트 단지별 연차 실거래가 비교, 시세 추이 분석` },
+    { icon: '🔔', title: '맞춤 알림', desc: '관심 단지 청약 마감, 종목 급등/급락, 실거래가 변동 알림을 무료로' },
+    { icon: '📝', title: '데이터 블로그', desc: `${fmtSocial(sp.blogCount)}+ 편의 부동산·주식 데이터 분석 블로그, 종목/아파트 비교 시리즈` },
+  ];
+  const STATS = [
+    { value: `${fmtSocial(sp.blogCount)}+`, label: '블로그 포스트' },
+    { value: fmtSocial(sp.stockCount), label: '추적 종목 수' },
+    { value: `${fmtSocial(sp.complexCount)}+`, label: '아파트 단지' },
+  ];
   return (
     <>
       {/* JSON-LD: AboutPage */}
@@ -114,8 +112,8 @@ export default function AboutPage() {
             개인 투자자가 더 나은 의사결정을 할 수 있도록 돕습니다.
           </p>
           <p style={{ margin: 0 }}>
-            매일 자동으로 업데이트되는 18,000편 이상의 데이터 분석 블로그,
-            728개 종목의 실시간 시세, 34,500개 아파트 단지의 실거래가 —
+            매일 자동으로 업데이트되는 {fmtSocial(sp.blogCount)}편 이상의 데이터 분석 블로그,
+            {fmtSocial(sp.stockCount)}개 종목의 실시간 시세, {fmtSocial(sp.complexCount)}개 아파트 단지의 실거래가 —
             카더라에서 확인하세요.
           </p>
         </div>

@@ -36,7 +36,7 @@ export function reEngagementEmail({
 
   const features = [
     { icon: '🏠', title: '청약 마감 알림', desc: '관심 단지 청약 마감 D-day를 놓치지 마세요' },
-    { icon: '📈', title: 'AI 종목 분석', desc: '728개 종목의 AI 투자 의견을 무료로 확인' },
+    { icon: '📈', title: 'AI 종목 분석', desc: '1,800+ 종목의 AI 투자 의견을 무료로 확인' },
     { icon: '💰', title: '실거래가 알림', desc: '관심 단지의 시세 변동을 실시간 추적' },
   ];
 
@@ -113,7 +113,7 @@ export function reEngagementEmail({
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#FFFFFF;border-radius:12px;padding:16px 20px;">
     <tr><td style="text-align:center;">
       <p style="font-size:13px;color:#64748B;margin:0 0 6px;">
-        📰 18,000+ 분석 블로그를 무료로 읽어보세요
+        📰 7,600+ 분석 블로그를 무료로 읽어보세요
       </p>
       <a href="${blogUrl}" style="font-size:14px;font-weight:700;color:#3B7BF6;text-decoration:none;">
         블로그 둘러보기 →

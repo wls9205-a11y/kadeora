@@ -27,12 +27,12 @@ const MORE_ITEMS: { href: string; emoji: string; label: string; sub?: string; gr
   // 투자 정보
   { href: '/daily',            emoji: '📊', label: '데일리 리포트', sub: '매일 시장 요약', group: '투자 정보' },
   { href: '/hot',             emoji: '🔥', label: '이번주 HOT', sub: '인기 글 모아보기', group: '투자 정보' },
-  { href: '/blog',            emoji: '📰', label: '블로그', sub: '18,000+ 분석 글', group: '투자 정보' },
+  { href: '/blog',            emoji: '📰', label: '블로그', sub: '7,600+ 분석 글', group: '투자 정보' },
   { href: '/blog/series',     emoji: '📚', label: '시리즈', sub: '주제별 연재 모음', group: '투자 정보' },
   { href: '/discuss',         emoji: '💬', label: '라운지 토론', sub: 'A vs B 투표·토론', group: '투자 정보' },
   // 주식
   { href: '/stock/compare',   emoji: '⚖️', label: '종목 비교', sub: '핵심 지표 비교', group: '주식' },
-  { href: '/stock/search',    emoji: '🔍', label: '종목 검색', sub: '728종목 필터', group: '주식' },
+  { href: '/stock/search',    emoji: '🔍', label: '종목 검색', sub: '1,800+종목 필터', group: '주식' },
   { href: '/stock/dividend',  emoji: '💎', label: '배당주 TOP', sub: '고배당 종목 순위', group: '주식' },
   { href: '/stock/movers',    emoji: '📈', label: '급등락', sub: '실시간 등락률', group: '주식' },
   { href: '/stock/themes',    emoji: '🎯', label: '테마주', sub: '섹터별 관련주', group: '주식' },

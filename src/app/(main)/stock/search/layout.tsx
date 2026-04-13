@@ -3,8 +3,8 @@ import { buildMeta } from '@/lib/seo';
 import { SITE_URL } from '@/lib/constants';
 
 export const metadata: Metadata = buildMeta({
-  title: '주식 종목 검색 — 국내외 728종목',
-  description: '코스피, 코스닥, NYSE, NASDAQ 728종목을 이름, 코드, 섹터로 검색하세요.',
+  title: '주식 종목 검색 — 국내외 1,800+종목',
+  description: '코스피, 코스닥, NYSE, NASDAQ 1,800+종목을 이름, 코드, 섹터로 검색하세요.',
   path: '/stock/search',
   section: '주식',
   ogCategory: 'stock',

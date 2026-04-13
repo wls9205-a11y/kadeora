@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 const STATS = [
   { label: '부동산 현장 데이터', value: '2,900+', desc: '청약·분양·재개발·미분양' },
   { label: '아파트 단지백과', value: '34,000+', desc: '전국 아파트 실거래가' },
-  { label: '주식 종목', value: '728', desc: 'KOSPI·KOSDAQ·NYSE·NASDAQ' },
+  { label: '주식 종목', value: '1,800+', desc: 'KOSPI·KOSDAQ·NYSE·NASDAQ' },
   { label: '블로그 포스트', value: '21,000+', desc: '투자 데이터 분석' },
   { label: '무료 계산기', value: '145종', desc: '세금·부동산·주식·대출' },
 ];

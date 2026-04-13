@@ -401,7 +401,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
           {[
             { href: '/stock', label: '📈 주식 시세', desc: '실시간 코스피·코스닥·나스닥' },
-            { href: '/apt/complex', label: '📖 단지백과', desc: '34,500 아파트 실거래가 비교' },
+            { href: '/apt/complex', label: '📖 단지백과', desc: '34,500+ 아파트 실거래가 비교' },
             { href: '/apt/diagnose', label: '🎯 가점 계산기', desc: '내 청약 가점 자동 계산' },
             { href: '/blog', label: '📝 투자 블로그', desc: '부동산·주식 데이터 분석' },
             { href: '/daily/서울', label: '📰 데일리 리포트', desc: '오늘의 시장 브리핑' },

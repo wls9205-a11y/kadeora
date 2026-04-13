@@ -410,7 +410,7 @@ export async function GET(req: NextRequest) {
     /* 홈 OG */
     if (!title) {
       const homeC = CAT.apt;
-      const _homeImg = new ImageResponse(D1(homeC, '아는 사람만 아는 그 정보', '주식 · 청약·분양 · 재테크 · 커뮤니티 · 19,000편+ 블로그', '카더라', ff), { width:1200, height:630, ...opts });
+      const _homeImg = new ImageResponse(D1(homeC, '아는 사람만 아는 그 정보', '주식 · 청약·분양 · 재테크 · 커뮤니티 · 7,600편+ 블로그', '카더라', ff), { width:1200, height:630, ...opts });
       const _homeBuf = await _homeImg.arrayBuffer();
       return new Response(_homeBuf, { headers: { 'Content-Type':'image/png', ...CACHE } });
     }

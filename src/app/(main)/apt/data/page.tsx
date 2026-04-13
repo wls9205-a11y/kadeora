@@ -126,7 +126,7 @@ export default async function AptDataPage() {
             links: [{ href: '/api/data/apt-unsold?format=xlsx', label: 'Excel', color: 'var(--accent-green)' }, { href: '/api/data/apt-unsold?format=csv', label: 'CSV', color: 'var(--accent-blue)' }] },
           { title: '단지백과 기본 정보', desc: '전국 34,000+ 아파트 단지의 기본 정보·세대수·준공일', icon: '🏢',
             links: [{ href: '/api/data/apt-complex?format=xlsx', label: 'Excel', color: 'var(--accent-green)' }, { href: '/api/data/apt-complex?format=csv', label: 'CSV', color: 'var(--accent-blue)' }] },
-          { title: '주식 전종목 시세', desc: '국내외 728종목 현재가·등락률·시가총액·거래량', icon: '📈',
+          { title: '주식 전종목 시세', desc: '국내외 1,800+ 종목 현재가·등락률·시가총액·거래량', icon: '📈',
             links: [{ href: '/api/data/stock-prices?format=xlsx', label: 'Excel', color: 'var(--accent-green)' }, { href: '/api/data/stock-prices?format=csv', label: 'CSV', color: 'var(--accent-blue)' }] },
           { title: '섹터별 종목 분석', desc: '반도체·바이오·2차전지 등 섹터별 종목 데이터', icon: '🏭',
             links: [{ href: '/api/data/stock-sectors?format=xlsx', label: 'Excel', color: 'var(--accent-green)' }, { href: '/api/data/stock-sectors?format=csv', label: 'CSV', color: 'var(--accent-blue)' }] },

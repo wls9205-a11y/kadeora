@@ -246,7 +246,7 @@ export default async function BlogPage({ searchParams }: Props) {
           <p className="blog-summary" style={{ fontSize: 11, color: 'var(--text-tertiary)', margin: '2px 0 0', letterSpacing: '0.3px' }}>매일 업데이트되는 투자 인사이트 · {totalCount.toLocaleString()}편</p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <SectionShareButton section="blog" label="투자 정보 블로그 19,000편+" pagePath="/blog" />
+          <SectionShareButton section="blog" label="투자 정보 블로그 7,600편+" pagePath="/blog" />
           <Link href="/blog?sort=popular" style={{ width: 32, height: 32, borderRadius: 'var(--radius-sm)', background: 'var(--bg-surface)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', fontSize: 14 }}>🔥</Link>
         </div>
       </div>

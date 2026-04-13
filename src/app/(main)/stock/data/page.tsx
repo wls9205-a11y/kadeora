@@ -57,7 +57,7 @@ export default async function StockDataPage() {
     <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 16px 80px' }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"카더라","item":SITE},{"@type":"ListItem","position":2,"name":"주식","item":`${SITE}/stock`},{"@type":"ListItem","position":3,"name":"통계 자료실"}]}) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"주식 통계 데이터는 어디서 확인하나요?","acceptedAnswer":{"@type":"Answer","text":"카더라 주식 통계 자료실에서 국내외 종목별 시세, 시가총액, 거래량, 섹터 통계를 무료로 확인할 수 있습니다."}},{"@type":"Question","name":"어떤 시장 데이터를 제공하나요?","acceptedAnswer":{"@type":"Answer","text":"KOSPI, KOSDAQ, NYSE, NASDAQ 4개 시장의 728개 종목에 대한 일별 시세, OHLCV, 이동평균선, 52주 최고/최저 데이터를 제공합니다."}}]}) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"주식 통계 데이터는 어디서 확인하나요?","acceptedAnswer":{"@type":"Answer","text":"카더라 주식 통계 자료실에서 국내외 종목별 시세, 시가총액, 거래량, 섹터 통계를 무료로 확인할 수 있습니다."}},{"@type":"Question","name":"어떤 시장 데이터를 제공하나요?","acceptedAnswer":{"@type":"Answer","text":"KOSPI, KOSDAQ, NYSE, NASDAQ 4개 시장의 1,800+ 종목에 대한 일별 시세, OHLCV, 이동평균선, 52주 최고/최저 데이터를 제공합니다."}}]}) }} />
 
       <div style={{ padding: '24px 0 16px' }}>
         <nav style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 12, display: 'flex', gap: 4 }}>

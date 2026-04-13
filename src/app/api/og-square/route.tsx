@@ -23,10 +23,10 @@ const CAT: Record<string, { color: string; dim: string; bg: [string,string,strin
 // 카테고리별 대표 수치 (제목 없이 수치를 자동 표시)
 const CAT_KPI: Record<string, { kw: string; kwv: string }> = {
   apt:     { kw: '분양데이터', kwv: '5,500건+' },
-  stock:   { kw: '종목수',     kwv: '728종목+' },
-  finance: { kw: '절세가이드', kwv: '19,000편+' },
+  stock:   { kw: '종목수',     kwv: '1,800종목+' },
+  finance: { kw: '절세가이드', kwv: '7,600편+' },
   unsold:  { kw: '미분양데이터', kwv: '전국현황' },
-  blog:    { kw: '블로그',     kwv: '19,000편+' },
+  blog:    { kw: '블로그',     kwv: '7,600편+' },
   general: { kw: '정보',       kwv: '실시간' },
   local:   { kw: '지역정보',   kwv: '우리동네' },
   free:    { kw: '커뮤니티',   kwv: '실시간' },
@@ -139,7 +139,7 @@ export async function GET(req: NextRequest) {
         {/* 스트라이프 4: KPI 하단 */}
         <div style={{ background: C.dim, borderTop: `0.5px solid ${C.color}35`, padding: '0 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-around', flexShrink: 0, height: 90 }}>
           {[
-            { n: '19,000편+', l: '블로그' },
+            { n: '7,600편+', l: '블로그' },
             { n: '실시간',    l: '업데이트' },
             { n: '무료',      l: '이용' },
           ].map((k, i, a) => (

@@ -43,7 +43,7 @@ const DEFAULT_BENEFIT = {
 };
 
 export default function SmartSectionGate({
-  htmlContent, slug, category, userCount = 66, todaySignups = 0
+  htmlContent, slug, category, userCount = 80, todaySignups = 0
 }: Props) {
   const pathname = usePathname();
   const [shouldGate, setShouldGate] = useState(false);

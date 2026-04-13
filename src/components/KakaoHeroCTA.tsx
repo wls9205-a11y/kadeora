@@ -2,10 +2,21 @@
 import { useAuth } from '@/components/AuthProvider';
 import { trackCTA } from '@/lib/analytics';
 import { usePathname } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
 export default function KakaoHeroCTA() {
   const { userId, loading } = useAuth();
   const pathname = usePathname();
+  const [stats, setStats] = useState({ totalViews: 690000, dailyVisitors: 1300 });
+
+  useEffect(() => {
+    const cached = sessionStorage.getItem('kd_social_proof');
+    if (cached) { try { setStats(JSON.parse(cached)); } catch {} return; }
+    fetch('/api/stats/social-proof')
+      .then(r => r.json())
+      .then(d => { setStats(d); sessionStorage.setItem('kd_social_proof', JSON.stringify(d)); })
+      .catch(() => {});
+  }, []);
 
   if (loading || userId) return null;
 
@@ -38,7 +49,7 @@ export default function KakaoHeroCTA() {
               width: 6, height: 6, borderRadius: '50%', background: '#34D399',
               animation: 'kdPulse 2s infinite',
             }} />
-            지금 2,847명 이용 중
+            누적 {Math.floor(stats.totalViews / 10000)}만+ 열람
           </div>
 
           {/* 타이틀 */}

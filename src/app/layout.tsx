@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     default: '카더라 — 부동산·주식 정보 플랫폼 | kadeora.app',
     template: '%s | 카더라',
   },
-  description: '카더라(kadeora.app) — 아파트 청약·재개발·실거래가, 주식 시세·AI 종목 분석, 투자 커뮤니티를 한곳에서. 18,000+ 데이터 분석 블로그.',
+  description: '카더라(kadeora.app) — 아파트 청약·재개발·실거래가, 주식 시세·AI 종목 분석, 투자 커뮤니티를 한곳에서. 7,600+ 데이터 분석 블로그.',
   keywords: ['카더라', 'kadeora', '카더라 부동산', '카더라 주식', '청약', '아파트 청약', '주식', '부동산', '청약 일정', '국내주식', '코스피', '코스닥', '실시간 시세', '재개발', 'AI 주식 분석', '커뮤니티'],
   authors: [{ name: '카더라', url: SITE_URL }],
   creator: '카더라',

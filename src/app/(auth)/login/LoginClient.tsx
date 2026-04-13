@@ -54,7 +54,7 @@ function LoginForm({ redirect }: LoginFormProps) {
           const source = params?.get('source') || '';
           const action = params?.get('action') || '';
           const MSG: Record<string, { icon: string; text: string }> = {
-            content_gate: { icon: '📊', text: '가입하면 18,000+ 분석 전문을 무제한 열람할 수 있어요' },
+            content_gate: { icon: '📊', text: '가입하면 7,600+ 분석 전문을 무제한 열람할 수 있어요' },
             action_bar_bookmark: { icon: '📌', text: '가입하면 이 분석을 저장하고 나중에 다시 볼 수 있어요' },
             action_bar_alert: { icon: '🔔', text: '가입하면 이 단지의 가격 변동 알림을 받을 수 있어요' },
             action_bar_watchlist: { icon: '⭐', text: '가입하면 관심 종목을 추가하고 시세 알림을 받을 수 있어요' },
