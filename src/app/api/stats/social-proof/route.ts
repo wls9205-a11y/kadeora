@@ -40,10 +40,8 @@ export async function GET() {
       userCount,
       dauStats,
     ] = await Promise.all([
-      // 블로그: published 수 + 총 조회수
-      sb.from('blog_posts')
-        .select('view_count')
-        .eq('is_published', true),
+      // 블로그: RPC로 정확한 count + sum (Supabase 1000행 limit 회피)
+      sb.rpc('get_blog_stats'),
       // 주식 종목 수
       (sb as any).from('stock_quotes')
         .select('symbol', { count: 'exact', head: true }),
@@ -74,9 +72,10 @@ export async function GET() {
         .limit(14),
     ]);
 
-    // 블로그 집계
-    const blogCount = blogStats.data?.length || 0;
-    const totalViews = (blogStats.data || []).reduce((sum: number, b: any) => sum + (b.view_count || 0), 0);
+    // 블로그 집계 (RPC 결과: [{blog_count, total_views}])
+    const blogRow = blogStats.data?.[0] || { blog_count: 0, total_views: 0 };
+    const blogCount = Number(blogRow.blog_count) || 0;
+    const totalViews = Number(blogRow.total_views) || 0;
 
     // DAU 집계
     const dauData = (dauStats.data || []).map((d: any) => d.dau || 0);
