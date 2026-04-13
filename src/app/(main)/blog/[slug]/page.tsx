@@ -808,10 +808,10 @@ export default async function BlogDetailPage({ params }: Props) {
           );
         })()}
 
-        {/* 히어로 이미지 캐러셀 (6~7장) */}
-        {postImages.length > 0 && (
+        {/* 히어로 이미지 캐러셀 (og_card 제외 — 텍스트 배너는 커버에만) */}
+        {postImages.filter((img: any) => img.image_type !== 'og_card').length > 0 && (
           <BlogHeroImage
-            images={postImages.map((img: any) => ({
+            images={postImages.filter((img: any) => img.image_type !== 'og_card').map((img: any) => ({
               url: img.image_url,
               alt: img.alt_text || `${post.title} — 카더라 ${catSection[post.category] || ''} 분석`,
               caption: img.caption || undefined,

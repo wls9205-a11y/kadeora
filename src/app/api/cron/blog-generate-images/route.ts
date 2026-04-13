@@ -87,7 +87,7 @@ export async function GET(req: Request) {
 
     if (!needImages.length) return NextResponse.json({ ok: true, processed: 0, msg: 'all done' });
 
-    // 카테고리별 Unsplash 캐시
+    // 카테고리별 + 제목 키워드별 Unsplash 캐시
     const catCache: Record<string, { url: string; alt: string; caption: string }[]> = {};
     const categories = [...new Set(needImages.map(p => p.category || 'general'))];
 
@@ -103,7 +103,15 @@ export async function GET(req: Request) {
       });
     }
 
-    // 각 글에 캐러셀 3장 할당
+    // 제목에서 검색 키워드 추출 (한글 명사 2~3개)
+    function extractKeywords(title: string, cat: string): string {
+      const clean = title.replace(/[|—·()（）\[\]「」『』""'']/g, ' ').replace(/\d{4}년?/g, '');
+      const words = clean.split(/\s+/).filter(w => w.length >= 2 && w.length <= 10);
+      const catWord = cat === 'apt' ? 'apartment korea' : cat === 'stock' ? 'stock market' : 'finance';
+      return `${words.slice(0, 2).join(' ')} ${catWord}`;
+    }
+
+    // 각 글에 6장 할당 (Unsplash 4 + infographic 2)
     const inserts: any[] = [];
     const catIdx: Record<string, number> = {};
 
@@ -113,32 +121,69 @@ export async function GET(req: Request) {
       if (!catIdx[cat]) catIdx[cat] = 0;
       const label = CAT_LABEL[cat] || '정보';
 
-      // Position 0: Unsplash 메인 사진
-      if (cache.length > 0) {
-        const img = cache[catIdx[cat] % cache.length];
+      // 제목 기반 검색으로 추가 이미지 시도
+      let titleImgs: { url: string; alt: string; caption: string }[] = [];
+      if (UNSPLASH_KEY) {
+        const kw = extractKeywords(post.title, cat);
+        titleImgs = await fetchUnsplash(kw, 5);
+      }
+
+      // Position 0: 제목 기반 Unsplash (주제 맞춤)
+      const img0 = titleImgs[0] || cache[catIdx[cat] % Math.max(cache.length, 1)];
+      if (img0) {
         catIdx[cat]++;
         inserts.push({
-          post_id: post.id, image_url: img.url,
+          post_id: post.id, image_url: img0.url,
           alt_text: post.image_alt || `${post.title} — ${label} 관련 이미지`,
-          caption: img.caption, image_type: 'stock_photo', position: 0,
+          caption: img0.caption, image_type: 'stock_photo', position: 0,
         });
       }
 
-      // Position 1: 인포그래픽
+      // Position 1: 핵심 데이터 인포그래픽
       inserts.push({
         post_id: post.id, image_url: makeInfoUrl(post.title, cat),
         alt_text: `${post.title} — 카더라 ${label} 인포그래픽`,
         caption: `카더라 ${label} 데이터 분석`, image_type: 'infographic', position: 1,
       });
 
-      // Position 2: 두 번째 Unsplash 사진
-      if (cache.length > 1) {
-        const img2 = cache[catIdx[cat] % cache.length];
+      // Position 2: 제목 기반 Unsplash 두 번째
+      const img2 = titleImgs[1] || cache[catIdx[cat] % Math.max(cache.length, 1)];
+      if (img2) {
         catIdx[cat]++;
         inserts.push({
           post_id: post.id, image_url: img2.url,
           alt_text: `${post.title} — ${label} 추가 이미지`,
           caption: img2.caption, image_type: 'stock_photo', position: 2,
+        });
+      }
+
+      // Position 3: 카테고리 기반 Unsplash (다양성)
+      if (cache.length > 0) {
+        const img3 = cache[catIdx[cat] % cache.length];
+        catIdx[cat]++;
+        inserts.push({
+          post_id: post.id, image_url: img3.url,
+          alt_text: `${post.title} — ${label} 관련`,
+          caption: img3.caption, image_type: 'stock_photo', position: 3,
+        });
+      }
+
+      // Position 4: 비교 인포그래픽
+      const infoUrl2 = `${SITE_URL}/api/og-infographic?title=${encodeURIComponent((post.title || '').slice(0, 30) + ' 비교')}&category=${cat}&type=comparison&items=${encodeURIComponent(`분류:${label},출처:카더라`)}`;
+      inserts.push({
+        post_id: post.id, image_url: infoUrl2,
+        alt_text: `${post.title} — 비교 분석 인포그래픽`,
+        caption: `카더라 ${label} 비교 분석`, image_type: 'infographic', position: 4,
+      });
+
+      // Position 5: 네 번째 Unsplash (다양성)
+      const img5 = titleImgs[2] || (cache.length > 0 ? cache[catIdx[cat] % cache.length] : null);
+      if (img5) {
+        catIdx[cat]++;
+        inserts.push({
+          post_id: post.id, image_url: img5.url,
+          alt_text: `${post.title} — ${label} 참고 이미지`,
+          caption: img5.caption, image_type: 'stock_photo', position: 5,
         });
       }
     }
