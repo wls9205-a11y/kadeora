@@ -1,4 +1,5 @@
 import { AptViewTracker } from '@/components/ViewTracker';
+import { sanitizeHtml } from '@/lib/sanitize-html';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { SITE_URL } from '@/lib/constants';
@@ -1238,14 +1239,14 @@ export default async function AptUnifiedPage({ params }: Props) {
         <div className="apt-card" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
           <h2 style={ct}>📊 {name} 종합 분석</h2>
           <div className="apt-analysis-content" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.85 }}
-            dangerouslySetInnerHTML={{ __html: (analysisText as string)
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml((analysisText as string)
               .replace(/^## (.+)$/gm, '<h3 style="font-size:15px;font-weight:700;color:var(--text-primary);margin:18px 0 8px">$1</h3>')
               .replace(/^### (.+)$/gm, '<h4 style="font-size:14px;font-weight:600;color:var(--text-primary);margin:14px 0 6px">$1</h4>')
               .replace(/\*\*(.+?)\*\*/g, '<strong style="color:var(--text-primary)">$1</strong>')
               .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" style="color:var(--brand);text-decoration:underline">$1</a>')
               .replace(/\n\n/g, '</p><p style="margin:0 0 10px">')
               .replace(/\n/g, '<br/>')
-            }}
+            )}}
           />
           <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 12, paddingTop: 8, borderTop: '1px solid var(--border)' }}>
             데이터: 국토교통부·청약홈·카더라 자체 수집

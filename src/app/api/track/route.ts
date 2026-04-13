@@ -1,3 +1,4 @@
+import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
@@ -6,6 +7,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
  * CTA 표시/클릭/완료 이벤트를 conversion_events 테이블에 기록
  */
 export async function POST(req: NextRequest) {
+  if (!(await rateLimit(req, 'api'))) return rateLimitResponse();
   try {
     const { event_type, cta_name, category, page_path, visitor_id } = await req.json();
     if (!event_type || !cta_name) {

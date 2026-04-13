@@ -1,10 +1,12 @@
-import { NextResponse } from 'next/server';
+import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';
+import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase-server';
 
 // 1분 캐시
 export const revalidate = 60;
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  if (!(await rateLimit(req, 'api'))) return rateLimitResponse();
   try {
     const sb = await createSupabaseServer();
     const { data, error } = await (sb as any).rpc('get_hot_topics', { p_limit: 8 });

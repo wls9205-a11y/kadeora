@@ -1,3 +1,4 @@
+import { sanitizeHtml } from '@/lib/sanitize-html';
 import Link from 'next/link';
 import { CALC_REGISTRY, CATEGORIES, findCalc, getCategoryLabel } from '@/lib/calc/registry';
 import CalcEngine from '@/components/calc/CalcEngine';
@@ -126,7 +127,7 @@ export default async function CalcPage({ params }: { params: Promise<{ category:
 
       {/* SEO 콘텐츠: 본문 (seoContent) */}
       {calc.seoContent && (
-        <div className="blog-content" style={{ marginTop: 28 }} dangerouslySetInnerHTML={{ __html: calc.seoContent }} />
+        <div className="blog-content" style={{ marginTop: 28 }} dangerouslySetInnerHTML={{ __html: sanitizeHtml(calc.seoContent) }} />
       )}
 
       {/* SEO 콘텐츠: FAQ */}

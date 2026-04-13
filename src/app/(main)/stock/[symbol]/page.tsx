@@ -1,3 +1,4 @@
+import { sanitizeHtml } from '@/lib/sanitize-html';
 import { stockColor, stockUpColor, stockDownColor, stockUpHex, stockDownHex, investorColor, signalColor, sentimentColor, sentimentBg, isKRMarket } from '@/lib/stockColor';
 import type { AIComment, StockPriceHistory, StockNews, InvestorFlow, Disclosure } from '@/types/stock';
 export const maxDuration = 30;
@@ -450,14 +451,14 @@ export default async function StockDetailPage({ params }: Props) {
         <section style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--card-p) var(--sp-lg)', marginBottom: 'var(--sp-md)' }}>
           <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 10px' }}>📊 {s.name} 종합 분석</h2>
           <div style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.85 }}
-            dangerouslySetInnerHTML={{ __html: (stockAnalysisText as string)
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml((stockAnalysisText as string)
               .replace(/^## (.+)$/gm, '<h3 style="font-size:14px;font-weight:700;color:var(--text-primary);margin:16px 0 6px">$1</h3>')
               .replace(/^### (.+)$/gm, '<h4 style="font-size:13px;font-weight:600;color:var(--text-primary);margin:12px 0 4px">$1</h4>')
               .replace(/\*\*(.+?)\*\*/g, '<strong style="color:var(--text-primary)">$1</strong>')
               .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" style="color:var(--brand);text-decoration:underline">$1</a>')
               .replace(/\n\n/g, '</p><p style="margin:0 0 8px">')
               .replace(/\n/g, '<br/>')
-            }}
+            )}}
           />
           <SectionShareButton section="stock-ai-analysis" label={`\${s.name} AI 분석`} text={`\${s.name} AI 종합 분석 — 카더라에서 확인하세요`} pagePath={`/stock/\${symbol}`} />
         </section>

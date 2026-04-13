@@ -1,8 +1,10 @@
+import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { NextRequest, NextResponse } from 'next/server';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
 
 export async function GET(req: NextRequest) {
+  if (!(await rateLimit(req, 'api'))) return rateLimitResponse();
   const q = req.nextUrl.searchParams.get('q')?.trim();
   if (!q || q.length < 2) return NextResponse.json({ results: [] });
 

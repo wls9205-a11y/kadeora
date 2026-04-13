@@ -1,3 +1,4 @@
+import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
@@ -6,6 +7,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
  * SW notificationclick에서 호출 — 푸시 클릭률 추적
  */
 export async function POST(req: NextRequest) {
+  if (!(await rateLimit(req, 'api'))) return rateLimitResponse();
   try {
     const { log_id } = await req.json();
     if (!log_id) return NextResponse.json({ ok: true });

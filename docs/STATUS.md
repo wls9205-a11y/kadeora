@@ -428,3 +428,21 @@
 #### DB 마이그레이션
 - 누락된 RPC 3개 생성 (get_trade_sites_for_sync, refresh_all_site_scores, refresh_seo_stats)
 - 미사용 인덱스 20개 DROP (59MB 절약)
+
+### 추가 수정 (병렬 2차)
+
+#### Rate Limiting (13개 API)
+- ✅ /api/apt/view, /api/blog/view — rate limit 추가
+- ✅ /api/push/click, /api/track — rate limit 추가
+- ✅ /api/feed/vs, /api/feed/vs/vote — rate limit 추가
+- ✅ /api/feed/predict, /api/feed/predict/vote — rate limit 추가
+- ✅ /api/feed/poll, /api/feed/poll/vote — rate limit 추가
+- ✅ /api/feed/short, /api/feed/hot-topics — rate limit 추가
+- ✅ /api/complex-search — rate limit 추가
+
+#### HTML Sanitization (XSS 방지)
+- ✅ sanitize-html.ts 유틸 생성 (script/iframe/event attrs/javascript: URL 제거)
+- ✅ apt/[id] analysisText — sanitizeHtml 적용
+- ✅ stock/[symbol] stockAnalysisText — sanitizeHtml 적용
+- ✅ blog/[slug] htmlFull — sanitizeHtml 적용
+- ✅ calc/[category]/[slug] seoContent — sanitizeHtml 적용

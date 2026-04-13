@@ -1,8 +1,10 @@
+import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase-server';
 
 // POST /api/feed/poll/vote — 투표 참여
 export async function POST(req: NextRequest) {
+  if (!(await rateLimit(req, 'api'))) return rateLimitResponse();
   try {
     const sb = await createSupabaseServer();
     const { data: { user } } = await sb.auth.getUser();

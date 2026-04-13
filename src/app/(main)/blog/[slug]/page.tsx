@@ -1,4 +1,5 @@
 import { BlogViewTracker } from '@/components/ViewTracker';
+import { sanitizeHtml } from '@/lib/sanitize-html';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -842,7 +843,7 @@ export default async function BlogDetailPage({ params }: Props) {
 
         {/* 본문 — 봇: 전체, 로그인: TossGate, 비로그인: SmartSectionGate (핵심 섹션만 블러) */}
         {isBot ? (
-          <div className="blog-content" itemProp="articleBody" dangerouslySetInnerHTML={{ __html: htmlFull }} />
+          <div className="blog-content" itemProp="articleBody" dangerouslySetInnerHTML={{ __html: sanitizeHtml(htmlFull) }} />
         ) : isLoggedIn ? (
           <BlogTossGate htmlFull={htmlFull} htmlShort={htmlTossShort} slug={slug} title={post.title} />
         ) : (
