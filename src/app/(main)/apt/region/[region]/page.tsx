@@ -114,9 +114,9 @@ async function fetchRegionData(region: string) {
       .ilike('region', `%${region}%`).eq('is_active', true)
       .order('created_at', { ascending: false }).limit(10) as unknown as Promise<any>,
     s.from('unsold_apts')
-      .select('id,complex_name,region,unsold_count')
-      .ilike('region', `%${region}%`).eq('is_active', true)
-      .order('unsold_count', { ascending: false }).limit(10) as unknown as Promise<any>,
+      .select('id,house_nm,region_nm,tot_unsold_hshld_co')
+      .ilike('region_nm', `%${region}%`).eq('is_active', true)
+      .order('tot_unsold_hshld_co', { ascending: false }).limit(10) as unknown as Promise<any>,
     // 지역 분양가 통계
     s.from('apt_sites')
       .select('price_min,price_max')
@@ -402,8 +402,8 @@ export default async function RegionLandingPage({ params }: Props) {
               padding: '8px 14px', background: 'var(--bg-surface)', border: '1px solid var(--border)',
               borderRadius: 'var(--radius-md)', marginBottom: 'var(--sp-xs)',
             }}>
-              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{u.complex_name}</div>
-              <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--accent-red)' }}>{u.unsold_count}세대</span>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{u.house_nm}</div>
+              <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--accent-red)' }}>{u.tot_unsold_hshld_co}세대</span>
             </div>
           ))}
         </section>
@@ -416,7 +416,7 @@ export default async function RegionLandingPage({ params }: Props) {
           {decoded} 지역에는 현재 청약 {data.subscriptions.length}건, 실거래 {data.transactions.length}건, 재개발·재건축 {data.redevelopments.length}건, 미분양 {data.unsolds.length}건의 부동산 정보가 등록되어 있습니다.
           {data.transactions.length > 0 && ` 최근 실거래 기준 평균 매매가는 ${(() => { const avg = Math.round(data.transactions.reduce((s: number, t: any) => s + (t.deal_amount || 0), 0) / data.transactions.length); return avg >= 10000 ? (avg / 10000).toFixed(1) + '억원' : avg.toLocaleString() + '만원'; })()}이며, 가장 최근 거래는 ${data.transactions[0]?.apt_name || ''} 단지입니다.`}
           {data.redevelopments.length > 0 && ` 재개발·재건축 사업이 ${data.redevelopments.length}건 진행 중이어서 향후 공급 물량이 기대됩니다.`}
-          {data.unsolds.length > 0 && ` 미분양 ${data.unsolds.reduce((s: number, u: any) => s + (u.unsold_count || 0), 0)}세대가 남아 있어 할인 분양 기회를 확인해볼 만합니다.`}
+          {data.unsolds.length > 0 && ` 미분양 ${data.unsolds.reduce((s: number, u: any) => s + (u.tot_unsold_hshld_co || 0), 0)}세대가 남아 있어 할인 분양 기회를 확인해볼 만합니다.`}
           {` 카더라에서 ${decoded} 지역 부동산 정보를 실시간으로 확인하세요.`}
         </p>
       </section>
