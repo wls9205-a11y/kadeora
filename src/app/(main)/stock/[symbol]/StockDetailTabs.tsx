@@ -1,7 +1,7 @@
 'use client';
 import { stockColor, stockUpColor, stockDownColor, investorColor, investorBg, signalColor, signalBg, sentimentColor, sentimentBg, isKRMarket } from '@/lib/stockColor';
 import type { StockPriceHistory, StockNews, InvestorFlow, Disclosure, AIComment } from '@/types/stock';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import StockComments from '@/components/StockComments';
 import dynamic from 'next/dynamic';
 import { timeAgo } from '@/lib/format';
