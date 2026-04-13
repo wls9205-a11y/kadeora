@@ -28,6 +28,12 @@ export default function BlogAptAlertCTA({ aptName, siteSlug, category = 'apt', l
     });
   }, []);
 
+  // view 추적 — 컴포넌트 노출 시 (isLoggedIn 로드 후)
+  useEffect(() => {
+    if (isLoggedIn === null) return;
+    trackCTA('view', 'apt_alert_cta');
+  }, [isLoggedIn]);
+
   const handleAlert = async () => {
     if (!isLoggedIn) {
       trackCTA('click', 'apt_alert_cta');

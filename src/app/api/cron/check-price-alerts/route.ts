@@ -85,6 +85,42 @@ export async function GET(req: Request) {
       }
     }
 
+    // apt_name 알림 — BlogAptAlertCTA fallback 등록 (실거래 신규 등록 감지)
+    // target_symbol = 단지명, condition = 'any_change'
+    const aptNameAlerts = alerts.filter((a: Record<string, any>) => a.alert_type === 'apt_name');
+    if (aptNameAlerts.length) {
+      const aptNames = [...new Set(aptNameAlerts.map((a: Record<string, any>) => a.target_symbol).filter(Boolean))];
+      const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+      // 최근 24시간 내 실거래 등록된 단지 확인
+      const { data: recentTrades } = await (sb as any).from('apt_transactions')
+        .select('apt_name, deal_date, deal_amount, exclusive_area')
+        .in('apt_name', aptNames)
+        .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+        .order('created_at', { ascending: false });
+      const recentTradeMap = new Map<string, any>();
+      for (const t of (recentTrades || [])) {
+        if (!recentTradeMap.has(t.apt_name)) recentTradeMap.set(t.apt_name, t);
+      }
+      for (const alert of aptNameAlerts) {
+        const trade = recentTradeMap.get(alert.target_symbol);
+        if (!trade) continue;
+        const msg = `${alert.target_symbol} 실거래 신규 — ${Math.round(trade.deal_amount / 10000)}억${Math.round(trade.deal_amount % 10000 / 1000) > 0 ? ` ${Math.round(trade.deal_amount % 10000 / 1000)}천` : ''}만원 (${trade.exclusive_area}㎡)`;
+        await sb.from('notifications').insert({
+          user_id: alert.user_id, type: 'apt_alert', content: `🏠 ${msg}`,
+          link: `/apt/complex/${encodeURIComponent(alert.target_symbol)}`,
+        });
+        sendPushToUsers([alert.user_id], {
+          title: '🏠 관심 단지 실거래 등록',
+          body: msg,
+          url: `/apt/complex/${encodeURIComponent(alert.target_symbol)}`,
+          tag: `apt-name-${alert.id}`,
+        }).catch(() => {});
+        // 알림 발송 후 재사용 가능하도록 is_triggered 리셋하지 않음 (계속 알림)
+        await sb.from('price_alerts').update({ last_checked_at: new Date().toISOString() }).eq('id', alert.id);
+        triggered++;
+      }
+    }
+
     return { checked: alerts.length, triggered };
   }, 5);
 
