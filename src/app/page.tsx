@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import KakaoHeroCTA from '@/components/KakaoHeroCTA';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
-import { SITE_URL as SITE , CONTACT_EMAIL} from '@/lib/constants';
+import { SITE_URL as SITE, CONTACT_EMAIL, CONTACT_PHONE, BIZ_INFO_LINE, BIZ_ADDRESS, BIZ_CONTACT_LINE } from '@/lib/constants';
 
 export const revalidate = 3600;
 
@@ -568,8 +568,8 @@ export default async function HomePage() {
           <div style={{ borderTop: '1px solid var(--border)', paddingTop: 20, fontSize: 11, color: 'var(--text-tertiary)', textAlign: 'center', lineHeight: 1.9 }}>
             <p style={{ fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 'var(--sp-xs)' }}>사업자 정보</p>
             <p>{BIZ_INFO_LINE}</p>
-            <p>사업장 주소: 부산광역시 연제구 연동로 27, 405호</p>
-            <p>전화: {CONTACT_PHONE} &nbsp;|&nbsp; 이메일: ${CONTACT_EMAIL}</p>
+            <p>사업장 주소: {BIZ_ADDRESS}</p>
+            <p>{BIZ_CONTACT_LINE}</p>
             <p style={{ marginTop: 'var(--sp-xs)' }}>© 2026 카더라. All rights reserved.</p>
           </div>
         </footer>
