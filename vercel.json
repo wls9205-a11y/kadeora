@@ -413,7 +413,7 @@
     },
     {
       "path": "/api/cron/blog-generate-images",
-      "schedule": "0 2,8,14,20 * * *"
+      "schedule": "0 */3 * * *"
     },
     {
       "path": "/api/cron/blog-enrich-rewrite",

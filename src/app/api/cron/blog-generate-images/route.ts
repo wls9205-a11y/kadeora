@@ -3,10 +3,10 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { SITE_URL } from '@/lib/constants';
 
 export const runtime = 'nodejs';
-export const maxDuration = 60;
+export const maxDuration = 120;
 
 const UNSPLASH_KEY = process.env.UNSPLASH_ACCESS_KEY || '';
-const BATCH = 50;
+const BATCH = 80;
 
 const CAT_QUERIES: Record<string, string[]> = {
   stock: [
