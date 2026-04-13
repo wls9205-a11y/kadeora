@@ -408,6 +408,7 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
 function EmailDashboard() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [tab, setTab] = useState<'stats'|'logs'>('stats');
 
   const load = () => {
     setLoading(true);
@@ -416,99 +417,152 @@ function EmailDashboard() {
   useEffect(()=>{load();},[]);
 
   const sub = data?.subscribers;
+  const overall = data?.overall || {};
   const remaining = data?.remaining ?? 0;
   const sentToday = data?.sentToday ?? 0;
-  const quotaPct = (sentToday/100)*100;
   const quotaColor = remaining < 20 ? '#EF4444' : remaining < 50 ? '#F59E0B' : '#10B981';
 
   const CAMPAIGN_LABELS: Record<string,string> = {
-    're-engagement_all': '전체발송',
-    're-engagement_dormant': '휴면발송',
-    're-engagement_test': '테스트',
-    'weekly-digest': '주간다이제스트',
-    'churn-d7': '이탈방지D+7',
+    're-engagement_all':'전체발송','re-engagement_dormant':'휴면발송',
+    're-engagement_test':'테스트','weekly-digest':'주간다이제스트','churn-d7':'이탈방지D+7',
   };
-
   const campaignOrder = ['re-engagement_all','re-engagement_dormant','weekly-digest','churn-d7','re-engagement_test'];
   const summary = data?.summary || {};
-  const sortedCampaigns = campaignOrder.filter(k=>summary[k]).concat(
-    Object.keys(summary).filter(k=>!campaignOrder.includes(k))
-  );
-
-  const recentLogs: any[] = data?.logs?.slice(0,8) || [];
+  const sortedCampaigns = campaignOrder.filter(k=>summary[k]).concat(Object.keys(summary).filter(k=>!campaignOrder.includes(k)));
+  const logs: any[] = data?.logs || [];
 
   const s = (n:number)=>n.toLocaleString();
-  const box = (label:string,val:string|number,sub2?:string,col?:string)=>(
+  const pct = (n:number)=>`${n}%`;
+
+  const StatBox = ({label,val,sub2,col,small}:{label:string;val:string|number;sub2?:string;col?:string;small?:boolean})=>(
     <div style={{flex:'1 1 0',minWidth:0,background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.06)',borderRadius:'var(--radius-sm)',padding:'8px 10px'}}>
-      <div style={{fontSize:10,color:'rgba(255,255,255,0.35)',marginBottom:2}}>{label}</div>
-      <div style={{fontSize:18,fontWeight:800,color:col||'#E2E8F0',lineHeight:1}}>{typeof val==='number'?s(val):val}</div>
-      {sub2&&<div style={{fontSize:10,color:'rgba(255,255,255,0.3)',marginTop:2}}>{sub2}</div>}
+      <div style={{fontSize:9,color:'rgba(255,255,255,0.35)',marginBottom:2,letterSpacing:'0.04em'}}>{label}</div>
+      <div style={{fontSize:small?14:18,fontWeight:800,color:col||'#E2E8F0',lineHeight:1.1}}>{typeof val==='number'?s(val):val}</div>
+      {sub2&&<div style={{fontSize:9,color:'rgba(255,255,255,0.3)',marginTop:2}}>{sub2}</div>}
     </div>
+  );
+
+  const tabBtn = (t:'stats'|'logs',label:string)=>(
+    <button onClick={()=>setTab(t)} style={{
+      padding:'4px 10px',borderRadius:'var(--radius-sm)',border:'none',cursor:'pointer',fontSize:11,fontWeight:600,
+      background:tab===t?'rgba(59,123,246,0.15)':'transparent',
+      color:tab===t?'#3B7BF6':'rgba(255,255,255,0.3)',
+    }}>{label}</button>
   );
 
   return (
     <div style={{background:'rgba(12,21,40,0.6)',border:'1px solid rgba(255,255,255,0.04)',borderRadius:'var(--radius-md)',padding:'12px'}}>
       {loading ? <div style={{fontSize:12,color:'rgba(255,255,255,0.3)',textAlign:'center',padding:'20px 0'}}>로딩 중...</div> : <>
 
-        {/* ── 구독자 현황 ── */}
-        <div style={{fontSize:11,fontWeight:700,color:'rgba(255,255,255,0.4)',marginBottom:6,letterSpacing:'0.05em'}}>구독자 현황</div>
-        <div style={{display:'flex',gap:4,marginBottom:12}}>
-          {box('활성 구독자', sub?.active??'—', `이번주 +${sub?.newThisWeek??0}`, '#3B7BF6')}
-          {box('수신거부', sub?.unsubscribed??'—', `이번달 신규 +${sub?.newThisMonth??0}`, '#F59E0B')}
+        {/* ── 핵심 KPI 6개 ── */}
+        <div style={{display:'flex',gap:4,marginBottom:10,flexWrap:'wrap'}}>
+          <StatBox label="활성 구독자" val={sub?.active??0} sub2={`이번주 +${sub?.newThisWeek??0}`} col="#3B7BF6"/>
+          <StatBox label="수신거부" val={sub?.unsubscribed??0} sub2="누적" col="#F59E0B"/>
+          <StatBox label="총 발송 (30일)" val={overall.totalSent??0} col="#94A3B8"/>
+          <StatBox label="오픈율" val={pct(overall.openRate??0)} sub2={`${overall.totalOpened??0}명 열람`} col={overall.openRate>=30?'#10B981':overall.openRate>=15?'#F59E0B':'#EF4444'} small/>
+          <StatBox label="클릭율" val={pct(overall.clickRate??0)} sub2={`${overall.totalClicked??0}명 클릭`} col={overall.clickRate>=5?'#10B981':overall.clickRate>=2?'#F59E0B':'#EF4444'} small/>
+          <StatBox label="오늘 잔여" val={remaining} sub2={`${sentToday}/100 사용`} col={quotaColor}/>
         </div>
 
-        {/* ── Resend 일일 한도 ── */}
-        <div style={{fontSize:11,fontWeight:700,color:'rgba(255,255,255,0.4)',marginBottom:6,letterSpacing:'0.05em'}}>오늘 발송 한도</div>
-        <div style={{marginBottom:12}}>
-          <div style={{display:'flex',justifyContent:'space-between',marginBottom:4}}>
-            <span style={{fontSize:12,color:'rgba(255,255,255,0.5)'}}>{sentToday} / 100 발송</span>
-            <span style={{fontSize:12,fontWeight:700,color:quotaColor}}>잔여 {remaining}통</span>
-          </div>
-          <div style={{height:6,background:'rgba(255,255,255,0.06)',borderRadius:3,overflow:'hidden'}}>
-            <div style={{height:'100%',width:`${Math.min(quotaPct,100)}%`,background:quotaColor,borderRadius:3,transition:'width .3s'}}/>
-          </div>
+        {/* ── 탭 전환 ── */}
+        <div style={{display:'flex',gap:2,borderBottom:'1px solid rgba(255,255,255,0.06)',marginBottom:10,paddingBottom:6}}>
+          {tabBtn('stats','📊 캠페인 통계')}
+          {tabBtn('logs','📋 발송 이력')}
         </div>
 
-        {/* ── 캠페인별 누적 통계 ── */}
-        {sortedCampaigns.length > 0 && <>
-          <div style={{fontSize:11,fontWeight:700,color:'rgba(255,255,255,0.4)',marginBottom:6,letterSpacing:'0.05em'}}>캠페인별 누적</div>
-          <div style={{marginBottom:12}}>
+        {tab==='stats' && <>
+          {/* ── Resend 한도 바 ── */}
+          <div style={{marginBottom:10}}>
+            <div style={{display:'flex',justifyContent:'space-between',marginBottom:3}}>
+              <span style={{fontSize:11,color:'rgba(255,255,255,0.4)'}}>오늘 한도</span>
+              <span style={{fontSize:11,fontWeight:700,color:quotaColor}}>{sentToday}/100통</span>
+            </div>
+            <div style={{height:4,background:'rgba(255,255,255,0.06)',borderRadius:2,overflow:'hidden'}}>
+              <div style={{height:'100%',width:`${Math.min((sentToday/100)*100,100)}%`,background:quotaColor,borderRadius:2,transition:'width .3s'}}/>
+            </div>
+          </div>
+
+          {/* ── 캠페인별 통계 (발송/오픈율/클릭율) ── */}
+          {sortedCampaigns.length > 0 && <div style={{marginBottom:10}}>
+            <div style={{display:'grid',gridTemplateColumns:'100px 1fr 52px 52px 52px',gap:4,padding:'4px 0',borderBottom:'1px solid rgba(255,255,255,0.08)'}}>
+              {['캠페인','발송률','발송','오픈율','클릭율'].map(h=>(
+                <div key={h} style={{fontSize:9,color:'rgba(255,255,255,0.3)',fontWeight:700,letterSpacing:'0.04em'}}>{h}</div>
+              ))}
+            </div>
             {sortedCampaigns.map(k=>{
               const st = summary[k];
-              const total = st.sent + st.failed;
-              const rate = total>0 ? Math.round((st.sent/total)*100) : 0;
+              const total = (st.sent||0) + (st.failed||0);
+              const successRate = total>0 ? Math.round((st.sent/total)*100) : 0;
+              const openRate = st.open_rate ?? 0;
+              const clickRate = st.click_rate ?? 0;
               return (
-                <div key={k} style={{display:'flex',alignItems:'center',gap:8,padding:'4px 0',borderBottom:'1px solid rgba(255,255,255,0.04)'}}>
-                  <div style={{flex:'0 0 110px',fontSize:11,color:'rgba(255,255,255,0.6)',fontWeight:600}}>{CAMPAIGN_LABELS[k]||k}</div>
-                  <div style={{flex:1,height:4,background:'rgba(255,255,255,0.06)',borderRadius:2,overflow:'hidden'}}>
-                    <div style={{height:'100%',width:`${rate}%`,background:'#3B7BF6',borderRadius:2}}/>
+                <div key={k} style={{display:'grid',gridTemplateColumns:'100px 1fr 52px 52px 52px',gap:4,padding:'5px 0',borderBottom:'1px solid rgba(255,255,255,0.04)',alignItems:'center'}}>
+                  <div style={{fontSize:11,color:'rgba(255,255,255,0.65)',fontWeight:600,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{CAMPAIGN_LABELS[k]||k}</div>
+                  <div style={{display:'flex',flexDirection:'column',gap:2}}>
+                    <div style={{height:3,background:'rgba(255,255,255,0.06)',borderRadius:2,overflow:'hidden'}}>
+                      <div style={{height:'100%',width:`${successRate}%`,background:'#3B7BF6',borderRadius:2}}/>
+                    </div>
+                    <div style={{fontSize:9,color:'rgba(255,255,255,0.3)'}}>
+                      {s(st.sent??0)}발송 {st.failed>0?`/ ✗${st.failed}`:''}</div>
                   </div>
-                  <div style={{flex:'0 0 80px',textAlign:'right',fontSize:11}}>
-                    <span style={{color:'#10B981'}}>✓{s(st.sent)}</span>
-                    {st.failed>0&&<span style={{color:'#EF4444',marginLeft:4}}>✗{s(st.failed)}</span>}
+                  <div style={{fontSize:12,fontWeight:700,color:'#E2E8F0',textAlign:'right'}}>{successRate}%</div>
+                  <div style={{fontSize:12,fontWeight:700,textAlign:'right',color:openRate>=30?'#10B981':openRate>=15?'#F59E0B':'rgba(255,255,255,0.4)'}}>
+                    {openRate>0?`${openRate}%`:'—'}
+                  </div>
+                  <div style={{fontSize:12,fontWeight:700,textAlign:'right',color:clickRate>=5?'#10B981':clickRate>=2?'#F59E0B':'rgba(255,255,255,0.4)'}}>
+                    {clickRate>0?`${clickRate}%`:'—'}
                   </div>
                 </div>
               );
             })}
-          </div>
+          </div>}
         </>}
 
-        {/* ── 최근 발송 이력 ── */}
-        {recentLogs.length > 0 && <>
-          <div style={{fontSize:11,fontWeight:700,color:'rgba(255,255,255,0.4)',marginBottom:6,letterSpacing:'0.05em'}}>최근 발송</div>
-          <div style={{marginBottom:10}}>
-            {recentLogs.map((log,i)=>{
+        {tab==='logs' && <>
+          {/* ── 발송 이력 상세 (오픈/클릭 포함) ── */}
+          <div style={{marginBottom:10,maxHeight:320,overflow:'auto'}}>
+            <div style={{display:'grid',gridTemplateColumns:'14px 1fr 70px 28px 28px 60px',gap:4,padding:'3px 0',borderBottom:'1px solid rgba(255,255,255,0.08)'}}>
+              {['','수신자','캠페인','열','클','발송일'].map(h=>(
+                <div key={h} style={{fontSize:9,color:'rgba(255,255,255,0.3)',fontWeight:700}}>{h}</div>
+              ))}
+            </div>
+            {logs.map((log,i)=>{
               const d = new Date(log.created_at);
               const ts = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+              const statusColor = log.status==='sent'||log.status==='delivered' ? '#10B981'
+                : log.status==='bounced'||log.status==='complained' ? '#EF4444' : '#F59E0B';
+              const statusIcon = log.status==='sent'||log.status==='delivered' ? '✓'
+                : log.status==='bounced' ? '↩' : log.status==='complained' ? '⚠' : '✗';
+              const opened = log.opened_at || log.open_count > 0;
+              const clicked = log.clicked_at || log.click_count > 0;
               return (
-                <div key={i} style={{display:'flex',alignItems:'center',gap:6,padding:'3px 0',borderBottom:'1px solid rgba(255,255,255,0.03)',fontSize:11}}>
-                  <span style={{color:log.status==='sent'?'#10B981':'#EF4444',flex:'0 0 12px'}}>{log.status==='sent'?'✓':'✗'}</span>
-                  <span style={{flex:1,color:'rgba(255,255,255,0.5)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{log.recipient_email}</span>
-                  <span style={{flex:'0 0 90px',color:'rgba(255,255,255,0.3)',textAlign:'right'}}>{CAMPAIGN_LABELS[log.campaign]||log.campaign}</span>
-                  <span style={{flex:'0 0 70px',color:'rgba(255,255,255,0.25)',textAlign:'right'}}>{ts}</span>
+                <div key={i} title={`제목: ${log.subject||'-'}
+클릭URL: ${log.clicked_url||'-'}
+오픈: ${log.open_count||0}회
+클릭: ${log.click_count||0}회`}
+                  style={{display:'grid',gridTemplateColumns:'14px 1fr 70px 28px 28px 60px',gap:4,padding:'3px 0',borderBottom:'1px solid rgba(255,255,255,0.03)',fontSize:11,alignItems:'center',cursor:'default'}}>
+                  <span style={{color:statusColor,fontSize:10}}>{statusIcon}</span>
+                  <span style={{color:'rgba(255,255,255,0.5)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{log.recipient_email}</span>
+                  <span style={{color:'rgba(255,255,255,0.3)',fontSize:10,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{CAMPAIGN_LABELS[log.campaign]||log.campaign}</span>
+                  <div style={{textAlign:'center'}}>
+                    <span style={{
+                      fontSize:10,padding:'1px 4px',borderRadius:3,
+                      background:opened?'rgba(16,185,129,0.12)':'rgba(255,255,255,0.04)',
+                      color:opened?'#10B981':'rgba(255,255,255,0.2)',
+                    }}>{opened?`👁${log.open_count>1?log.open_count:''}` :'—'}</span>
+                  </div>
+                  <div style={{textAlign:'center'}}>
+                    <span style={{
+                      fontSize:10,padding:'1px 4px',borderRadius:3,
+                      background:clicked?'rgba(59,123,246,0.12)':'rgba(255,255,255,0.04)',
+                      color:clicked?'#3B7BF6':'rgba(255,255,255,0.2)',
+                    }}>{clicked?`🔗${log.click_count>1?log.click_count:''}` :'—'}</span>
+                  </div>
+                  <span style={{color:'rgba(255,255,255,0.25)',textAlign:'right',fontSize:10}}>{ts}</span>
                 </div>
               );
             })}
+            {logs.length===0 && <div style={{fontSize:12,color:'rgba(255,255,255,0.2)',textAlign:'center',padding:'12px 0'}}>발송 이력 없음</div>}
           </div>
         </>}
 
@@ -520,6 +574,7 @@ function EmailDashboard() {
     </div>
   );
 }
+
 
 function EmailSender({onSent,remaining,sentToday}:{onSent?:()=>void;remaining?:number;sentToday?:number}) {
   const [sending, setSending] = useState(false);
