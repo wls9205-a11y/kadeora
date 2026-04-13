@@ -77,9 +77,10 @@ export async function GET(request: Request) {
       // ── 라우팅 분기 ──
       const safeRedirect = redirect.startsWith('/') ? redirect : '/feed';
 
-      // 1) CTA 신규 가입: 온보딩 스킵 → 바로 콘텐츠
+      // 1) CTA 신규 가입: 온보딩 스킵 → 바로 콘텐츠 + welcome 토스트
       if (isNewUser && isCTA) {
-        return NextResponse.redirect(`${origin}${safeRedirect}`);
+        const sep = safeRedirect.includes('?') ? '&' : '?';
+        return NextResponse.redirect(`${origin}${safeRedirect}${sep}welcome=1`);
       }
       // 2) 기존 유저 + 미온보딩 + CTA 재방문: 자동 완료 → 바로 콘텐츠
       if (existing && !existing.onboarded && isCTA) {

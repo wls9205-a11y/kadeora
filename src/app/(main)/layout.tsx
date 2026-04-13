@@ -13,6 +13,7 @@ import TopLoadingBar from '@/components/TopLoadingBar';
 import ScrollToTop from '@/components/ScrollToTop';
 import { AuthProvider } from '@/components/AuthProvider';
 import WelcomeReward from '@/components/WelcomeReward';
+import WelcomeToast from '@/components/WelcomeToast';
 import GlobalMissionBar from '@/components/GlobalMissionBar';
 import SmartPushPrompt from '@/components/SmartPushPrompt';
 
@@ -65,6 +66,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
       <PageViewTracker />
       <BehaviorTracker />
       <WelcomeReward />
+      <WelcomeToast />
       <ScrollToTop />
       <SmartPushPrompt />
       <footer className="hidden md:block" style={{

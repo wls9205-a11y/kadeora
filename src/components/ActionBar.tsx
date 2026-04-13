@@ -1,41 +1,66 @@
 'use client';
 /**
- * ActionBar v2 — 카카오 원버튼 하단 고정 바
+ * ActionBar v3 — 카카오 원버튼 하단 고정 바
  * 
- * 비로그인 유저에게 3초 후 등장 · 닫기 가능
- * 카카오 노란색 통일 디자인
+ * - 비로그인 유저에게 3초 후 등장 · 닫기 가능
+ * - SmartSectionGate 게이트 카드가 viewport에 있으면 자동 숨김
+ * - 페이지 카테고리별 컨텍스트 메시지
  */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
 import { trackCTA } from '@/lib/analytics';
 
 const EXCLUDED = ['/', '/login', '/auth', '/onboarding', '/admin', '/terms', '/privacy'];
 
+function getContextMessage(path: string): { title: string; sub: string } {
+  if (path.startsWith('/blog/')) return { title: '이 분석 전체 보기 · 무료', sub: '스팸 없음 · 3초 가입' };
+  if (path.startsWith('/apt/')) return { title: '이 단지 가격 변동 알림 받기', sub: '실거래 등록 시 알림 · 무료' };
+  if (path.startsWith('/stock/')) return { title: '이 종목 알림 받기 · 무료', sub: '급등락 · AI 분석 · 실적 공시' };
+  if (path.startsWith('/calc/')) return { title: '계산 결과 저장하기 · 무료', sub: '3초 가입 · 무제한 이용' };
+  return { title: '청약·주식 알림 무료로 받기', sub: '스팸 없음 · 3초 가입 · 전체 분석 무료' };
+}
+
 export default function ActionBar() {
   const [visible, setVisible] = useState(false);
   const [dismissed, setDismissed] = useState(false);
+  const [gateVisible, setGateVisible] = useState(false);
   const { userId, loading } = useAuth();
   const pathname = usePathname();
+  const obsRef = useRef<IntersectionObserver | null>(null);
 
   useEffect(() => {
     setVisible(false);
     setDismissed(false);
+    setGateVisible(false);
   }, [pathname]);
+
+  // SmartSectionGate 게이트 카드 감지 — 겹치면 숨김
+  useEffect(() => {
+    if (loading || userId) return;
+    const gate = document.querySelector('[data-cta="content-gate"]');
+    if (!gate) return;
+    obsRef.current = new IntersectionObserver(([e]) => {
+      setGateVisible(e.isIntersecting);
+    }, { threshold: 0.1 });
+    obsRef.current.observe(gate);
+    return () => { obsRef.current?.disconnect(); };
+  }, [pathname, userId, loading, visible]);
 
   useEffect(() => {
     if (loading || userId) return;
     if (EXCLUDED.includes(pathname)) return;
     const timer = setTimeout(() => {
       setVisible(true);
-      trackCTA('view', 'action_bar_kakao');
+      trackCTA('view', 'action_bar_kakao', { page_path: pathname });
     }, 3000);
     return () => clearTimeout(timer);
   }, [pathname, userId, loading]);
 
-  if (!visible || dismissed || loading || userId) return null;
+  if (!visible || dismissed || loading || userId || gateVisible) return null;
 
   const loginUrl = `/login?redirect=${encodeURIComponent(pathname)}&source=action_bar`;
+  const msg = getContextMessage(pathname);
 
   return (
     <>
@@ -51,20 +76,18 @@ export default function ActionBar() {
         animation: 'kdSlideUp .3s ease-out',
         boxShadow: '0 -4px 20px rgba(0,0,0,0.4)',
       }}>
-        {/* 텍스트 */}
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 13, fontWeight: 700, color: '#F0F4F8', letterSpacing: '-0.02em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            청약·주식 알림 무료로 받기
+            {msg.title}
           </div>
           <div style={{ fontSize: 10, color: 'rgba(224,232,240,0.3)', marginTop: 2 }}>
-            스팸 없음 · 3초 가입 · 전체 분석 무료
+            {msg.sub}
           </div>
         </div>
 
-        {/* 카카오 버튼 */}
         <a
           href={loginUrl}
-          onClick={() => trackCTA('click', 'action_bar_kakao')}
+          onClick={() => trackCTA('click', 'action_bar_kakao', { page_path: pathname })}
           style={{
             display: 'flex', alignItems: 'center', gap: 6,
             background: '#FEE500', color: '#191919', borderRadius: 'var(--radius-md)',
@@ -77,7 +100,6 @@ export default function ActionBar() {
           카카오 시작
         </a>
 
-        {/* 닫기 */}
         <button
           onClick={() => setDismissed(true)}
           style={{ background: 'none', border: 'none', color: 'rgba(224,232,240,0.2)', fontSize: 18, cursor: 'pointer', padding: '0 2px', lineHeight: 1 }}

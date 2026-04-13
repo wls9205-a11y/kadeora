@@ -9,7 +9,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 export async function POST(req: NextRequest) {
   if (!(await rateLimit(req, 'api'))) return rateLimitResponse();
   try {
-    const { event_type, cta_name, category, page_path, visitor_id } = await req.json();
+    const { event_type, cta_name, category, page_path, visitor_id, device_type, referrer_source } = await req.json();
     if (!event_type || !cta_name) {
       return NextResponse.json({ ok: false }, { status: 400 });
     }
@@ -21,6 +21,8 @@ export async function POST(req: NextRequest) {
       category: category ? String(category).slice(0, 20) : null,
       page_path: page_path ? String(page_path).slice(0, 200) : null,
       visitor_id: visitor_id ? String(visitor_id).slice(0, 50) : null,
+      device_type: device_type ? String(device_type).slice(0, 10) : null,
+      referrer_source: referrer_source ? String(referrer_source).slice(0, 50) : null,
     });
 
     return NextResponse.json({ ok: true });
