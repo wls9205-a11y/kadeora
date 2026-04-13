@@ -123,10 +123,10 @@ export async function GET(req: NextRequest) {
               await sendNotificationEmail(
                 authUser.user.email,
                 `${u.nickname}님, 놓치고 있는 투자 정보가 있어요 📊`,
-                `<p style="font-size:14px;color:#E2E8F0;margin:0 0 16px;">${u.nickname}님, 안녕하세요! 👋</p>
-                <p style="font-size:13px;color:rgba(255,255,255,0.5);line-height:1.7;">카더라에 새로운 분석과 청약 정보가 기다리고 있어요.</p>
+                `<p style="font-size:15px;color:#1E293B;margin:0 0 12px;">${u.nickname}님, 안녕하세요! 👋</p>
+                <p style="font-size:14px;color:#64748B;line-height:1.7;margin:0 0 20px;">카더라에 새로운 분석과 청약 정보가 기다리고 있어요.</p>
                 <div style="text-align:center;margin:20px 0;">
-                  <a href="https://kadeora.app/feed?utm_source=email&utm_medium=churn&utm_campaign=d7" style="display:inline-block;padding:12px 32px;border-radius:10px;background:#FEE500;color:#191919;font-size:14px;font-weight:800;text-decoration:none;">카더라 바로가기 →</a>
+                  <a href="https://kadeora.app/feed?utm_source=email&utm_medium=churn&utm_campaign=d7" style="display:inline-block;padding:12px 36px;border-radius:10px;background:#3B7BF6;color:#FFFFFF;font-size:15px;font-weight:700;text-decoration:none;">카더라 바로가기 →</a>
                 </div>`
               );
               d7Sent++;

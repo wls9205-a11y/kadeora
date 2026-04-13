@@ -7,10 +7,9 @@ export const maxDuration = 60;
 /**
  * email-digest — 매주 월요일 09:00 KST (0 0 * * 1)
  * 
- * weekly-digest를 대체: 실제 Resend 이메일 발송
- * 대상: marketing_agreed = true
- * 
- * Resend 무료: 100통/일, 3,000통/월
+ * 대상: marketing_agreed = true 실유저
+ * 발송: Resend (100통/일, 3,000통/월 무료)
+ * 로그: email_send_logs 테이블 기록
  */
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get('authorization');
@@ -51,43 +50,38 @@ export async function GET(req: NextRequest) {
     }));
     await (sb as any).from('notifications').insert(notifs);
 
-    // 이메일 발송 (Resend)
+    // 이메일 발송 (Resend + 새 템플릿)
     let emailSent = 0, emailFailed = 0;
     try {
       const { sendNotificationEmail } = await import('@/lib/email-sender');
+      const { weeklyDigestBody } = await import('@/lib/email-templates');
 
-      const hotPostsHtml = (hotPosts.data || []).map((p: any, i: number) =>
-        `<div style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
-          <span style="color:#3B7BF6;font-weight:700;">${i + 1}.</span>
-          <a href="https://kadeora.app/feed/${p.slug}?utm_source=email&utm_medium=digest" style="color:#E2E8F0;text-decoration:none;font-size:13px;">${p.title}</a>
-          <span style="color:rgba(255,255,255,0.3);font-size:11px;margin-left:6px;">❤️ ${p.likes_count}</span>
-        </div>`
-      ).join('');
-
-      const deadlinesHtml = (deadlines.data || []).map((d: any) =>
-        `<span style="display:inline-block;padding:3px 8px;margin:2px;border-radius:6px;background:rgba(239,68,68,0.1);color:#EF4444;font-size:11px;">${d.house_nm} ~${d.rcept_endde?.slice(5)}</span>`
-      ).join('');
-
-      const body = `
-        <p style="font-size:14px;color:#E2E8F0;margin:0 0 16px;">이번 주 카더라 하이라이트</p>
-        ${hotPostsHtml ? `<div style="margin:0 0 16px;"><p style="font-size:12px;color:rgba(255,255,255,0.4);margin:0 0 6px;">🔥 인기글</p>${hotPostsHtml}</div>` : ''}
-        ${deadlinesHtml ? `<div style="margin:0 0 16px;"><p style="font-size:12px;color:rgba(255,255,255,0.4);margin:0 0 6px;">🏠 이번 주 청약 마감</p>${deadlinesHtml}</div>` : ''}
-        <div style="text-align:center;margin:20px 0;">
-          <a href="https://kadeora.app/blog?utm_source=email&utm_medium=digest&utm_campaign=weekly" style="display:inline-block;padding:12px 32px;border-radius:10px;background:#FEE500;color:#191919;font-size:14px;font-weight:800;text-decoration:none;">전체 확인하기 →</a>
-        </div>`;
+      const body = weeklyDigestBody({
+        hotPosts: (hotPosts.data || []) as any[],
+        deadlines: (deadlines.data || []) as any[],
+        newBlogs: (newBlogs.data || []) as any[],
+      });
 
       // 배치 발송 (10명씩, 1초 딜레이)
-      for (let i = 0; i < Math.min(users.length, 80); i += 10) { // 일일 100통 한도 → 80명
+      for (let i = 0; i < Math.min(users.length, 80); i += 10) {
         const batch = users.slice(i, i + 10);
         await Promise.all(batch.map(async (u) => {
           try {
             const { data: authUser } = await sb.auth.admin.getUserById(u.id);
-            if (!authUser?.user?.email) return;
-            const r = await sendNotificationEmail(
-              authUser.user.email,
-              `${u.nickname || '회원'}님의 주간 투자 리포트 📊`,
-              body
-            );
+            const email = authUser?.user?.email;
+            if (!email) return;
+
+            const subject = `${u.nickname || '회원'}님의 주간 투자 리포트 📊`;
+            const r = await sendNotificationEmail(email, subject, body);
+
+            // email_send_logs 기록
+            await (sb as any).from('email_send_logs').insert({
+              campaign: 'weekly-digest',
+              recipient_email: email,
+              status: r.ok ? 'sent' : 'failed',
+              resend_id: r.id || null,
+            }).catch(() => {});
+
             if (r.ok) emailSent++; else emailFailed++;
           } catch { emailFailed++; }
         }));
@@ -97,7 +91,9 @@ export async function GET(req: NextRequest) {
 
     return {
       processed: notifs.length,
-      metadata: { emailSent, emailFailed, users: users.length, hotPosts: hotPosts.data?.length, deadlines: deadlines.data?.length },
+      created: emailSent,
+      failed: emailFailed,
+      metadata: { emailSent, emailFailed, users: users.length, hotPosts: hotPosts.data?.length, deadlines: deadlines.data?.length, newBlogs: newBlogs.data?.length },
     };
   });
 

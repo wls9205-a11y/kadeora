@@ -170,7 +170,10 @@ async function dispatchToChannels(payload: NotificationPayload, notifId: number)
         await sendNotificationEmail(
           user.user.email,
           pushPayload.title,
-          `<p>${pushPayload.body}</p><p><a href="https://kadeora.app${payload.link || '/'}">카더라에서 확인하기 →</a></p>`
+          `<p style="font-size:15px;color:#334155;margin:0 0 16px;line-height:1.7;">${pushPayload.body}</p>
+          <div style="text-align:center;margin:20px 0;">
+            <a href="https://kadeora.app${payload.link || '/'}" style="display:inline-block;padding:12px 32px;border-radius:10px;background:#3B7BF6;color:#FFFFFF;font-size:14px;font-weight:700;text-decoration:none;">카더라에서 확인하기 →</a>
+          </div>`
         );
       }
     } catch {}
