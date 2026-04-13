@@ -33,6 +33,22 @@ const COMMENT_DANGER = /<!--[\s\S]*?(script|javascript|on\w+\s*=)[\s\S]*?-->/gi;
 // data: URI 제거 (이미지 제외)
 const DATA_URI = /(href|action)\s*=\s*(?:"data:[^"]*"|'data:[^']*')/gi;
 
+// style 속성에서 위험/레이아웃 파괴 CSS 값 제거
+function sanitizeStyle(styleStr: string): string {
+  return styleStr
+    // position:fixed 는 레이아웃 깨짐 위험
+    .replace(/position\s*:\s*fixed[^;]*/gi, 'position:relative')
+    // user-select:none 은 복사 방지 (불필요)
+    .replace(/user-select\s*:\s*none[^;]*/gi, '')
+    // pointer-events:none 은 클릭 차단
+    .replace(/pointer-events\s*:\s*none[^;]*/gi, '')
+    // display:none 은 콘텐츠 숨김
+    .replace(/display\s*:\s*none[^;]*/gi, '')
+    // webkit-text-stroke 등 불필요한 webkit 전용
+    .replace(/-webkit-text-stroke[^;]*/gi, '')
+    .trim();
+}
+
 export function sanitizeHtml(html: string): string {
   if (!html) return '';
   
@@ -56,6 +72,16 @@ export function sanitizeHtml(html: string): string {
   // 4. data: URI 제거 (href, action에서만)
   clean = clean.replace(DATA_URI, '$1=""');
   
+  // 4.5. style 속성 내 위험 CSS 값 정화
+  clean = clean.replace(/style="([^"]*)"/gi, (match, styleVal) => {
+    const safe = sanitizeStyle(styleVal);
+    return safe ? `style="${safe}"` : '';
+  });
+  clean = clean.replace(/style='([^']*)'/gi, (match, styleVal) => {
+    const safe = sanitizeStyle(styleVal);
+    return safe ? `style='${safe}'` : '';
+  });
+
   // 5. 외부 링크에 nofollow 추가 (kadeora.app 제외)
   clean = clean.replace(/<a\s([^>]*href\s*=\s*"https?:\/\/(?!kadeora\.app)[^"]*"[^>]*)>/gi, (match, attrs) => {
     if (/rel\s*=/.test(attrs)) return match; // 이미 rel 있으면 스킵
