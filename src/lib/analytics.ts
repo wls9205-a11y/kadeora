@@ -194,8 +194,10 @@ export function trackCTA(action: 'view' | 'click' | 'dismiss', ctaName: string, 
       event_type: eventType,
       cta_name: ctaName,
       category: properties?.category || null,
-      page_path: window.location.pathname,
+      page_path: properties?.page_path || window.location.pathname,
       visitor_id: getVisitorId(),
+      device_type: /Mobile|Android|iPhone/i.test(navigator.userAgent) ? 'mobile' : 'desktop',
+      referrer_source: document.referrer ? (() => { try { return new URL(document.referrer).hostname; } catch { return null; } })() : null,
     });
     try {
       if (navigator.sendBeacon) {

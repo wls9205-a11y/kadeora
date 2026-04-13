@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
+import { trackCTA } from '@/lib/analytics';
 
 /**
  * ContentLock — 고부가가치 콘텐츠 잠금
@@ -25,6 +26,13 @@ export default function ContentLock({
 
   useEffect(() => { setMounted(true); }, []);
 
+  // 비로그인 + 마운트 완료 시 view 추적
+  useEffect(() => {
+    if (mounted && !userId) {
+      trackCTA('view', 'content_lock', { page_path: pathname });
+    }
+  }, [mounted, userId, pathname]);
+
   // SSR 또는 로그인 → 전체 표시
   if (!mounted || userId) return <>{children}</>;
 
@@ -43,11 +51,15 @@ export default function ContentLock({
           <div style={{ fontSize: 24, marginBottom: 6 }}>🔓</div>
           <div style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>{title}</div>
           <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 12 }}>{description}</div>
-          <Link href={`/login?redirect=${encodeURIComponent(pathname)}&source=content_lock`} style={{
-            display: 'inline-block', padding: '8px 24px', borderRadius: 'var(--radius-pill)',
-            background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)',
-            fontWeight: 700, fontSize: 'var(--fs-sm)', textDecoration: 'none',
-          }}>무료 가입하고 보기</Link>
+          <Link
+            href={`/login?redirect=${encodeURIComponent(pathname)}&source=content_lock`}
+            onClick={() => trackCTA('click', 'content_lock', { page_path: pathname })}
+            style={{
+              display: 'inline-block', padding: '8px 24px', borderRadius: 'var(--radius-pill)',
+              background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)',
+              fontWeight: 700, fontSize: 'var(--fs-sm)', textDecoration: 'none',
+            }}
+          >무료 가입하고 보기</Link>
         </div>
       </div>
     </div>

@@ -18,6 +18,13 @@ export default function KakaoHeroCTA() {
       .catch(() => {});
   }, []);
 
+  // view 추적 — 비로그인 유저에게 노출 시
+  useEffect(() => {
+    if (!loading && !userId) {
+      trackCTA('view', 'kakao_hero', { page_path: pathname });
+    }
+  }, [loading, userId, pathname]);
+
   if (loading || userId) return null;
 
   const loginUrl = `/login?redirect=${encodeURIComponent(pathname)}&source=kakao_hero`;

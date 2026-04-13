@@ -54,19 +54,34 @@ function LoginForm({ redirect }: LoginFormProps) {
           const source = params?.get('source') || '';
           const action = params?.get('action') || '';
           const MSG: Record<string, { icon: string; text: string }> = {
-            content_gate: { icon: '📊', text: '가입하면 7,600+ 분석 전문을 무제한 열람할 수 있어요' },
+            content_gate: { icon: '📊', text: '가입하면 전체 분석을 무제한 열람할 수 있어요' },
             action_bar_bookmark: { icon: '📌', text: '가입하면 이 분석을 저장하고 나중에 다시 볼 수 있어요' },
             action_bar_alert: { icon: '🔔', text: '가입하면 이 단지의 가격 변동 알림을 받을 수 있어요' },
             action_bar_watchlist: { icon: '⭐', text: '가입하면 관심 종목을 추가하고 시세 알림을 받을 수 있어요' },
             action_bar_comment: { icon: '💬', text: '가입하면 댓글을 달고 토론에 참여할 수 있어요' },
             calc_gate: { icon: '🎯', text: '가입하면 맞춤 전략과 지역별 커트라인을 확인할 수 있어요' },
             smart_gate: { icon: '🔓', text: '가입하면 전체 분석과 AI 투자 의견을 무료로 볼 수 있어요' },
-            apt_alert_cta: { icon: '🔔', text: '가입하면 이 단지의 가격 변동 알림을 무료로 받을 수 있어요' },
+            apt_alert_cta: { icon: '🔔', text: '가입하면 이 단지의 실거래 알림을 무료로 받을 수 있어요' },
             stock_alert_cta: { icon: '📈', text: '가입하면 종목 시세 알림과 AI 분석을 무료로 볼 수 있어요' },
             kakao_hero: { icon: '🚀', text: '가입하면 부동산·주식 분석과 맞춤 알림을 무료로 받을 수 있어요' },
             blog_mid_cta: { icon: '📊', text: '가입하면 전체 분석과 데이터를 무제한 열람할 수 있어요' },
             right_panel: { icon: '🔓', text: '가입하면 전체 기능을 무료로 이용할 수 있어요' },
             content_gate_email: { icon: '📧', text: '가입하면 주간 시황 리포트와 분석을 이메일로 받을 수 있어요' },
+            action_bar: { icon: '📊', text: '가입하면 전체 분석과 알림을 무료로 이용할 수 있어요' },
+            blog_inline_cta: { icon: '🔔', text: '가입하면 청약·종목 알림을 무료로 받을 수 있어요' },
+            content_lock: { icon: '🏠', text: '가입하면 실입주 비용 계산을 무료로 이용할 수 있어요' },
+            login_gate_ai_analysis: { icon: '🤖', text: '가입하면 AI 투자 분석을 무료로 볼 수 있어요' },
+            login_gate_apt_analysis: { icon: '📊', text: '가입하면 이 단지의 종합 분석을 볼 수 있어요' },
+            blog_comment: { icon: '💬', text: '가입하면 댓글을 달고 토론에 참여할 수 있어요' },
+            apt_comment: { icon: '💬', text: '가입하면 한줄평을 남기고 볼 수 있어요' },
+            stock_comment: { icon: '💬', text: '가입하면 종목 토론에 참여할 수 있어요' },
+            blog_bookmark: { icon: '📌', text: '가입하면 이 분석을 저장하고 다시 볼 수 있어요' },
+            apt_bookmark: { icon: '📌', text: '가입하면 이 단지를 저장하고 추적할 수 있어요' },
+            calc_cta: { icon: '🧮', text: '가입하면 계산기를 무료로 이용할 수 있어요' },
+            calc_engine: { icon: '🧮', text: '가입하면 계산 결과를 저장하고 비교할 수 있어요' },
+            discuss: { icon: '💬', text: '가입하면 토론에 참여할 수 있어요' },
+            sidebar: { icon: '🔓', text: '가입하면 전체 기능을 무료로 이용할 수 있어요' },
+            interest_register: { icon: '🔔', text: '가입하면 관심 단지 알림을 받을 수 있어요' },
           };
           const key = action ? `${source}_${action}` : source;
           const msg = MSG[key] || MSG[source];
