@@ -182,12 +182,20 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
     const newList = isWatched ? watchlistSymbols.filter(s => s !== symbol) : [...watchlistSymbols, symbol];
     setWatchlistSymbols(newList);
     try { localStorage.setItem(LS_WATCHLIST_KEY, JSON.stringify(newList)); } catch {}
+    // 서버 동기화 시도 — 실패해도 로컬은 유지
     try {
-      await fetch('/api/stock/watchlist', {
+      const res = await fetch('/api/stock/watchlist', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ symbol, action: isWatched ? 'remove' : 'add' }),
       });
+      if (res.status === 401 && !isWatched) {
+        // 비로그인: 로컬에 저장됐음을 알림
+        if (typeof window !== 'undefined' && !sessionStorage.getItem('watchlist_hint')) {
+          sessionStorage.setItem('watchlist_hint', '1');
+          setTimeout(() => alert('관심종목을 저장했어요! 로그인하면 모든 기기에서 동기화됩니다.'), 300);
+        }
+      }
     } catch {}
   }, [watchlistSymbols]);
 

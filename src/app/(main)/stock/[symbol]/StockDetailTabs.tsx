@@ -301,36 +301,76 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
           })()}
           {investorFlow.length === 0 ? (
             <div style={{ textAlign: 'center', padding: 30, color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)' }}>📊 외국인·기관 매매 데이터가 수집되면 표시됩니다</div>
-          ) : investorFlow.map((d) => {
-            const foreignNet = (d.foreign_buy || 0) - (d.foreign_sell || 0);
-            const instNet = (d.inst_buy || 0) - (d.inst_sell || 0);
-            const maxVal = Math.max(Math.abs(foreignNet), Math.abs(instNet), 1);
+          ) : (() => {
+            // 누적 라인 차트 — 날짜 오름차순
+            const sorted = [...investorFlow].sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+            let cumF = 0, cumI = 0;
+            const pts = sorted.map(d => {
+              cumF += (d.foreign_buy || 0) - (d.foreign_sell || 0);
+              cumI += (d.inst_buy || 0) - (d.inst_sell || 0);
+              return { date: (d.date || '').slice(5), f: cumF, i: cumI };
+            });
+            const allVals = pts.flatMap(p => [p.f, p.i]);
+            const minV = Math.min(...allVals);
+            const maxV = Math.max(...allVals);
+            const range = maxV - minV || 1;
+            const W = 400; const H = 80;
+            const toX = (i: number) => (i / (pts.length - 1 || 1)) * W;
+            const toY = (v: number) => H - 4 - ((v - minV) / range) * (H - 8);
+            const fLine = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${toX(i).toFixed(1)},${toY(p.f).toFixed(1)}`).join(' ');
+            const iLine = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${toX(i).toFixed(1)},${toY(p.i).toFixed(1)}`).join(' ');
+            const zeroY = toY(0).toFixed(1);
             return (
-              <div key={d.date || d.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: '1px solid var(--border)' }}>
-                <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', minWidth: 50 }}>{(d.date || '').slice(5)}</span>
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
-                    <span style={{ fontSize: 'var(--fs-xs)', minWidth: 36, color: 'var(--text-tertiary)' }}>외국인</span>
-                    <div style={{ flex: 1, height: 12, background: 'var(--bg-hover)', borderRadius: 'var(--radius-xs)', overflow: 'hidden', display: 'flex', justifyContent: foreignNet >= 0 ? 'flex-start' : 'flex-end' }}>
-                      <div style={{ width: `${Math.abs(foreignNet) / maxVal * 100}%`, height: '100%', background: investorColor('foreign'), borderRadius: 'var(--radius-xs)', minWidth: 2 }} />
-                    </div>
-                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, minWidth: 50, textAlign: 'right', color: investorColor('foreign') }}>
-                      {foreignNet >= 0 ? '+' : ''}{(foreignNet / 10000).toFixed(1)}만
-                    </span>
+              <div>
+                {/* 누적 라인 차트 */}
+                <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '10px 12px', marginBottom: 10 }}>
+                  <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 6, display: 'flex', justifyContent: 'space-between' }}>
+                    <span>{pts[0]?.date}</span><span style={{ fontWeight: 600 }}>누적 순매매 추이</span><span>{pts[pts.length-1]?.date}</span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span style={{ fontSize: 'var(--fs-xs)', minWidth: 36, color: 'var(--text-tertiary)' }}>기관</span>
-                    <div style={{ flex: 1, height: 12, background: 'var(--bg-hover)', borderRadius: 'var(--radius-xs)', overflow: 'hidden', display: 'flex', justifyContent: instNet >= 0 ? 'flex-start' : 'flex-end' }}>
-                      <div style={{ width: `${Math.abs(instNet) / maxVal * 100}%`, height: '100%', background: investorColor('inst'), borderRadius: 'var(--radius-xs)', minWidth: 2 }} />
-                    </div>
-                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, minWidth: 50, textAlign: 'right', color: investorColor('inst') }}>
-                      {instNet >= 0 ? '+' : ''}{(instNet / 10000).toFixed(1)}만
-                    </span>
+                  <svg width="100%" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{ display: 'block', height: 80 }}>
+                    <line x1="0" y1={zeroY} x2={W} y2={zeroY} stroke="var(--border)" strokeWidth="1" strokeDasharray="3,3" />
+                    <path d={fLine} fill="none" stroke="var(--stock-foreign)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d={iLine} fill="none" stroke="var(--stock-inst)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    {pts.length > 0 && <>
+                      <circle cx={toX(pts.length-1)} cy={toY(pts[pts.length-1].f)} r="3" fill="var(--stock-foreign)" />
+                      <circle cx={toX(pts.length-1)} cy={toY(pts[pts.length-1].i)} r="3" fill="var(--stock-inst)" />
+                    </>}
+                  </svg>
+                  <div style={{ display: 'flex', gap: 12, justifyContent: 'center', fontSize: 10, marginTop: 4 }}>
+                    <span style={{ color: 'var(--stock-foreign)', fontWeight: 600 }}>● 외국인</span>
+                    <span style={{ color: 'var(--stock-inst)', fontWeight: 600 }}>● 기관</span>
                   </div>
                 </div>
+                {/* 날짜별 요약 — 최근 5일만 */}
+                {sorted.slice(-5).reverse().map((d) => {
+                  const foreignNet = (d.foreign_buy || 0) - (d.foreign_sell || 0);
+                  const instNet = (d.inst_buy || 0) - (d.inst_sell || 0);
+                  const maxVal = Math.max(Math.abs(foreignNet), Math.abs(instNet), 1);
+                  return (
+                    <div key={d.date || d.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 0', borderBottom: '1px solid var(--border)' }}>
+                      <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', minWidth: 44, flexShrink: 0 }}>{(d.date || '').slice(5)}</span>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 2 }}>
+                          <span style={{ fontSize: 10, minWidth: 32, color: 'var(--text-tertiary)' }}>외국인</span>
+                          <div style={{ flex: 1, height: 8, background: 'var(--bg-hover)', borderRadius: 2, overflow: 'hidden', display: 'flex', justifyContent: foreignNet >= 0 ? 'flex-start' : 'flex-end' }}>
+                            <div style={{ width: `${Math.abs(foreignNet) / maxVal * 100}%`, height: '100%', background: 'var(--stock-foreign)', minWidth: 2 }} />
+                          </div>
+                          <span style={{ fontSize: 10, fontWeight: 700, minWidth: 48, textAlign: 'right', color: 'var(--stock-foreign)' }}>{foreignNet >= 0 ? '+' : ''}{(foreignNet / 100000000).toFixed(1)}억</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <span style={{ fontSize: 10, minWidth: 32, color: 'var(--text-tertiary)' }}>기관</span>
+                          <div style={{ flex: 1, height: 8, background: 'var(--bg-hover)', borderRadius: 2, overflow: 'hidden', display: 'flex', justifyContent: instNet >= 0 ? 'flex-start' : 'flex-end' }}>
+                            <div style={{ width: `${Math.abs(instNet) / maxVal * 100}%`, height: '100%', background: 'var(--stock-inst)', minWidth: 2 }} />
+                          </div>
+                          <span style={{ fontSize: 10, fontWeight: 700, minWidth: 48, textAlign: 'right', color: 'var(--stock-inst)' }}>{instNet >= 0 ? '+' : ''}{(instNet / 100000000).toFixed(1)}억</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             );
-          })}
+          })()}
         </div>
       )}
 

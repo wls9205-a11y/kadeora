@@ -1,3 +1,39 @@
+## 세션 100 — 주식 페이지 디자인 + SEO + 네이버 1위 전략
+
+### 커밋: ce9285e9 → 최종
+
+### 🔴 SEO 버그 수정
+- naver:written_time 하드코딩 → 동적(new Date()) — 섹터/배당/모버스/테마 4개 페이지
+- AI 분석 텍스트 LoginGate 밖 SEO용 숨김 section 분리 (네이버 봇 접근 보장)
+- description 200자 절삭 제거 → 크롤러에 전체 텍스트 노출
+
+### 🟠 FAQ 리치스니펫 최대화
+- /stock/[symbol]: FAQ DOM 3개 → 6개 (주가/52주/배당/PER/기업/전망), 답변 품질 강화
+- /stock/movers: FAQPage 4개 신규 추가
+- /stock/dividend: FAQ 2개 → 5개 (배당수익률 계산법 포함)
+- /stock/sector/[name]: FAQPage 3개 신규 추가
+- /stock/themes: ItemList + FAQPage JSON-LD 신규 추가
+
+### 🟠 사이트링크 서브페이지 (네이버 사이트링크 4개 확보)
+- /stock/[symbol]/chart — 차트 전용 메타데이터 + redirect
+- /stock/[symbol]/financials — 재무제표 전용 메타데이터 + redirect
+
+### 🟡 디자인/UX 개선
+- 스파크라인 높이 20px → 36px
+- 관심종목 ★ 터치 영역 44px (모바일 접근성)
+- 탭 끝 fade gradient (overflow 힌트)
+- 섹터 이름 min-width:52→80px + ellipsis
+- Compact 모드 토글 ☰/▦ (한 화면 20개+ 종목)
+- 수급 탭: 날짜별 스택 → 누적 라인 SVG 차트 + 최근 5일 요약
+
+### 🟡 기능 추가
+- /api/stock/view POST + increment_stock_view RPC (page_views 집계)
+- StockDetailTabs ViewTracker
+- 관심종목 비로그인 로그인 유도 안내
+- 가격 플래시 애니메이션 CSS keyframe
+- stock-fundamentals-kr 크론 2시간마다 (PER 전체 채우기 가속)
+- stock-fundamentals-us 크론 3시간마다
+
 # 카더라 STATUS.md
 > 마지막 업데이트: 2026-04-13 세션 98 (Claude)
 

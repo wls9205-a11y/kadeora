@@ -1859,3 +1859,25 @@ a, span, p, div {
     padding-bottom: calc(env(safe-area-inset-bottom) + 4px) !important;
   }
 }
+
+/* ── 주식 가격 플래시 애니메이션 ── */
+@keyframes price-up-flash {
+  0%   { background: rgba(255,82,82,0.25); }
+  100% { background: transparent; }
+}
+@keyframes price-dn-flash {
+  0%   { background: rgba(66,165,250,0.25); }
+  100% { background: transparent; }
+}
+@keyframes price-up-flash-us {
+  0%   { background: rgba(102,187,106,0.25); }
+  100% { background: transparent; }
+}
+@keyframes price-dn-flash-us {
+  0%   { background: rgba(239,83,80,0.25); }
+  100% { background: transparent; }
+}
+.price-flash-up    { animation: price-up-flash    0.6s ease-out; }
+.price-flash-dn    { animation: price-dn-flash    0.6s ease-out; }
+.price-flash-up-us { animation: price-up-flash-us 0.6s ease-out; }
+.price-flash-dn-us { animation: price-dn-flash-us 0.6s ease-out; }
