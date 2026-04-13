@@ -1,4 +1,4 @@
-export const maxDuration = 60;
+export const maxDuration = 120;
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronAuth } from '@/lib/cron-auth';
