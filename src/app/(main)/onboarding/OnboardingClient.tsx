@@ -189,14 +189,14 @@ export default function OnboardingClient() {
           </div>
         )}
 
-        <button onClick={() => handleFinish(false)} disabled={saving || !region}
+        <button onClick={() => handleFinish(false)} disabled={saving}
           style={{
             width: '100%', padding: 14, borderRadius: 'var(--radius-card)', border: 'none', fontSize: 15, fontWeight: 800,
-            background: !region ? 'var(--bg-hover)' : 'var(--brand)', color: !region ? 'var(--text-tertiary)' : '#fff',
-            cursor: saving || !region ? 'not-allowed' : 'pointer',
+            background: 'var(--brand)', color: '#fff',
+            cursor: saving ? 'not-allowed' : 'pointer',
             opacity: saving ? 0.7 : 1,
           }}>
-          {!region ? '📍 지역을 선택해주세요' : saving ? '시작하는 중...' : '카더라 시작하기 🚀'}
+          {saving ? '시작하는 중...' : '카더라 시작하기 🚀'}
         </button>
 
         {/* 시작하기 버튼 아래 혜택 요약 */}

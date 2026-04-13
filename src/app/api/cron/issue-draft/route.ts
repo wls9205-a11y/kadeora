@@ -312,7 +312,9 @@ async function handler(_req: NextRequest) {
   // issue_alerts 업데이트
   await (sb as any).from('issue_alerts').update({
     is_published: (canAutoPublish && (insertResult.success || !!blogPostId)),
-    publish_decision: canAutoPublish ? 'auto' : (insertResult.success || !!blogPostId) ? 'draft' : 'failed',
+    publish_decision: canAutoPublish && (insertResult.success || !!blogPostId) ? 'auto'
+      : canAutoPublish ? 'auto_failed'
+      : (insertResult.success || !!blogPostId) ? 'draft' : 'failed',
     blog_post_id: blogPostId,
     draft_title: article.title,
     draft_content: article.content,

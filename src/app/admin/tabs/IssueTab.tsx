@@ -129,10 +129,13 @@ export default function IssueTab() {
   const statusBadge = (issue: IssueAlert) => {
     if (issue.is_published) return <span style={{ color: '#22c55e', fontSize: 11 }}>✅ 발행됨</span>;
     if (issue.publish_decision === 'auto_published') return <span style={{ color: '#22c55e', fontSize: 11 }}>🤖 자동발행</span>;
+    if (issue.publish_decision === 'auto') return <span style={{ color: issue.is_published ? '#22c55e' : '#f97316', fontSize: 11 }}>{issue.is_published ? '🤖 자동발행' : '⏳ 자동발행 대기'}</span>;
+    if (issue.publish_decision === 'auto_failed') return <span style={{ color: '#ef4444', fontSize: 11 }}>💥 발행실패(한도)</span>;
     if (issue.publish_decision === 'draft') return <span style={{ color: '#eab308', fontSize: 11 }}>📝 초안</span>;
     if (issue.publish_decision === 'draft_saved') return <span style={{ color: '#eab308', fontSize: 11 }}>📝 초안저장</span>;
     if (issue.publish_decision === 'skipped') return <span style={{ color: '#6b7280', fontSize: 11 }}>⏭ 무시</span>;
     if (issue.publish_decision === 'ai_failed') return <span style={{ color: '#ef4444', fontSize: 11 }}>⚠ AI실패</span>;
+    if (issue.publish_decision === 'failed') return <span style={{ color: '#ef4444', fontSize: 11 }}>❌ 실패</span>;
     if (issue.block_reason) return <span style={{ color: '#ef4444', fontSize: 11 }}>🚫 {issue.block_reason}</span>;
     if (!issue.is_processed) return <span style={{ color: '#3b82f6', fontSize: 11 }}>⏳ 대기</span>;
     return <span style={{ color: '#6b7280', fontSize: 11 }}>—</span>;
@@ -155,16 +158,21 @@ export default function IssueTab() {
     return `${Math.floor(hrs / 24)}일 전`;
   };
 
-  const todayPublished = issues.filter(i => {
+  const todayPublished = stats.publishedToday ?? issues.filter(i => {
     if (!i.published_at) return false;
     const d = new Date(i.published_at);
     const now = new Date();
     return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
   }).length;
 
-  const pendingAutoPublish = issues.filter(i =>
+  const pendingAutoPublish = stats.pending40plus ?? issues.filter(i =>
     !i.is_processed && i.final_score >= minScore
   ).length;
+
+  const cronLimitUsed = stats.cronLimitUsed ?? 0;
+  const cronLimitMax = stats.cronLimitMax ?? 30;
+  const cronLimitPct = Math.round((cronLimitUsed / cronLimitMax) * 100);
+  const autoFailed = stats.autoFailed ?? 0;
 
   return (
     <div style={{ padding: '20px 0' }}>
@@ -180,14 +188,30 @@ export default function IssueTab() {
         <PipelineArrow />
         <PipelineStep icon="🚀" label="자동발행" sub={autoEnabled ? `${minScore}점+ → 즉시` : '중단됨'} active={autoEnabled} />
         <div style={{ flex: 1 }} />
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: 11, color: '#64748b' }}>오늘 자동발행</div>
+        {/* cronLimit 게이지 */}
+        <div style={{ textAlign: 'right', marginLeft: 16 }}>
+          <div style={{ fontSize: 11, color: '#64748b' }}>일간 한도</div>
+          <div style={{ fontSize: 14, fontWeight: 700, color: cronLimitPct >= 90 ? '#ef4444' : cronLimitPct >= 70 ? '#f97316' : '#94a3b8' }}>
+            {cronLimitUsed}/{cronLimitMax}
+          </div>
+          <div style={{ width: 52, height: 4, background: '#1e293b', borderRadius: 2, marginTop: 2 }}>
+            <div style={{ width: `${Math.min(cronLimitPct, 100)}%`, height: '100%', borderRadius: 2, background: cronLimitPct >= 90 ? '#ef4444' : cronLimitPct >= 70 ? '#f97316' : '#22c55e' }} />
+          </div>
+        </div>
+        <div style={{ textAlign: 'right', marginLeft: 16 }}>
+          <div style={{ fontSize: 11, color: '#64748b' }}>오늘 발행</div>
           <div style={{ fontSize: 22, fontWeight: 700, color: '#22c55e' }}>{todayPublished}</div>
         </div>
-        <div style={{ textAlign: 'right', marginLeft: 20 }}>
-          <div style={{ fontSize: 11, color: '#64748b' }}>발행 대기</div>
+        <div style={{ textAlign: 'right', marginLeft: 16 }}>
+          <div style={{ fontSize: 11, color: '#64748b' }}>40점+ 대기</div>
           <div style={{ fontSize: 22, fontWeight: 700, color: pendingAutoPublish > 0 ? '#f97316' : '#64748b' }}>{pendingAutoPublish}</div>
         </div>
+        {autoFailed > 0 && (
+          <div style={{ textAlign: 'right', marginLeft: 16 }}>
+            <div style={{ fontSize: 11, color: '#ef4444' }}>발행실패</div>
+            <div style={{ fontSize: 22, fontWeight: 700, color: '#ef4444' }}>{autoFailed}</div>
+          </div>
+        )}
       </div>
 
       {/* 킬스위치 + 기준점 */}
@@ -250,12 +274,12 @@ export default function IssueTab() {
       <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
         {[
           { label: '전체', value: stats.total, color: '#94a3b8' },
-          { label: '대기', value: stats.pending, color: '#3b82f6' },
+          { label: '40점+ 대기', value: stats.pending40plus ?? stats.pending, color: '#3b82f6' },
           { label: '초안', value: stats.draft, color: '#eab308' },
-          { label: '발행', value: stats.published, color: '#22c55e' },
+          { label: '오늘 발행', value: todayPublished, color: '#22c55e' },
+          ...(autoFailed > 0 ? [{ label: '발행실패', value: autoFailed, color: '#ef4444' }] : []),
           { label: '🏠부동산', value: issues.filter(i => i.category === 'apt').length, color: '#0ea5e9' },
           { label: '📊주식', value: issues.filter(i => i.category === 'stock').length, color: '#8b5cf6' },
-          { label: '💰재테크', value: issues.filter(i => i.category === 'finance').length, color: '#f59e0b' },
         ].map(({ label, value, color }) => (
           <div key={label} style={{
             background: 'var(--surface, #0C1528)', borderRadius: 8, padding: '8px 14px',
