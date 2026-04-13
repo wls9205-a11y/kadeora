@@ -1,3 +1,36 @@
+## 세션 102 — 전환율 극대화 전면 개편
+
+### 커밋: 709ede09 → 76a9b5af
+
+### 전수 감사 결과
+- 버그 6건 발견 (source 오염, page_path null, MSG 미매핑, 하드코딩, 추적 누락)
+- 유령 CTA 10건 (코드 삭제됐으나 캐시에서 이벤트 발생)
+- 추적 사각지대 5건 (ContentLock, CalcSignupCTA, RightPanel, Sidebar, KakaoHeroCTA view)
+- 이중 추적 시스템 (trackCTA vs trackConversion)
+- 서버주입 CTA 미추적 발견
+
+### 완료 (13파일 수정/신규)
+1. **SmartSectionGate v6** — 클리프행어 컷포인트 (68% → 두 번째 H2 직전) + Preview Hook (남은 분석 H2/H3 미리보기)
+2. **ActionBar v3** — IntersectionObserver 게이트 겹침 방지 + 페이지별 컨텍스트 메시지
+3. **서버주입 CTA source 분리** — apt_alert_cta → blog_inline_cta + onclick 추적 추가
+4. **LoginClient MSG 확장** — 13→27개 (action_bar, content_lock, login_gate_* 등 14개 추가)
+5. **analytics.ts** — page_path null 수정 + device_type/referrer_source 전송
+6. **ContentLock** — view/click 추적 추가
+7. **KakaoHeroCTA** — view 추적 추가
+8. **auth/callback** — 신규 가입 시 ?welcome=1 파라미터
+9. **WelcomeToast 신규** — 가입 후 축하 토스트 (4초)
+10. **api/track** — device_type, referrer_source 컬럼 지원
+11. **DB** — conversion_events 테이블 3컬럼 + 인덱스 추가
+
+### 설계 문서
+- docs/CONVERSION_IMPROVEMENT_PLAN.md — 초기 분석 (전수 감사 결과)
+- docs/CONVERSION_FINAL_PLAN.md — 최종 설계안 (30+ 커밋 이력 반영)
+
+### 예상 효과
+- CTA CTR: 0.5% → 3~5% (컷포인트 변경 + Preview Hook)
+- 트래킹 커버리지: ~30% → 100%
+- 로그인 컨텍스트: 7개 → 27개 source 매핑
+
 ## 세션 101 — 전수 코드 검토 + 버그 11건 수정 + 타입 재생성
 
 ### 커밋: ef04c2c0 → 3dc9c9c2
