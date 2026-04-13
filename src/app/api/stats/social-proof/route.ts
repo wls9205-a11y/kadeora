@@ -41,7 +41,7 @@ export async function GET() {
       dauStats,
     ] = await Promise.all([
       // 블로그: RPC로 정확한 count + sum (Supabase 1000행 limit 회피)
-      sb.rpc('get_blog_stats'),
+      (sb as any).rpc('get_blog_stats'),
       // 주식 종목 수
       (sb as any).from('stock_quotes')
         .select('symbol', { count: 'exact', head: true }),

@@ -729,7 +729,7 @@ export default async function BlogDetailPage({ params }: Props) {
       {/* 세션70: 상단 회원가입 유도 배너 */}
 
       <article itemScope itemType={`https://schema.org/${isNewsArticle ? 'NewsArticle' : 'BlogPosting'}`} style={{ paddingBottom: 40 }}>
-        <BlogViewTracker blogId={post.id} />
+        <BlogViewTracker blogId={String(post.id)} />
         {/* ImageGallery JSON-LD (유지 — 포털 이미지 탭) */}
         {post.cover_image && (() => {
           const ogSquare = `${SITE}/api/og-square?title=${encodeURIComponent(post.title)}&category=${post.category}&author=${encodeURIComponent(post.author_name || '카더라')}`;
