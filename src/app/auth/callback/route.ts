@@ -14,7 +14,7 @@ export async function GET(request: Request) {
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
         cookies: {
-          getAll() { return cookieStore.getAll(); },
+          getAll() { try { return cookieStore.getAll(); } catch { return []; } },
           setAll(cookiesToSet) {
             cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options));
           },
@@ -41,7 +41,8 @@ export async function GET(request: Request) {
 
       // ── Zero-Step 온보딩: CTA 가입자는 온보딩 스킵 ──
       const DIRECT_SOURCES = ['direct', 'nav', 'signup_cta', 'feed', 'sidebar', 'right_panel'];
-      const isCTA = !DIRECT_SOURCES.includes(source);
+      const isCTA = !DIRECT_SOURCES.includes(source) || 
+        (existing?.signup_source && !DIRECT_SOURCES.includes(existing.signup_source));
 
       if (isNewUser) {
         updates.provider = provider;

@@ -164,7 +164,7 @@ export async function middleware(request: NextRequest) {
   if (pathname.startsWith('/admin') && user) {
     try {
       const adminResult = await Promise.race([
-        supabase.from('profiles').select('is_admin').eq('id', user.id).single(),
+        supabase.from('profiles').select('is_admin').eq('id', user.id).maybeSingle(),
         new Promise<null>((r) => setTimeout(() => r(null), 2000)),
       ]);
       const adminProfile = (adminResult as { data: Record<string, unknown> | null })?.data;
@@ -181,7 +181,7 @@ export async function middleware(request: NextRequest) {
   if (user && !isPublic && pathname !== '/onboarding') {
     try {
       const profileResult = await Promise.race([
-        supabase.from('profiles').select('onboarded, nickname_set').eq('id', user.id).single(),
+        supabase.from('profiles').select('onboarded, nickname_set').eq('id', user.id).maybeSingle(),
         new Promise<null>((r) => setTimeout(() => r(null), 2000)),
       ]);
       const profile = (profileResult as { data: Record<string, unknown> | null })?.data;
