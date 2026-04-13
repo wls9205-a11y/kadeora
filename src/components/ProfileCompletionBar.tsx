@@ -38,6 +38,8 @@ export default function ProfileCompletionBar() {
 
   const done = STEPS.filter(s => s.check(profile)).length;
   const pct = Math.round((done / STEPS.length) * 100);
+  if (pct === 100) return null; // 완성 시 즉시 숨김 (DB 업데이트 전 방어)
+
 
   return (
     <div style={{
