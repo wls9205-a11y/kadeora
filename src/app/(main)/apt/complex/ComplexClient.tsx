@@ -1,3 +1,4 @@
+import LoginGate from '@/components/LoginGate';
 'use client';
 import { useState, useMemo, useCallback, useRef } from 'react';
 import Link from 'next/link';
@@ -235,6 +236,13 @@ export default function ComplexClient({ complexes, ageGroups, regions, initialRe
           );
         })}
       </div>
+
+      {/* LoginGate 기능 게이팅 (세션 108) */}
+      <LoginGate feature="apt_complex_track" title="관심 단지 시세 추적" description="여러 단지를 비교하고 시세 변동을 추적" blurHeight={100}>
+        <div style={{ padding: "8px 0" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, padding: "4px 0", color: "var(--text-tertiary)" }}><span>알림 대상</span><span>변동 예정</span></div>
+        </div>
+      </LoginGate>
     </>
   );
 }

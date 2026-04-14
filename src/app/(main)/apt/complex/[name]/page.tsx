@@ -1,3 +1,4 @@
+import LoginGate from '@/components/LoginGate';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { SITE_URL } from '@/lib/constants';
 import { notFound } from 'next/navigation';
@@ -728,6 +729,12 @@ export default async function ComplexDetailPage({ params }: Props) {
       }}>
         🏗️ {siteSlug ? '이 현장의 전체 정보 보기 (청약 · 이미지 · 리뷰)' : '실거래 검색에서 더 알아보기'} →
       </Link>
+      {/* LoginGate 기능 게이팅 (세션 108) */}
+      <LoginGate feature="apt_trade_alert" blurHeight={80}>
+        <div style={{ padding: "8px 0" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, padding: "4px 0", color: "var(--text-tertiary)" }}><span>실거래 변동</span><span>알림 설정</span></div>
+        </div>
+      </LoginGate>
     </article>
   );
 }

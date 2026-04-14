@@ -1,3 +1,4 @@
+import LoginGate from '@/components/LoginGate';
 'use client';
 import SectionShareButton from '@/components/SectionShareButton';
 import type { RedevProject } from '@/types/apt';
@@ -274,6 +275,13 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
           </div>
 
       {/* 재개발 상세 모달 */}
+
+      {/* LoginGate 기능 게이팅 (세션 108) */}
+      <LoginGate feature="redev_stage" title="사업 단계 변경 알림" description="관심 구역 단계가 바뀌면 즉시 알려드려요" blurHeight={100}>
+        <div style={{ padding: "8px 0" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, padding: "4px 0", color: "var(--text-tertiary)" }}><span>알림 대상</span><span>변동 예정</span></div>
+        </div>
+      </LoginGate>
     </>
   );
 }

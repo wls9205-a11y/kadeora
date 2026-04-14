@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { SITE_URL } from '@/lib/constants';
+import LoginGate from '@/components/LoginGate';
 export const metadata: Metadata = {
   title: '커뮤니티 피드',
   description: '주식, 부동산, 청약, 재테크 소문과 정보를 나누는 카더라 커뮤니티. 실시간 투자 이야기를 나누세요.',
@@ -98,6 +99,11 @@ export default async function FeedPage({ searchParams }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '커뮤니티 피드' }] }) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'CollectionPage', name: '카더라 커뮤니티 피드', description: '주식, 부동산, 청약, 재테크 소문과 정보를 나누는 커뮤니티', url: SITE_URL + '/feed', isPartOf: { '@type': 'WebSite', name: '카더라', url: SITE_URL } }) }} />
       <FeedClient posts={posts} activeCategory={category} activeRegion={region} activeSort={validSort} />
+      <LoginGate feature="feed_write" blurHeight={60}>
+        <div style={{ padding: '8px 0', textAlign: 'center' }}>
+          <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>글쓰기 · 댓글 · 투표에 참여하세요</div>
+        </div>
+      </LoginGate>
       <Disclaimer type="feed" />
     </Suspense>
   );

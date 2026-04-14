@@ -1,3 +1,49 @@
+## 세션 108 — CTA 전면 개편: 콘텐츠 게이팅 → 기능 게이팅
+
+### 브랜치: cta/feature-gate-overhaul
+### 커밋: 35b6711e — push 대기 (배포 보류)
+### 변경: 21파일 총, +721 -121
+
+### 전략 전환
+- **이전**: SmartSectionGate (콘텐츠 60% 차단 → 30일 1건 전환)
+- **이후**: LoginGate v2 (콘텐츠 100% 공개 + 기능 잠금 → apt_alert_cta 13건 패턴 확장)
+
+### 제거 (4개 CTA)
+- SmartSectionGate: blog page에서 import/사용 제거 (파일 보존)
+- BlogMidCTA: 동일
+- ContentLock: 동일
+- CalcSignupCTA: LoginGate로 교체
+
+### 확장 (LoginGate v2)
+- "회원 전용" 뱃지 + 블러 미리보기 + 카카오 48px 네이티브 버튼
+- "다른 방법으로 가입하기" 보조 링크
+- DEFAULTS 맵 18개 feature 추가
+
+### 신규 (KakaoBottomSheet)
+- ☆ 버튼 클릭 시 페이지 이탈 없이 미니 가입창 (향후 연동)
+
+### 수정 (ActionBar v4)
+- gateVisible 숨김 로직 제거 → 항상 표시
+- 페이지별 메시지 세분화 (12개 경로 컨텍스트)
+
+### 적용 범위 (20+ 페이지)
+- blog/[slug]: 콘텐츠 100% 공개 + 카테고리별 LoginGate
+- apt 6탭: 청약/분양중/미분양/재개발/실거래/단지백과
+- apt 상세 5페이지: complex/[name], compare, search, map, diagnose
+- calc: CalcSignupCTA → LoginGate 교체
+- feed: LoginGate 삽입
+
+### 어드민 대시보드
+- v2 API: FG 소스별 성과, 페이지별 전환 맵, 카카오 비율 쿼리 추가
+- FocusTab: 벤치마크 CTA CTR→FG CTR, 게이트→카카오비율 교체 + FG 성과 섹션
+- GrowthTab: 전환 퍼널 FG노출/클릭 추가 + 페이지별 전환 맵
+
+### PENDING
+- ☆ 버튼 → KakaoBottomSheet 연동 (현재 상세 페이지 LoginGate로 처리)
+- 배포 후 before/after CVR 비교 검증
+
+---
+
 ## 세션 109 — CTA 전략 전면 재설계 + SEO 28항목 수정
 
 ### 커밋: c5f55080 (CTA), 5ef2086a (SEO) — push 대기

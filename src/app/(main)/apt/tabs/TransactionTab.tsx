@@ -1,3 +1,4 @@
+import LoginGate from '@/components/LoginGate';
 'use client';
 import SectionShareButton from '@/components/SectionShareButton';
 import type { AptTransaction } from '@/types/apt';
@@ -387,6 +388,13 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
           </BottomSheet>
         );
       })()}
+
+      {/* LoginGate 기능 게이팅 (세션 108) */}
+      <LoginGate feature="apt_trade_alert" title="실거래 변동 알림" description="이 단지에 새 거래가 등록되면 바로 알려드려요" blurHeight={100}>
+        <div style={{ padding: "8px 0" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, padding: "4px 0", color: "var(--text-tertiary)" }}><span>알림 대상</span><span>변동 예정</span></div>
+        </div>
+      </LoginGate>
     </div>
   );
 }

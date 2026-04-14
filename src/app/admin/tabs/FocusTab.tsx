@@ -9,11 +9,11 @@ const ago=(d:string)=>{if(!d)return'—';const s=Math.floor((Date.now()-new Date
 // ── 벤치마크 ──
 type G='good'|'warn'|'critical';
 const BM:Record<string,{l:string;g:string;c:(v:number)=>G}>={
-  ctr:{l:'CTA CTR',g:'>2%',c:v=>v>2?'good':v>0.5?'warn':'critical'},
+  ctr:{l:'FG CTR',g:'>2%',c:v=>v>2?'good':v>0.5?'warn':'critical'},
   signup:{l:'가입전환',g:'>1%',c:v=>v>1?'good':v>0.3?'warn':'critical'},
   cron:{l:'크론',g:'>95%',c:v=>v>95?'good':v>80?'warn':'critical'},
   db:{l:'DB',g:'<50%',c:v=>v<50?'good':v<80?'warn':'critical'},
-  gate:{l:'게이트',g:'>3%',c:v=>v>3?'good':v>1?'warn':'critical'},
+  gate:{l:'카카오비율',g:'>70%',c:v=>v>70?'good':v>40?'warn':'critical'},
   profile:{l:'프로필',g:'>30%',c:v=>v>30?'good':v>10?'warn':'critical'},
   notif:{l:'알림',g:'>30%',c:v=>v>30?'good':v>15?'warn':'critical'},
   ret:{l:'재방문',g:'>30%',c:v=>v>30?'good':v>10?'warn':'critical'},
@@ -53,10 +53,11 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
 
   // 벤치마크
   const cr=pct(k.cronSuccess,k.cronSuccess+k.cronFail);
-  const ctrV=(g.ctaViews7d||0)>0?(g.ctaClicks7d||0)/g.ctaViews7d*100:0;
+  const fg = (d as any)?.featureGate || {};
+  const ctrV = fg.fgCtr || 0;
   const sRate=(x.pv7d||0)>0?(k.newUsers||0)/(x.pv7d||1)*100:0;
   const dbP=pct(k.dbMb||0,inf.dbMaxMb||8192);
-  const gateC=(x.gateViews||0)>0?(x.gateClicks||0)/x.gateViews*100:0;
+  const gateC = fg.kakaoRatio || 0;
   const bm=[
     {k:'ctr',v:ctrV},{k:'signup',v:sRate},{k:'cron',v:cr},{k:'db',v:dbP},
     {k:'gate',v:gateC},{k:'profile',v:g.profileRate||0},{k:'notif',v:g.notifReadRate||0},{k:'ret',v:k.returnRate||0},
@@ -183,7 +184,7 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
         <Card ch={<>
           <div style={{fontSize:12,fontWeight:700,color:'rgba(255,255,255,0.5)',marginBottom:6}}>📡 가입경로</div>
           {Object.entries(ss||{}).sort((a:any,b:any)=>b[1]-a[1]).slice(0,6).map(([src,cnt]:[string,any],i:number)=>{
-            const srcLabel:Record<string,string>={'kakao':'카카오','google':'구글','apt_alert_cta':'청약알림CTA','action_bar':'액션바','content_gate':'콘텐츠게이트','content_lock':'콘텐츠락','blog_cta':'블로그CTA','blog_inline_cta':'블로그인라인','nav':'네비','direct':'직접','sidebar':'사이드바','blog_comment':'블로그댓글','stock_comment':'종목댓글','kakao_hero':'홈CTA','calc_cta':'계산기CTA'};
+            const srcLabel:Record<string,string>={'kakao':'카카오','google':'구글','apt_alert_cta':'청약알림CTA','action_bar':'액션바','content_gate':'콘텐츠게이트','content_lock':'콘텐츠락','blog_cta':'블로그CTA','blog_inline_cta':'블로그인라인','nav':'네비','direct':'직접','sidebar':'사이드바','blog_comment':'블로그댓글','stock_comment':'종목댓글','kakao_hero':'홈CTA','calc_cta':'계산기CTA','login_gate_blog_compare':'FG 시세비교','login_gate_blog_calc':'FG 당첨확률','login_gate_blog_stock_ai':'FG 종목AI','login_gate_apt_analysis':'FG 단지분석','login_gate_ai_analysis':'FG AI분석','login_gate_apt_trade_alert':'FG 실거래알림','login_gate_apt_sub_alert':'FG 청약알림','login_gate_apt_ongoing_alert':'FG 분양알림','login_gate_apt_unsold_alert':'FG 미분양알림','login_gate_redev_stage':'FG 재개발','login_gate_apt_complex_track':'FG 시세추적','login_gate_apt_compare_save':'FG 비교저장','login_gate_apt_search_track':'FG 검색추적','login_gate_apt_map_alert':'FG 지역알림','login_gate_calc_save':'FG 계산저장','login_gate_feed_write':'FG 피드','kakao_sheet_star':'카카오시트'};
             return<div key={i} style={{display:'flex',justifyContent:'space-between',fontSize:11,padding:'2px 0',color:'rgba(255,255,255,0.5)'}}>
               <span>{srcLabel[src]||src}</span>
               <span style={{fontWeight:700,color:'#E2E8F0'}}>{cnt}</span>
@@ -193,11 +194,36 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
         </>} p="6px 8px"/>
       </div>
 
+      {/* ═══ 3.7 FeatureGate 소스별 성과 (세션 108) ═══ */}
+      {Object.keys(cb||{}).filter(k=>k.startsWith('login_gate_')).length>0&&(
+        <Card ch={<>
+          <div style={{fontSize:12,fontWeight:700,color:'rgba(255,255,255,0.5)',marginBottom:6}}>🎯 FeatureGate 성과 (7일)</div>
+          {Object.entries(cb||{}).filter(([k])=>k.startsWith('login_gate_')).sort((a,b)=>(b[1] as any).clicks-(a[1] as any).clicks).slice(0,6).map(([k,v])=>{
+            const d=v as {views:number;clicks:number};
+            const ctr=d.views>0?(d.clicks/d.views*100).toFixed(1):'0';
+            const label=k.replace('login_gate_','').replace(/_/g,' ');
+            return<div key={k} style={{display:'flex',justifyContent:'space-between',alignItems:'center',fontSize:11,padding:'3px 0',borderBottom:'1px solid rgba(255,255,255,0.03)'}}>
+              <span style={{color:'rgba(255,255,255,0.4)',flex:1}}>{label}</span>
+              <span style={{color:'rgba(255,255,255,0.25)',marginRight:8}}>{d.views}뷰</span>
+              <span style={{color:'#3B7BF6',fontWeight:600,minWidth:36,textAlign:'right'}}>{ctr}%</span>
+            </div>;
+          })}
+          <div style={{display:'flex',justifyContent:'space-between',marginTop:6,padding:'4px 0',borderTop:'1px solid rgba(255,255,255,0.06)'}}>
+            <span style={{fontSize:11,color:'rgba(255,255,255,0.3)'}}>ActionBar</span>
+            <span style={{fontSize:11,color:'#10B981',fontWeight:600}}>{fg.abCtr?.toFixed(1)||0}% ({fg.abClicks||0}클릭)</span>
+          </div>
+          <div style={{display:'flex',justifyContent:'space-between',padding:'4px 0'}}>
+            <span style={{fontSize:11,color:'rgba(255,255,255,0.3)'}}>카카오 비율</span>
+            <span style={{fontSize:11,color:'#FEE500',fontWeight:600}}>{fg.kakaoRatio?.toFixed(0)||0}% ({fg.kakaoCount||0}/{fg.totalProviders||0})</span>
+          </div>
+        </>} p="6px 8px"/>
+      )}
+
       {/* ═══ 4. 퍼널 + CTA 나란히 ═══ */}
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:4,marginBottom:8}}>
         <Card ch={<>
           <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}><span style={{fontSize:13,fontWeight:700,color:'rgba(255,255,255,0.4)'}}>🎯 퍼널 7일</span><span style={{fontSize:12,fontWeight:700,color:(x.pv7d||0)>0&&(k.newUsers||0)/(x.pv7d||1)*100>1?'#10B981':'#EF4444'}}>{(x.pv7d||0)>0?((k.newUsers||0)/(x.pv7d||1)*100).toFixed(2):'0'}%</span></div>
-          {[{l:'PV',v:x.pv7d||0,c:'#3B7BF6'},{l:'게이트',v:x.gateViews||0,c:'#F59E0B'},{l:'클릭',v:x.gateClicks||0,c:'#EF4444'},{l:'시도',v:x.signupAttempts7d||0,c:'#EC4899'},{l:'가입',v:k.newUsers||0,c:'#10B981'}].map((s,i,a)=>{
+          {[{l:'PV',v:x.pv7d||0,c:'#3B7BF6'},{l:'FG 노출',v:fg.fgViews||0,c:'#F59E0B'},{l:'FG 클릭',v:fg.fgClicks||0,c:'#EF4444'},{l:'시도',v:x.signupAttempts7d||0,c:'#EC4899'},{l:'가입',v:k.newUsers||0,c:'#10B981'}].map((s,i,a)=>{
             const mx=Math.max(...a.map(x=>x.v),1);
             return<div key={s.l} style={{marginBottom:6}}>
               <div style={{display:'flex',justifyContent:'space-between',fontSize:13,marginBottom:2}}>

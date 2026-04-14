@@ -26,18 +26,13 @@ export default function GrowthTab({ onNavigate }: { onNavigate: (t: any) => void
   const totalRef = Object.values(referrers || {}).reduce((s: number, v: any) => s + v, 0) as number;
   const totalDevice = Object.values(deviceSplit || {}).reduce((s: number, v: any) => s + v, 0) as number;
 
-  /* ── 전환 핵심 지표 계산 ── */
+  /* ── 전환 핵심 지표 계산 (세션 108: FeatureGate 기반) ── */
   const cm = conversionMetrics || {};
-  const cgViews = cm.contentGate7d?.cta_view || ctaStats?.content_gate?.cta_view || 0;
-  const cgClicks = cm.contentGate7d?.cta_click || ctaStats?.content_gate?.cta_click || 0;
-  const cgCtr = cgViews > 0 ? (cgClicks / cgViews * 100) : 0;
-  const biViews = cm.blogInlineCta7d?.cta_view || ctaStats?.blog_inline_cta?.cta_view || 0;
-  const biClicks = cm.blogInlineCta7d?.cta_click || ctaStats?.blog_inline_cta?.cta_click || 0;
-  const biCtr = biViews > 0 ? (biClicks / biViews * 100) : 0;
-  // 전체 게이트 CTR (content_gate + blog_inline_cta 합산)
-  const totalGateViews = cgViews + biViews;
-  const totalGateClicks = cgClicks + biClicks;
-  const totalGateCtr = totalGateViews > 0 ? (totalGateClicks / totalGateViews * 100) : 0;
+  const fg = data.featureGate || {} as any;
+  const fgViews = fg.fgViews || 0;
+  const fgClicks = fg.fgClicks || 0;
+  const fgCtr = fgViews > 0 ? (fgClicks / fgViews * 100) : 0;
+  const abCtr = fg.abCtr || 0;
   // OAuth 완료율 (signup_attempts 기반)
   const sf = signupFunnel || {};
   const totalAttempts = Object.values(sf).reduce((s: number, v: any) => s + v.attempts, 0);
@@ -52,10 +47,10 @@ export default function GrowthTab({ onNavigate }: { onNavigate: (t: any) => void
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 12 }}>
           {[
             {
-              label: '게이트 CTR (합산)',
-              value: `${totalGateCtr.toFixed(2)}%`,
-              sub: `게이트 ${cgViews}뷰·${cgClicks}클 + 인라인 ${biViews}뷰·${biClicks}클`,
-              good: totalGateCtr >= 2,
+              label: 'FeatureGate CTR',
+              value: `${fgCtr.toFixed(2)}%`,
+              sub: `FG ${fgViews}뷰·${fgClicks}클 / AB ${(fg.abViews||0)}뷰·${(fg.abClicks||0)}클`,
+              good: fgCtr >= 2,
               target: '목표 3%+',
             },
             {
@@ -132,12 +127,14 @@ export default function GrowthTab({ onNavigate }: { onNavigate: (t: any) => void
         {[
           { label: '페이지뷰', value: funnel.pv, pct: 100 },
           { label: '고유 방문자', value: funnel.uv, pct: funnel.pv > 0 ? (funnel.uv / funnel.pv) * 100 : 0 },
+          { label: 'FG 노출', value: fgViews, pct: funnel.pv > 0 ? (fgViews / funnel.pv) * 100 : 0 },
+          { label: 'FG 클릭', value: fgClicks, pct: funnel.pv > 0 ? (fgClicks / funnel.pv) * 100 : 0 },
           { label: '가입', value: funnel.signups, pct: funnel.pv > 0 ? (funnel.signups / funnel.pv) * 100 : 0 },
         ].map((s, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
             <span style={{ minWidth: 70, fontSize: 12, color: 'var(--text-secondary)' }}>{s.label}</span>
             <div style={{ flex: 1, height: 20, background: 'var(--bg-hover)', borderRadius: 4, overflow: 'hidden' }}>
-              <div style={{ height: '100%', width: `${Math.max(s.pct, 0.5)}%`, background: i === 0 ? 'var(--brand)' : i === 1 ? '#8B5CF6' : '#10B981', borderRadius: 4, transition: 'width .6s' }} />
+              <div style={{ height: '100%', width: `${Math.max(s.pct, 0.5)}%`, background: i <= 1 ? 'var(--brand)' : i === 2 ? '#F59E0B' : i === 3 ? '#EF4444' : '#10B981', borderRadius: 4, transition: 'width .6s' }} />
             </div>
             <span style={{ minWidth: 60, textAlign: 'right', fontSize: 12, fontWeight: 600 }}>{s.value.toLocaleString()}</span>
           </div>
@@ -146,6 +143,27 @@ export default function GrowthTab({ onNavigate }: { onNavigate: (t: any) => void
           전환율: <strong style={{ color: funnel.conversionRate >= 2 ? '#10B981' : '#F59E0B' }}>{funnel.conversionRate}%</strong> (목표 2.0%)
         </div>
       </div>
+
+      {/* 페이지별 전환 맵 (세션 108) */}
+      {fg.pageConvMap && Object.keys(fg.pageConvMap).length > 0 && (
+        <>
+          <div className="adm-sec">🗺️ 페이지별 전환 맵 (7일)</div>
+          <div className="adm-card">
+            {Object.entries(fg.pageConvMap as Record<string, number>).sort((a, b) => b[1] - a[1]).map(([path, count], i) => {
+              const maxCount = Math.max(...Object.values(fg.pageConvMap as Record<string, number>), 1);
+              return (
+                <div key={path} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                  <span style={{ minWidth: 90, fontSize: 11, color: 'var(--text-secondary)' }}>{path}</span>
+                  <div style={{ flex: 1, height: 16, background: 'var(--bg-hover)', borderRadius: 4, overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${(count / maxCount) * 100}%`, background: i === 0 ? '#3B82F6' : i === 1 ? '#10B981' : i === 2 ? '#8B5CF6' : '#F59E0B', borderRadius: 4 }} />
+                  </div>
+                  <span style={{ minWidth: 30, textAlign: 'right', fontSize: 12, fontWeight: 600 }}>{count}</span>
+                </div>
+              );
+            })}
+          </div>
+        </>
+      )}
 
       {/* 프로필 완성 퍼널 */}
       {data.extended?.dataCollection && (() => {

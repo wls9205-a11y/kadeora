@@ -215,6 +215,46 @@ export async function GET(req: NextRequest) {
         signupSources[s] = (signupSources[s] || 0) + 1;
       }
 
+      // ── FeatureGate 성과 (세션 108 CTA 개편) ──
+      // FG 전체 뷰/클릭 (벤치마크용)
+      const fgEntries = Object.entries(ctaBreakdown).filter(([k]) => k.startsWith('login_gate_'));
+      const fgViews = fgEntries.reduce((sum, [, v]) => sum + v.views, 0);
+      const fgClicks = fgEntries.reduce((sum, [, v]) => sum + v.clicks, 0);
+      const fgCtr = fgViews > 0 ? (fgClicks / fgViews) * 100 : 0;
+
+      // 카카오 vs 기타 비율 (7일)
+      const { data: recentProviders } = await sb.from('profiles')
+        .select('provider')
+        .neq('is_seed', true)
+        .gte('created_at', weekAgo);
+      const kakaoCount = (recentProviders || []).filter((p: any) => p.provider === 'kakao').length;
+      const totalProviders = (recentProviders || []).length;
+      const kakaoRatio = totalProviders > 0 ? (kakaoCount / totalProviders) * 100 : 0;
+
+      // 페이지별 전환 맵 (signup_attempts.redirect_path 7일)
+      const { data: pageConvRaw } = await (sb as any).from('signup_attempts')
+        .select('redirect_path')
+        .eq('success', true)
+        .gte('created_at', weekAgo);
+      const pageConvMap: Record<string, number> = {};
+      for (const r of (pageConvRaw || [])) {
+        const path = r.redirect_path || '/';
+        const prefix = path.startsWith('/blog/') ? '/blog/*'
+          : path.startsWith('/apt/complex/') ? '/apt/complex/*'
+          : path.startsWith('/apt/redev') ? '/apt/redev'
+          : path.startsWith('/apt/') ? '/apt/*'
+          : path.startsWith('/stock/') ? '/stock/*'
+          : path.startsWith('/calc/') ? '/calc/*'
+          : path.startsWith('/feed') ? '/feed'
+          : path;
+        pageConvMap[prefix] = (pageConvMap[prefix] || 0) + 1;
+      }
+
+      // ActionBar 성과 (action_bar* in ctaBreakdown)
+      const abViews = ctaBreakdown['action_bar']?.views || 0;
+      const abClicks = ctaBreakdown['action_bar']?.clicks || 0;
+      const abCtr = abViews > 0 ? (abClicks / abViews) * 100 : 0;
+
       // D7 리텐션 (최근 코호트)
       const { data: retentionRaw } = await (sb as any).from('retention_cohort')
         .select('cohort_week, cohort_size, d7_retained')
@@ -373,6 +413,7 @@ export async function GET(req: NextRequest) {
         ].sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime()).slice(0, 8),
         dailyTrend: dailyStats,
         ctaBreakdown,
+        featureGate: { fgViews, fgClicks, fgCtr, abViews, abClicks, abCtr, kakaoRatio, kakaoCount, totalProviders, pageConvMap },
         // 가입 시도 소스별 분석
         signupBySource: await (async () => {
           const { data: attempts } = await (sb as any).from('signup_attempts')

@@ -1,3 +1,4 @@
+import LoginGate from '@/components/LoginGate';
 'use client';
 import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
@@ -466,7 +467,8 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
             })()}
           </div>
 
-          <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 'var(--sp-md)', textAlign: 'center' }}>
+          <LoginGate feature="apt_sub_alert" blurHeight={100}><div style={{ padding: "8px 0" }}><div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, padding: "4px 0", color: "var(--text-tertiary)" }}><span>고양창릉지구 S-6</span><span>D-12 마감</span></div><div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, padding: "4px 0", color: "var(--text-tertiary)" }}><span>역삼센트럴자이</span><span>D-5 마감</span></div></div></LoginGate>
+          <p style={{ fontSize: "var(--fs-xs)", color: "var(--text-tertiary)", marginTop: "var(--sp-md)", textAlign: "center" }}>
             📊 청약홈·공공데이터포털 API 기준{freshDate ? ` · ${freshDate} 수집` : ''} · 매일 자동 갱신
           </p>
         </div>
