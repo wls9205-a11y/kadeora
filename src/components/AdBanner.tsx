@@ -49,7 +49,7 @@ export default function AdBanner() {
   const bs = badgeStyles[ad.badgeType] || badgeStyles.upcoming;
 
   return (
-    <div style={{ padding: '6px 8px 2px', maxWidth: 680, margin: '0 auto' }}>
+    <div style={{ padding: '8px 8px 4px', maxWidth: 800, margin: '0 auto' }}>
       <Link href={ad.link} style={{ textDecoration: 'none', display: 'block' }}>
         <div style={{
           background: 'var(--bg-surface)',
@@ -59,9 +59,9 @@ export default function AdBanner() {
           transform: visible ? 'translateY(0)' : 'translateY(3px)',
           transition: 'opacity 0.25s, transform 0.25s',
         }}>
-          <div style={{ display: 'flex', alignItems: 'stretch', minHeight: 80 }}>
-            <div style={{ flex: 1, padding: '10px 12px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 5 }}>
+          <div style={{ display: 'flex', alignItems: 'stretch', minHeight: 88 }}>
+            <div style={{ flex: 1, padding: '12px 14px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
                 <span style={{
                   fontSize: 10, fontWeight: 600, borderRadius: 4, padding: '1px 6px', lineHeight: '15px',
                   color: bs.color, background: bs.bg,
@@ -71,8 +71,8 @@ export default function AdBanner() {
                 )}
               </div>
               <p style={{
-                fontSize: 13, fontWeight: 500, color: 'var(--text-primary)',
-                margin: '0 0 5px', lineHeight: 1.35,
+                fontSize: 14, fontWeight: 600, color: 'var(--text-primary)',
+                margin: '0 0 6px', lineHeight: 1.35,
                 whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
               }}>{ad.title}</p>
               <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
@@ -86,7 +86,7 @@ export default function AdBanner() {
               </div>
             </div>
             <div style={{
-              flexShrink: 0, width: 100,
+              flexShrink: 0, width: 120,
               background: ad.imageUrl ? 'transparent' : 'var(--bg-hover)',
               display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
             }}>

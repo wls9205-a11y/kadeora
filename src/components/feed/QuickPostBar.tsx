@@ -99,7 +99,7 @@ export default function QuickPostBar({ category = 'free', regionId = '' }: { cat
           background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center',
           fontSize: 12, fontWeight: 800, color: '#fff', flexShrink: 0,
         }}>💬</div>
-        <span style={{ color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)', flex: 1 }}>한마디 던져보세요...</span>
+        <span style={{ color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)', flex: 1 }}>오늘 어떤 생각하세요? ✍️</span>
         <div style={{ display: 'flex', gap: 4 }}>
           {['📊', '🔮'].map((e, i) => <span key={i} style={{ fontSize: 13, opacity: 0.4 }}>{e}</span>)}
         </div>

@@ -23,7 +23,6 @@ import DailyReportCard from '@/components/DailyReportCard';
 import LiveActivityIndicator from '@/components/LiveActivityIndicator';
 import PostReactions from '@/components/PostReactions';
 import QuickPostBar from '@/components/feed/QuickPostBar';
-import HotTopicBar from '@/components/feed/HotTopicBar';
 import FeedPollCard from '@/components/feed/FeedPollCard';
 import FeedVSCard from '@/components/feed/FeedVSCard';
 import FeedPredictCard from '@/components/feed/FeedPredictCard';
@@ -304,7 +303,6 @@ export default function FeedClient({
         <DailyReportCard />
 
         <QuickPostBar category={activeCategory !== 'all' && activeCategory !== 'following' ? activeCategory : 'free'} regionId={activeRegion} />
-        <HotTopicBar />
 
         {/* ━━━ 카테고리 탭 (세그먼트 컨트롤) ━━━ */}
         <div style={{ display: 'flex', gap: 3, marginBottom: 'var(--sp-sm)', overflowX: 'auto', scrollbarWidth: 'none', padding: 3, background: 'var(--bg-surface)', borderRadius: 'var(--radius-xl, 20px)', border: '1px solid var(--border)' }}>
