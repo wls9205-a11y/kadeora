@@ -41,6 +41,7 @@ const MORE_ITEMS: { href: string; emoji: string; label: string; sub?: string; gr
   { href: '/apt/complex',     emoji: '🏢', label: '단지백과', sub: '34,500+ 단지 시세', group: '부동산' },
   { href: '/apt/search',      emoji: '🔍', label: '실거래 검색', sub: '전국 실거래가', group: '부동산' },
   { href: '/apt/map',         emoji: '🗺️', label: '부동산 지도', sub: '지도로 한눈에', group: '부동산' },
+  { href: '/apt/redev',       emoji: '🏗️', label: '재개발·재건축', sub: '정비사업 현황', group: '부동산' },
   { href: '/apt/diagnose',    emoji: '🎯', label: '가점 진단', sub: '청약 가점 계산', group: '부동산' },
   { href: '/apt/data',        emoji: '📥', label: '부동산 통계', sub: '공공 데이터', group: '부동산' },
   // 도구

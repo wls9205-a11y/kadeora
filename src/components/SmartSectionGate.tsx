@@ -34,6 +34,11 @@ const CATEGORY_BENEFITS: Record<string, { headline: string; bullets: string[]; b
     bullets: ['세법 변경 알림 (무료)', '맞춤 절세 팁 뉴스레터', '핵심 전략 이어 읽기'],
     btnText: '카카오로 무료 가입',
   },
+  redev: {
+    headline: '이 구역의 투자 분석 + 단계 변경 알림을',
+    bullets: ['단계 변경 실시간 알림 (무료)', '구역 내 실거래가 추적', '전체 분석 이어 읽기'],
+    btnText: '카카오로 무료 가입',
+  },
 };
 
 const DEFAULT_BENEFIT = {
