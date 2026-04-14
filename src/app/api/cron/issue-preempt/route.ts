@@ -315,86 +315,12 @@ async function detectNaverSpikes(sb: any): Promise<any[]> {
   return results;
 }
 
-/* ═══════════ Phase 4: 시공사 분양예정 페이지 크롤 ═══════════ */
+/* ═══════════ Phase 4: 시공사 분양예정 — DISABLED ═══════════ */
+/* 시공사 사이트가 JS 렌더링이라 정적 fetch로 실제 분양 목록 파싱 불가.
+   Headless browser(Puppeteer) 없이는 구현 불가 → 추후 별도 구현 */
 
-async function detectBuilderUpcoming(sb: any): Promise<any[]> {
-  const results: any[] = [];
-
-  // 두산위브 분양예정 RSS 크롤
-  const BUILDER_PAGES = [
-    { name: '두산위브', url: 'https://www.weveapt.co.kr/lttot/lttotDe/lttotDeList.do', brand: '위브' },
-    { name: '현대건설', url: 'https://www.hillstate.co.kr/city/sub01.do', brand: '힐스테이트' },
-    { name: 'GS건설', url: 'https://xi.co.kr/overview/business_map', brand: '자이' },
-  ];
-
-  for (const builder of BUILDER_PAGES) {
-    try {
-      const res = await fetch(builder.url, {
-        signal: AbortSignal.timeout(10000),
-        headers: { 'User-Agent': 'Mozilla/5.0 (compatible; Kadeora/1.0)' },
-      });
-      if (!res.ok) continue;
-      const html = await res.text();
-
-      // HTML에서 단지명 추출 (제목 패턴)
-      const namePattern = new RegExp(`([가-힣]{2,15}\\s*${builder.brand}[가-힣\\s]{0,20})`, 'g');
-      let match;
-      const found = new Set<string>();
-      while ((match = namePattern.exec(html)) !== null) {
-        const name = match[1].trim().replace(/\s+/g, ' ');
-        if (name.length >= 5 && name.length <= 30) found.add(name);
-      }
-
-      for (const name of found) {
-        // apt_sites에 이미 있는지 체크
-        const { count: siteCount } = await sb.from('apt_sites')
-          .select('id', { count: 'exact', head: true })
-          .ilike('name', `%${name.slice(0, 10)}%`);
-        if (siteCount && siteCount > 0) continue;
-
-        // 이미 issue_alerts에 있는지
-        const { data: existing } = await (sb as any).from('issue_alerts')
-          .select('id')
-          .ilike('title', `%${name.slice(0, 12)}%`)
-          .gte('detected_at', new Date(Date.now() - 30 * 24 * 3600000).toISOString())
-          .limit(1);
-        if (existing && existing.length > 0) continue;
-
-        const { error } = await (sb as any).from('issue_alerts').insert({
-          title: `[사전감지] ${name} — ${builder.name} 분양예정`,
-          summary: `${builder.name} 홈페이지에서 ${name} 분양예정 감지. 아직 청약홈/카더라에 등록되지 않은 신규 프로젝트.`,
-          category: 'apt',
-          sub_category: 'pre_announcement',
-          issue_type: 'pre_announcement',
-          source_type: 'builder_site',
-          source_urls: [builder.url],
-          detected_keywords: ['분양예정', builder.brand, builder.name],
-          related_entities: [name],
-          raw_data: {
-            builder: builder.name,
-            brand: builder.brand,
-            existing_posts: 0,
-            is_breaking: false,
-            has_news: false,
-            source_type: 'builder_site',
-          },
-          base_score: 50,
-          multiplier: 1.3,
-          penalty_rate: 0,
-          final_score: 65,
-          score_breakdown: { 사전감지: 50, 선점기회: 1.3 },
-          is_auto_publish: true,
-          detected_at: new Date().toISOString(),
-        });
-
-        if (!error) {
-          results.push({ type: 'builder', name, builder: builder.name, score: 65 });
-        }
-      }
-    } catch {}
-  }
-
-  return results;
+async function detectBuilderUpcoming(_sb: any): Promise<any[]> {
+  return []; // 비활성화
 }
 
 /* ═══════════ 메인 핸들러 ═══════════ */
