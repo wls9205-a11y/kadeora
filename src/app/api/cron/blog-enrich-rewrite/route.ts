@@ -139,6 +139,8 @@ ${dataPrompt}
           excerpt: clean.slice(0, 150),
           rewritten_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
+          content_length: newContent.length,
+          quality_checked_at: null, // 품질 재평가 트리거
         }).eq('id', post.id);
 
         enriched++;

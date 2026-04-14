@@ -467,6 +467,14 @@
     {
       "path": "/api/cron/issue-preempt",
       "schedule": "0 */2 * * *"
+    },
+    {
+      "path": "/api/cron/blog-quality-score",
+      "schedule": "30 * * * *"
+    },
+    {
+      "path": "/api/cron/blog-auto-publish",
+      "schedule": "45 * * * *"
     }
   ]
 }
