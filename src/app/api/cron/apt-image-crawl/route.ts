@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronAuth } from '@/lib/cron-auth';
-import { withCronLogging } from '@/lib/cron-logger';
 
 export const maxDuration = 300;
 export const runtime = 'nodejs';
@@ -238,4 +237,4 @@ async function handler(_req: NextRequest) {
   }, { status: 200 });
 }
 
-export const GET = withCronAuth((req: NextRequest) => withCronLogging('apt-image-crawl', () => handler(req)));
+export const GET = withCronAuth(handler);
