@@ -130,7 +130,7 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
     tags,
     cron_type: 'weekly-digest',
     data_date: now.toISOString().slice(0, 10),
-    cover_image: `${SITE_URL}/api/og?title=${encodeURIComponent(title)}&category=stock&author=${encodeURIComponent('카더라')}&design=2`,
+    cover_image: `${SITE_URL}/api/og?title=${encodeURIComponent(title)}&category=stock&author=${encodeURIComponent('카더라')}&design=${1 + Math.floor(Math.random() * 6)}`,
     image_alt: generateImageAlt('stock', title),
     meta_description: generateMetaDesc(content),
     meta_keywords: generateMetaKeywords('stock', tags),

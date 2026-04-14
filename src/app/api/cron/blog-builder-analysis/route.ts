@@ -325,7 +325,7 @@ export const GET = withCronAuth(async (req: NextRequest) => {
         cron_type: 'blog-builder-analysis',
         data_date: '2026-03',
         source_ref: 'apt_subscriptions',
-        cover_image: `${SITE_URL}/api/og?title=${encodeURIComponent(title)}&category=apt&author=${encodeURIComponent('카더라')}&design=2`,
+        cover_image: `${SITE_URL}/api/og?title=${encodeURIComponent(title)}&category=apt&author=${encodeURIComponent('카더라')}&design=${1 + Math.floor(Math.random() * 6)}`,
         image_alt: generateImageAlt('apt', title),
         meta_description: generateMetaDesc(content),
         meta_keywords: generateMetaKeywords('apt', tags),

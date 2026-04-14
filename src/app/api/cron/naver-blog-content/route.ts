@@ -83,7 +83,7 @@ async function generateNaverContent(post: any): Promise<{ title: string; html: s
 
   const ogImage = post.cover_image?.startsWith('http') 
     ? post.cover_image 
-    : `${SITE}/api/og?title=${encodeURIComponent((post.title || '').slice(0, 50))}&design=2&category=${post.category}`;
+    : `${SITE}/api/og?title=${encodeURIComponent((post.title || '').slice(0, 50))}&design=${1 + Math.floor(Math.random() * 6)}&category=${post.category}`;
 
   // AI로 네이버 블로그 최적화 변환
   const prompt = `다음 블로그 글을 네이버 블로그에 최적화된 HTML로 변환하세요.

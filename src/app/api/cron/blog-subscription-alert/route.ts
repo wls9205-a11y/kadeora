@@ -44,7 +44,7 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
         await sb.from('blog_posts').insert({
           slug, title, content, category: 'apt', is_published: true, author_id: 'system', view_count: 0,
           meta_description: metaDesc,
-          cover_image: `/api/og?title=${encodeURIComponent(sub.name + ' 청약 분석')}&category=apt&author=${encodeURIComponent('카더라 부동산팀')}&design=2`,
+          cover_image: `/api/og?title=${encodeURIComponent(sub.name + ' 청약 분석')}&category=apt&author=${encodeURIComponent('카더라 부동산팀')}&design=${1 + Math.floor(Math.random() * 6)}`,
           image_alt: `${sub.name} 청약 분석`, excerpt: metaDesc.slice(0, 100),
         });
         created++;
@@ -57,7 +57,7 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
             body: `${sub.region} ${sub.supply_count}세대 · 접수 ${sub.rcept_endde}까지`,
             url: `/blog/${slug}`,
             tag: `blog-sub-${sub.house_manage_no}`,
-            image: `/api/og?title=${encodeURIComponent(sub.name + ' 청약 분석')}&category=apt&design=2`,
+            image: `/api/og?title=${encodeURIComponent(sub.name + ' 청약 분석')}&category=apt&design=${1 + Math.floor(Math.random() * 6)}`,
           });
         } catch {}
       } catch { failed++; }

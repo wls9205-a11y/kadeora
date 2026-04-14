@@ -56,7 +56,7 @@ async function handler(req: NextRequest): Promise<NextResponse> {
       const { sent, failed } = await sendPushBroadcast({
         title: `${icon} ${topPost.title}`.slice(0, 60),
         body: '새 분석이 올라왔어요', url: `/blog/${topPost.slug}`, tag: 'content-alert',
-        image: `https://kadeora.app/api/og?title=${encodeURIComponent(topPost.title)}&category=${topPost.category}&design=2`,
+        image: `https://kadeora.app/api/og?title=${encodeURIComponent(topPost.title)}&category=${topPost.category}&design=${1 + Math.floor(Math.random() * 6)}`,
       });
       return { processed: sent, failed, metadata: { mode: 'broadcast', slug: topPost.slug } };
     }
@@ -101,7 +101,7 @@ async function handler(req: NextRequest): Promise<NextResponse> {
         title: `${icon} ${post.title}`.slice(0, 60),
         body: '관심 분야 새 분석이 올라왔어요',
         url: `/blog/${post.slug}`, tag: `content-${cat}`,
-        image: `https://kadeora.app/api/og?title=${encodeURIComponent(post.title)}&category=${post.category}&design=2`,
+        image: `https://kadeora.app/api/og?title=${encodeURIComponent(post.title)}&category=${post.category}&design=${1 + Math.floor(Math.random() * 6)}`,
       });
       totalSent += sent; totalFailed += failed;
       details[cat] = { slug: post.slug, users: uids.length, sent };

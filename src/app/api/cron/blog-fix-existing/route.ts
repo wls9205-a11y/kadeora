@@ -27,7 +27,7 @@ async function handler(_req: NextRequest) {
 
   let fixedCover = 0;
   for (const post of (noCover || [])) {
-    const coverUrl = `${SITE_URL}/api/og?title=${encodeURIComponent((post.title || '').slice(0, 60))}&category=${post.category || 'blog'}&author=${encodeURIComponent('카더라')}&design=2`;
+    const coverUrl = `${SITE_URL}/api/og?title=${encodeURIComponent((post.title || '').slice(0, 60))}&category=${post.category || 'blog'}&author=${encodeURIComponent('카더라')}&design=${1 + Math.floor(Math.random() * 6)}`;
     const imageAlt = `${post.title} — 카더라 분석`;
     await sb.from('blog_posts').update({ cover_image: coverUrl, image_alt: imageAlt }).eq('id', post.id);
     fixedCover++;
@@ -101,12 +101,12 @@ async function handler(_req: NextRequest) {
   let fixedWrongCover = 0;
   for (const post of (wrongCover || [])) {
     const cat = post.category || 'blog';
-    const correctUrl = `${SITE_URL}/api/og?title=${encodeURIComponent((post.title || '').slice(0, 60))}&category=${cat}&author=${encodeURIComponent('카더라')}&design=2`;
+    const correctUrl = `${SITE_URL}/api/og?title=${encodeURIComponent((post.title || '').slice(0, 60))}&category=${cat}&author=${encodeURIComponent('카더라')}&design=${1 + Math.floor(Math.random() * 6)}`;
     await sb.from('blog_posts').update({ cover_image: correctUrl }).eq('id', post.id);
     fixedWrongCover++;
   }
 
-  // 6. cover_image에 category= 파라미터가 없는 글 수정 (design=2만 있고 category 없는 패턴)
+  // 6. cover_image에 category= 파라미터가 없는 글 수정 (design만 있고 category 없는 패턴)
   const { data: noCatCover } = await sb.from('blog_posts')
     .select('id, title, category, cover_image')
     .eq('is_published', true)
@@ -118,7 +118,7 @@ async function handler(_req: NextRequest) {
   let fixedNoCatCover = 0;
   for (const post of (noCatCover || [])) {
     const cat = post.category || 'blog';
-    const correctUrl = `${SITE_URL}/api/og?title=${encodeURIComponent((post.title || '').slice(0, 60))}&category=${cat}&author=${encodeURIComponent('카더라')}&design=2`;
+    const correctUrl = `${SITE_URL}/api/og?title=${encodeURIComponent((post.title || '').slice(0, 60))}&category=${cat}&author=${encodeURIComponent('카더라')}&design=${1 + Math.floor(Math.random() * 6)}`;
     await sb.from('blog_posts').update({ cover_image: correctUrl }).eq('id', post.id);
     fixedNoCatCover++;
   }

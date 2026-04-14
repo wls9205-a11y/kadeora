@@ -165,7 +165,7 @@ ${nearbyData}
           source_ref: project.project_name,
           author_name: '카더라 부동산팀',
           author_role: '선점 분석',
-          cover_image: project.rendering_image_url || `/api/og?title=${encodeURIComponent(title.slice(0, 60))}&category=apt&design=2`,
+          cover_image: project.rendering_image_url || `/api/og?title=${encodeURIComponent(title.slice(0, 60))}&category=apt&design=${1 + Math.floor(Math.random() * 6)}`,
           meta_description: cleanText.slice(0, 120) + ' — 카더라',
           excerpt: cleanText.slice(0, 150),
           reading_time_min: Math.max(3, Math.ceil(content.length / 1500)),

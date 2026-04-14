@@ -221,7 +221,7 @@ export default async function BlogPage({ searchParams }: Props) {
       position: i + 1 + (pageNum - 1) * perPage,
       url: `${SITE}/blog/${p.slug}`,
       name: p.title,
-      image: p.cover_image || `${SITE}/api/og?title=${encodeURIComponent((p.title || "").slice(0, 50))}&design=2&category=${p.category || "blog"}`,
+      image: p.cover_image || `${SITE}/api/og?title=${encodeURIComponent((p.title || "").slice(0, 50))}&design=${(i % 6) + 1}&category=${p.category || "blog"}`,
     })),
   } : null;
 

@@ -219,7 +219,7 @@ export const GET = withCronAuth(async (req: NextRequest) => {
           tags,
           cron_type: 'disclosure',
           is_published: true,
-          cover_image: `${SITE_URL}/api/og?title=${encodeURIComponent(title)}&category=stock&author=${encodeURIComponent('카더라')}&design=2`,
+          cover_image: `${SITE_URL}/api/og?title=${encodeURIComponent(title)}&category=stock&author=${encodeURIComponent('카더라')}&design=${1 + Math.floor(Math.random() * 6)}`,
           image_alt: generateImageAlt('stock', title),
           meta_description: generateMetaDesc(content),
           meta_keywords: generateMetaKeywords('stock', tags),
