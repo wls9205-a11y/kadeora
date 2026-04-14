@@ -4,11 +4,11 @@ import { SITE_URL } from '@/lib/constants';
 import { withCronAuth } from '@/lib/cron-auth';
 
 export const runtime = 'nodejs';
-export const maxDuration = 120;
+export const maxDuration = 300;
 
 const NAVER_CLIENT_ID = process.env.NAVER_CLIENT_ID || '';
 const NAVER_CLIENT_SECRET = process.env.NAVER_CLIENT_SECRET || '';
-const BATCH = 40;
+const BATCH = 200;
 
 const CAT_QUERIES: Record<string, string[]> = {
   stock: ['주식 차트 분석', '증권 거래소', '경제 성장 그래프', '투자 포트폴리오', '금융 데이터'],

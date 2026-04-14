@@ -434,11 +434,11 @@
     },
     {
       "path": "/api/cron/blog-generate-images",
-      "schedule": "0 */3 * * *"
+      "schedule": "0 * * * *"
     },
     {
       "path": "/api/cron/blog-enrich-rewrite",
-      "schedule": "0 */3 * * *"
+      "schedule": "0 * * * *"
     },
     {
       "path": "/api/cron/blog-upcoming-projects",
