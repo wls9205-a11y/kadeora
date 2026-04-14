@@ -16,12 +16,16 @@ export async function POST(req: NextRequest) {
 
     const admin = getSupabaseAdmin();
 
-    // 로그인 유저 → profiles에 birth_year/zodiac_animal 저장
+    // 로그인 유저 → profiles에 birth_year/zodiac_animal/birth_date 저장
     if (user?.id) {
-      await (admin as any).from('profiles').update({ 
+      const updates: Record<string, any> = {
         birth_year: Number(birth_year),
         zodiac_animal,
-      }).eq('id', user.id);
+      };
+      // birth_date가 없으면 birth_year 기준으로 1월 1일로 설정 (연도만 알 때)
+      updates.birth_date = `${birth_year}-01-01`;
+      
+      await (admin as any).from('profiles').update(updates).eq('id', user.id);
 
       // fortune_views 로그 저장 (하루 1회만)
       const today = new Date().toISOString().slice(0, 10);

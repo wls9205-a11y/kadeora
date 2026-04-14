@@ -90,7 +90,29 @@ const ZF: Record<string, FortuneDetail[]> = {
 function DailyFortune() {
   const [year, setYear] = useState<number | null>(null);
   const [saved, setSaved] = useState(false);
-  useEffect(() => { const s = localStorage.getItem('kd_birth_year'); if (s) setYear(parseInt(s)); }, []);
+  const { userId } = useAuth();
+
+  // DB 우선 → localStorage 폴백
+  useEffect(() => {
+    (async () => {
+      // 1. 로그인 유저 → DB에서 birth_year 읽기
+      if (userId) {
+        try {
+          const { createSupabaseBrowser } = await import('@/lib/supabase-browser');
+          const sb = createSupabaseBrowser();
+          const { data } = await sb.from('profiles').select('birth_year').eq('id', userId).maybeSingle();
+          if (data?.birth_year) {
+            setYear(data.birth_year);
+            localStorage.setItem('kd_birth_year', String(data.birth_year));
+            return;
+          }
+        } catch {}
+      }
+      // 2. 폴백: localStorage
+      const s = localStorage.getItem('kd_birth_year');
+      if (s) setYear(parseInt(s));
+    })();
+  }, [userId]);
   const now = new Date();
   const seed = now.getFullYear() * 366 + (now.getMonth() + 1) * 31 + now.getDate();
   const getZ = (y: number) => ZA[(y - 4) % 12 >= 0 ? (y - 4) % 12 : (y - 4) % 12 + 12];
@@ -398,8 +420,24 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
           </div>
           <select
             value={d.region}
-            onChange={e => {
-              const base = `/daily/${encodeURIComponent(e.target.value)}`;
+            onChange={async (e) => {
+              const newRegion = e.target.value;
+              const base = `/daily/${encodeURIComponent(newRegion)}`;
+              // localStorage 동기화
+              localStorage.setItem('daily_region', newRegion);
+              // DB 동기화 (로그인 유저)
+              try {
+                const { createSupabaseBrowser } = await import('@/lib/supabase-browser');
+                const sb = createSupabaseBrowser();
+                const { data: { user } } = await sb.auth.getUser();
+                if (user) {
+                  await sb.from('profiles').update({
+                    residence_city: newRegion,
+                    region_text: newRegion,
+                    updated_at: new Date().toISOString(),
+                  }).eq('id', user.id);
+                }
+              } catch {}
               router.push(viewDate ? `${base}/${viewDate}` : base);
             }}
             style={{ fontSize: 12, fontWeight: 700, color: G.gold, background: G.goldBg, border: `1px solid ${G.goldBorder}`, borderRadius: 'var(--radius-xs)', padding: '4px 10px', cursor: 'pointer' }}
