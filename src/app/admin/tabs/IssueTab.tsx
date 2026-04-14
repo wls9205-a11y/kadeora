@@ -192,6 +192,8 @@ export default function IssueTab() {
         background: 'var(--surface, #0C1528)', borderRadius: 12, padding: '14px 20px', marginBottom: 16,
         border: '1px solid #1e293b', display: 'flex', alignItems: 'center', gap: 0,
       }}>
+        <PipelineStep icon="🎯" label="issue-preempt" sub="2시간 주기" active />
+        <PipelineArrow />
         <PipelineStep icon="🔍" label="issue-detect" sub="15분 주기" active />
         <PipelineArrow />
         <PipelineStep icon="✍️" label="issue-draft" sub="20분 주기" active />

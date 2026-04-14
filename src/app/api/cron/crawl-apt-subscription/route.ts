@@ -113,6 +113,18 @@ export async function GET(req: NextRequest) {
       .lt('rcept_endde', today)
       .is('status', null);
 
+    // 4. 새 데이터가 있으면 issue-preempt 트리거 (선점 감지)
+    if (totalSynced > 0) {
+      try {
+        const preemptUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app'}/api/cron/issue-preempt`;
+        fetch(preemptUrl, {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${process.env.CRON_SECRET}` },
+          signal: AbortSignal.timeout(5000),
+        }).catch(() => {});
+      } catch {}
+    }
+
     return {
       processed: totalSynced,
       created: totalSynced,

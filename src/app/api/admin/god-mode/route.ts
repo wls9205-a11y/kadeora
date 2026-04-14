@@ -40,6 +40,7 @@ const CRON_GROUPS = {
     '/api/cron/crawl-apt-rent',
     '/api/cron/issue-detect',
     '/api/cron/issue-trend',
+    '/api/cron/issue-preempt',
   ],
   process: [
     '/api/cron/aggregate-trade-stats',

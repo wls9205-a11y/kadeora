@@ -595,6 +595,8 @@ export function detectIssueType(keywords: string[], category: string): string {
     if (keywords.some(k => ['재건축', '재개발', '관리처분'].includes(k))) return 'redevelopment';
     if (keywords.some(k => ['미분양'].includes(k))) return 'unsold';
     if (keywords.some(k => ['청약', '분양', '경쟁률'].includes(k))) return 'cheongak';
+    if (keywords.some(k => ['분양예정'].includes(k))) return 'pre_announcement';
+    if (keywords.some(k => ['검색급증'].includes(k))) return 'search_spike';
     return 'apt_general';
   } else if (category === 'stock') {
     if (keywords.some(k => ['실적', '영업이익', '매출', '서프라이즈', '어닝쇼크'].includes(k))) return 'earnings';
@@ -644,6 +646,9 @@ export function selectDraftTemplate(category: string, issueType: string): string
       policy_change: 'apt_policy', regulation: 'apt_policy',
       jeonse_crisis: 'apt_jeonse', unsold: 'apt_unsold',
       redevelopment: 'apt_redev', apt_general: 'apt_general',
+      // v3: issue-preempt 신규 타입
+      new_subscription: 'apt_cheongak', pre_announcement: 'apt_preempt',
+      preempt_coverage: 'apt_preempt', search_spike: 'apt_general',
     },
     stock: {
       earnings: 'stock_earnings', price_surge: 'stock_price', price_drop: 'stock_price',

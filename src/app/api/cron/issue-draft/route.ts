@@ -41,10 +41,12 @@ async function generateArticle(issue: any): Promise<{ title: string; content: st
 
   const template = selectDraftTemplate(issue.category, issue.issue_type);
 
-  const systemPrompt = `당신은 카더라(kadeora.app)의 수석 데이터 에디터입니다. 부동산/주식 심층 분석 기사를 작성합니다.
+  const isPreempt = ['pre_announcement', 'preempt_coverage', 'new_subscription', 'search_spike'].includes(issue.issue_type);
+
+  const systemPrompt = `당신은 카더라(kadeora.app)의 수석 데이터 에디터입니다. ${isPreempt ? '분양 선점형 심층 분석' : '부동산/주식 심층 분석'} 기사를 작성합니다.
 
 규칙:
-- 분량: 5,000~7,000자 (충분히 깊이 있게)
+- 분량: ${isPreempt ? '6,000~8,000자' : '5,000~7,000자'} (충분히 깊이 있게)
 - H2 섹션: 6~10개 (## 형식)
 - 마크다운 표(|---|): 최소 2개 (비교 분석 필수)
 - FAQ: 5~8개 (### ❓ 형식, FAQPage 스키마용)
@@ -54,7 +56,15 @@ async function generateArticle(issue: any): Promise<{ title: string; content: st
 - "오를 것이다", "내릴 것이다" 등 단정적 전망 금지
 - 원본 뉴스 문장을 그대로 사용하지 말고 팩트만 추출하여 새로운 문장으로 작성
 - 카더라 내부 링크 3개 이상 (/apt, /stock, /blog, /calc 등)
-
+${isPreempt ? `
+## 선점형 콘텐츠 특별 규칙:
+- "~카더라" 식 전해듣기 정보와 확인된 팩트를 명확히 구분
+- 예상 분양가, 예상 경쟁률, 입지 분석을 깊이 있게
+- 주변 시세 비교 테이블 필수 (반경 1km 내 단지)
+- 청약 전략 가이드 섹션 포함 (가점/추첨, 자금계획)
+- "이 정보는 공식 발표 전 수집된 것으로 변동될 수 있습니다" 면책 포함
+- 제목에 "[선점분석]" 또는 "분양 전 알아야 할 모든 것" 스타일
+` : ''}
 ## 시각 요소 (필수):
 1. 본문 첫 문단 아래에 인포그래픽 이미지 삽입:
    ![제목](/api/og-infographic?title=핵심+요약&category=${issue.category === 'apt' ? 'apt' : 'stock'}&type=summary&items=핵심항목1,핵심항목2,핵심항목3)
@@ -212,11 +222,11 @@ async function handler(_req: NextRequest) {
   // 킬스위치 체크
   const config = await getAutoPublishConfig(sb);
 
-  // 미처리 이슈 1건 조회 (최고 점수 우선)
+  // 미처리 이슈 1건 조회 (최고 점수 우선) — v3: 25+ 이상 모두 처리 (draft로라도 생성)
   const { data: issues } = await (sb as any).from('issue_alerts')
     .select('*')
     .eq('is_processed', false)
-    .gte('final_score', 40)
+    .gte('final_score', 25)
     .order('final_score', { ascending: false })
     .limit(1);
 

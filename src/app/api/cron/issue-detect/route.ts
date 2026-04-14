@@ -16,6 +16,20 @@ import type { IssueCandidate } from '@/lib/issue-scoring';
 
 /* ═══════════ RSS 피드 목록 ═══════════ */
 
+/* ═══════════ apt_sites 동적 엔티티 캐시 ═══════════ */
+let _aptNameCache: string[] = [];
+async function getAptNameCache(sb: any): Promise<string[]> {
+  if (_aptNameCache.length > 0) return _aptNameCache;
+  try {
+    const { data } = await sb.from('apt_sites').select('name').not('name', 'is', null).limit(6000);
+    _aptNameCache = (data || []).map((r: any) => r.name).filter((n: string) => n && n.length >= 4);
+    return _aptNameCache;
+  } catch { return []; }
+}
+
+/* ═══════════ 시공사 분양예정: issue-preempt에서 처리 ═══════════ */
+
+
 const APT_RSS_FEEDS = [
   { name: '부산일보_부동산', url: 'https://www.busan.com/rss/economy/realestate.xml' },
   { name: '한경_부동산', url: 'https://www.hankyung.com/feed/realestate' },
@@ -245,13 +259,22 @@ function extractEntities(title: string, description: string): string[] {
   const text = `${title} ${description}`;
   const entities: string[] = [];
 
-  // 아파트 단지명 패턴: XX구 YY동, XX아파트, XX자이, XX래미안 등
-  const aptPatterns = /([가-힣]{2,8}(?:자이|래미안|푸르지오|힐스테이트|아이파크|이편한세상|더샵|파크리오|SK뷰|롯데캐슬|e편한세상|센트럴|프레스티지|디에이치|르엘|아크로|시그니처|카운티))/g;
+  // 아파트 브랜드 패턴 — 전국 시공사 브랜드 전수 (50+ 브랜드)
+  const aptPatterns = /([가-힣]{1,10}(?:자이|래미안|푸르지오|힐스테이트|아이파크|이편한세상|더샵|파크리오|SK뷰|롯데캐슬|e편한세상|센트럴|프레스티지|디에이치|르엘|아크로|시그니처|카운티|위브|트리니뷰|더제니스|꿈에그린|제일풍경채|중흥S클래스|우미린|금강펜테리움|호반써밋|한화포레나|대방엘리움|쌍용예가|동원로얄듀크|한신더휴|코아루|동문굿모닝힐|부영사랑으로|대림아크로|라인건설|서희스타힐스|모아엘가|태영데시앙|신영지웰|반도유보라|비스타동원|한라비발디|계룡리슈빌|태왕아너스|동부센트레빌|포스코더샵|대우조선해양|한양수자인|청솔|에코델타|트레지움|포레스트|더퍼스트|더센트럴|센트레빌|에피트))/g;
   let m;
   while ((m = aptPatterns.exec(text)) !== null) entities.push(m[1]);
 
-  // '레이카운티' 등 특수 단지명 하드코딩
-  const specialNames = ['레이카운티', '래미안원베일리', '아크로리버파크', '반포자이', '디에이치퍼스티어', '올림픽파크포레온'];
+  // 특수 단지명 확장 — 유명 단지 + 신규 브랜드
+  const specialNames = [
+    // 서울 핫 단지
+    '래미안원베일리', '아크로리버파크', '반포자이', '디에이치퍼스티어', '올림픽파크포레온',
+    '레이카운티', '아크로리버하임', '래미안퍼스티지', '래미안원펜타스', '오티에르반포',
+    // 부산 핫 단지
+    '힐스테이트아이코닉', '두산위브트리니뷰', '두산위브트리니뷰구명역',
+    '거제역동원로얄듀크', '금강펜테리움', '해운대삼성콘도맨션',
+    // 전국 대형 단지
+    '검단파라곤', '동탄그웬', '광교자이', '위례자이', '마곡자이',
+  ];
   for (const name of specialNames) {
     if (text.includes(name) && !entities.includes(name)) entities.push(name);
   }
@@ -264,6 +287,23 @@ function extractEntities(title: string, description: string): string[] {
     '엔비디아', '테슬라', '애플', '마이크로소프트', '구글', '아마존', '메타'];
   for (const stock of majorStocks) {
     if (text.includes(stock) && !entities.includes(stock)) entities.push(stock);
+  }
+
+  // DB 기반 apt_sites 동적 매칭 (캐시 사용)
+  if (_aptNameCache.length > 0) {
+    for (const name of _aptNameCache) {
+      if (name.length >= 5 && text.includes(name) && !entities.includes(name)) {
+        entities.push(name);
+      }
+    }
+  }
+
+  // 지역 + 브랜드 복합 패턴: "구명역 두산위브", "범천 힐스테이트" 등
+  const locationBrandPattern = /([가-힣]{2,4}(?:역|동|구|시))\s*([가-힣]{2,8}(?:위브|자이|래미안|푸르지오|힐스테이트|아이파크|더샵|롯데캐슬|포레나|트리니뷰|더제니스))/g;
+  let lbm;
+  while ((lbm = locationBrandPattern.exec(text)) !== null) {
+    const fullName = `${lbm[2]}${lbm[1]}`.trim();
+    if (!entities.includes(fullName) && !entities.includes(lbm[2])) entities.push(lbm[2]);
   }
 
   return [...new Set(entities)];
@@ -289,6 +329,9 @@ async function checkExistingPosts(sb: any, entities: string[]): Promise<number> 
 async function handler(_req: NextRequest) {
   const sb = getSupabaseAdmin();
   const results: any[] = [];
+
+  // apt_sites 이름 캐시 로드 (엔티티 매칭용)
+  await getAptNameCache(sb);
 
   // 시간대별 소스 분기
   const now = new Date();
