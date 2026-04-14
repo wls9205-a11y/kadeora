@@ -225,7 +225,7 @@ export default async function RegionRedevPage({ params }: Props) {
                 {p.avg_trade_price && <span>💰 평균 {(p.avg_trade_price / 10000).toFixed(1)}억</span>}
               </div>
               {p.address && <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>📍 {p.address}</div>}
-              {(p.ai_summary || p.notes) && <div style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 4, borderLeft: `2px solid ${sc}`, paddingLeft: 6, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>🤖 {p.ai_summary || p.notes}</div>}
+              {(p.ai_summary || (p.notes && !/사업지구|정비사업/.test(p.notes))) && <div style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 4, borderLeft: `2px solid ${sc}`, paddingLeft: 6, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>🤖 {p.ai_summary || p.notes}</div>}
             </Link>
           );
         })}
@@ -250,6 +250,35 @@ export default async function RegionRedevPage({ params }: Props) {
         <Link href="/apt/redev" style={{ display: 'inline-block', padding: '10px 24px', borderRadius: 'var(--radius-xl)', background: 'var(--brand)', color: '#fff', fontSize: 13, fontWeight: 700, textDecoration: 'none' }}>
           ← 전국 재개발 현황 보기
         </Link>
+      </div>
+
+      {/* FAQ 아코디언 (SEO + 사용자 편의) */}
+      <div style={{ borderTop: '1px solid var(--border)', padding: '16px 0' }}>
+        <h2 style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 10 }}>❓ {decodedRegion} 재개발 자주 묻는 질문</h2>
+        <details style={{ marginBottom: 6, borderRadius: 'var(--radius-sm)', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
+          <summary style={{ padding: '10px 14px', fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', cursor: 'pointer' }}>{decodedRegion} 재개발·재건축 구역은 몇 개인가요?</summary>
+          <div style={{ padding: '0 14px 12px', fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+            {decodedRegion} 지역에는 현재 {total}개의 재개발·재건축 구역이 활성화되어 있습니다. 재개발 {redevCount}건, 재건축 {rebuildCount}건이며 평균 진행률은 {avgProgress}%입니다.
+          </div>
+        </details>
+        <details style={{ marginBottom: 6, borderRadius: 'var(--radius-sm)', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
+          <summary style={{ padding: '10px 14px', fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', cursor: 'pointer' }}>{decodedRegion}에서 착공 단계 이상인 구역은?</summary>
+          <div style={{ padding: '0 14px 12px', fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+            {decodedRegion} 지역에서 관리처분·착공·준공 단계에 도달한 구역은 {lateStageCnt}건입니다. 전체 {total}건 중 {Math.round(lateStageCnt / total * 100)}%가 후기 단계에 진입했습니다.
+          </div>
+        </details>
+        {totalHouseholds > 0 && <details style={{ marginBottom: 6, borderRadius: 'var(--radius-sm)', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
+          <summary style={{ padding: '10px 14px', fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', cursor: 'pointer' }}>{decodedRegion} 재개발 총 세대수는?</summary>
+          <div style={{ padding: '0 14px 12px', fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+            {decodedRegion} 지역 재개발·재건축 사업의 총 계획 세대수는 약 {totalHouseholds.toLocaleString()}세대입니다.
+          </div>
+        </details>}
+        {constructorCount > 0 && <details style={{ marginBottom: 6, borderRadius: 'var(--radius-sm)', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
+          <summary style={{ padding: '10px 14px', fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', cursor: 'pointer' }}>{decodedRegion} 재개발 시공사는 어디인가요?</summary>
+          <div style={{ padding: '0 14px 12px', fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+            {decodedRegion} 지역 {constructorCount}개 구역에서 시공사가 선정되었습니다. {projects.filter((p: any) => p.constructor).slice(0, 3).map((p: any) => `${p.district_name}(${p.constructor})`).join(', ')} 등이 있습니다.
+          </div>
+        </details>}
       </div>
 
       {/* 다른 지역 링크 (SEO 내부링크) */}

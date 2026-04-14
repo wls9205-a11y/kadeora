@@ -42,7 +42,7 @@ export async function GET(_req: NextRequest) {
 
     // 지역별 redev 페이지도 주 1회 제출 (월요일만)
     if (new Date().getDay() === 1) {
-      const redevRegions = ['서울', '경기', '부산', '인천', '대구', '광주', '대전', '울산', '경남', '경북', '충남', '충북'];
+      const redevRegions = ['서울', '경기', '부산', '인천', '대구', '광주', '대전', '울산', '세종', '경남', '경북', '충남', '충북', '전남', '전북', '강원', '제주'];
       redevRegions.forEach(r => urls.push(`${SITE_URL}/apt/redev/${encodeURIComponent(r)}`));
     }
 
