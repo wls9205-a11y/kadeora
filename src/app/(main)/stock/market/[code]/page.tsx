@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     alternates: { canonical: `${SITE_URL}/stock/market/${code}` },
     robots: { index: true, follow: true, 'max-image-preview': 'large' as const, 'max-snippet': -1 as const },
     openGraph: { title: t, description: m.desc, url: `${SITE_URL}/stock/market/${code}`, siteName: '카더라', locale: 'ko_KR', type: 'website', images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent(`${m.flag} ${m.name} 종목`)}&category=stock&design=2`, width: 1200, height: 630 }, { url: `${SITE_URL}/api/og-square?title=${encodeURIComponent(t)}&category=stock`, width: 630, height: 630 }] },
-    other: { 'naver:author': '카더라', 'naver:description': m.desc.slice(0, 160), 'naver:written_time': '2026-04-12T00:00:00Z', 'article:section': '주식' },
+    other: { 'naver:author': '카더라', 'naver:description': m.desc.slice(0, 160), 'naver:written_time': new Date().toISOString(), 'article:section': '주식' },
   };
 }
 

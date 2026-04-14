@@ -49,13 +49,13 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
   if(ld)return<div style={{textAlign:'center',padding:80,color:'rgba(255,255,255,0.4)',fontSize:12}}>로딩...</div>;
   if(!d)return<div style={{textAlign:'center',padding:80,fontSize:12}}>⚠️ 실패</div>;
 
-  const{healthScore:hs=0,kpi:k={} as any,growth:g={} as any,extended:x={} as any,failedCrons:fc={},recentActivity:ra=[],dailyTrend:dt=[],ctaBreakdown:cb={},signupSources:ss={},retention:ret=null as any,featureHealth:fh={} as any,trafficDetail:td={} as any}=d;
+  const{healthScore:hs=0,kpi:k={} as any,growth:g={} as any,extended:x={} as any,failedCrons:fc={},recentActivity:ra=[],dailyTrend:dt=[],ctaBreakdown:cb={},signupSources:ss={},retention:ret=null as any,featureHealth:fh={} as any,trafficDetail:td={} as any,blogImages:bi=null as any,issuePipeline:ip=null as any,seoRewrite:sr=null as any,infra:inf={dbMaxMb:8192,cronMaxSlots:100,emailDailyLimit:100,cronCurrent:89} as any,apiKeys:ak=[] as any[]}=d;
 
   // 벤치마크
   const cr=pct(k.cronSuccess,k.cronSuccess+k.cronFail);
   const ctrV=(g.ctaViews7d||0)>0?(g.ctaClicks7d||0)/g.ctaViews7d*100:0;
   const sRate=(x.pv7d||0)>0?(k.newUsers||0)/(x.pv7d||1)*100:0;
-  const dbP=pct(k.dbMb||0,8400);
+  const dbP=pct(k.dbMb||0,inf.dbMaxMb||8192);
   const gateC=(x.gateViews||0)>0?(x.gateClicks||0)/x.gateViews*100:0;
   const bm=[
     {k:'ctr',v:ctrV},{k:'signup',v:sRate},{k:'cron',v:cr},{k:'db',v:dbP},
@@ -249,7 +249,7 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
           {v:f(k.blogs||0),l:'블로그',c:'#8B5CF6'},
           {v:f(k.stocks||0),l:'주식',c:'#3B7BF6'},
           {v:f(k.apts||0),l:'분양',c:'#10B981'},
-          {v:`${((k.dbMb||0)/1024).toFixed(1)}G`,l:'DB/8.4G',c:gc(BM.db.c(dbP))},
+          {v:`${((k.dbMb||0)/1024).toFixed(1)}G`,l:`DB/${(inf.dbMaxMb/1024).toFixed(0)}G`,c:gc(BM.db.c(dbP))},
           {v:f(k.emailSubs||0),l:'이메일',c:'#EC4899'},
           {v:f(x.shares7d||0),l:'공유7d',c:'#A855F7'},
           {v:f(x.sharesToday||0),l:'공유오늘',c:'#D946EF'},
@@ -474,6 +474,98 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
       {/* ═══ 네이버 발행 ═══ */}
       <Sec t="🟢 네이버 발행" open={false} ch={<NaverSyndication/>}/>
 
+      {/* ═══ 블로그 이미지 커버리지 (세션 102) ═══ */}
+      {bi&&<Sec t={`🖼️ 블로그 이미지 (${bi.coverRate||0}% 실사진)`} open={false} ch={
+        <Card ch={<>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:4,marginBottom:8}}>
+            {[
+              {l:'실사진 커버',v:bi.withRealCover||0,c:bi.coverRate>=90?'#10B981':'#F59E0B'},
+              {l:'총 이미지',v:f(bi.totalImages||0),c:'#8B5CF6'},
+              {l:'커버 전환율',v:`${bi.coverRate||0}%`,c:bi.coverRate>=95?'#10B981':bi.coverRate>=80?'#F59E0B':'#EF4444'},
+            ].map(s=><div key={s.l} style={{textAlign:'center',padding:4}}>
+              <div style={{fontSize:14,fontWeight:800,color:s.c}}>{s.v}</div>
+              <div style={{fontSize:10,color:'rgba(255,255,255,0.35)'}}>{s.l}</div>
+            </div>)}
+          </div>
+          {bi.imageTypes&&Object.entries(bi.imageTypes).sort((a:any,b:any)=>b[1]-a[1]).slice(0,5).map(([type,cnt]:[string,any])=>(
+            <div key={type} style={{display:'flex',justifyContent:'space-between',fontSize:11,padding:'2px 0',color:'rgba(255,255,255,0.5)'}}>
+              <span>{type}</span><span style={{fontWeight:700}}>{f(cnt)}</span>
+            </div>
+          ))}
+        </>} p="6px 8px"/>
+      }/>}
+
+      {/* ═══ 이슈 선점 파이프라인 ═══ */}
+      {ip&&<Sec t={`🎯 이슈 파이프라인 (발행률 ${ip.publishRate||0}%)`} open={false} ch={
+        <Card ch={<>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:4,marginBottom:8}}>
+            {[
+              {l:'감지',v:ip.detected||0,c:'#3B7BF6'},
+              {l:'처리',v:ip.drafted||0,c:'#F59E0B'},
+              {l:'발행',v:ip.published||0,c:'#10B981'},
+              {l:'선점형',v:ip.preemptAlerts||0,c:'#EC4899'},
+            ].map(s=><div key={s.l} style={{textAlign:'center',padding:4}}>
+              <div style={{fontSize:14,fontWeight:800,color:s.c}}>{s.v}</div>
+              <div style={{fontSize:10,color:'rgba(255,255,255,0.35)'}}>{s.l}</div>
+            </div>)}
+          </div>
+          <div style={{display:'flex',justifyContent:'space-between',fontSize:11,color:'rgba(255,255,255,0.45)'}}>
+            <span>평균 점수</span><span style={{fontWeight:700,color:ip.avgScore>=40?'#10B981':'#F59E0B'}}>{ip.avgScore||0}점</span>
+          </div>
+          <div style={{display:'flex',justifyContent:'space-between',fontSize:11,color:'rgba(255,255,255,0.45)'}}>
+            <span>발행 전환율</span><span style={{fontWeight:700,color:ip.publishRate>=10?'#10B981':'#EF4444'}}>{ip.publishRate||0}%</span>
+          </div>
+        </>} p="6px 8px"/>
+      }/>}
+
+      {/* ═══ SEO 리라이팅 상세 ═══ */}
+      {sr&&<Sec t={`✍️ SEO 리라이팅 (${sr.pct||0}%)`} open={false} ch={
+        <Card ch={<>
+          <div style={{marginBottom:6}}>
+            <div style={{display:'flex',justifyContent:'space-between',fontSize:11,marginBottom:2}}>
+              <span style={{color:'rgba(255,255,255,0.45)'}}>진행률</span>
+              <span style={{fontWeight:700,color:sr.pct>=80?'#10B981':sr.pct>=50?'#F59E0B':'#EF4444'}}>{f(sr.done)}/{f(sr.total)} ({sr.pct}%)</span>
+            </div>
+            <Bar v={sr.pct} c={sr.pct>=80?'#10B981':sr.pct>=50?'#F59E0B':'#EF4444'}/>
+          </div>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:4}}>
+            {[
+              {l:'남은',v:f(sr.remaining||0),c:'#EF4444'},
+              {l:'큐 대기',v:sr.queued||0,c:'#F59E0B'},
+              {l:'배치 진행',v:sr.batchPending||0,c:'#3B7BF6'},
+            ].map(s=><div key={s.l} style={{textAlign:'center',padding:3}}>
+              <div style={{fontSize:13,fontWeight:800,color:s.c}}>{s.v}</div>
+              <div style={{fontSize:10,color:'rgba(255,255,255,0.35)'}}>{s.l}</div>
+            </div>)}
+          </div>
+        </>} p="6px 8px"/>
+      }/>}
+
+      {/* ═══ 인프라 · API 키 ═══ */}
+      <Sec t="🔑 인프라 · API 키" open={false} ch={
+        <Card ch={<>
+          {/* 크론 슬롯 */}
+          <div style={{marginBottom:8}}>
+            <div style={{display:'flex',justifyContent:'space-between',fontSize:11,marginBottom:2}}>
+              <span style={{color:'rgba(255,255,255,0.45)'}}>크론 슬롯</span>
+              <span style={{fontWeight:700,color:inf.cronCurrent>=95?'#EF4444':inf.cronCurrent>=85?'#F59E0B':'#10B981'}}>{inf.cronCurrent}/{inf.cronMaxSlots}</span>
+            </div>
+            <Bar v={inf.cronCurrent} mx={inf.cronMaxSlots} c={inf.cronCurrent>=95?'#EF4444':inf.cronCurrent>=85?'#F59E0B':'#10B981'}/>
+          </div>
+          {/* API 키 동적 상태 */}
+          <div style={{display:'flex',flexWrap:'wrap',gap:3}}>
+            {(ak||[]).map((key:any)=>(
+              <span key={key.name} style={{display:'flex',alignItems:'center',gap:3,padding:'2px 6px',borderRadius:4,fontSize:10,background:key.ok?'rgba(16,185,129,0.1)':'rgba(239,68,68,0.1)',color:key.ok?'#10B981':'#EF4444'}}>
+                {key.ok?'✓':'✗'} {key.name}
+              </span>
+            ))}
+          </div>
+          {(ak||[]).filter((k:any)=>!k.ok).length>0&&<div style={{marginTop:4,fontSize:10,color:'#F59E0B'}}>
+            ⚠ 미등록: {(ak||[]).filter((k:any)=>!k.ok).map((k:any)=>k.name).join(', ')}
+          </div>}
+        </>} p="6px 8px"/>
+      }/>
+
       {/* ═══ 이메일 현황 + 발송 ═══ */}
       <Sec t={`📧 이메일 시스템`} open={true} ch={<EmailDashboard/>}/>
     </div>
@@ -495,6 +587,7 @@ function EmailDashboard() {
   const overall = data?.overall || {};
   const remaining = data?.remaining ?? 0;
   const sentToday = data?.sentToday ?? 0;
+  const emailLimit = remaining + sentToday || 100; // API에서 역산
   const quotaColor = remaining < 20 ? '#EF4444' : remaining < 50 ? '#F59E0B' : '#10B981';
 
   const CAMPAIGN_LABELS: Record<string,string> = {
@@ -536,7 +629,7 @@ function EmailDashboard() {
           <StatBox label="총 발송 (30일)" val={overall.totalSent??0} col="#94A3B8"/>
           <StatBox label="오픈율" val={pct(overall.openRate??0)} sub2={`${overall.totalOpened??0}명 열람`} col={overall.openRate>=30?'#10B981':overall.openRate>=15?'#F59E0B':'#EF4444'} small/>
           <StatBox label="클릭율" val={pct(overall.clickRate??0)} sub2={`${overall.totalClicked??0}명 클릭`} col={overall.clickRate>=5?'#10B981':overall.clickRate>=2?'#F59E0B':'#EF4444'} small/>
-          <StatBox label="오늘 잔여" val={remaining} sub2={`${sentToday}/100 사용`} col={quotaColor}/>
+          <StatBox label="오늘 잔여" val={remaining} sub2={`${sentToday}/${emailLimit} 사용`} col={quotaColor}/>
         </div>
 
         {/* ── 탭 전환 ── */}
@@ -550,10 +643,10 @@ function EmailDashboard() {
           <div style={{marginBottom:10}}>
             <div style={{display:'flex',justifyContent:'space-between',marginBottom:3}}>
               <span style={{fontSize:11,color:'rgba(255,255,255,0.4)'}}>오늘 한도</span>
-              <span style={{fontSize:11,fontWeight:700,color:quotaColor}}>{sentToday}/100통</span>
+              <span style={{fontSize:11,fontWeight:700,color:quotaColor}}>{sentToday}/{emailLimit}통</span>
             </div>
             <div style={{height:4,background:'rgba(255,255,255,0.06)',borderRadius:2,overflow:'hidden'}}>
-              <div style={{height:'100%',width:`${Math.min((sentToday/100)*100,100)}%`,background:quotaColor,borderRadius:2,transition:'width .3s'}}/>
+              <div style={{height:'100%',width:`${Math.min((sentToday/emailLimit)*100,100)}%`,background:quotaColor,borderRadius:2,transition:'width .3s'}}/>
             </div>
           </div>
 

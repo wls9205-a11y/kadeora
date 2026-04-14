@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: { params: Promise<{ category:
     other: {
       'naver:author': '카더라', 'naver:site_name': '카더라',
       'naver:description': `${label} 관련 무료 계산기. 2026년 최신 기준 반영.`,
-      'naver:written_time': '2026-01-15T00:00:00Z',
+      'naver:written_time': new Date().toISOString(),
       'naver:updated_time': new Date().toISOString(),
       'article:section': label,
       'article:tag': `${label},계산기,무료,카더라`,

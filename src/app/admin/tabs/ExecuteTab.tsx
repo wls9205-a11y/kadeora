@@ -12,21 +12,25 @@ export default function ExecuteTab({ onNavigate }: { onNavigate: (t: any) => voi
   const [completedCrons, setCompletedCrons] = useState(0);
   const [mode, setMode] = useState<string>('');
   const [lastRun, setLastRun] = useState<{ at: string; ok: number; fail: number } | null>(null);
+  const [infra, setInfra] = useState<{ cronCurrent: number; cronMaxSlots: number }>({ cronCurrent: 89, cronMaxSlots: 100 });
+  const [kpiCounts, setKpiCounts] = useState<{ stocks: number; sites: number }>({ stocks: 0, sites: 0 });
   const abortRef = useRef(false);
 
-  // 마지막 실행 정보 로드
+  // 마지막 실행 정보 + 인프라 로드
   useEffect(() => {
-    fetch('/api/admin/v2?tab=ops').then(r => r.json()).then(d => {
-      if (d?.recentCrons?.length > 0) {
-        const latest = d.recentCrons[0];
-        setLastRun({ at: latest.at, ok: d.totalOk || 0, fail: d.totalFail || 0 });
+    fetch('/api/admin/v2?tab=focus').then(r => r.json()).then(d => {
+      if (d?.infra) setInfra(d.infra);
+      if (d?.kpi) setKpiCounts({ stocks: d.kpi.stocks || 0, sites: d.extended?.aptSites || 0 });
+      if (d?.recentActivity?.length > 0) {
+        const cron = d.recentActivity.find((a: any) => a.type === 'cron');
+        if (cron) setLastRun({ at: cron.at, ok: d.kpi?.cronSuccess || 0, fail: d.kpi?.cronFail || 0 });
       }
     }).catch(() => {});
   }, []);
 
   const runGodMode = useCallback(async (selectedMode: string) => {
     if (running) return;
-    if (!confirm(`${selectedMode === 'full' ? '95개 크론을 5단계로' : selectedMode + ' 그룹을'} 실행합니다. 계속하시겠습니까?`)) return;
+    if (!confirm(`${selectedMode === 'full' ? `${infra.cronCurrent}개 크론을 5단계로` : selectedMode + ' 그룹을'} 실행합니다. 계속하시겠습니까?`)) return;
 
     setRunning(true);
     setResults([]);
@@ -105,7 +109,7 @@ export default function ExecuteTab({ onNavigate }: { onNavigate: (t: any) => voi
           <>
             🚀 전체 최신화
             <div style={{ fontSize: 12, fontWeight: 400, opacity: 0.85, marginTop: 6 }}>
-              95개 크론 · 5단계 순차 실행 · 예상 ~5분
+              {infra.cronCurrent}개 크론 · 5단계 순차 실행 · 예상 ~5분
             </div>
           </>
         )}
@@ -132,7 +136,7 @@ export default function ExecuteTab({ onNavigate }: { onNavigate: (t: any) => voi
         <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 6 }}>🔍 SEO 인덱싱 (IndexNow)</div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
           {[
-            { type: 'stock', icon: '📈', label: '종목 전체', desc: '1,846개' },
+            { type: 'stock', icon: '📈', label: '종목 전체', desc: kpiCounts.stocks > 0 ? `${kpiCounts.stocks.toLocaleString()}개` : '종목' },
             { type: 'complex&offset=0', icon: '🏠', label: '단지 1차', desc: '0~5000' },
             { type: 'complex&offset=5000', icon: '🏠', label: '단지 2차', desc: '5K~10K' },
             { type: 'complex&offset=10000', icon: '🏠', label: '단지 3차', desc: '10K~15K' },
@@ -140,7 +144,7 @@ export default function ExecuteTab({ onNavigate }: { onNavigate: (t: any) => voi
             { type: 'complex&offset=20000', icon: '🏠', label: '단지 5차', desc: '20K~25K' },
             { type: 'complex&offset=25000', icon: '🏠', label: '단지 6차', desc: '25K~30K' },
             { type: 'complex&offset=30000', icon: '🏠', label: '단지 7차', desc: '30K~35K' },
-            { type: 'site', icon: '🏗️', label: '현장 전체', desc: '5,783개' },
+            { type: 'site', icon: '🏗️', label: '현장 전체', desc: kpiCounts.sites > 0 ? `${kpiCounts.sites.toLocaleString()}개` : '현장' },
             { type: 'all', icon: '🌐', label: '전체', desc: '올인원' },
           ].map(s => (
             <button key={s.type} className="adm-btn" disabled={running}
@@ -225,7 +229,7 @@ export default function ExecuteTab({ onNavigate }: { onNavigate: (t: any) => voi
         <div className="adm-card" style={{ textAlign: 'center', padding: 24 }}>
           <div style={{ fontSize: 36, marginBottom: 8 }}>🚀</div>
           <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>전체 최신화 버튼을 누르면</div>
-          <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>95개 크론이 5단계로 순차 실행됩니다</div>
+          <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>{infra.cronCurrent}개 크론이 5단계로 순차 실행됩니다</div>
           <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>AI 크론은 Fire-and-Forget (백그라운드)</div>
           {lastRun && (
             <div style={{ marginTop: 14, padding: '10px 0', borderTop: '1px solid var(--border)', fontSize: 11, color: 'var(--text-tertiary)' }}>

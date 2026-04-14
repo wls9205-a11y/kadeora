@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     ],
   },
   twitter: { card: 'summary_large_image', title: '카더라 토론', description: '주식·부동산·경제 실시간 토론과 투표' },
-  other: { 'naver:written_time': '2026-04-12T00:00:00Z', 'naver:updated_time': '2026-04-12T00:00:00Z', 'article:section': '토론', 'article:tag': '토론,투표,주식,부동산,커뮤니티,실시간', 'dg:plink': SITE_URL + '/discuss', 'naver:author': '카더라', 'og:updated_time': '2026-04-12T00:00:00Z' },
+  other: { 'naver:written_time': new Date().toISOString(), 'naver:updated_time': new Date().toISOString(), 'article:section': '토론', 'article:tag': '토론,투표,주식,부동산,커뮤니티,실시간', 'dg:plink': SITE_URL + '/discuss', 'naver:author': '카더라', 'og:updated_time': new Date().toISOString() },
 };
 
 export default function DiscussPage() {

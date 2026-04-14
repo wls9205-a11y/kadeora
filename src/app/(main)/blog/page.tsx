@@ -81,7 +81,7 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
     twitter: { card: 'summary_large_image' as const, title: meta.title, description: meta.desc },
     ...(pageNum > 1 ? { robots: { index: false, follow: true } } : {}),
     other: {
-      'naver:written_time': '2026-04-01T00:00:00Z',
+      'naver:written_time': new Date().toISOString(),
       'naver:updated_time': new Date().toISOString().slice(0, 10) + 'T00:00:00Z',
       'naver:author': '카더라',
       'og:updated_time': new Date().toISOString().slice(0, 10) + 'T00:00:00Z',

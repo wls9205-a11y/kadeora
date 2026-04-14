@@ -18,8 +18,8 @@ export const metadata: Metadata = {
   other: {
     'naver:site_name': '카더라', 'naver:author': '카더라',
     'naver:description': '취득세, 양도세, 복리, 연봉 실수령액, 대출 상환, 청약 가점 등 145종 무료 계산기. 2026년 최신 세법 반영.',
-    'naver:written_time': '2026-01-15T00:00:00Z',
-    'naver:updated_time': '2026-04-12T00:00:00Z',
+    'naver:written_time': new Date().toISOString(),
+    'naver:updated_time': new Date().toISOString(),
     'article:section': '계산기',
     'article:tag': '계산기,세금,부동산,주식,대출,무료',
   },

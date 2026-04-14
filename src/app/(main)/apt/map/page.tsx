@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     ],
   },
   twitter: { card: 'summary_large_image' },
-  other: { 'naver:written_time': '2026-04-12T00:00:00Z', 'naver:updated_time': '2026-04-12T00:00:00Z', 'naver:author': '카더라', 'naver:description': '전국 청약·분양·재개발·미분양 지도 보기',
+  other: { 'naver:written_time': new Date().toISOString(), 'naver:updated_time': new Date().toISOString(), 'naver:author': '카더라', 'naver:description': '전국 청약·분양·재개발·미분양 지도 보기',
       'article:section': '부동산', 'dg:plink': SITE_URL + '/apt/map' },
 };
 

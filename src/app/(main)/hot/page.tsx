@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     ],
   },
   twitter: { card: 'summary_large_image' },
-  other: { 'naver:written_time': '2026-04-12T00:00:00Z', 'naver:updated_time': '2026-04-12T00:00:00Z', 'dg:plink': SITE_URL + '/hot', 'naver:author': '카더라', 'og:updated_time': '2026-04-12T00:00:00Z', 'article:section': '커뮤니티', 'article:tag': '인기글,HOT,추천,커뮤니티,주식,부동산' },
+  other: { 'naver:written_time': new Date().toISOString(), 'naver:updated_time': new Date().toISOString(), 'dg:plink': SITE_URL + '/hot', 'naver:author': '카더라', 'og:updated_time': new Date().toISOString(), 'article:section': '커뮤니티', 'article:tag': '인기글,HOT,추천,커뮤니티,주식,부동산' },
 };
 
 export const revalidate = 60;

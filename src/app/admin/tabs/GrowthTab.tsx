@@ -6,7 +6,14 @@ export default function GrowthTab({ onNavigate }: { onNavigate: (t: any) => void
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(() => {
-    fetch('/api/admin/v2?tab=growth').then(r => r.json()).then(d => { setData(d); setLoading(false); }).catch(() => setLoading(false));
+    Promise.all([
+      fetch('/api/admin/v2?tab=growth').then(r => r.json()),
+      fetch('/api/admin/v2?tab=focus').then(r => r.json()),
+    ]).then(([growth, focus]) => {
+      // growth 탭 응답에 focus의 extended/pushStats 병합
+      setData({ ...growth, extended: focus?.extended, funnel: { ...growth.funnel, onboarded: focus?.kpi?.activeUsers, profileCompleted: focus?.growth?.profileCompleted } });
+      setLoading(false);
+    }).catch(() => setLoading(false));
   }, []);
   useEffect(() => { load(); }, [load]);
 

@@ -1,5 +1,6 @@
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { sendPushToUsers, filterActiveUsers } from '@/lib/push-utils';
+import { ADMIN_INFRA } from '@/lib/constants';
 
 /**
  * notification-hub.ts — 중앙 알림 허브
@@ -164,12 +165,12 @@ async function dispatchToChannels(payload: NotificationPayload, notifId: number)
   // 채널 2: 이메일 (urgent/critical만, 일일 한도 체크)
   if (cascade === 'urgent' || cascade === 'critical') {
     try {
-      // 일일 한도 체크 (100통 중 5통 예비)
+      // 일일 한도 체크 (ADMIN_INFRA 기준)
       const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
       const { count: sentToday } = await (sb as any).from('email_send_logs')
         .select('id', { count: 'exact', head: true })
         .eq('status', 'sent').gte('created_at', todayStart.toISOString());
-      if ((sentToday || 0) >= 100) throw new Error('daily_limit');
+      if ((sentToday || 0) >= ADMIN_INFRA.EMAIL_DAILY_LIMIT) throw new Error('daily_limit');
 
       const { sendNotificationEmail } = await import('@/lib/email-sender');
       const { data: user } = await sb.auth.admin.getUserById(payload.userId);

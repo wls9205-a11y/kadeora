@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { ADMIN_INFRA } from '@/lib/constants';
 
 export const maxDuration = 60;
 
@@ -29,7 +30,7 @@ export async function GET(req: NextRequest) {
       .select('id', { count: 'exact', head: true })
       .eq('status', 'sent')
       .gte('created_at', todayStart.toISOString());
-    const remaining = 100 - (sentToday || 0);
+    const remaining = ADMIN_INFRA.EMAIL_DAILY_LIMIT - (sentToday || 0);
     if (remaining <= 0) return { processed: 0, metadata: { reason: 'daily_limit_reached', sentToday } };
 
     // 마케팅 동의 실유저

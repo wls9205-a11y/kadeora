@@ -17,10 +17,10 @@ export const metadata: Metadata = {
   },
   twitter: { card: 'summary_large_image', title: '자주 묻는 질문', description: '카더라 서비스 이용 FAQ' },
   other: {
-    'naver:written_time': '2026-04-12T00:00:00Z',
-    'naver:updated_time': '2026-04-12T00:00:00Z',
+    'naver:written_time': new Date().toISOString(),
+    'naver:updated_time': new Date().toISOString(),
     'naver:author': '카더라',
-    'og:updated_time': '2026-04-12T00:00:00Z',
+    'og:updated_time': new Date().toISOString(),
     'dg:plink': `${SITE_URL}/faq`,
     'article:section': '안내',
   },

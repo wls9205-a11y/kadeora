@@ -9,11 +9,20 @@ export default function DataTab({ onNavigate }: { onNavigate: (t: any) => void }
   const [loading, setLoading] = useState(true);
   const [sub, setSub] = useState<'freshness' | 'stock' | 'realestate' | 'blog' | 'seo'>('freshness');
   const [seoData, setSeoData] = useState<any>(null);
+  const [seoLoading, setSeoLoading] = useState(false);
 
   const load = useCallback(() => {
     fetch('/api/admin/v2?tab=data').then(r => r.json()).then(d => { setData(d); setLoading(false); }).catch(() => setLoading(false));
   }, []);
   useEffect(() => { load(); }, [load]);
+
+  // SEO 데이터 lazy load — sub 탭 전환 시 1회만
+  useEffect(() => {
+    if (sub === 'seo' && !seoData && !seoLoading) {
+      setSeoLoading(true);
+      fetch('/api/admin/seo-status').then(r => r.json()).then(d => { setSeoData(d); setSeoLoading(false); }).catch(() => { setSeoData({ error: true }); setSeoLoading(false); });
+    }
+  }, [sub, seoData, seoLoading]);
 
   if (loading || !data || data.error) return <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-secondary)' }}>로딩 중...</div>;
 
@@ -240,10 +249,11 @@ export default function DataTab({ onNavigate }: { onNavigate: (t: any) => void }
       )}
 
       {sub === 'seo' && (() => {
-        // Load SEO data on first view
-        if (!seoData) {
-          fetch('/api/admin/seo-status').then(r => r.json()).then(d => setSeoData(d)).catch(() => setSeoData({ error: true }));
+        if (seoLoading || !seoData) {
           return <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-secondary)' }}>SEO 데이터 로딩 중...</div>;
+        }
+        if (seoData.error) {
+          return <div style={{ textAlign: 'center', padding: 40, color: '#EF4444' }}>SEO 데이터 로드 실패</div>;
         }
         const { tierDist = [], batches = [], pruneStatus = {}, analysisStatus = {}, indexnowLogs = [], qualityDist = { high: 0, mid: 0, low: 0 } } = seoData;
         const aptPct = analysisStatus.apt_total > 0 ? Math.round((analysisStatus.apt_done / analysisStatus.apt_total) * 100) : 0;

@@ -97,21 +97,23 @@ export default function CommunityTab({ onNavigate }: { onNavigate?: (t: string) 
       .limit(10);
 
     if (pollData) {
-      const pollItems: PollItem[] = [];
-      for (const p of pollData) {
-        const { count } = await (sb as any).from('poll_votes')
-          .select('*', { count: 'exact', head: true })
-          .eq('poll_id', p.id);
-        pollItems.push({
-          id: p.id,
-          post_id: p.post_id,
-          title: p.posts?.title || '(제목없음)',
-          expires_at: p.expires_at,
-          vote_count: count ?? 0,
-          created_at: p.created_at,
-        });
+      // 일괄 vote count 조회 (N+1 → 1+1)
+      const pollIds = pollData.map((p: any) => p.id);
+      const { data: allPollVotes } = await (sb as any).from('poll_votes')
+        .select('poll_id')
+        .in('poll_id', pollIds);
+      const pollVoteCounts: Record<number, number> = {};
+      for (const v of (allPollVotes || [])) {
+        pollVoteCounts[v.poll_id] = (pollVoteCounts[v.poll_id] || 0) + 1;
       }
-      setPolls(pollItems);
+      setPolls(pollData.map((p: any) => ({
+        id: p.id,
+        post_id: p.post_id,
+        title: p.posts?.title || '(제목없음)',
+        expires_at: p.expires_at,
+        vote_count: pollVoteCounts[p.id] || 0,
+        created_at: p.created_at,
+      })));
     }
 
     // 최근 예측 목록
@@ -121,24 +123,26 @@ export default function CommunityTab({ onNavigate }: { onNavigate?: (t: string) 
       .limit(10);
 
     if (predData) {
-      const predItems: PredictionItem[] = [];
-      for (const p of predData) {
-        const { count } = await (sb as any).from('prediction_votes')
-          .select('*', { count: 'exact', head: true })
-          .eq('prediction_id', p.id);
-        predItems.push({
-          id: p.id,
-          post_id: p.post_id,
-          title: p.posts?.title || '(제목없음)',
-          target: p.target,
-          direction: p.direction,
-          deadline: p.deadline,
-          resolved: p.resolved,
-          result: p.result,
-          vote_count: count ?? 0,
-        });
+      // 일괄 vote count 조회 (N+1 → 1+1)
+      const predIds = predData.map((p: any) => p.id);
+      const { data: allPredVotes } = await (sb as any).from('prediction_votes')
+        .select('prediction_id')
+        .in('prediction_id', predIds);
+      const predVoteCounts: Record<number, number> = {};
+      for (const v of (allPredVotes || [])) {
+        predVoteCounts[v.prediction_id] = (predVoteCounts[v.prediction_id] || 0) + 1;
       }
-      setPredictions(predItems);
+      setPredictions(predData.map((p: any) => ({
+        id: p.id,
+        post_id: p.post_id,
+        title: p.posts?.title || '(제목없음)',
+        target: p.target,
+        direction: p.direction,
+        deadline: p.deadline,
+        resolved: p.resolved,
+        result: p.result,
+        vote_count: predVoteCounts[p.id] || 0,
+      })));
     }
 
     setLoading(false);

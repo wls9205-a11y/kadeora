@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: t, description: `${a?.name || symbol}과 ${b?.name || target}의 가격, PER, PBR, 배당, 시총 비교.`,
     alternates: { canonical: `${SITE_URL}/stock/${symbol}/vs/${target}` },
     openGraph: { title: t, url: `${SITE_URL}/stock/${symbol}/vs/${target}`, images: [`${SITE_URL}/api/og?title=${encodeURIComponent(t)}&design=2&category=stock`] },
-    other: { 'naver:written_time': '2026-04-12T00:00:00Z' },
+    other: { 'naver:written_time': new Date().toISOString() },
   };
 }
 

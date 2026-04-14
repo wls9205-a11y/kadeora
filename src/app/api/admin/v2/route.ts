@@ -2,6 +2,7 @@ import { errMsg } from '@/lib/error-utils';
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
 import { classifyReferrer } from '@/lib/referrer-classify';
+import { ADMIN_INFRA } from '@/lib/constants';
 
 export const maxDuration = 30;
 
@@ -99,17 +100,41 @@ export async function GET(req: NextRequest) {
       
 
       // 건강 점수 계산 (100점 만점)
+      // 실제 전환율 계산 (하드코딩 0.13 제거)
+      const actualConvRate = pvToday > 0 ? (newUsersToday / pvToday) * 100 : 0;
+
+      // 데이터 신선도 동적 계산 — 크론 6h+ 미실행 비율로 판정
+      const { data: freshnessCheck } = await sb.from('cron_logs')
+        .select('cron_name, created_at')
+        .eq('status', 'success')
+        .order('created_at', { ascending: false }).limit(200);
+      const lastRuns: Record<string, number> = {};
+      for (const f of (freshnessCheck || [])) {
+        if (!lastRuns[f.cron_name]) lastRuns[f.cron_name] = new Date(f.created_at).getTime();
+      }
+      const cronNames = Object.keys(lastRuns);
+      const staleCount = cronNames.filter(n => Date.now() - lastRuns[n] > 6 * 3600000).length;
+      const dataFreshnessScore = cronNames.length > 0 ? Math.round((1 - staleCount / cronNames.length) * 100) : 50;
+
+      // SEO 인덱싱 동적 계산 — indexed_at 비율
+      const [seoIndexedR, seoTotalR] = await Promise.all([
+        safeCount(sb.from('blog_posts').select('id', { count: 'exact', head: true }).eq('is_published', true).not('indexed_at', 'is', null)),
+        safeCount(sb.from('blog_posts').select('id', { count: 'exact', head: true }).eq('is_published', true)),
+      ]);
+      const seoIndexScore = seoTotalR > 0 ? Math.round((seoIndexedR / seoTotalR) * 100) : 0;
+
+      const DB_MAX = ADMIN_INFRA.DB_MAX_MB;
       const scores = {
         cronHealth: Math.min(cronRate * 100, 100) * 0.15,
         newUsers: Math.min(newUsers / 20, 1) * 100 * 0.15,
         returnRate: returnRate * 100 * 0.15,
-        conversionRate: Math.min(0.13 / 2, 1) * 100 * 0.10,
+        conversionRate: Math.min(actualConvRate / 2, 1) * 100 * 0.10,
         rewriteRate: rewriteRate * 100 * 0.10,
         subscriptions: Math.min((interests + emailSubs + pushSubs) / 50, 1) * 100 * 0.10,
-        dataFreshness: 80 * 0.10, // 추후 실제 계산
-        seoIndex: 50 * 0.05, // 추후 실제 계산
+        dataFreshness: dataFreshnessScore * 0.10,
+        seoIndex: seoIndexScore * 0.05,
         errorRate: (1 - Math.min(cronFail / Math.max(totalCron, 1), 1)) * 100 * 0.05,
-        dbHeadroom: Math.min(((8192 - dbMb) / 8192) * 100, 100) * 0.05,
+        dbHeadroom: Math.min(((DB_MAX - dbMb) / DB_MAX) * 100, 100) * 0.05,
       };
       const healthScore = Math.round(Object.values(scores).reduce((a, b) => a + b, 0));
 
@@ -452,6 +477,67 @@ export async function GET(req: NextRequest) {
             content: (c.content || '').slice(0, 60), at: c.created_at,
           })),
         },
+        // ── 블로그 이미지 커버리지 (세션 102) ──
+        blogImages: await (async () => {
+          try {
+            const [totalBlogs, withCover, imgTotal, imgTypes] = await Promise.all([
+              safeCount(sb.from('blog_posts').select('id', { count: 'exact', head: true }).eq('is_published', true)),
+              safeCount(sb.from('blog_posts').select('id', { count: 'exact', head: true }).eq('is_published', true).not('cover_image', 'is', null).not('cover_image', 'like', '%/api/og%')),
+              safeCount((sb as any).from('blog_post_images').select('id', { count: 'exact', head: true })),
+              safe((sb as any).from('blog_post_images').select('image_type').limit(5000), []),
+            ]);
+            const typeMap: Record<string, number> = {};
+            for (const r of (imgTypes || [])) { const t = (r as any)?.image_type || 'unknown'; typeMap[t] = (typeMap[t] || 0) + 1; }
+            return { totalBlogs, withRealCover: withCover, coverRate: totalBlogs > 0 ? Math.round(withCover / totalBlogs * 100) : 0, totalImages: imgTotal, imageTypes: typeMap };
+          } catch { return null; }
+        })(),
+        // ── 이슈 선점 파이프라인 (세션 102+) ──
+        issuePipeline: await (async () => {
+          try {
+            const [detected, drafted, published, preempt, avgScore] = await Promise.all([
+              safeCount((sb as any).from('issue_alerts').select('id', { count: 'exact', head: true })),
+              safeCount((sb as any).from('issue_alerts').select('id', { count: 'exact', head: true }).eq('is_processed', true)),
+              safeCount((sb as any).from('issue_alerts').select('id', { count: 'exact', head: true }).eq('is_published', true)),
+              safeCount((sb as any).from('issue_alerts').select('id', { count: 'exact', head: true }).in('alert_type', ['new_subscription', 'pre_announcement', 'preempt_coverage', 'search_spike'])),
+              safe((sb as any).from('issue_alerts').select('final_score').not('final_score', 'is', null).order('detected_at', { ascending: false }).limit(50), []),
+            ]);
+            const scores = (avgScore || []).map((r: any) => r.final_score).filter((s: any) => typeof s === 'number');
+            return { detected, drafted, published, preemptAlerts: preempt, publishRate: detected > 0 ? Math.round(published / detected * 100) : 0, avgScore: scores.length > 0 ? Math.round(scores.reduce((a: number, b: number) => a + b, 0) / scores.length) : 0 };
+          } catch { return null; }
+        })(),
+        // ── SEO 리라이팅 진행 상세 ──
+        seoRewrite: await (async () => {
+          try {
+            const [rwTotal, rwDone, rwQueued, rwBatchPending] = await Promise.all([
+              safeCount(sb.from('blog_posts').select('id', { count: 'exact', head: true }).eq('is_published', true)),
+              safeCount(sb.from('blog_posts').select('id', { count: 'exact', head: true }).eq('is_published', true).not('rewritten_at', 'is', null)),
+              safeCount((sb as any).from('rewrite_batches').select('id', { count: 'exact', head: true }).eq('status', 'pending')),
+              safeCount((sb as any).from('rewrite_batches').select('id', { count: 'exact', head: true }).in('status', ['submitted', 'processing'])),
+            ]);
+            return { total: rwTotal, done: rwDone, pct: rwTotal > 0 ? Math.round(rwDone / rwTotal * 100) : 0, queued: rwQueued, batchPending: rwBatchPending, remaining: rwTotal - rwDone };
+          } catch { return { total: blogs, done: rewritten, pct: blogs > 0 ? Math.round(rewritten / blogs * 100) : 0, queued: 0, batchPending: 0, remaining: blogs - rewritten }; }
+        })(),
+        // ── 인프라 상수 (프론트 참조용) ──
+        infra: {
+          dbMaxMb: ADMIN_INFRA.DB_MAX_MB,
+          cronMaxSlots: ADMIN_INFRA.CRON_MAX_SLOTS,
+          emailDailyLimit: ADMIN_INFRA.EMAIL_DAILY_LIMIT,
+          cronCurrent: 89, // vercel.json schedule 기준
+        },
+        // ── API 키 동적 상태 ──
+        apiKeys: [
+          { name: 'CRON_SECRET', ok: !!process.env.CRON_SECRET },
+          { name: 'ANTHROPIC', ok: !!process.env.ANTHROPIC_API_KEY },
+          { name: 'STOCK_DATA', ok: !!process.env.STOCK_DATA_API_KEY },
+          { name: 'VAPID', ok: !!process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY },
+          { name: 'SOLAPI', ok: !!process.env.SOLAPI_API_KEY },
+          { name: 'RESEND', ok: !!process.env.RESEND_API_KEY },
+          { name: 'RESEND_WEBHOOK', ok: !!process.env.RESEND_WEBHOOK_SECRET },
+          { name: 'KIS', ok: !!process.env.KIS_APP_KEY },
+          { name: 'APT_DATA', ok: !!process.env.APT_DATA_API_KEY },
+          { name: 'FINNHUB', ok: !!process.env.FINNHUB_API_KEY },
+          { name: 'NAVER_CLIENT', ok: !!process.env.NAVER_CLIENT_ID },
+        ],
       });
     }
 

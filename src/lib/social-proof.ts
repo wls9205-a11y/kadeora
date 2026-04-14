@@ -21,19 +21,19 @@ export interface SocialProofData {
   userCount: number;
 }
 
-/** 폴백 기본값 — API 실패 시 사용 */
+/** 폴백 기본값 — API 실패 시 사용 (마지막 업데이트: 2026-04-14) */
 export const SOCIAL_PROOF_FALLBACK: SocialProofData = {
-  dailyVisitors: 1300,
+  dailyVisitors: 2500,
   peakVisitors: 3900,
-  todayVisitors: 1200,
-  totalViews: 690000,
-  blogCount: 7600,
-  stockCount: 1800,
-  complexCount: 34500,
-  subscriptionCount: 2700,
-  tradeDataCount: 2600000,
-  totalDataPoints: 3300000,
-  userCount: 80,
+  todayVisitors: 2000,
+  totalViews: 900000,
+  blogCount: 15000,
+  stockCount: 1846,
+  complexCount: 34537,
+  subscriptionCount: 3000,
+  tradeDataCount: 2700000,
+  totalDataPoints: 3500000,
+  userCount: 150,
 };
 
 /** 포맷 헬퍼: 1234 → "1,234", 692287 → "69만+" */

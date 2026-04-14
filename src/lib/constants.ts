@@ -23,6 +23,24 @@ export const BIZ_ADDRESS = '부산광역시 연제구 연동로 27, 405호';
 export const BIZ_INFO_LINE = `상호명: ${BIZ_NAME} | 대표자: ${BIZ_OWNER} | 사업자등록번호: ${BIZ_NUMBER}`;
 export const BIZ_ADDRESS_LINE = `사업장 주소: ${BIZ_ADDRESS}`;
 export const BIZ_CONTACT_LINE = `전화: ${CONTACT_PHONE} | 이메일: ${CONTACT_EMAIL}`;
+
+/** 관리자 인프라 상수 — 어드민 대시보드 전체에서 참조 */
+export const ADMIN_INFRA = {
+  /** Supabase Pro 플랜 DB 한도 (MB) */
+  DB_MAX_MB: 8192,
+  /** Vercel Pro 크론 슬롯 한도 */
+  CRON_MAX_SLOTS: 100,
+  /** Resend 일일 이메일 발송 한도 */
+  EMAIL_DAILY_LIMIT: 100,
+  /** 관리자 UUID — PV/UV 집계 시 제외용 */
+  ADMIN_IDS: [
+    '265d8c3b-bd40-40c1-b7d2-bdde16a88204',
+    'b7b4dd42-4685-4ca6-9ee3-dfedf82e86f2',
+  ],
+  /** 테스트 이메일 기본값 */
+  TEST_EMAIL: 'norich92@gmail.com',
+} as const;
+
 export const DEMO_POSTS: any[] = [
   {
     id: 1, author_id: 'demo-1', category: 'apt', title: '강동구 둔촌주공 재건축 근황 알아봤습니다',

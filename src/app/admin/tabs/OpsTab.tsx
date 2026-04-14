@@ -7,18 +7,28 @@ export default function OpsTab({ onNavigate }: { onNavigate: (t: any) => void })
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [runningCron, setRunningCron] = useState<string | null>(null);
+  const [focusData, setFocusData] = useState<any>(null);
 
   const load = useCallback(() => {
-    fetch('/api/admin/v2?tab=ops').then(r => r.json()).then(d => { setData(d); setLoading(false); }).catch(() => setLoading(false));
+    Promise.all([
+      fetch('/api/admin/v2?tab=ops').then(r => r.json()),
+      fetch('/api/admin/v2?tab=focus').then(r => r.json()),
+    ]).then(([ops, focus]) => {
+      setData(ops);
+      setFocusData(focus);
+      setLoading(false);
+    }).catch(() => setLoading(false));
   }, []);
   useEffect(() => { load(); const t = setInterval(load, 30000); return () => clearInterval(t); }, [load]);
 
   if (loading || !data || data.error) return <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-secondary)' }}>로딩 중...</div>;
 
   const { cronGroups, failedCrons, totalOk, totalFail, dbMb, recentCrons } = data;
+  const inf = focusData?.infra || { dbMaxMb: 8192, cronMaxSlots: 100, cronCurrent: 89 };
+  const apiKeys = focusData?.apiKeys || [];
   const totalCron = totalOk + totalFail;
   const successRate = totalCron > 0 ? Math.round((totalOk / totalCron) * 1000) / 10 : 100;
-  const dbPct = dbMb ? Math.round((dbMb / 8192) * 1000) / 10 : 0;
+  const dbPct = dbMb ? Math.round((dbMb / inf.dbMaxMb) * 1000) / 10 : 0;
 
   const runSingle = async (cronName: string) => {
     setRunningCron(cronName);
@@ -92,9 +102,11 @@ export default function OpsTab({ onNavigate }: { onNavigate: (t: any) => void })
       )}
 
       {/* 크론 상한 경고 */}
-      <div style={{ padding: '8px 12px', marginBottom: 8, borderRadius: 'var(--radius-md)', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)' }}>
-        <div style={{ fontSize: 12, fontWeight: 700, color: '#EF4444' }}>⚠️ Vercel 크론 100/100 (Pro 상한 도달)</div>
-        <div style={{ fontSize: 11, color: 'rgba(239,68,68,0.6)', marginTop: 2 }}>크론 추가 불가 — 추가 시 빌드 실패. 새 크론 필요 시 기존 크론 비활성화 필수.</div>
+      <div style={{ padding: '8px 12px', marginBottom: 8, borderRadius: 'var(--radius-md)', background: inf.cronCurrent >= 95 ? 'rgba(239,68,68,0.08)' : inf.cronCurrent >= 85 ? 'rgba(245,158,11,0.08)' : 'rgba(16,185,129,0.08)', border: `1px solid ${inf.cronCurrent >= 95 ? 'rgba(239,68,68,0.2)' : inf.cronCurrent >= 85 ? 'rgba(245,158,11,0.2)' : 'rgba(16,185,129,0.2)'}` }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: inf.cronCurrent >= 95 ? '#EF4444' : inf.cronCurrent >= 85 ? '#F59E0B' : '#10B981' }}>
+          {inf.cronCurrent >= 95 ? '⚠️' : inf.cronCurrent >= 85 ? '⚠' : '✓'} Vercel 크론 {inf.cronCurrent}/{inf.cronMaxSlots} ({inf.cronMaxSlots - inf.cronCurrent}슬롯 여유)
+        </div>
+        {inf.cronCurrent >= 90 && <div style={{ fontSize: 11, color: 'rgba(239,68,68,0.6)', marginTop: 2 }}>크론 추가 시 기존 크론 비활성화 필요</div>}
       </div>
 
       {/* 크론 그룹 */}
@@ -139,10 +151,10 @@ export default function OpsTab({ onNavigate }: { onNavigate: (t: any) => void })
           <div style={{ flex: 1, height: 8, background: 'var(--bg-hover)', borderRadius: 4, overflow: 'hidden' }}>
             <div style={{ height: '100%', width: `${dbPct}%`, background: dbPct < 50 ? '#10B981' : dbPct < 80 ? '#F59E0B' : '#EF4444', borderRadius: 4 }} />
           </div>
-          <span style={{ fontSize: 11, color: 'var(--text-secondary)', minWidth: 80, textAlign: 'right' }}>{dbMb ? `${(dbMb/1024).toFixed(1)}GB` : '?'} / 8GB</span>
+          <span style={{ fontSize: 11, color: 'var(--text-secondary)', minWidth: 80, textAlign: 'right' }}>{dbMb ? `${(dbMb/1024).toFixed(1)}GB` : '?'} / {(inf.dbMaxMb/1024).toFixed(0)}GB</span>
         </div>
         <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 10 }}>
-          {dbPct}% 사용 · 여유 {dbMb ? `${((8192-dbMb)/1024).toFixed(1)}GB` : '?'}
+          {dbPct}% 사용 · 여유 {dbMb ? `${((inf.dbMaxMb-dbMb)/1024).toFixed(1)}GB` : '?'}
         </div>
 
         {/* 알림 발송 성과 */}
@@ -181,7 +193,7 @@ export default function OpsTab({ onNavigate }: { onNavigate: (t: any) => void })
         {/* API 키 */}
         <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 4 }}>API 키 상태</div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-          {[
+          {(apiKeys.length > 0 ? apiKeys : [
             { name: 'CRON_SECRET', ok: true },
             { name: 'ANTHROPIC', ok: true },
             { name: 'STOCK_DATA', ok: true },
@@ -189,12 +201,17 @@ export default function OpsTab({ onNavigate }: { onNavigate: (t: any) => void })
             { name: 'SOLAPI', ok: true },
             { name: 'KIS', ok: false },
             { name: 'APT_DATA', ok: false },
-          ].map(k => (
+          ]).map((k: any) => (
             <span key={k.name} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 4, fontSize: 10, background: k.ok ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)', color: k.ok ? '#10B981' : '#EF4444' }}>
               {k.ok ? '✓' : '✗'} {k.name}
             </span>
           ))}
         </div>
+        {apiKeys.filter((k: any) => !k.ok).length > 0 && (
+          <div style={{ fontSize: 10, color: '#F59E0B', marginTop: 4 }}>
+            ⚠ 미등록 키: {apiKeys.filter((k: any) => !k.ok).map((k: any) => k.name).join(', ')}
+          </div>
+        )}
       </div>
     </div>
   );

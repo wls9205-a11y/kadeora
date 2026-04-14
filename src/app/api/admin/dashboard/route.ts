@@ -27,7 +27,7 @@ export async function GET(req: Request) {
   try {
     if (section === 'overview') {
       const now = new Date();
-      const todayStr = now.toISOString().slice(0, 10);
+      const todayStr = new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10);
       const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString();
       const monthAgo = new Date(Date.now() - 30 * 86400000).toISOString();
 
@@ -201,13 +201,13 @@ export async function GET(req: Request) {
 
       // 방문자 요약 (관리자 제외)
       const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
-      const adminIds = ['265d8c3b-bd40-40c1-b7d2-bdde16a88204', 'b7b4dd42-4685-4ca6-9ee3-dfedf82e86f2'];
+      const adminIds = new Set(['265d8c3b-bd40-40c1-b7d2-bdde16a88204', 'b7b4dd42-4685-4ca6-9ee3-dfedf82e86f2']);
       const [pvTodayR, pvWeekR] = await Promise.all([
         sb.from('page_views').select('visitor_id').gte('created_at', todayStart),
         sb.from('page_views').select('visitor_id, path, referrer').gte('created_at', weekAgo),
       ]);
-      const pvTodayFiltered = (pvTodayR.data || []);
-      const pvWeekFiltered = (pvWeekR.data || []);
+      const pvTodayFiltered = (pvTodayR.data || []).filter((v: any) => !adminIds.has(v.visitor_id));
+      const pvWeekFiltered = (pvWeekR.data || []).filter((v: any) => !adminIds.has(v.visitor_id));
       const todayPV = pvTodayFiltered.length;
       const todayUV = new Set(pvTodayFiltered.map((v: { visitor_id?: string }) => v.visitor_id)).size;
       const weekPV = pvWeekFiltered.length;

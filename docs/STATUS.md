@@ -1,3 +1,75 @@
+## 세션 103 — 어드민 대시보드 전면 감사 + 버그/하드코딩 31파일 일괄 수정
+
+### 변경: 31파일, +359 -109
+
+### 🔴 버그 수정 8건
+1. **adminIds PV 미필터** — dashboard API에서 선언만 하고 관리자 PV/UV 제외 안 함 → Set 필터 적용
+2. **건강 점수 전환율 `0.13` 하드코딩** → `actualConvRate` 실시간 계산 (pvToday/newUsersToday)
+3. **건강 점수 `dataFreshness: 80` 하드코딩** ("추후 실제 계산" 주석) → 크론 6h+ 미실행 비율 동적 계산
+4. **건강 점수 `seoIndex: 50` 하드코딩** ("추후 실제 계산" 주석) → indexed_at 비율 동적 계산
+5. **DB 용량 기준 불일치** (v2=8192, FocusTab=8400, OpsTab=8192) → `ADMIN_INFRA.DB_MAX_MB` 통일
+6. **GrowthTab `data.extended` 미표시** — `?tab=growth`만 fetch → extended 필드 없어 프로필 완성 퍼널/알림 채널 섹션 영원히 안 보임 → focus+growth 병렬 fetch
+7. **DataTab seoData render-side fetch** — React anti-pattern → useEffect 이동
+8. **v2 API `blog_rewrite_queue` 존재하지 않는 테이블** → `rewrite_batches` 수정
+
+### 🔴 SEO 치명적 수정 — 17파일 26인스턴스
+- `naver:written_time` 하드코딩 `'2026-04-12T00:00:00Z'` / `'2026-01-15T00:00:00Z'` → `new Date().toISOString()` 동적화
+- 대상: faq, apt, apt/search, apt/map, apt/data, stock, stock/search, stock/data, stock/vs, stock/market, guide, grades, calc, calc/[category], hot, feed, discuss
+
+### 🟠 하드코딩 제거 12건
+1. OpsTab API 키 정적 배열 → v2 API `process.env` 동적 체크 (FINNHUB/NAVER/RESEND_WEBHOOK 추가)
+2. OpsTab "크론 100/100 상한 도달" 고정 경고 → 동적 (89/100, 11슬롯 여유)
+3. ExecuteTab "95개 크론" 3x → API 기반 동적
+4. ExecuteTab IndexNow "1,846개", "5,783개" → API 기반 동적
+5. Dashboard API `todayStr` UTC → KST 수정 (9시간 오차)
+6. notification-hub 이메일 한도 `100` → `ADMIN_INFRA.EMAIL_DAILY_LIMIT`
+7. email-digest 이메일 한도 `100` → `ADMIN_INFRA.EMAIL_DAILY_LIMIT`
+8. email-scheduler 이메일 한도 `95` → `ADMIN_INFRA.EMAIL_DAILY_LIMIT - 5`
+9. FocusTab 이메일 "100통" → API 응답 기반 동적 계산
+10. env-check API 검사 대상 키 8개 추가 (RESEND_WEBHOOK_SECRET, STOCK_DATA, KIS, APT_DATA, FINNHUB, NAVER)
+11. `ADMIN_INFRA` 상수 중앙화 (DB한도/크론한도/이메일한도/관리자ID)
+12. social-proof fallback 수치 업데이트 (blogCount 7600→15000, userCount 80→150)
+
+### 🟡 신규 대시보드 섹션 5개
+1. **🖼️ 블로그 이미지 커버리지** — 실사진 커버율, 이미지 타입별 분포
+2. **🎯 이슈 선점 파이프라인** — 감지/처리/발행/선점형, 평균 점수, 발행 전환율
+3. **✍️ SEO 리라이팅 상세** — 진행률 프로그레스바, 남은/큐대기/배치진행
+4. **🔑 인프라 · API 키** — 크론 슬롯 프로그레스바, API 키 동적 상태
+5. **v2 API `infra/apiKeys` 필드** — 프론트에서 매직넘버 없이 참조
+
+### 🟡 성능 개선 1건
+- CommunityTab 투표/예측 N+1 쿼리 → 일괄 조회 (N+1 → 2 쿼리로 축소)
+
+### 변경 파일 (31개)
+```
+[상수/라이브러리]
+src/lib/constants.ts — ADMIN_INFRA 상수 추가
+src/lib/notification-hub.ts — 이메일 한도 상수화
+src/lib/social-proof.ts — fallback 수치 업데이트
+
+[API]
+src/app/api/admin/v2/route.ts — 건강점수 동적화 + 5개 메트릭 + API키 동적 + 테이블명 수정
+src/app/api/admin/dashboard/route.ts — adminIds 필터 + KST 수정
+src/app/api/admin/env-check/route.ts — 키 8개 추가
+src/app/api/cron/email-digest/route.ts — 이메일 한도 상수화
+src/app/api/cron/email-scheduler/route.ts — 이메일 한도 상수화
+
+[어드민 탭]
+src/app/admin/tabs/FocusTab.tsx — DB 동적화 + 4개 섹션 + 이메일 동적화
+src/app/admin/tabs/GrowthTab.tsx — focus+growth 병렬 fetch
+src/app/admin/tabs/OpsTab.tsx — 크론 경고/DB/API키 동적화
+src/app/admin/tabs/ExecuteTab.tsx — 크론수/IndexNow 수치 동적화
+src/app/admin/tabs/DataTab.tsx — seoData useEffect 이동
+src/app/admin/tabs/CommunityTab.tsx — N+1 → 일괄 조회
+
+[SEO 17파일]
+src/app/faq/page.tsx
+src/app/(main)/apt/page.tsx, search, map, data
+src/app/(main)/stock/page.tsx, search, data, [symbol]/vs, market/[code]
+src/app/(main)/calc/page.tsx, [category]
+src/app/(main)/grades, guide, hot, feed, discuss
+```
+
 ## 세션 102b — 재개발·재건축 섹션 전면 강화 (Phase A+B+C+D 전부 완료)
 
 ### 커밋: a84d14ed → e3b13690

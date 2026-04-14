@@ -17,8 +17,8 @@ export const metadata: Metadata = {
   alternates: { canonical: `${SITE}/stock/data` },
   other: {
     'naver:author': '카더라',
-    'naver:written_time': '2026-04-12T00:00:00Z',
-    'naver:updated_time': '2026-04-12T00:00:00Z',
+    'naver:written_time': new Date().toISOString(),
+    'naver:updated_time': new Date().toISOString(),
     'naver:site_name': '카더라',
     'article:section': '주식',
     'article:tag': '주식통계,종목데이터,코스피,코스닥,시가총액순위',

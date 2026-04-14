@@ -18,8 +18,8 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true, 'max-snippet': -1 as const, 'max-image-preview': 'large' as const },
   other: {
     'naver:author': '카더라',
-    'naver:written_time': '2026-04-12T00:00:00Z',
-    'naver:updated_time': '2026-04-12T00:00:00Z',
+    'naver:written_time': new Date().toISOString(),
+    'naver:updated_time': new Date().toISOString(),
     'naver:site_name': '카더라',
     'article:section': '부동산',
     'article:tag': '부동산통계,청약통계,분양가,미분양,실거래데이터',

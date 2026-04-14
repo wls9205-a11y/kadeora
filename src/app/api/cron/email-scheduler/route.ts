@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { sendNotificationEmail } from '@/lib/email-sender';
+import { ADMIN_INFRA } from '@/lib/constants';
 import {
   welcomeBody,
   onboardingGuideBody,
@@ -50,7 +51,7 @@ export async function GET(req: NextRequest) {
       .select('id', { count: 'exact', head: true })
       .gte('created_at', todayStart)
       .eq('status', 'sent');
-    const dailyLimit = 95; // 100중 5통은 notification-hub 예비
+    const dailyLimit = ADMIN_INFRA.EMAIL_DAILY_LIMIT - 5; // 5통은 notification-hub 예비
     const remaining = dailyLimit - (sentToday || 0);
     if (remaining <= 0) {
       return { processed: 0, metadata: { reason: 'daily_limit_reached', sentToday } };
