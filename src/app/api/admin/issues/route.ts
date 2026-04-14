@@ -16,9 +16,9 @@ export async function GET() {
 
   const [issuesR, statsR] = await Promise.all([
     (sb as any).from('issue_alerts')
-      .select('id,title,summary,category,issue_type,final_score,is_processed,is_published,is_auto_publish,publish_decision,block_reason,blog_post_id,draft_title,draft_slug,draft_content,detected_keywords,related_entities,source_urls,detected_at,published_at,created_at,fact_check_passed')
+      .select('id,title,summary,category,sub_category,issue_type,lifecycle_stage,source_type,final_score,base_score,multiplier,competition_score,is_processed,is_published,is_auto_publish,publish_decision,block_reason,blog_post_id,draft_title,draft_slug,draft_content,draft_keywords,detected_keywords,related_entities,source_urls,detected_at,published_at,processed_at,created_at,fact_check_passed,post_24h_views,post_7d_views,effectiveness_score')
       .order('detected_at', { ascending: false })
-      .limit(50),
+      .limit(100),
     Promise.all([
       (sb as any).from('issue_alerts').select('id', { count: 'exact', head: true }),
       (sb as any).from('issue_alerts').select('id', { count: 'exact', head: true }).eq('is_published', true),
@@ -32,6 +32,12 @@ export async function GET() {
         .eq('is_processed', false).gte('final_score', minScore),
       sb.from('blog_posts').select('id', { count: 'exact', head: true })
         .eq('cron_type', 'issue-draft').gte('created_at', todayStart.toISOString()),
+      (sb as any).from('issue_alerts').select('id', { count: 'exact', head: true })
+        .eq('publish_decision', 'duplicate_blog'),
+      (sb as any).from('issue_alerts').select('id', { count: 'exact', head: true })
+        .in('publish_decision', ['ai_failed', 'failed', 'manual_failed']),
+      (sb as any).from('issue_alerts').select('id', { count: 'exact', head: true })
+        .gte('detected_at', todayStart.toISOString()),
     ]),
   ]);
 
@@ -48,6 +54,9 @@ export async function GET() {
       pending40plus: statsR[6].count || 0,
       cronLimitUsed: statsR[7].count || 0,
       cronLimitMax: 30,
+      duplicates: statsR[8].count || 0,
+      failed: statsR[9].count || 0,
+      detectedToday: statsR[10].count || 0,
     },
   });
 }

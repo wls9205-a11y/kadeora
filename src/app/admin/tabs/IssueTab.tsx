@@ -19,8 +19,14 @@ interface IssueAlert {
   title: string;
   summary: string;
   category: string;
+  sub_category: string | null;
   issue_type: string;
+  lifecycle_stage: string | null;
+  source_type: string | null;
   final_score: number;
+  base_score: number | null;
+  multiplier: number | null;
+  competition_score: number | null;
   is_processed: boolean;
   is_published: boolean;
   is_auto_publish: boolean;
@@ -30,12 +36,17 @@ interface IssueAlert {
   draft_title: string | null;
   draft_content: string | null;
   draft_slug: string | null;
+  draft_keywords: string[] | null;
   detected_keywords: string[];
   related_entities: string[];
   source_urls: string[];
   detected_at: string;
   published_at: string | null;
+  processed_at: string | null;
   fact_check_passed: boolean | null;
+  post_24h_views: number | null;
+  post_7d_views: number | null;
+  effectiveness_score: number | null;
 }
 
 export default function IssueTab() {
@@ -49,6 +60,7 @@ export default function IssueTab() {
     total: number; published: number; draft: number; pending: number;
     publishedToday?: number; autoFailed?: number; pending40plus?: number;
     cronLimitUsed?: number; cronLimitMax?: number;
+    duplicates?: number; failed?: number; detectedToday?: number;
   }>({ total: 0, published: 0, draft: 0, pending: 0 });
   const [running, setRunning] = useState(false);
 
@@ -154,7 +166,9 @@ export default function IssueTab() {
   const filtered = issues.filter(i => {
     if (filter === 'pending') return !i.is_processed;
     if (filter === 'published') return i.is_published;
-    if (filter === 'draft') return ['draft', 'draft_saved', 'duplicate_blog'].includes(i.publish_decision);
+    if (filter === 'draft') return ['draft', 'draft_saved'].includes(i.publish_decision);
+    if (filter === 'duplicate') return i.publish_decision === 'duplicate_blog';
+    if (filter === 'failed') return ['ai_failed', 'failed', 'manual_failed', 'auto_failed'].includes(i.publish_decision);
     if (['apt', 'stock', 'finance', 'tax', 'economy', 'life'].includes(filter)) return i.category === filter;
     return true;
   });
@@ -283,15 +297,18 @@ export default function IssueTab() {
       </div>
 
       {/* 통계 바 */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
         {[
           { label: '전체', value: stats.total, color: '#94a3b8' },
+          { label: '오늘 탐지', value: stats.detectedToday ?? 0, color: '#0ea5e9' },
           { label: '40점+ 대기', value: stats.pending40plus ?? stats.pending, color: '#3b82f6' },
           { label: '초안', value: stats.draft, color: '#eab308' },
           { label: '오늘 발행', value: todayPublished, color: '#22c55e' },
-          ...(autoFailed > 0 ? [{ label: '발행실패', value: autoFailed, color: '#ef4444' }] : []),
+          { label: '중복', value: stats.duplicates ?? 0, color: '#8b5cf6' },
+          ...(autoFailed > 0 || (stats.failed ?? 0) > 0 ? [{ label: '실패', value: (autoFailed + (stats.failed ?? 0)), color: '#ef4444' }] : []),
           { label: '🏠부동산', value: issues.filter(i => i.category === 'apt').length, color: '#0ea5e9' },
           { label: '📊주식', value: issues.filter(i => i.category === 'stock').length, color: '#8b5cf6' },
+          { label: '💰재테크', value: issues.filter(i => i.category === 'finance').length, color: '#f59e0b' },
         ].map(({ label, value, color }) => (
           <div key={label} style={{
             background: 'var(--surface, #0C1528)', borderRadius: 8, padding: '8px 14px',
@@ -305,13 +322,13 @@ export default function IssueTab() {
 
       {/* 필터 */}
       <div style={{ display: 'flex', gap: 6, marginBottom: 16, flexWrap: 'wrap' }}>
-        {(['all', 'pending', 'published', 'draft', 'apt', 'stock', 'finance', 'tax', 'economy', 'life'] as const).map(f => (
+        {(['all', 'pending', 'published', 'draft', 'duplicate', 'failed', 'apt', 'stock', 'finance', 'tax', 'economy', 'life'] as const).map(f => (
           <button key={f} onClick={() => setFilter(f)} style={{
             background: filter === f ? '#3b7bf6' : '#1e293b',
             color: '#e2e8f0', border: 'none', borderRadius: 6, padding: '4px 12px',
             fontSize: 11, cursor: 'pointer',
           }}>
-            {({ all: '전체', pending: '⏳대기', published: '✅발행', draft: '📝초안', apt: '🏠부동산', stock: '📊주식', finance: '💰재테크', tax: '📋세금', economy: '🌐경제', life: '🏃생활' }[f] || f)}
+            {({ all: '전체', pending: '⏳대기', published: '✅발행', draft: '📝초안', duplicate: '🔄중복', failed: '❌실패', apt: '🏠부동산', stock: '📊주식', finance: '💰재테크', tax: '📋세금', economy: '🌐경제', life: '🏃생활' }[f] || f)}
           </button>
         ))}
       </div>
@@ -338,10 +355,13 @@ export default function IssueTab() {
                       fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 4,
                     }}>
                       {issue.final_score}점
+                      {issue.base_score && issue.multiplier ? <span style={{ opacity: 0.6, fontSize: 9 }}> ({issue.base_score}×{Number(issue.multiplier).toFixed(1)})</span> : null}
                     </span>
                     <span style={{ fontSize: 11, color: '#64748b' }}>
                       {catIcon(issue.category)} {issue.issue_type}
                     </span>
+                    {issue.lifecycle_stage && <span style={{ fontSize: 9, color: '#475569', background: '#1e293b', padding: '1px 6px', borderRadius: 3 }}>{issue.lifecycle_stage}</span>}
+                    {issue.competition_score != null && issue.competition_score > 0 && <span style={{ fontSize: 9, color: '#f59e0b', background: '#f59e0b15', padding: '1px 6px', borderRadius: 3 }}>경쟁 {issue.competition_score}</span>}
                     {statusBadge(issue)}
                     {issue.fact_check_passed === true && <span style={{ fontSize: 10, color: '#22c55e' }}>✓팩트</span>}
                     {issue.fact_check_passed === false && <span style={{ fontSize: 10, color: '#ef4444' }}>✗팩트</span>}
@@ -354,9 +374,16 @@ export default function IssueTab() {
                   </div>
                   <div style={{ fontSize: 11, color: '#64748b', marginTop: 4 }}>
                     {timeAgo(issue.detected_at)}
+                    {issue.source_type && ` · ${issue.source_type}`}
                     {issue.related_entities?.length > 0 && ` · ${issue.related_entities.slice(0, 2).join(', ')}`}
                     {issue.detected_keywords?.length > 0 && ` · ${issue.detected_keywords.slice(0, 3).join(', ')}`}
                     {issue.published_at && ` · 발행: ${timeAgo(issue.published_at)}`}
+                    {issue.post_24h_views != null && issue.post_24h_views > 0 && (
+                      <span style={{ color: '#22c55e' }}> · 24h조회 {issue.post_24h_views}</span>
+                    )}
+                    {issue.post_7d_views != null && issue.post_7d_views > 0 && (
+                      <span style={{ color: '#0ea5e9' }}> · 7d조회 {issue.post_7d_views}</span>
+                    )}
                   </div>
                 </div>
 
@@ -386,14 +413,33 @@ export default function IssueTab() {
 
               {/* 확장: 초안 미리보기 */}
               {selectedIssue?.id === issue.id && (
-                <div style={{ marginTop: 12, padding: 12, background: '#0f172a', borderRadius: 8, fontSize: 12, color: '#94a3b8', maxHeight: 320, overflow: 'auto' }}>
+                <div style={{ marginTop: 12, padding: 12, background: '#0f172a', borderRadius: 8, fontSize: 12, color: '#94a3b8', maxHeight: 400, overflow: 'auto' }}>
+                  {/* 스코어 브레이크다운 */}
+                  <div style={{ display: 'flex', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
+                    {issue.base_score != null && <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 4, background: '#1e293b', color: '#94a3b8' }}>기본: {issue.base_score}</span>}
+                    {issue.multiplier != null && <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 4, background: '#1e293b', color: '#94a3b8' }}>배율: ×{Number(issue.multiplier).toFixed(1)}</span>}
+                    {issue.competition_score != null && <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 4, background: '#1e293b', color: '#f59e0b' }}>경쟁: {issue.competition_score}</span>}
+                    <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 4, background: scoreColor(issue.final_score) + '20', color: scoreColor(issue.final_score) }}>최종: {issue.final_score} ({issue.final_score >= minScore ? '✅ 기준충족' : `⚠ ${minScore}점 미달`})</span>
+                    {issue.lifecycle_stage && <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 4, background: '#1e293b', color: '#64748b' }}>{issue.lifecycle_stage}</span>}
+                    {issue.source_type && <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 4, background: '#1e293b', color: '#64748b' }}>소스: {issue.source_type}</span>}
+                  </div>
+
+                  {/* 성과 지표 (발행된 경우) */}
+                  {issue.is_published && (issue.post_24h_views != null || issue.post_7d_views != null) && (
+                    <div style={{ display: 'flex', gap: 12, marginBottom: 10, padding: '8px 10px', background: '#0a1628', borderRadius: 6 }}>
+                      <div><span style={{ color: '#64748b', fontSize: 10 }}>24h 조회</span><div style={{ fontSize: 14, fontWeight: 700, color: '#22c55e' }}>{issue.post_24h_views ?? 0}</div></div>
+                      <div><span style={{ color: '#64748b', fontSize: 10 }}>7d 조회</span><div style={{ fontSize: 14, fontWeight: 700, color: '#0ea5e9' }}>{issue.post_7d_views ?? 0}</div></div>
+                      {issue.effectiveness_score != null && <div><span style={{ color: '#64748b', fontSize: 10 }}>효과성</span><div style={{ fontSize: 14, fontWeight: 700, color: '#f59e0b' }}>{Number(issue.effectiveness_score).toFixed(1)}</div></div>}
+                    </div>
+                  )}
+
                   {issue.draft_title && (
                     <>
                       <div style={{ fontWeight: 600, color: '#e2e8f0', marginBottom: 6 }}>📝 초안 미리보기</div>
                       <div style={{ fontSize: 11, color: '#475569', marginBottom: 8 }}>
-                        슬러그: /blog/{issue.draft_slug} &nbsp;|&nbsp;
-                        키워드: {(issue.detected_keywords || []).join(', ')} &nbsp;|&nbsp;
-                        점수: {issue.final_score} ({issue.final_score >= minScore ? '✅ 기준점 충족' : `⚠ 기준점 ${minScore} 미달`})
+                        슬러그: /blog/{issue.draft_slug}
+                        {issue.draft_keywords?.length ? ` · 키워드: ${issue.draft_keywords.join(', ')}` : ''}
+                        {issue.processed_at && ` · 처리: ${timeAgo(issue.processed_at)}`}
                       </div>
                       <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
                         {issue.draft_content?.slice(0, 1000) || '(초안 내용 없음)'}
@@ -406,10 +452,11 @@ export default function IssueTab() {
                   {!issue.draft_title && (
                     <div>
                       <div style={{ fontWeight: 600, color: '#e2e8f0', marginBottom: 6 }}>🔍 이슈 정보</div>
-                      <div style={{ color: '#94a3b8' }}>{issue.summary}</div>
+                      <div style={{ color: '#94a3b8', lineHeight: 1.6 }}>{issue.summary}</div>
                       <div style={{ marginTop: 6, fontSize: 11, color: '#475569' }}>
-                        처리여부: {issue.is_processed ? '처리됨' : '미처리'} &nbsp;|&nbsp;
-                        결정: {issue.publish_decision || '없음'}
+                        처리: {issue.is_processed ? '완료' : '대기'} · 결정: {issue.publish_decision || '없음'}
+                        {issue.block_reason && <span style={{ color: '#ef4444' }}> · 차단: {issue.block_reason}</span>}
+                        {issue.processed_at && ` · ${timeAgo(issue.processed_at)}`}
                       </div>
                     </div>
                   )}
