@@ -10,7 +10,7 @@ const NAVER_CLIENT_ID = process.env.NAVER_CLIENT_ID;
 const NAVER_CLIENT_SECRET = process.env.NAVER_CLIENT_SECRET;
 const KAKAO_REST_KEY = process.env.KAKAO_REST_API_KEY;
 const BATCH = 50;    // 1회 처리 건수
-const PARALLEL = 10; // 동시 처리
+const PARALLEL = 5; // 동시 처리
 
 interface Img { title: string; url: string; thumbnail: string; source: string }
 
@@ -71,7 +71,7 @@ export async function GET(req: NextRequest) {
   const { data: sites } = await sb.from('apt_sites')
     .select('id, name, images')
     .eq('is_active', true)
-    .order('interest_count', { ascending: false })
+    .order('interest_count', { ascending: true })
     .limit(BATCH * 3);
 
   const targets = (sites||[]).filter((s:any) => { const i=s.images; return !i||!Array.isArray(i)||i.length===0; }).slice(0, BATCH);
