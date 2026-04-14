@@ -12,7 +12,7 @@ export default function ExecuteTab({ onNavigate }: { onNavigate: (t: any) => voi
   const [completedCrons, setCompletedCrons] = useState(0);
   const [mode, setMode] = useState<string>('');
   const [lastRun, setLastRun] = useState<{ at: string; ok: number; fail: number } | null>(null);
-  const [infra, setInfra] = useState<{ cronCurrent: number; cronMaxSlots: number }>({ cronCurrent: 89, cronMaxSlots: 100 });
+  const [infra, setInfra] = useState<{ cronCurrent: number; cronMaxSlots: number }>({ cronCurrent: 91, cronMaxSlots: 100 });
   const [kpiCounts, setKpiCounts] = useState<{ stocks: number; sites: number }>({ stocks: 0, sites: 0 });
   const abortRef = useRef(false);
 
