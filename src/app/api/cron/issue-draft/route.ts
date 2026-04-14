@@ -158,8 +158,8 @@ function factCheck(content: string, rawData: Record<string, any>): { passed: boo
   // 2. 최소 분량 체크
   if (content.length < 1500) issues.push('분량부족');
 
-  // 3. FAQ 존재 체크
-  if (!content.includes('Q.') && !content.includes('자주 묻는')) issues.push('FAQ누락');
+  // 3. FAQ 존재 체크 (Q./A., ❓, 자주 묻는 질문 형식 모두 인식)
+  if (!content.includes('Q.') && !content.includes('자주 묻는') && !content.includes('❓') && !content.includes('FAQ')) issues.push('FAQ누락');
 
   return {
     passed: issues.length === 0,
