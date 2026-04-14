@@ -5,9 +5,6 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { STAGE_COLORS, STAGE_ORDER, type SharedTabProps } from './apt-utils';
 import { generateAptSlug } from '@/lib/apt-slug';
-import dynamic from 'next/dynamic';
-
-const RedevTimeline = dynamic(() => import('@/components/RedevTimeline'), { ssr: false });
 
 interface Props extends SharedTabProps {
   redevelopment: RedevProject[];
@@ -20,6 +17,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
   const [redevPage, setRedevPage] = useState(1);
   const [redevStage, setRedevStage] = useState('전체');
   const [redevSearch, setRedevSearch] = useState('');
+  const [showDosiJeongbi, setShowDosiJeongbi] = useState(false);
   const effectiveSearch = globalSearch || redevSearch;
   // selectedRedev removed — now using Link to /apt/[slug]
 
@@ -60,6 +58,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
     if (redevType !== '전체' && r.project_type !== redevType) return false;
     if (redevRegion !== '전체' && r.region !== redevRegion) return false;
     if (redevStage !== '전체' && r.stage !== redevStage) return false;
+    if (!showDosiJeongbi && r.sub_type === '도시환경정비') return false;
     if (effectiveSearch) {
       const q = effectiveSearch.toLowerCase();
       if (!(r.district_name || '').toLowerCase().includes(q) && !(r.region || '').toLowerCase().includes(q) && !(r.sigungu || '').toLowerCase().includes(q) && !(r.constructor || '').toLowerCase().includes(q) && !(r.address || '').toLowerCase().includes(q)) return false;
@@ -140,7 +139,16 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
               {pill('전체', redevType, (v) => { setRedevType(v); setRedevPage(1); })}
               {pill('재개발', redevType, (v) => { setRedevType(v); setRedevPage(1); })}
               {pill('재건축', redevType, (v) => { setRedevType(v); setRedevPage(1); })}
-              {/* 시공사 있는 것만 필터 */}
+              {/* 도시환경정비 토글 */}
+              {(() => {
+                const dosiCount = redevelopment.filter((r) => r.sub_type === '도시환경정비').length;
+                return dosiCount > 0 ? (
+                  <button onClick={() => { setShowDosiJeongbi(!showDosiJeongbi); setRedevPage(1); }} style={{ fontSize: 10, color: showDosiJeongbi ? '#94A3B8' : 'var(--text-tertiary)', background: showDosiJeongbi ? 'rgba(148,163,184,0.15)' : 'transparent', border: '1px solid var(--border)', borderRadius: 'var(--radius-pill)', padding: '3px 10px', cursor: 'pointer' }}>
+                    도시정비 {dosiCount}건 {showDosiJeongbi ? '포함중' : '숨김'}
+                  </button>
+                ) : null;
+              })()}
+              {/* 시공사 확정 */}
               {(() => {
                 const withConstructor = filteredRedev.filter((r) => r.constructor);
                 return withConstructor.length > 0 ? (
@@ -160,54 +168,63 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
               총 <strong style={{ color: 'var(--text-primary)' }}>{filteredRedev.length}</strong>건
             </div>
 
-            {/* 카드 리스트 (20건씩 페이지네이션) */}
+            {/* 카드 리스트 (30건씩 페이지네이션) */}
             <div className="listing-grid">
             {filteredRedev.slice((redevPage - 1) * 30, redevPage * 30).map((r) => {
               const sc = STAGE_COLORS[r.stage || '정비구역지정'] || STAGE_COLORS['정비구역지정'];
               const stageIdx = STAGE_ORDER.indexOf(r.stage || '');
               const progress = stageIdx >= 0 ? Math.round(((stageIdx + 1) / STAGE_ORDER.length) * 100) : 0;
               const redevSlug = generateAptSlug(r.district_name || r.address || r.notes || `redev-${r.id}`);
+              const displayName = r.district_name && r.district_name !== '미상' && r.district_name !== '정보 준비중' ? r.district_name : r.address || r.notes || '정보 준비중';
+              const isDosiJeongbi = r.sub_type === '도시환경정비';
               return (
-                <Link key={r.id} href={`/apt/${encodeURIComponent(redevSlug)}`} className="kd-card-hover" style={{ display: 'block', textDecoration: 'none', color: 'inherit', borderRadius: 'var(--radius-card)', overflow: 'hidden', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
-                  {/* OG 이미지 스트립 */}
-                  <div style={{ height: 48, background: 'var(--bg-hover)', position: 'relative', overflow: 'hidden' }}>
-                    <img src={aptImageMap?.[r.district_name] || `/api/og?title=${encodeURIComponent(r.district_name || r.address || '재개발')}&category=apt&design=2`} alt={r.district_name || "부동산 이미지"} width={400} height={48} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', opacity: 0.8 }} loading="lazy" />
-                    <div style={{ position: 'absolute', top: 5, left: 8, display: 'flex', gap: 4, alignItems: 'center' }}>
-                      <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 'var(--radius-sm)', background: r.project_type === '재건축' ? 'rgba(245,158,11,0.9)' : 'rgba(139,92,246,0.9)', color: '#fff' }}>{r.project_type || '재개발'}</span>
-                      <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 4, background: 'rgba(0,0,0,0.4)', color: '#fff' }}>{r.stage || '진행중'} {progress}%</span>
+                <Link key={r.id} href={`/apt/${encodeURIComponent(redevSlug)}`} className="kd-card-hover" style={{ display: 'block', textDecoration: 'none', color: 'inherit', borderRadius: 'var(--radius-card)', overflow: 'hidden', background: 'var(--bg-surface)', border: '1px solid var(--border)', opacity: isDosiJeongbi ? 0.7 : 1 }}>
+                  {/* ① 헤더: 유형뱃지 + 단계 진행바 + 지역 */}
+                  <div style={{ padding: '8px 12px 0', display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 'var(--radius-sm)', background: r.project_type === '재건축' ? 'rgba(245,158,11,0.9)' : isDosiJeongbi ? 'rgba(107,114,128,0.7)' : 'rgba(139,92,246,0.9)', color: '#fff', flexShrink: 0 }}>
+                      {isDosiJeongbi ? '도시정비' : r.project_type || '재개발'}
+                    </span>
+                    <span style={{ fontSize: 10, fontWeight: 600, color: sc.color, flexShrink: 0 }}>{r.stage || '진행중'}</span>
+                    <div style={{ flex: 1, height: 4, background: 'var(--bg-hover)', borderRadius: 2, overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${progress}%`, background: sc.color, borderRadius: 2, transition: 'width .5s' }} />
                     </div>
-                  </div>
-                  {/* ① 헤더: 배지 + 이름 + 메타 */}
-                  <div style={{ padding: '8px 12px 6px', display: 'flex', gap: 8 }}>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 5, flexWrap: 'wrap' }}>
-                      </div>
-                      <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 2 }}>{r.district_name && r.district_name !== '미상' && r.district_name !== '정보 준비중' ? r.district_name : r.address || r.notes || '정보 준비중'}</div>
-                      <div style={{ fontSize: 10, color: 'var(--text-tertiary)', lineHeight: 1.5 }}>{r.region || ''}{r.sigungu ? ` ${r.sigungu}` : ''}{r.total_households ? ` · ${r.total_households.toLocaleString()}세대` : ''}{(r as any).area_sqm ? ` · ${((r as any).area_sqm / 1000).toFixed(0)}천m²` : ''}</div>
-                    </div>
-                    <div style={{ flexShrink: 0 }}>
-                      <a href={`/apt/${encodeURIComponent(redevSlug)}#interest-section`} onClick={(e) => e.stopPropagation()} aria-label="관심등록" style={{ fontSize: 16, background: 'transparent', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '3px 8px', lineHeight: 1, textDecoration: 'none', color: 'var(--text-tertiary)' }}>☆</a>
-                    </div>
+                    <span style={{ fontSize: 10, fontWeight: 700, color: sc.color, flexShrink: 0 }}>{progress}%</span>
+                    <span style={{ fontSize: 10, color: 'var(--text-tertiary)', flexShrink: 0 }}>{r.region}{r.sigungu ? ` ${r.sigungu}` : ''}</span>
                   </div>
 
-                  {/* ② 4열 KPI */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 1, margin: '0 10px 8px', background: 'var(--border)', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--border)' }}>
-                    <div style={{ textAlign: 'center', padding: '6px 4px', background: 'var(--bg-surface)' }}><div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 2 }}>세대수</div><div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: r.total_households ? 'var(--brand)' : 'var(--text-tertiary)' }}>{r.total_households ? r.total_households.toLocaleString() : '미확정'}</div></div>
-                    <div style={{ textAlign: 'center', padding: '6px 4px', background: 'var(--bg-surface)' }}><div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 2 }}>유형</div><div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--accent-yellow)' }}>{r.project_type || '미정'}</div></div>
-                    <div style={{ textAlign: 'center', padding: '6px 4px', background: 'var(--bg-surface)' }}><div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 2 }}>면적</div><div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: (r as any).area_sqm ? 'var(--text-primary)' : 'var(--text-tertiary)' }}>{(r as any).area_sqm ? `${((r as any).area_sqm / 1000).toFixed(0)}천m²` : '비공개'}</div></div>
-                    <div style={{ textAlign: 'center', padding: '6px 4px', background: 'var(--bg-surface)' }}><div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 2 }}>진행률</div><div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: sc.color }}>{progress}%</div></div>
+                  {/* ② 이름 */}
+                  <div style={{ padding: '6px 12px 4px', display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>{displayName}</div>
+                    <a href={`/apt/${encodeURIComponent(redevSlug)}#interest-section`} onClick={(e) => e.stopPropagation()} aria-label="관심등록" style={{ fontSize: 14, background: 'transparent', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '2px 6px', lineHeight: 1, textDecoration: 'none', color: 'var(--text-tertiary)', flexShrink: 0 }}>☆</a>
                   </div>
 
-                  {/* ③ 6단계 도트 타임라인 */}
-                  <div style={{ padding: '6px 12px 6px', borderTop: '1px solid var(--border)', marginTop: 2 }}>
-                    <div style={{ display: 'flex', position: 'relative' }}>
-                      {STAGE_ORDER.map((s, si) => { const done = si <= stageIdx; const active = si === stageIdx; const dc = active ? sc.color : done ? 'var(--accent-green)' : 'var(--border)'; const tc = active ? sc.color : done ? 'var(--accent-green)' : 'var(--text-tertiary)'; return (<div key={si} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}><div style={{ width: 8, height: 8, borderRadius: '50%', background: dc, zIndex: 1, border: '2px solid var(--bg-surface)', boxShadow: active ? `0 0 6px ${sc.color}40` : undefined }} />{si < STAGE_ORDER.length - 1 && <div style={{ position: 'absolute', top: 4, left: 'calc(50% + 4px)', width: 'calc(100% - 8px)', height: 2, background: done ? 'rgba(52,211,153,0.3)' : 'var(--border)' }} />}<div style={{ fontSize: 7, color: tc, fontWeight: active ? 700 : 500, marginTop: 3, whiteSpace: 'nowrap' }}>{s.replace('사업시행인가', '인가').replace('정비구역지정', '구역').replace('관리처분인가', '관리')}</div></div>); })}
+                  {/* ③ 핵심 KPI 인라인 — NULL이면 표시 안 함 */}
+                  <div style={{ padding: '0 12px 6px', display: 'flex', flexWrap: 'wrap', gap: '2px 10px', fontSize: 11, color: 'var(--text-secondary)' }}>
+                    {r.total_households && <span>🏢 <strong style={{ color: 'var(--brand)' }}>{r.total_households.toLocaleString()}</strong>세대{r.existing_households ? <span style={{ color: 'var(--text-tertiary)' }}>(기존 {r.existing_households.toLocaleString()})</span> : ''}</span>}
+                    {r.area_sqm && <span>📐 {r.area_sqm >= 10000 ? `${(r.area_sqm / 10000).toFixed(1)}만m²` : `${(r.area_sqm / 1000).toFixed(0)}천m²`}</span>}
+                    {r.constructor && <span>🏗️ <strong style={{ color: 'var(--accent-green)' }}>{r.constructor}</strong></span>}
+                  </div>
+
+                  {/* ④ 건축지표 — 하나라도 있으면 표시 */}
+                  {(r.floor_area_ratio || r.building_coverage || r.max_floor) && (
+                    <div style={{ padding: '0 12px 6px', display: 'flex', gap: 10, fontSize: 11, color: 'var(--text-tertiary)' }}>
+                      {r.floor_area_ratio && <span>📊 용적률 {Number(r.floor_area_ratio).toFixed(0)}%</span>}
+                      {r.building_coverage && <span>🏠 건폐율 {Number(r.building_coverage).toFixed(0)}%</span>}
+                      {r.max_floor && <span>🔝 {r.max_floor}층</span>}
                     </div>
-                  </div>
+                  )}
 
-                  {/* ④ AI 요약 */}
+                  {/* ⑤ 실거래 + 블로그 연동 — 데이터 있으면 표시 */}
+                  {(r.avg_trade_price || r.blog_count) ? (
+                    <div style={{ padding: '0 12px 6px', display: 'flex', gap: 10, fontSize: 11, color: 'var(--text-tertiary)' }}>
+                      {r.avg_trade_price ? <span>💰 구역 내 평균 <strong style={{ color: '#F59E0B' }}>{(r.avg_trade_price / 10000).toFixed(1)}억</strong>{r.recent_trade_count ? ` (${r.recent_trade_count}건)` : ''}</span> : null}
+                      {r.blog_count ? <span>📝 분석 {r.blog_count}편</span> : null}
+                    </div>
+                  ) : null}
+
+                  {/* ⑥ AI 요약 1줄 */}
                   {r.ai_summary && (
-                    <div style={{ padding: '4px 12px 8px' }}><div style={{ padding: '4px 7px', borderLeft: `2px solid ${sc.border}`, fontSize: 10, color: 'var(--text-secondary)', lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{r.ai_summary}</div></div>
+                    <div style={{ padding: '0 12px 8px' }}><div style={{ padding: '3px 7px', borderLeft: `2px solid ${sc.border}`, fontSize: 10, color: 'var(--text-secondary)', lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>🤖 {r.ai_summary}</div></div>
                   )}
                 </Link>
               );

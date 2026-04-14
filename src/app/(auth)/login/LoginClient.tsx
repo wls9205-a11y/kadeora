@@ -82,6 +82,8 @@ function LoginForm({ redirect }: LoginFormProps) {
             discuss: { icon: '💬', text: '가입하면 토론에 참여할 수 있어요' },
             sidebar: { icon: '🔓', text: '가입하면 전체 기능을 무료로 이용할 수 있어요' },
             interest_register: { icon: '🔔', text: '가입하면 관심 단지 알림을 받을 수 있어요' },
+            redev_interest: { icon: '🏗️', text: '가입하면 이 구역의 단계 변경 알림을 받을 수 있어요' },
+            redev_landing: { icon: '🏗️', text: '가입하면 전국 재개발·재건축 현황을 무료로 볼 수 있어요' },
           };
           const key = action ? `${source}_${action}` : source;
           const msg = MSG[key] || MSG[source];
