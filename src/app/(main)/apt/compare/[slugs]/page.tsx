@@ -1,3 +1,4 @@
+import LoginGate from '@/components/LoginGate';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { SITE_URL } from '@/lib/constants';
 import Link from 'next/link';
@@ -151,6 +152,12 @@ export default async function ComparePage({ params }: Props) {
       <footer style={{ fontSize: 10, color: 'var(--text-tertiary)', textAlign: 'center', paddingBottom: 40 }}>
         데이터 출처: 국토교통부 실거래가 공개시스템 · 카더라
       </footer>
+      {/* LoginGate 기능 게이팅 (세션 108) */}
+      <LoginGate feature="apt_compare_save" blurHeight={80}>
+        <div style={{ padding: "8px 0" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, padding: "4px 0", color: "var(--text-tertiary)" }}><span>비교 결과</span><span>저장 가능</span></div>
+        </div>
+      </LoginGate>
     </article>
   );
 }

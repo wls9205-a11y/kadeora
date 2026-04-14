@@ -4,7 +4,7 @@ import { CALC_REGISTRY, CATEGORIES, findCalc, getCategoryLabel } from '@/lib/cal
 import CalcEngine from '@/components/calc/CalcEngine';
 import Disclaimer from '@/components/Disclaimer';
 import ShareButtons from '@/components/ShareButtons';
-import CalcSignupCTA from '@/components/calc/CalcSignupCTA';
+import LoginGate from '@/components/LoginGate';
 import type { Metadata } from 'next';
 import { SITE_URL } from '@/lib/constants';
 import { notFound } from 'next/navigation';
@@ -160,8 +160,13 @@ export default async function CalcPage({ params }: { params: Promise<{ category:
         </div>
       )}
 
-      {/* 회원가입 유도 CTA */}
-      <CalcSignupCTA calcSlug={calc.slug} category={category} />
+      {/* 회원가입 유도 — LoginGate 기능 게이팅 (세션 108) */}
+      <LoginGate feature="calc_save" blurHeight={80}>
+        <div style={{ padding: '8px 0' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, padding: '4px 0', color: 'var(--text-tertiary)' }}><span>조건 A (3.8%, 30년)</span><span>139.8만/월</span></div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, padding: '4px 0', color: 'var(--text-tertiary)' }}><span>조건 B (4.2%, 25년)</span><span>162.3만/월</span></div>
+        </div>
+      </LoginGate>
 
       <Disclaimer type="calc" compact />
     </div>

@@ -8,7 +8,7 @@ import { marked } from 'marked';
 import { injectInternalLinks } from '@/lib/blog-auto-link';
 import BlogCommentInput from '@/components/BlogCommentInput';
 import BlogCommentCTA from '@/components/BlogCommentCTA';
-import BlogMidCTA from '@/components/BlogMidCTA';
+import LoginGate from '@/components/LoginGate';
 import BlogFloatingBar from '@/components/BlogFloatingBar';
 import ShareButtons from '@/components/ShareButtons';
 import KakaoShareButton from '@/components/KakaoShareButton';
@@ -32,7 +32,7 @@ import BlogHeroImage from '@/components/BlogHeroImage';
 import NextArticleFloat from '@/components/NextArticleFloat';
 import BlogTossGate from '@/components/BlogTossGate';
 import RelatedContentCard from '@/components/RelatedContentCard';
-import SmartSectionGate from '@/components/SmartSectionGate';
+// SmartSectionGate 제거 → LoginGate 기능 게이팅으로 전환 (세션 108)
 import BlogAptAlertCTA from '@/components/BlogAptAlertCTA';
 // NewsletterSubscribe 삭제 — 카카오 CTA로 통합
 
@@ -850,15 +850,13 @@ export default async function BlogDetailPage({ params }: Props) {
           {toc.length >= 3 && <BlogToc toc={toc} />}
         </div>
 
-        {/* 본문 — 봇: 전체, 로그인: TossGate, 비로그인: SmartSectionGate (핵심 섹션만 블러) */}
+        {/* 본문 — 봇: 전체, 로그인: TossGate, 비로그인: 전체 공개 (기능 게이팅으로 전환) */}
         {isBot ? (
           <div className="blog-content" itemProp="articleBody" dangerouslySetInnerHTML={{ __html: sanitizeHtml(htmlFull) }} />
         ) : isLoggedIn ? (
           <BlogTossGate htmlFull={htmlFull} htmlShort={htmlTossShort} slug={slug} title={post.title} />
         ) : (
-          <div className="blog-content" itemProp="articleBody">
-            <SmartSectionGate htmlContent={htmlFull} slug={slug} category={post.category} userCount={userCount} todaySignups={todaySignups} />
-          </div>
+          <div className="blog-content" itemProp="articleBody" dangerouslySetInnerHTML={{ __html: sanitizeHtml(htmlFull) }} />
         )}
 
         {/* 관심단지 알림 CTA — apt/unsold 카테고리 + 단지명 있을 때 (봇 제외) */}
@@ -871,17 +869,41 @@ export default async function BlogDetailPage({ params }: Props) {
           />
         )}
 
-        {/* BlogMidCTA — 비로그인 유저 전용, SmartSectionGate 아래 소프트 CTA */}
+        {/* LoginGate 기능 게이팅 — 비로그인 유저 전용 (콘텐츠 전체 공개 후 기능으로 가입 유도) */}
         {!isBot && !isLoggedIn && (
-          <BlogMidCTA category={post.category} slug={slug} userCount={userCount} />
+          <LoginGate
+            feature={post.category === 'stock' ? 'blog_stock_ai' : post.category === 'finance' ? 'blog_finance' : 'blog_compare'}
+            blurHeight={120}
+          >
+            <div style={{ padding: '8px 0' }}>
+              {post.category === 'apt' || post.category === 'unsold' ? (
+                <>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, padding: '4px 0', color: 'var(--text-tertiary)' }}><span>주변 단지 A</span><span>5.8억</span></div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, padding: '4px 0', color: 'var(--text-tertiary)' }}><span>주변 단지 B</span><span>5.1억</span></div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, padding: '4px 0', color: 'var(--text-tertiary)' }}><span>주변 단지 C</span><span>4.7억</span></div>
+                </>
+              ) : post.category === 'stock' ? (
+                <>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, padding: '4px 0', color: 'var(--text-tertiary)' }}><span>AI 의견</span><span>매수 우위</span></div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, padding: '4px 0', color: 'var(--text-tertiary)' }}><span>목표가</span><span>---원</span></div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, padding: '4px 0', color: 'var(--text-tertiary)' }}><span>외국인 수급</span><span>순매수 ---일</span></div>
+                </>
+              ) : (
+                <>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, padding: '4px 0', color: 'var(--text-tertiary)' }}><span>조건 A</span><span>--- 원/월</span></div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, padding: '4px 0', color: 'var(--text-tertiary)' }}><span>조건 B</span><span>--- 원/월</span></div>
+                </>
+              )}
+            </div>
+          </LoginGate>
         )}
 
-        {/* CTA — SmartSectionGate가 비로그인 전환 전담, BlogMidCTA 중복 제거 */}
+        {/* LoginGate 기능 게이팅이 비로그인 전환 전담 */}
 
         <RelatedContentCard type="blog" showSignup={false} />
 
         {/* 뉴스레터 — 본문 직후, 비로그인 유저 대상 (게이트 대안 경로) */}
-        {/* NewsletterSubscribe 삭제 — SmartSectionGate + ActionBar 카카오 CTA로 통합 */}
+        {/* NewsletterSubscribe 삭제 — LoginGate + ActionBar로 통합 */}
 
         {/* 관련 서비스 CTA (카테고리별) */}
         {post.category === 'apt' && (

@@ -1,3 +1,4 @@
+import LoginGate from '@/components/LoginGate';
 'use client';
 import Link from 'next/link';
 import SectionShareButton from '@/components/SectionShareButton';
@@ -249,6 +250,13 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
         </div>
       )}
       {fu.length === 0 && <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-tertiary)' }}>{effectiveSearch ? `"${effectiveSearch}" 검색 결과가 없습니다` : '해당 지역 데이터가 없습니다'}{effectiveSearch && <div style={{ fontSize: 'var(--fs-xs)', marginTop: 6 }}>단지명, 지역으로 검색해보세요</div>}</div>}
+
+      {/* LoginGate 기능 게이팅 (세션 108) */}
+      <LoginGate feature="apt_unsold_alert" title="미분양 할인 알림" description="관심 지역 미분양 할인·재분양 시 알림" blurHeight={100}>
+        <div style={{ padding: "8px 0" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, padding: "4px 0", color: "var(--text-tertiary)" }}><span>알림 대상</span><span>변동 예정</span></div>
+        </div>
+      </LoginGate>
     </div>
   );
 

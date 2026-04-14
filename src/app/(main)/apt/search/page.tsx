@@ -1,3 +1,4 @@
+import LoginGate from '@/components/LoginGate';
 import type { Metadata } from 'next';
 import { SITE_URL } from '@/lib/constants';
 import { createSupabaseServer } from '@/lib/supabase-server';
@@ -225,6 +226,11 @@ export default async function AptSearchPage({ searchParams }: Props) {
         </div>
       </div>
     </div>
-  
+    {/* LoginGate 기능 게이팅 (세션 108) */}
+    <LoginGate feature="apt_search_track" blurHeight={80}>
+      <div style={{ padding: "8px 0" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, padding: "4px 0", color: "var(--text-tertiary)" }}><span>관심 단지</span><span>시세 추적</span></div>
+      </div>
+    </LoginGate>
     </>);
 }

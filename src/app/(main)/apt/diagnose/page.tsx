@@ -1,3 +1,4 @@
+import LoginGate from '@/components/LoginGate';
 import DiagnoseClient from './DiagnoseClient';
 
 export default function DiagnosePage() {
@@ -83,6 +84,13 @@ export default function DiagnosePage() {
         실제 청약 시 주택 유형, 공급 지역, 세부 자격 요건에 따라 결과가 달라질 수 있습니다.
         정확한 자격은 <a href="https://www.applyhome.co.kr" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--brand)' }}>청약홈(applyhome.co.kr)</a>에서 확인하세요.
       </div>
+
+        {/* LoginGate 기능 게이팅 (세션 108) */}
+        <LoginGate feature="calc_save" blurHeight={80}>
+          <div style={{ padding: "8px 0" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, padding: "4px 0", color: "var(--text-tertiary)" }}><span>추적 대상</span><span>변동 예정</span></div>
+          </div>
+        </LoginGate>
     </div>
   );
 }

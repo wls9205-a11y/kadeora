@@ -1,3 +1,4 @@
+import LoginGate from '@/components/LoginGate';
 import type { Metadata } from 'next';
 import { SITE_URL } from '@/lib/constants';
 import { createSupabaseServer } from '@/lib/supabase-server';
@@ -99,6 +100,11 @@ export default async function AptMapPage() {
       <div style={{ marginTop: 'var(--sp-xl)' }}>
         <MapWrapper />
       </div>
-  
+      {/* LoginGate 기능 게이팅 (세션 108) */}
+      <LoginGate feature="apt_map_alert" blurHeight={80}>
+        <div style={{ padding: "8px 0" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, padding: "4px 0", color: "var(--text-tertiary)" }}><span>내 지역</span><span>알림 설정</span></div>
+        </div>
+      </LoginGate>
     </>);
 }
