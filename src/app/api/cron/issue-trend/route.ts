@@ -55,10 +55,11 @@ async function handler(_req: NextRequest) {
   const sb = getSupabaseAdmin();
 
   if (!NAVER_CLIENT_ID) {
-  
-
-  return NextResponse.json({ error: 'NAVER_CLIENT_ID not set', checked: 0 });
+    console.log('[issue-trend] NAVER_CLIENT_ID not set — skipping');
+    return NextResponse.json({ error: 'NAVER_CLIENT_ID not set', checked: 0 });
   }
+
+  console.log('[issue-trend] NAVER_CLIENT_ID OK — checking trends');
 
   const spikeKeywords: { group: string; keyword: string; ratio: number; category: string }[] = [];
 
