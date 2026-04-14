@@ -51,7 +51,7 @@ export default async function ComplexPage({ searchParams }: { searchParams: Prom
 
   // 프로필 조회
   let pq = (sb as any).from('apt_complex_profiles')
-    .select('apt_name, sigungu, region_nm, dong, age_group, latest_sale_price, latest_jeonse_price, latest_monthly_deposit, latest_monthly_rent, jeonse_ratio, sale_count_1y, rent_count_1y, built_year, avg_sale_price_pyeong, latitude, longitude')
+    .select('apt_name, sigungu, region_nm, dong, age_group, latest_sale_price, latest_jeonse_price, latest_monthly_deposit, latest_monthly_rent, jeonse_ratio, sale_count_1y, rent_count_1y, built_year, avg_sale_price_pyeong, latitude, longitude, images')
     .not('age_group', 'is', null)
     .order('sale_count_1y', { ascending: false });
   if (selectedRegion && REGIONS.includes(selectedRegion)) pq = pq.eq('region_nm', selectedRegion);
@@ -84,6 +84,7 @@ export default async function ComplexPage({ searchParams }: { searchParams: Prom
     monthly: p.latest_monthly_deposit || 0, monthlyRent: p.latest_monthly_rent || 0,
     ageGroup: p.age_group || '', jeonseRatio: p.jeonse_ratio || null,
     pyeongPrice: p.avg_sale_price_pyeong || 0, hasCoords: !!(p.latitude && p.longitude),
+    imageUrl: Array.isArray(p.images) && p.images.length > 0 ? (p.images[0]?.thumbnail || p.images[0]?.url || null) : null,
   }));
 
   const displayCount = selectedRegion ? regionData.find(r => r.region === selectedRegion)?.count || allProfiles.length : totalProfiles;

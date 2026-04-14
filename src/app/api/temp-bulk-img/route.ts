@@ -8,8 +8,8 @@ const ONE_TIME_TOKEN = 'f41f6717-5aff-4ff2-93d6-e9daf032689c';
 const NAVER_ID = process.env.NAVER_CLIENT_ID;
 const NAVER_SECRET = process.env.NAVER_CLIENT_SECRET;
 const KAKAO_KEY = process.env.KAKAO_REST_API_KEY;
-const PARALLEL = 5;
-const BATCH = 50;
+const PARALLEL = 10;
+const BATCH = 150;
 
 interface Img { title: string; url: string; thumbnail: string; source: string }
 
@@ -69,7 +69,7 @@ export async function GET(req: NextRequest) {
   let collected = 0, skipped = 0;
 
   for (let i = 0; i < targets.length; i += PARALLEL) {
-    if (Date.now() - start > 55_000) break;
+    if (Date.now() - start > 270_000) break;
     await Promise.allSettled(
       targets.slice(i, i+PARALLEL).map(async (site:any) => {
         const q1 = `${site.name} 아파트 조감도`;

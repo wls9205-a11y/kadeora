@@ -8,8 +8,8 @@ const TOKEN = 'f41f6717-5aff-4ff2-93d6-e9daf032689c';
 const NAVER_ID = process.env.NAVER_CLIENT_ID;
 const NAVER_SECRET = process.env.NAVER_CLIENT_SECRET;
 const KAKAO_KEY = process.env.KAKAO_REST_API_KEY;
-const BATCH = 60;
-const PARALLEL = 8;
+const BATCH = 300;
+const PARALLEL = 20;
 
 interface Img { title: string; url: string; thumbnail: string; source: string }
 
@@ -82,7 +82,7 @@ export async function GET(req: NextRequest) {
   let collected=0, skipped=0;
 
   for (let i=0;i<targets.length;i+=PARALLEL) {
-    if (Date.now()-start>55_000) break;
+    if (Date.now()-start>270_000) break;
     await Promise.allSettled(
       targets.slice(i,i+PARALLEL).map(async(row:any)=>{
         const imgs=await collect(row.apt_name);

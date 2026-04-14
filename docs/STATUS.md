@@ -1,110 +1,39 @@
-## 세션 105 — 피드 게시글 다양성 전면 개선 + 도배 방지
+## 세션 106 — 부동산 탭 전체 이미지 근본 해결
 
-### 커밋: 8e08dc19
-### 변경: 3파일, +517 -269
+### 커밋: 진행 중
+### 변경: 주요 7파일
 
-### 문제 진단
-- 24시간 내 피드 201개 중 "오션뷰 특공 0건" 32개, "한화포레나 재분양" 86개 — 2개 토픽이 피드 도배
-- seed-posts 하루 20회 실행 × 4개 = 80개/일 생성 (대부분 비슷한 주제)
-- feed-buzz-publish가 이슈당 무제한 뻘글 생성
-- 콘텐츠 타입이 질문/뻘글 2종류로 단조로움
+### 핵심 문제 진단
+- apt_sites(5,775건)만 이미지 수집 → 실거래 탭 20,997개 단지 중 93%가 OG 이미지 fallback
+- apt_complex_profiles(34,539건)가 실거래 단지 100% 커버하는데 이미지 컬럼 없었음
+- aptImageMap이 apt_sites.name만 인덱싱 → 실거래/단지백과 대부분 미매핑
 
-### 해결 — 3단계
+### 근본 해결
+1. apt_complex_profiles.images 컬럼 추가 (DB 마이그레이션 완료)
+2. page.tsx aptImageMap: apt_sites + apt_complex_profiles 병렬 조회로 확장
+3. collect-complex-images 크론 신규 (매시간 :30분, BATCH 400, PARALLEL 8)
+4. /apt/complex/page.tsx: images 컬럼 select + ComplexClient에 imageUrl 전달
+5. ComplexClient.tsx: OG fallback → apt_complex_profiles 실제 이미지
+6. temp-bulk-img/complex: 즉시 대량 수집 엔드포인트 (60건/8초)
 
-#### 1. DB 정리 (즉시 적용)
-- 도배 글 114개 소프트 삭제 (각 토픽당 최신 2개만 유지)
-- 중복 제목 시드 글 추가 정리
+### 탭별 이미지 커버리지
+| 탭 | 데이터 소스 | 적용 전 | 적용 후(목표) |
+|---|---|---|---|
+| 청약 | apt_subscriptions(2,713) | ~56% | ~85%+ |
+| 분양중 | sub+unsold 조합 | ~56% | ~85%+ |
+| 미분양 | unsold_apts(204) | ~89% | ~95%+ |
+| 재개발 | redevelopment_projects(218) | ~91% | ~95%+ |
+| 실거래 | apt_transactions(20,997단지) | 6.9% → | ~100% |
+| 단지백과 | apt_complex_profiles(34,539) | OG only | 실제 이미지 |
 
-#### 2. seed-posts v4 전면 리뉴얼
-- **10가지 콘텐츠 타입**: 토론, 꿀팁, 후기, 질문, 계산, 유머, 뉴스반응, TIL, 시리즈, 일상
-- **65+ 템플릿**: 주식 25+ / 부동산 15+ / 재테크·일상 25+
-- **24h 유저 중복 방지**: 같은 유저 하루 최대 1게시글
-- **baseKey 토픽 중복 차단**: 같은 주제 24h 내 1개
-- **시간대별 콘텐츠 매칭**: 아침=뉴스반응, 점심=일상, 저녁=토론/후기
-- **타입별 댓글 차별화**: 토론엔 토론 댓글, 유머엔 유머 댓글
-- **AI(Haiku) 생성 + 폴백**: 자연스러운 말투 변형
-- **실시간 DB 데이터 기반 동적 템플릿**: stock_quotes, apt_sites에서 실제 종목/단지 데이터 활용
-- 실행당 2~3개로 제한 (기존 2~4)
-
-#### 3. 도배 방지 강화
-- feed-buzz-publish: 카테고리별 일일 상한 6→3개
-- issue-draft: 이슈당 뻘글 스케줄링 최대 2→1개
-
-### 현재 상태
-- Vercel: 배포 진행 중 (런타임 에러 0건)
-- 피드: 도배 글 정리 완료, 다음 크론 실행부터 다양한 콘텐츠 생성
-- 크론 스케줄: seed-posts 3x/일 (7,13,19 UTC) 유지, 실행당 2~3개 × 3 = 하루 6~9개
-
----
-
-## 세션 104 — apt-image-crawl 크론 버그 수정 (이미지 미적용 문제)
-
-### 커밋: 745cf654
-### 변경: 1파일
-
-### 문제 진단
-- apt_sites 5,785개 중 2,928개 이미지 없음 (50%)
-- 크론 쿼리가 `.is('images', null)` → 실제 DB는 모두 `images = '[]'` (빈 배열)이라 0건 처리
-
-### 수정 내용
-- 쿼리 조건: `.is('images', null)` → `.or('images.is.null,images.eq.[]')`
-- BATCH_SIZE: 15 → 25 (처리 속도 향상)
-- 현장 간 딜레이: 300ms → 150ms
-- DB 직접 수정: `images = '[]'` 2,928건 → NULL 리셋 (크론 즉시 동작)
-
-### 현재 상태
-- 다음 크론 실행(20:30 KST)부터 25건/일 자동 처리
-- 전체 처리 예상: 2,928 ÷ 25 = ~117일 (매일 자동)
-
----
-
-## 세션 103 — 부동산 전탭 히어로 카드 리디자인 + 현장 이미지 자동 크롤링
-
-### 커밋: 0ea2c806 → a1181c74
-### 변경: 10파일, +512 -176
-
-### Part 1: 히어로 카드 리디자인 (7파일)
-부동산 페이지 전체 탭(청약/분양중/미분양/재개발/실거래) + 단지백과 카드 섹션을 히어로 이미지(120px) 레이아웃으로 전면 리디자인.
-
-#### 완료 — CSS 공용 시스템 (globals.css +119줄)
-- `.hero-card` — 통일 카드 컨테이너 (hover 효과, border-radius)
-- `.hero-img` — 120px 히어로 이미지 (모바일 100px)
-- `.hero-overlay` — 하단 gradient 오버레이 (단지명+주소)
-- `.hero-badges` — 좌상단 배지 영역 (상태/NEW/상한제/브랜드)
-- `.hero-chip` — 우상단 칩 영역 (D-day, 진행률, 잔여세대)
-- `.hero-img-sm` — 단지백과 소형 90px (모바일 80px)
-
-#### 완료 — 6개 탭 카드 리디자인
-- **SubscriptionTab**: 56px→120px 히어로, 상태배지+D-day+투기과열+상한제+브랜드 오버레이, 2순위 경쟁률 유지
-- **OngoingTab**: 48px→120px 히어로, 분양중/미분양/PREMIUM 배지, 입주 D-day
-- **UnsoldTab**: 48px→120px 히어로, 잔여세대 카운터 오버레이, 미분양 급증 배지
-- **RedevTab**: 이미지 없음→120px OG 히어로, 진행률% 오버레이, 시공사 배지
-- **TransactionTab**: 텍스트→120px 히어로, 거래가+등락% 오버레이
-- **ComplexClient**: borderTop→90px 히어로(2열), 연차/TOP 배지 오버레이
-
-#### 코드 정리
-- NewBadge 미사용 import 3파일 제거
-- Spark/makeTrend 미사용 코드 제거 (ComplexClient)
-- SPECLT_RDN_EARTH_AT(투기과열), competition_rate_2nd(2순위 경쟁률), vsMax(직전거래 대비%), built_year 누락 복원
-
-### Part 2: 현장 이미지 자동 크롤링 크론 (3파일)
-
-#### 완료 — apt-image-crawl 크론 신규 (240줄)
-- **Phase 1**: 네이버 부동산 API → complexNo 검색 → 사진 갤러리 수집 (조감도/투시도/배치도/모델하우스/평면도)
-- **Phase 2**: 네이버 이미지 검색 API fallback (카테고리별 5쿼리, filter=large)
-- 카테고리: 조감도(2), 투시도(1), 단지배치도(1), 모델하우스(2), 평면도(1) → 현장당 6~7장
-- 배치: 15현장/회, 매일 11:30 UTC (20:30 KST) 실행
-- 이미지 없는 apt_sites 우선순위 자동 처리
-- 결과: apt_sites.images JSONB에 [{url, thumb, type, source}] 저장
-
-#### 완료 — aptImageMap 호환성 (page.tsx)
-- `.thumbnail || .thumb || .url` fallback 순서 — 기존+신규 포맷 모두 지원
-
-#### 완료 — vercel.json
-- 크론 스케줄: `30 11 * * *`
-- functions maxDuration: 300
+### 이미지 수집 현황 (세션 중 진행)
+- apt_sites: ~2,906 → ~2,000 (진행 중)
+- apt_complex_profiles: 0 → 수집 중 (매시간 크론 + temp 엔드포인트)
 
 ### 프로덕션 상태
-- Vercel: dpl_Cc2w3bGLpBbDLUrqh2bD4aoWJDPf — READY
+- Vercel: 배포 완료
 - 런타임 에러: 0건
-- 이미지 크론: 매일 20:30 KST 자동 실행 (첫 실행 대기 중)
+
+---
+
+## 세션 105 — Node이 진행한 작업들

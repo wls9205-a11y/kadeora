@@ -10,6 +10,7 @@ interface Complex {
   lastPrice: number; jeonse: number; monthly: number; monthlyRent: number;
   ageGroup: string; jeonseRatio: number | null;
   pyeongPrice: number; hasCoords: boolean;
+  imageUrl?: string | null;
 }
 
 /* ── 원형 게이지 ── */
@@ -177,7 +178,7 @@ export default function ComplexClient({ complexes, ageGroups, regions, initialRe
             }}>
               {/* 히어로 이미지 (소형) */}
               <div className="hero-img hero-img-sm">
-                <img src={`/api/og?title=${encodeURIComponent(c.aptName)}&category=apt&design=2`} alt={c.aptName} width={300} height={90} loading="lazy" />
+                <img src={c.imageUrl || `/api/og?title=${encodeURIComponent(c.aptName)}&category=apt&design=2`} alt={c.aptName} width={300} height={90} loading="lazy" />
                 <div className="hero-badges">
                   {(() => {
                     const ageColors: Record<string, string> = { '신축': 'rgba(59,123,246,0.9)', '5년차': 'rgba(34,211,238,0.9)', '10년차': 'rgba(139,92,246,0.9)', '15년차': 'rgba(245,158,11,0.9)', '20년차': 'rgba(249,115,22,0.9)', '25년차': 'rgba(239,68,68,0.9)', '30년+': 'rgba(220,38,38,0.9)' };
