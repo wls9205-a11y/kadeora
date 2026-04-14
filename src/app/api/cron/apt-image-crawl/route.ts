@@ -7,7 +7,7 @@ export const runtime = 'nodejs';
 
 const NAVER_CLIENT_ID = process.env.NAVER_CLIENT_ID || '';
 const NAVER_CLIENT_SECRET = process.env.NAVER_CLIENT_SECRET || '';
-const BATCH_SIZE = 15; // 현장 수 (× 5~6쿼리 = 75~90 API 호출)
+const BATCH_SIZE = 25; // 현장 수 (× 5~6쿼리 = 125~150 API 호출)
 
 // ━━━ 이미지 카테고리 정의 ━━━
 const IMAGE_CATEGORIES = [
@@ -171,10 +171,10 @@ async function handler(_req: NextRequest) {
   }
 
   try {
-    // ━━━ Step 1: 이미지 없는 현장 조회 (우선순위: 최근 청약 > 분양중 > 재개발) ━━━
+    // ━━━ Step 1: 이미지 없는 현장 조회 (NULL 또는 빈 배열 모두 대상) ━━━
     const { data: sites } = await (sb as any).from('apt_sites')
       .select('id, slug, name, site_type, images, region, status')
-      .is('images', null)
+      .or('images.is.null,images.eq.[]')
       .eq('is_active', true)
       .order('updated_at', { ascending: false })
       .limit(BATCH_SIZE);
@@ -215,8 +215,8 @@ async function handler(_req: NextRequest) {
           created++;
         }
 
-        // 현장 간 딜레이 (300ms) — rate limit 방지
-        await new Promise(r => setTimeout(r, 300));
+        // 현장 간 딜레이 (150ms) — rate limit 방지
+        await new Promise(r => setTimeout(r, 150));
       } catch (e) {
         processed++;
         failed++;
