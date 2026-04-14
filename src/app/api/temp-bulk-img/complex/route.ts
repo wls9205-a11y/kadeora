@@ -19,8 +19,7 @@ async function nv(q: string): Promise<Img[]> {
     const r = await fetch(`https://openapi.naver.com/v1/search/image?query=${encodeURIComponent(q)}&display=5&sort=sim`,
       { headers: { 'X-Naver-Client-Id': NAVER_ID, 'X-Naver-Client-Secret': NAVER_SECRET }, signal: AbortSignal.timeout(7000) });
     if (!r.ok) return [];
-    const d = await r.json();
-    return (d.items||[]).map((x:any) => ({ title:(x.title||'').replace(/<[^>]*>/g,''), url:x.link, thumbnail:x.thumbnail, source:'naver' }));
+    return ((await r.json()).items||[]).map((x:any)=>({title:(x.title||'').replace(/<[^>]*>/g,''),url:x.link,thumbnail:x.thumbnail,source:'naver'}));
   } catch { return []; }
 }
 
@@ -28,11 +27,18 @@ async function kk(q: string): Promise<Img[]> {
   if (!KAKAO_KEY) return [];
   try {
     const r = await fetch(`https://dapi.kakao.com/v2/search/image?query=${encodeURIComponent(q)}&size=5&sort=accuracy`,
-      { headers: { Authorization: `KakaoAK ${KAKAO_KEY}` }, signal: AbortSignal.timeout(7000) });
+      { headers: { Authorization:`KakaoAK ${KAKAO_KEY}` }, signal: AbortSignal.timeout(7000) });
     if (!r.ok) return [];
-    const d = await r.json();
-    return (d.documents||[]).map((x:any) => ({ title:(x.display_sitename||'').replace(/<[^>]*>/g,''), url:x.image_url, thumbnail:x.thumbnail_url, source:'kakao' }));
+    return ((await r.json()).documents||[]).map((x:any)=>({title:(x.display_sitename||'').replace(/<[^>]*>/g,''),url:x.image_url,thumbnail:x.thumbnail_url,source:'kakao'}));
   } catch { return []; }
+}
+
+function cleanName(name: string): string {
+  // 괄호 안 숫자/코드 제거, 동 정보 제거
+  return name
+    .replace(/\([^)]*\)/g, '')   // (1019-0) 같은 괄호 제거
+    .replace(/\d+동$/,'')         // 끝에 오는 동 번호 제거
+    .replace(/\s+/g,' ').trim();
 }
 
 function ok(img: Img, name: string): boolean {
@@ -42,7 +48,7 @@ function ok(img: Img, name: string): boolean {
   const BADC=['호갱노노','직방','kb부동산','네이버부동산','다방','한경','매경','스톡 이미지','병원','치과','맛집','호텔','유튜브','게임','시세','매물','스포츠'];
   if (BADC.some(w=>cap.includes(w))) return false;
   if (/\b(icon|favicon|logo|badge|button)\b/i.test(url)) return false;
-  const core=name.replace(/\s+/g,'').slice(0,6).toLowerCase();
+  const core=cleanName(name).replace(/\s+/g,'').slice(0,5).toLowerCase();
   if (core.length>=3 && cap.replace(/\s+/g,'').includes(core)) return true;
   const GOOD=['조감도','투시도','배치도','분양','착공','준공','아파트','단지','외관','모델하우스','청약','입주','건설','재개발','재건축','주택','세대','공급','타워'];
   if (GOOD.some(w=>cap.includes(w))) return true;
@@ -51,14 +57,20 @@ function ok(img: Img, name: string): boolean {
   return false;
 }
 
-async function collect(name: string): Promise<Img[]> {
-  const qs=[`${name} 아파트 외관`,`${name} 아파트`];
-  const results = await Promise.allSettled(qs.flatMap(q=>[nv(q),kk(q)]));
+async function collect(name: string, sigungu: string): Promise<Img[]> {
+  const clean = cleanName(name);
+  // sigungu 포함 쿼리로 정확도 향상
+  const qs = [
+    `${sigungu} ${clean} 아파트`,
+    `${clean} ${sigungu} 아파트 외관`,
+  ];
+  const results = await Promise.allSettled(qs.flatMap(q=>[nv(q), kk(q)]));
   const all: Img[] = [];
   for (const r of results) if (r.status==='fulfilled') all.push(...r.value);
   const seen=new Set<string>();
   let imgs=all.filter(i=>{if(!i.url||seen.has(i.url))return false;seen.add(i.url);return ok(i,name);}).slice(0,5);
-  if (!imgs.length) {
+  // 폴백: 필터 없이 유효한 URL
+  if (!imgs.length){
     const s2=new Set<string>();
     imgs=all.filter(i=>{if(!i.url||s2.has(i.url))return false;s2.add(i.url);return true;}).slice(0,3);
   }
@@ -73,7 +85,7 @@ export async function GET(req: NextRequest) {
   const start=Date.now();
 
   const {data:rows} = await (sb as any).from('apt_complex_profiles')
-    .select('id, apt_name')
+    .select('id, apt_name, sigungu')
     .is('images',null)
     .order('sale_count_1y',{ascending:false})
     .limit(BATCH);
@@ -85,8 +97,8 @@ export async function GET(req: NextRequest) {
     if (Date.now()-start>270_000) break;
     await Promise.allSettled(
       targets.slice(i,i+PARALLEL).map(async(row:any)=>{
-        const imgs=await collect(row.apt_name);
-        if (!imgs.length) {
+        const imgs=await collect(row.apt_name, row.sigungu||'');
+        if (!imgs.length){
           await (sb as any).from('apt_complex_profiles').update({images:[]}).eq('id',row.id);
           skipped++; return;
         }
@@ -100,7 +112,7 @@ export async function GET(req: NextRequest) {
     await new Promise(r=>setTimeout(r,80));
   }
 
-  const {count:remaining} = await (sb as any).from('apt_complex_profiles')
+  const {count:remaining}=await (sb as any).from('apt_complex_profiles')
     .select('*',{count:'exact',head:true}).is('images',null);
 
   return NextResponse.json({collected,skipped,remaining,elapsed:`${((Date.now()-start)/1000).toFixed(1)}s`});
