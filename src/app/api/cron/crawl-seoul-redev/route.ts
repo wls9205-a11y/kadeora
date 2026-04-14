@@ -5,13 +5,14 @@ import { withCronLogging } from '@/lib/cron-logger';
 
 const SERVICE_NAME = 'upisRebuild';
 
-const TYPE_MAP: Record<string, string> = {
-  '재개발사업지구': '재개발',
-  '주택재개발사업지구': '재개발',
-  '도시환경정비사업지구': '재개발',
-  '주거환경개선사업지구': '재개발',
-  '재건축사업지구': '재건축',
-  '주택재건축사업지구': '재건축',
+const TYPE_MAP: Record<string, { project_type: string; sub_type: string }> = {
+  '재개발사업지구': { project_type: '재개발', sub_type: '주택재개발' },
+  '주택재개발사업지구': { project_type: '재개발', sub_type: '주택재개발' },
+  '도시환경정비사업지구': { project_type: '재개발', sub_type: '도시환경정비' },
+  '도시정비형 재개발': { project_type: '재개발', sub_type: '도시환경정비' },
+  '주거환경개선사업지구': { project_type: '재개발', sub_type: '주택재개발' },
+  '재건축사업지구': { project_type: '재건축', sub_type: '주택재건축' },
+  '주택재건축사업지구': { project_type: '재건축', sub_type: '주택재건축' },
 };
 
 function guessStage(row: Record<string, any>): string {
@@ -46,10 +47,12 @@ function extractGu(pstn: string | null): string | null {
   return match ? match[1] : null;
 }
 
-function getProjectType(sclsf: string): string | null {
+function getProjectType(sclsf: string): { project_type: string; sub_type: string } | null {
   for (const [key, val] of Object.entries(TYPE_MAP)) {
     if (sclsf.includes(key)) return val;
   }
+  // 도시정비형 키워드 추가 감지
+  if (/도시환경|도시정비/.test(sclsf)) return { project_type: '재개발', sub_type: '도시환경정비' };
   return null;
 }
 
@@ -102,39 +105,73 @@ export async function GET(req: NextRequest) {
     }
     const unique = Array.from(deduped.values());
 
-    // 4) 매핑
-    const mapped = unique.map(r => ({
-      district_name: r.RGN_NM || r.PSTN_NM || '미상',
-      region: '서울',
-      sigungu: extractGu(r.PSTN_NM),
-      project_type: getProjectType(r.SCLSF || '') || '재개발',
-      stage: guessStage(r),
-      total_households: (() => { const v = r.TOT_HSHLD_CO || r.HSHLD_CO || r.PLAN_HSHLD_CO || r.HO_CNT || null; const n = v ? parseInt(v) : null; return n && n > 0 && n < 100000 ? n : null; })(),
-      area_sqm: parseFloat(r.AREA_CHG_AFTR || r.AREA_EXS || '0') || null,
-      address: r.PSTN_NM || null,
-      notes: r.SCLSF || null,
-      source: 'seoul_opendata',
-      is_active: true,
-    }));
+    // 4) 매핑 — sub_type 분리 + external_id 추가
+    const mapped = unique.map(r => {
+      const typeInfo = getProjectType(r.SCLSF || '') || { project_type: '재개발', sub_type: '주택재개발' };
+      return {
+        district_name: r.RGN_NM || r.PSTN_NM || '미상',
+        region: '서울',
+        sigungu: extractGu(r.PSTN_NM),
+        project_type: typeInfo.project_type,
+        sub_type: typeInfo.sub_type,
+        stage: guessStage(r),
+        total_households: (() => { const v = r.TOT_HSHLD_CO || r.HSHLD_CO || r.PLAN_HSHLD_CO || r.HO_CNT || null; const n = v ? parseInt(v) : null; return n && n > 0 && n < 100000 ? n : null; })(),
+        area_sqm: parseFloat(r.AREA_CHG_AFTR || r.AREA_EXS || '0') || null,
+        constructor: r.CNSTRTR_NM || r.CONSRT_CO_NM || null,
+        address: r.PSTN_NM || null,
+        notes: r.SCLSF || null,
+        source: 'seoul_opendata',
+        is_active: true,
+        external_id: r.PRJC_CD ? `seoul_${r.PRJC_CD}` : null,
+      };
+    });
 
-    // 5) Full refresh
-    await supabase.from('redevelopment_projects').delete().eq('source', 'seoul_opendata');
+    // 5) UPSERT — external_id가 있으면 기존 데이터 보존 (AI요약, 좌표 등 유지)
+    //    external_id가 없으면 INSERT (중복 가능성 있지만 데이터 손실 방지)
+    const withExtId = mapped.filter(m => m.external_id);
+    const withoutExtId = mapped.filter(m => !m.external_id);
 
+    let upserted = 0;
     let inserted = 0;
     const insertErrors: string[] = [];
-    for (let i = 0; i < mapped.length; i += 100) {
-      const batch = mapped.slice(i, i + 100);
-      // @ts-expect-error supabase insert type
-      const { error } = await supabase.from('redevelopment_projects').insert(batch);
-      if (!error) inserted += batch.length;
+
+    // external_id 있는 건: UPSERT (AI요약/좌표/blog_count 등 보존)
+    for (let i = 0; i < withExtId.length; i += 100) {
+      const batch = withExtId.slice(i, i + 100);
+      const { error } = await (supabase as any).from('redevelopment_projects').upsert(batch, {
+        onConflict: 'external_id',
+        ignoreDuplicates: false,
+      });
+      if (!error) upserted += batch.length;
       else insertErrors.push(error.message);
+    }
+
+    // external_id 없는 건: 기존 Full refresh 방식 유지 (소수)
+    if (withoutExtId.length > 0) {
+      for (let i = 0; i < withoutExtId.length; i += 100) {
+        const batch = withoutExtId.slice(i, i + 100);
+        const { error } = await (supabase as any).from('redevelopment_projects').insert(batch);
+        if (!error) inserted += batch.length;
+        else insertErrors.push(error.message);
+      }
+    }
+
+    // API에 없는 기존 건: is_active = false 마킹 (삭제 대신)
+    const apiExternalIds = withExtId.map(m => m.external_id).filter(Boolean);
+    if (apiExternalIds.length > 0) {
+      await (supabase as any).from('redevelopment_projects')
+        .update({ is_active: false })
+        .eq('source', 'seoul_opendata')
+        .not('external_id', 'in', `(${apiExternalIds.join(',')})`)
+        .not('external_id', 'is', null);
     }
 
     return {
       processed: allRows.length,
-      created: inserted,
+      created: upserted + inserted,
+      updated: upserted,
       failed: insertErrors.length,
-      metadata: { api_name: 'seoul_opendata', api_calls: Math.ceil(totalCount / 1000) + 1, filtered: filtered.length, deduped: unique.length },
+      metadata: { api_name: 'seoul_opendata', api_calls: Math.ceil(totalCount / 1000) + 1, filtered: filtered.length, deduped: unique.length, withExtId: withExtId.length, withoutExtId: withoutExtId.length },
     };
   });
 

@@ -55,12 +55,15 @@ export interface RedevProject {
   sigungu: string | null;
   address: string | null;
   project_type: string;
+  sub_type: string | null;
   stage: string | null;
   total_households: number | null;
+  existing_households: number | null;
+  area_sqm: number | null;
   land_area: number | null;
   floor_area_ratio: number | null;
   building_coverage: number | null;
-  max_floor: number;
+  max_floor: number | null;
   estimated_move_in: string | null;
   expected_completion: string | null;
   developer: string | null;
@@ -70,6 +73,12 @@ export interface RedevProject {
   key_features: string | null;
   ai_summary: string | null;
   notes: string | null;
+  external_id: string | null;
+  blog_count: number;
+  avg_trade_price: number | null;
+  recent_trade_count: number;
+  last_stage_change: string | null;
+  previous_stage: string | null;
 }
 
 /** 실거래 (TransactionTab) */
