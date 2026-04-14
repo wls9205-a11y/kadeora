@@ -16,7 +16,7 @@ interface Props extends SharedTabProps {
   freshDate?: string;
 }
 
-export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUser, watchlist, toggleWatchlist, setCommentTarget, showToast, globalRegion, globalSearch, freshDate, aptImageMap }: Props) {
+export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUser, watchlist, toggleWatchlist, setCommentTarget, showToast, globalRegion, globalSearch, freshDate, aptImageMap, aptEngageMap }: Props) {
   const [unsoldRegion, setUnsoldRegion] = useState(globalRegion || '전체');
   const [unsoldSearch, setUnsoldSearch] = useState('');
   const [unsoldPage, setUnsoldPage] = useState(1);
@@ -160,9 +160,16 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
         const pMin = u.sale_price_min ? Math.round(u.sale_price_min / 10000 * 10) / 10 : null;
         const pMax = u.sale_price_max ? Math.round(u.sale_price_max / 10000 * 10) / 10 : null;
         const priceStr = pMin ? `${pMin}억${pMax && pMax !== pMin ? `~${pMax}억` : ''}` : null;
+        const ppAvg = (u as any).price_per_pyeong;
+        const fmtP = (n: number) => n >= 10000 ? `${(n / 10000).toFixed(1)}억` : `${n.toLocaleString()}만`;
+        const completionLabel = (u as any).completion_ym ? `${String((u as any).completion_ym).slice(0, 4)}.${parseInt(String((u as any).completion_ym).slice(4, 6)) || '?'}` : null;
+        const constructorShort = (u as any).constructor_nm ? String((u as any).constructor_nm).split('(')[0].trim().slice(0, 8) : ((u as any).developer_nm ? String((u as any).developer_nm).split('(')[0].trim().slice(0, 8) : null);
 
         const unsoldCount = u.tot_unsold_hshld_co || 0;
         const dangerColor = unsoldCount >= 1000 ? 'var(--accent-red)' : unsoldCount >= 500 ? 'var(--accent-orange)' : unsoldCount >= 100 ? 'var(--accent-yellow)' : 'var(--accent-green)';
+        const kS = { textAlign: 'center' as const, padding: '5px 4px', background: 'var(--bg-surface)', borderRadius: 2 };
+        const kL = { fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 2, fontWeight: 500 as const };
+        const kV = (c: string) => ({ fontSize: 'var(--fs-sm)', fontWeight: 800 as const, color: c, lineHeight: 1.3, overflow: 'hidden' as const, textOverflow: 'ellipsis' as const, whiteSpace: 'nowrap' as const });
 
         return (
           <Link key={u.id} href={`/apt/${encodeURIComponent(generateAptSlug(u.house_nm) || String(u.id))}`} className="hero-card" style={{ display: 'block', borderLeft: '3px solid rgba(248,113,113,0.5)' }}>
@@ -172,7 +179,9 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
               <div className="hero-badges">
                 <span className="hero-badge" style={{ background: 'rgba(220,38,38,0.9)', color: '#fff' }}>미분양</span>
                 {isNew(u, 'unsold') && <span className="hero-badge" style={{ background: 'rgba(254,243,199,0.95)', color: '#92400E' }}>NEW</span>}
+                {(u as any).discount_info && <span className="hero-badge" style={{ background: 'rgba(52,211,153,0.9)', color: '#fff' }}>🏷️ 할인</span>}
                 {(() => { const sa = surgeAlerts.find(a => a.region_nm === u.region_nm); return sa && sa.change_pct !== 0 ? <span className="hero-badge" style={{ background: sa.change_pct > 0 ? 'rgba(248,113,113,0.9)' : 'rgba(52,211,153,0.9)', color: '#fff' }}>{sa.change_pct > 0 ? '+' : ''}{sa.change_pct}%</span> : null; })()}
+                {constructorShort && <span className="hero-badge" style={{ background: 'rgba(255,255,255,0.92)', color: '#2563EB' }}>{constructorShort}</span>}
               </div>
               <div className="hero-chip">
                 <div className="hero-overlay-stat">
@@ -182,15 +191,28 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
               </div>
               <div className="hero-overlay">
                 <div className="hero-name">{u.house_nm || '미분양'}</div>
-                <div className="hero-addr">{u.region_nm}{u.sigungu_nm ? ` ${u.sigungu_nm}` : ''}</div>
+                <div className="hero-addr">{u.region_nm}{u.sigungu_nm ? ` ${u.sigungu_nm}` : ''}{constructorShort ? ` · ${constructorShort}` : ''}{u.tot_supply_hshld_co ? ` · ${u.tot_supply_hshld_co.toLocaleString()}세대` : ''}</div>
               </div>
             </div>
 
-            {/* ② 3열 KPI 그리드 */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 1, margin: '0 10px 8px', background: 'var(--border)', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--border)' }}>
-              <div style={{ textAlign: 'center', padding: '6px 4px', background: 'var(--bg-surface)' }}><div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 2 }}>미분양</div><div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--accent-red)' }}>{unsoldCount.toLocaleString()}호</div></div>
-              <div style={{ textAlign: 'center', padding: '6px 4px', background: 'var(--bg-surface)' }}><div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 2 }}>전월대비</div><div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: (() => { const sa = surgeAlerts.find(a => a.region_nm === u.region_nm); return sa && sa.change_pct > 0 ? 'var(--accent-red)' : sa && sa.change_pct < 0 ? 'var(--accent-green)' : 'var(--text-tertiary)'; })() }}>{(() => { const sa = surgeAlerts.find(a => a.region_nm === u.region_nm); return sa ? `${sa.change_pct > 0 ? '+' : ''}${sa.change_pct}%` : '집계중'; })()}</div></div>
-              <div style={{ textAlign: 'center', padding: '6px 4px', background: 'var(--bg-surface)' }}><div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 2 }}>총공급</div><div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--text-primary)' }}>{u.tot_supply_hshld_co ? u.tot_supply_hshld_co.toLocaleString() : '비공개'}</div></div>
+            {/* 배지 행: 할인정보 + 역세권 */}
+            {((u as any).discount_info || (u as any).nearest_station) && (
+              <div style={{ padding: '6px 12px 2px', display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                {(u as any).discount_info && <span style={{ fontSize: 11, fontWeight: 600, padding: '3px 7px', borderRadius: 6, background: 'rgba(52,211,153,0.08)', color: 'var(--accent-green)', border: '1px solid rgba(52,211,153,0.15)' }}>🏷️ {String((u as any).discount_info).slice(0, 20)}</span>}
+                {(u as any).nearest_station && <span style={{ fontSize: 11, fontWeight: 600, padding: '3px 7px', borderRadius: 6, background: 'rgba(96,165,250,0.08)', color: 'var(--accent-blue)', border: '1px solid rgba(96,165,250,0.15)' }}>🚇 {(u as any).nearest_station}</span>}
+              </div>
+            )}
+
+            {/* ② 4x2 KPI 그리드 */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 1, margin: '4px 10px 8px', background: 'var(--border)', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--border)' }}>
+              <div style={kS}><div style={kL}>미분양</div><div style={kV('var(--accent-red)')}>{unsoldCount.toLocaleString()}호</div></div>
+              <div style={kS}><div style={kL}>전월대비</div><div style={kV((() => { const sa = surgeAlerts.find(a => a.region_nm === u.region_nm); return sa && sa.change_pct > 0 ? 'var(--accent-red)' : sa && sa.change_pct < 0 ? 'var(--accent-green)' : 'var(--text-tertiary)'; })())}>{(() => { const sa = surgeAlerts.find(a => a.region_nm === u.region_nm); return sa ? `${sa.change_pct > 0 ? '+' : ''}${sa.change_pct}%` : '집계중'; })()}</div></div>
+              <div style={kS}><div style={kL}>분양가</div><div style={kV(priceStr ? 'var(--brand)' : 'var(--text-tertiary)')}>{priceStr || '문의'}</div></div>
+              <div style={kS}><div style={kL}>평당가</div><div style={kV(ppAvg ? 'var(--accent-purple)' : 'var(--text-tertiary)')}>{ppAvg ? fmtP(ppAvg) : (priceStr ? '계산중' : '문의')}</div></div>
+              <div style={kS}><div style={kL}>총공급</div><div style={kV('var(--text-primary)')}>{u.tot_supply_hshld_co ? u.tot_supply_hshld_co.toLocaleString() : '비공개'}</div></div>
+              <div style={kS}><div style={kL}>준공</div><div style={kV(completionLabel ? 'var(--accent-green)' : 'var(--text-tertiary)')}>{completionLabel || '미정'}</div></div>
+              <div style={kS}><div style={kL}>시공사</div><div style={kV('var(--text-primary)')}>{constructorShort || '미공개'}</div></div>
+              <div style={kS}><div style={kL}>미분양률</div><div style={kV(dangerColor)}>{rate !== null ? `${rate}%` : '-'}</div></div>
             </div>
 
             {/* ③ 미분양률 바 */}
@@ -199,7 +221,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
                 <div style={{ flex: 1, height: 5, borderRadius: 4, background: 'var(--bg-hover)', overflow: 'hidden' }}>
                   <div style={{ height: '100%', borderRadius: 4, width: `${Math.min(rate, 100)}%`, background: rate > 70 ? 'var(--accent-red)' : rate > 40 ? 'var(--accent-orange)' : 'var(--accent-yellow)' }} />
                 </div>
-                <span style={{ fontSize: 10, fontWeight: 700, color: dangerColor, flexShrink: 0 }}>{rate}%</span>
+                <span style={{ fontSize: 10, fontWeight: 700, color: dangerColor, flexShrink: 0 }}>미분양 {rate}%</span>
               </div>
             )}
 
@@ -208,10 +230,11 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
               <div style={{ padding: '4px 12px 8px' }}><div style={{ padding: '4px 7px', borderLeft: '2px solid rgba(59,123,246,0.25)', fontSize: 10, color: 'var(--text-secondary)', lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{(u as any).ai_summary}</div></div>
             )}
 
-            {/* ⑤ 액션 */}
-            <div style={{ padding: '6px 12px 10px', borderTop: '1px solid var(--border)', display: 'flex', gap: 4 }}>
+            {/* ⑤ Engage + 액션 */}
+            <div style={{ padding: '6px 12px 10px', borderTop: '1px solid var(--border)', display: 'flex', gap: 4, alignItems: 'center' }}>
               <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setCommentTarget({ houseKey: `unsold_${u.id}`, houseNm: u.house_nm || '미분양', houseType: 'unsold' }); }} style={{ fontSize: 10, padding: '3px 8px', borderRadius: 'var(--radius-lg)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-secondary)', cursor: 'pointer', fontWeight: 600 }}>✏️ 한줄평</button>
               {u.pblanc_url && <a href={u.pblanc_url} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} style={{ fontSize: 10, padding: '3px 8px', borderRadius: 'var(--radius-lg)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>홈페이지 →</a>}
+              <a href={`/apt/${encodeURIComponent(generateAptSlug(u.house_nm) || String(u.id))}#interest-section`} onClick={(e) => e.stopPropagation()} style={{ fontSize: 14, marginLeft: 'auto', background: 'transparent', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '2px 6px', lineHeight: 1, textDecoration: 'none', color: 'var(--text-tertiary)' }}>☆</a>
             </div>
           </Link>
         );

@@ -7,6 +7,7 @@ import { isTossMode } from '@/lib/toss-mode';
 import TossTeaser from '@/components/TossTeaser';
 import { type Apt, getStatus, fmtD, kstNow, isNew, STATUS_BADGE, generateAptSlug, type SharedTabProps } from './apt-utils';
 import SectionShareButton from '@/components/SectionShareButton';
+import EngageRow from '@/components/EngageRow';
 
 interface Props extends SharedTabProps {
   apts: Apt[];
@@ -18,7 +19,7 @@ interface Props extends SharedTabProps {
 
 const SB = STATUS_BADGE;
 
-export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUser, watchlist, toggleWatchlist, setCommentTarget: _setCommentTarget, showToast: _showToast, globalRegion, globalSearch, subTotalCount, freshDate, aptImageMap }: Props) {
+export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUser, watchlist, toggleWatchlist, setCommentTarget: _setCommentTarget, showToast: _showToast, globalRegion, globalSearch, subTotalCount, freshDate, aptImageMap, aptEngageMap }: Props) {
   const [region, setRegion] = useState(globalRegion || '전체');
   const [statusFilter, setStatusFilter] = useState('전체');
   const [aptSort, setAptSort] = useState<'date'|'supply'|'deadline'|'competition'|'price'>('date');
@@ -371,6 +372,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                     );
                   })()}
                 </div>
+                <EngageRow views={aptEngageMap?.[apt.house_nm]?.views} comments={aptEngageMap?.[apt.house_nm]?.comments} interest={aptEngageMap?.[apt.house_nm]?.interest} />
               </Link>
             );
           })}

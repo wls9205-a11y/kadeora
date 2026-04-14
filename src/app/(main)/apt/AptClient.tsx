@@ -285,6 +285,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           globalRegion={selectedRegion !== '전체' ? selectedRegion : undefined}
           globalSearch={globalSearch}
           freshDate={dataFreshness?.trade}
+          aptImageMap={aptImageMap}
         />
       )}
 

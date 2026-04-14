@@ -17,7 +17,7 @@ interface Props extends SharedTabProps {
   freshDate?: string;
 }
 
-export default function TransactionTab({ transactions, tradeMonthly, watchlist, toggleWatchlist, globalRegion, globalSearch, freshDate }: Props) {
+export default function TransactionTab({ transactions, tradeMonthly, watchlist, toggleWatchlist, globalRegion, globalSearch, freshDate, aptImageMap }: Props) {
   const [region, setRegion] = useState(globalRegion || '전체');
   const [page, setPage] = useState(1);
   const [areaFilter, setAreaFilter] = useState('전체');
@@ -253,16 +253,20 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
         const maxP = sameApt.length > 1 ? Math.max(...sameApt.map((x) => x.deal_amount || 0)) : 0;
         const vsMax = maxP > 0 && amt > 0 && maxP !== amt ? Math.round(((amt - maxP) / maxP) * 100) : null;
         const isMax = maxP > 0 && amt >= maxP && sameApt.length >= 2;
+        const ageYears = t.built_year ? new Date().getFullYear() - t.built_year : null;
+        const ageLabel = ageYears !== null ? (ageYears <= 5 ? '신축' : ageYears <= 15 ? `${ageYears}년차` : ageYears <= 30 ? `${ageYears}년차` : `${ageYears}년차`) : null;
+        const ageColor = ageYears !== null ? (ageYears <= 5 ? 'var(--accent-green)' : ageYears <= 15 ? 'var(--accent-blue)' : ageYears <= 30 ? 'var(--accent-orange)' : 'var(--accent-red)') : 'var(--text-tertiary)';
         return (
           <div key={`${t.id || i}`} onClick={() => setSelected(t)} className="hero-card" style={{ cursor: 'pointer', borderLeft: isMax ? '3px solid rgba(251,191,36,0.5)' : `3px solid ${borderColor}40` }}>
             {/* 히어로 이미지 */}
             <div className="hero-img">
-              <img src={`/api/og?title=${encodeURIComponent(t.apt_name || '아파트')}&category=apt&design=2`} alt={t.apt_name || "아파트"} width={400} height={120} loading="lazy" />
+              <img src={aptImageMap?.[t.apt_name] || `/api/og?title=${encodeURIComponent(t.apt_name || '아파트')}&category=apt&design=2`} alt={t.apt_name || "아파트"} width={400} height={120} loading="lazy" />
               <div className="hero-badges">
                 <span className="hero-badge" style={{ background: t.trade_type === '매매' ? 'rgba(124,58,237,0.9)' : 'rgba(5,150,105,0.9)', color: '#fff' }}>{t.trade_type || '매매'}</span>
                 {isNew(t, 'transaction') && <span className="hero-badge" style={{ background: 'rgba(254,243,199,0.95)', color: '#92400E' }}>NEW</span>}
                 {isMax && <span className="hero-badge" style={{ background: 'rgba(251,191,36,0.9)', color: '#1a1a2e' }}>신고가</span>}
                 {vsMax !== null && <span className="hero-badge" style={{ background: vsMax > 0 ? 'rgba(239,68,68,0.9)' : 'rgba(52,211,153,0.9)', color: '#fff' }}>{vsMax > 0 ? '▲' : '▼'}{vsMax > 0 ? '+' : ''}{vsMax}%</span>}
+                {ageLabel && <span className="hero-badge" style={{ background: 'rgba(255,255,255,0.92)', color: ageColor }}>{ageLabel}</span>}
               </div>
               <div className="hero-overlay" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
