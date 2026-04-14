@@ -1,4 +1,4 @@
-export const maxDuration = 120;
+export const maxDuration = 300;
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronAuth } from '@/lib/cron-auth';
@@ -407,7 +407,7 @@ async function handler(_req: NextRequest) {
   const sb = getSupabaseAdmin();
   const config = await getAutoPublishConfig(sb);
   const _start = Date.now();
-  const MAX_PER_RUN = 4;
+  const MAX_PER_RUN = 10;
 
   // 25점 미만 자동 스킵 (큐 정리)
   await (sb as any).from('issue_alerts')
@@ -428,7 +428,7 @@ async function handler(_req: NextRequest) {
 
   const results: any[] = [];
   for (const issue of issues) {
-    if (Date.now() - _start > 100_000) break; // 100s 안전 마진
+    if (Date.now() - _start > 250_000) break; // 250s 안전 마진
     try {
       const r = await processOneIssue(sb, issue, config);
       results.push(r);

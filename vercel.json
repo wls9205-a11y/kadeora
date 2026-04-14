@@ -410,7 +410,7 @@
     },
     {
       "path": "/api/cron/issue-draft",
-      "schedule": "*/15 * * * *"
+      "schedule": "*/10 * * * *"
     },
     {
       "path": "/api/cron/issue-trend",
