@@ -280,13 +280,29 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
               </div>
             </div>
 
-            {/* ② 4열 KPI */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 1, margin: '0 10px 8px', background: 'var(--border)', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--border)' }}>
-              <div style={{ textAlign: 'center', padding: '6px 4px', background: 'var(--bg-surface)' }}><div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 2 }}>평당가</div><div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--accent-purple)' }}>{(t.exclusive_area || 0) > 0 ? `${Math.round(amt / ((t.exclusive_area || 1) / 3.3058)).toLocaleString()}만` : '-'}</div></div>
-              <div style={{ textAlign: 'center', padding: '6px 4px', background: 'var(--bg-surface)' }}><div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 2 }}>거래수</div><div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--brand)' }}>{sameApt.length}건</div></div>
-              <div style={{ textAlign: 'center', padding: '6px 4px', background: 'var(--bg-surface)' }}><div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 2 }}>최저</div><div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--accent-cyan, #22D3EE)' }}>{sameApt.length > 1 ? fmtAmount(Math.min(...sameApt.map(x => x.deal_amount || 0))) : fmtAmount(amt)}</div></div>
-              <div style={{ textAlign: 'center', padding: '6px 4px', background: 'var(--bg-surface)' }}><div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 2 }}>최고</div><div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--accent-red)' }}>{maxP > 0 ? fmtAmount(maxP) : fmtAmount(amt)}</div></div>
-            </div>
+            {/* ② 8열 KPI (4x2) */}
+            {(() => {
+              const kS = { textAlign: 'center' as const, padding: '5px 3px', background: 'var(--bg-surface)' };
+              const kL = { fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 2 };
+              const ppyeong = (t.exclusive_area || 0) > 0 ? Math.round(amt / ((t.exclusive_area || 1) / 3.3058)) : 0;
+              const prevTx = sameApt.length >= 2 ? sameApt[1] : null;
+              const prevAmt = prevTx?.deal_amount || 0;
+              const prevDiff = prevAmt > 0 ? amt - prevAmt : 0;
+              const prevPct = prevAmt > 0 ? Math.round((prevDiff / prevAmt) * 100) : 0;
+              const avgAmt = sameApt.length > 0 ? Math.round(sameApt.reduce((s: number, x: any) => s + (x.deal_amount || 0), 0) / sameApt.length) : 0;
+              return (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 1, margin: '0 10px 4px', background: 'var(--border)', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--border)' }}>
+                  <div style={kS}><div style={kL}>평당가</div><div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--accent-purple)' }}>{ppyeong > 0 ? `${ppyeong.toLocaleString()}만` : '-'}</div></div>
+                  <div style={kS}><div style={kL}>거래수</div><div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--brand)' }}>{sameApt.length}건</div></div>
+                  <div style={kS}><div style={kL}>최저가</div><div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--accent-cyan, #22D3EE)' }}>{sameApt.length > 1 ? fmtAmount(Math.min(...sameApt.map(x => x.deal_amount || 0))) : fmtAmount(amt)}</div></div>
+                  <div style={kS}><div style={kL}>최고가</div><div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--accent-red)' }}>{maxP > 0 ? fmtAmount(maxP) : fmtAmount(amt)}</div></div>
+                  <div style={kS}><div style={kL}>전고점대비</div><div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: vsMax !== null ? (vsMax >= 0 ? 'var(--accent-red)' : 'var(--accent-green)') : 'var(--text-tertiary)' }}>{vsMax !== null ? `${vsMax >= 0 ? '▲+' : '▼'}${vsMax}%` : (isMax ? '신고가' : '-')}</div></div>
+                  <div style={kS}><div style={kL}>평형 평균</div><div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--accent-blue-light, #60A5FA)' }}>{avgAmt > 0 ? fmtAmount(avgAmt) : '-'}</div></div>
+                  <div style={kS}><div style={kL}>직전거래</div><div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--text-secondary)' }}>{prevAmt > 0 ? fmtAmount(prevAmt) : '-'}</div></div>
+                  <div style={kS}><div style={kL}>직전대비</div><div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: prevDiff > 0 ? 'var(--accent-red)' : prevDiff < 0 ? 'var(--accent-green)' : 'var(--text-tertiary)' }}>{prevDiff !== 0 ? `${prevDiff > 0 ? '+' : ''}${fmtAmount(prevDiff)}` : '-'}</div></div>
+                </div>
+              );
+            })()}
 
             {/* ③ 미니 추이 차트 */}
             {sameApt.length >= 3 && (() => {

@@ -209,16 +209,19 @@ export default function ComplexClient({ complexes, ageGroups, regions, initialRe
                 {c.jeonseRatio ? <Gauge ratio={c.jeonseRatio} size={42} /> : null}
               </div>
 
-              {/* 3열 부가 데이터 */}
-              <div className="kd-grid-3" style={{ gap: 'var(--sp-xs)', margin: '0 10px 8px' }}>
+              {/* 3열x2줄 부가 데이터 */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 1, margin: '0 10px 4px', background: 'var(--border)', borderRadius: 'var(--radius-sm)', overflow: 'hidden', border: '1px solid var(--border)' }}>
                 {[
-                  { label: '전세', value: c.jeonse > 0 ? fmtAmount(c.jeonse) : '—' },
-                  { label: '월세', value: c.monthlyRent > 0 ? `${c.monthlyRent}만` : '—' },
-                  { label: '평당가', value: c.pyeongPrice > 0 ? fmtAmount(c.pyeongPrice) : '—' },
+                  { label: '전세', value: c.jeonse > 0 ? fmtAmount(c.jeonse) : '—', color: 'var(--accent-green)' },
+                  { label: '평당가', value: c.pyeongPrice > 0 ? fmtAmount(c.pyeongPrice) : '—', color: 'var(--accent-purple, #A78BFA)' },
+                  { label: '갭투자', value: c.lastPrice > 0 && c.jeonse > 0 ? fmtAmount(c.lastPrice - c.jeonse) : '—', color: 'var(--accent-orange)' },
+                  { label: '매매', value: c.saleCount > 0 ? `${c.saleCount}건` : '—', color: 'var(--brand)' },
+                  { label: '전월세', value: c.rentCount > 0 ? `${c.rentCount}건` : '—', color: 'var(--accent-cyan, #22D3EE)' },
+                  { label: '월세', value: c.monthlyRent > 0 ? `${c.monthlyRent}만` : '—', color: 'var(--text-secondary)' },
                 ].map(p => (
-                  <div key={p.label} style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-xs)', padding: '4px 4px', textAlign: 'center' }}>
+                  <div key={p.label} style={{ textAlign: 'center', padding: '4px 2px', background: 'var(--bg-surface)' }}>
                     <div style={{ fontSize: 7, color: 'var(--text-tertiary)' }}>{p.label}</div>
-                    <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)' }}>{p.value}</div>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: p.color }}>{p.value}</div>
                   </div>
                 ))}
               </div>
