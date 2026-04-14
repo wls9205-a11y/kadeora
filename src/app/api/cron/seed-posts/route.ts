@@ -5,287 +5,505 @@ import { revalidatePath } from 'next/cache';
 import { withCronLogging } from '@/lib/cron-logger';
 
 /**
- * seed-posts 크론 — v3 (페르소나 기반 자연스러운 피드 게시글)
+ * seed-posts 크론 v4 — 다양하고 자연스러운 피드 게시글
  *
- * 시드 유저별 나이/성별/지역 반영
- * 20대~50대 연령대별 언어체 차별화
- * 주식/부동산 + 뻘글(일상/잡담) 비율 혼합
- * AI 생성 + 템플릿 폴백
- * 자연스러운 댓글 (연령대별)
+ * 핵심 개선:
+ * ✅ 10가지 콘텐츠 타입 (토론, 꿀팁, 후기, 질문, 계산, 유머, 뉴스반응, TIL, 시리즈, 일상)
+ * ✅ 24시간 내 동일 baseKey 1개 제한
+ * ✅ 같은 유저 24h 내 최대 1게시글
+ * ✅ 시간대별 콘텐츠 매칭
+ * ✅ 실제 DB 데이터 기반 동적 생성
+ * ✅ AI(Haiku)로 자연스러운 변형 + 폴백
  */
 
-const today = new Date();
-const dateTag = `${today.getMonth() + 1}/${today.getDate()}`;
-const dayNames = ['일','월','화','수','목','금','토'];
-const dayName = dayNames[today.getDay()];
+const ANTHROPIC_API = 'https://api.anthropic.com/v1/messages';
+const MODEL = 'claude-haiku-4-5-20251001';
 
-const TONE_GUIDE: Record<string, string> = {
- '20대_male': '20대 남성. 반말+존댓말 섞어, ㅋㅋ ㅎㅎ 자연스럽게. "~했는데" "~인듯" "ㄹㅇ" 같은 표현. 예: "오늘 장 개폭락했는데 ㅋㅋ 멘탈 나감"',
- '20대_female': '20대 여성. "~했어요" "~것 같아요" 존댓말에 "ㅠㅠ" "ㅎㅎ". 예: "요즘 적금 이자 너무 적지 않아요? ㅠㅠ"',
- '30대_male': '30대 남성. 존댓말 베이스 편하게. "~합니다" "~것 같네요". 분석적. 예: "삼전 PER 기준으로 보면 아직 저평가 구간"',
- '30대_female': '30대 여성. 존댓말+친근. "~예요" "~거든요" "~네요". 공감 표현. 예: "요즘 전세 구하기 진짜 힘들지 않나요?"',
- '40대_male': '40대 남성. 격식 존댓말. "~입니다". 경험 기반 조언. 예: "20년 투자 경험상 분산투자가 답입니다"',
- '40대_female': '40대 여성. 따뜻한 존댓말. "~해요" "~더라고요". 실생활 경험. 예: "아이 학군 때문에 이사 고민이에요"',
- '50대_male': '50대 남성. 격식+차분. "~하는 것이 좋겠습니다". 예: "노후 자금은 안정적인 배당주 위주로 구성하는 게 바람직합니다"',
- '50대_female': '50대 여성. 따뜻+경험. "~했어요" "~이더라고요". 예: "남편이랑 둘이 연금저축 넣고 있는데 뿌듯해요"',
+const today = new Date();
+const month = today.getMonth() + 1;
+const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+const dayName = dayNames[today.getDay()];
+const isWeekend = today.getDay() === 0 || today.getDay() === 6;
+const hourKST = (today.getUTCHours() + 9) % 24;
+
+// ═══ 연령대별 말투 ═══
+const TONE: Record<string, string> = {
+  '20대_male': '반말+존댓말 섞어. ㅋㅋ ㅎㅎ 자연스럽게. "~했는데" "~인듯" "ㄹㅇ"',
+  '20대_female': '"~했어요" "~것 같아요" 존댓말+ㅠㅠ ㅎㅎ. 이모티콘 1~2개',
+  '30대_male': '존댓말. "~합니다" "~것 같네요". 분석적, 팩트 위주',
+  '30대_female': '"~예요" "~거든요" "~네요". 공감 표현 많이. 친근',
+  '40대_male': '격식 존댓말. "~입니다". 경험 기반 조언 톤',
+  '40대_female': '"~해요" "~더라고요". 따뜻하고 실생활 경험 공유',
+  '50대_male': '"~하는 것이 좋겠습니다". 격식+차분',
+  '50대_female': '"~했어요" "~이더라고요". 따뜻+정감',
 };
 
-interface Template { category: string; title: string; content: string; age?: string }
+type ContentType = 'debate' | 'tip' | 'review' | 'question' | 'calc' | 'humor' | 'news_react' | 'til' | 'series' | 'casual';
+
+const TYPE_WEIGHTS: Record<ContentType, { weight: number; hours: number[] }> = {
+  debate:     { weight: 12, hours: [19, 20, 21, 22] },
+  tip:        { weight: 15, hours: [] },
+  review:     { weight: 10, hours: [18, 19, 20, 21] },
+  question:   { weight: 15, hours: [] },
+  calc:       { weight: 8,  hours: [9, 10, 11, 14, 15, 16] },
+  humor:      { weight: 10, hours: [12, 13, 18, 19] },
+  news_react: { weight: 10, hours: [8, 9, 10, 17, 18] },
+  til:        { weight: 8,  hours: [20, 21, 22] },
+  series:     { weight: 4,  hours: [] },
+  casual:     { weight: 8,  hours: [7, 8, 12, 13, 22, 23] },
+};
+
+interface Template {
+  baseKey: string;
+  category: string;
+  type: ContentType;
+  prompt: string;
+  fallback: { title: string; content: string };
+  ageFilter?: string;
+}
+
 const TEMPLATES: Template[] = [
- // 주식
- { category: 'stock', title: `${dayName}요일 장 마감 복기`, content: '오늘 장 어떠셨어요? 수익이든 손실이든 같이 공유해봐요' },
- { category: 'stock', title: '요즘 반도체주 어떻게 보세요?', content: 'HBM 수요는 계속 증가하는데 주가는 지지부진하네요' },
- { category: 'stock', title: 'ETF 적립식 vs 직접 매수', content: '매달 ETF 적립하는 것과 직접 종목 골라 매수하는 것 중에 뭐가 나을까요?' },
- { category: 'stock', title: '미장 따라갈까 국장 버틸까', content: '나스닥은 계속 오르는데 코스피는 제자리...' },
- { category: 'stock', title: '배당주 추천 좀요', content: '안정적으로 배당 받을 수 있는 종목 추천 부탁드립니다' },
- { category: 'stock', title: `오늘 투자 일기 ${dateTag}`, content: '오늘 매매 내역이나 느낀 점 공유해요' },
- { category: 'stock', title: '2차전지 아직 살아있나요?', content: '조정 많이 받았는데 분할매수 들어가도 될까요?' },
- // 부동산
- { category: 'apt', title: '4월 청약 일정 정리', content: '이번 달 나오는 청약 물량 확인하셨나요?' },
- { category: 'apt', title: '전세 vs 매매 고민', content: '지금 전세로 계속 살지 무리해서라도 매매를 해야 할지' },
- { category: 'apt', title: '청약 가점 낮으면 어디를', content: '40점대인데 수도권 당첨 가능할까요?' },
- { category: 'apt', title: '이번 달 입주 물량 체크', content: '입주 물량 많으면 전세가 하락 가능성 있으니 참고하세요' },
- { category: 'apt', title: '분양권 전매 고민', content: '프리미엄이 좀 붙었는데 지금 팔아야 할지 입주까지 기다려야 할지' },
- // 뻘글 (대폭 확대 — 55%)
- { category: 'free', title: '아 배고프다', content: '점심 뭐 먹을지 고민인데 추천 좀요 ㅋㅋ', age: '20대' },
- { category: 'free', title: '오늘 날씨 실화?', content: '아침에 반팔 입고 나왔는데 저녁에 패딩이 필요함 ㅋㅋㅋ', age: '20대' },
- { category: 'free', title: '월요일이 왜 이렇게 길어', content: '아직 화요일도 안 됐는데 벌써 지침...', age: '20대' },
- { category: 'free', title: '야근하면서 주식 보는 사람', content: '나만 그런 거 아니죠? ㅋㅋ HTS 켜놓고 일하는 척', age: '20대' },
- { category: 'free', title: '커피값이 진짜 올랐다', content: '아아 한잔에 5천원이면 한달에 15만원인데... 그래도 못 끊는 사람', age: '20대' },
- { category: 'free', title: '택배 올 때까지 못 자는 사람', content: '새벽배송 시켰는데 5시부터 깨서 기다리는 중 ㅋ', age: '20대' },
- { category: 'free', title: '넷플릭스 뭐 봐요 요즘', content: '볼 게 없어서 같은 거 돌려보는 중... 추천 부탁', age: '20대' },
- { category: 'free', title: '다이어트 내일부터 한다', content: '매일 내일부터라고 하는데 오늘도 치킨 시켜먹음 ㅋ', age: '20대' },
- { category: 'free', title: '장보면 깜짝 놀라요', content: '계란 한판에 만원이 넘더라고요. 물가가 진짜 미쳤어요 ㅠ', age: '30대' },
- { category: 'free', title: '주말에 뭐 하세요?', content: '날씨 좋은데 집에만 있기 아까워요. 나들이 코스 추천해주세요' },
- { category: 'free', title: '월급이 통장을 스쳐간다', content: '급여일인데 카드값 나가고 보험료 나가고 남는 게 없음', age: '30대' },
- { category: 'free', title: '점심시간에 주식 보는 직장인', content: '12시 되면 자동으로 HTS 켜지는 건 직업병인가요 ㅋ', age: '30대' },
- { category: 'free', title: '퇴근 후 치맥 한잔', content: '오늘 하루 수고했으니까 치킨에 맥주 한잔 다들 수고하셨습니다', age: '30대' },
- { category: 'free', title: '월급 루팡 고백', content: '솔직히 회사에서 카더라 피드 보고 있는 사람 나만 있는 건 아니겠지?', age: '30대' },
- { category: 'free', title: '아이 학원비가 월급보다 비쌈', content: '국어 영어 수학 태권도... 이러다 내 노후가 없어지겠어요', age: '40대' },
- { category: 'free', title: '비 올 때 전 부치는 날', content: '비 오니까 전 부치고 막걸리 한잔 해야지. 날씨 핑계 인정 ㅎ', age: '40대' },
- { category: 'free', title: '건강이 재산이에요', content: '작년에 건강검진 받고 깜짝 놀랐습니다. 다들 건강검진 꼭 받으세요', age: '50대' },
- { category: 'free', title: '비상금 얼마나 갖고 계세요?', content: '갑자기 궁금해졌는데 비상금 보통 월급의 몇 배 정도?' },
- { category: 'free', title: '보험 정리 좀 해야겠어요', content: '보험료가 월 25만원 넘는데 진짜 다 필요한 건지 모르겠어요' },
- { category: 'free', title: '카드 혜택 추천 부탁', content: '신용카드 바꾸려고 하는데 요즘 혜택 좋은 카드 추천해주세요' },
- // ── 뻘글 추가분 ──
- { category: 'free', title: '알바 뛸까 투자할까', content: '용돈이 부족한데 알바를 뛰는 게 나을까 그 시간에 공부를 할까', age: '20대' },
- { category: 'free', title: '오늘 카페 어디 감?', content: '작업할 카페 추천해주세요. 콘센트 많은 곳으로 ㅎ', age: '20대' },
- { category: 'free', title: '중고거래 사기 당할 뻔', content: '당근에서 직거래 했는데 진짜 아슬아슬했음;; 조심하세요 ㅋ', age: '20대' },
- { category: 'free', title: '자취 꿀팁 공유', content: '자취 3년차인데 가성비 좋은 생활 꿀팁 있으면 같이 공유해요', age: '20대' },
- { category: 'free', title: '요즘 물가 체감이 어때요?', content: '편의점 삼각김밥도 2천원 넘는 세상... 다들 장 어디서 보세요?', age: '20대' },
- { category: 'free', title: '쿠팡 와우 해지할까 말까', content: '한달에 4,990원인데 로켓배송 없으면 못 살 것 같기도 하고', age: '20대' },
- { category: 'free', title: '이직 고민 중', content: '연봉은 비슷한데 워라밸이 좋은 회사 vs 연봉 500 더 주는 회사', age: '30대' },
- { category: 'free', title: '아이한테 용돈 얼마 주세요?', content: '초등학생 아이 용돈 기준이 궁금해요. 다들 얼마 정도?', age: '30대' },
- { category: 'free', title: '출퇴근 시간이 아깝다', content: '왕복 2시간인데... 이 시간에 뭐라도 하고 싶은데 항상 폰만 봄', age: '30대' },
- { category: 'free', title: '점심값 만원 시대', content: '구내식당 없는 회사는 점심이 전쟁이에요. 김밥천국도 8천원;', age: '30대' },
- { category: 'free', title: '요즘 좋았던 유튜브 채널', content: '재테크 관련 유튜브 채널 추천해주세요 자극적이지 않은 걸로', age: '30대' },
- { category: 'free', title: '연말정산 미리 준비하시나요?', content: '매년 토해내기만 하는데 올해는 좀 돌려받고 싶어요', age: '30대' },
- { category: 'free', title: '집 정리가 안 된다', content: '미니멀리즘 도전 3일차에 포기... 버리는 것도 기술이에요', age: '30대' },
- { category: 'free', title: '아침에 일어나기 힘든 계절', content: '이불 밖은 위험해... 알람 5번 맞추는 사람 모여', age: '20대' },
- { category: 'free', title: '반려동물 키우시는 분', content: '고양이 키우고 싶은데 자취방에서 가능할까요? 경험담 부탁', age: '20대' },
- { category: 'free', title: '운동 뭐 하세요?', content: '헬스 갈까 필라테스 갈까 수영 갈까... 결정장애 ㅠ', age: '30대' },
- { category: 'free', title: '차 살까 안 살까', content: '서울인데 차가 필요한지 모르겠어요. 유지비만 생각하면 ㄷㄷ', age: '30대' },
- { category: 'free', title: '연금저축 하고 계세요?', content: 'IRP vs 연금저축펀드 뭐가 나을지 아직도 모르겠음', age: '30대' },
- { category: 'free', title: '부모님 용돈 얼마 드려요?', content: '매달 드리고 싶은데 현실적으로 고민이에요. 다들 어느 정도?', age: '30대' },
- { category: 'free', title: '캠핑 다녀왔습니다', content: '날씨 좋아서 가족 캠핑 다녀왔어요. 근데 장비 사는 데 돈이... ㅎ', age: '40대' },
- { category: 'free', title: '은퇴 후 뭐 하고 싶으세요?', content: '요즘 은퇴 후 계획을 세워보는데 막상 뭘 할지 모르겠어요', age: '40대' },
- { category: 'free', title: '아파트 관리비가 폭탄', content: '여름 전기세 합치면 40만원 넘는데 다들 비슷한가요?', age: '40대' },
- { category: 'free', title: '맥주 추천 좀', content: '편의점 맥주 중에 가성비 좋은 거 추천해주세요. 오늘 퇴근 후 한잔', age: '30대' },
- { category: 'free', title: '로또 이번 주 사셨나요', content: '매주 5천원씩 사는데 당첨은 5등이 최고 ㅋㅋ', age: '30대' },
- { category: 'free', title: '통신비 절약 팁', content: '알뜰폰으로 바꾸니까 월 2만원대면 충분하더라고요. 추천', age: '30대' },
- { category: 'free', title: '짠테크 고수 모여라', content: '가계부 쓰시는 분? 앱 추천이랑 절약 팁 공유해요', age: '30대' },
- { category: 'free', title: '퇴사 후기 들려드림', content: '3년 다닌 회사 퇴사하고 3개월 차. 솔직한 후기', age: '30대' },
- { category: 'free', title: '오늘 하루 감사한 것 3가지', content: '1. 출근 안 하는 주말 2. 따뜻한 커피 3. 카더라 피드 ㅎ' },
- // ── 두산위브 트리니뷰 구명역 특집 (5월 분양 핫이슈) ──
- { category: 'apt', title: '구포동 두산위브 트리니뷰 청약 고민', content: '구명역 바로 앞이라 입지는 괜찮은데 지역주택조합이라 좀 걱정... 분양가 얼마나 나올지도 궁금하고 다들 어떻게 보세요?' },
- { category: 'apt', title: '부산 북구에 드디어 신축이', content: '구포동에 두산위브가 들어온다는데 구명역 앞이라 위치 좋더라고요. 5월 모집공고 나온다는데 경쟁률 어떨지' },
- { category: 'apt', title: '지역주택조합 경험 있으신 분', content: '두산위브 트리니뷰 구명역이 지조 사업인데 추가분담금 같은 거 실제로 나오나요? 경험자분 의견 부탁' },
- { category: 'apt', title: '구포동 시세 많이 올랐네', content: '반도유보라 75타입이 5억 가까이 가는데 여기에 두산위브까지 오면 구포동 시세 더 오를까요?', age: '30대' },
- { category: 'apt', title: '구명역 역세권 신축 나온다', content: '구명역 도보 1분이면 진짜 초역세권인데 분양가만 적정하면 대박 아닌가요? 5월 공고 기다리는 중' },
- { category: 'apt', title: '두산위브 분양가 얼마 나올까', content: '구포동 반도유보라가 75타입 4.6억인데 지조라 좀 싸게 나오겠죠? 3억대면 로또급일 듯', age: '20대' },
- // 동네
- { category: 'local', title: '우리 동네 개발 소식', content: '교통이나 재개발 관련 호재 있으면 공유해주세요' },
- { category: 'local', title: '동네 맛집 추천', content: '이번 주말에 맛있는 거 먹으러 갈 건데 추천 좀요' },
- { category: 'local', title: '우리 동네 아파트 분위기', content: '요즘 매물은 많은데 거래가 안 되는 느낌? 체감이 어떠세요?' },
+  // ═══ 주식 — 토론 ═══
+  { baseKey: 'stk_etf_vs_ind', category: 'stock', type: 'debate',
+    prompt: '"ETF 적립식 vs 개별 종목 직투" 커뮤니티 논쟁 글. 양쪽 비교 후 "다들 어떻게?" 질문. 200자',
+    fallback: { title: 'ETF 적립식 vs 개별 종목, 뭐가 나아요?', content: '매달 ETF 넣는 사람이랑 직접 종목 골라 사는 사람이랑 결국 수익률이 비슷하다는데 진짜인가요? 다들 어떻게 하세요?' }},
+  { baseKey: 'stk_kr_vs_us', category: 'stock', type: 'debate',
+    prompt: '"국장 vs 미장" 논쟁. 코스피 박스피 vs 나스닥 우상향. 200자',
+    fallback: { title: '국장 버틸까 미장 갈까, 결론이 뭐예요?', content: '코스피는 매년 박스피인데 나스닥은 우상향이잖아요. 환율 리스크 감안해도 미장이 나은 거 아닌가 싶은데 국장파 의견도 듣고 싶어요' }},
+  { baseKey: 'stk_grow_vs_div', category: 'stock', type: 'debate',
+    prompt: '"성장주 vs 배당주" 투자 스타일 논쟁. 200자',
+    fallback: { title: '성장주 vs 배당주, 30대는 뭘 해야?', content: '20대는 성장주, 40대는 배당주라는데 30대인 저는 뭘 해야 할지 모르겠어요. 다들 포트폴리오 어떻게 구성하세요?' }},
+  { baseKey: 'stk_leverage', category: 'stock', type: 'debate',
+    prompt: '레버리지 ETF 장기보유 찬반. "위험 vs 역사적 우상향" 논쟁. 200자',
+    fallback: { title: '레버리지 ETF 장기보유, 미친 짓 vs 현명한 선택?', content: 'TQQQ 같은 3배 레버리지 장기 보유하는 사람들 있던데 횡보장에서 녹는다잖아요. 근데 10년 수익률 보면 엄청나고... 어떻게 생각하세요?' }},
+  { baseKey: 'stk_ai_bubble', category: 'stock', type: 'debate',
+    prompt: 'AI 관련주 거품론 vs 아직 시작이라는 논쟁. 200자',
+    fallback: { title: 'AI 주식, 거품일까 시작일까?', content: 'AI 관련주 너무 올랐다는 사람도 있고 아직 초입이라는 사람도 있는데 진짜 어떻게 생각하세요? 엔비디아 지금 들어가도 늦지 않은 건가요?' }},
+
+  // ═══ 주식 — 꿀팁 ═══
+  { baseKey: 'stk_tax_tip', category: 'stock', type: 'tip',
+    prompt: '주식 세금 절약 꿀팁 1가지. 최근 알게 된 느낌. 150자',
+    fallback: { title: '해외주식 양도세 절세 꿀팁', content: '해외주식 양도소득 250만원까지 비과세. 매년 12월에 수익난 종목 일부 매도 → 바로 재매수하면 매년 250만원 비과세 혜택 받을 수 있어요' }},
+  { baseKey: 'stk_tool_tip', category: 'stock', type: 'tip',
+    prompt: '무료 투자 도구/사이트 1개 추천. 초보 눈높이. 150자',
+    fallback: { title: '무료 주식 분석 도구 추천', content: '카더라에서 종목 비교하면 PER, PBR, 배당수익률 한눈에 보여요. 유료 사이트 없이도 충분합니다' }},
+  { baseKey: 'stk_routine', category: 'stock', type: 'tip',
+    prompt: '직장인 아침 투자 루틴. "출근 전 10분에 이것만" 톤. 150자',
+    fallback: { title: '출근 전 10분 투자 루틴', content: '아침 8:50 선물지수 확인 → 관심종목 뉴스 → 예약매수 설정. 이 3단계만 해도 업무 중 차트 안 봐도 됩니다' }},
+  { baseKey: 'stk_dividend_tip', category: 'stock', type: 'tip',
+    prompt: '배당주 투자 입문 팁. 배당락일, 배당기준일 설명. 150자',
+    fallback: { title: '배당주 초보가 꼭 알아야 할 것', content: '배당 받으려면 배당기준일 2영업일 전에 매수해야 해요. 배당락일에 사면 이번 배당 못 받습니다. 이거 모르고 당일 산 사람 여기 있음 ㅠ' }},
+
+  // ═══ 주식 — 질문 ═══
+  { baseKey: 'stk_begin_q', category: 'stock', type: 'question',
+    prompt: '주식 왕초보 질문. 계좌 개설 후 뭘 사야 하는지 모르겠다는 느낌. 120자',
+    fallback: { title: '주식 처음인데 뭘 사야 해요?', content: '계좌 만들었는데 뭘 사야 할지 모르겠어요. ETF가 낫다는데 어떤 ETF요? 삼성전자부터 사라는 말도 있고 혼란스러워요 ㅠ' }},
+  { baseKey: 'stk_term_q', category: 'stock', type: 'question',
+    prompt: 'PER, PBR 같은 용어를 모르겠다는 순수한 질문. 100자',
+    fallback: { title: 'PER, PBR 쉽게 설명해주실 분?', content: '주식 글 읽으면 PER 몇 배니 PBR 저평가니 하는데 무슨 뜻인지 모르겠어요. 쉽게 설명된 자료 있을까요?' }},
+  { baseKey: 'stk_loss_q', category: 'stock', type: 'question',
+    prompt: '손절 기준 질문. "얼마까지 떨어지면 손절?" 느낌. 120자',
+    fallback: { title: '손절 기준 어떻게 잡으세요?', content: '-10%면 자르는 사람, -30%까지 버티는 사람 다 있던데 다들 기준이 뭐예요? 저는 항상 늦게 잘라서 고통받는 중' }},
+  { baseKey: 'stk_isa_q', category: 'stock', type: 'question',
+    prompt: 'ISA 계좌, 연금저축 차이를 모르겠다는 질문. 120자',
+    fallback: { title: 'ISA vs 연금저축 차이가 뭐예요?', content: '절세 계좌 만들라는데 ISA, 연금저축, IRP 셋 다 뭔지 모르겠어요. 뭘 먼저 가입해야 하나요? 직장인입니다' }},
+
+  // ═══ 주식 — 후기 ═══
+  { baseKey: 'stk_first_buy', category: 'stock', type: 'review', ageFilter: '20대',
+    prompt: '주식 첫 매수 후기. 떨리면서 샀는데 바로 마이너스. 웃긴 톤. 150자',
+    fallback: { title: '인생 첫 주식 샀는데 바로 마이너스 ㅋㅋ', content: '드디어 주식 시작! 삼전 10주 샀는데 다음날 바로 -2%... 타이밍이 예술이라더니 진짜네요 ㅋㅋ 존버합니다' }},
+  { baseKey: 'stk_div_review', category: 'stock', type: 'review',
+    prompt: '배당금 처음 받은 후기. 금액은 작지만 뿌듯. 150자',
+    fallback: { title: '첫 배당금, 치킨 한 마리값이지만 뿌듯', content: '배당주 투자 6개월, 첫 배당금 입금. 치킨 한 마리값이지만 돈이 돈을 벌어오는 느낌이 좋네요. 복리의 마법 시작!' }},
+  { baseKey: 'stk_loss_review', category: 'stock', type: 'review',
+    prompt: '주식 손실 경험담. -30% 찍고 깨달은 교훈. 자조적이지만 유익. 180자',
+    fallback: { title: '-30% 찍고 깨달은 3가지', content: '1. 몰빵은 멘탈이 안 됨\n2. 뉴스 보고 사면 이미 늦음\n3. 손절 못 하면 계좌가 손절 당함\n\n수업료 비쌌지만 이제라도 알았으니 다행' }},
+
+  // ═══ 주식 — 유머 ═══
+  { baseKey: 'stk_humor_law', category: 'stock', type: 'humor',
+    prompt: '"주식의 법칙" 같은 자조 유머. 내가 사면 떨어지고 팔면 오르는. 100자',
+    fallback: { title: '주식의 법칙 발견함', content: '1. 내가 사면 떨어진다\n2. 내가 팔면 오른다\n3. 존버하면 더 떨어진다\n4. 손절하면 반등한다\n\n이거 깨는 법 아시는 분?' }},
+  { baseKey: 'stk_humor_salary', category: 'stock', type: 'humor',
+    prompt: '월급 vs 주식 손실 비교 자조 유머. 100자',
+    fallback: { title: '월급 vs 주식 손실', content: '월급: 통장을 스쳐간다\n주식 수익: 꿈에서만 존재\n주식 손실: 통장에 영구 거주\n\n...이게 맞나요?' }},
+  { baseKey: 'stk_humor_chart', category: 'stock', type: 'humor',
+    prompt: '차트 분석 유머. "차트 보면 다 아는데 수익이 안 난다" 류. 100자',
+    fallback: { title: '차트 분석의 진실', content: '차트 볼 때: "여기가 지지선이니까 반등하겠지"\n현실: 지지선 뚫고 지하실로\n\n기술적 분석 고수분들 이런 적 없어요?' }},
+
+  // ═══ 주식 — 계산 ═══
+  { baseKey: 'stk_compound', category: 'stock', type: 'calc',
+    prompt: '매달 50만원 연 10% 복리 20년 계산 공유. 구체적 숫자. 180자',
+    fallback: { title: '매달 50만원, 20년 복리로 얼마?', content: '계산기 돌렸는데 매달 50만원 연 10% 복리 20년 = 원금 1.2억 → 결과 3.8억. 복리의 힘이 진짜임... 일찍 시작하는 게 답' }},
+  { baseKey: 'stk_coffee_calc', category: 'stock', type: 'calc',
+    prompt: '"매일 커피값 5천원을 투자했다면?" 라떼효과 계산. 150자',
+    fallback: { title: '커피값을 투자했다면 얼마였을까?', content: '매일 5천원 × 365일 = 연 182만원. 이걸 연 8%로 10년 투자하면 약 2,800만원... 커피가 차 한 대값이었네요. 그래도 커피는 못 끊겠다 ㅋ' }},
+
+  // ═══ 주식 — TIL ═══
+  { baseKey: 'stk_til_after', category: 'stock', type: 'til',
+    prompt: '"오늘 알게 된 것: 시간외 거래" 같은 TIL. 투자 상식 1가지. 150자',
+    fallback: { title: 'TIL: 시간외 거래가 가능하다고?', content: '장 끝나고도 시간외 거래 가능한 거 오늘 처음 알았어요. 장 마감 후 뉴스 나오면 바로 대응 가능. 왜 이제 알았지...' }},
+  { baseKey: 'stk_til_isa', category: 'stock', type: 'til',
+    prompt: '"오늘 알게 된 것: ISA 비과세 혜택" TIL. 150자',
+    fallback: { title: 'TIL: ISA 계좌가 이렇게 좋았어?', content: 'ISA 200만원까지 비과세, 초과분 9.9% 분리과세. 일반 계좌 15.4%보다 훨씬 낫네요. 바로 가입함' }},
+
+  // ═══ 부동산 — 토론 ═══
+  { baseKey: 'apt_buy_rent', category: 'apt', type: 'debate',
+    prompt: '"전세 vs 매매" 지금 시점 고민. 양쪽 논거. 200자',
+    fallback: { title: '전세 계속 vs 무리해서 매매, 정답이 뭘까?', content: '전세 만기 다가오는데 매매로 전환할지 고민이에요. 금리 높아서 대출이자 부담, 전세도 보증금 올라서 부담... 다들 어떻게 판단하셨어요?' }},
+  { baseKey: 'apt_new_old', category: 'apt', type: 'debate',
+    prompt: '"신축 청약 기다리기 vs 구축 바로 사기" 논쟁. 200자',
+    fallback: { title: '청약 기다리기 vs 구축 바로 사기, 어느 쪽?', content: '청약 가점 50점대인데 계속 기다릴지 구축이라도 살지 고민이에요. 신축 로또 노리다 5년 날릴 수도 있고...' }},
+  { baseKey: 'apt_invest_live', category: 'apt', type: 'debate',
+    prompt: '"실거주 vs 투자" 아파트 선택 기준 토론. 200자',
+    fallback: { title: '실거주용 vs 투자용, 기준이 다르지 않나요?', content: '실거주면 학군이 1순위인데 투자면 개발호재가 1순위잖아요. 요즘은 실거주 좋은 곳이 투자도 좋다는 말이 있더라고요' }},
+  { baseKey: 'apt_region_gap', category: 'apt', type: 'debate',
+    prompt: '서울 vs 지방 부동산 격차에 대한 토론. 200자',
+    fallback: { title: '서울-지방 집값 격차, 더 벌어질까요?', content: '서울은 계속 오르는데 지방은 미분양 쌓이고... 이 격차가 계속 벌어질까요? 지방에 투자하는 건 이제 위험한 건가요?' }},
+
+  // ═══ 부동산 — 꿀팁 ═══
+  { baseKey: 'apt_check_tip', category: 'apt', type: 'tip',
+    prompt: '아파트 임장 체크리스트 3가지. 실전 경험. 180자',
+    fallback: { title: '임장 갈 때 이것만 체크하세요', content: '1. 평일 저녁 6시에 가보기 — 주차/실거주 체감\n2. 관리사무소에 관리비 물어보기\n3. 지하주차장 누수/균열 확인\n\n이 3개만 봐도 80%는 걸러져요' }},
+  { baseKey: 'apt_sub_tip', category: 'apt', type: 'tip',
+    prompt: '청약 당첨 확률 높이는 실전 팁. 150자',
+    fallback: { title: '청약 당첨 확률 올리는 꿀팁', content: '가점 낮으면 추첨제 노리세요. 85㎡ 초과 = 100% 추첨. 비인기 지역 + 대형 평형이 의외로 당첨률 높아요' }},
+  { baseKey: 'apt_loan_tip', category: 'apt', type: 'tip',
+    prompt: '주택담보대출 금리 비교 팁. 은행 3곳 비교해보라는 조언. 150자',
+    fallback: { title: '주담대 금리, 최소 3곳 비교하세요', content: '같은 조건인데 은행마다 금리 0.3~0.5% 차이 나요. 1억 대출이면 연 30~50만원 차이. 인터넷은행도 꼭 비교해보세요' }},
+
+  // ═══ 부동산 — 질문 ═══
+  { baseKey: 'apt_first_q', category: 'apt', type: 'question',
+    prompt: '사회초년생 내 집 마련 첫 질문. 순수하게 모르는 사람. 130자',
+    fallback: { title: '내 집 마련 어디서부터 시작해요?', content: '입사 2년차인데 집 살 수 있을까요? 청약통장은 있는데 뭘 해야 하는지 모르겠어요. 선배님들 처음에 어떻게 시작하셨어요?' }},
+  { baseKey: 'apt_dsr_q', category: 'apt', type: 'question',
+    prompt: 'DSR, LTV 개념 초보 질문. 120자',
+    fallback: { title: 'DSR, LTV 이게 다 뭔가요?', content: 'DSR 40%, LTV 70% 이런 말만 하는데 무슨 뜻이에요? 대출 얼마까지 받을 수 있는지 계산 방법을 모르겠어요' }},
+  { baseKey: 'apt_area_q', category: 'apt', type: 'question',
+    prompt: '특정 지역 부동산 전망/이사 고민 질문. 130자',
+    fallback: { title: '출퇴근 1시간 이내 지역 추천 좀', content: '직장이 강남인데 전세 3억대로 출퇴근 1시간 이내 어디가 좋을까요? 신혼이라 학군은 상관없고 교통 최우선이에요' }},
+
+  // ═══ 부동산 — 후기 ═══
+  { baseKey: 'apt_move_review', category: 'apt', type: 'review',
+    prompt: '구축→신축 이사 감동 후기. 180자',
+    fallback: { title: '구축→신축 이사하니 세상이 달라졌어요', content: '20년된 빌라에서 신축 아파트로 이사. 시스템 에어컨, 층간소음 거의 없음, 지하주차장에서 바로 엘베... 무리해서라도 옮기길 잘했어요' }},
+  { baseKey: 'apt_sub_review', category: 'apt', type: 'review',
+    prompt: '청약 4번만에 당첨 경험담. 180자',
+    fallback: { title: '청약 4번 만에 당첨!', content: '3번 미당첨이라 포기할까 했는데 4번째에 특공으로 당첨! 포기하지 마세요. 가점 낮아도 특공 조건 맞으면 승산 있어요' }},
+  { baseKey: 'apt_remodel_review', category: 'apt', type: 'review',
+    prompt: '셀프 인테리어 후기. 예산, 기간, 만족도 포함. 180자',
+    fallback: { title: '셀프 인테리어 후기 (예산 800만원)', content: '도배+장판+주방 싱크대+욕실 교체 총 800만원. 업자 맡기면 1,500이었는데 유튜브 보고 도배는 직접 했어요. 3주 걸렸지만 만족도 200%' }},
+
+  // ═══ 부동산 — 계산 ═══
+  { baseKey: 'apt_rent_calc', category: 'apt', type: 'calc',
+    prompt: '"전세 3억 vs 매매 5억" 월 비용 비교 계산. 구체적 숫자. 200자',
+    fallback: { title: '전세 3억 vs 매매 5억, 실제 월 비용', content: '전세 3억: 보증보험 15만 + 관리비 20만 = 월 35만\n매매 5억(대출 2억 3.5%): 이자 58만 + 관리비 20만 = 월 78만\n\n차액 월 43만원. 이게 자산 축적의 대가인 건가요?' }},
+
+  // ═══ 재테크/일상 — 토론 ═══
+  { baseKey: 'free_save_debate', category: 'free', type: 'debate',
+    prompt: '"적금 vs 투자" 안전 vs 리스크 논쟁. 200자',
+    fallback: { title: '적금이 바보짓이라는 말, 동의해요?', content: '적금 이자가 물가상승률도 못 따라간다고 투자하라는 사람 많은데 원금 보장 되는 적금이 진짜 바보짓인가요?' }},
+  { baseKey: 'free_100m_debate', category: 'free', type: 'debate',
+    prompt: '100만원 생기면 명품/여행/투자 중 뭐? 소비 가치관 토론. 150자',
+    fallback: { title: '보너스 100만원, 명품 vs 여행 vs 투자?', content: '갑자기 100만원 생기면 뭐 하세요? 정답은 없겠지만 다들 우선순위가 궁금해요' }},
+  { baseKey: 'free_retire_debate', category: 'free', type: 'debate',
+    prompt: '"조기은퇴 FIRE vs 안정적 직장생활" 논쟁. 200자',
+    fallback: { title: 'FIRE족 vs 안정 직장, 어떤 삶이 나아요?', content: '조기은퇴 해서 자유롭게 사는 FIRE족이 부럽기도 한데, 안정적인 월급의 가치도 무시 못하잖아요. 다들 은퇴 계획 어떻게 세우고 있어요?' }},
+
+  // ═══ 일상 — 꿀팁 ═══
+  { baseKey: 'free_save_tip1', category: 'free', type: 'tip',
+    prompt: '직장인 월 절약 꿀팁. 통신비/보험/구독 정리 등. 180자',
+    fallback: { title: '월 40만원 절약한 실전 방법', content: '알뜰폰 -5만 / 보험 정리 -8만 / 구독 정리 -3만 / 외식 축소 -15만 / 텀블러 -10만 = 월 41만원 절약!' }},
+  { baseKey: 'free_save_tip2', category: 'free', type: 'tip',
+    prompt: '짠테크 습관 1가지. 가계부, 현금봉투 등. 150자',
+    fallback: { title: '짠테크 습관 하나로 월 20만원 아꼈어요', content: '매일 지출 사진 찍기 시작했더니 충동구매가 확 줄었어요. 앱 안 써도 됨. 카드 결제마다 영수증 사진 한 장. 일주일만 해보세요' }},
+  { baseKey: 'free_tax_tip', category: 'free', type: 'tip',
+    prompt: '연말정산 놓치기 쉬운 공제 항목 1가지. 150자',
+    fallback: { title: '연말정산 때 이거 놓치지 마세요', content: '안경/콘택트렌즈 구매비도 의료비 공제 됩니다! 연 50만원 한도. 라식/라섹도 되고요. 의외로 모르는 분 많더라고요' }},
+  { baseKey: 'free_card_tip', category: 'free', type: 'tip',
+    prompt: '신용카드 실적 채우는 꿀팁 또는 추천. 150자',
+    fallback: { title: '카드 실적 채우는 꿀팁', content: '공과금, 통신비, 구독료 전부 한 카드로 몰면 실적 자동 달성. 월 30만원 실적 카드인데 이것만으로 25만원 채워져요' }},
+
+  // ═══ 일상 — 유머 ═══
+  { baseKey: 'free_humor_pay', category: 'free', type: 'humor',
+    prompt: '월급날 비극 유머. "들어왔다 나갔다" 류. 100자',
+    fallback: { title: '월급날의 진실', content: '월급날 아침: 나 부자다!\n월급날 오후: 카드값 자동이체\n월급날 저녁: 관리비 이체\n월급날 밤: ...남은 거 있나?\n\n매달 반복' }},
+  { baseKey: 'free_humor_adult', category: 'free', type: 'humor',
+    prompt: '"어른이 되면 알게 되는 것" 공감 유머. 100자',
+    fallback: { title: '어른이 되고 알게 된 것들', content: '1. 아프면 돈이 든다\n2. 건강해도 돈이 든다\n3. 살아있으면 돈이 든다\n4. 돈 벌려면 건강이 필요\n\n무한루프...' }},
+  { baseKey: 'free_humor_wknd', category: 'free', type: 'humor',
+    prompt: '주말 계획 vs 현실 유머. 100자',
+    fallback: { title: '주말 계획 vs 현실', content: '계획: 운동, 독서, 자기계발\n현실: 침대, 유튜브, 배달\n\n일요일 밤: "다음 주말엔 진짜..."\n매주 반복' }},
+  { baseKey: 'free_humor_diet', category: 'free', type: 'humor',
+    prompt: '다이어트 실패 유머. "내일부터" 패턴. 100자',
+    fallback: { title: '다이어트의 법칙', content: '월요일: 내일부터 한다\n화요일: 이번 주 안에 시작\n수요일: 다음 주 월요일부터\n...\n다음 달 1일: 내년부터' }},
+
+  // ═══ 일상 — 뻘글 ═══
+  { baseKey: `casual_am_${dayName}`, category: 'free', type: 'casual',
+    prompt: `${dayName}요일 아침 출근 뻘글. 커피/지하철/날씨 중 1개. 80자`,
+    fallback: { title: `${dayName}요일 아침`, content: isWeekend ? '주말인데 눈 떠보니 11시... 이게 행복이지' : '오늘도 출근 전쟁. 커피 한잔 하고 시작해야겠다' }},
+  { baseKey: `casual_lunch_${dayName}`, category: 'free', type: 'casual',
+    prompt: '점심 메뉴 고민 뻘글. 80자',
+    fallback: { title: '점심 메뉴 선택장애', content: '매일 이 시간 시작되는 점심 전쟁... 어제 먹은 거 빼면 선택지가 없어요. 제발 추천 좀' }},
+  { baseKey: `casual_eve_${dayName}`, category: 'free', type: 'casual',
+    prompt: '퇴근 후 뻘글. 치맥/넷플/산책 중 1개. 80자',
+    fallback: { title: '퇴근했다', content: '오늘도 수고했어요 다들. 치킨 시킬까 라면 끓일까 고민 중' }},
+  { baseKey: 'casual_money', category: 'free', type: 'casual',
+    prompt: '통장 잔고 걱정 뻘글. 100자',
+    fallback: { title: '통장 잔고 보면 한숨', content: '월급날까지 2주인데 통장이 벌써... 다들 월급 전 마지막 주 어떻게 버텨요?' }},
+  { baseKey: 'casual_pet', category: 'free', type: 'casual',
+    prompt: '반려동물 일상 뻘글. 120자',
+    fallback: { title: '퇴근길에 반겨주는 건 고양이뿐', content: '문 열면 달려오는 고양이가 세상에서 제일 귀여워요. 근데 밥 달라는 거였음 ㅋㅋ 그래도 귀여우니까 됐어' }},
+  { baseKey: 'casual_exercise', category: 'free', type: 'casual',
+    prompt: '운동 자조 뻘글. 헬스장 등록만 3번째 류. 100자',
+    fallback: { title: '헬스장 등록만 3번째', content: '올해 목표: 운동 꾸준히\n현실: 3개월 등록 → 2번 감 → 만료\n\n이번엔 진짜... 라고 매번 말함' }},
+
+  // ═══ 뉴스 반응 ═══
+  { baseKey: 'news_inflation', category: 'free', type: 'news_react',
+    prompt: `물가 상승 뉴스 반응. "${month}월 장보면 깜짝 놀란다" 톤. 130자`,
+    fallback: { title: '마트 가면 깜짝 놀라요 요즘', content: `계란 한판 만원, 과일은 금값. ${month}월 물가가 또 올랐다는데 체감이 뉴스보다 심해요. 장볼 때 절약법 있으면 공유해주세요` }},
+  { baseKey: 'news_interest', category: 'free', type: 'news_react',
+    prompt: '금리 뉴스 반응. 대출 이자 걱정. 130자',
+    fallback: { title: '금리 뉴스 볼 때마다 심장이 철렁', content: '기준금리 동결인데 대출 이자는 왜 높죠? 변동금리 받은 사람들 힘들 것 같아요. 고정금리로 갈아타야 하나' }},
+  { baseKey: 'news_job', category: 'free', type: 'news_react',
+    prompt: '취업/이직 관련 뉴스 반응. 구직 힘들다는 공감. 130자',
+    fallback: { title: '취업시장 뉴스 볼 때마다 답답해요', content: '경기가 안 좋아서 채용이 줄었다는데 체감은 더 심해요. 이력서 넣어도 연락이 안 오네요. 같은 고민인 분 계세요?' }},
+
+  // ═══ 시리즈 ═══
+  { baseKey: `series_stock_d${Math.floor(Math.random() * 30) + 1}`, category: 'stock', type: 'series',
+    prompt: `"주린이 일기 Day ${Math.floor(Math.random() * 30) + 1}" 형식. 주식 초보 하루. 150자`,
+    fallback: { title: `주린이 일기 Day ${Math.floor(Math.random() * 30) + 1}`, content: '오늘 분할매수의 의미를 깨달았다. 몰빵하면 -10%에 멘탈 나가는데 3번 나눠 사니 평단가도 낮아지고 마음도 편함. 성장 중' }},
+  { baseKey: `series_apt_n${Math.floor(Math.random() * 10) + 1}`, category: 'apt', type: 'series',
+    prompt: `"부린이 탐방기 #${Math.floor(Math.random() * 10) + 1}" 형식. 모델하우스 방문 후기. 150자`,
+    fallback: { title: `부린이 탐방기 #${Math.floor(Math.random() * 10) + 1}`, content: '첫 모델하우스 방문. 분위기에 휩쓸려 청약 넣을 뻔 ㅋㅋ 냉정하게 분석해야 하는데 인테리어 보면 마음이 흔들리네요' }},
 ];
 
-const COMMENTS: Record<string, string[]> = {
- '20대': ['ㄹㅇ 공감ㅋㅋ','오 대박','나도 이거 알아보는 중ㅎㅎ','ㅋㅋㅋ 진짜','ㅇㅈ요','이거 실화?','개꿀팁','북마크함','나만 그런 줄ㅋ','헐 대박','존버ㅋㅋ','ㄱㅅㄱㅅ','이거 진짜임?','아 공감 ㅋㅋ'],
- '30대': ['공감합니다 ㅎㅎ','정보 감사해요','저도 같은 고민이에요','좋은 정보네요','이거 유용하다','참고할게요','저도 해봐야겠어요','맞아요 진짜','정보 감사합니다~','공감 백배','저도 알아보는 중','오 몰랐네요'],
- '40대': ['경험상 맞는 말씀','좋은 정보 감사합니다','참고가 되네요','그렇군요','저도 비슷한 생각','도움이 됐습니다','좋은 의견이십니다','공감합니다','저도 그랬어요','유익하네요','알아봐야겠어요'],
- '50대': ['좋은 정보 감사합니다','참고하겠습니다','경험에서 나오는 말씀이네요','맞습니다','도움이 됐습니다','좋은 말씀','공감이 됩니다','새로 알았네요'],
+// ═══ 타입별 댓글 ═══
+const COMMENTS: Record<string, Record<string, string[]>> = {
+  debate: {
+    '20대': ['ㄹㅇ 이거 고민이에요', '저는 전자 ㅋㅋ', '둘 다 해본 사람?', '정답이 없는 듯'],
+    '30대': ['저도 같은 고민이에요', '케바케인 것 같아요', '경험상 전자가 나았어요', '좋은 토론이네요'],
+    '40대': ['경험에 비추어 보면...', '개인 상황에 따라 다릅니다', '양쪽 다 일리 있어요'],
+    '50대': ['좋은 질문이십니다', '본인 상황에 맞게 하시면 됩니다', '깊이 생각해볼 문제네요'],
+  },
+  tip: {
+    '20대': ['오 이거 몰랐네!', '저장 ㅋㅋ', '꿀팁 감사!', '나도 해봐야겠다'],
+    '30대': ['좋은 정보 감사합니다', '바로 실행해봐야겠네요', '추가 팁 있으면 더 알려주세요'],
+    '40대': ['실용적이네요', '주변에도 알려줘야겠어요', '저도 실천 중이에요'],
+    '50대': ['유익한 정보입니다', '감사합니다'],
+  },
+  humor: {
+    '20대': ['ㅋㅋㅋ 공감', '이거 나인데?', '빼박 내 이야기 ㅋ', '웃기면서 슬프다'],
+    '30대': ['너무 공감 ㅋㅋ', '웃으면서도 슬프네요', '나만 이런 줄 알았는데'],
+    '40대': ['ㅎㅎ 공감합니다', '현실이라 더 웃기네요'],
+    '50대': ['ㅎㅎ 재밌습니다'],
+  },
+  question: {
+    '20대': ['저도 궁금!', '아 나도 모름 ㅋ', '누가 알려주세요~'],
+    '30대': ['저도 궁금했어요', '답변 기다립니다', '좋은 질문이에요'],
+    '40대': ['이건 이렇게 하시면 됩니다', '제 경험을 말씀드리면...'],
+    '50대': ['전문가 상담 추천합니다'],
+  },
+  review: {
+    '20대': ['오 부럽다!', '나도 해보고 싶어요', '후기 감사!'],
+    '30대': ['좋은 경험이네요', '저도 비슷한 경험 있어요', '공유 감사합니다'],
+    '40대': ['좋은 후기 감사합니다', '참고하겠습니다'],
+    '50대': ['좋은 경험을 나눠주셨네요'],
+  },
+  default: {
+    '20대': ['ㅋㅋ 공감', '오 좋네요', '이거 진짜'],
+    '30대': ['공감합니다', '좋은 글이에요', '참고할게요'],
+    '40대': ['좋은 정보네요', '공감합니다'],
+    '50대': ['감사합니다', '좋은 글이네요'],
+  },
 };
 
+// ═══ 유틸 ═══
 function randInt(min: number, max: number) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 function pick<T>(arr: T[]): T { return arr[Math.floor(Math.random() * arr.length)]; }
 function pickN<T>(arr: T[], n: number): T[] { return [...arr].sort(() => Math.random() - 0.5).slice(0, Math.min(n, arr.length)); }
 
-interface SeedUser { id: string; nickname: string; age_group: string; gender: string; region_text: string; bio: string }
+function selectContentType(): ContentType {
+  const eligible = Object.entries(TYPE_WEIGHTS).filter(([_, c]) =>
+    c.hours.length === 0 || c.hours.includes(hourKST)
+  );
+  const total = eligible.reduce((s, [_, c]) => s + c.weight, 0);
+  let r = Math.random() * total;
+  for (const [type, c] of eligible) {
+    r -= c.weight;
+    if (r <= 0) return type as ContentType;
+  }
+  return 'casual';
+}
+
+async function generateWithAI(prompt: string, tone: string): Promise<{ title: string; content: string } | null> {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) return null;
+  try {
+    const res = await fetch(ANTHROPIC_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+      body: JSON.stringify({
+        model: MODEL, max_tokens: 400,
+        system: `한국 부동산/주식/재테크 커뮤니티의 일반 유저로서 글을 작성합니다.
+말투: ${tone}
+규칙: 진짜 일반인처럼 자연스럽게. URL/링크/해시태그 절대 금지. 이모지 1~2개 이내.
+출력형식:
+제목: (30자 이내, "제목:" 접두사 포함)
+---
+(본문)`,
+        messages: [{ role: 'user', content: prompt }],
+      }),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const text = data.content?.[0]?.text?.trim();
+    if (!text) return null;
+    const parts = text.split('---');
+    if (parts.length >= 2) {
+      const title = parts[0].replace(/^제목:\s*/i, '').trim().slice(0, 50);
+      const content = parts.slice(1).join('---').trim();
+      if (title && content) return { title, content };
+    }
+    const lines = text.split('\n').filter((l: string) => l.trim());
+    if (lines.length >= 2) return { title: lines[0].replace(/^제목:\s*/i, '').trim().slice(0, 50), content: lines.slice(1).join('\n') };
+    return null;
+  } catch { return null; }
+}
+
+interface SeedUser { id: string; nickname: string; age_group: string; gender: string; region_text: string }
 
 export async function GET(req: NextRequest) {
- const authHeader = req.headers.get('authorization');
- const cronSecret = process.env.CRON_SECRET;
- if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const authHeader = req.headers.get('authorization');
+  const cronSecret = process.env.CRON_SECRET;
+  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
- const result = await withCronLogging('seed-posts', async () => {
- const admin = getSupabaseAdmin();
- const { data: rawUsers } = await admin.from('profiles').select('id, nickname, age_group, gender, region_text, bio').eq('is_seed', true);
- const seedUsers: SeedUser[] = (rawUsers || []).map((u: any) => ({
- id: u.id, nickname: u.nickname || '익명',
- age_group: u.age_group || '30대', gender: u.gender === 'female' ? 'female' : 'male',
- region_text: u.region_text || '서울', bio: u.bio || '',
- }));
- if (seedUsers.length === 0) return { processed: 0, created: 0, failed: 0 };
+  const result = await withCronLogging('seed-posts', async () => {
+    const admin = getSupabaseAdmin();
+    const { data: rawUsers } = await admin.from('profiles').select('id, nickname, age_group, gender, region_text').eq('is_seed', true);
+    const seedUsers: SeedUser[] = (rawUsers || []).map((u: any) => ({
+      id: u.id, nickname: u.nickname || '익명',
+      age_group: u.age_group || '30대', gender: u.gender === 'female' ? 'female' : 'male',
+      region_text: u.region_text || '서울',
+    }));
+    if (seedUsers.length === 0) return { processed: 0, created: 0, failed: 0 };
 
- // ── 엔티티 동적 템플릿: 실제 종목명/현장명 자연스럽게 언급 ──
- let entityTemplates: Template[] = [];
- try {
-   const [{ data: topStocks }, { data: topApts }] = await Promise.all([
-     admin.from('stock_quotes').select('symbol, name, price, change_pct, currency, sector').eq('is_active', true).gt('price', 0).order('volume', { ascending: false, nullsFirst: false }).limit(40),
-     (admin as any).from('apt_sites').select('name, region, sigungu, builder').eq('is_active', true).not('analysis_text', 'is', null).order('page_views', { ascending: false, nullsFirst: false }).limit(40),
-   ]);
-   const rs = (a: any[]) => a[Math.floor(Math.random() * a.length)];
-   if (topStocks?.length) {
-     // 3~5개 종목을 뽑아서 다양한 패턴 생성
-     const picked = topStocks.sort(() => Math.random() - 0.5).slice(0, 5);
-     for (const s of picked) {
-       const isUS = s.currency === 'USD';
-       const p = isUS ? `$${Number(s.price).toFixed(0)}` : `${Number(s.price).toLocaleString()}원`;
-       const chg = Number(s.change_pct);
-       const s2 = rs(topStocks.filter((x: any) => x.symbol !== s.symbol && x.sector === s.sector));
-       const patterns = [
-         { title: `${s.name} 지금 매수 타이밍일까요?`, content: `${s.name}(${s.symbol}) 현재가 ${p}인데 여기서 분할매수 괜찮을까요? ${s.sector || ''} 섹터 전망이 궁금합니다` },
-         { title: `${s.name} ${chg >= 0 ? '상승' : '하락'} 이유 아시는 분?`, content: `${s.name} 오늘 ${chg >= 0 ? '+' : ''}${chg.toFixed(1)}% ${chg >= 0 ? '올랐는데' : '빠졌는데'} 무슨 뉴스 있나요?` },
-         { title: `${s.name} 장기 보유 vs 단타`, content: `${s.name} 보유 중인데 장기 가져갈지 단기로 수익 실현할지 고민이에요` },
-         { title: `${s.name} 배당은 어떤가요?`, content: `${s.name}(${s.symbol}) 배당 투자 괜찮을까요? 배당 수익률이나 배당 성장률 아시는 분` },
-         ...(s2 ? [{ title: `${s.name} vs ${s2.name} 비교`, content: `같은 ${s.sector || ''} 섹터인데 ${s.name}이랑 ${s2.name} 중에 어디가 더 나을까요? 카더라에서 비교해봤는데 의견 궁금해요` }] : []),
-         { title: `${s.name} 차트 분석 부탁`, content: `${s.name} 기술적 분석 잘하시는 분 계신가요? 지지선 저항선 어디쯤인지 궁금합니다` },
-       ];
-       entityTemplates.push({ category: 'stock', ...rs(patterns) });
-     }
-   }
-   if (topApts?.length) {
-     const picked = topApts.sort(() => Math.random() - 0.5).slice(0, 5);
-     for (const a of picked) {
-       const patterns = [
-         { title: `${a.name} 청약 넣을지 고민`, content: `${a.region} ${a.sigungu || ''} ${a.name} 관심 있는 분? ${a.builder || '시공사'} 시공인데 경쟁률이 걱정이에요` },
-         { title: `${a.name} 분양가 어떻게 보세요?`, content: `${a.name} 분양가가 주변 시세 대비 적정한지 궁금해요. ${a.region} ${a.sigungu || ''} 지역 아시는 분 의견 부탁` },
-         { title: `${a.name} 주변 인프라 어때요?`, content: `${a.name} 근처 학교, 마트, 교통 상황 아시는 분 있으면 정보 부탁드려요` },
-         { title: `${a.region} ${a.sigungu || ''} 부동산 전망`, content: `${a.region} ${a.sigungu || ''} 지역 부동산 분위기 어떤가요? ${a.name} 때문에 관심 갖게 됐는데 투자 가치가 있을까요` },
-         { title: `${a.name} 입주 준비하시는 분?`, content: `${a.name} 계약하신 분 계신가요? 입주 준비 꿀팁이나 인테리어 비용 공유해요` },
-         { title: `${a.builder || '시공사'} 시공 아파트 후기`, content: `${a.builder || '시공사'}에서 시공한 다른 아파트 살아보신 분 있나요? ${a.name} 청약 고민 중이라 시공 품질이 궁금해요` },
-       ];
-       entityTemplates.push({ category: 'apt', ...rs(patterns) });
-     }
-   }
- } catch {}
- // 동적 템플릿을 기존 템플릿 풀에 합치기
- const ALL_TEMPLATES = [...TEMPLATES, ...entityTemplates];
+    // 24h 내 기존 포스트 조회 (유저/토픽 중복 방지)
+    const since24h = new Date(Date.now() - 24 * 3600000).toISOString();
+    const { data: recentPosts } = await admin.from('posts')
+      .select('author_id, title').in('author_id', seedUsers.map(u => u.id))
+      .gte('created_at', since24h).eq('is_deleted', false);
 
- const postCount = randInt(2, 4); // v3: 2~4개로 축소 (기존 4~7)
- const results: { title: string; user: string; age: string; category: string }[] = [];
- let creditExhausted = false;
+    const recentAuthorIds = new Set((recentPosts || []).map(p => p.author_id));
+    const recentTitlePrefixes = new Set((recentPosts || []).map(p => p.title?.slice(0, 15)));
 
- // ── 라운드 로빈: 최근 게시한 시드 유저 제외 ──
- const { data: recentPosts } = await admin.from('posts')
- .select('author_id')
- .in('author_id', seedUsers.map(u => u.id))
- .order('created_at', { ascending: false })
- .limit(postCount + 2);
- const recentAuthorIds = new Set((recentPosts || []).map(p => p.author_id));
- // 최근 쓰지 않은 유저를 우선, 없으면 전체에서 선택
- const availableUsers = seedUsers.filter(u => !recentAuthorIds.has(u.id));
- const userPool = availableUsers.length >= postCount ? availableUsers : seedUsers;
- // 셔플해서 순서대로 사용 (같은 유저 연속 방지)
- const shuffledUsers = [...userPool].sort(() => Math.random() - 0.5);
+    const availableUsers = seedUsers.filter(u => !recentAuthorIds.has(u.id));
+    if (availableUsers.length === 0) return { processed: 0, created: 0, failed: 0, metadata: { reason: 'all_users_posted_today' } };
 
- // ── 7일 중복 체크용 기존 제목 가져오기 ──
- const sevenDaysAgo = new Date(Date.now() - 7 * 86400000).toISOString();
- const { data: existingPosts } = await admin.from('posts')
- .select('title')
- .in('author_id', seedUsers.map(u => u.id))
- .gte('created_at', sevenDaysAgo);
- const usedTitles = new Set((existingPosts || []).map(p => p.title));
- const usedTemplatesThisRun = new Set<string>();
+    const postCount = Math.min(randInt(2, 3), availableUsers.length);
+    const selectedUsers = pickN(availableUsers, postCount);
 
- for (let i = 0; i < postCount; i++) {
- if (creditExhausted) break;
- // 라운드 로빈 유저 선택
- const user = shuffledUsers[i % shuffledUsers.length];
- const toneKey = `${user.age_group}_${user.gender === 'female' ? 'female' : 'male'}`;
- const tone = TONE_GUIDE[toneKey] || TONE_GUIDE['30대_male'];
+    // 동적 데이터 기반 추가 템플릿
+    let dynamicTemplates: Template[] = [];
+    try {
+      const [{ data: stocks }, { data: apts }] = await Promise.all([
+        admin.from('stock_quotes').select('symbol, name, price, change_pct, currency')
+          .eq('is_active', true).gt('price', 0).order('volume', { ascending: false, nullsFirst: false }).limit(15),
+        (admin as any).from('apt_sites').select('name, region, sigungu, builder')
+          .eq('is_active', true).not('analysis_text', 'is', null)
+          .order('page_views', { ascending: false, nullsFirst: false }).limit(15),
+      ]);
+      if (stocks?.length) {
+        const s = pick(stocks);
+        const p = s.currency === 'USD' ? `$${Number(s.price).toFixed(0)}` : `${Number(s.price).toLocaleString()}원`;
+        const chg = Number(s.change_pct);
+        dynamicTemplates.push({
+          baseKey: `dyn_${s.symbol}`, category: 'stock', type: pick(['question', 'debate'] as ContentType[]),
+          prompt: `${s.name}(${s.symbol}) 현재가 ${p}, ${chg >= 0 ? '+' : ''}${chg.toFixed(1)}%. 이 종목에 대한 의견/질문/고민 글. 데이터 1~2개만 자연스럽게. 180자`,
+          fallback: { title: `${s.name} 어떻게 보세요?`, content: `${s.name} 현재 ${p}인데 ${chg >= 0 ? '오늘 올랐는데' : '오늘 빠졌는데'} 이 가격대가 적정한지 궁금해요` },
+        });
+      }
+      if (apts?.length) {
+        const a: any = pick(apts);
+        dynamicTemplates.push({
+          baseKey: `dyn_${(a.name || '').slice(0, 6)}`, category: 'apt', type: pick(['question', 'review'] as ContentType[]),
+          prompt: `${a.region} ${a.sigungu || ''} ${a.name} (${a.builder || '시공사 미정'}) 관련 실수요자/투자자 관점 글. 180자`,
+          fallback: { title: `${a.name} 어떠세요?`, content: `${a.region} ${a.sigungu || ''} ${a.name} 관심 있는 분? ${a.builder || '시공사'} 시공인데 입지 어떤지 궁금해요` },
+        });
+      }
+    } catch {}
 
- // 카테고리 — 뻘글 55%, 주식 18%, 부동산 15%, 동네 12%
- const r = Math.random();
- const category = r < 0.35 ? 'stock' : r < 0.65 ? 'apt' : r < 0.90 ? 'free' : 'local';
+    const allTemplates = [...TEMPLATES, ...dynamicTemplates];
+    const results: any[] = [];
+    const usedKeysThisRun = new Set<string>();
 
- const filtered = ALL_TEMPLATES.filter(t => t.category === category && (!t.age || t.age === user.age_group) && !usedTemplatesThisRun.has(t.title));
- const fallback = filtered.length > 0 ? pick(filtered) : pick(ALL_TEMPLATES.filter(t => t.category === category && !usedTemplatesThisRun.has(t.title)));
+    for (const user of selectedUsers) {
+      const contentType = selectContentType();
+      let candidates = allTemplates.filter(t =>
+        t.type === contentType && (!t.ageFilter || t.ageFilter === user.age_group) &&
+        !recentTitlePrefixes.has(t.fallback.title.slice(0, 15)) && !usedKeysThisRun.has(t.baseKey)
+      );
+      if (candidates.length === 0) {
+        candidates = allTemplates.filter(t =>
+          !usedKeysThisRun.has(t.baseKey) && (!t.ageFilter || t.ageFilter === user.age_group) &&
+          !recentTitlePrefixes.has(t.fallback.title.slice(0, 15))
+        );
+      }
+      if (candidates.length === 0) continue;
 
- // ── 동적 변형: 매번 다른 제목/내용 생성 ──
- const hour = new Date().getHours();
- const timeSuffix = hour < 12 ? '오전' : hour < 18 ? '오후' : '저녁';
- const variations = [
- `(${dateTag})`, `[${timeSuffix}]`, `— ${dayName}요일`, '',
- `(${user.region_text})`, `${dateTag} ver.`, `#${Math.floor(Math.random() * 99) + 1}`,
- ];
- let title = fallback.title;
- let content = fallback.content;
+      const template = pick(candidates);
+      usedKeysThisRun.add(template.baseKey);
 
- // 기본 치환
- title = title.replace(/4월/g, `${new Date().getMonth() + 1}월`);
+      const toneKey = `${user.age_group}_${user.gender === 'female' ? 'female' : 'male'}`;
+      const tone = TONE[toneKey] || TONE['30대_male'];
 
- // 제목에 변형 추가 (7일 내 같은 제목 방지)
- // v3: 기본 제목의 앞 15자가 겹치면 중복으로 판단 (변형 suffix 무시)
- const baseTitle15 = title.slice(0, 15);
- const isTitleUsed = [...usedTitles].some(t => t.startsWith(baseTitle15));
- if (isTitleUsed) continue; // 유사 제목 존재 → 스킵 (변형 시도 안 함)
+      let postContent = await generateWithAI(template.prompt, tone);
+      const aiGenerated = !!postContent;
+      if (!postContent) postContent = { ...template.fallback };
 
- const finalRegion = category === 'local' ? user.region_text : 'all';
- const postCreatedAt = new Date(Date.now() - randInt(0, 30) * 60000).toISOString();
- const slugBase = title.replace(/[^가-힣a-z0-9\s-]/gi, '').replace(/\s+/g, '-').toLowerCase();
+      if (recentTitlePrefixes.has(postContent.title.slice(0, 15))) continue;
 
- const { data: postData, error: postError } = await admin.from('posts').insert({
- author_id: user.id, title, content, category, region_id: finalRegion,
- is_anonymous: false, created_at: postCreatedAt,
- }).select('id').single();
- if (postError || !postData) continue;
- const postId = postData.id;
- usedTitles.add(title); // 이번 실행에서도 중복 방지
- usedTemplatesThisRun.add(fallback.title); // 같은 템플릿 재사용 방지
- await admin.from('posts').update({ slug: `${slugBase}-${postId}` }).eq('id', postId);
+      const category = template.category;
+      const postCreatedAt = new Date(Date.now() - randInt(1, 20) * 60000).toISOString();
 
- // 댓글 0~5개 (연령대별)
- const cc = randInt(0, 5);
- if (cc > 0) {
- const cUsers = pickN(seedUsers, cc);
- await admin.from('comments').insert(cUsers.map((cu: SeedUser) => ({
- post_id: postId, author_id: cu.id,
- content: pick(COMMENTS[cu.age_group] || COMMENTS['30대']),
- comment_type: 'comment',
- created_at: new Date(new Date(postCreatedAt).getTime() + randInt(3, 180) * 60000).toISOString(),
- })));
- await admin.from('posts').update({ comments_count: cc }).eq('id', postId);
- }
+      const { data: postData, error: postError } = await admin.from('posts').insert({
+        author_id: user.id, title: postContent.title, content: postContent.content,
+        category, region_id: 'all', is_anonymous: false, created_at: postCreatedAt,
+      }).select('id').single();
+      if (postError || !postData) continue;
 
- // 좋아요 0~10개
- const lc = randInt(0, 10);
- if (lc > 0) {
- const lUsers = pickN(seedUsers, Math.min(lc, seedUsers.length));
- await admin.from('post_likes').insert(lUsers.map((u: SeedUser) => ({ post_id: postId, user_id: u.id }))).then(() => {});
- await admin.from('posts').update({ likes_count: lc }).eq('id', postId);
- }
- results.push({ title, user: user.nickname, age: user.age_group, category });
- }
+      const postId = postData.id;
+      const slugBase = postContent.title.replace(/[^가-힣a-z0-9\s-]/gi, '').replace(/\s+/g, '-').toLowerCase();
+      await admin.from('posts').update({ slug: `${slugBase}-${postId}` }).eq('id', postId);
 
- try { revalidatePath('/feed'); revalidatePath('/hot'); } catch {}
- fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app'}/api/revalidate`, {
- method: 'POST', headers: { 'Content-Type': 'application/json' },
- body: JSON.stringify({ secret: cronSecret, path: '/feed' }),
- }).catch(() => {});
+      // 댓글 0~4개
+      const cc = randInt(0, 4);
+      if (cc > 0) {
+        const pool = COMMENTS[template.type] || COMMENTS.default;
+        const cUsers = pickN(seedUsers.filter(u => u.id !== user.id), cc);
+        await admin.from('comments').insert(cUsers.map((cu: SeedUser) => ({
+          post_id: postId, author_id: cu.id,
+          content: pick(pool[cu.age_group] || pool['30대']),
+          comment_type: 'comment',
+          created_at: new Date(new Date(postCreatedAt).getTime() + randInt(5, 240) * 60000).toISOString(),
+        })));
+        await admin.from('posts').update({ comments_count: cc }).eq('id', postId);
+      }
 
- return { processed: postCount, created: results.length, failed: postCount - results.length, metadata: { posts: results, creditExhausted } };
- });
- if (!result.success) return NextResponse.json({ error: result.error }, { status: 200 });
- return NextResponse.json({ ok: true, ...result });
+      // 좋아요 0~8개
+      const lc = randInt(0, 8);
+      if (lc > 0) {
+        const lUsers = pickN(seedUsers.filter(u => u.id !== user.id), Math.min(lc, seedUsers.length - 1));
+        await admin.from('post_likes').insert(lUsers.map((u: SeedUser) => ({ post_id: postId, user_id: u.id }))).then(() => {});
+        await admin.from('posts').update({ likes_count: lc }).eq('id', postId);
+      }
+
+      results.push({ title: postContent.title, user: user.nickname, age: user.age_group, category, type: template.type, aiGenerated });
+    }
+
+    try { revalidatePath('/feed'); revalidatePath('/hot'); } catch {}
+    return { processed: postCount, created: results.length, failed: postCount - results.length, metadata: { posts: results } };
+  });
+
+  if (!result.success) return NextResponse.json({ error: result.error }, { status: 200 });
+  return NextResponse.json({ ok: true, ...result });
 }

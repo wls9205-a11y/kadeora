@@ -284,7 +284,7 @@ async function createOfficialFeedPost(sb: any, issue: any, blogSlug: string) {
 /* ═══════════ 뻘글 스케줄링 ═══════════ */
 
 async function scheduleBuzzPosts(sb: any, issueId: string, score: number) {
-  const buzzCount = score >= 55 ? 3 : score >= 45 ? 2 : 1;
+  const buzzCount = 1; // v4: 이슈당 뻘글 1개로 제한 (도배 방지 강화)
   const personas = ['curious', 'self_deprecating', 'question', 'calculator', 'sharer', 'realist'];
   const selected = personas.sort(() => Math.random() - 0.5).slice(0, buzzCount);
 

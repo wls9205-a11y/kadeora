@@ -113,6 +113,19 @@ async function handler(_req: NextRequest) {
 
   const results: any[] = [];
 
+  // ── 24h 도배 방지: realestate/stock 카테고리 일일 상한 체크 ──
+  const oneDayAgo = new Date(Date.now() - 24 * 3600000).toISOString();
+  const { data: recentBuzz } = await sb.from('posts')
+    .select('title, category')
+    .in('category', ['realestate', 'stock'])
+    .gte('created_at', oneDayAgo)
+    .eq('is_deleted', false);
+  const buzzCount = (recentBuzz || []).filter(p => p.category === 'realestate').length;
+  const stockBuzzCount = (recentBuzz || []).filter(p => p.category === 'stock').length;
+  // 카테고리별 일일 상한: realestate 3개, stock 3개 (v4: 도배 방지 강화)
+  const DAILY_CAP = 3;
+  const recentTitles = (recentBuzz || []).map(p => p.title);
+
   for (const item of scheduled) {
     const issue = item.issue_alerts;
     if (!issue) continue;
@@ -121,7 +134,27 @@ async function handler(_req: NextRequest) {
     const issueAge = Date.now() - new Date(issue.detected_at).getTime();
     if (issueAge > 24 * 60 * 60 * 1000) {
       await (sb as any).from('scheduled_feed_posts')
-        .update({ is_published: true }) // 만료 처리
+        .update({ is_published: true })
+        .eq('id', item.id);
+      continue;
+    }
+
+    // 일일 상한 체크 — 초과 시 발행하지 않고 만료 처리
+    const category = issue.category === 'apt' ? 'realestate' : 'stock';
+    const currentCount = category === 'realestate' ? buzzCount : stockBuzzCount;
+    if (currentCount >= DAILY_CAP) {
+      await (sb as any).from('scheduled_feed_posts')
+        .update({ is_published: true }) // 상한 도달 → 만료
+        .eq('id', item.id);
+      continue;
+    }
+
+    // 동일 이슈 키워드 중복 체크 (제목 앞 15자 유사)
+    const issueKeywords = (issue.title || '').replace(/\[선점\]\s*/, '').slice(0, 15);
+    const duplicateCount = recentTitles.filter(t => t.includes(issueKeywords.slice(0, 8))).length;
+    if (duplicateCount >= 3) {
+      await (sb as any).from('scheduled_feed_posts')
+        .update({ is_published: true })
         .eq('id', item.id);
       continue;
     }
@@ -132,9 +165,6 @@ async function handler(_req: NextRequest) {
     // AI 뻘글 생성
     const content = await generateBuzzContent(issue, item.persona_type);
     if (!content) continue;
-
-    // 피드에 INSERT
-    const category = issue.category === 'apt' ? 'realestate' : 'stock';
     const { data: postData } = await sb.from('posts').insert({
       author_id: user.id,
       title: content.slice(0, 50).replace(/\n/g, ' '),
