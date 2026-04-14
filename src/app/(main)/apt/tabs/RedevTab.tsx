@@ -91,7 +91,10 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
             {/* 재개발/재건축 현황 헤더 */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-sm)' }}>
               <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)' }}>재개발·재건축 현황</span>
-              <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--brand)' }}>총 {filteredRedev.length}건 / {totalHouseholds.toLocaleString()}세대</span>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <Link href="/apt/redev" style={{ fontSize: 11, color: 'var(--brand)', textDecoration: 'none', fontWeight: 600, padding: '3px 10px', borderRadius: 'var(--radius-pill)', border: '1px solid var(--brand)', opacity: 0.8 }}>지역별 현황 →</Link>
+                <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--brand)' }}>총 {filteredRedev.length}건 / {totalHouseholds.toLocaleString()}세대</span>
+              </div>
             </div>
 
 
@@ -189,7 +192,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
                       <div style={{ height: '100%', width: `${progress}%`, background: sc.color, borderRadius: 2, transition: 'width .5s' }} />
                     </div>
                     <span style={{ fontSize: 10, fontWeight: 700, color: sc.color, flexShrink: 0 }}>{progress}%</span>
-                    <span style={{ fontSize: 10, color: 'var(--text-tertiary)', flexShrink: 0 }}>{r.region}{r.sigungu ? ` ${r.sigungu}` : ''}</span>
+                    <span style={{ fontSize: 10, color: 'var(--text-tertiary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 80 }}>{r.region}{r.sigungu ? ` ${r.sigungu}` : ''}</span>
                   </div>
 
                   {/* ② 이름 */}
@@ -207,7 +210,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
 
                   {/* ④ 건축지표 — 하나라도 있으면 표시 */}
                   {(r.floor_area_ratio || r.building_coverage || r.max_floor) && (
-                    <div style={{ padding: '0 12px 6px', display: 'flex', gap: 10, fontSize: 11, color: 'var(--text-tertiary)' }}>
+                    <div style={{ padding: '0 12px 6px', display: 'flex', flexWrap: 'wrap', gap: '2px 10px', fontSize: 11, color: 'var(--text-tertiary)' }}>
                       {r.floor_area_ratio && <span>📊 용적률 {Number(r.floor_area_ratio).toFixed(0)}%</span>}
                       {r.building_coverage && <span>🏠 건폐율 {Number(r.building_coverage).toFixed(0)}%</span>}
                       {r.max_floor && <span>🔝 {r.max_floor}층</span>}
@@ -216,7 +219,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
 
                   {/* ⑤ 실거래 + 블로그 연동 — 데이터 있으면 표시 */}
                   {(r.avg_trade_price || r.blog_count) ? (
-                    <div style={{ padding: '0 12px 6px', display: 'flex', gap: 10, fontSize: 11, color: 'var(--text-tertiary)' }}>
+                    <div style={{ padding: '0 12px 6px', display: 'flex', flexWrap: 'wrap', gap: '2px 10px', fontSize: 11, color: 'var(--text-tertiary)' }}>
                       {r.avg_trade_price ? <span>💰 구역 내 평균 <strong style={{ color: '#F59E0B' }}>{(r.avg_trade_price / 10000).toFixed(1)}억</strong>{r.recent_trade_count ? ` (${r.recent_trade_count}건)` : ''}</span> : null}
                       {r.blog_count ? <span>📝 분석 {r.blog_count}편</span> : null}
                     </div>
