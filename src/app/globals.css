@@ -1,4 +1,10 @@
 /* Pretendard font loaded via <link> in layout.tsx for better LCP */
+/* B-7: font-display: swap 보험 — CDN CSS에 없을 경우 대비 */
+@font-face {
+  font-family: 'Pretendard Variable';
+  font-display: swap;
+  src: local('Pretendard Variable'), local('Pretendard');
+}
 
 @tailwind base;
 @tailwind components;

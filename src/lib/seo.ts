@@ -25,7 +25,7 @@ interface BuildMetaOptions {
   type?: 'website' | 'article';
 }
 
-const BUILD_DATE = '2026-04-12T00:00:00Z';
+const BUILD_DATE = new Date().toISOString();
 
 export function buildMeta(opts: BuildMetaOptions): Metadata {
   const {

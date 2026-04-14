@@ -33,9 +33,11 @@ function applySecurityHeaders(response: NextResponse) {
   response.headers.set('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
   response.headers.set('Cross-Origin-Resource-Policy', 'same-origin');
   response.headers.set('X-Permitted-Cross-Domain-Policies', 'none');
-  // Last-Modified: 크롤러 효율성 (If-Modified-Since 지원)
+  response.headers.set('Content-Language', 'ko');
+  // Last-Modified: 정적 빌드 시각 고정 — 매 요청 갱신 방지 (크롤 예산 보호)
   if (!response.headers.has('Last-Modified')) {
-    response.headers.set('Last-Modified', new Date().toUTCString());
+    // Vercel ISR이 자체적으로 Last-Modified를 관리하도록 설정하지 않음
+    // 동적 페이지는 revalidate 주기에 따라 Vercel이 처리
   }
 }
 

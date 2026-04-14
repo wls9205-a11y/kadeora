@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   },
   twitter: { card: 'summary_large_image' },
   alternates: { canonical: SITE_URL + '/apt/search' },
-  robots: { index: true, follow: true, 'max-snippet': -1 as const, 'max-image-preview': 'large' as const },
+  robots: { index: false, follow: true },
   other: { 'naver:written_time': new Date().toISOString(), 'naver:updated_time': new Date().toISOString(), 'naver:author': '카더라', 'naver:description': '전국 아파트 실거래가 검색', 'og:updated_time': new Date().toISOString(), 'article:section': '부동산', 'article:tag': '실거래가,아파트,시세,매매,검색,부동산', 'dg:plink': SITE_URL + '/apt/search' },
 };
 

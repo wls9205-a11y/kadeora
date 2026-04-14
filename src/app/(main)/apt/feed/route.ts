@@ -11,12 +11,12 @@ export async function GET() {
     sb.from('apt_subscriptions')
       .select('id, house_nm, region_nm, rcept_bgnde, rcept_endde, tot_supply_hshld_co, hssply_adres, fetched_at')
       .order('rcept_endde', { ascending: false })
-      .limit(30),
+      .limit(60),
     sb.from('unsold_apts')
       .select('id, house_nm, region_nm, tot_unsold_hshld_co, created_at')
       .eq('is_active', true)
       .order('created_at', { ascending: false })
-      .limit(20),
+      .limit(40),
   ]);
 
   const subItems = (subsRes.data || []).map(s => {

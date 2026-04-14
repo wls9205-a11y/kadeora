@@ -9,7 +9,7 @@ export async function GET() {
     .select('slug, title, excerpt, category, published_at, created_at, author_name, tags, cover_image, image_alt')
     .eq('is_published', true)
     .order('published_at', { ascending: false, nullsFirst: false })
-    .limit(50);
+    .limit(100);
 
   const items = (posts || []).map(p => {
     const dateStr = p.published_at || p.created_at || new Date().toISOString();

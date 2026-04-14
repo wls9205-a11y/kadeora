@@ -42,6 +42,7 @@ export default async function ThemesPage() {
     itemListElement: (themes || []).slice(0, 10).map((t: any, i: number) => ({
       '@type': 'ListItem', position: i + 1,
       name: t.theme_name, url: `https://kadeora.app/stock/themes`,
+      image: `https://kadeora.app/api/og?title=${encodeURIComponent(t.theme_name || '')}&design=2&category=stock`,
     })),
   });
   const faqLd = JSON.stringify({
