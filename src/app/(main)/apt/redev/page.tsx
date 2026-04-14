@@ -5,12 +5,32 @@ import { SITE_URL } from '@/lib/constants';
 
 export const revalidate = 3600; // 1시간 캐시
 
+const OG_IMAGE = `${SITE_URL}/api/og?title=${encodeURIComponent('전국 재개발·재건축 현황')}&category=apt&design=2`;
+
 export const metadata: Metadata = {
-  title: '재개발 재건축 현황 — 전국 정비사업 진행 단계·시공사·세대수',
-  description: '전국 재개발·재건축 구역의 진행 단계, 시공사, 세대수, 용적률 정보를 한눈에. 서울·경기·부산 등 지역별 현황과 AI 분석.',
-  keywords: ['재개발', '재건축', '재개발 현황', '재건축 현황', '정비사업', '신통기획', '분담금', '입주권'],
+  title: '재개발 재건축 현황 — 전국 정비사업 진행 단계·시공사·세대수 | 카더라',
+  description: '서울·경기·부산 등 전국 재개발·재건축 구역의 진행 단계, 시공사, 세대수, 용적률, 분담금 정보를 한눈에. 정비구역지정부터 착공까지 단계별 현황과 AI 투자 분석.',
+  keywords: ['재개발', '재건축', '재개발 현황', '재건축 현황', '정비사업', '신통기획', '분담금', '입주권', '재개발 투자', '재건축 투자', '정비구역', '관리처분', '조합설립', '사업시행인가'],
   alternates: { canonical: `${SITE_URL}/apt/redev` },
-  openGraph: { title: '재개발·재건축 현황 | 카더라', description: '전국 정비사업 진행 현황을 한눈에', url: `${SITE_URL}/apt/redev`, type: 'website' },
+  openGraph: {
+    title: '재개발·재건축 현황 — 전국 정비사업 진행 단계 | 카더라',
+    description: '전국 재개발·재건축 구역의 진행 단계, 시공사, 세대수, 분담금 정보. 매주 자동 업데이트.',
+    url: `${SITE_URL}/apt/redev`,
+    type: 'website',
+    siteName: '카더라',
+    locale: 'ko_KR',
+    images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: '카더라 재개발·재건축 현황' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: '재개발·재건축 현황 | 카더라',
+    description: '전국 정비사업 진행 단계·시공사·세대수 한눈에',
+    images: [OG_IMAGE],
+  },
+  other: {
+    'naver:site_name': '카더라',
+    'naver:author': '카더라 부동산팀',
+  },
 };
 
 const STAGE_COLORS: Record<string, string> = {
@@ -52,13 +72,16 @@ export default async function RedevLandingPage() {
   residential.forEach((p: any) => { const s = p.stage || '정비구역지정'; stageMap.set(s, (stageMap.get(s) || 0) + 1); });
   const STAGE_ORDER = ['추진위', '정비구역지정', '조합설립', '사업시행인가', '관리처분', '착공', '준공'];
 
-  // JSON-LD
+  // JSON-LD — WebPage
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'WebPage',
     name: '재개발 재건축 현황',
     description: `전국 ${total}개 재개발·재건축 구역의 진행 단계, 시공사, 세대수 정보`,
     url: `${SITE_URL}/apt/redev`,
+    dateModified: new Date().toISOString(),
+    publisher: { '@type': 'Organization', name: '카더라', url: SITE_URL },
+    image: `${SITE_URL}/api/og?title=${encodeURIComponent('전국 재개발·재건축 현황')}&category=apt&design=2`,
     breadcrumb: {
       '@type': 'BreadcrumbList',
       itemListElement: [
@@ -67,6 +90,22 @@ export default async function RedevLandingPage() {
         { '@type': 'ListItem', position: 3, name: '재개발·재건축', item: `${SITE_URL}/apt/redev` },
       ],
     },
+  };
+
+  // JSON-LD — ItemList (구글 리치스니펫 목록형 노출)
+  const itemListLd = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: '전국 재개발·재건축 구역 목록',
+    description: `${total}개 구역의 진행 단계별 현황`,
+    numberOfItems: total,
+    itemListElement: regionStats.slice(0, 10).map((r, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: `${r.name} 재개발·재건축 (${r.total}건)`,
+      url: `${SITE_URL}/apt/redev/${encodeURIComponent(r.name)}`,
+      description: `재개발 ${r.redev}건, 재건축 ${r.rebuild}건${r.households > 0 ? `, ${r.households.toLocaleString()}세대` : ''}`,
+    })),
   };
 
   const faqLd = {
@@ -84,6 +123,7 @@ export default async function RedevLandingPage() {
     <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 16px' }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }} />
 
       {/* 히어로 */}
       <div style={{ padding: '32px 0 24px', textAlign: 'center' }}>
@@ -96,14 +136,15 @@ export default async function RedevLandingPage() {
       </div>
 
       {/* 단계별 파이프라인 */}
-      <div style={{ display: 'flex', gap: 4, marginBottom: 24 }}>
+      <div style={{ display: 'flex', gap: 3, marginBottom: 24 }}>
         {STAGE_ORDER.map(stage => {
           const count = stageMap.get(stage) || 0;
           const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+          const shortLabel: Record<string, string> = { '추진위': '추진위', '정비구역지정': '구역지정', '조합설립': '조합', '사업시행인가': '시행', '관리처분': '관리', '착공': '착공', '준공': '준공' };
           return (
-            <div key={stage} style={{ flex: Math.max(pct, 8), textAlign: 'center', padding: '10px 4px', borderRadius: 'var(--radius-sm)', background: `${STAGE_COLORS[stage]}15`, border: `1px solid ${STAGE_COLORS[stage]}30` }}>
-              <div style={{ fontSize: 16, fontWeight: 800, color: STAGE_COLORS[stage] }}>{count}</div>
-              <div style={{ fontSize: 10, color: STAGE_COLORS[stage], fontWeight: 600 }}>{stage.replace('사업시행인가', '시행인가')}</div>
+            <div key={stage} style={{ flex: Math.max(pct, 8), textAlign: 'center', padding: '8px 2px', borderRadius: 'var(--radius-sm)', background: `${STAGE_COLORS[stage]}15`, border: `1px solid ${STAGE_COLORS[stage]}30`, minWidth: 0, overflow: 'hidden' }}>
+              <div style={{ fontSize: 15, fontWeight: 800, color: STAGE_COLORS[stage] }}>{count}</div>
+              <div style={{ fontSize: 9, color: STAGE_COLORS[stage], fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{shortLabel[stage] || stage}</div>
             </div>
           );
         })}
@@ -113,7 +154,7 @@ export default async function RedevLandingPage() {
       <h2 style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 12 }}>📍 지역별 현황</h2>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 8, marginBottom: 24 }}>
         {regionStats.map(r => (
-          <Link key={r.name} href={`/apt?tab=redev&region=${encodeURIComponent(r.name)}`} style={{
+          <Link key={r.name} href={`/apt/redev/${encodeURIComponent(r.name)}`} style={{
             display: 'block', padding: '12px 10px', borderRadius: 'var(--radius-md)',
             background: 'var(--bg-surface)', border: '1px solid var(--border)',
             textDecoration: 'none', color: 'inherit', textAlign: 'center',
