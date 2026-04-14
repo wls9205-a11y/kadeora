@@ -85,7 +85,7 @@ async function handler(_req: NextRequest) {
       .from('blog_posts')
       .select('id, title, category, sub_category, image_alt, cover_image')
       .eq('is_published', true)
-      .neq('source_type', 'auto_issue')
+      .or('source_type.is.null,source_type.neq.auto_issue')
       .like('cover_image', '%/api/og?%')
       .order('created_at', { ascending: false })
       .limit(BATCH - (issuePosts?.length || 0));
