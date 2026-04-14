@@ -1,5 +1,5 @@
-import LoginGate from '@/components/LoginGate';
 'use client';
+import LoginGate from '@/components/LoginGate';
 import Link from 'next/link';
 import SectionShareButton from '@/components/SectionShareButton';
 import type { UnsoldApt } from '@/types/apt';

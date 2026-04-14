@@ -1,5 +1,5 @@
-import LoginGate from '@/components/LoginGate';
 'use client';
+import LoginGate from '@/components/LoginGate';
 import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';

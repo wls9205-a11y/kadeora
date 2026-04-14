@@ -1,5 +1,5 @@
-import LoginGate from '@/components/LoginGate';
 'use client';
+import LoginGate from '@/components/LoginGate';
 import SectionShareButton from '@/components/SectionShareButton';
 import type { OngoingApt, PremiumListing } from '@/types/apt';
 import { useState, useEffect } from 'react';
