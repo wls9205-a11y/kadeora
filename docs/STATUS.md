@@ -1,3 +1,50 @@
+## 세션 102b — 재개발·재건축 섹션 전면 강화 (Phase A+B+C 완료)
+
+### 커밋: a84d14ed → 8b6277d3
+
+### 진단 발견 (9가지 핵심 문제) → 전부 해결
+1. ✅ 서울 API 빈약 → UPSERT 전환 + 도시환경 분리
+2. ✅ Full Refresh 데이터 파괴 → external_id 기반 UPSERT
+3. ✅ 도시환경정비 81건(40%) 혼합 → sub_type 분리 + 기본 숨김
+4. ✅ 전국 크롤러 시군구 누락 → 경기 17개 + 세종 + 6개 추가 (54→71코드)
+5. ✅ STAGE_ORDER 누락 → 추진위 추가 (6→7단계)
+6. ✅ apt_sites 연결 불안정 → external_id 기반 안정화
+7. ✅ RedevProject 타입 area_sqm 누락 → 11필드 추가
+8. ✅ 블로그 345편 카테고리 혼재 → redev 카테고리 이동
+9. ⬜ interest_count 0 → 다음 세션 개선
+
+### 완료 — Phase A: 데이터 기반 (6파일)
+- DB: 8컬럼 + 3인덱스 + 도시환경 81건 분류 + 블로그 345편 이동
+- RedevProject 타입 11필드 추가
+- STAGE_ORDER 7단계 (추진위 추가)
+- 서울 크롤러: DELETE→UPSERT, 도시환경 분리, external_id, constructor
+- 전국 크롤러: 경기 17개 시군구 + 세종 + 6개 추가
+
+### 완료 — Phase B: 프론트엔드 + SEO (5파일)
+- RedevTab 카드 리디자인: OG이미지 제거, 인라인 진행바, 건축지표, 실거래/블로그 연동, 도시환경 토글
+- /apt/redev 전용 랜딩: 지역별 카드, 단계별 파이프라인, 최근 변경, FAQ 리치스니펫, JSON-LD
+- Navigation: 재개발·재건축 메뉴 추가
+- sitemap: /apt/redev 정적 경로 추가
+
+### 완료 — Phase C: 데이터 보강 + 전환 (3파일)
+- redev-enrich 크론: blog_count, avg_trade_price, stage 변경 감지 (매일 UTC 06:30)
+- SmartSectionGate: redev 카테고리 CTA
+- LoginClient: redev_interest, redev_landing MSG
+
+### 설계 문서
+- docs/REDEV_ENHANCEMENT_PLAN.md — 풀스택 최종 설계안 (585행)
+
+### 예상 효과
+- 도시환경 81건 분리 → 주거 투자 대상만 121건 표시 (데이터 정확도)
+- 다음 월요일 크론 후 서울 114→400+ / 전국 88→200+ (모수 3~4배)
+- /apt/redev SEO 랜딩 → "재개발 현황" 검색 유입 채널 확보
+- 블로그 345편 redev 카테고리 → SEO 크로스링크 완성
+
+### PENDING (Phase D)
+- D-1: GrowthTab 재개발 현황 섹션
+- D-2: 단계 변경 알림 (notification-hub 연동)
+- /apt/redev/[region] 지역별 SEO 페이지
+
 ## 세션 — 이슈 선점 시스템 v3: 5단 파이프라인 전면 재설계
 
 ### 커밋: a612e416 → (현재)
