@@ -489,3 +489,17 @@ email-digest — vercel.json에서 제거 (P4로 통합)
 | 빈 지역(세종 등) → 준비중 페이지 | ✅ (404 아닌 200) |
 | RedevTab → /apt/redev 링크 | ✅ |
 | 다크/라이트 모드 호환 | ✅ (CSS 변수 62개소) |
+
+## 세션 102c — 카드 SEO 강화 + 빌드 에러 수정 (2026-04-14)
+
+### 배포
+- `dpl_9nqZxbiGZ6NgLtXNmrj2wroei3Ve` — READY ✅
+- 빌드 에러 원인: `blog/[slug]/page.tsx` marked Link 타입 불일치 (Node 커밋) → 수정 완료
+
+### 카드 강화 4건 (모두 라이브 확인)
+1. ✅ 상단 통계 요약 카드 — 전체/재개발/재건축/평균 진행률/착공이상
+2. ✅ FAQPage JSON-LD — 지역별 동적 FAQ (구글 리치스니펫)
+3. ✅ 📍 address 카드 표시 — 62건 (서울 기준, 93% 채움률)
+4. ✅ 🤖 ai_summary → notes fallback — 66건 (81%+31%)
+
+### 런타임 에러: 0건
