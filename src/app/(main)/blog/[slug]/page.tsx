@@ -42,10 +42,10 @@ renderer.heading = function ({ text, depth }: { text: string; depth: number }) {
   const id = slugify(text);
   return `<h${depth} id="${id}">${text}</h${depth}>\n`;
 };
-renderer.image = function ({ href, title, text }: { href: string; title: string | null; text: string }) {
+renderer.image = function ({ href, title, text }: { href: string; title?: string | null; text: string }) {
   return `<img src="${href}" alt="${text || ''}" ${title ? `title="${title}"` : ''} loading="lazy" decoding="async" style="max-width:100%;height:auto;border-radius:8px" />`;
 };
-renderer.link = function ({ href, title, text }: { href: string; title: string | null; text: string }) {
+renderer.link = function ({ href, title, text }: { href: string; title?: string | null; text: string }) {
   const isExternal = href && (href.startsWith('http://') || href.startsWith('https://'));
   const titleAttr = title ? ` title="${title}"` : '';
   if (isExternal) {
