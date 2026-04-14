@@ -110,37 +110,46 @@ async function detectNewSubscriptions(sb: any): Promise<any[]> {
 async function detectUncoveredSites(sb: any): Promise<any[]> {
   const results: any[] = [];
 
-  // active apt_sites 중 블로그가 없는 것 (관심도 높은 순)
-  // 서브쿼리 불가 → 2단계 조회
-  const { data: activeSites } = await sb.from('apt_sites')
-    .select('id, name, region, sigungu, total_units, builder, status, interest_count')
-    .eq('status', 'active')
-    .not('name', 'is', null)
-    .order('interest_count', { ascending: false, nullsFirst: false })
-    .limit(60);
+  // RPC: 블로그도 issue_alert도 없는 active 단지를 random 순으로 반환
+  let sites: any[] = [];
+  try {
+    const { data } = await (sb as any).rpc('get_uncovered_apt_sites', { lim: 15 });
+    sites = data || [];
+  } catch {
+    // RPC 없으면 폴백: 최신순 조회 후 수동 필터
+    const { data: activeSites } = await sb.from('apt_sites')
+      .select('id, name, region, sigungu, total_units, builder, interest_count')
+      .eq('status', 'active')
+      .not('name', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(60);
+    sites = activeSites || [];
+  }
 
-  if (!activeSites) return results;
+  if (sites.length === 0) return results;
 
-  let checked = 0;
-  for (const site of activeSites) {
-    if (checked >= 15) break; // 실행당 최대 15건
+  let created = 0;
+  for (const site of sites) {
+    if (created >= 15) break;
     if (!site.name || site.name.length < 3) continue;
 
-    // 블로그 존재 체크
-    const { count } = await sb.from('blog_posts')
-      .select('id', { count: 'exact', head: true })
-      .eq('is_published', true)
-      .ilike('title', `%${site.name.slice(0, 12)}%`);
+    // RPC 폴백 경로일 때만 추가 체크 필요
+    if (sites.length > 15) {
+      // 블로그 존재 체크
+      const { count } = await sb.from('blog_posts')
+        .select('id', { count: 'exact', head: true })
+        .eq('is_published', true)
+        .ilike('title', `%${site.name.slice(0, 12)}%`);
+      if (count && count > 0) continue;
 
-    if (count && count > 0) continue;
-
-    // issue_alerts 중복 체크
-    const { data: existingIssue } = await (sb as any).from('issue_alerts')
-      .select('id')
-      .ilike('title', `%${site.name.slice(0, 12)}%`)
-      .gte('detected_at', new Date(Date.now() - 7 * 24 * 3600000).toISOString())
-      .limit(1);
-    if (existingIssue && existingIssue.length > 0) continue;
+      // issue_alerts 중복 체크
+      const { data: existingIssue } = await (sb as any).from('issue_alerts')
+        .select('id')
+        .ilike('title', `%${site.name.slice(0, 12)}%`)
+        .gte('detected_at', new Date(Date.now() - 7 * 24 * 3600000).toISOString())
+        .limit(1);
+      if (existingIssue && existingIssue.length > 0) continue;
+    }
 
     const score = Math.min(42 + (site.interest_count || 0) / 100, 65);
 
@@ -176,7 +185,7 @@ async function detectUncoveredSites(sb: any): Promise<any[]> {
 
     if (!error) {
       results.push({ type: 'uncovered', name: site.name, score: Math.round(score * 1.25) });
-      checked++;
+      created++;
     }
   }
 
