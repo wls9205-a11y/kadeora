@@ -97,7 +97,7 @@
   "crons": [
     {
       "path": "/api/cron/seed-posts",
-      "schedule": "0 */2 * * *"
+      "schedule": "0 7,13,19 * * *"
     },
     {
       "path": "/api/cron/cleanup",
@@ -401,7 +401,7 @@
     },
     {
       "path": "/api/cron/feed-buzz-publish",
-      "schedule": "*/5 * * * *"
+      "schedule": "30 8,12,18,21 * * *"
     },
     {
       "path": "/api/cron/check-price-alerts",

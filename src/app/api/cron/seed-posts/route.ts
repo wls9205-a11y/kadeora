@@ -182,7 +182,7 @@ export async function GET(req: NextRequest) {
  // 동적 템플릿을 기존 템플릿 풀에 합치기
  const ALL_TEMPLATES = [...TEMPLATES, ...entityTemplates];
 
- const postCount = randInt(4, 7);
+ const postCount = randInt(2, 4); // v3: 2~4개로 축소 (기존 4~7)
  const results: { title: string; user: string; age: string; category: string }[] = [];
  let creditExhausted = false;
 
@@ -236,12 +236,10 @@ export async function GET(req: NextRequest) {
  title = title.replace(/4월/g, `${new Date().getMonth() + 1}월`);
 
  // 제목에 변형 추가 (7일 내 같은 제목 방지)
- if (usedTitles.has(title)) {
- const v = pick(variations.filter(x => x !== ''));
- title = `${title} ${v}`;
- }
- // 그래도 중복이면 스킵
- if (usedTitles.has(title)) continue;
+ // v3: 기본 제목의 앞 15자가 겹치면 중복으로 판단 (변형 suffix 무시)
+ const baseTitle15 = title.slice(0, 15);
+ const isTitleUsed = [...usedTitles].some(t => t.startsWith(baseTitle15));
+ if (isTitleUsed) continue; // 유사 제목 존재 → 스킵 (변형 시도 안 함)
 
  const finalRegion = category === 'local' ? user.region_text : 'all';
  const postCreatedAt = new Date(Date.now() - randInt(0, 30) * 60000).toISOString();
