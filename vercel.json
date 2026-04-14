@@ -266,7 +266,7 @@
     },
     {
       "path": "/api/cron/apt-analysis-gen",
-      "schedule": "5 * * * *"
+      "schedule": "5 */6 * * *"
     },
     {
       "path": "/api/cron/stock-analysis-gen",
@@ -410,7 +410,7 @@
     },
     {
       "path": "/api/cron/issue-draft",
-      "schedule": "*/10 * * * *"
+      "schedule": "*/30 * * * *"
     },
     {
       "path": "/api/cron/issue-trend",

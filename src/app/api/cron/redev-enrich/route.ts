@@ -18,6 +18,7 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
   const sb = getSupabaseAdmin();
 
   const result = await withCronLogging('redev-enrich', async () => {
+    const _start = Date.now();
     let updated = 0;
     let blogUpdated = 0;
     let tradeUpdated = 0;
@@ -57,6 +58,7 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
     const sigunguSet = new Set<string>(projects.map((p: any) => `${p.region}|${p.sigungu}`).filter((s: string) => s.includes('|') && !s.endsWith('|null')));
 
     for (const key of Array.from(sigunguSet)) {
+      if (Date.now() - _start > 100_000) break; // 100s 안전 마진
       const [region, sigungu] = key.split('|');
       if (!sigungu) continue;
 

@@ -19,12 +19,16 @@ import { withCronLogging } from '@/lib/cron-logger';
 const ANTHROPIC_API = 'https://api.anthropic.com/v1/messages';
 const MODEL = 'claude-haiku-4-5-20251001';
 
-const today = new Date();
-const month = today.getMonth() + 1;
 const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
-const dayName = dayNames[today.getDay()];
-const isWeekend = today.getDay() === 0 || today.getDay() === 6;
-const hourKST = (today.getUTCHours() + 9) % 24;
+function getDateVars() {
+  const now = new Date();
+  return {
+    month: now.getMonth() + 1,
+    dayName: dayNames[now.getDay()],
+    isWeekend: now.getDay() === 0 || now.getDay() === 6,
+    hourKST: (now.getUTCHours() + 9) % 24,
+  };
+}
 
 // ═══ 연령대별 말투 ═══
 const TONE: Record<string, string> = {
@@ -62,7 +66,9 @@ interface Template {
   ageFilter?: string;
 }
 
-const TEMPLATES: Template[] = [
+function getTemplates(): Template[] {
+  const { dayName, isWeekend, month } = getDateVars();
+  return [
   // ═══ 주식 — 토론 ═══
   { baseKey: 'stk_etf_vs_ind', category: 'stock', type: 'debate',
     prompt: '"ETF 적립식 vs 개별 종목 직투" 커뮤니티 논쟁 글. 양쪽 비교 후 "다들 어떻게?" 질문. 200자',
@@ -276,6 +282,7 @@ const TEMPLATES: Template[] = [
     prompt: `"부린이 탐방기 #${Math.floor(Math.random() * 10) + 1}" 형식. 모델하우스 방문 후기. 150자`,
     fallback: { title: `부린이 탐방기 #${Math.floor(Math.random() * 10) + 1}`, content: '첫 모델하우스 방문. 분위기에 휩쓸려 청약 넣을 뻔 ㅋㅋ 냉정하게 분석해야 하는데 인테리어 보면 마음이 흔들리네요' }},
 ];
+}
 
 // ═══ 타입별 댓글 ═══
 const COMMENTS: Record<string, Record<string, string[]>> = {
@@ -323,6 +330,7 @@ function pick<T>(arr: T[]): T { return arr[Math.floor(Math.random() * arr.length
 function pickN<T>(arr: T[], n: number): T[] { return [...arr].sort(() => Math.random() - 0.5).slice(0, Math.min(n, arr.length)); }
 
 function selectContentType(): ContentType {
+  const { hourKST } = getDateVars();
   const eligible = Object.entries(TYPE_WEIGHTS).filter(([_, c]) =>
     c.hours.length === 0 || c.hours.includes(hourKST)
   );
@@ -432,7 +440,7 @@ export async function GET(req: NextRequest) {
       }
     } catch {}
 
-    const allTemplates = [...TEMPLATES, ...dynamicTemplates];
+    const allTemplates = [...getTemplates(), ...dynamicTemplates];
     const results: any[] = [];
     const usedKeysThisRun = new Set<string>();
 

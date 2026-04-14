@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
     const redevPromise = supabase.from('redevelopment_projects').select('id, district_name, region, stage, project_type, address, total_households').or(`district_name.ilike.%${query}%,region.ilike.%${query}%,address.ilike.%${query}%`).limit(5);
     const unsoldPromise = supabase.from('unsold_apts').select('id, house_nm, region_nm, sigungu_nm, tot_unsold_hshld_co').or(`house_nm.ilike.%${query}%,region_nm.ilike.%${query}%`).limit(5);
     const tradePromise = supabase.from('apt_transactions').select('id, apt_name, region_nm, deal_amount, exclusive_area, deal_date').or(`apt_name.ilike.%${query}%,region_nm.ilike.%${query}%`).order('deal_date', { ascending: false }).limit(5);
-    const discussPromise = supabase.from('discussion_topics').select('id, title, category, vote_yes, vote_no, created_at').ilike('title', `%${query}%`).limit(5);
+    const discussPromise = supabase.from('discussion_topics').select('id, title, category, vote_a, vote_b, created_at').ilike('title', `%${query}%`).limit(5);
 
     const [postsResult, blogsResult, stocksResult, aptsResult, redevResult, unsoldResult, tradeResult, discussResult] = await Promise.all([postsPromise, blogsPromise, stocksPromise, aptsPromise, redevPromise, unsoldPromise, tradePromise, discussPromise]);
 

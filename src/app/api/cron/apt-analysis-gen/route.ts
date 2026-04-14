@@ -2,11 +2,12 @@ import { AI_MODEL_HAIKU, ANTHROPIC_VERSION } from '@/lib/constants';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
+import { withCronAuth } from '@/lib/cron-auth';
 
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
 
-export async function GET(_req: NextRequest) {
+async function handler(_req: NextRequest) {
   const result = await withCronLogging('apt-analysis-gen', async () => {
     const admin = getSupabaseAdmin();
 
@@ -15,13 +16,15 @@ export async function GET(_req: NextRequest) {
       .is('analysis_text', null)
       .eq('is_active', true)
       .order('page_views', { ascending: false, nullsFirst: false })
-      .limit(15);
+      .limit(5);
 
     if (!sites || sites.length === 0) return { processed: 0, metadata: { reason: 'all_done' } };
 
     let processed = 0;
 
+    const start = Date.now();
     for (const site of sites) {
+      if (Date.now() - start > 250_000) break; // 250s 안전 마진
       try {
         const hmno = site.slug?.replace(/\D/g, '') || '';
         const { data: sub } = await admin.from('apt_subscriptions')
@@ -79,3 +82,5 @@ function buildPrompt(site: any, sub: any, trades: any[]): string {
 필수 5섹션(## 소제목): 입지분석, 분양가분석, 청약전략, 입주준비가이드([계산하기→](/calc) [가점진단→](/apt/diagnose) 링크 포함), FAQ(### Q. 5개).
 규칙: 마크다운, 목차금지, ##안에 볼드금지, 면책문구 마지막.`;
 }
+
+export const GET = withCronAuth(handler);

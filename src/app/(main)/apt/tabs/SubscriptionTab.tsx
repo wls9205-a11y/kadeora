@@ -156,7 +156,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
               }}>
                 {/* ⓪ 히어로 이미지 */}
                 <div className="hero-img">
-                  <img src={aptImageMap?.[apt.house_nm] || `/api/og?title=${encodeURIComponent(apt.house_nm)}&category=apt&design=2`} alt={apt.house_nm || "부동산 이미지"} width={400} height={120} loading="lazy" />
+                  <img src={aptImageMap?.[apt.house_nm] || `/api/og?title=${encodeURIComponent(apt.house_nm)}&category=apt&design=${(i % 6) + 1}`} alt={apt.house_nm || "부동산 이미지"} width={400} height={120} loading="lazy" />
                   <div className="hero-badges">
                     <span className="hero-badge" style={{ background: st === 'open' ? 'rgba(5,150,105,0.9)' : st === 'upcoming' ? 'rgba(37,99,235,0.9)' : 'rgba(100,116,139,0.85)', color: '#fff' }}>{bd.label}</span>
                     {st !== 'closed' && isNew(apt, 'subscription') && <span className="hero-badge" style={{ background: 'rgba(254,243,199,0.95)', color: '#92400E' }}>NEW</span>}

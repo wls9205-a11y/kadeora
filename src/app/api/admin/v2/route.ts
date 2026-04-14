@@ -498,7 +498,7 @@ export async function GET(req: NextRequest) {
               safeCount((sb as any).from('issue_alerts').select('id', { count: 'exact', head: true })),
               safeCount((sb as any).from('issue_alerts').select('id', { count: 'exact', head: true }).eq('is_processed', true)),
               safeCount((sb as any).from('issue_alerts').select('id', { count: 'exact', head: true }).eq('is_published', true)),
-              safeCount((sb as any).from('issue_alerts').select('id', { count: 'exact', head: true }).in('alert_type', ['new_subscription', 'pre_announcement', 'preempt_coverage', 'search_spike'])),
+              safeCount((sb as any).from('issue_alerts').select('id', { count: 'exact', head: true }).in('issue_type', ['new_subscription', 'pre_announcement', 'preempt_coverage', 'search_spike'])),
               safe((sb as any).from('issue_alerts').select('final_score').not('final_score', 'is', null).order('detected_at', { ascending: false }).limit(50), []),
             ]);
             const scores = (avgScore || []).map((r: any) => r.final_score).filter((s: any) => typeof s === 'number');

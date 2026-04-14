@@ -174,7 +174,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
 
             {/* 카드 리스트 (30건씩 페이지네이션) */}
             <div className="listing-grid">
-            {filteredRedev.slice((redevPage - 1) * 30, redevPage * 30).map((r) => {
+            {filteredRedev.slice((redevPage - 1) * 30, redevPage * 30).map((r, i) => {
               const sc = STAGE_COLORS[r.stage || '정비구역지정'] || STAGE_COLORS['정비구역지정'];
               const stageIdx = STAGE_ORDER.indexOf(r.stage || '');
               const progress = stageIdx >= 0 ? Math.round(((stageIdx + 1) / STAGE_ORDER.length) * 100) : 0;
@@ -185,7 +185,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
                 <Link key={r.id} href={`/apt/${encodeURIComponent(redevSlug)}`} className="hero-card" style={{ display: 'block', borderLeft: `3px solid ${sc.border}`, opacity: isDosiJeongbi ? 0.7 : 1 }}>
                   {/* 히어로 이미지 */}
                   <div className="hero-img">
-                    <img src={aptImageMap?.[r.district_name || ''] || `/api/og?title=${encodeURIComponent(displayName)}&category=apt&design=2`} alt={displayName} width={400} height={120} loading="lazy" />
+                    <img src={aptImageMap?.[r.district_name || ''] || `/api/og?title=${encodeURIComponent(displayName)}&category=apt&design=${(i % 6) + 1}`} alt={displayName} width={400} height={120} loading="lazy" />
                     <div className="hero-badges">
                       <span className="hero-badge" style={{ background: r.project_type === '재건축' ? 'rgba(245,158,11,0.9)' : isDosiJeongbi ? 'rgba(107,114,128,0.7)' : 'rgba(234,88,12,0.9)', color: '#fff' }}>
                         {isDosiJeongbi ? '도시정비' : r.project_type || '재개발'}

@@ -18,6 +18,7 @@ export const maxDuration = 120;
 
 export const GET = withCronAuth(async (_req: NextRequest) => {
   const result = await withCronLogging('apt-price-sync', async () => {
+    const _start = Date.now();
     const sb = getSupabaseAdmin();
     let synced = 0;
 
@@ -29,6 +30,7 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
     
     if (subsWithPrices) {
       for (const sub of subsWithPrices) {
+        if (Date.now() - _start > 100_000) break;
         if (!sub.house_nm || !Array.isArray(sub.house_type_info)) continue;
         const prices = sub.house_type_info
           .map((t: any) => t.lttot_top_amount)

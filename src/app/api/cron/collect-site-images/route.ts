@@ -178,7 +178,10 @@ async function handler(_req: NextRequest) {
     const results = await Promise.allSettled(
       batch.map(async (site: Record<string, any>) => {
         const images = await collectForSite(site.name);
-        if (images.length === 0) { skipped++; return; }
+        if (images.length === 0) {
+          await sb.from('apt_sites').update({ images: [], updated_at: new Date().toISOString() }).eq('id', site.id);
+          skipped++; return;
+        }
 
         const imageData = images.map(img => ({
           url: img.url,

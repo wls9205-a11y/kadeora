@@ -448,7 +448,7 @@ export default function SearchClient() {
                   <div key={d.id} className={acItemCls} style={{ padding: '10px 12px', cursor: 'pointer' }}
                     onClick={() => handleAcNavigate('/discuss')}>
                     <div style={{ fontWeight: 600, fontSize: 'var(--fs-base)', color: 'var(--text-primary)' }}>{highlight(d.title || '', inputVal)}</div>
-                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>찬성 {d.vote_yes || 0} · 반대 {d.vote_no || 0}</div>
+                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>찬성 {d.vote_a || 0} · 반대 {d.vote_b || 0}</div>
                   </div>
                 ))}
               </div>

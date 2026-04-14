@@ -286,6 +286,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           globalSearch={globalSearch}
           freshDate={dataFreshness?.trade}
           aptImageMap={aptImageMap}
+          aptEngageMap={aptEngageMap}
         />
       )}
 
