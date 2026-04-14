@@ -143,6 +143,78 @@ ${isPreempt ? `
   }
 }
 
+/* ═══════════ 시각 요소 강제 보강 ═══════════ */
+
+function enrichVisuals(content: string, issue: any): string {
+  let enriched = content;
+  const category = issue.category === 'apt' ? 'apt' : 'stock';
+  const title = issue.title || '';
+  const keywords = (issue.detected_keywords || []).slice(0, 5);
+  const entities = (issue.related_entities || []).join(', ') || title.slice(0, 20);
+
+  // 1. 인포그래픽 이미지가 없으면 → 첫 h2 앞에 요약 인포그래픽 자동 삽입
+  if (!content.includes('og-infographic') && !content.includes('![')) {
+    const summaryItems = keywords.length >= 3
+      ? keywords.slice(0, 4).join(',')
+      : `${entities},핵심분석,시장전망,투자포인트`;
+    const infographic = `\n![핵심 요약](/api/og-infographic?title=${encodeURIComponent(entities + ' 핵심 요약')}&category=${category}&type=summary&items=${encodeURIComponent(summaryItems)})\n`;
+
+    // 첫 번째 ## 앞에 삽입
+    const firstH2 = enriched.indexOf('\n## ');
+    if (firstH2 > 0) {
+      enriched = enriched.slice(0, firstH2) + '\n' + infographic + enriched.slice(firstH2);
+    } else {
+      // h2가 없으면 첫 문단 뒤에 삽입
+      const firstParagraphEnd = enriched.indexOf('\n\n');
+      if (firstParagraphEnd > 0) {
+        enriched = enriched.slice(0, firstParagraphEnd) + '\n' + infographic + enriched.slice(firstParagraphEnd);
+      }
+    }
+  }
+
+  // 2. 인포그래픽이 1개뿐이면 → 본문 중간에 비교 인포그래픽 추가
+  const infographicCount = (enriched.match(/og-infographic/g) || []).length;
+  if (infographicCount < 2) {
+    const compareItems = category === 'apt'
+      ? `현재시세:분석중,전월대비:변동,경쟁률:예상,투자매력:평가`
+      : `현재주가:분석중,PER:비교,업종평균:대비,전망:종합`;
+    const compareInfographic = `\n![비교 분석](/api/og-infographic?title=${encodeURIComponent('비교 분석')}&category=${category}&type=comparison&items=${encodeURIComponent(compareItems)})\n`;
+
+    // 전체의 60% 지점에 삽입
+    const insertPos = Math.floor(enriched.length * 0.6);
+    const nearestNewline = enriched.indexOf('\n\n', insertPos);
+    if (nearestNewline > 0) {
+      enriched = enriched.slice(0, nearestNewline) + '\n' + compareInfographic + enriched.slice(nearestNewline);
+    }
+  }
+
+  // 3. 테이블이 없으면 → 핵심 지표 요약 테이블 자동 삽입
+  if (!enriched.includes('|---')) {
+    const summaryTable = category === 'apt'
+      ? `\n\n| 항목 | 내용 |\n|---|---|\n| 대상 | ${entities} |\n| 카테고리 | 부동산 |\n| 핵심 키워드 | ${keywords.join(', ') || '분양, 청약'} |\n| 분석 시점 | ${new Date().toISOString().slice(0, 10)} |\n| 출처 | 카더라 데이터 분석 |\n\n`
+      : `\n\n| 항목 | 내용 |\n|---|---|\n| 대상 | ${entities} |\n| 카테고리 | 주식/금융 |\n| 핵심 키워드 | ${keywords.join(', ') || '시세, 전망'} |\n| 분석 시점 | ${new Date().toISOString().slice(0, 10)} |\n| 출처 | 카더라 데이터 분석 |\n\n`;
+
+    // 첫 h2 뒤에 삽입
+    const firstH2End = enriched.indexOf('\n', enriched.indexOf('\n## ') + 4);
+    if (firstH2End > 0) {
+      enriched = enriched.slice(0, firstH2End + 1) + summaryTable + enriched.slice(firstH2End + 1);
+    } else {
+      enriched = enriched + summaryTable;
+    }
+  }
+
+  // 4. 카더라 내부링크가 부족하면 → 하단에 관련 링크 블록 추가
+  const internalLinkCount = (enriched.match(/\]\(\//g) || []).length;
+  if (internalLinkCount < 2) {
+    const linkBlock = category === 'apt'
+      ? `\n\n---\n\n## 관련 정보\n\n- [카더라 청약 일정 →](/apt)\n- [전국 실거래가 조회 →](/apt?tab=transaction)\n- [청약 가점 계산기 →](/apt/diagnose)\n- [카더라 블로그 →](/blog?category=apt)\n\n`
+      : `\n\n---\n\n## 관련 정보\n\n- [실시간 주식 시세 →](/stock)\n- [종목 비교 분석 →](/stock/compare)\n- [카더라 블로그 →](/blog?category=stock)\n- [투자 커뮤니티 →](/feed)\n\n`;
+    enriched = enriched + linkBlock;
+  }
+
+  return enriched;
+}
+
 /* ═══════════ 팩트 검증 ═══════════ */
 
 function factCheck(content: string, rawData: Record<string, any>): { passed: boolean; details: Record<string, any> } {
@@ -298,6 +370,9 @@ async function handler(_req: NextRequest) {
     }).eq('id', issue.id);
     return NextResponse.json({ processed: 0, error: 'AI generation failed' });
   }
+
+  // 시각 요소 강제 보강 (인포그래픽, 테이블, 내부링크 누락 시 자동 삽입)
+  article.content = enrichVisuals(article.content, issue);
 
   // 팩트 검증
   const check = factCheck(article.content, issue.raw_data || {});
