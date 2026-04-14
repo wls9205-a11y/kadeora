@@ -5,13 +5,14 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { STAGE_COLORS, STAGE_ORDER, type SharedTabProps } from './apt-utils';
 import { generateAptSlug } from '@/lib/apt-slug';
+import EngageRow from '@/components/EngageRow';
 
 interface Props extends SharedTabProps {
   redevelopment: RedevProject[];
   freshDate?: string;
 }
 
-export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, setCommentTarget, showToast: _showToast, globalRegion, globalSearch, freshDate, aptImageMap }: Props) {
+export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, setCommentTarget, showToast: _showToast, globalRegion, globalSearch, freshDate, aptImageMap, aptEngageMap }: Props) {
   const [redevType, setRedevType] = useState('전체');
   const [redevRegion, setRedevRegion] = useState(globalRegion || '전체');
   const [redevPage, setRedevPage] = useState(1);
@@ -228,6 +229,21 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
                     </div>
                   )}
 
+                  {/* 입지정보: 역세권 + 학군 + 입주예정 + 단계변경 */}
+                  {(r.nearest_station || r.nearest_school || r.estimated_move_in || r.expected_completion || r.last_stage_change) && (
+                    <div style={{ padding: '0 12px 6px', display: 'flex', flexWrap: 'wrap', gap: '2px 10px', fontSize: 11, color: 'var(--text-secondary)' }}>
+                      {r.nearest_station && <span style={{ color: 'var(--accent-blue)' }}>🚇 {r.nearest_station}</span>}
+                      {r.nearest_school && <span style={{ color: 'var(--accent-cyan, #22D3EE)' }}>🏫 {r.nearest_school}</span>}
+                      {(r.estimated_move_in || r.expected_completion) && <span style={{ color: 'var(--accent-green)' }}>📅 {r.estimated_move_in || r.expected_completion} 입주</span>}
+                      {r.last_stage_change && <span style={{ color: 'var(--text-tertiary)' }}>🔄 {String(r.last_stage_change).slice(0, 10)}</span>}
+                    </div>
+                  )}
+
+                  {/* 핵심 특징 */}
+                  {r.key_features && (
+                    <div style={{ padding: '0 12px 6px' }}><span style={{ fontSize: 11, color: 'var(--text-secondary)', padding: '2px 6px', background: 'rgba(139,92,246,0.06)', borderRadius: 4, border: '1px solid rgba(139,92,246,0.1)' }}>✨ {String(r.key_features).slice(0, 40)}</span></div>
+                  )}
+
                   {/* 실거래 + 블로그 */}
                   {(r.avg_trade_price || r.blog_count) ? (
                     <div style={{ padding: '0 12px 6px', display: 'flex', flexWrap: 'wrap', gap: '2px 10px', fontSize: 11, color: 'var(--text-tertiary)' }}>
@@ -240,6 +256,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
                   {r.ai_summary && (
                     <div style={{ padding: '0 12px 8px' }}><div style={{ padding: '3px 7px', borderLeft: `2px solid ${sc.border}`, fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>🤖 {r.ai_summary}</div></div>
                   )}
+                  <EngageRow views={aptEngageMap?.[r.district_name || '']?.views} comments={aptEngageMap?.[r.district_name || '']?.comments} interest={aptEngageMap?.[r.district_name || '']?.interest} />
                 </Link>
               );
             })}
