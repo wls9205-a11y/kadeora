@@ -83,7 +83,7 @@ export async function GET(req: NextRequest) {
         published_count: published,
         sample_slugs: slugs.slice(0, 5),
         avg_quality: posts.length > 0
-          ? Math.round(posts.reduce((s, p) => s + (p.quality_score || 0), 0) / posts.length)
+          ? Math.round(posts.reduce((s: number, p: any) => s + (p.quality_score || 0), 0) / posts.length)
           : 0,
       },
     };
