@@ -322,10 +322,12 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
       .gte('created_at', since24h)
       .limit(50);
     if (recentBlogs) {
+      // 범용 키워드는 중복 판정에서 제외 (지역명, 공통 태그)
+      const GENERIC = new Set(['청약','분양','아파트','부동산','투자','시세','분석','전망','부산','서울','경기','인천','대구','대전','광주','울산','세종','강원','충북','충남','전북','전남','경북','경남','제주','수도권','지방','매매','전세','월세','실거래','재개발','재건축','미분양','stock','apt','finance']);
       for (const blog of recentBlogs) {
         const blogTags: string[] = blog.tags || [];
-        const overlap = issueKeywords.filter((k: string) => blogTags.includes(k) || (blog.title || '').includes(k));
-        if (overlap.length >= 2) { skipReasons.push(`keyword_overlap:${blog.id}:${overlap.join(',')}`); break; }
+        const overlap = issueKeywords.filter((k: string) => !GENERIC.has(k) && (blogTags.includes(k) || (blog.title || '').includes(k)));
+        if (overlap.length >= 3) { skipReasons.push(`keyword_overlap:${blog.id}:${overlap.join(',')}`); break; }
       }
     }
     if (skipReasons.length === 0) {
