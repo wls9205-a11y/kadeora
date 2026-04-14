@@ -45,6 +45,14 @@ renderer.heading = function ({ text, depth }: { text: string; depth: number }) {
 renderer.image = function ({ href, title, text }: { href: string; title: string | null; text: string }) {
   return `<img src="${href}" alt="${text || ''}" ${title ? `title="${title}"` : ''} loading="lazy" decoding="async" style="max-width:100%;height:auto;border-radius:8px" />`;
 };
+renderer.link = function ({ href, title, text }: { href: string; title: string | null; text: string }) {
+  const isExternal = href && (href.startsWith('http://') || href.startsWith('https://'));
+  const titleAttr = title ? ` title="${title}"` : '';
+  if (isExternal) {
+    return `<a href="${href}" target="_blank" rel="noopener noreferrer"${titleAttr} style="color:var(--brand);text-decoration:underline;text-underline-offset:2px">${text}</a>`;
+  }
+  return `<a href="${href}"${titleAttr} style="color:var(--brand);text-decoration:none">${text}</a>`;
+};
 marked.setOptions({ breaks: true, gfm: true, renderer });
 
 interface Props { params: Promise<{ slug: string }> }
