@@ -49,17 +49,12 @@ export async function GET(request: Request) {
         updates.nickname = meta?.full_name ?? meta?.name ?? data.user.email?.split('@')[0] ?? '사용자';
         updates.nickname_set = true;
         updates.signup_return_url = redirect;
-
-        if (isCTA) {
-          // CTA 가입: interests 자동 추론 + 온보딩 즉시 완료
-          const interests: string[] = [];
-          if (redirect.includes('/apt') || source.includes('apt')) interests.push('apt');
-          if (redirect.includes('/stock') || source.includes('stock')) interests.push('stock');
-          if (interests.length === 0) interests.push('news');
-          updates.interests = interests;
-          updates.onboarded = true;
-          updates.onboarding_method = 'auto';
-        }
+        // CTA 소스 기반 관심사 힌트 (온보딩에서 미리 선택되도록)
+        const hintInterests: string[] = [];
+        if (redirect.includes('/apt') || source.includes('apt')) hintInterests.push('apt');
+        if (redirect.includes('/stock') || source.includes('stock')) hintInterests.push('stock');
+        if (redirect.includes('/redev') || source.includes('redev')) hintInterests.push('redev');
+        if (hintInterests.length > 0) updates.interests = hintInterests;
       }
       await supabase.from('profiles').update(updates).eq('id', data.user.id);
 
@@ -77,29 +72,16 @@ export async function GET(request: Request) {
       // ── 라우팅 분기 ──
       const safeRedirect = redirect.startsWith('/') ? redirect : '/feed';
 
-      // 1) CTA 신규 가입: 온보딩 스킵 → 바로 콘텐츠 + welcome 토스트
-      if (isNewUser && isCTA) {
+      // 1) 신규 가입 (CTA든 직접이든): 항상 온보딩으로 → 관심 설정 필수
+      if (isNewUser) {
         const sep = safeRedirect.includes('?') ? '&' : '?';
-        return NextResponse.redirect(`${origin}${safeRedirect}${sep}welcome=1`);
+        return NextResponse.redirect(`${origin}/onboarding?return=${encodeURIComponent(safeRedirect)}&welcome=1`);
       }
-      // 2) 기존 유저 + 미온보딩 + CTA 재방문: 자동 완료 → 바로 콘텐츠
-      if (existing && !existing.onboarded && isCTA) {
-        const autoFix: Record<string, any> = { onboarded: true, onboarding_method: 'auto', updated_at: new Date().toISOString() };
-        if (!existing.interests || existing.interests.length === 0) {
-          const interests: string[] = [];
-          if (redirect.includes('/apt') || source.includes('apt')) interests.push('apt');
-          if (redirect.includes('/stock') || source.includes('stock')) interests.push('stock');
-          if (interests.length === 0) interests.push('news');
-          autoFix.interests = interests;
-        }
-        await supabase.from('profiles').update(autoFix).eq('id', data.user.id);
-        return NextResponse.redirect(`${origin}${safeRedirect}`);
-      }
-      // 3) direct 신규 or 미온보딩 기존유저 → 온보딩 진행
-      if (!existing || isNewUser || !existing.onboarded) {
+      // 2) 기존 유저 + 미온보딩: 온보딩으로
+      if (existing && !existing.onboarded) {
         return NextResponse.redirect(`${origin}/onboarding?return=${encodeURIComponent(safeRedirect)}`);
       }
-      // 4) 기존 유저, 온보딩 완료 → 바로 리다이렉트
+      // 3) 기존 유저, 온보딩 완료 → 바로 리다이렉트
       return NextResponse.redirect(`${origin}${safeRedirect}`);
     }
   }

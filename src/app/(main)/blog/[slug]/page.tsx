@@ -8,6 +8,8 @@ import { marked } from 'marked';
 import { injectInternalLinks } from '@/lib/blog-auto-link';
 import BlogCommentInput from '@/components/BlogCommentInput';
 import BlogCommentCTA from '@/components/BlogCommentCTA';
+import BlogMidCTA from '@/components/BlogMidCTA';
+import BlogFloatingBar from '@/components/BlogFloatingBar';
 import ShareButtons from '@/components/ShareButtons';
 import KakaoShareButton from '@/components/KakaoShareButton';
 import BlogFaqAccordion from '@/components/BlogFaqAccordion';
@@ -869,6 +871,11 @@ export default async function BlogDetailPage({ params }: Props) {
           />
         )}
 
+        {/* BlogMidCTA — 비로그인 유저 전용, SmartSectionGate 아래 소프트 CTA */}
+        {!isBot && !isLoggedIn && (
+          <BlogMidCTA category={post.category} slug={slug} userCount={userCount} />
+        )}
+
         {/* CTA — SmartSectionGate가 비로그인 전환 전담, BlogMidCTA 중복 제거 */}
 
         <RelatedContentCard type="blog" showSignup={false} />
@@ -966,6 +973,9 @@ export default async function BlogDetailPage({ params }: Props) {
           <BlogActions blogPostId={post.id} initialHelpfulCount={post.helpful_count ?? 0} />
         </div>
       </article>
+
+      {/* 플로팅 액션바 — 스크롤 30% 후 나타남, 봇 제외 */}
+      {!isBot && <BlogFloatingBar slug={slug} title={post.title} category={post.category} />}
 
       {/* 댓글 섹션 — D안 컴팩트 리스트 */}
       <BlogCommentCTA commentCount={comments.length} />

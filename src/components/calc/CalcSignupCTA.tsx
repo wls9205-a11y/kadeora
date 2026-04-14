@@ -12,17 +12,17 @@ export default function CalcSignupCTA({ calcSlug, category }: { calcSlug: string
       padding: '20px 20px 18px', marginTop: 20, marginBottom: 16, textAlign: 'center',
     }}>
       <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 6 }}>
-        카더라에서 더 많은 기능을 이용해보세요
+        계산 결과를 저장하고 알림을 받아보세요
       </div>
       <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: 14 }}>
-        142종 무료 계산기 · 부동산 청약·분양 알림 · 주식 시세 · 커뮤니티
+        청약 마감 알림 · 관심 종목 급등/급락 알림 · 주간 시세 리포트 — 모두 무료
       </div>
       <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
         <Link href={`/login?redirect=/calc/${category}/${calcSlug}&source=calc_cta`} style={{
           padding: '10px 24px', borderRadius: 'var(--radius-md)', background: 'var(--brand)', color: '#fff',
           fontSize: 13, fontWeight: 700, textDecoration: 'none',
         }}>
-          카카오로 3초 가입
+          무료 알림 설정하기
         </Link>
         <Link href="/calc" style={{
           padding: '10px 24px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)',

@@ -313,7 +313,7 @@ export default async function HomePage() {
               border: 'none', display: 'inline-flex', alignItems: 'center', gap: 6,
               transition: 'transform 0.12s ease, box-shadow 0.2s ease',
             }}>
-              💬 카카오로 3초 가입
+              💬 무료 알림 시작하기
             </Link>
           </div>
         </section>

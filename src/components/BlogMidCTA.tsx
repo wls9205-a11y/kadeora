@@ -5,9 +5,11 @@ import { trackConversion } from '@/lib/track-conversion';
 interface Props { category: string; slug: string; userCount?: number; }
 
 const CONFIGS: Record<string, { icon: string; hook: string; benefits: string[] }> = {
-  apt: { icon: '🏠', hook: '이 분석이 도움이 되셨나요?', benefits: ['청약 마감 D-day 알림', '내 가점으로 당첨 확률 확인', '실거래가 변동 알림'] },
-  stock: { icon: '📈', hook: '이 종목 분석, 계속 받아보세요', benefits: ['관심 종목 급등락 알림', 'AI 투자 의견 무료 열람', '포트폴리오 시뮬레이터'] },
-  finance: { icon: '💰', hook: '맞춤 재테크 정보를 받아보세요', benefits: ['세금 계산기 무제한', '대출 비교 분석', '절세 전략 리포트'] },
+  apt: { icon: '🏠', hook: '이 아파트 가격이 변하면 알려드릴까요?', benefits: ['실거래가 변동 즉시 알림', '청약 마감 D-day 카운트다운', '관심 지역 주간 시세 리포트'] },
+  stock: { icon: '📈', hook: '이 종목 급등/급락 시 알려드릴까요?', benefits: ['관심 종목 가격 변동 알림', '목표가 도달 시 즉시 알림', 'AI 투자 의견 주간 리포트'] },
+  finance: { icon: '💰', hook: '내 돈에 영향 주는 변화, 놓치지 마세요', benefits: ['금리·세법 변경 알림', '맞춤 절세 전략 리포트', '재테크 주간 브리핑'] },
+  unsold: { icon: '🏗️', hook: '이 지역 미분양 변동 시 알려드릴까요?', benefits: ['미분양 세대 변동 알림', '할인 분양 소식 즉시 전달', '관심 지역 시세 추적'] },
+  redev: { icon: '🔨', hook: '이 구역 단계 변경 시 알려드릴까요?', benefits: ['사업 단계 변경 즉시 알림', '구역 내 실거래가 추적', '관리처분·착공 일정 알림'] },
 };
 
 export default function BlogMidCTA({ category, slug, userCount = 80 }: Props) {
@@ -60,7 +62,7 @@ export default function BlogMidCTA({ category, slug, userCount = 80 }: Props) {
           textDecoration: 'none', alignItems: 'center', justifyContent: 'center', gap: 8, boxSizing: 'border-box',
         }}>
           <svg width="16" height="16" viewBox="0 0 512 512" fill="#191919"><path d="M255.5 48C141.1 48 48 126.1 48 222.4c0 62.2 38.7 116.7 97 149.8l-24.1 89.7c-2.1 7.9 6.8 14.4 13.7 9.9l101.2-65.2c7.2 1 14.6 1.5 22.2 1.5 114.4 0 207.5-78.1 207.5-174.4S369.9 48 255.5 48z"/></svg>
-          무료로 시작하기
+          알림 설정하기 (무료)
         </a>
         <div style={{ marginTop: 10, fontSize: 11, color: 'rgba(255,255,255,0.3)', textAlign: 'center' }}>✅ {userCount.toLocaleString()}명 이용 중 · 스팸 없음 · 3초 가입</div>
       </div>

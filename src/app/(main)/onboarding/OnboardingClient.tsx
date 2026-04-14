@@ -74,6 +74,11 @@ export default function OnboardingClient() {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ mission: 'interest' }),
       }).catch(() => {});
+      // ── 관심 설정 기반 알림 자동 등록 ──
+      fetch('/api/onboarding/auto-alerts', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ interests: selected, region: region || null }),
+      }).catch(() => {});
     } catch {}
 
     // Android/Desktop: 푸시 구독 시도

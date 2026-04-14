@@ -12,39 +12,39 @@ interface Props {
   aptName?: string;
 }
 
-/* 카테고리별 혜택 메시지 (Preview Hook이 비어있을 때 폴백) */
+/* 카테고리별 혜택 메시지 — "텍스트 잠금해제" → "맞춤 알림 서비스" */
 const CATEGORY_BENEFITS: Record<string, { headline: string; bullets: string[]; btnText: string }> = {
   apt: {
-    headline: '이 글의 나머지 분석 + 가격 변동 알림을',
-    bullets: ['실거래가 변동 알림 (무료)', '청약 마감 D-1 알림', '전체 분석 이어 읽기'],
-    btnText: '카카오로 무료 가입',
+    headline: '이 아파트의 가격이 변하면',
+    bullets: ['실거래가 변동 시 즉시 알림', '청약 마감 D-day 카운트다운', '관심 지역 주간 시세 리포트'],
+    btnText: '알림 설정하기',
   },
   unsold: {
-    headline: '미분양 현황 전체 데이터 + 알림을',
-    bullets: ['미분양 해소 알림 (무료)', '단지 가격 변동 추적', '전체 분석 이어 읽기'],
-    btnText: '카카오로 무료 가입',
+    headline: '이 지역 미분양이 해소되면',
+    bullets: ['미분양 세대 변동 알림', '할인 분양 소식 즉시 전달', '관심 지역 시세 추적'],
+    btnText: '알림 설정하기',
   },
   stock: {
-    headline: '종목 AI 분석 전체 + 가격 알림을',
-    bullets: ['목표가 도달 알림 (무료)', '급등/급락 알림 설정', 'AI 분석 전체 보기'],
-    btnText: '카카오로 무료 가입',
+    headline: '이 종목이 급등/급락하면',
+    bullets: ['관심 종목 가격 변동 알림', '목표가 도달 시 즉시 알림', 'AI 투자 의견 주간 리포트'],
+    btnText: '알림 설정하기',
   },
   finance: {
-    headline: '절세 전략 전체 + 주간 리포트를',
-    bullets: ['세법 변경 알림 (무료)', '맞춤 절세 팁 뉴스레터', '핵심 전략 이어 읽기'],
-    btnText: '카카오로 무료 가입',
+    headline: '내 돈에 영향 주는 변화가 생기면',
+    bullets: ['세법·금리 변경 알림', '맞춤 절세 전략 리포트', '재테크 주간 브리핑'],
+    btnText: '무료 알림 받기',
   },
   redev: {
-    headline: '이 구역의 투자 분석 + 단계 변경 알림을',
-    bullets: ['단계 변경 실시간 알림 (무료)', '구역 내 실거래가 추적', '전체 분석 이어 읽기'],
-    btnText: '카카오로 무료 가입',
+    headline: '이 구역 단계가 변경되면',
+    bullets: ['사업 단계 변경 즉시 알림', '구역 내 실거래가 추적', '관리처분·착공 일정 알림'],
+    btnText: '알림 설정하기',
   },
 };
 
 const DEFAULT_BENEFIT = {
-  headline: '전체 분석 + 맞춤 알림을',
-  bullets: ['청약·시세 변동 알림 (무료)', '주간 시황 리포트', '전체 내용 이어 읽기'],
-  btnText: '카카오로 무료 가입',
+  headline: '관심 분야에 변화가 생기면',
+  bullets: ['청약·시세 변동 즉시 알림', '주간 맞춤 시황 리포트', '관심 지역/종목 추적'],
+  btnText: '무료 알림 받기',
 };
 
 export default function SmartSectionGate({
@@ -60,21 +60,26 @@ export default function SmartSectionGate({
 
   if (!shouldGate) return <div dangerouslySetInnerHTML={{ __html: htmlContent }} />;
 
-  /* ── 클리프행어 컷포인트: 두 번째 H2 직전 ──
-   * 첫 섹션 전체를 보여주되, 두 번째 섹션 내용은 숨김 → "다음도 보고 싶다" FOMO
-   * 최소 20%, 최대 50% 보장. H2가 1개 이하면 30% 기본값.
+  /* ── 클리프행어 컷포인트: 세 번째 H2 직전 ──
+   * 콘텐츠의 대부분(40~70%)을 보여주어 신뢰 확보 후 CTA
+   * "더 읽으려면 가입" 대신 "이 정보의 변화를 추적하려면 가입"
    */
   const { visibleSection, remainingHeadings } = useMemo(() => {
     const h2Matches = [...htmlContent.matchAll(/<h2[^>]*>/gi)];
     let cutPoint: number;
 
-    if (h2Matches.length >= 2 && h2Matches[1].index !== undefined) {
+    if (h2Matches.length >= 3 && h2Matches[2].index !== undefined) {
+      cutPoint = h2Matches[2].index;
+      const minCut = Math.floor(htmlContent.length * 0.40);
+      const maxCut = Math.floor(htmlContent.length * 0.70);
+      cutPoint = Math.max(minCut, Math.min(cutPoint, maxCut));
+    } else if (h2Matches.length >= 2 && h2Matches[1].index !== undefined) {
       cutPoint = h2Matches[1].index;
-      const minCut = Math.floor(htmlContent.length * 0.20);
-      const maxCut = Math.floor(htmlContent.length * 0.50);
+      const minCut = Math.floor(htmlContent.length * 0.40);
+      const maxCut = Math.floor(htmlContent.length * 0.70);
       cutPoint = Math.max(minCut, Math.min(cutPoint, maxCut));
     } else {
-      cutPoint = Math.floor(htmlContent.length * 0.30);
+      cutPoint = Math.floor(htmlContent.length * 0.60);
     }
 
     // H2/H3 경계에 맞춰 정확히 자르기
@@ -121,7 +126,7 @@ export default function SmartSectionGate({
           {hasPreview ? (
             <>
               <div style={{ fontSize: 12, fontWeight: 600, color: 'rgba(224,232,240,0.4)', marginBottom: 10, textAlign: 'center', letterSpacing: '0.5px' }}>
-                이 글의 남은 분석
+                이 글에서 다루는 나머지 분석
               </div>
               <div style={{ marginBottom: 14 }}>
                 {remainingHeadings.map((h, i) => (
@@ -139,7 +144,7 @@ export default function SmartSectionGate({
             <>
               <p style={{ fontSize: 14, fontWeight: 700, color: '#e2e8f0', lineHeight: 1.5, margin: '0 0 12px', textAlign: 'center' }}>
                 {benefit.headline}<br />
-                <span style={{ color: '#FEE500' }}>무료로 받을 수 있어요</span>
+                <span style={{ color: '#FEE500' }}>카더라가 알려드릴게요</span>
               </p>
               <div style={{ marginBottom: 16 }}>
                 {benefit.bullets.map((b, i) => (
@@ -168,7 +173,7 @@ export default function SmartSectionGate({
             <svg width="16" height="16" viewBox="0 0 512 512" fill="#191919">
               <path d="M255.5 48C141.1 48 48 126.1 48 222.4c0 62.2 38.7 116.7 97 149.8l-24.1 89.7c-2.1 7.9 6.8 14.4 13.7 9.9l101.2-65.2c7.2 1 14.6 1.5 22.2 1.5 114.4 0 207.5-78.1 207.5-174.4S369.9 48 255.5 48z" />
             </svg>
-            {hasPreview ? '카카오 3초 가입 → 전체 보기' : benefit.btnText}
+            {hasPreview ? '카카오 3초 설정 → 알림 받기' : benefit.btnText}
           </a>
 
           <div style={{ marginTop: 10, textAlign: 'center' }}>

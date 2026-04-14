@@ -13,9 +13,10 @@ export default function ProfileCompleteBanner() {
     sb.auth.getUser().then(({ data }) => {
       if (!data.user) return;
       setUserId(data.user.id);
-      sb.from('profiles').select('bio, profile_completed').eq('id', data.user.id).single()
+      sb.from('profiles').select('interests, region_text, onboarded').eq('id', data.user.id).single()
         .then(({ data: p }) => {
-          if (p && !p.profile_completed && !p.bio) setShow(true);
+          // 관심 설정이 비어있거나 온보딩 미완료 시 표시
+          if (p && (!p.interests || p.interests.length === 0 || !p.region_text)) setShow(true);
         });
     });
   }, []);
@@ -29,15 +30,15 @@ export default function ProfileCompleteBanner() {
       border: '1px solid rgba(59,123,246,0.15)',
       display: 'flex', alignItems: 'center', gap: 10,
     }}>
-      <span style={{ fontSize: 24 }}>👤</span>
+      <span style={{ fontSize: 24 }}>🔔</span>
       <div style={{ flex: 1 }}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>프로필을 완성하면 +50P</div>
-        <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>한 줄 소개만 작성하면 완료!</div>
+        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>관심 지역·종목을 설정하면 맞춤 알림을 받을 수 있어요</div>
+        <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>10초면 설정 완료! 시세 변동, 청약 마감 알림을 무료로</div>
       </div>
-      <Link href={`/profile/${userId}`} style={{
+      <Link href="/onboarding" style={{
         padding: '6px 14px', borderRadius: 'var(--radius-md)', background: 'var(--brand)', color: '#fff',
         fontSize: 12, fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap',
-      }}>완성하기</Link>
+      }}>설정하기</Link>
       <button onClick={() => { sessionStorage.setItem('kd_profile_banner_dismissed', '1'); setShow(false); }}
         style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', fontSize: 16, cursor: 'pointer' }}>×</button>
     </div>

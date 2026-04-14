@@ -83,10 +83,10 @@ export default function LoginGate({ children, feature, title, description, blurH
             fontSize: 13, fontWeight: 700, textDecoration: 'none',
           }}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="#191919"><path d="M12 3C6.5 3 2 6.58 2 11c0 2.83 1.88 5.31 4.7 6.71l-.97 3.59c-.07.26.2.47.42.33L10.2 18.7c.58.08 1.19.13 1.8.13 5.5 0 10-3.58 10-8S17.5 3 12 3z"/></svg>
-          카카오 3초 가입
+          카카오로 알림 설정하기
         </Link>
         <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 6 }}>
-          스팸 없음 · 가입 즉시 전체 분석 열람
+          스팸 없음 · 가입 즉시 맞춤 알림 시작
         </div>
       </div>
     </div>
