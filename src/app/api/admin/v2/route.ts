@@ -886,15 +886,23 @@ export async function GET(req: NextRequest) {
       let aptBmCounts: Record<string, number> = {};
       let blogBmCounts: Record<string, number> = {};
       let attendCounts: Record<string, number> = {};
+      let pushCounts: Record<string, number> = {};
+      let emailCounts: Record<string, number> = {};
+      let notifCounts: Record<string, number> = {};
+      let alertCounts: Record<string, number> = {};
 
       if (userIds.length > 0) {
-        const [postsR, commentsR, wlR, abR, bbR, attR] = await Promise.all([
+        const [postsR, commentsR, wlR, abR, bbR, attR, pushR, emailR, notifR, alertR] = await Promise.all([
           sb.from('posts').select('author_id').in('author_id', userIds).eq('is_deleted', false),
           sb.from('comments').select('author_id').in('author_id', userIds),
           sb.from('stock_watchlist').select('user_id').in('user_id', userIds),
           (sb as any).from('apt_bookmarks').select('user_id').in('user_id', userIds),
           (sb as any).from('blog_bookmarks').select('user_id').in('user_id', userIds),
           sb.from('attendance').select('user_id').in('user_id', userIds),
+          sb.from('push_subscriptions').select('user_id').in('user_id', userIds),
+          (sb as any).from('email_subscribers').select('user_id').in('user_id', userIds).eq('is_active', true),
+          (sb as any).from('notification_settings').select('user_id').in('user_id', userIds),
+          (sb as any).from('price_alerts').select('user_id').in('user_id', userIds),
         ]);
         for (const r of (postsR.data || [])) postsCounts[r.author_id] = (postsCounts[r.author_id] || 0) + 1;
         for (const r of (commentsR.data || [])) commentsCounts[r.author_id] = (commentsCounts[r.author_id] || 0) + 1;
@@ -902,6 +910,10 @@ export async function GET(req: NextRequest) {
         for (const r of (abR.data || [])) aptBmCounts[r.user_id] = (aptBmCounts[r.user_id] || 0) + 1;
         for (const r of (bbR.data || [])) blogBmCounts[r.user_id] = (blogBmCounts[r.user_id] || 0) + 1;
         for (const r of (attR.data || [])) attendCounts[r.user_id] = (attendCounts[r.user_id] || 0) + 1;
+        for (const r of (pushR.data || [])) pushCounts[r.user_id] = (pushCounts[r.user_id] || 0) + 1;
+        for (const r of (emailR.data || [])) emailCounts[r.user_id] = (emailCounts[r.user_id] || 0) + 1;
+        for (const r of (notifR.data || [])) notifCounts[r.user_id] = (notifCounts[r.user_id] || 0) + 1;
+        for (const r of (alertR.data || [])) alertCounts[r.user_id] = (alertCounts[r.user_id] || 0) + 1;
       }
 
       // 유저에 활동 카운트 병합
@@ -913,6 +925,10 @@ export async function GET(req: NextRequest) {
         apt_bm_count: aptBmCounts[u.id] || 0,
         blog_bm_count: blogBmCounts[u.id] || 0,
         attendance_count: attendCounts[u.id] || 0,
+        push_count: pushCounts[u.id] || 0,
+        email_sub: emailCounts[u.id] || 0,
+        notif_count: notifCounts[u.id] || 0,
+        alert_count: alertCounts[u.id] || 0,
       }));
 
       // 관심단지 현장명 조인
