@@ -1,3 +1,45 @@
+## 세션 102b — 재개발·재건축 섹션 전면 강화
+
+### 커밋: a84d14ed → 6dbd5e73
+
+### 진단 발견 (9가지 핵심 문제)
+1. 서울 API 빈약 (upisRebuild만 사용, OA-2253 미사용)
+2. Full Refresh가 AI요약/좌표 등 보강 데이터 매주 파괴
+3. 도시환경정비 81건(40%)이 주택재개발과 혼합
+4. 전국 크롤러에 경기 주요 시군구 대량 누락
+5. STAGE_ORDER에 추진위/준공 누락
+6. apt_sites ↔ redevelopment_projects 연결 불안정 (Full Refresh로 ID 변경)
+7. RedevProject 타입에 area_sqm 누락 → (r as any) 캐스팅
+8. 블로그 348편이 apt 카테고리로 혼재 (redev 0편)
+9. 관심등록 interest_count 전부 0
+
+### 완료 — DB 마이그레이션
+- 8컬럼 추가: sub_type, existing_households, blog_count, avg_trade_price, recent_trade_count, last_stage_change, previous_stage, external_id
+- 3인덱스: external_id(unique), region+stage, sub_type
+- 도시환경정비 81건 자동 분류 (주택재개발 84 + 주택재건축 37 + 도시환경 81)
+- 블로그 345편 카테고리 apt→redev 이동
+
+### 완료 — 코드 변경 (6파일)
+1. **RedevProject 타입** — 11필드 추가 (area_sqm, sub_type, external_id, blog_count, avg_trade_price 등)
+2. **STAGE_ORDER** — 6→7단계 (추진위 추가), STAGE_COLORS 보강
+3. **서울 크롤러** — Full Refresh→UPSERT 전환, 도시환경 분리, external_id 매핑, constructor 추출
+4. **전국 크롤러** — 경기 17개 시군구 + 세종 + 기타 6개 추가 (54→71코드)
+5. **RedevTab** — 카드 완전 리디자인 (OG이미지 제거, 인라인 진행바, 건축지표, 실거래/블로그 연동, 도시환경 토글)
+6. **LoginClient** — redev_interest, redev_landing MSG 추가
+
+### 설계 문서
+- docs/REDEV_ENHANCEMENT_PLAN.md — 풀스택 최종 설계안 (585행)
+
+### PENDING (Phase B-C-D)
+- B-2: /apt/redev 전용 SEO 랜딩 페이지
+- B-3: /apt/redev/[region] 지역별 페이지
+- B-4: Navigation 재개발 메뉴 추가
+- B-5: sitemap + JSON-LD
+- C-1: redev-enrich 크론 (blog_count, avg_trade_price, stage 변경 감지)
+- C-2: apt_sites 연결 안정화 (external_id 기반)
+- D-1: GrowthTab 재개발 현황 섹션
+- D-2: 단계 변경 알림
+
 ## 세션 — 두산위브 트리니뷰 구명역 콘텐츠 전략 실행
 
 ### 커밋: 9325dc40
