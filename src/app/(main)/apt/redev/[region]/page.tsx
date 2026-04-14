@@ -50,7 +50,7 @@ export default async function RegionRedevPage({ params }: Props) {
 
   const sb = await createSupabaseServer();
   const [projectsR, blogR] = await Promise.all([
-    sb.from('redevelopment_projects').select('id, district_name, sigungu, project_type, sub_type, stage, total_households, constructor, floor_area_ratio, building_coverage, max_floor, ai_summary, blog_count, avg_trade_price, area_sqm').eq('is_active', true).eq('region', decodedRegion).neq('sub_type', '도시환경정비').order('stage'),
+    sb.from('redevelopment_projects').select('id, district_name, sigungu, project_type, sub_type, stage, total_households, constructor, floor_area_ratio, building_coverage, max_floor, ai_summary, blog_count, avg_trade_price, area_sqm, address, notes').eq('is_active', true).eq('region', decodedRegion).neq('sub_type', '도시환경정비').order('stage'),
     sb.from('blog_posts').select('slug, title, view_count').eq('category', 'redev').eq('is_published', true).contains('tags', [decodedRegion]).order('view_count', { ascending: false }).limit(5),
   ]);
 
@@ -85,6 +85,16 @@ export default async function RegionRedevPage({ params }: Props) {
   projects.forEach((p: any) => { const s = p.stage || '정비구역지정'; stageMap.set(s, (stageMap.get(s) || 0) + 1); });
   const totalHouseholds = projects.reduce((s: number, p: any) => s + (p.total_households || 0), 0);
 
+  // 통계 (상단 요약 카드용)
+  const redevCount = projects.filter((p: any) => p.project_type === '재개발').length;
+  const rebuildCount = projects.filter((p: any) => p.project_type === '재건축').length;
+  const avgProgress = Math.round(projects.reduce((s: number, p: any) => {
+    const idx = STAGE_ORDER.indexOf(p.stage || '');
+    return s + (idx >= 0 ? ((idx + 1) / STAGE_ORDER.length) * 100 : 0);
+  }, 0) / total);
+  const constructorCount = projects.filter((p: any) => p.constructor).length;
+  const lateStageCnt = projects.filter((p: any) => ['관리처분', '착공', '준공'].includes(p.stage || '')).length;
+
   // JSON-LD
   const jsonLd = {
     '@context': 'https://schema.org', '@type': 'WebPage',
@@ -112,10 +122,22 @@ export default async function RegionRedevPage({ params }: Props) {
     })),
   };
 
+  // FAQPage JSON-LD (지역별 동적 FAQ)
+  const faqLd = {
+    '@context': 'https://schema.org', '@type': 'FAQPage',
+    mainEntity: [
+      { '@type': 'Question', name: `${decodedRegion} 재개발·재건축 구역은 몇 개인가요?`, acceptedAnswer: { '@type': 'Answer', text: `${decodedRegion} 지역에는 현재 ${total}개의 재개발·재건축 구역이 활성화되어 있습니다. 재개발 ${redevCount}건, 재건축 ${rebuildCount}건이며 평균 진행률은 ${avgProgress}%입니다.` } },
+      { '@type': 'Question', name: `${decodedRegion}에서 착공 단계 이상인 구역은?`, acceptedAnswer: { '@type': 'Answer', text: `${decodedRegion} 지역에서 관리처분·착공·준공 단계에 도달한 구역은 ${lateStageCnt}건입니다. 전체 ${total}건 중 ${Math.round(lateStageCnt / total * 100)}%가 후기 단계에 진입했습니다.` } },
+      ...(totalHouseholds > 0 ? [{ '@type': 'Question', name: `${decodedRegion} 재개발 총 세대수는?`, acceptedAnswer: { '@type': 'Answer', text: `${decodedRegion} 지역 재개발·재건축 사업의 총 계획 세대수는 약 ${totalHouseholds.toLocaleString()}세대입니다.` } }] : []),
+      ...(constructorCount > 0 ? [{ '@type': 'Question', name: `${decodedRegion} 재개발 시공사는 어디인가요?`, acceptedAnswer: { '@type': 'Answer', text: `${decodedRegion} 지역 ${constructorCount}개 구역에서 시공사가 선정되었습니다. ${projects.filter((p: any) => p.constructor).slice(0, 3).map((p: any) => `${p.district_name}(${p.constructor})`).join(', ')} 등이 있습니다.` } }] : []),
+    ],
+  };
+
   return (
     <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 16px' }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
 
       {/* 히어로 */}
       <div style={{ padding: '32px 0 16px', textAlign: 'center' }}>
@@ -129,6 +151,30 @@ export default async function RegionRedevPage({ params }: Props) {
           <strong style={{ color: 'var(--brand)', fontSize: 18 }}>{total}</strong>개 구역
           {totalHouseholds > 0 && <> · <strong>{totalHouseholds.toLocaleString()}</strong>세대</>}
         </p>
+      </div>
+
+      {/* 상단 통계 요약 카드 */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))', gap: 6, marginBottom: 16, padding: '12px', borderRadius: 'var(--radius-card)', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--brand)' }}>{total}</div>
+          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 600 }}>전체 구역</div>
+        </div>
+        {redevCount > 0 && <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: 18, fontWeight: 900, color: '#8B5CF6' }}>{redevCount}</div>
+          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 600 }}>재개발</div>
+        </div>}
+        {rebuildCount > 0 && <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: 18, fontWeight: 900, color: '#F59E0B' }}>{rebuildCount}</div>
+          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 600 }}>재건축</div>
+        </div>}
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: 18, fontWeight: 900, color: avgProgress >= 50 ? '#34D399' : '#FB923C' }}>{avgProgress}%</div>
+          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 600 }}>평균 진행률</div>
+        </div>
+        {lateStageCnt > 0 && <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: 18, fontWeight: 900, color: '#34D399' }}>{lateStageCnt}</div>
+          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 600 }}>착공↑</div>
+        </div>}
       </div>
 
       {/* 단계별 파이프라인 */}
@@ -178,7 +224,8 @@ export default async function RegionRedevPage({ params }: Props) {
                 {p.area_sqm && <span>📐 {p.area_sqm >= 10000 ? `${(p.area_sqm / 10000).toFixed(1)}만m²` : `${(p.area_sqm / 1000).toFixed(0)}천m²`}</span>}
                 {p.avg_trade_price && <span>💰 평균 {(p.avg_trade_price / 10000).toFixed(1)}억</span>}
               </div>
-              {p.ai_summary && <div style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 4, borderLeft: `2px solid ${sc}`, paddingLeft: 6, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>🤖 {p.ai_summary}</div>}
+              {p.address && <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>📍 {p.address}</div>}
+              {(p.ai_summary || p.notes) && <div style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 4, borderLeft: `2px solid ${sc}`, paddingLeft: 6, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>🤖 {p.ai_summary || p.notes}</div>}
             </Link>
           );
         })}
