@@ -300,7 +300,7 @@
     },
     {
       "path": "/api/cron/apt-image-crawl",
-      "schedule": "30 11 * * *"
+      "schedule": "0 * * * *"
     },
     {
       "path": "/api/cron/batch-cluster-submit",

@@ -7,7 +7,7 @@ export const runtime = 'nodejs';
 
 const NAVER_CLIENT_ID = process.env.NAVER_CLIENT_ID || '';
 const NAVER_CLIENT_SECRET = process.env.NAVER_CLIENT_SECRET || '';
-const BATCH_SIZE = 25; // 현장 수 (× 5~6쿼리 = 125~150 API 호출)
+const BATCH_SIZE = 100; // 현장 수 (매시간 실행 × 100 = 2,400/일)
 
 // ━━━ 이미지 카테고리 정의 ━━━
 const IMAGE_CATEGORIES = [
@@ -118,7 +118,7 @@ async function searchNaverImages(
   }
 }
 
-// ━━━ 현장별 이미지 수집 (Phase 1 → Phase 2 fallback) ━━━
+// ━━━ 현장별 이미지 수집 (Phase 1 → Phase 2 병렬 fallback) ━━━
 async function collectImagesForSite(name: string): Promise<{ url: string; thumb: string; type: string; source: string }[]> {
   // Phase 1: 네이버 부동산 사진 갤러리
   const landPhotos = await fetchNaverLandPhotos(name);
@@ -126,32 +126,31 @@ async function collectImagesForSite(name: string): Promise<{ url: string; thumb:
     return landPhotos.slice(0, 8);
   }
 
-  // Phase 2: 네이버 이미지 검색 (카테고리별)
+  // Phase 2: 네이버 이미지 검색 (카테고리 병렬)
+  const coveredTypes = new Set(landPhotos.map((p) => p.type));
+
+  const catResults = await Promise.all(
+    IMAGE_CATEGORIES
+      .filter((cat) => !coveredTypes.has(cat.type))
+      .map(async (cat) => {
+        let images = await searchNaverImages(name, cat.queries[0], cat.display);
+        if (images.length === 0 && cat.queries.length > 1) {
+          images = await searchNaverImages(name, cat.queries[1] as string, cat.display);
+        }
+        return images.map((img) => ({ ...img, type: cat.type }));
+      })
+  );
+
+  const seenUrls = new Set(landPhotos.map((p) => p.url));
   const searchResults: { url: string; thumb: string; type: string; source: string }[] = [...landPhotos];
-  const seenUrls = new Set(landPhotos.map(p => p.url));
-  const coveredTypes = new Set(landPhotos.map(p => p.type));
 
-  for (const cat of IMAGE_CATEGORIES) {
-    if (searchResults.length >= 7) break;
-    // 이미 해당 카테고리가 있으면 스킵
-    if (coveredTypes.has(cat.type)) continue;
-
-    // 첫 번째 쿼리 시도
-    let images = await searchNaverImages(name, cat.queries[0], cat.display);
-    // 결과 없으면 대체 쿼리
-    if (images.length === 0 && cat.queries.length > 1) {
-      images = await searchNaverImages(name, cat.queries[1] as string, cat.display);
-    }
-
-    for (const img of images) {
+  for (const imgs of catResults) {
+    for (const img of imgs) {
       if (!seenUrls.has(img.url) && searchResults.length < 8) {
-        searchResults.push({ ...img, type: cat.type });
+        searchResults.push(img);
         seenUrls.add(img.url);
       }
     }
-
-    // 네이버 API rate limit 존중 — 50ms 딜레이
-    await new Promise(r => setTimeout(r, 50));
   }
 
   return searchResults;
