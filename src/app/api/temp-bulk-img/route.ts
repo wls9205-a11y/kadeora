@@ -1,5 +1,6 @@
-// 임시 일회성 벌크 이미지 수집 — 사용 후 삭제 예정
+// 임시 일회성 벌크 이미지 수집 — 즉시 반환 + after() 백그라운드 처리
 import { NextRequest, NextResponse } from 'next/server';
+import { after } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { errMsg } from '@/lib/error-utils';
 
@@ -25,9 +26,7 @@ async function searchNaver(query: string, display = 3): Promise<ImageResult[]> {
     const data = await res.json();
     return (data.items || []).map((item: any) => ({
       title: (item.title || '').replace(/<[^>]*>/g, ''),
-      url: item.link,
-      thumbnail: item.thumbnail,
-      source: 'naver',
+      url: item.link, thumbnail: item.thumbnail, source: 'naver',
     }));
   } catch { return []; }
 }
@@ -42,28 +41,26 @@ async function searchKakao(query: string, size = 3): Promise<ImageResult[]> {
     if (!res.ok) return [];
     const data = await res.json();
     return (data.documents || []).map((doc: any) => ({
-      title: (doc.display_sitename || doc.collection || '').replace(/<[^>]*>/g, ''),
-      url: doc.image_url,
-      thumbnail: doc.thumbnail_url,
-      source: 'kakao',
+      title: (doc.display_sitename || '').replace(/<[^>]*>/g, ''),
+      url: doc.image_url, thumbnail: doc.thumbnail_url, source: 'kakao',
     }));
   } catch { return []; }
 }
 
-function isRelevantImage(img: ImageResult, aptName: string): boolean {
-  const caption = (img.title || '').toLowerCase();
+function isRelevant(img: ImageResult, name: string): boolean {
+  const cap = (img.title || '').toLowerCase();
   const url = (img.url || '').toLowerCase();
-  const BAD_DOMAINS = ['hogangnono','zigbang','kbland','land.naver','landthumb','r114.co.kr','drapt.com','apt2you','peterpanz','dabangapp','station3','realestate.daum','chosun.com','hankyung.com','mk.co.kr','sedaily.com','utoimage','freepik','shutterstock','clipart','istockphoto','namu.wiki','wikipedia','pixabay','unsplash','pexels','youtube.com','ohousecdn','pinimg.com'];
-  if (BAD_DOMAINS.some(d => url.includes(d))) return false;
-  const BAD_CAPTIONS = ['호갱노노','직방','kb부동산','네이버부동산','다방','피터팬','부동산114','한경','매경','조선일보','스톡 이미지','클립아트','벡터','일러스트','의학과','병원','치과','맛집','카페','식당','호텔','유튜브','게임','영화','드라마','시세','매물','실거래가','스포츠','야구','축구'];
-  if (BAD_CAPTIONS.some(w => caption.includes(w))) return false;
+  const BAD = ['hogangnono','zigbang','kbland','land.naver','r114.co.kr','drapt.com','chosun.com','hankyung.com','mk.co.kr','utoimage','freepik','shutterstock','namu.wiki','wikipedia','pixabay','unsplash','youtube.com','ohousecdn','pinimg.com'];
+  if (BAD.some(d => url.includes(d))) return false;
+  const BAD_CAP = ['호갱노노','직방','kb부동산','네이버부동산','다방','한경','매경','스톡 이미지','병원','치과','맛집','호텔','유튜브','게임','영화','시세','매물','스포츠'];
+  if (BAD_CAP.some(w => cap.includes(w))) return false;
   if (/\b(icon|favicon|logo|badge|button)\b/i.test(url)) return false;
-  const nameCore = aptName.replace(/\s+/g, '').slice(0, 6).toLowerCase();
-  if (nameCore.length >= 3 && caption.replace(/\s+/g, '').includes(nameCore)) return true;
-  const GOOD_WORDS = ['조감도','투시도','배치도','분양','착공','준공','아파트','단지','외관','견본주택','모델하우스','청약','입주','시공','건설','재개발','재건축','주택','세대','공급','타워','블록','지구'];
-  if (GOOD_WORDS.some(w => caption.includes(w))) return true;
-  if (/apt|apart|danji|villa|tower|block/i.test(url)) return true;
-  if (url.includes('imgnews.naver.net') && caption.length > 5) return true;
+  const core = name.replace(/\s+/g, '').slice(0, 6).toLowerCase();
+  if (core.length >= 3 && cap.replace(/\s+/g, '').includes(core)) return true;
+  const GOOD = ['조감도','투시도','배치도','분양','착공','준공','아파트','단지','외관','모델하우스','청약','입주','건설','재개발','재건축','주택','세대'];
+  if (GOOD.some(w => cap.includes(w))) return true;
+  if (/apt|apart|danji|villa|tower/i.test(url)) return true;
+  if (url.includes('imgnews.naver.net') && cap.length > 5) return true;
   return false;
 }
 
@@ -71,28 +68,20 @@ async function collectForSite(name: string): Promise<ImageResult[]> {
   const queries = [`${name} 아파트 조감도`, `${name} 투시도`, `${name} 분양`];
   const promises = queries.flatMap(q => [searchNaver(q, 3), searchKakao(q, 3)]);
   const results = await Promise.allSettled(promises);
-  const allImages: ImageResult[] = [];
-  for (const r of results) {
-    if (r.status === 'fulfilled') allImages.push(...r.value);
-  }
+  const all: ImageResult[] = [];
+  for (const r of results) if (r.status === 'fulfilled') all.push(...r.value);
   const seen = new Set<string>();
-  return allImages.filter(img => {
+  return all.filter(img => {
     if (!img.url || seen.has(img.url)) return false;
-    if (!isRelevantImage(img, name)) return false;
+    if (!isRelevant(img, name)) return false;
     seen.add(img.url);
     return true;
   }).slice(0, 6);
 }
 
-export async function GET(req: NextRequest) {
-  const token = req.nextUrl.searchParams.get('token');
-  if (token !== ONE_TIME_TOKEN) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-  const hasApi = !!(NAVER_CLIENT_ID && NAVER_CLIENT_SECRET) || !!KAKAO_REST_KEY;
-  if (!hasApi) return NextResponse.json({ error: 'No API keys', naver: !!NAVER_CLIENT_ID, kakao: !!KAKAO_REST_KEY });
-
-  const start = Date.now();
+async function runBulk() {
   const sb = getSupabaseAdmin();
+  const start = Date.now();
 
   const { data: sites } = await sb.from('apt_sites')
     .select('id, name, site_type, images')
@@ -105,47 +94,45 @@ export async function GET(req: NextRequest) {
     return !imgs || !Array.isArray(imgs) || imgs.length === 0;
   }).slice(0, 400);
 
-  let collected = 0, skipped = 0;
-  const errors: string[] = [];
-
   for (let i = 0; i < targets.length; i += PARALLEL) {
     if (Date.now() - start > 270_000) break;
-
     const batch = targets.slice(i, i + PARALLEL);
-    const results = await Promise.allSettled(
+    await Promise.allSettled(
       batch.map(async (site: Record<string, any>) => {
-        const images = await collectForSite(site.name);
-        if (images.length === 0) { skipped++; return; }
-
-        await sb.from('apt_sites').update({
-          images: images.map(img => ({
-            url: img.url, thumbnail: img.thumbnail,
-            source: img.source, caption: img.title,
-            collected_at: new Date().toISOString(),
-          })),
-          updated_at: new Date().toISOString(),
-        }).eq('id', site.id);
-
-        collected++;
+        try {
+          const images = await collectForSite(site.name);
+          if (images.length === 0) return;
+          await sb.from('apt_sites').update({
+            images: images.map(img => ({ url: img.url, thumbnail: img.thumbnail, source: img.source, caption: img.title, collected_at: new Date().toISOString() })),
+            updated_at: new Date().toISOString(),
+          }).eq('id', site.id);
+        } catch { /* continue */ }
       })
     );
-    for (const r of results) {
-      if (r.status === 'rejected') errors.push(errMsg(r.reason));
-    }
     await new Promise(r => setTimeout(r, 20));
   }
+}
 
-  const { count: remaining } = await sb.from('apt_sites')
+export async function GET(req: NextRequest) {
+  const token = req.nextUrl.searchParams.get('token');
+  if (token !== ONE_TIME_TOKEN) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const hasApi = !!(NAVER_CLIENT_ID && NAVER_CLIENT_SECRET) || !!KAKAO_REST_KEY;
+  if (!hasApi) return NextResponse.json({ error: 'No API keys', naver: !!NAVER_CLIENT_ID, kakao: !!KAKAO_REST_KEY });
+
+  // 진행 전 현재 상태 확인
+  const { count: before } = await getSupabaseAdmin().from('apt_sites')
     .select('*', { count: 'exact', head: true })
     .eq('is_active', true)
     .or('images.is.null,images.eq.[]');
 
+  // 백그라운드로 처리 시작 (즉시 반환)
+  after(runBulk());
+
   return NextResponse.json({
-    collected, skipped,
-    total_checked: targets.length,
-    remaining: remaining ?? '?',
-    elapsed: `${((Date.now() - start) / 1000).toFixed(1)}s`,
+    status: 'started',
+    remaining_before: before ?? '?',
+    message: '백그라운드 처리 시작됨. /api/temp-bulk-img/status 로 진행 확인',
     apis: { naver: !!NAVER_CLIENT_ID, kakao: !!KAKAO_REST_KEY },
-    errors: errors.slice(0, 5),
   });
 }
