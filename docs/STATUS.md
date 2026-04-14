@@ -1,3 +1,35 @@
+## 세션 109 — CTA 전략 전면 재설계 + SEO 28항목 수정
+
+### 커밋: c5f55080 (CTA), 5ef2086a (SEO) — push 대기
+### 변경: 19파일 총, +303 -90
+
+### CTA 전략 재설계 (12파일)
+
+핵심 전환: "텍스트 잠금 → 알림 서비스" 가치 제안 전환
+
+**Phase 1 — CTA 카피 전환:**
+- SmartSectionGate: "나머지 분석 이어 읽기" → "가격이 변하면 알려드릴게요", 게이트 20-50% → 40-70%
+- BlogMidCTA: 부활 (import 0→1), 서비스 지향 카피, unsold/redev 카테고리 추가
+- BlogFloatingBar: 신규 컴포넌트 — 스크롤 30% 후 고정 [저장/알림/공유] 바
+- KakaoHeroCTA: "3초 가입 인사이트" → "관심 지역·종목 가격 변동 알림"
+- LoginGate/CalcSignupCTA/page.tsx: 전체 CTA 버튼 "가입" → "알림 설정" 통일
+
+**Phase 2 — 온보딩 재설계:**
+- auth/callback: CTA 가입자 온보딩 스킵 제거 → 모든 신규 유저 /onboarding 필수
+- OnboardingClient: 관심 설정 완료 시 auto-alerts API 호출 추가
+- api/onboarding/auto-alerts: notification_settings + email_subscribers 자동 등록
+- ProfileCompleteBanner: "프로필 완성 +50P" → "관심 설정하면 맞춤 알림" 전환
+
+### 근거 데이터
+- 실제 유저 102명 중 90명(88%) 가입 후 활동 0건 (유령)
+- price_alerts 등록: 0건, push_subscriptions: 7명
+- 원인: CTA 가입 → onboarded=true 자동 설정 → 온보딩 스킵 → 관심 미설정 → 알림 안 받음 → 재방문 0
+
+### SEO 28항목 수정 (7파일 + DB 6건)
+(이전 커밋 5ef2086a에 포함)
+
+---
+
 ## 세션 108 — 전체 감사 24건 + 어드민 대시보드 업데이트
 
 ### 3차 심층 감사 결과 총 24건 발견 → 13건 코드 수정 완료
