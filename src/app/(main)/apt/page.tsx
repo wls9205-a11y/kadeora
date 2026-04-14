@@ -153,16 +153,27 @@ async function fetchAptData() {
     } catch {}
   } catch {}
 
-  // ━━━ 현장 이미지 맵 (apt_sites.images → 카드 썸네일용) ━━━
+  // ━━━ 현장 이미지 맵 (apt_sites + apt_complex_profiles → 카드 썸네일용) ━━━
   let aptImageMap: Record<string, string> = {};
   let aptEngageMap: Record<string, { views: number; comments: number; interest: number }> = {};
   try {
     const { getSupabaseAdmin } = await import('@/lib/supabase-admin');
     const adminSb = getSupabaseAdmin();
-    const { data: imgRows } = await (adminSb as any).from('apt_sites').select('name, images, page_views, comment_count, interest_count').not('images', 'is', null);
-    for (const row of (imgRows || []) as any[]) {
-      if (Array.isArray(row.images) && row.images.length > 0 && (row.images[0])?.url) {
-        aptImageMap[row.name] = (row.images[0]).thumbnail || (row.images[0]).thumb || (row.images[0]).url;
+    // 병렬: apt_sites(청약/미분양/재개발) + apt_complex_profiles(실거래 34,539개 단지)
+    const [sitesRes, complexRes] = await Promise.all([
+      (adminSb as any).from('apt_sites').select('name, images, page_views, comment_count, interest_count').not('images', 'is', null),
+      (adminSb as any).from('apt_complex_profiles').select('apt_name, images').not('images', 'is', null),
+    ]);
+    // 1순위: apt_complex_profiles (실거래 단지 전체 커버)
+    for (const row of (complexRes.data || []) as any[]) {
+      if (Array.isArray(row.images) && row.images.length > 0 && row.images[0]?.url) {
+        aptImageMap[row.apt_name] = row.images[0].thumbnail || row.images[0].url;
+      }
+    }
+    // 2순위: apt_sites (청약/미분양/재개발 — 덮어쓰기로 더 정확한 이미지 우선)
+    for (const row of (sitesRes.data || []) as any[]) {
+      if (Array.isArray(row.images) && row.images.length > 0 && row.images[0]?.url) {
+        aptImageMap[row.name] = row.images[0].thumbnail || row.images[0].thumb || row.images[0].url;
       }
       if (row.page_views > 0 || row.comment_count > 0 || row.interest_count > 0) {
         aptEngageMap[row.name] = { views: row.page_views || 0, comments: row.comment_count || 0, interest: row.interest_count || 0 };

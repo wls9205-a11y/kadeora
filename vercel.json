@@ -51,6 +51,12 @@
     "src/app/api/cron/collect-site-*/*.ts": {
       "maxDuration": 300
     },
+    "src/app/api/cron/collect-complex-*/*.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/temp-bulk-img/**/*.ts": {
+      "maxDuration": 300
+    },
     "src/app/api/cron/indexnow-mass/*.ts": {
       "maxDuration": 120
     },
@@ -301,6 +307,10 @@
     {
       "path": "/api/cron/collect-site-images",
       "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/collect-complex-images",
+      "schedule": "30 * * * *"
     },
     {
       "path": "/api/cron/batch-cluster-submit",
