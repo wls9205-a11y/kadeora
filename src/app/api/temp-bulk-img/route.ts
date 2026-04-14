@@ -63,11 +63,12 @@ async function collectImages(name: string) {
   if (landPhotos.length >= 4) return landPhotos.slice(0, 8);
 
   const coveredTypes = new Set(landPhotos.map((p) => p.type));
+  type ImgItem = { url: string; thumb: string; type: string; source: string };
   const catResults = await Promise.all(
     IMAGE_CATEGORIES.filter((c) => !coveredTypes.has(c.type)).map(async (cat) => {
-      let imgs = await searchNaverImages(name, cat.queries[0], cat.display);
+      let imgs: ImgItem[] = await searchNaverImages(name, cat.queries[0], cat.display);
       if (imgs.length === 0 && cat.queries.length > 1) imgs = await searchNaverImages(name, cat.queries[1] as string, cat.display);
-      return imgs.map((i) => ({ ...i, type: cat.type }));
+      return imgs.map((i: ImgItem) => ({ ...i, type: cat.type }));
     })
   );
 
