@@ -88,20 +88,48 @@ export default function QuickPostBar({ category = 'free', regionId = '' }: { cat
   if (!expanded) {
     return (
       <div onClick={handleExpand} style={{
-        display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)',
-        padding: '10px var(--sp-md)', background: 'var(--bg-surface)',
-        borderRadius: 'var(--radius-card)', border: '1px solid var(--border)',
+        padding: '16px 18px', background: 'var(--bg-surface)',
+        borderRadius: 20, border: '1px solid rgba(59,123,246,0.12)',
         marginBottom: 'var(--sp-md)', cursor: 'pointer',
-        transition: 'border-color 0.15s',
+        transition: 'border-color 0.2s',
       }}>
+        {/* 상단: 아이콘 + 타이틀 */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+          <div style={{
+            width: 36, height: 36, borderRadius: '50%',
+            background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            flexShrink: 0,
+          }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>
+          </div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.3 }}>지금 무슨 생각하세요?</div>
+            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>주식, 부동산, 일상 뭐든 좋아요</div>
+          </div>
+        </div>
+
+        {/* 입력 영역 */}
         <div style={{
-          width: 32, height: 32, borderRadius: '50%',
-          background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 12, fontWeight: 800, color: '#fff', flexShrink: 0,
-        }}>💬</div>
-        <span style={{ color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)', flex: 1 }}>오늘 어떤 생각하세요? ✍️</span>
-        <div style={{ display: 'flex', gap: 4 }}>
-          {['📊', '🔮'].map((e, i) => <span key={i} style={{ fontSize: 13, opacity: 0.4 }}>{e}</span>)}
+          display: 'flex', alignItems: 'center', gap: 6,
+          background: 'var(--bg-hover)', borderRadius: 14,
+          padding: '10px 14px', border: '1px solid var(--border)',
+        }}>
+          <span style={{ color: 'var(--text-tertiary)', fontSize: 13, flex: 1 }}>탭해서 이야기 시작하기...</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" strokeWidth="2" strokeLinecap="round" style={{ opacity: 0.5 }}><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </div>
+
+        {/* 하단 버튼 */}
+        <div style={{ display: 'flex', gap: 6, marginTop: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '6px 12px', borderRadius: 10, background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.12)' }}>
+            <span style={{ fontSize: 11, color: '#A78BFA', fontWeight: 600 }}>📊 투표</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '6px 12px', borderRadius: 10, background: 'rgba(34,211,238,0.06)', border: '1px solid rgba(34,211,238,0.1)' }}>
+            <span style={{ fontSize: 11, color: '#22D3EE', fontWeight: 600 }}>🔮 예측</span>
+          </div>
+          <div style={{ flex: 1 }} />
+          <div style={{ padding: '6px 10px', borderRadius: 10, background: 'rgba(52,211,153,0.06)', border: '1px solid rgba(52,211,153,0.1)' }}>
+            <span style={{ fontSize: 11, color: 'rgba(52,211,153,0.7)', fontWeight: 500 }}>+5P</span>
+          </div>
         </div>
       </div>
     );

@@ -7,7 +7,7 @@ import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter, usePathname } from 'next/navigation';
-import { MessageCircle, Share2, TrendingUp, Clock, Users, Trash2 } from 'lucide-react';
+import { MessageCircle, Share2, TrendingUp, Clock, Users, Trash2, Eye } from 'lucide-react';
 import type { PostWithProfile } from '@/types/database';
 import { REGIONS, GRADE_EMOJI, gradeColor, gradeTitle } from '@/lib/constants';
 import { getAvatarColor } from '@/lib/avatar';
@@ -450,6 +450,7 @@ export default function FeedClient({
             const aptTags = (postExt.apt_tags ?? []).filter(Boolean);
             const isPinned = postExt.is_pinned ?? false;
             const bookmarksCount = postExt.bookmarks_count ?? 0;
+            const viewCount = (post as any).view_count ?? 0;
 
             const card = (
               <div key={post.id} className={`animate-fadeIn kd-feed-card${visitedIds.has(post.id) ? ' visited' : ''}`}
@@ -562,6 +563,12 @@ export default function FeedClient({
                   <button onClick={(e) => handleShare(e, post)} aria-label="공유" className="kd-action-btn">
                     <Share2 size={14} /> 공유
                   </button>
+                  {/* 조회수 */}
+                  {viewCount > 0 && (
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 11, color: 'var(--text-tertiary)', padding: '4px 6px', marginLeft: 'auto' }}>
+                      <Eye size={12} /> {numFmt(viewCount)}
+                    </span>
+                  )}
                   {/* 북마크 카운트 */}
                   {bookmarksCount > 0 && (
                     <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--text-tertiary)', padding: '4px 8px' }}>
