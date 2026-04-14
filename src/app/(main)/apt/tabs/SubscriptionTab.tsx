@@ -5,7 +5,7 @@ import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { haptic } from '@/lib/haptic';
 import { isTossMode } from '@/lib/toss-mode';
 import TossTeaser from '@/components/TossTeaser';
-import { type Apt, getStatus, fmtD, kstNow, isNew, NewBadge, STATUS_BADGE, generateAptSlug, type SharedTabProps } from './apt-utils';
+import { type Apt, getStatus, fmtD, kstNow, isNew, STATUS_BADGE, generateAptSlug, type SharedTabProps } from './apt-utils';
 import SectionShareButton from '@/components/SectionShareButton';
 
 interface Props extends SharedTabProps {
@@ -149,48 +149,43 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
             // 간략 주소: 전체 주소에서 구+동 추출
             const shortAddr = apt.hssply_adres ? apt.hssply_adres.replace(/^[^\s]+\s/, '').split(' ').slice(0, 3).join(' ') : '';
             return (
-              <Link key={apt.id} href={`/apt/${encodeURIComponent(generateAptSlug(apt.house_nm) || apt.house_manage_no || String(apt.id))}`} className="kd-card-hover" style={{
-                display: 'block', borderRadius: 'var(--radius-card)', overflow: 'hidden',
-                background: 'var(--bg-surface)',
-                border: st === 'open' ? '1.5px solid rgba(96,165,250,0.35)' : '1px solid var(--border)',
-                boxShadow: st === 'open' ? '0 0 16px rgba(59,123,246,0.08)' : undefined,
-                opacity: 1,
-                textDecoration: 'none', color: 'inherit',
+              <Link key={apt.id} href={`/apt/${encodeURIComponent(generateAptSlug(apt.house_nm) || apt.house_manage_no || String(apt.id))}`} className="hero-card" style={{
+                display: 'block',
+                borderLeft: st === 'open' ? '3px solid rgba(52,211,153,0.7)' : st === 'upcoming' ? '3px solid rgba(96,165,250,0.5)' : undefined,
               }}>
-                {/* ⓪ OG 이미지 스트립 */}
-                <div style={{ height: 56, background: 'var(--bg-hover)', position: 'relative', overflow: 'hidden' }}>
-                  <img src={aptImageMap?.[apt.house_nm] || `/api/og?title=${encodeURIComponent(apt.house_nm)}&category=apt&design=2`} alt={apt.house_nm || "부동산 이미지"} width={400} height={56} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', opacity: 0.85 }} loading="lazy" />
-                  <div style={{ position: 'absolute', top: 6, left: 8 }}>
-                    <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 'var(--radius-xs)', background: st === 'open' ? 'rgba(54,240,176,0.9)' : st === 'upcoming' ? 'rgba(74,138,247,0.9)' : 'rgba(148,163,184,0.8)', color: '#fff', lineHeight: '16px' }}>{bd.label}</span>
+                {/* ⓪ 히어로 이미지 */}
+                <div className="hero-img">
+                  <img src={aptImageMap?.[apt.house_nm] || `/api/og?title=${encodeURIComponent(apt.house_nm)}&category=apt&design=2`} alt={apt.house_nm || "부동산 이미지"} width={400} height={120} loading="lazy" />
+                  <div className="hero-badges">
+                    <span className="hero-badge" style={{ background: st === 'open' ? 'rgba(5,150,105,0.9)' : st === 'upcoming' ? 'rgba(37,99,235,0.9)' : 'rgba(100,116,139,0.85)', color: '#fff' }}>{bd.label}</span>
+                    {st !== 'closed' && isNew(apt, 'subscription') && <span className="hero-badge" style={{ background: 'rgba(254,243,199,0.95)', color: '#92400E' }}>NEW</span>}
+                    {((apt as Record<string, any>)['PARCPRC_ULS_AT'] === 'Y' || (apt as Record<string, any>).is_price_limit) && <span className="hero-badge" style={{ background: 'rgba(243,232,255,0.95)', color: '#6B21A8' }}>상한제</span>}
+                    {(apt as any).project_type && (apt as any).project_type !== '민간' && <span className="hero-badge" style={{ background: 'rgba(255,255,255,0.9)', color: (apt as any).project_type === '재개발' ? '#EA580C' : '#7C3AED' }}>{(apt as any).project_type}</span>}
+                    {(apt as any).brand_name && <span className="hero-badge" style={{ background: 'rgba(255,255,255,0.92)', color: '#2563EB' }}>{(apt as any).brand_name}</span>}
+                    {(apt as Record<string, any>)['SPECLT_RDN_EARTH_AT'] === 'Y' && <span className="hero-badge" style={{ background: 'rgba(239,68,68,0.9)', color: '#fff' }}>투기과열</span>}
                   </div>
                   {dday !== null && dday >= 0 && st !== 'closed' && (
-                    <div style={{ position: 'absolute', bottom: 5, right: 8, fontSize: 10, fontWeight: 800, color: 'rgba(255,255,255,0.8)' }}>
-                      {st === 'open' ? (dday === 0 ? '오늘 마감' : `D-${dday}`) : `D-${dday}`}
+                    <div className="hero-chip">
+                      <span className="hero-dday" style={{
+                        background: dday <= 1 ? 'rgba(220,38,38,0.9)' : dday <= 3 ? 'rgba(234,88,12,0.9)' : 'rgba(37,99,235,0.9)',
+                        color: '#fff',
+                      }}>{dday === 0 ? 'D-Day' : `D-${dday}`}</span>
                     </div>
                   )}
+                  <div className="hero-overlay">
+                    <div className="hero-name">{apt.house_nm}</div>
+                    <div className="hero-addr">{shortAddr}{apt.constructor_nm ? ` · ${apt.constructor_nm}` : ''}{apt.tot_supply_hshld_co ? ` · ${apt.tot_supply_hshld_co.toLocaleString()}세대` : ''}</div>
+                  </div>
                 </div>
-                {/* ① 헤더: 배지 + 경쟁률 링 */}
-                <div style={{ padding: '6px 10px 4px', display: 'flex', gap: 8 }}>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    {/* 배지 행 (상태+D-day는 이미지 스트립에 표시) */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 3, flexWrap: 'wrap' }}>
-                      {st !== 'closed' && isNew(apt, 'subscription') && <NewBadge />}
-                      {((apt as Record<string, any>)['PARCPRC_ULS_AT'] === 'Y' || (apt as Record<string, any>).is_price_limit) && <span style={{ fontSize: 10, fontWeight: 600, padding: '3px 6px', borderRadius: 4, background: 'var(--accent-purple-bg)', color: 'var(--accent-purple)', lineHeight: '14px' }}>상한제</span>}
-                      {(apt as any).project_type && (apt as any).project_type !== '민간' && <span style={{ fontSize: 10, fontWeight: 600, padding: '3px 6px', borderRadius: 4, background: (apt as any).project_type === '재개발' ? 'rgba(251,146,60,0.1)' : 'rgba(167,139,250,0.1)', color: (apt as any).project_type === '재개발' ? 'var(--accent-orange)' : 'var(--accent-purple)', lineHeight: '14px' }}>{(apt as any).project_type}</span>}
-                      {(apt as any).is_regulated_area && <span style={{ fontSize: 10, fontWeight: 600, padding: '3px 6px', borderRadius: 4, background: 'rgba(239,68,68,0.06)', color: 'var(--accent-red)', lineHeight: '14px' }}>규제</span>}
-                      {(apt as Record<string, any>)['SPECLT_RDN_EARTH_AT'] === 'Y' && <span style={{ fontSize: 10, fontWeight: 600, padding: '3px 6px', borderRadius: 4, background: 'var(--accent-red-bg)', color: 'var(--accent-red)', lineHeight: '14px' }}>투기과열</span>}
-                      {(apt as any).brand_name && <span style={{ fontSize: 10, fontWeight: 600, padding: '3px 6px', borderRadius: 4, background: 'rgba(59,123,246,0.08)', color: 'var(--brand)', lineHeight: '14px' }}>{(apt as any).brand_name}</span>}
-                      {(apt as any).balcony_extension && <span style={{ fontSize: 10, fontWeight: 600, padding: '3px 6px', borderRadius: 4, background: 'rgba(34,211,238,0.06)', color: 'var(--accent-cyan, #22D3EE)', lineHeight: '14px' }}>발코니확장</span>}
-                    </div>
-                    {/* 단지명 */}
-                    <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 2 }}>{apt.house_nm}</div>
-                    {/* 주소 + 시공사 + 스펙 */}
-                    <div style={{ fontSize: 10, color: 'var(--text-tertiary)', lineHeight: 1.5 }}>
-                      {shortAddr}{apt.constructor_nm ? ` · ${apt.constructor_nm}` : ''}{(apt as any).developer_nm && (apt as any).developer_nm !== apt.constructor_nm ? ` · 시행 ${String((apt as any).developer_nm).slice(0, 12)}` : ''}{(apt as any).heating_type ? ` · ${(apt as any).heating_type}` : ''}{(apt as any).parking_ratio ? ` · 주차 ${(apt as any).parking_ratio}대` : ''}
-                    </div>
+                {/* ① 배지 행 + 경쟁률 */}
+                <div style={{ padding: '8px 12px 6px', display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <div style={{ flex: 1, display: 'flex', gap: 5, flexWrap: 'wrap', alignItems: 'center' }}>
+                    {(apt as any).is_regulated_area && <span style={{ fontSize: 11, fontWeight: 600, padding: '3px 6px', borderRadius: 6, background: 'rgba(239,68,68,0.06)', color: 'var(--accent-red)' }}>규제지역</span>}
+                    {(apt as any).balcony_extension && <span style={{ fontSize: 11, fontWeight: 600, padding: '3px 6px', borderRadius: 6, background: 'rgba(34,211,238,0.06)', color: 'var(--accent-cyan, #22D3EE)' }}>발코니확장</span>}
+                    {(apt as any).move_in_month && <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{(apt as any).move_in_month} 입주</span>}
                   </div>
                   {/* 경쟁률 링 + 즐찾 */}
-                  <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                  <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
                     {(apt.competition_rate_1st != null && Number(apt.competition_rate_1st) > 0) ? (
                       <div style={{ width: 48, height: 48, position: 'relative' }}>
                         <svg width="48" height="48" viewBox="0 0 48 48">
@@ -198,12 +193,12 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                           <circle cx="24" cy="24" r="20" fill="none" stroke={Number(apt.competition_rate_1st) >= 10 ? 'var(--accent-red)' : Number(apt.competition_rate_1st) >= 5 ? 'var(--accent-orange)' : 'var(--accent-green)'} strokeWidth="3" strokeDasharray={`${Math.min(Number(apt.competition_rate_1st) / 50 * 100, 100) / 100 * Math.PI * 40} ${Math.PI * 40}`} strokeLinecap="round" transform="rotate(-90 24 24)" />
                         </svg>
                         <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                          <span style={{ fontSize: 10, fontWeight: 800, color: Number(apt.competition_rate_1st) >= 10 ? 'var(--accent-red)' : 'var(--text-primary)', lineHeight: 1 }}>{Number(apt.competition_rate_1st).toFixed(1)}</span>
-                          <span style={{ fontSize: 7, color: 'var(--text-tertiary)' }}>:1</span>
+                          <span style={{ fontSize: 11, fontWeight: 800, color: Number(apt.competition_rate_1st) >= 10 ? 'var(--accent-red)' : 'var(--text-primary)', lineHeight: 1 }}>{Number(apt.competition_rate_1st).toFixed(1)}</span>
+                          <span style={{ fontSize: 8, color: 'var(--text-tertiary)' }}>:1</span>
                         </div>
                       </div>
                     ) : null}
-                    {apt.competition_rate_2nd != null && Number(apt.competition_rate_2nd) > 0 && <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>2순위 {Number(apt.competition_rate_2nd).toFixed(1)}:1</span>}
+                    {apt.competition_rate_2nd != null && Number(apt.competition_rate_2nd) > 0 && <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>2순위 {Number(apt.competition_rate_2nd).toFixed(1)}:1</span>}
                     <a aria-label="관심등록" href={`/apt/${encodeURIComponent(generateAptSlug(apt.house_nm) || apt.house_manage_no || String(apt.id))}#interest-section`} onClick={(e) => { e.stopPropagation(); }} style={{ fontSize: 16, background: 'transparent', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '3px 6px', cursor: 'pointer', lineHeight: 1, textDecoration: 'none' }}>
                       ☆
                     </a>

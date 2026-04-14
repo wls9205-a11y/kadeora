@@ -3,7 +3,7 @@ import SectionShareButton from '@/components/SectionShareButton';
 import type { OngoingApt, PremiumListing } from '@/types/apt';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { isNew, NewBadge, kstNow, kstToday, generateAptSlug, type SharedTabProps } from './apt-utils';
+import { isNew, kstNow, kstToday, generateAptSlug, type SharedTabProps } from './apt-utils';
 import dynamic from 'next/dynamic';
 import EngageRow from '@/components/EngageRow';
 
@@ -186,29 +186,30 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
         const pipeStage = isUnsold ? 2 : (o.mvn_prearnge_ym && String(o.mvn_prearnge_ym) <= today.replace(/-/g, '').slice(0, 6) ? 4 : o.cntrct_cncls_bgnde && String(o.cntrct_cncls_bgnde).slice(0, 10) <= today ? 3 : o.przwner_presnatn_de && String(o.przwner_presnatn_de).slice(0, 10) <= today ? 2 : 1);
         const stages = ['청약', '당첨', '계약', '공사', '입주'];
         return (
-          <Link key={o.id} href={linkH} className="kd-card-hover" style={{ display: 'block', borderRadius: 'var(--radius-card)', overflow: 'hidden', background: isPremium ? 'linear-gradient(135deg, rgba(251,191,36,0.04), var(--bg-surface))' : 'var(--bg-surface)', border: isPremium ? '1.5px solid rgba(251,191,36,0.3)' : '1px solid var(--border)', textDecoration: 'none', color: 'inherit' }}>
-            {/* OG 이미지 스트립 */}
-            <div style={{ height: 48, background: 'var(--bg-hover)', position: 'relative', overflow: 'hidden' }}>
-              <img src={aptImageMap?.[o.house_nm] || `/api/og?title=${encodeURIComponent(o.house_nm || '분양중')}&category=apt&design=2`} alt={o.house_nm || "부동산 이미지"} width={400} height={48} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', opacity: 0.8 }} loading="lazy" />
-              <div style={{ position: 'absolute', top: 5, left: 8 }}>
-                <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 'var(--radius-sm)', background: isUnsold ? 'rgba(248,113,113,0.9)' : 'rgba(54,240,176,0.9)', color: '#fff' }}>{isUnsold ? '미분양' : '분양중'}</span>
-                {isPremium && <span style={{ fontSize: 10, fontWeight: 800, padding: '3px 6px', borderRadius: 4, background: 'linear-gradient(135deg,#FFD43B,#F59E0B)', color: '#1a1a2e', marginLeft: 3 }}>PREMIUM</span>}
+          <Link key={o.id} href={linkH} className="hero-card" style={{ display: 'block', borderLeft: isPremium ? '3px solid rgba(251,191,36,0.5)' : isUnsold ? '3px solid rgba(248,113,113,0.5)' : '3px solid rgba(52,211,153,0.5)' }}>
+            {/* 히어로 이미지 */}
+            <div className="hero-img">
+              <img src={aptImageMap?.[o.house_nm] || `/api/og?title=${encodeURIComponent(o.house_nm || '분양중')}&category=apt&design=2`} alt={o.house_nm || "부동산 이미지"} width={400} height={120} loading="lazy" />
+              <div className="hero-badges">
+                <span className="hero-badge" style={{ background: isUnsold ? 'rgba(220,38,38,0.9)' : 'rgba(5,150,105,0.9)', color: '#fff' }}>{isUnsold ? '미분양' : '분양중'}</span>
+                {isPremium && <span className="hero-badge" style={{ background: 'linear-gradient(135deg,#FFD43B,#F59E0B)', color: '#1a1a2e' }}>PREMIUM</span>}
+                {isNew(o, 'ongoing') && <span className="hero-badge" style={{ background: 'rgba(254,243,199,0.95)', color: '#92400E' }}>NEW</span>}
+                {(o as any).brand_name && <span className="hero-badge" style={{ background: 'rgba(255,255,255,0.92)', color: '#2563EB' }}>{(o as any).brand_name}</span>}
+              </div>
+              {o.daysToMove && (
+                <div className="hero-chip">
+                  <span className="hero-dday" style={{ background: 'rgba(234,88,12,0.9)', color: '#fff' }}>D-{o.daysToMove} 입주</span>
+                </div>
+              )}
+              <div className="hero-overlay">
+                <div className="hero-name">{o.house_nm || '현장명 없음'}</div>
+                <div className="hero-addr">{o.region_nm}{o.address ? ` ${o.address.replace(/^[^\s]+\s/, '').split(' ').slice(0, 2).join(' ')}` : ''}{o.constructor_nm ? ` · ${o.constructor_nm.split('(')[0].split('주식')[0].trim()}` : ''}{o.total_supply ? ` · ${o.total_supply.toLocaleString()}세대` : ''}</div>
               </div>
             </div>
-            <div style={{ padding: '8px 12px 6px', display: 'flex', gap: 8 }}>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 5, flexWrap: 'wrap' }}>
-                  {isNew(o, 'ongoing') && <NewBadge />}
-                  {transferLimit && <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--accent-red)' }}>전매{transferLimit}년</span>}
-                  {loanRate && <span style={{ fontSize: 10, fontWeight: 600, color: String(loanRate).includes('무이자') ? 'var(--accent-green)' : 'var(--accent-yellow)' }}>{String(loanRate).includes('무이자') ? '무이자' : '중도금'}</span>}
-                  {(o as any).brand_name && <span style={{ fontSize: 10, fontWeight: 600, padding: '3px 6px', borderRadius: 4, background: 'rgba(59,123,246,0.08)', color: 'var(--brand)', lineHeight: '14px' }}>{(o as any).brand_name}</span>}
-                </div>
-                <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 2 }}>{o.house_nm || '현장명 없음'}</div>
-                <div style={{ fontSize: 10, color: 'var(--text-tertiary)', lineHeight: 1.5 }}>{o.region_nm}{o.address ? ` ${o.address.replace(/^[^\s]+\s/, '').split(' ').slice(0, 2).join(' ')}` : ''}{o.constructor_nm ? ` · ${o.constructor_nm.split('(')[0].split('주식')[0].trim()}` : ''}{o.total_supply ? ` · ${o.total_supply.toLocaleString()}세대` : ''}</div>
-              </div>
-              <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-                <a href={`${linkH}#interest-section`} onClick={(e) => e.stopPropagation()} aria-label="관심등록" style={{ fontSize: 16, background: 'transparent', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '3px 8px', lineHeight: 1, textDecoration: 'none', color: 'var(--text-tertiary)' }}>☆</a>
-              </div>
+            <div style={{ padding: '6px 12px 4px', display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+              {transferLimit && <span style={{ fontSize: 11, fontWeight: 600, padding: '3px 6px', borderRadius: 6, background: 'rgba(239,68,68,0.06)', color: 'var(--accent-red)' }}>전매{transferLimit}년</span>}
+              {loanRate && <span style={{ fontSize: 11, fontWeight: 600, padding: '3px 6px', borderRadius: 6, background: String(loanRate).includes('무이자') ? 'rgba(52,211,153,0.08)' : 'rgba(251,191,36,0.08)', color: String(loanRate).includes('무이자') ? 'var(--accent-green)' : 'var(--accent-yellow)' }}>{String(loanRate).includes('무이자') ? '무이자' : '중도금'}</span>}
+              <a href={`${linkH}#interest-section`} onClick={(e) => e.stopPropagation()} aria-label="관심등록" style={{ fontSize: 16, background: 'transparent', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '3px 8px', lineHeight: 1, textDecoration: 'none', color: 'var(--text-tertiary)', marginLeft: 'auto' }}>☆</a>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 1, margin: '0 10px 8px', background: 'var(--border)', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--border)' }}>
               <div style={kS}><div style={kL}>분양가</div><div style={kV(priceStr ? 'var(--brand)' : 'var(--text-tertiary)')}>{priceStr || (isUnsold ? '문의' : '공고확인')}</div></div>
