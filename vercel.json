@@ -389,7 +389,7 @@
     },
     {
       "path": "/api/cron/issue-draft",
-      "schedule": "2,22,42 * * * *"
+      "schedule": "*/10 * * * *"
     },
     {
       "path": "/api/cron/issue-trend",

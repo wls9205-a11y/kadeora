@@ -196,7 +196,7 @@ export default function IssueTab() {
         <PipelineArrow />
         <PipelineStep icon="🔍" label="issue-detect" sub="15분 주기" active />
         <PipelineArrow />
-        <PipelineStep icon="✍️" label="issue-draft" sub="20분 주기" active />
+        <PipelineStep icon="✍️" label="issue-draft" sub="10분 주기" active />
         <PipelineArrow />
         <PipelineStep icon="🚀" label="자동발행" sub={autoEnabled ? `${minScore}점+ → 즉시` : '중단됨'} active={autoEnabled} />
         <div style={{ flex: 1 }} />

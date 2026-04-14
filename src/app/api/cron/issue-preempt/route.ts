@@ -110,20 +110,20 @@ async function detectNewSubscriptions(sb: any): Promise<any[]> {
 async function detectUncoveredSites(sb: any): Promise<any[]> {
   const results: any[] = [];
 
-  // active apt_sites 중 블로그가 없는 것 (랜덤 10개씩 처리)
+  // active apt_sites 중 블로그가 없는 것 (관심도 높은 순)
   // 서브쿼리 불가 → 2단계 조회
   const { data: activeSites } = await sb.from('apt_sites')
     .select('id, name, region, sigungu, total_units, builder, status, interest_count')
     .eq('status', 'active')
     .not('name', 'is', null)
     .order('interest_count', { ascending: false, nullsFirst: false })
-    .limit(30);
+    .limit(60);
 
   if (!activeSites) return results;
 
   let checked = 0;
   for (const site of activeSites) {
-    if (checked >= 5) break; // 실행당 최대 5건
+    if (checked >= 15) break; // 실행당 최대 15건
     if (!site.name || site.name.length < 3) continue;
 
     // 블로그 존재 체크

@@ -1,3 +1,60 @@
+## 세션 — 이슈 선점 시스템 v3: 5단 파이프라인 전면 재설계
+
+### 커밋: a612e416 → (현재)
+
+### 문제 진단 (5겹 구조적 문제)
+1. **감지 사각지대** — 뉴스 RSS만 모니터링, 청약홈 API/시공사 사이트/네이버 검색량 미감지
+2. **전환율 5.8%** — 86건 감지 중 5건만 발행 완료
+3. **발행 병목** — daily_publish_limit=3, 51,824건 큐 적체
+4. **커버리지 구멍** — apt_sites 3,054건 중 1,075건 블로그 미존재
+5. **엔티티 인식 한계** — 12개 브랜드만 하드코딩 (위브/트리니뷰/포레나 등 누락)
+
+### 완료 — 신규 크론: issue-preempt (2시간 주기)
+- Phase 1: apt_subscriptions 신규 분양 감지 → 블로그 미존재 시 issue_alerts 자동 생성
+- Phase 2: apt_sites active 중 블로그 미커버 단지 → 선점 기회 감지 (5건/회)
+- Phase 3: 네이버 DataLab 검색량 스파이크 모니터링 (200%+ 급증)
+- Phase 4: 시공사 홈페이지 분양예정 크롤 (두산위브, 현대건설, GS건설)
+- 새 이슈 발견 시 issue-draft 즉시 트리거
+
+### 완료 — issue-detect 엔티티 인식 확장
+- 아파트 브랜드 정규식: 12개 → 50+ (위브, 트리니뷰, 꿈에그린, 제일풍경채, 포레나, 에피트 등)
+- specialNames: 6개 → 20+ (부산 핫 단지 포함)
+- apt_sites DB 기반 동적 엔티티 매칭 (6,000건 캐시)
+- 지역+브랜드 복합 패턴 추가
+
+### 완료 — issue-draft 처리율 개선
+- 최소 점수 40→25 (25~39점도 draft로 생성)
+- 크론 주기 20분→10분 (시간당 3→6건 처리)
+- 선점형 콘텐츠 전용 프롬프트 (pre_announcement, preempt_coverage)
+- "카더라" 스타일: 팩트 vs 소문 구분, 주변 시세 비교, 청약 전략
+
+### 완료 — 인프라 개선
+- crawl-apt-subscription 스케줄: 연1회(!) → 매일 06시 + issue-preempt 트리거
+- daily_publish_limit: 3 → 15 (DB 직접 변경)
+- issue-scoring: 신규 타입 4종 (new_subscription, pre_announcement, preempt_coverage, search_spike)
+- admin IssueTab: 파이프라인에 issue-preempt 추가, issue-draft 10분 표시
+- god-mode CRON_GROUPS에 issue-preempt 등록
+- 크론 총 89개
+
+### 파이프라인 구조 (현재)
+```
+[2시간] issue-preempt → 시공사/청약홈/미커버/검색량
+           ↓
+[15분]  issue-detect  → 뉴스RSS 26곳 + GoogleTrends + DART + DB 매칭
+           ↓
+[10분]  issue-draft   → AI 기사생성 (25점+) + 즉시발행 (40점+)
+           ↓
+        자동발행 + IndexNow + 피드 + 뻘글
+```
+
+### PENDING
+- APT_DATA_API_KEY 미등록 → crawl-apt-subscription 실질적 미작동
+- NAVER_CLIENT_ID 미등록 의심 → issue-trend/issue-preempt Phase 3 미작동
+- HUG 분양보증 API 연동
+- 세움터 건축허가 API (6개월~1년 사전 감지)
+- 콘텐츠 라이프사이클 (한 단지 블로그가 단계별 자동 업데이트)
+- 시공사 크롤 패턴 튜닝 (현재 정규식 기반, 정확도 제한적)
+
 ## 세션 102b — 재개발·재건축 섹션 전면 강화
 
 ### 커밋: a84d14ed → 6dbd5e73
