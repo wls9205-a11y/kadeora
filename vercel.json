@@ -24,6 +24,9 @@
     "src/app/api/cron/apt-ai-summary/*.ts": {
       "maxDuration": 300
     },
+    "src/app/api/cron/apt-image-crawl/*.ts": {
+      "maxDuration": 300
+    },
     "src/app/api/cron/stock-daily-briefing/*.ts": {
       "maxDuration": 120
     },
@@ -294,6 +297,10 @@
     {
       "path": "/api/cron/apt-enrich-location",
       "schedule": "0 10 * * *"
+    },
+    {
+      "path": "/api/cron/apt-image-crawl",
+      "schedule": "30 11 * * *"
     },
     {
       "path": "/api/cron/batch-cluster-submit",

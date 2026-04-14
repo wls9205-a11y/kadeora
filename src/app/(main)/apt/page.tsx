@@ -162,7 +162,7 @@ async function fetchAptData() {
     const { data: imgRows } = await (adminSb as any).from('apt_sites').select('name, images, page_views, comment_count, interest_count').not('images', 'is', null);
     for (const row of (imgRows || []) as any[]) {
       if (Array.isArray(row.images) && row.images.length > 0 && (row.images[0])?.url) {
-        aptImageMap[row.name] = (row.images[0]).thumbnail || (row.images[0]).url;
+        aptImageMap[row.name] = (row.images[0]).thumbnail || (row.images[0]).thumb || (row.images[0]).url;
       }
       if (row.page_views > 0 || row.comment_count > 0 || row.interest_count > 0) {
         aptEngageMap[row.name] = { views: row.page_views || 0, comments: row.comment_count || 0, interest: row.interest_count || 0 };
