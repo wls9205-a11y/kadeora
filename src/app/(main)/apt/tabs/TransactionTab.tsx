@@ -2,7 +2,7 @@
 import SectionShareButton from '@/components/SectionShareButton';
 import type { AptTransaction } from '@/types/apt';
 import { useState, useEffect } from 'react';
-import { isNew, NewBadge, fmtAmount, type SharedTabProps } from './apt-utils';
+import { isNew, fmtAmount, type SharedTabProps } from './apt-utils';
 import dynamic from 'next/dynamic';
 
 const BottomSheet = dynamic(() => import('@/components/BottomSheet'), { ssr: false });
@@ -254,25 +254,25 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
         const vsMax = maxP > 0 && amt > 0 && maxP !== amt ? Math.round(((amt - maxP) / maxP) * 100) : null;
         const isMax = maxP > 0 && amt >= maxP && sameApt.length >= 2;
         return (
-          <div key={`${t.id || i}`} onClick={() => setSelected(t)} className="kd-card-hover" style={{ borderRadius: 'var(--radius-card)', overflow: 'hidden', background: isMax ? 'rgba(251,191,36,0.04)' : 'var(--bg-surface)', border: isMax ? '1px solid rgba(251,191,36,0.3)' : '1px solid var(--border)', cursor: 'pointer' }}>
-            {/* ① 헤더: 배지 + 이름+가격 + 메타 */}
-            <div style={{ padding: '10px 12px 6px', display: 'flex', gap: 8 }}>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 5, flexWrap: 'wrap' }}>
-                  {isNew(t, 'transaction') && <NewBadge />}
-                  <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 4, background: t.trade_type === '매매' ? 'rgba(59,130,246,0.1)' : 'rgba(52,211,153,0.1)', color: t.trade_type === '매매' ? 'var(--brand)' : 'var(--accent-green)', border: `1px solid ${t.trade_type === '매매' ? 'rgba(59,130,246,0.2)' : 'rgba(52,211,153,0.2)'}`, lineHeight: '14px' }}>{t.trade_type || '매매'}</span>
-                  {isMax && <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 6px', borderRadius: 4, background: 'rgba(251,191,36,0.1)', color: 'var(--accent-yellow)', lineHeight: '14px' }}>신고가</span>}
-                  <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{t.deal_date || ''}</span>
-                  {vsMax !== null && <span style={{ fontSize: 10, fontWeight: 700, color: vsMax > 0 ? 'var(--accent-green)' : 'var(--accent-red)', marginLeft: 'auto' }}>{vsMax > 0 ? '▲' : '▼'}{vsMax > 0 ? '+' : ''}{vsMax}%</span>}
-                </div>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 2 }}>
-                  <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.apt_name || '아파트'}</span>
-                  <span style={{ fontSize: 20, fontWeight: 800, color: borderColor, flexShrink: 0 }}>{fmtAmount(amt)}</span>
-                </div>
-                <div style={{ fontSize: 10, color: 'var(--text-tertiary)', lineHeight: 1.5 }}>{t.sigungu || ''}{t.dong ? ` ${t.dong}` : ''} · {t.exclusive_area}m²({Math.round((t.exclusive_area || 0) / 3.3058)}평) · {t.floor}층 · {t.built_year}년</div>
+          <div key={`${t.id || i}`} onClick={() => setSelected(t)} className="hero-card" style={{ cursor: 'pointer', borderLeft: isMax ? '3px solid rgba(251,191,36,0.5)' : `3px solid ${borderColor}40` }}>
+            {/* 히어로 이미지 */}
+            <div className="hero-img">
+              <img src={`/api/og?title=${encodeURIComponent(t.apt_name || '아파트')}&category=apt&design=2`} alt={t.apt_name || "아파트"} width={400} height={120} loading="lazy" />
+              <div className="hero-badges">
+                <span className="hero-badge" style={{ background: t.trade_type === '매매' ? 'rgba(124,58,237,0.9)' : 'rgba(5,150,105,0.9)', color: '#fff' }}>{t.trade_type || '매매'}</span>
+                {isNew(t, 'transaction') && <span className="hero-badge" style={{ background: 'rgba(254,243,199,0.95)', color: '#92400E' }}>NEW</span>}
+                {isMax && <span className="hero-badge" style={{ background: 'rgba(251,191,36,0.9)', color: '#1a1a2e' }}>신고가</span>}
+                {vsMax !== null && <span className="hero-badge" style={{ background: vsMax > 0 ? 'rgba(239,68,68,0.9)' : 'rgba(52,211,153,0.9)', color: '#fff' }}>{vsMax > 0 ? '▲' : '▼'}{vsMax > 0 ? '+' : ''}{vsMax}%</span>}
               </div>
-              <div style={{ flexShrink: 0 }}>
-                <a href={`/apt/complex/${encodeURIComponent(t.apt_name || '')}#interest-section`} onClick={(e) => e.stopPropagation()} aria-label="관심등록" style={{ fontSize: 16, background: 'transparent', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '3px 8px', lineHeight: 1, textDecoration: 'none', color: 'var(--text-tertiary)' }}>☆</a>
+              <div className="hero-overlay" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div className="hero-name">{t.apt_name || '아파트'}</div>
+                  <div className="hero-addr">{t.sigungu || ''}{t.dong ? ` ${t.dong}` : ''} · {t.exclusive_area}㎡({Math.round((t.exclusive_area || 0) / 3.3058)}평) · {t.floor}층{t.built_year ? ` · ${t.built_year}년` : ''}</div>
+                </div>
+                <div className="hero-overlay-stat">
+                  <div style={{ fontSize: 18, fontWeight: 800, color: borderColor === 'var(--accent-green)' ? '#34D399' : borderColor === 'var(--accent-red)' ? '#F87171' : borderColor === 'var(--accent-orange)' ? '#FB923C' : '#FBBF24', lineHeight: 1 }}>{fmtAmount(amt)}</div>
+                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)' }}>{t.deal_date || ''}</div>
+                </div>
               </div>
             </div>
 

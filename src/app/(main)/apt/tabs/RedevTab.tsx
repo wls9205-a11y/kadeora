@@ -181,34 +181,45 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
               const displayName = r.district_name && r.district_name !== '미상' && r.district_name !== '정보 준비중' ? r.district_name : r.address || r.notes || '정보 준비중';
               const isDosiJeongbi = r.sub_type === '도시환경정비';
               return (
-                <Link key={r.id} href={`/apt/${encodeURIComponent(redevSlug)}`} className="kd-card-hover" style={{ display: 'block', textDecoration: 'none', color: 'inherit', borderRadius: 'var(--radius-card)', overflow: 'hidden', background: 'var(--bg-surface)', border: '1px solid var(--border)', opacity: isDosiJeongbi ? 0.7 : 1 }}>
-                  {/* ① 헤더: 유형뱃지 + 단계 진행바 + 지역 */}
-                  <div style={{ padding: '8px 12px 0', display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 'var(--radius-sm)', background: r.project_type === '재건축' ? 'rgba(245,158,11,0.9)' : isDosiJeongbi ? 'rgba(107,114,128,0.7)' : 'rgba(139,92,246,0.9)', color: '#fff', flexShrink: 0 }}>
-                      {isDosiJeongbi ? '도시정비' : r.project_type || '재개발'}
-                    </span>
-                    <span style={{ fontSize: 10, fontWeight: 600, color: sc.color, flexShrink: 0 }}>{r.stage || '진행중'}</span>
-                    <div style={{ flex: 1, height: 4, background: 'var(--bg-hover)', borderRadius: 2, overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: `${progress}%`, background: sc.color, borderRadius: 2, transition: 'width .5s' }} />
+                <Link key={r.id} href={`/apt/${encodeURIComponent(redevSlug)}`} className="hero-card" style={{ display: 'block', borderLeft: `3px solid ${sc.border}`, opacity: isDosiJeongbi ? 0.7 : 1 }}>
+                  {/* 히어로 이미지 */}
+                  <div className="hero-img">
+                    <img src={aptImageMap?.[r.district_name || ''] || `/api/og?title=${encodeURIComponent(displayName)}&category=apt&design=2`} alt={displayName} width={400} height={120} loading="lazy" />
+                    <div className="hero-badges">
+                      <span className="hero-badge" style={{ background: r.project_type === '재건축' ? 'rgba(245,158,11,0.9)' : isDosiJeongbi ? 'rgba(107,114,128,0.7)' : 'rgba(234,88,12,0.9)', color: '#fff' }}>
+                        {isDosiJeongbi ? '도시정비' : r.project_type || '재개발'}
+                      </span>
+                      <span className="hero-badge" style={{ background: 'rgba(255,255,255,0.92)', color: sc.color }}>{r.stage || '진행중'}</span>
+                      {r.constructor && <span className="hero-badge" style={{ background: 'rgba(255,255,255,0.92)', color: '#059669' }}>{r.constructor}</span>}
                     </div>
-                    <span style={{ fontSize: 10, fontWeight: 700, color: sc.color, flexShrink: 0 }}>{progress}%</span>
-                    <span style={{ fontSize: 10, color: 'var(--text-tertiary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 80 }}>{r.region}{r.sigungu ? ` ${r.sigungu}` : ''}</span>
+                    <div className="hero-chip">
+                      <div className="hero-overlay-stat">
+                        <div style={{ fontSize: 16, fontWeight: 800, color: sc.color === 'var(--text-tertiary)' ? '#A78BFA' : sc.color, lineHeight: 1 }}>{progress}%</div>
+                        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)' }}>진행률</div>
+                      </div>
+                    </div>
+                    <div className="hero-overlay">
+                      <div className="hero-name">{displayName}</div>
+                      <div className="hero-addr">{r.region}{r.sigungu ? ` ${r.sigungu}` : ''}{r.total_households ? ` · ${r.total_households.toLocaleString()}세대 예정` : ''}</div>
+                    </div>
                   </div>
 
-                  {/* ② 이름 */}
-                  <div style={{ padding: '6px 12px 4px', display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>{displayName}</div>
+                  {/* 진행바 인라인 */}
+                  <div style={{ padding: '8px 12px 0', display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <div style={{ flex: 1, height: 6, background: 'var(--bg-hover)', borderRadius: 3, overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${progress}%`, background: sc.color, borderRadius: 3, transition: 'width .5s' }} />
+                    </div>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: sc.color, flexShrink: 0 }}>{r.stage || '진행중'}</span>
                     <a href={`/apt/${encodeURIComponent(redevSlug)}#interest-section`} onClick={(e) => e.stopPropagation()} aria-label="관심등록" style={{ fontSize: 14, background: 'transparent', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '2px 6px', lineHeight: 1, textDecoration: 'none', color: 'var(--text-tertiary)', flexShrink: 0 }}>☆</a>
                   </div>
 
-                  {/* ③ 핵심 KPI 인라인 — NULL이면 표시 안 함 */}
-                  <div style={{ padding: '0 12px 6px', display: 'flex', flexWrap: 'wrap', gap: '2px 10px', fontSize: 11, color: 'var(--text-secondary)' }}>
+                  {/* 핵심 KPI 인라인 */}
+                  <div style={{ padding: '6px 12px', display: 'flex', flexWrap: 'wrap', gap: '2px 10px', fontSize: 11, color: 'var(--text-secondary)' }}>
                     {r.total_households && <span>🏢 <strong style={{ color: 'var(--brand)' }}>{r.total_households.toLocaleString()}</strong>세대{r.existing_households ? <span style={{ color: 'var(--text-tertiary)' }}>(기존 {r.existing_households.toLocaleString()})</span> : ''}</span>}
                     {r.area_sqm && <span>📐 {r.area_sqm >= 10000 ? `${(r.area_sqm / 10000).toFixed(1)}만m²` : `${(r.area_sqm / 1000).toFixed(0)}천m²`}</span>}
-                    {r.constructor && <span>🏗️ <strong style={{ color: 'var(--accent-green)' }}>{r.constructor}</strong></span>}
                   </div>
 
-                  {/* ④ 건축지표 — 하나라도 있으면 표시 */}
+                  {/* 건축지표 */}
                   {(r.floor_area_ratio || r.building_coverage || r.max_floor) && (
                     <div style={{ padding: '0 12px 6px', display: 'flex', flexWrap: 'wrap', gap: '2px 10px', fontSize: 11, color: 'var(--text-tertiary)' }}>
                       {r.floor_area_ratio && <span>📊 용적률 {Number(r.floor_area_ratio).toFixed(0)}%</span>}
@@ -217,7 +228,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
                     </div>
                   )}
 
-                  {/* ⑤ 실거래 + 블로그 연동 — 데이터 있으면 표시 */}
+                  {/* 실거래 + 블로그 */}
                   {(r.avg_trade_price || r.blog_count) ? (
                     <div style={{ padding: '0 12px 6px', display: 'flex', flexWrap: 'wrap', gap: '2px 10px', fontSize: 11, color: 'var(--text-tertiary)' }}>
                       {r.avg_trade_price ? <span>💰 구역 내 평균 <strong style={{ color: '#F59E0B' }}>{(r.avg_trade_price / 10000).toFixed(1)}억</strong>{r.recent_trade_count ? ` (${r.recent_trade_count}건)` : ''}</span> : null}
@@ -225,9 +236,9 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
                     </div>
                   ) : null}
 
-                  {/* ⑥ AI 요약 1줄 */}
+                  {/* AI 요약 */}
                   {r.ai_summary && (
-                    <div style={{ padding: '0 12px 8px' }}><div style={{ padding: '3px 7px', borderLeft: `2px solid ${sc.border}`, fontSize: 10, color: 'var(--text-secondary)', lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>🤖 {r.ai_summary}</div></div>
+                    <div style={{ padding: '0 12px 8px' }}><div style={{ padding: '3px 7px', borderLeft: `2px solid ${sc.border}`, fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>🤖 {r.ai_summary}</div></div>
                   )}
                 </Link>
               );

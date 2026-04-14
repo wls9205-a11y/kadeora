@@ -3,7 +3,7 @@ import Link from 'next/link';
 import SectionShareButton from '@/components/SectionShareButton';
 import type { UnsoldApt } from '@/types/apt';
 import { useState, useEffect } from 'react';
-import { type SharedTabProps, generateAptSlug, isNew, NewBadge } from './apt-utils';
+import { type SharedTabProps, generateAptSlug, isNew } from './apt-utils';
 import dynamic from 'next/dynamic';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 
@@ -165,27 +165,24 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
         const dangerColor = unsoldCount >= 1000 ? 'var(--accent-red)' : unsoldCount >= 500 ? 'var(--accent-orange)' : unsoldCount >= 100 ? 'var(--accent-yellow)' : 'var(--accent-green)';
 
         return (
-          <Link key={u.id} href={`/apt/${encodeURIComponent(generateAptSlug(u.house_nm) || String(u.id))}`} className="kd-card-hover" style={{ display: 'block', borderRadius: 'var(--radius-card)', overflow: 'hidden', background: 'var(--bg-surface)', border: '1px solid var(--border)', textDecoration: 'none', color: 'inherit' }}>
-            {/* OG 이미지 스트립 */}
-            <div style={{ height: 48, background: 'var(--bg-hover)', position: 'relative', overflow: 'hidden' }}>
-              <img src={aptImageMap?.[u.house_nm] || `/api/og?title=${encodeURIComponent(u.house_nm || '미분양')}&category=apt&design=2`} alt={u.house_nm || "부동산 이미지"} width={400} height={48} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', opacity: 0.8 }} loading="lazy" />
-              <div style={{ position: 'absolute', top: 5, left: 8, display: 'flex', gap: 4, alignItems: 'center' }}>
-                <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 'var(--radius-sm)', background: 'rgba(248,113,113,0.9)', color: '#fff' }}>미분양</span>
-                <span style={{ fontSize: 10, fontWeight: 800, color: '#fff' }}>{unsoldCount.toLocaleString()}호</span>
+          <Link key={u.id} href={`/apt/${encodeURIComponent(generateAptSlug(u.house_nm) || String(u.id))}`} className="hero-card" style={{ display: 'block', borderLeft: '3px solid rgba(248,113,113,0.5)' }}>
+            {/* 히어로 이미지 */}
+            <div className="hero-img">
+              <img src={aptImageMap?.[u.house_nm] || `/api/og?title=${encodeURIComponent(u.house_nm || '미분양')}&category=apt&design=2`} alt={u.house_nm || "부동산 이미지"} width={400} height={120} loading="lazy" />
+              <div className="hero-badges">
+                <span className="hero-badge" style={{ background: 'rgba(220,38,38,0.9)', color: '#fff' }}>미분양</span>
+                {isNew(u, 'unsold') && <span className="hero-badge" style={{ background: 'rgba(254,243,199,0.95)', color: '#92400E' }}>NEW</span>}
+                {(() => { const sa = surgeAlerts.find(a => a.region_nm === u.region_nm); return sa && sa.change_pct !== 0 ? <span className="hero-badge" style={{ background: sa.change_pct > 0 ? 'rgba(248,113,113,0.9)' : 'rgba(52,211,153,0.9)', color: '#fff' }}>{sa.change_pct > 0 ? '+' : ''}{sa.change_pct}%</span> : null; })()}
               </div>
-            </div>
-            {/* ① 헤더: 배지 + 이름 + 메타 */}
-            <div style={{ padding: '8px 12px 6px', display: 'flex', gap: 8 }}>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 5, flexWrap: 'wrap' }}>
-                  {isNew(u, 'unsold') && <NewBadge />}
-                  {(() => { const sa = surgeAlerts.find(a => a.region_nm === u.region_nm); return sa && sa.change_pct !== 0 ? <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 5px', borderRadius: 10, background: sa.change_pct > 0 ? 'rgba(248,113,113,0.08)' : 'rgba(52,211,153,0.08)', color: sa.change_pct > 0 ? 'var(--accent-red)' : 'var(--accent-green)' }}>{sa.change_pct > 0 ? '+' : ''}{sa.change_pct}%</span> : null; })()}
+              <div className="hero-chip">
+                <div className="hero-overlay-stat">
+                  <div style={{ fontSize: 18, fontWeight: 800, color: '#F87171', lineHeight: 1 }}>{unsoldCount.toLocaleString()}</div>
+                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)' }}>잔여세대</div>
                 </div>
-                <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 2 }}>{u.house_nm || '미분양'}</div>
-                <div style={{ fontSize: 10, color: 'var(--text-tertiary)', lineHeight: 1.5 }}>{u.region_nm}{u.sigungu_nm ? ` ${u.sigungu_nm}` : ''}</div>
               </div>
-              <div style={{ flexShrink: 0 }}>
-                <a href={`/apt/${encodeURIComponent(generateAptSlug(u.house_nm) || String(u.id))}#interest-section`} aria-label="관심등록" onClick={(e) => e.stopPropagation()} style={{ fontSize: 16, background: 'transparent', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '3px 8px', lineHeight: 1, textDecoration: 'none', color: 'var(--text-tertiary)' }}>☆</a>
+              <div className="hero-overlay">
+                <div className="hero-name">{u.house_nm || '미분양'}</div>
+                <div className="hero-addr">{u.region_nm}{u.sigungu_nm ? ` ${u.sigungu_nm}` : ''}</div>
               </div>
             </div>
 

@@ -12,23 +12,6 @@ interface Complex {
   pyeongPrice: number; hasCoords: boolean;
 }
 
-/* ── SVG 스파크라인 (면적 채우기) ── */
-function Spark({ data, w = 56, h = 20 }: { data: number[]; w?: number; h?: number }) {
-  const v = data.filter(x => x > 0);
-  if (v.length < 2) return <div style={{ width: w, height: h }} />;
-  const mn = Math.min(...v), mx = Math.max(...v), rng = mx - mn || 1;
-  const pts = v.map((val, i) => `${(i / (v.length - 1)) * w},${h - ((val - mn) / rng) * (h - 3) - 1.5}`).join(' ');
-  const fill = v.map((val, i) => `${(i / (v.length - 1)) * w},${h - ((val - mn) / rng) * (h - 3) - 1.5}`);
-  fill.push(`${w},${h}`, `0,${h}`);
-  return (
-    <svg width={w} height={h} style={{ display: 'block' }}>
-      <polygon points={fill.join(' ')} fill="rgba(59,123,246,0.12)" />
-      <polyline points={pts} fill="none" stroke="#3B7BF6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx={w} cy={h - ((v[v.length - 1] - mn) / rng) * (h - 3) - 1.5} r="2.5" fill="#3B7BF6" />
-    </svg>
-  );
-}
-
 /* ── 원형 게이지 ── */
 function Gauge({ ratio, size = 40 }: { ratio: number; size?: number }) {
   const r = (size - 4) / 2, circ = 2 * Math.PI * r;
@@ -44,13 +27,6 @@ function Gauge({ ratio, size = 40 }: { ratio: number; size?: number }) {
       <text x={size / 2} y={size / 2 + 4} textAnchor="middle" fill={color} fontSize="10" fontWeight="800">{ratio}%</text>
     </svg>
   );
-}
-
-// 간이 트렌드 데이터 (실제로는 서버에서 전달)
-function makeTrend(price: number): number[] {
-  if (!price) return [];
-  const base = price * 0.85;
-  return [0.88, 0.91, 0.94, 0.96, 0.98, 1].map(m => Math.round(base + (price - base) * m));
 }
 
 export default function ComplexClient({ complexes, ageGroups, regions, initialRegion, ageChartData }: {
@@ -195,44 +171,36 @@ export default function ComplexClient({ complexes, ageGroups, regions, initialRe
           </div>
         )}
         {filtered.map((c: any, i: number) => {
-          const trend = makeTrend(c.lastPrice);
           return (
-            <Link key={`${c.aptName}__${c.sigungu}`} href={`/apt/complex/${encodeURIComponent(c.aptName)}`} style={{
-              display: 'block', padding: '14px 12px', borderRadius: 'var(--radius-lg)',
-              background: 'var(--bg-surface)', border: '1px solid var(--border)',
-              borderTop: '3px solid var(--brand)',
-              textDecoration: 'none', color: 'inherit', position: 'relative', overflow: 'hidden',
-              boxShadow: i < 3 && !searchResults && !selectedAge ? '0 4px 16px rgba(59,123,246,0.08)' : 'none',
-              transition: 'transform 0.12s ease, box-shadow 0.12s ease',
-            }}
-              onMouseEnter={(e: any) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(59,123,246,0.12)'; }}
-              onMouseLeave={(e: any) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = i < 3 ? '0 4px 16px rgba(59,123,246,0.08)' : 'none'; }}
-            >
-              {/* TOP 뱃지 */}
-              {i < 3 && !searchResults && !selectedAge && (
-                <div style={{
-                  position: 'absolute', top: -1, right: 12,
-                  background: i === 0 ? '#f59e0b' : i === 1 ? '#94a3b8' : '#cd7f32',
-                  color: '#fff', fontSize: 10, fontWeight: 900, padding: '3px 8px',
-                  borderRadius: '0 0 5px 5px', letterSpacing: 0.3,
-                }}>TOP {i + 1}</div>
-              )}
-
-              {/* 이름 + 스파크라인 */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--sp-sm)' }}>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.aptName}</div>
-                  <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}>
-                    {c.region} {c.sigungu}{c.dong ? ` ${c.dong}` : ''} · {c.builtYear > 0 ? `${c.builtYear}년` : ''}
-                    {c.hasCoords && <span style={{ marginLeft: 3, fontSize: 10 }}>📍</span>}
-                    <span style={{ marginLeft: 4, color: 'var(--brand)', fontWeight: 600 }}>{c.ageGroup}</span>
-                  </div>
+            <Link key={`${c.aptName}__${c.sigungu}`} href={`/apt/complex/${encodeURIComponent(c.aptName)}`} className="hero-card" style={{
+              display: 'block', position: 'relative', overflow: 'hidden',
+            }}>
+              {/* 히어로 이미지 (소형) */}
+              <div className="hero-img hero-img-sm">
+                <img src={`/api/og?title=${encodeURIComponent(c.aptName)}&category=apt&design=2`} alt={c.aptName} width={300} height={90} loading="lazy" />
+                <div className="hero-badges">
+                  {(() => {
+                    const ageColors: Record<string, string> = { '신축': 'rgba(59,123,246,0.9)', '5년차': 'rgba(34,211,238,0.9)', '10년차': 'rgba(139,92,246,0.9)', '15년차': 'rgba(245,158,11,0.9)', '20년차': 'rgba(249,115,22,0.9)', '25년차': 'rgba(239,68,68,0.9)', '30년+': 'rgba(220,38,38,0.9)' };
+                    return <span className="hero-badge" style={{ background: ageColors[c.ageGroup] || 'rgba(100,116,139,0.85)', color: '#fff' }}>{c.ageGroup}</span>;
+                  })()}
                 </div>
-                <Spark data={trend} />
+                {/* TOP 뱃지 */}
+                {i < 3 && !searchResults && !selectedAge && (
+                  <div className="hero-chip">
+                    <span className="hero-badge" style={{
+                      background: i === 0 ? 'rgba(245,158,11,0.9)' : i === 1 ? 'rgba(148,163,184,0.9)' : 'rgba(205,127,50,0.9)',
+                      color: '#fff', letterSpacing: 0.3,
+                    }}>TOP {i + 1}</span>
+                  </div>
+                )}
+                <div className="hero-overlay">
+                  <div className="hero-name" style={{ fontSize: 14 }}>{c.aptName}</div>
+                  <div className="hero-addr">{c.region} {c.sigungu}{c.dong ? ` ${c.dong}` : ''}{c.builtYear > 0 ? ` · ${c.builtYear}년` : ''}</div>
+                </div>
               </div>
 
               {/* 매매 크게 + 원형 게이지 */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-sm)' }}>
+              <div style={{ padding: '10px 12px 6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 600 }}>매매</div>
                   <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: -0.5 }}>{c.lastPrice > 0 ? fmtAmount(c.lastPrice) : '—'}</div>
@@ -241,7 +209,7 @@ export default function ComplexClient({ complexes, ageGroups, regions, initialRe
               </div>
 
               {/* 3열 부가 데이터 */}
-              <div className="kd-grid-3" style={{ gap: 'var(--sp-xs)', marginBottom: 'var(--sp-sm)' }}>
+              <div className="kd-grid-3" style={{ gap: 'var(--sp-xs)', margin: '0 10px 8px' }}>
                 {[
                   { label: '전세', value: c.jeonse > 0 ? fmtAmount(c.jeonse) : '—' },
                   { label: '월세', value: c.monthlyRent > 0 ? `${c.monthlyRent}만` : '—' },
@@ -255,7 +223,7 @@ export default function ComplexClient({ complexes, ageGroups, regions, initialRe
               </div>
 
               {/* 하단 */}
-              <div style={{ borderTop: '1px solid var(--border)', paddingTop: 6, fontSize: 10, color: 'var(--text-tertiary)', display: 'flex', justifyContent: 'space-between' }}>
+              <div style={{ borderTop: '1px solid var(--border)', padding: '6px 12px', fontSize: 10, color: 'var(--text-tertiary)', display: 'flex', justifyContent: 'space-between' }}>
                 <span>거래 <b style={{ color: 'var(--text-secondary)' }}>{(c.saleCount + (c.rentCount || 0)).toLocaleString()}</b>건</span>
                 <span style={{ color: 'var(--brand)', fontWeight: 700 }}>상세 →</span>
               </div>
