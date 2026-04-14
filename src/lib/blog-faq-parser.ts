@@ -13,9 +13,11 @@ export function parseFaqFromContent(content: string): FaqItem[] {
   for (const line of lines) {
     const trimmed = line.trim();
 
-    // Q 패턴: "Q. 질문", "**Q.** 질문", "### Q: 질문", "Q1. 질문"
+    // Q 패턴: "Q. 질문", "**Q.** 질문", "### Q: 질문", "Q1. 질문", "### ❓ 질문", "❓ Q1: 질문"
     const qMatch = trimmed.match(/^(?:\*\*)?Q\d*[.:]?\s*(?:\*\*)?\s*(.+)/i)
-                || trimmed.match(/^#{1,3}\s*Q\d*[.:]?\s*(.+)/i);
+                || trimmed.match(/^#{1,3}\s*Q\d*[.:]?\s*(.+)/i)
+                || trimmed.match(/^#{1,3}\s*❓\s*(?:Q\d*[.:]?\s*)?(.+)/i)
+                || trimmed.match(/^❓\s*(?:Q\d*[.:]?\s*)?(.+)/i);
 
     if (qMatch) {
       if (currentQ && currentA.trim()) {
@@ -27,10 +29,17 @@ export function parseFaqFromContent(content: string): FaqItem[] {
       continue;
     }
 
-    // A 패턴: "A. 답변", "**A.** 답변"
+    // A 패턴: "A. 답변", "**A.** 답변", "**A:** 답변"
     const aMatch = trimmed.match(/^(?:\*\*)?A\d*[.:]?\s*(?:\*\*)?\s*(.+)/i);
     if (aMatch) {
       currentA = aMatch[1].replace(/\*\*/g, '').trim();
+      inAnswer = true;
+      continue;
+    }
+
+    // ❓ 형식: A. 없이 바로 다음 줄에 답변이 오는 경우
+    if (currentQ && !currentA && !inAnswer && trimmed && !trimmed.startsWith('#') && !trimmed.startsWith('Q') && !trimmed.startsWith('❓')) {
+      currentA = trimmed.replace(/\*\*/g, '').trim();
       inAnswer = true;
       continue;
     }
