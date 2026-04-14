@@ -664,6 +664,26 @@ export async function GET(req: NextRequest) {
         }
       }
 
+      // ── 재개발 현황 ──
+      const [redevTotalR, redevResidentialR, redevDosiR, redevWithHHR, redevWithGeoR, redevWithAiR, redevWithConstructorR] = await Promise.all([
+        (sb as any).from('redevelopment_projects').select('id', { count: 'exact', head: true }).eq('is_active', true),
+        (sb as any).from('redevelopment_projects').select('id', { count: 'exact', head: true }).eq('is_active', true).neq('sub_type', '도시환경정비'),
+        (sb as any).from('redevelopment_projects').select('id', { count: 'exact', head: true }).eq('is_active', true).eq('sub_type', '도시환경정비'),
+        (sb as any).from('redevelopment_projects').select('id', { count: 'exact', head: true }).eq('is_active', true).not('total_households', 'is', null).gt('total_households', 0),
+        (sb as any).from('redevelopment_projects').select('id', { count: 'exact', head: true }).eq('is_active', true).not('latitude', 'is', null),
+        (sb as any).from('redevelopment_projects').select('id', { count: 'exact', head: true }).eq('is_active', true).not('ai_summary', 'is', null),
+        (sb as any).from('redevelopment_projects').select('id', { count: 'exact', head: true }).eq('is_active', true).not('constructor', 'is', null),
+      ]);
+      const redevStats = {
+        total: redevTotalR.count ?? 0,
+        residential: redevResidentialR.count ?? 0,
+        dosi: redevDosiR.count ?? 0,
+        withHouseholds: redevWithHHR.count ?? 0,
+        withGeo: redevWithGeoR.count ?? 0,
+        withAi: redevWithAiR.count ?? 0,
+        withConstructor: redevWithConstructorR.count ?? 0,
+      };
+
       return NextResponse.json({
         deviceSplit: deviceCounts,
         funnel: {
@@ -688,6 +708,7 @@ export async function GET(req: NextRequest) {
         conversionMetrics,
         signupFunnel,
         deviceConv,
+        redevStats,
       });
     }
 

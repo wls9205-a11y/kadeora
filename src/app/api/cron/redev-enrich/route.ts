@@ -81,18 +81,48 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
       }
     }
 
-    // 4. 단계 변경 감지
+    // 4. 단계 변경 감지 + 알림
+    const stageChanges: { name: string; region: string; from: string; to: string }[] = [];
     for (const p of projects) {
       if (p.previous_stage && p.previous_stage !== p.stage) {
-        // 이미 감지된 변경 — 스킵
-        continue;
-      }
-      // previous_stage가 없으면 현재 stage를 기록 (초기화)
-      if (!p.previous_stage) {
+        // 단계 변경 감지!
+        stageChanges.push({
+          name: p.district_name || '미상',
+          region: p.region || '',
+          from: p.previous_stage,
+          to: p.stage,
+        });
+        await (sb as any).from('redevelopment_projects')
+          .update({
+            previous_stage: p.stage,
+            last_stage_change: new Date().toISOString(),
+          })
+          .eq('id', p.id);
+        stageChanged++;
+      } else if (!p.previous_stage) {
+        // 초기화
         await (sb as any).from('redevelopment_projects')
           .update({ previous_stage: p.stage })
           .eq('id', p.id);
       }
+    }
+
+    // 단계 변경 시 admin 알림 (notifications 테이블)
+    if (stageChanges.length > 0) {
+      const summary = stageChanges.map(c => `${c.region} ${c.name}: ${c.from} → ${c.to}`).join('\n');
+      // 관리자 알림 (user_id 없이 type=system)
+      try {
+        const { data: admins } = await sb.from('profiles').select('id').eq('is_admin', true);
+        if (admins?.length) {
+          const notifications = admins.map((a: any) => ({
+            user_id: a.id,
+            type: 'system',
+            content: `🏗️ 재개발 단계 변경 ${stageChanges.length}건 감지\n${summary}`,
+            link: '/apt?tab=redev',
+          }));
+          await (sb as any).from('notifications').insert(notifications);
+        }
+      } catch { /* 알림 실패해도 크론은 계속 */ }
     }
 
     updated = blogUpdated + tradeUpdated + stageChanged;
