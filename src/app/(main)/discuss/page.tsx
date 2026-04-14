@@ -30,6 +30,7 @@ export default function DiscussPage() {
   return (
     <Suspense>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":SITE_URL},{"@type":"ListItem","position":2,"name":"토론","item":SITE_URL + "/discuss"}]}) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"WebPage","name":"카더라 토론","description":"주식, 부동산, 경제 이슈에 대해 실시간으로 토론하고 투표하는 공간","url":SITE_URL+"/discuss","isPartOf":{"@type":"WebSite","name":"카더라","url":SITE_URL},"about":[{"@type":"Thing","name":"주식 토론"},{"@type":"Thing","name":"부동산 토론"},{"@type":"Thing","name":"경제 토론"}]}) }} />
       <h1 style={{ position:"absolute", width:1, height:1, overflow:"hidden", clip:"rect(0,0,0,0)" }}>카더라 토론 — 주식·부동산·경제 실시간 토론</h1>
       <DiscussClient />
       <Disclaimer type="general" />

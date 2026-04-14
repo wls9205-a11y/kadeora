@@ -73,6 +73,24 @@ export default async function MainLayout({ children }: { children: React.ReactNo
         maxWidth: 1200, margin: '0 auto', padding: '0 24px 40px',
       }}>
         <div style={{borderTop:'1px solid var(--border)', paddingTop:16, fontSize: 'var(--fs-xs)', color:'var(--text-tertiary)', textAlign:'center', lineHeight:1.9}}>
+          <nav style={{display:'flex', justifyContent:'center', gap:16, flexWrap:'wrap', marginBottom:12, fontSize:11}}>
+            <a href="/stock" style={{color:'var(--text-secondary)',textDecoration:'none'}}>주식</a>
+            <a href="/stock/dividend" style={{color:'var(--text-secondary)',textDecoration:'none'}}>배당주</a>
+            <a href="/stock/themes" style={{color:'var(--text-secondary)',textDecoration:'none'}}>테마주</a>
+            <a href="/apt" style={{color:'var(--text-secondary)',textDecoration:'none'}}>부동산</a>
+            <a href="/apt/complex" style={{color:'var(--text-secondary)',textDecoration:'none'}}>단지백과</a>
+            <a href="/apt/redev" style={{color:'var(--text-secondary)',textDecoration:'none'}}>재개발</a>
+            <a href="/blog" style={{color:'var(--text-secondary)',textDecoration:'none'}}>블로그</a>
+            <a href="/calc" style={{color:'var(--text-secondary)',textDecoration:'none'}}>계산기</a>
+            <a href="/daily/전국" style={{color:'var(--text-secondary)',textDecoration:'none'}}>데일리</a>
+            <a href="/hot" style={{color:'var(--text-secondary)',textDecoration:'none'}}>인기글</a>
+            <a href="/feed" style={{color:'var(--text-secondary)',textDecoration:'none'}}>커뮤니티</a>
+            <a href="/discuss" style={{color:'var(--text-secondary)',textDecoration:'none'}}>토론</a>
+            <a href="/premium" style={{color:'var(--text-secondary)',textDecoration:'none'}}>프리미엄</a>
+            <a href="/press" style={{color:'var(--text-secondary)',textDecoration:'none'}}>보도자료</a>
+            <a href="/about" style={{color:'var(--text-secondary)',textDecoration:'none'}}>소개</a>
+            <a href="/about/team" style={{color:'var(--text-secondary)',textDecoration:'none'}}>팀</a>
+          </nav>
           <p style={{fontWeight:600, color:'var(--text-secondary)', marginBottom:4}}>사업자 정보</p>
           <p>{BIZ_INFO_LINE}</p>
           <p>{BIZ_ADDRESS_LINE}</p>

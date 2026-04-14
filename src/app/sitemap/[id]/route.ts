@@ -152,14 +152,18 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
     } catch { return xmlResponse([]); }
   }
 
-  // ── 3: feed posts ──
+  // ── 3: feed posts (시드 게시글 제외 — SEO 품질 보호) ──
   if (id === 3) {
     try {
       const sb = getSupabaseAdmin();
       const { data } = await sb.from('posts')
-        .select('id, slug, updated_at, created_at')
+        .select('id, slug, updated_at, created_at, author_id')
         .eq('is_deleted', false).order('created_at', { ascending: false }).limit(5000);
-      return xmlResponse((data || []).map((p: any) => ({
+      // 시드 유저 목록 조회
+      const { data: seedUsers } = await sb.from('profiles').select('id').eq('is_seed', true);
+      const seedIds = new Set((seedUsers || []).map((u: any) => u.id));
+      const filtered = (data || []).filter((p: any) => !seedIds.has(p.author_id));
+      return xmlResponse(filtered.map((p: any) => ({
         url: `${BASE}/feed/${p.slug || p.id}`,
         lastModified: p.updated_at || p.created_at || now,
         changeFrequency: 'weekly',

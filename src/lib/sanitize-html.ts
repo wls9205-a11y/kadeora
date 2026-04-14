@@ -13,5 +13,10 @@ export function sanitizeHtml(html: string): string {
     .replace(DANGEROUS_TAGS, '')
     .replace(EVENT_ATTRS, '')
     .replace(JAVASCRIPT_URLS, '$1="')
-    .replace(DATA_URLS, '$1="');
+    .replace(DATA_URLS, '$1="')
+    // ── 외부 링크에 nofollow noopener 자동 추가 (SEO 링크주스 유출 방지) ──
+    .replace(/<a\s+([^>]*?)href\s*=\s*["'](https?:\/\/(?!kadeora\.app)[^"']+)["']([^>]*?)>/gi, (match, pre, url, post) => {
+      if (/rel\s*=/i.test(pre + post)) return match;
+      return `<a ${pre}href="${url}"${post} rel="nofollow noopener" target="_blank">`;
+    });
 }

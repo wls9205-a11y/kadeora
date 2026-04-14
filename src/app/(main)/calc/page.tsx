@@ -36,6 +36,14 @@ export default function CalcHubPage() {
         ],
       })}} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org', '@type': 'WebApplication',
+        name: '카더라 무료 계산기', applicationCategory: 'FinanceApplication',
+        operatingSystem: 'Web', offers: { '@type': 'Offer', price: '0', priceCurrency: 'KRW' },
+        description: '세금, 부동산, 주식, 대출, 연금 계산기 무료 제공. 청약 가점, 양도세, 종합소득세, 복리 계산 등.',
+        url: 'https://kadeora.app/calc',
+        provider: { '@type': 'Organization', name: '카더라', url: 'https://kadeora.app' },
+      })}} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org', '@type': 'ItemList',
         name: '카더라 무료 계산기 모음',
         numberOfItems: CALC_REGISTRY.length,

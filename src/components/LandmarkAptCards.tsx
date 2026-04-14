@@ -21,7 +21,7 @@ export default function LandmarkAptCards() {
           }}>
             {a.image_url && (
               <div style={{ height: 48, background: 'var(--bg-hover)', overflow: 'hidden' }}>
-                <img src={a.image_url} alt="" width={140} height={48} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} loading="lazy" />
+                <img src={a.image_url} alt={`${a.name || '아파트'} 현장 사진`} width={140} height={48} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} loading="lazy" />
               </div>
             )}
             <div style={{ padding: '8px 12px' }}>

@@ -53,17 +53,21 @@ export async function generateMetadata({ params }: Props) {
     const numId = await findPostBySlugOrId(sb, id);
     const { data: post } = await sb
       .from('posts')
-      .select('title, content, created_at, slug, category, likes_count, comments_count, profiles!posts_author_id_fkey(nickname)')
+      .select('title, content, created_at, slug, category, likes_count, comments_count, author_id, profiles!posts_author_id_fkey(nickname, is_seed)')
       .eq('id', numId)
       .eq('is_deleted', false)
       .maybeSingle();
     if (!post) return {};
-    const author = (post.profiles as { nickname?: string } | null)?.nickname ?? '익명';
+    const profileData = post.profiles as { nickname?: string; is_seed?: boolean } | null;
+    const author = profileData?.nickname ?? '익명';
+    const isSeed = profileData?.is_seed === true;
     const description = post.content.slice(0, 160);
     const ogImageUrl = `${SITE_URL}/api/og?title=${encodeURIComponent(post.title)}&design=2&author=${encodeURIComponent(author)}&category=${encodeURIComponent(post.category || '')}&likes=${post.likes_count ?? 0}&comments=${post.comments_count ?? 0}`;
     return {
       title: post.title,
       description,
+      // 시드 유저 게시글은 noindex (SEO 품질 보호)
+      ...(isSeed ? { robots: { index: false, follow: false } } : {}),
       alternates: {
         canonical: `${SITE_URL}/feed/${post.slug || numId}`,
       },
