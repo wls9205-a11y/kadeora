@@ -9,16 +9,23 @@ import { selectDraftTemplate } from '@/lib/issue-scoring';
 import { SITE_URL } from '@/lib/constants';
 
 /**
- * issue-draft 크론 — AI 기사 생성 + 자동 발행 + 피드 포스트
+ * issue-draft v2 — AI 기사 생성 + 자동 발행 + 이미지 + 피드 포스트
  *
- * 미처리 이슈 1건씩 처리 (안정성)
- * score 40+ AND 킬스위치 ON → 자동 발행
- * score 25~39 → draft 저장
- * 주기: 매 20분
+ * 세션 108 전면 수정:
+ * - A1: og-infographic 제거 → 마크다운 하이라이트 블록
+ * - A2: blog_posts.is_published 강제 UPDATE (비공개 버그 수정)
+ * - A3: AI 에러 로깅 + retry_count 재시도 (최대 3회)
+ * - A5: 네이버 이미지 검색 → 실사진 삽입
+ * - B1: withCronLogging 적용
+ * - B3: FAQ 필수 강화 + max_tokens 12000
+ * - B4: MAX_PER_RUN 15, 스케줄 every 7min
+ * - C2: seo_tier 기본 'A'
  */
 
 const ANTHROPIC_API = 'https://api.anthropic.com/v1/messages';
 const MODEL = 'claude-haiku-4-5-20251001';
+const NAVER_CLIENT_ID = process.env.NAVER_CLIENT_ID || '';
+const NAVER_CLIENT_SECRET = process.env.NAVER_CLIENT_SECRET || '';
 
 /* ═══════════ 킬스위치 체크 ═══════════ */
 
@@ -33,59 +40,66 @@ async function getAutoPublishConfig(sb: any) {
   }
 }
 
-/* ═══════════ AI 기사 생성 ═══════════ */
+/* ═══════════ 네이버 이미지 검색 ═══════════ */
+
+async function searchNaverImages(query: string, count = 5): Promise<{ url: string; alt: string }[]> {
+  if (!NAVER_CLIENT_ID || !NAVER_CLIENT_SECRET) return [];
+  try {
+    const res = await fetch(`https://openapi.naver.com/v1/search/image?query=${encodeURIComponent(query)}&display=${count}&sort=sim&filter=large`, {
+      headers: { 'X-Naver-Client-Id': NAVER_CLIENT_ID, 'X-Naver-Client-Secret': NAVER_CLIENT_SECRET },
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data.items || []).map((item: any) => ({
+      url: (item.link || '').replace('http://', 'https://'),
+      alt: item.title?.replace(/<[^>]+>/g, '') || query,
+    })).filter((img: any) => img.url && !img.url.includes('daumcdn') && !img.url.includes('tistory'));
+  } catch { return []; }
+}
+
+/* ═══════════ AI 기사 생성 (v2: 에러 로깅 + og-infographic 제거) ═══════════ */
 
 async function generateArticle(issue: any): Promise<{ title: string; content: string; slug: string; keywords: string[]; meta_description: string; infographic_data: Record<string, any> } | null> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) return null;
+  if (!apiKey) { console.error('[issue-draft] ANTHROPIC_API_KEY missing'); return null; }
 
   const template = selectDraftTemplate(issue.category, issue.issue_type);
-
   const isPreempt = ['pre_announcement', 'preempt_coverage', 'new_subscription', 'search_spike'].includes(issue.issue_type);
+  const catKo = issue.category === 'apt' ? '부동산' : issue.category === 'stock' ? '주식' : '경제';
 
-  const systemPrompt = `당신은 카더라(kadeora.app)의 수석 데이터 에디터입니다. ${isPreempt ? '분양 선점형 심층 분석' : '부동산/주식 심층 분석'} 기사를 작성합니다.
+  const systemPrompt = `당신은 카더라(kadeora.app)의 수석 데이터 에디터입니다. ${isPreempt ? '분양 선점형 심층 분석' : catKo + ' 심층 분석'} 기사를 작성합니다.
 
 규칙:
 - 분량: ${isPreempt ? '6,000~8,000자' : '5,000~7,000자'} (충분히 깊이 있게)
 - H2 섹션: 6~10개 (## 형식)
 - 마크다운 표(|---|): 최소 2개 (비교 분석 필수)
-- FAQ: 5~8개 (반드시 "Q. 질문" + "A. 답변" 형식 — 구글/네이버 FAQPage 리치스니펫용)
+- 핵심 수치 강조: **굵은 숫자**와 퍼센트를 적극 활용
+- 각 섹션 첫 문장에 핵심 수치 배치
 - 면책 조항 포함 (투자 판단은 본인 책임)
 - 데이터 출처 명시
 - 특정 종목/단지 매수·매도 권유 절대 금지
 - "오를 것이다", "내릴 것이다" 등 단정적 전망 금지
-- 원본 뉴스 문장을 그대로 사용하지 말고 팩트만 추출하여 새로운 문장으로 작성
-- 카더라 내부 링크 3개 이상 (/apt, /stock, /blog, /calc 등)
+- 원본 뉴스 문장 그대로 사용 금지 — 팩트만 추출하여 새 문장
+- 카더라 내부 링크 3개 이상: [텍스트](/apt), [텍스트](/stock), [텍스트](/blog) 등
 ${isPreempt ? `
 ## 선점형 콘텐츠 특별 규칙:
-- "~카더라" 식 전해듣기 정보와 확인된 팩트를 명확히 구분
 - 예상 분양가, 예상 경쟁률, 입지 분석을 깊이 있게
 - 주변 시세 비교 테이블 필수 (반경 1km 내 단지)
 - 청약 전략 가이드 섹션 포함 (가점/추첨, 자금계획)
 - "이 정보는 공식 발표 전 수집된 것으로 변동될 수 있습니다" 면책 포함
-- 제목에 "[선점분석]" 또는 "분양 전 알아야 할 모든 것" 스타일
+- 제목에 "[선점분석]" 스타일
 ` : ''}
-## 시각 요소 (필수):
-1. 본문 첫 문단 아래에 인포그래픽 이미지 삽입:
-   ![제목](/api/og-infographic?title=핵심+요약&category=${issue.category === 'apt' ? 'apt' : 'stock'}&type=summary&items=핵심항목1,핵심항목2,핵심항목3)
-   → items는 쉼표 구분, 5개 이내
-
-2. 핵심 데이터 비교 섹션에 비교 인포그래픽:
-   ![비교](/api/og-infographic?title=비교+분석&category=${issue.category === 'apt' ? 'apt' : 'stock'}&type=comparison&items=항목1:값1,항목2:값2,항목3:값3)
-   → items는 "라벨:값" 형식
-
-3. 핵심 수치 강조:
-   - **굵은 숫자**와 퍼센트를 적극 활용
-   - 각 섹션 첫 문장에 핵심 수치 배치
-
 ## 구조 가이드:
-- 도입부: 핵심 팩트 1~2줄 → 인포그래픽 → 배경 설명
+- 도입부: 핵심 팩트 1~2줄 → 배경 설명
 - 본론: 데이터 테이블 + 분석 의견 교차
 - 결론: 전망 시나리오 (긍정/부정/중립 3가지)
-- FAQ: 실제 투자자가 궁금해할 질문
+
+⚠️ FAQ는 **필수**입니다. 누락 시 기사가 발행되지 않습니다.
+반드시 "## 자주 묻는 질문" 섹션을 포함하고, Q./A. 형식으로 5~8개 작성하세요.
+구글/네이버 FAQPage 리치스니펫용이므로 형식을 정확히 지켜주세요.
 
 기사 유형: ${template}
-카테고리: ${issue.category === 'apt' ? '부동산' : '주식'}`;
+카테고리: ${catKo}`;
 
   const userPrompt = `다음 이슈에 대해 데이터 분석 블로그 기사를 작성하세요.
 
@@ -93,41 +107,55 @@ ${isPreempt ? `
 요약: ${issue.summary}
 핵심 키워드: ${(issue.detected_keywords || []).join(', ')}
 관련 대상: ${(issue.related_entities || []).join(', ')}
-원본 데이터: ${JSON.stringify(issue.raw_data || {})}
+원본 데이터: ${JSON.stringify(issue.raw_data || {}).slice(0, 2000)}
 출처 URL: ${(issue.source_urls || []).join(', ')}
 
 요구사항:
-1. 도입부에 핵심 수치를 한눈에 보여주는 인포그래픽 이미지 삽입
-2. 비교 분석 테이블 최소 2개
-3. 3가지 시나리오 전망 (긍정/중립/부정)
-4. FAQ 5~8개 (반드시 "Q. 질문" 다음줄 "A. 답변" 형식)
-5. 관련 카더라 페이지 내부 링크 3개+
+1. 비교 분석 마크다운 테이블 최소 2개
+2. 3가지 시나리오 전망 (긍정/중립/부정)
+3. "## 자주 묻는 질문" 섹션 + Q./A. 형식 5~8개 (필수!)
+4. 관련 카더라 페이지 내부 링크 3개+ (마크다운 [텍스트](/경로) 형식)
+5. 이미지 삽입 금지 — 이미지는 자동으로 추가됩니다
 
 응답 형식 (JSON만, 다른 텍스트 없이):
 {
   "title": "SEO 최적화 제목 (40~60자, | 구분자)",
   "slug": "url-safe-slug-한글가능",
-  "keywords": ["키워드1", "키워드2", ...],
+  "keywords": ["키워드1", "키워드2", ...최소 5개],
   "meta_description": "검색 결과에 노출될 설명 (120~160자)",
-  "content": "마크다운 본문 전체 (5000자 이상, 인포그래픽 이미지 포함)"
+  "content": "마크다운 본문 전체 (5000자 이상)"
 }`;
 
   try {
     const res = await fetch(ANTHROPIC_API, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
-      body: JSON.stringify({ model: MODEL, max_tokens: 8192, system: systemPrompt, messages: [{ role: 'user', content: userPrompt }] }),
+      body: JSON.stringify({ model: MODEL, max_tokens: 12000, system: systemPrompt, messages: [{ role: 'user', content: userPrompt }] }),
     });
 
-    if (!res.ok) return null;
+    if (!res.ok) {
+      const errBody = await res.text().catch(() => '');
+      console.error(`[issue-draft] AI API ${res.status}: ${errBody.slice(0, 200)}`);
+      return null;
+    }
     const data = await res.json();
     const text = data.content?.[0]?.text || '';
+    if (!text) { console.error('[issue-draft] AI returned empty text'); return null; }
 
     // JSON 파싱 (```json 제거)
     const clean = text.replace(/```json|```/g, '').trim();
-    const parsed = JSON.parse(clean);
+    let parsed: any;
+    try {
+      parsed = JSON.parse(clean);
+    } catch (parseErr) {
+      console.error(`[issue-draft] JSON parse failed for issue ${issue.id}: ${(parseErr as Error).message}`, clean.slice(0, 200));
+      return null;
+    }
 
-    if (!parsed.title || !parsed.content) return null;
+    if (!parsed.title || !parsed.content) {
+      console.error(`[issue-draft] Missing title/content for issue ${issue.id}`);
+      return null;
+    }
 
     return {
       title: parsed.title,
@@ -135,94 +163,110 @@ ${isPreempt ? `
       slug: parsed.slug || parsed.title.replace(/[^가-힣a-z0-9\s-]/gi, '').replace(/\s+/g, '-').toLowerCase(),
       keywords: parsed.keywords || issue.detected_keywords || [],
       meta_description: parsed.meta_description || '',
-      infographic_data: parsed.infographic_data || {},
+      infographic_data: {},
     };
   } catch (e) {
-    console.error('[issue-draft] AI generation failed:', e);
+    console.error('[issue-draft] AI generation exception:', (e as Error).message);
     return null;
   }
 }
 
-/* ═══════════ 시각 요소 강제 보강 ═══════════ */
+/* ═══════════ 콘텐츠 보강 (v2: og-infographic 제거 → 마크다운 하이라이트) ═══════════ */
 
 function enrichVisuals(content: string, issue: any): string {
   let enriched = content;
-  // 인포그래픽 유효 카테고리: stock, apt, finance, tax, economy, life
-  const validCats = ['stock', 'apt', 'finance', 'tax', 'economy', 'life'];
-  const category = validCats.includes(issue.category) ? issue.category : (issue.category === 'apt' ? 'apt' : 'stock');
-  const title = issue.title || '';
   const keywords = (issue.detected_keywords || []).slice(0, 5);
-  const entities = (issue.related_entities || []).join(', ') || title.slice(0, 20);
+  const entities = (issue.related_entities || []).join(', ') || (issue.title || '').slice(0, 20);
+  const category = issue.category || 'general';
 
-  // 1. 인포그래픽 이미지가 없으면 → 첫 h2 앞에 요약 인포그래픽 자동 삽입
-  if (!content.includes('og-infographic') && !content.includes('![')) {
-    const summaryItems = keywords.length >= 3
-      ? keywords.slice(0, 4).join(',')
-      : `${entities},핵심분석,시장전망,투자포인트`;
-    const infographic = `\n![핵심 요약](/api/og-infographic?title=${encodeURIComponent(entities + ' 핵심 요약')}&category=${category}&type=summary&items=${encodeURIComponent(summaryItems)})\n`;
+  // 1. 깨진 og-infographic 참조 전부 제거
+  enriched = enriched.replace(/!\[[^\]]*\]\([^)]*og-infographic[^)]*\)\n?/g, '');
 
-    // 첫 번째 ## 앞에 삽입
+  // 2. 도입부에 핵심 요약 하이라이트 블록 (인포그래픽 대체)
+  if (!enriched.includes('> **📊') && !enriched.includes('> **🏠') && !enriched.includes('> **📈')) {
+    const icon = category === 'apt' ? '🏠' : category === 'stock' ? '📈' : '💡';
+    const summaryBlock = `\n> **${icon} 핵심 요약** | ${keywords.slice(0, 3).join(' · ') || entities}\n> ${issue.summary ? issue.summary.slice(0, 120) : '이 기사의 핵심 포인트를 확인하세요.'}\n\n`;
+
     const firstH2 = enriched.indexOf('\n## ');
     if (firstH2 > 0) {
-      enriched = enriched.slice(0, firstH2) + '\n' + infographic + enriched.slice(firstH2);
-    } else {
-      // h2가 없으면 첫 문단 뒤에 삽입
-      const firstParagraphEnd = enriched.indexOf('\n\n');
-      if (firstParagraphEnd > 0) {
-        enriched = enriched.slice(0, firstParagraphEnd) + '\n' + infographic + enriched.slice(firstParagraphEnd);
-      }
-    }
-  }
-
-  // 2. 인포그래픽이 1개뿐이면 → 본문 중간에 비교 인포그래픽 추가
-  const infographicCount = (enriched.match(/og-infographic/g) || []).length;
-  if (infographicCount < 2) {
-    const compareItems: Record<string, string> = {
-      apt: '현재시세:분석중,전월대비:변동,경쟁률:예상,투자매력:평가',
-      stock: '현재주가:분석중,PER:비교,업종평균:대비,전망:종합',
-      finance: '금리:비교,수익률:분석,리스크:평가,추천:종합',
-      economy: '지표:분석,전월대비:변동,전망:종합,영향:평가',
-      tax: '세율:비교,절세:방법,신고:일정,변경:사항',
-      life: '비용:비교,혜택:분석,신청:방법,대상:확인',
-    };
-    const compareInfographic = `\n![비교 분석](/api/og-infographic?title=${encodeURIComponent('비교 분석')}&category=${category}&type=comparison&items=${encodeURIComponent(compareItems[category] || compareItems.stock)})\n`;
-
-    // 전체의 60% 지점에 삽입
-    const insertPos = Math.floor(enriched.length * 0.6);
-    const nearestNewline = enriched.indexOf('\n\n', insertPos);
-    if (nearestNewline > 0) {
-      enriched = enriched.slice(0, nearestNewline) + '\n' + compareInfographic + enriched.slice(nearestNewline);
+      enriched = enriched.slice(0, firstH2) + '\n' + summaryBlock + enriched.slice(firstH2);
     }
   }
 
   // 3. 테이블이 없으면 → 핵심 지표 요약 테이블 자동 삽입
   if (!enriched.includes('|---')) {
-    const catLabel: Record<string, string> = {
-      apt: '부동산', stock: '주식/금융', finance: '재테크', economy: '경제', tax: '세금', life: '생활경제',
-    };
+    const catLabel: Record<string, string> = { apt: '부동산', stock: '주식/금융', finance: '재테크', economy: '경제' };
     const summaryTable = `\n\n| 항목 | 내용 |\n|---|---|\n| 대상 | ${entities} |\n| 카테고리 | ${catLabel[category] || '분석'} |\n| 핵심 키워드 | ${keywords.join(', ') || '분석, 전망'} |\n| 분석 시점 | ${new Date().toISOString().slice(0, 10)} |\n| 출처 | 카더라 데이터 분석 |\n\n`;
-
-    // 첫 h2 뒤에 삽입
     const firstH2End = enriched.indexOf('\n', enriched.indexOf('\n## ') + 4);
     if (firstH2End > 0) {
       enriched = enriched.slice(0, firstH2End + 1) + summaryTable + enriched.slice(firstH2End + 1);
     } else {
-      enriched = enriched + summaryTable;
+      enriched += summaryTable;
     }
   }
 
-  // 4. 카더라 내부링크가 부족하면 → 하단에 관련 링크 블록 추가
+  // 4. 카더라 내부링크 부족하면 → 하단에 추가
   const internalLinkCount = (enriched.match(/\]\(\//g) || []).length;
   if (internalLinkCount < 2) {
     const linkBlocks: Record<string, string> = {
       apt: `\n\n---\n\n## 관련 정보\n\n- [카더라 청약 일정 →](/apt)\n- [전국 실거래가 조회 →](/apt?tab=transaction)\n- [청약 가점 계산기 →](/apt/diagnose)\n- [카더라 블로그 →](/blog?category=apt)\n\n`,
       stock: `\n\n---\n\n## 관련 정보\n\n- [실시간 주식 시세 →](/stock)\n- [종목 비교 분석 →](/stock/compare)\n- [카더라 블로그 →](/blog?category=stock)\n- [투자 커뮤니티 →](/feed)\n\n`,
-      finance: `\n\n---\n\n## 관련 정보\n\n- [카더라 재테크 블로그 →](/blog?category=finance)\n- [실시간 주식 시세 →](/stock)\n- [부동산 정보 →](/apt)\n- [투자 커뮤니티 →](/feed)\n\n`,
-      economy: `\n\n---\n\n## 관련 정보\n\n- [카더라 경제 블로그 →](/blog?category=finance)\n- [실시간 시세 →](/stock)\n- [부동산 시장 →](/apt)\n- [투자 커뮤니티 →](/feed)\n\n`,
-      tax: `\n\n---\n\n## 관련 정보\n\n- [카더라 세금 가이드 →](/blog?category=finance)\n- [부동산 정보 →](/apt)\n- [투자 커뮤니티 →](/feed)\n\n`,
-      life: `\n\n---\n\n## 관련 정보\n\n- [카더라 생활경제 →](/blog?category=finance)\n- [투자 커뮤니티 →](/feed)\n- [부동산 정보 →](/apt)\n\n`,
     };
-    enriched = enriched + (linkBlocks[category] || linkBlocks.stock);
+    enriched += linkBlocks[category] || linkBlocks.stock || linkBlocks.apt;
+  }
+
+  return enriched;
+}
+
+/* ═══════════ 이미지 삽입 (본문 H2 사이에 실사진) ═══════════ */
+
+async function insertImages(content: string, title: string, keywords: string[], category: string, blogPostId: number | null, sb: any): Promise<string> {
+  const query = keywords.slice(0, 2).join(' ') || title.replace(/[[\]|()]/g, '').slice(0, 20);
+  const searchQuery = category === 'apt' ? `${query} 아파트 단지` : category === 'stock' ? `${query} 주식 차트` : `${query} 경제`;
+  const images = await searchNaverImages(searchQuery, 5);
+  if (images.length === 0) return content;
+
+  let enriched = content;
+  const h2Matches = [...enriched.matchAll(/^## .+$/gm)];
+
+  // H2 2개마다 이미지 1장 삽입 (최대 3장)
+  let inserted = 0;
+  for (let i = 2; i < h2Matches.length && inserted < 3 && inserted < images.length; i += 2) {
+    const match = h2Matches[i];
+    if (match.index !== undefined) {
+      const img = images[inserted];
+      const imgBlock = `\n\n![${img.alt}](${img.url})\n\n`;
+      enriched = enriched.slice(0, match.index) + imgBlock + enriched.slice(match.index);
+      // 이후 매치 인덱스가 밀리므로 offset 조정
+      for (let j = i + 1; j < h2Matches.length; j++) {
+        if (h2Matches[j].index !== undefined) {
+          (h2Matches[j] as any).index += imgBlock.length;
+        }
+      }
+      inserted++;
+    }
+  }
+
+  // blog_post_images DB에 저장
+  if (blogPostId && images.length > 0) {
+    const imageInserts = images.slice(0, inserted + 1).map((img, i) => ({
+      post_id: blogPostId,
+      image_url: img.url,
+      alt_text: img.alt,
+      image_type: 'stock_photo',
+      position: i,
+    }));
+    try { await (sb as any).from('blog_post_images').insert(imageInserts); } catch {}
+  }
+
+  // 커버 이미지 교체 (position 0)
+  if (blogPostId && images.length > 0) {
+    try {
+      await sb.from('blog_posts').update({
+        cover_image: images[0].url,
+        image_alt: images[0].alt,
+      }).eq('id', blogPostId);
+    } catch {}
   }
 
   return enriched;
@@ -232,82 +276,54 @@ function enrichVisuals(content: string, issue: any): string {
 
 function factCheck(content: string, rawData: Record<string, any>): { passed: boolean; details: Record<string, any> } {
   const issues: string[] = [];
-
-  // 1. 금지 표현 체크
   const banned = ['매수 추천', '매도 추천', '반드시 오를', '반드시 내릴', '급등 예상', '급락 예상',
     '목표가', '적정가', '저점 매수', '물타기', '꼭 사야', '꼭 팔아야'];
   for (const word of banned) {
     if (content.includes(word)) issues.push(`금지표현: ${word}`);
   }
-
-  // 2. 최소 분량 체크
   if (content.length < 1500) issues.push('분량부족');
-
-  // 3. FAQ 존재 체크 (Q./A., ❓, 자주 묻는 질문 형식 모두 인식)
   if (!content.includes('Q.') && !content.includes('자주 묻는') && !content.includes('❓') && !content.includes('FAQ')) issues.push('FAQ누락');
-
-  return {
-    passed: issues.length === 0,
-    details: { issues, content_length: content.length },
-  };
+  return { passed: issues.length === 0, details: { issues, content_length: content.length } };
 }
 
 /* ═══════════ 피드 포스트 생성 ═══════════ */
 
 async function createOfficialFeedPost(sb: any, issue: any, blogSlug: string) {
-  // 시드 유저 중 시스템 계정 찾기
-  const { data: systemUser } = await sb.from('profiles')
-    .select('id')
-    .eq('nickname', '카더라')
-    .limit(1)
-    .maybeSingle();
-
+  const { data: systemUser } = await sb.from('profiles').select('id').eq('nickname', '카더라').limit(1).maybeSingle();
   if (!systemUser) return;
-
   const prefixMap: Record<string, string> = { apt: '🏠', stock: '📊', finance: '💰', tax: '📋', economy: '🌐', life: '🏃' };
   const prefix = prefixMap[issue.category] || '📰';
   const entities = (issue.related_entities || []).join(', ');
   const title = issue.title.length > 50 ? issue.title.slice(0, 50) + '...' : issue.title;
-
   const content = `${prefix} [속보] ${title}\n\n${issue.summary || ''}\n\n상세 분석 👉 ${SITE_URL}/blog/${blogSlug}`;
-
   await sb.from('posts').insert({
-    author_id: systemUser.id,
-    title: `[속보] ${entities || '이슈'} 분석`,
+    author_id: systemUser.id, title: `[속보] ${entities || '이슈'} 분석`,
     content: content.slice(0, 500),
     category: issue.category === 'apt' ? 'realestate' : issue.category === 'stock' ? 'stock' : 'finance',
-    is_anonymous: false,
-    created_at: new Date().toISOString(),
+    is_anonymous: false, created_at: new Date().toISOString(),
   });
 }
 
 /* ═══════════ 뻘글 스케줄링 ═══════════ */
 
 async function scheduleBuzzPosts(sb: any, issueId: string, score: number) {
-  const buzzCount = 1; // v4: 이슈당 뻘글 1개로 제한 (도배 방지 강화)
   const personas = ['curious', 'self_deprecating', 'question', 'calculator', 'sharer', 'realist'];
-  const selected = personas.sort(() => Math.random() - 0.5).slice(0, buzzCount);
-
+  const selected = personas.sort(() => Math.random() - 0.5).slice(0, 1);
   const now = Date.now();
-  const inserts = selected.map((persona, i) => ({
-    issue_id: issueId,
-    persona_type: persona,
-    scheduled_at: new Date(now + (8 + i * 10) * 60 * 1000).toISOString(), // 8분, 18분, 28분 후
-    is_published: false,
-  }));
-
-  await (sb as any).from('scheduled_feed_posts').insert(inserts);
+  await (sb as any).from('scheduled_feed_posts').insert(selected.map((persona, i) => ({
+    issue_id: issueId, persona_type: persona,
+    scheduled_at: new Date(now + (8 + i * 10) * 60 * 1000).toISOString(), is_published: false,
+  })));
 }
 
-/* ═══════════ 메인 핸들러 ═══════════ */
+/* ═══════════ 메인: 이슈 1건 처리 ═══════════ */
 
 async function processOneIssue(sb: any, issue: any, config: any): Promise<{ decision: string; title?: string; score: number; slug?: string }> {
   // CAS lock
+  const retryCount = issue.retry_count || 0;
   const { data: lockResult } = await (sb as any).from('issue_alerts')
-    .update({ is_processed: true, processed_at: new Date().toISOString() })
-    .eq('id', issue.id)
-    .eq('is_processed', false)
-    .select('id');
+    .update({ is_processed: true, processed_at: new Date().toISOString(), retry_count: retryCount })
+    .eq('id', issue.id).eq('is_processed', false).select('id');
   if (!lockResult || lockResult.length === 0) return { decision: 'race', score: issue.final_score };
 
   // 중복 체크
@@ -316,13 +332,10 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
   if (issueKeywords.length >= 1) {
     const since24h = new Date(Date.now() - 24 * 3600000).toISOString();
     const { data: recentBlogs } = await sb.from('blog_posts')
-      .select('id, title, tags, cron_type')
-      .eq('is_published', true)
+      .select('id, title, tags, cron_type').eq('is_published', true)
       .eq('category', issue.category === 'economy' ? 'finance' : issue.category)
-      .gte('created_at', since24h)
-      .limit(50);
+      .gte('created_at', since24h).limit(50);
     if (recentBlogs) {
-      // 범용 키워드는 중복 판정에서 제외 (지역명, 공통 태그)
       const GENERIC = new Set(['청약','분양','아파트','부동산','투자','시세','분석','전망','부산','서울','경기','인천','대구','대전','광주','울산','세종','강원','충북','충남','전북','전남','경북','경남','제주','수도권','지방','매매','전세','월세','실거래','재개발','재건축','미분양','stock','apt','finance']);
       for (const blog of recentBlogs) {
         const blogTags: string[] = blog.tags || [];
@@ -345,8 +358,14 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
   // AI 기사 생성
   const article = await generateArticle(issue);
   if (!article) {
-    await (sb as any).from('issue_alerts').update({ publish_decision: 'ai_failed' }).eq('id', issue.id);
-    return { decision: 'ai_failed', score: issue.final_score };
+    // A3: 재시도 로직 — retry_count < 3이면 is_processed=false로 리셋
+    const newRetry = retryCount + 1;
+    if (newRetry < 3) {
+      await (sb as any).from('issue_alerts').update({ is_processed: false, publish_decision: null, retry_count: newRetry }).eq('id', issue.id);
+      return { decision: `ai_failed_retry_${newRetry}`, score: issue.final_score };
+    }
+    await (sb as any).from('issue_alerts').update({ publish_decision: 'ai_failed', retry_count: newRetry }).eq('id', issue.id);
+    return { decision: 'ai_failed_final', score: issue.final_score };
   }
 
   article.content = enrichVisuals(article.content, issue);
@@ -381,68 +400,102 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
     try { const { data: found } = await sb.from('blog_posts').select('id').eq('slug', article.slug).maybeSingle(); if (found) blogPostId = found.id; } catch {}
   }
 
+  // A2: 발행 결정인데 blog_posts.is_published=false인 경우 강제 공개
+  if (canAutoPublish && blogPostId) {
+    try {
+      await sb.from('blog_posts').update({
+        is_published: true,
+        published_at: new Date().toISOString(),
+        seo_tier: 'A', // C2: 이슈 선점 콘텐츠 기본 A등급
+      }).eq('id', blogPostId).eq('is_published', false);
+    } catch {}
+  }
+
+  // A5: 이미지 삽입 (네이버 검색 → 본문 + 커버 교체)
+  if (blogPostId) {
+    try {
+      const enrichedWithImages = await insertImages(article.content, article.title, article.keywords, blogCategory, blogPostId, sb);
+      if (enrichedWithImages !== article.content) {
+        await sb.from('blog_posts').update({ content: enrichedWithImages }).eq('id', blogPostId);
+      }
+    } catch (imgErr) {
+      console.warn('[issue-draft] image insert failed:', (imgErr as Error).message);
+    }
+  }
+
   const insertFailed = !insertResult.success && !blogPostId;
   await (sb as any).from('issue_alerts').update({
-    is_published: (canAutoPublish && (insertResult.success || !!blogPostId)),
-    publish_decision: canAutoPublish && (insertResult.success || !!blogPostId) ? 'auto' : canAutoPublish ? 'auto_failed' : (insertResult.success || !!blogPostId) ? 'draft' : 'failed',
+    is_published: (canAutoPublish && !!blogPostId),
+    publish_decision: canAutoPublish && !!blogPostId ? 'auto' : canAutoPublish ? 'auto_failed' : !!blogPostId ? 'draft' : 'failed',
     block_reason: insertFailed ? (insertResult.message || insertResult.reason || 'safeBlogInsert failed') : null,
     blog_post_id: blogPostId, draft_title: article.title, draft_content: article.content,
     draft_slug: article.slug, draft_keywords: article.keywords,
-    infographic_data: article.infographic_data || {},
+    infographic_data: {},
     draft_template: selectDraftTemplate(issue.category, issue.issue_type),
     fact_check_passed: check.passed, fact_check_details: check.details,
-    published_at: canAutoPublish && (insertResult.success || !!blogPostId) ? new Date().toISOString() : null,
+    published_at: canAutoPublish && !!blogPostId ? new Date().toISOString() : null,
   }).eq('id', issue.id);
 
-  if (canAutoPublish && insertResult.success) {
+  if (canAutoPublish && blogPostId) {
     await createOfficialFeedPost(sb, issue, article.slug);
     await scheduleBuzzPosts(sb, issue.id, issue.final_score);
     try { await submitIndexNow([`${SITE_URL}/blog/${article.slug}`]); } catch {}
   }
 
-  return { decision: canAutoPublish ? 'auto_published' : insertResult.success ? 'draft_saved' : 'failed', title: article.title, score: issue.final_score, slug: article.slug };
+  return { decision: canAutoPublish ? 'auto_published' : !!blogPostId ? 'draft_saved' : 'failed', title: article.title, score: issue.final_score, slug: article.slug };
 }
 
+/* ═══════════ 핸들러 ═══════════ */
+
 async function handler(_req: NextRequest) {
-  const sb = getSupabaseAdmin();
-  const config = await getAutoPublishConfig(sb);
-  const _start = Date.now();
-  const MAX_PER_RUN = 10;
+  const result = await withCronLogging('issue-draft', async () => {
+    const sb = getSupabaseAdmin();
+    const config = await getAutoPublishConfig(sb);
+    const _start = Date.now();
+    const MAX_PER_RUN = 15;
 
-  // 25점 미만 자동 스킵 (큐 정리)
-  await (sb as any).from('issue_alerts')
-    .update({ is_processed: true, publish_decision: 'below_threshold', processed_at: new Date().toISOString() })
-    .eq('is_processed', false).lt('final_score', 25);
+    // 25점 미만 자동 스킵 (큐 정리)
+    await (sb as any).from('issue_alerts')
+      .update({ is_processed: true, publish_decision: 'below_threshold', processed_at: new Date().toISOString() })
+      .eq('is_processed', false).lt('final_score', 25);
 
-  // 미처리 이슈 최대 4건 조회 (최고 점수 우선)
-  const { data: issues } = await (sb as any).from('issue_alerts')
-    .select('*')
-    .eq('is_processed', false)
-    .gte('final_score', 25)
-    .order('final_score', { ascending: false })
-    .limit(MAX_PER_RUN);
+    // 미처리 이슈 조회 (최고 점수 우선 + ai_failed 재시도 포함)
+    const { data: issues } = await (sb as any).from('issue_alerts')
+      .select('*')
+      .eq('is_processed', false)
+      .gte('final_score', 25)
+      .order('final_score', { ascending: false })
+      .limit(MAX_PER_RUN);
 
-  if (!issues || issues.length === 0) {
-    return NextResponse.json({ processed: 0, message: 'no pending issues' });
-  }
-
-  const results: any[] = [];
-  for (const issue of issues) {
-    if (Date.now() - _start > 250_000) break; // 250s 안전 마진
-    try {
-      const r = await processOneIssue(sb, issue, config);
-      results.push(r);
-    } catch (e) {
-      console.error(`[issue-draft] error processing ${issue.id}:`, e);
-      results.push({ decision: 'error', score: issue.final_score });
+    if (!issues || issues.length === 0) {
+      return { processed: 0, created: 0, failed: 0, metadata: { message: 'no pending issues' } };
     }
-  }
 
-  return NextResponse.json({
-    processed: results.length,
-    published: results.filter(r => r.decision === 'auto_published').length,
-    results: results.map(r => ({ decision: r.decision, score: r.score, title: r.title?.slice(0, 40) })),
+    const results: any[] = [];
+    let published = 0;
+    for (const issue of issues) {
+      if (Date.now() - _start > 250_000) break;
+      try {
+        const r = await processOneIssue(sb, issue, config);
+        results.push(r);
+        if (r.decision === 'auto_published') published++;
+      } catch (e) {
+        console.error(`[issue-draft] error processing ${issue.id}:`, e);
+        results.push({ decision: 'error', score: issue.final_score });
+      }
+    }
+
+    return {
+      processed: results.length,
+      created: published,
+      failed: results.filter(r => r.decision.includes('failed')).length,
+      metadata: {
+        published,
+        results: results.map(r => ({ decision: r.decision, score: r.score, title: r.title?.slice(0, 40) })),
+      },
+    };
   });
+  return NextResponse.json(result);
 }
 
 export const GET = withCronAuth(handler);

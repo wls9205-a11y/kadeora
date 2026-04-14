@@ -35,22 +35,24 @@ function scorePost(post: any): { score: number; details: QualityDetails; eligibl
   else if (contentLen >= 2000) length = 10;
   else if (contentLen >= 1000) length = 5;
 
-  // 2. 구조화 (20점) — H2, H3, 리스트, 테이블
+  // 2. 구조화 (20점) — H2, H3, 리스트, 테이블 (HTML + 마크다운 양쪽 지원)
   let structure = 0;
-  const h2Count = (content.match(/<h2/gi) || []).length;
-  const h3Count = (content.match(/<h3/gi) || []).length;
-  const hasList = /<[uo]l/i.test(content);
-  const hasTable = /<table/i.test(content);
+  const h2Count = (content.match(/<h2/gi) || []).length + (content.match(/^## [^#]/gm) || []).length;
+  const h3Count = (content.match(/<h3/gi) || []).length + (content.match(/^### [^#]/gm) || []).length;
+  const hasList = /<[uo]l/i.test(content) || /^[-*] /m.test(content) || /^\d+\. /m.test(content);
+  const hasTable = /<table/i.test(content) || /\|[-:]+\|/.test(content);
   if (h2Count >= 3) structure += 10; else if (h2Count >= 2) structure += 7; else if (h2Count >= 1) structure += 4;
   if (h3Count >= 1) structure += 5;
   if (hasList || hasTable) structure += 5;
 
-  // 3. 내부링크 (15점)
+  // 3. 내부링크 (15점) — HTML href + 마크다운 [](/) 양쪽 지원
   let links = 0;
   const relatedSlugs = post.related_slugs || [];
   if (relatedSlugs.length >= 3) links += 10; else if (relatedSlugs.length >= 1) links += 5;
-  const internalLinks = (content.match(/href="\/(?!api)/gi) || []).length;
-  if (internalLinks >= 2) links += 5; else if (internalLinks >= 1) links += 3;
+  const htmlLinks = (content.match(/href="\/(?!api)/gi) || []).length;
+  const mdLinks = (content.match(/\]\(\/(apt|stock|blog|calc|feed|search|daily|discuss)/g) || []).length;
+  const internalLinks = htmlLinks + mdLinks;
+  if (internalLinks >= 3) links += 5; else if (internalLinks >= 1) links += 3;
 
   // 4. 메타데이터 (15점)
   let meta = 0;
@@ -66,17 +68,18 @@ function scorePost(post: any): { score: number; details: QualityDetails; eligibl
   if (coverImage && !coverImage.includes('/api/og')) image += 5; else if (coverImage) image += 2;
   if (post.image_alt && post.image_alt.length > 5) image += 5;
 
-  // 6. 고유성 (10점) — AI 패턴 비율
+  // 6. 고유성 + 완성도 (10점) — FAQ 있으면 보너스, 면책 있으면 보너스
   let uniqueness = 0;
-  const hasFaq = /<(div|section)[^>]*class[^>]*faq/i.test(content) || /자주 묻는 질문|FAQ/i.test(content);
-  const hasDisclaimer = /면책|disclaimer|투자.*책임|개인.*의견/i.test(content);
-  if (!hasFaq) uniqueness += 5; else uniqueness += 2;
-  if (!hasDisclaimer) uniqueness += 5; else uniqueness += 2;
+  const hasFaq = /<(div|section)[^>]*class[^>]*faq/i.test(content) || /자주 묻는 질문|FAQ/i.test(content) || /^(?:\*\*)?Q\./m.test(content);
+  const hasDisclaimer = /면책|disclaimer|투자.*책임|개인.*의견|데이터 출처/i.test(content);
+  if (hasFaq) uniqueness += 5; else uniqueness += 1;
+  if (hasDisclaimer) uniqueness += 5; else uniqueness += 1;
 
   // 7. 데이터 신선도 (5점)
   let freshness = 0;
-  if (post.data_date) {
-    const daysDiff = Math.floor((Date.now() - new Date(post.data_date).getTime()) / 86400000);
+  const dateRef = post.data_date || post.rewritten_at || post.created_at;
+  if (dateRef) {
+    const daysDiff = Math.floor((Date.now() - new Date(dateRef).getTime()) / 86400000);
     if (daysDiff <= 30) freshness = 5;
     else if (daysDiff <= 90) freshness = 3;
     else if (daysDiff <= 365) freshness = 1;
@@ -105,7 +108,7 @@ export async function GET(req: NextRequest) {
     // 평가 대상: 비공개 + (미평가 OR 30일 경과)
     const { data: posts, error } = await (sb as any)
       .from('blog_posts')
-      .select('id, title, content, content_length, excerpt, meta_description, cover_image, image_alt, category, tags, related_slugs, seo_tier, seo_score, data_date, rewritten_at')
+      .select('id, title, content, content_length, excerpt, meta_description, cover_image, image_alt, category, tags, related_slugs, seo_tier, seo_score, data_date, rewritten_at, created_at')
       .eq('is_published', false)
       .or(`quality_checked_at.is.null,quality_checked_at.lt.${thirtyDaysAgo}`)
       .order('quality_checked_at', { ascending: true, nullsFirst: true })

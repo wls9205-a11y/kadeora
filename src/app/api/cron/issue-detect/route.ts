@@ -327,8 +327,10 @@ async function checkExistingPosts(sb: any, entities: string[]): Promise<number> 
 /* ═══════════ 메인 핸들러 ═══════════ */
 
 async function handler(_req: NextRequest) {
+  const result = await withCronLogging('issue-detect', async () => {
   const sb = getSupabaseAdmin();
   const results: any[] = [];
+  const seenTitles = new Set<string>(); // 동일 실행 내 중복 방지
 
   // apt_sites 이름 캐시 로드 (엔티티 매칭용)
   await getAptNameCache(sb);
@@ -357,7 +359,7 @@ async function handler(_req: NextRequest) {
   const sampleTitles = rssItems.slice(0, 5).map(r => r.title.slice(0, 40)).join(' | ');
   console.log(`[issue-detect] RSS: ${rssItems.length}, Google: ${googleItems.length}, DART: ${dartItems.length} | ${sampleTitles}`);
   if (rssItems.length === 0) {
-    return NextResponse.json({ detected: 0, message: 'no RSS items' });
+    return { processed: 0, created: 0, failed: 0, metadata: { message: 'no RSS items' } };
   }
 
   // 2. 기사별 키워드 매칭 + 이슈 후보 추출
@@ -399,6 +401,11 @@ async function handler(_req: NextRequest) {
 
     // 키워드 가중치 체크: 너무 약한 키워드만 있으면 스킵
     if (keywordWeight(keywords) < 1) continue;
+
+    // 동일 실행 내 제목 중복 방지
+    const titleKey = items[0].title.slice(0, 40);
+    if (seenTitles.has(titleKey)) continue;
+    seenTitles.add(titleKey);
 
     // 이슈 유형 판별 (중복 체크에서도 사용)
     const issueType = detectIssueType(keywords, category);
@@ -487,11 +494,18 @@ async function handler(_req: NextRequest) {
   }
 
   console.log(`[issue-detect] detected: ${results.length}, rss_items: ${rssItems.length}, keyword_matches: ${issueMap.size}`);
-  return NextResponse.json({
-    detected: results.length,
-    rss_items: rssItems.length,
-    issues: results,
-  });
+  return {
+    processed: rssItems.length,
+    created: results.length,
+    failed: 0,
+    metadata: {
+      detected: results.length,
+      rss_items: rssItems.length,
+      issues: results.slice(0, 10),
+    },
+  };
+  }); // withCronLogging
+  return NextResponse.json(result);
 }
 
 export const GET = withCronAuth(handler);

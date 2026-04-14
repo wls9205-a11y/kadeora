@@ -72,14 +72,25 @@ async function handler(_req: NextRequest) {
   }
 
   try {
-    // OG 커버인 글 우선 조회 (실사진이 필요한 글)
-    const { data: posts } = await sb
+    // OG 커버인 글 우선 조회 (이슈 블로그 최우선 → 나머지 최신순)
+    const { data: issuePosts } = await sb
+      .from('blog_posts')
+      .select('id, title, category, sub_category, image_alt, cover_image')
+      .eq('source_type', 'auto_issue')
+      .like('cover_image', '%/api/og?%')
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    const { data: normalPosts } = await sb
       .from('blog_posts')
       .select('id, title, category, sub_category, image_alt, cover_image')
       .eq('is_published', true)
+      .neq('source_type', 'auto_issue')
       .like('cover_image', '%/api/og?%')
       .order('created_at', { ascending: false })
-      .limit(BATCH);
+      .limit(BATCH - (issuePosts?.length || 0));
+
+    const posts = [...(issuePosts || []), ...(normalPosts || [])];
 
     if (!posts?.length) return NextResponse.json({ ok: true, processed: 0, msg: 'all covers are real images' });
 

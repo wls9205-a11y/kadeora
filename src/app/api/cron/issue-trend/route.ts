@@ -52,11 +52,12 @@ const KEYWORD_GROUPS: Record<string, { groupName: string; keywords: string[] }[]
 };
 
 async function handler(_req: NextRequest) {
+  const result = await withCronLogging('issue-trend', async () => {
   const sb = getSupabaseAdmin();
 
   if (!NAVER_CLIENT_ID) {
     console.log('[issue-trend] NAVER_CLIENT_ID not set — skipping');
-    return NextResponse.json({ error: 'NAVER_CLIENT_ID not set', checked: 0 });
+    return { processed: 0, created: 0, failed: 0, metadata: { error: 'NAVER_CLIENT_ID not set' } };
   }
 
   console.log('[issue-trend] NAVER_CLIENT_ID OK — checking trends');
@@ -198,13 +199,21 @@ async function handler(_req: NextRequest) {
     }
   }
 
-  return NextResponse.json({
-    spikes: spikeKeywords.length,
-    spike_details: spikeKeywords,
-    updated_issues: updated,
-    google_trends: googleTrendingKeywords.length,
-    daum_trends: daumTrendingKeywords.length,
-  });
+  return {
+    processed: spikeKeywords.length,
+    created: 0,
+    updated: updated,
+    failed: 0,
+    metadata: {
+      spikes: spikeKeywords.length,
+      spike_details: spikeKeywords,
+      updated_issues: updated,
+      google_trends: googleTrendingKeywords.length,
+      daum_trends: daumTrendingKeywords.length,
+    },
+  };
+  }); // withCronLogging
+  return NextResponse.json(result);
 }
 
 export const GET = withCronAuth(handler);

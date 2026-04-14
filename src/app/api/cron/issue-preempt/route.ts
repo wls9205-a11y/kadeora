@@ -326,6 +326,7 @@ async function detectBuilderUpcoming(_sb: any): Promise<any[]> {
 /* ═══════════ 메인 핸들러 ═══════════ */
 
 async function handler(_req: NextRequest) {
+  const result = await withCronLogging('issue-preempt', async () => {
   const sb = getSupabaseAdmin();
 
   // 4개 Phase 병렬 실행
@@ -357,18 +358,19 @@ async function handler(_req: NextRequest) {
 
   console.log(`[issue-preempt] total=${allResults.length} sub=${subResults.status === 'fulfilled' ? subResults.value.length : 0} uncovered=${uncoveredResults.status === 'fulfilled' ? uncoveredResults.value.length : 0} spikes=${spikeResults.status === 'fulfilled' ? spikeResults.value.length : 0} builders=${builderResults.status === 'fulfilled' ? builderResults.value.length : 0}`);
 
-  return NextResponse.json({
+  return {
     processed: allResults.length,
     created: allResults.length,
     failed: 0,
-    results: allResults,
     metadata: {
       subscriptions: subResults.status === 'fulfilled' ? subResults.value.length : 0,
       uncovered: uncoveredResults.status === 'fulfilled' ? uncoveredResults.value.length : 0,
       spikes: spikeResults.status === 'fulfilled' ? spikeResults.value.length : 0,
       builders: builderResults.status === 'fulfilled' ? builderResults.value.length : 0,
     },
-  });
+  };
+  }); // withCronLogging
+  return NextResponse.json(result);
 }
 
 export const GET = withCronAuth(handler);
