@@ -529,6 +529,12 @@ export default async function BlogDetailPage({ params }: Props) {
     isPartOf: { '@type': 'WebSite', name: '카더라', url: SITE },
     url: `${SITE}/blog/${slug}`,
     image: [
+      // 실제 본문 이미지 (텍스트 없는 사진 → 네이버 이미지 캐러셀 우대)
+      ...contentImages.map(img => ({
+        '@type': 'ImageObject' as const,
+        url: img.url,
+        caption: img.alt || post.title,
+      })),
       {
         '@type': 'ImageObject',
         url: post.cover_image || `${SITE}/api/og?title=${encodeURIComponent(post.title)}&category=${post.category}&design=2`,
@@ -547,7 +553,7 @@ export default async function BlogDetailPage({ params }: Props) {
     articleSection: catSection[post.category] || '정보',
     speakable: {
       '@type': 'SpeakableSpecification',
-      cssSelector: ['h1', '.blog-content p:first-of-type', '.blog-content h2:first-of-type'],
+      cssSelector: ['h1', '.blog-content p:first-of-type', '.blog-content h2:first-of-type', '.blog-content h2', '.faq-answer'],
     },
     ...(comments.length > 0 ? {
       commentCount: comments.length,
@@ -1052,7 +1058,7 @@ export default async function BlogDetailPage({ params }: Props) {
                   <span style={{ fontSize: 12, color: 'var(--text-tertiary)', marginLeft: 6 }}>{timeAgo(c.created_at)}</span>
                   <div style={{ fontSize: 14, color: 'var(--text-primary)', lineHeight: 1.6, marginTop: 3 }}>{c.content}</div>
                   {(c as any).image_url && (
-                    <a href={(c as any).image_url} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', marginTop: 4 }}>
+                    <a href={(c as any).image_url} target="_blank" rel="noopener noreferrer nofollow ugc" style={{ display: 'inline-block', marginTop: 4 }}>
                       <img src={(c as any).image_url} alt="댓글 이미지" style={{ maxWidth: 180, maxHeight: 120, borderRadius: 'var(--radius-md)', objectFit: 'cover', border: '1px solid var(--border)' }} />
                     </a>
                   )}
