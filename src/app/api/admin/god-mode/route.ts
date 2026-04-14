@@ -197,7 +197,7 @@ const ALL_CRONS = [
 ];
 
 // Fire-and-forget 대상 phase (Sonnet AI 호출 → 180s+ 소요)
-const FIRE_AND_FORGET_PHASES = new Set(['ai', 'content']);
+const FIRE_AND_FORGET_PHASES = new Set(['data', 'process', 'ai', 'content', 'system']);
 
 interface CronResult {
   endpoint: string;
