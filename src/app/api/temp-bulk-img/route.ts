@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
-export const maxDuration = 60;
+export const maxDuration = 30;
 export const runtime = 'nodejs';
 
 const ONE_TIME_TOKEN = 'f41f6717-5aff-4ff2-93d6-e9daf032689c';
@@ -10,7 +10,7 @@ const NAVER_CLIENT_ID = process.env.NAVER_CLIENT_ID;
 const NAVER_CLIENT_SECRET = process.env.NAVER_CLIENT_SECRET;
 const KAKAO_REST_KEY = process.env.KAKAO_REST_API_KEY;
 const PARALLEL = 8;
-const MAX_SECONDS = 45; // 45초 안에 최대한 처리
+const MAX_SECONDS = 20; // 45초 안에 최대한 처리
 
 interface ImageResult { title: string; url: string; thumbnail: string; source: string }
 
