@@ -72,12 +72,13 @@ async function handler(_req: NextRequest) {
   }
 
   try {
+    // 이미지 없는 글 우선 조회 (신규 글 우선)
     const { data: posts } = await sb
       .from('blog_posts')
       .select('id, title, category, sub_category, image_alt')
       .eq('is_published', true)
-      .order('view_count', { ascending: false, nullsFirst: false })
-      .limit(BATCH * 2);
+      .order('created_at', { ascending: false })
+      .limit(BATCH * 5);
 
     if (!posts?.length) return NextResponse.json({ ok: true, processed: 0 });
 
@@ -188,8 +189,8 @@ async function handler(_req: NextRequest) {
         .upsert(inserts, { onConflict: 'post_id,position', ignoreDuplicates: true });
       if (error) console.error('[blog-generate-images] upsert error:', error);
 
-      // cover_image 업데이트 — OG 텍스트 배너 → 실사진
-      const coverUpdates = inserts.filter(i => i.position === 0 && i.image_type === 'stock_photo');
+      // cover_image 업데이트 — OG 텍스트 배너 → 실사진 (position 0에 실사진이 있으면)
+      const coverUpdates = inserts.filter(i => i.position === 0 && !i.image_url.includes('/api/og'));
       for (const cu of coverUpdates) {
         await sb.from('blog_posts')
           .update({ cover_image: cu.image_url })
@@ -197,6 +198,25 @@ async function handler(_req: NextRequest) {
           .like('cover_image', '%/api/og?%');
       }
     }
+
+    // 커버 백필: 이미 이미지가 있지만 OG 커버인 글 → position 0 실사진으로 교체 (매 실행 50건)
+    try {
+      const { data: ogCovers } = await sb.from('blog_posts')
+        .select('id').eq('is_published', true)
+        .like('cover_image', '%/api/og?%')
+        .order('view_count', { ascending: false })
+        .limit(50);
+      if (ogCovers?.length) {
+        const ogIds = ogCovers.map((p: any) => p.id);
+        const { data: pos0 } = await (sb as any).from('blog_post_images')
+          .select('post_id, image_url').in('post_id', ogIds).eq('position', 0)
+          .not('image_url', 'like', '%/api/og%');
+        for (const img of (pos0 || [])) {
+          await sb.from('blog_posts').update({ cover_image: img.image_url }).eq('id', img.post_id);
+        }
+        if (pos0?.length) console.log(`[blog-generate-images] cover backfill: ${pos0.length}건 교체`);
+      }
+    } catch {}
 
     return NextResponse.json({
       ok: true, processed: needImages.length, inserted: inserts.length,
