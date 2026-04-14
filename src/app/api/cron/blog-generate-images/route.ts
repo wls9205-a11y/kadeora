@@ -72,27 +72,22 @@ async function handler(_req: NextRequest) {
   }
 
   try {
-    // 이미지 없는 글 우선 조회 (신규 글 우선)
+    // OG 커버인 글 우선 조회 (실사진이 필요한 글)
     const { data: posts } = await sb
       .from('blog_posts')
-      .select('id, title, category, sub_category, image_alt')
+      .select('id, title, category, sub_category, image_alt, cover_image')
       .eq('is_published', true)
+      .like('cover_image', '%/api/og?%')
       .order('created_at', { ascending: false })
-      .limit(BATCH * 5);
+      .limit(BATCH);
 
-    if (!posts?.length) return NextResponse.json({ ok: true, processed: 0 });
+    if (!posts?.length) return NextResponse.json({ ok: true, processed: 0, msg: 'all covers are real images' });
 
-    const postIds = posts.map((p: any) => p.id);
-    const { data: existing } = await (sb as any)
-      .from('blog_post_images').select('post_id').in('post_id', postIds);
-    const existingIds = new Set((existing || []).map((e: any) => e.post_id));
-    const needImages = posts.filter((p: any) => !existingIds.has(p.id)).slice(0, BATCH);
-
-    if (!needImages.length) return NextResponse.json({ ok: true, processed: 0, msg: 'all done' });
+    console.log(`[blog-generate-images] ${posts.length}건 OG 커버 → 실사진 교체 시작`);
 
     // 카테고리별 네이버 이미지 캐시
     const catCache: Record<string, { url: string; alt: string; caption: string }[]> = {};
-    const categories: string[] = Array.from(new Set(needImages.map((p: any) => String(p.category || 'general'))));
+    const categories: string[] = Array.from(new Set(posts.map((p: any) => String(p.category || 'general'))));
 
     for (const cat of categories) {
       const queries = CAT_QUERIES[cat as string] || CAT_QUERIES.general;
@@ -110,7 +105,7 @@ async function handler(_req: NextRequest) {
     const inserts: any[] = [];
     const catIdx: Record<string, number> = {};
 
-    for (const post of needImages) {
+    for (const post of posts) {
       const cat = post.category || 'general';
       const cache = catCache[cat] || [];
       if (!catIdx[cat]) catIdx[cat] = 0;
@@ -219,7 +214,7 @@ async function handler(_req: NextRequest) {
     } catch {}
 
     return NextResponse.json({
-      ok: true, processed: needImages.length, inserted: inserts.length,
+      ok: true, processed: posts.length, inserted: inserts.length,
       cache_sizes: Object.fromEntries(Object.entries(catCache).map(([k, v]) => [k, v.length])),
     });
   } catch (err: any) {
