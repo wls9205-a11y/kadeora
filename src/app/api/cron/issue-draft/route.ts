@@ -147,7 +147,9 @@ ${isPreempt ? `
 
 function enrichVisuals(content: string, issue: any): string {
   let enriched = content;
-  const category = issue.category === 'apt' ? 'apt' : 'stock';
+  // 인포그래픽 유효 카테고리: stock, apt, finance, tax, economy, life
+  const validCats = ['stock', 'apt', 'finance', 'tax', 'economy', 'life'];
+  const category = validCats.includes(issue.category) ? issue.category : (issue.category === 'apt' ? 'apt' : 'stock');
   const title = issue.title || '';
   const keywords = (issue.detected_keywords || []).slice(0, 5);
   const entities = (issue.related_entities || []).join(', ') || title.slice(0, 20);
@@ -175,10 +177,15 @@ function enrichVisuals(content: string, issue: any): string {
   // 2. 인포그래픽이 1개뿐이면 → 본문 중간에 비교 인포그래픽 추가
   const infographicCount = (enriched.match(/og-infographic/g) || []).length;
   if (infographicCount < 2) {
-    const compareItems = category === 'apt'
-      ? `현재시세:분석중,전월대비:변동,경쟁률:예상,투자매력:평가`
-      : `현재주가:분석중,PER:비교,업종평균:대비,전망:종합`;
-    const compareInfographic = `\n![비교 분석](/api/og-infographic?title=${encodeURIComponent('비교 분석')}&category=${category}&type=comparison&items=${encodeURIComponent(compareItems)})\n`;
+    const compareItems: Record<string, string> = {
+      apt: '현재시세:분석중,전월대비:변동,경쟁률:예상,투자매력:평가',
+      stock: '현재주가:분석중,PER:비교,업종평균:대비,전망:종합',
+      finance: '금리:비교,수익률:분석,리스크:평가,추천:종합',
+      economy: '지표:분석,전월대비:변동,전망:종합,영향:평가',
+      tax: '세율:비교,절세:방법,신고:일정,변경:사항',
+      life: '비용:비교,혜택:분석,신청:방법,대상:확인',
+    };
+    const compareInfographic = `\n![비교 분석](/api/og-infographic?title=${encodeURIComponent('비교 분석')}&category=${category}&type=comparison&items=${encodeURIComponent(compareItems[category] || compareItems.stock)})\n`;
 
     // 전체의 60% 지점에 삽입
     const insertPos = Math.floor(enriched.length * 0.6);
@@ -190,9 +197,10 @@ function enrichVisuals(content: string, issue: any): string {
 
   // 3. 테이블이 없으면 → 핵심 지표 요약 테이블 자동 삽입
   if (!enriched.includes('|---')) {
-    const summaryTable = category === 'apt'
-      ? `\n\n| 항목 | 내용 |\n|---|---|\n| 대상 | ${entities} |\n| 카테고리 | 부동산 |\n| 핵심 키워드 | ${keywords.join(', ') || '분양, 청약'} |\n| 분석 시점 | ${new Date().toISOString().slice(0, 10)} |\n| 출처 | 카더라 데이터 분석 |\n\n`
-      : `\n\n| 항목 | 내용 |\n|---|---|\n| 대상 | ${entities} |\n| 카테고리 | 주식/금융 |\n| 핵심 키워드 | ${keywords.join(', ') || '시세, 전망'} |\n| 분석 시점 | ${new Date().toISOString().slice(0, 10)} |\n| 출처 | 카더라 데이터 분석 |\n\n`;
+    const catLabel: Record<string, string> = {
+      apt: '부동산', stock: '주식/금융', finance: '재테크', economy: '경제', tax: '세금', life: '생활경제',
+    };
+    const summaryTable = `\n\n| 항목 | 내용 |\n|---|---|\n| 대상 | ${entities} |\n| 카테고리 | ${catLabel[category] || '분석'} |\n| 핵심 키워드 | ${keywords.join(', ') || '분석, 전망'} |\n| 분석 시점 | ${new Date().toISOString().slice(0, 10)} |\n| 출처 | 카더라 데이터 분석 |\n\n`;
 
     // 첫 h2 뒤에 삽입
     const firstH2End = enriched.indexOf('\n', enriched.indexOf('\n## ') + 4);
@@ -206,10 +214,15 @@ function enrichVisuals(content: string, issue: any): string {
   // 4. 카더라 내부링크가 부족하면 → 하단에 관련 링크 블록 추가
   const internalLinkCount = (enriched.match(/\]\(\//g) || []).length;
   if (internalLinkCount < 2) {
-    const linkBlock = category === 'apt'
-      ? `\n\n---\n\n## 관련 정보\n\n- [카더라 청약 일정 →](/apt)\n- [전국 실거래가 조회 →](/apt?tab=transaction)\n- [청약 가점 계산기 →](/apt/diagnose)\n- [카더라 블로그 →](/blog?category=apt)\n\n`
-      : `\n\n---\n\n## 관련 정보\n\n- [실시간 주식 시세 →](/stock)\n- [종목 비교 분석 →](/stock/compare)\n- [카더라 블로그 →](/blog?category=stock)\n- [투자 커뮤니티 →](/feed)\n\n`;
-    enriched = enriched + linkBlock;
+    const linkBlocks: Record<string, string> = {
+      apt: `\n\n---\n\n## 관련 정보\n\n- [카더라 청약 일정 →](/apt)\n- [전국 실거래가 조회 →](/apt?tab=transaction)\n- [청약 가점 계산기 →](/apt/diagnose)\n- [카더라 블로그 →](/blog?category=apt)\n\n`,
+      stock: `\n\n---\n\n## 관련 정보\n\n- [실시간 주식 시세 →](/stock)\n- [종목 비교 분석 →](/stock/compare)\n- [카더라 블로그 →](/blog?category=stock)\n- [투자 커뮤니티 →](/feed)\n\n`,
+      finance: `\n\n---\n\n## 관련 정보\n\n- [카더라 재테크 블로그 →](/blog?category=finance)\n- [실시간 주식 시세 →](/stock)\n- [부동산 정보 →](/apt)\n- [투자 커뮤니티 →](/feed)\n\n`,
+      economy: `\n\n---\n\n## 관련 정보\n\n- [카더라 경제 블로그 →](/blog?category=finance)\n- [실시간 시세 →](/stock)\n- [부동산 시장 →](/apt)\n- [투자 커뮤니티 →](/feed)\n\n`,
+      tax: `\n\n---\n\n## 관련 정보\n\n- [카더라 세금 가이드 →](/blog?category=finance)\n- [부동산 정보 →](/apt)\n- [투자 커뮤니티 →](/feed)\n\n`,
+      life: `\n\n---\n\n## 관련 정보\n\n- [카더라 생활경제 →](/blog?category=finance)\n- [투자 커뮤니티 →](/feed)\n- [부동산 정보 →](/apt)\n\n`,
+    };
+    enriched = enriched + (linkBlocks[category] || linkBlocks.stock);
   }
 
   return enriched;
@@ -385,10 +398,17 @@ async function handler(_req: NextRequest) {
     && !(config.auto_publish_blocked_categories || []).includes(issue.category);
 
   // safeBlogInsert로 발행
-  // v2: 카테고리 매핑 + 커버 이미지 자동 설정
+  // v3: 카테고리 정확 매핑 + 커버 이미지 디자인 랜덤 로테이션
   const blogCategory = (['apt', 'stock', 'finance', 'general'] as const).includes(issue.category as any)
     ? issue.category : (issue.category === 'tax' ? 'finance' : issue.category === 'economy' ? 'finance' : 'general');
-  const coverImage = `${SITE_URL}/api/og?title=${encodeURIComponent(article.title)}&category=${blogCategory}&author=${encodeURIComponent('카더라')}&design=2`;
+  // 디자인 1~6 로테이션 (카테고리별 기본 + 제목 해시로 변형)
+  const designBase: Record<string, number[]> = {
+    apt: [1, 2, 4, 6], stock: [2, 3, 5, 6], finance: [1, 3, 4, 5], general: [1, 2, 3, 4],
+  };
+  const designs = designBase[blogCategory] || designBase.general;
+  const titleHash = article.title.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+  const design = designs[titleHash % designs.length];
+  const coverImage = `${SITE_URL}/api/og?title=${encodeURIComponent(article.title)}&category=${blogCategory}&author=${encodeURIComponent('카더라')}&design=${design}`;
   const imageAlt = `${article.title} — 카더라 분석`;
 
   const insertResult = await safeBlogInsert(sb, {
