@@ -70,7 +70,7 @@ export async function GET(req: NextRequest) {
           // 인라인 HTML이라도 제거
           const cleaned = stripInlineHtml(post.content);
           if (cleaned !== post.content) {
-            await admin.from('blog_posts').update({
+            await (admin as any).from('blog_posts').update({
               content: cleaned,
               updated_at: new Date().toISOString(),
             }).eq('id', post.id);
@@ -133,7 +133,7 @@ ${dataPrompt}
         // meta_description 생성
         const clean = newContent.replace(/[#|*\n\r\-\[\]\(\)/]/g, ' ').replace(/\s+/g, ' ').trim();
 
-        await admin.from('blog_posts').update({
+        await (admin as any).from('blog_posts').update({
           content: newContent,
           meta_description: clean.slice(0, 120) + ' — 카더라',
           excerpt: clean.slice(0, 150),

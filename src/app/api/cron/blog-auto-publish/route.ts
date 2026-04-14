@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
     const sb = getSupabaseAdmin();
 
     // 자동 공개 대상 조회
-    const { data: posts, error } = await sb
+    const { data: posts, error } = await (sb as any)
       .from('blog_posts')
       .select('id, slug, title, category, quality_score, seo_tier, content_length')
       .eq('is_published', false)
@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
 
     for (const post of posts) {
       try {
-        const { error: updErr } = await sb.from('blog_posts').update({
+        const { error: updErr } = await (sb as any).from('blog_posts').update({
           is_published: true,
           published_at: new Date().toISOString(),
           auto_publish_eligible: false, // 한 번 공개된 글은 플래그 해제

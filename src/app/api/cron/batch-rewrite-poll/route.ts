@@ -103,7 +103,7 @@ export async function GET(req: NextRequest) {
             const now = new Date().toISOString();
 
             
-            await admin.from('blog_posts').update({
+            await (admin as any).from('blog_posts').update({
               content: newContent,
               meta_description: clean.slice(0, 120) + ' — 카더라',
               excerpt: clean.slice(0, 150),

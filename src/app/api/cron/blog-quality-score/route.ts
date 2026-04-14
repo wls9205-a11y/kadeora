@@ -103,7 +103,7 @@ export async function GET(req: NextRequest) {
     const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString();
 
     // 평가 대상: 비공개 + (미평가 OR 30일 경과)
-    const { data: posts, error } = await sb
+    const { data: posts, error } = await (sb as any)
       .from('blog_posts')
       .select('id, title, content, content_length, excerpt, meta_description, cover_image, image_alt, category, tags, related_slugs, seo_tier, seo_score, data_date, rewritten_at')
       .eq('is_published', false)
@@ -123,7 +123,7 @@ export async function GET(req: NextRequest) {
       try {
         const { score, details, eligible: isEligible } = scorePost(post);
 
-        await sb.from('blog_posts').update({
+        await (sb as any).from('blog_posts').update({
           quality_score: score,
           quality_details: details,
           quality_checked_at: new Date().toISOString(),
