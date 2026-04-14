@@ -41,6 +41,15 @@ const CRON_GROUPS = {
     '/api/cron/issue-detect',
     '/api/cron/issue-trend',
     '/api/cron/issue-preempt',
+    // 세션 108 추가
+    '/api/cron/collect-site-images',
+    '/api/cron/collect-complex-images',
+    '/api/cron/collect-site-facilities',
+    '/api/cron/collect-site-trends',
+    '/api/cron/apt-image-crawl',
+    '/api/cron/kapt-sync',
+    '/api/cron/naver-blog-content',
+    '/api/cron/health-check',
   ],
   process: [
     '/api/cron/aggregate-trade-stats',
@@ -55,6 +64,11 @@ const CRON_GROUPS = {
     '/api/cron/apt-price-sync',
     '/api/cron/auto-verify-households',
     '/api/cron/naver-complex-sync',
+    // 세션 108 추가
+    '/api/cron/apt-price-change',
+    '/api/cron/redev-enrich',
+    '/api/cron/redev-verify-households',
+    '/api/cron/daily-report-snapshot',
   ],
   ai: [
     '/api/cron/apt-ai-summary',
@@ -68,6 +82,10 @@ const CRON_GROUPS = {
     '/api/cron/batch-analysis-submit',
     '/api/cron/batch-analysis-poll',
     '/api/cron/issue-draft',
+    // 세션 108 추가
+    '/api/cron/blog-enrich-rewrite',
+    '/api/cron/blog-generate-images',
+    '/api/cron/post-ai-summary',
   ],
   content: [
     '/api/cron/seed-posts',
@@ -86,8 +104,6 @@ const CRON_GROUPS = {
     '/api/cron/blog-quality-prune',
     '/api/cron/blog-restore-candidate',
     '/api/cron/blog-restore-monitor',
-    '/api/cron/blog-apt-cluster',
-    '/api/cron/blog-stock-cluster',
     '/api/cron/analysis-refresh',
     '/api/cron/stock-fundamentals-kr',
     '/api/cron/stock-fundamentals-us',
@@ -99,7 +115,6 @@ const CRON_GROUPS = {
     '/api/cron/feed-buzz-publish',
     '/api/cron/daily-seed-activity',
     '/api/cron/aggregate-user-events',
-    // 누락됐던 블로그 크론 19개
     '/api/cron/blog-builder-analysis',
     '/api/cron/blog-calculator-guide',
     '/api/cron/blog-comparison',
@@ -119,6 +134,16 @@ const CRON_GROUPS = {
     '/api/cron/blog-trade-trend',
     '/api/cron/blog-unsold-trend',
     '/api/cron/blog-weekly-digest',
+    // 세션 108 추가
+    '/api/cron/blog-apt-landmark',
+    '/api/cron/blog-invest-calendar',
+    '/api/cron/blog-redev-summary',
+    '/api/cron/blog-upcoming-projects',
+    '/api/cron/blog-cleanup-padding',
+    '/api/cron/blog-data-update',
+    '/api/cron/naver-cafe-publish',
+    '/api/cron/seed-chat',
+    '/api/cron/seed-comments',
   ],
   system: [
     '/api/cron/daily-stats',
@@ -143,14 +168,23 @@ const CRON_GROUPS = {
     '/api/cron/seo-content-boost',
     '/api/cron/seo-internal-links',
     '/api/cron/blog-subscription-alert',
-    '/api/cron/weekly-digest',
     '/api/cron/welcome-nudge',
     '/api/cron/blog-fix-existing',
-    // SEO 확장 크론 (세션 92)
     '/api/cron/price-change-calc',
     '/api/cron/monthly-market-report',
     '/api/cron/blog-complex-crosslink',
     '/api/cron/data-quality-fix',
+    // 세션 108 추가
+    '/api/cron/email-scheduler',
+    '/api/cron/email-digest',
+    '/api/cron/daily-reset',
+    '/api/cron/expire-listings',
+    '/api/cron/churn-prevention',
+    '/api/cron/invite-reward',
+    '/api/cron/portfolio-snapshot',
+    '/api/cron/predict-check',
+    '/api/cron/premium-expire',
+    '/api/cron/streak-alert',
   ],
 };
 
