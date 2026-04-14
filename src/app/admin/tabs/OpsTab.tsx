@@ -24,7 +24,7 @@ export default function OpsTab({ onNavigate }: { onNavigate: (t: any) => void })
   if (loading || !data || data.error) return <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-secondary)' }}>로딩 중...</div>;
 
   const { cronGroups, failedCrons, totalOk, totalFail, dbMb, recentCrons } = data;
-  const inf = focusData?.infra || { dbMaxMb: 8192, cronMaxSlots: 100, cronCurrent: 89 };
+  const inf = focusData?.infra || { dbMaxMb: 8192, cronMaxSlots: 100, cronCurrent: 91 };
   const apiKeys = focusData?.apiKeys || [];
   const totalCron = totalOk + totalFail;
   const successRate = totalCron > 0 ? Math.round((totalOk / totalCron) * 1000) / 10 : 100;

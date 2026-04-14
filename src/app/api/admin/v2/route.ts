@@ -522,8 +522,24 @@ export async function GET(req: NextRequest) {
           dbMaxMb: ADMIN_INFRA.DB_MAX_MB,
           cronMaxSlots: ADMIN_INFRA.CRON_MAX_SLOTS,
           emailDailyLimit: ADMIN_INFRA.EMAIL_DAILY_LIMIT,
-          cronCurrent: 89, // vercel.json schedule 기준
+          cronCurrent: 91, // vercel.json schedule 기준 (2026-04-14 감사 후)
         },
+        // ── 부동산 이미지 수집 진행률 ──
+        imageCollection: await (async () => {
+          try {
+            const [sitesTotal, sitesWithImg, sitesEmpty, complexTotal, complexWithImg] = await Promise.all([
+              safeCount(sb.from('apt_sites').select('id', { count: 'exact', head: true }).eq('is_active', true)),
+              safeCount(sb.from('apt_sites').select('id', { count: 'exact', head: true }).eq('is_active', true).not('images', 'eq', '[]').not('images', 'is', null)),
+              safeCount(sb.from('apt_sites').select('id', { count: 'exact', head: true }).eq('is_active', true).or('images.is.null,images.eq.[]')),
+              safeCount((sb as any).from('apt_complex_profiles').select('id', { count: 'exact', head: true })),
+              safeCount((sb as any).from('apt_complex_profiles').select('id', { count: 'exact', head: true }).not('images', 'is', null).not('images', 'eq', '[]')),
+            ]);
+            return {
+              sites: { total: sitesTotal, done: sitesWithImg, remaining: sitesEmpty, pct: sitesTotal > 0 ? Math.round(sitesWithImg / sitesTotal * 100) : 0 },
+              complex: { total: complexTotal, done: complexWithImg, remaining: complexTotal - complexWithImg, pct: complexTotal > 0 ? Math.round(complexWithImg / complexTotal * 100) : 0 },
+            };
+          } catch { return null; }
+        })(),
         // ── API 키 동적 상태 ──
         apiKeys: [
           { name: 'CRON_SECRET', ok: !!process.env.CRON_SECRET },

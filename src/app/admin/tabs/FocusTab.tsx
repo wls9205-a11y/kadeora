@@ -49,7 +49,7 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
   if(ld)return<div style={{textAlign:'center',padding:80,color:'rgba(255,255,255,0.4)',fontSize:12}}>로딩...</div>;
   if(!d)return<div style={{textAlign:'center',padding:80,fontSize:12}}>⚠️ 실패</div>;
 
-  const{healthScore:hs=0,kpi:k={} as any,growth:g={} as any,extended:x={} as any,failedCrons:fc={},recentActivity:ra=[],dailyTrend:dt=[],ctaBreakdown:cb={},signupSources:ss={},retention:ret=null as any,featureHealth:fh={} as any,trafficDetail:td={} as any,blogImages:bi=null as any,issuePipeline:ip=null as any,seoRewrite:sr=null as any,infra:inf={dbMaxMb:8192,cronMaxSlots:100,emailDailyLimit:100,cronCurrent:89} as any,apiKeys:ak=[] as any[]}=d;
+  const{healthScore:hs=0,kpi:k={} as any,growth:g={} as any,extended:x={} as any,failedCrons:fc={},recentActivity:ra=[],dailyTrend:dt=[],ctaBreakdown:cb={},signupSources:ss={},retention:ret=null as any,featureHealth:fh={} as any,trafficDetail:td={} as any,blogImages:bi=null as any,issuePipeline:ip=null as any,seoRewrite:sr=null as any,infra:inf={dbMaxMb:8192,cronMaxSlots:100,emailDailyLimit:100,cronCurrent:91} as any,apiKeys:ak=[] as any[],imageCollection:imgC=null as any}=d;
 
   // 벤치마크
   const cr=pct(k.cronSuccess,k.cronSuccess+k.cronFail);
@@ -335,6 +335,21 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
           </div>)}
         </div>;
       })()}
+
+      {/* ═══ 6.6 이미지 수집 진행률 ═══ */}
+      {imgC && <div className="adm-card" style={{padding:'8px 12px',marginBottom:8}}>
+        <div style={{fontSize:11,fontWeight:700,color:'rgba(255,255,255,0.5)',marginBottom:6}}>🖼️ 부동산 이미지 수집</div>
+        {[
+          {l:'apt_sites',d:imgC.sites?.done||0,t:imgC.sites?.total||0,p:imgC.sites?.pct||0},
+          {l:'단지백과',d:imgC.complex?.done||0,t:imgC.complex?.total||0,p:imgC.complex?.pct||0},
+        ].map(s=><div key={s.l} style={{display:'flex',alignItems:'center',gap:6,padding:'3px 0'}}>
+          <span style={{fontSize:11,minWidth:54,color:'rgba(255,255,255,0.5)'}}>{s.l}</span>
+          <div style={{flex:1,height:6,background:'rgba(255,255,255,0.06)',borderRadius:3,overflow:'hidden'}}>
+            <div style={{height:'100%',width:`${s.p}%`,background:s.p>80?'#10B981':s.p>30?'#F59E0B':'#3B7BF6',borderRadius:3}}/>
+          </div>
+          <span style={{fontSize:11,minWidth:80,textAlign:'right',color:s.p>80?'#10B981':s.p>30?'#F59E0B':'#3B7BF6',fontWeight:600}}>{f(s.d)}/{f(s.t)} ({s.p}%)</span>
+        </div>)}
+      </div>}
 
       {/* ═══ 7. 크론 + 데이터 신선도 ═══ */}
       <Sec t="🔧 크론 · 데이터" ch={
