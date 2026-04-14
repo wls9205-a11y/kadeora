@@ -489,6 +489,44 @@ export default function GrowthTab({ onNavigate }: { onNavigate: (t: any) => void
       })()}
 
       {/* 가입 귀속 (CTA별) — 원래 위치 */}
+      {/* 재개발 현황 */}
+      {data.redevStats && (() => {
+        const rs = data.redevStats;
+        const total = rs.total || 1;
+        const items = [
+          { l: '주택', v: rs.residential, p: Math.round(rs.residential / total * 100), c: '#8B5CF6' },
+          { l: '도시정비', v: rs.dosi, p: Math.round(rs.dosi / total * 100), c: '#64748B' },
+          { l: '세대수', v: rs.withHouseholds, p: Math.round(rs.withHouseholds / total * 100), c: rs.withHouseholds / total > 0.3 ? '#10B981' : '#EF4444' },
+          { l: '좌표', v: rs.withGeo, p: Math.round(rs.withGeo / total * 100), c: rs.withGeo / total > 0.3 ? '#10B981' : '#EF4444' },
+          { l: 'AI요약', v: rs.withAi, p: Math.round(rs.withAi / total * 100), c: rs.withAi / total > 0.5 ? '#10B981' : '#F59E0B' },
+          { l: '시공사', v: rs.withConstructor, p: Math.round(rs.withConstructor / total * 100), c: '#3B82F6' },
+        ];
+        return (<>
+          <div className="adm-sec">🏗️ 재개발 데이터 현황 ({rs.total}건)</div>
+          <div className="adm-card" style={{ padding: '10px 14px' }}>
+            <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
+              <div style={{ textAlign: 'center', flex: 1, padding: 6, background: 'rgba(139,92,246,0.1)', borderRadius: 'var(--radius-sm)' }}>
+                <div style={{ fontSize: 18, fontWeight: 800, color: '#8B5CF6' }}>{rs.residential}</div>
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>주택 재개발/재건축</div>
+              </div>
+              <div style={{ textAlign: 'center', flex: 1, padding: 6, background: 'rgba(100,116,139,0.1)', borderRadius: 'var(--radius-sm)' }}>
+                <div style={{ fontSize: 18, fontWeight: 800, color: '#64748B' }}>{rs.dosi}</div>
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>도시환경정비</div>
+              </div>
+            </div>
+            {items.slice(2).map(s => (
+              <div key={s.l} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 0' }}>
+                <span style={{ fontSize: 11, minWidth: 44, color: 'var(--text-secondary)' }}>{s.l}</span>
+                <div style={{ flex: 1, height: 6, background: 'var(--bg-hover)', borderRadius: 3, overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: `${s.p}%`, background: s.c, borderRadius: 3 }} />
+                </div>
+                <span style={{ fontSize: 11, minWidth: 60, textAlign: 'right', color: s.c, fontWeight: 600 }}>{s.v}/{rs.total} ({s.p}%)</span>
+              </div>
+            ))}
+          </div>
+        </>);
+      })()}
+
       {data.signupSources && Object.keys(data.signupSources).length > 0 && (<>
         <div className="adm-sec">🎯 가입 귀속 (signup_source)</div>
         <div className="adm-card" style={{ padding: '8px 14px' }}>
