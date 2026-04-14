@@ -479,8 +479,7 @@ async function handler(_req: NextRequest) {
           fetch(draftUrl, {
             method: 'GET',
             headers: { Authorization: `Bearer ${process.env.CRON_SECRET}` },
-            signal: AbortSignal.timeout(5000),
-          }).catch(() => {}); // fire-and-forget
+          }).catch(() => {}); // fire-and-forget (타임아웃 없음 — 독립 실행)
           console.log(`[issue-detect] 🚀 instant trigger: score=${score.final_score} "${candidate.title.slice(0, 30)}"`);
         } catch {}
       }

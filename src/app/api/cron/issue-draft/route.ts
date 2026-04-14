@@ -301,41 +301,19 @@ async function scheduleBuzzPosts(sb: any, issueId: string, score: number) {
 
 /* ═══════════ 메인 핸들러 ═══════════ */
 
-async function handler(_req: NextRequest) {
-  const sb = getSupabaseAdmin();
-
-  // 킬스위치 체크
-  const config = await getAutoPublishConfig(sb);
-
-  // 미처리 이슈 1건 조회 (최고 점수 우선) — v3: 25+ 이상 모두 처리 (draft로라도 생성)
-  const { data: issues } = await (sb as any).from('issue_alerts')
-    .select('*')
-    .eq('is_processed', false)
-    .gte('final_score', 25)
-    .order('final_score', { ascending: false })
-    .limit(1);
-
-  if (!issues || issues.length === 0) {
-    return NextResponse.json({ processed: 0, message: 'no pending issues' });
-  }
-
-  const issue = issues[0];
-
-  // v2: 즉시 is_processed=true 마킹 (동시 실행 race condition 방지)
+async function processOneIssue(sb: any, issue: any, config: any): Promise<{ decision: string; title?: string; score: number; slug?: string }> {
+  // CAS lock
   const { data: lockResult } = await (sb as any).from('issue_alerts')
     .update({ is_processed: true, processed_at: new Date().toISOString() })
     .eq('id', issue.id)
-    .eq('is_processed', false) // CAS: 아직 미처리인 경우만
+    .eq('is_processed', false)
     .select('id');
-  if (!lockResult || lockResult.length === 0) {
-    return NextResponse.json({ processed: 0, message: 'already processing (race)' });
-  }
+  if (!lockResult || lockResult.length === 0) return { decision: 'race', score: issue.final_score };
 
-  // v2: 기존 blog_posts에 같은 토픽 글 있으면 AI 생성 스킵
+  // 중복 체크
   const issueKeywords: string[] = issue.detected_keywords || [];
   const skipReasons: string[] = [];
   if (issueKeywords.length >= 1) {
-    // 24시간 내 같은 키워드로 작성된 블로그 검색
     const since24h = new Date(Date.now() - 24 * 3600000).toISOString();
     const { data: recentBlogs } = await sb.from('blog_posts')
       .select('id, title, tags, cron_type')
@@ -347,140 +325,121 @@ async function handler(_req: NextRequest) {
       for (const blog of recentBlogs) {
         const blogTags: string[] = blog.tags || [];
         const overlap = issueKeywords.filter((k: string) => blogTags.includes(k) || (blog.title || '').includes(k));
-        if (overlap.length >= 2) {
-          skipReasons.push(`keyword_overlap:${blog.id}:${overlap.join(',')}`);
-          break;
-        }
+        if (overlap.length >= 2) { skipReasons.push(`keyword_overlap:${blog.id}:${overlap.join(',')}`); break; }
       }
     }
-    // pg_trgm으로 제목 유사도 체크
     if (skipReasons.length === 0) {
       try {
-        const { data: simBlogs } = await sb.rpc('check_blog_similarity', {
-          p_title: issue.title,
-          p_threshold: 0.35,
-        });
-        if (simBlogs && simBlogs.length > 0) {
-          skipReasons.push(`title_similar:${simBlogs[0].id}:${simBlogs[0].title?.slice(0, 30)}`);
-        }
-      } catch { /* RPC 없으면 스킵 */ }
+        const { data: simBlogs } = await sb.rpc('check_blog_similarity', { p_title: issue.title, p_threshold: 0.35 });
+        if (simBlogs && simBlogs.length > 0) skipReasons.push(`title_similar:${simBlogs[0].id}:${simBlogs[0].title?.slice(0, 30)}`);
+      } catch {}
     }
   }
   if (skipReasons.length > 0) {
-    await (sb as any).from('issue_alerts').update({
-      publish_decision: 'duplicate_blog',
-      block_reason: skipReasons.join(' | '), // draft_content 덮어쓰지 않음
-      is_processed: true,
-    }).eq('id', issue.id);
-    return NextResponse.json({ processed: 0, message: 'duplicate_blog', reason: skipReasons[0] });
+    await (sb as any).from('issue_alerts').update({ publish_decision: 'duplicate_blog', block_reason: skipReasons.join(' | '), is_processed: true }).eq('id', issue.id);
+    return { decision: 'duplicate', score: issue.final_score };
   }
 
   // AI 기사 생성
   const article = await generateArticle(issue);
   if (!article) {
-    await (sb as any).from('issue_alerts').update({
-      publish_decision: 'ai_failed',
-    }).eq('id', issue.id);
-    return NextResponse.json({ processed: 0, error: 'AI generation failed' });
+    await (sb as any).from('issue_alerts').update({ publish_decision: 'ai_failed' }).eq('id', issue.id);
+    return { decision: 'ai_failed', score: issue.final_score };
   }
 
-  // 시각 요소 강제 보강 (인포그래픽, 테이블, 내부링크 누락 시 자동 삽입)
   article.content = enrichVisuals(article.content, issue);
-
-  // 팩트 검증
   const check = factCheck(article.content, issue.raw_data || {});
 
-  // 자동 발행 판정
   const canAutoPublish = config.auto_publish_enabled
     && issue.final_score >= (config.auto_publish_min_score ?? 40)
-    && !issue.block_reason
-    && check.passed
+    && !issue.block_reason && check.passed
     && !(config.auto_publish_blocked_categories || []).includes(issue.category);
 
-  // safeBlogInsert로 발행
-  // v3: 카테고리 정확 매핑 + 커버 이미지 디자인 랜덤 로테이션
   const blogCategory = (['apt', 'stock', 'finance', 'general'] as const).includes(issue.category as any)
-    ? issue.category : (issue.category === 'tax' ? 'finance' : issue.category === 'economy' ? 'finance' : 'general');
-  // 디자인 1~6 로테이션 (카테고리별 기본 + 제목 해시로 변형)
-  const designBase: Record<string, number[]> = {
-    apt: [1, 2, 4, 6], stock: [2, 3, 5, 6], finance: [1, 3, 4, 5], general: [1, 2, 3, 4],
-  };
+    ? issue.category : (issue.category === 'tax' || issue.category === 'economy' ? 'finance' : 'general');
+  const designBase: Record<string, number[]> = { apt: [1,2,4,6], stock: [2,3,5,6], finance: [1,3,4,5], general: [1,2,3,4] };
   const designs = designBase[blogCategory] || designBase.general;
   const titleHash = article.title.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
   const design = designs[titleHash % designs.length];
   const coverImage = `${SITE_URL}/api/og?title=${encodeURIComponent(article.title)}&category=${blogCategory}&author=${encodeURIComponent('카더라')}&design=${design}`;
-  const imageAlt = `${article.title} — 카더라 분석`;
 
   const insertResult = await safeBlogInsert(sb, {
-    slug: article.slug,
-    title: article.title,
-    content: article.content,
-    category: blogCategory as any,
-    tags: article.keywords,
-    source_type: 'auto_issue',
-    cron_type: 'issue-draft',
+    slug: article.slug, title: article.title, content: article.content,
+    category: blogCategory as any, tags: article.keywords,
+    source_type: 'auto_issue', cron_type: 'issue-draft',
     source_ref: (issue.source_urls || [])[0],
-    meta_description: (() => {
-      const desc = (article as any).meta_description || (issue.summary || '').slice(0, 160);
-      return desc.length >= 20 ? desc : `${desc} — ${article.title}`.slice(0, 160);
-    })(),
+    meta_description: (() => { const desc = (article as any).meta_description || (issue.summary || '').slice(0, 160); return desc.length >= 20 ? desc : `${desc} — ${article.title}`.slice(0, 160); })(),
     meta_keywords: article.keywords.join(','),
-    cover_image: coverImage,
-    image_alt: imageAlt,
+    cover_image: coverImage, image_alt: `${article.title} — 카더라 분석`,
     is_published: canAutoPublish,
   });
 
-  // blog_post_id 확보 (safeBlogInsert가 id를 못 반환한 경우 slug으로 조회)
   let blogPostId: number | null = (insertResult.id ? Number(insertResult.id) : null);
   if (!blogPostId && article.slug) {
-    try {
-      const { data: found } = await sb.from('blog_posts')
-        .select('id').eq('slug', article.slug).maybeSingle();
-      if (found) blogPostId = found.id; // bigint
-    } catch {}
+    try { const { data: found } = await sb.from('blog_posts').select('id').eq('slug', article.slug).maybeSingle(); if (found) blogPostId = found.id; } catch {}
   }
 
-  // issue_alerts 업데이트
   const insertFailed = !insertResult.success && !blogPostId;
   await (sb as any).from('issue_alerts').update({
     is_published: (canAutoPublish && (insertResult.success || !!blogPostId)),
-    publish_decision: canAutoPublish && (insertResult.success || !!blogPostId) ? 'auto'
-      : canAutoPublish ? 'auto_failed'
-      : (insertResult.success || !!blogPostId) ? 'draft' : 'failed',
+    publish_decision: canAutoPublish && (insertResult.success || !!blogPostId) ? 'auto' : canAutoPublish ? 'auto_failed' : (insertResult.success || !!blogPostId) ? 'draft' : 'failed',
     block_reason: insertFailed ? (insertResult.message || insertResult.reason || 'safeBlogInsert failed') : null,
-    blog_post_id: blogPostId,
-    draft_title: article.title,
-    draft_content: article.content,
-    draft_slug: article.slug,
-    draft_keywords: article.keywords,
+    blog_post_id: blogPostId, draft_title: article.title, draft_content: article.content,
+    draft_slug: article.slug, draft_keywords: article.keywords,
     infographic_data: article.infographic_data || {},
     draft_template: selectDraftTemplate(issue.category, issue.issue_type),
-    fact_check_passed: check.passed,
-    fact_check_details: check.details,
+    fact_check_passed: check.passed, fact_check_details: check.details,
     published_at: canAutoPublish && (insertResult.success || !!blogPostId) ? new Date().toISOString() : null,
   }).eq('id', issue.id);
 
-  // 자동 발행 성공 시 후속 작업
   if (canAutoPublish && insertResult.success) {
-    // 피드 공식 포스트
     await createOfficialFeedPost(sb, issue, article.slug);
-
-    // 뻘글 스케줄링
     await scheduleBuzzPosts(sb, issue.id, issue.final_score);
+    try { await submitIndexNow([`${SITE_URL}/blog/${article.slug}`]); } catch {}
+  }
 
-    // IndexNow
+  return { decision: canAutoPublish ? 'auto_published' : insertResult.success ? 'draft_saved' : 'failed', title: article.title, score: issue.final_score, slug: article.slug };
+}
+
+async function handler(_req: NextRequest) {
+  const sb = getSupabaseAdmin();
+  const config = await getAutoPublishConfig(sb);
+  const _start = Date.now();
+  const MAX_PER_RUN = 4;
+
+  // 25점 미만 자동 스킵 (큐 정리)
+  await (sb as any).from('issue_alerts')
+    .update({ is_processed: true, publish_decision: 'below_threshold', processed_at: new Date().toISOString() })
+    .eq('is_processed', false).lt('final_score', 25);
+
+  // 미처리 이슈 최대 4건 조회 (최고 점수 우선)
+  const { data: issues } = await (sb as any).from('issue_alerts')
+    .select('*')
+    .eq('is_processed', false)
+    .gte('final_score', 25)
+    .order('final_score', { ascending: false })
+    .limit(MAX_PER_RUN);
+
+  if (!issues || issues.length === 0) {
+    return NextResponse.json({ processed: 0, message: 'no pending issues' });
+  }
+
+  const results: any[] = [];
+  for (const issue of issues) {
+    if (Date.now() - _start > 100_000) break; // 100s 안전 마진
     try {
-      await submitIndexNow([`${SITE_URL}/blog/${article.slug}`]);
-    } catch {}
+      const r = await processOneIssue(sb, issue, config);
+      results.push(r);
+    } catch (e) {
+      console.error(`[issue-draft] error processing ${issue.id}:`, e);
+      results.push({ decision: 'error', score: issue.final_score });
+    }
   }
 
   return NextResponse.json({
-    processed: 1,
-    title: article.title,
-    score: issue.final_score,
-    decision: canAutoPublish ? 'auto_published' : insertResult.success ? 'draft_saved' : 'failed',
-    fact_check: check.passed,
-    slug: article.slug,
+    processed: results.length,
+    published: results.filter(r => r.decision === 'auto_published').length,
+    results: results.map(r => ({ decision: r.decision, score: r.score, title: r.title?.slice(0, 40) })),
   });
 }
 
