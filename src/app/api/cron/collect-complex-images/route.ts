@@ -76,10 +76,30 @@ async function handler(_req: NextRequest) {
   const targets=(rows||[]) as any[];
   if (!targets.length) return NextResponse.json({message:'완료',processed:0});
 
-  let collected=0,skipped=0;
+  // ── Phase 0: apt_sites에서 이미지 복사 (API 호출 불필요) ──
+  const targetNames = targets.map((r: any) => r.apt_name);
+  const {data: siteImgs} = await (sb as any).from('apt_sites')
+    .select('name, images').in('name', targetNames)
+    .not('images', 'is', null);
+  const siteImgMap: Record<string, any> = {};
+  for (const s of (siteImgs || []) as any[]) {
+    if (Array.isArray(s.images) && s.images.length > 0) siteImgMap[s.name] = s.images;
+  }
+
+  let collected=0,skipped=0,fromSites=0;
   for (let i=0;i<targets.length;i+=PARALLEL) {
     if (Date.now()-start>270_000) break;
     await Promise.allSettled(targets.slice(i,i+PARALLEL).map(async(row:any)=>{
+      // apt_sites에 이미지 있으면 복사 (API 호출 절약)
+      if (siteImgMap[row.apt_name]) {
+        await (sb as any).from('apt_complex_profiles').update({
+          images: siteImgMap[row.apt_name],
+          updated_at: new Date().toISOString()
+        }).eq('id', row.id);
+        fromSites++;
+        return;
+      }
+      // apt_sites에 없으면 네이버/카카오 검색
       const imgs=await collect(row.apt_name,row.sigungu||'');
       if (!imgs.length){await (sb as any).from('apt_complex_profiles').update({images:[]}).eq('id',row.id);skipped++;return;}
       await (sb as any).from('apt_complex_profiles').update({
@@ -90,6 +110,6 @@ async function handler(_req: NextRequest) {
     }));
     await new Promise(r=>setTimeout(r,50));
   }
-  return NextResponse.json({processed:targets.length,collected,skipped,elapsed:`${((Date.now()-start)/1000).toFixed(1)}s`});
+  return NextResponse.json({processed:targets.length,collected,fromSites,skipped,elapsed:`${((Date.now()-start)/1000).toFixed(1)}s`});
 }
 export const GET = withCronAuth(handler);
