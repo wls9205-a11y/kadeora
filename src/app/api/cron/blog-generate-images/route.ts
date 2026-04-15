@@ -11,19 +11,45 @@ const NAVER_CLIENT_SECRET = process.env.NAVER_CLIENT_SECRET || '';
 const BATCH = 200;
 
 const CAT_QUERIES: Record<string, string[]> = {
-  stock: ['주식 차트 분석', '증권 거래소', '경제 성장 그래프', '투자 포트폴리오', '금융 데이터'],
-  apt: ['아파트 단지 조감도', '신축 아파트 외관', '아파트 모델하우스', '부동산 분양 현장', '아파트 인테리어'],
-  unsold: ['미분양 아파트', '신축 빈 아파트', '건설 현장 크레인', '분양 모델하우스'],
-  finance: ['재테크 저축', '세금 신고 서류', '투자 금화', '가계부 예산 관리'],
-  economy: ['경제 지표 그래프', 'GDP 성장률', '물가 상승', '경제 전망 분석'],
-  tax: ['세금 계산기', '연말정산 서류', '종합소득세', '세무 상담'],
-  life: ['생활 정보', '공공서비스 안내', '주민센터', '생활비 절약'],
-  general: ['데이터 분석 노트북', '정보 기술', '커뮤니티 미팅'],
+  stock: ['주식 증권 시장 차트', '코스피 주식 거래', '투자 분석 차트', '증권사 트레이딩'],
+  apt: ['아파트 단지 전경', '신축 아파트 외관', '아파트 모델하우스 내부', '분양 현장 조감도'],
+  unsold: ['미분양 아파트 현장', '아파트 건설 현장', '빈 아파트 단지'],
+  finance: ['재테크 저축 은행', '금융 투자 자산관리', '적금 예금 비교'],
+  economy: ['경제 성장 지표 그래프', '한국은행 기준금리', '물가 상승 소비자'],
+  tax: ['세금 연말정산 서류', '종합소득세 신고', '세무사 세금 계산'],
+  redev: ['재개발 재건축 현장', '정비사업 철거 현장', '도시재생 공사'],
+  life: ['생활 정보 서비스', '공공서비스 민원', '생활비 절약 가계부'],
+  general: ['데이터 분석 리포트', '정보 기술 디지털', '온라인 서비스'],
 };
+
+// sub_category별 더 정확한 검색어
+const SUB_CAT_QUERIES: Record<string, string[]> = {
+  '청약·분양': ['청약 모델하우스 분양', '아파트 분양 현장 조감도', '청약 당첨 발표'],
+  '실거래·시세': ['아파트 시세 매매', '부동산 실거래가 변동', '아파트 단지 전경'],
+  '수급분석': ['주식 수급 차트 외국인', '기관 매수 매도 현황', '투자 자금 흐름'],
+  '목표주가': ['증권사 리포트 목표주가', '주식 종목 분석', '애널리스트 전망'],
+  '종목분석': ['주식 종목 재무제표', '기업 실적 발표', '주식 펀더멘탈 분석'],
+  '배당분석': ['배당주 투자 배당금', '배당 수익률 주식', '배당 달력 투자'],
+  '해외주식': ['미국 뉴욕증시 월스트리트', 'NYSE 나스닥 해외주식', 'S&P500 미국 시장'],
+  '국내주식': ['코스피 코스닥 국내주식', '한국 증권시장 거래소', '국내 주식 투자'],
+  '비교분석': ['주식 종목 비교 차트', '투자 수익률 비교 분석', 'PER PBR 밸류에이션'],
+  '재테크일반': ['재테크 자산관리 투자', '목돈 만들기 적금', '금융 상품 비교'],
+  '재개발·재건축': ['재개발 현장 정비사업', '재건축 아파트 철거', '도시정비 사업'],
+  '미분양현황': ['미분양 아파트 빈 단지', '지방 미분양 현황', '분양 시장 전망'],
+  '섹터전망': ['산업 섹터 전망 분석', '반도체 바이오 업종', '테마주 섹터 투자'],
+  '부동산일반': ['부동산 시장 전망', '주택 정책 부동산', '집값 전망 분석'],
+};
+
+// 이미지 URL 블랙리스트 (관련 없는 사이트)
+const IMG_BLOCK_DOMAINS = [
+  'utoimage', 'freepik', 'shutterstock', 'pixabay', 'unsplash', 'istockphoto',
+  'namu.wiki', 'wikipedia', 'youtube.com', 'pinimg.com', 'ohousecdn',
+  'blog.kakaocdn.net/dn/0/', 'tistory.com/image/0/',
+];
 
 const CAT_LABEL: Record<string, string> = {
   stock: '주식', apt: '부동산', unsold: '미분양', finance: '재테크',
-  economy: '경제', tax: '세금', life: '생활', general: '정보',
+  economy: '경제', tax: '세금', life: '생활', general: '정보', redev: '재개발',
 };
 
 async function fetchNaverImages(query: string, count = 10): Promise<{
@@ -51,7 +77,10 @@ async function fetchNaverImages(query: string, count = 10): Promise<{
       .filter((item: any) => {
         const w = parseInt(item.sizewidth || '0');
         const h = parseInt(item.sizeheight || '0');
-        return w >= 400 && h >= 250;
+        if (w < 400 || h < 250) return false;
+        const url = (item.link || '').toLowerCase();
+        if (IMG_BLOCK_DOMAINS.some(d => url.includes(d))) return false;
+        return true;
       })
       .map((item: any) => ({
         url: (item.link || '').replace(/^http:\/\//, 'https://'),
@@ -68,11 +97,21 @@ async function fetchNaverImages(query: string, count = 10): Promise<{
   }
 }
 
-function extractKeywords(title: string, cat: string): string {
-  const clean = title.replace(/[|—·()（）\[\]「」『』""'']/g, ' ').replace(/\d{4}년?/g, '');
-  const words = clean.split(/\s+/).filter(w => w.length >= 2 && w.length <= 10);
+function extractKeywords(title: string, cat: string, subCat?: string): string {
+  // 특수문자 제거하되 한글/영문/숫자 보존
+  const clean = title.replace(/[|—·()（）\[\]「」『』""''%]/g, ' ').replace(/\d{4}년?/g, '');
+  const words = clean.split(/\s+/).filter(w => w.length >= 2 && w.length <= 12);
+  
+  // 핵심 엔티티 추출: 아파트명, 회사명, 지역명 등 (한글 2자 이상 고유명사)
+  const entities = words.filter(w => 
+    /[가-힣]{2,}/.test(w) && 
+    !['분석', '전망', '비교', '가이드', '정리', '요약', '방법', '완벽', '최신', '현황', '이란', '어떻게'].includes(w)
+  ).slice(0, 3);
+  
   const catWord = CAT_LABEL[cat] || '정보';
-  return `${words.slice(0, 3).join(' ')} ${catWord}`;
+  const subWord = subCat ? (SUB_CAT_QUERIES[subCat]?.[0]?.split(' ')[0] || '') : '';
+  
+  return `${entities.join(' ')} ${subWord || catWord}`.trim();
 }
 
 async function handler(_req: NextRequest) {
@@ -113,8 +152,12 @@ async function handler(_req: NextRequest) {
 
     for (const cat of categories) {
       const queries = CAT_QUERIES[cat as string] || CAT_QUERIES.general;
-      const q1 = queries[Math.floor(Math.random() * queries.length)];
-      const q2 = queries[Math.floor(Math.random() * queries.length)];
+      // sub_category별 쿼리도 섞어서 정확도 향상
+      const subCats = Array.from(new Set(posts.filter((p: any) => p.category === cat && p.sub_category).map((p: any) => p.sub_category)));
+      const subQueries = subCats.flatMap(sc => SUB_CAT_QUERIES[sc] || []);
+      const allQueries = [...queries, ...subQueries];
+      const q1 = allQueries[Math.floor(Math.random() * allQueries.length)];
+      const q2 = allQueries[Math.floor(Math.random() * allQueries.length)];
       const [imgs1, imgs2] = await Promise.all([fetchNaverImages(q1, 10), fetchNaverImages(q2, 10)]);
       const seen = new Set<string>();
       catCache[cat] = [...imgs1, ...imgs2].filter(img => {
@@ -135,7 +178,7 @@ async function handler(_req: NextRequest) {
 
       // 제목 기반 검색
       let titleImgs: { url: string; alt: string; caption: string }[] = [];
-      const kw = extractKeywords(post.title, cat);
+      const kw = extractKeywords(post.title, cat, post.sub_category);
       titleImgs = await fetchNaverImages(kw, 5);
       await new Promise(r => setTimeout(r, 50));
 
