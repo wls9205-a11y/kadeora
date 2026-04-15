@@ -87,6 +87,11 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
     }catch{setGRes({ok:0,fail:1,elapsed:'?'});}finally{setGr(false);}
   };
 
+  // 어제 PV (dailyTrend에서 추출)
+  const yesterdayPv = dt.length >= 2 ? dt[dt.length - 2]?.pv || 0 : 0;
+  const pvDelta = yesterdayPv > 0 ? Math.round(((k.pvToday || 0) - yesterdayPv) / yesterdayPv * 100) : 0;
+  const uvToday = td?.uniqueVisitors || 0;
+
   return (
     <div>
       {/* ═══ 1. 헤더: 헬스+KPI+최신화 ═══ */}
@@ -97,9 +102,17 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
             <span style={{fontSize:16,fontWeight:900,color:hsc}}>{hs}</span>
           </div>
         </div>
-        <div style={{flex:1,display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap: 4}}>
-          {[{l:'PV',v:f(k.pvToday||0),c:'#3B7BF6'},{l:'가입',v:`+${k.newUsersToday||0}`,c:'#10B981'},{l:'유저',v:f((k.users||0)+(x.seeds||0)),c:'#CBD5E1'}].map(s=>
-            <div key={s.l} style={{textAlign:'center'}}><div style={{fontSize:14,fontWeight:800,color:s.c,lineHeight:1}}>{s.v}</div><div style={{fontSize:11,color:'rgba(255,255,255,0.35)'}}>{s.l}</div></div>
+        <div style={{flex:1,display:'grid',gridTemplateColumns:'1fr 1fr 1fr 1fr',gap: 4}}>
+          {[
+            {l:'PV',v:f(k.pvToday||0),c:'#3B7BF6',sub:pvDelta!==0?`${pvDelta>0?'+':''}${pvDelta}%`:undefined,sc:pvDelta>=0?'#10B981':'#EF4444'},
+            {l:'UV',v:f(uvToday),c:'#8B5CF6'},
+            {l:'가입',v:`+${k.newUsersToday||0}`,c:'#10B981'},
+            {l:'유저',v:f((k.users||0)+(x.seeds||0)),c:'#CBD5E1'},
+          ].map(s=>
+            <div key={s.l} style={{textAlign:'center'}}>
+              <div style={{fontSize:13,fontWeight:800,color:s.c,lineHeight:1}}>{s.v}</div>
+              <div style={{fontSize:10,color:'rgba(255,255,255,0.35)',marginTop:1}}>{s.l}{s.sub?<span style={{color:s.sc,marginLeft:2,fontSize:9}}>{s.sub}</span>:null}</div>
+            </div>
           )}
         </div>
         <button onClick={godMode} disabled={gr} style={{padding:'7px 10px',borderRadius: 'var(--radius-md)',border:'none',cursor:'pointer',fontSize:13,fontWeight:700,background:gr?'rgba(255,255,255,0.04)':'linear-gradient(135deg,#3B7BF6,#10B981)',color:'#fff',display:'flex',flexDirection:'column',alignItems:'center',gap:1,flexShrink:0}}>
@@ -114,6 +127,18 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
         {crits.map(b=><div key={b.k} style={{fontSize:13,color:'rgba(255,255,255,0.45)',marginBottom:2}}>🔴 {BM[b.k].l} {b.v.toFixed(1)}% (기준 {BM[b.k].g})</div>)}
         {staleList.length>0&&<div style={{fontSize:13,color:'rgba(255,255,255,0.45)'}}>🟠 {staleList.length}개 크론 6h+ 미실행</div>}
         {Object.keys(fc||{}).length>0&&<div style={{fontSize:13,color:'rgba(255,255,255,0.45)'}}>🔴 실패 크론 {Object.keys(fc).length}개</div>}
+      </div>}
+
+      {/* ═══ 2.5 실시간 방문자 피드 ═══ */}
+      {(td?.recentVisitors||[]).length>0&&<div style={{padding:'5px 8px',margin:'4px 0',background:'rgba(59,123,246,0.03)',border:'1px solid rgba(59,123,246,0.08)',borderRadius:'var(--radius-md)'}}>
+        <div style={{fontSize:10,color:'rgba(255,255,255,0.3)',marginBottom:3}}>🔴 실시간</div>
+        {(td?.recentVisitors||[]).slice(0,4).map((v:any,i:number)=>(
+          <div key={i} style={{display:'flex',alignItems:'center',gap:4,padding:'2px 0',fontSize:11,color:'rgba(255,255,255,0.45)'}}>
+            <span style={{fontSize:9,opacity:0.5}}>{v.device==='📱'?'📱':'🖥️'}</span>
+            <span style={{flex:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',color:'rgba(255,255,255,0.6)'}}>{decodeURIComponent(v.path)}</span>
+            <span style={{fontSize:9,color:'rgba(255,255,255,0.2)',flexShrink:0}}>{v.ref&&v.ref!=='—'?v.ref:''}</span>
+          </div>
+        ))}
       </div>}
 
       {/* ═══ 3. 벤치마크 4x2 ═══ */}
@@ -424,10 +449,10 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
           ))}
         </>} p="5px 6px"/>
         <Card ch={<>
-          <div style={{fontSize:12,fontWeight:600,color:'rgba(255,255,255,0.35)',marginBottom:2}}>🎯 가입경로</div>
-          {Object.entries(ss).sort((a:any,b:any)=>b[1]-a[1]).slice(0,4).map(([src,cnt]:[string,any])=>(
-            <div key={src} style={{display:'flex',justifyContent:'space-between',fontSize:12,padding:'4px 0',color:'rgba(255,255,255,0.5)'}}>
-              <span style={{overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',flex:1}}>{src}</span><span style={{fontWeight:600}}>{cnt}</span>
+          <div style={{fontSize:12,fontWeight:600,color:'rgba(255,255,255,0.35)',marginBottom:2}}>📝 콘텐츠</div>
+          {[{l:'블로그',v:k.blogs||0,c:'#8B5CF6'},{l:'새글24h',v:x.newBlogs24||0,c:'#3B7BF6'},{l:'피드오늘',v:g.postsToday||0,c:'#06B6D4'},{l:'이슈발행',v:k.issuePublished||0,c:'#10B981'}].map(feat=>(
+            <div key={feat.l} style={{display:'flex',justifyContent:'space-between',fontSize:12,padding:'4px 0',color:'rgba(255,255,255,0.5)'}}>
+              <span>{feat.l}</span><span style={{fontWeight:600,color:feat.c}}>{f(feat.v)}</span>
             </div>
           ))}
         </>} p="5px 6px"/>
@@ -441,7 +466,7 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
       </div>
 
       {/* ═══ 9. 추이 ═══ */}
-      {dt.length>0&&<Sec t="📈 14일 추이" open={false} ch={
+      {dt.length>0&&<Sec t="📈 14일 추이" open={true} ch={
         <Card ch={<>
           <div style={{display:'flex',alignItems:'flex-end',gap: 4,height:40}}>
             {dt.map((d:any,i:number)=>{const mx=Math.max(...dt.map((x:any)=>x.pv||0),1);
