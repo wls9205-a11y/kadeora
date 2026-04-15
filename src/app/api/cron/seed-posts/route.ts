@@ -487,35 +487,179 @@ export async function GET(req: NextRequest) {
     const postCount = Math.min(randInt(3, 5), availableUsers.length);
     const selectedUsers = pickN(availableUsers, postCount);
 
-    // 동적 데이터 기반 추가 템플릿
+    // ═══ 동적 데이터 기반 추가 템플릿 (v3: 9개 소스, 매일 새 콘텐츠) ═══
     let dynamicTemplates: Template[] = [];
     try {
-      const [{ data: stocks }, { data: apts }] = await Promise.all([
+      const [
+        { data: stocks },
+        { data: apts },
+        { data: blogs },
+        { data: issues },
+        { data: volatileStocks },
+        { data: activeSubs },
+        { data: stockNews },
+        { data: trending },
+        { data: recentDeals },
+      ] = await Promise.all([
+        // 1. 인기 종목 (거래량 TOP)
         admin.from('stock_quotes').select('symbol, name, price, change_pct, currency')
-          .eq('is_active', true).gt('price', 0).order('volume', { ascending: false, nullsFirst: false }).limit(15),
+          .eq('is_active', true).gt('price', 0).order('volume', { ascending: false, nullsFirst: false }).limit(20),
+        // 2. 활발한 단지
         (admin as any).from('apt_sites').select('name, region, sigungu, builder')
           .eq('is_active', true).not('analysis_text', 'is', null)
-          .order('page_views', { ascending: false, nullsFirst: false }).limit(15),
+          .order('page_views', { ascending: false, nullsFirst: false }).limit(20),
+        // 3. 최근 인기 블로그
+        admin.from('blog_posts').select('id, title, slug, category, view_count')
+          .eq('is_published', true).gt('view_count', 3)
+          .gte('created_at', new Date(Date.now() - 3 * 86400000).toISOString())
+          .order('view_count', { ascending: false }).limit(10),
+        // 4. 핫 이슈 (오늘)
+        (admin as any).from('issue_alerts').select('title, category, summary, detected_keywords, final_score')
+          .gte('created_at', new Date(Date.now() - 24 * 3600000).toISOString())
+          .gte('final_score', 45)
+          .order('final_score', { ascending: false }).limit(10),
+        // 5. 급등/급락 종목 (변동률 >5%)
+        admin.from('stock_quotes').select('symbol, name, price, change_pct, currency')
+          .eq('is_active', true).gt('price', 0)
+          .order('change_pct', { ascending: false }).limit(10),
+        // 6. 진행 중 청약 (마감 임박순)
+        (admin as any).from('apt_subscriptions').select('house_nm, region_nm, tot_supply_hshld_co, rcept_endde, constructor_nm, is_price_limit')
+          .gte('rcept_endde', new Date().toISOString().slice(0, 10))
+          .order('rcept_endde', { ascending: true }).limit(10),
+        // 7. 오늘 주식 뉴스
+        (admin as any).from('stock_news').select('title, symbol, source, sentiment_label')
+          .gte('created_at', new Date(Date.now() - 24 * 3600000).toISOString())
+          .order('created_at', { ascending: false }).limit(15),
+        // 8. 트렌딩 키워드
+        (admin as any).from('trending_keywords').select('keyword, heat_score, category, rank')
+          .order('heat_score', { ascending: false }).limit(10),
+        // 9. 최근 실거래 (고가 거래)
+        (admin as any).from('apt_transactions').select('apt_name, region_nm, sigungu, deal_amount, exclusive_area, floor, deal_date')
+          .gte('created_at', new Date(Date.now() - 7 * 86400000).toISOString())
+          .order('deal_amount', { ascending: false }).limit(15),
       ]);
+
+      // ── 소스 1: 인기 종목 → 의견/질문 (2~3개) ──
       if (stocks?.length) {
-        const s = pick(stocks);
-        const p = s.currency === 'USD' ? `$${Number(s.price).toFixed(0)}` : `${Number(s.price).toLocaleString()}원`;
-        const chg = Number(s.change_pct);
-        dynamicTemplates.push({
-          baseKey: `dyn_${s.symbol}`, category: 'stock', type: pick(['question', 'debate'] as ContentType[]),
-          prompt: `${s.name}(${s.symbol}) 현재가 ${p}, ${chg >= 0 ? '+' : ''}${chg.toFixed(1)}%. 이 종목에 대한 의견/질문/고민 글. 데이터 1~2개만 자연스럽게. 180자`,
-          fallback: { title: `${s.name} 어떻게 보세요?`, content: `${s.name} 현재 ${p}인데 ${chg >= 0 ? '오늘 올랐는데' : '오늘 빠졌는데'} 이 가격대가 적정한지 궁금해요` },
-        });
+        for (const s of pickN(stocks as any[], randInt(2, 3))) {
+          const p = s.currency === 'USD' ? `$${Number(s.price).toFixed(0)}` : `${Number(s.price).toLocaleString()}원`;
+          const chg = Number(s.change_pct);
+          dynamicTemplates.push({
+            baseKey: `dyn_stk_${s.symbol}`, category: 'stock', type: pick(['question', 'debate', 'casual'] as ContentType[]),
+            prompt: `${s.name}(${s.symbol}) 현재가 ${p}, ${chg >= 0 ? '+' : ''}${chg.toFixed(1)}%. 이 종목에 대한 의견/질문/고민 글. 일반인 느낌으로 자연스럽게. 150자`,
+            fallback: { title: `${s.name} 어떻게 보세요?`, content: `${s.name} 현재 ${p}인데 ${chg >= 0 ? '오르고 있는데' : '빠지고 있는데'} 다들 어떻게 판단하세요? 의견 듣고 싶어요` },
+          });
+        }
       }
+
+      // ── 소스 2: 급등/급락 종목 → 놀라는 반응 (1~2개) ──
+      if (volatileStocks?.length) {
+        const volFiltered = (volatileStocks as any[]).filter((s: any) => Math.abs(Number(s.change_pct)) > 5);
+        for (const s of pickN(volFiltered, randInt(1, 2)) as any[]) {
+          const chg = Number(s.change_pct);
+          const p = s.currency === 'USD' ? `$${Number(s.price).toFixed(0)}` : `${Number(s.price).toLocaleString()}원`;
+          dynamicTemplates.push({
+            baseKey: `dyn_vol_${s.symbol}`, category: 'stock', type: pick(['news_react', 'casual'] as ContentType[]),
+            prompt: `${s.name} 오늘 ${chg >= 0 ? '+' : ''}${chg.toFixed(1)}% ${chg >= 0 ? '급등' : '급락'}! 놀라는 반응 글. "ㄷㄷ" "무슨 일??" 톤. 120자`,
+            fallback: { title: `${s.name} ${chg >= 0 ? '급등' : '급락'} ${chg.toFixed(0)}%...`, content: `${s.name} 오늘 ${chg >= 0 ? '+' : ''}${chg.toFixed(1)}%?? ${chg >= 0 ? '무슨 호재가 있는 건지' : '무슨 일인지'} 아시는 분? ${p}이면 ${chg >= 0 ? '들어갈 만한' : '물타기 해야 하나'}...` },
+          });
+        }
+      }
+
+      // ── 소스 3: 인기 블로그 → 공유/추천 (2~3개) ──
+      if (blogs?.length) {
+        for (const b of pickN(blogs as any[], randInt(2, 3))) {
+          const catKo = b.category === 'apt' ? '부동산' : b.category === 'stock' ? '주식' : '재테크';
+          dynamicTemplates.push({
+            baseKey: `dyn_blog_${b.id}`, category: 'free', type: 'content' as ContentType,
+            prompt: `카더라 블로그에서 "${b.title.slice(0, 30)}" 글 읽고 유익했다는 자연스러운 후기. ${catKo} 관심자 시점. URL 없이. 150자`,
+            fallback: { title: `이 ${catKo} 글 유익하네요`, content: `카더라 블로그에서 "${b.title.slice(0, 35)}" 읽었는데 정리가 잘 되어있어요. ${catKo} 관심 있으신 분들 한번 읽어보세요. 조회수 ${b.view_count}이면 다들 보고 계신 듯` },
+          });
+        }
+      }
+
+      // ── 소스 4: 핫 이슈 → 반응/질문 (1~2개) ──
+      if (issues?.length) {
+        for (const iss of pickN(issues as any[], randInt(1, 2))) {
+          const keywords = (iss.detected_keywords || []).slice(0, 3).join(', ');
+          const catKo = iss.category === 'apt' ? '부동산' : '주식';
+          dynamicTemplates.push({
+            baseKey: `dyn_iss_${(iss.title || '').slice(0, 8)}`, category: iss.category === 'apt' ? 'apt' : 'stock', type: pick(['news_react', 'question', 'casual'] as ContentType[]),
+            prompt: `"${iss.title.slice(0, 40)}" 뉴스에 대한 일반인 반응. ${keywords} 키워드 자연스럽게 언급. 커뮤니티 글 톤. 150자`,
+            fallback: { title: `${iss.title.slice(0, 35)}...`, content: `${iss.summary ? iss.summary.slice(0, 80) : iss.title}... ${catKo} 시장에 영향 있을까요? 다들 어떻게 보세요?` },
+          });
+        }
+      }
+
+      // ── 소스 5: 활발한 단지 → 청약/투자 질문 (1~2개) ──
       if (apts?.length) {
-        const a: any = pick(apts);
-        dynamicTemplates.push({
-          baseKey: `dyn_${(a.name || '').slice(0, 6)}`, category: 'apt', type: pick(['question', 'review'] as ContentType[]),
-          prompt: `${a.region} ${a.sigungu || ''} ${a.name} (${a.builder || '시공사 미정'}) 관련 실수요자/투자자 관점 글. 180자`,
-          fallback: { title: `${a.name} 어떠세요?`, content: `${a.region} ${a.sigungu || ''} ${a.name} 관심 있는 분? ${a.builder || '시공사'} 시공인데 입지 어떤지 궁금해요` },
-        });
+        for (const a of pickN(apts as any[], randInt(1, 2))) {
+          dynamicTemplates.push({
+            baseKey: `dyn_apt_${(a.name || '').slice(0, 6)}`, category: 'apt', type: pick(['question', 'review', 'casual'] as ContentType[]),
+            prompt: `${a.region} ${a.sigungu || ''} ${a.name} (${a.builder || '시공사 미정'}) 관련 실수요자/투자자 관점 글. 180자`,
+            fallback: { title: `${a.name} 관심 있는 분?`, content: `${a.region} ${a.sigungu || ''} ${a.name} 어떠세요? ${a.builder || ''} 시공이고 입지 궁금한데 주변 시세 대비 어떤지 아시는 분?` },
+          });
+        }
       }
-    } catch {}
+
+      // ── 소스 6: 청약 마감 임박 → D-day 긴박감 (1~2개) ──
+      if (activeSubs?.length) {
+        for (const sub of pickN(activeSubs as any[], randInt(1, 2))) {
+          const endDate = new Date(sub.rcept_endde);
+          const dDay = Math.ceil((endDate.getTime() - Date.now()) / 86400000);
+          const units = sub.tot_supply_hshld_co ? `${sub.tot_supply_hshld_co}세대` : '';
+          const builder = sub.constructor_nm || '';
+          const priceLim = sub.is_price_limit ? '분양가상한제' : '';
+          dynamicTemplates.push({
+            baseKey: `dyn_sub_${(sub.house_nm || '').slice(0, 6)}`, category: 'apt', type: pick(['question', 'casual', 'news_react'] as ContentType[]),
+            prompt: `${sub.region_nm} ${sub.house_nm} 청약 마감 D-${dDay}! ${units} ${builder} ${priceLim}. "넣을까 말까" 고민하는 글. 150자`,
+            fallback: { title: `${sub.house_nm} 청약 D-${dDay}인데 넣어요?`, content: `${sub.region_nm} ${sub.house_nm} 청약 마감이 ${dDay}일 남았어요. ${units} ${builder ? builder + ' 시공' : ''}${priceLim ? ', ' + priceLim : ''}인데 경쟁률 어떻게 나올지... 넣으신 분?` },
+          });
+        }
+      }
+
+      // ── 소스 7: 주식 뉴스 → 반응/질문 (1~2개) ──
+      if (stockNews?.length) {
+        for (const news of pickN(stockNews as any[], randInt(1, 2))) {
+          const sentimentKo = news.sentiment_label === 'positive' ? '호재' : news.sentiment_label === 'negative' ? '악재' : '뉴스';
+          dynamicTemplates.push({
+            baseKey: `dyn_news_${(news.title || '').slice(0, 8)}`, category: 'stock', type: pick(['news_react', 'question', 'casual'] as ContentType[]),
+            prompt: `"${news.title.slice(0, 40)}" ${sentimentKo} 뉴스에 대한 일반인 반응. ${news.symbol ? news.symbol + ' 관련' : ''}. "이거 보셨어요?" 톤. 130자`,
+            fallback: { title: `${news.title.slice(0, 30)}...`, content: `방금 ${news.source || '뉴스'}에서 "${news.title.slice(0, 35)}" 봤는데 ${sentimentKo}인 것 같은데 다들 어떻게 보세요?` },
+          });
+        }
+      }
+
+      // ── 소스 8: 트렌딩 키워드 → 관심/질문 (1~2개) ──
+      if (trending?.length) {
+        for (const t of pickN(trending as any[], randInt(1, 2))) {
+          const catKo = t.category === 'apt' ? '부동산' : t.category === 'stock' ? '주식' : '경제';
+          dynamicTemplates.push({
+            baseKey: `dyn_trend_${t.keyword?.slice(0, 6)}`, category: t.category === 'apt' ? 'apt' : 'stock', type: pick(['question', 'casual', 'debate'] as ContentType[]),
+            prompt: `요즘 "${t.keyword}" 많이 검색되고 있는데 이유가 뭔지 궁금해하는 글. ${catKo} 관심자 시점. 130자`,
+            fallback: { title: `요즘 "${t.keyword}" 왜 핫한가요?`, content: `${catKo} 쪽에서 "${t.keyword}" 검색량이 올라가고 있는데 무슨 이유인지 아시는 분? 뉴스를 놓친 건지...` },
+          });
+        }
+      }
+
+      // ── 소스 9: 실거래 고가 거래 → 놀라는 반응 (1~2개) ──
+      if (recentDeals?.length) {
+        for (const deal of pickN(recentDeals as any[], randInt(1, 2))) {
+          const amount = Number(deal.deal_amount);
+          const amountStr = amount >= 10000 ? `${(amount / 10000).toFixed(1)}억` : `${amount.toLocaleString()}만원`;
+          const area = deal.exclusive_area ? `${Math.round(Number(deal.exclusive_area))}㎡` : '';
+          dynamicTemplates.push({
+            baseKey: `dyn_deal_${(deal.apt_name || '').slice(0, 6)}`, category: 'apt', type: pick(['news_react', 'casual', 'question'] as ContentType[]),
+            prompt: `${deal.region_nm || ''} ${deal.sigungu || ''} ${deal.apt_name} ${area} ${amountStr}에 거래됐다는 소식 반응. "이 가격 실화?" 톤. 130자`,
+            fallback: { title: `${deal.apt_name} ${amountStr} 실거래??`, content: `${deal.region_nm || ''} ${deal.apt_name} ${area}가 ${amountStr}에 거래됐다는데... ${deal.floor ? deal.floor + '층' : ''} 이 가격이면 우리 동네랑 비교하면 어떤 수준인지 궁금하네요` },
+          });
+        }
+      }
+
+      console.log(`[seed-posts] dynamic templates: ${dynamicTemplates.length} (stocks:${stocks?.length || 0}, blogs:${blogs?.length || 0}, issues:${issues?.length || 0}, apts:${apts?.length || 0}, subs:${activeSubs?.length || 0}, news:${stockNews?.length || 0}, trends:${trending?.length || 0}, deals:${recentDeals?.length || 0})`);
+    } catch (e) {
+      console.warn('[seed-posts] dynamic template error:', (e as Error).message);
+    }
 
     const allTemplates = [...getTemplates(), ...dynamicTemplates];
     const results: any[] = [];
