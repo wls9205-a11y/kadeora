@@ -151,7 +151,7 @@ function getTemplates(): Template[] {
     fallback: { title: 'TIL: 시간외 거래가 가능하다고?', content: '장 끝나고도 시간외 거래 가능한 거 오늘 처음 알았어요. 장 마감 후 뉴스 나오면 바로 대응 가능. 왜 이제 알았지...' }},
   { baseKey: 'stk_til_isa', category: 'stock', type: 'til',
     prompt: '"오늘 알게 된 것: ISA 비과세 혜택" TIL. 150자',
-    fallback: { title: 'TIL: ISA 계좌가 이렇게 좋았어?', content: 'ISA 200만원까지 비과세, 초과분 9.9% 분리과세. 일반 계좌 15.4%보다 훨씬 낫네요. 바로 가입함' }},
+    fallback: { title: 'TIL: ISA 계좌가 이렇게 좋았어?', content: 'ISA 비과세 혜택이 생각보다 크더라고요. 일반 계좌보다 세금이 확 줄어요. 아직 안 만든 분들 빨리 가입하세요' }},
 
   // ═══ 부동산 — 토론 ═══
   { baseKey: 'apt_buy_rent', category: 'apt', type: 'debate',
@@ -187,7 +187,7 @@ function getTemplates(): Template[] {
     fallback: { title: 'DSR, LTV 이게 다 뭔가요?', content: 'DSR 40%, LTV 70% 이런 말만 하는데 무슨 뜻이에요? 대출 얼마까지 받을 수 있는지 계산 방법을 모르겠어요' }},
   { baseKey: 'apt_area_q', category: 'apt', type: 'question',
     prompt: '특정 지역 부동산 전망/이사 고민 질문. 130자',
-    fallback: { title: '출퇴근 1시간 이내 지역 추천 좀', content: '직장이 강남인데 전세 3억대로 출퇴근 1시간 이내 어디가 좋을까요? 신혼이라 학군은 상관없고 교통 최우선이에요' }},
+    fallback: { title: '출퇴근 1시간 이내 지역 추천 좀', content: '직장이 강남인데 전세 부담 적으면서 출퇴근 1시간 이내 어디가 좋을까요? 신혼이라 학군은 상관없고 교통 최우선이에요' }},
 
   // ═══ 부동산 — 후기 ═══
   { baseKey: 'apt_move_review', category: 'apt', type: 'review',
@@ -198,12 +198,12 @@ function getTemplates(): Template[] {
     fallback: { title: '청약 4번 만에 당첨!', content: '3번 미당첨이라 포기할까 했는데 4번째에 특공으로 당첨! 포기하지 마세요. 가점 낮아도 특공 조건 맞으면 승산 있어요' }},
   { baseKey: 'apt_remodel_review', category: 'apt', type: 'review',
     prompt: '셀프 인테리어 후기. 예산, 기간, 만족도 포함. 180자',
-    fallback: { title: '셀프 인테리어 후기 (예산 800만원)', content: '도배+장판+주방 싱크대+욕실 교체 총 800만원. 업자 맡기면 1,500이었는데 유튜브 보고 도배는 직접 했어요. 3주 걸렸지만 만족도 200%' }},
+    fallback: { title: '셀프 인테리어 후기', content: '도배+장판+주방+욕실 교체 직접 했더니 업자 맡기는 것 대비 거의 반값. 유튜브 보고 도배는 직접 했어요. 힘들었지만 만족도 최고' }},
 
   // ═══ 부동산 — 계산 ═══
   { baseKey: 'apt_rent_calc', category: 'apt', type: 'calc',
     prompt: '"전세 3억 vs 매매 5억" 월 비용 비교 계산. 구체적 숫자. 200자',
-    fallback: { title: '전세 3억 vs 매매 5억, 실제 월 비용', content: '전세 3억: 보증보험 15만 + 관리비 20만 = 월 35만\n매매 5억(대출 2억 3.5%): 이자 58만 + 관리비 20만 = 월 78만\n\n차액 월 43만원. 이게 자산 축적의 대가인 건가요?' }},
+    fallback: { title: '전세 vs 매매, 월 비용 차이 얼마나?', content: '전세 유지하면 보증보험+관리비만 내면 되는데, 매매하면 대출이자가 추가로 나가잖아요. 월 비용 차이가 꽤 크던데 다들 어떻게 판단하셨어요?' }},
 
   // ═══ 재테크/일상 — 토론 ═══
   { baseKey: 'free_save_debate', category: 'free', type: 'debate',
@@ -267,7 +267,7 @@ function getTemplates(): Template[] {
   // ═══ 뉴스 반응 ═══
   { baseKey: 'news_inflation', category: 'free', type: 'news_react',
     prompt: `물가 상승 뉴스 반응. "${month}월 장보면 깜짝 놀란다" 톤. 130자`,
-    fallback: { title: '마트 가면 깜짝 놀라요 요즘', content: `계란 한판 만원, 과일은 금값. ${month}월 물가가 또 올랐다는데 체감이 뉴스보다 심해요. 장볼 때 절약법 있으면 공유해주세요` }},
+    fallback: { title: '마트 가면 깜짝 놀라요 요즘', content: `요즘 장보면 계란이랑 과일값이 장난 아니에요. 물가가 체감상 뉴스보다 더 심한 느낌. 다들 장볼 때 절약법 있으면 공유해주세요` }},
   { baseKey: 'news_interest', category: 'free', type: 'news_react',
     prompt: '금리 뉴스 반응. 대출 이자 걱정. 130자',
     fallback: { title: '금리 뉴스 볼 때마다 심장이 철렁', content: '기준금리 동결인데 대출 이자는 왜 높죠? 변동금리 받은 사람들 힘들 것 같아요. 고정금리로 갈아타야 하나' }},
@@ -321,13 +321,13 @@ function getTemplates(): Template[] {
     fallback: { title: '청약 가점 계산해봤는데 충격', content: '카더라에서 청약 가점 계산기 돌려봤더니 42점... 생각보다 훨씬 낮았어요. 무주택 기간은 길어도 부양가족이 적으니 ㅠ 다들 가점 몇 점이세요?' }},
   { baseKey: 'ctn_calc_dsr', category: 'apt', type: 'content',
     prompt: '카더라 DSR 계산기 써본 후기. "대출 한도가 생각보다 적다" 톤. 130자',
-    fallback: { title: 'DSR 계산해보니 대출 한도가...', content: 'DSR 계산기 돌려봤는데 연봉 5천이면 대출 한도가 이 정도밖에? 집값에 비하면 턱없이 부족. 현실 파악 됐습니다 ㅠ' }},
+    fallback: { title: 'DSR 계산해보니 대출 한도가...', content: 'DSR 계산기 돌려봤는데 내 연봉 기준 대출 한도가 생각보다 적어요. 집값에 비하면 턱없이 부족. 현실 파악 됐습니다 ㅠ' }},
   { baseKey: 'ctn_calc_roi', category: 'stock', type: 'content',
     prompt: '카더라 주식 수익률 계산기로 계산해본 결과. "복리의 위력" 톤. 130자',
     fallback: { title: '수익률 계산기 돌려보니 소름', content: '매달 30만원씩 연 8% 20년이면 1.7억? 카더라 수익률 계산기로 돌려봤는데 복리의 힘이 진짜 무섭네요. 조금이라도 빨리 시작하는 게 답' }},
   { baseKey: 'ctn_calc_fee', category: 'apt', type: 'content',
     prompt: '중개수수료 계산기 써본 후기. "수수료가 이렇게 비싸?" 반응. 120자',
-    fallback: { title: '중개수수료 계산해보니 500만원??', content: '5억 아파트 매매 시 중개수수료 계산해봤더니 400만원 넘음... 이게 맞나요? 법정 요율이 이렇게 높을 줄 몰랐어요' }},
+    fallback: { title: '중개수수료 계산해보니 깜짝 놀람', content: '매매 중개수수료 계산기로 돌려봤는데 생각보다 많이 나와요. 법정 요율이 이렇게 높을 줄 몰랐는데 다들 수수료 협의하세요?' }},
   { baseKey: 'ctn_stock_compare', category: 'stock', type: 'content',
     prompt: '카더라에서 종목 비교 기능 써본 후기. 삼성 vs SK하이닉스 비교하면서. 150자',
     fallback: { title: '삼성전자 vs SK하이닉스 비교해봤어요', content: '카더라에서 종목 비교해봤는데 PER, PBR, 배당수익률 한눈에 비교 되더라고요. 삼성은 저평가, 하이닉스는 성장성... 어려워요' }},
@@ -345,7 +345,7 @@ function getTemplates(): Template[] {
     fallback: { title: '청약 알림 받아서 접수했어요!', content: '관심 지역 청약 일정 알림 설정해놨더니 딱 맞춰서 알려주네요. 이번에 놓칠 뻔한 거 알림 덕분에 접수함. 알림 꼭 켜놓으세요' }},
   { baseKey: 'ctn_calc_salary', category: 'free', type: 'content',
     prompt: '실수령액 계산기 써본 후기. 연봉 대비 실수령액 차이에 놀란 톤. 120자',
-    fallback: { title: '연봉 5000이면 실수령 얼마인지 아세요?', content: '실수령액 계산기 돌려봤는데 연봉 5000만원이면 월 실수령 345만원... 세금이 이렇게 많이 나가는 줄 몰랐어요. 현타 옵니다' }},
+    fallback: { title: '내 연봉 실수령 얼마인지 아세요?', content: '실수령액 계산기 돌려봤는데 생각보다 세금이 많이 나가네요. 4대보험+소득세 빼면 진짜 현타 옵니다. 다들 한번 계산해보세요' }},
   { baseKey: 'ctn_unsold_check', category: 'apt', type: 'content',
     prompt: '카더라에서 미분양 현황 확인한 후기. "이 지역은 미분양이 이렇게 많아?" 톤. 130자',
     fallback: { title: '미분양 현황 확인해봤는데 지방은...', content: '카더라에서 미분양 현황 봤는데 지방 미분양이 아직 많더라고요. 수도권은 괜찮은데 지방 투자는 좀 더 신중해야 할 듯' }},
@@ -430,8 +430,15 @@ async function generateWithAI(prompt: string, tone: string): Promise<{ title: st
       body: JSON.stringify({
         model: MODEL, max_tokens: 400,
         system: `한국 부동산/주식/재테크 커뮤니티의 일반 유저로서 글을 작성합니다.
+오늘 날짜: ${new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long', timeZone: 'Asia/Seoul' })}
 말투: ${tone}
-규칙: 진짜 일반인처럼 자연스럽게. URL/링크/해시태그 절대 금지. 이모지 1~2개 이내.
+규칙:
+- 진짜 일반인처럼 자연스럽게
+- URL/링크/해시태그 절대 금지
+- 이모지 1~2개 이내
+- 구체적 날짜(2024년, 2025년, 작년 등)나 특정 가격(~만원, ~억)을 확정적으로 쓰지 마세요
+- 시세/금리/물가 등 변동 가능한 수치는 "요즘", "최근", "현재 기준" 같은 표현 사용
+- 과거 뉴스나 이벤트를 지금 일어나는 것처럼 쓰지 마세요
 출력형식:
 제목: (30자 이내, "제목:" 접두사 포함)
 ---
@@ -463,6 +470,12 @@ export async function GET(req: NextRequest) {
   if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const result = await withCronLogging('seed-posts', async () => {
+    // KST 0~6시(야간)는 스킵
+    const kstHour = (new Date().getUTCHours() + 9) % 24;
+    if (kstHour >= 0 && kstHour < 7) {
+      return { processed: 0, created: 0, failed: 0, metadata: { skipped: 'sleeping_hours', kstHour } };
+    }
+
     const admin = getSupabaseAdmin();
     const { data: rawUsers } = await admin.from('profiles').select('id, nickname, age_group, gender, region_text').eq('is_seed', true);
     const seedUsers: SeedUser[] = (rawUsers || []).map((u: any) => ({
@@ -484,7 +497,7 @@ export async function GET(req: NextRequest) {
     const availableUsers = seedUsers.filter(u => !recentAuthorIds.has(u.id));
     if (availableUsers.length === 0) return { processed: 0, created: 0, failed: 0, metadata: { reason: 'all_users_posted_today' } };
 
-    const postCount = Math.min(randInt(3, 5), availableUsers.length);
+    const postCount = Math.min(randInt(4, 5), availableUsers.length);
     const selectedUsers = pickN(availableUsers, postCount);
 
     // ═══ 동적 데이터 기반 추가 템플릿 (v3: 9개 소스, 매일 새 콘텐츠) ═══
