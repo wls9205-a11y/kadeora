@@ -452,7 +452,7 @@ async function generateWithAI(prompt: string, tone: string): Promise<{ title: st
     if (!text) return null;
     const parts = text.split('---');
     if (parts.length >= 2) {
-      const title = parts[0].replace(/^제목:\s*/i, '').trim().slice(0, 50);
+      const title = parts[0].replace(/^[\s\n]*제목[:\s]*/i, '').trim().slice(0, 50);
       const content = parts.slice(1).join('---').trim();
       if (title && content) return { title, content };
     }
