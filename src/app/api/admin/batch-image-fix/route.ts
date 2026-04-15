@@ -52,7 +52,7 @@ async function doComplex(sb:any, limit:number) {
     const imgs=await naver(`${r.apt_name} ${r.sigungu||''} 아파트`,5);
     await new Promise(r=>setTimeout(r,110));
     if(!imgs.length){fail++;continue;}
-    const arr=imgs.map(i=>({url:i.url,source:'naver',caption:i.alt,thumbnail:i.thumb||i.url,collected_at:new Date().toISOString()}));
+    const arr=imgs.map((i:any)=>({url:i.url,source:'naver',caption:i.alt,thumbnail:i.thumb||i.url,collected_at:new Date().toISOString()}));
     const {error:e}=await sb.from('apt_complex_profiles').update({images:arr}).eq('id',r.id);
     if(!e) ok++; else fail++;
   }
@@ -74,7 +74,7 @@ async function doSites(sb:any, limit:number) {
     const imgs=await naver(`${r.name} ${r.district||r.region||''} 아파트`,5);
     await new Promise(r=>setTimeout(r,110));
     if(!imgs.length){fail++;continue;}
-    const arr=imgs.map(i=>({url:i.url,source:'naver',caption:i.alt,thumbnail:i.thumb||i.url,collected_at:new Date().toISOString()}));
+    const arr=imgs.map((i:any)=>({url:i.url,source:'naver',caption:i.alt,thumbnail:i.thumb||i.url,collected_at:new Date().toISOString()}));
     const upd:any={images:arr};
     const {error:e}=await (sb as any).from('apt_sites').update(upd).eq('id',r.id);
     if(!e) ok++; else fail++;
