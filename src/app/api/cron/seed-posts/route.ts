@@ -42,19 +42,20 @@ const TONE: Record<string, string> = {
   '50대_female': '"~했어요" "~이더라고요". 따뜻+정감',
 };
 
-type ContentType = 'debate' | 'tip' | 'review' | 'question' | 'calc' | 'humor' | 'news_react' | 'til' | 'series' | 'casual';
+type ContentType = 'debate' | 'tip' | 'review' | 'question' | 'calc' | 'humor' | 'news_react' | 'til' | 'series' | 'casual' | 'content';
 
 const TYPE_WEIGHTS: Record<ContentType, { weight: number; hours: number[] }> = {
-  debate:     { weight: 12, hours: [19, 20, 21, 22] },
-  tip:        { weight: 15, hours: [] },
-  review:     { weight: 10, hours: [18, 19, 20, 21] },
-  question:   { weight: 15, hours: [] },
-  calc:       { weight: 8,  hours: [9, 10, 11, 14, 15, 16] },
+  debate:     { weight: 10, hours: [19, 20, 21, 22] },
+  tip:        { weight: 12, hours: [] },
+  review:     { weight: 8,  hours: [18, 19, 20, 21] },
+  question:   { weight: 12, hours: [] },
+  calc:       { weight: 6,  hours: [9, 10, 11, 14, 15, 16] },
   humor:      { weight: 10, hours: [12, 13, 18, 19] },
-  news_react: { weight: 10, hours: [8, 9, 10, 17, 18] },
-  til:        { weight: 8,  hours: [20, 21, 22] },
-  series:     { weight: 4,  hours: [] },
-  casual:     { weight: 8,  hours: [7, 8, 12, 13, 22, 23] },
+  news_react: { weight: 8,  hours: [8, 9, 10, 17, 18] },
+  til:        { weight: 6,  hours: [20, 21, 22] },
+  series:     { weight: 3,  hours: [] },
+  casual:     { weight: 15, hours: [] },
+  content:    { weight: 14, hours: [] },
 };
 
 interface Template {
@@ -281,6 +282,76 @@ function getTemplates(): Template[] {
   { baseKey: `series_apt_n${Math.floor(Math.random() * 10) + 1}`, category: 'apt', type: 'series',
     prompt: `"부린이 탐방기 #${Math.floor(Math.random() * 10) + 1}" 형식. 모델하우스 방문 후기. 150자`,
     fallback: { title: `부린이 탐방기 #${Math.floor(Math.random() * 10) + 1}`, content: '첫 모델하우스 방문. 분위기에 휩쓸려 청약 넣을 뻔 ㅋㅋ 냉정하게 분석해야 하는데 인테리어 보면 마음이 흔들리네요' }},
+
+  // ═══ 일상 추가 (casual) ═══
+  { baseKey: 'casual_coffee_cost', category: 'free', type: 'casual',
+    prompt: '카페 커피값 올랐다는 일상 뻘글. 100자',
+    fallback: { title: '카페 커피 또 올랐어요', content: '아아 5,500원이 기본인 세상... 텀블러 들고 다니기 시작했어요. 다들 커피 어떻게 절약하세요?' }},
+  { baseKey: 'casual_weather_money', category: 'free', type: 'casual',
+    prompt: '날씨+돈 연결 뻘글. "비 오면 택시비" 류. 100자',
+    fallback: { title: '비 올 때마다 지갑이 운다', content: '비 오면 택시비, 우산값, 빨래건조기 전기세... 날씨도 돈이더라고요. 장마 오면 진짜 큰일' }},
+  { baseKey: 'casual_weekend_plan', category: 'free', type: 'casual',
+    prompt: '주말 자기계발 vs 쉬기 고민. 100자',
+    fallback: { title: '주말에 공부 vs 쉬기', content: '주중에는 "주말에 공부해야지" → 금요일 밤 "일단 쉬자" → 일요일 밤 "다음 주 주말엔..." 매주 반복 중' }},
+  { baseKey: 'casual_delivery', category: 'free', type: 'casual',
+    prompt: '배달비 비싸다는 뻘글. 100자',
+    fallback: { title: '배달비가 음식값이랑 맞먹네요', content: '치킨 19,000원 + 배달비 4,000원... 직접 포장하러 가야 하나. 다들 배달 많이 시키세요 아니면 직접 가세요?' }},
+  { baseKey: 'casual_sleep', category: 'free', type: 'casual',
+    prompt: '수면 패턴 뻘글. 잠이 부족하다는. 80자',
+    fallback: { title: '요즘 잠을 너무 못 자요', content: '새벽 1시에 눕는데 3시까지 잠이 안 옴. 스마트폰 때문인가... 수면 루틴 있으신 분?' }},
+  { baseKey: 'casual_hobby_money', category: 'free', type: 'casual',
+    prompt: '취미에 돈 쓰는 게 아까운지 토론. 120자',
+    fallback: { title: '취미에 돈 쓰는 거 아깝나요?', content: '운동, 게임, 여행... 취미비가 만만찮은데 다들 한 달에 취미비 얼마나 쓰세요? 아예 안 쓰는 분도 있나요' }},
+  { baseKey: 'casual_grocery', category: 'free', type: 'casual',
+    prompt: '장보기 물가 충격 뻘글. 100자',
+    fallback: { title: '마트 장바구니 10만원이 기본이네요', content: '대파 한 단 2,500원, 계란 한 판 8,000원... 예전에 5만원이면 한 주 먹었는데. 물가가 진짜 무섭다' }},
+  { baseKey: 'casual_saving_goal', category: 'free', type: 'casual',
+    prompt: '저축 목표 공유 뻘글. "올해 목표 1000만원" 류. 100자',
+    fallback: { title: '올해 저축 목표 1000만원인데...', content: '4월인데 아직 200만원 모았어요. 속도가 안 나요 ㅠ 다들 연간 저축 목표 얼마로 잡으세요?' }},
+  { baseKey: 'casual_commute', category: 'free', type: 'casual',
+    prompt: '출퇴근 고충 뻘글. 100자',
+    fallback: { title: '출퇴근 1시간 30분 버티는 중', content: '편도 1시간 30분이면 하루 3시간을 길에서 보내는 건데... 이사 가야 하나 차를 사야 하나. 다들 출퇴근 시간이 어떠세요?' }},
+  { baseKey: 'casual_ott_cost', category: 'free', type: 'casual',
+    prompt: 'OTT 구독 정리 뻘글. 넷플+유튜브+웨이브 등. 100자',
+    fallback: { title: 'OTT 구독료만 월 5만원 ㅋㅋ', content: '넷플 17,000 + 유튜브프리미엄 14,900 + 쿠팡플레이... 정리해야 하는데 다 쓰고 있어서 뭘 끊을지 모르겠다' }},
+
+  // ═══ 콘텐츠 언급 (content) — 카더라 기능 자연스럽게 노출 ═══
+  { baseKey: 'ctn_calc_score', category: 'apt', type: 'content',
+    prompt: '카더라 청약 가점 계산기를 써봤다는 후기. "생각보다 점수가 낮아서 충격" 느낌. 130자',
+    fallback: { title: '청약 가점 계산해봤는데 충격', content: '카더라에서 청약 가점 계산기 돌려봤더니 42점... 생각보다 훨씬 낮았어요. 무주택 기간은 길어도 부양가족이 적으니 ㅠ 다들 가점 몇 점이세요?' }},
+  { baseKey: 'ctn_calc_dsr', category: 'apt', type: 'content',
+    prompt: '카더라 DSR 계산기 써본 후기. "대출 한도가 생각보다 적다" 톤. 130자',
+    fallback: { title: 'DSR 계산해보니 대출 한도가...', content: 'DSR 계산기 돌려봤는데 연봉 5천이면 대출 한도가 이 정도밖에? 집값에 비하면 턱없이 부족. 현실 파악 됐습니다 ㅠ' }},
+  { baseKey: 'ctn_calc_roi', category: 'stock', type: 'content',
+    prompt: '카더라 주식 수익률 계산기로 계산해본 결과. "복리의 위력" 톤. 130자',
+    fallback: { title: '수익률 계산기 돌려보니 소름', content: '매달 30만원씩 연 8% 20년이면 1.7억? 카더라 수익률 계산기로 돌려봤는데 복리의 힘이 진짜 무섭네요. 조금이라도 빨리 시작하는 게 답' }},
+  { baseKey: 'ctn_calc_fee', category: 'apt', type: 'content',
+    prompt: '중개수수료 계산기 써본 후기. "수수료가 이렇게 비싸?" 반응. 120자',
+    fallback: { title: '중개수수료 계산해보니 500만원??', content: '5억 아파트 매매 시 중개수수료 계산해봤더니 400만원 넘음... 이게 맞나요? 법정 요율이 이렇게 높을 줄 몰랐어요' }},
+  { baseKey: 'ctn_stock_compare', category: 'stock', type: 'content',
+    prompt: '카더라에서 종목 비교 기능 써본 후기. 삼성 vs SK하이닉스 비교하면서. 150자',
+    fallback: { title: '삼성전자 vs SK하이닉스 비교해봤어요', content: '카더라에서 종목 비교해봤는데 PER, PBR, 배당수익률 한눈에 비교 되더라고요. 삼성은 저평가, 하이닉스는 성장성... 어려워요' }},
+  { baseKey: 'ctn_apt_analysis', category: 'apt', type: 'content',
+    prompt: '카더라 단지 분석 기능 써본 후기. 관심 단지의 분석 데이터가 유용했다는 느낌. 150자',
+    fallback: { title: '우리 동네 단지 분석 결과 봤는데', content: '카더라에서 우리 동네 아파트 분석해봤는데 교통점수, 학군점수 등 점수가 나오더라고요. 생각보다 학군이 약한 거 알고 충격' }},
+  { baseKey: 'ctn_blog_useful', category: 'free', type: 'content',
+    prompt: '카더라 블로그 글이 유용했다는 후기. 청약이나 주식 가이드 읽고 도움 된 느낌. 120자',
+    fallback: { title: '블로그에서 읽은 청약 가이드 완전 유용', content: '청약 일정이랑 전략을 정리한 글 읽었는데 완전 쉽게 설명돼있어서 좋았어요. 초보한테 딱이에요. 블로그 자주 들어가게 됨' }},
+  { baseKey: 'ctn_apt_trade', category: 'apt', type: 'content',
+    prompt: '카더라에서 실거래가 확인한 후기. "옆 단지가 이 가격에 팔렸다고?" 반응. 130자',
+    fallback: { title: '옆 단지 실거래가 보고 깜짝 놀람', content: '카더라에서 동네 실거래가 검색해봤는데 옆 단지가 2달 전에 이 가격에 거래? 우리 단지랑 2억 차이나는데 왜지... 신기하네요' }},
+  { baseKey: 'ctn_sub_alert', category: 'apt', type: 'content',
+    prompt: '카더라 청약 일정 알림이 유용하다는 글. "놓칠 뻔한 청약 알림 받아서 넣었다" 느낌. 130자',
+    fallback: { title: '청약 알림 받아서 접수했어요!', content: '관심 지역 청약 일정 알림 설정해놨더니 딱 맞춰서 알려주네요. 이번에 놓칠 뻔한 거 알림 덕분에 접수함. 알림 꼭 켜놓으세요' }},
+  { baseKey: 'ctn_calc_salary', category: 'free', type: 'content',
+    prompt: '실수령액 계산기 써본 후기. 연봉 대비 실수령액 차이에 놀란 톤. 120자',
+    fallback: { title: '연봉 5000이면 실수령 얼마인지 아세요?', content: '실수령액 계산기 돌려봤는데 연봉 5000만원이면 월 실수령 345만원... 세금이 이렇게 많이 나가는 줄 몰랐어요. 현타 옵니다' }},
+  { baseKey: 'ctn_unsold_check', category: 'apt', type: 'content',
+    prompt: '카더라에서 미분양 현황 확인한 후기. "이 지역은 미분양이 이렇게 많아?" 톤. 130자',
+    fallback: { title: '미분양 현황 확인해봤는데 지방은...', content: '카더라에서 미분양 현황 봤는데 지방 미분양이 아직 많더라고요. 수도권은 괜찮은데 지방 투자는 좀 더 신중해야 할 듯' }},
+  { baseKey: 'ctn_feed_good', category: 'free', type: 'content',
+    prompt: '카더라 커뮤니티에서 좋은 정보 얻었다는 글. 자연스럽게. 100자',
+    fallback: { title: '여기 커뮤니티 진짜 유익하네요', content: '부동산이랑 주식 정보를 한곳에서 보니까 편하고, 댓글에서도 배우는 게 많아요. 다들 적극적으로 공유해주시면 좋겠어요!' }},
 ];
 }
 
@@ -321,6 +392,12 @@ const COMMENTS: Record<string, Record<string, string[]>> = {
     '30대': ['공감합니다', '좋은 글이에요', '참고할게요'],
     '40대': ['좋은 정보네요', '공감합니다'],
     '50대': ['감사합니다', '좋은 글이네요'],
+  },
+  content: {
+    '20대': ['오 이거 나도 써봐야지', '저장!', '바로 해봄 ㅋㅋ', '이거 몰랐는데 대박'],
+    '30대': ['좋은 정보 감사합니다', '저도 써봤는데 유용해요', '공유 감사합니다', '바로 확인해봐야겠네요'],
+    '40대': ['실용적인 정보네요', '이런 기능이 있었군요', '잘 활용해야겠습니다'],
+    '50대': ['유익한 정보 감사합니다', '좋은 도구네요'],
   },
 };
 
@@ -407,7 +484,7 @@ export async function GET(req: NextRequest) {
     const availableUsers = seedUsers.filter(u => !recentAuthorIds.has(u.id));
     if (availableUsers.length === 0) return { processed: 0, created: 0, failed: 0, metadata: { reason: 'all_users_posted_today' } };
 
-    const postCount = Math.min(randInt(2, 3), availableUsers.length);
+    const postCount = Math.min(randInt(3, 5), availableUsers.length);
     const selectedUsers = pickN(availableUsers, postCount);
 
     // 동적 데이터 기반 추가 템플릿
