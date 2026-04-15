@@ -1,3 +1,51 @@
+## 세션 111 — 블로그 이미지 시스템 종합 감사 13건 수정
+
+### 브랜치: fix/blog-image-audit-13fixes → main 머지 완료
+### 커밋: e8c87208, d632eb02 — push 대기
+### 변경: 10파일 총 + DB UPDATE 2건
+
+### 감사 범위
+- 블로그 이미지 파이프라인 전수 점검: 썸네일, 히어로 캐러셀, 본문 인라인 이미지, OG API
+- DB 분석: blog_posts 7,690건 + blog_post_images 38,938건 + cover_image 패턴 + 인라인 이미지 URL
+- S급 4건 + A급 4건 + B급 2건 + C급 3건 = 총 13건 발견, 전건 수정
+
+### 핵심 발견
+- 커버 이미지 73.5% (5,655건)가 OG 텍스트 배너 — 실사진 아님
+- blog_post_images 80% (31,067건)가 OG URL — 히어로 캐러셀에 텍스트 배너 표시
+- Naver Image Search API 완전 장애 — 최근 7일 실사진 0건 생성 (silent fail)
+- 본문 89% (6,838건) 이미지 0장 — 텍스트 only
+- Mixed Content: 687건 http:// 인라인 이미지 (브라우저 차단)
+
+### DB 수정 (적용 완료)
+1. ✅ 본문 인라인 이미지 http:// → https:// 일괄 치환 (687건)
+2. ✅ 본문 og-infographic 마크다운 이미지 제거 (30건)
+
+### S급 수정
+3. ✅ S-1: Naver API 에러 로깅 — blog-generate-images + issue-draft 양쪽
+4. ✅ S-3: 히어로 캐러셀 infographic 타입 필터 추가
+5. ✅ S-4: marked 렌더러 http→https 자동 치환
+
+### A급 수정
+6. ✅ A-5: safeBlogInsert enrichContent og-infographic 자동 삽입 제거
+7. ✅ A-6: blog-prompt-templates og-infographic URL 지시 제거
+8. ✅ A-7: marked 렌더러 aspect-ratio:16/9 강제 제거 (이미지 찌그러짐 해소)
+9. ✅ A-8: marked 렌더러 + 블로그 리스트 onerror 폴백 추가
+
+### B급 수정
+10. ✅ B-10: next.config remotePatterns 8개 외부 도메인 추가 + BlogHeroImage 조건부 최적화
+
+### C급 수정
+11. ✅ C-11: blog-visual-enhancer 데드코드 정리 (insertColorTags, insertCoverImage)
+12. ✅ C-12: 블로그 리스트 (p.cover_image || true) 데드코드 제거
+13. ✅ C-13: globals.css .blog-content img 3중 중복 → 통합 + border-radius 8px 통일
+
+### PENDING (코드 외 조치)
+- ⬜ Naver Image Search API 키 유효성 확인 (Vercel 로그에서 에러 원인 확인 필요)
+- ⬜ Naver API 복구 후 기존 OG 커버 5,655건 실사진 교체 배치
+- ⬜ 외부 핫링크 이미지 → Supabase Storage 프록시/캐시 (구조 개선)
+
+---
+
 ## 세션 110 — SEO 종합 감사 33건 수정 (네이버 포털 1위 최적화)
 
 ### 브랜치: seo/mega-audit-33fixes
