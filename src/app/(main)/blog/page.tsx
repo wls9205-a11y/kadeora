@@ -400,7 +400,7 @@ export default async function BlogPage({ searchParams }: Props) {
                 <span style={{ fontSize: 10, fontWeight: 800, color: isHot ? 'var(--accent-red)' : 'var(--text-tertiary)', width: 18, textAlign: 'center', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>{rank}</span>
                 {/* 썸네일 */}
                 <div style={{ width: 80, height: 56, borderRadius: 'var(--radius-sm)', overflow: 'hidden', flexShrink: 0, background: 'var(--bg-hover)' }}>
-                    <img src={p.cover_image || `${SITE}/api/og?title=${encodeURIComponent((p.title || '').slice(0, 40))}&design=${(idx % 6) + 1}&category=${p.category || 'blog'}`} alt={p.title || "블로그 썸네일"} width={80} height={56} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} loading="lazy" onError={(e) => { const t = e.currentTarget; t.onerror = null; t.src = `${SITE}/api/og?title=${encodeURIComponent((p.title || '').slice(0, 40))}&design=${(idx % 6) + 1}&category=${p.category || 'blog'}`; }} />
+                    <img src={p.cover_image || `${SITE}/api/og?title=${encodeURIComponent((p.title || '').slice(0, 40))}&design=${(idx % 6) + 1}&category=${p.category || 'blog'}`} alt={p.title || "블로그 썸네일"} width={80} height={56} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} loading="lazy" />
                   </div>
                 {/* 본문 */}
                 <div style={{ flex: 1, minWidth: 0 }}>
