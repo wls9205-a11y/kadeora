@@ -6,7 +6,7 @@
 
 export const OUTPUT_RULES = `
 ## 출력 규칙 (필수 — 위반 시 재생성):
-- 순수 마크다운 출력 (단, 인포그래픽 이미지 마크다운은 허용)
+- 순수 마크다운 출력
 - 최소 5,000자 작성
 - 소제목(##) 5~7개, 각 섹션 300자 이상
 - ## 제목 안에 **볼드** 사용 금지
@@ -19,11 +19,8 @@ export const OUTPUT_RULES = `
 - 숫자 범위: ~ 대신 "에서" 사용
 
 ## 시각 요소 (필수):
-- 도입부 아래에 요약 인포그래픽 삽입:
-  ![요약](/api/og-infographic?title=핵심+요약&category=카테고리&type=summary&items=항목1,항목2,항목3)
-- 핵심 비교 섹션에 비교 인포그래픽:
-  ![비교](/api/og-infographic?title=비교&category=카테고리&type=comparison&items=항목:값,항목:값)
 - 핵심 수치는 **굵게** 강조, 각 섹션 첫 문장에 수치 배치
+- 비교 데이터가 있으면 마크다운 표로 정리
 `;
 
 export const FORBIDDEN_PATTERNS = [

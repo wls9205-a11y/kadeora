@@ -41,20 +41,31 @@ async function fetchNaverImages(query: string, count = 10): Promise<{
         signal: AbortSignal.timeout(5000),
       }
     );
-    if (!res.ok) return [];
+    if (!res.ok) {
+      const body = await res.text().catch(() => '');
+      console.error(`[blog-generate-images] Naver API error: ${res.status} ${res.statusText} | query="${query}" | body=${body.slice(0, 200)}`);
+      return [];
+    }
     const data = await res.json();
-    return (data.items || [])
+    const results = (data.items || [])
       .filter((item: any) => {
         const w = parseInt(item.sizewidth || '0');
         const h = parseInt(item.sizeheight || '0');
         return w >= 400 && h >= 250;
       })
       .map((item: any) => ({
-        url: item.link || '',
+        url: (item.link || '').replace(/^http:\/\//, 'https://'),
         alt: (item.title || query).replace(/<[^>]*>/g, ''),
         caption: `출처: ${(() => { try { return new URL(item.link || '').hostname; } catch { return '웹'; } })()}`,
       }));
-  } catch { return []; }
+    if (results.length === 0 && (data.items || []).length > 0) {
+      console.warn(`[blog-generate-images] Naver returned ${data.items.length} items but 0 passed size filter (>=400x250) | query="${query}"`);
+    }
+    return results;
+  } catch (err: any) {
+    console.error(`[blog-generate-images] Naver fetch error: ${err.message} | query="${query}"`);
+    return [];
+  }
 }
 
 function extractKeywords(title: string, cat: string): string {
