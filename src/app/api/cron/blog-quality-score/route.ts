@@ -109,7 +109,7 @@ export async function GET(req: NextRequest) {
     const { data: posts, error } = await (sb as any)
       .from('blog_posts')
       .select('id, title, content, content_length, excerpt, meta_description, cover_image, image_alt, category, tags, related_slugs, seo_tier, seo_score, data_date, rewritten_at, created_at')
-      .eq('is_published', false)
+      .or(`is_published.eq.false,and(is_published.eq.true,quality_score.eq.0)`)
       .or(`quality_checked_at.is.null,quality_checked_at.lt.${thirtyDaysAgo}`)
       .order('quality_checked_at', { ascending: true, nullsFirst: true })
       .limit(BATCH);
