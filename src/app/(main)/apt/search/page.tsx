@@ -39,42 +39,69 @@ export default async function AptSearchPage({ searchParams }: Props) {
 
   const sb = await createSupabaseServer();
 
+  // 검색어가 있으면 RPC 사용 (or+ilike 500 에러 방지)
+  if (q) {
+    const sq = sanitizeSearchQuery(q, 100);
+    const { data: rpcData } = await (sb as any).rpc('search_apt_transactions', {
+      search_term: sq || null,
+      region_filter: region || null,
+      area_filter: area || null,
+      page_num: pageNum,
+      per_page: perPage,
+    });
+    const trades = rpcData || [];
+    const count = trades.length > 0 ? Number(trades[0].total_count) : 0;
+    // count 제거 (total_count가 각 row에 포함됨)
+    const cleanTrades = trades.map((t: any) => { const { total_count, ...rest } = t; return rest; });
+
+    // 인기 지역
+    let regionStats: any[] = [];
+    try { const { data: rs } = await sb.rpc('get_trade_region_stats'); regionStats = rs || []; } catch {}
+
+    // 관련 블로그
+    let relatedBlogs: any[] = [];
+    if (q.length >= 2) {
+      try {
+        const { data } = await sb.from('blog_posts')
+          .select('slug, title, category, view_count')
+          .eq('is_published', true)
+          .ilike('title', `%${q}%`)
+          .order('view_count', { ascending: false })
+          .limit(3);
+        relatedBlogs = data || [];
+      } catch {}
+    }
+
+    const totalCount = count;
+    const hasMore = cleanTrades.length === perPage;
+    const finalTrades = cleanTrades;
+
+    return renderPage({ trades: finalTrades, totalCount, hasMore, regionStats, relatedBlogs, q, region, area, pageNum, perPage });
+  }
+
+  // 검색어 없는 경우 — 기본 쿼리 (or 없어서 빠름)
   let query = sb.from('apt_transactions')
     .select('id, apt_name, region_nm, sigungu, dong, deal_date, deal_amount, exclusive_area, floor, built_year, trade_type', { count: 'exact' })
     .order('deal_date', { ascending: false });
 
-  if (q) { const sq = sanitizeSearchQuery(q, 100); if (sq) query = query.or(`apt_name.ilike.%${sq}%,dong.ilike.%${sq}%,sigungu.ilike.%${sq}%`); }
   if (region) query = query.ilike('region_nm', `%${region}%`);
   if (area === 'small') query = query.lte('exclusive_area', 60);
   else if (area === 'mid') query = query.gt('exclusive_area', 60).lte('exclusive_area', 85);
   else if (area === 'large') query = query.gt('exclusive_area', 85);
 
   query = query.range((pageNum - 1) * perPage, pageNum * perPage - 1);
-  const { data: trades, count } = await query;
+  const { data: trades2, count: count2 } = await query;
 
-  // 인기 지역
   let regionStats: any[] = [];
-  try {
-    const { data: rs } = await sb.rpc('get_trade_region_stats');
-    regionStats = rs || [];
-  } catch {}
+  try { const { data: rs } = await sb.rpc('get_trade_region_stats'); regionStats = rs || []; } catch {}
 
-  // 관련 블로그
-  let relatedBlogs: any[] = [];
-  if (q && q.length >= 2) {
-    try {
-      const { data } = await sb.from('blog_posts')
-        .select('slug, title, category, view_count')
-        .eq('is_published', true)
-        .ilike('title', `%${q}%`)
-        .order('view_count', { ascending: false })
-        .limit(3);
-      relatedBlogs = data || [];
-    } catch {}
-  }
+  const totalCount = count2 || 0;
+  const hasMore = (trades2?.length || 0) === perPage;
 
-  const totalCount = count || 0;
-  const hasMore = (trades?.length || 0) === perPage;
+  return renderPage({ trades: trades2 || [], totalCount, hasMore, regionStats, relatedBlogs: [], q, region, area, pageNum, perPage });
+}
+
+function renderPage({ trades, totalCount, hasMore, regionStats, relatedBlogs, q, region, area, pageNum, perPage }: any) {
 
   return (
     <>      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "FAQPage", mainEntity: [{ "@type": "Question", name: "아파트 청약 검색은 어떻게 하나요?", acceptedAnswer: { "@type": "Answer", text: "카더라 부동산 검색에서 아파트명, 지역, 시공사로 청약 일정을 검색할 수 있습니다." } }] }) }} />
