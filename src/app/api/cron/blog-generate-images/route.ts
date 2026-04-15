@@ -97,7 +97,7 @@ async function fetchNaverImages(query: string, count = 10): Promise<{
   }
 }
 
-function extractKeywords(title: string, cat: string, subCat?: string): string {
+function extractKeywords(title: string, cat: string, subCat?: string | null): string {
   // 특수문자 제거하되 한글/영문/숫자 보존
   const clean = title.replace(/[|—·()（）\[\]「」『』""''%]/g, ' ').replace(/\d{4}년?/g, '');
   const words = clean.split(/\s+/).filter(w => w.length >= 2 && w.length <= 12);
