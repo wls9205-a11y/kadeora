@@ -1,3 +1,30 @@
+## 세션 112 — 온보딩 전환 장치 5개 구멍 수정
+
+### 브랜치: main 직접 커밋
+### 커밋: ac53d9fd — push 대기 (배포 미실행)
+### 변경: 7파일 +208 -28줄 + DB 마이그레이션 1건
+
+### 진단 결과
+- 리얼 유저 108명 중 미온보딩 25명 + 유령 온보딩(interests 없음) 16명
+- middleware 가드: 2초 타임아웃으로 미온보딩 유저 20명 우회 중
+- welcome-nudge: 7일간 517건 인앱 알림 → 0건 열람 (외부 채널 없음)
+- 건너뛰기 버튼: onboarded=true만 설정, interests/region 없이 유령화
+- ProfileCompleteBanner: sessionStorage dismiss → 세션 끝나면 영구 소멸
+- 푸시 구독자 8명, 30일 알림 열람률 0.35%
+
+### 수정 내역
+1. ✅ middleware.ts: Promise.race 2초 타임아웃 제거 → 직접 await + return 파라미터
+2. ✅ OnboardingClient.tsx: 건너뛰기 시 interests=['news'] + auto-alerts 호출
+3. ✅ DB 마이그레이션: 유령 온보딩 16명 interests=[] → ['news'] 복구
+4. ✅ ProfileCompleteBanner: localStorage 24h 쿨다운 + FeedClient→layout 이동
+5. ✅ welcome-nudge: 미온보딩 유저에 D+1/D+3 이메일 발송 추가 (Resend)
+6. ✅ email-templates.ts: onboardingNudgeEmail 템플릿 신규
+
+### 잔여 과제
+- RESEND_WEBHOOK_SECRET 미등록 (이메일 바운스 추적 안 됨)
+- welcome-nudge 하루 5~6회 중복 실행 원인 미확인 (Vercel cron 재실행?)
+- 카카오 알림톡 온보딩 유도 템플릿: 미심사 (Solapi 템플릿 심사 필요)
+
 ## 세션 111 — 블로그 이미지 시스템 종합 감사 13건 수정
 
 ### 브랜치: fix/blog-image-audit-13fixes → main 머지 완료
