@@ -399,15 +399,17 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
     try { const { data: found } = await sb.from('blog_posts').select('id').eq('slug', article.slug).maybeSingle(); if (found) blogPostId = found.id; } catch {}
   }
 
-  // A2: 발행 결정인데 blog_posts.is_published=false인 경우 강제 공개
+  // A2: 자동 발행 결정 시 blog_posts 반드시 공개 처리 (is_published 상태 무관)
   if (canAutoPublish && blogPostId) {
     try {
       await sb.from('blog_posts').update({
         is_published: true,
         published_at: new Date().toISOString(),
-        seo_tier: 'A', // C2: 이슈 선점 콘텐츠 기본 A등급
-      }).eq('id', blogPostId).eq('is_published', false);
-    } catch {}
+        seo_tier: 'A',
+      }).eq('id', blogPostId);
+    } catch (pubErr) {
+      console.error(`[issue-draft] force publish failed for ${blogPostId}:`, (pubErr as Error).message);
+    }
   }
 
   // A5: 이미지 삽입 (네이버 검색 → 본문 + 커버 교체)
