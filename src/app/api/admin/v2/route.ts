@@ -518,18 +518,30 @@ export async function GET(req: NextRequest) {
             content: (c.content || '').slice(0, 60), at: c.created_at,
           })),
         },
-        // ── 블로그 이미지 커버리지 (세션 102) ──
+        // ── 블로그 이미지 커버리지 (세션 102 + 세션 111 확장) ──
         blogImages: await (async () => {
           try {
-            const [totalBlogs, withCover, imgTotal, imgTypes] = await Promise.all([
+            const [totalBlogs, withCover, ogCover, imgTotal, imgTypes, realPos0, withInlineImg] = await Promise.all([
               safeCount(sb.from('blog_posts').select('id', { count: 'exact', head: true }).eq('is_published', true)),
               safeCount(sb.from('blog_posts').select('id', { count: 'exact', head: true }).eq('is_published', true).not('cover_image', 'is', null).not('cover_image', 'like', '%/api/og%')),
+              safeCount(sb.from('blog_posts').select('id', { count: 'exact', head: true }).eq('is_published', true).like('cover_image', '%/api/og%')),
               safeCount((sb as any).from('blog_post_images').select('id', { count: 'exact', head: true })),
-              safe((sb as any).from('blog_post_images').select('image_type').limit(5000), []),
+              safe((sb as any).from('blog_post_images').select('image_type').limit(10000), []),
+              safeCount((sb as any).from('blog_post_images').select('id', { count: 'exact', head: true }).eq('position', 0).neq('image_type', 'infographic')),
+              safeCount(sb.from('blog_posts').select('id', { count: 'exact', head: true }).eq('is_published', true).like('content', '%![%](http%')),
             ]);
             const typeMap: Record<string, number> = {};
             for (const r of (imgTypes || [])) { const t = (r as any)?.image_type || 'unknown'; typeMap[t] = (typeMap[t] || 0) + 1; }
-            return { totalBlogs, withRealCover: withCover, coverRate: totalBlogs > 0 ? Math.round(withCover / totalBlogs * 100) : 0, totalImages: imgTotal, imageTypes: typeMap };
+            const ogImgCount = (typeMap['infographic'] || 0);
+            const realImgCount = imgTotal - ogImgCount;
+            return {
+              totalBlogs, withRealCover: withCover, ogCover,
+              coverRate: totalBlogs > 0 ? Math.round(withCover / totalBlogs * 100) : 0,
+              totalImages: imgTotal, realImages: realImgCount, ogImages: ogImgCount,
+              realPos0, withInlineImg,
+              inlineRate: totalBlogs > 0 ? Math.round(withInlineImg / totalBlogs * 100) : 0,
+              imageTypes: typeMap,
+            };
           } catch { return null; }
         })(),
         // ── 이슈 선점 파이프라인 (세션 102+) ──

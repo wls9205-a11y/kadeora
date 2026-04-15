@@ -515,26 +515,51 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
       {/* ═══ 네이버 발행 ═══ */}
       <Sec t="🟢 네이버 발행" open={false} ch={<NaverSyndication/>}/>
 
-      {/* ═══ 블로그 이미지 커버리지 (세션 102) ═══ */}
-      {bi&&<Sec t={`🖼️ 블로그 이미지 (${bi.coverRate||0}% 실사진)`} open={false} ch={
+      {/* ═══ 블로그 이미지 커버리지 (세션 102 + 세션 111 확장) ═══ */}
+      {bi&&<Sec t={`🖼️ 블로그 이미지 (실사진 ${bi.coverRate||0}%)`} open={bi.coverRate<50} ch={
         <Card ch={<>
-          <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:4,marginBottom:8}}>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:4,marginBottom:8}}>
             {[
-              {l:'실사진 커버',v:bi.withRealCover||0,c:bi.coverRate>=90?'#10B981':'#F59E0B'},
-              {l:'총 이미지',v:f(bi.totalImages||0),c:'#8B5CF6'},
-              {l:'커버 전환율',v:`${bi.coverRate||0}%`,c:bi.coverRate>=95?'#10B981':bi.coverRate>=80?'#F59E0B':'#EF4444'},
+              {l:'실사진 커버',v:bi.withRealCover||0,c:bi.coverRate>=80?'#10B981':bi.coverRate>=50?'#F59E0B':'#EF4444'},
+              {l:'OG 텍스트',v:bi.ogCover||0,c:bi.ogCover>0?'#EF4444':'#10B981'},
+              {l:'실사진 이미지',v:f(bi.realImages||0),c:'#10B981'},
+              {l:'OG 이미지',v:f(bi.ogImages||0),c:bi.ogImages>0?'#F59E0B':'#10B981'},
             ].map(s=><div key={s.l} style={{textAlign:'center',padding:4}}>
               <div style={{fontSize:14,fontWeight:800,color:s.c}}>{s.v}</div>
               <div style={{fontSize:10,color:'rgba(255,255,255,0.35)'}}>{s.l}</div>
             </div>)}
           </div>
+          {/* 커버 이미지 분포 바 */}
+          <div style={{marginBottom:8}}>
+            <div style={{display:'flex',height:8,borderRadius:4,overflow:'hidden',background:'rgba(255,255,255,0.06)'}}>
+              <div style={{width:`${bi.coverRate||0}%`,background:'#10B981'}} title={`실사진 ${bi.withRealCover}`}/>
+              <div style={{width:`${100-(bi.coverRate||0)}%`,background:'#EF4444'}} title={`OG 배너 ${bi.ogCover}`}/>
+            </div>
+            <div style={{display:'flex',justifyContent:'space-between',fontSize:10,color:'rgba(255,255,255,0.35)',marginTop:2}}>
+              <span>실사진 {bi.coverRate||0}%</span>
+              <span>OG 배너 {bi.ogCover>0?Math.round(bi.ogCover/bi.totalBlogs*100):0}%</span>
+            </div>
+          </div>
+          {/* 추가 지표 */}
+          <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:4,marginBottom:6}}>
+            {[
+              {l:'히어로(pos0)',v:bi.realPos0||0,c:'#8B5CF6'},
+              {l:'인라인 有',v:`${bi.inlineRate||0}%`,c:bi.inlineRate>=50?'#10B981':'#F59E0B'},
+              {l:'총 게시글',v:f(bi.totalBlogs||0),c:'#3B7BF6'},
+            ].map(s=><div key={s.l} style={{textAlign:'center',padding:3}}>
+              <div style={{fontSize:12,fontWeight:800,color:s.c}}>{s.v}</div>
+              <div style={{fontSize:9,color:'rgba(255,255,255,0.3)'}}>{s.l}</div>
+            </div>)}
+          </div>
+          {/* 이미지 타입 분포 */}
           {bi.imageTypes&&Object.entries(bi.imageTypes).sort((a:any,b:any)=>b[1]-a[1]).slice(0,5).map(([type,cnt]:[string,any])=>(
             <div key={type} style={{display:'flex',justifyContent:'space-between',fontSize:11,padding:'2px 0',color:'rgba(255,255,255,0.5)'}}>
-              <span>{type}</span><span style={{fontWeight:700}}>{f(cnt)}</span>
+              <span>{type==='infographic'?'📊 infographic (OG)':type==='stock_photo'?'📷 stock_photo (실사진)':type==='site_photo'?'🏢 site_photo (현장)':type==='og_card'?'🎴 og_card':type}</span>
+              <span style={{fontWeight:700}}>{f(cnt)}</span>
             </div>
           ))}
         </>} p="6px 8px"/>
-      }/>}
+      }/> }
 
       {/* ═══ 이슈 선점 파이프라인 ═══ */}
       {ip&&<Sec t={`🎯 이슈 파이프라인 (발행률 ${ip.publishRate||0}%)`} open={false} ch={

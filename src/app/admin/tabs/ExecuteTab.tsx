@@ -12,7 +12,7 @@ export default function ExecuteTab({ onNavigate }: { onNavigate: (t: any) => voi
   const [completedCrons, setCompletedCrons] = useState(0);
   const [mode, setMode] = useState<string>('');
   const [lastRun, setLastRun] = useState<{ at: string; ok: number; fail: number } | null>(null);
-  const [infra, setInfra] = useState<{ cronCurrent: number; cronMaxSlots: number }>({ cronCurrent: 91, cronMaxSlots: 100 });
+  const [infra, setInfra] = useState<{ cronCurrent: number; cronMaxSlots: number }>({ cronCurrent: 153, cronMaxSlots: 200 });
   const [kpiCounts, setKpiCounts] = useState<{ stocks: number; sites: number }>({ stocks: 0, sites: 0 });
   const abortRef = useRef(false);
 
@@ -133,6 +133,37 @@ export default function ExecuteTab({ onNavigate }: { onNavigate: (t: any) => voi
 
       {/* IndexNow 풀스위프 */}
       <div style={{ marginBottom: 16 }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 6 }}>🖼️ 이미지 관리</div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>
+          {[
+            { ep: '/api/cron/blog-generate-images', icon: '📷', label: '블로그 이미지', desc: 'Naver→실사진' },
+            { ep: '/api/cron/collect-complex-images', icon: '🏠', label: '단지 이미지', desc: '아파트 사진' },
+            { ep: '/api/cron/collect-site-images', icon: '🏗️', label: '현장 이미지', desc: '분양현장' },
+            { ep: '/api/cron/apt-image-crawl', icon: '🔍', label: '청약 이미지', desc: '조감도 크롤' },
+          ].map(s => (
+            <button key={s.ep} className="adm-btn" disabled={running}
+              onClick={async () => {
+                if (!confirm(`${s.label} 크론을 실행합니다.`)) return;
+                setRunning(true); setResults([]);
+                try {
+                  const r = await fetch('/api/admin/god-mode', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ mode: 'single', endpoint: s.ep }),
+                  });
+                  const d = await r.json();
+                  const res = d.results?.[0];
+                  setResults(d.results || []);
+                  alert(`${res?.status === 200 ? '✅' : '❌'} ${s.label}: ${res?.status} (${(res?.duration || 0).toFixed(1)}s)`);
+                } catch (e: any) { alert(`❌ ${e.message}`); } finally { setRunning(false); }
+              }}
+              style={{ flex: '1 1 calc(25% - 5px)', minWidth: 70, textAlign: 'center', padding: '6px 4px' }}>
+              <div style={{ fontSize: 14 }}>{s.icon}</div>
+              <div style={{ fontSize: 10, fontWeight: 600 }}>{s.label}</div>
+              <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>{s.desc}</div>
+            </button>
+          ))}
+        </div>
+
         <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 6 }}>🔍 SEO 인덱싱 (IndexNow)</div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
           {[
