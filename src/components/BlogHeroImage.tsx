@@ -22,6 +22,10 @@ export default function BlogHeroImage({ images, title, priority = true }: Props)
   const visibleImages = images.filter((_, i) => !loadError.has(i));
   const total = visibleImages.length;
 
+  // Next.js Image 최적화 가능 도메인 (next.config.ts remotePatterns 등록됨)
+  const OPTIMIZABLE = ['imgnews.naver.net', 'pstatic.net', 'phinf.naver.net', 'daumcdn.net', 'kakaocdn.net', 'kadeora.app', 'supabase.co', 'hogangnono.com', 'bizwatch.co.kr'];
+  const isOptimizable = (url: string) => OPTIMIZABLE.some(d => url.includes(d));
+
   const goTo = useCallback((idx: number) => {
     setActiveIdx(Math.max(0, Math.min(idx, total - 1)));
   }, [total]);
@@ -62,7 +66,7 @@ export default function BlogHeroImage({ images, title, priority = true }: Props)
           style={{ objectFit: 'cover', transition: 'opacity 0.3s ease' }}
           priority={priority && activeIdx === 0}
           onError={() => setLoadError(prev => new Set(prev).add(activeIdx))}
-          unoptimized
+          unoptimized={!isOptimizable(current.url)}
         />
 
         {/* 이미지 카운터 (우상단) */}

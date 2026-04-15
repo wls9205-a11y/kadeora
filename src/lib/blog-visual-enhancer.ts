@@ -85,10 +85,7 @@ function insertHeroStats(html: string): string {
   return h2Idx > 0 ? html.slice(0, h2Idx) + grid + html.slice(h2Idx) : grid + html;
 }
 
-// ── 3. 카테고리 컬러 태그 바 ──
-function insertColorTags(html: string, _opts: EnhanceOptions): string {
-  return html;
-}
+// ── 3. 카테고리 컬러 태그 바 (제거됨 — 사용하지 않음) ──
 
 // ── 4. 가격 레인지 바 ──
 function insertPriceRange(html: string): string {
@@ -222,8 +219,8 @@ export function enhanceBlogVisuals(html: string, options?: EnhanceOptions): stri
   e = insertPriceRange(e);       // #4
   e = insertSummaryCard(e, opts.excerpt);
   e = insertHeroStats(e);        // #2
-  e = insertColorTags(e, opts);  // #3
-  // e = insertCoverImage(e, opts); // #1 — 히어로 카드로 대체 (page.tsx에서 처리)
+  // insertColorTags removed — empty function
+  // insertCoverImage removed — handled by BlogHeroImage component
 
   return e;
 }

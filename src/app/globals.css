@@ -852,7 +852,6 @@ body {
 .blog-content td { padding: 8px 12px; border-bottom: 1px solid var(--border); }
 .blog-content tr:last-child td { border-bottom: none; }
 .blog-content blockquote { border-left: 3px solid var(--brand); padding: 12px 16px; margin: 16px 0; background: var(--bg-surface); border-radius: 0 var(--radius-md) var(--radius-md) 0; }
-.blog-content img { max-width: 100%; height: auto; border-radius: var(--radius-md); margin: 12px 0; }
 
 /* 블로그 목차 인라인 (모바일용) — 데스크탑에서는 사이드바 사용 */
 .blog-toc-inline { display: block; }
@@ -1104,7 +1103,7 @@ body {
 .blog-content img {
   max-width: 100%;
   height: auto;
-  border-radius: 12px;
+  border-radius: 8px;
   margin: 20px 0;
 }
 
@@ -1125,7 +1124,7 @@ body {
   .blog-content h3 { margin-top: 28px; font-size: 16.5px; padding: 6px 0 6px 12px; }
   .blog-content table { font-size: 12.5px; display: block; overflow-x: auto; }
   .blog-content th, .blog-content td { padding: 10px 12px; white-space: nowrap; }
-  .blog-content img { margin: 16px 0; border-radius: 10px; }
+  .blog-content img { margin: 16px 0; border-radius: 8px; }
   .blog-content li { font-size: 15px; }
   .blog-content blockquote { padding: 16px 18px 16px 20px; font-size: 14.5px; }
 }
