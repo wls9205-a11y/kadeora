@@ -91,7 +91,6 @@ export default async function MainLayout({ children }: { children: React.ReactNo
             <a href="/premium" style={{color:'var(--text-secondary)',textDecoration:'none'}}>프리미엄</a>
             <a href="/press" style={{color:'var(--text-secondary)',textDecoration:'none'}}>보도자료</a>
             <a href="/about" style={{color:'var(--text-secondary)',textDecoration:'none'}}>소개</a>
-            <a href="/about/team" style={{color:'var(--text-secondary)',textDecoration:'none'}}>팀</a>
           </nav>
           <p style={{fontWeight:600, color:'var(--text-secondary)', marginBottom:4}}>사업자 정보</p>
           <p>{BIZ_INFO_LINE}</p>

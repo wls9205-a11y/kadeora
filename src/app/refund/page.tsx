@@ -3,9 +3,9 @@ import { SITE_URL } from '@/lib/constants';
 
 export const metadata: Metadata = {
   alternates: { canonical: SITE_URL + '/refund' },
-  robots: { index: false, follow: true },
   title: '환불정책',
   description: '카더라 환불 및 청약철회 정책',
+  openGraph: { title: '환불정책', description: '카더라 환불 및 청약철회 정책', url: `${SITE_URL}/refund`, siteName: '카더라', locale: 'ko_KR', type: 'website' },
 };
 
 export default function RefundPage() {

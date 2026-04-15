@@ -1,9 +1,11 @@
 import type { Metadata } from 'next';
+import { SITE_URL } from '@/lib/constants';
 
 export const metadata: Metadata = {
   title: '개인정보처리방침',
   description: '카더라 개인정보처리방침',
-  robots: { index: false },
+  alternates: { canonical: `${SITE_URL}/privacy` },
+  openGraph: { title: '개인정보처리방침', description: '카더라 개인정보처리방침', url: `${SITE_URL}/privacy`, siteName: '카더라', locale: 'ko_KR', type: 'website' },
 };
 
 export default function PrivacyPage() {

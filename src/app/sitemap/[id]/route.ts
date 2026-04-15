@@ -60,11 +60,11 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
 
     const staticPaths = [
       '', '/feed', '/hot', '/stock', '/apt', '/discuss', '/blog', '/about',
-      '/guide', '/search', '/faq', '/terms', '/privacy', '/refund', 
-      '/grades', '/daily', '/apt/map', '/apt/diagnose', '/apt/search', '/apt/complex', '/apt/redev', '/stock/compare', '/blog/series',
+      '/guide', '/search', '/faq', '/terms', '/privacy', '/refund', '/shop',
+      '/grades', '/apt/map', '/apt/diagnose', '/apt/complex', '/apt/redev', '/stock/compare', '/blog/series',
       '/apt/data', '/stock/data', '/stock/search', '/stock/dividend', '/stock/movers', '/stock/themes',
       '/stock/market/kospi', '/stock/market/kosdaq', '/stock/market/nyse', '/stock/market/nasdaq',
-      '/calc', '/about/team', '/press',
+      '/calc', '/press',
       // 지역별 재개발 SEO 페이지
       ...['서울','경기','부산','인천','대구','광주','대전','울산','경남','경북','충남','충북','전남','전북','강원','제주','세종'].map(r => `/apt/redev/${encodeURIComponent(r)}`),
     ];

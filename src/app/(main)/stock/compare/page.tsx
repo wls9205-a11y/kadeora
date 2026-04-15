@@ -3,8 +3,22 @@ import { SITE_URL } from '@/lib/constants';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import CompareClient from './CompareClient';
 import Disclaimer from '@/components/Disclaimer';
+import type { Metadata } from 'next';
 
 export const revalidate = 300;
+
+export const metadata: Metadata = {
+  title: '종목 비교 — 주식 재무·시세·배당 비교 분석',
+  description: '두 종목의 시가총액, PER, PBR, 배당수익률, 주가 추이를 한눈에 비교. 코스피·코스닥·NYSE·나스닥 전 종목 지원.',
+  alternates: { canonical: `${SITE_URL}/stock/compare` },
+  openGraph: {
+    title: '종목 비교 — 주식 재무·시세·배당 비교 분석',
+    description: '두 종목의 시가총액, PER, PBR, 배당수익률, 주가 추이를 한눈에 비교.',
+    url: `${SITE_URL}/stock/compare`, siteName: '카더라', locale: 'ko_KR', type: 'website',
+    images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent('종목 비교 분석')}&category=stock&design=2`, width: 1200, height: 630 }],
+  },
+  twitter: { card: 'summary_large_image' },
+};
 
 export default async function StockComparePage() {
   // SSR: 인기 종목 목록 (크롤러가 볼 수 있는 콘텐츠)

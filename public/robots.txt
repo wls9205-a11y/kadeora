@@ -18,7 +18,7 @@ Disallow: /api/
 Disallow: /profile/
 Disallow: /write
 Disallow: /onboarding
-Disallow: /shop/
+# Disallow: /shop/ — 토스 심사용 허용 (2026-04-16)
 Disallow: /consultant/
 Disallow: /login
 Disallow: /signup

@@ -1,5 +1,20 @@
+import type { Metadata } from 'next';
+import { SITE_URL } from '@/lib/constants';
 import LoginGate from '@/components/LoginGate';
 import DiagnoseClient from './DiagnoseClient';
+
+export const metadata: Metadata = {
+  title: '청약 가점 계산기 — 2026 주택청약 가점제 점수 계산',
+  description: '주택공급에 관한 규칙 별표1 기준 청약 가점 계산. 무주택기간·부양가족·청약통장 가입기간 자동 산출. 만점 84점.',
+  alternates: { canonical: `${SITE_URL}/apt/diagnose` },
+  openGraph: {
+    title: '청약 가점 계산기 — 2026 주택청약 가점제',
+    description: '무주택기간·부양가족·청약통장 가입기간 자동 산출. 만점 84점.',
+    url: `${SITE_URL}/apt/diagnose`, siteName: '카더라', locale: 'ko_KR', type: 'website',
+    images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent('청약 가점 계산기')}&category=apt&design=2`, width: 1200, height: 630 }],
+  },
+  twitter: { card: 'summary_large_image' },
+};
 
 export default function DiagnosePage() {
   return (
