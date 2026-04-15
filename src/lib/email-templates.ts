@@ -308,3 +308,100 @@ export function contentRecommendBody({ nickname, posts }: {
     </div>
   `;
 }
+
+/**
+ * 온보딩 완료 유도 이메일 — 미온보딩 유저 대상
+ * D+1: 관심 설정 안내, D+3: 놓친 혜택 강조
+ */
+export function onboardingNudgeEmail({
+  nickname,
+  email,
+  variant,
+}: {
+  nickname: string;
+  email: string;
+  variant: 'd1' | 'd3';
+}): { subject: string; html: string } {
+  const utmBase = `utm_source=email&utm_medium=onboarding-nudge&utm_campaign=${variant}`;
+  const onboardingUrl = `https://kadeora.app/onboarding?return=/feed&${utmBase}`;
+  const unsubUrl = buildUnsubUrl(email);
+
+  const subject = variant === 'd1'
+    ? `${nickname}님, 관심 설정 하나면 맞춤 알림이 시작돼요 🔔`
+    : `${nickname}님, 놓치고 있는 3가지 혜택이 있어요 🎁`;
+
+  const bodyContent = variant === 'd1' ? `
+    <p style="font-size:15px;color:#334155;margin:0 0 8px;line-height:1.7;font-weight:700;">
+      ${nickname}님, 환영합니다! 👋
+    </p>
+    <p style="font-size:14px;color:#64748B;margin:0 0 20px;line-height:1.7;">
+      카더라에 가입해 주셔서 감사해요.<br>
+      관심 분야만 설정하면 <strong style="color:#3B7BF6;">맞춤 알림</strong>이 바로 시작됩니다.
+    </p>
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px;">
+      <tr><td style="padding:10px 0;border-bottom:1px solid #F1F5F9;">
+        <span style="font-size:20px;vertical-align:middle;">📈</span>
+        <span style="font-size:14px;color:#334155;margin-left:10px;">관심 종목 급등/급락 알림</span>
+      </td></tr>
+      <tr><td style="padding:10px 0;border-bottom:1px solid #F1F5F9;">
+        <span style="font-size:20px;vertical-align:middle;">🏠</span>
+        <span style="font-size:14px;color:#334155;margin-left:10px;">청약 마감 D-day 알림</span>
+      </td></tr>
+      <tr><td style="padding:10px 0;">
+        <span style="font-size:20px;vertical-align:middle;">📰</span>
+        <span style="font-size:14px;color:#334155;margin-left:10px;">주간 시황 리포트</span>
+      </td></tr>
+    </table>
+  ` : `
+    <p style="font-size:15px;color:#334155;margin:0 0 8px;line-height:1.7;font-weight:700;">
+      ${nickname}님, 놓치고 계신 혜택이 있어요!
+    </p>
+    <p style="font-size:14px;color:#64748B;margin:0 0 20px;line-height:1.7;">
+      아직 관심 설정을 안 하셨네요. 10초면 끝나고, 바로 이런 혜택이 시작돼요:
+    </p>
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px;">
+      <tr><td style="padding:12px 16px;background:#F8FAFC;border-radius:8px;">
+        <div style="font-size:14px;font-weight:700;color:#1E293B;">🎁 가입 보너스 100P</div>
+        <div style="font-size:12px;color:#64748B;margin-top:2px;">관심 설정 완료 시 즉시 지급</div>
+      </td></tr>
+      <tr><td style="height:8px;"></td></tr>
+      <tr><td style="padding:12px 16px;background:#F8FAFC;border-radius:8px;">
+        <div style="font-size:14px;font-weight:700;color:#1E293B;">🔔 맞춤 시세 알림</div>
+        <div style="font-size:12px;color:#64748B;margin-top:2px;">관심 종목·단지 가격 변동 실시간 알림</div>
+      </td></tr>
+      <tr><td style="height:8px;"></td></tr>
+      <tr><td style="padding:12px 16px;background:#F8FAFC;border-radius:8px;">
+        <div style="font-size:14px;font-weight:700;color:#1E293B;">📊 AI 분석 리포트</div>
+        <div style="font-size:12px;color:#64748B;margin-top:2px;">1,800+ 종목 AI 투자 의견 무료 열람</div>
+      </td></tr>
+    </table>
+  `;
+
+  const html = `
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#F8FAFC;">
+<tr><td align="center" style="padding:32px 16px;">
+<table width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#FFFFFF;border-radius:16px;overflow:hidden;">
+<tr><td style="padding:28px 24px 0;">
+  <div style="text-align:center;margin-bottom:20px;">
+    <span style="font-size:22px;font-weight:900;color:#3B7BF6;">카더라</span>
+  </div>
+  ${bodyContent}
+  <div style="text-align:center;margin:24px 0 8px;">
+    <a href="${onboardingUrl}" style="display:inline-block;padding:14px 48px;border-radius:12px;background:#3B7BF6;color:#FFFFFF;font-size:16px;font-weight:800;text-decoration:none;">
+      관심 설정하기 (10초) →
+    </a>
+  </div>
+  <p style="font-size:11px;color:#94A3B8;text-align:center;margin:0 0 24px;">카카오 로그인으로 바로 시작</p>
+</td></tr>
+<tr><td style="padding:16px 24px 24px;text-align:center;">
+  <p style="font-size:11px;color:#94A3B8;margin:0 0 6px;line-height:1.6;">
+    이 메일은 카더라(kadeora.app) 가입 시 동의하신 이메일로 발송되었습니다.
+  </p>
+  <a href="${unsubUrl}" style="font-size:11px;color:#94A3B8;text-decoration:underline;">수신 거부</a>
+</td></tr>
+</table>
+</td></tr>
+</table>`;
+
+  return { subject, html };
+}

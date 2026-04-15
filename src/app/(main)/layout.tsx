@@ -16,6 +16,7 @@ import WelcomeReward from '@/components/WelcomeReward';
 import WelcomeToast from '@/components/WelcomeToast';
 import GlobalMissionBar from '@/components/GlobalMissionBar';
 import SmartPushPrompt from '@/components/SmartPushPrompt';
+import ProfileCompleteBanner from '@/components/ProfileCompleteBanner';
 
 export const metadata: Metadata = {
   title: { template: '%s | 카더라', default: '카더라 — 부동산·주식 정보 플랫폼' },
@@ -51,6 +52,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
         }}>
           <ErrorBoundary>
 
+              <ProfileCompleteBanner />
               <GlobalMissionBar />
               {children}
           </ErrorBoundary>

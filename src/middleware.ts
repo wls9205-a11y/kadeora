@@ -182,15 +182,19 @@ export async function middleware(request: NextRequest) {
   const isPublic = PUBLIC_PATHS.some(p => pathname.startsWith(p));
   if (user && !isPublic && pathname !== '/onboarding') {
     try {
-      const profileResult = await Promise.race([
-        supabase.from('profiles').select('onboarded, nickname_set').eq('id', user.id).maybeSingle(),
-        new Promise<null>((r) => setTimeout(() => r(null), 2000)),
-      ]);
-      const profile = (profileResult as { data: Record<string, unknown> | null })?.data;
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('onboarded, nickname_set')
+        .eq('id', user.id)
+        .maybeSingle();
       if (profile && (!profile.onboarded || !profile.nickname_set)) {
-        return NextResponse.redirect(new URL('/onboarding', request.url));
+        const onboardingUrl = new URL('/onboarding', request.url);
+        onboardingUrl.searchParams.set('return', pathname);
+        return NextResponse.redirect(onboardingUrl);
       }
-    } catch { }
+    } catch (e) {
+      console.error('[middleware] onboarding check failed:', e);
+    }
   }
 
   // ── user 정보를 header에 주입 (layout.tsx에서 DB 호출 없이 읽기) ──

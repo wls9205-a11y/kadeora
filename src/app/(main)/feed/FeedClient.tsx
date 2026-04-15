@@ -1,5 +1,4 @@
 'use client';
-import ProfileCompleteBanner from '@/components/ProfileCompleteBanner';
 import RelatedContentCard from '@/components/RelatedContentCard';
 import FirstMissionBanner from '@/components/FirstMissionBanner';
 import ProfileCompletionBar from '@/components/ProfileCompletionBar';
@@ -289,8 +288,6 @@ export default function FeedClient({
   return (
     <PullToRefresh>
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
-
-        <ProfileCompleteBanner />
 
         {/* 헤더 — 카더라 + 공유 */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, padding: '4px 0' }}>

@@ -211,12 +211,23 @@ export default function OnboardingClient() {
           </div>
         )}
 
-        {/* 건너뛰기 */}
+        {/* 건너뛰기 — 기본 관심사 ['news'] 설정 후 온보딩 완료 처리 */}
         <button
           onClick={async () => {
             const sb = createSupabaseBrowser();
             const { data } = await sb.auth.getUser();
-            if (data.user) await sb.from('profiles').update({ onboarded: true, onboarding_method: 'skip' }).eq('id', data.user.id);
+            if (data.user) {
+              await sb.from('profiles').update({
+                onboarded: true,
+                onboarding_method: 'skip',
+                interests: ['news'],
+                updated_at: new Date().toISOString(),
+              }).eq('id', data.user.id);
+              fetch('/api/onboarding/auto-alerts', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ interests: ['news'], region: null }),
+              }).catch(() => {});
+            }
             router.replace(returnUrl);
           }}
           style={{
