@@ -322,8 +322,20 @@ export default async function AptPage() {
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"아파트 청약 일정은 어디서 확인하나요?","acceptedAnswer":{"@type":"Answer","text":"카더라(kadeora.app)에서 전국 아파트 청약 일정, 경쟁률, 분양가, 입주 예정일을 실시간으로 확인할 수 있습니다. 지역별·상태별 필터링도 지원합니다."}},{"@type":"Question","name":"미분양 아파트 현황은 어떻게 확인하나요?","acceptedAnswer":{"@type":"Answer","text":`현재 전국 ${unsold.length}개 단지가 미분양 상태입니다. 카더라 부동산 페이지에서 지역별 미분양 세대수, 분양가, 연락처를 확인할 수 있습니다.`}},{"@type":"Question","name":"분양중인 아파트는 몇 개인가요?","acceptedAnswer":{"@type":"Answer","text":`현재 ${ongoingApts.length}개 단지가 분양 진행 중입니다. 각 단지별 분양가, 시공사, 위치 정보를 카더라에서 비교할 수 있습니다.`}}]}) }} />
     {/* speakable */}
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"WebPage","name":"부동산 — 청약·분양·미분양·재개발","speakable":{"@type":"SpeakableSpecification","cssSelector":["h1",".region-summary"]}}) }} />
-    <h1 style={{ position:"absolute", width:1, height:1, overflow:"hidden", clip:"rect(0,0,0,0)" }}>부동산 — 청약·분양·미분양·재개발</h1>
+    <h1 className="sr-only">부동산 — 청약·분양·미분양·재개발</h1>
+    <p className="sr-only">카더라 부동산에서는 전국 {apts.length}건의 아파트 청약 일정, {ongoingApts.length}건의 분양 현장, {unsold.length}건의 미분양 단지, {redevTotalCount}건의 재개발·재건축 정보를 실시간으로 제공합니다. 지역별·타입별 필터로 원하는 부동산 정보를 빠르게 찾을 수 있으며, 분양가·입주 예정일·경쟁률·시세 비교를 무료로 확인할 수 있습니다.</p>
     <AptClient apts={apts} unsold={unsold} alertCounts={alertCounts} lastRefreshed={lastRefreshed} regionStats={regionStats} ongoingApts={ongoingApts} redevTotalCount={redevTotalCount} tradeTotalCount={tradeTotalCount} tradeByRegion={tradeByRegion} redevByRegion={redevByRegion} subTotalCount={subTotalCount} unsoldTotalCount={unsoldTotalCount} ongoingTotalCount={ongoingTotalCount} dataFreshness={dataFreshness} redevRedevCount={redevRedevCount} redevRebuildCount={redevRebuildCount} aptImageMap={aptImageMap} aptEngageMap={aptEngageMap} />
+    {/* C-7: noscript — JS 비활성화 크롤러용 기본 청약 목록 */}
+    <noscript>
+      <div style={{ padding: 20 }}>
+        <h2>전국 아파트 청약 일정</h2>
+        <ul>
+          {apts.slice(0, 20).map((a: any) => (
+            <li key={a.id || a.house_nm}><a href={`/apt/${encodeURIComponent(a.house_nm?.trim().replace(/\s+/g, '-').replace(/[^\w가-힣\-]/g, '').toLowerCase() || a.id)}`}>{a.house_nm} — {a.region_nm} {a.tot_supply_hshld_co}세대</a></li>
+          ))}
+        </ul>
+      </div>
+    </noscript>
 
     {/* SEO 허브 내부 링크 — 크롤 심도 + PageRank 분배 */}
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg) var(--sp-lg)' }}>

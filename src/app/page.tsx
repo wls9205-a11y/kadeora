@@ -10,7 +10,7 @@ import { SITE_URL as SITE, CONTACT_EMAIL, CONTACT_PHONE, BIZ_INFO_LINE, BIZ_ADDR
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: '카더라 — 대한민국 소리소문 정보 커뮤니티',
+  title: '카더라 — 아파트 청약·주식 시세·부동산 정보 플랫폼 | kadeora.app',
   description: '주식 시세, 아파트 청약, 미분양, 재개발, 실거래가 정보와 커뮤니티를 한 곳에서. 코스피 코스닥 실시간 시세, 전국 청약 일정, 부동산 분석을 매일 업데이트합니다.',
   alternates: { canonical: SITE },
   openGraph: {
@@ -145,17 +145,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'WebSite',
-        name: '카더라',
-        url: SITE,
-        potentialAction: {
-          '@type': 'SearchAction',
-          target: { '@type': 'EntryPoint', urlTemplate: `${SITE}/search?q={search_term_string}` },
-          'query-input': 'required name=search_term_string',
-        },
-      }) }} />
+      {/* WebSite schema는 layout.tsx에서 이미 출력 — 중복 제거 (SEO 감사 A-8) */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org',
         '@type': 'ItemList',

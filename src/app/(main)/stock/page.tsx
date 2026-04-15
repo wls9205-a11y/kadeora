@@ -172,10 +172,24 @@ export default async function StockPage() {
           "position": i + 1,
           "name": `${s.name} (${s.symbol})`,
           "url": `${SITE_URL}/stock/${s.symbol}`,
+          "image": `${SITE_URL}/api/og-chart?symbol=${s.symbol}`,
+          "description": `${s.name} ${s.market || ''} ${s.price ? `현재가 ${Number(s.price).toLocaleString()}` : ''}`.trim(),
         })),
       }) }} />}
-      <h1 style={{ position:"absolute", width:1, height:1, overflow:"hidden", clip:"rect(0,0,0,0)" }}>주식 시세 — 실시간 국내외 종목</h1>
+      <h1 className="sr-only">주식 시세 — 실시간 국내외 종목</h1>
+      <p className="sr-only">카더라 주식에서는 KOSPI·KOSDAQ·NYSE·NASDAQ {stocks.length}개 종목의 실시간 시세, 등락률, 시가총액, PER, 배당수익률을 확인할 수 있습니다. AI 시황 브리핑, 섹터별 히트맵, 테마주 분석, 포트폴리오 시뮬레이터를 무료로 제공합니다.</p>
       <StockClient initialStocks={stocks as React.ComponentProps<typeof StockClient>['initialStocks']} briefing={briefing} briefingUS={briefingUS} exchangeHistory={exchangeHistory} themeHistory={themeHistory} />
+      {/* C-7: noscript — JS 비활성화 크롤러용 기본 종목 목록 */}
+      <noscript>
+        <div style={{ padding: 20 }}>
+          <h2>주요 종목 시세</h2>
+          <ul>
+            {stocks.slice(0, 20).map((s: any) => (
+              <li key={s.symbol}><a href={`/stock/${s.symbol}`}>{s.name} ({s.symbol}) — {s.market} {s.price ? `${Number(s.price).toLocaleString()}원` : ''}</a></li>
+            ))}
+          </ul>
+        </div>
+      </noscript>
       {/* StockClient 내부에 Disclaimer compact 있음 — 중복 제거 */}
     </Suspense>
   );

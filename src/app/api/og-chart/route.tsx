@@ -84,7 +84,7 @@ export async function GET(req: NextRequest) {
         </div>,
         { width: 1200, height: 630, ...fontOpts() }
       ).arrayBuffer();
-      return new Response(buf, { headers: { 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=3600' } });
+      return new Response(buf, { headers: { 'Content-Type': 'image/png', 'Cache-Control': 'public, s-maxage=21600, stale-while-revalidate=86400' } });
     }
 
     if (apt) {
@@ -132,7 +132,7 @@ export async function GET(req: NextRequest) {
         </div>,
         { width: 1200, height: 630, ...fontOpts() }
       ).arrayBuffer();
-      return new Response(buf, { headers: { 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=3600' } });
+      return new Response(buf, { headers: { 'Content-Type': 'image/png', 'Cache-Control': 'public, s-maxage=21600, stale-while-revalidate=86400' } });
     }
 
     return new Response('?symbol=XXX or ?apt=slug', { status: 400 });
@@ -140,6 +140,6 @@ export async function GET(req: NextRequest) {
     console.error("[og-chart]", e?.message, req.nextUrl.searchParams.toString());
     // Return 1x1 transparent PNG fallback instead of 500
     const fallback = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64');
-    return new Response(fallback, { headers: { 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=60' } });
+    return new Response(fallback, { headers: { 'Content-Type': 'image/png', 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=21600' } });
   }
 }

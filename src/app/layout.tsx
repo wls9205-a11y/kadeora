@@ -61,6 +61,10 @@ export const metadata: Metadata = {
     'mobile-web-app-title': '카더라',
     'format-detection': 'telephone=no',
     'google': 'notranslate',
+    'naver:imagesearch': 'true',
+    'og:image:alt': '카더라 — 부동산·주식 정보 플랫폼',
+    'og:image:width': '1200',
+    'og:image:height': '630',
   },
 };
 
@@ -88,6 +92,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
         <link rel="dns-prefetch" href="https://dapi.kakao.com" />
         <link rel="alternate" type="application/rss+xml" title="카더라 블로그 RSS" href="/blog/feed" />
+        <link rel="alternate" hrefLang="ko" href="https://kadeora.app" />
+        <link rel="alternate" hrefLang="x-default" href="https://kadeora.app" />
         <link rel="alternate" type="application/rss+xml" title="카더라 주식 RSS" href="/stock/feed" />
         <link rel="alternate" type="application/rss+xml" title="카더라 부동산 RSS" href="/apt/feed" />
         <link rel="search" type="application/opensearchdescription+xml" title="카더라 검색" href="/opensearch.xml" />

@@ -1,115 +1,56 @@
-## 세션 108 — CTA 전면 개편: 콘텐츠 게이팅 → 기능 게이팅
+## 세션 110 — SEO 종합 감사 33건 수정 (네이버 포털 1위 최적화)
 
-### 브랜치: cta/feature-gate-overhaul
-### 커밋: 35b6711e — push 대기 (배포 보류)
-### 변경: 21파일 총, +721 -121
+### 브랜치: seo/mega-audit-33fixes
+### 커밋: 3294e844, 91ea21f0, 03f92fb4 — push 완료 (배포 보류)
+### 변경: 17파일 총, +103 -38
 
-### 전략 전환
-- **이전**: SmartSectionGate (콘텐츠 60% 차단 → 30일 1건 전환)
-- **이후**: LoginGate v2 (콘텐츠 100% 공개 + 기능 잠금 → apt_alert_cta 13건 패턴 확장)
+### 감사 범위
+- 코드 514파일 전수검사 + 프로덕션 실측 + Google/Naver 검색결과 확인
+- S급 3건 + A급 11건 + B급 11건 + C급 8건 = 총 33건 발견, 31건 코드 수정
 
-### 제거 (4개 CTA)
-- SmartSectionGate: blog page에서 import/사용 제거 (파일 보존)
-- BlogMidCTA: 동일
-- ContentLock: 동일
-- CalcSignupCTA: LoginGate로 교체
+### S급 수정 (네이버 차단 해제)
+1. ✅ S-1: Yeti 봇 인식 추가 (`naverbot` → `yeti|naverbot|daumcrawler`)
+   - 이전: Naver Yeti가 non-bot 처리 → isAccessibleForFree:false → 전체 블로그 "유료 콘텐츠" 마킹
+   - 수정: blog/[slug]/page.tsx:290 봇 regex에 `yeti` 추가
+2. ✅ S-2: blog?q= 검색결과 페이지 noindex (`pageNum > 1 || q`)
+3. ✅ S-3: 홈 타이틀 '부동산·주식' 키워드 포함
 
-### 확장 (LoginGate v2)
-- "회원 전용" 뱃지 + 블러 미리보기 + 카카오 48px 네이티브 버튼
-- "다른 방법으로 가입하기" 보조 링크
-- DEFAULTS 맵 18개 feature 추가
+### A급 수정 (캐러셀/리치스니펫)
+4. ✅ A-1: 주식 ItemList에 image+description 추가
+5. ✅ A-2: article:tag 개별 meta 태그 (쉼표→개별)
+6. ✅ A-3: og:image:alt + naver:imagesearch 메타태그
+7. ✅ A-4: 블로그 본문 img width/height + aspect-ratio 추가
+8. ✅ A-5: Hidden H1 → sr-only (스팸 패널티 방지)
+9. ✅ A-6: og-chart 캐시 1h→6h
+10. ✅ A-7: BUILD_DATE 동적화
+11. ✅ A-8: 중복 WebSite JSON-LD 제거 (page.tsx)
+12. ✅ A-9: Last-Modified 매요청갱신 제거 (크롤예산 보호)
+13. ✅ A-10: 외부 링크 nofollow 추가 (PageRank 유출 방지)
+14. ✅ A-11: apt/search noindex
 
-### 신규 (KakaoBottomSheet)
-- ☆ 버튼 클릭 시 페이지 이탈 없이 미니 가입창 (향후 연동)
+### B급 수정 (캐러셀 최적화)
+15. ✅ B-1: 본문 실제 이미지 추출 → JSON-LD image 배열 선두 배치
+16. ✅ B-2: 블로그 리스트 cover_image 없는 포스트에 OG 이미지 폴백
+17. ✅ B-3: image-sitemap geo_location (부동산 이미지)
+18. ✅ B-4: 빈 alt 텍스트 자동 보강 ("이미지"→"[제목] 관련 이미지")
+19. ✅ B-5/B-8: RSS 50→100개, apt 30/20→60/40개
+20. ✅ B-6: hreflang ko + x-default 태그
+21. ✅ B-7: font-display:swap 보험
+22. ✅ B-9: 댓글 이미지 링크 rel=nofollow ugc
+23. ✅ B-10: apt/theme canonical에서 region 파라미터 제거
+24. ✅ B-11: Content-Language: ko 헤더
 
-### 수정 (ActionBar v4)
-- gateVisible 숨김 로직 제거 → 항상 표시
-- 페이지별 메시지 세분화 (12개 경로 컨텍스트)
+### C급 수정 (노출면적 확대)
+25. ✅ C-1: 부동산+주식 허브 SEO 텍스트 추가
+26. ✅ C-2: Speakable cssSelector 확장 (h2, .faq-answer)
+27. ✅ C-3: apt/[id] Residence+GeoCoordinates 스키마
+28. ✅ C-4: discussion redirect 페이지 noindex
+29. ✅ C-7: stock/apt noscript 폴백
 
-### 적용 범위 (20+ 페이지)
-- blog/[slug]: 콘텐츠 100% 공개 + 카테고리별 LoginGate
-- apt 6탭: 청약/분양중/미분양/재개발/실거래/단지백과
-- apt 상세 5페이지: complex/[name], compare, search, map, diagnose
-- calc: CalcSignupCTA → LoginGate 교체
-- feed: LoginGate 삽입
-
-### 어드민 대시보드
-- v2 API: FG 소스별 성과, 페이지별 전환 맵, 카카오 비율 쿼리 추가
-- FocusTab: 벤치마크 CTA CTR→FG CTR, 게이트→카카오비율 교체 + FG 성과 섹션
-- GrowthTab: 전환 퍼널 FG노출/클릭 추가 + 페이지별 전환 맵
-
-### PENDING
-- ☆ 버튼 → KakaoBottomSheet 연동 (현재 상세 페이지 LoginGate로 처리)
-- 배포 후 before/after CVR 비교 검증
-
----
-
-## 세션 109 — CTA 전략 전면 재설계 + SEO 28항목 수정
-
-### 커밋: c5f55080 (CTA), 5ef2086a (SEO) — push 대기
-### 변경: 19파일 총, +303 -90
-
-### CTA 전략 재설계 (12파일)
-
-핵심 전환: "텍스트 잠금 → 알림 서비스" 가치 제안 전환
-
-**Phase 1 — CTA 카피 전환:**
-- SmartSectionGate: "나머지 분석 이어 읽기" → "가격이 변하면 알려드릴게요", 게이트 20-50% → 40-70%
-- BlogMidCTA: 부활 (import 0→1), 서비스 지향 카피, unsold/redev 카테고리 추가
-- BlogFloatingBar: 신규 컴포넌트 — 스크롤 30% 후 고정 [저장/알림/공유] 바
-- KakaoHeroCTA: "3초 가입 인사이트" → "관심 지역·종목 가격 변동 알림"
-- LoginGate/CalcSignupCTA/page.tsx: 전체 CTA 버튼 "가입" → "알림 설정" 통일
-
-**Phase 2 — 온보딩 재설계:**
-- auth/callback: CTA 가입자 온보딩 스킵 제거 → 모든 신규 유저 /onboarding 필수
-- OnboardingClient: 관심 설정 완료 시 auto-alerts API 호출 추가
-- api/onboarding/auto-alerts: notification_settings + email_subscribers 자동 등록
-- ProfileCompleteBanner: "프로필 완성 +50P" → "관심 설정하면 맞춤 알림" 전환
-
-### 근거 데이터
-- 실제 유저 102명 중 90명(88%) 가입 후 활동 0건 (유령)
-- price_alerts 등록: 0건, push_subscriptions: 7명
-- 원인: CTA 가입 → onboarded=true 자동 설정 → 온보딩 스킵 → 관심 미설정 → 알림 안 받음 → 재방문 0
-
-### SEO 28항목 수정 (7파일 + DB 6건)
-(이전 커밋 5ef2086a에 포함)
+### PENDING (코드 외적 조치)
+- ⬜ C-5: 네이버 서치어드바이저에서 RSS(/blog/feed) + 사이트맵 수동 제출 확인
+- ⬜ C-8: INDEXNOW_KEY env 값 = public/3a23def313e1b1283822c54a0f9a5675.txt 일치 확인
+- ⬜ Google Search Console에서 `blog?q=` 패턴 URL 일괄 삭제 요청
+- ⬜ 배포 후 네이버 서치어드바이저 "페이지 수집 요청" 수동 실행
 
 ---
-
-## 세션 108 — 전체 감사 24건 + 어드민 대시보드 업데이트
-
-### 3차 심층 감사 결과 총 24건 발견 → 13건 코드 수정 완료
-
-#### CRITICAL 수정 완료
-1. ✅ admin/v2 `issue_alerts.alert_type` → `issue_type` (DB 에러 해소)
-2. ✅ search API `vote_yes/vote_no` → `vote_a/vote_b` (토론 검색 복구)
-3. ✅ `apt-analysis-gen` withCronAuth 추가 + batch 15→5 + 250s timeout + 스케줄 매시간→6시간
-4. ⚠️ `/apt/두산위브...` "Objects are not valid as React child" — 단발성, 모니터링 중
-5. ⚠️ DB statement timeout — 무거운 쿼리 모니터링 중
-
-#### HIGH 수정 완료
-6. ✅ seed-posts 모듈레벨 today/hourKST/isWeekend → `getDateVars()` 함수화
-7. ✅ 5개 탭 + ComplexClient `design=2` → `(i%6)+1` 로테이션
-8. ✅ collect-site-images 실패 사이트 `images:[]` 마킹 (API 낭비 차단)
-9. ✅ redev-enrich + apt-price-sync 타임아웃 방어 (100s 체크)
-
-#### MEDIUM 수정 완료
-10. ✅ unsold tab-data API + page.tsx에 `ai_summary` 컬럼 추가
-11. ✅ TransactionTab에 EngageRow import + aptEngageMap prop 전달
-12. ✅ issue-draft 스케줄 `*/10` → `*/30` (API 호출 66% 감소)
-
-#### 어드민 대시보드 업데이트
-13. ✅ 🖼️ 부동산 이미지 수집 진행률 섹션 추가 (apt_sites + 단지백과)
-14. ✅ 크론 슬롯 89 → 91 정확한 수치 반영 (v2 API + OpsTab + FocusTab)
-15. ✅ imageCollection 쿼리 추가 (NULL/빈배열 구분 정확 집계)
-
-### 남은 모니터링 항목
-- apt-analysis-gen: 6시간 간격으로 정상 완료되는지 확인 필요
-- collect-complex-images: 34,539개 단지 이미지 수집 진행 중 (매시간 500건)
-- collect-site-images: ~228개 실패 사이트 images:[] 마킹 후 API 낭비 차단 확인
-
-### 프로덕션 상태
-- 배포: READY ✅
-- TypeScript 에러: 0건
-- 런타임 에러: 0건 (최근 10분)
-- 크론 슬롯: 91/100

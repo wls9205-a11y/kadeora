@@ -79,7 +79,7 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
     },
     openGraph: { title: meta.title, description: meta.desc, url: canonical, siteName: '카더라', locale: 'ko_KR', type: 'website', images: [{ url: `${SITE}/api/og?title=${encodeURIComponent(meta.title)}&category=${category === 'all' ? 'blog' : category}&author=${encodeURIComponent('카더라')}&design=2`, width: 1200, height: 630, alt: meta.title }, { url: `${SITE}/api/og-square?title=${encodeURIComponent(meta.title)}&category=${category === 'all' ? 'blog' : category}`, width: 630, height: 630, alt: meta.title }] },
     twitter: { card: 'summary_large_image' as const, title: meta.title, description: meta.desc },
-    ...(pageNum > 1 ? { robots: { index: false, follow: true } } : {}),
+    ...(pageNum > 1 || q ? { robots: { index: false, follow: true } } : {}),
     other: {
       'naver:written_time': new Date().toISOString(),
       'naver:updated_time': new Date().toISOString().slice(0, 10) + 'T00:00:00Z',
@@ -399,9 +399,9 @@ export default async function BlogPage({ searchParams }: Props) {
                 {/* 순위 */}
                 <span style={{ fontSize: 10, fontWeight: 800, color: isHot ? 'var(--accent-red)' : 'var(--text-tertiary)', width: 18, textAlign: 'center', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>{rank}</span>
                 {/* 썸네일 */}
-                {p.cover_image && (
+                {(p.cover_image || true) && (
                   <div style={{ width: 80, height: 56, borderRadius: 'var(--radius-sm)', overflow: 'hidden', flexShrink: 0, background: 'var(--bg-hover)' }}>
-                    <img src={p.cover_image} alt={p.title || "블로그 썸네일"} width={80} height={56} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} loading="lazy" />
+                    <img src={p.cover_image || `${SITE}/api/og?title=${encodeURIComponent((p.title || '').slice(0, 40))}&design=${(idx % 6) + 1}&category=${p.category || 'blog'}`} alt={p.title || "블로그 썸네일"} width={80} height={56} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} loading="lazy" />
                   </div>
                 )}
                 {/* 본문 */}

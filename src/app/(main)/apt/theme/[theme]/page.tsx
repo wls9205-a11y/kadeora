@@ -112,7 +112,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 
   return {
     title, description: desc,
-    alternates: { canonical: `${SITE_URL}/apt/theme/${theme}${region ? `?region=${encodeURIComponent(region)}` : ''}` },
+    alternates: { canonical: `${SITE_URL}/apt/theme/${theme}` },
     robots: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' as const },
     openGraph: { title, description: desc, siteName: '카더라', locale: 'ko_KR', type: 'website',
       images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent(regionLabel + t.title)}&design=2&subtitle=${encodeURIComponent('TOP 100')}&author=${encodeURIComponent('카더라')}`, width: 1200, height: 630 }] },

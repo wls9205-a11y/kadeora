@@ -47,10 +47,13 @@ export async function GET() {
       const caption = s.region && s.sigungu
         ? escapeXml(`${s.region} ${s.sigungu} ${s.name} 분양 현장`)
         : escapeXml(`${s.name} 분양 현장`);
+      const geoLoc = s.region && s.sigungu
+        ? `\n        <image:geo_location>${escapeXml(`${s.region} ${s.sigungu}`)}</image:geo_location>`
+        : '';
       return `      <image:image>
         <image:loc>${escapeXml(url)}</image:loc>
         <image:title>${title}</image:title>
-        <image:caption>${caption}</image:caption>
+        <image:caption>${caption}</image:caption>${geoLoc}
       </image:image>`;
     }).filter(Boolean).join('\n');
 

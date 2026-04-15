@@ -45,13 +45,13 @@ renderer.heading = function ({ text, depth }: { text: string; depth: number }) {
   return `<h${depth} id="${id}">${text}</h${depth}>\n`;
 };
 renderer.image = function ({ href, title, text }: { href: string; title?: string | null; text: string }) {
-  return `<img src="${href}" alt="${text || ''}" ${title ? `title="${title}"` : ''} loading="lazy" decoding="async" style="max-width:100%;height:auto;border-radius:8px" />`;
+  return `<img src="${href}" alt="${text || ''}" ${title ? `title="${title}"` : ''} width="800" height="450" loading="lazy" decoding="async" style="max-width:100%;height:auto;border-radius:8px;aspect-ratio:16/9" />`;
 };
 renderer.link = function ({ href, title, text }: { href: string; title?: string | null; text: string }) {
   const isExternal = href && (href.startsWith('http://') || href.startsWith('https://'));
   const titleAttr = title ? ` title="${title}"` : '';
   if (isExternal) {
-    return `<a href="${href}" target="_blank" rel="noopener noreferrer"${titleAttr} style="color:var(--brand);text-decoration:underline;text-underline-offset:2px">${text}</a>`;
+    return `<a href="${href}" target="_blank" rel="noopener noreferrer nofollow"${titleAttr} style="color:var(--brand);text-decoration:underline;text-underline-offset:2px">${text}</a>`;
   }
   return `<a href="${href}"${titleAttr} style="color:var(--brand);text-decoration:none">${text}</a>`;
 };
@@ -287,7 +287,7 @@ export default async function BlogDetailPage({ params }: Props) {
   // 봇 감지 — SEO 크롤러에게는 전체 본문 제공
   const headersList = await headers();
   const ua = headersList.get('user-agent') || '';
-  const isBot = /googlebot|bingbot|yandex|baiduspider|naverbot|daumoa|slurp|msnbot|ahrefsbot|semrushbot|dotbot|petalbot|facebot|twitterbot|linkedinbot|kakaotalk-scrap/i.test(ua);
+  const isBot = /googlebot|bingbot|yandex|baiduspider|yeti|naverbot|daumoa|daumcrawler|slurp|msnbot|ahrefsbot|semrushbot|dotbot|petalbot|facebot|twitterbot|linkedinbot|kakaotalk-scrap|applebot|seznambot/i.test(ua);
 
   // CTA 소셜프루프 데이터
   let userCount = 66;
@@ -499,6 +499,13 @@ export default async function BlogDetailPage({ params }: Props) {
   ).replace(/[\n\r#*_|]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160);
 
   const isNewsArticle = post.source_type === 'auto_issue' || post.source_type === 'news_rss' || post.source_type === 'upcoming';
+  
+  // B-1: 본문 내 실제 이미지 URL 추출 (텍스트 없는 사진 → 네이버 이미지 캐러셀 우대)
+  const contentImages = (post.content || '').match(/!\[([^\]]*)\]\(([^)]+)\)/g)
+    ?.map(m => { const match = m.match(/!\[([^\]]*)\]\(([^)]+)\)/); return match ? { alt: match[1], url: match[2] } : null; })
+    .filter((img): img is { alt: string; url: string } => !!img && !img.url.includes('/api/og'))
+    .slice(0, 3) || [];
+
   const jsonLd = {
     '@context': 'https://schema.org', '@type': isNewsArticle ? 'NewsArticle' : 'BlogPosting',
     headline: post.title,
@@ -522,6 +529,12 @@ export default async function BlogDetailPage({ params }: Props) {
     isPartOf: { '@type': 'WebSite', name: '카더라', url: SITE },
     url: `${SITE}/blog/${slug}`,
     image: [
+      // 실제 본문 이미지 (텍스트 없는 사진 → 네이버 이미지 캐러셀 우대)
+      ...contentImages.map(img => ({
+        '@type': 'ImageObject' as const,
+        url: img.url,
+        caption: img.alt || post.title,
+      })),
       {
         '@type': 'ImageObject',
         url: post.cover_image || `${SITE}/api/og?title=${encodeURIComponent(post.title)}&category=${post.category}&design=2`,
@@ -540,7 +553,7 @@ export default async function BlogDetailPage({ params }: Props) {
     articleSection: catSection[post.category] || '정보',
     speakable: {
       '@type': 'SpeakableSpecification',
-      cssSelector: ['h1', '.blog-content p:first-of-type', '.blog-content h2:first-of-type'],
+      cssSelector: ['h1', '.blog-content p:first-of-type', '.blog-content h2:first-of-type', '.blog-content h2', '.faq-answer'],
     },
     ...(comments.length > 0 ? {
       commentCount: comments.length,
@@ -605,6 +618,13 @@ export default async function BlogDetailPage({ params }: Props) {
     // style="" 빈 속성 정리
     .replace(/\sstyle\s*=\s*"[\s;]*"/gi, '');
   
+  // B-4: 빈/일반적인 alt 텍스트 개선 (네이버 이미지 검색 인덱싱 강화)
+  const catLabel = post.category === 'stock' ? '주식' : post.category === 'apt' ? '부동산' : post.category === 'unsold' ? '미분양' : '재테크';
+  htmlRaw = htmlRaw.replace(
+    /<img([^>]*?)alt="(이미지|image|사진|그림|photo|picture|)"([^>]*?)>/gi,
+    (_, before, _alt, after) => `<img${before}alt="${post.title} — ${catLabel} 관련 이미지"${after}>`
+  );
+
   htmlRaw = injectInternalLinks(htmlRaw);
   let htmlFull = enhanceBlogVisuals(htmlRaw, {
     excerpt: post.excerpt,
@@ -723,6 +743,10 @@ export default async function BlogDetailPage({ params }: Props) {
     <div className="blog-detail-layout">
       <div className="blog-detail-main">
       <ReadingProgress />
+      {/* A-2: article:tag 개별 메타태그 — 네이버/구글 키워드 인식 강화 */}
+      {(post.tags ?? []).slice(0, 8).map((tag: string) => (
+        <meta key={`tag-${tag}`} property="article:tag" content={tag} />
+      ))}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       {faqSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />}
@@ -1034,7 +1058,7 @@ export default async function BlogDetailPage({ params }: Props) {
                   <span style={{ fontSize: 12, color: 'var(--text-tertiary)', marginLeft: 6 }}>{timeAgo(c.created_at)}</span>
                   <div style={{ fontSize: 14, color: 'var(--text-primary)', lineHeight: 1.6, marginTop: 3 }}>{c.content}</div>
                   {(c as any).image_url && (
-                    <a href={(c as any).image_url} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', marginTop: 4 }}>
+                    <a href={(c as any).image_url} target="_blank" rel="noopener noreferrer nofollow ugc" style={{ display: 'inline-block', marginTop: 4 }}>
                       <img src={(c as any).image_url} alt="댓글 이미지" style={{ maxWidth: 180, maxHeight: 120, borderRadius: 'var(--radius-md)', objectFit: 'cover', border: '1px solid var(--border)' }} />
                     </a>
                   )}
