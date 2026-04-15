@@ -109,7 +109,7 @@ export default function GuidePage() {
       </div>
 
       {/* 앱 설치 — 원버튼 */}
-      <div style={{ marginBottom: 'var(--sp-lg)' }}>
+      <div id="install" style={{ marginBottom: 'var(--sp-lg)', scrollMarginTop: 80 }}>
         <GuideInstallButton />
       </div>
 

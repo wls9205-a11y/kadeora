@@ -154,7 +154,7 @@ async function detectUncoveredSites(sb: any): Promise<any[]> {
     const score = Math.min(42 + (site.interest_count || 0) / 100, 65);
 
     const { error } = await (sb as any).from('issue_alerts').insert({
-      title: `[선점] ${site.name} — ${site.region} ${site.sigungu || ''} 분석`,
+      title: `${site.name} — ${site.region} ${site.sigungu || ''} 분석`,
       summary: `${site.name} (${site.region} ${site.sigungu || ''}) ${site.total_units || '?'}세대. 시공: ${site.builder || '미정'}. 아직 카더라 블로그가 없는 활성 단지.`,
       category: 'apt',
       sub_category: 'preempt_coverage',

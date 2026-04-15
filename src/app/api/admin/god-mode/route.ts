@@ -102,6 +102,8 @@ const CRON_GROUPS = {
     '/api/cron/blog-sector-rotation',
     '/api/cron/blog-subscription-strategy',
     '/api/cron/blog-quality-prune',
+    '/api/cron/blog-quality-score',
+    '/api/cron/blog-auto-publish',
     '/api/cron/blog-restore-candidate',
     '/api/cron/blog-restore-monitor',
     '/api/cron/analysis-refresh',
