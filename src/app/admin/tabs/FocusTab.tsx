@@ -34,7 +34,7 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
   const[df,setDf]=useState<any>(null);
   const[ld,setLd]=useState(true);
   const[gr,setGr]=useState(false);
-  const[gRes,setGRes]=useState<{ok:number;fail:number}|null>(null);
+  const[gRes,setGRes]=useState<{ok:number;fail:number;elapsed?:string}|null>(null);
   const ref=useRef<any>(null);
 
   const load=useCallback(()=>{
@@ -79,10 +79,12 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
   const godMode=async()=>{
     if(gr)return;if(!confirm('전체 크론 실행?'))return;
     setGr(true);setGRes(null);
+    const t0=Date.now();
     try{const r=await fetch('/api/admin/god-mode',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'full'})});
       const j=await r.json();const ok=(j.results||[]).filter((x:any)=>x.status>=200&&x.status<400).length;
-      setGRes({ok,fail:(j.results||[]).length-ok});load();
-    }catch{setGRes({ok:0,fail:1});}finally{setGr(false);}
+      const elapsed=((Date.now()-t0)/1000).toFixed(1);
+      setGRes({ok,fail:(j.results||[]).length-ok,elapsed});load();
+    }catch{setGRes({ok:0,fail:1,elapsed:'?'});}finally{setGr(false);}
   };
 
   return (
@@ -104,7 +106,7 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
           <span style={{fontSize:14}}>{gr?'⏳':'🚀'}</span>{gr?'...':'최신화'}
         </button>
       </div>} p="10px 12px"/>
-      {gRes&&<div style={{padding:'3px 8px',borderRadius: 'var(--radius-sm)',margin:'4px 0',fontSize:13,fontWeight:600,background:gRes.fail>0?'rgba(239,68,68,0.08)':'rgba(16,185,129,0.08)',color:gRes.fail>0?'#EF4444':'#10B981',textAlign:'center'}}>✓{gRes.ok}{gRes.fail>0&&` ✗${gRes.fail}`}</div>}
+      {gRes&&<div style={{padding:'3px 8px',borderRadius: 'var(--radius-sm)',margin:'4px 0',fontSize:13,fontWeight:600,background:gRes.fail>0?'rgba(239,68,68,0.08)':'rgba(16,185,129,0.08)',color:gRes.fail>0?'#EF4444':'#10B981',textAlign:'center'}}>✓{gRes.ok}{gRes.fail>0&&` ✗${gRes.fail}`} · {gRes.elapsed}s</div>}
       <div style={{fontSize:11,color:'rgba(255,255,255,0.35)',textAlign:'right',marginBottom:2}}>30초마다 자동 갱신 · {new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})}</div>
 
       {/* ═══ 2. 경고 ═══ */}

@@ -140,10 +140,10 @@ function getTemplates(): Template[] {
   // ═══ 주식 — 계산 ═══
   { baseKey: 'stk_compound', category: 'stock', type: 'calc',
     prompt: '매달 50만원 연 10% 복리 20년 계산 공유. 구체적 숫자. 180자',
-    fallback: { title: '매달 50만원, 20년 복리로 얼마?', content: '계산기 돌렸는데 매달 50만원 연 10% 복리 20년 = 원금 1.2억 → 결과 3.8억. 복리의 힘이 진짜임... 일찍 시작하는 게 답' }},
+    fallback: { title: '매달 적금 넣으면 20년 후 얼마?', content: '복리 계산기 돌려봤는데 매달 꾸준히 넣으면 원금의 몇 배가 되더라고요. 복리의 힘이 진짜임... 일찍 시작하는 게 답' }},
   { baseKey: 'stk_coffee_calc', category: 'stock', type: 'calc',
     prompt: '"매일 커피값 5천원을 투자했다면?" 라떼효과 계산. 150자',
-    fallback: { title: '커피값을 투자했다면 얼마였을까?', content: '매일 5천원 × 365일 = 연 182만원. 이걸 연 8%로 10년 투자하면 약 2,800만원... 커피가 차 한 대값이었네요. 그래도 커피는 못 끊겠다 ㅋ' }},
+    fallback: { title: '커피값을 투자했다면?', content: '매일 마시는 커피값을 적금이나 투자에 넣었으면 몇 년 뒤에 꽤 큰 돈이 됐을 텐데... 그래도 커피는 못 끊겠다 ㅋ 다들 라떼팩터 실천하세요?' }},
 
   // ═══ 주식 — TIL ═══
   { baseKey: 'stk_til_after', category: 'stock', type: 'til',
@@ -176,7 +176,7 @@ function getTemplates(): Template[] {
     fallback: { title: '청약 당첨 확률 올리는 꿀팁', content: '가점 낮으면 추첨제 노리세요. 85㎡ 초과 = 100% 추첨. 비인기 지역 + 대형 평형이 의외로 당첨률 높아요' }},
   { baseKey: 'apt_loan_tip', category: 'apt', type: 'tip',
     prompt: '주택담보대출 금리 비교 팁. 은행 3곳 비교해보라는 조언. 150자',
-    fallback: { title: '주담대 금리, 최소 3곳 비교하세요', content: '같은 조건인데 은행마다 금리 0.3~0.5% 차이 나요. 1억 대출이면 연 30~50만원 차이. 인터넷은행도 꼭 비교해보세요' }},
+    fallback: { title: '주담대 금리, 최소 3곳 비교하세요', content: '같은 조건인데 은행마다 금리 차이가 꽤 나요. 인터넷은행까지 비교하면 연간 수십만원 절약 가능. 꼭 비교해보세요' }},
 
   // ═══ 부동산 — 질문 ═══
   { baseKey: 'apt_first_q', category: 'apt', type: 'question',
@@ -219,7 +219,7 @@ function getTemplates(): Template[] {
   // ═══ 일상 — 꿀팁 ═══
   { baseKey: 'free_save_tip1', category: 'free', type: 'tip',
     prompt: '직장인 월 절약 꿀팁. 통신비/보험/구독 정리 등. 180자',
-    fallback: { title: '월 40만원 절약한 실전 방법', content: '알뜰폰 -5만 / 보험 정리 -8만 / 구독 정리 -3만 / 외식 축소 -15만 / 텀블러 -10만 = 월 41만원 절약!' }},
+    fallback: { title: '고정비 정리만으로 월 수십만원 절약', content: '알뜰폰 전환, 안 쓰는 보험 정리, 구독 서비스 정리, 외식 줄이기, 텀블러 지참... 하나씩 해보니 생각보다 많이 줄더라고요' }},
   { baseKey: 'free_save_tip2', category: 'free', type: 'tip',
     prompt: '짠테크 습관 1가지. 가계부, 현금봉투 등. 150자',
     fallback: { title: '짠테크 습관 하나로 월 20만원 아꼈어요', content: '매일 지출 사진 찍기 시작했더니 충동구매가 확 줄었어요. 앱 안 써도 됨. 카드 결제마다 영수증 사진 한 장. 일주일만 해보세요' }},
@@ -228,7 +228,7 @@ function getTemplates(): Template[] {
     fallback: { title: '연말정산 때 이거 놓치지 마세요', content: '안경/콘택트렌즈 구매비도 의료비 공제 됩니다! 연 50만원 한도. 라식/라섹도 되고요. 의외로 모르는 분 많더라고요' }},
   { baseKey: 'free_card_tip', category: 'free', type: 'tip',
     prompt: '신용카드 실적 채우는 꿀팁 또는 추천. 150자',
-    fallback: { title: '카드 실적 채우는 꿀팁', content: '공과금, 통신비, 구독료 전부 한 카드로 몰면 실적 자동 달성. 월 30만원 실적 카드인데 이것만으로 25만원 채워져요' }},
+    fallback: { title: '카드 실적 채우는 꿀팁', content: '공과금, 통신비, 구독료 전부 한 카드로 몰면 실적 자동 달성돼요. 생활비만으로도 실적 채워지니까 혜택 카드 하나 잘 고르는 게 중요해요' }},
 
   // ═══ 일상 — 유머 ═══
   { baseKey: 'free_humor_pay', category: 'free', type: 'humor',
@@ -304,7 +304,7 @@ function getTemplates(): Template[] {
     fallback: { title: '취미에 돈 쓰는 거 아깝나요?', content: '운동, 게임, 여행... 취미비가 만만찮은데 다들 한 달에 취미비 얼마나 쓰세요? 아예 안 쓰는 분도 있나요' }},
   { baseKey: 'casual_grocery', category: 'free', type: 'casual',
     prompt: '장보기 물가 충격 뻘글. 100자',
-    fallback: { title: '마트 장바구니 10만원이 기본이네요', content: '대파 한 단 2,500원, 계란 한 판 8,000원... 예전에 5만원이면 한 주 먹었는데. 물가가 진짜 무섭다' }},
+    fallback: { title: '요즘 마트 장보기 너무 비싸요', content: '장바구니에 기본적인 것만 담았는데 금액이 장난 아니에요. 예전보다 확실히 많이 올랐는데 다들 장보기 절약법 있으면 공유해주세요' }},
   { baseKey: 'casual_saving_goal', category: 'free', type: 'casual',
     prompt: '저축 목표 공유 뻘글. "올해 목표 1000만원" 류. 100자',
     fallback: { title: '올해 저축 목표 1000만원인데...', content: '4월인데 아직 200만원 모았어요. 속도가 안 나요 ㅠ 다들 연간 저축 목표 얼마로 잡으세요?' }},
@@ -313,7 +313,7 @@ function getTemplates(): Template[] {
     fallback: { title: '출퇴근 1시간 30분 버티는 중', content: '편도 1시간 30분이면 하루 3시간을 길에서 보내는 건데... 이사 가야 하나 차를 사야 하나. 다들 출퇴근 시간이 어떠세요?' }},
   { baseKey: 'casual_ott_cost', category: 'free', type: 'casual',
     prompt: 'OTT 구독 정리 뻘글. 넷플+유튜브+웨이브 등. 100자',
-    fallback: { title: 'OTT 구독료만 월 5만원 ㅋㅋ', content: '넷플 17,000 + 유튜브프리미엄 14,900 + 쿠팡플레이... 정리해야 하는데 다 쓰고 있어서 뭘 끊을지 모르겠다' }},
+    fallback: { title: 'OTT 구독 정리해야 하는데...', content: '넷플릭스, 유튜브 프리미엄, 쿠팡플레이... 합치면 월 구독료가 장난 아닌데 다 쓰고 있어서 뭘 끊을지 모르겠다' }},
 
   // ═══ 콘텐츠 언급 (content) — 카더라 기능 자연스럽게 노출 ═══
   { baseKey: 'ctn_calc_score', category: 'apt', type: 'content',
