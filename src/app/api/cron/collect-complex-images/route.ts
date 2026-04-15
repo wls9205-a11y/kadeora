@@ -8,8 +8,8 @@ export const runtime = 'nodejs';
 const NAVER_ID = process.env.NAVER_CLIENT_ID;
 const NAVER_SECRET = process.env.NAVER_CLIENT_SECRET;
 const KAKAO_KEY = process.env.KAKAO_REST_API_KEY;
-const BATCH = 500;
-const PARALLEL = 20;
+const BATCH = 3000;
+const PARALLEL = 50;
 
 interface Img { title: string; url: string; thumbnail: string; source: string }
 

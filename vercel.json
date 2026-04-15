@@ -310,7 +310,11 @@
     },
     {
       "path": "/api/cron/collect-complex-images",
-      "schedule": "30 * * * *"
+      "schedule": "*/10 * * * *"
+    },
+    {
+      "path": "/api/cron/apt-image-crawl",
+      "schedule": "15 * * * *"
     },
     {
       "path": "/api/cron/batch-cluster-submit",

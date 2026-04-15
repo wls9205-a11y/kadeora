@@ -2,7 +2,6 @@ import { createSupabaseServer } from '@/lib/supabase-server';
 import { SITE_URL } from '@/lib/constants';
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { fmtAmount } from '@/lib/format';
 import ShareButtons from '@/components/ShareButtons';
 import ComplexClient from './ComplexClient';
 
@@ -89,12 +88,6 @@ export default async function ComplexPage({ searchParams }: { searchParams: Prom
 
   const displayCount = selectedRegion ? regionData.find(r => r.region === selectedRegion)?.count || allProfiles.length : totalProfiles;
 
-  // KPI 집계
-  const avgSale = allProfiles.length ? Math.round(allProfiles.filter(p => p.latest_sale_price > 0).reduce((s: number, p: any) => s + Number(p.latest_sale_price), 0) / allProfiles.filter(p => p.latest_sale_price > 0).length) : 0;
-  const avgRatio = allProfiles.length ? Math.round(allProfiles.filter(p => p.jeonse_ratio > 0).reduce((s: number, p: any) => s + Number(p.jeonse_ratio), 0) / (allProfiles.filter(p => p.jeonse_ratio > 0).length || 1)) : 0;
-  const totalTrades = allProfiles.reduce((s: number, p: any) => s + (p.sale_count_1y || 0) + (p.rent_count_1y || 0), 0);
-  const ratioColor = avgRatio > 80 ? '#ef4444' : avgRatio > 60 ? '#f59e0b' : '#22c55e';
-
   // 도넛 데이터 (연차 비율)
   const ageDonut = ageChartData.filter(a => a.count > 0);
   const donutTotal = ageDonut.reduce((s, a) => s + a.count, 0);
@@ -131,55 +124,26 @@ export default async function ComplexPage({ searchParams }: { searchParams: Prom
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org', '@type': 'WebPage',
         name: selectedRegion ? `${selectedRegion} 단지백과` : '단지백과',
-        speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.kpi-card'] },
+        speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1'] },
       })}} />
 
-      {/* ═══ 그라데이션 히어로 ═══ */}
-      <div style={{
-        borderRadius: 'var(--radius-lg)', padding: '18px 18px 14px', marginBottom: 14, position: 'relative', overflow: 'hidden',
-        background: 'linear-gradient(135deg, #0F1B3E 0%, rgba(59,123,246,0.3) 100%)',
-        border: '1px solid rgba(59,123,246,0.15)',
-      }}>
-        <div style={{ position: 'absolute', top: -30, right: -30, width: 120, height: 120, borderRadius: '50%', background: 'rgba(59,123,246,0.08)' }} />
-        <div style={{ position: 'absolute', bottom: -20, left: -20, width: 80, height: 80, borderRadius: '50%', background: 'rgba(59,123,246,0.05)' }} />
-        <nav style={{ fontSize: 10, color: 'rgba(232,237,245,0.4)', marginBottom: 6, display: 'flex', gap: 'var(--sp-xs)', position: 'relative', flexWrap: 'wrap' }}>
-          <Link href="/" style={{ color: 'inherit', textDecoration: 'none' }}>홈</Link><span>›</span>
-          <Link href="/apt" style={{ color: 'inherit', textDecoration: 'none' }}>부동산</Link><span>›</span>
-          {selectedRegion ? (<><Link href="/apt/complex" style={{ color: 'inherit', textDecoration: 'none' }}>단지백과</Link><span>›</span><span style={{ color: 'rgba(232,237,245,0.9)' }}>{selectedRegion}</span></>) : (<span style={{ color: 'rgba(232,237,245,0.9)' }}>단지백과</span>)}
-        </nav>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', position: 'relative' }}>
-          <h1 style={{ position:"absolute", width:1, height:1, overflow:"hidden", clip:"rect(0,0,0,0)" }}>
-            🏢 {selectedRegion ? `${selectedRegion} 단지백과` : '단지백과'}
+      {/* ═══ 최소 헤더 ═══ */}
+      <nav style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 6, display: 'flex', gap: 'var(--sp-xs)', flexWrap: 'wrap' }}>
+        <Link href="/" style={{ color: 'inherit', textDecoration: 'none' }}>홈</Link><span>›</span>
+        <Link href="/apt" style={{ color: 'inherit', textDecoration: 'none' }}>부동산</Link><span>›</span>
+        {selectedRegion ? (<><Link href="/apt/complex" style={{ color: 'inherit', textDecoration: 'none' }}>단지백과</Link><span>›</span><span style={{ color: 'var(--text-primary)' }}>{selectedRegion}</span></>) : (<span style={{ color: 'var(--text-primary)' }}>단지백과</span>)}
+      </nav>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)' }}>
+          <h1 style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
+            {selectedRegion ? `${selectedRegion} 단지백과` : '단지백과'}
           </h1>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)' }}>
-            {selectedRegion && (
-              <Link href="/apt/complex" style={{ fontSize: 10, fontWeight: 600, color: 'var(--brand)', textDecoration: 'none', background: 'rgba(59,123,246,0.15)', padding: '3px 10px', borderRadius: 'var(--radius-sm)' }}>✕ 전체</Link>
-            )}
-            <span style={{ fontSize: 12, color: 'rgba(232,237,245,0.6)', fontWeight: 600 }}>{displayCount.toLocaleString()}개</span>
-          </div>
+          <span style={{ fontSize: 12, color: 'var(--text-tertiary)', fontWeight: 600 }}>{displayCount.toLocaleString()}개</span>
+          {selectedRegion && (
+            <Link href="/apt/complex" style={{ fontSize: 10, fontWeight: 600, color: 'var(--brand)', textDecoration: 'none', background: 'rgba(59,123,246,0.1)', padding: '3px 10px', borderRadius: 'var(--radius-sm)' }}>✕ 전체</Link>
+          )}
         </div>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 'var(--sp-sm)', position: 'relative' }}>
-          <ShareButtons title={`${selectedRegion || '전국'} 단지백과 — ${displayCount.toLocaleString()}개 아파트 비교`} contentType="page" contentRef="apt-complex" />
-        </div>
-      </div>
-
-      {/* ═══ KPI 3열 ═══ */}
-      <div className="kd-grid-3" style={{ gap: 6, marginBottom: 14 }}>
-        {[
-          { label: '평균 매매가', value: fmtAmount(avgSale), icon: '💰' },
-          { label: '평균 전세가율', value: `${avgRatio}%`, icon: '📊', color: ratioColor },
-          { label: '총 거래', value: totalTrades.toLocaleString() + '건', icon: '📈' },
-        ].map(k => (
-          <div key={k.label} style={{
-            background: 'linear-gradient(135deg, var(--bg-surface), var(--bg-hover))',
-            borderRadius: 'var(--radius-md)', padding: '10px 8px', textAlign: 'center',
-            border: '1px solid var(--border)',
-          }}>
-            <div style={{ fontSize: 14, marginBottom: 2 }}>{k.icon}</div>
-            <div style={{ fontSize: 15, fontWeight: 900, color: k.color || 'var(--text-primary)' }}>{k.value}</div>
-            <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 1 }}>{k.label}</div>
-          </div>
-        ))}
+        <ShareButtons title={`${selectedRegion || '전국'} 단지백과 — ${displayCount.toLocaleString()}개 아파트 비교`} contentType="page" contentRef="apt-complex" />
       </div>
 
       {/* ═══ 지역별 현황 — 도넛 + 타일 (부동산 메인 스타일) ═══ */}
