@@ -47,14 +47,21 @@ async function searchNaverImages(query: string, count = 5): Promise<{ url: strin
   try {
     const res = await fetch(`https://openapi.naver.com/v1/search/image?query=${encodeURIComponent(query)}&display=${count}&sort=sim&filter=large`, {
       headers: { 'X-Naver-Client-Id': NAVER_CLIENT_ID, 'X-Naver-Client-Secret': NAVER_CLIENT_SECRET },
+      signal: AbortSignal.timeout(5000),
     });
-    if (!res.ok) return [];
+    if (!res.ok) {
+      console.error(`[issue-draft] Naver Image API error: ${res.status} | query="${query}"`);
+      return [];
+    }
     const data = await res.json();
     return (data.items || []).map((item: any) => ({
       url: (item.link || '').replace('http://', 'https://'),
       alt: item.title?.replace(/<[^>]+>/g, '') || query,
     })).filter((img: any) => img.url && !img.url.includes('daumcdn') && !img.url.includes('tistory'));
-  } catch { return []; }
+  } catch (err: any) {
+    console.error(`[issue-draft] Naver fetch error: ${err.message} | query="${query}"`);
+    return [];
+  }
 }
 
 /* ═══════════ AI 기사 생성 (v2: 에러 로깅 + og-infographic 제거) ═══════════ */

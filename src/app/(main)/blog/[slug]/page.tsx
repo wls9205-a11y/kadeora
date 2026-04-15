@@ -45,7 +45,8 @@ renderer.heading = function ({ text, depth }: { text: string; depth: number }) {
   return `<h${depth} id="${id}">${text}</h${depth}>\n`;
 };
 renderer.image = function ({ href, title, text }: { href: string; title?: string | null; text: string }) {
-  return `<img src="${href}" alt="${text || ''}" ${title ? `title="${title}"` : ''} width="800" height="450" loading="lazy" decoding="async" style="max-width:100%;height:auto;border-radius:8px;aspect-ratio:16/9" />`;
+  const safeHref = href?.replace(/^http:\/\//, 'https://') || '';
+  return `<img src="${safeHref}" alt="${text || ''}" ${title ? `title="${title}"` : ''} width="800" height="450" loading="lazy" decoding="async" style="max-width:100%;height:auto;border-radius:8px" onerror="this.style.display='none'" />`;
 };
 renderer.link = function ({ href, title, text }: { href: string; title?: string | null; text: string }) {
   const isExternal = href && (href.startsWith('http://') || href.startsWith('https://'));
@@ -842,10 +843,10 @@ export default async function BlogDetailPage({ params }: Props) {
           );
         })()}
 
-        {/* 히어로 이미지 캐러셀 (og_card 제외 — 텍스트 배너는 커버에만) */}
-        {postImages.filter((img: any) => img.image_type !== 'og_card').length > 0 && (
+        {/* 히어로 이미지 캐러셀 (og_card + infographic 제외 — OG 텍스트 배너는 실사진이 아님) */}
+        {postImages.filter((img: any) => img.image_type !== 'og_card' && img.image_type !== 'infographic').length > 0 && (
           <BlogHeroImage
-            images={postImages.filter((img: any) => img.image_type !== 'og_card').map((img: any) => ({
+            images={postImages.filter((img: any) => img.image_type !== 'og_card' && img.image_type !== 'infographic').map((img: any) => ({
               url: img.image_url,
               alt: img.alt_text || `${post.title} — 카더라 ${catSection[post.category] || ''} 분석`,
               caption: img.caption || undefined,
