@@ -108,6 +108,7 @@ export default function ImageLightbox({ images, initialIndex, onClose }: Props) 
       <div style={{
         flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
         width: '100%', padding: '60px 16px 80px', overflow: 'hidden',
+        position: 'relative',
       }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -125,6 +126,11 @@ export default function ImageLightbox({ images, initialIndex, onClose }: Props) 
           }}
           draggable={false}
         />
+        {/* 워터마크 — 확대 뷰에서도 적용 */}
+        {!zoom && <div style={{ position: 'absolute', bottom: 90, right: 30, opacity: 0.5, pointerEvents: 'none', display: 'flex', alignItems: 'center', gap: 6, zIndex: 2 }}>
+          <svg width="16" height="16" viewBox="0 0 72 72"><circle cx="18" cy="36" r="7" fill="rgba(255,255,255,0.8)"/><circle cx="36" cy="36" r="7" fill="rgba(255,255,255,0.8)"/><circle cx="54" cy="36" r="7" fill="rgba(255,255,255,0.8)"/></svg>
+          <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.7)', fontWeight: 500 }}>kadeora.app</span>
+        </div>}
       </div>
 
       {/* Navigation arrows (desktop) */}
