@@ -39,7 +39,7 @@ function cleanName(name: string): string {
 
 function ok(img: Img, name: string): boolean {
   const cap=(img.title||'').toLowerCase(),url=(img.url||'').toLowerCase();
-  const BAD=['hogangnono','zigbang','kbland','land.naver','r114.co.kr','drapt.com','chosun.com','hankyung.com','mk.co.kr','utoimage','freepik','shutterstock','namu.wiki','wikipedia','pixabay','youtube.com','ohousecdn','pinimg.com'];
+  const BAD=['hogangnono','zigbang','kbland','land.naver','landthumb','r114.co.kr','drapt.com','apt2you','peterpanz','dabangapp','station3','realestate.daum','chosun.com','hankyung.com','mk.co.kr','sedaily.com','fnnews.com','utoimage','freepik','shutterstock','istockphoto','namu.wiki','wikipedia','pixabay','unsplash','pexels','youtube.com','ohousecdn','pinimg.com','tiktok.com'];
   if (BAD.some(d=>url.includes(d))) return false;
   const BADC=['호갱노노','직방','kb부동산','네이버부동산','다방','한경','매경','스톡 이미지','병원','치과','맛집','호텔','유튜브','게임','시세','매물','스포츠'];
   if (BADC.some(w=>cap.includes(w))) return false;

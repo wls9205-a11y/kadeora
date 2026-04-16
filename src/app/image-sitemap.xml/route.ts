@@ -16,7 +16,7 @@ export const revalidate = 3600; // 1시간 캐시
 export async function GET() {
   const sb = getSupabaseAdmin();
 
-  const [sitesR, blogsR] = await Promise.all([
+  const [sitesR, blogsR, complexR] = await Promise.all([
     sb.from('apt_sites')
       .select('slug, name, images, region, sigungu')
       .eq('is_active', true)
@@ -29,6 +29,11 @@ export async function GET() {
       .not('cover_image', 'is', null)
       .order('published_at', { ascending: false })
       .limit(50000),
+    (sb as any).from('apt_complex_profiles')
+      .select('apt_name, images, region_nm, sigungu')
+      .not('images', 'is', null)
+      .gt('sale_count_1y', 0)
+      .limit(10000),
   ]);
 
   const entries: string[] = [];
@@ -60,6 +65,27 @@ export async function GET() {
     if (imageXml) {
       entries.push(`  <url>
     <loc>${BASE}/apt/${encodeURIComponent(s.slug)}</loc>
+${imageXml}
+  </url>`);
+    }
+  }
+
+  // ━━━ 단지백과 이미지 (apt_complex_profiles) ━━━
+  for (const c of (complexR.data || [])) {
+    const imgs = Array.isArray(c.images) ? c.images : [];
+    if (imgs.length === 0) continue;
+    const imageXml = imgs.slice(0, 7).map((img: any) => {
+      const url = typeof img === 'string' ? img : img?.url;
+      if (!url) return '';
+      return `      <image:image>
+        <image:loc>${escapeXml(url)}</image:loc>
+        <image:title>${escapeXml(`${c.apt_name} 아파트 ${c.region_nm || ''} ${c.sigungu || ''}`.trim())}</image:title>
+        <image:caption>${escapeXml(`${c.region_nm || ''} ${c.sigungu || ''} ${c.apt_name} 아파트 실거래가 시세`)}</image:caption>${c.region_nm && c.sigungu ? `\n        <image:geo_location>${escapeXml(`${c.region_nm} ${c.sigungu}`)}</image:geo_location>` : ''}
+      </image:image>`;
+    }).filter(Boolean).join('\n');
+    if (imageXml) {
+      entries.push(`  <url>
+    <loc>${BASE}/apt/complex/${encodeURIComponent(c.apt_name)}</loc>
 ${imageXml}
   </url>`);
     }
