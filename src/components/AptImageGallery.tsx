@@ -88,7 +88,7 @@ export default function AptImageGallery({ images, name, region, badges }: {
                   onClick={() => setLightbox(i)}
                 >
                   <img
-                    src={img.url} alt={img.caption || `${name} 현장 사진 ${i + 1}`}
+                    src={img.url} alt={img.caption || `${name} ${region} 아파트 현장 사진 ${i + 1}`}
                     width={720} height={400}
                     style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                     loading={i === 0 ? 'eager' : 'lazy'}
@@ -144,7 +144,7 @@ export default function AptImageGallery({ images, name, region, badges }: {
               onClick={() => setLightbox(0)}
             >
               <img
-                src={visibleImages[0].url} alt={visibleImages[0].caption || `${name} 대표 이미지`}
+                src={visibleImages[0].url} alt={visibleImages[0].caption || `${name} ${region} 아파트 대표 이미지`}
                 width={720} height={400}
                 style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                 loading="eager" referrerPolicy="no-referrer"
@@ -160,7 +160,7 @@ export default function AptImageGallery({ images, name, region, badges }: {
                 onClick={() => setLightbox(i + 1)}
               >
                 <img
-                  src={img.url} alt={img.caption || `${name} 사진 ${i + 2}`}
+                  src={img.url} alt={img.caption || `${name} ${region} 아파트 사진 ${i + 2}`}
                   width={360} height={200}
                   style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                   loading="lazy" referrerPolicy="no-referrer"

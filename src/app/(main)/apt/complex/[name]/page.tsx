@@ -3,6 +3,7 @@ import { createSupabaseServer } from '@/lib/supabase-server';
 import { SITE_URL } from '@/lib/constants';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import AptImageGallery from '@/components/AptImageGallery';
 import type { Metadata } from 'next';
 import { fmtAmount } from '@/lib/format';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
@@ -155,12 +156,15 @@ export default async function ComplexDetailPage({ params }: Props) {
 
   const relatedBlogs: Record<string, any>[] = blogsR.status === 'fulfilled' ? (blogsR.value?.data || []) : [];
   const rentTrades: Record<string, any>[] = rentR.status === 'fulfilled' ? (rentR.value?.data || []) : [];
-  let siteImages: string[] = [];
+  let siteImages: {url: string; caption?: string}[] = [];
   let siteSlug: string | null = null;
   if (siteR.status === 'fulfilled' && siteR.value?.data) {
     const site = siteR.value.data;
     if (site?.images && Array.isArray(site.images)) {
-      siteImages = site.images.filter((img: any) => typeof img === 'string' || img?.url).map((img: any) => typeof img === 'string' ? img : img.url).slice(0, 6);
+      siteImages = site.images.filter((img: any) => typeof img === 'string' || img?.url).map((img: any) => ({
+        url: typeof img === 'string' ? img : img.url,
+        caption: typeof img === 'string' ? undefined : img?.caption,
+      })).slice(0, 7);
     }
     if (site?.slug) siteSlug = site.slug;
   }
@@ -330,17 +334,10 @@ export default async function ComplexDetailPage({ params }: Props) {
         <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{decoded}</span>
       </nav>
 
-      {/* 이미지 갤러리 (apt_sites 이미지 있을 때) */}
+      {/* 이미지 갤러리 (apt_sites 이미지 있을 때) — 클릭 확대 지원 */}
       {siteImages.length > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: siteImages.length >= 3 ? '2fr 1fr 1fr' : siteImages.length === 2 ? '1fr 1fr' : '1fr', gap: 'var(--sp-xs)', marginBottom: 'var(--sp-md)', borderRadius: 'var(--radius-card)', overflow: 'hidden', maxHeight: 200 }}>
-          {siteImages.slice(0, 3).map((url, i) => (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img key={i} src={url.startsWith('http') ? url : `https:${url}`}
-              alt={`${decoded} 아파트 ${i === 0 ? '조감도' : i === 1 ? '투시도' : '배치도'}`}
-              style={{ width: '100%', height: i === 0 && siteImages.length >= 3 ? 200 : 98, objectFit: 'cover', display: 'block' }}
-              loading={i === 0 ? 'eager' : 'lazy'} referrerPolicy="no-referrer"
-            />
-          ))}
+        <div style={{ marginBottom: 'var(--sp-md)' }}>
+          <AptImageGallery images={siteImages} name={decoded} region={`${region} ${sigungu}`} />
         </div>
       )}
 

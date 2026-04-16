@@ -55,7 +55,7 @@ function ok(img: Img, name: string): boolean {
 
 async function collect(name: string, sigungu: string): Promise<Img[]> {
   const clean=cleanName(name);
-  const qs=[`${sigungu} ${clean} 아파트`, `${clean} ${sigungu} 아파트 외관`];
+  const qs=[`${sigungu} ${clean} 아파트`, `${clean} 조감도 투시도`, `${clean} ${sigungu} 모델하우스 외관`];
   const results=await Promise.allSettled(qs.flatMap(q=>[nv(q),kk(q)]));
   const all: Img[]=[];
   for (const r of results) if (r.status==='fulfilled') all.push(...r.value);

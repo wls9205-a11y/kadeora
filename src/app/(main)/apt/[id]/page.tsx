@@ -405,7 +405,7 @@ export default async function AptUnifiedPage({ params }: Props) {
 
       {/* 이미지 갤러리 — 워터마크 + 반응형 (모바일 스와이프 / 데스크탑 그리드) */}
       {(() => {
-        const dbImages = Array.isArray(site?.images) ? site.images.slice(0, 5).map((img: any) => ({
+        const dbImages = Array.isArray(site?.images) ? site.images.slice(0, 7).map((img: any) => ({
           url: typeof img === 'string' ? img : img?.url || img?.link || '',
           caption: typeof img === 'string' ? undefined : img?.caption,
         })).filter((img: any) => img.url) : [];
