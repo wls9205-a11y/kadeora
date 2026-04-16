@@ -19,20 +19,28 @@ export default function BlogHeroImage({ images, title, priority = true }: Props)
   const [loadError, setLoadError] = useState<Set<number>>(new Set());
   const touchStart = useRef<number | null>(null);
 
-  const visibleImages = images.filter((_, i) => !loadError.has(i));
+  // 원본 이미지에서 에러난 것만 제외 + 원본 인덱스 매핑 유지
+  const visibleWithOrigIdx = images
+    .map((img, origIdx) => ({ img, origIdx }))
+    .filter((x) => !loadError.has(x.origIdx));
+  const visibleImages = visibleWithOrigIdx.map((x) => x.img);
   const total = visibleImages.length;
 
   // Next.js Image 최적화 가능 도메인 (next.config.ts remotePatterns 등록됨)
-  const OPTIMIZABLE = ['imgnews.naver.net', 'pstatic.net', 'phinf.naver.net', 'daumcdn.net', 'kakaocdn.net', 'kadeora.app', 'supabase.co', 'hogangnono.com', 'bizwatch.co.kr'];
+  const OPTIMIZABLE = ['imgnews.naver.net', 'pstatic.net', 'phinf.naver.net', 'daumcdn.net', 'kakaocdn.net', 'kadeora.app', 'supabase.co', 'bizwatch.co.kr'];
   const isOptimizable = (url: string) => OPTIMIZABLE.some(d => url.includes(d));
 
   const goTo = useCallback((idx: number) => {
     setActiveIdx(Math.max(0, Math.min(idx, total - 1)));
   }, [total]);
 
+  // total이 줄어들면 activeIdx도 보정
+  const safeActiveIdx = Math.min(activeIdx, Math.max(0, total - 1));
+
   if (!total) return null;
 
-  const current = visibleImages[activeIdx] || visibleImages[0];
+  const current = visibleImages[safeActiveIdx] || visibleImages[0];
+  const currentOrigIdx = visibleWithOrigIdx[safeActiveIdx]?.origIdx ?? 0;
 
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStart.current = e.touches[0].clientX;
@@ -41,7 +49,7 @@ export default function BlogHeroImage({ images, title, priority = true }: Props)
     if (touchStart.current === null) return;
     const diff = touchStart.current - e.changedTouches[0].clientX;
     if (Math.abs(diff) > 40) {
-      goTo(diff > 0 ? activeIdx + 1 : activeIdx - 1);
+      goTo(diff > 0 ? safeActiveIdx + 1 : safeActiveIdx - 1);
     }
     touchStart.current = null;
   };
@@ -64,8 +72,8 @@ export default function BlogHeroImage({ images, title, priority = true }: Props)
           fill
           sizes="(max-width: 780px) 100vw, 720px"
           style={{ objectFit: 'cover', transition: 'opacity 0.3s ease' }}
-          priority={priority && activeIdx === 0}
-          onError={() => setLoadError(prev => new Set(prev).add(activeIdx))}
+          priority={priority && safeActiveIdx === 0}
+          onError={() => setLoadError(prev => new Set(prev).add(currentOrigIdx))}
           unoptimized={!isOptimizable(current.url)}
         />
 
@@ -78,13 +86,13 @@ export default function BlogHeroImage({ images, title, priority = true }: Props)
             borderRadius: 'var(--radius-card)', backdropFilter: 'blur(4px)',
             fontVariantNumeric: 'tabular-nums',
           }}>
-            {activeIdx + 1} / {total}
+            {safeActiveIdx + 1} / {total}
           </div>
         )}
 
         {/* 좌우 네비 화살표 (2장 이상) */}
-        {total > 1 && activeIdx > 0 && (
-          <button onClick={() => goTo(activeIdx - 1)} aria-label="이전 이미지" style={{
+        {total > 1 && safeActiveIdx > 0 && (
+          <button onClick={() => goTo(safeActiveIdx - 1)} aria-label="이전 이미지" style={{
             position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)',
             width: 32, height: 32, borderRadius: '50%',
             background: 'rgba(0,0,0,0.4)', border: 'none', color: '#fff',
@@ -92,8 +100,8 @@ export default function BlogHeroImage({ images, title, priority = true }: Props)
             backdropFilter: 'blur(4px)', fontSize: 16,
           }}>‹</button>
         )}
-        {total > 1 && activeIdx < total - 1 && (
-          <button onClick={() => goTo(activeIdx + 1)} aria-label="다음 이미지" style={{
+        {total > 1 && safeActiveIdx < total - 1 && (
+          <button onClick={() => goTo(safeActiveIdx + 1)} aria-label="다음 이미지" style={{
             position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)',
             width: 32, height: 32, borderRadius: '50%',
             background: 'rgba(0,0,0,0.4)', border: 'none', color: '#fff',
@@ -114,9 +122,9 @@ export default function BlogHeroImage({ images, title, priority = true }: Props)
               onClick={() => goTo(i)}
               aria-label={`이미지 ${i + 1}`}
               style={{
-                width: activeIdx === i ? 20 : 8, height: 8,
+                width: safeActiveIdx === i ? 20 : 8, height: 8,
                 borderRadius: 4, border: 'none', cursor: 'pointer', padding: 0,
-                background: activeIdx === i ? 'var(--brand)' : 'var(--border)',
+                background: safeActiveIdx === i ? 'var(--brand)' : 'var(--border)',
                 transition: 'all 0.2s ease',
               }}
             />

@@ -1,62 +1,46 @@
-# 카더라 STATUS.md — 세션 112 (2026-04-16)
+# 카더라 STATUS.md — 세션 113 (2026-04-17)
 
 ## 최근 배포
-- **커밋**: `656d0e4a` (SEO 전수조사 8건 수정 + /about/team 제거)
-- **빌드**: ✅ 성공
+- **커밋**: `pending` (이미지 관련성 전면 점검 + 정화)
+- **빌드**: ✅ TS 컴파일 성공 (Vercel 배포 대기)
 - **프로덕션**: 정상 가동
 
-## 이번 세션 완료 (22건)
+## 이번 세션 완료 (12건)
 
-### 피드 시스템
-1. 피드 일상+콘텐츠 템플릿 강화 (6→16 casual, 12 content 추가)
-2. 피드 동적 데이터 소스 5→9개 확장 (청약D-day, 뉴스, 트렌딩, 고가실거래)
-3. 시간당 4건+ 자동발행 (매시간 × 4~5건 = 68~85건/일)
-4. 오래된 정보 차단 (AI 프롬프트 KST 날짜 주입 + 폴백 7건 수정)
-5. "제목:" 접두사 파싱 강화 (regex 개선 + DB 정리)
-6. 하드코딩 7건 제거 (마트물가/복리/커피/금리/절약/카드/OTT)
+### 이미지 관련성 + 정확도 전면 점검
 
-### 어드민
-7. 대시보드 개선 5건 (PV+UV+어제대비, 실시간방문자, 14일추이, 콘텐츠파이프라인, 중복제거)
-8. 최신화 버튼 elapsed 표시 (✓153 · 12.3s)
-9. god-mode 크론 누락 0건 확인
+#### DB 정화 (4건)
+1. 경쟁사 도메인 이미지 삭제 (호갱노노 229사이트, KB부동산 68, 네이버부동산 105, 디시인사이드 114 등)
+2. 단지간 3+ 중복 URL 이미지 제거 — 574사이트 (1장이 124개 단지에 붙어있는 극단적 오매칭 해소)
+3. `apt_sites.images IS NULL` 336건 → `'[]'::jsonb` 정규화 (프론트 null-safe)
+4. `blog_post_images` 과다중복(21+ 포스트 공유) 238장 삭제
 
-### 부동산
-10. 단지백과 히어로+KPI 제거 → 심플 헤더
-11. 부동산 썸네일 동기화 (+1,636건 복원 + Phase 0)
-12. 이미지 재수집 (빈배열 7,444건 리셋 + apt-image-crawl 스케줄 등록)
-13. 실거래 검색 500 에러 수정 (or(ilike) → RPC 전환)
+#### 크론 개선 (2건)
+5. `apt-image-crawl` 전면 재작성 (239→391줄) — DOMAIN_BLACKLIST + isRelevantToSite() + 글로벌 중복 방지 RPC + 스코프 확장 + merge 로직
+6. `blog-generate-images` 블랙리스트 확장 — 경쟁사 7개 도메인 추가
 
-### 블로그
-14. 이미지 정확도 개선 (sub_category 14개 쿼리 + 도메인 필터 12개)
-15. A2 강제발행 버그 수정 + ghost 47건 복구
-16. blog-quality-score 공개글 미채점 수정
+#### 프론트 버그 수정 (4건)
+7. `BlogHeroImage.tsx` 인덱스 버그 수정 — loadError/activeIdx 혼동 → visibleWithOrigIdx + safeActiveIdx 재설계
+8. `AptImageGallery.tsx` 데스크탑 onError 누락 추가 (모바일에만 있었음)
+9. `AptImageGallery.tsx` 전부-실패 시 그라데이션 폴백 UI 렌더링
+10. `next.config.ts` + `BlogHeroImage` 경쟁사 도메인 제거 (hogangnono)
 
-### 이슈 파이프라인
-17. [선점분석] 접두사 제거 (코드+템플릿+DB 28건)
+#### DB 인프라 (1건)
+11. `get_overused_apt_image_urls` RPC 생성
 
-### SEO 전수조사 (8건 수정)
-18. robots.txt /shop/ Disallow 해제
-19. stock/compare + apt/diagnose metadata 추가
-20. GEO 메타태그 추가 (geo.region=KR, ICBM)
-21. sitemap 정리 (/shop 추가, noindex 페이지 제거, /about/team 제거)
-22. privacy/terms/refund OG 추가 + twitter:site 글로벌 설정
-
-### 기타
-- /shop 비즈니스 정보 수정 (${BIZ_NAME} → {BIZ_NAME})
-- /about/team 페이지 완전 삭제
-- 토스페이먼츠 답장 이메일 작성
-- TS 빌드 에러 수정 (extractKeywords string|null)
+#### 건설사 페이지 (1건)
+12. `apt/builder/[name]` 현장 목록에 이미지 썸네일 + 폴백 추가
 
 ## 현재 상태
 - **PV**: ~100건/시간
-- **이미지 수집**: 27,302/34,539 (79%) — 크론 3개 자동 처리 중
-- **블로그**: 7,716건 공개, 2,181건 실사진 커버
-- **피드**: 61건/24시간 자동발행
+- **이미지**: 정화 완료, 재크롤 대기 (517 빈배열 + 1,319 부족)
+- **블로그**: 7,730건 공개, 2,172건 실사진 커버
 - **크론 에러**: 0건
 - **API 키**: ANTHROPIC ✅, CRON_SECRET ✅, STOCK_DATA ✅, NAVER ✅ / KIS ❌, FINNHUB ❌, APT_DATA ❌
 
 ## PENDING
-- 이미지 수집 완료 대기 (~6,489건, ~2시간 남음)
+- 이미지 재크롤 수렴 모니터링 (517+1,319건 → 6~7장 목표)
+- blog-generate-images 5,558건 OG→실사진 전환 속도 모니터링
 - issue-draft timeout 구조적 이슈 (Vercel 300s 제한)
-- Resend webhook secret (RESEND_WEBHOOK_SECRET) 미등록
+- Resend webhook secret 미등록
 - Toss Payments 상용 MID 전환 (심사 진행 중)

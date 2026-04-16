@@ -121,18 +121,31 @@ export default async function BuilderPage({ params }: Props) {
       <section style={{ marginBottom: 20 }}>
         <h2 style={{ fontSize: 14, fontWeight: 700, margin: '0 0 10px' }}>{shortName} 분양 현장</h2>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          {sites.map((s, i) => (
-            <Link key={i} href={`/apt/${s.slug}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', textDecoration: 'none' }}>
-              <div style={{ minWidth: 0, flex: 1 }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</div>
-                <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{s.region} {s.sigungu || ''} · {tLabel[s.site_type] || ''}{s.total_units ? ` · ${s.total_units}세대` : ''}</div>
-              </div>
-              <div style={{ textAlign: 'right', flexShrink: 0, marginLeft: 8 }}>
-                {s.price_min ? <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-primary)' }}>{fmtAmount(s.price_min)}~</div> : null}
-                {s.status && <div style={{ fontSize: 10, color: s.status === '분양중' ? 'var(--accent-blue)' : 'var(--text-tertiary)' }}>{s.status}</div>}
-              </div>
-            </Link>
-          ))}
+          {sites.map((s, i) => {
+            const thumb = Array.isArray((s as any).images) && (s as any).images[0]
+              ? ((s as any).images[0]?.thumbnail || (s as any).images[0]?.url || null)
+              : null;
+            const safeThumb = thumb ? String(thumb).replace(/^http:\/\//, 'https://') : null;
+            return (
+              <Link key={i} href={`/apt/${s.slug}`} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', textDecoration: 'none' }}>
+                {safeThumb ? (
+                  <img src={safeThumb} alt={`${s.name} 현장 이미지`} width={56} height={42} loading="lazy" referrerPolicy="no-referrer"
+                    style={{ width: 56, height: 42, objectFit: 'cover', borderRadius: 'var(--radius-sm)', background: '#162035', flexShrink: 0 }}
+                  />
+                ) : (
+                  <div aria-hidden style={{ width: 56, height: 42, borderRadius: 'var(--radius-sm)', flexShrink: 0, background: 'linear-gradient(135deg, #0c1629 0%, #1a3050 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, color: 'rgba(255,255,255,0.45)', fontWeight: 700 }}>{tLabel[s.site_type]?.slice(0,2) || '—'}</div>
+                )}
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</div>
+                  <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{s.region} {s.sigungu || ''} · {tLabel[s.site_type] || ''}{s.total_units ? ` · ${s.total_units}세대` : ''}</div>
+                </div>
+                <div style={{ textAlign: 'right', flexShrink: 0, marginLeft: 8 }}>
+                  {s.price_min ? <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-primary)' }}>{fmtAmount(s.price_min)}~</div> : null}
+                  {s.status && <div style={{ fontSize: 10, color: s.status === '분양중' ? 'var(--accent-blue)' : 'var(--text-tertiary)' }}>{s.status}</div>}
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </section>
 

@@ -65,7 +65,22 @@ export default function AptImageGallery({ images, name, region, badges }: {
     scrollRef.current.scrollTo({ left: i * scrollRef.current.clientWidth, behavior: 'smooth' });
   };
 
-  if (total === 0) return null;
+  if (total === 0) {
+    // 모든 이미지 로드 실패 → 그라데이션 폴백 UI (badges 유지)
+    return (
+      <div style={{
+        position: 'relative', borderRadius: 'var(--radius-lg)', overflow: 'hidden', marginBottom: 14,
+        height: 140,
+        background: 'linear-gradient(135deg, #0c1629 0%, #1a3050 50%, #1e3a8a 100%)',
+      }}>
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '12px 14px' }}>
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginBottom: 'var(--sp-xs)' }}>{region}</div>
+          <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 900, color: '#fff', lineHeight: 1.2, wordBreak: 'keep-all' }}>{name}</div>
+        </div>
+        {badges}
+      </div>
+    );
+  }
 
   return (
     <>
@@ -148,6 +163,7 @@ export default function AptImageGallery({ images, name, region, badges }: {
                 width={720} height={400}
                 style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                 loading="eager" referrerPolicy="no-referrer"
+                onError={() => handleImgError(images.findIndex(o => toHttps(o.url) === visibleImages[0].url))}
               />
               <Watermark />
               <WatermarkSm />
@@ -164,6 +180,7 @@ export default function AptImageGallery({ images, name, region, badges }: {
                   width={360} height={200}
                   style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                   loading="lazy" referrerPolicy="no-referrer"
+                  onError={() => handleImgError(images.findIndex(o => toHttps(o.url) === img.url))}
                 />
                 <WatermarkSm />
                 {i === 1 && total > 3 && (

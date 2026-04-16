@@ -44,7 +44,6 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "img1.daumcdn.net" },
       { protocol: "https", hostname: "blog.kakaocdn.net" },
       { protocol: "https", hostname: "cdn.bizwatch.co.kr" },
-      { protocol: "https", hostname: "image.hogangnono.com" },
     ],
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 86400,

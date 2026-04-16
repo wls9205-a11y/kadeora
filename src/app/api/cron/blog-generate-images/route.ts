@@ -40,17 +40,44 @@ const SUB_CAT_QUERIES: Record<string, string[]> = {
   '부동산일반': ['부동산 시장 전망', '주택 정책 부동산', '집값 전망 분석'],
 };
 
-// 이미지 URL 블랙리스트 (관련 없는 사이트)
+// 이미지 URL 블랙리스트 (관련 없는 사이트 + 경쟁사)
 const IMG_BLOCK_DOMAINS = [
   'utoimage', 'freepik', 'shutterstock', 'pixabay', 'unsplash', 'istockphoto',
   'namu.wiki', 'wikipedia', 'youtube.com', 'pinimg.com', 'ohousecdn',
   'blog.kakaocdn.net/dn/0/', 'tistory.com/image/0/',
+  // 경쟁사 (부동산 플랫폼)
+  'hogangnono', 'new.land.naver.com', 'landthumb', 'kbland', 'kbstar.com',
+  'zigbang', 'dabang',
+  // 부적합 출처
+  'dcinside.com', 'ruliweb.com',
+  // GIF 제외 (움짤 품질 문제)
 ];
 
 const CAT_LABEL: Record<string, string> = {
   stock: '주식', apt: '부동산', unsold: '미분양', finance: '재테크',
   economy: '경제', tax: '세금', life: '생활', general: '정보', redev: '재개발',
 };
+
+// 관련성 검증: 네이버 이미지 검색 결과 title이 쿼리 토큰을 포함하는지 체크
+function normalizeForMatch(s: string): string {
+  return (s || '').replace(/<[^>]*>/g, '').replace(/&[a-z]+;/g, '').replace(/[\s\-·,.()\[\]【】「」『』'"]/g, '').toLowerCase();
+}
+
+function extractQueryTokens(query: string): string[] {
+  return query.split(/\s+/).map(t => t.trim()).filter(t => t.length >= 2);
+}
+
+function isRelevantToQuery(itemTitle: string, query: string): boolean {
+  const t = normalizeForMatch(itemTitle);
+  if (!t) return false;
+  const tokens = extractQueryTokens(query);
+  if (tokens.length === 0) return true; // 쿼리 토큰 없으면 체크 불가 → 통과
+  // 토큰 중 최소 1개 일치 요구
+  return tokens.some(tok => {
+    const nt = normalizeForMatch(tok);
+    return nt.length >= 2 && t.includes(nt);
+  });
+}
 
 async function fetchNaverImages(query: string, count = 10): Promise<{
   url: string; alt: string; caption: string;
@@ -80,6 +107,8 @@ async function fetchNaverImages(query: string, count = 10): Promise<{
         if (w < 400 || h < 250) return false;
         const url = (item.link || '').toLowerCase();
         if (IMG_BLOCK_DOMAINS.some(d => url.includes(d))) return false;
+        // 관련성 검증: title에 쿼리 토큰 포함돼야 함
+        if (!isRelevantToQuery(item.title || '', query)) return false;
         return true;
       })
       .map((item: any) => ({
@@ -88,7 +117,7 @@ async function fetchNaverImages(query: string, count = 10): Promise<{
         caption: `출처: ${(() => { try { return new URL(item.link || '').hostname; } catch { return '웹'; } })()}`,
       }));
     if (results.length === 0 && (data.items || []).length > 0) {
-      console.warn(`[blog-generate-images] Naver returned ${data.items.length} items but 0 passed size filter (>=400x250) | query="${query}"`);
+      console.warn(`[blog-generate-images] Naver returned ${data.items.length} items but 0 passed filters | query="${query}"`);
     }
     return results;
   } catch (err: any) {
