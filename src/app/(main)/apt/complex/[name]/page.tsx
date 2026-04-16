@@ -311,9 +311,9 @@ export default async function ComplexDetailPage({ params }: Props) {
         description: `${decoded} 아파트 실거래가 차트, 조감도, 평면도 등`,
         url: `${SITE_URL}/apt/complex/${encodeURIComponent(decoded)}`,
         image: [
-          ...siteImages.map(url => ({
+          ...siteImages.map(img => ({
             '@type': 'ImageObject',
-            url: url.startsWith('http') ? url : `https:${url}`,
+            url: img.url.startsWith('http') ? img.url : `https:${img.url}`,
             name: `${decoded} 아파트`,
             description: `${region} ${sigungu} ${decoded} 아파트`,
           })),
