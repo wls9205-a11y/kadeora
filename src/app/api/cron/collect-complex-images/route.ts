@@ -16,7 +16,7 @@ interface Img { title: string; url: string; thumbnail: string; source: string }
 async function nv(q: string): Promise<Img[]> {
   if (!NAVER_ID || !NAVER_SECRET) return [];
   try {
-    const r = await fetch(`https://openapi.naver.com/v1/search/image?query=${encodeURIComponent(q)}&display=5&sort=sim`,
+    const r = await fetch(`https://openapi.naver.com/v1/search/image?query=${encodeURIComponent(q)}&display=10&sort=sim`,
       { headers: { 'X-Naver-Client-Id': NAVER_ID, 'X-Naver-Client-Secret': NAVER_SECRET }, signal: AbortSignal.timeout(7000) });
     if (!r.ok) return [];
     return ((await r.json()).items||[]).map((x:any)=>({title:(x.title||'').replace(/<[^>]*>/g,''),url:x.link,thumbnail:x.thumbnail,source:'naver'}));
@@ -26,7 +26,7 @@ async function nv(q: string): Promise<Img[]> {
 async function kk(q: string): Promise<Img[]> {
   if (!KAKAO_KEY) return [];
   try {
-    const r = await fetch(`https://dapi.kakao.com/v2/search/image?query=${encodeURIComponent(q)}&size=5&sort=accuracy`,
+    const r = await fetch(`https://dapi.kakao.com/v2/search/image?query=${encodeURIComponent(q)}&size=10&sort=accuracy`,
       { headers: { Authorization:`KakaoAK ${KAKAO_KEY}` }, signal: AbortSignal.timeout(7000) });
     if (!r.ok) return [];
     return ((await r.json()).documents||[]).map((x:any)=>({title:(x.display_sitename||'').replace(/<[^>]*>/g,''),url:x.image_url,thumbnail:x.thumbnail_url,source:'kakao'}));
@@ -60,8 +60,8 @@ async function collect(name: string, sigungu: string): Promise<Img[]> {
   const all: Img[]=[];
   for (const r of results) if (r.status==='fulfilled') all.push(...r.value);
   const seen=new Set<string>();
-  let imgs=all.filter(i=>{if(!i.url||seen.has(i.url))return false;seen.add(i.url);return ok(i,name);}).slice(0,5);
-  if (!imgs.length){const s2=new Set<string>();imgs=all.filter(i=>{if(!i.url||s2.has(i.url))return false;s2.add(i.url);return true;}).slice(0,3);}
+  let imgs=all.filter(i=>{if(!i.url||seen.has(i.url))return false;seen.add(i.url);return ok(i,name);}).slice(0,7);
+  if (!imgs.length){const s2=new Set<string>();imgs=all.filter(i=>{if(!i.url||s2.has(i.url))return false;s2.add(i.url);return true;}).slice(0,5);}
   return imgs;
 }
 

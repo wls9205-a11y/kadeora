@@ -53,22 +53,22 @@ async function searchKakao(query: string, size = 3): Promise<ImageResult[]> {
 async function collectForSite(name: string): Promise<ImageResult[]> {
   const queries = [`${name} 아파트 조감도`, `${name} 투시도`, `${name} 분양`];
 
-  // 네이버 3개 + 카카오 3개 = 6개 쿼리 병렬 실행
-  const promises = queries.flatMap(q => [searchNaver(q, 3), searchKakao(q, 3)]);
+  // 네이버 5개 + 카카오 5개 = 10개 쿼리 병렬 실행
+  const promises = queries.flatMap(q => [searchNaver(q, 5), searchKakao(q, 5)]);
   const results = await Promise.allSettled(promises);
   const allImages: ImageResult[] = [];
   for (const r of results) {
     if (r.status === 'fulfilled') allImages.push(...r.value);
   }
 
-  // 관련성 필터 + 중복 제거 + 최대 6장
+  // 관련성 필터 + 중복 제거 + 최대 7장
   const seen = new Set<string>();
   return allImages.filter(img => {
     if (!img.url || seen.has(img.url)) return false;
     if (!isRelevantImage(img, name)) return false;
     seen.add(img.url);
     return true;
-  }).slice(0, 6);
+  }).slice(0, 7);
 }
 
 /** 아파트 관련 이미지인지 판별 + 타사 워터마크 차단 */
