@@ -146,44 +146,51 @@ export function reEngagementEmail({
 
 /** 주간 다이제스트 본문 생성 */
 export function weeklyDigestBody(data: {
-  hotPosts: { title: string; slug: string; likes_count?: number }[];
-  deadlines: { house_nm: string; rcept_endde: string }[];
-  newBlogs: { title: string; slug: string; category?: string }[];
+  hotPosts?: { title?: string; slug?: string; likes_count?: number }[];
+  deadlines?: { house_nm?: string; rcept_endde?: string }[];
+  newBlogs?: { title?: string; slug?: string; category?: string }[];
 }): string {
   const campaign = currentUtmCampaign();
   const utmBase = `utm_source=email&utm_medium=digest&utm_campaign=${campaign}`;
 
-  const hotHtml = data.hotPosts.length > 0
+  // 세션 135: undefined 배열/항목 진입 시 TypeError 방지 — 유효 데이터만 필터
+  const safeHotPosts = (data?.hotPosts ?? []).filter(p => p?.title && p?.slug);
+  const safeDeadlines = (data?.deadlines ?? []).filter(d => d?.house_nm);
+  const safeNewBlogs = (data?.newBlogs ?? []).filter(b => b?.title && b?.slug);
+
+  const esc = (s: unknown) => String(s ?? '').replace(/[<>&"']/g, c => ({ '<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;' }[c]!));
+
+  const hotHtml = safeHotPosts.length > 0
     ? `<div style="margin:0 0 20px;">
         <p style="font-size:14px;font-weight:700;color:#1E293B;margin:0 0 8px;">🔥 이번 주 인기글</p>
-        ${data.hotPosts.map((p, i) => `
+        ${safeHotPosts.map((p, i) => `
           <div style="padding:10px 0;border-bottom:1px solid #F1F5F9;">
             <span style="color:#3B7BF6;font-weight:700;font-size:14px;">${i + 1}.</span>
-            <a href="https://kadeora.app/feed/${p.slug}?${utmBase}" style="color:#334155;text-decoration:none;font-size:14px;font-weight:500;margin-left:6px;">${p.title}</a>
+            <a href="https://kadeora.app/feed/${encodeURIComponent(p.slug!)}?${utmBase}" style="color:#334155;text-decoration:none;font-size:14px;font-weight:500;margin-left:6px;">${esc(p.title)}</a>
             ${p.likes_count ? `<span style="color:#94A3B8;font-size:12px;margin-left:8px;">❤️ ${p.likes_count}</span>` : ''}
           </div>
         `).join('')}
       </div>` : '';
 
-  const deadlineHtml = data.deadlines.length > 0
+  const deadlineHtml = safeDeadlines.length > 0
     ? `<div style="margin:0 0 20px;">
         <p style="font-size:14px;font-weight:700;color:#1E293B;margin:0 0 8px;">🏠 이번 주 청약 마감</p>
         <div style="display:flex;flex-wrap:wrap;gap:6px;">
-          ${data.deadlines.map(d => `
+          ${safeDeadlines.map(d => `
             <span style="display:inline-block;padding:6px 12px;border-radius:8px;background:#FEF2F2;color:#DC2626;font-size:13px;font-weight:600;">
-              ${d.house_nm} ~${d.rcept_endde?.slice(5)}
+              ${esc(d.house_nm)} ~${String(d.rcept_endde ?? '').slice(5)}
             </span>
           `).join('')}
         </div>
       </div>` : '';
 
-  const blogHtml = data.newBlogs.length > 0
+  const blogHtml = safeNewBlogs.length > 0
     ? `<div style="margin:0 0 20px;">
         <p style="font-size:14px;font-weight:700;color:#1E293B;margin:0 0 8px;">📝 새 분석 블로그</p>
-        ${data.newBlogs.map(b => `
+        ${safeNewBlogs.map(b => `
           <div style="padding:8px 0;">
-            <a href="https://kadeora.app/blog/${b.slug}?${utmBase}" style="color:#334155;text-decoration:none;font-size:14px;">
-              ${b.title}
+            <a href="https://kadeora.app/blog/${encodeURIComponent(b.slug!)}?${utmBase}" style="color:#334155;text-decoration:none;font-size:14px;">
+              ${esc(b.title)}
             </a>
           </div>
         `).join('')}

@@ -8,7 +8,7 @@ export const runtime = 'nodejs';
 
 const NAVER_CLIENT_ID = process.env.NAVER_CLIENT_ID || '';
 const NAVER_CLIENT_SECRET = process.env.NAVER_CLIENT_SECRET || '';
-const BATCH_SIZE = 30; // 현장 수 — Vercel 300s 제한 내 안전 처리 (매시간 실행)
+const BATCH_SIZE = 200; // 현장 수 — 세션 135: 인기 단지 우선, 매 5분 실행 가능
 const TARGET_IMG_COUNT = 7; // 목표 이미지 수
 const MIN_IMG_COUNT = 3; // 이하면 재크롤 대상
 const MAX_RUNTIME_MS = 250_000; // 250초 — 300초 제한에 여유 50초

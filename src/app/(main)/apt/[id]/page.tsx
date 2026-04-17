@@ -156,6 +156,64 @@ async function fetchUnifiedData(slug: string) {
     redev = data;
   }
 
+  // Stage 6: apt_complex_profiles fallback — handles cases like /apt/파크리오 where
+  // the Korean apt name lives only in apt_complex_profiles, not apt_sites.
+  if (!site && !sub && !unsold && !redev) {
+    const candidate = decodeURIComponent(slug).replace(/-/g, ' ').trim();
+    const koreanCandidate = candidate.replace(/[a-z0-9]+/gi, '').replace(/\s+/g, ' ').trim();
+    const searchName = koreanCandidate.length >= 2 ? koreanCandidate : candidate;
+    if (searchName.length >= 2) {
+      const { data: complex } = await (sb as any)
+        .from('apt_complex_profiles')
+        .select('id, apt_name, region_nm, sigungu, dong, total_households, built_year, images, latest_sale_price, avg_sale_price_pyeong, sale_count_1y, price_change_1y')
+        .ilike('apt_name', `%${searchName}%`)
+        .not('sale_count_1y', 'is', null)
+        .order('sale_count_1y', { ascending: false, nullsFirst: false })
+        .limit(1).maybeSingle();
+      if (complex) {
+        site = {
+          id: `complex-${complex.id}`,
+          slug,
+          name: complex.apt_name,
+          site_type: 'complex',
+          region: complex.region_nm || '',
+          sigungu: complex.sigungu || '',
+          dong: complex.dong || '',
+          address: [complex.sigungu, complex.dong].filter(Boolean).join(' '),
+          description: null,
+          seo_title: null,
+          seo_description: null,
+          builder: null,
+          developer: null,
+          total_units: complex.total_households || null,
+          built_year: complex.built_year || null,
+          move_in_date: null,
+          status: null,
+          is_active: true,
+          content_score: 50,
+          interest_count: 0,
+          page_views: 0,
+          comment_count: 0,
+          images: Array.isArray(complex.images) ? complex.images : [],
+          key_features: [],
+          faq_items: [],
+          nearby_facilities: [],
+          nearby_station: null,
+          school_district: null,
+          price_min: null,
+          price_max: null,
+          price_comparison: null,
+          search_trend: null,
+          latitude: null,
+          longitude: null,
+          source_ids: {},
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+      }
+    }
+  }
+
   if (!site && !sub && !unsold && !redev) return null;
 
   const name = sub?.house_nm || site?.name || unsold?.house_nm || redev?.district_name || slug.replace(/-/g, ' ');

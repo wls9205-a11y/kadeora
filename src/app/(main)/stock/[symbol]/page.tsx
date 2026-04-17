@@ -21,6 +21,7 @@ import SectionShareButton from '@/components/SectionShareButton';
 import StockMAOverlay from '@/components/StockMAOverlay';
 import RelatedStocks from '@/components/stock/RelatedStocks';
 import RelatedBlogBelt from '@/components/stock/RelatedBlogBelt';
+import { ImageLightbox } from '@/components/ui/ImageLightbox';
 
 interface Props { params: Promise<{ symbol: string }> }
 
@@ -136,6 +137,21 @@ export default async function StockDetailPage({ params }: Props) {
   const priceHist = (histR.data || []).map((d: any) => Number(d.close_price)).filter((p: number) => p > 0);
   const high52 = priceHist.length ? Math.max(...priceHist) : null;
   const low52 = priceHist.length ? Math.min(...priceHist) : null;
+
+  // 세션 135: stock_images dedup된 갤러리 (get_stock_images_gallery RPC)
+  let stockGallery: { image_url: string; caption: string | null; alt_text: string | null }[] = [];
+  try {
+    const { data: g } = await (sb as any).rpc('get_stock_images_gallery', { p_symbol: symbol });
+    if (Array.isArray(g)) {
+      stockGallery = g
+        .filter((r: any) => r?.image_url)
+        .map((r: any) => ({
+          image_url: r.image_url,
+          caption: r.caption ?? null,
+          alt_text: r.alt_text ?? null,
+        }));
+    }
+  } catch {}
 
   const items = [
     { label: '시가총액', value: fmtCap(s.market_cap ? Number(s.market_cap) : null, s.currency ?? undefined) },
@@ -471,6 +487,19 @@ export default async function StockDetailPage({ params }: Props) {
         </section>
         </LoginGate>
         </>
+      )}
+
+      {/* 세션 135: 종목 관련 이미지 갤러리 (lightbox + zoom) */}
+      {stockGallery.length > 0 && (
+        <section style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--card-p) var(--sp-lg)', marginBottom: 'var(--sp-md)' }}>
+          <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 10px' }}>
+            🖼️ {s.name} 관련 이미지 · {stockGallery.length}장
+          </h2>
+          <ImageLightbox
+            images={stockGallery.map(g => ({ url: g.image_url, caption: g.caption, alt: g.alt_text }))}
+            columns={3}
+          />
+        </section>
       )}
 
       {/* 탭 콘텐츠 */}

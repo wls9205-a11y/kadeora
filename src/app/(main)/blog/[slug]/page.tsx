@@ -29,6 +29,7 @@ import ReadingProgress from '@/components/ReadingProgress';
 // BlogSidebar removed — TOC inline + tools/metrics below article
 import BlogMetricCards from '@/components/BlogMetricCards';
 import BlogHeroImage from '@/components/BlogHeroImage';
+import { ImageLightbox } from '@/components/ui/ImageLightbox';
 import NextArticleFloat from '@/components/NextArticleFloat';
 import BlogTossGate from '@/components/BlogTossGate';
 import RelatedContentCard from '@/components/RelatedContentCard';
@@ -410,6 +411,21 @@ export default async function BlogDetailPage({ params }: Props) {
   try {
     const { data: imgs } = await (sb as any).from('blog_post_images').select('image_url, alt_text, caption, image_type, position').eq('post_id', post.id).order('position');
     postImages = imgs || [];
+  } catch {}
+
+  // 세션 135: dedup된 갤러리 이미지 (get_blog_images_dedup RPC — 중복 URL 자동 제거)
+  let galleryImages: { image_url: string; caption: string | null; alt_text: string | null }[] = [];
+  try {
+    const { data: gallery } = await (sb as any).rpc('get_blog_images_dedup', { p_post_id: post.id });
+    if (Array.isArray(gallery)) {
+      galleryImages = gallery
+        .filter((g: any) => g?.image_url)
+        .map((g: any) => ({
+          image_url: g.image_url,
+          caption: g.caption ?? null,
+          alt_text: g.alt_text ?? null,
+        }));
+    }
   } catch {}
 
   // 동적 apt_sites 이미지 폴백: pos0이 Unsplash면 apt_sites 현장사진으로 대체
@@ -863,6 +879,19 @@ export default async function BlogDetailPage({ params }: Props) {
 
         {/* 블로그 내 언급된 종목/단지 → 하위 페이지 유도 카드 (상단, 풍부 버전) */}
         <BlogMentionCard tags={post.tags ?? []} category={post.category} sourceRef={post.source_ref} title={post.title} placement="top" />
+
+        {/* 세션 135: dedup된 관련 이미지 갤러리 (lightbox + zoom) */}
+        {galleryImages.length > 0 && (
+          <section style={{ marginTop: 16, marginBottom: 20 }}>
+            <h3 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 10px' }}>
+              관련 이미지 · {galleryImages.length}장
+            </h3>
+            <ImageLightbox
+              images={galleryImages.map(g => ({ url: g.image_url, caption: g.caption, alt: g.alt_text }))}
+              columns={3}
+            />
+          </section>
+        )}
 
         {/* 공유 바 */}
         <div style={{
