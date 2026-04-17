@@ -350,7 +350,7 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
         const related = transactions.filter((x) => x.apt_name === t.apt_name && x.dong === t.dong).slice(0, 20);
         return (
           <BottomSheet open={!!selected} onClose={() => setSelected(null)} title={t.apt_name}>
-              <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-md)' }}>{t.region_nm} {t.sigungu} {t.dong}</div>
+              <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-md)' }}>{[t.region_nm, t.sigungu, t.dong].filter(Boolean).join(' ')}</div>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-lg)' }}>
                 <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '8px 10px', textAlign: 'center' }}>

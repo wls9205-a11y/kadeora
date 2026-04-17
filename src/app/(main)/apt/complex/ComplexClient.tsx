@@ -174,7 +174,7 @@ export default function ComplexClient({ complexes, ageGroups, regions, initialRe
         )}
         {filtered.map((c: any, i: number) => {
           return (
-            <Link key={`${c.aptName}__${c.sigungu}`} href={`/apt/complex/${encodeURIComponent(c.aptName)}`} className="hero-card" style={{
+            <Link key={`${c.aptName}__${c.sigungu || i}`} href={`/apt/complex/${encodeURIComponent(c.aptName)}`} className="hero-card" style={{
               display: 'block', position: 'relative', overflow: 'hidden',
             }}>
               {/* 히어로 이미지 (소형) */}
@@ -197,7 +197,7 @@ export default function ComplexClient({ complexes, ageGroups, regions, initialRe
                 )}
                 <div className="hero-overlay">
                   <div className="hero-name" style={{ fontSize: 14 }}>{c.aptName}</div>
-                  <div className="hero-addr">{c.region} {c.sigungu}{c.dong ? ` ${c.dong}` : ''}{c.builtYear > 0 ? ` · ${c.builtYear}년` : ''}</div>
+                  <div className="hero-addr">{[c.region, c.sigungu, c.dong].filter(Boolean).join(' ')}{c.builtYear > 0 ? ` · ${c.builtYear}년` : ''}</div>
                 </div>
               </div>
 

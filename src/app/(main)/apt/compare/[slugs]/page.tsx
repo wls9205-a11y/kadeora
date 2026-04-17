@@ -59,7 +59,7 @@ export default async function ComparePage({ params }: Props) {
 
   // 비교 항목
   const rows = [
-    { label: '지역', va: `${a.region_nm} ${a.sigungu}`, vb: `${b.region_nm} ${b.sigungu}` },
+    { label: '지역', va: `${a.region_nm} ${a.sigungu || ''}`.trim(), vb: `${b.region_nm} ${b.sigungu || ''}`.trim() },
     { label: '동', va: a.dong || '-', vb: b.dong || '-' },
     { label: '준공연도', va: a.built_year ? `${a.built_year}년` : '-', vb: b.built_year ? `${b.built_year}년` : '-' },
     { label: '연차', va: a.age_group || '-', vb: b.age_group || '-' },

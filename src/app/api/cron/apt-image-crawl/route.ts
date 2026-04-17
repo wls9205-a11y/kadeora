@@ -7,9 +7,10 @@ export const runtime = 'nodejs';
 
 const NAVER_CLIENT_ID = process.env.NAVER_CLIENT_ID || '';
 const NAVER_CLIENT_SECRET = process.env.NAVER_CLIENT_SECRET || '';
-const BATCH_SIZE = 100; // 현장 수 (매시간 실행)
+const BATCH_SIZE = 30; // 현장 수 — Vercel 300s 제한 내 안전 처리 (매시간 실행)
 const TARGET_IMG_COUNT = 7; // 목표 이미지 수
 const MIN_IMG_COUNT = 3; // 이하면 재크롤 대상
+const MAX_RUNTIME_MS = 250_000; // 250초 — 300초 제한에 여유 50초
 
 // ━━━ 도메인 블랙리스트 (경쟁사 + 관련성 낮은 출처) ━━━
 const DOMAIN_BLACKLIST = [
@@ -315,6 +316,11 @@ async function handler(_req: NextRequest) {
 
     // ━━━ Step 2: 각 현장별 이미지 수집 ━━━
     for (const site of targetSites) {
+      // 타임아웃 가드 — Vercel 300s 제한 안전 마진
+      if (Date.now() - start > MAX_RUNTIME_MS) {
+        errors.push(`timeout guard: ${processed} processed, stopping early`);
+        break;
+      }
       try {
         const region = site.region || '';
         const existing = Array.isArray(site.images) ? site.images : [];

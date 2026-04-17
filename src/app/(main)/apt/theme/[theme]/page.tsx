@@ -215,7 +215,7 @@ export default async function ThemePage({ params, searchParams }: Props) {
                 <span style={{ fontSize: 12, fontWeight: 800, color: i < 3 ? 'var(--accent-blue)' : 'var(--text-tertiary)', width: 24, flexShrink: 0 }}>{i + 1}</span>
                 <div style={{ minWidth: 0 }}>
                   <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.apt_name}</div>
-                  <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{p.region_nm} {p.sigungu} {p.dong || ''} · {p.age_group || ''}</div>
+                  <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{p.region_nm} {p.sigungu || ''} {p.dong || ''} · {p.age_group || ''}</div>
                 </div>
               </div>
               <div style={{ textAlign: 'right', flexShrink: 0, marginLeft: 8 }}>

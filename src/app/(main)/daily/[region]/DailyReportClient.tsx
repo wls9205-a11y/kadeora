@@ -540,8 +540,8 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
             { v: d.subCountThisWeek + '건', l: '이번주 청약', s: d.subUnitsThisWeek.toLocaleString() + '세대', sc: 'var(--text-secondary)' },
             { v: d.unsoldUnits.toLocaleString(), l: '전국 미분양', s: `${d.region} ${localUnsoldPct}%`, sc: localUnsoldPct < 5 ? 'var(--accent-green)' : 'var(--accent-red)' },
             { v: d.redevTotal + '건', l: `${d.region} 재개발`, s: `재건축 ${d.redevRebuild}`, sc: 'var(--text-tertiary)' },
-            { v: (sectorUp > sectorDn ? '+' : '') + d.sectors[0]?.avg_pct + '%', l: d.sectors[0]?.sector || '', s: sectorUp + '↑ ' + sectorDn + '↓', sc: 'var(--text-secondary)' },
-            { v: d.guPrices[0] ? fmt(d.guPrices[0].sale) : '-', l: d.guPrices[0]?.sigungu + ' 매매', s: '전세율 ' + (d.guPrices[0]?.jeonse_ratio || '-') + '%', sc: 'var(--text-secondary)' },
+            { v: (sectorUp > sectorDn ? '+' : '') + (d.sectors[0]?.avg_pct ?? '-') + '%', l: d.sectors[0]?.sector || '섹터', s: sectorUp + '↑ ' + sectorDn + '↓', sc: 'var(--text-secondary)' },
+            { v: d.guPrices[0] ? fmt(d.guPrices[0].sale) : '-', l: (d.guPrices[0]?.sigungu || d.region) + ' 매매', s: '전세율 ' + (d.guPrices[0]?.jeonse_ratio || '-') + '%', sc: 'var(--text-secondary)' },
           ].map((k, i) => (
             <div key={i} style={{ background: G.goldBg, borderRadius: 'var(--radius-sm)', padding: '10px 6px', textAlign: 'center', border: `1px solid ${G.goldBorder}` }}>
               <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: G.goldLight }}>{k.v}</div>

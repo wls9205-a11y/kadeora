@@ -341,6 +341,7 @@ export async function fetchDailyReportData(region: ReportRegion): Promise<DailyR
   // 구별 시세 집계
   const guMap = new Map<string, { total_sale: number; total_jeonse: number; cnt: number; max_sale: number }>();
   (guR.data || []).forEach((r: any) => {
+    if (!r.sigungu) return; // null sigungu 제외
     const existing = guMap.get(r.sigungu) || { total_sale: 0, total_jeonse: 0, cnt: 0, max_sale: 0 };
     guMap.set(r.sigungu, {
       total_sale: existing.total_sale + r.latest_sale_price,
@@ -425,7 +426,7 @@ export async function fetchDailyReportData(region: ReportRegion): Promise<DailyR
         avgPrice: lastAmounts.length > 0 ? Math.round(lastAmounts.reduce((a: number, b: number) => a + b, 0) / lastAmounts.length) : 0,
       },
       hotDeals: (tradeHotR.data || []).slice(0, 5).map((r: any) => ({
-        apt_name: r.apt_name, sigungu: r.sigungu, deal_amount: Number(r.deal_amount),
+        apt_name: r.apt_name, sigungu: r.sigungu || '', deal_amount: Number(r.deal_amount),
         exclusive_area: Number(r.exclusive_area), deal_date: r.deal_date,
       })),
     };
@@ -501,7 +502,7 @@ export async function fetchDailyReportData(region: ReportRegion): Promise<DailyR
     unsoldTotal,
     unsoldUnits,
     unsoldByRegion,
-    unsoldLocal: (unsoldLocalR.data || []).map((r: any) => ({ sigungu: r.sigungu_nm, units: r.tot_unsold_hshld_co })),
+    unsoldLocal: (unsoldLocalR.data || []).filter((r: any) => r.sigungu_nm).map((r: any) => ({ sigungu: r.sigungu_nm, units: r.tot_unsold_hshld_co })),
     redevTotal,
     redevRebuild,
     redevStages,
