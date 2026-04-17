@@ -1,132 +1,4 @@
 {
-  "functions": {
-    "src/app/api/**/*.ts": {
-      "maxDuration": 30
-    },
-    "src/app/api/admin/god-mode/*.ts": {
-      "maxDuration": 300
-    },
-    "src/app/api/admin/batch-pdf-parse/*.ts": {
-      "maxDuration": 300
-    },
-    "src/app/api/admin/batch-reparse/*.ts": {
-      "maxDuration": 300
-    },
-    "src/app/api/cron/sync-apt-sites/*.ts": {
-      "maxDuration": 180
-    },
-    "src/app/api/cron/apt-price-sync/*.ts": {
-      "maxDuration": 120
-    },
-    "src/app/api/cron/stock-price/*.ts": {
-      "maxDuration": 120
-    },
-    "src/app/api/cron/apt-ai-summary/*.ts": {
-      "maxDuration": 300
-    },
-    "src/app/api/cron/apt-image-crawl/*.ts": {
-      "maxDuration": 300
-    },
-    "src/app/api/cron/stock-daily-briefing/*.ts": {
-      "maxDuration": 120
-    },
-    "src/app/api/cron/dart-*/*.ts": {
-      "maxDuration": 120
-    },
-    "src/app/api/cron/us-*/*.ts": {
-      "maxDuration": 120
-    },
-    "src/app/api/cron/stock-flow-signals/*.ts": {
-      "maxDuration": 120
-    },
-    "src/app/api/cron/krx-short-selling/*.ts": {
-      "maxDuration": 120
-    },
-    "src/app/api/cron/earnings-krx-realtime/*.ts": {
-      "maxDuration": 120
-    },
-    "src/app/api/cron/macro-event-detect/*.ts": {
-      "maxDuration": 60
-    },
-    "src/app/api/cron/ipo-daily-update/*.ts": {
-      "maxDuration": 60
-    },
-    "src/app/api/cron/stock-hero-refresh/*.ts": {
-      "maxDuration": 60
-    },
-    "src/app/api/cron/stock-news-crawl/*.ts": {
-      "maxDuration": 120
-    },
-    "src/app/api/cron/stock-desc-gen/*.ts": {
-      "maxDuration": 120
-    },
-    "src/app/api/cron/redev-geocode/*.ts": {
-      "maxDuration": 180
-    },
-    "src/app/api/admin/blog-rewrite/*.ts": {
-      "maxDuration": 300
-    },
-    "src/app/api/cron/blog-*/*.ts": {
-      "maxDuration": 300
-    },
-    "src/app/api/cron/crawl-*/*.ts": {
-      "maxDuration": 300
-    },
-    "src/app/api/cron/collect-site-*/*.ts": {
-      "maxDuration": 300
-    },
-    "src/app/api/cron/collect-complex-*/*.ts": {
-      "maxDuration": 300
-    },
-    "src/app/api/temp-bulk-img/**/*.ts": {
-      "maxDuration": 300
-    },
-    "src/app/api/cron/indexnow-mass/*.ts": {
-      "maxDuration": 120
-    },
-    "src/app/(main)/**/*.tsx": {
-      "maxDuration": 30
-    },
-    "src/app/admin/**/*.tsx": {
-      "maxDuration": 30
-    },
-    "src/app/api/cron/naver-complex-sync/*.ts": {
-      "maxDuration": 120
-    },
-    "src/app/api/cron/naver-blog-content/*.ts": {
-      "maxDuration": 300
-    },
-    "src/app/api/cron/auto-verify-households/*.ts": {
-      "maxDuration": 120
-    },
-    "src/app/api/cron/batch-rewrite-submit/*.ts": {
-      "maxDuration": 300
-    },
-    "src/app/api/cron/batch-rewrite-poll/*.ts": {
-      "maxDuration": 300
-    },
-    "src/app/api/cron/blog-quality-prune/*.ts": {
-      "maxDuration": 120
-    },
-    "src/app/api/cron/blog-restore-*/*.ts": {
-      "maxDuration": 120
-    },
-    "src/app/api/cron/blog-restore-candidate/*.ts": {
-      "maxDuration": 120
-    },
-    "src/app/api/cron/blog-restore-monitor/*.ts": {
-      "maxDuration": 120
-    },
-    "src/app/api/cron/blog-enrich-rewrite/*.ts": {
-      "maxDuration": 300
-    },
-    "src/app/api/cron/blog-upcoming-projects/*.ts": {
-      "maxDuration": 300
-    },
-    "src/app/api/cron/blog-data-update/*.ts": {
-      "maxDuration": 120
-    }
-  },
   "crons": [
     {
       "path": "/api/cron/seed-posts",
@@ -231,10 +103,6 @@
     {
       "path": "/api/cron/crawl-nationwide-redev",
       "schedule": "0 7 * * 1"
-    },
-    {
-      "path": "/api/cron/crawl-competition-rate",
-      "schedule": "0 0 1 1 *"
     },
     {
       "path": "/api/cron/apt-ai-summary",
@@ -529,52 +397,136 @@
       "schedule": "10 20 * * 2-6"
     },
     {
-      "path": "/api/cron/naver-blog-content",
-      "schedule": "0 */8 * * *"
-    },
-    {
       "path": "/api/cron/naver-cafe-publish",
       "schedule": "0 9,21 * * *"
-    },
-    {
-      "path": "/api/cron/calc-topic-refresh",
-      "schedule": "0 5 * * 0"
-    },
-    {
-      "path": "/api/cron/cleanup-calc-results",
-      "schedule": "30 3 * * *"
-    },
-    {
-      "path": "/api/cron/premium-expire",
-      "schedule": "0 0 * * *"
-    },
-    {
-      "path": "/api/cron/expire-listings",
-      "schedule": "0 1 * * *"
-    },
-    {
-      "path": "/api/cron/health-check",
-      "schedule": "*/30 * * * *"
-    },
-    {
-      "path": "/api/cron/seo-content-boost",
-      "schedule": "0 4 * * 0"
-    },
-    {
-      "path": "/api/cron/email-digest",
-      "schedule": "0 0 * * 1"
-    },
-    {
-      "path": "/api/cron/seo-internal-links",
-      "schedule": "0 5 * * *"
-    },
-    {
-      "path": "/api/cron/seo-excerpt-fill",
-      "schedule": "0 2 * * *"
-    },
-    {
-      "path": "/api/cron/blog-calculator-guide",
-      "schedule": "0 6 * * 1"
     }
-  ]
+  ],
+  "functions": {
+    "src/app/api/**/*.ts": {
+      "maxDuration": 30
+    },
+    "src/app/api/admin/god-mode/*.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/admin/batch-pdf-parse/*.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/admin/batch-reparse/*.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/cron/sync-apt-sites/*.ts": {
+      "maxDuration": 180
+    },
+    "src/app/api/cron/apt-price-sync/*.ts": {
+      "maxDuration": 120
+    },
+    "src/app/api/cron/stock-price/*.ts": {
+      "maxDuration": 120
+    },
+    "src/app/api/cron/apt-ai-summary/*.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/cron/apt-image-crawl/*.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/cron/stock-daily-briefing/*.ts": {
+      "maxDuration": 120
+    },
+    "src/app/api/cron/dart-*/*.ts": {
+      "maxDuration": 120
+    },
+    "src/app/api/cron/us-*/*.ts": {
+      "maxDuration": 120
+    },
+    "src/app/api/cron/stock-flow-signals/*.ts": {
+      "maxDuration": 120
+    },
+    "src/app/api/cron/krx-short-selling/*.ts": {
+      "maxDuration": 120
+    },
+    "src/app/api/cron/earnings-krx-realtime/*.ts": {
+      "maxDuration": 120
+    },
+    "src/app/api/cron/macro-event-detect/*.ts": {
+      "maxDuration": 60
+    },
+    "src/app/api/cron/ipo-daily-update/*.ts": {
+      "maxDuration": 60
+    },
+    "src/app/api/cron/stock-hero-refresh/*.ts": {
+      "maxDuration": 60
+    },
+    "src/app/api/cron/stock-news-crawl/*.ts": {
+      "maxDuration": 120
+    },
+    "src/app/api/cron/stock-desc-gen/*.ts": {
+      "maxDuration": 120
+    },
+    "src/app/api/cron/redev-geocode/*.ts": {
+      "maxDuration": 180
+    },
+    "src/app/api/admin/blog-rewrite/*.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/cron/blog-*/*.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/cron/crawl-*/*.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/cron/collect-site-*/*.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/cron/collect-complex-*/*.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/temp-bulk-img/**/*.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/cron/indexnow-mass/*.ts": {
+      "maxDuration": 120
+    },
+    "src/app/(main)/**/*.tsx": {
+      "maxDuration": 30
+    },
+    "src/app/admin/**/*.tsx": {
+      "maxDuration": 30
+    },
+    "src/app/api/cron/naver-complex-sync/*.ts": {
+      "maxDuration": 120
+    },
+    "src/app/api/cron/naver-blog-content/*.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/cron/auto-verify-households/*.ts": {
+      "maxDuration": 120
+    },
+    "src/app/api/cron/batch-rewrite-submit/*.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/cron/batch-rewrite-poll/*.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/cron/blog-quality-prune/*.ts": {
+      "maxDuration": 120
+    },
+    "src/app/api/cron/blog-restore-*/*.ts": {
+      "maxDuration": 120
+    },
+    "src/app/api/cron/blog-restore-candidate/*.ts": {
+      "maxDuration": 120
+    },
+    "src/app/api/cron/blog-restore-monitor/*.ts": {
+      "maxDuration": 120
+    },
+    "src/app/api/cron/blog-enrich-rewrite/*.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/cron/blog-upcoming-projects/*.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/cron/blog-data-update/*.ts": {
+      "maxDuration": 120
+    }
+  }
 }
