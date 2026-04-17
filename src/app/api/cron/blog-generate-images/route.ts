@@ -8,7 +8,7 @@ export const maxDuration = 300;
 
 const NAVER_CLIENT_ID = process.env.NAVER_CLIENT_ID || '';
 const NAVER_CLIENT_SECRET = process.env.NAVER_CLIENT_SECRET || '';
-const BATCH = 200;
+const BATCH = 100; // 이미지 8장/post로 확장 → 배치 축소
 
 const CAT_QUERIES: Record<string, string[]> = {
   stock: ['주식 증권 시장 차트', '코스피 주식 거래', '투자 분석 차트', '증권사 트레이딩'],
@@ -49,7 +49,7 @@ const IMG_BLOCK_DOMAINS = [
   'hogangnono', 'new.land.naver.com', 'landthumb', 'kbland', 'kbstar.com',
   'zigbang', 'dabang',
   // 부적합 출처
-  'dcinside.com', 'ruliweb.com',
+  'dcinside', 'ruliweb.com', 'ppomppu.co.kr',
   // GIF 제외 (움짤 품질 문제)
 ];
 
@@ -156,7 +156,7 @@ async function handler(_req: NextRequest) {
       .from('blog_posts')
       .select('id, title, category, sub_category, image_alt, cover_image')
       .eq('source_type', 'auto_issue')
-      .like('cover_image', '%/api/og?%')
+      .like('cover_image', '%/api/og%')
       .order('created_at', { ascending: false })
       .limit(50);
 
@@ -165,7 +165,7 @@ async function handler(_req: NextRequest) {
       .select('id, title, category, sub_category, image_alt, cover_image')
       .eq('is_published', true)
       .or('source_type.is.null,source_type.neq.auto_issue')
-      .like('cover_image', '%/api/og?%')
+      .like('cover_image', '%/api/og%')
       .order('created_at', { ascending: false })
       .limit(BATCH - (issuePosts?.length || 0));
 
@@ -205,77 +205,82 @@ async function handler(_req: NextRequest) {
       if (!catIdx[cat]) catIdx[cat] = 0;
       const label = CAT_LABEL[cat] || '정보';
 
-      // 제목 기반 검색
+      // 제목 기반 검색 (7장 확보 위해 8장 요청)
       let titleImgs: { url: string; alt: string; caption: string }[] = [];
       const kw = extractKeywords(post.title, cat, post.sub_category);
-      titleImgs = await fetchNaverImages(kw, 5);
+      titleImgs = await fetchNaverImages(kw, 8);
       await new Promise(r => setTimeout(r, 50));
 
-      // Position 0: 제목 기반 (썸네일 후보)
-      const img0 = titleImgs[0] || (cache.length > 0 ? cache[catIdx[cat] % cache.length] : null);
+      // ━━━ 7장 실사진 + 1장 인포그래픽 = 총 8 position ━━━
+      // pos 0: 제목 기반 대표 (썸네일 후보)
+      const img0 = titleImgs[0] || (cache.length > 0 ? cache[catIdx[cat]++ % cache.length] : null);
       if (img0) {
-        catIdx[cat]++;
-        inserts.push({
-          post_id: post.id, image_url: img0.url,
+        inserts.push({ post_id: post.id, image_url: img0.url,
           alt_text: post.image_alt || `${post.title} — ${label} 관련 이미지`,
-          caption: img0.caption, image_type: 'stock_photo', position: 0,
-        });
+          caption: img0.caption, image_type: 'stock_photo', position: 0 });
       }
 
-      // Position 1: OG 인포그래픽
+      // pos 1: 제목 기반 두 번째
+      const img1 = titleImgs[1] || (cache.length > 0 ? cache[catIdx[cat]++ % cache.length] : null);
+      if (img1) {
+        inserts.push({ post_id: post.id, image_url: img1.url,
+          alt_text: `${post.title} — ${label} 추가 이미지`,
+          caption: img1.caption, image_type: 'stock_photo', position: 1 });
+      }
+
+      // pos 2: 카테고리 기반 (다양성)
+      if (cache.length > 0) {
+        const img2 = cache[catIdx[cat]++ % cache.length];
+        inserts.push({ post_id: post.id, image_url: img2.url,
+          alt_text: `${post.title} — ${label} 관련`,
+          caption: img2.caption, image_type: 'stock_photo', position: 2 });
+      }
+
+      // pos 3: 제목 기반 세 번째
+      const img3 = titleImgs[2] || (cache.length > 0 ? cache[catIdx[cat]++ % cache.length] : null);
+      if (img3) {
+        inserts.push({ post_id: post.id, image_url: img3.url,
+          alt_text: `${post.title} — ${label} 참고 이미지`,
+          caption: img3.caption, image_type: 'stock_photo', position: 3 });
+      }
+
+      // pos 4: 카테고리 기반 두 번째 (다양성)
+      if (cache.length > 1) {
+        const img4 = cache[catIdx[cat]++ % cache.length];
+        inserts.push({ post_id: post.id, image_url: img4.url,
+          alt_text: `${post.title} — ${label} 분석 이미지`,
+          caption: img4.caption, image_type: 'stock_photo', position: 4 });
+      }
+
+      // pos 5: 제목 기반 네 번째
+      const img5 = titleImgs[3] || (cache.length > 0 ? cache[catIdx[cat]++ % cache.length] : null);
+      if (img5) {
+        inserts.push({ post_id: post.id, image_url: img5.url,
+          alt_text: `${post.title} — ${label} 데이터 이미지`,
+          caption: img5.caption, image_type: 'stock_photo', position: 5 });
+      }
+
+      // pos 6: 제목/카테고리 기반 다섯 번째
+      const img6 = titleImgs[4] || (cache.length > 0 ? cache[catIdx[cat]++ % cache.length] : null);
+      if (img6) {
+        inserts.push({ post_id: post.id, image_url: img6.url,
+          alt_text: `${post.title} — ${label} 관련 자료`,
+          caption: img6.caption, image_type: 'stock_photo', position: 6 });
+      }
+
+      // pos 7: OG 인포그래픽 (렌더링에서 제외되지만 JSON-LD/커버 용도)
       inserts.push({
         post_id: post.id,
         image_url: `${SITE_URL}/api/og?title=${encodeURIComponent((post.title || '').slice(0, 40))}&category=${cat}&author=${encodeURIComponent('카더라 ' + label + '팀')}&design=${1 + Math.floor(Math.random() * 6)}`,
         alt_text: `${post.title} — 카더라 ${label} 인포그래픽`,
-        caption: `카더라 ${label} 데이터 분석`, image_type: 'infographic', position: 1,
+        caption: `카더라 ${label} 데이터 분석`, image_type: 'infographic', position: 7,
       });
-
-      // Position 2: 제목 기반 두 번째
-      const img2 = titleImgs[1] || (cache.length > 0 ? cache[catIdx[cat] % cache.length] : null);
-      if (img2) {
-        catIdx[cat]++;
-        inserts.push({
-          post_id: post.id, image_url: img2.url,
-          alt_text: `${post.title} — ${label} 추가 이미지`,
-          caption: img2.caption, image_type: 'stock_photo', position: 2,
-        });
-      }
-
-      // Position 3: 카테고리 기반 (다양성)
-      if (cache.length > 0) {
-        const img3 = cache[catIdx[cat] % cache.length];
-        catIdx[cat]++;
-        inserts.push({
-          post_id: post.id, image_url: img3.url,
-          alt_text: `${post.title} — ${label} 관련`,
-          caption: img3.caption, image_type: 'stock_photo', position: 3,
-        });
-      }
-
-      // Position 4: OG 비교 인포그래픽
-      inserts.push({
-        post_id: post.id,
-        image_url: `${SITE_URL}/api/og?title=${encodeURIComponent((post.title || '').slice(0, 35) + ' 비교분석')}&category=${cat}&author=${encodeURIComponent('카더라')}&design=${1 + Math.floor(Math.random() * 6)}`,
-        alt_text: `${post.title} — 비교 분석 인포그래픽`,
-        caption: `카더라 ${label} 비교 분석`, image_type: 'infographic', position: 4,
-      });
-
-      // Position 5: 네 번째 이미지
-      const img5 = titleImgs[2] || (cache.length > 0 ? cache[catIdx[cat] % cache.length] : null);
-      if (img5) {
-        catIdx[cat]++;
-        inserts.push({
-          post_id: post.id, image_url: img5.url,
-          alt_text: `${post.title} — ${label} 참고 이미지`,
-          caption: img5.caption, image_type: 'stock_photo', position: 5,
-        });
-      }
     }
 
     if (inserts.length > 0) {
       const { error } = await (sb as any)
         .from('blog_post_images')
-        .upsert(inserts, { onConflict: 'post_id,position', ignoreDuplicates: true });
+        .upsert(inserts, { onConflict: 'post_id,position', ignoreDuplicates: false });
       if (error) console.error('[blog-generate-images] upsert error:', error);
 
       // cover_image 업데이트 — OG 텍스트 배너 → 실사진 (position 0에 실사진이 있으면)
@@ -284,7 +289,7 @@ async function handler(_req: NextRequest) {
         await sb.from('blog_posts')
           .update({ cover_image: cu.image_url })
           .eq('id', cu.post_id)
-          .like('cover_image', '%/api/og?%');
+          .like('cover_image', '%/api/og%');
       }
     }
 
@@ -292,7 +297,7 @@ async function handler(_req: NextRequest) {
     try {
       const { data: ogCovers } = await sb.from('blog_posts')
         .select('id').eq('is_published', true)
-        .like('cover_image', '%/api/og?%')
+        .like('cover_image', '%/api/og%')
         .order('view_count', { ascending: false })
         .limit(50);
       if (ogCovers?.length) {

@@ -18,9 +18,11 @@ const DOMAIN_BLACKLIST = [
   /new\.land\.naver\.com|landthumb/i,  // 네이버부동산 (경쟁사)
   /kbland|kbstar\.com/i,               // KB부동산 (경쟁사)
   /zigbang|dabang/i,                   // 직방·다방 (경쟁사)
-  /dcimg\d+\.dcinside\.com/i,          // 디시인사이드 (부적합)
+  /dcinside\.(com|co\.kr)/i,           // 디시인사이드 전체 (부적합)
   /i\.pinimg\.com|ruliweb\.com/i,      // Pinterest·루리웹 (관련성 낮음)
   /namu\.wiki/i,                       // 나무위키
+  /ppomppu\.co\.kr/i,                  // 뽐뿌 (커뮤니티 무관 이미지)
+  /shop\d*\.phinf\.naver\.net/i,       // 네이버 쇼핑 (부적합)
   /\.gif(\?|$)/i,                      // 움짤 제외
 ];
 

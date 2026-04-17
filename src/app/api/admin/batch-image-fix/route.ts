@@ -88,7 +88,7 @@ async function doSites(sb:any, limit:number) {
 async function doBlog(sb:any, limit:number) {
   const {data:posts}=await sb.from('blog_posts')
     .select('id,title,category,image_alt,cover_image')
-    .eq('is_published',true).like('cover_image','%/api/og?%')
+    .eq('is_published',true).like('cover_image','%/api/og%')
     .order('view_count',{ascending:false}).limit(limit);
   if(!posts?.length) return NextResponse.json({ok:true,mode:'blog',processed:0,remaining:0});
   const CL:Record<string,string>={stock:'주식',apt:'부동산',unsold:'미분양',finance:'재테크',economy:'경제',tax:'세금',life:'생활',general:'정보'};
@@ -106,6 +106,6 @@ async function doBlog(sb:any, limit:number) {
     await sb.from('blog_posts').update({cover_image:imgs[0].url}).eq('id',p.id);
     ok++;
   }
-  const {count}=await sb.from('blog_posts').select('id',{count:'exact',head:true}).eq('is_published',true).like('cover_image','%/api/og?%');
+  const {count}=await sb.from('blog_posts').select('id',{count:'exact',head:true}).eq('is_published',true).like('cover_image','%/api/og%');
   return NextResponse.json({ok:true,mode:'blog',processed:posts.length,updated:ok,failed:fail,remaining:count||0});
 }
