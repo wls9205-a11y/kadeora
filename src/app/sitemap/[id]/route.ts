@@ -474,37 +474,55 @@ ${blogXml}
   if (id === 30) {
     try {
       const sb = getSupabaseAdmin();
-      const { data: topics } = await (sb as any).from('calc_topic_clusters')
+      const { data: topics, error } = await (sb as any).from('calc_topic_clusters')
         .select('topic_slug, updated_at, search_volume_naver')
         .eq('is_published', true);
+      if (error) {
+        console.error('[sitemap/30] supabase error:', error);
+        return new NextResponse(`<!-- sitemap30 error: ${error.message} -->\n<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>`, {
+          headers: { 'Content-Type': 'application/xml; charset=utf-8' },
+        });
+      }
       const entries = (topics || []).map((t: any) => ({
         url: `${BASE}/calc/topic/${encodeURIComponent(t.topic_slug)}`,
-        lastModified: t.updated_at || buildDate,
+        lastModified: t.updated_at ? new Date(t.updated_at).toISOString() : buildDate,
         changeFrequency: 'weekly',
         priority: t.search_volume_naver > 10000 ? 0.9 : t.search_volume_naver > 5000 ? 0.8 : 0.7,
       }));
       return xmlResponse(entries);
-    } catch { return xmlResponse([]); }
+    } catch (e: any) {
+      console.error('[sitemap/30] catch:', e);
+      return new NextResponse(`<!-- sitemap30 catch: ${e?.message || e} -->\n<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>`, {
+        headers: { 'Content-Type': 'application/xml; charset=utf-8' },
+      });
+    }
   }
 
   // ── 31: 인기 계산기 결과 영구 URL (조회수 5+) ──
   if (id === 31) {
     try {
       const sb = getSupabaseAdmin();
-      const { data: results } = await (sb as any).from('calc_results')
+      const { data: results, error } = await (sb as any).from('calc_results')
         .select('short_id, calc_slug, calc_category, view_count, created_at')
         .gt('view_count', 5)
         .gt('expires_at', new Date().toISOString())
         .order('view_count', { ascending: false })
         .limit(1000);
+      if (error) {
+        console.error('[sitemap/31] supabase error:', error);
+        return xmlResponse([]);
+      }
       const entries = (results || []).map((r: any) => ({
         url: `${BASE}/calc/${encodeURIComponent(r.calc_category)}/${encodeURIComponent(r.calc_slug)}/r/${encodeURIComponent(r.short_id)}`,
-        lastModified: r.created_at,
+        lastModified: r.created_at ? new Date(r.created_at).toISOString() : buildDate,
         changeFrequency: 'monthly',
         priority: r.view_count > 100 ? 0.7 : r.view_count > 50 ? 0.6 : 0.5,
       }));
       return xmlResponse(entries);
-    } catch { return xmlResponse([]); }
+    } catch (e) {
+      console.error('[sitemap/31] catch:', e);
+      return xmlResponse([]);
+    }
   }
 
   return xmlResponse([]);
