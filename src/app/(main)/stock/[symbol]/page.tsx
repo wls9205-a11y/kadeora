@@ -19,6 +19,8 @@ import { fmtPrice, fmtCap } from '@/lib/format';
 import Disclaimer from '@/components/Disclaimer';
 import SectionShareButton from '@/components/SectionShareButton';
 import StockMAOverlay from '@/components/StockMAOverlay';
+import RelatedStocks from '@/components/stock/RelatedStocks';
+import RelatedBlogBelt from '@/components/stock/RelatedBlogBelt';
 
 interface Props { params: Promise<{ symbol: string }> }
 
@@ -657,6 +659,12 @@ export default async function StockDetailPage({ params }: Props) {
           ))}
         </div>
       </div>
+
+      {/* 유사 종목 추천 */}
+      <RelatedStocks symbol={symbol} sector={s.sector} market={s.market} marketCap={s.market_cap} />
+
+      {/* 관련 블로그 벨트 */}
+      <RelatedBlogBelt symbol={symbol} stockName={s.name} />
 
       {/* 면책고지 */}
       <Disclaimer type="stock" compact />

@@ -39,28 +39,27 @@ async function detectForeignBuyingBreakout(): Promise<SignalResult[]> {
   const supabase = sb();
   const signals: SignalResult[] = [];
 
-  // 최근 5일 외국인 순매수 합산
-  const { data } = await (supabase as any).from('flow_snapshots_krx')
-    .select('symbol, foreign_net, trade_date')
-    .gte('trade_date', new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10))
-    .order('trade_date', { ascending: false });
+  // stock_investor_flow 테이블에서 최근 5일 데이터
+  const { data } = await supabase.from('stock_investor_flow')
+    .select('symbol, foreign_buy, foreign_sell, date')
+    .gte('date', new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10))
+    .order('date', { ascending: false });
 
   if (!data?.length) return signals;
 
-  // 종목별 5일 합산
   const symbolMap: Record<string, { total: number; days: number }> = {};
-  for (const row of data) {
+  for (const row of data as any[]) {
     if (!symbolMap[row.symbol]) symbolMap[row.symbol] = { total: 0, days: 0 };
-    symbolMap[row.symbol].total += Number(row.foreign_net || 0);
+    const foreignNet = Number(row.foreign_buy || 0) - Number(row.foreign_sell || 0);
+    symbolMap[row.symbol].total += foreignNet;
     symbolMap[row.symbol].days++;
   }
 
-  // 평균·표준편차 계산
   const totals = Object.values(symbolMap).map(v => v.total);
+  if (totals.length < 3) return signals;
   const mean = totals.reduce((a, b) => a + b, 0) / totals.length;
-  const std = Math.sqrt(totals.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / totals.length);
+  const std = Math.sqrt(totals.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / totals.length) || 1;
 
-  // 2σ 이상 이탈 종목
   for (const [symbol, v] of Object.entries(symbolMap)) {
     if (v.total > mean + 2 * std && v.days >= 3) {
       signals.push({
@@ -80,22 +79,21 @@ async function detectInstitutionStreak(): Promise<SignalResult[]> {
   const supabase = sb();
   const signals: SignalResult[] = [];
 
-  const { data } = await (supabase as any).from('flow_snapshots_krx')
-    .select('symbol, institution_net, trade_date')
-    .gte('trade_date', new Date(Date.now() - 5 * 86400000).toISOString().slice(0, 10))
-    .order('trade_date', { ascending: false });
+  const { data } = await supabase.from('stock_investor_flow')
+    .select('symbol, inst_buy, inst_sell, date')
+    .gte('date', new Date(Date.now() - 5 * 86400000).toISOString().slice(0, 10))
+    .order('date', { ascending: false });
 
   if (!data?.length) return signals;
 
-  // 종목별 연속 매수일 카운트
   const symbolDays: Record<string, number[]> = {};
-  for (const row of data) {
+  for (const row of data as any[]) {
     if (!symbolDays[row.symbol]) symbolDays[row.symbol] = [];
-    symbolDays[row.symbol].push(Number(row.institution_net || 0));
+    const instNet = Number(row.inst_buy || 0) - Number(row.inst_sell || 0);
+    symbolDays[row.symbol].push(instNet);
   }
 
   for (const [symbol, nets] of Object.entries(symbolDays)) {
-    // 최근 3일 모두 순매수
     const recent3 = nets.slice(0, 3);
     if (recent3.length >= 3 && recent3.every(n => n > 0)) {
       const total = recent3.reduce((a, b) => a + b, 0);
@@ -116,22 +114,21 @@ async function detectIndividualCapitulation(): Promise<SignalResult[]> {
   const supabase = sb();
   const signals: SignalResult[] = [];
 
-  const { data } = await (supabase as any).from('flow_snapshots_krx')
-    .select('symbol, foreign_net, individual_net, trade_date')
-    .gte('trade_date', new Date(Date.now() - 3 * 86400000).toISOString().slice(0, 10))
-    .order('trade_date', { ascending: false });
+  const { data } = await supabase.from('stock_investor_flow')
+    .select('symbol, foreign_buy, foreign_sell, retail_buy, retail_sell, date')
+    .gte('date', new Date(Date.now() - 3 * 86400000).toISOString().slice(0, 10))
+    .order('date', { ascending: false });
 
   if (!data?.length) return signals;
 
   const symbolMap: Record<string, { foreign: number; individual: number }> = {};
-  for (const row of data) {
+  for (const row of data as any[]) {
     if (!symbolMap[row.symbol]) symbolMap[row.symbol] = { foreign: 0, individual: 0 };
-    symbolMap[row.symbol].foreign += Number(row.foreign_net || 0);
-    symbolMap[row.symbol].individual += Number(row.individual_net || 0);
+    symbolMap[row.symbol].foreign += Number(row.foreign_buy || 0) - Number(row.foreign_sell || 0);
+    symbolMap[row.symbol].individual += Number(row.retail_buy || 0) - Number(row.retail_sell || 0);
   }
 
   for (const [symbol, v] of Object.entries(symbolMap)) {
-    // 개인 매도 + 외인 매수 동시 발생
     if (v.individual < -1e8 && v.foreign > 1e8) {
       signals.push({
         signal_type: 'individual_capitulation',

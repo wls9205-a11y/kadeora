@@ -37,15 +37,15 @@ export async function GET(req: NextRequest) {
 
   for (const sym of symbols.slice(0, 3)) {
     const { data } = await (sb as any)
-      .from('price_history')
-      .select('trade_date, close_price')
+      .from('stock_price_history')
+      .select('date, close_price')
       .eq('symbol', sym)
-      .gte('trade_date', since)
-      .order('trade_date', { ascending: true })
+      .gte('date', since)
+      .order('date', { ascending: true })
       .limit(400);
 
     allData[sym] = (data || []).map((d: any) => ({
-      date: d.trade_date,
+      date: d.date,
       close: Number(d.close_price),
     }));
   }
