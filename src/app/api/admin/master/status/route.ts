@@ -166,6 +166,15 @@ export async function GET() {
   const allConfigRes = await check(() => listConfig());
   const allConfig = allConfigRes.ok ? allConfigRes.data : {};
 
+  // ── 9.5. KPI 대시보드 (get_admin_dashboard RPC — SECURITY DEFINER + EXCEPTION 핸들러 내장) ──
+  // health/kpi_7d/kpi_30d/funnel_7d/top_pages_24h/retention_tools/cron_recent_failures 통합 반환
+  const dashboardRes = await check(async () => {
+    const { data, error } = await (sb as any).rpc('get_admin_dashboard');
+    if (error) throw error;
+    return data;
+  });
+  const dashboard = dashboardRes.ok ? dashboardRes.data : null;
+
   // ── 10. 헬스 점수 ──
   let healthScore = 100;
   if (!migrationsApplied) healthScore -= 30;
@@ -187,6 +196,7 @@ export async function GET() {
     crons_24h: cronRes.ok ? cronRes.data : { error: cronRes.error },
     env: { ok: envMissing.length === 0, missing: envMissing, status: envStatus },
     app_config: allConfig,
+    dashboard,
     next_actions: deriveNextActions({
       migrationsApplied, masterKill, oauth, envMissing,
       synStats: synRes.ok ? synRes.data : null,

@@ -72,6 +72,7 @@ export async function GET(req: NextRequest) {
 
     // 이메일 발송 (Resend + 한도 고려)
     let emailSent = 0, emailFailed = 0;
+    const failedReasons: Record<string, number> = {};
     try {
       const { sendNotificationEmail } = await import('@/lib/email-sender');
       const { weeklyDigestBody } = await import('@/lib/email-templates');
@@ -88,9 +89,10 @@ export async function GET(req: NextRequest) {
       for (let i = 0; i < maxSend; i += 10) {
         const batch = users.slice(i, i + 10);
         await Promise.all(batch.map(async (u) => {
+          let email: string | undefined;
           try {
             const { data: authUser } = await sb.auth.admin.getUserById(u.id);
-            const email = authUser?.user?.email;
+            email = authUser?.user?.email;
             if (!email || sentEmails.has(email)) return;
 
             const subject = `${u.nickname || '회원'}님의 주간 투자 리포트 📊`;
@@ -102,20 +104,41 @@ export async function GET(req: NextRequest) {
               user_id: u.id,
               status: r.ok ? 'sent' : 'failed',
               resend_id: r.ok ? r.id || null : null,
-            }).catch(() => {});
+            }).catch((logErr: any) => console.error('[email-digest] insert log failed:', logErr?.message));
 
-            if (r.ok) emailSent++; else emailFailed++;
-          } catch { emailFailed++; }
+            if (r.ok) {
+              emailSent++;
+            } else {
+              emailFailed++;
+              // sendNotificationEmail이 ok=false 반환한 경우 — 실제 사유 로깅
+              const reason = (r as any).error?.name || (r as any).error?.message?.slice(0, 60) || 'unknown_resend_error';
+              failedReasons[reason] = (failedReasons[reason] || 0) + 1;
+              console.error(`[email-digest] resend returned ok=false for ${email}:`, (r as any).error || r);
+            }
+          } catch (e: any) {
+            emailFailed++;
+            // throw 케이스 (네트워크·SDK·DB) — 실제 사유 로깅
+            const reason = e?.code || e?.name || e?.message?.slice(0, 60) || 'unknown_throw';
+            failedReasons[reason] = (failedReasons[reason] || 0) + 1;
+            console.error(`[email-digest] threw for ${email || '(no-email)'}:`, {
+              code: e?.code, name: e?.name, message: e?.message?.slice(0, 200),
+            });
+          }
         }));
         if (i + 10 < maxSend) await new Promise(r => setTimeout(r, 1000));
       }
-    } catch (e) { console.error('[email-digest]', e); }
+    } catch (e) { console.error('[email-digest] outer catch:', e); }
 
     return {
       processed: notifs.length,
       created: emailSent,
       failed: emailFailed,
-      metadata: { emailSent, emailFailed, users: users.length, remaining, hotPosts: hotPosts.data?.length, deadlines: deadlines.data?.length, newBlogs: newBlogs.data?.length },
+      metadata: {
+        emailSent, emailFailed,
+        failed_reasons: failedReasons,
+        users: users.length, remaining,
+        hotPosts: hotPosts.data?.length, deadlines: deadlines.data?.length, newBlogs: newBlogs.data?.length,
+      },
     };
   });
 

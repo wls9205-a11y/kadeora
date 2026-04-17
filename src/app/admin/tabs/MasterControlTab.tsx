@@ -13,6 +13,15 @@ interface Status {
   env: { ok: boolean; missing: string[]; status: Record<string, boolean> };
   app_config: Record<string, Record<string, any>>;
   next_actions: Array<{ priority: 'high' | 'medium' | 'low'; action: string; detail?: string }>;
+  dashboard?: {
+    health?: Record<string, number>;
+    kpi_7d?: { sessions: number; visitors: number; signups_real: number; signups_total: number; login_page_sessions: number };
+    kpi_30d?: { sessions: number; visitors: number; signups_real: number; signups_total: number; login_page_sessions: number };
+    funnel_7d?: Array<{ day: string; visitors: number; login_visits: number; signups: number; conv_rate_pct: number }>;
+    top_pages_24h?: Array<{ path: string; views: number }>;
+    retention_tools?: Record<string, number>;
+    cron_recent_failures?: Array<{ cron_name: string; error: string; started_at: string }>;
+  } | null;
 }
 
 interface ExecuteStep {
@@ -129,6 +138,82 @@ export default function MasterControlTab() {
           </div>
         </div>
       </div>
+
+      {/* 📊 KPI 대시보드 (get_admin_dashboard RPC — 통합 메트릭) */}
+      {status.dashboard && (
+        <div style={{ marginBottom: 16, padding: 14, background: 'rgba(15,23,42,0.4)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 10 }}>
+          <div style={{ fontSize: 12, fontWeight: 800, color: '#93C5FD', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
+            📊 KPI 대시보드 (실시간)
+          </div>
+
+          {/* KPI 7일 vs 30일 */}
+          {(status.dashboard.kpi_7d || status.dashboard.kpi_30d) && (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 8, marginBottom: 12 }}>
+              {[
+                { label: '7일 방문자', val: status.dashboard.kpi_7d?.visitors, color: '#60A5FA' },
+                { label: '7일 세션', val: status.dashboard.kpi_7d?.sessions, color: '#60A5FA' },
+                { label: '7일 가입(실)', val: status.dashboard.kpi_7d?.signups_real, color: '#10B981' },
+                { label: '7일 로그인 페이지', val: status.dashboard.kpi_7d?.login_page_sessions, color: '#F59E0B' },
+                { label: '30일 방문자', val: status.dashboard.kpi_30d?.visitors, color: '#94A3B8' },
+                { label: '30일 가입(실)', val: status.dashboard.kpi_30d?.signups_real, color: '#94A3B8' },
+              ].map((k, i) => k.val !== undefined && (
+                <div key={i} style={{ padding: 10, background: 'rgba(255,255,255,0.03)', borderRadius: 6, borderLeft: `2px solid ${k.color}` }}>
+                  <div style={{ fontSize: 18, fontWeight: 800, color: k.color }}>{k.val.toLocaleString('ko-KR')}</div>
+                  <div style={{ fontSize: 10, color: '#94A3B8', marginTop: 2 }}>{k.label}</div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* 7일 깔때기 (전환율) */}
+          {status.dashboard.funnel_7d && status.dashboard.funnel_7d.length > 0 && (
+            <div style={{ marginBottom: 12 }}>
+              <div style={{ fontSize: 11, color: '#94A3B8', marginBottom: 6, fontWeight: 700 }}>📉 7일 전환 깔때기 (방문 → 로그인페이지 → 가입)</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                {status.dashboard.funnel_7d.map((row) => (
+                  <div key={row.day} style={{ display: 'grid', gridTemplateColumns: '90px 1fr 1fr 1fr 60px', gap: 8, fontSize: 11, color: '#CBD5E1', padding: '4px 8px', background: 'rgba(255,255,255,0.02)', borderRadius: 4 }}>
+                    <span style={{ fontWeight: 600 }}>{row.day.slice(5)}</span>
+                    <span>방문 <strong>{row.visitors}</strong></span>
+                    <span>로그인 <strong>{row.login_visits}</strong></span>
+                    <span>가입 <strong style={{ color: '#10B981' }}>{row.signups}</strong></span>
+                    <span style={{ textAlign: 'right', color: row.conv_rate_pct >= 1 ? '#10B981' : '#F59E0B', fontWeight: 700 }}>{row.conv_rate_pct}%</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 24h Top 페이지 */}
+          {status.dashboard.top_pages_24h && status.dashboard.top_pages_24h.length > 0 && (
+            <div style={{ marginBottom: 12 }}>
+              <div style={{ fontSize: 11, color: '#94A3B8', marginBottom: 6, fontWeight: 700 }}>🔥 24h Top 페이지 (top 5)</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                {status.dashboard.top_pages_24h.slice(0, 5).map((p, i) => (
+                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: '#CBD5E1', padding: '3px 8px', background: 'rgba(255,255,255,0.02)', borderRadius: 4 }}>
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 'calc(100% - 70px)' }} title={decodeURIComponent(p.path)}>{decodeURIComponent(p.path)}</span>
+                    <strong>{p.views.toLocaleString('ko-KR')}</strong>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 최근 cron 실패 */}
+          {status.dashboard.cron_recent_failures && status.dashboard.cron_recent_failures.length > 0 && (
+            <div>
+              <div style={{ fontSize: 11, color: '#94A3B8', marginBottom: 6, fontWeight: 700 }}>⚠️ 최근 cron 실패 (top 3)</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                {status.dashboard.cron_recent_failures.slice(0, 3).map((c, i) => (
+                  <div key={i} style={{ fontSize: 10, color: '#FCA5A5', padding: '4px 8px', background: 'rgba(239,68,68,0.05)', borderRadius: 4, lineHeight: 1.5 }}>
+                    <div style={{ fontWeight: 700 }}>{c.cron_name}</div>
+                    <div style={{ color: '#FECACA', opacity: 0.8 }}>{(c.error || '').slice(0, 100)}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* 🚨 마스터 킬 스위치 */}
       <div style={{ background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 8, padding: 12, marginBottom: 16 }}>
