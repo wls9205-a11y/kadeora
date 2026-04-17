@@ -5,9 +5,13 @@ export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app
 export const CONTACT_EMAIL = 'kadeora.app@gmail.com';
 export const CONTACT_PHONE = '010-5001-1382';
 
-/** AI 모델 */
+/** AI 모델 — 최신 (2026-04 기준)
+ *  실시간 변경 가능: app_config.ai_models 에서 오버라이드 (lib/app-config.ts getAIModel)
+ *  여기는 fallback 용도
+ */
 export const AI_MODEL_HAIKU = 'claude-haiku-4-5-20251001';
-export const AI_MODEL_SONNET = 'claude-sonnet-4-20250514';
+export const AI_MODEL_SONNET = 'claude-sonnet-4-6';
+export const AI_MODEL_OPUS = 'claude-opus-4-7';
 export const ANTHROPIC_VERSION = '2023-06-01';
 
 
