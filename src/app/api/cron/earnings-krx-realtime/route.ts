@@ -101,20 +101,24 @@ ${stockInfo}
         const content = ensureDisclaimer(sanitized);
 
         // 블로그 발행
+        const today = new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10);
+        const slug = `earnings-krx-${filing.symbol || filing.corp_code}-${today.replace(/-/g, '')}`;
         await safeBlogInsert(supabase, {
+          slug,
           title: `[실적] ${title}`,
           content,
-          category: '주식',
-          sub_category: '실적발표',
+          category: 'stock',
           tags: [
             filing.corp_name,
             filing.symbol,
             '실적발표',
             '어닝시즌',
             stock?.sector || '국내주식',
-          ].filter(Boolean),
-          author: '카더라 증시팀',
-          cover_image: `/api/og?title=${encodeURIComponent(title)}&category=stock&design=7`,
+          ].filter(Boolean) as string[],
+          source_type: 'auto',
+          source_ref: filing.symbol || filing.corp_code,
+          data_date: today,
+          cover_image: `/api/og?title=${encodeURIComponent(title)}&category=stock&design=2`,
         });
 
         // earnings_events에도 기록

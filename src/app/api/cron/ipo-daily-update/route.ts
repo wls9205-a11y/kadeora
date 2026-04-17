@@ -104,13 +104,15 @@ export async function GET(req: NextRequest) {
           const { text: sanitized } = sanitizeAiContent(raw);
           const content = ensureDisclaimer(sanitized);
 
+          const slug = `ipo-preview-${ipo.company_name.replace(/[^a-z0-9가-힣]/gi, '-').slice(0, 30)}-${tomorrow.replace(/-/g, '')}`;
           await safeBlogInsert(supabase, {
+            slug,
             title: `[공모주] ${ipo.company_name} 청약 프리뷰 — ${tomorrow} 청약 시작`,
             content,
-            category: '주식',
-            sub_category: '공모주',
+            category: 'stock',
             tags: [ipo.company_name, '공모주', 'IPO', '청약', '상장'],
-            author: '카더라 증시팀',
+            source_type: 'auto',
+            data_date: tomorrow,
             cover_image: `/api/og?title=${encodeURIComponent(`${ipo.company_name} 공모주 청약`)}&category=stock&design=2`,
           });
 

@@ -150,14 +150,16 @@ ${eventsText}
       const lines = raw.split('\n');
       const title = lines[0].replace(/^#+\s*/, '').trim() || `이번 주 매크로 일정 — ${kstDate}`;
 
+      const slug = `macro-weekly-${kstDate.replace(/-/g, '')}`;
       await safeBlogInsert(supabase, {
+        slug,
         title: `[매크로] ${title}`,
         content,
-        category: '주식',
-        sub_category: '매크로',
+        category: 'stock',
         tags: ['매크로', '경제지표', 'FOMC', 'CPI', '금리', '미국경제'],
-        author: '카더라 증시팀',
-        cover_image: `/api/og?title=${encodeURIComponent(title)}&category=stock&design=11`,
+        source_type: 'auto',
+        data_date: kstDate,
+        cover_image: `/api/og?title=${encodeURIComponent(title)}&category=stock&design=2`,
       });
 
       return {

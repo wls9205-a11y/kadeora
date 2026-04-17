@@ -181,13 +181,17 @@ export async function publishBriefingAsBlog(opts: {
   tags: string[];
 }) {
   const supabase = getSupabaseAdmin();
+  const today = new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10).replace(/-/g, '');
+  const slugBase = opts.title.replace(/[^a-z0-9가-힣]/gi, '-').slice(0, 40).toLowerCase();
+  const slug = `us-brief-${slugBase}-${today}`;
   await safeBlogInsert(supabase, {
+    slug,
     title: opts.title,
     content: opts.content,
-    category: opts.category,
-    sub_category: opts.subCategory,
+    category: 'stock',
     tags: opts.tags,
-    author: '카더라 증시팀',
-    cover_image: `/api/og?title=${encodeURIComponent(opts.title)}&category=stock&author=${encodeURIComponent('카더라 증시팀')}&design=2`,
+    source_type: 'auto',
+    data_date: today.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'),
+    cover_image: `/api/og?title=${encodeURIComponent(opts.title)}&category=stock&design=2`,
   });
 }

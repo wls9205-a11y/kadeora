@@ -68,14 +68,18 @@ EPS 컨센서스: ${event.eps_consensus ?? '정보 없음'}
         const { text: sanitized } = sanitizeAiContent(raw);
         const content = ensureDisclaimer(sanitized);
 
+        const today = new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10);
+        const slug = `us-earnings-${event.symbol}-${(event.period || '').replace(/\s/g, '')}-${today.replace(/-/g, '')}`;
         await safeBlogInsert(supabase, {
+          slug,
           title: `${event.symbol} ${event.period} 실적 발표 — 한국어 요약`,
           content,
-          category: '주식',
-          sub_category: '해외주식',
+          category: 'stock',
           tags: [event.symbol, '실적발표', '해외주식', '어닝시즌'],
-          author: '카더라 증시팀',
-          cover_image: `/api/og?title=${encodeURIComponent(`${event.symbol} 실적 발표`)}&category=stock&design=7`,
+          source_type: 'auto',
+          source_ref: event.symbol,
+          data_date: today,
+          cover_image: `/api/og?title=${encodeURIComponent(`${event.symbol} 실적 발표`)}&category=stock&design=2`,
         });
 
         // earnings_events 상태 업데이트
