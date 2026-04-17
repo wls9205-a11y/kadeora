@@ -235,7 +235,37 @@ const SH = ({ icon, title }: { icon: string; title: string }) => (
 export default function DailyReportClient({ data, regions, viewDate, prevDate, nextDate }: Props) {
   const router = useRouter();
   const { userId, profile, loading: authLoading } = useAuth();
-  const d = data;
+  // 모든 array 필드 null/undefined 가드 — 일부 지역·날짜는 부분 데이터만 존재
+  // (예: 전남 4/1, 경기 4/4, 서울 4/6 — subscriptions 0건이지만 transactions 존재)
+  const d = data ? {
+    ...data,
+    unsoldLocal: Array.isArray(data.unsoldLocal) ? data.unsoldLocal : [],
+    sectors: Array.isArray(data.sectors) ? data.sectors : [],
+    stockTop10: Array.isArray(data.stockTop10) ? data.stockTop10 : [],
+    subscriptions: Array.isArray(data.subscriptions) ? data.subscriptions : [],
+    guPrices: Array.isArray(data.guPrices) ? data.guPrices : [],
+    indices: Array.isArray(data.indices) ? data.indices : [],
+    activityRanking: Array.isArray(data.activityRanking) ? data.activityRanking : [],
+    priceChanges: data.priceChanges && typeof data.priceChanges === 'object' ? {
+      stockUp: Array.isArray(data.priceChanges.stockUp) ? data.priceChanges.stockUp : [],
+      stockDown: Array.isArray(data.priceChanges.stockDown) ? data.priceChanges.stockDown : [],
+      aptUp: Array.isArray(data.priceChanges.aptUp) ? data.priceChanges.aptUp : [],
+      aptDown: Array.isArray(data.priceChanges.aptDown) ? data.priceChanges.aptDown : [],
+    } : { stockUp: [], stockDown: [], aptUp: [], aptDown: [] },
+    hotTopics: data.hotTopics && typeof data.hotTopics === 'object' ? {
+      polls: Array.isArray(data.hotTopics.polls) ? data.hotTopics.polls : [],
+      vsBattles: Array.isArray(data.hotTopics.vsBattles) ? data.hotTopics.vsBattles : [],
+      hotPosts: Array.isArray(data.hotTopics.hotPosts) ? data.hotTopics.hotPosts : [],
+      predictions: Array.isArray(data.hotTopics.predictions) ? data.hotTopics.predictions : [],
+    } : { polls: [], vsBattles: [], hotPosts: [], predictions: [] },
+    // 숫자 필드 안전 default
+    unsoldUnits: typeof data.unsoldUnits === 'number' ? data.unsoldUnits : 0,
+    subCountThisWeek: typeof data.subCountThisWeek === 'number' ? data.subCountThisWeek : 0,
+    subUnitsThisWeek: typeof data.subUnitsThisWeek === 'number' ? data.subUnitsThisWeek : 0,
+    redevTotal: typeof data.redevTotal === 'number' ? data.redevTotal : 0,
+    redevRebuild: typeof data.redevRebuild === 'number' ? data.redevRebuild : 0,
+    exchangeRate: typeof data.exchangeRate === 'number' ? data.exchangeRate : 0,
+  } : data;
   const isArchive = !!viewDate;
 
   const displayDate = viewDate ? new Date(viewDate) : new Date();

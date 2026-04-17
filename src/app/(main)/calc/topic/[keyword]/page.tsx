@@ -24,11 +24,27 @@ export async function generateStaticParams() {
   }
 }
 
-async function getTopic(slug: string) {
+async function getTopicData(slug: string): Promise<{ topic: any; blog_posts: any[] } | null> {
+  // safe_get_calc_topic RPC: SECURITY DEFINER + EXCEPTION 핸들러 내장 (절대 throw 안함)
+  // 반환: { found: boolean, topic: object, blog_posts: array }
   const sb = getSupabaseAdmin();
-  const { data } = await (sb as any).from('calc_topic_clusters')
-    .select('*').eq('topic_slug', slug).eq('is_published', true).maybeSingle();
-  return data;
+  try {
+    const { data, error } = await (sb as any).rpc('safe_get_calc_topic', { slug });
+    if (error || !data || !data.found) return null;
+    return {
+      topic: data.topic || null,
+      blog_posts: Array.isArray(data.blog_posts) ? data.blog_posts : [],
+    };
+  } catch (e) {
+    console.error('[calc/topic/page] safe_get_calc_topic threw:', e);
+    return null;
+  }
+}
+
+// 호환성 wrapper (generateMetadata에서 topic만 필요할 때)
+async function getTopic(slug: string) {
+  const result = await getTopicData(slug);
+  return result?.topic ?? null;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -37,7 +53,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!topic) return { robots: { index: false, follow: false } };
 
   const url = `${SITE_URL}/calc/topic/${keyword}`;
-  const ogImg = `${SITE_URL}/api/og?title=${encodeURIComponent(topic.topic_label)}&design=2&category=blog&subtitle=${encodeURIComponent(`${topic.calc_slugs.length}종 무료 계산기`)}`;
+  const calcCount = Array.isArray(topic.calc_slugs) ? topic.calc_slugs.length : 0;
+  const blogCount = Array.isArray(topic.blog_post_ids) ? topic.blog_post_ids.length : 0;
+  const ogImg = `${SITE_URL}/api/og?title=${encodeURIComponent(topic.topic_label)}&design=2&category=blog&subtitle=${encodeURIComponent(`${calcCount}종 무료 계산기`)}`;
 
   return {
     title: `${topic.topic_label} — 2026 무료 온라인 계산기 | 카더라`,
@@ -47,7 +65,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     alternates: { canonical: url },
     openGraph: {
       title: `${topic.topic_label} 종합 가이드 — 카더라`,
-      description: `${topic.topic_label} ${topic.calc_slugs.length}종 + 관련 가이드 ${(topic.blog_post_ids || []).length}편`,
+      description: `${topic.topic_label} ${calcCount}종 + 관련 가이드 ${blogCount}편`,
       url, siteName: '카더라', locale: 'ko_KR', type: 'website',
       images: [{ url: ogImg, width: 1200, height: 630 }],
     },
@@ -65,27 +83,23 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function TopicHubPage({ params }: PageProps) {
   const { keyword } = await params;
-  const topic = await getTopic(keyword);
-  if (!topic) notFound();
+  const result = await getTopicData(keyword);
+  if (!result || !result.topic) notFound();
+  const topic = result.topic;
 
   // view_count 증가 (fire-and-forget)
   const sb = getSupabaseAdmin();
   // 조회수 +1 (실패 무시 — Rule: try/await, never .catch)
   try { await (sb as any).rpc('increment_calc_topic_view', { p_topic_slug: keyword }); } catch {}
 
-  // 매핑된 계산기들
-  const calcs = (topic.calc_slugs || []).map((s: string) =>
+  // 매핑된 계산기들 (calc_slugs null 가드)
+  const calcSlugs: string[] = Array.isArray(topic.calc_slugs) ? topic.calc_slugs : [];
+  const calcs = calcSlugs.map((s: string) =>
     CALC_REGISTRY.find(c => c.slug === s)
   ).filter(Boolean);
 
-  // 관련 블로그
-  const blogIds = topic.blog_post_ids || [];
-  const { data: blogs } = blogIds.length > 0
-    ? await sb.from('blog_posts')
-        .select('id, slug, title, excerpt, cover_image, published_at, view_count')
-        .in('id', blogIds).eq('is_published', true)
-        .order('view_count', { ascending: false }).limit(10)
-    : { data: [] };
+  // 관련 블로그 — RPC가 미리 가져옴 (중복 쿼리 제거)
+  const blogs = result.blog_posts;
 
   const url = `${SITE_URL}/calc/topic/${keyword}`;
 
