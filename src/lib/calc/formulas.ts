@@ -685,7 +685,88 @@ export const FORMULAS: Record<string, (v: V) => CalcResult> = {
   childSupport, accidentCompensation,
   prepaymentFee, housingPension, retirementPensionSim,
   alcoholCalc, unitConvert, leaseVsInstallment, overtimePay, annualLeavePay,
+  // 청약 가점 (이전 누락 — registry는 있는데 formula 없어서 결과 안 떴음)
+  subscriptionScore,
 };
+
+// ═══ 청약 가점 계산기 (주택공급에 관한 규칙 별표1) ═══
+// 무주택 32점 + 부양가족 35점 + 청약통장 17점 = 84점 만점
+// 2024년부터 배우자 통장 가입기간 합산 가능 (최대 3년)
+
+function noHouseScore(years: number): number {
+  // 1년 미만 2점, 1년 이상부터 매년 +2, 15년 이상 32점 (만점)
+  if (years < 0) return 0;
+  if (years < 1) return 2;
+  return Math.min(32, 2 + Math.floor(years) * 2);
+}
+
+function dependentsScore(n: number): number {
+  // 0명 5점, 1명당 +5점, 6명 이상 35점 (만점)
+  if (n < 0) return 0;
+  return Math.min(35, 5 + Math.min(6, n) * 5);
+}
+
+function bankYearsScore(years: number): number {
+  // 6개월 미만 1점, 6개월~1년 2점, 1년부터 매년 +1, 15년 이상 17점 (만점)
+  if (years < 0.5) return 1;
+  if (years < 1) return 2;
+  return Math.min(17, 2 + Math.floor(years));
+}
+
+export function subscriptionScore(v: V): CalcResult {
+  const noHouseYears = n(v.noHouseYears);
+  const dependents = Math.floor(n(v.dependents));
+  const bankYears = n(v.bankYears);
+  // 배우자 통장 합산 — 2024년 신규 정책, 본인 통장 만점(15년) 안 됐을 때만 효과
+  const spouseBankYearsRaw = Math.max(0, n(v.spouseBankYears));
+  const spouseBankYears = Math.min(3, spouseBankYearsRaw); // 최대 3년 합산
+
+  const effectiveBankYears = bankYears + spouseBankYears;
+
+  const sNoHouse = noHouseScore(noHouseYears);
+  const sDependents = dependentsScore(dependents);
+  const sBank = bankYearsScore(effectiveBankYears);
+  const total = sNoHouse + sDependents + sBank;
+
+  // 가점 등급 진단 (실제 청약 당첨 사례 기반 분포)
+  let grade = '하위';
+  let advice = '경기 외곽·신도시 중심으로 도전 권장';
+  if (total >= 70) {
+    grade = '최상위 (상위 5%)';
+    advice = '서울 전 지역 강력 도전 가능. 강남4구 인기 단지도 충분';
+  } else if (total >= 60) {
+    grade = '상위 (상위 15%)';
+    advice = '서울 인기 단지 도전 가능. 비서울 지역에서는 1순위급';
+  } else if (total >= 50) {
+    grade = '중상위';
+    advice = '서울 비인기 지역 + 경기 인기 단지 도전 가능';
+  } else if (total >= 40) {
+    grade = '중간';
+    advice = '경기·인천·신도시 중심 권장';
+  } else if (total >= 30) {
+    grade = '중하위';
+    advice = '특별공급(신혼·생애최초·다자녀)을 우선 검토';
+  }
+
+  const details: { label: string; value: string }[] = [
+    { label: '무주택 기간 점수', value: `${sNoHouse}점 / 32점 (만 ${noHouseYears.toFixed(1)}년)` },
+    { label: '부양가족 점수', value: `${sDependents}점 / 35점 (${dependents}명)` },
+    { label: '청약통장 점수', value: `${sBank}점 / 17점 (${effectiveBankYears.toFixed(1)}년)` },
+  ];
+  if (spouseBankYears > 0) {
+    details.push({
+      label: '배우자 통장 합산 효과',
+      value: `+${spouseBankYears.toFixed(1)}년 (입력 ${spouseBankYearsRaw.toFixed(1)}년 중 최대 3년)`,
+    });
+  }
+  details.push({ label: '진단', value: `${grade} — ${advice}` });
+
+  return {
+    main: { label: '내 청약 가점', value: `${total}점 / 84점` },
+    details,
+  };
+}
+
 
 // ═══ 추가 공식 ═══
 

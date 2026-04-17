@@ -76,7 +76,15 @@ export const CALC_REGISTRY: CalcMeta[] = [
     keywords: ['청약 가점 계산기','청약 점수','무주택기간','부양가족','청약통장','배우자 통장 합산','2026 청약'],
     legalBasis: '주택공급에 관한 규칙 제28조 별표1', version: '2026.04', lastUpdated: '2026-04-05',
     pattern: 'diagnose', formula: 'subscriptionScore', resultLabel: '내 청약 가점', resultUnit: '점',
-    inputs: [], // 기존 DiagnoseClient 사용 (커스텀)
+    inputs: [
+      { id: 'noHouseYears', label: '무주택 기간 (년)', type: 'range', default: 5, min: 0, max: 30, step: 1, unit: '년',
+        hint: '세대주 기준. 만 30세부터 또는 결혼일부터 산정' },
+      { id: 'dependents', label: '부양가족 수 (본인 제외)', type: 'stepper', default: 2, min: 0, max: 10, step: 1, unit: '명',
+        hint: '같은 등본 기준 직계존비속·배우자' },
+      { id: 'bankYears', label: '본인 청약통장 가입기간', type: 'range', default: 5, min: 0, max: 30, step: 0.5, unit: '년' },
+      { id: 'spouseBankYears', label: '배우자 청약통장 가입기간 (합산용)', type: 'range', default: 0, min: 0, max: 15, step: 0.5, unit: '년',
+        hint: '2024년 정책 — 최대 3년 합산 가능' },
+    ],
     faqs: [
       { q: '청약 가점 만점은 몇 점?', a: '84점. 무주택 32 + 부양가족 35 + 통장 17.' },
       { q: '배우자 통장도 합산?', a: '50% 인정, 최대 3점 (규칙 제28조).' },
