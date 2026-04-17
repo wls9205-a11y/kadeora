@@ -95,5 +95,5 @@ EPS 컨센서스: ${event.eps_consensus ?? '정보 없음'}
 
     return { processed: events.length, created, failed: events.length - created, metadata: { api_name: 'anthropic', api_calls: apiCalls } };
   });
-  return NextResponse.json({ success: true, ...result });
+  return NextResponse.json(result);
 }

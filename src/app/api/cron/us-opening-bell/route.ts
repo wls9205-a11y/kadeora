@@ -19,5 +19,5 @@ export async function GET(req: NextRequest) {
     await saveBriefing({ market: 'US', title: briefing.title, summary: briefing.content.slice(0, 500), topGainers, topLosers, briefingType: 'opening' });
     return { processed: 1, created: 1, failed: 0, metadata: { api_name: 'anthropic', api_calls: briefing.apiCalls } };
   });
-  return NextResponse.json({ success: true, ...result });
+  return NextResponse.json(result);
 }

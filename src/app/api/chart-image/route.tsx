@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
   const allData: Record<string, Array<{ date: string; close: number }>> = {};
 
   for (const sym of symbols.slice(0, 3)) {
-    const { data } = await sb
+    const { data } = await (sb as any)
       .from('price_history')
       .select('trade_date, close_price')
       .eq('symbol', sym)
@@ -44,7 +44,7 @@ export async function GET(req: NextRequest) {
       .order('trade_date', { ascending: true })
       .limit(400);
 
-    allData[sym] = (data || []).map(d => ({
+    allData[sym] = (data || []).map((d: any) => ({
       date: d.trade_date,
       close: Number(d.close_price),
     }));
@@ -57,7 +57,7 @@ export async function GET(req: NextRequest) {
     .in('symbol', symbols);
   const nameMap: Record<string, string> = {};
   const priceMap: Record<string, { price: number; change: number }> = {};
-  for (const s of stockInfo || []) {
+  for (const s of (stockInfo || []) as any[]) {
     nameMap[s.symbol] = s.name;
     priceMap[s.symbol] = { price: s.price, change: Number(s.change_pct ?? 0) };
   }

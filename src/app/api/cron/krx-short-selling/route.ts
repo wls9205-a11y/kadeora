@@ -133,11 +133,11 @@ export async function GET(req: NextRequest) {
         .eq('trade_date', yesterday);
 
       if (todayData?.length && yesterdayData?.length) {
-        const yMap = new Map(yesterdayData.map((y: any) => [y.symbol, y.balance_shares]));
-        for (const t of todayData) {
-          const yBal = yMap.get(t.symbol);
+        const yMap = new Map(yesterdayData.map((y: any) => [y.symbol, Number(y.balance_shares)]));
+        for (const t of todayData as any[]) {
+          const yBal = yMap.get(t.symbol) as number | undefined;
           if (yBal && yBal > 0) {
-            const change1d = ((t.balance_shares - yBal) / yBal) * 100;
+            const change1d = ((Number(t.balance_shares) - yBal) / yBal) * 100;
             await (supabase as any).from('lending_balance_krx')
               .update({ change_1d: Math.round(change1d * 100) / 100 })
               .eq('symbol', t.symbol)
@@ -160,5 +160,5 @@ export async function GET(req: NextRequest) {
     };
   });
 
-  return NextResponse.json({ success: true, ...result });
+  return NextResponse.json(result);
 }

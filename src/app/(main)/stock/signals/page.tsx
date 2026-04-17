@@ -89,7 +89,7 @@ async function fetchStockNames(symbols: string[]) {
 
 export default async function SignalsPage() {
   const signals = await fetchSignals();
-  const symbols = [...new Set(signals.map((s: any) => s.symbol))];
+  const symbols = [...new Set(signals.map((s: any) => s.symbol))] as string[];
   const stockMap = await fetchStockNames(symbols);
 
   // 시그널 타입별 그룹핑
