@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronAuth } from '@/lib/cron-auth';
+import { withCronLogging } from '@/lib/cron-logger';
 
 export const maxDuration = 300;
 export const runtime = 'nodejs';
@@ -271,135 +272,130 @@ async function collectImagesForSite(
 
 // ━━━ 메인 핸들러 ━━━
 async function handler(_req: NextRequest) {
-  const start = Date.now();
-  const sb = getSupabaseAdmin();
-  let processed = 0;
-  let created = 0;
-  let updated = 0;
-  let failed = 0;
-  const errors: string[] = [];
-
-  if (!NAVER_CLIENT_ID || !NAVER_CLIENT_SECRET) {
-    return NextResponse.json({ error: 'NAVER API keys not set', processed: 0 }, { status: 200 });
-  }
-
-  try {
-    // 글로벌 과다사용 URL 조회 (경계 넘은 것들 방어)
-    const globalUsed = await fetchGlobalUsedUrls(sb);
-
-    // ━━━ Step 1: 이미지 부족 현장 조회 (RPC — PostgREST는 jsonb_array_length 필터 불가) ━━━
-    // 우선순위: NULL/빈배열 → 1~2장 (MIN_IMG_COUNT=3 미만 전부), updated_at 오래된 것 먼저
-    const { data: sites, error: sitesErr } = await (sb as any).rpc(
-      'get_apt_sites_needing_images',
-      { min_img_count: MIN_IMG_COUNT, batch_size: BATCH_SIZE }
-    );
-    if (sitesErr) {
-      return NextResponse.json(
-        { error: `RPC fail: ${sitesErr.message}`, processed: 0 },
-        { status: 200 }
-      );
-    }
-
-    const targetSites = (sites || []) as any[];
-
-    if (targetSites.length === 0) {
-      return NextResponse.json(
-        {
-          message: '모든 현장 이미지 3장 이상 확보',
-          processed: 0,
-          created: 0,
-          updated: 0,
-          failed: 0,
-          elapsed: `${Date.now() - start}ms`,
-        },
-        { status: 200 }
-      );
-    }
-
-    // ━━━ Step 2: 각 현장별 이미지 수집 ━━━
-    for (const site of targetSites) {
-      // 타임아웃 가드 — Vercel 300s 제한 안전 마진
-      if (Date.now() - start > MAX_RUNTIME_MS) {
-        errors.push(`timeout guard: ${processed} processed, stopping early`);
-        break;
-      }
-      try {
-        const region = site.region || '';
-        const existing = Array.isArray(site.images) ? site.images : [];
-        const isEmpty = existing.length === 0;
-
-        const images = await collectImagesForSite(site.name, region, globalUsed);
-        processed++;
-
-        if (images.length === 0) {
-          failed++;
-          continue;
-        }
-
-        // 부분 수집된 것도 기존 것보다 많으면 업데이트
-        if (images.length <= existing.length) {
-          // 새로 얻은 게 더 적으면 기존 + 새 것 합치기 (중복 제거)
-          const merged: any[] = [...existing];
-          const seenU = new Set(merged.map((x: any) => x?.url));
-          for (const ni of images) {
-            if (!seenU.has(ni.url) && merged.length < TARGET_IMG_COUNT) {
-              merged.push(ni);
-              seenU.add(ni.url);
-            }
-          }
-          if (merged.length <= existing.length) {
-            failed++;
-            continue;
-          }
-          const { error } = await (sb as any)
-            .from('apt_sites')
-            .update({ images: merged, updated_at: new Date().toISOString() })
-            .eq('id', site.id);
-          if (error) {
-            errors.push(`${site.name}: ${error.message}`);
-            failed++;
-          } else {
-            isEmpty ? created++ : updated++;
-          }
-        } else {
-          // 새로 얻은 게 더 많음 → 교체
-          const { error } = await (sb as any)
-            .from('apt_sites')
-            .update({ images, updated_at: new Date().toISOString() })
-            .eq('id', site.id);
-          if (error) {
-            errors.push(`${site.name}: ${error.message}`);
-            failed++;
-          } else {
-            isEmpty ? created++ : updated++;
-          }
-        }
-
-        // 새로 얻은 URL은 globalUsed에 추가 (같은 배치 내 중복 방지)
-        for (const img of images) globalUsed.add(img.url);
-
-        await new Promise((r) => setTimeout(r, 150));
-      } catch (e) {
-        processed++;
-        failed++;
-        errors.push(`${site.name}: ${e instanceof Error ? e.message : 'unknown'}`);
-      }
-    }
-  } catch (e) {
-    errors.push(`main: ${e instanceof Error ? e.message : 'unknown'}`);
-  }
-
   return NextResponse.json(
-    {
-      processed,
-      created,
-      updated,
-      failed,
-      errors: errors.slice(0, 10),
-      elapsed: `${Date.now() - start}ms`,
-      metadata: { batch: BATCH_SIZE, target: TARGET_IMG_COUNT, min: MIN_IMG_COUNT },
-    },
-    { status: 200 }
+    await withCronLogging('apt-image-crawl', async () => {
+      const start = Date.now();
+      const sb = getSupabaseAdmin();
+      let processed = 0;
+      let created = 0;
+      let updated = 0;
+      let failed = 0;
+      const errors: string[] = [];
+
+      if (!NAVER_CLIENT_ID || !NAVER_CLIENT_SECRET) {
+        return { processed: 0, metadata: { error: 'NAVER API keys not set' } };
+      }
+
+      try {
+        // 글로벌 과다사용 URL 조회 (경계 넘은 것들 방어)
+        const globalUsed = await fetchGlobalUsedUrls(sb);
+
+        // ━━━ Step 1: 이미지 부족 현장 조회 (RPC — PostgREST는 jsonb_array_length 필터 불가) ━━━
+        // 우선순위: NULL/빈배열 → 1~2장 (MIN_IMG_COUNT=3 미만 전부), updated_at 오래된 것 먼저
+        const { data: sites, error: sitesErr } = await (sb as any).rpc(
+          'get_apt_sites_needing_images',
+          { min_img_count: MIN_IMG_COUNT, batch_size: BATCH_SIZE }
+        );
+        if (sitesErr) {
+          return { processed: 0, failed: 1, metadata: { error: `RPC fail: ${sitesErr.message}` } };
+        }
+
+        const targetSites = (sites || []) as any[];
+
+        if (targetSites.length === 0) {
+          return {
+            processed: 0, created: 0, updated: 0, failed: 0,
+            metadata: { message: '모든 현장 이미지 3장 이상 확보', elapsed_ms: Date.now() - start },
+          };
+        }
+
+        // ━━━ Step 2: 각 현장별 이미지 수집 ━━━
+        for (const site of targetSites) {
+          // 타임아웃 가드 — Vercel 300s 제한 안전 마진
+          if (Date.now() - start > MAX_RUNTIME_MS) {
+            errors.push(`timeout guard: ${processed} processed, stopping early`);
+            break;
+          }
+          try {
+            const region = site.region || '';
+            const existing = Array.isArray(site.images) ? site.images : [];
+            const isEmpty = existing.length === 0;
+
+            const images = await collectImagesForSite(site.name, region, globalUsed);
+            processed++;
+
+            if (images.length === 0) {
+              failed++;
+              continue;
+            }
+
+            // 부분 수집된 것도 기존 것보다 많으면 업데이트
+            if (images.length <= existing.length) {
+              // 새로 얻은 게 더 적으면 기존 + 새 것 합치기 (중복 제거)
+              const merged: any[] = [...existing];
+              const seenU = new Set(merged.map((x: any) => x?.url));
+              for (const ni of images) {
+                if (!seenU.has(ni.url) && merged.length < TARGET_IMG_COUNT) {
+                  merged.push(ni);
+                  seenU.add(ni.url);
+                }
+              }
+              if (merged.length <= existing.length) {
+                failed++;
+                continue;
+              }
+              const { error } = await (sb as any)
+                .from('apt_sites')
+                .update({ images: merged, updated_at: new Date().toISOString() })
+                .eq('id', site.id);
+              if (error) {
+                errors.push(`${site.name}: ${error.message}`);
+                failed++;
+              } else {
+                isEmpty ? created++ : updated++;
+              }
+            } else {
+              // 새로 얻은 게 더 많음 → 교체
+              const { error } = await (sb as any)
+                .from('apt_sites')
+                .update({ images, updated_at: new Date().toISOString() })
+                .eq('id', site.id);
+              if (error) {
+                errors.push(`${site.name}: ${error.message}`);
+                failed++;
+              } else {
+                isEmpty ? created++ : updated++;
+              }
+            }
+
+            // 새로 얻은 URL은 globalUsed에 추가 (같은 배치 내 중복 방지)
+            for (const img of images) globalUsed.add(img.url);
+
+            await new Promise((r) => setTimeout(r, 150));
+          } catch (e) {
+            processed++;
+            failed++;
+            errors.push(`${site.name}: ${e instanceof Error ? e.message : 'unknown'}`);
+          }
+        }
+      } catch (e) {
+        errors.push(`main: ${e instanceof Error ? e.message : 'unknown'}`);
+      }
+
+      return {
+        processed,
+        created,
+        updated,
+        failed,
+        metadata: {
+          batch: BATCH_SIZE,
+          target: TARGET_IMG_COUNT,
+          min: MIN_IMG_COUNT,
+          elapsed_ms: Date.now() - start,
+          errors: errors.slice(0, 10),
+        },
+      };
+    })
   );
 }
 

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { SITE_URL } from '@/lib/constants';
 import { withCronAuth } from '@/lib/cron-auth';
+import { withCronLogging } from '@/lib/cron-logger';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300;
@@ -144,182 +145,199 @@ function extractKeywords(title: string, cat: string, subCat?: string | null): st
 }
 
 async function handler(_req: NextRequest) {
-  const sb = getSupabaseAdmin();
+  return NextResponse.json(
+    await withCronLogging('blog-generate-images', async () => {
+      const sb = getSupabaseAdmin();
 
-  if (!NAVER_CLIENT_ID || !NAVER_CLIENT_SECRET) {
-    return NextResponse.json({ ok: true, processed: 0, error: 'NAVER API keys not set' }, { status: 200 });
-  }
-
-  try {
-    // OG 커버인 글 우선 조회 (이슈 블로그 최우선 → 나머지 최신순)
-    const { data: issuePosts } = await sb
-      .from('blog_posts')
-      .select('id, title, category, sub_category, image_alt, cover_image')
-      .eq('source_type', 'auto_issue')
-      .like('cover_image', '%/api/og%')
-      .order('created_at', { ascending: false })
-      .limit(50);
-
-    const { data: normalPosts } = await sb
-      .from('blog_posts')
-      .select('id, title, category, sub_category, image_alt, cover_image')
-      .eq('is_published', true)
-      .or('source_type.is.null,source_type.neq.auto_issue')
-      .like('cover_image', '%/api/og%')
-      .order('created_at', { ascending: false })
-      .limit(BATCH - (issuePosts?.length || 0));
-
-    const posts = [...(issuePosts || []), ...(normalPosts || [])];
-
-    if (!posts?.length) return NextResponse.json({ ok: true, processed: 0, msg: 'all covers are real images' });
-
-    console.log(`[blog-generate-images] ${posts.length}건 OG 커버 → 실사진 교체 시작`);
-
-    // 카테고리별 네이버 이미지 캐시
-    const catCache: Record<string, { url: string; alt: string; caption: string }[]> = {};
-    const categories: string[] = Array.from(new Set(posts.map((p: any) => String(p.category || 'general'))));
-
-    for (const cat of categories) {
-      const queries = CAT_QUERIES[cat as string] || CAT_QUERIES.general;
-      // sub_category별 쿼리도 섞어서 정확도 향상
-      const subCats = Array.from(new Set(posts.filter((p: any) => p.category === cat && p.sub_category).map((p: any) => p.sub_category)));
-      const subQueries = subCats.flatMap(sc => SUB_CAT_QUERIES[sc] || []);
-      const allQueries = [...queries, ...subQueries];
-      const q1 = allQueries[Math.floor(Math.random() * allQueries.length)];
-      const q2 = allQueries[Math.floor(Math.random() * allQueries.length)];
-      const [imgs1, imgs2] = await Promise.all([fetchNaverImages(q1, 10), fetchNaverImages(q2, 10)]);
-      const seen = new Set<string>();
-      catCache[cat] = [...imgs1, ...imgs2].filter(img => {
-        if (seen.has(img.url)) return false;
-        seen.add(img.url); return true;
-      });
-      await new Promise(r => setTimeout(r, 100));
-    }
-
-    const inserts: any[] = [];
-    const catIdx: Record<string, number> = {};
-
-    for (const post of posts) {
-      const cat = post.category || 'general';
-      const cache = catCache[cat] || [];
-      if (!catIdx[cat]) catIdx[cat] = 0;
-      const label = CAT_LABEL[cat] || '정보';
-
-      // 제목 기반 검색 (7장 확보 위해 8장 요청)
-      let titleImgs: { url: string; alt: string; caption: string }[] = [];
-      const kw = extractKeywords(post.title, cat, post.sub_category);
-      titleImgs = await fetchNaverImages(kw, 8);
-      await new Promise(r => setTimeout(r, 50));
-
-      // ━━━ 7장 실사진 + 1장 인포그래픽 = 총 8 position ━━━
-      // pos 0: 제목 기반 대표 (썸네일 후보)
-      const img0 = titleImgs[0] || (cache.length > 0 ? cache[catIdx[cat]++ % cache.length] : null);
-      if (img0) {
-        inserts.push({ post_id: post.id, image_url: img0.url,
-          alt_text: post.image_alt || `${post.title} — ${label} 관련 이미지`,
-          caption: img0.caption, image_type: 'stock_photo', position: 0 });
+      if (!NAVER_CLIENT_ID || !NAVER_CLIENT_SECRET) {
+        return { processed: 0, metadata: { error: 'NAVER API keys not set' } };
       }
 
-      // pos 1: 제목 기반 두 번째
-      const img1 = titleImgs[1] || (cache.length > 0 ? cache[catIdx[cat]++ % cache.length] : null);
-      if (img1) {
-        inserts.push({ post_id: post.id, image_url: img1.url,
-          alt_text: `${post.title} — ${label} 추가 이미지`,
-          caption: img1.caption, image_type: 'stock_photo', position: 1 });
-      }
+      try {
+        // OG 커버인 글 우선 조회 (이슈 블로그 최우선 → 나머지 최신순)
+        const { data: issuePosts } = await sb
+          .from('blog_posts')
+          .select('id, title, category, sub_category, image_alt, cover_image')
+          .eq('source_type', 'auto_issue')
+          .like('cover_image', '%/api/og%')
+          .order('created_at', { ascending: false })
+          .limit(50);
 
-      // pos 2: 카테고리 기반 (다양성)
-      if (cache.length > 0) {
-        const img2 = cache[catIdx[cat]++ % cache.length];
-        inserts.push({ post_id: post.id, image_url: img2.url,
-          alt_text: `${post.title} — ${label} 관련`,
-          caption: img2.caption, image_type: 'stock_photo', position: 2 });
-      }
+        const { data: normalPosts } = await sb
+          .from('blog_posts')
+          .select('id, title, category, sub_category, image_alt, cover_image')
+          .eq('is_published', true)
+          .or('source_type.is.null,source_type.neq.auto_issue')
+          .like('cover_image', '%/api/og%')
+          .order('created_at', { ascending: false })
+          .limit(BATCH - (issuePosts?.length || 0));
 
-      // pos 3: 제목 기반 세 번째
-      const img3 = titleImgs[2] || (cache.length > 0 ? cache[catIdx[cat]++ % cache.length] : null);
-      if (img3) {
-        inserts.push({ post_id: post.id, image_url: img3.url,
-          alt_text: `${post.title} — ${label} 참고 이미지`,
-          caption: img3.caption, image_type: 'stock_photo', position: 3 });
-      }
+        const posts = [...(issuePosts || []), ...(normalPosts || [])];
 
-      // pos 4: 카테고리 기반 두 번째 (다양성)
-      if (cache.length > 1) {
-        const img4 = cache[catIdx[cat]++ % cache.length];
-        inserts.push({ post_id: post.id, image_url: img4.url,
-          alt_text: `${post.title} — ${label} 분석 이미지`,
-          caption: img4.caption, image_type: 'stock_photo', position: 4 });
-      }
-
-      // pos 5: 제목 기반 네 번째
-      const img5 = titleImgs[3] || (cache.length > 0 ? cache[catIdx[cat]++ % cache.length] : null);
-      if (img5) {
-        inserts.push({ post_id: post.id, image_url: img5.url,
-          alt_text: `${post.title} — ${label} 데이터 이미지`,
-          caption: img5.caption, image_type: 'stock_photo', position: 5 });
-      }
-
-      // pos 6: 제목/카테고리 기반 다섯 번째
-      const img6 = titleImgs[4] || (cache.length > 0 ? cache[catIdx[cat]++ % cache.length] : null);
-      if (img6) {
-        inserts.push({ post_id: post.id, image_url: img6.url,
-          alt_text: `${post.title} — ${label} 관련 자료`,
-          caption: img6.caption, image_type: 'stock_photo', position: 6 });
-      }
-
-      // pos 7: OG 인포그래픽 (렌더링에서 제외되지만 JSON-LD/커버 용도)
-      inserts.push({
-        post_id: post.id,
-        image_url: `${SITE_URL}/api/og?title=${encodeURIComponent((post.title || '').slice(0, 40))}&category=${cat}&author=${encodeURIComponent('카더라 ' + label + '팀')}&design=${1 + Math.floor(Math.random() * 6)}`,
-        alt_text: `${post.title} — 카더라 ${label} 인포그래픽`,
-        caption: `카더라 ${label} 데이터 분석`, image_type: 'infographic', position: 7,
-      });
-    }
-
-    if (inserts.length > 0) {
-      const { error } = await (sb as any)
-        .from('blog_post_images')
-        .upsert(inserts, { onConflict: 'post_id,position', ignoreDuplicates: false });
-      if (error) console.error('[blog-generate-images] upsert error:', error);
-
-      // cover_image 업데이트 — OG 텍스트 배너 → 실사진 (position 0에 실사진이 있으면)
-      const coverUpdates = inserts.filter(i => i.position === 0 && !i.image_url.includes('/api/og'));
-      for (const cu of coverUpdates) {
-        await sb.from('blog_posts')
-          .update({ cover_image: cu.image_url })
-          .eq('id', cu.post_id)
-          .like('cover_image', '%/api/og%');
-      }
-    }
-
-    // 커버 백필: 이미 이미지가 있지만 OG 커버인 글 → position 0 실사진으로 교체 (매 실행 50건)
-    try {
-      const { data: ogCovers } = await sb.from('blog_posts')
-        .select('id').eq('is_published', true)
-        .like('cover_image', '%/api/og%')
-        .order('view_count', { ascending: false })
-        .limit(50);
-      if (ogCovers?.length) {
-        const ogIds = ogCovers.map((p: any) => p.id);
-        const { data: pos0 } = await (sb as any).from('blog_post_images')
-          .select('post_id, image_url').in('post_id', ogIds).eq('position', 0)
-          .not('image_url', 'like', '%/api/og%');
-        for (const img of (pos0 || [])) {
-          await sb.from('blog_posts').update({ cover_image: img.image_url }).eq('id', img.post_id);
+        if (!posts?.length) {
+          return { processed: 0, metadata: { message: 'all covers are real images' } };
         }
-        if (pos0?.length) console.log(`[blog-generate-images] cover backfill: ${pos0.length}건 교체`);
-      }
-    } catch {}
 
-    return NextResponse.json({
-      ok: true, processed: posts.length, inserted: inserts.length,
-      cache_sizes: Object.fromEntries(Object.entries(catCache).map(([k, v]) => [k, v.length])),
-    });
-  } catch (err: any) {
-    console.error('[blog-generate-images]', err);
-    return NextResponse.json({ ok: true, error: err.message }, { status: 200 });
-  }
+        console.log(`[blog-generate-images] ${posts.length}건 OG 커버 → 실사진 교체 시작`);
+
+        // 카테고리별 네이버 이미지 캐시
+        const catCache: Record<string, { url: string; alt: string; caption: string }[]> = {};
+        const categories: string[] = Array.from(new Set(posts.map((p: any) => String(p.category || 'general'))));
+
+        for (const cat of categories) {
+          const queries = CAT_QUERIES[cat as string] || CAT_QUERIES.general;
+          // sub_category별 쿼리도 섞어서 정확도 향상
+          const subCats = Array.from(new Set(posts.filter((p: any) => p.category === cat && p.sub_category).map((p: any) => p.sub_category)));
+          const subQueries = subCats.flatMap(sc => SUB_CAT_QUERIES[sc] || []);
+          const allQueries = [...queries, ...subQueries];
+          const q1 = allQueries[Math.floor(Math.random() * allQueries.length)];
+          const q2 = allQueries[Math.floor(Math.random() * allQueries.length)];
+          const [imgs1, imgs2] = await Promise.all([fetchNaverImages(q1, 10), fetchNaverImages(q2, 10)]);
+          const seen = new Set<string>();
+          catCache[cat] = [...imgs1, ...imgs2].filter(img => {
+            if (seen.has(img.url)) return false;
+            seen.add(img.url); return true;
+          });
+          await new Promise(r => setTimeout(r, 100));
+        }
+
+        const inserts: any[] = [];
+        const catIdx: Record<string, number> = {};
+
+        for (const post of posts) {
+          const cat = post.category || 'general';
+          const cache = catCache[cat] || [];
+          if (!catIdx[cat]) catIdx[cat] = 0;
+          const label = CAT_LABEL[cat] || '정보';
+
+          // 제목 기반 검색 (7장 확보 위해 8장 요청)
+          let titleImgs: { url: string; alt: string; caption: string }[] = [];
+          const kw = extractKeywords(post.title, cat, post.sub_category);
+          titleImgs = await fetchNaverImages(kw, 8);
+          await new Promise(r => setTimeout(r, 50));
+
+          // ━━━ 7장 실사진 + 1장 인포그래픽 = 총 8 position ━━━
+          // pos 0: 제목 기반 대표 (썸네일 후보)
+          const img0 = titleImgs[0] || (cache.length > 0 ? cache[catIdx[cat]++ % cache.length] : null);
+          if (img0) {
+            inserts.push({ post_id: post.id, image_url: img0.url,
+              alt_text: post.image_alt || `${post.title} — ${label} 관련 이미지`,
+              caption: img0.caption, image_type: 'stock_photo', position: 0 });
+          }
+
+          // pos 1: 제목 기반 두 번째
+          const img1 = titleImgs[1] || (cache.length > 0 ? cache[catIdx[cat]++ % cache.length] : null);
+          if (img1) {
+            inserts.push({ post_id: post.id, image_url: img1.url,
+              alt_text: `${post.title} — ${label} 추가 이미지`,
+              caption: img1.caption, image_type: 'stock_photo', position: 1 });
+          }
+
+          // pos 2: 카테고리 기반 (다양성)
+          if (cache.length > 0) {
+            const img2 = cache[catIdx[cat]++ % cache.length];
+            inserts.push({ post_id: post.id, image_url: img2.url,
+              alt_text: `${post.title} — ${label} 관련`,
+              caption: img2.caption, image_type: 'stock_photo', position: 2 });
+          }
+
+          // pos 3: 제목 기반 세 번째
+          const img3 = titleImgs[2] || (cache.length > 0 ? cache[catIdx[cat]++ % cache.length] : null);
+          if (img3) {
+            inserts.push({ post_id: post.id, image_url: img3.url,
+              alt_text: `${post.title} — ${label} 참고 이미지`,
+              caption: img3.caption, image_type: 'stock_photo', position: 3 });
+          }
+
+          // pos 4: 카테고리 기반 두 번째 (다양성)
+          if (cache.length > 1) {
+            const img4 = cache[catIdx[cat]++ % cache.length];
+            inserts.push({ post_id: post.id, image_url: img4.url,
+              alt_text: `${post.title} — ${label} 분석 이미지`,
+              caption: img4.caption, image_type: 'stock_photo', position: 4 });
+          }
+
+          // pos 5: 제목 기반 네 번째
+          const img5 = titleImgs[3] || (cache.length > 0 ? cache[catIdx[cat]++ % cache.length] : null);
+          if (img5) {
+            inserts.push({ post_id: post.id, image_url: img5.url,
+              alt_text: `${post.title} — ${label} 데이터 이미지`,
+              caption: img5.caption, image_type: 'stock_photo', position: 5 });
+          }
+
+          // pos 6: 제목/카테고리 기반 다섯 번째
+          const img6 = titleImgs[4] || (cache.length > 0 ? cache[catIdx[cat]++ % cache.length] : null);
+          if (img6) {
+            inserts.push({ post_id: post.id, image_url: img6.url,
+              alt_text: `${post.title} — ${label} 관련 자료`,
+              caption: img6.caption, image_type: 'stock_photo', position: 6 });
+          }
+
+          // pos 7: OG 인포그래픽 (렌더링에서 제외되지만 JSON-LD/커버 용도)
+          inserts.push({
+            post_id: post.id,
+            image_url: `${SITE_URL}/api/og?title=${encodeURIComponent((post.title || '').slice(0, 40))}&category=${cat}&author=${encodeURIComponent('카더라 ' + label + '팀')}&design=${1 + Math.floor(Math.random() * 6)}`,
+            alt_text: `${post.title} — 카더라 ${label} 인포그래픽`,
+            caption: `카더라 ${label} 데이터 분석`, image_type: 'infographic', position: 7,
+          });
+        }
+
+        let insertFailed = 0;
+        if (inserts.length > 0) {
+          const { error } = await (sb as any)
+            .from('blog_post_images')
+            .upsert(inserts, { onConflict: 'post_id,position', ignoreDuplicates: false });
+          if (error) {
+            console.error('[blog-generate-images] upsert error:', error);
+            insertFailed = inserts.length;
+          }
+
+          // cover_image 업데이트 — OG 텍스트 배너 → 실사진 (position 0에 실사진이 있으면)
+          const coverUpdates = inserts.filter(i => i.position === 0 && !i.image_url.includes('/api/og'));
+          for (const cu of coverUpdates) {
+            await sb.from('blog_posts')
+              .update({ cover_image: cu.image_url })
+              .eq('id', cu.post_id)
+              .like('cover_image', '%/api/og%');
+          }
+        }
+
+        // 커버 백필: 이미 이미지가 있지만 OG 커버인 글 → position 0 실사진으로 교체 (매 실행 50건)
+        let backfilled = 0;
+        try {
+          const { data: ogCovers } = await sb.from('blog_posts')
+            .select('id').eq('is_published', true)
+            .like('cover_image', '%/api/og%')
+            .order('view_count', { ascending: false })
+            .limit(50);
+          if (ogCovers?.length) {
+            const ogIds = ogCovers.map((p: any) => p.id);
+            const { data: pos0 } = await (sb as any).from('blog_post_images')
+              .select('post_id, image_url').in('post_id', ogIds).eq('position', 0)
+              .not('image_url', 'like', '%/api/og%');
+            for (const img of (pos0 || [])) {
+              await sb.from('blog_posts').update({ cover_image: img.image_url }).eq('id', img.post_id);
+              backfilled++;
+            }
+            if (pos0?.length) console.log(`[blog-generate-images] cover backfill: ${pos0.length}건 교체`);
+          }
+        } catch {}
+
+        return {
+          processed: posts.length,
+          created: inserts.length - insertFailed,
+          updated: backfilled,
+          failed: insertFailed,
+          metadata: {
+            cache_sizes: Object.fromEntries(Object.entries(catCache).map(([k, v]) => [k, v.length])),
+          },
+        };
+      } catch (err: any) {
+        console.error('[blog-generate-images]', err);
+        return { processed: 0, failed: 1, metadata: { error: err.message } };
+      }
+    })
+  );
 }
 
 export const GET = withCronAuth(handler);

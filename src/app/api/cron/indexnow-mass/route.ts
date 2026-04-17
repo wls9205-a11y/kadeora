@@ -116,7 +116,43 @@ async function handler(_req: NextRequest) {
         for (const p of (cpData || [])) { seoUrls.push(`${SITE_URL}/apt/complex/${encodeURIComponent(p.apt_name)}`); }
       } catch {}
 
-      const allUrls = [...staticUrls, ...stockUrls, ...blogUrls, ...aptUrls, ...seoUrls];
+      // ━━━ 신규 SEO 페이지 (세션 114 확장) ━━━
+      // 용어사전 / 주식 차트·재무 / 데일리 리포트 히스토리
+      let newSeoUrls: string[] = [];
+      try {
+        // 용어사전 (41개)
+        const { data: glossary } = await (sb as any).from('stock_glossary')
+          .select('slug').not('slug', 'is', null).neq('slug', '');
+        for (const g of (glossary || [])) {
+          newSeoUrls.push(`${SITE_URL}/glossary/${encodeURIComponent(g.slug)}`);
+        }
+        newSeoUrls.push(`${SITE_URL}/glossary`);
+
+        // 종목 차트·재무 페이지 (상위 100 종목 — 거래량 순)
+        const { data: topStocks } = await sb.from('stock_quotes')
+          .select('symbol').eq('is_active', true).gt('price', 0)
+          .order('volume', { ascending: false, nullsFirst: false }).limit(100);
+        for (const s of (topStocks || [])) {
+          newSeoUrls.push(`${SITE_URL}/stock/${s.symbol}/chart`);
+          newSeoUrls.push(`${SITE_URL}/stock/${s.symbol}/financials`);
+        }
+
+        // 데일리 리포트 최근 7일 (17개 지역 × 7일 = 최대 119개)
+        const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+        const { data: daily } = await sb.from('daily_reports')
+          .select('region, report_date')
+          .gte('report_date', sevenDaysAgo)
+          .not('region', 'is', null);
+        for (const d of (daily || [])) {
+          const dateStr = typeof d.report_date === 'string' ? d.report_date.slice(0, 10) : new Date(d.report_date).toISOString().slice(0, 10);
+          newSeoUrls.push(`${SITE_URL}/daily/${encodeURIComponent(d.region)}/${dateStr}`);
+        }
+
+        // 신규 정적 페이지 (세션 114 추가)
+        newSeoUrls.push(`${SITE_URL}/stock/short-selling`, `${SITE_URL}/stock/signals`, `${SITE_URL}/premium`);
+      } catch {}
+
+      const allUrls = [...staticUrls, ...stockUrls, ...blogUrls, ...aptUrls, ...seoUrls, ...newSeoUrls];
 
       // 4) IndexNow 전송 (3개 엔드포인트 동시)
       const endpoints = [
@@ -167,6 +203,7 @@ async function handler(_req: NextRequest) {
           totalUrls: allUrls.length,
           blogUrls: blogUrls.length,
           seoUrls: seoUrls.length,
+          newSeoUrls: newSeoUrls.length,
           endpoints: endpointResults,
         },
       };
