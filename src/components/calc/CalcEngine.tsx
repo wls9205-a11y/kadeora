@@ -152,14 +152,37 @@ export default function CalcEngine({ calc }: { calc: CalcMeta }) {
           )}
 
           {/* 공유 버튼 */}
-          <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: 16 }}>
-            <button onClick={() => {
-              const text = `${calc.titleShort} 결과: ${result.main.value}\n${result.details.map(d => `${d.label}: ${d.value}`).join('\n')}\n\n카더라에서 계산해보기`;
-              const url = `https://kadeora.app/calc/${calc.category}/${calc.slug}`;
-              if (navigator.share) navigator.share({ title: calc.titleShort, text, url }).catch(() => {});
-              else navigator.clipboard.writeText(text + '\n' + url).then(() => alert('복사되었습니다!'));
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: 16, flexWrap: 'wrap' }}>
+            <button onClick={async () => {
+              // 결과 영구 URL 생성 → 카톡/네이버블로그/페이스북 공유 시 OG 이미지로 결과값 노출
+              try {
+                const r = await fetch('/api/calc/result', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    calcSlug: calc.slug,
+                    calcCategory: calc.category,
+                    inputs: values,
+                    result,
+                  }),
+                });
+                const data = await r.json();
+                if (!r.ok || !data.fullUrl) throw new Error(data?.error || 'failed');
+                const text = `${calc.titleShort} 결과: ${result.main.value}`;
+                if (navigator.share) {
+                  navigator.share({ title: calc.titleShort, text, url: data.fullUrl }).catch(() => {});
+                } else {
+                  navigator.clipboard.writeText(`${text}\n${data.fullUrl}`).then(() => alert('영구 URL 복사됨!'));
+                }
+              } catch {
+                // 폴백 — 일반 공유
+                const text = `${calc.titleShort} 결과: ${result.main.value}\n${result.details.map(d => `${d.label}: ${d.value}`).join('\n')}\n\n카더라에서 계산해보기`;
+                const url = `https://kadeora.app/calc/${calc.category}/${calc.slug}`;
+                if (navigator.share) navigator.share({ title: calc.titleShort, text, url }).catch(() => {});
+                else navigator.clipboard.writeText(text + '\n' + url).then(() => alert('복사되었습니다!'));
+              }
             }} style={{ padding: '8px 16px', borderRadius: 'var(--radius-md)', border: 'none', cursor: 'pointer', background: 'var(--brand)', color: '#fff', fontSize: 12, fontWeight: 700 }}>
-              결과 공유
+              🔗 결과 URL 공유
             </button>
             <button onClick={() => {
               const text = `${result.main.label}: ${result.main.value}`;

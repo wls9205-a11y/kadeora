@@ -152,7 +152,27 @@ async function handler(_req: NextRequest) {
         newSeoUrls.push(`${SITE_URL}/stock/short-selling`, `${SITE_URL}/stock/signals`, `${SITE_URL}/premium`);
       } catch {}
 
-      const allUrls = [...staticUrls, ...stockUrls, ...blogUrls, ...aptUrls, ...seoUrls, ...newSeoUrls];
+      // ━━━ 계산기 SEO (세션 132 추가) — 토픽 클러스터 + 인기 결과 ━━━
+      let calcUrls: string[] = [];
+      try {
+        // 1) 토픽 클러스터 허브 (검색량 높은 순)
+        const { data: topics } = await (sb as any).from('calc_topic_clusters')
+          .select('topic_slug').eq('is_published', true).limit(100);
+        for (const t of (topics || [])) {
+          calcUrls.push(`${SITE_URL}/calc/topic/${encodeURIComponent(t.topic_slug)}`);
+        }
+
+        // 2) 인기 계산기 결과 (조회 5+, 만료 안 됨)
+        const { data: popularResults } = await (sb as any).from('calc_results')
+          .select('short_id, calc_slug, calc_category, view_count')
+          .gt('view_count', 5).gt('expires_at', new Date().toISOString())
+          .order('view_count', { ascending: false }).limit(200);
+        for (const r of (popularResults || [])) {
+          calcUrls.push(`${SITE_URL}/calc/${encodeURIComponent(r.calc_category)}/${encodeURIComponent(r.calc_slug)}/r/${encodeURIComponent(r.short_id)}`);
+        }
+      } catch {}
+
+      const allUrls = [...staticUrls, ...stockUrls, ...blogUrls, ...aptUrls, ...seoUrls, ...newSeoUrls, ...calcUrls];
 
       // 4) IndexNow 전송 (3개 엔드포인트 동시)
       const endpoints = [
@@ -204,6 +224,7 @@ async function handler(_req: NextRequest) {
           blogUrls: blogUrls.length,
           seoUrls: seoUrls.length,
           newSeoUrls: newSeoUrls.length,
+          calcUrls: calcUrls.length,
           endpoints: endpointResults,
         },
       };

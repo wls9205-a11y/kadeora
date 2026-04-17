@@ -18,8 +18,10 @@ export const revalidate = 3600;
 // 15  = /stock/[symbol]/chart (종목별 차트 페이지)
 // 16  = /stock/[symbol]/financials (종목별 재무 페이지)
 // 21  = area hubs (시군구, 동, 빌더, apt 비교)
+// 30  = calc_topic_clusters (계산기 토픽 허브 50개)
+// 31  = calc_results popular (조회수 5+ 인기 결과 영구 URL)
 const FIXED_IDS_PRE_BLOG = [0, 1, 2, 3, 4, 5, 6, 7];
-const FIXED_IDS_POST_BLOG = [12, 13, 14, 15, 16, 21];
+const FIXED_IDS_POST_BLOG = [12, 13, 14, 15, 16, 21, 30, 31];
 const BLOG_PER_SITEMAP = 5000;
 
 export async function GET() {
