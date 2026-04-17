@@ -247,41 +247,37 @@ async function fetchAptMentions(
 
     // 6단계 (변경): 단지백과 매칭 - 이미지 있는 것 먼저
     if (results.length < 3) {
-      const complexTerms = [complexName, ...usefulTags].filter(Boolean).slice(0, 4);
-      const complexFromDb = async (withImages: boolean) => {
-        const out: any[] = [];
-        for (const tag of complexTerms) {
-          let q = (sb as any)
-            .from('apt_complex_profiles')
-            .select('id, apt_name, region_nm, sigungu, dong, total_households, built_year, images, latest_sale_price, sale_count_1y')
-            .ilike('apt_name', `%${tag}%`).limit(3);
-          if (sigungu) q = q.eq('sigungu', sigungu);
-          else if (region) q = q.ilike('region_nm', `%${region}%`);
-          if (withImages) q = q.not('images', 'eq', '[]');
-          const { data, error } = await q;
-          if (error) { console.error('[BlogMentionCard] apt_complex_profiles error:', error.message); continue; }
-          out.push(...((data || []) as any[]));
-          if (out.length >= 6) break;
-        }
-        return out;
+      const complexTerms = ([complexName, ...usefulTags].filter(Boolean) as string[]).slice(0, 4);
+      const fetchComplexByTag = async (tag: string) => {
+        let q = (sb as any)
+          .from('apt_complex_profiles')
+          .select('id, apt_name, region_nm, sigungu, dong, total_households, built_year, images, latest_sale_price, sale_count_1y')
+          .ilike('apt_name', `%${tag}%`).limit(15); // 많이 가져와서 JS-side 필터
+        if (sigungu) q = q.eq('sigungu', sigungu);
+        else if (region) q = q.ilike('region_nm', `%${region}%`);
+        const { data, error } = await q;
+        if (error) { console.error('[BlogMentionCard] apt_complex_profiles error:', error.message); return []; }
+        return (data || []) as any[];
       };
 
-      // 이미지 있는 것 먼저
-      let complexResults = await complexFromDb(true);
-      // 부족하면 이미지 없는 것 추가
-      if (complexResults.length < 6) {
-        const more = await complexFromDb(false);
-        const existingIds = new Set(complexResults.map((r: any) => r.id));
-        for (const r of more) {
-          if (!existingIds.has(r.id)) {
-            complexResults.push(r);
-            existingIds.add(r.id);
-          }
-          if (complexResults.length >= 6) break;
+      const allComplex: any[] = [];
+      for (const tag of complexTerms) {
+        const r = await fetchComplexByTag(tag);
+        for (const item of r) {
+          if (!allComplex.find(x => x.id === item.id)) allComplex.push(item);
         }
+        if (allComplex.length >= 30) break;
       }
 
-      for (const d of complexResults) {
+      // JS-side: 이미지 있는 것 먼저
+      const hasImg = (c: any) => Array.isArray(c.images) && c.images.length > 0
+        && (typeof c.images[0] === 'string' ? c.images[0] : c.images[0]?.url);
+      const sorted = [
+        ...allComplex.filter(hasImg),
+        ...allComplex.filter(c => !hasImg(c)),
+      ];
+
+      for (const d of sorted) {
         const key = `complex-${d.apt_name}-${d.sigungu || ''}`;
         if (seenKeys.has(key)) continue;
         seenKeys.add(key);
@@ -298,34 +294,24 @@ async function fetchAptMentions(
     }
 
     // 7단계 (변경): 같은 시군구 인기 단지 - 이미지 있는 것 먼저
-    if (results.length >= 1 && results.length < 3 && sigungu) {
-      const fetchPopular = async (withImages: boolean) => {
-        let q = (sb as any)
-          .from('apt_complex_profiles')
-          .select('id, apt_name, region_nm, sigungu, dong, total_households, built_year, images, latest_sale_price, sale_count_1y')
-          .eq('sigungu', sigungu).not('sale_count_1y', 'is', null)
-          .order('sale_count_1y', { ascending: false }).limit(10);
-        if (withImages) q = q.not('images', 'eq', '[]');
-        const { data } = await q;
-        return (data || []) as any[];
-      };
+    if (results.length >= 1 && results.length < 6 && sigungu) {
+      // 한 번에 30건 가져온 뒤 JS-side에서 이미지 있는 것 먼저 정렬
+      const { data } = await (sb as any)
+        .from('apt_complex_profiles')
+        .select('id, apt_name, region_nm, sigungu, dong, total_households, built_year, images, latest_sale_price, sale_count_1y')
+        .eq('sigungu', sigungu).not('sale_count_1y', 'is', null)
+        .order('sale_count_1y', { ascending: false }).limit(30);
 
-      // 이미지 있는 단지 우선
-      let popular = await fetchPopular(true);
-      // 부족하면 이미지 없는 단지로 보충
-      if (popular.length < 6) {
-        const more = await fetchPopular(false);
-        const existingIds = new Set(popular.map(r => r.id));
-        for (const r of more) {
-          if (!existingIds.has(r.id)) {
-            popular.push(r);
-            existingIds.add(r.id);
-          }
-          if (popular.length >= 8) break;
-        }
-      }
+      const all = (data || []) as any[];
+      const hasImg = (c: any) => Array.isArray(c.images) && c.images.length > 0
+        && (typeof c.images[0] === 'string' ? c.images[0] : c.images[0]?.url);
+      // 이미지 있는 것 먼저, 그 다음 이미지 없는 것 (각 그룹 내에서는 sale_count_1y 순서 유지)
+      const sorted = [
+        ...all.filter(hasImg),
+        ...all.filter(c => !hasImg(c)),
+      ];
 
-      for (const d of popular) {
+      for (const d of sorted) {
         const key = `complex-${d.apt_name}-${d.sigungu || ''}`;
         if (seenKeys.has(key)) continue;
         seenKeys.add(key);
