@@ -229,7 +229,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const uStr = units ? `${Number(units).toLocaleString()}세대` : '';
     const builder = d.site?.builder || d.sub?.constructor_nm || '';
     const desc = d.site?.seo_description || `${d.region} ${d.site?.sigungu || ''} ${d.name} ${uStr} ${builder}. 모집공고 요약, 분양가격, 청약일정, 견본주택, 실거래가까지 한눈에.`.trim();
-    const siteFirstImg = Array.isArray(d.site?.images) && (d.site.images[0] as any)?.url ? ((d.site.images[0] as any).thumbnail || (d.site.images[0] as any).url) : null;
+    const siteFirstImg = Array.isArray(d.site?.images) && (d.site.images[0] as any)?.url ? ((d.site.images[0] as any).thumbnail || (d.site.images[0] as any).url).replace(/^http:\/\//, 'https://') : null;
     const ogImg = siteFirstImg || `${SITE_URL}/api/og?title=${encodeURIComponent(d.name)}&design=2&subtitle=${encodeURIComponent(`${d.region} ${d.site?.sigungu || ''} · ${uStr} ${builder}`.trim())}`;
 
     const priceStr = d.site?.price_min && d.site?.price_max

@@ -60,7 +60,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const { getSupabaseAdmin } = await import('@/lib/supabase-admin');
     const admin = getSupabaseAdmin();
     const { data: siteRow } = await (admin as any).from('apt_sites').select('images, page_views, comment_count, interest_count, slug').eq('name', decoded).not('images', 'is', null).limit(1).maybeSingle();
-    if (Array.isArray(siteRow?.images) && (siteRow.images[0] as any)?.url) realImg = (siteRow.images[0] as any).thumbnail || (siteRow.images[0] as any).url;
+    if (Array.isArray(siteRow?.images) && (siteRow.images[0] as any)?.url) realImg = ((siteRow.images[0] as any).thumbnail || (siteRow.images[0] as any).url).replace(/^http:\/\//, 'https://');
     if (siteRow) siteEngage = { views: siteRow.page_views || 0, comments: siteRow.comment_count || 0, interest: siteRow.interest_count || 0 };
   } catch {}
   const ogUrl = realImg || `${SITE_URL}/api/og?title=${encodeURIComponent(decoded)}&design=2&category=apt&subtitle=${encodeURIComponent(ogSubtitle)}&author=${encodeURIComponent('카더라')}`;

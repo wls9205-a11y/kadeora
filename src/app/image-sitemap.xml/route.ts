@@ -44,8 +44,9 @@ export async function GET() {
     if (imgs.length === 0) continue;
 
     const imageXml = imgs.slice(0, 10).map((img: any) => {
-      const url = typeof img === 'string' ? img : img?.link || img?.url;
+      let url = typeof img === 'string' ? img : img?.link || img?.url;
       if (!url) return '';
+      url = url.replace(/^http:\/\//, 'https://');
       const title = typeof img === 'object' && img?.title
         ? escapeXml(img.title)
         : escapeXml(`${s.name} ${s.region || ''} ${s.sigungu || ''}`.trim());
@@ -75,8 +76,9 @@ ${imageXml}
     const imgs = Array.isArray(c.images) ? c.images : [];
     if (imgs.length === 0) continue;
     const imageXml = imgs.slice(0, 7).map((img: any) => {
-      const url = typeof img === 'string' ? img : img?.url;
+      let url = typeof img === 'string' ? img : img?.url;
       if (!url) return '';
+      url = url.replace(/^http:\/\//, 'https://');
       return `      <image:image>
         <image:loc>${escapeXml(url)}</image:loc>
         <image:title>${escapeXml(`${c.apt_name} 아파트 ${c.region_nm || ''} ${c.sigungu || ''}`.trim())}</image:title>

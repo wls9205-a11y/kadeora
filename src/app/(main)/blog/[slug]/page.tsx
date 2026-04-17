@@ -118,6 +118,11 @@ function sanitizeBlogContent(raw: string): string {
     return h2Count > 8 ? '### ' : '## ';
   });
 
+  // ── Mixed Content 방지: markdown 이미지 http→https ──
+  out = out.replace(/!\[([^\]]*)\]\(http:\/\//g, '![$1](https://');
+  out = out.replace(/src="http:\/\//g, 'src="https://');
+  out = out.replace(/src='http:\/\//g, "src='https://");
+
   return out;
 }
 
