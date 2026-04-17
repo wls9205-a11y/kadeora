@@ -30,9 +30,11 @@ export const metadata: Metadata = {
 };
 import { Suspense } from 'react';
 import { createSupabaseServer } from '@/lib/supabase-server';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { DEMO_POSTS } from '@/lib/constants';
 import type { PostWithProfile } from '@/types/database';
 import FeedClient from './FeedClient';
+import AnonymousFeedHero from '@/components/AnonymousFeedHero';
 import Disclaimer from '@/components/Disclaimer';
 
 // Cache: 60s — 피드 목록
@@ -84,12 +86,25 @@ export default async function FeedPage({ searchParams }: Props) {
   const { category = 'all', region = 'all', sort = 'latest' } = await searchParams;
   const validSort = (['latest', 'popular', 'comments'] as SortKey[]).includes(sort as SortKey) ? sort as SortKey : 'latest';
 
-  // 팔로잉 탭: 서버에서 유저 id 필요
+  // 로그인 여부 확인 (팔로잉 탭 + AnonymousFeedHero 양쪽에서 사용)
   let userId: string | undefined;
-  if (category === 'following') {
+  try {
     const sb = await createSupabaseServer();
     const { data: { user } } = await sb.auth.getUser();
     userId = user?.id;
+  } catch { /* 비로그인 OK */ }
+
+  // 비로그인이면 가입 유도 hero 데이터 fetch (RPC — SECURITY DEFINER + EXCEPTION 핸들러)
+  let anonHomepageData: any = null;
+  if (!userId) {
+    try {
+      const sbAdmin = getSupabaseAdmin();
+      const { data, error } = await (sbAdmin as any).rpc('get_homepage_for_anonymous');
+      if (!error && data) anonHomepageData = data;
+    } catch (e) {
+      console.error('[feed] get_homepage_for_anonymous threw:', e);
+      // null이어도 AnonymousFeedHero는 DEFAULT_VALUE_PROPS로 fallback 렌더
+    }
   }
 
   const postsData = await Promise.allSettled([getPosts(category, region, validSort, userId)]);
@@ -98,6 +113,7 @@ export default async function FeedPage({ searchParams }: Props) {
     <Suspense>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '커뮤니티 피드' }] }) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'CollectionPage', name: '카더라 커뮤니티 피드', description: '주식, 부동산, 청약, 재테크 소문과 정보를 나누는 커뮤니티', url: SITE_URL + '/feed', isPartOf: { '@type': 'WebSite', name: '카더라', url: SITE_URL } }) }} />
+      {!userId && <AnonymousFeedHero data={anonHomepageData} />}
       <FeedClient posts={posts} activeCategory={category} activeRegion={region} activeSort={validSort} />
       <LoginGate feature="feed_write" blurHeight={60}>
         <div style={{ padding: '8px 0', textAlign: 'center' }}>
