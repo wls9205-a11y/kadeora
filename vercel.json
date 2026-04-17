@@ -506,7 +506,7 @@
     },
     {
       "path": "/api/cron/dart-ingest",
-      "schedule": "*/15 9-18 * * 1-5"
+      "schedule": "*/15 0-9 * * 1-5"
     },
     {
       "path": "/api/cron/stock-flow-signals",
