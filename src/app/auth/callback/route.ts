@@ -70,7 +70,15 @@ export async function GET(request: Request) {
       }
 
       // ── 라우팅 분기 ──
-      const safeRedirect = redirect.startsWith('/') ? redirect : '/feed';
+      // Open redirect 방어: '/'로 시작하지만 '//' 또는 '/\' 시작 금지 (프로토콜-상대 URL 차단)
+      const isSafeInternalPath = (p: string): boolean => {
+        if (!p || typeof p !== 'string') return false;
+        if (!p.startsWith('/')) return false;
+        if (p.startsWith('//') || p.startsWith('/\\')) return false;
+        if (/^\/[\t\r\n\v\f ]/.test(p)) return false;
+        return true;
+      };
+      const safeRedirect = isSafeInternalPath(redirect) ? redirect : '/feed';
 
       // 1) 신규 가입 (CTA든 직접이든): 항상 온보딩으로 → 관심 설정 필수
       if (isNewUser) {

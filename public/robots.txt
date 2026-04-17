@@ -113,7 +113,21 @@ Allow: /calc/
 Disallow: /admin/
 Disallow: /api/
 
-User-agent: Claude-Web
+User-agent: ChatGPT-User
+Allow: /apt/
+Allow: /blog/
+Allow: /calc/
+Disallow: /admin/
+Disallow: /api/
+
+User-agent: ClaudeBot
+Allow: /apt/
+Allow: /blog/
+Allow: /calc/
+Disallow: /admin/
+Disallow: /api/
+
+User-agent: anthropic-ai
 Allow: /apt/
 Allow: /blog/
 Allow: /calc/
@@ -121,6 +135,27 @@ Disallow: /admin/
 Disallow: /api/
 
 User-agent: PerplexityBot
+Allow: /apt/
+Allow: /blog/
+Allow: /calc/
+Disallow: /admin/
+Disallow: /api/
+
+User-agent: Amazonbot
+Allow: /apt/
+Allow: /blog/
+Allow: /calc/
+Disallow: /admin/
+Disallow: /api/
+
+User-agent: Applebot-Extended
+Allow: /apt/
+Allow: /blog/
+Allow: /calc/
+Disallow: /admin/
+Disallow: /api/
+
+User-agent: Meta-ExternalAgent
 Allow: /apt/
 Allow: /blog/
 Allow: /calc/

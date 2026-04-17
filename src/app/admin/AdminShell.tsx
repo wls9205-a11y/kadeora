@@ -12,11 +12,15 @@ const DataTab = dynamic(() => import('./tabs/DataTab'), { loading: Loader });
 const OpsTab = dynamic(() => import('./tabs/OpsTab'), { loading: Loader });
 const ExecuteTab = dynamic(() => import('./tabs/ExecuteTab'), { loading: Loader });
 const CommunityTab = dynamic(() => import('./tabs/CommunityTab'), { loading: Loader });
+const MasterControlTab = dynamic(() => import('./tabs/MasterControlTab'), { loading: Loader });
+const NaverPublishTab = dynamic(() => import('./tabs/NaverPublishTab'), { loading: Loader });
 
-type TabKey = 'focus' | 'issue' | 'growth' | 'users' | 'data' | 'ops' | 'execute' | 'community';
+type TabKey = 'master' | 'focus' | 'issue' | 'growth' | 'users' | 'data' | 'ops' | 'execute' | 'community' | 'naver';
 
 const TABS: { key: TabKey; label: string; icon: string }[] = [
+  { key: 'master', label: '마스터', icon: '🎛️' },
   { key: 'focus', label: '대시보드', icon: '📊' },
+  { key: 'naver', label: '네이버 발행', icon: '🟢' },
   { key: 'issue', label: '이슈', icon: '🔍' },
   { key: 'growth', label: '성장', icon: '📈' },
   { key: 'users', label: '유저', icon: '👥' },
@@ -28,7 +32,7 @@ const TABS: { key: TabKey; label: string; icon: string }[] = [
 
 export default function AdminShell() {
   const [hp, setHp] = useState<{s:number;cr:number;pv:number;nu:number;iss?:number}|null>(null);
-  const [tab, setTab] = useState<TabKey>('focus');
+  const [tab, setTab] = useState<TabKey>('master');
 
   useEffect(() => {
     const ld = () => fetch('/api/admin/v2?tab=focus').then(r => r.json()).then(d => {
@@ -97,7 +101,9 @@ export default function AdminShell() {
       </div>
 
       {/* 탭 콘텐츠 */}
+      {tab === 'master' && <MasterControlTab />}
       {tab === 'focus' && <FocusTab onNavigate={(t: string) => setTab(t as TabKey)} />}
+      {tab === 'naver' && <NaverPublishTab />}
       {tab === 'issue' && <IssueTab />}
       {tab === 'growth' && <GrowthTab onNavigate={(t: string) => setTab(t as TabKey)} />}
       {tab === 'users' && <UsersTab onNavigate={(t: string) => setTab(t as TabKey)} />}

@@ -31,7 +31,13 @@ export default async function LoginPage({
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
       const params = await searchParams;
-      redirect(params.redirect ?? '/feed');
+      const target = params.redirect;
+      const isSafe = typeof target === 'string'
+        && target.startsWith('/')
+        && !target.startsWith('//')
+        && !target.startsWith('/\\')
+        && !/^\/[\t\r\n\v\f ]/.test(target);
+      redirect(isSafe ? target : '/feed');
     }
   } catch (e: any) {
     // redirect() throws NEXT_REDIRECT — must re-throw
