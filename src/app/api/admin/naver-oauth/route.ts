@@ -45,18 +45,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'provider_and_access_token_required' }, { status: 400 });
   }
 
-  const accessTokenExp = new Date(Date.now() + (Number(expires_in) || 3600) * 1000).toISOString();
-  const refreshTokenExp = refresh_token ? new Date(Date.now() + 365 * 86400 * 1000).toISOString() : null;
+  const accessTokenExpiresInSec = Number(expires_in) || 3600;
 
   await setOAuthToken({
     provider,
     access_token,
-    refresh_token: refresh_token || null,
-    client_id: client_id || null,
-    client_secret: client_secret || null,
+    refresh_token: refresh_token || undefined,
+    client_id: client_id || undefined,
+    client_secret: client_secret || undefined,
     metadata: metadata || {},
-    access_token_expires_at: accessTokenExp,
-    refresh_token_expires_at: refreshTokenExp,
+    expires_in_seconds: accessTokenExpiresInSec,
   });
 
   return NextResponse.json({ ok: true, provider });

@@ -79,6 +79,7 @@ export async function getPopularResults(opts: {
   calcSlug?: string;
   limit?: number;
   minViewCount?: number;
+  excludeShortId?: string;
 }): Promise<Array<{
   short_id: string;
   calc_slug: string;
@@ -95,6 +96,7 @@ export async function getPopularResults(opts: {
     .order('view_count', { ascending: false })
     .limit(opts.limit ?? 10);
   if (opts.calcSlug) q = q.eq('calc_slug', opts.calcSlug);
+  if (opts.excludeShortId) q = q.neq('short_id', opts.excludeShortId);
   const { data } = await q;
   return data || [];
 }
