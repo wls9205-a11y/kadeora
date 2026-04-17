@@ -133,6 +133,46 @@ export default function ExecuteTab({ onNavigate }: { onNavigate: (t: any) => voi
 
       {/* IndexNow 풀스위프 */}
       <div style={{ marginBottom: 16 }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 6 }}>📈 주식 마스터플랜</div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>
+          {[
+            { ep: '/api/cron/dart-ingest', icon: '📋', label: 'DART 수집', desc: '전자공시' },
+            { ep: '/api/cron/dart-classify', icon: '🏷️', label: 'DART 분류', desc: 'AI 분류' },
+            { ep: '/api/cron/stock-flow-signals', icon: '📊', label: '수급 시그널', desc: '외인·기관' },
+            { ep: '/api/cron/macro-event-detect', icon: '🌍', label: '매크로 이벤트', desc: 'CPI·FOMC' },
+            { ep: '/api/cron/stock-hero-refresh', icon: '🎯', label: '히어로 갱신', desc: '캐러셀' },
+            { ep: '/api/cron/us-premarket-brief', icon: '🇺🇸', label: '미국 프리마켓', desc: 'KST 21:30' },
+            { ep: '/api/cron/us-closing-recap', icon: '🔔', label: '미국 마감', desc: 'KST 05:10' },
+            { ep: '/api/cron/krx-short-selling', icon: '📉', label: '공매도', desc: 'KRX' },
+            { ep: '/api/cron/ipo-daily-update', icon: '🆕', label: 'IPO', desc: '신규상장' },
+            { ep: '/api/cron/us-opening-bell', icon: '🔓', label: '미국 개장', desc: '브리핑' },
+            { ep: '/api/cron/us-aftermarket-earnings', icon: '💰', label: '어닝 서프', desc: '실적' },
+            { ep: '/api/cron/us-daily-recap-blog', icon: '📝', label: '미국 일일 블로그', desc: '자동발행' },
+            { ep: '/api/cron/earnings-krx-realtime', icon: '🇰🇷', label: '한국 실적', desc: '실시간' },
+          ].map(s => (
+            <button key={s.ep} className="adm-btn" disabled={running}
+              onClick={async () => {
+                if (!confirm(`${s.label} 크론을 실행합니다.`)) return;
+                setRunning(true); setResults([]);
+                try {
+                  const r = await fetch('/api/admin/god-mode', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ mode: 'single', endpoint: s.ep }),
+                  });
+                  const d = await r.json();
+                  const res = d.results?.[0];
+                  setResults(d.results || []);
+                  alert(`${res?.status === 200 ? '✅' : '❌'} ${s.label}: ${res?.status} (${(res?.duration || 0).toFixed(1)}s)`);
+                } catch (e: any) { alert(`❌ ${e.message}`); } finally { setRunning(false); }
+              }}
+              style={{ flex: '1 1 calc(25% - 5px)', minWidth: 70, textAlign: 'center', padding: '6px 4px' }}>
+              <div style={{ fontSize: 14 }}>{s.icon}</div>
+              <div style={{ fontSize: 10, fontWeight: 600 }}>{s.label}</div>
+              <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>{s.desc}</div>
+            </button>
+          ))}
+        </div>
+
         <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 6 }}>🖼️ 이미지 관리</div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>
           {[

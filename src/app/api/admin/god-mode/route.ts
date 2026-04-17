@@ -50,6 +50,9 @@ const CRON_GROUPS = {
     '/api/cron/kapt-sync',
     '/api/cron/naver-blog-content',
     '/api/cron/health-check',
+    // 세션 113 추가 — 주식 마스터플랜
+    '/api/cron/dart-ingest',
+    '/api/cron/krx-short-selling',
   ],
   process: [
     '/api/cron/aggregate-trade-stats',
@@ -69,6 +72,8 @@ const CRON_GROUPS = {
     '/api/cron/redev-enrich',
     '/api/cron/redev-verify-households',
     '/api/cron/daily-report-snapshot',
+    // 세션 113 추가
+    '/api/cron/stock-flow-signals',
   ],
   ai: [
     '/api/cron/apt-ai-summary',
@@ -86,6 +91,10 @@ const CRON_GROUPS = {
     '/api/cron/blog-enrich-rewrite',
     '/api/cron/blog-generate-images',
     '/api/cron/post-ai-summary',
+    // 세션 113 추가
+    '/api/cron/dart-classify',
+    '/api/cron/earnings-krx-realtime',
+    '/api/cron/macro-event-detect',
   ],
   content: [
     '/api/cron/seed-posts',
@@ -146,6 +155,14 @@ const CRON_GROUPS = {
     '/api/cron/naver-cafe-publish',
     '/api/cron/seed-chat',
     '/api/cron/seed-comments',
+    // 세션 113 추가 — 주식 마스터플랜
+    '/api/cron/stock-hero-refresh',
+    '/api/cron/us-premarket-brief',
+    '/api/cron/us-closing-recap',
+    '/api/cron/ipo-daily-update',
+    '/api/cron/us-opening-bell',
+    '/api/cron/us-aftermarket-earnings',
+    '/api/cron/us-daily-recap-blog',
   ],
   system: [
     '/api/cron/daily-stats',
