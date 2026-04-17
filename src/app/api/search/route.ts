@@ -50,7 +50,44 @@ export async function GET(req: NextRequest) {
 
     const [postsResult, blogsResult, stocksResult, aptsResult, redevResult, unsoldResult, tradeResult, discussResult] = await Promise.all([postsPromise, blogsPromise, stocksPromise, aptsPromise, redevPromise, unsoldPromise, tradePromise, discussPromise]);
 
-    if (postsResult.error) { console.error('[Search GET] posts', postsResult.error); return NextResponse.json({ error: '검색에 실패했습니다.' }, { status: 500 }); }
+    if (postsResult.error) {
+      console.error('[Search GET] posts error, falling back to safe_search_posts RPC:', postsResult.error);
+      // RPC fallback: safe_search_posts() — SECURITY DEFINER + EXCEPTION 핸들러 내장 (절대 throw 안 함)
+      try {
+        const { data: rpcData, error: rpcErr } = await (supabase as any).rpc('safe_search_posts', { q: query, lim: limit });
+        if (rpcErr) {
+          console.error('[Search GET] safe_search_posts RPC also failed:', rpcErr);
+        }
+        const rpcResults = (rpcData && typeof rpcData === 'object' && 'results' in rpcData && Array.isArray((rpcData as any).results))
+          ? (rpcData as any).results : [];
+        const rpcCount = (rpcData && typeof rpcData === 'object' && 'count' in rpcData)
+          ? Number((rpcData as any).count) || rpcResults.length : rpcResults.length;
+        return NextResponse.json({
+          posts: rpcResults,
+          total: rpcCount,
+          query, page,
+          hasMore: rpcCount > page * limit,
+          stocks: stocksResult.data || [],
+          apts: aptsResult.data || [],
+          blogs: blogsResult.data || [],
+          redevelopments: redevResult.data || [],
+          unsolds: unsoldResult.data || [],
+          transactions: tradeResult.data || [],
+          discussions: discussResult.data || [],
+          fallback: 'safe_search_posts',
+        }, { headers: { 'Cache-Control': 'public, max-age=30' } });
+      } catch (fallbackErr) {
+        console.error('[Search GET] RPC fallback threw:', fallbackErr);
+        // 최종 fallback: 빈 결과라도 200 반환 (사이트 검색 사망 방지)
+        return NextResponse.json({
+          posts: [], total: 0, query, page, hasMore: false,
+          stocks: stocksResult.data || [], apts: aptsResult.data || [], blogs: blogsResult.data || [],
+          redevelopments: redevResult.data || [], unsolds: unsoldResult.data || [],
+          transactions: tradeResult.data || [], discussions: discussResult.data || [],
+          fallback: 'empty',
+        }, { headers: { 'Cache-Control': 'public, max-age=30' } });
+      }
+    }
 
     return NextResponse.json({
       posts: postsResult.data || [],
@@ -65,5 +102,34 @@ export async function GET(req: NextRequest) {
       transactions: tradeResult.data || [],
       discussions: discussResult.data || [],
     }, { headers: { 'Cache-Control': 'public, max-age=30' } });
-  } catch (err) { console.error('[Search GET]', err); return NextResponse.json({ error: '서버 오류' }, { status: 500 }); }
+  } catch (err) {
+    console.error('[Search GET] outer catch, attempting safe_search_posts RPC fallback:', err);
+    // 외부 try가 throw해도 검색 사망 방지 — RPC fallback 시도
+    try {
+      const supabase = await createSupabaseServer();
+      const { searchParams } = new URL(req.url);
+      const query = sanitizeSearchQuery(searchParams.get('q') || '', 200);
+      const limit = Math.min(30, Math.max(1, parseInt(searchParams.get('limit') || '20', 10)));
+      if (!query || query.length < 2) {
+        return NextResponse.json({ posts: [], total: 0, query: query || '', page: 1, hasMore: false, stocks: [], apts: [], blogs: [], redevelopments: [], unsolds: [], transactions: [], discussions: [], fallback: 'short_query' }, { headers: { 'Cache-Control': 'public, max-age=30' } });
+      }
+      const { data: rpcData } = await (supabase as any).rpc('safe_search_posts', { q: query, lim: limit });
+      const rpcResults = (rpcData && typeof rpcData === 'object' && 'results' in rpcData && Array.isArray((rpcData as any).results))
+        ? (rpcData as any).results : [];
+      const rpcCount = (rpcData && typeof rpcData === 'object' && 'count' in rpcData)
+        ? Number((rpcData as any).count) || rpcResults.length : rpcResults.length;
+      return NextResponse.json({
+        posts: rpcResults, total: rpcCount, query, page: 1, hasMore: false,
+        stocks: [], apts: [], blogs: [], redevelopments: [], unsolds: [], transactions: [], discussions: [],
+        fallback: 'outer_catch_rpc',
+      }, { headers: { 'Cache-Control': 'public, max-age=30' } });
+    } catch (finalErr) {
+      console.error('[Search GET] final fallback failed:', finalErr);
+      return NextResponse.json({
+        posts: [], total: 0, query: '', page: 1, hasMore: false,
+        stocks: [], apts: [], blogs: [], redevelopments: [], unsolds: [], transactions: [], discussions: [],
+        fallback: 'final_empty',
+      }, { headers: { 'Cache-Control': 'public, max-age=30' } });
+    }
+  }
 }

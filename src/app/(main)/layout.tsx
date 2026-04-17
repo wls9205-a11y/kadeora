@@ -17,6 +17,7 @@ import WelcomeToast from '@/components/WelcomeToast';
 import GlobalMissionBar from '@/components/GlobalMissionBar';
 import SmartPushPrompt from '@/components/SmartPushPrompt';
 import ProfileCompleteBanner from '@/components/ProfileCompleteBanner';
+import SignupNudgeModal from '@/components/SignupNudgeModal';
 
 export const metadata: Metadata = {
   title: { template: '%s | 카더라', default: '카더라 — 부동산·주식 정보 플랫폼' },
@@ -71,6 +72,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
       <WelcomeToast />
       <ScrollToTop />
       <SmartPushPrompt />
+      <SignupNudgeModal />
       <footer className="hidden md:block" style={{
         maxWidth: 1200, margin: '0 auto', padding: '0 24px 40px',
       }}>

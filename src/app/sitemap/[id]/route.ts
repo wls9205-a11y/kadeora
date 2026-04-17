@@ -470,24 +470,22 @@ ${blogXml}
     } catch { return xmlResponse([]); }
   }
 
-  // ── 30: 계산기 토픽 클러스터 ──
+  // ── 30: 계산기 토픽 클러스터 (RPC: get_calc_topic_sitemap_urls — SECURITY DEFINER + EXCEPTION 내장) ──
   if (id === 30) {
     try {
       const sb = getSupabaseAdmin();
-      const { data: topics, error } = await (sb as any).from('calc_topic_clusters')
-        .select('topic_slug, updated_at, search_volume_naver')
-        .eq('is_published', true);
+      const { data, error } = await (sb as any).rpc('get_calc_topic_sitemap_urls');
       if (error) {
-        console.error('[sitemap/30] supabase error:', error);
-        return new NextResponse(`<!-- sitemap30 error: ${error.message} -->\n<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>`, {
+        console.error('[sitemap/30] rpc error:', error);
+        return new NextResponse(`<!-- sitemap30 rpc error: ${error.message} -->\n<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>`, {
           headers: { 'Content-Type': 'application/xml; charset=utf-8' },
         });
       }
-      const entries = (topics || []).map((t: any) => ({
-        url: `${BASE}/calc/topic/${encodeURIComponent(t.topic_slug)}`,
-        lastModified: t.updated_at ? new Date(t.updated_at).toISOString() : buildDate,
-        changeFrequency: 'weekly',
-        priority: t.search_volume_naver > 10000 ? 0.9 : t.search_volume_naver > 5000 ? 0.8 : 0.7,
+      const entries = (Array.isArray(data) ? data : []).map((r: any) => ({
+        url: r.url,
+        lastModified: r.last_modified ? new Date(r.last_modified).toISOString() : buildDate,
+        changeFrequency: r.change_freq || 'weekly',
+        priority: typeof r.priority === 'number' ? r.priority : Number(r.priority) || 0.7,
       }));
       return xmlResponse(entries);
     } catch (e: any) {
