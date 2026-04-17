@@ -861,6 +861,9 @@ export default async function BlogDetailPage({ params }: Props) {
           />
         )}
 
+        {/* 블로그 내 언급된 종목/단지 → 하위 페이지 유도 카드 (상단, 풍부 버전) */}
+        <BlogMentionCard tags={post.tags ?? []} category={post.category} sourceRef={post.source_ref} title={post.title} placement="top" />
+
         {/* 공유 바 */}
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -931,8 +934,8 @@ export default async function BlogDetailPage({ params }: Props) {
 
         {/* LoginGate 기능 게이팅이 비로그인 전환 전담 */}
 
-        {/* 블로그 내 언급된 종목/단지 → 하위 페이지 유도 카드 */}
-        <BlogMentionCard tags={post.tags ?? []} category={post.category} sourceRef={post.source_ref} title={post.title} />
+        {/* 블로그 내 언급된 종목/단지 → 하위 페이지 유도 카드 (하단, 컴팩트) */}
+        <BlogMentionCard tags={post.tags ?? []} category={post.category} sourceRef={post.source_ref} title={post.title} placement="bottom" />
 
         <RelatedContentCard type="blog" showSignup={false} />
 
