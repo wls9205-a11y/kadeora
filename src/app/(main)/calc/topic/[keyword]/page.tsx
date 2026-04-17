@@ -70,7 +70,8 @@ export default async function TopicHubPage({ params }: PageProps) {
 
   // view_count 증가 (fire-and-forget)
   const sb = getSupabaseAdmin();
-  (sb as any).rpc('increment_calc_topic_view', { p_topic_slug: keyword }).catch(() => {});
+  // 조회수 +1 (실패 무시 — Rule: try/await, never .catch)
+  try { await (sb as any).rpc('increment_calc_topic_view', { p_topic_slug: keyword }); } catch {}
 
   // 매핑된 계산기들
   const calcs = (topic.calc_slugs || []).map((s: string) =>
