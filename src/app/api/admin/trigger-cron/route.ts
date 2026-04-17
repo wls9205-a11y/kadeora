@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
 
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 /**
  * 관리자용 크론 수동 트리거 API

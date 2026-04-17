@@ -12,9 +12,10 @@ export default function ExecuteTab({ onNavigate }: { onNavigate: (t: any) => voi
   const [completedCrons, setCompletedCrons] = useState(0);
   const [mode, setMode] = useState<string>('');
   const [lastRun, setLastRun] = useState<{ at: string; ok: number; fail: number } | null>(null);
-  const [infra, setInfra] = useState<{ cronCurrent: number; cronMaxSlots: number }>({ cronCurrent: 153, cronMaxSlots: 200 });
+  const [infra, setInfra] = useState<{ cronCurrent: number; cronMaxSlots: number }>({ cronCurrent: 100, cronMaxSlots: 100 });
   const [kpiCounts, setKpiCounts] = useState<{ stocks: number; sites: number }>({ stocks: 0, sites: 0 });
   const abortRef = useRef(false);
+  const [elapsed, setElapsed] = useState(0);
 
   // 마지막 실행 정보 + 인프라 로드
   useEffect(() => {
@@ -38,6 +39,7 @@ export default function ExecuteTab({ onNavigate }: { onNavigate: (t: any) => voi
     setProgress(0);
     setCompletedCrons(0);
     abortRef.current = false;
+    (window as any).__godStart = Date.now();
 
     try {
       const r = await fetch('/api/admin/god-mode', {
@@ -60,18 +62,20 @@ export default function ExecuteTab({ onNavigate }: { onNavigate: (t: any) => voi
     }
   }, [running]);
 
-  // 실행 중일 때 진행률 폴링
+  // 실행 중일 때 진행률 폴링 + 경과시간
   useEffect(() => {
     if (!running) return;
     const poll = setInterval(async () => {
+      setElapsed(Math.floor((Date.now() - ((window as any).__godStart || Date.now())) / 1000));
       try {
-        const r = await fetch('/api/admin/cron-summary');
+        const r = await fetch('/api/admin/cron-summary?hours=1');
         const d = await r.json();
-        if (d.recent) {
-          setCompletedCrons(d.recent.length);
+        if (d?.summary) {
+          const recent = Array.isArray(d.summary) ? d.summary : [];
+          setCompletedCrons(recent.length);
         }
       } catch { /* ignore */ }
-    }, 5000);
+    }, 2000);
     return () => clearInterval(poll);
   }, [running]);
 
@@ -245,12 +249,20 @@ export default function ExecuteTab({ onNavigate }: { onNavigate: (t: any) => voi
         <div className="adm-card">
           {running && (
             <>
-              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>실행 진행</div>
-              <div className="adm-bar" style={{ height: 12, marginBottom: 8 }}>
-                <div className="adm-bar-fill" style={{ width: '100%', background: 'var(--brand)', animation: 'pulse-glow 1.5s infinite' }} />
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
+                  {mode === 'full' ? '🚀 전체 최신화' : mode === 'failed' ? '🔴 실패 재실행' : `${mode} 그룹`} 실행 중
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--text-tertiary)', fontFamily: 'monospace' }}>
+                  {elapsed}s
+                </div>
               </div>
-              <div style={{ fontSize: 11, color: 'var(--text-tertiary)', textAlign: 'center' }}>
-                {mode} 모드 실행 중... 응답 대기
+              <div className="adm-bar" style={{ height: 8, marginBottom: 8, borderRadius: 4 }}>
+                <div style={{ height: '100%', borderRadius: 4, background: 'linear-gradient(90deg, #3B7BF6, #10B981)', animation: 'pulse 1.5s infinite', width: completedCrons > 0 ? `${Math.min(Math.round(completedCrons / Math.max(totalCrons, infra.cronCurrent) * 100), 95)}%` : '30%', transition: 'width 0.5s' }} />
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--text-tertiary)' }}>
+                <span>⏳ {mode} 모드 · 응답 대기</span>
+                {completedCrons > 0 && <span style={{ color: '#10B981' }}>+{completedCrons}건 완료</span>}
               </div>
             </>
           )}

@@ -575,7 +575,7 @@ export async function GET(req: NextRequest) {
           dbMaxMb: ADMIN_INFRA.DB_MAX_MB,
           cronMaxSlots: ADMIN_INFRA.CRON_MAX_SLOTS,
           emailDailyLimit: ADMIN_INFRA.EMAIL_DAILY_LIMIT,
-          cronCurrent: 91, // vercel.json schedule 기준 (2026-04-14 감사 후)
+          cronCurrent: 100, // vercel.json schedule 기준 (2026-04-17 세션 113 확인)
         },
         // ── 부동산 이미지 수집 진행률 ──
         imageCollection: await (async () => {
