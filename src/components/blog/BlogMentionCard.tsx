@@ -245,41 +245,87 @@ async function fetchAptMentions(
       }
     }
 
+    // 6단계 (변경): 단지백과 매칭 - 이미지 있는 것 먼저
     if (results.length < 3) {
       const complexTerms = [complexName, ...usefulTags].filter(Boolean).slice(0, 4);
-      for (const tag of complexTerms) {
-        let q = (sb as any)
-          .from('apt_complex_profiles')
-          .select('id, apt_name, region_nm, sigungu, dong, total_households, built_year, images, latest_sale_price, sale_count_1y')
-          .ilike('apt_name', `%${tag}%`).limit(3);
-        if (sigungu) q = q.eq('sigungu', sigungu);
-        else if (region) q = q.ilike('region_nm', `%${region}%`);
-        const { data, error } = await q;
-        if (error) { console.error('[BlogMentionCard] apt_complex_profiles error:', error.message); continue; }
-        for (const d of (data || []) as any[]) {
-          const key = `complex-${d.apt_name}-${d.sigungu || ''}`;
-          if (seenKeys.has(key)) continue;
-          seenKeys.add(key);
-          results.push({
-            id: d.id, slug: null, name: d.apt_name, region: d.region_nm,
-            sigungu: d.sigungu, address: d.dong, total_units: d.total_households,
-            move_in_date: d.built_year ? `${d.built_year}` : null,
-            built_year: d.built_year, images: d.images,
-            price_min: null, price_max: null, latest_sale_price: d.latest_sale_price,
-            _source: 'complex',
-          });
+      const complexFromDb = async (withImages: boolean) => {
+        const out: any[] = [];
+        for (const tag of complexTerms) {
+          let q = (sb as any)
+            .from('apt_complex_profiles')
+            .select('id, apt_name, region_nm, sigungu, dong, total_households, built_year, images, latest_sale_price, sale_count_1y')
+            .ilike('apt_name', `%${tag}%`).limit(3);
+          if (sigungu) q = q.eq('sigungu', sigungu);
+          else if (region) q = q.ilike('region_nm', `%${region}%`);
+          if (withImages) q = q.not('images', 'eq', '[]');
+          const { data, error } = await q;
+          if (error) { console.error('[BlogMentionCard] apt_complex_profiles error:', error.message); continue; }
+          out.push(...((data || []) as any[]));
+          if (out.length >= 6) break;
         }
+        return out;
+      };
+
+      // 이미지 있는 것 먼저
+      let complexResults = await complexFromDb(true);
+      // 부족하면 이미지 없는 것 추가
+      if (complexResults.length < 6) {
+        const more = await complexFromDb(false);
+        const existingIds = new Set(complexResults.map((r: any) => r.id));
+        for (const r of more) {
+          if (!existingIds.has(r.id)) {
+            complexResults.push(r);
+            existingIds.add(r.id);
+          }
+          if (complexResults.length >= 6) break;
+        }
+      }
+
+      for (const d of complexResults) {
+        const key = `complex-${d.apt_name}-${d.sigungu || ''}`;
+        if (seenKeys.has(key)) continue;
+        seenKeys.add(key);
+        results.push({
+          id: d.id, slug: null, name: d.apt_name, region: d.region_nm,
+          sigungu: d.sigungu, address: d.dong, total_units: d.total_households,
+          move_in_date: d.built_year ? `${d.built_year}` : null,
+          built_year: d.built_year, images: d.images,
+          price_min: null, price_max: null, latest_sale_price: d.latest_sale_price,
+          _source: 'complex',
+        });
         if (results.length >= 6) break;
       }
     }
 
+    // 7단계 (변경): 같은 시군구 인기 단지 - 이미지 있는 것 먼저
     if (results.length >= 1 && results.length < 3 && sigungu) {
-      const { data } = await (sb as any)
-        .from('apt_complex_profiles')
-        .select('id, apt_name, region_nm, sigungu, dong, total_households, built_year, images, latest_sale_price, sale_count_1y')
-        .eq('sigungu', sigungu).not('sale_count_1y', 'is', null)
-        .order('sale_count_1y', { ascending: false }).limit(8);
-      for (const d of (data || []) as any[]) {
+      const fetchPopular = async (withImages: boolean) => {
+        let q = (sb as any)
+          .from('apt_complex_profiles')
+          .select('id, apt_name, region_nm, sigungu, dong, total_households, built_year, images, latest_sale_price, sale_count_1y')
+          .eq('sigungu', sigungu).not('sale_count_1y', 'is', null)
+          .order('sale_count_1y', { ascending: false }).limit(10);
+        if (withImages) q = q.not('images', 'eq', '[]');
+        const { data } = await q;
+        return (data || []) as any[];
+      };
+
+      // 이미지 있는 단지 우선
+      let popular = await fetchPopular(true);
+      // 부족하면 이미지 없는 단지로 보충
+      if (popular.length < 6) {
+        const more = await fetchPopular(false);
+        const existingIds = new Set(popular.map(r => r.id));
+        for (const r of more) {
+          if (!existingIds.has(r.id)) {
+            popular.push(r);
+            existingIds.add(r.id);
+          }
+          if (popular.length >= 8) break;
+        }
+      }
+
+      for (const d of popular) {
         const key = `complex-${d.apt_name}-${d.sigungu || ''}`;
         if (seenKeys.has(key)) continue;
         seenKeys.add(key);
@@ -347,6 +393,95 @@ function buildSparklinePath(prices: number[], width = 120, height = 32): { line:
   const line = points.join(' ');
   const area = `${line} ${width},${height} 0,${height}`;
   return { line, area };
+}
+
+// ─── 부동산 폴백 디자인 ───
+// 6개 브랜드 팔레트 (모두 그린/틸 계열로 통일감 유지)
+const APT_PALETTES = [
+  { from: '#E1F5EE', to: '#9FE1CB', accent: '#0F6E56', initialColor: 'rgba(15,110,86,0.45)' },
+  { from: '#E0F2F1', to: '#80CBC4', accent: '#00695C', initialColor: 'rgba(0,105,92,0.45)' },
+  { from: '#E8F5E9', to: '#A5D6A7', accent: '#2E7D32', initialColor: 'rgba(46,125,50,0.45)' },
+  { from: '#F1F8E9', to: '#C5E1A5', accent: '#558B2F', initialColor: 'rgba(85,139,47,0.45)' },
+  { from: '#E0F7FA', to: '#80DEEA', accent: '#00838F', initialColor: 'rgba(0,131,143,0.45)' },
+  { from: '#F0F4C3', to: '#DCE775', accent: '#827717', initialColor: 'rgba(130,119,23,0.45)' },
+];
+// 시드 단지 전용 팔레트 (가장 진한 그린)
+const SEED_PALETTE = { from: '#9FE1CB', to: '#5DCAA5', accent: '#04342C', initialColor: 'rgba(4,52,44,0.55)' };
+
+// 단지명 → 결정론적 hash (같은 단지 = 항상 같은 색)
+function aptColorHash(name: string): number {
+  if (!name) return 0;
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = ((hash << 5) - hash + name.charCodeAt(i)) | 0;
+  }
+  return Math.abs(hash) % APT_PALETTES.length;
+}
+
+// 단지명 첫 글자 추출 (한글/영문/숫자 우선, 괄호/공백 스킵)
+function aptInitial(name: string): string {
+  if (!name) return '?';
+  const cleaned = name.replace(/^[^가-힣A-Za-z0-9]+/, '').trim();
+  if (!cleaned) return '?';
+  return cleaned.charAt(0).toUpperCase();
+}
+
+// 폴백 썸네일 컴포넌트
+function FallbackThumb({ name, height, isSeed }: { name: string; height: number; isSeed?: boolean }) {
+  const palette = isSeed ? SEED_PALETTE : APT_PALETTES[aptColorHash(name)];
+  const initial = aptInitial(name);
+  const initialFontSize = Math.round(height * 0.42);
+
+  return (
+    <div style={{
+      width: '100%', height, position: 'relative',
+      background: `linear-gradient(135deg, ${palette.from} 0%, ${palette.to} 100%)`,
+      overflow: 'hidden',
+    }}>
+      {/* 건물 실루엣 SVG (오른쪽 하단, 반투명) */}
+      <svg
+        width={height * 0.55} height={height * 0.55}
+        viewBox="0 0 24 24"
+        style={{ position: 'absolute', bottom: 4, right: 6, opacity: 0.18 }}
+        fill={palette.accent}
+        aria-hidden
+      >
+        <rect x="2" y="9" width="5" height="14" rx="0.5" />
+        <rect x="2.5" y="11" width="1" height="1.2" fill={palette.from} />
+        <rect x="4.5" y="11" width="1" height="1.2" fill={palette.from} />
+        <rect x="2.5" y="14" width="1" height="1.2" fill={palette.from} />
+        <rect x="4.5" y="14" width="1" height="1.2" fill={palette.from} />
+        <rect x="2.5" y="17" width="1" height="1.2" fill={palette.from} />
+        <rect x="4.5" y="17" width="1" height="1.2" fill={palette.from} />
+        <rect x="9" y="3" width="6" height="20" rx="0.5" />
+        <rect x="9.7" y="5" width="1.2" height="1.4" fill={palette.from} />
+        <rect x="12.2" y="5" width="1.2" height="1.4" fill={palette.from} />
+        <rect x="9.7" y="8" width="1.2" height="1.4" fill={palette.from} />
+        <rect x="12.2" y="8" width="1.2" height="1.4" fill={palette.from} />
+        <rect x="9.7" y="11" width="1.2" height="1.4" fill={palette.from} />
+        <rect x="12.2" y="11" width="1.2" height="1.4" fill={palette.from} />
+        <rect x="9.7" y="14" width="1.2" height="1.4" fill={palette.from} />
+        <rect x="12.2" y="14" width="1.2" height="1.4" fill={palette.from} />
+        <rect x="9.7" y="17" width="1.2" height="1.4" fill={palette.from} />
+        <rect x="12.2" y="17" width="1.2" height="1.4" fill={palette.from} />
+        <rect x="17" y="11" width="5" height="12" rx="0.5" />
+        <rect x="17.5" y="13" width="1" height="1.2" fill={palette.from} />
+        <rect x="19.5" y="13" width="1" height="1.2" fill={palette.from} />
+        <rect x="17.5" y="16" width="1" height="1.2" fill={palette.from} />
+        <rect x="19.5" y="16" width="1" height="1.2" fill={palette.from} />
+      </svg>
+      {/* 단지명 이니셜 (중앙) */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontSize: initialFontSize, fontWeight: 700,
+        color: palette.initialColor,
+        letterSpacing: '-1px', userSelect: 'none',
+      }}>
+        {initial}
+      </div>
+    </div>
+  );
 }
 
 // ═══════════════════════════════════════════════════════
@@ -686,7 +821,7 @@ function renderAptTop(apts: any[], region: string | null, sigungu: string | null
               }}
             >
               {/* 썸네일 */}
-              <div style={{ width: '100%', height: 88, position: 'relative', background: 'var(--bg-hover)' }}>
+              <div style={{ width: '100%', height: 88, position: 'relative' }}>
                 {thumbUrl ? (
                   <img
                     src={thumbUrl} alt={a.name || ''}
@@ -695,18 +830,7 @@ function renderAptTop(apts: any[], region: string | null, sigungu: string | null
                     loading="lazy"
                   />
                 ) : (
-                  <div style={{
-                    width: '100%', height: 88,
-                    background: isSeed
-                      ? 'linear-gradient(135deg, #9FE1CB 0%, #5DCAA5 100%)'
-                      : 'linear-gradient(135deg, #E1F5EE 0%, #9FE1CB 60%)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>
-                    <div style={{
-                      width: 28, height: 28, borderRadius: 4,
-                      background: isSeed ? '#04342C' : 'rgba(15,110,86,0.85)',
-                    }} />
-                  </div>
+                  <FallbackThumb name={a.name || ''} height={88} isSeed={isSeed} />
                 )}
                 {isSeed && (
                   <span style={{
@@ -819,12 +943,7 @@ function renderAptBottom(apts: any[], region: string | null, sigungu: string | n
                   loading="lazy"
                 />
               ) : (
-                <div style={{
-                  width: '100%', height: 76,
-                  background: 'linear-gradient(135deg, rgba(16,185,129,0.06), rgba(16,185,129,0.02))',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 24,
-                }}>🏢</div>
+                <FallbackThumb name={a.name || ''} height={76} />
               )}
               <div style={{ padding: '8px 8px 7px' }}>
                 <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
