@@ -1,5 +1,6 @@
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { SITE_URL , CONTACT_EMAIL} from '@/lib/constants';
+import { escapeXml } from '@/lib/xml-utils';
 
 export const revalidate = 3600;
 
@@ -16,18 +17,22 @@ export async function GET() {
     const pubDate = new Date(dateStr);
     const pubDateStr = isNaN(pubDate.getTime()) ? new Date().toUTCString() : pubDate.toUTCString();
     const catLabel = p.category === 'stock' ? '주식' : p.category === 'apt' ? '부동산' : p.category === 'unsold' ? '미분양' : p.category === 'finance' ? '재테크' : '생활정보';
-    const imgUrl = p.cover_image || `${SITE_URL}/api/og?title=${encodeURIComponent((p.title || '').slice(0, 60))}&design=2&category=${p.category || 'blog'}`;
-    const tagItems = (p.tags || []).map((t: string) => `      <category>${t}</category>`).join('\n');
+    // XML 속성 내 URL에 raw `&` 금지 — escapeXml 필수
+    const imgUrlRaw = p.cover_image || `${SITE_URL}/api/og?title=${encodeURIComponent((p.title || '').slice(0, 60))}&design=2&category=${p.category || 'blog'}`;
+    const imgUrl = escapeXml(imgUrlRaw);
+    // 태그 내 `&`, `<` 등 특수문자 이스케이프 (예: "R&D" → "R&amp;D")
+    const tagItems = (p.tags || []).map((t: string) => `      <category>${escapeXml(t)}</category>`).join('\n');
+    const blogUrl = escapeXml(`${SITE_URL}/blog/${p.slug}`);
     return `
     <item>
       <title><![CDATA[${p.title}]]></title>
-      <link>${SITE_URL}/blog/${p.slug}</link>
+      <link>${blogUrl}</link>
       <description><![CDATA[${p.excerpt || p.title || ''}]]></description>
       <pubDate>${pubDateStr}</pubDate>
       <category>${catLabel}</category>
 ${tagItems}
-      <author>${p.author_name || '카더라'}</author>
-      <guid isPermaLink="true">${SITE_URL}/blog/${p.slug}</guid>
+      <author>${escapeXml(p.author_name || '카더라')}</author>
+      <guid isPermaLink="true">${blogUrl}</guid>
       <media:content url="${imgUrl}" medium="image" width="1200" height="630">
         <media:title><![CDATA[${p.image_alt || p.title}]]></media:title>
         <media:description><![CDATA[카더라 ${catLabel} — ${p.title}]]></media:description>

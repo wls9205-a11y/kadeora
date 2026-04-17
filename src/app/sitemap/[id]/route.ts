@@ -64,7 +64,8 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
       '/grades', '/apt/map', '/apt/diagnose', '/apt/complex', '/apt/redev', '/stock/compare', '/blog/series',
       '/apt/data', '/stock/data', '/stock/search', '/stock/dividend', '/stock/movers', '/stock/themes',
       '/stock/market/kospi', '/stock/market/kosdaq', '/stock/market/nyse', '/stock/market/nasdaq',
-      '/calc', '/press',
+      '/stock/short-selling', '/stock/signals',
+      '/calc', '/press', '/glossary', '/premium',
       // 지역별 재개발 SEO 페이지
       ...['서울','경기','부산','인천','대구','광주','대전','울산','경남','경북','충남','충북','전남','전북','강원','제주','세종'].map(r => `/apt/redev/${encodeURIComponent(r)}`),
     ];
@@ -123,7 +124,11 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
   if (id === 1) {
     try {
       const sb = getSupabaseAdmin();
-      const { data } = await sb.from('stock_quotes').select('symbol, updated_at');
+      // 상장폐지/비활성 종목 제외 — 404 페이지가 사이트맵에 들어가는 것 방지
+      const { data } = await sb.from('stock_quotes')
+        .select('symbol, updated_at')
+        .eq('is_active', true)
+        .gt('price', 0);
       return xmlResponse((data || []).map(s => ({
         url: `${BASE}/stock/${s.symbol}`,
         lastModified: s.updated_at || now,
@@ -307,6 +312,83 @@ ${complexXml}
       } catch {}
 
       return xmlResponse(entries);
+    } catch { return xmlResponse([]); }
+  }
+
+  // ── 13: glossary (stock_glossary 용어사전) ──
+  if (id === 13) {
+    try {
+      const sb = getSupabaseAdmin();
+      const { data } = await (sb as any).from('stock_glossary')
+        .select('slug, created_at')
+        .not('slug', 'is', null)
+        .neq('slug', '');
+      return xmlResponse((data || []).map((g: any) => ({
+        url: `${BASE}/glossary/${encodeURIComponent(g.slug)}`,
+        lastModified: g.created_at || now,
+        changeFrequency: 'monthly',
+        priority: 0.65,
+      })));
+    } catch { return xmlResponse([]); }
+  }
+
+  // ── 14: daily_reports archive (지역별 일일 리포트 히스토리) ──
+  if (id === 14) {
+    try {
+      const sb = getSupabaseAdmin();
+      const { data } = await sb.from('daily_reports')
+        .select('region, report_date, created_at')
+        .not('region', 'is', null)
+        .not('report_date', 'is', null)
+        .order('report_date', { ascending: false })
+        .limit(10000);
+      return xmlResponse((data || []).map((d: any) => {
+        // report_date는 date 타입 — YYYY-MM-DD 형식 그대로 URL에 사용
+        const dateStr = typeof d.report_date === 'string'
+          ? d.report_date.slice(0, 10)
+          : new Date(d.report_date).toISOString().slice(0, 10);
+        const daysSince = Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000);
+        return {
+          url: `${BASE}/daily/${encodeURIComponent(d.region)}/${dateStr}`,
+          lastModified: d.created_at || dateStr,
+          changeFrequency: daysSince <= 7 ? 'daily' : daysSince <= 30 ? 'weekly' : 'monthly',
+          priority: daysSince <= 3 ? 0.8 : daysSince <= 14 ? 0.65 : 0.5,
+        };
+      }));
+    } catch { return xmlResponse([]); }
+  }
+
+  // ── 15: /stock/[symbol]/chart (종목별 차트 페이지) ──
+  if (id === 15) {
+    try {
+      const sb = getSupabaseAdmin();
+      const { data } = await sb.from('stock_quotes')
+        .select('symbol, updated_at')
+        .eq('is_active', true)
+        .gt('price', 0);
+      return xmlResponse((data || []).map(s => ({
+        url: `${BASE}/stock/${s.symbol}/chart`,
+        lastModified: s.updated_at || now,
+        changeFrequency: 'daily',
+        priority: 0.6,
+      })));
+    } catch { return xmlResponse([]); }
+  }
+
+  // ── 16: /stock/[symbol]/financials (종목별 재무 페이지) ──
+  if (id === 16) {
+    try {
+      const sb = getSupabaseAdmin();
+      const { data } = await sb.from('stock_quotes')
+        .select('symbol, updated_at')
+        .eq('is_active', true)
+        .gt('price', 0);
+      return xmlResponse((data || []).map(s => ({
+        url: `${BASE}/stock/${s.symbol}/financials`,
+        lastModified: s.updated_at || now,
+        changeFrequency: 'weekly',
+        priority: 0.6,
+      })));
     } catch { return xmlResponse([]); }
   }
 

@@ -208,9 +208,10 @@ export async function middleware(request: NextRequest) {
   return response;
 }
 
-// 정적 파일, 이미지, PWA 에셋 완전 제외 → middleware 자체가 실행되지 않음
+// 정적 파일, 이미지, PWA 에셋, SEO 엔드포인트 완전 제외 → middleware 자체가 실행되지 않음
+// SEO 엔드포인트(사이트맵/RSS)는 Googlebot 크롤 시 auth 불필요 + CSP 불필요 → 크롤 예산 절약
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|_next/data|favicon|icons/|manifest\\.json|sw\\.js|og-image|robots\\.txt|sitemap\\.xml|\\.well-known/|api/cron|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|woff2?)$).*)',
+    '/((?!_next/static|_next/image|_next/data|favicon|icons/|manifest\\.json|sw\\.js|og-image|robots\\.txt|sitemap\\.xml|sitemap/|rss\\.xml|feed\\.xml|image-sitemap\\.xml|news-sitemap\\.xml|blog/feed|stock/feed|apt/feed|\\.well-known/|api/cron|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|woff2?)$).*)',
   ],
 };
