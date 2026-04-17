@@ -392,8 +392,8 @@ ${complexXml}
     } catch { return xmlResponse([]); }
   }
 
-  // ── 8+: blog chunks (image 사이트맵 포함) ──
-  if (id >= 8) {
+  // ── 8~29: blog chunks (image 사이트맵 포함) — id 30+ 는 별도 핸들러 ──
+  if (id >= 8 && id < 30) {
     try {
       const sb = getSupabaseAdmin();
       const chunk = id - 8;
