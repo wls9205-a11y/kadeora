@@ -1,53 +1,56 @@
 # 카더라 STATUS.md — 세션 113 (2026-04-17)
 
 ## 최근 배포
-- **커밋**: `af3400cb` (null 렌더링 전수 점검 + 504 타임아웃 수정)
-- **빌드**: ✅ TS 컴파일 성공
-- **프로덕션**: 정상 가동 (apt-image-crawl 504 수정 배포됨)
+- **커밋**: `3bd16422` (블로그 이미지 파이프라인 치명적 버그 수정 + 7장 구조 재설계)
+- **빌드**: ✅ READY (`dpl_E5faXnGq4MXYJP8j3PmtMhs5Q1WP`)
+- **프로덕션**: kadeora.app 정상 가동, 에러 0건
 
-## 이번 세션 완료 (20건)
+## 이번 세션 완료 (25건+)
 
-### DB 정화 (4건)
-1. 경쟁사 도메인 이미지 삭제 (호갱노노/KB/네이버부동산/디시인사이드 등)
-2. 단지간 3+ 중복 URL 이미지 제거 — 574사이트 (최대 124단지 동일 이미지)
-3. `apt_sites.images IS NULL` 336건 → `'[]'::jsonb` 정규화
-4. `blog_post_images` 과다중복 238장 삭제
+### 치명적 버그 수정
+1. **blog-generate-images LIKE 패턴 치명적 버그** — `'%/api/og?%'` vs 실제 `og-infographic` → **5,558건이 한 번도 처리 안 됐음** → 수정 후 04:00부터 100건/시간 자동 처리
 
-### 크론 개선 (3건)
-5. `apt-image-crawl` 전면 재작성 (239→405줄) — DOMAIN_BLACKLIST + isRelevantToSite() + 글로벌 중복 방지 RPC + 스코프 확장
-6. `apt-image-crawl` 504 타임아웃 수정 — BATCH 100→30 + MAX_RUNTIME_MS 250초 가드
-7. `blog-generate-images` 블랙리스트 확장 — 경쟁사 7개 도메인 추가
+### DB 정화 (프로덕션 실행 완료)
+2. 경쟁사 도메인 이미지 삭제 (685→24장, 코드에서 자동 차단)
+3. 단지간 3+ 중복 URL 제거 → **0개** (http/https 동일 취급)
+4. NULL 336→0, blog_post_images infographic ~27,000행 삭제
+
+### 크론 재작성 (3건)
+5. `apt-image-crawl` 전면 재작성 — 블랙리스트 10패턴 + isRelevantToSite + RPC 중복방지 + BATCH 30 + 250초 타임아웃 가드
+6. `blog-generate-images` 7장 구조 재설계 — pos 0~6 실사진 + pos 7 infographic + ignoreDuplicates false + BATCH 100
+7. `batch-image-fix` LIKE 패턴 수정
 
 ### 프론트 버그 수정 (4건)
-8. `BlogHeroImage.tsx` loadError/activeIdx 인덱스 혼동 → visibleWithOrigIdx + safeActiveIdx
-9. `AptImageGallery.tsx` 데스크탑 onError 누락 + 전부-실패 폴백 UI
-10. `next.config.ts` + `BlogHeroImage` 경쟁사 도메인(hogangnono) 제거
-11. `apt/builder/[name]` 현장 목록 이미지 썸네일 + 폴백 추가
+8. BlogHeroImage loadError/activeIdx 인덱스 혼동 → visibleWithOrigIdx + safeActiveIdx
+9. AptImageGallery 데스크탑 onError 누락 + 전부-실패 폴백
+10. next.config.ts 경쟁사 도메인(hogangnono) 제거
+11. apt/builder/[name] 이미지 썸네일 추가
 
 ### null 렌더링 전수 점검 (8건)
-12. `compare/[slugs]` sigungu null → "서울 null" 방지
-13. `theme/[theme]` 목록 아이템 sigungu null 방지
-14. `ComplexClient` React key + hero-addr null sigungu
-15. `TransactionTab` 바텀시트 지역 표시 filter(Boolean).join
-16. `DailyReportClient` KPI 카드 sigungu/sector undefined 방지
-17. `daily-report-data` guPrices null sigungu 필터
-18. `daily-report-data` hotDeals sigungu || '' 폴백
-19. `daily-report-data` unsoldLocal null sigungu_nm 필터
+12~19. compare, theme, ComplexClient, TransactionTab, DailyReportClient, daily-report-data (guPrices/hotDeals/unsoldLocal)
 
-### DB 인프라 (1건)
-20. `get_overused_apt_image_urls` RPC 생성
+### 블랙리스트 강화
+20. dcinside.(com|co.kr) 전체 + ppomppu + 네이버쇼핑 (양쪽 크론)
+
+### DB 인프라
+21. get_overused_apt_image_urls RPC 생성
 
 ## 현재 상태
-- **PV**: ~100건/시간
-- **이미지**: 정화 완료, 재크롤 대기 (517 빈배열 + 1,319 부족)
-- **블로그**: 7,730건 공개, 2,172건 실사진 커버
-- **크론 에러**: apt-image-crawl 504 수정 배포됨 (다음 매시 실행에서 확인)
-- **API 키**: ANTHROPIC ✅, CRON_SECRET ✅, STOCK_DATA ✅, NAVER ✅ / KIS ❌, FINNHUB ❌, APT_DATA ❌
+| 지표 | 값 |
+|---|---|
+| 부동산 총 | 5,776 |
+| 빈배열 (크론 대상) | 135 |
+| 6~7장 달성 | 598 (10.4%) |
+| 경쟁사 잔존 | 24 (코드 차단됨) |
+| 중복3+ URL | **0** |
+| 블로그 OG커버 | 5,558 (04:00부터 처리) |
+| 블로그 실사커버 | 2,213 |
+| blog_post_images 실사 | 9,009 |
+| 에러 | 0건 |
+| API 키 | ANTHROPIC ✅ CRON ✅ STOCK ✅ NAVER ✅ / KIS ❌ FINNHUB ❌ APT ❌ |
 
 ## PENDING
-- apt-image-crawl 504 수정 후 정상 동작 확인 (다음 매시 크론)
-- 이미지 재크롤 수렴 모니터링 (517+1,319건 → 6~7장 목표)
-- blog-generate-images 5,558건 OG→실사진 전환 속도 모니터링
-- issue-draft timeout 구조적 이슈 (Vercel 300s 제한)
+- apt-image-crawl 04:15 실행 확인 (연속 504로 Vercel이 비활성화 했을 수 있음)
+- blog-generate-images 04:00 실행 → 5,558건 최초 처리 확인
 - Resend webhook secret 미등록
-- Toss Payments 상용 MID 전환 (심사 진행 중)
+- Toss Payments 상용 MID 전환
