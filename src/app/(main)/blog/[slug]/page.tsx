@@ -32,6 +32,7 @@ import BlogHeroImage from '@/components/BlogHeroImage';
 import NextArticleFloat from '@/components/NextArticleFloat';
 import BlogTossGate from '@/components/BlogTossGate';
 import RelatedContentCard from '@/components/RelatedContentCard';
+import BlogMentionCard from '@/components/blog/BlogMentionCard';
 // SmartSectionGate 제거 → LoginGate 기능 게이팅으로 전환 (세션 108)
 import BlogAptAlertCTA from '@/components/BlogAptAlertCTA';
 // NewsletterSubscribe 삭제 — 카카오 CTA로 통합
@@ -924,6 +925,9 @@ export default async function BlogDetailPage({ params }: Props) {
         )}
 
         {/* LoginGate 기능 게이팅이 비로그인 전환 전담 */}
+
+        {/* 블로그 내 언급된 종목/단지 → 하위 페이지 유도 카드 */}
+        <BlogMentionCard tags={post.tags ?? []} category={post.category} sourceRef={post.source_ref} />
 
         <RelatedContentCard type="blog" showSignup={false} />
 
