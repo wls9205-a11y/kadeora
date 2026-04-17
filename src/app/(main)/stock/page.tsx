@@ -44,6 +44,7 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { unstable_cache } from 'next/cache';
 import StockClient from './StockClient';
+import StockHeroCarousel from '@/components/stock/StockHeroCarousel';
 import Disclaimer from '@/components/Disclaimer';
 
 async function fetchStocks() {
@@ -109,26 +110,40 @@ const getCachedBriefingUS = unstable_cache(fetchBriefingUS, ['stock-briefing-us'
 const getCachedExchangeHistory = unstable_cache(fetchExchangeHistory, ['exchange-history', 'v1'], { revalidate: 3600 });
 const getCachedThemeHistory = unstable_cache(fetchThemeHistory, ['theme-history', 'v1'], { revalidate: 600 });
 
+async function fetchHeroSlides() {
+  const sb = await createSupabaseServer();
+  const { data } = await (sb as any).from('stock_hero_slides')
+    .select('id, title_ko, subtitle_ko, slide_type, link_url, data')
+    .eq('is_active', true)
+    .order('slide_order', { ascending: true })
+    .limit(7);
+  return data ?? [];
+}
+const getCachedHeroSlides = unstable_cache(fetchHeroSlides, ['hero-slides', 'v1'], { revalidate: 300 });
+
 export default async function StockPage() {
   let stocks: Record<string, any>[] = [];
   let briefing: any = null;
   let briefingUS: any = null;
   let exchangeHistory: Record<string, any>[] = [];
   let themeHistory: Record<string, any>[] = [];
+  let heroSlides: any[] = [];
 
   try {
-    const [stocksData, briefingData, briefingUSData, exchData, themeData] = await Promise.all([
+    const [stocksData, briefingData, briefingUSData, exchData, themeData, slidesData] = await Promise.all([
       getCachedStocks(),
       getCachedBriefing().catch(() => null),
       getCachedBriefingUS().catch(() => null),
       getCachedExchangeHistory().catch(() => []),
       getCachedThemeHistory().catch(() => []),
+      getCachedHeroSlides().catch(() => []),
     ]);
     stocks = stocksData.length > 0 ? stocksData : await fetchStocks();
     briefing = briefingData;
     briefingUS = briefingUSData;
     exchangeHistory = exchData;
     themeHistory = themeData;
+    heroSlides = slidesData;
   } catch {
     try { stocks = await fetchStocks(); } catch {}
   }
@@ -178,6 +193,11 @@ export default async function StockPage() {
       }) }} />}
       <h1 className="sr-only">주식 시세 — 실시간 국내외 종목</h1>
       <p className="sr-only">카더라 주식에서는 KOSPI·KOSDAQ·NYSE·NASDAQ {stocks.length}개 종목의 실시간 시세, 등락률, 시가총액, PER, 배당수익률을 확인할 수 있습니다. AI 시황 브리핑, 섹터별 히트맵, 테마주 분석, 포트폴리오 시뮬레이터를 무료로 제공합니다.</p>
+      {heroSlides.length > 0 && (
+        <div style={{ padding: '12px 16px 0' }}>
+          <StockHeroCarousel slides={heroSlides} />
+        </div>
+      )}
       <StockClient initialStocks={stocks as React.ComponentProps<typeof StockClient>['initialStocks']} briefing={briefing} briefingUS={briefingUS} exchangeHistory={exchangeHistory} themeHistory={themeHistory} />
       {/* C-7: noscript — JS 비활성화 크롤러용 기본 종목 목록 */}
       <noscript>

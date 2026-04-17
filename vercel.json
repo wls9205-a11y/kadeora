@@ -30,6 +30,30 @@
     "src/app/api/cron/stock-daily-briefing/*.ts": {
       "maxDuration": 120
     },
+    "src/app/api/cron/dart-*/*.ts": {
+      "maxDuration": 120
+    },
+    "src/app/api/cron/us-*/*.ts": {
+      "maxDuration": 120
+    },
+    "src/app/api/cron/stock-flow-signals/*.ts": {
+      "maxDuration": 120
+    },
+    "src/app/api/cron/krx-short-selling/*.ts": {
+      "maxDuration": 120
+    },
+    "src/app/api/cron/earnings-krx-realtime/*.ts": {
+      "maxDuration": 120
+    },
+    "src/app/api/cron/macro-event-detect/*.ts": {
+      "maxDuration": 60
+    },
+    "src/app/api/cron/ipo-daily-update/*.ts": {
+      "maxDuration": 60
+    },
+    "src/app/api/cron/stock-hero-refresh/*.ts": {
+      "maxDuration": 60
+    },
     "src/app/api/cron/stock-news-crawl/*.ts": {
       "maxDuration": 120
     },
@@ -479,6 +503,58 @@
     {
       "path": "/api/cron/blog-auto-publish",
       "schedule": "45 * * * *"
+    },
+    {
+      "path": "/api/cron/dart-ingest",
+      "schedule": "*/15 9-18 * * 1-5"
+    },
+    {
+      "path": "/api/cron/dart-classify",
+      "schedule": "5,35 9-18 * * 1-5"
+    },
+    {
+      "path": "/api/cron/stock-flow-signals",
+      "schedule": "30 7 * * 1-5"
+    },
+    {
+      "path": "/api/cron/krx-short-selling",
+      "schedule": "0 9 * * 1-5"
+    },
+    {
+      "path": "/api/cron/earnings-krx-realtime",
+      "schedule": "10,40 9-18 * * 1-5"
+    },
+    {
+      "path": "/api/cron/ipo-daily-update",
+      "schedule": "0 0 * * 1-5"
+    },
+    {
+      "path": "/api/cron/macro-event-detect",
+      "schedule": "30 11 * * 0-5"
+    },
+    {
+      "path": "/api/cron/stock-hero-refresh",
+      "schedule": "35 0,7 * * 1-5"
+    },
+    {
+      "path": "/api/cron/us-premarket-brief",
+      "schedule": "30 12 * * 1-5"
+    },
+    {
+      "path": "/api/cron/us-opening-bell",
+      "schedule": "35 13 * * 1-5"
+    },
+    {
+      "path": "/api/cron/us-closing-recap",
+      "schedule": "10 20 * * 2-6"
+    },
+    {
+      "path": "/api/cron/us-aftermarket-earnings",
+      "schedule": "30 20 * * 2-6"
+    },
+    {
+      "path": "/api/cron/us-daily-recap-blog",
+      "schedule": "0 22 * * 2-6"
     }
   ]
 }
