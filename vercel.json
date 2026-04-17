@@ -509,24 +509,8 @@
       "schedule": "*/15 9-18 * * 1-5"
     },
     {
-      "path": "/api/cron/dart-classify",
-      "schedule": "5,35 9-18 * * 1-5"
-    },
-    {
       "path": "/api/cron/stock-flow-signals",
       "schedule": "30 7 * * 1-5"
-    },
-    {
-      "path": "/api/cron/krx-short-selling",
-      "schedule": "0 9 * * 1-5"
-    },
-    {
-      "path": "/api/cron/earnings-krx-realtime",
-      "schedule": "10,40 9-18 * * 1-5"
-    },
-    {
-      "path": "/api/cron/ipo-daily-update",
-      "schedule": "0 0 * * 1-5"
     },
     {
       "path": "/api/cron/macro-event-detect",
@@ -541,20 +525,8 @@
       "schedule": "30 12 * * 1-5"
     },
     {
-      "path": "/api/cron/us-opening-bell",
-      "schedule": "35 13 * * 1-5"
-    },
-    {
       "path": "/api/cron/us-closing-recap",
       "schedule": "10 20 * * 2-6"
-    },
-    {
-      "path": "/api/cron/us-aftermarket-earnings",
-      "schedule": "30 20 * * 2-6"
-    },
-    {
-      "path": "/api/cron/us-daily-recap-blog",
-      "schedule": "0 22 * * 2-6"
     }
   ]
 }
