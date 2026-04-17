@@ -932,7 +932,7 @@ export default async function BlogDetailPage({ params }: Props) {
         {/* LoginGate 기능 게이팅이 비로그인 전환 전담 */}
 
         {/* 블로그 내 언급된 종목/단지 → 하위 페이지 유도 카드 */}
-        <BlogMentionCard tags={post.tags ?? []} category={post.category} sourceRef={post.source_ref} />
+        <BlogMentionCard tags={post.tags ?? []} category={post.category} sourceRef={post.source_ref} title={post.title} />
 
         <RelatedContentCard type="blog" showSignup={false} />
 
