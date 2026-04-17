@@ -1,60 +1,61 @@
-# 카더라 STATUS — 세션 132 완료 (2026-04-17 06:33 UTC)
+# 카더라 STATUS — 세션 133 완료 (2026-04-17 10:05 UTC)
 
 ## 🟢 배포 완료 — kadeora.app 라이브
-- **최종 commit**: `7169d677` (5번째 commit)
-- **최종 deployment**: `dpl_4qPZF3JuaLNjCHTKt8ty5Ldc1MzJ` (READY)
+- **최종 commit**: `5d6eb789` (2번째 commit)
+- **최종 deployment**: `dpl_63XnMf6zL47nV2Mtybk3ytg5tDo2` (READY, production)
 - **빌드 시간**: ~2분 / 런타임 에러: 0건
 
-## ✅ 검증 완료 항목
+## ✅ 이번 세션 작업 — P0 3건 완료
 
-### DB (Supabase production: tezftxakuwhsclarprlz)
-- `app_config`: 18 시드 row + master_kill 스위치 OFF
-- `oauth_tokens`: 0 rows (Naver OAuth 등록 대기)
-- `calc_results`: 0 rows (사용자 첫 결과 저장 시 생김)
-- `calc_topic_clusters`: 50 토픽 시드
+### P0 #1 — 사이트맵 30 (calc_topic 50개 노출) ✅ 라이브 검증 완료
+- **문제**: /sitemap/30 빈 `<urlset>` 반환 (200 OK이지만 0 URL) — 두 세션째 미해결
+- **근본 원인 (이번에 발견)**: `src/app/sitemap/[id]/route.ts:396` `if (id >= 8)` (blog chunks) 핸들러가 `id === 30`을 흡수
+  - blog query는 chunk=22 offset (110,000+)으로 빈 결과 → 빈 urlset
+  - 응답에 `xmlns:image` 포함된 게 단서 (blog chunks 핸들러 시그니처)
+- **수정**: `if (id >= 8 && id < 30)` 한 줄로 범위 제한
+- **검증**: `https://kadeora.app/sitemap/30` → 50개 `<url>` 노드 (실수령액·한연정산·청약가점 등 priority 0.9 상위)
+- **부수 효과**: case 31 (calc_results 인기 URL)도 동시 살아남
 
-### 토픽 페이지 SSR 검증 (`/calc/topic/chungyak-gajeon-gyesangi`)
-- HTTP 200 OK
-- `<h1>청약 가점 계산기</h1>` 정상 렌더
-- 계산기 카드: subscription-score 링크 + 설명
-- 관련 키워드 5개: 청약 가점, 청약 점수, 무주택 기간, 부양가족 청약, 배우자 통장 합산
-- JSON-LD: CollectionPage + ItemList + BreadcrumbList (4중)
-- 메타: title + description + canonical + og:* + twitter:* + naver:*
-- 런타임 에러: 0건
+### P0 #2 — /api/search 500 → 200 fallback ✅ 라이브 검증 완료
+- **수정**: `src/app/api/search/route.ts` 두 군데 안전장치
+  - 내부 `postsResult.error` 시 `safe_search_posts(q, lim)` RPC fallback
+  - 외부 catch도 RPC 재시도 + 최종 빈 객체 200 반환
+- **검증**: `https://kadeora.app/api/search?q=양도세` → 200 OK
+  - posts 20개 + blogs 5개 + discussions 1개
+  - FTS rank 정상 작동 (RPC fallback은 발동 안 함, 안전장치만 추가)
 
-### Cron 인증
-- `/api/cron/naver-cafe-publish` GET: 401 Unauthorized (정상 — Bearer auth 필요)
+### P0 #3 — SignupNudgeModal 신규 ✅ 번들 검증 완료
+- **신규**: `src/components/SignupNudgeModal.tsx` (262줄)
+  - localStorage 트리거: `kd_pv_count >= 3`
+  - 7일 cooldown (`kd_signup_nudge_dismissed_at`)
+  - `get_signup_value_props()` RPC + DEFAULT_PROPS fallback
+  - 카카오 1-tap 강조 (#FEE500) + Google 보조 + ESC/backdrop 닫기
+  - track-attempt source: 'signup_nudge_modal'
+- **마운트**: `(main)/layout.tsx`에 `<SmartPushPrompt />` 옆 추가
+- **검증**: `(main)/layout-c0774b91b102c697.js` 번들에 `kd_pv_count`, `kd_signup_nudge`, `3초 만에 가입` 문자열 모두 확인됨
+- **목표**: 일 608 방문 중 0.34% 로그인 페이지 진입 → 1% → 3% 전환 (7일 가입 84 → 200+)
 
-## 📦 5개 commit (모두 push 완료)
-1. `ca0c7fe1` foundation: app_config + oauth_tokens + calc_results + topic clusters
-2. `efcd08ec` naver-cafe: UTF-8 한글 영구 해결 + OAuth rotation
-3. `7bed0d3d` calc-seo: 결과 영구 URL + 토픽 클러스터 50 + 사이트맵 + IndexNow
-4. `e81d7633` master-admin: 통합 어드민 + 보안 픽스 (배포 1차 실패 — vercel.json 112 cron)
-5. `d05d392b` vercel cron 100 한도 맞춤 (배포 2차 실패 — TS error)
-6. `a41286d8` TS 에러 2건 수정 (배포 3차 성공)
-7. `7169d677` calc-topic .rpc().catch() → try/await (배포 4차 성공 + 본문 SSR 정상)
+## 📦 commit 2개 (모두 push 완료)
+1. `f1f8c569` fix(P0): sitemap30 RPC + search 500 fallback + signup nudge modal (4 files, +369/-13)
+2. `5d6eb789` fix(sitemap): case 30/31 라우팅 버그 — id >= 8 핸들러가 30+ 흡수 (1 file, +2/-2)
 
-## 🔴 사용자 직접 해야 할 것
-1. **네이버 OAuth 등록** (어드민 → 마스터 → 네이버 발행 탭)
-   - https://developers.naver.com/apps/ → 카페 글쓰기 권한 OAuth 앱 등록
-   - access_token + refresh_token 획득
-   - 어드민 화면에서 등록 + 🧪 테스트 발행 클릭 → 한글 정상 표시 확인
-2. **확인 후 자동화 작동**: `naver-cafe-publish` cron이 9시/21시 KST 자동 실행
+## ⚙️ 검증
+- TypeScript: `npx tsc --noEmit` 0 errors
+- ESLint (변경 파일): 0 warnings/errors
+- Build: `next build` Compiled successfully in 2.4min
+- 라이브 verify: `/sitemap/30` (50 URL), `/api/search?q=양도세` (200 OK), 번들에 SignupNudgeModal 포함
 
-## ⚙️ 운영
-- **마스터 어드민**: `/admin` → 첫 탭 (master) → 헬스 100점 + 6 카드 + 🚀 전체 실행
-- **수동 트리거 가능 크론** (vercel.json에서 빠진 11개): 어드민 → 마스터 → 단계별 트리거
-  - calc-topic-refresh (AI 갱신)
-  - cleanup-calc-results (만료 정리)
-  - 기타 8개 (premium-expire 등)
+## 🔧 기술 노트 (다음 세션 참고)
+- **Architecture Rule #13 적용**: RPC가 `database.ts` 타입에 미등록일 때 `(supabase as any).rpc('rpc_name', ...)` 패턴 필수
+- **사이트맵 라우팅 패턴**: `if (id >= N)` 형태는 항상 `&& id < M` 상한 추가 (specific case가 흡수당함)
+- **sitemap.xml index** (`src/app/sitemap.xml/route.ts`): `FIXED_IDS_POST_BLOG = [12, 13, 14, 15, 16, 21, 30, 31]` — 30/31은 fixed-ID 핸들러로 분기
 
-## 📊 최종 통계
-- 신규 파일: 20개
-- 수정 파일: 16개
-- DB 마이그레이션: 4개
-- 시드 데이터: 50개 토픽 + 17 app_config 설정
-- 빌드 통과: TypeScript 0 errors
-- 런타임: 0 errors
-- 사이트 다운: 0초 (모든 실패 빌드는 자동 fallback)
+## 📋 남은 작업 (work_orders P1+P2)
+- **P1 #4**: /calc/topic/chungyak-gajeon-gyesangi TypeError 우회 (`safe_get_calc_topic` RPC)
+- **P1 #5**: /daily/[지역]/[날짜] TypeError null 체크
+- **P1 #6**: email-digest cron 100% silent fail 디버그
+- **P2 #7**: 관리자 대시보드 통합 (`get_admin_dashboard` RPC)
+- **P2 #8**: 비로그인 홈페이지 가입 유도 강화 (`get_homepage_for_anonymous` RPC)
+- **P2 #9**: calc_results 0건 — 결과 저장 fix
 
-세션 132 완료. 다음 세션은 이 STATUS.md 먼저 읽고 시작.
+다음 세션은 이 STATUS.md 먼저 읽고 시작. work_orders P1 #4부터 진행 권장.
