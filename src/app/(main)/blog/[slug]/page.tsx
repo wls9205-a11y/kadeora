@@ -38,6 +38,7 @@ import RelatedContentCard from '@/components/RelatedContentCard';
 import BlogMentionCard from '@/components/blog/BlogMentionCard';
 // SmartSectionGate 제거 → LoginGate 기능 게이팅으로 전환 (세션 108)
 import BlogAptAlertCTA from '@/components/BlogAptAlertCTA';
+import YMYLBanner from '@/components/YMYLBanner';
 // NewsletterSubscribe 삭제 — 카카오 CTA로 통합
 
 // marked heading에 id 자동 부여 (TOC 앵커용)
@@ -908,6 +909,17 @@ export default async function BlogDetailPage({ params }: Props) {
           {toc.length >= 3 && <BlogToc toc={toc} />}
         </div>
 
+        {/* [L0-6] YMYL 카테고리 면책 배너 — 본문 위 1회 삽입 */}
+        {(post.category === 'stock' || post.category === 'finance' || post.category === 'apt' || post.category === 'unsold') && (
+          <YMYLBanner
+            category={post.category}
+            dataDate={post.data_date}
+            sourceRef={post.source_ref}
+            authorName={post.author_name}
+            authorRole={post.author_role}
+          />
+        )}
+
         {/* 본문 — 봇: 전체, 로그인: TossGate, 비로그인: 전체 공개 (기능 게이팅으로 전환) */}
         {isBot ? (
           <div className="blog-content" itemProp="articleBody" dangerouslySetInnerHTML={{ __html: sanitizeHtml(htmlFull) }} />
@@ -1036,10 +1048,35 @@ export default async function BlogDetailPage({ params }: Props) {
         </div>
         )}
 
+        {/* [L0-5] 참고자료 — source_ref 기반 외부 링크 블록 */}
+        {(() => {
+          const refRaw = (post.source_ref || '').trim();
+          if (!refRaw) return null;
+          const items = refRaw.split(';').map((r: string) => r.trim()).filter(Boolean).map((r: string) => {
+            const [label, url] = r.split('|');
+            return { label: label?.trim() || '', url: url?.trim() || '' };
+          }).filter((i: { label: string; url: string }) => i.label && /^https?:\/\//i.test(i.url));
+          if (items.length === 0) return null;
+          return (
+            <section style={{ marginTop: 'var(--sp-xl)', padding: '14px 16px', borderRadius: 'var(--radius-md)', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
+              <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px' }}>📚 참고자료</h2>
+              <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.8 }}>
+                {items.map((r: { label: string; url: string }, i: number) => (
+                  <li key={i}>
+                    <a href={r.url} target="_blank" rel="noopener nofollow" style={{ color: 'var(--brand)', textDecoration: 'underline' }}>
+                      {r.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          );
+        })()}
+
         {/* 자동생성 콘텐츠 면책 & 출처 표기 (E-E-A-T) */}
         {post.source_type === 'auto' && (
           <div style={{ marginTop: 'var(--sp-2xl)', padding: '12px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.6 }}>
-            <span style={{ fontWeight: 600 }}>ℹ️ 자동 작성 콘텐츠</span> · 이 글은 카더라의 공공 데이터(국토교통부, 금융위원회 등)를 기반으로 자동 작성되었습니다. 
+            <span style={{ fontWeight: 600 }}>ℹ️ 자동 작성 콘텐츠</span> · 이 글은 카더라의 공공 데이터(국토교통부, 금융위원회 등)를 기반으로 자동 작성되었습니다.
             {post.data_date && <> · 데이터 기준일: {post.data_date}</>}
             {post.source_ref && <> · 출처: {post.source_ref}</>}
           </div>

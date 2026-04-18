@@ -17,6 +17,31 @@ export const maxDuration = 300;
 
 import { diversifyPrompt } from '@/lib/blog-prompt-diversity';
 
+// [L0-5] 본문 내 공공기관/감독기관 언급 감지 → source_ref 자동 주입 맵
+// rel=noopener nofollow는 렌더러에서 자동 부여됨.
+const SOURCE_REF_MAP: { keyword: RegExp; label: string; url: string }[] = [
+  { keyword: /국토교통부|국토부/, label: '국토교통부', url: 'https://www.molit.go.kr/' },
+  { keyword: /금융감독원|금감원/, label: '금융감독원', url: 'https://www.fss.or.kr/' },
+  { keyword: /금융위원회|금융위/, label: '금융위원회', url: 'https://www.fsc.go.kr/' },
+  { keyword: /한국은행|한은/, label: '한국은행', url: 'https://www.bok.or.kr/' },
+  { keyword: /통계청|KOSIS/, label: '통계청 KOSIS', url: 'https://kosis.kr/' },
+  { keyword: /국세청/, label: '국세청', url: 'https://www.nts.go.kr/' },
+  { keyword: /한국거래소|KRX/, label: '한국거래소', url: 'https://www.krx.co.kr/' },
+  { keyword: /공정거래위원회|공정위/, label: '공정거래위원회', url: 'https://www.ftc.go.kr/' },
+  { keyword: /부동산원|한국부동산원/, label: '한국부동산원', url: 'https://www.reb.or.kr/' },
+  { keyword: /LH|한국토지주택공사/, label: 'LH 한국토지주택공사', url: 'https://www.lh.or.kr/' },
+  { keyword: /청약홈/, label: '청약홈', url: 'https://www.applyhome.co.kr/' },
+];
+
+function extractSourceRefs(content: string): string {
+  if (!content) return '';
+  const hits = SOURCE_REF_MAP.filter((m) => m.keyword.test(content));
+  if (hits.length === 0) return '';
+  return hits
+    .map((h) => `${h.label}|${h.url}`)
+    .join(';');
+}
+
 const STYLES = [
   '전문가 칼럼 스타일. 증권사 애널리스트처럼 분석적이고 객관적인 톤.',
   '친근한 해설자 스타일. 어려운 용어를 쉽게 풀어 독자에게 말을 거는 톤.',
@@ -109,13 +134,19 @@ ${post.content}`)
 
         const clean = newContent.replace(/[#|*\n\r\-\[\]\(\)/]/g, ' ').replace(/\s+/g, ' ').trim();
 
-        await admin.from('blog_posts').update({
+        // [L0-5] 본문에 언급된 공공기관 출처를 source_ref에 자동 주입 (기존 값이 있으면 유지)
+        const detectedRefs = extractSourceRefs(newContent);
+
+        const updatePayload: Record<string, any> = {
           content: newContent,
           meta_description: clean.slice(0, 120) + ' — 카더라',
           excerpt: clean.slice(0, 150),
           rewritten_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
-        }).eq('id', post.id);
+        };
+        if (detectedRefs) updatePayload.source_ref = detectedRefs;
+
+        await admin.from('blog_posts').update(updatePayload).eq('id', post.id);
 
         rewritten++;
         console.info(`[blog-rewrite] Rewritten: ${post.slug}`);
