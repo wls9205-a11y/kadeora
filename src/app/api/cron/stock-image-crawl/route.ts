@@ -66,10 +66,11 @@ async function handler(_req: NextRequest) {
         return { processed: 0, metadata: { error: 'NAVER API keys not set' } };
       }
 
-      // 종목 이미지가 TARGET_COUNT 미만인 종목 우선 (시총 큰 순)
+      // 세션 136 fix: 실제 RPC 시그니처는 get_stocks_needing_images(p_limit)
+      // 반환: TABLE(symbol, name, market, sector, current_image_count)
       const { data: symbolsNeeding } = await (sb as any).rpc(
-        'get_stock_symbols_needing_images',
-        { p_target: TARGET_COUNT, p_limit: BATCH_LIMIT },
+        'get_stocks_needing_images',
+        { p_limit: BATCH_LIMIT },
       );
 
       let targets = symbolsNeeding as any[] | null;

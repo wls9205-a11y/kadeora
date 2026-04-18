@@ -83,15 +83,14 @@ async function handler(_req: NextRequest) {
         const score = scoreRelevance(imgText, tokens);
         const isFlagged = tokens.length >= 2 && score < 0.4;
 
-        // 검증 결과 저장 — 관련 컬럼이 없으면 noop. RPC 가 있으면 그걸 사용.
+        // 세션 136 fix: 실제 RPC 시그니처는 mark_blog_image_validation(p_post_id, p_image_url, p_score)
         try {
           const { error: rpcErr } = await (sb as any).rpc('mark_blog_image_validation', {
-            p_image_id: row.id,
-            p_relevance_score: score,
-            p_flagged: isFlagged,
+            p_post_id: row.post_id,
+            p_image_url: row.image_url,
+            p_score: score,
           });
           if (rpcErr) {
-            // RPC 부재 — skip silently (Supabase MCP에서 함수 추가 후 동작)
             if (!/function .* does not exist/i.test(rpcErr.message)) {
               errors.push(`img ${row.id}: ${rpcErr.message}`);
             }

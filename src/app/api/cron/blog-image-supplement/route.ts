@@ -81,22 +81,31 @@ async function handler(_req: NextRequest) {
         return { processed: 0, metadata: { error: 'NAVER API keys not set' } };
       }
 
-      // 이미지 < MIN_COUNT 인 블로그 조회 (인기/최신 우선)
+      // 세션 136 fix: 실제 RPC 시그니처는 get_blogs_needing_images(p_limit)
+      // 반환: TABLE(post_id, title, slug, category, tags, current_image_count)
       const { data: lowImgPosts, error: rpcErr } = await (sb as any).rpc(
-        'get_blog_posts_needing_images',
-        { p_min_count: MIN_COUNT, p_limit: BATCH_LIMIT },
+        'get_blogs_needing_images',
+        { p_limit: BATCH_LIMIT },
       );
 
-      let targets = lowImgPosts as any[] | null;
+      let targets = (lowImgPosts as any[] | null)?.map((r) => ({
+        id: r.post_id,
+        slug: r.slug,
+        title: r.title,
+        category: r.category,
+        tags: r.tags,
+        current_image_count: r.current_image_count,
+      })) ?? null;
+
       if (rpcErr || !Array.isArray(targets)) {
-        // RPC가 없을 수 있으므로 PostgREST로 대체 경로
+        // RPC 실패 시 PostgREST fallback
         const { data: fallback } = await sb
           .from('blog_posts')
           .select('id, slug, title, category, tags')
           .eq('is_published', true)
           .order('view_count', { ascending: false, nullsFirst: false })
           .limit(BATCH_LIMIT);
-        targets = fallback || [];
+        targets = (fallback || []).map((r: any) => ({ ...r, current_image_count: undefined }));
       }
 
       if (!targets || targets.length === 0) {

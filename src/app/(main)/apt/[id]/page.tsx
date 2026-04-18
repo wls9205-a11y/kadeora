@@ -158,19 +158,41 @@ async function fetchUnifiedData(slug: string) {
 
   // Stage 6: apt_complex_profiles fallback — handles cases like /apt/파크리오 where
   // the Korean apt name lives only in apt_complex_profiles, not apt_sites.
+  // 세션 136: get_apt_complex_stage6 RPC 사용 — complex + images + related_blogs 한 번에 조회
+  let stage6RelatedBlogs: Array<{ id: any; title: string; slug: string; cover_image?: string; view_count?: number; published_at?: string }> = [];
   if (!site && !sub && !unsold && !redev) {
     const candidate = decodeURIComponent(slug).replace(/-/g, ' ').trim();
     const koreanCandidate = candidate.replace(/[a-z0-9]+/gi, '').replace(/\s+/g, ' ').trim();
     const searchName = koreanCandidate.length >= 2 ? koreanCandidate : candidate;
     if (searchName.length >= 2) {
-      const { data: complex } = await (sb as any)
-        .from('apt_complex_profiles')
-        .select('id, apt_name, region_nm, sigungu, dong, total_households, built_year, images, latest_sale_price, avg_sale_price_pyeong, sale_count_1y, price_change_1y')
-        .ilike('apt_name', `%${searchName}%`)
-        .not('sale_count_1y', 'is', null)
-        .order('sale_count_1y', { ascending: false, nullsFirst: false })
-        .limit(1).maybeSingle();
+      let { data: stage6 } = await (sb as any).rpc('get_apt_complex_stage6', { p_apt_name: searchName });
+      // apt_name은 정확 매칭이므로 ilike 성격의 이전 쿼리 대응을 위해 exact miss 시 fuzzy fallback
+      if (!stage6?.complex) {
+        const { data: fuzzy } = await (sb as any)
+          .from('apt_complex_profiles')
+          .select('apt_name')
+          .ilike('apt_name', `%${searchName}%`)
+          .not('sale_count_1y', 'is', null)
+          .order('sale_count_1y', { ascending: false, nullsFirst: false })
+          .limit(1).maybeSingle();
+        if (fuzzy?.apt_name) {
+          const r2 = await (sb as any).rpc('get_apt_complex_stage6', { p_apt_name: fuzzy.apt_name });
+          stage6 = r2?.data ?? null;
+        }
+      }
+      const complex = stage6?.complex;
+      const stage6Images = Array.isArray(stage6?.images) ? stage6.images : [];
+      stage6RelatedBlogs = Array.isArray(stage6?.related_blogs) ? stage6.related_blogs : [];
+
       if (complex) {
+        const mappedImages = stage6Images
+          .filter((img: any) => img?.url)
+          .map((img: any) => ({
+            url: String(img.url).replace(/^http:\/\//, 'https://'),
+            thumbnail: String(img.url).replace(/^http:\/\//, 'https://'),
+            caption: img.caption ?? null,
+            type: img.source ?? 'complex',
+          }));
         site = {
           id: `complex-${complex.id}`,
           slug,
@@ -180,9 +202,9 @@ async function fetchUnifiedData(slug: string) {
           sigungu: complex.sigungu || '',
           dong: complex.dong || '',
           address: [complex.sigungu, complex.dong].filter(Boolean).join(' '),
-          description: null,
-          seo_title: null,
-          seo_description: null,
+          description: complex.seo_description || null,
+          seo_title: complex.seo_title || null,
+          seo_description: complex.seo_description || null,
           builder: null,
           developer: null,
           total_units: complex.total_households || null,
@@ -194,7 +216,7 @@ async function fetchUnifiedData(slug: string) {
           interest_count: 0,
           page_views: 0,
           comment_count: 0,
-          images: Array.isArray(complex.images) ? complex.images : [],
+          images: mappedImages,
           key_features: [],
           faq_items: [],
           nearby_facilities: [],
@@ -204,8 +226,8 @@ async function fetchUnifiedData(slug: string) {
           price_max: null,
           price_comparison: null,
           search_trend: null,
-          latitude: null,
-          longitude: null,
+          latitude: complex.latitude ?? null,
+          longitude: complex.longitude ?? null,
           source_ids: {},
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
@@ -266,7 +288,20 @@ async function fetchUnifiedData(slug: string) {
   // Fire-and-forget: 조회수 증가
   // view count moved to client-side API call (ViewTracker component)
 
-  return { site, sub, unsold, redev, trades, relatedBlogs, relatedPosts, nearbySites, sameBuilderSites, regionBenchmark, regionTrades, complexProfiles, name, region, sigungu, slug, analysisText };
+  // 세션 136: Stage 6 경로에서 관련 블로그 보강 (기존 array shape 유지, 중복 제외, 최대 8개)
+  let mergedRelatedBlogs: any[] = Array.isArray(relatedBlogs) ? [...relatedBlogs] : [];
+  if (stage6RelatedBlogs.length > 0) {
+    const seenSlugs = new Set(mergedRelatedBlogs.map((b: any) => b?.slug).filter(Boolean));
+    for (const sb6 of stage6RelatedBlogs) {
+      if (sb6?.slug && !seenSlugs.has(sb6.slug)) {
+        mergedRelatedBlogs.push({ slug: sb6.slug, title: sb6.title, view_count: sb6.view_count, published_at: sb6.published_at });
+        seenSlugs.add(sb6.slug);
+      }
+    }
+    mergedRelatedBlogs = mergedRelatedBlogs.slice(0, 8);
+  }
+
+  return { site, sub, unsold, redev, trades, relatedBlogs: mergedRelatedBlogs, relatedPosts, nearbySites, sameBuilderSites, regionBenchmark, regionTrades, complexProfiles, name, region, sigungu, slug, analysisText };
 }
 
 // generateStaticParams 제거 — 전량 ISR on-demand (revalidate=3600)
