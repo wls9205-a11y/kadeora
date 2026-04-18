@@ -10,10 +10,11 @@ import AptCommentSheet from '@/components/AptCommentSheet';
 import { haptic } from '@/lib/haptic';
 import RegionStackedBar from '@/components/RegionStackedBar';
 import SubscriptionTab from './tabs/SubscriptionTab';
-const TransactionTab = dynamic(() => import('./tabs/TransactionTab'), { ssr: false });
-const RedevTab = dynamic(() => import('./tabs/RedevTab'), { ssr: false });
-const OngoingTab = dynamic(() => import('./tabs/OngoingTab'), { ssr: false });
-const UnsoldTab = dynamic(() => import('./tabs/UnsoldTab'), { ssr: false });
+// 세션 138: ssr:false 제거 — 초기 URL ?tab=unsold|redev|trade 로 접근 시 SSR HTML에 img 렌더
+const TransactionTab = dynamic(() => import('./tabs/TransactionTab'));
+const RedevTab = dynamic(() => import('./tabs/RedevTab'));
+const OngoingTab = dynamic(() => import('./tabs/OngoingTab'));
+const UnsoldTab = dynamic(() => import('./tabs/UnsoldTab'));
 import { SkeletonList } from '@/components/Skeleton';
 import { isNew } from './tabs/apt-utils';
 import { useToast } from '@/components/Toast';
@@ -40,8 +41,9 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
 
   // ━━━ Lazy fetch state ━━━
   const [lazyUnsold, setLazyUnsold] = useState<any[] | null>(unsold.length > 0 ? unsold : null);
-  const [lazyRedev, setLazyRedev] = useState<any[] | null>(null);
-  const [lazyTx, setLazyTx] = useState<any[] | null>(null);
+  // 세션 138: 서버 prefetch 된 redev/transactions 를 초기 state 로 사용 → SSR img 렌더
+  const [lazyRedev, setLazyRedev] = useState<any[] | null>(redevelopment.length > 0 ? redevelopment : null);
+  const [lazyTx, setLazyTx] = useState<any[] | null>(transactions.length > 0 ? transactions : null);
   const [lazyTradeMonthly, setLazyTradeMonthly] = useState<any[]>(tradeMonthly);
   const [lazyUnsoldMonthly, setLazyUnsoldMonthly] = useState<any[]>(unsoldMonthly);
   const [lazyUnsoldSummary, setLazyUnsoldSummary] = useState<any>(unsoldSummary);

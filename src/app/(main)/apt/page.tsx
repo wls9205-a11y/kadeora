@@ -78,6 +78,9 @@ async function fetchAptData() {
   let tradeByRegion: Record<string, number> = {};
   let redevByRegion: Record<string, number> = {};
   const regionAvgPriceMap: Record<string, number> = {};
+  // 세션 138: SSR 카드 렌더용 초기 30건 (unsold/redev/trade URL 진입 시 img 포함)
+  let initialTransactions: any[] = [];
+  let initialRedevelopment: any[] = [];
 
   try {
     const sb = await createSupabaseServer();
@@ -111,6 +114,19 @@ async function fetchAptData() {
       sb.from('redevelopment_projects').select('id', { count: 'exact', head: true }).eq('is_active', true).eq('project_type', '재개발'),
       sb.from('redevelopment_projects').select('id', { count: 'exact', head: true }).eq('is_active', true).eq('project_type', '재건축'),
     ]);
+
+    // 세션 138: SSR 카드 렌더용 초기 30건 (unsold/redev/trade 탭 URL 진입 시 img 포함)
+    const [initTxR, initRedevR] = await Promise.all([
+      sb.from('apt_transactions')
+        .select('id, apt_name, region_nm, sigungu, dong, deal_date, deal_amount, exclusive_area, floor, built_year, trade_type, created_at')
+        .gte('deal_date', `${new Date().getFullYear()}-01-01`)
+        .order('deal_date', { ascending: false }).limit(30),
+      sb.from('redevelopment_projects')
+        .select('id, district_name, region, sigungu, stage, total_households, constructor, developer, address, latitude, longitude, nearest_station, is_active, project_type, expected_completion, estimated_move_in, approval_date, area_sqm, notes, key_features, summary, ai_summary, max_floor, total_dong, floor_area_ratio, building_coverage, land_area, transfer_limit')
+        .eq('is_active', true).order('total_households', { ascending: false }).limit(30),
+    ]);
+    initialTransactions = initTxR.data || [];
+    initialRedevelopment = initRedevR.data || [];
     // 데이터 수집일 조회 (별도 — 실패해도 무시)
     try {
       const [subFreshR, tradeFreshR, unsoldFreshR, redevFreshR] = await Promise.all([
@@ -297,11 +313,11 @@ async function fetchAptData() {
   const dedupedSub = ongoingFromSub.filter(s => !unsoldNames.has(`${s.house_nm}::${s.region_nm}`));
   const ongoingApts = [...ongoingFromUnsold, ...dedupedSub].sort((a, b) => (b.total_supply || 0) - (a.total_supply || 0));
 
-  return { apts, unsold, alertCounts, lastRefreshed, regionStats, ongoingApts, redevTotalCount, tradeTotalCount, tradeByRegion, redevByRegion, subTotalCount, unsoldTotalCount, ongoingTotalCount, dataFreshness, redevRedevCount, redevRebuildCount, aptImageMap, aptEngageMap };
+  return { apts, unsold, alertCounts, lastRefreshed, regionStats, ongoingApts, redevTotalCount, tradeTotalCount, tradeByRegion, redevByRegion, subTotalCount, unsoldTotalCount, ongoingTotalCount, dataFreshness, redevRedevCount, redevRebuildCount, aptImageMap, aptEngageMap, initialTransactions, initialRedevelopment };
 }
 
 export default async function AptPage() {
-  const { apts, unsold, alertCounts, lastRefreshed, regionStats, ongoingApts, redevTotalCount, tradeTotalCount, tradeByRegion, redevByRegion, subTotalCount, unsoldTotalCount, ongoingTotalCount, dataFreshness, redevRedevCount, redevRebuildCount, aptImageMap, aptEngageMap } = await fetchAptData();
+  const { apts, unsold, alertCounts, lastRefreshed, regionStats, ongoingApts, redevTotalCount, tradeTotalCount, tradeByRegion, redevByRegion, subTotalCount, unsoldTotalCount, ongoingTotalCount, dataFreshness, redevRedevCount, redevRebuildCount, aptImageMap, aptEngageMap, initialTransactions, initialRedevelopment } = await fetchAptData();
   // ItemList for Google carousel rich results
   const itemList = apts.slice(0, 10).map((a: any, i: number) => ({
     '@type': 'ListItem',
@@ -324,7 +340,7 @@ export default async function AptPage() {
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"WebPage","name":"부동산 — 청약·분양·미분양·재개발","speakable":{"@type":"SpeakableSpecification","cssSelector":["h1",".region-summary"]}}) }} />
     <h1 className="sr-only">부동산 — 청약·분양·미분양·재개발</h1>
     <p className="sr-only">카더라 부동산에서는 전국 {apts.length}건의 아파트 청약 일정, {ongoingApts.length}건의 분양 현장, {unsold.length}건의 미분양 단지, {redevTotalCount}건의 재개발·재건축 정보를 실시간으로 제공합니다. 지역별·타입별 필터로 원하는 부동산 정보를 빠르게 찾을 수 있으며, 분양가·입주 예정일·경쟁률·시세 비교를 무료로 확인할 수 있습니다.</p>
-    <AptClient apts={apts} unsold={unsold} alertCounts={alertCounts} lastRefreshed={lastRefreshed} regionStats={regionStats} ongoingApts={ongoingApts} redevTotalCount={redevTotalCount} tradeTotalCount={tradeTotalCount} tradeByRegion={tradeByRegion} redevByRegion={redevByRegion} subTotalCount={subTotalCount} unsoldTotalCount={unsoldTotalCount} ongoingTotalCount={ongoingTotalCount} dataFreshness={dataFreshness} redevRedevCount={redevRedevCount} redevRebuildCount={redevRebuildCount} aptImageMap={aptImageMap} aptEngageMap={aptEngageMap} />
+    <AptClient apts={apts} unsold={unsold} transactions={initialTransactions} redevelopment={initialRedevelopment} alertCounts={alertCounts} lastRefreshed={lastRefreshed} regionStats={regionStats} ongoingApts={ongoingApts} redevTotalCount={redevTotalCount} tradeTotalCount={tradeTotalCount} tradeByRegion={tradeByRegion} redevByRegion={redevByRegion} subTotalCount={subTotalCount} unsoldTotalCount={unsoldTotalCount} ongoingTotalCount={ongoingTotalCount} dataFreshness={dataFreshness} redevRedevCount={redevRedevCount} redevRebuildCount={redevRebuildCount} aptImageMap={aptImageMap} aptEngageMap={aptEngageMap} />
     {/* C-7: noscript — JS 비활성화 크롤러용 기본 청약 목록 */}
     <noscript>
       <div style={{ padding: 20 }}>
