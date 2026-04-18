@@ -19,6 +19,10 @@ const CALC_REGISTRY = [
 const BATCH = 2;
 
 export async function GET(_req: NextRequest) {
+  // 세션 136: 7일 간 41회 실행 / 0 processed / ~54분 누적 — 모든 계산기 가이드 기생성됨.
+  return NextResponse.json({ ok: true, disabled: true, reason: 'session-136: 0 processed in 7d, topics exhausted' });
+
+  // eslint-disable-next-line no-unreachable
   const result = await withCronLogging('blog-calculator-guide', async () => {
     const sb = getSupabaseAdmin();
     const today = new Date().toISOString().slice(0, 10);

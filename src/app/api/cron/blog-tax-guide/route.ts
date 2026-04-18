@@ -22,6 +22,10 @@ const TOPICS = [
 ];
 
 export async function GET(_req: NextRequest) {
+  // 세션 136: 7일 간 42회 실행 / 0 processed / ~34분 누적 — 모든 세금 가이드 기생성됨.
+  return NextResponse.json({ ok: true, disabled: true, reason: 'session-136: 0 processed in 7d, topics exhausted' });
+
+  // eslint-disable-next-line no-unreachable
   const result = await withCronLogging('blog-tax-guide', async () => {
     const sb = getSupabaseAdmin();
     const today = new Date().toISOString().slice(0, 10);

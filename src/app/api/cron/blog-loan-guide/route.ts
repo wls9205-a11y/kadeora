@@ -18,6 +18,11 @@ const TOPICS = [
 ];
 
 export async function GET(_req: NextRequest) {
+  // 세션 136: 7일 간 43회 실행 / 0 processed / ~83분 누적 — 모든 토픽 기생성됨.
+  // 재활성 시 이 early-return 제거. 복구 방법: blog_posts에서 해당 slug들 삭제 후 재주행.
+  return NextResponse.json({ ok: true, disabled: true, reason: 'session-136: 0 processed in 7d, topics exhausted' });
+
+  // eslint-disable-next-line no-unreachable
   const result = await withCronLogging('blog-loan-guide', async () => {
     const sb = getSupabaseAdmin();
     const today = new Date().toISOString().slice(0, 10);
