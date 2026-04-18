@@ -8,7 +8,7 @@ const BottomSheet = dynamic(() => import('@/components/BottomSheet'), { ssr: fal
 
 interface Stock {
   symbol: string; name: string; market: string; price: number; change_amt: number;
-  change_pct: number; volume: number; market_cap: number; updated_at: string;
+  change_pct: number; volume: number; market_cap: number; updated_at?: string;
   currency?: string; sector?: string; description?: string;
 }
 

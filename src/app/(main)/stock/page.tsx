@@ -49,11 +49,16 @@ import Disclaimer from '@/components/Disclaimer';
 
 async function fetchStocks() {
   const sb = await createSupabaseServer();
-  const { data } = await sb
-    .from('stock_quotes')
-    .select('symbol, name, market, price, change_amt, change_pct, volume, market_cap, currency, sector, updated_at, is_active, description, logo_url')
-    .order('market_cap', { ascending: false })
-    .limit(2000);
+  // 세션 138: get_stocks_with_thumbnails RPC 로 교체 — stock_images 1장 thumbnail 병합
+  // 반환 TABLE: symbol, name, market, price, change_amt, change_pct, volume, market_cap,
+  //            currency, ticker, description, sector, per, pbr, dividend_yield,
+  //            logo_url, thumbnail, page_views, comment_count
+  const { data } = await (sb as any).rpc('get_stocks_with_thumbnails', {
+    p_market: null,
+    p_limit: 100,
+    p_offset: 0,
+    p_sort: 'market_cap',
+  });
   return data ?? [];
 }
 

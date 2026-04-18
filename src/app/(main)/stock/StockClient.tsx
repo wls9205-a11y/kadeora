@@ -25,8 +25,9 @@ import EngageRow from '@/components/EngageRow';
 
 interface Stock {
   symbol: string; name: string; market: string; price: number; change_amt: number;
-  change_pct: number; volume: number; market_cap: number; updated_at: string;
+  change_pct: number; volume: number; market_cap: number; updated_at?: string;
   currency?: string; sector?: string; description?: string; logo_url?: string;
+  thumbnail?: string; // 세션 138: stock_images 첫 장 — get_stocks_with_thumbnails RPC
   page_views?: number; comment_count?: number;
 }
 interface Theme { id: number; theme_name: string; change_pct: number; is_hot: boolean; related_symbols?: string[]; description?: string; }
@@ -239,10 +240,11 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
         {/* Row 1: Logo + Name + sector */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center', flex: 1, minWidth: 0 }}>
-            {(() => { const logo = getStockLogo(s.symbol, !isGlobal); return s.logo_url ? (
-              <img src={s.logo_url} alt={`${s.name} 로고`} width={32} height={32} style={{ width: 32, height: 32, borderRadius: 'var(--radius-md)', objectFit: 'contain', flexShrink: 0, background: '#fff', padding: 2 }} loading="lazy" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; (e.target as HTMLImageElement).nextElementSibling && ((e.target as HTMLImageElement).nextElementSibling as HTMLElement).style.removeProperty('display'); }} />
-            ) : (
-              <div style={{ width: 32, height: 32, borderRadius: 'var(--radius-md)', background: logo.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: logo.initials.length > 2 ? 8 : 11, fontWeight: 800, color: logo.textColor, letterSpacing: '-0.02em' }}>{logo.initials}</div>
+            {(() => { const logo = getStockLogo(s.symbol, !isGlobal); const imgSrc = s.thumbnail ?? s.logo_url ?? `/api/og-chart?symbol=${s.symbol}`; return (
+              <img src={imgSrc} alt={`${s.name} 로고`} width={32} height={32} style={{ width: 32, height: 32, borderRadius: 'var(--radius-md)', objectFit: 'cover', flexShrink: 0, background: '#fff', padding: 2 }} loading="lazy" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; const sib = (e.target as HTMLImageElement).nextElementSibling; if (sib) (sib as HTMLElement).style.removeProperty('display'); }} />
+            ); })()}
+            {(() => { const logo = getStockLogo(s.symbol, !isGlobal); return (
+              <div style={{ display: 'none', width: 32, height: 32, borderRadius: 'var(--radius-md)', background: logo.bg, alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: logo.initials.length > 2 ? 8 : 11, fontWeight: 800, color: logo.textColor, letterSpacing: '-0.02em' }}>{logo.initials}</div>
             ); })()}
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', letterSpacing: '-0.02em' }}>{s.name}</div>
@@ -1189,10 +1191,11 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
                       <div style={{ padding: '10px 12px 8px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
                           <div style={{ display: 'flex', gap: 8, alignItems: 'center', flex: 1, minWidth: 0 }}>
-                            {(() => { const logo = getStockLogo(s.symbol, !isGlobal); return s.logo_url ? (
-                              <img src={s.logo_url} alt={`${s.name} 로고`} width={32} height={32} style={{ width: 32, height: 32, borderRadius: 'var(--radius-md)', objectFit: 'contain', flexShrink: 0, background: '#fff', padding: 2 }} loading="lazy" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; (e.target as HTMLImageElement).nextElementSibling && ((e.target as HTMLImageElement).nextElementSibling as HTMLElement).style.removeProperty('display'); }} />
-                            ) : (
-                              <div style={{ width: 32, height: 32, borderRadius: 'var(--radius-md)', background: logo.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: logo.initials.length > 2 ? 8 : 11, fontWeight: 800, color: logo.textColor, letterSpacing: '-0.02em' }}>{logo.initials}</div>
+                            {(() => { const logo = getStockLogo(s.symbol, !isGlobal); const imgSrc = s.thumbnail ?? s.logo_url ?? `/api/og-chart?symbol=${s.symbol}`; return (
+                              <img src={imgSrc} alt={`${s.name} 로고`} width={32} height={32} style={{ width: 32, height: 32, borderRadius: 'var(--radius-md)', objectFit: 'cover', flexShrink: 0, background: '#fff', padding: 2 }} loading="lazy" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; const sib = (e.target as HTMLImageElement).nextElementSibling; if (sib) (sib as HTMLElement).style.removeProperty('display'); }} />
+                            ); })()}
+                            {(() => { const logo = getStockLogo(s.symbol, !isGlobal); return (
+                              <div style={{ display: 'none', width: 32, height: 32, borderRadius: 'var(--radius-md)', background: logo.bg, alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: logo.initials.length > 2 ? 8 : 11, fontWeight: 800, color: logo.textColor, letterSpacing: '-0.02em' }}>{logo.initials}</div>
                             ); })()}
                             <div style={{ flex: 1, minWidth: 0 }}>
                               <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', letterSpacing: '-0.02em' }}>{s.name}</div>
