@@ -64,9 +64,57 @@ async function searchNaverImages(query: string, count = 5): Promise<{ url: strin
   }
 }
 
+/* ═══════════ [P0-FACT] big_event_registry 팩트 컨텍스트 조회 ═══════════ */
+
+async function fetchBigEventContext(sb: any, issue: any): Promise<string> {
+  if (issue?.source_type !== 'big_event_registry') return '';
+  // big_event id는 raw_data.big_event_id 또는 detected_keywords/related_entities로 잡음
+  const rawId = issue?.raw_data?.big_event_id;
+  const slugHint = issue?.raw_data?.big_event_slug;
+  try {
+    let row: any = null;
+    if (rawId) {
+      const { data } = await (sb as any).from('big_event_registry').select('*').eq('id', rawId).maybeSingle();
+      row = data;
+    }
+    if (!row && slugHint) {
+      const { data } = await (sb as any).from('big_event_registry').select('*').eq('slug', slugHint).maybeSingle();
+      row = data;
+    }
+    if (!row) return '';
+    const constructors = Array.isArray(row.key_constructors) ? row.key_constructors.join(', ') : (row.key_constructors || '미정');
+    const brand = row.new_brand_name
+      ? `${row.new_brand_name} (${row.constructor_status || 'unconfirmed'})`
+      : '미정 (수주 전)';
+    const scale = row.scale_after ? `${row.scale_before ?? '?'} → ${row.scale_after}+세대` : `${row.scale_before ?? '?'}세대`;
+    const sources = Array.isArray(row.fact_sources) && row.fact_sources.length > 0
+      ? row.fact_sources.join(' · ')
+      : '카더라 내부 노트';
+    return [
+      '',
+      '[절대 팩트 고정 - 바꾸지 말 것]',
+      `- 이름: ${row.name}${row.full_name ? ` (${row.full_name})` : ''}`,
+      `- 지역: ${row.region_sido || ''} ${row.region_sigungu || ''} ${row.region_dong || ''}`.trim(),
+      `- 준공: ${row.build_year_before ?? '미상'}년`,
+      `- 세대: ${scale}`,
+      `- 재건축 후 브랜드: ${brand}`,
+      `- 시공사: ${constructors}`,
+      `- 현 Stage: ${row.stage ?? '미정'} / 예상 완공: ${row.build_year_after_est ?? '미정'}`,
+      `- 비고: ${row.notes || ''}`,
+      `- 출처: ${sources}`,
+      '⚠️ 위 정보는 그대로 인용하라. 다른 브랜드명/시공사/세대수로 바꾸지 말 것.',
+      '⚠️ 확정되지 않은 정보(분양가, 완공일 등)는 "추정", "예상", "시나리오" 임을 명시할 것.',
+      '',
+    ].join('\n');
+  } catch (err: any) {
+    console.error('[issue-draft] fetchBigEventContext failed:', err.message);
+    return '';
+  }
+}
+
 /* ═══════════ AI 기사 생성 (v2: 에러 로깅 + og-infographic 제거) ═══════════ */
 
-async function generateArticle(issue: any): Promise<{ title: string; content: string; slug: string; keywords: string[]; meta_description: string; infographic_data: Record<string, any> } | null> {
+async function generateArticle(issue: any, bigEventContext = ''): Promise<{ title: string; content: string; slug: string; keywords: string[]; meta_description: string; infographic_data: Record<string, any> } | null> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) { console.error('[issue-draft] ANTHROPIC_API_KEY missing'); return null; }
 
@@ -74,7 +122,8 @@ async function generateArticle(issue: any): Promise<{ title: string; content: st
   const isPreempt = ['pre_announcement', 'preempt_coverage', 'new_subscription', 'search_spike'].includes(issue.issue_type);
   const catKo = issue.category === 'apt' ? '부동산' : issue.category === 'stock' ? '주식' : '경제';
 
-  const systemPrompt = `당신은 카더라(kadeora.app)의 수석 데이터 에디터입니다. ${isPreempt ? '분양 선점형 심층 분석' : catKo + ' 심층 분석'} 기사를 작성합니다.
+  // [P0-FACT] big_event context를 system prompt 최상단에 강제 삽입
+  const systemPrompt = `${bigEventContext ? bigEventContext + '\n' : ''}당신은 카더라(kadeora.app)의 수석 데이터 에디터입니다. ${isPreempt ? '분양 선점형 심층 분석' : catKo + ' 심층 분석'} 기사를 작성합니다.
 
 규칙:
 - 분량: ${isPreempt ? '6,000~8,000자' : '5,000~7,000자'} (충분히 깊이 있게)
@@ -361,8 +410,11 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
     return { decision: 'duplicate', score: issue.final_score };
   }
 
+  // [P0-FACT] big_event 이슈는 registry 팩트 블록을 system prompt 앞에 강제 주입
+  const bigEventContext = await fetchBigEventContext(sb, issue);
+
   // AI 기사 생성
-  const article = await generateArticle(issue);
+  const article = await generateArticle(issue, bigEventContext);
   if (!article) {
     // A3: 재시도 로직 — retry_count < 3이면 is_processed=false로 리셋
     const newRetry = retryCount + 1;
