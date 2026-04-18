@@ -531,14 +531,11 @@ export default async function BlogDetailPage({ params }: Props) {
     wordCount,
     timeRequired: `PT${readingTimeMin}M`,
     author: {
-      '@type': 'Person',
+      '@type': 'Organization',
       name: post.author_name || '카더라',
-      jobTitle: post.author_role || '금융·부동산 데이터 분석',
-      // [L0-2] manual 글은 노영진 저자 프로필로 링크, 그 외는 /about
-      url: post.source_type === 'manual'
-        ? `${SITE}/about/authors/node`
-        : `${SITE}/about`,
-      worksFor: { '@type': 'Organization', name: '카더라', url: SITE },
+      description: post.author_role || '부동산·주식 데이터 분석팀',
+      url: `${SITE}/about/authors`,
+      parentOrganization: { '@type': 'Organization', name: '카더라', url: SITE },
     },
     publisher: {
       '@type': 'Organization', name: '카더라', url: SITE,

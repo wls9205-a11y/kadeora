@@ -171,3 +171,56 @@ Claude Code에서 `docs/CLAUDE_CODE_PHASE1.md` 읽고 논스톱으로 L1-5, L1-6
 - issue_alerts pending_draft 감소 관찰 (threshold 조정 효과)
 - L3-9 meta_description 배치: Node가 MasterControlTab 또는 `curl -X POST /api/admin/meta-description-batch` 1회 실행
 
+
+---
+
+# 세션 136 (2026-04-19) — 카더라 브랜드 통일 + Big Event 시스템 구축
+
+## 🎯 세션 135 직후 긴급 교정 (Node 지시: "노영진 → 모두 카더라")
+
+### 교정된 항목
+- `/about/authors/node/page.tsx` **삭제** (개인 프로필 개념 제거)
+- `/about/authors/page.tsx` **전면 재작성** — 7개 카더라 팀 브랜드 소개 (부동산/주식/재테크/데이터/생활/투자/부동산분석팀)
+- `/blog/[slug]/page.tsx` JSON-LD `author` block: `Person` → `Organization`, URL `/about/authors`로 통일
+- DB `author_role` 19건 "카더라 설립자·..." → 카테고리 기반 팀 role ("부동산 분석 · 카더라 부동산팀" 등)
+
+### 세션 135에서 이미 처리 확인
+- `src/lib/constants.ts` `BIZ_OWNER = '카더라'` (세션 135 commit 이전 수정 유지)
+- `src/app/layout.tsx` founder Person block 제거됨
+- `src/app/llms.txt/route.ts` 대표자 라인 제거됨
+
+### DB 최종 상태 (author)
+```
+author_name distinct = 7: 
+  카더라 데이터팀 | 카더라 부동산분석팀 | 카더라 부동산팀 | 
+  카더라 생활팀 | 카더라 재테크팀 | 카더라 주식팀 | 카더라 투자팀
+remaining_node = 0, remaining_founder = 0
+```
+
+## 🏗️ Big Event 시스템 신규 구축
+
+### 신규 테이블 3개
+- `big_event_registry` — 재건축/재개발 대형 이벤트 레지스트리 (Stage 1-7, 우선순위 점수, 단지 FK)
+- `big_event_milestones` — 발행 예정/완료 추적 + 데이터 갱신 주기
+- `big_event_assets` — 조감도/평면도/지도/인포그래픽 이미지 관리 (출처·라이선스)
+
+### 삼익비치 seed 등록
+- id=1, slug=`samik-beach`, Stage=3, priority=95
+- 3,060 → 4,000 세대, 1979년 준공, 평당 예상 5,500~7,500
+- apt_complex_profile_id 연결 (실거래 397건 활용)
+
+### 신규 문서
+- `docs/BIG_EVENT_PLAYBOOK.md` — 500+줄 전략서
+  - Hub & Spoke 10편 구조
+  - 조감도·이미지·차트·지도 전면 강화
+  - 15+ 내부 링크 카드섹션 설계
+  - 킬러 DNA 체크리스트
+  - 5주 발행 cadence
+  - Event 감지 → draft → 발행 45분 SLA
+  - 30개 대형 이벤트 확장 로드맵
+
+## 🚀 다음 단계
+- Vercel /blog/* timeout 실측 (세션 135 L1-5/L1-6/L1-7 효과)
+- 삼익비치 Pillar 글 draft 생성 착수 (`big_event_registry` 기반 AI 템플릿)
+- 9개 Spoke draft 일괄 생성 → Node 검수 → 5주 cadence 발행
+- Phase 2 (L2-2 Hostinger 109 백링크, L2-7 naver_syndication 자동화) 준비

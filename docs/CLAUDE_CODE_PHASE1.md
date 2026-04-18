@@ -121,27 +121,27 @@
 
 ### 🟡 L0 — 권위 (Authority, 동시 진행)
 
-#### [L0-1] Node 실명 저자 프로필 페이지
+#### [L0-1] 카더라 브랜드 About 페이지 (저자는 개인 아닌 브랜드)
 **작업**:
-1. `src/app/about/authors/node/page.tsx` 신규:
-   - 실명 "노영진" (또는 Node가 STATUS.md에 기재한 공개용 이름)
-   - 프로필 사진 (없으면 `/images/author-node.jpg` placeholder 생성 + TODO 주석)
-   - 이력: "카더라 설립자, 부동산·주식 데이터 분석 10년차", 부산 거주
-   - 전문 영역: 부동산·주식·재테크
-   - JSON-LD `Person` schema (sameAs 빈 배열 — Node가 SNS URL 채울 것)
-2. `src/app/about/authors/page.tsx` 목록 페이지 (향후 복수 저자 대비)
-3. `sitemap.xml/route.ts`에 `/about/authors/*` 추가
-4. commit `[L0-1] author profile page`
+1. `src/app/about/page.tsx` 신규 또는 기존 확장:
+   - **헤드라인**: "카더라 — 부동산·주식 데이터가 모여 이야기가 되는 곳"
+   - 설립 배경: 2026년, 부산 기반 프롭테크
+   - 데이터 기반: 아파트 34,500+ 단지·실거래 495K+건·종목 1,805개
+   - 카테고리별 분석팀 소개 (부동산팀 / 주식팀 / 재테크팀 / 데이터팀)
+   - 카더라 사명·원칙 (투자자문 아님 + 데이터 투명성)
+   - JSON-LD `Organization` schema (founder 필드 **없음**, foundingDate만)
+2. `src/app/about/authors/page.tsx` — **팀 페이지** (복수 "팀" 구조, 실명 저자 없음):
+   - 카더라 부동산팀 · 카더라 주식팀 · 카더라 재테크팀 등
+   - 각 팀의 전문 영역 + 데이터 소스 명시
+3. blog/[slug]/page.tsx의 저자 카드에서 `/about`로 링크
+4. commit `[L0-1] 카더라 브랜드 about + team pages`
 
-#### [L0-2] 저자 체제 재편 — manual 글 author_name 전환
-**작업**:
-1. 현재 author_name 종류: 카더라 데이터팀/부동산분석팀/부동산팀/생활팀/재테크팀/주식팀/투자팀 (7종)
-2. 신규 마이그레이션 `apply_migration`:
-   - `source_type = 'manual'` 글 `author_name = '노영진'`, `author_role = '카더라 설립자, 부동산·주식 데이터 분석'` 일괄 UPDATE
-   - `source_type = 'auto'` 글은 `author_name`은 기존 유지 + `author_role` 뒤에 ` (AI 자동 생성)` append
-   - `trg_blog_reading_time` 트리거 disable 후 UPDATE, 복구
-3. blog/[slug]/page.tsx JSON-LD `author` 블록에 `url: '/about/authors/node'` 추가 (manual일 때)
-4. commit `[L0-2] author system rebuild`
+#### [L0-2] ❌ SKIP — 이미 처리됨
+**상태**: Claude 챗에서 DB 레벨로 처리 완료:
+- 기존 `author_name` "노영진" 19건 → 카테고리별 "카더라 부동산팀/주식팀/재테크팀"으로 롤백
+- 코드 파일(`constants.ts`, `layout.tsx`, `llms.txt`) 3곳 모두 노영진 제거 완료
+- **중요**: 이 작업 건드리지 말고 skip. author_name은 **가상팀명 7종 유지** (카더라 브랜드).
+- `blog-rewrite` / `blog-enrich` cron이 향후 author_name 채울 때도 카테고리별 팀명 사용할 것 (노영진 금지)
 
 #### [L0-5] E-E-A-T: 외부 인용·출처 자동 주입
 **작업**:

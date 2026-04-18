@@ -187,7 +187,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           image: SITE_URL + '/icons/icon-512.png',
           description: '부동산·주식 정보 플랫폼 — 아파트 청약, 재개발, 주식 시세, AI 종목 분석, 투자 커뮤니티',
           foundingDate: '2026',
-          founder: { '@type': 'Person', name: '노영진' },
           address: { '@type': 'PostalAddress', addressCountry: 'KR', addressRegion: '부산광역시', addressLocality: '연제구', streetAddress: '연동로 27, 405호', postalCode: '47571' },
           contactPoint: { '@type': 'ContactPoint', contactType: 'customer service', email: 'kadeora.app@gmail.com', telephone: '+82-10-5001-1382', availableLanguage: 'Korean' },
           sameAs: [
