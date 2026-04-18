@@ -4,6 +4,7 @@ import { createSupabaseServer } from '@/lib/supabase-server';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { headers } from 'next/headers';
+import { cache } from 'react';
 import { marked } from 'marked';
 import { injectInternalLinks } from '@/lib/blog-auto-link';
 import BlogCommentInput from '@/components/BlogCommentInput';
@@ -22,7 +23,8 @@ import { parseFaqFromContent } from '@/lib/blog-faq-parser';
 import { timeAgo } from '@/lib/format';
 
 export const maxDuration = 30;
-export const revalidate = 300;
+// 크롤 예산/TTFB 안정화 — 킬러 URL은 generateStaticParams로 빌드 타임 pin, 그 외는 900s ISR
+export const revalidate = 900;
 import { SITE_URL as SITE } from '@/lib/constants';
 import { enhanceBlogVisuals } from '@/lib/blog-visual-enhancer';
 import ReadingProgress from '@/components/ReadingProgress';
@@ -183,31 +185,65 @@ const CTA_BY_CAT: Record<string, string> = {
 };
 
 /**
- * 빌드 타임 정적 생성 — 인기/최신 블로그 200편을 미리 HTML로 생성
- * Google 크롤러가 즉시 접근 가능하도록 TTFB 0ms 수준으로 제공
+ * [L1-5] 킬러 URL static pin
+ *
+ * 빌드 타임 3개 쿼리 병렬 → 합집합 60편 고정:
+ * - view_count DESC top 30
+ * - published_at DESC top 15 (최신 이슈 보장)
+ * - PINNED_SLUGS 10개 (도메인 유입 78% 글 포함)
+ *
+ * 결과: 킬러 URL은 빌드 산출물로 생성 → Vercel 504 timeout 원천 차단.
  */
+const PINNED_SLUGS = [
+  '레이카운티-무순위-청약-재분양-총정리-2026',
+  '두산위브-트리니뷰-구명역-분양-총정리-2026',
+  'guide-tax-regulated-area-2026',
+  'apt-trade-이펜하우스3단지-서울-2026',
+];
+
 export async function generateStaticParams() {
   try {
     const { getSupabaseAdmin } = await import('@/lib/supabase-admin');
     const sb = getSupabaseAdmin();
-    const { data } = await sb
-      .from('blog_posts')
-      .select('slug')
-      .eq('is_published', true)
-      .not('published_at', 'is', null)
-      .order('view_count', { ascending: false })
-      .limit(200);
-    return (data || []).map(p => ({ slug: p.slug }));
+    const [byViews, byRecent, byPinned] = await Promise.all([
+      sb.from('blog_posts').select('slug')
+        .eq('is_published', true).not('published_at', 'is', null)
+        .order('view_count', { ascending: false }).limit(30),
+      sb.from('blog_posts').select('slug')
+        .eq('is_published', true).not('published_at', 'is', null)
+        .order('published_at', { ascending: false }).limit(15),
+      sb.from('blog_posts').select('slug')
+        .eq('is_published', true).in('slug', PINNED_SLUGS).limit(PINNED_SLUGS.length),
+    ]);
+    const seen = new Set<string>();
+    const out: { slug: string }[] = [];
+    for (const row of [...(byViews.data || []), ...(byRecent.data || []), ...(byPinned.data || [])]) {
+      if (!row?.slug || seen.has(row.slug)) continue;
+      seen.add(row.slug);
+      out.push({ slug: row.slug });
+    }
+    return out.slice(0, 60);
   } catch {
     return [];
   }
 }
 
+/**
+ * [L1-1] blog_posts 단일 row fetch를 generateMetadata와 BlogDetailPage 간 공유.
+ * React cache() — 같은 요청 라이프사이클 내에서 중복 쿼리 제거.
+ */
+const getPostBySlug = cache(async (slug: string) => {
+  const sb = await createSupabaseServer();
+  const { data } = await sb.from('blog_posts')
+    .select('id,title,slug,content,excerpt,category,sub_category,cover_image,image_alt,tags,meta_description,meta_keywords,author_name,author_role,reading_time_min,view_count,comment_count,helpful_count,published_at,created_at,updated_at,series_id,series_order,source_type,source_ref,data_date,rewritten_at')
+    .eq('slug', slug).eq('is_published', true).maybeSingle();
+  return data;
+});
+
 export async function generateMetadata({ params }: Props) {
   const { slug: rawSlug } = await params;
   const slug = decodeURIComponent(rawSlug);
-  const sb = await createSupabaseServer();
-  const { data: post } = await sb.from('blog_posts').select('id,title,slug,content,excerpt,category,sub_category,cover_image,image_alt,tags,meta_description,meta_keywords,author_name,author_role,reading_time_min,view_count,comment_count,helpful_count,published_at,created_at,updated_at,series_id,series_order,source_type,source_ref,data_date,rewritten_at').eq('slug', slug).eq('is_published', true).maybeSingle();
+  const post = await getPostBySlug(slug);
   if (!post) return {};
     const ogImage = post.cover_image || `${SITE}/api/og?title=${encodeURIComponent(post.title)}&category=${post.category}&author=${encodeURIComponent(post.author_name || '카더라')}&design=2`;
     const ogSquare = `${SITE}/api/og-square?title=${encodeURIComponent(post.title)}&category=${post.category}&author=${encodeURIComponent(post.author_name || '카더라')}`;
@@ -275,7 +311,7 @@ export default async function BlogDetailPage({ params }: Props) {
   const slug = decodeURIComponent(rawSlug);
   const sb = await createSupabaseServer();
 
-  const { data: post } = await sb.from('blog_posts').select('id,title,slug,content,excerpt,category,sub_category,cover_image,image_alt,tags,meta_description,meta_keywords,author_name,author_role,reading_time_min,view_count,comment_count,helpful_count,published_at,created_at,updated_at,series_id,series_order,source_type,source_ref,data_date,rewritten_at').eq('slug', slug).eq('is_published', true).maybeSingle();
+  const post = await getPostBySlug(slug);
   if (!post) return notFound();
 
   // 뷰카운트 atomic 증가 — RPC로 race condition 방지
