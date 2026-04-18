@@ -299,3 +299,83 @@ remaining_node = 0, remaining_founder = 0
 - Pillar 제목 네이버 검색 반영 주기 (7~10일) 모니터링
 - 추가 시드 확장: 잠실 미성크로바, 대구 수성 범어 (apt_complex_profile 매칭 확보 후)
 - big_event_registry 기반 issue_alerts 자동 투입 파이프라인 설계 (Phase 3)
+
+---
+
+# 세션 138 (2026-04-19) — Big Event 자동화 파이프라인 구축
+
+## 🟢 완료 [9 tasks / 8 commits]
+
+### Fact 신뢰도 시스템
+- `[FACT-VERIFIER]` 팩트 신뢰도 점수 (0-100) + publish gate
+  - DB: `big_event_registry.fact_confidence_score int DEFAULT 50` + desc 인덱스
+  - `src/lib/big-event-fact-verify.ts`: compute/refreshAll/shouldBlock 3함수
+    - fact_sources≥3:+30, news30d≥2:+20, stage<180d:+20, confirmed:+20 likely:+10, brand:+10
+  - `/api/cron/big-event-fact-refresh` (pg_cron 일 1회 권장)
+  - `blog-publish-queue`: score <60 이면 published 롤백 게이트
+  - 초기 점수: 삼익비치 **70** (통과) / 나머지 7건 **30** (차단) — 데이터 갱신 시 자연 상승
+
+### 뉴스 감지 파이프라인
+- `[CRAWLER-NEWS]` `/api/cron/big-event-news-detect`
+  - 네이버 뉴스 API로 "{name} {region_sigungu} {event_type}" + "{brand} {name}" 검색
+  - fact_sources + 최근 60건 milestones URL 중복 필터
+  - `big_event_milestones(milestone_type='news_detected')` INSERT
+  - 중요 키워드(시공사/분양/이주/착공/인가/총회/관리처분/감정평가) 감지 시 Solapi 알림톡 발송
+  - pg_cron 30분 주기 (Vercel 100 cron 한도 외부)
+
+### 청약 연계
+- `[SUBSCRIPTION-BRIDGE]` `/api/cron/subscription-big-event-bridge`
+  - apt_subscriptions (500+ 세대 또는 주택구분=아파트) & 미래 접수 · 주 1회
+  - big_event_registry 자동 insert (event_type=신축분양, stage=6, constructor_status=confirmed)
+  - 매칭 있으면 stage/scale_after/constructors 업데이트
+- `[SUBSCRIPTION-PRE-BLOG]` `/api/cron/subscription-prebrief-generator` (일 1회)
+  - rcept_bgnde = D-30/-7/-1 매칭 단지 각각 draft 생성
+  - big_event 매칭 시 priority +10 bump + [절대 팩트 고정] 주입
+  - safeBlogInsert is_published=false → Solapi 알림톡
+
+### 시각화 + 역연결
+- `[BIG-EVENT-CHARTS]` `src/components/blog/BigEventCharts.tsx` (서버 컴포넌트, SVG)
+  - 평형별 median bar + 연도 평균가 line + Stage 7단계 타임라인
+  - blog/[slug]에서 pillar/spoke 연결 감지 후 YMYL 배너 아래 자동 렌더
+- `[COMPLEX-CARD-AREA]` `apt/area/[region]/[sigungu]`
+  - `fetchBigEvents` cache — region_sigungu 또는 region_sido 매칭 priority DESC 5건
+  - KPI 아래 "이 지역 재건축·재개발 대형 이벤트" 섹션 렌더
+
+### 이미지 + Pillar 자동화
+- `[IMAGE-CRAWL-EXTEND]` apt-image-crawl 말미에 big_event priority ≥80 phase 추가
+  - 10건 × 최대 5장 `big_event_assets INSERT` (is_verified=false, editorial-review)
+- `[AUTO-PILLAR-DRAFT]` `/api/cron/big-event-auto-pillar-draft` (주 2회, 실행당 최대 2건)
+  - fact_confidence_score ≥70 + pillar_blog_post_id IS NULL 조건
+  - [절대 팩트 고정] system prompt + Haiku 4.5 (12000 tokens)
+  - safeBlogInsert draft → big_event.pillar_blog_post_id 연결 + Solapi 알림톡
+
+### Skip (세션 137 원칙 유지)
+- `[APT-PROFILE-ENRICH]` 잠실 미성크로바 + 대구 수성 범어 → **skip**
+  - apt_complex_profiles 재확인 결과 매칭 없음
+  - 허위 정보 금지 원칙으로 seed 보류 (공식 공고/뉴스 확보 후 재시도)
+
+## 📦 commit 8건 (pre-push)
+1. `[FACT-VERIFIER]` reliability scoring + publish gate
+2. `[CRAWLER-NEWS]` naver news rss detector for big events
+3. `[SUBSCRIPTION-BRIDGE]` apt_subscriptions to big_event promotion
+4. `[SUBSCRIPTION-PRE-BLOG]` D-30/D-7/D-1 auto draft pipeline
+5. `[BIG-EVENT-CHARTS][COMPLEX-CARD-AREA]` charts + area hub section
+6. `[IMAGE-CRAWL-EXTEND][AUTO-PILLAR-DRAFT]` big_event phase + pillar draft pipeline
+
+## 🗄️ 신규 DB 변경
+- `big_event_registry.fact_confidence_score` int (DEFAULT 50) + desc 인덱스
+- 기존 8 이벤트 초기 점수 계산 완료
+
+## 🔧 신규 API 라우트 5건 (Vercel 100 cron 한도로 pg_cron 경로)
+- `/api/cron/big-event-fact-refresh` (일 1회)
+- `/api/cron/big-event-news-detect` (30분)
+- `/api/cron/subscription-big-event-bridge` (주 1회)
+- `/api/cron/subscription-prebrief-generator` (일 1회)
+- `/api/cron/big-event-auto-pillar-draft` (주 2회)
+
+## 🧭 다음 단계
+- pg_cron으로 5개 신규 API 라우트 스케줄 등록 (SUPABASE: pg_net or http 확장)
+- SOLAPI_TEMPLATE_BIG_EVENT_NEWS / SOLAPI_TEMPLATE_DRAFT_READY 알림톡 템플릿 심사 신청
+- NODE_NOTIFY_PHONE 환경변수 설정 (Vercel)
+- big_event fact_confidence_score 상승 추이 관찰 → pillar auto-draft 자동 활성화
+- 삼익비치 외 대상 확장: GS·현대·삼성 건설 공식 수주 보도 후 constructor_status='confirmed' 업데이트
