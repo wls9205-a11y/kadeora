@@ -224,3 +224,78 @@ remaining_node = 0, remaining_founder = 0
 - 삼익비치 Pillar 글 draft 생성 착수 (`big_event_registry` 기반 AI 템플릿)
 - 9개 Spoke draft 일괄 생성 → Node 검수 → 5주 cadence 발행
 - Phase 2 (L2-2 Hostinger 109 백링크, L2-7 naver_syndication 자동화) 준비
+
+---
+
+# 세션 137 (2026-04-19) — Big Event 시스템 실전 투입 + 삼익비치 본격 가동
+
+## 🟢 완료 [7 tasks / 8 commits]
+
+### P0 — 팩트 오염 방지
+- `[P0-FACT]` `src/app/api/cron/issue-draft/route.ts` — `fetchBigEventContext` 신설
+  - `source_type='big_event_registry'` 이슈에서 `raw_data.big_event_id`/`slug`로 registry 조회
+  - AI system prompt 최상단에 **[절대 팩트 고정 - 바꾸지 말 것]** 블록 강제 주입
+    (이름/지역/준공/세대/브랜드/시공사/Stage/비고/출처)
+  - 팩트와 다른 브랜드/시공사/세대수 생성 방지 + 미확정 항목은 "추정" 명시 규칙
+
+### P0 — 오염 정리
+- `[P0-DELETE]` `blog_posts` id 86744~86747 (samik-beach auto_issue 팩트오류 4편) 하드 DELETE
+  - blog_post_images / blog_comments 연결 레코드 제거
+  - issue_alerts.blog_post_id → NULL
+  - `next.config.ts` redirects: 4개 슬러그 → `/blog/samik-beach-redev-complete-guide-2026` (영구 301)
+
+### SAMIK-EXTEND — 5편 Spoke 본문 확장 (1,700~2,800자 → 4,500자+)
+- 86751 B2 samik-beach-premium-by-size (4,739자) — 수익 시나리오 3종(보수/중립/낙관) + 광안대교 조망 프리미엄 심층
+- 86752 C2 samik-beach-member-eligibility-guide (4,733자) — 도시정비법 제39/72/74/76/84조 + 실무 사례 3건 + 타임라인 표
+- 86754 E1 samik-beach-busan-top3-compare (4,549자) — 해운대 좌동·대연8 비교표 2+ + 브랜드 프리미엄 추정 + 지역 경제 영향
+- 86755 F1 samik-beach-area-15-complexes (4,714자) — 15단지 개별 1~2줄 + 완공 시점별 3단계 영향 시나리오
+- 86756 D1 samik-beach-public-sale-2028 (4,939자) — 청약 가점 시나리오 3종 + 자금 계획 4단계 로드맵
+- 공통: FAQ 5→10, 내부링크 3→5~6, manual 저자 유지, big_event 팩트 일관 반영
+- 마이그레이션 파일 `supabase/migrations/20260419_samik_beach_spoke_expansion.sql` (감사 추적 marker)
+
+### 역연결 — 단지 → 블로그
+- `[COMPLEX-CARD]` `src/app/(main)/apt/complex/[name]/page.tsx`
+  - `apt_complex_profile_id` 또는 name 매칭으로 `big_event_registry` 조회
+  - 매칭 시 Hero 아래 하이라이트 카드: 브랜드 + Stage + 세대수 + 시공사 + Pillar 링크
+  - `constructor_status`가 `likely`/`unconfirmed`면 "수주 유력/미확정" 라벨 명시
+  - 미매칭 + 1990 이전 준공 + 500세대+ → "재건축 후보" 배지 (link 없음)
+
+### 허브 — 전국 대형 이벤트 모음
+- `[BIG-EVENT-HUB]` `src/app/(main)/apt/big-events/page.tsx` 신규 (revalidate 900s)
+  - `is_active=true` + `priority_score DESC` 리스트
+  - 지역 탭 7개 (전국/서울/부산/경기/인천/대구/기타) + Stage 필터
+  - 카드: 이름·브랜드·Stage·세대수·시공사·수주 유력/미확정 라벨
+  - pillar_blog_post_id 있는 이벤트는 /blog/{pillar_slug}로 클릭 이동
+  - JSON-LD ItemList + SEO meta + breadcrumb
+
+### 시드 — 전국 확장
+- `[TOP30-SEED]` `supabase/migrations/20260419_big_event_registry_nationwide_seed.sql`
+  - **확실한 7건만 insert** (허위 정보 금지 원칙)
+  - 서울 4건 (apt_complex_profile 매칭 확정): 은마(강남)·목동신시가지1·여의도 시범·여의도 삼부
+  - 부산 3건: 해운대 좌동·대연8·우동1 (name 기반, 단지 프로필 미매칭)
+  - 전 건 `new_brand_name=NULL` · `constructor_status='unconfirmed'` · `notes='수동시드/팩트검증필요'` 명시
+  - **skip된 건**: 잠실 미성크로바(DB 프로필 미확인), 대구 수성구 범어·인천·경기 건 (과도한 추정 금지)
+
+### CTR 최적화
+- `[REFRESH-PILLAR-TITLE]` 삼익비치 Pillar 제목 교체 (id=86743)
+  - 기존 59자 → **45자**: "삼익비치 재건축 3,060세대, GS 그랑자이 유력 — 47년 만의 광안리 대전환"
+  - 후보 3개 A/B 비교:
+    1) 45자 (선택) — 네이버 앞 20자 매칭 + 3가지 팩트 즉시 노출
+    2) 44자 — 길이 하한 근접
+    3) 46자 — 감정 서사 강하나 키워드 앞 배치 약화
+  - meta_description 140자로 감정+숫자 반영 (30자 미만인 경우만 업데이트)
+
+## 📦 commit 8건 (단일 push)
+1. `[P0-DELETE]` auto_issue factcheck fail cleanup
+2. `[P0-FACT]` issue-draft big_event context injection
+3. `[COMPLEX-CARD]` big_event reverse link card
+4. `[BIG-EVENT-HUB]` national big event hub page
+5. `[TOP30-SEED][REFRESH-PILLAR-TITLE]` big_event nationwide seed + samik CTR title
+6. `[SAMIK-EXTEND]` 5 spoke full body expansion
+
+## 🧭 다음 단계
+- Vercel 배포 확인 → /apt/big-events 라이브 verify
+- 삼익비치 단지 /apt/complex/삼익비치 하이라이트 카드 노출 확인
+- Pillar 제목 네이버 검색 반영 주기 (7~10일) 모니터링
+- 추가 시드 확장: 잠실 미성크로바, 대구 수성 범어 (apt_complex_profile 매칭 확보 후)
+- big_event_registry 기반 issue_alerts 자동 투입 파이프라인 설계 (Phase 3)
