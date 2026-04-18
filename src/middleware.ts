@@ -41,6 +41,8 @@ function applySecurityHeaders(response: NextResponse) {
   }
 }
 
+const CRAWLER_UA_RE = /googlebot|yeti|bingbot|daumoa|daumcrawler|yandex|naverbot|applebot|slurp|msnbot/i;
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -58,6 +60,70 @@ export async function middleware(request: NextRequest) {
   // ── 봇 차단 ──
   if (BOT_PATHS.some(p => pathname.startsWith(p))) {
     return new NextResponse(null, { status: 404 });
+  }
+
+  // ── [L1-6] Crawler retry throttle ──
+  // 같은 크롤러가 10초 내 같은 URL을 3회+ 재요청하면 304로 즉시 응답 → 크롤 예산 보호
+  // ── [L1-7] Bot edge cache ──
+  // /blog/* 응답을 Upstash Redis에 1시간 캐시. hit 시 즉시 HTML 반환.
+  const ua = request.headers.get('user-agent') || '';
+  const isCrawler = CRAWLER_UA_RE.test(ua);
+  const isBlogPath = pathname.startsWith('/blog/') && pathname.length > '/blog/'.length;
+  if (isCrawler && request.method === 'GET') {
+    const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
+    const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
+    if (redisUrl && redisToken) {
+      const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'anon';
+      const throttleKey = `crawler:${ip}:${pathname}`;
+      try {
+        const res = await fetch(`${redisUrl}/incr/${encodeURIComponent(throttleKey)}`, {
+          headers: { Authorization: `Bearer ${redisToken}` },
+          cache: 'no-store',
+        });
+        const body = await res.json().catch(() => ({ result: 0 }));
+        const count = Number(body?.result ?? 0);
+        if (count === 1) {
+          await fetch(`${redisUrl}/expire/${encodeURIComponent(throttleKey)}/10`, {
+            headers: { Authorization: `Bearer ${redisToken}` },
+            cache: 'no-store',
+          });
+        }
+        if (count >= 3) {
+          // 재요청 스팸 — 304 Not Modified
+          return new NextResponse(null, {
+            status: 304,
+            headers: {
+              'Cache-Control': 'public, max-age=300, s-maxage=900',
+              'X-Crawler-Throttle': '1',
+            },
+          });
+        }
+      } catch { /* redis 장애 시 통과 */ }
+
+      // [L1-7] /blog/* 봇 응답 엣지 캐시 (GET hit 시 즉시 반환)
+      if (isBlogPath) {
+        try {
+          const cacheKey = `botcache:blog:${pathname}`;
+          const getRes = await fetch(`${redisUrl}/get/${encodeURIComponent(cacheKey)}`, {
+            headers: { Authorization: `Bearer ${redisToken}` },
+            cache: 'no-store',
+          });
+          const getBody = await getRes.json().catch(() => ({ result: null }));
+          if (typeof getBody?.result === 'string' && getBody.result.length > 0) {
+            return new NextResponse(getBody.result, {
+              status: 200,
+              headers: {
+                'Content-Type': 'text/html; charset=utf-8',
+                'Cache-Control': 'public, max-age=300, s-maxage=3600',
+                'X-Bot-Cache': 'HIT',
+              },
+            });
+          }
+          // miss — 아래 정상 경로로 진입. 응답 본문을 캐시 저장하는 것은
+          // Node 미들웨어 스트림 특성상 비용이 커서 스킵 (ISR + static pin으로 대체).
+        } catch { /* redis 장애 시 통과 */ }
+      }
+    }
   }
 
   // ── API 라우트: rate limit + SSRF 검사만, auth 불필요 ──
