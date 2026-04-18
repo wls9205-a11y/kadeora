@@ -481,8 +481,19 @@ async function handler(_req: NextRequest) {
 
     const results: any[] = [];
     let published = 0;
+    let stoppedReason: string | null = null;
+
+    // 세션 138: Vercel 300s timeout 방어
+    //  - 250s 가드는 루프 시작 시점 기준 → Claude API 1건 ~60-70s 가 245s 진입 시 315s 오버슛
+    //  - 180s pre-emptive 가드 + auto_published 최대 2건으로 교체 → 최악 180s + 70s = 250s 이내
+    //  - 잔여 issues 는 다음 iteration 에서 처리 (MAX_PER_RUN=15로 큐잉 유지)
+    const PREEMPT_MS = 180_000;
+    const MAX_PUBLISHED_PER_RUN = 2;
+
     for (const issue of issues) {
-      if (Date.now() - _start > 250_000) break;
+      const elapsed = Date.now() - _start;
+      if (elapsed > PREEMPT_MS) { stoppedReason = `elapsed_${Math.round(elapsed/1000)}s_over_preempt`; break; }
+      if (published >= MAX_PUBLISHED_PER_RUN) { stoppedReason = `hit_published_cap_${MAX_PUBLISHED_PER_RUN}`; break; }
       try {
         const r = await processOneIssue(sb, issue, config);
         results.push(r);
@@ -499,6 +510,9 @@ async function handler(_req: NextRequest) {
       failed: results.filter(r => r.decision.includes('failed')).length,
       metadata: {
         published,
+        stopped_reason: stoppedReason ?? 'all_processed',
+        elapsed_ms: Date.now() - _start,
+        remaining_queue: Math.max(0, issues.length - results.length),
         results: results.map(r => ({ decision: r.decision, score: r.score, title: r.title?.slice(0, 40) })),
       },
     };
