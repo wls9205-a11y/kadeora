@@ -59,3 +59,31 @@
 - **P2 #9**: calc_results 0건 — 결과 저장 fix
 
 다음 세션은 이 STATUS.md 먼저 읽고 시작. work_orders P1 #4부터 진행 권장.
+
+---
+
+# 세션 134 (2026-04-18) — v3 Phase 1 준비 (Claude 챗에서 DB/크론 선행)
+
+## 🟢 진행 — Claude Code로 이양 전 선행 작업 완료
+
+### DB 레벨 완료 (Claude 챗에서 직접 처리)
+- `[L1-2]` 미사용/중복 인덱스 드롭 5개: `idx_blog_posts_pgroonga_title/content`, `idx_blog_posts_title/content_length`, `idx_blog_posts_slug` (인덱스 95MB → 90MB)
+- `[L1-3 즉시]` VACUUM ANALYZE 실행 (blog_posts, issue_alerts, blog_post_images 등) — dead rows 9,274 → 4
+- `[L1-3 주간]` pg_cron `weekly_vacuum_analyze_blog` 등록 (매주 일 19:00 UTC)
+- `[L1-4 좀비 37건]` cron_logs 15분 초과 running 항목 `timeout` 상태로 일괄 마킹
+- `[L1-4 자동화]` pg_cron `cleanup_zombie_crons` 등록 (5분 주기)
+
+### 문서 산출물
+- `docs/NAVER_DOMINANCE_v3.md` — 6층 아키텍처 최종 마스터플랜 (v1·v2 폐기)
+- `docs/CLAUDE_CODE_PHASE1.md` — Claude Code용 논스톱 실행 지시서
+
+## 🚀 다음 단계: Claude Code로 Phase 1 본 실행
+
+Claude Code에서 `docs/CLAUDE_CODE_PHASE1.md` 읽고 논스톱으로 L1-5, L1-6, L1-1, L1-7, L1-4 나머지, L0-1, L0-2, L0-5, L0-6, L3-6, L2-4, L2-7, L3-3, L3-9, L1-8 병렬 진행.
+
+## ⚠️ Node 수동 필요 (Phase 1 중 skip)
+- `[L0-3]` 네이버 인플루언서 신청 (searchadvisor.naver.com 또는 influence.naver.com)
+- `[L0-4]` 카더라 공식 네이버 블로그 개설 (blog.naver.com)
+- `[L4-1]` Google Search Console OAuth 토큰 (Node의 구글 계정)
+- `[L5-1]` YouTube Data API 키 + 채널 연동
+
