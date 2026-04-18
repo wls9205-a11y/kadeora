@@ -39,6 +39,7 @@ import BlogMentionCard from '@/components/blog/BlogMentionCard';
 // SmartSectionGate 제거 → LoginGate 기능 게이팅으로 전환 (세션 108)
 import BlogAptAlertCTA from '@/components/BlogAptAlertCTA';
 import YMYLBanner from '@/components/YMYLBanner';
+import BigEventCharts from '@/components/blog/BigEventCharts';
 // NewsletterSubscribe 삭제 — 카카오 CTA로 통합
 
 // marked heading에 id 자동 부여 (TOC 앵커용)
@@ -332,6 +333,18 @@ export default async function BlogDetailPage({ params }: Props) {
       isPremiumUser = !!(prof?.is_premium && prof?.premium_expires_at && new Date(prof.premium_expires_at) > new Date());
     }
   } catch { /* 비로그인/만료 세션 */ }
+
+  // [BIG-EVENT-CHARTS] 이 글이 big_event_registry Pillar/Spoke에 연결되었는지 조회
+  let bigEventId: number | null = null;
+  try {
+    const { data: be } = await (sb as any)
+      .from('big_event_registry')
+      .select('id')
+      .or(`pillar_blog_post_id.eq.${post.id},spoke_blog_post_ids.cs.{${post.id}}`)
+      .limit(1)
+      .maybeSingle();
+    if (be?.id) bigEventId = be.id;
+  } catch {}
 
   // 봇 감지 — SEO 크롤러에게는 전체 본문 제공
   const headersList = await headers();
@@ -920,6 +933,9 @@ export default async function BlogDetailPage({ params }: Props) {
             authorRole={post.author_role}
           />
         )}
+
+        {/* [BIG-EVENT-CHARTS] 연결된 big_event가 있으면 본문 위에 3종 차트 자동 렌더 */}
+        {bigEventId ? <BigEventCharts eventId={bigEventId} /> : null}
 
         {/* 본문 — 봇: 전체, 로그인: TossGate, 비로그인: 전체 공개 (기능 게이팅으로 전환) */}
         {isBot ? (

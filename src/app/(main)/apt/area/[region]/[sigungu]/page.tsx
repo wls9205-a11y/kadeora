@@ -65,11 +65,32 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+const fetchBigEvents = cache(async (region: string, sigungu: string) => {
+  const sb = getSupabaseAdmin();
+  const { data } = await (sb as any).from('big_event_registry')
+    .select('id, slug, name, stage, scale_before, scale_after, key_constructors, new_brand_name, constructor_status, event_type, pillar_blog_post_id, priority_score')
+    .eq('is_active', true)
+    .or(`region_sigungu.eq.${sigungu},region_sido.eq.${region}`)
+    .order('priority_score', { ascending: false, nullsFirst: false })
+    .limit(5);
+  return data || [];
+});
+
 export default async function SigunguHubPage({ params }: Props) {
   const { region: rr, sigungu: rs } = await params;
   const region = decodeURIComponent(rr), sigungu = decodeURIComponent(rs);
   const profiles = await fetchData(region, sigungu);
   if (profiles.length < 10) return notFound();
+
+  // [COMPLEX-CARD-AREA] 이 지역 big_event + Pillar slug 맵
+  const bigEvents = await fetchBigEvents(region, sigungu);
+  const pillarIds = (bigEvents as any[]).map((e) => e.pillar_blog_post_id).filter(Boolean);
+  const pillarSlugMap = new Map<number, string>();
+  if (pillarIds.length > 0) {
+    const sbp = getSupabaseAdmin();
+    const { data: pillars } = await sbp.from('blog_posts').select('id, slug').in('id', pillarIds as any);
+    (pillars || []).forEach((p: any) => pillarSlugMap.set(p.id, p.slug));
+  }
 
   const wp = profiles.filter((p: any) => p.latest_sale_price > 0);
   const avg = wp.length > 0 ? Math.round(wp.reduce((s: number, p: any) => s + p.latest_sale_price, 0) / wp.length) : 0;
@@ -145,6 +166,48 @@ export default async function SigunguHubPage({ params }: Props) {
           {` 최근 1년 매매 ${totalTrades.toLocaleString()}건, 전월세 ${totalRents.toLocaleString()}건. 데이터 출처: 국토교통부 실거래가 공개시스템.`}
         </p>
       </section>
+
+      {/* [COMPLEX-CARD-AREA] 이 지역 재건축·재개발 대형 이벤트 */}
+      {bigEvents.length > 0 && (
+        <section aria-label={`${sigungu} 재건축·재개발 대형 이벤트`} style={{ marginBottom: 20 }}>
+          <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 10px' }}>
+            🏗️ 이 지역 재건축·재개발 대형 이벤트 <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-tertiary)', marginLeft: 6 }}>{bigEvents.length}건</span>
+          </h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 8 }}>
+            {(bigEvents as any[]).map((e) => {
+              const slug = pillarSlugMap.get(e.pillar_blog_post_id);
+              const inner = (
+                <>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6, flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 6px', borderRadius: 4, background: 'var(--brand-bg, rgba(59,123,246,0.18))', color: 'var(--brand)' }}>Stage {e.stage ?? '-'}</span>
+                    {e.constructor_status && e.constructor_status !== 'confirmed' && (
+                      <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 6px', borderRadius: 4, background: 'var(--warning-bg, rgba(234,179,8,0.08))', color: 'var(--text-tertiary)' }}>
+                        {e.constructor_status === 'likely' ? '수주 유력' : '수주 미확정'}
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 2 }}>
+                    {e.name}{e.new_brand_name ? <span style={{ color: 'var(--text-secondary)', fontWeight: 600, fontSize: 12 }}> · {e.new_brand_name}</span> : null}
+                  </div>
+                  <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
+                    {e.scale_before ?? '?'}세대 → <strong style={{ color: 'var(--text-primary)' }}>{e.scale_after ?? '?'}+세대</strong>
+                    {Array.isArray(e.key_constructors) && e.key_constructors.length > 0 ? <> · {e.key_constructors.join(', ')}</> : null}
+                  </div>
+                </>
+              );
+              const base = { display: 'block', padding: '12px 14px', borderRadius: 'var(--radius-sm, 8px)', background: 'var(--bg-surface)', border: '1px solid var(--border)', textDecoration: 'none', color: 'inherit' } as const;
+              return slug ? (
+                <Link key={e.id} href={`/blog/${slug}`} style={base}>{inner}</Link>
+              ) : (
+                <div key={e.id} style={base}>
+                  {inner}
+                  <div style={{ marginTop: 6, fontSize: 10, color: 'var(--text-tertiary)' }}>분석 예정</div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       {/* 연차별 */}
       <section style={{ marginBottom: 20 }}>
