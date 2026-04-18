@@ -346,45 +346,22 @@ export default async function BlogDetailPage({ params }: Props) {
     } catch {}
   }
 
-  // 관련 글 추천 (pre-computed related_slugs 우선 → 태그 유사도 → 카테고리 폴백)
+  // [L1-1] 관련 글 추천 — 단일 RPC로 3단 폴백 통합 (precomputed → tag → category)
   let related: Record<string, any>[] = [];
   try {
-    // 1순위: 크론으로 미리 계산된 related_slugs (별도 쿼리 — 타입 안전)
-    let precomputed: string[] = [];
-    try {
-      const { data: relData } = await (sb as any).from('blog_posts').select('related_slugs').eq('id', post.id).maybeSingle();
-      precomputed = (relData as any)?.related_slugs || [];
-    } catch { /* 컬럼 없을 수 있음 */ }
-    if (precomputed.length > 0) {
-      const { data: preRelated } = await sb.from('blog_posts')
-        .select('slug, title, view_count').in('slug', precomputed).eq('is_published', true).limit(5);
-      related = preRelated || [];
-    }
-
-    // 2순위: 태그 기반 추천
-    if (related.length < 3) {
-      const postTags = post.tags || [];
-      if (postTags.length > 0) {
-        const existingSlugs = new Set(related.map((r: any) => r.slug));
-        const tagQueries = postTags.slice(0, 2).map((t: string) => `tags.cs.{${t}}`).join(',');
-        const { data: tagRelated } = await sb.from('blog_posts')
-          .select('slug, title, view_count').eq('category', post.category).eq('is_published', true)
-          .neq('id', post.id).or(tagQueries)
-          .order('view_count', { ascending: false }).limit(5);
-        const extra = (tagRelated || []).filter((r: any) => !existingSlugs.has(r.slug));
-        related = [...related, ...extra].slice(0, 5);
-      }
-    }
-
-    // 3순위: 같은 카테고리 인기순 보충
-    if (related.length < 3) {
-      const existingSlugs = new Set(related.map((r: any) => r.slug));
-      const { data: catRelated } = await sb.from('blog_posts')
-        .select('slug, title, view_count').eq('category', post.category).eq('is_published', true)
-        .neq('id', post.id).not('published_at', 'is', null)
-        .order('view_count', { ascending: false }).limit(5 - related.length);
-      const extra = (catRelated || []).filter((r: any) => !existingSlugs.has(r.slug));
-      related = [...related, ...extra].slice(0, 5);
+    const { data: rpcRelated } = await (sb as any).rpc('get_related_posts', {
+      p_post_id: post.id,
+      p_category: post.category,
+      p_tags: post.tags || [],
+      p_limit: 5,
+    });
+    if (Array.isArray(rpcRelated)) {
+      related = rpcRelated.map((r: any) => ({
+        slug: r.r_slug,
+        title: r.r_title,
+        view_count: r.r_view_count,
+        category: post.category,
+      }));
     }
   } catch { }
 
@@ -413,34 +390,27 @@ export default async function BlogDetailPage({ params }: Props) {
     comments = data ?? [];
   } catch {}
 
-  // 관련 부동산 현장 (apt/unsold 카테고리일 때)
+  // [L1-1] 사이드바 bundle — 단일 RPC로 apt_complex_profiles + prev/next + related_sites/stocks 통합
   let relatedSites: Record<string, any>[] = [];
-  if (post.category === 'apt' || post.category === 'unsold') {
-    try {
-      const keywords = (post.tags || []).slice(0, 3).filter((t: string) => t.length >= 2);
-      if (keywords.length > 0) {
-        const orQuery = keywords.map((k: string) => `name.ilike.%${k}%`).join(',');
-        const { data } = await sb.from('apt_sites').select('slug, name, site_type, region, sigungu')
-          .eq('is_active', true).or(orQuery).gte('content_score', 25)
-          .order('interest_count', { ascending: false }).limit(3);
-        relatedSites = data || [];
-      }
-    } catch {}
-  }
-
-  // 관련 종목 (stock 카테고리일 때)
   let relatedStocks: Record<string, any>[] = [];
-  if (post.category === 'stock') {
-    try {
-      const keywords = (post.tags || []).slice(0, 3).filter((t: string) => t.length >= 2);
-      if (keywords.length > 0) {
-        const orQuery = keywords.map((k: string) => `name.ilike.%${k}%`).join(',');
-        const { data } = await sb.from('stock_quotes').select('symbol, name, market, price, change_pct, currency')
-          .eq('is_active', true).or(orQuery).gt('price', 0).limit(3);
-        relatedStocks = data || [];
-      }
-    } catch {}
-  }
+  let bundleComplex: any = null;
+  let bundlePrev: { slug: string; title: string } | null = null;
+  let bundleNext: { slug: string; title: string } | null = null;
+  try {
+    const { data: bundle } = await (sb as any).rpc('get_blog_sidebar_bundle', {
+      p_post_id: post.id,
+      p_category: post.category,
+      p_tags: post.tags || [],
+      p_published_at: post.published_at || post.created_at,
+    });
+    if (bundle && typeof bundle === 'object') {
+      bundleComplex = (bundle as any).complex || null;
+      bundlePrev = (bundle as any).prev || null;
+      bundleNext = (bundle as any).next || null;
+      relatedSites = Array.isArray((bundle as any).related_sites) ? (bundle as any).related_sites : [];
+      relatedStocks = Array.isArray((bundle as any).related_stocks) ? (bundle as any).related_stocks : [];
+    }
+  } catch {}
 
   // 블로그 인라인 이미지 (blog_post_images 테이블)
   let postImages: { image_url: string; alt_text: string; caption: string | null; image_type: string; position: number }[] = [];
@@ -495,25 +465,9 @@ export default async function BlogDetailPage({ params }: Props) {
     } catch {}
   }
 
-  // 이전/다음글 (같은 카테고리 내 시간순)
-  let prevPost: { slug: string; title: string } | null = null;
-  let nextPost: { slug: string; title: string } | null = null;
-  if (!post.series_id) {
-    try {
-      const [prevR, nextR] = await Promise.all([
-        sb.from('blog_posts').select('slug, title')
-          .eq('category', post.category).eq('is_published', true)
-          .lt('published_at', post.published_at || post.created_at)
-          .order('published_at', { ascending: false }).limit(1).maybeSingle(),
-        sb.from('blog_posts').select('slug, title')
-          .eq('category', post.category).eq('is_published', true)
-          .gt('published_at', post.published_at || post.created_at)
-          .order('published_at', { ascending: true }).limit(1).maybeSingle(),
-      ]);
-      prevPost = prevR.data;
-      nextPost = nextR.data;
-    } catch {}
-  }
+  // [L1-1] 이전/다음글은 get_blog_sidebar_bundle에 통합됨 (series_id 없을 때만)
+  const prevPost: { slug: string; title: string } | null = post.series_id ? null : bundlePrev;
+  const nextPost: { slug: string; title: string } | null = post.series_id ? null : bundleNext;
 
   const wordCount = post.content.replace(/[#*|\-\n\r\[\]`>]/g, '').replace(/\s+/g, ' ').trim().split(' ').filter(Boolean).length;
   const readingTimeMin = Math.max(1, Math.ceil(wordCount / 200));
@@ -524,15 +478,13 @@ export default async function BlogDetailPage({ params }: Props) {
   try {
     if ((post.category === 'apt' || post.category === 'unsold') && post.tags?.length) {
       const aptName = post.tags[0];
-      const { data: cp } = await (sb as any).from('apt_complex_profiles')
-        .select('avg_sale_price_pyeong, jeonse_ratio, total_households, built_year, price_change_1y, region_nm, sigungu')
-        .eq('apt_name', aptName).maybeSingle();
+      const cp = bundleComplex; // [L1-1] bundle에서 이미 fetch됨
       if (cp) {
         if (cp.avg_sale_price_pyeong) sidebarMetrics.push({ label: '평당가', value: `${cp.avg_sale_price_pyeong.toLocaleString()}만원` });
         if (cp.jeonse_ratio) sidebarMetrics.push({ label: '전세가율', value: `${cp.jeonse_ratio}%` });
         if (cp.total_households) sidebarMetrics.push({ label: '세대수', value: `${cp.total_households.toLocaleString()}세대` });
         if (cp.built_year) sidebarMetrics.push({ label: '연식', value: `${new Date().getFullYear() - cp.built_year}년차` });
-        if (cp.price_change_1y !== null) sidebarMetrics.push({ label: '1년 변동', value: `${cp.price_change_1y > 0 ? '+' : ''}${cp.price_change_1y}%` });
+        if (cp.price_change_1y !== null && cp.price_change_1y !== undefined) sidebarMetrics.push({ label: '1년 변동', value: `${cp.price_change_1y > 0 ? '+' : ''}${cp.price_change_1y}%` });
         // 단지백과 + 시군구 허브 내부 링크 (SEO 크로스링크)
         sidebarRelatedLinks.push({ title: `${aptName} 단지백과`, href: `/apt/complex/${encodeURIComponent(aptName)}` });
         if (cp.region_nm && cp.sigungu) sidebarRelatedLinks.push({ title: `${cp.sigungu} 아파트 시세`, href: `/apt/area/${encodeURIComponent(cp.region_nm)}/${encodeURIComponent(cp.sigungu)}` });
