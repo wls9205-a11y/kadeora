@@ -55,7 +55,7 @@ async function fetchStocks() {
   //            logo_url, thumbnail, page_views, comment_count
   const { data } = await (sb as any).rpc('get_stocks_with_thumbnails', {
     p_market: null,
-    p_limit: 100,
+    p_limit: 500,
     p_offset: 0,
     p_sort: 'market_cap',
   });
