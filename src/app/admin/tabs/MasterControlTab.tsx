@@ -22,6 +22,24 @@ interface Status {
     retention_tools?: Record<string, number>;
     cron_recent_failures?: Array<{ cron_name: string; error: string; started_at: string }>;
   } | null;
+  // 세션 138: get_admin_dashboard_v2 확장 섹션
+  image_system?: {
+    blog_coverage_pct?: number;
+    blog_images_total?: number;
+    blog_posts_under_3_imgs?: number;
+    blog_validation_count?: number;
+    stock_coverage_pct?: number;
+    stock_images_total?: number;
+    stock_6_7_complete?: number;
+    stock_symbols_covered?: number;
+    stock_total_active?: number;
+    broken_images_count?: number;
+    low_relevance_count?: number;
+  } | null;
+  pg_cron_jobs?: Array<{ active: boolean; ok_24h: number; fail_24h: number; jobname: string; schedule: string; secs_since_last: number | null }>;
+  cron_stuck?: { count: number; count_2h: number; count_30m: number; sample?: any[] } | null;
+  dead_crons?: Array<{ cron_name: string; runs_7d: number; avg_ms: number; total_seconds_wasted: number }>;
+  pg_cron_bridge_logs_24h?: Array<{ cron_name: string; calls: number; ok: number; fail: number; last_call_kst: string }>;
 }
 
 interface ExecuteStep {
@@ -207,6 +225,93 @@ export default function MasterControlTab() {
                   <div key={i} style={{ fontSize: 10, color: '#FCA5A5', padding: '4px 8px', background: 'rgba(239,68,68,0.05)', borderRadius: 4, lineHeight: 1.5 }}>
                     <div style={{ fontWeight: 700 }}>{c.cron_name}</div>
                     <div style={{ color: '#FECACA', opacity: 0.8 }}>{(c.error || '').slice(0, 100)}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 세션 138: 이미지 시스템 + pg_cron + cron_stuck + dead_crons (v2 확장 섹션) */}
+      {(status.image_system || (status.pg_cron_jobs && status.pg_cron_jobs.length > 0) || status.cron_stuck) && (
+        <div style={{ marginBottom: 16, padding: 14, background: 'rgba(15,23,42,0.4)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 10 }}>
+          <div style={{ fontSize: 12, fontWeight: 800, color: '#93C5FD', marginBottom: 10 }}>
+            🖼️ 이미지 시스템 · pg_cron · stuck
+          </div>
+
+          {/* 이미지 커버리지 */}
+          {status.image_system && (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 8, marginBottom: 12 }}>
+              {[
+                { label: '블로그 이미지 커버리지', val: status.image_system.blog_coverage_pct, unit: '%', color: (status.image_system.blog_coverage_pct ?? 0) >= 90 ? '#10B981' : '#F59E0B' },
+                { label: '블로그 이미지 총수', val: status.image_system.blog_images_total, color: '#60A5FA' },
+                { label: '블로그 <3장', val: status.image_system.blog_posts_under_3_imgs, color: '#F59E0B' },
+                { label: '종목 이미지 커버리지', val: status.image_system.stock_coverage_pct, unit: '%', color: (status.image_system.stock_coverage_pct ?? 0) >= 50 ? '#10B981' : '#EF4444' },
+                { label: '종목 이미지 총수', val: status.image_system.stock_images_total, color: '#60A5FA' },
+                { label: '종목 6-7장 완비', val: status.image_system.stock_6_7_complete, color: '#10B981' },
+                { label: '저연관도 이미지', val: status.image_system.low_relevance_count, color: '#F59E0B' },
+                { label: '깨진 이미지', val: status.image_system.broken_images_count, color: (status.image_system.broken_images_count ?? 0) > 0 ? '#EF4444' : '#10B981' },
+              ].map((k, i) => k.val !== undefined && k.val !== null && (
+                <div key={i} style={{ padding: 10, background: 'rgba(255,255,255,0.03)', borderRadius: 6, borderLeft: `2px solid ${k.color}` }}>
+                  <div style={{ fontSize: 18, fontWeight: 800, color: k.color }}>
+                    {typeof k.val === 'number' ? k.val.toLocaleString('ko-KR') : k.val}{k.unit ?? ''}
+                  </div>
+                  <div style={{ fontSize: 10, color: '#94A3B8', marginTop: 2 }}>{k.label}</div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* pg_cron 실시간 상태 */}
+          {status.pg_cron_jobs && status.pg_cron_jobs.length > 0 && (
+            <div style={{ marginBottom: 12 }}>
+              <div style={{ fontSize: 11, color: '#94A3B8', marginBottom: 6, fontWeight: 700 }}>🕒 pg_cron 작업 ({status.pg_cron_jobs.length})</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                {status.pg_cron_jobs.map((j) => {
+                  const dotColor = !j.active ? '#64748B' : (j.fail_24h > 0 ? '#EF4444' : (j.ok_24h > 0 ? '#10B981' : '#F59E0B'));
+                  const lastAgo = j.secs_since_last !== null && j.secs_since_last !== undefined
+                    ? (j.secs_since_last < 3600 ? `${Math.round(j.secs_since_last / 60)}분 전` : `${Math.round(j.secs_since_last / 3600)}시간 전`)
+                    : '실행 이력 없음';
+                  return (
+                    <div key={j.jobname} style={{ display: 'grid', gridTemplateColumns: '10px 1fr 80px 90px 110px', gap: 8, alignItems: 'center', fontSize: 11, color: '#CBD5E1', padding: '5px 8px', background: 'rgba(255,255,255,0.02)', borderRadius: 4 }}>
+                      <span style={{ width: 8, height: 8, borderRadius: '50%', background: dotColor, display: 'inline-block' }} />
+                      <span style={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={j.jobname}>{j.jobname}</span>
+                      <span style={{ fontFamily: 'monospace', color: '#94A3B8', fontSize: 10 }}>{j.schedule}</span>
+                      <span style={{ color: '#10B981' }}>ok {j.ok_24h}{j.fail_24h > 0 && <span style={{ color: '#EF4444' }}> · fail {j.fail_24h}</span>}</span>
+                      <span style={{ textAlign: 'right', color: '#94A3B8' }}>{lastAgo}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* cron_stuck 알림 */}
+          {status.cron_stuck && status.cron_stuck.count > 0 && (
+            <div style={{ marginBottom: 12, padding: 10, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.35)', borderRadius: 6 }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: '#FCA5A5', marginBottom: 4 }}>
+                ⚠️ cron_stuck {status.cron_stuck.count}건 (30분 내 {status.cron_stuck.count_30m}, 2시간 내 {status.cron_stuck.count_2h})
+              </div>
+              <button
+                onClick={() => fetch('/api/admin/master/cleanup-stuck-crons', { method: 'POST' }).then(() => load())}
+                style={{ marginTop: 4, padding: '5px 12px', background: '#7F1D1D', color: '#FCA5A5', border: '1px solid #EF4444', borderRadius: 4, fontSize: 11, fontWeight: 700, cursor: 'pointer' }}
+              >
+                stuck crons cleanup 실행
+              </button>
+            </div>
+          )}
+
+          {/* dead_crons top 5 */}
+          {status.dead_crons && status.dead_crons.length > 0 && (
+            <div>
+              <div style={{ fontSize: 11, color: '#94A3B8', marginBottom: 6, fontWeight: 700 }}>💀 dead_crons — 7일간 0 processed / 시간 낭비 top {Math.min(5, status.dead_crons.length)}</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                {status.dead_crons.slice(0, 5).map((c) => (
+                  <div key={c.cron_name} style={{ display: 'grid', gridTemplateColumns: '1fr 70px 90px', gap: 8, fontSize: 11, color: '#CBD5E1', padding: '4px 8px', background: 'rgba(255,255,255,0.02)', borderRadius: 4 }}>
+                    <span style={{ fontFamily: 'monospace' }}>{c.cron_name}</span>
+                    <span style={{ color: '#F59E0B', textAlign: 'right' }}>{c.runs_7d}회</span>
+                    <span style={{ color: '#F87171', textAlign: 'right', fontWeight: 700 }}>{Math.round(c.total_seconds_wasted / 60)}분 낭비</span>
                   </div>
                 ))}
               </div>

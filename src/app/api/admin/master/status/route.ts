@@ -175,6 +175,14 @@ export async function GET() {
   });
   const dashboard = dashboardRes.ok ? dashboardRes.data : null;
 
+  // 세션 138: v2 — image_system / pg_cron_status / cron_stuck / dead_crons 확장 섹션 (v1과 병행)
+  const dashboardV2Res = await check(async () => {
+    const { data, error } = await (sb as any).rpc('get_admin_dashboard_v2');
+    if (error) throw error;
+    return data;
+  });
+  const dashboardV2 = dashboardV2Res.ok ? dashboardV2Res.data : null;
+
   // ── 10. 헬스 점수 ──
   let healthScore = 100;
   if (!migrationsApplied) healthScore -= 30;
@@ -197,6 +205,12 @@ export async function GET() {
     env: { ok: envMissing.length === 0, missing: envMissing, status: envStatus },
     app_config: allConfig,
     dashboard,
+    // 세션 138: v2 확장 섹션 top-level 노출 (관리자 UI가 v1 키 변화 없이 새 카드 렌더 가능)
+    image_system: dashboardV2?.image_system ?? null,
+    pg_cron_jobs: dashboardV2?.pg_cron_status ?? [],
+    cron_stuck: dashboardV2?.cron_stuck ?? null,
+    dead_crons: (dashboardV2?.dead_crons ?? []).slice(0, 10),
+    pg_cron_bridge_logs_24h: dashboardV2?.pg_cron_bridge_logs?.last_24h ?? [],
     next_actions: deriveNextActions({
       migrationsApplied, masterKill, oauth, envMissing,
       synStats: synRes.ok ? synRes.data : null,

@@ -24,6 +24,11 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  // 세션 138: 7일 간 52회 실행 / 0 processed / 평균 41초 (~35분 누적) — upcoming_projects 기글 모두 발행 완료.
+  // 재활성: upcoming_projects 에 blog_post_id IS NULL 인 신규 rumor/announced 행이 생기면 이 early-return 제거.
+  return NextResponse.json({ ok: true, disabled: true, reason: 'session-138: 0 processed in 7d, topics exhausted' });
+
+  // eslint-disable-next-line no-unreachable
   const result = await withCronLogging('blog-upcoming-projects', async () => {
     const admin = getSupabaseAdmin();
 

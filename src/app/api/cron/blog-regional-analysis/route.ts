@@ -10,6 +10,10 @@ export const maxDuration = 300;
 const REGIONS = ['서울', '경기', '부산', '대구', '인천', '광주', '대전', '울산', '세종', '강원', '충북', '충남', '경북', '경남', '전북', '전남', '제주'];
 
 export async function GET(_req: NextRequest) {
+  // 세션 138: 7일 38회 실행 / 0 processed / 평균 52초 (~33분 누적). 월별 지역 리포트 이미 다 발행됨.
+  return NextResponse.json({ ok: true, disabled: true, reason: 'session-138: 0 processed in 7d, regional reports exhausted' });
+
+  // eslint-disable-next-line no-unreachable
   const result = await withCronLogging('blog-regional-analysis', async () => {
     const sb = getSupabaseAdmin();
     const today = new Date().toISOString().slice(0, 10);
