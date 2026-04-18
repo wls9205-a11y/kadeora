@@ -5,6 +5,7 @@ import { withCronLogging } from '@/lib/cron-logger';
 import { sendPushBroadcast } from '@/lib/push-utils';
 import { submitIndexNow } from '@/lib/indexnow';
 import { checkBlogQuality } from '@/lib/blog-quality-gate';
+import { shouldBlockBlogPublishForFact } from '@/lib/big-event-fact-verify';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,10 +42,30 @@ export async function GET(req: NextRequest) {
       throw new Error(publishError.message);
     }
 
-    // 발행 성공 시 품질 게이트 검증
+    // 발행 성공 시 품질 게이트 + [FACT-VERIFIER] big_event 신뢰도 게이트 검증
     const publishedId = (publishResult as Record<string, any>)?.published_id;
     if (publishedId) {
       try {
+        // [FACT-VERIFIER] big_event 신뢰도 <60 이면 unpublish 롤백
+        const factGate = await shouldBlockBlogPublishForFact(admin as any, publishedId);
+        if (factGate.blocked) {
+          await (admin as any).from('blog_posts')
+            .update({ is_published: false, published_at: null, updated_at: new Date().toISOString() })
+            .eq('id', publishedId);
+          console.warn(`[blog-publish-queue] 🚧 fact gate blocked publishedId=${publishedId} · ${factGate.reason}`);
+          return {
+            processed: 0,
+            created: 0,
+            failed: 0,
+            metadata: {
+              publish_result: publishResult,
+              fact_gate_blocked: true,
+              reason: factGate.reason,
+              score: factGate.score,
+            },
+          };
+        }
+
         const { data: post } = await admin.from('blog_posts')
           .select('title, slug, category, content')
           .eq('id', publishedId).single();
