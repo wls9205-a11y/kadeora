@@ -4,6 +4,7 @@ import { SITE_URL } from '@/lib/constants';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import AptImageGallery from '@/components/AptImageGallery';
+import { ImageLightbox } from '@/components/ui/ImageLightbox';
 import type { Metadata } from 'next';
 import { fmtAmount } from '@/lib/format';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
@@ -340,6 +341,32 @@ export default async function ComplexDetailPage({ params }: Props) {
           <AptImageGallery images={siteImages} name={decoded} region={`${region} ${sigungu}`} />
         </div>
       )}
+
+      {/* 세션 138: apt_complex_profiles.images 갤러리 (ImageLightbox + zoom) — stock/[symbol]과 동일 UX */}
+      {(() => {
+        const raw = Array.isArray(profile?.images) ? profile.images : [];
+        const complexImages = raw
+          .map((img: any) => {
+            if (!img) return null;
+            if (typeof img === 'string') return { url: img.replace(/^http:\/\//, 'https://'), caption: null, alt: null };
+            if (img.url) return {
+              url: String(img.url).replace(/^http:\/\//, 'https://'),
+              caption: img.caption ?? null,
+              alt: img.alt_text ?? null,
+            };
+            return null;
+          })
+          .filter((x: any): x is { url: string; caption: string | null; alt: string | null } => !!x);
+        if (complexImages.length === 0) return null;
+        return (
+          <section style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--card-p) var(--sp-lg)', marginBottom: 'var(--sp-md)' }}>
+            <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 10px' }}>
+              🖼️ {decoded} 관련 이미지 · {complexImages.length}장
+            </h2>
+            <ImageLightbox images={complexImages} columns={3} />
+          </section>
+        );
+      })()}
 
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={`/api/og?title=${encodeURIComponent(decoded)}&design=2&category=apt&subtitle=${encodeURIComponent(latestPrice > 0 ? `매매 ${fmtAmount(latestPrice)}${latestJeonse ? ` · 전세 ${fmtAmount(latestJeonse.deposit)}` : ''}` : '실거래가 시세')}&author=${encodeURIComponent('카더라')}`} alt={`${decoded} 아파트 ${region} ${sigungu} 실거래가 시세 ${latestPrice > 0 ? fmtAmount(latestPrice) : ''}`} width={1200} height={630} style={{ width: '100%', maxHeight: 160, objectFit: 'cover', display: 'block', borderRadius: 'var(--radius-md)', marginBottom: 'var(--sp-md)', border: '1px solid var(--border)' }} loading="lazy" />
