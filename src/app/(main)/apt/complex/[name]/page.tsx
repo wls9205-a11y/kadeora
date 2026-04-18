@@ -216,6 +216,33 @@ export default async function ComplexDetailPage({ params }: Props) {
   const builtYear = tradeList[0]?.built_year || profile?.built_year || 0;
   const hasCoords = profile?.latitude && profile?.longitude;
 
+  // [COMPLEX-CARD] big_event_registry 역연결 조회 — apt_complex_profile_id 또는 이름 매칭
+  let bigEvent: Record<string, any> | null = null;
+  let pillarSlug: string | null = null;
+  try {
+    if (profile?.id) {
+      const { data: be } = await (sb as any).from('big_event_registry')
+        .select('id, slug, name, stage, scale_before, scale_after, key_constructors, new_brand_name, constructor_status, event_type, pillar_blog_post_id, is_active')
+        .eq('apt_complex_profile_id', profile.id)
+        .eq('is_active', true)
+        .maybeSingle();
+      if (be) bigEvent = be;
+    }
+    if (!bigEvent) {
+      const { data: be } = await (sb as any).from('big_event_registry')
+        .select('id, slug, name, stage, scale_before, scale_after, key_constructors, new_brand_name, constructor_status, event_type, pillar_blog_post_id, is_active')
+        .eq('name', decoded).eq('is_active', true).maybeSingle();
+      if (be) bigEvent = be;
+    }
+    if (bigEvent?.pillar_blog_post_id) {
+      const { data: pillar } = await sb.from('blog_posts').select('slug').eq('id', bigEvent.pillar_blog_post_id).maybeSingle();
+      pillarSlug = pillar?.slug || null;
+    }
+  } catch {}
+
+  // 재건축 후보 배지 (big_event 없지만 1990 이전 + 500세대+)
+  const isRedevCandidate = !bigEvent && builtYear > 0 && builtYear < 1990 && (profile?.total_households ?? 0) >= 500;
+
   return (
     <article style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
       {/* JSON-LD: Place + GeoCoordinates */}
@@ -381,6 +408,83 @@ export default async function ComplexDetailPage({ params }: Props) {
         {profile?.id && <AptBookmarkButton aptId={String(profile.id)} aptName={decoded} />}
         <ShareButtons title={`${decoded} 아파트 실거래가·시세 — ${region} ${sigungu}`} contentType="apt-complex" contentRef={name} />
       </div>
+
+      {/* [COMPLEX-CARD] big_event 역연결 하이라이트 카드 */}
+      {bigEvent && (
+        <section
+          aria-label={`${decoded} ${bigEvent.event_type || '재건축'} 핵심 정보`}
+          style={{
+            marginBottom: 'var(--sp-lg)',
+            padding: '14px 16px',
+            borderRadius: 'var(--radius-card)',
+            background: 'linear-gradient(135deg, rgba(59,123,246,0.08), rgba(168,85,247,0.05))',
+            border: '1px solid rgba(59,123,246,0.25)',
+            position: 'relative',
+            overflow: 'hidden',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 18 }}>🏗️</span>
+            <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-primary)' }}>
+              {bigEvent.new_brand_name
+                ? `${bigEvent.new_brand_name} ${bigEvent.event_type || '재건축'}`
+                : `${bigEvent.event_type || '재건축'} 진행 중`}
+            </span>
+            <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 999, background: 'rgba(59,123,246,0.18)', color: 'var(--brand)' }}>
+              Stage {bigEvent.stage ?? '-'} / 7
+            </span>
+            {bigEvent.constructor_status && bigEvent.constructor_status !== 'confirmed' && (
+              <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 6px', borderRadius: 4, background: 'var(--warning-bg)', color: 'var(--warning, #eab308)' }}>
+                {bigEvent.constructor_status === 'likely' ? '수주 유력' : '수주 미확정'}
+              </span>
+            )}
+          </div>
+          <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: 10 }}>
+            {bigEvent.scale_before ?? '?'}세대 → <strong style={{ color: 'var(--text-primary)' }}>{bigEvent.scale_after ?? '?'}+세대</strong>
+            {Array.isArray(bigEvent.key_constructors) && bigEvent.key_constructors.length > 0 && (
+              <> · 시공사 {bigEvent.key_constructors.join(', ')}</>
+            )}
+          </div>
+          {pillarSlug && (
+            <Link
+              href={`/blog/${pillarSlug}`}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '8px 14px',
+                borderRadius: 'var(--radius-md)',
+                background: 'var(--brand)',
+                color: '#fff',
+                fontSize: 12,
+                fontWeight: 700,
+                textDecoration: 'none',
+              }}
+            >
+              상세 분석 보기 →
+            </Link>
+          )}
+        </section>
+      )}
+
+      {/* [COMPLEX-CARD] 재건축 후보 배지 — big_event 미등록 + 노후 단지 */}
+      {!bigEvent && isRedevCandidate && (
+        <section
+          aria-label="재건축 후보 단지"
+          style={{
+            marginBottom: 'var(--sp-md)',
+            padding: '10px 14px',
+            borderRadius: 'var(--radius-md)',
+            background: 'var(--warning-bg, rgba(234,179,8,0.08))',
+            border: '1px dashed rgba(234,179,8,0.3)',
+            fontSize: 12,
+            color: 'var(--text-secondary)',
+            lineHeight: 1.6,
+          }}
+        >
+          <strong style={{ color: 'var(--text-primary)' }}>🏘️ 재건축 후보 단지</strong> · {builtYear}년 준공 · {profile?.total_households?.toLocaleString() ?? '?'}세대 — 카더라는 정비사업 진입 시 이 단지 전용 분석 글을 발행합니다.
+        </section>
+      )}
 
       {/* SEO 가시적 텍스트 (확장) */}
       <section className="site-description" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', marginBottom: 14 }}>
