@@ -51,7 +51,11 @@ renderer.heading = function ({ text, depth }: { text: string; depth: number }) {
 };
 renderer.image = function ({ href, title, text }: { href: string; title?: string | null; text: string }) {
   const safeHref = href?.replace(/^http:\/\//, 'https://') || '';
-  return `<img src="${safeHref}" alt="${text || ''}" ${title ? `title="${title}"` : ''} width="800" height="450" loading="lazy" decoding="async" style="max-width:100%;height:auto;border-radius:8px" onerror="this.style.display='none'" />`;
+  // [L1-8] 네이버 CDN(pstatic/phinf) 이미지는 srcset 변환 시 네이버 이미지 탭 우대 손실 → unoptimized 유지
+  const isNaverCdn = /(pstatic\.net|phinf\.pstatic\.net|phinf\.naver\.net|naver-cdn)/i.test(safeHref);
+  const sizesAttr = isNaverCdn ? '' : ` sizes="(max-width: 640px) 100vw, 800px"`;
+  // 외부 CDN은 srcset 변환이 보장되지 않으므로 sizes만 힌트로 추가. next/image 대체는 별도 컴포넌트 사용처에서 진행.
+  return `<img src="${safeHref}" alt="${text || ''}" ${title ? `title="${title}"` : ''} width="800" height="450" loading="lazy" decoding="async"${sizesAttr} style="max-width:100%;height:auto;border-radius:8px" onerror="this.style.display='none'" />`;
 };
 renderer.link = function ({ href, title, text }: { href: string; title?: string | null; text: string }) {
   const isExternal = href && (href.startsWith('http://') || href.startsWith('https://'));
