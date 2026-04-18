@@ -529,7 +529,10 @@ export default async function BlogDetailPage({ params }: Props) {
       '@type': 'Person',
       name: post.author_name || '카더라',
       jobTitle: post.author_role || '금융·부동산 데이터 분석',
-      url: `${SITE}/about`,
+      // [L0-2] manual 글은 노영진 저자 프로필로 링크, 그 외는 /about
+      url: post.source_type === 'manual'
+        ? `${SITE}/about/authors/node`
+        : `${SITE}/about`,
       worksFor: { '@type': 'Organization', name: '카더라', url: SITE },
     },
     publisher: {
