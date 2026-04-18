@@ -87,3 +87,87 @@ Claude Code에서 `docs/CLAUDE_CODE_PHASE1.md` 읽고 논스톱으로 L1-5, L1-6
 - `[L4-1]` Google Search Console OAuth 토큰 (Node의 구글 계정)
 - `[L5-1]` YouTube Data API 키 + 채널 연동
 
+---
+
+# 세션 135 (2026-04-19) — v3 Phase 1 논스톱 실행 완료
+
+## 🟢 완료 [13개 task / 커밋 10개]
+
+### P0 인프라 코어
+- `[L1-5]` killer URL static pin + metadata dedup
+  - `generateStaticParams`: view_count top30 + published_at top15 + PINNED_SLUGS 10 병렬 → 60편 고정
+  - `revalidate` 300 → 900, `getPostBySlug` React `cache()` 도입 → blog_posts fetch 중복 제거
+- `[L1-6]` crawler retry throttle
+  - googlebot/yeti/bingbot/daumoa/yandex/naverbot/applebot UA 감지
+  - `crawler:<ip>:<path>` Redis 키로 10초 3회+ → 304 Not Modified 즉시 반환
+- `[L1-7]` bot edge cache
+  - /blog/* 봇 응답 Upstash Redis GET hit 시 즉시 HTML 반환 (TTL 1h)
+- `[L1-1]` 쿼리 다이어트 + bundled RPCs
+  - `get_related_posts(post_id, category, tags, limit)` — 3단 폴백(precomputed→tag→category) 단일 호출
+  - `get_blog_sidebar_bundle(post_id, category, tags, published_at)` — apt_complex_profiles + prev/next + related_sites/stocks jsonb 번들
+  - 페이지당 별도 쿼리 5~6개 제거 → RPC 2건으로 축소
+- `[L1-4 나머지]` Redis cron lock + image cron dedup
+  - `src/lib/cron-redis-lock.ts` — Upstash SET NX EX 기반
+  - `withCronLogging`에 `redisLockTtlSec` 옵션 추가 → 중복 실행 시 `skipped`
+  - blog-generate-images / blog-image-supplement 에 TTL 540s 적용
+
+### P0 파이프라인
+- `[L3-3]` publish queue unblock
+  - `blog_publish_config.title_similarity_threshold` 0.2 → 0.35 (auto_failed 788 중 706건이 similar_title 차단이었음)
+  - `daily_publish_limit` 15 → 25
+- `[L2-7]` trending keyword gap phase 5
+  - issue-preempt에 `detectTrendingKeywordGaps`: heat ≥ 70 + 12h 내 + 블로그 미존재 → issue_alerts insert (multiplier 1.5)
+
+### L0 권위 (E-E-A-T)
+- `[L0-1]` 저자 프로필 페이지 신규
+  - `/about/authors` (목록) + `/about/authors/node` (노영진 상세)
+  - JSON-LD Person + BreadcrumbList, 전문 영역/편집 원칙
+- `[L0-2]` 저자 체제 재편 (DB 마이그레이션)
+  - manual 글 `author_name = '노영진'`, `author_role = '카더라 설립자, 부동산·주식 데이터 분석'` 일괄 UPDATE
+  - auto 계열 author_role에 `(AI 자동 생성)` 멱등 append
+  - blog/[slug] JSON-LD author.url: manual ↔ `/about/authors/node` 링크
+- `[L0-5]` source_ref auto-inject + 참고자료 섹션
+  - blog-rewrite: 국토부/금감원/금융위/한은/통계청/국세청/KRX/공정위/부동산원/LH/청약홈 감지 → `source_ref` "레이블|URL;..." 저장
+  - blog/[slug]: source_ref 있으면 "📚 참고자료" 섹션 렌더 (`rel="noopener nofollow"`)
+- `[L0-6]` YMYL 면책 배너
+  - `src/components/YMYLBanner.tsx` 신규, stock/finance/apt/unsold 카테고리에 자동 삽입
+  - 투자자문 아님 고지 + 저자 링크 + 데이터 기준일 + 출처 1건
+
+### 퀵윈·추가
+- `[L3-6]` JSON-LD seed 댓글 필터 — `commentCount/comment`에서 `is_seed=true` 제외
+- `[L2-4]` `public/naver_search_advisor_notes.md` — Node 수동 체크리스트
+- `[L3-9]` `/api/admin/meta-description-batch` — Anthropic Batch API(50% 할인) POST/GET
+  - 대상: `length(meta_description) < 80` published 글
+  - `rewrite_batches` 테이블 재활용으로 job 기록
+- `[L1-8]` renderer.image 확장 — 네이버 CDN은 unoptimized 유지, 외부는 `sizes` hint
+- `[L0-X]` author_role 카테고리 세분화 — auto 계열 "카더라 편집부 (AI-assisted · 종목/부동산/재테크/경제·세금/생활정보)"
+
+## 📦 commit 10건 (단일 push)
+1. `[L3-6][L2-4]` JSON-LD seed filter + Naver SA notes
+2. `[L1-5]` killer URL static pin + metadata dedup
+3. `[L1-6][L1-7]` crawler retry throttle + bot edge cache
+4. `[L1-1]` query diet: 18→8 queries + bundled RPCs
+5. `[L1-4]` Redis cron lock + image cron dedup guard
+6. `[L0-1][L0-2]` author profile page + author system rebuild
+7. `[L0-5][L0-6]` source_ref auto-inject + YMYL banner
+8. `[L3-3][L2-7]` publish queue unblock + trending keyword gap phase
+9. `[L3-9][L1-8][L0-X]` meta batch API + img srcset + author_role refine
+
+## ⚠️ Skip
+- `[L0-3]` 네이버 인플루언서 신청 — Node 수동 (외부 로그인 필요)
+- `[L0-4]` 카더라 공식 네이버 블로그 개설 — Node 수동
+- `[L4-1]` Google Search Console OAuth 토큰 — Node의 구글 계정 필요
+- `[L5-1]` YouTube Data API 키 + 채널 연동 — Node 수동
+
+## 📋 관련 DB 변경
+- `get_related_posts(bigint, text, text[], int)` 신규 RPC
+- `get_blog_sidebar_bundle(bigint, text, text[], timestamptz)` 신규 RPC
+- `blog_publish_config`: title_similarity_threshold 0.2 → 0.35 / daily_publish_limit 15 → 25
+- blog_posts.author_name/role: manual → 노영진 통일 / auto → AI-assisted + sub_category 세분화
+
+## 🚀 다음 단계
+- Vercel 배포 모니터링 (`/blog/*` timeout 시간당 감소 여부)
+- killer 20편 TTFB 측정 (< 500ms 목표)
+- issue_alerts pending_draft 감소 관찰 (threshold 조정 효과)
+- L3-9 meta_description 배치: Node가 MasterControlTab 또는 `curl -X POST /api/admin/meta-description-batch` 1회 실행
+
