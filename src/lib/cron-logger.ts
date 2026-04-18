@@ -1,4 +1,5 @@
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { acquireCronLock, releaseCronLock } from '@/lib/cron-redis-lock';
 
 function getSupabase() {
   return getSupabaseAdmin();
@@ -12,11 +13,27 @@ interface CronResult {
   metadata?: Record<string, any>;
 }
 
+interface CronOptions {
+  /** Redis 기반 lock TTL(초). 0 또는 미설정 시 lock 비활성. */
+  redisLockTtlSec?: number;
+}
+
 export async function withCronLogging(
   cronName: string,
-  fn: () => Promise<CronResult>
-): Promise<{ success: boolean } & Partial<CronResult> & { error?: string }> {
+  fn: () => Promise<CronResult>,
+  options: CronOptions = {},
+): Promise<{ success: boolean } & Partial<CronResult> & { error?: string; skipped?: boolean }> {
   const supabase = getSupabase();
+
+  // [L1-4] Redis 기반 중복 실행 차단 (옵션)
+  if (options.redisLockTtlSec && options.redisLockTtlSec > 0) {
+    const ok = await acquireCronLock(cronName, options.redisLockTtlSec);
+    if (!ok) {
+      console.warn(`[cron] ${cronName} skipped — redis lock held`);
+      return { success: true, skipped: true, processed: 0 };
+    }
+  }
+
   const { data: log } = await supabase
     .from('cron_logs')
     .insert({ cron_name: cronName, status: 'running' })
@@ -51,6 +68,10 @@ export async function withCronLogging(
       });
     }
 
+    if (options.redisLockTtlSec && options.redisLockTtlSec > 0) {
+      await releaseCronLock(cronName);
+    }
+
     return { success: true, ...result };
   } catch (error: any) {
     const duration = Date.now() - startTime;
@@ -82,6 +103,10 @@ export async function withCronLogging(
       message: error.message?.substring(0, 500),
       metadata: { cron_name: cronName, duration_ms: duration },
     });
+
+    if (options.redisLockTtlSec && options.redisLockTtlSec > 0) {
+      await releaseCronLock(cronName);
+    }
 
     return { success: false, error: error.message };
   }

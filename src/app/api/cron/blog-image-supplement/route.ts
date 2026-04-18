@@ -191,7 +191,7 @@ async function handler(_req: NextRequest) {
           errors: errors.slice(0, 10),
         },
       };
-    }),
+    }, { redisLockTtlSec: 540 }),
   );
 }
 

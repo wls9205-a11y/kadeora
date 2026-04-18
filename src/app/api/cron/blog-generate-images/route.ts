@@ -146,6 +146,7 @@ function extractKeywords(title: string, cat: string, subCat?: string | null): st
 
 async function handler(_req: NextRequest) {
   return NextResponse.json(
+    // [L1-4] Redis lock TTL 540s — Vercel maxDuration 300s보다 길게 잡아 중복 실행 차단
     await withCronLogging('blog-generate-images', async () => {
       const sb = getSupabaseAdmin();
 
@@ -336,7 +337,7 @@ async function handler(_req: NextRequest) {
         console.error('[blog-generate-images]', err);
         return { processed: 0, failed: 1, metadata: { error: err.message } };
       }
-    })
+    }, { redisLockTtlSec: 540 })
   );
 }
 
