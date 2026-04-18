@@ -154,6 +154,11 @@ const nextConfig: NextConfig = {
       { source: "/rss", destination: "/feed.xml", permanent: true },
       { source: "/rss.xml", destination: "/feed.xml", permanent: true },
       { source: "/sitemap", destination: "/sitemap.xml", permanent: true },
+      // [P0-DELETE] 삼익비치 auto_issue 팩트 오류 4편 → Pillar로 통합 301
+      { source: "/blog/samik-beach-spoke-d1-general-sale-analysis", destination: "/blog/samik-beach-redev-complete-guide-2026", permanent: true },
+      { source: "/blog/samik-beach-real-transaction-price-analysis-2023-2025", destination: "/blog/samik-beach-redev-complete-guide-2026", permanent: true },
+      { source: "/blog/samik-beach-reconstruction-2026-stage3-progress", destination: "/blog/samik-beach-redev-complete-guide-2026", permanent: true },
+      { source: "/blog/samik-beach-contribution-simulation-spoke-c1", destination: "/blog/samik-beach-redev-complete-guide-2026", permanent: true },
     ];
   },
 };
