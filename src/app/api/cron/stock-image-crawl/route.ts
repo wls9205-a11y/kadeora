@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { withCronAuth } from '@/lib/cron-auth';
 import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { verifyPgCronAuth } from '@/lib/cron-pg-auth';
 
 export const maxDuration = 300;
 export const runtime = 'nodejs';
@@ -174,4 +174,14 @@ async function handler(_req: NextRequest) {
   );
 }
 
-export const GET = withCronAuth(handler);
+export async function GET(req: NextRequest) {
+  if (!verifyPgCronAuth(req)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  try {
+    return await handler(req);
+  } catch (e) {
+    console.error('[stock-image-crawl] error:', e);
+    return NextResponse.json({ error: e instanceof Error ? e.message : String(e) }, { status: 200 });
+  }
+}
