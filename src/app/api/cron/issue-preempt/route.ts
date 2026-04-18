@@ -323,18 +323,97 @@ async function detectBuilderUpcoming(_sb: any): Promise<any[]> {
   return []; // 비활성화
 }
 
+/* ═══════════ [L2-7] Phase 5: trending_keywords gap 감지 ═══════════ */
+/* heat_score ≥ 70 + 12h 내 업데이트 + 블로그 미존재 → issue_alerts 선점 삽입 */
+
+async function detectTrendingKeywordGaps(sb: any): Promise<any[]> {
+  const results: any[] = [];
+  try {
+    const since12h = new Date(Date.now() - 12 * 3600000).toISOString();
+    const { data: trending } = await sb.from('trending_keywords')
+      .select('keyword, heat_score, category, rank')
+      .gte('heat_score', 70)
+      .gte('updated_at', since12h)
+      .in('category', ['stock', 'apt', 'search'])
+      .order('heat_score', { ascending: false })
+      .limit(30);
+
+    if (!trending || trending.length === 0) return results;
+
+    for (const t of trending) {
+      if (!t.keyword || t.keyword.length < 2) continue;
+
+      // 블로그 미존재 체크
+      const kwSlice = t.keyword.slice(0, 14);
+      const { count: blogCount } = await sb.from('blog_posts')
+        .select('id', { count: 'exact', head: true })
+        .eq('is_published', true)
+        .or(`title.ilike.%${kwSlice}%,tags.cs.{${t.keyword}}`);
+      if (blogCount && blogCount > 0) continue;
+
+      // issue_alerts 중복 체크 (7일 내 같은 키워드)
+      const { data: existing } = await (sb as any).from('issue_alerts')
+        .select('id')
+        .ilike('title', `%${kwSlice}%`)
+        .gte('detected_at', new Date(Date.now() - 7 * 24 * 3600000).toISOString())
+        .limit(1);
+      if (existing && existing.length > 0) continue;
+
+      const baseScore = 50;
+      const multiplier = 1.5;
+      const finalScore = Math.min(Math.round(baseScore * multiplier), 100);
+      const cat = t.category === 'search' ? 'general' : t.category;
+
+      const { error } = await (sb as any).from('issue_alerts').insert({
+        title: `[급상승] ${t.keyword} — heat ${Math.round(t.heat_score)}`,
+        summary: `trending_keywords에서 heat score ${Math.round(t.heat_score)}로 감지된 급상승 키워드. 카더라 블로그 미존재 — 선점 기회.`,
+        category: cat,
+        sub_category: 'trending_gap',
+        issue_type: 'search_spike',
+        source_type: 'trending_keywords',
+        source_urls: [],
+        detected_keywords: [t.keyword, '급상승', t.category || ''].filter(Boolean),
+        related_entities: [t.keyword],
+        raw_data: {
+          heat_score: t.heat_score,
+          trending_category: t.category,
+          rank: t.rank,
+          existing_posts: 0,
+          is_breaking: true,
+          source_type: 'trending_keywords',
+        },
+        base_score: baseScore,
+        multiplier,
+        penalty_rate: 0,
+        final_score: finalScore,
+        score_breakdown: { trending_gap: baseScore, 선점기회: multiplier },
+        is_auto_publish: true,
+        detected_at: new Date().toISOString(),
+      });
+
+      if (!error) {
+        results.push({ type: 'trending_gap', keyword: t.keyword, heat: t.heat_score, score: finalScore });
+      }
+    }
+  } catch (err: any) {
+    console.error('[issue-preempt] trending gap phase error:', err.message);
+  }
+  return results;
+}
+
 /* ═══════════ 메인 핸들러 ═══════════ */
 
 async function handler(_req: NextRequest) {
   const result = await withCronLogging('issue-preempt', async () => {
   const sb = getSupabaseAdmin();
 
-  // 4개 Phase 병렬 실행
-  const [subResults, uncoveredResults, spikeResults, builderResults] = await Promise.allSettled([
+  // 5개 Phase 병렬 실행 (Phase 5: [L2-7] trending_keywords gap)
+  const [subResults, uncoveredResults, spikeResults, builderResults, trendingResults] = await Promise.allSettled([
     detectNewSubscriptions(sb),
     detectUncoveredSites(sb),
     detectNaverSpikes(sb),
     detectBuilderUpcoming(sb),
+    detectTrendingKeywordGaps(sb),
   ]);
 
   const allResults = [
@@ -342,6 +421,7 @@ async function handler(_req: NextRequest) {
     ...(uncoveredResults.status === 'fulfilled' ? uncoveredResults.value : []),
     ...(spikeResults.status === 'fulfilled' ? spikeResults.value : []),
     ...(builderResults.status === 'fulfilled' ? builderResults.value : []),
+    ...(trendingResults.status === 'fulfilled' ? trendingResults.value : []),
   ];
 
   // 새 이슈 발견 시 issue-draft 즉시 트리거
@@ -356,7 +436,8 @@ async function handler(_req: NextRequest) {
     } catch {}
   }
 
-  console.log(`[issue-preempt] total=${allResults.length} sub=${subResults.status === 'fulfilled' ? subResults.value.length : 0} uncovered=${uncoveredResults.status === 'fulfilled' ? uncoveredResults.value.length : 0} spikes=${spikeResults.status === 'fulfilled' ? spikeResults.value.length : 0} builders=${builderResults.status === 'fulfilled' ? builderResults.value.length : 0}`);
+  const trendingCount = trendingResults.status === 'fulfilled' ? trendingResults.value.length : 0;
+  console.log(`[issue-preempt] total=${allResults.length} sub=${subResults.status === 'fulfilled' ? subResults.value.length : 0} uncovered=${uncoveredResults.status === 'fulfilled' ? uncoveredResults.value.length : 0} spikes=${spikeResults.status === 'fulfilled' ? spikeResults.value.length : 0} builders=${builderResults.status === 'fulfilled' ? builderResults.value.length : 0} trending=${trendingCount}`);
 
   return {
     processed: allResults.length,
@@ -367,6 +448,7 @@ async function handler(_req: NextRequest) {
       uncovered: uncoveredResults.status === 'fulfilled' ? uncoveredResults.value.length : 0,
       spikes: spikeResults.status === 'fulfilled' ? spikeResults.value.length : 0,
       builders: builderResults.status === 'fulfilled' ? builderResults.value.length : 0,
+      trending_gaps: trendingCount,
     },
   };
   }); // withCronLogging
