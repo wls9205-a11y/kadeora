@@ -578,15 +578,19 @@ export default async function BlogDetailPage({ params }: Props) {
       '@type': 'SpeakableSpecification',
       cssSelector: ['h1', '.blog-content p:first-of-type', '.blog-content h2:first-of-type', '.blog-content h2', '.faq-answer'],
     },
-    ...(comments.length > 0 ? {
-      commentCount: comments.length,
-      comment: comments.slice(0, 3).map((c: Record<string, any>) => ({
-        '@type': 'Comment',
-        text: c.content,
-        dateCreated: c.created_at,
-        author: { '@type': 'Person', name: c.author_name || c.profiles?.nickname || '사용자' },
-      })),
-    } : {}),
+    ...((() => {
+      const realComments = comments.filter((c: Record<string, any>) => !c.is_seed);
+      if (realComments.length === 0) return {};
+      return {
+        commentCount: realComments.length,
+        comment: realComments.slice(0, 3).map((c: Record<string, any>) => ({
+          '@type': 'Comment',
+          text: c.content,
+          dateCreated: c.created_at,
+          author: { '@type': 'Person', name: c.author_name || c.profiles?.nickname || '사용자' },
+        })),
+      };
+    })()),
     interactionStatistic: {
       '@type': 'InteractionCounter',
       interactionType: 'https://schema.org/ReadAction',
