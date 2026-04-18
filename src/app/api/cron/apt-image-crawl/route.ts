@@ -382,15 +382,57 @@ async function handler(_req: NextRequest) {
         errors.push(`main: ${e instanceof Error ? e.message : 'unknown'}`);
       }
 
+      // [IMAGE-CRAWL-EXTEND] big_event priority ≥80 이벤트 우선 이미지 수집
+      let bigEventAssetsAdded = 0;
+      try {
+        const sbAdmin = getSupabaseAdmin();
+        const { data: priorityEvents } = await (sbAdmin as any)
+          .from('big_event_registry')
+          .select('id, name, new_brand_name, region_sigungu, event_type')
+          .eq('is_active', true)
+          .gte('priority_score', 80)
+          .limit(10);
+
+        for (const ev of (priorityEvents || []) as any[]) {
+          if (Date.now() - start > MAX_RUNTIME_MS) break;
+          try {
+            const brand = ev.new_brand_name ? `${ev.new_brand_name} ` : '';
+            const queryKw = `${brand}${ev.event_type || '재건축'} 조감도`.trim();
+            const imgs = await searchNaverImages(ev.name, queryKw, ev.region_sigungu || '', 5);
+            for (const img of imgs.slice(0, 5)) {
+              if (!img?.url || isBlacklisted(img.url)) continue;
+              // 해상도 정보 없음 → URL hostname 기반 간단 필터 유지 (isBlacklisted 내부)
+              const { error } = await (sbAdmin as any).from('big_event_assets').insert({
+                event_id: ev.id,
+                asset_type: 'rendering',
+                url: img.url,
+                caption: img.caption || `${ev.name} ${queryKw}`,
+                source_label: img.source || 'naver-image',
+                source_url: img.url,
+                license: 'editorial-review-required',
+                is_verified: false,
+              });
+              if (!error) bigEventAssetsAdded++;
+            }
+            await new Promise((r) => setTimeout(r, 250));
+          } catch (e) {
+            errors.push(`big_event:${ev.id}:${e instanceof Error ? e.message : 'unknown'}`);
+          }
+        }
+      } catch (e) {
+        errors.push(`big_event-phase: ${e instanceof Error ? e.message : 'unknown'}`);
+      }
+
       return {
         processed,
-        created,
+        created: created + bigEventAssetsAdded,
         updated,
         failed,
         metadata: {
           batch: BATCH_SIZE,
           target: TARGET_IMG_COUNT,
           min: MIN_IMG_COUNT,
+          big_event_assets_added: bigEventAssetsAdded,
           elapsed_ms: Date.now() - start,
           errors: errors.slice(0, 10),
         },
