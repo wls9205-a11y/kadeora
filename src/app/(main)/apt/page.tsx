@@ -181,9 +181,10 @@ async function fetchAptData() {
       ...apts.map((a: any) => a.house_nm).filter(Boolean),
       ...unsold.map((u: any) => u.house_nm).filter(Boolean),
     ])) as string[];
+    // 세션 143: og_image_url 도 포함 — images[0] 우선, og_image_url 은 images 없을 때만 참조
     const scopedSites = neededNames.length > 0
-      ? (adminSb as any).from('apt_sites').select('name, images, page_views, comment_count, interest_count').in('name', neededNames).not('images', 'is', null)
-      : (adminSb as any).from('apt_sites').select('name, images, page_views, comment_count, interest_count').not('images', 'is', null).limit(2000);
+      ? (adminSb as any).from('apt_sites').select('name, images, og_image_url, page_views, comment_count, interest_count').in('name', neededNames)
+      : (adminSb as any).from('apt_sites').select('name, images, og_image_url, page_views, comment_count, interest_count').limit(2000);
     const scopedComplex = neededNames.length > 0
       ? (adminSb as any).from('apt_complex_profiles').select('apt_name, images').in('apt_name', neededNames).not('images', 'is', null)
       : (adminSb as any).from('apt_complex_profiles').select('apt_name, images').not('images', 'is', null).limit(2000);
@@ -194,11 +195,25 @@ async function fetchAptData() {
         aptImageMap[row.apt_name] = row.images[0].thumbnail || row.images[0].url;
       }
     }
-    // 2순위: apt_sites (청약/미분양/재개발 — 덮어쓰기로 더 정확한 이미지 우선)
+    // 2순위: apt_sites (덮어쓰기로 더 정확한 이미지 우선)
+    // 세션 143 fix: 우선순위 — 1a apt_sites.images[0].url (외부 CDN 포함) > 1b og_image_url
+    // 기존 로직은 og_image_url /api/og 가 images[0] 를 가려 22/24 카드가 제네릭 렌더
     for (const row of (sitesRes.data || []) as any[]) {
-      if (Array.isArray(row.images) && row.images.length > 0 && row.images[0]?.url) {
-        aptImageMap[row.name] = row.images[0].thumbnail || row.images[0].thumb || row.images[0].url;
+      const firstImg = Array.isArray(row.images) && row.images.length > 0 && row.images[0]?.url
+        ? (row.images[0].thumbnail || row.images[0].thumb || row.images[0].url)
+        : null;
+      const ogUrl: string | null = row.og_image_url || null;
+      // 1a: images[0] (imgnews/daumcdn/pstatic 등 외부 CDN 포함, safeImg 가 렌더 시 차단)
+      if (firstImg) {
+        aptImageMap[row.name] = firstImg;
+      } else if (ogUrl && !ogUrl.includes('/api/og')) {
+        // 1b: og_image_url 외부 CDN (kadeora /api/og 아닌 것)
+        aptImageMap[row.name] = ogUrl;
+      } else if (ogUrl) {
+        // 1c: og_image_url /api/og 제네릭 (최후 fallback — 렌더 단계에서 safeImg 가 다시 og 로 떨어뜨림)
+        aptImageMap[row.name] = ogUrl;
       }
+      // 1d 는 렌더 측 safeImg fallback — aptImageMap[name]=undefined 일 때 /api/og?title={name}
       if (row.page_views > 0 || row.comment_count > 0 || row.interest_count > 0) {
         aptEngageMap[row.name] = { views: row.page_views || 0, comments: row.comment_count || 0, interest: row.interest_count || 0 };
       }
