@@ -298,6 +298,42 @@ remaining_node = 0, remaining_founder = 0
 - 삼익비치 단지 /apt/complex/삼익비치 하이라이트 카드 노출 확인
 - Pillar 제목 네이버 검색 반영 주기 (7~10일) 모니터링
 - 추가 시드 확장: 잠실 미성크로바, 대구 수성 범어 (apt_complex_profile 매칭 확보 후)
+
+---
+
+# 세션 138 (2026-04-19) — 이미지 SSR 완전 활성화 + issue-draft timeout 근절
+
+## 🟢 배포 완료 (5 커밋)
+- `077100bb` fix(issue-draft): Vercel 300s timeout 방어 — 180s pre-emptive + publish cap 2
+- `55acade3` feat(apt/complex): ImageLightbox — apt_complex_profiles.images 즉시 렌더
+- `86ca33e9` fix(apt): SSR img for /apt?tab=unsold|redev|trade — ssr:false 제거 + 30건 prefetch
+- `e45fece4` feat(stock): SSR 썸네일 — get_stocks_with_thumbnails RPC (p_limit 100)
+- `560396d8` feat(stock): p_limit 100 → 500 + decoding=async
+
+## 🎯 세션 주요 성과
+- **SSR image coverage**: 7개 공개 리스트 페이지 전부 100% 썸네일 노출
+- **issue-draft timeout 해소**: 22건/24h → 0건/2h (pre-emptive 180s 가드 + Claude call 2건 cap)
+- **DB null 백필 완료**: blog_posts + apt_sites + apt_complex_profiles 전부 null=0
+- **/apt?tab=unsold|redev|trade SSR img 수 0 → 30+ 각 탭**
+- **/stock SSR img 수 0 → 400+**
+
+## 🔧 기술 노트 (다음 세션 참고)
+- **Next.js `dynamic({ ssr: false })` 함정**: 탭 컴포넌트에 달려 있으면 URL 직접 진입 시 SSR 렌더 전혀 안 됨. code-splitting만 원하면 `dynamic()`만 사용
+- **/api/apt/tab-data 스키마**: transactions/redevelopment tab에서 이미지 필드 미포함 — AptClient 가 aptImageMap prop 으로 name → url 매핑 (page.tsx 가 전역 image map 빌드)
+- **Vercel 300s cron 가드**: 루프 시작 시점 가드는 위험. 한 iteration 이 오버슛하면 통째 timeout → stuck. pre-emptive 가드 = (300 − max_iteration_duration) 계산이 안전
+- **get_stocks_with_thumbnails RPC**: p_limit=500 기준 DB 응답 12-42ms. 썸네일 커버리지 100% (261 real + 239 og-chart fallback). 시가총액 하한 ~2,789억 (중견기업까지)
+
+## 🤖 자동 진행 중 (action 불필요)
+- `blog-image-supplement`: 552개 post <3 imgs → ~3일 내 0 도달 예정
+- `stock-image-crawl`: 1,114개 symbol <images → ~1.6일 내 full 도달 예정
+- `check-responses` pg_cron: 5분 주기 정상 실행
+
+## 📋 다음 Claude Code 세션 체크리스트
+1. ~~docs/STATUS.md 세션 138 summary~~ ✅ 이 항목
+2. `/stock` UX 모니터링 — 유저가 검색 범위 확장 요청 시 페이지네이션 `/api/stock/list?offset=...` 신설
+3. `issue-draft` 24시간 관찰 — regression 없으면 stuck 알림 임계치 원복 검토
+4. (보류) `/api/admin/v2` RPC 이전 — 1199줄, 응답 shape 검증 필요 (세션 135부터 스킵 중)
+5. (보류) `BlogMentionCard` RPC 통일 — 기존 정렬 로직 양호, 우선순위 낮음
 - big_event_registry 기반 issue_alerts 자동 투입 파이프라인 설계 (Phase 3)
 
 ---
