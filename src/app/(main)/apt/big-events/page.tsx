@@ -233,13 +233,14 @@ export default async function BigEventsHubPage({ searchParams }: SearchProps) {
             } as const;
             return (
               <li key={e.id}>
+                {/* 1차: Pillar blog → 2차: /apt/big-events/[slug] 상세 */}
                 {slug ? (
                   <Link href={`/blog/${slug}`} style={baseStyle}>{cardContent}</Link>
                 ) : (
-                  <div style={baseStyle} aria-label={`${e.name} 상세 글 준비 중`}>
+                  <Link href={`/apt/big-events/${encodeURIComponent(e.slug)}`} style={baseStyle} aria-label={`${e.name} 상세 보기`}>
                     {cardContent}
-                    <div style={{ marginTop: 8, fontSize: 11, color: 'var(--text-tertiary)' }}>상세 분석 준비 중</div>
-                  </div>
+                    <div style={{ marginTop: 8, fontSize: 11, color: 'var(--brand)' }}>이벤트 상세 →</div>
+                  </Link>
                 )}
               </li>
             );
