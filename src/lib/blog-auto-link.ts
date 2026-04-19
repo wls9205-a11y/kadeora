@@ -50,12 +50,11 @@ const APT_KEYWORDS: [string, string][] = [
   ['아파트 분양', '/apt'], ['분양 현장', '/apt'],
 ];
 
-const EXTERNAL_KEYWORDS: [string, string][] = [
-  ['부산 급매물', 'https://xn--kj0bw8tr3a.com'],
-  ['부산 부동산 급매물', 'https://xn--kj0bw8tr3a.com'],
-  ['분양권 투자', 'https://xn--zf0bv61a84di4cc7c4tay28c.com'],
-  ['분양권 실전투자', 'https://xn--zf0bv61a84di4cc7c4tay28c.com'],
-];
+// 세션 141 (2026-04-19): 호스팅어 네트워크 완전 분리
+// 119개 사이트 Japanese Keyword Hack 감염 확인 → 외부 링크 완전 비활성화
+// 카더라 블로그 본문에서 외부 도메인으로 나가는 모든 링크 중단.
+// 필요 시 내부 링크(STOCK_KEYWORDS/APT_KEYWORDS/FEATURE_KEYWORDS)만 유지.
+const EXTERNAL_KEYWORDS: [string, string][] = [];
 
 const FEATURE_KEYWORDS: [string, string][] = [
   ['종목 비교', '/stock/compare'], ['관심종목', '/stock'],

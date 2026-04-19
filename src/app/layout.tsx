@@ -212,9 +212,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <KakaoInit />
         {children}
         </ThemeProvider>
-        {/* GA4 */}
-        <Script src="https://www.googletagmanager.com/gtag/js?id=G-VP4F6TH2GD" strategy="afterInteractive" />
-        <Script id="gtag-init" strategy="afterInteractive">{`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-VP4F6TH2GD');gtag('config','AW-17792745509');`}</Script>
+        {/* GA4 — 세션 141: 호스팅어 분리로 env 기반 ID. 미설정 시 스크립트 로드 안함 */}
+        {process.env.NEXT_PUBLIC_GA_ID ? (
+          <>
+            <Script src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}`} strategy="afterInteractive" />
+            <Script id="gtag-init" strategy="afterInteractive">{`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${process.env.NEXT_PUBLIC_GA_ID}');${process.env.NEXT_PUBLIC_ADS_ID ? `gtag('config','${process.env.NEXT_PUBLIC_ADS_ID}');` : ''}`}</Script>
+          </>
+        ) : null}
         <VercelAnalytics />
       </body>
     </html>

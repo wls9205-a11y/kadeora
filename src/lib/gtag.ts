@@ -7,8 +7,11 @@
  * gtagEvent('select_content', { content_type: 'cta', item_id: 'hero_signup' });
  */
 
-export const GA_ID = 'G-VP4F6TH2GD';
-export const ADS_ID = 'AW-17792745509';
+// 세션 141: 호스팅어 네트워크 분리 — G-VP4F6TH2GD는 호스팅어 사이트들과 공유
+// 되었던 속성이라 평판 오염 리스크. env의 새 속성 ID 사용. 미설정 시 빈 문자열
+// → gtag.js 스크립트가 id 없이 로드되지 않음 (tracking pause).
+export const GA_ID = process.env.NEXT_PUBLIC_GA_ID || '';
+export const ADS_ID = process.env.NEXT_PUBLIC_ADS_ID || '';
 
 export function gtagEvent(
   action: string,
