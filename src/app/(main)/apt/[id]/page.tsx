@@ -3,6 +3,7 @@ import { sanitizeHtml } from '@/lib/sanitize-html';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { SITE_URL } from '@/lib/constants';
+import { aptSiteThumb } from '@/lib/thumbnail-fallback';
 import { generateAptSlug, isNumericId } from '@/lib/apt-slug';
 import { notFound, permanentRedirect } from 'next/navigation';
 import Link from 'next/link';
@@ -54,7 +55,7 @@ async function resolveParam(rawId: string) {
 
 async function fetchUnifiedData(slug: string) {
   const sb = getSupabaseAdmin();
-  const APT_COLS = 'id,slug,name,site_type,region,sigungu,dong,address,description,seo_title,seo_description,builder,developer,total_units,built_year,move_in_date,status,is_active,content_score,interest_count,page_views,comment_count,images,key_features,faq_items,nearby_facilities,nearby_station,school_district,price_min,price_max,price_comparison,search_trend,latitude,longitude,source_ids,created_at,updated_at';
+  const APT_COLS = 'id,slug,name,site_type,region,sigungu,dong,address,description,seo_title,seo_description,builder,developer,total_units,built_year,move_in_date,status,is_active,content_score,interest_count,page_views,comment_count,images,satellite_image_url,og_image_url,key_features,faq_items,nearby_facilities,nearby_station,school_district,price_min,price_max,price_comparison,search_trend,latitude,longitude,source_ids,created_at,updated_at';
 
   // Phase 1: apt_sites — exact slug → multi-stage fuzzy fallback
   let { data: site } = await (sb as any).from('apt_sites').select(APT_COLS).eq('slug', slug).maybeSingle();
@@ -323,8 +324,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const uStr = units ? `${Number(units).toLocaleString()}세대` : '';
     const builder = d.site?.builder || d.sub?.constructor_nm || '';
     const desc = d.site?.seo_description || `${d.region} ${d.site?.sigungu || ''} ${d.name} ${uStr} ${builder}. 모집공고 요약, 분양가격, 청약일정, 견본주택, 실거래가까지 한눈에.`.trim();
-    const siteFirstImg = Array.isArray(d.site?.images) && (d.site.images[0] as any)?.url ? ((d.site.images[0] as any).thumbnail || (d.site.images[0] as any).url).replace(/^http:\/\//, 'https://') : null;
-    const ogImg = siteFirstImg || `${SITE_URL}/api/og?title=${encodeURIComponent(d.name)}&design=2&subtitle=${encodeURIComponent(`${d.region} ${d.site?.sigungu || ''} · ${uStr} ${builder}`.trim())}`;
+    // thumbnail-fallback util 경유: satellite > og_image_url > images[0] > OG generator
+    const ogImg = aptSiteThumb({
+      satellite_image_url: d.site?.satellite_image_url,
+      og_image_url: d.site?.og_image_url,
+      images: d.site?.images as any,
+      name: d.name,
+    });
 
     const priceStr = d.site?.price_min && d.site?.price_max
       ? ` ${d.site.price_min >= 10000 ? `${(d.site.price_min/10000).toFixed(1)}억` : `${d.site.price_min.toLocaleString()}만`}~${d.site.price_max >= 10000 ? `${(d.site.price_max/10000).toFixed(1)}억` : `${d.site.price_max.toLocaleString()}만`}`
