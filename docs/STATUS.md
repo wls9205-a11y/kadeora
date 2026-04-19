@@ -545,3 +545,35 @@ remaining_node = 0, remaining_founder = 0
 - `/api/admin/image-backfill` dry_run으로 backlog 진단 후 실행 (POST body: {"target":"all","limit":50})
 - NODE_ADMIN_USER_ID env 세팅 권장 (미세팅 시 profiles.is_admin=true 첫 row로 fallback)
 - apt-image-crawl 다음 실행 결과: records_created > 0 인지 확인 (BATCH 50 효과)
+
+---
+
+# 세션 140 (2026-04-19) — 이미지 오염 대참사 후 코드 레벨 sanitize 복구 (P1)
+
+## 🔴 disaster 전말
+1. **01adc843** — 오염 이미지 차단 + onError fallback 커밋. **서버 컴포넌트 `BlogMentionCard`에 JSX `onError={(e)=>...}` 추가 → RSC 컴파일/런타임 에러**. Vercel 빌드가 DB 일괄 UPDATE 중 트리거되어 static HTML 에 에러 상태가 베이크됨.
+2. **263d1322** — 01adc843 revert. 코드는 1ad71eb2 와 바이트 동일 (git diff empty) 이지만 이미 빌드된 static HTML 캐시가 오염되어 `/blog/*` `/stock/*` 전부 500.
+3. **복구** — Vercel 대시보드에서 `dpl_H5LCMhji1BYEh1bTmbziiKoJbW6a` (1ad71eb2) instant rollback. 트래픽 회복.
+4. **P1 근본 해결** — 본 커밋. DB 건드리지 않고 코드 레벨 URL sanitize.
+
+## 🟢 P1 해결 (이 커밋)
+- **신규** `src/lib/image-sanitize.ts`:
+  - `SAFE_IMG_HOSTS` 화이트리스트 (/api/og, kadeora.app, supabase.co, vercel-storage.com, upload.wikimedia.org)
+  - `isSafeImg(url)`, `safeImg(url, {title, category, design, subtitle})` — 안전 호스트 아니면 `/api/og` URL 반환 (이벤트 핸들러 불필요)
+- **서버 컴포넌트 적용 (onError 절대 금지)**:
+  - `src/components/blog/BlogMentionCard.tsx`: `thumbUrl = safeImg(rawThumb, ...)` × 2곳, `FallbackThumb` 분기 제거, img 항상 렌더
+  - `src/app/(main)/blog/[slug]/page.tsx`: marked `renderer.image` 내부에 safeImg 적용 (HTML string `onerror=` 는 유지 — 이벤트 핸들러 prop 이 아니므로 안전), `BlogHeroImage`/`ImageLightbox` 에 전달하는 `postImages`/`galleryImages` url 도 safeImg wrap
+  - `src/app/(main)/blog/page.tsx`: 목록 카드 썸네일 img src safeImg wrap
+- **클라이언트 컴포넌트 적용 ('use client' 확인)**:
+  - `SubscriptionTab`, `UnsoldTab`, `RedevTab`, `TransactionTab` — 썸네일 img src safeImg wrap, `decoding="async"` 추가 (`OngoingTab` 은 범위 외)
+
+## ⚠️ 교훈 (향후 위반 금지)
+1. **서버 컴포넌트에서 JSX `onError={...}` 금지** — RSC 는 이벤트 핸들러 props 허용 안 함. 대안: (a) URL 레벨 sanitize (safeImg), (b) HTML string `onerror=""` 문자열 직렬화.
+2. **대량 DB UPDATE 중 Vercel 빌드 트리거 금지** — `generateStaticParams` 가 중간 상태를 읽어 static HTML 에 에러 베이크. DB 작업 전 빌드 pause 또는 revalidate 단축.
+3. **이미지 정화 방식 변경** — DB 대량 UPDATE (오염 소스 NULL 처리) ❌ → 코드 URL 화이트리스트 sanitize ✅. DB 상태와 독립적, revert 안전.
+
+## 📋 다음 세션
+- 배포 후 `/blog /stock /apt` 전수 200 확인
+- `/blog/samik-*`, `/blog/byeoksanchangma-*` 등 오염 이미지 노출됐던 페이지 visual 검증
+- `BlogMentionCard` 의 `FallbackThumb` 정의 (line 417) dead code — 추후 정리
+- `OngoingTab` 도 safeImg 적용 여부 검토

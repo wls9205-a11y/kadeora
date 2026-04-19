@@ -2,6 +2,7 @@
 import LoginGate from '@/components/LoginGate';
 import SectionShareButton from '@/components/SectionShareButton';
 import type { AptTransaction } from '@/types/apt';
+import { safeImg } from '@/lib/image-sanitize';
 import { useState, useEffect } from 'react';
 import { isNew, fmtAmount, type SharedTabProps } from './apt-utils';
 import dynamic from 'next/dynamic';
@@ -262,7 +263,7 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
           <div key={`${t.id || i}`} onClick={() => setSelected(t)} className="hero-card" style={{ cursor: 'pointer', borderLeft: isMax ? '3px solid rgba(251,191,36,0.5)' : `3px solid ${borderColor}40` }}>
             {/* 히어로 이미지 */}
             <div className="hero-img">
-              <img src={aptImageMap?.[t.apt_name] || `/api/og?title=${encodeURIComponent(t.apt_name || '아파트')}&category=apt&design=${(i % 6) + 1}`} alt={t.apt_name || "아파트"} width={400} height={120} loading="lazy" />
+              <img src={safeImg(aptImageMap?.[t.apt_name], { title: t.apt_name || '아파트', category: 'apt', design: (i % 6) + 1 })} alt={t.apt_name || "아파트"} width={400} height={120} loading="lazy" decoding="async" />
               <div className="hero-badges">
                 <span className="hero-badge" style={{ background: t.trade_type === '매매' ? 'rgba(124,58,237,0.9)' : 'rgba(5,150,105,0.9)', color: '#fff' }}>{t.trade_type || '매매'}</span>
                 {isNew(t, 'transaction') && <span className="hero-badge" style={{ background: 'rgba(254,243,199,0.95)', color: '#92400E' }}>NEW</span>}

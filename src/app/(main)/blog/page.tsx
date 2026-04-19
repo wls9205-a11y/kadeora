@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import React from 'react';
 import Link from 'next/link';
 import { createSupabaseServer } from '@/lib/supabase-server';
+import { safeImg } from '@/lib/image-sanitize';
 import EmptyState from '@/components/EmptyState';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
 import SectionShareButton from '@/components/SectionShareButton';
@@ -400,7 +401,7 @@ export default async function BlogPage({ searchParams }: Props) {
                 <span style={{ fontSize: 10, fontWeight: 800, color: isHot ? 'var(--accent-red)' : 'var(--text-tertiary)', width: 18, textAlign: 'center', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>{rank}</span>
                 {/* 썸네일 */}
                 <div style={{ width: 80, height: 56, borderRadius: 'var(--radius-sm)', overflow: 'hidden', flexShrink: 0, background: 'var(--bg-hover)' }}>
-                    <img src={p.cover_image || `${SITE}/api/og?title=${encodeURIComponent((p.title || '').slice(0, 40))}&design=${(idx % 6) + 1}&category=${p.category || 'blog'}`} alt={p.title || "블로그 썸네일"} width={80} height={56} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} loading="lazy" />
+                    <img src={safeImg(p.cover_image, { title: (p.title || '').slice(0, 40), category: p.category || 'blog', design: (idx % 6) + 1 })} alt={p.title || "블로그 썸네일"} width={80} height={56} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} loading="lazy" decoding="async" />
                   </div>
                 {/* 본문 */}
                 <div style={{ flex: 1, minWidth: 0 }}>

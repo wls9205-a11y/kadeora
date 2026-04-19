@@ -2,6 +2,7 @@
 import LoginGate from '@/components/LoginGate';
 import SectionShareButton from '@/components/SectionShareButton';
 import type { RedevProject } from '@/types/apt';
+import { safeImg } from '@/lib/image-sanitize';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { STAGE_COLORS, STAGE_ORDER, type SharedTabProps } from './apt-utils';
@@ -186,7 +187,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
                 <Link key={r.id} href={`/apt/${encodeURIComponent(redevSlug)}`} className="hero-card" style={{ display: 'block', borderLeft: `3px solid ${sc.border}`, opacity: isDosiJeongbi ? 0.7 : 1 }}>
                   {/* 히어로 이미지 */}
                   <div className="hero-img">
-                    <img src={aptImageMap?.[r.district_name || ''] || `/api/og?title=${encodeURIComponent(displayName)}&category=apt&design=${(i % 6) + 1}`} alt={displayName} width={400} height={120} loading="lazy" />
+                    <img src={safeImg(aptImageMap?.[r.district_name || ''], { title: displayName, category: 'apt', design: (i % 6) + 1 })} alt={displayName} width={400} height={120} loading="lazy" decoding="async" />
                     <div className="hero-badges">
                       <span className="hero-badge" style={{ background: r.project_type === '재건축' ? 'rgba(245,158,11,0.9)' : isDosiJeongbi ? 'rgba(107,114,128,0.7)' : 'rgba(234,88,12,0.9)', color: '#fff' }}>
                         {isDosiJeongbi ? '도시정비' : r.project_type || '재개발'}

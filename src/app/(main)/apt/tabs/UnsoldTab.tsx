@@ -2,6 +2,7 @@
 import LoginGate from '@/components/LoginGate';
 import Link from 'next/link';
 import SectionShareButton from '@/components/SectionShareButton';
+import { safeImg } from '@/lib/image-sanitize';
 import type { UnsoldApt } from '@/types/apt';
 import { useState, useEffect } from 'react';
 import { type SharedTabProps, generateAptSlug, isNew } from './apt-utils';
@@ -176,7 +177,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
           <Link key={u.id} href={`/apt/${encodeURIComponent(generateAptSlug(u.house_nm) || String(u.id))}`} className="hero-card" style={{ display: 'block', borderLeft: '3px solid rgba(248,113,113,0.5)' }}>
             {/* 히어로 이미지 */}
             <div className="hero-img">
-              <img src={aptImageMap?.[u.house_nm] || `/api/og?title=${encodeURIComponent(u.house_nm || '미분양')}&category=apt&design=${(i % 6) + 1}`} alt={u.house_nm || "부동산 이미지"} width={400} height={120} loading="lazy" />
+              <img src={safeImg(aptImageMap?.[u.house_nm], { title: u.house_nm || '미분양', category: 'apt', design: (i % 6) + 1 })} alt={u.house_nm || "부동산 이미지"} width={400} height={120} loading="lazy" decoding="async" />
               <div className="hero-badges">
                 <span className="hero-badge" style={{ background: 'rgba(220,38,38,0.9)', color: '#fff' }}>미분양</span>
                 {isNew(u, 'unsold') && <span className="hero-badge" style={{ background: 'rgba(254,243,199,0.95)', color: '#92400E' }}>NEW</span>}

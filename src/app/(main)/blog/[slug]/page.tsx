@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation';
 import { headers } from 'next/headers';
 import { cache } from 'react';
 import { marked } from 'marked';
+import { safeImg } from '@/lib/image-sanitize';
 import { injectInternalLinks } from '@/lib/blog-auto-link';
 import BlogCommentInput from '@/components/BlogCommentInput';
 import BlogCommentCTA from '@/components/BlogCommentCTA';
@@ -51,12 +52,13 @@ renderer.heading = function ({ text, depth }: { text: string; depth: number }) {
   return `<h${depth} id="${id}">${text}</h${depth}>\n`;
 };
 renderer.image = function ({ href, title, text }: { href: string; title?: string | null; text: string }) {
-  const safeHref = href?.replace(/^http:\/\//, 'https://') || '';
+  const httpsHref = href?.replace(/^http:\/\//, 'https://') || '';
+  // 세션 140 P1: 본문 마크다운 이미지도 화이트리스트 sanitize — 오염 소스는 /api/og 로 치환
+  const sanitized = safeImg(httpsHref, { title: text || '카더라', category: 'blog', design: 2 });
   // [L1-8] 네이버 CDN(pstatic/phinf) 이미지는 srcset 변환 시 네이버 이미지 탭 우대 손실 → unoptimized 유지
-  const isNaverCdn = /(pstatic\.net|phinf\.pstatic\.net|phinf\.naver\.net|naver-cdn)/i.test(safeHref);
+  const isNaverCdn = /(pstatic\.net|phinf\.pstatic\.net|phinf\.naver\.net|naver-cdn)/i.test(sanitized);
   const sizesAttr = isNaverCdn ? '' : ` sizes="(max-width: 640px) 100vw, 800px"`;
-  // 외부 CDN은 srcset 변환이 보장되지 않으므로 sizes만 힌트로 추가. next/image 대체는 별도 컴포넌트 사용처에서 진행.
-  return `<img src="${safeHref}" alt="${text || ''}" ${title ? `title="${title}"` : ''} width="800" height="450" loading="lazy" decoding="async"${sizesAttr} style="max-width:100%;height:auto;border-radius:8px" onerror="this.style.display='none'" />`;
+  return `<img src="${sanitized}" alt="${text || ''}" ${title ? `title="${title}"` : ''} width="800" height="450" loading="lazy" decoding="async"${sizesAttr} style="max-width:100%;height:auto;border-radius:8px" onerror="this.style.display='none'" />`;
 };
 renderer.link = function ({ href, title, text }: { href: string; title?: string | null; text: string }) {
   const isExternal = href && (href.startsWith('http://') || href.startsWith('https://'));
@@ -879,7 +881,8 @@ export default async function BlogDetailPage({ params }: Props) {
         {postImages.filter((img: any) => img.image_type !== 'og_card' && img.image_type !== 'infographic').length > 0 && (
           <BlogHeroImage
             images={postImages.filter((img: any) => img.image_type !== 'og_card' && img.image_type !== 'infographic').map((img: any) => ({
-              url: img.image_url,
+              // 세션 140 P1: 오염 URL 은 /api/og 로 치환
+              url: safeImg(img.image_url, { title: post.title, category: 'blog', design: 2 }),
               alt: img.alt_text || `${post.title} — 카더라 ${catSection[post.category] || ''} 분석`,
               caption: img.caption || undefined,
             }))}
@@ -897,7 +900,12 @@ export default async function BlogDetailPage({ params }: Props) {
               관련 이미지 · {galleryImages.length}장
             </h3>
             <ImageLightbox
-              images={galleryImages.map(g => ({ url: g.image_url, caption: g.caption, alt: g.alt_text }))}
+              images={galleryImages.map(g => ({
+                // 세션 140 P1: 갤러리 이미지도 sanitize
+                url: safeImg(g.image_url, { title: post.title, category: 'blog', design: 2 }),
+                caption: g.caption,
+                alt: g.alt_text,
+              }))}
               columns={3}
             />
           </section>

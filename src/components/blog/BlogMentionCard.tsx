@@ -1,4 +1,5 @@
 import { createSupabaseServer } from '@/lib/supabase-server';
+import { safeImg } from '@/lib/image-sanitize';
 import Link from 'next/link';
 
 /**
@@ -782,9 +783,11 @@ function renderAptTop(apts: any[], region: string | null, sigungu: string | null
             : `/apt/${a.slug || a.id}`;
 
           const imgs = Array.isArray(a.images) ? a.images : [];
-          const thumbUrl = imgs.length > 0
+          const rawThumb = imgs.length > 0
             ? (typeof imgs[0] === 'string' ? imgs[0] : imgs[0]?.url || '')
             : '';
+          // 세션 140 P1: 화이트리스트 sanitize — 서버 컴포넌트이므로 onError 금지, URL 레벨에서 확정
+          const thumbUrl = safeImg(rawThumb, { title: a.name || '카더라', category: 'apt', design: 2 });
 
           const price = a._source === 'complex'
             ? fmtComplexPrice(a.latest_sale_price)
@@ -806,18 +809,14 @@ function renderAptTop(apts: any[], region: string | null, sigungu: string | null
                 display: 'block',
               }}
             >
-              {/* 썸네일 */}
+              {/* 세션 140 P1: img 항상 렌더 (safeImg /api/og fallback 보장) — 서버 컴포넌트 onError 금지 */}
               <div style={{ width: '100%', height: 88, position: 'relative' }}>
-                {thumbUrl ? (
-                  <img
-                    src={thumbUrl} alt={a.name || ''}
-                    width={152} height={88}
-                    style={{ width: '100%', height: 88, objectFit: 'cover', display: 'block' }}
-                    loading="lazy"
-                  />
-                ) : (
-                  <FallbackThumb name={a.name || ''} height={88} isSeed={isSeed} />
-                )}
+                <img
+                  src={thumbUrl} alt={a.name || ''}
+                  width={152} height={88}
+                  style={{ width: '100%', height: 88, objectFit: 'cover', display: 'block' }}
+                  loading="lazy" decoding="async"
+                />
                 {isSeed && (
                   <span style={{
                     position: 'absolute', top: 6, left: 6,
@@ -903,9 +902,11 @@ function renderAptBottom(apts: any[], region: string | null, sigungu: string | n
             ? `/apt/complex/${encodeURIComponent(a.name)}`
             : `/apt/${a.slug || a.id}`;
           const imgs = Array.isArray(a.images) ? a.images : [];
-          const thumbUrl = imgs.length > 0
+          const rawThumb = imgs.length > 0
             ? (typeof imgs[0] === 'string' ? imgs[0] : imgs[0]?.url || '')
             : '';
+          // 세션 140 P1: safeImg 화이트리스트 적용
+          const thumbUrl = safeImg(rawThumb, { title: a.name || '카더라', category: 'apt', design: 2 });
           const price = a._source === 'complex'
             ? fmtComplexPrice(a.latest_sale_price)
             : fmtAptPriceRange(a.price_min, a.price_max);
@@ -921,16 +922,13 @@ function renderAptBottom(apts: any[], region: string | null, sigungu: string | n
                 background: 'var(--bg-surface, var(--bg-secondary))', display: 'block',
               }}
             >
-              {thumbUrl ? (
-                <img
-                  src={thumbUrl} alt={a.name || ''}
-                  width={136} height={76}
-                  style={{ width: '100%', height: 76, objectFit: 'cover', display: 'block', background: 'var(--bg-hover)' }}
-                  loading="lazy"
-                />
-              ) : (
-                <FallbackThumb name={a.name || ''} height={76} />
-              )}
+              {/* 세션 140 P1: img 항상 렌더 (safeImg /api/og fallback 보장) */}
+              <img
+                src={thumbUrl} alt={a.name || ''}
+                width={136} height={76}
+                style={{ width: '100%', height: 76, objectFit: 'cover', display: 'block', background: 'var(--bg-hover)' }}
+                loading="lazy" decoding="async"
+              />
               <div style={{ padding: '8px 8px 7px' }}>
                 <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {a.name}
