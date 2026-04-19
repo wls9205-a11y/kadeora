@@ -49,10 +49,27 @@ export default async function RegionRedevPage({ params }: Props) {
   if (!VALID_REGIONS.includes(decodedRegion)) notFound();
 
   const sb = await createSupabaseServer();
-  const [projectsR, blogR] = await Promise.all([
+  const [projectsR, blogR, siteImgR, complexImgR] = await Promise.all([
     sb.from('redevelopment_projects').select('id, district_name, sigungu, project_type, sub_type, stage, total_households, constructor, floor_area_ratio, building_coverage, max_floor, ai_summary, blog_count, avg_trade_price, area_sqm, address, notes').eq('is_active', true).eq('region', decodedRegion).neq('sub_type', '도시환경정비').order('stage'),
     sb.from('blog_posts').select('slug, title, view_count').eq('category', 'redev').eq('is_published', true).contains('tags', [decodedRegion]).order('view_count', { ascending: false }).limit(5),
+    // 세션 139: apt_sites 이미지 (district_name 매칭 용)
+    (sb as any).from('apt_sites').select('name, images').ilike('region', `%${decodedRegion}%`).not('images', 'is', null).limit(500),
+    // 세션 139: apt_complex_profiles 이미지 fallback
+    (sb as any).from('apt_complex_profiles').select('apt_name, images').ilike('region_nm', `%${decodedRegion}%`).not('images', 'is', null).limit(500),
   ]);
+
+  // 세션 139: name → thumbnail map 빌드 (apt_complex_profiles 1순위, apt_sites 덮어쓰기)
+  const imageMap = new Map<string, string>();
+  for (const row of (complexImgR.data || []) as any[]) {
+    if (Array.isArray(row.images) && row.images.length > 0 && row.images[0]?.url) {
+      imageMap.set(row.apt_name, String(row.images[0].thumbnail || row.images[0].url).replace(/^http:\/\//, 'https://'));
+    }
+  }
+  for (const row of (siteImgR.data || []) as any[]) {
+    if (Array.isArray(row.images) && row.images.length > 0 && row.images[0]?.url) {
+      imageMap.set(row.name, String(row.images[0].thumbnail || row.images[0].thumb || row.images[0].url).replace(/^http:\/\//, 'https://'));
+    }
+  }
 
   const projects: any[] = projectsR.data || [];
   const blogs: any[] = blogR.data || [];
@@ -200,12 +217,19 @@ export default async function RegionRedevPage({ params }: Props) {
           const stageIdx = STAGE_ORDER.indexOf(p.stage || '');
           const progress = stageIdx >= 0 ? Math.round(((stageIdx + 1) / STAGE_ORDER.length) * 100) : 0;
           const slug = generateAptSlug(p.district_name || `redev-${p.id}`);
+          const projectName = p.district_name || p.sigungu || '구역';
+          // 세션 139: name → thumb, og fallback 보장
+          const thumb = imageMap.get(p.district_name) || imageMap.get(projectName)
+            || `/api/og?title=${encodeURIComponent(projectName)}&design=2&category=apt&subtitle=${encodeURIComponent(p.project_type || '재개발')}`;
           return (
             <Link key={p.id} href={`/apt/${encodeURIComponent(slug)}`} style={{
-              display: 'block', padding: '10px 14px', borderRadius: 'var(--radius-md)',
+              display: 'flex', gap: 10, padding: '10px 14px', borderRadius: 'var(--radius-md)',
               background: 'var(--bg-surface)', border: '1px solid var(--border)',
               textDecoration: 'none', color: 'inherit',
             }}>
+              <img src={thumb} alt={`${projectName} 이미지`} width={72} height={54} loading="lazy" decoding="async" referrerPolicy="no-referrer"
+                style={{ width: 72, height: 54, objectFit: 'cover', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', flexShrink: 0 }} />
+              <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
                 <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 6px', borderRadius: 'var(--radius-sm)', background: p.project_type === '재건축' ? 'rgba(245,158,11,0.9)' : 'rgba(139,92,246,0.9)', color: '#fff' }}>{p.project_type || '재개발'}</span>
                 <span style={{ fontSize: 10, fontWeight: 600, color: sc }}>{p.stage}</span>
@@ -215,7 +239,7 @@ export default async function RegionRedevPage({ params }: Props) {
                 <span style={{ fontSize: 10, fontWeight: 700, color: sc }}>{progress}%</span>
               </div>
               <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 3 }}>
-                {p.district_name || p.sigungu || '구역'}
+                {projectName}
               </div>
               <div style={{ fontSize: 11, color: 'var(--text-tertiary)', display: 'flex', flexWrap: 'wrap', gap: '2px 10px' }}>
                 {p.sigungu && <span>{p.sigungu}</span>}
@@ -226,6 +250,7 @@ export default async function RegionRedevPage({ params }: Props) {
               </div>
               {p.address && <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>📍 {p.address}</div>}
               {(p.ai_summary || (p.notes && !/사업지구|정비사업/.test(p.notes))) && <div style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 4, borderLeft: `2px solid ${sc}`, paddingLeft: 6, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>🤖 {p.ai_summary || p.notes}</div>}
+              </div>
             </Link>
           );
         })}

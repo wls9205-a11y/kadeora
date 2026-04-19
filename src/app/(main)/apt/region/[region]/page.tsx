@@ -100,7 +100,7 @@ export const revalidate = 3600;
 async function fetchRegionData(region: string) {
   const s = sb();
 
-  const [subsRes, tradesRes, redevRes, unsoldRes, priceRes] = await Promise.all([
+  const [subsRes, tradesRes, redevRes, unsoldRes, priceRes, siteImgRes, complexImgRes] = await Promise.all([
     s.from('apt_subscriptions')
       .select('id,house_nm,region_nm,rcept_bgnde,rcept_endde,tot_supply_hshld_co,hssply_adres,is_price_limit,constructor_nm,ai_summary,house_type_info,price_per_pyeong_avg,brand_name,project_type,loan_rate,is_regulated_area,developer_nm,total_households')
       .ilike('region_nm', `%${region}%`)
@@ -123,7 +123,23 @@ async function fetchRegionData(region: string) {
       .ilike('region', `%${region}%`).eq('is_active', true)
       .gt('price_min', 0).gt('price_max', 0)
       .limit(50) as unknown as Promise<any>,
+    // 세션 139: 카드 썸네일 맵 (apt_sites + apt_complex_profiles)
+    (s as any).from('apt_sites').select('name, images').ilike('region', `%${region}%`).not('images', 'is', null).limit(500) as unknown as Promise<any>,
+    (s as any).from('apt_complex_profiles').select('apt_name, images').ilike('region_nm', `%${region}%`).not('images', 'is', null).limit(500) as unknown as Promise<any>,
   ]);
+
+  // 세션 139: name → thumbnail 맵 (apt_complex_profiles 1순위, apt_sites 덮어쓰기)
+  const imageMap: Record<string, string> = {};
+  for (const row of ((complexImgRes as any)?.data || []) as any[]) {
+    if (Array.isArray(row.images) && row.images.length > 0 && row.images[0]?.url) {
+      imageMap[row.apt_name] = String(row.images[0].thumbnail || row.images[0].url).replace(/^http:\/\//, 'https://');
+    }
+  }
+  for (const row of ((siteImgRes as any)?.data || []) as any[]) {
+    if (Array.isArray(row.images) && row.images.length > 0 && row.images[0]?.url) {
+      imageMap[row.name] = String(row.images[0].thumbnail || row.images[0].thumb || row.images[0].url).replace(/^http:\/\//, 'https://');
+    }
+  }
 
   const priceData = priceRes?.data || [];
   const priceStats = priceData.length > 0 ? {
@@ -140,7 +156,14 @@ async function fetchRegionData(region: string) {
     redevelopments: redevRes?.data || [],
     unsolds: unsoldRes?.data || [],
     priceStats,
+    imageMap,
   };
+}
+
+// 세션 139: 카드 썸네일 헬퍼 (map 미스 시 og fallback)
+function cardThumb(name: string, imageMap: Record<string, string>, subtitle = '') {
+  if (imageMap[name]) return imageMap[name];
+  return `/api/og?title=${encodeURIComponent(name || '')}&design=2&category=apt${subtitle ? `&subtitle=${encodeURIComponent(subtitle)}` : ''}`;
 }
 
 function fmtPrice(n: number) {
@@ -306,10 +329,13 @@ export default async function RegionLandingPage({ params }: Props) {
           <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>📋 최근 청약 {(() => { const plCount = data.subscriptions.filter((s: any) => s.is_price_limit).length; return plCount > 0 ? <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--accent-purple)', marginLeft: 6 }}>분양가상한제 {plCount}건</span> : null; })()}</h2>
           {data.subscriptions.map((s: any) => (
             <Link key={s.id} href={`/apt/${s.id}`} style={{
-              display: 'block', textDecoration: 'none', padding: 'var(--sp-md) var(--card-p)',
+              display: 'flex', gap: 10, textDecoration: 'none', padding: 'var(--sp-md) var(--card-p)',
               background: 'var(--bg-surface)', border: '1px solid var(--border)',
               borderRadius: 'var(--radius-md)', marginBottom: 6,
             }}>
+              {/* 세션 139: 카드 썸네일 */}
+              <img src={cardThumb(s.house_nm, data.imageMap, '청약')} alt={`${s.house_nm} 이미지`} width={72} height={54} loading="lazy" decoding="async" referrerPolicy="no-referrer" style={{ width: 72, height: 54, objectFit: 'cover', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', flexShrink: 0 }} />
+              <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
                 <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.house_nm}</span>
                 {s.is_price_limit && <span style={{ fontSize: 10, fontWeight: 600, padding: '1px 5px', borderRadius: 4, background: 'rgba(139,92,246,0.1)', color: 'var(--accent-purple)', flexShrink: 0 }}>상한제</span>}
@@ -337,6 +363,7 @@ export default async function RegionLandingPage({ params }: Props) {
                   </div>
                 );
               })()}
+              </div>
             </Link>
           ))}
         </section>
@@ -348,11 +375,13 @@ export default async function RegionLandingPage({ params }: Props) {
           <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>💰 최근 실거래</h2>
           {data.transactions.map((t: any, i: number) => (
             <div key={i} style={{
-              display: 'flex', justifyContent: 'space-between', padding: '8px 14px',
+              display: 'flex', alignItems: 'center', gap: 10, padding: '8px 14px',
               background: 'var(--bg-surface)', border: '1px solid var(--border)',
               borderRadius: 'var(--radius-md)', marginBottom: 'var(--sp-xs)',
             }}>
-              <div>
+              {/* 세션 139: 실거래 카드 썸네일 */}
+              <img src={cardThumb(t.apt_name, data.imageMap, '실거래')} alt={`${t.apt_name} 이미지`} width={56} height={42} loading="lazy" decoding="async" referrerPolicy="no-referrer" style={{ width: 56, height: 42, objectFit: 'cover', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', flexShrink: 0 }} />
+              <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{t.apt_name}</div>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{t.deal_date} · {t.exclusive_area}㎡</div>
               </div>
@@ -373,17 +402,19 @@ export default async function RegionLandingPage({ params }: Props) {
           <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>🏗️ 재개발 현황</h2>
           {data.redevelopments.map((r: any) => (
             <div key={r.id} style={{
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              display: 'flex', alignItems: 'center', gap: 10,
               padding: '8px 14px', background: 'var(--bg-surface)', border: '1px solid var(--border)',
               borderRadius: 'var(--radius-md)', marginBottom: 'var(--sp-xs)',
             }}>
-              <div>
+              {/* 세션 139: 재개발 카드 썸네일 */}
+              <img src={cardThumb(r.district_name, data.imageMap, '재개발')} alt={`${r.district_name} 이미지`} width={56} height={42} loading="lazy" decoding="async" referrerPolicy="no-referrer" style={{ width: 56, height: 42, objectFit: 'cover', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', flexShrink: 0 }} />
+              <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{r.district_name}</div>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{r.region}</div>
               </div>
               <span style={{
                 fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 4,
-                background: 'var(--bg-hover)', color: 'var(--accent-orange)', fontWeight: 600,
+                background: 'var(--bg-hover)', color: 'var(--accent-orange)', fontWeight: 600, flexShrink: 0,
               }}>
                 {r.stage || '진행중'}
               </span>
@@ -398,12 +429,14 @@ export default async function RegionLandingPage({ params }: Props) {
           <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>🏚️ 미분양</h2>
           {data.unsolds.map((u: any) => (
             <div key={u.id} style={{
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              display: 'flex', alignItems: 'center', gap: 10,
               padding: '8px 14px', background: 'var(--bg-surface)', border: '1px solid var(--border)',
               borderRadius: 'var(--radius-md)', marginBottom: 'var(--sp-xs)',
             }}>
-              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{u.house_nm}</div>
-              <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--accent-red)' }}>{u.tot_unsold_hshld_co}세대</span>
+              {/* 세션 139: 미분양 카드 썸네일 */}
+              <img src={cardThumb(u.house_nm, data.imageMap, '미분양')} alt={`${u.house_nm} 이미지`} width={56} height={42} loading="lazy" decoding="async" referrerPolicy="no-referrer" style={{ width: 56, height: 42, objectFit: 'cover', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', flexShrink: 0 }} />
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', flex: 1, minWidth: 0 }}>{u.house_nm}</div>
+              <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--accent-red)', flexShrink: 0 }}>{u.tot_unsold_hshld_co}세대</span>
             </div>
           ))}
         </section>

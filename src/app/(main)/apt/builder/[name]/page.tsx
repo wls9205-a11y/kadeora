@@ -125,16 +125,15 @@ export default async function BuilderPage({ params }: Props) {
             const thumb = Array.isArray((s as any).images) && (s as any).images[0]
               ? ((s as any).images[0]?.thumbnail || (s as any).images[0]?.url || null)
               : null;
-            const safeThumb = thumb ? String(thumb).replace(/^http:\/\//, 'https://') : null;
+            // 세션 139: og fallback 항상 보장 → img 태그 무조건 렌더 (placeholder div 제거)
+            const finalThumb = thumb
+              ? String(thumb).replace(/^http:\/\//, 'https://')
+              : `/api/og?title=${encodeURIComponent(s.name || '')}&design=2&category=apt&subtitle=${encodeURIComponent(tLabel[s.site_type] || '')}`;
             return (
               <Link key={i} href={`/apt/${s.slug}`} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', textDecoration: 'none' }}>
-                {safeThumb ? (
-                  <img src={safeThumb} alt={`${s.name} 현장 이미지`} width={56} height={42} loading="lazy" referrerPolicy="no-referrer"
-                    style={{ width: 56, height: 42, objectFit: 'cover', borderRadius: 'var(--radius-sm)', background: '#162035', flexShrink: 0 }}
-                  />
-                ) : (
-                  <div aria-hidden style={{ width: 56, height: 42, borderRadius: 'var(--radius-sm)', flexShrink: 0, background: 'linear-gradient(135deg, #0c1629 0%, #1a3050 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, color: 'rgba(255,255,255,0.45)', fontWeight: 700 }}>{tLabel[s.site_type]?.slice(0,2) || '—'}</div>
-                )}
+                <img src={finalThumb} alt={`${s.name} 현장 이미지`} width={56} height={42} loading="lazy" decoding="async" referrerPolicy="no-referrer"
+                  style={{ width: 56, height: 42, objectFit: 'cover', borderRadius: 'var(--radius-sm)', background: '#162035', flexShrink: 0 }}
+                />
                 <div style={{ minWidth: 0, flex: 1 }}>
                   <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</div>
                   <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{s.region} {s.sigungu || ''} · {tLabel[s.site_type] || ''}{s.total_units ? ` · ${s.total_units}세대` : ''}</div>
@@ -146,6 +145,7 @@ export default async function BuilderPage({ params }: Props) {
               </Link>
             );
           })}
+          {/* 세션 139: 위 map 블록은 img 항상 렌더 (og-fallback 보장) */}
         </div>
       </section>
 

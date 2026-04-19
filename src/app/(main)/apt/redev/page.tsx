@@ -155,10 +155,13 @@ export default async function RedevLandingPage() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 8, marginBottom: 24 }}>
         {regionStats.map(r => (
           <Link key={r.name} href={`/apt/redev/${encodeURIComponent(r.name)}`} style={{
-            display: 'block', padding: '12px 10px', borderRadius: 'var(--radius-md)',
+            display: 'block', borderRadius: 'var(--radius-md)', overflow: 'hidden',
             background: 'var(--bg-surface)', border: '1px solid var(--border)',
             textDecoration: 'none', color: 'inherit', textAlign: 'center',
           }}>
+            {/* 세션 139: 지역별 대표 og 썸네일 */}
+            <img src={`/api/og?title=${encodeURIComponent(r.name + ' 재개발·재건축')}&design=2&category=apt&subtitle=${encodeURIComponent(`${r.total}개 구역`)}`} alt={`${r.name} 재개발 현황`} width={280} height={88} loading="lazy" decoding="async" style={{ width: '100%', height: 88, objectFit: 'cover', display: 'block', background: 'var(--bg-hover)' }} />
+            <div style={{ padding: '10px' }}>
             <div style={{ fontSize: 20, fontWeight: 900, color: 'var(--brand)' }}>{r.total}</div>
             <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', margin: '2px 0' }}>{r.name}</div>
             <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>
@@ -166,6 +169,7 @@ export default async function RedevLandingPage() {
             </div>
             {r.households > 0 && <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{r.households.toLocaleString()}세대</div>}
             {r.withConstructor > 0 && <div style={{ fontSize: 10, color: 'var(--accent-green)' }}>시공사 확정 {r.withConstructor}</div>}
+            </div>
           </Link>
         ))}
       </div>
