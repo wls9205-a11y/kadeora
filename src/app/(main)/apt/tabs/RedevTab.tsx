@@ -186,7 +186,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
                 <Link key={r.id} href={`/apt/${encodeURIComponent(redevSlug)}`} className="hero-card" style={{ display: 'block', borderLeft: `3px solid ${sc.border}`, opacity: isDosiJeongbi ? 0.7 : 1 }}>
                   {/* 히어로 이미지 */}
                   <div className="hero-img">
-                    <img src={aptImageMap?.[r.district_name || ''] || `/api/og?title=${encodeURIComponent(displayName)}&category=apt&design=${(i % 6) + 1}`} alt={displayName} width={400} height={120} loading="lazy" decoding="async" referrerPolicy="no-referrer" onError={(e) => { const el = e.currentTarget as HTMLImageElement; const fb = `/api/og?title=${encodeURIComponent(displayName)}&category=apt&design=${(i % 6) + 1}`; if (!el.src.endsWith(fb)) el.src = fb; }} />
+                    <img src={aptImageMap?.[r.district_name || ''] || `/api/og?title=${encodeURIComponent(displayName)}&category=apt&design=${(i % 6) + 1}`} alt={displayName} width={400} height={120} loading="lazy" />
                     <div className="hero-badges">
                       <span className="hero-badge" style={{ background: r.project_type === '재건축' ? 'rgba(245,158,11,0.9)' : isDosiJeongbi ? 'rgba(107,114,128,0.7)' : 'rgba(234,88,12,0.9)', color: '#fff' }}>
                         {isDosiJeongbi ? '도시정비' : r.project_type || '재개발'}

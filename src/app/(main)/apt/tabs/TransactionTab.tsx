@@ -262,7 +262,7 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
           <div key={`${t.id || i}`} onClick={() => setSelected(t)} className="hero-card" style={{ cursor: 'pointer', borderLeft: isMax ? '3px solid rgba(251,191,36,0.5)' : `3px solid ${borderColor}40` }}>
             {/* 히어로 이미지 */}
             <div className="hero-img">
-              <img src={aptImageMap?.[t.apt_name] || `/api/og?title=${encodeURIComponent(t.apt_name || '아파트')}&category=apt&design=${(i % 6) + 1}`} alt={t.apt_name || "아파트"} width={400} height={120} loading="lazy" decoding="async" referrerPolicy="no-referrer" onError={(e) => { const el = e.currentTarget as HTMLImageElement; const fb = `/api/og?title=${encodeURIComponent(t.apt_name || '아파트')}&category=apt&design=${(i % 6) + 1}`; if (!el.src.endsWith(fb)) el.src = fb; }} />
+              <img src={aptImageMap?.[t.apt_name] || `/api/og?title=${encodeURIComponent(t.apt_name || '아파트')}&category=apt&design=${(i % 6) + 1}`} alt={t.apt_name || "아파트"} width={400} height={120} loading="lazy" />
               <div className="hero-badges">
                 <span className="hero-badge" style={{ background: t.trade_type === '매매' ? 'rgba(124,58,237,0.9)' : 'rgba(5,150,105,0.9)', color: '#fff' }}>{t.trade_type || '매매'}</span>
                 {isNew(t, 'transaction') && <span className="hero-badge" style={{ background: 'rgba(254,243,199,0.95)', color: '#92400E' }}>NEW</span>}

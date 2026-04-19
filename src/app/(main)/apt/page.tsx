@@ -176,33 +176,20 @@ async function fetchAptData() {
     const { getSupabaseAdmin } = await import('@/lib/supabase-admin');
     const adminSb = getSupabaseAdmin();
     // 병렬: apt_sites(청약/미분양/재개발) + apt_complex_profiles(실거래 34,539개 단지)
-    // 세션 140: og_image_url (kadeora /api/og safe 소스) 1순위 — 외부 hotlink 오염 차단
     const [sitesRes, complexRes] = await Promise.all([
-      (adminSb as any).from('apt_sites').select('name, og_image_url, images, page_views, comment_count, interest_count').or('images.not.is.null,og_image_url.not.is.null'),
+      (adminSb as any).from('apt_sites').select('name, images, page_views, comment_count, interest_count').not('images', 'is', null),
       (adminSb as any).from('apt_complex_profiles').select('apt_name, images').not('images', 'is', null),
     ]);
-    // 1순위: apt_complex_profiles (실거래 단지 전체 커버) — Task 1 DB 정화 후 images 는 safe 소스만
+    // 1순위: apt_complex_profiles (실거래 단지 전체 커버)
     for (const row of (complexRes.data || []) as any[]) {
       if (Array.isArray(row.images) && row.images.length > 0 && row.images[0]?.url) {
         aptImageMap[row.apt_name] = row.images[0].thumbnail || row.images[0].url;
       }
     }
     // 2순위: apt_sites (청약/미분양/재개발 — 덮어쓰기로 더 정확한 이미지 우선)
-    // 세션 140: og_image_url 이 /api/og 로 시작하면(kadeora safe) 최우선 — 외부 hotlink 오염 회피
     for (const row of (sitesRes.data || []) as any[]) {
-      const ogUrl: string | null = row.og_image_url;
-      const firstImg = Array.isArray(row.images) && row.images.length > 0 && row.images[0]?.url
-        ? (row.images[0].thumbnail || row.images[0].thumb || row.images[0].url)
-        : null;
-      // 1a 순위: kadeora /api/og 로 시작하는 safe og_image_url
-      if (ogUrl && ogUrl.includes('/api/og')) {
-        aptImageMap[row.name] = ogUrl;
-      } else if (firstImg) {
-        // 1b: images[0] (DB cleanup 이후 safe)
-        aptImageMap[row.name] = firstImg;
-      } else if (ogUrl) {
-        // 1c: 외부 og_image_url (placeholder 보다 낫음, onError 로 fallback)
-        aptImageMap[row.name] = ogUrl;
+      if (Array.isArray(row.images) && row.images.length > 0 && row.images[0]?.url) {
+        aptImageMap[row.name] = row.images[0].thumbnail || row.images[0].thumb || row.images[0].url;
       }
       if (row.page_views > 0 || row.comment_count > 0 || row.interest_count > 0) {
         aptEngageMap[row.name] = { views: row.page_views || 0, comments: row.comment_count || 0, interest: row.interest_count || 0 };
