@@ -8,7 +8,6 @@ import { SITE_URL } from '@/lib/constants';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { notFound } from 'next/navigation';
 import RelatedContentCard from '@/components/RelatedContentCard';
-import LoginGate from '@/components/LoginGate';
 import GatedStockSection from '@/components/stock/GatedStockSection';
 import Link from 'next/link';
 import type { Metadata } from 'next';
