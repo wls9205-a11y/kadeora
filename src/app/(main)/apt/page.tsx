@@ -170,16 +170,24 @@ async function fetchAptData() {
   } catch {}
 
   // ━━━ 현장 이미지 맵 (apt_sites + apt_complex_profiles → 카드 썸네일용) ━━━
+  // 세션 142 마감: PostgREST 1000 row cap 으로 34K row 조회 잘려 매칭 누락 → 0 외부 CDN URL
+  // → 실제 apts/unsold house_nm set 으로 타깃 in() 조회 (payload ↓, 매칭율 ↑)
   let aptImageMap: Record<string, string> = {};
   let aptEngageMap: Record<string, { views: number; comments: number; interest: number }> = {};
   try {
     const { getSupabaseAdmin } = await import('@/lib/supabase-admin');
     const adminSb = getSupabaseAdmin();
-    // 병렬: apt_sites(청약/미분양/재개발) + apt_complex_profiles(실거래 34,539개 단지)
-    const [sitesRes, complexRes] = await Promise.all([
-      (adminSb as any).from('apt_sites').select('name, images, page_views, comment_count, interest_count').not('images', 'is', null),
-      (adminSb as any).from('apt_complex_profiles').select('apt_name, images').not('images', 'is', null),
-    ]);
+    const neededNames = Array.from(new Set([
+      ...apts.map((a: any) => a.house_nm).filter(Boolean),
+      ...unsold.map((u: any) => u.house_nm).filter(Boolean),
+    ])) as string[];
+    const scopedSites = neededNames.length > 0
+      ? (adminSb as any).from('apt_sites').select('name, images, page_views, comment_count, interest_count').in('name', neededNames).not('images', 'is', null)
+      : (adminSb as any).from('apt_sites').select('name, images, page_views, comment_count, interest_count').not('images', 'is', null).limit(2000);
+    const scopedComplex = neededNames.length > 0
+      ? (adminSb as any).from('apt_complex_profiles').select('apt_name, images').in('apt_name', neededNames).not('images', 'is', null)
+      : (adminSb as any).from('apt_complex_profiles').select('apt_name, images').not('images', 'is', null).limit(2000);
+    const [sitesRes, complexRes] = await Promise.all([scopedSites, scopedComplex]);
     // 1순위: apt_complex_profiles (실거래 단지 전체 커버)
     for (const row of (complexRes.data || []) as any[]) {
       if (Array.isArray(row.images) && row.images.length > 0 && row.images[0]?.url) {

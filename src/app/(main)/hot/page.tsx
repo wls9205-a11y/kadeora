@@ -1,4 +1,5 @@
 import { SITE_URL } from '@/lib/constants';
+import { safeImg } from '@/lib/image-sanitize';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { createSupabaseServer } from '@/lib/supabase-server';
@@ -50,24 +51,15 @@ export default async function HotPage() {
     const sb = await createSupabaseServer();
     const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
+    // 세션 142 마감: 기존 2단계 posts 쿼리 → get_hot_posts_with_images RPC 1회 호출
+    // RPC 반환: [{id, slug, title, excerpt, category, author_id, created_at,
+    //           hero_image, view_count, likes_count, comments_count, ...}]
+    // hero_image 는 posts/apt_sites/apt_complex_profiles/blog_post_images 체인으로 DB 레벨 JOIN
     const topResult = await withTimeout(
-      sb.from('posts')
-        .select('id,title,slug,category,likes_count,comments_count,view_count,region_id,author_id,profiles!posts_author_id_fkey(nickname)')
-        .eq('is_deleted', false).gte('created_at', weekAgo)
-        .order('likes_count', { ascending: false }).limit(5)
+      (sb as any).rpc('get_hot_posts_with_images', { p_limit: 30, p_offset: 0 })
     );
-    topPosts = (topResult as { data: any })?.data ?? null;
-
-    if (!topPosts || topPosts.length === 0) {
-      const monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-      const fallback = await withTimeout(
-        sb.from('posts')
-          .select('id,title,slug,category,likes_count,comments_count,view_count,region_id,author_id,profiles!posts_author_id_fkey(nickname)')
-          .eq('is_deleted', false).gte('created_at', monthAgo)
-          .order('likes_count', { ascending: false }).limit(5)
-      );
-      topPosts = (fallback as { data: any })?.data ?? null;
-    }
+    const topAll = (topResult as { data: any })?.data ?? null;
+    topPosts = Array.isArray(topAll) ? topAll.slice(0, 5) : null;
 
     const regionResults = await Promise.allSettled(
       REGION_SECTIONS.map(region =>
@@ -171,6 +163,14 @@ export default async function HotPage() {
                 <span style={{ fontSize: i < 3 ? 15 : 12, width: 20, textAlign: 'center', flexShrink: 0 }}>
                   {MEDAL[i + 1] ?? `${i + 1}`}
                 </span>
+                {/* 세션 142 마감: hero_image 썸네일 (get_hot_posts_with_images RPC) */}
+                <img
+                  src={safeImg(post.hero_image, { title: post.title || '', category: post.category || 'blog', design: (i % 6) + 1 })}
+                  alt={post.title || '이미지'}
+                  width={40} height={40}
+                  style={{ width: 40, height: 40, borderRadius: 6, objectFit: 'cover', flexShrink: 0, background: 'var(--bg-hover)' }}
+                  loading="lazy" decoding="async" referrerPolicy="no-referrer"
+                />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</div>
                   <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 1 }}>
