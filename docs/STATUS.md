@@ -1,3 +1,36 @@
+# 카더라 STATUS — 세션 143 (2026-04-19)
+
+## 세션 143 (2026-04-19) — 회원가입/온보딩 플로우 근본 수리
+
+### 진단 (Supabase 직접 검증)
+- 14일 가입 483명 중 67명(14%) 온보딩 페이지 진입
+- profile_completed=true 33/126 (26%)
+- 14명 residence_city=NULL + region_text 있음 → 트리거 버그로 영원히 미완료
+- /api/auth/track-attempt 간헐 504 timeout
+
+### 수정
+1. update_profile_completed 트리거: residence_city OR region_text OR residence_district
+   (residence_region 컬럼 미존재 → residence_district로 대체)
+2. 기존 피해자 residence_city ← region_text 백필 (14명 영향)
+3. src/middleware.ts: profile_completed=false → /onboarding 강제 리다이렉트
+   (기존 봇 차단 / CSP / rate limit / 어드민 체크 로직 전부 보존)
+4. /api/auth/track-attempt: fire-and-forget, maxDuration 10s, user_agent 500자
+5. v_onboarding_funnel 뷰 추가 (signup_date별 단계별 퍼널)
+
+### 검증
+- 트리거 수정 확인 OK (pg_get_functiondef)
+- completed 33 → 37 (+4, 백필+트리거 재계산 효과)
+  ※ 47+ 목표 미달 — 남은 89명은 nickname_set/interests 단계 미완료 상태 (온보딩 자체를 안 함)
+  → 새 middleware 리다이렉트로 향후 재방문 시 강제 유입 예상
+- v_onboarding_funnel 7일치 정상 반환 (2026-04-13~19)
+- Vercel 배포 dpl_9Q55JRejHHX7voXwvCammBLcwsrH READY, 에러 로그 0
+- middleware 비로그인 유저 영향 없음 (user null 체크)
+
+### 커밋
+- 616b683e fix(signup): 온보딩 완료 판정 트리거 + middleware 리다이렉트 + track-attempt 비동기화
+
+---
+
 # 카더라 STATUS — 세션 133 완료 (2026-04-17 10:05 UTC)
 
 ## 🟢 배포 완료 — kadeora.app 라이브
