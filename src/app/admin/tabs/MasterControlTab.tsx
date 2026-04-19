@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
+import BigEventCronMonitor from './BigEventCronMonitor';
 
 interface Status {
   health_score: number;
@@ -319,6 +320,9 @@ export default function MasterControlTab() {
           )}
         </div>
       )}
+
+      {/* 세션 139: Big Event Phase 2 cron 모니터링 */}
+      <BigEventCronMonitor />
 
       {/* 🚨 마스터 킬 스위치 */}
       <div style={{ background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 8, padding: 12, marginBottom: 16 }}>
