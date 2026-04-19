@@ -28,6 +28,8 @@ export async function POST(req: NextRequest) {
           success: success ?? false,
           error_message: error_message || null,
           onboarding_skipped: onboarding_skipped ?? null,
+          oauth_started_at: new Date().toISOString(),
+          dropped_step: 'oauth_start',
         })
         .then(() => {})
         .catch(() => {});

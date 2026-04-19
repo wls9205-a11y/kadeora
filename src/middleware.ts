@@ -246,25 +246,11 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // 온보딩 체크: 인증된 사용자 + 일반 페이지만 (public 경로 제외)
-  // 세션 143: profile_completed (nickname_set + interests + 거주지역 중 하나) 기반으로 전환
-  const isPublic = PUBLIC_PATHS.some(p => pathname.startsWith(p));
-  if (user && !isPublic && pathname !== '/onboarding') {
-    try {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('profile_completed')
-        .eq('id', user.id)
-        .maybeSingle();
-      if (profile && profile.profile_completed === false) {
-        const onboardingUrl = new URL('/onboarding', request.url);
-        onboardingUrl.searchParams.set('return', pathname);
-        return NextResponse.redirect(onboardingUrl);
-      }
-    } catch (e) {
-      console.error('[middleware] onboarding check failed:', e);
-    }
-  }
+  // 온보딩 강제 리디렉트 제거 (frictionless signup):
+  // - profiles.onboarded DEFAULT true
+  // - handle_new_user_autoprofile 트리거가 auth.users INSERT 시 자동 onboarded=true 생성
+  // - complete_signup_frictionless RPC 가 callback 에서 idempotent 보정
+  // - /onboarding 페이지는 사용자가 직접 접속 시 optional 설정 용도로 유지
 
   // ── user 정보를 header에 주입 (layout.tsx에서 DB 호출 없이 읽기) ──
   if (user) {
