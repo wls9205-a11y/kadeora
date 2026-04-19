@@ -75,11 +75,20 @@ export async function GET(request: Request) {
     try { await supabase.from('profiles').update({ avatar_url: avatarUrl, updated_at: new Date().toISOString() }).eq('id', user.id); } catch { /* ignore */ }
   }
 
-  // signup_attempts 업데이트 (프로필 생성 추적)
+  // signup_attempts 업데이트 (프로필 생성 추적) + conversion_events cta_complete
   try {
     const { getSupabaseAdmin } = await import('@/lib/supabase-admin');
     const admin = getSupabaseAdmin();
     const nowIso = new Date().toISOString();
+
+    // cta_complete 기록 (fire-and-forget)
+    (admin as any).from('conversion_events').insert({
+      event_type: 'cta_complete',
+      cta_name: source,
+      category: 'signup',
+      page_path: safeRedirect,
+      visitor_id: user.id,
+    }).then(() => {}).catch(() => {});
     const ua = request.headers.get('user-agent') || '';
     const ipRaw = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'anon';
     const ipHash = ipRaw ? Buffer.from(ipRaw).toString('base64').slice(0, 24) : null;

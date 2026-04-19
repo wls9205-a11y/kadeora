@@ -2,6 +2,7 @@
 import { errMsg } from '@/lib/error-utils';
 import { useState, useEffect } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
+import { trackCtaClick } from '@/lib/cta-track';
 
 interface LoginFormProps {
   redirect: string;
@@ -21,8 +22,9 @@ function LoginForm({ redirect }: LoginFormProps) {
     setLoading(provider);
     setError('');
     const source = new URLSearchParams(window.location.search).get('source') || 'direct';
-    // 가입 시도 추적
+    // 가입 시도 추적 + CTA 클릭 이벤트 (conversion_events)
     fetch('/api/auth/track-attempt', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ provider, source, redirect_path: redirect, success: false }) }).catch(() => {});
+    trackCtaClick({ cta_name: source, category: 'signup', page_path: window.location.pathname });
     try {
       const sb = createSupabaseBrowser();
       const { error: err } = await sb.auth.signInWithOAuth({
