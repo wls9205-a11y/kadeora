@@ -158,10 +158,10 @@ async function fetchUnifiedData(slug: string) {
 
   // Stage 6: apt_complex_profiles fallback — handles cases like /apt/파크리오 where
   // the Korean apt name lives only in apt_complex_profiles, not apt_sites.
-  // 세션 142 P0-1: get_apt_complex_hero RPC (returns { profile: {..., images}, related_blogs })
-  // 이전 get_apt_complex_stage6 (동일 기능) → hero 로 통일
+  // 세션 142 P0-1 real: apt_sites 만 miss 해도(sub/unsold/redev 무관) RPC 시도
+  // 이전엔 ALL null 일 때만 진입 → sub ilike wildcard 가 송파파크리오 등을 잘못 매칭해 Stage 6 차단
   let stage6RelatedBlogs: Array<{ id: any; title: string; slug: string; cover_image?: string; view_count?: number; published_at?: string }> = [];
-  if (!site && !sub && !unsold && !redev) {
+  if (!site) {
     const candidate = decodeURIComponent(slug).replace(/-/g, ' ').trim();
     const koreanCandidate = candidate.replace(/[a-z0-9]+/gi, '').replace(/\s+/g, ' ').trim();
     const searchName = koreanCandidate.length >= 2 ? koreanCandidate : candidate;
