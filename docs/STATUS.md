@@ -415,3 +415,78 @@ remaining_node = 0, remaining_founder = 0
 - NODE_NOTIFY_PHONE 환경변수 설정 (Vercel)
 - big_event fact_confidence_score 상승 추이 관찰 → pillar auto-draft 자동 활성화
 - 삼익비치 외 대상 확장: GS·현대·삼성 건설 공식 수주 보도 후 constructor_status='confirmed' 업데이트
+
+---
+
+# 세션 139 (2026-04-20) — Big Event Phase 2 운영 인프라 + GSC 스캐폴드
+
+## 🟢 완료 [9 tasks / 8 commits]
+
+### 스케줄링
+- `[PG-CRON-REGISTER]` supabase/migrations/20260420_pg_cron_big_event_phase2.sql
+  - 5개 신규 cron Supabase pg_cron 등록 (`public._call_vercel_cron` 헬퍼 재사용)
+  - big_event_news_detect(*/30), fact_refresh(03시), subscription_bridge(월 05시),
+    subscription_prebrief(일 08시), auto_pillar_draft(화·금 09시)
+  - `cron.unschedule` 선행 → idempotent 등록
+  - 라이브 등록 확인: jobid 61~65
+
+### 감사·문서
+- `[CRON-TOTAL-AUDIT]` Vercel 100 + pg_cron 37 = **총 137 scheduled**
+  - dead_cron 4건(loan-guide 외)은 이미 vercel.json 미등록 상태 → 추가 정리 불필요
+- `[SOLAPI-TEMPLATES]` `docs/SOLAPI_TEMPLATES.md` — 4종 템플릿 명세
+  - BIG_EVENT_NEWS, DRAFT_READY, STAGE_TRANSITION, FACT_ALERT
+  - 변수/심사 주의/월 비용 ~420원/Node 제출 절차
+- `[NODE-NOTIFY-ENV]` `docs/ENV_SETUP.md`
+  - NODE_NOTIFY_PHONE 형식·환경별 세팅
+  - GSC OAuth env 3종 (client_id/secret, GSC_SITE_URL)
+
+### 관리자 모니터링
+- `[CRON-HEALTH-DASHBOARD]` 5개 cron 실시간 모니터링
+  - `/api/admin/big-event-crons` GET+POST (집계+수동 실행)
+  - `BigEventCronMonitor.tsx` dot + last_run + counts + 🚀 Run 버튼
+  - MasterControlTab 마스터 킬 스위치 위에 마운트
+
+### 프론트엔드 — big_event 상세
+- `[BIG-EVENT-DETAIL]` `/apt/big-events/[slug]` 신규
+  - 이벤트 정보 + fact_confidence 컬러 라벨 + Pillar/Spokes
+  - 최근 30일 news_detected (critical 플래그) + 마일스톤 타임라인
+  - verified assets 갤러리 + 같은 시도 관련 이벤트 cross-link
+  - JSON-LD Event schema + 허브 카드에서 pillar 없어도 detail로 연결
+
+### IndexNow + GSC
+- `[INDEXNOW-AUTO]` `/api/admin/indexnow-backfill` POST
+  - `{ slugs: [...] }` 또는 `{ pattern: 'samik-beach' }` 방식
+  - dry_run 지원, 최대 50 slug/request, indexed_at 동시 갱신
+  - 검증: samik-beach 10편 모두 indexed_at=2026-04-19 (정상 제출됨)
+- `[GSC-STUB]` Google Search Console OAuth 스캐폴드
+  - `src/lib/gsc-client.ts` — buildAuthUrl/exchangeCode/save/getValidAccessToken + samikSample
+  - `src/app/api/admin/gsc/oauth/route.ts` — 승인 URL + callback + 상태 확인
+  - `docs/GSC_SETUP.md` — Cloud Console 설정 → env → OAuth 승인 단계별 가이드
+
+## 📦 commit 8건 (pre-push)
+1. `[PG-CRON-REGISTER]`
+2. `[CRON-TOTAL-AUDIT][SOLAPI-TEMPLATES][NODE-NOTIFY-ENV]`
+3. `[BIG-EVENT-DETAIL]`
+4. `[CRON-HEALTH-DASHBOARD]`
+5. `[INDEXNOW-AUTO]`
+6. `[GSC-STUB]`
+
+## 📋 Node 수동 과제 (우선순위 순)
+1. **Solapi 템플릿 4종 심사 제출** — https://console.solapi.com/kakao (평일 1-3일)
+2. **Vercel env 주입**:
+   - `NODE_NOTIFY_PHONE`
+   - `SOLAPI_TEMPLATE_*` 4종 (심사 통과 후)
+   - `GOOGLE_OAUTH_CLIENT_ID` / `GOOGLE_OAUTH_CLIENT_SECRET` / `GSC_SITE_URL`
+3. **IndexNow 재제출** (Pillar 제목/5 Spoke 확장 반영):
+   ```
+   POST /api/admin/indexnow-backfill  body: { "pattern": "samik-beach" }
+   ```
+4. **GSC OAuth 1회 승인**: https://kadeora.app/api/admin/gsc/oauth
+5. **관리자 페이지에서 cron 모니터** 확인 → 필요 시 🚀 Run 버튼으로 즉시 실행
+
+## 🧭 다음 단계 (세션 140+)
+- `/api/cron/gsc-daily-pull` — samik-beach + killer URL 쿼리 일 집계 → `gsc_query_stats` 테이블
+- `/api/cron/big-event-stage-monitor` — stage 전환 감지 → SOLAPI_TEMPLATE_STAGE_TRANSITION
+- GSC 데이터로 감쇠 키워드 감지 → blog-rewrite 재작성 큐 자동 투입
+- big_event fact_confidence 상승 트렌드 → auto-pillar-draft 자동 활성화
+- 부산 외 서울 이벤트 (은마/목동1/시범/삼부) fact_sources 확보 → 70+ 진입
