@@ -577,3 +577,101 @@ remaining_node = 0, remaining_founder = 0
 - `/blog/samik-*`, `/blog/byeoksanchangma-*` 등 오염 이미지 노출됐던 페이지 visual 검증
 - `BlogMentionCard` 의 `FallbackThumb` 정의 (line 417) dead code — 추후 정리
 - `OngoingTab` 도 safeImg 적용 여부 검토
+
+---
+
+# 세션 141 (2026-04-19) — 호스팅어 네트워크 완전 분리
+
+## 배경
+호스팅어 119개 사이트 (분양권실전투자.com + 급매물.com + 주린이.site + 기타 116개)
+Japanese Keyword Hack 완전 감염 확정 (세션 140b 진단). GSC/GA/코드 레벨 공유로
+Google graph 에서 카더라를 PBN 네트워크 일부로 인식할 리스크 → 모든 연결 차단.
+
+## 🟢 자동 수행 [1 commit / 4 파일 / 0 DB 쓰기]
+
+### 코드 변경
+- `src/lib/blog-auto-link.ts` EXTERNAL_KEYWORDS 빈 배열
+  - 호스팅어 4개 키워드(부산 급매물/부산 부동산 급매물/분양권 투자/분양권 실전투자)
+    외부 링크 완전 중단. 5,996 published blog 즉시 반영 (렌더 시점 주입).
+- `src/lib/gtag.ts` GA_ID/ADS_ID → env 기반 (G-VP4F6TH2GD 공유 속성 분리)
+- `src/app/layout.tsx` GA4 스크립트 env 조건부 로드 (미설정 시 로드 안함)
+- `src/app/api/admin/satellite/route.ts` 410 Gone (orphan route 이력 보존)
+
+### 검증
+| 항목 | 결과 |
+|---|---|
+| src/ 내 호스팅어 도메인 grep | 주석 1건 제외 **0건** |
+| src/ 내 G-VP4F6TH2GD grep | 주석 1건 제외 **0건** |
+| src/ 내 UTM(byanggwon/geupmae/jurini) grep | **0건** |
+| layout.tsx sameAs | 호스팅어 도메인 없음 (naver/kakao 만) |
+| blog_posts.content 호스팅어 URL | **0건** (런타임 주입 구조로 DB 저장 안됨) |
+| vercel.json crons 호스팅어 path | **0건** |
+| WP_USER/WP_PASS/HOSTINGER env 참조 | **0건** |
+
+## ⚠️ SKIP (사유 명시)
+- **Phase 7 boost-cache SSH 추출**: 절대금지 "호스팅어 SSH 접속 금지" 원칙 준수.
+  suspend 이전 추출 필요하지만 Node 가 hPanel 을 통한 Hostinger 내장 File Manager
+  또는 Backup 기능으로 수동 추출 권장. (Claude Code 세션 140b 에서 SSH 접근은
+  가능했으나 세션 141 절대금지 규정에 따라 skip.)
+- **Phase 8 Vercel env 정리**: `NEXT_PUBLIC_GA_ID` 새 GA4 속성 교체 + HOSTINGER_* /
+  WP_USER / WP_PASS / SATELLITE_* 삭제 는 Node 가 Vercel Dashboard 에서 수동 진행.
+  (이 세션에서 코드는 env 없어도 안전하게 동작하도록 변경 완료.)
+
+## 📋 Node 수동 작업 (보안 감사 체크리스트)
+
+### A. 비밀번호 즉시 교체 (해킹된 WP admin 과 같은 암호 재사용 금지)
+- [ ] Hostinger hPanel 로그인 비밀번호
+- [ ] Google 계정 (구 G-VP4F6TH2GD 소유 계정 + 새 카더라 계정)
+- [ ] GitHub (wls9205-a11y)
+- [ ] Vercel 계정
+- [ ] Supabase 계정 (tezftxakuwhsclarprlz)
+- [ ] Anthropic Console
+- [ ] Toss Payments
+- [ ] 카카오 개발자 콘솔
+- [ ] Solapi
+
+### B. 2FA 강제 활성화
+- [ ] Google 새 계정 (카더라용)
+- [ ] GitHub / Vercel / Supabase / Hostinger
+
+### C. Whois 프라이버시
+- [ ] kadeora.app Whois 개인정보 노출 여부 (Vercel/Cloudflare Registrar Privacy ON)
+
+### D. 개인정보 유출 대응
+- [ ] 호스팅어 WP 사이트 회원가입·문의 폼 여부 리콜
+- [ ] DB 방문자 개인정보 저장 여부 확인 → 유출 시 KISA 신고 의무 검토
+
+### E. URL Removal (Google / Naver)
+- [ ] GSC 구 계정 → 감염 3도메인 속성 → Removals → 일괄 제거
+- [ ] Naver Search Advisor → 웹문서 수집제외 신청
+
+### F. Analytics 백업
+- [ ] G-VP4F6TH2GD 데이터 BigQuery export 또는 스크린샷 아카이브
+- [ ] 새 GA4 속성 생성 → Vercel env `NEXT_PUBLIC_GA_ID` 주입 → 재배포
+
+### G. 구 Google 계정 처리
+- [ ] 즉시 삭제 금지 (최소 6개월 유지)
+- [ ] 감염 도메인 GSC 수동조치 경고는 대응만, 재검토 요청 금지 (재감염 상태에서
+  재승인 시 manual action 연장됨)
+
+### H. 외부 참조 업데이트
+- [ ] 카카오톡 채널 연결 웹사이트 (카더라만)
+- [ ] 네이버 밴드 공식 사이트 필드
+- [ ] 오픈카톡 공지, 명함·문서
+
+### I. Hostinger 처리
+- [ ] hPanel 에서 119개 사이트 suspend
+- [ ] 도메인 auto-renewal OFF
+- [ ] 네이버 서치어드바이저에서 호스팅어 3사이트 제거
+
+### J. 1주일 후 모니터링
+- [ ] GSC 카더라 속성 → 보안 및 수동 조치 → 이슈 없음
+- [ ] Search Console 성능 → 비정상 impression 급감 없는지
+- [ ] Vercel 로그 → 이상 외부 요청
+- [ ] Supabase auth.users → 의심 계정
+
+## 🧭 최종 자동 검증 결과
+(배포 후 Vercel production 라이브 verify)
+- `curl -sL https://kadeora.app | grep -iE "xn--zf0bv|xn--kj0bw|G-VP4F6TH2GD"`  → 0건 예상
+- `curl -sL https://kadeora.app/sitemap.xml | grep -c "xn--zf"` → 0건 예상
+- sameAs JSON-LD 호스팅어 도메인 → 없음 확인됨 (코드 레벨)
