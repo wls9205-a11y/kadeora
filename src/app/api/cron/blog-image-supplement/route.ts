@@ -153,16 +153,30 @@ async function handler(_req: NextRequest) {
             continue;
           }
 
+          // 세션 140 [P0-IMAGE]: position 충돌 방지 — 실제 MAX(position)+1 부터 시작
+          let startPos = haveCount;
+          try {
+            const { data: posRows } = await (sb as any)
+              .from('blog_post_images')
+              .select('position')
+              .eq('post_id', post.id)
+              .order('position', { ascending: false })
+              .limit(1);
+            const maxPos = Array.isArray(posRows) && posRows.length > 0 ? Number(posRows[0]?.position || 0) : -1;
+            startPos = maxPos + 1;
+          } catch { /* fall back to haveCount */ }
+
           const rows = collected.map((img, idx) => ({
             post_id: post.id,
             image_url: img.url,
-            alt_text: `${post.title} 관련 이미지 ${haveCount + idx + 1}`,
+            alt_text: `${post.title} 관련 이미지 ${startPos + idx + 1}`,
             caption: img.title || null,
             image_type: 'supplement',
-            position: haveCount + idx,
+            position: startPos + idx,
           }));
 
-          // UNIQUE (post_id, image_url) 제약 고려 — onConflict ignore
+          // UNIQUE (post_id, image_url) + (post_id, position) 두 제약 모두 존재
+          // → ignoreDuplicates 로 (image_url) 중복 건너뛰고, position은 위에서 MAX+1 로 안전 계산
           const { error: insertErr } = await (sb as any)
             .from('blog_post_images')
             .upsert(rows, { onConflict: 'post_id,image_url', ignoreDuplicates: true });

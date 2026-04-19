@@ -26,10 +26,21 @@ export async function withCronLogging(
   const supabase = getSupabase();
 
   // [L1-4] Redis 기반 중복 실행 차단 (옵션)
+  // 세션 140 [P0-IMAGE]: lock 획득 실패 시에도 cron_logs 에 skipped 로우 INSERT → 관측 가능
   if (options.redisLockTtlSec && options.redisLockTtlSec > 0) {
     const ok = await acquireCronLock(cronName, options.redisLockTtlSec);
     if (!ok) {
       console.warn(`[cron] ${cronName} skipped — redis lock held`);
+      try {
+        await supabase.from('cron_logs').insert({
+          cron_name: cronName,
+          status: 'skipped',
+          started_at: new Date().toISOString(),
+          finished_at: new Date().toISOString(),
+          error_message: 'redis_lock_held',
+          metadata: { reason: 'redis_lock_held', ttl_sec: options.redisLockTtlSec },
+        });
+      } catch { /* ignore logging failure — 실행 자체는 skip 되었으므로 응답은 정상 */ }
       return { success: true, skipped: true, processed: 0 };
     }
   }
