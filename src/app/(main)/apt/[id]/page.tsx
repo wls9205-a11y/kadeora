@@ -158,16 +158,17 @@ async function fetchUnifiedData(slug: string) {
 
   // Stage 6: apt_complex_profiles fallback — handles cases like /apt/파크리오 where
   // the Korean apt name lives only in apt_complex_profiles, not apt_sites.
-  // 세션 136: get_apt_complex_stage6 RPC 사용 — complex + images + related_blogs 한 번에 조회
+  // 세션 142 P0-1: get_apt_complex_hero RPC (returns { profile: {..., images}, related_blogs })
+  // 이전 get_apt_complex_stage6 (동일 기능) → hero 로 통일
   let stage6RelatedBlogs: Array<{ id: any; title: string; slug: string; cover_image?: string; view_count?: number; published_at?: string }> = [];
   if (!site && !sub && !unsold && !redev) {
     const candidate = decodeURIComponent(slug).replace(/-/g, ' ').trim();
     const koreanCandidate = candidate.replace(/[a-z0-9]+/gi, '').replace(/\s+/g, ' ').trim();
     const searchName = koreanCandidate.length >= 2 ? koreanCandidate : candidate;
     if (searchName.length >= 2) {
-      let { data: stage6 } = await (sb as any).rpc('get_apt_complex_stage6', { p_apt_name: searchName });
-      // apt_name은 정확 매칭이므로 ilike 성격의 이전 쿼리 대응을 위해 exact miss 시 fuzzy fallback
-      if (!stage6?.complex) {
+      let { data: heroData } = await (sb as any).rpc('get_apt_complex_hero', { p_apt_name: searchName });
+      // apt_name 정확 매칭 miss 시 ilike fuzzy 재시도
+      if (!heroData?.profile) {
         const { data: fuzzy } = await (sb as any)
           .from('apt_complex_profiles')
           .select('apt_name')
@@ -176,13 +177,13 @@ async function fetchUnifiedData(slug: string) {
           .order('sale_count_1y', { ascending: false, nullsFirst: false })
           .limit(1).maybeSingle();
         if (fuzzy?.apt_name) {
-          const r2 = await (sb as any).rpc('get_apt_complex_stage6', { p_apt_name: fuzzy.apt_name });
-          stage6 = r2?.data ?? null;
+          const r2 = await (sb as any).rpc('get_apt_complex_hero', { p_apt_name: fuzzy.apt_name });
+          heroData = r2?.data ?? null;
         }
       }
-      const complex = stage6?.complex;
-      const stage6Images = Array.isArray(stage6?.images) ? stage6.images : [];
-      stage6RelatedBlogs = Array.isArray(stage6?.related_blogs) ? stage6.related_blogs : [];
+      const complex = heroData?.profile;
+      const stage6Images = Array.isArray(complex?.images) ? complex.images : [];
+      stage6RelatedBlogs = Array.isArray(heroData?.related_blogs) ? heroData.related_blogs : [];
 
       if (complex) {
         const mappedImages = stage6Images
