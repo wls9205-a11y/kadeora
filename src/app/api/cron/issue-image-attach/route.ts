@@ -19,87 +19,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withCronAuthFlex } from '@/lib/cron-auth';
 import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { runImagePipeline, type PostContext } from '@/lib/image-pipeline';
 
 export const maxDuration = 300;
 export const runtime = 'nodejs';
 
-const NAVER_CLIENT_ID = process.env.NAVER_CLIENT_ID || '';
-const NAVER_CLIENT_SECRET = process.env.NAVER_CLIENT_SECRET || '';
 const MAX_PER_RUN = 10;
 const PREEMPT_MS = 250_000;
-
-const IMG_BLOCK_DOMAINS = [
-  'utoimage', 'freepik', 'shutterstock', 'pixabay', 'unsplash', 'istockphoto',
-  'namu.wiki', 'wikipedia', 'youtube.com', 'pinimg.com', 'ohousecdn',
-  'blog.kakaocdn.net/dn/0/', 'tistory.com/image/0/',
-  'hogangnono', 'new.land.naver.com', 'landthumb', 'kbland', 'kbstar.com',
-  'zigbang', 'dabang', 'dcinside', 'ruliweb.com', 'ppomppu.co.kr',
-];
-
-const CAT_IMG_QUERY: Record<string, string[]> = {
-  apt: ['아파트 단지 전경', '아파트 분양 현장', '신축 아파트 외관'],
-  unsold: ['미분양 아파트 현장', '아파트 빈 단지'],
-  redev: ['재개발 현장', '재건축 아파트 철거', '도시정비 사업'],
-  stock: ['주식 증권 차트', '코스피 거래소', '증권 시장 분석'],
-  finance: ['재테크 자산관리', '금융 투자 적금', '예금 비교'],
-  general: ['경제 분석 리포트', '데이터 분석 차트', '정보 그래프'],
-};
-
-interface NaverImg {
-  url: string;
-  alt: string;
-  caption: string;
-}
-
-async function fetchNaverImages(query: string, display = 8): Promise<NaverImg[]> {
-  if (!NAVER_CLIENT_ID || !NAVER_CLIENT_SECRET) return [];
-  try {
-    const res = await fetch(
-      `https://openapi.naver.com/v1/search/image?query=${encodeURIComponent(query)}&display=${display}&sort=sim&filter=large`,
-      {
-        headers: {
-          'X-Naver-Client-Id': NAVER_CLIENT_ID,
-          'X-Naver-Client-Secret': NAVER_CLIENT_SECRET,
-        },
-        signal: AbortSignal.timeout(5000),
-      },
-    );
-    if (!res.ok) return [];
-    const data = await res.json();
-    const items: any[] = data?.items || [];
-    return items
-      .filter((it) => {
-        const w = parseInt(it?.sizewidth || '0');
-        const h = parseInt(it?.sizeheight || '0');
-        if (w < 400 || h < 250) return false;
-        const u = String(it?.link || '').toLowerCase();
-        if (!u) return false;
-        if (IMG_BLOCK_DOMAINS.some((d) => u.includes(d))) return false;
-        return true;
-      })
-      .map((it) => {
-        const link = String(it.link || '').replace(/^http:\/\//, 'https://');
-        let host = '웹';
-        try { host = new URL(link).hostname; } catch {}
-        return {
-          url: link,
-          alt: String(it.title || query).replace(/<[^>]*>/g, ''),
-          caption: `출처: ${host}`,
-        };
-      });
-  } catch {
-    return [];
-  }
-}
-
-function hashString(s: string): number {
-  let h = 0;
-  for (let i = 0; i < s.length; i++) {
-    h = ((h << 5) - h) + s.charCodeAt(i);
-    h |= 0;
-  }
-  return h;
-}
 
 function ensureContentHasEssentials(content: string, category: string): string {
   let c = content;
@@ -213,80 +139,32 @@ async function handler(_req: NextRequest) {
           const blogPostId = Number(postId);
           finalized++;
 
-          // 5) 이미지 수집 — 주요 엔티티/키워드 기반 (check_publish_gate: 6+ 총, 4+ real)
-          const entities: string[] = Array.isArray(issue.related_entities) ? issue.related_entities.slice(0, 2) : [];
-          const keywords: string[] = Array.isArray(issue.detected_keywords) ? issue.detected_keywords.slice(0, 3) : [];
-          const seed = entities[0] || keywords[0] || issue.title || '';
-          const catQueries = CAT_IMG_QUERY[category] || CAT_IMG_QUERY.general;
+          // 5) 이미지 파이프라인 — lib/image-pipeline (hydrate + relevance + record)
+          const postCtx: PostContext = {
+            id: blogPostId,
+            title: issue.draft_title || issue.title,
+            slug: issue.draft_slug,
+            excerpt: issue.summary,
+            category,
+            sub_category: issue.sub_category,
+            tags: Array.from(new Set([
+              ...(Array.isArray(issue.related_entities) ? issue.related_entities.slice(0, 4) : []),
+              ...(Array.isArray(issue.detected_keywords) ? issue.detected_keywords.slice(0, 6) : []),
+            ])).slice(0, 8),
+            source_ref: Array.isArray(issue.source_urls) ? issue.source_urls[0] : null,
+          };
+          const pipe = await runImagePipeline(sb, postCtx, {
+            relevanceThreshold: 0.55,
+            maxRealImages: 6,
+            includeInfographicPosition: true,
+            subdir: `blog/${new Date().toISOString().slice(0, 7)}/${blogPostId}`,
+          });
+          const inserted = pipe.storage_real + pipe.og_placeholder;
+          for (const f of pipe.failures) failures.push(`${issue.id}:${f}`);
 
-          const queries: string[] = [];
-          if (seed) queries.push(`${seed} ${catQueries[0]}`);
-          queries.push(catQueries[0]);
-          if (catQueries[1]) queries.push(catQueries[1]);
-          if (catQueries[2]) queries.push(catQueries[2]);
-
-          const collected: NaverImg[] = [];
-          for (const q of queries) {
-            if (collected.length >= 7) break;
-            const imgs = await fetchNaverImages(q, 10);
-            for (const im of imgs) {
-              if (collected.length >= 7) break;
-              if (collected.some((c) => c.url === im.url)) continue;
-              collected.push(im);
-            }
-            await new Promise((r) => setTimeout(r, 150));
-          }
-
-          // 6) record_blog_image — Naver 실사진은 pos 0~5, pos 6(infographic) + pos 7(OG) 로 총 8슬롯
-          //    image_kind 를 null 로 넘겨 자동 분류 (external_real / og_placeholder)
-          let inserted = 0;
-          const realImageSlots = Math.min(collected.length, 6);
-          for (let i = 0; i < realImageSlots; i++) {
-            const img = collected[i];
-            try {
-              await (sb as any).rpc('record_blog_image', {
-                p_post_id: blogPostId,
-                p_position: i,
-                p_image_url: img.url,
-                p_image_kind: null,
-                p_alt_text: img.alt.slice(0, 200),
-                p_caption: img.caption.slice(0, 200),
-                p_storage_path: null,
-              });
-              inserted++;
-            } catch (recErr: any) {
-              failures.push(`${issue.id}:img${i}:${recErr?.message || ''}`);
-            }
-          }
-
-          // pos 6, 7: OG fallback (체크 게이트 6+ 충족용; og_placeholder 로 자동 분류)
-          const designA = 1 + (Math.abs(hashString(issue.draft_title || '')) % 6);
-          const designB = 1 + ((designA % 6) + 1) % 6;
-          const ogA = `https://kadeora.app/api/og?title=${encodeURIComponent(String(issue.draft_title || '').slice(0, 40))}&category=${category}&author=${encodeURIComponent('카더라 속보팀')}&design=${designA}`;
-          const ogB = `https://kadeora.app/api/og?title=${encodeURIComponent(String(issue.draft_title || '').slice(0, 40))}&category=${category}&author=${encodeURIComponent('카더라 속보팀')}&design=${designB}`;
-          for (const [pos, url] of [[6, ogA], [7, ogB]] as const) {
-            try {
-              await (sb as any).rpc('record_blog_image', {
-                p_post_id: blogPostId,
-                p_position: pos,
-                p_image_url: url,
-                p_image_kind: null,
-                p_alt_text: `${issue.draft_title || ''} — 카더라 인포그래픽`.slice(0, 200),
-                p_caption: `카더라 ${category} 데이터 분석`.slice(0, 200),
-                p_storage_path: null,
-              });
-              inserted++;
-            } catch (recErr: any) {
-              failures.push(`${issue.id}:img_og_${pos}:${recErr?.message || ''}`);
-            }
-          }
-
-          // 7) cover_image 교체 + excerpt/image_alt 보정 (check_publish_gate: excerpt>=80)
+          // 6) cover_image 는 trg_bpi_cover_sync 트리거가 position 0 기준 자동 동기화 → 별도 update 불필요
+          //    excerpt/image_alt 만 보정
           const postUpdates: Record<string, any> = {};
-          if (collected[0]) {
-            postUpdates.cover_image = collected[0].url;
-            postUpdates.image_alt = collected[0].alt.slice(0, 200);
-          }
 
           // excerpt 80자 미만이면 확장
           const { data: postRow } = await sb
