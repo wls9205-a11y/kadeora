@@ -115,6 +115,15 @@ export async function withCronLogging(
       metadata: { cron_name: cronName, duration_ms: duration },
     });
 
+    // [NOTIFY-BELL] 세션 140: 관리자 벨에도 즉시 push (무료·실시간)
+    try {
+      const { NotificationBellService } = await import('@/lib/notification-bell');
+      await NotificationBellService.pushCronFailure({
+        cronName,
+        error: error.message?.substring(0, 500) || 'unknown',
+      });
+    } catch { /* 벨 실패는 무시 */ }
+
     if (options.redisLockTtlSec && options.redisLockTtlSec > 0) {
       await releaseCronLock(cronName);
     }

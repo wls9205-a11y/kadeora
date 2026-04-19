@@ -21,6 +21,7 @@ import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { sendKakaoAlimtalk } from '@/lib/kakao-alimtalk';
+import { NotificationBellService } from '@/lib/notification-bell';
 import { AI_MODEL_HAIKU, ANTHROPIC_VERSION } from '@/lib/constants';
 
 export const maxDuration = 300;
@@ -184,6 +185,16 @@ async function handler(_req: NextRequest) {
 
           created++;
           notes.push(`${ev.id}:ok:${gen.slug}`);
+
+          // [NOTIFY-BELL] 앱 내 벨 먼저 (무료·실시간)
+          try {
+            await NotificationBellService.pushDraftReady({
+              name: ev.name,
+              phase: 'Pillar',
+              region: `${ev.region_sido || ''} ${ev.region_sigungu || ''}`.trim(),
+              slug: gen.slug,
+            });
+          } catch { /* ignore */ }
 
           if (NOTIFY_TEMPLATE_ID && NOTIFY_PHONE) {
             try {

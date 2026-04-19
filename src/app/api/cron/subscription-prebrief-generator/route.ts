@@ -19,6 +19,7 @@ import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { sendKakaoAlimtalk } from '@/lib/kakao-alimtalk';
+import { NotificationBellService } from '@/lib/notification-bell';
 
 export const maxDuration = 240;
 export const runtime = 'nodejs';
@@ -255,6 +256,15 @@ async function handler(_req: NextRequest) {
 
           if (result.success) {
             created++;
+            // [NOTIFY-BELL] 앱 내 벨 우선
+            try {
+              await NotificationBellService.pushDraftReady({
+                name: sub.house_nm,
+                phase: t.phase,
+                region,
+                slug,
+              });
+            } catch { /* ignore */ }
             if (NOTIFY_TEMPLATE_ID && NOTIFY_PHONE) {
               try {
                 await sendKakaoAlimtalk({

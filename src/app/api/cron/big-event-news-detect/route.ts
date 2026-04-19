@@ -13,6 +13,7 @@ import { withCronAuth } from '@/lib/cron-auth';
 import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { sendKakaoAlimtalk } from '@/lib/kakao-alimtalk';
+import { NotificationBellService } from '@/lib/notification-bell';
 
 export const maxDuration = 180;
 export const runtime = 'nodejs';
@@ -144,20 +145,32 @@ async function handler(_req: NextRequest) {
               }
               totalDetected++;
 
-              if (critical && NOTIFY_TEMPLATE_ID && NOTIFY_PHONE) {
+              if (critical) {
+                // [NOTIFY-BELL] 앱 내 벨 우선 (무료·실시간) + Solapi 템플릿 있을 때만 보조
                 try {
-                  await sendKakaoAlimtalk({
-                    phone: NOTIFY_PHONE.replace(/[^0-9]/g, ''),
-                    templateId: NOTIFY_TEMPLATE_ID,
-                    variables: {
-                      '#{event_name}': ev.name || ev.slug || '',
-                      '#{title}': title.slice(0, 80),
-                      '#{url}': url.slice(0, 120),
-                    },
+                  await NotificationBellService.pushBigEventNews({
+                    eventName: ev.name || ev.slug || '',
+                    title: title.slice(0, 200),
+                    url: url.slice(0, 500),
+                    critical: true,
                   });
                   criticalNotified++;
-                } catch (err: any) {
-                  failures.push(`notify-fail:${err?.message || 'unknown'}`);
+                } catch { /* bell 실패해도 흐름 유지 */ }
+
+                if (NOTIFY_TEMPLATE_ID && NOTIFY_PHONE) {
+                  try {
+                    await sendKakaoAlimtalk({
+                      phone: NOTIFY_PHONE.replace(/[^0-9]/g, ''),
+                      templateId: NOTIFY_TEMPLATE_ID,
+                      variables: {
+                        '#{event_name}': ev.name || ev.slug || '',
+                        '#{title}': title.slice(0, 80),
+                        '#{url}': url.slice(0, 120),
+                      },
+                    });
+                  } catch (err: any) {
+                    failures.push(`notify-fail:${err?.message || 'unknown'}`);
+                  }
                 }
               }
             }

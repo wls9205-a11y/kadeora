@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
+import NotificationBell from './NotificationBell';
 
 const Loader = () => <div style={{display:'flex',justifyContent:'center',padding:60}}><div style={{width:24,height:24,border:'3px solid rgba(255,255,255,0.1)',borderTopColor:'#3B7BF6',borderRadius:'50%',animation:'spin .5s linear infinite'}}/></div>;
 
@@ -87,7 +88,8 @@ export default function AdminShell() {
             </>}
           </div>}
           <div style={{flex:1}}/>
-          <span style={{fontSize: 10,color:'rgba(255,255,255,0.35)',letterSpacing:1,fontWeight:700}}>MISSION CONTROL</span>
+          <NotificationBell />
+          <span style={{fontSize: 10,color:'rgba(255,255,255,0.35)',letterSpacing:1,fontWeight:700,marginLeft:8}}>MISSION CONTROL</span>
         </div>
 
         {/* 탭 네비게이션 — 스크롤 가능 */}
