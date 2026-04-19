@@ -190,7 +190,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
           <Link key={o.id} href={linkH} className="hero-card" style={{ display: 'block', borderLeft: isPremium ? '3px solid rgba(251,191,36,0.5)' : isUnsold ? '3px solid rgba(248,113,113,0.5)' : '3px solid rgba(52,211,153,0.5)' }}>
             {/* 히어로 이미지 */}
             <div className="hero-img">
-              <img src={aptImageMap?.[o.house_nm] || `/api/og?title=${encodeURIComponent(o.house_nm || '분양중')}&category=apt&design=${(i % 6) + 1}`} alt={o.house_nm || "부동산 이미지"} width={400} height={120} loading="lazy" />
+              <img src={aptImageMap?.[o.house_nm] || `/api/og?title=${encodeURIComponent(o.house_nm || '분양중')}&category=apt&design=${(i % 6) + 1}`} alt={o.house_nm || "부동산 이미지"} width={400} height={120} loading="lazy" decoding="async" referrerPolicy="no-referrer" onError={(e) => { const el = e.currentTarget as HTMLImageElement; const fb = `/api/og?title=${encodeURIComponent(o.house_nm || '분양중')}&category=apt&design=${(i % 6) + 1}`; if (!el.src.endsWith(fb)) el.src = fb; }} />
               <div className="hero-badges">
                 <span className="hero-badge" style={{ background: isUnsold ? 'rgba(220,38,38,0.9)' : 'rgba(5,150,105,0.9)', color: '#fff' }}>{isUnsold ? '미분양' : '분양중'}</span>
                 {isPremium && <span className="hero-badge" style={{ background: 'linear-gradient(135deg,#FFD43B,#F59E0B)', color: '#1a1a2e' }}>PREMIUM</span>}

@@ -782,9 +782,12 @@ function renderAptTop(apts: any[], region: string | null, sigungu: string | null
             : `/apt/${a.slug || a.id}`;
 
           const imgs = Array.isArray(a.images) ? a.images : [];
-          const thumbUrl = imgs.length > 0
+          // 세션 140: og API fallback 보장 — FallbackThumb 대신 img 항상 렌더 (null placeholder 제거)
+          const rawThumb = imgs.length > 0
             ? (typeof imgs[0] === 'string' ? imgs[0] : imgs[0]?.url || '')
             : '';
+          const ogFallback = `/api/og?title=${encodeURIComponent(a.name || '')}&category=apt&design=2`;
+          const thumbUrl = rawThumb || ogFallback;
 
           const price = a._source === 'complex'
             ? fmtComplexPrice(a.latest_sale_price)
@@ -806,18 +809,15 @@ function renderAptTop(apts: any[], region: string | null, sigungu: string | null
                 display: 'block',
               }}
             >
-              {/* 썸네일 */}
+              {/* 썸네일 — 세션 140: img 항상 렌더, 외부 hotlink 차단 시 og fallback */}
               <div style={{ width: '100%', height: 88, position: 'relative' }}>
-                {thumbUrl ? (
-                  <img
-                    src={thumbUrl} alt={a.name || ''}
-                    width={152} height={88}
-                    style={{ width: '100%', height: 88, objectFit: 'cover', display: 'block' }}
-                    loading="lazy"
-                  />
-                ) : (
-                  <FallbackThumb name={a.name || ''} height={88} isSeed={isSeed} />
-                )}
+                <img
+                  src={thumbUrl} alt={a.name || ''}
+                  width={152} height={88}
+                  style={{ width: '100%', height: 88, objectFit: 'cover', display: 'block' }}
+                  loading="lazy" decoding="async" referrerPolicy="no-referrer"
+                  onError={(e) => { const el = e.currentTarget as HTMLImageElement; if (!el.src.endsWith(ogFallback)) el.src = ogFallback; }}
+                />
                 {isSeed && (
                   <span style={{
                     position: 'absolute', top: 6, left: 6,
@@ -903,9 +903,12 @@ function renderAptBottom(apts: any[], region: string | null, sigungu: string | n
             ? `/apt/complex/${encodeURIComponent(a.name)}`
             : `/apt/${a.slug || a.id}`;
           const imgs = Array.isArray(a.images) ? a.images : [];
-          const thumbUrl = imgs.length > 0
+          // 세션 140: og API fallback 보장 — img 항상 렌더
+          const rawThumb = imgs.length > 0
             ? (typeof imgs[0] === 'string' ? imgs[0] : imgs[0]?.url || '')
             : '';
+          const ogFallback = `/api/og?title=${encodeURIComponent(a.name || '')}&category=apt&design=2`;
+          const thumbUrl = rawThumb || ogFallback;
           const price = a._source === 'complex'
             ? fmtComplexPrice(a.latest_sale_price)
             : fmtAptPriceRange(a.price_min, a.price_max);
@@ -921,16 +924,14 @@ function renderAptBottom(apts: any[], region: string | null, sigungu: string | n
                 background: 'var(--bg-surface, var(--bg-secondary))', display: 'block',
               }}
             >
-              {thumbUrl ? (
-                <img
-                  src={thumbUrl} alt={a.name || ''}
-                  width={136} height={76}
-                  style={{ width: '100%', height: 76, objectFit: 'cover', display: 'block', background: 'var(--bg-hover)' }}
-                  loading="lazy"
-                />
-              ) : (
-                <FallbackThumb name={a.name || ''} height={76} />
-              )}
+              {/* 세션 140: img 항상 렌더 + og onError fallback */}
+              <img
+                src={thumbUrl} alt={a.name || ''}
+                width={136} height={76}
+                style={{ width: '100%', height: 76, objectFit: 'cover', display: 'block', background: 'var(--bg-hover)' }}
+                loading="lazy" decoding="async" referrerPolicy="no-referrer"
+                onError={(e) => { const el = e.currentTarget as HTMLImageElement; if (!el.src.endsWith(ogFallback)) el.src = ogFallback; }}
+              />
               <div style={{ padding: '8px 8px 7px' }}>
                 <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {a.name}
