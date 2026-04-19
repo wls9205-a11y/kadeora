@@ -22,6 +22,7 @@ import StockMAOverlay from '@/components/StockMAOverlay';
 import RelatedStocks from '@/components/stock/RelatedStocks';
 import RelatedBlogBelt from '@/components/stock/RelatedBlogBelt';
 import { ImageLightbox } from '@/components/ui/ImageLightbox';
+import { safeImg } from '@/lib/image-sanitize';
 
 interface Props { params: Promise<{ symbol: string }> }
 
@@ -496,7 +497,12 @@ export default async function StockDetailPage({ params }: Props) {
             🖼️ {s.name} 관련 이미지 · {stockGallery.length}장
           </h2>
           <ImageLightbox
-            images={stockGallery.map(g => ({ url: g.image_url, caption: g.caption, alt: g.alt_text }))}
+            images={stockGallery.map(g => ({
+              // 세션 142 P0-7: stock_images 오염 URL 방지 — safeImg whitelist 통과만 허용
+              url: safeImg(g.image_url, { title: `${s.name}(${symbol})`, category: 'stock', design: 2 }),
+              caption: g.caption,
+              alt: g.alt_text,
+            }))}
             columns={3}
           />
         </section>
