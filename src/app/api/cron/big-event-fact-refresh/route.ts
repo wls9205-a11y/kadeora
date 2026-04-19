@@ -7,7 +7,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { withCronAuth } from '@/lib/cron-auth';
+import { withCronAuthFlex } from '@/lib/cron-auth';
 import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { refreshAllFactConfidence } from '@/lib/big-event-fact-verify';
@@ -37,4 +37,5 @@ async function handler(_req: NextRequest) {
   );
 }
 
-export const GET = withCronAuth(handler);
+export const GET = withCronAuthFlex(handler);
+export const POST = withCronAuthFlex(handler);
