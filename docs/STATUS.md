@@ -490,3 +490,58 @@ remaining_node = 0, remaining_founder = 0
 - GSC 데이터로 감쇠 키워드 감지 → blog-rewrite 재작성 큐 자동 투입
 - big_event fact_confidence 상승 트렌드 → auto-pillar-draft 자동 활성화
 - 부산 외 서울 이벤트 (은마/목동1/시범/삼부) fact_sources 확보 → 70+ 진입
+
+---
+
+# 세션 140 (2026-04-20) — 이미지 긴급 복구 + 앱내벨
+
+## 🟢 완료 [4 tasks / 5 commits]
+
+### P0 이미지 인프라
+- `[P0-IMAGE]` 이미지 크론 2개 복구 + 백필 엔드포인트
+  - `src/lib/cron-logger.ts` Redis lock 획득 실패 시 cron_logs에 status='skipped' INSERT
+    (기존: lock held 시 로그 없이 return → 관측 불가)
+  - `blog-image-supplement` position 충돌 방지: MAX(position)+1 재계산
+  - `/api/admin/image-backfill` POST (target: all/samik-beach/slug:/post_ids + dry_run)
+    · 네이버 이미지 검색 → upsert + OG cover 자동 교체
+- `[P0-APT-CRAWL]` `apt-image-crawl` BATCH_SIZE 200 → 50
+  - 근거: 7일간 47 runs 모두 "timeout guard: 32-36 processed" 조기 종료
+  - 50으로 축소 → 250s 내 완주 + big_event phase 도달 가능
+
+### 삼익비치 이미지 긴급 주입
+- `[P0-SAMIK-IMAGES]` 10편 × 4장 = 40 images
+  - 광안대교 전경 / 광안리 야경 / 부산 광안 전경 (Wikimedia CC BY-SA)
+  - 카더라 OG 인포그래픽 (position 3)
+  - cover_image: OG → 광안대교 실사진 교체
+  - 본문 최상단에 광안대교 마크다운 이미지 + 출처 캡션 멱등 삽입
+  - `supabase/migrations/20260420_samik_beach_images.sql` audit 기록
+
+### 앱내벨
+- `[NOTIFY-BELL]` Solapi 대체 앱 내 알림
+  - DB: `notification_bell` 테이블 + owner RLS + 인덱스 2개
+  - `src/lib/notification-bell.ts` — NotificationBellService 5 프리셋
+  - `/api/admin/notifications` GET (unread_only/limit) + PATCH (id/all)
+  - `src/app/admin/NotificationBell.tsx` — 헤더 🔔 + 99+ 뱃지 + 드롭다운
+  - AdminShell 헤더 우측(MISSION CONTROL 앞) 마운트
+  - 4지점 전환 (Solapi 보조, 벨 우선):
+    · big-event-news-detect critical
+    · big-event-auto-pillar-draft
+    · subscription-prebrief-generator
+    · cron-logger catch block (모든 cron 실패 자동 push)
+
+## 📦 commit 5건 (pre-push)
+1. `[P0-IMAGE][P0-APT-CRAWL]`
+2. `[P0-SAMIK-IMAGES]`
+3. `[NOTIFY-BELL]`
+
+## 🗄️ DB 변경
+- notification_bell 테이블 + RLS 정책 2건 + 인덱스 2건
+- blog_post_images +40 rows (samik-beach 10 × 4)
+- blog_posts (samik-beach 10) cover_image + content 첫 줄 업데이트
+
+## 🧭 다음 단계
+- Vercel 배포 후 /admin 헤더 🔔 점검 + 관리자 대상 cron 실패 push 확인
+- blog-generate-images 다음 실행에서 samik-beach 외 391건 OG cover 교체 여부 관찰
+- `/api/admin/image-backfill` dry_run으로 backlog 진단 후 실행 (POST body: {"target":"all","limit":50})
+- NODE_ADMIN_USER_ID env 세팅 권장 (미세팅 시 profiles.is_admin=true 첫 row로 fallback)
+- apt-image-crawl 다음 실행 결과: records_created > 0 인지 확인 (BATCH 50 효과)
