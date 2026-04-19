@@ -247,15 +247,16 @@ export async function middleware(request: NextRequest) {
   }
 
   // 온보딩 체크: 인증된 사용자 + 일반 페이지만 (public 경로 제외)
+  // 세션 143: profile_completed (nickname_set + interests + 거주지역 중 하나) 기반으로 전환
   const isPublic = PUBLIC_PATHS.some(p => pathname.startsWith(p));
   if (user && !isPublic && pathname !== '/onboarding') {
     try {
       const { data: profile } = await supabase
         .from('profiles')
-        .select('onboarded, nickname_set')
+        .select('profile_completed')
         .eq('id', user.id)
         .maybeSingle();
-      if (profile && (!profile.onboarded || !profile.nickname_set)) {
+      if (profile && profile.profile_completed === false) {
         const onboardingUrl = new URL('/onboarding', request.url);
         onboardingUrl.searchParams.set('return', pathname);
         return NextResponse.redirect(onboardingUrl);
