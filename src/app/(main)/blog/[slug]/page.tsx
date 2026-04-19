@@ -38,6 +38,7 @@ import BlogTossGate from '@/components/BlogTossGate';
 import RelatedContentCard from '@/components/RelatedContentCard';
 import BlogMentionCard from '@/components/blog/BlogMentionCard';
 import BlogHeroExtras from '@/components/blog/BlogHeroExtras';
+import BlogGatedRenderer from '@/components/blog/BlogGatedRenderer';
 // SmartSectionGate 제거 → LoginGate 기능 게이팅으로 전환 (세션 108)
 import BlogAptAlertCTA from '@/components/BlogAptAlertCTA';
 import YMYLBanner from '@/components/YMYLBanner';
@@ -953,9 +954,17 @@ export default async function BlogDetailPage({ params }: Props) {
         {/* [BIG-EVENT-CHARTS] 연결된 big_event가 있으면 본문 위에 3종 차트 자동 렌더 */}
         {bigEventId ? <BigEventCharts eventId={bigEventId} /> : null}
 
-        {/* 본문 — 봇: 전체, 로그인: TossGate, 비로그인: 전체 공개 (기능 게이팅으로 전환) */}
+        {/* 본문 — 봇: 전체, gated_sections 있으면 Gated 렌더, 로그인: TossGate, 비로그인: 전체 공개 */}
         {isBot ? (
           <div className="blog-content" itemProp="articleBody" dangerouslySetInnerHTML={{ __html: sanitizeHtml(htmlFull) }} />
+        ) : (post as any).has_gated_content ? (
+          <BlogGatedRenderer
+            content={post.content}
+            gatedSections={(post as any).gated_sections}
+            isLoggedIn={isLoggedIn}
+            isPremium={false}
+            slug={slug}
+          />
         ) : isLoggedIn ? (
           <BlogTossGate htmlFull={htmlFull} htmlShort={htmlTossShort} slug={slug} title={post.title} />
         ) : (
