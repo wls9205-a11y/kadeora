@@ -9,6 +9,7 @@ import { createSupabaseServer } from '@/lib/supabase-server';
 import { notFound } from 'next/navigation';
 import RelatedContentCard from '@/components/RelatedContentCard';
 import LoginGate from '@/components/LoginGate';
+import GatedStockSection from '@/components/stock/GatedStockSection';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import ShareButtons from '@/components/ShareButtons';
@@ -471,7 +472,7 @@ export default async function StockDetailPage({ params }: Props) {
         <div style={{ display: 'none' }} aria-hidden="true" data-seo="ai-analysis">
           {stockAnalysisText}
         </div>
-        <LoginGate feature="ai_analysis" title={`${s.name} AI 분석`} description="이 종목의 AI 투자 분석과 전망을 확인하세요">
+        <GatedStockSection sectionKey="ai_analysis" pageType="symbol" fallbackTitle={`${s.name} AI 분석`}>
         <section style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--card-p) var(--sp-lg)', marginBottom: 'var(--sp-md)' }}>
           <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 10px' }}>📊 {s.name} 종합 분석</h2>
           <div style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.85 }}
@@ -486,7 +487,7 @@ export default async function StockDetailPage({ params }: Props) {
           />
           <SectionShareButton section="stock-ai-analysis" label={`\${s.name} AI 분석`} text={`\${s.name} AI 종합 분석 — 카더라에서 확인하세요`} pagePath={`/stock/\${symbol}`} />
         </section>
-        </LoginGate>
+        </GatedStockSection>
         </>
       )}
 
@@ -570,6 +571,7 @@ export default async function StockDetailPage({ params }: Props) {
         const upC = stockUpColor(isKRStock);
         const downC = stockDownColor(isKRStock);
         return (
+        <GatedStockSection sectionKey="investor_flow" pageType="symbol" fallbackTitle={`${s.name} 투자자 동향`}>
         <section style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--card-p) var(--sp-lg)', marginBottom: 'var(--sp-md)' }}>
           <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 10px' }}>📊 {s.name} 투자자별 수급 ({flows.length}일)</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -596,6 +598,7 @@ export default async function StockDetailPage({ params }: Props) {
             <span>■ 외국인 (진하게)</span><span>□ 기관 (연하게)</span><span style={{ color: upC }}>← 매수</span><span style={{ color: downC }}>매도 →</span>
           </div>
         </section>
+        </GatedStockSection>
         );
       })()}
 
