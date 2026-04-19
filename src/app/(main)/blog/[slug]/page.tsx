@@ -37,6 +37,7 @@ import NextArticleFloat from '@/components/NextArticleFloat';
 import BlogTossGate from '@/components/BlogTossGate';
 import RelatedContentCard from '@/components/RelatedContentCard';
 import BlogMentionCard from '@/components/blog/BlogMentionCard';
+import BlogHeroExtras from '@/components/blog/BlogHeroExtras';
 // SmartSectionGate 제거 → LoginGate 기능 게이팅으로 전환 (세션 108)
 import BlogAptAlertCTA from '@/components/BlogAptAlertCTA';
 import YMYLBanner from '@/components/YMYLBanner';
@@ -242,8 +243,8 @@ export async function generateStaticParams() {
  */
 const getPostBySlug = cache(async (slug: string) => {
   const sb = await createSupabaseServer();
-  const { data } = await sb.from('blog_posts')
-    .select('id,title,slug,content,excerpt,category,sub_category,cover_image,image_alt,tags,meta_description,meta_keywords,author_name,author_role,reading_time_min,view_count,comment_count,helpful_count,published_at,created_at,updated_at,series_id,series_order,source_type,source_ref,data_date,rewritten_at')
+  const { data } = await (sb as any).from('blog_posts')
+    .select('id,title,slug,content,excerpt,category,sub_category,cover_image,image_alt,tags,meta_description,meta_keywords,author_name,author_role,reading_time_min,view_count,comment_count,helpful_count,published_at,created_at,updated_at,series_id,series_order,source_type,source_ref,data_date,rewritten_at,tldr,key_points,gated_sections,has_gated_content,reading_minutes')
     .eq('slug', slug).eq('is_published', true).maybeSingle();
   return data;
 });
@@ -533,8 +534,8 @@ export default async function BlogDetailPage({ params }: Props) {
   
   // B-1: 본문 내 실제 이미지 URL 추출 (텍스트 없는 사진 → 네이버 이미지 캐러셀 우대)
   const contentImages = (post.content || '').match(/!\[([^\]]*)\]\(([^)]+)\)/g)
-    ?.map(m => { const match = m.match(/!\[([^\]]*)\]\(([^)]+)\)/); return match ? { alt: match[1], url: match[2] } : null; })
-    .filter((img): img is { alt: string; url: string } => !!img && !img.url.includes('/api/og'))
+    ?.map((m: string) => { const match = m.match(/!\[([^\]]*)\]\(([^)]+)\)/); return match ? { alt: match[1], url: match[2] } : null; })
+    .filter((img: any): img is { alt: string; url: string } => !!img && !img.url.includes('/api/og'))
     .slice(0, 3) || [];
 
   const jsonLd = {
@@ -561,7 +562,7 @@ export default async function BlogDetailPage({ params }: Props) {
     url: `${SITE}/blog/${slug}`,
     image: [
       // 실제 본문 이미지 (텍스트 없는 사진 → 네이버 이미지 캐러셀 우대)
-      ...contentImages.map(img => ({
+      ...contentImages.map((img: { url: string; alt: string }) => ({
         '@type': 'ImageObject' as const,
         url: img.url,
         caption: img.alt || post.title,
@@ -792,7 +793,7 @@ export default async function BlogDetailPage({ params }: Props) {
         <Link href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)', opacity: 0.7 }}>홈</Link>
         <span style={{ opacity: 0.3 }}>/</span>
         <Link href="/blog" style={{ textDecoration: 'none', color: 'var(--text-tertiary)', opacity: 0.7 }}>블로그</Link>
-        {post.category && <><span style={{ opacity: 0.3 }}>/</span><Link href={`/blog?category=${post.category}`} style={{ textDecoration: 'none', color: catStyle.color, fontWeight: 600 }}>{{ stock: '주식', apt: '청약', unsold: '미분양', finance: '재테크', general: '생활' }[post.category] || post.category}</Link></>}
+        {post.category && <><span style={{ opacity: 0.3 }}>/</span><Link href={`/blog?category=${post.category}`} style={{ textDecoration: 'none', color: catStyle.color, fontWeight: 600 }}>{({ stock: '주식', apt: '청약', unsold: '미분양', finance: '재테크', general: '생활' } as Record<string, string>)[post.category] || post.category}</Link></>}
       </nav>
 
       {/* 세션70: 상단 회원가입 유도 배너 */}
@@ -827,6 +828,13 @@ export default async function BlogDetailPage({ params }: Props) {
           </div>
           {/* 제목 */}
           <h1 style={{ fontSize: 26, fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.5, margin: '0 0 18px', wordBreak: 'keep-all', letterSpacing: '-0.8px' }}>{post.title}</h1>
+          {/* Session D: TLDR + key_points hero (7,040건 100% backfill 완료) */}
+          <BlogHeroExtras
+            tldr={(post as any).tldr}
+            keyPoints={(post as any).key_points}
+            readingMinutes={(post as any).reading_minutes}
+            readingTimeMinFallback={post.reading_time_min}
+          />
           {/* 저자 카드 */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', borderRadius: 'var(--radius-card)', background: 'var(--bg-hover)', border: '1px solid var(--border)' }}>
             <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--brand-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, color: 'var(--brand)', flexShrink: 0 }}>
