@@ -1,3 +1,34 @@
+# 카더라 STATUS — 세션 144 (2026-04-19)
+
+## 세션 144 (2026-04-19) — 온보딩 완료 판정 구조적 수리
+
+### 진단 (세션 143 후속)
+- 세션 143에서 트리거 3-OR 완화, middleware 강제 리다이렉트 추가
+- 하지만 UI "건너뛰기" 경로가 region_text 미업데이트 → 무한 루프 위험
+- v_onboarding_funnel: 04-12 가입 11명 중 onboarded 11/11, completed 1/11
+- complete_profile_and_reward RPC: phone 필드 요구로 호출 0회 (dead code 확정)
+
+### 수정 (Fix A + Fix C)
+1. update_profile_completed: 지역 조건 완전 제거, 닉네임+관심사만 체크
+2. OnboardingClient 건너뛰기 핸들러: region '전국' 기본값 추가
+3. 기존 피해자 UPDATE updated_at으로 트리거 재계산 (UPDATE 0 건 직접 반환 — 트리거가 UPDATE 시점에 재계산되므로 후속 조회에서 flip 확인됨)
+
+### 검증
+- completed 37 → **73** (57.9%, +36명)
+- v_onboarding_funnel: 04-14/12/09/08/07 = 100%, 04-13 90%
+- 04-10 25명 nickname=0 잔존 — Fix D(별도 세션)로 이관
+- 04-16 onboarded=1 completed=1 (세션 143에서 completed=0이었던 유저 자동 flip)
+
+### 커밋
+- 8541f837 fix(onboarding): 완료 판정에서 지역 조건 제거
+
+### 보류/별건
+- Fix B (메인 버튼 region 기본값 '전국'): UI 선택사항 라벨과 충돌, 반대
+- Fix D (04-10 nickname=0 25명 조사): 별도 세션
+- Fix E (3컬럼 통합): 파괴적 변경, 별도 세션
+
+---
+
 # 카더라 STATUS — 세션 143 (2026-04-19)
 
 ## 세션 143 (2026-04-19) — 회원가입/온보딩 플로우 근본 수리
