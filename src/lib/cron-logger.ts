@@ -14,8 +14,16 @@ interface CronResult {
 }
 
 interface CronOptions {
-  /** Redis 기반 lock TTL(초). 0 또는 미설정 시 lock 비활성. */
+  /** Redis 기반 lock TTL(초). 0 또는 미설정 시 lock 비활성. Vercel maxDuration 300 초과 시 자동 cap. */
   redisLockTtlSec?: number;
+  /** Vercel maxDuration(초). TTL cap 산출용. 기본 300. */
+  maxDurationSec?: number;
+}
+
+/** CI-v1 task2: Vercel 함수 timeout 대비 lock TTL 상한 — maxDuration - 30 */
+function capLockTtl(requestedSec: number, maxDurationSec = 300): number {
+  const cap = Math.max(30, maxDurationSec - 30);
+  return Math.min(requestedSec, cap);
 }
 
 export async function withCronLogging(
@@ -25,12 +33,16 @@ export async function withCronLogging(
 ): Promise<{ success: boolean } & Partial<CronResult> & { error?: string; skipped?: boolean }> {
   const supabase = getSupabase();
 
-  // [L1-4] Redis 기반 중복 실행 차단 (옵션)
-  // 세션 140 [P0-IMAGE]: lock 획득 실패 시에도 cron_logs 에 skipped 로우 INSERT → 관측 가능
-  if (options.redisLockTtlSec && options.redisLockTtlSec > 0) {
-    const ok = await acquireCronLock(cronName, options.redisLockTtlSec);
+  // CI-v1 task2: lock 획득 후 finally 로 release 보장 — 이전엔 try/catch 분기 release 로 누수 가능성
+  let lockHeld = false;
+  const effectiveTtl = options.redisLockTtlSec && options.redisLockTtlSec > 0
+    ? capLockTtl(options.redisLockTtlSec, options.maxDurationSec ?? 300)
+    : 0;
+
+  if (effectiveTtl > 0) {
+    const ok = await acquireCronLock(cronName, effectiveTtl);
     if (!ok) {
-      console.warn(`[cron] ${cronName} skipped — redis lock held`);
+      console.warn(`[cron] ${cronName} skipped — redis lock held (ttl=${effectiveTtl}s)`);
       try {
         await supabase.from('cron_logs').insert({
           cron_name: cronName,
@@ -38,11 +50,12 @@ export async function withCronLogging(
           started_at: new Date().toISOString(),
           finished_at: new Date().toISOString(),
           error_message: 'redis_lock_held',
-          metadata: { reason: 'redis_lock_held', ttl_sec: options.redisLockTtlSec },
+          metadata: { reason: 'redis_lock_held', ttl_sec: effectiveTtl },
         });
-      } catch { /* ignore logging failure — 실행 자체는 skip 되었으므로 응답은 정상 */ }
+      } catch { /* ignore logging failure */ }
       return { success: true, skipped: true, processed: 0 };
     }
+    lockHeld = true;
   }
 
   const { data: log } = await supabase
@@ -79,15 +92,11 @@ export async function withCronLogging(
       });
     }
 
-    if (options.redisLockTtlSec && options.redisLockTtlSec > 0) {
-      await releaseCronLock(cronName);
-    }
-
     return { success: true, ...result };
   } catch (error: any) {
     const duration = Date.now() - startTime;
 
-    // Sentry 에러 리포트 (크론 컨텍스트 태그 포함)
+    // Sentry 에러 리포트
     try {
       const Sentry = await import('@sentry/nextjs');
       Sentry.captureException(error, {
@@ -106,7 +115,6 @@ export async function withCronLogging(
       })
       .eq('id', log?.id as string);
 
-    // 실패 알림 자동 생성
     await supabase.from('admin_alerts').insert({
       type: 'cron_fail',
       severity: 'error',
@@ -115,19 +123,20 @@ export async function withCronLogging(
       metadata: { cron_name: cronName, duration_ms: duration },
     });
 
-    // [NOTIFY-BELL] 세션 140: 관리자 벨에도 즉시 push (무료·실시간)
     try {
       const { NotificationBellService } = await import('@/lib/notification-bell');
       await NotificationBellService.pushCronFailure({
         cronName,
         error: error.message?.substring(0, 500) || 'unknown',
       });
-    } catch { /* 벨 실패는 무시 */ }
-
-    if (options.redisLockTtlSec && options.redisLockTtlSec > 0) {
-      await releaseCronLock(cronName);
-    }
+    } catch { /* 벨 실패 무시 */ }
 
     return { success: false, error: error.message };
+  } finally {
+    // CI-v1 task2: finally 로 단일 release 보장 — try/catch 분기 release 제거
+    if (lockHeld) {
+      try { await releaseCronLock(cronName); }
+      catch (e) { console.warn(`[cron] ${cronName} lock release failed:`, e); }
+    }
   }
 }
