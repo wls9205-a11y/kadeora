@@ -675,3 +675,33 @@ Google graph 에서 카더라를 PBN 네트워크 일부로 인식할 리스크 
 - `curl -sL https://kadeora.app | grep -iE "xn--zf0bv|xn--kj0bw|G-VP4F6TH2GD"`  → 0건 예상
 - `curl -sL https://kadeora.app/sitemap.xml | grep -c "xn--zf"` → 0건 예상
 - sameAs JSON-LD 호스팅어 도메인 → 없음 확인됨 (코드 레벨)
+
+---
+
+# 세션 142 (2026-04-20) — P0 이미지 파이프라인 대규모 복구 + 목록 SSR 이미지 맵핑
+
+## 🟢 커밋 7건 (모두 push 완료)
+1. `2106c322` P0-1: `/apt/[id]` Stage 6 RPC swap `get_apt_complex_stage6` → `get_apt_complex_hero` (shape: `{profile, related_blogs}`)
+2. `2bed6332` P0-7: `/stock/[symbol]` 갤러리 URL safeImg 적용
+3. `9ddac2ac` **image-sanitize 화이트리스트 → 블랙리스트 전환** — SAFE_IMG_HOSTS 제거, BLOCKED_IMG_HOSTS `hc.go.kr` 만, 모든 https URL 통과
+4. `b9285b6b` P0-1 real: apt_sites null → Stage 6 항상 시도 (sub/unsold/redev 상태 무관) — 파크리오 404 복구
+5. `16384050` P0-CSP: middleware.ts `img-src 'self' data: blob: https:` (`http:` 제거, 외부 CDN 전체 허용)
+6. `319b5eb4` P0-blog: `/blog` 목록 cover_image null → `blog_post_images` 첫 이미지 fallback
+7. `70b4310a` P0 마감: `/hot` → `get_hot_posts_with_images` RPC + `/apt` aptImageMap 을 `apts/unsold.house_nm in()` 으로 scoped query
+
+## 🔧 세션 142 핵심 교훈
+- **safeImg 화이트리스트 함정**: 5개 안전 호스트만 허용 → DB의 legitimate 외부 CDN(imgnews.naver 23,885건) 전부 /api/og 제네릭 카드로 치환 → 사용자 불만. 블랙리스트가 실용적.
+- **PostgREST 1000 row cap**: `.not('images','is',null)` 전수 조회가 34K 테이블에서 잘려 매칭율 1%대로 추락. `in()` 타깃 조회로 해결.
+- **Stage 6 진입 조건**: `!site && !sub && !unsold && !redev` 은 sub 의 ilike wildcard 매칭으로 skip 되기 쉬움 → `!site` 단독 체크로 단순화.
+- **서버 컴포넌트 JSX onError 절대 금지** (세션 140 교훈 계승).
+- **middleware CSP 와 safeImg 정합성**: 둘 다 `http:` 차단, `https:` 모두 허용 → 이중 방어.
+
+## 📋 세션 142 보류 (다음 세션)
+- P0-2: `/api/admin/v2` → `get_admin_dashboard_fast` swap — shape 100% 불일치(flat 36개 vs structured 11개). 병행 호출 + MasterControlTab 리팩토링 필요.
+- P0-3/4: Resend 도메인 + pg_cron secret 회전 — Node 측 env/vault 작업.
+- P0-5: signup_complete 이벤트에 cta_name 상속 — callback 탐색 필요.
+- P0-8: silent cron 4종 (blog-publish-queue / refresh-trending / streak-alert-daily / blog-upcoming-projects) 개별 디버깅.
+- P0-9: issue-draft JSON parse hardening — 구체 샘플 에러 확보 후.
+- P0-10: blog_posts draft 53K archive — migration + new API.
+- **/stock 목록 og-chart 비율 줄이기** — 실제 외부 CDN 이미지 수집 확대.
+- **BAILOUT_TO_CLIENT_SIDE_RENDERING 원인 추적** — Next.js 빌드 로그 분석.
