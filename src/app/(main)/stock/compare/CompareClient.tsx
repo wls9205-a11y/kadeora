@@ -6,6 +6,7 @@ import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import SectionShareButton from '@/components/SectionShareButton';
 import { fmtCap, fmtPrice } from '@/lib/format';
 import Disclaimer from '@/components/Disclaimer';
+import GatedStockSection from '@/components/stock/GatedStockSection';
 
 interface Stock {
   symbol: string; name: string; market: string; price: number;
@@ -184,6 +185,7 @@ export default function CompareClient() {
             const h = 120;
             const toPoints = (vals: number[]) => vals.map((v, i) => `${(i / (vals.length - 1)) * w},${h - ((v - min) / range) * h}`).join(' ');
             return (
+              <GatedStockSection sectionKey="compare_detailed" pageType="compare" fallbackTitle={`${stockA.name} × ${stockB.name} 상세 비교`}>
               <div style={{ marginTop: 'var(--sp-lg)', padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)' }}>
                 <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>📈 30일 수익률 비교 (%)</div>
                 <svg viewBox={`0 0 ${w} ${h}`} style={{ width: '100%', height: h }}>
@@ -196,6 +198,7 @@ export default function CompareClient() {
                   <span style={{ color: 'var(--accent-orange)', fontWeight: 700 }}>● {stockB.name}</span>
                 </div>
               </div>
+              </GatedStockSection>
             );
           })()}
         </div>
