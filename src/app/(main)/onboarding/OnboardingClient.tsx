@@ -221,6 +221,8 @@ export default function OnboardingClient() {
                 onboarded: true,
                 onboarding_method: 'skip',
                 interests: ['news'],
+                region_text: '전국',
+                residence_city: '전국',
                 updated_at: new Date().toISOString(),
               }).eq('id', data.user.id);
               fetch('/api/onboarding/auto-alerts', {
