@@ -171,11 +171,13 @@ export default async function BlogPage({ searchParams }: Props) {
   q2 = q2.range((pageNum - 1) * perPage, pageNum * perPage - 1);
   const { data: posts, count: filteredCount } = await q2;
 
-  // 세션 142 P0 마지막: cover_image 없는 글은 blog_post_images 첫 이미지로 fallback
-  // /blog 목록 SSR 이미지 커버리지 향상 (og 제네릭 카드 비율 ↓)
+  // 세션 142 P0: cover_image 없는 글은 blog_post_images 첫 이미지로 fallback
+  // 세션 143: cover_image 가 /api/og 제네릭 URL 인 경우도 fallback 대상 (53K posts 제네릭 카드 비율 ↓ 즉시 효과)
   const postImageMap: Record<string | number, string> = {};
+  const isGenericCover = (url: string | null | undefined): boolean =>
+    !url || url.includes('/api/og') || url.includes('/api/og-square');
   const missingCoverIds = (posts || [])
-    .filter((p: any) => !p.cover_image)
+    .filter((p: any) => isGenericCover(p.cover_image))
     .map((p: any) => p.id);
   if (missingCoverIds.length > 0) {
     const { data: imgs } = await (sb as any)
@@ -420,7 +422,7 @@ export default async function BlogPage({ searchParams }: Props) {
                 <span style={{ fontSize: 10, fontWeight: 800, color: isHot ? 'var(--accent-red)' : 'var(--text-tertiary)', width: 18, textAlign: 'center', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>{rank}</span>
                 {/* 썸네일 */}
                 <div style={{ width: 80, height: 56, borderRadius: 'var(--radius-sm)', overflow: 'hidden', flexShrink: 0, background: 'var(--bg-hover)' }}>
-                    <img src={safeImg(p.cover_image || postImageMap[p.id], { title: (p.title || '').slice(0, 40), category: p.category || 'blog', design: (idx % 6) + 1 })} alt={p.title || "블로그 썸네일"} width={80} height={56} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} loading="lazy" decoding="async" />
+                    <img src={safeImg((!p.cover_image || String(p.cover_image).includes('/api/og')) ? (postImageMap[p.id] || p.cover_image) : p.cover_image, { title: (p.title || '').slice(0, 40), category: p.category || 'blog', design: (idx % 6) + 1 })} alt={p.title || "블로그 썸네일"} width={80} height={56} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} loading="lazy" decoding="async" />
                   </div>
                 {/* 본문 */}
                 <div style={{ flex: 1, minWidth: 0 }}>

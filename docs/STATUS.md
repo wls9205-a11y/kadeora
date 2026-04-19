@@ -705,3 +705,37 @@ Google graph 에서 카더라를 PBN 네트워크 일부로 인식할 리스크 
 - P0-10: blog_posts draft 53K archive — migration + new API.
 - **/stock 목록 og-chart 비율 줄이기** — 실제 외부 CDN 이미지 수집 확대.
 - **BAILOUT_TO_CLIENT_SIDE_RENDERING 원인 추적** — Next.js 빌드 로그 분석.
+
+---
+
+# 세션 143 (2026-04-20) — aptImageMap 우선순위 재조정 + blog /api/og 역조정
+
+## 🟢 커밋 2건
+1. `d9b330bc` fix(apt): aptImageMap images[0] 우선 + og_image_url fallback (4단 priority) — `.not('images','is',null)` 필터 제거로 images 비어있어도 og_image_url 확보
+2. (이 커밋) fix(blog): cover_image 가 /api/og 제네릭인 경우도 blog_post_images fallback 트리거 — 53K posts 제네릭 카드 비율 ↓ 즉시 효과
+
+## 🔴 미해결 — /apt SSR BAILOUT
+MCP 실측:
+- `/apt` HTML 1.77MB 중 `<img>` 태그 **1개**, `listing-grid` 1개 (class 정의만)
+- `BAILOUT_TO_CLIENT_SIDE_RENDERING` 시그니처 **5+ 회 발견**
+- X-Vercel-Cache: MISS, Age: 0 (ISR 신선)
+
+근본: SubscriptionTab 자체가 SSR 에서 렌더 안 됨. 카드가 client-side 렌더 전환.
+가능한 원인:
+- `next/dynamic({ ssr: false })` — 세션 138 에서 탭은 풀렸지만 다른 컴포넌트에 잔존 가능
+- `useSearchParams()` without Suspense wrapper 가 어딘가
+- Server component 중 async throw
+- Next.js 15 newline: Math.random()/Date.now() 등 dynamic trigger
+
+**다음 세션 최우선 과제**: BAILOUT 원인 추적 → 해결 전까지 /apt 이미지 개선 효과 없음.
+
+## 📋 세션 143 기록 사항
+- **DB http://→https:// 전환 완료** (apt_sites.images 5,691 + og_image_url 5,691 + apt_complex_profiles 대량, Claude MCP 측)
+- **safeImg 블랙리스트 정합**: 현재 `/^http:\/\//i` 패턴 차단 → DB 정규화와 일치
+- **CSP 정합**: middleware `img-src 'self' data: blob: https:` 배포됨 (16384050 → 라이브 헤더 확인)
+- **blog 이미지 근본 개선 옵션 C 적용**: cover_image = /api/og 제네릭인 경우 blog_post_images 첫 이미지 우선. 옵션 A/B (cron 증설, Haiku 스크립트) 는 별 세션.
+
+## ⚠️ 전달 중요사항 (Node → 다음 세션)
+1. Vercel 배포 진행 중일 수 있음 — d9b330bc 배포 완료 후 /apt 재검증 필요
+2. BAILOUT 이 해결되지 않으면 aptImageMap 수정 효과 0 — /apt 관련 추가 이미지 수정은 BAILOUT 해결 후
+3. Option C 블로그 수정은 즉시 배포 적용 가능 — 다음 curl 시점부터 /blog 카드 이미지 다양성 증가 기대
