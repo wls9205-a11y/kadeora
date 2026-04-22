@@ -1,0 +1,139 @@
+'use client';
+
+/**
+ * BlogEarlyGateTeaser — 블로그 최상단 (TLDR 바로 아래) 즉시 노출 티저.
+ *
+ * 85% 유저가 스크롤 25% 미만에서 이탈하므로 중후반 H2 gated wall 은 노출 0.
+ * 상단 티저는 컴포넌트 마운트 + config 로드 즉시 cta_view 발송 (IntersectionObserver 불필요).
+ *
+ * 로그인 유저는 완전 숨김.
+ */
+
+import { useEffect, useRef, useState } from 'react';
+import { trackCtaClick } from '@/lib/cta-track';
+import { createSupabaseBrowser } from '@/lib/supabase-browser';
+
+interface TeaserConfig {
+  teaser_title: string;
+  teaser_bullets: string[];
+  cta_text: string;
+  cta_name: string;
+}
+
+interface Props {
+  slug: string;
+  /** has_gated_content=true 인 경우만 렌더. 서버에서 판단해 전달. */
+  enabled?: boolean;
+}
+
+function fireView(ctaName: string) {
+  const body = JSON.stringify({
+    event_type: 'cta_view',
+    cta_name: ctaName,
+    category: 'signup',
+    page_path: typeof window !== 'undefined' ? window.location.pathname : null,
+  });
+  try {
+    if (typeof navigator !== 'undefined' && navigator.sendBeacon) {
+      navigator.sendBeacon('/api/events/cta', new Blob([body], { type: 'application/json' }));
+    } else {
+      fetch('/api/events/cta', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body, keepalive: true,
+      }).catch(() => {});
+    }
+  } catch { /* silent */ }
+}
+
+export default function BlogEarlyGateTeaser({ slug, enabled = true }: Props) {
+  const [config, setConfig] = useState<TeaserConfig | null>(null);
+  const [isAuth, setIsAuth] = useState<boolean | null>(null);
+  const viewFired = useRef(false);
+
+  useEffect(() => {
+    if (!enabled) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const sb = createSupabaseBrowser();
+        const [cfgRes, accRes] = await Promise.all([
+          (sb.rpc as any)('get_blog_teaser_config'),
+          (sb.rpc as any)('get_my_access_level'),
+        ]);
+        if (cancelled) return;
+        const cfg = cfgRes?.data;
+        if (cfg && typeof cfg === 'object') {
+          setConfig({
+            teaser_title: String((cfg as any).teaser_title || ''),
+            teaser_bullets: Array.isArray((cfg as any).teaser_bullets) ? (cfg as any).teaser_bullets.map(String) : [],
+            cta_text: String((cfg as any).cta_text || '로그인하고 전체 보기'),
+            cta_name: String((cfg as any).cta_name || 'blog_early_teaser'),
+          });
+        }
+        const auth = accRes?.data;
+        setIsAuth(auth && typeof auth === 'object' ? !!(auth as any).is_authenticated : false);
+      } catch { /* silent — 티저 미노출 */ }
+    })();
+    return () => { cancelled = true; };
+  }, [enabled]);
+
+  useEffect(() => {
+    if (!config || isAuth !== false || viewFired.current) return;
+    viewFired.current = true;
+    fireView(config.cta_name);
+  }, [config, isAuth]);
+
+  if (!enabled || !config || isAuth !== false) return null;
+
+  const handleClick = () => {
+    trackCtaClick({ cta_name: config.cta_name, category: 'signup', page_path: typeof window !== 'undefined' ? window.location.pathname : undefined });
+    if (typeof window !== 'undefined') {
+      window.location.href = `/login?source=${config.cta_name}&redirect=${encodeURIComponent(`/blog/${slug}`)}`;
+    }
+  };
+
+  return (
+    <div
+      role="group"
+      aria-label={config.teaser_title}
+      style={{
+        margin: '20px 0',
+        padding: '18px 18px 16px',
+        borderRadius: 14,
+        border: '2px solid #FBBF24',
+        background: 'linear-gradient(135deg, rgba(251,191,36,0.12) 0%, rgba(254,229,0,0.08) 100%)',
+        boxShadow: '0 6px 20px rgba(0,0,0,0.25)',
+      }}
+    >
+      <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary, #e5e7eb)', marginBottom: 12, wordBreak: 'keep-all' }}>
+        {config.teaser_title}
+      </div>
+      {config.teaser_bullets.length > 0 && (
+        <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 14px', display: 'grid', gap: 6 }}>
+          {config.teaser_bullets.map((b, i) => (
+            <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 13, color: 'var(--text-secondary, #cbd5e1)', lineHeight: 1.5 }}>
+              <span aria-hidden style={{ color: '#FBBF24', marginTop: 1 }}>🔒</span>
+              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+      <button
+        onClick={handleClick}
+        style={{
+          width: '100%',
+          background: '#FEE500', color: '#000',
+          fontWeight: 800, fontSize: 15,
+          padding: '12px 20px', borderRadius: 10,
+          border: 'none', cursor: 'pointer',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+        }}
+      >
+        {config.cta_text}
+      </button>
+      <div style={{ fontSize: 11, textAlign: 'center', color: 'var(--text-tertiary, #94a3b8)', marginTop: 8 }}>
+        가입 즉시 100P · 언제든 해지 가능
+      </div>
+    </div>
+  );
+}
