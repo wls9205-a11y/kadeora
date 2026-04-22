@@ -209,10 +209,6 @@
       "schedule": "15 * * * *"
     },
     {
-      "path": "/api/cron/apt-satellite-crawl",
-      "schedule": "*/30 * * * *"
-    },
-    {
       "path": "/api/cron/batch-cluster-submit",
       "schedule": "0 5 * * *"
     },
