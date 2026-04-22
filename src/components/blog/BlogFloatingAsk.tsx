@@ -15,14 +15,20 @@ export default function BlogFloatingAsk({ slug, isLoggedIn }: Props) {
 
   useEffect(() => {
     if (isLoggedIn) return;
+    // 스크롤 임계값 20% 로 하향 (85% 유저가 25% 미만 이탈 → 기존 50% 는 노출 거의 0)
     const onScroll = () => {
       const scrolled = window.scrollY;
       const total = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
-      setShow(scrolled / total > 0.5);
+      if (scrolled / total > 0.2) setShow(true);
     };
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
-    return () => window.removeEventListener('scroll', onScroll);
+    // 체류 5초 타이머 폴백 — 스크롤 안 한 유저도 노출
+    const timer = setTimeout(() => setShow(true), 5000);
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      clearTimeout(timer);
+    };
   }, [isLoggedIn]);
 
   // show=true 로 전환 시 cta_view 1회 발송
