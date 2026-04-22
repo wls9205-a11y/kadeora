@@ -50,6 +50,18 @@ export default function BlogEarlyGateTeaser({ slug, enabled = true }: Props) {
   const [isAuth, setIsAuth] = useState<boolean | null>(null);
   const viewFired = useRef(false);
 
+  // 🔍 DEBUG probe — 마운트 즉시 log_teaser_debug('mount')
+  useEffect(() => {
+    try {
+      const sb = createSupabaseBrowser();
+      (sb.rpc as any)('log_teaser_debug', {
+        p_event: 'mount',
+        p_page_path: typeof window !== 'undefined' ? window.location.pathname : null,
+        p_details: { slug, enabled },
+      }).catch(() => {});
+    } catch { /* silent */ }
+  }, []);
+
   useEffect(() => {
     if (!enabled) return;
     let cancelled = false;
@@ -61,6 +73,22 @@ export default function BlogEarlyGateTeaser({ slug, enabled = true }: Props) {
           (sb.rpc as any)('get_my_access_level'),
         ]);
         if (cancelled) return;
+
+        // 🔍 DEBUG — RPC 응답 수신
+        try {
+          (sb.rpc as any)('log_teaser_debug', {
+            p_event: 'config_loaded',
+            p_page_path: typeof window !== 'undefined' ? window.location.pathname : null,
+            p_details: {
+              has_config: !!cfgRes?.data,
+              config_error: cfgRes?.error?.message ?? null,
+              is_authenticated: (accRes?.data as any)?.is_authenticated ?? null,
+              access_level: (accRes?.data as any)?.access_level ?? null,
+              access_error: accRes?.error?.message ?? null,
+            },
+          }).catch(() => {});
+        } catch { /* silent */ }
+
         const cfg = cfgRes?.data;
         if (cfg && typeof cfg === 'object') {
           setConfig({
@@ -72,15 +100,53 @@ export default function BlogEarlyGateTeaser({ slug, enabled = true }: Props) {
         }
         const auth = accRes?.data;
         setIsAuth(auth && typeof auth === 'object' ? !!(auth as any).is_authenticated : false);
-      } catch { /* silent — 티저 미노출 */ }
+      } catch (e: any) {
+        // 🔍 DEBUG — 예외 로깅
+        try {
+          const sb = createSupabaseBrowser();
+          (sb.rpc as any)('log_teaser_debug', {
+            p_event: 'config_exception',
+            p_page_path: typeof window !== 'undefined' ? window.location.pathname : null,
+            p_details: { message: String(e?.message || e).slice(0, 300) },
+          }).catch(() => {});
+        } catch { /* silent */ }
+      }
     })();
     return () => { cancelled = true; };
   }, [enabled]);
+
+  // 🔍 DEBUG — render 판정
+  useEffect(() => {
+    if (config === null || isAuth === null) return;
+    try {
+      const sb = createSupabaseBrowser();
+      const willRender = !!(enabled && config && isAuth === false);
+      (sb.rpc as any)('log_teaser_debug', {
+        p_event: 'render_decision',
+        p_page_path: typeof window !== 'undefined' ? window.location.pathname : null,
+        p_details: {
+          will_render: willRender,
+          enabled,
+          has_config: !!config,
+          is_auth: isAuth,
+        },
+      }).catch(() => {});
+    } catch { /* silent */ }
+  }, [config, isAuth, enabled]);
 
   useEffect(() => {
     if (!config || isAuth !== false || viewFired.current) return;
     viewFired.current = true;
     fireView(config.cta_name);
+    // 🔍 DEBUG — view fired
+    try {
+      const sb = createSupabaseBrowser();
+      (sb.rpc as any)('log_teaser_debug', {
+        p_event: 'view_fired',
+        p_page_path: typeof window !== 'undefined' ? window.location.pathname : null,
+        p_details: { cta_name: config.cta_name },
+      }).catch(() => {});
+    } catch { /* silent */ }
   }, [config, isAuth]);
 
   if (!enabled || !config || isAuth !== false) return null;
