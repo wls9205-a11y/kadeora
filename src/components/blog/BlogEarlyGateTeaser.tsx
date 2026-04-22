@@ -44,7 +44,7 @@ function fireView(ctaName: string) {
       fetch('/api/events/cta', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body, keepalive: true,
-      }).catch(() => {});
+      }).then(() => {}, () => {});
     }
   } catch { /* silent */ }
 }
@@ -59,11 +59,12 @@ export default function BlogEarlyGateTeaser({ slug, enabled = true, hasGatedCont
   useEffect(() => {
     try {
       const sb = createSupabaseBrowser();
+      // .then 체인으로 fetch 강제 실행 (PostgrestBuilder 는 thenable — .catch 단독으로는 미실행)
       (sb.rpc as any)('log_teaser_debug', {
         p_event: 'mount',
         p_page_path: typeof window !== 'undefined' ? window.location.pathname : null,
         p_details: { slug, enabled, hasGatedProp: hasGatedProp ?? null, isLoggedInHint: isLoggedInHint ?? null },
-      }).catch(() => {});
+      }).then(() => {}, () => {});
     } catch { /* silent */ }
   }, []);
 
@@ -109,7 +110,7 @@ export default function BlogEarlyGateTeaser({ slug, enabled = true, hasGatedCont
               access_level: (accRes?.data as any)?.access_level ?? null,
               access_error: accRes?.error?.message ?? null,
             },
-          }).catch(() => {});
+          }).then(() => {}, () => {});
         } catch { /* silent */ }
 
         const cfg = cfgRes?.data;
@@ -131,7 +132,7 @@ export default function BlogEarlyGateTeaser({ slug, enabled = true, hasGatedCont
             p_event: 'config_exception',
             p_page_path: typeof window !== 'undefined' ? window.location.pathname : null,
             p_details: { message: String(e?.message || e).slice(0, 300) },
-          }).catch(() => {});
+          }).then(() => {}, () => {});
         } catch { /* silent */ }
       }
     })();
@@ -154,7 +155,7 @@ export default function BlogEarlyGateTeaser({ slug, enabled = true, hasGatedCont
           is_auth: isAuth,
           has_gated: hasGated,
         },
-      }).catch(() => {});
+      }).then(() => {}, () => {});
     } catch { /* silent */ }
   }, [config, isAuth, enabled, hasGated]);
 
@@ -165,11 +166,12 @@ export default function BlogEarlyGateTeaser({ slug, enabled = true, hasGatedCont
     // 🔍 DEBUG — view fired
     try {
       const sb = createSupabaseBrowser();
+      // .then 체인으로 fetch 강제 실행 (PostgrestBuilder 는 thenable — .catch 단독으로는 미실행)
       (sb.rpc as any)('log_teaser_debug', {
         p_event: 'view_fired',
         p_page_path: typeof window !== 'undefined' ? window.location.pathname : null,
         p_details: { cta_name: config.cta_name },
-      }).catch(() => {});
+      }).then(() => {}, () => {});
     } catch { /* silent */ }
   }, [config, isAuth, hasGated]);
 
