@@ -7,6 +7,7 @@
 
 import Link from 'next/link';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import SimilarAptsTracker from './SimilarAptsTracker';
 
 interface SimilarRow {
   id: string;
@@ -64,7 +65,7 @@ export default async function SimilarAptsSection({ aptSiteId, limit = 6 }: Props
           gap: 10,
         }}
       >
-        {rows.map((r) => {
+        {rows.map((r, idx) => {
           const thumb = r.satellite_image_url || r.og_image_url || `/api/og?title=${encodeURIComponent(r.name)}`;
           const regionLabel = [r.region, r.sigungu].filter(Boolean).join(' ');
           const href = r.slug ? `/apt/${r.slug}` : `/apt/${r.id}`;
@@ -72,6 +73,8 @@ export default async function SimilarAptsSection({ aptSiteId, limit = 6 }: Props
             <Link
               key={r.id}
               href={href}
+              data-similar-apt-card
+              data-similar-idx={idx}
               style={{
                 display: 'block',
                 textDecoration: 'none',
@@ -111,6 +114,8 @@ export default async function SimilarAptsSection({ aptSiteId, limit = 6 }: Props
           );
         })}
       </div>
+      {/* C3: 3번째 카드 view/click 로깅 (apt_compare_unlock_logs) */}
+      <SimilarAptsTracker aptSiteId={aptSiteId} thirdCardId={rows[2]?.id || null} />
     </section>
   );
 }

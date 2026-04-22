@@ -11,7 +11,7 @@ import { injectInternalLinks } from '@/lib/blog-auto-link';
 import BlogCommentInput from '@/components/BlogCommentInput';
 import BlogCommentCTA from '@/components/BlogCommentCTA';
 import LoginGate from '@/components/LoginGate';
-import BlogFloatingBar from '@/components/BlogFloatingBar';
+// C3: BlogFloatingBar 제거 (1,031v / 0c)
 import ShareButtons from '@/components/ShareButtons';
 import KakaoShareButton from '@/components/KakaoShareButton';
 import BlogFaqAccordion from '@/components/BlogFaqAccordion';
@@ -992,34 +992,7 @@ export default async function BlogDetailPage({ params }: Props) {
           />
         )}
 
-        {/* LoginGate 기능 게이팅 — 비로그인 유저 전용 (콘텐츠 전체 공개 후 기능으로 가입 유도) */}
-        {!isBot && !isLoggedIn && (
-          <LoginGate
-            feature={post.category === 'stock' ? 'blog_stock_ai' : post.category === 'finance' ? 'blog_finance' : 'blog_compare'}
-            blurHeight={120}
-          >
-            <div style={{ padding: '8px 0' }}>
-              {post.category === 'apt' || post.category === 'unsold' ? (
-                <>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, padding: '4px 0', color: 'var(--text-tertiary)' }}><span>주변 단지 A</span><span>5.8억</span></div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, padding: '4px 0', color: 'var(--text-tertiary)' }}><span>주변 단지 B</span><span>5.1억</span></div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, padding: '4px 0', color: 'var(--text-tertiary)' }}><span>주변 단지 C</span><span>4.7억</span></div>
-                </>
-              ) : post.category === 'stock' ? (
-                <>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, padding: '4px 0', color: 'var(--text-tertiary)' }}><span>AI 의견</span><span>매수 우위</span></div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, padding: '4px 0', color: 'var(--text-tertiary)' }}><span>목표가</span><span>---원</span></div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, padding: '4px 0', color: 'var(--text-tertiary)' }}><span>외국인 수급</span><span>순매수 ---일</span></div>
-                </>
-              ) : (
-                <>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, padding: '4px 0', color: 'var(--text-tertiary)' }}><span>조건 A</span><span>--- 원/월</span></div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, padding: '4px 0', color: 'var(--text-tertiary)' }}><span>조건 B</span><span>--- 원/월</span></div>
-                </>
-              )}
-            </div>
-          </LoginGate>
-        )}
+        {/* v2.0 Week1 C3: login_gate_blog_compare / login_gate_blog_stock_ai — 0% CTR 로 제거 (2026-04-22 실측). blog_early_teaser / blog_gated_login 이 역할 대체. */}
 
         {/* LoginGate 기능 게이팅이 비로그인 전환 전담 */}
 
@@ -1155,7 +1128,7 @@ export default async function BlogDetailPage({ params }: Props) {
       </article>
 
       {/* 플로팅 액션바 — 스크롤 30% 후 나타남, 봇 제외 */}
-      {!isBot && <BlogFloatingBar slug={slug} title={post.title} category={post.category} />}
+      {/* C3: BlogFloatingBar 제거됨 */}
 
       {/* 댓글 섹션 — D안 컴팩트 리스트 */}
       <BlogCommentCTA commentCount={comments.length} />
