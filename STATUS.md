@@ -1,5 +1,20 @@
 # Session 145 — v2.0 Week 1 (2026-04-22 KST)
 
+## Commit 5 — `feat(admin): pulse_v3 tab + 4 widgets`
+- **신규**:
+  - `src/app/api/admin/pulse_v3/route.ts` — GET requireAdmin. 4 뷰 Promise.all 병렬 fetch.
+  - `src/app/admin/pulse_v3/page.tsx` + `PulseV3Client.tsx` — 전용 라우트 + 클라이언트 렌더
+- **수정**: `src/app/admin/AdminShell.tsx` — 'pulse_v3' 탭 등록 (🫀 아이콘, 맨 오른쪽)
+- **위젯 4종**:
+  1. **KPI 8-grid**: active_now / pv_today (yst ±%) / uv_today / signups_today / signups_7d / cta_ctr_7d / whales_unconverted / action_items
+  2. **Blog × APT 전환 매트릭스**: 6-bucket 색상 (gray→red→yellow→green→emerald). 각 셀 signups/visitors (pct%)
+  3. **미가입 고래 TOP 10**: visitor_id / pv / active_days / uniq_pages / deep_reads / last_seen
+  4. **Action Items**: severity pill (red/yellow/cyan) + key + message + action
+- **배너**: red/yellow severity Action Items 있을 때 상단 경고 배너
+- **DB deps**: `v_admin_master_v3`, `v_admin_action_items`, `v_admin_whale_unconverted`, `v_admin_behavior_conversion_matrix`
+- **접근**: `/admin` 에서 'Pulse v3' 탭 또는 `/admin/pulse_v3` 직접 URL
+- **Caveats**: `get_admin_user_detail` 모달 연동은 이번 C5 범위 밖 — 고래 행 클릭은 단순 표시만.
+
 ## Commit 4 — `feat(blog): 50% scroll mid-gate with variants`
 - **신규**: `src/components/blog/BlogMidGate.tsx` (client)
   - props: `{ blogId, isGatedPost?, isLoggedIn?, sentinelSelector?, className? }`

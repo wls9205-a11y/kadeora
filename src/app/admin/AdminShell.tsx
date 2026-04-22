@@ -11,6 +11,7 @@ const GrowthTab = dynamic(() => import('./tabs/GrowthTab'), { loading: Loader })
 const UsersTab = dynamic(() => import('./tabs/UsersTab'), { loading: Loader });
 const UsersListV2 = dynamic(() => import('./tabs/UsersListV2'), { loading: Loader });
 const DashboardV2 = dynamic(() => import('./tabs/DashboardV2'), { loading: Loader });
+const PulseV3 = dynamic(() => import('./pulse_v3/PulseV3Client'), { loading: Loader });
 const DataTab = dynamic(() => import('./tabs/DataTab'), { loading: Loader });
 const OpsTab = dynamic(() => import('./tabs/OpsTab'), { loading: Loader });
 const ExecuteTab = dynamic(() => import('./tabs/ExecuteTab'), { loading: Loader });
@@ -18,7 +19,7 @@ const CommunityTab = dynamic(() => import('./tabs/CommunityTab'), { loading: Loa
 const MasterControlTab = dynamic(() => import('./tabs/MasterControlTab'), { loading: Loader });
 const NaverPublishTab = dynamic(() => import('./tabs/NaverPublishTab'), { loading: Loader });
 
-type TabKey = 'master' | 'focus' | 'focus_v2' | 'issue' | 'growth' | 'users' | 'users_v2' | 'data' | 'ops' | 'execute' | 'community' | 'naver';
+type TabKey = 'master' | 'focus' | 'focus_v2' | 'pulse_v3' | 'issue' | 'growth' | 'users' | 'users_v2' | 'data' | 'ops' | 'execute' | 'community' | 'naver';
 
 const TABS: { key: TabKey; label: string; icon: string }[] = [
   { key: 'master', label: '마스터', icon: '🎛️' },
@@ -33,6 +34,7 @@ const TABS: { key: TabKey; label: string; icon: string }[] = [
   { key: 'data', label: '데이터', icon: '🗄️' },
   { key: 'ops', label: '운영', icon: '🔧' },
   { key: 'execute', label: '실행', icon: '⚡' },
+  { key: 'pulse_v3', label: 'Pulse v3', icon: '🫀' },
 ];
 
 export default function AdminShell() {
@@ -115,6 +117,7 @@ export default function AdminShell() {
       {tab === 'users' && <UsersTab onNavigate={(t: string) => setTab(t as TabKey)} />}
       {tab === 'users_v2' && <UsersListV2 />}
       {tab === 'focus_v2' && <DashboardV2 />}
+      {tab === 'pulse_v3' && <PulseV3 />}
       {tab === 'data' && <DataTab onNavigate={(t: string) => setTab(t as TabKey)} />}
       {tab === 'ops' && <OpsTab onNavigate={(t: string) => setTab(t as TabKey)} />}
       {tab === 'execute' && <ExecuteTab onNavigate={(t: string) => setTab(t as TabKey)} />}
