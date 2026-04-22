@@ -5,6 +5,7 @@
  */
 
 import { useEffect, useState } from 'react';
+import ImageQualityWidget from './ImageQualityWidget';
 
 interface TrendRow {
   dt: string;
@@ -66,6 +67,8 @@ export default function DashboardV2() {
 
       <h3 style={sec()}>🔲 Page × CTA CTR 매트릭스</h3>
       {loading ? <Skel /> : <MatrixTable rows={matrix} />}
+
+      <ImageQualityWidget />
 
       {err && <div style={{ color: '#F87171', fontSize: 12, marginTop: 8 }}>{err}</div>}
     </div>
