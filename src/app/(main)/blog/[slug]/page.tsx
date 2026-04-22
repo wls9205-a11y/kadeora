@@ -839,10 +839,13 @@ export default async function BlogDetailPage({ params }: Props) {
             readingMinutes={(post as any).reading_minutes}
             readingTimeMinFallback={post.reading_time_min}
           />
-          {/* Early Gate Teaser (비로그인 + has_gated_content=true 포스트만 노출) */}
-          {!isLoggedIn && (post as any).has_gated_content && (
-            <BlogEarlyGateTeaser slug={slug} enabled />
-          )}
+          {/* Early Gate Teaser — 무조건 마운트 (클라이언트에서 hasGated/isAuth 체크)
+              서버 조건 분기가 SSR/ISR 캐시와 맞물려 mount probe 0 유발하므로 제거 */}
+          <BlogEarlyGateTeaser
+            slug={slug}
+            hasGatedContent={!!(post as any).has_gated_content}
+            isLoggedInHint={isLoggedIn}
+          />
           {/* 저자 카드 */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', borderRadius: 'var(--radius-card)', background: 'var(--bg-hover)', border: '1px solid var(--border)' }}>
             <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--brand-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, color: 'var(--brand)', flexShrink: 0 }}>

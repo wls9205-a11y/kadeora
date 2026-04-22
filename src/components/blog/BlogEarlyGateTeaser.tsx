@@ -22,8 +22,12 @@ interface TeaserConfig {
 
 interface Props {
   slug: string;
-  /** has_gated_content=true 인 경우만 렌더. 서버에서 판단해 전달. */
+  /** 서버에서 판단한 초기값 (생략 가능 — 컴포넌트가 항상 마운트되도록 무조건 렌더 권장) */
   enabled?: boolean;
+  /** 서버에서 읽은 has_gated_content. undefined 면 컴포넌트 내부에서 blog_posts 조회로 재확인. */
+  hasGatedContent?: boolean | null;
+  /** 서버에서 읽은 로그인 여부. undefined 면 내부에서 get_my_access_level 결과 사용. */
+  isLoggedInHint?: boolean | null;
 }
 
 function fireView(ctaName: string) {
@@ -45,9 +49,10 @@ function fireView(ctaName: string) {
   } catch { /* silent */ }
 }
 
-export default function BlogEarlyGateTeaser({ slug, enabled = true }: Props) {
+export default function BlogEarlyGateTeaser({ slug, enabled = true, hasGatedContent: hasGatedProp, isLoggedInHint }: Props) {
   const [config, setConfig] = useState<TeaserConfig | null>(null);
-  const [isAuth, setIsAuth] = useState<boolean | null>(null);
+  const [isAuth, setIsAuth] = useState<boolean | null>(typeof isLoggedInHint === 'boolean' ? isLoggedInHint : null);
+  const [hasGated, setHasGated] = useState<boolean | null>(typeof hasGatedProp === 'boolean' ? hasGatedProp : null);
   const viewFired = useRef(false);
 
   // 🔍 DEBUG probe — 마운트 즉시 log_teaser_debug('mount')
@@ -57,10 +62,28 @@ export default function BlogEarlyGateTeaser({ slug, enabled = true }: Props) {
       (sb.rpc as any)('log_teaser_debug', {
         p_event: 'mount',
         p_page_path: typeof window !== 'undefined' ? window.location.pathname : null,
-        p_details: { slug, enabled },
+        p_details: { slug, enabled, hasGatedProp: hasGatedProp ?? null, isLoggedInHint: isLoggedInHint ?? null },
       }).catch(() => {});
     } catch { /* silent */ }
   }, []);
+
+  // hasGatedContent 서버 전달 없으면 blog_posts 직접 조회 (슬러그 기반)
+  useEffect(() => {
+    if (hasGated !== null) return;
+    (async () => {
+      try {
+        const sb = createSupabaseBrowser();
+        const { data } = await (sb as any)
+          .from('blog_posts')
+          .select('has_gated_content')
+          .eq('slug', slug)
+          .maybeSingle();
+        setHasGated(!!data?.has_gated_content);
+      } catch {
+        setHasGated(false);
+      }
+    })();
+  }, [slug, hasGated]);
 
   useEffect(() => {
     if (!enabled) return;
@@ -117,10 +140,10 @@ export default function BlogEarlyGateTeaser({ slug, enabled = true }: Props) {
 
   // 🔍 DEBUG — render 판정
   useEffect(() => {
-    if (config === null || isAuth === null) return;
+    if (config === null || isAuth === null || hasGated === null) return;
     try {
       const sb = createSupabaseBrowser();
-      const willRender = !!(enabled && config && isAuth === false);
+      const willRender = !!(enabled && config && isAuth === false && hasGated);
       (sb.rpc as any)('log_teaser_debug', {
         p_event: 'render_decision',
         p_page_path: typeof window !== 'undefined' ? window.location.pathname : null,
@@ -129,13 +152,14 @@ export default function BlogEarlyGateTeaser({ slug, enabled = true }: Props) {
           enabled,
           has_config: !!config,
           is_auth: isAuth,
+          has_gated: hasGated,
         },
       }).catch(() => {});
     } catch { /* silent */ }
-  }, [config, isAuth, enabled]);
+  }, [config, isAuth, enabled, hasGated]);
 
   useEffect(() => {
-    if (!config || isAuth !== false || viewFired.current) return;
+    if (!config || isAuth !== false || !hasGated || viewFired.current) return;
     viewFired.current = true;
     fireView(config.cta_name);
     // 🔍 DEBUG — view fired
@@ -147,9 +171,9 @@ export default function BlogEarlyGateTeaser({ slug, enabled = true }: Props) {
         p_details: { cta_name: config.cta_name },
       }).catch(() => {});
     } catch { /* silent */ }
-  }, [config, isAuth]);
+  }, [config, isAuth, hasGated]);
 
-  if (!enabled || !config || isAuth !== false) return null;
+  if (!enabled || !config || isAuth !== false || !hasGated) return null;
 
   const handleClick = () => {
     trackCtaClick({ cta_name: config.cta_name, category: 'signup', page_path: typeof window !== 'undefined' ? window.location.pathname : undefined });
