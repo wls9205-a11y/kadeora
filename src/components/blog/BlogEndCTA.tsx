@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { trackCtaClick } from '@/lib/cta-track';
 
 interface Props {
@@ -8,7 +8,40 @@ interface Props {
   isLoggedIn?: boolean;
 }
 
+function fireView(ctaName: string) {
+  const body = JSON.stringify({
+    event_type: 'cta_view',
+    cta_name: ctaName,
+    category: 'signup',
+    page_path: typeof window !== 'undefined' ? window.location.pathname : null,
+  });
+  try {
+    if (typeof navigator !== 'undefined' && navigator.sendBeacon) {
+      navigator.sendBeacon('/api/events/cta', new Blob([body], { type: 'application/json' }));
+    } else {
+      fetch('/api/events/cta', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body, keepalive: true }).catch(() => {});
+    }
+  } catch { /* silent */ }
+}
+
 export default function BlogEndCTA({ slug, isLoggedIn }: Props) {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const viewFired = useRef(false);
+
+  useEffect(() => {
+    if (isLoggedIn) return;
+    const node = ref.current;
+    if (!node || viewFired.current) return;
+    const io = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting || viewFired.current) return;
+      viewFired.current = true;
+      fireView('blog_end_cta');
+      io.disconnect();
+    }, { threshold: 0.3 });
+    io.observe(node);
+    return () => io.disconnect();
+  }, [isLoggedIn]);
+
   const handle = useCallback(() => {
     trackCtaClick({ cta_name: 'blog_end_cta', category: 'signup', page_path: typeof window !== 'undefined' ? window.location.pathname : undefined });
     if (typeof window !== 'undefined') {
@@ -19,7 +52,7 @@ export default function BlogEndCTA({ slug, isLoggedIn }: Props) {
   if (isLoggedIn) return null;
 
   return (
-    <div style={{
+    <div ref={ref} style={{
       margin: '28px 0',
       padding: '22px 20px',
       borderRadius: 16,

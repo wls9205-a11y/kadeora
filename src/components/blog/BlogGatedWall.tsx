@@ -7,7 +7,7 @@
  * 로그인 유저는 서버에서 gate 체크 후 full 만 렌더 → 이 컴포넌트 미사용.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { trackCtaClick } from '@/lib/cta-track';
 
 interface Props {
@@ -17,11 +17,48 @@ interface Props {
   ctaText?: string;
   redirectPath?: string;
   ctaSource?: string;
+  position?: number;
 }
 
-export default function BlogGatedWall({ h2, previewHtml, gate, ctaText, redirectPath, ctaSource }: Props) {
+export default function BlogGatedWall({ h2, previewHtml, gate, ctaText, redirectPath, ctaSource, position }: Props) {
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const viewFired = useRef(false);
+
+  // IntersectionObserver 로 cta_view 1회 발송 (threshold 0.3)
+  useEffect(() => {
+    const node = sectionRef.current;
+    if (!node || viewFired.current) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting || viewFired.current) return;
+      viewFired.current = true;
+      const ctaName = ctaSource || (gate === 'premium' ? 'blog_gated_premium' : 'blog_gated_login');
+      const body = JSON.stringify({
+        event_type: 'cta_view',
+        cta_name: ctaName,
+        category: 'signup',
+        page_path: typeof window !== 'undefined' ? window.location.pathname : null,
+        gate_position: typeof position === 'number' ? position : null,
+      });
+      try {
+        if (typeof navigator !== 'undefined' && navigator.sendBeacon) {
+          navigator.sendBeacon('/api/events/cta', new Blob([body], { type: 'application/json' }));
+        } else {
+          fetch('/api/events/cta', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body,
+            keepalive: true,
+          }).catch(() => {});
+        }
+      } catch { /* silent */ }
+      observer.disconnect();
+    }, { threshold: 0.3 });
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [gate, ctaSource, position]);
+
   const handleClick = useCallback(() => {
-    const source = ctaSource || 'blog_gated_section';
+    const source = ctaSource || (gate === 'premium' ? 'blog_gated_premium' : 'blog_gated_login');
     try { trackCtaClick({ cta_name: source, category: 'signup', page_path: redirectPath || (typeof window !== 'undefined' ? window.location.pathname : '') }); } catch { /* silent */ }
     if (typeof window === 'undefined') return;
     const dest = gate === 'premium' ? '/premium?from=gated' : `/login?redirect=${encodeURIComponent(redirectPath || window.location.pathname)}&source=${source}`;
@@ -33,7 +70,7 @@ export default function BlogGatedWall({ h2, previewHtml, gate, ctaText, redirect
   const btnLabel = ctaText || (isPremium ? '프리미엄 가입하기' : '카카오로 1초 로그인');
 
   return (
-    <section style={{ margin: '24px 0' }}>
+    <section ref={sectionRef} style={{ margin: '24px 0' }}>
       <h2 style={{ fontSize: 20, fontWeight: 800, margin: '0 0 12px', color: 'var(--text-primary, #e5e7eb)' }}>{h2}</h2>
 
       <div style={{ position: 'relative' }}>

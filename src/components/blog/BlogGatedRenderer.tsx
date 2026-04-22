@@ -93,6 +93,7 @@ export default function BlogGatedRenderer({ content, gatedSections, isLoggedIn, 
             previewHtml={previewHtml}
             gate={c.gate}
             ctaText={c.ctaText}
+            position={i}
             redirectPath={`/blog/${slug}`}
             ctaSource={c.gate === 'premium' ? 'blog_gated_premium' : 'blog_gated_login'}
           />

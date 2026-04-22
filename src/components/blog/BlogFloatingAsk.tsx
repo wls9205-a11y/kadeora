@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { trackCtaClick } from '@/lib/cta-track';
 
 interface Props {
@@ -10,6 +10,8 @@ interface Props {
 
 export default function BlogFloatingAsk({ slug, isLoggedIn }: Props) {
   const [show, setShow] = useState(false);
+
+  const viewFired = useRef(false);
 
   useEffect(() => {
     if (isLoggedIn) return;
@@ -22,6 +24,25 @@ export default function BlogFloatingAsk({ slug, isLoggedIn }: Props) {
     onScroll();
     return () => window.removeEventListener('scroll', onScroll);
   }, [isLoggedIn]);
+
+  // show=true 로 전환 시 cta_view 1회 발송
+  useEffect(() => {
+    if (!show || viewFired.current) return;
+    viewFired.current = true;
+    const body = JSON.stringify({
+      event_type: 'cta_view',
+      cta_name: 'blog_floating_ask',
+      category: 'signup',
+      page_path: typeof window !== 'undefined' ? window.location.pathname : null,
+    });
+    try {
+      if (typeof navigator !== 'undefined' && navigator.sendBeacon) {
+        navigator.sendBeacon('/api/events/cta', new Blob([body], { type: 'application/json' }));
+      } else {
+        fetch('/api/events/cta', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body, keepalive: true }).catch(() => {});
+      }
+    } catch { /* silent */ }
+  }, [show]);
 
   const handle = useCallback(() => {
     trackCtaClick({ cta_name: 'blog_floating_ask', category: 'signup', page_path: typeof window !== 'undefined' ? window.location.pathname : undefined });
