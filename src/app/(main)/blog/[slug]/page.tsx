@@ -43,6 +43,7 @@ import BlogEndCTA from '@/components/blog/BlogEndCTA';
 import BlogFloatingAsk from '@/components/blog/BlogFloatingAsk';
 import BlogEarlyGateTeaser from '@/components/blog/BlogEarlyGateTeaser';
 import RelatedBlogsSection from '@/components/blog/RelatedBlogsSection';
+import BlogMidGate from '@/components/blog/BlogMidGate';
 // SmartSectionGate 제거 → LoginGate 기능 게이팅으로 전환 (세션 108)
 import BlogAptAlertCTA from '@/components/BlogAptAlertCTA';
 import YMYLBanner from '@/components/YMYLBanner';
@@ -1118,6 +1119,15 @@ export default async function BlogDetailPage({ params }: Props) {
         }}>
           <BlogActions blogPostId={post.id} initialHelpfulCount={post.helpful_count ?? 0} />
         </div>
+
+        {/* v2.0 Week1 C4: 본문 50% 스크롤 mid-gate (비로그인 + !has_gated_content 만) */}
+        {!isBot && !isLoggedIn && (
+          <BlogMidGate
+            blogId={post.id}
+            isGatedPost={!!(post as any).has_gated_content}
+            isLoggedIn={isLoggedIn}
+          />
+        )}
 
         {/* v2.0 Week1 C2: 관련 글 3카드 (strategy badge 포함) — FAQ/BlogActions 뒤, EndCTA 앞 */}
         {!isBot && <RelatedBlogsSection blogId={post.id} />}

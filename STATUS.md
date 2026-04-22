@@ -1,5 +1,19 @@
 # Session 145 — v2.0 Week 1 (2026-04-22 KST)
 
+## Commit 4 — `feat(blog): 50% scroll mid-gate with variants`
+- **신규**: `src/components/blog/BlogMidGate.tsx` (client)
+  - props: `{ blogId, isGatedPost?, isLoggedIn?, sentinelSelector?, className? }`
+  - 세션당 1회 (`sessionStorage.blog_mid_gate_shown_${blogId}`)
+  - variants DB: `cta_message_variants WHERE cta_name='blog_mid_gate' AND variant_key='default' AND is_active=true`
+  - 폴백: `title="이 글 끝까지 보는 사람 8%뿐"` / `body="핵심 정보는 아래에..."`
+  - sentinel `[data-mid-gate-sentinel]` IntersectionObserver 진입 시 노출. 없으면 window scroll 50% 폴백.
+  - UI: indigo gradient card + dismiss(×) + 카카오 노란 버튼
+  - 이벤트: `cta_view('blog_mid_gate')` / `cta_click('blog_mid_gate')` / `cta_click('blog_mid_gate_dismiss')`
+- **수정**: `src/components/blog/BlogGatedRenderer.tsx` — classified.flatMap 으로 refactor, H2 섹션 중간(`midIdx = floor(length/2)`) 앞에 `<div data-mid-gate-sentinel />` inject
+- **수정**: `src/app/(main)/blog/[slug]/page.tsx` — 비로그인 + `!has_gated_content` 인 경우만 `<BlogMidGate />` 마운트 (BlogGatedWall 과 중복 방지)
+- **DB deps**: `cta_message_variants` (이미 존재, blog_mid_gate default row 필요)
+- **Caveats**: BlogGatedRenderer 가 client-side 렌더이므로 gated 포스트에서는 sentinel 주입 가능. 단 BlogGatedWall 과 중복 노출 방지 위해 mid-gate 는 `has_gated_content=false` 인 블로그에만 노출.
+
 ## Commit 3 — `chore(cta): remove 5 dead CTAs + C1 unlock logs backfill`
 - **삭제 파일**: `src/components/ActionBar.tsx`, `src/components/BlogFloatingBar.tsx`, `src/components/ContentLock.tsx`
 - **수정**:

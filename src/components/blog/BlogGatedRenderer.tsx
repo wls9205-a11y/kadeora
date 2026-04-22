@@ -70,25 +70,31 @@ export default function BlogGatedRenderer({ content, gatedSections, isLoggedIn, 
 
   const chunks = useMemo(() => splitMarkdownByH2(content || ''), [content]);
   const classified = useMemo(() => classifyChunks(chunks, gatedSections), [chunks, gatedSections]);
+  // C4: H2 섹션 중간 인덱스 — mid-gate sentinel 삽입 지점
+  const midIdx = Math.max(1, Math.floor(classified.length / 2));
 
   return (
     <div className="blog-content" itemProp="articleBody">
-      {classified.map((c, i) => {
+      {classified.flatMap((c, i) => {
+        const nodes: React.ReactNode[] = [];
+        if (i === midIdx) nodes.push(<div key={`mid-sentinel-${i}`} data-mid-gate-sentinel aria-hidden />);
         if (c.kind === 'free') {
           const body = c.h2 ? `## ${c.h2}\n\n${c.md}` : c.md;
-          return <div key={i} dangerouslySetInnerHTML={{ __html: mdToHtml(body) }} />;
+          nodes.push(<div key={`chunk-${i}`} dangerouslySetInnerHTML={{ __html: mdToHtml(body) }} />);
+          return nodes;
         }
         const locked =
           (c.gate === 'login' && !access.is_authenticated) ||
           (c.gate === 'premium' && !access.is_premium);
         if (!locked) {
           const body = `## ${c.h2}\n\n${c.md}`;
-          return <div key={i} dangerouslySetInnerHTML={{ __html: mdToHtml(body) }} />;
+          nodes.push(<div key={`chunk-${i}`} dangerouslySetInnerHTML={{ __html: mdToHtml(body) }} />);
+          return nodes;
         }
         const previewHtml = mdToHtml(c.previewMd);
-        return (
+        nodes.push(
           <BlogGatedWall
-            key={i}
+            key={`wall-${i}`}
             h2={c.h2}
             previewHtml={previewHtml}
             gate={c.gate}
@@ -96,8 +102,9 @@ export default function BlogGatedRenderer({ content, gatedSections, isLoggedIn, 
             position={i}
             redirectPath={`/blog/${slug}`}
             ctaSource={c.gate === 'premium' ? 'blog_gated_premium' : 'blog_gated_login'}
-          />
+          />,
         );
+        return nodes;
       })}
     </div>
   );
