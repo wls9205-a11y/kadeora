@@ -1,3 +1,40 @@
+# 카더라 STATUS — 세션 145 (2026-04-22)
+
+## 세션 145 — 2026-04-22 이미지 og_fallback 재오염 복구 + 크론 수정
+
+### 증상
+- /apt 페이지 카드 이미지 전부 OG 자동생성으로 표시, 콘솔 403(pstatic)
+- 4/22 웹 세션에서 DB 레벨 apt_sites(5,794 중 2,579 복구) + apt_complex_profiles(34,544 중 29,939 복구) 정화, `images_backup_142` 백업 보존
+
+### 진단 (코드 레포 grep)
+- `og_fallback` 리터럴 레포 전체 **0건** — DB 오염은 은퇴된 과거 소스 (git pickaxe 역사 확인, 현재 코드에 없음)
+- 실제 재오염 경로 2건 발견:
+  1. `src/lib/image-pipeline.ts:344-383` — position 7 OG placeholder 를 storage_real 실패 시에도 raw `/api/og?...` URL 로 DB insert (image_kind=null 은닉)
+  2. `collect-complex-images` / `collect-site-images` — fetch 0 결과 시 `images: []` **덮어쓰기**로 실 이미지 말소 가능
+- `apt-satellite-crawl` 크론은 존재·청결·pg_cron 등록됨 (*/30 \* \* \* \*) — Vercel crons 에는 미등록 (한도 100개)
+
+### 수정 (commit 4개)
+- `63f8d339` fix(apt): aptImageMap 우선순위 satellite > real images > 외부 CDN og > /api/og 제네릭, images[] OG source 필터 추가
+- `a80c7d5a` fix(cron): image-pipeline raw /api/og URL insert 제거 + isSuccess 기준 storage_real>0 로 타이트닝 + collect-complex/site 덮어쓰기 방지
+- `fc413fc1` feat(cron): apt-satellite-crawl vercel 등록 시도 (실패)
+- `18f62e2d` fix(vercel): 위 revert — Vercel 크론 한도 100 초과로 배포 ERROR → pg_cron 기 등록분만 유지
+
+### 검증
+- `og_fallback` 오염 재확인: apt_sites 0, apt_complex_profiles 0
+- satellite_image_url 커버리지: 150 → **180** (pg_cron 활성, 30분/30row)
+- Vercel 배포 18f62e2d **READY**, 에러 로그 0 (3분간)
+- /apt HTML: 상단 카드 대부분 여전히 /api/og — 신규 분양 단지(PH159, 용인 양지 서희 등)는 좌표 없음 → satellite crawl 타깃 제외 (데이터 문제, 코드는 정확 동작)
+- blog_post_images 중 20개 legacy raw /api/og with image_kind=null — 후속 cleanup 대상
+
+### 남은 Pending
+- satellite 커버리지 180/5,794 → 전체 완주 약 3.3일 (pg_cron 진행 중)
+- 신규 분양 사이트(좌표 null) 는 satellite 크롤 불가 — 별도 좌표 보강 크론 필요
+- blog_post_images 20행 cleanup: `DELETE FROM blog_post_images WHERE image_kind IS NULL AND image_url LIKE '%/api/og?%'`
+- Vercel Pro 크론 100개 한도 도달 — 신규 크론 추가 시 pg_cron 이관 필수 (이번 세션 교훈)
+- 세션 142 이후 `images_backup_142` 백업 컬럼 정리 시점 결정 (최소 7일 관찰 후)
+
+---
+
 # 카더라 STATUS — 세션 144 (2026-04-19)
 
 ## 세션 144 (2026-04-19) — 온보딩 완료 판정 구조적 수리
