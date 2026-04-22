@@ -15,6 +15,7 @@ import SectionShareButton from '@/components/SectionShareButton';
 import KakaoDirectShare from '@/components/KakaoDirectShare';
 import Disclaimer from '@/components/Disclaimer';
 import AptImageGallery from '@/components/AptImageGallery';
+import SimilarAptsSection from '@/components/apt/SimilarAptsSection';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
 import { getDisplayInterestCount, formatInterestText, formatInterestOrViews } from '@/lib/interest-utils';
 
@@ -1726,6 +1727,9 @@ export default async function AptUnifiedPage({ params }: Props) {
       </div>
 
       {/* 프로 업셀 — 결제 시스템 출시 전까지 비공개 */}
+
+      {/* v2.0 Week1 C1: 유사 단지 6개 그리드 (get_similar_apts RPC) */}
+      {site?.id && <SimilarAptsSection aptSiteId={site.id} limit={6} />}
 
       <Disclaimer type="apt" />
       <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textAlign: 'center', margin: '8px 0 40px', lineHeight: 1.6 }}>📊 데이터 출처: 국토교통부 · 청약홈 · 한국부동산원 · 각 지자체</p>

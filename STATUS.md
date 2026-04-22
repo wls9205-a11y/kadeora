@@ -1,3 +1,16 @@
+# Session 145 — v2.0 Week 1 (2026-04-22 KST)
+
+## Commit 1 — `feat(apt): similar apts section (get_similar_apts RPC)`
+- **파일**: `src/components/apt/SimilarAptsSection.tsx` (신규, 서버 컴포넌트), `src/app/(main)/apt/[id]/page.tsx` (import + 마운트 지점 추가)
+- **동작**: `apt_sites.id` → `get_similar_apts(p_apt_site_id, p_limit=6)` RPC 호출 → 6개 카드 그리드
+- **카드 구성**: satellite_image_url 우선, 없으면 og_image_url → 폴백 /api/og. 이름 + 지역(region sigungu).
+- **위치**: `apt/[id]` 페이지 하단, `Disclaimer` 직전
+- **링크**: `slug` 있으면 `/apt/{slug}`, 없으면 `/apt/{id}` (UUID)
+- **스타일**: grid `auto-fit minmax(140px, 1fr)`, aspect 4/3, 모바일 1~2 col / 데스크탑 4~6 col 자동
+- **안전**: RPC 실패 → 빈 배열 → 섹션 null (폴백 렌더 없음), 로그 없음
+
+---
+
 # 카더라 프로젝트 STATUS — 세션 52 (2026-03-29 KST)
 > SEO 극대화 + UI 글래스모피즘 + 프리미엄 멤버십 풀스택 + 주식 카드뷰
 > **다음 세션 시작:** "docs/STATUS.md 읽고 작업 이어가자"
