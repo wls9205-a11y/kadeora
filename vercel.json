@@ -209,6 +209,10 @@
       "schedule": "15 * * * *"
     },
     {
+      "path": "/api/cron/apt-satellite-crawl",
+      "schedule": "*/30 * * * *"
+    },
+    {
       "path": "/api/cron/batch-cluster-submit",
       "schedule": "0 5 * * *"
     },
@@ -427,6 +431,9 @@
       "maxDuration": 300
     },
     "src/app/api/cron/apt-image-crawl/*.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/cron/apt-satellite-crawl/*.ts": {
       "maxDuration": 300
     },
     "src/app/api/cron/stock-daily-briefing/*.ts": {
