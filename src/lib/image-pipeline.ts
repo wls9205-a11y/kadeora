@@ -341,8 +341,10 @@ export async function hydrateAndRecord(
     }
   }
 
-  // 3c) position 7: infographic OG
-  if (includeInfo) {
+  // 3c) position 7: infographic OG — 세션 145 fix:
+  //   1) real image 가 하나라도 성공했을 때만 infographic 부가 (단독 placeholder 금지)
+  //   2) hydration 실패 시 raw /api/og URL 삽입 금지 — Storage 에 저장된 것만 기록
+  if (includeInfo && result.storage_real > 0) {
     const catWord = ({ apt: '부동산', stock: '주식', unsold: '미분양', redev: '재개발', finance: '재테크', general: '분석' } as Record<string, string>)[post.category] || '정보';
     const design = 1 + (Math.abs(hashString(post.title)) % 6);
     const ogUrl = `${SITE_URL.replace(/\/$/, '')}/api/og?title=${encodeURIComponent(post.title.slice(0, 50))}&category=${post.category}&author=${encodeURIComponent(`카더라 ${catWord}팀`)}&design=${design}`;
@@ -365,17 +367,8 @@ export async function hydrateAndRecord(
         });
         result.og_placeholder++;
       } else {
-        // og 라도 실패하면 원본 URL 로 record (og_placeholder 로 자동 분류됨)
-        await (admin as any).rpc('record_blog_image', {
-          p_post_id: post.id,
-          p_position: 7,
-          p_image_url: ogUrl,
-          p_image_kind: null,
-          p_alt_text: `${post.title} — 인포그래픽`.slice(0, 200),
-          p_caption: null,
-          p_storage_path: null,
-        });
-        result.og_placeholder++;
+        // hydration 실패 — raw /api/og URL 은 DB 에 기록하지 않음 (오염 방지)
+        result.failures.push('og7:hydrate_failed');
       }
     } catch (err: any) {
       result.failures.push(`og7:${err?.message || ''}`.slice(0, 120));

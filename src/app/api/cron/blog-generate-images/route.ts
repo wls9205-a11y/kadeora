@@ -164,7 +164,8 @@ async function handler(req: NextRequest) {
         stats.total_candidates += pipe.candidates_count;
         allFailures.push(...pipe.failures);
 
-        const isSuccess = pipe.storage_real > 0 || pipe.og_placeholder > 0;
+        // 세션 145: og_placeholder 단독으로는 성공 아님 (real image 가 없으면 queue 재시도 허용)
+        const isSuccess = pipe.storage_real > 0;
         if (isSuccess) {
           stats.completed++;
           await (admin as any)

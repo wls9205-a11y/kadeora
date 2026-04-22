@@ -101,7 +101,9 @@ async function handler(_req: NextRequest) {
       }
       // apt_sites에 없으면 네이버/카카오 검색
       const imgs=await collect(row.apt_name,row.sigungu||'');
-      if (!imgs.length){await (sb as any).from('apt_complex_profiles').update({images:[]}).eq('id',row.id);skipped++;return;}
+      // 세션 145: fetch 실패 시 images=[] 로 덮지 말 것 (기존 실 이미지 말소 방지).
+      // updated_at 만 갱신 → selector 가 images IS NULL 조건이면 자연 재시도.
+      if (!imgs.length){await (sb as any).from('apt_complex_profiles').update({updated_at:new Date().toISOString()}).eq('id',row.id);skipped++;return;}
       await (sb as any).from('apt_complex_profiles').update({
         images:imgs.map(m=>({url:m.url,thumbnail:m.thumbnail,source:m.source,caption:m.title,collected_at:new Date().toISOString()})),
         updated_at:new Date().toISOString()

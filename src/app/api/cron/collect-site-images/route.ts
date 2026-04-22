@@ -179,7 +179,8 @@ async function handler(_req: NextRequest) {
       batch.map(async (site: Record<string, any>) => {
         const images = await collectForSite(site.name);
         if (images.length === 0) {
-          await sb.from('apt_sites').update({ images: [], updated_at: new Date().toISOString() }).eq('id', site.id);
+          // 세션 145: images=[] 덮어쓰기 금지 (실 이미지 말소 방지). updated_at 만 갱신.
+          await sb.from('apt_sites').update({ updated_at: new Date().toISOString() }).eq('id', site.id);
           skipped++; return;
         }
 

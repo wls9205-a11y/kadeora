@@ -175,7 +175,7 @@ async function handler(req: NextRequest) {
 
           // queue 완료 갱신
           await (admin as any).from('blog_image_backfill_queue').update({
-            status: (pipe.storage_real + pipe.og_placeholder) > 0 ? 'completed' : 'failed',
+            status: pipe.storage_real > 0 ? 'completed' : 'failed',
             completed_at: new Date().toISOString(),
             current_image_count: pipe.storage_real + pipe.og_placeholder,
             last_error: pipe.failures.slice(0, 3).join(' | ').slice(0, 500) || null,
