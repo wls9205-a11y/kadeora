@@ -1,3 +1,71 @@
+# 카더라 STATUS — 세션 147 (2026-04-23)
+
+## 세션 147 — 2026-04-23 gap 폐쇄 + 인프라 이관
+
+### 목표
+Session 146 의 3가지 gap (FAQ 5.5%, Batch 14%, image-sitemap 9%) 폐쇄 + Kakao 403 진단 + pg_cron 이관.
+
+### DB 작업
+- pg_cron 신규 5종 등록: `gsc-sync-daily`, `blog-inject-images-hourly`, `backlink-sync-weekly`, `programmatic-seo-consume-hourly`, `batch-poll-10min`
+- Vercel cron 100개 한도 정확히 도달 — 신규 크론은 모두 pg_cron 필수
+
+### 코드 변경
+- `src/lib/seo/parseFaqs.ts` — v2 재작성 (블록 식별 + 3패턴 병렬 매칭)
+- `src/lib/geocode/index.ts` — 4단 fallback (Kakao → Naver Cloud → VWorld → Nominatim)
+- `src/app/api/cron/batch-poll/route.ts` — Claude Batch 결과 poll + blog_posts UPDATE
+- `src/app/image-sitemap.xml/route.ts` — limit 확장 (complex 40K, sites 30K)
+- `scripts/backfill-faqs-v2.mjs` — 전수 재백필 (5 병렬)
+- `scripts/batch-meta-description-v2.mjs` / `batch-title-rewrite-v2.mjs` — metadata 마킹 + pagination 수정
+- `scripts/diag-kakao-api.mjs` — 403 원인 진단 (원인 확정: OPEN_MAP_AND_LOCAL service disabled)
+- `scripts/geocode-missing-v2.mjs` — Nominatim 기반 8건 재실행
+
+### 데이터 작업 결과
+- **FAQ 백필**: 367 → **7,414편** (목표 5,000 +48% 초과). 전수 재백필에서 7,405편 updated, 33,032 FAQ 추출. 파서 v2 매칭률 95%
+- **Meta desc Batch**: 303 + 2,524 = 2,827편 제출 → metadata 마킹 **2,826편**
+  - `msgbatch_01A5PZwT77p6vrN5VLuH93Gy` (303)
+  - `msgbatch_011ATEk6df13LjGWqrgR4ASo` (2,524)
+- **Title Batch**: 203 + 100 = 303편 (목표 897 미달, 실 대상 감소)
+  - `msgbatch_01E1y8ykcRXpxYKfYBgzkeYt` (203)
+  - `msgbatch_01Lhk4CLX67tMY3bcZYVSBg8` (100)
+- **Image sitemap**: limit 상향으로 커버리지 재생성 (배포 후 revalidate 1시간 경과 시 반영)
+- **Geocoding**: 4/8 성공 (Nominatim) — PH159, 고덕신도시 아테라, 인천가정2지구, 옥정중앙역 대방 디에트르. 나머지 4 (동탄 그웬 160, 경기광주역 롯데캐슬, 두산위브더제니스 구미, 용인 고림 동문) 은 OSM 등록 미흡으로 실패
+
+### Kakao 403 확정 진단
+```
+HTTP 403 {"errorType":"NotAuthorizedError","message":"App(카더라) disabled OPEN_MAP_AND_LOCAL service."}
+```
+→ Kakao 개발자 콘솔에서 "카카오맵" 제품 수동 활성화 필요 (Node 조치)
+
+### 완료 기준 8개 상태
+| # | 기준 | 결과 |
+|---|---|---|
+| 1 | FAQ 5,000+ | ✅ **7,414편** |
+| 2 | FAQPage JSON-LD 렌더 | ✅ (세션 146 배포된 FAQPageSchema 컴포넌트가 metadata.faqs 소비) |
+| 3 | Meta + Title Batch 재제출 | ⚠ Meta 2,827 ✅ / Title 303 (실 대상 감소) |
+| 4 | 이미지 사이트맵 60K+ | ⏳ 배포 후 revalidate 확인 |
+| 5 | 8건 geocoding | ⚠ **4/8 성공** (나머지 Kakao 활성화 필요) |
+| 6 | pg_cron 4종+1 | ✅ **6개** 등록 (기존 apt_satellite_crawl 포함) |
+| 7 | Vercel cron 100 이하 | ✅ 100 유지 (신규 전부 pg_cron) |
+| 8 | STATUS.md + CRON_REGISTRY.md | ✅ |
+
+### 라이브 검증 (배포 전 Supabase)
+- faq_coverage: **7,414**
+- meta_batch_marked: **2,826**
+- title_batch_marked: **303**
+- geocoded_sites: **5,772** (+4 from 세션 146)
+- pg_cron_jobs: **6**
+- cwv_24h: **57건** 실측 (세션 146 배포 후 실제 방문자 수집 시작 — baseline 확보)
+- cwv_unique_paths_24h: 18 경로
+
+### 남은 Pending (다음 세션)
+- batch-poll 크론이 2~3일 내 Batch 결과 반영 (meta 2,827, title 454, 기존 apt narrative 포함)
+- Kakao OPEN_MAP_AND_LOCAL 활성화 → Geocoding 8/8 복구 (Nominatim 실패 4건 Kakao/VWorld 성공 가능성)
+- Title Batch 나머지 ~600편 대상 조사 (기존 rewrite 로 길이 ≥25 된 것들 확인)
+- 네이버 블로그/스마트플레이스 수동 등록
+- CWV baseline 7일 누적 후 LCP 최적화
+
+---
+
 # 카더라 STATUS — 세션 146 (2026-04-23)
 
 ## 세션 146 — 2026-04-23 네이버 1위 + 이미지 캐러셀 풀패키지 Phase 1

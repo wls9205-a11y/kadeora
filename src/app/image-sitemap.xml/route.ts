@@ -16,13 +16,13 @@ export const revalidate = 3600; // 1시간 캐시
 export async function GET() {
   const sb = getSupabaseAdmin();
 
+  // 세션 147 C — 커버리지 60K+ 목표: limit 확장, complex 전수 조건 완화
   const [sitesR, blogsR, complexR] = await Promise.all([
     sb.from('apt_sites')
       .select('slug, name, images, region, sigungu')
       .eq('is_active', true)
-      .gte('content_score', 25)
       .not('images', 'is', null)
-      .limit(10000),
+      .limit(30000),
     sb.from('blog_posts')
       .select('slug, title, cover_image, image_alt, category')
       .eq('is_published', true)
@@ -32,8 +32,7 @@ export async function GET() {
     (sb as any).from('apt_complex_profiles')
       .select('apt_name, images, region_nm, sigungu')
       .not('images', 'is', null)
-      .gt('sale_count_1y', 0)
-      .limit(10000),
+      .limit(40000),
   ]);
 
   const entries: string[] = [];
