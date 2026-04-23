@@ -1,0 +1,139 @@
+/**
+ * 세션 155 — 이미지 사이트맵 분할 (10K URL/page).
+ * Vercel ISR 19.07MB 초과 방지 — 기존 49.71MB 단일 파일 → 페이지당 10K URL × ~1.8MB.
+ *
+ * /sitemap-image-1.xml, /sitemap-image-2.xml, ... 구조.
+ * 총 페이지 수는 sitemap.xml (인덱스) 에서 동적 계산.
+ */
+import { NextRequest, NextResponse } from 'next/server';
+import { escapeXml } from '@/lib/xml-utils';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { SITE_URL as BASE } from '@/lib/constants';
+
+export const runtime = 'nodejs';
+export const dynamic = 'force-static';
+export const revalidate = 3600; // 1시간
+
+const URLS_PER_PAGE = 10000;
+
+type ImgEntry = { loc: string; imgs: { url: string; title: string; caption: string; geo?: string }[] };
+
+async function collectAll(sb: any): Promise<ImgEntry[]> {
+  // range pagination 으로 전수 수집
+  async function fetchAll(table: string, cols: string, apply: (q: any) => any, pageSize = 1000, maxPages = 50) {
+    const all: any[] = [];
+    for (let i = 0; i < maxPages; i++) {
+      const q = apply(sb.from(table).select(cols));
+      const { data } = await q.range(i * pageSize, (i + 1) * pageSize - 1);
+      if (!data || data.length === 0) break;
+      all.push(...data);
+      if (data.length < pageSize) break;
+    }
+    return all;
+  }
+
+  const [sites, complexes, blogs] = await Promise.all([
+    fetchAll('apt_sites', 'slug, name, images, region, sigungu',
+      (q: any) => q.eq('is_active', true).not('images', 'is', null)),
+    fetchAll('apt_complex_profiles', 'apt_name, images, region_nm, sigungu',
+      (q: any) => q.not('images', 'is', null)),
+    fetchAll('blog_posts', 'slug, title, cover_image, image_alt, category',
+      (q: any) => q.eq('is_published', true).not('cover_image', 'is', null)
+        .order('published_at', { ascending: false })),
+  ]);
+
+  const out: ImgEntry[] = [];
+
+  for (const s of sites) {
+    const imgs = Array.isArray(s.images) ? s.images : [];
+    if (imgs.length === 0) continue;
+    const list = imgs.slice(0, 10).map((img: any) => {
+      let url = typeof img === 'string' ? img : img?.link || img?.url;
+      if (!url) return null;
+      url = String(url).replace(/^http:\/\//, 'https://');
+      const title = (typeof img === 'object' && img?.title)
+        ? String(img.title)
+        : `${s.name} ${s.region || ''} ${s.sigungu || ''}`.trim();
+      return {
+        url,
+        title,
+        caption: s.region && s.sigungu ? `${s.region} ${s.sigungu} ${s.name} 분양 현장` : `${s.name} 분양 현장`,
+        geo: s.region && s.sigungu ? `${s.region} ${s.sigungu}` : undefined,
+      };
+    }).filter(Boolean) as any[];
+    if (list.length) out.push({ loc: `${BASE}/apt/${encodeURIComponent(s.slug)}`, imgs: list });
+  }
+
+  for (const c of complexes) {
+    const imgs = Array.isArray(c.images) ? c.images : [];
+    if (imgs.length === 0) continue;
+    const list = imgs.slice(0, 7).map((img: any) => {
+      let url = typeof img === 'string' ? img : img?.url;
+      if (!url) return null;
+      url = String(url).replace(/^http:\/\//, 'https://');
+      return {
+        url,
+        title: `${c.apt_name} 아파트 ${c.region_nm || ''} ${c.sigungu || ''}`.trim(),
+        caption: `${c.region_nm || ''} ${c.sigungu || ''} ${c.apt_name} 아파트 실거래가 시세`.trim(),
+        geo: c.region_nm && c.sigungu ? `${c.region_nm} ${c.sigungu}` : undefined,
+      };
+    }).filter(Boolean) as any[];
+    if (list.length) out.push({ loc: `${BASE}/apt/complex/${encodeURIComponent(c.apt_name)}`, imgs: list });
+  }
+
+  for (const b of blogs) {
+    if (!b.cover_image || String(b.cover_image).includes('/api/og')) continue;
+    const url = String(b.cover_image).replace(/^http:\/\//, 'https://');
+    out.push({
+      loc: `${BASE}/blog/${encodeURIComponent(b.slug)}`,
+      imgs: [{
+        url,
+        title: b.title || '카더라',
+        caption: b.image_alt || `${b.title || '카더라'} — ${b.category || 'blog'}`,
+      }],
+    });
+  }
+
+  return out;
+}
+
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ page: string }> }) {
+  const { page: pageStr } = await params;
+  const page = parseInt(pageStr, 10);
+  if (!Number.isFinite(page) || page < 1) {
+    return new NextResponse('Not Found', { status: 404 });
+  }
+
+  const sb = getSupabaseAdmin();
+  const all = await collectAll(sb);
+  const offset = (page - 1) * URLS_PER_PAGE;
+  const slice = all.slice(offset, offset + URLS_PER_PAGE);
+  if (slice.length === 0) {
+    return new NextResponse('Not Found', { status: 404 });
+  }
+
+  const parts: string[] = [];
+  for (const e of slice) {
+    const imgXml = e.imgs.map((im) => {
+      const geoLoc = im.geo ? `\n        <image:geo_location>${escapeXml(im.geo)}</image:geo_location>` : '';
+      return `      <image:image>
+        <image:loc>${escapeXml(im.url)}</image:loc>
+        <image:title>${escapeXml(im.title)}</image:title>
+        <image:caption>${escapeXml(im.caption)}</image:caption>${geoLoc}
+      </image:image>`;
+    }).join('\n');
+    parts.push(`  <url>\n    <loc>${escapeXml(e.loc)}</loc>\n${imgXml}\n  </url>`);
+  }
+
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+${parts.join('\n')}
+</urlset>`;
+
+  return new NextResponse(xml, {
+    headers: {
+      'Content-Type': 'application/xml; charset=utf-8',
+      'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=600',
+    },
+  });
+}

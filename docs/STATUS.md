@@ -28,7 +28,49 @@
 - Article → Product 타입 변경 (별도)
 - blog notFound 가드 (별도)
 - apt/complex/[id] 수정 (다음)
-- 신규 pg_cron / image-sitemap / RLS
+
+### Phase C — image-sitemap 49.71MB ISR 초과 분할 + GSC 진단
+
+**실측 배포 에러**:
+```
+Warning: Oversized ISR page: image-sitemap.xml.fallback (49.71 MB)
+Pre-rendered responses >19.07 MB → FALLBACK_BODY_TOO_LARGE
+```
+→ 단지 11,489편 + 블로그 99.87% 확장 후 총 URL ~90K, 19MB 한도 초과
+
+**수정 — sitemap 분할**:
+- 신규 `src/app/sitemap-image-[page].xml/route.ts`: dynamic route, 10K URL/page, force-static + revalidate 3600
+- 기존 `src/app/image-sitemap.xml/route.ts` 재작성: 단일 XML → **sitemapindex** (총 N 페이지 동적 계산)
+- fetchAll range pagination 유지 (apt_sites/complex/blog)
+- 빈 페이지 404 반환
+
+**GSC 진단** — `scripts/test-gsc-refresh.mjs`:
+```
+HTTP 200 {
+  access_token: ya29.a0Aa7MYio...,
+  expires_in: 3599,
+  scope: webmasters.readonly,
+  refresh_token_expires_in: 230327
+}
+→ CASE A: refresh_token 유효
+```
+- oauth_tokens 실측: provider=gsc, refresh_token(103c), client_id(72c), client_secret(35c)
+- Session 154 커밋 f8b74944 가 배포 미반영 상태 추정 — 이번 커밋과 함께 재배포 시 자동 복구 예상
+
+**완료 기준**:
+- [x] Oversized 경고 제거 예상 (10K/page 분할)
+- [x] GSC CASE A 확정 — 재배포로 refresh_count=1 복구 예상
+
+**검증 (배포 후)**:
+```bash
+curl -I https://kadeora.app/sitemap-image-1.xml  # 200, <18MB
+curl -s https://kadeora.app/sitemap-image-1.xml | grep -c '<image:image>'  # ~10K
+curl -s https://kadeora.app/image-sitemap.xml | grep -c '<sitemap>'  # 9~10
+
+-- SQL
+SELECT public._call_vercel_cron('/api/cron/gsc-sync');
+SELECT refresh_count, last_refreshed_at FROM oauth_tokens WHERE provider='gsc';
+```
 
 ---
 
