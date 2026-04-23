@@ -1,9 +1,7 @@
 /**
- * 세션 155 — 이미지 사이트맵 분할 (10K URL/page).
- * Vercel ISR 19.07MB 초과 방지 — 기존 49.71MB 단일 파일 → 페이지당 10K URL × ~1.8MB.
- *
- * /sitemap-image-1.xml, /sitemap-image-2.xml, ... 구조.
- * 총 페이지 수는 sitemap.xml (인덱스) 에서 동적 계산.
+ * 세션 155 retry — 이미지 사이트맵 분할 (10K URL/page).
+ * Next.js 15 파일명 호환: [page].xml 조합 제거, /sitemap-image/{N} 경로 사용.
+ * Content-Type application/xml 로 Google/Naver 정상 인식.
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { escapeXml } from '@/lib/xml-utils';
@@ -12,18 +10,17 @@ import { SITE_URL as BASE } from '@/lib/constants';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-static';
-export const revalidate = 3600; // 1시간
+export const revalidate = 3600;
 
 const URLS_PER_PAGE = 10000;
 
 type ImgEntry = { loc: string; imgs: { url: string; title: string; caption: string; geo?: string }[] };
 
-async function collectAll(sb: any): Promise<ImgEntry[]> {
-  // range pagination 으로 전수 수집
+async function collectAll(sb: ReturnType<typeof getSupabaseAdmin>): Promise<ImgEntry[]> {
   async function fetchAll(table: string, cols: string, apply: (q: any) => any, pageSize = 1000, maxPages = 50) {
     const all: any[] = [];
     for (let i = 0; i < maxPages; i++) {
-      const q = apply(sb.from(table).select(cols));
+      const q = apply((sb as any).from(table).select(cols));
       const { data } = await q.range(i * pageSize, (i + 1) * pageSize - 1);
       if (!data || data.length === 0) break;
       all.push(...data);
@@ -60,7 +57,7 @@ async function collectAll(sb: any): Promise<ImgEntry[]> {
         caption: s.region && s.sigungu ? `${s.region} ${s.sigungu} ${s.name} 분양 현장` : `${s.name} 분양 현장`,
         geo: s.region && s.sigungu ? `${s.region} ${s.sigungu}` : undefined,
       };
-    }).filter(Boolean) as any[];
+    }).filter((x: any): x is NonNullable<typeof x> => x !== null);
     if (list.length) out.push({ loc: `${BASE}/apt/${encodeURIComponent(s.slug)}`, imgs: list });
   }
 
@@ -77,7 +74,7 @@ async function collectAll(sb: any): Promise<ImgEntry[]> {
         caption: `${c.region_nm || ''} ${c.sigungu || ''} ${c.apt_name} 아파트 실거래가 시세`.trim(),
         geo: c.region_nm && c.sigungu ? `${c.region_nm} ${c.sigungu}` : undefined,
       };
-    }).filter(Boolean) as any[];
+    }).filter((x: any): x is NonNullable<typeof x> => x !== null);
     if (list.length) out.push({ loc: `${BASE}/apt/complex/${encodeURIComponent(c.apt_name)}`, imgs: list });
   }
 

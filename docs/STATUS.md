@@ -29,6 +29,19 @@
 - blog notFound 가드 (별도)
 - apt/complex/[id] 수정 (다음)
 
+### Phase C-retry — image-sitemap 빌드 실패 복구 (Next.js 15 파일명 호환)
+
+**에러**: `sitemap-image-[page].xml/` 폴더에서 `[page]` + `.xml` 조합이 Next.js 15 params 타입 추론 깨짐 → `Promise<{}>` 로 생성 → TS 컴파일 실패.
+
+**수정**:
+- 기존 `src/app/sitemap-image-[page].xml/` 폴더 `git rm -r` 로 삭제
+- 신규 `src/app/sitemap-image/[page]/route.ts` 생성 (params 정상 추론)
+- URL 경로: `/sitemap-image-1.xml` → `/sitemap-image/1` (Content-Type application/xml 로 Google/Naver 정상 인식)
+- `image-sitemap.xml` 인덱스에서 loc URL 업데이트
+- 타입 workaround 없음 (as any/ts-ignore 0)
+- 로컬 `npm run build` `✓ Compiled successfully in 19.1s` 검증
+- `npx tsc --noEmit` 0 error
+
 ### Phase C — image-sitemap 49.71MB ISR 초과 분할 + GSC 진단
 
 **실측 배포 에러**:

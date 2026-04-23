@@ -37,8 +37,9 @@ export async function GET() {
   const pages = Math.max(1, Math.ceil(totalEntries / URLS_PER_PAGE));
 
   const now = new Date().toISOString();
+  // 세션 155 retry: /sitemap-image-N.xml → /sitemap-image/N (Next.js 15 TS 호환)
   const items = Array.from({ length: pages }, (_, i) => i + 1)
-    .map((p) => `  <sitemap>\n    <loc>${BASE}/sitemap-image-${p}.xml</loc>\n    <lastmod>${now}</lastmod>\n  </sitemap>`)
+    .map((p) => `  <sitemap>\n    <loc>${BASE}/sitemap-image/${p}</loc>\n    <lastmod>${now}</lastmod>\n  </sitemap>`)
     .join('\n');
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
