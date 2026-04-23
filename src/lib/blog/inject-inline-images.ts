@@ -38,10 +38,13 @@ function countExistingImages(md: string): number {
   return mdImgs + htmlImgs;
 }
 
-/** H2/H3 헤더 위치 수집. level 작은 것 (H2) 먼저, 동 level 은 순서대로. */
+/**
+ * H1~H4 헤더 위치 수집. H2 우선.
+ * 세션 154: H1/H4 까지 확장해서 목차만 있는 short-content 포스트도 커버.
+ */
 function findHeaderPositions(md: string): number[] {
   const positions: Array<{ pos: number; level: number }> = [];
-  const re = /^(#{2,3})\s+.+$/gm;
+  const re = /^(#{1,4})\s+.+$/gm;
   for (const m of md.matchAll(re)) {
     positions.push({ pos: m.index!, level: m[1].length });
   }

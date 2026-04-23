@@ -1,3 +1,74 @@
+# 카더라 STATUS — 세션 154 (2026-04-23)
+
+## 세션 154 — GSC 토큰 갱신 + 블로그 6편 H2 매칭 수정
+
+### Supabase 레벨 선행 작업 (Node 직접)
+- **pg_cron v2+v3 마이그레이션**: 74개 크론 전수 고유 offset 분산 (Session 153 v1 stagger 완성판)
+- **단지 이미지 확장**: 3,503 → **11,489편** 4장+ 달성 (Session 153 OG 합성 확장)
+
+### 코드 레벨 수정 (이번 세션)
+
+#### 1. GSC access_token 갱신 로직 (`src/app/api/cron/gsc-sync/route.ts`)
+**버그 확정**:
+- env GOOGLE_OAUTH_CLIENT_ID 없으면 조기 return → DB fallback 로직 실행 안 함
+- refreshAccessToken 이 token 만 반환, expires_in 누락 → UPDATE 못 함
+- oauth_tokens 에 access_token/expires_at 저장 없음 → refresh_count=0 영구
+- `last_refreshed_at: 2026-04-19` (4일 만료) 상태로 skip 반복
+
+**수정**:
+- env check 제거 → DB fallback 먼저 시도
+- `refreshAccessToken` 반환 `{ token, expiresIn }` 로 변경
+- 갱신 성공 시 oauth_tokens UPDATE: access_token, access_token_expires_at, refresh_count+1, last_refreshed_at, last_error=null
+- 갱신 실패 시 last_error 기록
+- access_token 이 30초 이상 유효하면 재갱신 생략 (API 호출 절약)
+
+#### 2. 블로그 6편 H2 매칭 실패 (`src/lib/blog/inject-inline-images.ts`)
+**대상 6편** (id 48914, 51814, 70948, 75676, 78120, 86790):
+- content 3K~7K, has_h2=true, img_count=0
+
+**원인**:
+- 모두 `##` 헤더 실존하나 Session 152 스크립트 실행 시점에 is_published=false 이었거나, `content_length>=800` 필터에서 미세하게 누락됐을 가능성
+- inject-inline-images 가 H2/H3 만 탐지 → 목차만 있고 본문이 H1 또는 H4 로 시작하는 edge case 미커버
+
+**수정**:
+- `findHeaderPositions` 정규식 `{2,3}` → `{1,4}` (H1~H4 전부)
+- H2 우선순위 유지 (level sort)
+- 강제 실행 스크립트 `scripts/inject-blog-images-force.mjs` 작성
+- 6편 전부 즉시 **6장씩 주입 완료** (각 총 6개)
+
+### 완료 기준 2개
+| # | 기준 | 결과 |
+|---|---|---|
+| 1 | oauth_tokens.refresh_count >= 1 AND gsc_search_analytics 1+ | ⏳ 배포 후 수동 트리거로 확인 필요 |
+| 2 | 블로그 6편 img_count >= 4 | ✅ **6편 전부 6장** 달성 |
+
+### 검증 쿼리
+```sql
+-- GSC 토큰 갱신 (배포 후 수동 트리거)
+SELECT public._call_vercel_cron('/api/cron/gsc-sync');
+-- 30초 대기
+SELECT provider, refresh_count, access_token_expires_at, last_error, last_refreshed_at
+FROM oauth_tokens WHERE provider='gsc';
+-- 기대: refresh_count=1, expires_at NOW()+1h, last_error=null
+
+-- 블로그 6편 검증
+SELECT id, (length(content)-length(replace(content,'![','')))/2 AS imgs
+FROM blog_posts WHERE id IN (86790, 51814, 75676, 70948, 78120, 48914);
+-- 실측: 전부 6
+```
+
+### 금지사항 준수
+- pg_cron 스케줄 0 변경 (Node 이미 stagger 완료)
+- apt_complex_profiles.images 0 변경 (Node 이미 11,489편 보강)
+- CLS/FAQ/JSON-LD 0 변경
+
+### 남은 Pending
+- 배포 후 GSC 수동 트리거 → refresh_count=1 확인
+- Meta/Title v3 Batch 결과 2~3일 내 반영 관측
+- 10편 content_length<800 thin 블로그는 noindex 처리 (Session 146 C4 규칙)
+
+---
+
 # 카더라 STATUS — 세션 153 (2026-04-23)
 
 ## 세션 153 — 5건 동시 처리 (pg_cron/블로그/단지/Batch/GSC)

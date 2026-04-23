@@ -1,7 +1,11 @@
 /**
- * 세션 146 A1 — Google Search Console 데이터 일 1회 동기화.
- * 기존 oauth_tokens 테이블의 GSC refresh_token 재사용.
- * 실패/미설정 시에도 200 반환 (아키텍처 룰 #5).
+ * 세션 146 A1 / 세션 153 컬럼명 / 세션 154 토큰 갱신 로직.
+ *
+ * 세션 154 변경:
+ * - env clientId/secret 없어도 DB fallback 으로 진행
+ * - refreshAccessToken 이 expires_in 까지 반환
+ * - oauth_tokens UPDATE (access_token, access_token_expires_at, refresh_count+1, last_refreshed_at, last_error)
+ * - access_token 유효하면 재갱신 생략
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyCronAuth } from '@/lib/cron-auth';
@@ -12,7 +16,7 @@ export const maxDuration = 120;
 
 const SITE_URL = process.env.GSC_SITE_URL || 'https://kadeora.app';
 
-async function refreshAccessToken(clientId: string, clientSecret: string, refreshToken: string): Promise<string | null> {
+async function refreshAccessToken(clientId: string, clientSecret: string, refreshToken: string): Promise<{ token: string; expiresIn: number } | null> {
   try {
     const res = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',
@@ -24,10 +28,15 @@ async function refreshAccessToken(clientId: string, clientSecret: string, refres
         grant_type: 'refresh_token',
       }).toString(),
     });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      try { const b = await res.text(); console.error('[gsc-sync] refresh fail', res.status, b.slice(0, 300)); } catch {}
+      return null;
+    }
     const body = await res.json();
-    return body?.access_token || null;
-  } catch {
+    if (!body?.access_token) return null;
+    return { token: body.access_token, expiresIn: Number(body.expires_in) || 3600 };
+  } catch (e: any) {
+    console.error('[gsc-sync] refresh exception', String(e?.message).slice(0, 200));
     return null;
   }
 }
@@ -35,17 +44,11 @@ async function refreshAccessToken(clientId: string, clientSecret: string, refres
 async function handler(req: NextRequest) {
   if (!verifyCronAuth(req as any)) return new NextResponse('ok', { status: 200 });
 
-  const clientId = process.env.GOOGLE_OAUTH_CLIENT_ID;
-  const clientSecret = process.env.GOOGLE_OAUTH_CLIENT_SECRET;
-  if (!clientId || !clientSecret) {
-    return NextResponse.json({ ok: true, skipped: 'no_google_oauth' });
-  }
-
   const sb = getSupabaseAdmin();
-  // 세션 153: 컬럼명 service → provider (oauth_tokens 스키마 실측 수정)
+  // 세션 153 컬럼명 + 154: access_token + expires + client creds 전부 조회
   const { data: token } = await (sb as any)
     .from('oauth_tokens')
-    .select('refresh_token, client_id, client_secret')
+    .select('refresh_token, access_token, access_token_expires_at, client_id, client_secret')
     .eq('provider', 'gsc')
     .maybeSingle();
 
@@ -53,15 +56,43 @@ async function handler(req: NextRequest) {
     return NextResponse.json({ ok: true, skipped: 'no_gsc_refresh_token' });
   }
 
-  // env 값 우선, 없으면 DB에 저장된 값 fallback
-  const effClientId = clientId || token.client_id;
-  const effClientSecret = clientSecret || token.client_secret;
+  // env 값 우선, 없으면 DB 저장 값 fallback
+  const effClientId = process.env.GOOGLE_OAUTH_CLIENT_ID || token.client_id;
+  const effClientSecret = process.env.GOOGLE_OAUTH_CLIENT_SECRET || token.client_secret;
   if (!effClientId || !effClientSecret) {
     return NextResponse.json({ ok: true, skipped: 'no_google_oauth_creds' });
   }
 
-  const access = await refreshAccessToken(effClientId, effClientSecret, token.refresh_token);
-  if (!access) return NextResponse.json({ ok: true, skipped: 'access_token_refresh_failed' });
+  // access_token 유효 여부 확인 (30초 버퍼)
+  let access: string | null = null;
+  const now = Date.now();
+  const expAt = token.access_token_expires_at ? new Date(token.access_token_expires_at).getTime() : 0;
+  if (token.access_token && expAt > now + 30_000) {
+    access = token.access_token;
+  } else {
+    const refreshed = await refreshAccessToken(effClientId, effClientSecret, token.refresh_token);
+    if (!refreshed) {
+      // UPDATE last_error 기록
+      await (sb as any).from('oauth_tokens').update({
+        last_error: 'access_token_refresh_failed',
+        last_error_at: new Date().toISOString(),
+      }).eq('provider', 'gsc');
+      return NextResponse.json({ ok: true, skipped: 'access_token_refresh_failed' });
+    }
+    access = refreshed.token;
+    // UPDATE oauth_tokens — 새 access_token 저장
+    const newExp = new Date(now + refreshed.expiresIn * 1000).toISOString();
+    const { data: cur } = await (sb as any).from('oauth_tokens').select('refresh_count').eq('provider', 'gsc').maybeSingle();
+    await (sb as any).from('oauth_tokens').update({
+      access_token: access,
+      access_token_expires_at: newExp,
+      last_refreshed_at: new Date().toISOString(),
+      refresh_count: (cur?.refresh_count || 0) + 1,
+      last_error: null,
+      last_error_at: null,
+      updated_at: new Date().toISOString(),
+    }).eq('provider', 'gsc');
+  }
 
   // 3일 전부터 어제까지 (GSC 지연 반영)
   const end = new Date(Date.now() - 2 * 24 * 3600_000).toISOString().slice(0, 10);
@@ -83,16 +114,16 @@ async function handler(req: NextRequest) {
       }),
     });
     if (!res.ok) {
+      const txt = await res.text();
+      console.error('[gsc-sync] api fail', res.status, txt.slice(0, 300));
       return NextResponse.json({ ok: true, skipped: `gsc_api_${res.status}` });
     }
     const body = await res.json();
     const rows = (body?.rows || []) as any[];
 
-    const batches: any[][] = [];
-    for (let i = 0; i < rows.length; i += 500) batches.push(rows.slice(i, i + 500));
-
     let inserted = 0;
-    for (const batch of batches) {
+    for (let i = 0; i < rows.length; i += 500) {
+      const batch = rows.slice(i, i + 500);
       const payload = batch.map((r) => ({
         date: r.keys[0],
         query: (r.keys[1] || '').slice(0, 300),
