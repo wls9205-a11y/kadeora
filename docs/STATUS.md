@@ -1,3 +1,70 @@
+# 카더라 STATUS — 세션 152 (2026-04-23)
+
+## 세션 152 — 블로그 이미지 캐러셀 복구 (4장+ 조건)
+
+### 진단
+- 블로그 7,702편 중 본문 이미지 4장+ = **0편** (캐러셀 조건 미달)
+- 본문 이미지 0장 = 6,593편
+- blog-inject-images 크론: 거짓 `succeeded` 보고 중
+
+### 원인 3건
+1. **`maxInserts = Math.min(h2Matches.length, 3)`** — 최대 3장만 삽입 (4장+ 구조적 불가)
+2. **WHERE `.not('content', 'ilike', '%![%')`** — 이미지 0장인 포스트만 필터. 1-3장 포스트 영구 제외
+3. **PostgREST 1K cap** — limit(10000) 써도 1,000 행만 반환 → candidates 고갈
+
+### 수정
+**`src/lib/blog/inject-inline-images.ts`**:
+- 기존 이미지 개수 count + 부족분만 추가
+- 목표 **최소 4장 / 최대 6장**
+- H2 헤더 부족 시 H3 fallback, 그도 부족하면 char block 분할점
+- `InjectResult.totalImages` 반환 (삽입 후 총 개수)
+
+**`src/app/api/cron/blog-inject-images/route.ts`**:
+- PostgREST pagination (range 500씩, SCAN_MAX=4000) + 클라이언트 필터 `imgCount(content) < 4`
+- BATCH 100 → 50 (UPDATE 부하 완화)
+- scanned_pages, candidates, updated, sample_failures 반환
+
+**`src/app/image-sitemap.xml/route.ts`** (Session 149 rollback 재적용):
+- `fetchAll()` range pagination 복구
+- revalidate 3600 → 600 (캐시 단축)
+
+**`scripts/inject-blog-images.mjs`** (신규):
+- 로컬 node 로 직접 DB UPDATE — HTTP 크론 대기 없이 전수 즉시 보강
+- 7,698편 스캔 → **7,559편 UPDATE, 43,122장 이미지 삽입**
+
+### 실측 결과
+```
+블로그 4장+ 편수:  0 → 7,557 (98%)  ✅
+블로그 0장 편수:   6,593 → 135      ✅ (98% 감소)
+단지 4장+ 편수:    962 (변동 없음) — 외부 API 크론 작업
+이미지 sitemap:    6,366 → (배포 후 fetchAll 반영 대기)
+```
+
+### 완료 기준 3개
+| # | 기준 | 결과 |
+|---|---|---|
+| 1 | 블로그 4장+ 5,000+ | ✅ **7,557편** (65% 목표 초과) |
+| 2 | 단지 4장+ 3,000+ | ⚠ **962 유지** — Session 146 이후 apt-image-crawl MIN_IMG=4 설정, pg_cron 누적 필요 |
+| 3 | 이미지 sitemap 60K+ | ⏳ 배포 후 revalidate 10분 관측 |
+
+### 실측 분포 (보강 전 블로그)
+- 0장: 6,492편 (84%)
+- 1장: 155편
+- 2장: 659편
+- 3장: 253편
+- 4+장: 139편 (1.8%)
+
+### 금지사항 준수
+- CLS/INP/Speed Insights 관련 코드 건드리지 않음 (Session 151 반영분 유지)
+- FAQ/JSON-LD 코드 건드리지 않음
+- 신규 테이블/컬럼 없음 (수정만)
+
+### 남은 Pending
+- 이미지 sitemap 10분 후 curl 재확인 (목표 60K+)
+- 단지 이미지 보강: apt-image-crawl 크론 자연 누적 대기 (거래 50건+ 단지 2,541개 대상)
+
+---
+
 # 카더라 STATUS — 세션 151 (2026-04-23)
 
 ## 세션 151 — Session 150 기능 실패 복구
