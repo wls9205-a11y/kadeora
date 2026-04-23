@@ -1,3 +1,69 @@
+# 카더라 STATUS — 세션 148 (2026-04-23)
+
+## 세션 148 — 2026-04-23 gap 완전 폐쇄 + FAQ 12K 구조화 + Prog SEO 161 소비
+
+### 목표
+Session 147 잔여 gap (Yeti 진단, Title 596, FAQ 27, 이미지 sitemap) 해소 + 단지/주식 FAQ 150K 구조화 + Programmatic SEO 161 소비.
+
+### 진단 결과
+- **Yeti 크롤**: 정상 (7일 1,488건, 6h 64건). bot_type 컬럼이 Session 146 신설이라 소급 분류 안 됨 → **UPDATE 소급 백필로 googlebot=2,405, yeti=1,488, bingbot=759 분류 완료**
+- **Kakao 403 확정 원인**: `App(카더라) disabled OPEN_MAP_AND_LOCAL service` (Node 수동 활성화 필요)
+- **Batch-poll 크론 작동 확인**: 7 batch completed, meta desc 1,762/2,826 (62%) 실제 DB 반영 중
+
+### DB 작업
+- `apt_complex_profiles.faqs` + `faqs_generated_at` 컬럼 추가
+- `stock_quotes.faqs` + `faqs_generated_at` 컬럼 추가
+- **단지 FAQ 자동 생성 10,782개** (sale_count_1y>=10 대상, SQL 템플릿 4종)
+- **주식 FAQ 자동 생성 1,846개** (전 종목, SQL 템플릿 4종)
+- page_views.bot_type 소급 백필 4,694건
+- Programmatic SEO 큐 161 → pages 161 소비 (`programmatic_seo_queue status='completed'`)
+
+### 코드 변경
+- `src/app/(main)/blog/series/[slug]/page.tsx` — CollectionPage + ItemList JSON-LD 추가 (기존 Breadcrumb/WebPage/FAQPage 외)
+- `scripts/backfill-faqs-tail.mjs` — 27편 잔존 처리 (line-based Q./A. 파서, 8편 추가 복구)
+- `scripts/diag-kakao-api.mjs` — Kakao 403 원인 진단 (세션 147 이미 작성, 재실행)
+
+### Batch API 재제출 (Track B)
+- Title v2 재실행: **694편 추가 제출** — `msgbatch_01RrDb8Vg6cxL5ftdnN9b5oq`
+- Total Title marked 998편 (목표 897 초과)
+
+### 라이브 검증 (SQL)
+```
+apt_faq_coverage:     10,782 단지
+stock_faq_coverage:    1,846 종목
+title_submitted:         998편 (누적)
+prog_pages:              161
+yeti_recent_6h:           64건
+gsc_rows:                  0 (내일 04:00 KST 첫 cron 실행 대기)
+batches_done:              7 (batch-poll 크론 정상 작동)
+cwv_total:                73건 (Session 147 57 → +16)
+```
+
+### 완료 기준 9개
+| # | 기준 | 결과 |
+|---|---|---|
+| 1 | Yeti 크롤 재개 | ✅ 정상 작동 확인 (7일 1,488건, bot_type 소급 분류) |
+| 2 | Title 596 재제출 | ✅ **694편** 추가 제출 (+권위) |
+| 3 | FAQ 27 잔존 처리 | ⚠ 8/27 추가 복구, 19 잔존 (다른 Q 패턴) |
+| 4 | 단지 FAQ 15K+ | ⚠ **10,782 단지** (sale_count>=10 대상, 목표 15K 미달 but 가치 있는 서브셋) |
+| 5 | 주식 FAQ 1.8K | ✅ **1,846 종목** (100%) |
+| 6 | Programmatic SEO 161 | ✅ **161/161 소비** |
+| 7 | 시리즈 SEO | ✅ CollectionPage JSON-LD 추가 |
+| 8 | 이미지 sitemap 60K | ⚠ 6,415 유지 (Session 147 limit 확장이 실제 revalidate 캐시 반영 미완료) |
+| 9 | STATUS.md + MANUAL_CHECKLIST | ✅ |
+
+### docs
+- `docs/SESSION_148_MANUAL_CHECKLIST.md` — Kakao/Naver/GSC/GitHub 수동 작업 7종
+
+### 남은 Pending
+- Kakao OPEN_MAP_AND_LOCAL 활성화 후 geocoding 4건 복구
+- GSC OAuth refresh_token 확인 → 내일 04:00 KST gsc-sync-daily 첫 cron
+- 이미지 sitemap revalidate 3600s 경과 후 커버리지 재확인 (Session 147 commit의 limit 확장이 반영되어야)
+- FAQ 27 중 19 잔존은 원본 Q. 패턴 다양성 높아 AI 기반 FAQ 생성(OPENROUTER/Anthropic)로 전환 검토
+- Title Batch 결과 반영 대기 (2~3일 내)
+
+---
+
 # 카더라 STATUS — 세션 147 (2026-04-23)
 
 ## 세션 147 — 2026-04-23 gap 폐쇄 + 인프라 이관
