@@ -39,7 +39,9 @@ export default function NoticeBanner() {
   const [notices, setNotices] = useState<NoticeData[]>([]);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [showSheet, setShowSheet] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const impressionLogged = useRef<Set<number>>(new Set());
+  useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
     // 5분 캐시: 매 페이지 로드마다 DB 쿼리 방지
@@ -105,6 +107,8 @@ export default function NoticeBanner() {
     // fire-and-forget
   }, [currentIdx, notices]);
 
+  // 세션 156: mount 전 + 데이터 로드 중 placeholder — CLS 방지
+  if (!mounted) return <div aria-hidden="true" style={{ minHeight: 40 }} />;
   if (notices.length === 0) return null;
 
   const notice = notices[currentIdx];

@@ -20,15 +20,29 @@ function rateFor(name: string, value: number): 'good' | 'needs-improvement' | 'p
   }
 }
 
+function selectorPart(el: Element | null | undefined): string {
+  if (!el || typeof el !== 'object') return '';
+  const h = el as HTMLElement;
+  if (h.id) return `#${h.id}`;
+  const cls = typeof h.className === 'string' ? h.className : '';
+  const classPart = cls ? '.' + cls.trim().split(/\s+/).slice(0, 2).join('.') : '';
+  const tag = el.tagName ? el.tagName.toLowerCase() : 'unknown';
+  return `${tag}${classPart}`;
+}
+
 function selectorFor(el: Element | null | undefined): string | null {
   if (!el || typeof el !== 'object') return null;
   try {
-    const h = el as HTMLElement;
-    if (h.id) return `#${h.id}`;
-    const cls = typeof h.className === 'string' ? h.className : '';
-    const classPart = cls ? '.' + cls.trim().split(/\s+/).slice(0, 2).join('.') : '';
-    const tag = el.tagName ? el.tagName.toLowerCase() : 'unknown';
-    return `${tag}${classPart}`.slice(0, 200);
+    // 세션 156: parent chain 3 깊이까지 추적해서 구체 selector 생성
+    const parts: string[] = [];
+    let cur: Element | null = el;
+    for (let i = 0; i < 3 && cur; i++) {
+      const p = selectorPart(cur);
+      if (p) parts.unshift(p);
+      if ((cur as HTMLElement).id) break; // id 있으면 거기서 종료
+      cur = cur.parentElement;
+    }
+    return parts.join(' > ').slice(0, 200);
   } catch { return null; }
 }
 

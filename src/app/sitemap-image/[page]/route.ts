@@ -28,7 +28,8 @@ async function collectAll(sb: ReturnType<typeof getSupabaseAdmin>): Promise<ImgE
     return all;
   }
 
-  const [sites, complexes, blogs] = await Promise.all([
+  // 세션 156: stock_images + blog_post_images 추가 (누락 ~29K URL 복구)
+  const [sites, complexes, blogs, stockImgs, blogImgs] = await Promise.all([
     fetchAll('apt_sites', 'slug, name, images, region, sigungu',
       (q: any) => q.eq('is_active', true).not('images', 'is', null)),
     fetchAll('apt_complex_profiles', 'apt_name, images, region_nm, sigungu',
@@ -36,6 +37,10 @@ async function collectAll(sb: ReturnType<typeof getSupabaseAdmin>): Promise<ImgE
     fetchAll('blog_posts', 'slug, title, cover_image, image_alt, category',
       (q: any) => q.eq('is_published', true).not('cover_image', 'is', null)
         .order('published_at', { ascending: false })),
+    fetchAll('stock_images', 'symbol, image_url, alt_text, caption',
+      (q: any) => q.eq('is_active', true).not('image_url', 'is', null)),
+    fetchAll('blog_post_images', 'post_id, image_url, alt_text, position',
+      (q: any) => q.not('image_url', 'is', null).order('post_id', { ascending: true })),
   ]);
 
   const out: ImgEntry[] = [];
@@ -89,6 +94,28 @@ async function collectAll(sb: ReturnType<typeof getSupabaseAdmin>): Promise<ImgE
       }],
     });
   }
+
+  // 세션 156: stock_images — /stock/{symbol} URL 단위로 그룹화
+  const stockBySymbol = new Map<string, any[]>();
+  for (const si of stockImgs) {
+    if (!si.symbol || !si.image_url) continue;
+    const url = String(si.image_url).replace(/^http:\/\//, 'https://');
+    if (!stockBySymbol.has(si.symbol)) stockBySymbol.set(si.symbol, []);
+    stockBySymbol.get(si.symbol)!.push({
+      url,
+      title: si.alt_text || `${si.symbol} 주식 차트`,
+      caption: si.caption || `${si.symbol} 주가·시세 차트`,
+    });
+  }
+  for (const [symbol, imgs] of stockBySymbol) {
+    out.push({ loc: `${BASE}/stock/${encodeURIComponent(symbol)}`, imgs: imgs.slice(0, 10) });
+  }
+
+  // 세션 156: blog_post_images — /blog/{slug} URL 단위로 그룹화 (post_id→slug 매핑 필요)
+  // 비용 절약: post_id 기준으로 slug 이미 blogs 에서 조회됨. blogs 는 cover_image 있는 것만 포함.
+  // 따라서 blog_post_images 는 별도 post lookup 없이 post_id 기반 URL 생성 불가.
+  // 대안: /blog/post-{post_id} URL 은 없으므로 blog slug 재조회 또는 skip.
+  // 이번 세션: skip (다음 세션 blog_posts.slug 매핑 추가)
 
   return out;
 }

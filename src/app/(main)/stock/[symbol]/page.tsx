@@ -45,6 +45,12 @@ export async function generateStaticParams() {
   }
 }
 
+// 세션 156: GSC 상위 impression 쿼리 타겟 (주가 전망 2026 키워드 강화)
+const FORECAST_TARGETS = new Set([
+  '036930', '010120', '047040', '336260', '036530', '096530', '112610',
+  '008770', '001570', '112040', '077360', '036460', '383310',
+]);
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { symbol } = await params;
   const sb = await createSupabaseServer();
@@ -57,9 +63,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const divText = Number(s.dividend_yield) > 0 ? `배당수익률 ${Number(s.dividend_yield).toFixed(2)}%` : '';
   const sectorText = s.sector ? `${s.sector} 섹터` : '';
   const metaFragments = [perText, divText, sectorText].filter(Boolean).join(' · ');
+
+  // 세션 156: 13 종목은 "주가 전망 2026" 키워드로 타이틀/설명 강화
+  const isForecastTarget = FORECAST_TARGETS.has(symbol);
+  const title = isForecastTarget
+    ? `${s.name}(${symbol}) 주가 전망 2026 — 실시간 시세·목표주가·배당 | 카더라`
+    : `${s.name}(${symbol}) 주가·배당금·실적·AI 분석 — 카더라`;
+  const description = isForecastTarget
+    ? `${s.name} 주가 전망 2026. 실시간 시세 ${p}${ch ? ' ' + ch : ''}. ${metaFragments ? metaFragments + '. ' : ''}증권사 목표주가 컨센서스, 외국인·기관 수급, 배당 수익률을 카더라에서 한눈에.`
+    : `${s.name} 현재가 ${p} ${ch}. ${metaFragments ? metaFragments + '. ' : ''}${s.market} 상장. 실시간 시세, 차트, 수급, 재무제표, 목표가, AI 분석을 카더라에서 무료로 확인하세요.`;
+
   return {
-    title: `${s.name}(${symbol}) 주가·배당금·실적·AI 분석 — 카더라`,
-    description: `${s.name} 현재가 ${p} ${ch}. ${metaFragments ? metaFragments + '. ' : ''}${s.market} 상장. 실시간 시세, 차트, 수급, 재무제표, 목표가, AI 분석을 카더라에서 무료로 확인하세요.`,
+    title,
+    description,
     alternates: { canonical: `${SITE_URL}/stock/${symbol}` },
     robots: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' as const, 'max-video-preview': -1, googleBot: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' as const } },
     openGraph: {

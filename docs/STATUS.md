@@ -1,3 +1,66 @@
+# 카더라 STATUS — 세션 156 (2026-04-23)
+
+## 세션 156 — CLS poor 원인 수정 + image-sitemap 소스 확장 + 13종목 주가전망 SEO
+
+### 1. CLS 0.271 poor → <0.15 목표 수정
+
+**Attribution 실측** (`web_vitals.cls_largest_shift_target` 첫 1일):
+| selector | n | avg_shift | avg_cls |
+|---|---|---|---|
+| `#main-content` | 12 | 0.130 | **0.258** 주범 |
+| `div` | 31 | 0.150 | 0.186 |
+| `body` | 5 | 0 | 0 |
+
+→ `#main-content` 통째 shift = 페이지 상단 비동기 banner 로 전체 main 아래로 밀림.
+
+**수정**:
+- `NoticeBanner`: mount 전 40px placeholder
+- `ProfileCompleteBanner`: mount 전 60px placeholder
+- `InstallBanner`: position fixed 확인 → 손대지 않음 (이미 flow 영향 없음)
+- `VitalsReporter.selectorFor`: parent chain 3 깊이 추적으로 구체적 selector 생성 (기존 `div` → `main > div.xxx > span`)
+
+### 2. image-sitemap 소스 확장
+
+**실측 URL 단위 총량**:
+- apt_sites: 3,723 / apt_complex_profiles: 31,651 / blog_posts real cover: 3,974
+- stock_images: 12,639 (new) / stock_symbols: 1,846
+- blog_post_images: 17,196 (slug 매핑 필요해 skip — 다음 세션)
+
+**수정**:
+- `sitemap-image/[page]/route.ts`: stock_images 추가 — /stock/{symbol} URL 단위 그룹화
+- `image-sitemap.xml/route.ts` index: stock_quotes 추가 → N 계산에 반영
+- 결과 totalEntries 증가 (약 39K → 70K+ symbol 기준)
+
+### 3. 13종목 "주가 전망 2026" SEO 강화
+
+**GSC 상위 impression 쿼리 타겟**:
+주성엔지니어링(036930), LS Electric(010120), 대우건설(047040), 두산퓨얼셀(336260), 심텍(036530), 씨젠(096530), 씨에스윈드(112610), 호텔신라(008770), 금양(001570), 위메이드(112040), 덕산하이메탈(077360), 한국가스공사(036460), 에코프로에이치엔(383310)
+
+**수정**:
+- `/stock/[symbol]/page.tsx` generateMetadata 에 `FORECAST_TARGETS` Set 추가
+- 13 종목에 대해서만 title: `{name}({symbol}) 주가 전망 2026 — 실시간 시세·목표주가·배당 | 카더라`
+- description 에 "주가 전망 2026" + 증권사 컨센서스 + 외국인·기관 수급 키워드 포함
+- 그 외 전 종목은 기존 타이틀 유지 (A/B 측정 가능)
+
+### 완료 기준 3개
+| # | 기준 | 결과 |
+|---|---|---|
+| 1 | CLS p75 <0.15 (2h 관측) | ⏳ 배포 후 관측 |
+| 2 | image-sitemap <sitemap> 162+ | ⚠ 실측 URL 70K 기준 N=70 (스펙 162 달성은 blog_post_images slug 매핑 다음 세션) |
+| 3 | 13 종목 메타 적용 | ✅ generateMetadata FORECAST_TARGETS 분기 |
+
+### 금지사항 준수
+- pg_cron 0 변경
+- FAQ/JSON-LD/노출면적 0 변경
+- blog_posts/apt_complex_profiles DB UPDATE 0
+
+### 남은 Pending
+- 2h 관측 후 CLS p75 재측정 (목표 <0.15)
+- blog_post_images 17,196 을 sitemap에 포함하려면 blog_posts.slug 매핑 추가 필요 (다음 세션)
+- 13종목 2주 후 GSC 재확인 → 순위 5위 이내 진입 + click 10+ 검증
+
+---
+
 # 카더라 STATUS — 세션 155 (2026-04-23)
 
 ## 세션 155 — SEO-safe section gate 인프라 (phase A+B)

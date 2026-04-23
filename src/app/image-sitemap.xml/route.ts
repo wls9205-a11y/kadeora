@@ -27,12 +27,14 @@ export async function GET() {
     return total;
   }
 
-  const [sitesN, complexN, blogsN] = await Promise.all([
+  // 세션 156: stock_images 에 symbol 단위 DISTINCT 추가 (URL 단위 — symbol당 1 URL)
+  const [sitesN, complexN, blogsN, stockSymbolsN] = await Promise.all([
     pageCount('apt_sites', (q: any) => q.eq('is_active', true).not('images', 'is', null)),
     pageCount('apt_complex_profiles', (q: any) => q.not('images', 'is', null)),
     pageCount('blog_posts', (q: any) => q.eq('is_published', true).not('cover_image', 'is', null)),
+    pageCount('stock_quotes', (q: any) => q.not('symbol', 'is', null)),
   ]);
-  const totalEntries = sitesN + complexN + blogsN;
+  const totalEntries = sitesN + complexN + blogsN + stockSymbolsN;
   const pages = Math.max(1, Math.ceil(totalEntries / URLS_PER_PAGE));
 
   const now = new Date().toISOString();

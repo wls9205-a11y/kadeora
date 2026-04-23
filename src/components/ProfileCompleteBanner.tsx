@@ -8,6 +8,8 @@ const COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24시간
 
 export default function ProfileCompleteBanner() {
   const [show, setShow] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
     // 24시간 쿨다운 체크
@@ -30,6 +32,8 @@ export default function ProfileCompleteBanner() {
     });
   }, []);
 
+  // 세션 156: mount 전 placeholder — show 판정 전 CLS 방지
+  if (!mounted) return <div aria-hidden="true" style={{ minHeight: 60 }} />;
   if (!show) return null;
 
   return (
