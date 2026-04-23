@@ -29,9 +29,22 @@ export default function BlogStickyLoginBar() {
 
   const handleClick = () => {
     try {
-      import('@/lib/analytics').then((m: any) => {
-        m.trackCTA?.('click', 'blog_sticky_bar', { page_path: window.location.pathname });
+      const body = JSON.stringify({
+        event_type: 'cta_click',
+        cta_name: 'blog_sticky_bar',
+        category: 'signup',
+        page_path: window.location.pathname,
       });
+      if (typeof navigator !== 'undefined' && navigator.sendBeacon) {
+        navigator.sendBeacon('/api/events/cta', new Blob([body], { type: 'application/json' }));
+      } else {
+        fetch('/api/events/cta', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body,
+          keepalive: true,
+        }).catch(() => {});
+      }
     } catch {}
   };
 

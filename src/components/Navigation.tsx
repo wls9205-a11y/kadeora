@@ -467,7 +467,22 @@ export function Navigation() {
                   href={`/login?redirect=${encodeURIComponent(pathname)}&source=nav`}
                   onClick={() => {
                     try {
-                      import('@/lib/analytics').then(m => m.trackCTA?.('click', 'nav_login_button', { page_path: window.location.pathname }));
+                      const body = JSON.stringify({
+                        event_type: 'cta_click',
+                        cta_name: 'nav_login_button',
+                        category: 'signup',
+                        page_path: window.location.pathname,
+                      });
+                      if (typeof navigator !== 'undefined' && navigator.sendBeacon) {
+                        navigator.sendBeacon('/api/events/cta', new Blob([body], { type: 'application/json' }));
+                      } else {
+                        fetch('/api/events/cta', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body,
+                          keepalive: true,
+                        }).catch(() => {});
+                      }
                     } catch {}
                   }}
                   style={{
