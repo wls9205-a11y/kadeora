@@ -1,3 +1,37 @@
+# 카더라 STATUS — 세션 155 (2026-04-23)
+
+## 세션 155 — SEO-safe section gate 인프라 (phase A+B)
+
+### DB (이미 완료)
+- apt_gate_config 테이블 + 12 섹션 (detail 8 / complex 4)
+- get_apt_gate_config(p_page_type) RPC
+- stock_gate_config 15 섹션 active (기존)
+- blog_posts.gated_sections 91% 적용 (기존)
+
+### 신규 공통 컴포넌트 4종
+- `src/lib/seo/isBot.ts` — Googlebot/Yeti/Bingbot/Daum/GPTBot/ClaudeBot/Perplexity 등 cover
+- `src/components/seo/PaywallMarker.tsx` — Google Subscription Content 가이드 준수 JSON-LD (isAccessibleForFree=false + hasPart.cssSelector=.kadeora-paywall)
+- `src/components/common/SectionGate.tsx` — isBot → full render, level=login/premium 게이트 + preview gradient mask + CTA, sendBeacon cta_view/click
+- `src/app/api/apt/gate-config/route.ts` — get_apt_gate_config RPC 래퍼, 5분 캐시
+
+### 페이지 수정
+- `/apt/[id]` — AI 분석 섹션 SectionGate level=login 래핑 (`apt_gate_ai_analysis`) + RealEstateListing PaywallMarker
+- `/stock/[symbol]` — FinancialProduct PaywallMarker 추가 (기존 GatedStockSection 유지)
+- `/blog/[slug]` — 무변경 (기존 BlogGatedRenderer 완벽)
+
+### SEO 준수
+- JSON-LD: blog ✅ stock ✅ apt ✅ isAccessibleForFree=false + hasPart
+- Googlebot UA → SectionGate bypass → 전체 SSR 인덱싱 유지
+- 일반 UA → preview + CTA
+
+### Scope 경계 (이번 세션 손대지 않음)
+- Article → Product 타입 변경 (별도)
+- blog notFound 가드 (별도)
+- apt/complex/[id] 수정 (다음)
+- 신규 pg_cron / image-sitemap / RLS
+
+---
+
 # 카더라 STATUS — 세션 154 (2026-04-23)
 
 ## 세션 154 — GSC 토큰 갱신 + 블로그 6편 H2 매칭 수정

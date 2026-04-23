@@ -18,6 +18,10 @@ import AptImageGallery from '@/components/AptImageGallery';
 import SimilarAptsSection from '@/components/apt/SimilarAptsSection';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
 import { getDisplayInterestCount, formatInterestText, formatInterestOrViews } from '@/lib/interest-utils';
+import { headers } from 'next/headers';
+import { isBot } from '@/lib/seo/isBot';
+import { SectionGate } from '@/components/common/SectionGate';
+import { PaywallMarker } from '@/components/seo/PaywallMarker';
 
 const AptPriceTrendChart = dynamic(() => import('@/components/charts/AptPriceTrendChart'));
 const InterestRegistration = dynamic(() => import('@/components/InterestRegistration'));
@@ -442,12 +446,18 @@ export default async function AptUnifiedPage({ params }: Props) {
   };
   let aptUser = null;
   try { const sbA = await createSupabaseServer(); const { data: { user } } = await sbA.auth.getUser(); aptUser = user; } catch {}
+  const isLoggedInApt = !!aptUser;
+  const isPremiumApt = false;
+  const aptUA = (await headers()).get('user-agent');
+  const isBotVisit = isBot(aptUA);
   const unsoldRate = unsold?.tot_supply_hshld_co ? Math.round(((unsold.tot_unsold_hshld_co ?? 0) / unsold.tot_supply_hshld_co) * 100) : null;
 
   return (
     <article style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }} itemScope itemType='https://schema.org/ApartmentComplex'>
       {noindex && <meta name="robots" content="noindex,follow" />}
       {site?.id && <AptViewTracker siteId={site.id} />}
+
+      <PaywallMarker hasGatedContent={true} schemaType="RealEstateListing" />
 
       {/* JSON-LD 1: RealEstateListing */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'RealEstateListing', name, description: site?.description || `${region} ${name}`, url: `${SITE_URL}/apt/${slug}`, address: { '@type': 'PostalAddress', addressRegion: region, addressLocality: site?.sigungu || '', streetAddress: site?.address || sub?.hssply_adres || '', addressCountry: 'KR' }, ...(site?.total_units || sub?.tot_supply_hshld_co ? { numberOfRooms: site?.total_units || sub?.tot_supply_hshld_co } : {}), ...(site?.latitude && site?.longitude ? { geo: { '@type': 'GeoCoordinates', latitude: site.latitude, longitude: site.longitude } } : {}), ...(site?.builder || sub?.constructor_nm ? { brand: { '@type': 'Organization', name: site?.builder || sub?.constructor_nm } } : {}), ...(site?.price_min || site?.price_max ? { offers: { '@type': 'AggregateOffer', priceCurrency: 'KRW', ...(site?.price_min ? { lowPrice: site.price_min * 10000 } : {}), ...(site?.price_max ? { highPrice: site.price_max * 10000 } : {}), offerCount: site?.total_units || 1 } } : {}) }) }} />
@@ -572,10 +582,22 @@ export default async function AptUnifiedPage({ params }: Props) {
           {(site?.nearby_station || sub?.nearest_station) && <span style={{ color: 'var(--accent-blue)' }}>🚇 {site?.nearby_station || sub?.nearest_station}</span>}
         </div>
         {(sub?.ai_summary || site?.description) && (
-          <div style={{ padding: 'var(--sp-md) var(--card-p)', borderRadius: 'var(--radius-md)', background: 'linear-gradient(135deg, var(--brand-bg), rgba(139,92,246,0.06))', border: '1px solid var(--brand-border)' }}>
-            <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--brand)', marginBottom: 3 }}>🤖 AI 분석</div>
-            <div className="site-description" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', lineHeight: 1.6 }}>{sub?.ai_summary || site?.description}</div>
-          </div>
+          <SectionGate
+            sectionKey="ai_analysis"
+            level="login"
+            previewLines={5}
+            ctaName="apt_gate_ai_analysis"
+            ctaText="1초 로그인하고 전체 분석 보기"
+            redirectPath={`/apt/${slug}`}
+            isLoggedIn={isLoggedInApt}
+            isPremium={isPremiumApt}
+            isBot={isBotVisit}
+          >
+            <div style={{ padding: 'var(--sp-md) var(--card-p)', borderRadius: 'var(--radius-md)', background: 'linear-gradient(135deg, var(--brand-bg), rgba(139,92,246,0.06))', border: '1px solid var(--brand-border)' }}>
+              <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--brand)', marginBottom: 3 }}>🤖 AI 분석</div>
+              <div className="site-description" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', lineHeight: 1.6 }}>{sub?.ai_summary || site?.description}</div>
+            </div>
+          </SectionGate>
         )}
       </div>
 
