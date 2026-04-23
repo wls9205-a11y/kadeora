@@ -64,7 +64,11 @@ export default function LoginGate({ children, feature, title, description, blurH
   }, [userId, loading, feature, pathname, mounted]);
 
   // SSR 또는 로딩 중 또는 로그인 → children 전체 표시
-  if (!mounted || loading || userId) {
+  // 세션 150: mount 전에는 고정 높이 래퍼로 CLS 방지
+  if (!mounted) {
+    return <div aria-hidden="true" style={{ minHeight: Math.max(blurHeight, 200), margin: '18px 0' }} />;
+  }
+  if (loading || userId) {
     return <>{children}</>;
   }
 

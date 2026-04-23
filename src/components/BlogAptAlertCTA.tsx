@@ -66,8 +66,10 @@ export default function BlogAptAlertCTA({ aptName, siteSlug, category = 'apt', l
     }
   };
 
-  // 렌더링 준비 전
-  if (isLoggedIn === null) return null;
+  // 렌더링 준비 전 — 세션 150: CLS 방지 위해 최종 컴포넌트 높이만큼 자리 예약 (blank placeholder)
+  if (isLoggedIn === null) {
+    return <div aria-hidden="true" style={{ minHeight: 124, margin: '20px 0' }} />;
+  }
 
   if (status === 'done') {
     return (

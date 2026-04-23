@@ -1,3 +1,59 @@
+# 카더라 STATUS — 세션 150 (2026-04-23)
+
+## 세션 150 — 2026-04-23 CLS 0.23 → <0.1 집중 수정
+
+### CWV 측정 (배포 전, n=12)
+- **CLS desktop p75 = 0.232** (poor 3/12, needs 7/12) — 심각
+- **CLS mobile p75 = 0.180** (poor 1/12, needs 4/12)
+- LCP 모바일 1,908ms 🟢 / 데스크탑 2,192ms 🟢
+- INP 모바일 284ms ⚠ (n=3 샘플 적음) / 데스크탑 32ms 🟢
+- FCP 984ms 🟢 / TTFB 352ms 🟢
+
+→ CLS 홀로 needs-improvement/poor → Google/Naver 모바일 가중치 손실
+
+### 상위 CLS path (avg CLS)
+1. `/apt/경기-고양시-미분양` 0.329
+2. `/blog/apt-sub-analysis-*` 0.282
+3. `/blog/035420-kospi-수급분석` 0.281
+4. `/blog/018290-kosdaq-목표주가` 0.274
+5. `/apt/레이카운티` 0.218
+6. `/apt/complex/미래엠피아` 0.214
+(상위 10 docs/CLS_DIAGNOSIS.md)
+
+### DB 변경
+- `web_vitals` attribution 컬럼 4개 추가: cls_largest_shift_target, cls_largest_shift_value, lcp_element, inp_target
+
+### 코드 변경
+- `VitalsReporter.tsx`: PerformanceObserver 로 layout-shift + LCP 엘리먼트 관찰, 서버 전송
+- `api/web-vitals/route.ts`: attribution 필드 저장
+- `/admin/seo/vitals` 신규: CLS 범인 TOP 30 + LCP 엘리먼트 TOP 20 대시보드
+- `BlogAptAlertCTA`: isLoggedIn 판정 전 min-height 124px 자리 예약
+- `LoginGate`: mount 전 min-height 래퍼 렌더
+- `BlogEarlyGateTeaser`: 판정 완료 전 min-height 220px (서버 hint 없을 때만)
+- `layout.tsx`: cdn.jsdelivr.net preconnect (폰트 FOUT 단축)
+- `globals.css`: font-display swap → optional (FOIT 허용, reflow 방지)
+
+### docs
+- `docs/CLS_DIAGNOSIS.md`
+
+### 완료 기준 4개
+| # | 기준 | 결과 |
+|---|---|---|
+| 1 | CLS 상위 10 path 원인 | ✅ |
+| 2 | 이미지 치수 명시 | ✅ 기존 markdown renderer width/height 확인, CTA placeholder 추가 |
+| 3 | Skeleton 적용 | ✅ 3종 CTA 컴포넌트 |
+| 4 | web-vitals Attribution + 대시보드 | ✅ |
+
+### 배포 후 관측 (2시간 뒤 목표)
+- CLS p75 < 0.1 (현재 0.232/0.180)
+- cls_largest_shift_target TOP 10 실측 집계 → 잔존 범인 식별 후 다음 세션 타겟 수정
+
+### 남은 Pending
+- 2시간 관측 후 attribution 데이터 기반 추가 수정 대상 확정
+- 차트 skeleton 치수 고정 (/stock, /apt/complex) — 다음 세션
+
+---
+
 # 카더라 STATUS — 세션 149 (2026-04-23)
 
 ## 세션 149 — 2026-04-23 apt_sites FAQ + 잔여 AI + 측정 현황

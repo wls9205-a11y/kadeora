@@ -1,8 +1,8 @@
 /* Pretendard font loaded via <link> in layout.tsx for better LCP */
-/* B-7: font-display: swap 보험 — CDN CSS에 없을 경우 대비 */
+/* 세션 150 CLS: swap → optional (FOIT 허용, reflow 방지). Pretendard 로드 실패 시 system-ui 유지하며 layout shift 차단. */
 @font-face {
   font-family: 'Pretendard Variable';
-  font-display: swap;
+  font-display: optional;
   src: local('Pretendard Variable'), local('Pretendard');
 }
 

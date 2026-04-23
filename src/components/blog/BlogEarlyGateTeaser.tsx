@@ -175,7 +175,15 @@ export default function BlogEarlyGateTeaser({ slug, enabled = true, hasGatedCont
     } catch { /* silent */ }
   }, [config, isAuth, hasGated]);
 
-  if (!enabled || !config || isAuth !== false || !hasGated) return null;
+  // 세션 150: CLS 방지 위해 판정 완료 전 자리 예약
+  // 단, 서버에서 로그인 확정(hint=true) 또는 gated 아닌 것이 확정이면 자리 예약 안 함
+  const shouldReserveSpace = isLoggedInHint !== true && hasGatedProp !== false;
+  if (!enabled || !config) {
+    return shouldReserveSpace
+      ? <div aria-hidden="true" style={{ minHeight: 220, margin: '18px 0' }} />
+      : null;
+  }
+  if (isAuth !== false || !hasGated) return null;
 
   const handleClick = () => {
     trackCtaClick({ cta_name: config.cta_name, category: 'signup', page_path: typeof window !== 'undefined' ? window.location.pathname : undefined });

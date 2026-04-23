@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
     let body: any;
     try { body = JSON.parse(text); } catch { return NextResponse.json({ ok: true }); }
 
-    const { page_path, metric_name, value, rating, device } = body || {};
+    const { page_path, metric_name, value, rating, device, cls_largest_shift_target, cls_largest_shift_value, lcp_element, inp_target } = body || {};
     if (!VALID_METRICS.has(metric_name) || typeof value !== 'number' || !VALID_RATINGS.has(rating)) {
       return NextResponse.json({ ok: true });
     }
@@ -35,6 +35,10 @@ export async function POST(req: NextRequest) {
           rating,
           device: device === 'mobile' ? 'mobile' : 'desktop',
           user_agent_hash: uaHash,
+          cls_largest_shift_target: cls_largest_shift_target ? String(cls_largest_shift_target).slice(0, 200) : null,
+          cls_largest_shift_value: typeof cls_largest_shift_value === 'number' ? cls_largest_shift_value : null,
+          lcp_element: lcp_element ? String(lcp_element).slice(0, 200) : null,
+          inp_target: inp_target ? String(inp_target).slice(0, 200) : null,
         })
         .then(() => {})
         .catch(() => {});
