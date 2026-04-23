@@ -1,3 +1,50 @@
+# 카더라 STATUS — 세션 158 (2026-04-24)
+
+## 세션 158 — 단지 썸네일 OG 문제 (크롤 + 프론트 라벨)
+
+### 배경
+- Claude DB 선행: 백업 컬럼에서 실사진 4,541편 복구, 우선순위 정렬, 9,701편 실사진 적용
+- 남은 24,800편(72%) 실사진 자체 DB 없음 → 외부 크롤 필요
+
+### 1. apt-image-crawl + collect-complex-images pg_cron 등록 (A)
+Vercel cron 이미 등록돼있으나 (apt-image-crawl 매시간 15분, collect-complex-images 10분마다), pg_cron 백업 스케줄 추가:
+```
+apt-image-crawl-backup        15,45 */3 * * *  (3시간 주기, 오프셋 분산)
+collect-complex-images-backup 7,37 */2 * * *   (2시간 주기)
+```
+→ Vercel cron 실패/timeout 시 백업 트리거. stagger 준수.
+
+### 2. 단지 페이지 OG fallback 라벨 (B)
+`/apt/complex/[name]/page.tsx` hero 이미지 렌더 재작성:
+- `profile.images` 에서 real hero (URL 존재 + `/api/og` 미포함) 우선
+- 없으면 `/api/og?title=...` fallback + **blur + "📷 실사진 준비 중" 라벨** 오버레이
+- 실사진 있을 땐 blur 없이 원본 명확하게 표시
+
+사용자가 OG 제네릭을 "실제 조감도"로 오해하는 문제 해소.
+
+### 3. C/D 보류
+- C (naver-complex-sync): 기존 route 유지, 추가 크롤 전략 미변경 (Vercel cron 이미 작동)
+- D (crawl_priority 컬럼): scope 확장 위험, 다음 세션 별도 처리
+
+### 완료 기준 4개
+| # | 기준 | 결과 |
+|---|---|---|
+| 1 | apt-image-crawl pg_cron 등록 + 200 응답 | ✅ backup 2건 등록 |
+| 2 | 라우트 maxDuration/timeout 보호 | ✅ 기존 MAX_RUNTIME_MS=250s + try/catch 적용 상태 확인 |
+| 3 | 단지 페이지 "실사진 준비 중" 라벨 | ✅ |
+| 4 | 1시간 후 real_thumbnails 10,500+ | ⏳ 배포 후 관측 |
+
+### 금지사항 준수
+- DB images 배열 0 변경
+- og_image_url/narrative_text/noindex 0 변경
+- pg_cron stagger 준수 (backup 스케줄도 unique offset)
+
+### 남은 Pending
+- 1시간 후 real_thumbnails_now 실측 (목표 10,500+)
+- naver-complex-sync 우선순위 큐 + priority 컬럼화 (다음 세션)
+
+---
+
 # 카더라 STATUS — 세션 157 (2026-04-24)
 
 ## 세션 157 — 전체 클린업 최종 (코드 레벨 10건 병렬)

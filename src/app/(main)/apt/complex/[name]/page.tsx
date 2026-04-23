@@ -399,8 +399,38 @@ export default async function ComplexDetailPage({ params }: Props) {
         );
       })()}
 
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={`/api/og?title=${encodeURIComponent(decoded)}&design=2&category=apt&subtitle=${encodeURIComponent(latestPrice > 0 ? `매매 ${fmtAmount(latestPrice)}${latestJeonse ? ` · 전세 ${fmtAmount(latestJeonse.deposit)}` : ''}` : '실거래가 시세')}&author=${encodeURIComponent('카더라')}`} alt={`${decoded} 아파트 ${region} ${sigungu} 실거래가 시세 ${latestPrice > 0 ? fmtAmount(latestPrice) : ''}`} width={1200} height={630} style={{ width: '100%', maxHeight: 160, objectFit: 'cover', display: 'block', borderRadius: 'var(--radius-md)', marginBottom: 'var(--sp-md)', border: '1px solid var(--border)' }} loading="lazy" />
+      {/* 세션 158 B: hero 이미지 실사진 우선, 없으면 OG + "실사진 준비 중" 라벨 */}
+      {(() => {
+        const profileImages = Array.isArray(profile?.images) ? (profile.images as any[]) : [];
+        const realHero = profileImages
+          .map((im) => typeof im === 'string' ? im : im?.url)
+          .find((u) => typeof u === 'string' && u.length > 10 && !u.includes('/api/og'));
+        const ogHeroUrl = `/api/og?title=${encodeURIComponent(decoded)}&design=2&category=apt&subtitle=${encodeURIComponent(latestPrice > 0 ? `매매 ${fmtAmount(latestPrice)}${latestJeonse ? ` · 전세 ${fmtAmount(latestJeonse.deposit)}` : ''}` : '실거래가 시세')}&author=${encodeURIComponent('카더라')}`;
+        const heroSrc = realHero
+          ? (typeof realHero === 'string' ? realHero : '').replace(/^http:\/\//, 'https://')
+          : ogHeroUrl;
+        const isPlaceholder = heroSrc.includes('/api/og');
+        return (
+          <div style={{ position: 'relative', marginBottom: 'var(--sp-md)' }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={heroSrc}
+              alt={`${decoded} 아파트 ${region} ${sigungu} 실거래가 시세 ${latestPrice > 0 ? fmtAmount(latestPrice) : ''}`}
+              width={1200}
+              height={630}
+              style={{ width: '100%', maxHeight: 160, objectFit: 'cover', display: 'block', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', filter: isPlaceholder ? 'blur(1px) brightness(0.8)' : undefined }}
+              loading="lazy"
+            />
+            {isPlaceholder && (
+              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 'var(--radius-md)', pointerEvents: 'none' }}>
+                <span style={{ fontSize: 11, fontWeight: 600, color: '#fff', background: 'rgba(0,0,0,0.5)', padding: '3px 10px', borderRadius: 12 }}>
+                  📷 실사진 준비 중
+                </span>
+              </div>
+            )}
+          </div>
+        );
+      })()}
       <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 4px' }}>{decoded}</h1>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
         <time dateTime={new Date().toISOString()} style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{new Date().toLocaleDateString('ko-KR')} 기준</time>
