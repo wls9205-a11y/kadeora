@@ -68,11 +68,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const ogSquareUrl = `${SITE_URL}/api/og-square?title=${encodeURIComponent(decoded)}&category=apt&subtitle=${encodeURIComponent(ogSubtitle)}`;
   const keywords = [decoded, '실거래가', '시세', '아파트', region, sigungu, ageGroup, '전세', '월세', '매매', '평당가', '전세가율', '시세조회', '학군', '재건축', '분양가', '입주', '조감도', '평면도'].filter(Boolean);
 
+  // 세션 157 A: apt_complex_profiles.metadata.noindex=true 이면 robots meta 반영
+  const isNoindex = p && (p as any).metadata && typeof (p as any).metadata === 'object' && (p as any).metadata.noindex === true;
   const meta: Metadata = {
     title,
     description,
     alternates: { canonical: `${SITE_URL}/apt/complex/${name}` },
-    robots: { index: true, follow: true, 'max-snippet': -1 as const, 'max-image-preview': 'large' as const },
+    robots: isNoindex
+      ? { index: false, follow: true }
+      : { index: true, follow: true, 'max-snippet': -1 as const, 'max-image-preview': 'large' as const },
     openGraph: {
       title: `${decoded} 실거래가·시세·평당가 — ${region} ${sigungu}`,
       description: metaParts ? `${metaParts} — ${region} ${sigungu}` : `실거래가·시세 분석 — ${region} ${sigungu}`,

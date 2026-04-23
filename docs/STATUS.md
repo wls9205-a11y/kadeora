@@ -1,3 +1,75 @@
+# 카더라 STATUS — 세션 157 (2026-04-24)
+
+## 세션 157 — 전체 클린업 최종 (코드 레벨 10건 병렬)
+
+### Supabase 선행 완료 (Node/Claude 직접)
+- 10개 migration 병렬 실행 (View DROP, RLS, narrative_text, noindex 1,324+7,569, H1 제거, <br> 정리, Dead 테이블 DROP 등)
+
+### 코드 레벨 수정 (이번 세션)
+
+**A. noindex metadata 렌더**
+- `/blog/[slug]` generateMetadata: `post.metadata?.noindex=true` → `robots: { index: false, follow: true }` (기존 Session 146 C4 코드 유지됨)
+- `/apt/complex/[name]` generateMetadata: `p.metadata?.noindex=true` 체크 추가, isNoindex 시 robots 분기
+
+**B. 블로그 canonical URL cannibalization 해소**
+- `/blog/{code}-kos(pi|daq)-*` → canonical `${SITE}/stock/{code}`
+- `/blog/apt-trade-*` + post.tags[0] 존재 → canonical `${SITE}/apt/complex/{tags[0]}`
+- 598 apt-trade + 260 주식 블로그 PageRank 원본 페이지로 집중
+
+**C+E. pg_cron 3건 등록**
+```
+stock-fundamentals-kr  0 2 * * *
+stock-fundamentals-us  30 2 * * *
+dart-ingest-daily      0 6 * * *
+```
+→ PER/PBR/EPS/ROE 0% 근본 해소, stock_disclosures 멈춤 복구
+
+**D. 주식 페이지 graceful degrade**
+- 기존 코드 이미 `(s as any).per > 0 ? [..] : []` 조건부 렌더 완비 (PER/PBR/dividend/EPS/ROE)
+- FAQ 에도 0일 때 fallback 문구 적용
+- 추가 변경 불필요
+
+**F. stock-crawl 진단 (read-only)**
+- 코드 정상 (upsert + updated_at) — `KIS_APP_KEY`/`SECRET` env 부재로 1단계 skip, 2단계 `STOCK_DATA_API_KEY` 기반 공공 API 사용
+- 다음 세션: Vercel env에 KIS 키 추가 검토
+
+**G. 외부 링크 rel=nofollow 자동**
+- 기존 marked renderer 이미 `rel="noopener noreferrer nofollow"` 적용 중
+- 개선: `isExternal` 체크에 `kadeora.app` 도메인 제외 — 내부 링크는 nofollow 안 붙음 (PageRank 내부 흐름 유지)
+
+**H. 블로그 H1 잔여 140편 청소**
+- `UPDATE blog_posts SET content = regexp_replace(content, '^#\s+[^\n]*\n+', '', 'n')` — 140편 → **0편**
+
+**I. Kakao Local API** (지도/역/학교) — Node 수동 대기 중
+- 세션 146부터 계속 `OPEN_MAP_AND_LOCAL service disabled` 상태
+- Kakao Developers 콘솔에서 활성화 필요 → docs/ISSUES/kakao-geocode-403.md
+
+**J. STATUS.md 세션 157 섹션 (본 문서)**
+
+### 완료 기준 8개
+| # | 기준 | 결과 |
+|---|---|---|
+| 1 | 배포 READY + 빌드 에러 0 | ⏳ push 후 검증 |
+| 2 | noindex 렌더 반영 | ✅ 블로그+단지 |
+| 3 | canonical 로직 작동 | ✅ apt-trade/stock 분기 |
+| 4 | fundamentals pg_cron | ✅ 3건 등록 |
+| 5 | 주식 graceful degrade | ✅ (기존 완비) |
+| 6 | 외부 링크 nofollow | ✅ (기존 완비 + 내부 링크 예외 추가) |
+| 7 | stock-crawl DB UPDATE 복구 | ⚠ 코드 정상, KIS env 확인 필요 |
+| 8 | dart-ingest 재등록 | ✅ pg_cron 등록 |
+
+### 금지사항 준수
+- Claude 처리분 0 변경 (View/RLS/narrative_text/noindex UPDATE/H1/br/dead table)
+- FAQ/apt_complex images/pg_cron stagger 0 변경
+
+### Node 수동 대기
+1. Kakao Developers OPEN_MAP_AND_LOCAL 활성화
+2. 네이버 스마트플레이스 등록 (사업자번호 278-57-00801)
+3. 네이버 서치어드바이저 사이트맵 재제출
+4. DART API key 재발급 (필요시)
+
+---
+
 # 카더라 STATUS — 세션 156 (2026-04-23)
 
 ## 세션 156 — CLS poor 원인 수정 + image-sitemap 소스 확장 + 13종목 주가전망 SEO

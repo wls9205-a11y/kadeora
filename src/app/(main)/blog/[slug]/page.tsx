@@ -69,7 +69,11 @@ renderer.image = function ({ href, title, text }: { href: string; title?: string
   return `<img src="${sanitized}" alt="${text || ''}" ${title ? `title="${title}"` : ''} width="800" height="450" loading="lazy" decoding="async"${sizesAttr} style="width:100%;max-width:800px;aspect-ratio:800/450;object-fit:cover;border-radius:8px" onerror="this.style.display='none'" />`;
 };
 renderer.link = function ({ href, title, text }: { href: string; title?: string | null; text: string }) {
-  const isExternal = href && (href.startsWith('http://') || href.startsWith('https://'));
+  // 세션 157 G: kadeora.app 내부 링크는 nofollow 제외 (PageRank 내부 흐름 유지)
+  const isExternal = href
+    && (href.startsWith('http://') || href.startsWith('https://'))
+    && !href.startsWith('https://kadeora.app')
+    && !href.startsWith('http://kadeora.app');
   const titleAttr = title ? ` title="${title}"` : '';
   if (isExternal) {
     return `<a href="${href}" target="_blank" rel="noopener noreferrer nofollow"${titleAttr} style="color:var(--brand);text-decoration:underline;text-underline-offset:2px">${text}</a>`;
@@ -273,11 +277,19 @@ export async function generateMetadata({ params }: Props) {
     const brandSuffix = post.category === 'stock' ? '카더라 주식' : post.category === 'apt' ? '카더라 부동산' : post.category === 'unsold' ? '카더라 부동산' : '카더라';
   // 세션 146 C4: metadata.noindex=true 이면 robots meta 반영 (얇은 콘텐츠)
   const isNoindex = post.metadata && typeof post.metadata === 'object' && (post.metadata as any).noindex === true;
+  // 세션 157 B: URL cannibalization 해소 — apt-trade-*, {code}-kos(pi|daq)- 블로그는 canonical 원본 페이지로
+  let canonical = `${SITE}/blog/${slug}`;
+  const stockSlugMatch = slug.match(/^(\d{6})-kos(pi|daq)-/);
+  if (stockSlugMatch) {
+    canonical = `${SITE}/stock/${stockSlugMatch[1]}`;
+  } else if (slug.startsWith('apt-trade-') && post.tags && Array.isArray(post.tags) && post.tags[0]) {
+    canonical = `${SITE}/apt/complex/${encodeURIComponent(post.tags[0])}`;
+  }
   return {
     title: { absolute: `${post.title} | ${brandSuffix}` },
     description: descClean,
     keywords: post.meta_keywords || (post.tags ?? []).join(', '),
-    alternates: { canonical: `${SITE}/blog/${slug}` },
+    alternates: { canonical },
     ...(isNoindex ? { robots: { index: false, follow: true } } : {}),
     openGraph: {
       title: post.title, description: descClean, type: 'article',
