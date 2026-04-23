@@ -10,9 +10,11 @@ type SchemaType =
 export function PaywallMarker({
   hasGatedContent,
   schemaType,
+  cssSelector = '.kadeora-paywall',
 }: {
   hasGatedContent: boolean;
   schemaType: SchemaType;
+  cssSelector?: string;
 }) {
   if (!hasGatedContent) return null;
 
@@ -23,7 +25,7 @@ export function PaywallMarker({
     hasPart: {
       '@type': 'WebPageElement',
       isAccessibleForFree: false,
-      cssSelector: '.kadeora-paywall',
+      cssSelector,
     },
   };
 

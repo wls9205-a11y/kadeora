@@ -622,7 +622,7 @@ export default async function BlogDetailPage({ params }: Props) {
       hasPart: {
         '@type': 'WebPageElement',
         isAccessibleForFree: false,
-        cssSelector: '.blog-content',
+        cssSelector: '.kadeora-paywall',
       },
     } : {}),
   };

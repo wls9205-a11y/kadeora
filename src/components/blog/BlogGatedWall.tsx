@@ -70,7 +70,13 @@ export default function BlogGatedWall({ h2, previewHtml, gate, ctaText, redirect
   const btnLabel = ctaText || (isPremium ? '프리미엄 가입하기' : '카카오로 1초 로그인');
 
   return (
-    <section ref={sectionRef} style={{ margin: '24px 0' }}>
+    <section
+      ref={sectionRef}
+      className="kadeora-paywall"
+      data-gate-section={ctaSource || (gate === 'premium' ? 'blog_gated_premium' : 'blog_gated_login')}
+      data-gate-level={gate}
+      style={{ margin: '24px 0' }}
+    >
       <h2 style={{ fontSize: 20, fontWeight: 800, margin: '0 0 12px', color: 'var(--text-primary, #e5e7eb)' }}>{h2}</h2>
 
       <div style={{ position: 'relative' }}>

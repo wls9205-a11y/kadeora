@@ -154,7 +154,13 @@ export default function GatedStockSection({ sectionKey, pageType = 'symbol', chi
   const previewPx = Math.max(40, Math.min(300, (gate?.preview_lines ?? 2) * 40));
 
   return (
-    <section ref={sectionRef} style={{ margin: '20px 0' }}>
+    <section
+      ref={sectionRef}
+      className="kadeora-paywall"
+      data-gate-section={sectionKey}
+      data-gate-level={gate?.gate_level || 'login'}
+      style={{ margin: '20px 0' }}
+    >
       {(gate?.display_name || fallbackTitle) && (
         <h3 style={{ fontSize: 18, fontWeight: 800, margin: '0 0 12px', color: 'var(--text-primary, #e5e7eb)' }}>
           {gate?.display_name || fallbackTitle}
