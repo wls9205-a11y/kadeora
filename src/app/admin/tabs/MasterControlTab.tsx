@@ -1,6 +1,9 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import BigEventCronMonitor from './BigEventCronMonitor';
+import AdminActionItemsCard from '@/components/admin/AdminActionItemsCard';
+import AdminWhaleExport from '@/components/admin/AdminWhaleExport';
+import AdminCtaPerformancePanel from '@/components/admin/AdminCtaPerformancePanel';
 
 interface Status {
   health_score: number;
@@ -138,6 +141,11 @@ export default function MasterControlTab() {
 
   return (
     <div style={{ padding: '12px 0' }}>
+      {/* s158: 신규 — 액션 시그널 + 고래 export + CTA 성능 */}
+      <AdminActionItemsCard />
+      <AdminWhaleExport />
+      <AdminCtaPerformancePanel />
+
       {/* 헬스 스코어 + 핵심 KPI */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 16, padding: 16,
         background: 'linear-gradient(135deg, rgba(59,123,246,0.08), rgba(124,58,237,0.05))',
