@@ -1199,3 +1199,21 @@ MCP 실측:
 1. Vercel 배포 진행 중일 수 있음 — d9b330bc 배포 완료 후 /apt 재검증 필요
 2. BAILOUT 이 해결되지 않으면 aptImageMap 수정 효과 0 — /apt 관련 추가 이미지 수정은 BAILOUT 해결 후
 3. Option C 블로그 수정은 즉시 배포 적용 가능 — 다음 curl 시점부터 /blog 카드 이미지 다양성 증가 기대
+
+## 세션 146 Phase 2 — 블로그 sticky 로그인 바 추가 (2026-04-23)
+
+### 배경
+- Phase 1 Header 버튼 강화 배포 완료(73e23306), HTML 렌더 검증 완료
+- 배포 후 30분: nav_login_button click 0, /login PV 0
+- 원인: 세션 145 C1 에서 action_bar 제거 후 블로그 긴 본문 스크롤 중 가입 버튼이 시각적으로 사라짐
+- Header 는 상단 1회 노출, 긴 글 읽는 동안엔 안 보임
+
+### 조치
+- BlogStickyLoginBar: 400px 스크롤 후 하단 fixed bar 상시 노출
+- 모바일 하단 nav 와 스태킹 회피(bottom offset = var(--mobile-nav-h, 56px))
+- source=blog_sticky_bar 로 trackCTA view/click 양쪽 발행
+
+### 측정 기준 (24h)
+- /login PV 일일 15+ 회복
+- 가입 완료 일일 3+ 회복
+- 24h 후 여전히 0 이면 action_bar 직접 복원으로 rollback

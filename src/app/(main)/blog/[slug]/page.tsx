@@ -42,6 +42,7 @@ import BlogGatedRenderer from '@/components/blog/BlogGatedRenderer';
 import BlogEndCTA from '@/components/blog/BlogEndCTA';
 import BlogFloatingAsk from '@/components/blog/BlogFloatingAsk';
 import BlogEarlyGateTeaser from '@/components/blog/BlogEarlyGateTeaser';
+import BlogStickyLoginBar from '@/components/blog/BlogStickyLoginBar';
 import RelatedBlogsSection from '@/components/blog/RelatedBlogsSection';
 import BlogMidGate from '@/components/blog/BlogMidGate';
 // SmartSectionGate 제거 → LoginGate 기능 게이팅으로 전환 (세션 108)
@@ -1138,6 +1139,7 @@ export default async function BlogDetailPage({ params }: Props) {
         {/* Session D: 본문 끝 CTA (비로그인만) + 플로팅 질문 버튼 (스크롤 50%+) */}
         {!isBot && !isLoggedIn && <BlogEndCTA slug={slug} isLoggedIn={false} />}
         {!isBot && !isLoggedIn && <BlogFloatingAsk slug={slug} isLoggedIn={false} />}
+        {!isBot && !isLoggedIn && <BlogStickyLoginBar />}
       </article>
 
       {/* 플로팅 액션바 — 스크롤 30% 후 나타남, 봇 제외 */}
