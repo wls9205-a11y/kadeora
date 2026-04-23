@@ -6,11 +6,10 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { SITE_URL as BASE } from '@/lib/constants';
+import { URLS_PER_PAGE } from '@/lib/seo/sitemapConfig';
 
 export const runtime = 'nodejs';
 export const revalidate = 3600;
-
-const URLS_PER_PAGE = 1000; // 세션 155 retry2: 10K 에서 size 초과 → 1K 로 축소
 
 export async function GET() {
   const sb = getSupabaseAdmin();

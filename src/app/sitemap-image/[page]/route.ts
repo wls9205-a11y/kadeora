@@ -7,14 +7,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { escapeXml } from '@/lib/xml-utils';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { SITE_URL as BASE } from '@/lib/constants';
+import { URLS_PER_PAGE } from '@/lib/seo/sitemapConfig';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-static';
 export const revalidate = 3600;
-
-// 세션 155 retry2: URL당 평균 5-10 <image:image> 태그로 10K URL 는 여전히 18MB 초과 (413)
-// → URL 1K/page 로 축소 (페이지당 약 5-10K image 태그, ~2MB 이내)
-const URLS_PER_PAGE = 1000;
 
 type ImgEntry = { loc: string; imgs: { url: string; title: string; caption: string; geo?: string }[] };
 

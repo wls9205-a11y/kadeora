@@ -61,6 +61,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: `${s.name}(${symbol}) 주가·배당금·실적·AI 분석 — 카더라`,
     description: `${s.name} 현재가 ${p} ${ch}. ${metaFragments ? metaFragments + '. ' : ''}${s.market} 상장. 실시간 시세, 차트, 수급, 재무제표, 목표가, AI 분석을 카더라에서 무료로 확인하세요.`,
     alternates: { canonical: `${SITE_URL}/stock/${symbol}` },
+    robots: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' as const, 'max-video-preview': -1, googleBot: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' as const } },
     openGraph: {
       title: `${s.name}(${symbol}) ${p} ${ch} — 실시간 주가·배당·분석`,
       description: `${s.market} 상장 · 실시간 시세 · 차트 · 수급 분석 · 재무제표 · AI 종목 분석 · 종목 토론`,
