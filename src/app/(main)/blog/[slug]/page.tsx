@@ -40,9 +40,8 @@ import BlogMentionCard from '@/components/blog/BlogMentionCard';
 import BlogHeroExtras from '@/components/blog/BlogHeroExtras';
 import BlogGatedRenderer from '@/components/blog/BlogGatedRenderer';
 import BlogEndCTA from '@/components/blog/BlogEndCTA';
-import BlogFloatingAsk from '@/components/blog/BlogFloatingAsk';
 import BlogEarlyGateTeaser from '@/components/blog/BlogEarlyGateTeaser';
-import BlogStickyLoginBar from '@/components/blog/BlogStickyLoginBar';
+import SignupPopupModal from '@/components/signup/SignupPopupModal';
 import RelatedBlogsSection from '@/components/blog/RelatedBlogsSection';
 import BlogMidGate from '@/components/blog/BlogMidGate';
 // SmartSectionGate 제거 → LoginGate 기능 게이팅으로 전환 (세션 108)
@@ -1137,10 +1136,10 @@ export default async function BlogDetailPage({ params }: Props) {
         {/* v2.0 Week1 C2: 관련 글 3카드 (strategy badge 포함) — FAQ/BlogActions 뒤, EndCTA 앞 */}
         {!isBot && <RelatedBlogsSection blogId={post.id} />}
 
-        {/* Session D: 본문 끝 CTA (비로그인만) + 플로팅 질문 버튼 (스크롤 50%+) */}
+        {/* Session D: 본문 끝 CTA (비로그인만) */}
         {!isBot && !isLoggedIn && <BlogEndCTA slug={slug} isLoggedIn={false} />}
-        {!isBot && !isLoggedIn && <BlogFloatingAsk slug={slug} isLoggedIn={false} />}
-        {!isBot && !isLoggedIn && <BlogStickyLoginBar />}
+        {/* s157: FOMO 팝업 모달 (스크롤 50% or 60s, 세션 1회) — sticky_bar/floating_ask 대체 */}
+        {!isBot && !isLoggedIn && <SignupPopupModal slug={slug} redirectPath={`/blog/${slug}`} isLoggedIn={isLoggedIn} />}
       </article>
 
       {/* 플로팅 액션바 — 스크롤 30% 후 나타남, 봇 제외 */}
