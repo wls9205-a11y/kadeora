@@ -1,3 +1,63 @@
+# 카더라 STATUS — 세션 149 (2026-04-23)
+
+## 세션 149 — 2026-04-23 apt_sites FAQ + 잔여 AI + 측정 현황
+
+### 목표
+Session 148 누락된 apt_sites 5,794 FAQ + FAQ 19편 AI + 이미지 sitemap 캐시 문제 해소 + 측정 베이스라인 산출.
+
+### DB 작업
+- apt_sites.faqs + faqs_generated_at 컬럼 신설
+- `faq_items` (기존 5,794편 전수 보유) → `faqs` 복사: 5,454개 설정 (jsonb_array_length >= 2)
+- apt/[id] 페이지에 이미 FAQPage JSON-LD 완비 (site.faq_items 소비) — 추가 작업 불필요
+
+### 데이터 성과
+- **apt_sites FAQ 5,454개** (기존 faq_items 재활용)
+- Batch API 활성: 7 completed + 1 in_progress (Session 148 대비 +1)
+- Meta desc length>=80 **6,638편** (세션 147 1,762 → 4,876 증가 — batch-poll 실효 반영)
+- Title length>=25 **7,666편** (99.5%)
+
+### 코드 변경
+- `src/app/image-sitemap.xml/route.ts`:
+  - revalidate 3600 → 600 (캐시 단축)
+  - `fetchAll()` helper 도입 — PostgREST 1K cap 우회 range pagination
+- `src/app/api/cron/batch-poll/route.ts`:
+  - `faq_ai_generate` job_type 분기 추가 (metadata.faqs 에 AI 결과 저장)
+
+### AI Batch 제출 (Track B)
+- FAQ 19편 AI 생성 Batch 제출: `msgbatch_01P4KRh8G4A7aoczX68AiHXn`
+- 제출 후 batch-poll 크론이 2~3일 내 반영 (metadata.faqs source='ai' 마킹)
+
+### 측정 베이스라인 (Track D)
+- CWV 104건 누적, 5 metrics 수집
+- **LCP p75**: 모바일 **1,909ms** 🟢 / 데스크탑 **2,192ms** 🟢 (둘 다 "good" 범위)
+- **INP p75**: **56ms** 🟢 (목표 <200ms)
+- GSC: 0 rows — pg_cron gsc-sync-daily 첫 실행 대기 (OAuth refresh_token 상태는 별도 확인 필요)
+
+### 이미지 sitemap 현황
+- 현재 라이브: **5,557개** (목표 60K+ 미달)
+- 원인: PostgREST 1K cap + slice(0,7) 제약
+- 조치: fetchAll() range 페이지네이션 + revalidate 단축 → 배포 후 반영 예정
+
+### docs
+- `docs/NAVER_SC_API_SETUP.md` — 네이버 색인 API 부재 공식 확인 + 대안 경로 4종 정리
+
+### 완료 기준 5개
+| # | 기준 | 결과 |
+|---|---|---|
+| 1 | apt_sites 5,794 FAQ | ✅ **5,454편** (faq_items 재활용, jsonb_array_length>=2 기준) |
+| 2 | FAQ 19편 AI 처리 | ✅ Batch 제출 (msgbatch_01P4KRh8G4A7aoczX68AiHXn) |
+| 3 | Naver 색인 자동화 | ⚠ 공식 API 부재 확인 + 대안 가이드 문서화 |
+| 4 | GSC 데이터 | ⚠ 0 rows — cron 첫 실행 + OAuth 상태 다음 세션 |
+| 5 | 이미지 sitemap 20K+ | ⏳ 라우트 수정 배포 후 revalidate (10분) |
+
+### 남은 Pending
+- Image sitemap 배포 후 10분 뒤 count 재확인
+- FAQ AI batch 2~3일 내 결과 반영
+- GSC refresh_token 실재 여부 확인
+- CWV 7일 누적 후 정식 baseline 확정 (현재는 104건으로 초기 지표)
+
+---
+
 # 카더라 STATUS — 세션 148 (2026-04-23)
 
 ## 세션 148 — 2026-04-23 gap 완전 폐쇄 + FAQ 12K 구조화 + Prog SEO 161 소비

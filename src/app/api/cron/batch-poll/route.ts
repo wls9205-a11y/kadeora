@@ -108,6 +108,17 @@ async function handler(req: NextRequest) {
         } else if (job.job_type === 'apt_narrative' && parsed.narrative) {
           await (sb as any).from('apt_complex_profiles').update({ narrative_text: String(parsed.narrative).slice(0, 5000), narrative_generated_at: new Date().toISOString() }).eq('id', postId);
           applied++;
+        } else if (job.job_type === 'faq_ai_generate' && Array.isArray(parsed.faqs)) {
+          // metadata.faqs 에 AI 생성 결과 저장 (세션 149 B)
+          const { data: existing } = await (sb as any).from('blog_posts').select('metadata').eq('id', postId).maybeSingle();
+          const meta = (existing?.metadata && typeof existing.metadata === 'object') ? existing.metadata : {};
+          const cleanFaqs = parsed.faqs.filter((f: any) => f?.q && f?.a).slice(0, 5).map((f: any, i: number) => ({ q: String(f.q).slice(0, 300), a: String(f.a).slice(0, 1500), idx: i, source: 'ai' }));
+          if (cleanFaqs.length > 0) {
+            await (sb as any).from('blog_posts').update({ metadata: { ...meta, faqs: cleanFaqs } }).eq('id', postId);
+            applied++;
+          } else {
+            failed++;
+          }
         } else {
           failed++;
         }
