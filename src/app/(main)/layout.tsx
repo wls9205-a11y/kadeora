@@ -13,6 +13,7 @@ import TopLoadingBar from '@/components/TopLoadingBar';
 import ScrollToTop from '@/components/ScrollToTop';
 import { AuthProvider } from '@/components/AuthProvider';
 import WelcomeReward from '@/components/WelcomeReward';
+import KakaoChannelAddModal from '@/components/signup/KakaoChannelAddModal';
 import WelcomeToast from '@/components/WelcomeToast';
 import GlobalMissionBar from '@/components/GlobalMissionBar';
 import SmartPushPrompt from '@/components/SmartPushPrompt';
@@ -73,6 +74,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
       <BehaviorTracker />
       <CtaGlobalTracker />
       <WelcomeReward />
+      <KakaoChannelAddModal triggerOnMount={true} />
       <WelcomeToast />
       <ScrollToTop />
       <SmartPushPrompt />
