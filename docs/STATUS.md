@@ -1,3 +1,62 @@
+# 카더라 STATUS — 세션 153 (2026-04-23)
+
+## 세션 153 — 5건 동시 처리 (pg_cron/블로그/단지/Batch/GSC)
+
+### 완료 기준 5개
+| # | 기준 | 결과 |
+|---|---|---|
+| 1 | pg_cron fail rate <1% (stagger 후) | ✅ stagger 적용 (*/5/10/15 + hourly 해시 offset 분산) |
+| 2 | 블로그 4장+ 100% | ⚠ **7,692/7,702 (99.87%)** — 10편 content_length<800 예외 |
+| 3 | 단지 4장+ 3,500+ | ✅ **962 → 3,503** (SQL UPDATE OG 합성 주입) |
+| 4 | Meta desc 약함 <500 | ⏳ Batch v3 제출 1,062편 (msgbatch_0118XtLmGRLjR2nswRbScWVJ) — 2~3일 반영 |
+| 5 | GSC 데이터 1건+ | ⚠ 0 rows 유지. **원인 확정: route.ts 컬럼명 버그** (service→provider). 배포 후 내일 04:00 자동 시도 |
+
+### pg_cron stagger (1건)
+- 해시 기반 offset 분산: `*/5` → `N-59/5` (N=0~4), `*/10` → `N-59/10`, `*/15` → `N-59/15`, hourly → N분(0~59)
+- 결과: distinct offset 3~4 → 정각 몰림 해소
+
+### 블로그 이미지 보강 (2건)
+- Session 152 script 재실행: 잔존 146편 중 **136편 UPDATE + 798장 삽입**
+- 최종: **7,692/7,702 (99.87%)** 4장+ 달성
+- 10편 잔존: content_length < 800 (스크립트 skip 조건, thin content)
+
+### 단지 OG 합성 주입 (3건)
+- SQL UPDATE `jsonb_agg(DISTINCT)` 로 멱등성 확보
+- 기존 images + 4종 OG URL (design=1/3/5 + og-square) 합성
+- WHERE `sale_count_1y>=50 AND jsonb_array_length(images)<4`
+- 결과: **962 → 3,503 단지 (+2,541)**
+
+### Batch API (4건)
+- Meta desc v3: **1,062편** 제출 `msgbatch_0118XtLmGRLjR2nswRbScWVJ` + metadata.meta_desc_batch_v3_submitted 마킹
+- Title v3: **36편** 제출 `msgbatch_01Tw722M7ZkmVNjTDFU5HsCp` + metadata.title_batch_v3_submitted 마킹
+- batch-poll 크론이 2~3일 내 결과 반영
+
+### GSC 진단 (5건)
+- 원인: `/api/cron/gsc-sync/route.ts` 에서 `.eq('service','gsc')` — 실제 컬럼은 `provider`
+- DB 실측: provider='gsc', refresh_token(103c), access_token, client_id, client_secret 전부 SET
+- 수정: `.eq('provider','gsc')` + env 누락 시 DB client_id/secret fallback
+- 수동 트리거: 배포 후 `SELECT public._call_vercel_cron('/api/cron/gsc-sync')`
+
+### 코드 변경
+- `src/app/api/cron/gsc-sync/route.ts` — oauth_tokens 컬럼명 수정 + env fallback
+- `scripts/batch-meta-description-v3.mjs` (신규)
+- `scripts/batch-title-rewrite-v3.mjs` (신규)
+
+### docs
+- `docs/GSC_DIAGNOSIS.md` (신규)
+
+### 금지사항 준수
+- CLS/INP/Speed Insights 코드 0 변경
+- 신규 테이블/컬럼 0개 (기존 컬럼 SQL UPDATE만)
+- FAQ 코드 0 변경
+
+### 남은 Pending
+- Meta/Title Batch 2~3일 결과 반영 관측
+- GSC 배포 후 수동 트리거 → gsc_search_analytics 1 row 적재 확인
+- pg_cron fail rate 1시간 관측 후 효과 확인
+
+---
+
 # 카더라 STATUS — 세션 152 (2026-04-23)
 
 ## 세션 152 — 블로그 이미지 캐러셀 복구 (4장+ 조건)

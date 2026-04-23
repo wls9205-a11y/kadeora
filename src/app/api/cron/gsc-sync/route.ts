@@ -42,17 +42,25 @@ async function handler(req: NextRequest) {
   }
 
   const sb = getSupabaseAdmin();
+  // 세션 153: 컬럼명 service → provider (oauth_tokens 스키마 실측 수정)
   const { data: token } = await (sb as any)
     .from('oauth_tokens')
-    .select('refresh_token')
-    .eq('service', 'gsc')
+    .select('refresh_token, client_id, client_secret')
+    .eq('provider', 'gsc')
     .maybeSingle();
 
   if (!token?.refresh_token) {
     return NextResponse.json({ ok: true, skipped: 'no_gsc_refresh_token' });
   }
 
-  const access = await refreshAccessToken(clientId, clientSecret, token.refresh_token);
+  // env 값 우선, 없으면 DB에 저장된 값 fallback
+  const effClientId = clientId || token.client_id;
+  const effClientSecret = clientSecret || token.client_secret;
+  if (!effClientId || !effClientSecret) {
+    return NextResponse.json({ ok: true, skipped: 'no_google_oauth_creds' });
+  }
+
+  const access = await refreshAccessToken(effClientId, effClientSecret, token.refresh_token);
   if (!access) return NextResponse.json({ ok: true, skipped: 'access_token_refresh_failed' });
 
   // 3일 전부터 어제까지 (GSC 지연 반영)
