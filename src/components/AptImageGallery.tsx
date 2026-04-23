@@ -13,6 +13,21 @@ function toHttps(url: string): string {
   return url.replace(/^http:\/\//, 'https://');
 }
 
+function isSatellite(url: string): boolean {
+  return url.includes('/api/satellite');
+}
+
+const SatelliteBadge = () => (
+  <span style={{
+    position: 'absolute', top: 8, right: 8, zIndex: 2,
+    background: 'rgba(0,0,0,0.6)', color: '#fff',
+    fontSize: 11, padding: '3px 8px', borderRadius: 'var(--radius-card)',
+    display: 'inline-flex', alignItems: 'center', gap: 4, fontWeight: 600,
+  }}>
+    🛰️ 위성 사진
+  </span>
+);
+
 /** CSS 오버레이 워터마크 — 중앙 로고 (recommended 35%) */
 const Watermark = () => (
   <svg width="100" height="100" viewBox="0 0 72 72" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', opacity: 0.35, pointerEvents: 'none', zIndex: 1 }}>
@@ -112,6 +127,7 @@ export default function AptImageGallery({ images, name, region, badges }: {
                   />
                   <Watermark />
                   <WatermarkSm />
+                  {isSatellite(img.url) && <SatelliteBadge />}
                   {i === 0 && badges}
                   <span style={{
                     position: 'absolute', bottom: 8, right: 8,
@@ -167,6 +183,7 @@ export default function AptImageGallery({ images, name, region, badges }: {
               />
               <Watermark />
               <WatermarkSm />
+              {isSatellite(visibleImages[0].url) && <SatelliteBadge />}
               {badges}
             </div>
             {visibleImages.slice(1, 3).map((img, i) => (
@@ -183,6 +200,7 @@ export default function AptImageGallery({ images, name, region, badges }: {
                   onError={() => handleImgError(images.findIndex(o => toHttps(o.url) === img.url))}
                 />
                 <WatermarkSm />
+                {isSatellite(img.url) && <SatelliteBadge />}
                 {i === 1 && total > 3 && (
                   <span style={{
                     position: 'absolute', bottom: 8, right: 8,
