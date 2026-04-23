@@ -10,7 +10,7 @@ import { SITE_URL as BASE } from '@/lib/constants';
 export const runtime = 'nodejs';
 export const revalidate = 3600;
 
-const URLS_PER_PAGE = 10000;
+const URLS_PER_PAGE = 1000; // 세션 155 retry2: 10K 에서 size 초과 → 1K 로 축소
 
 export async function GET() {
   const sb = getSupabaseAdmin();
