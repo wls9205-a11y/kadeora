@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { SITE_URL as BASE } from '@/lib/constants';
 
-export const revalidate = 600; // 세션 149 E: 10분으로 단축, 커버리지 확장 반영 가속
+export const revalidate = 3600; // 1시간 캐시
 
 /**
  * 이미지 사이트맵 — Google/Naver 이미지 검색 채널
@@ -16,32 +16,24 @@ export const revalidate = 600; // 세션 149 E: 10분으로 단축, 커버리지
 export async function GET() {
   const sb = getSupabaseAdmin();
 
-  // 세션 149 E — PostgREST 1K cap 우회: range() 페이지네이션으로 전수 수집
-  async function fetchAll(table: string, cols: string, filters: (q: any) => any, pageSize = 1000, maxPages = 40) {
-    const all: any[] = [];
-    for (let i = 0; i < maxPages; i++) {
-      const q = (sb as any).from(table).select(cols);
-      const filtered = filters(q);
-      const { data } = await filtered.range(i * pageSize, (i + 1) * pageSize - 1);
-      if (!data || data.length === 0) break;
-      all.push(...data);
-      if (data.length < pageSize) break;
-    }
-    return all;
-  }
-
-  const [sitesData, blogsData, complexData] = await Promise.all([
-    fetchAll('apt_sites', 'slug, name, images, region, sigungu',
-      (q) => q.eq('is_active', true).not('images', 'is', null)),
-    fetchAll('blog_posts', 'slug, title, cover_image, image_alt, category',
-      (q) => q.eq('is_published', true).not('cover_image', 'is', null).order('published_at', { ascending: false })),
-    fetchAll('apt_complex_profiles', 'apt_name, images, region_nm, sigungu',
-      (q) => q.not('images', 'is', null)),
+  // 세션 147 C — 커버리지 60K+ 목표: limit 확장, complex 전수 조건 완화
+  const [sitesR, blogsR, complexR] = await Promise.all([
+    sb.from('apt_sites')
+      .select('slug, name, images, region, sigungu')
+      .eq('is_active', true)
+      .not('images', 'is', null)
+      .limit(30000),
+    sb.from('blog_posts')
+      .select('slug, title, cover_image, image_alt, category')
+      .eq('is_published', true)
+      .not('cover_image', 'is', null)
+      .order('published_at', { ascending: false })
+      .limit(50000),
+    (sb as any).from('apt_complex_profiles')
+      .select('apt_name, images, region_nm, sigungu')
+      .not('images', 'is', null)
+      .limit(40000),
   ]);
-
-  const sitesR = { data: sitesData };
-  const blogsR = { data: blogsData };
-  const complexR = { data: complexData };
 
   const entries: string[] = [];
 
