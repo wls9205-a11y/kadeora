@@ -66,7 +66,8 @@ renderer.image = function ({ href, title, text }: { href: string; title?: string
   // [L1-8] 네이버 CDN(pstatic/phinf) 이미지는 srcset 변환 시 네이버 이미지 탭 우대 손실 → unoptimized 유지
   const isNaverCdn = /(pstatic\.net|phinf\.pstatic\.net|phinf\.naver\.net|naver-cdn)/i.test(sanitized);
   const sizesAttr = isNaverCdn ? '' : ` sizes="(max-width: 640px) 100vw, 800px"`;
-  return `<img src="${sanitized}" alt="${text || ''}" ${title ? `title="${title}"` : ''} width="800" height="450" loading="lazy" decoding="async"${sizesAttr} style="max-width:100%;height:auto;border-radius:8px" onerror="this.style.display='none'" />`;
+  // 세션 151: height:auto 제거 — aspect-ratio 고정으로 CLS 방지
+  return `<img src="${sanitized}" alt="${text || ''}" ${title ? `title="${title}"` : ''} width="800" height="450" loading="lazy" decoding="async"${sizesAttr} style="width:100%;max-width:800px;aspect-ratio:800/450;object-fit:cover;border-radius:8px" onerror="this.style.display='none'" />`;
 };
 renderer.link = function ({ href, title, text }: { href: string; title?: string | null; text: string }) {
   const isExternal = href && (href.startsWith('http://') || href.startsWith('https://'));

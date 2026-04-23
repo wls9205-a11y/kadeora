@@ -1,3 +1,52 @@
+# 카더라 STATUS — 세션 151 (2026-04-23)
+
+## 세션 151 — Session 150 기능 실패 복구
+
+### 진단
+- Session 150 배포 후 CWV 105건 수집, attribution 필드 **0건** (cls_largest_shift_target / lcp_element 전부 null)
+- CLS p75 0.215 유지 (개선 없음)
+
+### 원인 확정
+1. **PerformanceObserver init 타이밍**: useEffect 내 초기화 → React hydration 지연으로 초기 layout-shift 놓침
+2. **LayoutShift.sources[] 비어있을 때 fallback 부재** → selector null 전송
+3. **sendBeacon Content-Type application/json Blob**: 브라우저 호환성 문제 (허용 MIME: text/plain, x-www-form-urlencoded, multipart/form-data)
+4. **블로그 본문 이미지 style=height:auto**: lazy-load 후 실제 픽셀 비율 도착 시 재계산 발생
+
+### 수정
+**`VitalsReporter.tsx` 재작성**:
+- PerformanceObserver 모듈 로드 즉시 초기화 (useEffect 제거)
+- LayoutShift.sources 비면 document.body fallback
+- INP target (event-timing) 추가 수집
+- sendBeacon MIME application/json → text/plain
+
+**블로그 markdown 이미지 렌더**:
+- `max-width:100%;height:auto` → `width:100%;max-width:800px;aspect-ratio:800/450;object-fit:cover`
+- 이미지 로드 전/후 높이 불변
+
+**`scripts/test-vitals-payload.mjs`** (신규): 배포 후 DB insert 검증 curl 샘플
+
+### 완료 기준 4개
+| # | 기준 | 결과 |
+|---|---|---|
+| 1 | Reporter+route 동작 검증 | ✅ test 스크립트 작성 |
+| 2 | 배포 후 1h attribution ≥10 | ⏳ 배포 후 관측 |
+| 3 | CLS 상위 path 수정 | ✅ 블로그 이미지 aspect-ratio 고정 (공통 적용) |
+| 4 | 배포 후 2h CLS p75 < 0.15 | ⏳ 배포 후 관측 |
+
+### 상위 CLS 샘플 (배포 전)
+- /apt/경기-고양시-미분양 0.329 (desktop)
+- /blog/apt-9952ac6858a4 0.282 (mobile)
+- /blog/apt-sub-analysis-* 0.282 (desktop)
+- /blog/035420-kospi-수급분석 0.281 (mobile)
+- /apt/레이카운티 0.218 (desktop)
+- /apt/complex/미래엠피아 0.214 (mobile)
+
+### 남은 Pending
+- 1h 후 attribution 필드 수집 재확인 → 잔존 범인 식별
+- CLS p75 < 0.1 달성까지 추가 세션 (차트/댓글 skeleton 세부)
+
+---
+
 # 카더라 STATUS — 세션 150 (2026-04-23)
 
 ## 세션 150 — 2026-04-23 CLS 0.23 → <0.1 집중 수정
