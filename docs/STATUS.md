@@ -211,6 +211,33 @@ HTTP 403 {"errorType":"NotAuthorizedError","message":"App(카더라) disabled OP
 
 ### 중단 사항
 - Vercel Pro 크론 100개 한도 이미 도달 (세션 145 교훈) — 신규 크론(gsc-sync/blog-inject-images/backlink-sync/programmatic-seo-consume 4개)은 pg_cron 이관 필요. 이번 세션에서는 코드만 배포, 스케줄 미등록.
+---
+
+# 카더라 STATUS — 세션 146 Phase 1 (2026-04-23)
+
+## 세션 146 Phase 1 최종 — Header 로그인 CTA 복원 (2026-04-23)
+
+### 진단 결과
+- 4/22-23 auth.users 신규 가입 0건 원인: **기술 문제 아님**
+- Supabase Auth / OAuth 체인 / DNS·SSL / alias / CSP / JS 전부 정상 (curl + SQL 교차 검증)
+  - Supabase `disable_signup=false`, kakao/google provider `true`
+  - Kakao: `accounts.kakao.com/login` 정상 도달 (KOE006 / mismatch 없음)
+  - Google: `accounts.google.com/v3/signin/identifier` 정상 도달
+  - `kadeora.supabase.co` alias DNS + SSL 정상
+- **실제 원인: `/login` 페이지 방문자 자체가 0 (4/23)** — CTA 유입 경로 부족
+- 배경: 세션 145 C1 에서 dead CTA 5개 제거 후, 비로그인 유저에게 상시 노출되는 로그인 진입점이 약화됨 (Header 로그인 버튼이 투명+outline 이라 눈에 안 띔)
+
+### 조치
+- `src/components/Navigation.tsx` 비로그인 분기 리디자인
+  - **로그인**: brand solid 배경 + 흰 글씨 + 약한 그림자 → 1차 강조 (모바일+데스크 공통)
+  - **회원가입**: brand outline 으로 전환 → 2차 보조 (데스크 only)
+  - `onClick` 에서 `trackCTA('click', 'nav_login_button')` 발행 (dynamic import)
+  - `source=nav` / `source=nav_signup` 파라미터로 유입 경로 추적 분리
+
+### 다음 세션 예정
+- 1~2시간 후 `/login` PV + `nav_login_button` cta_click + auth.users 신규 가입 검증
+- 증가 없으면 blog/apt 페이지 하단에 "로그인 유도" 배너 추가 검토
+- 세션 145 C4 `blog_mid_gate` cta_view 3건 원인 조사 (스크롤 50%→20% 조정해도 안 터짐)
 
 ---
 

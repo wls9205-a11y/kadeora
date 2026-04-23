@@ -463,22 +463,37 @@ export function Navigation() {
                   borderRadius:'50%', color:'var(--text-secondary)', textDecoration:'none', fontSize:16,
                   background:'var(--bg-hover)', border:'1px solid var(--border)',
                 }}><Search size={18} /></Link>
-                <Link href={`/login?redirect=${encodeURIComponent(pathname)}&source=nav`} style={{
-                  height:34, padding:'0 14px', borderRadius: 'var(--radius-pill)',
-                  border:'1px solid var(--brand)',
-                  color:'var(--brand)', background:'transparent',
-                  display:'flex', alignItems:'center',
-                  textDecoration:'none', fontSize:'var(--fs-xs)', fontWeight:700,
-                  transition:'border-color 0.12s',
-                }}
-                  onMouseEnter={e=>(e.currentTarget.style.borderColor='var(--border-strong)')}
-                  onMouseLeave={e=>(e.currentTarget.style.borderColor='var(--border)')}
+                <Link
+                  href={`/login?redirect=${encodeURIComponent(pathname)}&source=nav`}
+                  onClick={() => {
+                    try {
+                      import('@/lib/analytics').then(m => m.trackCTA?.('click', 'nav_login_button', { page_path: window.location.pathname }));
+                    } catch {}
+                  }}
+                  style={{
+                    height:34, padding:'0 16px', borderRadius: 'var(--radius-pill)',
+                    background:'var(--brand)', color:'var(--text-inverse, #fff)',
+                    display:'flex', alignItems:'center',
+                    textDecoration:'none', fontSize:'var(--fs-sm)', fontWeight:700,
+                    letterSpacing:'-0.2px',
+                    boxShadow:'0 2px 8px rgba(59,123,246,0.24)',
+                    transition:'opacity 0.12s, transform 0.12s',
+                  }}
+                  onMouseEnter={e=>(e.currentTarget.style.opacity='0.92')}
+                  onMouseLeave={e=>(e.currentTarget.style.opacity='1')}
                 >로그인</Link>
-                <Link href={`/login?redirect=${encodeURIComponent(pathname)}&source=nav`} className="hidden md:flex" style={{
-                  height:34, padding:'0 14px', borderRadius: 'var(--radius-pill)',
-                  background:'var(--brand)', color:'var(--text-inverse, #fff)',
-                  alignItems:'center', textDecoration:'none', fontSize:'var(--fs-xs)', fontWeight:700,
-                }}>회원가입</Link>
+                <Link
+                  href={`/login?redirect=${encodeURIComponent(pathname)}&source=nav_signup`}
+                  className="hidden md:flex"
+                  style={{
+                    height:34, padding:'0 14px', borderRadius: 'var(--radius-pill)',
+                    border:'1px solid var(--brand)', color:'var(--brand)', background:'transparent',
+                    alignItems:'center', textDecoration:'none', fontSize:'var(--fs-xs)', fontWeight:700,
+                    transition:'background 0.12s',
+                  }}
+                  onMouseEnter={e=>(e.currentTarget.style.background='rgba(59,123,246,0.08)')}
+                  onMouseLeave={e=>(e.currentTarget.style.background='transparent')}
+                >회원가입</Link>
               </>
             )}
           </div>
