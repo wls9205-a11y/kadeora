@@ -63,12 +63,13 @@ export async function GET(req: NextRequest) {
   const result = await withCronLogging('blog-rewrite', async () => {
     const admin = getSupabaseAdmin();
 
-    // 리라이팅 안 된 글 3건
+    // 세션 146 C3: 스케줄 확장 — seo_score<80 AND rewrite_version<2
+    // 기존 rewritten_at IS NULL 도 포함 (첫 리라이트 우선). 일 500편 처리 목표.
     const { data: posts } = await admin.from('blog_posts')
       .select('id, title, content, category, slug')
       .eq('is_published', true)
-      .is('rewritten_at', null)
-      .order('created_at', { ascending: true })
+      .or('rewritten_at.is.null,and(seo_score.lt.80,rewrite_version.lt.2)')
+      .order('seo_score', { ascending: true, nullsFirst: true })
       .limit(6);
 
     if (!posts || posts.length === 0) {

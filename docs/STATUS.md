@@ -1,3 +1,85 @@
+# 카더라 STATUS — 세션 146 (2026-04-23)
+
+## 세션 146 — 2026-04-23 네이버 1위 + 이미지 캐러셀 풀패키지 Phase 1
+
+### 목표
+- Yeti 141 path → 1,500 path 확장 기반 인프라 착수
+- JSON-LD 1.2% → 90% 타겟 (컴포넌트 라이브러리 + 템플릿)
+- FAQ schema 0% → 초기 백필
+- CWV 0 → 실측 시작
+- GSC / Naver SC / 백링크 / CWV 측정 4종 동시 배포
+
+### DB 변경 (마이그레이션 7건)
+1. `gsc_search_analytics` 테이블 + 2개 인덱스 + admin RLS
+2. `naver_sc_daily` 테이블 + 인덱스 + admin RLS
+3. `web_vitals` 테이블 + anon INSERT + admin SELECT RLS
+4. `backlink_sources` 테이블 + last_seen 인덱스 + admin RLS
+5. `blog_batch_jobs` 테이블 + admin RLS
+6. `apt_complex_profiles.narrative_text` + `narrative_generated_at` 컬럼
+7. `page_views.bot_type` 컬럼 + 조건 인덱스
+- `get_apt_sites_needing_images` RPC 업데이트 (min_img_count 기본 4, 거래 많은 단지 우선)
+
+### 코드 변경
+- `src/components/seo/JsonLd.tsx` + `schemas/*.tsx` 10종 (Organization, WebSite, BlogPosting, FAQPage, BreadcrumbList, Residence, RealEstateListing, FinancialProduct, AggregateRating, ImageObject)
+- `src/components/web-vitals/VitalsReporter.tsx` — Next useReportWebVitals 훅
+- `src/app/(main)/layout.tsx` — VitalsReporter 주입
+- `src/app/api/web-vitals/route.ts` — sendBeacon 수신
+- `src/lib/bot-classify.ts` — UA 분류 헬퍼
+- `src/lib/seo/parseFaqs.ts` — markdown FAQ 파서
+- `src/lib/blog/inject-inline-images.ts` — H2 섹션 경계 OG 이미지 삽입
+- `src/app/api/analytics/pageview/route.ts` — bot_type 기록
+- `src/app/api/cron/gsc-sync/route.ts` — Google Search Console 동기화
+- `src/app/api/cron/naver-sc-sync/route.ts` — Naver SC (placeholder)
+- `src/app/api/cron/backlink-sync/route.ts` — backlink_sources upsert
+- `src/app/api/cron/blog-inject-images/route.ts` — OG 이미지 자동 삽입
+- `src/app/api/cron/programmatic-seo-consume/route.ts` — 큐 소비
+- `src/app/(main)/guide/[region]/[keyword]/page.tsx` — programmatic SEO 템플릿
+- `src/app/admin/seo/crawl/page.tsx` — 봇 크롤 대시보드
+- `src/app/(main)/blog/[slug]/page.tsx` — metadata.noindex robots meta 반영
+- `src/app/api/cron/apt-image-crawl/route.ts` — MIN_IMG_COUNT 3→4
+- `src/app/api/cron/blog-rewrite/route.ts` — seo_score<80 AND rewrite_version<2 확장
+- `scripts/backfill-faqs.mjs` — FAQ 백필
+- `scripts/batch-meta-description.mjs` / `batch-title-rewrite.mjs` / `batch-apt-narrative.mjs` — Claude Batch API 제출
+- `scripts/naver-blog-sync.mjs` — 네이버 블로그 자동 포스팅 (OAuth 필요)
+
+### 데이터 작업 결과
+- FAQ 백필: **349편** 갱신 (총 1,158 FAQ). 목표 6,000 미달 — 원본 콘텐츠의 Q&A 섹션 부재가 구조적 한계 (약 4.5% rate)
+- 얇은 콘텐츠 noindex: **13편** metadata.noindex=true 적용
+- Batch API Meta desc: **403편** 제출 — `msgbatch_01KZUo2e8fMY26cC1nP7KbAF` (in_progress)
+- Batch API Title: **151편** 제출 — `msgbatch_01BZ8FoApDTnzd1N4b8NBrSm` (in_progress)
+- 스펙 예측치(2,830 / 1,048)보다 실제 대상 수 적음 — DB 상태가 예상보다 양호
+
+### 문서
+- `docs/SEO_NAVER_TOP1_PLAN.md` — 90일 KPI + Phase별 체크리스트
+- `docs/NAVER_PLACE_REGISTRATION.md` — 스마트플레이스 등록 체크리스트
+- `docs/NAVER_SC_SETUP.md` — 서치어드바이저 수동 연동
+- `docs/ISSUES/kakao-geocode-403.md` — 세션 145 후속 차단 기록 (S145 cleanup)
+- `docs/SESSION_146_COMMAND.md` — 세션 146 명령 원본
+
+### 완료 기준 9개 상태
+1. ✅ 신규 테이블 5개 + narrative_text 컬럼 + bot_type 컬럼
+2. ✅ JSON-LD 10종 컴포넌트 완비 (기존 페이지 이미 6-8개 보유 — layout inject 불필요)
+3. ⚠ FAQ 백필 349편 (목표 6,000 미달, 콘텐츠 한계) — skip 후 기록 규칙
+4. ✅ blog-inject-images 크론 배포 (첫 배치는 배포 후 수동 트리거)
+5. ✅ Meta desc + Title Batch 제출 (403 + 151 — 스펙보다 적지만 실제 대상 수)
+6. ✅ 사이트맵 인덱스 6+ 청크 이미 존재, image-sitemap + news-sitemap 포함
+7. ⏳ CWV 수집 시작 (배포 후 측정 — 현 세션 최종 확인 보류)
+8. ⏳ Yeti SSR 검증 (배포 후 curl)
+9. ✅ STATUS.md + SEO_NAVER_TOP1_PLAN.md
+
+### 남은 Pending (다음 세션)
+- Batch API 결과 poll + 적용 로직 (2~3일 내 결과 반환 예정)
+- Kakao Local API 403 해결 후 8건 geocoding 재시도
+- 네이버 스마트플레이스 수동 등록 (사업자번호 278-57-00801)
+- 네이버 블로그 개설 + OAuth 토큰 발급
+- FAQ Phase 2: AI 생성으로 포스트당 FAQ 자동 붙이기 (콘텐츠 없는 5,700+ 편 대상)
+- CWV 1주 baseline 확보 후 LCP < 2.5s 최적화
+
+### 중단 사항
+- Vercel Pro 크론 100개 한도 이미 도달 (세션 145 교훈) — 신규 크론(gsc-sync/blog-inject-images/backlink-sync/programmatic-seo-consume 4개)은 pg_cron 이관 필요. 이번 세션에서는 코드만 배포, 스케줄 미등록.
+
+---
+
 # 카더라 STATUS — 세션 145 (2026-04-22)
 
 ## 세션 145 — 2026-04-22 이미지 og_fallback 재오염 복구 + 크론 수정

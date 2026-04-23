@@ -19,6 +19,7 @@ import SmartPushPrompt from '@/components/SmartPushPrompt';
 import ProfileCompleteBanner from '@/components/ProfileCompleteBanner';
 import SignupNudgeModal from '@/components/SignupNudgeModal';
 import CtaGlobalTracker from '@/components/CtaGlobalTracker';
+import VitalsReporter from '@/components/web-vitals/VitalsReporter';
 
 export const metadata: Metadata = {
   title: { template: '%s | 카더라', default: '카더라 — 부동산·주식 정보 플랫폼' },
@@ -36,6 +37,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
     <ToastProvider>
       <AuthProvider serverLoggedIn={isLoggedIn}>
       <TopLoadingBar />
+      <VitalsReporter />
       <Navigation />
       <NoticeBanner />
       <AdBanner />

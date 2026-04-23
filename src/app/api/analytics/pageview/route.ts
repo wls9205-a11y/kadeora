@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';
+import { classifyBot } from '@/lib/bot-classify';
 
 export async function POST(req: NextRequest) {
   const rl = await rateLimit(req); if (!rl) return rateLimitResponse();
@@ -29,6 +30,7 @@ export async function POST(req: NextRequest) {
     path: body.path,
     referrer: body.referrer || null,
     user_agent: ua,
+    bot_type: classifyBot(ua),
   }).then(() => {});
 
   return NextResponse.json({ ok: true });

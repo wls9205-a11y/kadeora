@@ -12,7 +12,7 @@ const NAVER_CLIENT_SECRET = process.env.NAVER_CLIENT_SECRET || '';
 // 관측: 250s 내 ~32-36 site 처리 → 50 로 줄여 여유 확보 + big_event phase 도달
 const BATCH_SIZE = 50;
 const TARGET_IMG_COUNT = 7; // 목표 이미지 수
-const MIN_IMG_COUNT = 3; // 이하면 재크롤 대상
+const MIN_IMG_COUNT = 4; // 세션 146 B5: 3→4 (네이버 이미지 캐러셀 진입 요건: 4장+)
 const MAX_RUNTIME_MS = 250_000; // 250초 — 300초 제한에 여유 50초
 
 // ━━━ 도메인 블랙리스트 (경쟁사 + 관련성 낮은 출처) ━━━
