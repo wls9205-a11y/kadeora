@@ -1,3 +1,51 @@
+# Session 169 — 피드 상단 리디자인 (2026-04-25 KST)
+
+## 작업 요약
+피드 상단 레이아웃 재구성 — 정보 밀도 줄이고 실시간성 강조 + 데일리 리포트 헤더 상시 노출
+
+## 신규 컴포넌트 3개
+1. **`src/components/feed/LiveActivityBar.tsx`** (client)
+   - 왼쪽: Supabase Realtime Presence 기반 접속자 수 (`channel='kd-online'`, presence key=sessionStorage UUID)
+   - 오른쪽: `/discuss` 링크 버튼 + 최근 24h 활성 토론방 수 뱃지 (빨간색)
+   - 토론방 쿼리: `discussion_topics WHERE created_at > now()-24h AND comment_count > 0` (2분 폴링)
+2. **`src/components/feed/LiveDiscussionCards.tsx`** (client)
+   - 가로 스크롤 (`.kd-scroll-row`) 토론방 카드 — 빨간 펄스 도트 + 참여자 수 + 제목
+   - Source: `discussion_topics ORDER BY comment_count DESC LIMIT 8`
+   - 카드 클릭 → `/discuss/[id]`
+3. **`src/components/feed/DailyReportBadge.tsx`** (client)
+   - 헤더 내 펄싱 앰버 도트 + "데일리 리포트" 링크 (localStorage `daily_region` fallback='서울')
+   - Navigation.tsx 로고 직후 삽입
+
+## 수정
+- **`src/components/Navigation.tsx`**: `DailyReportBadge` import + 로고 뒤 렌더
+- **`src/app/(main)/feed/FeedClient.tsx`**:
+  - 제거 import/render: `FeedStatusBar`, `DailyReportCard`, `LiveActivityIndicator` (파일 자체는 보존 — 다른 곳 재활용 가능)
+  - 추가 import/render: `LiveActivityBar`, `LiveDiscussionCards` (탭 바 위, QuickPostBar 위)
+
+## 레이아웃 순서 변경
+- **Before**: 카더라 헤더 / FeedStatusBar (날짜/통계/활동중) / DailyReportCard (단지 카드) / QuickPostBar / 탭 / 정렬 / 피드
+- **After**: (앱 헤더: 로고 + 데일리 리포트 뱃지 + 검색) / 카더라 h1 / **LiveActivityBar** / **LiveDiscussionCards** / QuickPostBar / 탭 / 정렬 / 피드
+
+## DB 의존성
+- `discussion_topics` (기존 테이블) — vote_a, vote_b, comment_count, created_at
+- Realtime Presence — Supabase Realtime (신규 채널 `kd-online`)
+- 기존 `get_active_visitors` RPC 는 사용 안 함 (Presence 로 교체)
+
+## 검증
+- TypeScript `npx tsc --noEmit --skipLibCheck` 통과 (0 errors)
+- 로컬 `npm run build` 는 s168 PR 미머지 상태로 별개 이슈(env-validate) 때문에 불가. Vercel Preview 빌드로 검증 예정
+- UI 수동 테스트 미진행 (로컬 dev 서버 미기동)
+
+## Tradeoff / 모니터링 포인트
+- **Realtime Presence 비용**: 매 피드 방문자가 WebSocket 1개 개설. Supabase Realtime quota 소비. 피크시 문제되면 RPC polling (`get_active_visitors`) 으로 롤백
+- **discussion_topics 쿼리 캐시 없음**: 2분 폴링. 부하 시 `/api/discuss/active-count` 같은 캐시 라우트로 옮기는 것 고려
+
+## 잔여 이슈 / 다음 세션
+- s168 PR 머지 필요 (issue-pipeline + build fixes)
+- 원본 `FeedStatusBar`/`DailyReportCard`/`LiveActivityIndicator` 완전 삭제 여부는 유저 판단 대기
+
+---
+
 # Session 161 — 위성 라우트 + VACUUM 크론 복구 (2026-04-24 KST)
 
 ## 작업 요약
