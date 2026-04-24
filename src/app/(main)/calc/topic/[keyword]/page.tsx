@@ -8,20 +8,16 @@ import { jsonLdSafe } from '@/lib/jsonld';
 import { sanitizeHtml } from '@/lib/sanitize-html';
 
 export const revalidate = 86400; // 1일
+export const dynamicParams = true; // s168: 빌드타임 DB 호출 제거, 요청 시 ISR 생성
 
 interface PageProps {
   params: Promise<{ keyword: string }>;
 }
 
+// s168: 빌드 단계에서 DB 호출하지 않도록 빈 배열 반환. ISR on-demand + revalidate=86400 로 최적화.
+// 원래 로직: calc_topic_clusters WHERE is_published=true LIMIT 200
 export async function generateStaticParams() {
-  const sb = getSupabaseAdmin();
-  try {
-    const { data } = await (sb as any).from('calc_topic_clusters')
-      .select('topic_slug').eq('is_published', true).limit(200);
-    return (data || []).map((t: any) => ({ keyword: t.topic_slug }));
-  } catch {
-    return [];
-  }
+  return [];
 }
 
 async function getTopicData(slug: string): Promise<{ topic: any; blog_posts: any[] } | null> {
