@@ -181,46 +181,40 @@ async function fetchAptData() {
       ...apts.map((a: any) => a.house_nm).filter(Boolean),
       ...unsold.map((u: any) => u.house_nm).filter(Boolean),
     ])) as string[];
-    // 세션 145: satellite_image_url 최우선 — VWorld 위성 이미지가 있으면 무조건 우선
-    // 그 다음 real images (og/og_fallback/og_generated source 또는 /api/og URL 은 제외)
-    // 마지막으로 og_image_url 외부 CDN
+    // s163: PostgREST .in() 큰 배열 URL 한계 우회 — chunked batch (50/query)
+    const { pickRealImage, pickBestAptImage, batchedInQuery } = await import('@/lib/aptImage');
     const APT_SITE_COLS = 'name, satellite_image_url, images, og_image_url, page_views, comment_count, interest_count';
-    const scopedSites = neededNames.length > 0
-      ? (adminSb as any).from('apt_sites').select(APT_SITE_COLS).in('name', neededNames)
-      : (adminSb as any).from('apt_sites').select(APT_SITE_COLS).limit(2000);
-    const scopedComplex = neededNames.length > 0
-      ? (adminSb as any).from('apt_complex_profiles').select('apt_name, images').in('apt_name', neededNames).not('images', 'is', null)
-      : (adminSb as any).from('apt_complex_profiles').select('apt_name, images').not('images', 'is', null).limit(2000);
-    const [sitesRes, complexRes] = await Promise.all([scopedSites, scopedComplex]);
 
-    // 가짜 OG placeholder 판별 — images[] 안에 source==='og_fallback' 이나 /api/og URL 은 스킵
-    const pickRealImage = (arr: any[]): string | null => {
-      if (!Array.isArray(arr)) return null;
-      for (const im of arr) {
-        if (!im) continue;
-        const u = typeof im === 'string' ? im : (im.url || im.thumbnail || im.thumb);
-        if (!u || typeof u !== 'string') continue;
-        if (im.source === 'og' || im.source === 'og_fallback' || im.source === 'og_generated') continue;
-        if (u.includes('/api/og')) continue;
-        return (typeof im === 'string' ? u : (im.thumbnail || im.thumb || im.url));
-      }
-      return null;
-    };
+    let sitesData: any[] = [];
+    let complexData: any[] = [];
+    if (neededNames.length > 0) {
+      sitesData = await batchedInQuery<any>(
+        async (chunk) => (adminSb as any).from('apt_sites').select(APT_SITE_COLS).in('name', chunk),
+        neededNames,
+        50,
+      );
+      complexData = await batchedInQuery<any>(
+        async (chunk) => (adminSb as any).from('apt_complex_profiles').select('apt_name, images').in('apt_name', chunk).not('images', 'is', null),
+        neededNames,
+        50,
+      );
+    } else {
+      const [sitesRes, complexRes] = await Promise.all([
+        (adminSb as any).from('apt_sites').select(APT_SITE_COLS).limit(2000),
+        (adminSb as any).from('apt_complex_profiles').select('apt_name, images').not('images', 'is', null).limit(2000),
+      ]);
+      sitesData = (sitesRes.data as any[]) || [];
+      complexData = (complexRes.data as any[]) || [];
+    }
 
     // 1순위: apt_complex_profiles 에서 real image (OG 필터)
-    for (const row of (complexRes.data || []) as any[]) {
+    for (const row of complexData) {
       const real = pickRealImage(row.images);
       if (real) aptImageMap[row.apt_name] = real;
     }
     // 2순위: apt_sites — satellite > real images > 외부 CDN og_image_url > /api/og 제네릭
-    for (const row of (sitesRes.data || []) as any[]) {
-      const sat: string | null = row.satellite_image_url && String(row.satellite_image_url).length > 10
-        ? row.satellite_image_url : null;
-      const realImg = pickRealImage(row.images);
-      const ogExternal: string | null = row.og_image_url && !row.og_image_url.includes('/api/og')
-        ? row.og_image_url : null;
-      const ogGeneric: string | null = row.og_image_url || null;
-      const picked = sat || realImg || ogExternal || ogGeneric;
+    for (const row of sitesData) {
+      const picked = pickBestAptImage(row);
       if (picked) aptImageMap[row.name] = picked;
       if (row.page_views > 0 || row.comment_count > 0 || row.interest_count > 0) {
         aptEngageMap[row.name] = { views: row.page_views || 0, comments: row.comment_count || 0, interest: row.interest_count || 0 };
