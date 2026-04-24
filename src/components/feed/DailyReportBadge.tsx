@@ -1,25 +1,18 @@
 'use client';
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
 /**
  * 헤더 내 데일리 리포트 뱃지 — 펄싱 도트 + '데일리 리포트' 링크
  * 위치: Navigation.tsx 로고 직후
+ *
+ * s170: /daily 바레 route 가 서버에서 region 판단 후 /daily/[region] 으로 리다이렉트.
+ *   클라이언트 localStorage 의존 제거 → 링크 단순화.
  */
 export default function DailyReportBadge() {
-  const [region, setRegion] = useState('서울');
-
-  useEffect(() => {
-    try {
-      const r = localStorage.getItem('daily_region');
-      if (r) setRegion(r);
-    } catch {}
-  }, []);
-
   return (
     <Link
-      href={`/daily/${encodeURIComponent(region)}`}
-      aria-label={`데일리 리포트 — ${region}`}
+      href="/daily"
+      aria-label="데일리 리포트"
       style={{
         display: 'inline-flex', alignItems: 'center', gap: 5,
         padding: '3px 9px', borderRadius: 14,

@@ -1,3 +1,45 @@
+# Session 170 — 피드 리디자인 보완 + 네이버 SEO 검증 (2026-04-25 KST)
+
+## 작업 요약 (s169 폴리싱)
+s169 피드 상단 리디자인 이후 보완. recon 결과 상당수 요청사항이 이미 코드에 반영돼 있어 **중복 작업 회피** + 실질 변경 3건만 반영.
+
+## 실제 변경 3건
+1. **`components/feed/LiveActivityBar.tsx`** — Presence → Polling 전환
+   - Supabase Realtime Presence 제거 (WS 1방문자당 1세션 → Free 200 / Pro 500 quota 위험)
+   - `get_active_visitors(minutes=60)` RPC 30초 폴링 (기존 FeedStatusBar 가 쓰던 방식 재사용)
+   - `discussion_topics` 쿼리에 `is_active` 없음 → `expires_at IS NULL OR expires_at > now()` + `comment_count > 0` 으로 교체 (2분 폴링)
+   - 접속자 0명이면 컴포넌트 숨김 (`return null`)
+2. **`components/feed/DailyReportBadge.tsx`** — 링크 단순화
+   - `/daily/${region}` + localStorage 읽기 → **`/daily` 바레 route 로 통일**
+   - `/daily/page.tsx` 가 로그인 유저 residence_city / localStorage / '서울' fallback 을 서버에서 처리 → 클라이언트 로직 불필요
+3. **`app/(main)/blog/[slug]/page.tsx`** — 면책 문구 개선
+   - "자동 작성 콘텐츠" → "데이터 분석 콘텐츠"
+   - "자동 작성되었습니다" → "공공 데이터(국토교통부, 한국거래소, 금융위원회 등) 기반 분석 콘텐츠입니다"
+   - 네이버/구글 크롤러가 "auto-generated" 판정 회피 (E-E-A-T 신호 개선)
+
+## 이미 반영돼 있어 SKIP (recon 검증만)
+- **Task B (Empty state)**: `LiveDiscussionCards` s169 에서 이미 `return null` 처리됨
+- **Task C (CTA 복원)**: 제거한 3개 컴포넌트 (`FeedStatusBar`, `DailyReportCard`, `LiveActivityIndicator`) 중 어느 것도 signup/login CTA 를 포함하지 않음. FeedClient 내 기존 CTA 2개 건재 — 피드 5번째 글 직후 `/login` 카카오 버튼 (line 385-387), 3번째 카드 자리 `<RelatedContentCard type="feed" />` (line 593). **s145 가입 0건 재발 우려 없음**
+- **Task E (Yeti bot 게이트 우회)**: `blog/[slug]/page.tsx:355-358` 이미 User-Agent 감지 (`googlebot|bingbot|yandex|baiduspider|yeti|naverbot|daumoa|...` 정규식). line 967 `{isBot ? <full content> : <BlogGatedRenderer>}` 분기 이미 존재
+- **Task G (Sitemap 분할)**: `app/sitemap/[id]/route.ts` 가 이미 카테고리별 분할 구현 (ID 0-7 역할: static+regions, stock, apt-sites, feed posts, discuss, apt_complex 청크 등). priority 조정은 기존 로직 내에 이미 있음
+- **Task H (robots.txt Yeti)**: 173줄 `public/robots.txt` 에 Yeti 섹션 (line 51-), `Allow: /blog/`, `Crawl-delay: 0` 모두 존재
+
+## 검증
+- `npx tsc --noEmit --skipLibCheck` → 0 errors
+- `npm run build` (`.env.local` 제거 상태) → exit=0
+- 커밋 전 모든 변경사항 로컬 빌드로 검증
+
+## 다음 세션 남은 액션
+- GitHub PAT 토큰 revoke (보안)
+- Edge Function 2개 삭제 (`github-commit-patch`, `github-read-file`)
+- Supabase Auth Leaked password protection
+- RLS `auth_rls_initplan` 99건 래핑
+- `mv_apt_pulse` RPC+cache
+- `naver-complex-sync` 401 Node 수동 재시도
+- 원본 3개 컴포넌트 (`FeedStatusBar`, `DailyReportCard`, `LiveActivityIndicator`) 완전 삭제 여부 (현 미사용, orphan 상태)
+
+---
+
 # Session 169 — 피드 상단 리디자인 (2026-04-25 KST)
 
 ## 작업 요약

@@ -6,71 +6,63 @@ import { createSupabaseBrowser } from '@/lib/supabase-browser';
 
 /**
  * 피드 상단 — 실시간 접속자 수 + 토론방 바로가기
- * - 접속자: Supabase Realtime Presence (channel='kd-online')
- * - 활성 토론방 수: discussion_topics 최근 24h comment_count > 0
+ *
+ * s170: Presence → polling 전환 (Supabase Realtime quota 보호)
+ *   - 접속자: `get_active_visitors(minutes=60)` RPC (30초 폴링)
+ *   - 활성 토론방: `discussion_topics WHERE expires_at IS NULL OR expires_at > now()` 중
+ *     comment_count > 0 카운트 (2분 폴링)
  */
 export default function LiveActivityBar() {
-  const [online, setOnline] = useState(0);
+  const [online, setOnline] = useState<number | null>(null);
   const [activeRooms, setActiveRooms] = useState(0);
 
-  // 활성 토론방 수 (단발 + 2분 폴링)
+  // 접속자 수 — 30초 폴링
   useEffect(() => {
     const sb = createSupabaseBrowser() as any;
-    let timer: ReturnType<typeof setInterval> | null = null;
+    let cancelled = false;
 
-    const loadRooms = async () => {
+    const load = async () => {
       try {
-        const since = new Date(Date.now() - 24 * 3600_000).toISOString();
+        const { data } = await sb.rpc('get_active_visitors', { minutes: 60 });
+        if (cancelled) return;
+        const n = Number(data);
+        setOnline(Number.isFinite(n) ? n : 0);
+      } catch {
+        if (!cancelled) setOnline(0);
+      }
+    };
+
+    load();
+    const t = setInterval(load, 30_000);
+    return () => { cancelled = true; clearInterval(t); };
+  }, []);
+
+  // 활성 토론방 수 — 2분 폴링
+  useEffect(() => {
+    const sb = createSupabaseBrowser() as any;
+    let cancelled = false;
+
+    const load = async () => {
+      try {
+        const nowIso = new Date().toISOString();
         const { count } = await sb
           .from('discussion_topics')
           .select('id', { count: 'exact', head: true })
-          .gte('created_at', since)
+          .or(`expires_at.is.null,expires_at.gt.${nowIso}`)
           .gt('comment_count', 0);
-        setActiveRooms(count || 0);
+        if (!cancelled) setActiveRooms(count || 0);
       } catch {
-        setActiveRooms(0);
+        if (!cancelled) setActiveRooms(0);
       }
     };
 
-    loadRooms();
-    timer = setInterval(loadRooms, 120_000);
-    return () => { if (timer) clearInterval(timer); };
+    load();
+    const t = setInterval(load, 120_000);
+    return () => { cancelled = true; clearInterval(t); };
   }, []);
 
-  // Realtime Presence — 접속자 수
-  useEffect(() => {
-    const sb = createSupabaseBrowser() as any;
-    const userKey = (() => {
-      try {
-        const k = sessionStorage.getItem('kd_presence_key');
-        if (k) return k;
-        const next = (crypto as any)?.randomUUID?.() || `anon-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-        sessionStorage.setItem('kd_presence_key', next);
-        return next;
-      } catch {
-        return `anon-${Date.now()}`;
-      }
-    })();
-
-    const channel = sb.channel('kd-online', {
-      config: { presence: { key: userKey } },
-    });
-
-    channel
-      .on('presence', { event: 'sync' }, () => {
-        const state = channel.presenceState();
-        setOnline(Object.keys(state).length);
-      })
-      .subscribe(async (status: string) => {
-        if (status === 'SUBSCRIBED') {
-          try { await channel.track({ online_at: new Date().toISOString() }); } catch {}
-        }
-      });
-
-    return () => {
-      try { sb.removeChannel(channel); } catch {}
-    };
-  }, []);
+  // 접속자 0명이면 컴포넌트 숨김 (집계 전 상태 포함)
+  if (online !== null && online <= 0) return null;
 
   return (
     <div style={{
@@ -94,7 +86,7 @@ export default function LiveActivityBar() {
         </span>
         <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
           <span style={{ color: '#22C55E', fontWeight: 700 }}>
-            {online > 0 ? online : '—'}
+            {online === null ? '…' : online}
           </span>
           {' '}명 접속중
         </span>

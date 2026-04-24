@@ -1097,10 +1097,10 @@ export default async function BlogDetailPage({ params }: Props) {
           );
         })()}
 
-        {/* 자동생성 콘텐츠 면책 & 출처 표기 (E-E-A-T) */}
+        {/* 공공 데이터 기반 분석 콘텐츠 면책 & 출처 표기 (E-E-A-T) */}
         {post.source_type === 'auto' && (
           <div style={{ marginTop: 'var(--sp-2xl)', padding: '12px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.6 }}>
-            <span style={{ fontWeight: 600 }}>ℹ️ 자동 작성 콘텐츠</span> · 이 글은 카더라의 공공 데이터(국토교통부, 금융위원회 등)를 기반으로 자동 작성되었습니다.
+            <span style={{ fontWeight: 600 }}>ℹ️ 데이터 분석 콘텐츠</span> · 이 글은 공공 데이터(국토교통부, 한국거래소, 금융위원회 등) 기반 분석 콘텐츠입니다.
             {post.data_date && <> · 데이터 기준일: {post.data_date}</>}
             {post.source_ref && <> · 출처: {post.source_ref}</>}
           </div>
