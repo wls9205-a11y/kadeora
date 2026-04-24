@@ -8,6 +8,9 @@ import {
   publishBriefingAsBlog,
 } from '@/lib/us-market-cron-helpers';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 /**
  * 미국 프리마켓 워치리스트 크론
  * KST 21:30 (US ET 08:30) 실행
