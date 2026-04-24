@@ -3,6 +3,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { NextRequest, NextResponse } from 'next/server';
 
 export const revalidate = 1800; // 30분마다 갱신
+export const dynamic = 'force-dynamic'; // s168: 빌드타임 DB 호출 제거
 
 import { SITE_URL as SITE } from '@/lib/constants';
 

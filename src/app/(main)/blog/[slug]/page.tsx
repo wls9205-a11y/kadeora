@@ -221,31 +221,12 @@ const PINNED_SLUGS = [
   'apt-trade-이펜하우스3단지-서울-2026',
 ];
 
+export const dynamicParams = true; // s168: 빌드타임 DB 호출 제거, 요청 시 ISR 생성
+
+// s168: 빌드 단계 DB 호출 제거. 원래 로직은 조회수 TOP 30 + 최신 15 + 핀 슬러그 합쳐 최대 60건 프리렌더.
+// ISR on-demand 로 첫 요청 시 생성+캐시. PINNED_SLUGS 는 sitemap/내부 링크에서 참조 유지.
 export async function generateStaticParams() {
-  try {
-    const { getSupabaseAdmin } = await import('@/lib/supabase-admin');
-    const sb = getSupabaseAdmin();
-    const [byViews, byRecent, byPinned] = await Promise.all([
-      sb.from('blog_posts').select('slug')
-        .eq('is_published', true).not('published_at', 'is', null)
-        .order('view_count', { ascending: false }).limit(30),
-      sb.from('blog_posts').select('slug')
-        .eq('is_published', true).not('published_at', 'is', null)
-        .order('published_at', { ascending: false }).limit(15),
-      sb.from('blog_posts').select('slug')
-        .eq('is_published', true).in('slug', PINNED_SLUGS).limit(PINNED_SLUGS.length),
-    ]);
-    const seen = new Set<string>();
-    const out: { slug: string }[] = [];
-    for (const row of [...(byViews.data || []), ...(byRecent.data || []), ...(byPinned.data || [])]) {
-      if (!row?.slug || seen.has(row.slug)) continue;
-      seen.add(row.slug);
-      out.push({ slug: row.slug });
-    }
-    return out.slice(0, 60);
-  } catch {
-    return [];
-  }
+  return [];
 }
 
 /**
