@@ -401,7 +401,7 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
     if (skipReasons.length === 0) {
       try {
         const { data: simBlogs } = await sb.rpc('check_blog_similarity', { p_title: issue.title, p_threshold: 0.35 });
-        if (simBlogs && simBlogs.length > 0) skipReasons.push(`title_similar:${simBlogs[0].id}:${simBlogs[0].title?.slice(0, 30)}`);
+        if (simBlogs && simBlogs.length > 0) skipReasons.push(`similar_title:${simBlogs[0].id}:${simBlogs[0].title?.slice(0, 30)}`);
       } catch {}
     }
   }

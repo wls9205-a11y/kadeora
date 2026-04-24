@@ -23,7 +23,7 @@ import { SITE_URL } from '@/lib/constants';
 export const maxDuration = 120;
 export const runtime = 'nodejs';
 
-const MAX_PER_RUN = 10;
+const MAX_PER_RUN = 20; // T5 (s168): 1,388건 백로그 소진 가속 — 외부 API 無, DB I/O only
 const PREEMPT_MS = 100_000;
 
 const META_MIN = 150;
@@ -234,6 +234,11 @@ async function handler(_req: NextRequest) {
         }
       }
 
+      const elapsedMs = Date.now() - start;
+      console.warn(
+        `[issue-seo-enrich] processed=${pending.length} enriched=${enriched} meta_fixed=${metaFixed} failed=${failed} elapsed_ms=${elapsedMs}`,
+      );
+
       return {
         processed: pending.length,
         created: enriched,
@@ -242,9 +247,10 @@ async function handler(_req: NextRequest) {
         metadata: {
           enriched,
           meta_fixed: metaFixed,
+          batch_size: MAX_PER_RUN,
           samples,
           sample_failures: failures.slice(0, 5),
-          elapsed_ms: Date.now() - start,
+          elapsed_ms: elapsedMs,
         },
       };
     }, { redisLockTtlSec: 150 }),

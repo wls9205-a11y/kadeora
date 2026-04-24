@@ -1,3 +1,55 @@
+# Session 168 — 이슈 선점 파이프라인 코드 이중 방어 (2026-04-24 KST)
+
+## 배경
+- **DB 측 복구 완료 (Claude 세션, s167~s168 DB)**: timestamp backfill, noindex 158건 해제, 트리거 3개 자가치유, `app_config.namespace='issue_pipeline'` 신설 (`daily_limit=30`, `auto_noindex=false`)
+- 이번 세션은 Vercel cron route 측 **"정중한 이중 방어"** — 트리거 안전망 있어도 코드가 반복 덮어쓰지 않도록 수정
+
+## 수정 route 4개
+1. **`src/app/api/cron/issue-publish/route.ts`**
+   - **T2 (🔴)**: `get_issue_config('daily_limit')` + `get_today_issue_publish_count()` RPC 호출. `naver_cafe` 네임스페이스 오염 차단. 일일 한도 도달 시 early-return `{ message: 'daily_limit_reached' }`
+   - **T4 (🟢)**: 성공 publish UPDATE에 `publish_attempted_at: nowIso` 이중 스탬프 (기존 선-스탬프 + 성공 시 재스탬프)
+   - 응답 metadata 에 `daily_limit`, `today_count`, `batch_size` 추가
+2. **`src/app/api/cron/issue-seo-enrich/route.ts`**
+   - **T5 (🔴)**: `MAX_PER_RUN` 10 → 20. DB I/O only, 외부 API 無, `maxDuration=120s` 여유 충분. 1,388건 백로그 소진 가속
+   - `console.log` 로 `processed/enriched/meta_fixed/failed/elapsed_ms` 노출
+3. **`src/app/api/cron/issue-draft/route.ts`**
+   - **T6 (🟡)**: `skipReasons` 의 `title_similar:` → `similar_title:` 통일 (DB s167a 정규화 이름과 일치). threshold 0.35 (blog), 0.2 (issue-detect) 유지 — 현재 값 합리적
+4. **T1/T3**: Vercel 코드엔 해당 경로 없음. DB 트리거가 primary. 코드 변경 無.
+
+## 미수정 — 의도적 (DB 트리거가 처리)
+- T1 (자동 noindex 제거): Vercel cron 코드엔 `noindex` 쓰기 경로 없음. 재부여 5건은 트리거가 7일 이내 `is_published` 이슈 블로그 noindex 해제하는 쪽으로 DB 대응됨
+- T3 (fact_check_at): `issue-fact-check/route.ts` 이미 양쪽 UPDATE 경로에 `fact_check_at: new Date().toISOString()` 포함
+
+## 배포 후 검증 쿼리 (A~D) — STATUS 룰 #11
+```sql
+-- A. 새 이슈 noindex 없이 발행
+SELECT bp.slug, bp.metadata->>'noindex', ia.published_at
+FROM blog_posts bp JOIN issue_alerts ia ON ia.blog_post_id = bp.id
+WHERE ia.published_at > NOW() - INTERVAL '30 minutes' ORDER BY ia.published_at DESC LIMIT 5;
+
+-- B. fact_check_at stale_bug_count = 0
+SELECT COUNT(*) FILTER (WHERE fact_check_passed AND fact_check_at IS NULL) AS stale_bug_count
+FROM issue_alerts WHERE created_at > NOW() - INTERVAL '30 minutes';
+
+-- C. SEO enrich 30분 내 10건 이상
+SELECT COUNT(*) FILTER (WHERE seo_enriched_at > NOW() - INTERVAL '30 minutes') AS seo_30m,
+       COUNT(*) FILTER (WHERE fact_check_passed AND seo_enriched_at IS NULL) AS backlog
+FROM issue_alerts;
+
+-- D. daily_limit 30 인식
+SELECT public.get_today_issue_publish_count() AS today,
+       public.get_issue_config('daily_limit') AS limit_config;
+```
+
+## 잔여 이슈 (이번 범위 외)
+- GitHub PAT 토큰 즉시 revoke (`ghp_PSDB***DRa`)
+- Edge Function 2개 삭제 (`github-commit-patch`, `github-read-file`)
+- Supabase Auth: Leaked password protection 활성화
+- 다음 세션: RLS `auth_rls_initplan` 99건 일괄 래핑, `mv_apt_pulse` RPC+cache 전환
+- `naver-complex-sync` 401 Node 수동 재시도
+
+---
+
 # Session 161 — 위성 라우트 + VACUUM 크론 복구 (2026-04-24 KST)
 
 ## 작업 요약

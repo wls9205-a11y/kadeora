@@ -46,6 +46,30 @@ async function handler(_req: NextRequest) {
       const sb = getSupabaseAdmin();
       const start = Date.now();
 
+      // T2 (s168): daily_limit 체크 — namespace='issue_pipeline' RPC 경유
+      let dailyLimit = 30;
+      let todayCount = 0;
+      try {
+        const [limRes, cntRes] = await Promise.all([
+          (sb as any).rpc('get_issue_config', { p_key: 'daily_limit' }),
+          (sb as any).rpc('get_today_issue_publish_count'),
+        ]);
+        const limRaw = Array.isArray(limRes?.data) ? limRes.data[0] : limRes?.data;
+        const cntRaw = Array.isArray(cntRes?.data) ? cntRes.data[0] : cntRes?.data;
+        const parsedLim = Number(limRaw);
+        if (Number.isFinite(parsedLim) && parsedLim > 0) dailyLimit = parsedLim;
+        const parsedCnt = Number(cntRaw);
+        if (Number.isFinite(parsedCnt) && parsedCnt >= 0) todayCount = parsedCnt;
+      } catch {}
+      const remaining = Math.max(0, dailyLimit - todayCount);
+      if (remaining === 0) {
+        return {
+          processed: 0,
+          metadata: { message: 'daily_limit_reached', daily_limit: dailyLimit, today_count: todayCount },
+        };
+      }
+      const batchSize = Math.min(MAX_PER_RUN, remaining);
+
       const { data: pending, error: fetchErr } = await (sb as any)
         .from('issue_alerts')
         .select('id, blog_post_id, final_score, is_published')
@@ -53,7 +77,7 @@ async function handler(_req: NextRequest) {
         .not('blog_post_id', 'is', null)
         .or('is_published.eq.false,is_published.is.null')
         .order('final_score', { ascending: false })
-        .limit(MAX_PER_RUN);
+        .limit(batchSize);
 
       if (fetchErr) return { processed: 0, failed: 1, metadata: { error: fetchErr.message } };
       if (!pending || pending.length === 0) {
@@ -128,12 +152,13 @@ async function handler(_req: NextRequest) {
             continue;
           }
 
-          // 4) issue_alerts 발행 표기
+          // 4) issue_alerts 발행 표기 — T4 (s168): publish_attempted_at 이중 방어
           await (sb as any)
             .from('issue_alerts')
             .update({
               is_published: true,
               published_at: nowIso,
+              publish_attempted_at: nowIso,
               publish_decision: 'auto_published',
               block_reason: null,
             })
@@ -168,6 +193,9 @@ async function handler(_req: NextRequest) {
           published,
           gate_blocked: gateBlocked,
           gate_enabled: GATE_ENABLED,
+          daily_limit: dailyLimit,
+          today_count: todayCount,
+          batch_size: batchSize,
           top_gate_reasons: Object.entries(gateReasonCounts)
             .sort((a, b) => b[1] - a[1])
             .slice(0, 5)
