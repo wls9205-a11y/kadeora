@@ -223,12 +223,31 @@ const PINNED_SLUGS = [
   'apt-trade-이펜하우스3단지-서울-2026',
 ];
 
-export const dynamicParams = true; // s168: 빌드타임 DB 호출 제거, 요청 시 ISR 생성
-
-// s168: 빌드 단계 DB 호출 제거. 원래 로직은 조회수 TOP 30 + 최신 15 + 핀 슬러그 합쳐 최대 60건 프리렌더.
-// ISR on-demand 로 첫 요청 시 생성+캐시. PINNED_SLUGS 는 sitemap/내부 링크에서 참조 유지.
 export async function generateStaticParams() {
-  return [];
+  try {
+    const { getSupabaseAdmin } = await import('@/lib/supabase-admin');
+    const sb = getSupabaseAdmin();
+    const [byViews, byRecent, byPinned] = await Promise.all([
+      sb.from('blog_posts').select('slug')
+        .eq('is_published', true).not('published_at', 'is', null)
+        .order('view_count', { ascending: false }).limit(30),
+      sb.from('blog_posts').select('slug')
+        .eq('is_published', true).not('published_at', 'is', null)
+        .order('published_at', { ascending: false }).limit(15),
+      sb.from('blog_posts').select('slug')
+        .eq('is_published', true).in('slug', PINNED_SLUGS).limit(PINNED_SLUGS.length),
+    ]);
+    const seen = new Set<string>();
+    const out: { slug: string }[] = [];
+    for (const row of [...(byViews.data || []), ...(byRecent.data || []), ...(byPinned.data || [])]) {
+      if (!row?.slug || seen.has(row.slug)) continue;
+      seen.add(row.slug);
+      out.push({ slug: row.slug });
+    }
+    return out.slice(0, 60);
+  } catch {
+    return [];
+  }
 }
 
 /**
@@ -1109,10 +1128,10 @@ export default async function BlogDetailPage({ params }: Props) {
           );
         })()}
 
-        {/* 공공 데이터 기반 분석 콘텐츠 면책 & 출처 표기 (E-E-A-T) */}
+        {/* 자동생성 콘텐츠 면책 & 출처 표기 (E-E-A-T) */}
         {post.source_type === 'auto' && (
           <div style={{ marginTop: 'var(--sp-2xl)', padding: '12px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.6 }}>
-            <span style={{ fontWeight: 600 }}>ℹ️ 데이터 분석 콘텐츠</span> · 이 글은 공공 데이터(국토교통부, 한국거래소, 금융위원회 등) 기반 분석 콘텐츠입니다.
+            <span style={{ fontWeight: 600 }}>ℹ️ 자동 작성 콘텐츠</span> · 이 글은 카더라의 공공 데이터(국토교통부, 금융위원회 등)를 기반으로 자동 작성되었습니다.
             {post.data_date && <> · 데이터 기준일: {post.data_date}</>}
             {post.source_ref && <> · 출처: {post.source_ref}</>}
           </div>

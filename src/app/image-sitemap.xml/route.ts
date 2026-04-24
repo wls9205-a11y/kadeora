@@ -10,7 +10,6 @@ import { URLS_PER_PAGE } from '@/lib/seo/sitemapConfig';
 
 export const runtime = 'nodejs';
 export const revalidate = 3600;
-export const dynamic = 'force-dynamic'; // s168: 빌드타임 DB 호출 제거
 
 export async function GET() {
   const sb = getSupabaseAdmin();

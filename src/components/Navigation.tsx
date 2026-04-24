@@ -8,7 +8,6 @@ import { useAuth } from '@/components/AuthProvider';
 import { haptic } from '@/lib/haptic';
 import { isTossMode } from '@/lib/toss-mode';
 import { useTheme } from '@/components/ThemeProvider';
-import DailyReportBadge from '@/components/feed/DailyReportBadge';
 
 const NAV_ITEMS = [
   { href: '/feed',    label: '피드',   Icon: Home },
@@ -228,8 +227,7 @@ export function Navigation() {
             </span>
           </Link>
 
-          {/* 데일리 리포트 뱃지 */}
-          <DailyReportBadge />
+
 
           {/* 검색바 (데스크탑) — 인기검색어 통합 */}
           <Link href="/search" className="hidden md:flex" style={{

@@ -10,11 +10,11 @@ interface Props { params: Promise<{ slug: string }> }
 
 const sb = () => getSupabaseAdmin();
 
-export const dynamicParams = true; // s168: 빌드타임 DB 호출 제거, 요청 시 ISR 생성
-
-// s168: 원래 blog_series 전체 slug 프리렌더. 런타임 dynamic + ISR 로 자연 최적화.
 export async function generateStaticParams() {
-  return [];
+  try {
+    const { data } = await sb().from('blog_series').select('slug');
+    return (data || []).map((s: any) => ({ slug: s.slug }));
+  } catch { return []; }
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

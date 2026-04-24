@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 export const revalidate = 1800;
-export const dynamic = 'force-dynamic'; // s168: 빌드타임 DB 호출 제거
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type R = Record<string, any>;

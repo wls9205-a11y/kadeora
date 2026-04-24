@@ -9,9 +9,10 @@ import { AI_MODEL_HAIKU, AI_MODEL_SONNET, ANTHROPIC_VERSION } from '@/lib/consta
 import { sanitizeAiContent, ensureDisclaimer } from '@/lib/ai/sanitize-investment-content';
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
 
+const supabase = getSupabaseAdmin();
+
 /** 미국 주식 시세 조회 (등락률 상위/하위) */
 export async function getUSMarketSnapshot() {
-  const supabase = getSupabaseAdmin();
   const { data: stocks } = await supabase
     .from('stock_quotes')
     .select('symbol, name, price, change_amt, change_pct, volume, market_cap, currency, sector, updated_at')
@@ -137,9 +138,8 @@ export async function saveBriefing(opts: {
   topLosers: any[];
   briefingType?: string;
 }) {
-  const supabase = getSupabaseAdmin();
   const today = new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10);
-
+  
   // 같은 날 같은 타입이 있으면 스킵
   const { data: existing } = await supabase
     .from('stock_daily_briefing')

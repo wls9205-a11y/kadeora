@@ -27,12 +27,22 @@ import { safeImg } from '@/lib/image-sanitize';
 
 interface Props { params: Promise<{ symbol: string }> }
 
-export const dynamicParams = true; // s168: 빌드타임 DB 호출 제거, 요청 시 ISR 생성
-
-// s168: 빌드 단계 DB 호출 제거. revalidate=300 초 ISR 로 첫 요청 시 생성+캐시.
-// 원래 로직: stock_quotes WHERE is_active=true → 전체 심볼 프리렌더 (728종)
+/**
+ * 빌드 타임 정적 생성 — 전 종목 페이지를 미리 생성
+ * 728종목이라 빌드 부담 적음 + 크롤러 TTFB 극소화
+ */
 export async function generateStaticParams() {
-  return [];
+  try {
+    const { getSupabaseAdmin } = await import('@/lib/supabase-admin');
+    const sb = getSupabaseAdmin();
+    const { data } = await sb
+      .from('stock_quotes')
+      .select('symbol')
+      .eq('is_active', true);
+    return (data || []).map(s => ({ symbol: s.symbol }));
+  } catch {
+    return [];
+  }
 }
 
 // 세션 156: GSC 상위 impression 쿼리 타겟 (주가 전망 2026 키워드 강화)

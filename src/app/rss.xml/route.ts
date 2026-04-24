@@ -3,7 +3,6 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { SITE_URL as SITE } from '@/lib/constants';
 
 export const revalidate = 3600;
-export const dynamic = 'force-dynamic'; // s168: 빌드타임 DB 호출 제거
 
 export async function GET() {
   const sb = getSupabaseAdmin();

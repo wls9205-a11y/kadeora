@@ -3,7 +3,6 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { SITE_URL } from '@/lib/constants';
 
 export const revalidate = 300; // 5분 캐시
-export const dynamic = 'force-dynamic'; // s168: 빌드타임 DB 호출 제거
 
 function escXml(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;');
