@@ -4,6 +4,7 @@ import { createSupabaseServer } from '@/lib/supabase-server';
 
 // 1분 캐시
 export const revalidate = 60;
+export const dynamic = 'force-dynamic'; // s168: 빌드타임 DB 호출 제거
 
 export async function GET(req: NextRequest) {
   if (!(await rateLimit(req, 'api'))) return rateLimitResponse();

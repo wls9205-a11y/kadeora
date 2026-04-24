@@ -4,6 +4,7 @@ import { createSupabaseServer } from '@/lib/supabase-server';
 import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';
 
 export const revalidate = 600;
+export const dynamic = 'force-dynamic'; // s168: 빌드타임 DB 호출 제거
 
 export async function GET(req: NextRequest) {
   const rl = await rateLimit(req); if (!rl) return rateLimitResponse();

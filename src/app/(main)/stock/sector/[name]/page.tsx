@@ -9,21 +9,13 @@ import Disclaimer from '@/components/Disclaimer';
 import ShareButtons from '@/components/ShareButtons';
 
 export const revalidate = 3600;
+export const dynamicParams = true; // s168: 빌드타임 DB 호출 제거, 요청 시 ISR 생성
 
 interface Props { params: Promise<{ name: string }> }
 
+// s168: 빌드 단계 DB 호출 제거. 원래 로직: stock_quotes 에서 distinct sector 추출.
 export async function generateStaticParams() {
-  try {
-    const { getSupabaseAdmin } = await import('@/lib/supabase-admin');
-    const sb = getSupabaseAdmin();
-    const { data } = await sb.from('stock_quotes')
-      .select('sector')
-      .not('sector', 'is', null)
-      .neq('sector', '')
-      .gt('price', 0);
-    const sectors = [...new Set((data || []).map((s: any) => s.sector))];
-    return sectors.map(s => ({ name: encodeURIComponent(s) }));
-  } catch { return []; }
+  return [];
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
