@@ -1,3 +1,46 @@
+# 카더라 STATUS — 세션 171 (2026-04-25)
+
+## 세션 171 — 블로그 500 롤백 + 162편 벌크 잔여분 실행
+
+### 1. Track A — b86e54a3 블로그 500 원인 분석 (보류)
+- 직전 배포 dpl_GbNiPPj8bsPbmNat35BqJGoGksPa (b86e54a3 "merge: 피드 상단 리디자인 + 네이버 SEO 보완") 이후 `/blog/*` 전체 500
+- **즉시 복구**:
+  1. `vercel rollback dpl_4jnLoD7iRo3fPDefXywPe55zLVVE --yes` → production alias 324fe409 (s170 직전)으로 복원
+  2. `git revert b86e54a3 --no-edit -m 1` → 33e071fd 커밋 main push
+- Vercel MCP runtime logs 가 `"An error occurred i..."` 로 truncated → 실제 stack trace 수집 불가
+- **결정**: 사용자가 Vercel Dashboard 에서 full stack trace 확인 후 별도 세션에서 재진행 (worktree 로컬 재현은 시간 소요로 보류)
+
+### 2. Track B — 162편 잔여분 벌크 실행 (완료)
+세션 170 에서 19편(idx 1-19, run-1 bif3um930 kill) 후 중단된 잔여분 재개.
+
+**스크립트 보정** (`scripts/generate-bulk-posts.ts`):
+- `CONCURRENCY 5 → 3` (Anthropic rate limit 완화)
+- `DELAY_MS 2000 → 5000` (배치 간 5초 sleep)
+
+**실행 결과**:
+- Run-2 (byp8cqet5): ok=18, skipped=125, failed=0 — 약 50분 소요
+- DB 누적 (`source_ref='s170-bulk'`): **총 37편** (apt=30, stock=6, finance=1)
+- skipped 125 → safeBlogInsert `DAILY_LIMIT` 게이트 정상 작동 (의도된 동작)
+
+### 3. daily_create_limit 원복
+- s170 벌크 진입 직전 80 → 200 으로 임시 상향 한 것을 다시 80 으로 원복
+- `UPDATE blog_publish_config SET daily_create_limit=80 WHERE id=1` 적용 확인
+
+### 4. 잔여 105편 처리 방침
+- 162 - 37 = 약 105편 미생성 (DAILY_LIMIT 상한 + 이번 세션 종료)
+- 별도 세션에서 daily_create_limit 일시 상향 + 재실행 검토 (정책상 80 상한 우선)
+
+### 결과 요약
+| 항목 | 값 |
+|---|---|
+| Vercel 롤백 | dpl_4jnLoD7iRo3fPDefXywPe55zLVVE (324fe409) |
+| Git revert 커밋 | 33e071fd |
+| 벌크 신규 발행 | run-1: 19편, run-2: 18편 → DB 총 37편 |
+| daily_create_limit | 200 → 80 원복 ✅ |
+| Track A | 별도 세션 (Vercel Dashboard 풀 트레이스 후) |
+
+---
+
 # 카더라 STATUS — 세션 158 (2026-04-24)
 
 ## 세션 158 — 단지 썸네일 OG 문제 (크롤 + 프론트 라벨)

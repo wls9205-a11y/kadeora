@@ -338,7 +338,9 @@ async function main() {
   console.log(`Processing ${slice.length} topics (${from}..${to - 1})${dryRun ? ' [DRY-RUN]' : ''}`);
 
   const stats = { ok: 0, skipped: 0, failed: 0 };
-  const CONCURRENCY = 5;
+  // s171: BATCH_SIZE 5→3 (Supabase 부하 감소), DELAY 2s→5s
+  const CONCURRENCY = 3;
+  const DELAY_MS = 5000;
 
   for (let i = 0; i < slice.length; i += CONCURRENCY) {
     const batch = slice.slice(i, i + CONCURRENCY);
@@ -348,9 +350,8 @@ async function main() {
       else if (r.reason === 'exception') stats.failed++;
       else stats.skipped++;
     }
-    // rate limit 배치 간 2초
     if (i + CONCURRENCY < slice.length) {
-      await new Promise((r) => setTimeout(r, 2000));
+      await new Promise((r) => setTimeout(r, DELAY_MS));
     }
   }
 
