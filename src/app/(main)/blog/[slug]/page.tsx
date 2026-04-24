@@ -44,6 +44,7 @@ import BlogEarlyGateTeaser from '@/components/blog/BlogEarlyGateTeaser';
 import SignupPopupModal from '@/components/signup/SignupPopupModal';
 import RelatedBlogsSection from '@/components/blog/RelatedBlogsSection';
 import BlogSocialBar from '@/components/blog/BlogSocialBar';
+import BlogFooterMeta from '@/components/blog/BlogFooterMeta';
 import BlogMidGate from '@/components/blog/BlogMidGate';
 // SmartSectionGate 제거 → LoginGate 기능 게이팅으로 전환 (세션 108)
 import BlogAptAlertCTA from '@/components/BlogAptAlertCTA';
@@ -1163,6 +1164,15 @@ export default async function BlogDetailPage({ params }: Props) {
         {!isBot && !isLoggedIn && <BlogEndCTA slug={slug} isLoggedIn={false} />}
         {/* s157: FOMO 팝업 모달 (스크롤 50% or 60s, 세션 1회) — sticky_bar/floating_ask 대체 */}
         {!isBot && !isLoggedIn && <SignupPopupModal slug={slug} redirectPath={`/blog/${slug}`} isLoggedIn={isLoggedIn} />}
+
+        {/* s170: 하단 메타 — 태그 pill + 최초/수정일 */}
+        <BlogFooterMeta
+          tags={post.tags}
+          category={post.category}
+          createdAt={post.created_at}
+          updatedAt={post.updated_at}
+          rewrittenAt={post.rewritten_at}
+        />
       </article>
 
       {/* 플로팅 액션바 — 스크롤 30% 후 나타남, 봇 제외 */}

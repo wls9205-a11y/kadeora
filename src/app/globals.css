@@ -2015,3 +2015,40 @@ a, span, p, div {
 .price-flash-dn    { animation: price-dn-flash    0.6s ease-out; }
 .price-flash-up-us { animation: price-up-flash-us 0.6s ease-out; }
 .price-flash-dn-us { animation: price-dn-flash-us 0.6s ease-out; }
+
+/* ──────────────────────────────────
+   s170 — Blog 비주얼 토큰 + h2 액센트 바
+   ────────────────────────────────── */
+:root {
+  --blog-hero-glow: rgba(59,130,246,0.08);
+  --blog-carousel-bg: var(--bg-base);
+  --blog-info-box-bg: rgba(59,130,246,0.06);
+  --blog-info-box-border: rgba(59,130,246,0.15);
+  --blog-tag-bg: rgba(59,123,246,0.08);
+  --blog-tag-color: var(--brand, #60A5FA);
+  --blog-disclaimer-border: #F59E0B;
+}
+
+html[data-theme="light"] {
+  --blog-hero-glow: rgba(37,99,235,0.04);
+  --blog-carousel-bg: var(--bg-elevated);
+  --blog-info-box-bg: rgba(37,99,235,0.04);
+  --blog-info-box-border: rgba(37,99,235,0.1);
+  --blog-tag-bg: rgba(37,99,235,0.06);
+  --blog-tag-color: var(--brand, #2563EB);
+  --blog-disclaimer-border: #D97706;
+}
+
+/* h2 좌측 컬러 액센트 바 */
+.blog-content h2 {
+  border-left: 4px solid var(--blog-tag-color, var(--brand));
+  padding-left: 14px;
+  margin-left: -18px;
+}
+@media (max-width: 640px) {
+  .blog-content h2 {
+    margin-left: -4px;
+    padding-left: 10px;
+    border-left-width: 3px;
+  }
+}
