@@ -5,6 +5,7 @@ import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';
 
 // Cache: 600s — 트렌딩 검색어
 export const revalidate = 600;
+export const dynamic = 'force-dynamic'; // s168: 빌드타임 DB 호출 제거
 
 const withTimeout = <T>(p: PromiseLike<T>, ms = 3000): Promise<T | null> =>
   Promise.race([p, new Promise<null>((r) => setTimeout(() => r(null), ms))]);

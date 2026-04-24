@@ -3,6 +3,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withCronLogging } from '@/lib/cron-logger';
 import { getUSMarketSnapshot, generateUSBriefing, publishBriefingAsBlog } from '@/lib/us-market-cron-helpers';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get('authorization');
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {

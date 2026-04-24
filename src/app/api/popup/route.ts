@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 export const revalidate = 60;
+export const dynamic = 'force-dynamic'; // s168: 빌드타임 DB 호출 제거
 
 /** GET /api/popup — 현재 활성 팝업 조회 (경로 기반 필터) */
 export async function GET(req: NextRequest) {
