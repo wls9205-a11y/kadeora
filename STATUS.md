@@ -1,3 +1,31 @@
+# Session 161 — 위성 라우트 + VACUUM 크론 복구 (2026-04-24 KST)
+
+## 작업 요약
+1. **VACUUM 크론 dblink 우회로 수정** (Claude SQL, pg_cron 80개 schedule 무건드림)
+   - `weekly_vacuum_analyze_blog` 재생성 **금지** — 이미 dblink로 수정 완료된 경로 유지
+2. **위성 라우트 PR 머지 + 24,719편 위성 썸네일 복구**
+   - PR `fix/satellite-endpoint` → `main` 머지 → Vercel 자동 배포
+   - `src/app/api/satellite/route.ts` (edge, 30일 immutable): Esri World Imagery → OSM fallback → `/api/og-chart` 302
+   - `src/components/AptImageGallery.tsx`: 위성 슬라이드에 🛰️ 위성 사진 배지 (모바일 캐러셀 + 데스크탑 1+2)
+   - 머지 후 1회 SQL (`apt_complex_profiles` 만):
+     ```sql
+     UPDATE apt_complex_profiles
+     SET images = jsonb_build_array(metadata->>'satellite_url_pending') || images,
+         og_image_url = metadata->>'satellite_url_pending'
+     WHERE metadata->>'satellite_url_pending' IS NOT NULL;
+     ```
+   - 외부 API 키 0개 추가. 인증 불필요 타일 소스만 사용.
+
+## 잔여 이슈
+- **`naver-complex-sync` 401** — Node에서 수동 재시도 필요. cron 루프가 아닌 일회성 backfill 스크립트.
+
+## 금지 영역 (건드리지 말 것)
+- `pg_cron` 기존 80개 schedule
+- `weekly_vacuum_analyze_blog` 재생성 (dblink 경로 유지)
+- `apt_complex_profiles.images` 직접 수정 (위 SQL 1회 외)
+
+---
+
 # Session 145 — v2.0 Week 1 (2026-04-22 KST)
 
 ## Commit 5 — `feat(admin): pulse_v3 tab + 4 widgets`
