@@ -43,6 +43,7 @@ import BlogEndCTA from '@/components/blog/BlogEndCTA';
 import BlogEarlyGateTeaser from '@/components/blog/BlogEarlyGateTeaser';
 import SignupPopupModal from '@/components/signup/SignupPopupModal';
 import RelatedBlogsSection from '@/components/blog/RelatedBlogsSection';
+import BlogSocialBar from '@/components/blog/BlogSocialBar';
 import BlogMidGate from '@/components/blog/BlogMidGate';
 // SmartSectionGate 제거 → LoginGate 기능 게이팅으로 전환 (세션 108)
 import BlogAptAlertCTA from '@/components/BlogAptAlertCTA';
@@ -949,6 +950,16 @@ export default async function BlogDetailPage({ params }: Props) {
         )}
 
         {/* 공유 바 */}
+        {/* s169: 신규 소셜바 — 카카오/링크복사/댓글 이동 */}
+        <BlogSocialBar
+          title={post.title}
+          description={post.meta_description || post.excerpt || ''}
+          slug={slug}
+          coverImage={post.cover_image || undefined}
+          commentCount={post.comment_count ?? 0}
+          helpfulCount={post.helpful_count ?? 0}
+          commentAnchorId="blog-comments"
+        />
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           padding: '10px 0', marginBottom: 24, fontSize: 'var(--fs-sm)',
@@ -1169,7 +1180,8 @@ export default async function BlogDetailPage({ params }: Props) {
           {CTA_BY_CAT[post.category] ?? CTA_BY_CAT.general}
         </p>
 
-        {/* 댓글 입력 */}
+        {/* 댓글 입력 — s169: BlogSocialBar 가 scrollIntoView target 사용 */}
+        <div id="blog-comments" style={{ scrollMarginTop: 64 }} />
         {isLoggedIn ? (
           <BlogCommentInput blogPostId={post.id} />
         ) : (

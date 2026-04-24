@@ -54,8 +54,16 @@ export default function BlogHeroImage({ images, title, priority = true }: Props)
     touchStart.current = null;
   };
 
+  const enrichedAlt = current.alt
+    ? (current.alt.includes(title) ? current.alt : `${title} — ${current.alt}`)
+    : title;
+
   return (
-    <figure style={{ margin: '0 0 20px', padding: 0 }}>
+    <figure
+      itemScope
+      itemType="https://schema.org/ImageObject"
+      style={{ margin: '0 0 20px', padding: 0 }}
+    >
       {/* 메인 이미지 */}
       <div
         style={{
@@ -68,14 +76,19 @@ export default function BlogHeroImage({ images, title, priority = true }: Props)
       >
         <Image
           src={current.url}
-          alt={current.alt || title}
+          alt={enrichedAlt}
           fill
           sizes="(max-width: 780px) 100vw, 720px"
           style={{ objectFit: 'cover', transition: 'opacity 0.3s ease' }}
           priority={priority && safeActiveIdx === 0}
+          loading={priority && safeActiveIdx === 0 ? undefined : 'lazy'}
           onError={() => setLoadError(prev => new Set(prev).add(currentOrigIdx))}
           unoptimized={!isOptimizable(current.url)}
+          itemProp="url"
         />
+        <meta itemProp="width" content="1200" />
+        <meta itemProp="height" content="630" />
+        <meta itemProp="name" content={enrichedAlt} />
 
         {/* 이미지 카운터 (우상단) */}
         {total > 1 && (
@@ -134,10 +147,13 @@ export default function BlogHeroImage({ images, title, priority = true }: Props)
 
       {/* 캡션 */}
       {current.caption && (
-        <figcaption style={{
-          fontSize: 11, color: 'var(--text-tertiary)',
-          textAlign: 'center', marginTop: 4, lineHeight: 1.5,
-        }}>
+        <figcaption
+          itemProp="caption"
+          style={{
+            fontSize: 11, color: 'var(--text-tertiary)',
+            textAlign: 'center', marginTop: 4, lineHeight: 1.5,
+          }}
+        >
           {current.caption}
         </figcaption>
       )}
