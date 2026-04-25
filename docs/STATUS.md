@@ -1,3 +1,40 @@
+# 카더라 STATUS — 세션 175 (2026-04-25)
+
+## 세션 175 — DYNAMIC_SERVER_USAGE 추가 페이지 + 트리거 config 참조 + 93편 벌크
+
+### Track 1 — 추가 500 페이지 force-dynamic 적용 ✅
+s174 fix (blog/[slug] + stock/[symbol]) 외 동일 패턴 3개 추가 발견 (확정 500):
+- `blog/series/[slug]`: revalidate=3600 → `dynamic='force-dynamic'`
+- `calc/topic/[keyword]`: revalidate=86400 → `dynamic='force-dynamic'`
+- `stock/sector/[name]`: revalidate=3600 + createSupabaseServer → `dynamic='force-dynamic'`
+
+다른 30+ 페이지 표본 16개 200 OK 확인 → prerender 베이스 또는 s168 패턴 미적용으로 안전.
+
+### Track 2 — validate_blog_post 트리거 config 참조 ✅
+**문제**: 트리거 함수가 `v_daily_count >= 80`, `v_hourly_count >= 80` 하드코딩.
+
+**마이그레이션** (`s175_validate_blog_post_config_limits`):
+- `blog_publish_config` 에 `hourly_create_limit integer DEFAULT 80` 컬럼 신규
+- 트리거 수정: `daily_create_limit / hourly_create_limit` 동적 SELECT 후 비교
+
+### Track 3 — 93편 미생성 벌크 재실행 ✅
+- limit 임시 상향 (daily 80→300, hourly 80→200)
+- bulk run 결과: ok=55, skipped=14, failed=24 → DB s170-bulk **69 → 124편** (+55)
+- 카테고리: apt=78, stock=18, finance=14, unsold=3, general=11
+- limit 80/80 원복 ✅
+
+### 위기 대응 — DB 과부하 보고
+- 사용자 보고: 사이트 타임아웃. 확인 결과 벌크 자체 종료, DB pool 49 idle / 2 active 정상
+- 사이트 200 OK 복구 확인
+
+### TODO — cache 전략 (다음 세션)
+force-dynamic 으로 매 요청 ~5 RPC 호출. 개선:
+- `unstable_cache()` 로 getPostBySlug / get_related_posts / get_blog_sidebar_bundle 래핑 (slug 키, 5분 TTL)
+- 또는 page 분할: 정적 본문 + 동적 인증 영역
+- Vercel CDN edge cache (Cache-Control 응답 헤더)
+
+---
+
 # 카더라 STATUS — 세션 176 (2026-04-25)
 
 ## 세션 176 — Session 145 CTA 리버트 + 실시간 접속자
