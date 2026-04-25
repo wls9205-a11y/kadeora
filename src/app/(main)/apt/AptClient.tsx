@@ -25,6 +25,7 @@ import LandmarkAptCards from '@/components/LandmarkAptCards';
 import TrendingKeywords from '@/components/TrendingKeywords';
 import { isTossMode } from '@/lib/toss-mode';
 import TossTeaser from '@/components/TossTeaser';
+import FallbackThumb from '@/components/FallbackThumb';
 
 export default function AptClient({ apts, unsold = [], redevelopment = [], transactions = [], unsoldSummary, alertCounts = {}, regionStats = [], unsoldMonthly = [], tradeMonthly = [], ongoingApts = [], redevTotalCount = 0, tradeTotalCount = 0, tradeByRegion = {}, redevByRegion = {}, subTotalCount = 0, unsoldTotalCount = 0, ongoingTotalCount = 0, dataFreshness = { sub: '', trade: '', unsold: '', redev: '' }, redevRedevCount = 0, redevRebuildCount = 0, aptImageMap = {}, aptEngageMap = {} }: { apts: any[]; unsold?: any[]; redevelopment?: any[]; transactions?: any[]; unsoldSummary?: any; alertCounts?: Record<string, number>; lastRefreshed?: string | null; regionStats?: { name: string; total: number; open: number; upcoming: number; closed: number }[]; unsoldMonthly?: any[]; tradeMonthly?: any[]; ongoingApts?: any[]; redevTotalCount?: number; tradeTotalCount?: number; tradeByRegion?: Record<string, number>; redevByRegion?: Record<string, number>; subTotalCount?: number; unsoldTotalCount?: number; ongoingTotalCount?: number; dataFreshness?: { sub: string; trade: string; unsold: string; redev: string }; redevRedevCount?: number; redevRebuildCount?: number; aptImageMap?: Record<string, string>; aptEngageMap?: Record<string, { views: number; comments: number; interest: number }> }) {
   const searchParams = useSearchParams();
@@ -317,23 +318,33 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
         return (
           <div style={{ marginBottom: 8, padding: 10, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)' }}>
             <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>📅 이번 주 청약 D-day</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              {ddayList.map((a: any) => (
-                <Link key={a.id} href={`/apt/${a.id}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', textDecoration: 'none', color: 'inherit', padding: '5px 4px', borderRadius: 'var(--radius-xs)', borderBottom: '1px solid var(--border)' }}>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.house_nm}</div>
-                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{a.region_nm} · {a.isOpen ? '접수중' : '접수예정'}</div>
-                  </div>
-                  <span style={{
-                    fontSize: 'var(--fs-sm)', fontWeight: 800, flexShrink: 0, marginLeft: 8,
-                    padding: '3px 10px', borderRadius: 'var(--radius-xs)',
-                    color: a.dday <= 1 ? 'var(--accent-red)' : a.dday <= 3 ? 'var(--accent-orange)' : 'var(--brand)',
-                    background: a.dday <= 1 ? 'rgba(255,107,107,0.1)' : a.dday <= 3 ? 'rgba(255,159,67,0.1)' : 'var(--brand-bg)',
-                  }}>
-                    {a.dday === 0 ? 'D-Day' : a.dday > 0 ? `D-${a.dday}` : `D+${Math.abs(a.dday)}`}
-                  </span>
-                </Link>
-              ))}
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              {ddayList.map((a: any) => {
+                const statusColor = a.isOpen ? 'var(--accent-green)' : 'var(--accent-blue)';
+                const ddayColor = a.dday <= 1 ? 'var(--accent-red)' : a.dday <= 3 ? 'var(--accent-orange)' : 'var(--brand)';
+                return (
+                  <Link key={a.id} href={`/apt/${a.id}`} style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none', color: 'inherit', padding: '9px 6px', borderBottom: '1px solid rgba(30,50,88,0.25)' }}>
+                    <FallbackThumb name={a.house_nm || ''} size={48} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.house_nm}</div>
+                      <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{a.region_nm}{a.tot_supply_hshld_co ? ` · ${a.tot_supply_hshld_co.toLocaleString()}세대` : ''}</div>
+                      <div style={{ marginTop: 2 }}>
+                        <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 5px', borderRadius: 4, background: `color-mix(in srgb, ${statusColor} 12%, transparent)`, color: statusColor }}>
+                          {a.isOpen ? '접수중' : '예정'}
+                        </span>
+                      </div>
+                    </div>
+                    <span style={{
+                      fontSize: 10, fontWeight: 700, flexShrink: 0,
+                      padding: '1px 5px', borderRadius: 4,
+                      color: ddayColor,
+                      background: `color-mix(in srgb, ${ddayColor} 12%, transparent)`,
+                    }}>
+                      {a.dday === 0 ? 'D-Day' : a.dday > 0 ? `D-${a.dday}` : `D+${Math.abs(a.dday)}`}
+                    </span>
+                  </Link>
+                );
+              })}
             </div>
           </div>
         );

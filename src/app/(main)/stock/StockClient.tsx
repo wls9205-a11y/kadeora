@@ -22,6 +22,7 @@ import TrendingKeywords from '@/components/TrendingKeywords';
 import { isTossMode } from '@/lib/toss-mode';
 import TossTeaser from '@/components/TossTeaser';
 import EngageRow from '@/components/EngageRow';
+import FallbackThumb from '@/components/FallbackThumb';
 
 interface Stock {
   symbol: string; name: string; market: string; price: number; change_amt: number;
@@ -302,20 +303,21 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
     const col = pct > 0 ? stockUpColor(!isGlobal) : pct < 0 ? stockDownColor(!isGlobal) : 'var(--stock-flat)';
     return (
       <Link href={`/stock/${encodeURIComponent(s.symbol)}`} style={{
-        display: 'flex', alignItems: 'center', gap: 8, padding: '6px 10px',
+        display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px',
         borderBottom: '1px solid var(--border)', textDecoration: 'none',
         background: 'var(--bg-surface)', transition: 'background .1s',
       }} className="kd-card-hover">
         <span style={{ fontSize: 10, color: 'var(--text-tertiary)', minWidth: 20, textAlign: 'right', fontFamily: 'monospace' }}>{rank}</span>
+        <FallbackThumb name={s.name || s.symbol || '?'} size={28} />
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</div>
+          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</div>
           {s.sector && <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{s.sector}</div>}
         </div>
         <div style={{ textAlign: 'right', flexShrink: 0, minWidth: 70 }}>
-          <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>
+          <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>
             {pct === 0 ? '—' : isGlobal ? `$${Number(s.price)?.toFixed(2)}` : fmt(Number(s.price))}
           </div>
-          <div style={{ fontSize: 11, fontWeight: 700, color: col, fontVariantNumeric: 'tabular-nums' }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: col, fontVariantNumeric: 'tabular-nums' }}>
             {pct > 0 ? '▲' : pct < 0 ? '▼' : ''}{Math.abs(pct).toFixed(2)}%
           </div>
         </div>
@@ -509,9 +511,9 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
                 ? (ind.krStyle ? stockDownColor(true) : stockDownColor(false))
                 : 'var(--text-tertiary)';
             return (
-              <div key={ind.label} style={{ background: 'var(--bg-surface)', padding: '8px 8px', borderLeft: `3px solid ${color}`, borderRadius: 0 }}>
-                <div style={{ fontSize: 10, color: 'var(--text-tertiary)', letterSpacing: '0.3px' }}>{ind.label}</div>
-                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>{ind.val}</div>
+              <div key={ind.label} style={{ background: 'var(--bg-surface)', padding: '8px 12px', border: '1px solid var(--border)', borderRadius: 8 }}>
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)', letterSpacing: '0.3px', fontWeight: 600 }}>{ind.label}</div>
+                <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>{ind.val}</div>
                 {ind.pct !== 0 && <div style={{ fontSize: 10, color, fontWeight: 700 }}>{ind.pct > 0 ? '▲' : '▼'}{Math.abs(ind.pct).toFixed(2)}%</div>}
               </div>
             );
