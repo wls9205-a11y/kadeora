@@ -5,7 +5,7 @@ import CompareClient from './CompareClient';
 import Disclaimer from '@/components/Disclaimer';
 import type { Metadata } from 'next';
 
-export const revalidate = 300;
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: '종목 비교 — 주식 재무·시세·배당 비교 분석',

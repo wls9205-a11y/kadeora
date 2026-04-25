@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   other: { 'naver:author': '카더라', 'naver:written_time': new Date().toISOString(), 'naver:updated_time': new Date().toISOString(), 'dg:plink': SITE_URL + '/blog/series' },
 };
 
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
 
 export default async function BlogSeriesPage() {
   let seriesList: any[] = [];
