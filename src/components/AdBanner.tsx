@@ -54,7 +54,8 @@ export default function AdBanner() {
         <div style={{
           background: 'var(--bg-surface)',
           borderRadius: 'var(--radius-md)', overflow: 'hidden',
-          border: '1px solid var(--border)',
+          border: '1.5px solid rgba(212,168,83,0.4)', // s173: 광고판 금테 (TODO: 'AD' 라벨 예비)
+          boxShadow: '0 0 0 1px rgba(212,168,83,0.08)',
           opacity: visible ? 1 : 0.3,
           transform: visible ? 'translateY(0)' : 'translateY(3px)',
           transition: 'opacity 0.25s, transform 0.25s',

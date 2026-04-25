@@ -17,7 +17,6 @@ import EmptyState from '@/components/EmptyState';
 import { isTossMode } from '@/lib/toss-mode';
 import TossTeaser from '@/components/TossTeaser';
 import SectionShareButton from '@/components/SectionShareButton';
-import AttendanceBanner from '@/components/AttendanceBanner';
 import DailyReportCard from '@/components/DailyReportCard';
 import LiveActivityIndicator from '@/components/LiveActivityIndicator';
 import PostReactions from '@/components/PostReactions';
@@ -417,19 +416,51 @@ export default function FeedClient({
         <ProfileCompletionBar />
         <div className="listing-grid">
           {visiblePosts.map((post: PostWithProfile, i: number) => {
+            // s173: 비로그인 유저 컴팩트 CTA — 3번째 글 직후 (i===2). RelatedContentCard (i===3) 와 별개.
+            const inlineCta = (i === 2 && !currentUserId) ? (
+              <div key="feed-inline-cta" style={{
+                display: 'flex', alignItems: 'center', gap: 10,
+                padding: '10px 14px', margin: '2px 0',
+                background: 'var(--bg-surface)', border: '1px solid var(--border)',
+                borderRadius: 12,
+              }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.3 }}>
+                    카더라 회원이 되면
+                  </div>
+                  <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    알림 · 댓글 · 포인트 · 글 전문 보기
+                  </div>
+                </div>
+                <Link
+                  href={`/login?redirect=${encodeURIComponent(pathname)}&source=feed_inline_cta`}
+                  style={{
+                    flexShrink: 0, padding: '8px 14px', borderRadius: 10,
+                    background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)',
+                    fontSize: 12, fontWeight: 700, textDecoration: 'none',
+                  }}
+                >
+                  카카오 가입
+                </Link>
+              </div>
+            ) : null;
+
             // ── post_type별 특수 카드 렌더링 ──
             const postType = post.post_type ?? 'post';
             if (postType === 'poll') {
               const nodes: React.ReactNode[] = [<FeedPollCard key={post.id} post={post} />];
-              if (i === 0 && currentUserId) nodes.push(<AttendanceBanner key="attend" />);
+              // s173: AttendanceBanner 피드 내 삽입 제거 (GlobalMissionBar 전역 유지)
+              if (inlineCta) nodes.push(inlineCta);
               return nodes;
             }
             if (postType === 'vs') {
               const nodes: React.ReactNode[] = [<FeedVSCard key={post.id} post={post} />];
+              if (inlineCta) nodes.push(inlineCta);
               return nodes;
             }
             if (postType === 'predict') {
               const nodes: React.ReactNode[] = [<FeedPredictCard key={post.id} post={post} />];
+              if (inlineCta) nodes.push(inlineCta);
               return nodes;
             }
 
@@ -589,7 +620,8 @@ export default function FeedClient({
             );
 
             const nodes: React.ReactNode[] = [card];
-            if (i === 0 && currentUserId) nodes.push(<AttendanceBanner key="attend" />);
+            // s173: AttendanceBanner 피드 내 삽입 제거 (GlobalMissionBar 전역 유지)
+            if (inlineCta) nodes.push(inlineCta);
             if (i === 3 && !currentUserId) {
               nodes.push(<RelatedContentCard key="feed-cta" type="feed" />);
             }

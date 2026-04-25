@@ -1,10 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useAuth } from '@/components/AuthProvider';
-
-import { useState, useEffect } from 'react';
 
 const MENU = [
   { href: '/feed', icon: '📋', label: '피드' },
@@ -17,16 +14,6 @@ const MENU = [
 export default function Sidebar() {
   const pathname = usePathname();
   const { userId } = useAuth();
-  const [unread, setUnread] = useState(0);
-
-  useEffect(() => {
-    if (!userId) { setUnread(0); return; }
-    if (typeof window !== 'undefined' && window.innerWidth < 900) return;
-    const sb = createSupabaseBrowser();
-    sb.from('notifications').select('id', { count: 'exact', head: true })
-      .eq('user_id', userId).eq('is_read', false)
-      .then(({ count }) => setUnread(count ?? 0));
-  }, [userId]);
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/');
 
@@ -80,24 +67,6 @@ export default function Sidebar() {
           onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'var(--bg-hover)'}
           onMouseLeave={e => { if (!isActive('/profile')) (e.currentTarget as HTMLElement).style.background = 'transparent'; }}>
             <span style={{ fontSize: 'var(--fs-lg)' }}>👤</span> 내 프로필
-          </Link>
-          <Link href="/notifications" style={{
-            display: 'flex', alignItems: 'center', gap: 10,
-            padding: 'var(--sp-md) var(--card-p)', borderRadius: 'var(--radius-md)',
-            textDecoration: 'none', fontSize: 'var(--fs-base)',
-            color: 'var(--text-primary)', background: 'transparent',
-          }}
-          onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'var(--bg-hover)'}
-          onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>
-            <span style={{ fontSize: 'var(--fs-lg)' }}>🔔</span>
-            알림
-            {unread > 0 && (
-              <span style={{
-                marginLeft: 'auto', background: 'var(--brand)', color: 'var(--text-inverse)',
-                fontSize: 'var(--fs-xs)', fontWeight: 600, borderRadius: 'var(--radius-md)',
-                padding: '3px 8px', minWidth: 18, textAlign: 'center',
-              }}>{unread}</span>
-            )}
           </Link>
           <Link href="/write" style={{
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 'var(--sp-sm)',

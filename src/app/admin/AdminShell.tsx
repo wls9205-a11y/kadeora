@@ -48,7 +48,7 @@ export default function AdminShell() {
         setHp({ s: d.healthScore, cr: Math.round(k.cronSuccess / Math.max(k.cronSuccess + k.cronFail, 1) * 100), pv: k.pvToday || 0, nu: k.newUsersToday || 0, iss: k.issuePending || 0 });
       }
     }).catch(() => {});
-    ld(); const t = setInterval(ld, 60000); return () => clearInterval(t);
+    ld(); const t = setInterval(ld, 300000); return () => clearInterval(t); // s173: 60s → 5min (Supabase 부하 완화)
   }, []);
 
   const sc = hp ? hp.s >= 71 ? '#10B981' : hp.s >= 41 ? '#F59E0B' : '#EF4444' : '#666';

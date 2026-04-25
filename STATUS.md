@@ -1,3 +1,62 @@
+# Session 173 — P0 크론 stagger + P1 피드 정비 + s168 build fix 재적용 (2026-04-25 KST)
+
+## 배경
+s169+s170 머지가 origin 에서 33e071fd 로 revert 되며 s168 build fix 도 함께 사라짐.
+이번 세션은 (a) P0 크론 안정화 + (b) P1 피드 정비 + (c) s168 build fix 재적용 (cherry-pick).
+신규 컴포넌트 (LiveActivityBar/LiveDiscussionCards/DailyReportBadge) 생성 금지 — 기존 컴포넌트 수정만.
+
+## P0 (Supabase 연결풀 보호)
+1. **`vercel.json` 크론 stagger** — 매시 :00 동시 발사 5개 분산
+   - `seed-posts`: `0 * * * *` (유지, 가벼움)
+   - `refresh-mv`: `0 * * * *` → `12 * * * *`
+   - `collect-site-images`: `0 * * * *` → `22 * * * *`
+   - `blog-generate-images`: `0 * * * *` → `32 * * * *`
+   - `blog-enrich-rewrite`: `0 * * * *` → `42 * * * *`
+   - `0 */N * * *` 카덴스 크론은 의미 보존 위해 미변경
+2. **`blog-quality-score/route.ts`** — `BATCH = 200 → 50` (Vercel 60s 제한 + DB 부하 보호)
+3. **`AdminShell.tsx` + `NotificationBell.tsx`** — `setInterval 60s → 300s`
+4. **`apt/search`** — RPC + revalidate=300 + perPage=30 이미 적용 (SKIP)
+5. **`issue-draft` 중복** — 단일 entry, 중복 없음 (SKIP)
+
+## P1 (피드 UX)
+1. **`Sidebar.tsx`** — `🔔 알림` Link 제거 + orphan state/import 정리
+2. **`AnonymousFeedHero.tsx`** — 거대 `🚀` CTA 카드 블록 제거. 가치/통계/청약/블로그/토픽 유지
+3. **`QuickPostBar.tsx`** — collapsed state 1줄 슬림 (24px 아바타 + "무슨 생각이세요?")
+4. **`AdBanner.tsx`** — 금색 1.5px 테두리 + soft glow
+5. **`FeedClient.tsx`** — AttendanceBanner 양쪽 push 경로 + import 제거. 비로그인 i===2 컴팩트 CTA (poll/vs/predict/normal 모두)
+6. **면책 문구** — s172 가 이미 변경 (SKIP)
+
+## s168 build fix 재적용 (cherry-pick)
+- `e9c0256a → 66d29116`: 4 cron force-dynamic + us-market-cron-helpers lazy
+- `e7c780a9 → 71284cd2`: 5 page.tsx generateStaticParams=[] + 17 route.ts force-dynamic
+- ⚠️ blog/[slug]/page.tsx 는 generateStaticParams 만 변경 (렌더링 로직 미변경)
+
+## 검증
+- `npx tsc --noEmit --skipLibCheck` → 0 errors
+- `npm run build` (`.env.local` 제거 상태) → exit=0
+
+## CTA 보존 확인 (s145 재발 방지)
+- 카카오 CTA 3곳 건재: i===2 컴팩트 (신규) / i===3 RelatedContentCard / following 탭 안내 (line 382)
+- AnonymousFeedHero 거대 CTA 만 제거 — 컴팩트 CTA 가 대체
+
+## Forbidden 영역 준수
+- ❌ blog/[slug]/page.tsx 렌더링 로직 미변경 — generateStaticParams 만 변경
+- ❌ Navigation.tsx 신규 컴포넌트 삽입 안 함
+- ❌ LiveActivityBar/LiveDiscussionCards/DailyReportBadge 신규 컴포넌트 생성 안 함
+- ❌ award_points/deduct_points RPC 미변경
+- ❌ vercel.json 크론 path 미변경 (schedule 만 변경)
+
+## 다음 세션 잔여
+- GitHub PAT 토큰 revoke
+- Edge Function 2개 삭제 (`github-commit-patch`, `github-read-file`)
+- Supabase Auth Leaked password protection
+- RLS `auth_rls_initplan` 99건 래핑
+- `mv_apt_pulse` RPC+cache
+- `naver-complex-sync` 401
+- 매 2/4/6 시간 :00 크론 stagger 필요 여부 모니터링
+
+---
+
 # Session 161 — 위성 라우트 + VACUUM 크론 복구 (2026-04-24 KST)
 
 ## 작업 요약

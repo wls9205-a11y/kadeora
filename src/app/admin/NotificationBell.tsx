@@ -47,7 +47,7 @@ export default function NotificationBell() {
 
   useEffect(() => {
     load();
-    const t = setInterval(load, 60_000);
+    const t = setInterval(load, 300_000); // s173: 60s → 5min (Supabase 부하 완화)
     return () => clearInterval(t);
   }, [load]);
 

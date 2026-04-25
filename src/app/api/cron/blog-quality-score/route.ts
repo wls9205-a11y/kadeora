@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
 
-const BATCH = 200;
+const BATCH = 50; // s173: 200 → 50 (Vercel 함수 60s 제한 + Supabase 연결풀 보호)
 
 /**
  * 블로그 품질 자동 평가 크론

@@ -138,7 +138,7 @@
     },
     {
       "path": "/api/cron/refresh-mv",
-      "schedule": "0 * * * *"
+      "schedule": "12 * * * *"
     },
     {
       "path": "/api/cron/auto-verify-households",
@@ -198,7 +198,7 @@
     },
     {
       "path": "/api/cron/collect-site-images",
-      "schedule": "0 * * * *"
+      "schedule": "22 * * * *"
     },
     {
       "path": "/api/cron/collect-complex-images",
@@ -330,11 +330,11 @@
     },
     {
       "path": "/api/cron/blog-generate-images",
-      "schedule": "0 * * * *"
+      "schedule": "32 * * * *"
     },
     {
       "path": "/api/cron/blog-enrich-rewrite",
-      "schedule": "0 * * * *"
+      "schedule": "42 * * * *"
     },
     {
       "path": "/api/cron/blog-upcoming-projects",

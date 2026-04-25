@@ -76,40 +76,7 @@ export default function AnonymousFeedHero({ data }: { data: HomepageData | null 
 
   return (
     <div style={{ marginBottom: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
-      {/* 1. CTA 카드 (가장 중요) */}
-      <div style={{
-        padding: 'clamp(20px, 4vw, 28px)',
-        background: 'linear-gradient(135deg, rgba(254,229,0,0.08) 0%, rgba(37,99,235,0.06) 100%)',
-        border: '1px solid rgba(254,229,0,0.2)',
-        borderRadius: 16,
-        textAlign: 'center',
-      }}>
-        <div style={{ fontSize: 28, marginBottom: 8 }}>🚀</div>
-        <h2 style={{ margin: 0, fontSize: 'clamp(18px, 3vw, 22px)', fontWeight: 900, color: 'var(--text-primary)' }}>
-          {cta.primary?.label || '카카오로 3초 가입'}
-        </h2>
-        <p style={{ margin: '8px 0 16px', fontSize: 'var(--fs-sm, 13px)', color: 'var(--text-secondary)' }}>
-          {cta.subtitle}
-        </p>
-        <Link
-          href={cta.primary?.href || '/login?source=anon_feed_hero'}
-          style={{
-            display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-            padding: '12px 28px', borderRadius: 12,
-            background: '#FEE500', color: '#191919',
-            fontWeight: 800, fontSize: 'var(--fs-md, 15px)',
-            textDecoration: 'none',
-            boxShadow: '0 4px 12px rgba(254, 229, 0, 0.4)',
-          }}
-        >
-          💬 {cta.primary?.label || '카카오로 3초 가입'}
-        </Link>
-        {cta.social_proof && (
-          <div style={{ marginTop: 10, fontSize: 'var(--fs-xs, 12px)', color: 'var(--text-tertiary)' }}>
-            👥 {cta.social_proof}
-          </div>
-        )}
-      </div>
+      {/* s173: 거대 🚀 CTA 카드 제거. 컴팩트 1줄 CTA 는 FeedClient 가 피드 중간 (i===2) 에 삽입. */}
 
       {/* 2. 가치 제안 그리드 */}
       <div style={{
