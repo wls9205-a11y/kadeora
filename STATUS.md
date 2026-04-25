@@ -57,6 +57,84 @@ s169+s170 머지가 origin 에서 33e071fd 로 revert 되며 s168 build fix 도 
 
 ---
 
+# Session 174 — 크론 stagger 확장 + canonical 정규화 + 진단 (2026-04-25 KST)
+
+## 실제 변경 3건 (코드)
+1. **`vercel.json`** — 매시 :00 발사 multi-hour 크론 5개 stagger
+   - `check-price-alerts`: `0 */2` → `9 */2`
+   - `issue-preempt`: `0 */2` → `11 */2`
+   - `apt-parse-announcement`: `0 */4` → `43 */4`
+   - `indexnow-new-content`: `0 */4` → `9 */4`
+   - `blog-upcoming-projects`: `0 */4` → `49 */4`
+   - 매 6시간 (`0 */6`) 4개 (`apt-parse-pdf-pricing`, `indexnow-mass`, `refresh-trending`, `auto-verify-households`)는 빈도 낮아 미변경
+2. **`blog/[slug]/page.tsx:265`** — canonical URL 한글 slug 정규화
+   - `${SITE}/blog/${slug}` → `${SITE}/blog/${encodeURIComponent(slug)}`
+   - generateMetadata 내 alternates.canonical 만 변경. 페이지 렌더링 로직 미변경
+3. **`apt/search/page.tsx`** — pg_trgm 인덱스 TODO 주석 추가 (실제 코드 변경 無)
+   - 추가 권장: `CREATE INDEX ... USING gin (apt_name gin_trgm_ops)`
+
+## 진단 결과 (코드 변경 無 — STATUS 기록)
+
+### Task C: 면책 문구
+- 현재 line 1236: "공공 데이터(국토교통부, 한국거래소, 금융위원회 등) 기반의 정보 제공" — s172 가 이미 변경
+- **SKIP** (작업 불필요)
+
+### Task D: 포인트 기능 검증
+- `award_points` RPC 호출 경로 (10+ 지점 확인):
+  - `welcome-bonus` 100P / `feed/short` 10P / `feed/vs` 10P / `comment` 5P / `share` 5P / `chat` 1P
+  - `attendance-check` 10P (+streak7 30P, +streak30 100P)
+  - `profile/mission` 50P / `profile/complete-bonus` 50P / `stock/watchlist` 50/200P
+- `lib/point-rules.ts` POINT_RULES 정의 정상
+- `AuthProvider.points` context → `ProfileHeader` 표시. Navigation 헤더엔 미표시 (디자인 결정)
+- **상태: 정상. 수정 불필요**
+
+### Task F: naver-complex-sync 401 진단
+- 파일: `src/app/api/cron/naver-complex-sync/route.ts`
+- API 호출처:
+  - `https://new.land.naver.com/api/search` (line 30)
+  - `https://fin.land.naver.com/front-api/v1/search/complex` (line 32)
+  - `https://new.land.naver.com/api/complexes/{complexNo}` (line 44)
+- **인증 방식: API 키 無 — Mozilla User-Agent + Referer 헤더로 스크래핑**
+- **401 원인 추정:**
+  1. 네이버가 봇 트래픽 감지 → User-Agent/IP 차단 (가장 가능성 높음)
+  2. Referer 헤더 검증 강화 (네이버 land 도메인 외 거부)
+  3. 일일 호출 한도 (스크래핑이라 공식 한도 없음, 실효적 throttle)
+- **해결 옵션:**
+  - (a) 네이버 부동산 공식 Open API 가입 (`fin.land.naver.com` 비공개라 어려울 수 있음)
+  - (b) User-Agent 로테이션 + 헤더 다양화
+  - (c) Vercel IP 회피 위해 별도 프록시 경유
+  - (d) 크론 빈도 축소 (현 매시 → 6시간마다)
+- **권장: (d) 즉시 적용 후 (b) 점진 도입. 코드 수정은 다음 세션에서**
+
+### Task G: 슬로우 쿼리 인프라
+- `/api/admin/analytics` 만 존재 (page_view 집계)
+- pg_stat_statements 모니터링 엔드포인트 없음
+- **TODO**: `/api/admin/slow-queries` 엔드포인트 추가
+  ```sql
+  SELECT query, calls, mean_exec_time, total_exec_time
+  FROM pg_stat_statements ORDER BY mean_exec_time DESC LIMIT 20;
+  ```
+
+## 검증
+- `npx tsc --noEmit --skipLibCheck` → 0 errors
+- `npm run build` (`.env.local` 제거) → exit=0
+
+## Forbidden 영역 준수
+- ❌ blog/[slug]/page.tsx 렌더링 로직 미변경 (generateMetadata.alternates.canonical 만 변경, 사용자 명시 허용 범위)
+- ❌ Navigation.tsx 미수정
+- ❌ award_points/deduct_points RPC 미수정
+- ❌ vercel.json cron path 미변경 (schedule 만)
+- ❌ LiveActivityBar/LiveDiscussionCards/DailyReportBadge 미수정 (origin/main ff41d3cb 가 재추가했으나 건드리지 않음)
+
+## 수동 처리 필요 (코드 외)
+- GitHub PAT 토큰 revoke → GitHub Settings → Developer settings → PATs
+- RESEND_WEBHOOK_SECRET → Vercel Dashboard → Settings → Environment Variables
+- RLS `auth_rls_initplan` 99건 → Supabase SQL Editor 직접 실행
+- 네이버 부동산 Open API 키 발급 검토 (naver-complex-sync 대안)
+- pg_stat_statements 활성화 확인 + slow query 어드민 라우트 추가
+
+---
+
 # Session 161 — 위성 라우트 + VACUUM 크론 복구 (2026-04-24 KST)
 
 ## 작업 요약

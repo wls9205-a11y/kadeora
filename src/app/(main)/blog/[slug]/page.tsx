@@ -262,7 +262,8 @@ export async function generateMetadata({ params }: Props) {
   // 세션 146 C4: metadata.noindex=true 이면 robots meta 반영 (얇은 콘텐츠)
   const isNoindex = post.metadata && typeof post.metadata === 'object' && (post.metadata as any).noindex === true;
   // 세션 157 B: URL cannibalization 해소 — apt-trade-*, {code}-kos(pi|daq)- 블로그는 canonical 원본 페이지로
-  let canonical = `${SITE}/blog/${slug}`;
+  // s174: 한글 slug 정규화 — encodeURIComponent 로 canonical URL 통일 (네이버/구글 크롤러 호환)
+  let canonical = `${SITE}/blog/${encodeURIComponent(slug)}`;
   const stockSlugMatch = slug.match(/^(\d{6})-kos(pi|daq)-/);
   if (stockSlugMatch) {
     canonical = `${SITE}/stock/${stockSlugMatch[1]}`;

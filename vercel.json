@@ -90,7 +90,7 @@
     },
     {
       "path": "/api/cron/apt-parse-announcement",
-      "schedule": "0 */4 * * *"
+      "schedule": "43 */4 * * *"
     },
     {
       "path": "/api/cron/apt-parse-pdf-pricing",
@@ -178,7 +178,7 @@
     },
     {
       "path": "/api/cron/indexnow-new-content",
-      "schedule": "0 */4 * * *"
+      "schedule": "9 */4 * * *"
     },
     {
       "path": "/api/cron/stock-fundamentals-kr",
@@ -318,7 +318,7 @@
     },
     {
       "path": "/api/cron/check-price-alerts",
-      "schedule": "0 */2 * * *"
+      "schedule": "9 */2 * * *"
     },
     {
       "path": "/api/cron/push-daily-reminder",
@@ -338,7 +338,7 @@
     },
     {
       "path": "/api/cron/blog-upcoming-projects",
-      "schedule": "0 */4 * * *"
+      "schedule": "49 */4 * * *"
     },
     {
       "path": "/api/cron/blog-data-update",
@@ -362,7 +362,7 @@
     },
     {
       "path": "/api/cron/issue-preempt",
-      "schedule": "0 */2 * * *"
+      "schedule": "11 */2 * * *"
     },
     {
       "path": "/api/cron/blog-quality-score",

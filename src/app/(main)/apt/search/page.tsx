@@ -7,6 +7,14 @@ import { fmtAmount } from '@/lib/format';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
 import ShareButtons from '@/components/ShareButtons';
 
+// s174: 검색어 매칭은 RPC search_apt_transactions + apt_name ILIKE 인덱스에 의존.
+// 트래픽 증가 시 pg_trgm 인덱스 추가 권장:
+//   CREATE EXTENSION IF NOT EXISTS pg_trgm;
+//   CREATE INDEX IF NOT EXISTS idx_apt_transactions_apt_name_trgm
+//     ON apt_transactions USING gin (apt_name gin_trgm_ops);
+//   CREATE INDEX IF NOT EXISTS idx_apt_transactions_region_trgm
+//     ON apt_transactions USING gin (region_nm gin_trgm_ops);
+
 export const metadata: Metadata = {
   title: '아파트 실거래가 검색',
   description: '전국 아파트 실거래가를 검색하세요. 단지명, 지역, 면적별 실거래 조회. 카더라에서 최신 거래 내역을 확인하세요.',
