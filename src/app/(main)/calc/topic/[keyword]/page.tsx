@@ -7,7 +7,8 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { jsonLdSafe } from '@/lib/jsonld';
 import { sanitizeHtml } from '@/lib/sanitize-html';
 
-export const revalidate = 86400; // 1일
+// s175: revalidate + return [] (s168 cold-SSR) 조합으로 DYNAMIC_SERVER_USAGE
+export const dynamic = 'force-dynamic';
 export const dynamicParams = true; // s168: 빌드타임 DB 호출 제거, 요청 시 ISR 생성
 
 interface PageProps {

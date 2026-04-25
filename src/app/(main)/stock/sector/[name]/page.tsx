@@ -8,7 +8,8 @@ import { fmtCap, fmtPrice } from '@/lib/format';
 import Disclaimer from '@/components/Disclaimer';
 import ShareButtons from '@/components/ShareButtons';
 
-export const revalidate = 3600;
+// s175: createSupabaseServer (cookies) + revalidate + return [] 조합으로 DYNAMIC_SERVER_USAGE
+export const dynamic = 'force-dynamic';
 export const dynamicParams = true; // s168: 빌드타임 DB 호출 제거, 요청 시 ISR 생성
 
 interface Props { params: Promise<{ name: string }> }

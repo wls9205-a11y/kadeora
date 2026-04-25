@@ -51,7 +51,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export const revalidate = 3600;
+// s175: revalidate(ISR) + return [] (s168 cold-SSR) 조합으로 DYNAMIC_SERVER_USAGE
+export const dynamic = 'force-dynamic';
 
 export default async function SeriesDetailPage({ params }: Props) {
   const { slug } = await params;
