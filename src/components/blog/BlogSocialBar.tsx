@@ -148,9 +148,9 @@ export default function BlogSocialBar({
           style={{
             ...btn,
             cursor: 'default',
-            border: '1px solid rgba(239,68,68,0.18)',
-            background: 'rgba(239,68,68,0.05)',
-            color: '#F87171',
+            border: '1px solid var(--accent-red-bg, rgba(239,68,68,0.18))',
+            background: 'var(--accent-red-bg, rgba(239,68,68,0.05))',
+            color: 'var(--accent-red, #F87171)',
           }}
           aria-label={`좋아요 ${helpfulCount}개`}
         >

@@ -17,14 +17,13 @@ import EmptyState from '@/components/EmptyState';
 import { isTossMode } from '@/lib/toss-mode';
 import TossTeaser from '@/components/TossTeaser';
 import SectionShareButton from '@/components/SectionShareButton';
-import DailyReportCard from '@/components/DailyReportCard';
-import LiveActivityIndicator from '@/components/LiveActivityIndicator';
 import PostReactions from '@/components/PostReactions';
 import QuickPostBar from '@/components/feed/QuickPostBar';
 import FeedPollCard from '@/components/feed/FeedPollCard';
 import FeedVSCard from '@/components/feed/FeedVSCard';
 import FeedPredictCard from '@/components/feed/FeedPredictCard';
-import FeedStatusBar from '@/components/feed/FeedStatusBar';
+import LiveActivityBar from '@/components/feed/LiveActivityBar';
+import LiveDiscussionCards from '@/components/feed/LiveDiscussionCards';
 import { timeAgo, numFmt } from '@/lib/format';
 import { useAuth } from '@/components/AuthProvider';
 
@@ -294,9 +293,9 @@ export default function FeedClient({
           <SectionShareButton section="feed" label="카더라 커뮤니티" pagePath="/feed" />
         </div>
 
-        <FeedStatusBar />
+        <LiveActivityBar />
 
-        <DailyReportCard />
+        <LiveDiscussionCards />
 
         <QuickPostBar category={activeCategory !== 'all' && activeCategory !== 'following' ? activeCategory : 'free'} regionId={activeRegion} />
 

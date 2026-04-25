@@ -1,3 +1,63 @@
+# 카더라 STATUS — 세션 173 (2026-04-25)
+
+## 세션 173 — 잔여 3트랙 병렬 (CSS 변수화 + 피드 리디자인 재적용 + 105편 재생성)
+
+### 배포 상태 (s172 base)
+- live: dpl_GsecdhgYeFKr1SuxhAgJAyGFKMDN (s172, 7e724607) ✅ promote 완료
+- alias 핀 해제 → 이번 push 자동 promote 복귀
+
+### 트랙 1 — 하드코딩 hex → CSS vars (최소 적용) ✅
+s169-s172 신규/수정 5파일 grep 결과 실제 노출된 hex 만 교체:
+- `BlogSocialBar.tsx` L153 `#F87171` → `var(--accent-red, #F87171)` + 인접 rgba 도 var bg
+- `RelatedBlogsSection.tsx` L121 strategy badge `#F59E0B` → `var(--warning, #F59E0B)` (배경)
+- `BlogImageCarousel`/`BlogFooterMeta`/page.tsx 면책 — 이미 var(--blog-*) 토큰 사용 → 추가 변경 불필요
+- 카카오 브랜드 컬러 (#FEE500 / #191919) 의도적 유지
+
+### 트랙 2 — b86e54a3 피드 리디자인 재적용 ✅
+**원인 진단**: Vercel runtime logs (production filter) 메시지가 `[Error: An error occurred i...` 로 truncated → full stack trace 미수집. Deploy 시점 transient (cold start, DB throttle) 가능성 높음. 컴포넌트 자체 코드 검사 시 모두 'use client' 깔끔.
+
+**적용** (worktree 격리 진단 + 안전 cherry-pick):
+- 신규 `src/components/feed/DailyReportBadge.tsx` (40 lines, 'use client' Link + styled-jsx)
+- 신규 `src/components/feed/LiveActivityBar.tsx` (124 lines, get_active_visitors 30s polling + discussion_topics 2min count)
+- 신규 `src/components/feed/LiveDiscussionCards.tsx` (87 lines, discussion_topics 가로스크롤)
+- `Navigation.tsx`: import + 로고 직후 `<DailyReportBadge />` 마운트
+- `FeedClient.tsx`: DailyReportCard / LiveActivityIndicator / FeedStatusBar 3종 import 제거 → LiveActivityBar / LiveDiscussionCards 로 교체
+- 기존 deprecated 파일 (DailyReportCard.tsx, LiveActivityIndicator.tsx, FeedStatusBar.tsx) 디스크 잔존 (회귀 안전망)
+- worktree `kadeora-diag` 정리
+
+### 트랙 3 — 미존재 주제 선별 + 재생성 ✅
+**선별 (pg_trgm GIN idx_blog_title_trgm, similarity threshold 0.25)**:
+- 162 topics × 7,849 published posts 매칭
+- truly_missing (sim < 0.25): **105건**
+- borderline (0.25-0.4): 52건
+- likely_exists (>0.4): 5건
+
+**스크립트 보강**: `scripts/generate-bulk-posts.ts` 에 `--idxs=1,3,5...` 임의 인덱스 필터 옵션 추가 (range 외 산발 인덱스 처리 가능)
+
+**재생성**: 105 missing idxs 로 background bulk run 시작 (B0wmmhqkv)
+- daily_create_limit 80 → 250 임시 상향
+- CONCURRENCY 3, DELAY 5s 유지
+- 완료 후 limit 80 원복 예정
+
+### 적용 파일
+- `src/components/blog/BlogSocialBar.tsx` (Track 1)
+- `src/components/blog/RelatedBlogsSection.tsx` (Track 1)
+- `src/components/feed/DailyReportBadge.tsx` (Track 2 신규)
+- `src/components/feed/LiveActivityBar.tsx` (Track 2 신규)
+- `src/components/feed/LiveDiscussionCards.tsx` (Track 2 신규)
+- `src/components/Navigation.tsx` (Track 2)
+- `src/app/(main)/feed/FeedClient.tsx` (Track 2)
+- `scripts/generate-bulk-posts.ts` (Track 3 — --idxs 옵션)
+
+### 결과 요약
+| 트랙 | 결과 |
+|---|---|
+| 1 | 2 hex → CSS var 교체 (실제 발견된 것만) |
+| 2 | 3 컴포넌트 신규 + Navigation/FeedClient 재적용 |
+| 3 | 105 missing 선별 + bg bulk run 시작 |
+
+---
+
 # 카더라 STATUS — 세션 172 (2026-04-25)
 
 ## 세션 172 — 블로그 시각 강화 6트랙 병렬 (배포 1회)

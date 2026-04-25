@@ -118,7 +118,7 @@ export default async function RelatedBlogsSection({ blogId, className }: Props) 
                   <span style={{
                     fontSize: 10, fontWeight: 800,
                     padding: '2px 8px', borderRadius: 999,
-                    background: '#F59E0B', color: '#111',
+                    background: 'var(--warning, #F59E0B)', color: '#111',
                   }}>⚡ 전략</span>
                 )}
               </div>

@@ -227,9 +227,19 @@ function parseArgs() {
   const dryRun = argv.includes('--dry-run');
   const fromI = argv.indexOf('--from');
   const toI = argv.indexOf('--to');
+  const idxsI = argv.indexOf('--idxs');
   const from = fromI >= 0 ? parseInt(argv[fromI + 1] || '0', 10) : 0;
   const to = toI >= 0 ? parseInt(argv[toI + 1] || String(TOPICS.length), 10) : TOPICS.length;
-  return { dryRun, from, to };
+  // s173: --idxs=1,3,5  또는  --idxs 1,3,5  로 임의 인덱스 필터
+  let idxs: number[] | null = null;
+  if (idxsI >= 0) {
+    const raw = argv[idxsI + 1] || '';
+    idxs = raw.split(',').map((s) => parseInt(s.trim(), 10)).filter((n) => Number.isFinite(n));
+  } else {
+    const eq = argv.find((a) => a.startsWith('--idxs='));
+    if (eq) idxs = eq.slice(7).split(',').map((s) => parseInt(s.trim(), 10)).filter((n) => Number.isFinite(n));
+  }
+  return { dryRun, from, to, idxs };
 }
 
 async function generateContent(ai: Anthropic, topic: Topic): Promise<{ content: string; excerpt: string; tldr: string }> {
@@ -321,7 +331,7 @@ async function processOne(ai: Anthropic, admin: SupabaseClient, topic: Topic, dr
 }
 
 async function main() {
-  const { dryRun, from, to } = parseArgs();
+  const { dryRun, from, to, idxs } = parseArgs();
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
   const supaUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -334,8 +344,14 @@ async function main() {
   const ai = new Anthropic({ apiKey });
   const admin = createClient(supaUrl, supaKey, { auth: { persistSession: false } });
 
-  const slice = TOPICS.slice(from, to);
-  console.log(`Processing ${slice.length} topics (${from}..${to - 1})${dryRun ? ' [DRY-RUN]' : ''}`);
+  // s173: --idxs 가 주어지면 임의 인덱스 필터 (truly_missing 105건 등)
+  const slice = idxs && idxs.length
+    ? TOPICS.filter((t) => idxs.includes(t.idx))
+    : TOPICS.slice(from, to);
+  const sliceLabel = idxs && idxs.length
+    ? `idxs=[${idxs.length} items]`
+    : `${from}..${to - 1}`;
+  console.log(`Processing ${slice.length} topics (${sliceLabel})${dryRun ? ' [DRY-RUN]' : ''}`);
 
   const stats = { ok: 0, skipped: 0, failed: 0 };
   // s171: BATCH_SIZE 5→3 (Supabase 부하 감소), DELAY 2s→5s
