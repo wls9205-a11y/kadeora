@@ -2,7 +2,8 @@ import { sanitizeHtml } from '@/lib/sanitize-html';
 import { stockColor, stockUpColor, stockDownColor, stockUpHex, stockDownHex, investorColor, signalColor, sentimentColor, sentimentBg, isKRMarket } from '@/lib/stockColor';
 import type { AIComment, StockPriceHistory, StockNews, InvestorFlow, Disclosure } from '@/types/stock';
 export const maxDuration = 30;
-export const revalidate = 300;
+// s174: revalidate(ISR) + cookies()/headers() (createSupabaseServer) 충돌 → DYNAMIC_SERVER_USAGE 500
+export const dynamic = 'force-dynamic';
 import { SITE_URL } from '@/lib/constants';
 
 import { createSupabaseServer } from '@/lib/supabase-server';

@@ -24,8 +24,10 @@ import { parseFaqFromContent } from '@/lib/blog-faq-parser';
 import { timeAgo } from '@/lib/format';
 
 export const maxDuration = 30;
-// 크롤 예산/TTFB 안정화 — 킬러 URL은 generateStaticParams로 빌드 타임 pin, 그 외는 900s ISR
-export const revalidate = 900;
+// s174: revalidate(ISR) + headers()/cookies() 동시 사용 시 Next.js 15 의 DYNAMIC_SERVER_USAGE
+// 충돌 → 전체 페이지 500. force-dynamic 으로 전환 (ISR 손실 대신 안정성).
+// 향후 headers/cookies 호출을 분리하면 ISR 복원 가능.
+export const dynamic = 'force-dynamic';
 import { SITE_URL as SITE } from '@/lib/constants';
 import { enhanceBlogVisuals } from '@/lib/blog-visual-enhancer';
 import ReadingProgress from '@/components/ReadingProgress';
@@ -1311,7 +1313,7 @@ export default async function BlogDetailPage({ params }: Props) {
                 background: 'var(--bg-surface)', border: '1px solid var(--border)',
                 borderRadius: 'var(--radius-md)', textDecoration: 'none', color: 'inherit',
               }}>
-                <span style={{ fontSize: 18, fontWeight: 700, color: i === 0 ? '#ef4444' : i === 1 ? '#f59e0b' : '#6b7280', minWidth: 24 }}>{i + 1}</span>
+                <span style={{ fontSize: 18, fontWeight: 700, color: i === 0 ? 'var(--accent-red, #ef4444)' : i === 1 ? 'var(--warning, #f59e0b)' : 'var(--text-tertiary, #6b7280)', minWidth: 24 }}>{i + 1}</span>
                 <span style={{ fontSize: 13, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.title?.slice(0, 40)}</span>
               </Link>
             ))}
