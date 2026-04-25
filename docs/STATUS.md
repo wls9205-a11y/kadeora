@@ -13,17 +13,20 @@ s169-s172 신규/수정 5파일 grep 결과 실제 노출된 hex 만 교체:
 - `BlogImageCarousel`/`BlogFooterMeta`/page.tsx 면책 — 이미 var(--blog-*) 토큰 사용 → 추가 변경 불필요
 - 카카오 브랜드 컬러 (#FEE500 / #191919) 의도적 유지
 
-### 트랙 2 — b86e54a3 피드 리디자인 재적용 ✅
-**원인 진단**: Vercel runtime logs (production filter) 메시지가 `[Error: An error occurred i...` 로 truncated → full stack trace 미수집. Deploy 시점 transient (cold start, DB throttle) 가능성 높음. 컴포넌트 자체 코드 검사 시 모두 'use client' 깔끔.
+### 트랙 2 — b86e54a3 피드 리디자인 재적용 ❌ (hotfix 로 revert)
+**시도**: worktree 격리 진단 + 안전 cherry-pick 으로 ff41d3cb 에 적용:
+- 신규 `src/components/feed/DailyReportBadge.tsx` (40 lines)
+- 신규 `src/components/feed/LiveActivityBar.tsx` (124 lines)
+- 신규 `src/components/feed/LiveDiscussionCards.tsx` (87 lines)
+- `Navigation.tsx`: 로고 직후 `<DailyReportBadge />` 마운트
+- `FeedClient.tsx`: DailyReportCard/LiveActivityIndicator/FeedStatusBar → LiveActivityBar/LiveDiscussionCards 교체
 
-**적용** (worktree 격리 진단 + 안전 cherry-pick):
-- 신규 `src/components/feed/DailyReportBadge.tsx` (40 lines, 'use client' Link + styled-jsx)
-- 신규 `src/components/feed/LiveActivityBar.tsx` (124 lines, get_active_visitors 30s polling + discussion_topics 2min count)
-- 신규 `src/components/feed/LiveDiscussionCards.tsx` (87 lines, discussion_topics 가로스크롤)
-- `Navigation.tsx`: import + 로고 직후 `<DailyReportBadge />` 마운트
-- `FeedClient.tsx`: DailyReportCard / LiveActivityIndicator / FeedStatusBar 3종 import 제거 → LiveActivityBar / LiveDiscussionCards 로 교체
-- 기존 deprecated 파일 (DailyReportCard.tsx, LiveActivityIndicator.tsx, FeedStatusBar.tsx) 디스크 잔존 (회귀 안전망)
-- worktree `kadeora-diag` 정리
+**결과**: 배포 후 **블로그 전체 500 재현**. Node 세션 c5aedbf1 hotfix 로 다음 제거:
+- Navigation.tsx 의 DailyReportBadge import + JSX
+- FeedClient.tsx 의 LiveActivityBar / LiveDiscussionCards import + JSX
+- 컴포넌트 .tsx 파일 자체는 디스크 잔존 (다음 시도 시 재사용)
+
+**진단**: Navigation 이 (main) 전체 layout 에서 렌더 → DailyReportBadge SSR 시 블로그 페이지 영향. styled-jsx 또는 'use client' 컴포넌트가 layout 내 server component 와 부딪히는 것으로 추정. **다음 세션에서 isolation 강화 + 단계적 활성화 (Navigation 빼고 FeedClient 만 등) 필요**.
 
 ### 트랙 3 — 미존재 주제 선별 + 재생성 ✅
 **선별 (pg_trgm GIN idx_blog_title_trgm, similarity threshold 0.25)**:
@@ -53,7 +56,7 @@ s169-s172 신규/수정 5파일 grep 결과 실제 노출된 hex 만 교체:
 | 트랙 | 결과 |
 |---|---|
 | 1 | 2 hex → CSS var 교체 (실제 발견된 것만) |
-| 2 | 3 컴포넌트 신규 + Navigation/FeedClient 재적용 |
+| 2 | 시도 → 블로그 500 재현 → c5aedbf1 hotfix 로 mount 제거 (컴포넌트 .tsx 잔존) |
 | 3 | 105 missing 선별 + bulk run 완료 (ok=32, +32편 누적 69편), limit 80 원복 |
 
 ---
