@@ -24,6 +24,7 @@ import FeedVSCard from '@/components/feed/FeedVSCard';
 import FeedPredictCard from '@/components/feed/FeedPredictCard';
 import LiveActivityBar from '@/components/feed/LiveActivityBar';
 import LiveDiscussionCards from '@/components/feed/LiveDiscussionCards';
+import FallbackThumb from '@/components/FallbackThumb';
 import { timeAgo, numFmt } from '@/lib/format';
 import { useAuth } from '@/components/AuthProvider';
 
@@ -413,7 +414,7 @@ export default function FeedClient({
         {/* ━━━ 게시글 목록 ━━━ */}
         <FirstMissionBanner />
         <ProfileCompletionBar />
-        <div className="listing-grid">
+        <div className="listing-grid" style={{ gap: 8 }}>
           {visiblePosts.map((post: PostWithProfile, i: number) => {
             // s173: 비로그인 유저 컴팩트 CTA — 3번째 글 직후 (i===2). RelatedContentCard (i===3) 와 별개.
             const inlineCta = (i === 2 && !currentUserId) ? (
@@ -482,7 +483,9 @@ export default function FeedClient({
             const card = (
               <div key={post.id} className={`animate-fadeIn kd-feed-card${visitedIds.has(post.id) ? ' visited' : ''}`}
                 data-cat={post.category}
-                style={{ padding: '8px 10px', background: 'var(--bg-surface)', border: `1px solid ${isPinned ? 'var(--brand)' : 'var(--border)'}`, borderRadius: 'var(--radius-card)', transition: 'all var(--transition-fast)', position: 'relative' }}>
+                style={isPinned
+                  ? { padding: '9px 6px', background: 'var(--bg-surface)', border: '1px solid var(--brand)', borderRadius: 'var(--radius-card)', transition: 'all var(--transition-fast)', position: 'relative' }
+                  : { padding: '9px 6px', borderBottom: '1px solid rgba(30,50,88,0.25)', transition: 'all var(--transition-fast)', position: 'relative' }}>
                 {/* 핀 배지 */}
                 {isPinned && (
                   <div style={{ position: 'absolute', top: -1, right: 10, background: 'var(--brand)', color: '#fff', fontSize: 10, fontWeight: 600, padding: '1px 6px', borderRadius: '0 0 4px 4px' }}>
@@ -505,7 +508,7 @@ export default function FeedClient({
                     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                       <span style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: 12 }}>{displayName}</span>
                       <span style={{ fontSize: 10, color: gradeColor(post.profiles?.grade ?? 1) }}>{gradeEmoji}</span>
-                      <span style={{ fontSize: 10, padding: '0px 5px', borderRadius: 4, background: cat.bg, color: cat.color, fontWeight: 600 }}>{cat.label}</span>
+                      <span style={{ fontSize: 10, padding: '1px 5px', borderRadius: 4, background: cat.bg, color: cat.color, fontWeight: 700 }}>{cat.label}</span>
                       {postType === 'short' && <span style={{ fontSize: 9, padding: '1px 4px', borderRadius: 3, background: 'rgba(168,85,247,0.1)', color: '#A855F7', fontWeight: 700 }}>한마디</span>}
                       <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{timeAgo(post.created_at)}</span>
                     </div>
@@ -522,13 +525,18 @@ export default function FeedClient({
                   const nv = new Set(visitedIds); nv.add(post.id); setVisitedIds(nv);
                   try { const arr = Array.from(nv).slice(-200); localStorage.setItem('kd_visited', JSON.stringify(arr)); } catch {}
                 }} style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}>
-                  {post.title && (
-                    <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.4, marginBottom: 4 }}>
-                      {post.title}
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                    <FallbackThumb name={post.title || displayName} size={32} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      {post.title && (
+                        <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.4, marginBottom: 4 }}>
+                          {post.title}
+                        </div>
+                      )}
+                      <div style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word' }}>
+                        {stripHtml(post.excerpt || post.content).slice(0, 150)}
+                      </div>
                     </div>
-                  )}
-                  <div style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word' }}>
-                    {stripHtml(post.excerpt || post.content).slice(0, 150)}
                   </div>
                   {/* 히어로 이미지 (1장) 또는 갤러리 (2장+) */}
                   {post.images && post.images.length === 1 && (
