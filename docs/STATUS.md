@@ -1,3 +1,62 @@
+# 카더라 STATUS — 세션 174 (2026-04-25)
+
+## 세션 174 — 블로그 500 근본 원인 해결 (DYNAMIC_SERVER_USAGE)
+
+### Track 1 — 블로그 500 근본 진단 ✅✅✅
+**증상**: kadeora.app/blog/* 와 /stock/[symbol] 전체 500. c5aedbf1 hotfix 도 효과 없음.
+
+**진단 (로컬 prod 모드 재현)**:
+1. `npm run dev` → 200 OK (스트릭트 체크 비활성)
+2. `npm run start` → 500 with `digest: 'DYNAMIC_SERVER_USAGE'`
+3. Next.js 15 가 `revalidate = N` (ISR) + `headers()`/`cookies()` 동시 사용을 거부
+
+**원인 흐름**:
+- 71284cd2 (s168 재적용): blog/[slug] generateStaticParams `return []` + `dynamicParams=true`
+- 이로 인해 모든 slug 가 ISR cold-SSR 경로
+- 페이지 내부 `headers()` (line 377) + `createSupabaseServer().auth.getUser()` (cookies) 호출
+- `revalidate=900` 와 충돌 → DYNAMIC_SERVER_USAGE 즉시 발생
+- Vercel 런타임 로그는 메시지 truncated 로 진단 차단됨 ("An error occurred i...")
+
+**수정**:
+- `blog/[slug]/page.tsx`: `revalidate = 900` → `dynamic = 'force-dynamic'`
+- `stock/[symbol]/page.tsx`: `revalidate = 300` → `dynamic = 'force-dynamic'`
+- ISR 캐시 손실은 트레이드오프 (향후 headers/cookies 분리 시 복원 가능)
+
+**검증**: 로컬 `npm run start` → 3 URL 모두 200 ✅. 라이브 promote 후 4 URL 모두 200 ✅.
+
+### Track 2 — CSS vars 추가 ✅
+spec 의 15개 hex 중 실제 발견된 것:
+- `page.tsx` L1316 인기글 랭크: `#ef4444 / #f59e0b / #6b7280` → `var(--accent-red) / var(--warning) / var(--text-tertiary)`
+- 나머지 13개 hex 는 검사 결과 이미 CSS var 사용 중 또는 카카오/장식 색상 (의도적 유지)
+
+### Track 3 — 93편 미생성 부분 진행 ⚠️
+- 9 미생성 idxs 산출: [1,34,37,38,40,42,43,44,46,48,...,162] (162-69=93)
+- daily_create_limit 80 → 300 임시 상향
+- bulk run 시작 → **DB 트리거 `validate_blog_post` 의 `HOURLY_LIMIT >= 80` / `DAILY_LIMIT >= 80` 하드코딩** 발견
+- config 우회 못함 → 모든 시도 duplicate_slug 로 fail (Anthropic API 호출 비용만 낭비)
+- 6 skip 이후 KILL → daily_create_limit 80 원복
+- **다음 세션**: 트리거 수정 (`v_daily_count >= cfg.daily_create_limit`) 또는 시간 분산 재시도
+
+### Track 4 — 피드 Live 컴포넌트 FeedClient 만 ✅
+- `FeedClient.tsx`: `LiveActivityBar` + `LiveDiscussionCards` import + 헤더 직후 마운트
+- Navigation `<DailyReportBadge />` 는 보류 (다음 세션)
+- c5aedbf1 hotfix 가 잘못 원인지목한 컴포넌트들 — 실제 원인은 DYNAMIC_SERVER_USAGE 였으므로 안전하게 재마운트
+
+### 결과 요약
+| 트랙 | 결과 |
+|---|---|
+| 1 | ✅✅✅ 블로그/주식 500 근본 해결, alias promote 라이브 200 OK |
+| 2 | ✅ 발견된 hex 3종 → CSS var |
+| 3 | ⚠️ 트리거 하드코딩 80 한계로 부분 진행 (트리거 수정 필요) |
+| 4 | ✅ FeedClient Live 마운트 |
+
+### 라이브 배포
+- ff41d3cb / 37bbd0eb / c5aedbf1 / 86c524d3 / 63c76222 → 500 발생
+- 임시 rollback: `dpl_GsecdhgYeFKr1SuxhAgJAyGFKMDN` (s172) 으로 복원
+- 최종: `dpl_5xMZ6yJX6PQF7YaGxpwj5TkJj7PH` (e9820225 fix) promote ✅
+
+---
+
 # 카더라 STATUS — 세션 173 (2026-04-25)
 
 ## 세션 173 — 잔여 3트랙 병렬 (CSS 변수화 + 피드 리디자인 재적용 + 105편 재생성)
