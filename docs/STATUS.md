@@ -1,3 +1,72 @@
+# 카더라 STATUS — 세션 172 (2026-04-25)
+
+## 세션 172 — 블로그 시각 강화 6트랙 병렬 (배포 1회)
+
+### 트랙 1 — b86e54a3 블로그 500 진단 (부분 적용)
+- worktree `kadeora-diag` 격리 + diff 분석
+- b86e54a3 = 324fe409 + 9f458953 merge. 33파일 변경 중:
+  - 신규 파일: `feed/DailyReportBadge.tsx`, `feed/LiveActivityBar.tsx`, `feed/LiveDiscussionCards.tsx` — 모두 'use client' 깔끔
+  - `Navigation.tsx` 4줄: `<DailyReportBadge />` import + 마운트
+  - `FeedClient.tsx` 9줄: 기존 DailyReportCard/LiveActivityIndicator/FeedStatusBar → 신규 3종으로 교체 (기존 파일 디스크 잔존)
+  - 다수 라우트 `dynamic='force-dynamic'` 추가
+  - `stock/[symbol]`, `stock/sector`, `blog/series`, `calc/topic` 페이지 `dynamicParams=true; return []` (s168 패턴)
+  - **`src/lib/us-market-cron-helpers.ts`**: top-level `getSupabaseAdmin()` → 함수 내 lazy init (명백한 fix)
+- npm ci 5+ min 부담으로 실 런타임 stack trace 미수집
+- **부분 cherry-pick**: `us-market-cron-helpers.ts` lazy init 만 적용 (cron 전용, UI 영향 0). 나머지는 SKIP.
+- 별도 세션에서 Vercel Dashboard 풀 트레이스 확보 후 안전 분 재적용
+
+### 트랙 2 — BlogImageCarousel 신규 ✅
+`src/components/blog/BlogImageCarousel.tsx`:
+- `galleryImages` 횡스크롤 캐러셀 (170px 카드, scroll-snap, scrollbar 숨김)
+- 실이미지 0건 → 카테고리 이모지 6종 fallback 그라데이션 카드 (apt/unsold/stock/finance/general/default)
+- `<figure itemScope ImageObject>` + `<figcaption>` (네이버 이미지탭 / 구글 리치 마크업)
+- `--blog-carousel-bg`, `--blog-info-box-border` 토큰 사용 → 다크/라이트 자동 대응
+- hover translateY(-3px) lift, 모바일 터치 OK
+- `page.tsx`: BlogSocialBar 직후 마운트, props = galleryImages + title + category
+
+### 트랙 3 — 히어로 강화 (SKIP)
+검토 결과 page.tsx L816-852 에 이미:
+- breadcrumb (홈/블로그/카테고리, 카테고리 색 강조)
+- 카테고리 배지 + 인기/UP 배지
+- 저자 카드 (이모지 아바타 + 이름 + 날짜·읽기시간 + 조회수)
+가 spec 충족 상태. MetaPill 추가 시 정보 중복 발생 → 변경 보류.
+
+### 트랙 4 — RelatedBlogsSection 2x2 그리드 ✅
+`src/components/blog/RelatedBlogsSection.tsx` 카드 디자인 교체:
+- 3건 grid auto-fit → 4건 2x2 (모바일 1열, 768px+ 2열)
+- 카테고리 이모지(28px) + 제목(2줄 클램프) + 카테고리 라벨 + 조회수 + 읽기시간
+- strategy badge ⚡ pill 형태 유지 (기존 데이터 호환)
+- hover lift + border-color 전환, scoped CSS 외부 주입
+- `match_related_blogs(p_limit=4)` 로 RPC limit 인상
+
+### 트랙 5 — 면책사항 재배치 + warn 보더 ✅
+- 위치: 본문 직후(L1131) → **댓글 직후 + BlogFooterMeta 직전**
+- BlogFooterMeta 도 article 외부로 이동 (`</article>` → 댓글 → 면책 → BlogFooterMeta)
+- 디자인: 좌측 amber 3px border + ⚠️ 헤더 + 본문 12.5px tertiary
+- `--blog-disclaimer-border` 토큰 사용 (다크 #F59E0B / 라이트 #D97706 자동)
+- 문구: "자동 작성" → "공공 데이터 기반의 정보 제공 / 투자 권유 아님" (E-E-A-T)
+
+### 트랙 6 — 라이트모드 (SKIP)
+`globals.css` L2022-2040 에 이미 `:root` + `html[data-theme="light"]` 양쪽 `--blog-*` 6종 변수 매핑 완료. 추가 변경 불필요.
+
+### 적용 파일
+- `src/lib/us-market-cron-helpers.ts` (cherry-pick)
+- `src/components/blog/BlogImageCarousel.tsx` (신규)
+- `src/components/blog/RelatedBlogsSection.tsx` (재작성)
+- `src/app/(main)/blog/[slug]/page.tsx` (import 1 + 캐러셀 마운트 + 면책 위치 + BlogFooterMeta 위치 이동)
+
+### 결과 요약
+| 트랙 | 결과 |
+|---|---|
+| 1 | 부분 cherry-pick (helper lazy init), 나머지 별도 세션 |
+| 2 | BlogImageCarousel 신규 + 마운트 ✅ |
+| 3 | 기존 충족, SKIP |
+| 4 | 2x2 그리드 + 이모지/조회수 카드 ✅ |
+| 5 | 면책 위치 이동 + amber 보더 ✅ |
+| 6 | 변수 이미 적용, SKIP |
+
+---
+
 # 카더라 STATUS — 세션 171 (2026-04-25)
 
 ## 세션 171 — 블로그 500 롤백 + 162편 벌크 잔여분 실행

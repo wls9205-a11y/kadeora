@@ -45,6 +45,7 @@ import SignupPopupModal from '@/components/signup/SignupPopupModal';
 import RelatedBlogsSection from '@/components/blog/RelatedBlogsSection';
 import BlogSocialBar from '@/components/blog/BlogSocialBar';
 import BlogFooterMeta from '@/components/blog/BlogFooterMeta';
+import BlogImageCarousel from '@/components/blog/BlogImageCarousel';
 import BlogMidGate from '@/components/blog/BlogMidGate';
 // SmartSectionGate 제거 → LoginGate 기능 게이팅으로 전환 (세션 108)
 import BlogAptAlertCTA from '@/components/BlogAptAlertCTA';
@@ -961,6 +962,18 @@ export default async function BlogDetailPage({ params }: Props) {
           helpfulCount={post.helpful_count ?? 0}
           commentAnchorId="blog-comments"
         />
+
+        {/* s172: 본문 진입 직전 이미지 캐러셀 — 실이미지 ≥ 2 또는 이미지 없을 때 카테고리 이모지 fallback */}
+        <BlogImageCarousel
+          images={galleryImages.map((g) => ({
+            url: safeImg(g.image_url, { title: post.title, category: 'blog', design: 2 }),
+            alt: g.alt_text,
+            caption: g.caption,
+          }))}
+          title={post.title}
+          category={post.category}
+        />
+
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           padding: '10px 0', marginBottom: 24, fontSize: 'var(--fs-sm)',
@@ -1128,15 +1141,7 @@ export default async function BlogDetailPage({ params }: Props) {
           );
         })()}
 
-        {/* 자동생성 콘텐츠 면책 & 출처 표기 (E-E-A-T) */}
-        {post.source_type === 'auto' && (
-          <div style={{ marginTop: 'var(--sp-2xl)', padding: '12px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.6 }}>
-            <span style={{ fontWeight: 600 }}>ℹ️ 자동 작성 콘텐츠</span> · 이 글은 카더라의 공공 데이터(국토교통부, 금융위원회 등)를 기반으로 자동 작성되었습니다.
-            {post.data_date && <> · 데이터 기준일: {post.data_date}</>}
-            {post.source_ref && <> · 출처: {post.source_ref}</>}
-          </div>
-        )}
-
+        {/* s172: 자동생성 면책 — 댓글 직후로 이동 (article 외부) */}
 
         {/* 관련 종목/현장은 하단 섹션에서만 렌더링 (중복 제거) */}
 
@@ -1165,14 +1170,7 @@ export default async function BlogDetailPage({ params }: Props) {
         {/* s157: FOMO 팝업 모달 (스크롤 50% or 60s, 세션 1회) — sticky_bar/floating_ask 대체 */}
         {!isBot && !isLoggedIn && <SignupPopupModal slug={slug} redirectPath={`/blog/${slug}`} isLoggedIn={isLoggedIn} />}
 
-        {/* s170: 하단 메타 — 태그 pill + 최초/수정일 */}
-        <BlogFooterMeta
-          tags={post.tags}
-          category={post.category}
-          createdAt={post.created_at}
-          updatedAt={post.updated_at}
-          rewrittenAt={post.rewritten_at}
-        />
+        {/* s172: BlogFooterMeta 댓글 직후로 이동 (article 외부) */}
       </article>
 
       {/* 플로팅 액션바 — 스크롤 30% 후 나타남, 봇 제외 */}
@@ -1229,6 +1227,46 @@ export default async function BlogDetailPage({ params }: Props) {
           )}
         </div>
       </div>
+
+      {/* s172: 자동생성 콘텐츠 면책 — 댓글 하단, BlogFooterMeta 위 */}
+      {post.source_type === 'auto' && (
+        <div style={{
+          background: 'var(--bg-elevated, var(--bg-surface))',
+          borderRadius: 12,
+          padding: '16px 18px',
+          border: '1px solid var(--border)',
+          borderLeft: '3px solid var(--blog-disclaimer-border, #F59E0B)',
+          marginBottom: 16,
+        }}>
+          <div style={{
+            fontSize: 13, fontWeight: 800,
+            color: 'var(--blog-disclaimer-border, #F59E0B)',
+            marginBottom: 6,
+            display: 'flex', alignItems: 'center', gap: 6,
+          }}>
+            ⚠️ 면책사항
+          </div>
+          <p style={{
+            fontSize: 12.5,
+            color: 'var(--text-tertiary)',
+            lineHeight: 1.75,
+            margin: 0,
+          }}>
+            본 콘텐츠는 공공 데이터(국토교통부, 한국거래소, 금융위원회 등) 기반의 정보 제공 목적이며 투자 권유가 아닙니다.
+            {post.data_date && <> 데이터 기준일: {post.data_date}.</>}
+            {post.source_ref && <> 출처: {post.source_ref}.</>}
+          </p>
+        </div>
+      )}
+
+      {/* s172: 하단 메타 — 태그 pill + 최초/수정일 (댓글 + 면책사항 다음) */}
+      <BlogFooterMeta
+        tags={post.tags}
+        category={post.category}
+        createdAt={post.created_at}
+        updatedAt={post.updated_at}
+        rewrittenAt={post.rewritten_at}
+      />
 
       {/* 시리즈 네비게이션 */}
       {seriesInfo && seriesInfo.posts.length > 1 && (() => {

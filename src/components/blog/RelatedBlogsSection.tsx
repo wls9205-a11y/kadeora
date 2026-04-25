@@ -1,12 +1,12 @@
 /**
- * RelatedBlogsSection — 블로그 상세 하단 "이어서 읽을 만한 글" 3개 카드.
+ * RelatedBlogsSection — "이어서 읽을 만한 글" 4카드 (2x2 그리드).
  *
- * DB: match_related_blogs(p_blog_id bigint, p_limit int=3) → jsonb[]
- *   { id, title, slug, cover_image, reading_minutes, tldr, badge }
+ * DB: match_related_blogs(p_blog_id bigint, p_limit int=4) → jsonb[]
+ *   { id, title, slug, cover_image, reading_minutes, tldr, badge, category, view_count }
  *   badge ∈ 'strategy' | 'related'
  *
- * 서버 컴포넌트. 결과 0건 → null.
- * 사용자 이벤트 (view/click) 는 클라이언트 Tracker 컴포넌트로 위임.
+ * 디자인: 카테고리 이모지 아이콘 + 제목 + 카테고리 + 조회수
+ * 모바일은 1열, 데스크탑 1024px+ 2열.
  */
 
 import Link from 'next/link';
@@ -21,7 +21,25 @@ interface RelatedBlog {
   reading_minutes?: number | null;
   tldr?: string | null;
   badge?: 'strategy' | 'related' | string | null;
+  category?: string | null;
+  view_count?: number | null;
 }
+
+const CATEGORY_EMOJI: Record<string, string> = {
+  apt: '🏗️',
+  unsold: '🏚️',
+  stock: '📈',
+  finance: '💡',
+  general: '📰',
+};
+
+const CATEGORY_LABEL: Record<string, string> = {
+  apt: '청약·분양',
+  unsold: '미분양',
+  stock: '주식',
+  finance: '재테크',
+  general: '생활',
+};
 
 async function fetchRelated(blogId: number, limit: number): Promise<RelatedBlog[]> {
   try {
@@ -44,7 +62,7 @@ interface Props {
 
 export default async function RelatedBlogsSection({ blogId, className }: Props) {
   if (!blogId) return null;
-  const rows = await fetchRelated(blogId, 3);
+  const rows = await fetchRelated(blogId, 4);
   if (rows.length === 0) return null;
 
   return (
@@ -54,23 +72,20 @@ export default async function RelatedBlogsSection({ blogId, className }: Props) 
       style={{ margin: '24px 0' }}
     >
       <div style={{ marginBottom: 12 }}>
-        <h2 style={{ fontSize: 18, fontWeight: 800, margin: '0 0 4px', color: 'var(--text-primary, #e5e7eb)' }}>
+        <h2 style={{ fontSize: 18, fontWeight: 800, margin: '0 0 4px', color: 'var(--text-primary)' }}>
           이어서 읽을 만한 글
         </h2>
-        <p style={{ fontSize: 12, color: 'var(--text-tertiary, #94a3b8)', margin: 0 }}>
+        <p style={{ fontSize: 12, color: 'var(--text-tertiary)', margin: 0 }}>
           블로그 2글 이상 본 분들, 가입률 6.5배 (실측)
         </p>
       </div>
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-          gap: 12,
-        }}
-      >
+      <div className="kd-related-grid">
         {rows.map((r) => {
           const isStrategy = r.badge === 'strategy';
-          const cover = r.cover_image || `/api/og?title=${encodeURIComponent(r.title || 'kadeora')}&category=blog`;
+          const cat = r.category || '';
+          const emoji = CATEGORY_EMOJI[cat] || '📰';
+          const catLabel = CATEGORY_LABEL[cat] || cat;
+          const views = Number(r.view_count ?? 0);
           return (
             <Link
               key={r.id}
@@ -78,82 +93,60 @@ export default async function RelatedBlogsSection({ blogId, className }: Props) 
               data-related-card
               data-related-badge={isStrategy ? 'strategy' : 'related'}
               data-related-blog-id={r.id}
+              className="kd-related-card"
               style={{
-                display: 'block',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 8,
+                padding: '14px 14px 12px',
                 textDecoration: 'none',
                 color: 'inherit',
-                border: isStrategy ? '1px solid rgba(245,158,11,0.55)' : '1px solid var(--border, rgba(255,255,255,0.1))',
-                borderRadius: 12,
-                overflow: 'hidden',
+                border: isStrategy
+                  ? '1px solid rgba(245,158,11,0.55)'
+                  : '1px solid var(--border)',
+                borderRadius: 16,
                 background: isStrategy
-                  ? 'linear-gradient(135deg, rgba(251,191,36,0.18) 0%, rgba(255,255,255,0.02) 100%)'
-                  : 'var(--bg-surface, #0f172a)',
-                boxShadow: isStrategy ? '0 10px 24px rgba(245,158,11,0.12)' : '0 4px 12px rgba(0,0,0,0.15)',
-                transition: 'transform 0.12s ease',
+                  ? 'linear-gradient(135deg, rgba(251,191,36,0.12) 0%, var(--bg-surface) 100%)'
+                  : 'var(--bg-surface)',
+                transition: 'transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease',
+                position: 'relative',
               }}
             >
-              <div
-                style={{
-                  aspectRatio: '16 / 9',
-                  background: `url('${cover}') center/cover no-repeat, rgba(255,255,255,0.03)`,
-                  position: 'relative',
-                }}
-                aria-hidden
-              >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 28, lineHeight: 1, flexShrink: 0 }} aria-hidden>{emoji}</span>
                 {isStrategy && (
-                  <span
-                    style={{
-                      position: 'absolute', top: 8, left: 8,
-                      padding: '3px 8px', borderRadius: 999,
-                      background: '#F59E0B', color: '#111',
-                      fontSize: 10, fontWeight: 800,
-                      boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
-                    }}
-                  >
-                    ⚡ 전략
-                  </span>
+                  <span style={{
+                    fontSize: 10, fontWeight: 800,
+                    padding: '2px 8px', borderRadius: 999,
+                    background: '#F59E0B', color: '#111',
+                  }}>⚡ 전략</span>
                 )}
               </div>
-              <div style={{ padding: '10px 12px 12px' }}>
-                <div
-                  style={{
-                    fontSize: 14,
-                    fontWeight: 700,
-                    color: 'var(--text-primary, #e5e7eb)',
-                    lineHeight: 1.4,
-                    display: '-webkit-box',
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden',
-                    wordBreak: 'keep-all',
-                  }}
-                >
-                  {r.title}
-                </div>
-                {r.tldr && (
-                  <div
-                    style={{
-                      marginTop: 6,
-                      fontSize: 12,
-                      color: 'var(--text-tertiary, #94a3b8)',
-                      lineHeight: 1.45,
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden',
-                    }}
-                  >
-                    {r.tldr}
-                  </div>
-                )}
-                <div style={{ marginTop: 8, display: 'flex', gap: 8, fontSize: 11, color: 'var(--text-tertiary, #94a3b8)' }}>
-                  {r.reading_minutes && <span>⏱ {r.reading_minutes}분</span>}
-                </div>
+              <div
+                style={{
+                  fontSize: 14,
+                  fontWeight: 700,
+                  color: 'var(--text-primary)',
+                  lineHeight: 1.45,
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden',
+                  wordBreak: 'keep-all',
+                }}
+              >
+                {r.title}
+              </div>
+              <div style={{ marginTop: 'auto', display: 'flex', gap: 10, alignItems: 'center', fontSize: 11, color: 'var(--text-tertiary)' }}>
+                {catLabel && <span style={{ fontWeight: 600 }}>{catLabel}</span>}
+                {views > 0 && <span>👁️ {views.toLocaleString()}</span>}
+                {r.reading_minutes ? <span>⏱ {r.reading_minutes}분</span> : null}
               </div>
             </Link>
           );
         })}
       </div>
+      <style dangerouslySetInnerHTML={{ __html: `.kd-related-grid{display:grid;grid-template-columns:1fr;gap:12px}@media (min-width:768px){.kd-related-grid{grid-template-columns:1fr 1fr;gap:14px}}@media (hover:hover){.kd-related-card:hover{transform:translateY(-3px);box-shadow:0 10px 22px rgba(0,0,0,0.18);border-color:var(--blog-info-box-border,var(--border))}}` }} />
       <RelatedBlogsTracker blogId={blogId} />
     </section>
   );
