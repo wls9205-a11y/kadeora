@@ -22,8 +22,6 @@ import QuickPostBar from '@/components/feed/QuickPostBar';
 import FeedPollCard from '@/components/feed/FeedPollCard';
 import FeedVSCard from '@/components/feed/FeedVSCard';
 import FeedPredictCard from '@/components/feed/FeedPredictCard';
-import LiveActivityBar from '@/components/feed/LiveActivityBar';
-import LiveDiscussionCards from '@/components/feed/LiveDiscussionCards';
 import { timeAgo, numFmt } from '@/lib/format';
 import { useAuth } from '@/components/AuthProvider';
 
@@ -292,10 +290,6 @@ export default function FeedClient({
           <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 900, color: 'var(--brand)', margin: 0, letterSpacing: -0.5, flexShrink: 0 }}>카더라</h1>
           <SectionShareButton section="feed" label="카더라 커뮤니티" pagePath="/feed" />
         </div>
-
-        <LiveActivityBar />
-
-        <LiveDiscussionCards />
 
         <QuickPostBar category={activeCategory !== 'all' && activeCategory !== 'following' ? activeCategory : 'free'} regionId={activeRegion} />
 
