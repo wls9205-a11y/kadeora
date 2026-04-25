@@ -6,6 +6,7 @@ import { safeImg } from '@/lib/image-sanitize';
 import EmptyState from '@/components/EmptyState';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
 import SectionShareButton from '@/components/SectionShareButton';
+import FallbackThumb from '@/components/FallbackThumb';
 
 function highlightTitle(title: string, query: string): React.ReactNode {
   if (!query) return title;
@@ -103,7 +104,7 @@ const CATS = [
 ];
 
 const CAT_COLORS: Record<string, string> = {
-  stock: 'var(--accent-blue)', apt: 'var(--accent-green)', unsold: 'var(--accent-orange)', finance: 'var(--accent-purple)', general: 'var(--text-tertiary)',
+  stock: 'var(--accent-blue)', apt: 'var(--accent-green)', unsold: 'var(--accent-red)', finance: 'var(--accent-purple)', general: 'var(--text-tertiary)',
 };
 
 interface Props { searchParams: Promise<{ category?: string; sort?: string; q?: string; page?: string; sub?: string }> }
@@ -421,9 +422,22 @@ export default async function BlogPage({ searchParams }: Props) {
                 {/* 순위 */}
                 <span style={{ fontSize: 10, fontWeight: 800, color: isHot ? 'var(--accent-red)' : 'var(--text-tertiary)', width: 18, textAlign: 'center', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>{rank}</span>
                 {/* 썸네일 */}
-                <div style={{ width: 80, height: 56, borderRadius: 'var(--radius-sm)', overflow: 'hidden', flexShrink: 0, background: 'var(--bg-hover)' }}>
-                    <img src={safeImg((!p.cover_image || String(p.cover_image).includes('/api/og')) ? (postImageMap[p.id] || p.cover_image) : p.cover_image, { title: (p.title || '').slice(0, 40), category: p.category || 'blog', design: (idx % 6) + 1 })} alt={p.title || "블로그 썸네일"} width={80} height={56} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} loading="lazy" decoding="async" />
-                  </div>
+                {(() => {
+                  const hasRealCover = p.cover_image && !String(p.cover_image).includes('/api/og');
+                  const hasMappedImg = !!postImageMap[p.id];
+                  if (!hasRealCover && !hasMappedImg) {
+                    return (
+                      <div style={{ width: 80, height: 56, borderRadius: 'var(--radius-sm)', overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-hover)' }}>
+                        <FallbackThumb name={p.title || ''} size={56} />
+                      </div>
+                    );
+                  }
+                  return (
+                    <div style={{ width: 80, height: 56, borderRadius: 'var(--radius-sm)', overflow: 'hidden', flexShrink: 0, background: 'var(--bg-hover)' }}>
+                      <img src={safeImg(hasRealCover ? p.cover_image : postImageMap[p.id], { title: (p.title || '').slice(0, 40), category: p.category || 'blog', design: (idx % 6) + 1 })} alt={p.title || "블로그 썸네일"} width={80} height={56} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} loading="lazy" decoding="async" />
+                    </div>
+                  );
+                })()}
                 {/* 본문 */}
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>

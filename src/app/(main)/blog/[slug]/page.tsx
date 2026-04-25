@@ -836,7 +836,7 @@ export default async function BlogDetailPage({ params }: Props) {
             {post.rewritten_at && <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 'var(--radius-xl)', background: 'var(--success-bg)', color: 'var(--success)' }}>UP</span>}
           </div>
           {/* 제목 */}
-          <h1 style={{ fontSize: 26, fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.5, margin: '0 0 18px', wordBreak: 'keep-all', letterSpacing: '-0.8px' }}>{post.title}</h1>
+          <h1 style={{ fontSize: 'var(--fs-2xl)', fontWeight: 900, color: 'var(--text-primary)', lineHeight: 1.5, margin: '0 0 18px', wordBreak: 'keep-all', letterSpacing: '-0.5px' }}>{post.title}</h1>
           {/* Session D: TLDR + key_points hero (7,040건 100% backfill 완료) */}
           <BlogHeroExtras
             tldr={(post as any).tldr}
@@ -858,8 +858,10 @@ export default async function BlogDetailPage({ params }: Props) {
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>{post.author_name || '카더라 부동산팀'}</div>
-              <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 2 }}>
-                <time dateTime={post.published_at || post.created_at || new Date().toISOString()}>{new Date(post.published_at || post.created_at || Date.now()).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}</time> · {readingTimeMin}분 읽기
+              <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8, fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>
+                <time dateTime={post.published_at || post.created_at || new Date().toISOString()}>{new Date(post.published_at || post.created_at || Date.now()).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}</time>
+                <span>{readingTimeMin}분 읽기</span>
+                <span>👀 {(post.view_count ?? 0).toLocaleString()}</span>
               </div>
             </div>
             <div style={{ textAlign: 'right', flexShrink: 0 }}>
