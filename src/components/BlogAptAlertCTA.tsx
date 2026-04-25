@@ -35,8 +35,8 @@ export default function BlogAptAlertCTA({ aptName, siteSlug, category = 'apt', l
   }, [isLoggedIn]);
 
   const handleAlert = async () => {
+    trackCTA('click', 'apt_alert_cta');
     if (!isLoggedIn) {
-      trackCTA('click', 'apt_alert_cta');
       window.location.href = loginUrl;
       return;
     }
@@ -47,7 +47,6 @@ export default function BlogAptAlertCTA({ aptName, siteSlug, category = 'apt', l
       const { data: { user } } = await sb.auth.getUser();
       if (!user) { window.location.href = loginUrl; return; }
 
-      // apt_site_interests INSERT (관심단지 알림)
       const siteRes = await fetch(`/api/apt/interest`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -55,10 +54,8 @@ export default function BlogAptAlertCTA({ aptName, siteSlug, category = 'apt', l
       });
 
       if (siteRes.ok) {
-        trackCTA('click', 'apt_alert_cta');
         setStatus('done');
       } else {
-        // API 없으면 가입 유도로 폴백
         setStatus('done');
       }
     } catch {

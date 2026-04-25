@@ -39,8 +39,8 @@ export default function BlogFloatingBar({ slug, title, category }: Props) {
   const loginUrl = `/login?redirect=${encodeURIComponent(pathname)}&source=floating_bar`;
 
   const handleSave = async () => {
-    if (!userId) { window.location.href = loginUrl; return; }
     trackCTA('click', 'floating_save', { page_path: pathname });
+    if (!userId) { window.location.href = loginUrl; return; }
     try {
       await fetch('/api/bookmark', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -52,8 +52,8 @@ export default function BlogFloatingBar({ slug, title, category }: Props) {
   };
 
   const handleAlert = () => {
-    if (!userId) { window.location.href = loginUrl; return; }
     trackCTA('click', 'floating_alert', { page_path: pathname, category });
+    if (!userId) { window.location.href = loginUrl; return; }
     window.location.href = `/notifications/settings`;
   };
 
