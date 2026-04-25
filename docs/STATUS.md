@@ -34,10 +34,10 @@ s169-s172 신규/수정 5파일 grep 결과 실제 노출된 hex 만 교체:
 
 **스크립트 보강**: `scripts/generate-bulk-posts.ts` 에 `--idxs=1,3,5...` 임의 인덱스 필터 옵션 추가 (range 외 산발 인덱스 처리 가능)
 
-**재생성**: 105 missing idxs 로 background bulk run 시작 (B0wmmhqkv)
-- daily_create_limit 80 → 250 임시 상향
-- CONCURRENCY 3, DELAY 5s 유지
-- 완료 후 limit 80 원복 예정
+**재생성 결과** (background bulk run 완료):
+- 105 missing idxs 처리 → ok=32, skipped=73 (duplicate_slug + HOURLY_LIMIT), failed=0
+- DB `source_ref='s170-bulk'` 누적: 37 → **69편** (+32) (apt=60, stock=6, finance=2, unsold=1)
+- daily_create_limit 250 → 80 원복 완료
 
 ### 적용 파일
 - `src/components/blog/BlogSocialBar.tsx` (Track 1)
@@ -54,7 +54,7 @@ s169-s172 신규/수정 5파일 grep 결과 실제 노출된 hex 만 교체:
 |---|---|
 | 1 | 2 hex → CSS var 교체 (실제 발견된 것만) |
 | 2 | 3 컴포넌트 신규 + Navigation/FeedClient 재적용 |
-| 3 | 105 missing 선별 + bg bulk run 시작 |
+| 3 | 105 missing 선별 + bulk run 완료 (ok=32, +32편 누적 69편), limit 80 원복 |
 
 ---
 
