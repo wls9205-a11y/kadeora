@@ -5,7 +5,7 @@ import { Navigation } from '@/components/Navigation';
 import AdBanner from '@/components/AdBanner';
 import { ToastProvider } from '@/components/Toast';
 import ErrorBoundary from '@/components/ErrorBoundary';
-// C3: ActionBar 제거 (3,054v / 1c = 0.03% CTR)
+import ActionBar from '@/components/ActionBar';
 
 
 import { Sidebar, RightPanel, InstallBanner, PWAInstallTracker, NoticeBanner, PageViewTracker, BehaviorTracker } from '@/components/ClientDynamics';
@@ -68,7 +68,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
       </div>
       <InstallBanner />
       <PWAInstallTracker />
-      {/* C3: <ActionBar /> 제거됨 */}
+      <ActionBar />
 
       <PageViewTracker />
       <BehaviorTracker />

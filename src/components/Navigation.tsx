@@ -8,6 +8,7 @@ import { useAuth } from '@/components/AuthProvider';
 import { haptic } from '@/lib/haptic';
 import { isTossMode } from '@/lib/toss-mode';
 import { useTheme } from '@/components/ThemeProvider';
+import LiveActivityIndicator from '@/components/LiveActivityIndicator';
 
 const NAV_ITEMS = [
   { href: '/feed',    label: '피드',   Icon: Home },
@@ -268,6 +269,7 @@ export function Navigation() {
           {/* 우측 액션 */}
           <div style={{ marginLeft:'auto', display:'flex', alignItems:'center', gap:6 }}>
 
+            <div className="hidden md:flex"><LiveActivityIndicator /></div>
             {/* 더보기 (데스크탑 전용 — 모바일은 하단 탭바에 있음) */}
             <button
               onClick={(e) => { e.stopPropagation(); setMoreOpen(!moreOpen); setMenuOpen(false); }}

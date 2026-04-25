@@ -1,3 +1,13 @@
+# 카더라 STATUS — 세션 176 (2026-04-25)
+
+## 세션 176 — Session 145 CTA 리버트 + 실시간 접속자
+- **ActionBar 복원**: 50bb1991^ 시점의 `src/components/ActionBar.tsx` 복원 + `(main)/layout.tsx` 에 import/render 재도입.
+- **BlogFloatingBar 복원**: 50bb1991^ 시점의 `src/components/BlogFloatingBar.tsx` 복원 + `blog/[slug]/page.tsx` 에서 `!isBot` 조건으로 렌더.
+- **실시간 접속자 인디케이터**: `Navigation.tsx` 데스크탑 우측 액션 영역에 `LiveActivityIndicator` 추가 (md+ 만).
+- **배경**: Session 145 의 "C3: dead CTA 제거" 결정이 CTR 측정 직후의 단발성 데이터에 의존했음. 사용자 피드백상 ActionBar/BlogFloatingBar 의 부재가 navigation depth 를 떨어뜨려 리버트.
+
+---
+
 # 카더라 STATUS — 세션 174 (2026-04-25)
 
 ## 세션 174 — 블로그 500 근본 원인 해결 (DYNAMIC_SERVER_USAGE)

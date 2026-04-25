@@ -11,7 +11,7 @@ import { injectInternalLinks } from '@/lib/blog-auto-link';
 import BlogCommentInput from '@/components/BlogCommentInput';
 import BlogCommentCTA from '@/components/BlogCommentCTA';
 import LoginGate from '@/components/LoginGate';
-// C3: BlogFloatingBar 제거 (1,031v / 0c)
+import BlogFloatingBar from '@/components/BlogFloatingBar';
 import ShareButtons from '@/components/ShareButtons';
 import KakaoShareButton from '@/components/KakaoShareButton';
 import BlogFaqAccordion from '@/components/BlogFaqAccordion';
@@ -1158,7 +1158,7 @@ export default async function BlogDetailPage({ params }: Props) {
       </article>
 
       {/* 플로팅 액션바 — 스크롤 30% 후 나타남, 봇 제외 */}
-      {/* C3: BlogFloatingBar 제거됨 */}
+      {!isBot && <BlogFloatingBar slug={slug} title={post.title} category={post.category} />}
 
       {/* 댓글 섹션 — D안 컴팩트 리스트 */}
       <BlogCommentCTA commentCount={comments.length} />
