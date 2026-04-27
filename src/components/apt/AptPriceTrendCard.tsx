@@ -51,26 +51,32 @@ function buildSparklinePath(values: number[]): { line: string; area: string } {
 export default async function AptPriceTrendCard({ region, sigungu, aptName, priceMin, priceMax }: Props) {
   if (!region || !sigungu) return null;
 
-  const sb = getSupabaseAdmin();
-  const [trendRes, summaryRes] = await Promise.all([
-    (sb as any).from('v_sigungu_trade_stats')
-      .select('deal_month, total_deals, avg_price_per_pyeong')
-      .eq('region_nm', region)
-      .eq('sigungu', sigungu)
-      .order('deal_month', { ascending: false })
-      .limit(12),
-    (sb as any).from('v_apt_with_local_price')
-      .select('sigungu_pyeong_recent, sigungu_pyeong_year_ago, sigungu_change_pct_1y, sigungu_deals_recent_month')
-      .eq('region', region)
-      .eq('sigungu', sigungu)
-      .limit(1).maybeSingle(),
-  ]);
+  let trend: SigunguMonth[] = [];
+  let summary: Record<string, any> | null = null;
+  try {
+    const sb = getSupabaseAdmin();
+    const [trendRes, summaryRes] = await Promise.all([
+      (sb as any).from('v_sigungu_trade_stats')
+        .select('deal_month, total_deals, avg_price_per_pyeong')
+        .eq('region_nm', region)
+        .eq('sigungu', sigungu)
+        .order('deal_month', { ascending: false })
+        .limit(12),
+      (sb as any).from('v_apt_with_local_price')
+        .select('sigungu_pyeong_recent, sigungu_pyeong_year_ago, sigungu_change_pct_1y, sigungu_deals_recent_month')
+        .eq('region', region)
+        .eq('sigungu', sigungu)
+        .limit(1).maybeSingle(),
+    ]);
+    trend = (((trendRes as any)?.data ?? []) as SigunguMonth[])
+      .filter(r => r.avg_price_per_pyeong != null)
+      .reverse();
+    summary = (summaryRes as any)?.data as Record<string, any> | null;
+  } catch (err) {
+    console.error('[AptPriceTrendCard]', err);
+    return null;
+  }
 
-  const trend = (((trendRes as any)?.data ?? []) as SigunguMonth[])
-    .filter(r => r.avg_price_per_pyeong != null)
-    .reverse(); // ascending for sparkline left→right
-
-  const summary = (summaryRes as any)?.data as Record<string, any> | null;
   if (trend.length < 2 || !summary?.sigungu_pyeong_recent) return null;
 
   const recentPyeong = Number(summary.sigungu_pyeong_recent);

@@ -52,36 +52,46 @@ const cardeoraBadgeStyle: React.CSSProperties = { fontSize: 9, fontWeight: 800, 
 const sectionMargin: React.CSSProperties = { margin: '0 0 18px' };
 
 export default async function AptHubCuration() {
-  const sb = getSupabaseAdmin();
-  const [todayRes, imminentRes, modelRes, hotRes, buildersRes, regionHubsRes] = await Promise.all([
-    (sb as any).from('v_apt_today_pick')
-      .select('slug,name,site_type,lifecycle_stage,region,sigungu,dong,popularity_score,total_units,builder,rank')
-      .order('rank', { ascending: true }).limit(10),
-    (sb as any).from('v_apt_subscription_imminent')
-      .select('slug,site_name,region,sigungu,rcept_bgnde,days_until_apply')
-      .order('days_until_apply', { ascending: true }).limit(10),
-    (sb as any).from('v_apt_model_house_opening')
-      .select('slug,name,region,sigungu,builder,total_units')
-      .limit(10),
-    (sb as any).from('v_apt_hot_by_region')
-      .select('region,site_type,slug,name,sigungu,popularity_score,total_units,rank')
-      .lte('rank', 5)
-      .order('region', { ascending: true })
-      .order('rank', { ascending: true })
-      .limit(170),
-    (sb as any).from('v_apt_by_builder')
-      .select('builder,site_count,upcoming_count')
-      .order('site_count', { ascending: false }).limit(10),
-    (sb as any).from('v_apt_region_hubs')
-      .select('region,cnt'),
-  ]);
-
-  const todayPicks = ((todayRes as any)?.data ?? []) as TodayPickRow[];
-  const imminent = ((imminentRes as any)?.data ?? []) as ImminentRow[];
-  const modelHouses = ((modelRes as any)?.data ?? []) as ModelHouseRow[];
-  const hotByRegion = ((hotRes as any)?.data ?? []) as HotByRegionRow[];
-  const builders = ((buildersRes as any)?.data ?? []) as BuilderRow[];
-  const regionHubsRaw = ((regionHubsRes as any)?.data ?? []) as RegionHubRow[];
+  let todayPicks: TodayPickRow[] = [];
+  let imminent: ImminentRow[] = [];
+  let modelHouses: ModelHouseRow[] = [];
+  let hotByRegion: HotByRegionRow[] = [];
+  let builders: BuilderRow[] = [];
+  let regionHubsRaw: RegionHubRow[] = [];
+  try {
+    const sb = getSupabaseAdmin();
+    const [todayRes, imminentRes, modelRes, hotRes, buildersRes, regionHubsRes] = await Promise.all([
+      (sb as any).from('v_apt_today_pick')
+        .select('slug,name,site_type,lifecycle_stage,region,sigungu,dong,popularity_score,total_units,builder,rank')
+        .order('rank', { ascending: true }).limit(10),
+      (sb as any).from('v_apt_subscription_imminent')
+        .select('slug,site_name,region,sigungu,rcept_bgnde,days_until_apply')
+        .order('days_until_apply', { ascending: true }).limit(10),
+      (sb as any).from('v_apt_model_house_opening')
+        .select('slug,name,region,sigungu,builder,total_units')
+        .limit(10),
+      (sb as any).from('v_apt_hot_by_region')
+        .select('region,site_type,slug,name,sigungu,popularity_score,total_units,rank')
+        .lte('rank', 5)
+        .order('region', { ascending: true })
+        .order('rank', { ascending: true })
+        .limit(170),
+      (sb as any).from('v_apt_by_builder')
+        .select('builder,site_count,upcoming_count')
+        .order('site_count', { ascending: false }).limit(10),
+      (sb as any).from('v_apt_region_hubs')
+        .select('region,cnt'),
+    ]);
+    todayPicks = ((todayRes as any)?.data ?? []) as TodayPickRow[];
+    imminent = ((imminentRes as any)?.data ?? []) as ImminentRow[];
+    modelHouses = ((modelRes as any)?.data ?? []) as ModelHouseRow[];
+    hotByRegion = ((hotRes as any)?.data ?? []) as HotByRegionRow[];
+    builders = ((buildersRes as any)?.data ?? []) as BuilderRow[];
+    regionHubsRaw = ((regionHubsRes as any)?.data ?? []) as RegionHubRow[];
+  } catch (err) {
+    console.error('[AptHubCuration]', err);
+    // fail-safe: 모든 섹션 빈 상태로 nav만 노출
+  }
 
   // 시도별 카운트 합산
   const regionCount = new Map<string, number>();
