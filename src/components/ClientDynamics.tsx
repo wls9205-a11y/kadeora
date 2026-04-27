@@ -1,10 +1,15 @@
 'use client';
 import dynamic from 'next/dynamic';
 
-export const Sidebar = dynamic(() => import('@/components/Sidebar'), { ssr: false });
-export const RightPanel = dynamic(() => import('@/components/RightPanel'), { ssr: false });
-export const InstallBanner = dynamic(() => import('@/components/InstallBanner'), { ssr: false });
-export const PWAInstallTracker = dynamic(() => import('@/components/PWAInstallTracker'), { ssr: false });
-export const NoticeBanner = dynamic(() => import('@/components/NoticeBanner'), { ssr: false });
-export const PageViewTracker = dynamic(() => import('@/components/PageViewTracker'), { ssr: false });
-export const BehaviorTracker = dynamic(() => import('@/components/BehaviorTracker'), { ssr: false });
+// s187 fix: { ssr: false } 7개 모두 제거 — 각 ssr:false 가 SSR Suspense bailout 을 만들어
+// blog/[slug] 의 notFound() 가 서버에서 HTTP 404 로 전파되지 못하고 200 OK 로 떨어졌음
+// (BAILOUT_TO_CLIENT_SIDE_RENDERING 7개 = 이 7개 ssr:false 와 1:1 매칭).
+// 모든 컴포넌트는 'use client' 이며 브라우저 API 는 useEffect 안에서만 호출 → SSR 안전.
+// SSR 시에는 초기 state (보통 빈/숨김) 가 렌더되고, 클라이언트에서 hydrate.
+export const Sidebar = dynamic(() => import('@/components/Sidebar'));
+export const RightPanel = dynamic(() => import('@/components/RightPanel'));
+export const InstallBanner = dynamic(() => import('@/components/InstallBanner'));
+export const PWAInstallTracker = dynamic(() => import('@/components/PWAInstallTracker'));
+export const NoticeBanner = dynamic(() => import('@/components/NoticeBanner'));
+export const PageViewTracker = dynamic(() => import('@/components/PageViewTracker'));
+export const BehaviorTracker = dynamic(() => import('@/components/BehaviorTracker'));
