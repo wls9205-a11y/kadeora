@@ -63,7 +63,7 @@ export default function LifecycleTimeline({ current }: Props) {
           const isCurrent = i === activeIdx;
           const isPast = i < activeIdx;
           const dotSize = isCurrent ? 12 : 8;
-          const dotColor = isCurrent ? '#FAC775' : isPast ? 'var(--text-primary)' : 'var(--text-tertiary)';
+          const dotColor = isCurrent ? 'var(--kd-accent)' : isPast ? 'var(--text-primary)' : 'var(--text-tertiary)';
           return (
             <div key={s.key} style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, position: 'relative' }}>
               {/* connector line behind */}
@@ -92,7 +92,7 @@ export default function LifecycleTimeline({ current }: Props) {
                   boxShadow: isCurrent ? '0 0 0 4px rgba(250,199,117,0.25)' : 'none',
                 }}
               />
-              <span style={{ fontSize: 9, fontWeight: isCurrent ? 800 : 600, color: isCurrent ? '#FAC775' : 'var(--text-tertiary)', whiteSpace: 'nowrap' }}>
+              <span style={{ fontSize: 11, fontWeight: isCurrent ? 800 : 600, color: isCurrent ? 'var(--kd-accent)' : 'var(--text-tertiary)', whiteSpace: 'nowrap' }}>
                 {s.label}
               </span>
             </div>
@@ -109,7 +109,7 @@ export default function LifecycleTimeline({ current }: Props) {
     >
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
         <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: 0.5 }}>단지 진행 단계</span>
-        <span style={{ fontSize: 9, fontWeight: 800, color: '#FAC775', padding: '2px 8px', borderRadius: 999, background: 'rgba(250,199,117,0.12)', border: '1px solid rgba(250,199,117,0.32)', letterSpacing: 0.5 }}>
+        <span style={{ fontSize: 9, fontWeight: 800, color: 'var(--kd-accent)', padding: '2px 8px', borderRadius: 999, background: 'var(--kd-accent-soft)', border: '1px solid var(--kd-accent-border)', letterSpacing: 0.5 }}>
           CARDERA ONLY
         </span>
       </div>
@@ -118,11 +118,11 @@ export default function LifecycleTimeline({ current }: Props) {
       <div className="lf-mobile">{renderStages(STAGES_MOBILE, mIdx)}</div>
 
       {nextHint && (
-        <div style={{ marginTop: 8, padding: '8px 10px', background: 'rgba(250,199,117,0.08)', border: '1px solid rgba(250,199,117,0.3)', borderRadius: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 6 }}>
-          <span style={{ fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600 }}>
-            다음 단계: <span style={{ color: '#FAC775', fontWeight: 800 }}>{nextHint}</span>
+        <div style={{ marginTop: 'var(--kd-gap-md)', padding: '10px 12px', background: 'var(--kd-accent-soft)', border: '1px solid var(--kd-accent-border)', borderRadius: 'var(--kd-radius-card)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--kd-gap-sm)' }}>
+          <span style={{ fontSize: 12, color: 'var(--text-secondary)', fontWeight: 600, lineHeight: 1.5 }}>
+            다음 단계: <span style={{ color: 'var(--kd-accent)', fontWeight: 800 }}>{nextHint}</span>
           </span>
-          <span style={{ fontSize: 11, color: '#FAC775', fontWeight: 800 }}>알림 받기 →</span>
+          <span style={{ fontSize: 12, color: 'var(--kd-accent)', fontWeight: 800, whiteSpace: 'nowrap' }}>알림 받기 →</span>
         </div>
       )}
 

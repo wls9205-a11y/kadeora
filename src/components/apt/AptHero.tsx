@@ -46,7 +46,7 @@ export default function AptHero({ site, interestCount }: Props) {
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 10 }}>
         {lifecycle && (
-          <span style={{ fontSize: 11, fontWeight: 800, color: '#FAC775', padding: '4px 10px', borderRadius: 999, background: 'rgba(250,199,117,0.12)', border: '1px solid rgba(250,199,117,0.32)' }}>
+          <span style={{ fontSize: 12, fontWeight: 800, color: '#FFD688', padding: '4px 10px', borderRadius: 999, background: 'rgba(255,214,136,0.14)', border: '1px solid rgba(255,214,136,0.36)' }}>
             {lifecycle}
           </span>
         )}
@@ -64,7 +64,7 @@ export default function AptHero({ site, interestCount }: Props) {
           </div>
         )}
         {typeof interestCount === 'number' && interestCount > 0 && (
-          <div style={{ fontSize: 12, color: '#FAC775', fontWeight: 700, whiteSpace: 'nowrap' }}>
+          <div style={{ fontSize: 12, color: '#FFD688', fontWeight: 700, whiteSpace: 'nowrap' }}>
             ★ 관심 {interestCount.toLocaleString()}명
           </div>
         )}

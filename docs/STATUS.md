@@ -1,5 +1,53 @@
 # 카더라 STATUS — 세션 188 (2026-04-27 / 28 cont.)
 
+## 세션 188 — SEO Phase 8: 가독성 통일 + 가격대 필터 + 다크모드 contrast
+
+### 핵심 발견 (수정 동기)
+- 코드베이스는 `html[data-theme="light"]`로 테마 전환 (default `:root`가 다크 모드)
+- Phase 6/7에서 사용했던 `@media (prefers-color-scheme: dark)` 인라인 미디어 쿼리는 **이 사이트에서 작동 안 함** — Phase 8에서 정리
+
+### 산출물
+- **`src/app/globals.css`** 끝에 `--kd-*` 토큰 추가:
+  - spacing: `--kd-gap-sm/md/lg` (8/12/16px) + 모바일 ≤480px에서 md=10/lg=14
+  - radius: `--kd-radius-card` (12px)
+  - 카더라 시그니처 앰버 (테마별 contrast):
+    · 다크(default): `--kd-accent: #FFD688` (밝은 앰버)
+    · 라이트(`html[data-theme="light"]`): `--kd-accent: #BA7517` (진한 앰버 — light bg 위 가독성)
+    · 동반: `--kd-accent-soft / -border / -bg`
+  - 의미: `--kd-success / -warning / -danger` (테마별)
+- **`src/components/apt/PriceBandFilter.tsx`** (신규)
+  - 5단계 pill: 3억 미만(2,014) / 3-6억(2,133) / 6-10억(910) / 10-20억(589) / 20억+(128)
+  - URL query `?price=under_3` → 활성 pill 표시 + 전체 보기 ✕ 토글
+  - hardcode 카운트(view 미배포 — 정확 매칭 검증 후)
+- **`src/app/(main)/apt/page.tsx`** 수정
+  - `searchParams.price` 받아서 `PriceBandFilter active={activePriceBand}` 전달
+  - AptHubCuration 위에 마운트
+
+### 컴포넌트 정리 (8개)
+- 모든 `#FAC775` 하드코딩 → `var(--kd-accent)` (테마 자동 분기)
+- `rgba(250,199,117,0.12/0.32)` → `var(--kd-accent-soft / -border)`
+- **AptHero hero 라벨/관심자 카운트**: `#FFD688` 하드코딩 (hero는 항상 검정 bg, dark contrast 강제)
+- **AptBlogStack** 카드: 95px → **110px**, thumb 50px → **56px**, 제목 line-clamp 3 → **2**, line-height 1.3 → **1.4**, 폰트 10/11 → **11/12**
+- **LifecycleTimeline** 라벨 9px → **11px** (가독성), 다음 단계 카드 padding 8/10 → **10/12**, 폰트 11 → **12**
+- **AptPriceTrendCard** sparkline + 변동률: 잘못된 `prefers-color-scheme` media query 제거 → `currentColor` + `var(--kd-success/-danger)` 직접 사용 (테마 자동 분기)
+
+### 검증
+- `npx tsc --noEmit` 0 error
+- view 사전 검증 (v_apt_by_price_band 미존재 확인 후 카운트 hardcode)
+
+### 의도적 미반영 (Phase 9+)
+- searchParams.price → 실제 필터된 그리드 렌더 (현재는 pill 활성 표시까지만, 그리드 reload 별도 PR)
+- 검색 자동완성
+- 네이버 Maps
+- builder-watch 시공사 확장
+
+### 누적 (Phase 1~8)
+- 4,681행 og_cards · 3,945행 popularity_score · 68,273개 keyword_targets
+- view 22+ · 컴포넌트 9개 (AptHero / LifecycleTimeline / CheongakMatchCard / AptBlogStack / AptCompareTable / AptSidebar / AptPriceTrendCard / AptHubCuration / PriceBandFilter)
+- 4 cron · 4 페이지 · 6 트리거 · GitHub Actions
+
+---
+
 ## 세션 188 — SEO Phase 7: 단지 시세 트렌드 + /apt 메인 hub 큐레이션
 
 ### 산출물

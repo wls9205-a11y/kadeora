@@ -2052,3 +2052,40 @@ html[data-theme="light"] {
     border-left-width: 3px;
   }
 }
+
+/* ──────────────────────────────────
+   Phase 8 — Cardera 단지 페이지 토큰
+   ────────────────────────────────── */
+:root {
+  /* spacing 3단계 통일 */
+  --kd-gap-sm: 8px;
+  --kd-gap-md: 12px;
+  --kd-gap-lg: 16px;
+  --kd-radius-card: 12px;
+
+  /* 카더라 시그니처 앰버 (default = 다크모드, root 자체가 다크) */
+  --kd-accent: #FFD688;
+  --kd-accent-soft: rgba(255,214,136,0.16);
+  --kd-accent-border: rgba(255,214,136,0.36);
+  --kd-accent-bg: #412402;
+  --kd-success: #5DCAA5;
+  --kd-warning: #FAC775;
+  --kd-danger: #F09595;
+}
+
+html[data-theme="light"] {
+  --kd-accent: #BA7517;
+  --kd-accent-soft: rgba(186,117,23,0.10);
+  --kd-accent-border: rgba(186,117,23,0.28);
+  --kd-accent-bg: #FFF8EC;
+  --kd-success: #0F6E56;
+  --kd-warning: #BA7517;
+  --kd-danger: #791F1F;
+}
+
+@media (max-width: 480px) {
+  :root {
+    --kd-gap-md: 10px;
+    --kd-gap-lg: 14px;
+  }
+}

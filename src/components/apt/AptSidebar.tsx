@@ -61,7 +61,7 @@ export default async function AptSidebar({ slug, builder }: Props) {
       <section style={cardCss}>
         <div style={titleCss}>
           <span>알림 받기</span>
-          <span style={{ fontSize: 9, fontWeight: 800, color: '#FAC775', padding: '2px 6px', borderRadius: 999, background: 'rgba(250,199,117,0.12)', border: '1px solid rgba(250,199,117,0.32)' }}>
+          <span style={{ fontSize: 9, fontWeight: 800, color: 'var(--kd-accent)', padding: '2px 6px', borderRadius: 999, background: 'var(--kd-accent-soft)', border: '1px solid var(--kd-accent-border)' }}>
             6단계
           </span>
         </div>
@@ -69,10 +69,10 @@ export default async function AptSidebar({ slug, builder }: Props) {
           {ALERT_TYPES.map(a => (
             <div key={a.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 11 }}>
               <span style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>
-                <span style={{ color: a.defaultOn ? '#FAC775' : 'var(--text-tertiary)', marginRight: 6, fontSize: 14 }}>{a.defaultOn ? '●' : '○'}</span>
+                <span style={{ color: a.defaultOn ? 'var(--kd-accent)' : 'var(--text-tertiary)', marginRight: 6, fontSize: 14 }}>{a.defaultOn ? '●' : '○'}</span>
                 {a.label}
               </span>
-              <span style={{ color: a.defaultOn ? '#FAC775' : 'var(--text-tertiary)', fontWeight: 800, fontSize: 10 }}>
+              <span style={{ color: a.defaultOn ? 'var(--kd-accent)' : 'var(--text-tertiary)', fontWeight: 800, fontSize: 10 }}>
                 {a.defaultOn ? 'ON' : 'OFF'}
               </span>
             </div>

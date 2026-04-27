@@ -62,6 +62,7 @@ import { createSupabaseServer } from '@/lib/supabase-server';
 import AptClient from './AptClient';
 import Disclaimer from '@/components/Disclaimer';
 import AptHubCuration from '@/components/apt/AptHubCuration';
+import PriceBandFilter from '@/components/apt/PriceBandFilter';
 
 async function fetchAptData() {
   let apts: Record<string, any>[] = [];
@@ -342,7 +343,9 @@ async function fetchAptData() {
   return { apts, unsold, alertCounts, lastRefreshed, regionStats, ongoingApts, redevTotalCount, tradeTotalCount, tradeByRegion, redevByRegion, subTotalCount, unsoldTotalCount, ongoingTotalCount, dataFreshness, redevRedevCount, redevRebuildCount, aptImageMap, aptEngageMap, initialTransactions, initialRedevelopment };
 }
 
-export default async function AptPage() {
+export default async function AptPage({ searchParams }: { searchParams?: Promise<{ price?: string }> }) {
+  const sp = (await searchParams) || {};
+  const activePriceBand = typeof sp.price === 'string' ? sp.price : null;
   const { apts, unsold, alertCounts, lastRefreshed, regionStats, ongoingApts, redevTotalCount, tradeTotalCount, tradeByRegion, redevByRegion, subTotalCount, unsoldTotalCount, ongoingTotalCount, dataFreshness, redevRedevCount, redevRebuildCount, aptImageMap, aptEngageMap, initialTransactions, initialRedevelopment } = await fetchAptData();
   // ItemList for Google carousel rich results
   const itemList = apts.slice(0, 10).map((a: any, i: number) => ({
@@ -366,6 +369,8 @@ export default async function AptPage() {
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"WebPage","name":"부동산 — 청약·분양·미분양·재개발","speakable":{"@type":"SpeakableSpecification","cssSelector":["h1",".region-summary"]}}) }} />
     <h1 className="sr-only">부동산 — 청약·분양·미분양·재개발</h1>
     <p className="sr-only">카더라 부동산에서는 전국 {apts.length}건의 아파트 청약 일정, {ongoingApts.length}건의 분양 현장, {unsold.length}건의 미분양 단지, {redevTotalCount}건의 재개발·재건축 정보를 실시간으로 제공합니다. 지역별·타입별 필터로 원하는 부동산 정보를 빠르게 찾을 수 있으며, 분양가·입주 예정일·경쟁률·시세 비교를 무료로 확인할 수 있습니다.</p>
+    {/* Phase 8: 가격대 필터 pill (5 단계) */}
+    <PriceBandFilter active={activePriceBand} />
     {/* Phase 7 A: 메인 hub 큐레이션 (4 섹션 + 분류 nav + 시공사/시도) */}
     <AptHubCuration />
     <AptClient apts={apts} unsold={unsold} transactions={initialTransactions} redevelopment={initialRedevelopment} alertCounts={alertCounts} lastRefreshed={lastRefreshed} regionStats={regionStats} ongoingApts={ongoingApts} redevTotalCount={redevTotalCount} tradeTotalCount={tradeTotalCount} tradeByRegion={tradeByRegion} redevByRegion={redevByRegion} subTotalCount={subTotalCount} unsoldTotalCount={unsoldTotalCount} ongoingTotalCount={ongoingTotalCount} dataFreshness={dataFreshness} redevRedevCount={redevRedevCount} redevRebuildCount={redevRebuildCount} aptImageMap={aptImageMap} aptEngageMap={aptEngageMap} />

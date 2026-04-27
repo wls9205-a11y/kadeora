@@ -100,7 +100,7 @@ export default async function AptPriceTrendCard({ region, sigungu, aptName, pric
     >
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
         <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: 0.5 }}>인근 시세 트렌드</span>
-        <span style={{ fontSize: 9, fontWeight: 800, color: '#FAC775', padding: '2px 8px', borderRadius: 999, background: 'rgba(250,199,117,0.12)', border: '1px solid rgba(250,199,117,0.32)', letterSpacing: 0.5 }}>
+        <span style={{ fontSize: 9, fontWeight: 800, color: 'var(--kd-accent)', padding: '2px 8px', borderRadius: 999, background: 'var(--kd-accent-soft)', border: '1px solid var(--kd-accent-border)', letterSpacing: 0.5 }}>
           CARDERA
         </span>
       </div>
@@ -115,11 +115,10 @@ export default async function AptPriceTrendCard({ region, sigungu, aptName, pric
               {fmtMan(recentPyeong)}
             </span>
             {changePct != null && (
-              <span className="apt-trend-pct" style={{ fontSize: 14, fontWeight: 800, color: lineColorLight }}>
+              <span style={{ fontSize: 14, fontWeight: 800, color: changePct >= 0 ? 'var(--kd-danger)' : 'var(--kd-success)' }}>
                 {changePct > 0 ? '↑' : changePct < 0 ? '↓' : '→'} {Math.abs(changePct).toFixed(1)}%
               </span>
             )}
-            <style>{`.apt-trend-pct { color: ${lineColorLight}; } @media (prefers-color-scheme: dark) { .apt-trend-pct { color: ${lineColorDark} !important; } }`}</style>
           </div>
           <div style={{ fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 600, marginTop: 2 }}>
             최근 1년 거래 {totalDealsYear.toLocaleString()}건
@@ -128,18 +127,17 @@ export default async function AptPriceTrendCard({ region, sigungu, aptName, pric
 
         {/* sparkline */}
         {sparkline.line && (
-          <svg width="120" height="36" viewBox="0 0 100 30" preserveAspectRatio="none" style={{ flexShrink: 0 }} aria-label="12개월 평당가 트렌드">
-            <polygon points={sparkline.area} fill={lineColorLight} fillOpacity="0.12" />
-            <polyline points={sparkline.line} fill="none" stroke={lineColorLight} strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
-            <style>{`@media (prefers-color-scheme: dark) { polygon { fill: ${lineColorDark} !important; } polyline { stroke: ${lineColorDark} !important; } }`}</style>
+          <svg width="120" height="36" viewBox="0 0 100 30" preserveAspectRatio="none" style={{ flexShrink: 0, color: changePct != null && changePct >= 0 ? 'var(--kd-danger)' : 'var(--kd-success)' }} aria-label="12개월 평당가 트렌드">
+            <polygon points={sparkline.area} fill="currentColor" fillOpacity="0.16" />
+            <polyline points={sparkline.line} fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
           </svg>
         )}
       </div>
 
       {estPyeongPrice && premiumX != null && (
-        <div style={{ marginTop: 10, padding: '8px 10px', background: 'rgba(250,199,117,0.08)', border: '1px solid rgba(250,199,117,0.28)', borderRadius: 8, fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600 }}>
+        <div style={{ marginTop: 10, padding: '8px 10px', background: 'var(--kd-accent-soft)', border: '1px solid var(--kd-accent-border)', borderRadius: 8, fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600 }}>
           분양 추정 평당 <span style={{ color: 'var(--text-primary)', fontWeight: 800 }}>{fmtMan(estPyeongPrice)}</span> ({aptName || '단지'}) → 시군구 평균의{' '}
-          <span style={{ color: '#FAC775', fontWeight: 800 }}>{premiumX.toFixed(1)}배</span>
+          <span style={{ color: 'var(--kd-accent)', fontWeight: 800 }}>{premiumX.toFixed(1)}배</span>
         </div>
       )}
     </section>

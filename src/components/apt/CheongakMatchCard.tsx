@@ -15,8 +15,8 @@ export default function CheongakMatchCard({ isLoggedIn, myScore, aptName }: Prop
       <section
         aria-label="가점 매칭"
         style={{
-          background: 'rgba(250,199,117,0.06)',
-          border: '1px solid rgba(250,199,117,0.32)',
+          background: 'var(--kd-accent-soft)',
+          border: '1px solid var(--kd-accent-border)',
           borderRadius: 12,
           padding: '14px 16px',
           margin: '0 0 12px',
@@ -28,7 +28,7 @@ export default function CheongakMatchCard({ isLoggedIn, myScore, aptName }: Prop
         }}
       >
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 11, fontWeight: 800, color: '#FAC775', letterSpacing: 0.5 }}>PHASE 5</div>
+          <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--kd-accent)', letterSpacing: 0.5 }}>PHASE 5</div>
           <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginTop: 2 }}>
             내 가점으로 {aptName} 당첨 가능?
           </div>
@@ -41,7 +41,7 @@ export default function CheongakMatchCard({ isLoggedIn, myScore, aptName }: Prop
           style={{
             padding: '8px 14px',
             borderRadius: 999,
-            background: '#FAC775',
+            background: 'var(--kd-accent)',
             color: '#1A1A18',
             fontWeight: 800,
             fontSize: 12,
@@ -60,8 +60,8 @@ export default function CheongakMatchCard({ isLoggedIn, myScore, aptName }: Prop
       <section
         aria-label="가점 매칭"
         style={{
-          background: 'rgba(250,199,117,0.06)',
-          border: '1px solid rgba(250,199,117,0.32)',
+          background: 'var(--kd-accent-soft)',
+          border: '1px solid var(--kd-accent-border)',
           borderRadius: 12,
           padding: '14px 16px',
           margin: '0 0 12px',
@@ -73,14 +73,14 @@ export default function CheongakMatchCard({ isLoggedIn, myScore, aptName }: Prop
         }}
       >
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 11, fontWeight: 800, color: '#FAC775', letterSpacing: 0.5 }}>PHASE 5</div>
+          <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--kd-accent)', letterSpacing: 0.5 }}>PHASE 5</div>
           <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginTop: 2 }}>
             내 가점 입력하면 당첨 확률이 보입니다
           </div>
         </div>
         <Link
           href="/profile/cheongak"
-          style={{ padding: '8px 14px', borderRadius: 999, background: '#FAC775', color: '#1A1A18', fontWeight: 800, fontSize: 12, textDecoration: 'none', whiteSpace: 'nowrap' }}
+          style={{ padding: '8px 14px', borderRadius: 999, background: 'var(--kd-accent)', color: '#1A1A18', fontWeight: 800, fontSize: 12, textDecoration: 'none', whiteSpace: 'nowrap' }}
         >
           가점 입력 →
         </Link>
@@ -91,21 +91,21 @@ export default function CheongakMatchCard({ isLoggedIn, myScore, aptName }: Prop
   const diff = myScore - ESTIMATED_MIN_SCORE;
   // 단순 추정: 점수 차이로 확률 매핑 — +20점=99%, +0=50%, -20=10%
   const winPct = Math.round(Math.max(5, Math.min(99, 50 + diff * 2.5)));
-  const successColor = winPct >= 70 ? 'var(--success, #00FF87)' : winPct >= 40 ? '#FAC775' : '#FF6B6B';
+  const successColor = winPct >= 70 ? 'var(--success, #00FF87)' : winPct >= 40 ? 'var(--kd-accent)' : '#FF6B6B';
 
   return (
     <section
       aria-label="가점 매칭"
       style={{
-        background: 'rgba(250,199,117,0.06)',
-        border: '1px solid rgba(250,199,117,0.32)',
+        background: 'var(--kd-accent-soft)',
+        border: '1px solid var(--kd-accent-border)',
         borderRadius: 12,
         padding: '14px 16px',
         margin: '0 0 12px',
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-        <span style={{ fontSize: 11, fontWeight: 800, color: '#FAC775', letterSpacing: 0.5 }}>PHASE 5</span>
+        <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--kd-accent)', letterSpacing: 0.5 }}>PHASE 5</span>
         <Link href="/profile/cheongak" style={{ fontSize: 11, color: 'var(--text-tertiary)', textDecoration: 'none', fontWeight: 700 }}>가점 수정 →</Link>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>

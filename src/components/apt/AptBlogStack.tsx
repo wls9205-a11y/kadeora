@@ -60,12 +60,12 @@ export default async function AptBlogStack({ slug }: Props) {
             <Link
               key={b.blog_slug}
               href={`/blog/${encodeURIComponent(b.blog_slug)}`}
-              style={{ flex: '0 0 auto', width: 95, scrollSnapAlign: 'start', textDecoration: 'none', display: 'flex', flexDirection: 'column', gap: 6 }}
+              style={{ flex: '0 0 auto', width: 110, scrollSnapAlign: 'start', textDecoration: 'none', display: 'flex', flexDirection: 'column', gap: 8 }}
             >
-              <div style={{ width: 95, height: 50, borderRadius: 6, background: c.bg, color: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, letterSpacing: -0.5 }}>
+              <div style={{ width: 110, height: 56, borderRadius: 8, background: c.bg, color: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, letterSpacing: -0.5 }}>
                 {c.label}
               </div>
-              <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.3, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                 {b.title}
               </div>
               {(b.view_count ?? 0) > 0 && (
@@ -78,8 +78,8 @@ export default async function AptBlogStack({ slug }: Props) {
       <style>{`
         .apt-blog-stack::-webkit-scrollbar { display: none; }
         @media (max-width: 480px) {
-          .apt-blog-stack > a { width: 70px !important; }
-          .apt-blog-stack > a > div:first-child { width: 70px !important; height: 36px !important; font-size: 9px !important; }
+          .apt-blog-stack > a { width: 88px !important; }
+          .apt-blog-stack > a > div:first-child { width: 88px !important; height: 44px !important; font-size: 10px !important; }
         }
       `}</style>
     </section>

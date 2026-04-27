@@ -48,7 +48,7 @@ interface BuilderRow {
 interface RegionHubRow { region: string; cnt: number; }
 
 const sectionTitleStyle: React.CSSProperties = { fontSize: 13, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' };
-const cardeoraBadgeStyle: React.CSSProperties = { fontSize: 9, fontWeight: 800, color: '#FAC775', padding: '2px 8px', borderRadius: 999, background: 'rgba(250,199,117,0.12)', border: '1px solid rgba(250,199,117,0.32)', letterSpacing: 0.5 };
+const cardeoraBadgeStyle: React.CSSProperties = { fontSize: 9, fontWeight: 800, color: 'var(--kd-accent)', padding: '2px 8px', borderRadius: 999, background: 'var(--kd-accent-soft)', border: '1px solid var(--kd-accent-border)', letterSpacing: 0.5 };
 const sectionMargin: React.CSSProperties = { margin: '0 0 18px' };
 
 export default async function AptHubCuration() {
@@ -145,7 +145,7 @@ export default async function AptHubCuration() {
             {todayPicks.map(p => (
               <Link key={p.slug} href={`/apt/${encodeURIComponent(p.slug)}`} style={{ flex: '0 0 auto', width: 180, scrollSnapAlign: 'start', textDecoration: 'none', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 12, display: 'flex', flexDirection: 'column', gap: 6 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 9, fontWeight: 800, color: 'var(--text-tertiary)' }}>
-                  <span style={{ color: '#FAC775' }}>#{p.rank ?? '—'}</span>
+                  <span style={{ color: 'var(--kd-accent)' }}>#{p.rank ?? '—'}</span>
                   {p.site_type && <span>{SITE_TYPE_LABEL[p.site_type] || p.site_type}</span>}
                   {p.popularity_score && <span>· ★ {p.popularity_score}</span>}
                 </div>
@@ -154,7 +154,7 @@ export default async function AptHubCuration() {
                   {[p.region, p.sigungu, p.dong].filter(Boolean).join(' ')}
                 </div>
                 {p.lifecycle_stage && (
-                  <div style={{ fontSize: 9, fontWeight: 800, color: '#FAC775' }}>{LIFECYCLE_LABEL[p.lifecycle_stage] || p.lifecycle_stage}</div>
+                  <div style={{ fontSize: 9, fontWeight: 800, color: 'var(--kd-accent)' }}>{LIFECYCLE_LABEL[p.lifecycle_stage] || p.lifecycle_stage}</div>
                 )}
               </Link>
             ))}
@@ -206,7 +206,7 @@ export default async function AptHubCuration() {
                   {[m.region, m.sigungu].filter(Boolean).join(' ')}
                   {m.builder && ` · ${m.builder}`}
                 </div>
-                <div style={{ marginTop: 4, fontSize: 9, fontWeight: 800, color: '#FAC775', padding: '2px 8px', borderRadius: 999, background: 'rgba(250,199,117,0.12)', border: '1px solid rgba(250,199,117,0.32)', alignSelf: 'flex-start' }}>방문 가능</div>
+                <div style={{ marginTop: 4, fontSize: 9, fontWeight: 800, color: 'var(--kd-accent)', padding: '2px 8px', borderRadius: 999, background: 'var(--kd-accent-soft)', border: '1px solid var(--kd-accent-border)', alignSelf: 'flex-start' }}>방문 가능</div>
               </Link>
             ))}
           </div>
@@ -233,13 +233,13 @@ export default async function AptHubCuration() {
                   {sites.slice(0, 5).map(s => (
                     <li key={s.slug}>
                       <Link href={`/apt/${encodeURIComponent(s.slug)}`} style={{ display: 'flex', alignItems: 'center', gap: 6, textDecoration: 'none', fontSize: 11 }}>
-                        <span style={{ color: '#FAC775', fontWeight: 800, width: 14 }}>{s.rank}</span>
+                        <span style={{ color: 'var(--kd-accent)', fontWeight: 800, width: 14 }}>{s.rank}</span>
                         <span style={{ flex: 1, color: 'var(--text-secondary)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</span>
                       </Link>
                     </li>
                   ))}
                 </ol>
-                <Link href={`/apt/ranking/${encodeURIComponent(region)}/landmark`} style={{ display: 'block', marginTop: 8, fontSize: 10, fontWeight: 700, color: '#FAC775', textDecoration: 'none' }}>
+                <Link href={`/apt/ranking/${encodeURIComponent(region)}/landmark`} style={{ display: 'block', marginTop: 8, fontSize: 10, fontWeight: 700, color: 'var(--kd-accent)', textDecoration: 'none' }}>
                   ranking TOP 30 →
                 </Link>
               </div>
@@ -258,7 +258,7 @@ export default async function AptHubCuration() {
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {builders.map(b => (
               <Link key={b.builder} href={`/apt/builder/${encodeURIComponent(b.builder)}`} style={{ padding: '6px 12px', borderRadius: 999, fontSize: 11, fontWeight: 700, textDecoration: 'none', background: 'var(--bg-surface)', border: '1px solid var(--border)', color: 'var(--text-secondary)' }}>
-                {shortBuilder(b.builder)} <span style={{ color: '#FAC775', fontWeight: 800 }}>({b.site_count})</span>
+                {shortBuilder(b.builder)} <span style={{ color: 'var(--kd-accent)', fontWeight: 800 }}>({b.site_count})</span>
               </Link>
             ))}
           </div>
@@ -275,7 +275,7 @@ export default async function AptHubCuration() {
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {regionTop.map(([r, c]) => (
               <Link key={r} href={`/apt/region/${encodeURIComponent(r)}`} style={{ padding: '6px 12px', borderRadius: 999, fontSize: 11, fontWeight: 700, textDecoration: 'none', background: 'var(--bg-surface)', border: '1px solid var(--border)', color: 'var(--text-secondary)' }}>
-                {r} <span style={{ color: '#FAC775', fontWeight: 800 }}>({c.toLocaleString()})</span>
+                {r} <span style={{ color: 'var(--kd-accent)', fontWeight: 800 }}>({c.toLocaleString()})</span>
               </Link>
             ))}
           </div>

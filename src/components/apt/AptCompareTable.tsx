@@ -119,13 +119,13 @@ export default async function AptCompareTable({ slug, currentSite }: Props) {
         <tbody>
           {rows.map((r, i) => {
             const grade = r.lifecycle_stage ? LIFECYCLE_GRADE[r.lifecycle_stage] || 'B' : 'B';
-            const bg = r.isCurrent ? 'rgba(250,199,117,0.08)' : 'transparent';
+            const bg = r.isCurrent ? 'var(--kd-accent-soft)' : 'transparent';
             const cell: React.CSSProperties = { padding: '10px 12px', borderTop: i > 0 ? '1px solid var(--border)' : 'none' };
             return (
               <tr key={r.slug + i} style={{ background: bg }}>
                 <td style={{ ...cell, fontWeight: r.isCurrent ? 800 : 600, color: 'var(--text-primary)' }}>
                   {r.isCurrent ? (
-                    <span>{r.name} <span style={{ fontSize: 9, fontWeight: 800, color: '#FAC775', marginLeft: 4 }}>★ 현재</span></span>
+                    <span>{r.name} <span style={{ fontSize: 9, fontWeight: 800, color: 'var(--kd-accent)', marginLeft: 4 }}>★ 현재</span></span>
                   ) : (
                     <Link href={`/apt/${encodeURIComponent(r.slug)}`} style={{ textDecoration: 'none', color: 'var(--text-primary)' }}>
                       {r.name}
