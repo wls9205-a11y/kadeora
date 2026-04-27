@@ -135,20 +135,31 @@ export async function GET(request: Request) {
       void supabase.from('profiles').update({ signup_source: source } as any).eq('id', user.id).then(() => {});
     }
     if (action === 'register_interest' && source && source.startsWith('apt_interest_')) {
-      const slug = source.slice('apt_interest_'.length);
-      if (slug) {
+      const key = source.slice('apt_interest_'.length);
+      if (key) {
         const { getSupabaseAdmin } = await import('@/lib/supabase-admin');
         const admin2 = getSupabaseAdmin();
+        // s187 fix: key 가 UUID 일 수도 slug 일 수도 있어 둘 다 시도. UUID 매칭은 ?key 형식으로 OR 검색.
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(key);
         const { data: site } = await (admin2 as any)
-          .from('apt_sites').select('id').eq('slug', slug).maybeSingle();
+          .from('apt_sites')
+          .select('id')
+          .or(isUuid ? `id.eq.${key},slug.eq.${key}` : `slug.eq.${key}`)
+          .maybeSingle();
         if (site?.id) {
-          void (admin2 as any).from('apt_site_interests').insert({
+          // s187 fix: 등록 결과 로깅 — silent fail 방지 (apt_site_interests 0 행 디버그용)
+          const { error: insertErr } = await (admin2 as any).from('apt_site_interests').insert({
             site_id: site.id,
             user_id: user.id,
             is_member: true,
             notification_enabled: true,
             source: 'login_callback',
           });
+          if (insertErr) {
+            console.error('[auth/callback] apt_site_interests insert failed:', insertErr.message, { key, site_id: site.id });
+          }
+        } else {
+          console.warn('[auth/callback] apt_interest registration: site not found for key:', key);
         }
       }
     }

@@ -1,3 +1,61 @@
+# 카더라 STATUS — 세션 187 (2026-04-27)
+
+## 세션 187 — InterestRegisterHero silent-fail 근본 해결 + BlogC dead 7파일 삭제 + BAILOUT 정적 분석
+
+### 🔴 핵심 발견 — apt_site_interests 0행의 실제 원인
+`InterestRegisterHero` (apt/[id]) 가 비로그인 클릭 시 `?source=apt_interest_${aptId}` 로 redirect.
+- `aptId` 는 apt/[id]/page.tsx 487-488 라인에서 `site?.id ?? slug` (즉 **UUID 우선**).
+- `auth/callback` 의 등록 로직 (line 137-154) 은 source 의 suffix 를 **slug 로 가정**하고 `apt_sites.slug = key` 로 조회.
+- UUID ≠ slug → `maybeSingle()` null → registration silently skipped.
+- 어떤 에러도 로깅되지 않아 발견 안 됨 → `apt_site_interests = 0 행`.
+
+**수정**:
+- `InterestRegisterHero.tsx`: `key = aptSlug || aptId` (slug 우선).
+- `auth/callback/route.ts`: key 가 UUID 패턴이면 `id.eq.${key}` OR `slug.eq.${key}` 둘 다 시도.
+- `auth/callback`: insert 결과 `error` 시 `console.error` + site 미발견 시 `console.warn` — 다음 silent fail 즉시 발견.
+
+### 🟡 SSR BAILOUT — 정적 분석으로는 원인 미발견
+`useSearchParams` 사용처 9개 모두 페이지별 client (write/search/payment/onboarding/profile/discuss/stock-compare/apt) — (main)/layout.tsx 트리에는 없음. `usePathname` 만 사용하는 트래커들 (PageViewTracker / BehaviorTracker / Navigation / TopLoadingBar) — `usePathname` 은 BAILOUT 유발 안 함.
+
+`(main)/layout.tsx` 는 `await headers()` 로 자체 dynamic. `blog/[slug]/page.tsx` 는 `dynamic='force-dynamic'` (s174). 이 조합에서 BAILOUT_TO_CLIENT_SIDE_RENDERING 가 SSR HTML 에 노출될 코드 경로를 찾지 못함.
+
+**가설**:
+1. 사용자가 본 BAILOUT 태그가 Vercel CDN 의 stale HTML (s174 force-dynamic 적용 전 빌드) — 현재 새 배포가 아직 캐시 갱신 안 함.
+2. 특정 라우트나 봇 UA 에서만 발생 (i.e. blog/series/[slug] 같은 미수정 경로).
+
+**조치**: 추측으로 Suspense 추가는 오히려 BAILOUT 을 *유발* 가능. 실측 HTML 샘플 (curl 출력) 없이는 추가 변경 보류. 배포 후 다시 확인 권장:
+```
+curl -s https://kadeora.app/blog/<실존 slug> | grep -c "BAILOUT_TO_CLIENT_SIDE"
+```
+0 이면 의심 #1 확정 (CDN stale). > 0 이면 그 HTML 샘플로 다음 세션에서 핀포인트.
+
+### Phase 2 — Blog C 옵션 컴포넌트 7파일 삭제 (다른 PC 작업, s184 후 dead)
+다른 PC 에서 추가됐던 옵션 레이아웃 (s183 commit `12421670`) 이 s184 의 content-first 재구조화 후 한 곳도 import 되지 않음 (grep 0 hit, 자기 자신 제외).
+- `src/components/blog/BlogPageC.tsx`
+- `src/components/blog/BlogHeader.tsx`
+- `src/components/blog/BlogTLDR.tsx`
+- `src/components/blog/BlogTOC.tsx`
+- `src/components/blog/BlogPostFooter.tsx`
+- `src/components/blog/RelatedAptSites.tsx`
+- `src/lib/extractToc.ts` — `blog/[slug]/page.tsx:94` 에 자체 inline `extractToc` 가 있어 lib 버전 0 callers.
+
+### Phase 3 — /api/og-image (보류, 삭제 안 함)
+`middleware.ts` 외에는 어디서도 호출 안 됨. 신규 endpoint (twemoji + Noto Sans KR) 가 향후 `/api/og` 대체용일 가능성 — 의도 미확인 상태에서 삭제는 위험. 다음 세션에 사용자가 명시적으로 마이그레이션 결정하면 둘 중 하나 정리.
+
+### Phase 4 — search RPC 라이브 검증 (보류)
+배포 + 외부 curl 필요. 본 세션 push 후 사용자가 직접 다음 명령으로 확인 권장:
+```
+curl -sI "https://kadeora.app/api/search?q=코스피" | grep -i "search-duration"
+curl -s -o /dev/null -w "%{time_total}s\n" "https://kadeora.app/api/search?q=삼성전자"
+```
+응답 시간 1~3 s 면 RPC 정상. 10s+ 면 RPC fallback 발동 — 별도 세션에서 RPC 자체 디버깅.
+
+### 비고
+- `.next/types` 에 s186 에서 삭제된 `pulse_v3` / `api/admin/master/*` stale 참조 남아있으나 `tsc --noEmit` exit 0. Vercel 배포 시 `.next` 자동 regenerate.
+- 변경 파일 9, 삭제 7 파일.
+
+---
+
 # 카더라 STATUS — 세션 186 (2026-04-27)
 
 ## 세션 186 — 어드민 Phase 3~5 (탭 13→8 + 유저 상세 패널 + FocusTab 최신화) — 2,343 줄 삭제

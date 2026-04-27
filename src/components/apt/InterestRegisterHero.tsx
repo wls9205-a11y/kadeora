@@ -26,7 +26,10 @@ export function InterestRegisterHero({ aptId, aptName, aptSlug, status, isLogged
   async function handleClick() {
     setErr(null);
     if (!isLoggedIn) {
-      const source = `apt_interest_${aptId}`;
+      // s187 fix: source 의 suffix 는 반드시 slug — auth/callback 이 slug 로 apt_sites 조회.
+      // aptId 는 UUID 일 수 있어 slug 매칭 실패로 silent fail (apt_site_interests 0 행의 직접 원인).
+      const key = aptSlug || aptId;
+      const source = `apt_interest_${key}`;
       const redirect = encodeURIComponent(typeof window !== 'undefined' ? window.location.pathname : '/apt');
       router.push(`/login?source=${encodeURIComponent(source)}&action=register_interest&redirect=${redirect}`);
       return;
