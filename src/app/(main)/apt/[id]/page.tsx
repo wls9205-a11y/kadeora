@@ -26,6 +26,12 @@ import { SectionGate } from '@/components/common/SectionGate';
 import { PaywallMarker } from '@/components/seo/PaywallMarker';
 import AptSiteSchema from '@/components/schema/AptSiteSchema';
 import CardCarousel from '@/components/og/CardCarousel';
+import AptHero from '@/components/apt/AptHero';
+import LifecycleTimeline from '@/components/apt/LifecycleTimeline';
+import CheongakMatchCard from '@/components/apt/CheongakMatchCard';
+import AptBlogStack from '@/components/apt/AptBlogStack';
+import AptCompareTable from '@/components/apt/AptCompareTable';
+import AptSidebar from '@/components/apt/AptSidebar';
 
 const AptPriceTrendChart = dynamic(() => import('@/components/charts/AptPriceTrendChart'));
 const InterestRegistration = dynamic(() => import('@/components/InterestRegistration'));
@@ -466,7 +472,16 @@ export default async function AptUnifiedPage({ params }: Props) {
     closed: { label: '마감', bg: 'transparent', color: 'var(--text-tertiary)', border: 'var(--border)' },
   };
   let aptUser = null;
-  try { const sbA = await createSupabaseServer(); const { data: { user } } = await sbA.auth.getUser(); aptUser = user; } catch {}
+  let aptUserCheongakScore: number | null = null;
+  try {
+    const sbA = await createSupabaseServer();
+    const { data: { user } } = await sbA.auth.getUser();
+    aptUser = user;
+    if (user) {
+      const { data: prof } = await (sbA as any).from('profiles').select('cheongak_score').eq('id', user.id).maybeSingle();
+      aptUserCheongakScore = (prof as any)?.cheongak_score ?? null;
+    }
+  } catch {}
   const isLoggedInApt = !!aptUser;
   const isPremiumApt = false;
   const aptUA = (await headers()).get('user-agent');
@@ -512,6 +527,45 @@ export default async function AptUnifiedPage({ params }: Props) {
       />
 
       <CardCarousel slug={slug} name={name} cards={site?.og_cards as any} />
+
+      {/* Phase 6: 차별화 무기 6 컴포넌트 */}
+      <AptHero
+        site={{
+          name,
+          region: site?.region ?? region,
+          sigungu: site?.sigungu ?? sigungu,
+          dong: site?.dong ?? null,
+          builder: site?.builder ?? sub?.constructor_nm ?? null,
+          total_units: site?.total_units ?? sub?.tot_supply_hshld_co ?? null,
+          lifecycle_stage: (site as any)?.lifecycle_stage ?? null,
+        }}
+        interestCount={site?.interest_count ?? null}
+      />
+
+      <div className="apt-phase6-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 280px', gap: 12, margin: '0 0 16px' }}>
+        <main style={{ minWidth: 0 }}>
+          <LifecycleTimeline current={(site as any)?.lifecycle_stage ?? null} />
+          <CheongakMatchCard isLoggedIn={isLoggedInApt} myScore={aptUserCheongakScore} aptName={name} />
+          <AptBlogStack slug={slug} />
+          <AptCompareTable
+            slug={slug}
+            currentSite={{
+              name,
+              total_units: site?.total_units ?? null,
+              price_min: site?.price_min ?? null,
+              price_max: site?.price_max ?? null,
+              lifecycle_stage: (site as any)?.lifecycle_stage ?? null,
+              popularity_score: (site as any)?.popularity_score ?? null,
+            }}
+          />
+        </main>
+        <AptSidebar slug={slug} builder={site?.builder ?? sub?.constructor_nm ?? null} />
+      </div>
+      <style>{`
+        @media (max-width: 768px) {
+          .apt-phase6-grid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
 
       <AptSiteSchema
         site={{

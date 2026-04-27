@@ -1,5 +1,79 @@
 # 카더라 STATUS — 세션 188 (2026-04-27 / 28 cont.)
 
+## 세션 188 — SEO Phase 6: 단지 페이지 차별화 무기 6 컴포넌트
+
+### 산출물 (모두 신규, src/components/apt/*.tsx)
+- **`AptHero.tsx`** — 시그니처 검정(#0F0F0E) hero
+  · lifecycle 한글 라벨 (앰버 #FAC775) + region · 단지명(22px/500wt) + builder/세대수 meta + 우측 관심자 ★N명
+- **`LifecycleTimeline.tsx`** — Cardera ONLY 배지
+  · 데스크탑 7단계(사전계획→분양예고→모델하우스→청약→발표→계약→입주)
+  · 모바일 4단계(예고→모델→청약→입주, max-width:480px CSS 자동 압축)
+  · 현재 stage 12px dot + halo(rgba(250,199,117,0.25) 4px) + 앰버 라벨
+  · 다음 단계 안내 카드 ("다음: 모델하우스 D-90 → 알림 받기")
+- **`CheongakMatchCard.tsx`** — Phase 5 무기
+  · 비회원: "내 가점으로 {단지명} 당첨 가능?" + /profile/cheongak CTA
+  · 회원 (가점 입력 전): "가점 입력하면 당첨 확률이 보입니다" CTA
+  · 회원 (가점 입력 후): 2분할 카드 (좌:내 가점/84점 + 우:당첨가능 N% 색상별 — ≥70 success, ≥40 amber, 그 외 red)
+  · ESTIMATED_MIN_SCORE=60 baseline, 점수 차이 × 2.5%로 확률 추정
+- **`AptBlogStack.tsx`** — v_apt_related_blogs(7,961 자산)
+  · 가로 스크롤 5장 (95px 데스크탑 / 70px 모바일, scroll-snap)
+  · sub_category/cron_type 색상 매핑 7종 (청약 #791F1F, 시세 #854F0B, 이슈 #0C447C, 재개발 #0F6E56, 미분양 #3C3489, 단지분석 #0F6E56, 기타 #2C2C2A)
+  · "7,961 자산" 배지
+- **`AptCompareTable.tsx`** — 데스크탑 only (max-width:768px display:none)
+  · v_apt_nearby_sites top 4 + 단지명/분양가/세대수/등급(lifecycle 기반 A+/A/A-/B+/B/C)
+  · 현재 단지 행 #FFF8EC 하이라이트 + ★ 현재 배지
+  · 인근 단지는 /apt/{slug} 링크
+- **`AptSidebar.tsx`** — 3 카드
+  1. 알림 받기 (Phase 4 6단계, 4 ON / 2 OFF default)
+  2. 인근 단지 top 3 (v_apt_nearby_sites)
+  3. {builder} 다른 단지 top 3 (v_apt_same_builder, builder 있을 때만)
+
+### 페이지 통합 (apt/[id]/page.tsx)
+- 신규 fetch: `aptUserCheongakScore` (회원이면 profiles.cheongak_score 조회)
+- 새 layout (CardCarousel 다음, AptSiteSchema 이전):
+```
+  <AptHero />
+  <div grid 1fr+280px>
+    <main>
+      <LifecycleTimeline />
+      <CheongakMatchCard />
+      <AptBlogStack />
+      <AptCompareTable />
+    </main>
+    <AptSidebar />
+  </div>
+```
+- mobile (≤768px): grid-template-columns 1fr (자동 stack), AptCompareTable 숨김
+- mobile (≤480px): LifecycleTimeline 데스크탑 7단계 hidden + 모바일 4단계 표시
+
+### 디자인 시스템
+- 모든 컴포넌트 CSS variable 활용(`var(--bg-surface)`, `var(--border)`, `var(--text-primary/secondary/tertiary)`, `var(--brand)`) — 다크/라이트 자동
+- AptHero만 시그니처 검정 강제(#0F0F0E) — 양 모드 동일
+- 앰버(#FAC775)는 카더라 ONLY 색 (Cardera Only 배지 + 가점 매칭 카드 + lifecycle 현재 stage)
+- 컴포넌트별 inline `<style>` 태그로 media query 처리(scrollbar hide, mobile compress, desktop hide)
+
+### 검증
+- `npx tsc --noEmit` 0 error (`.next/types` cleanup 후)
+- view 5종 컬럼 사전 검증 (v_apt_complex_link / v_apt_nearby_sites / v_apt_related_blogs / v_apt_same_builder / v_apt_subscription_imminent)
+
+### 누적 (Phase 1~6) 라이브 자산
+- 4,681행 og_cards (단지 234 + 블로그 4,447)
+- 3,945행 popularity_score
+- 51,917+16,356 keyword_targets (Phase 6 사전 적용)
+- view 13종 (Phase 6 사전 적용)
+- 6 신규 단지 페이지 컴포넌트 + 6 schema/OG 자산
+- 4 페이지 + 4 cron 라우트 + 6 DB 트리거/함수 + GitHub Actions
+
+### Phase 7 후보
+- 가점 미입력 회원의 default cheongak_score=null 케이스 UX 정교화
+- LifecycleTimeline 단지별 "다음 단계 D-day" 동적 계산 (현재는 라벨만 정적)
+- AptSidebar 알림 토글 client component (현재는 ON/OFF 정적 표시)
+- AptCompareTable 정렬·필터 (지금은 view rn 순)
+- 게스트 가점 임시 저장 (apt_site_interests 컬럼 추가)
+- builder-watch 시공사 추가 PR
+
+---
+
 ## 세션 188 — SEO Phase 5: 가점 매칭 알림 + 시군구 hub ISR 전환
 
 ### DB 변경 (Supabase MCP migration: phase5_profiles_cheongak_score)
