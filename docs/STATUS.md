@@ -1,5 +1,52 @@
 # 카더라 STATUS — 세션 188 (2026-04-27 / 28 cont.)
 
+## 세션 188 — SEO Phase 7: 단지 시세 트렌드 + /apt 메인 hub 큐레이션
+
+### 산출물
+- **`src/components/apt/AptPriceTrendCard.tsx`** (신규, B1)
+  - v_sigungu_trade_stats(12개월) + v_apt_with_local_price 활용
+  - 시군구 평당가 + 1년 변동률(상승 #791F1F / 하락 #0F6E56)
+  - inline SVG sparkline (recharts 의존 X, 100×30 viewBox + polygon area + polyline)
+  - 다크모드 별도 색상(media query inline `<style>`)
+  - 분양 추정 평당 = priceMax/34평 → 시군구 평균 대비 N배 (앰버 강조)
+  - 데이터 부재(trend < 2 또는 sigungu_pyeong_recent NULL) → 컴포넌트 자체 hidden
+- **`src/components/apt/AptHubCuration.tsx`** (신규, A1-A5)
+  - 6개 view 병렬 fetch (todayPick / imminent / modelHouse / hotByRegion / builders / regionHubs)
+  - 분류 pill nav (분양 진행 / 임박 D-7 / 모델하우스 / 미분양 / 재건축 / 실거래 — `?tab=` query)
+  - 섹션 1: ★ 오늘의 추천 (가로 스크롤, 180px 카드 × 10건, rank/popularity/lifecycle)
+  - 섹션 2: ⏰ 분양 임박 D-7 (auto-fill 220px grid, D-3 #791F1F / D-7 #BA7517 색상 분기)
+  - 섹션 3: 🏠 모델하우스 오픈 ("방문 가능" 앰버 배지 + builder 명시)
+  - 섹션 4: 🔥 시도별 hot (시도 카드 12개, 각 카드는 top 5 단지 + ranking TOP 30 링크)
+  - 시공사 brand pill (top 10, 단지 카운트 표시)
+  - 시도 nav (regionHubs 합산 top 7)
+
+### 페이지 통합
+- **apt/[id]/page.tsx**: AptCheongakMatchCard와 AptBlogStack 사이에 `<AptPriceTrendCard />` 마운트
+- **apt/page.tsx**: AptClient 직전에 `<AptHubCuration />` 마운트 (큐레이션이 기존 탭 시스템 위 노출)
+
+### 디자인
+- Phase 6 동일 컬러 시스템 + CSS variable
+- `CARDERA` 배지 (앰버 시그니처)
+- 다크모드 sparkline 색상은 inline `<style>` + prefers-color-scheme 분기
+- 모바일: 가로 스크롤 (scroll-snap-type: x mandatory + scrollbar hide)
+
+### 검증
+- `npx tsc --noEmit` 0 error (TodayPickRow 타입에 dong 추가 + view SELECT에 dong 추가)
+- 10개 view 컬럼 사전 검증
+
+### 누적 (Phase 1~7)
+- 4,681행 og_cards · 3,945행 popularity_score · 68,273개 keyword_targets
+- view 22+ · 7 단지 컴포넌트 (AptHero, LifecycleTimeline, CheongakMatchCard, AptBlogStack, AptCompareTable, AptSidebar, AptPriceTrendCard) + 1 hub 큐레이션
+- 4 cron · 4 페이지 · 6 트리거 · GitHub Actions
+
+### 의도적 미반영 (Phase 8+)
+- 가격대/평형 필터 — price_max 단위 보정 후
+- 검색 자동완성 — 별도 PR
+- 네이버 Maps — API 키 필요
+- builder-watch 시공사 확장 — 한웅 검증 후
+
+---
+
 ## 세션 188 — SEO Phase 6: 단지 페이지 차별화 무기 6 컴포넌트
 
 ### 산출물 (모두 신규, src/components/apt/*.tsx)

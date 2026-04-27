@@ -61,6 +61,7 @@ export const maxDuration = 30;
 import { createSupabaseServer } from '@/lib/supabase-server';
 import AptClient from './AptClient';
 import Disclaimer from '@/components/Disclaimer';
+import AptHubCuration from '@/components/apt/AptHubCuration';
 
 async function fetchAptData() {
   let apts: Record<string, any>[] = [];
@@ -365,6 +366,8 @@ export default async function AptPage() {
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"WebPage","name":"부동산 — 청약·분양·미분양·재개발","speakable":{"@type":"SpeakableSpecification","cssSelector":["h1",".region-summary"]}}) }} />
     <h1 className="sr-only">부동산 — 청약·분양·미분양·재개발</h1>
     <p className="sr-only">카더라 부동산에서는 전국 {apts.length}건의 아파트 청약 일정, {ongoingApts.length}건의 분양 현장, {unsold.length}건의 미분양 단지, {redevTotalCount}건의 재개발·재건축 정보를 실시간으로 제공합니다. 지역별·타입별 필터로 원하는 부동산 정보를 빠르게 찾을 수 있으며, 분양가·입주 예정일·경쟁률·시세 비교를 무료로 확인할 수 있습니다.</p>
+    {/* Phase 7 A: 메인 hub 큐레이션 (4 섹션 + 분류 nav + 시공사/시도) */}
+    <AptHubCuration />
     <AptClient apts={apts} unsold={unsold} transactions={initialTransactions} redevelopment={initialRedevelopment} alertCounts={alertCounts} lastRefreshed={lastRefreshed} regionStats={regionStats} ongoingApts={ongoingApts} redevTotalCount={redevTotalCount} tradeTotalCount={tradeTotalCount} tradeByRegion={tradeByRegion} redevByRegion={redevByRegion} subTotalCount={subTotalCount} unsoldTotalCount={unsoldTotalCount} ongoingTotalCount={ongoingTotalCount} dataFreshness={dataFreshness} redevRedevCount={redevRedevCount} redevRebuildCount={redevRebuildCount} aptImageMap={aptImageMap} aptEngageMap={aptEngageMap} />
     {/* C-7: noscript — JS 비활성화 크롤러용 기본 청약 목록 */}
     <noscript>

@@ -32,6 +32,7 @@ import CheongakMatchCard from '@/components/apt/CheongakMatchCard';
 import AptBlogStack from '@/components/apt/AptBlogStack';
 import AptCompareTable from '@/components/apt/AptCompareTable';
 import AptSidebar from '@/components/apt/AptSidebar';
+import AptPriceTrendCard from '@/components/apt/AptPriceTrendCard';
 
 const AptPriceTrendChart = dynamic(() => import('@/components/charts/AptPriceTrendChart'));
 const InterestRegistration = dynamic(() => import('@/components/InterestRegistration'));
@@ -546,6 +547,15 @@ export default async function AptUnifiedPage({ params }: Props) {
         <main style={{ minWidth: 0 }}>
           <LifecycleTimeline current={(site as any)?.lifecycle_stage ?? null} />
           <CheongakMatchCard isLoggedIn={isLoggedInApt} myScore={aptUserCheongakScore} aptName={name} />
+          <AptPriceTrendCard
+            region={site?.region ?? region}
+            sigungu={site?.sigungu ?? sigungu}
+            aptName={name}
+            currentLifecycle={(site as any)?.lifecycle_stage ?? null}
+            priceMin={site?.price_min ?? null}
+            priceMax={site?.price_max ?? null}
+            totalUnits={site?.total_units ?? null}
+          />
           <AptBlogStack slug={slug} />
           <AptCompareTable
             slug={slug}
