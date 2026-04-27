@@ -15,7 +15,9 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
   const redirect = searchParams.get('redirect') ?? '/feed';
-  const source = searchParams.get('source') ?? 'direct';
+  // s188: source 가 실제로 URL 에 없을 때 'direct' 디폴트로 가리지 않도록 분리.
+  const sourceParam = searchParams.get('source');
+  const source = sourceParam ?? 'direct';
   const cookieStore = await cookies();
 
   // Open redirect 방어
@@ -128,11 +130,24 @@ export async function GET(request: Request) {
     }
   } catch { /* 로깅 실패는 무시 */ }
 
-  // s183: 진입 source 추적 + apt_interest_<slug> 1-shot 등록
+  // s188: 진입 source 추적 + apt_interest_<slug> 1-shot 등록
+  // s188 fix: void+.then() fire-and-forget 은 NextResponse.redirect 직전에 cancel 되어
+  // signup_source 91% 누락의 직접 원인. admin client + await + .is('signup_source', null)
+  // (이미 source 가 있으면 덮어쓰지 않음 — 재로그인 시 signup_source 보존).
   try {
     const action = searchParams.get('action');
-    if (source && source !== 'direct') {
-      void supabase.from('profiles').update({ signup_source: source } as any).eq('id', user.id).then(() => {});
+    if (sourceParam && sourceParam !== 'direct') {
+      try {
+        const { getSupabaseAdmin } = await import('@/lib/supabase-admin');
+        const adminSrc = getSupabaseAdmin();
+        await (adminSrc as any)
+          .from('profiles')
+          .update({ signup_source: sourceParam })
+          .eq('id', user.id)
+          .is('signup_source', null);
+      } catch (e) {
+        console.error('[auth/callback] signup_source update failed:', e);
+      }
     }
     if (action === 'register_interest' && source && source.startsWith('apt_interest_')) {
       const key = source.slice('apt_interest_'.length);

@@ -4,10 +4,11 @@ import { useAuth } from '@/components/AuthProvider';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import Link from 'next/link';
 
+// s188: 댓글 미션 동선 — 피드보다 블로그가 댓글 진입 자연스러움. 글쓰기는 /write 유지.
 const MISSIONS = [
-  { key: 'interest', label: '관심사 설정', icon: '🎯', reward: 50, link: '/onboarding' },
-  { key: 'watchlist', label: '관심종목/단지 추가', icon: '⭐', reward: 50, link: '/stock' },
-  { key: 'comment', label: '첫 댓글 달기', icon: '💬', reward: 30, link: '/feed' },
+  { key: 'interest', label: '관심 단지 등록', icon: '🏠', reward: 50, link: '/apt' },
+  { key: 'watchlist', label: '관심 종목 등록', icon: '📈', reward: 50, link: '/stock' },
+  { key: 'comment', label: '첫 댓글 달기', icon: '💬', reward: 30, link: '/blog' },
   { key: 'post', label: '첫 글 작성', icon: '✍️', reward: 100, link: '/write' },
 ];
 
@@ -15,7 +16,8 @@ export default function GlobalMissionBar() {
   const { userId, loading } = useAuth();
   const [mission, setMission] = useState<{ completed: boolean; progress: Record<string, boolean> } | null>(null);
   const [attended, setAttended] = useState(true);
-  const [expanded, setExpanded] = useState(false);
+  // s188: done < 2 면 기본 펼침 — 14/638 (2.2%) 완료율의 직접 원인은 collapsed 기본값.
+  const [expanded, setExpanded] = useState(true);
   const [checking, setChecking] = useState(false);
 
   useEffect(() => {
@@ -76,19 +78,31 @@ export default function GlobalMissionBar() {
         background: 'linear-gradient(135deg, rgba(251,191,36,0.08), rgba(59,123,246,0.06))',
         border: '1px solid rgba(251,191,36,0.15)', fontSize: 13, overflow: 'hidden',
       }}>
-        {/* 헤더 */}
+        {/* 헤더 — s188: 진행도 도트 추가 (collapsed 시에도 시각적 피드백) */}
         <div
           onClick={() => setExpanded(!expanded)}
           style={{
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            padding: '8px 12px', cursor: 'pointer',
+            padding: '8px 12px', cursor: 'pointer', gap: 10,
           }}
         >
-          <span style={{ color: 'var(--text-secondary)' }}>
-            🎯 첫 미션 <strong style={{ color: 'var(--brand)' }}>{done}/{total}</strong> 완료
-            {done >= 2 ? ' → 보너스 수령 완료!' : ` → 2개 완료 시 +200P 보너스`}
+          <span style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
+            <span style={{ whiteSpace: 'nowrap' }}>🎯 첫 미션</span>
+            <span style={{ display: 'flex', gap: 3, flexShrink: 0 }}>
+              {MISSIONS.map(m => (
+                <span key={m.key} style={{
+                  width: 8, height: 8, borderRadius: '50%',
+                  background: mission.progress[m.key] ? '#22c55e' : 'rgba(255,255,255,0.12)',
+                  border: mission.progress[m.key] ? 'none' : '1px solid var(--border)',
+                }} />
+              ))}
+            </span>
+            <strong style={{ color: 'var(--brand)' }}>{done}/{total}</strong>
+            <span style={{ fontSize: 11, color: 'var(--text-tertiary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {done >= 2 ? '보너스 수령 완료!' : '2개 완료 시 +200P'}
+            </span>
           </span>
-          <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{expanded ? '▲' : '▼'}</span>
+          <span style={{ fontSize: 11, color: 'var(--text-tertiary)', flexShrink: 0 }}>{expanded ? '▲' : '▼'}</span>
         </div>
 
         {/* 미션 목록 (확장 시) */}

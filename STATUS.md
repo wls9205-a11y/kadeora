@@ -1,3 +1,51 @@
+# Session 188 — signup_source OAuth 보존 + 온보딩 미션 UI 활성화 (2026-04-27 KST)
+
+## 배경 (실측 데이터)
+- signup_source 추적률 8.9% (518건 중 46건만 기록 — **91% 누락**)
+- first_mission 완료율 2.2% (638명 중 14명)
+- 7일 재방문율 6.7% (15명 중 1명)
+- 가입 후 행동: 스크롤만, 글/댓글/북마크 0건
+- 인프라 (`first_mission_progress` jsonb, `WelcomeReward`, `GlobalMissionBar`) 는 이미 존재. 노출 부족이 진짜 병목.
+
+## 변경
+
+### 1) `src/app/auth/callback/route.ts` — signup_source 91% 누락 해결
+- **버그:** `void supabase.from('profiles').update({signup_source}).then(()=>{})` fire-and-forget 패턴이 직후 `NextResponse.redirect(...)` 가 발사되며 cancel 됨 (서버리스 함수 종료). 이게 91% 누락의 직접 원인.
+- **부수 버그:** `searchParams.get('source') ?? 'direct'` 가 "URL 에 source 없음" 케이스를 'direct' 로 덮어 `!== 'direct'` 가드가 항상 통과되는 것처럼 보이지만, 실제로는 어떤 source 값이라도 update 자체가 cancel 되어 무용지물.
+- **수정:**
+  - `sourceParam = searchParams.get('source')` (raw, null 가능) 추가 — 'direct' fallback 과 분리.
+  - admin client (`getSupabaseAdmin`) + `await` + `.is('signup_source', null)` 멱등 가드.
+  - `sourceParam !== 'direct'` 일 때만 update — URL 에 없으면 건너뜀.
+  - try/catch 로 실패 로깅 (silent fail 방지).
+
+### 2) `src/components/GlobalMissionBar.tsx` — 미션 완료율 2.2% → 노출 강화
+- **버그:** `useState(false)` (collapsed 기본값) — 사용자가 헤더 클릭해야만 4개 미션 보임. 14/638 의 직접 원인.
+- **수정:**
+  - `useState(true)` — 기본 expanded.
+  - collapsed 시에도 4개 진행도 도트 (• • • •) 시각 노출 — 클릭 안 해도 진행 상황 인지 가능.
+  - 댓글 미션 link `/feed` → `/blog` (블로그 글 읽고 댓글 다는 동선이 자연스러움).
+  - 관심 미션 link `/onboarding` → `/apt` (interest mission 은 apt_site_interests 와 매핑됨).
+
+### 3) `src/app/(main)/layout.tsx` — SignupNudgeModal 제거
+- StickySignupBar 와 동일 대상 (비로그인) 에 중복 노출. SignupNudgeModal 은 모달 (intrusive), Sticky 는 하단 바 (gentle). gentler 옵션 유지.
+- import + mount 둘 다 제거. 컴포넌트 파일 (`SignupNudgeModal.tsx`) 자체는 미삭제 — 향후 A/B 가능성 보존.
+
+### 4) redirect URL 이중 인코딩 — 검증 결과 **버그 없음**
+- `grep encodeURIComponent(encodeURIComponent` → 0 매치.
+- 모든 `?redirect=...` 콜사이트가 `encodeURIComponent(pathname)` 1회 적용 (pathname 은 `usePathname()` 또는 `window.location.pathname` — 이미 디코드됨).
+- `InterestRegisterHero.tsx` 의 변수 사전인코딩 패턴은 가독성만 다를 뿐 단일 인코딩. 행동 동일.
+
+## 검증
+- `npx tsc --noEmit --skipLibCheck` → src 코드 0 errors. (`.next/types/validator.ts` 의 stale admin/pulse_v3, master/execute-all, master/status 참조는 사전 빌드 잔여물 — 이번 변경과 무관)
+
+## 다음 (재측정 시점 권장: 7일 후)
+- signup_source 추적률 8.9% → ?
+- first_mission_completed 2.2% → ?
+- 7일 재방문율 6.7% → ?
+- 만약 signup_source 추적률이 여전히 낮다면: `complete_signup_frictionless` RPC 가 자체적으로 signup_source 를 'direct' 로 덮어쓰는지 (RPC 본문 SQL 확인 필요) 추가 점검.
+
+---
+
 # Session 173 — P0 크론 stagger + P1 피드 정비 + s168 build fix 재적용 (2026-04-25 KST)
 
 ## 배경

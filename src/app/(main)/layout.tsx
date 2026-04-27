@@ -19,7 +19,7 @@ import WelcomeToast from '@/components/WelcomeToast';
 import GlobalMissionBar from '@/components/GlobalMissionBar';
 import SmartPushPrompt from '@/components/SmartPushPrompt';
 import ProfileCompleteBanner from '@/components/ProfileCompleteBanner';
-import SignupNudgeModal from '@/components/SignupNudgeModal';
+// s188: SignupNudgeModal 제거 — StickySignupBar 와 동일 대상(비로그인)에 중복 노출.
 import CtaGlobalTracker from '@/components/CtaGlobalTracker';
 import VitalsReporter from '@/components/web-vitals/VitalsReporter';
 
@@ -79,7 +79,6 @@ export default async function MainLayout({ children }: { children: React.ReactNo
       <WelcomeToast />
       <ScrollToTop />
       <SmartPushPrompt />
-      <SignupNudgeModal />
       <footer className="hidden md:block" style={{
         maxWidth: 1200, margin: '0 auto', padding: '0 24px 40px',
       }}>
