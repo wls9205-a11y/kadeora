@@ -1,5 +1,78 @@
 # 카더라 STATUS — 세션 188 (2026-04-27)
 
+## 세션 188 — SEO Phase 4: 알림 트리거 3개 + builder-watch + pr-monitor + alert-time-based
+
+### DB 변경 (Supabase MCP migration: phase4_apt_alert_triggers)
+3개 트리거 적용 — notifications INSERT는 트리거만 (Architecture Rule 준수):
+
+1. **`trg_apt_lifecycle_change_alert`** (apt_sites AFTER UPDATE OF lifecycle_stage)
+   - 단지 lifecycle 단계 변경 시 → 관심자(apt_site_interests)에게 notifications INSERT
+   - 10단계 한글 라벨 매핑 (pre_announcement→분양 예고, model_house_open→모델하우스 오픈 등)
+   - 조건: `notification_enabled=true OR NULL` (default ON)
+
+2. **`trg_apt_price_change_alert`** (apt_sites AFTER UPDATE OF price_max)
+   - price_max ±5% 이상 변동 시 → 관심자에게 INSERT
+   - 상승/하락 라벨 + 변동률(소수 1자리)
+   - 조건: 이전·현재 모두 NOT NULL + 0 아님
+
+3. **`trg_apt_review_new_alert`** (apt_reviews AFTER INSERT)
+   - **주의**: apt_reviews는 `apt_site_id` 없이 `apt_name`(text)만 — TRIM exact 매칭으로 `apt_sites.name`에서 site 찾음 (popularity_score 우선)
+   - is_deleted=false + 본인 후기 제외 (asi.user_id != NEW.user_id)
+   - 매칭 site 없으면 silent skip
+
+**Dry-run 검증**: altiero-gwangan lifecycle pre_announcement→model_house_open→pre_announcement → 트리거 발화, INSERT 0행 (관심자 0명) → 정확. 트리거 룰 작동 확인.
+
+### API 라우트 (외부 cron 트리거 패턴 — vercel.json 미편집)
+- **`src/app/api/admin/builder-watch/route.ts`** (manual-trigger, GET/POST, Bearer)
+  - 1차 한웅건설(mattian.co.kr) 1곳 — 검증 통과 후 PR per builder 확장
+  - cheerio 1.2.0 신규 의존 + claude-haiku-4-5 정규화
+  - 비용가드: AI 호출 MAX 5건/run, INSERT MAX 5건/run, slug 충돌 시 skip
+  - 신규 단지 자동 og_cards 6장 채움 (Phase 1 패턴 동일)
+  - parse_failed → 200 + metadata 기록 (cron handler 항상 200 규칙)
+- **`src/app/api/cron/pr-monitor/route.ts`** (Bearer)
+  - 5개 RSS 중 2개 검증 활성: heraldcorp_biz, sedaily_realestate
+  - 키워드 9종 필터(분양 예정/공급 예정/모델하우스/청약 일정/N월 분양/분양가/입주자 모집)
+  - 매치 기사 → claude-haiku 정규화 → apt_sites INSERT (lifecycle_stage='pre_announcement')
+  - 비용가드: AI 호출 MAX 5건/run, INSERT MAX 5건/run
+- **`src/app/api/cron/alert-time-based/route.ts`** (Bearer)
+  - D-3: apt_subscriptions.rcept_bgnde = today+3 → 관심자 알림
+  - D-day: przwner_presnatn_de = today → 관심자 알림
+  - 24h idempotency: 같은 user+type+link 23시간 내 중복 INSERT 방지 (직접 INSERT지만 시간 트리거 + 강한 dedup)
+  - claude API 0건 (DB query만)
+
+### 의도적 미반영 (위험 회피)
+- **C1 vercel.json 100 cron 정리 보류**: 런타임 로그 없이 deprecated cron 식별은 silent break 위험. 위 3 라우트 모두 Bearer 인증 + 외부 cron(GitHub Actions / cron-job.org / 수동) 에서 호출 가능. 사용자가 vercel cron 100개 audit 후 직접 등록 권장.
+- **가점 매칭 알림 미구현**: profiles.cheongak_score 컬럼 미검증 — 별도 PR.
+- **시공사 30곳 watcher 확장**: 한웅건설 production 검증 후 PR per builder.
+
+### 신규 의존성
+- `cheerio: ^1.2.0` (devDependencies 아닌 dependencies)
+
+### 검증
+- `npx tsc --noEmit` 0 error (`.next/types` cleanup 후)
+- 트리거 dry-run pass (notifications INSERT 0건 — 관심자 0명 sites는 silent skip)
+
+### 사용 가이드 (외부 cron 등록 시)
+```bash
+# 매 6시간 — pr-monitor
+curl -X GET "https://kadeora.app/api/cron/pr-monitor" -H "Authorization: Bearer $CRON_SECRET"
+
+# 매일 KST 04:00 — alert-time-based
+curl -X GET "https://kadeora.app/api/cron/alert-time-based" -H "Authorization: Bearer $CRON_SECRET"
+
+# 매일 1회 — builder-watch (한웅건설)
+curl -X POST "https://kadeora.app/api/admin/builder-watch?builder=hanwoong" -H "Authorization: Bearer $CRON_SECRET"
+```
+
+### Phase 5 후보
+- vercel.json cron audit + 신규 cron 3개 등록
+- profiles.cheongak_score 가점 매칭 알림 (D-day 발표 신호 시 점수 매칭한 단지 추천)
+- builder-watch 시공사 추가 (한웅 검증 후 dongwon, sk-eco, 롯데, 대우 ...)
+- pr-monitor RSS 추가 (디지털타임스 / 다음 부동산 / 아시아경제)
+- 시군구 hub generateStaticParams ISR 전환 (force-dynamic 부담 완화)
+
+---
+
 ## 세션 188 — SEO Phase 3: 시군구 hub + ranking hub + popularity_score 일괄 + sitemap-region-hubs
 
 ### 산출물
