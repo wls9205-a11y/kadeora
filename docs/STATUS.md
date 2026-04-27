@@ -1,5 +1,46 @@
 # 카더라 STATUS — 세션 188 (2026-04-27)
 
+## 세션 188 — SEO Phase 2: 블로그 6장 OG 카드 + Schema + Wave 2 4,447건 백필
+
+### 산출물
+- **`src/app/api/og-blog/route.tsx`** (신규, Node runtime, 630×630 PNG)
+  - `?slug=...&card=1~6&v=1` — sub_category/category 별 디자인 분기
+  - card=1 cover(#1A1A18 + 카테고리 배지), 2~5 핵심포인트(key_points 페어 분리), 6 CTA(앰버 #FAC775 + hub_cta_target)
+  - 폰트: `public/fonts/NotoSansKR-Bold.woff` (Node, fs.readFileSync)
+  - blog_posts SELECT: title/category/sub_category/key_points/tldr/hub_cta_target/hub_apt_slug
+- **`src/components/schema/BlogPostSchema.tsx`** (신규)
+  - `@graph`: Article(headline+author+publisher+image) + BreadcrumbList + ImageGallery(og_cards 6장) + FAQPage(post.faqs)
+  - 기존 inline JSON-LD(jsonLd/breadcrumbLd/faqSchema/howtoSchema/datasetSchema)와 공존
+- **`src/app/(main)/blog/[slug]/page.tsx`** 수정
+  - getPostBySlug SELECT에 og_cards/hub_cta_target/hub_apt_slug/keyword_targets 추가
+  - generateMetadata: og_cards 6개면 openGraph.images / twitter.images 모두 6 URL 사용
+  - 본문 직전 `<BlogPostSchema />` + `<CardCarousel />` mount
+
+### DB 변경 (Supabase MCP)
+- Wave 2 og_cards UPDATE: **4,447행** 부동산 관련 블로그
+  - sub_category: 청약·분양(1,749) + 실거래·시세(1,056) + 재개발·재건축(361) + 단지별분석(265) + 미분양현황(238) + 비교분석(183) + 부동산일반(48) + 단지분석(11) + cheongak(40) + lotto_cheongak(24) + 청약(2)
+  - cron_type: bulk-apt-sites(1,145) + apt-trade-analysis(606) + apt-batch-v3(353) + sub-seed-v2(280) + unsold-analysis(246) + unsold-sigungu-analysis(175) + apt-landmark(119) + seed-guide(117) + sub-seed-v3(112) + redev-seed(107) + apt-sub-analysis(105)
+  - WHERE: is_published AND og_cards=`[]` AND (sub_category IN 한글11종 OR cron_type IN 부동산11종)
+  - **주의**: 사용자 spec의 sub_category IN ('cheongak','lotto_cheongak') 만으로는 64건만 매칭 — 실제 한글 카테고리 통합으로 확장(원래 의도 ~6,000)
+
+### 검증
+- `npx tsc --noEmit` 0 error (`.next/types` 캐시 정리 후)
+
+### 누적 (Phase 1 + Phase 2)
+- DB: 234 단지 + 4,447 블로그 = **4,681행** og_cards 채워짐
+- API: /api/og-apt + /api/og-blog (총 12 카드 디자인)
+- Schema: AptSiteSchema + BlogPostSchema (각 @graph)
+- 공용: CardCarousel (단지·블로그 양쪽)
+
+### 다음(Phase 3 명세 대기)
+- builder-watch 한웅건설 1곳만 (cheerio + Anthropic API 1회 호출, 비용 가드 < $0.10)
+- 시군구 hub `/apt/region/[sido]/[sigungu]/[category]` (부산만)
+- ranking hub `/apt/ranking/[sido]/[category]`
+- ranking-update cron (popularity_score 재계산)
+- 알림 6단계는 후반(선택)
+
+---
+
 ## 세션 188 — SEO Phase 1: 단지 6장 OG 카드 시스템 + 시드 2건 + Wave 1 234건 백필
 
 ### 산출물

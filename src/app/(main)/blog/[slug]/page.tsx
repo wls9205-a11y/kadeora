@@ -46,6 +46,8 @@ import BlogEarlyGateTeaser from '@/components/blog/BlogEarlyGateTeaser';
 import RelatedBlogsSection from '@/components/blog/RelatedBlogsSection';
 // s184: BlogSocialBar 제거 — 본문 직후 ShareButtons 1세트로 통합.
 import BlogFooterMeta from '@/components/blog/BlogFooterMeta';
+import BlogPostSchema from '@/components/schema/BlogPostSchema';
+import CardCarousel from '@/components/og/CardCarousel';
 // s184: BlogImageCarousel 제거 — 캐러셀 자체 폐지.
 // s185: BlogMidGate 제거 — SmartSectionGate(60% 무료3회) + StickySignupBar(300px) 와 중복.
 // s183: SmartSectionGate 복귀 (s108 에 LoginGate 로 전환했었으나 비로그인 가입 유도가 사실상 0개로
@@ -242,7 +244,7 @@ export async function generateStaticParams() {
 const getPostBySlug = cache(async (slug: string) => {
   const sb = await createSupabaseServer();
   const { data } = await (sb as any).from('blog_posts')
-    .select('id,title,slug,content,excerpt,category,sub_category,cover_image,image_alt,tags,meta_description,meta_keywords,author_name,author_role,reading_time_min,view_count,comment_count,helpful_count,published_at,created_at,updated_at,series_id,series_order,source_type,source_ref,data_date,rewritten_at,tldr,key_points,gated_sections,has_gated_content,reading_minutes')
+    .select('id,title,slug,content,excerpt,category,sub_category,cover_image,image_alt,tags,meta_description,meta_keywords,author_name,author_role,reading_time_min,view_count,comment_count,helpful_count,published_at,created_at,updated_at,series_id,series_order,source_type,source_ref,data_date,rewritten_at,tldr,key_points,gated_sections,has_gated_content,reading_minutes,og_cards,hub_cta_target,hub_apt_slug,keyword_targets')
     .eq('slug', slug).eq('is_published', true).maybeSingle();
   return data;
 });
@@ -288,14 +290,31 @@ export async function generateMetadata({ params }: Props) {
       tags: post.tags ?? [],
       section: post.category === 'stock' ? '주식' : post.category === 'apt' ? '부동산' : post.category === 'unsold' ? '미분양' : '재테크',
       url: `${SITE}/blog/${slug}`,
-      images: [
-        { url: ogImage, width: 1200, height: 630, alt: post.image_alt || descClean || post.title },
-        { url: ogSquare, width: 630, height: 630, alt: post.image_alt || descClean || post.title },
-      ],
+      images: (() => {
+        const cards = Array.isArray(post.og_cards) ? post.og_cards : [];
+        if (cards.length === 6) {
+          return cards.map((c: any) => ({
+            url: typeof c?.url === 'string' && c.url.startsWith('http') ? c.url : `${SITE}${c?.url || ''}`,
+            width: 630,
+            height: 630,
+            alt: c?.alt || post.image_alt || post.title,
+          }));
+        }
+        return [
+          { url: ogImage, width: 1200, height: 630, alt: post.image_alt || descClean || post.title },
+          { url: ogSquare, width: 630, height: 630, alt: post.image_alt || descClean || post.title },
+        ];
+      })(),
     },
     twitter: {
       card: 'summary_large_image' as const,
-      images: [ogImage, ogSquare],
+      images: (() => {
+        const cards = Array.isArray(post.og_cards) ? post.og_cards : [];
+        if (cards.length === 6) {
+          return cards.map((c: any) => typeof c?.url === 'string' && c.url.startsWith('http') ? c.url : `${SITE}${c?.url || ''}`).filter(Boolean);
+        }
+        return [ogImage, ogSquare];
+      })(),
     },
     other: (() => {
       const allText = `${post.title} ${(post.tags ?? []).join(' ')}`;
@@ -798,6 +817,35 @@ export default async function BlogDetailPage({ params }: Props) {
       {faqSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />}
       {howtoSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howtoSchema) }} />}
       {datasetSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(datasetSchema) }} />}
+
+      <BlogPostSchema
+        post={{
+          slug: post.slug,
+          title: post.title,
+          excerpt: post.excerpt ?? null,
+          meta_description: post.meta_description ?? null,
+          category: post.category ?? null,
+          sub_category: post.sub_category ?? null,
+          cover_image: post.cover_image ?? null,
+          author_name: post.author_name ?? null,
+          author_role: post.author_role ?? null,
+          published_at: post.published_at ?? null,
+          created_at: post.created_at ?? null,
+          updated_at: post.updated_at ?? null,
+          rewritten_at: post.rewritten_at ?? null,
+          tags: post.tags ?? null,
+          og_cards: (post as any).og_cards ?? null,
+          faqs: null,
+          hub_cta_target: (post as any).hub_cta_target ?? null,
+          hub_apt_slug: (post as any).hub_apt_slug ?? null,
+        }}
+        origin={SITE}
+      />
+      <CardCarousel
+        slug={post.slug}
+        name={post.title}
+        cards={(post as any).og_cards ?? null}
+      />
 
       <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 20, flexWrap: 'wrap', letterSpacing: '0.3px' }}>
         <Link href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)', opacity: 0.7 }}>홈</Link>
