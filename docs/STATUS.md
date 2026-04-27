@@ -1,4 +1,69 @@
-# 카더라 STATUS — 세션 188 (2026-04-27)
+# 카더라 STATUS — 세션 188 (2026-04-27 / 28 cont.)
+
+## 세션 188 — SEO Phase 5: 가점 매칭 알림 + 시군구 hub ISR 전환
+
+### DB 변경 (Supabase MCP migration: phase5_profiles_cheongak_score)
+- profiles 8 컬럼 추가:
+  - `cheongak_score smallint CHECK 0~84` (자동 계산)
+  - `no_house_period_months smallint CHECK 0~240`
+  - `dependents_count smallint CHECK 0~10`
+  - `savings_period_months smallint CHECK 0~240`
+  - `cheongak_target_regions text[] DEFAULT '{}'`
+  - `cheongak_target_unit_min/max integer`
+  - `cheongak_score_updated_at timestamptz`
+- `trg_profiles_cheongak_score_calc` BEFORE INSERT/UPDATE — 한국 표준 가점제 자동 계산
+  - 무주택 32점(6개월=1점) + 부양 35점(5+5×N, 본인 제외 입력) + 통장 17점(6개월=1점)
+  - 모든 입력 NULL → score NULL (의도하지 않은 부분 점수 방지)
+  - dependents_count NULL이면 부양가족 항목 0점 (본인 5점 미적용)
+- 인덱스: `cheongak_score`(부분, NOT NULL), `cheongak_target_regions`(GIN)
+
+**Formula CTE 검증 (실제 profile 미수정)**:
+- (10년 무주택 + 부양 2명 + 5년 통장) → **45점** ✓
+- (max 모든 항목) → **84점** ✓ (만점)
+- (전부 0 + dependents=0) → **5점** ✓ (본인만)
+- (60개월 + dependents NULL) → **10점** ✓ (부양 0점, 본인 5점 미적용)
+
+### 산출물
+- **`src/app/(main)/profile/cheongak/page.tsx`** + **`CheongakForm.tsx`** (신규)
+  - 미로그인 → /login 리다이렉트
+  - 슬라이더 3개(무주택/통장 6개월 단위, 부양 0~6+)
+  - 17개 시도 multi-select(최대 10개), 면적 min/max 옵션
+  - 실시간 미리보기 점수(client) + 저장 후 trigger 계산값(server) 표시
+  - 점수별 안내(60+ 수도권 / 40+ 지역 / 추가 입력 권장)
+- **`src/app/api/profile/cheongak/route.ts`** (신규, GET/PUT, auth required)
+  - clamp/sanitize 입력값
+  - PUT 시 trigger가 자동 점수 계산 + updated_at 갱신
+- **`src/app/api/cron/alert-time-based/route.ts`** 확장
+  - 3) 가점 매칭 블록 추가
+  - 2주 내 청약(rcept_bgnde BETWEEN today AND today+14) × profiles.cheongak_score>=55 (baseline 60−5) × `target_regions @> [region_token]`
+  - 24h dedup 유지(같은 user+type+link 23h 내 1회)
+  - claude API 0건
+  - 응답에 `cheongak_match` count 추가
+- **`src/components/apt/InterestRegisterHero.tsx`** 확장
+  - 관심등록 완료 후 follow-up CTA: "★ 가점 입력하면 매칭 단지 자동 알림 → 입력하기"
+  - 회원 한정(게스트는 미노출 — 회원가입 후 노출)
+- **`src/app/(main)/apt/region/[region]/[sigungu]/[category]/page.tsx`** 수정 (B3)
+  - `force-dynamic` 제거, `revalidate=3600` + `dynamicParams=true`
+  - `generateStaticParams()`: v_region_hub_clusters cluster_size DESC top 100만 정적 build
+  - 나머지 666개는 ondemand ISR (첫 방문 시 생성)
+
+### 검증
+- `npx tsc --noEmit` 0 error (`.next/types` cleanup 후)
+- 마이그레이션 + formula CTE 모두 통과
+- 실제 profile 데이터 미변경(dry-run skip — auth.users 의존 + 프로덕션 사용자 보호)
+
+### 의도적 미반영
+- 게스트 가점 입력 (apt_site_interests 컬럼 추가 필요 — 별도 PR)
+- apt_competition_rates에 winning_score 컬럼 없음 → baseline 60 사용 (나중에 데이터 누적되면 단지별 동적 추정)
+
+### Phase 6 후보
+- 게스트 가점 입력 + 회원가입 시 profiles 이전
+- vercel.json cron audit + 신규 cron 등록
+- builder-watch 시공사 추가
+- pr-monitor RSS 추가
+- popularity_score 매일 갱신 cron
+
+---
 
 ## 세션 188 — SEO Phase 4: 알림 트리거 3개 + builder-watch + pr-monitor + alert-time-based
 

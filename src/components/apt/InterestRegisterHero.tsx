@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 interface Props {
   aptId: string | number;
@@ -117,6 +118,16 @@ export function InterestRegisterHero({ aptId, aptName, aptSlug, status, isLogged
       </button>
       {err && (
         <div style={{ width: '100%', fontSize: 12, color: '#FF6B6B', marginTop: 4 }}>{err}</div>
+      )}
+      {/* Phase 5 B2: 등록 완료 후 가점 매칭 follow-up CTA */}
+      {done && isLoggedIn && (
+        <div style={{ width: '100%', marginTop: 4, padding: '8px 10px', background: 'rgba(250,199,117,0.08)', border: '1px solid rgba(250,199,117,0.3)', borderRadius: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          <span style={{ fontSize: 12, color: 'var(--text-secondary)', fontWeight: 600 }}>
+            <span style={{ color: '#FAC775', marginRight: 4 }}>★</span>
+            가점 입력하면 매칭 단지 자동 알림
+          </span>
+          <Link href="/profile/cheongak" style={{ fontSize: 12, fontWeight: 800, color: '#FAC775', textDecoration: 'none' }}>입력하기 →</Link>
+        </div>
       )}
     </div>
   );

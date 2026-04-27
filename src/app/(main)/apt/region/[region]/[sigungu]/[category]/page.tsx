@@ -4,8 +4,31 @@ import { notFound } from 'next/navigation';
 import { SITE_URL } from '@/lib/constants';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
-export const dynamic = 'force-dynamic';
+// Phase 5 B3: ISR 전환 — top 100 정적 + 나머지 ondemand ISR (1h revalidate)
+export const revalidate = 3600;
+export const dynamicParams = true;
 export const maxDuration = 30;
+
+export async function generateStaticParams() {
+  try {
+    const sb = getSupabaseAdmin();
+    const { data } = await (sb as any).from('v_region_hub_clusters')
+      .select('region,sigungu,site_type,cluster_size')
+      .order('cluster_size', { ascending: false, nullsFirst: false })
+      .limit(100);
+    const rows = ((data ?? []) as Array<{ region: string; sigungu: string; site_type: string }>);
+    return rows
+      .filter(r => r.region && r.sigungu && r.site_type)
+      .map(r => ({
+        region: encodeURIComponent(r.region),
+        sigungu: encodeURIComponent(r.sigungu),
+        category: r.site_type,
+      }));
+  } catch (err) {
+    console.error('[region-hub generateStaticParams]', err);
+    return [];
+  }
+}
 
 const CATEGORY: Record<string, { label: string; site_type: string }> = {
   subscription: { label: '분양', site_type: 'subscription' },
