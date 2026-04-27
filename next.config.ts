@@ -2,7 +2,10 @@
 import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
-  generateBuildId: () => `build-${process.env.NEXT_PUBLIC_CACHE_VERSION || '20260329'}`,
+  generateBuildId: async () =>
+    process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 8)
+      ?? process.env.NEXT_PUBLIC_CACHE_VERSION
+      ?? `build-${Date.now().toString(36)}`,
   typescript: { ignoreBuildErrors: false },
   eslint: { ignoreDuringBuilds: true },
   compress: true,

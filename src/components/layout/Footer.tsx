@@ -61,7 +61,6 @@ export default function Footer() {
           사업자 정보
         </p>
         <p>{BIZ_INFO_LINE}</p>
-        <p>대표자: 노영진</p>
         <p>{BIZ_ADDRESS_LINE}</p>
         <p>{BIZ_CONTACT_LINE}</p>
         <p style={{ marginTop: 4 }}>

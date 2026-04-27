@@ -484,15 +484,13 @@ export default async function AptUnifiedPage({ params }: Props) {
         />
       )}
 
-      {site?.id && (
-        <InterestRegisterHero
-          aptId={site.id}
-          aptName={name}
-          aptSlug={slug}
-          status={subSt}
-          isLoggedIn={isLoggedInApt}
-        />
-      )}
+      <InterestRegisterHero
+        aptId={site?.id ?? slug}
+        aptName={name}
+        aptSlug={slug}
+        status={subSt}
+        isLoggedIn={isLoggedInApt}
+      />
 
       <PaywallMarker hasGatedContent={true} schemaType="RealEstateListing" />
 

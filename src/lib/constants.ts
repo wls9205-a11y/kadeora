@@ -19,7 +19,7 @@ export const ANTHROPIC_VERSION = '2023-06-01';
 
 /** 사업자 정보 — 법적 고지에 사용 */
 export const BIZ_NAME = '카더라';
-export const BIZ_OWNER = '카더라';
+export const BIZ_OWNER = '노영진';
 export const BIZ_NUMBER = '278-57-00801';
 export const BIZ_ADDRESS = '부산광역시 연제구 연동로 27, 405호';
 
