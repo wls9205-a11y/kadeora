@@ -406,6 +406,12 @@ ${complexXml}
         .order('published_at', { ascending: false })
         .range(offset, offset + BLOG_PER_SITEMAP - 1);
 
+      // 빈 사이트맵 (구글에 "이 카테고리의 콘텐츠가 사라졌다" 신호) 차단
+      // chunk 0 (=id 8)은 항상 200 유지 (DB 일시 에러 시 보호) — 이후 청크는 데이터 없으면 410.
+      if (chunk > 0 && (!data || data.length === 0)) {
+        return new NextResponse('Sitemap chunk no longer exists', { status: 410, headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
+      }
+
       let seriesEntries: SitemapEntry[] = [];
       if (chunk === 0) {
         try {
@@ -427,7 +433,8 @@ ${complexXml}
         const freq = daysSincePub <= 7 ? 'daily' : daysSincePub <= 30 ? 'weekly' : 'monthly';
         const prio = b.source_type === 'upcoming' ? 0.9 : daysSincePub <= 3 ? 0.8 : daysSincePub <= 14 ? 0.7 : daysSincePub <= 60 ? 0.6 : 0.5;
         const lastmod = b.updated_at || b.published_at || now;
-        const imgUrl = b.cover_image || `${BASE}/api/og?title=${encodeURIComponent((b.title || '').slice(0, 60))}&category=${b.category || 'blog'}&design=2`;
+        const rawImg = b.cover_image || `${BASE}/api/og?title=${encodeURIComponent((b.title || '').slice(0, 60))}&category=${b.category || 'blog'}&design=2`;
+        const imgUrl = rawImg.startsWith('/') ? `${BASE}${rawImg}` : rawImg;
         const imgAlt = escXml(b.image_alt || b.title || '카더라 블로그');
         const imgTitle = escXml((b.title || '').slice(0, 80));
         return `  <url>
@@ -524,5 +531,7 @@ ${blogXml}
     }
   }
 
-  return xmlResponse([]);
+  // 알려진 핸들러에 매칭되지 않는 id (가령 /sitemap/99.xml 같은 stale URL)은 404로 처리
+  // — 빈 200 응답이 구글에 "이 사이트맵 살아있음, 콘텐츠 없음" 신호를 주는 것을 방지.
+  return new NextResponse('Not Found', { status: 404, headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
 }

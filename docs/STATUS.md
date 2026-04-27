@@ -1,3 +1,41 @@
+# 카더라 STATUS — 세션 182 (2026-04-27)
+
+## 세션 182 — SEO 긴급 수정 (Soft 404 → Hard 404, robots 충돌, sitemap 위생)
+
+### Track A — Soft 404 근본 원인 수정 ✅
+**문제**: 존재하지 않는 블로그 슬러그가 HTTP 200 + 빈 스켈레톤. Googlebot이 정상 페이지로 인식 → 크롤 버짓 낭비.
+
+**근본 원인**: `src/components/ErrorBoundary.tsx` (class boundary) 가 `notFound()` 가 throw하는 `NEXT_NOT_FOUND` 까지 catch → "문제가 발생했습니다" UI 렌더 → Next.js는 성공 렌더로 간주 → **HTTP 200**. 그 결과 not-found.tsx 가 절대 호출되지 않으므로 robots:{index:false} 도 적용 안 됨.
+
+**수정**:
+- `ErrorBoundary.tsx`: `error.digest` 가 `NEXT_*` 로 시작하면 (`NEXT_NOT_FOUND`, `NEXT_REDIRECT`, `NEXT_HTTP_ERROR_FALLBACK;404`) re-throw하여 framework로 전파.
+- `blog/[slug]/page.tsx` `generateMetadata`: `if (!post) return {}` → `notFound()` (메타데이터 단계에서도 404 트리거).
+
+### Track B — root layout robots 제거 ✅
+- `app/layout.tsx`: root metadata 의 `robots` 필드 제거. 404/auth/global-error 등 (main) 외부 라우트가 root robots 를 상속하지 않도록.
+- `(main)/layout.tsx` 의 `robots` 는 유지: 일반 컨텐츠 라우트만 영향. not-found.tsx 의 `robots:{index:false,follow:false}` 가 metadata merge 로 덮어씀 (Track A 수정 후 정상 동작).
+
+### Track C — sitemap 위생 ✅
+- `news-sitemap.xml/route.ts`: `cover_image` 가 `/...` 상대 경로인 경우 `${SITE_URL}` prefix 보정.
+- `sitemap/[id]/route.ts` (blog 청크): chunk 0 (id=8) 외에 `data.length === 0` 이면 **HTTP 410 Gone** 반환 (구글에 영구 제거 신호).
+- `sitemap/[id]/route.ts` 미매칭 fallback: 기존 빈 200 → **HTTP 404** (stale crawl URL 정리).
+- 이미지 절대경로 보정: blog 청크 핸들러 imgUrl 도 동일 패턴 적용.
+
+### Track D — 미수정 / 미검증 (의도적 보류)
+- **SSR BAILOUT**: blog/[slug] 는 이미 s174 에서 `dynamic='force-dynamic'` 설정. 이 상태에서 `useSearchParams()` 는 Suspense 없이도 동작하므로 BAILOUT 가 발생할 이유가 없음. 만약 아직도 HTML 에 BAILOUT 태그가 보인다면 sub-component 의 다른 원인 (서버 전용 API 가 client component 에 import 등) — 살아있는 HTML 응답 샘플 필요. 다음 세션.
+- **삭제된 포스트 sitemap 제거**: 기존 query 가 이미 `eq('is_published', true).not('published_at', 'is', null)` 로 필터링. unpublish 시 자동 제외됨. 추가 작업 불필요.
+- **sitemap.xml index 의 BLOG_IDS ↔ FIXED_IDS_POST_BLOG ID 충돌** (잠재적 버그): 게시글 >20K 시 BLOG_IDS=[8..N] 이 12-16 과 겹쳐서 청크 4-9 가 손실될 수 있음. 위험한 변경이라 별도 세션 필요.
+
+### 검증 (배포 후 수행 권장)
+```
+curl -sI https://kadeora.app/blog/존재하지않는슬러그   → HTTP/2 404
+curl -s https://kadeora.app/blog/존재하지않는슬러그 | grep robots  → noindex
+curl -sI https://kadeora.app/sitemap/99.xml          → HTTP/2 404
+curl -s https://kadeora.app/news-sitemap.xml | grep '<image:loc>/' → 결과 없음
+```
+
+---
+
 # 카더라 STATUS — 세션 175 (2026-04-25)
 
 ## 세션 175 — DYNAMIC_SERVER_USAGE 추가 페이지 + 트리거 config 참조 + 93편 벌크

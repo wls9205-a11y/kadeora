@@ -25,7 +25,9 @@ export async function GET() {
   const items = (posts || []).map((p: any) => {
     const pubDate = p.published_at ? new Date(p.published_at).toISOString() : new Date().toISOString();
     const tags = (p.tags || []).slice(0, 5).join(', ');
-    const imgUrl = p.cover_image || `${SITE_URL}/api/og?title=${encodeURIComponent((p.title || '').slice(0, 60))}&category=${p.category || 'blog'}&design=2`;
+    // cover_image가 상대 경로(/api/og?... 등)일 때 절대 URL로 보정 — 구글 이미지 크롤러 호환
+    const rawImg = p.cover_image || `${SITE_URL}/api/og?title=${encodeURIComponent((p.title || '').slice(0, 60))}&category=${p.category || 'blog'}&design=2`;
+    const imgUrl = rawImg.startsWith('/') ? `${SITE_URL}${rawImg}` : rawImg;
     const imgAlt = escXml(p.image_alt || p.title || '카더라');
 
     return `  <url>

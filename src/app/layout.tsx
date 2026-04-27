@@ -42,7 +42,10 @@ export const metadata: Metadata = {
     site: '@kadeora_app',
     creator: '@kadeora_app',
   },
-  robots: { index: true, follow: true, googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1, 'max-video-preview': -1 } },
+  // robots는 의도적으로 root layout 에서 제외:
+  // 404/에러 페이지에서 Next.js 가 자동 주입하는 noindex 와 충돌하므로 per-route 에서 설정.
+  // (main)/layout.tsx 가 일반 컨텐츠 페이지에 index/follow 를 부여하고,
+  // not-found.tsx 가 robots:{index:false,follow:false} 로 명시적 override.
   verification: {
     google: 'ozIZYKHPCsd47yk_paPH5mbsSNSCpc-hzLGgQw0lhyU',
     other: { 'naver-site-verification': '0d8703ac50ef51c3c2feb0ee48784069936492f5' },

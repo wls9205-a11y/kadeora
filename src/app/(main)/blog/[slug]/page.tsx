@@ -250,7 +250,7 @@ export async function generateMetadata({ params }: Props) {
   const { slug: rawSlug } = await params;
   const slug = decodeURIComponent(rawSlug);
   const post = await getPostBySlug(slug);
-  if (!post) return {};
+  if (!post) notFound();
     const ogImage = post.cover_image || `${SITE}/api/og?title=${encodeURIComponent(post.title)}&category=${post.category}&author=${encodeURIComponent(post.author_name || '카더라')}&design=2`;
     const ogSquare = `${SITE}/api/og-square?title=${encodeURIComponent(post.title)}&category=${post.category}&author=${encodeURIComponent(post.author_name || '카더라')}`;
     // 네이버/구글 통일 설명문 (meta_description > excerpt > title)
