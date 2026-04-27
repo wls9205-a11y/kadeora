@@ -16,14 +16,10 @@ import PullToRefresh from '@/components/PullToRefresh';
 import EmptyState from '@/components/EmptyState';
 import { isTossMode } from '@/lib/toss-mode';
 import TossTeaser from '@/components/TossTeaser';
-import SectionShareButton from '@/components/SectionShareButton';
 import PostReactions from '@/components/PostReactions';
-import QuickPostBar from '@/components/feed/QuickPostBar';
 import FeedPollCard from '@/components/feed/FeedPollCard';
 import FeedVSCard from '@/components/feed/FeedVSCard';
 import FeedPredictCard from '@/components/feed/FeedPredictCard';
-import LiveActivityBar from '@/components/feed/LiveActivityBar';
-import LiveDiscussionCards from '@/components/feed/LiveDiscussionCards';
 import FallbackThumb from '@/components/FallbackThumb';
 import { timeAgo, numFmt } from '@/lib/format';
 import { useAuth } from '@/components/AuthProvider';
@@ -287,18 +283,6 @@ export default function FeedClient({
   return (
     <PullToRefresh>
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
-
-        {/* 헤더 — 카더라 + 공유 */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, padding: '4px 0' }}>
-          <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 900, color: 'var(--brand)', margin: 0, letterSpacing: -0.5, flexShrink: 0 }}>카더라</h1>
-          <SectionShareButton section="feed" label="카더라 커뮤니티" pagePath="/feed" />
-        </div>
-
-        {/* s174: FeedClient 한정 Live 컴포넌트 (Navigation 은 미변경) */}
-        <LiveActivityBar />
-        <LiveDiscussionCards />
-
-        <QuickPostBar category={activeCategory !== 'all' && activeCategory !== 'following' ? activeCategory : 'free'} regionId={activeRegion} />
 
         {/* ━━━ 카테고리 탭 (세그먼트 컨트롤) ━━━ */}
         <div style={{ display: 'flex', gap: 3, marginBottom: 'var(--sp-sm)', overflowX: 'auto', scrollbarWidth: 'none', padding: 3, background: 'var(--bg-surface)', borderRadius: 'var(--radius-xl, 20px)', border: '1px solid var(--border)' }}>

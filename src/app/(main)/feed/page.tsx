@@ -35,7 +35,6 @@ import { DEMO_POSTS } from '@/lib/constants';
 import type { PostWithProfile } from '@/types/database';
 import FeedClient from './FeedClient';
 import AnonymousFeedHero from '@/components/AnonymousFeedHero';
-import FeedMarketBar from '@/components/FeedMarketBar';
 import Disclaimer from '@/components/Disclaimer';
 
 // Cache: 60s — 피드 목록
@@ -115,9 +114,6 @@ export default async function FeedPage({ searchParams }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '커뮤니티 피드' }] }) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'CollectionPage', name: '카더라 커뮤니티 피드', description: '주식, 부동산, 청약, 재테크 소문과 정보를 나누는 커뮤니티', url: SITE_URL + '/feed', isPartOf: { '@type': 'WebSite', name: '카더라', url: SITE_URL } }) }} />
       {!userId && <AnonymousFeedHero data={anonHomepageData} />}
-      <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
-        <FeedMarketBar />
-      </div>
       <FeedClient posts={posts} activeCategory={category} activeRegion={region} activeSort={validSort} />
       <LoginGate feature="feed_write" blurHeight={60}>
         <div style={{ padding: '8px 0', textAlign: 'center' }}>

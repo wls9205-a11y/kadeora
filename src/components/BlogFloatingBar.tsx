@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/components/AuthProvider';
 import { usePathname } from 'next/navigation';
 import { trackCTA } from '@/lib/analytics';
+import { Star, Bell, Share2 } from 'lucide-react';
 
 interface Props {
   slug: string;
@@ -68,43 +69,51 @@ export default function BlogFloatingBar({ slug, title, category }: Props) {
     }
   };
 
-  const btnStyle: React.CSSProperties = {
-    display: 'flex', alignItems: 'center', gap: 4, padding: '8px 14px',
-    borderRadius: 'var(--radius-lg, 12px)', border: 'none', cursor: 'pointer',
-    fontSize: 12, fontWeight: 600, transition: 'transform 0.1s',
-  };
-
   return (
     <div style={{
-      position: 'fixed', bottom: 20, left: '50%', transform: 'translateX(-50%)',
-      zIndex: 50, display: 'flex', gap: 6, padding: '6px 8px',
-      borderRadius: 'var(--radius-xl, 16px)',
-      background: 'rgba(10,15,30,0.92)', backdropFilter: 'blur(12px)',
-      border: '1px solid rgba(255,255,255,0.08)',
-      boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+      position: 'fixed', bottom: 24, left: '50%', transform: `translateX(-50%) translateY(${visible ? 0 : 20}px)`,
+      zIndex: 50, display: 'flex', gap: 8, padding: '8px 12px',
+      borderRadius: 20,
+      background: 'rgba(15,20,35,0.95)', backdropFilter: 'blur(16px)',
+      border: '1px solid rgba(255,255,255,0.12)',
+      boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
       opacity: visible ? 1 : 0,
-      transition: 'opacity 0.3s, transform 0.3s',
+      transition: 'opacity 0.3s ease, transform 0.3s ease',
     }}>
       <button onClick={handleSave} style={{
-        ...btnStyle,
-        background: saved ? 'rgba(34,197,94,0.2)' : 'rgba(255,255,255,0.08)',
-        color: saved ? '#22c55e' : '#e2e8f0',
+        display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px',
+        borderRadius: 14, border: 'none', cursor: 'pointer',
+        background: saved ? 'rgba(245,158,11,0.2)' : 'rgba(245,158,11,0.08)',
+        color: saved ? '#fbbf24' : '#f59e0b',
+        fontSize: 13, fontWeight: 700, transition: 'all 0.15s',
+        fontFamily: 'inherit',
       }}>
-        {saved ? '✓ 저장됨' : '☆ 저장'}
+        <Star size={16} fill={saved ? '#fbbf24' : 'none'} strokeWidth={2.2} />
+        {saved ? '저장됨' : '저장'}
       </button>
+
       <button onClick={handleAlert} style={{
-        ...btnStyle,
-        background: userId ? 'rgba(59,123,246,0.15)' : 'rgba(254,229,0,0.12)',
-        color: userId ? '#60a5fa' : '#FEE500',
+        display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px',
+        borderRadius: 14, border: 'none', cursor: 'pointer',
+        background: 'rgba(59,130,246,0.08)',
+        color: '#60a5fa',
+        fontSize: 13, fontWeight: 700, transition: 'all 0.15s',
+        fontFamily: 'inherit',
       }}>
-        {userId ? '🔔 알림' : '🔔 알림 받기'}
+        <Bell size={16} strokeWidth={2.2} />
+        알림
       </button>
+
       <button onClick={handleShare} style={{
-        ...btnStyle,
-        background: shared ? 'rgba(34,197,94,0.2)' : 'rgba(255,255,255,0.08)',
-        color: shared ? '#22c55e' : '#e2e8f0',
+        display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px',
+        borderRadius: 14, border: 'none', cursor: 'pointer',
+        background: shared ? 'rgba(34,197,94,0.2)' : 'rgba(34,197,94,0.08)',
+        color: shared ? '#4ade80' : '#22c55e',
+        fontSize: 13, fontWeight: 700, transition: 'all 0.15s',
+        fontFamily: 'inherit',
       }}>
-        {shared ? '✓ 복사됨' : '↗ 공유'}
+        <Share2 size={16} strokeWidth={2.2} />
+        {shared ? '복사됨' : '공유'}
       </button>
     </div>
   );
