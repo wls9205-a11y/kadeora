@@ -1,5 +1,53 @@
 # 카더라 STATUS — 세션 188 (2026-04-27)
 
+## 세션 188 — SEO Phase 3: 시군구 hub + ranking hub + popularity_score 일괄 + sitemap-region-hubs
+
+### 산출물
+- **`src/app/(main)/apt/region/[region]/[sigungu]/[category]/page.tsx`** (신규)
+  - URL: `/apt/region/{region}/{sigungu}/{category}` (category=subscription/trade/redevelopment/unsold/landmark)
+  - v_region_hub_clusters에서 cluster 메트릭(upcoming_count/active_trade_count/total_review_count/avg_review_score) + apt_sites 60곳 popularity_score DESC
+  - JSON-LD: ItemList(상위 30개) + BreadcrumbList(5단계)
+  - 다른 카테고리 4개 internal links
+- **`src/app/(main)/apt/ranking/[region]/[category]/page.tsx`** (신규)
+  - URL: `/apt/ranking/{region}/{category}`
+  - v_apt_ranking_by_region rank ≤ 30 사용
+  - rank 1~3은 brand 색 강조, popularity_score 우측 표시
+  - JSON-LD: ItemList(rank 정렬) + BreadcrumbList
+- **`src/app/sitemap-region-hubs.xml/route.ts`** (신규)
+  - v_region_hub_clusters → 시군구 hub URL (5 카테고리)
+  - v_apt_ranking_by_region rank=1 → ranking hub URL (region×site_type 유니크)
+  - revalidate=3600, dynamic=force-dynamic
+
+### DB 변경 (Supabase MCP)
+- popularity_score 1회 일괄 계산 (cron 없이):
+  - 공식: `page_views + review_count×5 + interest_count×10`
+  - 영향: **3,945행** (점수>0), 최댓값 429, 평균 32
+  - 잔여 1,852행은 모두 0(데이터 없음)
+
+### 검증
+- `npx tsc --noEmit` 0 error
+
+### Phase 3 의도적 축소(원래 spec 대비)
+- **builder-watch 한웅건설 1곳 제외**: cheerio 미설치 + Anthropic 호출 비용 가드 + 사이트별 셀렉터 검증이 별도 PR로 적합
+- **ranking-update cron 제외**: vercel.json crons 100개로 Pro tier 상한 도달 — cron 추가 불가. 1회 일괄 계산으로 대체
+- **알림 6단계 트리거 제외**: 명세상 "선택" 명시
+
+### Phase 4 후보
+- vercel.json cron 정리 후 ranking-update cron 추가 (popularity_score 매일 갱신)
+- builder-watch 한웅건설부터 (cheerio + Anthropic API 비용가드 < $0.10, 신규 단지 발견 시 apt_sites insert)
+- pr-monitor RSS 5개 (저비용)
+- 시군구 hub generateStaticParams 단계적 확장 (지금은 force-dynamic로 모든 region 작동)
+- 알림 6단계 트리거 (DB 트리거 기반)
+
+### 누적 (Phase 1+2+3)
+- DB: 234 단지 og_cards + 4,447 블로그 og_cards + 3,945 popularity_score = **총 4,681 카드 + 3,945 ranking score**
+- API: /api/og-apt + /api/og-blog + /sitemap-region-hubs.xml
+- Pages: apt/[id] · blog/[slug] · apt/region/[region]/[sigungu]/[category] · apt/ranking/[region]/[category]
+- Schema: AptSiteSchema + BlogPostSchema (각 @graph)
+- Components: CardCarousel (재사용)
+
+---
+
 ## 세션 188 — SEO Phase 2: 블로그 6장 OG 카드 + Schema + Wave 2 4,447건 백필
 
 ### 산출물
