@@ -24,6 +24,8 @@ import { headers } from 'next/headers';
 import { isBot } from '@/lib/seo/isBot';
 import { SectionGate } from '@/components/common/SectionGate';
 import { PaywallMarker } from '@/components/seo/PaywallMarker';
+import AptSiteSchema from '@/components/schema/AptSiteSchema';
+import CardCarousel from '@/components/og/CardCarousel';
 
 const AptPriceTrendChart = dynamic(() => import('@/components/charts/AptPriceTrendChart'));
 const InterestRegistration = dynamic(() => import('@/components/InterestRegistration'));
@@ -62,7 +64,7 @@ async function resolveParam(rawId: string) {
 
 async function fetchUnifiedData(slug: string) {
   const sb = getSupabaseAdmin();
-  const APT_COLS = 'id,slug,name,site_type,region,sigungu,dong,address,description,seo_title,seo_description,builder,developer,total_units,built_year,move_in_date,status,is_active,content_score,interest_count,page_views,comment_count,images,satellite_image_url,og_image_url,key_features,faq_items,nearby_facilities,nearby_station,school_district,price_min,price_max,price_comparison,search_trend,latitude,longitude,source_ids,created_at,updated_at';
+  const APT_COLS = 'id,slug,name,site_type,region,sigungu,dong,address,description,seo_title,seo_description,builder,developer,total_units,built_year,move_in_date,status,is_active,content_score,interest_count,page_views,comment_count,images,satellite_image_url,og_image_url,key_features,faq_items,nearby_facilities,nearby_station,school_district,price_min,price_max,price_comparison,search_trend,latitude,longitude,source_ids,created_at,updated_at,og_cards,lifecycle_stage,review_score,review_count,faqs';
 
   // Phase 1: apt_sites — exact slug → multi-stage fuzzy fallback
   let { data: site } = await (sb as any).from('apt_sites').select(APT_COLS).eq('slug', slug).maybeSingle();
@@ -346,8 +348,25 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: `${title}${priceStr} — ${d.region} | 카더라`, description: desc,
       alternates: { canonical: `${SITE_URL}/apt/${resolved.slug}` },
       robots: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' as const, 'max-video-preview': -1, googleBot: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' as const } },
-      openGraph: { title, description: desc, url: `${SITE_URL}/apt/${resolved.slug}`, siteName: '카더라', locale: 'ko_KR', type: 'article', images: [{ url: ogImg, width: 1200, height: 630, alt: `${d.name} 분양정보` }, { url: `${SITE_URL}/api/og-square?title=${encodeURIComponent(d.name)}&category=apt`, width: 630, height: 630, alt: `${d.name}` }] },
-      twitter: { card: 'summary_large_image', title, description: desc, site: '@kadeora_app', images: [ogImg] },
+      openGraph: { title, description: desc, url: `${SITE_URL}/apt/${resolved.slug}`, siteName: '카더라', locale: 'ko_KR', type: 'article', images: (() => {
+        const cards = Array.isArray(d.site?.og_cards) ? d.site.og_cards : [];
+        if (cards.length === 6) {
+          return cards.map((c: any) => ({
+            url: typeof c?.url === 'string' && c.url.startsWith('http') ? c.url : `${SITE_URL}${c?.url || ''}`,
+            width: 630,
+            height: 630,
+            alt: c?.alt || d.name,
+          }));
+        }
+        return [{ url: ogImg, width: 1200, height: 630, alt: `${d.name} 분양정보` }, { url: `${SITE_URL}/api/og-apt?slug=${encodeURIComponent(resolved.slug)}&card=1&v=1`, width: 630, height: 630, alt: d.name }];
+      })() },
+      twitter: { card: 'summary_large_image', title, description: desc, site: '@kadeora_app', images: (() => {
+        const cards = Array.isArray(d.site?.og_cards) ? d.site.og_cards : [];
+        if (cards.length === 6) {
+          return cards.map((c: any) => typeof c?.url === 'string' && c.url.startsWith('http') ? c.url : `${SITE_URL}${c?.url || ''}`).filter(Boolean);
+        }
+        return [ogImg];
+      })() },
       other: {
         'article:published_time': d.site?.created_at || d.sub?.fetched_at || '',
         'article:modified_time': d.site?.updated_at || new Date().toISOString(),
@@ -490,6 +509,33 @@ export default async function AptUnifiedPage({ params }: Props) {
         aptSlug={slug}
         status={subSt}
         isLoggedIn={isLoggedInApt}
+      />
+
+      <CardCarousel slug={slug} name={name} cards={site?.og_cards as any} />
+
+      <AptSiteSchema
+        site={{
+          slug,
+          name,
+          site_type: site?.site_type ?? sType,
+          region: site?.region ?? region,
+          sigungu: site?.sigungu ?? sigungu,
+          dong: site?.dong ?? null,
+          address: site?.address ?? sub?.hssply_adres ?? null,
+          description: site?.description ?? null,
+          builder: site?.builder ?? sub?.constructor_nm ?? null,
+          total_units: site?.total_units ?? sub?.tot_supply_hshld_co ?? null,
+          price_min: site?.price_min ?? null,
+          price_max: site?.price_max ?? null,
+          latitude: site?.latitude ?? null,
+          longitude: site?.longitude ?? null,
+          review_score: (site as any)?.review_score ?? null,
+          review_count: (site as any)?.review_count ?? null,
+          og_cards: (site as any)?.og_cards ?? null,
+          faqs: (site as any)?.faqs ?? null,
+          move_in_date: site?.move_in_date ?? null,
+        }}
+        origin={SITE_URL}
       />
 
       <PaywallMarker hasGatedContent={true} schemaType="RealEstateListing" />

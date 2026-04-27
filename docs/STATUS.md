@@ -1,3 +1,59 @@
+# 카더라 STATUS — 세션 188 (2026-04-27)
+
+## 세션 188 — SEO Phase 1: 단지 6장 OG 카드 시스템 + 시드 2건 + Wave 1 234건 백필
+
+### 산출물
+- **`src/app/api/og-apt/route.tsx`** (신규, Node runtime, 630×630 PNG)
+  - `?slug=...&card=1~6&v=1` — site_type/lifecycle 별 6 디자인 분기
+  - card=1 cover(#1A1A18 + #FAC775), 2 metric(site_type별 분기), 3 units, 4 timing, 5 place, 6 spec
+  - 폰트: `public/fonts/NotoSansKR-Bold.woff` (Edge 아님 — Architecture Rule 준수)
+  - 데이터 부재 시 fallback (slug=없음) — 200 + 브랜드 이미지
+  - Cache: `public, max-age=86400, s-maxage=604800, swr=86400`
+- **`src/components/schema/AptSiteSchema.tsx`** (신규)
+  - `@graph` JSON-LD: Apartment + Place(geo) + Offer(price) + AggregateRating(review_count>0) + BreadcrumbList + ImageGallery(og_cards 6장) + FAQPage(faqs)
+  - 기존 inline JSON-LD (RealEstateListing/Residence/FAQPage 등)와 공존 — 점진 마이그레이션 가능
+- **`src/components/og/CardCarousel.tsx`** (신규, pure CSS scroll-snap)
+  - 모바일 1.2장, 데스크톱(640px+) 3장
+  - og_cards 비어있으면 6개 URL 동적 생성 fallback
+- **`src/app/(main)/apt/[id]/page.tsx`** 수정
+  - `APT_COLS`에 og_cards/lifecycle_stage/review_score/review_count/faqs 추가
+  - generateMetadata: og_cards 6개면 openGraph.images / twitter.images 모두 6 URL 사용
+  - InterestRegisterHero 직후 `<CardCarousel />` + `<AptSiteSchema />` mount
+
+### DB 변경 (Supabase MCP)
+- 시드 INSERT 2건:
+  - `altiero-gwangan` — 알티에로 광안 (부산 수영구 민락동, 한웅건설, 366세대, lat/lng 35.1530/129.1290, lifecycle=`pre_announcement`)
+  - `haeundae-mattian-d-edition` — 해운대 마티안 디에디션 (부산 해운대구, 한웅건설, lifecycle=`pre_announcement`)
+- Wave 1 og_cards UPDATE: **234행** (landmark 120 + subscription 114(=112+시드 2))
+  - 6 카드 jsonb 배열 + cards_generated_at=NOW() + cards_version=1
+  - WHERE: is_active AND ((landmark+active) OR (subscription+active) OR slug IN 시드2) AND og_cards=`[]`
+
+### 검증
+- `npx tsc --noEmit` 0 error (`.next/types` 캐시 정리 후)
+- 로컬 dev (port 3199):
+  - `/api/og-apt?slug=altiero-gwangan&card=1~6` 모두 **200 + image/png** ✓
+  - 응답 헤더 `X-OG-Card`/`X-OG-Slug` 작동 ✓
+  - 페이지 렌더는 dev 환경에 Supabase env 미설정으로 fallback 분기(404 콘텐츠) — 코드 경로는 production env에서 진짜 검증 필요
+
+### Phase 2 (다음 세션 명세 대기)
+- `/api/og-blog` 6장 카드 + BlogPostSchema
+- og-cards-backfill cron + Anthropic Batch API 큐잉 (잔량 ~7,500)
+- 카드 본문 텍스트 정규화 (haiku)
+
+### 제외 (Phase 1 의도적 미포함)
+- 외부 watcher cron (builder-watch / pr-monitor / competitor-watch)
+- 시군구 hub / ranking hub
+- 알림 6단계 트리거
+- popularity_score 계산
+
+### Architecture Rule 준수
+- #11 STATUS.md 본 세션 커밋에 포함 ✓
+- #13 `(sb as any).from()` 미등록 컬럼(og_cards/lifecycle_stage/review_score/review_count/faqs) 접근 ✓
+- OG 폰트 fs.readFileSync(node runtime) ✓ (Edge 아님)
+- profiles.points 미수정, notifications 트리거 외 INSERT 0건
+
+---
+
 # 카더라 STATUS — 세션 187 (2026-04-27)
 
 ## 세션 187 — InterestRegisterHero silent-fail 근본 해결 + BlogC dead 7파일 삭제 + BAILOUT 정적 분석
