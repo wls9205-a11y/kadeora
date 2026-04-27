@@ -13,7 +13,7 @@ import BlogCommentCTA from '@/components/BlogCommentCTA';
 import LoginGate from '@/components/LoginGate';
 import BlogFloatingBar from '@/components/BlogFloatingBar';
 import ShareButtons from '@/components/ShareButtons';
-import KakaoShareButton from '@/components/KakaoShareButton';
+// s184: KakaoShareButton 제거 — ShareButtons (8 플랫폼) 안에 카카오 포함됨.
 import BlogFaqAccordion from '@/components/BlogFaqAccordion';
 import BlogToc from '@/components/BlogToc';
 import BlogActions from '@/components/BlogActions';
@@ -33,8 +33,7 @@ import { enhanceBlogVisuals } from '@/lib/blog-visual-enhancer';
 import ReadingProgress from '@/components/ReadingProgress';
 // BlogSidebar removed — TOC inline + tools/metrics below article
 import BlogMetricCards from '@/components/BlogMetricCards';
-import BlogHeroImage from '@/components/BlogHeroImage';
-import { ImageLightbox } from '@/components/ui/ImageLightbox';
+// s184: BlogHeroImage 제거 (대표 이미지 1장 inline 으로 대체). ImageLightbox 도 미사용.
 import NextArticleFloat from '@/components/NextArticleFloat';
 import BlogTossGate from '@/components/BlogTossGate';
 import RelatedContentCard from '@/components/RelatedContentCard';
@@ -45,9 +44,9 @@ import BlogEndCTA from '@/components/blog/BlogEndCTA';
 import BlogEarlyGateTeaser from '@/components/blog/BlogEarlyGateTeaser';
 // s183: SignupPopupModal import 제거 — SmartSectionGate(60%) + StickySignupBar 와 중복.
 import RelatedBlogsSection from '@/components/blog/RelatedBlogsSection';
-import BlogSocialBar from '@/components/blog/BlogSocialBar';
+// s184: BlogSocialBar 제거 — 본문 직후 ShareButtons 1세트로 통합.
 import BlogFooterMeta from '@/components/blog/BlogFooterMeta';
-import BlogImageCarousel from '@/components/blog/BlogImageCarousel';
+// s184: BlogImageCarousel 제거 — 캐러셀 자체 폐지.
 import BlogMidGate from '@/components/blog/BlogMidGate';
 // s183: SmartSectionGate 복귀 (s108 에 LoginGate 로 전환했었으나 비로그인 가입 유도가 사실상 0개로
 // 떨어져 4/22 신규가입 0건. 60% 게이트 + 무료 3회 미터링 + 봇 SEO 보호 형태로 재도입.)
@@ -905,92 +904,41 @@ export default async function BlogDetailPage({ params }: Props) {
           );
         })()}
 
-        {/* 히어로 이미지 캐러셀 (og_card + infographic 제외 — OG 텍스트 배너는 실사진이 아님) */}
-        {postImages.filter((img: any) => img.image_type !== 'og_card' && img.image_type !== 'infographic').length > 0 && (
-          <BlogHeroImage
-            images={postImages.filter((img: any) => img.image_type !== 'og_card' && img.image_type !== 'infographic').map((img: any) => ({
-              // 세션 140 P1: 오염 URL 은 /api/og 로 치환
-              url: safeImg(img.image_url, { title: post.title, category: 'blog', design: 2 }),
-              alt: img.alt_text || `${post.title} — 카더라 ${catSection[post.category] || ''} 분석`,
-              caption: img.caption || undefined,
-            }))}
-            title={post.title}
-          />
-        )}
+        {/* s184: 대표 이미지 1장 (캐러셀 제거 — BlogHeroImage / BlogImageCarousel / ImageLightbox 모두 콘텐츠 가치 0 으로 판정).
+            cover_image 없으면 OG 폴백, 그것도 없으면 이미지 자체 생략. */}
+        {(() => {
+          const heroSrc = post.cover_image || `${SITE}/api/og?title=${encodeURIComponent((post.title || '').slice(0, 60))}&category=${post.category || 'blog'}&design=2`;
+          const heroAlt = post.image_alt || `${post.title} — 카더라 ${catSection[post.category] || ''} 분석`;
+          if (!heroSrc) return null;
+          return (
+            <figure style={{ margin: '0 0 20px', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
+              <img
+                src={heroSrc.startsWith('/') ? `${SITE}${heroSrc}` : heroSrc}
+                alt={heroAlt}
+                width={1200}
+                height={630}
+                loading="eager"
+                decoding="async"
+                style={{ width: '100%', height: 'auto', aspectRatio: '1200 / 630', objectFit: 'cover', display: 'block' }}
+              />
+            </figure>
+          );
+        })()}
 
         {/* 블로그 내 언급된 종목/단지 → 하위 페이지 유도 카드 (상단, 풍부 버전) */}
         <BlogMentionCard tags={post.tags ?? []} category={post.category} sourceRef={post.source_ref} title={post.title} placement="top" />
 
-        {/* 세션 135: dedup된 관련 이미지 갤러리 (lightbox + zoom) */}
-        {galleryImages.length > 0 && (
-          <section style={{ marginTop: 16, marginBottom: 20 }}>
-            <h3 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 10px' }}>
-              관련 이미지 · {galleryImages.length}장
-            </h3>
-            <ImageLightbox
-              images={galleryImages.map(g => ({
-                // 세션 140 P1: 갤러리 이미지도 sanitize
-                url: safeImg(g.image_url, { title: post.title, category: 'blog', design: 2 }),
-                caption: g.caption,
-                alt: g.alt_text,
-              }))}
-              columns={3}
-            />
-          </section>
-        )}
-
-        {/* 공유 바 */}
-        {/* s169: 신규 소셜바 — 카카오/링크복사/댓글 이동 */}
-        <BlogSocialBar
-          title={post.title}
-          description={post.meta_description || post.excerpt || ''}
-          slug={slug}
-          coverImage={post.cover_image || undefined}
-          commentCount={post.comment_count ?? 0}
-          helpfulCount={post.helpful_count ?? 0}
-          commentAnchorId="blog-comments"
-        />
-
-        {/* s172: 본문 진입 직전 이미지 캐러셀 — 실이미지 ≥ 2 또는 이미지 없을 때 카테고리 이모지 fallback */}
-        <BlogImageCarousel
-          images={galleryImages.map((g) => ({
-            url: safeImg(g.image_url, { title: post.title, category: 'blog', design: 2 }),
-            alt: g.alt_text,
-            caption: g.caption,
-          }))}
-          title={post.title}
-          category={post.category}
-        />
-
-        <div style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '10px 0', marginBottom: 24, fontSize: 'var(--fs-sm)',
-          borderBottom: '1px solid var(--border)', flexWrap: 'wrap', gap: 8,
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <KakaoShareButton title={post.title} description={post.meta_description || post.excerpt || ''} slug={slug} coverImage={post.cover_image || undefined} />
-            <ShareButtons title={post.title} content={post.excerpt || post.meta_description || undefined} category={post.category} contentType="blog" contentRef={slug} />
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <BlogBookmarkButton blogPostId={post.id} />
-          </div>
-        </div>
+        {/* s184: "관련 이미지 N장" 섹션 제거 — AI 생성 + 무관 스톡사진 혼재로 콘텐츠 가치 0. */}
+        {/* s184: BlogSocialBar 제거 — 본문 직후 ShareButtons 1세트로 통합. */}
+        {/* s184: BlogImageCarousel 제거 — 캐러셀 자체 폐지. */}
+        {/* s184: 본문 위 KakaoShareButton + ShareButtons + BlogBookmarkButton 행 제거 — 본문 직후로 이동. */}
 
         {/* 목차 (모바일: 인라인, 데스크탑: 사이드바) */}
         <div className="blog-toc-inline">
           {toc.length >= 3 && <BlogToc toc={toc} />}
         </div>
 
-        {/* [L0-6] YMYL 카테고리 면책 배너 — 본문 위 1회 삽입 */}
-        {(post.category === 'stock' || post.category === 'finance' || post.category === 'apt' || post.category === 'unsold') && (
-          <YMYLBanner
-            category={post.category}
-            dataDate={post.data_date}
-            sourceRef={post.source_ref}
-            authorName={post.author_name}
-            authorRole={post.author_role}
-          />
-        )}
+        {/* s184: YMYLBanner 본문 위 → 하단 <details> 로 이동. 본문 직전에 면책 노출은 신뢰 저하. */}
 
         {/* [BIG-EVENT-CHARTS] 연결된 big_event가 있으면 본문 위에 3종 차트 자동 렌더 */}
         {bigEventId ? <BigEventCharts eventId={bigEventId} /> : null}
@@ -1018,6 +966,17 @@ export default async function BlogDetailPage({ params }: Props) {
           />
         )}
 
+        {/* s184: 본문 직후 — 단일 공유 버튼 세트 (8개 플랫폼) + 북마크. 페이지 내 공유 UI 는 이 한 곳뿐. */}
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '16px 0 12px', marginTop: 16,
+          borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)',
+          flexWrap: 'wrap', gap: 8,
+        }}>
+          <ShareButtons title={post.title} content={post.excerpt || post.meta_description || undefined} category={post.category} contentType="blog" contentRef={slug} />
+          <BlogBookmarkButton blogPostId={post.id} />
+        </div>
+
         {/* 관심단지 알림 CTA — apt/unsold 카테고리 + 단지명 있을 때 (봇 제외) */}
         {!isBot && (post.category === 'apt' || post.category === 'unsold') && post.tags?.[0] && (
           <BlogAptAlertCTA
@@ -1035,7 +994,7 @@ export default async function BlogDetailPage({ params }: Props) {
         {/* 블로그 내 언급된 종목/단지 → 하위 페이지 유도 카드 (하단, 컴팩트) */}
         <BlogMentionCard tags={post.tags ?? []} category={post.category} sourceRef={post.source_ref} title={post.title} placement="bottom" />
 
-        <RelatedContentCard type="blog" showSignup={false} />
+        {/* s184: RelatedContentCard 댓글 아래로 이동. */}
 
         {/* 뉴스레터 — 본문 직후, 비로그인 유저 대상 (게이트 대안 경로) */}
         {/* NewsletterSubscribe 삭제 — LoginGate + ActionBar로 통합 */}
@@ -1156,8 +1115,7 @@ export default async function BlogDetailPage({ params }: Props) {
           />
         )}
 
-        {/* v2.0 Week1 C2: 관련 글 3카드 (strategy badge 포함) — FAQ/BlogActions 뒤, EndCTA 앞 */}
-        {!isBot && <RelatedBlogsSection blogId={post.id} />}
+        {/* s184: RelatedBlogsSection 도 댓글 아래로 이동 — 본문 흐름 보호. */}
 
         {/* Session D: 본문 끝 CTA (비로그인만) */}
         {!isBot && !isLoggedIn && <BlogEndCTA slug={slug} isLoggedIn={false} />}
@@ -1223,36 +1181,58 @@ export default async function BlogDetailPage({ params }: Props) {
         </div>
       </div>
 
-      {/* s172: 자동생성 콘텐츠 면책 — 댓글 하단, BlogFooterMeta 위 */}
-      {post.source_type === 'auto' && (
-        <div style={{
-          background: 'var(--bg-elevated, var(--bg-surface))',
-          borderRadius: 12,
-          padding: '16px 18px',
-          border: '1px solid var(--border)',
-          borderLeft: '3px solid var(--blog-disclaimer-border, #F59E0B)',
-          marginBottom: 16,
-        }}>
-          <div style={{
-            fontSize: 13, fontWeight: 800,
-            color: 'var(--blog-disclaimer-border, #F59E0B)',
-            marginBottom: 6,
-            display: 'flex', alignItems: 'center', gap: 6,
-          }}>
-            ⚠️ 면책사항
-          </div>
-          <p style={{
-            fontSize: 12.5,
-            color: 'var(--text-tertiary)',
-            lineHeight: 1.75,
-            margin: 0,
-          }}>
-            본 콘텐츠는 공공 데이터(국토교통부, 한국거래소, 금융위원회 등) 기반의 정보 제공 목적이며 투자 권유가 아닙니다.
-            {post.data_date && <> 데이터 기준일: {post.data_date}.</>}
-            {post.source_ref && <> 출처: {post.source_ref}.</>}
-          </p>
+      {/* s184: 추천 글 + RelatedContentCard — 댓글 아래로 이동 */}
+      {!isBot && (
+        <div style={{ marginTop: 24 }}>
+          <RelatedBlogsSection blogId={post.id} />
+          <RelatedContentCard type="blog" showSignup={false} />
         </div>
       )}
+
+      {/* s184: 면책 공지 통합 — 최하단 + 접힌 상태 (details/summary). YMYL + 자동생성 면책을 한 블록으로. */}
+      {(() => {
+        const isYmyl = post.category === 'stock' || post.category === 'finance' || post.category === 'apt' || post.category === 'unsold';
+        const isAuto = post.source_type === 'auto';
+        if (!isYmyl && !isAuto) return null;
+        return (
+          <details style={{
+            marginTop: 24,
+            marginBottom: 16,
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border)',
+            borderRadius: 12,
+            padding: '12px 16px',
+          }}>
+            <summary style={{
+              cursor: 'pointer',
+              fontSize: 13,
+              fontWeight: 700,
+              color: 'var(--text-tertiary)',
+              listStyle: 'none',
+            }}>
+              ⚠️ 투자 관련 안내 (펼쳐서 확인)
+            </summary>
+            <div style={{ marginTop: 10, fontSize: 12.5, color: 'var(--text-tertiary)', lineHeight: 1.75 }}>
+              {isYmyl && (
+                <YMYLBanner
+                  category={post.category}
+                  dataDate={post.data_date}
+                  sourceRef={post.source_ref}
+                  authorName={post.author_name}
+                  authorRole={post.author_role}
+                />
+              )}
+              {isAuto && (
+                <p style={{ margin: '8px 0 0' }}>
+                  본 콘텐츠는 공공 데이터(국토교통부, 한국거래소, 금융위원회 등) 기반의 정보 제공 목적이며 투자 권유가 아닙니다.
+                  {post.data_date && <> 데이터 기준일: {post.data_date}.</>}
+                  {post.source_ref && <> 출처: {post.source_ref}.</>}
+                </p>
+              )}
+            </div>
+          </details>
+        );
+      })()}
 
       {/* s172: 하단 메타 — 태그 pill + 최초/수정일 (댓글 + 면책사항 다음) */}
       <BlogFooterMeta

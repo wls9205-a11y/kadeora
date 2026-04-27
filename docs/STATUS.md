@@ -1,3 +1,85 @@
+# 카더라 STATUS — 세션 184 (2026-04-27)
+
+## 세션 184 — 블로그 상세 페이지 리스트럭처 (content-first)
+
+### 배경
+블로그 상세 페이지 진입 시 실제 본문이 스크롤 3~4 회 아래에 위치. 본문 위에 쌓인 노이즈:
+- 다중 이미지 캐러셀 (BlogHeroImage)
+- "관련 이미지 N장" 갤러리 (AI 생성 + 무관 스톡사진)
+- BlogSocialBar (kakao/copy/comment 가로 바)
+- BlogImageCarousel (또 다른 캐러셀)
+- KakaoShareButton + ShareButtons 행 (공유 중복)
+- YMYL 면책 배너 (본문 직전 신뢰 저하)
+
+공유 UI 가 한 페이지에 3 회 노출, 본문 아래 추천 글 카드가 본문 위에 위치하는 등 정보 우선순위 깨진 상태.
+
+### 적용된 변경 (`src/app/(main)/blog/[slug]/page.tsx`)
+
+**제거 (본문 위 노이즈 5종)**
+- `BlogHeroImage` mount + import — `postImages` 다중 이미지 hero 폐지.
+- 관련 이미지 갤러리 (`<ImageLightbox>`) + import — 콘텐츠 가치 0.
+- `BlogSocialBar` mount + import — 본문 직후 ShareButtons 1세트로 통합.
+- `BlogImageCarousel` mount + import — 캐러셀 자체 폐지.
+- 본문 위 share 행 (`KakaoShareButton` + `ShareButtons` + `BlogBookmarkButton`) — 본문 직후로 이동. `KakaoShareButton` import 제거 (ShareButtons 8 플랫폼 안에 카카오 포함).
+
+**추가 (대체)**
+- 단일 `<figure><img>` 대표 이미지: `cover_image` 우선, fallback 으로 OG 이미지. aspect-ratio 1200:630 고정 (CLS 방지).
+- 본문 직후 share 섹션: `<ShareButtons>` (8 플랫폼) + `<BlogBookmarkButton>` 한 행. 위/아래 borderTop/Bottom 으로 시각 구분.
+
+**이동**
+- `RelatedContentCard` (블로그 본문 직후 → 댓글 아래).
+- `RelatedBlogsSection` (BlogActions 직후 → 댓글 아래). 추천 글 카드는 댓글 다음에만 노출.
+- `YMYLBanner` (본문 위 → 최하단 `<details>` 안). 본문 진입 직전에 면책 노출은 신뢰 저하.
+- 자동생성 면책 (자체 div → 위 YMYL 과 같은 `<details>` 안에 통합).
+
+**`<details>` 면책 통합**
+- 한 개의 `<summary>⚠️ 투자 관련 안내 (펼쳐서 확인)</summary>` 안에 YMYL + 자동생성 면책. 기본 접힌 상태. YMYL 또는 auto 둘 중 하나라도 해당될 때만 렌더.
+
+### 최종 레이아웃 (위→아래)
+1. breadcrumb / 카테고리 배지 / 제목 (s177 의 `var(--fs-2xl)/900/-0.5px`) / 저자 카드 (날짜 · 읽기시간 · 조회)
+2. 태그 pills
+3. 시리즈 진행 바 (해당 시)
+4. **대표 이미지 1장** (단일 `<figure>`)
+5. BlogMentionCard (top placement — 언급 종목/단지 링크)
+6. TOC (≥3 항목)
+7. BigEventCharts (해당 시)
+8. **본문** (`SmartSectionGate` / `BlogTossGate` / `BlogGatedRenderer` / 봇 분기)
+9. **공유 버튼 1세트 + 북마크**
+10. BlogAptAlertCTA (apt/unsold 한정)
+11. BlogMentionCard (bottom)
+12. 관련 서비스 CTA (apt 카테고리)
+13. FAQ
+14. 읽기 완료 메시지 (로그인)
+15. 참고자료 (source_ref)
+16. BlogActions (도움이됐어요)
+17. BlogMidGate (비로그인)
+18. BlogEndCTA (비로그인)
+19. `</article>` 종료
+20. BlogFloatingBar (로그인 한정 — s183)
+21. **댓글**
+22. **추천 글 (RelatedBlogsSection + RelatedContentCard)**
+23. BlogFooterMeta (태그 + 일자)
+24. **`<details>` 면책 (YMYL + 자동생성)**
+
+### 보류 사항
+- `BlogMidGate` (비로그인 50% 스크롤 게이트) 와 `SmartSectionGate` (60% 컷) + `StickySignupBar` (300px) 는 노출 시점이 겹칠 가능성. "동시 화면 CTA 최대 2개" 의 경계 케이스. 다음 세션에서 BlogMidGate 제거 또는 트리거 분리 검토.
+- `RelatedContentCard` 는 사실상 시그업 CTA 카드. RelatedBlogsSection 과 댓글 아래에서 같이 표시되면 중복 가능성. 컴포넌트 역할 명확화 필요.
+
+### 검증 (배포 후)
+```
+# 1. 본문 위 share 컴포넌트 0 회 확인
+curl -s https://kadeora.app/blog/<slug> | awk '/<article/{f=1} /SmartSection|blog-content/{exit} f{print}' | grep -ic 'ShareButtons\|KakaoShare\|BlogSocialBar'
+# 기대: 0
+
+# 2. cover_image 1 장만
+curl -s https://kadeora.app/blog/<slug> | grep -c '<figure'  # 본문 외 figure 가 적은지
+
+# 3. 추천 글 + 면책이 댓글 아래 위치 확인
+curl -s https://kadeora.app/blog/<slug> | tr '>' '>\n' | grep -nE '댓글|추천 글|투자 관련 안내' | head
+```
+
+---
+
 # 카더라 STATUS — 세션 183 (2026-04-27)
 
 ## 세션 183 — CTA 복구: StickySignupBar + SmartSectionGate (60% 미터링) + dead 정리
