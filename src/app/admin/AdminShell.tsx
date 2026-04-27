@@ -5,41 +5,32 @@ import NotificationBell from './NotificationBell';
 
 const Loader = () => <div style={{display:'flex',justifyContent:'center',padding:60}}><div style={{width:24,height:24,border:'3px solid rgba(255,255,255,0.1)',borderTopColor:'#3B7BF6',borderRadius:'50%',animation:'spin .5s linear infinite'}}/></div>;
 
+// s186: 13 → 8 탭 정리 (master/focus_v2/issue/users_v2/pulse_v3 삭제). master/issue 기능은 execute/ops 에 흡수.
 const FocusTab = dynamic(() => import('./tabs/FocusTab'), { loading: Loader });
-const IssueTab = dynamic(() => import('./tabs/IssueTab'), { loading: Loader });
 const GrowthTab = dynamic(() => import('./tabs/GrowthTab'), { loading: Loader });
 const UsersTab = dynamic(() => import('./tabs/UsersTab'), { loading: Loader });
-const UsersListV2 = dynamic(() => import('./tabs/UsersListV2'), { loading: Loader });
-const DashboardV2 = dynamic(() => import('./tabs/DashboardV2'), { loading: Loader });
-const PulseV3 = dynamic(() => import('./pulse_v3/PulseV3Client'), { loading: Loader });
 const DataTab = dynamic(() => import('./tabs/DataTab'), { loading: Loader });
 const OpsTab = dynamic(() => import('./tabs/OpsTab'), { loading: Loader });
 const ExecuteTab = dynamic(() => import('./tabs/ExecuteTab'), { loading: Loader });
 const CommunityTab = dynamic(() => import('./tabs/CommunityTab'), { loading: Loader });
-const MasterControlTab = dynamic(() => import('./tabs/MasterControlTab'), { loading: Loader });
 const NaverPublishTab = dynamic(() => import('./tabs/NaverPublishTab'), { loading: Loader });
 
-type TabKey = 'master' | 'focus' | 'focus_v2' | 'pulse_v3' | 'issue' | 'growth' | 'users' | 'users_v2' | 'data' | 'ops' | 'execute' | 'community' | 'naver';
+type TabKey = 'focus' | 'growth' | 'users' | 'data' | 'ops' | 'execute' | 'community' | 'naver';
 
 const TABS: { key: TabKey; label: string; icon: string }[] = [
-  { key: 'master', label: '마스터', icon: '🎛️' },
-  { key: 'focus', label: '대시보드', icon: '📊' },
-  { key: 'focus_v2', label: '대시보드 v2', icon: '📈' },
-  { key: 'naver', label: '네이버 발행', icon: '🟢' },
-  { key: 'issue', label: '이슈', icon: '🔍' },
+  { key: 'focus', label: '집중', icon: '🎯' },
   { key: 'growth', label: '성장', icon: '📈' },
-  { key: 'users', label: '유저', icon: '👥' },
-  { key: 'users_v2', label: '유저 v2', icon: '🆕' },
-  { key: 'community', label: '커뮤니티', icon: '💬' },
+  { key: 'users', label: '유저', icon: '👤' },
   { key: 'data', label: '데이터', icon: '🗄️' },
   { key: 'ops', label: '운영', icon: '🔧' },
   { key: 'execute', label: '실행', icon: '⚡' },
-  { key: 'pulse_v3', label: 'Pulse v3', icon: '🫀' },
+  { key: 'community', label: '커뮤니티', icon: '💬' },
+  { key: 'naver', label: '네이버', icon: '🟢' },
 ];
 
 export default function AdminShell() {
   const [hp, setHp] = useState<{s:number;cr:number;pv:number;nu:number;iss?:number}|null>(null);
-  const [tab, setTab] = useState<TabKey>('master');
+  const [tab, setTab] = useState<TabKey>('focus');
 
   useEffect(() => {
     const ld = () => fetch('/api/admin/v2?tab=focus').then(r => r.json()).then(d => {
@@ -114,19 +105,14 @@ export default function AdminShell() {
       </div>
 
       {/* 탭 콘텐츠 */}
-      {tab === 'master' && <MasterControlTab />}
       {tab === 'focus' && <FocusTab onNavigate={(t: string) => setTab(t as TabKey)} />}
-      {tab === 'naver' && <NaverPublishTab />}
-      {tab === 'issue' && <IssueTab />}
       {tab === 'growth' && <GrowthTab onNavigate={(t: string) => setTab(t as TabKey)} />}
       {tab === 'users' && <UsersTab onNavigate={(t: string) => setTab(t as TabKey)} />}
-      {tab === 'users_v2' && <UsersListV2 />}
-      {tab === 'focus_v2' && <DashboardV2 />}
-      {tab === 'pulse_v3' && <PulseV3 />}
       {tab === 'data' && <DataTab onNavigate={(t: string) => setTab(t as TabKey)} />}
       {tab === 'ops' && <OpsTab onNavigate={(t: string) => setTab(t as TabKey)} />}
       {tab === 'execute' && <ExecuteTab onNavigate={(t: string) => setTab(t as TabKey)} />}
       {tab === 'community' && <CommunityTab onNavigate={(t: string) => setTab(t as TabKey)} />}
+      {tab === 'naver' && <NaverPublishTab />}
     </div>
   );
 }

@@ -697,6 +697,30 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
 
       {/* ═══ 이메일 현황 + 발송 ═══ */}
       <Sec t={`📧 이메일 시스템`} open={true} ch={<EmailDashboard/>}/>
+
+      {/* s186: 최근 시스템 개선 — 하드코딩, API 호출 없음 */}
+      <div style={{background:'rgba(12,21,40,0.65)',border:'1px solid rgba(255,255,255,0.04)',borderRadius:8,padding:'10px 12px',marginTop:8}}>
+        <div style={{fontSize:11,fontWeight:700,color:'rgba(255,255,255,0.5)',marginBottom:6}}>최근 시스템 개선</div>
+        {[
+          {s:'✅', t:'Soft 404 → Hard 404', d:'s182'},
+          {s:'✅', t:'robots meta 충돌 해결', d:'s182'},
+          {s:'✅', t:'빈 sitemap 410 Gone', d:'s182'},
+          {s:'✅', t:'StickySignupBar 배포', d:'s183'},
+          {s:'✅', t:'SmartSectionGate 60% 미터링', d:'s183'},
+          {s:'✅', t:'블로그 Content-first 구조', d:'s184'},
+          {s:'✅', t:'504 폴링 부하 해결', d:'s185'},
+          {s:'✅', t:'Dead code 646줄 삭제', d:'s185'},
+          {s:'✅', t:'어드민 13→8 탭 + 유저 상세', d:'s186'},
+          {s:'⚠️', t:'SSR Bailout 미해결', d:'다음'},
+          {s:'⚠️', t:'sitemap ID 충돌', d:'별도'},
+        ].map(r => (
+          <div key={r.t} style={{display:'flex', gap:6, fontSize:10, padding:'2px 0', color:'rgba(255,255,255,0.35)'}}>
+            <span>{r.s}</span>
+            <span style={{flex:1, color: r.s==='⚠️' ? '#F59E0B' : 'rgba(255,255,255,0.4)'}}>{r.t}</span>
+            <span style={{fontSize:9}}>{r.d}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

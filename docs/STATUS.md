@@ -1,3 +1,68 @@
+# 카더라 STATUS — 세션 186 (2026-04-27)
+
+## 세션 186 — 어드민 Phase 3~5 (탭 13→8 + 유저 상세 패널 + FocusTab 최신화) — 2,343 줄 삭제
+
+### 변경 요약
+| 항목 | 전 | 후 |
+|------|----|----|
+| 어드민 탭 수 | 13 | 8 |
+| 삭제된 파일 | — | 8 |
+| 삭제된 줄 | — | 2,343 |
+| 유저 상세 (포인트/이벤트/글) | ✗ | ✓ |
+| FocusTab 변경 이력 카드 | ✗ | ✓ |
+
+### Phase 3 — 탭 통합 (13 → 8)
+**`AdminShell.tsx` 재작성.** 기본 탭 `master` → `focus`. 최종 탭 순서:
+`focus(🎯) | growth(📈) | users(👤) | data(🗄️) | ops(🔧) | execute(⚡) | community(💬) | naver(🟢)`
+
+**삭제 (5 탭, 8 파일)**:
+- `MasterControlTab.tsx` (580 줄) — execute 와 기능 중복
+- `IssueTab.tsx` (496 줄) — ops 의 failedCrons 와 중복
+- `DashboardV2.tsx` (200 줄, focus_v2) — focus 와 중복 dashboard
+- `UsersListV2.tsx` (301 줄, users_v2) — users 가 더 풍부
+- `pulse_v3/PulseV3Client.tsx` (276 줄) + `pulse_v3/page.tsx` (12 줄) — 또 다른 dashboard 변종
+- `api/admin/master/status/route.ts` (273 줄) + `api/admin/master/execute-all/route.ts` (183 줄) — MasterControlTab 외 호출자 0 (`grep` 확인)
+
+**보류**: `CommunityTab` 은 polls/VS/predictions 관리 기능이 실재 → 7 탭 → 8 탭으로 1 개 초과. 유지 결정.
+
+### Phase 4 — UsersTab 유저 상세 패널
+**`/api/admin/v2?tab=users&userId=<uuid>` 신설** (route.ts 873 직후 fast-path 삽입). 3 batch 순차 실행:
+- Batch 1: `profile` + `posts.count(author_id)` + `comments.count(author_id)` ← `comments.author_id` (user_id 아님!)
+- Batch 2: `share_logs.count(user_id)` + `attendance.count(user_id)` + `point_history` (15)
+- Batch 3: `user_events` (20) + `recent posts` (5) — `posts.likes_count` (`like_count` 아님)
+
+응답 헤더에 `Cache-Control: private, max-age=30` — 같은 유저 재펼침 시 30 s 동안 캐시.
+스키마 검증 결과 `bookmarks` (0 행) / `apt_interest` (0 행) 는 호출 생략 (커넥션 절약).
+
+**`UsersTab.tsx` 수정**:
+- 카드 펼침 시 `useEffect` 가 `userId` 디테일을 1 회 fetch + 클라이언트 캐시 (`detail` state).
+- 기존 8-KPI grid + interests + meta 그대로 두고, 그 아래에 신규 3 섹션 추가:
+  - 💰 포인트 이력 (15 건) — reason / amount(±) / 시간
+  - ⚡ 활동 로그 (20 건) — event_name / page_path / 시간
+  - 📝 최근 글 (5 건) — title / category / ♥likes_count / 시간
+- 로딩/에러 상태 표시.
+
+기존 검색 input + 5종 필터 + 5종 정렬 + 라이프사이클 funnel 등은 그대로.
+
+### Phase 5 — FocusTab/GrowthTab 최신화 + CSS
+- **FocusTab**: 이메일 시스템 카드 직후에 "최근 시스템 개선" 하드코딩 카드 추가 (s182~s186 변경 11 항목, ✅/⚠️ 마킹).
+- **GrowthTab**: `action_bar` / `blog_floating_bar` / `content_lock` / `login_gate_blog_compare` / `login_gate_blog_stock_ai` 검색 결과 0 건 — 변경 불필요.
+- **CSS**: `.adm-card / .adm-sec / .adm-btn / .adm-tabs / .adm-kpi* / .adm-bar*` 사용 vs 정의 일치 확인 완료. `100vw` 사용 0 건.
+
+### 비고
+- `.next/types/validator.ts` 에 stale `pulse_v3` 참조 1 건 남음 — Vercel 배포 시 `next build` 가 자동 regenerate, 현재 `tsc` exit 0.
+- 정확한 마스터 → 실행 기능 병합은 하지 않음. MasterControl 의 "전체 cron 실행" 기능은 ExecuteTab 의 godMode 와 중복. 빠진 기능 발견 시 명시적으로 추가.
+
+### 검증 (배포 후)
+```
+# 어드민 탭이 8개로 감소
+# UsersTab: 카드 클릭 → 펼침 패널에 포인트 이력/활동 로그/최근 글 3 섹션 표시
+# FocusTab 하단: "최근 시스템 개선" 카드 11 줄 노출
+# Network: 펼친 후 두번째 클릭 시 /api/admin/v2?tab=users&userId=xxx 호출 1회 (캐시 동작)
+```
+
+---
+
 # 카더라 STATUS — 세션 185 (2026-04-27)
 
 ## 세션 185 — 504 site-wide 장애 원인 (어드민 polling DB 커넥션 고갈) + dead code 646 줄 삭제

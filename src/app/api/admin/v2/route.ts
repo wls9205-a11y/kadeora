@@ -871,6 +871,44 @@ export async function GET(req: NextRequest) {
     // 👤 사용자 탭
     // ═══════════════════════════════════════
     if (tab === 'users') {
+      // s186: userId 단일 유저 상세 모드 — 3 batch 순차 (커넥션 풀 보호)
+      const userId = req.nextUrl.searchParams.get('userId');
+      if (userId) {
+        // Batch 1: profile + count
+        const [profileRes, postCountRes, commentCountRes] = await Promise.all([
+          (sb as any).from('profiles').select('*').eq('id', userId).maybeSingle(),
+          sb.from('posts').select('id', { count: 'exact', head: true }).eq('author_id', userId).eq('is_deleted', false),
+          sb.from('comments').select('id', { count: 'exact', head: true }).eq('author_id', userId),
+        ]);
+        if (!profileRes.data) {
+          return NextResponse.json({ error: 'user not found' }, { status: 404 });
+        }
+        // Batch 2: 활동 카운트 + 포인트 이력
+        const [shareCountRes, attendCountRes, pointHistoryRes] = await Promise.all([
+          sb.from('share_logs').select('id', { count: 'exact', head: true }).eq('user_id', userId),
+          sb.from('attendance').select('id', { count: 'exact', head: true }).eq('user_id', userId),
+          sb.from('point_history').select('reason, amount, created_at').eq('user_id', userId).order('created_at', { ascending: false }).limit(15),
+        ]);
+        // Batch 3: 활동 로그 + 최근 글
+        const [eventsRes, recentPostsRes] = await Promise.all([
+          (sb as any).from('user_events').select('event_name, page_path, device_type, created_at').eq('user_id', userId).order('created_at', { ascending: false }).limit(20),
+          sb.from('posts').select('id, title, category, created_at, likes_count').eq('author_id', userId).eq('is_deleted', false).order('created_at', { ascending: false }).limit(5),
+        ]);
+        return NextResponse.json({
+          mode: 'detail',
+          profile: profileRes.data,
+          stats: {
+            posts: postCountRes.count || 0,
+            comments: commentCountRes.count || 0,
+            shares: shareCountRes.count || 0,
+            attendance: attendCountRes.count || 0,
+          },
+          pointHistory: pointHistoryRes.data || [],
+          recentEvents: eventsRes.data || [],
+          recentPosts: recentPostsRes.data || [],
+        }, { headers: { 'Cache-Control': 'private, max-age=30' } });
+      }
+
       const [realUsersR, interestsR, bookmarksR, watchlistR, searchesR, sharesR, pwaR, totalRealR, emailSubsR] = await Promise.all([
         sb.from('profiles')
           .select('id, nickname, provider, created_at, last_active_at, grade, points, residence_city, residence_district, onboarded, profile_completed, interests, is_seed, first_mission_completed, signup_source, gender, age_group, birth_year, marketing_agreed, is_premium, streak_days, influence_score')

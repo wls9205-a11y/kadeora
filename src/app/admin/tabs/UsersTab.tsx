@@ -54,8 +54,21 @@ export default function UsersTab({ onNavigate }: { onNavigate: (t: any) => void 
   const [sort, setSort] = useState<Sort>('newest');
   const [search, setSearch] = useState('');
   const [expanded, setExpanded] = useState<string | null>(null);
+  // s186: 펼친 유저 상세 캐시 (userId → { loading | data })
+  const [detail, setDetail] = useState<Record<string, { loading: boolean; data?: any }>>({});
 
   useEffect(() => { fetch('/api/admin/v2?tab=users').then(r => r.json()).then(v => { setD(v); setLd(false); }).catch(() => setLd(false)); }, []);
+
+  // s186: 카드 펼치면 v2?tab=users&userId=xxx 호출 (1회 캐시).
+  useEffect(() => {
+    if (!expanded) return;
+    if (detail[expanded]) return; // 이미 로드/요청됨
+    setDetail(p => ({ ...p, [expanded]: { loading: true } }));
+    fetch(`/api/admin/v2?tab=users&userId=${encodeURIComponent(expanded)}`)
+      .then(r => r.json())
+      .then(data => setDetail(p => ({ ...p, [expanded]: { loading: false, data } })))
+      .catch(() => setDetail(p => ({ ...p, [expanded]: { loading: false, data: { error: 'fetch failed' } } })));
+  }, [expanded, detail]);
 
   const users = useMemo(() => {
     if (!d?.users) return [];
@@ -323,6 +336,55 @@ export default function UsersTab({ onNavigate }: { onNavigate: (t: any) => void 
                   {u.marketing_agreed && ' · 마케팅✓'}
                   {u.is_premium && ' · 프리미엄'}
                 </div>
+
+                {/* s186: 상세 패널 — 포인트 이력 / 활동 로그 / 최근 글 (server fetch 1회 캐시) */}
+                {(() => {
+                  const dt = detail[u.id];
+                  if (!dt) return null;
+                  if (dt.loading) {
+                    return <div style={{ marginTop: 6, fontSize: 10, color: 'rgba(255,255,255,0.25)' }}>상세 불러오는 중…</div>;
+                  }
+                  if (!dt.data || dt.data.error) {
+                    return <div style={{ marginTop: 6, fontSize: 10, color: '#EF4444' }}>상세 로드 실패</div>;
+                  }
+                  const { pointHistory = [], recentEvents = [], recentPosts = [] } = dt.data;
+                  const subSec: React.CSSProperties = { fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.4)', marginTop: 8, marginBottom: 3, letterSpacing: 0.3 };
+                  const row: React.CSSProperties = { display: 'flex', justifyContent: 'space-between', gap: 6, fontSize: 9, padding: '2px 0', borderBottom: '1px solid rgba(255,255,255,0.02)' };
+                  return (
+                    <div style={{ marginTop: 6, paddingTop: 4, borderTop: '1px dashed rgba(255,255,255,0.04)' }}>
+                      <div style={subSec}>💰 포인트 이력 ({pointHistory.length})</div>
+                      {pointHistory.length === 0 && <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.12)' }}>없음</div>}
+                      {pointHistory.map((p: any, i: number) => (
+                        <div key={i} style={row}>
+                          <span style={{ color: 'rgba(255,255,255,0.4)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.reason || '—'}</span>
+                          <span style={{ color: (p.amount || 0) >= 0 ? '#10B981' : '#EF4444', fontWeight: 700, flexShrink: 0 }}>{(p.amount || 0) >= 0 ? '+' : ''}{p.amount}P</span>
+                          <span style={{ color: 'rgba(255,255,255,0.15)', flexShrink: 0 }}>{ago(p.created_at)}</span>
+                        </div>
+                      ))}
+
+                      <div style={subSec}>⚡ 활동 로그 ({recentEvents.length})</div>
+                      {recentEvents.length === 0 && <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.12)' }}>없음</div>}
+                      {recentEvents.map((e: any, i: number) => (
+                        <div key={i} style={row}>
+                          <span style={{ color: 'rgba(255,255,255,0.45)', flexShrink: 0 }}>{e.event_name}</span>
+                          <span style={{ color: 'rgba(255,255,255,0.25)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{e.page_path}</span>
+                          <span style={{ color: 'rgba(255,255,255,0.15)', flexShrink: 0 }}>{ago(e.created_at)}</span>
+                        </div>
+                      ))}
+
+                      <div style={subSec}>📝 최근 글 ({recentPosts.length})</div>
+                      {recentPosts.length === 0 && <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.12)' }}>없음</div>}
+                      {recentPosts.map((p: any) => (
+                        <div key={p.id} style={row}>
+                          <span style={{ color: 'rgba(255,255,255,0.5)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>{p.title}</span>
+                          {p.category && <Tag text={p.category} />}
+                          <span style={{ color: '#F59E0B', flexShrink: 0 }}>♥{p.likes_count ?? 0}</span>
+                          <span style={{ color: 'rgba(255,255,255,0.15)', flexShrink: 0 }}>{ago(p.created_at)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
               </div>
             )}
           </div>
