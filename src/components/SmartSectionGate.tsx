@@ -10,7 +10,16 @@ interface Props {
   userCount?: number;
   todaySignups?: number;
   aptName?: string;
+  /** 봇/로그인 유저는 부모에서 분기하여 이 컴포넌트 자체를 렌더하지 않는 것이 권장.
+   *  안전장치로 isBot=true 면 게이트 없이 전문 렌더. */
+  isBot?: boolean;
+  /** 무료 열람 허용 횟수 (기본 3). 같은 세션 내 4번째 글부터 게이트 작동.
+   *  값을 0 으로 주면 무조건 게이트. */
+  freeReads?: number;
 }
+
+const READS_KEY = 'kd_blog_reads';
+const READS_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30일
 
 /* 카테고리별 혜택 메시지 — "텍스트 잠금해제" → "맞춤 알림 서비스" */
 const CATEGORY_BENEFITS: Record<string, { headline: string; bullets: string[]; btnText: string }> = {
@@ -48,17 +57,55 @@ const DEFAULT_BENEFIT = {
 };
 
 export default function SmartSectionGate({
-  htmlContent, slug, category, userCount = 90, todaySignups = 0
+  htmlContent, slug, category, userCount = 90, todaySignups = 0, isBot = false, freeReads = 3
 }: Props) {
   const pathname = usePathname();
-  const [shouldGate, setShouldGate] = useState(false);
+  // null = 판정 전 (SSR), false = 게이트 없이 전문, true = 게이트 적용
+  const [shouldGate, setShouldGate] = useState<boolean | null>(null);
+  const [bypassedThisSession, setBypassedThisSession] = useState(false);
 
-  useEffect(() => { setShouldGate(true); }, [slug]);
+  // localStorage 기반 미터링: slug 별 첫 방문만 카운트, 30일 이상 된 항목 GC.
   useEffect(() => {
-    if (shouldGate) trackCTA('view', 'content_gate', { page_path: pathname, category });
-  }, [shouldGate, category, pathname]);
+    if (isBot) { setShouldGate(false); return; }
+    let reads: { slug: string; ts: number }[] = [];
+    try {
+      const raw = localStorage.getItem(READS_KEY);
+      if (raw) reads = JSON.parse(raw);
+      if (!Array.isArray(reads)) reads = [];
+      const cutoff = Date.now() - READS_TTL_MS;
+      reads = reads.filter(r => r && r.ts > cutoff);
+    } catch { reads = []; }
 
-  if (!shouldGate) return <div dangerouslySetInnerHTML={{ __html: htmlContent }} />;
+    const seen = reads.some(r => r.slug === slug);
+    if (!seen) {
+      reads.push({ slug, ts: Date.now() });
+      try { localStorage.setItem(READS_KEY, JSON.stringify(reads.slice(-200))); } catch {}
+    }
+    // 무료 카운트 = 현재 글을 포함한 고유 slug 수
+    const uniqueCount = new Set(reads.map(r => r.slug)).size;
+    setShouldGate(uniqueCount > freeReads);
+  }, [slug, isBot, freeReads]);
+
+  useEffect(() => {
+    if (shouldGate === true && !bypassedThisSession) {
+      trackCTA('view', 'content_gate', { page_path: pathname, category });
+    }
+  }, [shouldGate, bypassedThisSession, category, pathname]);
+
+  // 같은 세션에서 "나중에" 클릭 시 — sessionStorage 표시
+  useEffect(() => {
+    try {
+      if (sessionStorage.getItem(`kd_gate_bypass_${slug}`) === '1') setBypassedThisSession(true);
+    } catch {}
+  }, [slug]);
+
+  // SSR 단계 + 판정 전: 빈 placeholder 만 렌더 (CLS 방지). 판정 후 적절한 분기로.
+  if (shouldGate === null) {
+    return <div className="blog-content" itemProp="articleBody" dangerouslySetInnerHTML={{ __html: htmlContent }} />;
+  }
+  if (shouldGate === false || bypassedThisSession) {
+    return <div className="blog-content" itemProp="articleBody" dangerouslySetInnerHTML={{ __html: htmlContent }} />;
+  }
 
   /* ── 클리프행어 컷포인트: 세 번째 H2 직전 ──
    * 콘텐츠의 대부분(40~70%)을 보여주어 신뢰 확보 후 CTA
@@ -105,8 +152,14 @@ export default function SmartSectionGate({
     ? `오늘 ${todaySignups}명 가입 · 총 ${userCount.toLocaleString()}명 이용 중`
     : `${userCount.toLocaleString()}명이 무료로 이용 중`;
 
+  const handleLater = () => {
+    try { sessionStorage.setItem(`kd_gate_bypass_${slug}`, '1'); } catch {}
+    setBypassedThisSession(true);
+    trackCTA('dismiss', 'content_gate', { page_path: pathname, category });
+  };
+
   return (
-    <>
+    <div className="blog-content" itemProp="articleBody">
       <div dangerouslySetInnerHTML={{ __html: visibleSection }} />
 
       {/* 페이드아웃 */}
@@ -178,15 +231,20 @@ export default function SmartSectionGate({
 
           <div style={{ marginTop: 10, textAlign: 'center' }}>
             <div style={{ fontSize: 11, color: 'rgba(224,232,240,0.3)', marginBottom: 4 }}>{socialText}</div>
-            <a
-              href={`/login?redirect=${encodeURIComponent(pathname)}&source=content_gate_email`}
-              style={{ fontSize: 11, color: 'rgba(224,232,240,0.35)', textDecoration: 'underline', textUnderlineOffset: '2px' }}
+            <button
+              onClick={handleLater}
+              style={{
+                background: 'transparent', border: 'none', cursor: 'pointer',
+                fontSize: 11, color: 'rgba(224,232,240,0.35)',
+                textDecoration: 'underline', textUnderlineOffset: '2px',
+                padding: '2px 4px',
+              }}
             >
-              이메일로 가입
-            </a>
+              나중에 (이번 글은 그대로 보기)
+            </button>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }

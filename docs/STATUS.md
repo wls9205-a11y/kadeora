@@ -1,3 +1,63 @@
+# 카더라 STATUS — 세션 183 (2026-04-27)
+
+## 세션 183 — CTA 복구: StickySignupBar + SmartSectionGate (60% 미터링) + dead 정리
+
+### 배경
+4/22 이후 신규 가입 0 건. 비로그인 블로그 방문자에게 노출되는 가입 유도 CTA 가 사실상 cron-injected `blog_inline_cta` 1 개뿐 (s145 에서 ActionBar/BlogFloatingBar 데이터 기반 삭제, s108 에서 SmartSectionGate 제거 후 미복구). 본 세션은 두 컴포넌트 (재)도입 + 중복 차단.
+
+### 핵심 원칙
+- **동시 화면 CTA 최대 2 개**: 인라인 + 하단바, 또는 게이트 + 하단바.
+- **신규 팝업/모달 금지** (과거 6 개 동시 팝업 회귀 방지).
+- **비로그인 한정 렌더** — 로그인 유저에게는 가입 CTA 자체가 mount 되지 않음.
+
+### Track A — `StickySignupBar` 신규 ✅
+파일: `src/components/StickySignupBar.tsx`.
+- ActionBar (CTR 0.03%) 를 대체. 기존 ActionBar.tsx 는 rollback 보호용으로 파일만 잔존, mount 만 제거.
+- 비로그인 + scroll>300px + InstallBanner 비활성 + 24h cooldown 미적용 시 표시.
+- 디자인: 52px 높이, dark gradient bg, 카카오 노란색 CTA 버튼, 닫기 X (24h localStorage cooldown).
+- z-index 90 — InstallBanner(100 추정) 아래, BlogFloatingBar(50) 위, 모바일 nav 아래.
+- 이벤트: `trackCTA('view'|'click'|'dismiss', 'sticky_signup_bar')`.
+- mount: `(main)/layout.tsx` — `<ActionBar />` 자리에 교체.
+
+### Track B — `SmartSectionGate` 복귀 + 무료 미터링 ✅
+파일: `src/components/SmartSectionGate.tsx` (기존 파일 확장).
+- 기존 cliffhanger 로직 (3rd H2 컷, 40-70% 범위 보정, remaining headings preview) 유지.
+- 신규: localStorage `kd_blog_reads` 로 30 일 윈도우 내 고유 slug 카운트. **무료 3 회까지 전문 노출, 4 번째 글부터 60% 게이트.**
+- 신규: `isBot` prop — true 면 게이트 없이 전문 (SEO 보호).
+- 신규: "나중에 (이번 글은 그대로 보기)" 버튼 — sessionStorage 표시 후 unmask, 같은 세션 내 같은 slug 재게이트 안 함.
+- mount: `blog/[slug]/page.tsx` 의 비로그인 분기 (line 1009-1011) 가 plain `<div className="blog-content"...>` 에서 `<SmartSectionGate ...>` 로 교체. has_gated_content (`BlogGatedRenderer`) / 로그인(`BlogTossGate`) / 봇 분기는 영향 없음.
+
+### Track C — 중복/팝업 제거 ✅
+- `blog/[slug]/page.tsx` 의 `<SignupPopupModal>` mount + import 제거 — SmartSectionGate(60%) + StickySignupBar 와 시각적 중복.
+- `<BlogFloatingBar>` mount 에 `isLoggedIn` 조건 추가 — 비로그인 하단은 StickySignupBar 가 차지하므로 stack 방지. 로그인 유저는 BlogFloatingBar 의 저장/알림/공유 engagement bar 그대로 받음.
+- `(main)/layout.tsx` 에서 `<ActionBar />` mount 제거.
+
+### Track D — Dead CTA audit (deletion 보류) 📋
+import 검색 결과 mount 되는 곳이 없는 컴포넌트:
+- `ActionBar.tsx` — s183 unmount 후 dead. **파일 잔존** (s145→s176 revert 이력 고려, rollback 안전망).
+- `SignupCTA.tsx`, `ProfileCompletionBanner.tsx` (Banner 와 다른 …Completion**Banner**.tsx), `AttendanceBanner.tsx`, `BlogMidCTA.tsx` — import grep 0 건. 다음 세션에서 일괄 삭제 권장.
+- `SignupNudgeModal.tsx` — `(main)/layout.tsx` 에서 전역 mount. 트리거 조건 + StickySignupBar 와 노출 중복 가능성 있음. 별도 audit 필요.
+
+### 비로그인 블로그 페이지 CTA 노출 정리 (배포 후)
+| 위치 | 컴포넌트 | source |
+|------|---------|--------|
+| 본문 30% (cron 주입) | inline CTA | `blog_inline_cta` |
+| 본문 60% (4번째 글~) | `<SmartSectionGate>` | `content_gate` |
+| 하단 고정 (scroll>300) | `<StickySignupBar>` | `sticky_signup_bar` |
+| 본문 (apt/unsold만) | `<BlogAptAlertCTA>` | `apt_alert_cta` |
+| 본문 끝 | `<BlogEndCTA>` | (own tracker) |
+| 댓글 | `<BlogCommentCTA>` | (own tracker) |
+같은 시점에 화면에 함께 보이는 것은 최대 2 개 (스크롤 위치 별로 다름).
+
+### 검증 (배포 후)
+```
+curl -s https://kadeora.app/blog/<slug> | grep -i 'sticky_signup_bar\|content_gate\|kd_blog_reads'
+# 비로그인 시 sticky_signup_bar / content_gate 둘 다 노출되어야 함
+# 로그인 시 둘 다 노출 안 됨 — Network 에 trackCTA('view', 'sticky_signup_bar') 없는 것으로 검증
+```
+
+---
+
 # 카더라 STATUS — 세션 182 (2026-04-27)
 
 ## 세션 182 — SEO 긴급 수정 (Soft 404 → Hard 404, robots 충돌, sitemap 위생)

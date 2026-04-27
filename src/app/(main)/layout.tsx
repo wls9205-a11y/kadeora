@@ -5,7 +5,8 @@ import { Navigation } from '@/components/Navigation';
 import AdBanner from '@/components/AdBanner';
 import { ToastProvider } from '@/components/Toast';
 import ErrorBoundary from '@/components/ErrorBoundary';
-import ActionBar from '@/components/ActionBar';
+// s183: ActionBar (CTR 0.03%) → StickySignupBar 로 교체.
+import StickySignupBar from '@/components/StickySignupBar';
 
 
 import { Sidebar, RightPanel, InstallBanner, PWAInstallTracker, NoticeBanner, PageViewTracker, BehaviorTracker } from '@/components/ClientDynamics';
@@ -68,7 +69,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
       </div>
       <InstallBanner />
       <PWAInstallTracker />
-      <ActionBar />
+      <StickySignupBar />
 
       <PageViewTracker />
       <BehaviorTracker />

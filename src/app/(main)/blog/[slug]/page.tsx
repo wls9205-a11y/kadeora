@@ -43,13 +43,15 @@ import BlogHeroExtras from '@/components/blog/BlogHeroExtras';
 import BlogGatedRenderer from '@/components/blog/BlogGatedRenderer';
 import BlogEndCTA from '@/components/blog/BlogEndCTA';
 import BlogEarlyGateTeaser from '@/components/blog/BlogEarlyGateTeaser';
-import SignupPopupModal from '@/components/signup/SignupPopupModal';
+// s183: SignupPopupModal import 제거 — SmartSectionGate(60%) + StickySignupBar 와 중복.
 import RelatedBlogsSection from '@/components/blog/RelatedBlogsSection';
 import BlogSocialBar from '@/components/blog/BlogSocialBar';
 import BlogFooterMeta from '@/components/blog/BlogFooterMeta';
 import BlogImageCarousel from '@/components/blog/BlogImageCarousel';
 import BlogMidGate from '@/components/blog/BlogMidGate';
-// SmartSectionGate 제거 → LoginGate 기능 게이팅으로 전환 (세션 108)
+// s183: SmartSectionGate 복귀 (s108 에 LoginGate 로 전환했었으나 비로그인 가입 유도가 사실상 0개로
+// 떨어져 4/22 신규가입 0건. 60% 게이트 + 무료 3회 미터링 + 봇 SEO 보호 형태로 재도입.)
+import SmartSectionGate from '@/components/SmartSectionGate';
 import BlogAptAlertCTA from '@/components/BlogAptAlertCTA';
 import YMYLBanner from '@/components/YMYLBanner';
 import BigEventCharts from '@/components/blog/BigEventCharts';
@@ -1007,7 +1009,13 @@ export default async function BlogDetailPage({ params }: Props) {
         ) : isLoggedIn ? (
           <BlogTossGate htmlFull={htmlFull} htmlShort={htmlTossShort} slug={slug} title={post.title} />
         ) : (
-          <div className="blog-content" itemProp="articleBody" dangerouslySetInnerHTML={{ __html: sanitizeHtml(htmlFull) }} />
+          // 비로그인 + 봇 아님 + has_gated_content 없음: 무료 3회까지는 전문, 4번째부터 60% 게이트.
+          <SmartSectionGate
+            htmlContent={sanitizeHtml(htmlFull)}
+            slug={slug}
+            category={post.category}
+            isBot={isBot}
+          />
         )}
 
         {/* 관심단지 알림 CTA — apt/unsold 카테고리 + 단지명 있을 때 (봇 제외) */}
@@ -1153,14 +1161,15 @@ export default async function BlogDetailPage({ params }: Props) {
 
         {/* Session D: 본문 끝 CTA (비로그인만) */}
         {!isBot && !isLoggedIn && <BlogEndCTA slug={slug} isLoggedIn={false} />}
-        {/* s157: FOMO 팝업 모달 (스크롤 50% or 60s, 세션 1회) — sticky_bar/floating_ask 대체 */}
-        {!isBot && !isLoggedIn && <SignupPopupModal slug={slug} redirectPath={`/blog/${slug}`} isLoggedIn={isLoggedIn} />}
+        {/* s183: SignupPopupModal 제거 — SmartSectionGate (60%) + StickySignupBar (스크롤 300px+) 와 중복.
+            "동시 화면 CTA 최대 2개" 원칙. 과거 동시 6개 팝업 회귀 방지. */}
 
         {/* s172: BlogFooterMeta 댓글 직후로 이동 (article 외부) */}
       </article>
 
-      {/* 플로팅 액션바 — 스크롤 30% 후 나타남, 봇 제외 */}
-      {!isBot && <BlogFloatingBar slug={slug} title={post.title} category={post.category} />}
+      {/* 플로팅 액션바 — 로그인 유저 전용 (저장/알림/공유 engagement 바).
+          비로그인은 StickySignupBar 가 하단 자리를 차지하므로 중복 방지. */}
+      {!isBot && isLoggedIn && <BlogFloatingBar slug={slug} title={post.title} category={post.category} />}
 
       {/* 댓글 섹션 — D안 컴팩트 리스트 */}
       <BlogCommentCTA commentCount={comments.length} />
