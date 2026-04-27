@@ -82,10 +82,13 @@ export default function MasterControlTab() {
     setLoading(false);
   }, []);
 
+  // s185: 30s → 5min + tab 비활성 시 polling 정지 (Supabase 커넥션 풀 고갈로 인한 site-wide 504 원인 제거)
   useEffect(() => {
     load();
-    const t = setInterval(load, 30000);
-    return () => clearInterval(t);
+    const tick = () => { if (typeof document !== 'undefined' && document.visibilityState === 'visible') load(); };
+    const t = setInterval(tick, 300000);
+    document.addEventListener('visibilitychange', tick);
+    return () => { clearInterval(t); document.removeEventListener('visibilitychange', tick); };
   }, [load]);
 
   async function handleExecuteAll() {

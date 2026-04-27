@@ -48,7 +48,12 @@ export default function AdminShell() {
         setHp({ s: d.healthScore, cr: Math.round(k.cronSuccess / Math.max(k.cronSuccess + k.cronFail, 1) * 100), pv: k.pvToday || 0, nu: k.newUsersToday || 0, iss: k.issuePending || 0 });
       }
     }).catch(() => {});
-    ld(); const t = setInterval(ld, 300000); return () => clearInterval(t); // s173: 60s → 5min (Supabase 부하 완화)
+    // s185: visibilitychange — 탭 백그라운드면 polling 정지 (다른 탭/창 작업 시 어드민 자동 폴링이 사용자 페이지 504 유발했던 것 차단)
+    ld();
+    const tick = () => { if (typeof document !== 'undefined' && document.visibilityState === 'visible') ld(); };
+    const t = setInterval(tick, 300000);
+    document.addEventListener('visibilitychange', tick);
+    return () => { clearInterval(t); document.removeEventListener('visibilitychange', tick); };
   }, []);
 
   const sc = hp ? hp.s >= 71 ? '#10B981' : hp.s >= 41 ? '#F59E0B' : '#EF4444' : '#666';

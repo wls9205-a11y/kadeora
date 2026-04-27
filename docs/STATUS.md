@@ -1,3 +1,59 @@
+# 카더라 STATUS — 세션 185 (2026-04-27)
+
+## 세션 185 — 504 site-wide 장애 원인 (어드민 polling DB 커넥션 고갈) + dead code 646 줄 삭제
+
+### 🚨 핵심 — 504 대규모 장애 원인 해결
+**증상**: 최근 24h 동안 블로그/아파트/주식/메인/로그인 전체 페이지에서 504 타임아웃 다발.
+**원인**: 어드민 탭이 한 곳이라도 열려 있으면 `setInterval(load, 30000)` 폴링이 매 30 초 admin/v2 호출 → admin/v2 의 한 탭 핸들러 평균 40+ 병렬 query (focus 탭 단독 43 개) → Supabase 커넥션 풀 고갈 → 일반 유저 페이지 query 가 wait/타임아웃.
+
+5 개의 30 초 폴링이 동시 가동:
+| 파일 | 호출 | 1 회 query 수 |
+|------|------|--------------|
+| `MasterControlTab.tsx` | `master/status` + `master/execute-all` | 2 |
+| `OpsTab.tsx` | `admin/v2?tab=ops` + `?tab=focus` | ~50 |
+| `FocusTab.tsx` | `admin/v2?tab=focus` + `?tab=ops` + `?tab=data` | ~80 |
+| `AdminShell.tsx` (header) | `admin/v2?tab=focus` (5 분) | ~43 |
+| `NotificationBell.tsx` | `admin/notifications` (5 분) | 2 |
+
+어드민이 **한 탭만 열려 있어도** 매 30 초 약 100~130 개 SQL query. Supabase Pro 풀 (15~20 connection) 즉시 포화.
+
+### 적용 (5 개 파일)
+모든 polling effect 를 동일 패턴으로 변경:
+- **interval 30 초 → 5 분 (300000 ms)**: MasterControlTab, OpsTab, FocusTab.
+- **`document.addEventListener('visibilitychange', tick)`** 추가 (5 개 모두): 어드민 탭이 background 면 polling 정지, foreground 복귀 시 즉시 1 회 refresh.
+- **이전 5 분 폴러** (AdminShell, NotificationBell) 도 visibilitychange 추가 — 다른 탭/창 작업 중일 때 어드민 자동 폴링이 일반 유저 페이지를 죽이는 것 차단.
+
+**효과 (예상)**:
+- 어드민 활성 + foreground: 30 초 → 5 분 = **10× 부하 감소**
+- 어드민 background (다른 탭/창): polling **0** = 사용자 페이지 query 정상 처리
+- 합산: 평시 12~20× 풀 여유 확보
+
+### admin/v2 query batching — 보류 (이유)
+admin/v2 는 이미 `?tab=focus|growth|users|data|ops` 로 split (line 42/616/873/1014/1119), 한 호출당 한 탭만 실행. polling 10× 감소 + visibilitychange 차단으로 즉시 효과 확보된 상태에서 batching 은 latency 증가 (병렬 → 순차) 와 코드 복잡도 추가만 가져와 ROI 낮음. 실제 504 재발 시 다음 세션에서 검토.
+
+### Phase 2 — Dead component 삭제 (646 줄)
+import grep 결과 mount 되는 곳이 없는 6 파일 일괄 삭제:
+- `src/components/ActionBar.tsx` (106 줄) — s183 unmount
+- `src/components/SignupCTA.tsx` (100 줄)
+- `src/components/ProfileCompletionBanner.tsx` (92 줄) — `ProfileCompleteBanner` (without "tion") 가 진짜 mount 되는 컴포넌트
+- `src/components/AttendanceBanner.tsx` (82 줄)
+- `src/components/BlogMidCTA.tsx` (71 줄)
+- `src/components/blog/BlogMidGate.tsx` (195 줄) — SmartSectionGate(60% 게이트) + StickySignupBar(300px) 와 노출 시점 중복. blog/[slug]/page.tsx 의 mount + import 도 함께 제거.
+
+### 이번 세션에 NOT 한 것 (의도적 보류)
+- **Phase 3 탭 통합 (10 → 7)** — MasterControlTab/IssueTab/CommunityTab 병합·삭제 + AdminShell 탭바 수정. 기능 병합 정확히 옮겨야 하므로 별도 세션에서 신중히. 504 압력은 Phase 1 polling fix 만으로도 해소.
+- **Phase 4 UsersTab 유저 상세 패널** — API 엔드포인트 + 검색 input + accordion + 4×4 KPI + 리스트 4 종 = 신규 ~500 줄 코드. 한 세션에 504 fix + dead 삭제 + 이 feature 까지 묶으면 review 어려워짐. 별도 세션 권장.
+- **Phase 5 FocusTab/GrowthTab 카드 업데이트** — 사소한 작업이지만 504 긴급 수정과 묶는 것보다 분리.
+
+### 검증 (배포 후)
+```
+# 1. 어드민에 들어가서 30초 대기 → Network tab 에서 admin/v2 호출이 1 회만인지 확인
+# 2. 다른 탭으로 전환 → Network 에서 새 admin/v2 호출 없어야 함
+# 3. Supabase Dashboard > Database > Connections 그래프에서 평균 connection 수 감소 확인
+```
+
+---
+
 # 카더라 STATUS — 세션 184 (2026-04-27)
 
 ## 세션 184 — 블로그 상세 페이지 리스트럭처 (content-first)

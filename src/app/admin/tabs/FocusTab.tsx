@@ -44,7 +44,14 @@ export default function FocusTab({onNavigate}:{onNavigate:(t:any)=>void}) {
       fetch('/api/admin/v2?tab=data').then(r=>r.json()),
     ]).then(([a,b,c])=>{setD(a);setOps(b);setDf(c);setLd(false);}).catch(()=>setLd(false));
   },[]);
-  useEffect(()=>{load();ref.current=setInterval(load,30000);return()=>clearInterval(ref.current);},[load]);
+  // s185: 30s → 5min + visibilitychange (탭 비활성 시 polling 중지) — 504 site-wide 장애 원인 차단
+  useEffect(()=>{
+    load();
+    const tick = () => { if (typeof document !== 'undefined' && document.visibilityState === 'visible') load(); };
+    ref.current = setInterval(tick, 300000);
+    document.addEventListener('visibilitychange', tick);
+    return () => { clearInterval(ref.current); document.removeEventListener('visibilitychange', tick); };
+  },[load]);
 
   if(ld)return<div style={{textAlign:'center',padding:80,color:'rgba(255,255,255,0.4)',fontSize:12}}>로딩...</div>;
   if(!d)return<div style={{textAlign:'center',padding:80,fontSize:12}}>⚠️ 실패</div>;

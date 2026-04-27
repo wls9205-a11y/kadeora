@@ -45,10 +45,13 @@ export default function NotificationBell() {
     } catch { /* ignore */ }
   }, []);
 
+  // s185: visibilitychange 추가 — 탭 비활성 시 polling 중지
   useEffect(() => {
     load();
-    const t = setInterval(load, 300_000); // s173: 60s → 5min (Supabase 부하 완화)
-    return () => clearInterval(t);
+    const tick = () => { if (typeof document !== 'undefined' && document.visibilityState === 'visible') load(); };
+    const t = setInterval(tick, 300_000);
+    document.addEventListener('visibilitychange', tick);
+    return () => { clearInterval(t); document.removeEventListener('visibilitychange', tick); };
   }, [load]);
 
   useEffect(() => {

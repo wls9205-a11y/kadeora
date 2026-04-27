@@ -19,7 +19,14 @@ export default function OpsTab({ onNavigate }: { onNavigate: (t: any) => void })
       setLoading(false);
     }).catch(() => setLoading(false));
   }, []);
-  useEffect(() => { load(); const t = setInterval(load, 30000); return () => clearInterval(t); }, [load]);
+  // s185: 30s → 5min + 탭 비활성 시 정지 (504 원인 차단)
+  useEffect(() => {
+    load();
+    const tick = () => { if (typeof document !== 'undefined' && document.visibilityState === 'visible') load(); };
+    const t = setInterval(tick, 300000);
+    document.addEventListener('visibilitychange', tick);
+    return () => { clearInterval(t); document.removeEventListener('visibilitychange', tick); };
+  }, [load]);
 
   if (loading || !data || data.error) return <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-secondary)' }}>로딩 중...</div>;
 

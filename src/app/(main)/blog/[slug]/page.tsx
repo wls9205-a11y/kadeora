@@ -47,7 +47,7 @@ import RelatedBlogsSection from '@/components/blog/RelatedBlogsSection';
 // s184: BlogSocialBar 제거 — 본문 직후 ShareButtons 1세트로 통합.
 import BlogFooterMeta from '@/components/blog/BlogFooterMeta';
 // s184: BlogImageCarousel 제거 — 캐러셀 자체 폐지.
-import BlogMidGate from '@/components/blog/BlogMidGate';
+// s185: BlogMidGate 제거 — SmartSectionGate(60% 무료3회) + StickySignupBar(300px) 와 중복.
 // s183: SmartSectionGate 복귀 (s108 에 LoginGate 로 전환했었으나 비로그인 가입 유도가 사실상 0개로
 // 떨어져 4/22 신규가입 0건. 60% 게이트 + 무료 3회 미터링 + 봇 SEO 보호 형태로 재도입.)
 import SmartSectionGate from '@/components/SmartSectionGate';
@@ -1106,14 +1106,7 @@ export default async function BlogDetailPage({ params }: Props) {
           <BlogActions blogPostId={post.id} initialHelpfulCount={post.helpful_count ?? 0} />
         </div>
 
-        {/* v2.0 Week1 C4: 본문 50% 스크롤 mid-gate (비로그인 + !has_gated_content 만) */}
-        {!isBot && !isLoggedIn && (
-          <BlogMidGate
-            blogId={post.id}
-            isGatedPost={!!(post as any).has_gated_content}
-            isLoggedIn={isLoggedIn}
-          />
-        )}
+        {/* s185: BlogMidGate 제거 — SmartSectionGate (60% 무료 3회 미터링) + StickySignupBar (300px scroll) 와 동일 영역 CTA 중복. "최대 2개" 원칙 위배. */}
 
         {/* s184: RelatedBlogsSection 도 댓글 아래로 이동 — 본문 흐름 보호. */}
 
