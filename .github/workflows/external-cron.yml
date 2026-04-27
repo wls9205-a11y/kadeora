@@ -1,0 +1,46 @@
+name: kadeora-external-cron
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'    # pr-monitor 6시간마다
+    - cron: '0 19 * * *'     # alert-time-based KST 04:00 (UTC 19:00)
+    - cron: '0 21 * * *'     # builder-watch KST 06:00 (UTC 21:00)
+  workflow_dispatch:
+    inputs:
+      task:
+        description: '수동 실행할 task (schedule 무시)'
+        required: true
+        default: 'pr-monitor'
+        type: choice
+        options:
+          - pr-monitor
+          - alert
+          - builder-watch
+
+jobs:
+  pr-monitor:
+    if: github.event.schedule == '0 */6 * * *' || (github.event_name == 'workflow_dispatch' && inputs.task == 'pr-monitor')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger pr-monitor
+        run: |
+          curl -sf --max-time 300 -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://kadeora.app/api/cron/pr-monitor
+
+  alert-time-based:
+    if: github.event.schedule == '0 19 * * *' || (github.event_name == 'workflow_dispatch' && inputs.task == 'alert')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger alert-time-based
+        run: |
+          curl -sf --max-time 300 -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://kadeora.app/api/cron/alert-time-based
+
+  builder-watch:
+    if: github.event.schedule == '0 21 * * *' || (github.event_name == 'workflow_dispatch' && inputs.task == 'builder-watch')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger builder-watch (한웅건설)
+        run: |
+          curl -sf --max-time 300 -X POST -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "https://kadeora.app/api/admin/builder-watch?builder=hanwoong"
