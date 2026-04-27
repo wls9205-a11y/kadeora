@@ -128,6 +128,32 @@ export async function GET(request: Request) {
     }
   } catch { /* 로깅 실패는 무시 */ }
 
+  // s183: 진입 source 추적 + apt_interest_<slug> 1-shot 등록
+  try {
+    const action = searchParams.get('action');
+    if (source && source !== 'direct') {
+      void supabase.from('profiles').update({ signup_source: source } as any).eq('id', user.id).then(() => {});
+    }
+    if (action === 'register_interest' && source && source.startsWith('apt_interest_')) {
+      const slug = source.slice('apt_interest_'.length);
+      if (slug) {
+        const { getSupabaseAdmin } = await import('@/lib/supabase-admin');
+        const admin2 = getSupabaseAdmin();
+        const { data: site } = await (admin2 as any)
+          .from('apt_sites').select('id').eq('slug', slug).maybeSingle();
+        if (site?.id) {
+          void (admin2 as any).from('apt_site_interests').insert({
+            site_id: site.id,
+            user_id: user.id,
+            is_member: true,
+            notification_enabled: true,
+            source: 'login_callback',
+          });
+        }
+      }
+    }
+  } catch { /* 등록 실패는 무시 */ }
+
   // 즉시 목적지로 이동 — /onboarding 강제 리디렉트 제거
   return NextResponse.redirect(`${origin}${safeRedirect}`);
 }

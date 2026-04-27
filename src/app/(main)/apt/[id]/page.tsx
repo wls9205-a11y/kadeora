@@ -1,4 +1,6 @@
 import { AptViewTracker } from '@/components/ViewTracker';
+import { InterestRegisterHero } from '@/components/apt/InterestRegisterHero';
+import { buildAptJsonLd } from '@/lib/schema/apt';
 import { sanitizeHtml } from '@/lib/sanitize-html';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
@@ -452,10 +454,45 @@ export default async function AptUnifiedPage({ params }: Props) {
   const isBotVisit = isBot(aptUA);
   const unsoldRate = unsold?.tot_supply_hshld_co ? Math.round(((unsold.tot_unsold_hshld_co ?? 0) / unsold.tot_supply_hshld_co) * 100) : null;
 
+  const aptItemListJsonLd = buildAptJsonLd({
+    id: site?.id ?? slug,
+    slug,
+    name,
+    region: site?.region ?? region ?? null,
+    sigungu: site?.sigungu ?? sigungu ?? null,
+    dong: site?.dong ?? null,
+    address: site?.address ?? sub?.hssply_adres ?? null,
+    description: site?.description ?? null,
+    builder: site?.builder ?? sub?.constructor_nm ?? null,
+    total_units: site?.total_units ?? sub?.tot_supply_hshld_co ?? null,
+    price_min: site?.price_min ?? null,
+    price_max: site?.price_max ?? null,
+    latitude: site?.latitude ?? null,
+    longitude: site?.longitude ?? null,
+    status: site?.status ?? subSt ?? null,
+  }).find(s => s['@type'] === 'ItemList');
+
   return (
     <article style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }} itemScope itemType='https://schema.org/ApartmentComplex'>
       {noindex && <meta name="robots" content="noindex,follow" />}
       {site?.id && <AptViewTracker siteId={site.id} />}
+
+      {aptItemListJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(aptItemListJsonLd) }}
+        />
+      )}
+
+      {site?.id && (
+        <InterestRegisterHero
+          aptId={site.id}
+          aptName={name}
+          aptSlug={slug}
+          status={subSt}
+          isLoggedIn={isLoggedInApt}
+        />
+      )}
 
       <PaywallMarker hasGatedContent={true} schemaType="RealEstateListing" />
 
