@@ -269,7 +269,7 @@ export function Navigation() {
           {/* 우측 액션 */}
           <div style={{ marginLeft:'auto', display:'flex', alignItems:'center', gap:6 }}>
 
-            <div className="hidden md:flex"><LiveActivityIndicator /></div>
+            <LiveActivityIndicator />
             {/* 더보기 (데스크탑 전용 — 모바일은 하단 탭바에 있음) */}
             <button
               onClick={(e) => { e.stopPropagation(); setMoreOpen(!moreOpen); setMenuOpen(false); }}
