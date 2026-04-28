@@ -5,9 +5,10 @@ import AdBanner from '@/components/AdBanner';
 
 import { detectDefaultRegion } from '@/lib/region-detection';
 import {
-  fetchHeroSite, fetchSiteList, fetchPriceTrend, fetchAIAnalysis,
-  fetchBuilders, fetchCategoryCounts,
-  type AptCategory, type AptFilters,
+  fetchHeroSite, fetchSiteList, fetchAIAnalysis, fetchCategoryCounts,
+  fetchStatsKPI, fetchImminentTop3, fetchSigunguTrends, fetchPriceBands,
+  fetchBuildersHub, fetchRecentTrades, fetchBlogList,
+  type AptCategory, type AptFilters, type AptSortKey,
 } from '@/lib/apt-fetcher';
 
 import RegionHero from '@/components/apt/RegionHero';
@@ -15,11 +16,14 @@ import RegionHeader from '@/components/apt/RegionHeader';
 import AptHeroSearch from '@/components/apt/AptHeroSearch';
 import AptCategoryTabs from '@/components/apt/AptCategoryTabs';
 import AptQuickFilters from '@/components/apt/AptQuickFilters';
-import AptHeroCard from '@/components/apt/AptHeroCard';
-import AptSiteList from '@/components/apt/AptSiteList';
-import AptLocalPriceCard from '@/components/apt/AptLocalPriceCard';
-import AptAIAnalysisCard from '@/components/apt/AptAIAnalysisCard';
-import AptBuildersSection from '@/components/apt/AptBuildersSection';
+import AptStatsKPI from '@/components/apt/AptStatsKPI';
+import AptHeroLarge from '@/components/apt/AptHeroLarge';
+import AptImminentBar from '@/components/apt/AptImminentBar';
+import AptMainGrid from '@/components/apt/AptMainGrid';
+import AptPriceTrendUnified from '@/components/apt/AptPriceTrendUnified';
+import AptBuilderHub from '@/components/apt/AptBuilderHub';
+import AptRecentTradeList from '@/components/apt/AptRecentTradeList';
+import AptInsightsUnified from '@/components/apt/AptInsightsUnified';
 import AptOtherRegions from '@/components/apt/AptOtherRegions';
 import AptMapCTA from '@/components/apt/AptMapCTA';
 
@@ -70,6 +74,7 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
 }
 
 const VALID_CATEGORIES: AptCategory[] = ['all', 'subscription', 'imminent_d7', 'unsold', 'redev', 'trade'];
+const VALID_SORTS: AptSortKey[] = ['popularity', 'price', 'units', 'move_in'];
 
 export default async function AptPage({
   searchParams,
@@ -77,6 +82,7 @@ export default async function AptPage({
   searchParams?: Promise<{
     region?: string; sigungu?: string; category?: string;
     price?: string; size?: string; builder?: string;
+    sort?: string; page?: string;
     section?: string;
   }>;
 }) {
@@ -84,7 +90,7 @@ export default async function AptPage({
   const region = sp.region?.trim() || null;
   const sigungu = sp.sigungu?.trim() || null;
 
-  // 지역 미설정 → RegionHero (IP geolocation default 만 server-side, 나머지는 client)
+  // 지역 미설정 → RegionHero (IP geolocation default)
   if (!region) {
     const defaultRegion = await detectDefaultRegion();
     return (
@@ -95,22 +101,36 @@ export default async function AptPage({
     );
   }
 
-  // ─── region 설정됨 → 큐레이션 server fetch ───
+  // ─── region 설정됨 → 8섹션 server fetch ───
   const rawCat = (sp.category as AptCategory | undefined) || 'all';
   const category: AptCategory = VALID_CATEGORIES.includes(rawCat) ? rawCat : 'all';
+  const rawSort = (sp.sort as AptSortKey | undefined) || 'popularity';
+  const sort: AptSortKey = VALID_SORTS.includes(rawSort) ? rawSort : 'popularity';
+  const pageNum = Math.max(1, Math.min(5, Number(sp.page) || 1));
+
   const filters: AptFilters = {
     region, sigungu, category,
     price: sp.price?.trim() || undefined,
     size: sp.size?.trim() || undefined,
     builder: sp.builder?.trim() || undefined,
+    sort, page: pageNum,
   };
 
-  const [heroSite, siteList, priceTrend, aiAnalysis, builders, categoryCounts] = await Promise.all([
+  const [
+    heroSite, mainGridSites, kpis, imminentTop3,
+    sigunguTrends, priceBands, builders,
+    recentTrades, aiPost, blogList, categoryCounts,
+  ] = await Promise.all([
     fetchHeroSite(filters),
-    fetchSiteList(filters, 6),
-    fetchPriceTrend(region, sigungu),
+    fetchSiteList(filters, 12),
+    fetchStatsKPI(region, sigungu),
+    fetchImminentTop3(region, sigungu),
+    fetchSigunguTrends(region, sigungu, 12),
+    fetchPriceBands(region, sigungu),
+    fetchBuildersHub(region, 6),
+    fetchRecentTrades(region, sigungu, 10),
     fetchAIAnalysis(region),
-    fetchBuilders(region, 5),
+    fetchBlogList(region, 3),
     fetchCategoryCounts(region, sigungu),
   ]);
 
@@ -118,7 +138,7 @@ export default async function AptPage({
 
   return (
     <>
-      {/* SEO JSON-LD — region 컨텍스트 적용 */}
+      {/* SEO JSON-LD — region 컨텍스트 */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -160,22 +180,57 @@ export default async function AptPage({
 
       <h1 className="sr-only">{regionLabel} 부동산 — 청약·분양·미분양·재개발</h1>
       <p className="sr-only region-summary">
-        {regionLabel}의 청약·분양·미분양·재개발 단지 {(categoryCounts.all ?? 0).toLocaleString()}건을 한눈에. 분양 진행 {categoryCounts.subscription ?? 0}건, 청약 임박 {categoryCounts.imminent_d7 ?? 0}건, 미분양 {categoryCounts.unsold ?? 0}건, 재개발 {categoryCounts.redev ?? 0}건, 실거래 {categoryCounts.trade ?? 0}건.
+        {regionLabel}의 청약·분양·미분양·재개발 단지 {(categoryCounts.all ?? 0).toLocaleString()}건. 분양중 {kpis.active_sub}, 미분양 {kpis.unsold}, 재개발 {kpis.redev}, 7일 실거래 {kpis.trade_7d}건.
       </p>
 
-      {/* sticky chrome — RegionHeader → AptCategoryTabs */}
+      {/* Chrome — sticky */}
       <RegionHeader region={region} sigungu={sigungu} />
       <AptHeroSearch region={region} sigungu={sigungu} />
       <AptCategoryTabs current={category} region={region} sigungu={sigungu} countByCategory={categoryCounts} />
-      <AptQuickFilters filters={filters} topBuilders={builders} />
+      <AptQuickFilters filters={filters} topBuilders={builders.map(b => ({ builder: b.builder, count: b.site_count }))} />
 
-      {heroSite && <AptHeroCard site={heroSite} region={region} sigungu={sigungu} />}
-      <AptSiteList sites={siteList} category={category} region={region} sigungu={sigungu} />
+      {/* 8 섹션 */}
+      {/* 1. KPI */}
+      <AptStatsKPI region={region} sigungu={sigungu} kpis={kpis} />
 
-      {priceTrend && <AptLocalPriceCard data={priceTrend} region={region} sigungu={sigungu} />}
-      {aiAnalysis && <AptAIAnalysisCard post={aiAnalysis} region={region} />}
-      <AptBuildersSection builders={builders} region={region} />
+      {/* 2. Hero (큰 사진) */}
+      {heroSite && <AptHeroLarge site={heroSite} region={region} sigungu={sigungu} />}
 
+      {/* 3. 임박 D-7 */}
+      <AptImminentBar sites={imminentTop3} />
+
+      {/* 4. 메인 grid (정렬 + 더보기) */}
+      <AptMainGrid
+        sites={mainGridSites}
+        category={category}
+        region={region} sigungu={sigungu}
+        sort={sort} page={pageNum} perPage={12}
+        price={filters.price} size={filters.size} builder={filters.builder}
+      />
+
+      {/* 5. 시세 + 가격대 */}
+      <AptPriceTrendUnified
+        region={region} sigungu={sigungu}
+        trends={sigunguTrends} priceBands={priceBands}
+        activePrice={filters.price}
+        category={category} builder={filters.builder}
+      />
+
+      {/* 6. 시공사 hub */}
+      <AptBuilderHub
+        region={region} sigungu={sigungu}
+        builders={builders}
+        activeBuilder={filters.builder}
+        category={category} price={filters.price}
+      />
+
+      {/* 7. 최근 실거래 */}
+      <AptRecentTradeList region={region} sigungu={sigungu} trades={recentTrades} />
+
+      {/* 8. AI + 블로그 */}
+      <AptInsightsUnified region={region} aiPost={aiPost} blogList={blogList} />
+
+      {/* footer chrome */}
       <AptOtherRegions current={region} />
       <AptMapCTA disabled />
 
