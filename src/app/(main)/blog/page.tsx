@@ -7,6 +7,7 @@ import EmptyState from '@/components/EmptyState';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
 import SectionShareButton from '@/components/SectionShareButton';
 import FallbackThumb from '@/components/FallbackThumb';
+import LiveBar from '@/components/ui/LiveBar';
 
 function highlightTitle(title: string, query: string): React.ReactNode {
   if (!query) return title;
@@ -263,6 +264,8 @@ export default async function BlogPage({ searchParams }: Props) {
       })}} />
       {/* speakable — 네이버 음성검색 */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebPage', name: '카더라 블로그', speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.blog-summary'] } }) }} />
+      {/* Phase 9: 실시간 신선도 시그니처 */}
+      <LiveBar text={`블로그 · ${totalCount.toLocaleString()}편 · 매일 업데이트 · 투자 인사이트`} />
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 14, paddingTop: 4 }}>
         <div>
           <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 900, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.5px' }}>블로그</h1>

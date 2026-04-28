@@ -63,6 +63,32 @@ import AptClient from './AptClient';
 import Disclaimer from '@/components/Disclaimer';
 import AptHubCuration from '@/components/apt/AptHubCuration';
 import PriceBandFilter from '@/components/apt/PriceBandFilter';
+import LiveBar from '@/components/ui/LiveBar';
+import HeroCard from '@/components/ui/HeroCard';
+import { getSupabaseAdmin as getSbAdminForHero } from '@/lib/supabase-admin';
+
+const LIFECYCLE_KO: Record<string, string> = {
+  pre_announcement: '분양 예고',
+  model_house_open: '모델하우스',
+  subscription_open: '청약 진행',
+  special_supply: '특별공급',
+  contract: '계약',
+  construction: '시공',
+  pre_move_in: '입주 예정',
+  move_in: '입주',
+  resale: '실거래',
+  site_planning: '부지계획',
+};
+
+async function fetchHero() {
+  try {
+    const sb = getSbAdminForHero();
+    const { data } = await (sb as any).from('v_apt_today_pick')
+      .select('slug,name,site_type,lifecycle_stage,region,sigungu,dong,popularity_score,total_units,builder')
+      .order('rank', { ascending: true }).limit(1).maybeSingle();
+    return (data ?? null) as Record<string, any> | null;
+  } catch { return null; }
+}
 
 async function fetchAptData() {
   let apts: Record<string, any>[] = [];
@@ -346,7 +372,8 @@ async function fetchAptData() {
 export default async function AptPage({ searchParams }: { searchParams?: Promise<{ price?: string }> }) {
   const sp = (await searchParams) || {};
   const activePriceBand = typeof sp.price === 'string' ? sp.price : null;
-  const { apts, unsold, alertCounts, lastRefreshed, regionStats, ongoingApts, redevTotalCount, tradeTotalCount, tradeByRegion, redevByRegion, subTotalCount, unsoldTotalCount, ongoingTotalCount, dataFreshness, redevRedevCount, redevRebuildCount, aptImageMap, aptEngageMap, initialTransactions, initialRedevelopment } = await fetchAptData();
+  const [aptData, hero] = await Promise.all([fetchAptData(), fetchHero()]);
+  const { apts, unsold, alertCounts, lastRefreshed, regionStats, ongoingApts, redevTotalCount, tradeTotalCount, tradeByRegion, redevByRegion, subTotalCount, unsoldTotalCount, ongoingTotalCount, dataFreshness, redevRedevCount, redevRebuildCount, aptImageMap, aptEngageMap, initialTransactions, initialRedevelopment } = aptData;
   // ItemList for Google carousel rich results
   const itemList = apts.slice(0, 10).map((a: any, i: number) => ({
     '@type': 'ListItem',
@@ -369,6 +396,29 @@ export default async function AptPage({ searchParams }: { searchParams?: Promise
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"WebPage","name":"부동산 — 청약·분양·미분양·재개발","speakable":{"@type":"SpeakableSpecification","cssSelector":["h1",".region-summary"]}}) }} />
     <h1 className="sr-only">부동산 — 청약·분양·미분양·재개발</h1>
     <p className="sr-only">카더라 부동산에서는 전국 {apts.length}건의 아파트 청약 일정, {ongoingApts.length}건의 분양 현장, {unsold.length}건의 미분양 단지, {redevTotalCount}건의 재개발·재건축 정보를 실시간으로 제공합니다. 지역별·타입별 필터로 원하는 부동산 정보를 빠르게 찾을 수 있으며, 분양가·입주 예정일·경쟁률·시세 비교를 무료로 확인할 수 있습니다.</p>
+    {/* Phase 9: 실시간 신선도 시그니처 */}
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
+      <LiveBar text={`실시간 · 5,797 단지 · 분양 ${ongoingApts.length}건 · 청약 ${apts.length}건 · 미분양 ${unsold.length}건`} />
+      {/* Phase 9: 오늘의 추천 hero — v_apt_today_pick rank=1 */}
+      {hero && (
+        <HeroCard
+          tag="오늘의 추천"
+          title={hero.name}
+          meta={[
+            hero.lifecycle_stage ? LIFECYCLE_KO[hero.lifecycle_stage] || hero.lifecycle_stage : null,
+            [hero.region, hero.sigungu, hero.dong].filter(Boolean).join(' '),
+            hero.builder,
+            hero.total_units ? `${Number(hero.total_units).toLocaleString()}세대` : null,
+          ].filter(Boolean).join(' · ')}
+          stats={[
+            ...(hero.lifecycle_stage ? [{ value: LIFECYCLE_KO[hero.lifecycle_stage] || hero.lifecycle_stage, label: '단계' }] : []),
+            ...(hero.total_units ? [{ value: Number(hero.total_units).toLocaleString(), label: '세대수' }] : []),
+            ...(hero.popularity_score ? [{ value: `★ ${hero.popularity_score}`, label: '인기', tone: 'success' as const }] : []),
+          ]}
+          href={`/apt/${encodeURIComponent(hero.slug)}`}
+        />
+      )}
+    </div>
     {/* Phase 8: 가격대 필터 pill (5 단계) */}
     <PriceBandFilter active={activePriceBand} />
     {/* Phase 7 A: 메인 hub 큐레이션 (4 섹션 + 분류 nav + 시공사/시도) */}

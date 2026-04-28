@@ -1,5 +1,55 @@
 # 카더라 STATUS — 세션 188 (2026-04-27 / 28 cont.)
 
+## 세션 188 — Phase 9a: 통합 디자인 토큰 + 4 빌딩블록 + 5 페이지 LiveBar + /apt HeroCard
+
+### 핵심 결정 (스코프)
+사용자 spec Phase 9는 거대 (3 글로벌 컴포넌트 칠하기 + 5 페이지 콘텐츠 적용 + 모바일). 안전하게 9a/9b 분리:
+- **9a (이번 PR)**: 토큰 + 4 빌딩블록 + 5 페이지 LiveBar + /apt HeroCard 시범
+- **9b (별도 PR)**: Navigation(729줄)/Sidebar/RightPanel 칠하기 + 5 페이지 HeroCard 콘텐츠 + 모바일 햄버거
+
+### 산출물
+- **`globals.css` 토큰 보강** (Phase 8 토큰 위에 신규 추가):
+  - 텍스트 3단계: `--kd-text-1/2/3`
+  - 배경/보더: `--kd-bg-page/-card/-soft/-border`
+  - 카더라 시그니처: `--kd-accent: #FFC957` (기존 #FFD688 → 통합 색)
+  - 시맨틱: `--kd-success/-warning/-danger/-live`
+  - 라이트 mode `[data-theme="light"]` override (#7A4F0A 진한 앰버, light bg 위 contrast)
+  - `@keyframes kd-pulse` (live dot 애니메이션)
+- **빌딩블록 4개 (`src/components/ui/`)**:
+  - **`LiveBar.tsx`** — 빨간 dot pulse + 카운트 텍스트 (compact/default 변형)
+  - **`AIRelatedPanel.tsx`** — 노란 "AI" 배지 + 제목 + list 5개 (tag/title/meta/href)
+  - **`CategoryGrid.tsx`** — sidebar용, icon + label + count + active 표시
+  - **`HeroCard.tsx`** — tag/title/meta/stats(3-4분할, tone success/danger) + optional href
+- **5 페이지 LiveBar 마운트**:
+  - `/apt`: `실시간 · 5,797 단지 · 분양 N건 · 청약 N건 · 미분양 N건`
+  - `/stock`: `LIVE · KOSPI/KOSDAQ/NYSE/NASDAQ N종 · 시세 5분 간격`
+  - `/blog`: `블로그 · N편 · 매일 업데이트 · 투자 인사이트`
+  - `/feed`: `피드 · N건 노출 · 카테고리 X · 정렬 Y`
+  - `/write`: `글쓰기 · 자동 저장 활성 · 카테고리 선택 후 발행`
+- **`/apt` HeroCard 시범 적용**:
+  - `v_apt_today_pick rank=1` 1건 fetch (Promise.all로 fetchAptData 병렬)
+  - tag="오늘의 추천" + title=단지명 + meta=lifecycle/region/builder/세대수
+  - stats 3분할: 단계 / 세대수 / 인기(★ popularity_score, success tone)
+  - href=`/apt/{slug}` (전체 카드 클릭)
+
+### 검증
+- `npx tsc --noEmit` 0 error
+
+### 의도적 미반영 (Phase 9b)
+- Navigation/Sidebar/RightPanel 디자인 칠하기 (Navigation 729줄 신중 작업)
+- 5 페이지 모두 HeroCard (각 페이지 데이터 fetch)
+- AIRelatedPanel을 RightPanel 첫 섹션으로 통합
+- CategoryGrid sidebar 페이지별 props 동적 콘텐츠
+- 모바일 햄버거 메뉴 + RightPanel stack
+
+### 누적 (Phase 1~9a)
+- 13K og_cards · 3,945 popularity · 68K keyword_targets · 22+ view
+- 단지 컴포넌트 9개 + UI 빌딩블록 4개 = **13개 재사용 컴포넌트**
+- 5 페이지 LiveBar 시그니처 라이브
+- /apt HeroCard "오늘의 추천" 라이브
+
+---
+
 ## 세션 188 — SEO Phase 8: 가독성 통일 + 가격대 필터 + 다크모드 contrast
 
 ### 핵심 발견 (수정 동기)

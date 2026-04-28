@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import WriteClient from './WriteClient';
+import LiveBar from '@/components/ui/LiveBar';
 
 export const metadata: Metadata = {
   title: '글쓰기',
@@ -11,6 +12,10 @@ export const metadata: Metadata = {
 export default function WritePage() {
   return (
     <Suspense fallback={<div style={{ color: 'var(--text-tertiary)', textAlign: 'center', padding: '60px 0' }}>로딩 중...</div>}>
+      {/* Phase 9: 실시간 신선도 시그니처 */}
+      <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
+        <LiveBar text="글쓰기 · 자동 저장 활성 · 카테고리 선택 후 발행" />
+      </div>
       <WriteClient />
     </Suspense>
   );

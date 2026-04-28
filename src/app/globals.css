@@ -2054,33 +2054,57 @@ html[data-theme="light"] {
 }
 
 /* ──────────────────────────────────
-   Phase 8 — Cardera 단지 페이지 토큰
+   Phase 8/9 — Cardera 통합 디자인 토큰 (다크 우선)
    ────────────────────────────────── */
 :root {
-  /* spacing 3단계 통일 */
+  /* spacing 4단계 */
+  --kd-gap-xs: 4px;
   --kd-gap-sm: 8px;
   --kd-gap-md: 12px;
   --kd-gap-lg: 16px;
+  --kd-radius-sm: 6px;
+  --kd-radius: 8px;
   --kd-radius-card: 12px;
+  --kd-radius-lg: 10px;
 
-  /* 카더라 시그니처 앰버 (default = 다크모드, root 자체가 다크) */
-  --kd-accent: #FFD688;
-  --kd-accent-soft: rgba(255,214,136,0.16);
-  --kd-accent-border: rgba(255,214,136,0.36);
+  /* 텍스트 3단계 */
+  --kd-text-1: #F5F5F2;
+  --kd-text-2: #B8B6B0;
+  --kd-text-3: #8A8985;
+
+  /* 배경/보더 */
+  --kd-bg-page: #0F0F0E;
+  --kd-bg-card: #1C1C1A;
+  --kd-bg-soft: #161614;
+  --kd-border: #3A3A37;
+
+  /* 카더라 시그니처 노랑 (Phase 9: #FFC957) */
+  --kd-accent: #FFC957;
+  --kd-accent-soft: rgba(255,201,87,0.12);
+  --kd-accent-border: rgba(255,201,87,0.30);
   --kd-accent-bg: #412402;
-  --kd-success: #5DCAA5;
-  --kd-warning: #FAC775;
-  --kd-danger: #F09595;
+  --kd-success: #7EE0BA;
+  --kd-warning: #FFC957;
+  --kd-danger: #FFB5B5;
+  --kd-live: #FF6B6B;
 }
 
 html[data-theme="light"] {
-  --kd-accent: #BA7517;
-  --kd-accent-soft: rgba(186,117,23,0.10);
-  --kd-accent-border: rgba(186,117,23,0.28);
-  --kd-accent-bg: #FFF8EC;
-  --kd-success: #0F6E56;
-  --kd-warning: #BA7517;
-  --kd-danger: #791F1F;
+  --kd-text-1: #1A1A18;
+  --kd-text-2: #6B6A65;
+  --kd-text-3: #8A8985;
+  --kd-bg-page: #FAFAF7;
+  --kd-bg-card: #FFFFFF;
+  --kd-bg-soft: #F5F5F2;
+  --kd-border: #E5E5E0;
+  --kd-accent: #7A4F0A;
+  --kd-accent-soft: #FFF6E5;
+  --kd-accent-border: #F5D88A;
+  --kd-accent-bg: #FFF6E5;
+  --kd-success: #0A5F49;
+  --kd-warning: #7A4F0A;
+  --kd-danger: #6B1F1F;
+  --kd-live: #C92D2D;
 }
 
 @media (max-width: 480px) {
@@ -2088,4 +2112,9 @@ html[data-theme="light"] {
     --kd-gap-md: 10px;
     --kd-gap-lg: 14px;
   }
+}
+
+@keyframes kd-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
 }
