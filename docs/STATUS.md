@@ -1,5 +1,52 @@
 # 카더라 STATUS — 세션 188 (2026-04-27 / 28 cont.)
 
+## 세션 188 — Phase 9b-3: Supabase auth lock + AdBanner 글로벌 노출 fix
+
+### 진단
+사용자 콘솔 에러 4종 중 2개 root cause 분석:
+
+**1) Supabase auth lock 5초 대기**
+- `@supabase/gotrue-js: Lock 'lock:sb-kadeora-auth-token' was not released within 5000ms`
+- 원인: `createSupabaseBrowser()`가 매 호출마다 새 BrowserClient 생성
+- React Strict Mode double-mount + 다중 컴포넌트(AuthProvider/RightPanel/NoticeBanner/Sidebar 등) 동시 호출 시 lock 충돌
+- 영향: 페이지 로드 5초 지연 + force lock steal
+
+**2) /stock /blog /feed에 부동산 청약 D-day 카드 노출**
+- 원인: `AdBanner.tsx` (글로벌 마운트 in `(main)/layout.tsx`)가 `/api/ads`에서 청약/광고 회전 캐러셀 fetch
+- `badgeType: 'urgent'/'upcoming'`으로 청약 D-day 정보 표시 — 모든 페이지 동일 노출
+
+### 산출물
+- **`src/lib/supabase-browser.ts`** — module-level singleton 패턴
+  - `let _client: ReturnType<...> | null = null;`
+  - `if (_client) return _client;` 가드
+  - 호출자 signature 그대로 (`createSupabaseBrowser()`) — 무수정
+  - React Strict Mode double-mount + 다중 컴포넌트에서 동일 인스턴스 공유
+- **`src/components/AdBanner.tsx`** — pathname 가드 추가
+  - `usePathname()` + `pathname?.startsWith('/apt')` 체크
+  - `!isAptContext` 시 fetch skip + return null
+  - `/apt` 외 페이지(stock/blog/feed/write)에 부동산 청약 캐러셀 안 노출
+  - `/apt` 내에서는 기존 동작 그대로
+
+### 검증
+- `npx tsc --noEmit` 0 error
+
+### 의도적 미반영
+- events/pageview 504 디버그 (실측 없이 추측 fix는 위험 — 실 발생 시 별도 PR)
+- Navigation 729줄 토큰 swap (9b-2에서 평가 후 SKIP 결정 — 이미 충분히 토큰화됨)
+- 모바일 햄버거 메뉴
+
+### 추적 영향
+- AuthProvider/RightPanel/NoticeBanner/Sidebar 모두 같은 supabase 인스턴스 공유 → 단일 auth state subscription
+- 페이지 진입 latency 5초 lock wait 제거 (예상 -5,000ms)
+- 페이지 정체성: /apt 부동산 hub / /stock 종목 hub / /blog 콘텐츠 hub 명확
+
+### 누적 (Phase 1~9b-3)
+- 빌딩블록 4 + 단지 컴포넌트 9 + Sidebar/RightPanel page-aware
+- 5 페이지 LiveBar + 3 페이지 HeroCard
+- supabase singleton + AdBanner pathname 가드
+
+---
+
 ## 세션 188 — Phase 9b-2: /stock /blog HeroCard + Navigation 토큰 swap 평가
 
 ### 핵심 결정 (Navigation 토큰 swap **SKIP**)

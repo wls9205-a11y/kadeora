@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 interface AdItem {
   id: string;
@@ -18,13 +19,21 @@ export default function AdBanner() {
   const [ads, setAds] = useState<AdItem[]>([]);
   const [index, setIndex] = useState(0);
   const [visible, setVisible] = useState(true);
+  const pathname = usePathname();
+
+  // Phase 9b-3: 부동산 청약 광고 캐러셀이라 /apt 컨텍스트에서만 노출.
+  // /stock /blog /feed 등에 부동산 청약 D-day 카드 노출되어 페이지 정체성 흐림 → 제한.
+  const isAptContext = pathname?.startsWith('/apt') ?? false;
 
   useEffect(() => {
+    if (!isAptContext) { setAds([]); return; }
     fetch('/api/ads')
       .then(r => r.json())
       .then(d => { if (Array.isArray(d?.ads) && d.ads.length > 0) setAds(d.ads); })
       .catch(() => {});
-  }, []);
+  }, [isAptContext]);
+
+  if (!isAptContext) return null;
 
   const next = useCallback(() => {
     if (ads.length <= 1) return;
