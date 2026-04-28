@@ -23,6 +23,12 @@ Disallow: /consultant/
 Disallow: /login
 Disallow: /signup
 Disallow: /notifications
+# s189: facet/검색 URL crawl budget 절약
+Disallow: /search?
+Disallow: /*?q=
+Disallow: /*?sort=
+Disallow: /*?utm_*
+Disallow: /*?ref=
 
 # ===== Google =====
 User-agent: Googlebot
@@ -164,8 +170,8 @@ Disallow: /api/
 
 # ===== Sitemaps =====
 Sitemap: https://kadeora.app/sitemap.xml
-Sitemap: https://kadeora.app/news-sitemap.xml
-Sitemap: https://kadeora.app/image-sitemap.xml
+Sitemap: https://kadeora.app/sitemap-news.xml
+Sitemap: https://kadeora.app/sitemap-region-hubs.xml
 Host: https://kadeora.app
 
 # ===== Daum Verification =====

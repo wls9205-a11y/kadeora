@@ -48,6 +48,9 @@ import RelatedBlogsSection from '@/components/blog/RelatedBlogsSection';
 import BlogFooterMeta from '@/components/blog/BlogFooterMeta';
 import BlogPostSchema from '@/components/schema/BlogPostSchema';
 import CardCarousel from '@/components/og/CardCarousel';
+// s189: AI Overview / 음성검색 인용 + YouTube 영상 schema
+import SpeakableSchema from '@/components/schema/SpeakableSchema';
+import VideoObjectSchema, { extractVideosFromContent } from '@/components/schema/VideoObjectSchema';
 // s184: BlogImageCarousel 제거 — 캐러셀 자체 폐지.
 // s185: BlogMidGate 제거 — SmartSectionGate(60% 무료3회) + StickySignupBar(300px) 와 중복.
 // s183: SmartSectionGate 복귀 (s108 에 LoginGate 로 전환했었으나 비로그인 가입 유도가 사실상 0개로
@@ -846,6 +849,8 @@ export default async function BlogDetailPage({ params }: Props) {
         name={post.title}
         cards={(post as any).og_cards ?? null}
       />
+      <SpeakableSchema url={`${SITE}/blog/${post.slug}`} title={post.title} />
+      <VideoObjectSchema videos={extractVideosFromContent(post.content || '', post.title)} />
 
       <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 20, flexWrap: 'wrap', letterSpacing: '0.3px' }}>
         <Link href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)', opacity: 0.7 }}>홈</Link>

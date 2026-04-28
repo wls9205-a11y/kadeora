@@ -1,3 +1,105 @@
+# 카더라 STATUS — 세션 189 (2026-04-28)
+
+## 세션 189 — 풀스택 SEO 마스터 (hub-spoke + EAT + Speakable + News sitemap + CI-v1 Phase 2)
+
+### 배경 (실측)
+- 이슈선점 발행글 7일 평균 1~2 view, 최고 6 view → SEO 효과 ≈ 0
+- 카테고리 오분류: "EU 포장규제" → apt 등 부동산 카테고리 오염
+- 블로그 3,468건 중 단지페이지 링크 0.98% → link equity 가 /apt 탑페이지로만 흐름
+  (Topic Cluster 모델 정반대)
+- BlogPostSchema/sitemap-image/OG 6design 인프라는 있었으나 이슈선점 글이 못 입음
+- CI-v1 Phase 2 4 cron 코드만 있고 vercel.json 미스케줄
+- News sitemap, Speakable, EAT 외부링크 누락
+
+### DB (이미 production 적용 완료, 이번 세션은 코드만)
+- 테이블: `blog_hub_mapping`, `external_citations` (시드 27개)
+- RPC 5개: `resolve_hub_url`, `inject_hub_mapping_for_post`, `resolve_external_citations`,
+  `check_blog_seo_gate`, `backfill_seo_master_batch`
+- 백필: meta_description / image_alt 100% (7,117건),
+  hub_mapping apt 64.6% / stock 73.7% (총 7,235개 매핑)
+
+### 코드 변경 — 신규 9개 + 수정 5개
+
+**신규 라이브러리**
+- `src/lib/blog-seo-master.ts` — `runBlogSeoMaster(sb, input)` orchestrator. hard gate
+  (image<3, internal<2, h2<4, content<1500, title 15~80) + soft warning. 메타/alt
+  자동 생성, 태그 카테고리 디폴트 보강, primary_keyword head 200자 + 지역명 검증
+  (apt/redev/unsold). `KOREAN_PROVINCES` 상수 export.
+- `src/lib/internal-link-injector.ts` — 5분 module 캐시 (apt_sites + redevelopment_projects
+  + unsold_apts), entity 첫 등장만 마크다운 [name](url) 변환, postId 있으면
+  `blog_hub_mapping` upsert. `appendRelatedHubFooter` (관련 정보 섹션 자동 footer).
+- `src/lib/external-citations.ts` — 10분 카테고리 캐시, `external_citations` 권위 점수
+  DESC 정렬, keyword_pattern regex 매칭 + 동일 URL skip. "## 데이터 출처" 섹션 안에
+  추가 또는 면책 위 새 섹션.
+- `src/lib/share-utm.ts` — `withUtm` (idempotent), 14 SharePlatform + 6 ShareCampaign,
+  `kakaoOgImageUrl` (1200x630 design 2), `naverSquareOgImageUrl` (1080x1080).
+
+**신규 schema 컴포넌트**
+- `src/components/schema/SpeakableSchema.tsx` — WebPage + speakable.cssSelector
+  (h1 / .blog-summary / .blog-faq-question / meta description). AI Overview / 음성검색.
+- `src/components/schema/CollectionPageSchema.tsx` — CollectionPage + ItemList
+  (itemListOrderDescending, max 50 ListItem).
+- `src/components/schema/SearchActionSchema.tsx` — WebSite + Organization + SearchAction
+  (호환용; layout.tsx 와 중복 마운트 시 Google 무시).
+- `src/components/schema/VideoObjectSchema.tsx` — videos 0개면 null 반환.
+  `extractVideosFromContent` (YouTube embed/watch?v=/youtu.be 11자 ID 매칭, thumbnail =
+  img.youtube.com/vi/{id}/maxresdefault.jpg).
+
+**신규 라우트**
+- `src/app/sitemap-news.xml/route.ts` — Google News 스펙 (xmlns:news + publication
+  name/language/date + title), 48h 이내 + is_published + source_type IN
+  (auto_issue, news_rss, upcoming, issue) LIMIT 1000. revalidate=600. fail-safe 빈
+  sitemap.
+
+**수정**
+- `src/app/api/cron/issue-detect/route.ts` — 카테고리 오분류 종결.
+  `GENERIC_APT_WORDS` (규제/급등/급락/폭등/폭락/신고가/인상/인하/인수/동결).
+  apt 1위 + generic 단어만 + entity 없음 → 2위 카테고리 또는 `economy` fallback.
+  `extractEntities` 호출을 catScores 다음으로 이동.
+- `src/app/api/cron/issue-draft/route.ts` — `enrichVisuals` 다음 + `factCheck` 직전에
+  `runBlogSeoMaster` + `appendRelatedHubFooter` 실행. `seoEnriched`/`seoMetaDesc`/
+  `seoImageAlt` 변수 생성, try/catch (실패해도 발행 진행).
+  `safeBlogInsert` 인자: content → seoEnriched, meta_description → seoMetaDesc
+  (80자 미만이면 title 보강), image_alt → seoImageAlt.
+  `insertImages` 인자도 seoEnriched, 직후 `inject_hub_mapping_for_post` RPC 호출.
+- `src/app/(main)/blog/[slug]/page.tsx` — `<CardCarousel>` 직후
+  `<SpeakableSchema url={`${SITE}/blog/${post.slug}`} title={post.title} />` +
+  `<VideoObjectSchema videos={extractVideosFromContent(post.content||'', post.title)} />`.
+- `public/robots.txt` — User-agent:* 블록에 facet disallow 5줄 추가
+  (`/search?`, `/*?q=`, `/*?sort=`, `/*?utm_*`, `/*?ref=`). Sitemap directive
+  교체: `news-sitemap.xml` → `sitemap-news.xml`, `image-sitemap.xml` 제거,
+  `sitemap-region-hubs.xml` 추가.
+- `vercel.json` — `feed-buzz-publish` 다음에 CI-v1 Phase 2 4 cron 추가:
+  - `issue-fact-check`     `13,43 * * * *`
+  - `issue-image-attach`   `18,48 * * * *`
+  - `issue-seo-enrich`     `23,53 * * * *`
+  - `issue-publish`        `28,58 * * * *`
+
+### 검증
+- `npx tsc --noEmit --skipLibCheck` — s189 변경 0 errors.
+  (`builder-watch/cheerio` 3 errors 는 사전 `npm install` 미실행 — `npm install` 후 해소.
+  `.next/types/validator.ts` stale admin/pulse_v3 참조는 무관.)
+- `npm install` (cheerio 외 32개 누락 dep 설치) → `npm run build` 성공.
+  region-hub generateStaticParams 의 SUPABASE_URL 누락 로그는 graceful fallback
+  (Vercel 빌드는 env 있음).
+
+### 효과 (가설, 7일 후 재측정)
+- 발행되는 모든 글 SEO 100% 위생 (meta 80~165 / image≥3 / internal≥2 / EAT≥1)
+- 카테고리 오분류 종결 ("EU 포장규제" 부류가 economy 로 빠짐)
+- Hub-spoke link equity 7,235개 매핑으로 분산
+- Google News 색인 활성화 (48h 이내 발행글)
+- AI Overview / 음성검색 인용 (Speakable JSON-LD)
+- facet URL crawl budget 절약 (5 disallow)
+
+### Invariants 준수
+- `daily_create_limit` (현재 80) 미변경.
+- 블로그 DELETE 금지 — INSERT/UPDATE만.
+- `safeBlogInsert` 통해서만 신규 블로그.
+- `(sb as any)` 패턴 (RPC 미등록 타입).
+- STATUS 업데이트 (Architecture Rule #11).
+
+---
+
 # 카더라 STATUS — 세션 188 (2026-04-27 / 28 cont.)
 
 ## 세션 188 — Phase 9b-3: Supabase auth lock + AdBanner 글로벌 노출 fix
