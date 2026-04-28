@@ -1,24 +1,28 @@
-// Kadeora Service Worker v2
-const CACHE_VERSION = '202604280933';
+// Kadeora Service Worker v3 — Network First (s200 — stale chunk 근본 fix)
+const CACHE_VERSION = '202604281112';
 const CACHE_NAME = 'kadeora-v' + CACHE_VERSION;
-const PRECACHE = ['/feed', '/offline.html', '/icons/icon-192.png', '/blog', '/apt'];
-const OFFLINE_PAGES = ['/feed', '/stock', '/hot', '/apt', '/blog'];
+const OFFLINE_FALLBACK = '/offline.html';
+const PRECACHE = ['/offline.html', '/icons/icon-192.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(
-    caches.open(CACHE_NAME).then(c => c.addAll(PRECACHE)).then(() => self.skipWaiting())
+    caches.open(CACHE_NAME)
+      .then(c => c.addAll(PRECACHE))
+      .then(() => self.skipWaiting())
   );
 });
 
 self.addEventListener('activate', e => {
   e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k.startsWith('kadeora-') && k !== CACHE_NAME).map(k => caches.delete(k)))
-    ).then(() => clients.claim())
+    caches.keys()
+      .then(keys => Promise.all(
+        keys.filter(k => k.startsWith('kadeora-') && k !== CACHE_NAME).map(k => caches.delete(k))
+      ))
+      .then(() => clients.claim())
   );
 });
 
-// Web Push 수신 — 태그로 중복 방지 + 이미지 지원
+// Push / notificationclick / pushsubscriptionchange 핸들러는 그대로 유지
 self.addEventListener('push', e => {
   if (!e.data) return;
   try {
@@ -44,41 +48,29 @@ self.addEventListener('push', e => {
       .then(() => { if ('setAppBadge' in navigator) navigator.setAppBadge(); })
     );
   } catch (err) {
-    e.waitUntil(
-      self.registration.showNotification('카더라', { body: '새 알림이 있습니다', icon: '/icons/icon-192.png' })
-    );
+    e.waitUntil(self.registration.showNotification('카더라', { body: '새 알림이 있습니다', icon: '/icons/icon-192.png' }));
   }
 });
 
-// 알림 클릭 → 클릭 로그 + 페이지 열기
 self.addEventListener('notificationclick', e => {
   e.notification.close();
   if (e.action === 'close') return;
   if ('clearAppBadge' in navigator) navigator.clearAppBadge();
   const url = e.notification.data?.url || '/';
   const log_id = e.notification.data?.log_id;
-  e.waitUntil(
-    Promise.all([
-      log_id
-        ? fetch('/api/push/click', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ log_id }),
-          }).catch(() => {})
-        : Promise.resolve(),
-      clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
-        for (const c of list) {
-          if (new URL(c.url).pathname === new URL(url, self.location.origin).pathname && 'focus' in c) {
-            return c.focus();
-          }
-        }
-        return clients.openWindow(url);
-      }),
-    ])
-  );
+  e.waitUntil(Promise.all([
+    log_id
+      ? fetch('/api/push/click', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ log_id }) }).catch(() => {})
+      : Promise.resolve(),
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+      for (const c of list) {
+        if (new URL(c.url).pathname === new URL(url, self.location.origin).pathname && 'focus' in c) return c.focus();
+      }
+      return clients.openWindow(url);
+    }),
+  ]));
 });
 
-// 푸시 구독 변경 시 자동 재구독
 self.addEventListener('pushsubscriptionchange', e => {
   e.waitUntil(
     self.registration.pushManager.subscribe(e.oldSubscription?.options || { userVisibleOnly: true })
@@ -91,31 +83,24 @@ self.addEventListener('pushsubscriptionchange', e => {
   );
 });
 
-// 캐시 전략
+// 핵심 fix: 모든 GET 요청 Network First (stale chunk 근본 차단)
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   const url = new URL(e.request.url);
+
+  // API 요청은 sw 우회
   if (url.pathname.startsWith('/api/')) return;
 
-  // 정적 자산: Cache First
-  if (url.pathname.startsWith('/_next/static/') || url.pathname.match(/\.(png|jpg|svg|ico|woff2?|css|js)$/)) {
-    e.respondWith(
-      caches.match(e.request).then(cached => cached || fetch(e.request).then(res => {
-        if (res.ok) { const c = res.clone(); caches.open(CACHE_NAME).then(cache => cache.put(e.request, c)); }
-        return res;
-      }))
-    );
-    return;
-  }
+  // 외부 origin도 우회 (CDN, kakao SDK 등)
+  if (url.origin !== self.location.origin) return;
 
-  // 페이지: Network First → 캐시 → offline.html
+  // Network First — 항상 fresh 자원 우선
   e.respondWith(
-    fetch(e.request).then(res => {
-      if (res.ok && OFFLINE_PAGES.some(p => url.pathname === p || url.pathname.startsWith(p + '/'))) {
-        const c = res.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(e.request, c));
-      }
-      return res;
-    }).catch(() => caches.match(e.request).then(c => c || caches.match('/offline.html')))
+    fetch(e.request).then(res => res).catch(() =>
+      // 네트워크 실패 시 캐시 (offline 대응) → 그것도 없으면 offline.html
+      caches.match(e.request).then(cached =>
+        cached || (e.request.mode === 'navigate' ? caches.match(OFFLINE_FALLBACK) : new Response('', { status: 504 }))
+      )
+    )
   );
 });
