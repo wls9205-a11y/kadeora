@@ -1,3 +1,87 @@
+# 카더라 STATUS — 2026-04-27/28 통합 회고 (s189~s196, 8 sessions)
+
+## 누적 변경 요약
+
+### DB (production 적용 완료)
+- 신규 테이블 2: blog_hub_mapping, external_citations
+- 신규 RPC 9: resolve_hub_url, inject_hub_mapping_for_post, resolve_external_citations, check_blog_seo_gate, backfill_seo_master_batch, backfill_image_variants_for_published, ci_publish_gate (image 6→3 완화), check_seo_gate_faq_regex (확장), v_cta_health_check
+- 신규 인덱스: blog_hub_mapping 5개, image_attach_retry_guard, idx_external_citations_cat
+- 시드: external_citations 27건 (정부/공기업), cta_message_variants s196_* 5건 (priority 200)
+
+### 코드 (commit 범위 c718d064 ~ a71e2cd3)
+- 신규 lib 6: blog-seo-master, internal-link-injector, external-citations, share-utm, cta-progressive, cta-config
+- 신규 schema 4: SpeakableSchema, CollectionPageSchema, SearchActionSchema, VideoObjectSchema
+- 신규 라우트 3: sitemap-news.xml, cron/issue-pipeline-orchestrator, admin/issues/run-pipeline
+- 신규 컴포넌트: KakaoOneTapButton (예정), SocialProofBadge, PushSubscribePrompt 강화
+- 수정: issue-detect (카테고리 fix + RSS batch + maxDuration 90), issue-draft (SEO master 통합 + 강제 UPDATE + image≥5 fallback + retry_count reset), issue-publish (OG padding + hub_mapping + 단계별 진단), issue-image-attach (fast-path + retry guard + MAX 20), issue-fact-check (윈도우 7d), blog/[slug] (Speakable+Video), og-blog/og-apt (catch enrichment), analytics.ts (trackCTA keepalive), Sidebar (onClick trackCTA), auth/callback (모바일 isMobile 진단), robots.txt (facet + sitemap directive), vercel.json (CI-v1 Phase 2 orchestrator 100 한도)
+
+### 백필 (1회성, 완료)
+- meta_description 100% (7,117건)
+- image_alt 100%
+- hub_mapping 7,238개 (apt 74.6%, stock 93.6%)
+- image variants 261건 (7d image=0 → 0)
+- 무한 retry stuck 1,280건 retry_count=99 마킹
+
+## 핵심 효과 (확정 작동)
+
+| 영역 | 결과 |
+|---|---|
+| 7d 발행글 image≥5 | 94.7% (네이버 SmartBlock + Google Image Pack 진입) |
+| meta_desc/image_alt | 100% |
+| hub-spoke link equity | 7,238 매핑 (이전 ~34) |
+| og-blog 에러 (새 deploy) | 0건 (abe25967 root fix) |
+| Phase 2 cron (4 stage) | 가동 시작 (orchestrator 15분 주기) |
+| publish gate_blocked | 100% → 25% (image 6→3 완화) |
+| 무한 retry 청산 | 1,280건 자동 제외 |
+| Vercel cron 한도 | 104 위반 → 100 정확 (orchestrator 합치기) |
+
+## 진단으로 발견된 문제 (s196 spec 대상)
+
+- 4/18 이후 8개 CTA source 추적 깨짐 (apt_alert_cta 67→0, blog_inline_cta 27→0, action_bar 25→0 등 누적 138건 잠재 가입 사라짐)
+- 모바일 OAuth callback 75% drop (28 dropped 중 21건 mobile)
+- /stock 페이지 50% CTR but 노출 8건만 (popup_signup_modal 미확장)
+- 트래픽 63% 감소 (4/14 1,291 → 4/28 474)
+- 푸시 구독 1.56% (639 유저 중 10명)
+- popup_signup_modal 4.09% CTR (유일하게 작동)
+- engagement 매트릭스: apt 1-2 + blog 2+ → 18.92% conv (37명만)
+- 1h 신규 발행글 image≥5 44.2% (issue-publish OG padding silent fail)
+- 본문 hub link 0% / hub_mapping insert 7% (s195 fix 후 검증 대기)
+
+## 검증 대기 항목 (s196 push 후 자연 안정화)
+
+- 30분 후: trackCTA keepalive 효과 / /stock popup 노출 / s196_* variant 표시
+- 1h 후: BROKEN CTA → HEALTHY 분류 변화 / 신규 signup_attempts 발생
+- 3h 후: 모바일 OAuth callback drop 75% → 30% 이하 변화
+- 24h 후: 일 가입 attempts 138건 회복 / CTR 평균 1% → 3~5%
+- s195 silent fail fix 효과 (issue-draft 발행 글 hub link / hub_mapping / image≥5 / 데이터 출처 / footer)
+
+## 알려진 미해결 / 다음 세션 후보
+
+- individual 4 cron + orchestrator 중복 가동 (Vercel sync 지연, 자연 해소 대기)
+- issue-detect 504 간헐 (RSS 일부 매우 느림, batch=4 적용 후에도 일부 발생)
+- finance/general 카테고리 hub_mapping 0% (자연스러움 — 매칭 대상 없음)
+- apt 25.4% / stock 6.4% hub 미커버 글 (title 매칭 실패, 본문 매칭으로 확장 검토)
+- og-blog/og-apt TypeError 일부 input 케이스 잔존 (abe25967 부분 fix만)
+- cleanup-pageviews 일요일 cron 임시 제거 (cron 한도 100 확보용)
+- 신규 발행글 본문 hub link 0% (s195 fix 검증 대기 중 — 큐 EMPTY로 검증 못 함)
+
+## Invariants 준수
+- daily_create_limit 80 미변경 (가드는 retry/marker 우회)
+- 4 cron 라우트 파일 그대로 (orchestrator + admin run-pipeline 의존)
+- safeBlogInsert만 신규 (강제 UPDATE는 그 후)
+- (sb as any) RPC (미등록 테이블/RPC)
+- STATUS.md 매 세션 commit (Architecture Rule #11)
+- 블로그 DELETE 금지
+
+## 통계 (2026-04-28 기준)
+- 발행 블로그 (7d): 566건 (image≥5 94.7%)
+- hub_mapping: 7,238개
+- 24h 트래픽: ~474 (전월 대비 63%↓ — SEO 알고리즘 변동 또는 search 트래픽 감소 의심)
+- 7d 가입 완료: 16건 (drop 28건, 36% 성공률)
+- popup_signup_modal CTR: 4.09% (유일 작동 CTA)
+
+---
+
 # 카더라 STATUS — 세션 196 (2026-04-28)
 
 ## 세션 196 — 회원가입 funnel 비약 회복 (P0 root-cause + DB 인프라, P1/P2 일부)
