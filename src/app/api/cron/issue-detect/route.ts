@@ -379,9 +379,28 @@ async function handler(_req: NextRequest) {
       ['economy', kw.economy.length], ['life', kw.life.length],
     ];
     catScores.sort((a, b) => b[1] - a[1]);
-    const category = (catScores[0][0] || 'apt') as any;
-    const keywords = (kw as any)[category] as string[];
+
+    // s189: 카테고리 오분류 방지 — apt 키워드가 generic real-estate 단어
+    // ('규제','급등','폭락' 등) 만 있고 entity (단지명) 가 없으면 apt 가
+    // 아닌 2위 카테고리 (또는 'economy') 로 fallback.
     const entities = extractEntities(item.title, item.description || '');
+    const GENERIC_APT_WORDS = new Set([
+      '규제', '급등', '급락', '폭등', '폭락', '신고가',
+      '인상', '인하', '인수', '동결',
+    ]);
+    const aptKwOnlyGeneric = kw.apt.length > 0 && kw.apt.every(k => GENERIC_APT_WORDS.has(k));
+    const aptHasEntity = entities.length > 0;
+
+    let category: any;
+    if (catScores[0][1] === 0) {
+      continue; // 매칭된 키워드 자체가 없음
+    } else if (catScores[0][0] === 'apt' && aptKwOnlyGeneric && !aptHasEntity) {
+      // apt 1위지만 generic 단어만 + entity 없음 → 2위 또는 economy fallback
+      category = (catScores[1] && catScores[1][1] > 0 ? catScores[1][0] : 'economy') as any;
+    } else {
+      category = catScores[0][0] as any;
+    }
+    const keywords = (kw as any)[category] as string[];
 
     // 엔티티 기반 그룹핑 (같은 단지/종목 기사 묶기)
     const groupKey = entities.length > 0 ? entities.sort().join('|') : item.title.slice(0, 20);

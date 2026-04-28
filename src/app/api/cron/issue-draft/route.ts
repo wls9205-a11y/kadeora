@@ -7,6 +7,9 @@ import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { submitIndexNow } from '@/lib/indexnow';
 import { selectDraftTemplate } from '@/lib/issue-scoring';
 import { SITE_URL } from '@/lib/constants';
+// s189: SEO 마스터 (내부링크/EAT 외부인용은 master 가 내부 호출) + 관련 hub footer
+import { runBlogSeoMaster } from '@/lib/blog-seo-master';
+import { appendRelatedHubFooter } from '@/lib/internal-link-injector';
 
 /**
  * issue-draft v2 — AI 기사 생성 + 자동 발행 + 이미지 + 피드 포스트
@@ -427,7 +430,35 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
   }
 
   article.content = enrichVisuals(article.content, issue);
-  const check = factCheck(article.content, issue.raw_data || {});
+
+  // s189: SEO 마스터 — 발행 직전 위생 검사 + 자동 보강 (내부링크/EAT/meta/alt/tags)
+  // 실패해도 발행은 진행, hub_mapping 은 insertImages 직후 RPC 가 한 번 더 보장.
+  let seoEnriched = article.content;
+  let seoMetaDesc = (article as any).meta_description || '';
+  let seoImageAlt = `${article.title} — 카더라 분석`;
+  try {
+    const seoCategory = (['apt', 'stock', 'finance', 'general'] as const).includes(issue.category as any)
+      ? issue.category : (issue.category === 'tax' || issue.category === 'economy' ? 'finance' : 'general');
+    const seoRes = await runBlogSeoMaster(getSupabaseAdmin(), {
+      title: article.title,
+      content: article.content,
+      category: seoCategory,
+      slug: article.slug,
+      meta_description: seoMetaDesc,
+      tags: article.keywords,
+      primary_keyword: (issue.detected_keywords || [])[0],
+    });
+    seoEnriched = await appendRelatedHubFooter(getSupabaseAdmin(), seoRes.enriched.content, { category: seoCategory });
+    seoMetaDesc = seoRes.enriched.meta_description;
+    seoImageAlt = seoRes.enriched.image_alt;
+    if (!seoRes.passes) {
+      console.warn(`[issue-draft] seo-master gate failed for "${article.title.slice(0,30)}":`, seoRes.failed_checks.join(' | '));
+    }
+  } catch (seoErr: any) {
+    console.error('[issue-draft] seo-master failed (continuing):', seoErr?.message);
+  }
+
+  const check = factCheck(seoEnriched, issue.raw_data || {});
 
   const canAutoPublish = config.auto_publish_enabled
     && issue.final_score >= (config.auto_publish_min_score ?? 40)
@@ -443,13 +474,17 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
   const coverImage = `${SITE_URL}/api/og?title=${encodeURIComponent(article.title)}&category=${blogCategory}&author=${encodeURIComponent('카더라')}&design=${design}`;
 
   const insertResult = await safeBlogInsert(sb, {
-    slug: article.slug, title: article.title, content: article.content,
+    slug: article.slug, title: article.title, content: seoEnriched,
     category: blogCategory as any, tags: article.keywords,
     source_type: 'auto_issue', cron_type: 'issue-draft',
     source_ref: (issue.source_urls || [])[0],
-    meta_description: (() => { const desc = (article as any).meta_description || (issue.summary || '').slice(0, 160); return desc.length >= 20 ? desc : `${desc} — ${article.title}`.slice(0, 160); })(),
+    meta_description: (() => {
+      // s189: seo-master 결과 우선, 80자 미만이면 title 보강
+      const desc = seoMetaDesc || (article as any).meta_description || (issue.summary || '').slice(0, 160);
+      return desc.length >= 80 ? desc : `${desc} — ${article.title}`.slice(0, 160);
+    })(),
     meta_keywords: article.keywords.join(','),
-    cover_image: coverImage, image_alt: `${article.title} — 카더라 분석`,
+    cover_image: coverImage, image_alt: seoImageAlt,
     is_published: canAutoPublish,
   });
 
@@ -471,15 +506,22 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
     }
   }
 
-  // A5: 이미지 삽입 (네이버 검색 → 본문 + 커버 교체)
+  // A5: 이미지 삽입 (네이버 검색 → 본문 + 커버 교체) — s189: seoEnriched 사용
   if (blogPostId) {
     try {
-      const enrichedWithImages = await insertImages(article.content, article.title, article.keywords, blogCategory, blogPostId, sb);
-      if (enrichedWithImages !== article.content) {
+      const enrichedWithImages = await insertImages(seoEnriched, article.title, article.keywords, blogCategory, blogPostId, sb);
+      if (enrichedWithImages !== seoEnriched) {
         await sb.from('blog_posts').update({ content: enrichedWithImages }).eq('id', blogPostId);
       }
     } catch (imgErr) {
       console.warn('[issue-draft] image insert failed:', (imgErr as Error).message);
+    }
+
+    // s189: hub_mapping RPC — 본문 entity 매칭으로 blog_hub_mapping 영구 적용 (멱등)
+    try {
+      await (sb as any).rpc('inject_hub_mapping_for_post', { p_post_id: blogPostId });
+    } catch (mapErr: any) {
+      console.warn('[issue-draft] inject_hub_mapping_for_post failed:', mapErr?.message);
     }
   }
 
@@ -488,7 +530,7 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
     is_published: (canAutoPublish && !!blogPostId),
     publish_decision: canAutoPublish && !!blogPostId ? 'auto' : canAutoPublish ? 'auto_failed' : !!blogPostId ? 'draft' : 'failed',
     block_reason: insertFailed ? (insertResult.message || insertResult.reason || 'safeBlogInsert failed') : null,
-    blog_post_id: blogPostId, draft_title: article.title, draft_content: article.content,
+    blog_post_id: blogPostId, draft_title: article.title, draft_content: seoEnriched,
     draft_slug: article.slug, draft_keywords: article.keywords,
     infographic_data: {},
     draft_template: selectDraftTemplate(issue.category, issue.issue_type),
