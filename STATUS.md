@@ -1,3 +1,47 @@
+# Session 189 — Post-Marathon Recovery (2026-04-28 KST)
+
+브랜치: `fix/post-marathon-recovery` · 한 commit 한 deploy.
+
+## 0) DB 인시던트 — `match_related_blogs` row_to_jsonb(record) 버그 (Architecture Rule #11)
+- claude.ai 측에서 production DB 에 직접 핫픽스 적용 (마이그레이션: `fix_match_related_blogs_row_to_jsonb_record`).
+- 본 PR 에서는 추가 SQL 마이그레이션을 추가하지 않음. (사후 마이그레이션은 `supabase mcp` 로 등록·관리됨.)
+
+## 1) Track A — Chrome 단일화 (LiveBar)
+- `(main)/layout.tsx` 가 이미 단일 `Navigation` (header + mobile bottom nav) 을 갖고 있음 → 추가 변경 불필요.
+- 누락 영역인 LiveBar 만 layout 으로 이전:
+  - `src/components/ui/LiveBarChrome.tsx` 신설 — `usePathname()` 기반 page 분기, fetch 실패/로딩 시 skeleton (텍스트 ❌).
+  - `src/app/api/livebar/route.ts` 신설 — `?page=apt|stock|blog|feed` 카운트 합쳐 `{text}` 반환. 60s revalidate.
+  - `(main)/layout.tsx` 에 `<LiveBarChrome />` 1회 mount.
+  - `/apt`, `/stock`, `/blog`, `/feed` 페이지에서 인라인 `<LiveBar text=…/>` + import 제거.
+- 결과: 4 페이지 nav DOM 동일, LiveBar 텍스트는 클라이언트 fetch 후 채워지며 실패 시 텍스트 0.
+
+## 2) Track B — 클라이언트 버그 3종
+- **B-1** `src/app/(main)/apt/page.tsx`, `src/app/(main)/stock/page.tsx` — Suspense fallback 텍스트("부동산 정보를 불러오는 중...", "주식 시세를 불러오는 중...") → `null`. SSR HTML 에 자열 박힘 제거 (view-source 0건 충족).
+- **B-2** `src/lib/market-hours.ts` 신설 — KST(Asia/Seoul) 환산 후 weekday 판정. `kstWeekday`, `isKstWeekend`, `isKstWeekday`, `kstWeekdayLabel`, `isKrxOpen` export. `DailyReportCard.tsx` 가 새 helper 사용.
+- **B-3** `src/components/PageViewTracker.tsx` — `/api/analytics/pageview` 전송 경로를 `navigator.sendBeacon` 우선, 실패 시 `fetch({ keepalive: true })` 폴백으로 변경. (`/api/analytics/events` 는 이미 `src/lib/analytics.ts` 에서 sendBeacon 사용 중.)
+
+## 3) Track C — ISR + 카드
+- **C-1** `scripts/revalidate-sweep.ts` 신설 — `'use server'` action, `requireAdmin()` 가드. `/apt`, `/blog`, `/feed`, `/apt/region` 루트 + 활성 `apt_sites.slug` 전수 + 게시 `blog_posts.slug` 전수 + region/sigungu/category 조합 일괄 `revalidatePath`. 어드민 라우트에서 import 해 호출.
+- **C-2 popularity_score === 100 hide** — 4 곳에 `!== 100` 가드 추가:
+  - `src/components/apt/AptHubCuration.tsx` (오늘의 추천 카드 ★ pill)
+  - `src/app/(main)/apt/page.tsx` (HeroCard stat)
+  - `src/app/(main)/apt/ranking/[region]/[category]/page.tsx`
+  - `src/app/(main)/apt/region/[region]/[sigungu]/[category]/page.tsx`
+- **C-2 카드 Link wrap** — 활성 apt 카드 렌더링 사이트(`AptClient.tsx`, `AptHubCuration.tsx`, `LandmarkAptCards.tsx`, `AptRankingCard.tsx`, region/sigungu/category 페이지) 모두 이미 `<Link>` 래핑 확인. 별도 누락 발견 사례 없음.
+
+## 검증
+- 로컬 `npm run build` (Track D).
+- 로컬 smoke 8 URL — view-source 에서 "잠시만요" / "불러오는 중" 0건 확인.
+
+## 금지 사항 준수
+- daily_create_limit 미변경.
+- 블로그 데이터 미변경.
+- DB 마이그레이션 미추가.
+- profiles.points 직접 UPDATE 없음.
+- CSP middleware.ts 외 미변경.
+
+---
+
 # Session 188 — signup_source OAuth 보존 + 온보딩 미션 UI 활성화 (2026-04-27 KST)
 
 ## 배경 (실측 데이터)

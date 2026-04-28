@@ -163,7 +163,7 @@ export default async function RegionSigunguCategoryHub({ params }: Props) {
             <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 14, transition: 'border-color var(--transition-fast)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8, marginBottom: 8 }}>
                 <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.3 }}>{s.name}</h3>
-                {s.popularity_score > 0 && <span style={{ fontSize: 10, fontWeight: 800, color: 'var(--brand)', flexShrink: 0 }}>★ {s.popularity_score}</span>}
+                {s.popularity_score > 0 && s.popularity_score !== 100 && <span style={{ fontSize: 10, fontWeight: 800, color: 'var(--brand)', flexShrink: 0 }}>★ {s.popularity_score}</span>}
               </div>
               <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 6 }}>
                 {s.dong || sigungu} {s.builder ? `· ${s.builder}` : ''}

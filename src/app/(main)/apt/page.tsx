@@ -63,7 +63,6 @@ import AptClient from './AptClient';
 import Disclaimer from '@/components/Disclaimer';
 import AptHubCuration from '@/components/apt/AptHubCuration';
 import PriceBandFilter from '@/components/apt/PriceBandFilter';
-import LiveBar from '@/components/ui/LiveBar';
 import HeroCard from '@/components/ui/HeroCard';
 import { getSupabaseAdmin as getSbAdminForHero } from '@/lib/supabase-admin';
 
@@ -383,7 +382,7 @@ export default async function AptPage({ searchParams }: { searchParams?: Promise
     url: `${SITE_URL}/apt/${encodeURIComponent(a.house_nm?.trim().replace(/\s+/g, '-').replace(/[^\w가-힣\-]/g, '').toLowerCase() || a.house_manage_no || a.id)}`,
   }));
 
-  return <Suspense fallback={<div style={{ padding: '60px 20px', textAlign: 'center', color: 'var(--text-tertiary)' }}>부동산 정보를 불러오는 중...</div>}>
+  return <Suspense fallback={null}>
     {/* BreadcrumbList */}
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"카더라","item":SITE_URL},{"@type":"ListItem","position":2,"name":"부동산","item":SITE_URL + "/apt"}]}) }} />
     {/* ItemList → Google carousel */}
@@ -396,10 +395,9 @@ export default async function AptPage({ searchParams }: { searchParams?: Promise
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"WebPage","name":"부동산 — 청약·분양·미분양·재개발","speakable":{"@type":"SpeakableSpecification","cssSelector":["h1",".region-summary"]}}) }} />
     <h1 className="sr-only">부동산 — 청약·분양·미분양·재개발</h1>
     <p className="sr-only">카더라 부동산에서는 전국 {apts.length}건의 아파트 청약 일정, {ongoingApts.length}건의 분양 현장, {unsold.length}건의 미분양 단지, {redevTotalCount}건의 재개발·재건축 정보를 실시간으로 제공합니다. 지역별·타입별 필터로 원하는 부동산 정보를 빠르게 찾을 수 있으며, 분양가·입주 예정일·경쟁률·시세 비교를 무료로 확인할 수 있습니다.</p>
-    {/* Phase 9: 실시간 신선도 시그니처 */}
+    {/* Phase 9: 오늘의 추천 hero — v_apt_today_pick rank=1. LiveBar 는 (main)/layout 의 LiveBarChrome 으로 통합. */}
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
-      <LiveBar text={`실시간 · 5,797 단지 · 분양 ${ongoingApts.length}건 · 청약 ${apts.length}건 · 미분양 ${unsold.length}건`} />
-      {/* Phase 9: 오늘의 추천 hero — v_apt_today_pick rank=1 */}
+      {/* */}
       {hero && (
         <HeroCard
           tag="오늘의 추천"
@@ -413,7 +411,7 @@ export default async function AptPage({ searchParams }: { searchParams?: Promise
           stats={[
             ...(hero.lifecycle_stage ? [{ value: LIFECYCLE_KO[hero.lifecycle_stage] || hero.lifecycle_stage, label: '단계' }] : []),
             ...(hero.total_units ? [{ value: Number(hero.total_units).toLocaleString(), label: '세대수' }] : []),
-            ...(hero.popularity_score ? [{ value: `★ ${hero.popularity_score}`, label: '인기', tone: 'success' as const }] : []),
+            ...(hero.popularity_score && hero.popularity_score !== 100 ? [{ value: `★ ${hero.popularity_score}`, label: '인기', tone: 'success' as const }] : []),
           ]}
           href={`/apt/${encodeURIComponent(hero.slug)}`}
         />

@@ -10,6 +10,7 @@ import StickySignupBar from '@/components/StickySignupBar';
 
 
 import { Sidebar, RightPanel, InstallBanner, PWAInstallTracker, NoticeBanner, PageViewTracker, BehaviorTracker } from '@/components/ClientDynamics';
+import LiveBarChrome from '@/components/ui/LiveBarChrome';
 import TopLoadingBar from '@/components/TopLoadingBar';
 import ScrollToTop from '@/components/ScrollToTop';
 import { AuthProvider } from '@/components/AuthProvider';
@@ -60,6 +61,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
 
               <ProfileCompleteBanner />
               <GlobalMissionBar />
+              <LiveBarChrome />
               {children}
           </ErrorBoundary>
         </main>

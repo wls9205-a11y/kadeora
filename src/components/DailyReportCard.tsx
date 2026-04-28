@@ -1,6 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { isKstWeekend, kstWeekday } from '@/lib/market-hours';
 
 export default function DailyReportCard() {
   const [region, setRegion] = useState<string | null>(null);
@@ -15,7 +16,7 @@ export default function DailyReportCard() {
 
   const now = new Date();
   const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
-  const isWeekend = now.getDay() === 0 || now.getDay() === 6;
+  const isWeekend = isKstWeekend(now);
 
   return (
     <Link href={`/daily/${encodeURIComponent(region)}`} style={{ textDecoration: 'none', display: 'block', marginBottom: 8 }}>
@@ -32,7 +33,7 @@ export default function DailyReportCard() {
             <span style={{ fontSize: 10, fontWeight: 700, color: '#D4A853', background: 'rgba(212,168,83,0.1)', padding: '1px 5px', borderRadius: 4, border: '1px solid rgba(212,168,83,0.2)' }}>회원전용</span>
           </div>
           <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 1 }}>
-            {now.getMonth() + 1}/{now.getDate()} {dayNames[now.getDay()]} {isWeekend ? '주말판' : '투자 브리핑'}
+            {now.getMonth() + 1}/{now.getDate()} {dayNames[kstWeekday(now)]} {isWeekend ? '주말판' : '투자 브리핑'}
           </div>
         </div>
         <div style={{ padding: '5px 12px', borderRadius: 'var(--radius-card)', background: 'linear-gradient(135deg, #D4A853, #B8942E)', color: '#fff', fontSize: 11, fontWeight: 700, flexShrink: 0 }}>읽기 →</div>
