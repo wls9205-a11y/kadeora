@@ -55,7 +55,8 @@ export default function LiveBarChrome() {
     let cancelled = false;
     setState('loading');
     setText(null);
-    fetch(`/api/livebar?page=${page}`, { cache: 'no-store' })
+    // s206: 8s timeout — 504 가 명확히 fail 후 skeleton 으로 fallback. UI 영향 없음.
+    fetch(`/api/livebar?page=${page}`, { cache: 'no-store', signal: AbortSignal.timeout(8000) })
       .then(r => (r.ok ? r.json() : Promise.reject(r.status)))
       .then((d: { text?: string }) => {
         if (cancelled) return;

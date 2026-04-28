@@ -27,8 +27,9 @@ export default function AdBanner() {
 
   useEffect(() => {
     if (!isAptContext) { setAds([]); return; }
-    fetch('/api/ads')
-      .then(r => r.json())
+    // s206: 8s timeout — 504 silent fallback (catch 에서 setState 안 함 → 광고 미노출, ErrorBoundary 안 깨짐).
+    fetch('/api/ads', { signal: AbortSignal.timeout(8000) })
+      .then(r => (r.ok ? r.json() : Promise.reject(r.status)))
       .then(d => { if (Array.isArray(d?.ads) && d.ads.length > 0) setAds(d.ads); })
       .catch(() => {});
   }, [isAptContext]);
