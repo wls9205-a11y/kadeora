@@ -1,3 +1,55 @@
+# 카더라 STATUS — 세션 197 (2026-04-28)
+
+## 세션 197 — 어드민 V4 Phase 1+2 (DB view + API + /admin/v4)
+
+### Phase 1 (DB, Claude direct 적용 — 이번 commit 외부에서 사전 적용)
+- 신규 RPC: `calc_health_score()` — 100점 가중평균 (cron 15% / signup 15% / 재방문 15% / CTR 10% / baseline 45% - BROKEN×5)
+- 신규 VIEW: `v_admin_dashboard_v4` — 단일 SELECT 5섹션 jsonb (323ms)
+- 라이브 검증 (이번 세션 시작 시): score=62 (cron 99.2% / 재방문 80.4% / BROKEN 3건 -15)
+
+### Phase 2 (코드 — 이번 commit)
+- 신규 라우트 `/api/admin/v4` (`unstable_cache` 60s revalidate, single SELECT, requireAdmin 가드)
+- 신규 페이지 `/admin/v4` + `AdminShellV4.tsx` (60s 폴링 + visibilitychange 가드, s185 패턴)
+- 5 sections (`src/app/admin/v4/sections/`):
+  - `SignupCTASection`: 4 KPI + BROKEN AlertCard + WEAK 펼침 + 5단계 funnel + source×provider 매트릭스
+  - `IssuePipelineSection`: orchestrator 시간 + 6 stage 가로 스트립 + publish_7d KPI + [orchestrator 즉시] 버튼
+  - `ContentHealthSection`: meta/alt/excerpt/published KPI + hub_by_category 표
+  - `OpsSection`: cron 24h KPI + failed_24h AlertCard + GOD MODE 슬라이드오버
+  - `UsersCommunitySection`: 회원/active/push% KPI + 활동 today·7d + 공유 채널별
+- 5 공통 컴포넌트 (`src/app/admin/v4/components/`):
+  - `AdminKPI` (label/value/delta/health border-left)
+  - `AlertCard` (critical/warn/info, hideWhenEmpty 가드)
+  - `HealthRing` (SVG 게이지, 0~40 빨강 / 41~70 노랑 / 71~100 초록)
+  - `PipelineStages` (가로 스트립, fail>0 → 주황)
+  - `KPIStrip` (헤더용 한 줄 요약)
+
+### 핵심 발견 (라이브 검증)
+- `drop_before_provider` 28/46 (60%) — 모바일 OAuth 가 아니라 OAuth 버튼 도달 전 drop 이 funnel 1순위 손실
+- 재방문율 80.4% (V4 문서 추정 0% 는 옛 데이터, 통계 기반 양호)
+- `hub_link_pct` 61% (s195 fix 효과 확인, 추정 25% 보다 양호)
+- `meta_desc` 99.1% (100% 추정에서 살짝 누락)
+- BROKEN 3건: `apt_alert_cta` (310/0), `blog_early_teaser` (232/0), `blog_gated_login` (176/0) — s196 trackCTA keepalive fix 검증 대기 중
+
+### 다음 (s198 — 사용자 검증 후 실행)
+- `/admin` → `/admin/v4` 308 redirect
+- 기존 `/admin` 페이지 + 8 탭 보존 (90일 후 삭제)
+- `/api/admin/v2` 308 redirect
+- 무호출 API 청소 (실측 0건만)
+
+### 검증
+- `npx tsc --noEmit --skipLibCheck` → 0 errors
+- `npm run build` → 성공
+- `v_admin_dashboard_v4.data` 응답 확인 (5 section 모두 정상)
+
+### Invariants 준수
+- `daily_create_limit` 80 미변경
+- vercel cron 100/100 유지 (cron 추가 0)
+- 기존 `/admin` 페이지 / 기존 8 탭 / 기존 `v_admin_unified` 등 미터치
+- DB Phase 1 (view + RPC) 미변경 (이번 commit 외부 사전 적용)
+- `(sb as any).from('v_admin_dashboard_v4')` 패턴 (unregistered view)
+
+---
+
 # 카더라 STATUS — 2026-04-27/28 통합 회고 (s189~s196, 8 sessions)
 
 ## 누적 변경 요약
