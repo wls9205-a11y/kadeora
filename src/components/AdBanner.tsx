@@ -33,8 +33,8 @@ export default function AdBanner() {
       .catch(() => {});
   }, [isAptContext]);
 
-  if (!isAptContext) return null;
-
+  // s205: hook 은 early return 위에서 무조건 호출 — 이전엔 isAptContext early return
+  // 뒤에 useCallback + useEffect 가 있어 hook count 5 ↔ 7 변동 → React #310 발생.
   const next = useCallback(() => {
     if (ads.length <= 1) return;
     setVisible(false);
@@ -42,11 +42,13 @@ export default function AdBanner() {
   }, [ads.length]);
 
   useEffect(() => {
+    if (!isAptContext) return;
     if (ads.length <= 1) return;
     const id = setInterval(next, 8000);
     return () => clearInterval(id);
-  }, [ads.length, next]);
+  }, [isAptContext, ads.length, next]);
 
+  if (!isAptContext) return null;
   if (!ads.length) return null;
   const ad = ads[index];
 
