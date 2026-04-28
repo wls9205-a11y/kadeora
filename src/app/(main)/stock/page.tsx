@@ -47,6 +47,7 @@ import StockClient from './StockClient';
 import StockHeroCarousel from '@/components/stock/StockHeroCarousel';
 import Disclaimer from '@/components/Disclaimer';
 import LiveBar from '@/components/ui/LiveBar';
+import HeroCard from '@/components/ui/HeroCard';
 
 async function fetchStocks() {
   const sb = await createSupabaseServer();
@@ -203,6 +204,31 @@ export default async function StockPage() {
       <div style={{ padding: '12px 16px 0' }}>
         <LiveBar text={`LIVE · KOSPI/KOSDAQ/NYSE/NASDAQ ${stocks.length.toLocaleString()}종 · 시세 5분 간격`} />
       </div>
+      {/* Phase 9b-2: 오늘의 종목 HeroCard (일간 상승 top1) */}
+      {(() => {
+        const heroStock = (stocks
+          .filter((s: any) => s?.change_pct != null && Number(s.change_pct) > 0)
+          .sort((a: any, b: any) => Number(b.change_pct) - Number(a.change_pct))[0]) || stocks[0];
+        if (!heroStock) return null;
+        const isUSD = heroStock.currency === 'USD';
+        const price = Number(heroStock.price);
+        const change = Number(heroStock.change_pct ?? 0);
+        return (
+          <div style={{ padding: '12px 16px 0' }}>
+            <HeroCard
+              tag="오늘의 종목"
+              title={heroStock.name}
+              meta={[heroStock.symbol, heroStock.market, isUSD ? '해외' : '국내'].filter(Boolean).join(' · ')}
+              stats={[
+                { value: isUSD ? `$${price.toFixed(2)}` : `₩${price.toLocaleString()}`, label: '현재가' },
+                { value: `${change > 0 ? '+' : ''}${change.toFixed(2)}%`, label: '일간', tone: change > 0 ? 'success' : change < 0 ? 'danger' : 'default' },
+                { value: heroStock.market || '—', label: '시장' },
+              ]}
+              href={`/stock/${heroStock.symbol}`}
+            />
+          </div>
+        );
+      })()}
       {heroSlides.length > 0 && (
         <div style={{ padding: '12px 16px 0' }}>
           <StockHeroCarousel slides={heroSlides} />

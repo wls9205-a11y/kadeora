@@ -1,5 +1,44 @@
 # 카더라 STATUS — 세션 188 (2026-04-27 / 28 cont.)
 
+## 세션 188 — Phase 9b-2: /stock /blog HeroCard + Navigation 토큰 swap 평가
+
+### 핵심 결정 (Navigation 토큰 swap **SKIP**)
+사전 grep 결과 Navigation.tsx 729줄 색상 audit:
+- hex 색상 4개만 (각 1회) — `#FFD700`, `#FFA500`, `#2563EB`, `#0F1B3E` (의미 있는 색)
+- `var(--*)` 토큰 이미 압도적: `--brand` 21회, `--text-primary` 15회, `--bg-hover` 21회, `--border` 30회
+- **즉 이미 토큰 잘 적용된 상태** — 추가 swap 가치 매우 낮고 silent break 위험만 큼
+- 결정: Navigation 토큰 swap SKIP. var(--brand)/var(--text-primary) 등이 globals.css에서 다크/라이트 자동 분기됨
+
+### 산출물
+- **`src/app/(main)/stock/page.tsx`** — HeroCard 추가
+  - `stocks` 배열에서 `change_pct DESC` top1 추출 (서버 정렬)
+  - tag="오늘의 종목" + symbol/market/통화 meta + 현재가/일간%/시장 stats 3분할
+  - 일간 % tone: 상승=success(녹) / 하락=danger(빨)
+  - href=`/stock/{symbol}`
+  - 기존 StockHeroCarousel 보존 (제거 X)
+- **`src/app/(main)/blog/page.tsx`** — HeroCard 추가
+  - 별도 fetch `fetchBlogHero()`: blog_posts view_count DESC limit 1 (server)
+  - Top1: "레이카운티 무순위 청약 재분양 총정리" (5,839 view)
+  - tag="{sub_category} · 가장 많이 읽힌 글" + 조회/분량/날짜 meta + 조회수/분량/TOP 1 stats
+  - 표시 조건: `pageNum === 1 && category === 'all' && !sub && !q` (필터 적용 시 hide)
+  - href=`/blog/{slug}` URL encoded
+
+### 검증
+- `npx tsc --noEmit` 0 error
+- /apt/[slug] RightPanel 9b-1에서 이미 처리됨 (확인) — pathname segments 분기 + v_apt_related_blogs WHERE apt_slug=slug
+
+### 의도적 미반영 (Phase 9b-3)
+- Navigation 730줄 토큰 swap (가치-위험 비율 낮아 SKIP)
+- 모바일 햄버거 메뉴 (Sidebar 토글)
+- 검색 모달 (⌘K), 알림 드롭다운
+
+### 누적 (Phase 1~9b-2)
+- 빌딩블록 4 (LiveBar/AIRelatedPanel/CategoryGrid/HeroCard) 완전 활용
+- 5 페이지 LiveBar + 3 페이지 HeroCard (/apt /stock /blog)
+- Sidebar 5종 페이지 CategoryGrid + RightPanel AI 시그니처 page-aware
+
+---
+
 ## 세션 188 — Phase 9b-1: Sidebar/RightPanel page-aware 통합
 
 ### 핵심 결정 (스코프)
