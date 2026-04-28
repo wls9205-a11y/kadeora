@@ -1,3 +1,71 @@
+# 카더라 STATUS — 세션 204~206 회고 + Architecture Rules #14~16 (2026-04-28)
+
+## 세션 204~206 — React #310 + /api 504 종합 회고 + 회귀 방지 룰 정립
+
+### 사건 타임라인 (production 에러 → 4 단계 fix)
+| 세션 | 가설 | 결과 |
+|---|---|---|
+| s202 | Sidebar/RightPanel hydration mismatch | Sidebar/RightPanel 만 `{ ssr: false }` — **무관 (증상 잔존)** |
+| s203 | layout 의 12+ client 컴포넌트 SSR 오염 | 20개 컴포넌트 모두 nuclear `ssr:false` ClientShell — **무관 (증상 잔존)** |
+| s204 | hook order 위반 (자동 진단) | `SmartSectionGate.tsx` useMemo가 early return 아래 → **확정 root cause #1** |
+| s205 | source map 으로 두 번째 위반 | `AdBanner.tsx:38` useCallback + useEffect가 early return 아래 → **확정 root cause #2** |
+| s206 | `/api/livebar` `/api/ads` 504 | `count: 'exact'` + `maxDuration` 미설정 → **확정 root cause #3** |
+
+### 핵심 인사이트
+- **Hook 위반은 SSR 토글로 안 가려짐**. s202/s203 의 nuclear `ssr:false` 격리는 결과적으로
+  무의미했음. ClientShell.tsx 는 보존하되 점진적으로 `ssr:true` 복원 가능 (s207+ 검토).
+- **자동 진단 + source map** 이 #310 핀포인트의 정답. grep + awk function-boundary
+  자체 수동 검증으로 false positive 4개 (FocusTab, CalcEngine, LiveBarChrome 등) 제거.
+- **`count: 'exact'`** 가 8,050+행 테이블에서 sequential scan 유발 — 'estimated' 로 ms 단위.
+
+### Architecture Rules — 회귀 방지 (이번 세션에 정립)
+
+**Rule #14: Hook 호출 위치 강제**
+- 모든 `'use client'` 컴포넌트의 hook (useState/useEffect/useMemo/useCallback/useRef/
+  useContext/usePathname/useSearchParams/useAuth 등) 은 함수 **최상단**에서 무조건 호출.
+- early return / conditional 호출 / 삼항 안의 hook 호출 **금지**.
+- Conditional rendering 은 JSX 안에서만 (`isXxx && <Component/>` 또는 변수에 담아 분기).
+- 위반 시 hook count 변동 → React #310 (Hook order) production 에러.
+- **Why:** s204 SmartSectionGate (useMemo 위반), s205 AdBanner (useCallback+useEffect 위반)
+  가 production ErrorBoundary 발동시킴. 자동 진단만으로 식별 가능.
+- **How to apply:** 컴포넌트 작성/리뷰 시 함수 본문 첫 줄들이 모두 hook 인지 검증.
+  early return 은 모든 hook 호출 *후* 에만 허용.
+
+**Rule #15: count 쿼리 임계값**
+- Supabase `select(..., { count: 'exact', head: true })` 는 테이블 행 수가 **1,000 이하**
+  일 때만. 그 이상은 `'estimated'` (planner reltuples 기반, ms 단위).
+- 위반 시 sequential scan 으로 6s+ 소요 → Vercel function timeout 504.
+- **Why:** s206 livebar/ads 가 blog_posts (8,050행), apt_subscriptions, posts 테이블에
+  exact count 사용 → 504. estimated 로 즉시 해소.
+- **How to apply:** 새 route 작성 시 count 사용처마다 대상 테이블 행 수 확인.
+  통계용 KPI 표시는 estimated 로 충분 (정확도 ±5%).
+
+**Rule #16: 외부 데이터 fetch route 의 maxDuration**
+- 모든 외부(Supabase / 외부 API) 데이터 fetch route 는 `export const maxDuration = 10`
+  명시. cron 라우트 (300s) 를 제외하면 10s 가 합리적 상한.
+- 미설정 시 Vercel default (60s) 까지 함수 점유 → 504 발생 시 함수 pool 고갈 가능.
+- **Why:** s206 livebar/ads 가 maxDuration 미설정으로 60s 까지 점유.
+- **How to apply:** 새 `/api/*/route.ts` 작성 시 cron 가 아닌 한 `maxDuration = 10`
+  필수. 외부 API 호출 등 길어질 가능성 있으면 30 까지. 10s 안에 처리 가능하도록
+  per-query timeout (`Promise.race` 또는 `AbortSignal.timeout`) 도 같이 적용.
+
+### 부수 정리 — ClientShell 점진 복원 후보
+- s203 ClientShell.tsx 의 20개 `{ ssr: false }` 중 hook-light 컴포넌트는 점진적으로
+  `ssr: true` 복원 가능:
+  - 즉시 복원 후보 (hook 0~2 + 외부 효과 없음): NoticeBanner, AdBanner (s205 fix 후),
+    InstallBanner, PWAInstallTracker
+  - 신중히 복원: PageViewTracker, BehaviorTracker, CtaGlobalTracker, VitalsReporter
+    (effect-only 라 SSR placeholder 비용 0)
+  - 유지 (hook-heavy): Navigation, Sidebar, RightPanel, AuthProvider, ToastProvider
+- 복원 시 페이지별 SEO 영향 측정 후 결정 (현 상태 SSR 페이지 본문은 정상 직렬화 유지).
+
+### 검증
+- Production /blog /apt /stock /feed 페이지에서 ErrorBoundary 미발동 확인 (배포 후)
+- /api/livebar /api/ads 504 비율 측정 (Vercel function logs)
+- React DevTools Profiler 로 hook count 변동 0 확인
+
+---
+
 # 카더라 STATUS — 세션 197 (2026-04-28)
 
 ## 세션 197 — 어드민 V4 Phase 1+2 (DB view + API + /admin/v4)
