@@ -19,6 +19,10 @@
 - **B-1** `src/app/(main)/apt/page.tsx`, `src/app/(main)/stock/page.tsx` — Suspense fallback 텍스트("부동산 정보를 불러오는 중...", "주식 시세를 불러오는 중...") → `null`. SSR HTML 에 자열 박힘 제거 (view-source 0건 충족).
 - **B-2** `src/lib/market-hours.ts` 신설 — KST(Asia/Seoul) 환산 후 weekday 판정. `kstWeekday`, `isKstWeekend`, `isKstWeekday`, `kstWeekdayLabel`, `isKrxOpen` export. `DailyReportCard.tsx` 가 새 helper 사용.
 - **B-3** `src/components/PageViewTracker.tsx` — `/api/analytics/pageview` 전송 경로를 `navigator.sendBeacon` 우선, 실패 시 `fetch({ keepalive: true })` 폴백으로 변경. (`/api/analytics/events` 는 이미 `src/lib/analytics.ts` 에서 sendBeacon 사용 중.)
+- **B-4 og-blog TypeError** `src/app/api/og-blog/route.tsx` — Vercel logs 에서 6장 burst 마다 6번 throw → 302 redirect 폴백 중. 원인: `renderCover` (line 84) `post.title.length`, `renderKeyPoints` (line 130-131) `post.title.slice/length` 가 `post.title === null` row 에서 TypeError. 기존 try 는 `new ImageResponse(...)` 만 감싸 render fn 호출(body 구성) 시점의 throw 를 잡지 못함. 수정:
+  - `fetchPost()` 후 row 정규화 — title/excerpt/tldr/meta_description/hub_cta_target/hub_apt_slug 를 string 또는 null 로 강제. title 이 비면 slug 또는 `'카더라 콘텐츠'` 사용.
+  - body 구성 + ImageResponse 를 단일 `try` 로 wrapping → 어떤 필드 throw 도 fallback redirect (`/images/brand/kadeora-hero.png`) 로 다운그레이드.
+  - error log 에 `{ slug, card, hasPost, message, stack }` 포함 → 차후 원인 row 추적 용이.
 
 ## 3) Track C — ISR + 카드
 - **C-1** `scripts/revalidate-sweep.ts` 신설 — `'use server'` action, `requireAdmin()` 가드. `/apt`, `/blog`, `/feed`, `/apt/region` 루트 + 활성 `apt_sites.slug` 전수 + 게시 `blog_posts.slug` 전수 + region/sigungu/category 조합 일괄 `revalidatePath`. 어드민 라우트에서 import 해 호출.
