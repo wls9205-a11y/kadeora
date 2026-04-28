@@ -119,16 +119,24 @@ async function handler(_req: NextRequest) {
 
           // s191: 발행 직전 OG variant 자동 보강 — 게이트는 통과했어도 image<5 이면
           // SERP 캐러셀/이미지 팩 미노출이라 이 시점에 5장 보장.
+          // s193: 작동 안 한 부작용 디버깅 — fetch/imgCount/UPDATE 단계별 진단 로깅 추가.
           try {
-            const { data: post } = await sb
+            const { data: post, error: fetchErr } = await sb
               .from('blog_posts')
               .select('content, title, category')
               .eq('id', postId)
               .single();
-            if (post && post.content && post.title) {
+            if (fetchErr) {
+              console.warn(`[issue-publish] og-pad fetch err post=${postId}:`, fetchErr.message);
+            } else if (!post) {
+              console.warn(`[issue-publish] og-pad post not found post=${postId}`);
+            } else if (!post.content || !post.title) {
+              console.warn(`[issue-publish] og-pad missing fields post=${postId} hasContent=${!!post.content} hasTitle=${!!post.title}`);
+            } else {
               const imgCount = (post.content.match(/!\[.*?\]\(.*?\)/g) || []).length;
-              if (imgCount < 5) {
-                const need = 5 - imgCount;
+              const need = Math.max(0, 5 - imgCount);
+              console.log(`[issue-publish] og-pad post=${postId} imgCount=${imgCount} need=${need} title="${post.title.slice(0, 40)}"`);
+              if (need > 0) {
                 const titleHash = Array.from(post.title).reduce((a: number, c: string) => a + c.charCodeAt(0), 0);
                 const variants: string[] = [];
                 for (let i = 0; i < need; i++) {
@@ -137,11 +145,16 @@ async function handler(_req: NextRequest) {
                   variants.push(`![${post.title} OG ${i + 1}](${url})`);
                 }
                 const padded = post.content + '\n\n' + variants.join('\n\n');
-                await sb.from('blog_posts').update({ content: padded }).eq('id', postId);
+                const { error: updateErr } = await sb.from('blog_posts').update({ content: padded }).eq('id', postId);
+                if (updateErr) {
+                  console.error(`[issue-publish] og-pad UPDATE failed post=${postId}:`, updateErr.message);
+                } else {
+                  console.log(`[issue-publish] og-pad applied post=${postId} variants=${variants.length} new_len=${padded.length}`);
+                }
               }
             }
           } catch (padErr: any) {
-            console.warn(`[issue-publish] og-pad failed post=${postId}:`, padErr?.message);
+            console.warn(`[issue-publish] og-pad exception post=${postId}:`, padErr?.stack || padErr?.message);
           }
 
           // s191: hub_mapping RPC — issue-draft 가 누락했거나 image-attach 우회 발행

@@ -1,4 +1,62 @@
-# 카더라 STATUS — 세션 192 (2026-04-28)
+# 카더라 STATUS — 세션 193 (2026-04-28)
+
+## 세션 193 — orchestrator 가동 검증 + issue-publish OG padding 디버그 + image-attach 처리량 ↑
+
+### Rebase 정리
+- 다른 컴퓨터에서 `1b255d0f fix(build): unblock Vercel deploy from s189 regression` 가
+  먼저 push 됨 — s189 의 4 cron entry 만 제거 (s192 의 orchestrator 추가/cleanup-pageviews 임시 제거 와 중복).
+- vercel.json conflict 1곳 해결: orchestrator entry 라인 채택. cleanup-pageviews 는 s192 의 의도대로 제거 유지. 최종 100 cron.
+
+### s192 deploy 후 cron_logs 검증 (06:39 까지 last 6h)
+- `issue-pipeline-orchestrator`: **0 runs** — s192 가 production 적용 전 (1b255d0f 의 deploy 가 막 propagate 중).
+- 4 individual s189 entries 가 여전히 마지막 사이클 동안 가동:
+  - `issue-fact-check`: 22 runs · 1 processed
+  - `issue-image-attach`: 21 runs · 210 processed · **200 failed** (`safeBlogInsert` quality gate `CRON_TYPE_DAILY_LIMIT`)
+  - `issue-seo-enrich`: 19 runs · 2 processed
+  - `issue-publish`: 23 runs · 460 processed · 26 created
+
+### 발견 — `daily_create_limit=80` 가 image-attach 백로그 stuck 의 진짜 병목
+- 동일 5 issue ID (`a4ccea4e…`, `3ffe64d3…`, `7c50be62…`, `ae65550f…`, `fc6e9039…`) 가
+  매 cron 사이클마다 똑같이 `finalize` 단계에서 `CRON_TYPE_DAILY_LIMIT` 차단.
+- 처리되지 못하므로 `image_attached_at` 가 NULL 유지 → 다음 사이클에 또 SELECT → 무한 retry.
+- **Invariants 준수**: `daily_create_limit` 80 미변경. 후속 세션에서 `finalize_blocked` 마커
+  추가 또는 retry_count 가드 도입 검토 필요 (이번 세션 scope 외).
+
+### 변경
+
+`src/app/api/cron/issue-publish/route.ts`
+- s191 OG variant padding 부작용 — 작동 안 함 → 단계별 진단 로그 추가:
+  - fetch error / post 부재 / content·title null 분기별 `console.warn`
+  - 정상 fetch 후: `imgCount`, `need`, `title.slice(0,40)` `console.log`
+  - UPDATE error 분리: `updateErr.message` 로깅
+  - 성공 시: `variants.length`, `new_len` 로깅
+  - exception catch: stack trace 로깅
+- 다음 deploy 후 Vercel logs 에서 `[issue-publish] og-pad ...` 패턴으로 어느 단계가
+  silent fail 인지 즉시 식별 가능.
+
+`src/app/api/cron/issue-image-attach/route.ts`
+- `MAX_PER_RUN` 10 → **20**.
+- 근거: 측정치 10건 16s, 20건 추정 32s, PREEMPT_MS 250s 안 충분.
+- orchestrator 가 image-attach 를 호출할 때 stage timeout 80s 안에서도 32s 안전.
+
+### 검증
+- `npx tsc --noEmit --skipLibCheck` → 0 errors
+- `npm run build` → 성공
+- `vercel.json` crons 100 (한도 정확)
+
+### 효과 (가설, deploy 후 ~30분)
+- orchestrator 첫 실행 200 응답 + 4 stage 결과 jsonb 확인 → CI-v1 Phase 2 정상화 확정
+- image-attach 처리량 2배 (10/run → 20/run) × orchestrator 빈도 2배 (30분 → 15분) = **4배**
+- issue-publish OG padding 디버그 로그로 silent fail 위치 파악 → 다음 세션 fix
+- 신규 발행글 image≥5 27% → 향상 가능 (디버그 로그 후속 작업 의존)
+
+### Invariants 준수
+- `daily_create_limit` 80 미변경 (추가 발견 사항만 STATUS 에 기록)
+- 4 cron 라우트 파일 미삭제 (orchestrator + admin 디버그 도구 의존)
+- `safeBlogInsert` 통해서만 신규 (이번 작업은 UPDATE/log 추가만)
+- `(sb as any)` RPC 패턴
+
+---
 
 ## 세션 192 — 긴급 fix: vercel crons 100 한도 초과 (Phase 2 4 cron → 1 orchestrator)
 

@@ -24,7 +24,9 @@ import { runImagePipeline, type PostContext } from '@/lib/image-pipeline';
 export const maxDuration = 300;
 export const runtime = 'nodejs';
 
-const MAX_PER_RUN = 10;
+// s193: orchestrator 가 30분→15분 빈도라 이론상 8건→16건/h. 백로그 1,486 청산 가속
+// 위해 MAX_PER_RUN 10→20. 측정치: 10건 평균 16s, 20건 추정 32s, PREEMPT_MS 80s 안 안전.
+const MAX_PER_RUN = 20;
 const PREEMPT_MS = 250_000;
 
 function ensureContentHasEssentials(content: string, category: string): string {
