@@ -2,11 +2,13 @@
 import { useEffect, useState, useCallback } from 'react';
 import HealthRing from './components/HealthRing';
 import KPIStrip from './components/KPIStrip';
+import SignupRealtimeHeader from './components/SignupRealtimeHeader';
 import SignupCTASection from './sections/SignupCTASection';
 import IssuePipelineSection from './sections/IssuePipelineSection';
 import ContentHealthSection from './sections/ContentHealthSection';
 import OpsSection from './sections/OpsSection';
 import UsersCommunitySection from './sections/UsersCommunitySection';
+import TrafficSection from './sections/TrafficSection';
 
 interface DashboardData {
   generated_at?: string;
@@ -89,6 +91,8 @@ export default function AdminShellV4() {
         }}>↻ 새로고침</button>
       </header>
 
+      <SignupRealtimeHeader />
+
       {loading && !data && (
         <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-tertiary, #888)' }}>
           로드 중…
@@ -116,6 +120,7 @@ export default function AdminShellV4() {
           </div>
 
           <UsersCommunitySection data={data.section_users_community ?? {}} />
+          <TrafficSection />
 
           <div style={{
             padding: '6px 10px', fontSize: 10, color: 'var(--text-tertiary, #888)',

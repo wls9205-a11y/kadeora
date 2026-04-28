@@ -34,9 +34,17 @@ export default function UsersCommunitySection({ data }: Props) {
       padding: 16, borderRadius: 'var(--radius-lg, 14px)',
       background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border, #2a2b35)',
     }}>
-      <h2 style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary, #fff)', marginTop: 0, marginBottom: 10 }}>
-        👥 사용자 & 커뮤니티
-      </h2>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+        <h2 style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary, #fff)', margin: 0 }}>
+          👥 사용자 & 커뮤니티
+        </h2>
+        <a href="/admin/users" style={{
+          marginLeft: 'auto', fontSize: 11, fontWeight: 700,
+          padding: '6px 10px', borderRadius: 6,
+          background: 'var(--bg-surface, #1a1b22)', color: 'var(--text-secondary, #ccc)',
+          border: '1px solid var(--border, #2a2b35)', textDecoration: 'none',
+        }}>유저 상세 보기 →</a>
+      </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 8 }}>
         <AdminKPI label="누적 회원" value={(data.total ?? 0).toLocaleString()} />
