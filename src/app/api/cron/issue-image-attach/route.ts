@@ -62,11 +62,13 @@ async function handler(_req: NextRequest) {
       console.log('[issue-image-attach] start');
 
       // s190: ORDER BY detected_at DESC — 1,489건 백로그 청산 시 최신부터 처리.
+      // s194: retry_count<3 가드 + blog_post_id/retry_count 컬럼 추가 — 무한 retry 차단 + finalize 스킵 fast-path.
       const { data: pending, error: fetchErr } = await (sb as any)
         .from('issue_alerts')
-        .select('id, title, summary, category, sub_category, draft_title, draft_content, draft_slug, draft_keywords, detected_keywords, related_entities, source_urls, detected_at')
+        .select('id, title, summary, category, sub_category, draft_title, draft_content, draft_slug, draft_keywords, detected_keywords, related_entities, source_urls, detected_at, blog_post_id, retry_count')
         .eq('fact_check_passed', true)
         .is('image_attached_at', null)
+        .or('retry_count.is.null,retry_count.lt.3')
         .order('detected_at', { ascending: false })
         .limit(MAX_PER_RUN);
 
@@ -139,17 +141,35 @@ async function handler(_req: NextRequest) {
           }
 
           // 4) finalize_issue_to_post → blog_post_id
-          const { data: postId, error: finErr } = await (sb as any).rpc('finalize_issue_to_post', {
-            p_issue_id: issue.id,
-          });
-          if (finErr || !postId) {
-            failed++;
-            const reason = finErr?.message || 'no_post_id_returned';
-            console.error(`[issue-image-attach] finalize failed ${issue.id}: ${reason}`);
-            failures.push(`${issue.id}:finalize:${reason}`);
-            continue;
+          // s194: issue-draft 가 이미 INSERT 한 경우 (blog_post_id 존재) finalize 스킵.
+          // daily_create_limit (80) 가 finalize 단계에서 차단해서 무한 retry 발생했던 부분 회피.
+          let blogPostId: number;
+          if (issue.blog_post_id) {
+            blogPostId = Number(issue.blog_post_id);
+            console.log(`[issue-image-attach] finalize_skipped issue=${issue.id} post=${blogPostId} (already inserted)`);
+          } else {
+            const { data: postId, error: finErr } = await (sb as any).rpc('finalize_issue_to_post', {
+              p_issue_id: issue.id,
+            });
+            if (finErr || !postId) {
+              failed++;
+              const reason = finErr?.message || 'no_post_id_returned';
+              console.error(`[issue-image-attach] finalize failed ${issue.id}: ${reason}`);
+              failures.push(`${issue.id}:finalize:${reason}`);
+              // s194: retry_count 증가 + block_reason 마커 — 3회 후 SELECT 가드에서 자동 제외.
+              const newRetry = (issue.retry_count || 0) + 1;
+              try {
+                await (sb as any).from('issue_alerts').update({
+                  block_reason: `finalize_blocked: ${reason}`.slice(0, 240),
+                  retry_count: newRetry,
+                }).eq('id', issue.id);
+              } catch (markErr: any) {
+                console.warn(`[issue-image-attach] retry mark failed ${issue.id}:`, markErr?.message);
+              }
+              continue;
+            }
+            blogPostId = Number(postId);
           }
-          const blogPostId = Number(postId);
           finalized++;
 
           // 5) 이미지 파이프라인 — lib/image-pipeline (hydrate + relevance + record)

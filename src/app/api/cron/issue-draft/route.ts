@@ -561,6 +561,9 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
     draft_template: selectDraftTemplate(issue.category, issue.issue_type),
     fact_check_passed: check.passed, fact_check_details: check.details,
     published_at: canAutoPublish && !!blogPostId ? new Date().toISOString() : null,
+    // s194: 발행 성공 시 retry_count 0 reset — image-attach 단계의 retry<3 가드가
+    // 이전 ai_failed 누적 카운트를 들고 가지 않도록.
+    retry_count: blogPostId ? 0 : (issue.retry_count || 0),
   }).eq('id', issue.id);
 
   if (canAutoPublish && blogPostId) {

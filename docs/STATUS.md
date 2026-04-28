@@ -1,4 +1,59 @@
-# 카더라 STATUS — 세션 193 (2026-04-28)
+# 카더라 STATUS — 세션 194 (2026-04-28)
+
+## 세션 194 — image-attach 무한 retry 루프 fix (daily_create_limit 우회)
+
+### 사전 진단 (s193 deploy 후)
+- `image-attach` pending 1,488건 분포:
+  - **`blog_post_id` 보유: 202** ← issue-draft 가 이미 INSERT 한 글 (finalize 불필요)
+  - `blog_post_id` NULL: 1,286 (이 중 1,280 가 12h+ stuck)
+  - `retry_count >= 3`: 0 (가드 작동 안 했었음)
+- 동일 5 issue ID 가 매 cron 사이클마다 `finalize_issue_to_post` → `safeBlogInsert`
+  → quality gate `CRON_TYPE_DAILY_LIMIT` 차단 → `image_attached_at` NULL 유지 → 재SELECT
+  → 무한 retry. (`daily_create_limit=80` 임시 설정 — Invariants 미변경.)
+
+### 변경
+
+**DB**
+- 마이그레이션 `image_attach_retry_guard_index`:
+  - `idx_issue_alerts_image_attach_pending` partial index
+    `(fact_check_passed, image_attached_at, retry_count, detected_at DESC)`
+    `WHERE fact_check_passed=true AND image_attached_at IS NULL`.
+  - SELECT `retry_count<3` 가드를 즉시 사용.
+- 즉시 청산 UPDATE: 12h+ NULL post_id stuck 1,280건 → `retry_count=99`,
+  `block_reason='finalize_blocked_daily_limit_s194'`. 후속 SELECT 에서 자동 제외.
+- 청산 후 분포: `retry_lt_3_active=208` (= 202 has_post_id + 6 fresh).
+
+**`src/app/api/cron/issue-image-attach/route.ts`**
+- SELECT 컬럼 추가: `blog_post_id`, `retry_count`. 필터 추가: `retry_count IS NULL OR retry_count < 3`.
+- `finalize_issue_to_post` 호출 전 `issue.blog_post_id` 존재 시 **finalize 스킵 fast-path**
+  (issue-draft 가 이미 INSERT 한 글에 대해 daily_limit 가 트리거되지 않도록).
+- finalize 실패 시 `retry_count + 1` + `block_reason: finalize_blocked: <reason>` 마커.
+  3회 누적 후 SELECT 가드에서 자동 제외 — 무한 retry 차단.
+
+**`src/app/api/cron/issue-draft/route.ts`**
+- 발행 성공 시 (`blogPostId !== null`) `retry_count: 0` 명시 reset.
+  AI 재시도 누적치를 image-attach 단계가 들고 가지 않도록.
+
+### 검증
+- DB UPDATE 후 분포: pending 1,488 / has_post_id 202 / retry≥3 1,280 / **active 208**.
+- `npx tsc --noEmit --skipLibCheck` → 0 errors.
+- `npm run build` → 성공.
+
+### 효과 (가설)
+- 무한 retry 5+ 즉시 청산 (1,280건 retry=99 마킹).
+- `blog_post_id` 보유 202건 → finalize 스킵 fast-path → orchestrator 첫 사이클부터
+  쾌속 처리 (이미지 파이프라인만 도는 데 ~1-2s/건).
+- 신규 issue 도 daily_limit hit 시 retry++ 3회 후 자동 skip → 큐 막힘 영구 방지.
+- 추정: orchestrator 15분 × MAX_PER_RUN 20 × finalize 스킵 → 백로그 ~1.5h 청산.
+
+### Invariants 준수
+- `daily_create_limit` 80 미변경 (가드는 retry/marker 로 우회).
+- 4 cron 라우트 파일 미삭제.
+- `safeBlogInsert` 통해서만 신규 (이번 작업은 UPDATE/skip 만).
+- `(sb as any)` RPC 패턴.
+- DB 변경: 신규 partial index + 데이터 마킹 UPDATE 만 (스키마 미변경).
+
+---
 
 ## 세션 193 — orchestrator 가동 검증 + issue-publish OG padding 디버그 + image-attach 처리량 ↑
 
