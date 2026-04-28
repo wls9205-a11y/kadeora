@@ -1,4 +1,3 @@
-import { Suspense } from 'react';
 import { SITE_URL } from '@/lib/constants';
 import Link from 'next/link';
 import type { Metadata } from 'next';
@@ -382,7 +381,10 @@ export default async function AptPage({ searchParams }: { searchParams?: Promise
     url: `${SITE_URL}/apt/${encodeURIComponent(a.house_nm?.trim().replace(/\s+/g, '-').replace(/[^\w가-힣\-]/g, '').toLowerCase() || a.house_manage_no || a.id)}`,
   }));
 
-  return <Suspense fallback={<div aria-hidden="true" style={{ minHeight: 1 }} />}>
+  // Suspense 제거 — async server component (AptHubCuration) 는 inline await 가능,
+  // outer Suspense 는 RightPanel/SectionShareButton 의 dynamic({ssr:false}) bailout 과
+  // 함께 $RS replace race 를 발생시켜 production 에서 parentNode null TypeError 를 던짐.
+  return <>
     {/* BreadcrumbList */}
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"카더라","item":SITE_URL},{"@type":"ListItem","position":2,"name":"부동산","item":SITE_URL + "/apt"}]}) }} />
     {/* ItemList → Google carousel */}
@@ -470,5 +472,5 @@ export default async function AptPage({ searchParams }: { searchParams?: Promise
     </div>
 
     <Disclaimer type="apt" />
-  </Suspense>;
+  </>;
 }
