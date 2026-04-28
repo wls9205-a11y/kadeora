@@ -18,12 +18,12 @@ const DEFAULT_ORDER = [
 ];
 
 const SHORT: Record<string, string> = {
-  'issue-detect':                'Detect',
-  'issue-draft':                 'Draft',
-  'issue-fact-check':            'Fact',
-  'issue-image-attach':          'Image',
-  'issue-publish':               'Publish',
-  'issue-pipeline-orchestrator': 'Orchestr.',
+  'issue-detect':                '감지',
+  'issue-draft':                 '초안',
+  'issue-fact-check':            '팩트',
+  'issue-image-attach':          '이미지',
+  'issue-publish':               '발행',
+  'issue-pipeline-orchestrator': '오케스트레이터',
 };
 
 function statusColor(stat: StageStat): string {
@@ -57,7 +57,7 @@ export default function PipelineStages({ stages, order = DEFAULT_ORDER }: Props)
               {SHORT[k] ?? k}
             </div>
             <div style={{ fontSize: 12, fontWeight: 700, color }}>
-              ok {st?.ok ?? 0} <span style={{ color: 'var(--text-tertiary, #888)', fontWeight: 500 }}>·</span> fail {st?.fail ?? 0}
+              성공 {st?.ok ?? 0} <span style={{ color: 'var(--text-tertiary, #888)', fontWeight: 500 }}>·</span> 실패 {st?.fail ?? 0}
             </div>
           </div>
         );

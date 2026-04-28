@@ -35,15 +35,15 @@ export default function UsersCommunitySection({ data }: Props) {
       background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border, #2a2b35)',
     }}>
       <h2 style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary, #fff)', marginTop: 0, marginBottom: 10 }}>
-        👥 Users & Community
+        👥 사용자 & 커뮤니티
       </h2>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 8 }}>
         <AdminKPI label="누적 회원" value={(data.total ?? 0).toLocaleString()} />
-        <AdminKPI label="신규 7d" value={data.new_7d ?? 0} />
-        <AdminKPI label="active 7d" value={data.active_7d ?? 0} />
+        <AdminKPI label="7일 신규" value={data.new_7d ?? 0} />
+        <AdminKPI label="7일 활성" value={data.active_7d ?? 0} />
         <AdminKPI
-          label="push 구독률"
+          label="푸시 구독률"
           value={`${pushPct}%`}
           delta={`${data.push_subs ?? 0}/${data.push_users ?? 0}`}
           deltaColor="tertiary"
@@ -51,19 +51,19 @@ export default function UsersCommunitySection({ data }: Props) {
         />
       </div>
 
-      <div style={subTitleStyle}>활동 (today / 7d)</div>
+      <div style={subTitleStyle}>활동 (오늘 / 7일)</div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 8 }}>
-        <AdminKPI label="posts today" value={data.posts_today ?? 0} delta={`7d ${data.posts_7d ?? 0}`} />
-        <AdminKPI label="comments today" value={data.comments_today ?? 0} delta={`7d ${data.comments_7d ?? 0}`} />
+        <AdminKPI label="오늘 게시" value={data.posts_today ?? 0} delta={`7일 ${data.posts_7d ?? 0}`} />
+        <AdminKPI label="오늘 댓글" value={data.comments_today ?? 0} delta={`7일 ${data.comments_7d ?? 0}`} />
       </div>
 
-      <div style={subTitleStyle}>공유 7d</div>
+      <div style={subTitleStyle}>7일 공유</div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(70px, 1fr))', gap: 6, fontSize: 11 }}>
         {[
-          { k: 'total', label: 'total',  v: share.total ?? 0 },
-          { k: 'kakao', label: 'kakao',  v: share.kakao ?? 0 },
-          { k: 'naver', label: 'naver',  v: share.naver ?? 0 },
-          { k: 'daum',  label: 'daum',   v: share.daum  ?? 0 },
+          { k: 'total', label: '전체',   v: share.total ?? 0 },
+          { k: 'kakao', label: '카카오', v: share.kakao ?? 0 },
+          { k: 'naver', label: '네이버', v: share.naver ?? 0 },
+          { k: 'daum',  label: '다음',   v: share.daum  ?? 0 },
         ].map(it => (
           <div key={it.k} style={{
             padding: '8px 10px', borderRadius: 6,

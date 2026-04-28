@@ -13,7 +13,7 @@ function colorFor(s: number): string {
   return '#34d399';
 }
 
-export default function HealthRing({ score, size = 64, label = '헬스' }: Props) {
+export default function HealthRing({ score, size = 64, label = '헬스 점수' }: Props) {
   const pct = Math.max(0, Math.min(100, Number(score) || 0));
   const r = (size / 2) - 4;
   const c = 2 * Math.PI * r;

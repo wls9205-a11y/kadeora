@@ -28,7 +28,7 @@ export default function OpsSection({ data }: Props) {
       background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border, #2a2b35)',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-        <h2 style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary, #fff)', margin: 0 }}>⚙️ Ops</h2>
+        <h2 style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary, #fff)', margin: 0 }}>⚙️ 운영</h2>
         <button
           onClick={() => setGodOpen(v => !v)}
           style={{
@@ -37,19 +37,19 @@ export default function OpsSection({ data }: Props) {
             background: 'transparent', color: 'var(--text-secondary, #ccc)', cursor: 'pointer',
           }}
         >
-          🛠️ GOD MODE
+          🛠️ 일괄 최신화
         </button>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 8 }}>
-        <AdminKPI label="cron 24h" value={`${c.pct ?? 0}%`} delta={`ok ${c.ok ?? 0} / fail ${c.fail ?? 0}`} deltaColor={(c.fail ?? 0) > 0 ? 'red' : 'tertiary'} health={cronHealth} />
-        <AdminKPI label="cron 등록" value="100" unit="/100" />
-        <AdminKPI label="pv today" value={(data.pv_today ?? 0).toLocaleString()} />
-        <AdminKPI label="uv today" value={(data.uv_today ?? 0).toLocaleString()} />
+        <AdminKPI label="24시간 크론" value={`${c.pct ?? 0}%`} delta={`성공 ${c.ok ?? 0} / 실패 ${c.fail ?? 0}`} deltaColor={(c.fail ?? 0) > 0 ? 'red' : 'tertiary'} health={cronHealth} />
+        <AdminKPI label="크론 등록" value="100" unit="/100" />
+        <AdminKPI label="오늘 PV" value={(data.pv_today ?? 0).toLocaleString()} />
+        <AdminKPI label="오늘 UV" value={(data.uv_today ?? 0).toLocaleString()} />
       </div>
 
       <div style={{ marginTop: 12 }}>
-        <AlertCard severity="warn" title="실패 cron (24h)" hideWhenEmpty count={failed.length}>
+        <AlertCard severity="warn" title="실패 크론 (24시간)" hideWhenEmpty count={failed.length}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4, maxHeight: 220, overflowY: 'auto' }}>
             {failed.slice(0, 12).map(f => (
               <div key={f.name} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, padding: '5px 8px', borderRadius: 6, background: 'rgba(0,0,0,0.18)' }}>
@@ -75,11 +75,11 @@ export default function OpsSection({ data }: Props) {
             display: 'flex', flexDirection: 'column', gap: 12, overflowY: 'auto',
           }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <strong style={{ fontSize: 14, color: 'var(--text-primary, #fff)' }}>🛠️ GOD MODE</strong>
+              <strong style={{ fontSize: 14, color: 'var(--text-primary, #fff)' }}>🛠️ 일괄 최신화</strong>
               <button onClick={() => setGodOpen(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-tertiary, #888)', cursor: 'pointer', fontSize: 14 }}>✕</button>
             </div>
             <p style={{ fontSize: 12, color: 'var(--text-secondary, #ccc)', margin: 0 }}>
-              긴급 운영 액션 — 다음 phase (s198+) 에서 채워질 예정. 현재는 admin/run-pipeline 만 노출.
+              긴급 운영 액션 — 다음 단계에서 채워질 예정. 현재는 파이프라인 즉시 실행만 노출.
             </p>
             <a href="/api/admin/issues/run-pipeline" style={{ fontSize: 12, color: 'var(--accent, #3b82f6)', textDecoration: 'none' }}>
               POST /api/admin/issues/run-pipeline →

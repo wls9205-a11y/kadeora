@@ -74,11 +74,11 @@ export default function AdminShellV4() {
       }}>
         <HealthRing score={h.score ?? 0} />
         <KPIStrip items={[
-          { label: 'cron',     value: `${h.cron_pct ?? 0}%`, tone: (h.cron_pct ?? 0) >= 95 ? 'green' : (h.cron_pct ?? 0) >= 80 ? 'orange' : 'red' },
-          { label: '+신규 7d', value: h.week_signups ?? 0, tone: (h.week_signups ?? 0) >= 30 ? 'green' : (h.week_signups ?? 0) >= 10 ? 'orange' : 'red' },
+          { label: '크론',     value: `${h.cron_pct ?? 0}%`, tone: (h.cron_pct ?? 0) >= 95 ? 'green' : (h.cron_pct ?? 0) >= 80 ? 'orange' : 'red' },
+          { label: '7일 신규', value: h.week_signups ?? 0, tone: (h.week_signups ?? 0) >= 30 ? 'green' : (h.week_signups ?? 0) >= 10 ? 'orange' : 'red' },
           { label: 'UV',       value: h.active_users ?? 0 },
-          { label: 'BROKEN',   value: h.broken_count ?? 0, tone: (h.broken_count ?? 0) === 0 ? 'green' : 'red' },
-          { label: 'return',   value: `${h.return_rate_pct ?? 0}%`, tone: (h.return_rate_pct ?? 0) >= 50 ? 'green' : 'orange' },
+          { label: '작동 안함', value: h.broken_count ?? 0, tone: (h.broken_count ?? 0) === 0 ? 'green' : 'red' },
+          { label: '재방문',   value: `${h.return_rate_pct ?? 0}%`, tone: (h.return_rate_pct ?? 0) >= 50 ? 'green' : 'orange' },
           { label: 'CTR',      value: `${h.ctr_avg_pct ?? 0}%`, tone: (h.ctr_avg_pct ?? 0) >= 2 ? 'green' : 'orange' },
         ]} />
         <button onClick={fetchData} style={{
@@ -101,7 +101,7 @@ export default function AdminShellV4() {
           background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.4)',
           color: '#f87171', fontSize: 12,
         }}>
-          fetch 실패: {err}
+          데이터 가져오기 실패: {err}
         </div>
       )}
 
@@ -121,8 +121,8 @@ export default function AdminShellV4() {
             padding: '6px 10px', fontSize: 10, color: 'var(--text-tertiary, #888)',
             textAlign: 'right',
           }}>
-            generated_at: {data.generated_at ?? '—'}
-            {lastFetch != null && <> · last fetch: {new Date(lastFetch).toLocaleTimeString('ko-KR')}</>}
+            생성 시각: {data.generated_at ?? '—'}
+            {lastFetch != null && <> · 마지막 갱신: {new Date(lastFetch).toLocaleTimeString('ko-KR')}</>}
           </div>
         </>
       )}

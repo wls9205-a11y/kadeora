@@ -31,29 +31,29 @@ export default function ContentHealthSection({ data }: Props) {
       background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border, #2a2b35)',
     }}>
       <h2 style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary, #fff)', marginTop: 0, marginBottom: 10 }}>
-        📚 Content Health
+        📚 콘텐츠 위생
       </h2>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 8 }}>
-        <AdminKPI label="meta_desc" value={`${data.meta_pct ?? 0}%`} health={healthFor(data.meta_pct)} />
-        <AdminKPI label="image_alt" value={`${data.alt_pct ?? 0}%`} health={healthFor(data.alt_pct)} />
-        <AdminKPI label="excerpt" value={`${data.excerpt_pct ?? 0}%`} health={healthFor(data.excerpt_pct)} />
-        <AdminKPI label="published 누적" value={(data.published ?? 0).toLocaleString()} />
+        <AdminKPI label="메타 설명" value={`${data.meta_pct ?? 0}%`} health={healthFor(data.meta_pct)} />
+        <AdminKPI label="이미지 alt" value={`${data.alt_pct ?? 0}%`} health={healthFor(data.alt_pct)} />
+        <AdminKPI label="발췌문" value={`${data.excerpt_pct ?? 0}%`} health={healthFor(data.excerpt_pct)} />
+        <AdminKPI label="누적 발행" value={(data.published ?? 0).toLocaleString()} />
       </div>
 
       <div style={{
         marginTop: 12, fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary, #888)',
         textTransform: 'uppercase', letterSpacing: 0.4,
       }}>
-        Hub mapping by category
+        카테고리별 허브 매핑
       </div>
       <div style={{ overflowX: 'auto', marginTop: 6 }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
           <thead>
             <tr style={{ color: 'var(--text-tertiary, #888)' }}>
-              <th style={{ padding: 6, textAlign: 'left' }}>category</th>
-              <th style={{ padding: 6, textAlign: 'right' }}>mapped</th>
-              <th style={{ padding: 6, textAlign: 'right' }}>total</th>
+              <th style={{ padding: 6, textAlign: 'left' }}>카테고리</th>
+              <th style={{ padding: 6, textAlign: 'right' }}>매핑됨</th>
+              <th style={{ padding: 6, textAlign: 'right' }}>전체</th>
               <th style={{ padding: 6, textAlign: 'right' }}>%</th>
             </tr>
           </thead>

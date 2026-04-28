@@ -34,9 +34,9 @@ export default function IssuePipelineSection({ data }: Props) {
     try {
       const r = await fetch('/api/admin/issues/run-pipeline', { method: 'POST' });
       const j = await r.json().catch(() => null);
-      setResult(j ? `ok=${r.status} duration=${j.total_duration_ms ?? '?'}ms steps=${j.steps?.length ?? 0}` : `status=${r.status}`);
+      setResult(j ? `상태 ${r.status} · 소요 ${j.total_duration_ms ?? '?'}ms · 단계 ${j.steps?.length ?? 0}` : `상태 ${r.status}`);
     } catch (e: any) {
-      setResult(`err: ${e?.message ?? 'failed'}`);
+      setResult(`오류: ${e?.message ?? '실패'}`);
     } finally {
       setRunning(false);
     }
@@ -49,10 +49,10 @@ export default function IssuePipelineSection({ data }: Props) {
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10, flexWrap: 'wrap' }}>
         <h2 style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary, #fff)', margin: 0 }}>
-          🔄 Issue Pipeline
+          🔄 이슈 파이프라인
         </h2>
         <span style={{ fontSize: 11, color: 'var(--text-tertiary, #888)' }}>
-          마지막 orchestrator: <strong style={{ color: 'var(--text-secondary, #ccc)' }}>{relTime(data.last_orchestrator_at)}</strong>
+          마지막 오케스트레이터: <strong style={{ color: 'var(--text-secondary, #ccc)' }}>{relTime(data.last_orchestrator_at)}</strong>
         </span>
         <button
           onClick={runOrchestrator}
@@ -64,7 +64,7 @@ export default function IssuePipelineSection({ data }: Props) {
             opacity: running ? 0.6 : 1,
           }}
         >
-          {running ? '실행 중…' : '⚡ orchestrator 즉시'}
+          {running ? '실행 중…' : '⚡ 오케스트레이터 즉시 실행'}
         </button>
       </div>
 
@@ -81,9 +81,9 @@ export default function IssuePipelineSection({ data }: Props) {
         background: 'var(--bg-surface, #1a1b22)', border: '1px solid var(--border, #2a2b35)',
         display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 8,
       }}>
-        <AdminKPI label="7d publish total" value={p7.total ?? 0} />
-        <AdminKPI label="image≥5" value={`${p7.img5_pct ?? 0}%`} health={(p7.img5_pct ?? 0) >= 90 ? 'ok' : (p7.img5_pct ?? 0) >= 70 ? 'warn' : 'critical'} />
-        <AdminKPI label="hub link 본문" value={`${p7.hub_link_pct ?? 0}%`} health={(p7.hub_link_pct ?? 0) >= 70 ? 'ok' : (p7.hub_link_pct ?? 0) >= 30 ? 'warn' : 'critical'} />
+        <AdminKPI label="7일 발행 합계" value={p7.total ?? 0} />
+        <AdminKPI label="이미지 5+ 비율" value={`${p7.img5_pct ?? 0}%`} health={(p7.img5_pct ?? 0) >= 90 ? 'ok' : (p7.img5_pct ?? 0) >= 70 ? 'warn' : 'critical'} />
+        <AdminKPI label="본문 허브 링크" value={`${p7.hub_link_pct ?? 0}%`} health={(p7.hub_link_pct ?? 0) >= 70 ? 'ok' : (p7.hub_link_pct ?? 0) >= 30 ? 'warn' : 'critical'} />
       </div>
     </section>
   );
