@@ -2,6 +2,8 @@
 import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
+  // s204: production source maps — React #310/#300 정확한 file:line stack trace 확보용
+  productionBrowserSourceMaps: true,
   generateBuildId: async () =>
     process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 8)
       ?? process.env.NEXT_PUBLIC_CACHE_VERSION

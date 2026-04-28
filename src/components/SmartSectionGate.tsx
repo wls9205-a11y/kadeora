@@ -99,17 +99,12 @@ export default function SmartSectionGate({
     } catch {}
   }, [slug]);
 
-  // SSR 단계 + 판정 전: 빈 placeholder 만 렌더 (CLS 방지). 판정 후 적절한 분기로.
-  if (shouldGate === null) {
-    return <div className="blog-content" itemProp="articleBody" dangerouslySetInnerHTML={{ __html: htmlContent }} />;
-  }
-  if (shouldGate === false || bypassedThisSession) {
-    return <div className="blog-content" itemProp="articleBody" dangerouslySetInnerHTML={{ __html: htmlContent }} />;
-  }
-
   /* ── 클리프행어 컷포인트: 세 번째 H2 직전 ──
    * 콘텐츠의 대부분(40~70%)을 보여주어 신뢰 확보 후 CTA
    * "더 읽으려면 가입" 대신 "이 정보의 변화를 추적하려면 가입"
+   *
+   * s204: hook 은 early return 전에 호출되어야 함 — useMemo 가 early return 뒤에
+   * 있으면 shouldGate 상태에 따라 hook count 가 6 ↔ 7 변동하여 React #310 발생.
    */
   const { visibleSection, remainingHeadings } = useMemo(() => {
     const h2Matches = [...htmlContent.matchAll(/<h2[^>]*>/gi)];
@@ -143,6 +138,14 @@ export default function SmartSectionGate({
 
     return { visibleSection: visible, remainingHeadings: headings };
   }, [htmlContent]);
+
+  // SSR 단계 + 판정 전: 빈 placeholder 만 렌더 (CLS 방지). 판정 후 적절한 분기로.
+  if (shouldGate === null) {
+    return <div className="blog-content" itemProp="articleBody" dangerouslySetInnerHTML={{ __html: htmlContent }} />;
+  }
+  if (shouldGate === false || bypassedThisSession) {
+    return <div className="blog-content" itemProp="articleBody" dangerouslySetInnerHTML={{ __html: htmlContent }} />;
+  }
 
   const loginUrl = `/login?redirect=${encodeURIComponent(pathname)}&source=content_gate`;
   const benefit = CATEGORY_BENEFITS[category] || DEFAULT_BENEFIT;
