@@ -83,8 +83,17 @@ export default function AdminShellV4() {
           { label: '재방문',   value: `${h.return_rate_pct ?? 0}%`, tone: (h.return_rate_pct ?? 0) >= 50 ? 'green' : 'orange' },
           { label: 'CTR',      value: `${h.ctr_avg_pct ?? 0}%`, tone: (h.ctr_avg_pct ?? 0) >= 2 ? 'green' : 'orange' },
         ]} />
+        <a
+          href="/admin/signup-flow"
+          style={{
+            marginLeft: 'auto', fontSize: 11, fontWeight: 700,
+            padding: '6px 12px', borderRadius: 6,
+            background: 'transparent', color: 'var(--text-secondary, #ccc)',
+            border: '1px solid var(--border, #2a2b35)', textDecoration: 'none',
+          }}
+        >📊 가입 플로우 진단</a>
         <button onClick={fetchData} style={{
-          marginLeft: 'auto', fontSize: 11, fontWeight: 700,
+          fontSize: 11, fontWeight: 700,
           padding: '6px 12px', borderRadius: 6, cursor: 'pointer',
           background: 'transparent', color: 'var(--text-secondary, #ccc)',
           border: '1px solid var(--border, #2a2b35)',

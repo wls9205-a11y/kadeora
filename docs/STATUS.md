@@ -1,3 +1,48 @@
+# 카더라 STATUS — 세션 208 + 가입 플로우 진단 페이지 (2026-04-29)
+
+## 세션 208 — `/admin/signup-flow` 가입 funnel 진단 페이지
+
+### 배경
+- 4/22~23, 4/25 가입 0건 — OAuth 시작 단계 산발적 회귀 패턴.
+- `v_admin_signup_diagnostic` 4/25 실측: UV 633 / CTA클릭 13 / signup_attempts 2 / signups 0.
+- `dropped_step='oauth_start'` 4/19부터 등장, 4/26~28 부분 회복.
+- 모바일 클로드가 prod DB 에 3 RPC 직접 적용 완료, 코드 4 파일은 미배포 상태로 컨테이너 내부(`9157ed4`)에 머무름. 패치 파일도 `~/Downloads/signup-flow.patch` 부재.
+
+### 작업 (이 세션)
+모바일 클로드의 4 파일 작업분을 스펙 기반으로 처음부터 작성:
+- `src/app/api/admin/signup-flow/route.ts` 신규 — 4 쿼리 Promise.allSettled 병렬:
+  - `admin_signup_flow_funnel_7d()` RPC (7일 funnel JSON)
+  - `admin_signup_flow_hourly_24h()` RPC (24h 시간대별)
+  - `admin_signup_flow_users(p_include_seed, p_limit, p_offset, p_search)` RPC
+  - `v_admin_signup_diagnostic` 14d 윈도우 (일별)
+  - 모든 호출 graceful fallback — 실패 시 `errors[]` 누적, `ok:true` 200 보장.
+  - `requireAdmin()` 가드, `maxDuration=15`.
+- `src/app/admin/signup-flow/page.tsx` 신규 — 단순 wrapper.
+- `src/app/admin/signup-flow/SignupFlowClient.tsx` 신규 (~580 line):
+  - 7일 Funnel 막대 (7 stage: cta_view → … → signup_success).
+  - 이탈 분석 카드 3개 (노출→가입 / 클릭→시도 / 시도→성공) green/orange/red 임계값.
+  - 7일 dropped_step 분포 chip + source × 성공률 테이블.
+  - 14일 일별 진단표 — `signups_real=0` 강조.
+  - 24h 시간대별 SVG line chart (visits / cta_clicks / signups_real / signups_seed).
+  - 가입자 상세 테이블 (시드 토글, 페이징 20·50·100·200, 이메일·소스 검색, 마지막 이탈 단계).
+  - 30s 자동 갱신 + visibilitychange 즉시 fetch.
+  - **defensive normalize** — RPC 반환 모양이 객체/배열/단일 row 어떻게 와도 alias 매핑.
+- `src/app/admin/v4/AdminShellV4.tsx` 수정 — 헤더에 `📊 가입 플로우 진단` 링크.
+
+### Rule 준수
+- `(sb as any).rpc()` (Rule #13). DB 마이그레이션 추가 X (RPC 사전 적용분 활용).
+- API 200 보장 (Promise.allSettled + try-catch). points / blog 무손상.
+- `typescript.ignoreBuildErrors` 미사용 — `npm run type-check` 0, `npm run build` 클린.
+
+### 검증
+- 로컬: 554/554, `/admin/signup-flow 6.28 kB`, `/api/admin/signup-flow 1.35 kB`.
+- prod: deploy 후 직접 fetch + 8~10분 트래픽 후 `oauth_start` 이탈 재확인.
+
+### 부수 관찰
+- 사용자 보고 "/login + /api/og-blog 500 동일 TypeError" — 현재 prod 둘 다 `curl -sI` 200. s205(AdBanner hook) + s206(livebar/ads timeout) 으로 자연 해소 추정. 본 commit 별도 fix 미포함.
+
+---
+
 # 카더라 STATUS — 세션 204~206 회고 + Architecture Rules #14~16 (2026-04-28)
 
 ## 세션 204~206 — React #310 + /api 504 종합 회고 + 회귀 방지 룰 정립
