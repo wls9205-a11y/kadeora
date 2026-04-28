@@ -7,7 +7,6 @@ import EmptyState from '@/components/EmptyState';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
 import SectionShareButton from '@/components/SectionShareButton';
 import FallbackThumb from '@/components/FallbackThumb';
-import LiveBar from '@/components/ui/LiveBar';
 import HeroCard from '@/components/ui/HeroCard';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
@@ -281,8 +280,7 @@ export default async function BlogPage({ searchParams }: Props) {
       })}} />
       {/* speakable — 네이버 음성검색 */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebPage', name: '카더라 블로그', speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.blog-summary'] } }) }} />
-      {/* Phase 9: 실시간 신선도 시그니처 */}
-      <LiveBar text={`블로그 · ${totalCount.toLocaleString()}편 · 매일 업데이트 · 투자 인사이트`} />
+      {/* LiveBar 는 (main)/layout 의 LiveBarChrome 으로 통합. */}
       {/* Phase 9b-2: 인기 글 HeroCard (필터 없을 때만) */}
       {blogHero && (
         <HeroCard

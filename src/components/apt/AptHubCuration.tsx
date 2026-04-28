@@ -147,7 +147,7 @@ export default async function AptHubCuration() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 9, fontWeight: 800, color: 'var(--text-tertiary)' }}>
                   <span style={{ color: 'var(--kd-accent)' }}>#{p.rank ?? '—'}</span>
                   {p.site_type && <span>{SITE_TYPE_LABEL[p.site_type] || p.site_type}</span>}
-                  {p.popularity_score && <span>· ★ {p.popularity_score}</span>}
+                  {p.popularity_score != null && p.popularity_score !== 100 && <span>· ★ {p.popularity_score}</span>}
                 </div>
                 <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.3, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.name}</div>
                 <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 600 }}>

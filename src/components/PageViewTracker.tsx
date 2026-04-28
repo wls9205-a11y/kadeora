@@ -20,11 +20,17 @@ export default function PageViewTracker() {
         vid = crypto.randomUUID();
         localStorage.setItem('kd_visitor_id', vid);
       }
-      fetch('/api/analytics/pageview', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ visitor_id: vid, path: pathname, referrer: document.referrer || null }),
-      }).catch(() => {});
+      const body = JSON.stringify({ visitor_id: vid, path: pathname, referrer: document.referrer || null });
+      const sent = typeof navigator !== 'undefined' && typeof navigator.sendBeacon === 'function'
+        && navigator.sendBeacon('/api/analytics/pageview', new Blob([body], { type: 'application/json' }));
+      if (!sent) {
+        fetch('/api/analytics/pageview', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body,
+          keepalive: true,
+        }).catch(() => {});
+      }
 
       // GA4 SPA 페이지뷰 추적
       const w = window as any;

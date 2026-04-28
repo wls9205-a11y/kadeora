@@ -53,7 +53,18 @@ async function fetchPost(slug: string): Promise<BlogRow | null> {
     const sb = getSupabaseAdmin();
     const cols = 'slug,title,category,sub_category,cron_type,excerpt,tldr,key_points,tags,cover_image,published_at,created_at,hub_cta_target,hub_apt_slug,view_count,reading_minutes,data_date,meta_description';
     const { data } = await (sb as any).from('blog_posts').select(cols).eq('slug', slug).eq('is_published', true).maybeSingle();
-    return (data ?? null) as BlogRow | null;
+    if (!data) return null;
+    // 정규화 — title/excerpt/tldr 등이 null 인 row 가 존재. 렌더러에서 .length / .slice 직접 접근하므로 string 강제.
+    const row = data as BlogRow;
+    return {
+      ...row,
+      title: typeof row.title === 'string' && row.title ? row.title : (row.slug || '카더라 콘텐츠'),
+      excerpt: typeof row.excerpt === 'string' ? row.excerpt : null,
+      tldr: typeof row.tldr === 'string' ? row.tldr : null,
+      meta_description: typeof row.meta_description === 'string' ? row.meta_description : null,
+      hub_cta_target: typeof row.hub_cta_target === 'string' ? row.hub_cta_target : null,
+      hub_apt_slug: typeof row.hub_apt_slug === 'string' ? row.hub_apt_slug : null,
+    } as BlogRow;
   } catch { return null; }
 }
 
@@ -180,26 +191,32 @@ export async function GET(req: NextRequest) {
   const ff = fontData ? 'NotoSansKR, sans-serif' : 'sans-serif';
 
   let post: BlogRow | null = null;
-  if (slug) post = await fetchPost(slug);
-
-  let body: React.ReactElement;
-  if (!post) {
-    body = renderFallback(slug);
-  } else if (card === 1) {
-    body = renderCover(post);
-  } else if (card === 6) {
-    body = renderCta(post);
-  } else {
-    body = renderKeyPoints(post, card);
+  try {
+    if (slug) post = await fetchPost(slug);
+  } catch (err) {
+    console.error('[og-blog] fetchPost error:', err);
+    post = null;
   }
 
-  const wrapped = (
-    <div style={{ width: '100%', height: '100%', display: 'flex', background: bgFor(card, post), fontFamily: ff }}>
-      {body}
-    </div>
-  );
-
+  // body 구성 + ImageResponse 모두 단일 try 로 감싸서 어떤 필드 접근 throw 가 일어나도 fallback redirect 로 우아하게 다운그레이드.
   try {
+    let body: React.ReactElement;
+    if (!post) {
+      body = renderFallback(slug);
+    } else if (card === 1) {
+      body = renderCover(post);
+    } else if (card === 6) {
+      body = renderCta(post);
+    } else {
+      body = renderKeyPoints(post, card);
+    }
+
+    const wrapped = (
+      <div style={{ width: '100%', height: '100%', display: 'flex', background: bgFor(card, post), fontFamily: ff }}>
+        {body}
+      </div>
+    );
+
     const img = new ImageResponse(wrapped, {
       width: SIDE,
       height: SIDE,
@@ -217,7 +234,8 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (err) {
-    console.error('[og-blog] render error:', err);
+    // 식별 가능 필드(slug/card) 와 함께 로깅 — Vercel logs 에서 원인 row 추적 용이.
+    console.error('[og-blog] render error:', { slug, card, hasPost: !!post, message: (err as any)?.message, stack: (err as any)?.stack });
     return Response.redirect('https://kadeora.app/images/brand/kadeora-hero.png', 302);
   }
 }

@@ -122,7 +122,9 @@ export default async function RegionRankingHub({ params }: Props) {
                     {r.sigungu}{r.review_count > 0 ? ` · 후기 ${r.review_count}` : ''}{r.lifecycle_stage ? ` · ${r.lifecycle_stage}` : ''}
                   </div>
                 </div>
-                <div style={{ flexShrink: 0, fontSize: 12, fontWeight: 800, color: 'var(--brand)' }}>★ {r.popularity_score}</div>
+                {r.popularity_score != null && r.popularity_score !== 100 && (
+                  <div style={{ flexShrink: 0, fontSize: 12, fontWeight: 800, color: 'var(--brand)' }}>★ {r.popularity_score}</div>
+                )}
               </div>
             </Link>
           </li>
