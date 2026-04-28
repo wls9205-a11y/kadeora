@@ -19,6 +19,10 @@ export async function GET(request: Request) {
   const sourceParam = searchParams.get('source');
   const source = sourceParam ?? 'direct';
   const cookieStore = await cookies();
+  // s196: 모바일 OAuth callback drop 75% 진단 — UA/provider/code 존재 여부 로깅
+  const ua = request.headers.get('user-agent') || '';
+  const isMobile = /Mobile|Android|iPhone|iPad|iPod/i.test(ua);
+  console.log(`[auth/callback] entry mobile=${isMobile} source="${source}" hasCode=${!!code} redirect="${redirect}" ua="${ua.slice(0, 80)}"`);
 
   // Open redirect 방어
   const isSafeInternalPath = (p: string): boolean => {
@@ -30,7 +34,10 @@ export async function GET(request: Request) {
   };
   const safeRedirect = isSafeInternalPath(redirect) ? redirect : '/feed';
 
-  if (!code) return NextResponse.redirect(`${origin}/login?error=auth_failed`);
+  if (!code) {
+    console.warn(`[auth/callback] missing_code mobile=${isMobile} source="${source}" — redirect to /login?error=auth_failed`);
+    return NextResponse.redirect(`${origin}/login?error=auth_failed`);
+  }
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -47,6 +54,7 @@ export async function GET(request: Request) {
 
   const { data, error } = await supabase.auth.exchangeCodeForSession(code);
   if (error || !data?.user) {
+    console.warn(`[auth/callback] exchange_failed mobile=${isMobile} source="${source}" err=${error?.message ?? 'no_user'}`);
     return NextResponse.redirect(`${origin}/login?error=auth_failed`);
   }
 
@@ -54,6 +62,7 @@ export async function GET(request: Request) {
   const meta = user.user_metadata ?? {};
   const avatarUrl = (meta?.avatar_url || meta?.picture || null)?.replace('http://', 'https://') ?? null;
   const provider = (user.app_metadata?.provider ?? 'unknown') as string;
+  console.log(`[auth/callback] success mobile=${isMobile} source="${source}" provider=${provider} user=${user.id.slice(0, 8)}`);
   const fallbackNickname =
     (meta?.full_name as string | undefined)
     || (meta?.name as string | undefined)

@@ -1,5 +1,5 @@
 // Kadeora Service Worker v2
-const CACHE_VERSION = '202604280721';
+const CACHE_VERSION = '202604280820';
 const CACHE_NAME = 'kadeora-v' + CACHE_VERSION;
 const PRECACHE = ['/feed', '/offline.html', '/icons/icon-192.png', '/blog', '/apt'];
 const OFFLINE_PAGES = ['/feed', '/stock', '/hot', '/apt', '/blog'];

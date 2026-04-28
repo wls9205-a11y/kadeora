@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
 import CategoryGrid, { type CategoryGridItem } from '@/components/ui/CategoryGrid';
+import { trackCTA } from '@/lib/analytics';
 
 const MENU = [
   { href: '/feed', icon: '📋', label: '피드' },
@@ -184,12 +185,16 @@ export default function Sidebar() {
       </div>
 
       {!userId && (
-        <Link href={`/login?redirect=${encodeURIComponent(pathname)}&source=sidebar`} style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-          padding: '11px 14px', borderRadius: 'var(--radius-md)', marginTop: 'var(--sp-sm)',
-          textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 700,
-          color: 'var(--kakao-text, #191919)', background: 'var(--kakao-bg, #FEE500)',
-        }}>
+        <Link
+          href={`/login?redirect=${encodeURIComponent(pathname)}&source=sidebar`}
+          onClick={() => trackCTA('click', 'sidebar', { page_path: pathname })}
+          style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+            padding: '11px 14px', borderRadius: 'var(--radius-md)', marginTop: 'var(--sp-sm)',
+            textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 700,
+            color: 'var(--kakao-text, #191919)', background: 'var(--kakao-bg, #FEE500)',
+          }}
+        >
           카카오로 3초 가입
         </Link>
       )}

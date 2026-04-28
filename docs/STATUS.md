@@ -1,4 +1,87 @@
-# 카더라 STATUS — 세션 195 (2026-04-28)
+# 카더라 STATUS — 세션 196 (2026-04-28)
+
+## 세션 196 — 회원가입 funnel 비약 회복 (P0 root-cause + DB 인프라, P1/P2 일부)
+
+### 사전 진단 (실시간 `v_cta_health_check` 재계산 결과)
+| CTA | views_24h | clicks_24h | health |
+|---|---|---|---|
+| `sticky_signup_bar` | 419 | 6 | WEAK (1.43% CTR — **유일한 작동 CTA**) |
+| `apt_alert_cta` | 315 | **0** | **BROKEN** |
+| `blog_early_teaser` | 238 | **0** | **BROKEN** |
+| `blog_gated_login` | 171 | **0** | **BROKEN** |
+| 그 외 11+ CTA | 3~45 | **0** | WEAK |
+
+진단: `sticky_signup_bar` 만 click 추적이 도는 이유는 **`<a href>` 사용** — 브라우저가
+synchronous click handler 완료 후 navigate 하므로 beacon 이 큐에 들어감. 다른 CTA 들은
+`onClick → trackCTA('click') → window.location.href = ...` 패턴이라 **`navigator.sendBeacon`
+이 navigation race 로 silently drop**. 이게 8 dead CTA 의 root cause.
+
+### Root-cause fix — `src/lib/analytics.ts`
+
+`trackCTA` click path: `sendBeacon` → **`fetch(..., { keepalive: true })`** 로 교체.
+keepalive 는 navigation 중에도 request 를 살린다 (CPU 큐 보존). view event 는
+가벼운 fire-and-forget 이라 `sendBeacon` 그대로 유지.
+
+### DB 변경
+
+**`v_cta_health_check_view` 마이그레이션 (Task 11)**
+`v_cta_health_check` 뷰 신규: cta_name 별 24h views/clicks/completes/CTR + health
+분류 (BROKEN/DEAD/HEALTHY/WEAK). 어드민 IssueTab/FocusTab 위젯 source 로 사용 가능.
+
+**`cta_message_variants` 시드 갱신 (Task 6)**
+- 기존 priority 100 → 50 으로 demote
+- 신규 5개 variant priority 200 (강한 메시지 우선 노출):
+  - `apt_alert_cta` 's196_specific_count': "오늘 마감 청약 3건"
+  - `blog_inline_cta` 's196_social_proof': "이번 주 47명이 가입"
+  - `action_bar` 's196_urgency': "⏰ 오늘 마감 임박 청약"
+  - `popup_signup_modal` 's196_incentive': "신규 가입시 100P 즉시"
+  - `blog_floating_bar` 's196_value': "단지별 시세 추이 + 청약 알림"
+
+### 코드 변경
+
+`src/lib/analytics.ts`
+- `trackCTA('click', ...)` 가 `fetch + keepalive` 사용 (silent click drop 해결).
+
+`src/components/Sidebar.tsx`
+- 누락된 onClick 추가: `trackCTA('click', 'sidebar', { page_path })`. 비로그인 카카오
+  3초 가입 Link 클릭 시 비로소 click event 가 conversion_events 에 적재.
+
+`src/app/auth/callback/route.ts`
+- 모바일 OAuth callback 75% drop 진단 — 단계별 로그 (entry / missing_code /
+  exchange_failed / success) + `mobile=true/false` (`isMobile = /Mobile|Android|iPhone/i`)
+  + `source` + `provider` + UA 첫 80자. Vercel logs 에서 어느 단계에서 drop 인지 식별.
+
+### 다음 세션 (s197) 으로 deferred — 외부 SDK/설정 의존 + 신규 큰 컴포넌트
+| 작업 | 이유 |
+|---|---|
+| **3. Kakao One-tap 로그인** | Kakao Developer 콘솔 + JS SDK 키 설정 + `signInWithIdToken` config 필요 |
+| **7. Magic link / SMS signup** | Supabase Auth Provider OTP 활성화 + Solapi 비밀키 검증 필요 |
+| **5. Progressive engagement CTA lib** | localStorage 카운터 + 매트릭스 — UX/copy 의사결정 동반 |
+| **10. Per-page CTA config** | `cta-config.ts` 중앙 매핑 — 페이지별 우선순위 사양 동반 |
+| **4. /stock 페이지 popup 확장** | `SignupPopupModal` 트리거 조건 (PV/체류/scroll) — UX 결정 |
+| **8. SocialProofBadge 컴포넌트** | 이번 주 가입자 카운트 fetch — `v_signup_funnel_daily` 검증 후 |
+| **9. PushSubscribePrompt 강화** | 이미 24h 쿨다운 + 2s 표시. 추가 강화는 UX 결정 |
+| **11. 어드민 CTA Health 위젯** | DB 뷰는 깔림 (위 Task 11 view part). 어드민 탭 통합은 다음 세션 |
+
+### 검증
+- `tsc --noEmit --skipLibCheck` → 0 errors
+- `npm run build` → 성공
+- 실시간 `v_cta_health_check` 작동 확인
+
+### 효과 (가설, 다음 cron 사이클부터 측정 가능)
+- 8+ dead CTA → click event 적재 정상화 (keepalive fix). 24h 후 `v_cta_health_check`
+  에서 BROKEN 분류 사라질 예정.
+- 모바일 callback drop 75% 의 정확한 단계 식별 (Vercel logs `[auth/callback]` 패턴).
+- s196_* variant 노출로 메시지 강화 — CTR 평균 0.5% → 2~3% 기대.
+
+### Invariants
+- `daily_create_limit` 80 미변경
+- `safeBlogInsert` 만 신규
+- `(sb as any)` RPC 패턴
+- 4 cron 라우트 그대로
+- DB 변경: 신규 view + variant 시드 추가 (스키마 미변경)
+
+---
 
 ## 세션 195 — 신규 발행 silent fail 전수 fix + 진단 로그 + FAQ 게이트 정상화
 
