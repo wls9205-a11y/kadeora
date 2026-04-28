@@ -234,8 +234,17 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (err) {
-    // 식별 가능 필드(slug/card) 와 함께 로깅 — Vercel logs 에서 원인 row 추적 용이.
-    console.error('[og-blog] render error:', { slug, card, hasPost: !!post, message: (err as any)?.message, stack: (err as any)?.stack });
+    // 식별 가능 필드(slug/card/titleLen) 와 stack/class/code 를 함께 로깅 —
+    // Vercel logs 에서 원인 row 추적 + 잘려도 핵심 진단 정보 노출.
+    // (s189 Track B-4 의 null-title fix + s190 의 진단 강화 머지)
+    const e = err as Error;
+    console.error(
+      '[og-blog] render error:',
+      e?.stack || e?.message || String(err),
+      'class=', e?.constructor?.name,
+      'code=', (err as any)?.code,
+      'input=', { slug, card, fontLoaded: !!fontData, hasPost: !!post, postCategory: post?.category, titleLen: post?.title?.length },
+    );
     return Response.redirect('https://kadeora.app/images/brand/kadeora-hero.png', 302);
   }
 }

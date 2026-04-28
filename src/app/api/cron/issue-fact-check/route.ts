@@ -122,15 +122,17 @@ async function handler(_req: NextRequest) {
       const sb = getSupabaseAdmin();
       const start = Date.now();
 
-      const since24h = new Date(Date.now() - 24 * 3600_000).toISOString();
+      // s190: 24h → 7d, is_auto_publish/is_processed 조건 제거 — 397건 NULL 백로그 청산.
+      // draft_content NOT NULL + retry_count < 3 (또는 NULL) 조건 추가.
+      const since7d = new Date(Date.now() - 7 * 24 * 3600_000).toISOString();
 
       const { data: pending, error: fetchErr } = await (sb as any)
         .from('issue_alerts')
-        .select('id, title, summary, draft_title, draft_content, detected_keywords, related_entities, source_urls, raw_data, category, final_score')
-        .eq('is_auto_publish', true)
-        .eq('is_processed', true)
+        .select('id, title, summary, draft_title, draft_content, detected_keywords, related_entities, source_urls, raw_data, category, final_score, retry_count')
         .is('fact_check_passed', null)
-        .gte('detected_at', since24h)
+        .gte('detected_at', since7d)
+        .not('draft_content', 'is', null)
+        .or('retry_count.is.null,retry_count.lt.3')
         .order('final_score', { ascending: false })
         .limit(MAX_PER_RUN);
 

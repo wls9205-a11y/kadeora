@@ -57,18 +57,27 @@ async function handler(_req: NextRequest) {
       const sb = getSupabaseAdmin();
       const start = Date.now();
 
+      console.log('[issue-image-attach] start');
+
+      // s190: ORDER BY detected_at DESC — 1,489건 백로그 청산 시 최신부터 처리.
       const { data: pending, error: fetchErr } = await (sb as any)
         .from('issue_alerts')
-        .select('id, title, summary, category, sub_category, draft_title, draft_content, draft_slug, draft_keywords, detected_keywords, related_entities')
+        .select('id, title, summary, category, sub_category, draft_title, draft_content, draft_slug, draft_keywords, detected_keywords, related_entities, source_urls, detected_at')
         .eq('fact_check_passed', true)
         .is('image_attached_at', null)
-        .order('final_score', { ascending: false })
+        .order('detected_at', { ascending: false })
         .limit(MAX_PER_RUN);
 
-      if (fetchErr) return { processed: 0, failed: 1, metadata: { error: fetchErr.message } };
+      if (fetchErr) {
+        console.error('[issue-image-attach] fetch error:', fetchErr.message);
+        return { processed: 0, failed: 1, metadata: { error: fetchErr.message } };
+      }
+      console.log(`[issue-image-attach] step1 fact_check_passed_count=${pending?.length ?? 0}`);
       if (!pending || pending.length === 0) {
+        console.log('[issue-image-attach] end: no pending candidates');
         return { processed: 0, metadata: { message: 'no pending image-attach candidates' } };
       }
+      console.log(`[issue-image-attach] start: target=${pending.length}`);
 
       let finalized = 0;
       let imagesAttached = 0;
@@ -133,7 +142,9 @@ async function handler(_req: NextRequest) {
           });
           if (finErr || !postId) {
             failed++;
-            failures.push(`${issue.id}:finalize:${finErr?.message || 'no post id'}`);
+            const reason = finErr?.message || 'no_post_id_returned';
+            console.error(`[issue-image-attach] finalize failed ${issue.id}: ${reason}`);
+            failures.push(`${issue.id}:finalize:${reason}`);
             continue;
           }
           const blogPostId = Number(postId);
@@ -160,6 +171,7 @@ async function handler(_req: NextRequest) {
             subdir: `blog/${new Date().toISOString().slice(0, 7)}/${blogPostId}`,
           });
           const inserted = pipe.storage_real + pipe.og_placeholder;
+          console.log(`[issue-image-attach] step2 image_pipeline issue=${issue.id} post=${blogPostId} storage_real=${pipe.storage_real} og_placeholder=${pipe.og_placeholder} failures=${pipe.failures.length}`);
           for (const f of pipe.failures) failures.push(`${issue.id}:${f}`);
 
           // 6) cover_image 는 trg_bpi_cover_sync 트리거가 position 0 기준 자동 동기화 → 별도 update 불필요
@@ -219,9 +231,13 @@ async function handler(_req: NextRequest) {
           }
         } catch (err: any) {
           failed++;
+          // s190: stack trace 전체 로깅 — 이전엔 .message 만이라 silent fail 분류 불가
+          console.error(`[issue-image-attach] exception issue=${issue.id}:`, err?.stack || err?.message || err);
           failures.push(`${issue.id}:exception:${err?.message || 'unknown'}`);
         }
       }
+
+      console.log(`[issue-image-attach] end: processed=${pending.length} finalized=${finalized} skipped=${skipped} failed=${failed} images=${imagesAttached}`);
 
       return {
         processed: pending.length,

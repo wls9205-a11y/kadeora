@@ -508,13 +508,38 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
 
   // A5: 이미지 삽입 (네이버 검색 → 본문 + 커버 교체) — s189: seoEnriched 사용
   if (blogPostId) {
+    let finalContent = seoEnriched;
     try {
-      const enrichedWithImages = await insertImages(seoEnriched, article.title, article.keywords, blogCategory, blogPostId, sb);
-      if (enrichedWithImages !== seoEnriched) {
-        await sb.from('blog_posts').update({ content: enrichedWithImages }).eq('id', blogPostId);
-      }
+      finalContent = await insertImages(seoEnriched, article.title, article.keywords, blogCategory, blogPostId, sb);
     } catch (imgErr) {
       console.warn('[issue-draft] image insert failed:', (imgErr as Error).message);
+    }
+
+    // s190: image-attach 백로그 청산 전까지 issue-draft 가 단독으로 image≥5 보장.
+    // 부족하면 OG variant URL 을 데이터 출처 섹션 위(또는 본문 끝)에 추가.
+    try {
+      const imgCount = (finalContent.match(/!\[.*?\]\(.*?\)/g) || []).length;
+      if (imgCount < 5) {
+        const need = 5 - imgCount;
+        const variants: string[] = [];
+        for (let i = 0; i < need; i++) {
+          const variantDesign = ((titleHash + i + 1) % 6) + 1;
+          const variantUrl = `${SITE_URL}/api/og?title=${encodeURIComponent(article.title + ' ' + (i + 1))}&category=${blogCategory}&design=${variantDesign}`;
+          variants.push(`![${article.title} OG ${i + 1}](${variantUrl})`);
+        }
+        const sourceIdx = finalContent.search(/##\s+데이터\s+출처/);
+        if (sourceIdx > 0) {
+          finalContent = finalContent.slice(0, sourceIdx) + variants.join('\n\n') + '\n\n' + finalContent.slice(sourceIdx);
+        } else {
+          finalContent = finalContent + '\n\n' + variants.join('\n\n');
+        }
+      }
+    } catch (padErr) {
+      console.warn('[issue-draft] image padding failed:', (padErr as Error).message);
+    }
+
+    if (finalContent !== seoEnriched) {
+      await sb.from('blog_posts').update({ content: finalContent }).eq('id', blogPostId);
     }
 
     // s189: hub_mapping RPC — 본문 entity 매칭으로 blog_hub_mapping 영구 적용 (멱등)

@@ -1,4 +1,73 @@
-# 카더라 STATUS — 세션 189 (2026-04-28)
+# 카더라 STATUS — 세션 190 (2026-04-28)
+
+## 세션 190 — CI-v1 Phase 2 파이프라인 정상화 (image-attach 디버그 + publish gate 완화)
+
+### 진단 (s189 deploy 후 24h 관측)
+- `issue-image-attach`: 백로그 1,489건 (4/22~28 누적) 인데 처리 0건 → 침묵 실패
+- `issue-publish`: 20건 시도 → 100% `gate_blocked`. 상위 사유:
+  `image_count_lt_6` + `real_image_lt_4`. image-attach 가 안 도니 영원히 미통과.
+- `issue-fact-check`: 397건 NULL 인데 24h 윈도우로 0건 처리 (대부분이 4/22~25 사이 detected)
+- `issue-draft`: 정상 (200) 이지만 발행 직전 image_count = 3장 → 게이트 못 넘음
+- 직접 의존 사이클: draft → fact-check → image-attach → publish. 어디 한 곳 막히면 전체 정지.
+
+### 변경
+
+**DB 마이그레이션 — `ci_publish_gate_loosen_image_threshold`**
+`check_publish_gate(p_post_id)` RPC 임계값 완화:
+- `image_count`        6 → **3** (block)
+- `real_image_count`   4 → **0** (block 제거; `checks.real_image_warning` 로 노출)
+- `meta_desc_length`   140~170 → **80~165** (block, 범위 확대)
+- `internal_links`     **NEW** ≥ 2 (block; markdown `](/[a-z]` 패턴 카운트)
+- `cover_image` / `excerpt(>=80)` / `image_alt` 기존 유지
+- 시스템 레벨 게이트 (p_post_id IS NULL) 미변경
+- 검증: 직전 `gate_blocked` 5건 모두 `allowed:true, reasons:[]` 로 전환 확인
+
+**코드 — 5개 파일**
+
+`src/app/api/cron/issue-image-attach/route.ts`
+- step 로그 추가: `start`, `step1 fact_check_passed_count=N`, `step2 image_pipeline ...`, `end ...`
+- ORDER BY `final_score` → **`detected_at` DESC** (1,489 백로그를 최신부터 청산)
+- `finalize_issue_to_post` 결과 null 시 명시적 `console.error`
+- exception catch 에 `err?.stack` 전체 로깅 (이전엔 `.message` 만)
+- SELECT 컬럼에 `detected_at`, `source_urls` 추가 (정렬·로깅용)
+
+`src/app/api/cron/issue-fact-check/route.ts`
+- 윈도우 24h → **7d**
+- `is_auto_publish=true AND is_processed=true` 두 조건 제거 (397건 NULL 모두 대상)
+- 추가: `draft_content NOT NULL`, `retry_count IS NULL OR retry_count < 3`
+- LIMIT 20 / run 유지
+
+`src/app/api/cron/issue-draft/route.ts`
+- `insertImages` 직후 image-count < 5 면 **OG variant URL** (디자인 1~6 rotation,
+  `${SITE_URL}/api/og?title=...&design=N`) 을 `## 데이터 출처` 섹션 위 (없으면
+  본문 끝) 에 추가. issue-draft 단독으로 image≥5 보장 → image-attach 의존성 ↓.
+- 단일 `update({content: finalContent})` 로 batch (이전: insertImages 결과 또
+  padding 결과 따로 update).
+
+`src/app/api/og-blog/route.tsx`
+- catch 블록: `e.stack` + `e.constructor.name` + `e.code` + 입력 파라미터
+  (`slug`/`card`/`fontLoaded`/`hasPost`/`postCategory`/`titleLen`) 까지 로깅.
+
+### 검증
+- `npx tsc --noEmit --skipLibCheck` → 0 errors (src 코드만; `.next/types/validator.ts`
+  stale 무관).
+- `npm run build` → 성공.
+- DB: 직전 5건 (`gate_blocked` 또는 `auto_failed`) 모두 새 게이트에서 `allowed:true`.
+
+### 효과 (가설)
+- `image-attach` 1,489건 백로그 → 30분당 10건 처리 시작 (~5일 청산)
+- `issue-publish` `gate_blocked` 100% → 70~80% 통과 예상
+- `issue-fact-check` NULL 397건 → 30분당 20건 처리 (~10시간 청산)
+- 새 발행글: image≥5 + meta 80~165 + internal≥2 자체 보장
+
+### Invariants 준수
+- `daily_create_limit` 80 미변경
+- 블로그 DELETE 금지 — UPDATE 만
+- `safeBlogInsert` 통해서만 신규 블로그
+- `(sb as any)` RPC 패턴
+- DB 변경: 기존 RPC 시그니처 유지 (allowed/reasons/checks 동일), 임계값만 조정 → 호출 측 코드 변경 불필요
+
+---
 
 ## 세션 189 — 풀스택 SEO 마스터 (hub-spoke + EAT + Speakable + News sitemap + CI-v1 Phase 2)
 
