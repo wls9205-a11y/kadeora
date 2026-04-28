@@ -439,6 +439,7 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
   try {
     const seoCategory = (['apt', 'stock', 'finance', 'general'] as const).includes(issue.category as any)
       ? issue.category : (issue.category === 'tax' || issue.category === 'economy' ? 'finance' : 'general');
+    const beforeLen = article.content.length;
     const seoRes = await runBlogSeoMaster(getSupabaseAdmin(), {
       title: article.title,
       content: article.content,
@@ -451,11 +452,19 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
     seoEnriched = await appendRelatedHubFooter(getSupabaseAdmin(), seoRes.enriched.content, { category: seoCategory });
     seoMetaDesc = seoRes.enriched.meta_description;
     seoImageAlt = seoRes.enriched.image_alt;
+
+    // s195: enrich 결과 진단 — silent fail 케이스 식별 (이전 발행글 hub link 0% 부작용)
+    const hubLinksAfter = (seoEnriched.match(/\]\(\/(apt|blog|stock)/g) || []).length;
+    const externalAfter = (seoEnriched.match(/\]\(https?:\/\/(?!kadeora)/g) || []).length;
+    const hasHubFooter = seoEnriched.includes('## 관련 정보') || seoEnriched.includes('## 관련 페이지');
+    const hasCitations = seoEnriched.includes('## 📊 데이터 출처') || seoEnriched.includes('## 데이터 출처');
+    console.log(`[issue-draft] seo-master before=${beforeLen} after=${seoEnriched.length} hub_links=${hubLinksAfter} external=${externalAfter} hub_footer=${hasHubFooter} citations=${hasCitations} passes=${seoRes.passes} score=${seoRes.score}`);
+
     if (!seoRes.passes) {
       console.warn(`[issue-draft] seo-master gate failed for "${article.title.slice(0,30)}":`, seoRes.failed_checks.join(' | '));
     }
   } catch (seoErr: any) {
-    console.error('[issue-draft] seo-master failed (continuing):', seoErr?.message);
+    console.error('[issue-draft] seo-master failed (continuing):', seoErr?.stack || seoErr?.message);
   }
 
   const check = factCheck(seoEnriched, issue.raw_data || {});
@@ -491,6 +500,21 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
   let blogPostId: number | null = (insertResult.id ? Number(insertResult.id) : null);
   if (!blogPostId && article.slug) {
     try { const { data: found } = await sb.from('blog_posts').select('id').eq('slug', article.slug).maybeSingle(); if (found) blogPostId = found.id; } catch {}
+  }
+
+  // s195: safeBlogInsert 내부 enrichContent 가 우리 seoEnriched 를 덮어쓸 위험 차단.
+  // 강제 UPDATE 로 content/meta/alt 를 seo-master 결과로 확정.
+  if (blogPostId) {
+    try {
+      const { error: forceErr } = await sb.from('blog_posts').update({
+        content: seoEnriched,
+        meta_description: seoMetaDesc,
+        image_alt: seoImageAlt,
+      }).eq('id', blogPostId);
+      console.log(`[issue-draft] forced content update post=${blogPostId} len=${seoEnriched.length} err=${forceErr?.message ?? 'none'}`);
+    } catch (e: any) {
+      console.warn(`[issue-draft] forced update failed post=${blogPostId}:`, e?.message);
+    }
   }
 
   // A2: 자동 발행 결정 시 blog_posts 반드시 공개 처리 (is_published 상태 무관)
@@ -542,11 +566,37 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
       await sb.from('blog_posts').update({ content: finalContent }).eq('id', blogPostId);
     }
 
-    // s189: hub_mapping RPC — 본문 entity 매칭으로 blog_hub_mapping 영구 적용 (멱등)
+    // s195: 최종 이미지 카운트 검증 — DB 에서 다시 읽어 확인. 부족하면 마지막 한 번 더 padding.
     try {
-      await (sb as any).rpc('inject_hub_mapping_for_post', { p_post_id: blogPostId });
+      const { data: finalPost } = await sb.from('blog_posts').select('content').eq('id', blogPostId).single();
+      const finalImg = (finalPost?.content?.match(/!\[.*?\]\(.*?\)/g) || []).length;
+      console.log(`[issue-draft] final image check post=${blogPostId} imgs=${finalImg} title="${article.title.slice(0,40)}"`);
+      if (finalPost?.content && finalImg < 5) {
+        const need = 5 - finalImg;
+        const variants: string[] = [];
+        for (let i = 0; i < need; i++) {
+          const variantDesign = ((titleHash + i + 1) % 6) + 1;
+          const variantUrl = `${SITE_URL}/api/og?title=${encodeURIComponent(article.title + ' ' + (i + 1))}&category=${blogCategory}&design=${variantDesign}`;
+          variants.push(`![${article.title} ${i + 1}](${variantUrl})`);
+        }
+        const sourceIdx = finalPost.content.search(/##\s+데이터\s+출처|## 📊 데이터/);
+        const padded = sourceIdx > 0
+          ? finalPost.content.slice(0, sourceIdx) + variants.join('\n\n') + '\n\n' + finalPost.content.slice(sourceIdx)
+          : finalPost.content + '\n\n' + variants.join('\n\n');
+        const { error: padErr2 } = await sb.from('blog_posts').update({ content: padded }).eq('id', blogPostId);
+        console.log(`[issue-draft] final padding post=${blogPostId} added=${need} err=${padErr2?.message ?? 'none'}`);
+      }
+    } catch (e: any) {
+      console.warn(`[issue-draft] final image check failed post=${blogPostId}:`, e?.message);
+    }
+
+    // s189: hub_mapping RPC — 본문 entity 매칭으로 blog_hub_mapping 영구 적용 (멱등)
+    // s195: RPC 결과 카운트 + 에러 로깅 (silent fail 식별)
+    try {
+      const { data: mappingResult, error: mErr } = await (sb as any).rpc('inject_hub_mapping_for_post', { p_post_id: blogPostId });
+      console.log(`[issue-draft] hub_mapping post=${blogPostId} result=${JSON.stringify(mappingResult ?? null).slice(0,120)} err=${mErr?.message ?? 'none'}`);
     } catch (mapErr: any) {
-      console.warn('[issue-draft] inject_hub_mapping_for_post failed:', mapErr?.message);
+      console.warn('[issue-draft] inject_hub_mapping_for_post exception:', mapErr?.message);
     }
   }
 

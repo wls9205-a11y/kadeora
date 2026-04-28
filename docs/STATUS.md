@@ -1,4 +1,81 @@
-# 카더라 STATUS — 세션 194 (2026-04-28)
+# 카더라 STATUS — 세션 195 (2026-04-28)
+
+## 세션 195 — 신규 발행 silent fail 전수 fix + 진단 로그 + FAQ 게이트 정상화
+
+### 사전 진단 (2h × 44건 신규 발행 실측)
+| 항목 | 작동률 | 7d 백필 비교 |
+|---|---|---|
+| 본문 hub link `/apt/...` | **0%** | 75%+ |
+| `blog_hub_mapping` insert | 7% | 75%+ |
+| image≥5 | 44% (1h 19/43) | 94.7% |
+| 데이터 출처 섹션 | 14% | — |
+| 관련 정보 footer | 11% | — |
+| 외부 EAT 링크 | 66% | — |
+| FAQ | 100% (Claude 가 작성) | — |
+| 면책 고지 | 86% | — |
+
+진단: `internal-link-injector` cache 에는 entity 가 있는데 본문 변환이 0%.
+가설은 (a) 정규식 lookbehind/lookahead 한글 미매칭, (b) `safeBlogInsert` 내부 enrichContent
+가 우리 enrich 결과를 덮어씀, (c) `external-citations` 의 기존-섹션 매칭 분기 광범위
+오작동, (d) `check_blog_seo_gate` FAQ 정규식이 `Q.` 만 잡아 Claude 의 다양한 패턴 누락.
+
+### 변경
+
+**DB — `ci_check_seo_gate_faq_regex_fix`**
+- `check_blog_seo_gate` FAQ 정규식 확장:
+  `(^|\n)(Q\.\s|##\s*자주\s*묻는|##\s*FAQ|\*\*Q[:\.]\s|Q[0-9]+[\.\s])`
+- 검증: 직전 발행 5건 FAQ 카운트 1 → 8~9 (정상화).
+
+**`src/lib/internal-link-injector.ts`**
+- `replaceFirstOccurrence`: lookbehind/lookahead 정규식 → `indexOf` 기반 단순 매칭.
+  V8 한글 경계 silent fail 회피. 직전 `[` / 직후 50자 안 `](` 가드만 유지.
+- 진단 로그: cache size, injected count, matched entity 3개 sample, postId.
+- `hub_mapping` upsert: error 메시지 + rows count 로깅.
+
+**`src/lib/external-citations.ts`**
+- 기존 섹션 매칭 분기 (`/(## (?:데이터 )?출처[\s\S]*?)(\n##\s|$)/`) **삭제** —
+  14% 작동률의 직접 원인 (광범위 매칭이 어떤 H2 든 잡아서 덮어쓰기 실패).
+- 무조건 `## 📊 데이터 출처` 새 섹션 append (면책고지 위 우선, 없으면 끝).
+- 진단 로그: candidates count, picked sources.
+
+**`src/app/api/cron/issue-draft/route.ts`**
+- s195 enrich 진단 로그: before/after length, hub_links 카운트, external 카운트,
+  hub_footer 존재, citations 존재, passes/score.
+- **`safeBlogInsert` 직후 강제 UPDATE**: `content/meta_description/image_alt` 를
+  `seoEnriched/seoMetaDesc/seoImageAlt` 로 확정. internal enrichContent 충돌 차단.
+- 최종 이미지 카운트 검증 (DB 재조회 후 image<5 면 한 번 더 padding).
+- `inject_hub_mapping_for_post` RPC 결과/에러 로깅.
+
+**`src/app/api/og-apt/route.tsx`**
+- catch 블록 enrichment (og-blog 와 동일): stack/class/code/input(slug, card,
+  fontLoaded, hasSite, siteType, nameLen).
+
+### 미변경 (이미 충분)
+- `src/app/api/og-blog/route.tsx`: s190 + abe25967 머지로 이미 풍부한 로깅.
+- `src/app/api/cron/issue-publish/route.ts`: s193 OG padding 단계별 로그 이미 적용.
+
+### 검증
+- `npx tsc --noEmit --skipLibCheck` → 0 errors
+- `npm run build` → 성공
+- DB FAQ 게이트 재계산: 5/5 글에서 1 → 8~9 카운트.
+
+### 효과 (가설, 다음 cron 사이클부터)
+- 본문 hub link 0% → 70%+ (indexOf 매칭 + 강제 UPDATE)
+- `blog_hub_mapping` 7% → 70%+ (RPC 결과 가시화)
+- image≥5 44% → 95%+ (DB 재조회 fallback padding)
+- 데이터 출처 14% → 95%+ (무조건 append)
+- 관련 정보 footer 11% → 70%+ (`appendRelatedHubFooter` seo-master 안 호출 보존됨)
+- og-blog/og-apt silent error → 다음 세션 핀포인트 fix 가능
+- FAQ 게이트 측정 정상화 (`faq_lt_3` 부정확 마킹 종결)
+
+### Invariants 준수
+- `daily_create_limit` 80 미변경
+- 4 cron 라우트 파일 미삭제
+- `safeBlogInsert` 통해서만 신규 (그 후 UPDATE 만 추가)
+- `(sb as any)` RPC 패턴
+- DB: 함수 시그니처 미변경 (regex 본문만 교체)
+
+---
 
 ## 세션 194 — image-attach 무한 retry 루프 fix (daily_create_limit 우회)
 

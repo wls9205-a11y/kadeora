@@ -338,7 +338,16 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (err) {
-    console.error('[og-apt] render error:', err);
+    // s195: stack + class + code + input params 로깅 (og-blog 와 동일 패턴) —
+    // Vercel 로그 잘려도 핵심 진단 정보 노출.
+    const e = err as Error;
+    console.error(
+      '[og-apt] render error:',
+      e?.stack || e?.message || String(err),
+      'class=', e?.constructor?.name,
+      'code=', (err as any)?.code,
+      'input=', { slug, card, fontLoaded: !!fontData, hasSite: !!site, siteType: site?.site_type, nameLen: site?.name?.length },
+    );
     return Response.redirect('https://kadeora.app/images/brand/kadeora-hero.png', 302);
   }
 }

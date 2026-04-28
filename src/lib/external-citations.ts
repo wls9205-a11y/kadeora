@@ -56,6 +56,7 @@ export async function injectExternalCitations(
   maxCitations = 3
 ): Promise<string> {
   const candidates = await loadCitations(sb, category);
+  console.log(`[external-citations] cat=${category} candidates=${candidates.length}`);
   if (candidates.length === 0) return content;
 
   const picked: Citation[] = [];
@@ -69,24 +70,18 @@ export async function injectExternalCitations(
     }
     picked.push(c);
   }
+  console.log(`[external-citations] picked=${picked.length} sources=${picked.map(p => p.source_name).join(', ')}`);
   if (picked.length === 0) return content;
 
   const bullets = picked.map(c => `- [${c.source_name}](${c.source_url})`).join('\n');
 
-  // 기존 섹션 안에 추가
-  const reSection = /(## (?:데이터 )?출처[\s\S]*?)(\n##\s|$)/;
-  const m = content.match(reSection);
-  if (m) {
-    const inside = m[1].endsWith('\n') ? m[1] : m[1] + '\n';
-    return content.replace(reSection, `${inside}${bullets}\n${m[2]}`);
-  }
-
-  // 면책 고지 위에 새 섹션
-  const reDisclaim = /\n+##? 면책|\n+> ?면책/;
+  // s195: 기존 섹션 매칭 분기 제거 — 14% 작동률의 원인. 무조건 본문 끝(또는
+  // 면책 고지 위) 에 새 "## 데이터 출처" 섹션 append.
+  const newSection = `\n\n---\n\n## 📊 데이터 출처\n\n${bullets}\n`;
+  const reDisclaim = /(\n>\s*(?:⚠️|면책)|\n##?\s*면책)/;
   const md = content.match(reDisclaim);
-  const block = `\n\n## 데이터 출처\n\n${bullets}\n`;
   if (md && md.index !== undefined) {
-    return content.slice(0, md.index) + block + content.slice(md.index);
+    return content.slice(0, md.index) + newSection + content.slice(md.index);
   }
-  return content + block;
+  return content + newSection;
 }

@@ -40,32 +40,30 @@ async function loadCache(sb: any): Promise<CacheState> {
   return _cache;
 }
 
-function escapeRegExp(s: string): string {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
 /**
  * 첫 등장 1회만 마크다운 링크로 변환.
- * - 이미 링크 안 ([텍스트](url) 의 텍스트 부분) 이면 skip
- * - 이미 동일 URL 이 본문에 있으면 skip
- * - lookbehind/lookahead 로 단어 경계 보장 (한글은 별도 가드)
+ * - 이미 동일 URL 링크 있으면 skip
+ * - 직전 문자가 '[' 면 (이미 마크다운 링크 텍스트의 일부) skip
+ * - 직후 50자 이내 ']('가 보이면 (다른 마크다운 링크 텍스트의 일부) skip
+ *
+ * s195: lookbehind/lookahead 정규식이 한글 entity 에서 silent fail (브라우저별
+ * 동작 다름 + V8 한글 경계 문제) → indexOf 기반 단순 매칭으로 교체.
  */
 function replaceFirstOccurrence(content: string, name: string, url: string): { changed: boolean; out: string } {
   if (content.includes(`](${url})`)) return { changed: false, out: content };
 
-  const escaped = escapeRegExp(name);
-  // [name](...) 의 name 부분에 매칭되는 케이스를 피하려면, 매칭 시점에 직전 '['/직후 '](' 가 없어야 함.
-  // 한글 단어 경계: \b 는 한글에 안 먹으므로, 직전·직후가 영숫자한글이 아닌 경우만 인정.
-  const re = new RegExp(`(?<![\\[A-Za-z0-9가-힣])${escaped}(?![A-Za-z0-9가-힣\\]])`, '');
-  const m = content.match(re);
-  if (!m || m.index === undefined) return { changed: false, out: content };
+  const idx = content.indexOf(name);
+  if (idx === -1) return { changed: false, out: content };
 
-  // 직후가 ]( 패턴이면 이미 링크 텍스트의 일부 → skip
-  const after = content.slice(m.index + name.length, m.index + name.length + 2);
-  if (after === '](') return { changed: false, out: content };
+  // 직전이 '[' 면 이미 링크 텍스트 안
+  if (idx > 0 && content[idx - 1] === '[') return { changed: false, out: content };
 
-  const before = content.slice(0, m.index);
-  const tail = content.slice(m.index + name.length);
+  // 직후 50자 이내에 '](' 가 보이면 (그 사이 ]/[ 없을 때) 이미 다른 링크 텍스트
+  const after = content.slice(idx + name.length, idx + name.length + 50);
+  if (/^[^\[\]]*?\]\(/.test(after)) return { changed: false, out: content };
+
+  const before = content.slice(0, idx);
+  const tail = content.slice(idx + name.length);
   return { changed: true, out: `${before}[${name}](${url})${tail}` };
 }
 
@@ -95,9 +93,11 @@ export async function injectInternalLinks(
 ): Promise<string> {
   const maxLinks = opts.maxLinks ?? 5;
   const cache = await loadCache(sb);
+  console.log(`[link-injector] cache size apt=${cache.apt.length} redev=${cache.redev.length} unsold=${cache.unsold.length}`);
 
   let out = content;
   let injected = 0;
+  const matched: string[] = [];
   const mappings: HubMappingRow[] = [];
 
   // 우선순위: apt → redev → unsold (apt 사이트 링크가 가장 가치 큼)
@@ -108,6 +108,7 @@ export async function injectInternalLinks(
     if (changed) {
       out = next;
       injected++;
+      matched.push(`apt:${site.name}`);
       mappings.push({ hub_type: 'apt', hub_id: site.slug });
     }
   }
@@ -118,6 +119,7 @@ export async function injectInternalLinks(
     if (changed) {
       out = next;
       injected++;
+      matched.push(`redev:${r.district_name}`);
       mappings.push({ hub_type: 'redev', hub_id: String(r.id) });
     }
   }
@@ -128,9 +130,12 @@ export async function injectInternalLinks(
     if (changed) {
       out = next;
       injected++;
+      matched.push(`unsold:${u.house_nm}`);
       mappings.push({ hub_type: 'unsold', hub_id: String(u.id) });
     }
   }
+
+  console.log(`[link-injector] injected=${injected} matched=${matched.slice(0, 3).join(', ')} postId=${opts.postId ?? 'none'}`);
 
   if (opts.postId && mappings.length > 0) {
     try {
@@ -139,12 +144,17 @@ export async function injectInternalLinks(
         hub_type: m.hub_type,
         hub_id: m.hub_id,
       }));
-      await (sb as any).from('blog_hub_mapping').upsert(rows, {
+      const { error: upErr } = await (sb as any).from('blog_hub_mapping').upsert(rows, {
         onConflict: 'blog_post_id,hub_type,hub_id',
         ignoreDuplicates: true,
       });
+      if (upErr) {
+        console.error('[link-injector] hub_mapping upsert err:', upErr.message);
+      } else {
+        console.log(`[link-injector] hub_mapping upserted rows=${rows.length} postId=${opts.postId}`);
+      }
     } catch (e: any) {
-      console.error('[internal-link-injector] hub_mapping upsert failed:', e?.message);
+      console.error('[link-injector] hub_mapping upsert exception:', e?.message);
     }
   }
 
