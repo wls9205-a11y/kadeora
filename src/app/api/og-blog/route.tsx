@@ -84,15 +84,21 @@ function bgFor(card: number, post: BlogRow | null): string {
   return '#2C2C2A';
 }
 
+// ── 안전한 string/array 접근 헬퍼 (각 render fn 내부 가드용) ─────────────
+function safeStr(v: unknown, fallback = ''): string {
+  return typeof v === 'string' ? v : fallback;
+}
+
 function fmtDate(s?: string | null): string {
-  if (!s) return '';
-  return s.slice(0, 10);
+  const v = safeStr(s);
+  return v ? v.slice(0, 10) : '';
 }
 
 function renderCover(post: BlogRow): React.ReactElement {
-  const cat = CATEGORY_LABEL[post.category || ''] || '카더라';
-  const sub = post.sub_category || '';
-  const titleFS = post.title.length > 30 ? 36 : post.title.length > 22 ? 44 : post.title.length > 14 ? 56 : 68;
+  const title = safeStr(post.title) || safeStr(post.slug) || '카더라 콘텐츠';
+  const cat = CATEGORY_LABEL[safeStr(post.category)] || '카더라';
+  const sub = safeStr(post.sub_category);
+  const titleFS = title.length > 30 ? 36 : title.length > 22 ? 44 : title.length > 14 ? 56 : 68;
   return (
     <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: 56 }}>
       <div style={{ display: 'flex', gap: 8 }}>
@@ -101,7 +107,7 @@ function renderCover(post: BlogRow): React.ReactElement {
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         <div style={{ width: 56, height: 4, background: '#FAC775' }} />
-        <div style={{ fontSize: titleFS, fontWeight: 900, color: '#FFFFFF', lineHeight: 1.15, letterSpacing: -1.5 }}>{post.title}</div>
+        <div style={{ fontSize: titleFS, fontWeight: 900, color: '#FFFFFF', lineHeight: 1.15, letterSpacing: -1.5 }}>{title}</div>
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'rgba(255,255,255,0.55)', fontSize: 18, fontWeight: 700 }}>
         <span>카더라 · {fmtDate(post.published_at || post.created_at)}</span>
@@ -112,33 +118,42 @@ function renderCover(post: BlogRow): React.ReactElement {
 }
 
 function renderKeyPoints(post: BlogRow, card: number): React.ReactElement {
-  const points = Array.isArray(post.key_points) ? post.key_points : [];
-  const tldr = post.tldr || post.excerpt || post.meta_description || '';
+  const title = safeStr(post.title) || safeStr(post.slug) || '카더라';
+  const points: unknown[] = Array.isArray(post.key_points) ? post.key_points : [];
+  const tldrSrc = safeStr(post.tldr) || safeStr(post.excerpt) || safeStr(post.meta_description);
   const titleByCard: Record<number, string> = { 2: '핵심 포인트', 3: '데이터·분석', 4: '시점·일정', 5: '비교·결론' };
   const sectionTitle = titleByCard[card] || '핵심';
-  const startIdx = (card - 2) * 2;
-  const slice = points.slice(startIdx, startIdx + 2);
+  const startIdx = Math.max(0, (card - 2) * 2);
+  const sliceArr = points.slice(startIdx, startIdx + 2);
+
+  // key_points 가 비어있거나 현재 카드 인덱스 범위 초과면 tldr 풀텍스트로 graceful fallback.
+  const useTldr = sliceArr.length === 0;
+
   return (
     <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', padding: 56, justifyContent: 'space-between' }}>
       <div style={{ fontSize: 22, color: 'rgba(255,255,255,0.55)', fontWeight: 700, letterSpacing: 2 }}>{sectionTitle.toUpperCase()}</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-        {slice.length > 0 ? (
-          slice.map((kp: any, i: number) => {
-            const text = typeof kp === 'string' ? kp : (kp?.text || kp?.point || JSON.stringify(kp));
+        {!useTldr ? (
+          sliceArr.map((kp: any, i: number) => {
+            // kp 가 string / { text } / { point } / 그 외 어떤 모양이어도 throw 없이 string 도출.
+            let text = '';
+            if (typeof kp === 'string') text = kp;
+            else if (kp && typeof kp === 'object') text = safeStr((kp as any).text) || safeStr((kp as any).point) || '';
+            if (!text) text = '본문에서 자세히 확인하세요.';
             const num = startIdx + i + 1;
             return (
               <div key={i} style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
                 <div style={{ flexShrink: 0, width: 36, height: 36, borderRadius: 8, background: '#FAC775', color: '#1A1A18', fontSize: 20, fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{num}</div>
-                <div style={{ fontSize: 26, fontWeight: 700, color: '#FFFFFF', lineHeight: 1.4, letterSpacing: -0.5 }}>{String(text).slice(0, 90)}</div>
+                <div style={{ fontSize: 26, fontWeight: 700, color: '#FFFFFF', lineHeight: 1.4, letterSpacing: -0.5 }}>{text.slice(0, 90)}</div>
               </div>
             );
           })
         ) : (
-          <div style={{ fontSize: 26, fontWeight: 600, color: 'rgba(255,255,255,0.85)', lineHeight: 1.5 }}>{tldr ? tldr.slice(0, 200) : '본문에서 자세히 확인하세요.'}</div>
+          <div style={{ fontSize: 26, fontWeight: 600, color: 'rgba(255,255,255,0.85)', lineHeight: 1.5 }}>{tldrSrc ? tldrSrc.slice(0, 200) : '본문에서 자세히 확인하세요.'}</div>
         )}
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'rgba(255,255,255,0.55)', fontSize: 16, fontWeight: 700 }}>
-        <span>{post.title.slice(0, 28)}{post.title.length > 28 ? '...' : ''}</span>
+        <span>{title.slice(0, 28)}{title.length > 28 ? '...' : ''}</span>
         <span>kadeora.app</span>
       </div>
     </div>
@@ -146,19 +161,29 @@ function renderKeyPoints(post: BlogRow, card: number): React.ReactElement {
 }
 
 function renderCta(post: BlogRow): React.ReactElement {
-  const target = post.hub_cta_target || '카더라 부동산';
-  const slug = post.hub_apt_slug || '';
+  const slug = safeStr(post.hub_apt_slug);
+  const postSlug = safeStr(post.slug);
+  const hasTarget = !!safeStr(post.hub_cta_target);
+  // hub_cta_target/hub_apt_slug 가 둘 다 없으면 generic CTA, 본문 슬러그가 있으면 /blog/{slug}, 그것도 없으면 /feed.
+  const target = hasTarget ? safeStr(post.hub_cta_target) : '카더라에서 더 보기';
+  const headline = hasTarget ? '이 글에서 다룬 단지' : '관련 글 더 보기';
+  const ctaUrl = slug
+    ? `kadeora.app/apt/${slug}`
+    : postSlug
+      ? `kadeora.app/blog/${postSlug}`
+      : 'kadeora.app/feed';
+  const buttonLabel = slug ? '단지 페이지로 →' : (hasTarget ? '더 알아보기 →' : '카더라 둘러보기 →');
   return (
     <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', padding: 56, justifyContent: 'space-between' }}>
       <div style={{ fontSize: 22, color: 'rgba(26,26,24,0.55)', fontWeight: 800, letterSpacing: 2 }}>NEXT · 더 알아보기</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
         <div style={{ width: 56, height: 4, background: '#1A1A18' }} />
-        <div style={{ fontSize: 32, fontWeight: 700, color: 'rgba(26,26,24,0.66)', letterSpacing: -0.5 }}>이 글에서 다룬 단지</div>
+        <div style={{ fontSize: 32, fontWeight: 700, color: 'rgba(26,26,24,0.66)', letterSpacing: -0.5 }}>{headline}</div>
         <div style={{ fontSize: target.length > 14 ? 56 : 72, fontWeight: 900, color: '#1A1A18', letterSpacing: -2.5, lineHeight: 1.05 }}>{target.slice(0, 24)}</div>
-        {slug && <div style={{ fontSize: 22, color: 'rgba(26,26,24,0.66)', fontWeight: 700 }}>kadeora.app/apt/{slug}</div>}
+        <div style={{ fontSize: 22, color: 'rgba(26,26,24,0.66)', fontWeight: 700 }}>{ctaUrl}</div>
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ background: '#1A1A18', color: '#FAC775', fontSize: 26, fontWeight: 900, padding: '14px 28px', borderRadius: 999, letterSpacing: -0.5 }}>단지 페이지로 →</div>
+        <div style={{ background: '#1A1A18', color: '#FAC775', fontSize: 26, fontWeight: 900, padding: '14px 28px', borderRadius: 999, letterSpacing: -0.5 }}>{buttonLabel}</div>
         <div style={{ fontSize: 18, color: '#1A1A18', fontWeight: 800 }}>kadeora.app</div>
       </div>
     </div>

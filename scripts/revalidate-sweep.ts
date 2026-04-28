@@ -23,8 +23,14 @@ export async function revalidateSweep(): Promise<RevalidateSweepResult> {
   if ('error' in auth) return { ok: false, error: 'forbidden' };
   const { admin } = auth;
 
-  // 루트 라우트
-  const ROOT_ROUTES = ['/apt', '/blog', '/feed', '/apt/region'];
+  // 루트 라우트 — /stock 서브루트(/dividend, /themes 등) + /write, /discuss, /hot 추가.
+  // /stock/[symbol] 같은 동적 종목 페이지(728건)는 너무 많아 자연 회전에 맡김.
+  const ROOT_ROUTES = [
+    '/apt', '/blog', '/feed', '/apt/region',
+    '/stock', '/stock/dividend', '/stock/themes', '/stock/compare', '/stock/movers', '/stock/search',
+    '/write',
+    '/discuss', '/hot',
+  ];
   for (const r of ROOT_ROUTES) revalidatePath(r);
 
   // /blog/[slug]

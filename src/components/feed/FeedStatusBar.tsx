@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
+import { kstWeekday } from '@/lib/market-hours';
 
 export default function FeedStatusBar() {
   const [active, setActive] = useState(0);
@@ -32,7 +33,7 @@ export default function FeedStatusBar() {
 
   const m = now.getMonth() + 1;
   const d = now.getDate();
-  const w = ['일','월','화','수','목','금','토'][now.getDay()];
+  const w = ['일','월','화','수','목','금','토'][kstWeekday(now)];
   const hh = String(now.getHours()).padStart(2, '0');
   const mm = String(now.getMinutes()).padStart(2, '0');
 

@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import SearchInput from '@/components/SearchInput';
 import dynamic from 'next/dynamic';
+import { isKstWeekend, isKrxOpen } from '@/lib/market-hours';
 
 const PortfolioTab = dynamic(() => import('@/components/PortfolioTab'), { ssr: false });
 const SectorHeatmap = dynamic(() => import('@/components/SectorHeatmap'), { ssr: false });
@@ -45,17 +46,13 @@ function isIdx(s: Stock) {
 const M7 = ['AAPL', 'MSFT', 'NVDA', 'GOOGL', 'AMZN', 'META', 'TSLA'];
 
 function getMarketStatus(): { label: string; color: string } {
+  // KST 기준 시장 상태 — src/lib/market-hours.ts 의 helper 로 위임 (단일 진실의 원천).
   const now = new Date();
+  if (isKstWeekend(now)) return { label: '⏸ 휴장', color: 'var(--text-tertiary)' };
+  if (isKrxOpen(now)) return { label: '🟢 장중', color: 'var(--stock-market-open)' };
+  // US market window (KST 22:30~익일 05:00) 은 helper 미커버 — KST 분 단위로만 추가 판정.
   const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
-  const h = kst.getUTCHours();
-  const m = kst.getUTCMinutes();
-  const day = kst.getUTCDay();
-  const kstMin = h * 60 + m;
-  // Weekend
-  if (day === 0 || day === 6) return { label: '⏸ 휴장', color: 'var(--text-tertiary)' };
-  // KR market: 09:00~15:30 KST
-  if (kstMin >= 540 && kstMin <= 930) return { label: '🟢 장중', color: 'var(--stock-market-open)' };
-  // US market: 22:30~05:00 KST (next day)
+  const kstMin = kst.getUTCHours() * 60 + kst.getUTCMinutes();
   if (kstMin >= 1350 || kstMin <= 300) return { label: '🟢 미국장중', color: 'var(--stock-market-open)' };
   return { label: '🔴 장마감', color: 'var(--stock-market-closed)' };
 }
