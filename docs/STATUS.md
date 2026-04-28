@@ -1,5 +1,56 @@
 # 카더라 STATUS — 세션 188 (2026-04-27 / 28 cont.)
 
+## 세션 188 — Phase 9b-1: Sidebar/RightPanel page-aware 통합
+
+### 핵심 결정 (스코프)
+사용자 spec Phase 9b는 (Navigation 729줄 칠하기 + Sidebar/RightPanel page-props + 5페이지 적용 + 모바일). 안전하게 9b-1/9b-2/9b-3 분리:
+- **9b-1 (이번 PR)**: Sidebar/RightPanel page-aware section 추가 (기존 구조 보존)
+- **9b-2 (다음)**: Navigation 729줄 토큰 칠하기 + /stock /blog HeroCard
+- **9b-3**: 모바일 햄버거
+
+### 핵심 발견
+- Sidebar/RightPanel 둘 다 이미 `'use client'` + `usePathname()` 사용 — props 없이 페이지 자동 감지 가능 → layout.tsx 무수정으로 구현
+- Phase 9b spec의 props 패턴 대신 컴포넌트 내부 자가 분기 채택 (더 안전)
+
+### 사전 검증 (사용자 spec '사전 적용' claim)
+- `v_blog_category_groups` ✓ (6 그룹: 종목·투자 2,805 / 청약·분양 1,816 / 기타 1,322 / 실거래·시세 1,056 / 재개발·재건축 361 / 테마·섹터 16)
+- 시드 popularity_score 350 ✓ (altiero-gwangan, haeundae-mattian-d-edition 모두 부스팅됨)
+
+### 산출물
+- **`src/components/Sidebar.tsx`** 수정
+  - `getPageGrid(pathname, search)` 함수 추가 — 5종 페이지별 정적 카테고리 매핑
+  - `/apt`: 분양 진행/임박/모델하우스/미분양/재건축/실거래
+  - `/stock`: KOSPI/KOSDAQ/NYSE/NASDAQ
+  - `/blog`: 6 카테고리 그룹 (v_blog_category_groups 카운트 hardcode)
+  - `/feed`: 청약/주식/토론/자유
+  - `/write`: 발행 위치 (피드/블로그)
+  - 가이드북 링크 다음에 CategoryGrid 마운트 (divider로 구분)
+  - 기존 글로벌 메뉴 구조/스타일 그대로 유지
+- **`src/components/RightPanel.tsx`** 수정
+  - `useEffect([pathname])` 추가 — page-aware AI 데이터 fetch
+  - `/apt/[slug]` 단지 detail: v_apt_related_blogs WHERE apt_slug=slug AND rn≤5 → "AI · {단지명} 관련 분석"
+  - `/apt` 메인: blog_posts 부동산 카테고리 view_count DESC 5개 → "AI · 인기 단지 관련 분석"
+  - `/stock`: blog_posts 주식 카테고리 (종목분석/수급/목표주가/배당) → "AI · 주식 종목 분석"
+  - `/blog` 외: 인기 글 view_count 상위 5
+  - AIRelatedPanel을 프로필 카드 직후 첫 섹션에 마운트 (시그니처)
+  - 기존 trending/recBlogs/indices 그대로 유지
+
+### 검증
+- `npx tsc --noEmit` 0 error
+
+### 의도적 미반영 (Phase 9b-2/9b-3)
+- Navigation 729줄 토큰 칠하기 — 별도 PR (silent break 위험)
+- /stock /blog HeroCard 추가 (9a에서 /apt만 적용)
+- 모바일 햄버거 메뉴 (Sidebar 토글)
+- 검색 모달 (⌘K), 알림 드롭다운
+
+### 누적 (Phase 1~9b-1)
+- 컴포넌트 13개 (단지 9개 + UI 4개) + Sidebar/RightPanel page-aware
+- 토큰 --kd-* 11종 + @keyframes kd-pulse
+- 5 페이지 LiveBar + /apt HeroCard + 5 페이지 Sidebar CategoryGrid + RightPanel AI 시그니처
+
+---
+
 ## 세션 188 — Phase 9a: 통합 디자인 토큰 + 4 빌딩블록 + 5 페이지 LiveBar + /apt HeroCard
 
 ### 핵심 결정 (스코프)

@@ -7,6 +7,7 @@ import { GRADE_EMOJI, GRADE_MAP, gradeTitle } from '@/lib/constants';
 import { getAvatarColor } from '@/lib/avatar';
 import { useAuth } from '@/components/AuthProvider';
 import dynamic from 'next/dynamic';
+import AIRelatedPanel, { type AIRelatedItem } from '@/components/ui/AIRelatedPanel';
 
 const MiniLounge = dynamic(() => import('@/components/MiniLounge'), { ssr: false });
 
@@ -21,6 +22,8 @@ export default function RightPanel() {
   const pathname = usePathname();
   const [recBlogs, setRecBlogs] = useState<{ slug: string; title: string }[]>([]);
   const [indices, setIndices] = useState<{name:string;price:number;pct:number}[]>([]);
+  const [aiItems, setAiItems] = useState<AIRelatedItem[]>([]);
+  const [aiTitle, setAiTitle] = useState<string>('이 화면 관련 분석');
 
   useEffect(() => {
     if (typeof window !== 'undefined' && window.innerWidth < 1200) return;
@@ -39,6 +42,99 @@ export default function RightPanel() {
       if (data) setIndices(data.map((d:any) => ({name: d.name, price: Number(d.price), pct: Number(d.change_pct) || 0})));
     });
   }, []);
+
+  // Phase 9b-1: AI 시그니처 — page-aware fetch
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.innerWidth < 1200) return;
+    if (!pathname) return;
+
+    const sb = createSupabaseBrowser();
+    const segs = pathname.split('/').filter(Boolean);
+
+    // /apt/[slug] 단지 detail
+    if (segs[0] === 'apt' && segs[1] && !['region', 'ranking', 'sites', 'redev', 'unsold', 'complex', 'compare', 'theme', 'search', 'data', 'diagnose', 'map', 'big-events', 'builder', 'area'].includes(segs[1])) {
+      const slug = decodeURIComponent(segs[1]);
+      setAiTitle(`AI · ${slug.replace(/-/g, ' ')} 관련 분석`);
+      (sb as any).from('v_apt_related_blogs')
+        .select('blog_slug, title, sub_category, view_count, rn')
+        .eq('apt_slug', slug)
+        .lte('rn', 5)
+        .order('rn', { ascending: true })
+        .then(({ data }: any) => {
+          if (Array.isArray(data) && data.length > 0) {
+            setAiItems(data.map((b: any) => ({
+              tag: b.sub_category || '관련 글',
+              title: b.title,
+              meta: b.view_count ? `👀 ${Number(b.view_count).toLocaleString()}` : undefined,
+              href: `/blog/${b.blog_slug}`,
+            })));
+          }
+        });
+      return;
+    }
+
+    // /apt 메인 hub
+    if (segs[0] === 'apt') {
+      setAiTitle('AI · 인기 단지 관련 분석');
+      (sb as any).from('blog_posts')
+        .select('slug, title, sub_category, view_count')
+        .eq('is_published', true)
+        .in('sub_category', ['청약·분양', '실거래·시세', '재개발·재건축', '단지별분석'])
+        .order('view_count', { ascending: false })
+        .limit(5)
+        .then(({ data }: any) => {
+          if (Array.isArray(data)) {
+            setAiItems(data.map((b: any) => ({
+              tag: b.sub_category || '부동산',
+              title: b.title,
+              meta: b.view_count ? `👀 ${Number(b.view_count).toLocaleString()}` : undefined,
+              href: `/blog/${b.slug}`,
+            })));
+          }
+        });
+      return;
+    }
+
+    // /stock
+    if (segs[0] === 'stock') {
+      setAiTitle('AI · 주식 종목 분석');
+      (sb as any).from('blog_posts')
+        .select('slug, title, sub_category, view_count')
+        .eq('is_published', true)
+        .in('sub_category', ['종목분석', '수급분석', '목표주가', '배당분석'])
+        .order('view_count', { ascending: false })
+        .limit(5)
+        .then(({ data }: any) => {
+          if (Array.isArray(data)) {
+            setAiItems(data.map((b: any) => ({
+              tag: b.sub_category || '주식',
+              title: b.title,
+              meta: b.view_count ? `👀 ${Number(b.view_count).toLocaleString()}` : undefined,
+              href: `/blog/${b.slug}`,
+            })));
+          }
+        });
+      return;
+    }
+
+    // /blog or others — 인기 글
+    setAiTitle('AI · 인기 분석');
+    (sb as any).from('blog_posts')
+      .select('slug, title, sub_category, view_count')
+      .eq('is_published', true)
+      .order('view_count', { ascending: false })
+      .limit(5)
+      .then(({ data }: any) => {
+        if (Array.isArray(data)) {
+          setAiItems(data.map((b: any) => ({
+            tag: b.sub_category || '인기',
+            title: b.title,
+            meta: b.view_count ? `👀 ${Number(b.view_count).toLocaleString()}` : undefined,
+            href: `/blog/${b.slug}`,
+          })));
+        }
+      });
+  }, [pathname]);
 
   const display = trending.length > 0 ? trending : FALLBACK.map(k => ({ keyword: k }));
 
@@ -85,6 +181,11 @@ export default function RightPanel() {
             background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)', textDecoration: 'none',
           }}>카카오로 3초 가입</Link>
         </div>
+      )}
+
+      {/* Phase 9b-1: AI 시그니처 — 모든 페이지 공통 첫 섹션 */}
+      {aiItems.length > 0 && (
+        <AIRelatedPanel items={aiItems} title={aiTitle} maxItems={5} />
       )}
 
       {/* 친구 초대 미니 배너 (로그인 유저만) */}

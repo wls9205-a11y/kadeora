@@ -1,7 +1,8 @@
 'use client';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
+import CategoryGrid, { type CategoryGridItem } from '@/components/ui/CategoryGrid';
 
 const MENU = [
   { href: '/feed', icon: '📋', label: '피드' },
@@ -11,8 +12,73 @@ const MENU = [
   { href: '/hot', icon: '🔥', label: '이번주 HOT' },
 ];
 
+// Phase 9b-1: page-aware 카테고리 (정적 데이터 — 카운트는 사전 검증된 값)
+function getPageGrid(pathname: string, search: string): { title: string; items: CategoryGridItem[] } | null {
+  if (pathname.startsWith('/apt')) {
+    return {
+      title: '부동산 분류',
+      items: [
+        { icon: '🏗️', label: '분양 진행', href: '/apt?tab=subscription', active: search === 'tab=subscription' },
+        { icon: '⏰', label: '분양 임박 D-7', href: '/apt?tab=imminent', active: search === 'tab=imminent' },
+        { icon: '🏠', label: '모델하우스', href: '/apt?tab=model', active: search === 'tab=model' },
+        { icon: '⚠️', label: '미분양·줍줍', href: '/apt?tab=unsold', active: search === 'tab=unsold' },
+        { icon: '🏗️', label: '재건축·재개발', href: '/apt?tab=redev', active: search === 'tab=redev' },
+        { icon: '📊', label: '실거래·시세', href: '/apt?tab=trade', active: search === 'tab=trade' },
+      ],
+    };
+  }
+  if (pathname.startsWith('/stock')) {
+    return {
+      title: '시장',
+      items: [
+        { icon: '🇰🇷', label: 'KOSPI', href: '/stock?market=kospi', active: search === 'market=kospi' },
+        { icon: '🇰🇷', label: 'KOSDAQ', href: '/stock?market=kosdaq', active: search === 'market=kosdaq' },
+        { icon: '🇺🇸', label: 'NYSE', href: '/stock?market=nyse', active: search === 'market=nyse' },
+        { icon: '🇺🇸', label: 'NASDAQ', href: '/stock?market=nasdaq', active: search === 'market=nasdaq' },
+      ],
+    };
+  }
+  if (pathname.startsWith('/blog')) {
+    return {
+      title: '블로그 카테고리',
+      items: [
+        { icon: '📈', label: '종목·투자', count: 2805, href: '/blog?cat=stock-invest', active: search.includes('cat=stock-invest') },
+        { icon: '🏠', label: '청약·분양', count: 1816, href: '/blog?cat=cheongak', active: search.includes('cat=cheongak') },
+        { icon: '📊', label: '실거래·시세', count: 1056, href: '/blog?cat=trade', active: search.includes('cat=trade') },
+        { icon: '🏗️', label: '재개발·재건축', count: 361, href: '/blog?cat=redev', active: search.includes('cat=redev') },
+        { icon: '🔥', label: '테마·섹터', count: 16, href: '/blog?cat=theme', active: search.includes('cat=theme') },
+        { icon: '📝', label: '기타', count: 1322, href: '/blog?cat=etc', active: search.includes('cat=etc') },
+      ],
+    };
+  }
+  if (pathname.startsWith('/feed')) {
+    return {
+      title: '피드 카테고리',
+      items: [
+        { icon: '🏠', label: '청약', href: '/feed?category=apt', active: search.includes('category=apt') },
+        { icon: '📈', label: '주식', href: '/feed?category=stock', active: search.includes('category=stock') },
+        { icon: '💬', label: '토론', href: '/feed?category=discuss', active: search.includes('category=discuss') },
+        { icon: '📝', label: '자유', href: '/feed?category=free', active: search.includes('category=free') },
+      ],
+    };
+  }
+  if (pathname.startsWith('/write')) {
+    return {
+      title: '발행 위치',
+      items: [
+        { icon: '📋', label: '피드', href: '/write?to=feed' },
+        { icon: '📝', label: '블로그', href: '/write?to=blog' },
+      ],
+    };
+  }
+  return null;
+}
+
 export default function Sidebar() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const search = searchParams ? searchParams.toString() : '';
+  const pageGrid = getPageGrid(pathname, search);
   const { userId } = useAuth();
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/');
@@ -104,6 +170,14 @@ export default function Sidebar() {
       onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>
         <span>📖</span> 가이드북
       </Link>
+
+      {/* Phase 9b-1: page-aware CategoryGrid */}
+      {pageGrid && (
+        <>
+          <div style={{ height: 1, background: 'var(--border)', margin: '12px 0 8px' }} />
+          <CategoryGrid title={pageGrid.title} items={pageGrid.items} />
+        </>
+      )}
 
       <div style={{ padding: '0 8px', marginTop: 'var(--sp-xs)' }}>
         
