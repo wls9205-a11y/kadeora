@@ -1,4 +1,53 @@
-# 카더라 STATUS — 세션 191 (2026-04-28)
+# 카더라 STATUS — 세션 192 (2026-04-28)
+
+## 세션 192 — 긴급 fix: vercel crons 100 한도 초과 (Phase 2 4 cron → 1 orchestrator)
+
+### 문제
+- s189 에서 `issue-fact-check / image-attach / seo-enrich / publish` 4 cron 추가 → **vercel.json crons 104** (한도 100 초과).
+- Vercel 빌드 실패: `crons should NOT have more than 100 items`.
+- s189/s190/s191 전체 변경이 production 미적용 상태로 묶임.
+
+### 해결 — 4 cron → 1 orchestrator 통합 (-3) + 1 weekly 임시 제거 (-1) = 100
+
+**신규: `src/app/api/cron/issue-pipeline-orchestrator/route.ts`**
+- `withCronAuth` + `withCronLogging` 표준 cron 래퍼.
+- `STAGES = [fact-check 60s, image-attach 80s, seo-enrich 50s, publish 50s]` 직렬 실행.
+- `callStage(base, secret, stage)` — `AbortController + setTimeout` per-stage timeout,
+  `Bearer CRON_SECRET` 자체 호출.
+- best-effort: 단계 실패해도 다음 진행 (멱등 cron 이라 안전).
+- `maxDuration = 290`, `redisLockTtlSec = 270`. worst-case 240s + 여유.
+- 결과: `processed/created/failed` 합계 + 단계별 `body_preview / status / duration_ms`.
+
+**`vercel.json`**
+- 제거 4 (s189): `issue-fact-check`, `issue-image-attach`, `issue-seo-enrich`, `issue-publish`.
+- 추가 1: `issue-pipeline-orchestrator` `*/15 * * * *`.
+- **임시 제거 1**: `cleanup-pageviews` (`0 3 * * 0`, 일요일 새벽 1회). 100 한도 정확히
+  맞추기 위한 off-by-one 해소. 다음 세션에서 다른 cron 와 합치거나 한도 여유 시 복원.
+
+**4 cron 라우트 파일은 그대로 유지** — orchestrator 가 internal HTTP 로 호출.
+admin `/api/admin/issues/run-pipeline` (s191) 도 동일 라우트 직접 호출하므로 디버그 도구 작동 유지.
+
+### 빌드 트랩
+초기 작성 시 JSDoc 주석에 `*/15 * * * *` 표기 → `*/` 가 블록 주석을 조기 종료시켜
+TS1127/TS1005 11+ errors. `every 15min` 으로 평문 표기 변경하여 해소.
+
+### 검증
+- `node -e require('./vercel.json').crons.length` → **100** (한도 정확히 맞음)
+- `npx tsc --noEmit --skipLibCheck` → 0 errors
+- `npm run build` → 성공
+
+### 효과
+- Vercel 빌드 통과 → s189/s190/s191/s192 일괄 promote.
+- CI-v1 Phase 2 파이프라인 **15분 주기** 직렬 실행 (이전 30분 분산보다 빈번).
+- `cleanup-pageviews` 1주 누락 — pageviews 테이블 ~1주 추가 행 누적 (기존 보존정책에 미미한 영향).
+
+### Invariants
+- 4 cron 라우트 파일 미삭제 (orchestrator + admin 디버그 도구 의존).
+- `daily_create_limit` 80 미변경.
+- `safeBlogInsert` 통해서만 신규.
+- `(sb as any)` RPC 패턴.
+
+---
 
 ## 세션 191 — 사후 처리 + Phase 2 완전 정상화
 

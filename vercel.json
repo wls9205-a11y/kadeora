@@ -9,10 +9,6 @@
       "schedule": "0 3 * * *"
     },
     {
-      "path": "/api/cron/cleanup-pageviews",
-      "schedule": "0 3 * * 0"
-    },
-    {
       "path": "/api/cron/stock-price",
       "schedule": "0 18 * * 1-5"
     },
@@ -315,6 +311,10 @@
     {
       "path": "/api/cron/feed-buzz-publish",
       "schedule": "30 8,12,18,21 * * *"
+    },
+    {
+      "path": "/api/cron/issue-pipeline-orchestrator",
+      "schedule": "*/15 * * * *"
     },
     {
       "path": "/api/cron/check-price-alerts",
