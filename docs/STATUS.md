@@ -1,4 +1,68 @@
-# 카더라 STATUS — 세션 190 (2026-04-28)
+# 카더라 STATUS — 세션 191 (2026-04-28)
+
+## 세션 191 — 사후 처리 + Phase 2 완전 정상화
+
+### s190 deploy 후 검증 결과 (24h)
+- ✅ `check_publish_gate` 완화 → gate_blocked 100% → 25%, **15건 auto_published**
+- ⚠️ 부작용: 발행된 15건 모두 `image_count = 0` — 누적된 옛 글들이 게이트 통과
+- ❌ `issue-draft` 신규 0건 — `issue-detect` 06:00 **504 timeout** 으로 감지 자체 실패
+- ❌ `issue-image-attach` 백로그 1,489 → 처리 0
+- ❌ `issue-fact-check` NULL 397 → 처리 0
+- ❌ `inject_hub_mapping_for_post` — issue-publish 경로에서 미호출 (issue-draft 만 호출)
+
+### 변경
+
+**DB — `backfill_image_variants_for_published(p_limit INT)` RPC**
+일회성 유틸. `is_published = true AND published_at >= NOW() - 7d AND markdown image count < 5`
+대상에 OG variant 5장 (디자인 1~6 rotation) append. 재실행 방지: 이미 `/api/og?title=`
+가 들어간 글은 skip. URL-safe escape: ` `→`%20`, `&`→`%26`, `#`→`%23`, `?`→`%3F`.
+- 호출: `SELECT backfill_image_variants_for_published(200);` → 200 처리, skip 0
+- 호출 2: `SELECT backfill_image_variants_for_published(500);` → 61 처리, skip 6 (이미 OG 보유)
+- **총 261건 backfill 완료**. 7d 윈도우 image=0 글 **0개** 확인 (5장 237 / 6+ 301 / 1-4 6).
+
+**코드 — 4 파일**
+
+`src/app/api/cron/issue-publish/route.ts`
+- `is_published=true` flip **직전**:
+  1. blog_posts SELECT (`content`, `title`, `category`)
+  2. markdown image count < 5 → OG variant URL append (`titleHash` rotation, design 1~6).
+  3. `inject_hub_mapping_for_post` RPC 멱등 호출.
+- `SITE_URL` import 추가.
+- 효과: image-attach 우회 발행이라도 image≥5 + hub-spoke link equity 보장.
+
+`src/app/api/cron/issue-detect/route.ts`
+- `maxDuration` 60 → **90** (Vercel pro 내 한도).
+- RSS fetch: 14+ feeds 한 번에 `Promise.allSettled` → **batch 4개씩 직렬**
+  (`for i...slice(i,i+4)`). 각 fetch 는 기존 `AbortSignal.timeout(8000)` 유지.
+  worst-case: 8s × ⌈feeds/4⌉ batch ≈ 32s, 90s 한도 대비 충분.
+
+`src/app/api/admin/issues/run-pipeline/route.ts` (신규)
+- POST `/api/admin/issues/run-pipeline` — `requireAdmin` + `Bearer CRON_SECRET` 자체
+  internal fetch.
+- 4 단계 순차 실행: `issue-fact-check` → `issue-image-attach` → `issue-seo-enrich`
+  → `issue-publish`. 각 단계 결과 (`status`, `processed`, `created`, `metadata`) 수집.
+- `maxDuration = 300`, 단계당 250s timeout, 멱등 cron 이라 중간 실패 시에도 다음 단계 진행.
+- GET 은 405 + 사용 안내 (외부 GET 노출 방어).
+
+### 검증
+- `npx tsc --noEmit --skipLibCheck` → 0 errors (src 코드만)
+- `npm run build` → 성공
+- DB: 261건 backfill 완료, 7d window image=0 → 0건
+
+### 효과 (가설)
+- 발행글 image=0 부작용 → **즉시 청산** (네이버 이미지 캐러셀 / Google Image Pack 노출 가능)
+- `issue-publish` 신규 발행: image≥5 + hub_mapping 자동 (issue-draft 누락분 보강)
+- `issue-detect` 504 → 90s 이내 정상 종료, 새 이슈 감지 재개
+- 어드민 디버그 도구 확보 (cron 사이클 안 기다리고 즉시 처리 + 단계별 결과 가시화)
+
+### Invariants 준수
+- `daily_create_limit` 80 미변경
+- 블로그 DELETE 금지 (RPC 도 UPDATE 만)
+- `safeBlogInsert` 통해서만 신규 (이번 작업은 UPDATE 만)
+- `(sb as any)` RPC 패턴
+- DB RPC 시그니처 변화 없음 (backfill 은 신규 RPC)
+
+---
 
 ## 세션 190 — CI-v1 Phase 2 파이프라인 정상화 (image-attach 디버그 + publish gate 완화)
 

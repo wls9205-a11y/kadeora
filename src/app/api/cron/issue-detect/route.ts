@@ -1,4 +1,5 @@
-export const maxDuration = 60;
+// s191: 60→90 — RSS 14곳 + Google Trends + DART 병렬에서 504 발생. batch 4개씩 + 90s.
+export const maxDuration = 90;
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronAuth } from '@/lib/cron-auth';
@@ -346,10 +347,16 @@ async function handler(_req: NextRequest) {
     ? [...APT_RSS_FEEDS, ...STOCK_RSS_FEEDS, ...FINANCE_RSS_FEEDS, ...ECONOMY_RSS_FEEDS, ...LIFE_RSS_FEEDS, ...GOV_RSS_FEEDS]
     : [...APT_RSS_FEEDS, ...FINANCE_RSS_FEEDS]; // 그룹B: 부동산+재테크
 
-  const allItems = await Promise.allSettled(feeds.map(f => fetchRSS(f)));
+  // s191: 14+ feeds 동시 발사 시 일부 slow source 가 전체 504 유발 → 4개 batch 직렬.
+  // 각 fetchRSS 는 이미 AbortSignal.timeout(8000) — 배치 1개 worst-case 8s × 4 batch ≈ 32s.
   const rssItems: RSSItem[] = [];
-  for (const r of allItems) {
-    if (r.status === 'fulfilled') rssItems.push(...r.value);
+  const BATCH = 4;
+  for (let i = 0; i < feeds.length; i += BATCH) {
+    const slice = feeds.slice(i, i + BATCH);
+    const results = await Promise.allSettled(slice.map(f => fetchRSS(f)));
+    for (const r of results) {
+      if (r.status === 'fulfilled') rssItems.push(...r.value);
+    }
   }
 
   // v2: Google Trends RSS + DART 공시 병합

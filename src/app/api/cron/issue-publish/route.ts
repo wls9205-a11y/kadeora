@@ -26,6 +26,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withCronAuthFlex } from '@/lib/cron-auth';
 import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { SITE_URL } from '@/lib/constants';
 
 export const maxDuration = 120;
 export const runtime = 'nodejs';
@@ -114,6 +115,41 @@ async function handler(_req: NextRequest) {
               samples.push({ id: issue.id, post: postId, gate: 'blocked', reasons: gate.reasons.slice(0, 3) });
             }
             continue;
+          }
+
+          // s191: 발행 직전 OG variant 자동 보강 — 게이트는 통과했어도 image<5 이면
+          // SERP 캐러셀/이미지 팩 미노출이라 이 시점에 5장 보장.
+          try {
+            const { data: post } = await sb
+              .from('blog_posts')
+              .select('content, title, category')
+              .eq('id', postId)
+              .single();
+            if (post && post.content && post.title) {
+              const imgCount = (post.content.match(/!\[.*?\]\(.*?\)/g) || []).length;
+              if (imgCount < 5) {
+                const need = 5 - imgCount;
+                const titleHash = Array.from(post.title).reduce((a: number, c: string) => a + c.charCodeAt(0), 0);
+                const variants: string[] = [];
+                for (let i = 0; i < need; i++) {
+                  const design = ((titleHash + i + 1) % 6) + 1;
+                  const url = `${SITE_URL}/api/og?title=${encodeURIComponent(post.title + ' ' + (i + 1))}&category=${post.category || 'general'}&design=${design}`;
+                  variants.push(`![${post.title} OG ${i + 1}](${url})`);
+                }
+                const padded = post.content + '\n\n' + variants.join('\n\n');
+                await sb.from('blog_posts').update({ content: padded }).eq('id', postId);
+              }
+            }
+          } catch (padErr: any) {
+            console.warn(`[issue-publish] og-pad failed post=${postId}:`, padErr?.message);
+          }
+
+          // s191: hub_mapping RPC — issue-draft 가 누락했거나 image-attach 우회 발행
+          // 시에도 hub-spoke link equity 가 적용되도록 멱등 호출.
+          try {
+            await (sb as any).rpc('inject_hub_mapping_for_post', { p_post_id: postId });
+          } catch (mapErr: any) {
+            console.warn(`[issue-publish] inject_hub_mapping_for_post failed post=${postId}:`, mapErr?.message);
           }
 
           // 3) blog_posts 공개 전환 → trigger 가 indexnow 큐 enqueue
