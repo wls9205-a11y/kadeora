@@ -155,7 +155,7 @@ export default async function StockPage() {
   }
 
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<div aria-hidden="true" style={{ minHeight: 1 }} />}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         "@context": "https://schema.org",
         "@type": "DataCatalog",
