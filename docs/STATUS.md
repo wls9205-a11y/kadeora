@@ -1,3 +1,44 @@
+# 카더라 STATUS — 세션 209: CTA tracking 회귀 fix + signup-flow 잔여 fix (2026-04-29)
+
+## 세션 209 — Track A: CTA tracking 회귀 + Track B: signup-flow 시각/매핑 fix
+
+### Track A — CTA 클릭 트래킹 회귀 (4/28~29)
+**증상** (모바일 클로드 진단 인계):
+- `v_admin_signup_diagnostic` 9~16시 KST: 4/27 800/9 (6 source) → 4/28 452/1 (1 source) → 4/29 447/1 (1 source).
+- 16:25 기준 attempts=0, signups=0 (트래픽 167명).
+- 4/28 `c18c9e52` (s203 Nuclear) 의심.
+
+**진단** — Claude Code playwright 직접 검증:
+- prod `/apt` 진입 → /login anchor 클릭 → 2 POST `/api/events/cta` 발화 (헤드리스 desktop 환경 OK).
+- 코드 path 확인: `CtaGlobalTracker` (document-level capture click → `trackCtaClick` → sendBeacon `/api/events/cta`) 모두 정상.
+- 그러나 s203 에서 `CtaGlobalTracker / PageViewTracker / BehaviorTracker` 셋 다 `dynamic({ ssr: false })` 으로 격리됨.
+- 모바일/저속망 사용자: 청크 도착 전 anchor 클릭 → 페이지 navigation → listener 미장착 상태로 click 손실. 데스크탑 빠른 머신만 4/28~29 에 1 source 남기는 패턴이 정확히 이 hypothesis 와 일치.
+
+**Fix**:
+- `src/app/(main)/ClientShell.tsx`: 트래커 3종 (`CtaGlobalTracker`, `PageViewTracker`, `BehaviorTracker`) 을 `dynamic({ ssr: false })` 에서 직접 import 로 전환.
+- 셋 다 `'use client' + return null` — SSR HTML 영향 0, 메인 청크에 묶여 hydrate 즉시 listener 가 attach.
+- 다른 chrome 컴포넌트 (Toast/Auth/Navigation/Sidebar/RightPanel/AdBanner 등) 는 ssr:false 유지 (s203 hook order regression 회피 보존).
+- Architecture Rule #14 의 "ssr:false 점진적 복원" 정책에 따른 surgical un-isolation.
+
+### Track B — `/admin/signup-flow` 시각/매핑 fix
+- **B1: FunnelBars** — 단계 우측 빨간 `−99% / −100%` 텍스트(첫 단계 대비 누적 감소율) 제거. 본질적으로 funnel 은 매 단계 줄어드므로 노이즈/오해 유발. **이전 단계 대비 통과율** (`stage[i].count / stage[i-1].count * 100`) + 임계 색상으로 교체:
+  - ≥70%: green (`#34d399`)
+  - 30~70%: amber (`#fbbf24`)
+  - <30%: red (`#f87171`)
+  - 첫 단계 (`cta_view`) 는 `—` 표시 (이전 단계 없음).
+- **B2: DailyTable** — view 신규 컬럼 매핑 추가. `oauth_started` (bigint) 를 oauth alias 체인에 prepend (`r.oauth_started ?? r.oauth_start ?? r.oauth_starts`). `signups_seed`, `top_dropped_step` 는 기존 alias 로 이미 매핑됨.
+
+### 검증
+- `npm run type-check` 0 errors.
+- `npm run build` 클린, 554/554 pages.
+- prod deploy 후 5분 모니터링 — `conversion_events.event_type='cta_click'` 신규 카운트 증가 확인 (Track A).
+- `/admin/signup-flow` 새로고침 — funnel 빨간 % 사라짐, 14일 표 OAUTH 시작 / 시드 / 주 DROPPED 컬럼 채워짐 (Track B).
+
+### DB 변경 0
+RPC + view 모두 모바일 클로드가 prod 사전 적용 완료. 본 commit 코드 only.
+
+---
+
 # 카더라 STATUS — 세션 208 + 가입 플로우 진단 페이지 (2026-04-29)
 
 ## 세션 208 — `/admin/signup-flow` 가입 funnel 진단 페이지

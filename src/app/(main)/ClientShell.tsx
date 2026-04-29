@@ -24,6 +24,15 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 import TopLoadingBar from '@/components/TopLoadingBar';
 import ScrollToTop from '@/components/ScrollToTop';
 
+// s209 fix(track-regression): listener-only 트래커 3종은 dynamic({ssr:false}) 격리 해제.
+// 이 셋은 useEffect 안에서 document-level click listener / fetch beacon 만 attach 하고
+// 항상 null 을 렌더한다. 즉 SSR HTML 은 변하지 않으면서, 메인 청크에 묶여 hydrate 즉시
+// 리스너가 붙는다. s203 nuclear 적용 후 모바일/저속망에서 chunk 도착 전 클릭이 navigate
+// 되어 conversion_events.cta_click 이 누락된 게 4/28 회귀의 직접 원인 — 6 source → 1.
+import CtaGlobalTracker from '@/components/CtaGlobalTracker';
+import PageViewTracker from '@/components/PageViewTracker';
+import BehaviorTracker from '@/components/BehaviorTracker';
+
 const ToastProvider          = dynamic(() => import('@/components/Toast').then(m => m.ToastProvider),       { ssr: false });
 const AuthProvider           = dynamic(() => import('@/components/AuthProvider').then(m => m.AuthProvider), { ssr: false });
 const Navigation             = dynamic(() => import('@/components/Navigation').then(m => m.Navigation),     { ssr: false });
@@ -37,9 +46,6 @@ const GlobalMissionBar       = dynamic(() => import('@/components/GlobalMissionB
 const StickySignupBar        = dynamic(() => import('@/components/StickySignupBar'),                         { ssr: false });
 const InstallBanner          = dynamic(() => import('@/components/InstallBanner'),                           { ssr: false });
 const PWAInstallTracker      = dynamic(() => import('@/components/PWAInstallTracker'),                       { ssr: false });
-const PageViewTracker        = dynamic(() => import('@/components/PageViewTracker'),                         { ssr: false });
-const BehaviorTracker        = dynamic(() => import('@/components/BehaviorTracker'),                         { ssr: false });
-const CtaGlobalTracker       = dynamic(() => import('@/components/CtaGlobalTracker'),                        { ssr: false });
 const WelcomeReward          = dynamic(() => import('@/components/WelcomeReward'),                           { ssr: false });
 const WelcomeToast           = dynamic(() => import('@/components/WelcomeToast'),                            { ssr: false });
 const SmartPushPrompt        = dynamic(() => import('@/components/SmartPushPrompt'),                         { ssr: false });

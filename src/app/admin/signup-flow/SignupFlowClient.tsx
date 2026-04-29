@@ -407,21 +407,27 @@ function Banner({ tone = 'default', children }: { tone?: 'default' | 'danger'; c
 
 function FunnelBars({ rows }: { rows: { label: string; key: string; count: number }[] }) {
   const max = Math.max(1, ...rows.map((r) => r.count));
-  const top = rows[0]?.count || 1;
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-      {rows.map((r) => {
+      {rows.map((r, i) => {
         const w = max > 0 ? (r.count / max) * 100 : 0;
-        const dropFromTop = top > 0 ? (1 - r.count / top) * 100 : 0;
+        // 이전 단계 대비 통과율 (funnel 본질이 매 단계 줄어드는 것이므로 빨간 -% 대신 "통과율" 표기)
+        const prev = i > 0 ? rows[i - 1].count : 0;
+        const passRate = prev > 0 ? (r.count / prev) * 100 : null;
+        const passColor = passRate == null
+          ? 'var(--text-tertiary)'
+          : passRate >= 70 ? '#34d399'
+          : passRate >= 30 ? '#fbbf24'
+          : '#f87171';
         return (
-          <div key={r.key} style={{ display: 'grid', gridTemplateColumns: '120px 1fr 80px 60px', gap: 10, alignItems: 'center' }}>
+          <div key={r.key} style={{ display: 'grid', gridTemplateColumns: '120px 1fr 80px 90px', gap: 10, alignItems: 'center' }}>
             <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)' }}>{r.label}</span>
             <div style={{ height: 22, background: 'var(--bg-base)', borderRadius: 4, overflow: 'hidden', border: '1px solid var(--border)' }}>
               <div style={{ width: `${w}%`, height: '100%', background: 'linear-gradient(90deg, #2563EB 0%, #60A5FA 100%)' }} />
             </div>
             <span style={{ fontSize: 12, fontWeight: 800, textAlign: 'right' }}>{fmtNum(r.count)}</span>
-            <span style={{ fontSize: 10, color: dropFromTop > 50 ? '#f87171' : dropFromTop > 30 ? '#fbbf24' : 'var(--text-tertiary)', textAlign: 'right' }}>
-              {dropFromTop > 0 ? `−${dropFromTop.toFixed(0)}%` : '·'}
+            <span style={{ fontSize: 10, color: passColor, fontWeight: 700, textAlign: 'right' }} title="이전 단계 대비 통과율">
+              {passRate == null ? '—' : `통과 ${passRate.toFixed(0)}%`}
             </span>
           </div>
         );
@@ -484,7 +490,8 @@ function DailyTable({ rows }: { rows: any[] }) {
         const uv = n(r.uv ?? r.unique_visitors ?? r.visitors);
         const cta = n(r.cta_clicks ?? r.clicks);
         const att = n(r.signup_attempts ?? r.attempts);
-        const oauth = n(r.oauth_start ?? r.oauth_starts);
+        // s209 — view 신규 컬럼 매핑: oauth_started (bigint), signups_seed (bigint), top_dropped_step (text)
+        const oauth = n(r.oauth_started ?? r.oauth_start ?? r.oauth_starts);
         const real = n(r.signups_real ?? r.signups ?? r.real_signups);
         const seed = n(r.signups_seed ?? r.seed_signups);
         const dropped = String(r.top_dropped_step ?? r.dropped_step ?? r.main_drop ?? '');
