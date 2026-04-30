@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { headers } from 'next/headers';
 import ClientShell from './ClientShell';
 
 export const metadata: Metadata = {
@@ -10,12 +9,13 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' as const, 'max-video-preview': -1 },
 };
 
-export default async function MainLayout({ children }: { children: React.ReactNode }) {
-  const headerStore = await headers();
-  const isLoggedIn = headerStore.get('x-user-logged-in') === '1';
-
+// s217 P0 Cache-Control: 기존 `await headers()` 가 (main) 전체를 dynamic 으로 강제 →
+// Next.js 가 `Cache-Control: private, no-cache, no-store` 를 응답에 박아 middleware 의 public
+// s-maxage=300 헤더가 무력화 됐음. AuthProvider 가 client-side `sb.auth.getSession()` 로 로그인
+// 상태를 직접 감지하므로 serverLoggedIn 는 dead prop. 제거하여 ISR + edge cache 활성화.
+export default function MainLayout({ children }: { children: React.ReactNode }) {
   return (
-    <ClientShell serverLoggedIn={isLoggedIn}>
+    <ClientShell serverLoggedIn={false}>
       {children}
     </ClientShell>
   );
