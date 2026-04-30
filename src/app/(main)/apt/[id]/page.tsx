@@ -352,7 +352,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       ? ` ${d.site.price_min >= 10000 ? `${(d.site.price_min/10000).toFixed(1)}억` : `${d.site.price_min.toLocaleString()}만`}~${d.site.price_max >= 10000 ? `${(d.site.price_max/10000).toFixed(1)}억` : `${d.site.price_max.toLocaleString()}만`}`
       : '';
     return {
-      title: `${title}${priceStr} — ${d.region} | 카더라`, description: desc,
+      // s212 P0-B: '| 카더라' 제거 — root layout template '%s | 카더라' 가 자동 추가하므로 explicit 표기 시 중복.
+      title: `${title}${priceStr} — ${d.region}`, description: desc,
       alternates: { canonical: `${SITE_URL}/apt/${resolved.slug}` },
       robots: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' as const, 'max-video-preview': -1, googleBot: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' as const } },
       openGraph: { title, description: desc, url: `${SITE_URL}/apt/${resolved.slug}`, siteName: '카더라', locale: 'ko_KR', type: 'article', images: (() => {

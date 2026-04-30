@@ -32,8 +32,9 @@ async function fetchEvent(slug: string) {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const ev = await fetchEvent(slug);
-  if (!ev) return { title: '대형 이벤트 | 카더라', robots: { index: false, follow: true } };
-  const title = `${ev.name} ${ev.event_type || '재건축'} — Stage ${ev.stage ?? '-'} 상세 분석 | 카더라`;
+  // s212 P0-B: template 가 '| 카더라' 자동 추가
+  if (!ev) return { title: '대형 이벤트', robots: { index: false, follow: true } };
+  const title = `${ev.name} ${ev.event_type || '재건축'} — Stage ${ev.stage ?? '-'} 상세 분석`;
   const desc = `${ev.region_sido || ''} ${ev.region_sigungu || ''} ${ev.name} ${ev.event_type || '재건축'}: ${ev.scale_before ?? '?'} → ${ev.scale_after ?? '?'}+세대, 브랜드 ${ev.new_brand_name || '미정'} (${ev.constructor_status || 'unconfirmed'}). Stage, 시공사, 타임라인, 관련 블로그 전체 정보.`.slice(0, 170);
   return {
     title,

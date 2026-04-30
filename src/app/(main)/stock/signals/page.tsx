@@ -7,7 +7,8 @@ import Disclaimer from '@/components/Disclaimer';
 export const revalidate = 300;
 
 export const metadata: Metadata = {
-  title: '수급 시그널 — 외국인·기관 매매 조합 신호 | 카더라',
+  // s212 P0-B: template 가 '| 카더라' 자동 추가
+  title: '수급 시그널 — 외국인·기관 매매 조합 신호',
   description: '외국인 대량 순매수, 기관 연속 순매수, 개인 투매 후 외인 유입, 숏스퀴즈 후보 등 수급 조합 시그널을 매일 자동 탐지합니다.',
   alternates: { canonical: SITE_URL + '/stock/signals' },
   openGraph: {

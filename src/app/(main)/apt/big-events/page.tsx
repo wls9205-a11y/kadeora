@@ -6,7 +6,8 @@ import { SITE_URL } from '@/lib/constants';
 export const revalidate = 900;
 
 export const metadata: Metadata = {
-  title: '전국 재건축·재개발 대형 이벤트 모음 — 카더라',
+  // s212 P0-B: template 가 '| 카더라' 자동 추가
+  title: '전국 재건축·재개발 대형 이벤트 모음',
   description:
     '삼익비치·은마·잠실·목동 등 전국 주요 재건축·재개발 단지의 현재 Stage, 브랜드, 시공사, 세대수를 한눈에. 카더라 데이터 기반 분석.',
   alternates: { canonical: `${SITE_URL}/apt/big-events` },

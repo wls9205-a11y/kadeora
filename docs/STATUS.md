@@ -109,6 +109,56 @@
 - `npm run build` 클린, 558/558 pages.
 - 신규 라우트 등록: `/api/admin/watchlist-widget 1.36 kB`.
 - prod 배포 후 admin 세션 검증 — 위젯이 SignupFunnelWidget 직후 노출, 30s 자동 갱신.
+## 세션 212.5 — P0-B title 중복 fix (P0-A blog ISR 은 다음 세션 옵션 X로 분리)
+
+### 배경 (세션 211 진단 결과)
+세션 211 진단 표 P0-B: `/apt/레이카운티` 의 `<title>` 에 `| 카더라` **3회 중복** 발견:
+> "레이카운티 분양정보 — 분양가·청약일정·입주시기 2026 | 카더라 3.0억~7.1억 — 부산 | 카더라 | 카더라"
+
+### 원인 분석 (3 source)
+| 소스 | 내용 | 영향 |
+|---|---|---|
+| `app/layout.tsx:19` | `template: '%s \| 카더라'` (root) | 모든 페이지 `metadata.title` 에 `\| 카더라` 자동 추가 — **유지** (전역 default) |
+| `(main)/layout.tsx:6` | `template: '%s \| 카더라'` (sub-layout, root와 동일) | 중복 정의지만 동일 string → harmless. **유지** |
+| 페이지 `metadata.title` 에 explicit `\| 카더라` 또는 `— 카더라` 박혀있음 | `apt/[id]:355`, `apt/redev:11`, 외 9개 파일 | template 가 한 번 더 추가하므로 **2x 중복** 발생. **fix 대상** |
+| DB `apt_sites.seo_title` 컬럼 | 일부 row 에 `\| 카더라` baked | 3rd 중복의 출처. **DB cleanup 별도 세션** (이번 scope 외) |
+
+### 수정 (코드 only — 11 파일, metadata.title 만)
+explicit `| 카더라` / `— 카더라` 제거. `openGraph.title` / `twitter.title` 은 template 영향 없으므로 그대로 보존.
+
+| 파일 | 변경 |
+|---|---|
+| `apt/[id]/page.tsx:355` | `\`${title}${priceStr} — ${d.region} \| 카더라\`` → `\`${title}${priceStr} — ${d.region}\`` |
+| `about/authors/page.tsx:6` | `'카더라 편집부 소개 \| 카더라'` → `'카더라 편집부 소개'` |
+| `apt/big-events/page.tsx:9` | `'... 모음 — 카더라'` → `'... 모음'` |
+| `apt/big-events/[slug]/page.tsx:35,36` | fallback + 동적 title 모두 `\| 카더라` 제거 |
+| `apt/complex/[name]/page.tsx:53` | `seo_title` fallback 의 `\| 카더라` 제거 (DB seo_title 은 별도) |
+| `apt/redev/page.tsx:11` | metadata.title `\| 카더라` 제거 (openGraph 16, twitter 26 은 보존) |
+| `consultant/page.tsx:5` | `'준비 중 — 카더라'` → `'준비 중'` |
+| `glossary/page.tsx:9` | `'... A to Z \| 카더라'` → `'... A to Z'` |
+| `profile/cheongak/page.tsx:11` | `'내 청약 가점 — 카더라'` → `'내 청약 가점'` |
+| `stock/short-selling/page.tsx:9` | `'... 후보 \| 카더라'` → `'... 후보'` |
+| `stock/signals/page.tsx:10` | `'... 신호 \| 카더라'` → `'... 신호'` |
+
+### 보존 (수정 안 함)
+- `blog/[slug]/page.tsx:282` — `title: { absolute: \`${post.title} \| ${brandSuffix}\` }`. `absolute` 모드는 template 우회 → 중복 X. **force-dynamic 코드 절대 손대지 않음 (P0-A 분리)**.
+- `(main)/layout.tsx:6` — root 와 동일 template. 중복이지만 결과 동일.
+- `openGraph.title` / `twitter.title` — template 영향 없음.
+- `app/layout.tsx:19` template 자체 — 전역 fallback 필요.
+- DB `apt_sites.seo_title` — 일부 row 에 `\| 카더라` baked. DB cleanup 별도 세션.
+
+### 검증
+- `tsc --noEmit --skipLibCheck` → 0 errors
+- `npm run build` → 성공
+- route type: `/apt/[id]` ƒ (Dynamic), `/blog/[slug]` ● (SSG, generateStaticParams[] + dynamicParams) — **둘 다 변경 없음**, P0-A scope 침범 X
+- 배포 후 `curl <title>` 표본 검증 예정 (apt/레이카운티, apt/big-events, glossary)
+
+### P0-A 다음 세션 (옵션 X — 3 commit 분리)
+> 회귀 위험 큼 (30+ isBot/isLoggedIn 분기, SmartSectionGate hook fix 와 상호작용, BlogReadGate 봇 100% 노출 정책)
+> 작은 단계로 분할:
+> - sub-step (a): 데이터 fetch SSR/client 분리 — userCount, todaySignups, related blogs 등 isBot 가드 client 이동
+> - sub-step (b): isBot 분기 제거 — SSR 항상 봇/full 버전 (SEO 최적), 게이팅은 SmartSectionGate client-side 만
+> - sub-step (c): `force-dynamic` 제거 + `revalidate=3600` 명시. ISR 활성화
 
 ---
 

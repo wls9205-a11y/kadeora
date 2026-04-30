@@ -3,7 +3,8 @@ import Link from 'next/link';
 import { SITE_URL } from '@/lib/constants';
 
 export const metadata: Metadata = {
-  title: '카더라 편집부 소개 | 카더라',
+  // s212 P0-B: template 가 '| 카더라' 자동 추가
+  title: '카더라 편집부 소개',
   description: '카더라 블로그를 제작하는 분야별 편집팀 소개. 부동산·주식·재테크·데이터 분석 전문.',
   alternates: { canonical: `${SITE_URL}/about/authors` },
   openGraph: {

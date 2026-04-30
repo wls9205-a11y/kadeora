@@ -8,7 +8,8 @@ export const revalidate = 3600; // 1시간 캐시
 const OG_IMAGE = `${SITE_URL}/api/og?title=${encodeURIComponent('전국 재개발·재건축 현황')}&category=apt&design=2`;
 
 export const metadata: Metadata = {
-  title: '재개발 재건축 현황 — 전국 정비사업 진행 단계·시공사·세대수 | 카더라',
+  // s212 P0-B: template 가 '| 카더라' 자동 추가
+  title: '재개발 재건축 현황 — 전국 정비사업 진행 단계·시공사·세대수',
   description: '서울·경기·부산 등 전국 재개발·재건축 구역의 진행 단계, 시공사, 세대수, 용적률, 분담금 정보를 한눈에. 정비구역지정부터 착공까지 단계별 현황과 AI 투자 분석.',
   keywords: ['재개발', '재건축', '재개발 현황', '재건축 현황', '정비사업', '신통기획', '분담금', '입주권', '재개발 투자', '재건축 투자', '정비구역', '관리처분', '조합설립', '사업시행인가'],
   alternates: { canonical: `${SITE_URL}/apt/redev` },

@@ -2,7 +2,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: '준비 중 — 카더라',
+  // s212 P0-B: template 가 '| 카더라' 자동 추가
+  title: '준비 중',
   robots: { index: false, follow: false },
 };
 

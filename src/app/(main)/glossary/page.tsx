@@ -6,7 +6,8 @@ import Link from 'next/link';
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: '주식 용어사전 — 투자 초보를 위한 A to Z | 카더라',
+  // s212 P0-B: template 가 '| 카더라' 자동 추가
+  title: '주식 용어사전 — 투자 초보를 위한 A to Z',
   description: 'PER, PBR, EPS, RSI, MACD, 공매도, 배당수익률 등 주식 투자에 필요한 핵심 용어를 쉽게 설명합니다.',
   alternates: { canonical: SITE_URL + '/glossary' },
   openGraph: {

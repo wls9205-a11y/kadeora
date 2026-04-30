@@ -8,7 +8,8 @@ export const dynamic = 'force-dynamic';
 export const maxDuration = 30;
 
 export const metadata: Metadata = {
-  title: '내 청약 가점 — 카더라',
+  // s212 P0-B: template 가 '| 카더라' 자동 추가
+  title: '내 청약 가점',
   description: '무주택 기간·부양가족·청약통장 가입 기간 입력 → 자동 가점 계산 + 매칭 단지 알림',
   alternates: { canonical: `${SITE_URL}/profile/cheongak` },
   robots: { index: false, follow: false },

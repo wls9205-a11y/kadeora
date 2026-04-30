@@ -50,7 +50,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const yearFragment = builtYear ? `${builtYear}년 준공` : '';
   const metaParts = [salePrice ? `매매 ${salePrice}` : '', pricePerPyeong, jeonseRatio, yearFragment].filter(Boolean).join(' · ');
 
-  const title = p?.seo_title || `${decoded} 실거래가·시세·전세가율·평당가 ${new Date().getFullYear()} — ${region} ${sigungu} | 카더라`;
+  // s212 P0-B: template 가 '| 카더라' 자동 추가 — fallback 에서 explicit 표기 제거
+  const title = p?.seo_title || `${decoded} 실거래가·시세·전세가율·평당가 ${new Date().getFullYear()} — ${region} ${sigungu}`;
   const description = p?.seo_description || `${decoded} 아파트 ${metaParts ? metaParts + '. ' : ''}실거래가 이력, 전세·월세 시세, 평당가 추이, 면적별 비교, 학군 정보를 카더라에서 무료로 확인하세요.`;
   const ogSubtitle = salePrice ? `매매 ${salePrice}${jeonsePrice ? ` · 전세 ${jeonsePrice}` : ''}` : '실거래가·시세 분석';
   // 실제 현장 이미지 조회 (apt_sites에서)

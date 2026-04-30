@@ -6,7 +6,8 @@ import Disclaimer from '@/components/Disclaimer';
 export const revalidate = 300;
 
 export const metadata: Metadata = {
-  title: '공매도·대차잔고 대시보드 — 과열종목·숏스퀴즈 후보 | 카더라',
+  // s212 P0-B: template 가 '| 카더라' 자동 추가
+  title: '공매도·대차잔고 대시보드 — 과열종목·숏스퀴즈 후보',
   description: 'KRX 공매도 거래현황, 과열종목 지정, 대차잔고 급증·급감 종목, 숏스퀴즈 후보를 매일 자동 업데이트합니다.',
   alternates: { canonical: SITE_URL + '/stock/short-selling' },
   openGraph: {
