@@ -1,7 +1,8 @@
-export const maxDuration = 30;
+export const maxDuration = 60;
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronAuth } from '@/lib/cron-auth';
+import { fetchBatched } from '@/lib/db/fetchBatched';
 
 /**
  * aggregate-user-events 크론 — 일별 유저 행동 집계
@@ -15,14 +16,20 @@ async function handler(_req: NextRequest) {
   const dayStart = `${yesterday}T00:00:00+09:00`;
   const dayEnd = `${yesterday}T23:59:59+09:00`;
 
+  // s216: PostgREST 1k cap 우회 — fetchBatched 로 하루치 events 전수 집계.
+  // 기존 .limit(50000) 는 1k 만 반환되어 매일 49k events 미집계 (S214.5 #1 P0-CRIT).
   // 어제의 이벤트 집계
-  const { data: events } = await (sb as any).from('user_events')
-    .select('visitor_id, user_id, session_id, event_type, event_name, page_path, page_category, duration_ms, device_type, properties')
-    .gte('created_at', dayStart)
-    .lt('created_at', dayEnd)
-    .limit(50000);
+  const events = await fetchBatched<any>((off, lim) =>
+    (sb as any).from('user_events')
+      .select('visitor_id, user_id, session_id, event_type, event_name, page_path, page_category, duration_ms, device_type, properties')
+      .gte('created_at', dayStart)
+      .lt('created_at', dayEnd)
+      .order('created_at', { ascending: true })
+      .range(off, off + lim - 1),
+    100000, // 안전 ceiling. user_events 는 14일 retention 으로 총 57k row.
+  );
 
-  if (!events || events.length === 0) {
+  if (events.length === 0) {
     return NextResponse.json({ date: yesterday, visitors: 0, skipped: true });
   }
 
