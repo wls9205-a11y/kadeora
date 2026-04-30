@@ -18,7 +18,8 @@ export const metadata: Metadata = {
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ redirect?: string }>;
+  // s220: next 는 redirect alias (메인 v5 신규 CTA 호환)
+  searchParams: Promise<{ redirect?: string; next?: string; cta?: string; source?: string }>;
 }) {
   const cookieStore = await cookies();
   const safeCookies = () => { try { return cookieStore.getAll(); } catch { return []; } };
@@ -31,7 +32,7 @@ export default async function LoginPage({
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
       const params = await searchParams;
-      const target = params.redirect;
+      const target = params.next || params.redirect;
       const isSafe = typeof target === 'string'
         && target.startsWith('/')
         && !target.startsWith('//')

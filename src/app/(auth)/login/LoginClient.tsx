@@ -21,7 +21,9 @@ function LoginForm({ redirect }: LoginFormProps) {
   const login = async (provider: 'kakao' | 'google') => {
     setLoading(provider);
     setError('');
-    const source = new URLSearchParams(window.location.search).get('source') || 'direct';
+    // s220: cta param 우선, source fallback (메인 v5 신규 CTA 가 cta=... 사용)
+    const sp = new URLSearchParams(window.location.search);
+    const source = sp.get('cta') || sp.get('source') || 'direct';
     // 가입 시도 추적 + CTA 클릭 이벤트 (conversion_events)
     fetch('/api/auth/track-attempt', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ provider, source, redirect_path: redirect, success: false }) }).catch(() => {});
     trackCtaClick({ cta_name: source, category: 'signup', page_path: window.location.pathname });
@@ -153,7 +155,8 @@ export default function LoginClient() {
   const [redirect, setRedirect] = useState('/feed');
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const r = params.get('redirect');
+    // s220: next 는 redirect alias, cta 는 source alias — 메인 v5 신규 CTA 호환
+    const r = params.get('next') || params.get('redirect');
     if (r && r.startsWith('/')) setRedirect(r);
   }, []);
   return <LoginForm redirect={redirect} />;

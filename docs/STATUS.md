@@ -1,3 +1,109 @@
+# 카더라 STATUS — 세션 220: 메인 페이지 v5 리디자인 — 9섹션 + 3 OAuth + 추적중 단지 + Rule #17 (2026-05-01)
+
+## 세션 220 — 트래픽 우선순위 9섹션 재배열 + Suspense-free SSR
+
+> 모바일 클로드 brief 가 Architecture Rule "#12" 로 호칭. Rules #14~16 이 이미 점유 — 본 sprint 는 **Rule #17** 로 추가.
+> backup 컬럼 / DB 명명 (`og_image_url_backup_s218`, `cover_image_backup_s214`, `signup_attempts.referer_section`) 모두 모바일 클로드 명명 그대로 보존.
+
+### 배경
+s219 회귀 (`(main)/loading.tsx` 부모 Suspense boundary 가 main slot 안 본문을 hidden div streaming 으로 떨어뜨림) 가 메인 SEO 의 함정을 재증명. 이번 sprint 는 SEO critical 메인 페이지 (`/`) 를 데이터 driven 9섹션으로 리디자인하면서 **같은 함정 재발 금지** 가 최우선.
+
+### 변경 (요약)
+- **DB**: 1 migration 파일 (적용은 모바일 클로드 — 본 sprint commit 은 SQL 파일만)
+- **컴포넌트**: 13개 신규 (서버 11 + 클라이언트 2)
+- **API**: 1개 신규 (`/api/watchlist` POST/DELETE)
+- **페이지**: `src/app/page.tsx` 전면 재작성 (590 line landing → 9섹션 데이터 driven)
+- **CTA/OAuth**: login `next`/`cta` alias 추가 (기존 `redirect`/`source` 호환 보존)
+- **Rule #17**: `(main)` 그룹 + 메인 페이지 Suspense/loading.tsx 금지 정립
+
+### 세부
+
+#### Track A — DB SQL (`supabase/migrations/20260501_main_v5_redesign.sql`)
+- 누락 컬럼 ALTER (안전, IF NOT EXISTS 가드):
+  - `apt_subscriptions.expected_competition`, `apt_subscriptions.feature_tags`
+  - `apt_sites.remaining_units`, `apt_sites.discount_pct`
+  - `redevelopment_projects.next_milestone_date`
+  - `signup_attempts.referer_section` (Track D 연동, 컬럼만 — 값은 기존 `source` 컬럼이 그대로 처리)
+- 신규 테이블 `user_apt_watchlist` (user_id+apt_id PK, RLS SELECT/INSERT/DELETE 자기데이터만)
+- 신규 RPC 5개 (전부 SECURITY DEFINER + service_role/authenticated grant):
+  - `get_main_page_data(p_region text)` — 단일 호출 9섹션 jsonb
+  - `get_apt_3y_trend(p_apt_id bigint)` — 3년 평균가 비교
+  - `add_to_watchlist(p_apt_id bigint)` / `remove_from_watchlist(p_apt_id bigint)`
+  - `get_user_watchlist(p_user_id uuid)` — auth.uid() fallback
+- **migration 적용은 별도** — 본 commit 은 파일만. 모바일 클로드가 prod execute_sql 로 적용 권장.
+
+#### Track B — 13개 컴포넌트 (`src/components/main/`)
+모두 server component default. 클라이언트는 `MapModeToggle` (router push) + `WatchlistAddButton` (fetch) 만.
+- `types.ts` — 9섹션 + WatchlistItem 인터페이스 + `MAIN_REGION_LIST`/`MAIN_REGION_TO_KO` 상수
+- `RegionFilterChips` (`<Link href="/?region=…">` chips, 18개)
+- `MainLayout` (sticky header + chips wrapper)
+- `SubscriptionDdayRail` (가로 스크롤, D-day badge 색상 분기, `/login?next=/apt/alerts&cta=apt_alert_cta_global` CTA)
+- `TodayHeroCard` (BIG_EVENT/EXPIRING adaptive, `/login?next=…&cta=today_alert_cta` CTA)
+- `MarketSignalCard` (SVG 320x60 area chart + 4-stripe pulse)
+- `MapView` + `MapModeToggle` (SVG 360x200 lat/lng 매핑, 4 모드 토글)
+- `ListingHotPicks` (2-col grid)
+- `TodayBriefList` ([AI]/[HOT]/[INSIGHT] 태그)
+- `ActivityFeed` (transactions+unsold+redev 통합 stream, 색 점)
+- `ConstructionStockRail` (sparkline + 매핑 단지 chip)
+- `WatchlistSection` + `WatchlistAddButton` (로그인 시 sparkline 카드, 비로그인 시 CTA `/login?next=/watchlist&cta=watchlist_add_cta`)
+- 모든 컴포넌트 `'use client'` 없음 또는 인터랙션 부분만 격리. **Suspense / dynamic ssr:false 0건**.
+
+#### Track C — page.tsx 9섹션 조립 (`src/app/page.tsx`)
+- server component, `searchParams: { region?, map_mode? }`
+- 단일 try-catch 안에서 `Promise.all([rpc('get_main_page_data'), supabase.auth.getUser()])` — 9섹션 + watchlist 동시 fetch
+- RPC 실패 / env 누락 시 `EMPTY_DATA` fallback → 페이지 안 깨짐, 봇은 SEO fallback `<section>` (`<h1>카더라 — …</h1>`) 받음
+- `revalidate = 300` (5분 ISR)
+- `dynamic` 마킹 X (cookies + searchParams 가 자동 dynamic 처리)
+- **`<Suspense>` / `loading.tsx` / `dynamic({ssr:false})` 0건** — 봇이 본문 직접 SSR 수신
+- 9섹션 순서: SubscriptionRail → TodayHero → MarketSignal → MapView → HotPicks → BriefList → ActivityFeed → StockRail → Watchlist
+
+#### Track D — CTA + OAuth next/cta alias
+- `src/app/(auth)/login/page.tsx`: searchParams 에 `next?` `cta?` `source?` 추가, `params.next || params.redirect` fallback
+- `src/app/(auth)/login/LoginClient.tsx`: `params.get('next') || params.get('redirect')` + `params.get('cta') || params.get('source')` 둘 다 alias
+- 기존 `redirect`/`source` 흐름은 그대로 (backward compat) — `auth/callback/route.ts` 는 변경 없음, 기존 `source` 값이 `signup_attempts.source` 에 자동 기록
+- 신규 cta-tracker / api/cta-click 추가 X — 기존 `lib/cta-track.ts` + `/api/events/cta` 인프라 그대로 사용 (브리프의 D1/D2 가 기존 코드와 중복이라 skip)
+
+### 검증
+- `npx tsc --noEmit` exit 0.
+- `npm run build` 클린, 548 routes. 메인 `/` row: `┌ ƒ /` (1.26 kB / 232 kB) — Dynamic 마킹, ISR revalidate 적용.
+- **Naver Yeti UA bot 시뮬 (가장 중요)**:
+  ```
+  curl -A "...Yeti/1.1..." http://localhost:3000/?region=busan
+  ```
+  - **BAILOUT_TO_CLIENT_SIDE_RENDERING: 0** ✓
+  - **aria-busy="true": 0** ✓
+  - h1: 1, h2: 3, section: 6, "카더라" 40회 노출
+  - noScripts body 32,617 bytes (skeleton 없음, 본문 직접 SSR)
+  - **s219 회귀 0건 — Rule #17 정상 작동**
+
+### Architecture Rule #17 신설
+**Rule #17: SEO critical 페이지는 Suspense-free 동기 SSR**
+- `(main)` 그룹 전체 + 메인 페이지 (`/`) 에 `loading.tsx` 또는 `<Suspense>` 추가 금지.
+- SEO critical 페이지는 server component 단일 await 로 데이터 fetch (N+1 금지) — 본문 server component 가 SSR 끝까지 대기 → 봇이 직접 본문 HTML 수신.
+- TTFB 1.5~2s 감수, ISR `revalidate=300~600` 으로 cache hit 률 보장.
+- 인터랙션 컴포넌트는 page.tsx 자식의 별 client component 로 격리 (`MapModeToggle`, `WatchlistAddButton` 패턴).
+- **Why:** s219 의 `(main)/loading.tsx` 가 부모 Suspense boundary 로 모든 (main) 페이지 본문을 deferred-stream hidden div 로 떨어뜨림 (Naver Yeti 등 JS 미실행 봇은 skeleton 만 봄). s219b 에서 삭제로 회복. 본 sprint 는 같은 함정 재발 금지.
+- **How to apply:** 새 route 작성 시 `loading.tsx` 추가 금지. `<Suspense>` 는 `(auth)/login` 등 SEO 무관 페이지에서만 허용. 데이터 fetch 가 길면 RPC 1회 통합 + ISR 캐시 + cron 사전 warming.
+
+### Architecture Rule 준수 (s217~219 회귀 방지)
+- ClientShell 정책 그대로 (14 컴포넌트 ssr:false 보존, s202 React #310/#300 보호).
+- ToastProvider/AuthProvider 직접 import 그대로 (s217).
+- `(main)/loading.tsx` 삭제 상태 유지 (s219b).
+- DB 변경 0 (migration 파일만 — 적용은 별도).
+- backup 컬럼 (`og_image_url_backup_s218` 등) DROP 금지.
+- 새 페이지 추가가 ClientShell 라우팅 영향 없음 — `/` 는 (main) 그룹 외부 root.
+
+### 백로그 (별 sprint)
+- **migration 적용** — 모바일 클로드가 `apply_migration('20260501_main_v5_redesign.sql')` 실행. 적용 전 `get_main_page_data` 가 없어 메인 페이지는 `EMPTY_DATA` fallback 으로 렌더 (SEO OK, UX 빈 상태).
+- **CTA 이벤트 통합** — 브리프 D 의 `/api/cta-click` + `lib/cta-tracker.ts` 신설은 기존 `/api/events/cta` + `lib/cta-track.ts` 와 중복 → skip. 추후 통합 검토 (이름 통일).
+- **컬럼 backfill cron** — apt_subscriptions.expected_competition / feature_tags, apt_sites.remaining_units / discount_pct, redevelopment_projects.next_milestone_date 채우는 cron 활성화.
+- **construction_stocks 매핑 정확도** — 현재 RPC 의 `builder ILIKE '%' || 시공사명 || '%'` 매칭이 부정확 가능. 별 sprint 매핑 테이블 추가 검토.
+- **WatchlistItem.sparkline_30d 채우기** — 현재 RPC 가 빈 배열 반환. apt_transactions 30일 치 fill 별 sprint.
+- **다른 (main) 페이지 OG 1순위** — apt/area, apt/redev, apt/region, apt/builder 등 generateMetadata `/api/og` → og-square swap (s218 백로그 그대로).
+- **모바일 OAuth dropped_step=oauth_start 50%+** — 본 sprint 의 next/cta alias 가 root cause 와 무관 가능. 별 sprint 직접 진단.
+
+---
+
 # 카더라 STATUS — 세션 219: s217 후속 P0 3개 fix (UUID 라우팅 + main slot SSR + OG 1순위) (2026-05-01)
 
 > 모바일 클로드 brief 에서는 본 작업을 "s218" 로 호칭했으나, s218 sprint 번호는 title 회귀 + Cache-Control + sitemap 잔여 fix 가 먼저 점유. 본 sprint 는 s219 로 표기. DB backup 컬럼명 (`*_backup_s218`) 은 모바일 클로드 명명 그대로 보존 (롤백 호환).
