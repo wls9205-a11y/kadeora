@@ -405,11 +405,17 @@ ${complexXml}
   if (id === 15) {
     try {
       const sb = getSupabaseAdmin();
-      const { data } = await sb.from('stock_quotes')
-        .select('symbol, updated_at')
-        .eq('is_active', true)
-        .gt('price', 0);
-      return xmlResponse((data || []).map(s => ({
+      // s217: PostgREST 1k cap 우회 — fetchBatched 로 1,846 종목 모두 수집 (s214 누락분).
+      const data = await fetchBatched<any>((off, lim) =>
+        sb.from('stock_quotes')
+          .select('symbol, updated_at')
+          .eq('is_active', true)
+          .gt('price', 0)
+          .order('symbol', { ascending: true })
+          .range(off, off + lim - 1),
+        10000,
+      );
+      return xmlResponse(data.map(s => ({
         url: `${BASE}/stock/${s.symbol}/chart`,
         lastModified: s.updated_at || now,
         changeFrequency: 'daily',
@@ -422,11 +428,17 @@ ${complexXml}
   if (id === 16) {
     try {
       const sb = getSupabaseAdmin();
-      const { data } = await sb.from('stock_quotes')
-        .select('symbol, updated_at')
-        .eq('is_active', true)
-        .gt('price', 0);
-      return xmlResponse((data || []).map(s => ({
+      // s217: PostgREST 1k cap 우회 — fetchBatched 로 1,846 종목 모두 수집 (s214 누락분).
+      const data = await fetchBatched<any>((off, lim) =>
+        sb.from('stock_quotes')
+          .select('symbol, updated_at')
+          .eq('is_active', true)
+          .gt('price', 0)
+          .order('symbol', { ascending: true })
+          .range(off, off + lim - 1),
+        10000,
+      );
+      return xmlResponse(data.map(s => ({
         url: `${BASE}/stock/${s.symbol}/financials`,
         lastModified: s.updated_at || now,
         changeFrequency: 'weekly',
