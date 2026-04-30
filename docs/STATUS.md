@@ -29,7 +29,8 @@ s217 검증 결과, 다음 3건 P0 잔존 발견:
 - 삭제: `src/app/(main)/apt/[id]/loading.tsx`, `src/app/(main)/stock/[symbol]/loading.tsx`, `src/app/(main)/apt/loading.tsx`.
 - 효과: 본문 server component 가 SSR 끝날 때까지 응답 대기 → **봇이 main slot 안에 직접 H1·H2·본문 받음** (hidden div streaming X).
 - Trade-off: TTFB 245ms → ~1.5s (apt detail). ISR `revalidate=3600` 가 cache hit 라 첫 요청만 영향. 사용자 빈 화면 1~1.5s 가능.
-- 다른 (main) 라우트의 `loading.tsx` 는 보존 (UI critical).
+- **추가 fix (s219b)**: 1차 push 후 prod 검증에서 main slot 안 skeleton 여전 + UUID 200 응답 (404 안나옴) 회귀 발견. 원인: `src/app/(main)/loading.tsx` (그룹-level) 가 부모 Suspense boundary 로 모든 (main) 페이지 wrap — nested 3개 삭제만으론 부족. **`(main)/loading.tsx` 도 삭제** → 진짜 SSR 회복 + notFound() 정상 404 status.
+- 다른 segment-level `loading.tsx` (apt/complex, blog/, feed/, profile/, stock/, write/ 등 30+ 파일) 는 보존 — 각자 sub-tree 의 fallback 으로 동작.
 
 #### Track C — 페이지별 generateMetadata OG 1순위 swap
 - `apt/page.tsx` (apt list): `images: [og-square (630x630), og (1200x630)]` 로 swap. `twitter.images: [og-square]`.
