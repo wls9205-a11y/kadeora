@@ -2,6 +2,7 @@
 // server-only — supabase-admin 사용. 모든 함수는 fail-soft (실패 시 빈 결과 반환).
 
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { fetchBatched } from '@/lib/db/fetchBatched';
 
 export type AptCategory = 'all' | 'subscription' | 'imminent_d7' | 'unsold' | 'redev' | 'trade';
 export type AptSortKey = 'popularity' | 'price' | 'units' | 'move_in';
@@ -203,13 +204,17 @@ export async function fetchBuilders(region: string, limit = 5): Promise<BuilderR
   try {
     const sb = getSupabaseAdmin();
     // Supabase 가 직접 GROUP BY 미지원 → builder 컬럼만 가져와 JS 집계.
-    let q: any = (sb as any).from('apt_sites').select('builder').eq('is_active', true);
-    if (region && region !== '전국') q = q.eq('region', region);
-    q = q.not('builder', 'is', null).neq('builder', '');
-    const { data } = await q;
-    if (!Array.isArray(data)) return [];
+    // s216 (S215.5 #22): region='전국' 호출 시 PostgREST 1k cap 으로 5.8k apt_sites 중 1k 만
+    // 받아 시공사 랭킹이 부정확. fetchBatched 로 전수 페이지네이션.
+    const data = await fetchBatched<{ builder: string }>((off, lim) => {
+      let q: any = (sb as any).from('apt_sites').select('builder').eq('is_active', true);
+      if (region && region !== '전국') q = q.eq('region', region);
+      return q.not('builder', 'is', null).neq('builder', '')
+        .order('id', { ascending: true }).range(off, off + lim - 1);
+    }, 20000);
+    if (!Array.isArray(data) || data.length === 0) return [];
     const counts = new Map<string, number>();
-    for (const r of data as { builder: string }[]) {
+    for (const r of data) {
       const b = (r.builder || '').trim();
       if (!b) continue;
       counts.set(b, (counts.get(b) || 0) + 1);

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
+import { fetchBatched } from '@/lib/db/fetchBatched';
 
 export const maxDuration = 120;
 
@@ -164,8 +165,14 @@ const MUST_HAVE_US: { symbol: string; name: string; market: string }[] = [
 
 async function handler() {
   const sb = getSupabaseAdmin();
-  const { data: existing } = await sb.from('stock_quotes').select('symbol').eq('is_active', true);
-  const existingSet = new Set((existing || []).map((s: any) => s.symbol));
+  // s216 (S215.5 #23): PostgREST 1k cap 으로 1.8k stock_quotes 중 1k 만 받아 800여 종목이
+  // 매번 "신규" 로 잘못 분류 → 중복 insert 시도 누적. fetchBatched 로 전수 페이지네이션.
+  const existing = await fetchBatched<{ symbol: string }>((off, lim) =>
+    sb.from('stock_quotes').select('symbol').eq('is_active', true)
+      .order('symbol', { ascending: true }).range(off, off + lim - 1),
+    10000,
+  );
+  const existingSet = new Set(existing.map((s) => s.symbol));
   const existingCount = existingSet.size;
 
   let added = 0;
