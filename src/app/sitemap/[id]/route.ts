@@ -267,19 +267,36 @@ ${complexXml}
       const sb = getSupabaseAdmin();
       const entries: SitemapEntry[] = [];
       // 시군구 (10개+ 단지만)
-      const { data: sgd } = await (sb as any).from('apt_complex_profiles').select('region_nm, sigungu').not('age_group', 'is', null).not('sigungu', 'is', null);
+      // s216 (S215.5 #1,2,3): PostgREST 1k cap 우회 — apt_complex_profiles 34k / apt_sites 5.8k 전수 집계.
+      // 기존엔 1k 만 받아 시군구/동/건설사 hub URL 이 사이트맵에서 광범위 누락.
+      const sgd = await fetchBatched<{ region_nm: string; sigungu: string }>((off, lim) =>
+        (sb as any).from('apt_complex_profiles').select('region_nm, sigungu')
+          .not('age_group', 'is', null).not('sigungu', 'is', null)
+          .order('apt_name', { ascending: true }).range(off, off + lim - 1),
+        100000,
+      );
       const sgMap = new Map<string, number>();
-      for (const r of (sgd || [])) { const k = `${r.region_nm}|${r.sigungu}`; sgMap.set(k, (sgMap.get(k) || 0) + 1); }
+      for (const r of sgd) { const k = `${r.region_nm}|${r.sigungu}`; sgMap.set(k, (sgMap.get(k) || 0) + 1); }
       for (const [k, c] of sgMap) { if (c < 10) continue; const [reg, sg] = k.split('|'); if (!reg || !sg) continue; entries.push({ url: `${BASE}/apt/area/${encodeURIComponent(reg)}/${encodeURIComponent(sg)}`, lastModified: now, changeFrequency: 'weekly', priority: c > 200 ? 0.85 : c > 50 ? 0.75 : 0.65 }); }
       // 동 (5개+ 단지만)
-      const { data: dd } = await (sb as any).from('apt_complex_profiles').select('region_nm, sigungu, dong').not('age_group', 'is', null).not('dong', 'is', null).neq('dong', '');
+      const dd = await fetchBatched<{ region_nm: string; sigungu: string; dong: string }>((off, lim) =>
+        (sb as any).from('apt_complex_profiles').select('region_nm, sigungu, dong')
+          .not('age_group', 'is', null).not('dong', 'is', null).neq('dong', '')
+          .order('apt_name', { ascending: true }).range(off, off + lim - 1),
+        100000,
+      );
       const dMap = new Map<string, number>();
-      for (const r of (dd || [])) { const k = `${r.region_nm}|${r.sigungu}|${r.dong}`; dMap.set(k, (dMap.get(k) || 0) + 1); }
+      for (const r of dd) { const k = `${r.region_nm}|${r.sigungu}|${r.dong}`; dMap.set(k, (dMap.get(k) || 0) + 1); }
       for (const [k, c] of dMap) { if (c < 5) continue; const [reg, sg, dg] = k.split('|'); if (!reg || !sg || !dg) continue; entries.push({ url: `${BASE}/apt/area/${encodeURIComponent(reg)}/${encodeURIComponent(sg)}/${encodeURIComponent(dg)}`, lastModified: now, changeFrequency: 'monthly', priority: c > 30 ? 0.7 : 0.6 }); }
       // 건설사 (3개+ 현장만)
-      const { data: bd } = await sb.from('apt_sites').select('builder').eq('is_active', true).not('builder', 'is', null).neq('builder', '');
+      const bd = await fetchBatched<{ builder: string | null }>((off, lim) =>
+        sb.from('apt_sites').select('builder').eq('is_active', true)
+          .not('builder', 'is', null).neq('builder', '')
+          .order('id', { ascending: true }).range(off, off + lim - 1),
+        20000,
+      );
       const bMap = new Map<string, number>();
-      for (const r of (bd || [])) { if (r.builder) bMap.set(r.builder, (bMap.get(r.builder) || 0) + 1); }
+      for (const r of bd) { if (r.builder) bMap.set(r.builder, (bMap.get(r.builder) || 0) + 1); }
       for (const [b, c] of bMap) { if (c < 3) continue; entries.push({ url: `${BASE}/apt/builder/${encodeURIComponent(b)}`, lastModified: now, changeFrequency: 'monthly', priority: c > 20 ? 0.75 : 0.6 }); }
       // 비교 페이지 — 인기 시군구 상위 단지 조합 (스팸 방지: 최대 200개)
       try {
