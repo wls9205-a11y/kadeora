@@ -1,3 +1,94 @@
+# 카더라 STATUS — 세션 218: title 회귀 + Cache-Control + sitemap 잔여 + price-change RPC (2026-05-01)
+
+## 세션 218 — S216 검증 발견 회귀 5건 + 보류 1건 일괄 처리
+
+### 배경
+S216 배포 검증 (라이브 curl + DB 직접 조회) 결과 회귀 3건 + 보류 1건 + 신규 발견 1건:
+| # | 발견 | Severity |
+|---|------|----------|
+| 1 | `/stock/[symbol]`, `/apt/complex/[name]` title `| 카더라` 2회 (S212 누락) | 🔴 P0 |
+| 2 | middleware Cache-Control 이 layout.tsx `headers()` 로 인해 무력화 | 🔴 P0 |
+| 3 | sitemap/15, 16 (stock/chart, financials) 1k cap (S214 누락) | 🔴 P0 |
+| 4 | price-change-calc 보류 (S216 E) | 🔴 P0 |
+| 5 | apt_complex_profiles.seo_title 34,544 row `| 카더라` baked (S214 #15 apt_sites 만 처리) | 🔴 P0 |
+
+### 변경 (커밋 4개)
+
+#### B. `/stock/[symbol]` + `/apt/complex/[name]` title 회귀
+**코드** (`src/app/(main)/stock/[symbol]/page.tsx:60-62`):
+- `'... 주가 전망 2026 — ... | 카더라'` → `'... 주가 전망 2026 — ...'`
+- `'... AI 분석 — 카더라'` → `'... AI 분석'`
+
+**DB** (Supabase MCP, 별도 처리):
+```sql
+UPDATE apt_complex_profiles
+SET seo_title = regexp_replace(seo_title, '\s*[|—]\s*카더라\s*$', '')
+WHERE seo_title ~ '[|—]\s*카더라\s*$';
+-- 34,544 row 영향 (S214 #15 가 apt_sites 만 처리한 누락분)
+```
+
+확인:
+- `apt_sites` 0 dirty (S214 OK)
+- `apt_complex_profiles` 0 dirty (이번 세션)
+- `blog_posts`, `stock_quotes` 에는 seo_title 컬럼 자체 없음
+
+#### C. Cache-Control 덮어씌우기 — 진짜 원인 + 근본 수정
+**원인**: `src/app/(main)/layout.tsx:14` 의 `await headers()` 호출이 (main) 라우트 그룹 전체를 dynamic 으로 강제. Next.js 가 응답에 `Cache-Control: private, no-cache, no-store, max-age=0` 를 박아 middleware 의 `public, s-maxage=300, stale-while-revalidate=600` 를 무력화.
+
+**검증**: `AuthProvider.tsx:26-79` 가 `serverLoggedIn` prop 을 받지만 함수 본문에서 단 한 번도 참조 안 함. 로그인 상태는 client-side `sb.auth.getSession()` (line 60) + `onAuthStateChange` (line 67) 로 결정. → `serverLoggedIn` 은 dead prop chain.
+
+**수정**: layout 에서 `headers()` 호출 제거, `serverLoggedIn={false}` 정적 전달. 함수 `async` 제거.
+
+**효과**:
+- (main) 라우트 ISR 정상 동작 (revalidate=60/300/3600 exports 가 비로소 의미 있음)
+- middleware Cache-Control 헤더 보존
+- `/apt /blog /stock /feed` Edge HIT 활성화 (TTFB 안정 + Vercel CDN 비용 절약)
+
+⚠️ `/blog/[slug]` 는 자체 `force-dynamic` 유지 (P0-A 별도 세션). 본 fix 로 영향 X.
+
+#### D. sitemap/15, 16 1k cap fix
+`src/app/sitemap/[id]/route.ts` id===15 (stock/chart), id===16 (stock/financials) 가 raw query 로 1k 만 받았음. id===1 과 동일하게 `fetchBatched` 적용 (target 10000).
+효과: 1,000 → 1,805 URLs each (× 2 = +1,610 색인 가능 URL).
+
+#### E. price-change-calc SQL aggregate RPC (S216 E 보류 처리)
+**위험 평가**: apt_transactions 621k row × 4 윈도우 fetch + in-memory 집계 + 단지별 update — 메모리 ~40MB, 시간 80s, fragile. 본질이 GROUP BY apt_name + AVG(deal_amount) → SQL aggregate 영역.
+
+**선택**: Opt 1 (DB-side aggregate) 채택. 인덱스 `idx_apt_tx_name_date_cover (apt_name, deal_date DESC) INCLUDE (deal_amount, ...)` 가 이미 존재 — 추가 index 불필요.
+
+**RPC** (Supabase MCP 적용):
+```sql
+CREATE OR REPLACE FUNCTION calc_apt_price_change_1y()
+RETURNS TABLE(updated_count integer, phase1_count integer, phase2_count integer)
+-- Phase 1: 최근 3개월 (≥2건) vs 12-15개월 전 (≥2건) 평균 비교
+-- Phase 2: 최근 6개월 (≥1건) vs 12-18개월 전 (≥1건), Phase 1 미커버 단지만
+-- |change_pct| < 200 필터
+-- apt_complex_profiles UPDATE 단일 트랜잭션
+```
+
+**Cron route**: 80+ 줄 → 21 줄. `.rpc('calc_apt_price_change_1y')` 단일 호출. maxDuration 120→60s.
+
+**첫 실행 결과** (수동 검증):
+- Phase 1: 5,500 단지
+- Phase 2: 7,033 단지
+- updated: 17,304
+- profiles_with_change_1y: 13,493 → 17,748 (**+31%**)
+
+### 검증 (배포 후 자동 실행 예정)
+- `/stock/005930`, `/stock/AAPL` title `| 카더라` 1회 확인
+- `/apt/complex/은마` title `| 카더라` 1회 확인
+- `/apt`, `/apt/complex/은마` Cache-Control `public, s-maxage=300` + 2회차 X-Vercel-Cache HIT
+- `/sitemap/15.xml`, `/sitemap/16.xml` ~1,805 URL each
+- `apt_complex_profiles.price_change_1y` 17,748 (이미 RPC 1회 수동 실행)
+
+### 다음 세션 plan
+- **S218**: 사용자 가시성 P0 (apt/map 4건 5000, apt/area 2000, apt/complex 1000 boundary, stock/StockClient 1.8k, stock/data marketStats)
+- **S219**: cron 일괄 (sync-apt-sites 3건 10000, issue-detect 6000, blog-complex-crosslink 5000, blog-internal-links 2000, monthly-market-report 2000, seo-score-refresh 2000, stock-hero-refresh 2000, blog-series-assign 2000, stock-theme-daily, blog-monthly-market, blog-weekly-market)
+- **S220**: Public API 3건 (apt-complex 5000, apt-subscription 2000, apt-unsold 3000) + admin/dashboard 5건 SQL view + push-broadcast 사전 fix
+- **S221+**: blog ISR 3-step (P0-A)
+
+### CTA 트랙 (별도, 인프라 작업 후)
+S216 검증에서 apt_alert_cta CTR 0.17% (4,038 view / 7 click 30일) 확인. 1k cap 아님, **product 문제**. UI 위치/문구/동기 재검토 — 다음 1-2주 내 별도 세션.
+
 # 카더라 STATUS — 세션 217: 이미지 시스템 Critical/Major 6 fix (2026-05-01)
 
 ## 세션 217 — 이미지 fallback 체계 + (main) BAILOUT 회복
@@ -75,6 +166,7 @@
 - M6: `constructors.logo_url` 20개 시공사 logo 시스템 (clearbit 자동 또는 수동 큐).
 - s213 백로그 그대로: `sub-seed-v3` cron 도입부 다양화.
 - s217 후속: `v_admin_image_coverage` view 어드민 메인 위젯 임베드.
+
 
 ---
 
