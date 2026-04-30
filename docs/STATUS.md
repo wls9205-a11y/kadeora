@@ -1,3 +1,81 @@
+# 카더라 STATUS — 세션 214: SEO 누수 일괄 fix (2026-05-01)
+
+## 세션 214 — SEO P0 5건 일괄 fix (s213 진단 결과 #1+2+3 + #4 + #14 + #15)
+
+### 배경 (s213 진단)
+| # | Category | Issue | 영향 |
+|---|---|---|---|
+| 1 | Sitemap | apt_complex 31,544 (91%) 누락 | 색인 안 됨 |
+| 2 | Sitemap | blog_posts 6,145 (75%) 누락 | 색인 안 됨 |
+| 3 | Sitemap | apt_sites 4,799 (83%) 누락 | 색인 안 됨 |
+| 4 | Cache | `Cache-Control: no-cache, no-store` 전체 라우트 | CDN 캐시 X, TTFB 변동 |
+| 14 | Korea SE | Daum verification 주석 처리 | Daum 색인 일부 누락 |
+| 15 | DB | `apt_sites.seo_title` 5,523 row `\| 카더라` baked | title 3x 중복의 마지막 출처 |
+| (skip) | #8 | s212 push (rebase 풀어서 통과) | — |
+
+### Root cause 분석 (#1+2+3 sitemap)
+- `BLOG_PER_SITEMAP = 5000`, `COMPLEX_PER_SITEMAP = 12000` 로 chunk 크기 설정.
+- 그러나 **PostgREST 기본 `db-max-rows = 1000`** 으로 단일 쿼리는 최대 1,000 행만 반환.
+- `.range(0, 4999)` 라도 실제로는 첫 1000개만 응답 → chunk 0 = 1000개, chunk 1 = 1000개, 그 사이 4,000개 누락.
+- 8,145 blog 중 첫 chunk 1000 + 두 번째 chunk 첫 1000 = 2,000 만 sitemap 등록.
+
+### 변경
+
+#### #15 DB cleanup (Supabase MCP, 즉시 적용)
+```sql
+UPDATE apt_sites
+SET seo_title = regexp_replace(seo_title, '\s*\|\s*카더라\s*$', '')
+WHERE seo_title ~ '\|\s*카더라\s*$';
+-- 5,523 rows 영향, suffix 만 정확히 trim, 다른 텍스트 보존.
+```
+
+#### #14 robots.txt (1 line)
+- `#DaumWebMasterTool:...` → `DaumWebMasterTool:...` 주석 해제.
+
+#### #4 middleware.ts Cache-Control
+- `isPublicOnly && !isProtected` 분기에 추가:
+  `Cache-Control: public, max-age=0, s-maxage=300, stale-while-revalidate=600`
+- 효과: Vercel Edge / CDN 5분 캐시, 봇/유저 동일 SSR HTML 재사용. TTFB 안정. SSR 자체는 ssr:false chrome 으로 user-specific 콘텐츠 분리되어 있어 안전.
+
+#### #1+2+3 sitemap fetchBatched 헬퍼
+`src/app/sitemap/[id]/route.ts`:
+- 신규 `fetchBatched<T>(buildQuery, targetCount)` 헬퍼 — PostgREST 1000 cap 우회.
+- 적용: id 1 (stock), 2 (apt_sites), 3 (posts), 5-7 (apt_complex chunks), 8-29 (blog chunks).
+- 각 chunk 의 base offset 유지하면서 내부 batch loop 으로 1000 row × N 반복.
+- 효과:
+  - blog 8,145 → chunks 0,1 (5000 + 3145) 모두 cover (이전 2,000 만)
+  - apt_complex 34,544 → chunks 0,1,2 (12000 × 3 capacity, 실제 12000+12000+10544) 모두 cover
+  - apt_sites 5,799 → 단일 chunk 모두 cover
+  - posts 7,184 → 단일 chunk 모두 cover
+  - stocks 1,846 → 단일 chunk 모두 cover
+
+### 추가 처리 — #8 P0-B title 중복 fix push 통과
+- 세션 212 commit (`2cd352eb`) 가 origin `5b4b5400` (s211 SignupFunnelWidget) 와 STATUS.md 충돌로 push 막힘.
+- rebase resolve: 양쪽 STATUS 항목 모두 보존 (s211 + s212 both).
+- s212 → `7ba6e24f` 로 rebased. 본 세션과 함께 push.
+
+### Architecture Rules 준수
+- Rule #13: `(sb as any).from()` 패턴 — fetchBatched 도 동일.
+- Rule #14: hook 변경 X (sitemap route 는 server-only).
+- Rule #16: route maxDuration — sitemap 은 cron 성격이라 기존 `revalidate=3600` 유지, 추가 maxDuration 명시 검토는 다음 세션.
+
+### 검증
+- `tsc --noEmit --skipLibCheck` → 0 errors
+- `npm run build` → 성공
+- DB UPDATE 후 sample row 확인: 깔끔한 title (`"명곡미래빌4 대구 달성군 분양정보 · 청약일정"`)
+- 배포 후 검증 예정:
+  - `curl /sitemap/8.xml | grep -c "<url>"` → 5,000 기대 (이전 1000)
+  - `curl /sitemap/2.xml | grep -c "<url>"` → 5,799 기대 (이전 1000)
+  - `curl /apt/레이카운티 -I | grep Cache-Control` → `public, s-maxage=300...` 기대 (이전 no-store)
+  - `curl /apt/레이카운티 | grep "<title>"` → `\| 카더라` 1회 기대 (이전 3회)
+
+### 효과 (가설, 24h~3d 후)
+- 색인 가능 URL: 11,529 → ~50,000+ (Sitemap 84% → 95%+)
+- 봇 응답 안정: TTFB 변동 ↓, Vercel Edge HIT 비율 ↑
+- Daum 색인 활성화 (3rd party 검증 메타 적용)
+
+---
+
 # 카더라 STATUS — 세션 213: 블로그 상세 본문 우선 재배치 (2026-05-01)
 
 ## 세션 213 — `/blog/[slug]` 본문 집중 방해 요소 최하단 이동

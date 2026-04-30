@@ -7,7 +7,33 @@ export const dynamic = 'force-dynamic'; // s168: 빌드타임 DB 호출 제거
 
 const REGIONS = ['서울','부산','대구','인천','광주','대전','울산','세종','경기','강원','충북','충남','전북','전남','경북','경남','제주','강남구','서초구','송파구','마포구','용산구','성남시','수원시','고양시','화성시','평택시','해운대구','부산진구','동래구'];
 const SECTORS_FALLBACK = ['반도체','금융','자동차','바이오','IT','에너지','ETF','방산'];
+// s214 #1+2+3: PostgREST default db-max-rows=1000 우회 — fetchAll 헬퍼로 batch 반복 fetch.
+// BLOG_PER_SITEMAP/COMPLEX_PER_SITEMAP 는 sitemap 1개 의 URL 수. sitemap.org 한도 50,000 이하.
 const BLOG_PER_SITEMAP = 5000;
+const POSTGREST_BATCH = 1000;
+
+// PostgREST 기본 db-max-rows=1000 우회. supabase-js .range(N, M) 쓸 때 M-N+1 ≤ 1000 이어야
+// 실제로 그만큼 반환됨. 더 많이 원하면 여러 번 호출 필요 — 본 헬퍼가 그 역할.
+async function fetchBatched<T = any>(
+  buildQuery: (offset: number, limit: number) => any,
+  targetCount: number,
+): Promise<T[]> {
+  const all: T[] = [];
+  let offset = 0;
+  while (all.length < targetCount) {
+    const batch = Math.min(POSTGREST_BATCH, targetCount - all.length);
+    try {
+      const { data, error } = await buildQuery(offset, batch);
+      if (error || !data || data.length === 0) break;
+      all.push(...data);
+      if (data.length < batch) break;
+      offset += data.length;
+    } catch {
+      break;
+    }
+  }
+  return all;
+}
 
 interface SitemapEntry {
   url: string;
@@ -125,12 +151,17 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
   if (id === 1) {
     try {
       const sb = getSupabaseAdmin();
-      // 상장폐지/비활성 종목 제외 — 404 페이지가 사이트맵에 들어가는 것 방지
-      const { data } = await sb.from('stock_quotes')
-        .select('symbol, updated_at')
-        .eq('is_active', true)
-        .gt('price', 0);
-      return xmlResponse((data || []).map(s => ({
+      // s214 #1: PostgREST 1000 cap 우회 — fetchBatched 로 1846 종목 모두 수집
+      const data = await fetchBatched<any>((off, lim) =>
+        sb.from('stock_quotes')
+          .select('symbol, updated_at')
+          .eq('is_active', true)
+          .gt('price', 0)
+          .order('symbol', { ascending: true })
+          .range(off, off + lim - 1),
+        10000,
+      );
+      return xmlResponse(data.map(s => ({
         url: `${BASE}/stock/${s.symbol}`,
         lastModified: s.updated_at || now,
         changeFrequency: 'daily',
@@ -143,13 +174,18 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
   if (id === 2) {
     try {
       const sb = getSupabaseAdmin();
-      const { data } = await sb.from('apt_sites')
-        .select('slug, updated_at, site_type, interest_count')
-        .eq('is_active', true).gte('content_score', 25)
-        .order('interest_count', { ascending: false }).limit(10000);
+      // s214 #2: PostgREST 1000 cap 우회 — fetchBatched 로 5,799 단지 모두 수집
+      const data = await fetchBatched<any>((off, lim) =>
+        sb.from('apt_sites')
+          .select('slug, updated_at, site_type, interest_count')
+          .eq('is_active', true).gte('content_score', 25)
+          .order('interest_count', { ascending: false })
+          .range(off, off + lim - 1),
+        10000,
+      );
       const typePriority: Record<string, number> = { subscription: 0.85, trade: 0.8, redevelopment: 0.75, unsold: 0.7, landmark: 0.8 };
       const typeFreq: Record<string, string> = { subscription: 'daily', trade: 'weekly', redevelopment: 'weekly', unsold: 'weekly', landmark: 'monthly' };
-      return xmlResponse((data || []).map((s: any) => ({
+      return xmlResponse(data.map((s: any) => ({
         url: `${BASE}/apt/${s.slug}`,
         lastModified: s.updated_at || now,
         changeFrequency: typeFreq[s.site_type] || 'weekly',
@@ -162,13 +198,19 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
   if (id === 3) {
     try {
       const sb = getSupabaseAdmin();
-      const { data } = await sb.from('posts')
-        .select('id, slug, updated_at, created_at, author_id')
-        .eq('is_deleted', false).order('created_at', { ascending: false }).limit(5000);
-      // 시드 유저 목록 조회
+      // s214 #3: PostgREST 1000 cap 우회 — fetchBatched 로 7,184 posts 모두 (seed 필터 후 SEO 품질 보호)
+      const data = await fetchBatched<any>((off, lim) =>
+        sb.from('posts')
+          .select('id, slug, updated_at, created_at, author_id')
+          .eq('is_deleted', false)
+          .order('created_at', { ascending: false })
+          .range(off, off + lim - 1),
+        10000,
+      );
+      // 시드 유저 목록 조회 (1000 cap 안 걸림 — seed 유저 적음)
       const { data: seedUsers } = await sb.from('profiles').select('id').eq('is_seed', true);
       const seedIds = new Set((seedUsers || []).map((u: any) => u.id));
-      const filtered = (data || []).filter((p: any) => !seedIds.has(p.author_id));
+      const filtered = data.filter((p: any) => !seedIds.has(p.author_id));
       return xmlResponse(filtered.map((p: any) => ({
         url: `${BASE}/feed/${p.slug || p.id}`,
         lastModified: p.updated_at || p.created_at || now,
@@ -203,12 +245,17 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
     try {
       const sb = getSupabaseAdmin();
       const chunk = id - 5;
-      const offset = chunk * COMPLEX_PER_SITEMAP;
-      const { data } = await (sb as any).from('apt_complex_profiles')
-        .select('apt_name, region_nm, sigungu, updated_at, sale_count_1y, rent_count_1y')
-        .not('age_group', 'is', null)
-        .order('sale_count_1y', { ascending: false })
-        .range(offset, offset + COMPLEX_PER_SITEMAP - 1);
+      const baseOffset = chunk * COMPLEX_PER_SITEMAP;
+      // s214 #1+2+3: PostgREST 1000 cap 우회 — fetchBatched 로 chunk 12000 row 모두 수집.
+      // chunk 0: 0..11999, chunk 1: 12000..23999, chunk 2: 24000..34543 (총 34,544).
+      const data = await fetchBatched<any>((off, lim) =>
+        (sb as any).from('apt_complex_profiles')
+          .select('apt_name, region_nm, sigungu, updated_at, sale_count_1y, rent_count_1y')
+          .not('age_group', 'is', null)
+          .order('sale_count_1y', { ascending: false })
+          .range(baseOffset + off, baseOffset + off + lim - 1),
+        COMPLEX_PER_SITEMAP,
+      );
 
       const esc = (s: string) => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
       const complexXml = (data || []).map((p: any) => {
@@ -398,13 +445,18 @@ ${complexXml}
     try {
       const sb = getSupabaseAdmin();
       const chunk = id - 8;
-      const offset = chunk * BLOG_PER_SITEMAP;
-      const { data } = await sb.from('blog_posts')
-        .select('slug, title, updated_at, published_at, cover_image, image_alt, category, source_type')
-        .eq('is_published', true).not('published_at', 'is', null)
-        .lte('published_at', now)
-        .order('published_at', { ascending: false })
-        .range(offset, offset + BLOG_PER_SITEMAP - 1);
+      const baseOffset = chunk * BLOG_PER_SITEMAP;
+      // s214 #1+2+3: PostgREST 1000 cap 우회 — chunk 5,000 row 모두 수집 (이전엔 첫 1000 만).
+      // 8,145 blog → chunks 0,1 = 5000 + 3145 = 모두 cover.
+      const data = await fetchBatched<any>((off, lim) =>
+        sb.from('blog_posts')
+          .select('slug, title, updated_at, published_at, cover_image, image_alt, category, source_type')
+          .eq('is_published', true).not('published_at', 'is', null)
+          .lte('published_at', now)
+          .order('published_at', { ascending: false })
+          .range(baseOffset + off, baseOffset + off + lim - 1),
+        BLOG_PER_SITEMAP,
+      );
 
       // 빈 사이트맵 (구글에 "이 카테고리의 콘텐츠가 사라졌다" 신호) 차단
       // chunk 0 (=id 8)은 항상 200 유지 (DB 일시 에러 시 보호) — 이후 청크는 데이터 없으면 410.
