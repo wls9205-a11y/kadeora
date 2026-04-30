@@ -1,3 +1,42 @@
+# 카더라 STATUS — 세션 210: apt-tabs 리디자인 (/apt-v2 신규) (2026-04-30)
+
+## 세션 210 — apt-tabs 리디자인 (/apt-v2 신규, 기존 /apt 무손상)
+
+### 변경
+- 신규 라우트 `/apt-v2/{청약,실거래,재개발,미분양}` 4 페이지.
+- 신규 컴포넌트 디렉토리 `src/components/apt-tabs/` (shared 7 + 탭 9 + util/types/index 3, 총 19).
+  기존 `src/components/apt/` 34개와 별개.
+- 신규 토큰 시스템 `src/styles/apt-tabs.css` (`--aptr-*` 네임스페이스, 라이트/다크 양쪽).
+  `src/app/globals.css` 최상단에 `@import "../styles/apt-tabs.css"` 추가 (기존 토큰 무영향).
+- 신규 lib `src/lib/apt/resolveCoverImage.ts` — on-demand 이미지 resolver
+  (lat/lng 있는 단지에 카카오맵 staticmap fetch → Storage 업로드 → 다음 ISR 시 노출).
+  cron 추가 X (vercel.json 100/100 한도 유지).
+- DB migration `apt_cover_images_v2` 적용:
+  - `apt_sites` 5 컬럼 추가 (`cover_image_url/kind/source/blurhash/resolved_at`),
+    CHECK 제약 (kind ∈ official/satellite/ai/initial).
+  - 인덱스 2개 (resolved_at NULLS FIRST, present partial).
+  - Storage bucket `apt-covers` (public read, service_role write/update/delete).
+- 5 파일 import 경로 fix: `@/lib/supabase/admin` → `@/lib/supabase-admin`
+  (스테이징 패키지의 import alias 가 카더라 실제 경로와 달라 typecheck 실패).
+- staging 디렉토리 `apt-tabs-staging/` 삭제 (배포 트리에서 제거).
+
+### Architecture Rules 준수
+- Rule #13: `(sb as any).from()` 패턴 (apt-v2 페이지 4개, resolveCoverImage 모두 적용)
+- Rule #14: hook 위반 0건 (서버 컴포넌트 우선, 클라이언트 컴포넌트 hook 최상단)
+- Rule #16: 외부 fetch 없음 (페이지는 SSR + ISR 10분, on-demand resolver 는 페이지 응답
+  안 막고 fire-and-forget)
+
+### 검증
+- `npx tsc --noEmit --skipLibCheck` → 0 errors
+- `npm run build` → 4 라우트 모두 생성 확인 (`/apt-v2`, `/transactions`, `/redevelopment`, `/unsold`)
+- 기존 `/apt`, `/apt/[id]`, `/apt/sites/[slug]` 라우트·컴포넌트 무손상 (모두 그대로)
+- vercel cron 카운트 100 유지
+
+### Swap (다음 세션 — 사용자 검증 후)
+사용자가 `/apt-v2` 4 탭 충분히 검증한 뒤 별도 명령으로 swap. 이번 세션은 swap X.
+
+---
+
 # 카더라 STATUS — 세션 209: CTA tracking 회귀 fix + signup-flow 잔여 fix (2026-04-29)
 
 ## 세션 209 — Track A: CTA tracking 회귀 + Track B: signup-flow 시각/매핑 fix

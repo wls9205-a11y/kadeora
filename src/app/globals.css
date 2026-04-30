@@ -1,3 +1,6 @@
+/* s208 apt-tabs: 스코프된 토큰/유틸리티 (--aptr-*) — 기존 카더라 토큰과 충돌 X. */
+@import "../styles/apt-tabs.css";
+
 /* Pretendard font loaded via <link> in layout.tsx for better LCP */
 /* 세션 150 CLS: swap → optional (FOIT 허용, reflow 방지). Pretendard 로드 실패 시 system-ui 유지하며 layout shift 차단. */
 @font-face {

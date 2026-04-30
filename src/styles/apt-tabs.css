@@ -1,0 +1,308 @@
+/**
+ * apt-tabs.css
+ *
+ * apt-tabs 리디자인 디자인 토큰. --aptr-* 네임스페이스로 분리.
+ * 적용: src/app/globals.css 최상단에 @import "../styles/apt-tabs.css";
+ *
+ * 기존 카더라 토큰(--brand 등)과 충돌 없음.
+ * data-theme="dark" 명시 또는 prefers-color-scheme: dark 자동 감지.
+ */
+
+:root {
+  /* 표면 */
+  --aptr-bg-canvas: #F5F6F8;
+  --aptr-bg-card: #FFFFFF;
+  --aptr-bg-elevated: #FAFAFB;
+
+  /* 테두리 */
+  --aptr-border-subtle: rgba(0, 0, 0, 0.06);
+  --aptr-border-default: rgba(0, 0, 0, 0.10);
+
+  /* 텍스트 */
+  --aptr-text-primary: #1A1F2E;
+  --aptr-text-secondary: #5A6378;
+  --aptr-text-tertiary: #9098A8;
+  --aptr-text-on-image: #FFFFFF;
+
+  /* 의미 */
+  --aptr-brand: #3B7BF6;
+  --aptr-brand-strong: #1F5BC8;
+  --aptr-positive: #0F6E56;
+  --aptr-negative: #A32D2D;
+
+  /* 배지 6종 */
+  --aptr-badge-pink-bg: #FBEAF0;
+  --aptr-badge-pink-fg: #993556;
+  --aptr-badge-amber-bg: #FAEEDA;
+  --aptr-badge-amber-fg: #854F0B;
+  --aptr-badge-green-bg: #E1F5EE;
+  --aptr-badge-green-fg: #0F6E56;
+  --aptr-badge-gray-bg: #EFEEED;
+  --aptr-badge-gray-fg: #5A6378;
+  --aptr-badge-red-bg: #FCEBEB;
+  --aptr-badge-red-fg: #A32D2D;
+  --aptr-badge-blue-bg: #E6F1FB;
+  --aptr-badge-blue-fg: #0C447C;
+
+  /* 이미지 오버레이 */
+  --aptr-image-overlay-bg: rgba(255, 255, 255, 0.88);
+  --aptr-image-overlay-fg: #5A6378;
+
+  /* 그라디언트 (이미지 위 텍스트용 — 토큰 외부) */
+  --aptr-gradient-image-bottom: linear-gradient(to top, rgba(0, 0, 0, 0.78), transparent);
+
+  /* 모서리 */
+  --aptr-radius-xs: 4px;
+  --aptr-radius-sm: 6px;
+  --aptr-radius-md: 8px;
+  --aptr-radius-lg: 12px;
+  --aptr-radius-pill: 999px;
+
+  /* 그림자 */
+  --aptr-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --aptr-shadow-elevated: 0 4px 16px rgba(0, 0, 0, 0.08);
+
+  /* 시그니처 컬러 (탭별) */
+  --aptr-tab-subscription: #993556;  /* pink */
+  --aptr-tab-transactions: #0F6E56;  /* green */
+  --aptr-tab-redevelopment: #854F0B; /* amber */
+  --aptr-tab-unsold: #5A6378;        /* gray */
+}
+
+/* ============================================================
+ * 다크 모드 - data-theme="dark" 명시
+ * ============================================================ */
+[data-theme="dark"] {
+  --aptr-bg-canvas: #050A18;       /* 카더라 navy base */
+  --aptr-bg-card: #0C1528;         /* 카더라 surface */
+  --aptr-bg-elevated: #15202F;
+
+  --aptr-border-subtle: rgba(255, 255, 255, 0.06);
+  --aptr-border-default: rgba(255, 255, 255, 0.10);
+
+  --aptr-text-primary: #E8EDF5;
+  --aptr-text-secondary: #9BA8C0;
+  --aptr-text-tertiary: #5A6378;
+  --aptr-text-on-image: #FFFFFF;
+
+  --aptr-brand: #5B97F8;
+  --aptr-brand-strong: #3B7BF6;
+  --aptr-positive: #6FD9B0;
+  --aptr-negative: #F09595;
+
+  --aptr-badge-pink-bg: rgba(212, 83, 126, 0.20);
+  --aptr-badge-pink-fg: #F4A4C0;
+  --aptr-badge-amber-bg: rgba(186, 117, 23, 0.20);
+  --aptr-badge-amber-fg: #F4C28A;
+  --aptr-badge-green-bg: rgba(29, 158, 117, 0.22);
+  --aptr-badge-green-fg: #6FD9B0;
+  --aptr-badge-gray-bg: rgba(255, 255, 255, 0.06);
+  --aptr-badge-gray-fg: #9BA8C0;
+  --aptr-badge-red-bg: rgba(226, 75, 74, 0.18);
+  --aptr-badge-red-fg: #F09595;
+  --aptr-badge-blue-bg: rgba(74, 142, 232, 0.18);
+  --aptr-badge-blue-fg: #85B7EB;
+
+  --aptr-image-overlay-bg: rgba(0, 0, 0, 0.50);
+  --aptr-image-overlay-fg: #E8EDF5;
+
+  --aptr-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --aptr-shadow-elevated: 0 4px 16px rgba(0, 0, 0, 0.5);
+
+  --aptr-tab-subscription: #F4A4C0;
+  --aptr-tab-transactions: #6FD9B0;
+  --aptr-tab-redevelopment: #F4C28A;
+  --aptr-tab-unsold: #9BA8C0;
+}
+
+/* ============================================================
+ * 시스템 다크 모드 자동 감지 (사용자가 토글 안 한 경우)
+ * ============================================================ */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --aptr-bg-canvas: #050A18;
+    --aptr-bg-card: #0C1528;
+    --aptr-bg-elevated: #15202F;
+    --aptr-border-subtle: rgba(255, 255, 255, 0.06);
+    --aptr-border-default: rgba(255, 255, 255, 0.10);
+    --aptr-text-primary: #E8EDF5;
+    --aptr-text-secondary: #9BA8C0;
+    --aptr-text-tertiary: #5A6378;
+    --aptr-brand: #5B97F8;
+    --aptr-brand-strong: #3B7BF6;
+    --aptr-positive: #6FD9B0;
+    --aptr-negative: #F09595;
+    --aptr-badge-pink-bg: rgba(212, 83, 126, 0.20);
+    --aptr-badge-pink-fg: #F4A4C0;
+    --aptr-badge-amber-bg: rgba(186, 117, 23, 0.20);
+    --aptr-badge-amber-fg: #F4C28A;
+    --aptr-badge-green-bg: rgba(29, 158, 117, 0.22);
+    --aptr-badge-green-fg: #6FD9B0;
+    --aptr-badge-gray-bg: rgba(255, 255, 255, 0.06);
+    --aptr-badge-gray-fg: #9BA8C0;
+    --aptr-badge-red-bg: rgba(226, 75, 74, 0.18);
+    --aptr-badge-red-fg: #F09595;
+    --aptr-badge-blue-bg: rgba(74, 142, 232, 0.18);
+    --aptr-badge-blue-fg: #85B7EB;
+    --aptr-image-overlay-bg: rgba(0, 0, 0, 0.50);
+    --aptr-image-overlay-fg: #E8EDF5;
+    --aptr-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --aptr-shadow-elevated: 0 4px 16px rgba(0, 0, 0, 0.5);
+    --aptr-tab-subscription: #F4A4C0;
+    --aptr-tab-transactions: #6FD9B0;
+    --aptr-tab-redevelopment: #F4C28A;
+    --aptr-tab-unsold: #9BA8C0;
+  }
+}
+
+/* ============================================================
+ * 유틸리티 클래스
+ * ============================================================ */
+
+.aptr-root {
+  background: var(--aptr-bg-canvas);
+  color: var(--aptr-text-primary);
+  min-height: 100vh;
+  font-family: var(--font-sans, ui-sans-serif, system-ui, -apple-system, sans-serif);
+}
+
+.aptr-num {
+  font-family: var(--font-mono, ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", monospace);
+  font-variant-numeric: tabular-nums;
+}
+
+.aptr-headline {
+  font-family: var(--font-serif, ui-serif, "Pretendard Serif", Georgia, serif);
+  letter-spacing: -0.3px;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+.aptr-text-clip {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.aptr-scroll-x {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+
+.aptr-scroll-x::-webkit-scrollbar {
+  display: none;
+}
+
+/* 한글 본문 줄바꿈 */
+.aptr-prose {
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+/* 포커스 a11y */
+.aptr-focus:focus-visible {
+  outline: 2px solid var(--aptr-brand);
+  outline-offset: 2px;
+  border-radius: var(--aptr-radius-xs);
+}
+
+/* 링크 reset */
+.aptr-link-reset {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* 버튼 reset */
+.aptr-btn-reset {
+  border: none;
+  background: transparent;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+/* ============================================================
+ * InitialPlaceholder 색상 7종 (해시 기반 인덱싱용)
+ * ============================================================ */
+
+:root {
+  --aptr-placeholder-bg-0: #E6F1FB; --aptr-placeholder-fg-0: #0C447C;
+  --aptr-placeholder-bg-1: #E1F5EE; --aptr-placeholder-fg-1: #0F6E56;
+  --aptr-placeholder-bg-2: #FAEEDA; --aptr-placeholder-fg-2: #854F0B;
+  --aptr-placeholder-bg-3: #EEEDFE; --aptr-placeholder-fg-3: #3C3489;
+  --aptr-placeholder-bg-4: #FBEAF0; --aptr-placeholder-fg-4: #993556;
+  --aptr-placeholder-bg-5: #FAECE7; --aptr-placeholder-fg-5: #993C1D;
+  --aptr-placeholder-bg-6: #EFEEED; --aptr-placeholder-fg-6: #5F5E5A;
+}
+
+[data-theme="dark"] {
+  --aptr-placeholder-bg-0: #0A1828; --aptr-placeholder-fg-0: #85B7EB;
+  --aptr-placeholder-bg-1: #0A1F18; --aptr-placeholder-fg-1: #6FD9B0;
+  --aptr-placeholder-bg-2: #1F1505; --aptr-placeholder-fg-2: #F4C28A;
+  --aptr-placeholder-bg-3: #15102C; --aptr-placeholder-fg-3: #A89FE2;
+  --aptr-placeholder-bg-4: #2D1611; --aptr-placeholder-fg-4: #F4A4C0;
+  --aptr-placeholder-bg-5: #2A1409; --aptr-placeholder-fg-5: #E8A795;
+  --aptr-placeholder-bg-6: #1A1A18; --aptr-placeholder-fg-6: #C2C0BB;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --aptr-placeholder-bg-0: #0A1828; --aptr-placeholder-fg-0: #85B7EB;
+    --aptr-placeholder-bg-1: #0A1F18; --aptr-placeholder-fg-1: #6FD9B0;
+    --aptr-placeholder-bg-2: #1F1505; --aptr-placeholder-fg-2: #F4C28A;
+    --aptr-placeholder-bg-3: #15102C; --aptr-placeholder-fg-3: #A89FE2;
+    --aptr-placeholder-bg-4: #2D1611; --aptr-placeholder-fg-4: #F4A4C0;
+    --aptr-placeholder-bg-5: #2A1409; --aptr-placeholder-fg-5: #E8A795;
+    --aptr-placeholder-bg-6: #1A1A18; --aptr-placeholder-fg-6: #C2C0BB;
+  }
+}
+
+/* ============================================================
+ * 그리드 레이아웃 (모바일 1col / 태블릿 2col / 데스크톱 2col)
+ * ============================================================ */
+
+.aptr-grid-2col {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  padding: 0 12px;
+}
+
+@media (min-width: 768px) {
+  .aptr-grid-2col {
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    padding: 0 18px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .aptr-grid-2col {
+    padding: 0 24px;
+  }
+}
+
+/* hero가 좌측 큰 영역, 우측은 작은 카드 stack */
+.aptr-grid-asymmetric {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  padding: 0 12px;
+}
+
+@media (min-width: 768px) {
+  .aptr-grid-asymmetric {
+    grid-template-columns: 1.4fr 1fr;
+    gap: 14px;
+    padding: 0 18px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .aptr-grid-asymmetric {
+    padding: 0 24px;
+  }
+}
