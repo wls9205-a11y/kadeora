@@ -1,3 +1,64 @@
+# 카더라 STATUS — 세션 212: /admin 관심 등록 위젯 (watchlist + leadgen) (2026-04-30)
+
+## 세션 212 — `/admin` 메인에 WatchlistWidget 추가 (s211 SignupFunnelWidget 패턴 그대로)
+
+### 배경
+- s211 (SignupFunnelWidget commit `5b4b5400`) 임베드 완료. 같은 패턴으로 watchlist + apt_site_interests 위젯 추가.
+- 모바일 클로드가 prod RPC `admin_dashboard_watchlist_widget()` 사전 적용 완료 (DB 변경 0).
+
+### RPC 응답 구조 핵심
+```
+{ generated_at,
+  watchlist: { total, organic_total, auto_total, apt_total, stock_total,
+               organic_apt, organic_stock, unique_users, organic_users,
+               today/yesterday {…}, delta_pct, organic_delta_pct,
+               avg_per_user, organic_avg_per_user,
+               daily_14d [{date, apt, stock, total, organic}],
+               top_apt [{name, item_id, users, organic_users, last_added}],
+               top_stock [동일],
+               recent_added [{item_name, item_type, ..., is_organic, user_email_masked, user_nickname}] },
+  site_interest: { total, members, guests, notif_enabled, last_24h, last_7d, distinct_sites,
+                   top_sites [{site_id, site_name, total, members, guests, last_added}] } }
+```
+
+### 관찰된 인사이트 (위젯에 반영됨)
+- 누적 259건 중 27건만 자동, 232건 organic — 위젯이 organic/auto 분리 표시.
+- 자연 등록 116명 모두 "헬리오시티" 1단지 — 단지 다양성 신호 부족 (top_apt 컬럼이 1줄만 노출).
+- 분양현장 leadgen 13건 모두 회원, 게스트 0 — 비회원 channel 미활성. site 패널에 "게스트 0" 강조.
+- 4/17 spike 233건 = 실제 마이그레이션 (시드 0 검증). 14일 차트가 자연스럽게 표시 (anomaly mark 없이 동일 스케일).
+
+### 작업 (3 파일)
+- **`src/app/api/admin/watchlist-widget/route.ts` 신규**:
+  - `requireAdmin()` 가드 + `unstable_cache(rpc, ['admin-dashboard-watchlist-widget'], { revalidate: 30 })`.
+  - 실패 시 `{ ok:false, error }` 200 보장 (Architecture Rule #11).
+- **`src/app/admin/v4/sections/WatchlistWidget.tsx` 신규** (~390 line):
+  - 한 카드 안에 4 패널:
+    - **A) 누적 KPI 5 tile** — 총 등록 / 자연 등록(highlight green) / 자동(muted) / 단지 / 종목. 각 어제 대비 delta_pct 칩 (양수 green / 음수 red). 자연 등록 tile 의 sub 에 "오늘 X / 어제 Y" 표기.
+    - **B) 14일 daily SVG 막대** — `total` 회색(`rgba(156,163,175,0.5)`) + `organic` 녹색(`#34d399 0.92`) 오버레이. 4/17 spike 자연 표시 (스케일 자동). y grid 25/50/75/100% + 양 끝 date 라벨.
+    - **C) 인기 TOP 좌우 컬럼** — 단지 / 종목. row: rank · name · "총 X (자연 Y)" 또는 "X명" green (split needed only when users != organic_users).
+    - **D) 최근 자연 등록 10건** — 시각 / nickname / 단지|종목 chip / item_name.
+  - **헤더 우측**:
+    - health 배지: organic_today=0 → amber "오늘 자연 등록 0" / organic_delta < -30 → red / 0~-30 → amber / OK → green.
+    - `🏢 분양현장 N건 (24h M)` 토글 버튼 — 클릭 시 site_interest 패널 expand (회원/게스트/알림/단지수 + top_sites 5).
+    - ↻ 새로고침.
+  - 30s 자동 폴링 + `visibilitychange` 가드 (s211 패턴 동일).
+- **`src/app/admin/v4/AdminShellV4.tsx` 수정**:
+  - `<WatchlistWidget />` 를 `<SignupFunnelWidget />` 직후에 mount (가입→관심등록 funnel 한 묶음).
+
+### Architecture Rule 준수
+- DB RPC 변경 X (사전 적용분 사용).
+- Rule #11: API 200 보장.
+- Rule #13: `(sb as any).rpc()`.
+- Rule #14: s209 트래커 직접 import 정책 보존 — 본 변경 무관.
+
+### 검증
+- `npm run type-check` 0 errors.
+- `npm run build` 클린, 558/558 pages.
+- 신규 라우트 등록: `/api/admin/watchlist-widget 1.36 kB`.
+- prod 배포 후 admin 세션 검증 — 위젯이 SignupFunnelWidget 직후 노출, 30s 자동 갱신.
+
+---
+
 # 카더라 STATUS — 세션 211: /admin 가입 진단 위젯 임베드 (2026-04-30)
 
 ## 세션 211 — `/admin` 메인 대시보드에 SignupFunnelWidget 임베드
