@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback } from 'react';
 import HealthRing from './components/HealthRing';
 import KPIStrip from './components/KPIStrip';
 import SignupRealtimeHeader from './components/SignupRealtimeHeader';
+import SignupFunnelWidget from './sections/SignupFunnelWidget';
 import SignupCTASection from './sections/SignupCTASection';
 import IssuePipelineSection from './sections/IssuePipelineSection';
 import ContentHealthSection from './sections/ContentHealthSection';
@@ -101,6 +102,7 @@ export default function AdminShellV4() {
       </header>
 
       <SignupRealtimeHeader />
+      <SignupFunnelWidget />
 
       {loading && !data && (
         <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-tertiary, #888)' }}>

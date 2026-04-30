@@ -1,3 +1,57 @@
+# 카더라 STATUS — 세션 211: /admin 가입 진단 위젯 임베드 (2026-04-30)
+
+## 세션 211 — `/admin` 메인 대시보드에 SignupFunnelWidget 임베드
+
+### 배경
+- s208 (`/admin/signup-flow` 별도 페이지) + s209 (CTA 트래킹 회귀 fix · funnel 시각/매핑) 로 진단 인프라는 완성. 다만 어드민 매번 별도 페이지 들어가야 신호 보임.
+- 사용자 피드백: "숨겨놓지 말고 어드민 메인에 표시" — 한 눈에 즉시 판정 가능하게.
+- 모바일 클로드가 prod RPC `admin_dashboard_signup_widget()` 사전 적용 완료 (DB 변경 0).
+- 본 commit 작성 시 origin main 에 동시 진행 중이던 apt-tabs 리디자인(s210 — `0c42dab9`)이 먼저 landed 되어 세션 번호 충돌. apt-tabs 가 s210 으로 확정되며 본 작업은 s211 로 재번호 부여.
+
+### RPC 응답 구조 (검증된 실데이터, 모바일 클로드 인계 paste)
+```
+{ generated_at, today_kst {visitors, cta_clicks, attempts, signups},
+  yesterday_kst {동일}, delta_pct {visitors, cta_clicks, signups},
+  funnel_24h {cta_views, cta_clicks, attempts, oauth_callback, success,
+              signups_real, click_to_attempt_pct, attempt_to_signup_pct},
+  sparkline_8h [{h, visitors, clicks, attempts, signups}, ...],
+  recent_signups [{email_masked, created_at, provider, source}, ...],
+  health {clicks_1h, clicks_baseline_1h, click_status, signup_status} }
+```
+
+### 작업 (3 파일)
+- **`src/app/api/admin/dashboard-widget/route.ts` 신규**:
+  - `requireAdmin()` 가드.
+  - `unstable_cache(rpc, ['admin-dashboard-signup-widget'], { revalidate: 30 })` — 대시보드 새로고침 빈도 높아 30s 캐시.
+  - 실패 시 `{ ok:false, error }` 200 보장 (Architecture Rule #11).
+  - `dynamic = 'force-dynamic'`, `maxDuration = 10`.
+- **`src/app/admin/v4/sections/SignupFunnelWidget.tsx` 신규** (~340 line):
+  - 한 카드 안에 4 패널 — A) 오늘 KPI 4 tile (방문/클릭/시도/가입) + 어제 대비 delta_pct 칩 (양수 green / 음수 red), 가입은 highlight 그린 배경. B) 24h funnel 5단계 미니 막대 (노출→클릭→시도→콜백→성공) + 이전 단계 대비 통과율 % + 임계 색상 (≥70 green / 30~70 amber / <30 red) + 보조 KPI 클릭→시도 / 시도→가입. C) 8h sparkline SVG (visitors area+line + signup green dots). D) 최근 가입 5명 리스트 (email_masked / source/provider chip / KST 시각).
+  - 헤더 우측 health 배지 2개: `클릭 OK/WARN/CRITICAL/데이터부족` + `가입 OK/WARN/CRITICAL/데이터부족` (status 별 bg/fg 색상).
+  - 헤더 우측 `📊 상세 진단` 링크 → `/admin/signup-flow` (별도 페이지 그대로 유지 · 위젯=요약, 페이지=분석).
+  - 30s 자동 폴링 + `visibilitychange` 가드 (s185 패턴 — 탭 비활성 시 fetch skip).
+  - 카드 자체 클릭 navigate 안 함, 링크는 명시 버튼만.
+- **`src/app/admin/v4/AdminShellV4.tsx` 수정**:
+  - `SignupRealtimeHeader` 직후 + `SignupCTASection` 앞에 `<SignupFunnelWidget />` mount (가입 깔때기 한 묶음으로 보이게).
+  - 기존 헤더 `📊 가입 플로우 진단` 버튼 그대로 유지 (별도 상세 페이지 진입점 보존).
+
+### Architecture Rule 준수
+- DB RPC 변경 X (사전 적용분 사용).
+- Rule #11: API 200 보장 (try-catch + unstable_cache + ok:false fallback).
+- Rule #13: `(sb as any).rpc()` cast 패턴.
+- Rule #14: s209 의 트래커 직접 import 정책 보존 — 본 변경 무관.
+
+### 검증
+- `npm run type-check` 0 errors.
+- `npm run build` 클린 (s210 apt-v2 4 라우트 합쳐 558/558 pages).
+- 신규 라우트 등록 확인: `/api/admin/dashboard-widget 1.35 kB`.
+- prod 배포 후 admin 세션으로 `/admin` 진입 → 위젯이 헤더 직후 노출, 30s 자동 갱신, health 배지 색상 상태별 표시.
+
+### 잔존 관찰
+- 4/29 저녁 가입 2명 (sticky_signup_bar→kakao) 발생 — s209 CTA 트래킹 fix 효과 1차 신호. 4/30 KST 13시 다시 visitors -78% / clicks -89% 신호 — 시간대 작아 자연 변동인지 재회귀인지 불명, 위젯이 박혀 있으면 admin 진입 시 즉시 판정 가능.
+
+---
+
 # 카더라 STATUS — 세션 210: apt-tabs 리디자인 (/apt-v2 신규) (2026-04-30)
 
 ## 세션 210 — apt-tabs 리디자인 (/apt-v2 신규, 기존 /apt 무손상)
