@@ -3,8 +3,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
 import { classifyReferrer } from '@/lib/referrer-classify';
 import { ADMIN_INFRA } from '@/lib/constants';
+import { fetchBatched } from '@/lib/db/fetchBatched';
 
 export const maxDuration = 30;
+
+// s216: PostgREST 1k cap 우회. 기존 .data 셰이프 유지.
+async function batchedR<T = any>(
+  buildQuery: (offset: number, limit: number) => any,
+  target = 100000,
+): Promise<{ data: T[] }> {
+  return { data: await fetchBatched<T>(buildQuery, target) };
+}
 
 // Supabase query returns PromiseLike (no .catch), wrap safely
 async function safe<T>(p: PromiseLike<{ data: T; error: any }>, fallback: T): Promise<T> {
@@ -614,19 +623,42 @@ export async function GET(req: NextRequest) {
     // 📊 성장 탭
     // ═══════════════════════════════════════
     if (tab === 'growth') {
+      // s216 (S214.5+S215.5): PostgREST 1k cap 우회 — conversion_events / page_views 전수 페이지네이션.
+      // 기존 .limit/.range 없는 5개 쿼리가 1k 만 반환되어 ctaStats / topPages / hourly / dailyTrend / referrer 통계가 모두 1k 후 누락.
+      // apt_alert_cta clicks=0 미스터리의 직접적 원인 후보.
+      const fortnightAgo = new Date(Date.now() - 14 * 86400000).toISOString();
       const [pvR, uvR, signupsR, ctaR, topPagesR, hourlyR, dailyPvR, referrerR, signupDailyR] = await Promise.all([
         sb.from('page_views').select('id', { count: 'exact', head: true }).gte('created_at', weekAgo),
         safe(sb.rpc('count_unique_visitors_7d'), 0),
         sb.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', weekAgo).neq('is_seed', true).neq('is_ghost', true),
-        (sb as any).from('conversion_events').select('event_type, cta_name').gte('created_at', weekAgo),
-        sb.from('page_views').select('path').gte('created_at', weekAgo),
-        sb.from('page_views').select('created_at, user_agent').gte('created_at', weekAgo),
-        // 14일 일별 PV/UV 추이
-        sb.from('page_views').select('created_at, visitor_id').gte('created_at', new Date(Date.now() - 14 * 86400000).toISOString()),
-        // 유입 경로
-        sb.from('page_views').select('referrer').gte('created_at', weekAgo),
-        // 일별 가입자 추이
-        sb.from('profiles').select('created_at').gte('created_at', new Date(Date.now() - 14 * 86400000).toISOString()).neq('is_seed', true).neq('is_ghost', true),
+        // 7d conversion_events: cta_name + event_type 분포 (전체 27k 중 7d 부분)
+        batchedR<{ event_type: string; cta_name: string }>((off, lim) =>
+          (sb as any).from('conversion_events').select('event_type, cta_name')
+            .gte('created_at', weekAgo).order('created_at', { ascending: true }).range(off, off + lim - 1)
+        ),
+        // 7d page_views: top pages (path 분포)
+        batchedR<{ path: string }>((off, lim) =>
+          sb.from('page_views').select('path').gte('created_at', weekAgo)
+            .order('created_at', { ascending: true }).range(off, off + lim - 1)
+        ),
+        // 7d page_views: hourly + device (created_at, user_agent)
+        batchedR<{ created_at: string; user_agent: string | null }>((off, lim) =>
+          sb.from('page_views').select('created_at, user_agent').gte('created_at', weekAgo)
+            .order('created_at', { ascending: true }).range(off, off + lim - 1)
+        ),
+        // 14d page_views: dailyTrend (created_at, visitor_id)
+        batchedR<{ created_at: string; visitor_id: string | null }>((off, lim) =>
+          sb.from('page_views').select('created_at, visitor_id').gte('created_at', fortnightAgo)
+            .order('created_at', { ascending: true }).range(off, off + lim - 1),
+          200000,
+        ),
+        // 7d referrer
+        batchedR<{ referrer: string | null }>((off, lim) =>
+          sb.from('page_views').select('referrer').gte('created_at', weekAgo)
+            .order('created_at', { ascending: true }).range(off, off + lim - 1)
+        ),
+        // 14일 일별 가입자 추이 (필터 강해 1k 안 넘을 가능성 크지만 안전하게 batch)
+        sb.from('profiles').select('created_at').gte('created_at', fortnightAgo).neq('is_seed', true).neq('is_ghost', true),
       ]);
 
       // 14일 일별 PV/UV
