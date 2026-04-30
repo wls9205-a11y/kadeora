@@ -1,4 +1,56 @@
-# 카더라 STATUS — 세션 214: SEO 누수 일괄 fix (2026-05-01)
+# 카더라 STATUS — 세션 216: P0 데이터 신뢰성 회복 (2026-05-01)
+
+## 세션 216 — admin metric + sitemap area-hubs + fetcher dedup 일괄 fix (S214.5+S215.5 audit 후속)
+
+### 배경
+S213 진단 → S214 sitemap+cache fix → S214.5 PostgREST 1k cap 누수 audit (26건 발견) → S215.5 추가 audit (38건 신규, 합 64건). S216 은 그 중 P0 데이터 무결성·통계 정확도 직결 항목 5건 처리.
+
+### 변경 (커밋 5개)
+
+#### B. `src/lib/db/fetchBatched.ts` 헬퍼 추출 (refactor)
+- `sitemap/[id]` 의 `fetchBatched(buildQuery, targetCount)` + `sitemap-image/[page]` 의 `fetchAll(sb, table, cols, apply, ...)` 두 헬퍼를 단일 모듈로 통합.
+- behavior 변동 없음. 다른 라우트에서 재사용하기 위함.
+
+#### C. `cron/aggregate-user-events` 49K events/day 손실 (CRITICAL)
+- 기존 `.limit(50000)` 가 PostgREST cap 1k 에 걸려 매일 1k events 만 user_daily_summary 에 반영.
+- `fetchBatched` 로 하루치 events 전수 페이지네이션 (target 100k, 14일 retention 총 57k 안전).
+- `maxDuration` 30→60s.
+
+#### D. `admin/v2?tab=growth` 5개 raw-data 쿼리 cap (CTA 미스터리)
+- conversion_events 7d (ctaR) → ctaStats / activeCtaStats / contentGate7d / blogInlineCta7d
+- page_views 7d (topPagesR, hourlyR, referrerR) → topPages / featureUsage / hourCounts / deviceCounts / refCounts
+- page_views 14d (dailyPvR) → dailyTrend
+- `batchedR` 헬퍼로 `{ data: T[] }` 셰이프 유지 (downstream `.data` 호환).
+- **검증 필요**: admin 대시보드의 `apt_alert_cta` clicks 가 0이 아닌 실제 값으로 회복되는지 확인.
+
+#### F. `sitemap/[id]:270/275/280` area-hubs (#21) 사이트맵
+- apt_complex_profiles 34k sigungu/dong 집계가 1k 후 누락 → sigungu/dong hub URL 광범위 미포함.
+- apt_sites 5.8k builder 집계 → builder hub URL 4.8k 분 누락.
+- 모두 fetchBatched 적용.
+
+#### G. `apt-fetcher.ts:206 fetchBuilders` + `cron/stock-discover:167`
+- fetchBuilders region='전국' → 1k 만 받아 시공사 랭킹 부정확. fetchBatched (target 20k).
+- stock-discover existing set 1k cap → 800 종목 매번 "신규" 오분류 → 중복 insert 누적. fetchBatched (target 10k).
+
+### 보류 — `cron/price-change-calc` (E, STOP for decision)
+**위험 평가**:
+- apt_transactions 621k row 의 3m/6m/12m/15m/18m 윈도우 4개 쿼리 — 윈도우 별 100k+ row in-memory 로 fetchBatched 적용 시 메모리 ~40MB, 시간 ~80s. maxDuration=120s 이긴 하지만 fragile.
+- 실제 작업은 `apt_name → AVG(deal_amount)` 그룹 집계 → diff 계산. **정확히 SQL aggregate 의 영역**.
+
+**옵션**:
+- **Opt 1 (권장)**: SQL view / direct SQL exec — 단일 쿼리로 GROUP BY apt_name + JOIN. 메모리·시간 부담 0. 가장 정석.
+- Opt 2: 단지별 cursor — 매 cron 실행마다 N개 단지만 처리. UX 저하 (가격변화 데이터 갱신 지연).
+- Opt 3: Supabase RPC (PL/pgSQL) — Opt 1 의 wrapped 버전.
+
+**STOP**. 사용자 옵션 결정 후 다음 세션 (S216.5 또는 S217) 적용.
+
+### 다음 세션 plan
+- **S216.5**: price-change-calc 옵션 결정 후 적용 (사용자 결정 대기)
+- **S217**: 사용자 가시성 P0 — apt/map (4x 5000), apt/area/[sigungu] (2000), apt/complex (boundary 1000), stock/StockClient (1.8k), stock/data marketStats
+- **S218**: cron 일괄 — sync-apt-sites (3x 10000), issue-detect (6000), blog-complex-crosslink (5000), blog-internal-links (2000), monthly-market-report (2000), seo-score-refresh (2000), stock-hero-refresh (2000), blog-series-assign (2000), stock-theme-daily, blog-monthly-market, blog-weekly-market
+- **S219**: Public API 3건 (data/apt-complex 5000, data/apt-subscription 2000, data/apt-unsold 3000) + admin/dashboard 5건 SQL view 재설계 + push-broadcast 사전 fix (가입자 1k 돌파 임박 대비)
+
+---
 
 ## 세션 214 — SEO P0 5건 일괄 fix (s213 진단 결과 #1+2+3 + #4 + #14 + #15)
 
