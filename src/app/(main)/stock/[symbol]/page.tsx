@@ -56,10 +56,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const metaFragments = [perText, divText, sectorText].filter(Boolean).join(' · ');
 
   // 세션 156: 13 종목은 "주가 전망 2026" 키워드로 타이틀/설명 강화
+  // s217 P0-B: layout template 가 '| 카더라' 자동 추가 → explicit 표기 제거 (s212 P0-B 누락분).
   const isForecastTarget = FORECAST_TARGETS.has(symbol);
   const title = isForecastTarget
-    ? `${s.name}(${symbol}) 주가 전망 2026 — 실시간 시세·목표주가·배당 | 카더라`
-    : `${s.name}(${symbol}) 주가·배당금·실적·AI 분석 — 카더라`;
+    ? `${s.name}(${symbol}) 주가 전망 2026 — 실시간 시세·목표주가·배당`
+    : `${s.name}(${symbol}) 주가·배당금·실적·AI 분석`;
   const description = isForecastTarget
     ? `${s.name} 주가 전망 2026. 실시간 시세 ${p}${ch ? ' ' + ch : ''}. ${metaFragments ? metaFragments + '. ' : ''}증권사 목표주가 컨센서스, 외국인·기관 수급, 배당 수익률을 카더라에서 한눈에.`
     : `${s.name} 현재가 ${p} ${ch}. ${metaFragments ? metaFragments + '. ' : ''}${s.market} 상장. 실시간 시세, 차트, 수급, 재무제표, 목표가, AI 분석을 카더라에서 무료로 확인하세요.`;
