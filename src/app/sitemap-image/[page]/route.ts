@@ -8,6 +8,7 @@ import { escapeXml } from '@/lib/xml-utils';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { SITE_URL as BASE } from '@/lib/constants';
 import { URLS_PER_PAGE } from '@/lib/seo/sitemapConfig';
+import { fetchAll } from '@/lib/db/fetchBatched';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-static';
@@ -16,30 +17,19 @@ export const revalidate = 3600;
 type ImgEntry = { loc: string; imgs: { url: string; title: string; caption: string; geo?: string }[] };
 
 async function collectAll(sb: ReturnType<typeof getSupabaseAdmin>): Promise<ImgEntry[]> {
-  async function fetchAll(table: string, cols: string, apply: (q: any) => any, pageSize = 1000, maxPages = 50) {
-    const all: any[] = [];
-    for (let i = 0; i < maxPages; i++) {
-      const q = apply((sb as any).from(table).select(cols));
-      const { data } = await q.range(i * pageSize, (i + 1) * pageSize - 1);
-      if (!data || data.length === 0) break;
-      all.push(...data);
-      if (data.length < pageSize) break;
-    }
-    return all;
-  }
-
+  // s216: fetchAll 헬퍼 src/lib/db/fetchBatched.ts 로 추출.
   // 세션 156: stock_images + blog_post_images 추가 (누락 ~29K URL 복구)
   const [sites, complexes, blogs, stockImgs, blogImgs] = await Promise.all([
-    fetchAll('apt_sites', 'slug, name, images, region, sigungu',
+    fetchAll(sb, 'apt_sites', 'slug, name, images, region, sigungu',
       (q: any) => q.eq('is_active', true).not('images', 'is', null)),
-    fetchAll('apt_complex_profiles', 'apt_name, images, region_nm, sigungu',
+    fetchAll(sb, 'apt_complex_profiles', 'apt_name, images, region_nm, sigungu',
       (q: any) => q.not('images', 'is', null)),
-    fetchAll('blog_posts', 'slug, title, cover_image, image_alt, category',
+    fetchAll(sb, 'blog_posts', 'slug, title, cover_image, image_alt, category',
       (q: any) => q.eq('is_published', true).not('cover_image', 'is', null)
         .order('published_at', { ascending: false })),
-    fetchAll('stock_images', 'symbol, image_url, alt_text, caption',
+    fetchAll(sb, 'stock_images', 'symbol, image_url, alt_text, caption',
       (q: any) => q.eq('is_active', true).not('image_url', 'is', null)),
-    fetchAll('blog_post_images', 'post_id, image_url, alt_text, position',
+    fetchAll(sb, 'blog_post_images', 'post_id, image_url, alt_text, position',
       (q: any) => q.not('image_url', 'is', null).order('post_id', { ascending: true })),
   ]);
 

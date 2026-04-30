@@ -1,39 +1,17 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { SITE_URL as BASE } from '@/lib/constants';
+import { fetchBatched, POSTGREST_BATCH } from '@/lib/db/fetchBatched';
 
 export const revalidate = 3600;
 export const dynamic = 'force-dynamic'; // s168: 빌드타임 DB 호출 제거
 
 const REGIONS = ['서울','부산','대구','인천','광주','대전','울산','세종','경기','강원','충북','충남','전북','전남','경북','경남','제주','강남구','서초구','송파구','마포구','용산구','성남시','수원시','고양시','화성시','평택시','해운대구','부산진구','동래구'];
 const SECTORS_FALLBACK = ['반도체','금융','자동차','바이오','IT','에너지','ETF','방산'];
-// s214 #1+2+3: PostgREST default db-max-rows=1000 우회 — fetchAll 헬퍼로 batch 반복 fetch.
+// s214 #1+2+3: PostgREST default db-max-rows=1000 우회 — fetchBatched 헬퍼로 batch 반복 fetch.
+// s216: 헬퍼 src/lib/db/fetchBatched.ts 로 추출.
 // BLOG_PER_SITEMAP/COMPLEX_PER_SITEMAP 는 sitemap 1개 의 URL 수. sitemap.org 한도 50,000 이하.
 const BLOG_PER_SITEMAP = 5000;
-const POSTGREST_BATCH = 1000;
-
-// PostgREST 기본 db-max-rows=1000 우회. supabase-js .range(N, M) 쓸 때 M-N+1 ≤ 1000 이어야
-// 실제로 그만큼 반환됨. 더 많이 원하면 여러 번 호출 필요 — 본 헬퍼가 그 역할.
-async function fetchBatched<T = any>(
-  buildQuery: (offset: number, limit: number) => any,
-  targetCount: number,
-): Promise<T[]> {
-  const all: T[] = [];
-  let offset = 0;
-  while (all.length < targetCount) {
-    const batch = Math.min(POSTGREST_BATCH, targetCount - all.length);
-    try {
-      const { data, error } = await buildQuery(offset, batch);
-      if (error || !data || data.length === 0) break;
-      all.push(...data);
-      if (data.length < batch) break;
-      offset += data.length;
-    } catch {
-      break;
-    }
-  }
-  return all;
-}
 
 interface SitemapEntry {
   url: string;
