@@ -1,3 +1,69 @@
+# 카더라 STATUS — 세션 219: s217 후속 P0 3개 fix (UUID 라우팅 + main slot SSR + OG 1순위) (2026-05-01)
+
+> 모바일 클로드 brief 에서는 본 작업을 "s218" 로 호칭했으나, s218 sprint 번호는 title 회귀 + Cache-Control + sitemap 잔여 fix 가 먼저 점유. 본 sprint 는 s219 로 표기. DB backup 컬럼명 (`*_backup_s218`) 은 모바일 클로드 명명 그대로 보존 (롤백 호환).
+
+## 세션 219 — apt/[id] noindex/404 회복 + main slot deferred Suspense 제거 + 페이지별 OG swap
+
+### 배경 (모바일 클로드 prod fetch 직접 진단)
+s217 검증 결과, 다음 3건 P0 잔존 발견:
+1. **apt/[id] UUID 진입 시 noindex/404 fallback** — `굿모닝뷰(000c5598-…)` DB 멀쩡한데 `<meta name="robots" content="noindex">` + `digest:"NEXT_HTTP_ERROR_FALLBACK;404"`. UUID 형 URL 이 외부 링크/sitemap 등에서 들어오면 통째로 색인 차단.
+2. **(main) 페이지 main slot 안 본문 deferred Suspense** — s217 ToastProvider/AuthProvider 해제로 (main) 그룹 내 children boundary 는 SSR 회복했지만, **main slot 안에서 본문이 다시 deferred Suspense (`<!--$?-->` + `aria-busy="true"` skeleton) 로 들어가 hidden div 로 streaming 됨**. 봇은 main 안에 skeleton 만 보고 본문 못 받음.
+3. **stock/apt 페이지별 generateMetadata 의 og:image 1순위가 여전히 `/api/og`** — s217 은 root layout 만 fix. SNS 카드 / 봇 크롤러 timeout.
+
+### 사전 진단 (코드 단 확인)
+- apt/[id] noindex 원인: `resolveParam(rawId)` 가 UUID 를 numeric/slug 로 분류 못 해 slug 로 fallback → `fetchUnifiedData('uuid-string')` 모든 stage miss → null → `if (!d) notFound()` → Next.js 404 페이지 (noindex+404 status) 렌더.
+- main slot 안 deferred Suspense 원인: `apt/[id]/loading.tsx`, `stock/[symbol]/loading.tsx`, `apt/loading.tsx` 존재 → Next.js 가 자동으로 page 를 `<Suspense fallback={<Loading/>}>` 로 wrap → server data fetch 1.5s 동안 skeleton 송출, 본문은 streaming 로 hidden div 에 전송. ssr:false 컴포넌트 문제 아님 (브리프 추측 정정).
+- main 안 BAILOUT 3건은 chrome 배너 (`ProfileCompleteBanner` / `GlobalMissionBar` / `LiveBarChrome`, ClientShell 에 ssr:false 로 마운트) — 각자 isolated Suspense 라 children 영향 X. **그대로 보존** (s202 React #310/#300 보호 그대로).
+
+### 변경 (코드 단)
+
+#### Track A — apt/[id] UUID 라우팅 fix
+- `src/lib/apt-slug.ts` — `isUuid(id)` helper 추가 (RFC 4122 8-4-4-4-12 hex 패턴).
+- `src/app/(main)/apt/[id]/page.tsx` `resolveParam`:
+  - UUID 검출 → `apt_sites WHERE id = uuid` 직접 조회.
+  - 매칭 시 `{ type: 'redirect', slug }` 리턴 → page 하단 `permanentRedirect('/apt/{slug}')` 트리거.
+  - 미매칭 시 `{ type: 'not_found' }` (정상 404).
+- 비-UUID 비-numeric 은 기존대로 slug fallback.
+
+#### Track B — main slot deferred Suspense 제거
+- 삭제: `src/app/(main)/apt/[id]/loading.tsx`, `src/app/(main)/stock/[symbol]/loading.tsx`, `src/app/(main)/apt/loading.tsx`.
+- 효과: 본문 server component 가 SSR 끝날 때까지 응답 대기 → **봇이 main slot 안에 직접 H1·H2·본문 받음** (hidden div streaming X).
+- Trade-off: TTFB 245ms → ~1.5s (apt detail). ISR `revalidate=3600` 가 cache hit 라 첫 요청만 영향. 사용자 빈 화면 1~1.5s 가능.
+- 다른 (main) 라우트의 `loading.tsx` 는 보존 (UI critical).
+
+#### Track C — 페이지별 generateMetadata OG 1순위 swap
+- `apt/page.tsx` (apt list): `images: [og-square (630x630), og (1200x630)]` 로 swap. `twitter.images: [og-square]`.
+- `stock/[symbol]/page.tsx`: openGraph.images + twitter.images + JSON-LD Article.image + JSON-LD ImageGallery.image 4 곳 swap. og-square 1순위, /api/og 보존 fallback.
+- `apt/[id]/page.tsx`: 변경 없음 — 이미 `aptSiteThumb` chain (cover > satellite > **og_image_url** > images[0] > og-square) 가 og_image_url 우선이고, 모바일 클로드가 5779건 `og_image_url` 을 `/api/og-apt?...` 로 마이그 완료 → DB 직접 fetch 시 og-apt 가 1순위.
+- 다른 페이지 (apt/area, apt/redev, apt/region, apt/builder 등) 의 /api/og 잔존은 별 sprint 백로그.
+
+### 검증
+- `npx tsc --noEmit` exit 0.
+- `npm run build` 클린.
+- prod 배포 후 확인:
+  - `https://kadeora.app/apt/000c5598-1d63-4163-94b1-f9ed0c728d46` → 301 redirect 후 정상 페이지, noindex 사라짐, H1 "굿모닝뷰" SSR.
+  - `https://kadeora.app/apt/{slug}` HTML — main slot 안 `<h1>` `<h2>` 본문 SSR (hidden div streaming X).
+  - `https://kadeora.app/stock/005930` HTML — main slot 안 본문 SSR.
+  - `<meta property="og:image">` 1순위 `og-square` 가리킴.
+
+### Architecture Rule 준수 (s217 회귀 방지)
+- **ClientShell 정책 그대로** — Sidebar/RightPanel/Navigation/AdBanner/NoticeBanner/ProfileCompleteBanner/GlobalMissionBar/LiveBarChrome 등 14 컴포넌트 ssr:false 보존 (s202 React #310/#300 보호).
+- ToastProvider/AuthProvider 직접 import 도 그대로 (s217).
+- DB 변경 0 (모바일 클로드 사전 적용분 보존).
+- backup 컬럼 (`og_image_url_backup_s218`, `cover_image_backup_s214`, `og_image_url_backup_s214`) DROP 금지.
+
+### 백로그 (별 sprint)
+- og-chart 잔존 호출처 1~2개 (route 자체 console.error 외) 추적.
+- /api/og 라우트 자체 timeout 원인 진단 (Edge runtime / font fetch 의심).
+- 다른 (main) 페이지 generateMetadata `/api/og` → og-square 일괄 swap (apt/area, apt/redev, apt/region, apt/builder, apt/compare, apt/complex, apt/diagnose, apt/map, apt/ranking, apt/search, apt/theme).
+- v_admin_image_coverage 어드민 위젯 임베드.
+- C4 cover_image_url 5,809건 backfill.
+- C5 stock_logo 1,798건 backfill cron.
+- M5 redev_thumb 35건 / M6 constructor_logo 20건 backfill.
+- apt/[id] page 의 JSON-LD Article schema (line ~641) 의 /api/og 도 별 sprint 에서 og-square swap.
+
+---
+
 # 카더라 STATUS — 세션 218: title 회귀 + Cache-Control + sitemap 잔여 + price-change RPC (2026-05-01)
 
 ## 세션 218 — S216 검증 발견 회귀 5건 + 보류 1건 일괄 처리

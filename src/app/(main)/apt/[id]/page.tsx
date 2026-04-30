@@ -6,7 +6,7 @@ import { createSupabaseServer } from '@/lib/supabase-server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { SITE_URL } from '@/lib/constants';
 import { aptSiteThumb } from '@/lib/thumbnail-fallback';
-import { generateAptSlug, isNumericId } from '@/lib/apt-slug';
+import { generateAptSlug, isNumericId, isUuid } from '@/lib/apt-slug';
 import { notFound, permanentRedirect } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
@@ -55,6 +55,18 @@ async function resolveParam(rawId: string) {
   // 특수문자(|, ;, ', " 등) 제거 — PostgREST 쿼리 인젝션/에러 방지
   const sanitized = decoded.replace(/[|;'"\\<>]/g, '');
   const sb = getSupabaseAdmin();
+  // s218 Track A: UUID 진입 (apt_sites.id) — apt_sites 직접 lookup 후 slug 로 redirect.
+  // 모바일 클로드 prod 진단: /apt/000c5598-1d63-... 같은 uuid URL 이 slug 로 잘못 처리되어
+  // notFound() → noindex/404 fallback. (sitemap 또는 외부 링크에서 uuid 형태로 유입)
+  if (isUuid(sanitized)) {
+    const { data: site } = await (sb as any).from('apt_sites').select('slug, name').eq('id', sanitized).maybeSingle();
+    if (site?.slug) return { type: 'redirect' as const, slug: site.slug };
+    if (site?.name) {
+      const slug = generateAptSlug(site.name);
+      if (slug) return { type: 'redirect' as const, slug };
+    }
+    return { type: 'not_found' as const };
+  }
   if (isNumericId(sanitized)) {
     const isHmno = sanitized.length >= 7;
     const { data: apt } = isHmno

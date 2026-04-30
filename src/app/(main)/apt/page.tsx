@@ -44,7 +44,9 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
   const baseDesc = s?.desc || (regionLabel
     ? `${regionLabel}의 청약 일정, 분양중·미분양·재개발 단지를 한눈에. 실거래가, 시공사별 분석까지 카더라에서.`
     : '2026년 전국 아파트 청약 일정, 현재 분양중인 아파트, 미분양 현황, 재개발·재건축 진행 현황을 한눈에 확인하세요.');
-  const ogImg = sp.section
+  // s218 Track C: og-square 1순위 (정사각, DB 호출 X). /api/og 는 fallback 보존.
+  const ogSquareImg = `${SITE_URL}/api/og-square?title=${encodeURIComponent(regionLabel || '부동산')}&category=apt`;
+  const ogWideImg = sp.section
     ? `${SITE_URL}/api/og?section=${sp.section}&design=2`
     : `${SITE_URL}/api/og?title=${encodeURIComponent('아파트 청약·분양·재개발')}&subtitle=${encodeURIComponent(regionLabel || '전국 실시간 현황')}`;
 
@@ -56,11 +58,11 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
       title: baseTitle, description: baseDesc,
       url: SITE_URL + '/apt', siteName: '카더라', locale: 'ko_KR', type: 'website',
       images: [
-        { url: ogImg, width: 1200, height: 630, alt: `카더라 ${baseTitle}` },
-        { url: `${SITE_URL}/api/og-square?title=${encodeURIComponent('부동산')}&category=apt`, width: 630, height: 630, alt: `카더라 ${baseTitle}` },
+        { url: ogSquareImg, width: 630, height: 630, alt: `카더라 ${baseTitle}` },
+        { url: ogWideImg, width: 1200, height: 630, alt: `카더라 ${baseTitle}` },
       ],
     },
-    twitter: { card: 'summary_large_image', title: baseTitle, description: baseDesc, images: [ogImg] },
+    twitter: { card: 'summary_large_image', title: baseTitle, description: baseDesc, images: [ogSquareImg] },
     other: {
       'article:section': '부동산',
       'article:tag': '부동산,청약,분양,미분양,재개발,실거래가,아파트',

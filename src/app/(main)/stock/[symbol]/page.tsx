@@ -77,12 +77,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       siteName: '카더라',
       locale: 'ko_KR',
       type: 'article',
+      // s218 Track C: /api/og 가 prod 간헐 timeout — og-square 1순위 (정사각, DB 호출 X).
+      // og 는 fallback 보존.
       images: [
-        { url: `${SITE_URL}/api/og?title=${encodeURIComponent(`${s.name} (${symbol}) ${p} ${ch}`)}&design=2&category=stock`, width: 1200, height: 630, alt: `${s.name} 주가 시세` },
         { url: `${SITE_URL}/api/og-square?title=${encodeURIComponent(`${s.name} (${symbol})`)}&category=stock`, width: 630, height: 630, alt: `${s.name} 시세` },
+        { url: `${SITE_URL}/api/og?title=${encodeURIComponent(`${s.name} (${symbol}) ${p} ${ch}`)}&design=2&category=stock`, width: 1200, height: 630, alt: `${s.name} 주가 시세` },
       ],
     },
-    twitter: { card: 'summary_large_image', title: `${s.name} ${p} ${ch}`, description: `${s.market} · 시세 · 배당금 · 재무제표 · PER · 차트 · AI 분석` },
+    twitter: { card: 'summary_large_image', title: `${s.name} ${p} ${ch}`, description: `${s.market} · 시세 · 배당금 · 재무제표 · PER · 차트 · AI 분석`, images: [`${SITE_URL}/api/og-square?title=${encodeURIComponent(`${s.name} (${symbol})`)}&category=stock`] },
     other: (() => {
       const isUS = s.market === 'NYSE' || s.market === 'NASDAQ';
       const lat = isUS ? '40.7128' : '37.5665';
@@ -216,8 +218,8 @@ export default async function StockDetailPage({ params }: Props) {
         author: { '@type': 'Organization', name: '카더라', url: SITE_URL },
         publisher: { '@type': 'Organization', name: '카더라', url: SITE_URL, logo: { '@type': 'ImageObject', url: `${SITE_URL}/icons/icon-192.png`, width: 192, height: 192 } },
         image: [
-          { '@type': 'ImageObject', url: `${SITE_URL}/api/og?title=${encodeURIComponent(`${s.name} (${symbol})`)}&design=2&category=stock`, width: 1200, height: 630 },
           { '@type': 'ImageObject', url: `${SITE_URL}/api/og-square?title=${encodeURIComponent(`${s.name}`)}&category=stock`, width: 630, height: 630 },
+          { '@type': 'ImageObject', url: `${SITE_URL}/api/og?title=${encodeURIComponent(`${s.name} (${symbol})`)}&design=2&category=stock`, width: 1200, height: 630 },
         ],
         thumbnailUrl: `${SITE_URL}/api/og-square?title=${encodeURIComponent(`${s.name}`)}&category=stock`,
         mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE_URL}/stock/${symbol}` },
@@ -244,9 +246,9 @@ export default async function StockDetailPage({ params }: Props) {
         description: `${s.name} 실시간 주가 차트, 시세 변동, AI 분석 그래프`,
         url: `${SITE_URL}/stock/${symbol}`,
         image: [
-          { '@type': 'ImageObject', url: `${SITE_URL}/api/og?title=${encodeURIComponent(`${s.name} (${symbol}) 주가`)}&design=2&category=stock`, width: 1200, height: 630, name: `${s.name} 주가 시세`, caption: `${s.name}(${symbol}) 현재가 ${fmtPrice(Number(s.price), s.currency ?? undefined)}` },
           { '@type': 'ImageObject', url: `${SITE_URL}/api/og-square?title=${encodeURIComponent(s.name + ' ' + symbol)}&category=stock`, width: 630, height: 630, name: `${s.name} 주가 차트`, caption: `${s.name} 가격 추이 차트` },
           { '@type': 'ImageObject', url: `${SITE_URL}/api/og-square?title=${encodeURIComponent(`${s.name}`)}&category=stock`, width: 630, height: 630, name: `${s.name} 종목 정보`, caption: `${s.name} ${s.market} 상장 종목` },
+          { '@type': 'ImageObject', url: `${SITE_URL}/api/og?title=${encodeURIComponent(`${s.name} (${symbol}) 주가`)}&design=2&category=stock`, width: 1200, height: 630, name: `${s.name} 주가 시세`, caption: `${s.name}(${symbol}) 현재가 ${fmtPrice(Number(s.price), s.currency ?? undefined)}` },
         ],
       })}} />
 
