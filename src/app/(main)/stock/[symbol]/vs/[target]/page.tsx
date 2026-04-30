@@ -58,10 +58,10 @@ export default async function StockComparePage({ params }: Props) {
       <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 16 }}>두 종목의 핵심 투자 지표를 한눈에 비교합니다.</p>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16 }}>
         <figure style={{ margin: 0, borderRadius: 'var(--radius-sm)', overflow: 'hidden', border: '1px solid var(--border)' }}>
-          <img src={`${SITE_URL}/api/og-chart?symbol=${a.symbol}`} alt={`${a.name} ${a.symbol} 주가 PER PBR 배당 시총 투자 지표 인포그래픽`} width={600} height={315} style={{ width: '100%', height: 'auto', display: 'block' }} loading="lazy" />
+          <img src={`${SITE_URL}/api/og-square?title=${encodeURIComponent(a.name + ' ' + a.symbol)}&category=stock`} alt={`${a.name} ${a.symbol} 주가 PER PBR 배당 시총 투자 지표 인포그래픽`} width={600} height={315} style={{ width: '100%', height: 'auto', display: 'block' }} loading="lazy" />
         </figure>
         <figure style={{ margin: 0, borderRadius: 'var(--radius-sm)', overflow: 'hidden', border: '1px solid var(--border)' }}>
-          <img src={`${SITE_URL}/api/og-chart?symbol=${b.symbol}`} alt={`${b.name} ${b.symbol} 주가 PER PBR 배당 시총 투자 지표 인포그래픽`} width={600} height={315} style={{ width: '100%', height: 'auto', display: 'block' }} loading="lazy" />
+          <img src={`${SITE_URL}/api/og-square?title=${encodeURIComponent(b.name + ' ' + b.symbol)}&category=stock`} alt={`${b.name} ${b.symbol} 주가 PER PBR 배당 시총 투자 지표 인포그래픽`} width={600} height={315} style={{ width: '100%', height: 'auto', display: 'block' }} loading="lazy" />
         </figure>
       </div>
       <div style={{ borderRadius: 'var(--radius-card)', overflow: 'hidden', border: '1px solid var(--border)' }}>

@@ -193,7 +193,7 @@ export default async function StockPage() {
           "position": i + 1,
           "name": `${s.name} (${s.symbol})`,
           "url": `${SITE_URL}/stock/${s.symbol}`,
-          "image": `${SITE_URL}/api/og-chart?symbol=${s.symbol}`,
+          "image": `${SITE_URL}/api/og-square?title=${encodeURIComponent(s.name + ' ' + s.symbol)}&category=stock`,
           "description": `${s.name} ${s.market || ''} ${s.price ? `현재가 ${Number(s.price).toLocaleString()}` : ''}`.trim(),
         })),
       }) }} />}

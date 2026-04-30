@@ -244,7 +244,7 @@ export default async function StockDetailPage({ params }: Props) {
         url: `${SITE_URL}/stock/${symbol}`,
         image: [
           { '@type': 'ImageObject', url: `${SITE_URL}/api/og?title=${encodeURIComponent(`${s.name} (${symbol}) 주가`)}&design=2&category=stock`, width: 1200, height: 630, name: `${s.name} 주가 시세`, caption: `${s.name}(${symbol}) 현재가 ${fmtPrice(Number(s.price), s.currency ?? undefined)}` },
-          { '@type': 'ImageObject', url: `${SITE_URL}/api/og-chart?symbol=${symbol}&type=price`, width: 1200, height: 630, name: `${s.name} 주가 차트`, caption: `${s.name} 가격 추이 차트` },
+          { '@type': 'ImageObject', url: `${SITE_URL}/api/og-square?title=${encodeURIComponent(s.name + ' ' + symbol)}&category=stock`, width: 630, height: 630, name: `${s.name} 주가 차트`, caption: `${s.name} 가격 추이 차트` },
           { '@type': 'ImageObject', url: `${SITE_URL}/api/og-square?title=${encodeURIComponent(`${s.name}`)}&category=stock`, width: 630, height: 630, name: `${s.name} 종목 정보`, caption: `${s.name} ${s.market} 상장 종목` },
         ],
       })}} />
@@ -463,7 +463,7 @@ export default async function StockDetailPage({ params }: Props) {
       {/* 📊 인포그래픽 이미지 — 네이버/구글 이미지 검색 크롤링용 */}
       <figure style={{ margin: '0 0 var(--sp-md)', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--border)' }}>
         <img
-          src={`${SITE_URL}/api/og-chart?symbol=${symbol}`}
+          src={`${SITE_URL}/api/og-square?title=${encodeURIComponent(s.name + ' ' + symbol)}&category=stock`}
           alt={`${s.name} ${symbol} 주가 시세 차트 PER PBR 배당수익률 시가총액 ${s.market} ${s.sector || ''} 투자 지표 인포그래픽 2026`}
           width={1200} height={630}
           style={{ width: '100%', height: 'auto', display: 'block' }}

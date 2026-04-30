@@ -1,6 +1,6 @@
 'use client';
 import { stockColor, stockUpColor, stockDownColor, sentimentColor } from '@/lib/stockColor';
-import { getStockLogo } from '@/lib/stockLogo';
+import { getStockLogo, getClearbitLogoUrl } from '@/lib/stockLogo';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import SearchInput from '@/components/SearchInput';
@@ -238,7 +238,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
         {/* Row 1: Logo + Name + sector */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center', flex: 1, minWidth: 0 }}>
-            {(() => { const logo = getStockLogo(s.symbol, !isGlobal); const imgSrc = s.thumbnail ?? s.logo_url ?? `/api/og-chart?symbol=${s.symbol}`; return (
+            {(() => { const logo = getStockLogo(s.symbol, !isGlobal); const imgSrc = s.thumbnail ?? s.logo_url ?? getClearbitLogoUrl(s.symbol) ?? `/api/og-square?title=${encodeURIComponent(s.symbol)}&category=stock`; return (
               <img src={imgSrc} alt={`${s.name} 로고`} width={32} height={32} style={{ width: 32, height: 32, borderRadius: 'var(--radius-md)', objectFit: 'cover', flexShrink: 0, background: '#fff', padding: 2 }} loading="lazy" decoding="async" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; const sib = (e.target as HTMLImageElement).nextElementSibling; if (sib) (sib as HTMLElement).style.removeProperty('display'); }} />
             ); })()}
             {(() => { const logo = getStockLogo(s.symbol, !isGlobal); return (
@@ -1190,7 +1190,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
                       <div style={{ padding: '10px 12px 8px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
                           <div style={{ display: 'flex', gap: 8, alignItems: 'center', flex: 1, minWidth: 0 }}>
-                            {(() => { const logo = getStockLogo(s.symbol, !isGlobal); const imgSrc = s.thumbnail ?? s.logo_url ?? `/api/og-chart?symbol=${s.symbol}`; return (
+                            {(() => { const logo = getStockLogo(s.symbol, !isGlobal); const imgSrc = s.thumbnail ?? s.logo_url ?? getClearbitLogoUrl(s.symbol) ?? `/api/og-square?title=${encodeURIComponent(s.symbol)}&category=stock`; return (
                               <img src={imgSrc} alt={`${s.name} 로고`} width={32} height={32} style={{ width: 32, height: 32, borderRadius: 'var(--radius-md)', objectFit: 'cover', flexShrink: 0, background: '#fff', padding: 2 }} loading="lazy" decoding="async" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; const sib = (e.target as HTMLImageElement).nextElementSibling; if (sib) (sib as HTMLElement).style.removeProperty('display'); }} />
                             ); })()}
                             {(() => { const logo = getStockLogo(s.symbol, !isGlobal); return (

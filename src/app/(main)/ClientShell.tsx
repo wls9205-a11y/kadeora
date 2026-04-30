@@ -23,6 +23,11 @@ import { CONTACT_EMAIL, CONTACT_PHONE, BIZ_INFO_LINE, BIZ_ADDRESS_LINE, BIZ_CONT
 import ErrorBoundary from '@/components/ErrorBoundary';
 import TopLoadingBar from '@/components/TopLoadingBar';
 import ScrollToTop from '@/components/ScrollToTop';
+// s214 C3: ToastProvider/AuthProvider 가 ssr:false 면 children 트리 전체가 BAILOUT
+// → 모든 (main) 페이지의 본문이 SSR 안되고 RSC payload 로만 전송 (h1/h2 0개, SEO 무의미).
+// 두 provider 는 useEffect 안에서만 브라우저 API 사용 → SSR-safe. 직접 import 로 전환.
+import { ToastProvider } from '@/components/Toast';
+import { AuthProvider } from '@/components/AuthProvider';
 
 // s209 fix(track-regression): listener-only 트래커 3종은 dynamic({ssr:false}) 격리 해제.
 // 이 셋은 useEffect 안에서 document-level click listener / fetch beacon 만 attach 하고
@@ -33,8 +38,6 @@ import CtaGlobalTracker from '@/components/CtaGlobalTracker';
 import PageViewTracker from '@/components/PageViewTracker';
 import BehaviorTracker from '@/components/BehaviorTracker';
 
-const ToastProvider          = dynamic(() => import('@/components/Toast').then(m => m.ToastProvider),       { ssr: false });
-const AuthProvider           = dynamic(() => import('@/components/AuthProvider').then(m => m.AuthProvider), { ssr: false });
 const Navigation             = dynamic(() => import('@/components/Navigation').then(m => m.Navigation),     { ssr: false });
 const NoticeBanner           = dynamic(() => import('@/components/NoticeBanner'),                            { ssr: false });
 const AdBanner               = dynamic(() => import('@/components/AdBanner'),                                { ssr: false });

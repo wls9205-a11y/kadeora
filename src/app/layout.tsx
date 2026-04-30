@@ -27,9 +27,10 @@ export const metadata: Metadata = {
     description: '아파트 청약·재개발, 주식 시세·AI 종목 분석, 투자 커뮤니티를 한곳에서.',
     url: SITE_URL,
     siteName: '카더라',
+    // s214 C1: /api/og 라우트 timeout 회피 — og-square 를 1순위로. og 는 보존 fallback.
     images: [
-      { url: SITE_URL + '/api/og', width: 1200, height: 630, alt: '카더라 - 부동산·주식 정보 플랫폼' },
-      { url: SITE_URL + '/api/og-square', width: 630, height: 630, alt: '카더라 - 부동산·주식 정보 플랫폼' },
+      { url: SITE_URL + '/api/og-square?title=' + encodeURIComponent('카더라'), width: 630, height: 630, alt: '카더라 - 부동산·주식 정보 플랫폼' },
+      { url: SITE_URL + '/api/og?title=' + encodeURIComponent('카더라'), width: 1200, height: 630, alt: '카더라 - 부동산·주식 정보 플랫폼' },
     ],
     locale: 'ko_KR',
     type: 'website',
@@ -38,7 +39,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: '카더라 - 부동산·주식 정보 플랫폼',
     description: '아파트 청약·재개발, 주식 시세·AI 종목 분석, 투자 커뮤니티',
-    images: [SITE_URL + '/api/og', SITE_URL + '/api/og-square'],
+    images: [SITE_URL + '/api/og-square?title=' + encodeURIComponent('카더라'), SITE_URL + '/api/og?title=' + encodeURIComponent('카더라')],
     site: '@kadeora_app',
     creator: '@kadeora_app',
   },

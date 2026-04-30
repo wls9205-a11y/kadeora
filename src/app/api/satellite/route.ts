@@ -65,6 +65,6 @@ export async function GET(request: NextRequest) {
   if (osmTile) return osmTile;
 
   // 3) 최종 fallback — 절대 실패하지 않는 OG 차트로 리다이렉트
-  const fallback = `${origin}/api/og-chart?apt=${encodeURIComponent(apt)}`;
+  const fallback = `${origin}/api/og-square?title=${encodeURIComponent(apt)}&category=apt`;
   return Response.redirect(fallback, 302);
 }

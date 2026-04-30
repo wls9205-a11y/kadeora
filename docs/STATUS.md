@@ -1,3 +1,83 @@
+# 카더라 STATUS — 세션 217: 이미지 시스템 Critical/Major 6 fix (2026-05-01)
+
+## 세션 217 — 이미지 fallback 체계 + (main) BAILOUT 회복
+
+> 모바일 클로드 brief 에서는 본 작업을 "s214" 로 호칭했으나, s214 sprint 번호는 sitemap fix 가 먼저 점유 (s214/s215/s216 진행). 본 sprint 는 s217 로 표기. DB backup 컬럼명 (`*_backup_s214`) 은 모바일 클로드 명명 그대로 보존 (롤백 호환).
+
+### 배경 (모바일 클로드 사전 분석)
+- 모바일 클로드가 prod fetch + Supabase MCP 로 7개 항목 발견 후 DB 단 사전 적용 완료:
+  - `blog_posts.cover_image` 192건 `/api/og?...` → 절대 URL `/api/og-apt`/`og-square`
+  - `blog_posts.cover_image` 17건 `http://imgnews` → NULL (cron 재채움)
+  - `apt_complex_profiles.og_image_url` 1228건 `http://imgnews` → NULL
+  - backup 컬럼 `cover_image_backup_s214`, `og_image_url_backup_s214` 보존 (롤백용)
+  - view `public.v_admin_image_coverage` 신규 (9테이블 status: OK/WARN/CRITICAL/EMPTY_TABLE)
+- 본 세션 코드 단 작업 6개. **DB 변경 0** (사전 적용분 그대로 사용).
+
+### 변경 (코드 단)
+
+#### C1 — `/api/og` timeout 우회 (`src/app/layout.tsx`)
+- `metadata.openGraph.images`, `metadata.twitter.images` 1순위 → `/api/og-square?title=카더라` (정사각 가벼운 카드, DB 호출 X).
+- `/api/og` 도 fallback 으로 보존 (라우트 자체는 catch → static brand image redirect, 죽지는 않음).
+- `src/lib/thumbnail-fallback.ts` `ogFallback` 도 `/api/og-square` 로 통일 — aptSiteThumb / blogThumb / unsoldThumb / redevThumb / ogFor 전부 영향, /api/og 의존도 ↓.
+
+#### C2 — `/api/og-chart` 호출처 9곳 일괄 `/api/og-square` 교체
+- 라우트 파일 자체는 보존 (`src/app/api/og-chart/route.tsx`, 1x1 PNG fallback 내장).
+- 클라이언트 img: `StockClient.tsx` 241/1193, `stock/[symbol]/page.tsx` 466, `stock/[symbol]/vs/[target]/page.tsx` 61/64, `apt/[id]/page.tsx` 1503.
+- JSON-LD ImageObject / openGraph metadata: `stock/[symbol]/page.tsx` 247, `stock/[symbol]/chart/page.tsx` 27, `stock/page.tsx` 196, `apt/[id]/page.tsx` 633 (apt 는 og-square 1순위 + og-apt 보조).
+- 서버 fallback: `app/api/satellite/route.ts` 68 — og-chart redirect → og-square redirect.
+
+#### C3 — (main) BAILOUT 회복 (`src/app/(main)/ClientShell.tsx`)
+- prod fetch 진단: `/apt/{slug}`, `/blog`, `/stock` 등 모든 (main) 페이지 noScripts body 6.7KB / h1·h2 0개 / 본문은 RSC payload 안에만 — **SSR 본문이 BAILOUT_TO_CLIENT_SIDE_RENDERING 으로 통째로 client 로 떨어짐**. 봇 SEO 사실상 무력.
+- 원인: `ToastProvider` + `AuthProvider` 두 provider 가 `dynamic({ssr:false})` 로 wrap → children 트리 전체가 동일 Suspense boundary 안에서 bailout. (Sidebar/RightPanel ssr:false 아님)
+- 두 provider 는 useEffect 안에서만 브라우저 API 사용 → SSR-safe. 직접 import 로 전환 (s187 전 패턴).
+- Sidebar / RightPanel / Navigation / NoticeBanner / AdBanner / ProfileCompleteBanner / GlobalMissionBar / LiveBarChrome / 기타 14 컴포넌트 ssr:false 그대로 — hook-heavy (useSearchParams + useAuth + 다중 useEffect) 들 만 격리 유지 (s202 React #310/#300 보호 그대로).
+
+#### C4 — apt_sites cover_image_url fallback chain (`src/lib/thumbnail-fallback.ts`)
+- `aptSiteThumb` chain: `cover_image_url` (NEW) → satellite_image_url → og_image_url → images[0] → og-square OG generator.
+- `apt/[id]/page.tsx` 의 generateMetadata 도 `cover_image_url` 전달.
+- `apt_sites.cover_image_url` 5컬럼군은 100% NULL (5,809건) — backfill 별 sprint, 본 sprint 는 chain 추가만 (backfill 시 즉시 우선 사용 가능).
+
+#### C5 — Stock logo fallback chain (`src/app/(main)/stock/StockClient.tsx`)
+- 두 호출 지점: `s.thumbnail ?? s.logo_url ?? getClearbitLogoUrl(s.symbol) ?? og-square`.
+- `stockLogo.ts` 의 `getClearbitLogoUrl` 활용 — US 50 대 종목 도메인 매핑 우선.
+- onError 시 letter avatar div (background + initials) — 무한 루프 방지 sibling display swap 그대로.
+
+#### M5/M6 — fallback infrastructure (`src/lib/thumbnail-fallback.ts`)
+- `redevThumb` 이미 존재 (thumbnail_url → og-square OG generator). chain category `apt` 로 통일.
+- `constructorLogo(row)` 신규 추가: DB `logo_url` → CONSTRUCTOR_DOMAINS clearbit 매핑 (10개 시공사) → null. 컴포넌트는 null 일 때 letter avatar 직접 렌더.
+- 본 sprint 에선 백필 cron 활성화 X (별 sprint 백로그).
+
+### 검증
+- `npx tsc --noEmit` exit 0.
+- `npm run build` 클린, 558+ pages 컴파일 성공.
+- 잔여 `og-chart` 참조: route 파일 1건 (`console.error` 식별자 문자열) 만 남음.
+- prod 배포 후 확인 항목:
+  - `/api/og?test=1` HEAD 200 (or static brand image redirect — 둘 다 정상).
+  - Vercel 로그 5분 — `/api/og-chart 404` 0건 (callsite 0).
+  - `https://kadeora.app/apt/{slug}` HTML — `BAILOUT_TO_CLIENT_SIDE_RENDERING` 사라짐, h1+본문 SSR.
+  - `https://kadeora.app/stock/005930` HTML — `<img>` 태그 ≥ 1 (s.logo_url ?? clearbit ?? og-square).
+- `SELECT * FROM v_admin_image_coverage` — 본 sprint 영향 미미 (코드 fallback 위주, DB 변경 0).
+
+### Architecture Rule 준수
+- DB 변경 0 (모바일 클로드 사전 적용분 보존).
+- backup 컬럼 (cover_image_backup_s214, og_image_url_backup_s214) DROP 금지 — 그대로.
+- s209 트래커 직접 import 정책 보존.
+- s211/s212 어드민 위젯 (Watchlist/SignupFunnel) 보존.
+- s213 블로그 본문 재배치 보존.
+- s214 sitemap fix / s215 / s216 P0 데이터 fix 보존 — rebase 로 위에 cherry-pick.
+
+### 백로그 (별 sprint)
+- C4 후속: `apt_sites.cover_image_url` 5,809건 backfill (다음 sprint).
+- C5 후속: stock_logo_queue backfill cron 활성화 (1,798건).
+- M3: `image_health_checks` 모니터링 cron 가동 (현재 0건).
+- M4: `og_cards_updated_at` 신선도 추적 활성화.
+- M5: `redevelopment_projects.thumbnail_url` 35건 backfill cron.
+- M6: `constructors.logo_url` 20개 시공사 logo 시스템 (clearbit 자동 또는 수동 큐).
+- s213 백로그 그대로: `sub-seed-v3` cron 도입부 다양화.
+- s217 후속: `v_admin_image_coverage` view 어드민 메인 위젯 임베드.
+
+---
+
 # 카더라 STATUS — 세션 216: P0 데이터 신뢰성 회복 (2026-05-01)
 
 ## 세션 216 — admin metric + sitemap area-hubs + fetcher dedup 일괄 fix (S214.5+S215.5 audit 후속)

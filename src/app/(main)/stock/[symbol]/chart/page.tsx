@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: `${s.name}(${symbol}) 주가 차트 — 카더라`,
       description: `${s.name} 현재가 ${p} · 일봉·주봉·이동평균 차트 · 52주 고저`,
       url: `${SITE_URL}/stock/${symbol}/chart`,
-      images: [{ url: `${SITE_URL}/api/og-chart?symbol=${symbol}`, width: 1200, height: 630 }],
+      images: [{ url: `${SITE_URL}/api/og-square?title=${encodeURIComponent(s.name + ' ' + symbol)}&category=stock`, width: 630, height: 630 }],
     },
     other: {
       'naver:written_time': new Date().toISOString(),
