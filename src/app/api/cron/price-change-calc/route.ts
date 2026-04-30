@@ -2,81 +2,36 @@ import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
 
-export const maxDuration = 120;
+export const maxDuration = 60;
 
 /**
  * price_change_1y 자동 계산 크론
  * 매주 월요일 06:30 (vercel.json)
- * apt_transactions 기반 1년 가격 변동률 JS 계산
+ *
+ * s217: 기존 in-memory JS 집계 (apt_transactions 621k row × 4 윈도우 fetch + Promise.allSettled
+ * 단지별 update) 가 PostgREST 1k cap 으로 데이터 잘림 + 메모리 부담 + 단지별 update 수천 round-trip.
+ * → SQL aggregate RPC `calc_apt_price_change_1y()` 단일 호출로 전환.
+ *
+ * RPC 동작 (apt_transactions idx_apt_tx_name_date_cover 인덱스 활용):
+ *   Phase 1: 최근 3개월 (≥2건) vs 12-15개월 전 (≥2건) → AVG 비교
+ *   Phase 2: 최근 6개월 (≥1건) vs 12-18개월 전 (≥1건) → Phase 1 미커버 단지만
+ *   |change_pct| < 200 필터 (이상치 제거)
+ *   apt_complex_profiles UPDATE 단일 트랜잭션
  */
 export async function GET() {
   const result = await withCronLogging('price-change-calc', async () => {
     const sb = getSupabaseAdmin();
-    const now = new Date();
-    const fmt = (d: Date) => d.toISOString().slice(0, 10);
-    const recent3m = fmt(new Date(now.getTime() - 90 * 86400000));
-    const recent6m = fmt(new Date(now.getTime() - 180 * 86400000));
-    const past12m = fmt(new Date(now.getTime() - 365 * 86400000));
-    const past15m = fmt(new Date(now.getTime() - 456 * 86400000));
-    const past18m = fmt(new Date(now.getTime() - 548 * 86400000));
-
-    // Phase 1: 최근 3개월 + 12~15개월 전
-    const [{ data: rd }, { data: pd }] = await Promise.all([
-      sb.from('apt_transactions').select('apt_name, deal_amount').gte('deal_date', recent3m).gt('deal_amount', 0),
-      sb.from('apt_transactions').select('apt_name, deal_amount').gte('deal_date', past15m).lt('deal_date', past12m).gt('deal_amount', 0),
-    ]);
-
-    const avg = (arr: number[]) => arr.reduce((a, b) => a + b, 0) / arr.length;
-    const group = (data: any[]) => {
-      const m = new Map<string, number[]>();
-      for (const t of data) { const a = m.get(t.apt_name) || []; a.push(t.deal_amount); m.set(t.apt_name, a); }
-      return m;
+    const { data, error } = await (sb as any).rpc('calc_apt_price_change_1y');
+    if (error) throw new Error(error.message);
+    const row = Array.isArray(data) ? data[0] : data;
+    return {
+      processed: row?.updated_count ?? 0,
+      metadata: {
+        updated: row?.updated_count ?? 0,
+        phase1: row?.phase1_count ?? 0,
+        phase2: row?.phase2_count ?? 0,
+      },
     };
-
-    const rMap = group(rd || []), pMap = group(pd || []);
-    const updates: { name: string; change: number }[] = [];
-
-    for (const [name, rp] of rMap) {
-      if (rp.length < 2) continue;
-      const pp = pMap.get(name);
-      if (!pp || pp.length < 2) continue;
-      const pAvg = avg(pp);
-      if (pAvg <= 0) continue;
-      const chg = Math.round((avg(rp) - pAvg) / pAvg * 1000) / 10;
-      if (Math.abs(chg) < 200) updates.push({ name, change: chg });
-    }
-
-    // Phase 2: 완화 (6개월/18개월, 1건+) — Phase 1 미처리만
-    const [{ data: r6d }, { data: p18d }] = await Promise.all([
-      sb.from('apt_transactions').select('apt_name, deal_amount').gte('deal_date', recent6m).gt('deal_amount', 0),
-      sb.from('apt_transactions').select('apt_name, deal_amount').gte('deal_date', past18m).lt('deal_date', past12m).gt('deal_amount', 0),
-    ]);
-    const r6 = group(r6d || []), p18 = group(p18d || []);
-    const done = new Set(updates.map(u => u.name));
-
-    for (const [name, rp] of r6) {
-      if (done.has(name)) continue;
-      const pp = p18.get(name);
-      if (!pp || pp.length < 1) continue;
-      const pAvg = avg(pp);
-      if (pAvg <= 0) continue;
-      const chg = Math.round((avg(rp) - pAvg) / pAvg * 1000) / 10;
-      if (Math.abs(chg) < 200) updates.push({ name, change: chg });
-    }
-
-    // 배치 업데이트
-    let updated = 0;
-    for (let i = 0; i < updates.length; i += 50) {
-      const batch = updates.slice(i, i + 50);
-      const results = await Promise.allSettled(
-        batch.map(u => (sb as any).from('apt_complex_profiles')
-          .update({ price_change_1y: u.change, updated_at: new Date().toISOString() })
-          .eq('apt_name', u.name))
-      );
-      updated += results.filter(r => r.status === 'fulfilled').length;
-    }
-
-    return { processed: updates.length, metadata: { updated, phase1: done.size, phase2: updates.length - done.size } };
   });
 
   return NextResponse.json({ ok: true, ...result });
