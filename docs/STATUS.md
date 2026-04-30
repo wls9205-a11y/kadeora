@@ -1,3 +1,56 @@
+# 카더라 STATUS — 세션 213: 블로그 상세 본문 우선 재배치 (2026-05-01)
+
+## 세션 213 — `/blog/[slug]` 본문 집중 방해 요소 최하단 이동
+
+### 배경 (모바일 클로드 사전 분석)
+- 8147 published 검토 — title/slug-prefix80/source_ref hard duplicate 0건. content 첫 500자 정규화 동일은 1그룹 4건 (id 36765/37114/37116/37570 "골든렉시움 강원·충북·전북") 인데 1500자부터 본문 다름. **hard duplicate 아니므로 unpublish 불필요.** "sub-seed-v3 cron 도입부 boilerplate 다양화" 만 백로그.
+- 본문 집중 방해 요소 분포: tags 100% / tldr 99% / key_points 86% / source_ref 9%. 거의 모든 글이 H1 직후 TLDR + key_points + 태그 누적되어 본문 시작까지 스크롤이 멀었음.
+
+### 변경 (`src/app/(main)/blog/[slug]/page.tsx` 단일 파일)
+**본문 위 (간소화)**:
+- H1 유지.
+- H1 직후 컴팩트 한 줄 메타 — `날짜 · N분 읽기 · 👀 view_count` (작은 폰트, var(--text-tertiary)).
+- BlogEarlyGateTeaser 유지 (게이트 트리거 전 무료 N/3 인디케이터 노출 필수).
+- (이하 그대로) 시리즈 카드 / cover_image / TOC inline / BigEventCharts.
+- **본문 즉시 시작** (BlogGatedRenderer / BlogTossGate / SmartSectionGate).
+
+**본문 위에서 제거 (+ 본문 끝으로 이동)**:
+- `<BlogHeroExtras tldr keyPoints />` (TLDR + key_points hero 박스): 제거 → 본문 끝 `<details>` collapsible default-closed 안으로 이동. summary "📝 요약 보충 자료 (TLDR · 핵심 요약)".
+- 큰 저자 카드 (40px avatar + name + meta + view bar): 제거 → 컴팩트 한 줄 메타로 대체. author 정보는 본문 끝 "이 글 정보" 섹션의 일부로 재구성.
+- 태그 pills (#tag1 #tag2 …) 본문 위 행: 제거. 태그는 article 외부 최하단 `BlogFooterMeta` (line 1284)에서 이미 노출 → 중복 제거.
+- `<BlogMentionCard placement="top" />`: 제거. `placement="bottom"` 만 본문 직후에 1회 유지 (spec 의 "관련글/추천 단지 카드 기존 위치 유지").
+
+**본문 끝 신설 (`읽기 완료` 메시지 직후 / `참고자료` 직전)**:
+- "📝 요약 보충 자료" `<details>` (collapsible, default closed) — BlogHeroExtras 그대로 wrap.
+- "이 글 정보" 작은 카드 — 작성자 (avatar 24px + name + role) / 카테고리 라벨 + 서브카테고리 / source_type chip. 모두 한 줄 inline-flex.
+
+**보존**:
+- 광고 슬롯 (현재 본문 위에 광고 없음 — 추가 X).
+- BlogReadGate / SmartSectionGate / BlogGatedRenderer / BlogTossGate gating 로직.
+- StickySignupBar (별 컴포넌트, 위치 변경 X).
+- BlogFooterMeta (line 1284, article 외부, 태그 + 일자).
+- 면책 details (line 1244, article 외부).
+- 댓글 / RelatedBlogsSection / BlogEndCTA / 시리즈 navigation 위치.
+
+### Architecture Rule 준수
+- DB 변경 X.
+- structured data (Article schema) keywords 는 `tags` 컬럼 그대로 사용 — DOM 위치 무관.
+- meta_description / meta_keywords HTML `<head>` 그대로 — SEO 영향 없음.
+- 본문 DOM 더 위로 → LCP 개선 가능, 본문 weight 증가 가능.
+- s209 트래커 직접 import 정책 보존 — 본 변경 무관.
+
+### 검증
+- `npm run type-check` 0 errors.
+- `npm run build` 클린, 558/558 pages.
+- 본문이 cover_image 직후 즉시 시작 — 첫 viewport 안에 본문 첫 문단 보일 것 (메타 카드/TLDR 카드 X).
+- 봇 SSR 100% / 로그인 유저 BlogTossGate / 비로그인 SmartSectionGate gating 모두 보존.
+
+### 백로그
+- **`sub-seed-v3` cron 도입부 boilerplate 다양화**: 4건의 "골든렉시움 region variant" 가 첫 500자 동일. cron 도입부 템플릿에 region/lifecycle/builder 등 시드 변수 더 노출해 1500자 안에 자연 분기되도록.
+- /blog/[slug] floating TOC 가 있다면 H2 만 노출되게 조정 (이번 sprint X).
+
+---
+
 # 카더라 STATUS — 세션 212: /admin 관심 등록 위젯 (watchlist + leadgen) (2026-04-30)
 
 ## 세션 212 — `/admin` 메인에 WatchlistWidget 추가 (s211 SignupFunnelWidget 패턴 그대로)

@@ -890,47 +890,26 @@ export default async function BlogDetailPage({ params }: Props) {
             {post.rewritten_at && <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 'var(--radius-xl)', background: 'var(--success-bg)', color: 'var(--success)' }}>UP</span>}
           </div>
           {/* 제목 */}
-          <h1 style={{ fontSize: 'var(--fs-2xl)', fontWeight: 900, color: 'var(--text-primary)', lineHeight: 1.5, margin: '0 0 18px', wordBreak: 'keep-all', letterSpacing: '-0.5px' }}>{post.title}</h1>
-          {/* Session D: TLDR + key_points hero (7,040건 100% backfill 완료) */}
-          <BlogHeroExtras
-            tldr={(post as any).tldr}
-            keyPoints={(post as any).key_points}
-            readingMinutes={(post as any).reading_minutes}
-            readingTimeMinFallback={post.reading_time_min}
-          />
-          {/* Early Gate Teaser — 무조건 마운트 (클라이언트에서 hasGated/isAuth 체크)
-              서버 조건 분기가 SSR/ISR 캐시와 맞물려 mount probe 0 유발하므로 제거 */}
+          <h1 style={{ fontSize: 'var(--fs-2xl)', fontWeight: 900, color: 'var(--text-primary)', lineHeight: 1.5, margin: '0 0 10px', wordBreak: 'keep-all', letterSpacing: '-0.5px' }}>{post.title}</h1>
+          {/* s213: H1 직후 컴팩트 메타 한 줄 — 큰 저자 카드 / TLDR / key_points / 태그 pills 모두 본문 종료 후 "이 글 정보" 섹션으로 이동.
+              독자가 페이지 열자마자 본문 첫 문단까지 스크롤이 짧아짐. */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 10, fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 16 }}>
+            <time dateTime={post.published_at || post.created_at || new Date().toISOString()}>
+              {new Date(post.published_at || post.created_at || Date.now()).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}
+            </time>
+            <span aria-hidden>·</span>
+            <span>{readingTimeMin}분 읽기</span>
+            <span aria-hidden>·</span>
+            <span>👀 {(post.view_count ?? 0).toLocaleString()}</span>
+          </div>
+          {/* Early Gate Teaser — 무조건 마운트 (클라이언트에서 hasGated/isAuth 체크).
+              게이트 트리거 전에 무료 N/3 인디케이터를 노출해야 하므로 본문 위 유지. */}
           <BlogEarlyGateTeaser
             slug={slug}
             hasGatedContent={!!(post as any).has_gated_content}
             isLoggedInHint={isLoggedIn}
           />
-          {/* 저자 카드 */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', borderRadius: 'var(--radius-card)', background: 'var(--bg-hover)', border: '1px solid var(--border)' }}>
-            <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--brand-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, color: 'var(--brand)', flexShrink: 0 }}>
-              {(post.author_name || '카더라').charAt(0)}
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>{post.author_name || '카더라 부동산팀'}</div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8, fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>
-                <time dateTime={post.published_at || post.created_at || new Date().toISOString()}>{new Date(post.published_at || post.created_at || Date.now()).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}</time>
-                <span>{readingTimeMin}분 읽기</span>
-                <span>👀 {(post.view_count ?? 0).toLocaleString()}</span>
-              </div>
-            </div>
-            <div style={{ textAlign: 'right', flexShrink: 0 }}>
-              <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--brand)' }}>{(post.view_count ?? 0).toLocaleString()}</div>
-              <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 1 }}>조회</div>
-            </div>
-          </div>
         </div>
-
-        {/* 태그 — 필 스타일 */}
-        {(post.tags ?? []).length > 0 && (
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 14 }}>
-            {(post.tags ?? []).map((t: string) => <Link key={t} href={`/blog?q=${encodeURIComponent(t)}`} style={{ fontSize: 12, padding: '4px 12px', borderRadius: 'var(--radius-xl)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-tertiary)', textDecoration: 'none', fontWeight: 400 }}>#{t}</Link>)}
-          </div>
-        )}
 
         {seriesInfo && (() => {
           const total = seriesInfo.posts.length;
@@ -978,8 +957,7 @@ export default async function BlogDetailPage({ params }: Props) {
           );
         })()}
 
-        {/* 블로그 내 언급된 종목/단지 → 하위 페이지 유도 카드 (상단, 풍부 버전) */}
-        <BlogMentionCard tags={post.tags ?? []} category={post.category} sourceRef={post.source_ref} title={post.title} placement="top" />
+        {/* s213: BlogMentionCard placement="top" 제거 — 본문 위에 외부 link 카드 누적이 본문 도달 지연. 본문 직후 placement="bottom" 1회로 충분. */}
 
         {/* s184: "관련 이미지 N장" 섹션 제거 — AI 생성 + 무관 스톡사진 혼재로 콘텐츠 가치 0. */}
         {/* s184: BlogSocialBar 제거 — 본문 직후 ShareButtons 1세트로 통합. */}
@@ -1121,6 +1099,63 @@ export default async function BlogDetailPage({ params }: Props) {
           )}
         </div>
         )}
+
+        {/* s213: 요약 보충 자료 — TLDR + 핵심 요약. 본문 위에서 끝으로 이동, default 접힘. */}
+        {((post as any).tldr || (Array.isArray((post as any).key_points) && (post as any).key_points.length > 0)) && (
+          <details style={{ marginTop: 'var(--sp-md)', padding: '10px 14px', borderRadius: 'var(--radius-md)', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
+            <summary style={{ cursor: 'pointer', fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', listStyle: 'none' }}>
+              📝 요약 보충 자료 (TLDR · 핵심 요약)
+            </summary>
+            <div style={{ marginTop: 12 }}>
+              <BlogHeroExtras
+                tldr={(post as any).tldr}
+                keyPoints={(post as any).key_points}
+                readingMinutes={(post as any).reading_minutes}
+                readingTimeMinFallback={post.reading_time_min}
+              />
+            </div>
+          </details>
+        )}
+
+        {/* s213: 이 글 정보 — 작성자 / 카테고리 / 출처. 태그는 BlogFooterMeta(article 외부)에서 노출. */}
+        <section
+          aria-label="이 글 정보"
+          style={{
+            marginTop: 'var(--sp-md)', padding: '12px 14px',
+            borderRadius: 'var(--radius-md)',
+            background: 'var(--bg-surface)', border: '1px solid var(--border)',
+            fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.7,
+          }}
+        >
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
+            {/* 작성자 */}
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+              <span aria-hidden style={{
+                width: 24, height: 24, borderRadius: '50%',
+                background: 'var(--brand-bg)', color: 'var(--brand)',
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 11, fontWeight: 700, flexShrink: 0,
+              }}>{(post.author_name || '카더라').charAt(0)}</span>
+              <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{post.author_name || '카더라 부동산팀'}</span>
+              {post.author_role && <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>· {post.author_role}</span>}
+            </span>
+            {/* 카테고리 / 서브카테고리 */}
+            <span aria-hidden style={{ color: 'var(--text-tertiary)' }}>|</span>
+            <span>
+              {(({ stock: '주식 분석', apt: '청약 분석', unsold: '미분양 분석', finance: '재테크', general: '생활' } as Record<string, string>)[post.category] || post.category)}
+              {(post as any).sub_category && <span style={{ color: 'var(--text-tertiary)' }}> · {(post as any).sub_category}</span>}
+            </span>
+            {/* 출처 type */}
+            {post.source_type && (
+              <>
+                <span aria-hidden style={{ color: 'var(--text-tertiary)' }}>|</span>
+                <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 'var(--radius-xl)', background: 'var(--bg-hover)', color: 'var(--text-tertiary)' }}>
+                  {post.source_type}
+                </span>
+              </>
+            )}
+          </div>
+        </section>
 
         {/* [L0-5] 참고자료 — source_ref 기반 외부 링크 블록 */}
         {(() => {
