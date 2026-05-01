@@ -1,3 +1,105 @@
+# 카더라 STATUS — 세션 221: s220 v5 follow-up — 카드 정보 풍부화 + sigungu 렌더 제거 + referer_section backfill + s220 RPC 컬럼 mismatch 일괄 fix (2026-05-01)
+
+## 세션 221 — 사용자 명시 요구 2건 충족 + 미완 1건 fix + s220 RPC 부트스트랩
+
+### 배경
+s220 v5 메인 리디자인 구조는 정상이나, 사용자 명시 요구 2건 위반 + 미완 1건 잔존:
+1. 시군구 ("기장군"/"서귀포시" 등) 가 카드/feed 에 그대로 노출 — **사용자 요구 (turn 2): "시군구 중에 군 구 까지 표현될 필요는 없어"** 위반
+2. 카드 다이어트 (5 필드 / 5 필드) — **사용자 요구 (turn 3): "카드 다이어트가 아닌 반대로 카드자체는 정보가 꽤 풍부 했으면 좋겠는데"** 위반
+3. s220 마이그이 `signup_attempts.referer_section` 컬럼만 추가 + INSERT/UPDATE 어디서도 안 함 → dead code
+
+추가로, s220 마이그 자체가 prod 미적용 + 미테스트라 다수 SQL 컬럼명 mismatch 잔존 — `get_main_page_data` RPC 가 호출 시 즉시 throw → 메인 페이지가 항상 EMPTY_DATA fallback 으로만 렌더되고 있었음 (UX 빈 상태로 SEO 만 작동).
+
+### 변경 (트랙 4)
+
+#### Track A — sigungu 렌더 제거 (3 컴포넌트)
+- `src/components/main/SubscriptionDdayRail.tsx:147` — `[it.region, it.sigungu].filter(Boolean).join(' ')` → `it.region` 단독
+- `src/components/main/ListingHotPicks.tsx:53` — `{item.region} {item.sigungu}` → `{item.region}`
+- `src/components/main/ActivityFeed.tsx:34` — `${t.apt_name} ${t.region} ${t.sigungu} …` → `${t.apt_name} ${t.region} …`
+- `types.ts` 의 `sigungu` 필드는 보존 (RPC 반환 구조 유지, 다른 페이지 활용 가능)
+- 다른 main 컴포넌트 (TodayHeroCard / MapView / MarketSignalCard / ConstructionStockRail / TodayBriefList / WatchlistSection / MainLayout / RegionFilterChips) 는 sigungu 렌더 사용 0건 — 추가 변경 불필요
+
+#### Track B — 카드 정보 풍부화
+**B1 SubscriptionDdayRail (5 → 9 필드, 폭 168 → 178px):**
+- 추가 필드: 시공사 (`builder`) · 평형 (`sizes` ㎡) · 세대수 + 입주예정 (`total_units` + `move_in_ym` YYYYMM 포맷) · 특징 chip (`feature_tags` 최대 4개) · 청약 일정 (`청약 5/4~5/7` 강조 색)
+- 예상 경쟁률: 카드 우상단 overlay badge (`예상 1,402:1`)
+- 비어있는 영역은 fallback hidden (cron backfill 후 자동 표시)
+- 이미지 (og_image_url) 보존 + 정보 영역 expand 절충
+
+**B2 ListingHotPicks (5 → 7 필드, padding 8 → 9px):**
+- 추가 필드: 시공사 + 총세대수 (`{builder} · {total_units}세대`) · 평형 (`sizes` ㎡) · 입주예정 (`move_in_ym`) · 잔여 (`remaining_units` warning 색) / 미분양 시 할인율 (`-{discount_pct}% 할인` danger 색)
+- 분양가 + 상태 라벨 같은 row 그대로
+
+**B3 RPC 보강 (`get_main_page_data` redefine):**
+- `subscriptions` JSON: + `feature_tags` (text[]) · `move_in_ym` (`mvn_prearnge_ym`) · `sizes` (`house_type_info` jsonb 의 `type` 필드 파싱: `084.0000A` → `84A`)
+- `hot_listings` JSON: + `move_in_ym` (`move_in_date`) · `sizes` (현재 `[]` — 후속 cron backfill)
+- 신규 마이그: `supabase/migrations/20260501_main_v5_richness_s221.sql`
+
+**B4 types.ts 업데이트:**
+- `MainSubscription`: `apt_id` `number` → `string` (apt_sites.id 가 uuid), + `feature_tags`/`move_in_ym`/`sizes` 필드
+- `MainListing`: `id` `number` → `string` (uuid), + `move_in_ym`/`sizes` 필드
+- `MainConstructionStock.related_apts.id`: `number` → `string`
+- `WatchlistItem.apt.id`: `number` → `string`
+- `src/components/main/WatchlistAddButton.tsx`: `aptId: number` → `aptId: string`
+- `src/app/api/watchlist/route.ts`: `getAptId` integer 검증 → uuid 정규식 (s220 의 `Number(body.apt_id)` 버그 fix)
+
+#### Track C — referer_section dead code 살리기
+- `src/app/auth/callback/route.ts`: `signup_attempts` UPDATE + INSERT 둘 다에 `referer_section: source` 추가. source 와 동일값으로 backfill (cta_name === referer_section). 별도 from 파라미터는 over-engineering 으로 skip.
+
+#### Track D — s220 RPC 부트스트랩 + 일괄 fix (사전 작업)
+모바일 클로드 브리프에 따르면 s220 마이그 적용은 별도 sprint. 본 sprint 에서 적용하면서 s220 의 미테스트 결함 다수 발견 — fix 일괄 처리:
+
+**적용한 마이그 4개 (Supabase MCP `apply_migration`):**
+1. `main_v5_redesign_20260501` — 누락 컬럼 ALTER (apt_subscriptions: expected_competition/feature_tags · apt_sites: remaining_units/discount_pct · redevelopment_projects: next_milestone_date · signup_attempts: referer_section) + `user_apt_watchlist` 테이블 + RLS 정책. **`apt_id` 타입은 `uuid` 로 정정 (s220 SQL 의 `bigint` 는 apt_sites.id 실제 타입과 mismatch).**
+2. `main_v5_redesign_rpcs_20260501` — get_apt_3y_trend / add_to_watchlist / remove_from_watchlist / get_user_watchlist (`p_apt_id uuid`)
+3. `main_v5_richness_s221` — get_main_page_data redefine
+4. `main_v5_richness_s221_columnfix` + `main_v5_richness_s221_brieffix` — 다음 mismatch 일괄 fix:
+   - `subscriptions` 절: `ORDER BY + LIMIT` 가 `jsonb_agg` 외부에 있어 GROUP BY 충돌 → CTE (`picked`) 로 분리
+   - `apt_transactions.region` → `region_nm`
+   - `unsold_apts.sigungu/total_households/unsold_households/discount_pct` → `sigungu_nm/tot_supply_hshld_co/tot_unsold_hshld_co/null` (discount_pct 컬럼 자체 미존재, `discount_info` jsonb 만 존재)
+   - `big_event_registry.region_nm/title/subtitle/cover_image_url/priority/is_active` 6 컬럼 모두 mismatch (실제 컬럼: `region_sido/name/...`) → big_event 절 비활성화 (`v_big_event := NULL`) → EXPIRING fallback 으로 자동 연결
+   - `blog_posts.summary` → `excerpt`
+   - `stock_quotes.is_active = true` 가드 추가
+
+**검증 (Supabase MCP `execute_sql`):**
+- `get_main_page_data('부산')` → subscriptions 1건 (기장 이진캐스빌 포레, sigungu="기장군" 파싱, sizes=[], feature_tags=[], expected_competition=null — backfill 대기)
+- `get_main_page_data(NULL)` → hot_listings 6 / transactions 6 / unsold 4 / redev 2 / briefs 3 — 9 섹션 모두 정상 반환
+
+### 검증
+- `npx tsc --noEmit --skipLibCheck` exit 0 ✓
+- `npm run build` 클린, `/` row: `┌ ƒ /` (1.26 kB / 232 kB, **Dynamic SSR — Rule #17 보존, s220 동일 사이즈**)
+- **로컬 dev `curl -A "...Yeti/1.1..." http://localhost:3000/?region=busan`** (env 없어 EMPTY_DATA fallback 상태):
+  - `BAILOUT_TO_CLIENT_SIDE_RENDERING`: **0** ✓
+  - `aria-busy="true"`: **0** ✓
+  - h1: 1, h2: 9, section: 10
+  - sigungu 텍스트 (기장군/서귀포시/강릉시/고성군/삼척시): **0** ✓ (Track A 성공)
+  - **s219/Rule #17 회귀 0건**
+
+### Architecture Rule 준수 (s217~220 회귀 방지)
+- ClientShell 14 컴포넌트 ssr:false 보존 (s217 그대로)
+- ToastProvider/AuthProvider 직접 import 보존 (s217 그대로)
+- (main)/loading.tsx 삭제 상태 유지 (s219b)
+- `(main)` 그룹 + `/` Suspense/loading.tsx 추가 0건 (Rule #17)
+- 단일 RPC await + cookies + searchParams 자동 dynamic 패턴 보존 (s220)
+- backup 컬럼 (`og_image_url_backup_s218`/`cover_image_backup_s214`) DROP 0건
+- daily_create_limit / 블로그 데이터 / profiles.points / CSP middleware 변경 0건
+
+### 백로그 (별 sprint cron)
+- `apt_subscriptions.feature_tags` 추출 cron — 본문/지구단위계획 키워드 매칭 (조망/역세권/학군/숲세권 등)
+- `apt_subscriptions.expected_competition` 계산 RPC — 지난 청약 결과 (competition_rate_1st/2nd) 기반 추산
+- `apt_sites.remaining_units` backfill — 분양현황 API/스크래핑
+- `apt_sites.discount_pct` backfill — 미분양 단지 분양가 인하 모니터링
+- `apt_sites.move_in_date` 정규화 — 자유 형식 → YYYYMM
+- `apt_sites.sizes` 컬럼 신설 + backfill — 또는 RPC 가 `apt_subscriptions.house_type_info` join 으로 derive
+- `big_event_registry` RPC 매핑 복원 — title/subtitle/cover_image_url 컬럼명 통합 후 재활성화
+
+### 다음 sprint 잔여 (s220 백로그 그대로)
+- WatchlistItem.sparkline_30d 채우기 (현재 빈 배열 — apt_transactions 30일 fill)
+- 다른 (main) 페이지 OG 1순위 swap (apt/area/redev/region/builder/compare/complex/diagnose/map/ranking/search/theme)
+- 모바일 OAuth dropped_step=oauth_start 50%+ 직접 진단
+
+---
+
 # 카더라 STATUS — 세션 220: 메인 페이지 v5 리디자인 — 9섹션 + 3 OAuth + 추적중 단지 + Rule #17 (2026-05-01)
 
 ## 세션 220 — 트래픽 우선순위 9섹션 재배열 + Suspense-free SSR

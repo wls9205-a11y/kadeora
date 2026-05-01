@@ -31,7 +31,7 @@ export default function ActivityFeed({ transactions, unsold, redev }: Props) {
     ...transactions.map<FeedItem>((t) => ({
       kind: 'transaction',
       date: t.deal_date,
-      text: `${t.apt_name} ${t.region || ''} ${t.sigungu || ''} ${fmtAmount(t.deal_amount)} (${t.deal_date})`,
+      text: `${t.apt_name} ${t.region || ''} ${fmtAmount(t.deal_amount)} (${t.deal_date})`,
     })),
     ...unsold.map<FeedItem>((u) => ({
       kind: 'unsold',

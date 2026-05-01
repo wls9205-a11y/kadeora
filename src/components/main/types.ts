@@ -8,37 +8,42 @@ export type MainRegion = 'busan' | 'seoul' | 'gyeonggi' | 'incheon' | 'daegu' | 
 
 export interface MainSubscription {
   id: number;
-  apt_id: number | null;            // apt_sites.id (bigint) — watchlist 매핑용
+  apt_id: string | null;            // apt_sites.id (uuid) — watchlist 매핑용
   slug: string | null;              // apt_sites.slug
   name: string;                     // house_nm
   region: string | null;            // region_nm
-  sigungu: string | null;
+  sigungu: string | null;           // RPC 반환 보존, 렌더 X (s221 — 사용자 요구: 군/구 표현 X)
   builder: string | null;           // constructor_nm
-  total_units: number | null;
+  total_units: number | null;       // tot_supply_hshld_co (세대수)
   price_min: number | null;
   price_max: number | null;
   rcept_bgnde: string | null;       // 청약 시작
   rcept_endde: string | null;       // 청약 종료
-  dday: number;                     // 종료일 - 오늘 (0 = 오늘 마감, -1 = 내일 마감 X 가능)
+  dday: number;                     // 종료일 - 오늘 (0 = 오늘 마감)
   og_image_url: string | null;
-  expected_competition: number | null; // 예상 경쟁률 (없으면 null)
+  expected_competition: number | null; // 예상 경쟁률 (cron backfill 대기, 없으면 null)
+  feature_tags: string[];           // 특징 태그 (조망/역세권/학군 등 — cron backfill 대기, 없으면 [])
+  move_in_ym: string | null;        // 입주예정 YYYYMM (mvn_prearnge_ym)
+  sizes: string[];                  // 평형 옵션 (house_type_info 파싱 — 예: ['74','84','108'])
 }
 
 export interface MainListing {
-  id: number;                       // apt_sites.id
+  id: string;                       // apt_sites.id (uuid)
   slug: string;
   name: string;
   region: string | null;
-  sigungu: string | null;
+  sigungu: string | null;           // RPC 반환 보존, 렌더 X (s221 — 사용자 요구: 군/구 표현 X)
   builder: string | null;
   total_units: number | null;
-  remaining_units: number | null;   // 분양중 잔여 (없으면 null)
+  remaining_units: number | null;   // 분양중 잔여 (cron backfill 대기, 없으면 null)
   price_min: number | null;
   price_max: number | null;
   status: 'active' | 'unsold' | 'closed' | string | null;
   og_image_url: string | null;
   content_score: number | null;
-  discount_pct: number | null;      // 미분양 할인율 (없으면 null)
+  discount_pct: number | null;      // 미분양 할인율 (cron backfill 대기, 없으면 null)
+  move_in_ym: string | null;        // 입주예정 (move_in_date YYYYMM)
+  sizes: string[];                  // 평형 옵션 (현재 [], 후속 cron backfill)
 }
 
 export interface MainTransaction {
@@ -100,7 +105,7 @@ export interface MainConstructionStock {
   name: string;                     // 시공사명
   change_pct: number;
   sparkline: number[];              // 최근 7일 가격 배열
-  related_apts: Array<{ id: number; name: string; slug: string }>;
+  related_apts: Array<{ id: string; name: string; slug: string }>;
 }
 
 export interface MainBrief {
@@ -125,7 +130,7 @@ export interface MainPageData {
 }
 
 export interface WatchlistItem {
-  apt: { id: number; name: string; slug: string };
+  apt: { id: string; name: string; slug: string };
   current_price: number | null;
   change_pct_30d: number | null;
   sparkline_30d: number[];

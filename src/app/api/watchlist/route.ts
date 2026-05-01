@@ -5,11 +5,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase-server';
 
-async function getAptId(req: NextRequest): Promise<number | null> {
+// s221: apt_sites.id 가 uuid 라 string 으로 받음 (s220 number 가정 버그)
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+async function getAptId(req: NextRequest): Promise<string | null> {
   try {
     const body = await req.json();
-    const id = Number(body?.apt_id);
-    return Number.isFinite(id) && id > 0 ? id : null;
+    const id = String(body?.apt_id || '');
+    return UUID_RE.test(id) ? id : null;
   } catch {
     return null;
   }

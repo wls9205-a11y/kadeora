@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation';
 
 interface Props {
   mode: 'add' | 'remove';
-  aptId: number;
+  aptId: string;
   onSuccess?: () => void;
 }
 

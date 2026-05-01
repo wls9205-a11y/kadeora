@@ -118,12 +118,14 @@ export async function GET(request: Request) {
       .maybeSingle();
 
     if (existingAttempt?.id) {
+      // s221: source 를 referer_section 에도 그대로 backfill (s220 이 컬럼만 추가하고 누락)
       await (admin as any).from('signup_attempts').update({
         oauth_callback_at: nowIso,
         profile_created_at: rpcOk ? nowIso : null,
         success: rpcOk,
         onboarding_skipped: true,
         redirect_path: safeRedirect,
+        referer_section: source,
         error_message: rpcOk ? null : 'frictionless_rpc_failed',
       }).eq('id', existingAttempt.id);
     } else {
@@ -134,6 +136,7 @@ export async function GET(request: Request) {
         oauth_callback_at: nowIso,
         profile_created_at: rpcOk ? nowIso : null,
         onboarding_skipped: true,
+        referer_section: source,
         error_message: rpcOk ? null : 'frictionless_rpc_failed',
       });
     }
