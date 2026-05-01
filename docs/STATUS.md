@@ -1,3 +1,81 @@
+# 카더라 STATUS — 세션 222: s220 cleanup — /apt defaultRegion IP geolocation fix + Supabase URL/og-chart not-a-bug 진단 (2026-05-01)
+
+## 세션 222 — IP geolocation fix + 진단 2건
+
+### 배경 (모바일 클로드 prod 직접 fetch 검증)
+s221 까지 회복 검증 완료. 모바일 클로드가 prod chunk minified JS 파싱 + RSC payload 직접 검사로 cleanup 후보 4건 제기:
+- H1: apt page chunk 에 `kadeora.supabase.co` 하드코딩
+- H4: /apt RSC payload 에 `defaultRegion:"서울"` 박힘 — 미국 iad1 IP 였는데 서울 fallback 인지, 진짜 하드코딩인지 진단 필요
+- og-chart 시간당 ~10건 호출 잔존 — s217 9곳 교체 후에도
+- 누적 백로그 정리
+
+### 진단 결과 (코드 변경 0)
+
+#### Track A: kadeora.supabase.co 하드코딩 — **not-a-bug**
+- `ripgrep 'kadeora.supabase.co' src/` → **0건**
+- `ripgrep 'createBrowserClient' src/` → **1곳**: `src/lib/supabase-browser.ts:12`
+  - 이미 `process.env.NEXT_PUBLIC_SUPABASE_URL!` / `process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!` 사용
+- Next.js 빌드 시 `process.env.NEXT_PUBLIC_*` 값을 inline 해 minified JS 에 풀어 박는 게 표준 동작 (모바일 클로드 brief 본인 명시: "환경변수 사용해도 풀어 박히는 게 정상")
+- anon key payload 의 `ref="tezftxakuwhsclarprlz"` 가 vanity 도메인 `kadeora.supabase.co` 와 같은 프로젝트 가리킴 — 작동도 정상
+
+#### Track C: og-chart 잔존 호출처 — **not-a-bug (코드 단)**
+- `ripgrep 'og-chart' src/` → **route 파일 1건만** (`src/app/api/og-chart/route.tsx:140` `console.error("[og-chart]", ...)` 식별자 문자열)
+- 다른 src 위치 0건. `docs/` (SEO_FINAL_WORK_PLAN/SERP_DOMINATION_PLAN/SERP_TOTAL_DOMINATION) 의 og-chart 언급은 미래 plan 문서 참조 (코드 영향 X)
+- `public/robots.txt` 의 `Allow: /api/og-chart` 5곳 — route 자체는 보존 정책이라 의도적
+- prod 시간당 ~10건 호출은 **CDN 캐시된 구 청크** (s217 이전 빌드) 또는 외부 인덱스/검색엔진 stale 링크 — 자연 소멸 (TTL 만료 후 0)
+- 추가 변경 0건
+
+### 변경 (코드 단)
+
+#### Track B: /apt defaultRegion IP geolocation fix
+**원인**: `src/lib/region-detection.ts:27` 의 `return '서울'` fallback. 다음 케이스 모두 "서울" 강제:
+- `x-vercel-ip-country !== 'KR'` (외국 IP — 모바일 클로드 iad1, 봇, 관리자)
+- `x-vercel-ip-country-region` 미존재 또는 `IP_REGION_MAP` 미매칭
+- 정적 prerender 컨텍스트 (`headers()` throw)
+
+**부산 사용자 영향**: KR-26 매핑은 정상 작동했지만, 매핑 실패/header 누락 케이스에서도 "서울" 잘못 표시 회귀 가능.
+
+**수정**:
+- `src/lib/region-detection.ts`:
+  - 반환 타입 `Promise<string>` → `Promise<string | null>`
+  - `x-vercel-ip-country !== 'KR'` 명시 가드 → `null`
+  - 매칭 실패 / header 누락 / catch 모두 `null`
+  - IP_REGION_MAP 자체는 그대로 (KR-11~KR-50 17개 시도 ISO 3166-2 정확)
+- `src/components/apt/RegionHero.tsx`:
+  - props `defaultRegion: string` → `string | null`
+  - `selected` state 초기값 `defaultRegion ?? KR_REGIONS_17[0]` (서울 — picker 동작 위해 첫 옵션)
+  - `<option>` "(현재 지역)" 마킹은 `defaultRegion !== null` 일 때만
+  - 하단 안내 문구 분기:
+    - 추정 OK → `IP 기반으로 "X"을 기본 선택했습니다.`
+    - 추정 불가 → `지역을 자동 추정하지 못했습니다. 위에서 지역을 선택하세요.`
+- `src/app/(main)/apt/page.tsx`: 변경 없음 (await 결과 그대로 props 전달, 새 nullable 타입 자동 호환)
+
+### 검증
+- `npx tsc --noEmit --skipLibCheck` exit 0 ✓
+- `npm run build` 클린:
+  - `┌ ƒ /` (1.26 kB / 232 kB) — Dynamic SSR 보존, s221 동일
+  - `├ ƒ /apt` (9.51 kB / 295 kB) — Dynamic SSR 보존
+- 모든 s217~s221 회귀 가드 보존 (ClientShell 14 ssr:false / Toast+Auth 직접 import / (main)+/ Suspense·loading 0건)
+
+### Architecture Rule 준수
+- DB 변경 0 (백업 컬럼 `*_backup_s214`/`*_backup_s218` 그대로)
+- ClientShell 정책 / loading.tsx 정책 / s213 블로그 layout / s211/s212 어드민 위젯 mount 위치 보존
+- CSP middleware 변경 0
+- 신규 마이그 0
+
+### 누적 백로그 (별 sprint 후보)
+- 이미지 백필: cover_image_url 5,809 / stock_logo 1,798 / constructor_logo 20 / redev_thumb 35
+- image_health_checks 모니터링 cron 가동
+- og_cards_updated_at 신선도 추적
+- sub-seed-v3 cron 도입부 다양화
+- /api/og 라우트 timeout 진단 (Edge runtime / font fetch)
+- 다른 (main) 페이지 OG 1순위 swap (apt/area/redev/region/builder/compare/complex/diagnose/map/ranking/search/theme)
+- s221 RPC 데이터 backfill: feature_tags / expected_competition / remaining_units / discount_pct / sizes
+- big_event_registry 컬럼명 통합 후 RPC big_event 절 재활성화
+- WatchlistItem.sparkline_30d 채우기 (apt_transactions 30일 fill)
+
+---
+
 # 카더라 STATUS — 세션 221: s220 v5 follow-up — 카드 정보 풍부화 + sigungu 렌더 제거 + referer_section backfill + s220 RPC 컬럼 mismatch 일괄 fix (2026-05-01)
 
 ## 세션 221 — 사용자 명시 요구 2건 충족 + 미완 1건 fix + s220 RPC 부트스트랩

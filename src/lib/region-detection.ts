@@ -12,9 +12,16 @@ const IP_REGION_MAP: Record<string, string> = {
   'KR-49': '제주',
 };
 
-export async function detectDefaultRegion(): Promise<string> {
+// s222: 한국 외 IP / 매칭 실패 시 '서울' 로 fallback 하지 않음.
+//  - 이전 동작: 부산 사용자에게도 "현재 지역: 서울" 잘못 표시 / 외국 봇·관리자에게도 서울 강제
+//  - 변경: country !== 'KR' 또는 region 매칭 실패 → null 반환. 호출처가 "IP 추정 불가" UI 처리.
+//  - x-vercel-ip-country / -country-region 은 prod 에서만 박힘 (로컬 dev 는 없음 → null)
+export async function detectDefaultRegion(): Promise<string | null> {
   try {
     const h = await headers();
+    const country = h.get('x-vercel-ip-country');
+    // 한국 외 IP — 한국 시도 fallback 부적절. null 로 "추정 불가" 표시.
+    if (country && country !== 'KR') return null;
     // Vercel 은 x-vercel-ip-country-region 에 ISO 3166-2 두 자리 코드 만 (앞에 KR- 없이) 보낸다.
     const ipRegion = h.get('x-vercel-ip-country-region');
     if (ipRegion) {
@@ -22,7 +29,7 @@ export async function detectDefaultRegion(): Promise<string> {
       if (mapped) return mapped;
     }
   } catch {
-    // headers() 가 사용 불가능한 컨텍스트 (정적 prerender 등) — fallback
+    // headers() 가 사용 불가능한 컨텍스트 (정적 prerender 등) — fallback null
   }
-  return '서울';
+  return null;
 }

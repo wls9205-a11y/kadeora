@@ -6,13 +6,15 @@ import { KR_REGIONS_17, getStoredRegion, setStoredRegion } from '@/lib/region-st
 import RegionPicker from '@/components/apt/RegionPicker';
 
 interface Props {
-  defaultRegion: string;
+  // s222: null = IP 추정 불가 (한국 외 IP / 매칭 실패). UI 가 "(현재 지역)" 마킹 생략.
+  defaultRegion: string | null;
 }
 
 export default function RegionHero({ defaultRegion }: Props) {
   const router = useRouter();
   const [pickerOpen, setPickerOpen] = useState(false);
-  const [selected, setSelected] = useState<string>(defaultRegion);
+  // defaultRegion 이 null 이어도 select 는 첫 옵션 (서울) 으로 채워야 picker 동작 가능.
+  const [selected, setSelected] = useState<string>(defaultRegion ?? KR_REGIONS_17[0]);
 
   // mount 시 localStorage 에 region 이 있으면 즉시 redirect — 첫 paint 후에 client 에서만 실행.
   useEffect(() => {
@@ -64,7 +66,7 @@ export default function RegionHero({ defaultRegion }: Props) {
           >
             {KR_REGIONS_17.map((r) => (
               <option key={r} value={r}>
-                {r}{r === defaultRegion ? ' (현재 지역)' : ''}
+                {r}{defaultRegion !== null && r === defaultRegion ? ' (현재 지역)' : ''}
               </option>
             ))}
           </select>
@@ -107,7 +109,9 @@ export default function RegionHero({ defaultRegion }: Props) {
         </div>
 
         <p style={{ fontSize: 10, color: 'var(--text-tertiary)', margin: '14px 0 0', opacity: 0.7 }}>
-          IP 기반으로 “{defaultRegion}”을 기본 선택했습니다. 다른 지역을 보려면 위 버튼/드롭다운을 사용하세요.
+          {defaultRegion !== null
+            ? `IP 기반으로 “${defaultRegion}”을 기본 선택했습니다. 다른 지역을 보려면 위 버튼/드롭다운을 사용하세요.`
+            : '지역을 자동 추정하지 못했습니다. 위에서 지역을 선택하세요.'}
         </p>
       </section>
 
