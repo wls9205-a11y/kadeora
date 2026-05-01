@@ -12,6 +12,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { trackCtaClick } from '@/lib/cta-track';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
+import { getVariant, trackAbView, trackAbClick } from '@/lib/analytics/abTest';
+
+const EXPERIMENT = 'blog_early_teaser_v223';
 
 interface TeaserConfig {
   teaser_title: string;
@@ -54,6 +57,11 @@ export default function BlogEarlyGateTeaser({ slug, enabled = true, hasGatedCont
   const [isAuth, setIsAuth] = useState<boolean | null>(typeof isLoggedInHint === 'boolean' ? isLoggedInHint : null);
   const [hasGated, setHasGated] = useState<boolean | null>(typeof hasGatedProp === 'boolean' ? hasGatedProp : null);
   const viewFired = useRef(false);
+  // s222 G (blog_early_teaser_v223): A control / B 희소성 카피
+  const [variant, setVariant] = useState<'A' | 'B' | null>(null);
+  useEffect(() => {
+    setVariant(getVariant(EXPERIMENT, ['A', 'B']) as 'A' | 'B');
+  }, []);
 
   // 🔍 DEBUG probe — 마운트 즉시 log_teaser_debug('mount')
   useEffect(() => {
@@ -160,9 +168,10 @@ export default function BlogEarlyGateTeaser({ slug, enabled = true, hasGatedCont
   }, [config, isAuth, enabled, hasGated]);
 
   useEffect(() => {
-    if (!config || isAuth !== false || !hasGated || viewFired.current) return;
+    if (!config || isAuth !== false || !hasGated || viewFired.current || variant === null) return;
     viewFired.current = true;
     fireView(config.cta_name);
+    trackAbView(EXPERIMENT, variant, { slug, has_gated: hasGated });
     // 🔍 DEBUG — view fired
     try {
       const sb = createSupabaseBrowser();
@@ -187,15 +196,23 @@ export default function BlogEarlyGateTeaser({ slug, enabled = true, hasGatedCont
 
   const handleClick = () => {
     trackCtaClick({ cta_name: config.cta_name, category: 'signup', page_path: typeof window !== 'undefined' ? window.location.pathname : undefined });
+    if (variant) trackAbClick(EXPERIMENT, variant, { slug });
     if (typeof window !== 'undefined') {
       window.location.href = `/login?source=${config.cta_name}&redirect=${encodeURIComponent(`/blog/${slug}`)}`;
     }
   };
 
+  // s222 G B variant: 희소성 카피로 teaser_title 오버라이드.
+  // locked_count = teaser_bullets.length 가 정확한 잠금 섹션 수 (DB config 기준). 0/null 이면 5 fallback.
+  const lockedCount = config.teaser_bullets.length > 0 ? config.teaser_bullets.length : 5;
+  const displayTitle = variant === 'B'
+    ? `이 글의 핵심 ${lockedCount}개는 가입자만 볼 수 있어요`
+    : config.teaser_title;
+
   return (
     <div
       role="group"
-      aria-label={config.teaser_title}
+      aria-label={displayTitle}
       style={{
         margin: '20px 0',
         padding: '18px 18px 16px',
@@ -206,7 +223,7 @@ export default function BlogEarlyGateTeaser({ slug, enabled = true, hasGatedCont
       }}
     >
       <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary, #e5e7eb)', marginBottom: 12, wordBreak: 'keep-all' }}>
-        {config.teaser_title}
+        {displayTitle}
       </div>
       {config.teaser_bullets.length > 0 && (
         <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 14px', display: 'grid', gap: 6 }}>
