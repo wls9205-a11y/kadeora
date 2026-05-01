@@ -214,12 +214,16 @@ export async function GET(req: NextRequest) {
       }
 
       // 가입 귀속 (signup_source)
-      const { data: signupSourceRaw } = await sb.from('profiles')
-        .select('signup_source')
-        .neq('is_seed', true)
-        .not('signup_source', 'is', null);
+      // s218 (S215.5 #32): profiles 가입자 1k 돌파 임박 — fetchBatched 로 사전 fix.
+      const signupSourceRaw = await fetchBatched<{ signup_source: string | null }>((off, lim) =>
+        sb.from('profiles').select('signup_source')
+          .neq('is_seed', true)
+          .not('signup_source', 'is', null)
+          .order('created_at', { ascending: true }).range(off, off + lim - 1),
+        50000,
+      );
       const signupSources: Record<string, number> = {};
-      for (const p of (signupSourceRaw || [])) {
+      for (const p of signupSourceRaw) {
         const s = p.signup_source || 'direct';
         signupSources[s] = (signupSources[s] || 0) + 1;
       }

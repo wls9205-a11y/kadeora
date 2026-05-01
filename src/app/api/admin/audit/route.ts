@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { requireAdmin } from '@/lib/admin-auth';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { fetchBatched } from '@/lib/db/fetchBatched';
 
 export const maxDuration = 120;
 
@@ -241,11 +242,15 @@ export async function GET(req: NextRequest) {
       .limit(500);
 
     // 최근 7일 크론 로그 (고유 크론 이름별 마지막 실행)
-    const { data: logs7d } = await (sb as any).from('cron_logs')
-      .select('cron_name, status, created_at, duration_ms')
-      .gte('created_at', since7d)
-      .order('created_at', { ascending: false })
-      .limit(2000);
+    // s218 (S214.5 #21): PostgREST 1k cap 우회 — fetchBatched 로 cron_logs 7일 전수.
+    const logs7d = await fetchBatched<{ cron_name: string; status: string; created_at: string; duration_ms: number | null }>(
+      (off, lim) => (sb as any).from('cron_logs')
+        .select('cron_name, status, created_at, duration_ms')
+        .gte('created_at', since7d)
+        .order('created_at', { ascending: false })
+        .range(off, off + lim - 1),
+      20000,
+    );
 
     const cronStats: Record<string, { runs: number; success: number; failed: number; lastRun: string; lastStatus: string; avgDuration: number; totalProcessed: number; totalUpdated: number }> = {};
 
