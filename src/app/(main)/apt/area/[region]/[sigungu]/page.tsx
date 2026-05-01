@@ -1,4 +1,5 @@
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { fetchBatched } from '@/lib/db/fetchBatched';
 import { SITE_URL } from '@/lib/constants';
 import Link from 'next/link';
 import type { Metadata } from 'next';
@@ -26,12 +27,16 @@ const GEO: Record<string, { code: string; lat: string; lng: string }> = {
 
 const fetchData = cache(async (region: string, sigungu: string) => {
   const sb = getSupabaseAdmin();
-  const { data } = await (sb as any).from('apt_complex_profiles')
-    .select('apt_name, dong, age_group, latest_sale_price, latest_jeonse_price, jeonse_ratio, sale_count_1y, rent_count_1y, built_year, avg_sale_price_pyeong, latitude, longitude, total_households, price_change_1y')
-    .eq('region_nm', region).eq('sigungu', sigungu)
-    .not('age_group', 'is', null)
-    .order('sale_count_1y', { ascending: false }).limit(2000);
-  return data || [];
+  // s221 (S214.5): PostgREST 1k cap 우회 — fetchBatched. 시군구별 단지가 1k 초과해도 전수.
+  const data = await fetchBatched<any>((off, lim) =>
+    (sb as any).from('apt_complex_profiles')
+      .select('apt_name, dong, age_group, latest_sale_price, latest_jeonse_price, jeonse_ratio, sale_count_1y, rent_count_1y, built_year, avg_sale_price_pyeong, latitude, longitude, total_households, price_change_1y')
+      .eq('region_nm', region).eq('sigungu', sigungu)
+      .not('age_group', 'is', null)
+      .order('sale_count_1y', { ascending: false }).range(off, off + lim - 1),
+    5000,
+  );
+  return data;
 });
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

@@ -1,4 +1,5 @@
 import { createSupabaseServer } from '@/lib/supabase-server';
+import { fetchBatched } from '@/lib/db/fetchBatched';
 import { SITE_URL } from '@/lib/constants';
 import Link from 'next/link';
 import type { Metadata } from 'next';
@@ -49,13 +50,15 @@ export default async function ComplexPage({ searchParams }: { searchParams: Prom
   for (const r of (ageRows || [])) ageMap.set(r.age_group, r);
 
   // 프로필 조회
-  let pq = (sb as any).from('apt_complex_profiles')
-    .select('apt_name, sigungu, region_nm, dong, age_group, latest_sale_price, latest_jeonse_price, latest_monthly_deposit, latest_monthly_rent, jeonse_ratio, sale_count_1y, rent_count_1y, built_year, avg_sale_price_pyeong, latitude, longitude, images')
-    .not('age_group', 'is', null)
-    .order('sale_count_1y', { ascending: false });
-  if (selectedRegion && REGIONS.includes(selectedRegion)) pq = pq.eq('region_nm', selectedRegion);
-  const { data: profiles } = await pq.limit(1000);
-  const allProfiles: any[] = profiles || [];
+  // s221 (S214.5): boundary 1000 → fetchBatched 5000. 인기 단지 list 가 1001번째부터 누락되던 문제 해소.
+  const allProfiles = await fetchBatched<any>((off, lim) => {
+    let pq = (sb as any).from('apt_complex_profiles')
+      .select('apt_name, sigungu, region_nm, dong, age_group, latest_sale_price, latest_jeonse_price, latest_monthly_deposit, latest_monthly_rent, jeonse_ratio, sale_count_1y, rent_count_1y, built_year, avg_sale_price_pyeong, latitude, longitude, images')
+      .not('age_group', 'is', null)
+      .order('sale_count_1y', { ascending: false });
+    if (selectedRegion && REGIONS.includes(selectedRegion)) pq = pq.eq('region_nm', selectedRegion);
+    return pq.range(off, off + lim - 1);
+  }, 5000);
 
   // 연차별 통계 (현재 필터 기준)
   const localAgeStats = new Map<string, { cnt: number; totalPrice: number }>();
