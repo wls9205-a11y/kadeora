@@ -1,3 +1,76 @@
+# 카더라 STATUS — 세션 220: admin 대시보드 P0 + North Star + CTA + Funnel (2026-05-01)
+
+## 세션 220 — admin/dashboard 5건 P0 + admin/v2/seo/audit 정리 + North Star + CTA 성능 + 가입 퍼널
+
+> 사용자 brief 에서는 "s218" 로 호칭, 본 repo 의 s218 슬롯은 다른 세션이 점유 (s217.5/s217.6 desktop + 모바일 클로드 s219 UUID fix). 본 sprint 는 s220 으로 표기. 의도는 s218 admin 대시보드 batch.
+
+### 배경
+S214.5 + S215.5 audit 의 admin 트랙 잔여 P0 5건 + 신규 데이터 가시성 (North Star / CTA / Funnel) 한 세션 처리.
+
+### 변경 (커밋 4개)
+
+#### B. RPC 5개 (Supabase MCP, 별도 적용)
+- `admin_cta_performance(window_days int)` — cta_name 별 view/click/dismiss + CTR + last_event
+- `admin_north_star_metrics()` — DAU/signups/PV by category/CTA clicks 의 today/yesterday/7d + 7d sparkline json
+- `admin_signup_funnel(window_days int)` — 7단계 (visit→cta_view→cta_click→oauth_start→oauth_callback→signup_complete→onboarded) + 단계별 conv_from_prev
+- `admin_blog_category_distribution()` — 60k blog_posts SQL GROUP BY (in-memory 부담 회피)
+- `admin_apt_sites_type_distribution()` — apt_sites SQL GROUP BY
+
+모두 SECURITY DEFINER + STABLE.
+
+#### C. admin/dashboard 5건 1k cap fix (S214.5 #7-12)
+- page_views today + week (visitor_id/path/referrer): fetchBatched (50k/200k target)
+- apt_sites scoreStats (site_type/content_score/sitemap_wave): fetchBatched (5,809 row 전수)
+- blog_posts.rewritten_at: head:true 추가 (60k row 전송 제거, count 만)
+- posts.category 분포: fetchBatched (~7k)
+- blog_posts.category 60k 분포: admin_blog_category_distribution() RPC
+
+#### D. admin/v2 + admin/seo/crawl + admin/audit 잔여 fix
+- admin/v2:217 signup_source 분포: fetchBatched (profiles 1k 임박 사전 fix, S215.5 #32)
+- admin/seo/crawl/page.tsx:22 봇 크롤 page_views 7일: .limit(5000) → fetchBatched (target 50k)
+- admin/audit/route.ts:248 cron_logs 7일: .limit(2000) → fetchBatched (target 20k)
+
+#### E. North Star + CTA + Funnel 컴포넌트 신설
+- `src/components/admin/NorthStarCard.tsx` — 4 KPI 카드 + 어제 대비 변동% + 7d sparkline SVG
+- `src/components/admin/CtaPerformanceTable.tsx` — 30일 CTA 표 (CTR 색상 코드: 녹/황/적)
+- `src/components/admin/SignupFunnel.tsx` — 7단계 가로 막대 + 최대 drop 자동 강조
+- `src/app/admin/page.tsx` — AdminShellV4 위에 3 컴포넌트 stack (V4 보존)
+
+### 첫 데이터 검증 (RPC 직접 실행)
+- **CTA 성능 (30d)**:
+  - action_bar: 5,129 view / 1 click = CTR 0.02% ❌ (broken)
+  - apt_alert_cta: 4,067 / 7 = 0.17% ❌
+  - blog_floating_bar: 1,496 / 0 = 0.00% ❌ (zero clicks)
+  - content_gate: 2,554 / 16 = 0.63%
+  - blog_early_teaser: 1,963 / 15 = 0.76%
+  - login_gate_apt_analysis: 1,424 / 9 = 0.63%
+
+- **Signup Funnel (7d)**:
+  - 9,043 visit → 2,865 cta_view (31.68%) → **38 cta_click (1.33% — 최대 drop)** → 25 oauth_start (65.79%) → 16 callback (64%) → 13 signup (81.25%) → 13 onboarded (100%)
+  - Bottleneck 명확: cta_view → cta_click 이 1.33% 만 통과. CTA UI/카피가 product 차원 문제.
+
+### Architecture Rule 준수
+- `(sb as any).from()` / `.rpc()` 패턴 그대로
+- middleware /admin 가드 + RPC SECURITY DEFINER (이중 방어)
+- vercel.json 변경 X (cron + headers + functions 모두 invariant)
+- /apt /apt-v2 /blog /stock 라우트 무손상
+
+### 다음 세션 plan
+- **S221**: 사용자 가시성 P0 (apt/map 4건 5000, apt/area 2000, apt/complex 1000, stock/StockClient 1.8k, stock/data marketStats)
+- **S222**: cron 일괄 (sync-apt-sites 3건, issue-detect, blog-complex-crosslink, blog-internal-links, monthly-market-report, seo-score-refresh, stock-hero-refresh, blog-series-assign + stock-theme-daily, blog-monthly-market, blog-weekly-market)
+- **S223**: Public API 3건 + admin/dashboard 추가 SQL view + push-broadcast 사전 fix
+- **S224+**: blog ISR 3-step (P0-A)
+
+### CTA 트랙 (별도 우선)
+S220 데이터로 broken CTA 명확:
+- `action_bar` (5K view, 1 click) — 즉시 점검 필요
+- `blog_floating_bar` (1.5K view, 0 click) — 클릭 이벤트 발화 자체 의심
+- `apt_alert_cta` (4K view, 7 click) — UI/카피 재검토
+
+CTA UX sprint 다음 1-2주 안 별도 세션.
+
+---
+
 # 카더라 STATUS — 세션 219: s217 후속 P0 3개 fix (UUID 라우팅 + main slot SSR + OG 1순위) (2026-05-01)
 
 > 모바일 클로드 brief 에서는 본 작업을 "s218" 로 호칭했으나, s218 sprint 번호는 title 회귀 + Cache-Control + sitemap 잔여 fix 가 먼저 점유. 본 sprint 는 s219 로 표기. DB backup 컬럼명 (`*_backup_s218`) 은 모바일 클로드 명명 그대로 보존 (롤백 호환).
