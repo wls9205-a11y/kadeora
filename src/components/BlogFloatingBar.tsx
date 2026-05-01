@@ -40,7 +40,9 @@ export default function BlogFloatingBar({ slug, title, category }: Props) {
   const loginUrl = `/login?redirect=${encodeURIComponent(pathname)}&source=floating_bar`;
 
   const handleSave = async () => {
-    trackCTA('click', 'floating_save', { page_path: pathname });
+    // s221: cta_name 통일 — view 와 동일한 'blog_floating_bar' 사용. (이전: 'floating_save')
+    // properties.action 으로 액션 종류 보존.
+    trackCTA('click', 'blog_floating_bar', { page_path: pathname, action: 'save' });
     if (!userId) { window.location.href = loginUrl; return; }
     try {
       await fetch('/api/bookmark', {
@@ -53,13 +55,13 @@ export default function BlogFloatingBar({ slug, title, category }: Props) {
   };
 
   const handleAlert = () => {
-    trackCTA('click', 'floating_alert', { page_path: pathname, category });
+    trackCTA('click', 'blog_floating_bar', { page_path: pathname, category, action: 'alert' });
     if (!userId) { window.location.href = loginUrl; return; }
     window.location.href = `/notifications/settings`;
   };
 
   const handleShare = async () => {
-    trackCTA('click', 'floating_share', { page_path: pathname });
+    trackCTA('click', 'blog_floating_bar', { page_path: pathname, action: 'share' });
     if (navigator.share) {
       try { await navigator.share({ title, url: window.location.href }); setShared(true); } catch {}
     } else {
