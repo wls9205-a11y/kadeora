@@ -2,6 +2,7 @@ import LoginGate from '@/components/LoginGate';
 import type { Metadata } from 'next';
 import { SITE_URL } from '@/lib/constants';
 import { createSupabaseServer } from '@/lib/supabase-server';
+import { fetchBatched } from '@/lib/db/fetchBatched';
 import Link from 'next/link';
 import MapWrapper from './MapWrapper';
 import ShareButtons from '@/components/ShareButtons';
@@ -33,31 +34,51 @@ const REGIONS = ['서울','부산','대구','인천','광주','대전','울산',
 export default async function AptMapPage() {
   const sb = await createSupabaseServer();
 
-  const [subR, unsoldR, redevR, tradeR] = await Promise.all([
-    sb.from('apt_subscriptions').select('region_nm').gte('rcept_endde', new Date().toISOString().slice(0, 10)).limit(5000),
-    sb.from('unsold_apts').select('region_nm').eq('is_active', true).limit(5000),
-    sb.from('redevelopment_projects').select('region').eq('is_active', true).limit(5000),
-    sb.from('apt_transactions').select('region_nm').gte('deal_date', new Date(Date.now() - 90 * 86400000).toISOString().slice(0, 10)).limit(5000),
+  // s221 (S214.5): PostgREST 1k cap 우회 — fetchBatched 4건 (target 50k each).
+  // 메모리: 4 × 50k × 10B ≈ 2MB. 단일 컬럼 fetch 라 가벼움.
+  const today = new Date().toISOString().slice(0, 10);
+  const tradeFrom = new Date(Date.now() - 90 * 86400000).toISOString().slice(0, 10);
+  const [subData, unsoldData, redevData, tradeData] = await Promise.all([
+    fetchBatched<{ region_nm: string | null }>((off, lim) =>
+      sb.from('apt_subscriptions').select('region_nm').gte('rcept_endde', today)
+        .order('rcept_endde', { ascending: true }).range(off, off + lim - 1),
+      50000,
+    ),
+    fetchBatched<{ region_nm: string | null }>((off, lim) =>
+      sb.from('unsold_apts').select('region_nm').eq('is_active', true)
+        .order('id', { ascending: true }).range(off, off + lim - 1),
+      50000,
+    ),
+    fetchBatched<{ region: string | null }>((off, lim) =>
+      sb.from('redevelopment_projects').select('region').eq('is_active', true)
+        .order('id', { ascending: true }).range(off, off + lim - 1),
+      50000,
+    ),
+    fetchBatched<{ region_nm: string | null }>((off, lim) =>
+      sb.from('apt_transactions').select('region_nm').gte('deal_date', tradeFrom)
+        .order('deal_date', { ascending: true }).range(off, off + lim - 1),
+      200000,
+    ),
   ]);
 
   // Count by region
   const subByRegion: Record<string, number> = {};
   const unsoldByRegion: Record<string, number> = {};
   const redevByRegion: Record<string, number> = {};
-  (subR.data || []).forEach((r: any) => {
+  subData.forEach((r) => {
     const key = REGIONS.find(reg => (r.region_nm || '').startsWith(reg));
     if (key) subByRegion[key] = (subByRegion[key] || 0) + 1;
   });
-  (unsoldR.data || []).forEach((r: any) => {
+  unsoldData.forEach((r) => {
     const key = REGIONS.find(reg => (r.region_nm || '').startsWith(reg));
     if (key) unsoldByRegion[key] = (unsoldByRegion[key] || 0) + 1;
   });
-  (redevR.data || []).forEach((r: any) => {
+  redevData.forEach((r) => {
     const key = REGIONS.find(reg => (r.region || '').startsWith(reg));
     if (key) redevByRegion[key] = (redevByRegion[key] || 0) + 1;
   });
   const tradeByRegion: Record<string, number> = {};
-  (tradeR?.data || []).forEach((r: { region_nm: string | null }) => {
+  tradeData.forEach((r) => {
     const key = REGIONS.find(reg => (r.region_nm || '').startsWith(reg));
     if (key) tradeByRegion[key] = (tradeByRegion[key] || 0) + 1;
   });
