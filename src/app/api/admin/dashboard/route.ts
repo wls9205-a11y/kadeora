@@ -2,6 +2,7 @@ import { errMsg } from '@/lib/error-utils';
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
+import { fetchBatched } from '@/lib/db/fetchBatched';
 
 export const maxDuration = 30;
 
@@ -200,14 +201,23 @@ export async function GET(req: Request) {
         .order('created_at', { ascending: false }).limit(5);
 
       // 방문자 요약 (관리자 제외)
+      // s218 (S214.5 #7,8): PostgREST 1k cap 우회 — fetchBatched 로 page_views 전수 페이지네이션
       const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
       const adminIds = new Set(['265d8c3b-bd40-40c1-b7d2-bdde16a88204', 'b7b4dd42-4685-4ca6-9ee3-dfedf82e86f2']);
-      const [pvTodayR, pvWeekR] = await Promise.all([
-        sb.from('page_views').select('visitor_id').gte('created_at', todayStart),
-        sb.from('page_views').select('visitor_id, path, referrer').gte('created_at', weekAgo),
+      const [pvTodayData, pvWeekData] = await Promise.all([
+        fetchBatched<{ visitor_id: string }>((off, lim) =>
+          sb.from('page_views').select('visitor_id').gte('created_at', todayStart)
+            .order('created_at', { ascending: true }).range(off, off + lim - 1),
+          50000,
+        ),
+        fetchBatched<{ visitor_id: string; path: string | null; referrer: string | null }>((off, lim) =>
+          sb.from('page_views').select('visitor_id, path, referrer').gte('created_at', weekAgo)
+            .order('created_at', { ascending: true }).range(off, off + lim - 1),
+          200000,
+        ),
       ]);
-      const pvTodayFiltered = (pvTodayR.data || []).filter((v: any) => !adminIds.has(v.visitor_id));
-      const pvWeekFiltered = (pvWeekR.data || []).filter((v: any) => !adminIds.has(v.visitor_id));
+      const pvTodayFiltered = pvTodayData.filter((v) => !adminIds.has(v.visitor_id));
+      const pvWeekFiltered = pvWeekData.filter((v) => !adminIds.has(v.visitor_id));
       const todayPV = pvTodayFiltered.length;
       const todayUV = new Set(pvTodayFiltered.map((v: { visitor_id?: string }) => v.visitor_id)).size;
       const weekPV = pvWeekFiltered.length;
@@ -238,13 +248,18 @@ export async function GET(req: Request) {
       const cronFail = cronData.filter(c => c.status === 'failed').length;
 
       // content_score 분포 + SEO 현황
-      const { data: scoreStats } = await sb.from('apt_sites')
-        .select('site_type, content_score, sitemap_wave')
-        .eq('is_active', true);
+      // s218 (S214.5 #9): PostgREST 1k cap 우회 — fetchBatched 로 apt_sites 5,809 전수 집계
+      const scoreStats = await fetchBatched<{ site_type: string | null; content_score: number | null; sitemap_wave: number | null }>(
+        (off, lim) =>
+          sb.from('apt_sites').select('site_type, content_score, sitemap_wave')
+            .eq('is_active', true)
+            .order('id', { ascending: true }).range(off, off + lim - 1),
+        20000,
+      );
 
       const siteTypeBreakdown: Record<string, { count: number; avgScore: number; sitemapCount: number }> = {};
       let totalSitemap = 0;
-      for (const s of (scoreStats || [])) {
+      for (const s of scoreStats) {
         const t = s.site_type || 'unknown';
         if (!siteTypeBreakdown[t]) siteTypeBreakdown[t] = { count: 0, avgScore: 0, sitemapCount: 0 };
         siteTypeBreakdown[t].count++;
@@ -266,11 +281,13 @@ export async function GET(req: Request) {
       const anthropicCreditWarning = blogCronTotal > 0 && (blogCronFails / blogCronTotal) > 0.5;
 
       // 블로그 리라이팅 현황
-      const { data: blogStats } = await sb.from('blog_posts')
-        .select('rewritten_at', { count: 'exact' })
+      // s218 (S214.5 #10): head:true 추가 → 60k row 데이터 전송 제거, count 만 정확히 받음.
+      const blogRewrittenR = await sb.from('blog_posts')
+        .select('id', { count: 'exact', head: true })
         .eq('is_published', true)
         .not('rewritten_at', 'is', null);
-      const blogRewrittenPct = blogR.count ? Math.round(((blogStats?.length || 0) / blogR.count) * 100) : 0;
+      const blogRewrittenCount = blogRewrittenR.count ?? 0;
+      const blogRewrittenPct = blogR.count ? Math.round((blogRewrittenCount / blogR.count) * 100) : 0;
 
       // ── 추가 데이터: 어제 대비 + 인기 페이지 + 크론 상세 + 카테고리 분포 ──
       const yesterdayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1).toISOString();
@@ -289,9 +306,14 @@ export async function GET(req: Request) {
       const topPages = [...pathMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5).map(([path, count]) => ({ path, count }));
 
       // 카테고리별 게시글 분포 (전체)
-      const { data: catDist } = await sb.from('posts').select('category').eq('is_deleted', false);
+      // s218 (S214.5 #11): PostgREST 1k cap 우회 — fetchBatched (posts ~7k)
+      const catDist = await fetchBatched<{ category: string | null }>((off, lim) =>
+        sb.from('posts').select('category').eq('is_deleted', false)
+          .order('id', { ascending: true }).range(off, off + lim - 1),
+        20000,
+      );
       const catMap = new Map<string, number>();
-      (catDist || []).forEach((p: any) => { catMap.set(p.category || 'free', (catMap.get(p.category || 'free') || 0) + 1); });
+      catDist.forEach((p) => { catMap.set(p.category || 'free', (catMap.get(p.category || 'free') || 0) + 1); });
       const categoryDistribution = [...catMap.entries()].sort((a, b) => b[1] - a[1]).map(([category, count]) => ({ category, count }));
 
       // 크론 상세: 크론별 마지막 실행 + 24h records_created
@@ -312,18 +334,21 @@ export async function GET(req: Request) {
       const totalRecordsCreated = Object.values(cronSummary).reduce((s, v) => s + v.created, 0);
 
       // ── 추가: 블로그 생산 + 댓글 + 크론 카테고리 ──
-      const [blogTodayR, blogCatR, commentsTodayR, repliesR, blogQueueR, blogUnpubR] = await Promise.all([
+      // s218 (S214.5 #12): blog_posts 60k category 분포는 RPC SQL aggregate (fetchBatched 도 무거움).
+      const [blogTodayR, blogCatRpcR, commentsTodayR, repliesR, blogQueueR, blogUnpubR] = await Promise.all([
         sb.from('blog_posts').select('id', { count: 'exact', head: true }).eq('is_published', true).gte('published_at', todayStr),
-        sb.from('blog_posts').select('category').eq('is_published', true),
+        (sb as any).rpc('admin_blog_category_distribution'),
         sb.from('comments').select('id', { count: 'exact', head: true }).eq('is_deleted', false).gte('created_at', todayStart),
         sb.from('comments').select('id', { count: 'exact', head: true }).not('parent_id', 'is', null),
         sb.from('blog_posts').select('id', { count: 'exact', head: true }).eq('is_published', false),
         sb.from('blog_posts').select('id, content', { count: 'exact' }).eq('is_published', false).limit(500),
       ]);
 
-      // 블로그 카테고리 분포
+      // 블로그 카테고리 분포 (RPC 결과 → 객체 변환)
       const blogCatMap: Record<string, number> = {};
-      (blogCatR.data || []).forEach((b: any) => { blogCatMap[b.category || 'general'] = (blogCatMap[b.category || 'general'] || 0) + 1; });
+      ((blogCatRpcR as any)?.data || []).forEach((b: { category: string; count: number }) => {
+        blogCatMap[b.category || 'general'] = Number(b.count) || 0;
+      });
 
       // 크론 카테고리별 분류
       const cronByCategory: Record<string, { success: number; fail: number; total: number; created: number }> = {
