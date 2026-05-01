@@ -401,6 +401,29 @@
       "schedule": "0 9,21 * * *"
     }
   ],
+  "headers": [
+    { "source": "/login(/.*)?",         "headers": [{ "key": "Cache-Control", "value": "private, no-cache, no-store, max-age=0, must-revalidate" }] },
+    { "source": "/signup(/.*)?",        "headers": [{ "key": "Cache-Control", "value": "private, no-cache, no-store, max-age=0, must-revalidate" }] },
+    { "source": "/payment(/.*)?",       "headers": [{ "key": "Cache-Control", "value": "private, no-cache, no-store, max-age=0, must-revalidate" }] },
+    { "source": "/profile(/.*)?",       "headers": [{ "key": "Cache-Control", "value": "private, no-cache, no-store, max-age=0, must-revalidate" }] },
+    { "source": "/admin(/.*)?",         "headers": [{ "key": "Cache-Control", "value": "private, no-cache, no-store, max-age=0, must-revalidate" }] },
+    { "source": "/onboarding(/.*)?",    "headers": [{ "key": "Cache-Control", "value": "private, no-cache, no-store, max-age=0, must-revalidate" }] },
+    { "source": "/write(/.*)?",         "headers": [{ "key": "Cache-Control", "value": "private, no-cache, no-store, max-age=0, must-revalidate" }] },
+    { "source": "/notifications(/.*)?", "headers": [{ "key": "Cache-Control", "value": "private, no-cache, no-store, max-age=0, must-revalidate" }] },
+    { "source": "/settings(/.*)?",      "headers": [{ "key": "Cache-Control", "value": "private, no-cache, no-store, max-age=0, must-revalidate" }] },
+    { "source": "/blog/(.*)",           "headers": [{ "key": "Cache-Control", "value": "public, s-maxage=3600, stale-while-revalidate=86400" }] },
+    { "source": "/stock/(.*)",          "headers": [{ "key": "Cache-Control", "value": "public, s-maxage=120, stale-while-revalidate=600" }] },
+    { "source": "/apt/(.*)",            "headers": [{ "key": "Cache-Control", "value": "public, s-maxage=600, stale-while-revalidate=3600" }] },
+    { "source": "/feed/(.*)",           "headers": [{ "key": "Cache-Control", "value": "public, s-maxage=300, stale-while-revalidate=600" }] },
+    { "source": "/calc(/.*)?",          "headers": [{ "key": "Cache-Control", "value": "public, s-maxage=3600, stale-while-revalidate=86400" }] },
+    { "source": "/glossary(/.*)?",      "headers": [{ "key": "Cache-Control", "value": "public, s-maxage=3600, stale-while-revalidate=86400" }] },
+    { "source": "/daily/(.*)",          "headers": [{ "key": "Cache-Control", "value": "public, s-maxage=600, stale-while-revalidate=3600" }] },
+    { "source": "/sitemap/(.*)",        "headers": [{ "key": "Cache-Control", "value": "public, s-maxage=3600, stale-while-revalidate=86400" }] },
+    { "source": "/(.+)\\.xml",          "headers": [{ "key": "Cache-Control", "value": "public, s-maxage=3600, stale-while-revalidate=86400" }] },
+    { "source": "/robots.txt",          "headers": [{ "key": "Cache-Control", "value": "public, s-maxage=86400" }] },
+    { "source": "/(apt|blog|stock|hot|feed|discuss|search|grades|guide|faq|terms|privacy|refund|press)", "headers": [{ "key": "Cache-Control", "value": "public, s-maxage=300, stale-while-revalidate=600" }] },
+    { "source": "/",                    "headers": [{ "key": "Cache-Control", "value": "public, s-maxage=300, stale-while-revalidate=600" }] }
+  ],
   "functions": {
     "src/app/api/**/*.ts": {
       "maxDuration": 30
