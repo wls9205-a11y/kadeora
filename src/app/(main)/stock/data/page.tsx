@@ -35,11 +35,11 @@ export default async function StockDataPage() {
   const { count: totalPrices } = await (sb as any).from('stock_price_history').select('id', { count: 'exact', head: true });
 
   // 마켓별 종목수
-  const { data: marketStats } = await (sb as any).from('stock_quotes').select('market');
+  // s221 (S215.5 #5): PostgREST 1k cap → SQL aggregate RPC. 1,800+ 종목 정확 집계.
+  const { data: marketRows } = await (sb as any).rpc('stock_market_distribution');
   const marketCounts: Record<string, number> = {};
-  (marketStats ?? []).forEach((r: any) => {
-    const m = r.market || '기타';
-    marketCounts[m] = (marketCounts[m] || 0) + 1;
+  ((marketRows ?? []) as { market: string; count: number }[]).forEach((r) => {
+    marketCounts[r.market || '기타'] = Number(r.count) || 0;
   });
 
   const jsonLd = {

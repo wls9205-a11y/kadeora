@@ -108,8 +108,21 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
   const refresh = useCallback(async () => {
     try {
       const sb = (await import('@/lib/supabase-browser')).createSupabaseBrowser();
-      const { data } = await sb.from('stock_quotes').select('symbol, name, market, price, change_amt, change_pct, volume, market_cap, currency, sector, updated_at, is_active, page_views, comment_count').order('market_cap', { ascending: false });
-      if (data?.length) setStocks(data as unknown as Stock[]);
+      // s221 (S215.5 #6): PostgREST 1k cap 우회 — client-side batched fetch.
+      // stock_quotes 1,800+ 종목 전수 (이전엔 1k 만 받아 800여 종목 누락).
+      const cols = 'symbol, name, market, price, change_amt, change_pct, volume, market_cap, currency, sector, updated_at, is_active, page_views, comment_count';
+      const all: any[] = [];
+      const PAGE = 1000;
+      const MAX = 5000;
+      for (let off = 0; off < MAX; off += PAGE) {
+        const { data } = await sb.from('stock_quotes').select(cols)
+          .order('market_cap', { ascending: false, nullsFirst: false })
+          .range(off, off + PAGE - 1);
+        if (!data || data.length === 0) break;
+        all.push(...data);
+        if (data.length < PAGE) break;
+      }
+      if (all.length) setStocks(all as unknown as Stock[]);
     } catch (e) { if (process.env.NODE_ENV === 'development') console.warn('[Stock.refresh]', e); }
   }, []);
 
