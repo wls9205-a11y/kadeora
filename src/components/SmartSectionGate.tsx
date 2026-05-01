@@ -2,6 +2,10 @@
 import { usePathname } from 'next/navigation';
 import { useEffect, useState, useMemo } from 'react';
 import { trackCTA } from '@/lib/analytics';
+import { getVariant, trackAbView, trackAbClick } from '@/lib/analytics/abTest';
+import { createSupabaseBrowser } from '@/lib/supabase-browser';
+
+const EXPERIMENT = 'content_gate_v223';
 
 interface Props {
   htmlContent: string;
@@ -10,6 +14,8 @@ interface Props {
   userCount?: number;
   todaySignups?: number;
   aptName?: string;
+  /** s222 F: B variant 시 apt_region_recent_change(region, 7) 호출용. 미제공 시 전국. */
+  region?: string;
   /** 봇/로그인 유저는 부모에서 분기하여 이 컴포넌트 자체를 렌더하지 않는 것이 권장.
    *  안전장치로 isBot=true 면 게이트 없이 전문 렌더. */
   isBot?: boolean;
@@ -57,12 +63,20 @@ const DEFAULT_BENEFIT = {
 };
 
 export default function SmartSectionGate({
-  htmlContent, slug, category, userCount = 90, todaySignups = 0, isBot = false, freeReads = 3
+  htmlContent, slug, category, userCount = 90, todaySignups = 0, isBot = false, freeReads = 3, region
 }: Props) {
   const pathname = usePathname();
   // null = 판정 전 (SSR), false = 게이트 없이 전문, true = 게이트 적용
   const [shouldGate, setShouldGate] = useState<boolean | null>(null);
   const [bypassedThisSession, setBypassedThisSession] = useState(false);
+  // s222 F: A/B variant + 데이터 fetch
+  const [variant, setVariant] = useState<'A' | 'B' | null>(null);
+  const [regionData, setRegionData] = useState<{
+    region: string; change_pct: number | null; avg_won_diff: number | null;
+  } | null>(null);
+  useEffect(() => {
+    setVariant(getVariant(EXPERIMENT, ['A', 'B']) as 'A' | 'B');
+  }, []);
 
   // localStorage 기반 미터링: slug 별 첫 방문만 카운트, 30일 이상 된 항목 GC.
   useEffect(() => {
@@ -87,10 +101,33 @@ export default function SmartSectionGate({
   }, [slug, isBot, freeReads]);
 
   useEffect(() => {
-    if (shouldGate === true && !bypassedThisSession) {
+    if (shouldGate === true && !bypassedThisSession && variant !== null) {
       trackCTA('view', 'content_gate', { page_path: pathname, category });
+      trackAbView(EXPERIMENT, variant, { category, region: region ?? null });
     }
-  }, [shouldGate, bypassedThisSession, category, pathname]);
+  }, [shouldGate, bypassedThisSession, category, pathname, variant, region]);
+
+  // s222 F: B variant 시 지역 매매가 변동 데이터 fetch (1회)
+  useEffect(() => {
+    if (variant !== 'B' || shouldGate !== true) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const sb = createSupabaseBrowser();
+        const { data } = await (sb as any).rpc('apt_region_recent_change', {
+          p_region: region ?? null, p_window_days: 7,
+        });
+        if (cancelled || !data) return;
+        const d = data as { region: string; change_pct: number | string | null; avg_won_diff: number | string | null };
+        setRegionData({
+          region: d.region,
+          change_pct: d.change_pct === null || d.change_pct === undefined ? null : Number(d.change_pct),
+          avg_won_diff: d.avg_won_diff === null || d.avg_won_diff === undefined ? null : Number(d.avg_won_diff),
+        });
+      } catch { /* fallback to enhanced V1 */ }
+    })();
+    return () => { cancelled = true; };
+  }, [variant, shouldGate, region]);
 
   // 같은 세션에서 "나중에" 클릭 시 — sessionStorage 표시
   useEffect(() => {
@@ -161,6 +198,16 @@ export default function SmartSectionGate({
     trackCTA('dismiss', 'content_gate', { page_path: pathname, category });
   };
 
+  // s222 F: B variant 카피 (데이터 있으면 손실 회피, 없으면 enhanced V1 fallback).
+  // 데이터 임계: |change_pct| ≥ 0.5% — 너무 작은 변화는 fallback.
+  const useBLossCopy = variant === 'B' && regionData
+    && regionData.change_pct !== null
+    && Math.abs(regionData.change_pct) >= 0.5;
+  const useBFallback = variant === 'B' && !useBLossCopy;
+  const bWonDiffEok = regionData?.avg_won_diff != null
+    ? Math.abs(Math.round(regionData.avg_won_diff / 100) / 100)  // 만원 → 억원 (소수 2자리)
+    : null;
+
   return (
     <div className="blog-content" itemProp="articleBody">
       <div dangerouslySetInnerHTML={{ __html: visibleSection }} />
@@ -196,6 +243,36 @@ export default function SmartSectionGate({
                 ))}
               </div>
             </>
+          ) : useBLossCopy && regionData ? (
+            <>
+              <p style={{ fontSize: 14, fontWeight: 700, color: '#e2e8f0', lineHeight: 1.5, margin: '0 0 12px', textAlign: 'center' }}>
+                지난 주 {regionData.region} 평균 매매가 <span style={{ color: '#FEE500' }}>{Number(regionData.change_pct).toFixed(1)}%</span> 변동<br />
+                <span style={{ color: 'rgba(224,232,240,0.75)', fontWeight: 600, fontSize: 13 }}>
+                  {bWonDiffEok !== null ? `평균 ${bWonDiffEok}억원 차이` : '실거래가 큰 폭 변동 중'}
+                </span>
+              </p>
+              <div style={{ marginBottom: 16, fontSize: 12, color: 'rgba(224,232,240,0.75)', textAlign: 'center', lineHeight: 1.5 }}>
+                알림 없으면 다음 변동도 모르고 지나가요
+              </div>
+            </>
+          ) : useBFallback ? (
+            <>
+              <p style={{ fontSize: 14, fontWeight: 700, color: '#e2e8f0', lineHeight: 1.5, margin: '0 0 12px', textAlign: 'center' }}>
+                이 정보, 변하면 알아야 하지 않을까요?<br />
+                <span style={{ color: '#FEE500' }}>놓치면 다음에 다시 못 만나요</span>
+              </p>
+              <div style={{ marginBottom: 16 }}>
+                {benefit.bullets.map((b, i) => (
+                  <div key={i} style={{
+                    display: 'flex', alignItems: 'center', gap: 8,
+                    fontSize: 12, color: 'rgba(224,232,240,0.75)', padding: '4px 0',
+                  }}>
+                    <span style={{ color: '#22c55e', fontSize: 13 }}>✓</span>
+                    {b}
+                  </div>
+                ))}
+              </div>
+            </>
           ) : (
             <>
               <p style={{ fontSize: 14, fontWeight: 700, color: '#e2e8f0', lineHeight: 1.5, margin: '0 0 12px', textAlign: 'center' }}>
@@ -218,7 +295,10 @@ export default function SmartSectionGate({
 
           <a
             href={loginUrl}
-            onClick={() => trackCTA('click', 'content_gate', { page_path: pathname, category })}
+            onClick={() => {
+              trackCTA('click', 'content_gate', { page_path: pathname, category });
+              if (variant) trackAbClick(EXPERIMENT, variant, { category, region: region ?? null });
+            }}
             style={{
               display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'center', gap: 8,
               background: '#FEE500', color: '#191919', borderRadius: 8,
