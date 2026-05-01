@@ -1,3 +1,53 @@
+# 카더라 STATUS — 세션 221: 사용자 가시성 P0 + CTA tracking 통일 (2026-05-01)
+
+## 세션 221 — apt/map + apt/area + apt/complex + stock 일괄 + BlogFloatingBar tracking 통일
+
+> 사용자 brief "S221" 그대로 사용 (S220 admin 직후 다음 슬롯).
+
+### 배경
+S214.5 + S215.5 audit 의 **사용자 가시성 P0** 5건 (apt/map 4×5000, apt/area 2000, apt/complex 1000 boundary, stock/StockClient 1.8k, stock/data marketStats) 일괄 처리. 추가로 S220 에서 발견한 **CTA 트래킹 mismatch** (BlogFloatingBar 0% 오판) 정정.
+
+### 변경 (커밋 5개)
+
+#### B'. BlogFloatingBar tracking 통일
+**문제**: view 이벤트는 `blog_floating_bar`, click 이벤트는 `floating_save`/`floating_alert`/`floating_share` 로 분리 트래킹 → S220 admin 표에서 1,497 view / 0 click = 0% 로 오판. 실제로는 `floating_save`(5) + `floating_share`(1) = 6 click = **실 CTR 0.40%**.
+
+**수정**: handleSave/handleAlert/handleShare 의 `trackCTA` cta_name 모두 `'blog_floating_bar'` 로 통일, 액션 종류는 `properties.action` 으로 보존.
+
+**`action_bar` (5,129 view / 1 click)**: 활성 코드에 emitter 없음 — StickySignupBar 가 이미 대체 (s212/s213 era). views 는 캐시된 구버전 JS / SW 에서 오는 stale event. 코드 변경 0 (자연 소멸).
+
+#### D-1. apt/map 4건 fetchBatched
+- apt_subscriptions, unsold_apts, redevelopment_projects (각 50k target)
+- apt_transactions 90일 (200k target)
+- 단일 region 컬럼 fetch — 메모리 ~2MB total. 가벼움.
+
+#### D-2,3. apt/area + apt/complex
+- apt/area/[region]/[sigungu]/page.tsx:33 — `.limit(2000)` → `fetchBatched` (5k target). 강남구 등 1k 초과 시군구 단지 누락 해소.
+- apt/complex/page.tsx:57 — `.limit(1000)` boundary → `fetchBatched` (5k target). 1001번째부터 누락 시작 해소.
+
+#### D-4,5. stock/StockClient + stock/data
+- stock/StockClient.tsx:111 — client-side batched fetch loop (range 0-999 / 1000-1999 ...). MAX 5k ceiling. 1,800+ 종목 전수.
+- stock/data/page.tsx:38 — `stock_market_distribution()` SQL aggregate RPC (Supabase MCP 별도 적용). 결과: KOSDAQ 1016 / KOSPI 301 / NYSE 296 / NASDAQ 192 (총 1,805).
+
+### 신규 RPC (Supabase MCP, 별도 적용)
+- `stock_market_distribution()` — stock_quotes market 별 SQL GROUP BY
+
+### Architecture Rule 준수
+- (sb as any).from() 패턴 그대로
+- /apt-v2 무손상
+- /blog/[slug] force-dynamic 손대지 않음
+- vercel.json 변경 X
+
+### 다음 세션 plan
+- **S222**: cron 일괄 (S214.5 audit 의 cron 8-11건 — sync-apt-sites 3, issue-detect, blog-complex-crosslink, blog-internal-links, monthly-market-report, seo-score-refresh, stock-hero-refresh, blog-series-assign + stock-theme-daily, blog-monthly-market, blog-weekly-market)
+- **S223**: Public API 3건 (apt-complex 5000, apt-subscription 2000, apt-unsold 3000) + push-broadcast 사전 fix
+- **S224+**: blog ISR 3-step (P0-A)
+
+### CTA 트랙 (별도 우선)
+S221 BlogFloatingBar tracking 정정 후, 다음 30일 데이터로 **약한 CTA 3개** (apt_alert, content_gate, blog_early_teaser) 재디자인. 이건 디자인 의사결정 — 자동화 X.
+
+---
+
 # 카더라 STATUS — 세션 220: admin 대시보드 P0 + North Star + CTA + Funnel (2026-05-01)
 
 ## 세션 220 — admin/dashboard 5건 P0 + admin/v2/seo/audit 정리 + North Star + CTA 성능 + 가입 퍼널
