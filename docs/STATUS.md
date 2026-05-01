@@ -1,3 +1,70 @@
+# 카더라 STATUS — 세션 222: 약한 CTA 3개 A/B 재디자인 + A/B 인프라 (2026-05-02)
+
+## 세션 222 — apt_alert_cta_v223 / content_gate_v223 / blog_early_teaser_v223 A/B
+
+### 배경
+S220 admin_cta_performance + admin_signup_funnel 결과:
+- Funnel 최대 drop: cta_view → cta_click 1.32%
+- 약한 CTA 3개: apt_alert_cta 0.17%, content_gate 0.63%, blog_early_teaser 0.76%
+- 벤치마크 popup_signup_modal 4.09% (기존 가장 잘 작동) — 손실 회피 + 구체 수치 + fullscreen 차단 + 의도자만 노출 패턴
+
+### A/B 인프라 신설 (커밋 1: `0c756ab1`)
+**DB (Supabase MCP)**:
+- `ab_experiments` table — experiment_name, variant, user_id, visitor_id, event_type, page_path, metadata. 2 indexes. RLS: anon INSERT, admin SELECT.
+- `ab_test_significance(exp_name, window_days=14)` RPC — variant 별 view/click/CTR + vs control delta% + significance flag (views ≥ 100 + |Δ| ≥ 0.5%pt).
+
+**코드**:
+- `src/lib/analytics/abTest.ts` — getVariant (FNV-1a 해시 deterministic), trackAbView/Click/Convert (sendBeacon → fetch keepalive).
+- `src/app/api/events/ab/route.ts` — POST /api/events/ab. raw text → JSON.parse → INSERT.
+- `src/components/admin/AbExperimentViewer.tsx` — 등록된 실험 별 ab_test_significance() 호출 + 표.
+- `src/app/admin/page.tsx` — AbExperimentViewer SignupFunnel 아래 stack.
+
+### CTA 재디자인 A/B 3건
+
+#### E. apt_alert_cta_v223 (커밋 `80cc5b8b`)
+- **A (control)**: 기존 inline + 카피 "{단지명} 가격 변동 알림 받기 · 실거래 등록 시 바로 알려드려요 · 무료"
+- **B (V2+V3)**: 본문 80% 스크롤 시점 sticky bottom (fixed, blur backdrop) + 손실 회피 카피 "{단지명} 가격이 5% 떨어지면 알림 받기 · 놓치면 다시 못 만나요"
+
+#### F. content_gate_v223 (커밋 `6e2d331f`)
+- **A (control)**: 기존 카테고리별 benefit ("이 아파트의 가격이 변하면 ...")
+- **B (V3)**: `apt_region_recent_change(region, 7)` RPC 호출:
+  - 데이터 + |change_pct| ≥ 0.5%: "지난 주 {region} 평균 매매가 {x.x}% 변동 / 평균 {y}억원 차이 / 알림 없으면 다음 변동도 모르고 지나가요"
+  - 데이터 부족: enhanced V1 fallback ("이 정보, 변하면 알아야 하지 않을까요? 놓치면 다음에 다시 못 만나요" + 기존 bullets) — control 과 다름
+
+신규 RPC:
+- `apt_region_recent_change(p_region text DEFAULT NULL, p_window_days int DEFAULT 7)` → json. apt_transactions GROUP BY region_nm, last 7d vs prior 7d, p_region NULL → 전국.
+
+검증 (전국 7d): change_pct -15.91%, avg_won_diff -7,270만원 (recent_count 3819 / past 5969)
+
+#### G. blog_early_teaser_v223 (커밋 `1f439545`)
+- **A (control)**: DB `get_blog_teaser_config` teaser_title 그대로
+- **B (V2 희소성)**: "이 글의 핵심 {locked_count}개는 가입자만 볼 수 있어요". locked_count = teaser_bullets.length || 5
+
+DB 변경 X — 컴포넌트 단 variant 분기.
+
+### 추적
+모든 variant 가 trackCTA + trackAb*(EXPERIMENT, variant) 동시 발화. 기존 admin_cta_performance 표 호환 + 신규 ab_experiments 표.
+
+### 검증 (배포 후)
+- 두 variant 노출 확인 (incognito + 일반 브라우저)
+- ab_experiments 테이블 view 이벤트 입력 확인
+- **14일 후** ab_test_significance() 결과로 winner 결정. significant=true + vs_control_pct > 10% 가 채택 기준.
+
+### Architecture Rule 준수
+- (sb as any).from() / .rpc() 패턴
+- /apt /apt-v2 /blog /stock 라우트 무손상
+- /blog/[slug] force-dynamic 그대로
+- vercel.json 변경 X
+- A/B variant deterministic (visitor_id 해시) — 같은 사용자 같은 variant
+- keepalive fetch (S196 패턴)
+- React #310 보호 — variant useState/useEffect 모두 early return 위 (Architecture Rule #14)
+
+### 다음 세션 plan
+- **S223** (예정 14일 후): 자동 RemoteTrigger 또는 사용자 trigger 로 ab_test_significance() 결과 모니터링 → winner 결정 → control variant 코드 제거
+- 그 사이 인프라 트랙: cron 일괄 (S214.5 audit), Public API + push-broadcast 사전 fix, blog ISR 3-step (P0-A) 등
+
+---
+
 # 카더라 STATUS — 세션 221: 사용자 가시성 P0 + CTA tracking 통일 (2026-05-01)
 
 ## 세션 221 — apt/map + apt/area + apt/complex + stock 일괄 + BlogFloatingBar tracking 통일
