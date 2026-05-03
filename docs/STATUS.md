@@ -1,3 +1,40 @@
+# Session 224 — Region Filter Inline Drilldown (B+A Hybrid) (2026-05-04 KST)
+
+브랜치: `feat/s224-region-filter-redesign` · 한 commit 한 deploy.
+
+## 0) 사용자 결정
+- B(인라인) + A(검색) 하이브리드
+- 동(dong) 단계 미포함 (시군구까지만)
+- 내 위치: 현 수준 유지 (저장값 + IP fallback)
+
+## 1) 변경 — RegionHeader.tsx 단일 파일 재작성 (64 → 457 lines)
+- 모달 제거 → sticky 헤더 아래 인라인 드로어
+- breadcrumb 칩 (`📍 부산 › 연제구 ▾`) — 어디 탭해도 드로어 열림
+- 드로어: 검색 자동완성 + 즐겨찾기 ★ + 최근 + 현재 시도 시군구 + 시도 4-col 그리드
+- `router.replace(..., { scroll: false })` — 스크롤 위치 보존이 핵심
+- localStorage 신규: `kadeora_region_fav_v1` (8개), `kadeora_region_recent_v1` (5개)
+
+## 2) 보존
+- RegionPicker.tsx — RegionHero 가 여전히 사용하므로 유지
+- v_apt_region_summary view — 그대로 사용 (DB 변경 ❌)
+- RegionAutoSelect.tsx — 자동 지역 선택 로직 그대로
+
+## 3) 페인포인트 vs 해결
+| 기존 페인포인트 | 해결 |
+|---|---|
+| 모달 3-스텝 | 인라인 드로어 1탭 |
+| 페이지 점프 / scroll 0으로 | scroll: false replace |
+| "📍 현재 위치" = 서울 하드코딩 | 제거 (RegionAutoSelect 가 IP 기반 처리) |
+| 즐겨찾기/최근 없음 | localStorage 기반 신규 |
+| 검색이 모달 안에서만 | 검색 입력 시 즉시 자동완성 |
+
+## 4) 배포 노트
+- 1 파일 변경. SQL/API/env 변경 ❌. 100% 클라이언트.
+- tsc + eslint 통과.
+- localStorage 키 신규 — 기존 사용자 영향 없음 (없으면 빈 배열).
+
+---
+
 # 카더라 STATUS — 세션 223: P0 가입 깔때기 + cron 인증 + 보안 lockdown (2026-05-04)
 
 ## s223 — P0 가입 깔때기 + cron 인증 + 보안 lockdown (2026-05-04)
