@@ -69,6 +69,20 @@ export default async function DailyReportDatePage({ params }: Props) {
   if (!snapshot || !reportData || (typeof reportData === 'object' && Object.keys(reportData).length === 0)) {
     return notFound();
   }
+
+  // s223 T5b: 부분 빈 데이터 가드 — array 필드 자체 누락 (undefined) 또는 빈 array 면 404.
+  // T5 의 data === {} 가드는 객체 전체가 빈 케이스만 잡아, 핵심 array 가 빈 채로 들어오면
+  // DailyReportClient 의 .map / [0] 접근에서 throw → error.tsx 가 잡으며 500.
+  const REQUIRED_ARRAYS = ['indices', 'sectors', 'stockTop10', 'globalStocks', 'guPrices', 'subscriptions'];
+  const missing = REQUIRED_ARRAYS.filter(k => {
+    const v = (reportData as any)?.[k];
+    return !Array.isArray(v) || v.length === 0;
+  });
+  if (missing.length > 0) {
+    console.warn('[daily] partial empty data', { region, date: dateStr, missing });
+    return notFound();
+  }
+
   const issueNo = snapshot?.issue_no ?? 0;
 
   // 이전/다음 날짜 확인 — 한쪽 실패해도 페이지 렌더 계속

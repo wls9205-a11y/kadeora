@@ -34,6 +34,9 @@ catch-all 은 짧은 외부 fetch 라우트 한정, cron / 무거운 SSR 은 ver
 - NAVER_CLIENT_ID / NAVER_CLIENT_SECRET Vercel env (코드 외 작업)
 - og-blog/og-apt 302 fallback 빈도 — Vercel runtime log truncation 으로 정확한
   message 미확보. lambda 안 console.error 분리 + cron_logs 별도 적재 검토 (s224?)
+- TODO: daily snapshot generator 가 indices/stockTop10/globalStocks 등을
+  수집 실패 시 빈 array 로 채우지 않게 — fallback 데이터 또는 snapshot
+  자체 미저장으로 변경. (s223 T5b 가드는 임시 처치)
 
 ---
 
