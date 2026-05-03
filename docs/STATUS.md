@@ -24,10 +24,11 @@
 - db_health_snapshots / image_quality_daily ENABLE + FORCE RLS, service_role policy
 - advisor ERROR 36 → 32 (auth_users_exposed 1, rls_disabled 2, security_definer_view 1 해소)
 
-### Architecture Rule #17 (신규)
+### Architecture Rule #18 (신규)
 vercel.json `functions` catch-all maxDuration 은 per-route export 를 override 한다.
 catch-all 은 짧은 외부 fetch 라우트 한정, cron / 무거운 SSR 은 vercel.json 에 경로별
 명시 또는 per-route export 단독. 둘 충돌 시 vercel.json 이 이긴다.
+(Rule #17 = s205 Anthropic Batch API polling, ARCHITECTURE_RULES.md 참조)
 
 ### Pending
 - NAVER_CLIENT_ID / NAVER_CLIENT_SECRET Vercel env (코드 외 작업)

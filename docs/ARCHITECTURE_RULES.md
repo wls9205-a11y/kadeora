@@ -23,3 +23,16 @@
 - 비슷한 구조의 다른 큐 (예: `blog_image_batch` purpose=image, `apt_ai_batch`) 도 동일 패턴 적용.
 
 **참고**: 직접 영향 워커 — `app/api/cron/blog-meta-rewrite-poll/route.ts`. 동일 패턴 워커 — `app/api/cron/blog-image-batch-poll/*`, `app/api/cron/apt-ai-batch-poll/*`.
+
+## Rule #18 — vercel.json catch-all maxDuration 은 per-route export 를 override 한다 (s223 신설)
+
+**Symptom**: route 안 `export const maxDuration = 60` 을 분명히 적었는데도 실제 배포된 함수는 30s 에서 timeout. cron 이 504 로 죽는데 코드만 보면 원인 안 보임.
+
+**Cause**: vercel.json `functions` 의 catch-all glob (예: `src/app/api/**/*.ts`) 에 `maxDuration` 이 박혀 있으면 해당 glob 에 매치되는 모든 route 의 per-route export 를 silently override 한다. Vercel 빌드 단계에서 경고도 뜨지 않음.
+
+**Rule**:
+- vercel.json catch-all 은 짧은 외부 fetch 라우트 한정으로만 사용.
+- cron / 무거운 SSR / OG image 처럼 긴 함수는 vercel.json 에 경로별 명시 override 또는 per-route export 단독 사용. 둘이 충돌하면 vercel.json 이 이긴다.
+- 새 cron 추가 시 vercel.json 의 functions glob 매치 여부 우선 확인.
+
+**Discovered**: s223 (2026-05-04) — stock-fundamentals-kr / data-quality-fix 504 timeout 추적 중 발견. 둘 다 route export 60 적었으나 catch-all 30 이 이김.
