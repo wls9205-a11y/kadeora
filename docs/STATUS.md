@@ -38,6 +38,12 @@ catch-all 은 짧은 외부 fetch 라우트 한정, cron / 무거운 SSR 은 ver
   수집 실패 시 빈 array 로 채우지 않게 — fallback 데이터 또는 snapshot
   자체 미저장으로 변경. (s223 T5b 가드는 임시 처치)
 
+Pending (s224 후보):
+- /daily/[region]/[date] 의 인천 2026-03-31, 경남 2026-03-30, 서울 2026-03-31
+  3페이지 SSR throw — T5b array empty 가드 통과. 의심: unsoldLocal 시군구
+  자리에 동 단위 데이터 혼입 (예: 인천 unsoldLocal[8].sigungu="동춘동").
+  daily snapshot generator 본질 fix 또는 component lookup 가드 (다음 sprint).
+
 ---
 
 # 카더라 STATUS — 세션 222: 약한 CTA 3개 A/B 재디자인 + A/B 인프라 (2026-05-02)
