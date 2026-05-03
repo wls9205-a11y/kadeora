@@ -34,8 +34,10 @@ export default function KakaoHeroCTA() {
       maxWidth: 440, width: '100%', margin: '0 auto', padding: '0 16px',
     }}>
       <div style={{
-        background: '#050A18', borderRadius: 'var(--radius-xl)', overflow: 'hidden',
+        background: 'var(--gate-card-bg)', borderRadius: 'var(--radius-xl)', overflow: 'hidden',
         position: 'relative', padding: '28px 24px 24px',
+        border: '1px solid var(--gate-card-border)',
+        boxShadow: 'var(--shadow-md)',
       }}>
         {/* 글로우 */}
         <div style={{
@@ -48,12 +50,12 @@ export default function KakaoHeroCTA() {
           {/* 라이브 배지 */}
           <div style={{
             display: 'inline-flex', alignItems: 'center', gap: 6,
-            background: 'rgba(52,211,153,0.12)', color: '#34D399',
+            background: 'var(--accent-green-bg)', color: 'var(--accent-green)',
             fontSize: 11, fontWeight: 700, padding: '5px 12px', borderRadius: 'var(--radius-lg)',
             marginBottom: 14,
           }}>
             <span style={{
-              width: 6, height: 6, borderRadius: '50%', background: '#34D399',
+              width: 6, height: 6, borderRadius: '50%', background: 'var(--accent-green)',
               animation: 'kdPulse 2s infinite',
             }} />
             누적 {Math.floor(stats.totalViews / 10000)}만+ 열람
@@ -61,17 +63,17 @@ export default function KakaoHeroCTA() {
 
           {/* 타이틀 */}
           <h2 style={{
-            fontSize: 22, fontWeight: 800, color: '#F0F4F8',
+            fontSize: 22, fontWeight: 800, color: 'var(--gate-card-text)',
             lineHeight: 1.35, letterSpacing: '-0.03em', marginBottom: 8,
           }}>
             내 관심 지역·종목의<br />
-            <span style={{ color: '#FEE500' }}>가격 변동 알림</span>을<br />
+            <span style={{ color: 'var(--gate-accent)' }}>가격 변동 알림</span>을<br />
             무료로 받아보세요
           </h2>
 
           {/* 설명 */}
           <p style={{
-            fontSize: 13, color: 'rgba(224,232,240,0.45)', lineHeight: 1.6,
+            fontSize: 13, color: 'var(--gate-card-muted)', lineHeight: 1.6,
             marginBottom: 18,
           }}>
             청약 마감 D-day, 실거래가 변동, 관심 종목 급등/급락까지.
@@ -89,12 +91,12 @@ export default function KakaoHeroCTA() {
               { n: '19,000+', l: '블로그 콘텐츠' },
             ].map(s => (
               <div key={s.l} style={{
-                background: 'rgba(255,255,255,0.04)', borderRadius: 'var(--radius-md)',
+                background: 'var(--gate-stat-bg)', borderRadius: 'var(--radius-md)',
                 padding: '10px 8px', textAlign: 'center',
-                border: '1px solid rgba(255,255,255,0.04)',
+                border: '1px solid var(--gate-stat-border)',
               }}>
-                <div style={{ fontSize: 15, fontWeight: 800, color: '#F0F4F8', letterSpacing: '-0.02em' }}>{s.n}</div>
-                <div style={{ fontSize: 10, color: 'rgba(224,232,240,0.3)', marginTop: 2, fontWeight: 500 }}>{s.l}</div>
+                <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--gate-card-text)', letterSpacing: '-0.02em' }}>{s.n}</div>
+                <div style={{ fontSize: 10, color: 'var(--gate-card-faint)', marginTop: 2, fontWeight: 500 }}>{s.l}</div>
               </div>
             ))}
           </div>
@@ -112,20 +114,20 @@ export default function KakaoHeroCTA() {
             }}
           >
             <svg width="20" height="20" viewBox="0 0 512 512" fill="#191919"><path d="M255.5 48C141.1 48 48 126.1 48 222.4c0 62.2 38.7 116.7 97 149.8l-24.1 89.7c-2.1 7.9 6.8 14.4 13.7 9.9l101.2-65.2c7.2 1 14.6 1.5 22.2 1.5 114.4 0 207.5-78.1 207.5-174.4S369.9 48 255.5 48z" /></svg>
-            카카오로 알림 설정하기
+            카카오로 시작
           </a>
 
           {/* 이메일 대안 */}
-          <div style={{ textAlign: 'center', marginTop: 10, fontSize: 12, color: 'rgba(224,232,240,0.2)' }}>
-            또는 <a href={loginUrl} style={{ color: 'rgba(224,232,240,0.4)', textDecoration: 'underline', textUnderlineOffset: 2 }}>이메일로 가입</a>
+          <div style={{ textAlign: 'center', marginTop: 10, fontSize: 12, color: 'var(--gate-card-faint)' }}>
+            또는 <a href={loginUrl} style={{ color: 'var(--gate-card-muted)', textDecoration: 'underline', textUnderlineOffset: 2 }}>이메일로 가입</a>
           </div>
 
           {/* 신뢰 배지 */}
           <div style={{
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16,
             marginTop: 14, paddingTop: 14,
-            borderTop: '1px solid rgba(255,255,255,0.05)',
-            fontSize: 10, color: 'rgba(224,232,240,0.22)',
+            borderTop: '1px solid var(--gate-divider)',
+            fontSize: 10, color: 'var(--gate-card-faint)',
           }}>
             <span>스팸 없음</span>
             <span>10초 설정</span>

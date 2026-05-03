@@ -56,7 +56,7 @@ export default function StockRadarChart({ stocks, isKR }: Props) {
 
       {/* 검색 */}
       <div style={{ position: 'relative', marginBottom: 'var(--sp-sm)' }}>
-        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="비교할 종목 검색..."
+        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="🔍 비교할 종목 추가"
           className="kd-search-input" style={{ width: '100%' }} />
         {searchRes.length > 0 && (
           <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', zIndex: 50, marginTop: 3 }}>

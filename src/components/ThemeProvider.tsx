@@ -8,18 +8,21 @@ interface ThemeContextType {
   toggleTheme: () => void;
 }
 
-const ThemeContext = createContext<ThemeContextType>({ theme: 'dark', toggleTheme: () => {} });
+// s215: 기본값 light. 다크는 사용자가 명시 저장한 경우에만.
+const ThemeContext = createContext<ThemeContextType>({ theme: 'light', toggleTheme: () => {} });
 
 export function useTheme() {
   return useContext(ThemeContext);
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>('dark');
+  // s215: 기본값 light. 다크는 사용자가 명시 저장한 경우에만.
+  const [theme, setTheme] = useState<Theme>('light');
 
   useEffect(() => {
     const saved = localStorage.getItem('kd_theme') as Theme | null;
-    const t = saved === 'light' ? 'light' : 'dark';
+    // s215: 명시 'dark' 저장된 사용자만 다크 유지, 그 외 (null/'light') 모두 light.
+    const t: Theme = saved === 'dark' ? 'dark' : 'light';
     setTheme(t);
     applyTheme(t);
   }, []);
@@ -38,7 +41,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   };
 
   const toggleTheme = useCallback(() => {
-    const next: Theme = theme === 'dark' ? 'light' : 'dark';
+    // s215: light 가 기본, 토글로 다크로 전환.
+    const next: Theme = theme === 'light' ? 'dark' : 'light';
     setTheme(next);
     localStorage.setItem('kd_theme', next);
     applyTheme(next);

@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { WatchButton } from '@/components/ui/ActionButtons';
 
 export default function StockWatchlistButton({ symbol }: { symbol: string }) {
   const [watched, setWatched] = useState(false);
@@ -26,16 +27,6 @@ export default function StockWatchlistButton({ symbol }: { symbol: string }) {
   };
 
   return (
-    <button onClick={toggle} disabled={loading} style={{
-      display: 'inline-flex', alignItems: 'center', gap: 6,
-      padding: '8px 16px', borderRadius: 'var(--radius-xl)',
-      border: watched ? '1px solid var(--brand)' : '1px solid var(--border)',
-      background: watched ? 'rgba(251,191,36,0.12)' : 'var(--bg-surface)',
-      color: watched ? 'var(--brand)' : 'var(--text-secondary)',
-      fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: loading ? 'not-allowed' : 'pointer',
-      opacity: loading ? 0.6 : 1,
-    }}>
-      {watched ? '⭐ 관심종목' : '☆ 관심종목 추가 (+50P)'}
-    </button>
+    <WatchButton domain="stock" watched={watched} loading={loading} onClick={toggle} variant="inline" pointReward={50} />
   );
 }

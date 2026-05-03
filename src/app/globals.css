@@ -480,8 +480,8 @@ html.font-large {
   /* 시맨틱 액센트 (카테고리/상태별) — 세션70: 밝기 +10% */
   --accent-green:   #36F0B0;
   --accent-green-bg: rgba(54,240,176,0.12);
-  --accent-purple:  #C4A5FF;
-  --accent-purple-bg: rgba(196,165,255,0.12);
+  --accent-purple:  #A78BFA;
+  --accent-purple-bg: rgba(167,139,250,0.14);
   --accent-orange:  #FFB050;
   --accent-orange-bg: rgba(255,176,80,0.12);
   --accent-yellow:  #FFE04A;
@@ -539,6 +539,19 @@ html.font-large {
   --shadow-md: 0 2px 8px rgba(0,0,0,0.6);
   --shadow-lg: 0 8px 24px rgba(0,0,0,0.7);
   --shadow-xl: 0 16px 40px rgba(0,0,0,0.8);
+
+  /* s215: SmartSectionGate(블로그/콘텐츠 게이트 카드) 토큰 — 모드별 분기 */
+  --gate-fade-from:    rgba(5,10,24,0);
+  --gate-fade-to:      rgba(5,10,24,1);
+  --gate-card-bg:      rgba(12,21,40,0.97);
+  --gate-card-border:  rgba(254,229,0,0.20);
+  --gate-card-text:    #e2e8f0;
+  --gate-card-muted:   rgba(224,232,240,0.75);
+  --gate-card-faint:   rgba(224,232,240,0.40);
+  --gate-accent:       #FEE500;
+  --gate-stat-bg:      rgba(255,255,255,0.04);
+  --gate-stat-border:  rgba(255,255,255,0.06);
+  --gate-divider:      rgba(255,255,255,0.05);
 }
 
 /* 다크모드 단일 테마 — 라이트모드 제거됨 */
@@ -565,8 +578,8 @@ html.theme-light {
   --brand:          #2563EB;
   --brand-hover:    #1D4ED8;
   --brand-light:    #EBF2FF;
-  --brand-bg:       rgba(37,99,235,0.08);
-  --brand-border:   rgba(37,99,235,0.18);
+  --brand-bg:       rgba(37,99,235,0.10);
+  --brand-border:   rgba(37,99,235,0.22);
   --accent-blue-light:  #60A5FA;
   --accent-orange-light: #F97316;
   --brand-dark:     #1E40AF;
@@ -587,12 +600,12 @@ html.theme-light {
   --accent-purple-bg: rgba(124,58,237,0.10);
   --accent-orange:  #EA580C;
   --accent-orange-bg: rgba(234,88,12,0.10);
-  --accent-yellow:  #CA8A04;
-  --accent-yellow-bg: rgba(202,138,4,0.10);
+  --accent-yellow:  #D97706;
+  --accent-yellow-bg: rgba(217,119,6,0.10);
   --accent-red:     #DC2626;
   --accent-red-bg:  rgba(220,38,38,0.10);
-  --accent-blue:    #2563EB;
-  --accent-blue-bg: rgba(37,99,235,0.10);
+  --accent-blue:    #0EA5E9;
+  --accent-blue-bg: rgba(14,165,233,0.10);
 
   /* Stock colors — KR */
   --stock-kr-up:        #D32F2F;
@@ -641,6 +654,19 @@ html.theme-light {
   --shadow-md: 0 2px 8px rgba(0,0,0,0.10);
   --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
   --shadow-xl: 0 16px 40px rgba(0,0,0,0.15);
+
+  /* s215: SmartSectionGate 라이트모드 분기 — 흰 배경 위 자연스러운 페이드/카드 */
+  --gate-fade-from:    rgba(245,247,250,0);
+  --gate-fade-to:      rgba(245,247,250,1);
+  --gate-card-bg:      #FFFFFF;
+  --gate-card-border:  rgba(37,99,235,0.18);
+  --gate-card-text:    #1F2937;
+  --gate-card-muted:   #6B7280;
+  --gate-card-faint:   #9CA3AF;
+  --gate-accent:       #F59E0B;
+  --gate-stat-bg:      #F3F4F6;
+  --gate-stat-border:  #E5E7EB;
+  --gate-divider:      #E5E7EB;
   color-scheme: light;
 }
 html.theme-light body {

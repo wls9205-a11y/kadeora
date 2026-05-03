@@ -248,7 +248,7 @@ export default function SearchClient() {
           value={inputVal}
           onChange={e => handleInputChange(e.target.value)}
           onFocus={() => { if (inputVal.length >= 2) setAcOpen(true); }}
-          placeholder="종목, 청약, 단지명 검색"
+          placeholder="🔍 종목 · 청약 · 단지 검색"
           style={{
             width: '100%', height: 48, padding: '0 44px 0 46px',
             fontSize: 15, fontWeight: 500, borderRadius: 'var(--radius-card)',

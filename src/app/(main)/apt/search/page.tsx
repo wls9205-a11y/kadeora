@@ -125,7 +125,7 @@ function renderPage({ trades, totalCount, hasMore, regionStats, relatedBlogs, q,
       <form method="GET" action="/apt/search" style={{ display: 'flex', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-lg)', position: 'relative' }}>
         <div style={{ position: 'relative', flex: 1 }}>
           <svg style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--text-tertiary)' }} width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input name="q" defaultValue={q} placeholder="단지명, 동 검색" aria-label="실거래가 검색"
+          <input name="q" defaultValue={q} placeholder="🔍 단지명, 동 검색" aria-label="실거래가 검색"
             style={{ width: '100%', height: 40, padding: '0 12px 0 38px', fontSize: 13, fontWeight: 500, borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', boxSizing: 'border-box', outline: 'none' }} />
         </div>
         <button type="submit" style={{ padding: '0 20px', height: 40, borderRadius: 'var(--radius-md)', background: 'var(--brand)', color: '#fff', border: 'none', fontSize: 13, fontWeight: 700, cursor: 'pointer', flexShrink: 0 }}>검색</button>

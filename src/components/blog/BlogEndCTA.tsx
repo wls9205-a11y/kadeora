@@ -61,7 +61,7 @@ export default function BlogEndCTA({ slug, isLoggedIn }: Props) {
       textAlign: 'center',
     }}>
       <div style={{ fontSize: 13, color: 'var(--text-tertiary, #94a3b8)', marginBottom: 6 }}>이 글이 도움 되셨나요?</div>
-      <div style={{ fontSize: 17, fontWeight: 800, marginBottom: 14, color: 'var(--text-primary, #e5e7eb)' }}>매주 실시간 분양·시세 알림 받기</div>
+      <div style={{ fontSize: 17, fontWeight: 800, marginBottom: 14, color: 'var(--text-primary)' }}>매주 알림 받기</div>
       <button onClick={handle} style={{
         background: '#FEE500', color: '#000', fontWeight: 800, fontSize: 15,
         padding: '12px 28px', borderRadius: 10, border: 'none', cursor: 'pointer',

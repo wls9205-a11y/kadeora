@@ -126,7 +126,7 @@ export default function BlogEarlyGateTeaser({ slug, enabled = true, hasGatedCont
           setConfig({
             teaser_title: String((cfg as any).teaser_title || ''),
             teaser_bullets: Array.isArray((cfg as any).teaser_bullets) ? (cfg as any).teaser_bullets.map(String) : [],
-            cta_text: String((cfg as any).cta_text || '로그인하고 전체 보기'),
+            cta_text: String((cfg as any).cta_text || '로그인하고 계속 읽기'),
             cta_name: String((cfg as any).cta_name || 'blog_early_teaser'),
           });
         }

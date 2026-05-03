@@ -194,7 +194,7 @@ export default function GatedStockSection({ sectionKey, pageType = 'symbol', chi
           🔒 {isPremium ? '프리미엄 회원 전용' : '로그인 후 전체 열람'}
         </div>
         <div style={{ fontSize: 16, fontWeight: 800, marginBottom: 14, color: 'var(--text-primary, #e5e7eb)', wordBreak: 'keep-all' }}>
-          {gate?.cta_text || '로그인하고 전체 정보 보기'}
+          {gate?.cta_text || '로그인하고 전체 보기'}
         </div>
         <button
           onClick={handleClick}

@@ -83,12 +83,12 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   userScalable: true,
-  themeColor: '#050A18',
+  themeColor: '#F5F7FA',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko" className="dark" suppressHydrationWarning>
+    <html lang="ko" className="theme-light" suppressHydrationWarning>
       <head>
         {/* 세션 150: CLS 방지 — pretendard preconnect + preload (폰트 swap FOUT 최소화) */}
         <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
@@ -121,8 +121,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="카더라" />
         <meta name="mobile-web-app-capable" content="yes" />
-        {/* 다크모드 강제 적용 */}
-        <script dangerouslySetInnerHTML={{ __html: `(function(){var t=localStorage.getItem('kd_theme');if(t==='light'){document.documentElement.classList.add('theme-light');document.documentElement.classList.remove('dark');}else{document.documentElement.classList.add('dark');}})();` }} />
+        {/* s215: 라이트모드 기본. 'dark' 명시 저장된 사용자만 다크 유지 */}
+        <script dangerouslySetInnerHTML={{ __html: `(function(){var t=localStorage.getItem('kd_theme');if(t==='dark'){document.documentElement.classList.add('dark');document.documentElement.classList.remove('theme-light');}else{document.documentElement.classList.add('theme-light');document.documentElement.classList.remove('dark');}})();` }} />
         {/* 글씨크기 SSR 적용 */}
         <script dangerouslySetInnerHTML={{ __html: `try{var fs=localStorage.getItem('kd_font_size');if(fs&&['small','medium','large'].indexOf(fs)>=0){var cl=document.documentElement.classList;cl.remove('font-small','font-medium','font-large');cl.add('font-'+fs);}}catch(e){}` }} />
         {/* Kakao SDK — KakaoInit 컴포넌트에서 next/script로 로드 (중복 방지) */}

@@ -21,22 +21,22 @@ export default function TossBottomBanner() {
   // 페이지별 CTA 메시지
   const getCtaInfo = () => {
     if (pathname.startsWith('/stock')) return {
-      label: '전체 종목 보기',
-      sub: '국내외 주요 종목 실시간 시세',
+      label: '주식 전체',
+      sub: '국내외 종목 실시간 시세',
       path: '/stock',
     };
     if (pathname.startsWith('/apt')) return {
-      label: '부동산 전체 보기',
+      label: '부동산 전체',
       sub: '청약·분양·미분양·재개발',
       path: '/apt',
     };
     if (pathname.startsWith('/blog')) return {
-      label: '블로그 전체 보기',
-      sub: '투자 정보 블로그',
+      label: '블로그 전체',
+      sub: '투자 정보 데이터 블로그',
       path: pathname,
     };
     if (pathname.startsWith('/feed')) return {
-      label: '커뮤니티 참여하기',
+      label: '커뮤니티 가기',
       sub: '글쓰기·댓글·토론',
       path: '/feed',
     };

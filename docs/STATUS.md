@@ -1,3 +1,48 @@
+# Session 215 — Light Mode Default + Action Unification System (2026-05-04 KST)
+
+브랜치: `feat/s215-light-default-and-action-unification` · 한 commit 한 deploy.
+
+## 0) 합병 PR — 라이트모드 디폴트 + 액션 통일
+사용자 요청 두 건 (light default · 버튼 텍스트 검수) 단일 PR.
+
+## 1) Track A — 라이트모드 디폴트
+- ThemeProvider/layout/globals.css. `kd_theme==='dark'` 명시 사용자만 다크 유지.
+- iOS Safari status bar `#F5F7FA` 동기화.
+
+## 2) Track B — 액센트 컬러 모드별 미세 조정
+- 라이트: `--accent-blue` `#0EA5E9` (brand 동색 문제 해결), `--accent-yellow` `#D97706`, `--brand-bg/border` 강화.
+- 다크: `--accent-purple` `#A78BFA` (가독성).
+
+## 3) Track C — 게이트/모달 토큰화 (4 컴포넌트)
+- `--gate-*` 토큰 신규. 라이트/다크 양쪽 정의.
+- SmartSectionGate, KakaoHeroCTA, KakaoBottomSheet, KakaoChannelAddModal, InterestRegisterHero 토큰화.
+- 라이트모드 흰배경 위 검정 그라디언트/검정 카드로 깨지던 핫스팟 정리.
+
+## 4) Track D — 통일 액션 컴포넌트 라이브러리 (NEW)
+`src/components/ui/ActionButtons.tsx` 신설. 5 컴포넌트 + `SEARCH_PLACEHOLDER` 상수:
+- `<WatchButton/>`, `<ShareButton/>`, `<NotifyButton/>`, `<SeeAllLink/>`, `<FormActions/>`
+- `watchToast.added(50)` / `watchToast.removed()` 토스트 헬퍼.
+- 1차 마이그레이션: `stock/[symbol]/WatchlistButton.tsx`.
+
+## 5) Track E — 라벨 통일 sweep
+- 가입 CTA 7곳 → "카카오로 가입" / "카카오로 시작" / "무료로 알림 받기"
+- 관심 등록 18종 → 별 모양(☆/★) + 도메인 명사 유지(`<WatchButton domain/>`)
+- "전체 X 보기" 13종 → 4 패턴 (더보기 → / 전체 → / 로그인하고 계속 읽기 / ···)
+- 검색 placeholder 12종 → 5종 (`🔍 + 핵심어`)
+- 폼 액션: `결과 보기` → `가점 확인`, `결과 공유` → `⤴ 공유`, `다시 계산` → `↻ 다시`
+
+## 6) Architecture Rules — 신규 #17, #18, #19
+- #17 컬러 토큰 강제 (인라인 hex 금지)
+- #18 모드별 분기는 CSS 변수로 (JS theme 분기 ❌)
+- #19 반복 액션은 표준 컴포넌트 사용 (관심/공유/알림/더보기/폼/검색)
+
+## 7) Production 배포 노트
+- DB / API / env / 외부 서비스 변경 ❌.
+- 영향: 클라이언트 100%, SSR HTML class 1회 변경 (`dark` → `theme-light`).
+- `tsc --noEmit` 통과. `eslint --quiet` 통과. `npm run build` 통과.
+
+---
+
 # 카더라 STATUS — 세션 222: 약한 CTA 3개 A/B 재디자인 + A/B 인프라 (2026-05-02)
 
 ## 세션 222 — apt_alert_cta_v223 / content_gate_v223 / blog_early_teaser_v223 A/B

@@ -32,34 +32,34 @@ const CATEGORY_BENEFITS: Record<string, { headline: string; bullets: string[]; b
   apt: {
     headline: '이 아파트의 가격이 변하면',
     bullets: ['실거래가 변동 시 즉시 알림', '청약 마감 D-day 카운트다운', '관심 지역 주간 시세 리포트'],
-    btnText: '알림 설정하기',
+    btnText: '무료로 알림 받기',
   },
   unsold: {
     headline: '이 지역 미분양이 해소되면',
     bullets: ['미분양 세대 변동 알림', '할인 분양 소식 즉시 전달', '관심 지역 시세 추적'],
-    btnText: '알림 설정하기',
+    btnText: '무료로 알림 받기',
   },
   stock: {
     headline: '이 종목이 급등/급락하면',
     bullets: ['관심 종목 가격 변동 알림', '목표가 도달 시 즉시 알림', 'AI 투자 의견 주간 리포트'],
-    btnText: '알림 설정하기',
+    btnText: '무료로 알림 받기',
   },
   finance: {
     headline: '내 돈에 영향 주는 변화가 생기면',
     bullets: ['세법·금리 변경 알림', '맞춤 절세 전략 리포트', '재테크 주간 브리핑'],
-    btnText: '무료 알림 받기',
+    btnText: '무료로 알림 받기',
   },
   redev: {
     headline: '이 구역 단계가 변경되면',
     bullets: ['사업 단계 변경 즉시 알림', '구역 내 실거래가 추적', '관리처분·착공 일정 알림'],
-    btnText: '알림 설정하기',
+    btnText: '무료로 알림 받기',
   },
 };
 
 const DEFAULT_BENEFIT = {
   headline: '관심 분야에 변화가 생기면',
   bullets: ['청약·시세 변동 즉시 알림', '주간 맞춤 시황 리포트', '관심 지역/종목 추적'],
-  btnText: '무료 알림 받기',
+  btnText: '무료로 알림 받기',
 };
 
 export default function SmartSectionGate({
@@ -212,32 +212,33 @@ export default function SmartSectionGate({
     <div className="blog-content" itemProp="articleBody">
       <div dangerouslySetInnerHTML={{ __html: visibleSection }} />
 
-      {/* 페이드아웃 */}
+      {/* 페이드아웃 — s215: 모드별 토큰 */}
       <div style={{
         height: 100, pointerEvents: 'none', marginTop: -40,
-        background: 'linear-gradient(to bottom, rgba(5,10,24,0) 0%, rgba(5,10,24,1) 100%)',
+        background: 'linear-gradient(to bottom, var(--gate-fade-from) 0%, var(--gate-fade-to) 100%)',
       }} />
 
-      {/* 게이트 카드 */}
-      <div data-cta="content-gate" style={{ background: 'var(--bg-base, #050A18)', padding: '0 16px 32px' }}>
+      {/* 게이트 카드 — s215: 토큰화 */}
+      <div data-cta="content-gate" style={{ background: 'var(--bg-base)', padding: '0 16px 32px' }}>
         <div style={{
           maxWidth: 400, width: '100%', margin: '0 auto',
           padding: '22px 20px', borderRadius: 16, boxSizing: 'border-box' as const,
-          border: '1px solid rgba(254,229,0,0.2)',
-          background: 'rgba(12,21,40,0.97)',
+          border: '1px solid var(--gate-card-border)',
+          background: 'var(--gate-card-bg)',
+          boxShadow: 'var(--shadow-md)',
         }}>
           {hasPreview ? (
             <>
-              <div style={{ fontSize: 12, fontWeight: 600, color: 'rgba(224,232,240,0.4)', marginBottom: 10, textAlign: 'center', letterSpacing: '0.5px' }}>
+              <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--gate-card-faint)', marginBottom: 10, textAlign: 'center', letterSpacing: '0.5px' }}>
                 이 글에서 다루는 나머지 분석
               </div>
               <div style={{ marginBottom: 14 }}>
                 {remainingHeadings.map((h, i) => (
                   <div key={i} style={{
                     display: 'flex', alignItems: 'center', gap: 8,
-                    fontSize: 13, color: '#e2e8f0', fontWeight: 600, padding: '5px 0',
+                    fontSize: 13, color: 'var(--gate-card-text)', fontWeight: 600, padding: '5px 0',
                   }}>
-                    <span style={{ color: '#FEE500', fontSize: 12, flexShrink: 0 }}>✦</span>
+                    <span style={{ color: 'var(--gate-accent)', fontSize: 12, flexShrink: 0 }}>✦</span>
                     {h}
                   </div>
                 ))}
@@ -245,29 +246,29 @@ export default function SmartSectionGate({
             </>
           ) : useBLossCopy && regionData ? (
             <>
-              <p style={{ fontSize: 14, fontWeight: 700, color: '#e2e8f0', lineHeight: 1.5, margin: '0 0 12px', textAlign: 'center' }}>
-                지난 주 {regionData.region} 평균 매매가 <span style={{ color: '#FEE500' }}>{Number(regionData.change_pct).toFixed(1)}%</span> 변동<br />
-                <span style={{ color: 'rgba(224,232,240,0.75)', fontWeight: 600, fontSize: 13 }}>
+              <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--gate-card-text)', lineHeight: 1.5, margin: '0 0 12px', textAlign: 'center' }}>
+                지난 주 {regionData.region} 평균 매매가 <span style={{ color: 'var(--gate-accent)' }}>{Number(regionData.change_pct).toFixed(1)}%</span> 변동<br />
+                <span style={{ color: 'var(--gate-card-muted)', fontWeight: 600, fontSize: 13 }}>
                   {bWonDiffEok !== null ? `평균 ${bWonDiffEok}억원 차이` : '실거래가 큰 폭 변동 중'}
                 </span>
               </p>
-              <div style={{ marginBottom: 16, fontSize: 12, color: 'rgba(224,232,240,0.75)', textAlign: 'center', lineHeight: 1.5 }}>
+              <div style={{ marginBottom: 16, fontSize: 12, color: 'var(--gate-card-muted)', textAlign: 'center', lineHeight: 1.5 }}>
                 알림 없으면 다음 변동도 모르고 지나가요
               </div>
             </>
           ) : useBFallback ? (
             <>
-              <p style={{ fontSize: 14, fontWeight: 700, color: '#e2e8f0', lineHeight: 1.5, margin: '0 0 12px', textAlign: 'center' }}>
+              <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--gate-card-text)', lineHeight: 1.5, margin: '0 0 12px', textAlign: 'center' }}>
                 이 정보, 변하면 알아야 하지 않을까요?<br />
-                <span style={{ color: '#FEE500' }}>놓치면 다음에 다시 못 만나요</span>
+                <span style={{ color: 'var(--gate-accent)' }}>놓치면 다음에 다시 못 만나요</span>
               </p>
               <div style={{ marginBottom: 16 }}>
                 {benefit.bullets.map((b, i) => (
                   <div key={i} style={{
                     display: 'flex', alignItems: 'center', gap: 8,
-                    fontSize: 12, color: 'rgba(224,232,240,0.75)', padding: '4px 0',
+                    fontSize: 12, color: 'var(--gate-card-muted)', padding: '4px 0',
                   }}>
-                    <span style={{ color: '#22c55e', fontSize: 13 }}>✓</span>
+                    <span style={{ color: 'var(--accent-green)', fontSize: 13 }}>✓</span>
                     {b}
                   </div>
                 ))}
@@ -275,17 +276,17 @@ export default function SmartSectionGate({
             </>
           ) : (
             <>
-              <p style={{ fontSize: 14, fontWeight: 700, color: '#e2e8f0', lineHeight: 1.5, margin: '0 0 12px', textAlign: 'center' }}>
+              <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--gate-card-text)', lineHeight: 1.5, margin: '0 0 12px', textAlign: 'center' }}>
                 {benefit.headline}<br />
-                <span style={{ color: '#FEE500' }}>카더라가 알려드릴게요</span>
+                <span style={{ color: 'var(--gate-accent)' }}>카더라가 알려드릴게요</span>
               </p>
               <div style={{ marginBottom: 16 }}>
                 {benefit.bullets.map((b, i) => (
                   <div key={i} style={{
                     display: 'flex', alignItems: 'center', gap: 8,
-                    fontSize: 12, color: 'rgba(224,232,240,0.75)', padding: '4px 0',
+                    fontSize: 12, color: 'var(--gate-card-muted)', padding: '4px 0',
                   }}>
-                    <span style={{ color: '#22c55e', fontSize: 13 }}>✓</span>
+                    <span style={{ color: 'var(--accent-green)', fontSize: 13 }}>✓</span>
                     {b}
                   </div>
                 ))}
@@ -309,16 +310,16 @@ export default function SmartSectionGate({
             <svg width="16" height="16" viewBox="0 0 512 512" fill="#191919">
               <path d="M255.5 48C141.1 48 48 126.1 48 222.4c0 62.2 38.7 116.7 97 149.8l-24.1 89.7c-2.1 7.9 6.8 14.4 13.7 9.9l101.2-65.2c7.2 1 14.6 1.5 22.2 1.5 114.4 0 207.5-78.1 207.5-174.4S369.9 48 255.5 48z" />
             </svg>
-            {hasPreview ? '카카오 3초 설정 → 알림 받기' : benefit.btnText}
+            {hasPreview ? '무료로 알림 받기' : benefit.btnText}
           </a>
 
           <div style={{ marginTop: 10, textAlign: 'center' }}>
-            <div style={{ fontSize: 11, color: 'rgba(224,232,240,0.3)', marginBottom: 4 }}>{socialText}</div>
+            <div style={{ fontSize: 11, color: 'var(--gate-card-faint)', marginBottom: 4 }}>{socialText}</div>
             <button
               onClick={handleLater}
               style={{
                 background: 'transparent', border: 'none', cursor: 'pointer',
-                fontSize: 11, color: 'rgba(224,232,240,0.35)',
+                fontSize: 11, color: 'var(--gate-card-faint)',
                 textDecoration: 'underline', textUnderlineOffset: '2px',
                 padding: '2px 4px',
               }}

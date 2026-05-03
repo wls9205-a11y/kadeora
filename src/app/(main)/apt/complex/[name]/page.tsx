@@ -890,7 +890,7 @@ export default async function ComplexDetailPage({ params }: Props) {
         color: '#fff', boxShadow: '0 4px 16px rgba(37,99,235,0.3)',
         transition: 'transform 0.15s ease',
       }}>
-        🏗️ {siteSlug ? '이 현장의 전체 정보 보기 (청약 · 이미지 · 리뷰)' : '실거래 검색에서 더 알아보기'} →
+        🏗️ {siteSlug ? '단지 전체 정보 보기' : '실거래 검색에서 보기'} →
       </Link>
       {/* LoginGate 기능 게이팅 (세션 108) */}
       <LoginGate feature="apt_trade_alert" blurHeight={80}>

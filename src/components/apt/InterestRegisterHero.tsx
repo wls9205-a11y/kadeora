@@ -66,8 +66,8 @@ export function InterestRegisterHero({ aptId, aptName, aptSlug, status, isLogged
       style={{
         margin: '12px 0 16px',
         padding: '14px 16px',
-        background: 'linear-gradient(135deg, rgba(0,255,135,0.08), rgba(0,229,255,0.08))',
-        border: '1px solid rgba(0,255,135,0.18)',
+        background: 'var(--brand-bg)',
+        border: '1px solid var(--brand-border)',
         borderRadius: 12,
         display: 'flex',
         alignItems: 'center',
@@ -84,8 +84,8 @@ export function InterestRegisterHero({ aptId, aptName, aptSlug, status, isLogged
                 marginLeft: 8,
                 padding: '2px 8px',
                 borderRadius: 999,
-                background: 'rgba(0,255,135,0.16)',
-                color: '#00FF87',
+                background: 'var(--accent-green-bg)',
+                color: 'var(--accent-green)',
                 fontSize: 11,
                 fontWeight: 700,
               }}
@@ -95,7 +95,7 @@ export function InterestRegisterHero({ aptId, aptName, aptSlug, status, isLogged
           )}
         </div>
         <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', wordBreak: 'keep-all' }}>
-          {aptName} 청약·일정 알림 받기
+          청약·일정 알림 받기
         </div>
       </div>
       <button
@@ -105,28 +105,28 @@ export function InterestRegisterHero({ aptId, aptName, aptSlug, status, isLogged
         style={{
           padding: '10px 18px',
           borderRadius: 999,
-          background: done ? 'rgba(0,255,135,0.2)' : '#00FF87',
-          color: done ? '#00FF87' : '#000',
+          background: done ? 'var(--accent-green-bg)' : 'var(--brand)',
+          color: done ? 'var(--accent-green)' : '#fff',
           fontWeight: 800,
           fontSize: 13,
-          border: 'none',
+          border: done ? '1px solid var(--accent-green)' : 'none',
           cursor: loading || done ? 'default' : 'pointer',
           whiteSpace: 'nowrap',
         }}
       >
-        {done ? '✓ 등록 완료' : loading ? '등록 중…' : isLoggedIn ? '관심 등록' : '로그인하고 등록'}
+        {done ? '★ 등록 완료' : loading ? '등록 중…' : isLoggedIn ? '☆ 관심 등록' : '☆ 로그인하고 등록'}
       </button>
       {err && (
-        <div style={{ width: '100%', fontSize: 12, color: '#FF6B6B', marginTop: 4 }}>{err}</div>
+        <div style={{ width: '100%', fontSize: 12, color: 'var(--error)', marginTop: 4 }}>{err}</div>
       )}
       {/* Phase 5 B2: 등록 완료 후 가점 매칭 follow-up CTA */}
       {done && isLoggedIn && (
-        <div style={{ width: '100%', marginTop: 4, padding: '8px 10px', background: 'rgba(250,199,117,0.08)', border: '1px solid rgba(250,199,117,0.3)', borderRadius: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+        <div style={{ width: '100%', marginTop: 4, padding: '8px 10px', background: 'var(--accent-yellow-bg)', border: '1px solid var(--accent-yellow)', borderRadius: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
           <span style={{ fontSize: 12, color: 'var(--text-secondary)', fontWeight: 600 }}>
-            <span style={{ color: '#FAC775', marginRight: 4 }}>★</span>
+            <span style={{ color: 'var(--accent-yellow)', marginRight: 4 }}>★</span>
             가점 입력하면 매칭 단지 자동 알림
           </span>
-          <Link href="/profile/cheongak" style={{ fontSize: 12, fontWeight: 800, color: '#FAC775', textDecoration: 'none' }}>입력하기 →</Link>
+          <Link href="/profile/cheongak" style={{ fontSize: 12, fontWeight: 800, color: 'var(--accent-yellow)', textDecoration: 'none' }}>가점 입력 →</Link>
         </div>
       )}
     </div>

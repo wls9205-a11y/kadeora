@@ -47,16 +47,18 @@ export default function KakaoBottomSheet({ open, onClose, feature = 'star', titl
     >
       <div style={{
         width: '100%', maxWidth: 440,
-        background: '#0C1528', borderRadius: '20px 20px 0 0',
+        background: 'var(--gate-card-bg)', borderRadius: '20px 20px 0 0',
         padding: '24px 20px calc(20px + env(safe-area-inset-bottom, 0px))',
         animation: 'ksSlideUp .25s ease-out',
+        border: '1px solid var(--gate-card-border)',
+        borderBottom: 'none',
       }}>
-        <div style={{ width: 40, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.1)', margin: '0 auto 16px' }} />
+        <div style={{ width: 40, height: 4, borderRadius: 2, background: 'var(--gate-card-faint)', margin: '0 auto 16px' }} />
 
-        <div style={{ fontSize: 16, fontWeight: 500, color: '#ddd8d0', marginBottom: 4, textAlign: 'center' }}>
+        <div style={{ fontSize: 16, fontWeight: 500, color: 'var(--gate-card-text)', marginBottom: 4, textAlign: 'center' }}>
           {title || '회원 전용 기능이에요'}
         </div>
-        <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', marginBottom: 20, textAlign: 'center' }}>
+        <div style={{ fontSize: 13, color: 'var(--gate-card-muted)', marginBottom: 20, textAlign: 'center' }}>
           {description || '가입하면 바로 이용할 수 있어요'}
         </div>
 
@@ -73,15 +75,15 @@ export default function KakaoBottomSheet({ open, onClose, feature = 'star', titl
             <path d="M255.5 48C141.1 48 48 126.1 48 222.4c0 62.2 38.7 116.7 97 149.8l-24.1 89.7c-2.1 7.9 6.8 14.4 13.7 9.9l101.2-65.2c7.2 1 14.6 1.5 22.2 1.5 114.4 0 207.5-78.1 207.5-174.4S369.9 48 255.5 48z" />
           </svg>
           <span style={{ fontSize: 15, color: 'rgba(0,0,0,0.85)', fontWeight: 500 }}>
-            카카오톡으로 3초 만에 가입하기
+            카카오로 가입
           </span>
         </Link>
 
-        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.16)', textAlign: 'center', marginTop: 12 }}>
+        <div style={{ fontSize: 12, color: 'var(--gate-card-faint)', textAlign: 'center', marginTop: 12 }}>
           <Link
             href={altUrl}
             onClick={() => trackCTA('click', `kakao_sheet_${feature}_alt`, { page_path: pathname })}
-            style={{ color: 'rgba(255,255,255,0.16)', textDecoration: 'underline', textUnderlineOffset: '3px' }}
+            style={{ color: 'var(--gate-card-faint)', textDecoration: 'underline', textUnderlineOffset: '3px' }}
           >
             다른 방법으로 가입하기
           </Link>

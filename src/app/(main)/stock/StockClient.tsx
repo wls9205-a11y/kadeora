@@ -1009,7 +1009,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
           <SearchInput
             value={search}
             onChange={v => { setSearch(v); setStockListLimit(30); }}
-            placeholder="종목명, 코드 검색"
+            placeholder="🔍 종목 검색"
             size="sm"
             style={{ flex: 1 }}
           />

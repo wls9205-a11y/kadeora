@@ -137,10 +137,10 @@ export default function KakaoChannelAddModal({ triggerOnMount = true }: Props) {
         <div
           onClick={(e) => e.stopPropagation()}
           style={{
-            background: '#0F1729', borderRadius: 20, padding: '28px 22px 22px',
+            background: 'var(--gate-card-bg)', borderRadius: 20, padding: '28px 22px 22px',
             width: '100%', maxWidth: 340, position: 'relative',
-            border: '0.5px solid rgba(254,229,0,0.3)',
-            boxShadow: '0 24px 60px rgba(0,0,0,0.5)',
+            border: '0.5px solid var(--gate-card-border)',
+            boxShadow: 'var(--shadow-xl)',
             animation: 'kd-channel-card-in 280ms cubic-bezier(0.16,1,0.3,1) forwards',
           }}
         >
@@ -149,7 +149,7 @@ export default function KakaoChannelAddModal({ triggerOnMount = true }: Props) {
             aria-label="닫기"
             style={{
               position: 'absolute', top: 10, right: 12,
-              width: 28, height: 28, color: 'rgba(255,255,255,0.5)',
+              width: 28, height: 28, color: 'var(--gate-card-muted)',
               background: 'transparent', border: 'none', fontSize: 18, cursor: 'pointer',
               padding: 0,
             }}
@@ -158,27 +158,27 @@ export default function KakaoChannelAddModal({ triggerOnMount = true }: Props) {
           <div style={{ textAlign: 'center', marginBottom: 14 }}>
             <div style={{ fontSize: 48, marginBottom: 8 }}>💬</div>
             <div style={{
-              fontSize: 11, color: '#FEE500', fontWeight: 500, marginBottom: 6,
+              fontSize: 11, color: 'var(--gate-accent)', fontWeight: 500, marginBottom: 6,
               background: 'rgba(254,229,0,0.1)', padding: '4px 12px',
               borderRadius: 999, display: 'inline-block',
             }}>
-              카카오톡 채널 친구 추가
+              💬 카카오 채널 추가
             </div>
           </div>
 
           <div
             id="kd-channel-title"
             style={{
-              textAlign: 'center', color: '#fff', fontSize: 18, fontWeight: 500,
+              textAlign: 'center', color: 'var(--gate-card-text)', fontSize: 18, fontWeight: 500,
               lineHeight: 1.3, marginBottom: 12, wordBreak: 'keep-all',
             }}
           >
             청약·실거래 알림을<br />
-            <span style={{ color: '#FEE500' }}>카톡으로</span> 받아보세요
+            <span style={{ color: 'var(--gate-accent)' }}>카톡으로</span> 받아보세요
           </div>
 
           <div style={{
-            textAlign: 'center', color: 'rgba(255,255,255,0.65)',
+            textAlign: 'center', color: 'var(--gate-card-muted)',
             fontSize: 12, lineHeight: 1.5, marginBottom: 18,
           }}>
             우리 동네 부동산 핫이슈 + 청약 임박 알림<br />
@@ -194,14 +194,14 @@ export default function KakaoChannelAddModal({ triggerOnMount = true }: Props) {
               boxShadow: '0 4px 16px rgba(254,229,0,0.18)',
             }}
           >
-            💬 카카오톡 채널 친구 추가
+            💬 카카오 채널 추가
           </button>
 
           <button
             onClick={() => handleDismiss()}
             style={{
               width: '100%', background: 'transparent',
-              color: 'rgba(255,255,255,0.5)', fontSize: 12,
+              color: 'var(--gate-card-muted)', fontSize: 12,
               padding: 8, border: 'none', cursor: 'pointer',
             }}
           >

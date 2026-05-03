@@ -115,11 +115,11 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
       const { data: existing } = await sb.from('apt_watchlist').select('id').eq('user_id', aptUser.id).eq('item_type', itemType).eq('item_id', itemId).maybeSingle();
       if (existing) {
         await sb.from('apt_watchlist').delete().eq('id', existing.id);
-        showToast('관심단지에서 해제했습니다');
+        showToast('관심 해제됨');
         trackFeature('watchlist_remove', { item_type: itemType, item_id: itemId });
       } else {
         await sb.from('apt_watchlist').insert({ user_id: aptUser.id, item_type: itemType, item_id: itemId, notify_enabled: true });
-        showToast('⭐ 관심단지 등록! 새 소식이 있으면 알림을 보내드립니다');
+        showToast('★ 관심 등록 · 새 소식이 있으면 알려드릴게요');
         trackFeature('watchlist_add', { item_type: itemType, item_id: itemId });
         // 첫 미션: 관심단지 추가 자동 완료
         fetch('/api/profile/mission', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mission: 'watchlist' }) }).catch(() => {});
@@ -166,7 +166,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
         <SearchInput
           value={globalSearch}
           onChange={setGlobalSearch}
-          placeholder="단지명, 시공사, 지역 검색"
+          placeholder="🔍 단지 · 시공사 · 지역 검색"
           size="sm"
           debounceMs={200}
           style={{ flex: 1 }}
@@ -432,7 +432,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
       {typeof window !== 'undefined' && isTossMode() && (
         <TossTeaser
           path="/apt"
-          label="부동산 전체 정보 보기"
+          label="더보기"
           subtitle="청약 2,694건 · 미분양 213건 · 재개발 206건"
         />
       )}

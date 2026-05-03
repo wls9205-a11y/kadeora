@@ -747,7 +747,7 @@ export default async function AptUnifiedPage({ params }: Props) {
             level="login"
             previewLines={5}
             ctaName="apt_gate_ai_analysis"
-            ctaText="1초 로그인하고 전체 분석 보기"
+            ctaText="로그인하고 전체 분석 보기"
             redirectPath={`/apt/${slug}`}
             isLoggedIn={isLoggedInApt}
             isPremium={isPremiumApt}
@@ -1854,7 +1854,7 @@ export default async function AptUnifiedPage({ params }: Props) {
               </div>
             ));
           })()}
-          <Link href={`/apt/complex/${encodeURIComponent(name)}`} style={{ display: 'block', textAlign: 'center', marginTop: 10, padding: '8px 0', borderRadius: 'var(--radius-sm)', background: 'var(--brand-bg)', color: 'var(--brand)', fontSize: 'var(--fs-sm)', fontWeight: 600, textDecoration: 'none' }}>전체 실거래 내역 보기 →</Link>
+          <Link href={`/apt/complex/${encodeURIComponent(name)}`} style={{ display: 'block', textAlign: 'center', marginTop: 10, padding: '8px 0', borderRadius: 'var(--radius-sm)', background: 'var(--brand-bg)', color: 'var(--brand)', fontSize: 'var(--fs-sm)', fontWeight: 600, textDecoration: 'none' }}>실거래 전체 →</Link>
         </div>
       )}
 

@@ -87,7 +87,7 @@ export default function PortfolioSimulator({ stocks, isKR }: Props) {
       {/* 검색 */}
       <div style={{ position: 'relative', marginBottom: 'var(--sp-sm)' }}>
         <input value={search} onChange={e => { setSearch(e.target.value); setShowSearch(true); }} onFocus={() => setShowSearch(true)}
-          placeholder="종목 검색해서 추가..." className="kd-search-input" style={{ width: '100%' }} />
+          placeholder="🔍 비교할 종목 추가" className="kd-search-input" style={{ width: '100%' }} />
         {showSearch && searchResults.length > 0 && (
           <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', zIndex: 50, marginTop: 'var(--sp-xs)', overflow: 'hidden' }}>
             {searchResults.map(s => (

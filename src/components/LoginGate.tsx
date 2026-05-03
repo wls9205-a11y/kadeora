@@ -114,7 +114,7 @@ export default function LoginGate({ children, feature, title, description, blurH
           <path d="M255.5 48C141.1 48 48 126.1 48 222.4c0 62.2 38.7 116.7 97 149.8l-24.1 89.7c-2.1 7.9 6.8 14.4 13.7 9.9l101.2-65.2c7.2 1 14.6 1.5 22.2 1.5 114.4 0 207.5-78.1 207.5-174.4S369.9 48 255.5 48z" />
         </svg>
         <span style={{ fontSize: 15, color: 'rgba(0,0,0,0.85)', fontWeight: 500, letterSpacing: '-0.2px' }}>
-          카카오톡으로 3초 만에 가입하기
+          카카오로 가입
         </span>
       </Link>
 

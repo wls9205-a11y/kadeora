@@ -138,7 +138,7 @@ export default function DiagnoseClient() {
             <div style={{display:'flex',gap:6}}>
               {step>0&&<button onClick={()=>setStep(step-1)} style={{padding:'10px 18px',borderRadius: 'var(--radius-md)',border:'1px solid var(--border)',background:'var(--bg-hover)',color:'var(--text-primary)',cursor:'pointer',fontWeight:600,fontSize:13}}>이전</button>}
               {step<3?<button onClick={()=>setStep(step+1)} style={{padding:'10px 18px',borderRadius: 'var(--radius-md)',border:'none',background:'var(--brand)',color:'var(--text-inverse, #fff)',cursor:'pointer',fontWeight:700,fontSize:13}}>다음</button>
-              :<button onClick={()=>{setShowResult(true);trackFeature('calc_result',{calculator:'apt_score',total})}} style={{padding:'10px 24px',borderRadius: 'var(--radius-md)',border:'none',background:'var(--brand)',color:'var(--text-inverse, #fff)',cursor:'pointer',fontWeight:700,fontSize:14}}>결과 보기</button>}
+              :<button onClick={()=>{setShowResult(true);trackFeature('calc_result',{calculator:'apt_score',total})}} style={{padding:'10px 24px',borderRadius: 'var(--radius-md)',border:'none',background:'var(--brand)',color:'var(--text-inverse, #fff)',cursor:'pointer',fontWeight:700,fontSize:14}}>가점 확인</button>}
             </div>
           </div>
         </>
@@ -167,8 +167,8 @@ export default function DiagnoseClient() {
                 if(typeof window!=='undefined'&&(window as unknown as Record<string,unknown>).Kakao){try{((window as unknown as Record<string,unknown>).Kakao as Record<string,unknown> as {Share:{sendDefault:(o:unknown)=>void}}).Share.sendDefault({objectType:'feed',content:{title:'청약 가점 진단 결과',description:text.slice(0,100),imageUrl:`${url.replace('/apt/diagnose','')}/api/og?title=${encodeURIComponent('청약 가점 '+total+'점')}`,link:{mobileWebUrl:url,webUrl:url}}});}catch{navigator.share?.({title:'청약 가점 진단',text,url}).catch(()=>{});}}
                 else if(navigator.share)navigator.share({title:'청약 가점 진단 결과',text,url}).catch(()=>{});
                 else navigator.clipboard.writeText(text+'\n'+url).then(()=>alert('복사되었습니다!'));
-              }} style={{padding:'10px 20px',borderRadius: 'var(--radius-md)',border:'none',cursor:'pointer',background:'var(--brand)',color:'#fff',fontSize:13,fontWeight:700}}>결과 공유</button>
-              <button onClick={()=>setShowResult(false)} style={{padding:'10px 20px',borderRadius: 'var(--radius-md)',border:'1px solid var(--border)',cursor:'pointer',background:'var(--bg-hover)',color:'var(--text-secondary)',fontSize:13,fontWeight:600}}>다시 계산</button>
+              }} style={{padding:'10px 20px',borderRadius: 'var(--radius-md)',border:'none',cursor:'pointer',background:'var(--brand)',color:'#fff',fontSize:13,fontWeight:700}}>⤴ 공유</button>
+              <button onClick={()=>setShowResult(false)} style={{padding:'10px 20px',borderRadius: 'var(--radius-md)',border:'1px solid var(--border)',cursor:'pointer',background:'var(--bg-hover)',color:'var(--text-secondary)',fontSize:13,fontWeight:600}}>↻ 다시</button>
             </div>
           </div>
 
@@ -207,7 +207,7 @@ export default function DiagnoseClient() {
           <div style={{...card,textAlign:'center',padding:24,background:'linear-gradient(135deg, rgba(59,123,246,0.06), rgba(139,92,246,0.06))',border:'1px solid rgba(59,123,246,0.15)'}}>
             <div style={{fontSize:15,fontWeight:800,color:'var(--text-primary)',marginBottom:6}}>🔒 맞춤 전략·지역별 커트라인·가점 올리는 법</div>
             <div style={{fontSize:12,color:'var(--text-secondary)',marginBottom:16,lineHeight:1.6}}>카카오 가입하면 내 점수에 맞는 추천 전략,<br/>지역별 당첨 가능성, 가점 올리는 꿀팁을 볼 수 있어요</div>
-            <Link href="/login?redirect=/apt/diagnose&source=calc_gate" style={{display:'inline-block',padding:'12px 36px',borderRadius:30,background:'#FEE500',color:'#191919',fontWeight:800,fontSize:14,textDecoration:'none'}}>카카오로 3초 만에 열기</Link>
+            <Link href="/login?redirect=/apt/diagnose&source=calc_gate" style={{display:'inline-block',padding:'12px 36px',borderRadius:30,background:'#FEE500',color:'#191919',fontWeight:800,fontSize:14,textDecoration:'none'}}>카카오로 시작</Link>
             <div style={{fontSize:11,color:'var(--text-tertiary)',marginTop:10}}>가입 즉시 이용 · 스팸 없음</div>
           </div>
           )}

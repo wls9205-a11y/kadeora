@@ -66,7 +66,7 @@ export default function BlogGatedWall({ h2, previewHtml, gate, ctaText, redirect
   }, [gate, redirectPath, ctaSource]);
 
   const isPremium = gate === 'premium';
-  const label = isPremium ? '프리미엄 회원 전용' : '로그인 후 전체 보기';
+  const label = isPremium ? '프리미엄 회원 전용' : '로그인하고 계속 읽기';
   const btnLabel = ctaText || (isPremium ? '프리미엄 가입하기' : '카카오로 1초 로그인');
 
   return (

@@ -9,25 +9,25 @@ interface Props {
 
 const WIDGET_CONFIG: Record<string, { title: string; desc: string; href: string; icon: string; cta: string }[]> = {
   apt: [
-    { title: '아파트 검색', desc: '관심 단지의 실거래가·시세를 확인하세요', href: '/apt/search', icon: '🔍', cta: '단지 검색하기' },
-    { title: '청약 캘린더', desc: '이번 달 청약 일정 한눈에 보기', href: '/apt', icon: '📅', cta: '청약 일정 보기' },
+    { title: '아파트 검색', desc: '관심 단지 실거래가·시세 확인', href: '/apt/search', icon: '🔍', cta: '단지 검색' },
+    { title: '청약 캘린더', desc: '이번 달 청약 일정', href: '/apt', icon: '📅', cta: '청약 일정' },
   ],
   stock: [
-    { title: '종목 시세', desc: '실시간 시세와 AI 분석을 확인하세요', href: '/stock', icon: '📈', cta: '종목 보기' },
-    { title: '투자 계산기', desc: '수익률·세금 계산을 해보세요', href: '/calc', icon: '🧮', cta: '계산기 열기' },
+    { title: '종목 시세', desc: '실시간 시세와 AI 분석', href: '/stock', icon: '📈', cta: '종목 보기' },
+    { title: '투자 계산기', desc: '수익률·세금 계산', href: '/calc', icon: '🧮', cta: '계산기 열기' },
   ],
   unsold: [
-    { title: '미분양 현황', desc: '전국 미분양 아파트를 지역별로 확인', href: '/apt/search', icon: '🏚️', cta: '미분양 검색' },
-    { title: '청약 가점 계산', desc: '내 가점으로 당첨 가능성 확인', href: '/apt/diagnose', icon: '✅', cta: '가점 계산하기' },
+    { title: '미분양 현황', desc: '전국 미분양 아파트 지역별', href: '/apt/search', icon: '🏚️', cta: '미분양 검색' },
+    { title: '청약 가점', desc: '내 가점으로 당첨 가능성', href: '/apt/diagnose', icon: '✅', cta: '가점 계산' },
   ],
   finance: [
-    { title: '금융 계산기', desc: '대출·이자·연금·절세 계산을 한곳에서', href: '/calc', icon: '🧮', cta: '계산기 모음' },
-    { title: '주식 시세', desc: '관심 종목 시세와 AI 투자 분석', href: '/stock', icon: '📈', cta: '종목 보기' },
+    { title: '금융 계산기', desc: '대출·이자·연금·절세 한곳에', href: '/calc', icon: '🧮', cta: '계산기 모음' },
+    { title: '주식 시세', desc: '관심 종목 시세와 AI 분석', href: '/stock', icon: '📈', cta: '종목 보기' },
   ],
 };
 
 const DEFAULT_WIDGETS = [
-  { title: '카더라 둘러보기', desc: '주식·부동산·청약 정보를 한곳에서', href: '/feed', icon: '🏠', cta: '피드 보기' },
+  { title: '카더라 둘러보기', desc: '주식·부동산·청약 한곳에', href: '/feed', icon: '🏠', cta: '피드 보기' },
   { title: '계산기', desc: '대출·수익률·세금 계산', href: '/calc', icon: '🧮', cta: '계산기 열기' },
 ];
 

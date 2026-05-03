@@ -153,7 +153,7 @@ export default function ComplexClient({ complexes, ageGroups, regions, initialRe
         <SearchInput
           value={searchQuery}
           onChange={v => handleSearch(v)}
-          placeholder="단지명 검색"
+          placeholder="🔍 단지 검색"
           size="sm"
           loading={searching}
           style={{ flex: '1 1 200px' }}

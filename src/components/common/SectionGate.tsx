@@ -159,7 +159,7 @@ function GatedSection({
             marginBottom: 6,
           }}
         >
-          🔒 {isPremiumGate ? '프리미엄 회원 전용' : '로그인 후 전체 보기'}
+          🔒 {isPremiumGate ? '프리미엄 회원 전용' : '로그인하고 계속 읽기'}
         </div>
         <Link
           href={targetUrl}

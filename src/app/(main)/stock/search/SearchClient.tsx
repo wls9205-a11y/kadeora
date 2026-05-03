@@ -56,7 +56,7 @@ export default function StockSearchClient() {
 
       {/* Search + Filters */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
-        <input type="text" placeholder="종목명 또는 심볼 검색..." value={search} onChange={e => setSearch(e.target.value)}
+        <input type="text" placeholder="🔍 종목 검색" value={search} onChange={e => setSearch(e.target.value)}
           style={{ width: '100%', padding: '10px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', fontSize: 14 }} />
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
           {['ALL','KOSPI','KOSDAQ','NYSE','NASDAQ'].map(m => (

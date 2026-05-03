@@ -626,7 +626,7 @@ export default function FeedClient({
             <div style={{ fontSize: 36, marginBottom: 'var(--sp-sm)' }}>👥</div>
             <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-xs)' }}>팔로우한 사람의 글이 없어요</div>
             <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-md)' }}>관심 있는 유저를 팔로우해보세요</div>
-            <Link href="/feed" style={{ display: 'inline-block', padding: '8px 20px', borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: '#fff', fontWeight: 700, fontSize: 13, textDecoration: 'none' }}>전체 피드 보기</Link>
+            <Link href="/feed" style={{ display: 'inline-block', padding: '8px 20px', borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: '#fff', fontWeight: 700, fontSize: 13, textDecoration: 'none' }}>피드 더보기 →</Link>
           </div>
         )}
 
@@ -643,7 +643,7 @@ export default function FeedClient({
         {typeof window !== 'undefined' && isTossMode() && posts.length > 5 && (
           <TossTeaser
             path="/feed"
-            label="카더라 커뮤니티 전체 보기"
+            label="더보기"
             subtitle={`${posts.length.toLocaleString()}개 글 중 5개만 표시 중`}
           />
         )}

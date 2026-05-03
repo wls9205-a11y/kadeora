@@ -121,9 +121,9 @@ export default function CompareClient() {
 
       {/* 종목 선택 */}
       <div style={{ display: 'flex', gap: 10, marginBottom: 'var(--sp-lg)', alignItems: 'flex-start' }}>
-        <SelectBox value={stockA} search={searchA} setSearch={setSearchA} onSelect={setStockA} placeholder="종목 A 검색..." />
+        <SelectBox value={stockA} search={searchA} setSearch={setSearchA} onSelect={setStockA} placeholder="🔍 종목 A" />
         <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-tertiary)', paddingTop: 10 }}>VS</div>
-        <SelectBox value={stockB} search={searchB} setSearch={setSearchB} onSelect={setStockB} placeholder="종목 B 검색..." />
+        <SelectBox value={stockB} search={searchB} setSearch={setSearchB} onSelect={setStockB} placeholder="🔍 종목 B" />
       </div>
 
       {/* 비교 테이블 */}
