@@ -7,20 +7,7 @@ import EmptyState from '@/components/EmptyState';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
 import SectionShareButton from '@/components/SectionShareButton';
 import FallbackThumb from '@/components/FallbackThumb';
-import HeroCard from '@/components/ui/HeroCard';
-import { getSupabaseAdmin } from '@/lib/supabase-admin';
-
-async function fetchBlogHero() {
-  try {
-    const sb = getSupabaseAdmin();
-    const { data } = await (sb as any).from('blog_posts')
-      .select('slug, title, sub_category, view_count, reading_minutes, published_at')
-      .eq('is_published', true)
-      .order('view_count', { ascending: false, nullsFirst: false })
-      .limit(1).maybeSingle();
-    return data ?? null;
-  } catch { return null; }
-}
+// s205-W2: HeroCard "오늘의 블로그" 제거 — 14d /blog 1,176 PV, 카드 클릭 1건. fetchBlogHero / getSupabaseAdmin 도 함께 제거.
 
 function highlightTitle(title: string, query: string): React.ReactNode {
   if (!query) return title;
@@ -128,9 +115,7 @@ export default async function BlogPage({ searchParams }: Props) {
   const pageNum = Math.max(1, parseInt(page) || 1);
   const perPage = 30;
   const sb = await createSupabaseServer();
-  // Phase 9b-2: HeroCard top1 (view_count) — 첫 페이지 + 필터 없을 때만
-  const showHero = pageNum === 1 && category === 'all' && !sub && !q;
-  const blogHero = showHero ? await fetchBlogHero() : null;
+  // s205-W2: blogHero (HeroCard) 제거 — 효용 0 (클릭 1건/14d).
 
   // 카테고리 건수 + 인기글 + 인기태그 — 병렬 조회
   const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString();
@@ -281,24 +266,7 @@ export default async function BlogPage({ searchParams }: Props) {
       {/* speakable — 네이버 음성검색 */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebPage', name: '카더라 블로그', speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.blog-summary'] } }) }} />
       {/* LiveBar 는 (main)/layout 의 LiveBarChrome 으로 통합. */}
-      {/* Phase 9b-2: 인기 글 HeroCard (필터 없을 때만) */}
-      {blogHero && (
-        <HeroCard
-          tag={`${blogHero.sub_category || '인기'} · 가장 많이 읽힌 글`}
-          title={blogHero.title}
-          meta={[
-            blogHero.view_count ? `조회 ${Number(blogHero.view_count).toLocaleString()}회` : null,
-            blogHero.reading_minutes ? `${blogHero.reading_minutes}분` : null,
-            blogHero.published_at ? new Date(blogHero.published_at).toISOString().slice(0, 10) : null,
-          ].filter(Boolean).join(' · ')}
-          stats={[
-            { value: Number(blogHero.view_count || 0).toLocaleString(), label: '조회수', tone: 'success' },
-            ...(blogHero.reading_minutes ? [{ value: `${blogHero.reading_minutes}분`, label: '분량' }] : []),
-            { value: 'TOP 1', label: '인기' },
-          ]}
-          href={`/blog/${encodeURIComponent(blogHero.slug)}`}
-        />
-      )}
+      {/* s205-W2: HeroCard "오늘의 블로그" 제거. */}
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 14, paddingTop: 4 }}>
         <div>
           <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 900, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.5px' }}>블로그</h1>

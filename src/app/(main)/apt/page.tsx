@@ -3,7 +3,6 @@ import type { Metadata } from 'next';
 import Disclaimer from '@/components/Disclaimer';
 import AdBanner from '@/components/AdBanner';
 
-import { detectDefaultRegion } from '@/lib/region-detection';
 import {
   fetchHeroSite, fetchSiteList, fetchAIAnalysis, fetchCategoryCounts,
   fetchStatsKPI, fetchImminentTop3, fetchSigunguTrends, fetchPriceBands,
@@ -11,7 +10,7 @@ import {
   type AptCategory, type AptFilters, type AptSortKey,
 } from '@/lib/apt-fetcher';
 
-import RegionHero from '@/components/apt/RegionHero';
+import RegionAutoSelect from '@/components/apt/RegionAutoSelect';
 import RegionHeader from '@/components/apt/RegionHeader';
 import AptHeroSearch from '@/components/apt/AptHeroSearch';
 import AptCategoryTabs from '@/components/apt/AptCategoryTabs';
@@ -89,19 +88,12 @@ export default async function AptPage({
   }>;
 }) {
   const sp = (await searchParams) || {};
-  const region = sp.region?.trim() || null;
+  // s205-W1 SSR 복구: region 미설정 시 RegionHero 만 렌더 → 봇 HTML 텍스트 0건이었음.
+  // 이제 default '전국' 으로 SSR 풀렌더 + 클라이언트 측 RegionAutoSelect 가
+  // 브라우저 IP/저장값 기반으로 ?region= 으로 replace.
+  const region = sp.region?.trim() || '전국';
   const sigungu = sp.sigungu?.trim() || null;
-
-  // 지역 미설정 → RegionHero (IP geolocation default)
-  if (!region) {
-    const defaultRegion = await detectDefaultRegion();
-    return (
-      <>
-        <RegionHero defaultRegion={defaultRegion} />
-        <Disclaimer type="apt" />
-      </>
-    );
-  }
+  const isAutoRegion = !sp.region;
 
   // ─── region 설정됨 → 8섹션 server fetch ───
   const rawCat = (sp.category as AptCategory | undefined) || 'all';
@@ -184,6 +176,9 @@ export default async function AptPage({
       <p className="sr-only region-summary">
         {regionLabel}의 청약·분양·미분양·재개발 단지 {(categoryCounts.all ?? 0).toLocaleString()}건. 분양중 {kpis.active_sub}, 미분양 {kpis.unsold}, 재개발 {kpis.redev}, 7일 실거래 {kpis.trade_7d}건.
       </p>
+
+      {/* s205-W1: 클라이언트 IP/저장 기반 region 자동선택 (SSR 안 막음) */}
+      {isAutoRegion && <RegionAutoSelect />}
 
       {/* Chrome — sticky */}
       <RegionHeader region={region} sigungu={sigungu} />

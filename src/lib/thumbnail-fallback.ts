@@ -9,6 +9,7 @@
  */
 
 import { SITE_URL } from '@/lib/constants';
+import { pickPrimaryImage } from '@/lib/apt/imagePriority';
 
 const SITE = SITE_URL.replace(/\/$/, '') || 'https://kadeora.app';
 
@@ -17,15 +18,12 @@ function ogFallback(title: string, category: string = 'blog'): string {
   return `${SITE}/api/og-square?title=${encodeURIComponent(t)}&category=${category}`;
 }
 
-/** images jsonb 첫 번째 URL 안전 추출 */
+/**
+ * images jsonb 에서 우선순위 정렬 후 1장 추출 (s205-W3).
+ * satellite 강등, 시공사 도메인 우대.
+ */
 function firstImageUrl(images: unknown): string | null {
-  if (!Array.isArray(images) || images.length === 0) return null;
-  const first = images[0] as any;
-  if (typeof first === 'string' && first.length > 0) return first;
-  if (first && typeof first === 'object' && typeof first.url === 'string' && first.url.length > 0) {
-    return first.url;
-  }
-  return null;
+  return pickPrimaryImage(images);
 }
 
 export interface AptSiteThumbRow {

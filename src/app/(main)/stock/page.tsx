@@ -44,9 +44,8 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { unstable_cache } from 'next/cache';
 import StockClient from './StockClient';
-import StockHeroCarousel from '@/components/stock/StockHeroCarousel';
+// s205-W2: StockHeroCarousel + HeroCard "오늘의 종목" 제거 — 14d 클릭 0건, hero refresh cron 도 정리.
 import Disclaimer from '@/components/Disclaimer';
-import HeroCard from '@/components/ui/HeroCard';
 
 async function fetchStocks() {
   const sb = await createSupabaseServer();
@@ -116,16 +115,7 @@ const getCachedBriefingUS = unstable_cache(fetchBriefingUS, ['stock-briefing-us'
 const getCachedExchangeHistory = unstable_cache(fetchExchangeHistory, ['exchange-history', 'v1'], { revalidate: 3600 });
 const getCachedThemeHistory = unstable_cache(fetchThemeHistory, ['theme-history', 'v1'], { revalidate: 600 });
 
-async function fetchHeroSlides() {
-  const sb = await createSupabaseServer();
-  const { data } = await (sb as any).from('stock_hero_slides')
-    .select('id, title_ko, subtitle_ko, slide_type, link_url, data')
-    .eq('is_active', true)
-    .order('slide_order', { ascending: true })
-    .limit(7);
-  return data ?? [];
-}
-const getCachedHeroSlides = unstable_cache(fetchHeroSlides, ['hero-slides', 'v1'], { revalidate: 300 });
+// s205-W2: fetchHeroSlides + getCachedHeroSlides 제거 — stock_hero_slides 13개 활성 중복, 클릭 0건.
 
 export default async function StockPage() {
   let stocks: Record<string, any>[] = [];
@@ -133,23 +123,20 @@ export default async function StockPage() {
   let briefingUS: any = null;
   let exchangeHistory: Record<string, any>[] = [];
   let themeHistory: Record<string, any>[] = [];
-  let heroSlides: any[] = [];
 
   try {
-    const [stocksData, briefingData, briefingUSData, exchData, themeData, slidesData] = await Promise.all([
+    const [stocksData, briefingData, briefingUSData, exchData, themeData] = await Promise.all([
       getCachedStocks(),
       getCachedBriefing().catch(() => null),
       getCachedBriefingUS().catch(() => null),
       getCachedExchangeHistory().catch(() => []),
       getCachedThemeHistory().catch(() => []),
-      getCachedHeroSlides().catch(() => []),
     ]);
     stocks = stocksData.length > 0 ? stocksData : await fetchStocks();
     briefing = briefingData;
     briefingUS = briefingUSData;
     exchangeHistory = exchData;
     themeHistory = themeData;
-    heroSlides = slidesData;
   } catch {
     try { stocks = await fetchStocks(); } catch {}
   }
@@ -200,36 +187,7 @@ export default async function StockPage() {
       <h1 className="sr-only">주식 시세 — 실시간 국내외 종목</h1>
       <p className="sr-only">카더라 주식에서는 KOSPI·KOSDAQ·NYSE·NASDAQ {stocks.length}개 종목의 실시간 시세, 등락률, 시가총액, PER, 배당수익률을 확인할 수 있습니다. AI 시황 브리핑, 섹터별 히트맵, 테마주 분석, 포트폴리오 시뮬레이터를 무료로 제공합니다.</p>
       {/* LiveBar 는 (main)/layout 의 LiveBarChrome 으로 통합. */}
-      {/* Phase 9b-2: 오늘의 종목 HeroCard (일간 상승 top1) */}
-      {(() => {
-        const heroStock = (stocks
-          .filter((s: any) => s?.change_pct != null && Number(s.change_pct) > 0)
-          .sort((a: any, b: any) => Number(b.change_pct) - Number(a.change_pct))[0]) || stocks[0];
-        if (!heroStock) return null;
-        const isUSD = heroStock.currency === 'USD';
-        const price = Number(heroStock.price);
-        const change = Number(heroStock.change_pct ?? 0);
-        return (
-          <div style={{ padding: '12px 16px 0' }}>
-            <HeroCard
-              tag="오늘의 종목"
-              title={heroStock.name}
-              meta={[heroStock.symbol, heroStock.market, isUSD ? '해외' : '국내'].filter(Boolean).join(' · ')}
-              stats={[
-                { value: isUSD ? `$${price.toFixed(2)}` : `₩${price.toLocaleString()}`, label: '현재가' },
-                { value: `${change > 0 ? '+' : ''}${change.toFixed(2)}%`, label: '일간', tone: change > 0 ? 'success' : change < 0 ? 'danger' : 'default' },
-                { value: heroStock.market || '—', label: '시장' },
-              ]}
-              href={`/stock/${heroStock.symbol}`}
-            />
-          </div>
-        );
-      })()}
-      {heroSlides.length > 0 && (
-        <div style={{ padding: '12px 16px 0' }}>
-          <StockHeroCarousel slides={heroSlides} />
-        </div>
-      )}
+      {/* s205-W2: "오늘의 종목" HeroCard + StockHeroCarousel 2종 제거 — 14d /stock 23 PV, 클릭 0건 */}
       <StockClient initialStocks={stocks as React.ComponentProps<typeof StockClient>['initialStocks']} briefing={briefing} briefingUS={briefingUS} exchangeHistory={exchangeHistory} themeHistory={themeHistory} />
       {/* C-7: noscript — JS 비활성화 크롤러용 기본 종목 목록 */}
       <noscript>

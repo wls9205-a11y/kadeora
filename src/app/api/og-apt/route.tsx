@@ -300,27 +300,39 @@ export async function GET(req: NextRequest) {
   const ff = fontData ? 'NotoSansKR, sans-serif' : 'sans-serif';
 
   let site: AptRow | null = null;
-  if (slug) site = await fetchSite(slug);
-
-  let body: React.ReactElement;
-  if (!site) {
-    body = renderFallback(slug);
-  } else {
-    if (card === 1) body = renderCover(site);
-    else if (card === 2) body = renderMetric(site);
-    else if (card === 3) body = renderUnits(site);
-    else if (card === 4) body = renderTiming(site);
-    else if (card === 5) body = renderPlace(site);
-    else body = renderSpec(site);
+  try {
+    if (slug) site = await fetchSite(slug);
+  } catch (err) {
+    console.error('[og-apt] fetchSite error:', err);
+    site = null;
   }
 
-  const wrapped = (
-    <div style={{ width: '100%', height: '100%', display: 'flex', background: bgFor(card, site), fontFamily: ff }}>
-      {body}
-    </div>
-  );
-
+  // s205-W9: body 구성 + ImageResponse 모두 단일 try 로 wrapping → 어떤 필드 throw 도 fallback 으로 다운그레이드.
   try {
+    let body: React.ReactElement;
+    if (!site) {
+      body = renderFallback(slug);
+    } else if (card === 1) {
+      body = renderCover(site);
+    } else if (card === 2) {
+      body = renderMetric(site);
+    } else if (card === 3) {
+      body = renderUnits(site);
+    } else if (card === 4) {
+      body = renderTiming(site);
+    } else if (card === 5) {
+      body = renderPlace(site);
+    } else {
+      body = renderSpec(site);
+    }
+
+    const wrapped = (
+      <div style={{ width: '100%', height: '100%', display: 'flex', background: bgFor(card, site), fontFamily: ff }}>
+        {body}
+      </div>
+    );
+
+
     const img = new ImageResponse(wrapped, {
       width: SIDE,
       height: SIDE,
@@ -338,12 +350,12 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (err) {
-    // s195: stack + class + code + input params 로깅 (og-blog 와 동일 패턴) —
-    // Vercel 로그 잘려도 핵심 진단 정보 노출.
+    // s205-W9: TypeError 24h 진단 — message + stack 풀, prefix 통일로 grep 용이.
     const e = err as Error;
     console.error(
-      '[og-apt] render error:',
-      e?.stack || e?.message || String(err),
+      '[og-apt] FULL:',
+      'message=', e?.message,
+      'stack=', e?.stack,
       'class=', e?.constructor?.name,
       'code=', (err as any)?.code,
       'input=', { slug, card, fontLoaded: !!fontData, hasSite: !!site, siteType: site?.site_type, nameLen: site?.name?.length },

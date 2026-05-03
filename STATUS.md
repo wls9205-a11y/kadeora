@@ -1,3 +1,38 @@
+# Session 205 — Oneshot Batch (2026-05-02 KST)
+
+브랜치: `main` · 한 commit / 한 deploy. session-205-oneshot-batch tag.
+
+## 변경 요약 (work order 9건)
+
+- **W1 (P0)**: `/apt` SSR 복구 — `next/headers` 의존 server-side region detection 분리. `searchParams.region ?? '전국'` 으로 default SSR + `RegionAutoSelect` (client) 가 브라우저 IP/저장값 기반 `?region=` 으로 replace. 봇 HTML 에 단지 카드 0건 → 50+ 회복 목표.
+- **W2 (P1)**: 오늘의 종목/현장/블로그 hero 3종 제거. `/stock` HeroCard + StockHeroCarousel, `/blog` blogHero HeroCard 삭제. 14일 클릭 0~1건 확정. `vercel.json` 의 `stock-hero-refresh` cron 도 정리.
+- **W3 (P1)**: `lib/apt/imagePriority.ts` 신설. `pickPrimaryImage()` 가 우선순위 정렬 후 1장 추출 — satellite=90 (강등), 시공사 도메인=5 (우대). `thumbnail-fallback.ts` 의 `firstImageUrl` 이 새 헬퍼 사용. 카드 썸네일에서 satellite 비율 < 5% 목표.
+- **W4 (P2)**: BlogCard 정보 디자인 — SKIP (별도 컴포넌트 없이 인라인이라 디자인 변경 폭 큼, 다음 세션에서 별도 PR).
+- **W5 (P0)**: `blog-meta-rewrite-poll` — batch select 에 `'completed'` status 포함 (results_processed=false 인 stuck 케이스). 404/410 = batch 만료 분기 추가, batch 자체만 expired 마킹하고 큐는 pending 유지 (재제출용).
+- **W6 (P0)**: `blog-image-supplement` — errors 를 `{post_id, msg, stack}` 객체 배열로. cron_logs.metadata 에 첫 5개 보존. 24h 440/440 fail 의 진짜 원인을 다음 1회 실행 후 파악.
+- **W7 (P1)**: `stock-logo-fetch` — KOSPI/KOSDAQ 6자리 심볼용 fallback chain 보강. `/imgstock/icons/` + `/imgstock/item/logo/` + Google/DuckDuckGo favicon. 1,317건 모두 NULL → 1h 후 30%+ 회복 목표. push 직후 `reset_kr_stock_logo_queue()` 호출 필요.
+- **W8 (P0)**: STATUS.md 본 섹션 + Architecture Rule #17 추가.
+- **W9 (P0)**: `/api/og-blog`, `/api/og-apt` catch 로깅 prefix 통일 (`[og-blog] FULL:` / `[og-apt] FULL:`). og-apt 는 fetchSite 도 try 로 감싸 ImageResponse 영역과 분리. TypeError 24h 의 진짜 message+stack 노출.
+
+## DB 측 사전 적용
+
+- `get_image_priority` RPC + `get_apt_site_images_sorted` RPC
+- `app_config WHERE namespace=ui_hero` 토글 3종 false (hero 제거 안전 가드)
+- `trg_stock_hero_toggle` 트리거
+- `blog_meta_rewrite_queue` 4,780건 in_progress→pending reset (batch_id 보존)
+- `reset_kr_stock_logo_queue()` 헬퍼
+- `v_image_quality_summary`, `image_quality_daily` 뷰
+
+## 검증 (배포 후)
+
+- `/apt` 봇 뷰: `curl -A Googlebot https://kadeora.app/apt` HTML 에 "분양"/"청약" 50회+
+- `blog_meta_rewrite_queue.status='completed'` 15분 내 진행 (poll 워커 동작)
+- `apt_sites` 카드 첫 이미지 satellite 비율 < 5%
+- `stock_quotes` market IN (KOSPI/KOSDAQ) logo_url 1h 후 30%+
+- Vercel runtime logs 에서 `[og-blog] FULL:` / `[og-apt] FULL:` prefix 로 진짜 에러 캡처
+
+---
+
 # Session 189 — Post-Marathon Recovery (2026-04-28 KST)
 
 브랜치: `fix/post-marathon-recovery` · 한 commit 한 deploy.

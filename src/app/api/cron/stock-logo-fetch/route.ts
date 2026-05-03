@@ -19,14 +19,24 @@ const PREEMPT_MS = 260_000;
 
 function buildSources(symbol: string, domain: string | null): Array<{ source: string; url: string }> {
   const out: Array<{ source: string; url: string }> = [];
-  if (domain) out.push({ source: 'clearbit', url: `https://logo.clearbit.com/${domain.replace(/^https?:\/\//, '')}` });
-  // KOSPI/KOSDAQ 6자리 숫자 심볼
+  const cleanDomain = domain ? domain.replace(/^https?:\/\//, '').replace(/\/.*$/, '') : null;
+  if (cleanDomain) out.push({ source: 'clearbit', url: `https://logo.clearbit.com/${cleanDomain}` });
+
+  // KOSPI/KOSDAQ 6자리 숫자 심볼 — s205-W7: fallback chain 보강 (1,317건 모두 logo NULL 회복)
   if (/^\d{6}$/.test(symbol)) {
-    out.push({ source: 'naver_pstatic', url: `https://ssl.pstatic.net/imgstock/item/logo/${symbol}.png` });
+    out.push({ source: 'naver_pstatic_icons', url: `https://ssl.pstatic.net/imgstock/icons/${symbol}.png` });
+    out.push({ source: 'naver_pstatic_logo', url: `https://ssl.pstatic.net/imgstock/item/logo/${symbol}.png` });
+    if (cleanDomain) {
+      out.push({ source: 'google_favicon', url: `https://www.google.com/s2/favicons?domain=${cleanDomain}&sz=128` });
+      out.push({ source: 'duckduckgo_favicon', url: `https://icons.duckduckgo.com/ip3/${cleanDomain}.ico` });
+    }
   } else {
     // US ticker
     out.push({ source: 'stocklight', url: `https://logo.stocklight.com/ko/${symbol}.png` });
     out.push({ source: 'yahoo', url: `https://financialmodelingprep.com/image-stock/${symbol}.png` });
+    if (cleanDomain) {
+      out.push({ source: 'google_favicon', url: `https://www.google.com/s2/favicons?domain=${cleanDomain}&sz=128` });
+    }
   }
   return out;
 }

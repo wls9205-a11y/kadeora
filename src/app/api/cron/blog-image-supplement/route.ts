@@ -115,11 +115,12 @@ async function handler(_req: NextRequest) {
       let processed = 0;
       let created = 0;
       let failed = 0;
-      const errors: string[] = [];
+      // s205-W6: errors 를 객체 배열로 — message + stack 동시 캡처 (cron_logs.metadata 에 첫 5개 보존)
+      const errors: Array<{ post_id?: number | string; msg: string; stack?: string }> = [];
 
       for (const post of targets) {
         if (Date.now() - start > MAX_RUNTIME_MS) {
-          errors.push('timeout guard');
+          errors.push({ msg: 'timeout guard' });
           break;
         }
         try {
@@ -182,14 +183,20 @@ async function handler(_req: NextRequest) {
             .upsert(rows, { onConflict: 'post_id,image_url', ignoreDuplicates: true });
           if (insertErr) {
             failed++;
-            errors.push(`post ${post.id}: ${insertErr.message}`);
+            errors.push({ post_id: post.id, msg: insertErr.message || 'insert failed' });
           } else {
             created += rows.length;
           }
           await new Promise((r) => setTimeout(r, 120));
         } catch (e) {
           failed++;
-          errors.push(`post ${post.id}: ${e instanceof Error ? e.message : 'unknown'}`);
+          // s205-W6: stack 까지 같이 — 24h/440 fail 의 진짜 원인을 cron_logs.metadata 에서 잡기 위함
+          const err = e as Error;
+          errors.push({
+            post_id: post.id,
+            msg: String(err?.message ?? err ?? 'unknown'),
+            stack: err?.stack ? String(err.stack).slice(0, 600) : undefined,
+          });
         }
       }
 
@@ -202,7 +209,7 @@ async function handler(_req: NextRequest) {
           min: MIN_COUNT,
           batch: BATCH_LIMIT,
           elapsed_ms: Date.now() - start,
-          errors: errors.slice(0, 10),
+          errors: errors.slice(0, 5),
         },
       };
     }, { redisLockTtlSec: 540 }),

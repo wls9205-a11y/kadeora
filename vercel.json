@@ -385,10 +385,6 @@
       "schedule": "30 11 * * 0-5"
     },
     {
-      "path": "/api/cron/stock-hero-refresh",
-      "schedule": "35 0,7 * * 1-5"
-    },
-    {
       "path": "/api/cron/us-premarket-brief",
       "schedule": "30 12 * * 1-5"
     },
@@ -477,9 +473,6 @@
       "maxDuration": 60
     },
     "src/app/api/cron/ipo-daily-update/*.ts": {
-      "maxDuration": 60
-    },
-    "src/app/api/cron/stock-hero-refresh/*.ts": {
       "maxDuration": 60
     },
     "src/app/api/cron/stock-news-crawl/*.ts": {

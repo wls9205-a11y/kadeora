@@ -47,11 +47,13 @@ async function handler(req: NextRequest) {
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) throw new Error('ANTHROPIC_API_KEY missing');
 
+    // s205-W5: 'completed' 도 포함 — batch 완료 마킹은 됐지만 results_processed=false 인 케이스
+    // (큐 4,780건 stuck 의 직접 원인) 도 다시 시도하도록.
     const { data: batches } = await (admin as any)
       .from('blog_image_batch')
       .select('id, anthropic_batch_id, status, post_ids, metadata, results_processed')
       .eq('purpose', 'meta_rewrite')
-      .in('status', ['submitted', 'in_progress'])
+      .in('status', ['submitted', 'in_progress', 'completed'])
       .eq('results_processed', false)
       .order('submitted_at', { ascending: true })
       .limit(MAX_BATCHES);
@@ -71,6 +73,16 @@ async function handler(req: NextRequest) {
         signal: AbortSignal.timeout(30_000),
       });
       if (!statusRes.ok) {
+        // s205-W5: 404 = batch 자체가 만료 (Anthropic ~29일 보관 후 삭제). 큐는 pending 유지 → 다음 submit 이 재제출.
+        if (statusRes.status === 404) {
+          await (admin as any).from('blog_image_batch').update({
+            status: 'expired',
+            results_processed: true,
+            updated_at: new Date().toISOString(),
+          }).eq('id', b.id);
+          failures.push(`${b.id}:expired_404`);
+          continue;
+        }
         failures.push(`${b.id}:status_${statusRes.status}`);
         continue;
       }
@@ -98,6 +110,16 @@ async function handler(req: NextRequest) {
         signal: AbortSignal.timeout(60_000),
       });
       if (!rRes.ok) {
+        // s205-W5: 410/404 = results 만료. batch 만 expired 마킹, 큐는 pending 유지.
+        if (rRes.status === 404 || rRes.status === 410) {
+          await (admin as any).from('blog_image_batch').update({
+            status: 'expired',
+            results_processed: true,
+            updated_at: new Date().toISOString(),
+          }).eq('id', b.id);
+          failures.push(`${b.id}:results_expired_${rRes.status}`);
+          continue;
+        }
         failures.push(`${b.id}:res_${rRes.status}`);
         continue;
       }
