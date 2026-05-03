@@ -1,3 +1,41 @@
+# 카더라 STATUS — 세션 223: P0 가입 깔때기 + cron 인증 + 보안 lockdown (2026-05-04)
+
+## s223 — P0 가입 깔때기 + cron 인증 + 보안 lockdown (2026-05-04)
+
+### Outcomes
+- T1 SignupPopupModal mount 복구 — 진짜 원인 s183 (62a31d82) blog/[slug] 에서
+  컴포넌트 트리 통째 누락. AuthProvider 트리에 직접 mount + useAuth() adapter
+- T2 lib/analytics.ts trackCTA sendBeacon 1순위 + fetch keepalive fallback 통일
+  → 회복 대상 5건: related_blog_section, blog_end_cta, blog_floating_bar,
+     apt_alert_cta, apt_gate_ai_analysis
+  → 좀비 2건 (active emit site 0): action_bar, login_gate_apt_analysis
+     14일 후에도 click=0 이면 ACTIVE_CTAS 정리
+- T3 dart-ingest withCronAuthFlex 교체 — pg_cron 401 → 200,
+  vault 시크릿 drift 시에도 4-path fallback
+- T4 vercel.json catch-all `maxDuration: 30` 이 per-route export 를 silently
+  override 하던 함정 발견. stock-fundamentals-kr / data-quality-fix 명시적 60
+  override + LIMIT 절반 + cursor (data-quality-fix 는 app_config.last_apt_name)
+- T5 daily/[region]/[date] snapshot.data === {} notFound 가드 +
+  apt/map maxDuration 30 + Promise.race 8s/12s timeout cap
+  (Supabase 체인이 AbortSignal 못 받아서 race 패턴)
+
+### DB (별도 prod 적용, s223_p0_security_lockdown)
+- v_admin_signup_diagnostic anon/authenticated REVOKE + service_role only
+- db_health_snapshots / image_quality_daily ENABLE + FORCE RLS, service_role policy
+- advisor ERROR 36 → 32 (auth_users_exposed 1, rls_disabled 2, security_definer_view 1 해소)
+
+### Architecture Rule #17 (신규)
+vercel.json `functions` catch-all maxDuration 은 per-route export 를 override 한다.
+catch-all 은 짧은 외부 fetch 라우트 한정, cron / 무거운 SSR 은 vercel.json 에 경로별
+명시 또는 per-route export 단독. 둘 충돌 시 vercel.json 이 이긴다.
+
+### Pending
+- NAVER_CLIENT_ID / NAVER_CLIENT_SECRET Vercel env (코드 외 작업)
+- og-blog/og-apt 302 fallback 빈도 — Vercel runtime log truncation 으로 정확한
+  message 미확보. lambda 안 console.error 분리 + cron_logs 별도 적재 검토 (s224?)
+
+---
+
 # 카더라 STATUS — 세션 222: 약한 CTA 3개 A/B 재디자인 + A/B 인프라 (2026-05-02)
 
 ## 세션 222 — apt_alert_cta_v223 / content_gate_v223 / blog_early_teaser_v223 A/B
