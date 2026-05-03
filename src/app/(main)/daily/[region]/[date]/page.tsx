@@ -64,24 +64,32 @@ export default async function DailyReportDatePage({ params }: Props) {
     .eq('report_date', dateStr)
     .maybeSingle();
 
-  if (!snapshot?.data) return notFound();
+  // 중앙 데이터 row 가 없거나 data 페이로드가 비어있으면 404
+  const reportData = snapshot?.data ?? null;
+  if (!snapshot || !reportData || (typeof reportData === 'object' && Object.keys(reportData).length === 0)) {
+    return notFound();
+  }
+  const issueNo = snapshot?.issue_no ?? 0;
 
-  // 이전/다음 날짜 확인
-  const { data: prevRow } = await (sb as any).from('daily_reports')
-    .select('report_date')
-    .eq('region', region)
-    .lt('report_date', dateStr)
-    .order('report_date', { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  const { data: nextRow } = await (sb as any).from('daily_reports')
-    .select('report_date')
-    .eq('region', region)
-    .gt('report_date', dateStr)
-    .order('report_date', { ascending: true })
-    .limit(1)
-    .maybeSingle();
+  // 이전/다음 날짜 확인 — 한쪽 실패해도 페이지 렌더 계속
+  const [prevRes, nextRes] = await Promise.allSettled([
+    (sb as any).from('daily_reports')
+      .select('report_date')
+      .eq('region', region)
+      .lt('report_date', dateStr)
+      .order('report_date', { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+    (sb as any).from('daily_reports')
+      .select('report_date')
+      .eq('region', region)
+      .gt('report_date', dateStr)
+      .order('report_date', { ascending: true })
+      .limit(1)
+      .maybeSingle(),
+  ]);
+  const prevRow = prevRes.status === 'fulfilled' ? (prevRes.value?.data ?? null) : null;
+  const nextRow = nextRes.status === 'fulfilled' ? (nextRes.value?.data ?? null) : null;
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px 40px' }}>
@@ -89,7 +97,7 @@ export default async function DailyReportDatePage({ params }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org',
         '@type': 'NewsArticle',
-        headline: `카더라 데일리 리포트 리포트 — ${region} 투자 브리핑 #${snapshot.issue_no}`,
+        headline: `카더라 데일리 리포트 리포트 — ${region} 투자 브리핑 #${issueNo}`,
         datePublished: new Date(dateStr + 'T07:00:00+09:00').toISOString(),
         author: { '@type': 'Organization', name: '카더라', url: SITE_URL },
         publisher: { '@type': 'Organization', name: '카더라', url: SITE_URL },
@@ -114,11 +122,11 @@ export default async function DailyReportDatePage({ params }: Props) {
       }) }} />
 
       <DailyReportClient
-        data={snapshot.data}
+        data={reportData}
         regions={[...REPORT_REGIONS]}
         viewDate={dateStr}
-        prevDate={prevRow?.report_date || null}
-        nextDate={nextRow?.report_date || null}
+        prevDate={prevRow?.report_date ?? null}
+        nextDate={nextRow?.report_date ?? null}
       />
       <div style={{ marginTop: 16 }}>
         <ShareButtons title={`카더라 데일리 리포트 — ${region} ${dateStr}`} contentType="daily" contentRef={`${region}-${dateStr}`} />

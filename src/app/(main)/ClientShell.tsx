@@ -27,7 +27,11 @@ import ScrollToTop from '@/components/ScrollToTop';
 // → 모든 (main) 페이지의 본문이 SSR 안되고 RSC payload 로만 전송 (h1/h2 0개, SEO 무의미).
 // 두 provider 는 useEffect 안에서만 브라우저 API 사용 → SSR-safe. 직접 import 로 전환.
 import { ToastProvider } from '@/components/Toast';
-import { AuthProvider } from '@/components/AuthProvider';
+import { AuthProvider, useAuth } from '@/components/AuthProvider';
+// s223: SignupPopupModal mount 복구. s183 에서 blog/[slug] 에서 제거된 후 어디에도
+// 마운트되지 않아 4/27 이후 popup_signup_modal cta_view = 0. 항상 마운트되는 ClientShell
+// 자식으로 직접 import (트래커 3종과 동일 패턴) — useAuth 어댑터로 isLoggedIn prop 공급.
+import SignupPopupModal from '@/components/signup/SignupPopupModal';
 
 // s209 fix(track-regression): listener-only 트래커 3종은 dynamic({ssr:false}) 격리 해제.
 // 이 셋은 useEffect 안에서 document-level click listener / fetch beacon 만 attach 하고
@@ -102,6 +106,7 @@ export default function ClientShell({ children, serverLoggedIn }: Props) {
         <CtaGlobalTracker />
         <WelcomeReward />
         <KakaoChannelAddModal triggerOnMount={true} />
+        <SignupPopupModalMount />
         <WelcomeToast />
         <ScrollToTop />
         <SmartPushPrompt />
@@ -136,6 +141,14 @@ export default function ClientShell({ children, serverLoggedIn }: Props) {
       </AuthProvider>
     </ToastProvider>
   );
+}
+
+// useAuth 는 AuthProvider 자식에서만 호출 가능 → ClientShell top-level 이 아닌
+// AuthProvider 트리 내부에 마운트되는 작은 어댑터.
+function SignupPopupModalMount() {
+  const { userId, loading } = useAuth();
+  if (loading) return null;
+  return <SignupPopupModal isLoggedIn={!!userId} />;
 }
 
 // CONTACT_EMAIL/PHONE 는 footer 에서 직접 사용 안 하지만 import 보존 (다른 의존 가능성).

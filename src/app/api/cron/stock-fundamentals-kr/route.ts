@@ -3,7 +3,11 @@ import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 export const dynamic = 'force-dynamic';
-export const maxDuration = 300;
+// s223-T4: lowered to 60 (Vercel hard cap on this route was 30 via vercel.json catch-all → bumping override too)
+export const maxDuration = 60;
+
+// s223-T4: halved limit
+const PER_RUN_LIMIT = 25;
 
 const HEADERS = { 'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)', Referer: 'https://m.stock.naver.com/' };
 
@@ -27,35 +31,61 @@ async function fetchNaverFundamentals(symbol: string): Promise<Record<string, an
 }
 
 export async function GET(_req: NextRequest) {
-  const result = await withCronLogging('stock-fundamentals-kr', async () => {
-    const admin = getSupabaseAdmin();
+  const start = Date.now();
+  try {
+    const result = await withCronLogging('stock-fundamentals-kr', async () => {
+      const admin = getSupabaseAdmin();
 
-    // PER이 NULL인 한국 종목 우선 (인기순)
-    const { data: stocks } = await admin.from('stock_quotes')
-      .select('symbol')
-      .in('market', ['KOSPI', 'KOSDAQ'])
-      .eq('is_active', true)
-      .is('per', null)
-      .order('volume', { ascending: false, nullsFirst: false })
-      .limit(50);
-
-    if (!stocks?.length) {
-      // PER 있는 종목 중 7일 이상 미갱신 건
-      const { data: stale } = await (admin as any).from('stock_quotes')
+      // s223-T4: cursor — WHERE per IS NULL 자체가 자연 cursor.
+      //   처리된 종목은 per 가 채워져 다음 run 의 쿼리에서 빠짐.
+      //   stale 분기는 fundamentals_updated_at 으로 자연 advance.
+      // PER이 NULL인 한국 종목 우선 (인기순)
+      const { data: stocks } = await admin.from('stock_quotes')
         .select('symbol')
         .in('market', ['KOSPI', 'KOSDAQ'])
         .eq('is_active', true)
-        .not('per', 'is', null)
-        .or('fundamentals_updated_at.is.null,fundamentals_updated_at.lt.' + new Date(Date.now() - 7 * 86400000).toISOString())
+        .is('per', null)
         .order('volume', { ascending: false, nullsFirst: false })
-        .limit(50);
-      if (!stale?.length) return { processed: 0, metadata: { reason: 'all_updated' } };
-      return await processStocks(admin, stale);
-    }
+        .limit(PER_RUN_LIMIT);
 
-    return await processStocks(admin, stocks);
-  });
-  return NextResponse.json(result);
+      if (!stocks?.length) {
+        // PER 있는 종목 중 7일 이상 미갱신 건
+        const { data: stale } = await (admin as any).from('stock_quotes')
+          .select('symbol')
+          .in('market', ['KOSPI', 'KOSDAQ'])
+          .eq('is_active', true)
+          .not('per', 'is', null)
+          .or('fundamentals_updated_at.is.null,fundamentals_updated_at.lt.' + new Date(Date.now() - 7 * 86400000).toISOString())
+          .order('volume', { ascending: false, nullsFirst: false })
+          .limit(PER_RUN_LIMIT);
+        if (!stale?.length) return { processed: 0, metadata: { reason: 'all_updated' } };
+        return await processStocks(admin, stale);
+      }
+
+      return await processStocks(admin, stocks);
+    });
+    return NextResponse.json(result);
+  } catch (e) {
+    // s223-T4: timeout/exception 시 200 + cron_logs partial 마킹 (Vercel cron retry 폭주 방지)
+    const elapsed = Date.now() - start;
+    const msg = e instanceof Error ? e.message : String(e);
+    try {
+      const admin = getSupabaseAdmin();
+      await (admin as any).from('cron_logs').insert({
+        cron_name: 'stock-fundamentals-kr',
+        status: 'partial',
+        started_at: new Date(start).toISOString(),
+        finished_at: new Date().toISOString(),
+        duration_ms: elapsed,
+        error_message: msg.slice(0, 1000),
+        metadata: { reason: 'route_catch', elapsed_ms: elapsed },
+      });
+    } catch { /* ignore */ }
+    return NextResponse.json(
+      { success: false, partial: true, error: msg, elapsed_ms: elapsed },
+      { status: 200 },
+    );
+  }
 }
 
 async function processStocks(admin: any, stocks: any[]) {

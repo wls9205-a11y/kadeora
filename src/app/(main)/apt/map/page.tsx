@@ -29,6 +29,8 @@ export const metadata: Metadata = {
       'article:section': '부동산', 'dg:plink': SITE_URL + '/apt/map' },
 };
 
+export const maxDuration = 30;
+
 const REGIONS = ['서울','부산','대구','인천','광주','대전','울산','세종','경기','강원','충북','충남','전북','전남','경북','경남','제주'];
 
 export default async function AptMapPage() {
@@ -36,30 +38,56 @@ export default async function AptMapPage() {
 
   // s221 (S214.5): PostgREST 1k cap 우회 — fetchBatched 4건 (target 50k each).
   // 메모리: 4 × 50k × 10B ≈ 2MB. 단일 컬럼 fetch 라 가벼움.
+  // s223: allSettled + 개별 timeout 로 한쪽 실패/지연이 전체 페이지를 막지 않도록.
   const today = new Date().toISOString().slice(0, 10);
   const tradeFrom = new Date(Date.now() - 90 * 86400000).toISOString().slice(0, 10);
-  const [subData, unsoldData, redevData, tradeData] = await Promise.all([
-    fetchBatched<{ region_nm: string | null }>((off, lim) =>
-      sb.from('apt_subscriptions').select('region_nm').gte('rcept_endde', today)
-        .order('rcept_endde', { ascending: true }).range(off, off + lim - 1),
-      50000,
+  const withTimeout = <T,>(p: Promise<T>, ms: number, fallback: T): Promise<T> =>
+    Promise.race<T>([
+      p,
+      new Promise<T>((resolve) => setTimeout(() => resolve(fallback), ms)),
+    ]);
+  const settled = await Promise.allSettled([
+    withTimeout(
+      fetchBatched<{ region_nm: string | null }>((off, lim) =>
+        sb.from('apt_subscriptions').select('region_nm').gte('rcept_endde', today)
+          .order('rcept_endde', { ascending: true }).range(off, off + lim - 1),
+        50000,
+      ),
+      8000,
+      [] as { region_nm: string | null }[],
     ),
-    fetchBatched<{ region_nm: string | null }>((off, lim) =>
-      sb.from('unsold_apts').select('region_nm').eq('is_active', true)
-        .order('id', { ascending: true }).range(off, off + lim - 1),
-      50000,
+    withTimeout(
+      fetchBatched<{ region_nm: string | null }>((off, lim) =>
+        sb.from('unsold_apts').select('region_nm').eq('is_active', true)
+          .order('id', { ascending: true }).range(off, off + lim - 1),
+        50000,
+      ),
+      8000,
+      [] as { region_nm: string | null }[],
     ),
-    fetchBatched<{ region: string | null }>((off, lim) =>
-      sb.from('redevelopment_projects').select('region').eq('is_active', true)
-        .order('id', { ascending: true }).range(off, off + lim - 1),
-      50000,
+    withTimeout(
+      fetchBatched<{ region: string | null }>((off, lim) =>
+        sb.from('redevelopment_projects').select('region').eq('is_active', true)
+          .order('id', { ascending: true }).range(off, off + lim - 1),
+        50000,
+      ),
+      8000,
+      [] as { region: string | null }[],
     ),
-    fetchBatched<{ region_nm: string | null }>((off, lim) =>
-      sb.from('apt_transactions').select('region_nm').gte('deal_date', tradeFrom)
-        .order('deal_date', { ascending: true }).range(off, off + lim - 1),
-      200000,
+    withTimeout(
+      fetchBatched<{ region_nm: string | null }>((off, lim) =>
+        sb.from('apt_transactions').select('region_nm').gte('deal_date', tradeFrom)
+          .order('deal_date', { ascending: true }).range(off, off + lim - 1),
+        200000,
+      ),
+      12000,
+      [] as { region_nm: string | null }[],
     ),
   ]);
+  const subData = settled[0].status === 'fulfilled' ? (settled[0].value ?? []) : [];
+  const unsoldData = settled[1].status === 'fulfilled' ? (settled[1].value ?? []) : [];
+  const redevData = settled[2].status === 'fulfilled' ? (settled[2].value ?? []) : [];
+  const tradeData = settled[3].status === 'fulfilled' ? (settled[3].value ?? []) : [];
 
   // Count by region
   const subByRegion: Record<string, number> = {};

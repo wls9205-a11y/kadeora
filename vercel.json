@@ -546,6 +546,12 @@
     },
     "src/app/api/cron/blog-data-update/*.ts": {
       "maxDuration": 120
+    },
+    "src/app/api/cron/stock-fundamentals-kr/*.ts": {
+      "maxDuration": 60
+    },
+    "src/app/api/cron/data-quality-fix/*.ts": {
+      "maxDuration": 60
     }
   }
 }

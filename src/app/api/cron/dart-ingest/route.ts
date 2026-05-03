@@ -2,6 +2,7 @@ export const maxDuration = 60;
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
+import { withCronAuthFlex } from '@/lib/cron-auth';
 
 /**
  * DART (전자공시시스템) 신규 공시 수집 크론
@@ -54,12 +55,7 @@ function calcImportance(reportName: string, category: string): number {
   return 4;
 }
 
-export async function GET(req: NextRequest) {
-  const authHeader = req.headers.get('authorization');
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
+async function handler(_req: NextRequest) {
   const result = await withCronLogging('dart-ingest', async () => {
     const apiKey = process.env.DART_API_KEY;
     if (!apiKey) {
@@ -142,3 +138,6 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json(result);
 }
+
+export const GET = withCronAuthFlex(handler);
+export const POST = withCronAuthFlex(handler);

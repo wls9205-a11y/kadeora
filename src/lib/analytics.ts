@@ -188,10 +188,10 @@ export function trackCTA(action: 'view' | 'click' | 'dismiss', ctaName: string, 
     try { localStorage.setItem('kd_last_cta', ctaName); } catch {}
   }
   // conversion_events에도 동시 전송 — 어드민 GrowthTab/FocusTab 통합
-  // s196: click 은 navigation 직후 발사되는 경우가 많아 sendBeacon 이 race 로
-  //  drop 되는 케이스 발견 (apt_alert_cta 315 views / 0 clicks 등). click 은
-  //  fetch + keepalive 로 flush 보장 (브라우저가 navigation 동안에도 완료),
-  //  view 는 sendBeacon 우선 (가벼운 fire-and-forget).
+  // s223: sendBeacon-first / fetch keepalive fallback 으로 통일.
+  //   - sendBeacon 은 sync 큐잉이라 navigation 직후 fire 해도 drop 되지 않음.
+  //   - sendBeacon 미지원 또는 큐잉 실패 시 keepalive fetch 로 fallback.
+  //   - 호출자는 절대 await 하지 말 것 (fire-and-forget). 호출 후 즉시 navigate 가능.
   if ((action === 'view' || action === 'click') && typeof window !== 'undefined') {
     const eventType = action === 'view' ? 'cta_view' : 'cta_click';
     const body = JSON.stringify({
@@ -204,12 +204,11 @@ export function trackCTA(action: 'view' | 'click' | 'dismiss', ctaName: string, 
       referrer_source: document.referrer ? (() => { try { return new URL(document.referrer).hostname; } catch { return null; } })() : null,
     });
     try {
-      if (action === 'click') {
-        // keepalive 가 navigation 중에도 request 를 살린다.
-        fetch('/api/track', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body, keepalive: true }).catch(() => {});
-      } else if (navigator.sendBeacon) {
-        navigator.sendBeacon('/api/track', new Blob([body], { type: 'application/json' }));
-      } else {
+      let sent = false;
+      if (typeof navigator !== 'undefined' && typeof navigator.sendBeacon === 'function') {
+        sent = navigator.sendBeacon('/api/track', new Blob([body], { type: 'application/json' }));
+      }
+      if (!sent) {
         fetch('/api/track', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body, keepalive: true }).catch(() => {});
       }
     } catch {}
