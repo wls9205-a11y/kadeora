@@ -1,3 +1,25 @@
+# 카더라 STATUS — 세션 230-231: apt 위성사진 → 현장사진 전환 (2026-05-04 KST)
+
+## s230-s231 (2026-05-04) — apt 위성사진 → 현장사진 전환
+- s230: `apt_sites.cover_image_url` 채움. 3,080개(53%) 위성→조감도/모델하우스/배치도/단지사진.
+  WHERE cover_image_url IS NULL 조건이라 idempotent. 캡션 우선순위:
+  조감도 > 모델하우스 > 배치도 > 투시도 > 단지/아파트 > 분양 > 재개발 > 기타.
+- s231: `get_apt_sites_needing_images` RPC 수정. 진짜 이미지 0개(OG placeholder 4-5개로 가득
+  찬) 사이트 1,726개가 영구 큐 제외 상태였음 → 최우선 진입. 도곡렉슬·남천자이·더샵스타시티 등
+  핵심 단지 포함.
+- 자동 처리: `apt-image-crawl` cron (매 3시간 15·45분, ~100개/회) → ~800개/일 → 2-3일 완료 예상.
+- 모니터링 SQL은 노션/STATUS 백업 참고.
+- 코드 측 변경:
+  - `next.config.ts` `images.remotePatterns`: i2.media.daumcdn.net, postfiles.pstatic.net,
+    ldb-/scs-/dthumb-/landthumb-/mblogthumb-phinf.pstatic.net, d2v80xjmx68n4w.cloudfront.net
+    추가 (이미 있던 *.pstatic.net / *.cloudfront.net 와 별개로 명시 등록).
+  - `src/lib/apt-fetcher.ts` `AptSiteRow` + `SITE_COLS` 에 `cover_image_url` 추가.
+  - `src/components/apt/AptCardGridV5.tsx` 썸네일: `aptSiteThumb()` 사용으로 통합 →
+    cover_image_url > satellite_image_url > og_image_url > images[0] > og-square 생성기 순.
+    이전: images[0] > og > satellite (잘못된 순서, 위성사진 먼저 노출됨).
+
+---
+
 # 카더라 STATUS — 세션 230 (V5 redesign + CTA fix 병합) (2026-05-04 KST)
 
 ## s230c — /apt V5 컴팩트 재설계 (17 섹션 → 5 섹션) — 2026-05-01

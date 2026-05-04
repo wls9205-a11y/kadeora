@@ -34,6 +34,7 @@ export interface AptSiteRow {
   images: any;
   og_image_url: string | null;
   satellite_image_url: string | null;
+  cover_image_url: string | null;
   popularity_score?: number | null;
   site_type?: string | null;
   lifecycle_stage?: string | null;
@@ -41,7 +42,7 @@ export interface AptSiteRow {
 }
 
 const SITE_COLS =
-  'id, slug, name, region, sigungu, dong, builder, total_units, move_in_date, built_year, price_min, price_max, images, og_image_url, satellite_image_url, popularity_score, site_type, lifecycle_stage, status';
+  'id, slug, name, region, sigungu, dong, builder, total_units, move_in_date, built_year, price_min, price_max, images, og_image_url, satellite_image_url, cover_image_url, popularity_score, site_type, lifecycle_stage, status';
 
 // ─── 가격대 band ↔ 만원 단위 변환 (apt_sites.price_min/max 단위가 만원 가정) ───
 // price_min/max 가 만원 단위 — 1억 = 10000.
@@ -121,7 +122,7 @@ export async function fetchSiteList(filters: AptFilters, perPage = 12): Promise<
         builder: r.builder, total_units: r.total_units,
         move_in_date: null, built_year: null,
         price_min: null, price_max: null,
-        images: null, og_image_url: null, satellite_image_url: null,
+        images: null, og_image_url: null, satellite_image_url: null, cover_image_url: null,
         popularity_score: r.popularity_score,
         site_type: r.site_type, lifecycle_stage: r.lifecycle_stage,
         status: 'active',

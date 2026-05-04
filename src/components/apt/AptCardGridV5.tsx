@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { fetchSiteList, type AptFilters, type AptSiteRow } from '@/lib/apt-fetcher';
+import { aptSiteThumb } from '@/lib/thumbnail-fallback';
 
 interface Props { filters: AptFilters }
 
@@ -22,11 +23,8 @@ function priceLabel(row: AptSiteRow): string {
   return '-';
 }
 
-function thumbUrl(row: AptSiteRow): string | null {
-  if (Array.isArray(row.images) && row.images.length > 0 && typeof row.images[0] === 'string') return row.images[0];
-  if (row.og_image_url) return row.og_image_url;
-  if (row.satellite_image_url) return row.satellite_image_url;
-  return null;
+function thumbUrl(row: AptSiteRow): string {
+  return aptSiteThumb(row);
 }
 
 export default async function AptCardGridV5({ filters }: Props) {
@@ -53,8 +51,7 @@ export default async function AptCardGridV5({ filters }: Props) {
           const thumb = thumbUrl(r);
           return (
             <Link key={r.slug} href={`/apt/${encodeURIComponent(r.slug)}`} style={{ background: 'var(--bg-elevated, #1f2028)', border: '0.5px solid var(--border, #2a2b35)', borderRadius: 10, overflow: 'hidden', textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column' }}>
-              <div style={{ aspectRatio: '4 / 3', background: thumb ? `center/cover no-repeat url('${thumb}')` : 'var(--bg-base, #0d0e14)', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22 }}>
-                {!thumb && '🏢'}
+              <div style={{ aspectRatio: '4 / 3', background: `center/cover no-repeat url('${thumb}'), var(--bg-base, #0d0e14)`, position: 'relative' }}>
                 {badge && <span style={{ position: 'absolute', top: 5, left: 5, fontSize: 9, padding: '2px 6px', borderRadius: 4, fontWeight: 700, background: badge.bg, color: badge.fg }}>{badge.label}</span>}
               </div>
               <div style={{ padding: '7px 9px 9px' }}>

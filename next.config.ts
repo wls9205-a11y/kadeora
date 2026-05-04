@@ -47,7 +47,16 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "shop1.phinf.naver.net" },
       { protocol: "https", hostname: "t1.daumcdn.net" },
       { protocol: "https", hostname: "img1.daumcdn.net" },
+      { protocol: "https", hostname: "i2.media.daumcdn.net" },
       { protocol: "https", hostname: "blog.kakaocdn.net" },
+      // s230-s231: apt cover image 외부 호스트
+      { protocol: "https", hostname: "postfiles.pstatic.net" },
+      { protocol: "https", hostname: "ldb-phinf.pstatic.net" },
+      { protocol: "https", hostname: "scs-phinf.pstatic.net" },
+      { protocol: "https", hostname: "dthumb-phinf.pstatic.net" },
+      { protocol: "https", hostname: "landthumb-phinf.pstatic.net" },
+      { protocol: "https", hostname: "mblogthumb-phinf.pstatic.net" },
+      { protocol: "https", hostname: "d2v80xjmx68n4w.cloudfront.net" },
       { protocol: "https", hostname: "cdn.bizwatch.co.kr" },
       // 블로그 커버 이미지 추가 도메인 (세션 114 — 270개 깨짐 수정)
       { protocol: "https", hostname: "www.neonet.co.kr" },
