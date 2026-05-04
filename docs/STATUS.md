@@ -33,7 +33,7 @@
 - **L5**: dead components 30개 (per-file static+dynamic grep verify, 스킵 0)
 - **L6**: npm uninstall form-data, iconv-lite
 
-## Phase 0 검증 결과 (Architecture Rule #18 신설)
+## Phase 0 검증 결과 (Architecture Rule #19 신설)
 - **cron_logs 30d**: 6개 활성 발견 (big-event-bootstrap-process 703 runs, stock-image-crawl 188, blog-image-supplement 95, blog-image-validate 4, cleanup-calc-results 2, calc-topic-refresh 2)
 - **pg_cron `_call_vercel_cron('/api/cron/...')` 등록**: 21개 추가 활성 발견 (apt-satellite-crawl, blog-cover-auto-enhance, indexnow-urgent, stock-logo-fetch, unsold-redev-enhance, image-relevance-check, blog-inject-images, indexnow-batch, blog-backfill-submit, unsplash-fetch, image-relevance-replace, blog-backfill-poll, blog-meta-rewrite-poll, programmatic-seo-consume, batch-poll, naver-hotlink-migrate, kakao-place-fetch, faq-extract, blog-meta-rewrite-submit, gsc-sync, backlink-sync)
 - **외부 cron route fetch (src grep)**: 0
@@ -42,8 +42,8 @@
 
 > ⚠️ vercel.json crons 등록 ≠ 활성 cron. pg_cron 외부 호출이 별도로 존재. 검증 없이 30개 모두 삭제했으면 production 즉시 손상.
 
-## Architecture Rule #18 신설
-**cron route 삭제 전 반드시 3종 검증**:
+## Architecture Rule #19 신설
+**cron route 삭제 전 반드시 3종 검증** (#18 = vercel.json catch-all maxDuration override 와 별개):
 1. `cron_logs` 30d 실행 기록 (`SELECT cron_name, COUNT(*), MAX(created_at) FROM cron_logs ...`)
 2. pg_cron job 등록 (`SELECT * FROM cron.job WHERE command ILIKE '%api/cron%'`)
 3. `src/` 내 fetch / import 호출 (`grep -rln "api/cron/<name>"`)

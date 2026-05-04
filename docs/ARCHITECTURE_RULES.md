@@ -36,3 +36,30 @@
 - 새 cron 추가 시 vercel.json 의 functions glob 매치 여부 우선 확인.
 
 **Discovered**: s223 (2026-05-04) — stock-fundamentals-kr / data-quality-fix 504 timeout 추적 중 발견. 둘 다 route export 60 적었으나 catch-all 30 이 이김.
+
+## Rule #19 — cron route 삭제 전 3종 검증 (s223 신설)
+
+cron route 를 dead 로 판정하고 삭제하기 전에 반드시 다음 3가지를 모두 확인:
+
+1. **cron_logs 30일 실행 기록**: 최근 30일간 한 번도 실행되지 않았는지
+
+```sql
+SELECT route, COUNT(*) FROM cron_logs
+ WHERE route = '<route>' AND created_at > now() - interval '30 days';
+```
+
+2. **Supabase pg_cron job 등록 여부**: cron.job 테이블에 _call_vercel_cron 패턴으로 외부 호출되는지 — vercel.json 에 없어도 pg_cron 이 호출하는 케이스 다수 존재
+
+```sql
+SELECT * FROM cron.job WHERE command LIKE '%<route>%';
+```
+
+3. **src/ fetch/import grep**: 다른 코드가 fetch 하거나 import 하는지
+
+```bash
+grep -r "<route>" src/
+```
+
+세 검증 모두 통과 시에만 삭제 가능. vercel.json crons 등록 여부만으로 활성/dead 판단 금지 — s223 Phase 0 검증에서 "dead 추정 30개" 중 27개가 실제 pg_cron 으로 활성 상태였음 (3개만 진짜 dead).
+
+**Discovered**: s223 Big Cleanup (2026-05-04) — vercel.json crons 에서 빠진 cron 들도 pg_cron `_call_vercel_cron` 으로 외부 호출되는 사례 21건 발견. 검증 없이 30개 모두 삭제했으면 production 즉시 손상.
