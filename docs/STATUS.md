@@ -1,3 +1,48 @@
+# 카더라 STATUS — 세션 226: apt-image-crawl 효율 패치 + s225b 회귀 차단 (2026-05-04)
+
+## s225b P0 — enrich_apt_images_v2 회귀 차단 (Supabase MCP 직접 적용)
+
+s225 P0 의 satellite cleanup 이 24h~수일 안에 회귀할 위험 발견 후 즉시 prod 적용.
+
+원인: `enrich_apt_images_v2(uuid)` Postgres 함수 본문에
+```sql
+v_images := jsonb_build_array(v_apt.satellite_image_url) || v_images;  -- unshift
+```
+가 박혀 있어 매 호출마다 satellite_image_url 을 images[0] 로 다시 push. pg_cron
+`enrich_apt_images_safe` 가 매일 19시 200건씩 호출 → s225 cleanup 회귀.
+
+prod 적용 (Supabase MCP 직접):
+- `enrich_apt_images_v2` 함수 본문 수정 (satellite unshift 제거 또는 no-op)
+- pg_cron `enrich_apt_images_safe` active=false (검증: cron.job 조회)
+
+## s226 P1 — apt-image-crawl 효율 패치
+
+증상: cron_logs 30일간 매회 records_failed 95%+ (35-43 처리 → 0-4 success).
+empty_images = 973건 stuck.
+
+진단 (Phase A):
+- BATCH_SIZE 50 / TARGET_IMG_COUNT 7 / Phase 1 m.land.naver 비공식 스크래핑 (5s × site)
+  으로 250s 가 Phase 1 단독 소진.
+- DOMAIN_BLACKLIST 의 `landthumb` 패턴이 NAVER 검색 결과 thumbnail 까지 차단.
+- size filter 400×250 너무 strict — NAVER 양질 결과 추가 차단.
+
+패치 (Phase B):
+- Phase 1 (m.land.naver) `SKIP_PHASE1_LAND_NAVER=true` 토글 비활성화. Phase 2 NAVER 공식만.
+- BATCH_SIZE 50 → 30 (실제 처리량 안전 마진).
+- TARGET_IMG_COUNT 7 → 3 (단지당 시간 절반 + 카테고리 매칭률 ↑).
+- MIN_IMG_COUNT 4 → 3 (RPC 큐 잡는 임계 완화).
+- DOMAIN_BLACKLIST 에서 `landthumb` 제거 (`new.land.naver.com` 만 차단 유지).
+- size filter 280×180 으로 완화.
+
+기대: 처리량 0-4 → 단지당 시간 절반 + 차단 해소로 사이클당 N배 success.
+
+### Pending (s226 P1 후속)
+- NAVER_CLIENT_ID / NAVER_CLIENT_SECRET Vercel env 미설정이면 패치 효과 없음.
+  records_failed 가 계속 95%+ 면 admin/env-check 호출 후 env 설정 작업 필수.
+- empty_images 983 → 7d 내 < 100 추이 확인.
+
+---
+
 # Session 224 — Admin V5 Critical Alert + Cron 가시화 (2026-05-04 KST)
 
 브랜치: main · 한 commit / 한 deploy. tag: `s224-v5-partial`. 롤백 앵커: `pre-s224-v5`.
