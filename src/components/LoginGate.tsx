@@ -10,11 +10,11 @@
  * - 카카오 48px 네이티브 버튼 (아이콘 좌측 고정, 텍스트 중앙)
  * - "다른 방법으로 가입하기" 보조 링크
  */
-import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
 import { useEffect, useRef, useState, ReactNode } from 'react';
 import { trackCTA } from '@/lib/analytics';
+import { trackCtaAndNavigate } from '@/lib/cta-navigate';
 
 interface LoginGateProps {
   children: ReactNode;
@@ -101,13 +101,14 @@ export default function LoginGate({ children, feature, title, description, blurH
       </div>
 
       {/* 카카오 네이티브 버튼 (48px, 아이콘 좌측 고정, 텍스트 중앙) */}
-      <Link
-        href={loginUrl}
-        onClick={() => trackCTA('click', `login_gate_${feature}`, { page_path: pathname })}
+      <button
+        type="button"
+        onClick={() => trackCtaAndNavigate({ href: loginUrl, ctaName: `login_gate_${feature}`, pagePath: pathname })}
         style={{
           display: 'flex', width: '100%', height: 48, borderRadius: 12,
           background: '#FEE500', alignItems: 'center', justifyContent: 'center',
           position: 'relative', textDecoration: 'none', boxSizing: 'border-box',
+          border: 'none', cursor: 'pointer', padding: 0,
         }}
       >
         <svg style={{ position: 'absolute', left: 16 }} width="18" height="18" viewBox="0 0 512 512" fill="rgba(0,0,0,0.9)">
@@ -116,17 +117,17 @@ export default function LoginGate({ children, feature, title, description, blurH
         <span style={{ fontSize: 15, color: 'rgba(0,0,0,0.85)', fontWeight: 500, letterSpacing: '-0.2px' }}>
           카카오톡으로 3초 만에 가입하기
         </span>
-      </Link>
+      </button>
 
       {/* 다른 방법으로 가입하기 */}
       <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.16)', textAlign: 'center', marginTop: 10 }}>
-        <Link
-          href={altUrl}
-          onClick={() => trackCTA('click', `login_gate_${feature}_alt`, { page_path: pathname })}
-          style={{ color: 'rgba(255,255,255,0.16)', textDecoration: 'underline', textUnderlineOffset: '3px' }}
+        <button
+          type="button"
+          onClick={() => trackCtaAndNavigate({ href: altUrl, ctaName: `login_gate_${feature}_alt`, pagePath: pathname })}
+          style={{ color: 'rgba(255,255,255,0.16)', textDecoration: 'underline', textUnderlineOffset: '3px', background: 'none', border: 'none', padding: 0, cursor: 'pointer', font: 'inherit' }}
         >
           다른 방법으로 가입하기
-        </Link>
+        </button>
       </div>
     </div>
   );

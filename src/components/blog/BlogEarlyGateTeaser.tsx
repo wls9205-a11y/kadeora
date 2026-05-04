@@ -13,6 +13,7 @@ import { useEffect, useRef, useState } from 'react';
 import { trackCtaClick } from '@/lib/cta-track';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { getVariant, trackAbView, trackAbClick } from '@/lib/analytics/abTest';
+import { trackCtaAndNavigate } from '@/lib/cta-navigate';
 
 const EXPERIMENT = 'blog_early_teaser_v223';
 
@@ -195,11 +196,15 @@ export default function BlogEarlyGateTeaser({ slug, enabled = true, hasGatedCont
   if (isAuth !== false || !hasGated) return null;
 
   const handleClick = () => {
-    trackCtaClick({ cta_name: config.cta_name, category: 'signup', page_path: typeof window !== 'undefined' ? window.location.pathname : undefined });
     if (variant) trackAbClick(EXPERIMENT, variant, { slug });
-    if (typeof window !== 'undefined') {
-      window.location.href = `/login?source=${config.cta_name}&redirect=${encodeURIComponent(`/blog/${slug}`)}`;
-    }
+    if (typeof window === 'undefined') return;
+    const href = `/login?source=${config.cta_name}&redirect=${encodeURIComponent(`/blog/${slug}`)}`;
+    trackCtaAndNavigate({
+      href,
+      ctaName: config.cta_name,
+      category: 'signup',
+      pagePath: window.location.pathname,
+    });
   };
 
   // s222 G B variant: 희소성 카피로 teaser_title 오버라이드.

@@ -64,21 +64,22 @@ function send(event_type: 'cta_view' | 'cta_click' | 'cta_complete', p: CtaPaylo
     device_type: deviceType(),
     referrer_source: referrerSource(),
   });
+  let sent = false;
   try {
-    if (navigator.sendBeacon) {
-      const blob = new Blob([body], { type: 'application/json' });
-      navigator.sendBeacon('/api/events/cta', blob);
-      return;
+    if (typeof navigator !== 'undefined' && navigator.sendBeacon) {
+      sent = navigator.sendBeacon('/api/events/cta', new Blob([body], { type: 'application/json' }));
     }
   } catch { /* fall through */ }
-  try {
-    fetch('/api/events/cta', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body,
-      keepalive: true,
-    }).catch(() => {});
-  } catch { /* silent */ }
+  if (!sent) {
+    try {
+      fetch('/api/events/cta', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body,
+        keepalive: true,
+      }).catch(() => {});
+    } catch {}
+  }
 }
 
 export const trackCtaClick = (p: CtaPayload) => send('cta_click', p);

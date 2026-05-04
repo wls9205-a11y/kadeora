@@ -105,3 +105,32 @@ grep -r "<route>" src/
 - localStorage 키는 `kd:region` 으로 통일. `apt:lastRegion` 등 자체 키 추가 금지.
 
 **Discovered**: s229 (2026-05-04) — /apt picker flash + localStorage 키 mismatch + middleware geo 미사용 합계 10 bugs 추적 중 발견. 단일 source-of-truth 흐름으로 정리.
+
+## Rule #22 — CTA click 트래킹: navigation 일으키는 onClick 은 helper 통과 (s230 신설)
+
+**Symptom**: cta_view 1,121 / cta_click 18 / 24h. desktop CTR 1.5% / mobile 1.6% — 모든 device 공통. 18 click 은 모두 modal/in-page/logged-in (navigation 없는 케이스). anchor / Link / `window.location.href` 로 navigation 일으키는 click 은 0건 기록됨.
+
+**Cause**: `<a href="...">` / `<Link href="...">` / `window.location.href = ...` 가 onClick handler 의 `trackCTA(...)` 호출보다 먼저 실행 — sendBeacon 큐가 enqueue 되기 전 navigation 시작 → 브라우저가 unload 시 in-flight 큐 drop → 이벤트 silent fail. SW 무관, endpoint 정상, hook 정상. 패턴 자체가 race.
+
+**Rule**:
+
+navigation 일으키는 모든 CTA click 은 `src/lib/cta-navigate.ts` 의 `trackCtaAndNavigate(...)` helper 통과 필수:
+
+```ts
+trackCtaAndNavigate({
+  href: '/login?...',
+  ctaName: 'sticky_signup_bar',
+  pagePath: pathname,
+  category: 'signup',
+});
+```
+
+helper 가 (1) `trackCTA('click', ...)` (2) `trackCtaClick(...)` 둘 다 호출 (이중 안전망) 후 (3) 80ms `setTimeout` 으로 sendBeacon 큐잉 보장 후 navigate. modal/in-page click (navigation 없음) 은 `trackCTA('click', ...)` 직접 호출 OK.
+
+**How to apply**:
+- 새 CTA 추가 시 anchor/Link 직접 navigation 금지. `<button type="button" onClick={...}>` + helper 사용.
+- 기존 anchor/Link 의 visual style (border-radius, padding 등) 은 button 으로 옮길 때 100% 보존 — 추가만 (border:'none', background:'none', cursor:'pointer').
+- helper 는 fire-and-forget. caller 가 await 하면 navigation 80ms delay 가 의미 없어짐 — 절대 await 금지.
+- sendBeacon 실패 시 keepalive fetch fallback 은 `cta-track.ts` send 함수가 처리.
+
+**Discovered**: s230 (2026-05-04) — 12+ BROKEN CTA (sticky_signup_bar 312 view 0 click, login_gate_apt_analysis 423 view 0 click, blog_early_teaser 146 view 0 click 등) 일제히 navigation race 패턴. 8 컴포넌트 button + helper 로 통일.

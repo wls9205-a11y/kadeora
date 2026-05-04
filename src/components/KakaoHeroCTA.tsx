@@ -1,6 +1,7 @@
 'use client';
 import { useAuth } from '@/components/AuthProvider';
 import { trackCTA } from '@/lib/analytics';
+import { trackCtaAndNavigate } from '@/lib/cta-navigate';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 
@@ -100,20 +101,21 @@ export default function KakaoHeroCTA() {
           </div>
 
           {/* 카카오 버튼 */}
-          <a
-            href={loginUrl}
-            onClick={() => trackCTA('click', 'kakao_hero')}
+          <button
+            type="button"
+            onClick={() => trackCtaAndNavigate({ href: loginUrl, ctaName: 'kakao_hero', pagePath: pathname })}
             style={{
               display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'center', gap: 10,
               background: '#FEE500', color: '#191919', borderRadius: 'var(--radius-card)',
               padding: '14px 0', fontSize: 15, fontWeight: 700, textDecoration: 'none',
               boxShadow: '0 0 24px rgba(254,229,0,0.15)',
               transition: 'transform 0.15s',
+              border: 'none', cursor: 'pointer',
             }}
           >
             <svg width="20" height="20" viewBox="0 0 512 512" fill="#191919"><path d="M255.5 48C141.1 48 48 126.1 48 222.4c0 62.2 38.7 116.7 97 149.8l-24.1 89.7c-2.1 7.9 6.8 14.4 13.7 9.9l101.2-65.2c7.2 1 14.6 1.5 22.2 1.5 114.4 0 207.5-78.1 207.5-174.4S369.9 48 255.5 48z" /></svg>
             카카오로 알림 설정하기
-          </a>
+          </button>
 
           {/* 이메일 대안 */}
           <div style={{ textAlign: 'center', marginTop: 10, fontSize: 12, color: 'rgba(224,232,240,0.2)' }}>

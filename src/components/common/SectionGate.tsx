@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef } from 'react';
-import Link from 'next/link';
+import { trackCtaAndNavigate } from '@/lib/cta-navigate';
 
 export type GateLevel = 'free' | 'login' | 'premium';
 
@@ -161,32 +161,15 @@ function GatedSection({
         >
           🔒 {isPremiumGate ? '프리미엄 회원 전용' : '로그인 후 전체 보기'}
         </div>
-        <Link
-          href={targetUrl}
+        <button
+          type="button"
           onClick={() => {
-            try {
-              const body = JSON.stringify({
-                event_type: 'cta_click',
-                cta_name: ctaName,
-                category: 'signup',
-                page_path:
-                  typeof window !== 'undefined' ? window.location.pathname : '',
-                gate_section: sectionKey,
-              });
-              if (typeof navigator !== 'undefined' && navigator.sendBeacon) {
-                navigator.sendBeacon(
-                  '/api/events/cta',
-                  new Blob([body], { type: 'application/json' })
-                );
-              } else {
-                fetch('/api/events/cta', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body,
-                  keepalive: true,
-                }).catch(() => {});
-              }
-            } catch {}
+            trackCtaAndNavigate({
+              href: targetUrl,
+              ctaName,
+              category: 'signup',
+              pagePath: typeof window !== 'undefined' ? window.location.pathname : undefined,
+            });
           }}
           style={{
             display: 'inline-block',
@@ -196,13 +179,16 @@ function GatedSection({
             fontSize: 15,
             padding: '12px 28px',
             borderRadius: 10,
+            border: 'none',
+            cursor: 'pointer',
             textDecoration: 'none',
             minWidth: 220,
             boxShadow: '0 6px 14px rgba(0,0,0,0.2)',
+            fontFamily: 'inherit',
           }}
         >
           {ctaText}
-        </Link>
+        </button>
         <div
           style={{
             fontSize: 11,

@@ -17,6 +17,7 @@ import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
 import { trackCTA } from '@/lib/analytics';
+import { trackCtaAndNavigate } from '@/lib/cta-navigate';
 
 const EXCLUDED = ['/', '/login', '/auth', '/onboarding', '/admin', '/terms', '/privacy'];
 const CLOSE_KEY = 'kd_sticky_bar_closed';
@@ -94,9 +95,9 @@ export default function StickySignupBar() {
       <span style={{ fontSize: 13, fontWeight: 700, color: '#fff', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
         🔔 청약·주식 알림 무료
       </span>
-      <a
-        href={loginUrl}
-        onClick={() => trackCTA('click', 'sticky_signup_bar', { page_path: pathname })}
+      <button
+        type="button"
+        onClick={() => trackCtaAndNavigate({ href: loginUrl, ctaName: 'sticky_signup_bar', pagePath: pathname })}
         style={{
           flexShrink: 0,
           padding: '8px 16px',
@@ -107,10 +108,12 @@ export default function StickySignupBar() {
           fontWeight: 800,
           textDecoration: 'none',
           whiteSpace: 'nowrap',
+          border: 'none',
+          cursor: 'pointer',
         }}
       >
         카카오 3초 가입
-      </a>
+      </button>
       <button
         onClick={handleClose}
         aria-label="닫기"

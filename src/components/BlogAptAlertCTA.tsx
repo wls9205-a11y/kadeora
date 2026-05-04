@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { trackCTA } from '@/lib/analytics';
 import { getVariant, trackAbView, trackAbClick } from '@/lib/analytics/abTest';
+import { trackCtaAndNavigate } from '@/lib/cta-navigate';
 
 interface Props {
   aptName: string;      // 단지명 (post.tags[0])
@@ -65,12 +66,12 @@ export default function BlogAptAlertCTA({ aptName, siteSlug, category = 'apt', l
   }, [variant, isLoggedIn, scrollVisible, category]);
 
   const handleAlert = async () => {
-    trackCTA('click', 'apt_alert_cta');
     if (variant) trackAbClick(EXPERIMENT, variant, { logged_in: isLoggedIn, category });
     if (!isLoggedIn) {
-      window.location.href = loginUrl;
+      trackCtaAndNavigate({ href: loginUrl, ctaName: 'apt_alert_cta' });
       return;
     }
+    trackCTA('click', 'apt_alert_cta');
     setStatus('loading');
     try {
       const sb = createSupabaseBrowser();

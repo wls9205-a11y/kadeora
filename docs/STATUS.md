@@ -1,3 +1,56 @@
+# 카더라 STATUS — 세션 230: CTA navigation race fix + legacy cleanup (2026-05-04 KST)
+
+## s230 — CTA 12+ navigation race fix + legacy cleanup + 진단성
+
+### 진단 (확정)
+- conversion_events 24h: cta_view 1,121 / cta_click 18 / cta_dismiss 70
+- desktop CTR 1.5% / mobile 1.6% — 모든 device 공통 navigation race
+- 18 click 모두 modal/in-page/logged-in. anchor/Link/window.location navigation click = **0건**
+- SW 무관 (sw.js:88 GET only). endpoint 무관 (admin client INSERT 정상). Hook 무관.
+
+### W1: 통합 helper 신규
+- **신규** `src/lib/cta-navigate.ts` — `trackCtaAndNavigate({href, ctaName, pagePath?, category?})`.
+  trackCTA + trackCtaClick 이중 호출 → 80ms `setTimeout` → `window.location.href`.
+  sendBeacon 큐잉 보장 후 navigation. fire-and-forget (await 금지).
+
+### W2: 8 컴포넌트 button + helper 통일
+- StickySignupBar — `<a href={loginUrl}>` → `<button>`. ctaName: `sticky_signup_bar` (312 view/24h)
+- LoginGate — Link x2 → button x2. ctaName: `login_gate_${feature}` + `_alt` (7 features 영향, 7d 671 view)
+- KakaoHeroCTA — `<a>` → `<button>`. ctaName: `kakao_hero`
+- KakaoBottomSheet — Link x2 → button x2. ctaName: `kakao_sheet_${feature}` + `_alt`
+- BlogAptAlertCTA — handleAlert 비로그인 path. ctaName: `apt_alert_cta` (74 view/24h)
+- BlogGatedWall — handleClick 패턴 통합. ctaName: `blog_gated_${gate}` (135 view/24h)
+- BlogEarlyGateTeaser — handleClick. ctaName: `config.cta_name` (146 view/24h, A/B variant 보존)
+- SectionGate — Link → button. ctaName: `props.ctaName` e.g. `apt_gate_ai_analysis` (35 view/24h)
+
+### W3: cta-track.ts sendBeacon return value 체크
+- `let sent = false; sent = navigator.sendBeacon(...)`. `!sent` 시 `fetch keepalive` fallback.
+  64KB overflow 케이스도 잡힘.
+
+### W4: legacy + 진단성
+- `src/lib/track-conversion.ts` — `/api/track` (legacy) → `/api/events/cta` (2 places).
+- `src/app/api/region/from-coords/route.ts` — Kakao res.ok=false 시 res.json() 으로 `kakao_msg` /
+  `kakao_code` 노출 + status 502 반환 (이전: 단순 502, 콘솔 점검 어려움).
+
+### W5: Architecture Rule #22
+CTA navigation race 가이드. anchor/Link/window.location 직접 navigation 금지, helper 통과 필수.
+button + onClick + helper 패턴 표준화.
+
+### 메모리 정정
+- award_points 가입보너스 = **100P** (1000P 아님). 7일 12명 신규 모두 정상 부여 (RPC 정상).
+- KAKAO_REST_API_KEY ✅ Vercel 등록 (kakao-place-fetch cron 200 OK 확인). from-coords 503 회귀
+  아님 — 카카오 콘솔 측 endpoint 권한 점검 필요할 수도 (kakao_msg 응답으로 추적 가능).
+
+### 효과 예상 (24h 후 검증)
+12+ BROKEN/DEAD/WEAK CTA → HEALTHY. CTR 1.5% → 회복 가능 (sticky_signup_bar / login_gate_*
+/ blog_early_teaser 등 모두 click 잡힘).
+
+### Pending
+- 24h 후 conversion_events 재집계 → BROKEN→HEALTHY 전환 여부
+- KakaoHeroCTA 의 secondary `<a>` (email 링크) onClick 없어 race 영향 없음 (그대로 유지)
+
+---
+
 # 카더라 STATUS — 세션 229: /apt region filter + 모바일 UX (2026-05-04 KST)
 
 ## s229 — /apt region filter overhaul + mobile UX (5 worker 병렬)

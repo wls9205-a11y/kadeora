@@ -9,6 +9,7 @@
 
 import { useCallback, useEffect, useRef } from 'react';
 import { trackCtaClick } from '@/lib/cta-track';
+import { trackCtaAndNavigate } from '@/lib/cta-navigate';
 
 interface Props {
   h2: string;
@@ -59,10 +60,16 @@ export default function BlogGatedWall({ h2, previewHtml, gate, ctaText, redirect
 
   const handleClick = useCallback(() => {
     const source = ctaSource || (gate === 'premium' ? 'blog_gated_premium' : 'blog_gated_login');
-    try { trackCtaClick({ cta_name: source, category: 'signup', page_path: redirectPath || (typeof window !== 'undefined' ? window.location.pathname : '') }); } catch { /* silent */ }
     if (typeof window === 'undefined') return;
-    const dest = gate === 'premium' ? '/premium?from=gated' : `/login?redirect=${encodeURIComponent(redirectPath || window.location.pathname)}&source=${source}`;
-    window.location.href = dest;
+    const dest = gate === 'premium'
+      ? '/premium?from=gated'
+      : `/login?redirect=${encodeURIComponent(redirectPath || window.location.pathname)}&source=${source}`;
+    trackCtaAndNavigate({
+      href: dest,
+      ctaName: source,
+      category: 'signup',
+      pagePath: redirectPath || window.location.pathname,
+    });
   }, [gate, redirectPath, ctaSource]);
 
   const isPremium = gate === 'premium';

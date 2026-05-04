@@ -39,9 +39,9 @@ export function trackConversion(
 
   if (navigator.sendBeacon) {
     const blob = new Blob([body], { type: 'application/json' });
-    navigator.sendBeacon('/api/track', blob);
+    navigator.sendBeacon('/api/events/cta', blob);
   } else {
-    fetch('/api/track', {
+    fetch('/api/events/cta', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body,

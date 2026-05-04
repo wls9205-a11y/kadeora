@@ -1,6 +1,8 @@
 // Edge runtime: lat/lng → Kakao reverse geocoding → 17-region short name.
 // 클라이언트 RegionPicker 의 '📍 현재 위치' 버튼이 호출.
 
+import { NextResponse } from 'next/server';
+
 export const runtime = 'edge';
 export const maxDuration = 10;
 
@@ -79,7 +81,14 @@ export async function GET(req: Request): Promise<Response> {
   }
 
   if (!res.ok) {
-    return jsonResponse({ error: 'kakao_bad_status', status: res.status }, 502);
+    let kakaoBody: any = null;
+    try { kakaoBody = await res.json(); } catch {}
+    return NextResponse.json({
+      error: 'kakao_bad_status',
+      status: res.status,
+      kakao_msg: kakaoBody?.msg || null,
+      kakao_code: kakaoBody?.code || null,
+    }, { status: 502 });
   }
 
   let data: { documents?: KakaoDocument[] } | null = null;
