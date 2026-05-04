@@ -8,17 +8,22 @@ export const runtime = 'nodejs';
 
 const NAVER_CLIENT_ID = process.env.NAVER_CLIENT_ID || '';
 const NAVER_CLIENT_SECRET = process.env.NAVER_CLIENT_SECRET || '';
-// 세션 140 [P0-APT-CRAWL]: 250s timeout 안에 완주 가능하도록 축소 (이전 200 → 50)
-// 관측: 250s 내 ~32-36 site 처리 → 50 로 줄여 여유 확보 + big_event phase 도달
-const BATCH_SIZE = 50;
-const TARGET_IMG_COUNT = 7; // 목표 이미지 수
-const MIN_IMG_COUNT = 4; // 세션 146 B5: 3→4 (네이버 이미지 캐러셀 진입 요건: 4장+)
+// s226 P1: 처리량 개선
+// - BATCH_SIZE 50 → 30 (실제 250s 안 처리량 35-43 → 30 으로 안전 마진)
+// - TARGET 7 → 3 (단지당 시간 절반, 카테고리 매칭률 ↑)
+// - Phase 1 (land.naver) 비활성화 — 비공식 스크래핑 + 5s timeout × site 가 시간 대부분 소진
+const BATCH_SIZE = 30;
+const TARGET_IMG_COUNT = 3;
+const MIN_IMG_COUNT = 3; // RPC 큐 잡는 임계 — 4 → 3 으로 완화 (lt3 부터 보충)
 const MAX_RUNTIME_MS = 250_000; // 250초 — 300초 제한에 여유 50초
+const SKIP_PHASE1_LAND_NAVER = true; // s226 P1: Phase 1 비활성화 토글
 
 // ━━━ 도메인 블랙리스트 (경쟁사 + 관련성 낮은 출처) ━━━
 const DOMAIN_BLACKLIST = [
   /hogangnono/i,                       // 호갱노노 (경쟁사)
-  /new\.land\.naver\.com|landthumb/i,  // 네이버부동산 (경쟁사)
+  // s226 P1: landthumb-phinf.pstatic.net 은 NAVER 검색 결과 thumbnail 이 자주 매치되어
+  // 정상 NAVER 이미지까지 차단되던 회귀. new.land.naver.com 만 차단 유지.
+  /new\.land\.naver\.com/i,            // 네이버부동산 (경쟁사)
   /kbland|kbstar\.com/i,               // KB부동산 (경쟁사)
   /zigbang|dabang/i,                   // 직방·다방 (경쟁사)
   /dcinside\.(com|co\.kr)/i,           // 디시인사이드 전체 (부적합)
@@ -186,10 +191,11 @@ async function searchNaverImages(
 
     return items
       .filter((item) => {
-        // 크기
+        // s226 P1: size filter 완화 400x250 → 280x180. NAVER API 가 작은 thumbnail 사이즈를
+        // 반환하는 경우가 많아 양질의 결과까지 차단되던 회귀.
         const w = parseInt(item.sizewidth || '0');
         const h = parseInt(item.sizeheight || '0');
-        if (w < 400 || h < 250) return false;
+        if (w < 280 || h < 180) return false;
         // 블랙리스트
         if (isBlacklisted(item.link || '')) return false;
         // 관련성 — title에 단지명 토큰 있어야 함
@@ -244,14 +250,16 @@ async function collectImagesForSite(
     results.push({ ...img, url: u });
   };
 
-  // Phase 1: 네이버 부동산 단지 사진
-  const landPhotos = await fetchNaverLandPhotos(name);
-  for (const p of landPhotos) {
-    push(p);
-    if (results.length >= TARGET_IMG_COUNT) break;
+  // s226 P1: Phase 1 (m.land.naver 비공식 스크래핑) 토글로 비활성화.
+  // 5s timeout × site = 250s 가 단독으로 소진되던 회귀. Phase 2 NAVER 공식 API 만 사용.
+  if (!SKIP_PHASE1_LAND_NAVER) {
+    const landPhotos = await fetchNaverLandPhotos(name);
+    for (const p of landPhotos) {
+      push(p);
+      if (results.length >= TARGET_IMG_COUNT) break;
+    }
+    if (results.length >= TARGET_IMG_COUNT) return results.slice(0, TARGET_IMG_COUNT);
   }
-
-  if (results.length >= TARGET_IMG_COUNT) return results.slice(0, TARGET_IMG_COUNT);
 
   // Phase 2: 카테고리별 이미지 검색 (관련성 검증 포함)
   const coveredTypes = new Set(results.map((p) => p.type));
