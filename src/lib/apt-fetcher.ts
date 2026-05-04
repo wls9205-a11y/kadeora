@@ -159,9 +159,9 @@ export async function fetchPriceTrend(region: string, sigungu: string | null): P
     const sb = getSupabaseAdmin();
     let q: any = (sb as any).from('apt_trade_monthly_stats')
       .select('region, sigungu, avg_price, yoy_pct, stat_month')
-      .eq('region', region)
       .order('stat_month', { ascending: false })
       .limit(1);
+    if (region !== '전국') q = q.eq('region', region);
     if (sigungu) q = q.eq('sigungu', sigungu);
     const { data } = await q;
     return Array.isArray(data) && data.length > 0 ? (data[0] as PriceTrendRow) : null;
@@ -182,11 +182,12 @@ export interface AIAnalysisPost {
 export async function fetchAIAnalysis(region: string): Promise<AIAnalysisPost | null> {
   try {
     const sb = getSupabaseAdmin();
-    const { data } = await (sb as any).from('blog_posts')
+    let q: any = (sb as any).from('blog_posts')
       .select('slug, title, excerpt, published_at, cover_image, tags, category')
       .eq('is_published', true)
-      .eq('category', 'apt')
-      .contains('tags', [region])
+      .eq('category', 'apt');
+    if (region !== '전국') q = q.contains('tags', [region]);
+    const { data } = await q
       .order('published_at', { ascending: false })
       .limit(1);
     if (!Array.isArray(data) || data.length === 0) return null;
@@ -354,9 +355,9 @@ export async function fetchSigunguTrends(region: string, sigungu: string | null,
     const sb = getSupabaseAdmin();
     let q: any = (sb as any).from('v_sigungu_trade_stats')
       .select('region_nm, sigungu, deal_month, total_deals, avg_price, avg_price_per_pyeong, avg_area')
-      .eq('region_nm', region)
       .order('deal_month', { ascending: false })
       .limit(months);
+    if (region !== '전국') q = q.eq('region_nm', region);
     if (sigungu) q = q.eq('sigungu', sigungu);
     const { data } = await q;
     // 시계열 chart 는 ascending 순서가 자연스러움
@@ -507,11 +508,12 @@ export interface BlogListRow {
 export async function fetchBlogList(region: string, limit = 3): Promise<BlogListRow[]> {
   try {
     const sb = getSupabaseAdmin();
-    const { data } = await (sb as any).from('blog_posts')
+    let q: any = (sb as any).from('blog_posts')
       .select('slug, title, excerpt, cover_image, published_at, reading_minutes, view_count, tags, category, is_published')
       .eq('is_published', true)
-      .eq('category', 'apt')
-      .contains('tags', [region])
+      .eq('category', 'apt');
+    if (region !== '전국') q = q.contains('tags', [region]);
+    const { data } = await q
       .order('view_count', { ascending: false, nullsFirst: false })
       .limit(limit);
     return (data as BlogListRow[]) || [];

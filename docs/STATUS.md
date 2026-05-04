@@ -1,3 +1,65 @@
+# 카더라 STATUS — 세션 229: /apt region filter + 모바일 UX (2026-05-04 KST)
+
+## s229 — /apt region filter overhaul + mobile UX (5 worker 병렬)
+
+### W1 DB (Supabase MCP 직접 적용 — 코드 변경 0)
+- 신규 뷰: `v_apt_region_summary` (전국 + 17 시도 + 시군구; site_count, active_subscription,
+  unsold_count, redev_count, trade_count, subscription_open_count) — `s229_a/a2`
+- 데이터 cleanup: sigungu 6건 동→시군구 정리 — `s229_b`
+  (장전동→금정구, 재송동→해운대구, 삼숭동→양주시, 수택동→구리시, 동춘동→연수구, 상방동→NULL)
+
+### W2 Edge geo
+- **신규** `src/lib/region-detection.ts` — Edge-runtime 안전. `KR_REGIONS_17` 재export
+  (region-storage.ts canonical), `isValidKrRegion(s)`, `isoToKrRegion(iso)` (17 ISO 3166-2:KR
+  bare suffix 매핑).
+- `src/middleware.ts` — `kd_region` 쿠키 → Vercel `x-vercel-ip-country-region` →
+  `request.headers.set('x-kd-region', resolved || '전국')` 로 SSR 에 전달. Supabase
+  `setAll` callback 의 response 재생성 경로에도 동일 propagation.
+
+### W3 apt-fetcher 전국 처리 + page.tsx headers()
+- `src/lib/apt-fetcher.ts` — 4 fns 모두 `region === '전국'` 일 때 `.eq()`/`.contains()`
+  안 걸도록 conditional:
+  - fetchPriceTrend (실제로는 apt_trade_monthly_stats 테이블)
+  - fetchSigunguTrends (v_sigungu_trade_stats)
+  - fetchAIAnalysis / fetchBlogList (blog_posts.tags contains)
+- `src/app/(main)/apt/page.tsx` — `region = sp.region?.trim() || (await headers()).get('x-kd-region') || '전국'`.
+  `generateMetadata` 의 alternates.canonical 동적 (region 있으면 쿼리 포함).
+
+### W4 RegionPicker UX + 좌표 API
+- **신규** `src/app/api/region/from-coords/route.ts` — Edge runtime. 좌표 → Kakao
+  reverse geocoding → 17-region 정규화. KAKAO_REST_API_KEY 미설정 503, 한국 외 좌표
+  400, region whitelist 미통과 422.
+- **rewrite** `src/components/apt/RegionAutoSelect.tsx` — 44줄 → 23줄. `getStoredRegion`
+  + `isValidKrRegion` 만 사용. timezone 매핑 / `apt:lastRegion` 키 제거.
+- `src/components/apt/RegionPicker.tsx` — `choose()` 에 `kd_region` 쿠키 set (max-age 1y,
+  samesite=lax). `📍 현재 위치` 버튼 → `tryGeolocation()` (navigator.geolocation +
+  /api/region/from-coords + geoLoading state). 모바일 padding 강화.
+
+### W5 모바일 UX + AptOtherRegions 강화
+- `RegionHeader.tsx` 라인 49-50: padding 6/12 → 9/14, fontSize 11 → 12.
+- **rewrite** `AptOtherRegions.tsx` — async server component. `v_apt_region_summary`
+  sigungu IS NULL row fetch → KR_REGIONS_17 filter+sort by counts DESC. count ≥10 일 때
+  badge 표시.
+- `AptStatsKPI.tsx` — minmax 150 → 140, value fontSize 28 → 24.
+- `AptQuickFilters.tsx` — label fontSize 10 → 11 (3 places), chip 11 → 12 (1 place).
+
+### Architecture Rule #21 (신규)
+`/apt` region resolution 단일 흐름: Edge middleware → x-kd-region header → SSR
+page.tsx headers().get() → fetcher 전국 처리 → Client RegionAutoSelect (저장값 있을
+때만 redirect). localStorage 키는 `kd:region` 통일.
+
+### 효과
+- SSR 첫 페인트 시점에 region 결정 → flash 제거
+- 전국 합계 정상 노출 (이전: '전국' 일 때 빈 결과)
+- '현재 위치' 버튼 동작 (이전: 하드코딩)
+- sigungu 동 단위 혼입 6건 정리
+- 모바일 touch target ↑
+
+### Pending
+- KAKAO_REST_API_KEY Vercel env 미설정 시 `/api/region/from-coords` 503 (다른 흐름 영향 없음)
+
+---
+
 # 카더라 STATUS — 세션 227: Kakao Marketing Hub (2026-05-04 KST)
 
 ## s227 — Kakao Marketing Hub (5 work orders 병렬, 1 commit / 1 deploy)

@@ -46,8 +46,8 @@ export default function RegionHeader({ region, sigungu }: Props) {
           onClick={() => setPickerOpen(true)}
           aria-label="지역 변경"
           style={{
-            padding: '6px 12px', borderRadius: 999,
-            fontSize: 11, fontWeight: 700,
+            padding: '9px 14px', borderRadius: 999,
+            fontSize: 12, fontWeight: 700,
             background: 'var(--bg-hover)', color: 'var(--text-secondary)',
             border: '1px solid var(--border)', cursor: 'pointer',
             whiteSpace: 'nowrap',

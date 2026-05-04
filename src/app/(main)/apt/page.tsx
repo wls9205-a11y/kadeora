@@ -1,5 +1,6 @@
 import { SITE_URL } from '@/lib/constants';
 import type { Metadata } from 'next';
+import { headers } from 'next/headers';
 import Disclaimer from '@/components/Disclaimer';
 import AdBanner from '@/components/AdBanner';
 
@@ -49,9 +50,13 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
     ? `${SITE_URL}/api/og?section=${sp.section}&design=2`
     : `${SITE_URL}/api/og?title=${encodeURIComponent('아파트 청약·분양·재개발')}&subtitle=${encodeURIComponent(regionLabel || '전국 실시간 현황')}`;
 
+  const canonicalUrl = sp.region
+    ? `${SITE_URL}/apt?region=${encodeURIComponent(sp.region)}${sp.sigungu ? `&sigungu=${encodeURIComponent(sp.sigungu)}` : ''}`
+    : `${SITE_URL}/apt`;
+
   return {
     title: baseTitle, description: baseDesc,
-    alternates: { canonical: SITE_URL + '/apt' },
+    alternates: { canonical: canonicalUrl },
     robots: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' as const },
     openGraph: {
       title: baseTitle, description: baseDesc,
@@ -91,7 +96,9 @@ export default async function AptPage({
   // s205-W1 SSR 복구: region 미설정 시 RegionHero 만 렌더 → 봇 HTML 텍스트 0건이었음.
   // 이제 default '전국' 으로 SSR 풀렌더 + 클라이언트 측 RegionAutoSelect 가
   // 브라우저 IP/저장값 기반으로 ?region= 으로 replace.
-  const region = sp.region?.trim() || '전국';
+  const region = sp.region?.trim()
+    || (await headers()).get('x-kd-region')
+    || '전국';
   const sigungu = sp.sigungu?.trim() || null;
   const isAutoRegion = !sp.region;
 

@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
+import { isValidKrRegion, isoToKrRegion } from '@/lib/region-detection';
 
 const PROTECTED_PATHS = ['/write', '/payment', '/profile', '/notifications', '/admin'];
 const PUBLIC_PATHS = ['/login', '/auth', '/onboarding', '/terms', '/privacy', '/faq'];
@@ -175,8 +176,21 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // ── Edge geo-resolution: x-kd-region 헤더로 SSR에 전달 ──
+  const cookieRegion = request.cookies.get('kd_region')?.value;
+  let resolvedRegion: string | null = null;
+  if (cookieRegion && isValidKrRegion(cookieRegion)) {
+    resolvedRegion = cookieRegion;
+  } else if (request.headers.get('x-vercel-ip-country') === 'KR') {
+    resolvedRegion = isoToKrRegion(request.headers.get('x-vercel-ip-country-region'));
+  }
+  const regionHeaderValue = resolvedRegion || '전국';
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set('x-kd-region', regionHeaderValue);
+
   // ── 페이지 요청만: Supabase auth + 보호 경로 + 온보딩 체크 ──
-  let response = NextResponse.next({ request });
+  let response = NextResponse.next({ request: { headers: requestHeaders } });
+  response.headers.set('x-kd-region', regionHeaderValue);
 
   // 공개 전용 페이지: auth 체크 없이 바로 통과 (속도 대폭 향상)
   const PUBLIC_ONLY = ['/', '/feed', '/stock', '/apt', '/blog', '/discuss', '/hot', '/search', '/faq', '/terms', '/privacy', '/guide', '/grades', '/discussion'];
@@ -215,7 +229,8 @@ export async function middleware(request: NextRequest) {
         getAll() { return request.cookies.getAll(); },
         setAll(cookiesToSet: { name: string; value: string; options?: CookieOptions }[]) {
           cookiesToSet.forEach(({ name, value }: { name: string; value: string }) => request.cookies.set(name, value));
-          response = NextResponse.next({ request });
+          response = NextResponse.next({ request: { headers: requestHeaders } });
+          response.headers.set('x-kd-region', regionHeaderValue);
           cookiesToSet.forEach(({ name, value, options }: { name: string; value: string; options?: CookieOptions }) => response.cookies.set(name, value, options as Record<string, unknown>));
         },
       },

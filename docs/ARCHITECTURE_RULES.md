@@ -82,3 +82,26 @@ grep -r "<route>" src/
 - consent 만료 (Rule #20 항목 3) 검증은 `consent-renewal-check` (T-14d 알림) + `consent-expiry-revoke` (T+0 자동 철회) 두 cron 으로 보장.
 
 **Discovered**: s227 (2026-05-03) — 마케팅 카카오 채널 발송 파이프라인 신설 시 정보통신망법 50조/62조의3 감사 요건 정식화. cron `kakao-channel-sync` / `consent-renewal-check` / `consent-expiry-revoke` 와 admin route `marketing/kakao/send` 가 모두 동일 가드 + 동일 로그 테이블 사용해야 함.
+
+## Rule #21 — /apt region resolution = Edge → SSR → Client 단일 흐름 (s229 신설)
+
+**Symptom**: `/apt` 진입 시 region picker flash, localStorage 가 redirect 직후 다시 덮어씀, server/client region 가 다르게 계산되어 hydration mismatch.
+
+**Cause**: 이전 흐름은 client-only — server 는 region 모르고 RegionAutoSelect 가 mount 후 redirect 시도. timezone 강제 매핑 + 'apt:lastRegion' 자체 키 사용으로 다른 페이지(`region-storage.ts`의 `kd:region`) 와 mismatch. 결과: SSR 가 '전국' 으로 한 번 렌더 → client 가 다른 값으로 재요청 → 깜빡임.
+
+**Rule**:
+
+`/apt` 의 region 결정 흐름은 단일:
+
+1. **Edge middleware** (`src/middleware.ts`) — `kd_region` 쿠키 → Vercel `x-vercel-ip-country-region` (`isoToKrRegion`) → `null`. 결과를 `request.headers.set('x-kd-region', resolved || '전국')` 로 downstream SSR 에 전달.
+2. **SSR page.tsx** — `region = sp.region?.trim() || (await headers()).get('x-kd-region') || '전국'`. 첫 페인트 시점에 정답 region 으로 SSR.
+3. **fetcher 전국 처리** — `region === '전국'` 일 때 `.eq()`/`.contains()` 안 걸어 전국 합계 반환 (V_apt_region_summary 등).
+4. **Client RegionAutoSelect** — `useSearchParams().get('region')` 있으면 no-op. 없으면 `getStoredRegion()` (`@/lib/region-storage`) → `isValidKrRegion()` 통과 시만 `router.replace`. timezone 매핑/자체 키 금지 — single source `kd:region`.
+5. **RegionPicker choose()** — region 선택 시 `kd_region` 쿠키 set (max-age 1y, samesite=lax). 다음 방문에서 middleware 가 즉시 SSR 단계에 region 주입.
+
+**How to apply**:
+- 새 region-aware 페이지 (예: `/stock/region/[region]`) 도 동일 패턴 — Edge → SSR header → fetcher 전국 처리.
+- 좌표 → region 변환은 `/api/region/from-coords` (Edge runtime, Kakao reverse geocoding) 사용. KAKAO_REST_API_KEY 미설정 시 503 반환 — middleware 흐름은 영향 없음.
+- localStorage 키는 `kd:region` 으로 통일. `apt:lastRegion` 등 자체 키 추가 금지.
+
+**Discovered**: s229 (2026-05-04) — /apt picker flash + localStorage 키 mismatch + middleware geo 미사용 합계 10 bugs 추적 중 발견. 단일 source-of-truth 흐름으로 정리.

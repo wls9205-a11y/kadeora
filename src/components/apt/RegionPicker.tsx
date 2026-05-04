@@ -27,6 +27,7 @@ export default function RegionPicker({ open, onClose, initialRegion }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [activeRegion, setActiveRegion] = useState<string | null>(initialRegion ?? null);
   const [search, setSearch] = useState('');
+  const [geoLoading, setGeoLoading] = useState(false);
 
   // open 상태가 true 가 된 시점에만 v_apt_region_summary fetch (모달 닫힐 때 메모리 보존, 재열기 시 재사용).
   useEffect(() => {
@@ -105,8 +106,28 @@ export default function RegionPicker({ open, onClose, initialRegion }: Props) {
     params.set('region', region);
     if (sigungu) params.set('sigungu', sigungu);
     router.replace(`/apt?${params.toString()}`);
+    try { document.cookie = `kd_region=${encodeURIComponent(region)}; path=/; max-age=${60*60*24*365}; samesite=lax`; } catch {}
     onClose();
   };
+
+  async function tryGeolocation() {
+    if (!navigator.geolocation) { alert('위치 권한을 사용할 수 없습니다'); return; }
+    setGeoLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const r = await fetch(`/api/region/from-coords?lat=${pos.coords.latitude}&lng=${pos.coords.longitude}`);
+          if (!r.ok) throw new Error('geocoding failed');
+          const j = await r.json();
+          if (j.region) choose(j.region, j.sigungu || null);
+          else alert('현재 위치의 지역을 찾을 수 없어요');
+        } catch { alert('현재 위치 조회에 실패했어요'); }
+        finally { setGeoLoading(false); }
+      },
+      () => { alert('위치 권한이 거부되었습니다'); setGeoLoading(false); },
+      { timeout: 8000, maximumAge: 60000 }
+    );
+  }
 
   if (!open) return null;
 
@@ -169,9 +190,10 @@ export default function RegionPicker({ open, onClose, initialRegion }: Props) {
         {/* 빠른 액션 */}
         <div style={{ display: 'flex', gap: 8, padding: '6px 16px 12px' }}>
           <button
-            onClick={() => choose('서울', null)}
+            onClick={tryGeolocation}
+            disabled={geoLoading}
             style={pillStyle()}
-          >📍 현재 위치</button>
+          >{geoLoading ? '위치 조회 중...' : '📍 현재 위치'}</button>
           <button
             onClick={() => {
               setStoredRegion('전국', null);
@@ -271,8 +293,8 @@ export default function RegionPicker({ open, onClose, initialRegion }: Props) {
 
 function pillStyle(): React.CSSProperties {
   return {
-    padding: '7px 12px', borderRadius: 999,
-    fontSize: 12, fontWeight: 700,
+    padding: '9px 14px', borderRadius: 999,
+    fontSize: 13, fontWeight: 700,
     background: 'var(--bg-hover)', color: 'var(--text-secondary)',
     border: '1px solid var(--border)', cursor: 'pointer',
   };
@@ -280,9 +302,9 @@ function pillStyle(): React.CSSProperties {
 
 function tileStyle(): React.CSSProperties {
   return {
-    padding: '12px 8px', borderRadius: 10,
+    padding: '14px 8px', borderRadius: 10,
     border: '1px solid var(--border)', background: 'var(--bg-hover)',
-    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
     cursor: 'pointer',
   };
 }
@@ -290,9 +312,9 @@ function tileStyle(): React.CSSProperties {
 function rowBtnStyle(): React.CSSProperties {
   return {
     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-    padding: '10px 12px', borderRadius: 8,
+    padding: '12px 14px', borderRadius: 8,
     background: 'var(--bg-hover)', border: '1px solid var(--border)',
-    fontSize: 13, fontWeight: 600, color: 'var(--text-primary)',
+    fontSize: 14, fontWeight: 600, color: 'var(--text-primary)',
     cursor: 'pointer', textAlign: 'left',
   };
 }
