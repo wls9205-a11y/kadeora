@@ -1,3 +1,41 @@
+# Session 226 — Cron 모니터링 시스템 fix (2026-05-04 KST)
+
+브랜치: main · DB only commit. 코드 변경 0줄. tag: `s226-cron-monitoring`.
+
+## 진단 (s225 후속)
+- s224 CriticalAlertBar 의 "cron_failures 8건" = **거짓 양성**
+- 모든 cron 실제로는 정상 작동 (vercel 200 응답, 0~1초)
+- 거짓 원인: `cron_health_v2()` Step 1 (`check_pg_cron_responses`) 의 `duration_ms` 계산 버그
+
+## 버그 상세
+- `check_pg_cron_responses` 의 `duration_ms = NOW() - started_at`
+  → 30분 주기 watcher 가 늦게 호출되면 실제 1초만에 끝난 cron 도 평균 15분 기록
+- `cron_logs` 의 599 / 1199 / 1799 같은 정확히 10/20/30 분 마크 = watcher 호출 주기의 흔적
+- Step 2 의 "15분+ running → timeout" 마킹 로직이 정상 cron 도 잘못 timeout 처리
+
+## DB 변경 (Supabase MCP)
+1. `check_pg_cron_responses`: `duration_ms = (resp.created - started_at)` (실제 응답 시점)
+2. `cron_health_v2` pg_cron 주기: 30분 → **2분** (Step 1 자주 돌게)
+3. 24h 거짓 timeout **10건** → success/auth_failed/failed 정정
+
+## 검증 결과
+- 최근 1시간 pg_cron entries: success 7건 + running 3건. duration_ms 19/135/52/558/58/36/39 (모두 <1초, 사실적)
+- cron_failures alert: 8 → **6** (24h window 점진 감소 중)
+
+## 노드 추가 액션 필요 (수동)
+- Vercel env 에 `PG_CRON_SHARED_SECRET` 설정 (vault 의 `cron_secret` 값과 동일) — dart-ingest auth_failed fix
+- 1일 후 admin CriticalAlertBar `cron_failures` 자연 해제 확인
+
+## Architecture Rule #19 (신설)
+> DB 함수에서 외부 응답 시간 측정 시 `NOW()` 사용 금지. 항상 실제 응답 시점 (예: `net._http_response.created`) 기준. 그렇지 않으면 watcher 주기에 비례한 가짜 latency 기록.
+
+## 효과
+- cron 모니터링 신뢰성 회복
+- CriticalAlertBar `cron_failures` 거짓 알람 점진 0
+- 진짜 cron 사고 발생 시 진짜 알람으로 detect 가능
+
+---
+
 # Session 225-P1 — /api/track 통합 fix (2026-05-04 KST)
 
 브랜치: main · 한 commit / 한 deploy. tag: `s225-p1-track-merge`.
