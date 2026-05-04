@@ -395,22 +395,6 @@
     {
       "path": "/api/cron/naver-cafe-publish",
       "schedule": "0 9,21 * * *"
-    },
-    {
-      "path": "/api/cron/kakao-channel-sync",
-      "schedule": "0 18 * * *"
-    },
-    {
-      "path": "/api/cron/consent-renewal-check",
-      "schedule": "0 0 * * *"
-    },
-    {
-      "path": "/api/cron/consent-expiry-revoke",
-      "schedule": "30 0 * * *"
-    },
-    {
-      "path": "/api/cron/region-infer-backfill",
-      "schedule": "0 19 * * 0"
     }
   ],
   "headers": [
