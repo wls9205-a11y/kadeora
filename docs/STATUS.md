@@ -1,4 +1,48 @@
-# 카더라 STATUS — 세션 230: CTA navigation race fix + legacy cleanup (2026-05-04 KST)
+# 카더라 STATUS — 세션 230 (V5 redesign + CTA fix 병합) (2026-05-04 KST)
+
+## s230c — /apt V5 컴팩트 재설계 (17 섹션 → 5 섹션) — 2026-05-01
+
+브랜치: main · 한 commit / 한 deploy. tag: `s230-apt-v5`. 롤백 앵커: `pre-s230-apt-v5` (2019d439).
+
+### Why
+- 이전 /apt: 17 imports, 11개 fetch fn, 8 메인 섹션 + 4 chrome — 모바일 스크롤 피로 / 정보 노이즈 과다
+- 정보 밀도 보다 핵심 흐름 (지역 → 카테고리 → 단지) 에 집중
+
+### 구조 변경
+- **Before**: RegionHeader + AptHeroSearch + AptCategoryTabs + AptQuickFilters + 8 섹션 + AptOtherRegions + AptMapCTA (17 컴포넌트)
+- **After**: AptHeaderV5 (region picker + 6 tabs in 1 sticky card) + AptCardGridV5 (2-col 단지 그리드) (2 컴포넌트)
+
+### Phase 0 — DB
+- 신규 RPC: `get_apt_v5_summary(p_region text)` — cat (5 site_type counts) + imminent
+  (apt_subscriptions rcept_endde 7d) + sido (17 region count DESC) jsonb 단일 호출
+- 검증: 전국 total 5813, ongoing 2853, sido 17 / 서울 total 752, ongoing 192
+
+### Phase 1 — 컴포넌트
+- **신규** `src/components/apt/AptHeaderV5.tsx` — sticky header. region 버튼 → RegionSheetV5,
+  검색/지도 아이콘, 6-tab category strip (전체/분양중/⏰D-7/미분양/재개발/실거래) router.replace 이동
+- **신규** `src/components/apt/RegionSheetV5.tsx` — bottom sheet. 검색 + 📍 geo + 즐겨찾기
+  (kadeora_region_fav_v1) + 최근 (kadeora_region_recent_v1) + 시도 3-col 그리드 + 전국 보기
+- **신규** `src/components/apt/AptCardGridV5.tsx` — server component. fetchSiteList(filters, 12)
+  → 2-col 4:3 카드 (이미지 fallback chain + site_type 배지 + 가격/세대/입주 라벨)
+- **rewrite** `src/app/(main)/apt/page.tsx` — 245 → ~135 lines, imports 17 → 10. RPC 단일 호출
+  + AptHeaderV5 + AptCardGridV5. s229 work 보존: x-kd-region header / RegionAutoSelect /
+  generateMetadata 보존 / SEO JSON-LD 3종 보존.
+
+### Phase 2 — 빌드 검증
+- tsc --noEmit: clean
+- next build: 성공. /apt = 4.52 kB / 235 kB First Load
+
+### s229 / s230(CTA) 보존 확인
+- middleware.ts x-kd-region: 변경 없음
+- RegionAutoSelect.tsx: 그대로 사용 (isAutoRegion 분기)
+- /api/region/from-coords: 변경 없음. RegionSheetV5 의 📍 버튼이 호출
+- lib/region-storage.ts setStoredRegion: RegionSheetV5 pick() 에서 사용
+- s230 CTA helpers (cta-navigate / cta-track / track-conversion) 변경 없음 — V5 페이지에는
+  CTA 컴포넌트 직접 사용 안 함 (page chrome 만 변경)
+
+---
+
+## s230 — CTA navigation race fix + legacy cleanup + 진단성 (2026-05-04)
 
 ## s230 — CTA 12+ navigation race fix + legacy cleanup + 진단성
 
