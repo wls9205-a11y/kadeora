@@ -1,3 +1,72 @@
+# 카더라 STATUS — 세션 231+232: signup flow 회복 + blog freshness (2026-05-04 KST)
+
+## s231 — Signup flow + 거주지 등록 회복
+
+### 진단 (회귀 30일)
+- 거주지 등록률 21% → 1.3% (16배 추락) — 4/14 frictionless 변경 시점과 일치
+- email/google 78% 가 어떤 모달도 못 봄 (provider==='kakao' 강제 가드)
+- 모달 sessionStorage → 새 탭마다 부활 = 사용자 짜증
+
+### W1 DB (Supabase MCP 직접)
+- `complete_signup_frictionless` RPC 가 신규 사용자 `onboarded=FALSE` 로 INSERT (이전 강제 TRUE)
+
+### W2 auth/callback redirect
+- `src/app/auth/callback/route.ts` 마지막 redirect 직전: profiles 조회 → `onboarded=false`
+  면 `/onboarding?return=<safeRedirect>` 로 redirect (path 복구)
+
+### W3 MarketingConsentModal 강화
+- `MarketingConsentModalMount.tsx`: `provider !== 'kakao'` 가드 제거 (email/google 도 노출)
+- view/click/dismiss event fire (trackCTA 호출)
+
+### W4 ResidenceNudgeModal 신규
+- `src/components/onboarding/ResidenceNudgeModal.tsx` — onboarded=true + residence_city=null
+  사용자에 5초 delay 모달 + 7일 cooldown
+- ClientShell.tsx mount
+
+### W5 모달 cooldown 통일
+- KakaoChannelAddModal / SignupPopupModal / MarketingConsentModalMount
+- sessionStorage flag → localStorage 7일 timestamp (Rule #24)
+
+## s232 — Blog freshness 시스템
+
+### 진단
+- blog rewrite cron 17개 active 인데 created/updated 모두 0
+- 391개 (2024 title) + 9개 (2025 stale 시즌성) 검색 노출 중
+- LLM prompt 에 "현재 시점" 컨텍스트 부재 — 학습 cutoff 기준으로 과거 연도 미래형 작성
+
+### W6 DB (Supabase MCP 직접)
+- `blog_posts` 컬럼 추가: `target_year`, `expires_at`, `is_seasonal`, `freshness_score`,
+  `auto_unpublished_at`, `auto_unpublished_reason`
+- backfill: 391 (2024 title) + 8 (2025 stale) 자동 unpublish (8,574 → 8,175 published)
+
+### W7 blog-stale-unpublish cron
+- **신규** `src/app/api/cron/blog-stale-unpublish/route.ts` — withCronAuthFlex + withCronLogging
+- 매일 KST 02:00 (UTC 17:00) 실행. 3 조건 자동 unpublish:
+  1. `expires_at < now()` → reason='expired'
+  2. `target_year < current_year` → reason='target_year_past'
+  3. `is_seasonal=true AND published_at < now()-180d` → reason='seasonal_stale'
+- vercel.json 99/100 한도 → **pg_cron 등록** (s232_register_blog_stale_unpublish_pg_cron migration)
+
+### W9 freshness-context inject
+- **신규** `src/lib/blog/freshness-context.ts` — `getFreshnessContext()` (오늘 KST + 현재 연/분기 +
+  과거 연도 미래형 금지 + 메타 가이드) + `deriveFreshnessFields({ isSeasonal, targetYear })`
+- 9 cron route 에 적용:
+  - blog-apt-v2 / blog-stock-v2 / issue-draft (prompt + safeBlogInsert)
+  - blog-enrich-rewrite (prompt + UPDATE)
+  - batch-rewrite-submit / blog-meta-rewrite-submit / seed-posts (prompt only)
+  - issue-publish / issue-preempt (skip — LLM 없거나 blog_posts INSERT 없음)
+
+### Architecture Rules (3 신규)
+- Rule #23 — signup flow: frictionless → /onboarding → 거주지+관심사
+- Rule #24 — 모달 cooldown = localStorage 7일 timestamp (sessionStorage 금지)
+- Rule #25 — blog 작성 cron freshness-context + auto-unpublish
+
+### Pending
+- `safeBlogInsert` (`src/lib/blog-safe-insert.ts`) 가 freshness 필드 forward 안 함 — 다음 sprint
+  에서 helper 업데이트 또는 INSERT 직후 UPDATE 패턴으로 보강.
+
+---
+
 # 카더라 STATUS — 세션 230-231: apt 위성사진 → 현장사진 전환 (2026-05-04 KST)
 
 ## s230-s231 (2026-05-04) — apt 위성사진 → 현장사진 전환

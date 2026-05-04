@@ -189,6 +189,16 @@ export async function GET(request: Request) {
     }
   } catch { /* 등록 실패는 무시 */ }
 
-  // 즉시 목적지로 이동 — /onboarding 강제 리디렉트 제거
-  return NextResponse.redirect(`${origin}${safeRedirect}`);
+  // s231: onboarded=false 신규/미완료 사용자는 /onboarding 으로 redirect.
+  let needsOnboarding = false;
+  try {
+    const { data: prof } = await (supabase as any)
+      .from('profiles').select('onboarded, residence_city, interests')
+      .eq('id', user.id).maybeSingle();
+    needsOnboarding = !prof?.onboarded;
+  } catch {}
+  const dest = needsOnboarding
+    ? `/onboarding?return=${encodeURIComponent(safeRedirect)}`
+    : safeRedirect;
+  return NextResponse.redirect(`${origin}${dest}`);
 }

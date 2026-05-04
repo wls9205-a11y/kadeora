@@ -10,6 +10,7 @@ import { SITE_URL } from '@/lib/constants';
 // s189: SEO 마스터 (내부링크/EAT 외부인용은 master 가 내부 호출) + 관련 hub footer
 import { runBlogSeoMaster } from '@/lib/blog-seo-master';
 import { appendRelatedHubFooter } from '@/lib/internal-link-injector';
+import { getFreshnessContext, deriveFreshnessFields } from '@/lib/blog/freshness-context';
 
 /**
  * issue-draft v2 — AI 기사 생성 + 자동 발행 + 이미지 + 피드 포스트
@@ -157,7 +158,9 @@ ${isPreempt ? `
 구글/네이버 FAQPage 리치스니펫용이므로 형식을 정확히 지켜주세요.
 
 기사 유형: ${template}
-카테고리: ${catKo}`;
+카테고리: ${catKo}
+
+${getFreshnessContext()}`;
 
   const userPrompt = `다음 이슈에 대해 데이터 분석 블로그 기사를 작성하세요.
 
@@ -495,7 +498,8 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
     meta_keywords: article.keywords.join(','),
     cover_image: coverImage, image_alt: seoImageAlt,
     is_published: canAutoPublish,
-  });
+    ...deriveFreshnessFields({ isSeasonal: true, targetYear: new Date().getFullYear() }),
+  } as any);
 
   let blogPostId: number | null = (insertResult.id ? Number(insertResult.id) : null);
   if (!blogPostId && article.slug) {

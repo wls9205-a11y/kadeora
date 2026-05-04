@@ -5,6 +5,7 @@ import { createSupabaseBrowser } from '@/lib/supabase-browser';
 
 const CHANNEL_ID = '_NFxdxhX';
 const STORAGE_KEY = 'kd_channel_modal_dismissed';
+const COOLDOWN_MS = 7 * 24 * 60 * 60 * 1000;
 
 type Props = {
   triggerOnMount?: boolean;
@@ -18,7 +19,8 @@ export default function KakaoChannelAddModal({ triggerOnMount = true }: Props) {
     if (!triggerOnMount) return;
 
     try {
-      if (typeof sessionStorage !== 'undefined' && sessionStorage.getItem(STORAGE_KEY)) return;
+      const ts = localStorage.getItem(STORAGE_KEY);
+      if (ts && Date.now() - Number(ts) < COOLDOWN_MS) return;
     } catch {}
 
     let cancelled = false;
@@ -73,7 +75,7 @@ export default function KakaoChannelAddModal({ triggerOnMount = true }: Props) {
 
   const handleDismiss = (fireDismissEvent = true) => {
     if (fireDismissEvent) fireBeacon('dismiss');
-    try { sessionStorage.setItem(STORAGE_KEY, '1'); } catch {}
+    try { localStorage.setItem(STORAGE_KEY, String(Date.now())); } catch {}
     setClosing(true);
     setTimeout(() => setVisible(false), 200);
   };

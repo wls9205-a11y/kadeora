@@ -134,3 +134,76 @@ helper 가 (1) `trackCTA('click', ...)` (2) `trackCtaClick(...)` 둘 다 호출 
 - sendBeacon 실패 시 keepalive fetch fallback 은 `cta-track.ts` send 함수가 처리.
 
 **Discovered**: s230 (2026-05-04) — 12+ BROKEN CTA (sticky_signup_bar 312 view 0 click, login_gate_apt_analysis 423 view 0 click, blog_early_teaser 146 view 0 click 등) 일제히 navigation race 패턴. 8 컴포넌트 button + helper 로 통일.
+
+## Rule #23 — signup flow: frictionless → /onboarding → 거주지+관심사 (s231 신설)
+
+**Symptom**: 신규 가입 30일간 거주지 등록률 21% → 1.3% (16배 추락). 4/14 frictionless RPC 변경 시점과 일치.
+
+**Cause**: `complete_signup_frictionless` RPC 가 신규 사용자를 `onboarded=true` 로 강제 INSERT — 이후 `/onboarding` 페이지에 진입할 path 가 없어 91% skip. 거주지·관심사 등 필수 메타데이터 미수집.
+
+**Rule**:
+
+DB 측 frictionless RPC 는 신규 사용자를 `onboarded=FALSE` 로 INSERT. `auth/callback/route.ts` 가 redirect 직전 profiles 조회 → `onboarded=false` 면 `/onboarding?return=<safeRedirect>` 로 redirect. 사용자가 `/onboarding` 에서 거주지/관심사/마케팅 동의 manual 등록 → `onboarded=TRUE` 마침.
+
+**How to apply**:
+- 새 OAuth provider 추가 시 같은 callback 패턴 — onboarded 조회 → 미완료면 /onboarding 으로.
+- `/onboarding` 페이지가 fallback 으로 작동해야 하므로 항상 reachable. middleware 의 인증 가드가 차단하지 않도록 주의.
+- onboarded=false + residence_city=null 사용자에게는 백업으로 ResidenceNudgeModal (5초 delay, 7일 cooldown) 도 함께 mount — onboarding 직접 접근 못 한 케이스 회수.
+
+**Discovered**: s231 (2026-05-04) — 거주지 등록률 회귀 30일 추적 중 발견. DB W1 (frictionless onboarded=FALSE) + 코드 callback redirect + ResidenceNudgeModal 3종 동시 적용으로 path 복구.
+
+## Rule #24 — 모달 cooldown = localStorage 7일 timestamp (s231 신설)
+
+**Symptom**: 사용자가 dismiss 한 모달 (KakaoChannelAddModal, SignupPopupModal, MarketingConsentModal) 이 새 탭/세션마다 다시 노출 → 짜증 + dismiss 율 ↑.
+
+**Cause**: 기존 cooldown 이 sessionStorage 에 단순 flag (`'1'`) 저장. 새 탭/창 = 새 세션 → flag 사라짐 → 다시 노출.
+
+**Rule**:
+
+모든 client-side 모달의 cooldown 은 `localStorage` + timestamp 패턴:
+
+```ts
+const STORAGE_KEY = 'kd_<modal>_dismissed_at';
+const COOLDOWN_MS = 7 * 24 * 60 * 60 * 1000;
+
+// skip check
+const ts = localStorage.getItem(STORAGE_KEY);
+if (ts && Date.now() - Number(ts) < COOLDOWN_MS) return;
+
+// dismiss write
+localStorage.setItem(STORAGE_KEY, String(Date.now()));
+```
+
+**How to apply**:
+- 신규 모달 추가 시 sessionStorage 사용 금지. 키는 `kd_` prefix + 모달 식별자 + `_dismissed_at` suffix.
+- COOLDOWN_MS 는 default 7일. 더 짧은 cooldown 이 비즈니스 요구일 때만 override.
+- localStorage 접근은 try/catch 로 감쌈 (Safari private 모드 등 차단 케이스).
+
+**Discovered**: s231 (2026-05-04) — KakaoChannelAddModal / SignupPopupModal / MarketingConsentModalMount 3 모달이 sessionStorage 사용해 새 탭마다 부활. 일괄 localStorage 7일 timestamp 로 통일.
+
+## Rule #25 — blog 작성 cron 은 freshness-context inject + auto-unpublish (s232 신설)
+
+**Symptom**: 8,574 published 중 391개 (2024 title) + 9개 (2025 stale 시즌성) 검색 노출 중. LLM 이 학습 cutoff 기준으로 "2024년" 같은 과거 연도를 미래/현재형으로 작성.
+
+**Cause**: blog 작성 cron 의 LLM prompt 에 "현재 시점" 컨텍스트 부재. INSERT 시 freshness 메타데이터 (target_year/expires_at/is_seasonal) 미기록 → stale 자동 정리 불가.
+
+**Rule**:
+
+blog 작성용 LLM 호출은 모두 `getFreshnessContext()` (`src/lib/blog/freshness-context.ts`) 를 system prompt 에 inject 필수:
+
+```ts
+const systemPrompt = `${baseSystemPrompt}\n\n${getFreshnessContext()}`;
+```
+
+context 에는 오늘 날짜 (KST), 현재 연도/분기, "과거 연도 미래형 금지", target_year/expires_at/is_seasonal 메타 가이드 포함.
+
+INSERT 시 `deriveFreshnessFields({ isSeasonal, targetYear })` 로 freshness 컬럼 채움. seasonal=true 면 `expires_at = now + 90d` 자동 계산.
+
+매일 KST 02:00 `blog-stale-unpublish` cron 이 (1) `expires_at < now` (2) `target_year < current_year` (3) `is_seasonal=true AND published_at < now-180d` 조건의 글을 `is_published=false` + `auto_unpublished_reason` 마킹.
+
+**How to apply**:
+- 새 blog 작성 cron 추가 시 freshness-context import 필수. system prompt + INSERT 양쪽 적용.
+- `is_seasonal` 휴리스틱: 청약일정/공고/D-day/분기실적 = true; 영구 가이드/단지소개 = false. 애매하면 false (보수).
+- `safeBlogInsert` helper 사용 시 freshness 필드가 payload 에 포함되도록 helper 도 forward 하게 업데이트 (s232 follow-up TODO).
+
+**Discovered**: s232 (2026-05-04) — blog_posts 391+9 stale 노출 추적 중 발견. 9 작성 cron + freshness-context lib + 자동 unpublish cron 3종 동시 적용.

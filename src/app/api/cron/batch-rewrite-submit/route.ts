@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { diversifyPrompt, getRandomStructure, getRandomStyle } from '@/lib/blog-prompt-diversity';
+import { getFreshnessContext } from '@/lib/blog/freshness-context';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -76,6 +77,8 @@ export async function GET(req: NextRequest) {
 - 글 끝에 "### 🔗 관련 정보" 섹션 추가
 
 카테고리: ${post.category}
+
+${getFreshnessContext()}
 
 ${post.content}`);
 

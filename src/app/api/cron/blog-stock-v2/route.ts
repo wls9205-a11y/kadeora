@@ -2,6 +2,7 @@ import { AI_MODEL_HAIKU, ANTHROPIC_VERSION } from '@/lib/constants';
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
+import { getFreshnessContext, deriveFreshnessFields } from '@/lib/blog/freshness-context';
 import { NextRequest, NextResponse } from 'next/server';
 
 export const maxDuration = 300;
@@ -104,7 +105,9 @@ export async function GET(req: NextRequest) {
 ### 리스크 요인
 1. (위험1)
 2. (위험2)
-3. (위험3)`;
+3. (위험3)
+
+${getFreshnessContext()}`;
 
             const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
               method: 'POST',
@@ -201,7 +204,8 @@ ${naver ? `> 가격 정보는 네이버 금융과 교차 검증 완료 (${today}
           excerpt: `${stock.name}(${stock.symbol}) ${stock.market} ${stock.sector||''} 종목 분석. 현재가 ${priceStr}원, PER ${per>0?per.toFixed(1):'—'}, 섹터 비교, 가격 추이 (${today}).`,
           category: 'stock', tags,
           source_type: 'auto', source_ref: stock.symbol, data_date: today,
-        });
+          ...deriveFreshnessFields({ isSeasonal: true, targetYear: new Date().getFullYear() }),
+        } as any);
         if (ok) created++;
       } catch { continue; }
     }

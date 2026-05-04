@@ -2,6 +2,7 @@ import { AI_MODEL_HAIKU, ANTHROPIC_VERSION } from '@/lib/constants';
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
+import { getFreshnessContext, deriveFreshnessFields } from '@/lib/blog/freshness-context';
 import { NextRequest, NextResponse } from 'next/server';
 
 export const maxDuration = 300;
@@ -97,7 +98,9 @@ export async function GET(req: NextRequest) {
 ### 청약 시 유의사항
 1. (유의1)
 2. (유의2)
-3. (유의3)`;
+3. (유의3)
+
+${getFreshnessContext()}`;
 
             const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
               method: 'POST',
@@ -234,7 +237,8 @@ ${apt.heating_type ? `| **난방** | ${apt.heating_type} |\n` : ''}${apt.parking
           excerpt: `${apt.house_nm} ${region} ${units}세대 청약 분석. ${constructor} 시공, ${ppyeong > 0 ? '평당 '+ppyeong.toLocaleString()+'만원' : ''} 분양가, 일정, 주변 시세 비교 (${today}).`,
           category: 'apt', tags,
           source_type: 'auto', source_ref: apt.house_manage_no, data_date: today,
-        });
+          ...deriveFreshnessFields({ isSeasonal: true, targetYear: new Date().getFullYear() }),
+        } as any);
         if (ok) created++;
       } catch { continue; }
     }

@@ -14,6 +14,7 @@ type Props = {
 const STORAGE_KEY = 'kd_popup_signup_dismissed';
 const SCROLL_TRIGGER_PCT = 50;
 const TIMER_TRIGGER_MS = 60000;
+const COOLDOWN_MS = 7 * 24 * 60 * 60 * 1000;
 
 export default function SignupPopupModal({
   slug: _slug,
@@ -34,7 +35,8 @@ export default function SignupPopupModal({
     if (isLoggedIn) return;
 
     try {
-      if (typeof sessionStorage !== 'undefined' && sessionStorage.getItem(STORAGE_KEY)) return;
+      const ts = localStorage.getItem(STORAGE_KEY);
+      if (ts && Date.now() - Number(ts) < COOLDOWN_MS) return;
     } catch {}
 
     let fired = false;
@@ -114,7 +116,7 @@ export default function SignupPopupModal({
           keepalive: true,
         }).catch(() => {});
       }
-      sessionStorage.setItem(STORAGE_KEY, '1');
+      localStorage.setItem(STORAGE_KEY, String(Date.now()));
     } catch {}
     setClosing(true);
     setTimeout(() => setVisible(false), 200);
@@ -138,7 +140,7 @@ export default function SignupPopupModal({
           keepalive: true,
         }).catch(() => {});
       }
-      sessionStorage.setItem(STORAGE_KEY, '1');
+      localStorage.setItem(STORAGE_KEY, String(Date.now()));
     } catch {}
   };
 

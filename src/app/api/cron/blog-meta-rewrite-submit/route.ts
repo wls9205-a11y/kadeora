@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyCronAuth } from '@/lib/cron-auth';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { AI_MODEL_HAIKU, ANTHROPIC_VERSION } from '@/lib/constants';
+import { getFreshnessContext } from '@/lib/blog/freshness-context';
 
 export const runtime = 'nodejs';
 export const maxDuration = 120;
@@ -58,7 +59,7 @@ async function handler(req: NextRequest) {
           params: {
             model: AI_MODEL_HAIKU,
             max_tokens: 400,
-            system: '당신은 한국 SEO 에디터입니다. 주어진 블로그 글 제목·카테고리·본문 발췌를 읽고 meta_description 을 한국어 150~160자로 재작성합니다. 2~3 문장, 클릭 유도, plain text (따옴표·마크다운 금지). 응답은 meta_description 문자열 그 자체만.',
+            system: '당신은 한국 SEO 에디터입니다. 주어진 블로그 글 제목·카테고리·본문 발췌를 읽고 meta_description 을 한국어 150~160자로 재작성합니다. 2~3 문장, 클릭 유도, plain text (따옴표·마크다운 금지). 응답은 meta_description 문자열 그 자체만.\n\n' + getFreshnessContext(),
             messages: [{
               role: 'user',
               content: `제목: ${String(post.title).slice(0, 80)}\n카테고리: ${post.category}\n발췌: ${String(post.excerpt || '').slice(0, 220)}\n본문 앞부분: ${String(post.content || '').replace(/[#*>\n`|]/g, ' ').slice(0, 400)}`,

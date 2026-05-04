@@ -5,6 +5,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { enrichAptData, enrichStockData, formatAptDataForPrompt, formatStockDataForPrompt, extractAptName, extractStockSymbol } from '@/lib/blog-data-enrichment';
 import { checkBlogQuality, stripInlineHtml } from '@/lib/blog-quality-gate';
 import { diversifyPrompt } from '@/lib/blog-prompt-diversity';
+import { getFreshnessContext, deriveFreshnessFields } from '@/lib/blog/freshness-context';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -97,7 +98,9 @@ ${dataPrompt}
 - 도입부: 매번 다른 방식으로 시작 (정형화 금지)
 - 숫자 범위: ~ 대신 "에서" 사용 (예: "60%에서 70%")
 
-카테고리: ${post.category}`;
+카테고리: ${post.category}
+
+${getFreshnessContext()}`;
 
         const res = await fetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',
@@ -141,6 +144,7 @@ ${dataPrompt}
           updated_at: new Date().toISOString(),
           content_length: newContent.length,
           quality_checked_at: null, // 품질 재평가 트리거
+          ...deriveFreshnessFields({ isSeasonal: post.category === 'apt' || post.category === 'stock' || post.category === 'unsold', targetYear: new Date().getFullYear() }),
         }).eq('id', post.id);
 
         enriched++;

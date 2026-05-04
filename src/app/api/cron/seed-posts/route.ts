@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { revalidatePath } from 'next/cache';
 import { withCronLogging } from '@/lib/cron-logger';
+import { getFreshnessContext } from '@/lib/blog/freshness-context';
 
 /**
  * seed-posts 크론 v4 — 다양하고 자연스러운 피드 게시글
@@ -442,7 +443,9 @@ async function generateWithAI(prompt: string, tone: string): Promise<{ title: st
 출력형식:
 제목: (30자 이내, "제목:" 접두사 포함)
 ---
-(본문)`,
+(본문)
+
+${getFreshnessContext()}`,
         messages: [{ role: 'user', content: prompt }],
       }),
     });

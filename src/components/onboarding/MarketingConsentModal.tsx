@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useToast } from '@/components/Toast';
+import { trackCTA } from '@/lib/analytics';
 
 const CHANNEL_PUBLIC_ID = '_NFxdxhX';
 
@@ -71,6 +72,7 @@ export default function MarketingConsentModal({ userId, isOpen, onClose }: Props
 
   const handleAgree = async () => {
     if (submitting) return;
+    try { trackCTA('click', 'marketing_consent_modal', { page_path: window.location.pathname }); } catch {}
     setSubmitting(true);
 
     try {

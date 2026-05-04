@@ -58,6 +58,7 @@ const WelcomeToast           = dynamic(() => import('@/components/WelcomeToast')
 const SmartPushPrompt        = dynamic(() => import('@/components/SmartPushPrompt'),                         { ssr: false });
 const KakaoChannelAddModal   = dynamic(() => import('@/components/signup/KakaoChannelAddModal'),             { ssr: false });
 const MarketingConsentModalMount = dynamic(() => import('@/components/onboarding/MarketingConsentModalMount'), { ssr: false });
+const ResidenceNudgeModal = dynamic(() => import('@/components/onboarding/ResidenceNudgeModal'), { ssr: false });
 const VitalsReporter         = dynamic(() => import('@/components/web-vitals/VitalsReporter'),               { ssr: false });
 
 interface Props {
@@ -108,6 +109,7 @@ export default function ClientShell({ children, serverLoggedIn }: Props) {
         <WelcomeReward />
         <KakaoChannelAddModal triggerOnMount={true} />
         <MarketingConsentModalMount />
+        <ResidenceNudgeModal />
         <SignupPopupModalMount />
         <WelcomeToast />
         <ScrollToTop />
