@@ -7,28 +7,41 @@ import ShareButtons from '@/components/ShareButtons';
 import LoginGate from '@/components/LoginGate';
 import type { Metadata } from 'next';
 import { SITE_URL } from '@/lib/constants';
+import { buildAlternates } from '@/lib/seo';
 import { notFound } from 'next/navigation';
 
 export async function generateStaticParams() {
   return CALC_REGISTRY.map(c => ({ category: c.category, slug: c.slug }));
 }
 
+// s224 T1C: subscription-score 는 /apt/diagnose 가 정식 (richer SEO content + SiteNavigationElement 등록).
+// canonical 만 그쪽으로 가리켜 Google 인덱스 합치기. 페이지 자체는 그대로 reachable.
+const CANONICAL_OVERRIDES: Record<string, string> = {
+  'real-estate/subscription-score': '/apt/diagnose',
+};
+
 export async function generateMetadata({ params }: { params: Promise<{ category: string; slug: string }> }): Promise<Metadata> {
   const { slug, category } = await params;
   const calc = findCalc(slug);
   if (!calc || calc.category !== category) return {};
-  const url = `${SITE_URL}/calc/${category}/${slug}`;
+  const path = `/calc/${category}/${slug}`;
+  const url = `${SITE_URL}${path}`;
+  const canonicalOverride = CANONICAL_OVERRIDES[`${category}/${slug}`];
+  const canonicalUrl = canonicalOverride ? `${SITE_URL}${canonicalOverride}` : url;
   const ogTitle = `${calc.emoji} ${calc.title} — 무료 온라인 계산기`;
   const metaDesc = `${calc.description} 2026년 최신 기준 반영. 무료·회원가입 불필요.`;
+  // s224 T1B: 5개 timestamp 모두 calc.lastUpdated 기준으로 통일.
+  // 빌드 시점 new Date() 와 hardcoded '2026-01-15' 박혀있던 부분 제거.
+  const ts = `${calc.lastUpdated}T00:00:00Z`;
   return {
     title: ogTitle,
     description: metaDesc,
     keywords: [...calc.keywords, '카더라', '무료 계산기', '온라인 계산기', calc.categoryLabel],
-    alternates: { canonical: url },
+    alternates: buildAlternates(path, canonicalOverride ? `${SITE_URL}${canonicalOverride}` : undefined),
     openGraph: {
       title: ogTitle,
       description: metaDesc,
-      url, siteName: '카더라', locale: 'ko_KR', type: 'website',
+      url: canonicalUrl, siteName: '카더라', locale: 'ko_KR', type: 'website',
       images: [
         { url: `${SITE_URL}/api/og?title=${encodeURIComponent(calc.emoji + ' ' + calc.titleShort)}&design=2&subtitle=${encodeURIComponent(calc.legalBasis || calc.categoryLabel)}`, width: 1200, height: 630, alt: calc.titleShort },
         { url: `${SITE_URL}/api/og-square?title=${encodeURIComponent(calc.emoji + ' ' + calc.titleShort)}&category=calc`, width: 630, height: 630, alt: calc.titleShort },
@@ -38,13 +51,13 @@ export async function generateMetadata({ params }: { params: Promise<{ category:
     other: {
       'naver:author': '카더라', 'naver:site_name': '카더라', 'daum:site_name': '카더라',
       'naver:description': metaDesc,
-      'naver:written_time': new Date().toISOString(),
-      'naver:updated_time': calc.lastUpdated + 'T00:00:00Z',
-      'og:updated_time': calc.lastUpdated + 'T00:00:00Z',
+      'naver:written_time': ts,
+      'naver:updated_time': ts,
+      'og:updated_time': ts,
       'article:section': calc.categoryLabel,
       'article:tag': calc.keywords.join(','),
-      'article:published_time': '2026-01-15T00:00:00Z',
-      'article:modified_time': calc.lastUpdated + 'T00:00:00Z',
+      'article:published_time': ts,
+      'article:modified_time': ts,
     },
   };
 }

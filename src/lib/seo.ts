@@ -9,6 +9,26 @@ import type { Metadata } from 'next';
  * - article:tag 지원
  */
 
+/**
+ * s224 T1A: hreflang self-reference 헬퍼.
+ * 한국어 단독 사이트 — ko / x-default 모두 현재 페이지 URL 로 자기참조.
+ * 글로벌 layout.tsx 의 hardcoded alternates.languages 는 제거됨 (모든 페이지가 root URL 로 가리키던 회귀).
+ *
+ * 사용: generateMetadata 내부에서 alternates: buildAlternates(`/calc/${category}/${slug}`)
+ * 또는 alternates: buildAlternates(path, overrideCanonical) — canonical 다른 URL 로 가리킬 때.
+ */
+export function buildAlternates(pathname: string, canonicalOverride?: string): Metadata['alternates'] {
+  const url = `${SITE_URL}${pathname}`;
+  const canonical = canonicalOverride || url;
+  return {
+    canonical,
+    languages: {
+      'ko': url,
+      'x-default': url,
+    },
+  };
+}
+
 interface BuildMetaOptions {
   title: string;
   description: string;

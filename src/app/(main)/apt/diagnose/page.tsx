@@ -1,12 +1,14 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { SITE_URL } from '@/lib/constants';
+import { buildAlternates } from '@/lib/seo';
 import LoginGate from '@/components/LoginGate';
 import DiagnoseClient from './DiagnoseClient';
 
 export const metadata: Metadata = {
   title: '청약 가점 계산기 — 2026 주택청약 가점제 점수 계산',
   description: '주택공급에 관한 규칙 별표1 기준 청약 가점 계산. 무주택기간·부양가족·청약통장 가입기간 자동 산출. 만점 84점.',
-  alternates: { canonical: `${SITE_URL}/apt/diagnose` },
+  alternates: buildAlternates('/apt/diagnose'),
   openGraph: {
     title: '청약 가점 계산기 — 2026 주택청약 가점제',
     description: '무주택기간·부양가족·청약통장 가입기간 자동 산출. 만점 84점.',
@@ -94,10 +96,20 @@ export default function DiagnosePage() {
         <p>네, 분양권 및 입주권은 주택으로 간주됩니다. 분양권을 보유한 세대원이 있으면 무주택 세대 구성원 자격을 상실하게 됩니다. 단, 상속 후 3개월 이내에 지분을 처분하는 경우는 예외적으로 무주택으로 인정됩니다.</p>
       </div>
 
-      <div style={{ marginTop: 16, fontSize: 11, color: 'var(--text-tertiary)', textAlign: 'center', lineHeight: 1.6, paddingBottom: 40 }}>
+      <div style={{ marginTop: 16, fontSize: 11, color: 'var(--text-tertiary)', textAlign: 'center', lineHeight: 1.6, paddingBottom: 16 }}>
         본 계산기는 주택공급에 관한 규칙 제28조 및 별표1(가점 산정 기준표)에 의거하여 설계되었습니다.
         실제 청약 시 주택 유형, 공급 지역, 세부 자격 요건에 따라 결과가 달라질 수 있습니다.
         정확한 자격은 <a href="https://www.applyhome.co.kr" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--brand)' }}>청약홈(applyhome.co.kr)</a>에서 확인하세요.
+      </div>
+
+      {/* s224 T1C: 관련 계산기 cross-link */}
+      <div style={{ marginTop: 8, marginBottom: 24 }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 6 }}>관련 계산기</div>
+        <Link href="/calc/real-estate" style={{
+          display: 'inline-block', padding: '6px 12px', borderRadius: 'var(--radius-md)',
+          background: 'var(--bg-surface)', color: 'var(--text-secondary)',
+          textDecoration: 'none', fontSize: 12, fontWeight: 600, border: '1px solid var(--border)',
+        }}>🏠 부동산 계산기 모음 →</Link>
       </div>
 
         {/* LoginGate 기능 게이팅 (세션 108) */}

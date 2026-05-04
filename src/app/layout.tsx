@@ -54,7 +54,8 @@ export const metadata: Metadata = {
   manifest: '/manifest.json',
   appleWebApp: { capable: true, statusBarStyle: 'black-translucent', title: '카더라' },
   category: '금융, 부동산, 주식, 커뮤니티',
-  alternates: { languages: { 'ko-KR': SITE_URL } },
+  // s224 T1A: 글로벌 alternates.languages 제거 — 모든 페이지가 root URL 로 가리키던 회귀.
+  // 페이지별 self-reference 는 lib/seo.ts buildAlternates(pathname) 에서 생성.
   other: {
     'application-name': '카더라',
     'service-type': '금융·부동산 정보 커뮤니티',
@@ -104,8 +105,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
         <link rel="dns-prefetch" href="https://dapi.kakao.com" />
         <link rel="alternate" type="application/rss+xml" title="카더라 블로그 RSS" href="/blog/feed" />
-        <link rel="alternate" hrefLang="ko" href="https://kadeora.app" />
-        <link rel="alternate" hrefLang="x-default" href="https://kadeora.app" />
+        {/* s224 T1A: hardcoded hrefLang root self-reference 제거 — buildAlternates() 가 페이지별 self-ref 생성 */}
         <link rel="alternate" type="application/rss+xml" title="카더라 주식 RSS" href="/stock/feed" />
         <link rel="alternate" type="application/rss+xml" title="카더라 부동산 RSS" href="/apt/feed" />
         <link rel="search" type="application/opensearchdescription+xml" title="카더라 검색" href="/opensearch.xml" />
