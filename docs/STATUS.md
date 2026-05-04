@@ -1,3 +1,57 @@
+# 카더라 STATUS — 세션 233: 액션 게이트 UX 점검 + 가입 모달 통일 (2026-05-04 KST)
+
+## s233 — 비로그인 액션 게이트 UX 점검
+
+DB는 RLS로 안전. UX 측 비로그인 클릭 → /login redirect 또는 가입 폼 통일이 목표.
+브랜치: main · 한 commit / 한 deploy.
+
+### 점검 결과
+
+**✅ 이미 잘 처리됨 (수정 불필요):**
+- `AptBookmarkButton` — `<Link href="/login?redirect=...&source=apt_bookmark">` 변환
+- `InterestRegistration` — 회원(원클릭+50P) / 게스트(폼 입력) 양 흐름
+- `InterestRegisterHero` — `router.push('/login...')`
+- `LikeButton` — toast + redirect
+- `AptCommentInline` / `AptCommentSheet` — 비로그인 시 "로그인 후 한줄평" 안내
+- `SectionGate` (common): `apt_analysis` (line 745), `LoginGate apt_analysis` (line 1531)
+  이미 적용 — blur preview + 로그인 CTA
+
+**❌ 수정한 항목:**
+
+#### 1. `apt/AptCommentSection.tsx` — RLS 에러로 떨어짐
+- **문제 1**: `submit()` 비로그인 시 native `alert()` 후 return → 못생긴 브라우저 popup
+- **문제 2**: `like()` 가 직접 `apt_comments.update()` → 비로그인 RLS reject, 사용자 피드백 0
+- **문제 3**: 입력 textarea 항상 노출 → 비로그인 유저가 타이핑 후 좌절
+- **수정**:
+  - `useAuth()` + `useRouter()` 도입, `sb.auth.getUser()` 직접 호출 제거
+  - `submit() / like()` 모두 비로그인 시 `router.push(loginUrl)` 통일
+  - 입력 영역을 `userId` 분기로 감쌈. 비로그인 시 "💬 로그인하고 댓글 남기기 (+5P)" 링크 노출
+
+#### 2. `/apt/[id]/page.tsx` — 깊은 데이터 게이트 추가 (호갱노노 패턴)
+- **이전**: 모든 시세/실거래 비교 데이터가 비로그인 유저에게 100% 노출
+- **수정**: 첫 1개 차트 자유, 나머지는 blur + login CTA
+  - 자유 (그대로): `AptPriceTrendCard` (sparkline, sidebar), `AptCompareTable` (인근 4개),
+    `AptPriceTrendChart` + 단지 자체 실거래 이력 (Transactions 섹션)
+  - 게이트 (NEW): "📊 주변 아파트 시세 비교" 큰 테이블 →
+    `SectionGate sectionKey="apt_price_compare"` level="login"
+  - 게이트 (NEW): "📊 최근 실거래 비교" 큰 테이블 →
+    `SectionGate sectionKey="apt_trade_compare"` level="login"
+- isBot=true 시 SectionGate 가 children 풀 노출 (SEO 안전)
+- previewLines=6 으로 첫 6줄 미리보기 + 페이드아웃
+
+### ℹ️ N/A 항목
+- "비교 추가 버튼 (3개까지 free)" — 코드상 사용자 액션 버튼은 없음.
+  `AptCompareTable` 은 자동 노출 (RPC rn≤4 인근 단지). 게이트 불필요.
+
+### Architecture Rule #26 (신규)
+비로그인 유저 액션 버튼 클릭 시:
+1. native `alert()` 절대 사용 금지 (UX 후퇴)
+2. 직접 supabase mutation 으로 RLS 에러에 의존 금지 (사용자 피드백 0)
+3. 표준 패턴: `router.push(\`/login?redirect=\${pathname}&source=\${ctaName}\`)` 통일
+   (s225 helper `cta-navigate.ts` 도 가능)
+
+---
+
 # 카더라 STATUS — 세션 231+232: signup flow 회복 + blog freshness (2026-05-04 KST)
 
 ## s231 — Signup flow + 거주지 등록 회복

@@ -1,6 +1,8 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
+import { useAuth } from '@/components/AuthProvider';
 
 interface Comment {
   id: number;
@@ -17,10 +19,13 @@ export default function AptCommentSection({ slug, siteName }: { slug: string; si
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [userId, setUserId] = useState<string | null>(null);
   const [showAll, setShowAll] = useState(false);
+  const { userId } = useAuth();
+  const pathname = usePathname();
+  const router = useRouter();
 
   const sb = createSupabaseBrowser();
+  const loginUrl = `/login?redirect=${encodeURIComponent(pathname || `/apt/${slug}`)}&source=apt_comment`;
 
   const load = useCallback(async () => {
     const { data } = await (sb as any).from('apt_comments')
@@ -33,24 +38,17 @@ export default function AptCommentSection({ slug, siteName }: { slug: string; si
     setLoading(false);
   }, [slug]);
 
-  useEffect(() => {
-    load();
-    sb.auth.getUser().then(({ data }) => setUserId(data?.user?.id || null));
-  }, [load]);
+  useEffect(() => { load(); }, [load]);
 
   const submit = async () => {
     if (!input.trim() || input.trim().length < 2 || submitting) return;
-    const { data: user } = await sb.auth.getUser();
-    if (!user?.user) {
-      alert('로그인 후 댓글을 작성할 수 있습니다.');
-      return;
-    }
+    if (!userId) { router.push(loginUrl); return; }
     setSubmitting(true);
-    const { data: profile } = await sb.from('profiles').select('nickname').eq('id', user.user.id).maybeSingle();
+    const { data: profile } = await sb.from('profiles').select('nickname').eq('id', userId).maybeSingle();
     await (sb as any).from('apt_comments').insert({
       house_key: slug,
       house_nm: siteName,
-      author_id: user.user.id,
+      author_id: userId,
       author_name: profile?.nickname || '익명',
       content: input.trim(),
     });
@@ -60,6 +58,7 @@ export default function AptCommentSection({ slug, siteName }: { slug: string; si
   };
 
   const like = async (commentId: number) => {
+    if (!userId) { router.push(loginUrl); return; }
     await (sb as any).from('apt_comments')
       .update({ like_count: comments.find(c => c.id === commentId)!.like_count + 1 })
       .eq('id', commentId);
@@ -86,31 +85,42 @@ export default function AptCommentSection({ slug, siteName }: { slug: string; si
         💬 댓글 <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--accent-blue)', fontWeight: 600 }}>{top.length}</span>
       </h2>
 
-      {/* 입력 */}
-      <div style={{ display: 'flex', gap: 6, marginBottom: 14 }}>
-        <input
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && submit()}
-          placeholder="이 현장에 대한 의견을 남겨주세요"
-          maxLength={500}
-          style={{
-            flex: 1, padding: '9px 12px', borderRadius: 'var(--radius-sm)',
-            border: '1px solid var(--border)', background: 'var(--bg-hover)',
-            fontSize: 'var(--fs-xs)', color: 'var(--text-primary)', outline: 'none',
-          }}
-        />
-        <button
-          onClick={submit}
-          disabled={submitting || input.trim().length < 2}
-          style={{
-            padding: '9px 16px', borderRadius: 'var(--radius-sm)', border: 'none',
-            background: 'var(--brand)', color: '#fff', fontSize: 'var(--fs-xs)',
-            fontWeight: 700, cursor: submitting ? 'wait' : 'pointer',
-            opacity: submitting || input.trim().length < 2 ? 0.5 : 1,
-          }}
-        >등록</button>
-      </div>
+      {/* 입력 — 비로그인 시 로그인 유도 */}
+      {userId ? (
+        <div style={{ display: 'flex', gap: 6, marginBottom: 14 }}>
+          <input
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && submit()}
+            placeholder="이 현장에 대한 의견을 남겨주세요"
+            maxLength={500}
+            style={{
+              flex: 1, padding: '9px 12px', borderRadius: 'var(--radius-sm)',
+              border: '1px solid var(--border)', background: 'var(--bg-hover)',
+              fontSize: 'var(--fs-xs)', color: 'var(--text-primary)', outline: 'none',
+            }}
+          />
+          <button
+            onClick={submit}
+            disabled={submitting || input.trim().length < 2}
+            style={{
+              padding: '9px 16px', borderRadius: 'var(--radius-sm)', border: 'none',
+              background: 'var(--brand)', color: '#fff', fontSize: 'var(--fs-xs)',
+              fontWeight: 700, cursor: submitting ? 'wait' : 'pointer',
+              opacity: submitting || input.trim().length < 2 ? 0.5 : 1,
+            }}
+          >등록</button>
+        </div>
+      ) : (
+        <a href={loginUrl} style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+          padding: '10px 12px', marginBottom: 14, borderRadius: 'var(--radius-sm)',
+          border: '1px dashed var(--border)', background: 'var(--bg-hover)',
+          textDecoration: 'none', color: 'var(--brand)', fontSize: 'var(--fs-xs)', fontWeight: 600,
+        }}>
+          💬 로그인하고 댓글 남기기 (+5P)
+        </a>
+      )}
 
       {/* 댓글 목록 */}
       {loading ? (

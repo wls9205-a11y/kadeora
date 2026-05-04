@@ -1627,8 +1627,20 @@ export default async function AptUnifiedPage({ params }: Props) {
           {redev.notes && !redev.ai_summary && <div style={{ padding: '6px 8px', borderLeft: '2px solid rgba(183,148,255,0.25)', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.5, marginTop: 6 }}>{redev.notes}</div>}
         </div>); })()}
 
-      {/* 주변 아파트 시세 비교 (단지백과 데이터) */}
-      {complexProfiles.length > 0 && (site?.price_min || site?.price_max) && (() => {
+      {/* 주변 아파트 시세 비교 (단지백과 데이터) — 비로그인 blur */}
+      {complexProfiles.length > 0 && (site?.price_min || site?.price_max) && (
+      <SectionGate
+        sectionKey="apt_price_compare"
+        level="login"
+        previewLines={6}
+        ctaName="apt_gate_price_compare"
+        ctaText="1초 로그인하고 시세 비교 전체 보기"
+        redirectPath={`/apt/${slug}`}
+        isLoggedIn={isLoggedInApt}
+        isPremium={isPremiumApt}
+        isBot={isBotVisit}
+      >
+      {(() => {
         const avgPyeong = complexProfiles.filter((c: any) => c.avg_sale_price_pyeong > 0).reduce((s: number, c: any, _: number, a: any[]) => s + c.avg_sale_price_pyeong / a.length, 0);
         const avgJeonse = complexProfiles.filter((c: any) => c.jeonse_ratio && Number(c.jeonse_ratio) > 0);
         const avgJeonseRatio = avgJeonse.length > 0 ? Math.round(avgJeonse.reduce((s: number, c: any) => s + Number(c.jeonse_ratio), 0) / avgJeonse.length) : 0;
@@ -1698,9 +1710,22 @@ export default async function AptUnifiedPage({ params }: Props) {
         </div>
         );
       })()}
+      </SectionGate>
+      )}
 
-      {/* 같은 지역 최근 실거래 비교 */}
+      {/* 같은 지역 최근 실거래 비교 — 비로그인 blur */}
       {regionTrades.length > 0 && (site?.price_min || site?.price_max) && (
+        <SectionGate
+          sectionKey="apt_trade_compare"
+          level="login"
+          previewLines={6}
+          ctaName="apt_gate_trade_compare"
+          ctaText="1초 로그인하고 실거래 비교 전체 보기"
+          redirectPath={`/apt/${slug}`}
+          isLoggedIn={isLoggedInApt}
+          isPremium={isPremiumApt}
+          isBot={isBotVisit}
+        >
         <div className="apt-card">
           <h2 style={ct}>📊 {sigungu || region} 최근 실거래 비교</h2>
           <p style={{ fontSize: 11, color: 'var(--text-tertiary)', margin: '0 0 8px' }}>같은 지역 아파트 최근 실거래가와 비교합니다.</p>
@@ -1731,6 +1756,7 @@ export default async function AptUnifiedPage({ params }: Props) {
             <SectionShareButton section="apt-trade-compare" label={`${sigungu || region} 최근 실거래 vs ${name} 분양가 비교`} pagePath={`/apt/${slug}`} />
           </div>
         </div>
+        </SectionGate>
       )}
 
       {/* 주변 시설 (nearby_facilities) — 크롤러 가시적 텍스트 */}
