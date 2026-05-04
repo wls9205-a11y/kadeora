@@ -1,9 +1,11 @@
-// Edge runtime: lat/lng → Kakao reverse geocoding → 17-region short name.
+// lat/lng → Kakao reverse geocoding → 17-region short name.
 // 클라이언트 RegionPicker 의 '📍 현재 위치' 버튼이 호출.
+// s230b: runtime edge → nodejs. Edge runtime fetch 가 카카오에 403 로 차단됨
+// (같은 KAKAO_REST_API_KEY 로 nodejs cron 은 200 OK).
 
 import { NextResponse } from 'next/server';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 export const maxDuration = 10;
 
 const KR_SHORT_MAP: Record<string, string> = {
