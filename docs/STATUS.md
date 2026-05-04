@@ -1,3 +1,46 @@
+# Session 223 — Big Cleanup (2026-05-04 KST)
+
+브랜치: `main` · 한 commit / 한 deploy. 롤백 앵커 tag: `pre-s223-cleanup`.
+
+## 변경 요약 (62 files, -10,695 lines)
+- **L0+L1**: Admin V1 legacy 전체 (AdminShell, AdminShellWrapper, tabs/ 10개, /api/admin/v2 1273줄, /api/admin/dashboard 847줄)
+- **L2**: s218 이전 admin components 7개 (AdminActionItemsCard, AdminCriticalAlertBar, AdminCtaPerformancePanel, AdminCtaSignals, AdminKpiHero, AdminWhaleExport, AdminWhaleExportCard)
+- **L3**: dead lib 8개 (gtag, blog-padding, point-rules, region-detection, share-utm, notification-hub, data-sources, parseFaqs)
+- **L4**: dead cron 3개만 (alert-time-based, naver-sc-sync, pr-monitor) — Phase 0 검증으로 27/30 활성 발견 후 축소
+- **L5**: dead components 30개 (per-file static+dynamic grep verify, 스킵 0)
+- **L6**: npm uninstall form-data, iconv-lite
+
+## Phase 0 검증 결과 (Architecture Rule #18 신설)
+- **cron_logs 30d**: 6개 활성 발견 (big-event-bootstrap-process 703 runs, stock-image-crawl 188, blog-image-supplement 95, blog-image-validate 4, cleanup-calc-results 2, calc-topic-refresh 2)
+- **pg_cron `_call_vercel_cron('/api/cron/...')` 등록**: 21개 추가 활성 발견 (apt-satellite-crawl, blog-cover-auto-enhance, indexnow-urgent, stock-logo-fetch, unsold-redev-enhance, image-relevance-check, blog-inject-images, indexnow-batch, blog-backfill-submit, unsplash-fetch, image-relevance-replace, blog-backfill-poll, blog-meta-rewrite-poll, programmatic-seo-consume, batch-poll, naver-hotlink-migrate, kakao-place-fetch, faq-extract, blog-meta-rewrite-submit, gsc-sync, backlink-sync)
+- **외부 cron route fetch (src grep)**: 0
+- **dedup KEEP**: 27 / 30 (90%)
+- **DELETE 안전**: 3 (alert-time-based, naver-sc-sync, pr-monitor)
+
+> ⚠️ vercel.json crons 등록 ≠ 활성 cron. pg_cron 외부 호출이 별도로 존재. 검증 없이 30개 모두 삭제했으면 production 즉시 손상.
+
+## Architecture Rule #18 신설
+**cron route 삭제 전 반드시 3종 검증**:
+1. `cron_logs` 30d 실행 기록 (`SELECT cron_name, COUNT(*), MAX(created_at) FROM cron_logs ...`)
+2. pg_cron job 등록 (`SELECT * FROM cron.job WHERE command ILIKE '%api/cron%'`)
+3. `src/` 내 fetch / import 호출 (`grep -rln "api/cron/<name>"`)
+
+## 보존 (의도적)
+- **onboarding/PWA**: SignupNudgeModal, WelcomeReward, WelcomeToast, KakaoChannelAddModal, SmartPushPrompt, InstallBanner, PWAInstallTracker, ProfileCompleteBanner
+- **SEO schema**: SearchActionSchema, CollectionPageSchema, Organization, WebSite, ImageObject, AggregateRating, Residence, RealEstateListing, FinancialProduct
+- **popup/notice**: NoticeBanner, NewsletterSubscribe, KakaoShareButton, KakaoBottomSheet
+- **27 active crons** (Phase 0 검증 통과)
+
+## 검증
+- `npm run build` 성공
+- 558+ pages 컴파일 OK
+- bundle First Load JS shared 229 kB (변동 X — admin/v2 dashboard 가 client bundle 에 포함 안 되어 있었음)
+
+## 롤백 절차 (필요 시)
+사용자가 직접 실행: `pre-s223-cleanup` tag로 reset 후 origin 동기화. 본 commit hash 기록해 둘 것.
+
+---
+
 # 카더라 STATUS — 세션 223: P0 가입 깔때기 + cron 인증 + 보안 lockdown (2026-05-04)
 
 ## s223 — P0 가입 깔때기 + cron 인증 + 보안 lockdown (2026-05-04)
