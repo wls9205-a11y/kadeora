@@ -63,3 +63,22 @@ grep -r "<route>" src/
 세 검증 모두 통과 시에만 삭제 가능. vercel.json crons 등록 여부만으로 활성/dead 판단 금지 — s223 Phase 0 검증에서 "dead 추정 30개" 중 27개가 실제 pg_cron 으로 활성 상태였음 (3개만 진짜 dead).
 
 **Discovered**: s223 Big Cleanup (2026-05-04) — vercel.json crons 에서 빠진 cron 들도 pg_cron `_call_vercel_cron` 으로 외부 호출되는 사례 21건 발견. 검증 없이 30개 모두 삭제했으면 production 즉시 손상.
+
+## Rule #20 — 광고성 메시지 발송 5중 가드 (s227 신설)
+
+**Symptom**: 광고성('ad') 카카오 메시지를 발송했는데 정보통신망법 위반 (야간 발송, 동의 만료, 채널 친구 아님 등) 사후 적발 — 감사 증거가 없어 면책 불가.
+
+**Cause**: 발송 직전 가드 체크가 분산되어 있거나 특정 경로에서 누락. 가드 통과 여부와 무관하게 발송 시도 자체가 로그로 남지 않으면 정보통신망법 50조 (광고성 정보 전송 제한) + 62조의3 (자료 보관) 감사 시 면책 근거가 사라진다.
+
+**Rule**:
+
+모든 광고성('ad') 카카오 메시지는 발송 직전 RPC `kakao_send_guard_check` 통과 필수: (1) 활성 사용자, (2) 마케팅 수신 동의, (3) 동의 2년 미만 또는 재확인, (4) 카카오 채널 친구, (5) 발송 시각 KST 08-21시 또는 야간 동의. 가드 통과 여부와 무관하게 모든 시도는 `kakao_message_send_logs` 기록 (정보통신망법 50조 + 62조의3 감사 증거).
+
+**How to apply**:
+- 광고성 메시지 발송 코드는 단일 진입점 (예: `src/lib/kakao-send.ts` 또는 admin/marketing 라우트) 으로 통합. 가드 체크 우회 경로 금지.
+- RPC 호출: `kakao_send_guard_check(p_user_id, p_message_type, p_send_at)`. `message_type='ad'` 외에도 'info' 등 광고성 외 메시지에도 적용 가능 (야간 발송 가드는 'info' 에도 권장).
+- 가드 차단 케이스도 반드시 `kakao_message_send_logs` 에 `delivery_status='blocked'` + `metadata.reason` 기록 — "가드가 막아서 안 보냄" 이력 자체가 감사 증거.
+- 가드 통과 시 실제 발송 결과 (`delivered` / `failed`) 도 동일 테이블에 기록. 모킹 환경은 `delivery_status='mock'`.
+- consent 만료 (Rule #20 항목 3) 검증은 `consent-renewal-check` (T-14d 알림) + `consent-expiry-revoke` (T+0 자동 철회) 두 cron 으로 보장.
+
+**Discovered**: s227 (2026-05-03) — 마케팅 카카오 채널 발송 파이프라인 신설 시 정보통신망법 50조/62조의3 감사 요건 정식화. cron `kakao-channel-sync` / `consent-renewal-check` / `consent-expiry-revoke` 와 admin route `marketing/kakao/send` 가 모두 동일 가드 + 동일 로그 테이블 사용해야 함.

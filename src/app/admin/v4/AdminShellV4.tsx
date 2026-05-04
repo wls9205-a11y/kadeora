@@ -94,6 +94,15 @@ export default function AdminShellV4() {
             border: '1px solid var(--border, #2a2b35)', textDecoration: 'none',
           }}
         >📊 가입 플로우 진단</a>
+        <a
+          href="/admin/marketing/kakao"
+          style={{
+            fontSize: 11, fontWeight: 700,
+            padding: '6px 12px', borderRadius: 6,
+            background: 'transparent', color: 'var(--text-secondary, #ccc)',
+            border: '1px solid var(--border, #2a2b35)', textDecoration: 'none',
+          }}
+        >📨 카카오 마케팅</a>
         <button onClick={fetchData} style={{
           fontSize: 11, fontWeight: 700,
           padding: '6px 12px', borderRadius: 6, cursor: 'pointer',

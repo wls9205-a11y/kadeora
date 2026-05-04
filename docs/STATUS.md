@@ -1,3 +1,61 @@
+# 카더라 STATUS — 세션 227: Kakao Marketing Hub (2026-05-04 KST)
+
+## s227 — Kakao Marketing Hub (5 work orders 병렬, 1 commit / 1 deploy)
+
+### W1 DB (Supabase MCP 직접 적용 — 코드 변경 0)
+- 신규 테이블: `kakao_message_send_logs`, `consent_history`, `marketing_segments`
+- 신규 컬럼: `profiles.{night_consent, night_consent_at, marketing_consent_renewed_at}`
+- 신규 뷰: `v_admin_kakao_funnel`
+- 신규 RPC: `get_kakao_funnel_summary()`, `kakao_send_guard_check(p_user_id, p_message_type, p_send_at)`
+- 신규 트리거: `trg_profiles_consent_history` (동의 변경 자동 기록)
+- Architecture Rule #13: 새 테이블 모두 `(sb as any).from('table_name')` 적용
+
+### W2 API (6 routes + 1 webhook)
+- `src/app/api/admin/marketing/kakao/funnel/route.ts` — GET, RPC `get_kakao_funnel_summary()` 호출
+- `src/app/api/admin/marketing/kakao/segment/preview/route.ts` — POST, view 동적 WHERE + sample
+- `src/app/api/admin/marketing/kakao/segment/save/route.ts` — POST, marketing_segments INSERT
+- `src/app/api/admin/marketing/kakao/segment/list/route.ts` — GET, ORDER BY last_used_at
+- `src/app/api/admin/marketing/kakao/export/route.ts` — POST, BOM+CRLF CSV + privacy_audit_log
+- `src/app/api/admin/marketing/kakao/send/route.ts` — POST, 5중 가드 + 로그 (Rule #20)
+- `src/app/api/admin/marketing/kakao/history/route.ts` — GET, 페이지네이션 + group by status
+- `src/app/api/webhook/kakao/channel-leave/route.ts` — POST, HMAC 검증 + kakao_channel_added=false
+
+### W3 FE (admin page + 8 components)
+- `src/app/admin/marketing/kakao/page.tsx` — Server Component
+- `_components/`: KakaoFunnel / SegmentBuilder / SegmentSavedList / ExportButton / SendModal /
+  SendHistory / ConsentExpiryAlerts / KakaoMarketingClient (orchestrator)
+- 사이드바: `src/app/admin/v4/AdminShellV4.tsx` 에 📨 카카오 마케팅 링크 추가
+- SWR 미설치 → fetch + setInterval(30s) + visibilitychange pause 패턴 사용
+
+### W4 Cron (4 신규 + vercel.json + Rule #20)
+- `kakao-channel-sync` (KST 03:00) — 발송 가능 사용자 카카오 친구 파일 동기화
+- `consent-renewal-check` (KST 09:00) — 14일 전 마케팅 동의 만료 임박자에게 재확인
+- `consent-expiry-revoke` (KST 09:30) — 2년 경과 마케팅 동의 자동 철회 + consent_history
+- `region-infer-backfill` (KST 04:00 월) — apt_alerts 집계로 region_text 자동 추론
+- vercel.json: 4 crons + 5 functions overrides (admin/marketing/kakao/send 포함)
+- Architecture Rule #20 신설: 광고성 메시지 5중 가드 + kakao_message_send_logs 감사 증거
+
+### W5 Onboarding UX
+- `src/components/onboarding/MarketingConsentModal.tsx` — 마케팅/채널/야간 3 토글 + 카카오 SDK
+- `src/components/onboarding/MarketingConsentModalMount.tsx` — useAuth + onboarded=false AND provider='kakao' 가드
+- `src/app/api/profile/consent/route.ts` — POST, profiles UPDATE + consent_history (source='onboarding')
+- `src/app/api/profile/kakao-channel-added/route.ts` — POST, kakao_channel_added=true
+- ClientShell.tsx 에 mount 추가 (KakaoChannelAddModal sibling)
+
+### 법적 안전 (정보통신망법 50조 + 62조의3)
+- 5중 가드: 활성 / 마케팅 동의 / 동의 2년 미만 / 채널 친구 / KST 08-21시 또는 야간 동의
+- 모든 발송 시도 (가드 통과/차단 무관) `kakao_message_send_logs` 기록 — 감사 증거
+- 2년 자동 철회 + 14일 전 재확인 cron 으로 동의 만료 자동 처리
+
+### 실제 funnel 예상 (배포 후)
+137 가입 → 활성 136 → 마케팅 동의 20 → 2년 유효 8 → 채널 친구 13 → ✅ 발송 가능 3.
+
+### Pending
+- KAKAO_REST_API_KEY / KAKAO_WEBHOOK_SECRET Vercel env 미설정이면 send/webhook 모킹.
+- onboarding modal 의 award_points RPC RLS 차단 가능성 — 막히면 server route 로 이동 (s228).
+
+---
+
 # Session 226 — Cron 모니터링 시스템 fix (2026-05-04 KST)
 
 브랜치: main · DB only commit. 코드 변경 0줄. tag: `s226-cron-monitoring`.

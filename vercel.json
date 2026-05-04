@@ -395,6 +395,22 @@
     {
       "path": "/api/cron/naver-cafe-publish",
       "schedule": "0 9,21 * * *"
+    },
+    {
+      "path": "/api/cron/kakao-channel-sync",
+      "schedule": "0 18 * * *"
+    },
+    {
+      "path": "/api/cron/consent-renewal-check",
+      "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/cron/consent-expiry-revoke",
+      "schedule": "30 0 * * *"
+    },
+    {
+      "path": "/api/cron/region-infer-backfill",
+      "schedule": "0 19 * * 0"
     }
   ],
   "headers": [
@@ -551,6 +567,21 @@
       "maxDuration": 60
     },
     "src/app/api/cron/data-quality-fix/*.ts": {
+      "maxDuration": 60
+    },
+    "src/app/api/cron/kakao-channel-sync/route.ts": {
+      "maxDuration": 60
+    },
+    "src/app/api/cron/consent-renewal-check/route.ts": {
+      "maxDuration": 60
+    },
+    "src/app/api/cron/consent-expiry-revoke/route.ts": {
+      "maxDuration": 30
+    },
+    "src/app/api/cron/region-infer-backfill/route.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/admin/marketing/kakao/send/route.ts": {
       "maxDuration": 60
     }
   }
