@@ -79,7 +79,7 @@ export default function AdminShellV4() {
         <HealthRing score={h.score ?? 0} />
         <KPIStrip items={[
           { label: '크론',     value: `${h.cron_pct ?? 0}%`, tone: (h.cron_pct ?? 0) >= 95 ? 'green' : (h.cron_pct ?? 0) >= 80 ? 'orange' : 'red' },
-          { label: '7일 신규', value: h.week_signups ?? 0, tone: (h.week_signups ?? 0) >= 30 ? 'green' : (h.week_signups ?? 0) >= 10 ? 'orange' : 'red' },
+          // s224: '7일 신규' 제거 — NorthStarCard signups_7d 와 중복
           { label: 'UV',       value: h.active_users ?? 0 },
           { label: '작동 안함', value: h.broken_count ?? 0, tone: (h.broken_count ?? 0) === 0 ? 'green' : 'red' },
           { label: '재방문',   value: `${h.return_rate_pct ?? 0}%`, tone: (h.return_rate_pct ?? 0) >= 50 ? 'green' : 'orange' },

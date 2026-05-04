@@ -173,7 +173,7 @@ export default function WatchlistWidget() {
   }, [today.organic, orgDelta?.organic]);
 
   return (
-    <section
+    <details
       aria-label="관심 등록 위젯"
       style={{
         padding: '14px 16px', borderRadius: 12,
@@ -181,9 +181,12 @@ export default function WatchlistWidget() {
         display: 'flex', flexDirection: 'column', gap: 14,
       }}
     >
+      {/* s224: <details> 로 접힘 (513줄 위젯 기본 closed) */}
+      <summary style={{ cursor: 'pointer', listStyle: 'none' }}>
       {/* 헤더 */}
       <header style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-        <h2 style={{ margin: 0, fontSize: 13, fontWeight: 800, color: 'var(--text-primary, #fff)' }}>
+        <h2 style={{ margin: 0, fontSize: 13, fontWeight: 800, color: 'var(--text-primary, #fff)', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+          <span aria-hidden style={{ fontSize: 10, color: 'var(--text-tertiary, #888)' }}>▸</span>
           🏠 관심 등록 현황
         </h2>
         <span style={{ fontSize: 11, color: 'var(--text-tertiary, #888)' }}>
@@ -217,6 +220,7 @@ export default function WatchlistWidget() {
           >↻</button>
         </div>
       </header>
+      </summary>
 
       {loading && !data && (
         <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-tertiary, #888)', fontSize: 12 }}>로드 중…</div>
@@ -308,7 +312,7 @@ export default function WatchlistWidget() {
           </div>
         </>
       )}
-    </section>
+    </details>
   );
 }
 

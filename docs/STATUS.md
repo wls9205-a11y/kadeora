@@ -1,3 +1,38 @@
+# Session 224 — Admin V5 Critical Alert + Cron 가시화 (2026-05-04 KST)
+
+브랜치: main · 한 commit / 한 deploy. tag: `s224-v5-partial`. 롤백 앵커: `pre-s224-v5`.
+
+## 변경 요약 (옵션 D — GodMode 제외 부분 배포)
+- **C1**: CriticalAlertBar 신설 — 페이지 최상단. broken_cta / cron_failures / no_signups / score_drop 4 트리거.
+  현재 production 상태: **broken_cta 797건 + cron_failures 9개 ALERT 중** (Phase 0 검증 시 발견)
+- **C2**: page.tsx 위계 재정렬 — Critical → V4 → CronPanel → 참조 데이터 순
+- **C3**: SignupFunnel(s218) 제거 — V4 SignupCTASection funnel 과 중복
+- **C4**: KPIStrip "7일 신규" 제거 (NorthStarCard signups_7d 와 중복)
+- **C5**: WatchlistWidget `<details>` 로 접힘 (513줄 위젯 기본 closed)
+- **D1**: CronUnifiedPanel — vercel.json + pg_cron 통합 뷰 (Architecture Rule #18 가시화)
+
+## 보류 (s225 후)
+- **C6 (GodMode 카테고리 실행)**: Claude Code 시스템이 mass cron trigger 위험으로 차단. 정당. dry-run + 단일 cron + audit log 재설계
+- **C7 (SignupCTASection 24h/7d 토글)**: `v_admin_dashboard_v4` view 에 funnel_24h CTE 추가 필요
+
+## DB 사전 적용 (영구)
+- RPC `admin_critical_alerts()` (4 트리거)
+- table `admin_score_history` + RLS (admin only read)
+- RPC `admin_godmode_categorize(text)` + view `v_admin_pg_cron_jobs` (39 jobs 자동 분류)
+
+## Phase 0 검증 결과 (production 현황)
+- broken CTA 24h: **797건** (50+ view, 0 click CTA들의 view 합산)
+- cron failure 24h: **9개 distinct cron**
+- pg_cron jobs: 39개 (apt 4 / blog 24 / stock 5 / system 6)
+- vercel.json crons: ~99개
+
+## 즉시 액션 (다음 세션)
+1. **긴급**: broken_cta 797건 원인 디버그 — 어떤 CTA들이 view 50+/click 0?
+2. **긴급**: 9개 failed cron 정체 파악 — cron_logs 24h status NOT IN ('success','running','skipped')
+3. **계획**: GodMode dry-run 재설계 + funnel_24h view 추가
+
+---
+
 # 카더라 STATUS — 세션 225: 썸네일 위성사진 → 진짜 이미지 (2026-05-04)
 
 ## s225 P0 — 썸네일 위성사진 → 진짜 이미지
