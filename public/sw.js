@@ -1,5 +1,9 @@
 // Kadeora Service Worker v3 — Network First (s200 — stale chunk 근본 fix)
-const CACHE_VERSION = '202605040528';
+<<<<<<< Updated upstream
+const CACHE_VERSION = '202605040556';
+=======
+const CACHE_VERSION = '202605010417';
+>>>>>>> Stashed changes
 const CACHE_NAME = 'kadeora-v' + CACHE_VERSION;
 const OFFLINE_FALLBACK = '/offline.html';
 const PRECACHE = ['/offline.html', '/icons/icon-192.png'];

@@ -205,11 +205,14 @@ export function trackCTA(action: 'view' | 'click' | 'dismiss', ctaName: string, 
     });
     try {
       let sent = false;
+      // s225-P0: /api/track → /api/events/cta. /api/track 의 rate limit (Redis 호출) 이
+      // navigation 직전 abort 유발 → 5개 CTA 24h 0 click. /api/events/cta 는 rate limit 없어
+      // popup_signup_modal CTR 5.45% 정상 (검증된 endpoint).
       if (typeof navigator !== 'undefined' && typeof navigator.sendBeacon === 'function') {
-        sent = navigator.sendBeacon('/api/track', new Blob([body], { type: 'application/json' }));
+        sent = navigator.sendBeacon('/api/events/cta', new Blob([body], { type: 'application/json' }));
       }
       if (!sent) {
-        fetch('/api/track', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body, keepalive: true }).catch(() => {});
+        fetch('/api/events/cta', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body, keepalive: true }).catch(() => {});
       }
     } catch {}
   }

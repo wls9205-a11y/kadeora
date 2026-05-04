@@ -1,3 +1,34 @@
+# Session 225-P0 — Broken CTA + cron failure fix (2026-05-04 KST)
+
+브랜치: main · 한 commit / 한 deploy. tag: `s225-p0-fix`.
+
+## 변경 (P0 긴급)
+- **P0-1**: `trackCTA` endpoint `/api/track` → `/api/events/cta` (src/lib/analytics.ts:209,212)
+  - 원인: `/api/track` 의 rate limit (Redis incr) 이 click 직전 navigation 시 abort 유발
+  - 영향: sticky_signup_bar / blog_early_teaser / blog_gated_login / related_blog_section / login_gate_apt_analysis — 5개 CTA 24h 동안 click 0건
+  - 진단: popup_signup_modal (rate limit 없는 `/api/events/cta` 사용) 만 정상 (CTR 5.45% HEALTHY)
+  - 효과 예상: 5개 CTA 1시간 내 click 발생 시작 → 24h 후 CTR 정상화
+- **P0-2**: `indexnow_queue.is_urgent DEFAULT false` (Supabase MCP)
+  - 원인: blog-publish-queue cron 매 실행 NOT NULL constraint violation
+  - 효과: 즉시 fail 0건
+
+## DB 사전 적용
+```sql
+ALTER TABLE indexnow_queue ALTER COLUMN is_urgent SET DEFAULT false;
+UPDATE indexnow_queue SET is_urgent = false WHERE is_urgent IS NULL;
+```
+
+## 미정리 (s226+)
+- `src/app/(main)/blog/[slug]/page.tsx:731` 인라인 onclick `/api/track` — blog_inline_cta
+- `src/lib/track-conversion.ts:42-44` — track-conversion 헬퍼
+- `/api/track` 라우트 자체 — 다른 호출처 있을 수 있어 보존
+
+## 검증
+- 1시간 후 cta_health_check 재조회 — 5개 CTA click 진입 확인
+- Critical Alert Bar 알림 자동 해제 (broken_cta 0 → 자동 사라짐)
+
+---
+
 # 카더라 STATUS — 세션 226: apt-image-crawl 효율 패치 + s225b 회귀 차단 (2026-05-04)
 
 ## s225b P0 — enrich_apt_images_v2 회귀 차단 (Supabase MCP 직접 적용)
