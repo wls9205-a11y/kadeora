@@ -60,6 +60,32 @@ page.tsx headers().get() → fetcher 전국 처리 → Client RegionAutoSelect (
 
 ---
 
+# Session 227b — apt nearby sites perf fix (2026-05-04 KST)
+
+브랜치: main · 한 commit / 한 deploy. tag: `s227-apt-perf`. 롤백 앵커: `pre-s227-perf`.
+
+## 진단 (pg_stat_statements)
+- `v_apt_nearby_sites`: 1.8만 호출 / 평균 750ms / 누적 7.8시간
+- 원인: window 함수 push down 안 됨, 24만 rows 전체 계산 후 source_slug 필터
+- 영향: 매 `/apt/[id]` 페이지 사이드바 + 비교표 750ms 추가
+
+## 수정
+- DB: `get_apt_nearby_sites(slug, limit)` RPC — source slug → region/sigungu 추출 → 직접 join
+- 코드: `AptSidebar.tsx` (limit 3), `AptCompareTable.tsx` (limit 4) — view → RPC 호출
+
+## EXPLAIN 결과
+- Before (v_apt_nearby_sites view): Execution ~750ms / Buffers 267,054
+- **After (get_apt_nearby_sites RPC): Execution 3.18ms / Buffers 425** (235x speedup)
+
+## 효과
+- `/apt/[id]` 페이지 LCP 0.5~0.8s 단축 기대
+- DB 부하 7.8시간/일 → ~0.03시간/일 (95%+ 감소)
+
+## 보존
+- `v_apt_nearby_sites` view 자체는 유지 (다른 호출처 없음 확인됐지만 backward compat)
+
+---
+
 # 카더라 STATUS — 세션 227: Kakao Marketing Hub (2026-05-04 KST)
 
 ## s227 — Kakao Marketing Hub (5 work orders 병렬, 1 commit / 1 deploy)

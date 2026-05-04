@@ -35,12 +35,10 @@ const ALERT_TYPES = [
 
 export default async function AptSidebar({ slug, builder }: Props) {
   const sb = getSupabaseAdmin();
+  // s227: v_apt_nearby_sites view (24만 rows window 함수, 평균 750ms) →
+  //         get_apt_nearby_sites RPC (직접 region/sigungu join, 3ms 검증).
   const [nearbyRes, siblingsRes] = await Promise.all([
-    (sb as any).from('v_apt_nearby_sites')
-      .select('nearby_slug,nearby_name,nearby_dong,nearby_lifecycle,rn')
-      .eq('source_slug', slug)
-      .lte('rn', 3)
-      .order('rn', { ascending: true }),
+    (sb as any).rpc('get_apt_nearby_sites', { p_source_slug: slug, p_limit: 3 }),
     builder
       ? (sb as any).from('v_apt_same_builder')
           .select('sibling_slug,sibling_name,sibling_region,sibling_sigungu,sibling_lifecycle,rn')

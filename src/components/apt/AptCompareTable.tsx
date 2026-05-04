@@ -61,11 +61,10 @@ function fmtPriceRange(min?: number | null, max?: number | null): string {
 
 export default async function AptCompareTable({ slug, currentSite }: Props) {
   const sb = getSupabaseAdmin();
-  const { data: nearbyData } = await (sb as any).from('v_apt_nearby_sites')
-    .select('source_slug,nearby_slug,nearby_name,nearby_type,nearby_lifecycle,nearby_popularity,nearby_dong,rn')
-    .eq('source_slug', slug)
-    .lte('rn', 4)
-    .order('rn', { ascending: true });
+  // s227: v_apt_nearby_sites view 750ms → get_apt_nearby_sites RPC 3ms.
+  const { data: nearbyData } = await (sb as any).rpc('get_apt_nearby_sites', {
+    p_source_slug: slug, p_limit: 4,
+  });
 
   const nearbyRows = ((nearbyData ?? []) as NearbyRow[]).filter(r => r.nearby_slug);
   if (nearbyRows.length === 0) return null;
