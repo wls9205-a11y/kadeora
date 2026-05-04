@@ -1,32 +1,8 @@
-import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';
-import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseAdmin } from '@/lib/supabase-admin';
-
-/**
- * /api/track — 전환 이벤트 추적 (fire-and-forget, beacon API 대응)
- * CTA 표시/클릭/완료 이벤트를 conversion_events 테이블에 기록
- */
-export async function POST(req: NextRequest) {
-  if (!(await rateLimit(req, 'api'))) return rateLimitResponse();
-  try {
-    const { event_type, cta_name, category, page_path, visitor_id, device_type, referrer_source } = await req.json();
-    if (!event_type || !cta_name) {
-      return NextResponse.json({ ok: false }, { status: 400 });
-    }
-
-    const sb = getSupabaseAdmin();
-    await (sb as any).from('conversion_events').insert({
-      event_type: String(event_type).slice(0, 30),
-      cta_name: String(cta_name).slice(0, 30),
-      category: category ? String(category).slice(0, 20) : null,
-      page_path: page_path ? String(page_path).slice(0, 200) : null,
-      visitor_id: visitor_id ? String(visitor_id).slice(0, 50) : null,
-      device_type: device_type ? String(device_type).slice(0, 10) : null,
-      referrer_source: referrer_source ? String(referrer_source).slice(0, 50) : null,
-    });
-
-    return NextResponse.json({ ok: true });
-  } catch {
-    return NextResponse.json({ ok: true }); // 추적 실패해도 200 반환
-  }
-}
+// s225-P1: /api/track → /api/events/cta 으로 통합.
+// rate limit (Redis incr) 차단으로 navigation 직후 click 이벤트가 INSERT 실패하던 회귀 fix.
+// 기존 호출처 (analytics.ts trackCTA, lib/track-conversion.ts, blog 인라인 HTML 등) 자동 회복.
+// /api/events/cta 는 sendBeacon (text/plain) 호환 + rate limit 없음.
+export { POST } from '../events/cta/route';
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+export const maxDuration = 5;

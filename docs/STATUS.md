@@ -1,3 +1,24 @@
+# Session 225-P1 — /api/track 통합 fix (2026-05-04 KST)
+
+브랜치: main · 한 commit / 한 deploy. tag: `s225-p1-track-merge`.
+
+## 변경 (1 file, 8 lines)
+- `src/app/api/track/route.ts` → `/api/events/cta` POST 로 forward (`export { POST } from '../events/cta/route'`)
+
+## 추가 회복 대상 (P0 에서 누락)
+- `blog_inline_cta` (blog/[slug]/page.tsx:731 인라인 HTML)
+- `lib/track-conversion.ts` 호출처 (newsletter / onboarding 등)
+- 기타 직접 `/api/track` 호출
+
+## 진단 근거
+- conversion_events 24h: blog_inline_cta / onboarding / newsletter 0건
+- 동일 rate limit 회귀 패턴 (Redis incr 가 navigation 직후 abort)
+
+## 검증 (1시간 후, P0 와 동시)
+5개 P0 CTA + blog_inline_cta + onboarding/newsletter 모두 click 잡혀야 정상.
+
+---
+
 # Session 225-P0 — Broken CTA + cron failure fix (2026-05-04 KST)
 
 브랜치: main · 한 commit / 한 deploy. tag: `s225-p0-fix`.
