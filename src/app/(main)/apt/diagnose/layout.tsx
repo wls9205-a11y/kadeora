@@ -1,15 +1,18 @@
 import type { Metadata } from 'next';
 import { SITE_URL } from '@/lib/constants';
+import { buildAlternates } from '@/lib/seo';
 
 const TITLE = '2026 청약 가점 계산기 — 무주택·부양가족·통장 자동 계산';
 const DESC = '2026년 최신 기준 청약 가점 자동 계산기. 무주택기간·부양가족 수·청약통장 가입기간(배우자 합산 포함)을 입력하면 총점 84점 기준 가점, 지역별 당첨 가능성, 맞춤 전략을 제공합니다. 주택공급규칙 별표1 기준.';
 const URL = `${SITE_URL}/apt/diagnose`;
+// s224 T1.fix.B: calc.lastUpdated 등가물. 5개 timestamp 메타 단일 source.
+const DIAGNOSE_LAST_UPDATED = '2026-04-05T00:00:00Z';
 
 export const metadata: Metadata = {
   title: TITLE,
   description: DESC,
   keywords: ['청약 가점 계산기', '청약 점수 계산기', '청약 가점 만점', '무주택기간 계산', '부양가족 점수', '청약통장 가입기간', '배우자 통장 합산', '청약 당첨 전략', '2026 청약', '아파트 청약 가점'],
-  alternates: { canonical: URL },
+  alternates: buildAlternates('/apt/diagnose'),
   robots: { index: true, follow: true, 'max-snippet': -1 as const, 'max-image-preview': 'large' as const },
   openGraph: {
     title: '2026 청약 가점 계산기 — 카더라',
@@ -23,14 +26,16 @@ export const metadata: Metadata = {
   twitter: { card: 'summary_large_image', title: '2026 청약 가점 계산기', description: '무주택·부양가족·통장 가점 자동 계산 + 배우자 합산' },
   other: {
     'naver:author': '카더라',
-    'naver:written_time': new Date().toISOString(),
-    'naver:updated_time': '2026-04-05T00:00:00Z',
-    'og:updated_time': '2026-04-05T00:00:00Z',
+    // s224 T1.fix.B: 5개 timestamp 모두 DIAGNOSE_LAST_UPDATED 상수로 통일.
+    // 빌드시각 (new Date().toISOString()) 박힘 + 하드코딩 1/15 published_time 제거.
+    'naver:written_time': DIAGNOSE_LAST_UPDATED,
+    'naver:updated_time': DIAGNOSE_LAST_UPDATED,
+    'og:updated_time': DIAGNOSE_LAST_UPDATED,
     'dg:plink': URL,
     'article:section': '부동산',
     'article:tag': '청약가점계산기,청약점수계산,무주택기간,부양가족,청약통장,배우자통장합산,청약당첨,2026청약,아파트청약,가점제',
-    'article:published_time': '2026-01-15T00:00:00Z',
-    'article:modified_time': '2026-04-05T00:00:00Z',
+    'article:published_time': DIAGNOSE_LAST_UPDATED,
+    'article:modified_time': DIAGNOSE_LAST_UPDATED,
   },
 };
 

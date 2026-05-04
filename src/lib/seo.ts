@@ -18,13 +18,14 @@ import type { Metadata } from 'next';
  * 또는 alternates: buildAlternates(path, overrideCanonical) — canonical 다른 URL 로 가리킬 때.
  */
 export function buildAlternates(pathname: string, canonicalOverride?: string): Metadata['alternates'] {
-  const url = `${SITE_URL}${pathname}`;
-  const canonical = canonicalOverride || url;
+  // s224 T1.fix.A: override 가 있으면 hreflang 도 override 로 통일.
+  // canonical 과 hreflang 가 서로 다른 URL 가리키면 Google 가이드라인 위반 (신호 충돌).
+  const targetUrl = canonicalOverride || `${SITE_URL}${pathname}`;
   return {
-    canonical,
+    canonical: targetUrl,
     languages: {
-      'ko': url,
-      'x-default': url,
+      'ko': targetUrl,
+      'x-default': targetUrl,
     },
   };
 }
