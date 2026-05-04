@@ -1,3 +1,26 @@
+# 카더라 STATUS — 세션 225: 썸네일 위성사진 → 진짜 이미지 (2026-05-04)
+
+## s225 P0 — 썸네일 위성사진 → 진짜 이미지
+
+### Outcomes
+- **코드**: `src/lib/aptImage.ts` `pickRealImage` — string item 분기에 `/satellite/` URL skip
+  추가. images[0] 가 satellite URL string 인 1,436+ 단지가 진짜 이미지 (조감도/모델하우스/
+  뉴스 썸네일) 로 즉시 전환. 우선순위 변경 없음 — satellite_image_url 컬럼은 4순위 fallback
+  으로 그대로 유지.
+- **DB** (`s225_p0_clean_satellite_from_images`):
+  - apt_sites: 3,403건 처리 (5,823 total, still_satellite_first=0, now_obj_first=3,050,
+    empty_now=983 — 코드 4순위 satellite_image_url 로 fallback)
+  - apt_complex_profiles: 18건 처리 (34,544 total)
+  - 백업: `images_backup_s225` 컬럼 (s140/s142 backup 과 별도 snapshot)
+- **효과**: 1,436+ 카드가 위성사진에서 진짜 이미지 (조감도 178 + 모델하우스 93 + 투시도 41
+  + naver/kakao 뉴스 7,423 + 3,758) 로 즉시 노출.
+
+### Pending (s226 후보)
+- empty_now 983건 — 코드는 satellite_image_url 4순위로 fallback 하니 깨지진 않으나,
+  일부는 og_image_url 까지 떨어짐. naver 뉴스 이미지 backfill cron 보강 검토.
+
+---
+
 # Session 223 — Big Cleanup (2026-05-04 KST)
 
 브랜치: `main` · 한 commit / 한 deploy. 롤백 앵커 tag: `pre-s223-cleanup`.

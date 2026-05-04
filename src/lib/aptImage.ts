@@ -46,6 +46,9 @@ export function pickRealImage(images: unknown): string | null {
     if (!im) continue;
     const u = typeof im === 'string' ? im : (im.url || im.thumbnail || im.thumb);
     if (!u || typeof u !== 'string') continue;
+    // s225-A: satellite URL 은 4순위 fallback 으로만 사용. string item 일 때도 skip.
+    // 1,436+ 단지가 images[0] 에 satellite URL 이 박혀 있어 진짜 이미지가 가려지던 회귀.
+    if (typeof im === 'string' && /\/satellite\//.test(u)) continue;
     if (typeof im === 'object') {
       const src = (im.source || '').toLowerCase();
       if (src === 'og' || src === 'og_fallback' || src === 'og_generated') continue;
