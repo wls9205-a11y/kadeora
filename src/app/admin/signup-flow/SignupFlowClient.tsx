@@ -6,6 +6,7 @@
 // 모든 렌더는 defensive — RPC 실패/필드 누락 시 "—" 또는 0 fallback.
 
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
+import InAppBrowserCard from '@/components/admin/InAppBrowserCard';
 
 interface ApiResponse {
   ok: boolean;
@@ -253,6 +254,9 @@ export default function SignupFlowClient() {
 
       {data && (
         <>
+          {/* s235: 인앱 브라우저 funnel */}
+          <InAppBrowserCard />
+
           {/* 1) 7일 Funnel */}
           <Section title="7일 Funnel" subtitle="CTA 노출 → 클릭 → 시도 → OAuth → 콜백 → 프로필 → 성공">
             <FunnelBars rows={funnel} />

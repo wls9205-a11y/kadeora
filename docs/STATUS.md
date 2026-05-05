@@ -1,3 +1,66 @@
+# 카더라 STATUS — 세션 234-235: Sign-up funnel 진단 + 인앱 OAuth fix (2026-05-06 KST)
+
+## s234-s235 (2026-05-06) — Sign-up funnel 진단 + 인앱 OAuth fix
+
+### s234 (DB 진단 — pre-applied)
+- `v_signup_inapp_browser_funnel` 뷰 신규 — 브라우저별 OAuth 성공률 추적
+- 14일 데이터로 진짜 누수 6개 식별:
+  1. **다음(Daum) 인앱 OAuth 성공률 0%** (5/5 실패) — 가입 자체 불가능
+  2. **당근(Karrot) 인앱 16.7%** (1/6) — 거의 불가능
+  3. OAuth 동의화면 이탈률 50% (모든 브라우저 공통) — Kakao 동의항목 검수 의심
+  4. **apt_alert_cta CTR 0.15%** (view 2,672 / click 4) — CTA 자체 매력도 문제
+  5. nav_login_button click→signup 0%
+  6. login_gate_apt_analysis click→signup 0%
+- 메모리 정정:
+  - "apt_alert_cta = 0 회귀" 부정확 — 4 클릭 발생, CTR 만 매우 낮음
+  - "view 점진 감소" 거짓 — uniq_visitors 평탄
+
+### s235 (코드 fix)
+
+#### 1. 인앱 브라우저 감지 + 차단 모달
+- **신규** `src/hooks/useInAppBrowser.ts` — UA 검사로 type/canDoOAuth 판정
+  - 차단: Daum/Karrot/Facebook(FB_IAB,FBAN)/Instagram/Line/일반 webview(`; wv)`)
+  - 통과: Naver(`NAVER(inapp`) 45.8%, Kakao(`KAKAOTALK`) 50%
+- **신규** `src/components/InAppBrowserModal.tsx` — full-screen 모달
+  - "주소 복사" (clipboard.writeText + execCommand fallback)
+  - "외부 브라우저로 열기" — Android intent://...;package=chrome;..., iOS 는 자동 복사
+  - `cta_view`/`cta_click` 추적 (`cta_name='inapp_browser_modal'`, `source='inapp_blocked'`)
+
+#### 2. LoginClient OAuth 진입점에 분기
+- `src/app/(auth)/login/LoginClient.tsx`:
+  - `useInAppBrowser()` 결과 `!canDoOAuth` 면 InAppBrowserModal 만 렌더 (login form 숨김)
+  - `signInWithOAuth` / `track-attempt` POST 모두 호출 안 함 — `signup_attempts` row 만들지 않음
+  - 모든 진입점(StickySignupBar, SignupPopupModal, nav, BlogAptAlertCTA)이 결국 /login 으로 흘러오므로
+    단일 choke-point 차단으로 전체 커버
+
+#### 3. Kakao OAuth 최소 스코프
+- `LoginClient` 의 `signInWithOAuth({ provider: 'kakao', options.scopes: 'profile_nickname profile_image' })`
+- `account_email` 제외 — Kakao 비즈채널 검수 미통과 시 OAuth 자체 실패. 50% 이탈 주범 후보.
+
+#### 4. 어드민 인앱 funnel 카드
+- **신규** `src/app/api/admin/inapp-browser-funnel/route.ts` — `v_signup_inapp_browser_funnel`
+  14d SELECT, 일별 + 브라우저별 14d 합계 반환
+- **신규** `src/components/admin/InAppBrowserCard.tsx` — 14d 합계 테이블
+  + 일별 상세 details 토글. `success_pct < 20%` 빨강, `< 40%` 주황. `🚫` 차단군 표시.
+- `src/app/admin/signup-flow/SignupFlowClient.tsx` 최상단에 `<InAppBrowserCard />` 마운트
+
+#### 5. apt_alert_cta 디자인/문구 재디자인 (CTR 0.15% → 목표 5%+)
+- A/B 양 variant 카피 동시 변경:
+  - 이전 A: "{aptName} 가격 변동 알림 받기" / "실거래 등록 시 바로 · 무료" / "무료 가입 후 알림 받기"
+  - 이후 A: "{aptName} 청약 시작/실거래 등록 시 알림" / "가입 즉시 100P · 알림 +10P" / "🚀 1초 가입 + 100P 받기"
+  - 이전 B(sticky): "가격이 5% 떨어지면 알림" / "놓치면 다시 못 만나요" / "무료 가입"
+  - 이후 B(sticky): "청약 시작/실거래 시 알림" / "가입 즉시 100P · 알림 +10P" / "🚀 1초 가입"
+- 핵심: 구체적 트리거(청약/실거래) + 보상 명시(100P) + 행동 동사 강화
+
+### 수동 후속 (코드로 안 됨)
+1. **Kakao Developers 콘솔** (https://developers.kakao.com) 동의항목 점검:
+   - 닉네임/프로필 사진: 선택 동의로 변경 가능 시 변경 (이탈 ↓)
+   - 카카오계정(이메일): 검수 상태 확인. 검수 안 된 상태로 필수 요청 시 OAuth 실패
+   - Redirect URI: `https://kadeora.app/auth/callback` 등록 확인
+2. (선택) Vercel env 에 `KAKAO_REST_API_KEY` 등록 — Kakao Marketing Hub mock 모드 해제
+
+---
+
 # 카더라 STATUS — 세션 232 (V2): /apt 현장 아래 섹션 + 더보기 페이지 (2026-05-06 KST)
 
 ## s232 (2026-05-06) — /apt 현장 아래 섹션 + 더보기 페이지

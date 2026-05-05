@@ -3,6 +3,8 @@ import { errMsg } from '@/lib/error-utils';
 import { useState, useEffect } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { trackCtaClick } from '@/lib/cta-track';
+import { useInAppBrowser } from '@/hooks/useInAppBrowser';
+import InAppBrowserModal from '@/components/InAppBrowserModal';
 
 interface LoginFormProps {
   redirect: string;
@@ -11,6 +13,7 @@ interface LoginFormProps {
 function LoginForm({ redirect }: LoginFormProps) {
   const [loading, setLoading] = useState<'kakao' | 'google' | null>(null);
   const [error, setError] = useState('');
+  const inApp = useInAppBrowser();
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -27,18 +30,26 @@ function LoginForm({ redirect }: LoginFormProps) {
     trackCtaClick({ cta_name: source, category: 'signup', page_path: window.location.pathname });
     try {
       const sb = createSupabaseBrowser();
-      const { error: err } = await sb.auth.signInWithOAuth({
-        provider,
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirect)}&source=${source}`,
-        },
-      });
+      // s235: kakao 최소 스코프. account_email 은 Kakao 비즈채널 검수 필요해서 제외 — 50% 이탈
+      // 주범 후보. profile_nickname/profile_image 만 받고 supabase 가 제공하는 default email
+      // (kakao_${id}@kakao.com placeholder) 사용.
+      const oauthOptions: Record<string, unknown> = {
+        redirectTo: `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirect)}&source=${source}`,
+      };
+      if (provider === 'kakao') oauthOptions.scopes = 'profile_nickname profile_image';
+      const { error: err } = await sb.auth.signInWithOAuth({ provider, options: oauthOptions });
       if (err) throw err;
     } catch (e: unknown) {
       setError(e instanceof Error ? errMsg(e) : '로그인 중 오류가 발생했습니다');
       setLoading(null);
     }
   };
+
+  // s235: 인앱 브라우저(다음/당근/페이스북/일반 webview) — OAuth 동의화면 차단됨.
+  // signup_attempts 기록 안 만들고 InAppBrowserModal 노출.
+  if (inApp.resolved && inApp.isInApp && !inApp.canDoOAuth) {
+    return <InAppBrowserModal type={inApp.type} />;
+  }
 
   return (
     <div style={{ width: '100%', maxWidth: 400 }}>

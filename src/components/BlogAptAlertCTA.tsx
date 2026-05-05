@@ -135,13 +135,13 @@ export default function BlogAptAlertCTA({ aptName, siteSlug, category = 'apt', l
           backdropFilter: 'blur(8px)',
         }}
       >
-        <span style={{ fontSize: 22, flexShrink: 0, lineHeight: 1 }}>🔔</span>
+        <span style={{ fontSize: 22, flexShrink: 0, lineHeight: 1 }}>🚨</span>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 13, fontWeight: 700, color: '#fff', wordBreak: 'keep-all', lineHeight: 1.35 }}>
-            {aptName} 가격이 5% 떨어지면 알림 받기
+            {aptName} 청약 시작/실거래 등록 시 알림
           </div>
-          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', marginTop: 2 }}>
-            놓치면 다시 못 만나요
+          <div style={{ fontSize: 11, color: '#FEE500', marginTop: 2, fontWeight: 700 }}>
+            가입 즉시 100P · 알림 등록 +10P
           </div>
         </div>
         <button
@@ -155,7 +155,7 @@ export default function BlogAptAlertCTA({ aptName, siteSlug, category = 'apt', l
             flexShrink: 0,
           }}
         >
-          {status === 'loading' ? '등록 중' : isLoggedIn ? '알림 ON' : '무료 가입'}
+          {status === 'loading' ? '등록 중' : isLoggedIn ? '🔔 알림 ON' : '🚀 1초 가입'}
         </button>
       </div>
     );
@@ -170,25 +170,25 @@ export default function BlogAptAlertCTA({ aptName, siteSlug, category = 'apt', l
       background: 'rgba(254,229,0,0.04)', border: '1px solid rgba(254,229,0,0.15)',
     }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-        <span style={{ fontSize: 22, flexShrink: 0, lineHeight: 1 }}>🔔</span>
+        <span style={{ fontSize: 26, flexShrink: 0, lineHeight: 1 }}>🚨</span>
         <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 3 }}>
-            {aptName} 가격 변동 알림 받기
+          <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 3 }}>
+            {aptName} 청약 시작/실거래 등록 시 알림
           </div>
           <div style={{ fontSize: 11, color: 'var(--text-tertiary)', lineHeight: 1.5, marginBottom: 10 }}>
-            실거래 등록 시 바로 알려드려요 · 무료
+            가입 즉시 <span style={{ color: '#FEE500', fontWeight: 800 }}>100P</span> · 알림 등록 시 추가 <span style={{ color: '#FEE500', fontWeight: 800 }}>+10P</span>
           </div>
           <button
             onClick={handleAlert}
             disabled={status === 'loading'}
             style={{
-              padding: '9px 16px', borderRadius: 8, border: 'none', cursor: 'pointer',
+              padding: '10px 18px', borderRadius: 8, border: 'none', cursor: 'pointer',
               background: '#FEE500',
               color: '#191919', fontSize: 13, fontWeight: 800,
               opacity: status === 'loading' ? 0.7 : 1,
             }}
           >
-            {status === 'loading' ? '등록 중...' : isLoggedIn ? '알림 ON' : '무료 가입 후 알림 받기'}
+            {status === 'loading' ? '등록 중...' : isLoggedIn ? '🔔 알림 ON' : '🚀 1초 가입 + 100P 받기'}
           </button>
         </div>
       </div>
