@@ -1,3 +1,16 @@
+# 카더라 STATUS — 세션 236-after: 수동 결정 처리 (2026-05-06 KST)
+
+## s236-after (2026-05-06) — 수동 결정 처리
+- big_event_assets garbage 1,884 row DELETE (백업 테이블 `big_event_assets_garbage_s236` 보관)
+  * `source_label='naver-search'`, `is_verified=false`, 5/4 06:15 ~ 5/5 15:45 생성분
+  * remaining: 12 rows (verified 1 + 기타 11)
+- pg_cron jobid 118 `apt-image-crawl-backup` unschedule (Architecture Rule #19 위배 해소)
+  * 이제 apt-image-crawl 은 Vercel cron 만 매시 :15 단일 호출
+- 신규 의심: pg_cron `_call_vercel_cron` 42개 중 일부가 vercel.json crons 와 중복 가능성
+  * s227 hotfix 의도적 4개 외 나머지 38개 점검 필요 → **s237 에서 처리**
+
+---
+
 # 카더라 STATUS — 세션 236: apt-image-crawl cron 코드 복구 (2026-05-06 KST)
 
 ## s236 (2026-05-06) — apt-image-crawl cron 코드 복구
