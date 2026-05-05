@@ -65,6 +65,13 @@ export async function middleware(request: NextRequest) {
     return new NextResponse(null, { status: 404 });
   }
 
+  // s235 W4: legacy /apt/sites/* → /apt/* 308 redirect.
+  if (pathname.startsWith('/apt/sites/')) {
+    const url = request.nextUrl.clone();
+    url.pathname = pathname.replace('/apt/sites/', '/apt/');
+    return NextResponse.redirect(url, 308);
+  }
+
   // ── [L1-6] Crawler retry throttle ──
   // 같은 크롤러가 10초 내 같은 URL을 3회+ 재요청하면 304로 즉시 응답 → 크롤 예산 보호
   // ── [L1-7] Bot edge cache ──

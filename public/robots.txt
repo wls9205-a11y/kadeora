@@ -29,6 +29,15 @@ Disallow: /*?q=
 Disallow: /*?sort=
 Disallow: /*?utm_*
 Disallow: /*?ref=
+# s235: dead routes (PV<25/30d)
+Disallow: /apt/map
+Disallow: /apt/popular
+Disallow: /apt/landmark
+Disallow: /apt/feed
+Disallow: /apt/unsold-deals
+Disallow: /apt/big-events
+Disallow: /apt/tabs
+Disallow: /apt/data
 
 # ===== Google =====
 User-agent: Googlebot

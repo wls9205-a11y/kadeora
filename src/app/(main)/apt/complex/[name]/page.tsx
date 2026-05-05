@@ -8,6 +8,7 @@ import { ImageLightbox } from '@/components/ui/ImageLightbox';
 import type { Metadata } from 'next';
 import { fmtAmount } from '@/lib/format';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
+import { sanitizeHtml } from '@/lib/sanitize-html';
 import dynamic from 'next/dynamic';
 import ShareButtons from '@/components/ShareButtons';
 import AptNearbyCompare from '@/components/AptNearbyCompare';
@@ -111,6 +112,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     (meta.other as any)['geo.placename'] = `${decoded} 아파트`;
     (meta.other as any)['geo.region'] = 'KR';
     (meta.other as any)['ICBM'] = `${p.latitude}, ${p.longitude}`;
+  }
+
+  // s235 W9b: 저품질 단지(quality_score < 30) 자동 noindex
+  const qualityScore = (p as any)?.data_quality_score ?? (p as any)?.quality_score ?? null;
+  if (qualityScore !== null && qualityScore < 30) {
+    return { ...meta, robots: { index: false, follow: true } };
   }
 
   return meta;
@@ -249,7 +256,7 @@ export default async function ComplexDetailPage({ params }: Props) {
   const isRedevCandidate = !bigEvent && builtYear > 0 && builtYear < 1990 && (profile?.total_households ?? 0) >= 500;
 
   return (
-    <article style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
+    <article style={{ margin: '0 auto', padding: '0 var(--sp-lg)' }}>
       {/* JSON-LD: Place + GeoCoordinates */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org', '@type': 'Place', 'speakable': { '@type': 'SpeakableSpecification', 'cssSelector': ['h1', '.complex-summary'] },
@@ -367,6 +374,9 @@ export default async function ComplexDetailPage({ params }: Props) {
         <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{decoded}</span>
       </nav>
 
+      <div className="apt-complex-layout" style={{ maxWidth: 1200, margin: '0 auto' }}>
+      <div className="apt-complex-main">
+
       {/* 이미지 갤러리 (apt_sites 이미지 있을 때) — 클릭 확대 지원 */}
       {siteImages.length > 0 && (
         <div style={{ marginBottom: 'var(--sp-md)' }}>
@@ -392,7 +402,7 @@ export default async function ComplexDetailPage({ params }: Props) {
         if (complexImages.length === 0) return null;
         return (
           <section style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--card-p) var(--sp-lg)', marginBottom: 'var(--sp-md)' }}>
-            <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 10px' }}>
+            <h2 className="apt-section-title">
               🖼️ {decoded} 관련 이미지 · {complexImages.length}장
             </h2>
             <ImageLightbox images={complexImages} columns={3} />
@@ -532,6 +542,44 @@ export default async function ComplexDetailPage({ params }: Props) {
         </p>
       </section>
 
+      {/* s235 W11: narrative_text (단지 분석 HTML) */}
+      {profile?.narrative_text && (
+        <section className="apt-card-v2">
+          <h2 className="apt-section-title">📖 단지 분석</h2>
+          <div
+            style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.7 }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(profile.narrative_text) }}
+          />
+        </section>
+      )}
+
+      {/* s235 W11: 단지 데이터 (전세가율 / 월세 시세 / 총 세대수) */}
+      {(profile?.jeonse_ratio || profile?.latest_monthly_rent || profile?.total_households) && (
+        <section className="apt-card-v2">
+          <h2 className="apt-section-title">📊 단지 데이터</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 'var(--sp-sm)' }}>
+            {profile.total_households && (
+              <div>
+                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>총 세대수</div>
+                <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800 }}>{Number(profile.total_households).toLocaleString()}</div>
+              </div>
+            )}
+            {profile.jeonse_ratio && (
+              <div>
+                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>전세가율</div>
+                <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800 }}>{Number(profile.jeonse_ratio).toFixed(0)}%</div>
+              </div>
+            )}
+            {profile.latest_monthly_rent && (
+              <div>
+                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>월세 시세</div>
+                <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800 }}>{Number(profile.latest_monthly_rent).toLocaleString()}만</div>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
       {/* ═══ 핵심 시세 요약 — 히어로 카드 ═══ */}
       <div style={{
         display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 10, marginBottom: 'var(--sp-lg)',
@@ -589,73 +637,13 @@ export default async function ComplexDetailPage({ params }: Props) {
         </div>
       </div>
 
-      {/* 📈 월별 시세 추이 — 향상된 SVG */}
-      {monthlyTrend.length >= 3 && (() => {
-        const data = monthlyTrend.slice(-12);
-        const maxVal = Math.max(...data.map(d => d.avg));
-        const minVal = Math.min(...data.map(d => d.avg));
-        const range = maxVal - minVal || 1;
-        const w = 100; const h = 40;
-        const pts = data.map((d, i) => `${(i / (data.length - 1)) * w},${h - ((d.avg - minVal) / range) * (h - 4) - 2}`).join(' ');
-        const lastAvg = data[data.length - 1].avg;
-        const firstAvg = data[0].avg;
-        const trendPct = Math.round(((lastAvg - firstAvg) / firstAvg) * 100);
-        const isUp = trendPct >= 0;
-        const color = isUp ? '#ef4444' : '#3b82f6';
-        return (
-          <div style={{
-            borderRadius: 'var(--radius-lg)', padding: '18px 20px', marginBottom: 'var(--sp-lg)',
-            background: 'var(--bg-surface)', border: '1px solid var(--border)',
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-md)' }}>
-              <span style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)' }}>📈 월별 시세 추이</span>
-              <div style={{
-                fontSize: 12, fontWeight: 800, color,
-                background: `${color}15`, padding: '4px 12px', borderRadius: 'var(--radius-sm)',
-                display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)',
-              }}>
-                <span style={{ fontSize: 14 }}>{isUp ? '▲' : '▼'}</span>
-                {Math.abs(trendPct)}%
-                <span style={{ fontSize: 10, fontWeight: 600, opacity: 0.7 }}>({data.length}개월)</span>
-              </div>
-            </div>
-            <svg viewBox={`0 0 ${w} ${h}`} style={{ width: '100%', height: 100 }} preserveAspectRatio="none">
-              <defs>
-                <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={color} stopOpacity="0.25" />
-                  <stop offset="100%" stopColor={color} stopOpacity="0.02" />
-                </linearGradient>
-              </defs>
-              <polygon points={`0,${h} ${pts} ${w},${h}`} fill="url(#trendFill)" />
-              <polyline points={pts} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              {/* 최근값 점 */}
-              {(() => {
-                const lastPt = pts.split(' ').pop()?.split(',') || ['100','20'];
-                return <circle cx={lastPt[0]} cy={lastPt[1]} r="2.5" fill={color} stroke="#fff" strokeWidth="1" />;
-              })()}
-            </svg>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 11, marginTop: 6 }}>
-              <span style={{ color: 'var(--text-tertiary)' }}>{data[0].ym}</span>
-              <div style={{ display: 'flex', gap: 'var(--sp-md)' }}>
-                <span style={{ color: 'var(--text-tertiary)' }}>최저 {fmtAmount(minVal)}</span>
-                <span style={{ fontWeight: 800, color: 'var(--text-primary)' }}>최근 {fmtAmount(lastAvg)}</span>
-              </div>
-              <span style={{ color: 'var(--text-tertiary)' }}>{data[data.length - 1].ym}</span>
-            </div>
-          </div>
-        );
-      })()}
-
-      {/* 🏘️ 주변 단지 비교 */}
-      <AptNearbyCompare aptName={decoded} sigungu={sigungu} />
-
       {/* 📐 면적별 비교 — 그라데이션 바 + 카드 */}
       {areaStats.length > 1 && (() => {
         const maxAvg = Math.max(...areaStats.map(a => a.avg));
         const colors = ['#3b82f6','#8b5cf6','#06b6d4','#f59e0b','#ef4444','#ec4899','#10b981','#6366f1'];
         return (
         <div style={{ borderRadius: 'var(--radius-lg)', padding: '18px 20px', marginBottom: 'var(--sp-lg)', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
-          <h2 style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 14px' }}>📐 면적별 비교</h2>
+          <h2 className="apt-section-title">📐 면적별 비교</h2>
           <div style={{ marginBottom: 14 }}>
             {areaStats.slice(0, 6).map((a, i) => {
               const pct = maxAvg > 0 ? (a.avg / maxAvg) * 100 : 0;
@@ -691,9 +679,6 @@ export default async function ComplexDetailPage({ params }: Props) {
           </div>
         </div>);
       })()}
-
-      {/* 가격 추이 차트 */}
-      <AptPriceTrendChart aptName={decoded} region={region} />
 
       {/* 📋 매매 거래 이력 — 테이블 스타일 */}
       <div style={{ borderRadius: 'var(--radius-lg)', padding: '18px 20px', marginBottom: 'var(--sp-lg)', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
@@ -774,9 +759,6 @@ export default async function ComplexDetailPage({ params }: Props) {
         </div>
       )}
 
-      {/* 주민 리뷰 */}
-      <AptReviewSection aptName={decoded} region={region} />
-
       {/* 🔗 외부 링크 — 아이콘 카드 */}
       <div className={siteSlug ? 'kd-grid-4' : 'kd-grid-3'} style={{ gap: 'var(--sp-sm)', marginBottom: 'var(--sp-lg)' }}>
         {[
@@ -805,82 +787,9 @@ export default async function ComplexDetailPage({ params }: Props) {
       {/* 조회·댓글·관심 */}
       <EngageRow views={siteEngage.views} comments={siteEngage.comments} interest={siteEngage.interest} style={{ borderTop: 'none', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', marginBottom: 'var(--sp-lg)', background: 'var(--bg-surface)' }} />
 
-      {/* 📰 관련 분석 */}
-      {relatedBlogs.length > 0 && (
-        <div style={{ borderRadius: 'var(--radius-lg)', padding: '18px 20px', marginBottom: 'var(--sp-lg)', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
-          <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 'var(--sp-md)' }}>📰 관련 분석</div>
-          {relatedBlogs.map((b: Record<string, any>) => (
-            <Link key={b.slug} href={`/blog/${b.slug}`} style={{
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              padding: '10px 0', borderBottom: '1px solid var(--border)',
-              textDecoration: 'none', color: 'inherit', transition: 'opacity 0.12s',
-            }}>
-              <span style={{ fontSize: 13, color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 600 }}>{b.title}</span>
-              <span style={{ fontSize: 11, color: 'var(--text-tertiary)', flexShrink: 0, marginLeft: 8, background: 'var(--bg-hover)', padding: '3px 8px', borderRadius: 4 }}>👀 {b.view_count || 0}</span>
-            </Link>
-          ))}
-        </div>
-      )}
-
       <p style={{ fontSize: 11, color: 'var(--text-tertiary)', textAlign: 'center', margin: '16px 0 8px' }}>
         📊 국토교통부 실거래가 공개시스템 기준 · 카더라 자체 분석
       </p>
-
-      {/* SSR 자동 분석 텍스트 — Featured Snippet / AI Overview 타겟 */}
-      <section className="complex-analysis" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', marginBottom: 14 }}>
-        <h2 style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px' }}>{decoded} 실거래가 분석</h2>
-        <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0 }}>
-          {decoded}은 {region} {sigungu} {dong}에 위치한{builtYear ? ` ${builtYear}년 준공` : ''}{profile?.total_households ? ` ${profile.total_households.toLocaleString()}세대 규모의` : ''} 아파트입니다.
-          {latestPrice > 0 && ` 최근 매매 실거래가는 ${fmtAmount(latestPrice)}이며, 평균 매매가 ${fmtAmount(avgPrice)}, 최고가 ${fmtAmount(maxPrice)}, 최저가 ${fmtAmount(minPrice)}입니다.`}
-          {latestJeonse && ` 전세 시세는 ${fmtAmount(latestJeonse.deposit)}${jeonseRatio ? ` (전세가율 ${jeonseRatio}%)` : ''}이며,`}
-          {latestMonthly && ` 월세는 보증금 ${fmtAmount(latestMonthly.deposit)}/월 ${latestMonthly.monthly_rent}만원입니다.`}
-          {profile?.price_change_1y && ` 최근 1년 가격 변동률은 ${Number(profile.price_change_1y) > 0 ? '+' : ''}${profile.price_change_1y}%입니다.`}
-          {areaStats.length > 0 && ` 거래가 가장 활발한 면적은 ${areaStats[0].area}(${areaStats[0].count}건, 평균 ${fmtAmount(areaStats[0].avg)})입니다.`}
-          {` 총 ${tradeList.length}건의 매매 거래와 ${rentTrades.length}건의 전월세 거래가 기록되어 있습니다.`}
-        </p>
-      </section>
-
-      {/* 지역 허브 내부 링크 — SEO 계층 구조 */}
-      {(region || sigungu) && (
-        <section style={{ marginBottom: 14, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-          {region && <Link href={`/apt/region/${encodeURIComponent(region)}`} style={{ padding: '6px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 20, textDecoration: 'none', fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600 }}>{region} 부동산</Link>}
-          {region && sigungu && <Link href={`/apt/area/${encodeURIComponent(region)}/${encodeURIComponent(sigungu)}`} style={{ padding: '6px 12px', background: 'var(--bg-surface)', border: '1px solid var(--accent-blue)', borderRadius: 20, textDecoration: 'none', fontSize: 11, color: 'var(--accent-blue)', fontWeight: 600 }}>{sigungu} 시세 분석</Link>}
-          {region && sigungu && dong && <Link href={`/apt/area/${encodeURIComponent(region)}/${encodeURIComponent(sigungu)}/${encodeURIComponent(dong)}`} style={{ padding: '6px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 20, textDecoration: 'none', fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600 }}>{dong} 아파트</Link>}
-        </section>
-      )}
-
-      {/* 관련 단지 — 내부 링크 강화 (크롤링 심도 개선) */}
-      {relatedComplexes.length > 0 && (
-        <section style={{ marginBottom: 14 }}>
-          <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px' }}>{sigungu} 주요 아파트</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 6 }}>
-            {relatedComplexes.slice(0, 6).map((rc: any, i: number) => (
-              <Link key={i} href={`/apt/complex/${encodeURIComponent(rc.apt_name)}`} style={{
-                display: 'block', padding: '10px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)',
-                borderRadius: 'var(--radius-sm)', textDecoration: 'none', transition: 'border-color 0.15s',
-              }}>
-                <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{rc.apt_name}</div>
-                <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}>
-                  {rc.latest_sale_price ? fmtAmount(rc.latest_sale_price) : '시세 미상'}
-                  {rc.built_year ? ` · ${rc.built_year}년` : ''}
-                  {rc.total_households ? ` · ${rc.total_households}세대` : ''}
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* 비교하기 CTA */}
-      {relatedComplexes.length > 0 && relatedComplexes[0]?.apt_name && (
-        <Link href={`/apt/compare/${encodeURIComponent(decoded)}-vs-${encodeURIComponent(relatedComplexes[0].apt_name)}`} style={{
-          display: 'block', textAlign: 'center', padding: '12px', marginBottom: 8,
-          borderRadius: 'var(--radius-sm)', fontWeight: 700, textDecoration: 'none', fontSize: 13,
-          background: 'var(--bg-surface)', border: '1px solid var(--accent-blue)', color: 'var(--accent-blue)',
-        }}>
-          ⚖️ {decoded} vs {relatedComplexes[0].apt_name} 비교
-        </Link>
-      )}
 
       {/* CTA */}
       <Link href={siteSlug ? `/apt/${siteSlug}` : `/apt/search?q=${encodeURIComponent(decoded)}`} style={{
@@ -898,6 +807,150 @@ export default async function ComplexDetailPage({ params }: Props) {
           <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, padding: "4px 0", color: "var(--text-tertiary)" }}><span>실거래 변동</span><span>알림 설정</span></div>
         </div>
       </LoginGate>
+
+      </div>{/* /apt-complex-main */}
+
+      <aside className="apt-complex-side" aria-label="분석 차트">
+        {/* 📈 월별 시세 추이 — 향상된 SVG */}
+        {monthlyTrend.length >= 3 && (() => {
+          const data = monthlyTrend.slice(-12);
+          const maxVal = Math.max(...data.map(d => d.avg));
+          const minVal = Math.min(...data.map(d => d.avg));
+          const range = maxVal - minVal || 1;
+          const w = 100; const h = 40;
+          const pts = data.map((d, i) => `${(i / (data.length - 1)) * w},${h - ((d.avg - minVal) / range) * (h - 4) - 2}`).join(' ');
+          const lastAvg = data[data.length - 1].avg;
+          const firstAvg = data[0].avg;
+          const trendPct = Math.round(((lastAvg - firstAvg) / firstAvg) * 100);
+          const isUp = trendPct >= 0;
+          const color = isUp ? '#ef4444' : '#3b82f6';
+          return (
+            <div style={{
+              borderRadius: 'var(--radius-lg)', padding: '18px 20px', marginBottom: 'var(--sp-lg)',
+              background: 'var(--bg-surface)', border: '1px solid var(--border)',
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-md)' }}>
+                <span style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)' }}>📈 월별 시세 추이</span>
+                <div style={{
+                  fontSize: 12, fontWeight: 800, color,
+                  background: `${color}15`, padding: '4px 12px', borderRadius: 'var(--radius-sm)',
+                  display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)',
+                }}>
+                  <span style={{ fontSize: 14 }}>{isUp ? '▲' : '▼'}</span>
+                  {Math.abs(trendPct)}%
+                  <span style={{ fontSize: 10, fontWeight: 600, opacity: 0.7 }}>({data.length}개월)</span>
+                </div>
+              </div>
+              <svg viewBox={`0 0 ${w} ${h}`} style={{ width: '100%', height: 100 }} preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={color} stopOpacity="0.25" />
+                    <stop offset="100%" stopColor={color} stopOpacity="0.02" />
+                  </linearGradient>
+                </defs>
+                <polygon points={`0,${h} ${pts} ${w},${h}`} fill="url(#trendFill)" />
+                <polyline points={pts} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                {(() => {
+                  const lastPt = pts.split(' ').pop()?.split(',') || ['100','20'];
+                  return <circle cx={lastPt[0]} cy={lastPt[1]} r="2.5" fill={color} stroke="#fff" strokeWidth="1" />;
+                })()}
+              </svg>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 11, marginTop: 6 }}>
+                <span style={{ color: 'var(--text-tertiary)' }}>{data[0].ym}</span>
+                <div style={{ display: 'flex', gap: 'var(--sp-md)' }}>
+                  <span style={{ color: 'var(--text-tertiary)' }}>최저 {fmtAmount(minVal)}</span>
+                  <span style={{ fontWeight: 800, color: 'var(--text-primary)' }}>최근 {fmtAmount(lastAvg)}</span>
+                </div>
+                <span style={{ color: 'var(--text-tertiary)' }}>{data[data.length - 1].ym}</span>
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* 🏘️ 주변 단지 비교 */}
+        <AptNearbyCompare aptName={decoded} sigungu={sigungu} />
+
+        {/* 가격 추이 차트 */}
+        <AptPriceTrendChart aptName={decoded} region={region} />
+
+        {/* 주민 리뷰 */}
+        <AptReviewSection aptName={decoded} region={region} />
+
+        {/* 📰 관련 분석 */}
+        {relatedBlogs.length > 0 && (
+          <div style={{ borderRadius: 'var(--radius-lg)', padding: '18px 20px', marginBottom: 'var(--sp-lg)', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
+            <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 'var(--sp-md)' }}>📰 관련 분석</div>
+            {relatedBlogs.map((b: Record<string, any>) => (
+              <Link key={b.slug} href={`/blog/${b.slug}`} style={{
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                padding: '10px 0', borderBottom: '1px solid var(--border)',
+                textDecoration: 'none', color: 'inherit', transition: 'opacity 0.12s',
+              }}>
+                <span style={{ fontSize: 13, color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 600 }}>{b.title}</span>
+                <span style={{ fontSize: 11, color: 'var(--text-tertiary)', flexShrink: 0, marginLeft: 8, background: 'var(--bg-hover)', padding: '3px 8px', borderRadius: 4 }}>👀 {b.view_count || 0}</span>
+              </Link>
+            ))}
+          </div>
+        )}
+
+        {/* SSR 자동 분석 텍스트 — Featured Snippet / AI Overview 타겟 */}
+        <section className="complex-analysis" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', marginBottom: 14 }}>
+          <h2 className="apt-section-title">{decoded} 실거래가 분석</h2>
+          <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0 }}>
+            {decoded}은 {region} {sigungu} {dong}에 위치한{builtYear ? ` ${builtYear}년 준공` : ''}{profile?.total_households ? ` ${profile.total_households.toLocaleString()}세대 규모의` : ''} 아파트입니다.
+            {latestPrice > 0 && ` 최근 매매 실거래가는 ${fmtAmount(latestPrice)}이며, 평균 매매가 ${fmtAmount(avgPrice)}, 최고가 ${fmtAmount(maxPrice)}, 최저가 ${fmtAmount(minPrice)}입니다.`}
+            {latestJeonse && ` 전세 시세는 ${fmtAmount(latestJeonse.deposit)}${jeonseRatio ? ` (전세가율 ${jeonseRatio}%)` : ''}이며,`}
+            {latestMonthly && ` 월세는 보증금 ${fmtAmount(latestMonthly.deposit)}/월 ${latestMonthly.monthly_rent}만원입니다.`}
+            {profile?.price_change_1y && ` 최근 1년 가격 변동률은 ${Number(profile.price_change_1y) > 0 ? '+' : ''}${profile.price_change_1y}%입니다.`}
+            {areaStats.length > 0 && ` 거래가 가장 활발한 면적은 ${areaStats[0].area}(${areaStats[0].count}건, 평균 ${fmtAmount(areaStats[0].avg)})입니다.`}
+            {` 총 ${tradeList.length}건의 매매 거래와 ${rentTrades.length}건의 전월세 거래가 기록되어 있습니다.`}
+          </p>
+        </section>
+
+        {/* 지역 허브 내부 링크 — SEO 계층 구조 */}
+        {(region || sigungu) && (
+          <section style={{ marginBottom: 14, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            {region && <Link href={`/apt/region/${encodeURIComponent(region)}`} style={{ padding: '6px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 20, textDecoration: 'none', fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600 }}>{region} 부동산</Link>}
+            {region && sigungu && <Link href={`/apt/area/${encodeURIComponent(region)}/${encodeURIComponent(sigungu)}`} style={{ padding: '6px 12px', background: 'var(--bg-surface)', border: '1px solid var(--accent-blue)', borderRadius: 20, textDecoration: 'none', fontSize: 11, color: 'var(--accent-blue)', fontWeight: 600 }}>{sigungu} 시세 분석</Link>}
+            {region && sigungu && dong && <Link href={`/apt/area/${encodeURIComponent(region)}/${encodeURIComponent(sigungu)}/${encodeURIComponent(dong)}`} style={{ padding: '6px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 20, textDecoration: 'none', fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600 }}>{dong} 아파트</Link>}
+          </section>
+        )}
+
+        {/* 관련 단지 — 내부 링크 강화 (크롤링 심도 개선) */}
+        {relatedComplexes.length > 0 && (
+          <section style={{ marginBottom: 14 }}>
+            <h2 className="apt-section-title">{sigungu} 주요 아파트</h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 6 }}>
+              {relatedComplexes.slice(0, 6).map((rc: any, i: number) => (
+                <Link key={i} href={`/apt/complex/${encodeURIComponent(rc.apt_name)}`} style={{
+                  display: 'block', padding: '10px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)',
+                  borderRadius: 'var(--radius-sm)', textDecoration: 'none', transition: 'border-color 0.15s',
+                }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{rc.apt_name}</div>
+                  <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}>
+                    {rc.latest_sale_price ? fmtAmount(rc.latest_sale_price) : '시세 미상'}
+                    {rc.built_year ? ` · ${rc.built_year}년` : ''}
+                    {rc.total_households ? ` · ${rc.total_households}세대` : ''}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* 비교하기 CTA */}
+        {relatedComplexes.length > 0 && relatedComplexes[0]?.apt_name && (
+          <Link href={`/apt/compare/${encodeURIComponent(decoded)}-vs-${encodeURIComponent(relatedComplexes[0].apt_name)}`} style={{
+            display: 'block', textAlign: 'center', padding: '12px', marginBottom: 8,
+            borderRadius: 'var(--radius-sm)', fontWeight: 700, textDecoration: 'none', fontSize: 13,
+            background: 'var(--bg-surface)', border: '1px solid var(--accent-blue)', color: 'var(--accent-blue)',
+          }}>
+            ⚖️ {decoded} vs {relatedComplexes[0].apt_name} 비교
+          </Link>
+        )}
+      </aside>
+
+      </div>{/* /apt-complex-layout */}
     </article>
   );
 }

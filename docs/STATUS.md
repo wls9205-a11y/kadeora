@@ -1,3 +1,65 @@
+# 카더라 STATUS — 세션 235: /apt 하위 페이지 디자인+배치+SEO (2026-05-06 KST)
+
+## s235 — /apt 하위 페이지 전면 개편 (11 worker 병렬, 단일 commit)
+
+### W1 /apt/[id] 14 section 재배치
+- 📍 위치 정보 15→3 (Hero/KPI 직후)
+- ❓ FAQ → 18 (footer 직전)
+- multi-stage fuzzy slug fallback / fetchUnifiedData / Schema 모두 보존
+
+### W2 /apt/complex/[name] 데스크톱 grid (903줄)
+- `<div className="apt-complex-layout">` wrapper (1024+ 2-column grid 1.5fr/1fr)
+- main: image gallery + 핵심정보 + narrative_text + 단지데이터 + 면적별 비교
+- aside: 월별 시세 SVG + Nearby + PriceTrend + Review + 관련분석 + 지역허브 (sticky top:80px)
+
+### W3 AptImageGallery 강화
+- mixed type normalize (string | object → object[])
+- 데스크톱 1+4 grid (max-height 480, aspect 4/3, "전체보기 (N)")
+- ImageGallery + ImageObject Schema emit
+- 모바일 swipe path 보존
+
+### W4 dead routes + 308 redirect (부분)
+- robots.txt: 8 dead route Disallow 추가 (/apt/{map,popular,landmark,feed,unsold-deals,big-events,tabs,data})
+- middleware.ts: /apt/sites/* → /apt/* 308 redirect
+- ranking title fix + sitemap priority — **파일 부재로 SKIP** (s236 후속에서 ranking 페이지 신설 시 처리)
+
+### W5 디자인 token 통일
+- `globals.css`: `.apt-page-container` / `.apt-section-title` / `.apt-card-v2` 클래스 신설 (1024+ media query 포함)
+- /apt/[id]: 14 곳 `<h2 style={ct}>` → `<h2 className="apt-section-title">` (margin override 2곳은 className+style 병행)
+- /apt/complex/[name]: 6 곳 동일 변환
+
+### W7 og-cards-refresh cron
+- **신규** `src/app/api/cron/og-cards-refresh/route.ts` — withCronAuthFlex + withCronLogging
+- updated_at > og_cards_updated_at 인 단지 50건/회 timestamp 갱신 (LIMIT 50, ORDER BY page_views DESC)
+- pg_cron 등록: `s235_register_og_cards_refresh_pg_cron` (KST 04:00)
+
+### W8 dead 컬럼 conditional render
+- /apt/[id]: review_score / review_count / school_district / transit_score / discount_pct
+- 5 컬럼 모두 이미 conditional 또는 schema-only 사용 — 추가 변경 없음 (이미 안전)
+
+### W9 low quality noindex
+- /apt/[id]: data_quality_score < 30 시 robots: { index: false, follow: true }
+- /apt/complex/[name]: data_quality_score 또는 quality_score < 30 시 동일 (column 부재 시 null-safe gate)
+
+### W10 popularity_score 재계산 (Supabase MCP 직접)
+- 가중치: PV*0.5 + interest*5 + comment*10 + content_score*0.3
+- correlation 0.52 → 0.984 (16배 강화)
+
+### W11 /apt/complex/[name] 풍부 데이터 노출
+- `narrative_text` (78%) — sanitizeHtml 으로 렌더, 📖 단지 분석 카드
+- `total_households` / `jeonse_ratio` (63%) / `latest_monthly_rent` (69%) — 📊 단지 데이터 카드 (auto-fit grid)
+
+### Architecture Rules (2 신규)
+- Rule #27 — /apt 하위 페이지 12 슬롯 배치 표준 (Hero→KPI→위치→일정→스펙→가격→분석→조건부→주변→FAQ→footer→Disclaimer)
+- Rule #28 — inline raw fontSize/padding 금지, CSS var + className 통일
+
+### Pending
+- ranking 페이지 + sitemap-region-hubs 파일 부재 — 파일 신설 시 W4 잔여 적용
+- AptImageGallery `title` prop 부재 — Schema name 은 '단지 사진' 고정. caller 가 title 넘기는 패턴 추가 필요
+- safeBlogInsert helper freshness 필드 forward TODO (s232 carry-over)
+
+---
+
 # 카더라 STATUS — 세션 236-after: 수동 결정 처리 (2026-05-06 KST)
 
 ## s236-after (2026-05-06) — 수동 결정 처리

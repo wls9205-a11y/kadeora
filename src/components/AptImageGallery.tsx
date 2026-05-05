@@ -1,5 +1,5 @@
 'use client';
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import ImageLightbox from '@/components/ImageLightbox';
 
 interface AptImage {
@@ -59,9 +59,25 @@ export default function AptImageGallery({ images, name, region, badges }: {
   const [idx, setIdx] = useState(0);
   const [lightbox, setLightbox] = useState<number | null>(null);
   const [loadFails, setLoadFails] = useState<Set<number>>(new Set());
+  const [isDesktop, setIsDesktop] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const safeImages = images.map(img => ({ ...img, url: toHttps(img.url) }));
+  // 혼합 타입(string | object) 정규화 — url 누락 항목은 제거
+  const normalized = (images || []).map((img: any) =>
+    typeof img === 'string' ? { url: img } : img
+  ).filter((img: any) => img?.url);
+
+  // SSR-safe 데스크탑 판정
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const mql = window.matchMedia('(min-width: 768px)');
+    const update = () => setIsDesktop(mql.matches);
+    update();
+    mql.addEventListener?.('change', update);
+    return () => mql.removeEventListener?.('change', update);
+  }, []);
+
+  const safeImages = normalized.map((img: any) => ({ ...img, url: toHttps(img.url) }));
   const visibleImages = safeImages.filter((_, i) => !loadFails.has(i));
   const total = visibleImages.length;
 
@@ -123,7 +139,7 @@ export default function AptImageGallery({ images, name, region, badges }: {
                     style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                     loading={i === 0 ? 'eager' : 'lazy'}
                     referrerPolicy="no-referrer"
-                    onError={() => handleImgError(images.findIndex(o => toHttps(o.url) === img.url))}
+                    onError={() => handleImgError(normalized.findIndex((o: any) => toHttps(o.url) === img.url))}
                   />
                   <Watermark />
                   <WatermarkSm />
@@ -162,56 +178,115 @@ export default function AptImageGallery({ images, name, region, badges }: {
           )}
         </div>
 
-        {/* 데스크탑: 1+2 그리드 */}
+        {/* 데스크탑: 1+4 그리드 (matchMedia + Tailwind 양쪽 가드 — SSR 시 모바일 우선) */}
+        {isDesktop && (
         <div className="hidden md:block">
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: total >= 3 ? '2fr 1fr' : '1fr',
-            gridTemplateRows: total >= 3 ? '1fr 1fr' : 'auto',
-            gap: 4, height: 280,
-          }}>
+          {total === 1 ? (
+            // 1장: 풀폭
             <div
-              style={{ position: 'relative', overflow: 'hidden', gridRow: total >= 3 ? '1 / 3' : 'auto', background: '#162035', cursor: 'pointer' }}
+              style={{ position: 'relative', overflow: 'hidden', maxHeight: 480, aspectRatio: '4/3', background: '#162035', cursor: 'pointer' }}
               onClick={() => setLightbox(0)}
             >
               <img
                 src={visibleImages[0].url} alt={visibleImages[0].caption || `${name} ${region} 아파트 대표 이미지`}
-                width={720} height={400}
+                width={1280} height={960}
                 style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                 loading="eager" referrerPolicy="no-referrer"
-                onError={() => handleImgError(images.findIndex(o => toHttps(o.url) === visibleImages[0].url))}
+                onError={() => handleImgError(normalized.findIndex((o: any) => toHttps(o.url) === visibleImages[0].url))}
               />
               <Watermark />
               <WatermarkSm />
               {isSatellite(visibleImages[0].url) && <SatelliteBadge />}
               {badges}
             </div>
-            {visibleImages.slice(1, 3).map((img, i) => (
-              <div
-                key={i}
-                style={{ position: 'relative', overflow: 'hidden', background: '#162035', cursor: 'pointer' }}
-                onClick={() => setLightbox(i + 1)}
-              >
-                <img
-                  src={img.url} alt={img.caption || `${name} ${region} 아파트 사진 ${i + 2}`}
-                  width={360} height={200}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                  loading="lazy" referrerPolicy="no-referrer"
-                  onError={() => handleImgError(images.findIndex(o => toHttps(o.url) === img.url))}
-                />
-                <WatermarkSm />
-                {isSatellite(img.url) && <SatelliteBadge />}
-                {i === 1 && total > 3 && (
-                  <span style={{
-                    position: 'absolute', bottom: 8, right: 8,
-                    background: 'rgba(0,0,0,0.6)', color: '#fff',
-                    fontSize: 12, padding: '4px 12px', borderRadius: 'var(--radius-card)', fontWeight: 600,
-                  }}>+{total - 3}</span>
-                )}
+          ) : total === 2 ? (
+            // 2장: 좌우 분할
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4, maxHeight: 480 }}>
+              {visibleImages.slice(0, 2).map((img, i) => (
+                <div
+                  key={i}
+                  style={{ position: 'relative', overflow: 'hidden', aspectRatio: '4/3', background: '#162035', cursor: 'pointer' }}
+                  onClick={() => setLightbox(i)}
+                >
+                  <img
+                    src={img.url} alt={img.caption || `${name} ${region} 아파트 사진 ${i + 1}`}
+                    width={720} height={540}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                    loading={i === 0 ? 'eager' : 'lazy'} referrerPolicy="no-referrer"
+                    onError={() => handleImgError(normalized.findIndex((o: any) => toHttps(o.url) === img.url))}
+                  />
+                  {i === 0 && <Watermark />}
+                  <WatermarkSm />
+                  {isSatellite(img.url) && <SatelliteBadge />}
+                  {i === 0 && badges}
+                </div>
+              ))}
+            </div>
+          ) : (
+            // 3+장: 좌측 대표 + 우측 2x2 썸네일
+            <div style={{ position: 'relative' }}>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: '2fr 1fr',
+                gridTemplateRows: '1fr 1fr',
+                gap: 4, maxHeight: 480,
+              }}>
+                {/* 대표 이미지 — 좌측 2행 span */}
+                <div
+                  style={{ position: 'relative', overflow: 'hidden', gridRow: '1 / 3', aspectRatio: '4/3', background: '#162035', cursor: 'pointer' }}
+                  onClick={() => setLightbox(0)}
+                >
+                  <img
+                    src={visibleImages[0].url} alt={visibleImages[0].caption || `${name} ${region} 아파트 대표 이미지`}
+                    width={1280} height={960}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                    loading="eager" referrerPolicy="no-referrer"
+                    onError={() => handleImgError(normalized.findIndex((o: any) => toHttps(o.url) === visibleImages[0].url))}
+                  />
+                  <Watermark />
+                  <WatermarkSm />
+                  {isSatellite(visibleImages[0].url) && <SatelliteBadge />}
+                  {badges}
+                </div>
+                {/* 썸네일 4장 (2x2) */}
+                {visibleImages.slice(1, 5).map((img, i) => (
+                  <div
+                    key={i}
+                    style={{ position: 'relative', overflow: 'hidden', aspectRatio: '4/3', background: '#162035', cursor: 'pointer' }}
+                    onClick={() => setLightbox(i + 1)}
+                  >
+                    <img
+                      src={img.url} alt={img.caption || `${name} ${region} 아파트 사진 ${i + 2}`}
+                      width={480} height={360}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                      loading="lazy" referrerPolicy="no-referrer"
+                      onError={() => handleImgError(normalized.findIndex((o: any) => toHttps(o.url) === img.url))}
+                    />
+                    <WatermarkSm />
+                    {isSatellite(img.url) && <SatelliteBadge />}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+              {/* 전체보기 버튼 (N > 5) */}
+              {total > 5 && (
+                <button
+                  type="button"
+                  onClick={() => setLightbox(0)}
+                  style={{
+                    position: 'absolute', bottom: 12, right: 12,
+                    background: 'rgba(0,0,0,0.7)', color: '#fff',
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    fontSize: 13, padding: '8px 14px', borderRadius: 'var(--radius-card)',
+                    fontWeight: 600, cursor: 'pointer', zIndex: 2,
+                  }}
+                >
+                  전체보기 ({total})
+                </button>
+              )}
+            </div>
+          )}
         </div>
+        )}
       </div>
 
       {/* 라이트박스 — 풀스크린 뷰어 (스와이프/키보드/핀치줌 지원) */}
@@ -222,6 +297,24 @@ export default function AptImageGallery({ images, name, region, badges }: {
           onClose={() => setLightbox(null)}
         />
       )}
+
+      {/* JSON-LD: ImageGallery + ImageObject — SEO 풍부한 결과 노출 */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'ImageGallery',
+            name: '단지 사진',
+            image: normalized.map((img: any, i: number) => ({
+              '@type': 'ImageObject',
+              contentUrl: img.url,
+              thumbnailUrl: img.thumbnail || img.thumb || img.url,
+              caption: img.caption || `이미지 ${i + 1}`,
+            })),
+          }),
+        }}
+      />
     </>
   );
 }

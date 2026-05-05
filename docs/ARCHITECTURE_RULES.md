@@ -207,3 +207,64 @@ INSERT 시 `deriveFreshnessFields({ isSeasonal, targetYear })` 로 freshness 컬
 - `safeBlogInsert` helper 사용 시 freshness 필드가 payload 에 포함되도록 helper 도 forward 하게 업데이트 (s232 follow-up TODO).
 
 **Discovered**: s232 (2026-05-04) — blog_posts 391+9 stale 노출 추적 중 발견. 9 작성 cron + freshness-context lib + 자동 unpublish cron 3종 동시 적용.
+
+## Rule #27 — /apt 하위 컨텐츠 배치 표준 (s235 신설)
+
+**Symptom**: /apt/[id] 사용자 알고싶은 정보 (위치 / 단지스펙) 가 15번째 / 7번째에 배치 → 모바일 스크롤 피로 + bounce.
+
+**Cause**: 섹션 추가 history 가 누적되며 비즈니스 로직 (분양 일정/실거래/사업일정) 이 위에 쌓여 결정 정보 (위치/스펙) 가 뒤로 밀림.
+
+**Rule**:
+
+`/apt/[id]` 와 `/apt/complex/[name]` 등 단지 상세 페이지의 섹션 배치 순서는 다음을 따른다:
+
+1. **Hero** (이름/카테고리/대표 이미지)
+2. **KPI cards** (분양가/세대수/입주일 등 요약)
+3. **📍 위치 정보** (지도/주소/교통/학군 — 결정 요소)
+4. **📅 분양 일정** (D-day, 청약접수 일정)
+5. **🏗️ 단지 스펙** (세대수/면적별 구성)
+6. **💰 가격 정보** (분양가 vs 실거래가 / 분양가 비교 / 실거래 이력)
+7. **📊 분석 섹션** (종합 분석 / 시세 비교 / 최근 실거래 비교)
+8. **조건부 섹션** (경쟁률 / 미분양 / 재개발 — 데이터 있는 경우만)
+9. **🏪 주변 시설**
+10. **❓ FAQ**
+11. **footer 그룹** (커뮤니티 / 블로그 / 다른 현장)
+12. **Disclaimer**
+
+**How to apply**:
+- 새 섹션 추가 시 위 12개 슬롯에 매핑. 슬롯 사이에 끼우면 안 됨.
+- 데스크톱 1024+ 는 2-column grid (1.5fr / 1fr) 권장. 분석/추천 섹션을 aside 로.
+- 조건부 섹션은 `{data && <section>...}` 패턴 — 데이터 없으면 렌더 X.
+
+**Discovered**: s235 (2026-05-06) — /apt/[id] 14 section 분석 중 위치=15번째, 단지스펙=7번째 발견. 표준 배치로 재정렬.
+
+## Rule #28 — inline raw fontSize/padding 금지, CSS var + class 통일 (s235 신설)
+
+**Symptom**: 컴포넌트마다 `fontSize: 14`, `padding: 14` 같은 raw 숫자 분산. 디자인 토큰 변경 시 일괄 수정 불가 + 데스크톱 layout 미고려.
+
+**Cause**: 빠른 prototyping 으로 `style={{...}}` inline value 채택. 누적되며 디자인 일관성 깨짐.
+
+**Rule**:
+
+`/apt`, `/apt/complex` 등 핵심 페이지의 섹션 타이틀/카드/wrapper 는 다음 클래스 사용:
+
+```css
+.apt-page-container { max-width: 720px; padding: var(--sp-md); }
+@media (min-width: 1024px) { .apt-page-container { max-width: 900px; padding: var(--sp-lg); } }
+
+.apt-section-title { font-size: var(--fs-md); font-weight: 800; ... }
+@media (min-width: 768px) { .apt-section-title { font-size: var(--fs-lg); } }
+
+.apt-card-v2 { background: var(--bg-surface); border-radius: var(--radius-md); padding: var(--sp-md) var(--card-p); }
+@media (min-width: 768px) { .apt-card-v2 { padding: var(--sp-lg) var(--card-p); } }
+```
+
+raw 숫자 (예: `fontSize: 14`, `padding: 16`) → CSS var (`var(--fs-sm)`, `var(--sp-md)`) 만 사용.
+
+**How to apply**:
+- 새 섹션 타이틀 = `<h2 className="apt-section-title">`. 인라인 style 금지.
+- 카드 wrapper = `<section className="apt-card-v2">`. inline padding/border 금지.
+- 1024+ layout 의무 — sticky aside (`position: sticky; top: 80px`) 패턴 권장.
+- 예외: 동적 값 (e.g. `style={{ width: progressPct + '%' }}`) 만 inline 허용.
+
+**Discovered**: s235 (2026-05-06) — /apt/[id] 14 곳 + /apt/complex/[name] 5 곳 inline `style={ct}` 사용 중. 일괄 className 으로 통일 + globals.css 클래스 신설.
