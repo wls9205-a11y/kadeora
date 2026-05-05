@@ -1,3 +1,47 @@
+# 카더라 STATUS — 세션 232 (V2): /apt 현장 아래 섹션 + 더보기 페이지 (2026-05-06 KST)
+
+## s232 (2026-05-06) — /apt 현장 아래 섹션 + 더보기 페이지
+
+DB 측 4개 RPC 는 사전 적용 완료 (검증: popular_first="안산 고잔동 재건축",
+unsold_first="부산 사상구 미분양", landmark_first="인덕원자이"). 이번 commit 은 코드 측만.
+
+### 신규 컴포넌트
+- `src/components/apt/AptHomeSections.tsx` — 서버. 단일 RPC `get_apt_homepage_sections(6)` 호출,
+  3 섹션 (popular/unsold/landmark) 렌더. 각 섹션 헤더 우상단에 "전체 보기 →" 링크.
+- `src/components/apt/HomeSiteCard.tsx` — popular/unsold 공용 카드. `aptSiteThumb()` 통해
+  cover_image_url > satellite > og > images > og-square 폴백 (s230 표준). 미분양 카드는
+  bottom-right 가격 강조 배지 (`price_min/price_max` 만원→억).
+- `src/components/apt/LandmarkCard.tsx` — landmark_apts (id integer) 전용. blog_slug 있으면
+  `/blog/{slug}`, 없으면 `/apt/search?q={name}`. tags 칩, description 2줄 클램프,
+  avg_price_100m (text "약 30억") 우하단 배지. image_url 폴백 og-square.
+- `src/components/apt/Pagination.tsx` — basePath + page + totalPages + query{} 받는
+  서버 친화 컴포넌트. window=[cur-2..cur+2] + 첫/끝 페이지 링크.
+
+### 신규 라우트 (3개, 모두 SSR)
+- `src/app/(main)/apt/popular/page.tsx` — `get_apt_popular_paginated(24, offset, region)`,
+  total_count 로 totalPages 계산, robots index/follow.
+- `src/app/(main)/apt/landmark/page.tsx` — `get_apt_landmark_paginated(...)`.
+- `src/app/(main)/apt/unsold-deals/page.tsx` — `get_apt_unsold_paginated(...)`.
+  (기존 `/apt/unsold` 는 `[id]` 디테일만 존재해서 list 라우트 새로 생성.)
+- 각 페이지: ?page=N&region=서울 쿼리 지원, 페이지당 24개.
+
+### /apt 메인 변경
+- `<AptHomeSections />` 를 `<AptCardGridV5 />` 아래에 렌더. `activeTab === 'all'` AND `page === 1`
+  일 때만 노출 (필터 적용된 뷰는 노이즈 방지).
+- `?page=N` 쿼리 지원. `AptCardGridV5` 가 `moreHref` + `perPage` props 받음. 누적로딩 방식
+  (page * perPage). rows 가 expectedTotal 만큼 saturated 면 "더보기 →" 버튼 노출, 그 외 숨김.
+
+### 데이터 풀
+- popular: 5,813 / unsold: 212 / landmark: 120 (RPC 검증 결과)
+
+### Architecture Rule
+- landmark_apts.id 가 integer (apt_sites.id uuid 와 다름) — LandmarkRow 타입에서 `number` 명시.
+- (sb as any).rpc() 패턴 유지 (Architecture Rule #13).
+- popularity_score 타입 차이 (paginated string, homepage integer) 는 `HomeSiteRow.popularity_score`
+  를 `number | string | null` 로 통합.
+
+---
+
 # 카더라 STATUS — 세션 233: 액션 게이트 UX 점검 + 가입 모달 통일 (2026-05-04 KST)
 
 ## s233 — 비로그인 액션 게이트 UX 점검

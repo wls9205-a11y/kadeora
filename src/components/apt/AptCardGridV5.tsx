@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { fetchSiteList, type AptFilters, type AptSiteRow } from '@/lib/apt-fetcher';
 import { aptSiteThumb } from '@/lib/thumbnail-fallback';
 
-interface Props { filters: AptFilters }
+interface Props { filters: AptFilters; moreHref?: string; perPage?: number }
 
 function badgeFor(row: AptSiteRow): { label: string; bg: string; fg: string } | null {
   if (row.site_type === 'unsold') return { label: '미분양', bg: 'rgba(239,68,68,0.15)', fg: '#ef4444' };
@@ -27,10 +27,12 @@ function thumbUrl(row: AptSiteRow): string {
   return aptSiteThumb(row);
 }
 
-export default async function AptCardGridV5({ filters }: Props) {
-  const rows = await fetchSiteList(filters, 12);
+export default async function AptCardGridV5({ filters, moreHref, perPage = 12 }: Props) {
+  const rows = await fetchSiteList(filters, perPage);
   const labelMap: Record<string, string> = { all: '추천 단지', ongoing: '분양중', imminent_d7: '청약 임박', unsold: '미분양', redev: '재개발', trade: '실거래' };
   const label = labelMap[filters.category ?? 'all'] ?? '단지 목록';
+  const expectedTotal = perPage * Math.max(1, filters.page ?? 1);
+  const saturated = rows.length >= expectedTotal;
 
   if (rows.length === 0) {
     return (
@@ -63,6 +65,25 @@ export default async function AptCardGridV5({ filters }: Props) {
           );
         })}
       </div>
+      {moreHref && saturated && (
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 12 }}>
+          <Link
+            href={moreHref}
+            style={{
+              padding: '9px 18px',
+              borderRadius: 999,
+              border: '0.5px solid var(--border-strong, #3a3b45)',
+              background: 'var(--bg-elevated, #1f2028)',
+              color: 'var(--text-primary, #fff)',
+              fontSize: 12,
+              fontWeight: 700,
+              textDecoration: 'none',
+            }}
+          >
+            더보기 →
+          </Link>
+        </div>
+      )}
     </section>
   );
 }

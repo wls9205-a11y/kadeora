@@ -7,6 +7,7 @@ import AdBanner from '@/components/AdBanner';
 import RegionAutoSelect from '@/components/apt/RegionAutoSelect';
 import AptHeaderV5 from '@/components/apt/AptHeaderV5';
 import AptCardGridV5 from '@/components/apt/AptCardGridV5';
+import AptHomeSections from '@/components/apt/AptHomeSections';
 import type { AptFilters, AptCategory } from '@/lib/apt-fetcher';
 
 export const dynamic = 'force-dynamic';
@@ -70,7 +71,7 @@ interface SummaryPayload {
 export default async function AptPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ region?: string; tab?: string }>;
+  searchParams?: Promise<{ region?: string; tab?: string; page?: string }>;
 }) {
   const sp = (await searchParams) || {};
   const region = sp.region?.trim()
@@ -79,12 +80,19 @@ export default async function AptPage({
   const isAutoRegion = !sp.region;
   const activeTab = sp.tab ?? 'all';
   const category = tabToCategory(sp.tab);
+  const pageNum = Math.max(1, Math.min(10, Number(sp.page) || 1));
 
   const sb = getSupabaseAdmin();
   const { data: summary } = await (sb as any).rpc('get_apt_v5_summary', { p_region: region });
   const s = (summary ?? { cat: { total: 0, ongoing: 0, unsold: 0, redev: 0, trade: 0 }, imminent: 0, sido: [] }) as SummaryPayload;
 
-  const filters: AptFilters = { region, sigungu: null, category, sort: 'popularity', page: 1 };
+  const filters: AptFilters = { region, sigungu: null, category, sort: 'popularity', page: pageNum };
+
+  const moreParams = new URLSearchParams();
+  if (sp.region) moreParams.set('region', sp.region);
+  if (sp.tab) moreParams.set('tab', sp.tab);
+  moreParams.set('page', String(pageNum + 1));
+  const moreHref = `/apt?${moreParams.toString()}`;
 
   return (
     <>
@@ -132,7 +140,9 @@ export default async function AptPage({
         activeTab={activeTab}
       />
 
-      <AptCardGridV5 filters={filters} />
+      <AptCardGridV5 filters={filters} moreHref={moreHref} perPage={12} />
+
+      {activeTab === 'all' && pageNum === 1 && <AptHomeSections />}
 
       <AdBanner />
       <Disclaimer type="apt" />
