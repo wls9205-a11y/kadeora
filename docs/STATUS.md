@@ -1,3 +1,60 @@
+# 카더라 STATUS — 세션 236: apt-image-crawl cron 코드 복구 (2026-05-06 KST)
+
+## s236 (2026-05-06) — apt-image-crawl cron 코드 복구
+
+### 진단 (확정)
+- `apt_sites.cover_image_resolved_at` 마지막 업데이트 2026-05-04 11:59:58 (s230 backfill 시점) 이후 **0건**
+- `/api/cron/apt-image-crawl` 응답 메타: `big_event_assets_added: 32` — apt_sites 가 아니라 **big_event_assets** 처리 코드가 잘못 들어가 있음
+- 7d big_event_assets INSERT: **1,884건** (전부 source_label='naver-search', is_verified=false, distinct_events=10) — 노이즈 garbage
+- 1,884 row 모두 2026-05-04 06:15 ~ 2026-05-05 15:45 사이에 생성됨
+
+### 원인 (commit 675dd9f6 — `[IMAGE-CRAWL-EXTEND][AUTO-PILLAR-DRAFT]`)
+- 이전 정상 cron (apt_sites 큐 처리) 뒤에 `big_event_registry` priority≥80 이벤트 10개에 대해
+  네이버 검색 결과 5개씩 `big_event_assets` 에 INSERT 하는 블록이 추가됨
+- apt_sites 큐는 정상 처리됐지만 update 시 `images` + `updated_at` 만 건드려서
+  `cover_image_url`/`cover_image_resolved_at` 은 손대지 않음 → s230 backfill 이후 정지처럼 보임
+
+### 수정 (1 commit)
+- `src/app/api/cron/apt-image-crawl/route.ts`:
+  - `[IMAGE-CRAWL-EXTEND]` big_event_assets INSERT 블록 (~40 LOC) 제거
+  - 응답 metadata 에서 `big_event_assets_added` 키 제거. created 합산 분리
+  - apt_sites UPDATE 시 `cover_image_url` + `cover_image_resolved_at` 함께 설정.
+    `isEmpty`(이미지 0개) 인 사이트만 cover 신규 부여 (기존 cover 보존)
+- big_event 이미지 수집은 별도 cron (`big-event-bootstrap-process` 등) 책임으로 분리
+
+### 중복 cron 점검 (수동 실행 필요 — 자동 적용 안 함)
+- Vercel cron `/api/cron/apt-image-crawl` schedule `15 * * * *` (매시 :15)
+- pg_cron jobid 118 `apt-image-crawl-backup` schedule `15,45 */3 * * *` (3시간마다 :15,:45)
+- 둘 다 활성 → 중복. **추천:** Vercel cron 유지(maxDuration=300 컨트롤 쉬움), pg_cron unschedule
+- 사용자 수동 실행: `SELECT cron.unschedule(118);`
+
+### big_event_assets garbage 정리 (수동 실행 필요)
+- 1,884 row 전부 `source_label='naver-search' AND is_verified=false AND created_at > 2026-05-04 06:15`
+  로 식별 가능. 이 시점 이전 verified 12 row 만 진짜 데이터.
+- 사용자 수동 실행 (검토 후):
+  ```sql
+  DELETE FROM big_event_assets
+  WHERE source_label = 'naver-search'
+    AND is_verified = false
+    AND created_at >= '2026-05-04 06:15:00+00';
+  ```
+
+### 검증 (배포 직후)
+```sql
+SELECT
+  COUNT(*) FILTER (WHERE cover_image_url IS NOT NULL) AS with_cover,
+  COUNT(*) FILTER (WHERE cover_image_resolved_at > NOW() - INTERVAL '5 minutes') AS just_updated
+FROM apt_sites WHERE is_active = true;
+```
+- 배포 전: with_cover=3,080 / just_updated=0 / last_resolved_at=2026-05-04 11:59
+- 배포 후: cron 1회 실행 시 just_updated > 0 이어야 정상
+
+### Architecture Rule #19 재확인
+- 외부 fetch 있는 cron route 는 `maxDuration=300` (vercel.json 항목별 설정 — apt-image-crawl 이미 유지)
+- pg_cron 과 Vercel cron 동시 등록 금지. 한 쪽만 활성
+
+---
+
 # 카더라 STATUS — 세션 234-235: Sign-up funnel 진단 + 인앱 OAuth fix (2026-05-06 KST)
 
 ## s234-s235 (2026-05-06) — Sign-up funnel 진단 + 인앱 OAuth fix

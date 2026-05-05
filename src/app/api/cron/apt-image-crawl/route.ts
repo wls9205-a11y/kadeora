@@ -339,6 +339,12 @@ async function handler(_req: NextRequest) {
               continue;
             }
 
+            // s236: cover_image_url 도 함께 업데이트 — 이전 코드는 images 만 건드려서
+            // cover_image_resolved_at 이 5/4 이후 0건 회귀.
+            // RPC `get_apt_sites_needing_images` 가 cover_image_url 미반환 → isEmpty(이미지 0개)
+            // 인 사이트만 cover 신규 설정. 기존 cover (s230 backfill 또는 후보정) 보존.
+            const nowIso = new Date().toISOString();
+
             // 부분 수집된 것도 기존 것보다 많으면 업데이트
             if (images.length <= existing.length) {
               // 새로 얻은 게 더 적으면 기존 + 새 것 합치기 (중복 제거)
@@ -354,9 +360,17 @@ async function handler(_req: NextRequest) {
                 failed++;
                 continue;
               }
+              const patch: Record<string, unknown> = { images: merged, updated_at: nowIso };
+              if (isEmpty) {
+                const firstUrl = merged.find((m: any) => typeof m?.url === 'string')?.url;
+                if (firstUrl) {
+                  patch.cover_image_url = firstUrl;
+                  patch.cover_image_resolved_at = nowIso;
+                }
+              }
               const { error } = await (sb as any)
                 .from('apt_sites')
-                .update({ images: merged, updated_at: new Date().toISOString() })
+                .update(patch)
                 .eq('id', site.id);
               if (error) {
                 errors.push(`${site.name}: ${error.message}`);
@@ -366,9 +380,17 @@ async function handler(_req: NextRequest) {
               }
             } else {
               // 새로 얻은 게 더 많음 → 교체
+              const patch: Record<string, unknown> = { images, updated_at: nowIso };
+              if (isEmpty) {
+                const firstUrl = images.find((m) => typeof m.url === 'string')?.url;
+                if (firstUrl) {
+                  patch.cover_image_url = firstUrl;
+                  patch.cover_image_resolved_at = nowIso;
+                }
+              }
               const { error } = await (sb as any)
                 .from('apt_sites')
-                .update({ images, updated_at: new Date().toISOString() })
+                .update(patch)
                 .eq('id', site.id);
               if (error) {
                 errors.push(`${site.name}: ${error.message}`);
@@ -392,57 +414,20 @@ async function handler(_req: NextRequest) {
         errors.push(`main: ${e instanceof Error ? e.message : 'unknown'}`);
       }
 
-      // [IMAGE-CRAWL-EXTEND] big_event priority ≥80 이벤트 우선 이미지 수집
-      let bigEventAssetsAdded = 0;
-      try {
-        const sbAdmin = getSupabaseAdmin();
-        const { data: priorityEvents } = await (sbAdmin as any)
-          .from('big_event_registry')
-          .select('id, name, new_brand_name, region_sigungu, event_type')
-          .eq('is_active', true)
-          .gte('priority_score', 80)
-          .limit(10);
-
-        for (const ev of (priorityEvents || []) as any[]) {
-          if (Date.now() - start > MAX_RUNTIME_MS) break;
-          try {
-            const brand = ev.new_brand_name ? `${ev.new_brand_name} ` : '';
-            const queryKw = `${brand}${ev.event_type || '재건축'} 조감도`.trim();
-            const imgs = await searchNaverImages(ev.name, queryKw, ev.region_sigungu || '', 5);
-            for (const img of imgs.slice(0, 5)) {
-              if (!img?.url || isBlacklisted(img.url)) continue;
-              // 해상도 정보 없음 → URL hostname 기반 간단 필터 유지 (isBlacklisted 내부)
-              const { error } = await (sbAdmin as any).from('big_event_assets').insert({
-                event_id: ev.id,
-                asset_type: 'rendering',
-                url: img.url,
-                caption: img.caption || `${ev.name} ${queryKw}`,
-                source_label: img.source || 'naver-image',
-                source_url: img.url,
-                license: 'editorial-review-required',
-                is_verified: false,
-              });
-              if (!error) bigEventAssetsAdded++;
-            }
-            await new Promise((r) => setTimeout(r, 250));
-          } catch (e) {
-            errors.push(`big_event:${ev.id}:${e instanceof Error ? e.message : 'unknown'}`);
-          }
-        }
-      } catch (e) {
-        errors.push(`big_event-phase: ${e instanceof Error ? e.message : 'unknown'}`);
-      }
+      // s236: big_event_assets 처리 블록 제거. 이전 [IMAGE-CRAWL-EXTEND] 가
+      // apt_sites 큐 처리 후 매 cron 호출마다 big_event_registry 우선순위 ≥80 이벤트에
+      // naver-search 결과 5개씩 INSERT 하던 회귀 — 24h 1,268 / 7d 1,862 garbage row 양산.
+      // big_event 이미지 수집은 별도 cron (big-event-bootstrap-process) 책임.
 
       return {
         processed,
-        created: created + bigEventAssetsAdded,
+        created,
         updated,
         failed,
         metadata: {
           batch: BATCH_SIZE,
           target: TARGET_IMG_COUNT,
           min: MIN_IMG_COUNT,
-          big_event_assets_added: bigEventAssetsAdded,
           elapsed_ms: Date.now() - start,
           errors: errors.slice(0, 10),
         },
