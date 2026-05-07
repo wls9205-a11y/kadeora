@@ -1,3 +1,36 @@
+# 카더라 STATUS — s248 (2026-05-07 12:15) ⭐ og throw 진짜 root cause fix
+
+## 이번 세션 (s248) — og throw 한자 sanitize 완전 처리
+
+**진단 (실측):**
+- og-apt route 5분간 20+건 throw (deployment dpl_4mDvgi77DJb4fSUbKGcjYDr1Cwfh)
+- "Failed to load dynamic font" + "Cannot co..." 메시지
+- DB 검색: apt_sites.name 3건 한자 (그대家×2, 安愛家꿈꾸는집), blog_posts.title 5건
+- → 진짜 culprit: NotoSansKR-Bold.woff에 한자 없음 → satori가 외부 dynamic font fetch → Vercel network block → throw
+
+**Fix:**
+- src/lib/og-sanitize.ts 신규 (sanitizeForOG + sanitizeRowForOG)
+  · 한자 → 한글 발음 변환 (40+ 매핑) 또는 제거
+  · 일본어 가나, CJK 호환, 박스 도형 모두 제거
+- 4개 og route fetch 함수에 sanitize 적용:
+  · og-apt fetchSite line 82: sanitizeRowForOG(data)
+  · og-blog fetchPost line 54: sanitizeRowForOG({...})
+  · og-stock fetchQuote line 45: sanitizeRowForOG(data)
+  · og main line 545-546: sanitizeForOG(title/subtitle 쿼리 파라미터)
+  · og main line 631: sanitizeForOG(catch 블록 log title)
+
+## Architecture Rule 추가
+- **#52** og 라우트 input string은 sanitizeForOG/sanitizeRowForOG 통과 필수
+  · NotoSansKR 미포함 글자 (한자/일본어/특수기호) → satori dynamic font fetch → throw
+  · 신규 og 라우트 추가 시 fetch 결과를 sanitizeRowForOG 통과
+
+## 다음 세션
+- og main D1 통일 우회 (s242 commit 7bc391e5) 풀기 — sanitize fix 후 D2~D6 정상 동작 가능성 검증
+- /apt/[id] 504 24h 모니터링 (s246 fix 효과)
+- Phase 4 Supabase 정리
+
+---
+
 # 카더라 STATUS — s247 (2026-05-07 12:05) ⭐ 3,700줄 dead code 삭제
 
 ## 이번 세션 (s247) — /apt-v2 + apt-tabs 완전 dead code 삭제

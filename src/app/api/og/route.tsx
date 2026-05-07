@@ -3,6 +3,7 @@ import { NextRequest } from 'next/server';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { OG_CAT as CAT, type OgCategoryToken } from '@/lib/og-tokens';
+import { sanitizeForOG } from '@/lib/og-sanitize';
 
 export const runtime = 'nodejs';
 export const maxDuration = 30;
@@ -540,8 +541,9 @@ export async function GET(req: NextRequest) {
     };
 
     const sp       = new URL(req.url).searchParams;
-    const title    = sp.get('title') ?? '';
-    const subtitle = sp.get('subtitle') ?? '';
+    // s248: 한자/일본어/특수기호 sanitize — NotoSansKR 미포함 글자가 dynamic font fetch throw 유발
+    const title    = sanitizeForOG(sp.get('title') ?? '');
+    const subtitle = sanitizeForOG(sp.get('subtitle') ?? '');
     const author   = sp.get('author') ?? '';
     const category = sp.get('category') ?? 'blog';
     const design   = sp.get('design') ?? '2';   // 1~6 (기본: D2 풀컬러 좌측)
@@ -626,7 +628,7 @@ export async function GET(req: NextRequest) {
     const stk = e?.stack ?? '';
     const cls = e?.constructor?.name ?? '';
     const inp = JSON.stringify({
-      title: new URL(req.url).searchParams.get('title')?.slice(0, 40),
+      title: sanitizeForOG(new URL(req.url).searchParams.get('title')?.slice(0, 40)),
       card: new URL(req.url).searchParams.get('card'),
       design: new URL(req.url).searchParams.get('design'),
       category: new URL(req.url).searchParams.get('category'),

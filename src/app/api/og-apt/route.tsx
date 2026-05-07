@@ -5,6 +5,7 @@ import { join } from 'path';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { OG_CAT } from '@/lib/og-tokens';
 import { SITE_URL } from '@/lib/constants';
+import { sanitizeRowForOG } from '@/lib/og-sanitize';
 
 export const runtime = 'nodejs';
 export const maxDuration = 30;
@@ -78,7 +79,7 @@ async function fetchSite(slug: string): Promise<AptRow | null> {
     const sb = getSupabaseAdmin();
     const cols = 'slug,name,site_type,region,sigungu,dong,address,builder,developer,total_units,built_year,move_in_date,price_min,price_max,latitude,longitude,nearby_station,school_district,description,key_features,lifecycle_stage,interest_count';
     const { data } = await (sb as any).from('apt_sites').select(cols).eq('slug', slug).maybeSingle();
-    return (data ?? null) as AptRow | null;
+    return sanitizeRowForOG(data ?? null) as AptRow | null;
   } catch { return null; }
 }
 
