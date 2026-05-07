@@ -1,3 +1,49 @@
+# 카더라 STATUS — 세션 239 Phase 2.1: DART 큰 이벤트 → issue_alerts 자동 연결 (2026-05-08 KST)
+
+## s239 Phase 2.1 (2026-05-08) — DART 큰 이벤트 → issue_alerts 자동 연결
+
+### 진단 (사용자 측 SQL)
+- `dart_filings` 7d 1,484건 분포:
+  - 합병 3건 (score 9), 실적공시 1건 (9), 유상증자 1건 (8) → auto publish 후보
+  - 자사주 10건 (score 7) → draft
+  - importance_score >= 7 합계 **15건/주** (일 평균 2건)
+  - 임원매매 194건 (6) / 기타 1,178건 (4-5) → noise, skip
+- 현재 stock issue 11/주 → DART 연결 후 26/주 (2.4배 추정)
+
+### 코드 (이번 commit)
+- `src/app/api/cron/dart-ingest/route.ts`:
+  - 기존 `dart_filings` INSERT 로직 그대로 보존 (변경 0)
+  - 신규 분기: `importance >= 7` 인 신규 filing → `issue_alerts` INSERT 추가
+  - 패턴: `issue-preempt` apt_sites_gap INSERT 차용 (base_score / multiplier / score_breakdown 동형)
+  - 점수: `base = importance * 5` (35/40/45), `multiplier 1.25` → `final 44/50/56`.
+    auto_publish_min_score=40 → 8/9 auto, 7 draft
+  - 멱등성: `raw_data->>'rcept_no' = item.rcept_no` SELECT 후 INSERT (cron 재실행/partial
+    failure 방어)
+  - title: `[DART] ${corp_name} — ${report_nm}`
+  - sub_category/issue_type: dart category 그대로 ('합병'/'실적공시'/'유상증자' 등 한국어)
+  - related_entities: `[corp_name, symbol]`
+  - raw_data: rcept_no/corp_code/symbol/dart_category/importance_score 등
+  - detected_at: `filed_at` ISO (DART 공시 시점) — 트리거 `trg_issue_alerts_extract_region` 자동 작동
+  - response metadata 에 `issues_created`, `issues_skipped_dup` 노출
+
+### vercel.json crons 99 유지
+- 신규 cron 0개 (dart-ingest 안에 통합)
+
+### 다른 PC 작업 충돌 없음
+- s238 SEO 노출 회복 + s239 phase 1 (디자인 토큰/OG 진단) — issue_alerts INSERT 경로 안 건드림
+
+### 안전장치 (지키기)
+- `importance < 7` 처리 금지 (spam 방지) ✅
+- 기존 dart_filings INSERT 로직 변경 0 (추가만) ✅
+- region 컬럼 직접 INSERT 금지 (트리거가 처리) ✅
+- base_score 계산은 issue-preempt 패턴 차용 ✅
+- 신규 cron 추가 0 ✅
+
+### 빌드
+- tsc EXIT=0, next build EXIT=0
+
+---
+
 # 카더라 STATUS — 세션 239: 하드코딩 정리 + onboarded 강제 source fix + OG 분할 진단 + 디자인 통합 (2026-05-07 KST)
 
 ## s239 (2026-05-07) — 하드코딩 정리 + onboarded TRUE 강제 fix + OG 진단 + 디자인 토큰 통합

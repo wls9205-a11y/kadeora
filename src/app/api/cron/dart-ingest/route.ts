@@ -93,6 +93,10 @@ async function handler(_req: NextRequest) {
 
     let created = 0;
     let failed = 0;
+    // s239 Phase 2.1: importance>=7 인 신규 dart_filing 을 issue_alerts 로도 자동 연결.
+    // issue-preempt 의 apt_sites_gap INSERT 패턴 차용 (base_score / multiplier / score_breakdown).
+    let issuesCreated = 0;
+    let issuesSkipped = 0;
 
     for (const item of items) {
       if (existingSet.has(item.rcept_no)) continue;
@@ -106,6 +110,10 @@ async function handler(_req: NextRequest) {
         symbol = item.stock_code;
       }
 
+      const filedAtIso = item.rcept_dt
+        ? `${item.rcept_dt.slice(0, 4)}-${item.rcept_dt.slice(4, 6)}-${item.rcept_dt.slice(6, 8)}`
+        : null;
+
       const { error } = await (supabase as any).from('dart_filings').insert({
         rcept_no: item.rcept_no,
         corp_code: item.corp_code,
@@ -115,16 +123,75 @@ async function handler(_req: NextRequest) {
         category,
         importance_score: importance,
         original_url: `https://dart.fss.or.kr/dsaf001/main.do?rcpNo=${item.rcept_no}`,
-        filed_at: item.rcept_dt
-          ? `${item.rcept_dt.slice(0, 4)}-${item.rcept_dt.slice(4, 6)}-${item.rcept_dt.slice(6, 8)}`
-          : null,
+        filed_at: filedAtIso,
       });
 
       if (error) {
         console.error(`[dart-ingest] insert error for ${item.rcept_no}:`, error.message);
         failed++;
+        continue;
+      }
+      created++;
+
+      // s239 Phase 2.1: 큰 이벤트 (importance>=7) 만 issue_alerts INSERT.
+      // 임원매매(6) / 일반 보고서(4-5) 는 noise — skip.
+      if (importance < 7) continue;
+
+      // 멱등성: 동일 rcept_no 의 issue 가 이미 있으면 skip (cron 재실행 / partial failure 방어).
+      const { data: existingIssue } = await (supabase as any).from('issue_alerts')
+        .select('id')
+        .eq('source_type', 'dart_filing')
+        .filter('raw_data->>rcept_no', 'eq', item.rcept_no)
+        .limit(1);
+      if (existingIssue && existingIssue.length > 0) {
+        issuesSkipped++;
+        continue;
+      }
+
+      // base_score: importance * 5 (35/40/45). multiplier 1.25 (issue-preempt 차용).
+      // → final 7=44, 8=50, 9=56. auto_publish_min_score=40 → 8/9 auto, 7 draft.
+      const base = importance * 5;
+      const mult = 1.25;
+      const final = Math.round(base * mult);
+
+      const corpName = item.corp_name || 'Unknown';
+      const reportName = item.report_nm || category;
+      const entities: string[] = [corpName];
+      if (symbol) entities.push(symbol);
+
+      const { error: issueErr } = await (supabase as any).from('issue_alerts').insert({
+        title: `[DART] ${corpName} — ${reportName}`,
+        summary: `${corpName}${symbol ? ` (${symbol})` : ''} ${reportName} 공시. DART 중요도 ${importance}/9 (${category}).`,
+        category: 'stock',
+        sub_category: category,
+        issue_type: category,
+        source_type: 'dart_filing',
+        source_urls: [`https://dart.fss.or.kr/dsaf001/main.do?rcpNo=${item.rcept_no}`],
+        detected_keywords: [category, 'DART', '공시'].filter(Boolean),
+        related_entities: entities,
+        raw_data: {
+          rcept_no: item.rcept_no,
+          corp_code: item.corp_code,
+          symbol,
+          dart_category: category,
+          report_nm: reportName,
+          importance_score: importance,
+          source_type: 'dart_filing',
+          is_breaking: importance >= 8,
+          has_news: true,
+        },
+        base_score: base,
+        multiplier: mult,
+        penalty_rate: 0,
+        final_score: final,
+        score_breakdown: { dart_importance: base, dart_multiplier: mult },
+        is_auto_publish: final >= 40,
+        detected_at: filedAtIso ? new Date(filedAtIso).toISOString() : new Date().toISOString(),
+      });
+      if (issueErr) {
+        console.error(`[dart-ingest] issue_alerts insert error ${item.rcept_no}:`, issueErr.message);
       } else {
-        created++;
+        issuesCreated++;
       }
     }
 
@@ -132,7 +199,7 @@ async function handler(_req: NextRequest) {
       processed: items.length,
       created,
       failed,
-      metadata: { api_name: 'dart', api_calls: 1 },
+      metadata: { api_name: 'dart', api_calls: 1, issues_created: issuesCreated, issues_skipped_dup: issuesSkipped },
     };
   });
 
