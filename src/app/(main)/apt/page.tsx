@@ -48,8 +48,16 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
     ? `${regionLabel}의 청약 일정, 분양중·미분양·재개발 단지를 한눈에. 실거래가, 시공사별 분석까지 카더라에서.`
     : '2026년 전국 아파트 청약 일정, 현재 분양중인 아파트, 미분양 현황, 재개발·재건축 진행 현황을 한눈에 확인하세요.';
   const ogSquareImg = `${SITE_URL}/api/og-square?title=${encodeURIComponent(regionLabel)}&category=apt`;
-  const ogWideImg = `${SITE_URL}/api/og?title=${encodeURIComponent('아파트 청약·분양·재개발')}&subtitle=${encodeURIComponent(regionLabel)}`;
   const canonicalUrl = sp.region ? `${SITE_URL}/apt?region=${encodeURIComponent(sp.region)}` : `${SITE_URL}/apt`;
+  const titleEnc = encodeURIComponent(baseTitle);
+  const ogImages = [
+    { url: `${SITE_URL}/api/og?card=hero&category=apt&title=${titleEnc}`, width: 1200, height: 630, alt: `카더라 ${baseTitle}` },
+    { url: `${SITE_URL}/api/og?card=stats&category=apt&title=${titleEnc}`, width: 1200, height: 630, alt: `${baseTitle} 통계` },
+    { url: `${SITE_URL}/api/og?card=imminent&category=apt&title=${titleEnc}`, width: 1200, height: 630, alt: `${baseTitle} 임박/추천` },
+    { url: `${SITE_URL}/api/og?card=ranking&category=apt&title=${titleEnc}`, width: 1200, height: 630, alt: `${baseTitle} 랭킹` },
+    { url: `${SITE_URL}/api/og?card=region&category=apt&title=${titleEnc}`, width: 1200, height: 630, alt: `${baseTitle} 지역` },
+    { url: ogSquareImg, width: 630, height: 630, alt: `카더라 ${baseTitle}` },
+  ];
 
   return {
     title: baseTitle,
@@ -59,12 +67,9 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
     openGraph: {
       title: baseTitle, description: baseDesc,
       url: canonicalUrl, siteName: '카더라', locale: 'ko_KR', type: 'website',
-      images: [
-        { url: ogSquareImg, width: 630, height: 630, alt: `카더라 ${baseTitle}` },
-        { url: ogWideImg, width: 1200, height: 630, alt: `카더라 ${baseTitle}` },
-      ],
+      images: ogImages,
     },
-    twitter: { card: 'summary_large_image', title: baseTitle, description: baseDesc, images: [ogSquareImg] },
+    twitter: { card: 'summary_large_image', title: baseTitle, description: baseDesc, images: ogImages },
     other: {
       'article:section': '부동산',
       'article:tag': '부동산,청약,분양,미분양,재개발,실거래가,아파트',

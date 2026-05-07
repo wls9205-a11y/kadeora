@@ -16,6 +16,15 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
   const title = s?.title || '실시간 주식 시세 — KOSPI·KOSDAQ·해외주식';
   const desc = s?.desc || '국내외 주요 종목 실시간 시세, 등락률, 배당금, PER, 섹터 분석, AI 시황 브리핑, 포트폴리오 시뮬레이터. 카더라에서 무료로 확인하세요.';
   const ogImg = section ? `${SITE_URL}/api/og?section=${section}&design=2` : `${SITE_URL}/api/og?title=${encodeURIComponent('실시간 주식 시세')}&subtitle=${encodeURIComponent('KOSPI·KOSDAQ·해외주식')}&category=stock`;
+  const titleEnc = encodeURIComponent(title);
+  const ogImages = [
+    { url: `${SITE_URL}/api/og?card=hero&category=stock&title=${titleEnc}`, width: 1200, height: 630, alt: `카더라 ${title}` },
+    { url: `${SITE_URL}/api/og?card=stats&category=stock&title=${titleEnc}`, width: 1200, height: 630, alt: `${title} 통계` },
+    { url: `${SITE_URL}/api/og?card=imminent&category=stock&title=${titleEnc}`, width: 1200, height: 630, alt: `${title} 임박/추천` },
+    { url: `${SITE_URL}/api/og?card=ranking&category=stock&title=${titleEnc}`, width: 1200, height: 630, alt: `${title} 랭킹` },
+    { url: `${SITE_URL}/api/og?card=region&category=stock&title=${titleEnc}`, width: 1200, height: 630, alt: `${title} 지역` },
+    { url: `${SITE_URL}/api/og-square?title=${encodeURIComponent('실시간 주식 시세')}&category=stock`, width: 630, height: 630, alt: `카더라 ${title}` },
+  ];
 
   return {
     title, description: desc,
@@ -24,10 +33,7 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
       title, description: desc,
       url: SITE_URL + '/stock',
       siteName: '카더라', locale: 'ko_KR', type: 'website',
-      images: [
-        { url: ogImg, width: 1200, height: 630, alt: `카더라 ${title}` },
-        { url: `${SITE_URL}/api/og-square?title=${encodeURIComponent('실시간 주식 시세')}&category=stock`, width: 630, height: 630, alt: `카더라 ${title}` },
-      ],
+      images: ogImages,
     },
     other: {
       'naver:written_time': new Date().toISOString(),
@@ -38,7 +44,7 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
       'article:section': '주식',
       'article:tag': '주식,시세,KOSPI,KOSDAQ,실시간,등락률',
     },
-    twitter: { card: 'summary_large_image', title, description: desc, images: [ogImg] },
+    twitter: { card: 'summary_large_image', title, description: desc, images: ogImages },
   };
 }
 import { createSupabaseServer } from '@/lib/supabase-server';

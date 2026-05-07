@@ -15,14 +15,23 @@ export async function GET() {
   // 최근 48시간 이내 자동발행 기사만 (Google News Sitemap 정책)
   const cutoff = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
 
-  const { data: posts } = await sb.from('blog_posts')
+  const { data: rawPosts } = await sb.from('blog_posts')
     .select('slug, title, published_at, tags, category, cover_image, image_alt')
     .eq('is_published', true)
     .gte('published_at', cutoff)
     .order('published_at', { ascending: false })
-    .limit(100);
+    .limit(200);
 
-  const items = (posts || []).map((p: any) => {
+  // s238 W6: 카테고리 우선순위 정렬 (PostgREST CASE 미지원 → JS 후처리)
+  const CATEGORY_RANK: Record<string, number> = { finance: 1, unsold: 2, redev: 3, apt: 4 };
+  const rank = (c: string | null) => CATEGORY_RANK[c || ''] ?? 9;
+  const posts = (rawPosts || []).slice().sort((a: any, b: any) => {
+    const r = rank(a.category) - rank(b.category);
+    if (r !== 0) return r;
+    return (b.published_at || '') < (a.published_at || '') ? -1 : 1;
+  }).slice(0, 50);
+
+  const items = posts.map((p: any) => {
     const pubDate = p.published_at ? new Date(p.published_at).toISOString() : new Date().toISOString();
     const tags = (p.tags || []).slice(0, 5).join(', ');
     // cover_image가 상대 경로(/api/og?... 등)일 때 절대 URL로 보정 — 구글 이미지 크롤러 호환

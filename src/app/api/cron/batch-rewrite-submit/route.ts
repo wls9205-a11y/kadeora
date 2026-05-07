@@ -56,6 +56,14 @@ export async function GET(req: NextRequest) {
     const requests = candidates.map((post: any) => {
       const style = getRandomStyle();
       const structure = getRandomStructure();
+      const stockGuidance = post.category === 'stock' ? `
+
+[주식 카테고리 SEO 강화 요구사항]
+- 글 본문 첫 단락에 종목 ticker (예: 005930, AAPL) + 회사명 + 섹터 명시
+- meta_description 에 ticker + 회사명 포함
+- 본문에 \`/stock/{ticker}\` 형식의 내부 링크 최소 2개 포함 (마크다운: [회사명](/stock/{ticker}))
+- 종목 비교 시 \`/stock/{tickerA}/vs/{tickerB}\` 링크 권장
+` : '';
       const prompt = diversifyPrompt(`한국 금융·부동산 전문 블로그 작가로서 아래 글을 리라이팅하세요.
 
 스타일: ${style}
@@ -75,7 +83,7 @@ export async function GET(req: NextRequest) {
 내부링크 규칙:
 - 카더라 내부 페이지 링크 5개 이상 자연스럽게 삽입
 - 글 끝에 "### 🔗 관련 정보" 섹션 추가
-
+${stockGuidance}
 카테고리: ${post.category}
 
 ${getFreshnessContext()}

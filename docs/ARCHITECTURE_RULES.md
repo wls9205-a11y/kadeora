@@ -301,3 +301,87 @@ raw 숫자 (예: `fontSize: 14`, `padding: 16`) → CSS var (`var(--fs-sm)`, `va
 - OG fallback 사용 시 작은 watermark "사진 준비중" 추가 (사용자 신뢰도).
 
 **Discovered**: s236 (2026-05-07) — 4,887 apt_sites 중 진짜 사진 47%, OG fallback 31%, NULL 19%. apt_complex_profiles 34,544 중 cover 재계산 후 위성 거의 사라짐. cover-image-backfill cron 으로 점진 회복.
+
+## Rule #31 — 메인/상세 페이지 og:image 6장 패턴 (s238 신설)
+
+**Symptom**: 네이버/구글 search snippet 에 단일 이미지만 노출. 카루셀 안 잡힘. 캐러셀 보유한 블로그 글 (6장 이상) 만 search rich result 노출.
+
+**Cause**: 메인 페이지 (/apt, /blog, /stock) 의 `openGraph.images` 가 1-2장. 단일 hero/og-square 만으로는 네이버/구글이 캐러셀 못 만듦.
+
+**Rule**:
+
+모든 메인/상세 페이지의 generateMetadata 는 `openGraph.images` 와 `twitter.images` 에 6장 emit 의무:
+
+- 1: `card=hero` (메인 hero)
+- 2: `card=stats` (통계 그리드)
+- 3: `card=imminent` (D-7 / 임박 / 추천 — amber theme)
+- 4: `card=ranking` (TOP 3 또는 ranking list)
+- 5: `card=region` (지역 / 카테고리 grid)
+- 6: og-square 630×630 (네이버 모바일 1:1 크롭)
+
+`/api/og?card=...&category=...&title=...` 로 단일 라우트가 5개 layout 생성 (DB-free, 빠른 generation). 종목 detail 은 `/api/og-stock?symbol=...&card=price|chart|financial|flow|ai`.
+
+**How to apply**:
+- 새 메인/상세 페이지 추가 시 6장 패턴 의무. `og-square` 는 항상 6번째.
+- `card` 값은 카테고리별로 어울리게 — 종목은 price/chart/financial, 부동산은 imminent/region.
+- 1200×630 + 630×630 ratio 두 종 함께 (구글 carousel + 네이버 1:1 크롭 동시 대응).
+
+**Discovered**: s238 (2026-05-07) — 메인 페이지 og:image 1-2장 vs 블로그 글 6장 격차로 네이버 캐러셀 누락. /apt/complex/[name] 등은 BAILOUT_TO_CSR 로 인덱싱 0%.
+
+## Rule #32 — Server Component BAILOUT_TO_CSR 즉시 fix (s238 신설)
+
+**Symptom**: 페이지가 SSR 안 되고 CSR fallback. Vercel dev 콘솔에 `BAILOUT_TO_CLIENT_SIDE_RENDERING`. Google bot 이 컨텐츠 못 봄 → 자동 noindex.
+
+**Cause**: Next.js 15 의 `dynamic = 'auto'` 가 ambiguous 한 server component (cookies 사용 + ISR + 'use client' 혼합) 를 만나면 BAILOUT 으로 fallback. 흔한 트리거:
+- `createSupabaseServer()` 가 `next/headers` 의 cookies 사용 — Dynamic API
+- 자식 컴포넌트가 `'use client'` 인데 SSR-critical (h1/h2) 포함
+- error.tsx 가 무거운 client-only 작업 수행
+- generateMetadata 또는 fetchData 가 throw 시 catch 안 됨
+
+**Rule**:
+
+Server Component 페이지의 BAILOUT 진단 + fix 순서:
+
+1. `export const dynamic = 'force-static' | 'force-dynamic'` 명시 (auto 금지)
+2. `export const revalidate = N` ISR 명시
+3. `createSupabaseServer()` (cookies 의존) 대신 `getSupabaseAdmin()` (service role, cookie-free) 사용 — 단지 상세/공개 페이지에 한해
+4. SSR-critical 자식 컴포넌트 (h1/h2/p) 는 server component 만. `'use client'` 자식은 dynamic import + ssr:false 로 격리
+5. 모든 fetch 에 try/catch + fallback null. 절대 throw 금지 (error.tsx 가 client 면 BAILOUT)
+6. `generateMetadata` 의 `robots.index: false` 는 명시적 사유 (data_quality_score 등) 만. ambiguous noindex 금지
+
+**Discovered**: s238 (2026-05-07) — /apt/complex/[name] 34,544 단지 BAILOUT_TO_CSR + 자동 noindex. createSupabaseServer→getSupabaseAdmin 전환 + dynamic=force-static + 명시적 robots 가드로 복구.
+
+## Rule #33 — image-sitemap 단지/글당 4-7 이미지 entry (s238 신설)
+
+**Symptom**: image-sitemap 단지/글당 1 entry → 네이버 이미지 검색 노출 절반 이하.
+
+**Rule**:
+
+`src/app/sitemap-image/[page]/route.ts` 가 각 row 의 `images` jsonb 모든 element 를 `<image:image>` entry 로 emit (단지/글당 cap 7):
+- cover_image_url 우선
+- images jsonb 의 모든 element (string + object)
+- satellite/og fallback 필터 (Rule #30 패턴)
+- caption 필드 명시 (image:title + image:caption)
+
+**How to apply**:
+- 새 image-bearing 컬럼 추가 시 sitemap 에 emit. 신규 페이지 (apt/region/* 등) 도 동일.
+- cap 7 은 네이버 권장. 더 많이 노출하려면 페이지 자체에 schema:ImageObject 로 추가.
+
+**Discovered**: s238 (2026-05-07) — apt_sites 5천 + apt_complex_profiles 3.4만 = 약 30,869 entries → 4-7배 = 100,000+ entries.
+
+## Rule #34 — news-sitemap 48h 신선도 + 카테고리 우선순위 (s238 신설)
+
+**Symptom**: news-sitemap 100건 중 60건이 7일+ 이전 글. 네이버 뉴스 search 는 48h 신선도 절대 우선.
+
+**Rule**:
+
+`src/app/news-sitemap.xml/route.ts`:
+- WHERE `published_at > NOW() - INTERVAL '48 hours'`
+- 카테고리 우선순위 sort: finance(1) > unsold(2) > redev(3) > apt(4) > 기타(9). 같은 우선순위 내 published_at DESC.
+- LIMIT 50 (네이버 권장 cap)
+
+**How to apply**:
+- 카테고리별 평균 view 데이터 변경 시 우선순위 재조정 (현재 finance=180, unsold=172).
+- PostgREST CASE 정렬 불가 → JS 측 post-sort 사용.
+
+**Discovered**: s238 (2026-05-07) — finance/unsold 카테고리가 view 평균 높지만 sitemap order 무차별 → 신선도 낮은 일반 글이 위로 와서 네이버 색인 누락.

@@ -72,6 +72,17 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
     ? `${SITE}/blog`
     : `${SITE}/blog?${category !== 'all' ? `category=${category}&` : ''}${pageNum > 1 ? `page=${pageNum}` : ''}`.replace(/&$/, '');
 
+  const ogCat = category === 'all' ? 'blog' : category;
+  const titleEnc = encodeURIComponent(meta.title);
+  const ogImages = [
+    { url: `${SITE}/api/og?card=hero&category=${ogCat}&title=${titleEnc}`, width: 1200, height: 630, alt: `카더라 ${meta.title}` },
+    { url: `${SITE}/api/og?card=stats&category=${ogCat}&title=${titleEnc}`, width: 1200, height: 630, alt: `${meta.title} 통계` },
+    { url: `${SITE}/api/og?card=imminent&category=${ogCat}&title=${titleEnc}`, width: 1200, height: 630, alt: `${meta.title} 임박/추천` },
+    { url: `${SITE}/api/og?card=ranking&category=${ogCat}&title=${titleEnc}`, width: 1200, height: 630, alt: `${meta.title} 랭킹` },
+    { url: `${SITE}/api/og?card=region&category=${ogCat}&title=${titleEnc}`, width: 1200, height: 630, alt: `${meta.title} 지역` },
+    { url: `${SITE}/api/og-square?title=${titleEnc}&category=${ogCat}`, width: 630, height: 630, alt: `카더라 ${meta.title}` },
+  ];
+
   return {
     title: `${meta.title}${suffix}${qSuffix}`,
     description: meta.desc,
@@ -80,8 +91,8 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
       ...(pageNum > 1 ? { prev: `${SITE}/blog?${category !== 'all' ? `category=${category}&` : ''}page=${pageNum - 1}`.replace(/[&?]page=1$/, '').replace(/&$/, '') } : {}),
       ...(pageNum < 100 ? { next: `${SITE}/blog?${category !== 'all' ? `category=${category}&` : ''}page=${pageNum + 1}` } : {}),
     },
-    openGraph: { title: meta.title, description: meta.desc, url: canonical, siteName: '카더라', locale: 'ko_KR', type: 'website', images: [{ url: `${SITE}/api/og?title=${encodeURIComponent(meta.title)}&category=${category === 'all' ? 'blog' : category}&author=${encodeURIComponent('카더라')}&design=2`, width: 1200, height: 630, alt: meta.title }, { url: `${SITE}/api/og-square?title=${encodeURIComponent(meta.title)}&category=${category === 'all' ? 'blog' : category}`, width: 630, height: 630, alt: meta.title }] },
-    twitter: { card: 'summary_large_image' as const, title: meta.title, description: meta.desc },
+    openGraph: { title: meta.title, description: meta.desc, url: canonical, siteName: '카더라', locale: 'ko_KR', type: 'website', images: ogImages },
+    twitter: { card: 'summary_large_image' as const, title: meta.title, description: meta.desc, images: ogImages },
     ...(pageNum > 1 || q ? { robots: { index: false, follow: true } } : {}),
     other: {
       'naver:written_time': new Date().toISOString(),
@@ -446,7 +457,7 @@ export default async function BlogPage({ searchParams }: Props) {
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
                     <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 5px', borderRadius: 4, background: `${catColor}12`, color: catColor, flexShrink: 0 }}>{catLabel}</span>
-                    <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.3 }}>{q ? highlightTitle(p.title, q) : p.title}</span>
+                    <h2 className="blog-card-title" style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.3, margin: 0, display: 'inline' }}>{q ? highlightTitle(p.title, q) : p.title}</h2>
                     {isHot && <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--accent-red)', flexShrink: 0 }}>HOT</span>}
                   </div>
                   {p.excerpt && <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.3, marginBottom: 2 }}>{p.excerpt}</div>}

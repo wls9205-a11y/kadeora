@@ -1,3 +1,73 @@
+# 카더라 STATUS — 세션 238: SEO 노출 완전 회복 (SSR + og:6 + image-sitemap 폭발) (2026-05-07 KST)
+
+## s238 — 네이버 검색 노출 완전 회복 (4 worker 병렬, 단일 commit)
+
+### 진단 (확정)
+- /apt/complex/[name] BAILOUT_TO_CLIENT_SIDE_RENDERING + 자동 noindex (34,544 단지 인덱싱 0%)
+- 메인 og:image 1-2장 vs 블로그 글 6장 (네이버 캐러셀 누락)
+- /blog 메인 h2 0개 (카드 div 만, 검색엔진 글 제목 인식 안 됨)
+- 주식 종목 og:image 2장 (블로그 패턴 누락)
+- Google bot 8,587 크롤 vs referrer 11건 (인덱싱 99.9% gap)
+- AI bot 30일 0건 (allow 됐는데 안 옴 — verify only)
+
+### W1 (P0): /apt/complex/[name] SSR 복구
+- `dynamic = 'force-static'` + `revalidate = 3600` + `dynamicParams = true` 명시
+- **createSupabaseServer → getSupabaseAdmin** 전환 (cookies 의존 제거 → BAILOUT 원인 해소)
+- 2 try/catch 추가 (getProfile + apt_transactions)
+- legacy `metadata.noindex === true` 가드 제거 (data_quality_score < 30 만 유지)
+- `import dynamic from 'next/dynamic'` → `nextDynamic` rename (export shadow 회피)
+- 8 client components 감지, 모두 SSR-critical 아닌 위젯 — 그대로 유지
+
+### W2: 메인 og:image 6장 (apt/blog/stock)
+- 5x `/api/og?card={hero|stats|imminent|ranking|region}&category=...` + 1x og-square
+- /api/og/route.tsx: card switch 추가 (5 layout) — DB-free, category-driven
+- openGraph + twitter 양쪽 적용
+
+### W3: /blog 메인 카드 div → h2
+- `src/app/(main)/blog/page.tsx` line 460: `<span>` → `<h2 className="blog-card-title">`
+- 카드 wrapper 가 Link 이므로 inner Link 안 씀 (nested anchor 회피)
+
+### W4: /stock/[symbol] og:image 6장 + naver:written_time
+- 5x `/api/og-stock?symbol=...&card={price|chart|financial|flow|ai}` + 1x og-square
+- **신규** `src/app/api/og-stock/route.tsx` — 5 layout (price hero / chart sparkline / financial PER 그리드 / flow / AI sentiment)
+- metadata.other 의 naver/article tags 이미 풍부 — 그대로
+
+### W5: image-sitemap 단지당 4-7장
+- `src/app/sitemap-image/[page]/route.ts` (실제 파일은 sitemap-image 가 per-image 라우트)
+- cover_image_url + images jsonb dedup → satellite filter → cap 7
+- 약 30,869 → 100,000+ entries 예상
+
+### W6: news-sitemap 48h + 카테고리 우선
+- 48h cutoff 이미 있음 (no change)
+- CATEGORY_RANK { finance:1, unsold:2, redev:3, apt:4 } JS post-sort + slice 50
+- LIMIT 100 → 200 (sort 후 50 trim)
+
+### W7: stock 블로그 prompt 강화
+- `src/app/api/cron/batch-rewrite-submit/route.ts` `stockGuidance` 조건부 inject
+- post.category === 'stock' 일 때: ticker + 회사명 + 섹터 첫 단락 + meta_description + /stock/{ticker} 내부 링크 2개+
+
+### W8: AI bot — llms.txt + robots
+- **신규** `public/llms.txt` (sitemap + key pages + license)
+- robots.txt 의 GPTBot/ClaudeBot/PerplexityBot 등 8개 AI bot allow 이미 있음 — 그대로
+
+### W9: search-engine-ping cron
+- **신규** `src/app/api/cron/search-engine-ping/route.ts` — Google + Bing sitemap ping
+- pg_cron 등록: `s238_register_search_engine_ping_pg_cron` (KST 05:00)
+- 주의: Google/Bing /ping?sitemap= 은 deprecated. 최신 best practice 는 IndexNow + sitemap auto-discovery via robots.txt — 다음 sprint 에서 IndexNow 우선화 검토
+
+### Architecture Rules (4 신규)
+- Rule #31 — 메인/상세 og:image 6장 패턴
+- Rule #32 — Server Component BAILOUT_TO_CSR 즉시 fix
+- Rule #33 — image-sitemap 단지/글당 4-7 image entry
+- Rule #34 — news-sitemap 48h 신선도 + 카테고리 우선순위
+
+### Pending
+- Google/Bing /ping?sitemap= deprecated — IndexNow 우선화 (다음 sprint)
+- /apt/complex/[name] 배포 후 web_fetch 검증 (BAILOUT 0건 + noindex 0건)
+- AI bot 인덱싱 추이 7d 후 재진단
+
+---
+
 # 카더라 STATUS — 세션 238b: issue-detect timeout fix + 충돌 점검 (2026-05-07 KST)
 
 ## s238b (2026-05-07) — issue-detect timeout fix + 다른 PC 충돌 점검

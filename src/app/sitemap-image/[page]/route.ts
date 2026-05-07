@@ -20,9 +20,9 @@ async function collectAll(sb: ReturnType<typeof getSupabaseAdmin>): Promise<ImgE
   // s216: fetchAll 헬퍼 src/lib/db/fetchBatched.ts 로 추출.
   // 세션 156: stock_images + blog_post_images 추가 (누락 ~29K URL 복구)
   const [sites, complexes, blogs, stockImgs, blogImgs] = await Promise.all([
-    fetchAll(sb, 'apt_sites', 'slug, name, images, region, sigungu',
+    fetchAll(sb, 'apt_sites', 'slug, name, images, cover_image_url, region, sigungu',
       (q: any) => q.eq('is_active', true).not('images', 'is', null)),
-    fetchAll(sb, 'apt_complex_profiles', 'apt_name, images, region_nm, sigungu',
+    fetchAll(sb, 'apt_complex_profiles', 'apt_name, images, cover_image_url, region_nm, sigungu',
       (q: any) => q.not('images', 'is', null)),
     fetchAll(sb, 'blog_posts', 'slug, title, cover_image, image_alt, category',
       (q: any) => q.eq('is_published', true).not('cover_image', 'is', null)
@@ -35,13 +35,23 @@ async function collectAll(sb: ReturnType<typeof getSupabaseAdmin>): Promise<ImgE
 
   const out: ImgEntry[] = [];
 
+  // s236: 위성지도 이미지 제외 — Google 이미지 검색에 무가치
+  const isSatellite = (u: string) => /\/satellite\/|maps\.googleapis|staticmap/i.test(u);
+
   for (const s of sites) {
     const imgs = Array.isArray(s.images) ? s.images : [];
-    if (imgs.length === 0) continue;
-    const list = imgs.slice(0, 10).map((img: any) => {
+    // s238 W5: cover_image_url 을 첫 항목으로 prepend (있으면), images 배열 + dedup, cap 7
+    const merged: any[] = [];
+    if (s.cover_image_url) merged.push(s.cover_image_url);
+    for (const img of imgs) merged.push(img);
+    const seen = new Set<string>();
+    const list = merged.map((img: any) => {
       let url = typeof img === 'string' ? img : img?.link || img?.url;
       if (!url) return null;
       url = String(url).replace(/^http:\/\//, 'https://');
+      if (isSatellite(url)) return null;
+      if (seen.has(url)) return null;
+      seen.add(url);
       const title = (typeof img === 'object' && img?.title)
         ? String(img.title)
         : `${s.name} ${s.region || ''} ${s.sigungu || ''}`.trim();
@@ -51,24 +61,30 @@ async function collectAll(sb: ReturnType<typeof getSupabaseAdmin>): Promise<ImgE
         caption: s.region && s.sigungu ? `${s.region} ${s.sigungu} ${s.name} 분양 현장` : `${s.name} 분양 현장`,
         geo: s.region && s.sigungu ? `${s.region} ${s.sigungu}` : undefined,
       };
-    }).filter((x: any): x is NonNullable<typeof x> => x !== null);
+    }).filter((x: any): x is NonNullable<typeof x> => x !== null).slice(0, 7);
     if (list.length) out.push({ loc: `${BASE}/apt/${encodeURIComponent(s.slug)}`, imgs: list });
   }
 
   for (const c of complexes) {
     const imgs = Array.isArray(c.images) ? c.images : [];
-    if (imgs.length === 0) continue;
-    const list = imgs.slice(0, 7).map((img: any) => {
+    const merged: any[] = [];
+    if (c.cover_image_url) merged.push(c.cover_image_url);
+    for (const img of imgs) merged.push(img);
+    const seen = new Set<string>();
+    const list = merged.map((img: any) => {
       let url = typeof img === 'string' ? img : img?.url;
       if (!url) return null;
       url = String(url).replace(/^http:\/\//, 'https://');
+      if (isSatellite(url)) return null;
+      if (seen.has(url)) return null;
+      seen.add(url);
       return {
         url,
         title: `${c.apt_name} 아파트 ${c.region_nm || ''} ${c.sigungu || ''}`.trim(),
         caption: `${c.region_nm || ''} ${c.sigungu || ''} ${c.apt_name} 아파트 실거래가 시세`.trim(),
         geo: c.region_nm && c.sigungu ? `${c.region_nm} ${c.sigungu}` : undefined,
       };
-    }).filter((x: any): x is NonNullable<typeof x> => x !== null);
+    }).filter((x: any): x is NonNullable<typeof x> => x !== null).slice(0, 7);
     if (list.length) out.push({ loc: `${BASE}/apt/complex/${encodeURIComponent(c.apt_name)}`, imgs: list });
   }
 

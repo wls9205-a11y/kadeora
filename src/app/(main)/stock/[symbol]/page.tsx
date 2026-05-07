@@ -65,6 +65,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     ? `${s.name} 주가 전망 2026. 실시간 시세 ${p}${ch ? ' ' + ch : ''}. ${metaFragments ? metaFragments + '. ' : ''}증권사 목표주가 컨센서스, 외국인·기관 수급, 배당 수익률을 카더라에서 한눈에.`
     : `${s.name} 현재가 ${p} ${ch}. ${metaFragments ? metaFragments + '. ' : ''}${s.market} 상장. 실시간 시세, 차트, 수급, 재무제표, 목표가, AI 분석을 카더라에서 무료로 확인하세요.`;
 
+  const ogTitleEnc = encodeURIComponent(`${s.name} (${symbol})`);
+  const ogImages = [
+    { url: `${SITE_URL}/api/og-stock?symbol=${encodeURIComponent(symbol)}&card=price`, width: 1200, height: 630, alt: `${s.name} ${symbol} 현재가` },
+    { url: `${SITE_URL}/api/og-stock?symbol=${encodeURIComponent(symbol)}&card=chart`, width: 1200, height: 630, alt: `${s.name} 차트` },
+    { url: `${SITE_URL}/api/og-stock?symbol=${encodeURIComponent(symbol)}&card=financial`, width: 1200, height: 630, alt: `${s.name} 재무 PER PBR 배당` },
+    { url: `${SITE_URL}/api/og-stock?symbol=${encodeURIComponent(symbol)}&card=flow`, width: 1200, height: 630, alt: `${s.name} 외국인·기관 수급` },
+    { url: `${SITE_URL}/api/og-stock?symbol=${encodeURIComponent(symbol)}&card=ai`, width: 1200, height: 630, alt: `${s.name} AI 분석` },
+    { url: `${SITE_URL}/api/og-square?title=${ogTitleEnc}&category=stock`, width: 630, height: 630, alt: `${s.name} 시세` },
+  ];
+
   return {
     title,
     description,
@@ -77,14 +87,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       siteName: '카더라',
       locale: 'ko_KR',
       type: 'article',
-      // s218 Track C: /api/og 가 prod 간헐 timeout — og-square 1순위 (정사각, DB 호출 X).
-      // og 는 fallback 보존.
-      images: [
-        { url: `${SITE_URL}/api/og-square?title=${encodeURIComponent(`${s.name} (${symbol})`)}&category=stock`, width: 630, height: 630, alt: `${s.name} 시세` },
-        { url: `${SITE_URL}/api/og?title=${encodeURIComponent(`${s.name} (${symbol}) ${p} ${ch}`)}&design=2&category=stock`, width: 1200, height: 630, alt: `${s.name} 주가 시세` },
-      ],
+      // s238: og-stock 5 카드 + og-square 1 (총 6장). 카카오·네이버·트위터 다양한 카드 활용.
+      images: ogImages,
     },
-    twitter: { card: 'summary_large_image', title: `${s.name} ${p} ${ch}`, description: `${s.market} · 시세 · 배당금 · 재무제표 · PER · 차트 · AI 분석`, images: [`${SITE_URL}/api/og-square?title=${encodeURIComponent(`${s.name} (${symbol})`)}&category=stock`] },
+    twitter: { card: 'summary_large_image', title: `${s.name} ${p} ${ch}`, description: `${s.market} · 시세 · 배당금 · 재무제표 · PER · 차트 · AI 분석`, images: ogImages },
     other: (() => {
       const isUS = s.market === 'NYSE' || s.market === 'NASDAQ';
       const lat = isUS ? '40.7128' : '37.5665';

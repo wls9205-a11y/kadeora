@@ -321,6 +321,179 @@ function D5(C: typeof CAT[string], title: string, sub: string, author: string, f
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   카드형 OG (s238) — `card` 파라미터로 5종 레이아웃
+   hero / stats / imminent / ranking / region
+   DB-free, category+title 만 사용
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function CardHero(C: typeof CAT[string], title: string, ff: string) {
+  const bg = `linear-gradient(135deg, ${C.g[0]} 0%, ${C.g[1]} 50%, ${C.g[2]} 100%)`;
+  const titleFS = title.length > 28 ? 52 : title.length > 18 ? 64 : 76;
+  return (
+    <div style={{ width:'100%', height:'100%', display:'flex', flexDirection:'column', background:bg, fontFamily: ff, padding:'56px 64px', position:'relative', overflow:'hidden' }}>
+      <div style={{ position:'absolute', top:'-20%', right:'-10%', width:'55%', aspectRatio:'1', borderRadius:'50%', background:`radial-gradient(circle,${C.a}28 0%,transparent 65%)`, display:'flex' }} />
+      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', position:'relative', zIndex:2 }}>
+        <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+          {Logo(36)}
+          <span style={{ fontSize:22, fontWeight:900, color:'#fff' }}>카더라</span>
+        </div>
+        <div style={{ display:'flex', alignItems:'center', gap:8, padding:'8px 18px', background:`${C.a}22`, border:`1px solid ${C.a}66`, borderRadius:'var(--radius-pill)' }}>
+          <span style={{ fontSize:18 }}>{C.I}</span>
+          <span style={{ fontSize:15, fontWeight:800, color:C.a }}>{C.L}</span>
+        </div>
+      </div>
+      <div style={{ flex:1, display:'flex', flexDirection:'column', justifyContent:'center', position:'relative', zIndex:2 }}>
+        <div style={{ width:48, height:5, background:C.a, borderRadius:'var(--radius-pill)', marginBottom:24 }} />
+        <div style={{ fontSize:titleFS, fontWeight:900, color:'#fff', lineHeight:1.1, letterSpacing:-2, marginBottom:18, wordBreak:'keep-all' }}>{title}</div>
+        <div style={{ fontSize:22, color:'rgba(255,255,255,.55)', fontWeight:700, letterSpacing:-.3 }}>kadeora.app · 데이터 기반 한국 투자 정보</div>
+      </div>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', position:'relative', zIndex:2, paddingTop:14, borderTop:'0.5px solid rgba(255,255,255,.12)' }}>
+        <span style={{ fontSize:14, color:'rgba(255,255,255,.45)', fontWeight:700, letterSpacing:1 }}>{C.E} · HERO</span>
+        <span style={{ fontSize:14, color:'rgba(255,255,255,.35)', fontWeight:700 }}>kadeora.app</span>
+      </div>
+    </div>
+  );
+}
+
+function CardStats(C: typeof CAT[string], title: string, ff: string) {
+  const bg = `linear-gradient(160deg, ${C.g[0]} 0%, ${C.g[2]} 100%)`;
+  // 카테고리별 placeholder 통계 (DB-free)
+  const stats: Record<string, [string, string][]> = {
+    apt: [['청약 일정', '주간'], ['분양중', '실시간'], ['미분양', '월간'], ['실거래가', '일일']],
+    blog: [['7,600+', '편'], ['매일', '신규'], ['5개', '카테고리'], ['무료', '구독']],
+    stock: [['KOSPI', '실시간'], ['KOSDAQ', '실시간'], ['NASDAQ', '글로벌'], ['수급', '외국인·기관']],
+    unsold: [['전국', '집계'], ['시·군·구', '단위'], ['추세', '월간'], ['할인', '분양']],
+    finance: [['절세', '전략'], ['투자', '입문'], ['저축', '목표'], ['연금', '설계']],
+    general: [['생활', '정보'], ['지역', '소식'], ['정책', '안내'], ['커뮤니티', '소통']],
+    local: [['우리동네', '소식'], ['지역', '맛집'], ['편의시설', '검색'], ['생활권', '정보']],
+    free: [['자유', '게시판'], ['익명', '가능'], ['실시간', '댓글'], ['커뮤니티', '소통']],
+  };
+  const grid = stats[Object.keys(CAT).find(k => CAT[k] === C) || 'blog'] || stats.blog;
+  return (
+    <div style={{ width:'100%', height:'100%', display:'flex', flexDirection:'column', background:bg, fontFamily: ff, padding:'48px 56px' }}>
+      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:28 }}>
+        <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+          {Logo(28)}<span style={{ fontSize:18, fontWeight:900, color:'#fff' }}>카더라</span>
+        </div>
+        <span style={{ fontSize:14, fontWeight:800, color:C.a, letterSpacing:1.5 }}>{C.I} STATS · {C.E}</span>
+      </div>
+      <div style={{ fontSize:42, fontWeight:900, color:'#fff', lineHeight:1.15, letterSpacing:-1, marginBottom:8, wordBreak:'keep-all' }}>{title.length > 22 ? title.slice(0, 21) + '…' : title}</div>
+      <div style={{ width:36, height:4, background:C.a, borderRadius:'var(--radius-pill)', marginBottom:28 }} />
+      <div style={{ flex:1, display:'flex', flexDirection:'row', gap:18 }}>
+        {grid.map(([num, label], i) => (
+          <div key={i} style={{ flex:1, display:'flex', flexDirection:'column', justifyContent:'center', padding:'22px 16px', background:`${C.a}10`, border:`1px solid ${C.a}40`, borderRadius:14 }}>
+            <div style={{ fontSize:32, fontWeight:900, color:C.a, letterSpacing:-1, lineHeight:1.05, marginBottom:6 }}>{num}</div>
+            <div style={{ fontSize:14, color:'rgba(255,255,255,.55)', fontWeight:700 }}>{label}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{ display:'flex', justifyContent:'flex-end', marginTop:14 }}>
+        <span style={{ fontSize:13, color:'rgba(255,255,255,.35)', fontWeight:700 }}>kadeora.app</span>
+      </div>
+    </div>
+  );
+}
+
+function CardImminent(_C: typeof CAT[string], title: string, ff: string) {
+  // 임박/D-day amber theme — 카테고리 무관 amber 강조
+  const A = '#FFB020';
+  const bg = `linear-gradient(135deg, #1a0c00 0%, #2a1500 50%, #3a1f00 100%)`;
+  return (
+    <div style={{ width:'100%', height:'100%', display:'flex', flexDirection:'column', background:bg, fontFamily: ff, padding:'52px 60px', position:'relative', overflow:'hidden' }}>
+      <div style={{ position:'absolute', top:'-25%', left:'-10%', width:'60%', aspectRatio:'1', borderRadius:'50%', background:`radial-gradient(circle,${A}22 0%,transparent 65%)`, display:'flex' }} />
+      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', position:'relative', zIndex:2, marginBottom:30 }}>
+        <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+          {Logo(28)}<span style={{ fontSize:18, fontWeight:900, color:'#fff' }}>카더라</span>
+        </div>
+        <div style={{ display:'flex', alignItems:'center', gap:8, padding:'7px 16px', background:`${A}24`, border:`1px solid ${A}80`, borderRadius:'var(--radius-pill)' }}>
+          <div style={{ width:8, height:8, borderRadius:'50%', background:A, boxShadow:`0 0 10px ${A}` }} />
+          <span style={{ fontSize:14, fontWeight:900, color:A, letterSpacing:1 }}>URGENT · 임박</span>
+        </div>
+      </div>
+      <div style={{ flex:1, display:'flex', flexDirection:'column', justifyContent:'center', position:'relative', zIndex:2 }}>
+        <div style={{ fontSize:80, fontWeight:900, color:A, letterSpacing:-3, lineHeight:1, marginBottom:18 }}>D-7</div>
+        <div style={{ width:48, height:4, background:A, borderRadius:'var(--radius-pill)', marginBottom:18 }} />
+        <div style={{ fontSize:title.length > 22 ? 40 : 50, fontWeight:900, color:'#fff', lineHeight:1.15, letterSpacing:-1, marginBottom:14, wordBreak:'keep-all' }}>{title}</div>
+        <div style={{ fontSize:20, color:'rgba(255,255,255,.55)', fontWeight:700 }}>마감 임박 · 놓치지 마세요</div>
+      </div>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', position:'relative', zIndex:2 }}>
+        <span style={{ fontSize:13, color:`${A}aa`, fontWeight:800, letterSpacing:1 }}>IMMINENT · 추천</span>
+        <span style={{ fontSize:13, color:'rgba(255,255,255,.35)', fontWeight:700 }}>kadeora.app</span>
+      </div>
+    </div>
+  );
+}
+
+function CardRanking(C: typeof CAT[string], title: string, ff: string) {
+  const bg = `linear-gradient(170deg, ${C.g[0]} 0%, ${C.g[1]} 100%)`;
+  const top3 = [
+    { rank: 1, label: 'TOP 1', sub: '실시간 1위' },
+    { rank: 2, label: 'TOP 2', sub: '주목 종목/단지' },
+    { rank: 3, label: 'TOP 3', sub: '인기 급상승' },
+  ];
+  return (
+    <div style={{ width:'100%', height:'100%', display:'flex', flexDirection:'column', background:bg, fontFamily: ff, padding:'46px 56px' }}>
+      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:24 }}>
+        <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+          {Logo(28)}<span style={{ fontSize:18, fontWeight:900, color:'#fff' }}>카더라</span>
+        </div>
+        <span style={{ fontSize:14, fontWeight:900, color:C.a, letterSpacing:2 }}>RANKING · {C.E}</span>
+      </div>
+      <div style={{ fontSize:38, fontWeight:900, color:'#fff', lineHeight:1.15, letterSpacing:-1, marginBottom:6, wordBreak:'keep-all' }}>{title.length > 24 ? title.slice(0, 23) + '…' : title}</div>
+      <div style={{ width:40, height:4, background:C.a, borderRadius:'var(--radius-pill)', marginBottom:22 }} />
+      <div style={{ flex:1, display:'flex', flexDirection:'column', gap:12 }}>
+        {top3.map((r) => (
+          <div key={r.rank} style={{ display:'flex', alignItems:'center', gap:18, padding:'16px 22px', background:`${C.a}0c`, border:`1px solid ${C.a}30`, borderRadius:14 }}>
+            <div style={{ width:54, height:54, borderRadius:12, background:C.a, color:'#000', fontSize:28, fontWeight:900, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>{r.rank}</div>
+            <div style={{ display:'flex', flexDirection:'column', flex:1 }}>
+              <div style={{ fontSize:24, fontWeight:900, color:'#fff', letterSpacing:-.5, marginBottom:3 }}>{r.label}</div>
+              <div style={{ fontSize:14, color:'rgba(255,255,255,.55)', fontWeight:700 }}>{r.sub}</div>
+            </div>
+            <span style={{ fontSize:22 }}>{C.I}</span>
+          </div>
+        ))}
+      </div>
+      <div style={{ display:'flex', justifyContent:'flex-end', marginTop:14 }}>
+        <span style={{ fontSize:13, color:'rgba(255,255,255,.35)', fontWeight:700 }}>kadeora.app</span>
+      </div>
+    </div>
+  );
+}
+
+function CardRegion(C: typeof CAT[string], title: string, ff: string) {
+  const bg = `linear-gradient(150deg, ${C.g[0]} 0%, ${C.g[1]} 60%, ${C.g[2]} 100%)`;
+  const regions = ['서울', '경기', '인천', '부산', '대구', '대전', '광주', '세종'];
+  return (
+    <div style={{ width:'100%', height:'100%', display:'flex', flexDirection:'column', background:bg, fontFamily: ff, padding:'46px 56px' }}>
+      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:22 }}>
+        <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+          {Logo(28)}<span style={{ fontSize:18, fontWeight:900, color:'#fff' }}>카더라</span>
+        </div>
+        <span style={{ fontSize:14, fontWeight:900, color:C.a, letterSpacing:2 }}>REGION · 전국</span>
+      </div>
+      <div style={{ fontSize:38, fontWeight:900, color:'#fff', lineHeight:1.15, letterSpacing:-1, marginBottom:8, wordBreak:'keep-all' }}>{title.length > 24 ? title.slice(0, 23) + '…' : title}</div>
+      <div style={{ width:40, height:4, background:C.a, borderRadius:'var(--radius-pill)', marginBottom:18 }} />
+      <div style={{ flex:1, display:'flex', flexDirection:'row', flexWrap:'wrap', gap:12, alignContent:'flex-start' }}>
+        {regions.map((r, i) => (
+          <div key={r} style={{
+            width:'calc(25% - 9px)', padding:'18px 14px', display:'flex', flexDirection:'column', justifyContent:'center', alignItems:'center',
+            background: i === 0 ? `${C.a}28` : `${C.a}10`,
+            border: i === 0 ? `1px solid ${C.a}` : `1px solid ${C.a}30`,
+            borderRadius:12,
+          }}>
+            <div style={{ fontSize:24, marginBottom:6 }}>{C.I}</div>
+            <div style={{ fontSize:18, fontWeight:900, color:'#fff', letterSpacing:-.5 }}>{r}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{ display:'flex', justifyContent:'space-between', marginTop:14 }}>
+        <span style={{ fontSize:13, color:'rgba(255,255,255,.45)', fontWeight:800 }}>{C.L} 지역별</span>
+        <span style={{ fontSize:13, color:'rgba(255,255,255,.35)', fontWeight:700 }}>kadeora.app</span>
+      </div>
+    </div>
+  );
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    디자인 6: 그라디언트 풀컬러
    배경 전체가 컬러 그라디언트 + 반투명 카드
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
@@ -384,12 +557,31 @@ export async function GET(req: NextRequest) {
     const category = sp.get('category') ?? 'blog';
     const design   = sp.get('design') ?? '2';   // 1~6 (기본: D2 풀컬러 좌측)
     const section  = sp.get('section');
+    const card     = sp.get('card');             // s238: hero/stats/imminent/ranking/region
     const likes    = sp.get('likes') ?? '0';
     const comments = sp.get('comments') ?? '0';
 
     const C = CAT[category] ?? CAT.blog;
     const titleTrim = title.length > 48 ? title.slice(0, 47) + '…' : title;
     const subTrim   = subtitle.length > 68 ? subtitle.slice(0, 67) + '…' : subtitle;
+
+    /* s238: 카드형 OG (메인 페이지 6장 전략) */
+    if (card) {
+      const cardTitle = titleTrim || (CAT[category] ? CAT[category].L : '카더라');
+      const cardMap: Record<string, any> = {
+        hero:     CardHero(C, cardTitle, ff),
+        stats:    CardStats(C, cardTitle, ff),
+        imminent: CardImminent(C, cardTitle, ff),
+        ranking:  CardRanking(C, cardTitle, ff),
+        region:   CardRegion(C, cardTitle, ff),
+      };
+      const cardEl = cardMap[card];
+      if (cardEl) {
+        const _cardImg = new ImageResponse(cardEl, { width:1200, height:630, ...opts });
+        const _cardBuf = await _cardImg.arrayBuffer();
+        return new Response(_cardBuf, { headers: { 'Content-Type':'image/png', 'X-OG-Card': card, ...CACHE } });
+      }
+    }
 
     /* 섹션 OG */
     if (section) {

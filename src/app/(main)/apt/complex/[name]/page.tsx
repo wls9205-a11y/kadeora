@@ -1,5 +1,5 @@
 import LoginGate from '@/components/LoginGate';
-import { createSupabaseServer } from '@/lib/supabase-server';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { SITE_URL } from '@/lib/constants';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
@@ -9,7 +9,7 @@ import type { Metadata } from 'next';
 import { fmtAmount } from '@/lib/format';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
 import { sanitizeHtml } from '@/lib/sanitize-html';
-import dynamic from 'next/dynamic';
+import nextDynamic from 'next/dynamic';
 import ShareButtons from '@/components/ShareButtons';
 import AptNearbyCompare from '@/components/AptNearbyCompare';
 import AptBookmarkButton from '@/components/AptBookmarkButton';
@@ -19,22 +19,29 @@ import AptKpiGrid from '@/components/apt/detail/AptKpiGrid';
 import AptScheduleTimeline from '@/components/apt/detail/AptScheduleTimeline';
 import AptLocationMini from '@/components/apt/detail/AptLocationMini';
 
-const AptPriceTrendChart = dynamic(() => import('@/components/charts/AptPriceTrendChart'));
-const AptReviewSection = dynamic(() => import('@/components/AptReviewSection'));
+const AptPriceTrendChart = nextDynamic(() => import('@/components/charts/AptPriceTrendChart'));
+const AptReviewSection = nextDynamic(() => import('@/components/AptReviewSection'));
 
 export const maxDuration = 30;
 export const revalidate = 3600;
+export const dynamic = 'force-static';
+export const dynamicParams = true;
 
 interface Props { params: Promise<{ name: string }> }
 
 async function getProfile(decoded: string) {
-  const sb = await createSupabaseServer();
-  const { data } = await (sb as any).from('apt_complex_profiles')
-    .select('*')
-    .eq('apt_name', decoded)
-    .limit(1)
-    .maybeSingle();
-  return data;
+  try {
+    // s238 P0: cookie-free admin client — force-static SSG 호환
+    const sb = getSupabaseAdmin();
+    const { data } = await (sb as any).from('apt_complex_profiles')
+      .select('*')
+      .eq('apt_name', decoded)
+      .limit(1)
+      .maybeSingle();
+    return data;
+  } catch {
+    return null;
+  }
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -63,8 +70,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   let realImg: string | null = null;
   let siteEngage = { views: 0, comments: 0, interest: 0 };
   try {
-    const sb = (await import('@/lib/supabase-server')).createSupabaseServer;
-    const { getSupabaseAdmin } = await import('@/lib/supabase-admin');
     const admin = getSupabaseAdmin();
     const { data: siteRow } = await (admin as any).from('apt_sites').select('images, page_views, comment_count, interest_count, slug').eq('name', decoded).not('images', 'is', null).limit(1).maybeSingle();
     if (Array.isArray(siteRow?.images) && (siteRow.images[0] as any)?.url) realImg = ((siteRow.images[0] as any).thumbnail || (siteRow.images[0] as any).url).replace(/^http:\/\//, 'https://');
@@ -74,15 +79,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const ogSquareUrl = `${SITE_URL}/api/og-square?title=${encodeURIComponent(decoded)}&category=apt&subtitle=${encodeURIComponent(ogSubtitle)}`;
   const keywords = [decoded, '실거래가', '시세', '아파트', region, sigungu, ageGroup, '전세', '월세', '매매', '평당가', '전세가율', '시세조회', '학군', '재건축', '분양가', '입주', '조감도', '평면도'].filter(Boolean);
 
-  // 세션 157 A: apt_complex_profiles.metadata.noindex=true 이면 robots meta 반영
-  const isNoindex = p && (p as any).metadata && typeof (p as any).metadata === 'object' && (p as any).metadata.noindex === true;
+  // s238 P0: legacy metadata.noindex 게이트 제거 — data_quality_score < 30 (s235 W9b) 만 noindex 의 유일한 정당한 이유
   const meta: Metadata = {
     title,
     description,
     alternates: { canonical: `${SITE_URL}/apt/complex/${name}` },
-    robots: isNoindex
-      ? { index: false, follow: true }
-      : { index: true, follow: true, 'max-snippet': -1 as const, 'max-image-preview': 'large' as const },
+    robots: { index: true, follow: true, 'max-snippet': -1 as const, 'max-image-preview': 'large' as const },
     openGraph: {
       title: `${decoded} 실거래가·시세·평당가 — ${region} ${sigungu}`,
       description: metaParts ? `${metaParts} — ${region} ${sigungu}` : `실거래가·시세 분석 — ${region} ${sigungu}`,
@@ -130,16 +132,23 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ComplexDetailPage({ params }: Props) {
   const { name } = await params;
   const decoded = decodeURIComponent(name);
-  const sb = await createSupabaseServer();
+  // s238 P0: cookie-free admin client — force-static SSG 호환
+  const sb = getSupabaseAdmin();
 
   // 프로필 조회 (좌표, SEO 데이터 포함)
   const profile = await getProfile(decoded);
 
-  const { data: trades } = await sb.from('apt_transactions')
-    .select('id, apt_name, region_nm, sigungu, dong, deal_date, deal_amount, exclusive_area, floor, built_year, trade_type')
-    .eq('apt_name', decoded)
-    .order('deal_date', { ascending: false })
-    .limit(200) as { data: Record<string, any>[] | null };
+  let trades: Record<string, any>[] | null = null;
+  try {
+    const tradesRes = await sb.from('apt_transactions')
+      .select('id, apt_name, region_nm, sigungu, dong, deal_date, deal_amount, exclusive_area, floor, built_year, trade_type')
+      .eq('apt_name', decoded)
+      .order('deal_date', { ascending: false })
+      .limit(200) as { data: Record<string, any>[] | null };
+    trades = tradesRes.data;
+  } catch {
+    trades = null;
+  }
 
   if (!trades?.length) notFound();
   const tradeList = trades!;
