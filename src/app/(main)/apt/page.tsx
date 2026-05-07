@@ -1,6 +1,9 @@
 import { SITE_URL } from '@/lib/constants';
 import type { Metadata } from 'next';
-import { headers } from 'next/headers';
+// s241 W1: next/headers import 제거 — `headers()` 호출이 page 를 dynamic 강제하여
+// Next.js 가 'Cache-Control: private, no-cache, no-store' 응답 → middleware 의 public 무력화.
+// region 은 searchParams 만 사용. 미설정 시 '전국' default + RegionAutoSelect (client) 가
+// cookie/localStorage 기반으로 ?region= 추가해 router.replace.
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import Disclaimer from '@/components/Disclaimer';
 import AdBanner from '@/components/AdBanner';
@@ -95,9 +98,8 @@ export default async function AptPage({
   searchParams?: Promise<{ region?: string; tab?: string; page?: string }>;
 }) {
   const sp = (await searchParams) || {};
-  const region = sp.region?.trim()
-    || (await headers()).get('x-kd-region')
-    || '전국';
+  // s241 W1: headers() 제거 — fully static cacheable. RegionAutoSelect 가 client-side redirect.
+  const region = sp.region?.trim() || '전국';
   const isAutoRegion = !sp.region;
   const activeTab = sp.tab ?? 'all';
   const category = tabToCategory(sp.tab);

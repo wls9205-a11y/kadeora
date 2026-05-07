@@ -218,9 +218,9 @@ export async function GET(req: NextRequest) {
     post = null;
   }
 
-  // body 구성 + ImageResponse 모두 단일 try 로 감싸서 어떤 필드 접근 throw 가 일어나도 fallback redirect 로 우아하게 다운그레이드.
+  // s241 W2/W3: body 구성 + ImageResponse 분리 — render fn throw vs ImageResponse throw 식별.
+  let body: React.ReactElement;
   try {
-    let body: React.ReactElement;
     if (!post) {
       body = renderFallback(slug);
     } else if (card === 1) {
@@ -230,7 +230,13 @@ export async function GET(req: NextRequest) {
     } else {
       body = renderKeyPoints(post, card);
     }
+  } catch (renderErr) {
+    console.error('[og-blog] render-fn-throw card=', card, 'msg=', (renderErr as Error)?.message?.slice(0, 80));
+    console.error('[og-blog] render-fn-throw cls=', (renderErr as Error)?.constructor?.name);
+    body = renderFallback(slug);
+  }
 
+  try {
     const wrapped = (
       <div style={{ width: '100%', height: '100%', display: 'flex', background: bgFor(card, post), fontFamily: ff }}>
         {body}

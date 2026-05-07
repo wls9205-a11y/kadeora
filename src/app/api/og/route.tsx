@@ -596,16 +596,23 @@ export async function GET(req: NextRequest) {
       return new Response(_homeBuf, { headers: { 'Content-Type':'image/png', ...CACHE } });
     }
 
-    /* 포스트 OG — design 파라미터로 선택 */
-    const designMap: Record<string, any> = {
-      '1': D1(C, titleTrim, subTrim, author, ff),
-      '2': D2(C, titleTrim, subTrim, author, ff),
-      '3': D3(C, titleTrim, subTrim, author, ff),
-      '4': D4(C, titleTrim, subTrim, author, ff),
-      '5': D5(C, titleTrim, subTrim, author, ff),
-      '6': D6(C, titleTrim, subTrim, author, ff),
-    };
-    const el = designMap[design] ?? designMap['1'];
+    /* s241 W3: design 함수 lazy 호출 + per-design try/catch — D1~D6 중 어느 게 throw 하는지 식별. */
+    let el: any;
+    try {
+      switch (design) {
+        case '2': el = D2(C, titleTrim, subTrim, author, ff); break;
+        case '3': el = D3(C, titleTrim, subTrim, author, ff); break;
+        case '4': el = D4(C, titleTrim, subTrim, author, ff); break;
+        case '5': el = D5(C, titleTrim, subTrim, author, ff); break;
+        case '6': el = D6(C, titleTrim, subTrim, author, ff); break;
+        default:  el = D1(C, titleTrim, subTrim, author, ff); break;
+      }
+    } catch (designErr) {
+      console.error('[og] design-fn-throw design=', design, 'msg=', (designErr as Error)?.message?.slice(0, 80));
+      console.error('[og] design-fn-throw cls=', (designErr as Error)?.constructor?.name);
+      // fallback to simple D1 (가장 단순, throw 가능성 가장 낮음)
+      try { el = D1(C, titleTrim, subTrim, author, ff); } catch { throw designErr; }
+    }
 
     const _postImg = new ImageResponse(el, { width: 1200, height: 630, ...opts });
     const _postBuf = await _postImg.arrayBuffer();

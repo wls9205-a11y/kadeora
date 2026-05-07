@@ -1,3 +1,45 @@
+# 카더라 STATUS — 세션 241: cache-control 진짜 source fix + OG 진단 미세 분할 + InAppModal 검증 (2026-05-08 KST)
+
+## s241 (2026-05-08) — cache-control private 진짜 source 발견 + OG 진단 + InApp 재검증
+
+### W1 (P0): /apt cache-control private 진짜 source 발견
+- 진단 (s240 fix 후 여전히 private):
+  - middleware line 224: `/apt /blog /stock` 등 PUBLIC_ONLY 매치 시 `Cache-Control: public, ...` 설정 — 정상
+  - (main)/layout.tsx: cookies/headers 호출 없음 (clean)
+  - **진짜 source**: `/apt/page.tsx` 의 `(await headers()).get('x-kd-region')` — `next/headers` 의 `headers()` 호출이 page 를 dynamic 강제 → Next.js 가 `Cache-Control: private, no-cache, no-store` 응답에 박음 → middleware 의 public 무력화
+- fix:
+  - `headers()` import 제거
+  - `region = sp.region?.trim() || '전국'` 만 사용 (default fully static cacheable)
+  - RegionAutoSelect (client) 가 cookie/localStorage 기반 ?region= router.replace
+- 기대: cache-control public, s-maxage=600 회복 + x-vercel-cache HIT
+
+### W2: og-blog body build / ImageResponse 분리 try/catch
+- 기존 단일 try/catch — render-fn throw vs ImageResponse throw 식별 불가
+- 분리: body build (renderCover/Cta/KeyPoints/Fallback) 자체 try → 실패 시 renderFallback 으로 다운그레이드 + log `render-fn-throw card= msg=`
+- 그 후 ImageResponse + arrayBuffer try/catch — 80자 chunk 분할 (s240)
+
+### W3: og design 함수 lazy 호출 + per-design try/catch
+- 기존 designMap 객체 즉시 평가 → D1-D6 모두 동시 호출 → 어느 디자인이 throw 했는지 식별 불가
+- switch 로 lazy 호출 변경. 각 design 함수 호출 시 try/catch:
+  - throw 시 `[og] design-fn-throw design= msg= cls=` 로깅
+  - D1 으로 fallback (D1 도 throw 시 원래 throw rethrow)
+
+### W4: InAppBrowserModal 재검증 — 코드 변경 없음
+- `useInAppBrowser` hook (`src/hooks/useInAppBrowser.ts`) detection 정확:
+  - daum/karrot/social/webview → `canDoOAuth=false` 차단
+  - **kakao → `canDoOAuth=true` 통과** (50% 성공률 정책으로 통과)
+  - naver → `canDoOAuth=true` 통과 (45.8% 성공률)
+- InAppBrowserModal mount: /login 페이지의 `LoginClient.tsx` 가 `inApp.isInApp && !inApp.canDoOAuth` 시 표시
+- **카카오는 통과 카테고리** — 24h 50% 실패는 카카오 자체 정책/사용자 동의 거부 (외부 요인)
+- 코드 fix 불필요. 추가 모니터링만
+
+### Pending
+- W1 배포 후 즉시 `curl -sI https://kadeora.app/apt` cache-control 검증 (목표: `public, s-maxage=600`)
+- W2/W3 배포 후 5분 + curl trigger + Vercel MCP query=`[og] design-fn-throw` 로 진짜 source 식별
+- og-blog `render-fn-throw` 빈도 추이 — 어느 card 가 가장 많이 throw 하는지
+
+---
+
 # 카더라 STATUS — 세션 240: 메인 cache-control public + OG 진단 강화 + SITE_URL 잔여 (2026-05-08 KST)
 
 ## s240 (2026-05-08) — cache-control public 회복 + OG 분할 강화 + 잔여 정리
