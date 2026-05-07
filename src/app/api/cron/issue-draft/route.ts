@@ -162,12 +162,37 @@ ${isPreempt ? `
 
 ${getFreshnessContext()}`;
 
+  // s238: title 다양화 컨텍스트 — sub_category/region/월 토큰 prepend.
+  // similar_title (pg_trgm 0.35) 차단 95건/주 회복 목적. "{단지명} 분양 분석 | {지역}"
+  // 패턴이 자기들끼리 매칭되던 회귀 회피.
+  const SUB_CATEGORY_LABEL: Record<string, string> = {
+    preempt_coverage: '청약 선점 가이드',
+    pre_announcement: '예비 공고 분석',
+    new_subscription: '신규 청약',
+    search_spike: '검색 급등 분석',
+    policy_change: '정책 변경',
+    rate_decision: '금리 결정',
+    earnings: '실적',
+    ma: 'M&A',
+    price_change: '가격 변동',
+    price_surge: '급등',
+    inheritance_tax: '상속·증여',
+    fx_change: '환율',
+    unsold: '미분양',
+    trending_gap: '핫이슈 격차',
+  };
+  const subLabel = (issue.sub_category && SUB_CATEGORY_LABEL[issue.sub_category]) || '';
+  const regionTokens = [issue.region_sido, issue.region_sigungu].filter(Boolean).join(' ');
+  const monthLabel = `${new Date().getFullYear()}년 ${new Date().getMonth() + 1}월`;
+  const titleHint = [subLabel, regionTokens, monthLabel].filter(Boolean).join(' · ');
+
   const userPrompt = `다음 이슈에 대해 데이터 분석 블로그 기사를 작성하세요.
 
 제목: ${issue.title}
 요약: ${issue.summary}
 핵심 키워드: ${(issue.detected_keywords || []).join(', ')}
 관련 대상: ${(issue.related_entities || []).join(', ')}
+${titleHint ? `타이틀 보조 토큰: ${titleHint}` : ''}
 원본 데이터: ${JSON.stringify(issue.raw_data || {}).slice(0, 2000)}
 출처 URL: ${(issue.source_urls || []).join(', ')}
 
@@ -177,10 +202,11 @@ ${getFreshnessContext()}`;
 3. "## 자주 묻는 질문" 섹션 + Q./A. 형식 5~8개 (필수!)
 4. 관련 카더라 페이지 내부 링크 3개+ (마크다운 [텍스트](/경로) 형식)
 5. 이미지 삽입 금지 — 이미지는 자동으로 추가됩니다
+${titleHint ? `6. 제목에 다음 토큰 중 최소 2개 포함 (다양성 ↑, 중복 차단 회피): ${titleHint.split(' · ').filter(Boolean).map(t => `"${t}"`).join(', ')}` : ''}
 
 응답 형식 (JSON만, 다른 텍스트 없이):
 {
-  "title": "SEO 최적화 제목 (40~60자, | 구분자)",
+  "title": "SEO 최적화 제목 (40~60자, | 구분자, ${titleHint ? `반드시 [${titleHint}] 중 2개 이상 포함` : '단지명+분석 패턴 회피'})",
   "slug": "url-safe-slug-한글가능",
   "keywords": ["키워드1", "키워드2", ...최소 5개],
   "meta_description": "검색 결과에 노출될 설명 (120~160자)",

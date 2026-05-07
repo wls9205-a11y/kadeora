@@ -1,3 +1,48 @@
+# 카더라 STATUS — 세션 238: CRON_TYPE_DAILY_LIMIT fix + title 다양화 (2026-05-08 KST)
+
+## s238 (2026-05-08) — issue-publish CRON_TYPE_DAILY_LIMIT fix + issue-draft title 다양화
+
+### s237 진단 정정
+- 어제 보고 "publish auto_failed 81건/주 = similar_title" — **잘못된 진단**
+- 실제: `block_reason='finalize_blocked: ❌ 품질 게이트 실패 (1건): CRON_TYPE_DAILY_LIMIT'`
+- 7d 재집계: auto_failed **542건** (sub_category='preempt_coverage' 542 / 모든 카테고리 분포 위 표 참조)
+- 진짜 원인: PG 트리거 `validate_blog_post()` 의 cron_type 별 하드코딩 (issue-draft/manual=30, **else=15**) →
+  `issue_preempt` cron 이 15/day 캡에 막히면서 지방 단지 backfill 가 한도 차지
+
+### DB (Supabase MCP 직접 적용 — migration s238_daily_limit_by_type)
+- `blog_publish_config.daily_limit_by_type jsonb` 컬럼 추가
+- 기본값:
+  ```
+  { "issue-draft": 30, "issue-manual": 30, "issue_preempt": 30,
+    "station-apt": 15, "default": 15 }
+  ```
+- `validate_blog_post()` 트리거 함수 교체:
+  - `daily_limit_by_type` jsonb 우선 lookup, 없으면 기존 하드코딩 fallback (graceful degradation)
+  - 에러 메시지에 실제 `count/limit` 표시: `CRON_TYPE_DAILY_LIMIT (15/15)`
+- 핵심 변경: `issue_preempt` cap **15 → 30** (2배 — preempt_coverage 542 차단 절반은 즉시 회복 추정)
+
+### 코드 (이번 commit)
+- `src/app/api/cron/issue-draft/route.ts` `generateArticle()`:
+  - `SUB_CATEGORY_LABEL` 매핑 추가 (preempt_coverage → "청약 선점 가이드" 등 14종)
+  - `regionTokens` (region_sido + region_sigungu) + `monthLabel` (YYYY년 N월)
+  - userPrompt 에 `titleHint` 주입 + 6번 요구사항 추가: 제목에 토큰 중 2개 이상 포함
+  - JSON spec 의 `title` 설명에 토큰 강제 명시
+- 효과: "{단지명} 분양 분석 | {지역}" 단조 패턴 → "{단지명} 청약 선점 가이드 | 경북 영주 2026년 5월" 다양화 →
+  pg_trgm 0.35 매칭 회피 (similar_title 차단 95건/주 추정 회복)
+
+### 안전장치
+- DB 마이그레이션은 ALTER TABLE ADD COLUMN with DEFAULT — idempotent
+- 트리거 graceful degradation: `daily_limit_by_type IS NULL` 이면 기존 30/15 하드코딩 사용
+- 빌드: tsc clean, next build EXIT=0
+
+### 효과 예상
+- 합계 한도 일일 30+30+30+15 = **105** (격리 후, 이전 30/15 합산 비교)
+- preempt_coverage 542/7d 차단 → 60% 회복 (~330 추가 publish)
+- similar_title 차단 별도 95/7d → 70% 회복 (~65 추가 publish)
+- 24h 후 재집계 필요
+
+---
+
 # 카더라 STATUS — 세션 236: /apt 메인+상세 디자인 + 조감도 우선 정책 (2026-05-07 KST)
 
 ## s236 — /apt 메인+상세 전면 + cover image priority (11 worker 병렬, 단일 commit)
