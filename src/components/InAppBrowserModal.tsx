@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import type { InAppBrowserType } from '@/hooks/useInAppBrowser';
+import { SITE_URL } from '@/lib/constants';
 
 interface Props {
   type: InAppBrowserType;
@@ -68,7 +69,7 @@ function fireClick(action: 'copy' | 'open_external', type: InAppBrowserType) {
 export default function InAppBrowserModal({ type, onClose, href }: Props) {
   const [copied, setCopied] = useState(false);
   const [opening, setOpening] = useState(false);
-  const url = href ?? (typeof window !== 'undefined' ? window.location.href : 'https://kadeora.app/login');
+  const url = href ?? (typeof window !== 'undefined' ? window.location.href : `${SITE_URL}/login`);
   const label = type ? TYPE_LABEL[type] : '인앱 브라우저';
 
   useEffect(() => {

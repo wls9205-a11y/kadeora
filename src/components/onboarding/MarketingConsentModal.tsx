@@ -33,15 +33,9 @@ export default function MarketingConsentModal({ userId, isOpen, onClose }: Props
   };
 
   const handleSkip = async () => {
+    // s239 W1.A: skip 은 동의/거부 변경만 — onboarded 는 /onboarding 완료 시점만 변경.
     if (submitting) return;
     setSubmitting(true);
-    try {
-      await fetch('/api/profile/consent', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ onboarded: true }),
-      });
-    } catch {}
     setSubmitting(false);
     close();
   };
@@ -76,6 +70,7 @@ export default function MarketingConsentModal({ userId, isOpen, onClose }: Props
     setSubmitting(true);
 
     try {
+      // s239 W1.A: marketing/night/channel_action 만 — onboarded 는 /onboarding 완료 시점만 변경.
       const res = await fetch('/api/profile/consent', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -83,7 +78,6 @@ export default function MarketingConsentModal({ userId, isOpen, onClose }: Props
           marketing,
           night,
           channel_action: channel ? 'add' : null,
-          onboarded: true,
         }),
       });
       if (!res.ok) toastError('동의 저장에 실패했어요. 잠시 후 다시 시도해주세요.');

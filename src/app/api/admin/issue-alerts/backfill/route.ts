@@ -280,8 +280,8 @@ async function runBackfill(): Promise<any> {
         }
         const designA = 1 + (Math.abs(hashString(issue.draft_title || '')) % 6);
         const designB = 1 + ((designA % 6) + 1) % 6;
-        const ogA = `https://kadeora.app/api/og?title=${encodeURIComponent(String(issue.draft_title || '').slice(0, 40))}&category=${category}&author=${encodeURIComponent('카더라 속보팀')}&design=${designA}`;
-        const ogB = `https://kadeora.app/api/og?title=${encodeURIComponent(String(issue.draft_title || '').slice(0, 40))}&category=${category}&author=${encodeURIComponent('카더라 속보팀')}&design=${designB}`;
+        const ogA = `${SITE_URL}/api/og?title=${encodeURIComponent(String(issue.draft_title || '').slice(0, 40))}&category=${category}&author=${encodeURIComponent('카더라 속보팀')}&design=${designA}`;
+        const ogB = `${SITE_URL}/api/og?title=${encodeURIComponent(String(issue.draft_title || '').slice(0, 40))}&category=${category}&author=${encodeURIComponent('카더라 속보팀')}&design=${designB}`;
         for (const [pos, url] of [[6, ogA], [7, ogB]] as const) {
           try {
             await (sb as any).rpc('record_blog_image', {

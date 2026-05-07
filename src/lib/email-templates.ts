@@ -3,6 +3,7 @@
  */
 
 import { createHmac } from 'crypto';
+import { SITE_URL } from '@/lib/constants';
 
 export function generateUnsubToken(email: string): string {
   const secret = process.env.UNSUBSCRIBE_SECRET || process.env.NEXTAUTH_SECRET || 'kadeora-unsub-secret';
@@ -11,7 +12,7 @@ export function generateUnsubToken(email: string): string {
 
 export function buildUnsubUrl(email: string): string {
   const token = generateUnsubToken(email);
-  return `https://kadeora.app/api/unsubscribe?email=${encodeURIComponent(email)}&token=${token}`;
+  return `${SITE_URL}/api/unsubscribe?email=${encodeURIComponent(email)}&token=${token}`;
 }
 
 /** 현재 연월 기반 UTM campaign 문자열 (예: 2026_04) */
@@ -30,8 +31,8 @@ export function reEngagementEmail({
 }): string {
   const campaign = utmCampaign || currentUtmCampaign();
   const utmBase = `utm_source=email&utm_medium=re-engagement&utm_campaign=${campaign}`;
-  const siteUrl = `https://kadeora.app?${utmBase}`;
-  const blogUrl = `https://kadeora.app/blog?${utmBase}`;
+  const siteUrl = `${SITE_URL}?${utmBase}`;
+  const blogUrl = `${SITE_URL}/blog?${utmBase}`;
   const unsubUrl = buildUnsubUrl(email);
 
   const features = [
@@ -130,7 +131,7 @@ export function reEngagementEmail({
   <p style="font-size:12px;margin:0;">
     <a href="${unsubUrl}" style="color:#64748B;text-decoration:underline;">수신거부</a>
     <span style="color:#CBD5E1;margin:0 8px;">·</span>
-    <a href="https://kadeora.app/notifications/settings?utm_source=email" style="color:#64748B;text-decoration:underline;">알림 설정</a>
+    <a href="${SITE_URL}/notifications/settings?utm_source=email" style="color:#64748B;text-decoration:underline;">알림 설정</a>
   </p>
   <p style="font-size:11px;color:#CBD5E1;margin:16px 0 0;">
     © 2026 카더라 · 부산광역시 연제구 연동로 27
@@ -166,7 +167,7 @@ export function weeklyDigestBody(data: {
         ${safeHotPosts.map((p, i) => `
           <div style="padding:10px 0;border-bottom:1px solid #F1F5F9;">
             <span style="color:#3B7BF6;font-weight:700;font-size:14px;">${i + 1}.</span>
-            <a href="https://kadeora.app/feed/${encodeURIComponent(p.slug!)}?${utmBase}" style="color:#334155;text-decoration:none;font-size:14px;font-weight:500;margin-left:6px;">${esc(p.title)}</a>
+            <a href="${SITE_URL}/feed/${encodeURIComponent(p.slug!)}?${utmBase}" style="color:#334155;text-decoration:none;font-size:14px;font-weight:500;margin-left:6px;">${esc(p.title)}</a>
             ${p.likes_count ? `<span style="color:#94A3B8;font-size:12px;margin-left:8px;">❤️ ${p.likes_count}</span>` : ''}
           </div>
         `).join('')}
@@ -189,7 +190,7 @@ export function weeklyDigestBody(data: {
         <p style="font-size:14px;font-weight:700;color:#1E293B;margin:0 0 8px;">📝 새 분석 블로그</p>
         ${safeNewBlogs.map(b => `
           <div style="padding:8px 0;">
-            <a href="https://kadeora.app/blog/${encodeURIComponent(b.slug!)}?${utmBase}" style="color:#334155;text-decoration:none;font-size:14px;">
+            <a href="${SITE_URL}/blog/${encodeURIComponent(b.slug!)}?${utmBase}" style="color:#334155;text-decoration:none;font-size:14px;">
               ${esc(b.title)}
             </a>
           </div>
@@ -201,7 +202,7 @@ export function weeklyDigestBody(data: {
     ${deadlineHtml}
     ${blogHtml}
     <div style="text-align:center;margin:24px 0 0;">
-      <a href="https://kadeora.app/blog?${utmBase}" style="display:inline-block;padding:12px 36px;border-radius:10px;background:#3B7BF6;color:#FFFFFF;font-size:15px;font-weight:700;text-decoration:none;">
+      <a href="${SITE_URL}/blog?${utmBase}" style="display:inline-block;padding:12px 36px;border-radius:10px;background:#3B7BF6;color:#FFFFFF;font-size:15px;font-weight:700;text-decoration:none;">
         전체 확인하기 →
       </a>
     </div>
@@ -240,7 +241,7 @@ export function welcomeBody({ nickname }: { nickname: string }): string {
       `).join('')}
     </div>
     <div style="text-align:center;margin:24px 0 0;">
-      <a href="https://kadeora.app/feed?${utmBase}" style="display:inline-block;padding:12px 36px;border-radius:10px;background:#3B7BF6;color:#FFFFFF;font-size:15px;font-weight:700;text-decoration:none;">
+      <a href="${SITE_URL}/feed?${utmBase}" style="display:inline-block;padding:12px 36px;border-radius:10px;background:#3B7BF6;color:#FFFFFF;font-size:15px;font-weight:700;text-decoration:none;">
         카더라 시작하기 →
       </a>
     </div>
@@ -275,7 +276,7 @@ export function onboardingGuideBody({ nickname, interests }: { nickname: string;
       </div>
     `).join('')}
     <div style="text-align:center;margin:24px 0 0;">
-      <a href="https://kadeora.app/feed?${utmBase}" style="display:inline-block;padding:12px 36px;border-radius:10px;background:#3B7BF6;color:#FFFFFF;font-size:15px;font-weight:700;text-decoration:none;">
+      <a href="${SITE_URL}/feed?${utmBase}" style="display:inline-block;padding:12px 36px;border-radius:10px;background:#3B7BF6;color:#FFFFFF;font-size:15px;font-weight:700;text-decoration:none;">
         카더라 둘러보기 →
       </a>
     </div>
@@ -303,13 +304,13 @@ export function contentRecommendBody({ nickname, posts }: {
           <span style="font-size:11px;color:#94A3B8;">${catLabel[p.category] || '📝 분석'}</span>
           <span style="font-size:11px;color:#CBD5E1;">조회 ${p.view_count?.toLocaleString()}</span>
         </div>
-        <a href="https://kadeora.app/blog/${p.slug}?${utmBase}" style="font-size:14px;color:#334155;text-decoration:none;line-height:1.5;font-weight:500;">
+        <a href="${SITE_URL}/blog/${p.slug}?${utmBase}" style="font-size:14px;color:#334155;text-decoration:none;line-height:1.5;font-weight:500;">
           ${p.title}
         </a>
       </div>
     `).join('')}
     <div style="text-align:center;margin:24px 0 0;">
-      <a href="https://kadeora.app/blog?${utmBase}" style="display:inline-block;padding:12px 36px;border-radius:10px;background:#3B7BF6;color:#FFFFFF;font-size:15px;font-weight:700;text-decoration:none;">
+      <a href="${SITE_URL}/blog?${utmBase}" style="display:inline-block;padding:12px 36px;border-radius:10px;background:#3B7BF6;color:#FFFFFF;font-size:15px;font-weight:700;text-decoration:none;">
         더 많은 분석 보기 →
       </a>
     </div>
@@ -330,7 +331,7 @@ export function onboardingNudgeEmail({
   variant: 'd1' | 'd3';
 }): { subject: string; html: string } {
   const utmBase = `utm_source=email&utm_medium=onboarding-nudge&utm_campaign=${variant}`;
-  const onboardingUrl = `https://kadeora.app/onboarding?return=/feed&${utmBase}`;
+  const onboardingUrl = `${SITE_URL}/onboarding?return=/feed&${utmBase}`;
   const unsubUrl = buildUnsubUrl(email);
 
   const subject = variant === 'd1'

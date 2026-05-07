@@ -4,6 +4,7 @@ import Link from 'next/link';
 import type { CalcMeta, CalcInput } from '@/lib/calc/registry';
 import { FORMULAS, type CalcResult } from '@/lib/calc/formulas';
 import { useAuth } from '@/components/AuthProvider';
+import { SITE_URL } from '@/lib/constants';
 
 const card: React.CSSProperties = { background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20, marginBottom: 14 };
 const label: React.CSSProperties = { fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', display: 'block', marginBottom: 6 };
@@ -177,7 +178,7 @@ export default function CalcEngine({ calc }: { calc: CalcMeta }) {
               } catch {
                 // 폴백 — 일반 공유
                 const text = `${calc.titleShort} 결과: ${result.main.value}\n${result.details.map(d => `${d.label}: ${d.value}`).join('\n')}\n\n카더라에서 계산해보기`;
-                const url = `https://kadeora.app/calc/${calc.category}/${calc.slug}`;
+                const url = `${SITE_URL}/calc/${calc.category}/${calc.slug}`;
                 if (navigator.share) navigator.share({ title: calc.titleShort, text, url }).catch(() => {});
                 else navigator.clipboard.writeText(text + '\n' + url).then(() => alert('복사되었습니다!'));
               }

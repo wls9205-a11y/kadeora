@@ -385,3 +385,90 @@ Server Component 페이지의 BAILOUT 진단 + fix 순서:
 - PostgREST CASE 정렬 불가 → JS 측 post-sort 사용.
 
 **Discovered**: s238 (2026-05-07) — finance/unsold 카테고리가 view 평균 높지만 sitemap order 무차별 → 신선도 낮은 일반 글이 위로 와서 네이버 색인 누락.
+
+## Rule #36 — SITE_URL 사용 의무 (s239 신설)
+
+**Symptom**: `https://kadeora.app/...` 직접 박힌 코드 17 파일. 도메인 변경 시 일괄 수정 불가, 환경별 staging URL 차별화 불가.
+
+**Rule**:
+- 코드 안 `https://kadeora.app/...` 직접 박지 말 것.
+- `import { SITE_URL } from '@/lib/constants'` 후 `${SITE_URL}/...` 사용.
+- 예외: User-Agent header 의 `(+https://kadeora.app)` 는 브랜딩 식별자 — keep.
+- 검증: `grep -rn "'https://kadeora.app/" src/` 결과 = User-Agent 만.
+
+**Discovered**: s239 (2026-05-07) — 17 파일 + 33 occurrences 통일.
+
+## Rule #37 — NEXT_PUBLIC_SUPABASE_URL env var 사용 (s239 신설)
+
+**Rule**:
+- layout.tsx 등에 supabase URL 직접 박지 말 것.
+- `process.env.NEXT_PUBLIC_SUPABASE_URL ?? '<hardcoded fallback>'` 패턴.
+- 빌드 타임 치환 + env 미설정 시 안전 fallback.
+
+## Rule #38 — OG 토큰 단일 source `src/lib/og-tokens.ts` (s239 신설)
+
+**Rule**:
+- 6 OG route (og/og-apt/og-blog/og-square/og-image/og-stock) 모두 `OG_CAT` import.
+- 색상/라벨/아이콘 변경 시 이 파일만 수정.
+- 새 OG route 추가 시 반드시 OG_CAT import + `getOgCat(key)` fallback.
+
+**`OgCategoryToken` 필드**: color / dim / bg [3-stop] / label / code / icon.
+
+## Rule #39 — console.error 분할 출력 (s239 신설)
+
+**Symptom**: Vercel runtime log 1 row 길이 제한 (~250 chars). 단일 호출로 message + stack + input 묶어 보내면 stack/input 부분 truncated.
+
+**Rule**:
+- 패턴: 한 줄에 한 정보만.
+  ```ts
+  console.error('[name] message=', e?.message);
+  console.error('[name] stack=', e?.stack);
+  console.error('[name] class=', e?.constructor?.name);
+  console.error('[name] input=', JSON.stringify({...}));
+  ```
+- prefix `[route-name]` 통일 (grep 용이).
+- 단일 console.error 에 `stack=`, `class=` 등 함께 넣지 말 것.
+
+**Discovered**: s239 (2026-05-07) — /api/og + /api/og-blog throw 메시지 진단 시 단일 console.error 가 30자 자르고 stack/input 모두 사라짐 발견.
+
+## Rule #40 — light mode `!important` body/html 만 제거 (s239 신설)
+
+**Symptom**: light mode 의 background/color !important 가 component override 차단 (specificity 깨짐).
+
+**Rule**:
+- `html.theme-light body` 의 `!important` 제거. 다른 component 가 override 가능.
+- 단, `input/textarea/select` 의 `!important` 는 keep — third-party form widget (kakao/google/toss) 호환.
+- font-size adjust (`html.font-large` 등) 의 `!important` 도 keep — 사용자 접근성 우선.
+
+## Rule #41 — onboarded 컬럼 변경 권한 (s239 신설)
+
+**Symptom**: 카카오 24h 가입자 100% onboarded=TRUE / residence=NULL — ResidenceNudgeModal 작동 0건. /onboarding 페이지 redirect path 무용.
+
+**Cause**: `auto_rescue_stuck_users` RPC 가 가입 5분 후 모든 사용자 강제 onboarded=TRUE. + MarketingConsentModal/profile/consent route 가 동의 시 onboarded:true 함께 update.
+
+**Rule**:
+
+`onboarded=TRUE` 설정 권한은 **단 두 곳**:
+1. `complete_onboarding` RPC — 사용자가 `/onboarding` 페이지 완료 시 (거주지 + 관심사 + 마케팅 동의 manual)
+2. `auto_rescue_stuck_users` RPC — 가입 24h 후 fallback (조건: residence_city OR interests >= 1)
+
+**금지 위치** (s239 적용):
+- `handle_new_user_autoprofile` trigger — `onboarded=FALSE` 로 INSERT (이미 OK)
+- `complete_signup_frictionless` RPC — onboarded 변경 금지 (이미 OK)
+- `MarketingConsentModal.tsx` — 동의/거부 모두 onboarded 변경 금지 (s239 W1.A fix)
+- `profile/consent/route.ts` — onboarded body 무시 (s239 W1.D fix)
+- 기타 client/server 코드 일체 — 직접 update 금지
+
+**How to apply**:
+- 새 trigger/RPC 추가 시 onboarded 변경 코드 review 필수.
+- ResidenceNudgeModal 등 onboarded=FALSE + residence=NULL 조건 사용하는 컴포넌트는 path 보존 검증.
+
+**Discovered**: s239 (2026-05-07) — auto_rescue 5분 → 24h + 조건 추가, 2 client + 1 server route fix.
+
+## Rule #42 — 메인 페이지 ISR `revalidate=600` (s239 신설)
+
+**Rule**:
+- `/apt`, `/blog`, `/stock` 메인 페이지: `export const revalidate = 600` (10분 ISR).
+- cold start 감소 + 봇 캐시 hit rate 향상.
+- 단지/글 상세 페이지는 `force-static` (Rule #32 / s238 적용).
+- 더 짧은 revalidate (60s) 는 트래픽 적은 페이지 한정 — 봇 hit rate 가 cold start 비용 못 갚음.

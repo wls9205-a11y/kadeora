@@ -3,6 +3,8 @@ import { NextRequest } from 'next/server';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { OG_CAT } from '@/lib/og-tokens';
+import { SITE_URL } from '@/lib/constants';
 
 export const runtime = 'nodejs';
 export const maxDuration = 30;
@@ -18,14 +20,6 @@ function loadFont(): ArrayBuffer | null {
 }
 
 const SIDE = 630;
-
-const CATEGORY_LABEL: Record<string, string> = {
-  apt: '부동산',
-  stock: '주식',
-  unsold: '미분양',
-  finance: '재테크',
-  general: '뉴스',
-};
 
 interface BlogRow {
   slug: string;
@@ -96,7 +90,8 @@ function fmtDate(s?: string | null): string {
 
 function renderCover(post: BlogRow): React.ReactElement {
   const title = safeStr(post.title) || safeStr(post.slug) || '카더라 콘텐츠';
-  const cat = CATEGORY_LABEL[safeStr(post.category)] || '카더라';
+  const catKey = safeStr(post.category);
+  const cat = catKey && OG_CAT[catKey] ? OG_CAT[catKey].label : '카더라';
   const sub = safeStr(post.sub_category);
   const titleFS = title.length > 30 ? 36 : title.length > 22 ? 44 : title.length > 14 ? 56 : 68;
   return (
@@ -266,6 +261,6 @@ export async function GET(req: NextRequest) {
     console.error('[og-blog] class=', e?.constructor?.name);
     console.error('[og-blog] code=', (err as any)?.code);
     console.error('[og-blog] input=', JSON.stringify({ slug, card, fontLoaded: !!fontData, hasPost: !!post, postCategory: post?.category, titleLen: post?.title?.length }));
-    return Response.redirect('https://kadeora.app/images/brand/kadeora-hero.png', 302);
+    return Response.redirect(`${SITE_URL}/images/brand/kadeora-hero.png`, 302);
   }
 }

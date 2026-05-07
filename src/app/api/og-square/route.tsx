@@ -2,23 +2,13 @@ import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { OG_CAT as CAT } from '@/lib/og-tokens';
 
 export const runtime = 'nodejs';
 export const maxDuration = 30;
 
 // og-square: 630×630 — 네이버 모바일 1:1 크롭 전용
 // 모든 핵심 정보가 중앙 100%에 집중 → 크롭 손실 없음
-
-const CAT: Record<string, { color: string; dim: string; bg: [string,string,string]; label: string; icon: string; en: string }> = {
-  apt:     { color: '#00FF87', dim: 'rgba(0,255,135,0.15)',   bg: ['#010804','#031509','#05230E'], label: '청약·분양',   icon: '🏢', en: 'APT' },
-  stock:   { color: '#00E5FF', dim: 'rgba(0,229,255,0.15)',   bg: ['#010508','#031020','#051830'], label: '주식·시세',   icon: '📈', en: 'STOCK' },
-  finance: { color: '#FFE000', dim: 'rgba(255,224,0,0.15)',   bg: ['#070500','#140E00','#201500'], label: '재테크·절세', icon: '💰', en: 'FINANCE' },
-  unsold:  { color: '#FF6B1A', dim: 'rgba(255,107,26,0.15)',  bg: ['#070100','#140500','#210900'], label: '미분양',      icon: '⚠️', en: 'UNSOLD' },
-  general: { color: '#C084FC', dim: 'rgba(192,132,252,0.15)', bg: ['#030108','#080518','#0D0825'], label: '생활정보',   icon: '📰', en: 'INFO' },
-  blog:    { color: '#C084FC', dim: 'rgba(192,132,252,0.15)', bg: ['#030108','#080518','#0D0825'], label: '블로그',      icon: '✍️', en: 'BLOG' },
-  local:   { color: '#FFD43B', dim: 'rgba(255,212,59,0.15)',  bg: ['#080700','#141000','#201800'], label: '우리동네',   icon: '📍', en: 'LOCAL' },
-  free:    { color: '#F472B6', dim: 'rgba(244,114,182,0.15)', bg: ['#080210','#130820','#1E0F30'], label: '자유',        icon: '💬', en: 'FREE' },
-};
 
 // 카테고리별 대표 수치 (제목 없이 수치를 자동 표시)
 const CAT_KPI: Record<string, { kw: string; kwv: string }> = {
@@ -107,7 +97,7 @@ export async function GET(req: NextRequest) {
             <LogoSVG size={26} />
             <span style={{ fontSize: 'var(--fs-lg)', fontWeight: 900, color: '#000' }}>카더라</span>
           </div>
-          <span style={{ fontSize: 'var(--fs-lg)', fontWeight: 900, color: '#000', letterSpacing: 1 }}>{C.icon}  {C.en}</span>
+          <span style={{ fontSize: 'var(--fs-lg)', fontWeight: 900, color: '#000', letterSpacing: 1 }}>{C.icon}  {C.code}</span>
         </div>
 
         {/* 스트라이프 2: 핵심 수치 */}

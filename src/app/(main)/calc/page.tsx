@@ -31,7 +31,7 @@ export default function CalcHubPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org', '@type': 'BreadcrumbList',
         itemListElement: [
-          { '@type': 'ListItem', position: 1, name: '카더라', item: 'https://kadeora.app' },
+          { '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL },
           { '@type': 'ListItem', position: 2, name: '계산기' },
         ],
       })}} />
@@ -40,8 +40,8 @@ export default function CalcHubPage() {
         name: '카더라 무료 계산기', applicationCategory: 'FinanceApplication',
         operatingSystem: 'Web', offers: { '@type': 'Offer', price: '0', priceCurrency: 'KRW' },
         description: '세금, 부동산, 주식, 대출, 연금 계산기 무료 제공. 청약 가점, 양도세, 종합소득세, 복리 계산 등.',
-        url: 'https://kadeora.app/calc',
-        provider: { '@type': 'Organization', name: '카더라', url: 'https://kadeora.app' },
+        url: `${SITE_URL}/calc`,
+        provider: { '@type': 'Organization', name: '카더라', url: SITE_URL },
       })}} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org', '@type': 'ItemList',
@@ -49,9 +49,9 @@ export default function CalcHubPage() {
         numberOfItems: CALC_REGISTRY.length,
         itemListElement: CALC_REGISTRY.slice(0, 10).map((c, i) => ({
           '@type': 'ListItem', position: i + 1,
-          url: 'https://kadeora.app/calc/' + c.category + '/' + c.slug,
+          url: `${SITE_URL}/calc/` + c.category + '/' + c.slug,
           name: c.title,
-          image: 'https://kadeora.app/api/og?title=' + encodeURIComponent(c.title) + '&design=2&category=calc',
+          image: `${SITE_URL}/api/og?title=` + encodeURIComponent(c.title) + '&design=2&category=calc',
         })),
       })}} />
     <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 var(--sp-lg)' }}>

@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
 import { setOAuthToken, getValidAccessToken, listOAuthProviders, deleteOAuthProvider } from '@/lib/naver/oauth-store';
 import { postCafeArticle } from '@/lib/naver/cafe-client';
+import { SITE_URL } from '@/lib/constants';
 
 export const dynamic = 'force-dynamic';
 
@@ -86,7 +87,7 @@ export async function PUT(req: NextRequest) {
     if (!cafeId || !menuId) return NextResponse.json({ error: 'cafe_or_menu_id_missing' }, { status: 400 });
 
     const subject = testSubject || `[테스트] 카더라 카페 발행 테스트 ${new Date().toLocaleString('ko-KR')}`;
-    const content = testContent || `<p>안녕하세요. 카더라 자동 발행 한글 테스트입니다.</p><p>이모지: 🏠 📊 💰 — 가나다라마바사</p><p><a href="https://kadeora.app">카더라 (kadeora.app)</a></p>`;
+    const content = testContent || `<p>안녕하세요. 카더라 자동 발행 한글 테스트입니다.</p><p>이모지: 🏠 📊 💰 — 가나다라마바사</p><p><a href="${SITE_URL}">카더라 (kadeora.app)</a></p>`;
 
     const result = await postCafeArticle({
       accessToken: tokenInfo.token,

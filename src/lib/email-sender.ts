@@ -5,6 +5,7 @@
  */
 
 import { buildUnsubUrl } from './email-templates';
+import { SITE_URL } from '@/lib/constants';
 
 let resendInstance: any = null;
 
@@ -64,7 +65,7 @@ function wrapEmailTemplate(to: string, subject: string, body: string): string {
 <tr><td align="center" style="padding:32px 16px 40px;">
 <table width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;">
 <tr><td style="padding:0 0 20px;text-align:center;">
-  <a href="https://kadeora.app?utm_source=email" style="text-decoration:none;">
+  <a href="${SITE_URL}?utm_source=email" style="text-decoration:none;">
     <span style="font-size:22px;font-weight:900;color:#1E293B;letter-spacing:-0.5px;">카더라</span>
     <span style="font-size:11px;color:#94A3B8;margin-left:4px;">kadeora.app</span>
   </a>
@@ -80,7 +81,7 @@ function wrapEmailTemplate(to: string, subject: string, body: string): string {
   <p style="font-size:12px;margin:0;">
     <a href="${unsubUrl}" style="color:#64748B;text-decoration:underline;">수신거부</a>
     <span style="color:#CBD5E1;margin:0 8px;">·</span>
-    <a href="https://kadeora.app/notifications/settings?utm_source=email" style="color:#64748B;text-decoration:underline;">알림 설정</a>
+    <a href="${SITE_URL}/notifications/settings?utm_source=email" style="color:#64748B;text-decoration:underline;">알림 설정</a>
   </p>
   <p style="font-size:11px;color:#CBD5E1;margin:16px 0 0;">
     © 2026 카더라 · 부산광역시 연제구 연동로 27

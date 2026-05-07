@@ -3,6 +3,8 @@ import { NextRequest } from 'next/server';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { OG_CAT } from '@/lib/og-tokens';
+import { SITE_URL } from '@/lib/constants';
 
 export const runtime = 'nodejs';
 export const maxDuration = 30;
@@ -274,13 +276,14 @@ function renderSpec(site: AptRow): React.ReactElement {
 }
 
 function renderFallback(slug: string | null): React.ReactElement {
+  const aptLabel = OG_CAT.apt.label;
   return (
     <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', padding: 56, justifyContent: 'space-between', background: '#1A1A18' }}>
       <div style={{ fontSize: 22, color: '#FAC775', fontWeight: 800 }}>카더라 · kadeora.app</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         <div style={{ width: 56, height: 4, background: '#FAC775' }} />
         <div style={{ fontSize: 64, fontWeight: 900, color: '#FFFFFF', lineHeight: 1.1, letterSpacing: -2 }}>단지 정보</div>
-        <div style={{ fontSize: 22, color: 'rgba(255,255,255,0.66)', fontWeight: 600 }}>{slug ? `slug=${slug}` : '대한민국 부동산 커뮤니티'}</div>
+        <div style={{ fontSize: 22, color: 'rgba(255,255,255,0.66)', fontWeight: 600 }}>{slug ? `slug=${slug}` : `대한민국 ${aptLabel} 커뮤니티`}</div>
       </div>
       <div style={{ fontSize: 18, color: 'rgba(255,255,255,0.55)', fontWeight: 700 }}>주식·부동산 소리소문 커뮤니티</div>
     </div>
@@ -357,6 +360,6 @@ export async function GET(req: NextRequest) {
     console.error('[og-apt] class=', e?.constructor?.name);
     console.error('[og-apt] code=', (err as any)?.code);
     console.error('[og-apt] input=', JSON.stringify({ slug, card, fontLoaded: !!fontData, hasSite: !!site, siteType: site?.site_type, nameLen: site?.name?.length }));
-    return Response.redirect('https://kadeora.app/images/brand/kadeora-hero.png', 302);
+    return Response.redirect(`${SITE_URL}/images/brand/kadeora-hero.png`, 302);
   }
 }

@@ -21,7 +21,7 @@ function highlightTitle(title: string, query: string): React.ReactNode {
 }
 
 export const maxDuration = 60;
-export const revalidate = 300;
+export const revalidate = 600; // s239 W5: 10분 ISR (cold start ↓ + 봇 캐시 hit ↑)
 
 import { SITE_URL as SITE } from '@/lib/constants';
 

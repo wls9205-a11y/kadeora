@@ -38,9 +38,8 @@ export async function POST(req: NextRequest) {
       update.night_consent = night;
       if (night) update.night_consent_at = now;
     }
-    if (typeof onboarded === 'boolean') {
-      update.onboarded = onboarded;
-    }
+    // s239 W1.D: onboarded 는 이 endpoint 에서 변경 금지. /onboarding 완료 시점만 변경.
+    // (auto_rescue_stuck_users RPC 가 24h 후 fallback 으로 처리 — Rule #41)
 
     const admin = getSupabaseAdmin();
 

@@ -643,9 +643,10 @@ html.theme-light {
   --shadow-xl: 0 16px 40px rgba(0,0,0,0.15);
   color-scheme: light;
 }
+/* s239 W6: body/html !important 제거 — specificity 충돌 풀면서 component override 가능. input/textarea 는 third-party 호환 위해 keep. */
 html.theme-light body {
-  background: #F5F7FA !important;
-  color: #111827 !important;
+  background: #F5F7FA;
+  color: #111827;
 }
 html.theme-light input,
 html.theme-light textarea,
@@ -2234,4 +2235,17 @@ html[data-theme="light"] {
   .apt-gallery-thumbs {
     display: grid; grid-template-rows: 1fr 1fr; grid-template-columns: 1fr 1fr; gap: 4px;
   }
+}
+
+/* s239 W7: apt-* 모바일 sizing 보강 (480px 이하) — section title 작게 + 카드 padding 줄임 */
+@media (max-width: 480px) {
+  .apt-section-title { font-size: var(--fs-base); }
+  .apt-card-v2 { padding: 10px 12px; margin-bottom: var(--sp-md); }
+  .apt-imminent-card { flex-basis: 150px; }
+  .apt-category-card { padding: 10px 8px; }
+  .apt-dday-card { padding: 12px 14px; margin: 0 12px var(--sp-md); }
+  .apt-dday-number { font-size: 24px; }
+  .apt-kpi-grid { padding: 0 12px; }
+  .apt-kpi-card { padding: 10px 12px; }
+  .apt-kpi-number { font-size: 18px; }
 }

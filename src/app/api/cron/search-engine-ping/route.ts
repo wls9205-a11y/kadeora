@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withCronAuthFlex } from '@/lib/cron-auth';
 import { withCronLogging } from '@/lib/cron-logger';
+import { SITE_URL } from '@/lib/constants';
 
 export const runtime = 'nodejs';
 export const maxDuration = 30;
 
-const SITEMAP = 'https://kadeora.app/sitemap.xml';
+const SITEMAP = `${SITE_URL}/sitemap.xml`;
 
 async function pingOne(url: string, label: string): Promise<{ label: string; status: number | string }> {
   try {

@@ -26,7 +26,7 @@ import {
 import type { AptFilters, AptCategory } from '@/lib/apt-fetcher';
 
 export const dynamic = 'force-dynamic';
-export const revalidate = 60;
+export const revalidate = 600; // s239 W5: 10분 ISR (cold start ↓ + 봇 캐시 hit ↑)
 export const maxDuration = 30;
 
 function tabToCategory(tab: string | undefined): AptCategory {

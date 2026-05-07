@@ -97,8 +97,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="icon" href="/favicon.png" type="image/png" sizes="32x32" />
         {/* Preconnect — 주요 외부 도메인 DNS/TLS 선행 연결 (LCP 개선) */}
-        <link rel="preconnect" href="https://tezftxakuwhsclarprlz.supabase.co" />
-        <link rel="dns-prefetch" href="https://tezftxakuwhsclarprlz.supabase.co" />
+        {/* s239 W3: env var 우선, 미설정 시 hardcoded fallback */}
+        <link rel="preconnect" href={process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'https://tezftxakuwhsclarprlz.supabase.co'} />
+        <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'https://tezftxakuwhsclarprlz.supabase.co'} />
         <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
         <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="anonymous" />

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
+import { SITE_URL } from '@/lib/constants';
 
 export const maxDuration = 120;
 
@@ -115,7 +116,7 @@ ${avgJR > 65 ? `${sigungu}의 전세가율이 ${avgJR}%로 높은 편이므로, 
         category: 'apt',
         tags,
         source_type: 'monthly-report',
-        cover_image: `https://kadeora.app/api/og?title=${encodeURIComponent(`${monthLabel} ${sigungu} 시황`)}&design=${1 + Math.floor(Math.random() * 6)}&subtitle=${encodeURIComponent(`평균 ${fmtAmt(avgPrice)} · 거래 ${totalTrades}건`)}&author=${encodeURIComponent('카더라')}&category=apt`,
+        cover_image: `${SITE_URL}/api/og?title=${encodeURIComponent(`${monthLabel} ${sigungu} 시황`)}&design=${1 + Math.floor(Math.random() * 6)}&subtitle=${encodeURIComponent(`평균 ${fmtAmt(avgPrice)} · 거래 ${totalTrades}건`)}&author=${encodeURIComponent('카더라')}&category=apt`,
         image_alt: `${monthLabel} ${sigungu} 아파트 시장 동향 분석`,
         is_published: true,
       });

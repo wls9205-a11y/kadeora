@@ -4,6 +4,7 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { SITE_URL } from '@/lib/constants';
+import { OG_CAT } from '@/lib/og-tokens';
 
 export const runtime = 'nodejs';
 export const maxDuration = 30;
@@ -275,11 +276,12 @@ function AICard(q: QuoteRow, ff: string) {
 }
 
 function FallbackCard(symbol: string | null, ff: string) {
+  const stockAccent = OG_CAT.stock.color;
   return (
     <div style={{ width:'100%', height:'100%', display:'flex', flexDirection:'column', background:'#0F1B3E', fontFamily: ff, padding:'56px 64px', justifyContent:'space-between' }}>
-      <div style={{ fontSize:22, color:'#00E5FF', fontWeight:900, letterSpacing:2 }}>📈 카더라 주식</div>
+      <div style={{ fontSize:22, color:stockAccent, fontWeight:900, letterSpacing:2 }}>{OG_CAT.stock.icon} 카더라 주식</div>
       <div style={{ display:'flex', flexDirection:'column', gap:18 }}>
-        <div style={{ width:60, height:5, background:'#00E5FF', borderRadius:999 }} />
+        <div style={{ width:60, height:5, background:stockAccent, borderRadius:999 }} />
         <div style={{ fontSize:64, fontWeight:900, color:'#fff', letterSpacing:-2, lineHeight:1.05 }}>{symbol || '주식 종목'}</div>
         <div style={{ fontSize:22, color:'rgba(255,255,255,.55)', fontWeight:700 }}>실시간 시세 · 차트 · 수급 · 재무 · AI 분석</div>
       </div>

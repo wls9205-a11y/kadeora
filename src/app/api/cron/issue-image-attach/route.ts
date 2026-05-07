@@ -20,6 +20,7 @@ import { withCronAuthFlex } from '@/lib/cron-auth';
 import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { runImagePipeline, type PostContext } from '@/lib/image-pipeline';
+import { SITE_URL } from '@/lib/constants';
 
 export const maxDuration = 300;
 export const runtime = 'nodejs';
@@ -117,7 +118,7 @@ async function handler(_req: NextRequest) {
               : [...(issue.draft_keywords || []), '카더라', category].slice(0, 5);
             const excerptForCheck = (issue.summary || enriched.slice(0, 180)).slice(0, 240);
             const metaDescForCheck = (issue.summary || enriched.replace(/[#*>`|]/g, '').slice(0, 155)).slice(0, 160);
-            const coverForCheck = `https://kadeora.app/api/og?title=${encodeURIComponent(issue.draft_title?.slice(0, 40) || '')}&category=${category}`;
+            const coverForCheck = `${SITE_URL}/api/og?title=${encodeURIComponent(issue.draft_title?.slice(0, 40) || '')}&category=${category}`;
             const { data: dry } = await (sb as any).rpc('validate_blog_post_dry_run', {
               p_title: issue.draft_title,
               p_slug: issue.draft_slug || `issue-${issue.id}`,

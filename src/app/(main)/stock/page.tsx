@@ -2,7 +2,7 @@
 import { SITE_URL } from '@/lib/constants';
 import type { Metadata } from 'next';
 
-export const revalidate = 60;
+export const revalidate = 600; // s239 W5: 10분 ISR (cold start ↓ + 봇 캐시 hit ↑)
 
 const SECTION_META: Record<string, { title: string; desc: string }> = {
   'stock-kr':      { title: '국내 주식 시세', desc: 'KOSPI·KOSDAQ 실시간 시세와 등락률을 확인하세요' },

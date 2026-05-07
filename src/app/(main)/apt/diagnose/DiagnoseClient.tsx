@@ -4,6 +4,7 @@ import Link from 'next/link';
 import SectionShareButton from '@/components/SectionShareButton';
 import { trackFeature } from '@/lib/analytics';
 import { useAuth } from '@/components/AuthProvider';
+import { SITE_URL } from '@/lib/constants';
 
 const HT = [
   {min:0,max:1,s:2},{min:1,max:2,s:4},{min:2,max:3,s:6},{min:3,max:4,s:8},{min:4,max:5,s:10},{min:5,max:6,s:12},{min:6,max:7,s:14},{min:7,max:8,s:16},
@@ -163,7 +164,7 @@ export default function DiagnoseClient() {
             <div style={{display:'flex',gap:8,justifyContent:'center'}}>
               <button onClick={()=>{
                 const text=`내 청약 가점: ${total}점/84점 (${grade.l})\n무주택 ${hs}/32 · 부양가족 ${fs}/35 · 통장 ${bs}/17\n추천전략: ${strategy.t}\n\n카더라에서 내 가점 진단해보기`;
-                const url='https://kadeora.app/apt/diagnose';
+                const url=`${SITE_URL}/apt/diagnose`;
                 if(typeof window!=='undefined'&&(window as unknown as Record<string,unknown>).Kakao){try{((window as unknown as Record<string,unknown>).Kakao as Record<string,unknown> as {Share:{sendDefault:(o:unknown)=>void}}).Share.sendDefault({objectType:'feed',content:{title:'청약 가점 진단 결과',description:text.slice(0,100),imageUrl:`${url.replace('/apt/diagnose','')}/api/og?title=${encodeURIComponent('청약 가점 '+total+'점')}`,link:{mobileWebUrl:url,webUrl:url}}});}catch{navigator.share?.({title:'청약 가점 진단',text,url}).catch(()=>{});}}
                 else if(navigator.share)navigator.share({title:'청약 가점 진단 결과',text,url}).catch(()=>{});
                 else navigator.clipboard.writeText(text+'\n'+url).then(()=>alert('복사되었습니다!'));

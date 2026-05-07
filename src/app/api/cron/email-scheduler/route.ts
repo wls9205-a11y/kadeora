@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { sendNotificationEmail } from '@/lib/email-sender';
-import { ADMIN_INFRA } from '@/lib/constants';
+import { ADMIN_INFRA, SITE_URL } from '@/lib/constants';
 import {
   welcomeBody,
   onboardingGuideBody,
@@ -104,7 +104,7 @@ export async function GET(req: NextRequest) {
             subject: `🏠 청약 마감 임박: ${deadlines[0].house_nm}`,
             body: `<p style="font-size:15px;color:#1E293B;margin:0 0 12px;">${p.nickname || '회원'}님, 관심 단지 청약이 곧 마감됩니다!</p>
               <p style="font-size:14px;color:#DC2626;font-weight:500;margin:0 0 16px;">마감 임박: ${items}</p>
-              <div style="text-align:center;"><a href="https://kadeora.app/apt?utm_source=email&utm_medium=deadline" style="display:inline-block;padding:12px 36px;border-radius:10px;background:#3B7BF6;color:#fff;font-size:15px;font-weight:700;text-decoration:none;">청약 일정 확인 →</a></div>`,
+              <div style="text-align:center;"><a href="${SITE_URL}/apt?utm_source=email&utm_medium=deadline" style="display:inline-block;padding:12px 36px;border-radius:10px;background:#3B7BF6;color:#fff;font-size:15px;font-weight:700;text-decoration:none;">청약 일정 확인 →</a></div>`,
           });
         }
       }
@@ -191,7 +191,7 @@ export async function GET(req: NextRequest) {
         subject: `${p.nickname || '회원'}님, 새 분석이 기다리고 있어요 📊`,
         body: `<p style="font-size:15px;color:#1E293B;margin:0 0 12px;">${p.nickname || '회원'}님, 안녕하세요!</p>
           <p style="font-size:14px;color:#64748B;line-height:1.7;margin:0 0 20px;">카더라에 새로운 분석과 청약 정보가 기다리고 있어요.</p>
-          <div style="text-align:center;"><a href="https://kadeora.app/feed?utm_source=email&utm_medium=churn&utm_campaign=d7" style="display:inline-block;padding:12px 36px;border-radius:10px;background:#3B7BF6;color:#fff;font-size:15px;font-weight:700;text-decoration:none;">카더라 바로가기 →</a></div>`,
+          <div style="text-align:center;"><a href="${SITE_URL}/feed?utm_source=email&utm_medium=churn&utm_campaign=d7" style="display:inline-block;padding:12px 36px;border-radius:10px;background:#3B7BF6;color:#fff;font-size:15px;font-weight:700;text-decoration:none;">카더라 바로가기 →</a></div>`,
       });
     }
 
@@ -208,7 +208,7 @@ export async function GET(req: NextRequest) {
         subject: `${p.nickname || '회원'}님, 혹시 놓치셨나요?`,
         body: `<p style="font-size:15px;color:#1E293B;margin:0 0 12px;">${p.nickname || '회원'}님, 오랜만이에요!</p>
           <p style="font-size:14px;color:#64748B;line-height:1.7;margin:0 0 20px;">그동안 카더라에 많은 변화가 있었어요. 새 청약 일정과 종목 분석을 확인해보세요.</p>
-          <div style="text-align:center;"><a href="https://kadeora.app/feed?utm_source=email&utm_medium=churn&utm_campaign=d30" style="display:inline-block;padding:12px 36px;border-radius:10px;background:#3B7BF6;color:#fff;font-size:15px;font-weight:700;text-decoration:none;">카더라 다시 방문 →</a></div>`,
+          <div style="text-align:center;"><a href="${SITE_URL}/feed?utm_source=email&utm_medium=churn&utm_campaign=d30" style="display:inline-block;padding:12px 36px;border-radius:10px;background:#3B7BF6;color:#fff;font-size:15px;font-weight:700;text-decoration:none;">카더라 다시 방문 →</a></div>`,
       });
     }
 

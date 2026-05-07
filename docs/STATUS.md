@@ -1,4 +1,84 @@
-# 카더라 STATUS — 세션 239 Phase 0: LLM 사용량 추적 인프라 (2026-05-08 KST)
+# 카더라 STATUS — 세션 239: 하드코딩 정리 + onboarded 강제 source fix + OG 분할 진단 + 디자인 통합 (2026-05-07 KST)
+
+## s239 (2026-05-07) — 하드코딩 정리 + onboarded TRUE 강제 fix + OG 진단 + 디자인 토큰 통합
+
+### Phase 1 (3e0b73bb, 단독 commit)
+- W0: OG 3 endpoints catch block console.error 분할 출력 (Vercel log 1 row 길이 제한 우회)
+- 5분 후 Vercel runtime log 진단:
+  - `/api/og`: `Unexpected to...` (truncated, 8건/5min)
+  - `/api/og-blog`: `Cannot c...` (truncated, 13건/5min)
+  - `/api/og-apt`: catch 진입 0건 (정상)
+- MCP get_runtime_logs 의 Message 컬럼 ~30자 자름 — stack/input 풀 텍스트 미확보
+- s240 분리 결정: graceful fallback (302 → kadeora-hero.png) 작동 중, 사용자 망가짐 없음
+
+### Phase 2 진단 결과
+**카카오 24h 가입자 2명 모두 onboarded=true / has_res=false / interests=1.**
+진짜 source 확정: `auto_rescue_stuck_users` RPC — 가입 5분 후 모든 사용자 강제 onboarded=TRUE.
+
+### W1 (P0): onboarded TRUE 강제 source 4단계 fix
+- **W1.A** `MarketingConsentModal.tsx` (line 42, 86): handleSkip + handleAgree 의 `onboarded:true` body 제거
+- **W1.B** `src/components/signup/*` grep — 일치 없음. /onboarding/OnboardingClient.tsx 는 정식 권한 (Rule #41) — keep
+- **W1.C** Supabase migration `s239_w1c_auto_rescue_stuck_users_24h`:
+  - INTERVAL `5 minutes` → `24 hours`
+  - 추가 조건: `(residence_city IS NOT NULL OR array_length(interests, 1) >= 1)` — 사용자 의지 표명한 경우만 rescue
+- **W1.D** `src/app/api/profile/consent/route.ts` line 42: `update.onboarded = onboarded` 라인 제거 (body 의 onboarded 필드 무시)
+
+### W2: SITE_URL 17 파일 일괄 통일
+- `https://kadeora.app/...` → `${SITE_URL}/...` (33 occurrences)
+- 17 파일 (lib/email-templates, lib/email-sender, calc 페이지들, og-apt/og-blog, cron 5종, admin 2종)
+- User-Agent 3 곳 keep (image-hydrate, builder-watch, satellite — 브랜딩)
+- 잔여: og-image (W4 worker 가 처리), gsc-client.ts GSC_SITE_URL (별도 env, semantic 차이)
+
+### W3: layout.tsx Supabase URL env var
+- `process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'https://tezftxakuwhsclarprlz.supabase.co'` 패턴
+- preconnect + dns-prefetch 양쪽 적용
+
+### W4: OG 토큰 단일 source `src/lib/og-tokens.ts`
+- 신설: `OG_CAT` Record (9 categories: apt/stock/finance/unsold/redev/general/blog/local/free)
+- `OgCategoryToken` 필드: color/dim/bg/label/code/icon
+- `getOgCat(key)` safe fallback ('blog')
+- 6 OG route 모두 import (og/og-apt/og-blog/og-square/og-image/og-stock)
+- og-apt/og-blog/og-stock 는 domain-specific 라벨 (SITE_TYPE_LABEL 등) keep — partial swap
+
+### W5: 메인 페이지 ISR 활성화
+- /apt, /blog, /stock revalidate 60/300/60 → **600** (10분)
+- cold start ↓ + 봇 캐시 hit ↑
+
+### W6: light mode body/html `!important` 제거
+- `html.theme-light body` background/color `!important` 만 제거
+- input/textarea/select 는 third-party 호환 위해 keep
+
+### W7: apt-* 모바일 sizing 보강
+- 480px 이하 breakpoint 추가
+- apt-section-title fs-base, apt-card-v2 padding 10px 12px
+- imminent/category/dday/kpi 모두 mobile-first 조정
+
+### W8: ARCHITECTURE_RULES #36-#42 추가
+- #36 SITE_URL 의무 / #37 SUPABASE_URL env / #38 og-tokens 단일 source
+- #39 console.error 분할 / #40 !important 사용 금지 / #41 onboarded 변경 권한 / #42 메인 ISR
+
+### W10 (SQL migration): W1.C 가 이미 처리
+- `s239_w1c_auto_rescue_stuck_users_24h` migration 적용 완료
+
+### Pending (s240)
+- /api/og + /api/og-blog throw 메시지 풀텍스트 — Vercel 대시보드 직접 확인 후 fix
+- gsc-client.ts GSC_SITE_URL 변수명 통일 검토
+- og-image route 의 SITE_URL hardcoded 잔여 1건 (W4 가 partial swap)
+
+### 검증 (deploy 후 즉시)
+- `/api/og?card=hero&category=apt&title=test` 200 + image/png (W4 회귀 없음)
+- 메인 페이지 ISR: `curl -sI https://kadeora.app/apt` x-vercel-cache HIT (2번째 요청부터)
+- light mode toggle 시 /apt 배경 #F5F7FA 정상
+- grep `'https://kadeora.app/'` src/api 결과 = User-Agent 만
+
+### 검증 (24h 후) — W1 효과
+- 카카오 24h 가입자 onboarded=FALSE 70%+ (auto_rescue 24h 미만이라 자연스럽게 FALSE 우세)
+- residence/interests 등록한 사용자만 24h 후 TRUE
+- ResidenceNudgeModal mount 정상 (onboarded=FALSE + residence=NULL 조건 충족 시작)
+
+---
+
+# 카더라 STATUS — 세션 239 Phase 0: LLM 사용량 추적 인프라 (2026-05-08 KST, 다른 PC)
 
 ## s239 Phase 0 (2026-05-08) — LLM 사용량 추적 인프라
 
