@@ -1,3 +1,42 @@
+# 카더라 STATUS — s255 (2026-05-07 15:50) 🚨 og main D2~D6 임시 우회 재적용
+
+## 이번 세션 (s255) — s254 후속 throw 추가 발견
+
+### 진단 (s254 deployment 활성 후 5분간):
+- ✅ s254 fix 적용 검증: emoji icon 9건 한국어 1글자 (집/주/돈/미/재/뉴/글/동/톡)
+- ✅ s254 fix 적용 검증: repeating-linear-gradient 0건
+- 🚨 **잔여 throw 여전 발생** (15:36~15:43 다수)
+- 직접 테스트: /api/og?title=test&design=2
+  · 응답: x-matched-path /images/brand/kadeora-hero.png (fallback PNG)
+  · D2 자체가 throw → catch → 302 redirect
+
+### 잔여 위험 패턴 (D2 분석):
+- `<>...</>` React Fragment (L162) — satori 일부 미지원
+- `borderTop:'0.5px solid rgba(255,255,255,0.07)'` (L154) — sub-pixel border
+- `border:'0.5px solid ${C.color}55'` (L131) — sub-pixel border
+- 정확한 culprit 식별은 면밀한 isolation 필요 (별도 세션)
+
+### Fix (이번 commit) — 임시 우회 재적용:
+- D2~D6 case 5건 모두 D1으로 redirect (s242 commit 7bc391e5 패턴 재적용)
+- og throw 0 보장 + 디자인 다양성 임시 손실
+
+### Architecture Rule
+- **#60 추가**: OG ImageResponse 내 React Fragment `<>...</>` 사용 시 주의
+  · satori 일부 버전에서 미지원. `<div style={{display:'flex'}}>` 권장
+- **#61 추가**: OG ImageResponse 내 sub-pixel border (0.5px) 금지
+  · 1px 이상 또는 border 제거 권장
+
+## PENDING (별도 세션):
+1. D2~D6 각각 isolation 진단 (직접 호출 + chunked log 분석)
+   · 어떤 design이 throw 하는지 정확 식별
+   · 각 D 함수의 satori 미지원 패턴 격리
+2. 진짜 fix:
+   · React Fragment 제거 (D2 L162)
+   · sub-pixel border 정수화
+   · 또는 D2~D6 satori-friendly 재작성
+
+---
+
 # 카더라 STATUS — s254 (2026-05-07 15:15) 🚨 og main D2~D6 잔여 throw 진단/fix
 
 ## 이번 세션 (s254) — s253 deployment 활성 후 og throw 재발 진단
