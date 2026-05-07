@@ -14,6 +14,10 @@ import ShareButtons from '@/components/ShareButtons';
 import AptNearbyCompare from '@/components/AptNearbyCompare';
 import AptBookmarkButton from '@/components/AptBookmarkButton';
 import EngageRow from '@/components/EngageRow';
+import AptDDayCard from '@/components/apt/detail/AptDDayCard';
+import AptKpiGrid from '@/components/apt/detail/AptKpiGrid';
+import AptScheduleTimeline from '@/components/apt/detail/AptScheduleTimeline';
+import AptLocationMini from '@/components/apt/detail/AptLocationMini';
 
 const AptPriceTrendChart = dynamic(() => import('@/components/charts/AptPriceTrendChart'));
 const AptReviewSection = dynamic(() => import('@/components/AptReviewSection'));
@@ -542,6 +546,14 @@ export default async function ComplexDetailPage({ params }: Props) {
         </p>
       </section>
 
+      <AptLocationMini
+        address={profile?.address ?? null}
+        latitude={profile?.latitude ?? null}
+        longitude={profile?.longitude ?? null}
+        nearbyStation={profile?.nearby_station ?? null}
+        schoolDistrict={profile?.school_district ?? null}
+      />
+
       {/* s235 W11: narrative_text (단지 분석 HTML) */}
       {profile?.narrative_text && (
         <section className="apt-card-v2">
@@ -578,6 +590,26 @@ export default async function ComplexDetailPage({ params }: Props) {
             )}
           </div>
         </section>
+      )}
+
+      <AptKpiGrid
+        priceMin={profile?.price_min ?? null}
+        priceMax={profile?.price_max ?? null}
+        totalUnits={profile?.total_households ?? null}
+        moveInDate={profile?.move_in_date ?? profile?.completion_date ?? null}
+        builderRating={profile?.builder_rating ?? null}
+      />
+
+      {profile?.next_subscription_date && (
+        <AptDDayCard targetDate={profile.next_subscription_date} ctaHref="#alert" />
+      )}
+      {profile?.special_supply_date && (
+        <AptScheduleTimeline
+          specialDate={profile?.special_supply_date}
+          rank1Date={profile?.rank1_date}
+          rank2Date={profile?.rank2_date}
+          announceDate={profile?.announce_date}
+        />
       )}
 
       {/* ═══ 핵심 시세 요약 — 히어로 카드 ═══ */}

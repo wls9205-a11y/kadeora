@@ -33,6 +33,10 @@ import AptBlogStack from '@/components/apt/AptBlogStack';
 import AptCompareTable from '@/components/apt/AptCompareTable';
 import AptSidebar from '@/components/apt/AptSidebar';
 import AptPriceTrendCard from '@/components/apt/AptPriceTrendCard';
+import AptDDayCard from '@/components/apt/detail/AptDDayCard';
+import AptKpiGrid from '@/components/apt/detail/AptKpiGrid';
+import AptScheduleTimeline from '@/components/apt/detail/AptScheduleTimeline';
+import AptLocationMini from '@/components/apt/detail/AptLocationMini';
 
 const AptPriceTrendChart = dynamic(() => import('@/components/charts/AptPriceTrendChart'));
 const InterestRegistration = dynamic(() => import('@/components/InterestRegistration'));
@@ -828,6 +832,12 @@ export default async function AptUnifiedPage({ params }: Props) {
           </>
         );
       })()}
+
+      {/* s236: detail summary cards */}
+      <AptDDayCard targetDate={(site as any)?.rcept_endde || (site as any)?.subscription_open_date || sub?.rcept_endde} ctaHref="#" />
+      <AptKpiGrid priceMin={site?.price_min} priceMax={site?.price_max} totalUnits={site?.total_units ?? sub?.tot_supply_hshld_co} moveInDate={site?.move_in_date ?? sub?.mvn_prearnge_ym} builderRating={(site as any)?.builder_rating ?? (site as any)?.review_score} />
+      <AptScheduleTimeline specialDate={(site as any)?.special_supply_date || sub?.spsply_rcept_de} rank1Date={(site as any)?.rank1_date || sub?.rcept_bgnde} rank2Date={(site as any)?.rank2_date || sub?.rcept_endde} announceDate={(site as any)?.announce_date || sub?.przwner_presnatn_de} />
+      <AptLocationMini address={site?.address ?? sub?.hssply_adres ?? undefined} latitude={site?.latitude ?? undefined} longitude={site?.longitude ?? undefined} nearbyStation={site?.nearby_station ?? sub?.nearest_station ?? undefined} schoolDistrict={site?.school_district ?? sub?.nearest_school ?? undefined} />
 
       {/* Location */}
       <div className="apt-card"><h2 className="apt-section-title">📍 위치 정보</h2>

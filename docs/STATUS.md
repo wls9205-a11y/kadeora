@@ -1,3 +1,78 @@
+# 카더라 STATUS — 세션 236: /apt 메인+상세 디자인 + 조감도 우선 정책 (2026-05-07 KST)
+
+## s236 — /apt 메인+상세 전면 + cover image priority (11 worker 병렬, 단일 commit)
+
+### W-A DB (Supabase MCP 직접 적용)
+- `pick_apt_cover_image(p_site_id uuid)` RPC: 조감도(1)>모델(2)>현장(3)>naver(4)>일반(5)>위성(8)>OG_fallback(9)
+- `apt_complex_profiles.cover_image_url` 컬럼 추가
+- 39,431 단지 cover 재계산 (apt_sites 4,887 + complex 34,544)
+- 진짜 사진 2,758 (47%), OG fallback 1,779 (31%, backfill 대상), NULL 927 (19%)
+
+### W1 /apt 메인 6-section 재설계 (1,035 PV)
+- **신규 5 components** under `src/components/apt/home/`:
+  - AptHomeHero (위치 + 이번 주 청약 N개)
+  - AptImminentCarousel (D-7 amber swipe)
+  - AptCategoryGrid (분양중/미분양/재개발/실거래/단지백과/가점)
+  - AptRealtimeRanking (TOP 5, popularity_score 0.984)
+  - AptRegionalPriceGrid (시군구 +/- 트렌드)
+- /apt/page.tsx: home view 시 6-section, 카테고리 view 시 기존 V5 fallback
+
+### W2 /apt/[id] 단지 상세 (5,531 PV)
+- **신규 4 components** under `src/components/apt/detail/`:
+  - AptDDayCard (D-30 amber 28px 카운트다운)
+  - AptKpiGrid (분양가/세대수/입주/시공사 2x2)
+  - AptScheduleTimeline (특별/1/2/발표 4단계 progress)
+  - AptLocationMini (위치 mini + 주변 chip)
+- 4 컴포넌트 라인 837-840 삽입 (s235 W1 위치 정보 직전)
+
+### W3+W6+W8+W9 image strategy
+- **AptImageGallery.tsx (W3)**: normalize 강화 — satellite/og 필터 + priority sort
+- **AptHeroLarge.tsx (W6)**: `isSatellite()` / `isOgFallback()` 헬퍼 + "사진 준비중" badge + AptImagePlaceholder fallback
+- **신규 `_shared/AptImagePlaceholder.tsx` (W8)**: SVG building skyline gradient + "사진 준비중 · {name}"
+- **schema/apt.ts (W9)**: `buildSchemaImages()` — RealEstateListing.image 에 ImageObject[] (contentUrl + caption), 위성 차단 + priority sort
+
+### W4 cover-image-backfill cron
+- **신규** `src/app/api/cron/cover-image-backfill/route.ts` — withCronAuthFlex + withCronLogging
+- 매일 KST 03:30 (UTC 18:30) 실행. cover NULL 또는 OG fallback 인 단지 50개/회 backfill
+- 카카오 image search `${name} 조감도` → images jsonb prepend → pick_apt_cover_image RPC 재호출
+- pg_cron 등록: `s236_register_cover_image_backfill_pg_cron` migration
+
+### W5 globals.css (89 lines, 17 classes)
+- apt-home-hero / apt-home-imminent / apt-imminent-carousel / apt-imminent-card
+- apt-category-grid / apt-category-card (768+ 6 col)
+- apt-dday-card / apt-dday-number (28px amber)
+- apt-kpi-grid / apt-kpi-card / apt-kpi-number (2x2)
+- apt-timeline / apt-timeline-line / apt-timeline-step / apt-timeline-dot (.done/.active/.pending)
+- apt-gallery-desktop-grid / apt-gallery-thumbs (768+)
+
+### W7 /apt/complex/[name] 통합 (6,339 PV)
+- s235 W11 narrative_text/jeonse 활용 + s236 W2 컴포넌트 (DDay/Kpi/Timeline/LocationMini) 적용
+- main column 에 KpiGrid (line 595), Location (549), DDay/Timeline 조건부 (604/607)
+- profile var 사용. 데스크톱 sticky aside 보존
+
+### W10 popularity_score 재계산 (이전 sprint, 보고만)
+- correlation 0.52 → 0.984
+- 가중치: PV*0.5 + interest*5 + comment*10 + content_score*0.3
+
+### W11 /apt/complex/[name] 풍부 데이터 (s235 W11 carry-over)
+- narrative_text(78%) + jeonse_ratio(63%) + monthly_rent(69%) + total_households
+
+### Architecture Rule #30 (신규)
+/apt cover image priority + 위성/OG fallback 차단 — 클라이언트 normalize + schema buildSchemaImages 적용
+
+### 진단
+- string array 1,790 단지 = 자체 OG placeholder (진짜 사진 0장)
+- object array 3,097 = naver 뉴스 (kind 필드 없음, caption 분류)
+- 진짜 위성 14건 (대부분 false positive '항공우주청')
+- critical = 1,779 OG fallback + 927 NULL = 2,706 단지 backfill 필요
+
+### Pending
+- AptImagePlaceholder size prop 미사용 — 추후 dynamic 사이즈 처리
+- AptCardV5 미존재 (AptHeroLarge 가 cover hero) — 다른 카드 variant 도 필요 시 동일 패턴
+- Worker C 가 Documents/kadeora 경로에 작성한 4 파일 canonical 로 수동 포팅 (개발 환경 path 정정 필요)
+
+---
+
 # 카더라 STATUS — 세션 237: 이슈 선점 시스템 종합 정비 (2026-05-07 KST)
 
 ## s237 (2026-05-07) — 이슈 선점 시스템 종합 정비

@@ -2146,3 +2146,92 @@ html[data-theme="light"] {
 @media (min-width: 768px) {
   .apt-card-v2 { padding: var(--sp-lg) var(--card-p); margin-bottom: var(--sp-lg); }
 }
+
+/* s236: 메인 페이지 6 section */
+.apt-home-hero {
+  padding: 20px 18px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.apt-home-imminent {
+  background: var(--accent-amber-bg, rgba(245,158,11,0.08));
+  border-bottom: 1px solid var(--border);
+  padding: 14px 18px;
+}
+.apt-imminent-carousel {
+  display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px;
+  scroll-snap-type: x mandatory;
+}
+.apt-imminent-card {
+  flex: 0 0 140px; scroll-snap-align: start;
+  background: var(--bg-surface); border: 1px solid var(--border);
+  border-radius: var(--radius-md); overflow: hidden;
+}
+.apt-category-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+}
+@media (min-width: 768px) {
+  .apt-category-grid { grid-template-columns: repeat(6, 1fr); }
+}
+.apt-category-card {
+  padding: 12px 10px; background: var(--bg-surface);
+  border-radius: var(--radius-md); text-align: center;
+  transition: background 0.15s;
+}
+.apt-category-card:hover { background: var(--bg-hover); }
+
+/* 단지 상세 D-day card */
+.apt-dday-card {
+  background: var(--accent-amber-bg, rgba(245,158,11,0.08));
+  border: 1px solid var(--accent-amber-border, rgba(245,158,11,0.3));
+  border-radius: var(--radius-md);
+  padding: 16px 18px; margin: 0 18px 18px;
+}
+.apt-dday-number {
+  font-size: 28px; font-weight: 800; color: var(--accent-amber, #f59e0b);
+  letter-spacing: -0.02em; line-height: 1;
+}
+
+/* KPI 2x2 grid */
+.apt-kpi-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0 18px;
+}
+.apt-kpi-card {
+  background: var(--bg-surface); padding: 14px;
+  border-radius: var(--radius-md);
+}
+.apt-kpi-number {
+  font-size: 20px; font-weight: 700; line-height: 1.1; letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+
+/* Timeline */
+.apt-timeline {
+  position: relative; padding-left: 18px;
+}
+.apt-timeline-line {
+  position: absolute; left: 5px; top: 6px; bottom: 6px;
+  width: 1px; background: var(--border);
+}
+.apt-timeline-step {
+  position: relative; margin-bottom: 12px;
+}
+.apt-timeline-dot {
+  position: absolute; left: -18px; top: 4px;
+  width: 11px; height: 11px; border-radius: 50%;
+}
+.apt-timeline-dot.done { background: var(--accent-green-bg, rgba(34,197,94,0.15)); border: 2px solid var(--accent-green, #22c55e); }
+.apt-timeline-dot.active { background: var(--accent-amber-bg, rgba(245,158,11,0.15)); border: 2px solid var(--accent-amber, #f59e0b); }
+.apt-timeline-dot.pending { background: var(--bg-base); border: 1px solid var(--border); }
+
+/* Image gallery 1+4 grid */
+.apt-gallery-desktop-grid { display: none; }
+@media (min-width: 768px) {
+  .apt-gallery-mobile-swipe { display: none; }
+  .apt-gallery-desktop-grid {
+    display: grid; grid-template-columns: 2fr 1fr; gap: 4px;
+    max-height: 480px; border-radius: var(--radius-lg); overflow: hidden;
+  }
+  .apt-gallery-thumbs {
+    display: grid; grid-template-rows: 1fr 1fr; grid-template-columns: 1fr 1fr; gap: 4px;
+  }
+}

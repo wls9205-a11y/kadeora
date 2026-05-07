@@ -8,6 +8,21 @@ import RegionAutoSelect from '@/components/apt/RegionAutoSelect';
 import AptHeaderV5 from '@/components/apt/AptHeaderV5';
 import AptCardGridV5 from '@/components/apt/AptCardGridV5';
 import AptHomeSections from '@/components/apt/AptHomeSections';
+import AptInsightsUnified from '@/components/apt/AptInsightsUnified';
+import AptHomeHero from '@/components/apt/home/AptHomeHero';
+import AptImminentCarousel from '@/components/apt/home/AptImminentCarousel';
+import AptCategoryGrid from '@/components/apt/home/AptCategoryGrid';
+import AptRealtimeRanking from '@/components/apt/home/AptRealtimeRanking';
+import AptRegionalPriceGrid from '@/components/apt/home/AptRegionalPriceGrid';
+import {
+  fetchStatsKPI,
+  fetchImminentTop3,
+  fetchCategoryCounts,
+  fetchSiteList,
+  fetchSigunguTrends,
+  fetchAIAnalysis,
+  fetchBlogList,
+} from '@/lib/apt-fetcher';
 import type { AptFilters, AptCategory } from '@/lib/apt-fetcher';
 
 export const dynamic = 'force-dynamic';
@@ -86,7 +101,33 @@ export default async function AptPage({
   const { data: summary } = await (sb as any).rpc('get_apt_v5_summary', { p_region: region });
   const s = (summary ?? { cat: { total: 0, ongoing: 0, unsold: 0, redev: 0, trade: 0 }, imminent: 0, sido: [] }) as SummaryPayload;
 
-  const filters: AptFilters = { region, sigungu: null, category, sort: 'popularity', page: pageNum };
+  const sigungu: string | null = null;
+  const filters: AptFilters = { region, sigungu, category, sort: 'popularity', page: pageNum };
+  const isHome = activeTab === 'all' && pageNum === 1;
+
+  const [kpisRaw, imminentTop3, categoryCountsRaw, mainGridSites, sigunguTrends, aiPost, blogList] = isHome
+    ? await Promise.all([
+        fetchStatsKPI(region, sigungu),
+        fetchImminentTop3(region, sigungu),
+        fetchCategoryCounts(region, sigungu),
+        fetchSiteList({ ...filters, page: 1 }, 5),
+        fetchSigunguTrends(region, sigungu, 24),
+        fetchAIAnalysis(region),
+        fetchBlogList(region, 3),
+      ])
+    : [null, [], {}, [], [], null, []] as const;
+
+  const kpis: any = {
+    ...(kpisRaw || {}),
+    imminent_d7: s.imminent ?? (kpisRaw as any)?.imminent_d7 ?? 0,
+  };
+
+  const categoryCounts = {
+    active_subscription: (categoryCountsRaw as any)?.subscription ?? 0,
+    unsold: (categoryCountsRaw as any)?.unsold ?? 0,
+    redev: (categoryCountsRaw as any)?.redev ?? 0,
+    trade: (categoryCountsRaw as any)?.trade ?? 0,
+  };
 
   const moreParams = new URLSearchParams();
   if (sp.region) moreParams.set('region', sp.region);
@@ -131,18 +172,29 @@ export default async function AptPage({
 
       {isAutoRegion && <RegionAutoSelect />}
 
-      <AptHeaderV5
-        region={region}
-        totalCount={s.cat.total}
-        imminentCount={s.imminent}
-        cat={s.cat}
-        sido={s.sido}
-        activeTab={activeTab}
-      />
-
-      <AptCardGridV5 filters={filters} moreHref={moreHref} perPage={12} />
-
-      {activeTab === 'all' && pageNum === 1 && <AptHomeSections />}
+      {isHome ? (
+        <>
+          <AptHomeHero region={region} sigungu={sigungu} kpis={kpis} />
+          <AptImminentCarousel sites={imminentTop3 as any[]} />
+          <AptCategoryGrid counts={categoryCounts} />
+          <AptRealtimeRanking sites={(mainGridSites as any[]).slice(0, 5)} />
+          <AptRegionalPriceGrid region={region} sigunguTrends={sigunguTrends as any[]} />
+          <AptInsightsUnified region={region} aiPost={aiPost} blogList={blogList as any} />
+          <AptHomeSections />
+        </>
+      ) : (
+        <>
+          <AptHeaderV5
+            region={region}
+            totalCount={s.cat.total}
+            imminentCount={s.imminent}
+            cat={s.cat}
+            sido={s.sido}
+            activeTab={activeTab}
+          />
+          <AptCardGridV5 filters={filters} moreHref={moreHref} perPage={12} />
+        </>
+      )}
 
       <AdBanner />
       <Disclaimer type="apt" />

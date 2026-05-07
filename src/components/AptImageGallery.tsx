@@ -62,10 +62,27 @@ export default function AptImageGallery({ images, name, region, badges }: {
   const [isDesktop, setIsDesktop] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // 혼합 타입(string | object) 정규화 — url 누락 항목은 제거
-  const normalized = (images || []).map((img: any) =>
-    typeof img === 'string' ? { url: img } : img
-  ).filter((img: any) => img?.url);
+  // s236 W3: normalize (string|object → object) + satellite filter + priority sort
+  const normalized = (images || [])
+    .map((img: any) => typeof img === 'string' ? { url: img, caption: '' } : img)
+    .filter((img: any) => img?.url)
+    .filter((img: any) => {
+      if (/maps\.googleapis|staticmap|openstreetmap|aerial.view|satellite.image/i.test(img.url)) return false;
+      if (img.caption && /위성사진|aerial.view|satellite.image/i.test(img.caption)) return false;
+      return true;
+    })
+    .sort((a: any, b: any) => {
+      const score = (img: any) => {
+        const c = img.caption || '';
+        if (/조감도|투시도|rendering|birdseye/i.test(c)) return 1;
+        if (/모델하우스|견본|평면도|배치도/i.test(c)) return 2;
+        if (/현장|건설|공사|시공/i.test(c)) return 3;
+        if (/imgnews\.naver|pstatic|kakaocdn|daumcdn/i.test(img.url)) return 4;
+        if (/kadeora\.app\/api\/og/i.test(img.url)) return 9;
+        return 5;
+      };
+      return score(a) - score(b);
+    });
 
   // SSR-safe 데스크탑 판정
   useEffect(() => {

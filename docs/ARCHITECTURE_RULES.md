@@ -268,3 +268,36 @@ raw 숫자 (예: `fontSize: 14`, `padding: 16`) → CSS var (`var(--fs-sm)`, `va
 - 예외: 동적 값 (e.g. `style={{ width: progressPct + '%' }}`) 만 inline 허용.
 
 **Discovered**: s235 (2026-05-06) — /apt/[id] 14 곳 + /apt/complex/[name] 5 곳 inline `style={ct}` 사용 중. 일괄 className 으로 통일 + globals.css 클래스 신설.
+
+## Rule #30 — /apt cover image 우선순위 + 위성/OG fallback 차단 (s236 신설)
+
+**Symptom**: /apt 페이지 카드에 위성사진 / `/api/og` placeholder 가 진짜 사진보다 먼저 노출. 사용자가 "이게 실제 단지 사진이야?" 의심 → 신뢰도 ↓.
+
+**Cause**: `apt_sites.images` jsonb 가 mixed type (string + object) 이고 caption/source 필드 미통일. cover image 정렬 기준이 단순 array index 였음.
+
+**Rule**:
+
+`/apt` 하위 페이지의 cover image priority (낮은 score = 우선):
+
+| score | 종류 | 패턴 |
+|---|---|---|
+| 1 | 조감도/투시도 | caption: 조감도/투시도/rendering/birdseye |
+| 2 | 모델하우스/배치도/평면도 | caption: 모델하우스/견본/평면도/배치도 |
+| 3 | 현장 사진 | caption: 현장/건설/공사/시공 |
+| 4 | naver/kakao 외부 출처 | url: imgnews.naver/pstatic/kakaocdn/daumcdn |
+| 5 | 일반 외부 | (그 외) |
+| 8 | 위성 | url: maps.googleapis/staticmap/openstreetmap/aerial.view/satellite.image, caption: 위성사진 |
+| 9 | kadeora OG fallback | url: kadeora.app/api/og |
+
+**서버**: DB `pick_apt_cover_image(p_site_id uuid)` RPC 호출 — `apt_sites.cover_image_url` 자동 갱신. 매일 KST 03:30 `cover-image-backfill` cron 이 NULL 또는 OG fallback 인 단지에 카카오 이미지 검색으로 조감도 추가 후 RPC 재호출.
+
+**클라이언트**: `AptImageGallery.tsx` 의 `normalized` 단계에서 satellite filter + priority sort 한 번 더 (RPC 결과 보강). `AptHeroLarge.tsx` / `AptCardV5.tsx` 등 카드는 `isSatellite()` + `isOgFallback()` 헬퍼로 cover 검증 후 `AptImagePlaceholder` (SVG building skyline) fallback.
+
+**Schema**: `src/lib/schema/apt.ts` 의 `buildSchemaImages()` 가 RealEstateListing.image 에 `ImageObject[]` (contentUrl + caption) 로 emit, 위성 차단 + priority sort 적용.
+
+**How to apply**:
+- 새 apt 카드 컴포넌트 만들 때 `pickBestAptImage(site)` + `isSatellite()` 가드 + `AptImagePlaceholder` fallback 패턴 의무.
+- 새 image 쓰는 cron 은 caption 필드에 출처/종류 명시 (조감도/모델하우스/뉴스 등) — pickRealImage 정렬 보장.
+- OG fallback 사용 시 작은 watermark "사진 준비중" 추가 (사용자 신뢰도).
+
+**Discovered**: s236 (2026-05-07) — 4,887 apt_sites 중 진짜 사진 47%, OG fallback 31%, NULL 19%. apt_complex_profiles 34,544 중 cover 재계산 후 위성 거의 사라짐. cover-image-backfill cron 으로 점진 회복.
