@@ -155,8 +155,10 @@ interface RSSItem {
 
 async function fetchRSS(feed: { name: string; url: string }): Promise<RSSItem[]> {
   try {
-    // s238b: 8s → 5s. 평균 27s 대기 → 8-10s 목표. 느린 feed 는 다음 tick 에 재시도.
-    const res = await fetch(feed.url, { signal: AbortSignal.timeout(5000) });
+    // s238c: 5s → 8s 복구. s238b 의 5s cut off 가 매경/한경/뉴시스 등 무거운 부동산 매체
+    // 응답 시간 cut off 시켜 detect quality 회귀 (newsis 외 매체 INSERT 0건). BATCH=8 +
+    // maxDuration=90 으로 worst-case 32 feeds × 8s / 8 = 32s 안에 종료 — 90s 안 안전.
+    const res = await fetch(feed.url, { signal: AbortSignal.timeout(8000) });
     if (!res.ok) return [];
     const xml = await res.text();
 

@@ -1,3 +1,16 @@
+# 카더라 STATUS — 세션 238c: issue-detect timeout 5000→8000 복구 (2026-05-07 KST)
+
+## s238c (2026-05-07) — issue-detect timeout 5000→8000 복구
+- 진단: s238b commit 6dd700d2 의 fetchRSS timeout 8000→5000 변경이 매경/한경/뉴시스 등 무거운
+  부동산 매체 응답 시간 cut off 시켜 detect quality 회귀
+- s238b 추측 "newsis 코드 누락" 은 **틀림** — `route.ts:45` 에 정상 등록 확인
+- raw 코드 + commit history 확인 후 1줄 fix:
+  - `src/app/api/cron/issue-detect/route.ts:159` `AbortSignal.timeout(5000)` → `8000`
+- BATCH 8, maxDuration 90 유지 (worst-case 32 feeds × 8s / 8 = 32s, 90s 안 안전)
+- 효과 예상: detect quality 회복 (score 40+ auto publish 부활), unique domains 2 → 5+
+
+---
+
 # 카더라 STATUS — 세션 238: SEO 노출 완전 회복 (SSR + og:6 + image-sitemap 폭발) (2026-05-07 KST)
 
 ## s238 — 네이버 검색 노출 완전 회복 (4 worker 병렬, 단일 commit)
