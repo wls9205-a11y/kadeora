@@ -1,3 +1,57 @@
+# 카더라 STATUS — s257 (2026-05-07 17:30) ⭐ Phase 4 Track 4 — 함수 권한 정리
+
+## 이번 세션 (s257) — 코드 변경 없음, Supabase MCP 직접 작업
+
+### 진단
+- 안건 분석: 427건 anon/authenticated_security_definer_function_executable
+- 코드 .rpc 호출되는 함수 list 추출 (124건, /tmp/rpc_called.txt)
+- pg_trigger join으로 trigger function 정확 식별 (57건)
+
+### Phase 1 (migration s257_track4_phase1_trigger_functions_revoke)
+- trigger 함수 57개 anon, authenticated EXECUTE REVOKE
+- 효과: 0 (이유: PUBLIC default privilege 잔존)
+
+### Phase 1b (migration s257_track4_phase1b_revoke_public)
+- **핵심 발견**: PostgreSQL의 PUBLIC default privilege가 implicit GRANT
+  · anon/authenticated는 PUBLIC 멤버 → PUBLIC EXECUTE 그대로면 anon/auth도 실행 가능
+  · `REVOKE EXECUTE FROM anon, authenticated`만으로는 부족
+  · 반드시 `REVOKE EXECUTE FROM PUBLIC`도 적용 필수
+- 효과: 455 → 383 (-72)
+  · 36개 sec_def=true × 2 advisor (anon + authenticated) = 72건 감소
+
+### Phase 2 (migration s257_track4_phase2_cron_seed_functions_revoke)
+- cron/seed/batch 함수 ~60건 PUBLIC + anon + authenticated REVOKE
+- 코드 .rpc 호출 0건 검증 완료 (cron route는 service_role 사용)
+- 카테고리: batch_generate_*, snapshot_*, capture_*, seed_*, backfill_*, _cron_*, ci_*, generate_*_blog, gen_*, full_*, build_*, auto_*, add_map_to_*
+- 효과: 383 → 367 (-16)
+  · 8개 sec_def=true × 2 advisor = 16건 감소 (나머지 52건은 sec_def=false라 advisor 안 잡음, 보안 강화 효과는 있음)
+
+## 진행률 누적
+- 세션 시작 527 → 367 (-160) 🎉
+- ERROR: 41 → 0 ✅
+- WARN: 485 → 365 (-120)
+- INFO: 1 → 2
+
+## Architecture Rule 추가
+- **#63**: Supabase function REVOKE 시 anon/authenticated만 REVOKE는 부족
+  · PostgreSQL의 PUBLIC default privilege가 anon/auth 모두에 implicit GRANT
+  · 반드시 `REVOKE EXECUTE ... FROM PUBLIC, anon, authenticated`로 3개 같이
+- **#64**: trigger function (pg_trigger.tgfoid join) 식별은 권한 정리의 100% 안전 시작점
+  · trigger는 owner 권한으로 자동 실행 → caller GRANT 불필요
+
+## PENDING (Phase 3 별도 세션)
+- 남은 339건 (sec_def=true + anon/auth GRANT)
+- 코드 .rpc 호출되는 124개와 차집합 분석 필요
+- 안전한 카테고리: admin RPC (admin client는 service_role 사용), internal helper 함수
+- 위험 카테고리: 실제로 client에서 직접 호출하는 함수 (RLS 의존 보호)
+- 별도 시간 2~3시간 면밀한 분류 필요
+
+## 검증
+- 적용 후 cron 정상 200 응답 (cron route는 service_role 사용 → 영향 없음)
+- ERROR 0 유지
+
+---
+
 # 카더라 STATUS — s256 (2026-05-07 17:10) 🚨 og-apt array element sanitize fix
 
 ## 이번 세션 (s256) — s255 활성 후 og-apt 잔여 throw 진단
