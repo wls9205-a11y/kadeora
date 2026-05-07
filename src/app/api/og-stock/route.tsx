@@ -83,7 +83,7 @@ function PriceCard(q: QuoteRow, ff: string) {
       <div style={{ position:'absolute', top:'-25%', right:'-10%', width:'55%', aspectRatio:'1', borderRadius:'50%', background:`radial-gradient(circle,${accent}22 0%,transparent 65%)`, display:'flex' }} />
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', position:'relative', zIndex:2 }}>
         <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-          <span style={{ fontSize:24, fontWeight:900, color:'#00E5FF', letterSpacing:-.5 }}>📈 카더라</span>
+          <span style={{ fontSize:24, fontWeight:900, color:'#00E5FF', letterSpacing:-.5 }}>카더라</span>
         </div>
         <div style={{ display:'flex', alignItems:'center', gap:8, padding:'7px 16px', background:`${accent}22`, border:`1px solid ${accent}66`, borderRadius:999 }}>
           <span style={{ fontSize:14, fontWeight:900, color:accent, letterSpacing:1 }}>PRICE · 실시간</span>

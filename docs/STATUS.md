@@ -1,3 +1,57 @@
+# 카더라 STATUS — s245 (2026-05-07 23:50)
+
+## 이번 세션 (s245) — 면밀 진단 + Phase 1+3 한방 처리
+**진단 (실측):**
+- Vercel 24h logs: /apt/[id], /apt/complex/[name], /apt/compare/[slugs], /blog 등 504 timeout 다수 발생
+- /apt/[id] line 285: Promise.allSettled 8개 동시 fetch → 진짜 root cause (Phase 2 작업)
+- og-apt: 🚉🎓 emoji 잔여 (s244 fix 미완) — 이번에 fix
+- og-stock: 📈 emoji 잔여 — 이번에 fix
+- /apt/region/page.tsx 부재 → 404 (AptHomeHero 지역 선택 클릭 시) — 이번에 신규
+- AptCategoryGrid aspectRatio 1:1 → 면적 과대 — 이번에 28% 축소
+- AptClient.tsx + tabs/ 7파일 dead code (page.tsx import 안 함) — 이번에 삭제
+- apt_transactions '세종시' 1,809건 → '세종' 정규화 — 이번에 DB UPDATE
+- Supabase advisor: Security 527건(ERROR 41) + Performance 442건 — Phase 4 작업
+- /apt-v2 dead code 의심 (link 0개) — 다음 세션 검증
+
+**완료 (이번 commit):**
+- og-apt 🚉→역, 🎓→학교 (한국어 prefix, satori NotoSansKR 처리 가능)
+- og-stock 📈 제거
+- AptCategoryGrid padding 14px→10px, aspectRatio 1:1→1.4:1, emoji fontSize 24→20
+- /apt/region/page.tsx 신규 (17개 시도 + 전국, 3열 grid)
+- AptClient.tsx + tabs/ 7파일 삭제 (~3,000줄 dead code 정리)
+- apt_transactions UPDATE: '세종시' → '세종' (1,809건, migration s245_normalize_sejong_si)
+
+## 다음 세션 즉시 할 일 (Phase 2)
+1. **/apt/[id] line 285 Promise.allSettled 8개 fetch 분리** — 504 timeout 핵심 fix
+   - 핵심 4개만 SSR, 나머지는 Suspense 또는 client-side
+2. **/apt/complex/[name], /apt/compare/[slugs] 동일 패턴 분석**
+3. **/blog 메인 30s timeout 진단**
+
+## 다음 세션 (Phase 3-2 검토)
+- /apt-v2 dead code 검증 (link 0개, deprecated 가능성)
+- og main D2~D6 진짜 원인 진단 (D1 통일 임시 우회 풀기)
+
+## 다음 세션 (Phase 4 — Supabase 정리, 별도 시간)
+- Security ERROR 41건: security_definer_view 38, function_search_path_mutable 31, rls_policy_always_true 8
+- Performance: multiple_permissive_policies 180, auth_rls_initplan 108, unindexed_foreign_keys 49
+- award_points RPC service_role RLS 검증 (s228 #1)
+
+## Architecture Rules 추가
+- **#48** OG ImageResponse 내 모든 emoji 직접 사용 금지 (s244 fix 부분만 적용 → s245 완전 제거)
+  · 한국어 단어로 의미 보존 (NotoSansKR 폰트 처리 가능)
+  · Unicode 도형(▲▼●=)도 가능
+- **#49** /apt/[id] 같은 dynamic page에서 Promise.allSettled 8개 이상 금지 (504 timeout 위험)
+  · 핵심 fetch만 SSR, 나머지는 Suspense + dynamic import
+- **#50** apt_sites.region vs apt_subscriptions.region_nm 컬럼 일관성 — 신규 페이지/RPC는 통일된 컬럼명 사용
+
+## 시간 대기
+- 5~60분: AdSense 첫 광고 송출
+- 24h: 카톡 referrer 회복, onboarded_pct, AdSense 게재율 측정
+- 7일: OG fallback PNG cache 자연 만료
+- 1~5일: 토스 답변 → 라이브 키 교체
+
+---
+
 # 카더라 STATUS — s241~s244 (2026-05-07)
 
 ## 이번 세션 완료

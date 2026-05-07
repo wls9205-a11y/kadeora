@@ -68,16 +68,16 @@ export default function AptCategoryGrid({ counts }: Props) {
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: 4,
-                padding: '14px 8px',
+                padding: '10px 6px',
                 background: 'var(--bg-surface)',
                 border: '1px solid var(--border)',
                 borderRadius: 12,
                 textDecoration: 'none',
                 color: 'inherit',
-                aspectRatio: '1 / 1',
+                aspectRatio: '1.4 / 1',
               }}
             >
-              <span aria-hidden style={{ fontSize: 24 }}>
+              <span aria-hidden style={{ fontSize: 20 }}>
                 {c.emoji}
               </span>
               <span

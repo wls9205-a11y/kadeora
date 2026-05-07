@@ -224,10 +224,10 @@ function renderPlace(site: AptRow): React.ReactElement {
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {site.nearby_station && (
-          <div style={{ fontSize: 18, color: '#FFFFFF', fontWeight: 700 }}>🚉 {site.nearby_station}</div>
+          <div style={{ fontSize: 18, color: '#FFFFFF', fontWeight: 700 }}>역 {site.nearby_station}</div>
         )}
         {site.school_district && (
-          <div style={{ fontSize: 18, color: '#FFFFFF', fontWeight: 700 }}>🎓 {site.school_district}</div>
+          <div style={{ fontSize: 18, color: '#FFFFFF', fontWeight: 700 }}>학교 {site.school_district}</div>
         )}
         <div style={{ fontSize: 16, color: 'rgba(255,255,255,0.55)', fontWeight: 700, marginTop: 4 }}>kadeora.app</div>
       </div>
