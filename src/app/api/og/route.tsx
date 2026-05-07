@@ -622,7 +622,18 @@ export async function GET(req: NextRequest) {
     const _postBuf = await _postImg.arrayBuffer();
     return new Response(_postBuf, { headers: { 'Content-Type':'image/png', 'X-Content-Type-Options':'nosniff', ...CACHE } });
 
-  } catch {
+  } catch (err) {
+    // s239-p1: console.error 분할 (Vercel log 1 row 길이 제한 우회)
+    const e = err as Error;
+    console.error('[og] message=', e?.message);
+    console.error('[og] stack=', e?.stack);
+    console.error('[og] class=', e?.constructor?.name);
+    console.error('[og] input=', JSON.stringify({
+      title: new URL(req.url).searchParams.get('title')?.slice(0, 40),
+      card: new URL(req.url).searchParams.get('card'),
+      design: new URL(req.url).searchParams.get('design'),
+      category: new URL(req.url).searchParams.get('category'),
+    }));
     const cat = new URL(req.url).searchParams.get('category') ?? 'default';
     const fb: Record<string,string> = { stock:`${SITE}/images/brand/kadeora-wide.png`, apt:`${SITE}/images/brand/kadeora-full.png`, default:`${SITE}/images/brand/kadeora-hero.png` };
     return Response.redirect(fb[cat] ?? fb.default, 302);

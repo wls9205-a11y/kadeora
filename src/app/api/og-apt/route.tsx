@@ -350,16 +350,13 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (err) {
-    // s205-W9: TypeError 24h 진단 — message + stack 풀, prefix 통일로 grep 용이.
+    // s239-p1: console.error 분할 (Vercel log 1 row 길이 제한 — 단일 호출 시 stack 잘림)
     const e = err as Error;
-    console.error(
-      '[og-apt] FULL:',
-      'message=', e?.message,
-      'stack=', e?.stack,
-      'class=', e?.constructor?.name,
-      'code=', (err as any)?.code,
-      'input=', { slug, card, fontLoaded: !!fontData, hasSite: !!site, siteType: site?.site_type, nameLen: site?.name?.length },
-    );
+    console.error('[og-apt] message=', e?.message);
+    console.error('[og-apt] stack=', e?.stack);
+    console.error('[og-apt] class=', e?.constructor?.name);
+    console.error('[og-apt] code=', (err as any)?.code);
+    console.error('[og-apt] input=', JSON.stringify({ slug, card, fontLoaded: !!fontData, hasSite: !!site, siteType: site?.site_type, nameLen: site?.name?.length }));
     return Response.redirect('https://kadeora.app/images/brand/kadeora-hero.png', 302);
   }
 }

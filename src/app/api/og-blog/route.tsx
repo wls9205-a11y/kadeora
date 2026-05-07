@@ -259,19 +259,13 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (err) {
-    // 식별 가능 필드(slug/card/titleLen) 와 stack/class/code 를 함께 로깅 —
-    // Vercel logs 에서 원인 row 추적 + 잘려도 핵심 진단 정보 노출.
-    // (s189 Track B-4 의 null-title fix + s190 의 진단 강화 머지)
-    // s205-W9: TypeError 24h 진단 — message + stack 풀, prefix 통일로 grep 용이.
+    // s239-p1: console.error 분할 (Vercel log 1 row 길이 제한 — 단일 호출 시 stack 잘림)
     const e = err as Error;
-    console.error(
-      '[og-blog] FULL:',
-      'message=', e?.message,
-      'stack=', e?.stack,
-      'class=', e?.constructor?.name,
-      'code=', (err as any)?.code,
-      'input=', { slug, card, fontLoaded: !!fontData, hasPost: !!post, postCategory: post?.category, titleLen: post?.title?.length },
-    );
+    console.error('[og-blog] message=', e?.message);
+    console.error('[og-blog] stack=', e?.stack);
+    console.error('[og-blog] class=', e?.constructor?.name);
+    console.error('[og-blog] code=', (err as any)?.code);
+    console.error('[og-blog] input=', JSON.stringify({ slug, card, fontLoaded: !!fontData, hasPost: !!post, postCategory: post?.category, titleLen: post?.title?.length }));
     return Response.redirect('https://kadeora.app/images/brand/kadeora-hero.png', 302);
   }
 }
