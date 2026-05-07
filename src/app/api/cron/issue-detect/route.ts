@@ -31,15 +31,22 @@ async function getAptNameCache(sb: any): Promise<string[]> {
 /* ═══════════ 시공사 분양예정: issue-preempt에서 처리 ═══════════ */
 
 
+// s237: RSS 7d 데이터 분석 결과 newsis 만 INSERT 됨 (124/124). 다른 13 feed 는
+// timeout / 4xx / 키워드 미매칭 추정. 검증된 spec URL 로 교체 + 3개 신규 추가
+// (헤럴드/뉴스1/연합). raw_data 에 source_name 기록하여 향후 매체별 yield 추적.
 const APT_RSS_FEEDS = [
   { name: '부산일보_부동산', url: 'https://www.busan.com/rss/economy/realestate.xml' },
   { name: '한경_부동산', url: 'https://www.hankyung.com/feed/realestate' },
-  { name: '매경_부동산', url: 'https://www.mk.co.kr/rss/realestate/' },
-  { name: '머니투데이_부동산', url: 'https://rss.mt.co.kr/mt/realestate/' },
-  { name: '서울경제_부동산', url: 'https://www.sedaily.com/rss/NewsList/GC' },
-  { name: '조선비즈_부동산', url: 'https://biz.chosun.com/rss/realestate/' },
+  { name: '매경_부동산', url: 'https://www.mk.co.kr/rss/50300009/' },
+  { name: '머니투데이_부동산', url: 'https://rss.mt.co.kr/mt_realty.xml' },
+  { name: '서울경제_부동산', url: 'https://www.sedaily.com/RSS/S6.xml' },
+  { name: '조선비즈_부동산', url: 'https://biz.chosun.com/arc/outboundfeeds/rss/category/real_estate/?outputType=xml' },
   { name: '아시아경제_부동산', url: 'https://www.asiae.co.kr/rss/realestate.xml' },
   { name: '뉴시스_부동산', url: 'https://newsis.com/RSS/economy.xml' },
+  // s237 신규
+  { name: '헤럴드_부동산', url: 'http://biz.heraldcorp.com/common_prog/rssdisp.php?ct=011115000000.xml' },
+  { name: '뉴스1_부동산', url: 'https://www.news1.kr/rss/realty.xml' },
+  { name: '연합_경제', url: 'https://www.yna.co.kr/rss/economy.xml' },
 ];
 
 const STOCK_RSS_FEEDS = [
@@ -349,15 +356,25 @@ async function handler(_req: NextRequest) {
 
   // s191: 14+ feeds 동시 발사 시 일부 slow source 가 전체 504 유발 → 4개 batch 직렬.
   // 각 fetchRSS 는 이미 AbortSignal.timeout(8000) — 배치 1개 worst-case 8s × 4 batch ≈ 32s.
+  // s237: 매체별 item count 로깅 추가 (dead feed 식별).
   const rssItems: RSSItem[] = [];
+  const feedYield: Record<string, number> = {};
   const BATCH = 4;
   for (let i = 0; i < feeds.length; i += BATCH) {
     const slice = feeds.slice(i, i + BATCH);
     const results = await Promise.allSettled(slice.map(f => fetchRSS(f)));
-    for (const r of results) {
-      if (r.status === 'fulfilled') rssItems.push(...r.value);
+    for (let j = 0; j < results.length; j++) {
+      const r = results[j];
+      const feedName = slice[j].name;
+      if (r.status === 'fulfilled') {
+        feedYield[feedName] = r.value.length;
+        rssItems.push(...r.value);
+      } else {
+        feedYield[feedName] = -1; // rejected
+      }
     }
   }
+  console.log(`[issue-detect] feed_yield: ${JSON.stringify(feedYield)}`);
 
   // v2: Google Trends RSS + DART 공시 병합
   const [googleItems, dartItems] = await Promise.all([fetchGoogleTrends(), fetchDARTDisclosures()]);
@@ -464,6 +481,9 @@ async function handler(_req: NextRequest) {
         is_breaking: true,
         has_news: true,
         source_type: 'news_rss',
+        // s237: 매체별 yield 추적용 (이전엔 raw_data->>'source' 가 NULL — 사실상 어떤 RSS 가
+        // INSERT 되는지 알 수 없었음). 동일 group 안의 모든 매체 누적.
+        source_names: Array.from(new Set(items.map(i => i.source).filter(Boolean))),
       },
     };
 

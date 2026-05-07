@@ -1,3 +1,55 @@
+# 카더라 STATUS — 세션 237: 이슈 선점 시스템 종합 정비 (2026-05-07 KST)
+
+## s237 (2026-05-07) — 이슈 선점 시스템 종합 정비
+
+### DB 측 (s236 후속, 이미 적용됨)
+- `issue_alerts` 컬럼 추가: `region_sido`, `region_sigungu`, `region_extracted_at`
+- RPC `extract_region_from_text(text)` (시도 17 + 시군구 230)
+- 뷰 `v_issue_region_coverage`
+- 트리거 `trg_issue_alerts_extract_region` (신규/UPDATE 시 자동 추출)
+- 7일 데이터 backfill 완료
+
+### 진단 결과 (7d 기준)
+1. RSS 매체: `news_rss` 124건 / `apt_sites_gap` 699건 / `trending_keywords` 4건. RSS 14개 정의됐지만
+   실제 INSERT 는 `newsis` 만. 다른 13 feed 는 timeout/4xx/키워드 미매칭 추정 → 확인 불가
+   (`raw_data->>'source'` NULL 이라 매체별 yield 미가시).
+2. 서울 12건 / 경남 137건 — 핵심 시장 11배 역전. 서울 25 자치구 중 6개만 등장
+3. 이미지 첨부 7d 1,574 silent fail (region 키워드 미활용)
+4. publish `auto_failed` 81건/주 — 모두 `block_reason='similar_title'`. `safeBlogInsert` 가
+   `check_blog_similarity(threshold=0.35)` 에서 기존 apt 분석글과 매칭됨
+   ("{단지명} — {지역} 분석" 패턴 양산이 원인)
+
+### 코드 측 (이번 commit)
+
+#### 작업 1 — RSS 매체 확장 + 매체별 yield 추적
+- `src/app/api/cron/issue-detect/route.ts`:
+  - `APT_RSS_FEEDS` 8 → **11개** (헤럴드/뉴스1/연합 신규, 매경/머투/서경/조비 URL 검증된 spec 으로 교체)
+  - `raw_data.source_names` 신규 — 매체별 INSERT yield 추적 가능
+  - `feedYield` 객체 + `console.log('[issue-detect] feed_yield: ...')` — dead feed 식별
+- 기대 효과: 외부 감지 124 → 600~1,200/주 (5-10배)
+
+#### 작업 3 — 이미지 첨부 region 키워드
+- `src/app/api/cron/issue-image-attach/route.ts`:
+  - SELECT 에 `region_sido`, `region_sigungu` 추가
+  - `runImagePipeline` 의 `tags` 배열 앞에 `regionTags` prepend → 이미지 검색 query
+    정확도 ↑ ("강남구 + 단지명" vs 단지명 단독)
+- 기대 효과: 30.8% → 50%+
+
+### 작업 2/4 — 코드 변경 안 함 (DB-only 또는 추후 처리)
+- 작업 2 (region NER cron): 트리거 `trg_issue_alerts_extract_region` 가 자동 처리 — SKIP
+- 작업 4 (publish auto_failed):
+  - 진단 확정: `blog_publish_config.title_similarity_threshold = 0.35` 가 너무 낮음
+  - issue-draft 가 매번 같은 패턴 ("{단지명} — {지역} 분석") 으로 title 생성
+  - **해결안 (이번 commit 안 함, 다음 세션):**
+    A) DB UPDATE: `title_similarity_threshold` 0.35 → 0.5
+    B) issue-draft title 생성 다양화 (날짜/sub_category 추가)
+  - 81건 모두 `has_draft=false` 로 finalize 안 된 상태 → 큰 손실은 아님
+
+### 빌드
+- tsc clean (EXIT=0), next build EXIT=0
+
+---
+
 # 카더라 STATUS — 세션 235: /apt 하위 페이지 디자인+배치+SEO (2026-05-06 KST)
 
 ## s235 — /apt 하위 페이지 전면 개편 (11 worker 병렬, 단일 commit)

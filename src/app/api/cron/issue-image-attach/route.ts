@@ -63,9 +63,10 @@ async function handler(_req: NextRequest) {
 
       // s190: ORDER BY detected_at DESC — 1,489건 백로그 청산 시 최신부터 처리.
       // s194: retry_count<3 가드 + blog_post_id/retry_count 컬럼 추가 — 무한 retry 차단 + finalize 스킵 fast-path.
+      // s237: region_sido/sigungu 추가 SELECT — 이미지 검색 키워드 정확도 ↑ (silent fail 1,574/7d 회복용).
       const { data: pending, error: fetchErr } = await (sb as any)
         .from('issue_alerts')
-        .select('id, title, summary, category, sub_category, draft_title, draft_content, draft_slug, draft_keywords, detected_keywords, related_entities, source_urls, detected_at, blog_post_id, retry_count')
+        .select('id, title, summary, category, sub_category, draft_title, draft_content, draft_slug, draft_keywords, detected_keywords, related_entities, source_urls, detected_at, blog_post_id, retry_count, region_sido, region_sigungu')
         .eq('fact_check_passed', true)
         .is('image_attached_at', null)
         .or('retry_count.is.null,retry_count.lt.3')
@@ -173,6 +174,9 @@ async function handler(_req: NextRequest) {
           finalized++;
 
           // 5) 이미지 파이프라인 — lib/image-pipeline (hydrate + relevance + record)
+          // s237: region_sido/sigungu 가 있으면 tags 앞쪽에 prepend — 이미지 검색 query
+          // 정확도 ↑ (전국 무관 generic 매물사진 회피, silent fail 회복용).
+          const regionTags = [issue.region_sido, issue.region_sigungu].filter(Boolean);
           const postCtx: PostContext = {
             id: blogPostId,
             title: issue.draft_title || issue.title,
@@ -181,6 +185,7 @@ async function handler(_req: NextRequest) {
             category,
             sub_category: issue.sub_category,
             tags: Array.from(new Set([
+              ...regionTags,
               ...(Array.isArray(issue.related_entities) ? issue.related_entities.slice(0, 4) : []),
               ...(Array.isArray(issue.detected_keywords) ? issue.detected_keywords.slice(0, 6) : []),
             ])).slice(0, 8),
