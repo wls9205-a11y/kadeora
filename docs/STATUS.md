@@ -1,3 +1,57 @@
+# 카더라 STATUS — s253 (2026-05-07 14:35) ⭐ 병렬 마무리 — Track A+B+C 한방 배포
+
+## 이번 세션 (s253) — 3 Track 병렬 처리
+
+### Track A (Claude MCP 직접) — Phase 4 작은 항목 정리
+- 진단 결과 (5개 항목 분석):
+  · rls_policy_always_true 8건: false positive (analytics/waitlist 의도된 INSERT)
+  · materialized_view_in_api 11건: false positive (UI hot data 의도된 select)
+  · extension_in_public 6건: 별도 세션 (의존성 큼)
+  · public_bucket_allows_listing 1건: ✅ fix
+  · auth_leaked_password_protection 1건: 사용자 직접 (Supabase UI)
+- 적용 (migration s253_drop_backups_and_storage_listing_lockdown):
+  · DROP apt_sites_sigungu_backup_s229b (6 rows, 코드 0건)
+  · DROP big_event_assets_garbage_s236 (1884 rows, 코드 0건)
+  · apt-covers SELECT policy 강화 (anon listing → service_role only, public URL access 영향 없음)
+
+### Track B (Claude MCP 직접) — award_points RPC 검증
+- s228 #1 PENDING 해소
+- 실측: security_definer=true + execute_grantees=[authenticated, postgres, service_role]
+- → onboarding modal 1000P 지급 정상 동작 확인 (false alarm 이었음)
+
+### Track C (이번 commit) — og main D2~D6 우회 풀기 + 위험 CSS 제거
+- 진단 (s242 commit 7bc391e5 메시지 + D2~D6 코드 분석):
+  · 진짜 culprit: position:'absolute' + 음수% + borderRadius:'50%'
+  · self-closing 장식 div 9곳 (D2 2, D4 2, D5 3, D6 2)
+  · D3 0건 (안전)
+- Fix:
+  1. 위험 div 9곳 한방 제거 (Python regex, self-closing이라 안전)
+  2. switch case '2'~'6' D1 redirect 풀기 → D2~D6 정상 호출 복구
+- 효과:
+  · 디자인 다양성 회복 (D2 풀컬러 좌측 ~ D6 글로우 원형)
+  · 핵심 OG 정보 (제목/카테고리/색상/로고) 영향 0
+  · 장식 단순해지지만 throw 0 보장
+
+## Architecture Rule 추가
+- **#58** OG ImageResponse 내 self-closing 장식 div 작성 시 음수 % position + borderRadius:50% on absolute 금지
+  · satori 미지원 — throw 유발
+  · 대안: 양수 position + 명시 width/height + borderRadius px (>=9999)
+
+## 진행률 누적 (s251 + s253)
+- 527 lint → 455 (-72)
+- ERROR 41 → 0 ✅
+- WARN 485 → 453 (-32)
+- INFO 1 → 2 (llm_pricing 1건만 — view 의존성 있어 그대로 유지)
+
+## 다음 세션 (별도 시간)
+- Track 4 anon/auth function executable 427건 (가장 큼, 신중한 분석)
+- extension_in_public 6건 (의존성 분석 후 schema 이동)
+- auth_leaked_password_protection (Supabase Auth UI에서 활성화)
+- /apt/[id] 504 24h 모니터링 (s246 효과 측정)
+- 7일 후 fallback PNG 캐시 만료 + 위험 단지 정상 OG 검증
+
+---
+
 # 카더라 STATUS — s252 (2026-05-07 14:15) 🚨 빌드 에러 핫픽스 — U+2028 literal in regex
 
 ## 이번 세션 (s252) — s250 빌드 실패 진단 + 핫픽스
