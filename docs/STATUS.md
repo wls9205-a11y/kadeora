@@ -1,3 +1,58 @@
+# 카더라 STATUS — s256 (2026-05-07 17:10) 🚨 og-apt array element sanitize fix
+
+## 이번 세션 (s256) — s255 활성 후 og-apt 잔여 throw 진단
+
+### 상황
+- s255 commit 8eaf4613 활성 (deployment dpl_6KD8gV835bWGSeUMSe9FayYViukW)
+- ✅ og main throw 0건 (D2~D6 → D1 redirect 효과)
+- 🚨 og-apt throw 6건 burst (17:01:40~41) 별개 issue
+- 메시지: `[og-apt] message= Cannot co...` + `Failed to load dynamic font...`
+
+### Root cause 식별 (src/lib/og-sanitize.ts L44-53):
+```typescript
+// before (BUG):
+for (const key in result) {
+  if (typeof result[key] === 'string') {
+    result[key] = sanitizeForOG(result[key]);  // ← string만!
+  }
+}
+```
+- `apt_sites.key_features`는 **postgres text[] (array)** → string 검증 통과 못함 → sanitize 0건 적용
+- 위험 단지의 key_features element에 한자/일본어 있으면 → satori dynamic font fetch → throw
+- 동일 패턴: blog_posts.categories, tags 등 array 컬럼 모두 영향
+
+### Fix (이번 commit):
+```typescript
+// after:
+for (const key in result) {
+  const v = result[key];
+  if (typeof v === 'string') {
+    result[key] = sanitizeForOG(v);
+  } else if (Array.isArray(v)) {
+    result[key] = v.map((item) =>
+      typeof item === 'string' ? sanitizeForOG(item) : item
+    );
+  }
+}
+```
+
+### 영향 og 라우트 (sanitizeRowForOG 사용처):
+- ✅ og-apt: key_features array 자동 sanitize
+- ✅ og-blog: categories/tags array 자동 sanitize
+- ✅ og-stock: 해당 시 자동 sanitize
+- ✅ og main: 영향 없음 (D1만 사용)
+
+## Architecture Rule
+- **#62 추가**: og 라우트 sanitizeRowForOG는 string field 외 array element도 sanitize 필수
+  · postgres text[]/jsonb array 컬럼 처리 위해
+  · nested object 처리는 별도 (필요 시 recursive sanitize)
+
+## 검증 (이 commit 활성 후)
+- og-apt 5분 throw 0건
+- og-blog/og-stock 동일 안정화
+
+---
+
 # 카더라 STATUS — s255 (2026-05-07 15:50) 🚨 og main D2~D6 임시 우회 재적용
 
 ## 이번 세션 (s255) — s254 후속 throw 추가 발견

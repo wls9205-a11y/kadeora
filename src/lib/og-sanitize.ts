@@ -41,12 +41,18 @@ export function sanitizeForOG(text: string | null | undefined): string {
 }
 
 // 객체의 모든 string field에 sanitize 자동 적용
+// s256: array element도 sanitize (postgres text[]/jsonb array 컬럼 처리)
 export function sanitizeRowForOG<T extends Record<string, any>>(row: T | null | undefined): T | null {
   if (!row) return null;
   const result: any = { ...row };
   for (const key in result) {
-    if (typeof result[key] === 'string') {
-      result[key] = sanitizeForOG(result[key]);
+    const v = result[key];
+    if (typeof v === 'string') {
+      result[key] = sanitizeForOG(v);
+    } else if (Array.isArray(v)) {
+      result[key] = v.map((item) =>
+        typeof item === 'string' ? sanitizeForOG(item) : item
+      );
     }
   }
   return result as T;
