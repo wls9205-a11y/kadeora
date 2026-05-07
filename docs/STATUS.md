@@ -1,3 +1,41 @@
+# 카더라 STATUS — s252 (2026-05-07 14:15) 🚨 빌드 에러 핫픽스 — U+2028 literal in regex
+
+## 이번 세션 (s252) — s250 빌드 실패 진단 + 핫픽스
+
+**진단 (Vercel deployment list):**
+- s250 commit baf3725b → state: ERROR ❌
+- s251 commit 38014398 → state: ERROR ❌ (s250 위에 builds라 같은 syntax 상속)
+- 활성 deployment: dpl_Dvx22bpPDZLigYfXSYNTsT89hy8j (s249, READY) ✅
+
+**진짜 root cause (od/hexdump 검증):**
+- src/lib/og-sanitize.ts line 35:
+  · raw bytes: `\xe2\x80\xa8` = literal U+2028 (LINE SEPARATOR)
+- ECMAScript spec: regex literal `/.../` 안에 U+2028/U+2029 직접 포함 = SyntaxError
+  · LineTerminator로 처리되어 regex literal이 종료되지 않음
+- s250 spec의 ` ` escape가 노드 PC 적용 시 literal U+2028로 변환됨
+- → JS SyntaxError → 빌드 실패
+
+**Fix:**
+- src/lib/og-sanitize.ts line 35 전체를 `\u` escape 형태로 통일:
+  · before: `.replace(/[​-‏ -  -⁯]/g, '')` (literal U+2028 + literal range chars)
+  · after: `.replace(/[​-‏ -  -⁯]/g, '')` (전체 \u escape)
+- 다른 line은 안전 (U+2028/2029 없음):
+  · line 31 (U+3000 공백) ✓
+  · line 33 (U+3001-303F CJK Symbols) ✓
+  · line 37 (U+2010-2015 dash) ✓
+  · line 39 (U+2018-201F quotes) ✓
+
+## Architecture Rule 추가
+- **#57** JS regex literal에 U+2028 (LINE SEPARATOR) / U+2029 (PARAGRAPH SEPARATOR) 직접 포함 금지
+  · ECMAScript LineTerminator로 처리되어 regex 종료 → SyntaxError
+  · 반드시   /   escape 형태 사용
+
+## 검증
+- 새 deployment build 성공 확인
+- og throw 0건 유지 확인 (sanitize 정규식 확장 효과 정상 발휘)
+
+---
+
 # 카더라 STATUS — s251 (2026-05-07 14:10) ⭐ Phase 4 Supabase Security ERROR 41건 완전 해소
 
 ## 이번 세션 (s251) — Supabase advisor ERROR 41 → 0

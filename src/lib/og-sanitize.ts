@@ -32,7 +32,7 @@ export function sanitizeForOG(text: string | null | undefined): string {
     // s250: CJK Symbols and Punctuation 나머지 제거 (전각 공백 제외)
     .replace(/[、-〿]/g, '')
     // s250: General Punctuation zero-width / 특수 공백 제거
-    .replace(/[​-‏ -  -⁯]/g, '')
+    .replace(/[\u200B-\u200F\u2028-\u202F\u205F-\u206F]/g, '')
     // s250: General Punctuation dash/hyphen → ASCII -
     .replace(/[‐-―]/g, '-')
     // s250: General Punctuation 따옴표 → ASCII "
