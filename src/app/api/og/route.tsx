@@ -102,9 +102,9 @@ function D2(C: OgCategoryToken, title: string, sub: string, author: string, ff: 
       {/* ── 좌측 40%: 순수 컬러 패널 ── */}
       <div style={{ width:'40%', background:C.color, display:'flex', flexDirection:'column', justifyContent:'space-between', padding:'32px 28px', position:'relative', overflow:'hidden', flexShrink:0 }}>
         {/* 원형 장식 1 — 우하단 큰 원 */}
-        <div style={{ position:'absolute', bottom:'-28%', right:'-28%', width:'85%', aspectRatio:'1', borderRadius:'50%', background:'rgba(0,0,0,0.14)', display:'flex' }} />
+        <div style={{ position:'absolute', bottom:'-28%', right:'-28%', width:'85%', borderRadius:'50%', background:'rgba(0,0,0,0.14)', display:'flex' }} />
         {/* 원형 장식 2 — 좌상단 작은 원 */}
-        <div style={{ position:'absolute', top:'-18%', left:'-18%', width:'58%', aspectRatio:'1', borderRadius:'50%', background:'rgba(255,255,255,0.13)', display:'flex' }} />
+        <div style={{ position:'absolute', top:'-18%', left:'-18%', width:'58%', borderRadius:'50%', background:'rgba(255,255,255,0.13)', display:'flex' }} />
 
         {/* 상단: 로고 */}
         <div style={{ position:'relative', zIndex:1, display:'flex', alignItems:'center', gap:8 }}>
@@ -232,8 +232,8 @@ function D4(C: OgCategoryToken, title: string, sub: string, author: string, ff: 
     <div style={{ width:'100%', height:'100%', display:'flex', overflow:'hidden', fontFamily: ff }}>
       {/* 왼쪽 컬러 패널 */}
       <div style={{ width:'42%', background:C.color, display:'flex', flexDirection:'column', justifyContent:'space-between', padding:'32px 28px', position:'relative', overflow:'hidden' }}>
-        <div style={{ position:'absolute', bottom:'-25%', right:'-25%', width:'80%', aspectRatio:'1', borderRadius:'50%', background:'rgba(0,0,0,.12)', display:'flex' }} />
-        <div style={{ position:'absolute', top:'-15%', left:'-15%', width:'55%', aspectRatio:'1', borderRadius:'50%', background:'rgba(255,255,255,.15)', display:'flex' }} />
+        <div style={{ position:'absolute', bottom:'-25%', right:'-25%', width:'80%', borderRadius:'50%', background:'rgba(0,0,0,.12)', display:'flex' }} />
+        <div style={{ position:'absolute', top:'-15%', left:'-15%', width:'55%', borderRadius:'50%', background:'rgba(255,255,255,.15)', display:'flex' }} />
         <div style={{ position:'relative', zIndex:1 }}>
           <div style={{ display:'flex', alignItems:'center', gap: 8, marginBottom:16 }}>
             {Logo(20)}<span style={{ fontSize:13, fontWeight:900, color:'rgba(0,0,0,.6)' }}>카더라</span>
@@ -276,7 +276,7 @@ function D5(C: OgCategoryToken, title: string, sub: string, author: string, ff: 
       {/* 사선 줄무늬 배경 */}
       <div style={{ position:'absolute', inset:0, backgroundImage:`repeating-linear-gradient(135deg,transparent,transparent 60px,${C.color}06 60px,${C.color}06 61px)`, display:'flex' }} />
       {/* 우상단 글로우 */}
-      <div style={{ position:'absolute', top:'-35%', right:'-10%', width:'55%', aspectRatio:'1', borderRadius:'50%', background:`radial-gradient(circle,${C.color}22 0%,transparent 65%)`, display:'flex' }} />
+      <div style={{ position:'absolute', top:'-35%', right:'-10%', width:'55%', borderRadius:'50%', background:`radial-gradient(circle,${C.color}22 0%,transparent 65%)`, display:'flex' }} />
       {/* 헤더 */}
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'20px 40px', flexShrink:0, position:'relative', zIndex:2 }}>
         <div style={{ display:'flex', alignItems:'center', gap:8 }}>
@@ -319,7 +319,7 @@ function CardHero(C: OgCategoryToken, title: string, ff: string) {
   const titleFS = title.length > 28 ? 52 : title.length > 18 ? 64 : 76;
   return (
     <div style={{ width:'100%', height:'100%', display:'flex', flexDirection:'column', background:bg, fontFamily: ff, padding:'56px 64px', position:'relative', overflow:'hidden' }}>
-      <div style={{ position:'absolute', top:'-20%', right:'-10%', width:'55%', aspectRatio:'1', borderRadius:'50%', background:`radial-gradient(circle,${C.color}28 0%,transparent 65%)`, display:'flex' }} />
+      <div style={{ position:'absolute', top:'-20%', right:'-10%', width:'55%', borderRadius:'50%', background:`radial-gradient(circle,${C.color}28 0%,transparent 65%)`, display:'flex' }} />
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', position:'relative', zIndex:2 }}>
         <div style={{ display:'flex', alignItems:'center', gap:12 }}>
           {Logo(36)}
@@ -388,7 +388,7 @@ function CardImminent(_C: OgCategoryToken, title: string, ff: string) {
   const bg = `linear-gradient(135deg, #1a0c00 0%, #2a1500 50%, #3a1f00 100%)`;
   return (
     <div style={{ width:'100%', height:'100%', display:'flex', flexDirection:'column', background:bg, fontFamily: ff, padding:'52px 60px', position:'relative', overflow:'hidden' }}>
-      <div style={{ position:'absolute', top:'-25%', left:'-10%', width:'60%', aspectRatio:'1', borderRadius:'50%', background:`radial-gradient(circle,${A}22 0%,transparent 65%)`, display:'flex' }} />
+      <div style={{ position:'absolute', top:'-25%', left:'-10%', width:'60%', borderRadius:'50%', background:`radial-gradient(circle,${A}22 0%,transparent 65%)`, display:'flex' }} />
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', position:'relative', zIndex:2, marginBottom:30 }}>
         <div style={{ display:'flex', alignItems:'center', gap:10 }}>
           {Logo(28)}<span style={{ fontSize:18, fontWeight:900, color:'#fff' }}>카더라</span>
@@ -492,8 +492,8 @@ function D6(C: OgCategoryToken, title: string, sub: string, author: string, ff: 
   return (
     <div style={{ width:'100%', height:'100%', overflow:'hidden', position:'relative', background:bg, display:'flex', flexDirection:'column', fontFamily: ff }}>
       {/* 배경 글로우 원 */}
-      <div style={{ position:'absolute', top:'-30%', right:'-10%', width:'60%', aspectRatio:'1', borderRadius:'50%', background:`radial-gradient(circle,${C.color}25 0%,transparent 65%)`, display:'flex' }} />
-      <div style={{ position:'absolute', bottom:'-25%', left:'-5%', width:'45%', aspectRatio:'1', borderRadius:'50%', background:`radial-gradient(circle,${C.color}15 0%,transparent 65%)`, display:'flex' }} />
+      <div style={{ position:'absolute', top:'-30%', right:'-10%', width:'60%', borderRadius:'50%', background:`radial-gradient(circle,${C.color}25 0%,transparent 65%)`, display:'flex' }} />
+      <div style={{ position:'absolute', bottom:'-25%', left:'-5%', width:'45%', borderRadius:'50%', background:`radial-gradient(circle,${C.color}15 0%,transparent 65%)`, display:'flex' }} />
       {/* 헤더 */}
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'22px 44px 0', flexShrink:0, position:'relative', zIndex:2 }}>
         <div style={{ display:'flex', alignItems:'center', gap:8 }}>
