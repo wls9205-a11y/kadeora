@@ -155,7 +155,8 @@ interface RSSItem {
 
 async function fetchRSS(feed: { name: string; url: string }): Promise<RSSItem[]> {
   try {
-    const res = await fetch(feed.url, { signal: AbortSignal.timeout(8000) });
+    // s238b: 8s → 5s. 평균 27s 대기 → 8-10s 목표. 느린 feed 는 다음 tick 에 재시도.
+    const res = await fetch(feed.url, { signal: AbortSignal.timeout(5000) });
     if (!res.ok) return [];
     const xml = await res.text();
 
@@ -354,12 +355,13 @@ async function handler(_req: NextRequest) {
     ? [...APT_RSS_FEEDS, ...STOCK_RSS_FEEDS, ...FINANCE_RSS_FEEDS, ...ECONOMY_RSS_FEEDS, ...LIFE_RSS_FEEDS, ...GOV_RSS_FEEDS]
     : [...APT_RSS_FEEDS, ...FINANCE_RSS_FEEDS]; // 그룹B: 부동산+재테크
 
-  // s191: 14+ feeds 동시 발사 시 일부 slow source 가 전체 504 유발 → 4개 batch 직렬.
-  // 각 fetchRSS 는 이미 AbortSignal.timeout(8000) — 배치 1개 worst-case 8s × 4 batch ≈ 32s.
+  // s191: 14+ feeds 동시 발사 시 일부 slow source 가 전체 504 유발 → batch 직렬.
   // s237: 매체별 item count 로깅 추가 (dead feed 식별).
+  // s238b: BATCH 4 → 8 + per-feed timeout 8s → 5s. 12h 동안 cron 1회만 실행
+  // (평소 47회) 회귀 회복. 29 feeds / 8 batch × 5s = ~18s (이전 64s) → cron 빈도 정상화.
   const rssItems: RSSItem[] = [];
   const feedYield: Record<string, number> = {};
-  const BATCH = 4;
+  const BATCH = 8;
   for (let i = 0; i < feeds.length; i += BATCH) {
     const slice = feeds.slice(i, i + BATCH);
     const results = await Promise.allSettled(slice.map(f => fetchRSS(f)));

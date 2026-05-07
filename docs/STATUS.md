@@ -1,3 +1,49 @@
+# 카더라 STATUS — 세션 238b: issue-detect timeout fix + 충돌 점검 (2026-05-07 KST)
+
+## s238b (2026-05-07) — issue-detect timeout fix + 다른 PC 충돌 점검
+
+### 다른 PC 작업 인지
+- `c0e3434d` (5/7 04:32, gmail email): /apt 메인 6-section 재설계 + apt_complex_profiles cover 100% +
+  pick_apt_cover_image RPC + cover-image-backfill cron
+- 우리 작업 `b1617280` → `c0e3434d` → `14deaf6e` 순서로 정상 머지됨
+- 충돌 없음 — apt cover 53%→84% 시너지
+
+### s237 부작용 fix (s238b)
+- 진단: issue-detect 12h 1회 실행 (평소 47회), 평균 27s — Vercel cron timeout 위험
+- 원인: 29 feeds(group A) / BATCH 4 / per-feed timeout 8s = worst-case 64s, 90s maxDuration 끝까지 사용
+- 수정 (`src/app/api/cron/issue-detect/route.ts`):
+  - per-feed timeout `AbortSignal.timeout(8000)` → `5000` (s237 매체별 yield 봐도 5s 안에 답 안 오는
+    feed 는 dead 로 간주)
+  - `BATCH = 4 → 8` — 동시 fetch 2배. s191 504 회귀 우려는 timeout 5s 가 단축으로 흡수
+- 효과: 29 feeds / 8 / 5s = ~18s (이전 64s) → cron 빈도 정상화 예상 (15분 간격)
+
+### s232 vs c0e3434d 6-section 정리
+- 발견: `<AptHomeSections>` 와 c0e3434d 의 `<AptRealtimeRanking>` 모두 popularity top N 노출 → **중복**
+- 처리: `AptHomeSections.tsx` 의 popular 섹션 비활성화 (코멘트 + `void popular`).
+  unsold (가격 강조 카드) + landmark (랜드마크 — c0e3434d 에 없음) 만 유지
+- /apt 메인 렌더 순서 그대로:
+  1. AptHomeHero (region+sigungu+kpis)
+  2. AptImminentCarousel (imminent_d7)
+  3. AptCategoryGrid (counts)
+  4. AptRealtimeRanking (popular top 5) ← 인기 단지 단일 source
+  5. AptRegionalPriceGrid (sigungu trends)
+  6. AptInsightsUnified (ai+blog)
+  7. AptHomeSections (💸 미분양 + 🏆 랜드마크) ← popular 제거됨
+
+### cover-image-backfill cron 점검
+- pg_cron jobid 138, schedule `30 18 * * *` (UTC = KST 03:30 daily), active=true
+- 다음 실행 KST 03:30 — 정상
+
+### s238 효과 검증 (deploy ~6h 후)
+- pre-s238 (24h~6h 전): `auto_failed` 18 + `failed` 19 = 37 fails / 40 detected = **64% 실패**
+- post-s238 (최근 6h): `auto_failed` 0 + `failed` 0 / 19 detected = **0% 실패**
+- 근거: validate_blog_post() 트리거 jsonb lookup 적용, `issue_preempt` cap 15 → 30 효과
+
+### 빌드
+- tsc clean, next build EXIT=0
+
+---
+
 # 카더라 STATUS — 세션 238: CRON_TYPE_DAILY_LIMIT fix + title 다양화 (2026-05-08 KST)
 
 ## s238 (2026-05-08) — issue-publish CRON_TYPE_DAILY_LIMIT fix + issue-draft title 다양화

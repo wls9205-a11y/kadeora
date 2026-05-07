@@ -32,17 +32,12 @@ export default async function AptHomeSections() {
   const unsold = Array.isArray(s.unsold) ? s.unsold : [];
   const landmark = Array.isArray(s.landmark) ? s.landmark : [];
 
+  // s238b: c0e3434d 의 <AptRealtimeRanking> 가 popular top 5 를 이미 노출 → 중복 제거.
+  // unsold (가격 강조 카드) + landmark (랜드마크 — 다른 데이터 풀) 만 유지.
+  void popular;
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24, marginTop: 20 }}>
-      {popular.length > 0 && (
-        <section aria-label="지금 인기 단지">
-          <SectionHeader title="🔥 지금 인기 단지" href="/apt/popular" />
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 6 }}>
-            {popular.map((r) => <HomeSiteCard key={r.id} row={r} variant="popular" />)}
-          </div>
-        </section>
-      )}
-
       {unsold.length > 0 && (
         <section aria-label="미분양 기회">
           <SectionHeader title="💸 미분양 기회" href="/apt/unsold-deals" />
