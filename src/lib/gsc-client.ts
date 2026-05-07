@@ -8,6 +8,7 @@
  */
 
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { SITE_URL } from '@/lib/constants';
 
 const PROVIDER = 'gsc';
 const OAUTH_SCOPE = 'https://www.googleapis.com/auth/webmasters.readonly';
@@ -27,7 +28,7 @@ export interface OAuthToken {
 
 export function buildGscAuthUrl(state: string): string | null {
   const clientId = process.env.GOOGLE_OAUTH_CLIENT_ID;
-  const siteOrigin = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
+  const siteOrigin = process.env.NEXT_PUBLIC_SITE_URL || SITE_URL;
   if (!clientId) return null;
   const params = new URLSearchParams({
     client_id: clientId,
@@ -44,7 +45,7 @@ export function buildGscAuthUrl(state: string): string | null {
 export async function exchangeCodeForTokens(code: string): Promise<OAuthToken | null> {
   const clientId = process.env.GOOGLE_OAUTH_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_OAUTH_CLIENT_SECRET;
-  const siteOrigin = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
+  const siteOrigin = process.env.NEXT_PUBLIC_SITE_URL || SITE_URL;
   if (!clientId || !clientSecret) return null;
 
   const body = new URLSearchParams({
@@ -152,7 +153,7 @@ export async function getValidAccessToken(): Promise<string | null> {
 export async function fetchSamikBeachQuery(): Promise<any> {
   const token = await getValidAccessToken();
   if (!token) return { error: 'no valid token' };
-  const siteUrl = process.env.GSC_SITE_URL || 'https://kadeora.app/';
+  const siteUrl = process.env.GSC_SITE_URL || `${SITE_URL}/`;
   const startDate = new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10);
   const endDate = new Date(Date.now() - 1 * 86400000).toISOString().slice(0, 10);
 

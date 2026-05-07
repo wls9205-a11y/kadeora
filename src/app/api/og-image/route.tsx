@@ -3,6 +3,7 @@ import { NextRequest } from 'next/server';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { OG_CAT as CAT } from '@/lib/og-tokens';
+import { SITE_URL } from '@/lib/constants';
 
 export const runtime = 'nodejs';
 export const maxDuration = 30;
@@ -66,6 +67,6 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch {
-    return Response.redirect('https://kadeora.app/images/brand/kadeora-hero.png', 302);
+    return Response.redirect(`${SITE_URL}/images/brand/kadeora-hero.png`, 302);
   }
 }

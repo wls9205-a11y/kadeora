@@ -25,8 +25,9 @@ import {
 } from '@/lib/apt-fetcher';
 import type { AptFilters, AptCategory } from '@/lib/apt-fetcher';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 600; // s239 W5: 10분 ISR (cold start ↓ + 봇 캐시 hit ↑)
+// s240 W1: force-dynamic 제거 — getSupabaseAdmin (cookie-free) 사용 중이라 ISR static 가능.
+// cache-control public, s-maxage=600, stale-while-revalidate=86400 회복.
+export const revalidate = 600;
 export const maxDuration = 30;
 
 function tabToCategory(tab: string | undefined): AptCategory {

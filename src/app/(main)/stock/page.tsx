@@ -47,14 +47,15 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
     twitter: { card: 'summary_large_image', title, description: desc, images: ogImages },
   };
 }
-import { createSupabaseServer } from '@/lib/supabase-server';
+// s240 W1: createSupabaseServer → getSupabaseAdmin (cookie-free, ISR static 가능)
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { unstable_cache } from 'next/cache';
 import StockClient from './StockClient';
 // s205-W2: StockHeroCarousel + HeroCard "오늘의 종목" 제거 — 14d 클릭 0건, hero refresh cron 도 정리.
 import Disclaimer from '@/components/Disclaimer';
 
 async function fetchStocks() {
-  const sb = await createSupabaseServer();
+  const sb = getSupabaseAdmin();
   // 세션 138: get_stocks_with_thumbnails RPC 로 교체 — stock_images 1장 thumbnail 병합
   // 반환 TABLE: symbol, name, market, price, change_amt, change_pct, volume, market_cap,
   //            currency, ticker, description, sector, per, pbr, dividend_yield,
@@ -69,7 +70,7 @@ async function fetchStocks() {
 }
 
 async function fetchBriefing() {
-  const sb = await createSupabaseServer();
+  const sb = getSupabaseAdmin();
   const { data } = await sb
     .from('stock_daily_briefing')
     .select('id, market, briefing_date, title, summary, sentiment, top_gainers, top_losers')
@@ -81,7 +82,7 @@ async function fetchBriefing() {
 }
 
 async function fetchBriefingUS() {
-  const sb = await createSupabaseServer();
+  const sb = getSupabaseAdmin();
   const { data } = await sb
     .from('stock_daily_briefing')
     .select('id, market, briefing_date, title, summary, sentiment, top_gainers, top_losers')
@@ -93,7 +94,7 @@ async function fetchBriefingUS() {
 }
 
 async function fetchExchangeHistory() {
-  const sb = await createSupabaseServer();
+  const sb = getSupabaseAdmin();
   const since = new Date(Date.now() - 7 * 86400000).toISOString();
   const { data } = await sb
     .from('exchange_rate_history')
@@ -105,7 +106,7 @@ async function fetchExchangeHistory() {
 }
 
 async function fetchThemeHistory() {
-  const sb = await createSupabaseServer();
+  const sb = getSupabaseAdmin();
   const { data } = await sb
     .from('stock_theme_history')
     .select('id, theme_id, theme_name, change_pct, recorded_date')

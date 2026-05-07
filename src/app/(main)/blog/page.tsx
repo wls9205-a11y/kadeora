@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
 import React from 'react';
 import Link from 'next/link';
-import { createSupabaseServer } from '@/lib/supabase-server';
+// s240 W1: createSupabaseServer (cookies 의존) → getSupabaseAdmin (cookie-free) 전환.
+// 메인 페이지 anonymous SSR — RLS 우회 OK. cache-control public 회복.
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { safeImg } from '@/lib/image-sanitize';
 import EmptyState from '@/components/EmptyState';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
@@ -125,7 +127,7 @@ export default async function BlogPage({ searchParams }: Props) {
   const { category = 'all', sort = 'latest', q = '', page = '1', sub = '' } = await searchParams;
   const pageNum = Math.max(1, parseInt(page) || 1);
   const perPage = 30;
-  const sb = await createSupabaseServer();
+  const sb = getSupabaseAdmin();
   // s205-W2: blogHero (HeroCard) 제거 — 효용 0 (클릭 1건/14d).
 
   // 카테고리 건수 + 인기글 + 인기태그 — 병렬 조회

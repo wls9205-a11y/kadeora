@@ -1,4 +1,51 @@
-# 카더라 STATUS — 세션 239 Phase 2.1: DART 큰 이벤트 → issue_alerts 자동 연결 (2026-05-08 KST)
+# 카더라 STATUS — 세션 240: 메인 cache-control public + OG 진단 강화 + SITE_URL 잔여 (2026-05-08 KST)
+
+## s240 (2026-05-08) — cache-control public 회복 + OG 분할 강화 + 잔여 정리
+
+### W1 (P0): 메인 페이지 cache-control public 회복
+- 진단:
+  - `/apt`: `Cache-Control: private, no-cache, no-store, max-age=0, must-revalidate` ❌
+  - 원인: `/apt/page.tsx` 가 `force-dynamic` 강제 + `/blog`, `/stock` 가 `createSupabaseServer`
+    (cookies 의존) 사용 → Supabase auth helper 가 자동 `Cache-Control: private` 강제
+- fix:
+  - `/apt/page.tsx`: `export const dynamic = 'force-dynamic'` 제거 (이미 `getSupabaseAdmin`
+    cookie-free + revalidate=600 ISR 활성)
+  - `/blog/page.tsx`: `createSupabaseServer` → `getSupabaseAdmin` (anonymous SSR + RLS 우회)
+  - `/stock/page.tsx`: 5 fetcher 모두 `createSupabaseServer` → `getSupabaseAdmin`
+- 기대: cache-control `public, s-maxage=600, stale-while-revalidate` 회복 + x-vercel-cache HIT
+
+### W2: OG throw chunk 분할 강화
+- 진단: s239 Phase 1 분할 후 MCP `get_runtime_logs` 가 Message 컬럼 ~30자 truncate.
+  `/api/og`: `Unexpected to...`, `/api/og-blog`: `Cannot c...` — stack/input 풀 못 봄.
+- fix: catch block 의 message/stack/input 을 80자 chunk 로 분할 (each line < 100자).
+  prefix `[og] m0=`, `[og] m1=`, `[og] s0=`, `[og] i0=` 등 — Vercel MCP truncate 회피.
+- 적용: `/api/og/route.tsx` + `/api/og-blog/route.tsx`
+- stack 은 480자까지 (6 chunks) 만 출력 — 그 이상은 노이즈
+
+### W3: SITE_URL 잔여 2건 통일
+- `src/lib/gsc-client.ts`: 3 occurrences (`process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app'`
+  → `|| SITE_URL`). GSC_SITE_URL fallback 도 `${SITE_URL}/` 로.
+- `src/app/api/og-image/route.tsx`: catch fallback `'https://kadeora.app/images/brand/...'`
+  → `${SITE_URL}/...`
+
+### W4: signup_attempts 50% failure 진단
+- 24h: 4 attempts / 2 fail (50%)
+- 7d provider 분포:
+  - kakao: 18 ok / **24 fail** (57% 실패)
+  - google: 0 ok / 1 fail
+- 모든 실패 케이스 `dropped_step='oauth_start'` — OAuth start 시점에서 callback 못 옴
+- 진단 결론: **카카오 인앱 브라우저 OAuth 차단 추정** (메모리 #14 known issue).
+  s223 sprint 의 `InAppBrowserModal` 이 이미 외부 브라우저 안내 — 코드 fix 불필요.
+  사용자 행동/카카오 정책 의존. 추가 모니터링 필요.
+
+### Pending
+- W1 배포 후 즉시 `curl -sI https://kadeora.app/apt` cache-control 검증
+- W2 배포 후 5분 + curl trigger + Vercel MCP 풀 메시지 확인 (chunk 분할 효과)
+- signup_attempts 7d 추이 (InAppBrowserModal 효과)
+
+---
+
+# 카더라 STATUS — 세션 239 Phase 2.1: DART 큰 이벤트 → issue_alerts 자동 연결 (2026-05-08 KST, 다른 PC)
 
 ## s239 Phase 2.1 (2026-05-08) — DART 큰 이벤트 → issue_alerts 자동 연결
 

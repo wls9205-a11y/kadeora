@@ -612,17 +612,22 @@ export async function GET(req: NextRequest) {
     return new Response(_postBuf, { headers: { 'Content-Type':'image/png', 'X-Content-Type-Options':'nosniff', ...CACHE } });
 
   } catch (err) {
-    // s239-p1: console.error 분할 (Vercel log 1 row 길이 제한 우회)
+    // s240 W2: chunk 분할 강화 — Vercel MCP get_runtime_logs Message 컬럼 ~30자 truncate 우회.
+    // 80자 단위로 잘라 prefix 포함 한 줄 < 100자 보장.
     const e = err as Error;
-    console.error('[og] message=', e?.message);
-    console.error('[og] stack=', e?.stack);
-    console.error('[og] class=', e?.constructor?.name);
-    console.error('[og] input=', JSON.stringify({
+    const msg = e?.message ?? '';
+    const stk = e?.stack ?? '';
+    const cls = e?.constructor?.name ?? '';
+    const inp = JSON.stringify({
       title: new URL(req.url).searchParams.get('title')?.slice(0, 40),
       card: new URL(req.url).searchParams.get('card'),
       design: new URL(req.url).searchParams.get('design'),
       category: new URL(req.url).searchParams.get('category'),
-    }));
+    });
+    console.error('[og] cls=', cls);
+    for (let i = 0; i < msg.length; i += 80) console.error('[og] m' + (i / 80) + '=', msg.slice(i, i + 80));
+    for (let i = 0; i < Math.min(stk.length, 480); i += 80) console.error('[og] s' + (i / 80) + '=', stk.slice(i, i + 80));
+    for (let i = 0; i < inp.length; i += 80) console.error('[og] i' + (i / 80) + '=', inp.slice(i, i + 80));
     const cat = new URL(req.url).searchParams.get('category') ?? 'default';
     const fb: Record<string,string> = { stock:`${SITE}/images/brand/kadeora-wide.png`, apt:`${SITE}/images/brand/kadeora-full.png`, default:`${SITE}/images/brand/kadeora-hero.png` };
     return Response.redirect(fb[cat] ?? fb.default, 302);

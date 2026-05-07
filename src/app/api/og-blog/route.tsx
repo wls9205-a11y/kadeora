@@ -255,12 +255,17 @@ export async function GET(req: NextRequest) {
     });
   } catch (err) {
     // s239-p1: console.error 분할 (Vercel log 1 row 길이 제한 — 단일 호출 시 stack 잘림)
+    // s240 W2: chunk 분할 강화 (80자) — MCP truncate 우회
     const e = err as Error;
-    console.error('[og-blog] message=', e?.message);
-    console.error('[og-blog] stack=', e?.stack);
-    console.error('[og-blog] class=', e?.constructor?.name);
-    console.error('[og-blog] code=', (err as any)?.code);
-    console.error('[og-blog] input=', JSON.stringify({ slug, card, fontLoaded: !!fontData, hasPost: !!post, postCategory: post?.category, titleLen: post?.title?.length }));
+    const msg = e?.message ?? '';
+    const stk = e?.stack ?? '';
+    const cls = e?.constructor?.name ?? '';
+    const code = (err as any)?.code ?? '';
+    const inp = JSON.stringify({ slug, card, fontLoaded: !!fontData, hasPost: !!post, postCategory: post?.category, titleLen: post?.title?.length });
+    console.error('[og-blog] cls=', cls, 'code=', code);
+    for (let i = 0; i < msg.length; i += 80) console.error('[og-blog] m' + (i / 80) + '=', msg.slice(i, i + 80));
+    for (let i = 0; i < Math.min(stk.length, 480); i += 80) console.error('[og-blog] s' + (i / 80) + '=', stk.slice(i, i + 80));
+    for (let i = 0; i < inp.length; i += 80) console.error('[og-blog] i' + (i / 80) + '=', inp.slice(i, i + 80));
     return Response.redirect(`${SITE_URL}/images/brand/kadeora-hero.png`, 302);
   }
 }
