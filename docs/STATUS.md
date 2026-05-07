@@ -1,3 +1,59 @@
+# 카더라 STATUS — s258 (2026-05-07 17:50) ⭐ 전부 한방 — Phase 3 + D2~D6 + RULES.md
+
+## 이번 세션 (s258) — 4 Track 동시 처리
+
+### Track A (Supabase MCP 직접) — Phase 3
+- 차집합 분석: DB sec_def=true GRANT 함수 - 코드 .rpc 호출 124개 = 120건
+- 면밀 분류 (코드 grep 추가 검증으로 deprecated 함수 식별):
+  · admin_*, get_admin_* admin route 호출 (service_role 사용)
+  · admin tools (delete_seed/anonymize/kill/reset/detect)
+  · cron health/db monitoring
+  · notification triggers (handle_comment_notification, notify_on_*)
+  · deprecated (get_apt_unified, search_posts, add_to_watchlist, check_attendance 등 코드 0건)
+  · use_megaphone 등 premium 함수 (admin route)
+- 적용 (migration s258_track4_phase3_admin_internal_revoke):
+  · 약 70건 PUBLIC + anon + authenticated REVOKE
+- 효과: 367 → 200 (-167)
+
+### Track B — Phase 4 작은 항목 (skip 결정)
+- materialized_view_in_api 11건: 진짜 fix는 mv→view 변환 또는 RPC wrap (큰 작업)
+- rls_policy_always_true 8건: INSERT 정책 specific화 (큰 작업)
+- 둘 다 의도된 동작 → 별도 세션
+
+### Track C (이번 commit) — D2~D6 satori-friendly 재작성
+- 진단 결과 (s255 D1 redirect 활성 후):
+  · D2 React Fragment <>...</> (L162-170) — satori 의심 패턴
+  · D2~D6 sub-pixel 0.5px border (Architecture Rule #61 위반)
+  · D1은 0.5px 3건 있지만 정상 → D1은 그대로 유지
+- Fix:
+  · D2 Fragment → div wrap (Rule #60)
+  · D2~D6 안의 0.5px → 1px (Rule #61, 7곳)
+  · case '2'~'6' D1 redirect 풀고 D2~D6 정상 호출 복구
+
+### Track D (이번 commit) — docs/RULES.md 신설
+- Architecture Rules #43~#64 (오늘 추가) 통합 문서화
+- OG / Performance / Schema / Cron / Supabase Security / 워크플로 카테고리
+- STATUS.md는 세션별 기록, RULES.md는 최종 규칙 모음
+
+## 진행률 누적 (s251 + s253 + s257 + s258)
+- 세션 시작 527 → 200 (-327, 62% 감소) 🚀
+- ERROR: 41 → 0 ✅
+- WARN: 485 → 198 (-287)
+- INFO: 1 → 2
+
+## 검증 (이 commit 활성 후)
+- og?design=2~6 모두 200 image/png + x-matched-path /api/og
+- 5분 logs throw 0건 측정
+- Phase 3 후 cron/admin route 정상 200 응답 (이미 검증)
+
+## PENDING
+- og fallback PNG 캐시 7일 자연 만료 후 위험 단지 OG 재검증 (s256 array sanitize 효과)
+- Phase 4 작은 항목 (mv → view 변환 + rls policy specific화) 별도 시간 필요
+- Phase 3 잔여 ~50건 (homepage SSR + carousel + dashboard 등 검증 필요)
+- 사용자 직접: leaked password protection (Supabase UI), RESEND_WEBHOOK_SECRET (Vercel env)
+
+---
+
 # 카더라 STATUS — s257 (2026-05-07 17:30) ⭐ Phase 4 Track 4 — 함수 권한 정리
 
 ## 이번 세션 (s257) — 코드 변경 없음, Supabase MCP 직접 작업
