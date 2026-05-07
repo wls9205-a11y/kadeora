@@ -1,3 +1,52 @@
+# 카더라 STATUS — s254 (2026-05-07 15:15) 🚨 og main D2~D6 잔여 throw 진단/fix
+
+## 이번 세션 (s254) — s253 deployment 활성 후 og throw 재발 진단
+
+**진단 (실측):**
+- s253 commit 4f76db37 활성 (deployment dpl_9sb81HkxpCLfSUtGUMgg9d14UuGp)
+- D2~D6 우회 풀린 후 5분간 og throw 6+건 (15:01~15:09)
+- /api/og?design=2~6 일부 200 + 일부 302 fallback (D별 차이 명확)
+- 진짜 culprit 광범위 검색:
+  · ✅ D5 L271 `repeating-linear-gradient` (satori 미지원)
+  · ✅ OG_CAT 9개 entry 모두 emoji icon: 🏢📈💰⚠️🏗️📰✍️📍💬
+    → 모든 D 함수가 `{C.icon}` 사용 → satori emoji font fetch → throw
+    → Architecture Rule #48 위반
+
+**Fix (한방 commit):**
+
+### Track D-1: src/lib/og-tokens.ts — emoji icon 9건 한국어 1글자로
+- apt 🏢 → 집
+- stock 📈 → 주
+- finance 💰 → 돈
+- unsold ⚠️ → 미
+- redev 🏗️ → 재
+- general 📰 → 뉴
+- blog ✍️ → 글
+- local 📍 → 동
+- free 💬 → 톡
+- → NotoSansKR 100% 보장 + 디자인 다양성 유지
+
+### Track D-2: src/app/api/og/route.tsx D5 L271 — repeating-linear-gradient div 제거
+- satori 미지원 (linear-gradient는 OK, repeating-linear는 ❌)
+- 사선 패턴 장식 → 시각 단순해지지만 throw 0 보장
+
+## Architecture Rule
+- **#48 강화**: OG_CAT/OG token 정의 시 emoji icon 사용 금지 (모든 사용처에 영향)
+- **#59 추가**: satori repeating-linear-gradient / repeating-radial-gradient / conic-gradient 미지원
+  · 일반 linear-gradient / radial-gradient 만 사용
+  · 반복 패턴 필요 시 SVG pattern 또는 image background
+
+## 검증 (이 commit 활성 후)
+- /api/og?design=2~6 모두 200 응답 + image/png + x-matched-path /api/og
+- og throw 0건 5분 logs 측정
+
+## 다음 세션
+- og 안정화 24h 모니터링
+- /apt/[id] 504 24h 모니터링
+- Track 4 anon/auth function executable 427건
+
+---
+
 # 카더라 STATUS — s253 (2026-05-07 14:35) ⭐ 병렬 마무리 — Track A+B+C 한방 배포
 
 ## 이번 세션 (s253) — 3 Track 병렬 처리

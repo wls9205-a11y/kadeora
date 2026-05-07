@@ -267,8 +267,6 @@ function D5(C: OgCategoryToken, title: string, sub: string, author: string, ff: 
   const titleFS = title.length > 22 ? 38 : title.length > 16 ? 44 : 52;
   return (
     <div style={{ width:'100%', height:'100%', background:'#000', overflow:'hidden', position:'relative', display:'flex', flexDirection:'column', fontFamily: ff }}>
-      {/* 사선 줄무늬 배경 */}
-      <div style={{ position:'absolute', inset:0, backgroundImage:`repeating-linear-gradient(135deg,transparent,transparent 60px,${C.color}06 60px,${C.color}06 61px)`, display:'flex' }} />
       {/* 헤더 */}
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'20px 40px', flexShrink:0, position:'relative', zIndex:2 }}>
         <div style={{ display:'flex', alignItems:'center', gap:8 }}>
