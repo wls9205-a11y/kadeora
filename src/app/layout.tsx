@@ -112,6 +112,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="search" type="application/opensearchdescription+xml" title="카더라 검색" href="/opensearch.xml" />
         <meta name="msvalidate.01" content="BAE0BF3F5071F16E8BAE497D195B2FD6" />
         <meta name="google-adsense-account" content="ca-pub-2356113563328542" />
+        <Script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2356113563328542" crossOrigin="anonymous" strategy="afterInteractive" />
         {/* iOS PWA 아이콘 — v6 캐시 갱신 */}
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=7" />
         <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=7" />

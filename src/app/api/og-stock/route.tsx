@@ -323,7 +323,6 @@ export async function GET(req: NextRequest) {
     const img = new ImageResponse(body, {
       width: 1200,
       height: 630,
-      emoji: 'twemoji',
       ...fontOpts,
     });
     return new Response(await img.arrayBuffer(), {

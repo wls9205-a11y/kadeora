@@ -246,7 +246,6 @@ export async function GET(req: NextRequest) {
     const img = new ImageResponse(wrapped, {
       width: SIDE,
       height: SIDE,
-      emoji: 'twemoji',
       ...fontOpts,
     });
     return new Response(await img.arrayBuffer(), {
