@@ -218,7 +218,7 @@ function renderPlace(site: AptRow): React.ReactElement {
     <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', padding: 56, justifyContent: 'space-between' }}>
       <div style={{ fontSize: 24, color: 'rgba(255,255,255,0.66)', fontWeight: 700, letterSpacing: 2 }}>PLACE · 입지</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-        <div style={{ width: 96, height: 96, borderRadius: 999, background: 'rgba(255,255,255,0.12)', border: '3px solid #FAC775', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 48 }}>📍</div>
+        <div style={{ width: 96, height: 96, borderRadius: 999, background: 'rgba(255,255,255,0.12)', border: '3px solid #FAC775', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 48 }}>●</div>
         <div style={{ fontSize: 38, fontWeight: 900, color: '#FFFFFF', lineHeight: 1.15 }}>{region || '주소 정보'}</div>
         <div style={{ fontSize: 22, color: 'rgba(255,255,255,0.66)', fontWeight: 600, lineHeight: 1.4 }}>{site.address || site.dong || ''}</div>
       </div>

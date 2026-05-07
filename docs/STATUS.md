@@ -1,3 +1,39 @@
+# 카더라 STATUS — s241~s244 (2026-05-07)
+
+## 이번 세션 완료
+- **토스페이먼츠 6주 심사 마무리** (commit 5f6dfe87, 7479c773)
+  - CSP connect-src + frame-src wildcard 적용 → TossPayments 결제창 정상 (간편결제 3종 + 카드 9종)
+  - 답변 PDF (kadeora_결제경로_단건결제_20260507.pdf) 발송 → 1~5일 답변 대기
+- **AdSense 통과 + 운영 인프라**
+  - Publisher: pub-2356113563328542
+  - Step 1 인프라 (commit 662fd8d9): ads.txt + CSP (pagead2/tpc/googleads) + adsbygoogle.js script
+  - Step 2 블로그 본문 배치 (commit f1bbb97a): AdSlot.tsx 컴포넌트, 슬롯 8739799675 하드코딩, 블로그 본문 분기 끝 직후 `{!isBot && <AdSlot />}` 배치
+- **/api/og throw 차단** (commit 7bc391e5): D2~D6 → D1 redirect 임시 우회 (디자인 다양성 손실, 진짜 원인 미진단)
+- **/api/og-apt + /api/og-stock throw fix** (s244): JSX 내 emoji 제거 (satori font fetch 실패 진단)
+
+## 시간 대기
+- 5~60분: AdSense 첫 광고 송출
+- 24h: 카톡 referrer 회복, onboarded_false_pct, AdSense 게재율 측정
+- 7일: OG fallback PNG cache 자연 만료
+- 1~5일: 토스 답변
+
+## 다음 세션 즉시 할 일
+1. **/api/og-apt + /api/og-stock prod 검증** — s244 emoji fix 효과 확인 (Vercel runtime logs로 throw 0건)
+2. **/api/og 진짜 원인 진단** — catch에서 `Object.keys(err)` + `JSON.stringify(err)` 추가, D2~D6 복원
+3. **AdSense 사용자 직접** — 자동광고 OFF + 일반 브라우저로 광고 송출 확인
+4. **토스 답변 후** — 라이브 키 교체(test_→live_) + 100원 카드 테스트
+5. **award_points RPC service_role RLS 검증** (s228 item #1) — 1000P 온보딩 보상
+6. **RESEND_WEBHOOK_SECRET Vercel env 등록**
+
+## Architecture Rules 추가
+- **#43** ImageResponse 내 CSS variable 사용 금지 (효과 추정, 검증 안 됨)
+- **#44** ImageResponse `emoji: 'twemoji'` 옵션 금지 (효과 추정)
+- **#45** AdSense 광고 정책 매트릭스: Tier 1(/blog/[slug]) only, Tier 0(/payment/admin/biz/shop/onboarding/login) 광고 0, Tier 2(/apt/[id]) 자체 광고만, 봇/프리미엄 광고 0
+- **#46** ImageResponse string aspectRatio 사용 금지 — **검증 실패 (효과 없음 확인됨, 잘못된 가설)**
+- **#47** ImageResponse JSX 내 emoji 직접 사용 금지 — satori가 외부 emoji font fetch 시도 → Vercel 차단/timeout → throw. Unicode 도형(▲▼●=) 또는 SVG로 대체
+
+---
+
 # 카더라 STATUS — 세션 241: cache-control 진짜 source fix + OG 진단 미세 분할 + InAppModal 검증 (2026-05-08 KST)
 
 ## s241 (2026-05-08) — cache-control private 진짜 source 발견 + OG 진단 + InApp 재검증

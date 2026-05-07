@@ -241,9 +241,9 @@ function FlowCard(q: QuoteRow, ff: string) {
 function AICard(q: QuoteRow, ff: string) {
   const name = safeStr(q.name) || q.symbol;
   const chg = Number(q.change_pct) || 0;
-  const sentiment = chg > 1 ? { lab: '긍정', color: '#00FF87', emoji: '🟢' }
-                   : chg < -1 ? { lab: '주의', color: '#FF6B1A', emoji: '🟠' }
-                   : { lab: '중립', color: '#FFE000', emoji: '🟡' };
+  const sentiment = chg > 1 ? { lab: '긍정', color: '#00FF87', emoji: '▲' }
+                   : chg < -1 ? { lab: '주의', color: '#FF6B1A', emoji: '▼' }
+                   : { lab: '중립', color: '#FFE000', emoji: '=' };
   const summary = chg > 1
     ? `최근 강세 흐름이 이어지고 있습니다. 단기 모멘텀과 거래량 동향을 함께 점검하세요.`
     : chg < -1
