@@ -1,3 +1,44 @@
+# 카더라 STATUS — 세션 239 Phase 0: LLM 사용량 추적 인프라 (2026-05-08 KST)
+
+## s239 Phase 0 (2026-05-08) — LLM 사용량 추적 인프라
+
+### DB (이미 적용됨)
+- `llm_usage_logs` 테이블 (id, cron_name, trigger, model, input_tokens, output_tokens,
+  cache_creation_tokens, cache_read_tokens, total_tokens, duration_ms, status, error_code,
+  metadata jsonb, created_at)
+- `llm_pricing` 매핑 (placeholder — 사용자가 정확 가격 update 필요)
+- `v_llm_usage_24h` / `v_llm_usage_7d` / `v_llm_cost_summary` 뷰
+
+### 코드 (이번 세션)
+- **신규** `src/lib/llm/usage-tracker.ts`
+  - `trackedAnthropicCreate(client, params, ctx)` — `@anthropic-ai/sdk` 기반 caller 용 wrapper
+  - `logAnthropicUsage(args)` — fetch 기반 caller 용 (현재 issue-draft 등 다수가 직접 fetch 사용)
+  - 두 함수 모두 fire-and-forget 로깅 (`getSupabaseAdmin().from('llm_usage_logs').insert()`).
+    promise reject 도 catch 로 흡수 — main flow 영향 0
+- **수정** `src/app/api/cron/issue-draft/route.ts` (가장 호출 많은 cron, 1088 runs/7d)
+  - `logAnthropicUsage` import 추가
+  - `generateArticle()` 의 fetch 호출 위 아래에 `llmStart` + 3 군데 로깅 (success/4xx/exception)
+  - 기존 동작 100% 보존, wrapper 만 추가
+- **note**: 사용자 spec 의 `createServiceClient`/`@/lib/supabase/server` 경로는 codebase 에 없음 →
+  실제 export `getSupabaseAdmin()` from `@/lib/supabase-admin` 으로 적용 (사용자 spec 의
+  "없으면 동등한 service_role client 사용" 지시 준수)
+- **note**: issue-draft 는 `@anthropic-ai/sdk` 가 아니라 직접 `fetch(ANTHROPIC_API)` 사용 →
+  `logAnthropicUsage` 헬퍼로 instrument. `trackedAnthropicCreate` 는 미래 SDK-based cron 용으로 보존
+
+### 다음 단계 (별도 세션)
+- 24h 데이터 누적 → input/output token 분포 + duration 정확도 검증
+- 안정 확인 후 나머지 cron 5-10개씩 batch 점진 적용 (60개 file 전부 한번에 = 빌드 break 위험 큼)
+
+### 안전장치
+- fire-and-forget 로깅 (await 없음, promise reject 흡수)
+- error 발생 시 silent (로깅 실패 → LLM 호출은 정상 진행)
+- 기존 generateArticle 시그니처/리턴 100% 동일
+
+### 빌드
+- tsc clean (EXIT=0), next build EXIT=0
+
+---
+
 # 카더라 STATUS — 세션 238c: issue-detect timeout 5000→8000 복구 (2026-05-07 KST)
 
 ## s238c (2026-05-07) — issue-detect timeout 5000→8000 복구

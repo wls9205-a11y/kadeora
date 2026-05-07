@@ -10,6 +10,8 @@ import { SITE_URL } from '@/lib/constants';
 // s189: SEO 마스터 (내부링크/EAT 외부인용은 master 가 내부 호출) + 관련 hub footer
 import { runBlogSeoMaster } from '@/lib/blog-seo-master';
 import { appendRelatedHubFooter } from '@/lib/internal-link-injector';
+// s239 Phase 0: LLM 사용량 추적 (fire-and-forget, main flow 영향 0)
+import { logAnthropicUsage } from '@/lib/llm/usage-tracker';
 import { getFreshnessContext, deriveFreshnessFields } from '@/lib/blog/freshness-context';
 
 /**
@@ -213,6 +215,8 @@ ${titleHint ? `6. 제목에 다음 토큰 중 최소 2개 포함 (다양성 ↑,
   "content": "마크다운 본문 전체 (5000자 이상)"
 }`;
 
+  // s239 Phase 0: LLM 사용량 추적 — duration + usage 로깅 (fire-and-forget)
+  const llmStart = Date.now();
   try {
     const res = await fetch(ANTHROPIC_API, {
       method: 'POST',
@@ -223,9 +227,22 @@ ${titleHint ? `6. 제목에 다음 토큰 중 최소 2개 포함 (다양성 ↑,
     if (!res.ok) {
       const errBody = await res.text().catch(() => '');
       console.error(`[issue-draft] AI API ${res.status}: ${errBody.slice(0, 200)}`);
+      logAnthropicUsage({
+        cron_name: 'issue-draft', model: MODEL,
+        duration_ms: Date.now() - llmStart,
+        status: 'error', error_code: String(res.status),
+        metadata: { max_tokens: 12000, issue_id: issue?.id ?? null },
+      });
       return null;
     }
     const data = await res.json();
+    logAnthropicUsage({
+      cron_name: 'issue-draft', model: MODEL,
+      usage: data?.usage,
+      duration_ms: Date.now() - llmStart,
+      status: 'success',
+      metadata: { max_tokens: 12000, issue_id: issue?.id ?? null, category: issue?.category ?? null },
+    });
     const text = data.content?.[0]?.text || '';
     if (!text) { console.error('[issue-draft] AI returned empty text'); return null; }
 
@@ -254,6 +271,12 @@ ${titleHint ? `6. 제목에 다음 토큰 중 최소 2개 포함 (다양성 ↑,
     };
   } catch (e) {
     console.error('[issue-draft] AI generation exception:', (e as Error).message);
+    logAnthropicUsage({
+      cron_name: 'issue-draft', model: MODEL,
+      duration_ms: Date.now() - llmStart,
+      status: 'error', error_code: 'exception',
+      metadata: { max_tokens: 12000, issue_id: issue?.id ?? null, error: (e as Error).message?.slice(0, 200) },
+    });
     return null;
   }
 }
