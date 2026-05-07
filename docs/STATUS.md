@@ -1,3 +1,44 @@
+# 카더라 STATUS — s250 (2026-05-07 13:55) ⭐ og sanitize 정규식 확장
+
+## 이번 세션 (s250) — sanitizeForOG 정규식 4개 추가
+
+**진단 (실측):**
+- s249 deployment dpl_Dvx22bpPDZLigYfXSYNTsT89hy8j 활성 후 og throw 3분간 0건 ✅
+- 위험 단지 직접 호출 시 fallback PNG (x-vercel-cache: HIT, age 186초)
+  → catch redirect 정상 동작 + 7일간 캐시
+- 그러나 s248 sanitize는 충분히 광범위하지 않음 — 신규 단지 추가 시 재throw 위험
+- DB 추가 미처리 글자 발견:
+  · `·` (U+00B7, middle dot) — 14건+ (광명4R구역, e편한세상 등) — keep 결정
+  · `　` (U+3000, 전각 공백) — 1건+ (김포한강센트럴블루힐ac-05)
+  · `８１５（，）` (U+FF00-FFEF, 전각 숫자/괄호) — 1건+
+  · 기타 General Punctuation 위험 글자
+
+**Fix:**
+- src/lib/og-sanitize.ts sanitizeForOG에 .replace 6개 추가:
+  · 전각 → 반각 변환 (U+FF01-FF5E)
+  · 전각 공백 → 일반 공백 (U+3000 → ' ')
+  · CJK Symbols and Punctuation 나머지 제거 (U+3001-303F)
+  · General Punctuation zero-width 제거 (U+200B-206F)
+  · General Punctuation dash → ASCII - (U+2010-2015)
+  · General Punctuation 따옴표 → ASCII " (U+2018-201F)
+- og-apt/og-blog/og-stock/og main 모두 자동 적용 (sanitizeForOG/sanitizeRowForOG 통과)
+
+## Architecture Rule 추가
+- **#54** sanitize 정규식 확장 매트릭스 — NotoSansKR 처리 못 하는 추가 글자:
+  · 전각 글자 (U+FF00-FFEF) → 반각 변환 권장
+  · 전각 공백 (U+3000) → 일반 공백 변환
+  · CJK Symbols (U+3001-303F) → 제거
+  · General Punctuation special (U+200B-206F) → 제거
+  · middle dot (U+00B7), Latin-1 Supplement → keep (대부분 처리 가능)
+
+## 다음 세션
+- 7일 후 fallback PNG 캐시 자연 만료 후 위험 단지 재호출 → og 정상 생성 검증
+- og main D2~D6 디자인 다양성 우회 풀기 (s242 commit 7bc391e5)
+- /apt/[id] 504 24h 모니터링
+- Phase 4 Supabase 정리 (Security 41 + Performance 442)
+
+---
+
 # 카더라 STATUS — s249 (2026-05-07 13:05) ⭐ s248 og-blog TypeError hotfix
 
 ## 이번 세션 (s249) — sanitize 위치 변경: fetchPost return → safeStr 내부
