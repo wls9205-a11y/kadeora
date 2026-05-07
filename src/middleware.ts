@@ -15,7 +15,7 @@ const CSP_DIRECTIVES = [
   // http: 제거 (safeImg 블랙리스트 와 정합 — 혼합 콘텐츠 차단).
   "img-src 'self' data: blob: https:",
   "font-src 'self' https://cdn.jsdelivr.net",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://vitals.vercel-insights.com https://va.vercel-scripts.com https://cdn.jsdelivr.net https://*.kakao.com https://*.kakaocdn.net https://*.daumcdn.net https://accounts.google.com https://api.tosspayments.com https://*.sentry.io https://*.upstash.io https://open.er-api.com https://www.google-analytics.com https://*.google-analytics.com https://*.googletagmanager.com https://www.google.com https://google.com https://googleads.g.doubleclick.net https://www.googleadservices.com",
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://vitals.vercel-insights.com https://va.vercel-scripts.com https://cdn.jsdelivr.net https://*.kakao.com https://*.kakaocdn.net https://*.daumcdn.net https://accounts.google.com https://*.tosspayments.com https://*.sentry.io https://*.upstash.io https://open.er-api.com https://www.google-analytics.com https://*.google-analytics.com https://*.googletagmanager.com https://www.google.com https://google.com https://googleads.g.doubleclick.net https://www.googleadservices.com",
   "frame-src 'self' https://kauth.kakao.com https://accounts.google.com https://js.tosspayments.com",
   "frame-ancestors 'self' https://*.tossmini.com",
   "base-uri 'self'",
