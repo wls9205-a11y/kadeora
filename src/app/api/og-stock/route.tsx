@@ -5,7 +5,7 @@ import { join } from 'path';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { SITE_URL } from '@/lib/constants';
 import { OG_CAT } from '@/lib/og-tokens';
-import { sanitizeRowForOG } from '@/lib/og-sanitize';
+import { sanitizeForOG } from '@/lib/og-sanitize';
 
 export const runtime = 'nodejs';
 export const maxDuration = 30;
@@ -42,13 +42,16 @@ async function fetchQuote(symbol: string): Promise<QuoteRow | null> {
       .select('symbol,name,price,change_pct,sector,currency,market_cap,per,pbr,dividend_yield')
       .eq('symbol', symbol)
       .maybeSingle();
-    return sanitizeRowForOG(data || null);
+    return data || null;
   } catch {
     return null;
   }
 }
 
-const safeStr = (v: unknown, fb = '') => (typeof v === 'string' ? v : fb);
+const safeStr = (v: unknown, fb = '') => {
+  if (typeof v !== 'string') return fb;
+  return sanitizeForOG(v) || fb;
+};
 const fmtCur = (n: number, ccy?: string | null) => {
   const isUSD = ccy === 'USD';
   if (isUSD) return `$${n.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;

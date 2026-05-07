@@ -1,3 +1,34 @@
+# 카더라 STATUS — s249 (2026-05-07 13:05) ⭐ s248 og-blog TypeError hotfix
+
+## 이번 세션 (s249) — sanitize 위치 변경: fetchPost return → safeStr 내부
+
+**진단 (실측):**
+- s248 deployment dpl_CirtaST1rEMgYwEAzK8mPQoZ271G 활성 후
+- og-apt throw 0건 ✅ (s248 효과 정상)
+- og-blog 신규 TypeError 6건 발생 (이전엔 한자 throw, 이제 TypeError)
+- 추정: sanitizeRowForOG의 spread 결과가 BlogRow normalize 이후 어떤 field 손상
+
+**Fix:**
+- og-blog: sanitize를 fetchPost return에서 빼고 safeStr 내부에 통합
+  · safeStr(v) → typeof string이면 sanitizeForOG(v) || fallback
+  · fetchPost return은 s248 이전 상태로 복구 (spread만)
+- og-stock: 동일 패턴 (한자 0건이지만 일관성)
+- og-apt: 그대로 (정상 동작 — Promise.allSettled 결과 단순 cast)
+- og main: 그대로 (정상 동작 — title 쿼리 파라미터 sanitize)
+
+## Architecture Rule 추가
+- **#53** og 라우트 sanitize 적용 시 위치 매트릭스:
+  · safeStr 함수 있는 라우트 (og-blog, og-stock): safeStr 내부에 sanitize
+  · safeStr 없는 라우트 (og-apt): fetchSite return에 sanitizeRowForOG
+  · 쿼리 파라미터 (og main): 추출 시점에 sanitizeForOG
+
+## 다음 세션
+- og-blog TypeError 사라졌는지 5분 logs 검증
+- og main D1 통일 우회 풀기 검토
+- /apt/[id] 504 24h 모니터링
+
+---
+
 # 카더라 STATUS — s248 (2026-05-07 12:15) ⭐ og throw 진짜 root cause fix
 
 ## 이번 세션 (s248) — og throw 한자 sanitize 완전 처리

@@ -5,7 +5,7 @@ import { join } from 'path';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { OG_CAT } from '@/lib/og-tokens';
 import { SITE_URL } from '@/lib/constants';
-import { sanitizeRowForOG } from '@/lib/og-sanitize';
+import { sanitizeForOG } from '@/lib/og-sanitize';
 
 export const runtime = 'nodejs';
 export const maxDuration = 30;
@@ -51,7 +51,7 @@ async function fetchPost(slug: string): Promise<BlogRow | null> {
     if (!data) return null;
     // 정규화 — title/excerpt/tldr 등이 null 인 row 가 존재. 렌더러에서 .length / .slice 직접 접근하므로 string 강제.
     const row = data as BlogRow;
-    return sanitizeRowForOG({
+    return {
       ...row,
       title: typeof row.title === 'string' && row.title ? row.title : (row.slug || '카더라 콘텐츠'),
       excerpt: typeof row.excerpt === 'string' ? row.excerpt : null,
@@ -59,7 +59,7 @@ async function fetchPost(slug: string): Promise<BlogRow | null> {
       meta_description: typeof row.meta_description === 'string' ? row.meta_description : null,
       hub_cta_target: typeof row.hub_cta_target === 'string' ? row.hub_cta_target : null,
       hub_apt_slug: typeof row.hub_apt_slug === 'string' ? row.hub_apt_slug : null,
-    }) as BlogRow;
+    } as BlogRow;
   } catch { return null; }
 }
 
@@ -81,7 +81,8 @@ function bgFor(card: number, post: BlogRow | null): string {
 
 // ── 안전한 string/array 접근 헬퍼 (각 render fn 내부 가드용) ─────────────
 function safeStr(v: unknown, fallback = ''): string {
-  return typeof v === 'string' ? v : fallback;
+  if (typeof v !== 'string') return fallback;
+  return sanitizeForOG(v) || fallback;
 }
 
 function fmtDate(s?: string | null): string {
