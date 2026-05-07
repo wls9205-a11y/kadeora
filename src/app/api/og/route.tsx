@@ -600,11 +600,11 @@ export async function GET(req: NextRequest) {
     let el: any;
     try {
       switch (design) {
-        case '2': el = D2(C, titleTrim, subTrim, author, ff); break;
-        case '3': el = D3(C, titleTrim, subTrim, author, ff); break;
-        case '4': el = D4(C, titleTrim, subTrim, author, ff); break;
-        case '5': el = D5(C, titleTrim, subTrim, author, ff); break;
-        case '6': el = D6(C, titleTrim, subTrim, author, ff); break;
+        case '2': el = D1(C, titleTrim, subTrim, author, ff); break;
+        case '3': el = D1(C, titleTrim, subTrim, author, ff); break;
+        case '4': el = D1(C, titleTrim, subTrim, author, ff); break;
+        case '5': el = D1(C, titleTrim, subTrim, author, ff); break;
+        case '6': el = D1(C, titleTrim, subTrim, author, ff); break;
         default:  el = D1(C, titleTrim, subTrim, author, ff); break;
       }
     } catch (designErr) {
