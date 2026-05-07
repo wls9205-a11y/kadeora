@@ -59,6 +59,7 @@ import SmartSectionGate from '@/components/SmartSectionGate';
 import BlogAptAlertCTA from '@/components/BlogAptAlertCTA';
 import YMYLBanner from '@/components/YMYLBanner';
 import BigEventCharts from '@/components/blog/BigEventCharts';
+import { AdSlot } from '@/components/ads/AdSlot';
 // NewsletterSubscribe 삭제 — 카카오 CTA로 통합
 
 // marked heading에 id 자동 부여 (TOC 앵커용)
@@ -996,6 +997,9 @@ export default async function BlogDetailPage({ params }: Props) {
             isBot={isBot}
           />
         )}
+
+        {/* AdSense 본문 하단 광고 (Rule #45) */}
+        {!isBot && <AdSlot />}
 
         {/* s184: 본문 직후 — 단일 공유 버튼 세트 (8개 플랫폼) + 북마크. 페이지 내 공유 UI 는 이 한 곳뿐. */}
         <div style={{
