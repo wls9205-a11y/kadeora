@@ -37,6 +37,9 @@ export function sanitizeForOG(text: string | null | undefined): string {
     .replace(/[‐-―]/g, '-')
     // s250: General Punctuation 따옴표 → ASCII "
     .replace(/[‘-‟]/g, '"')
+    // s259: NotoSansKR-Bold.woff에서 처리 가능한 글자만 keep (strict whitelist)
+    // 한글 음절(가-힣) + 한글 자모(ㄱ-ㅣ) + ASCII printable + 일부 안전 기호
+    .replace(/[^ -~가-힯ᄀ-ᇿ㄰-㆏·]/g, '')
     .trim();
 }
 

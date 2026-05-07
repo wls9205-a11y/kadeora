@@ -1,3 +1,46 @@
+# 카더라 STATUS — s259 (2026-05-07 17:55) 🚨 og main 다시 D1 redirect + sanitize strict whitelist
+
+## 이번 세션 (s259) — s258 활성 후 잔여 throw 진단
+
+### 상황
+- s258 commit bf1bf32b 활성 (D2~D6 Fragment + sub-pixel fix + Phase 3 -167)
+- 검증 결과 **D2 호출 여전히 fallback PNG redirect** (실측 x-matched-path)
+- og-apt 6+건/분 throw 지속 ('Cannot co...' + 'Failed to load dynamic font')
+
+### 진단
+- D2 잔여 위험 (Fragment + sub-pixel 외):
+  · 의심 candidates: 3-stop linear-gradient template literal, gap, padding string
+  · 정확한 culprit isolation 시간 큼 → 별도 세션 필수
+- og-apt throw root cause:
+  · NotoSansKR-Bold.woff에 없는 글자가 input에 잔존
+  · s248 한자 매핑 + s250 정규식 확장만으로 부족
+  · 진짜 fix: sanitize에 **strict whitelist** 추가 (한글 + ASCII만 keep)
+
+### Fix (이번 commit)
+
+#### Track A: src/lib/og-sanitize.ts strict whitelist
+- `.replace(/[^ -~가-힯ᄀ-ᇿ㄰-㆏·]/g, '')`
+- 한글 음절(가-힣) + 한글 자모(ㄱ-ㅣ) + ASCII printable + 안전 기호(·)
+- 모든 다른 글자 (한자/일본어/emoji/CJK 호환/특수 기호) 제거
+- NotoSansKR-Bold.woff에서 100% 처리 보장
+- 영향: og-apt + og-blog + og-stock + og main 모두 자동 적용 (sanitizeForOG 공유)
+
+#### Track B: og main 다시 D1 redirect (s255 패턴 재적용)
+- D2~D6 case 5건 모두 D1 호출
+- s258 시도 (Fragment + sub-pixel fix)도 부족 → 진짜 fix는 D2~D6 처음부터 satori-friendly 재설계
+
+## Architecture Rule
+- **#65**: og 라우트 sanitize는 NotoSansKR-Bold.woff에서 처리 가능한 글자만 strict whitelist
+  · 한글 음절 + 자모 + ASCII printable + 안전 기호만 keep
+  · 한자/일본어/emoji/특수기호는 모두 제거 (외부 dynamic font fetch 차단)
+
+## PENDING (별도 세션 필수)
+- D2~D6 satori-friendly 처음부터 재설계 (각 D 함수 isolation 진단 + 모든 미지원 패턴 제거)
+  · 후보: linear-gradient 2-stop only, gap → margin/padding 변환, template literal 분리
+  · 시간: 2~3시간
+
+---
+
 # 카더라 STATUS — s258 (2026-05-07 17:50) ⭐ 전부 한방 — Phase 3 + D2~D6 + RULES.md
 
 ## 이번 세션 (s258) — 4 Track 동시 처리
