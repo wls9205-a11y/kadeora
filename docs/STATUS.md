@@ -1,3 +1,28 @@
+# 카더라 STATUS — s246 (2026-05-07 11:55) ⭐ 진짜 504 root cause fix
+
+## 이번 세션 (s246) — 진짜 504 root cause 식별 + 즉시 fix
+
+**진단 (실측):**
+- EXPLAIN ANALYZE 개별 RPC 모두 빠름 (regionTradesR 3ms, sameBuilderR 0.86ms)
+- 진짜 culprit: 짧은 string ilike '%X%' 폭발
+  · apt_transactions WHERE sigungu ILIKE '%구%' → 400,262건 (60만의 67%)
+  · apt_subscriptions WHERE constructor_nm ILIKE '%주%' → 2,403건 (전체와 거의 같음)
+  · min_sigungu_len = 0 (빈 string), min_builder_len = 2
+
+**즉시 fix:**
+- /apt/[id] line 285 sigunguSafe + builderSafe 길이 검증 (>= 3) 추가
+- 영향 RPC: sameBuilderR, regionTradesR, complexR (3개 안전)
+
+## Architecture Rule 추가
+- **#51** Supabase ilike '%X%' 패턴 사용 시 입력 string 길이 >= 3 검증 필수
+
+## 다음 세션 후속 (Phase 2-2)
+- /apt/redev/[region], /apt/region/[region], /apt/search 동일 패턴 fix
+- /apt-v2 829줄 dead code 검증 + 삭제
+- og main D2~D6 진짜 원인 진단
+
+---
+
 # 카더라 STATUS — s245 (2026-05-07 23:50)
 
 ## 이번 세션 (s245) — 면밀 진단 + Phase 1+3 한방 처리

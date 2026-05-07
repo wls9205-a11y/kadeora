@@ -281,6 +281,10 @@ async function fetchUnifiedData(slug: string) {
   const rShort = sanitizeSearchQuery(region.slice(0, 2), 10);
 
   const sigungu = site?.sigungu || sub?.hssply_adres?.split(' ').slice(1, 2).join('') || '';
+  // s246 fix: ilike '%X%' 폭발 방지 — 짧은 string은 60만건 전체 스캔 위험 (apt_transactions sigungu='%구%' = 400,262건)
+  const sigunguSafe = sigungu && sigungu.length >= 3 ? sigungu : '';
+  const builderName = (sub?.constructor_nm || site?.builder || '').split('(')[0].split('주식')[0].trim();
+  const builderSafe = builderName.length >= 3 ? builderName : '';
 
   const [tradesR, blogsR, postsR, nearbyR, sameBuilderR, regionPriceR, regionTradesR, complexR] = await Promise.allSettled([
     sb.from('apt_transactions').select('id, apt_name, deal_date, deal_amount, exclusive_area, floor, built_year').eq('apt_name', name).order('deal_date', { ascending: false }).limit(30),
@@ -288,11 +292,11 @@ async function fetchUnifiedData(slug: string) {
     termPost ? sb.from('posts').select('id, title, created_at, comments_count').eq('is_deleted', false).ilike('title', `%${termPost}%`).order('created_at', { ascending: false }).limit(3) : Promise.resolve({ data: [] }),
     region ? sb.from('apt_sites').select('slug, name, site_type, region, sigungu, total_units, status').eq('is_active', true).eq('region', region).neq('slug', slug).gte('content_score', 25).order('interest_count', { ascending: false }).limit(4) : Promise.resolve({ data: [] }),
     // 같은 시공사 다른 현장 (분양가 포함)
-    (sub?.constructor_nm || site?.builder) ? sb.from('apt_subscriptions').select('id, house_nm, region_nm, tot_supply_hshld_co, rcept_bgnde, house_type_info').ilike('constructor_nm', `%${(sub?.constructor_nm || site?.builder || '').split('(')[0].split('주식')[0].trim()}%`).neq('house_nm', name).order('rcept_bgnde', { ascending: false }).limit(5) : Promise.resolve({ data: [] }),
+    builderSafe ? sb.from('apt_subscriptions').select('id, house_nm, region_nm, tot_supply_hshld_co, rcept_bgnde, house_type_info').ilike('constructor_nm', `%${builderSafe}%`).neq('house_nm', name).order('rcept_bgnde', { ascending: false }).limit(5) : Promise.resolve({ data: [] }),
     region ? sb.from('apt_sites').select('price_min, price_max').eq('region', region).eq('is_active', true).gt('price_min', 0).gt('price_max', 0).limit(100) : Promise.resolve({ data: [] }),
-    sigungu ? sb.from('apt_transactions').select('apt_name, deal_date, deal_amount, exclusive_area, floor').ilike('sigungu', `%${sigungu}%`).neq('apt_name', name).order('deal_date', { ascending: false }).limit(10) : Promise.resolve({ data: [] }),
+    sigunguSafe ? sb.from('apt_transactions').select('apt_name, deal_date, deal_amount, exclusive_area, floor').ilike('sigungu', `%${sigunguSafe}%`).neq('apt_name', name).order('deal_date', { ascending: false }).limit(10) : Promise.resolve({ data: [] }),
     // 단지백과 — 같은 시군구 기존 아파트 시세 (시세비교/전세가율/평당가)
-    sigungu ? (sb as any).from('apt_complex_profiles').select('apt_name, built_year, latest_sale_price, avg_sale_price_pyeong, latest_jeonse_price, jeonse_ratio, total_households, price_change_1y, sale_count_1y').ilike('sigungu', `%${sigungu}%`).gt('latest_sale_price', 0).order('latest_sale_price', { ascending: false }).limit(10) : Promise.resolve({ data: [] }),
+    sigunguSafe ? (sb as any).from('apt_complex_profiles').select('apt_name, built_year, latest_sale_price, avg_sale_price_pyeong, latest_jeonse_price, jeonse_ratio, total_households, price_change_1y, sale_count_1y').ilike('sigungu', `%${sigunguSafe}%`).gt('latest_sale_price', 0).order('latest_sale_price', { ascending: false }).limit(10) : Promise.resolve({ data: [] }),
   ]);
 
   const trades = tradesR.status === 'fulfilled' ? (tradesR.value as { data: any })?.data || [] : [];
