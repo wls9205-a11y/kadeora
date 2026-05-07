@@ -1,3 +1,34 @@
+# 카더라 STATUS — s247 (2026-05-07 12:05) ⭐ 3,700줄 dead code 삭제
+
+## 이번 세션 (s247) — /apt-v2 + apt-tabs 완전 dead code 삭제
+
+**진단 (실측):**
+- /apt-v2 4파일 829줄 (page/redevelopment/transactions/unsold)
+- src/components/apt-tabs/ 2,871줄 (subscription/redevelopment/transactions/unsold/shared/utils/types/index)
+- /apt-v2 직접 link 0건 (href/Link/push/redirect 모두 0)
+- sitemap.ts에 /apt-v2 등록 0건
+- apt-tabs는 /apt-v2/* 4파일에서만 import (다른 곳 0건)
+- 마지막 commit: 0c42dab9 "feat(apt): apt-tabs redesign (v2 route)"
+- → 100% dead code 검증 완료
+
+**삭제 (이번 commit):**
+- rm -rf src/app/(main)/apt-v2/ (-829줄)
+- rm -rf src/components/apt-tabs/ (-2,871줄)
+- 총 -3,700줄 dead code 정리
+
+## 누적 dead code 정리 (오늘)
+- s245: AptClient.tsx + tabs/ 7파일 ~3,000줄
+- s247: /apt-v2 + apt-tabs ~3,700줄
+- 합계: 약 6,700줄 정리 (1일)
+
+## 다음 세션
+- /apt/[id] 504 24h 모니터링 (s246 fix 효과 측정)
+- og main D2~D6 진짜 원인 진단 (다음 throw 시 catch chunk logging 자동 진단)
+- Phase 4 Supabase 정리 (Security 41 + Performance 442)
+- 토스 답변 1~5일 대기 → 라이브 키 교체
+
+---
+
 # 카더라 STATUS — s246 (2026-05-07 11:55) ⭐ 진짜 504 root cause fix
 
 ## 이번 세션 (s246) — 진짜 504 root cause 식별 + 즉시 fix
