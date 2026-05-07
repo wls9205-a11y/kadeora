@@ -1,3 +1,65 @@
+# 카더라 STATUS — s251 (2026-05-07 14:10) ⭐ Phase 4 Supabase Security ERROR 41건 완전 해소
+
+## 이번 세션 (s251) — Supabase advisor ERROR 41 → 0
+
+**진단 (실측):**
+- s250 commit baf3725b 활성 후 og throw 안정화 (sanitize 정규식 확장 효과)
+- 위험 단지 직접 호출 = fallback PNG cache HIT (catch redirect 정상)
+- og main D2~D6 우회 풀기 시도 → s242 commit 7bc391e5 메시지 + D2 코드 확인:
+  · 진짜 culprit = 음수 % position + borderRadius:'50%' on absolute (CSS issue)
+  · sanitize와 무관 → 우회 풀기 보류 (D2~D6 별도 CSS fix 필요)
+- Phase 4 Supabase 우선 → advisor 실측 527건 lint:
+  · ERROR 41 (가장 critical), WARN 485, INFO 1
+
+**Fix (3개 migration 직접 적용 — Supabase MCP):**
+
+### Track 1 — rls_disabled_in_public 3건 fix
+- apt_sites_sigungu_backup_s229b (6 rows): RLS 활성화 + DROP 후보 comment
+- big_event_assets_garbage_s236 (1884 rows): RLS 활성화 + DROP 후보 comment
+- llm_pricing (6 rows): RLS 활성화 + admin RPC 전용 comment
+- service_role bypass이라 cron/admin 영향 0
+- migration: s251_track1_rls_enable_3_tables
+
+### Track 2 — security_definer_view 38건 fix
+- 모든 38개 view에 `ALTER VIEW SET (security_invoker = on)` 적용
+- view definition 변경 0 — 권한 모델만 변경
+- before: view owner 권한으로 underlying 테이블 접근 (RLS 우회)
+- after: view 호출자 권한으로 접근 (RLS 정상 적용)
+- migration: s251_track2_security_invoker_38_views
+
+### Track 3 — function_search_path_mutable 31건 fix
+- 모든 31개 function에 `SET search_path = public, pg_temp` 적용
+- ALTER FUNCTION ... SET search_path
+- → SQL injection 위험 차단 (search_path 덮어쓰기 공격 방지)
+- migration: s251_track3_search_path_31_functions
+
+## Architecture Rule 추가
+- **#55** Supabase view 정의 시 `WITH (security_invoker=on)` 옵션 필수 — RLS 우회 방지
+- **#56** Supabase function 정의 시 `SET search_path = public, pg_temp` 필수 — SQL injection 방지
+
+## 진행률
+- 527 lint → 458 lint (-69)
+- ERROR 41 → 0 ✅ (Phase 4 가장 critical 완전 해소)
+- WARN 485 → 454 (search_path 31 fix)
+- INFO 1 → 4 (RLS 활성화한 3개 테이블 신규 INFO — service_role bypass라 무시)
+
+## 남은 Phase 4 작업 (별도 세션)
+- **Track 4 (가장 큼)**: anon/authenticated function executable 427건
+  · 222 authenticated + 205 anon
+  · 신중한 분석 필요 — client RPC 호출 보존 + service_role 전용 분류
+- materialized_view_in_api 11건
+- rls_policy_always_true 8건
+- extension_in_public 6건
+- public_bucket_allows_listing 1건
+- auth_leaked_password_protection 1건 (Supabase Auth 설정)
+
+## 다음 세션
+- Track 4 — function executable 427건 (시간 2~3h)
+- og main D2~D6 CSS fix (음수 % + borderRadius:'50%' on absolute)
+- /apt/[id] 504 24h 모니터링 (s246 fix 효과)
+
+---
+
 # 카더라 STATUS — s250 (2026-05-07 13:55) ⭐ og sanitize 정규식 확장
 
 ## 이번 세션 (s250) — sanitizeForOG 정규식 4개 추가
