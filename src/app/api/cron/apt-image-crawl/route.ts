@@ -81,7 +81,6 @@ function extractNameTokens(name: string): string[] {
 function isRelevantToSite(title: string, siteName: string): boolean {
   const t = normalizeForMatch(title);
   if (!t) return false;
-  const nSiteName = normalizeForMatch(siteName);
 
   // 차수 마커 미스매치 거부
   const ROMAN = ['Ⅰ', 'Ⅱ', 'Ⅲ', 'Ⅳ', 'Ⅴ', 'II', 'III', 'IV'];
