@@ -21,12 +21,16 @@ export default function WelcomeReward() {
     if (typeof window === 'undefined') return;
     if (localStorage.getItem('kd_welcomed')) return;
 
-    localStorage.setItem('kd_welcomed', '1');
-
+    // s260 P0: localStorage.setItem 을 fetch 성공 후로 이동.
+    // 기존: fetch 호출 직전 무조건 set → fetch 실패 시 100P 영영 미지급 dead loop.
+    // 변경: awarded 또는 already_awarded 일 때만 set. 네트워크/서버 실패는 재시도 가능.
     fetch('/api/welcome-bonus', { method: 'POST' })
       .then(r => r.json())
       .then(data => {
-        if (data.awarded) {
+        if (data?.awarded === true || data?.reason === 'already_awarded') {
+          try { localStorage.setItem('kd_welcomed', '1'); } catch {}
+        }
+        if (data?.awarded) {
           success('환영합니다! 가입 보너스 100P가 지급됐어요 🎉');
         }
       })

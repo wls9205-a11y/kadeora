@@ -26,7 +26,8 @@ function LoginForm({ redirect }: LoginFormProps) {
     setError('');
     const source = new URLSearchParams(window.location.search).get('source') || 'direct';
     // 가입 시도 추적 + CTA 클릭 이벤트 (conversion_events)
-    fetch('/api/auth/track-attempt', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ provider, source, redirect_path: redirect, success: false }) }).catch(() => {});
+    // s260 P0: keepalive — OAuth 리디렉트가 먼저 일어나 fetch drop 되는 race 방지.
+    fetch('/api/auth/track-attempt', { method: 'POST', headers: { 'Content-Type': 'application/json' }, keepalive: true, body: JSON.stringify({ provider, source, redirect_path: redirect, success: false }) }).catch(() => {});
     trackCtaClick({ cta_name: source, category: 'signup', page_path: window.location.pathname });
     try {
       const sb = createSupabaseBrowser();
@@ -40,6 +41,11 @@ function LoginForm({ redirect }: LoginFormProps) {
       const { error: err } = await sb.auth.signInWithOAuth({ provider, options: oauthOptions });
       if (err) throw err;
     } catch (e: unknown) {
+      // s260 P0: 실패 사유 기록 — track-attempt 두 번째 호출로 error_message 전달.
+      fetch('/api/auth/track-attempt', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, keepalive: true,
+        body: JSON.stringify({ provider, source, redirect_path: redirect, success: false, error_message: (e instanceof Error ? e.message : 'login_oauth_throw').slice(0, 250) }),
+      }).catch(() => {});
       setError(e instanceof Error ? errMsg(e) : '로그인 중 오류가 발생했습니다');
       setLoading(null);
     }
@@ -111,7 +117,7 @@ function LoginForm({ redirect }: LoginFormProps) {
 
         <button
           onClick={() => login('kakao')}
-          disabled={!!loading}
+          disabled={!!loading || !inApp.resolved}
           style={{ width: '100%', padding: '14px 20px', marginBottom: 'var(--sp-md)', borderRadius: 'var(--radius-card)', border: 'none', cursor: loading ? 'not-allowed' : 'pointer', background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)', fontWeight: 700, fontSize: 'var(--fs-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, opacity: loading === 'google' ? 0.5 : 1, transition: 'all 0.15s' }}
         >
           {loading === 'kakao' ? (
@@ -126,7 +132,7 @@ function LoginForm({ redirect }: LoginFormProps) {
 
         <button
           onClick={() => login('google')}
-          disabled={!!loading}
+          disabled={!!loading || !inApp.resolved}
           style={{ width: '100%', padding: '14px 20px', borderRadius: 'var(--radius-card)', border: '1px solid var(--border)', cursor: loading ? 'not-allowed' : 'pointer', background: 'var(--bg-hover)', color: 'var(--text-primary)', fontWeight: 700, fontSize: 'var(--fs-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, opacity: loading === 'kakao' ? 0.5 : 1, transition: 'all 0.15s' }}
         >
           {loading === 'google' ? (

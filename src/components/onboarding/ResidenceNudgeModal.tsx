@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { trackCTA } from '@/lib/analytics';
@@ -11,10 +11,13 @@ const COOLDOWN_MS = 7 * 24 * 60 * 60 * 1000;
 export default function ResidenceNudgeModal() {
   const { userId, loading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
     if (loading || !userId) return;
+    // s260 P1: /onboarding 페이지에서는 모달 마운트 차단 — 다중 모달 충돌 방지.
+    if (pathname?.startsWith('/onboarding')) return;
     try {
       const ts = localStorage.getItem(STORAGE_KEY);
       if (ts && Date.now() - Number(ts) < COOLDOWN_MS) return;
@@ -39,7 +42,7 @@ export default function ResidenceNudgeModal() {
       } catch {}
     })();
     return () => { cancelled = true; };
-  }, [userId, loading]);
+  }, [userId, loading, pathname]);
 
   const dismiss = () => {
     try { localStorage.setItem(STORAGE_KEY, String(Date.now())); } catch {}

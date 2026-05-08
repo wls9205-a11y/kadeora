@@ -191,7 +191,10 @@ export async function middleware(request: NextRequest) {
   } else if (request.headers.get('x-vercel-ip-country') === 'KR') {
     resolvedRegion = isoToKrRegion(request.headers.get('x-vercel-ip-country-region'));
   }
-  const regionHeaderValue = resolvedRegion || '전국';
+  // s260 P1: 한국어 헤더 값 ASCII 강제 (Latin-1 외 문자 → encodeURIComponent).
+  // Edge 런타임이 비-Latin-1 헤더 값에 대해 24h Invalid header warning 출력.
+  // 소비측에서 decodeURIComponent 필요 (현재 src/ 내 SSR 사용처 0건 — 추후 구독자가 추가될 때 디코드).
+  const regionHeaderValue = encodeURIComponent(resolvedRegion || '전국');
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set('x-kd-region', regionHeaderValue);
 
