@@ -63,17 +63,32 @@ export default function UniversalSearchBar({
     }
   }, [open]);
 
-  // 트렌딩 로드 (모달 열림 1회)
+  // 트렌딩 로드 (모달 열림 1회) — string[] 으로 정규화 (React #31 fix).
+  // /api/search/trending 응답이 [{ keyword, heat_score }] 형태일 때 객체가 그대로
+  // children 으로 박혀 "Objects are not valid as a React child" 폭발하던 버그.
   useEffect(() => {
-    if (open && trending.length === 0) {
-      fetch("/api/search/trending")
-        .then((r) => (r.ok ? r.json() : null))
-        .then((j) => {
-          if (Array.isArray(j?.keywords)) setTrending(j.keywords.slice(0, 8));
-          else if (Array.isArray(j)) setTrending(j.slice(0, 8).map((x) => x.keyword ?? x));
-        })
-        .catch(() => {});
-    }
+    if (!open || trending.length > 0) return;
+    fetch("/api/search/trending")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        const arr: unknown[] = Array.isArray(data?.keywords)
+          ? data.keywords
+          : Array.isArray(data)
+          ? data
+          : [];
+        const keywords = arr
+          .slice(0, 8)
+          .map((k) =>
+            typeof k === "string"
+              ? k
+              : k && typeof k === "object" && "keyword" in k && typeof (k as { keyword?: unknown }).keyword === "string"
+              ? ((k as { keyword: string }).keyword)
+              : "",
+          )
+          .filter((s): s is string => s.length > 0);
+        setTrending(keywords);
+      })
+      .catch(() => {});
   }, [open, trending.length]);
 
   // 검색 (debounce 200ms)
