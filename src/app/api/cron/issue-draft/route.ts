@@ -382,18 +382,71 @@ async function insertImages(content: string, title: string, keywords: string[], 
   return enriched;
 }
 
-/* ═══════════ 팩트 검증 ═══════════ */
+/* ═══════════ 팩트 검증 (s261: category-aware) ═══════════ */
 
-function factCheck(content: string, rawData: Record<string, any>): { passed: boolean; details: Record<string, any> } {
+// 카테고리별 금지 표현. apt 도메인에서 "목표가/적정가"는 분양가 분석 정상 표현이라 허용.
+const BANNED_BY_CATEGORY: Record<string, string[]> = {
+  apt: ['매수 추천', '매도 추천', '반드시 오를', '반드시 내릴', '급등 예상', '급락 예상',
+        '꼭 사야', '꼭 팔아야', '확정수익률', '원금보장'],
+  unsold: ['매수 추천', '매도 추천', '반드시 오를', '반드시 내릴', '확정수익률', '원금보장'],
+  redev: ['매수 추천', '매도 추천', '반드시 오를', '반드시 내릴', '확정수익률', '원금보장'],
+  stock: ['매수 추천', '매도 추천', '반드시 오를', '반드시 내릴', '급등 예상', '급락 예상',
+          '목표가', '적정가', '저점 매수', '물타기', '꼭 사야', '꼭 팔아야', '확정수익률'],
+  finance: ['확정수익률', '원금보장', '반드시', '꼭 사야'],
+  tax: ['확정수익률', '원금보장'],
+  economy: ['확정수익률', '원금보장'],
+  general: ['확정수익률', '원금보장'],
+};
+
+function factCheck(
+  content: string,
+  rawData: Record<string, any>,
+  category: string = 'general',
+  locationLock?: { sigungu?: string | null; dong?: string | null; address?: string | null }
+): { passed: boolean; details: Record<string, any> } {
   const issues: string[] = [];
-  const banned = ['매수 추천', '매도 추천', '반드시 오를', '반드시 내릴', '급등 예상', '급락 예상',
-    '목표가', '적정가', '저점 매수', '물타기', '꼭 사야', '꼭 팔아야'];
+
+  // 1) 카테고리별 금지 표현
+  const banned = BANNED_BY_CATEGORY[category] || BANNED_BY_CATEGORY.general;
   for (const word of banned) {
-    if (content.includes(word)) issues.push(`금지표현: ${word}`);
+    if (content.includes(word)) issues.push(`금지표현(${category}): ${word}`);
   }
+
+  // 2) 분량
   if (content.length < 1500) issues.push('분량부족');
-  if (!content.includes('Q.') && !content.includes('자주 묻는') && !content.includes('❓') && !content.includes('FAQ')) issues.push('FAQ누락');
-  return { passed: issues.length === 0, details: { issues, content_length: content.length } };
+
+  // 3) FAQ
+  if (!content.includes('Q.') && !content.includes('자주 묻는') && !content.includes('❓') && !content.includes('FAQ')) {
+    issues.push('FAQ누락');
+  }
+
+  // 4) s261: 위치 잠금 검증 — apt 카테고리에서 정확한 시군구·동 등장 확인
+  if ((category === 'apt' || category === 'unsold' || category === 'redev') && locationLock) {
+    const { sigungu, dong, address } = locationLock;
+    // 시군구가 주소 데이터에 있는데 본문에 등장 안 하면 location_drift 표시
+    if (sigungu && !content.includes(sigungu)) {
+      issues.push(`location_drift_sigungu:${sigungu}_누락`);
+    }
+    // 동 정보 있으면 본문에 한 번 이상 등장해야 함
+    if (dong && dong.length >= 2 && !content.includes(dong)) {
+      issues.push(`location_drift_dong:${dong}_누락`);
+    }
+    // 주소에 명시된 시군구와 다른 시군구가 본문에 자주 등장하면 환각
+    // (예: 마산합포구 단지인데 본문에 "진해구"가 3회 이상)
+    if (address) {
+      const KNOWN_GU = ['진해구','마산합포구','마산회원구','성산구','의창구','중구','동구','서구','남구','북구','강서구','강동구','수영구','해운대구','연제구','부산진구','사하구','사상구','금정구','기장군','일산동구','일산서구','분당구','수정구','중원구'];
+      const addressLower = (address || '').toLowerCase();
+      for (const gu of KNOWN_GU) {
+        // 주소에 이 구가 안 등장하지만 본문에 3회 이상 등장 → 환각
+        if (!addressLower.includes(gu.toLowerCase()) && (content.match(new RegExp(gu, 'g')) || []).length >= 3) {
+          issues.push(`location_drift_wrong_gu:${gu}`);
+          break; // 1건만 표시
+        }
+      }
+    }
+  }
+
+  return { passed: issues.length === 0, details: { issues, content_length: content.length, category } };
 }
 
 /* ═══════════ 피드 포스트 생성 ═══════════ */
@@ -519,7 +572,41 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
     console.error('[issue-draft] seo-master failed (continuing):', seoErr?.stack || seoErr?.message);
   }
 
-  const check = factCheck(seoEnriched, issue.raw_data || {});
+  // s261: location lock 데이터 수집 (apt 카테고리에서 fact_check가 환각 검출에 사용)
+  let locationLock: { sigungu?: string | null; dong?: string | null; address?: string | null } | undefined;
+  if (issue.category === 'apt' || issue.category === 'unsold' || issue.category === 'redev') {
+    try {
+      // related_entities 첫 항목이 단지명 → apt_subscriptions / apt_sites 매칭
+      const complexName = (issue.related_entities || [])[0];
+      if (complexName) {
+        const { data: sub } = await (sb as any)
+          .from('apt_subscriptions')
+          .select('hssply_adres, supply_addr')
+          .ilike('house_nm', `%${complexName}%`)
+          .limit(1)
+          .maybeSingle();
+        const { data: site } = await (sb as any)
+          .from('apt_sites')
+          .select('sigungu, dong, address')
+          .ilike('name', `%${complexName}%`)
+          .limit(1)
+          .maybeSingle();
+        const fullAddr = (sub?.hssply_adres || sub?.supply_addr || site?.address || '') as string;
+        // 주소에서 시군구·동 추출
+        const guMatch = fullAddr.match(/([가-힣]+(시|군))\s*([가-힣]+(구|군))?/);
+        const dongMatch = fullAddr.match(/([가-힣]+동)\s/);
+        locationLock = {
+          sigungu: site?.sigungu || (guMatch ? (guMatch[3] || guMatch[1]) : null),
+          dong: site?.dong || (dongMatch ? dongMatch[1] : null),
+          address: fullAddr || null,
+        };
+      }
+    } catch (locErr: any) {
+      console.warn(`[issue-draft] location lookup failed:`, locErr?.message);
+    }
+  }
+
+  const check = factCheck(seoEnriched, issue.raw_data || {}, issue.category || 'general', locationLock);
 
   const canAutoPublish = config.auto_publish_enabled
     && issue.final_score >= (config.auto_publish_min_score ?? 40)
@@ -547,6 +634,8 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
     meta_keywords: article.keywords.join(','),
     cover_image: coverImage, image_alt: seoImageAlt,
     is_published: canAutoPublish,
+    // s261: 선점 우선순위 — final_score 그대로 priority_score 로 사용. 70+ 면 daily_limit 우회
+    priority_score: Math.min(100, Math.max(0, Number(issue.final_score) || 0)),
     ...deriveFreshnessFields({ isSeasonal: true, targetYear: new Date().getFullYear() }),
   } as any);
 

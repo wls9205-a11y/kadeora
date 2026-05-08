@@ -167,6 +167,7 @@ interface BlogInsertData {
   meta_description?: string;
   meta_keywords?: string;
   is_published?: boolean;
+  priority_score?: number; // s261: 선점 우선순위 (>=70 시 daily_limit 우회)
 }
 
 interface SafeInsertResult {
@@ -226,16 +227,21 @@ export async function safeBlogInsert(
       // pg_trgm 미설치 → 스킵
     }
 
-    // 5. 하루 생성량 체크
-    const todayStart = new Date();
-    todayStart.setHours(0, 0, 0, 0);
-    const { count } = await admin
-      .from('blog_posts')
-      .select('id', { count: 'exact', head: true })
-      .gte('created_at', todayStart.toISOString());
+    // s261: 선점 우선순위 — TS 단계 daily_limit guard도 우회
+    const isPriorityPreempt = (data.priority_score ?? 0) >= 70;
 
-    if ((count ?? 0) >= config.daily_create_limit) {
-      return { success: false, reason: 'daily_limit' };
+    // 5. 하루 생성량 체크 (priority>=70은 우회)
+    if (!isPriorityPreempt) {
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      const { count } = await admin
+        .from('blog_posts')
+        .select('id', { count: 'exact', head: true })
+        .gte('created_at', todayStart.toISOString());
+
+      if ((count ?? 0) >= config.daily_create_limit) {
+        return { success: false, reason: 'daily_limit' };
+      }
     }
 
     // 6. 커버 이미지 자동 생성 (미제공 시)
@@ -269,6 +275,7 @@ export async function safeBlogInsert(
         meta_keywords: autoMetaKw,
         is_published: data.is_published ?? false,
         published_at: data.is_published ? new Date().toISOString() : null,
+        priority_score: data.priority_score ?? 0, // s261: 선점 우선순위
     };
 
     const { data: inserted, error } = await admin
