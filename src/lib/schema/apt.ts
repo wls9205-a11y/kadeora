@@ -18,12 +18,41 @@ export interface AptForSchema {
   status?: string | null;
   faq_items?: Array<{ q: string; a: string }> | null;
   key_features?: string[] | null;
+  images?: Array<string | { url: string; caption?: string | null }> | null;
 }
 
 type JsonLd = Record<string, unknown>;
 
 function urlFor(slug: string | null | undefined): string {
   return `${SITE_URL}/apt/${encodeURIComponent(slug || '')}`;
+}
+
+// s236 W9: filter satellite/og + sort by priority for schema images
+function buildSchemaImages(images: AptForSchema['images']): JsonLd[] | undefined {
+  if (!images || !Array.isArray(images) || images.length === 0) return undefined;
+  const objs = images
+    .map(img => typeof img === 'string' ? { url: img, caption: undefined as string | null | undefined } : img)
+    .filter((img): img is { url: string; caption?: string | null } => !!img && !!img.url)
+    .filter(img => !/maps\.googleapis|staticmap|openstreetmap|\/satellite\/|aerial.view|satellite.image/i.test(img.url))
+    .filter(img => !(img.caption && /위성사진|aerial.view|satellite.image/i.test(img.caption)))
+    .sort((a, b) => {
+      const score = (img: { url: string; caption?: string | null }) => {
+        const c = img.caption || '';
+        if (/조감도|투시도|rendering|birdseye/i.test(c)) return 1;
+        if (/모델하우스|견본|평면도|배치도/i.test(c)) return 2;
+        if (/현장|건설|공사|시공/i.test(c)) return 3;
+        if (/imgnews\.naver|pstatic|kakaocdn|daumcdn/i.test(img.url)) return 4;
+        if (/kadeora\.app\/api\/og/i.test(img.url)) return 9;
+        return 5;
+      };
+      return score(a) - score(b);
+    });
+  if (objs.length === 0) return undefined;
+  return objs.map(img => ({
+    '@type': 'ImageObject',
+    contentUrl: img.url,
+    ...(img.caption ? { caption: img.caption } : {}),
+  }));
 }
 
 function buildRealEstateListing(apt: AptForSchema): JsonLd {
@@ -38,6 +67,7 @@ function buildRealEstateListing(apt: AptForSchema): JsonLd {
           offerCount: apt.total_units || 1,
         }
       : undefined;
+  const schemaImages = buildSchemaImages(apt.images);
 
   return {
     '@context': 'https://schema.org',
@@ -58,6 +88,7 @@ function buildRealEstateListing(apt: AptForSchema): JsonLd {
       : {}),
     ...(apt.builder ? { brand: { '@type': 'Organization', name: apt.builder } } : {}),
     ...(offers ? { offers } : {}),
+    ...(schemaImages ? { image: schemaImages } : {}),
   };
 }
 

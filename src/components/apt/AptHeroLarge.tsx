@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { pickBestAptImage, pickImageCaption } from '@/lib/aptImage';
 import type { AptSiteRow } from '@/lib/apt-fetcher';
+import AptImagePlaceholder from '@/components/apt/_shared/AptImagePlaceholder';
 
 const LIFECYCLE_LABEL: Record<string, string> = {
   site_planning: '부지계획', pre_announcement: '분양 예고',
@@ -19,8 +20,16 @@ interface Props {
   sigungu: string | null;
 }
 
+// s236 W6: satellite filter + og fallback watermark helpers
+const isSatellite = (url: string | null | undefined) =>
+  !url ? false : /maps\.googleapis|staticmap|openstreetmap|\/satellite\//i.test(url);
+const isOgFallback = (url: string | null | undefined) =>
+  !url ? false : /kadeora\.app\/api\/og/i.test(url);
+
 export default function AptHeroLarge({ site, region, sigungu }: Props) {
-  const thumb = pickBestAptImage(site);
+  const rawThumb = pickBestAptImage(site);
+  const thumb = isSatellite(rawThumb) ? null : rawThumb;
+  const showOgBadge = isOgFallback(thumb);
   const caption = pickImageCaption(site.images);
   const lifecycle = site.lifecycle_stage ? (LIFECYCLE_LABEL[site.lifecycle_stage] || site.lifecycle_stage) : null;
   const sub = [site.region, site.sigungu, site.dong].filter(Boolean).join(' ');
@@ -44,14 +53,27 @@ export default function AptHeroLarge({ site, region, sigungu }: Props) {
         {/* 사진 영역 — 240px (전체 320 의 ~75%) */}
         <div style={{ position: 'relative', height: 240, background: 'var(--bg-hover)', overflow: 'hidden' }}>
           {thumb ? (
-            <img
-              src={thumb} alt={site.name}
-              width={720} height={240}
-              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-              loading="eager" decoding="async"
-            />
+            <>
+              <img
+                src={thumb} alt={site.name}
+                width={720} height={240}
+                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                loading="eager" decoding="async"
+              />
+              {showOgBadge && !caption && (
+                <span style={{
+                  position: 'absolute', top: 10, right: 10, zIndex: 3,
+                  padding: '3px 8px', borderRadius: 6,
+                  fontSize: 10, fontWeight: 700,
+                  background: 'rgba(0,0,0,0.55)', color: 'rgba(255,255,255,0.92)',
+                  backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)',
+                }}>
+                  사진 준비중
+                </span>
+              )}
+            </>
           ) : (
-            <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-tertiary)', fontSize: 28 }}>🏢</div>
+            <AptImagePlaceholder name={site.name} aspectRatio="3/1" />
           )}
 
           {/* tag — 좌상단 */}
