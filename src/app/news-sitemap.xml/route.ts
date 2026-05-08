@@ -37,7 +37,14 @@ export async function GET() {
     // cover_image가 상대 경로(/api/og?... 등)일 때 절대 URL로 보정 — 구글 이미지 크롤러 호환
     const rawImg = p.cover_image || `${SITE_URL}/api/og?title=${encodeURIComponent((p.title || '').slice(0, 60))}&category=${p.category || 'blog'}&design=2`;
     const imgUrl = rawImg.startsWith('/') ? `${SITE_URL}${rawImg}` : rawImg;
-    const imgAlt = escXml(p.image_alt || p.title || '카더라');
+    // s261: image_alt 가 외부 뉴스 제목 leak (예: "[단독]", "댓글 :", "TVING", "한국경제") 일 수 있어
+    // 카더라 자체 제목으로 통일. 단 image_alt 가 명확히 우리 형식이면 우선 사용.
+    const externalLeakPatterns = [/\[단독\]/, /^댓글 :/, /TVING/, /한국경제/, /매일경제/, /조선일보/, /동아일보/, /^\(/];
+    const isLeaky = p.image_alt && externalLeakPatterns.some((re) => re.test(p.image_alt));
+    const imgCaption = (!isLeaky && p.image_alt && p.image_alt.length >= 5 && p.image_alt.length <= 120)
+      ? p.image_alt
+      : p.title;
+    const imgCaptionEsc = escXml(imgCaption || '카더라');
 
     return `  <url>
     <loc>${SITE_URL}/blog/${escXml(p.slug)}</loc>
@@ -53,7 +60,7 @@ export async function GET() {
     <image:image>
       <image:loc>${escXml(imgUrl)}</image:loc>
       <image:title>${escXml(p.title)}</image:title>
-      <image:caption>${imgAlt}</image:caption>
+      <image:caption>${imgCaptionEsc}</image:caption>
     </image:image>
   </url>`;
   });

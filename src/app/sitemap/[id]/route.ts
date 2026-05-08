@@ -496,6 +496,18 @@ ${complexXml}
         const imgUrl = rawImg.startsWith('/') ? `${BASE}${rawImg}` : rawImg;
         const imgAlt = escXml(b.image_alt || b.title || '카더라 블로그');
         const imgTitle = escXml((b.title || '').slice(0, 80));
+
+        // s261: apt/unsold 카테고리 글에는 og-apt 6장 추가 (이미지 캐러셀 자격 강화)
+        let extraCardsXml = '';
+        if ((b.category === 'apt' || b.category === 'unsold') && b.slug) {
+          const types = ['cover','metric','units','timing','place','spec'];
+          extraCardsXml = types.map((t, i) => `    <image:image>
+      <image:loc>${BASE}/api/og-apt?slug=${encodeURIComponent(b.slug)}&amp;card=${i + 1}&amp;v=1</image:loc>
+      <image:title>${escXml((b.title || '').slice(0, 80) + ' ' + t)}</image:title>
+      <image:caption>${imgAlt}</image:caption>
+    </image:image>`).join('\n');
+        }
+
         return `  <url>
     <loc>${BASE}/blog/${b.slug}</loc>
     <lastmod>${lastmod}</lastmod>
@@ -510,7 +522,7 @@ ${complexXml}
       <image:loc>${BASE}/api/og-infographic?title=${encodeURIComponent((b.title || '').slice(0, 40))}&amp;category=${b.category || 'blog'}&amp;type=summary</image:loc>
       <image:title>${escXml(b.title + ' 인포그래픽')}</image:title>
       <image:caption>${imgAlt}</image:caption>
-    </image:image>
+    </image:image>${extraCardsXml ? '\n' + extraCardsXml : ''}
   </url>`;
       }).join('\n');
 

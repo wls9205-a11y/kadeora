@@ -304,6 +304,20 @@ export async function generateMetadata({ params }: Props) {
             alt: c?.alt || post.image_alt || post.title,
           }));
         }
+        // s261: apt 카테고리는 og_cards 비어있어도 og-apt 6장 fallback (CardCarousel과 동일 로직)
+        if ((post.category === 'apt' || post.category === 'unsold') && post.slug) {
+          const fallbackTypes = ['cover', 'metric', 'units', 'timing', 'place', 'spec'];
+          return [
+            { url: ogImage, width: 1200, height: 630, alt: post.image_alt || descClean || post.title },
+            ...fallbackTypes.map((type, i) => ({
+              url: `${SITE}/api/og-apt?slug=${encodeURIComponent(post.slug)}&card=${i + 1}&v=1`,
+              width: 630,
+              height: 630,
+              alt: `${post.title} ${type}`,
+            })),
+            { url: ogSquare, width: 630, height: 630, alt: post.image_alt || descClean || post.title },
+          ];
+        }
         return [
           { url: ogImage, width: 1200, height: 630, alt: post.image_alt || descClean || post.title },
           { url: ogSquare, width: 630, height: 630, alt: post.image_alt || descClean || post.title },
@@ -316,6 +330,15 @@ export async function generateMetadata({ params }: Props) {
         const cards = Array.isArray(post.og_cards) ? post.og_cards : [];
         if (cards.length === 6) {
           return cards.map((c: any) => typeof c?.url === 'string' && c.url.startsWith('http') ? c.url : `${SITE}${c?.url || ''}`).filter(Boolean);
+        }
+        // s261: apt 카테고리 fallback (twitter)
+        if ((post.category === 'apt' || post.category === 'unsold') && post.slug) {
+          const fallbackTypes = ['cover', 'metric', 'units', 'timing', 'place', 'spec'];
+          return [
+            ogImage,
+            ...fallbackTypes.map((_, i) => `${SITE}/api/og-apt?slug=${encodeURIComponent(post.slug)}&card=${i + 1}&v=1`),
+            ogSquare,
+          ];
         }
         return [ogImage, ogSquare];
       })(),
@@ -799,6 +822,61 @@ export default async function BlogDetailPage({ params }: Props) {
     })),
   } : null;
 
+  // s261: Event schema (청약 일정) — apt 카테고리 + 단지명 매칭 시 청약 이벤트 카드 노출
+  let eventSchema: any = null;
+  if (post.category === 'apt' || post.category === 'unsold') {
+    try {
+      // related_entities 또는 tags 첫 항목에서 단지명 추출
+      const entities = (post.tags ?? []) as string[];
+      const candidates = [post.title.split(' ').slice(0, 3).join(' '), ...entities].filter(Boolean);
+      for (const cand of candidates.slice(0, 3)) {
+        const { data: sub } = await sb
+          .from('apt_subscriptions')
+          .select('house_nm, hssply_adres, supply_addr, rcept_bgnde, rcept_endde, przwner_presnatn_de, mvn_prearnge_ym, total_households, constructor_nm')
+          .ilike('house_nm', `%${cand}%`)
+          .limit(1)
+          .maybeSingle();
+        if (sub && sub.rcept_bgnde) {
+          const startDate = sub.rcept_bgnde;
+          const endDate = sub.rcept_endde || sub.rcept_bgnde;
+          const venue = sub.hssply_adres || sub.supply_addr || '';
+          eventSchema = {
+            '@context': 'https://schema.org',
+            '@type': 'Event',
+            name: `${sub.house_nm} 청약 접수`,
+            description: `${sub.house_nm} ${sub.total_households ? `${sub.total_households}세대 ` : ''}청약 접수 일정. ${descClean}`,
+            startDate,
+            endDate,
+            eventStatus: 'https://schema.org/EventScheduled',
+            eventAttendanceMode: 'https://schema.org/OnlineEventAttendanceMode',
+            location: {
+              '@type': 'Place',
+              name: sub.house_nm,
+              address: { '@type': 'PostalAddress', streetAddress: venue, addressCountry: 'KR' },
+            },
+            organizer: {
+              '@type': 'Organization',
+              name: sub.constructor_nm || '청약홈',
+              url: 'https://www.applyhome.co.kr',
+            },
+            offers: {
+              '@type': 'Offer',
+              url: `${SITE}/blog/${slug}`,
+              availability: 'https://schema.org/InStock',
+              priceCurrency: 'KRW',
+              price: '0',
+            },
+            url: `${SITE}/blog/${slug}`,
+            image: post.cover_image || `${SITE}/api/og?title=${encodeURIComponent(post.title)}&category=apt&design=2`,
+          };
+          break;
+        }
+      }
+    } catch {
+      // 매칭 실패 시 Event schema 출력 안 함
+    }
+  }
+
   const catColorMap: Record<string, { color: string; bg: string }> = {
     stock:   { color: 'var(--accent-blue)',   bg: 'var(--accent-blue-bg)' },
     apt:     { color: 'var(--accent-green)',  bg: 'var(--accent-green-bg)' },
@@ -821,6 +899,7 @@ export default async function BlogDetailPage({ params }: Props) {
       {faqSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />}
       {howtoSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howtoSchema) }} />}
       {datasetSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(datasetSchema) }} />}
+      {eventSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(eventSchema) }} />}
 
       <BlogPostSchema
         post={{
@@ -864,18 +943,47 @@ export default async function BlogDetailPage({ params }: Props) {
 
       <article itemScope itemType={`https://schema.org/${isNewsArticle ? 'NewsArticle' : 'BlogPosting'}`} style={{ paddingBottom: 40 }}>
         <BlogViewTracker blogId={String(post.id)} />
-        {/* ImageGallery JSON-LD (유지 — 포털 이미지 탭) */}
+        {/* ImageGallery JSON-LD (s261: 3장 → 최대 9장으로 확장 — 포털 이미지 캐러셀 자격 강화) */}
         {post.cover_image && (() => {
-          const ogSquare = `${SITE}/api/og-square?title=${encodeURIComponent(post.title)}&category=${post.category}&author=${encodeURIComponent(post.author_name || '카더라')}`;
+          const ogSquareUrl = `${SITE}/api/og-square?title=${encodeURIComponent(post.title)}&category=${post.category}&author=${encodeURIComponent(post.author_name || '카더라')}`;
+          const ogMainUrl = `${SITE}/api/og?title=${encodeURIComponent((post.title || '').slice(0, 40))}&category=${post.category}&design=2`;
+          const coverUrl = post.cover_image.startsWith('/') ? `${SITE}${post.cover_image}` : post.cover_image;
+          const cards = Array.isArray((post as any).og_cards) ? (post as any).og_cards : [];
+
+          // s261: og_cards 6장 우선, 없으면 apt 카테고리는 og-apt 6장 fallback
+          let cardImages: any[] = [];
+          if (cards.length === 6) {
+            cardImages = cards.map((c: any, i: number) => ({
+              '@type': 'ImageObject',
+              url: typeof c?.url === 'string' && c.url.startsWith('http') ? c.url : `${SITE}${c?.url || ''}`,
+              name: c?.alt || `${post.title} card${i + 1}`,
+              width: 630,
+              height: 630,
+              position: i + 2, // 1번은 cover
+            }));
+          } else if ((post.category === 'apt' || post.category === 'unsold') && post.slug) {
+            const fallbackTypes = ['cover', 'metric', 'units', 'timing', 'place', 'spec'];
+            cardImages = fallbackTypes.map((type, i) => ({
+              '@type': 'ImageObject',
+              url: `${SITE}/api/og-apt?slug=${encodeURIComponent(post.slug)}&card=${i + 1}&v=1`,
+              name: `${post.title} ${type}`,
+              width: 630,
+              height: 630,
+              position: i + 2,
+            }));
+          }
+
+          const allImages = [
+            { '@type': 'ImageObject', url: coverUrl, name: post.image_alt || post.title, width: 1200, height: 630, position: 1 },
+            ...cardImages,
+            { '@type': 'ImageObject', url: ogSquareUrl, name: `${post.title} — 카더라 블로그`, width: 630, height: 630, position: cardImages.length + 2 },
+            { '@type': 'ImageObject', url: ogMainUrl, name: `${post.title} 분석`, width: 1200, height: 630, position: cardImages.length + 3 },
+          ];
+
           return (
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
               '@context': 'https://schema.org', '@type': 'ImageGallery', name: `${post.title} 이미지`,
-              image: [
-                { '@type': 'ImageObject', url: post.cover_image.startsWith('/') ? `${SITE}${post.cover_image}` : post.cover_image, name: post.image_alt || post.title, width: 1200, height: 630, position: 1 },
-                { '@type': 'ImageObject', url: ogSquare, name: `${post.title} — 카더라 블로그`, width: 630, height: 630, position: 2 },
-                { '@type': 'ImageObject', url: `${SITE}/api/og?title=${encodeURIComponent((post.title || '').slice(0, 40))}&category=${post.category}&design=2`, name: `${post.title} 분석`, width: 1200, height: 630, position: 3 },
-
-              ],
+              image: allImages,
             })}} />
           );
         })()}
