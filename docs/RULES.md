@@ -1,4 +1,4 @@
-# 카더라 Architecture Rules (#1~#64)
+# 카더라 Architecture Rules (#1~#72)
 
 `docs/STATUS.md`는 세션별 작업 기록, 이 파일은 최종 규칙 모음.
 
@@ -54,6 +54,11 @@
   END $$;
   ```
 - **#69** 카드 view 표준 컬럼 시그니처 — 정보 과다 테이블 (50+ 컬럼) 은 카드용 view 별도 정의. 표준 16 컬럼: `id / slug_id / name / region / builder / date_start / date_end / dday_end / status / price_per_pyeong / supply_min,max / households / area_lineup / cover_image_url / tags / created_at`. 모든 카테고리 view 동일 시그니처 → 단일 `AptCardCompact` 컴포넌트 재사용.
+
+## Search (s260 추가)
+- **#70** 검색은 통합 RPC 단일 진입 — 검색 페이지에서 `.from().ilike().or()` 직접 사용 금지. 반드시 `search_kadeora_unified_vN` RPC 호출. 이유: (1) ILIKE leading wildcard 는 trgm gin 인덱스 활용 못 함 (lower() 호출 시 더 안 됨), (2) 여러 도메인 검색 시 N+1 query 누적으로 maxDuration 초과, (3) RPC 안에서 pgroonga `&@~`, name_variants, scoring CASE 활용 가능. 신규 도메인 추가 시 RPC 보강(v4, v5 ...) — 페이지 코드 변경 없이 즉시 반영. 기존 v2/v3 는 deprecation 후 30일 유지.
+- **#71** `search_logs.results_count` + `clicked_rank` 항상 채움 — `/api/search` 응답 시 `log_search(query, results_count)` 호출 필수, 클릭 시 `log_search_click(id, rank)` POST. NULL 채움 안 하면 zero-result 키워드 발굴 불가(SEO 손실), CTR 측정 불가, 트렌드 분석 부정확.
+- **#72** 검색창은 단 하나, ⌘K/Ctrl+K + 헤더 — 페이지별 별도 검색창(AptSearchBar, StockSearchBox 등) 금지. 모든 페이지가 동일한 `UniversalSearchBar`(헤더 또는 layout). 이유: (1) 사용자 학습 비용 0(어디서든 ⌘K), (2) 검색 컴포넌트 분기 = 검색 분석 분기 = 데이터 손실, (3) 도메인별 검색 카테고리는 RPC 가 처리(페이지 측 별도 구현 X). 별도 카테고리 검색은 결과 페이지 탭으로 처리(`/search?tab=apt_sites`).
 
 ## 워크플로
 - **#11** `docs/STATUS.md`는 매 세션 prepend + commit/push 필수

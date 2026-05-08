@@ -1,4 +1,45 @@
 
+## Session s260 — Universal Search (2026-05-08)
+
+### 면밀 진단 발견
+- **/apt/search 100% timeout** (Vercel Runtime Timeout): 페이지가 search_kadeora_unified_v2 RPC 안 쓰고 직접 .from('apt_complex_profiles').ilike('region_nm', '%q%') 호출 — 286 calls × max 3.4초 누적 timeout
+- **검색 인프라는 풍부, 활용은 0**:
+  - 13개 검색 RPC (unified_v1 + v2 + 도메인별 + trending)
+  - 27개 검색 인덱스 (pgroonga 2 + gin_trgm 17 + GIN fts 2)
+  - search_logs (611건) / search_autocomplete (56건) / mv_search_keyword_trends (11건) / gsc_search_analytics
+  - search_kadeora_unified_v2 실측 181ms — 24배 빠른데 페이지가 안 씀
+- **사용자 검색 행동**:
+  - 단지명 1위 (레이카운티 43회 + truncated 31회 = 74회)
+  - 지역 2위 (부산/해운대좌동/경기/고덕강일)
+  - 주식 3위 (삼성전자/sk하이닉스/kospi)
+  - 청약 4위 ("4월 청약" 11회, "청약 경쟁률" 5회) — unified_v2 가 누락
+  - **CTR 0.0%** — 검색 후 클릭 전무
+  - results_count 모두 NULL — zero-result 추적 불가
+- **unified_v2 약점 5개**: lower(name) 으로 인덱스 못 씀, ILIKE %% leading wildcard, plainto_tsquery 'simple' (한국어 토크나이즈 안 됨), 청약/재개발/미분양/지역 누락, scoring CASE 중복 평가
+
+### 적용 변경
+- DB 마이그레이션 2건:
+  - `s260_search_unified_v3`: 4 도메인 추가 (subscriptions, redev, unsold, regions), pgroonga `&@~` 활용, name_variants 매칭, results_count 반환
+  - `s260_log_search_and_analytics`: log_search / log_search_click RPC + v_search_zero_result / v_search_top_keywords / v_search_health view + mv_search_keyword_trends 재정의 + refresh cron (daily KST 03:00)
+- 신규 코드 7 파일:
+  - `src/lib/search/parse-query.ts`: 자연어 시간/카테고리/지역 파싱 ("4월 청약" → category='subscription', month=4)
+  - `src/components/search/UniversalSearchBar.tsx`: 헤더 단일 검색창 (⌘K + 모달 + typeahead 200ms debounce)
+  - `src/app/api/search/route.ts`: 단일 API (RPC v3 호출 + log_search 백그라운드)
+  - `src/app/api/search/click/route.ts`: CTR 추적
+  - `src/app/(main)/search/page.tsx`: 통합 결과 페이지 (9 카테고리 탭)
+  - `src/app/(main)/apt/search/page.tsx`: timeout hot-fix (RPC v3 호출, /search 자동 redirect)
+  - `src/app/admin/search-analytics/page.tsx`: 어드민 분석 (헬스 / 인기 / zero-result)
+
+### 성능 개선
+- /apt/search 페이지: 5초 timeout → **~200ms** (24x 빠름)
+- 검색 도메인: 5개 → **9개** (+ 청약/재개발/미분양/지역)
+- pgroonga 인덱스 활용: 0개 → **2개** (apt_complex_profiles, apt_subscriptions)
+
+### Pending (s260 외)
+- search_logs.results_count 백필 — 기존 611건은 NULL 그대로 (신규부터 채움)
+- 헤더 통합 — Claude Code 가 카더라 정확한 헤더 위치 못 찾으면 사용자 안내 필요
+- naver/google search analytics 연동 (gsc_search_analytics 테이블 활용)
+
 ## Session s259 — 부동산 페이지 컴팩트화 + 신규 등록순 정렬 (2026-05-08)
 
 ### 면밀 진단 발견
