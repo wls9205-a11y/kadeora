@@ -9,6 +9,7 @@ import { haptic } from '@/lib/haptic';
 import { isTossMode } from '@/lib/toss-mode';
 import { useTheme } from '@/components/ThemeProvider';
 import LiveActivityIndicator from '@/components/LiveActivityIndicator';
+import UniversalSearchBar from '@/components/search/UniversalSearchBar';
 
 const NAV_ITEMS = [
   { href: '/feed',    label: '피드',   Icon: Home },
@@ -228,31 +229,12 @@ export function Navigation() {
             </span>
           </Link>
 
-          {/* 검색바 (데스크탑) — 인기검색어 통합 */}
-          <Link href="/search" className="hidden md:flex" style={{
-            flex:1, maxWidth:360, minWidth:160, height:34,
-            background:'var(--bg-hover)',
-            border:'1px solid var(--border)',
-            borderRadius: 'var(--radius-pill)', alignItems:'center', padding:'0 14px', gap: 'var(--sp-sm)',
-            textDecoration:'none', transition:'border-color var(--transition-fast)',
-            justifyContent:'space-between',
-          }}
-            onMouseEnter={e=>(e.currentTarget.style.borderColor='var(--border-strong)')}
-            onMouseLeave={e=>(e.currentTarget.style.borderColor='var(--border)')}
-          >
-            <div style={{ display:'flex', alignItems:'center', gap:6, overflow:'hidden', flex:1 }}>
-              <Search size={13} color="var(--text-tertiary)" style={{ flexShrink:0 }} />
-              {trendingKw ? (
-                <span style={{ fontSize:12, color:'var(--text-secondary)', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', display:'flex', alignItems:'center', gap:4 }}>
-                  <span style={{ fontSize: 10, fontWeight:700, color:'var(--brand)', padding:'0px 4px', borderRadius: 4, border:'1px solid var(--brand)', lineHeight:'14px', flexShrink:0 }}>인기</span>
-                  {trendingKw}
-                </span>
-              ) : (
-                <span style={{ fontSize:12, color:'var(--text-tertiary)' }}>종목, 청약, 블로그 검색...</span>
-              )}
-            </div>
-            <kbd style={{ fontSize:10, fontWeight:600, color:'var(--text-tertiary)', background:'var(--bg-base)', padding:'1px 5px', borderRadius:4, border:'1px solid var(--border)', fontFamily:'monospace', lineHeight:1.5 }}>/</kbd>
-          </Link>
+          {/* s260: UniversalSearchBar — typeahead + ⌘K 모달. 옛 fake-Link 박스(L232-255) 교체. */}
+          <div className="hidden md:flex" style={{ flex:1, maxWidth:360, minWidth:160 }}>
+            <UniversalSearchBar
+              placeholder={trendingKw ? `인기 · ${trendingKw}` : '종목, 청약, 블로그 검색...'}
+            />
+          </div>
 
           {/* 데스크탑 네비 */}
           <nav className="hidden md:flex" style={{ gap:0, marginLeft:4 }}>
