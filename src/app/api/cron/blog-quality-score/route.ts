@@ -2,6 +2,8 @@ export const maxDuration = 120;
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
+// s258 patch #14: LLM 빈말 검출 + 외부 출처 카운트
+import { checkBlogContent, countExternalLinks } from '@/lib/llm/post-process';
 
 const BATCH = 50; // s173: 200 → 50 (Vercel 함수 60s 제한 + Supabase 연결풀 보호)
 
@@ -85,8 +87,21 @@ function scorePost(post: any): { score: number; details: QualityDetails; eligibl
     else if (daysDiff <= 365) freshness = 1;
   }
 
-  const details: QualityDetails = { length, structure, links, meta, image, uniqueness, freshness };
-  const score = length + structure + links + meta + image + uniqueness + freshness;
+  // s258 patch #14: LLM 빈말 차감
+  const llmCheck = checkBlogContent(content);
+  const llmPenalty = Math.min(40, llmCheck.total_penalty);
+  // 외부 출처/비교표 가산
+  const externalLinkBonus = countExternalLinks(content) >= 1 ? 5 : 0;
+
+  const details: QualityDetails & { llm_hits?: any; llm_penalty?: number; needs_regeneration?: boolean } = {
+    length, structure, links, meta, image, uniqueness, freshness,
+    llm_hits: llmCheck.hits,
+    llm_penalty: llmPenalty,
+    needs_regeneration: llmCheck.needs_regeneration,
+  };
+  const score = Math.max(0, Math.min(100,
+    length + structure + links + meta + image + uniqueness + freshness + externalLinkBonus - llmPenalty
+  ));
 
   // 자동 공개 자격: score >= 65 AND seo_tier S/A/restore_candidate AND content >= 2500자
   const eligibleTiers = ['S', 'A', 'restore_candidate'];

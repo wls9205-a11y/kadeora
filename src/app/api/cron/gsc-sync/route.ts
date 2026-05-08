@@ -29,7 +29,10 @@ async function refreshAccessToken(clientId: string, clientSecret: string, refres
       }).toString(),
     });
     if (!res.ok) {
-      try { const b = await res.text(); console.error('[gsc-sync] refresh fail', res.status, b.slice(0, 300)); } catch {}
+      // s258 patch #7: refresh_token 만료 시 명시적 에러 메시지 (silent null 회복)
+      let body = '';
+      try { body = await res.text(); } catch {}
+      console.error(`[gsc-sync] oauth_refresh_failed_${res.status}: ${body.slice(0, 300)}`);
       return null;
     }
     const body = await res.json();

@@ -4,19 +4,20 @@ import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 export const runtime = 'nodejs';
-export const maxDuration = 60;
+export const maxDuration = 10; // s258 patch #10: Rule #16
 
-const BATCH = 50;
+const BATCH = 30;
 
 async function handler(_req: NextRequest) {
   return NextResponse.json(
     await withCronLogging('og-cards-refresh', async () => {
       const sb = getSupabaseAdmin();
 
-      // Find sites whose underlying data has changed since og_cards was last generated.
+      // s258 patch #10: og_cards_updated_at is null OR 7일 이상 stale 한 행만
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString();
       const { data: sites } = await (sb as any).from('apt_sites')
         .select('id, name, slug, page_views, updated_at, og_cards_updated_at')
-        .or('og_cards_updated_at.is.null,og_cards_updated_at.lt.updated_at')
+        .or(`og_cards_updated_at.is.null,og_cards_updated_at.lt.${sevenDaysAgo}`)
         .order('page_views', { ascending: false, nullsFirst: false })
         .limit(BATCH);
 

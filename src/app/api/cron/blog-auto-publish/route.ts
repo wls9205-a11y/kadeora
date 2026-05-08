@@ -35,7 +35,8 @@ export async function GET(req: NextRequest) {
       .limit(BATCH);
 
     if (error) throw new Error(`query error: ${error.message}`);
-    if (!posts?.length) return { processed: 0, created: 0, failed: 0, metadata: { reason: 'no_eligible' } };
+    // s258 patch #3: 후보 0건은 success 로 명시 (failed 카운트 방지)
+    if (!posts?.length) return { processed: 0, created: 0, failed: 0, metadata: { published_count: 0, queue_empty: true, reason: 'no_eligible_candidates' } };
 
     let published = 0;
     let failed = 0;

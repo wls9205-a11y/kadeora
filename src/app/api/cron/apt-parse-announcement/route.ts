@@ -47,10 +47,21 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
           continue;
         }
 
-        const html = await res.text();
-        const parsed = parseAnnouncementHtml(html);
-        const ud = buildUpdateDict(parsed, apt.tot_supply_hshld_co);
-
+        // s258 patch #5: content-type 분기 — PDF 가정 silent fail 방지
+        const ct = (res.headers.get('content-type') || '').toLowerCase();
+        const isPdf = ct.includes('pdf') || apt.pblanc_url.endsWith('.pdf');
+        const ud: Record<string, any> = {};
+        if (isPdf) {
+          // PDF 응답: parser.ts 의 parseAnnouncementDoc 사용 (별도 cron 책임)
+          // 여기서는 raw_text 만 저장하고 parsed_at 마크 (다음 cron 이 파싱)
+          ud.announcement_parsed_at = new Date().toISOString();
+          ud.pdf_parse_version = 0; // 미파싱 상태 표시
+        } else {
+          // HTML: 기존 파서 그대로
+          const html = await res.text();
+          const parsed = parseAnnouncementHtml(html);
+          Object.assign(ud, buildUpdateDict(parsed, apt.tot_supply_hshld_co));
+        }
         await (sb as any).from('apt_subscriptions').update(ud).eq('id', apt.id);
         processed++;
       } catch (err: any) {

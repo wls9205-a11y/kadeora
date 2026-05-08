@@ -1,4 +1,4 @@
-export const maxDuration = 60;
+export const maxDuration = 10; // s258 patch #2: 15분 timeout 회복 (Rule #16)
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';

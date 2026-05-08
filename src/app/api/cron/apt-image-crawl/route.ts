@@ -335,6 +335,8 @@ async function handler(_req: NextRequest) {
             processed++;
 
             if (images.length === 0) {
+              // s258 patch #13: errors 에 진짜 원인 명시 (이전 빈 [] → 진단 불가)
+              errors.push(`${site.name}: no_images_collected (region=${region || 'NA'} naver_blacklist 또는 0 result)`);
               failed++;
               continue;
             }

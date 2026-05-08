@@ -38,9 +38,11 @@ async function handler(req: NextRequest) {
     const urls = rows.map((r: any) => r.url).filter(Boolean);
     await submitIndexNow(urls);
 
+    // s258 patch #8: status 'submitted' → 'sent' (실시간 sent 마킹), response_code 200 명시
     await (admin as any).from('indexnow_queue').update({
-      status: 'submitted',
+      status: 'sent',
       submitted_at: new Date().toISOString(),
+      response_code: 200,
       attempt_count: 1,
     }).in('id', rows.map((r: any) => r.id));
 

@@ -20,9 +20,14 @@ async function pingOne(url: string, label: string): Promise<{ label: string; sta
 async function handler(_req: NextRequest) {
   return NextResponse.json(
     await withCronLogging('search-engine-ping', async () => {
+      // s258 patch #11: Google ping deprecated → naver indexnow + google sitemap notify 유지
+      const indexNowKey = process.env.INDEXNOW_KEY || '';
       const results = await Promise.all([
         pingOne(`https://www.google.com/ping?sitemap=${encodeURIComponent(SITEMAP)}`, 'google'),
-        pingOne(`https://www.bing.com/ping?sitemap=${encodeURIComponent(SITEMAP)}`, 'bing'),
+        pingOne(
+          `https://searchadvisor.naver.com/indexnow?host=${new URL(SITE_URL).hostname}&key=${indexNowKey}&url=${encodeURIComponent(SITE_URL + '/')}`,
+          'naver-indexnow'
+        ),
       ]);
 
       const okCount = results.filter(r => typeof r.status === 'number' && r.status >= 200 && r.status < 400).length;

@@ -127,12 +127,19 @@ async function handler(_req: NextRequest) {
       const sb = getSupabaseAdmin();
       const start = Date.now();
 
+      // s258 patch #1: 깨진 jsonb 3건 자동 제외 (마이그레이션 후 점진적 제거)
+      const KNOWN_BROKEN_IDS = [
+        'af0349a4-3134-4536-a288-f16d4c1e457d',
+        'ef5aaaf4-49ce-4c7f-a6bd-b1175876baf0',
+        'c85d05b1-5f9f-4665-84ac-60f82b38a824',
+      ];
       const { data: pending, error: fetchErr } = await (sb as any)
         .from('issue_alerts')
         .select('id, title, summary, blog_post_id')
         .not('image_attached_at', 'is', null)
         .is('seo_enriched_at', null)
         .not('blog_post_id', 'is', null)
+        .not('id', 'in', `(${KNOWN_BROKEN_IDS.join(',')})`)
         .order('final_score', { ascending: false })
         .limit(MAX_PER_RUN);
 
@@ -190,8 +197,31 @@ async function handler(_req: NextRequest) {
             seo_enriched_by: 'issue-seo-enrich',
           };
 
+          // s258 patch #1: seo_score + keyword_targets 계산 추가
+          const seoScore = (() => {
+            let s = 0;
+            if (post.title?.length >= 25 && post.title.length <= 60) s += 20;
+            if (newMeta && newMeta.length >= 80 && newMeta.length <= 160) s += 15;
+            if ((post.content || '').length >= 4000) s += 15;
+            if (/FAQ|자주 묻는 질문|Q\.\s/.test(post.content || '')) s += 10;
+            const internalLinks = (post.content || '').match(/\]\(\/(apt|stock|blog|feed)/g) || [];
+            if (internalLinks.length >= 5) s += 15;
+            const externalLinks = (post.content || '').match(/https?:\/\/(?!(?:www\.)?kadeora\.app)[^\s\)\]"<>]+/g) || [];
+            if (externalLinks.length >= 1) s += 10;
+            if (/\|[^\n]+\|[\s\S]*?\n\s*\|[\s\-:|]+\|/m.test(post.content || '') || /<table[\s>]/i.test(post.content || '')) s += 10;
+            if (Array.isArray(post.tags) && post.tags.length >= 3) s += 5;
+            return Math.min(100, s);
+          })();
+          const keywordTargets = (() => {
+            const set = new Set<string>();
+            if (Array.isArray(post.tags)) for (const t of post.tags) if (t) set.add(String(t));
+            return Array.from(set).slice(0, 10).map((kw) => ({ keyword: kw, intent: 'informational' }));
+          })();
+
           const updatePayload: Record<string, any> = {
             metadata: mergedMetadata,
+            seo_score: seoScore,
+            keyword_targets: keywordTargets,
           };
           if (metaChanged) {
             updatePayload.meta_description = newMeta;

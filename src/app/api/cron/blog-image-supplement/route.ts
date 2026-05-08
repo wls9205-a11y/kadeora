@@ -167,7 +167,16 @@ async function handler(_req: NextRequest) {
             startPos = maxPos + 1;
           } catch { /* fall back to haveCount */ }
 
-          const rows = collected.map((img, idx) => ({
+          // s258 patch #12: position 0~15 한도 (check_bpi_position_range)
+          if (startPos > 15) {
+            errors.push({ post_id: post.id, msg: `position_full (startPos=${startPos})` });
+            continue;
+          }
+          // 한도 안에서만 슬라이스 (let → const 수정 회피)
+          const remainingSlots = Math.max(0, 16 - startPos);
+          const collectedSliced = collected.slice(0, remainingSlots);
+
+          const rows = collectedSliced.map((img, idx) => ({
             post_id: post.id,
             image_url: img.url,
             alt_text: `${post.title} 관련 이미지 ${startPos + idx + 1}`,

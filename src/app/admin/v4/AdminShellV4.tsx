@@ -103,6 +103,21 @@ export default function AdminShellV4() {
             border: '1px solid var(--border, #2a2b35)', textDecoration: 'none',
           }}
         >📨 카카오 마케팅</a>
+        {/* s258: Health 5개 페이지 */}
+        {[
+          { href: '/admin/pipeline-health',     label: '📊 이슈 파이프라인' },
+          { href: '/admin/silent-fails',        label: '⚠️ Silent Fails' },
+          { href: '/admin/pdf-parsing',         label: '📄 PDF 파싱' },
+          { href: '/admin/carousel-eligibility',label: '🖼️ 캐러셀 적격성' },
+          { href: '/admin/seo-measurement',     label: '🎯 SEO 측정' },
+        ].map(m => (
+          <a key={m.href} href={m.href} style={{
+            fontSize: 11, fontWeight: 700,
+            padding: '6px 12px', borderRadius: 6,
+            background: 'transparent', color: 'var(--text-secondary, #ccc)',
+            border: '1px solid var(--border, #2a2b35)', textDecoration: 'none',
+          }}>{m.label}</a>
+        ))}
         <button onClick={fetchData} style={{
           fontSize: 11, fontWeight: 700,
           padding: '6px 12px', borderRadius: 6, cursor: 'pointer',

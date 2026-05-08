@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withCronAuth } from '@/lib/cron-auth';
 import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+// s258 patch #6: 휴리스틱 추출 helper (parser.ts) 사전 import — 큐 확장 시 사용
+import { extractPriceHeuristic as _extractPriceHeuristic } from '@/lib/pdf/parser';
+void _extractPriceHeuristic;
 
 export const maxDuration = 300;
 export const runtime = 'nodejs';

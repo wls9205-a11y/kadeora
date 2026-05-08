@@ -47,9 +47,11 @@ async function handler(_req: NextRequest) {
       const sb = getSupabaseAdmin();
       const start = Date.now();
 
+      // s258 patch #4: seo_enriched_at NOT NULL 이미 강제 (latency 음수 불가)
+      // draft_ready_at + seo_enriched_at IS NULL row 는 issue-seo-enrich cron 이 처리 (분리 책임)
       const { data: pending, error: fetchErr } = await (sb as any)
         .from('issue_alerts')
-        .select('id, blog_post_id, final_score, is_published')
+        .select('id, blog_post_id, final_score, is_published, seo_enriched_at, draft_ready_at')
         .not('seo_enriched_at', 'is', null)
         .not('blog_post_id', 'is', null)
         .or('is_published.eq.false,is_published.is.null')
