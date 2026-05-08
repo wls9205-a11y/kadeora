@@ -1,4 +1,29 @@
 
+## Session s262 — Issue Engine v1 Phase A (DB) (2026-05-09)
+
+### 적용 변경 (DB 마이그레이션 7건, frontend 영향 0)
+- `s262_a_issue_score_weights`: stock + apt weights 테이블 + v1 INSERT (활성 3 factor 합 1.0, 비활성은 0 으로 보존)
+- `s262_a_stock_issue_scores`: 매트뷰 (1,805 active stocks, 1,715 non-zero score) — vol_z(30d) + abs_change_z + recency_boost. weights 테이블 dynamic read.
+- `s262_a_apt_issue_scores`: 매트뷰 (37 active subs) — dday_proximity + listing_freshness + region_match
+- `s262_a_get_home_data`: RPC — hero_issue (issue_alerts 우선 → stock top1 fallback) + stock_top3 + apt_top3 + hot_blog
+- `s262_b_comments_polymorphic`: ADD entity_type/entity_id/tags/verification_badge, post_id NULL 허용, CHECK constraint, 9,235 row 백필 완료 (legacy NULL 0)
+- `s262_b_entity_comment_stats`: 카운트 캐시 + INSERT/UPDATE 트리거 + 2,889 row 백필
+- `s262_b_get_entity_comment_counts`: batch RPC (N+1 방지)
+
+### v1 가중치
+- **stock**: vol_z 0.50 + abs_change_z 0.30 + recency_boost 0.20 (news_z/sent_d/disc_w/flow_flip 0)
+- **apt**: dday_proximity 0.45 + listing_freshness 0.35 + region_match 0.20 (sub_comp/policy/news/price_anom 0)
+- 비활성 factor 는 weights 테이블에 0 으로 INSERT — V2 enable 시 UPDATE 만 필요. mat view 가 dynamic read 하므로 REFRESH 로 즉시 반영.
+
+### 검증 (smoke)
+- get_home_data: hero "[급상승] 가온전선 — heat 100" / stock_top3 [대한전선 0.733, 가온전선 0.731, 한국피아이엠 0.728] / apt_top3 [더샵 관저아르테 0.994 등 dday=0 5건] / hot_blog 3건
+- 매핑 결과 SQL 안에 `-- DATA SOURCE:` 코멘트 박음
+
+### Phase 잔여
+- Phase B (lib + components) — frontend 빌딩 블록, 미사용 상태 main merge
+- Phase C (페이지 flip) — `/`, `/stock`, `/apt` rewrite, Vercel preview 검증 후
+- Phase D (cron + vercel.json) — refresh-stock-issue-scores + refresh-apt-issue-scores
+
 ## Session s260 — Universal Search (2026-05-08)
 
 ### 면밀 진단 발견

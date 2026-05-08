@@ -1,4 +1,4 @@
-# 카더라 Architecture Rules (#1~#72)
+# 카더라 Architecture Rules (#1~#85)
 
 `docs/STATUS.md`는 세션별 작업 기록, 이 파일은 최종 규칙 모음.
 
@@ -59,6 +59,21 @@
 - **#70** 검색은 통합 RPC 단일 진입 — 검색 페이지에서 `.from().ilike().or()` 직접 사용 금지. 반드시 `search_kadeora_unified_vN` RPC 호출. 이유: (1) ILIKE leading wildcard 는 trgm gin 인덱스 활용 못 함 (lower() 호출 시 더 안 됨), (2) 여러 도메인 검색 시 N+1 query 누적으로 maxDuration 초과, (3) RPC 안에서 pgroonga `&@~`, name_variants, scoring CASE 활용 가능. 신규 도메인 추가 시 RPC 보강(v4, v5 ...) — 페이지 코드 변경 없이 즉시 반영. 기존 v2/v3 는 deprecation 후 30일 유지.
 - **#71** `search_logs.results_count` + `clicked_rank` 항상 채움 — `/api/search` 응답 시 `log_search(query, results_count)` 호출 필수, 클릭 시 `log_search_click(id, rank)` POST. NULL 채움 안 하면 zero-result 키워드 발굴 불가(SEO 손실), CTR 측정 불가, 트렌드 분석 부정확.
 - **#72** 검색창은 단 하나, ⌘K/Ctrl+K + 헤더 — 페이지별 별도 검색창(AptSearchBar, StockSearchBox 등) 금지. 모든 페이지가 동일한 `UniversalSearchBar`(헤더 또는 layout). 이유: (1) 사용자 학습 비용 0(어디서든 ⌘K), (2) 검색 컴포넌트 분기 = 검색 분석 분기 = 데이터 손실, (3) 도메인별 검색 카테고리는 RPC 가 처리(페이지 측 별도 구현 X). 별도 카테고리 검색은 결과 페이지 탭으로 처리(`/search?tab=apt_sites`).
+
+## Issue Engine + Project invariants (s262 추가)
+- **#73** 마이그레이션은 idempotent + reversible — `CREATE TABLE IF NOT EXISTS`, `DROP MATERIALIZED VIEW IF EXISTS`, `CREATE OR REPLACE`, `ADD COLUMN IF NOT EXISTS`. 파일 헤더에 `-- DOWN:` 주석으로 롤백 SQL 명시. mat view 는 `CREATE OR REPLACE` 불가 → `DROP IF EXISTS CASCADE` 후 재생성.
+- **#74** 포인트 변동은 `award_points` / `deduct_points` RPC 만 — `point_history` 직접 INSERT 또는 `profiles.points` 직접 UPDATE 금지. 트랜잭션·중복 차단·history 기록이 RPC 안에 묶여 있음.
+- **#75** CSP 는 `src/middleware.ts` 의 `CSP_DIRECTIVES` 단일 정의만 사용. 페이지/컴포넌트별 meta CSP, vercel.json `headers` 의 CSP 추가 금지 (s260 #63 보강).
+- **#76** 블로그 데이터 (`blog_posts`) DELETE 금지 — `is_published = false`, `auto_unpublished_at`, `expires_at` 으로만 비활성화. 삭제는 SEO/링크 수명 손상 + GSC 색인 실종.
+- **#77** `PostWithProfile` / `CommentWithProfile` 타입 export 보존 — `src/types/community.ts` 안의 두 타입은 12+ 컴포넌트가 import. signature 변경 시 cascade 영향. ADD field 만 OK, REMOVE 금지.
+- **#78** Cron route 는 에러 시 항상 200 반환 — Vercel cron 은 5xx 시 자동 재시도, 같은 작업 중복 실행 위험. `try/catch` 후 error JSON + 200 (또는 cron-logger 기록 후 200).
+- **#79** Issue score 가중치는 `*_issue_score_weights` 테이블만 변경 — mat view 는 weights subquery 로 dynamic read. 코드 / SQL / 환경변수에 가중치 하드코딩 금지.
+- **#80** mat view REFRESH 로 가중치 즉시 반영 — `REFRESH MATERIALIZED VIEW [CONCURRENTLY] *_issue_scores` 만 호출하면 weights 테이블 변경이 적용. CREATE/DROP 불필요.
+- **#81** Issue score v1 은 보수적 — 24h 모니터링 후 튜닝. 백테스트 없이 weight 큰 변경 금지. UPDATE 시 1 factor 당 ≤ 0.10 변경 + 1주 관찰.
+- **#82** Comments polymorphic — `comments` row 는 `(entity_type IS NOT NULL AND entity_id IS NOT NULL) OR post_id IS NOT NULL` CHECK 만족 필수. 신규 댓글은 가능하면 entity_type/entity_id 사용 (post_id 는 legacy + blog_posts 댓글에만).
+- **#83** 카드 색상은 헬퍼 함수 통과 — `stockChipStyle` / `stockBarColor` / `getStockTone` 등. 컴포넌트 안에 hex (`#DC2626` 등) 직접 사용 금지. 디자인 토큰 변경이 한 곳에서 끝나야 함.
+- **#84** `entity_comment_stats` 는 트리거로 즉시 동기화 — INSERT / UPDATE OF is_deleted 트리거가 count 즉시 갱신. 배치 cron / manual reconcile 금지 (drift 위험).
+- **#85** 단일 commit production flip 회피 — DB / lib·components / 페이지 / cron 4단계 분리, 각 phase 독립 revert 가능. 3 high-traffic 페이지 동시 rewrite 는 90초 롤백 약속 못 지킴.
 
 ## 워크플로
 - **#11** `docs/STATUS.md`는 매 세션 prepend + commit/push 필수
