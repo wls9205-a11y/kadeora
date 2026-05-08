@@ -72,17 +72,39 @@ function extractNameTokens(name: string): string[] {
   return tokens.length > 0 ? tokens : [normalized];
 }
 
-/** title/alt 속 단지명 토큰 포함 여부 (핵심 토큰 1개라도 있으면 관련) */
+/** title/alt 속 단지명 토큰 포함 여부.
+ *  s261: substring 매칭 강화 — 다음을 모두 통과해야 관련.
+ *   1) 모든 2자+ 토큰의 80% 이상 매칭 (예: 3토큰 중 2개 이상)
+ *   2) 차수 마커 (Ⅰ/Ⅱ/Ⅲ/1차/2차/3차/-2/-3) 가 title 에 있는데 siteName 엔 없으면 거부
+ *      (메트로시티 자산 데시앙 vs 메트로시티Ⅱ 케이스 false positive 차단)
+ */
 function isRelevantToSite(title: string, siteName: string): boolean {
   const t = normalizeForMatch(title);
   if (!t) return false;
-  const tokens = extractNameTokens(siteName);
-  // 토큰 중 하나라도 title에 포함되면 관련
-  for (const tok of tokens) {
-    const ntok = normalizeForMatch(tok);
-    if (ntok.length >= 2 && t.includes(ntok)) return true;
+  const nSiteName = normalizeForMatch(siteName);
+
+  // 차수 마커 미스매치 거부
+  const ROMAN = ['Ⅰ', 'Ⅱ', 'Ⅲ', 'Ⅳ', 'Ⅴ', 'II', 'III', 'IV'];
+  const PHASE = ['2차', '3차', '4차', '5차', '제2차', '제3차', '-2', '-3', '-4', '2단지', '3단지', '4단지'];
+  const titleHasMarker = (markers: string[]) => markers.some(m => title.includes(m));
+  const siteHasMarker = (markers: string[]) => markers.some(m => siteName.includes(m));
+
+  if ((titleHasMarker(ROMAN) || titleHasMarker(PHASE)) && !(siteHasMarker(ROMAN) || siteHasMarker(PHASE))) {
+    return false; // title 은 다른 차수 단지
   }
-  return false;
+
+  const tokens = extractNameTokens(siteName).filter((t) => t.length >= 2);
+  if (tokens.length === 0) return false;
+
+  // 단일 토큰 단지명은 기존 로직 (substring OK)
+  if (tokens.length === 1) {
+    return t.includes(normalizeForMatch(tokens[0]));
+  }
+
+  // 다중 토큰: 80% 이상 매칭 필요
+  const matchCount = tokens.filter((tok) => t.includes(normalizeForMatch(tok))).length;
+  const ratio = matchCount / tokens.length;
+  return ratio >= 0.66; // 3토큰 중 2개 이상 (66.6%) 매칭 시만 통과
 }
 
 // ━━━ Phase 1: 네이버 부동산 API (비공식) — 단지 사진 갤러리 ━━━

@@ -43,11 +43,24 @@ const PUBLIC_URL_HOSTS = [
 ];
 
 // hotlink 거부 대상 (블로그 이미지 파이프와 동일 블랙리스트)
+// s261: 뉴스 매체 핫링크 차단 강화 — imgnews.naver.net, wowtv, 한국경제, 매경 등
 const IMG_BLOCK_HOSTS = [
+  // 스톡/위키/SNS
   'utoimage', 'freepik', 'shutterstock', 'pixabay', 'unsplash', 'istockphoto',
   'namu.wiki', 'wikipedia', 'youtube.com', 'pinimg.com', 'ohousecdn',
+  // 부동산 경쟁/스크래핑
   'hogangnono', 'new.land.naver.com', 'landthumb', 'kbland', 'kbstar.com',
   'zigbang', 'dabang', 'dcinside', 'ruliweb.com', 'ppomppu.co.kr',
+  // s261: 네이버/다음 뉴스 이미지 핫링크 (저작권 + 403 위험)
+  'imgnews.naver.net', 'mimgnews.pstatic.net', 'pstatic.net',
+  'img.kakaocdn.net', 'i1.daumcdn.net',
+  // s261: 한국 주요 매체 도메인 (이미지 핫링크 시 저작권/링크 끊김)
+  'hankyung.com', 'wowtv.co.kr', 'mk.co.kr', 'mkbn.mk.co.kr',
+  'chosun.com', 'donga.com', 'joongang.co.kr', 'khan.co.kr',
+  'mt.co.kr', 'moneys.co.kr', 'fnnews.com', 'sedaily.com',
+  'news1.kr', 'yna.co.kr', 'newsis.com', 'etnews.com',
+  'mbn.co.kr', 'sbs.co.kr', 'mbc.co.kr', 'kbs.co.kr',
+  'jtbc.co.kr', 'tvchosun.com', 'channela.com', 'ytn.co.kr',
 ];
 
 export interface HydrateOptions {

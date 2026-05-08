@@ -25,10 +25,22 @@ const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
 const IMG_BLOCK_DOMAINS = [
+  // 스톡/위키/SNS
   'utoimage', 'freepik', 'shutterstock', 'pixabay', 'unsplash', 'istockphoto',
   'namu.wiki', 'wikipedia', 'youtube.com', 'pinimg.com', 'ohousecdn',
+  // 부동산 경쟁/스크래핑
   'hogangnono', 'new.land.naver.com', 'landthumb', 'kbland', 'kbstar.com',
   'zigbang', 'dabang', 'dcinside', 'ruliweb.com', 'ppomppu.co.kr',
+  // s261: 네이버/다음 뉴스 이미지 핫링크 (저작권 + 403)
+  'imgnews.naver.net', 'mimgnews.pstatic.net', 'pstatic.net',
+  'img.kakaocdn.net', 'i1.daumcdn.net',
+  // s261: 한국 주요 매체 도메인 (저작권/링크 끊김)
+  'hankyung.com', 'wowtv.co.kr', 'mk.co.kr', 'mkbn.mk.co.kr',
+  'chosun.com', 'donga.com', 'joongang.co.kr', 'khan.co.kr',
+  'mt.co.kr', 'moneys.co.kr', 'fnnews.com', 'sedaily.com',
+  'news1.kr', 'yna.co.kr', 'newsis.com', 'etnews.com',
+  'mbn.co.kr', 'sbs.co.kr', 'mbc.co.kr', 'kbs.co.kr',
+  'jtbc.co.kr', 'tvchosun.com', 'channela.com', 'ytn.co.kr',
 ];
 
 // ─────────── 타입 ───────────
