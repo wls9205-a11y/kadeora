@@ -397,10 +397,6 @@
       "schedule": "0 9,21 * * *"
     },
     {
-      "path": "/api/cron/naver-sc-sync",
-      "schedule": "30 17 * * *"
-    },
-    {
       "path": "/api/cron/apt-summary-gen",
       "schedule": "10 * * * *"
     }
