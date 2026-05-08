@@ -1,4 +1,28 @@
 
+## Session s262 — Issue Engine v1 Phase B (lib + components, unused) (2026-05-09)
+
+### 적용 변경 (frontend 빌딩 블록 14건 + sandbox 1건, 어디서도 import 안 함)
+- `src/lib/stockColor.ts` — 기존 v2 API 보존 + s262 v3 compact 추가 (`getStockTone` / `stockChipStyle` / `stockBarColor` / `formatChangePct`, ±29.5% 경계)
+- `src/lib/issue/types.ts` — Phase A 컬럼 1:1 매칭 (`StockIssueScore` / `AptIssueScore` / `IssueReason` / `IssueWarning`)
+- `src/lib/issue/calc.ts` — weights 테이블 read + 60s 인-메모리 캐시 + `scoreToDisplay`
+- `src/lib/issue/labels.ts` — reason chip 11종 색 매핑 + warning 4종 + REASON_MIN_VALUE
+- `src/lib/comments/contracts.ts` — `CommentEntityType` 8종 (post/stock/apt/redev/unsold/complex/issue/feed) + hot 임계값
+- `src/lib/comments/rpc.ts` — `getEntityCommentCounts` batch wrapper + `isHotComment` 판정 (hot_score ≥ 0.5 OR 24h 댓글 ≥ 2)
+- `src/lib/home/contracts.ts` — `HomeData` / `HeroIssue` / `HotBlog`
+- `src/components/issue/IssueScoreBadge.tsx` — 70+ red / 50+ orange / 회색
+- `src/components/issue/IssueScoreBar.tsx` — 3px 가로 바
+- `src/components/issue/IssueReasonChips.tsx` — sort by value DESC, max 4, MIN_VALUE 미만 hide
+- `src/components/issue/WarningLabel.tsx` — 4종 ⚠️ amber
+- `src/components/comments/CommentChip.tsx` — 💬 N, hot 시 빨강 + "핫"
+- `src/components/cards/StockIssueCard.tsx` — v3 compact 2줄 ('use client', stockChipStyle/stockBarColor 만 사용 — hex 직접 0)
+- `src/components/cards/AptIssueCard.tsx` — 동일 패턴, 등락칩 자리에 D-day 칩
+- `src/app/sandbox/issue-cards/page.tsx` — 시각 검증용 mock sandbox (NODE_ENV !== production 만 200, 외 404, noindex)
+
+### 검증
+- `npm run type-check` 통과 (0 errors)
+- `npm run build` 통과 (s262 관련 warning 0). `/sandbox/issue-cards` 라우트 3.15 kB
+- 기존 컴포넌트/페이지 import path 영향 0 — 어디서도 import 안 함 (Phase C 에서 활성화)
+
 ## Session s262 — Issue Engine v1 Phase A (DB) (2026-05-09)
 
 ### 적용 변경 (DB 마이그레이션 7건, frontend 영향 0)

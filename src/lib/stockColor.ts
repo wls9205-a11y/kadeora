@@ -98,3 +98,48 @@ export function marketStatusColor(isOpen: boolean): string {
 export function marketStatusBg(isOpen: boolean): string {
   return isOpen ? 'var(--stock-market-open-bg)' : 'var(--stock-market-closed-bg)';
 }
+
+// ─────────────────────────────────────────────────────────────────────
+// s262 Phase B — v3 compact card 톤 시스템 (Architecture Rule #83).
+// 한국 주식 일일 등락 한계 ±30% 기준, ±29.5% 부근부터 limit 톤.
+// 카드/배지에서 hex 직접 사용 금지 — 반드시 이 헬퍼 통과.
+// ─────────────────────────────────────────────────────────────────────
+
+export type StockTone = 'limit_up' | 'up' | 'flat' | 'down' | 'limit_down';
+
+const FLAT_THRESHOLD = 0.05;   // ±0.05% 미만 보합
+const LIMIT_THRESHOLD = 29.5;  // ±29.5% 이상 limit
+
+export function getStockTone(changePct: number | null | undefined): StockTone {
+  if (changePct == null || Number.isNaN(changePct)) return 'flat';
+  if (changePct >= LIMIT_THRESHOLD)  return 'limit_up';
+  if (changePct <= -LIMIT_THRESHOLD) return 'limit_down';
+  if (Math.abs(changePct) < FLAT_THRESHOLD) return 'flat';
+  return changePct > 0 ? 'up' : 'down';
+}
+
+export function stockBarColor(tone: StockTone): string {
+  switch (tone) {
+    case 'limit_up':   return '#DC2626';
+    case 'up':         return '#EF4444';
+    case 'flat':       return '#6B7280';
+    case 'down':       return '#2563EB';
+    case 'limit_down': return '#1D4ED8';
+  }
+}
+
+export function stockChipStyle(tone: StockTone): { background: string; color: string; fontWeight: number } {
+  switch (tone) {
+    case 'limit_up':   return { background: '#DC2626', color: '#FFFFFF', fontWeight: 700 };
+    case 'up':         return { background: '#FEE2E2', color: '#991B1B', fontWeight: 600 };
+    case 'flat':       return { background: '#F3F4F6', color: '#4B5563', fontWeight: 600 };
+    case 'down':       return { background: '#DBEAFE', color: '#1E40AF', fontWeight: 600 };
+    case 'limit_down': return { background: '#1D4ED8', color: '#FFFFFF', fontWeight: 700 };
+  }
+}
+
+export function formatChangePct(pct: number | null | undefined): string {
+  if (pct == null || Number.isNaN(pct)) return '0.00%';
+  const sign = pct > 0 ? '+' : '';
+  return `${sign}${pct.toFixed(2)}%`;
+}
