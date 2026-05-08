@@ -1,3 +1,48 @@
+## [s260] 2026-05-08 — 회원가입 funnel + 전방위 stabilize 일괄 적용 (production main)
+
+브랜치: `main` · commit `1d528d51`
+
+배경:
+- s258 plan 을 처음에 사용자 지시(feat/main-redesign-v5 유지)로 feat 브랜치에 적용했으나,
+  feat 브랜치에는 plan 이 가정한 인프라(useInAppBrowser hook, x-kd-region 헤더,
+  cta-navigate.ts, ResidenceNudgeModal) 가 삭제되어 있어 6건만 적용 가능.
+- 이후 production = main 확정. main 에는 plan 의 모든 인프라 코드 존재.
+- main 에 9건 전체 적용한 것이 본 s260 entry.
+
+코드 수정 (9건):
+1. WelcomeReward localStorage race fix — kd_welcomed mark 를 fetch 성공 후로 이동
+   (100P 미지급 dead loop 종결)
+2. LoginClient track-attempt keepalive + catch 블록 error_message capture (250자)
+3. LoginClient 카카오/구글 disabled 조건에 `|| !inApp.resolved` — 인앱 브라우저 SSR race 보강
+4. callback IP hash sha256/16 hex 통일 — track-attempt 와 매칭 (base64/24 mismatch 로
+   existingAttempt 룩업 0건 → INSERT 분기 누적되던 문제 해소)
+5. callback redirect 에 `?welcome=1` 부착 — WelcomeToast 활성화
+6. middleware `regionHeaderValue` encodeURIComponent — Edge 24h Invalid header warning 종결
+   (소비측 SSR 사용처 0건 — 추후 구독자 추가 시 decodeURIComponent)
+7. cta-navigate `trackCtaClick` 중복 호출 제거 + `setTimeout` 80→50ms (navigation 지연 단축)
+8. SmartSectionGate hydration placeholder — visibleSection 만 노출 (기존 전체 htmlContent
+   노출 시 게이트 판정 후 사라지는 시각적 결함 + content gate 우회 차단)
+9. Marketing/KakaoChannel/ResidenceNudge 모달 3종 `/onboarding` pathname 가드
+   (다중 모달 충돌 방지)
+
+Supabase (feat 작업 시 이미 적용 완료, DB 공유):
+- migration `cron_logs_30d_purge` — `purge_old_cron_logs()` + 매일 04:15 UTC 스케줄
+- migration `v_signup_funnel_daily_redefine` — login_visits 정의 변경:
+  `conversion_events.cta_click + (category='signup' OR cta_name LIKE '%login%' OR ...)`.
+  page_view 트래커가 OAuth 즉시 redirect 로 drop 되던 측정 누락 해소.
+
+Architecture Rules:
+- #63 신설: 응답 헤더 값 ASCII 강제 (Latin-1 외 문자 encodeURIComponent)
+- #64 신설: 가입 보너스 mark 는 외부 호출 성공 응답 확인 후 (race 방지)
+
+Pending next:
+1. `complete_profile_and_reward` RPC 통합 (welcome-bonus + signup_attempts UPDATE 단일화)
+2. `auth_rls_initplan` 108건 일괄 fix (Supabase advisor)
+3. pg_cron startup timeout 진단
+4. OG `og-apt` / `og-stock` / `og-blog` 잔여 TypeError
+
+---
+
 # Session 205 — Oneshot Batch (2026-05-02 KST)
 
 브랜치: `main` · 한 commit / 한 deploy. session-205-oneshot-batch tag.
