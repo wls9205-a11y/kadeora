@@ -25,7 +25,8 @@ function LoginForm({ redirect }: LoginFormProps) {
     const sp = new URLSearchParams(window.location.search);
     const source = sp.get('cta') || sp.get('source') || 'direct';
     // 가입 시도 추적 + CTA 클릭 이벤트 (conversion_events)
-    fetch('/api/auth/track-attempt', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ provider, source, redirect_path: redirect, success: false }) }).catch(() => {});
+    // s258 P0: keepalive — OAuth 리디렉트가 먼저 일어나 fetch drop 되는 race 방지.
+    fetch('/api/auth/track-attempt', { method: 'POST', headers: { 'Content-Type': 'application/json' }, keepalive: true, body: JSON.stringify({ provider, source, redirect_path: redirect, success: false }) }).catch(() => {});
     trackCtaClick({ cta_name: source, category: 'signup', page_path: window.location.pathname });
     try {
       const sb = createSupabaseBrowser();
@@ -37,6 +38,11 @@ function LoginForm({ redirect }: LoginFormProps) {
       });
       if (err) throw err;
     } catch (e: unknown) {
+      // s258 P0: 실패 사유 기록 — track-attempt 두 번째 호출로 error_message 전달.
+      fetch('/api/auth/track-attempt', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, keepalive: true,
+        body: JSON.stringify({ provider, source, redirect_path: redirect, success: false, error_message: (e instanceof Error ? e.message : 'login_oauth_throw').slice(0, 250) }),
+      }).catch(() => {});
       setError(e instanceof Error ? errMsg(e) : '로그인 중 오류가 발생했습니다');
       setLoading(null);
     }

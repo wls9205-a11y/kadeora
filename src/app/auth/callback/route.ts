@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
+import { createHash } from 'crypto';
 
 /**
  * Frictionless OAuth callback
@@ -101,8 +102,11 @@ export async function GET(request: Request) {
       visitor_id: user.id,
     }).then(() => {}).catch(() => {});
     const ua = request.headers.get('user-agent') || '';
-    const ipRaw = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'anon';
-    const ipHash = ipRaw ? Buffer.from(ipRaw).toString('base64').slice(0, 24) : null;
+    // s258 P0: track-attempt 와 동일한 sha256/16 hex 알고리즘으로 통일.
+    // 기존 base64/24 는 track-attempt 측 sha256/16 와 매칭 실패 → existingAttempt
+    // 룩업 0건 → INSERT 분기로 진입하여 oauth_started_at 누락된 row 누적.
+    const ipRaw = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? '';
+    const ipHash = ipRaw ? createHash('sha256').update(ipRaw).digest('hex').slice(0, 16) : null;
 
     // 기존 attempt row (oauth_started_at 있는 것) 을 갱신, 없으면 신규 INSERT
     const { data: existingAttempt } = await (admin as any)
@@ -193,5 +197,7 @@ export async function GET(request: Request) {
   } catch { /* 등록 실패는 무시 */ }
 
   // 즉시 목적지로 이동 — /onboarding 강제 리디렉트 제거
-  return NextResponse.redirect(`${origin}${safeRedirect}`);
+  // s258 P0: ?welcome=1 부착 — WelcomeToast 가 신규 가입 직후 토스트 표시할 수 있도록.
+  const sep = safeRedirect.includes('?') ? '&' : '?';
+  return NextResponse.redirect(`${origin}${safeRedirect}${sep}welcome=1`);
 }

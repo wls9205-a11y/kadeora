@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 
 const CHANNEL_ID = '_NFxdxhX';
@@ -11,11 +12,14 @@ type Props = {
 };
 
 export default function KakaoChannelAddModal({ triggerOnMount = true }: Props) {
+  const pathname = usePathname();
   const [visible, setVisible] = useState(false);
   const [closing, setClosing] = useState(false);
 
   useEffect(() => {
     if (!triggerOnMount) return;
+    // s258 P1: /onboarding 페이지에서는 모달 마운트 차단 — 다중 모달 충돌 방지.
+    if (pathname?.startsWith('/onboarding')) return;
 
     try {
       if (typeof sessionStorage !== 'undefined' && sessionStorage.getItem(STORAGE_KEY)) return;
@@ -44,7 +48,7 @@ export default function KakaoChannelAddModal({ triggerOnMount = true }: Props) {
     })();
 
     return () => { cancelled = true; };
-  }, [triggerOnMount]);
+  }, [triggerOnMount, pathname]);
 
   const fireBeacon = (event: 'view' | 'click' | 'dismiss') => {
     try {

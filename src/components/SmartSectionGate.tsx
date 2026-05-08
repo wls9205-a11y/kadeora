@@ -139,9 +139,16 @@ export default function SmartSectionGate({
     return { visibleSection: visible, remainingHeadings: headings };
   }, [htmlContent]);
 
-  // SSR 단계 + 판정 전: 빈 placeholder 만 렌더 (CLS 방지). 판정 후 적절한 분기로.
+  // SSR 단계 + 판정 전: visibleSection 만 렌더 (CLS 방지 + content gate 우회 방지).
+  // s258 P0: 기존엔 htmlContent 전체 노출 → 게이트 판정 전 본문 disappear 사용자 컴플레인.
+  // visibleSection (40~70% cut) 만 보여주면 hydration 후 게이트 카드가 자연스럽게 추가됨.
   if (shouldGate === null) {
-    return <div className="blog-content" itemProp="articleBody" dangerouslySetInnerHTML={{ __html: htmlContent }} />;
+    return (
+      <div className="blog-content" itemProp="articleBody">
+        <div dangerouslySetInnerHTML={{ __html: visibleSection }} />
+        <div aria-hidden="true" style={{ minHeight: 280 }} />
+      </div>
+    );
   }
   if (shouldGate === false || bypassedThisSession) {
     return <div className="blog-content" itemProp="articleBody" dangerouslySetInnerHTML={{ __html: htmlContent }} />;
