@@ -1,3 +1,67 @@
+
+## Session s259 — 부동산 페이지 컴팩트화 + 신규 등록순 정렬 (2026-05-08)
+
+### 면밀 진단 발견
+- **`apt_subscriptions.updated_at` / `fetched_at` 정렬 무의미**: 2,757건 모두 4초 안에 일괄 UPSERT. cron 패턴 자체가 신규/기존 구분 안 함
+- **컬럼 과다**: 카드에 노출하기엔 128 컬럼은 압도적 — 6~8개로 추려야 컴팩트
+- **이미지/평형 데이터 풍부**: apt_sites cover 84%, apt_subscriptions.house_type_info 98%
+- **`crawl-unsold-molit` Vercel cron 7일 정지**: unsold_apts 5/1 이후 갱신 0 (부수 이슈, Track F)
+- **`announcement_parsed_at` 거의 정지**: 7d=0 / 30d=1 (s258 PDF 거짓 성공 fix 후 재가동 필요)
+
+### 적용 변경
+- DB 마이그레이션 2건:
+  - `s259_apt_created_at`: `apt_subscriptions.created_at` 신규 추가 + `updated_at` 으로 backfill + 보존 트리거 (UPDATE 시 OLD 보존) + 인덱스 2개 (`idx_apt_sub_created_at_active`, `idx_apt_sub_rcept_endde_upcoming`)
+  - `s259_apt_card_views`: 카드 view 5개 (`v_apt_card_subscription`, `v_apt_card_imminent`, `v_apt_card_redev`, `v_apt_card_unsold`, `v_apt_card_complex`) — 128 컬럼 → 8 컬럼
+
+- 신규 코드 4 파일:
+  - `src/lib/apt/card-types.ts`: AptCard 공통 타입 + AptSortKey
+  - `src/lib/apt/card-format.ts`: 가격/D-day/평형/지역 포맷터 + 태그 한글 라벨
+  - `src/components/apt/AptCardCompact.tsx`: 컴팩트 카드 (이미지 1 + 정보 6, 사용자 답변 기준)
+  - `src/components/apt/AptListSorter.tsx`: 정렬 토글 + URL 동기화 + applySort 헬퍼
+
+- 페이지 패치 4개 (Claude Code 가 적용):
+  - `/apt`, `/apt/redev`, `/apt/unsold`, `/apt/complex/[slug]`
+
+### 정렬 기준
+| 카테고리 | 기본 | 옵션 |
+|---|---|---|
+| 청약 (`/apt`) | newest (created_at DESC) | ongoing / deadline / price_asc |
+| 마감 임박 | deadline (date_end ASC) | newest |
+| 재개발 | newest | deadline / name |
+| 미분양 | newest | price_asc / price_desc |
+| 단지 | name | newest / price_desc |
+
+### Pending (s259 외)
+- `crawl-unsold-molit` 7일 정지 (Track F 가이드)
+- `announcement_parsed_at` 거의 정지 (apt-summary-gen + 그 전 단계 재가동)
+- `apt-summary-gen` BATCH_SIZE=1 또는 Anthropic Batch API 도입 (s258 잔재)
+
+---
+
+## Architecture Rules — s259 추가 (#68 ~ #69)
+
+### Rule #68 — 일괄 UPSERT 테이블의 created_at 정확성
+
+> 외부 공공 API 를 매일 전수 UPSERT 하는 테이블 (apt_subscriptions 등) 은 `updated_at` 만으로 신규 검출 불가. **`created_at` 컬럼 + DEFAULT now() + BEFORE UPDATE 트리거로 OLD.created_at 보존** 패턴 필수. cron 코드의 ON CONFLICT DO UPDATE 는 SET 절에서 created_at 제외 또는 트리거가 자동 보존.
+
+```sql
+-- 트리거 표준 패턴
+CREATE OR REPLACE FUNCTION fn_<table>_preserve_created_at()
+RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  IF TG_OP = 'UPDATE' AND OLD.created_at IS NOT NULL THEN
+    NEW.created_at := OLD.created_at;
+  END IF;
+  RETURN NEW;
+END $$;
+```
+
+### Rule #69 — 카드 view 표준 패턴
+
+> 정보 과다 테이블 (50+ 컬럼) 은 사용자가 보는 카드용 view 를 별도 정의. **id / slug_id / name / region / builder / date_start / date_end / dday_end / status / price_per_pyeong / supply_min,max / households / area_lineup / cover_image_url / tags / created_at** — 표준 16 컬럼 안에서 추림. 모든 카테고리 view 가 동일 컬럼 시그니처 유지하면 단일 `AptCardCompact` 컴포넌트 재사용 가능.
+
+---
+
 # 카더라 STATUS — s259 (2026-05-07 17:55) 🚨 og main 다시 D1 redirect + sanitize strict whitelist
 
 ## 이번 세션 (s259) — s258 활성 후 잔여 throw 진단

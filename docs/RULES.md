@@ -41,6 +41,20 @@
 - **#63** Supabase function REVOKE는 anon/authenticated만으로는 부족 — `PUBLIC`도 함께 (default privilege)
 - **#64** trigger function 식별은 `pg_trigger.tgfoid` join이 100% 안전
 
+## Schema (s259 추가)
+- **#68** 일괄 UPSERT 테이블의 `created_at` 정확성 — 외부 공공 API 를 매일 전수 UPSERT 하는 테이블 (apt_subscriptions 등) 은 `updated_at` 만으로 신규 검출 불가. `created_at` 컬럼 + DEFAULT now() + BEFORE UPDATE 트리거로 OLD.created_at 보존 패턴 필수.
+  ```sql
+  CREATE OR REPLACE FUNCTION fn_<table>_preserve_created_at()
+  RETURNS trigger LANGUAGE plpgsql AS $$
+  BEGIN
+    IF TG_OP = 'UPDATE' AND OLD.created_at IS NOT NULL THEN
+      NEW.created_at := OLD.created_at;
+    END IF;
+    RETURN NEW;
+  END $$;
+  ```
+- **#69** 카드 view 표준 컬럼 시그니처 — 정보 과다 테이블 (50+ 컬럼) 은 카드용 view 별도 정의. 표준 16 컬럼: `id / slug_id / name / region / builder / date_start / date_end / dday_end / status / price_per_pyeong / supply_min,max / households / area_lineup / cover_image_url / tags / created_at`. 모든 카테고리 view 동일 시그니처 → 단일 `AptCardCompact` 컴포넌트 재사용.
+
 ## 워크플로
 - **#11** `docs/STATUS.md`는 매 세션 prepend + commit/push 필수
 - 두 PC 동시 작업: `git stash && git pull --rebase origin main && git stash pop` 의무
