@@ -95,53 +95,6 @@ export default function AptListSorter({
   );
 }
 
-// 서버 컴포넌트 측에서 ORDER BY 절을 만들 때 쓰는 헬퍼
-export function buildOrderClause(sort: AptSortKey | null | undefined): string {
-  switch (sort) {
-    case "deadline":
-      return "date_end ASC NULLS LAST, dday_end ASC NULLS LAST";
-    case "ongoing":
-      // status='ongoing' 우선 + date_end ASC
-      return "(status = 'ongoing') DESC, date_end ASC NULLS LAST";
-    case "name":
-      return "name ASC";
-    case "price_asc":
-      return "price_per_pyeong ASC NULLS LAST";
-    case "price_desc":
-      return "price_per_pyeong DESC NULLS LAST";
-    case "newest":
-    default:
-      return "created_at DESC, id DESC";
-  }
-}
-
-// supabase-js 의 .order() 체이닝용 헬퍼
-export function applySort<
-  T extends {
-    order: (
-      column: string,
-      opts?: { ascending?: boolean; nullsFirst?: boolean },
-    ) => T;
-  },
->(query: T, sort: AptSortKey | null | undefined): T {
-  switch (sort) {
-    case "deadline":
-      return query
-        .order("date_end", { ascending: true, nullsFirst: false })
-        .order("dday_end", { ascending: true, nullsFirst: false });
-    case "ongoing":
-      // (status='ongoing') DESC 는 supabase-js 로 표현 어려움 → 페이지 측에서 별도 필터
-      return query.order("date_end", { ascending: true, nullsFirst: false });
-    case "name":
-      return query.order("name", { ascending: true });
-    case "price_asc":
-      return query.order("price_per_pyeong", { ascending: true, nullsFirst: false });
-    case "price_desc":
-      return query.order("price_per_pyeong", { ascending: false, nullsFirst: false });
-    case "newest":
-    default:
-      return query
-        .order("created_at", { ascending: false })
-        .order("id", { ascending: false });
-  }
-}
+// s259 fix: server-side helpers (buildOrderClause, applySort) 분리 → @/lib/apt/card-sort
+//   client component 'use client' 와 server-only helper 가 한 파일에 공존하면
+//   server component 가 client bundle 을 끌고 들어가는 문제 회피.

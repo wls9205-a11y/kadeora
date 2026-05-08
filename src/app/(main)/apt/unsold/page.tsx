@@ -2,7 +2,8 @@
 // path: src/app/(main)/apt/unsold/page.tsx (kadeora convention)
 // 의존: getSupabaseAdmin (@/lib/supabase-admin) — kadeora 표준
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
-import AptListSorter, { applySort } from '@/components/apt/AptListSorter';
+import AptListSorter from '@/components/apt/AptListSorter';
+import { applySort } from '@/lib/apt/card-sort';
 import { AptCardGrid } from '@/components/apt/AptCardCompact';
 import type { AptSortKey } from '@/lib/apt/card-types';
 
