@@ -9,10 +9,11 @@ import Anthropic from "@anthropic-ai/sdk";
 import { logCronStart, logCronEnd } from "@/lib/cron-log";
 import { extractPriceHeuristic } from "@/lib/pdf/parser";
 
-export const maxDuration = 10;
+// s258 fix: LLM 호출 cron 은 Architecture Rule #16 예외 — Vercel Pro 60s 한도 활용
+export const maxDuration = 60;
 export const dynamic = "force-dynamic";
 
-const BATCH_SIZE = 8;     // Haiku 호출 비용 통제
+const BATCH_SIZE = 2;     // 시간당 2건 = 일 48건, 백로그 145건 3일 완주
 const MIN_RAW_LEN = 500;  // 너무 짧은 raw_text는 처리 보류
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
