@@ -74,7 +74,7 @@ export async function GET(req: Request) {
     const { data: rows, error: qErr } = await supabase
       .from("apt_subscriptions")
       .select(
-        "id, apt_name, announcement_raw_text, price_per_pyeong, announcement_summary",
+        "id, house_nm, announcement_raw_text, price_per_pyeong, announcement_summary",
       )
       .gte("pdf_parse_version", 1)
       .not("announcement_raw_text", "is", null)
@@ -110,7 +110,7 @@ export async function GET(req: Request) {
       let isPriceLimit: boolean | null = null;
 
       try {
-        const llm = await summarizeWithLlm(raw, row.apt_name || "분양 단지");
+        const llm = await summarizeWithLlm(raw, row.house_nm || "분양 단지");
         if (llm) {
           summary = llm.summary || null;
           if (!priceHeur && Number.isFinite(llm.price_per_pyeong)) {
@@ -129,7 +129,10 @@ export async function GET(req: Request) {
       }
 
       const update: Record<string, any> = {};
-      if (summary) update.announcement_summary = summary;
+      if (summary) {
+        update.ai_summary = summary; // text 컬럼
+        update.announcement_summary = { summary, generated_at: new Date().toISOString() }; // jsonb 컬럼
+      }
       if (priceHeur && priceHeur > 0) {
         update.price_per_pyeong = priceHeur;
         update.price_parsed_at = new Date().toISOString();
