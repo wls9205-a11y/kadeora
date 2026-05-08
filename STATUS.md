@@ -1,3 +1,31 @@
+## [s258] 2026-05-08 — 회원가입 funnel 면밀 검토 + P0+P1 일괄 배포
+
+브랜치: `feat/main-redesign-v5` · commits 878ff84b + 365c3e8e
+
+- **Fixed (코드)**:
+  - WelcomeReward localStorage race — kd_welcomed mark 를 fetch 성공 후로 이동 (100P 미지급 dead loop 종결)
+  - LoginClient track-attempt keepalive + catch 블록 error_message capture (250자)
+  - callback IP hash sha256/16 hex 통일 — track-attempt 와 매칭 (기존 base64/24 mismatch 로 existingAttempt 룩업 0건 → INSERT 분기 누적)
+  - callback redirect 에 `?welcome=1` 부착 — WelcomeToast 활성화
+  - SmartSectionGate hydration placeholder — 판정 전 visibleSection 만 노출 (전체 htmlContent 노출 + content gate 우회 차단)
+  - KakaoChannelAddModal + MarketingConsentModalMount `/onboarding` 가드 — 다중 모달 충돌 방지
+- **Fixed (Supabase)**:
+  - migration `cron_logs_30d_purge` — `purge_old_cron_logs()` + 매일 04:15 UTC 스케줄
+  - migration `v_signup_funnel_daily_redefine` — login_visits 정의 변경: page_view 트래커 의존 제거 → conversion_events.cta_click + signup category (page_view 가 OAuth 즉시 redirect 로 drop 되던 측정 누락 해소)
+- **Skipped (premise mismatch — 코드 부재로 적용 불가)**:
+  - middleware `x-kd-region` ASCII 강제 — 미들웨어에 region detection 로직 없음, src 내 사용처 0건
+  - `cta-navigate.ts` 중복 sendBeacon 제거 — 파일 부재, 호출처 0건
+  - `ResidenceNudgeModal` 가드 — 파일 부재, 호출처 0건
+  - LoginClient `inApp.resolved` disabled 보강 — `inApp` 변수 부재
+- **Architecture Rule #64 신설**: 가입 보너스 mark 는 외부 호출 성공 응답 확인 후 — 사전 mark + 호출 실패 = silent data loss
+- **Pending next**:
+  1. `complete_profile_and_reward` RPC 통합 (welcome-bonus + signup_attempts UPDATE 단일화)
+  2. `auth_rls_initplan` 108건 일괄 fix (Supabase advisor)
+  3. pg_cron startup timeout 진단
+  4. OG `og-apt` / `og-stock` / `og-blog` 잔여 TypeError
+
+---
+
 # Session 189 — Post-Marathon Recovery (2026-04-28 KST)
 
 브랜치: `fix/post-marathon-recovery` · 한 commit 한 deploy.
