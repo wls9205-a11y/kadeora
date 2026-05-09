@@ -1,4 +1,4 @@
-# 카더라 Architecture Rules (#1~#94)
+# 카더라 Architecture Rules (#1~#95)
 
 `docs/STATUS.md`는 세션별 작업 기록, 이 파일은 최종 규칙 모음.
 
@@ -85,6 +85,7 @@
 - **#92** Per-tab/per-block SSR metadata 필수 — `?tab=` / `?block=` 같은 query 분기 페이지는 `generateMetadata({ searchParams })` 에서 tab 별 title/description/canonical 분기 + ItemList JSON-LD. 동일 path 가 여러 콘텐츠 variant 를 표시하면 GSC 가 단일 페이지로 처리 → 키워드 충돌. canonical 을 variant 마다 다르게 두면 separate 색인.
 - **#93** Mat view 컬럼 추가 시 source 데이터 실제 채움률 사전 측정 필수 — 컬럼 정의가 정확해도 source 가 비면 mat view row 가 NULL. apt_sites 같은 dimension 테이블이 전체 99% 채움이지만 매칭되는 부분집합은 0% 가능 (s262 Phase E 회고 — 신규 분양 단지는 apt_sites.price_min 미입력). 작성 전 (1) source 컬럼 grep, (2) WHERE 조건 적용된 부분집합 채움률, (3) LATERAL JOIN 의 LIMIT 1 정렬 우선순위 검증. 50% 미만이면 fallback 컬럼 추가 또는 UI 폴백 텍스트 (예: '분양가 미공개') 같이 디자인.
 - **#94** Inline hex 사용 시 항상 소문자 + var() 호출 우선 — 카드/배지의 `style={{ background: '#FFFFFF' }}` 같은 inline hex 가 dark mode catch-all selector 와 미스매치되면 가독성 회귀. 새 컴포넌트 작성 시 (1) 디자인 토큰 var() 우선 (`var(--bg-surface)`, `var(--text-primary)` 등), (2) hex 불가피한 경우 소문자 + 스페이스 syntax (`background: #ffffff`) 로 globals.css 의 catch-all selector 와 매칭 보장. 이미 적용된 inline hex 는 globals.css 끝의 catch-all 확장으로 cover (Phase F-lite 패턴) — 다만 본질 fix 는 inline hex 자체를 var() 로 전환 (Phase F real migration 은 별도 세션).
+- **#95** GRANT 누락 점검은 새 함수/view 추가 시 필수 — production 클라이언트(authenticated/anon)가 호출하는 모든 SECURITY INVOKER 함수와 RLS 적용 view 는 명시적 `GRANT EXECUTE`/`GRANT SELECT TO authenticated, anon` 필요. Supabase Phase 4 Track 4 보안 강화 이후 PUBLIC default GRANT 무효. 마이그 작성 시 (1) 클라이언트 호출 여부 확인, (2) GRANT 명시 추가, (3) 적용 직후 `NOTIFY pgrst, 'reload schema'`, (4) 5분 후 postgres 로그에서 `permission denied` 0건 검증. 증거 기록: s263_a (log_teaser_debug, get_my_access_level, v_complex_region_stats, v_complex_age_stats 4건 회귀 ERROR 매 분 burst — postgres 로그 18:46:20 이후 0건 회복).
 
 ## 워크플로
 - **#11** `docs/STATUS.md`는 매 세션 prepend + commit/push 필수

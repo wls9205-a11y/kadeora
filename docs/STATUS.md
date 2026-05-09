@@ -1,4 +1,31 @@
 
+## s263 Phase 1 — production GRANT fix (2026-05-09 KST 18:46)
+
+### ✅ Phase 1.1 — DB 적용 + 검증 완료
+- 마이그: s263_a_grants_log_teaser_view_complex (Supabase MCP)
+- 4건 GRANT 보충: get_my_access_level / log_teaser_debug / v_complex_region_stats / v_complex_age_stats → authenticated, anon
+- has_function_privilege / has_table_privilege 4/4 true 검증
+- 검증: 18:46:20 적용 후 90초 내 PostgREST cache reload. postgres 로그 permission denied ERROR 0건 (이전 매 분 burst).
+
+### Phase 1.2/1.3 — Phase 2 코드 사안으로 이관
+- indexnow_queue: DB default=false 정상. cron route 코드가 explicit NULL INSERT — `/api/cron/blog-publish-queue` 코드 수정 필요
+- big_event_bootstrap_queue: CHECK 정상 (pending|in_progress|fact_checking|blocked|completed|failed). cron route 가 허용 외 값 INSERT — `/api/cron/big-event-bootstrap-process` 코드 수정 필요
+
+### Phase 2 진단 — Phase 3 마이그 대상 식별
+- v_admin_dashboard_v4 EXPLAIN ANALYZE 2.63초:
+  * blog_posts category aggregate 1614ms (idx 너무 wide)
+  * cron_logs status filter 430ms (partial idx 부재)
+  * comments seq scan 199ms × 2 (created_at idx **부재**)
+- og-stock 폰트 에러: 매 분 5건 burst 현재 진행. `src/app/api/og-stock/route.ts` 코드 검토 필요
+- CTA click 추적 회귀: sticky_signup_bar view 65 / click 0. `lib/cta-track.ts` keepalive 검토 필요
+
+### Architecture Rules
+- **#95** GRANT 누락 점검 패턴 신설
+
+### 다음 결정
+- Phase 2 코드 영역 (사용자 PC): og-stock 진단 + cta-track 진단 + cron route 2건 fix
+- Phase 3.3 admin v4 인덱스 마이그 (위험 중) GO 여부
+
 ## Session s262 — Phase F-lite 적용 + Phase F 백로그 (2026-05-09)
 
 ### 진단
