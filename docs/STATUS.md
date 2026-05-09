@@ -1,4 +1,42 @@
 
+## Session s262 — Phase F-lite 적용 + Phase F 백로그 (2026-05-09)
+
+### 진단
+ISSUE ENGINE Phase E 카드 (StockIssueCard / AptIssueCard / V2 cards / IssueGateCard / DDayAlertCTA) 가 inline `style={{ background: '#FFFFFF', color: '#111827', ... }}` 패턴 사용. 기존 globals.css line 750 catch-all selector 는 **소문자 + 스페이스 syntax** (`background: #fff`) 만 매칭 → 대문자 + 스페이스 없는 syntax 미스매치 → dark mode 가독성 회귀.
+
+### 적용 (`296bf4c6`)
+`globals.css` 끝 (line 2252+) 에 catch-all selector 14개 추가:
+- 카드 배경 #FFFFFF/#FFF + rgba(255,255,255 → var(--bg-surface)
+- 텍스트 #111827/#1F2937/#374151 → var(--text-primary)
+- 보조 #6B7280/#9CA3AF → var(--text-secondary)
+- 보더 #E5E7EB → var(--border)
+- 빨강 칩 #FEE2E2/#FECACA + #991B1B/#7F1D1D → dark-tuned alpha
+- 배경 변형 #F9FAFB/#F3F4F6 → var(--bg-elevated)/var(--bg-hover)
+- DDayAlertCTA #FEF2F2 + #FCA5A5 → 빨강 alpha
+
+CSS only, JSX 0 수정. typecheck + build 통과.
+
+### Production 검증
+- /, /stock, /apt 200 OK (598ms~1094ms)
+- Vercel 빌드 청크 `50c299cb97e349ba.css` 안에 새 selector 5/5 deploy 확인:
+  `.dark[style*="background:#FFFFFF"]`, `.dark[style*="color:#111827"]`,
+  `.dark[style*="background:#FEE2E2"]`, `.dark[style*="color:#991B1B"]`,
+  `.dark[style*="background:#FEF2F2"]` ✅
+- /apt /stock 안 ISSUE ENGINE Phase E 카드들이 dark 시 var() 색으로 정상 분기 (사용자 토글 후 시각 검증 필요)
+
+### Architecture Rule #94 신설
+Inline hex 사용 시 항상 소문자 + var() 호출 우선. hex 불가피 시 소문자 + 스페이스 syntax 로 catch-all selector 매칭 보장.
+
+### Phase F (real migration) — s263 백로그
+- 모든 inline hex 를 디자인 토큰 var() 로 전환
+- 컴포넌트별 하드코딩 색 grep + 정리 (예상 ~50+ site)
+- 회귀 테스트: dark 토글 시 모든 카드/배지/모달 가독성 점검
+- 우선순위: Phase F-lite 가 catch-all 로 cover 중이라 긴급도 낮음. carousel flip 후 측정 24h 확보 후 진행.
+
+### Rollback (90초)
+- globals.css 끝 36줄 revert (`git revert 296bf4c6`) → push
+- 카드 inline hex 그대로 (회귀 0)
+
 ## Session s262 — FLIP 미실행 정정 (2026-05-09)
 
 ### 발생한 일

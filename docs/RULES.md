@@ -1,4 +1,4 @@
-# 카더라 Architecture Rules (#1~#93)
+# 카더라 Architecture Rules (#1~#94)
 
 `docs/STATUS.md`는 세션별 작업 기록, 이 파일은 최종 규칙 모음.
 
@@ -84,6 +84,7 @@
 - **#91** 큰 UI 변경은 flag + 측정완료 후 flip — `process.env.NEXT_PUBLIC_<FEATURE>_ENABLED === 'true'` 패턴. 코드는 main 에 들어가지만 default false. T+24h 이상 baseline 측정 + pre-flip gate 통과 후 ENV 변경 + redeploy. legacy 분기 코드 절대 삭제 금지 (롤백 = ENV false 1줄).
 - **#92** Per-tab/per-block SSR metadata 필수 — `?tab=` / `?block=` 같은 query 분기 페이지는 `generateMetadata({ searchParams })` 에서 tab 별 title/description/canonical 분기 + ItemList JSON-LD. 동일 path 가 여러 콘텐츠 variant 를 표시하면 GSC 가 단일 페이지로 처리 → 키워드 충돌. canonical 을 variant 마다 다르게 두면 separate 색인.
 - **#93** Mat view 컬럼 추가 시 source 데이터 실제 채움률 사전 측정 필수 — 컬럼 정의가 정확해도 source 가 비면 mat view row 가 NULL. apt_sites 같은 dimension 테이블이 전체 99% 채움이지만 매칭되는 부분집합은 0% 가능 (s262 Phase E 회고 — 신규 분양 단지는 apt_sites.price_min 미입력). 작성 전 (1) source 컬럼 grep, (2) WHERE 조건 적용된 부분집합 채움률, (3) LATERAL JOIN 의 LIMIT 1 정렬 우선순위 검증. 50% 미만이면 fallback 컬럼 추가 또는 UI 폴백 텍스트 (예: '분양가 미공개') 같이 디자인.
+- **#94** Inline hex 사용 시 항상 소문자 + var() 호출 우선 — 카드/배지의 `style={{ background: '#FFFFFF' }}` 같은 inline hex 가 dark mode catch-all selector 와 미스매치되면 가독성 회귀. 새 컴포넌트 작성 시 (1) 디자인 토큰 var() 우선 (`var(--bg-surface)`, `var(--text-primary)` 등), (2) hex 불가피한 경우 소문자 + 스페이스 syntax (`background: #ffffff`) 로 globals.css 의 catch-all selector 와 매칭 보장. 이미 적용된 inline hex 는 globals.css 끝의 catch-all 확장으로 cover (Phase F-lite 패턴) — 다만 본질 fix 는 inline hex 자체를 var() 로 전환 (Phase F real migration 은 별도 세션).
 
 ## 워크플로
 - **#11** `docs/STATUS.md`는 매 세션 prepend + commit/push 필수
