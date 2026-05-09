@@ -2249,3 +2249,39 @@ html[data-theme="light"] {
   .apt-kpi-card { padding: 10px 12px; }
   .apt-kpi-number { font-size: 18px; }
 }
+
+/* ─────────────────────────────────────────────────────────────────────
+   Phase F-lite (s262) — dark mode catch-all 확장.
+   기존 line 750 catch-all 은 소문자 + 스페이스 syntax (`background: #fff`)
+   만 매칭. ISSUE ENGINE Phase E 카드들이 대문자 + 스페이스 없는 syntax
+   (`background:#FFFFFF`) 사용 → 미스매치. 확장 selector 로 cover.
+   CSS only, JSX 0 수정. 회귀 리스크 거의 0.
+   ───────────────────────────────────────────────────────────────────── */
+.dark [style*="background:#FFFFFF"],
+.dark [style*="background:#FFF"],
+.dark [style*="background-color:#FFFFFF"],
+.dark [style*="background:rgba(255,255,255"]
+{ background-color: var(--bg-surface) !important; }
+
+.dark [style*="color:#111827"],
+.dark [style*="color:#1F2937"],
+.dark [style*="color:#374151"]
+{ color: var(--text-primary) !important; }
+
+.dark [style*="color:#6B7280"],
+.dark [style*="color:#9CA3AF"]
+{ color: var(--text-secondary) !important; }
+
+.dark [style*="border:1px solid #E5E7EB"],
+.dark [style*="border-bottom:1px solid #E5E7EB"]
+{ border-color: var(--border) !important; }
+
+.dark [style*="background:#FEE2E2"] { background-color: rgba(220,38,38,0.18) !important; }
+.dark [style*="color:#991B1B"]      { color: #F09595 !important; }
+.dark [style*="background:#FECACA"] { background-color: rgba(220,38,38,0.22) !important; }
+.dark [style*="color:#7F1D1D"]      { color: #F4A4A4 !important; }
+.dark [style*="background:#F9FAFB"] { background-color: var(--bg-elevated) !important; }
+.dark [style*="background:#F3F4F6"] { background-color: var(--bg-hover) !important; }
+.dark [style*="color:#4B5563"]      { color: var(--text-secondary) !important; }
+.dark [style*="background:#FEF2F2"] { background-color: rgba(220,38,38,0.10) !important; }
+.dark [style*="border:1px solid #FCA5A5"] { border-color: rgba(220,38,38,0.30) !important; }
