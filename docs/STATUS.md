@@ -1,4 +1,25 @@
 
+## s263 Phase 2.1 — og-stock 무한 hang fix (2026-05-09)
+
+### Root cause 확정
+`next.config.ts` `outputFileTracingIncludes` 가 `/api/og` + `/api/og-square` 만 명시하고 **`/api/og-stock`, `/api/og-blog` 누락**. Vercel 빌드 시 `.next/server/app/api/og-stock/route.func/` 결과물에 `public/fonts/NotoSansKR-Bold.woff` 가 trace 안 됨 → readFileSync 실패 → `loadFont()` null 반환 → ImageResponse 에 빈 fontOpts 전달 → satori 가 한글 텍스트("카더라", "주식" 등) 렌더 위해 **dynamic font fetch (CDN) 시도** → CDN 차단/timeout → "Failed to load dynamic font" → catch 에서 302 redirect → 매 분 5건 burst.
+
+### 적용 (single commit)
+1. `next.config.ts` outputFileTracingIncludes 에 `/api/og-stock` + `/api/og-blog` 추가 (둘 다 trace 누락이라 함께 fix)
+2. `src/app/api/og-stock/route.tsx` chunk logging fix — multi-arg `console.error` 가 Vercel runtime logs 에서 4 chunks (U/U/I/E) 로 분리되던 것을 단일 string concat 으로 한 줄 출력
+
+### 검증 절차
+- Vercel auto deploy 후 5분 모니터:
+  - `curl https://kadeora.app/api/og-stock?symbol=005930&card=price` 200 응답 (이전 5분 timeout)
+  - Vercel runtime logs `Failed to load dynamic font` 0건
+  - `[og-stock] FULL` chunks 가 단일 line 출력 (만약 여전히 에러)
+- 폰트 trace 확인: `og-stock` 라우트 deploy 후 첫 cold-start 시 readFileSync 성공 → fontOpts 정상 → satori 한글 폰트 사용
+
+### Architecture Rules 적용
+- #11 STATUS prepend ✅
+- #16 maxDuration — og-stock 은 30s 유지 (외부 fetch 아님, ImageResponse 자체 무거움). #16은 외부 fetch 라우트 한정.
+- #47/#48 emoji/Unicode — 회귀 없음, 기존 sanitizeForOG 적용 그대로.
+
 ## s263 Phase 3.3 — admin v4 인덱스 보강 (2026-05-09)
 
 ### 적용 (Supabase MCP execute_sql, CONCURRENTLY)

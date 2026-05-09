@@ -15,10 +15,14 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   serverExternalPackages: ['pdf-parse'],
 
-  // Edge Runtime에서 /api/og, /api/og-square가 public/fonts/** 접근할 수 있도록 번들에 포함
+  // s263 Phase 2.1: og-stock / og-blog 회귀 — public/fonts trace 누락 시 satori 가
+  // dynamic font fetch 시도 → "Failed to load dynamic font" → 매 분 5건 burst → 302 redirect.
+  // 모든 og-* 라우트에 폰트 trace 명시.
   outputFileTracingIncludes: {
     '/api/og':        ['./public/fonts/**'],
     '/api/og-square': ['./public/fonts/**'],
+    '/api/og-stock':  ['./public/fonts/**'],
+    '/api/og-blog':   ['./public/fonts/**'],
   },
 
   images: {

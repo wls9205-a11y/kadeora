@@ -341,11 +341,12 @@ export async function GET(req: NextRequest) {
     });
   } catch (err) {
     const e = err as Error;
-    console.error('[og-stock] FULL:',
-      'message=', e?.message,
-      'stack=', e?.stack,
-      'class=', e?.constructor?.name,
-      'input=', { symbol, card, fontLoaded: !!fontData, hasQuote: !!quote },
+    // s263 Phase 2.1: Vercel runtime logs 가 multi-arg console.error 를 chunk 로
+    // 분리 (U/U/I/E 4 chunks). 단일 string concat 으로 합쳐 한 줄에 진단 정보 모두 노출.
+    console.error(
+      `[og-stock] FULL: message=${e?.message ?? 'n/a'} class=${e?.constructor?.name ?? 'n/a'} ` +
+      `input=${JSON.stringify({ symbol, card, fontLoaded: !!fontData, hasQuote: !!quote })} ` +
+      `stack=${(e?.stack ?? '').slice(0, 500)}`
     );
     return Response.redirect(`${SITE_URL}/images/brand/kadeora-wide.png`, 302);
   }
