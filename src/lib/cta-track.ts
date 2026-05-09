@@ -85,3 +85,16 @@ function send(event_type: 'cta_view' | 'cta_click' | 'cta_complete', p: CtaPaylo
 export const trackCtaClick = (p: CtaPayload) => send('cta_click', p);
 export const trackCtaView = (p: CtaPayload) => send('cta_view', p);
 export const trackCtaComplete = (p: CtaPayload) => send('cta_complete', p);
+
+// s262 Phase E — carousel swipe 측정.
+// from_tab/to_tab 은 page_path 에 슬래시로 인코딩 (cta_events 컬럼 무관, 단일 endpoint 재활용).
+// cta_name='carousel_swipe', category=source (e.g. 'stock_carousel').
+export function trackSwipe(args: { source: string; from_tab: string; to_tab: string; page_path?: string }) {
+  if (typeof window === 'undefined') return;
+  const path = args.page_path ?? window.location.pathname;
+  send('cta_click', {
+    cta_name: 'carousel_swipe',
+    category: args.source,
+    page_path: `${path}#${args.from_tab}->${args.to_tab}`,
+  });
+}

@@ -29,6 +29,7 @@ export type StockIssueScore = {
   volume: number | null;
   market_cap: number | null;
   sector: string | null;
+  sparkline_5d?: number[] | null; // s262-E: 5거래일 close_price array
   score: number; // numeric(5,4) 0..1
   reasons: IssueReason[];
   warning: IssueWarning | null;
@@ -47,6 +48,9 @@ export type AptIssueScore = {
   status: string | null;
   competition_rate_1st: number | null;
   price_per_pyeong: number | null;
+  sale_price_min?: number | null; // s262-E: 만원 단위 최저 분양가
+  house_ty?: string | null;        // s262-E: 평형 (e.g. '84A')
+  thumbnail_url?: string | null;   // s262-E: 썸네일
   dday: number | null;
   score: number;
   reasons: IssueReason[];

@@ -1,4 +1,4 @@
-# 카더라 Architecture Rules (#1~#86)
+# 카더라 Architecture Rules (#1~#92)
 
 `docs/STATUS.md`는 세션별 작업 기록, 이 파일은 최종 규칙 모음.
 
@@ -75,6 +75,14 @@
 - **#84** `entity_comment_stats` 는 트리거로 즉시 동기화 — INSERT / UPDATE OF is_deleted 트리거가 count 즉시 갱신. 배치 cron / manual reconcile 금지 (drift 위험).
 - **#85** 단일 commit production flip 회피 — DB / lib·components / 페이지 / cron 4단계 분리, 각 phase 독립 revert 가능. 3 high-traffic 페이지 동시 rewrite 는 90초 롤백 약속 못 지킴.
 - **#86** mat view REFRESH 는 pg_cron 우선 — Vercel cron 100/100 한도 가득. `REFRESH MATERIALIZED VIEW` 같은 DB-bound 작업은 Vercel HTTP route 만들지 말고 pg_cron 으로 직접 등록. HTTP roundtrip / cold start / Bearer ${CRON_SECRET} 보일러플레이트 모두 불필요. Vercel cron 은 외부 API fetch / Node-bound 작업에만. 신규 cron 작성 전 vercel.json 한도 확인 + 한도 초과 시 STOP + 옵션 제시 (기존 정리 / pg_cron 이전 / plan 상향).
+
+## Carousel + flag-gated rollout (s262 Phase E)
+- **#87** Carousel URL sync 는 `history.replaceState` 만 — `pushState` / `router.push` 금지. Embla 의 `select` 이벤트마다 push 하면 backstack 이 swipe 횟수만큼 누적되어 사용자가 뒤로 가기 한 번에 carousel 한 칸만 되돌아가는 끔찍한 UX 발생. replaceState 는 history entry 추가 없이 query 만 갱신.
+- **#88** Sparkline 은 mat view 에 캐시 — 페이지/카드 렌더 시 `stock_price_history` 직접 SELECT 금지. `stock_issue_scores.sparkline_5d` 컬럼에서 numeric[] 으로 사전 집계. mat view REFRESH cron 안에서만 재계산. 실시간 N+1 query 가능성 차단.
+- **#89** Thumbnail Image 는 lazy default — `priority={true}` 는 첫 2장만 (LCP 후보). 나머지는 `loading="lazy"`. 가로 스크롤 carousel 에서 보이지 않는 카드를 priority 로 깔면 Vercel Image Optimization 경유 cold fetch 가 LCP 직격탄.
+- **#90** Carousel 라이브러리는 `embla-carousel-react` 단일 — swiper / react-slick / framer 등 다른 라이브러리 추가 금지. 디자인 토큰처럼 단일 진입점 유지 → bundle 중복 + UX 분기 막음.
+- **#91** 큰 UI 변경은 flag + 측정완료 후 flip — `process.env.NEXT_PUBLIC_<FEATURE>_ENABLED === 'true'` 패턴. 코드는 main 에 들어가지만 default false. T+24h 이상 baseline 측정 + pre-flip gate 통과 후 ENV 변경 + redeploy. legacy 분기 코드 절대 삭제 금지 (롤백 = ENV false 1줄).
+- **#92** Per-tab/per-block SSR metadata 필수 — `?tab=` / `?block=` 같은 query 분기 페이지는 `generateMetadata({ searchParams })` 에서 tab 별 title/description/canonical 분기 + ItemList JSON-LD. 동일 path 가 여러 콘텐츠 variant 를 표시하면 GSC 가 단일 페이지로 처리 → 키워드 충돌. canonical 을 variant 마다 다르게 두면 separate 색인.
 
 ## 워크플로
 - **#11** `docs/STATUS.md`는 매 세션 prepend + commit/push 필수

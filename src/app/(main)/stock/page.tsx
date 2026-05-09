@@ -1,23 +1,29 @@
 // s262 Phase C — Issue Engine v1 /stock (legacy: src/_legacy/s262/stock_page_v0.tsx)
 // 7 sub-tab: 이슈/시총/급등/급락/거래폭증/외인/관심
 // default = 이슈 (stock_issue_scores). 비로그인 시 6번째 카드 자리에 IssueGateCard 노출.
+// s262 Phase E (CAROUSEL v1): NEXT_PUBLIC_CAROUSEL_ENABLED 시 swipe carousel 모드.
 import { Suspense } from 'react';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { SITE_URL } from '@/lib/constants';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import StockIssueCard from '@/components/cards/StockIssueCard';
+import StockIssueCardV2 from '@/components/cards/v2/StockIssueCardV2';
 import IssueGateCard from '@/components/cta/IssueGateCard';
+import StockTabCarousel from '@/components/carousel/StockTabCarousel';
 import {
   getStockTone,
   stockChipStyle,
   stockBarColor,
   formatChangePct,
 } from '@/lib/stockColor';
+import { stockTabMeta, stockItemListJsonLd } from '@/lib/seo/per-tab-meta';
 import type { StockIssueScore } from '@/lib/issue/types';
 
 export const revalidate = 60;
 export const maxDuration = 10;
+
+const CAROUSEL_ENABLED = process.env.NEXT_PUBLIC_CAROUSEL_ENABLED === 'true';
 
 const TAB_LABELS: { key: string; label: string }[] = [
   { key: 'issue',   label: '이슈' },
@@ -31,16 +37,18 @@ const TAB_LABELS: { key: string; label: string }[] = [
 
 export async function generateMetadata({ searchParams }: { searchParams: Promise<{ tab?: string }> }): Promise<Metadata> {
   const sp = await searchParams;
-  const tab = sp.tab ?? 'issue';
-  const tabLabel = TAB_LABELS.find((t) => t.key === tab)?.label ?? '이슈';
-  const title = `주식 ${tabLabel} — 카더라`;
+  const m = stockTabMeta(sp.tab);
   return {
-    title,
-    description: 'KOSPI·KOSDAQ 이슈 종목, 시총, 급등락, 거래폭증, 외인 매매를 한 화면에. 카더라 이슈 엔진 v1.',
-    alternates: { canonical: `${SITE_URL}/stock${tab !== 'issue' ? `?tab=${tab}` : ''}` },
+    title: m.title,
+    description: m.description,
+    alternates: { canonical: m.canonical },
     openGraph: {
-      title, siteName: '카더라', locale: 'ko_KR', type: 'website',
-      url: `${SITE_URL}/stock`,
+      title: m.title,
+      description: m.description,
+      siteName: '카더라',
+      locale: 'ko_KR',
+      type: 'website',
+      url: m.canonical,
     },
   };
 }
@@ -113,8 +121,41 @@ async function fetchByTab(tab: string, limit = 30): Promise<{ kind: 'issue' | 'p
 export default async function StockPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
   const sp = await searchParams;
   const tab = (sp.tab ?? 'issue') as string;
-  const { kind, rows } = await fetchByTab(tab, 30);
 
+  // s262 Phase E: CAROUSEL 모드 — 7 탭 모두 prefetch + Embla carousel
+  if (CAROUSEL_ENABLED) {
+    const allResults = await Promise.all(TAB_LABELS.map((t) => fetchByTab(t.key, 30)));
+    const initialIdx = Math.max(0, TAB_LABELS.findIndex((t) => t.key === tab));
+    const issueRows = (allResults[0]?.rows ?? []) as StockIssueScore[];
+    const itemListJsonLd = stockItemListJsonLd('이슈', issueRows.slice(0, 5));
+    return (
+      <div style={{ maxWidth: 720, margin: '0 auto', padding: '8px 6px 24px' }}>
+        <h1 className="sr-only">주식 시세 — 이슈 캐러셀</h1>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }} />
+        <StockTabCarousel tabs={TAB_LABELS} initialIndex={initialIdx} paramDefault="issue" trackSource="stock_carousel">
+          {TAB_LABELS.map((t, i) => {
+            const r = allResults[i];
+            if (!r) return <Empty key={t.key} label="데이터 준비 중" />;
+            if (r.kind === 'issue') {
+              const issues = r.rows as StockIssueScore[];
+              if (issues.length === 0) return <Empty key={t.key} label="이슈 종목 데이터 준비 중" />;
+              return (
+                <div key={t.key}>
+                  {issues.slice(0, 5).map((s) => <StockIssueCardV2 key={s.symbol} data={s} />)}
+                  <IssueGateCard source="issue_gate_stock" redirect="/stock" totalCount={issues.length} />
+                  {issues.slice(5).map((s) => <StockIssueCardV2 key={s.symbol} data={s} />)}
+                </div>
+              );
+            }
+            return <PlainList key={t.key} rows={r.rows as StockRow[]} tab={t.key} />;
+          })}
+        </StockTabCarousel>
+      </div>
+    );
+  }
+
+  // Legacy single-tab UI (flag off, default)
+  const { kind, rows } = await fetchByTab(tab, 30);
   return (
     <Suspense>
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '8px 6px 24px' }}>

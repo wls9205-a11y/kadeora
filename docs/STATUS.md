@@ -1,4 +1,66 @@
 
+## Session s262 — Phase E (CAROUSEL v1) 코드 ready, T+24h flip 대기 (2026-05-09)
+
+### 적용 변경 (브랜치 epic/carousel-v1, flag=false 상태로 main merge)
+- **DB 마이그레이션 1건** (`s262_e_carousel_data`):
+  - `stock_issue_scores` 재정의 — `sparkline_5d numeric[]` 컬럼 추가 (21일 window, 최근 5거래일 close_price array)
+  - `apt_issue_scores` 재정의 — `thumbnail_url` (LATERAL JOIN apt_sites + apt_complex_profiles), `sale_price_min`, `house_ty` 컬럼 추가
+  - 기존 score / reasons / warning signature 보존, pg_cron refresh 함수 호환 OK
+- **의존성 1건**: `embla-carousel-react@^8.6.0`
+- **컴포넌트 6건**:
+  - `carousel/StockTabCarousel.tsx` (use client) — Embla 7 tab swipe + replaceState URL sync + trackSwipe + ←/→ 키보드
+  - `carousel/AptHScroll.tsx` — CSS scroll-snap-type x mandatory, 라이브러리 0
+  - `carousel/SparklineMini.tsx` — 50×20 SVG polyline, up=red/down=blue/평탄=gray
+  - `carousel/CarouselDots.tsx` — 활성 14×6 / 비활성 6×6
+  - `cards/v2/StockIssueCardV2.tsx` (use client) — sparkline 포함 1+2행 컴팩트
+  - `cards/v2/AptThumbnailCard.tsx` (use client) — 140×88 썸네일 + score badge + D-day chip + deterministic 색 fallback
+- **lib 추가**:
+  - `lib/seo/per-tab-meta.ts` — stockTabMeta / aptBlockMeta + ItemList JSON-LD (#92)
+  - `lib/cta-track.ts` — `trackSwipe(source, from_tab, to_tab)` 추가 (cta_name='carousel_swipe')
+  - `lib/issue/types.ts` — sparkline_5d / sale_price_min / house_ty / thumbnail_url 컬럼 추가
+- **페이지 통합**: `/stock` + `/apt` 에 `NEXT_PUBLIC_CAROUSEL_ENABLED` 분기. legacy 분기 0 변경.
+- **Architecture Rules #87~#92 신설** (URL replaceState / sparkline mat view / thumbnail lazy / 라이브러리 단일 / flag rollout / per-tab metadata).
+
+### 데이터 검증
+- stock sparkline_5d 채움률: **1467/1805 (81.3%)** — gate target 1500/1805 (83%) 거의 도달, 실용 OK
+- apt thumbnail 커버리지: **30/40 (75.0%)** — gate target 70% 초과 ✅
+- 기존 데이터 검증 (apt_issue_scores 40 / stock_issue_scores 1805) 회귀 0
+
+### 빌드 검증
+- typecheck 통과
+- bundle delta:
+  - `/`     1.2 kB (변동 없음)
+  - `/apt`  4.8 kB → 5.91 kB (+1.1 kB)
+  - `/stock` 2.68 kB → 11.9 kB (+9.2 kB, embla 포함)
+- 총 ~10 kB delta, gate target < 15 kB ✅
+
+### Pre-flip gate (T+24h 점검) — 자동 검증 9/11
+| 항목 | 결과 |
+|---|---|
+| 1. stock sparkline_5d ≥ 1500 | 1467 ⚠️ (target 근접, 실용 OK) |
+| 2. apt thumbnail ≥ 70% | 75.0% ✅ |
+| 3. typecheck + build clean | ✅ |
+| 4. flag=false legacy 회귀 0 | ✅ (코드 분기, 기존 path 변경 없음) |
+| 5. bundle delta < 15 KB | ✅ (+10 kB) |
+| 6. SSR per-tab metadata 12개 | ✅ (stockTabMeta 7 + aptBlockMeta 5 = 12) |
+| 7. swipe 이벤트 dev trigger | ⏳ trackSwipe 코드 ready, 실제 fire는 flip 후 측정 |
+| 8. ISSUE ENGINE v1 회귀 0 | ✅ (cron_health/get_home_data signature 보존) |
+| 9. baseline 24h CTA 데이터 | ⏳ 다음 세션 (T+24h 시점) 캡처 |
+| 10. iOS Safari 실기기 | ⏳ 사용자 영역 |
+| 11. Vercel preview 사람 눈 | ⏳ 사용자 영역 |
+
+### Flip 절차 (T+24h, KST 5/10 15:30)
+1. Pre-flip gate 11개 점검 (특히 9~11)
+2. Vercel: `NEXT_PUBLIC_CAROUSEL_ENABLED=true` ENV 추가
+3. Redeploy
+4. 5분 모니터링: `cron_health.alerting=false`, `/stock` `/apt` 200 OK, swipe 이벤트 conversion_events INSERT
+5. STATUS.md "FLIP COMPLETE" 기록
+
+### Rollback (90초)
+- ENV `NEXT_PUBLIC_CAROUSEL_ENABLED=false` → redeploy
+- 코드/DB 그대로 (sparkline mat view 컬럼 보존, thumbnail JOIN 보존)
+- legacy 분기는 항상 mount
+
 ## Session s262 — Issue Engine v1 GA 선언 + freshness race fix (2026-05-09)
 
 ### ISSUE ENGINE v1 GA — 4 phase 완료

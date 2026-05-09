@@ -1,17 +1,22 @@
 // s262 Phase C — Issue Engine v1 /apt (legacy: src/_legacy/s262/apt_page_v0.tsx)
 // 5 블록: 정책알림 + 마감임박 + 신규공고24h + 미분양핫 + 재개발단계변경 + 도구 4개
 // DDayAlertCTA 마감임박 블록 끝에 노출 (비로그인 only).
+// s262 Phase E (CAROUSEL v1): NEXT_PUBLIC_CAROUSEL_ENABLED 시 각 블록을 AptHScroll wrap.
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { SITE_URL } from '@/lib/constants';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import RegionAutoSelect from '@/components/apt/RegionAutoSelect';
 import AptIssueCard from '@/components/cards/AptIssueCard';
+import AptThumbnailCard from '@/components/cards/v2/AptThumbnailCard';
+import AptHScroll from '@/components/carousel/AptHScroll';
 import DDayAlertCTA from '@/components/cta/DDayAlertCTA';
 import type { AptIssueScore } from '@/lib/issue/types';
 
 export const revalidate = 60;
 export const maxDuration = 10;
+
+const CAROUSEL_ENABLED = process.env.NEXT_PUBLIC_CAROUSEL_ENABLED === 'true';
 
 export async function generateMetadata({ searchParams }: { searchParams: Promise<{ region?: string }> }): Promise<Metadata> {
   const sp = await searchParams;
@@ -147,11 +152,30 @@ export default async function AptPage({ searchParams }: { searchParams?: Promise
         ))}
       </Block>
 
-      {/* 2. 마감 임박 */}
+      {/* 2. 마감 임박 — CAROUSEL 모드 시 가로 썸네일 카드 */}
       <Block title="⏰ 마감 임박 (D-7)" subtitle="이슈 점수 기준" href="/apt/imminent">
         {blocks.imminent.length === 0 ? (
           <Empty label="마감 임박 청약 없음" />
-        ) : blocks.imminent.map((a) => <AptIssueCard key={a.id} data={a} />)}
+        ) : CAROUSEL_ENABLED ? (
+          <AptHScroll ariaLabel="마감 임박 청약">
+            {blocks.imminent.map((a, i) => (
+              <AptThumbnailCard
+                key={a.id}
+                id={a.id}
+                name={a.house_nm}
+                location={a.region_nm}
+                price={(a as AptIssueScore & { sale_price_min?: number | null }).sale_price_min}
+                score={a.score}
+                dday={a.dday}
+                thumbnailUrl={(a as AptIssueScore & { thumbnail_url?: string | null }).thumbnail_url}
+                houseTy={(a as AptIssueScore & { house_ty?: string | null }).house_ty}
+                priority={i < 2}
+              />
+            ))}
+          </AptHScroll>
+        ) : (
+          blocks.imminent.map((a) => <AptIssueCard key={a.id} data={a} />)
+        )}
         <DDayAlertCTA source="apt_dday_alert" redirect="/apt" />
       </Block>
 
