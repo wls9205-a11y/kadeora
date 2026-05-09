@@ -1,4 +1,4 @@
-# 카더라 Architecture Rules (#1~#85)
+# 카더라 Architecture Rules (#1~#86)
 
 `docs/STATUS.md`는 세션별 작업 기록, 이 파일은 최종 규칙 모음.
 
@@ -74,6 +74,7 @@
 - **#83** 카드 색상은 헬퍼 함수 통과 — `stockChipStyle` / `stockBarColor` / `getStockTone` 등. 컴포넌트 안에 hex (`#DC2626` 등) 직접 사용 금지. 디자인 토큰 변경이 한 곳에서 끝나야 함.
 - **#84** `entity_comment_stats` 는 트리거로 즉시 동기화 — INSERT / UPDATE OF is_deleted 트리거가 count 즉시 갱신. 배치 cron / manual reconcile 금지 (drift 위험).
 - **#85** 단일 commit production flip 회피 — DB / lib·components / 페이지 / cron 4단계 분리, 각 phase 독립 revert 가능. 3 high-traffic 페이지 동시 rewrite 는 90초 롤백 약속 못 지킴.
+- **#86** mat view REFRESH 는 pg_cron 우선 — Vercel cron 100/100 한도 가득. `REFRESH MATERIALIZED VIEW` 같은 DB-bound 작업은 Vercel HTTP route 만들지 말고 pg_cron 으로 직접 등록. HTTP roundtrip / cold start / Bearer ${CRON_SECRET} 보일러플레이트 모두 불필요. Vercel cron 은 외부 API fetch / Node-bound 작업에만. 신규 cron 작성 전 vercel.json 한도 확인 + 한도 초과 시 STOP + 옵션 제시 (기존 정리 / pg_cron 이전 / plan 상향).
 
 ## 워크플로
 - **#11** `docs/STATUS.md`는 매 세션 prepend + commit/push 필수

@@ -1,4 +1,41 @@
 
+## Session s262 — Issue Engine v1 Phase D (pg_cron 활성화) — ISSUE ENGINE v1 GA (2026-05-09)
+
+### 적용 변경 (DB 마이그레이션 1건, Vercel 변경 0)
+- `s262_d_issue_scores_pg_cron` — cron_health 테이블 + 함수 3개 + pg_cron schedule 4건
+- **Vercel cron 변경 0** (한도 100/100 가득 — Rule #86 신설로 pg_cron 단독)
+- 신규 함수: `refresh_stock_issue_scores_v1()` / `refresh_apt_issue_scores_v1()` / `check_issue_scores_freshness()` — REFRESH CONCURRENTLY + cron_logs INSERT + cron_health UPSERT + 25분/90분 stale alert
+- 신규 pg_cron 4건:
+  - `kadeora-refresh-stock-issue-scores-weekday`: `*/5 0-15 * * 1-5` (KST 09–24시 평일 5분)
+  - `kadeora-refresh-stock-issue-scores-weekend`: `0 * * * 0,6` (주말 매시 정각)
+  - `kadeora-refresh-apt-issue-scores`: `0 * * * *` (시간당)
+  - `kadeora-issue-scores-freshness-check`: `*/10 * * * *` (10분마다 stale 감지)
+
+### 검증 (마이그레이션 직후)
+- cron.job 4개 등록 확인 ✅ (전체 9개 kadeora-* — 기존 5개 영향 없음)
+- 수동 실행 결과: stock 1018ms / apt 28ms — mat view 정상 갱신
+- cron_health 4 rows: alerting=false, last_error=null ✅
+- 매트뷰 computed_at 타임스탬프 갱신 확인
+
+### Architecture Rule #86 신설
+mat view REFRESH 는 pg_cron 단독. Vercel cron 한도 가득 + DB-bound 작업이라 HTTP roundtrip 불필요. 한도 초과 신규 cron 요청 시 STOP + 옵션 제시 (기존 정리 / pg_cron 이전 / plan 상향).
+
+### ISSUE ENGINE v1 GA 선언
+| Phase | 결과 |
+|---|---|
+| A (DB)            | 7 마이그레이션. weights / stock+apt mat view / get_home_data RPC / comments polymorphic / entity_comment_stats / get_entity_comment_counts |
+| B (lib + comp)    | 14 파일 + sandbox. stockColor v3 + issue/contracts/labels/calc + cards (Stock/AptIssueCard) + IssueScoreBadge/Bar/ReasonChips/WarningLabel + CommentChip |
+| C (페이지 flip)   | 3 페이지 rewrite (`/`, `/stock`, `/apt`) + IssueGateCard + DDayAlertCTA + `_legacy/s262/` 백업 |
+| D (cron)          | pg_cron 4 schedule + cron_health 안전망 + Architecture Rule #86 |
+
+### s263 TODO 우선순위 재정렬 (cron 가동 24h 후 재평가)
+1. **카카오 OAuth 50% 이탈** — Kakao 콘솔 동의항목 검수 + 사용자 운영 (s235 메모리 일치, 코드로 해결 불가)
+2. **action_bar 사망** — 컴포넌트 mount/render 회귀 grep + 트래킹 fire 시점 점검
+3. **apt_dday_alert vs apt_alert_cta** — Phase C 신규 source 와 기존 source 효과 비교 (24h 데이터 누적 후)
+4. **issue_gate_stock baseline** — /stock 6번째 자리 게이트 클릭률 측정 (Phase C 신규 source)
+5. **direct 29% source 추적 보강** — UTM 파라미터 부착 + referer 활용 source 채움
+6. cron_health 모니터링 — admin/health 페이지 신설해서 alerting=true row 시각화 (옵션)
+
 ## Session s262 — Issue Engine v1 Phase C (page flip + signup hooks) (2026-05-09)
 
 ### 적용 변경 (3 페이지 rewrite + 2 CTA 컴포넌트)
