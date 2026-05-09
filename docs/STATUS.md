@@ -1,4 +1,36 @@
 
+## s263 Phase 3.3 — admin v4 인덱스 보강 (2026-05-09)
+
+### 적용 (Supabase MCP execute_sql, CONCURRENTLY)
+- `idx_comments_created_at` ON comments(created_at) — comments 9356 row, seq scan 부재
+- `idx_cron_logs_failed_recent_full` ON cron_logs(status, created_at DESC) WHERE status IN ('error','failed','timeout') — partial idx
+- `ANALYZE blog_posts / cron_logs / comments` — planner 통계 갱신
+
+### 효과 측정 (v_admin_dashboard_v4 EXPLAIN ANALYZE)
+| 영역 | Before | After | Δ |
+|---|---:|---:|---:|
+| comments seq scan × 2 | 284ms | 1.4ms | -282ms |
+| failed_crons_24h status filter | 220ms | 3ms | -217ms |
+| publish_7d Aggregate | 1529ms | 768ms | -761ms (캐시+ANALYZE) |
+| **Total exec** | **2391ms** | **1104ms** | **-1287ms (-54%)** |
+
+### 잔존 병목 — s263.4 후속 view 최적화 영역
+publish_7d 768ms = blog_posts.content regex (`~* '/blog/|/apt/|/stock/'`) + jsonb_array_length 7800 row 평가. **인덱스로 해결 불가** — view body 자체 비용.
+
+후속 마이그 옵션 (s263.4):
+- (1) generated boolean column (`has_hub_link`, `has_5_imgs`) — INSERT/UPDATE trigger 갱신
+- (2) summary table + cron refresh (1시간/회)
+- (3) v_admin_dashboard_v4 → mat view 전환 (REFRESH 5분/회)
+
+사용자 spec 목표 ~300ms 달성하려면 (1) 또는 (3) 필요. 현재 1104ms 도 admin 페이지 504 회피 (timeout 30s 내) 충분. 긴급도 낮음.
+
+### Architecture Rules
+- 신규 룰 후보 없음 — 기존 #15 (count exact 1000행 미만), #80 (mat view REFRESH는 pg_cron) 일관 패턴 유지.
+
+### 다음 결정
+- s263.4 view body 최적화 GO/HOLD
+- Phase 2 사용자 PC 코드 작업 (og-stock / cta-track / cron 2건) 진행 상황 대기
+
 ## s263 Phase 1 — production GRANT fix (2026-05-09 KST 18:46)
 
 ### ✅ Phase 1.1 — DB 적용 + 검증 완료
