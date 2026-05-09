@@ -1,4 +1,13 @@
 
+## s263 Phase 2.3.b — indexnow_queue BEFORE INSERT default urgent trigger (defense in depth)
+
+RPC level NULL safety (17f917b5 enqueue_indexnow COALESCE) 와 함께 DB level 보강:
+- `fn_indexnow_queue_default_urgent()` BEFORE INSERT trigger
+- NEW.is_urgent IS NULL → false 보정
+- RPC 우회 INSERT 경로 (직접 SQL / 외부 client / 미래 RPC) 모두 cover
+
+마이그: `s263_b2_indexnow_queue_default_urgent_trigger` (Supabase MCP 적용 + 파일 sync).
+
 ## s263 Phase 2.1++ + 2.3 검증 + 2.3 indexnow 추가 fix (2026-05-10 KST 01:00)
 
 ### Phase 2.1++ ✅ 회복 (5분 후 verify)
