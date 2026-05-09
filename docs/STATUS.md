@@ -1,4 +1,27 @@
 
+## Session s262 — Phase E2 hotfix (2026-05-09)
+
+### 발견
+T+24h flip 전 점검 중 `apt_issue_scores.sale_price_min` **0/40 (0%) 채움** 확인. 활성 청약 매칭되는 apt_sites 38건 모두 `price_min` NULL — apt_sites 전체 99.2% 채움이지만 신규 분양 단지는 미입력 패턴.
+
+### 진단 후 결정
+- apt_sites.price_min fallback 무효 (0/40 동일)
+- apt_subscriptions 자체 가격 컬럼 (price_per_pyeong*, supply_price_info, total_apply_count, competition_rate_*) **모두 0/40**
+- **`tot_supply_hshld_co` (총 공급 세대수) 만 100% 채움 (40/40)** — fallback signal 채택
+
+### 적용 (`s262_e2_apt_supply_fallback`)
+- `apt_issue_scores` 재정의 — `households_count` 컬럼 신규 (= `apt_subscriptions.tot_supply_hshld_co`)
+- `AptThumbnailCard` props 에 `households` 추가, 가격 영역 fallback 우선순위:
+  1. `price > 0` → "X.X억" / "N만" (현재 0/40)
+  2. `households > 0` → "1,231세대" (100% 보장)
+  3. else → "분양가 미공개"
+- `lib/issue/types.ts` AptIssueScore 에 `households_count` 추가
+- 검증: `households_count > 0` 채움률 **40/40 (100%)** ✅
+
+### Architecture Rule #93 신설
+Mat view 컬럼 추가 시 source 데이터 실제 채움률 사전 측정 필수 — apt_sites 99% / 매칭 부분집합 0% 같은 함정.
+(1) source 컬럼 grep, (2) WHERE 적용된 부분집합 채움률, (3) LATERAL JOIN LIMIT 1 정렬 우선순위 검증.
+
 ## Session s262 — Phase E (CAROUSEL v1) 코드 ready, T+24h flip 대기 (2026-05-09)
 
 ### 적용 변경 (브랜치 epic/carousel-v1, flag=false 상태로 main merge)

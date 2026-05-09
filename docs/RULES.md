@@ -1,4 +1,4 @@
-# 카더라 Architecture Rules (#1~#92)
+# 카더라 Architecture Rules (#1~#93)
 
 `docs/STATUS.md`는 세션별 작업 기록, 이 파일은 최종 규칙 모음.
 
@@ -83,6 +83,7 @@
 - **#90** Carousel 라이브러리는 `embla-carousel-react` 단일 — swiper / react-slick / framer 등 다른 라이브러리 추가 금지. 디자인 토큰처럼 단일 진입점 유지 → bundle 중복 + UX 분기 막음.
 - **#91** 큰 UI 변경은 flag + 측정완료 후 flip — `process.env.NEXT_PUBLIC_<FEATURE>_ENABLED === 'true'` 패턴. 코드는 main 에 들어가지만 default false. T+24h 이상 baseline 측정 + pre-flip gate 통과 후 ENV 변경 + redeploy. legacy 분기 코드 절대 삭제 금지 (롤백 = ENV false 1줄).
 - **#92** Per-tab/per-block SSR metadata 필수 — `?tab=` / `?block=` 같은 query 분기 페이지는 `generateMetadata({ searchParams })` 에서 tab 별 title/description/canonical 분기 + ItemList JSON-LD. 동일 path 가 여러 콘텐츠 variant 를 표시하면 GSC 가 단일 페이지로 처리 → 키워드 충돌. canonical 을 variant 마다 다르게 두면 separate 색인.
+- **#93** Mat view 컬럼 추가 시 source 데이터 실제 채움률 사전 측정 필수 — 컬럼 정의가 정확해도 source 가 비면 mat view row 가 NULL. apt_sites 같은 dimension 테이블이 전체 99% 채움이지만 매칭되는 부분집합은 0% 가능 (s262 Phase E 회고 — 신규 분양 단지는 apt_sites.price_min 미입력). 작성 전 (1) source 컬럼 grep, (2) WHERE 조건 적용된 부분집합 채움률, (3) LATERAL JOIN 의 LIMIT 1 정렬 우선순위 검증. 50% 미만이면 fallback 컬럼 추가 또는 UI 폴백 텍스트 (예: '분양가 미공개') 같이 디자인.
 
 ## 워크플로
 - **#11** `docs/STATUS.md`는 매 세션 prepend + commit/push 필수

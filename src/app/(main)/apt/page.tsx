@@ -164,11 +164,12 @@ export default async function AptPage({ searchParams }: { searchParams?: Promise
                 id={a.id}
                 name={a.house_nm}
                 location={a.region_nm}
-                price={(a as AptIssueScore & { sale_price_min?: number | null }).sale_price_min}
+                price={a.sale_price_min}
+                households={a.households_count}
                 score={a.score}
                 dday={a.dday}
-                thumbnailUrl={(a as AptIssueScore & { thumbnail_url?: string | null }).thumbnail_url}
-                houseTy={(a as AptIssueScore & { house_ty?: string | null }).house_ty}
+                thumbnailUrl={a.thumbnail_url}
+                houseTy={a.house_ty}
                 priority={i < 2}
               />
             ))}

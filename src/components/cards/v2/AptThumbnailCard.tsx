@@ -12,6 +12,7 @@ type Props = {
   name: string;
   location?: string | null;
   price?: number | null;        // sale_price_min (만 단위 또는 원 단위)
+  households?: number | null;    // s262-E2: 분양가 미공개 시 fallback
   score?: number | null;
   dday?: number | null;
   commentCount?: number;
@@ -40,18 +41,27 @@ function ddayChip(d: number | null | undefined): { bg: string; fg: string; label
   return null;
 }
 
-function fmtPrice(p: number | null | undefined): string {
-  if (p == null) return '';
-  // sale_price_min 은 보통 만원 단위. 1억 이상은 'X.X억' 표시.
-  if (p >= 10000) return `${(p / 10000).toFixed(1)}억`;
-  return `${p.toLocaleString()}만`;
+// s262-E2: 가격 영역 fallback 우선순위.
+// 1) price (sale_price_min) > 0 → "X.X억" / "N만"
+// 2) households > 0 → "1,231세대"
+// 3) else → "분양가 미공개"
+function fmtPriceOrFallback(price: number | null | undefined, households: number | null | undefined): { text: string; tone: 'price' | 'house' | 'na' } {
+  if (price != null && price > 0) {
+    if (price >= 10000) return { text: `${(price / 10000).toFixed(1)}억`, tone: 'price' };
+    return { text: `${price.toLocaleString()}만`, tone: 'price' };
+  }
+  if (households != null && households > 0) {
+    return { text: `${households.toLocaleString()}세대`, tone: 'house' };
+  }
+  return { text: '분양가 미공개', tone: 'na' };
 }
 
 export default function AptThumbnailCard({
-  id, name, location, price, score, dday,
+  id, name, location, price, households, score, dday,
   commentCount = 0, commentHot = false,
   thumbnailUrl, houseTy, href, priority = false,
 }: Props) {
+  const priceFb = fmtPriceOrFallback(price, households);
   const url = href ?? `/apt/subscription/${id}`;
   const dchip = ddayChip(dday);
   const bg = fallbackColor(id);
@@ -118,8 +128,16 @@ export default function AptThumbnailCard({
           </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 3 }}>
-          <span style={{ fontSize: 11.5, fontWeight: 700, fontVariantNumeric: 'tabular-nums', flex: 1 }}>
-            {fmtPrice(price)}
+          <span
+            style={{
+              fontSize: 11.5,
+              fontWeight: priceFb.tone === 'price' ? 700 : 600,
+              fontVariantNumeric: 'tabular-nums',
+              flex: 1,
+              color: priceFb.tone === 'na' ? '#9CA3AF' : priceFb.tone === 'house' ? '#374151' : '#111827',
+            }}
+          >
+            {priceFb.text}
           </span>
           {commentCount > 0 || commentHot ? (
             <CommentChip count={commentCount} hot={commentHot} hideZero />

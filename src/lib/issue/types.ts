@@ -49,6 +49,7 @@ export type AptIssueScore = {
   competition_rate_1st: number | null;
   price_per_pyeong: number | null;
   sale_price_min?: number | null; // s262-E: 만원 단위 최저 분양가
+  households_count?: number | null; // s262-E2: 총 공급 세대수 (분양가 fallback)
   house_ty?: string | null;        // s262-E: 평형 (e.g. '84A')
   thumbnail_url?: string | null;   // s262-E: 썸네일
   dday: number | null;
