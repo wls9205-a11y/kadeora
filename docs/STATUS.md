@@ -1,4 +1,37 @@
 
+## s263 Phase 2.1++ + 2.3 검증 + 2.3 indexnow 추가 fix (2026-05-10 KST 01:00)
+
+### Phase 2.1++ ✅ 회복 (5분 후 verify)
+| 라우트 | 상태 |
+|---|---|
+| og-blog | 200 OK ✅ |
+| og-apt | 200 OK ✅ |
+| og-stock | 200 OK + image/png ✅ (이전 5분 timeout) |
+- Vercel logs `Failed to load dynamic font` 5분 안 0건
+- catch fallback ImageResponse 효과 입증
+
+### Phase 2.3 — bootstrap status 적용 ✅
+- 'running' → 'in_progress', 'done' → 'completed' commit `601d88df`
+- big_event_bootstrap_queue 2시간 안 status 변경 0 row (cron 미발동 또는 fix 후 위반 0)
+- 다음 cron 실행 시점에 postgres logs 위반 ERROR 0건 검증 가능
+
+### Phase 2.3 — indexnow_queue 추가 fix (`s263_b_enqueue_indexnow_null_safety`)
+**Root cause 추적:**
+- `enqueue_indexnow` RPC 가 indexnow_queue INSERT
+- `trigger_enqueue_indexnow_on_publish` 가 RPC 호출 시 `(NEW.cron_type IN ('issue_preempt','big_event'))` 를 p_urgent 로 전달
+- `NEW.cron_type` NULL → `NULL IN (...)` = NULL → p_urgent NULL → `is_urgent` (NOT NULL) 위반
+
+**Fix:** RPC 안 `COALESCE(p_urgent, false)` NULL safety. 모든 호출자 영향 (단일 변경, single source of truth).
+
+마이그 적용: `CREATE OR REPLACE FUNCTION enqueue_indexnow` + `v_urgent BOOLEAN := COALESCE(p_urgent, false)`.
+
+### 검증 (다음 시간 모니터)
+- postgres logs `null value in column is_urgent` 0건
+- big_event_bootstrap_queue_status_check 위반 0건
+
+### 누적 commit (s263)
+- bb0babb5 / f20bd6bc / fcbc97fb / d4ce1641 / 8c336cc1 / dada09f8 / 4d203c15 / 1c83f009 / 6998e97b / 601d88df / **(이번 마이그)**
+
 ## s263 Phase 2.1++ + 2.3 병렬 fix (2026-05-10 KST 00:50)
 
 ### Phase 2.1++ — og 라우트 catch fallback ImageResponse (302 redirect 제거)
