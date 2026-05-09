@@ -1,213 +1,233 @@
-﻿import { Suspense } from 'react';
-import { SITE_URL } from '@/lib/constants';
+// s262 Phase C — Issue Engine v1 /stock (legacy: src/_legacy/s262/stock_page_v0.tsx)
+// 7 sub-tab: 이슈/시총/급등/급락/거래폭증/외인/관심
+// default = 이슈 (stock_issue_scores). 비로그인 시 6번째 카드 자리에 IssueGateCard 노출.
+import { Suspense } from 'react';
+import Link from 'next/link';
 import type { Metadata } from 'next';
+import { SITE_URL } from '@/lib/constants';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import StockIssueCard from '@/components/cards/StockIssueCard';
+import IssueGateCard from '@/components/cta/IssueGateCard';
+import {
+  getStockTone,
+  stockChipStyle,
+  stockBarColor,
+  formatChangePct,
+} from '@/lib/stockColor';
+import type { StockIssueScore } from '@/lib/issue/types';
 
-export const revalidate = 600; // s239 W5: 10분 ISR (cold start ↓ + 봇 캐시 hit ↑)
+export const revalidate = 60;
+export const maxDuration = 10;
 
-const SECTION_META: Record<string, { title: string; desc: string }> = {
-  'stock-kr':      { title: '국내 주식 시세', desc: 'KOSPI·KOSDAQ 실시간 시세와 등락률을 확인하세요' },
-  'stock-us':      { title: '해외 주식 시세', desc: 'NASDAQ·S&P 500 글로벌 종목 시세와 등락률' },
-  'stock-heatmap': { title: '섹터별 등락률 히트맵', desc: '업종별 시장 흐름을 한눈에 파악하세요' },
-};
+const TAB_LABELS: { key: string; label: string }[] = [
+  { key: 'issue',   label: '이슈' },
+  { key: 'mcap',    label: '시총' },
+  { key: 'gain',    label: '급등' },
+  { key: 'loss',    label: '급락' },
+  { key: 'volume',  label: '거래폭증' },
+  { key: 'foreign', label: '외인' },
+  { key: 'watch',   label: '관심' },
+];
 
-export async function generateMetadata({ searchParams }: { searchParams: Promise<{ section?: string }> }): Promise<Metadata> {
-  const { section } = await searchParams;
-  const s = section ? SECTION_META[section] : null;
-  const title = s?.title || '실시간 주식 시세 — KOSPI·KOSDAQ·해외주식';
-  const desc = s?.desc || '국내외 주요 종목 실시간 시세, 등락률, 배당금, PER, 섹터 분석, AI 시황 브리핑, 포트폴리오 시뮬레이터. 카더라에서 무료로 확인하세요.';
-  const ogImg = section ? `${SITE_URL}/api/og?section=${section}&design=2` : `${SITE_URL}/api/og?title=${encodeURIComponent('실시간 주식 시세')}&subtitle=${encodeURIComponent('KOSPI·KOSDAQ·해외주식')}&category=stock`;
-  const titleEnc = encodeURIComponent(title);
-  const ogImages = [
-    { url: `${SITE_URL}/api/og?card=hero&category=stock&title=${titleEnc}`, width: 1200, height: 630, alt: `카더라 ${title}` },
-    { url: `${SITE_URL}/api/og?card=stats&category=stock&title=${titleEnc}`, width: 1200, height: 630, alt: `${title} 통계` },
-    { url: `${SITE_URL}/api/og?card=imminent&category=stock&title=${titleEnc}`, width: 1200, height: 630, alt: `${title} 임박/추천` },
-    { url: `${SITE_URL}/api/og?card=ranking&category=stock&title=${titleEnc}`, width: 1200, height: 630, alt: `${title} 랭킹` },
-    { url: `${SITE_URL}/api/og?card=region&category=stock&title=${titleEnc}`, width: 1200, height: 630, alt: `${title} 지역` },
-    { url: `${SITE_URL}/api/og-square?title=${encodeURIComponent('실시간 주식 시세')}&category=stock`, width: 630, height: 630, alt: `카더라 ${title}` },
-  ];
-
+export async function generateMetadata({ searchParams }: { searchParams: Promise<{ tab?: string }> }): Promise<Metadata> {
+  const sp = await searchParams;
+  const tab = sp.tab ?? 'issue';
+  const tabLabel = TAB_LABELS.find((t) => t.key === tab)?.label ?? '이슈';
+  const title = `주식 ${tabLabel} — 카더라`;
   return {
-    title, description: desc,
-    alternates: { canonical: SITE_URL + '/stock' },
+    title,
+    description: 'KOSPI·KOSDAQ 이슈 종목, 시총, 급등락, 거래폭증, 외인 매매를 한 화면에. 카더라 이슈 엔진 v1.',
+    alternates: { canonical: `${SITE_URL}/stock${tab !== 'issue' ? `?tab=${tab}` : ''}` },
     openGraph: {
-      title, description: desc,
-      url: SITE_URL + '/stock',
-      siteName: '카더라', locale: 'ko_KR', type: 'website',
-      images: ogImages,
+      title, siteName: '카더라', locale: 'ko_KR', type: 'website',
+      url: `${SITE_URL}/stock`,
     },
-    other: {
-      'naver:written_time': new Date().toISOString(),
-      'naver:updated_time': new Date().toISOString(),
-      'naver:author': '카더라',
-      'og:updated_time': new Date().toISOString(),
-      'dg:plink': SITE_URL + '/stock',
-      'article:section': '주식',
-      'article:tag': '주식,시세,KOSPI,KOSDAQ,실시간,등락률',
-    },
-    twitter: { card: 'summary_large_image', title, description: desc, images: ogImages },
   };
 }
-// s240 W1: createSupabaseServer → getSupabaseAdmin (cookie-free, ISR static 가능)
-import { getSupabaseAdmin } from '@/lib/supabase-admin';
-import { unstable_cache } from 'next/cache';
-import StockClient from './StockClient';
-// s205-W2: StockHeroCarousel + HeroCard "오늘의 종목" 제거 — 14d 클릭 0건, hero refresh cron 도 정리.
-import Disclaimer from '@/components/Disclaimer';
 
-async function fetchStocks() {
+type StockRow = {
+  symbol: string;
+  name: string;
+  market: string | null;
+  price: number | null;
+  change_pct: number | null;
+  volume: number | null;
+  market_cap?: number | null;
+  sector?: string | null;
+};
+
+async function fetchByTab(tab: string, limit = 30): Promise<{ kind: 'issue' | 'plain'; rows: StockIssueScore[] | StockRow[] }> {
   const sb = getSupabaseAdmin();
-  // 세션 138: get_stocks_with_thumbnails RPC 로 교체 — stock_images 1장 thumbnail 병합
-  // 반환 TABLE: symbol, name, market, price, change_amt, change_pct, volume, market_cap,
-  //            currency, ticker, description, sector, per, pbr, dividend_yield,
-  //            logo_url, thumbnail, page_views, comment_count
-  const { data } = await (sb as any).rpc('get_stocks_with_thumbnails', {
-    p_market: null,
-    p_limit: 500,
-    p_offset: 0,
-    p_sort: 'market_cap',
-  });
-  return data ?? [];
-}
-
-async function fetchBriefing() {
-  const sb = getSupabaseAdmin();
-  const { data } = await sb
-    .from('stock_daily_briefing')
-    .select('id, market, briefing_date, title, summary, sentiment, top_gainers, top_losers')
-    .eq('market', 'KR')
-    .order('briefing_date', { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  return data ?? null;
-}
-
-async function fetchBriefingUS() {
-  const sb = getSupabaseAdmin();
-  const { data } = await sb
-    .from('stock_daily_briefing')
-    .select('id, market, briefing_date, title, summary, sentiment, top_gainers, top_losers')
-    .eq('market', 'US')
-    .order('briefing_date', { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  return data ?? null;
-}
-
-async function fetchExchangeHistory() {
-  const sb = getSupabaseAdmin();
-  const since = new Date(Date.now() - 7 * 86400000).toISOString();
-  const { data } = await sb
-    .from('exchange_rate_history')
-    .select('id, currency_pair, rate, change_pct, recorded_at')
-    .eq('currency_pair', 'USD/KRW')
-    .gte('recorded_at', since)
-    .order('recorded_at', { ascending: true });
-  return data ?? [];
-}
-
-async function fetchThemeHistory() {
-  const sb = getSupabaseAdmin();
-  const { data } = await sb
-    .from('stock_theme_history')
-    .select('id, theme_id, theme_name, change_pct, recorded_date')
-    .order('recorded_date', { ascending: false })
-    .limit(20);
-  return data ?? [];
-}
-
-// Cache: 300s — 주식 목록 (시세 크론 5분 주기)
-const getCachedStocks = unstable_cache(fetchStocks, ['stock-quotes', 'v6'], { revalidate: 60 });
-const getCachedBriefing = unstable_cache(fetchBriefing, ['stock-briefing', 'v1'], { revalidate: 600 });
-const getCachedBriefingUS = unstable_cache(fetchBriefingUS, ['stock-briefing-us', 'v1'], { revalidate: 600 });
-const getCachedExchangeHistory = unstable_cache(fetchExchangeHistory, ['exchange-history', 'v1'], { revalidate: 3600 });
-const getCachedThemeHistory = unstable_cache(fetchThemeHistory, ['theme-history', 'v1'], { revalidate: 600 });
-
-// s205-W2: fetchHeroSlides + getCachedHeroSlides 제거 — stock_hero_slides 13개 활성 중복, 클릭 0건.
-
-export default async function StockPage() {
-  let stocks: Record<string, any>[] = [];
-  let briefing: any = null;
-  let briefingUS: any = null;
-  let exchangeHistory: Record<string, any>[] = [];
-  let themeHistory: Record<string, any>[] = [];
-
-  try {
-    const [stocksData, briefingData, briefingUSData, exchData, themeData] = await Promise.all([
-      getCachedStocks(),
-      getCachedBriefing().catch(() => null),
-      getCachedBriefingUS().catch(() => null),
-      getCachedExchangeHistory().catch(() => []),
-      getCachedThemeHistory().catch(() => []),
-    ]);
-    stocks = stocksData.length > 0 ? stocksData : await fetchStocks();
-    briefing = briefingData;
-    briefingUS = briefingUSData;
-    exchangeHistory = exchData;
-    themeHistory = themeData;
-  } catch {
-    try { stocks = await fetchStocks(); } catch {}
+  if (tab === 'issue') {
+    const { data } = await (sb as any)
+      .from('stock_issue_scores').select('*').is('warning', null)
+      .order('score', { ascending: false, nullsFirst: false }).limit(limit);
+    return { kind: 'issue', rows: (data ?? []) as StockIssueScore[] };
   }
+  // 그 외 탭은 stock_quotes 직접 query
+  const baseCols = 'symbol,name,market,price,change_pct,volume,market_cap,sector';
+  if (tab === 'mcap') {
+    const { data } = await (sb as any).from('stock_quotes').select(baseCols)
+      .eq('is_active', true).order('market_cap', { ascending: false, nullsFirst: false }).limit(limit);
+    return { kind: 'plain', rows: (data ?? []) as StockRow[] };
+  }
+  if (tab === 'gain') {
+    const { data } = await (sb as any).from('stock_quotes').select(baseCols)
+      .eq('is_active', true).order('change_pct', { ascending: false, nullsFirst: false }).limit(limit);
+    return { kind: 'plain', rows: (data ?? []) as StockRow[] };
+  }
+  if (tab === 'loss') {
+    const { data } = await (sb as any).from('stock_quotes').select(baseCols)
+      .eq('is_active', true).order('change_pct', { ascending: true, nullsFirst: false }).limit(limit);
+    return { kind: 'plain', rows: (data ?? []) as StockRow[] };
+  }
+  if (tab === 'volume') {
+    const { data } = await (sb as any).from('stock_quotes').select(baseCols)
+      .eq('is_active', true).order('volume', { ascending: false, nullsFirst: false }).limit(limit);
+    return { kind: 'plain', rows: (data ?? []) as StockRow[] };
+  }
+  if (tab === 'foreign') {
+    // stock_investor_flow 최신 날짜의 (foreign_buy - foreign_sell) DESC top N
+    // → join 으로 stock_quotes 메타 첨부
+    const { data: flow } = await (sb as any).from('stock_investor_flow')
+      .select('symbol, foreign_buy, foreign_sell, date')
+      .order('date', { ascending: false })
+      .order('foreign_buy', { ascending: false }).limit(limit * 2);
+    const map = new Map<string, number>();
+    for (const r of (flow ?? []) as { symbol: string; foreign_buy: number | null; foreign_sell: number | null }[]) {
+      const net = (r.foreign_buy ?? 0) - (r.foreign_sell ?? 0);
+      if (!map.has(r.symbol) || net > (map.get(r.symbol) ?? 0)) map.set(r.symbol, net);
+    }
+    const symbols = Array.from(map.entries()).sort((a, b) => b[1] - a[1]).slice(0, limit).map((e) => e[0]);
+    if (symbols.length === 0) return { kind: 'plain', rows: [] };
+    const { data: q } = await (sb as any).from('stock_quotes').select(baseCols)
+      .in('symbol', symbols);
+    const rows = (q ?? []) as StockRow[];
+    rows.sort((a, b) => (map.get(b.symbol) ?? 0) - (map.get(a.symbol) ?? 0));
+    return { kind: 'plain', rows };
+  }
+  // 'watch' 탭은 클라이언트 필요 (user 세션) — 비로그인 시 빈 배열
+  return { kind: 'plain', rows: [] };
+}
+
+export default async function StockPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
+  const sp = await searchParams;
+  const tab = (sp.tab ?? 'issue') as string;
+  const { kind, rows } = await fetchByTab(tab, 30);
 
   return (
-    <Suspense fallback={<div aria-hidden="true" style={{ minHeight: 1 }} />}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": "DataCatalog",
-        "name": "카더라 실시간 주식 시세",
-        "description": "KOSPI, KOSDAQ, NYSE, NASDAQ 주요 종목 실시간 시세",
-        "url": SITE_URL + "/stock",
-        "inLanguage": "ko-KR",
-        "provider": { "@type": "Organization", "name": "카더라", "url": SITE_URL }
-      }) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-        "@context": "https://schema.org", "@type": "BreadcrumbList",
-        "itemListElement": [
-          { "@type": "ListItem", "position": 1, "name": "홈", "item": SITE_URL },
-          { "@type": "ListItem", "position": 2, "name": "주식 시세", "item": SITE_URL + "/stock" },
-        ]
-      }) }} />
-      {/* FAQ JSON-LD (검색결과 아코디언) */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-        "@context": "https://schema.org", "@type": "FAQPage",
-        "mainEntity": [
-          { "@type": "Question", "name": "카더라에서 어떤 주식을 볼 수 있나요?", "acceptedAnswer": { "@type": "Answer", "text": "KOSPI, KOSDAQ, NYSE, NASDAQ 등 국내외 주요 종목의 실시간 시세를 제공합니다. 테마별 동향, 섹터 히트맵, AI 종목 분석, 투자자 매매동향까지 확인 가능합니다." } },
-          { "@type": "Question", "name": "주식 시세는 얼마나 자주 업데이트되나요?", "acceptedAnswer": { "@type": "Answer", "text": "장중에는 5~10분 간격으로 시세가 업데이트됩니다. 장 마감 후에도 종가 기준 데이터를 제공합니다." } },
-          { "@type": "Question", "name": "카더라 주식 서비스는 무료인가요?", "acceptedAnswer": { "@type": "Answer", "text": "네, 카더라의 모든 주식 시세 조회, 차트, 수급 분석, AI 한줄평, 종목 토론 기능은 완전 무료입니다. 카카오 로그인으로 관심종목 등록, 가격 알림도 무료로 사용할 수 있습니다." } },
-        ],
-      }) }} />
-      {/* speakable — 네이버 음성검색 + 스마트 스니펫 */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "WebPage", "name": "실시간 주식 시세", "speakable": { "@type": "SpeakableSpecification", "cssSelector": ["h1", ".market-status", ".briefing-summary"] } }) }} />
-      {/* ItemList JSON-LD (Google 캐러셀) — 상위 10 종목 */}
-      {stocks.length > 0 && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-        "@context": "https://schema.org", "@type": "ItemList",
-        "name": "실시간 인기 종목",
-        "numberOfItems": Math.min(stocks.length, 10),
-        "itemListElement": stocks.slice(0, 10).map((s: any, i: number) => ({
-          "@type": "ListItem",
-          "position": i + 1,
-          "name": `${s.name} (${s.symbol})`,
-          "url": `${SITE_URL}/stock/${s.symbol}`,
-          "image": `${SITE_URL}/api/og-square?title=${encodeURIComponent(s.name + ' ' + s.symbol)}&category=stock`,
-          "description": `${s.name} ${s.market || ''} ${s.price ? `현재가 ${Number(s.price).toLocaleString()}` : ''}`.trim(),
-        })),
-      }) }} />}
-      <h1 className="sr-only">주식 시세 — 실시간 국내외 종목</h1>
-      <p className="sr-only">카더라 주식에서는 KOSPI·KOSDAQ·NYSE·NASDAQ {stocks.length}개 종목의 실시간 시세, 등락률, 시가총액, PER, 배당수익률을 확인할 수 있습니다. AI 시황 브리핑, 섹터별 히트맵, 테마주 분석, 포트폴리오 시뮬레이터를 무료로 제공합니다.</p>
-      {/* LiveBar 는 (main)/layout 의 LiveBarChrome 으로 통합. */}
-      {/* s205-W2: "오늘의 종목" HeroCard + StockHeroCarousel 2종 제거 — 14d /stock 23 PV, 클릭 0건 */}
-      <StockClient initialStocks={stocks as React.ComponentProps<typeof StockClient>['initialStocks']} briefing={briefing} briefingUS={briefingUS} exchangeHistory={exchangeHistory} themeHistory={themeHistory} />
-      {/* C-7: noscript — JS 비활성화 크롤러용 기본 종목 목록 */}
-      <noscript>
-        <div style={{ padding: 20 }}>
-          <h2>주요 종목 시세</h2>
-          <ul>
-            {stocks.slice(0, 20).map((s: any) => (
-              <li key={s.symbol}><a href={`/stock/${s.symbol}`}>{s.name} ({s.symbol}) — {s.market} {s.price ? `${Number(s.price).toLocaleString()}원` : ''}</a></li>
-            ))}
-          </ul>
-        </div>
-      </noscript>
-      {/* StockClient 내부에 Disclaimer compact 있음 — 중복 제거 */}
+    <Suspense>
+      <div style={{ maxWidth: 720, margin: '0 auto', padding: '8px 6px 24px' }}>
+        <h1 className="sr-only">주식 시세 — {TAB_LABELS.find((t) => t.key === tab)?.label ?? '이슈'}</h1>
+
+        {/* Sticky tab bar */}
+        <nav
+          role="tablist"
+          aria-label="주식 정렬"
+          style={{
+            position: 'sticky', top: 44, zIndex: 10,
+            display: 'flex', flexWrap: 'wrap', gap: 4,
+            padding: '8px 6px', margin: '0 -6px 8px',
+            background: 'rgba(255,255,255,0.92)',
+            backdropFilter: 'blur(8px)',
+            borderBottom: '1px solid #E5E7EB',
+          }}
+        >
+          {TAB_LABELS.map((t) => {
+            const active = t.key === tab;
+            return (
+              <Link
+                key={t.key}
+                role="tab"
+                aria-selected={active}
+                href={t.key === 'issue' ? '/stock' : `/stock?tab=${t.key}`}
+                prefetch={false}
+                style={{
+                  padding: '5px 10px',
+                  borderRadius: 999,
+                  fontSize: 12,
+                  fontWeight: active ? 700 : 600,
+                  background: active ? '#111827' : '#F3F4F6',
+                  color: active ? '#FFFFFF' : '#374151',
+                  textDecoration: 'none',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {t.label}
+              </Link>
+            );
+          })}
+        </nav>
+
+        {kind === 'issue' ? (
+          <IssueList rows={rows as StockIssueScore[]} />
+        ) : (
+          <PlainList rows={rows as StockRow[]} tab={tab} />
+        )}
+      </div>
     </Suspense>
+  );
+}
+
+function IssueList({ rows }: { rows: StockIssueScore[] }) {
+  if (rows.length === 0) {
+    return <Empty label="이슈 종목 데이터 준비 중" />;
+  }
+  // 5번째 다음 IssueGateCard 삽입 — 비로그인일 때만 실제 렌더 (컴포넌트 내부에서 useAuth 체크).
+  // 로그인 사용자에게는 6번째 카드부터 정상 노출.
+  return (
+    <div>
+      {rows.slice(0, 5).map((s) => <StockIssueCard key={s.symbol} data={s} />)}
+      <IssueGateCard source="issue_gate_stock" redirect="/stock" totalCount={rows.length} />
+      {rows.slice(5).map((s) => <StockIssueCard key={s.symbol} data={s} />)}
+    </div>
+  );
+}
+
+function PlainList({ rows, tab }: { rows: StockRow[]; tab: string }) {
+  if (rows.length === 0) {
+    return (
+      <Empty label={tab === 'watch' ? '로그인하면 관심 종목을 볼 수 있어요' : '데이터 준비 중'} />
+    );
+  }
+  return (
+    <div>
+      {rows.map((r) => {
+        const tone = getStockTone(r.change_pct);
+        const chip = stockChipStyle(tone);
+        return (
+          <Link
+            key={r.symbol}
+            href={`/stock/${r.symbol}`}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 8,
+              padding: '8px 9px', margin: 3, borderRadius: 6,
+              background: '#FFFFFF', borderLeft: `3px solid ${stockBarColor(tone)}`,
+              boxShadow: '0 1px 1px rgba(0,0,0,0.04)',
+              textDecoration: 'none', color: '#111827',
+            }}
+          >
+            <span style={{ flex: 1, minWidth: 0, fontSize: 12.5, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {r.name}
+            </span>
+            <span style={{ fontSize: 11, color: '#6B7280', whiteSpace: 'nowrap' }}>{r.market}</span>
+            <span style={{ fontSize: 11.5, fontVariantNumeric: 'tabular-nums', color: '#374151', whiteSpace: 'nowrap' }}>
+              {r.price ? Number(r.price).toLocaleString() : '-'}
+            </span>
+            <span style={{ ...chip, padding: '1px 6px', borderRadius: 3, fontSize: 11, lineHeight: 1.4, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
+              {formatChangePct(r.change_pct)}
+            </span>
+          </Link>
+        );
+      })}
+    </div>
+  );
+}
+
+function Empty({ label }: { label: string }) {
+  return (
+    <div style={{ padding: 16, margin: 3, borderRadius: 6, background: '#F9FAFB', border: '1px solid #E5E7EB', fontSize: 12, color: '#9CA3AF', textAlign: 'center' }}>
+      {label}
+    </div>
   );
 }

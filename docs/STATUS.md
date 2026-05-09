@@ -1,4 +1,119 @@
 
+## Session s262 — Issue Engine v1 Phase C (page flip + signup hooks) (2026-05-09)
+
+### 적용 변경 (3 페이지 rewrite + 2 CTA 컴포넌트)
+- `src/app/page.tsx` — 4 섹션 (hero stat bar + 이슈종목5 + 이슈단지5 + 인기 블로그3). 데이터: stock_issue_scores / apt_issue_scores 직접 query top 5 + get_home_data RPC hero/blog. revalidate=60.
+- `src/app/(main)/stock/page.tsx` — 7 sub-tab (이슈/시총/급등/급락/거래폭증/외인/관심), default=이슈. 6번째 자리 IssueGateCard (비로그인 only). 외인 탭 stock_investor_flow join. revalidate=60. legacy StockClient + briefing/exchange/theme history 제거 (단지 / 라우팅 영향 없음).
+- `src/app/(main)/apt/page.tsx` — sticky region + 5 블록 (정책알림 / 마감임박 / 신규공고24h / 미분양핫 / 재개발단계변경) + 도구 4개 (지도 / 가점진단 / 재개발 / 미분양 딜). DDayAlertCTA 마감임박 끝. RegionAutoSelect 보존. revalidate=60.
+- `src/components/cta/IssueGateCard.tsx` (use client) — useAuth 로그인 판정, source='issue_gate_stock', kakao 버튼.
+- `src/components/cta/DDayAlertCTA.tsx` (use client) — source='apt_dday_alert', 마감임박 블록 끝.
+
+### 백업 (rollback safety)
+- `src/_legacy/s262/{home,stock,apt}_page_v0.tsx` — 옛 page 원본 그대로 (Next.js 라우터 스캔 외 위치). `// @ts-nocheck` prepend, import 0, 활성 0.
+- 롤백: 3 파일 `mv` + commit revert. DB 영향 0.
+
+### 검증
+- `npm run type-check` 통과 (0 errors)
+- `npm run build` 통과: `/` 1.2 kB / 240 kB First Load, `/apt` 4.8 kB / 290 kB, `/stock` 2.68 kB / 291 kB
+- 데이터 query smoke: stock_top5=5, apt_imminent=5, apt_fresh24h=3, unsold_top=5, redev_recent=0, regulated=0 (빈 블록은 Empty fallback)
+- popup_signup_modal / sticky_signup_bar / blog_early_teaser 등 ClientShell chrome 영역 0 변경 (Phase C scope 외)
+
+### 새 CTA source 2개 — s263 funnel 측정 baseline
+- `issue_gate_stock` — /stock 6번째 카드 자리, 비로그인 한정. clicks → conversion_events.cta_click, signup → signup_attempts.source.
+- `apt_dday_alert` — /apt 마감임박 블록 끝, 비로그인 한정. apt_alert_cta 정체 우회용 새 source.
+
+### s263 TODO (별도 세션 — Phase C scope 외)
+- **카카오 OAuth 동의화면 50% 이탈** — 코드 변경 외 영역. Kakao 콘솔 동의항목 검수 + 사용자 운영 액션 필요 (s235 메모리 일치). 인앱 브라우저 차단/유도 (s234-235 InAppBrowserModal) 작동 점검.
+- **action_bar 완전 사망** (clicks 0 / attempts 0 7d) — 컴포넌트 mount/render 회귀 추정. 어디서 mount 되는지 grep + 트래킹 fire 시점 점검 필요.
+- **apt_alert_cta 정체** (1 click / 0 attempts) — 클릭 후 /login 진입했지만 OAuth 안 누름. apt_dday_alert 신규 source 와 동시 측정해서 어느 쪽이 더 효과적인지 비교.
+- **direct 29% source 추적 약함** — UTM 파라미터 부착 + referer 활용 source 채움 보강.
+- 위 4개 + Phase D (cron + vercel.json) 같이 처리 권장.
+
+## Signup Funnel Audit (s262) — 2026-05-09
+
+진단만, 파일 변경 0. Phase C 진행 전 같이 처리할 수 있는 게 있는지 평가용.
+
+### 1) dropped_step 분포 (signup_attempts, 7d, n=34)
+| step           | n   | %    |
+|----------------|-----|------|
+| oauth_start    | 18  | 52.9 |
+| <success>      | 16  | 47.1 |
+
+**메모리 일치** — oauth_start 50%+ 여전히 살아있음. profile_complete / first_action 드롭 0건 (callback 이후 단계는 전부 통과).
+
+### 2) Provider 분포 (7d)
+| provider | attempts | success | oauth_start drop | success% | drop% |
+|----------|---------:|--------:|-----------------:|---------:|------:|
+| kakao    | 34       | 16      | 18               | 47.1     | 52.9  |
+| google   | 0        | -       | -                | -        | -     |
+| apple    | 0        | -       | -                | -        | -     |
+
+**카카오 단일 흐름**. Google/Apple 시도 0 — UI 버튼은 카카오 + 구글 두 개 (`LoginClient.tsx`) 인데 7일간 구글 클릭 0. 카카오 동의화면이 50% 전후 이탈 주범 후보 (s235 메모리: kakao 최소 스코프 적용 후도 여전히 50%대).
+
+| device  | total | success | oauth_start drop | drop% |
+|---------|------:|--------:|-----------------:|------:|
+| mobile  | 22    | 10      | 12               | 54.5  |
+| desktop | 12    | 6       | 6                | 50.0  |
+
+mobile/desktop 비슷 (카카오 자체 문제 강함). error_message 분포는 모두 `<no_error>` — 사용자가 OAuth 화면에서 **직접 close** 한 케이스 (throw 0건). UX/동의항목/타이밍 문제이지 코드 throw 가 아님.
+
+### 3) Signup 진입 source 분포
+**signup_attempts.source (실제 OAuth 버튼 클릭 시점)**
+| source                  | attempts | success | oauth drop |
+|-------------------------|---------:|--------:|-----------:|
+| direct                  | 10       | 5       | 5          |
+| popup_signup_modal      | 9        | 4       | 5          |
+| blog_early_teaser       | 4        | 2       | 2          |
+| nav                     | 4        | 2       | 2          |
+| nav_signup              | 2        | 1       | 1          |
+| apt_interest_레이카운티 | 2        | 1       | 1          |
+| apt_interest_평택       | 2        | 1       | 1          |
+| sticky_signup_bar       | 1        | 0       | 1          |
+
+**conversion_events.cta_click (CTA 버튼 클릭 단계, 7d)**
+| cta_name              | clicks |
+|-----------------------|-------:|
+| popup_signup_modal    | 20     |
+| blog_early_teaser     | 6      |
+| direct / nav / related| 4-5    |
+| apt_gate_ai_analysis  | 3      |
+| sticky_signup_bar     | 3      |
+| nav_login_button      | 2      |
+| nav_signup            | 2      |
+| **apt_alert_cta**     | **1**  |
+| right_panel           | 1      |
+| residence_nudge_modal | 1      |
+
+**핵심:**
+- **`popup_signup_modal` 부활 + 최대 source** (20 clicks → 9 attempts). 모달 노출/클릭은 정상.
+- **`apt_alert_cta` 1 click / 0 attempts** — 메모리 4/14 사망 → 부분 부활 (1건). 클릭은 됐으나 /login 진입 후 OAuth 버튼 안 누름. UX 정체.
+- **`action_bar` 완전 사망** — clicks 0 / attempts 0. 메모리 4/15 사망 후 부활 못함.
+- `direct` 10건 (29%) — URL ?source 없이 /login 진입. 북마크 / 외부 검색 → 추적 불가.
+
+### 4) 코드 레벨 흐름
+- **진입**: `src/app/(auth)/login/page.tsx` (server, 이미 로그인 시 redirect) → `LoginClient.tsx` (use client, kakao/google 버튼)
+- **OAuth 시작**: `LoginClient.login()` — `track-attempt` POST (keepalive=true, race 차단) + `trackCtaClick` + `supabase.auth.signInWithOAuth`
+- **OAuth callback**: `src/app/auth/callback/route.ts`
+  - `exchangeCodeForSession` → `complete_signup_frictionless` RPC → `signup_attempts` UPDATE/INSERT (sha256/16 ip_hash로 기존 row 매칭) → `conversion_events.cta_complete` insert
+  - profile.onboarded=false 시 `/onboarding?return=...&welcome=1` 리디렉트, 그 외 원래 redirect + `?welcome=1`
+- **Track attempt API**: `src/app/api/auth/track-attempt/route.ts` — fire-and-forget insert, 즉시 200, dropped_step='oauth_start' 디폴트
+- **Post-signup landing**: 별도 welcome 페이지 없음. `?welcome=1` 파라미터 + `WelcomeToast` 컴포넌트가 토스트 띄움. /onboarding 페이지는 onboarded=false 인 경우만.
+- **keepalive=true 적용 site (30개 매칭)**: 모든 CTA tracking은 `lib/cta-track.ts` 통과 (sendBeacon 우선, fallback keepalive fetch). LoginClient의 track-attempt도 keepalive=true. **race condition 패턴 적용 OK**.
+
+### 5) middleware.ts 인증 처리 (CSP 외)
+- **PROTECTED_PATHS**: `/write`, `/payment`, `/profile`, `/notifications`, `/admin` — 미인증 시 `/login?redirect=<path>` 308.
+- **PUBLIC_ONLY** (auth check skip + Edge cache 5min): `/`, `/feed`, `/stock`, `/apt`, `/blog`, `/discuss`, `/hot`, `/search`, `/faq`, `/terms`, `/privacy`, `/guide`, `/grades`, `/discussion` — 쿠키 sb-*-auth-token 존재만 보고 x-user-logged-in 헤더 부착 (DB 호출 X).
+- **/admin/***: `profiles.is_admin` 체크 (3s/2s timeout, 실패 시 /feed 리다이렉트).
+- **온보딩 강제 redirect 제거됨** (s231) — frictionless 가입: `profiles.onboarded` DEFAULT true + `handle_new_user_autoprofile` 트리거. /onboarding 페이지는 optional 진입 only.
+
+### 진단 요약 + Phase C 합류 평가
+1. **oauth_start 52.9% drop**: 카카오 OAuth 단계 자체 (동의화면 close), error throw 0 — UX/카카오 콘솔 동의항목 검수 / 인앱 브라우저 / 쿠키 정책 문제. 코드 변경으로 해결 어려움. **kakao 콘솔 검수 + 사용자 운영 액션 필요** (s235 메모리와 일치). Phase C 코드 변경으로는 영향 못 줌.
+2. **action_bar / apt_alert_cta 사망**: 컴포넌트 mount/render 회귀 가능성. **Phase C 와 별개 작업**. 빠른 fix 가능하지만 별도 commit 권장.
+3. **popup_signup_modal 정상**: 20 clicks / 9 attempts / 4 success — funnel 작동. Phase C 영향 없음.
+4. **direct 29%**: 추적 약함. URL UTM 또는 referer 활용 source 채움 추가하면 개선 — Phase C 와 별개.
+
+**Phase C 합류 권장 항목**: 없음. Phase C 는 페이지 rewrite (홈 / stock / apt) 이며 funnel 컴포넌트 (popup_signup_modal, sticky_signup_bar, blog_early_teaser, nav 등) 는 모두 ClientShell / chrome 영역에 있어 Phase C 변경 영향 받지 않음. **Phase C 그대로 진행 가능** + funnel 이슈는 후속 세션 (s263) 에서 별도 처리.
+
 ## Session s262 — Issue Engine v1 Phase B (lib + components, unused) (2026-05-09)
 
 ### 적용 변경 (frontend 빌딩 블록 14건 + sandbox 1건, 어디서도 import 안 함)
