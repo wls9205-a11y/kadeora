@@ -1,4 +1,40 @@
 
+## s263 Phase 2.1 — og-stock fix 부분 성공 / og-blog 회복, og-stock 잔존 (2026-05-09)
+
+### deploy 후 검증 결과 (10분 wait 후)
+| route | trace 명시 전 | trace 명시 후 |
+|---|---|---|
+| /api/og | 200 (이미 trace 있음) | 200 ✅ 회귀 없음 |
+| /api/og-blog | 302 (trace 누락) | **200 ✅ 회복** |
+| /api/og-stock | 302 (trace 누락) | **여전히 302 ❌** |
+| /api/og-square | 200 (이미 trace 있음) | 200 ✅ |
+
+### og-blog 회복 → trace 누락 가설 입증
+같은 commit `d4ce1641` 으로 og-blog 회복. outputFileTracingIncludes 추가가 효과 있다는 증거.
+
+### og-stock 만 잔존 — 다른 root cause
+- fallback (no symbol) / invalid symbol / card=ai/flow/financial 모두 302
+- fetchQuote 무관 (fallback 안 호출)
+- ImageResponse render 자체 또는 폰트 로딩 자체 실패
+
+다음 진단 포인트 (사용자 영역 — Vercel runtime logs):
+1. `[og-stock] FULL: message=... fontLoaded=...` 단일 line 메시지 (우리 chunk logging fix 적용 여부)
+   - `fontLoaded=false` → trace 적용 안 됨 (deploy cache 의심, 강제 redeploy 필요)
+   - `fontLoaded=true` 면 다른 root cause (JSX rendering / SVG path / character encoding 등)
+2. message 실제 내용 — 폰트 외 에러가 있다면 정확한 fix 가능
+3. Vercel deployment 로그 — `8c336cc1` 빌드가 og-stock function 정상 빌드했는지
+
+### 현재 STATUS
+- ✅ og-blog 회복 (trace fix 효과)
+- ✅ og + og-square 회귀 없음
+- ❌ og-stock 잔존 (다른 원인 추정)
+- 응급 폴백 작동 중: catch redirect 302 → kadeora-wide.png (depth 보장)
+
+### 다음 결정
+- 사용자: Vercel runtime logs `[og-stock] FULL` 메시지 확인
+- 또는 사용자 PC 에서 og-stock route.tsx 읽기 + 추가 진단 logging 삽입
+- chat: 진단 정보 받으면 정확한 fix 마이그/패치
+
 ## s263 Phase 2.2 — CTA click 추적 회귀 fix (2026-05-09)
 
 ### Root cause 확정
