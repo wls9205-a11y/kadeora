@@ -1,4 +1,45 @@
 
+## s263 Phase 2.2 — CTA click 추적 회귀 fix (2026-05-09)
+
+### Root cause 확정
+`src/lib/cta-navigate.ts` `trackCtaAndNavigate()` 의 `setTimeout(50ms)` — s230 P1 commit `086e438f` 에서 80→50ms 단축한 것이 **모바일 환경 sendBeacon flush 시간 부족** 회귀를 유발. 50ms 후 즉시 `window.location.href = href` 강제 navigation → sendBeacon 큐의 `/api/events/cta` POST 가 fire 전 페이지 unload → drop.
+
+### 영향 범위 — 8개 컴포넌트 모두 동일 회귀
+| 컴포넌트 | cta_name | view (24h) | click (24h) |
+|---|---|---:|---:|
+| StickySignupBar | sticky_signup_bar | 65 | 0 |
+| LoginGate | login_gate_apt_analysis 등 | 31 | 0 |
+| BlogGatedWall | blog_gated_login | 24 | 0 |
+| BlogEarlyGateTeaser | blog_early_teaser | 23 | 0 |
+| BlogAptAlertCTA, KakaoHeroCTA, KakaoBottomSheet, SectionGate | (각 source) | - | - |
+| **popup_signup_modal (대조군)** | popup_signup_modal | n/a | **5 ✅** |
+
+popup_signup_modal 만 정상: OAuth `signInWithOAuth` await 흐름이라 navigation 타이밍 충분. 다른 8개는 즉시 `window.location.href` 강제 navigation.
+
+### 적용
+`cta-navigate.ts` setTimeout 50ms → 200ms 복귀.
+- 사용자 클릭 응답 200ms 지연 — 인지 못 하는 수준
+- sendBeacon 큐 안전 fire 보장
+- 단일 위치 변경으로 8개 컴포넌트 모두 회복
+
+### 검증 (deploy 후 5-10분 모니터)
+```sql
+SELECT cta_name, count(*) FILTER (WHERE event_type='cta_view') AS view,
+       count(*) FILTER (WHERE event_type='cta_click') AS click
+FROM conversion_events
+WHERE cta_name IN ('sticky_signup_bar','login_gate_apt_analysis','blog_gated_login','blog_early_teaser')
+  AND created_at > now() - interval '15 minutes'
+GROUP BY cta_name;
+```
+기대: click > 0 회복.
+
+### 별도 진단 (s263 후속)
+- `related_blog_section`: view 30/click 0. RelatedBlogsTracker 가 view 만 fire 하고 click handler 없을 가능성 — 별도 점검.
+- 가입 trend 회복 측정: 5/10 시점 가입 attempts → 5/4 6명 수준 회귀 측정.
+
+### Architecture Rule 후보
+- **#96 (후보)** sendBeacon + navigation timing — sendBeacon 발사 후 즉시 navigate 시 200ms 이상 setTimeout 보장. 80ms / 50ms 같은 micro-tuning 회귀 위험. requestAnimationFrame + setTimeout 패턴 권장.
+
 ## s263 Phase 2.1 — og-stock 무한 hang fix (2026-05-09)
 
 ### Root cause 확정
