@@ -1,4 +1,45 @@
 
+## s263 Phase 2.1 후속 — og-apt 발견 + og-stock 잔존 (2026-05-09 KST 19:50)
+
+### Vercel runtime logs 직접 fetch 결과
+- `/api/og-apt` 에서 'Failed to load dynamic font' 매 분 fire (사용자 trace 누락 발견 시점에 og-stock 만 의심했지만 og-apt 도 같은 누락).
+- `/api/og-stock` 에서 catch redirect 발생하지만 chunked logs (cls/m0/s0) 가 Vercel logs UI 에 표시 안 됨. DIAG single line 만 보임.
+- `/api/og-blog` 일부 slug 에서 cls= TypeError 잡힘 (catch chunked logs 작동 — og-blog는 정상).
+
+### 적용 (commit `1c83f009`)
+- next.config.ts outputFileTracingIncludes 에 `/api/og-apt` 추가 (4 → 5 entries)
+- 5분 후 og-apt 회복 예상
+
+### og-stock 잔존 — chat 측 진단 한계
+- DIAG line fired ✅ (try block 진입 전 logged)
+- catch chunked logs (cls=, m0=, m1=, s0=, s1=) Vercel logs UI 에 안 보임
+- 가능 원인:
+  1. catch entered 됐지만 console.error chunked 라인이 logs ingestion 에서 dedupe/truncate
+  2. catch 미진입 → 그러나 302 redirect 는 catch 안에서만 발생 (모순)
+  3. message length 0 + stack length 0 → m0/s0 loop 0번 → cls 1줄만 fire — 그런데 cls 도 안 보임
+
+### 사용자 PC 영역 — og-stock 깊은 진단 옵션
+1. **카드 binary search**: PriceCard 만 남기고 ChartCard/AICard 등 임시 제거. 200 응답이면 카드 코드 issue.
+2. **fontOpts 없이 시도**: fontData=null 강제로 ImageResponse 호출 → 폰트 의존성 제거 후 작동 여부.
+3. **body element trivial**: `<div>test</div>` 같은 minimal JSX 로 대체. 작동하면 카드 JSX issue.
+4. **og-blog 패턴 wrapped div** (`<div style={{ width: '100%', height: '100%', display: 'flex' }}>`) 명시 차용.
+5. **catch chunked logs 다른 패턴 시도**: console.log 로 변경, 또는 res.headers 에 X-OG-Error 추가해서 응답 안에 포함.
+
+### 현재 누적 (s263)
+- bb0babb5 Phase 1.1 GRANT 4건
+- f20bd6bc filename sync
+- fcbc97fb Phase 3.3 admin v4 인덱스
+- d4ce1641 Phase 2.1 og-stock + og-blog trace
+- 8c336cc1 Phase 2.2 cta-navigate setTimeout 200ms
+- dada09f8 STATUS update
+- 4d203c15 og-stock 진단 logging
+- 1c83f009 og-apt trace 추가
+
+### 다음 결정
+- 사용자: og-stock 직접 binary search (시간 절약)
+- chat: Phase 2.3 cron 2건 fix GO 또는 Phase 3.4 view 최적화 GO 신호 대기
+- 5분 후 og-apt 회복 verify
+
 ## s263 Phase 2.1 — og-stock fix 부분 성공 / og-blog 회복, og-stock 잔존 (2026-05-09)
 
 ### deploy 후 검증 결과 (10분 wait 후)
