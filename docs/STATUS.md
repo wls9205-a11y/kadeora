@@ -1,4 +1,40 @@
 
+## Session s262 — CAROUSEL v1 FLIP IN PROGRESS (2026-05-09)
+
+### T+24h 진짜 baseline (24h 누적)
+| cta_name | clicks (24h) | uniq visitor | 어제 동일 시각 vs |
+|---|---:|---:|---|
+| sticky_signup_bar  | 71 | 36 | 77 → 71 (-6, 약간 감소) |
+| popup_signup_modal | 40 | 1  | 41 → 40 (거의 동일, visitor 1 봇 의심) |
+| blog_early_teaser  | 26 | 0  | 30 → 26 (visitor_id 없는 노이즈) |
+| **issue_gate_stock** | 0 | 0 | flag off, 기대값 |
+| **apt_dday_alert**   | 0 | 0 | flag off, 기대값 |
+
+기존 source 변동 ±10% 내 — 정상 트래픽 유지. 새 source 0 노출 (flag off 정확 작동).
+
+### cron_health 회귀 0
+4 rows / 모두 alerting=false / last_error=null ✅
+- refresh_stock: last_run 08:00, 1153ms
+- refresh_apt: last_run 08:01, 818ms
+- freshness 2개: last_run 08:15
+
+### ISSUE ENGINE 매트뷰 fresh
+- stock: 15.8분 age (1805 rows)
+- apt: 9.2분 age (40 rows)
+- 둘 다 1시간 이내 ✅
+
+### Pre-flip gate 11/11 통과
+자동 9 + 사용자 영역 (iOS Safari + Vercel preview) 어제 OK 확인 완료.
+
+### Flip 시퀀스 시작
+1. 사용자 작업 (Vercel 대시보드): ENV `NEXT_PUBLIC_CAROUSEL_ENABLED` Production 체크 추가
+2. 빈 commit push로 redeploy 트리거 (이번 commit)
+3. 5분 모니터링 + STATUS finalize
+
+### Rollback (90초)
+- ENV Production 체크 해제 → redeploy
+- 코드/DB 그대로 (legacy 분기 보존, sparkline + thumbnail mat view 컬럼 유지)
+
 ## Session s262 — Phase E2 hotfix (2026-05-09)
 
 ### 발견
