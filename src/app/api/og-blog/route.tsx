@@ -273,6 +273,23 @@ export async function GET(req: NextRequest) {
     for (let i = 0; i < msg.length; i += 80) console.error('[og-blog] m' + (i / 80) + '=', msg.slice(i, i + 80));
     for (let i = 0; i < Math.min(stk.length, 480); i += 80) console.error('[og-blog] s' + (i / 80) + '=', stk.slice(i, i + 80));
     for (let i = 0; i < inp.length; i += 80) console.error('[og-blog] i' + (i / 80) + '=', inp.slice(i, i + 80));
-    return Response.redirect(`${SITE_URL}/images/brand/kadeora-hero.png`, 302);
+    // s263 Phase 2.1++: redirect 302 제거. catch 안에서 폰트/한글 의존성 없는 simple
+    // ImageResponse 반환 (로고 + KADEORA 영문) — 카카오/네이버 미리보기에 무엇이라도 표시 보장.
+    try {
+      const fbImg = new ImageResponse(
+        (
+          <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#0F1B3E', color: '#fff', fontFamily: 'sans-serif' }}>
+            <div style={{ fontSize: 28, color: '#FBBF24', letterSpacing: 4, marginBottom: 16, fontWeight: 900 }}>KADEORA</div>
+            <div style={{ fontSize: 56, fontWeight: 900, letterSpacing: -1 }}>blog</div>
+          </div>
+        ),
+        { width: SIDE, height: SIDE },
+      );
+      return new Response(await fbImg.arrayBuffer(), {
+        headers: { 'Content-Type': 'image/png', 'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=900', 'X-OG-Fallback': '1' },
+      });
+    } catch {
+      return Response.redirect(`${SITE_URL}/images/brand/kadeora-hero.png`, 302);
+    }
   }
 }

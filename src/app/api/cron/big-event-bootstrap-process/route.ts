@@ -535,10 +535,11 @@ async function handler(_req: NextRequest) {
 
         stats.processed++;
 
-        // 선 started_at 스탬프 + CAS lock (status=pending → running)
+        // s263 Phase 2.3: status='running' → 'in_progress' (CHECK 허용 값 매칭).
+        // 선 started_at 스탬프 + CAS lock (status=pending → in_progress)
         const { data: lockRow } = await (sb as any)
           .from('big_event_bootstrap_queue')
-          .update({ status: 'running', started_at: new Date().toISOString() })
+          .update({ status: 'in_progress', started_at: new Date().toISOString() })
           .eq('id', q.id)
           .eq('status', 'pending')
           .select('id');
@@ -599,8 +600,9 @@ async function handler(_req: NextRequest) {
             ev.spoke_blog_post_ids = newSpokes; // in-memory 반영 (같은 event 여러 spoke 처리 시)
           }
 
+          // s263 Phase 2.3: status='done' → 'completed' (CHECK 허용 값 매칭).
           await (sb as any).from('big_event_bootstrap_queue').update({
-            status: 'done',
+            status: 'completed',
             blog_post_id: ins.id,
             completed_at: new Date().toISOString(),
             last_error: null,

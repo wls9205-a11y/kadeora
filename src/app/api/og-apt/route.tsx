@@ -360,6 +360,22 @@ export async function GET(req: NextRequest) {
     console.error('[og-apt] class=', e?.constructor?.name);
     console.error('[og-apt] code=', (err as any)?.code);
     console.error('[og-apt] input=', JSON.stringify({ slug, card, fontLoaded: !!fontData, hasSite: !!site, siteType: site?.site_type, nameLen: site?.name?.length }));
-    return Response.redirect(`${SITE_URL}/images/brand/kadeora-hero.png`, 302);
+    // s263 Phase 2.1++: redirect 302 제거. simple ImageResponse fallback.
+    try {
+      const fbImg = new ImageResponse(
+        (
+          <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#0F1B3E', color: '#fff', fontFamily: 'sans-serif' }}>
+            <div style={{ fontSize: 28, color: '#FBBF24', letterSpacing: 4, marginBottom: 16, fontWeight: 900 }}>KADEORA</div>
+            <div style={{ fontSize: 56, fontWeight: 900, letterSpacing: -1 }}>apt</div>
+          </div>
+        ),
+        { width: SIDE, height: SIDE },
+      );
+      return new Response(await fbImg.arrayBuffer(), {
+        headers: { 'Content-Type': 'image/png', 'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=900', 'X-OG-Fallback': '1' },
+      });
+    } catch {
+      return Response.redirect(`${SITE_URL}/images/brand/kadeora-hero.png`, 302);
+    }
   }
 }

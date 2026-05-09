@@ -1,4 +1,42 @@
 
+## s263 Phase 2.1++ + 2.3 병렬 fix (2026-05-10 KST 00:50)
+
+### Phase 2.1++ — og 라우트 catch fallback ImageResponse (302 redirect 제거)
+
+og(작동) vs og-blog/og-apt/og-stock(회귀) 헤드 30 비교 결과: runtime/폰트 패턴 동일. 차이 없음. 회귀 원인은 ImageResponse 안의 JSX (카드 컴포넌트) 자체 throw 가능성. catch 안에서 redirect 302 대신 **simple ImageResponse fallback** 적용:
+- og-blog: `<div>KADEORA / blog</div>` 로고 fallback (SIDE × SIDE)
+- og-apt: `<div>KADEORA / apt</div>` 로고 fallback (SIDE × SIDE)
+- og-stock: `<div>KADEORA / {symbol}</div>` 로고 fallback (1200×630)
+
+폰트 의존성 없음 (sans-serif). 한글 깨지지만 200 응답 보장 → 카카오/네이버 미리보기에 무엇이라도 표시.
+이중 try-catch 로 안전망: ImageResponse fallback 도 throw 시 최종 redirect (legacy).
+
+### Phase 2.3 — big-event-bootstrap-process status 교정
+
+CHECK 허용 값 (`pending|in_progress|fact_checking|blocked|completed|failed`) 위반:
+- `'running'` (line 541) → `'in_progress'` ✅
+- `'done'` (line 603) → `'completed'` ✅
+
+Postgres logs 매 분 burst (10건/2초) → CHECK 위반 ERROR 0건 회복 예상.
+
+### Phase 2.3 indexnow_queue 부분 — src/ 미발견
+`src/` 전역에서 indexnow_queue INSERT 없음 (UPDATE만 indexnow-batch / indexnow-urgent 라우트). User spec ('blog-publish-queue 가 INSERT')과 매칭 X. 추정:
+- DB trigger 가 blog_posts INSERT 시 indexnow_queue 자동 INSERT → is_urgent 누락
+- 또는 다른 lib/RPC 경유
+
+Supabase MCP timeout 으로 즉시 trigger 확인 불가. 사용자 PC 영역에서 별도 확인 권장 (supabase 대시보드 또는 추후 retry).
+
+### 검증 (push 후 5-10분)
+- `/api/og-blog?slug=...` 200 OK + Content-Type: image/png
+- `/api/og-apt?slug=...` 200 OK
+- `/api/og-stock?symbol=005930` 200 OK
+- Vercel logs `Failed to load dynamic font` 0건
+- postgres logs `big_event_bootstrap_queue_status_check` 위반 0건
+
+### 잔존
+- og 라우트 가 작동하는데 다른 3 라우트는 ImageResponse throw — 본질 root cause 미해결. fallback ImageResponse 로 사용자 경험 보장. 깊은 진단은 사용자 PC 영역.
+- indexnow_queue INSERT 누락 컬럼 — src 코드 외 영역 가능성.
+
 ## s263 Phase 2.1 후속 — og-apt 발견 + og-stock 잔존 (2026-05-09 KST 19:50)
 
 ### Vercel runtime logs 직접 fetch 결과
