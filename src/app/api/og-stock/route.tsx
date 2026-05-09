@@ -308,6 +308,14 @@ export async function GET(req: NextRequest) {
     : {};
   const ff = fontData ? 'NotoSansKR, sans-serif' : 'sans-serif';
 
+  // s263 Phase 2.1 후속: 진단 logging — single line 으로 모든 컨텍스트 노출.
+  // og-blog 회복 / og-stock 잔존 → trace 외 다른 root cause 식별 위해.
+  console.error(
+    `[og-stock] DIAG fontLoaded=${!!fontData} fontBytes=${fontData?.byteLength ?? 0} ` +
+    `runtime=${process.env.NEXT_RUNTIME ?? 'unset'} cwd=${process.cwd()} ` +
+    `card=${card} symbol=${symbol ?? 'null'}`
+  );
+
   let quote: QuoteRow | null = null;
   if (symbol) {
     try { quote = await fetchQuote(symbol); } catch (err) { console.error('[og-stock] fetchQuote error', err); }
@@ -341,13 +349,19 @@ export async function GET(req: NextRequest) {
     });
   } catch (err) {
     const e = err as Error;
-    // s263 Phase 2.1: Vercel runtime logs 가 multi-arg console.error 를 chunk 로
-    // 분리 (U/U/I/E 4 chunks). 단일 string concat 으로 합쳐 한 줄에 진단 정보 모두 노출.
-    console.error(
-      `[og-stock] FULL: message=${e?.message ?? 'n/a'} class=${e?.constructor?.name ?? 'n/a'} ` +
-      `input=${JSON.stringify({ symbol, card, fontLoaded: !!fontData, hasQuote: !!quote })} ` +
-      `stack=${(e?.stack ?? '').slice(0, 500)}`
-    );
+    // s263 Phase 2.1 후속: og-blog 패턴 차용 — message 80자 chunked 출력으로 잘림 방지.
+    // 사용자 리포트: "Unexpected ..." 까지만 보이고 잘림. chunked 로 full message 확보.
+    const msg = (e?.message ?? 'n/a');
+    const cls = (e?.constructor?.name ?? 'n/a');
+    const code = (e as { code?: string })?.code ?? 'n/a';
+    console.error(`[og-stock] cls=${cls} code=${code} fontLoaded=${!!fontData} hasQuote=${!!quote} symbol=${symbol ?? 'null'} card=${card}`);
+    for (let i = 0; i < msg.length && i < 800; i += 80) {
+      console.error(`[og-stock] m${i / 80}=${msg.slice(i, i + 80)}`);
+    }
+    const stk = (e?.stack ?? '');
+    for (let i = 0; i < Math.min(stk.length, 480); i += 80) {
+      console.error(`[og-stock] s${i / 80}=${stk.slice(i, i + 80)}`);
+    }
     return Response.redirect(`${SITE_URL}/images/brand/kadeora-wide.png`, 302);
   }
 }
