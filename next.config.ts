@@ -23,6 +23,7 @@ const nextConfig: NextConfig = {
     '/api/og-square': ['./public/fonts/**'],
     '/api/og-stock':  ['./public/fonts/**'],
     '/api/og-blog':   ['./public/fonts/**'],
+    '/api/og-apt':    ['./public/fonts/**'],
   },
 
   images: {
