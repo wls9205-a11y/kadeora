@@ -1,4 +1,53 @@
 
+## Session s262 — Issue Engine v1 GA 선언 + freshness race fix (2026-05-09)
+
+### ISSUE ENGINE v1 GA — 4 phase 완료
+
+| Phase | commit | 결과 |
+|---|---|---|
+| A (DB)         | b8df23ee | 7 마이그레이션 — weights / mat view 2 / get_home_data / comments polymorphic / entity_comment_stats / counts RPC |
+| B (lib + comp) | ffcaa69c | 14 파일 + sandbox — stockColor v3 / issue helpers / cards / chips |
+| C (pages)      | 5c44cc12 | 3 페이지 rewrite + IssueGateCard + DDayAlertCTA + _legacy 백업 |
+| D (cron)       | 67627fe5 | pg_cron 4 schedule + cron_health 안전망, Architecture Rule #86 |
+
+### Phase D 자동화 검증 (UTC 06:33 마이그레이션 → 07:02 폴링)
+- 06:40 freshness 자동 fire: 33.96ms succeeded ✅
+- 06:50 freshness 자동 fire: 92.74ms ✅
+- 07:00 동시 fire: freshness 194ms + weekend stock 1859ms ✅
+- 07:01 apt 자동 fire: 293ms (apt 단독 :01 분리) ✅
+- 매트뷰 자동 갱신: stock 1805 / apt 37 → 40 (새 청약 자동 반영) ✅
+
+### 발견 사항: 07:00 race condition (false positive stale alert)
+타임라인:
+- 07:00:00.224 freshness 시작 → max(stock.computed_at) 읽음 = 06:33 (수동 실행 시점)
+- 07:00:00.405 weekend stock REFRESH 시작 (freshness 종료 13ms 전)
+- 07:00:00.418 freshness 종료 → 25분 임계 초과 → alerting=true, "stale 1611s"
+- 07:00:02.264 stock REFRESH 종료, max(computed_at) 갱신 → 다음 freshness fire 시 self-heal
+
+**원인:** freshness 와 weekend stock cron 둘 다 :00 정각 fire, 13ms 시작 차이로 race.
+
+**해결 (A안 적용):** freshness schedule `*/10 * * * *` → `5,15,25,35,45,55 * * * *`. :00 정각 회피, weekend stock(:00) + apt(:01) REFRESH 끝난 후 :05에 체크.
+
+```sql
+-- 적용 결과 (마이그레이션 파일 sync 됨)
+SELECT cron.unschedule('kadeora-issue-scores-freshness-check');
+SELECT cron.schedule('kadeora-issue-scores-freshness-check', '5,15,25,35,45,55 * * * *', ...);
+-- false positive UPDATE: 안전 조건 (매트뷰가 last_run 보다 5분+ 더 최신) 검증 후 alerting=false
+```
+
+### 운영 측 추가 발견 (모니터만, 액션 없음)
+- 06:50 freshness 92.74ms (06:40 33.96ms 의 2.7배) — 첫 실행 후 매트뷰 size 늘어난 영향 추정. 정상 범위(<200ms 임계).
+- run_count_24h 자동 reset 트리거: cron_logs 24h 윈도우로 매번 SELECT count → 자연스럽게 슬라이딩. 별도 reset cron 불필요. **다음 세션 24h 후 검증** (s263 TODO).
+
+### s263 TODO 우선순위
+1. **카카오 OAuth 50% 이탈** — 코드 외 영역. Kakao 콘솔 동의항목 검수.
+2. **action_bar 사망** — mount/render 회귀 진단.
+3. **apt_dday_alert vs apt_alert_cta** — 24h 데이터 누적 후 비교.
+4. **issue_gate_stock baseline** — /stock 6번째 자리 게이트 클릭률.
+5. **direct 29% source 추적 보강** — UTM/referer.
+6. **run_count_24h 자동 reset 검증** — 24h 후 cron_logs 슬라이딩 동작 확인.
+7. (옵션) admin/health 페이지 — cron_health.alerting=true 시각화.
+
 ## Session s262 — Issue Engine v1 Phase D (pg_cron 활성화) — ISSUE ENGINE v1 GA (2026-05-09)
 
 ### 적용 변경 (DB 마이그레이션 1건, Vercel 변경 0)

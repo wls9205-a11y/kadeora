@@ -243,19 +243,20 @@ SELECT cron.schedule(
   $cron$ SELECT public.refresh_stock_issue_scores_v1(); $cron$
 );
 
--- apt 매시 정각 (KST 무관, 시간당 1회)
+-- apt 매시 :01 (UTC 07:00 weekend stock + freshness 동시 fire 부하 분산)
 SELECT cron.unschedule(jobid) FROM cron.job WHERE jobname = 'kadeora-refresh-apt-issue-scores';
 SELECT cron.schedule(
   'kadeora-refresh-apt-issue-scores',
-  '0 * * * *',
+  '1 * * * *',
   $cron$ SELECT public.refresh_apt_issue_scores_v1(); $cron$
 );
 
--- freshness check 10분마다
+-- freshness check 10분마다, :00 정각 회피.
+-- :00 정각 회피 (UTC 07:00 weekend stock REFRESH race condition 방지, s262 06:40 fire 검증 시 발견 — freshness 가 stock REFRESH 시작 13ms 전에 max(computed_at) 읽고 stale 잘못 raise).
 SELECT cron.unschedule(jobid) FROM cron.job WHERE jobname = 'kadeora-issue-scores-freshness-check';
 SELECT cron.schedule(
   'kadeora-issue-scores-freshness-check',
-  '*/10 * * * *',
+  '5,15,25,35,45,55 * * * *',
   $cron$ SELECT public.check_issue_scores_freshness(); $cron$
 );
 
