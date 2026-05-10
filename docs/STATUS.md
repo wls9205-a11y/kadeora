@@ -1,4 +1,20 @@
 
+## s263 Phase C — freshness weekend threshold 분기 (2026-05-10 KST 16:05)
+
+### 발견
+- cron_health.issue_scores_freshness_stock alerting=true, last_error="stale 3300s"
+- weekday 25min threshold 고정인데 weekend stock 은 hourly REFRESH (cron '0 * * * 0,6')
+- 25~55min stale 정상이지만 false positive
+
+### Fix
+- check_issue_scores_freshness() 함수에 EXTRACT(DOW FROM KST) IN (0,6) 분기
+- weekend → 90min threshold / weekday → 25min threshold (기존 유지)
+- s263_c_freshness_weekend_threshold 마이그 적용
+
+### 검증
+- 적용 직후 수동 fire → 둘 다 alerting=false, last_error=null
+- stock stale 8.5min, apt stale 7.5min (weekend 90min threshold 안)
+
 ## s263 Phase 2.3.b — indexnow_queue BEFORE INSERT default urgent trigger (defense in depth)
 
 RPC level NULL safety (17f917b5 enqueue_indexnow COALESCE) 와 함께 DB level 보강:
