@@ -44,14 +44,17 @@ type Sub = {
   is_speculative_zone: boolean | null;
 };
 
+// s264-b P0-2: v_apt_card_unsold view 로 전환 + region_nm/sigungu_nm 추가 (s264_a).
+// 정규화된 카드 컬럼: name / region / households / supply_min / cover_image_url.
 type UnsoldRow = {
   id: number;
-  house_nm: string;
+  name: string;
+  region: string | null;
+  households: number | null;
+  supply_min: number | null;
+  cover_image_url: string | null;
   region_nm: string | null;
   sigungu_nm: string | null;
-  tot_unsold_hshld_co: number | null;
-  sale_price_min: number | null;
-  thumbnail_url: string | null;
 };
 
 type RedevRow = {
@@ -87,14 +90,15 @@ async function fetchBlocks(region: string) {
       .or('is_regulated_area.eq.true,is_speculative_zone.eq.true')
       .gte('rcept_endde', new Date(Date.now() - 7 * 86400_000).toISOString().slice(0, 10))
       .order('rcept_endde', { ascending: true }).limit(3),
-    // 미분양 핫 — s264-b P0-2: region_nm eq 매칭. v_apt_card_unsold 가 s264_a 에서
-    // region_nm 컬럼 expose. region 이 '전국' 아니면 서버 측 filter (서울 16 / 부산 17 / 경기 31).
+    // 미분양 핫 — s264-b P0-2: v_apt_card_unsold view (정규화 컬럼) + region_nm eq.
+    // s264_a 에서 region_nm/sigungu_nm 컬럼 expose. 서울 16 / 부산 17 / 경기 31 표시.
     (() => {
-      let q = (sb as any).from('unsold_apts')
-        .select('id, house_nm, region_nm, sigungu_nm, tot_unsold_hshld_co, sale_price_min, thumbnail_url')
-        .eq('is_active', true);
+      let q = (sb as any).from('v_apt_card_unsold')
+        .select('id, name, region, households, supply_min, cover_image_url, region_nm, sigungu_nm')
+        .order('households', { ascending: false, nullsFirst: false })
+        .limit(5);
       if (!isAll) q = q.eq('region_nm', region);
-      return q.order('tot_unsold_hshld_co', { ascending: false, nullsFirst: false }).limit(5);
+      return q;
     })(),
     // 재개발 단계 변경
     (sb as any).from('redevelopment_projects')
@@ -287,13 +291,13 @@ function UnsoldHotRow({ u }: { u: UnsoldRow }) {
       }}
     >
       <span style={{ flex: 1, minWidth: 0, fontSize: 12.5, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-        {u.house_nm}
+        {u.name}
       </span>
       <span style={{ fontSize: 11, color: '#6B7280', whiteSpace: 'nowrap' }}>
-        {u.sigungu_nm ?? u.region_nm ?? ''}
+        {u.sigungu_nm ?? u.region_nm ?? u.region ?? ''}
       </span>
-      {u.tot_unsold_hshld_co ? (
-        <span style={{ fontSize: 11, color: '#9A3412', fontWeight: 600 }}>잔여 {u.tot_unsold_hshld_co.toLocaleString()}세대</span>
+      {u.households ? (
+        <span style={{ fontSize: 11, color: '#9A3412', fontWeight: 600 }}>잔여 {u.households.toLocaleString()}세대</span>
       ) : null}
     </Link>
   );
