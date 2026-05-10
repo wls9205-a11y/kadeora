@@ -4,6 +4,7 @@
 // s262 Phase E (CAROUSEL v1): NEXT_PUBLIC_CAROUSEL_ENABLED 시 각 블록을 AptHScroll wrap.
 // s264-b: 미분양 v_apt_card_unsold view + region_nm eq.
 // s265-b: cascade fallback RPC + EmptyState + 통합 carousel.
+// s265-c: 통합 carousel 평탄 schema (s265_a2) — thumbnail + meta + section-specific href.
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { SITE_URL } from '@/lib/constants';
@@ -76,21 +77,28 @@ type RedevRow = {
 type ImminentRow = AptIssueScore & { tier?: CascadeTier };
 type FreshRow = Sub & { tier?: CascadeTier };
 
-// s265-b: 통합 carousel — section 별 색 chip + 단지명 + 메타.
+// s265-c: 통합 carousel — s265_a2 RPC 평탄 schema (DISTINCT id, href 포함).
 type UnifiedItem = {
+  id?: number | string;
   section: 'unsold' | 'imminent' | 'redev' | 'fresh' | 'score';
-  id: number | string;
-  title: string;
-  meta?: string | null;
-  href?: string | null;
+  badge_label: string;
+  badge_color: 'amber' | 'coral' | 'green' | 'blue' | 'purple';
+  title?: string;
+  region?: string;
+  sigungu?: string;
+  meta?: string;
+  image_url?: string | null;
+  href?: string;
+  tier?: CascadeTier;
+  empty?: boolean;
 };
 
-const SECTION_STYLE: Record<UnifiedItem['section'], { bg: string; fg: string; label: string }> = {
-  unsold:    { bg: '#FEF3C7', fg: '#92400E', label: '미분양' },
-  imminent:  { bg: '#FEF3C7', fg: '#92400E', label: '청약' },
-  redev:     { bg: '#DCFCE7', fg: '#166534', label: '재개발' },
-  fresh:     { bg: '#DBEAFE', fg: '#1E40AF', label: '신규' },
-  score:     { bg: '#EDE9FE', fg: '#5B21B6', label: '점수' },
+const BADGE_COLORS: Record<string, [string, string]> = {
+  amber:  ['#FAEEDA', '#854F0B'],
+  coral:  ['#FAECE7', '#993C1D'],
+  green:  ['#E1F5EE', '#085041'],
+  blue:   ['#E6F1FB', '#0C447C'],
+  purple: ['#EEEDFE', '#3C3489'],
 };
 
 function topTier<T extends { tier?: CascadeTier }>(rows: T[]): CascadeTier {
@@ -184,49 +192,79 @@ export default async function AptPage({ searchParams }: { searchParams?: Promise
         </Link>
       </div>
 
-      {/* s265-b: 통합 carousel (cross-section 5장) — 페이지 최상단 */}
+      {/* s265-c: 통합 carousel (cross-section 5장) — 평탄 schema rendering */}
       {blocks.unified.length > 0 && (
-        <section style={{ marginBottom: 14 }}>
-          <div style={{ padding: '0 6px 6px' }}>
-            <h2 style={{ fontSize: 14, fontWeight: 700, margin: 0 }}>🎯 오늘의 단지 5</h2>
-            <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 1 }}>{region} 핵심 단지 한눈에</div>
-          </div>
-          <AptHScroll ariaLabel="오늘의 단지">
-            {blocks.unified.slice(0, 5).map((u) => {
-              const s = SECTION_STYLE[u.section] ?? SECTION_STYLE.score;
+        <section style={{ marginBottom: 14, padding: '0 6px' }}>
+          <h2 style={{ fontSize: 14, fontWeight: 700, margin: 0 }}>🎯 오늘의 단지 5</h2>
+          <p style={{ fontSize: 12, color: 'var(--text-secondary, #6B7280)', margin: '2px 0 0' }}>
+            {region === '전국' ? '전국' : region} 핵심 단지 한눈에
+          </p>
+          <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 8, marginTop: 8 }}>
+            {blocks.unified.slice(0, 5).map((item, idx) => {
+              const [bg, fg] = BADGE_COLORS[item.badge_color] ?? BADGE_COLORS.amber;
+              if (item.empty || !item.href || !item.title) {
+                return (
+                  <div
+                    key={`empty-${idx}`}
+                    style={{
+                      flex: '0 0 144px',
+                      background: 'var(--bg-elevated, #F9FAFB)',
+                      borderRadius: 8,
+                      padding: 8,
+                      border: '1px solid var(--border, #E5E7EB)',
+                    }}
+                  >
+                    <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 4, background: bg, color: fg, fontWeight: 700 }}>
+                      {item.badge_label}
+                    </span>
+                    <div style={{ marginTop: 6, fontSize: 11, color: 'var(--text-secondary, #6B7280)' }}>준비 중</div>
+                  </div>
+                );
+              }
               return (
                 <Link
-                  key={`${u.section}-${u.id}`}
-                  href={u.href ?? '/apt'}
+                  key={`${item.section}-${item.id}`}
+                  href={item.href}
                   style={{
-                    flex: '0 0 200px',
-                    scrollSnapAlign: 'start',
-                    padding: '10px 12px',
-                    borderRadius: 6,
-                    background: '#FFFFFF',
-                    border: '1px solid #E5E7EB',
+                    flex: '0 0 144px',
+                    background: 'var(--bg-surface, #fff)',
+                    borderRadius: 8,
+                    border: '1px solid var(--border, #e5e7eb)',
+                    overflow: 'hidden',
                     textDecoration: 'none',
-                    color: '#111827',
-                    boxShadow: '0 1px 1px rgba(0,0,0,0.04)',
+                    color: 'inherit',
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 6 }}>
-                    <span style={{ background: s.bg, color: s.fg, padding: '1px 6px', borderRadius: 3, fontSize: 10.5, fontWeight: 700 }}>
-                      {s.label}
+                  {item.image_url ? (
+                    <div
+                      style={{
+                        width: '100%',
+                        height: 80,
+                        background: `url(${item.image_url}) center/cover`,
+                        backgroundColor: 'var(--bg-elevated, #F9FAFB)',
+                      }}
+                    />
+                  ) : (
+                    <div style={{ width: '100%', height: 80, background: 'var(--bg-elevated, #F9FAFB)' }} />
+                  )}
+                  <div style={{ padding: 8 }}>
+                    <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 4, background: bg, color: fg, fontWeight: 700 }}>
+                      {item.badge_label}
                     </span>
-                  </div>
-                  <div style={{ fontSize: 12.5, fontWeight: 600, lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {u.title}
-                  </div>
-                  {u.meta ? (
-                    <div style={{ fontSize: 11, color: '#6B7280', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {u.meta}
+                    <div style={{ marginTop: 4, fontSize: 12, fontWeight: 500, lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {item.title}
                     </div>
-                  ) : null}
+                    <div style={{ fontSize: 10, color: 'var(--text-secondary, #6B7280)', marginTop: 2 }}>
+                      {item.region}{item.sigungu && item.sigungu !== item.region ? ` · ${item.sigungu}` : ''}
+                    </div>
+                    {item.meta ? (
+                      <div style={{ fontSize: 10, color: 'var(--text-secondary, #6B7280)' }}>{item.meta}</div>
+                    ) : null}
+                  </div>
                 </Link>
               );
             })}
-          </AptHScroll>
+          </div>
         </section>
       )}
 

@@ -1,4 +1,29 @@
 
+## s265-c — apt 통합 carousel rendering 본격 + s265_a2 RPC schema (2026-05-10 KST)
+
+### s265_a2 (선행, Supabase MCP 적용)
+- get_apt_unified_carousel(p_region) 평탄 schema 재작성:
+  - 공통 필드: id, section, badge_label, badge_color, title, region, sigungu, meta, image_url, href, tier, empty
+  - DISTINCT id 보장 (cross-section 중복 차단)
+  - section 별 deep link href (/apt/unsold/{id}, /apt/subscription/{id}, /apt/redev/{id})
+- get_apt_fresh_cascade: rcept_endde >= CURRENT_DATE active filter 적용 (6년 전 2020 청약 제거)
+
+### s265-c — 코드 layer (이번 commit)
+**app/(main)/apt/page.tsx** — 통합 carousel rendering 재작성:
+- chip-only 5개 (s265-b) → thumbnail + 단지명 + region/sigungu + meta + section-specific href 카드 5장
+- BADGE_COLORS map (amber/coral/green/blue/purple)
+- 카드 width 144px, image 80px, padding 8, var(--bg-surface/--text-secondary/--border) 토큰 사용
+- empty placeholder 케이스 (item.empty === true) 처리 — '준비 중' fallback
+- UnifiedItem type s265_a2 schema 동기화
+
+### Architecture Rule #99/#100 신설
+- #99: Cross-section unified carousel RPC schema 통일 의무 — 평탄 구조 + 공통 필드 + DISTINCT id.
+- #100: 청약 fetch 시 rcept_endde >= CURRENT_DATE active filter 필수.
+
+### 검증
+- 부산 RPC 응답: 5장 (미분양 amber / 청약 coral / 재개발 green / 신규 blue / 점수 purple) — DISTINCT id, href 평탄 schema 확인.
+- npm run type-check / build (이번 commit 전 검증).
+
 ## s265-b — apt cascade fallback + EmptyState + 통합 carousel (2026-05-08 KST)
 
 ### s265_a (선행, Supabase MCP 적용)

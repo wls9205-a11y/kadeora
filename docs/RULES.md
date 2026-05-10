@@ -1,4 +1,4 @@
-# 카더라 Architecture Rules (#1~#98)
+# 카더라 Architecture Rules (#1~#100)
 
 `docs/STATUS.md`는 세션별 작업 기록, 이 파일은 최종 규칙 모음.
 
@@ -89,6 +89,8 @@
 - **#96** sendBeacon 또는 fetch keepalive 필수 — navigate-triggering 클릭 추적은 `setTimeout` 패턴 금지. unload 시 콜백 drop. `navigator.sendBeacon` 우선 (sync queue, 브라우저가 unload 시 자동 flush 보장), 실패 시 `fetch(..., { keepalive: true })` fallback. 즉시 fire 후 navigate. s230 P1 (80→50ms) / s263 Phase 2.2 (50→200ms) 모두 setTimeout 의존이라 모바일 환경에서 sendBeacon drop 회귀 발생 — s264-b 에서 setTimeout 제거. 영향: 6 silent CTA (sticky_signup_bar, blog_early_teaser, related_blog_section, login_gate_apt_analysis, login_gate_apt_trade_alert, blog_gated_login) 회복.
 - **#97** 빈 상태는 cascade fallback + EmptyState 의무 — raw query 단독 + 빈 메시지 노출 금지. 지역 필터 query 가 빈 결과 시 cascade RPC 사용 (s265_a 의 `get_apt_imminent_cascade` / `get_apt_fresh_cascade` / `get_apt_redev_cascade` / `get_apt_unified_carousel`). cascade 4단계: L1=region 매칭 → L2=시간 확장 (D-30) → L3=인접 지역 (`ADJACENT_REGIONS` from `lib/regions.ts`) → L4=전국. L4 까지 거의 항상 5장 보장. 그래도 0 이면 `<EmptyState>` 컴포넌트로 fallback (icon + title + description + 선택 CTA). 단순 회색 박스 + "데이터 없음" 텍스트 금지.
 - **#98** Region 필터 일관성 — middleware `x-kd-region` 헤더와 page-level `region` 항상 sync. cookie/localStorage/query param 우선순위 명시. cross-region carousel (예: 통합 carousel) 은 RPC 의 `p_region` 인자 명시 필수. 미명시 시 fallback default ('전국') 가 적용되어 사용자 선택 region 외 단지 노출 버그 발생 (s265 발견 — 부산 선택 시 경기 단지 carousel 노출).
+- **#99** Cross-section unified carousel RPC 응답 schema 통일 의무 — 여러 도메인 섹션 (미분양/청약/재개발/Fresh/Score 등) 을 하나의 carousel 에 합치는 RPC 는 모든 섹션이 공통 평탄 필드를 갖도록 통일 (`id`, `section`, `title`, `region`, `sigungu`, `meta`, `image_url`, `href`, `badge_label`, `badge_color`, `tier`, optional `empty`). data wrapper / nested object / per-section 다른 컬럼명 금지. 클라이언트가 section 별 분기 없이 단일 카드 컴포넌트로 렌더 가능해야 함. DISTINCT id 보장 (cross-section 중복 방지). placeholder 가 필요한 슬롯은 `empty: true` 로 표시.
+- **#100** 청약 데이터 fetch 시 `rcept_endde >= CURRENT_DATE` active filter 필수 — 마감된 청약을 "신규" 라벨로 노출하면 사용자 신뢰도 회복 불가. RPC / view / page-level fetch 모두 active 필터 적용 (`get_apt_fresh_cascade` 는 s265_a2 에서 보강). 6년 전 (예: 2020) 청약이 신규 carousel 에 떠 있는 회귀가 발견되면 신뢰성 P0 — 즉시 RPC 수정 + filter 적용.
 
 ## 워크플로
 - **#11** `docs/STATUS.md`는 매 세션 prepend + commit/push 필수
