@@ -40,7 +40,7 @@ export function headerForTier(base: string, tier: CascadeTier): string {
   switch (tier) {
     case 'L1': return base;
     case 'L2': return `최근 ${stripped}`;
-    case 'L3': return `${stripped} (인접 지역 포함)`;
+    case 'L3': return `${base} (인접 지역 포함)`;
     case 'L4': return `전국 ${stripped}`;
   }
 }
