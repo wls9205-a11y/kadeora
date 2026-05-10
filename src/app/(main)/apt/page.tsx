@@ -87,11 +87,15 @@ async function fetchBlocks(region: string) {
       .or('is_regulated_area.eq.true,is_speculative_zone.eq.true')
       .gte('rcept_endde', new Date(Date.now() - 7 * 86400_000).toISOString().slice(0, 10))
       .order('rcept_endde', { ascending: true }).limit(3),
-    // 미분양 핫
-    (sb as any).from('unsold_apts')
-      .select('id, house_nm, region_nm, sigungu_nm, tot_unsold_hshld_co, sale_price_min, thumbnail_url')
-      .eq('is_active', true)
-      .order('tot_unsold_hshld_co', { ascending: false, nullsFirst: false }).limit(5),
+    // 미분양 핫 — s264-b P0-2: region_nm eq 매칭. v_apt_card_unsold 가 s264_a 에서
+    // region_nm 컬럼 expose. region 이 '전국' 아니면 서버 측 filter (서울 16 / 부산 17 / 경기 31).
+    (() => {
+      let q = (sb as any).from('unsold_apts')
+        .select('id, house_nm, region_nm, sigungu_nm, tot_unsold_hshld_co, sale_price_min, thumbnail_url')
+        .eq('is_active', true);
+      if (!isAll) q = q.eq('region_nm', region);
+      return q.order('tot_unsold_hshld_co', { ascending: false, nullsFirst: false }).limit(5);
+    })(),
     // 재개발 단계 변경
     (sb as any).from('redevelopment_projects')
       .select('id, district_name, region, sigungu, stage, previous_stage, last_stage_change, thumbnail_url')

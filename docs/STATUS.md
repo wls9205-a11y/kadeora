@@ -1,4 +1,46 @@
 
+## s264-b — cta-navigate sendBeacon + apt page region_nm 매칭 (2026-05-10 KST)
+
+### s264_a (선행, Supabase MCP 적용)
+- v_apt_card_unsold: region_nm + sigungu_nm 컬럼 추가
+- v_admin_carousel_metrics 신규 (carousel 트래픽)
+- v_admin_health_alerts 신규 (cron alerting 통합)
+- v_admin_silent_ctas 신규 (silent 6건 / CRITICAL 2건 발견)
+
+### s264_b — 코드 layer (이번 commit)
+**P0-1 lib/cta-navigate.ts** — setTimeout 패턴 완전 제거.
+- sendBeacon (sync queue, unload 시 자동 flush 보장) 우선
+- fetch keepalive fallback
+- 즉시 navigate (setTimeout 0)
+- 호출자 8개 호환 위해 object signature (CtaNavigateProps) 보존
+- inline visitorId / detectDevice helper
+
+**P0-2 app/(main)/apt/page.tsx** — 미분양 핫 fetch region_nm eq 매칭.
+- region 이 '전국' 아니면 server-side `.eq('region_nm', region)` 적용
+- v_apt_card_unsold s264_a 갱신으로 region_nm column expose
+- 서울 16 / 부산 17 / 경기 31 표시 가능
+
+### Architecture Rule #96 신설
+sendBeacon 또는 fetch keepalive 필수. navigate-triggering 클릭 추적은 setTimeout 패턴 금지. 즉시 fire 후 navigate. s230 P1 (80→50ms) / s263 Phase 2.2 (50→200ms) 모두 회귀 — s264-b 에서 setTimeout 완전 제거.
+
+### 영향 (회복 예상)
+- sticky_signup_bar (36 view / 0 click → click > 0)
+- blog_early_teaser (31 / 0 → > 0)
+- login_gate_apt_analysis / login_gate_apt_trade_alert / blog_gated_login / related_blog_section
+- 6개 silent CTA 모두
+
+### 검증 SQL (deploy 5분 후)
+```sql
+SELECT cta_name, views_24h, clicks_24h, ctr, health
+FROM v_cta_health_check WHERE views_24h >= 10 ORDER BY views_24h DESC;
+
+SELECT (data->'silent_count')::int as silent, (data->'critical_count')::int as critical
+FROM v_admin_silent_ctas;
+```
+
+### Verify (web)
+- /apt?region=서울 미분양 카드 표시 (전 '미분양 데이터 준비 중' → 5 카드)
+
 ## s263 Phase C — freshness weekend threshold 분기 (2026-05-10 KST 16:05)
 
 ### 발견
