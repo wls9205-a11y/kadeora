@@ -1,4 +1,4 @@
-# 카더라 Architecture Rules (#1~#96)
+# 카더라 Architecture Rules (#1~#98)
 
 `docs/STATUS.md`는 세션별 작업 기록, 이 파일은 최종 규칙 모음.
 
@@ -87,6 +87,8 @@
 - **#94** Inline hex 사용 시 항상 소문자 + var() 호출 우선 — 카드/배지의 `style={{ background: '#FFFFFF' }}` 같은 inline hex 가 dark mode catch-all selector 와 미스매치되면 가독성 회귀. 새 컴포넌트 작성 시 (1) 디자인 토큰 var() 우선 (`var(--bg-surface)`, `var(--text-primary)` 등), (2) hex 불가피한 경우 소문자 + 스페이스 syntax (`background: #ffffff`) 로 globals.css 의 catch-all selector 와 매칭 보장. 이미 적용된 inline hex 는 globals.css 끝의 catch-all 확장으로 cover (Phase F-lite 패턴) — 다만 본질 fix 는 inline hex 자체를 var() 로 전환 (Phase F real migration 은 별도 세션).
 - **#95** GRANT 누락 점검은 새 함수/view 추가 시 필수 — production 클라이언트(authenticated/anon)가 호출하는 모든 SECURITY INVOKER 함수와 RLS 적용 view 는 명시적 `GRANT EXECUTE`/`GRANT SELECT TO authenticated, anon` 필요. Supabase Phase 4 Track 4 보안 강화 이후 PUBLIC default GRANT 무효. 마이그 작성 시 (1) 클라이언트 호출 여부 확인, (2) GRANT 명시 추가, (3) 적용 직후 `NOTIFY pgrst, 'reload schema'`, (4) 5분 후 postgres 로그에서 `permission denied` 0건 검증. 증거 기록: s263_a (log_teaser_debug, get_my_access_level, v_complex_region_stats, v_complex_age_stats 4건 회귀 ERROR 매 분 burst — postgres 로그 18:46:20 이후 0건 회복).
 - **#96** sendBeacon 또는 fetch keepalive 필수 — navigate-triggering 클릭 추적은 `setTimeout` 패턴 금지. unload 시 콜백 drop. `navigator.sendBeacon` 우선 (sync queue, 브라우저가 unload 시 자동 flush 보장), 실패 시 `fetch(..., { keepalive: true })` fallback. 즉시 fire 후 navigate. s230 P1 (80→50ms) / s263 Phase 2.2 (50→200ms) 모두 setTimeout 의존이라 모바일 환경에서 sendBeacon drop 회귀 발생 — s264-b 에서 setTimeout 제거. 영향: 6 silent CTA (sticky_signup_bar, blog_early_teaser, related_blog_section, login_gate_apt_analysis, login_gate_apt_trade_alert, blog_gated_login) 회복.
+- **#97** 빈 상태는 cascade fallback + EmptyState 의무 — raw query 단독 + 빈 메시지 노출 금지. 지역 필터 query 가 빈 결과 시 cascade RPC 사용 (s265_a 의 `get_apt_imminent_cascade` / `get_apt_fresh_cascade` / `get_apt_redev_cascade` / `get_apt_unified_carousel`). cascade 4단계: L1=region 매칭 → L2=시간 확장 (D-30) → L3=인접 지역 (`ADJACENT_REGIONS` from `lib/regions.ts`) → L4=전국. L4 까지 거의 항상 5장 보장. 그래도 0 이면 `<EmptyState>` 컴포넌트로 fallback (icon + title + description + 선택 CTA). 단순 회색 박스 + "데이터 없음" 텍스트 금지.
+- **#98** Region 필터 일관성 — middleware `x-kd-region` 헤더와 page-level `region` 항상 sync. cookie/localStorage/query param 우선순위 명시. cross-region carousel (예: 통합 carousel) 은 RPC 의 `p_region` 인자 명시 필수. 미명시 시 fallback default ('전국') 가 적용되어 사용자 선택 region 외 단지 노출 버그 발생 (s265 발견 — 부산 선택 시 경기 단지 carousel 노출).
 
 ## 워크플로
 - **#11** `docs/STATUS.md`는 매 세션 prepend + commit/push 필수

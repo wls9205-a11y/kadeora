@@ -22,3 +22,29 @@ export const SIGUNGU_MAP: Record<string, string[]> = {
 };
 
 export type Sido = typeof REGIONS[number];
+
+// s265 — REGIONS alias (동일 17개) + 인접 지역 매핑.
+// cascade fallback RPC (get_apt_*_cascade) 의 L3 (인접 지역 포함) 단계와 매칭.
+// 인접 정의: 행정구역 직접 인접 + 일반적 생활권 (예: 서울 ↔ 경기/인천).
+export const REGIONS_17 = REGIONS;
+export type Region17 = (typeof REGIONS_17)[number];
+
+export const ADJACENT_REGIONS: Record<string, string[]> = {
+  '서울': ['경기', '인천'],
+  '부산': ['경남', '울산'],
+  '대구': ['경북', '경남'],
+  '인천': ['경기', '서울'],
+  '광주': ['전남', '전북'],
+  '대전': ['충남', '충북', '세종'],
+  '울산': ['부산', '경남'],
+  '세종': ['대전', '충남', '충북'],
+  '경기': ['서울', '인천', '강원'],
+  '강원': ['경기', '경북'],
+  '충북': ['충남', '세종', '경북'],
+  '충남': ['대전', '세종', '충북'],
+  '전북': ['전남', '광주', '충남'],
+  '전남': ['전북', '광주'],
+  '경북': ['경남', '대구', '강원'],
+  '경남': ['부산', '울산', '경북'],
+  '제주': ['전남'],
+};

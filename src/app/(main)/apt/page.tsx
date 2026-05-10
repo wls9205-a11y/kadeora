@@ -2,6 +2,8 @@
 // 5 블록: 정책알림 + 마감임박 + 신규공고24h + 미분양핫 + 재개발단계변경 + 도구 4개
 // DDayAlertCTA 마감임박 블록 끝에 노출 (비로그인 only).
 // s262 Phase E (CAROUSEL v1): NEXT_PUBLIC_CAROUSEL_ENABLED 시 각 블록을 AptHScroll wrap.
+// s264-b: 미분양 v_apt_card_unsold view + region_nm eq.
+// s265-b: cascade fallback RPC + EmptyState + 통합 carousel.
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { SITE_URL } from '@/lib/constants';
@@ -11,6 +13,8 @@ import AptIssueCard from '@/components/cards/AptIssueCard';
 import AptThumbnailCard from '@/components/cards/v2/AptThumbnailCard';
 import AptHScroll from '@/components/carousel/AptHScroll';
 import DDayAlertCTA from '@/components/cta/DDayAlertCTA';
+import EmptyState from '@/components/ui/EmptyState';
+import { TierBadge, headerForTier, type CascadeTier } from '@/components/cards/v2/TierBadge';
 import type { AptIssueScore } from '@/lib/issue/types';
 
 export const revalidate = 60;
@@ -44,8 +48,7 @@ type Sub = {
   is_speculative_zone: boolean | null;
 };
 
-// s264-b P0-2: v_apt_card_unsold view 로 전환 + region_nm/sigungu_nm 추가 (s264_a).
-// 정규화된 카드 컬럼: name / region / households / supply_min / cover_image_url.
+// s264-b P0-2: v_apt_card_unsold view 정규화 컬럼.
 type UnsoldRow = {
   id: number;
   name: string;
@@ -66,32 +69,51 @@ type RedevRow = {
   previous_stage: string | null;
   last_stage_change: string | null;
   thumbnail_url: string | null;
+  tier?: CascadeTier;
 };
+
+// s265-b: cascade RPC 응답 — AptIssueScore 위에 tier 추가.
+type ImminentRow = AptIssueScore & { tier?: CascadeTier };
+type FreshRow = Sub & { tier?: CascadeTier };
+
+// s265-b: 통합 carousel — section 별 색 chip + 단지명 + 메타.
+type UnifiedItem = {
+  section: 'unsold' | 'imminent' | 'redev' | 'fresh' | 'score';
+  id: number | string;
+  title: string;
+  meta?: string | null;
+  href?: string | null;
+};
+
+const SECTION_STYLE: Record<UnifiedItem['section'], { bg: string; fg: string; label: string }> = {
+  unsold:    { bg: '#FEF3C7', fg: '#92400E', label: '미분양' },
+  imminent:  { bg: '#FEF3C7', fg: '#92400E', label: '청약' },
+  redev:     { bg: '#DCFCE7', fg: '#166534', label: '재개발' },
+  fresh:     { bg: '#DBEAFE', fg: '#1E40AF', label: '신규' },
+  score:     { bg: '#EDE9FE', fg: '#5B21B6', label: '점수' },
+};
+
+function topTier<T extends { tier?: CascadeTier }>(rows: T[]): CascadeTier {
+  return (rows[0]?.tier ?? 'L1') as CascadeTier;
+}
 
 async function fetchBlocks(region: string) {
   const sb = getSupabaseAdmin();
   const isAll = region === '전국';
 
-  const [imminent, fresh24h, regulated, unsoldHot, redevStage] = await Promise.all([
-    // 마감 임박: apt_issue_scores dday 0..7
-    (sb as any).from('apt_issue_scores').select('*').is('warning', null)
-      .gte('dday', 0).lte('dday', 7)
-      .order('dday', { ascending: true })
-      .order('score', { ascending: false, nullsFirst: false })
-      .limit(5),
-    // 신규 공고 24h
-    (sb as any).from('apt_subscriptions')
-      .select('id, house_nm, region_nm, mdatrgbn_nm, rcept_endde, created_at, is_regulated_area, is_speculative_zone')
-      .gte('created_at', new Date(Date.now() - 24 * 3600 * 1000).toISOString())
-      .order('created_at', { ascending: false }).limit(5),
-    // 정책 알림: 규제/투기 지역
+  const [unifiedRes, imminentRes, freshRes, regulatedRes, unsoldRes, redevRes] = await Promise.all([
+    // s265-b: 통합 carousel (cross-section 5장)
+    (sb as any).rpc('get_apt_unified_carousel', { p_region: region }),
+    // s265-b: cascade RPC (L1 region → L2 D-30 → L3 인접 → L4 전국)
+    (sb as any).rpc('get_apt_imminent_cascade', { p_region: region, p_limit: 5 }),
+    (sb as any).rpc('get_apt_fresh_cascade',    { p_region: region, p_limit: 5 }),
+    // 정책 알림: 규제/투기 지역 (region 매칭 strict, 0건이면 섹션 hide)
     (sb as any).from('apt_subscriptions')
       .select('id, house_nm, region_nm, mdatrgbn_nm, rcept_endde, created_at, is_regulated_area, is_speculative_zone')
       .or('is_regulated_area.eq.true,is_speculative_zone.eq.true')
       .gte('rcept_endde', new Date(Date.now() - 7 * 86400_000).toISOString().slice(0, 10))
       .order('rcept_endde', { ascending: true }).limit(3),
-    // 미분양 핫 — s264-b P0-2: v_apt_card_unsold view (정규화 컬럼) + region_nm eq.
-    // s264_a 에서 region_nm/sigungu_nm 컬럼 expose. 서울 16 / 부산 17 / 경기 31 표시.
+    // 미분양 핫 — s264-b view + region eq.
     (() => {
       let q = (sb as any).from('v_apt_card_unsold')
         .select('id, name, region, households, supply_min, cover_image_url, region_nm, sigungu_nm')
@@ -100,12 +122,18 @@ async function fetchBlocks(region: string) {
       if (!isAll) q = q.eq('region_nm', region);
       return q;
     })(),
-    // 재개발 단계 변경
-    (sb as any).from('redevelopment_projects')
-      .select('id, district_name, region, sigungu, stage, previous_stage, last_stage_change, thumbnail_url')
-      .not('last_stage_change', 'is', null)
-      .order('last_stage_change', { ascending: false }).limit(5),
+    // s265-b: 재개발 cascade
+    (sb as any).rpc('get_apt_redev_cascade', { p_region: region, p_limit: 5 }),
   ]);
+
+  // RPC 응답: data 가 jsonb 배열 또는 array<object>. 둘 다 대응.
+  const asArray = <T,>(x: unknown): T[] => {
+    if (Array.isArray(x)) return x as T[];
+    if (x && typeof x === 'object' && Array.isArray((x as { items?: unknown[] }).items)) {
+      return (x as { items: T[] }).items;
+    }
+    return [];
+  };
 
   const filterRegion = <T extends { region_nm?: string | null; region?: string | null }>(rows: T[]): T[] => {
     if (isAll) return rows;
@@ -113,11 +141,12 @@ async function fetchBlocks(region: string) {
   };
 
   return {
-    imminent: ((imminent?.data ?? []) as AptIssueScore[]).filter((r) => isAll || (r.region_nm ?? '').includes(region)),
-    fresh24h: filterRegion((fresh24h?.data ?? []) as Sub[]),
-    regulated: filterRegion((regulated?.data ?? []) as Sub[]),
-    unsoldHot: filterRegion((unsoldHot?.data ?? []) as UnsoldRow[]),
-    redevStage: filterRegion((redevStage?.data ?? []) as RedevRow[]),
+    unified:    asArray<UnifiedItem>(unifiedRes?.data ?? []),
+    imminent:   asArray<ImminentRow>(imminentRes?.data ?? []),
+    fresh:      asArray<FreshRow>(freshRes?.data ?? []),
+    regulated:  filterRegion((regulatedRes?.data ?? []) as Sub[]),
+    unsoldHot:  ((unsoldRes?.data ?? []) as UnsoldRow[]),
+    redevStage: asArray<RedevRow>(redevRes?.data ?? []),
   };
 }
 
@@ -126,6 +155,10 @@ export default async function AptPage({ searchParams }: { searchParams?: Promise
   const region = sp.region?.trim() || '전국';
   const isAutoRegion = !sp.region;
   const blocks = await fetchBlocks(region);
+
+  const imminentTier = topTier(blocks.imminent);
+  const freshTier    = topTier(blocks.fresh);
+  const redevTier    = topTier(blocks.redevStage);
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '8px 6px 24px' }}>
@@ -151,62 +184,141 @@ export default async function AptPage({ searchParams }: { searchParams?: Promise
         </Link>
       </div>
 
-      {/* 1. 정책 알림 */}
-      <Block title="🚨 정책 알림" subtitle="규제·투기 지역 청약" href="/apt/subscription?filter=regulated">
-        {blocks.regulated.length === 0 ? (
-          <Empty label="현재 지역 규제 청약 없음" />
-        ) : blocks.regulated.map((s) => (
-          <SubRow key={s.id} sub={s} badge={s.is_speculative_zone ? '투기과열' : '조정대상'} />
-        ))}
-      </Block>
+      {/* s265-b: 통합 carousel (cross-section 5장) — 페이지 최상단 */}
+      {blocks.unified.length > 0 && (
+        <section style={{ marginBottom: 14 }}>
+          <div style={{ padding: '0 6px 6px' }}>
+            <h2 style={{ fontSize: 14, fontWeight: 700, margin: 0 }}>🎯 오늘의 단지 5</h2>
+            <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 1 }}>{region} 핵심 단지 한눈에</div>
+          </div>
+          <AptHScroll ariaLabel="오늘의 단지">
+            {blocks.unified.slice(0, 5).map((u) => {
+              const s = SECTION_STYLE[u.section] ?? SECTION_STYLE.score;
+              return (
+                <Link
+                  key={`${u.section}-${u.id}`}
+                  href={u.href ?? '/apt'}
+                  style={{
+                    flex: '0 0 200px',
+                    scrollSnapAlign: 'start',
+                    padding: '10px 12px',
+                    borderRadius: 6,
+                    background: '#FFFFFF',
+                    border: '1px solid #E5E7EB',
+                    textDecoration: 'none',
+                    color: '#111827',
+                    boxShadow: '0 1px 1px rgba(0,0,0,0.04)',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 6 }}>
+                    <span style={{ background: s.bg, color: s.fg, padding: '1px 6px', borderRadius: 3, fontSize: 10.5, fontWeight: 700 }}>
+                      {s.label}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: 12.5, fontWeight: 600, lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {u.title}
+                  </div>
+                  {u.meta ? (
+                    <div style={{ fontSize: 11, color: '#6B7280', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {u.meta}
+                    </div>
+                  ) : null}
+                </Link>
+              );
+            })}
+          </AptHScroll>
+        </section>
+      )}
 
-      {/* 2. 마감 임박 — CAROUSEL 모드 시 가로 썸네일 카드 */}
-      <Block title="⏰ 마감 임박 (D-7)" subtitle="이슈 점수 기준" href="/apt/imminent">
+      {/* 1. 정책 알림 — 0건 시 섹션 자체 hide (s265-b) */}
+      {blocks.regulated.length > 0 && (
+        <Block title="🚨 정책 알림" subtitle="규제·투기 지역 청약" href="/apt/subscription?filter=regulated">
+          {blocks.regulated.map((s) => (
+            <SubRow key={s.id} sub={s} badge={s.is_speculative_zone ? '투기과열' : '조정대상'} />
+          ))}
+        </Block>
+      )}
+
+      {/* 2. 마감 임박 — cascade RPC + TierBadge */}
+      <Block title={headerForTier('⏰ 마감 임박 (D-7)', imminentTier)} subtitle="이슈 점수 기준" href="/apt/imminent">
         {blocks.imminent.length === 0 ? (
-          <Empty label="마감 임박 청약 없음" />
+          <EmptyState icon="⏰" title="마감 임박 청약 없음" description="cascade 폴백에도 결과가 없습니다." cta={{ label: '전국 보기', href: '/apt' }} />
         ) : CAROUSEL_ENABLED ? (
           <AptHScroll ariaLabel="마감 임박 청약">
             {blocks.imminent.map((a, i) => (
-              <AptThumbnailCard
-                key={a.id}
-                id={a.id}
-                name={a.house_nm}
-                location={a.region_nm}
-                price={a.sale_price_min}
-                households={a.households_count}
-                score={a.score}
-                dday={a.dday}
-                thumbnailUrl={a.thumbnail_url}
-                houseTy={a.house_ty}
-                priority={i < 2}
-              />
+              <div key={a.id} style={{ flex: '0 0 auto', position: 'relative' }}>
+                <AptThumbnailCard
+                  id={a.id}
+                  name={a.house_nm}
+                  location={a.region_nm}
+                  price={a.sale_price_min}
+                  households={a.households_count}
+                  score={a.score}
+                  dday={a.dday}
+                  thumbnailUrl={a.thumbnail_url}
+                  houseTy={a.house_ty}
+                  priority={i < 2}
+                />
+                {a.tier && a.tier !== 'L1' ? (
+                  <span style={{ position: 'absolute', top: 6, right: 6 }}>
+                    <TierBadge tier={a.tier} />
+                  </span>
+                ) : null}
+              </div>
             ))}
           </AptHScroll>
         ) : (
-          blocks.imminent.map((a) => <AptIssueCard key={a.id} data={a} />)
+          blocks.imminent.map((a) => (
+            <div key={a.id} style={{ position: 'relative' }}>
+              <AptIssueCard data={a} />
+              {a.tier && a.tier !== 'L1' ? (
+                <span style={{ position: 'absolute', top: 6, right: 6 }}>
+                  <TierBadge tier={a.tier} />
+                </span>
+              ) : null}
+            </div>
+          ))
         )}
         <DDayAlertCTA source="apt_dday_alert" redirect="/apt" />
       </Block>
 
-      {/* 3. 신규 공고 24h */}
-      <Block title="🆕 신규 공고 (24h)" subtitle="공고 등재 24시간 내" href="/apt/subscription?sort=newest">
-        {blocks.fresh24h.length === 0 ? (
-          <Empty label="24시간 내 신규 공고 없음" />
-        ) : blocks.fresh24h.map((s) => <SubRow key={s.id} sub={s} />)}
+      {/* 3. 신규 공고 — cascade */}
+      <Block title={headerForTier('🆕 신규 공고 (24h)', freshTier)} subtitle="공고 등재 24시간 내" href="/apt/subscription?sort=newest">
+        {blocks.fresh.length === 0 ? (
+          <EmptyState icon="🆕" title="신규 공고 없음" description="cascade 폴백에도 결과가 없습니다." cta={{ label: '전국 보기', href: '/apt' }} />
+        ) : (
+          blocks.fresh.map((s) => (
+            <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 6, margin: '0 3px' }}>
+              <div style={{ flex: 1 }}>
+                <SubRow sub={s} />
+              </div>
+              {s.tier && s.tier !== 'L1' ? <TierBadge tier={s.tier} /> : null}
+            </div>
+          ))
+        )}
       </Block>
 
-      {/* 4. 미분양 핫 */}
+      {/* 4. 미분양 핫 (region eq) */}
       <Block title="🔥 미분양 핫" subtitle="잔여 세대 많은 단지" href="/apt/unsold">
         {blocks.unsoldHot.length === 0 ? (
-          <Empty label="미분양 데이터 준비 중" />
+          <EmptyState icon="🔥" title="미분양 데이터 준비 중" description="해당 지역 미분양 단지가 없거나 갱신 대기 중입니다." cta={{ label: '전국 보기', href: '/apt' }} />
         ) : blocks.unsoldHot.map((u) => <UnsoldHotRow key={u.id} u={u} />)}
       </Block>
 
-      {/* 5. 재개발 단계 변경 */}
-      <Block title="🏗️ 재개발 단계 변경" subtitle="최근 단계 변경 단지" href="/apt/redev">
+      {/* 5. 재개발 — cascade */}
+      <Block title={headerForTier('🏗️ 재개발 단계 변경', redevTier)} subtitle="최근 단계 변경 단지" href="/apt/redev">
         {blocks.redevStage.length === 0 ? (
-          <Empty label="최근 단계 변경 없음" />
-        ) : blocks.redevStage.map((r) => <RedevRowComp key={r.id} r={r} />)}
+          <EmptyState icon="🏗️" title="최근 단계 변경 없음" description="cascade 폴백에도 결과가 없습니다." cta={{ label: '전국 보기', href: '/apt' }} />
+        ) : (
+          blocks.redevStage.map((r) => (
+            <div key={r.id} style={{ display: 'flex', alignItems: 'center', gap: 6, margin: '0 3px' }}>
+              <div style={{ flex: 1 }}>
+                <RedevRowComp r={r} />
+              </div>
+              {r.tier && r.tier !== 'L1' ? <TierBadge tier={r.tier} /> : null}
+            </div>
+          ))
+        )}
       </Block>
 
       {/* 도구 4개 */}
@@ -352,13 +464,5 @@ function ToolCard({ href, emoji, label, desc }: { href: string; emoji: string; l
       <div style={{ fontSize: 13, fontWeight: 600 }}>{label}</div>
       <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 1 }}>{desc}</div>
     </Link>
-  );
-}
-
-function Empty({ label }: { label: string }) {
-  return (
-    <div style={{ padding: 16, margin: 3, borderRadius: 6, background: '#F9FAFB', border: '1px solid #E5E7EB', fontSize: 12, color: '#9CA3AF', textAlign: 'center' }}>
-      {label}
-    </div>
   );
 }

@@ -1,4 +1,44 @@
 
+## s265-b — apt cascade fallback + EmptyState + 통합 carousel (2026-05-08 KST)
+
+### s265_a (선행, Supabase MCP 적용)
+- get_apt_imminent_cascade(p_region, p_limit) — L1 region → L2 D-30 확장 → L3 인접지역 → L4 전국
+- get_apt_fresh_cascade(p_region, p_limit) — 동일 4-tier cascade
+- get_apt_redev_cascade(p_region, p_limit) — 동일 4-tier cascade
+- get_apt_unified_carousel(p_region) — 미분양/임박/재개발/Fresh/Score top 카드 jsonb
+
+### s265_b — 코드 layer (이번 commit)
+**lib/regions.ts** — REGIONS_17 alias + Region17 type + ADJACENT_REGIONS Record (17 광역 시도 인접 매핑).
+
+**components/ui/EmptyState.tsx** (신규) — 빈 섹션 fallback 표준 컴포넌트.
+- icon (emoji 기본 '📭', Tabler 미설치) / title / description / cta
+- gray box, 28px icon, 13px title, brand link CTA
+- cascade L4 까지 보장하므로 거의 발동 안 함 (정책 알림 등 region-strict 섹션만)
+
+**components/cards/v2/TierBadge.tsx** (신규) — cascade tier chip + header 변형 helper.
+- CascadeTier = L1|L2|L3|L4
+- L1 chip 없음, L2 amber 'D-30 확장', L3 coral '인접 지역', L4 blue '전국'
+- headerForTier(base, tier): L2 '최근 ~', L3 '~ (인접 지역 포함)', L4 '전국 ~'
+
+**app/(main)/apt/page.tsx** (refactor) — cascade RPC 도입 + 통합 carousel + TierBadge overlay.
+- 임박/Fresh/재개발 raw query → get_apt_*_cascade RPC
+- 페이지 상단 통합 carousel (get_apt_unified_carousel)
+- 정책 알림 0건 시 섹션 자체 hide
+- 빈 섹션 fallback EmptyState (L4 전국까지 0건 시만)
+- v_apt_card_unsold (s264_a) 미분양 region_nm 매칭 유지
+
+### Architecture Rule #97/#98 신설
+- #97: 빈 상태 = cascade fallback + EmptyState 의무. lib/regions ADJACENT_REGIONS 참조.
+- #98: Region 필터 일관성 — middleware x-kd-region sync, RPC p_region 명시 필수.
+
+### 검증
+- npm run type-check ✅
+- npm run build ✅
+
+### Verify (web)
+- /apt?region=서울 통합 carousel 표시 + 임박 5 카드 (region 매칭 부족 시 tier chip)
+- 정책 알림 0건 region 진입 시 섹션 sealing (fallback Empty 안 뜸)
+
 ## s264-b — cta-navigate sendBeacon + apt page region_nm 매칭 (2026-05-10 KST)
 
 ### s264_a (선행, Supabase MCP 적용)
