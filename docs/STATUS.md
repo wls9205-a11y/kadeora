@@ -1,4 +1,35 @@
 
+## s266_c — 8 callers router.push refactor — mobile sendBeacon abort 완전 해소 (2026-05-12 KST)
+
+### 회귀 데이터 (s266_b 후 24h)
+- mobile: 191 view / 0 click / 14 dismiss (CTR 0%, 완전 회귀)
+- desktop: 132 view / 2 click / 13 dismiss (CTR 1.5%, 일부 작동)
+- 결론: setTimeout 50ms fallback 모바일 race 미해결. dismiss path 정상 (sendBeacon 자체 작동), navigate path 가 unload race.
+
+### Fix — 8 callers refactor
+- src/components/StickySignupBar.tsx
+- src/components/BlogAptAlertCTA.tsx
+- src/components/blog/BlogEarlyGateTeaser.tsx
+- src/components/blog/BlogGatedWall.tsx (useCallback deps 갱신)
+- src/components/KakaoBottomSheet.tsx (2 호출)
+- src/components/KakaoHeroCTA.tsx
+- src/components/LoginGate.tsx (2 호출)
+- src/components/common/SectionGate.tsx (nested GatedSection)
+
+각 파일: `useRouter()` 추가 + `trackCtaAndNavigate({ ..., router })` 전달.
+
+### Architecture Rule #96 갱신
+trackCtaAndNavigate 호출 시 router 인자 필수. setTimeout fallback emergency-only.
+
+### 검증 SQL (deploy 후 30분)
+```sql
+SELECT device_type, cta_name, COUNT(*)
+FROM conversion_events
+WHERE event_type='cta_click' AND created_at > NOW() - INTERVAL '30 minutes'
+GROUP BY 1,2;
+```
+기대: mobile cta_click 회복 (5% 이상 CTR).
+
 ## s266_b — cta-navigate.ts sendBeacon abort 회귀 fix (2026-05-12 KST)
 
 ### 회귀 진단 (s266_a)

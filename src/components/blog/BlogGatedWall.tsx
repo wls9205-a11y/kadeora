@@ -8,6 +8,7 @@
  */
 
 import { useCallback, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { trackCtaClick } from '@/lib/cta-track';
 import { trackCtaAndNavigate } from '@/lib/cta-navigate';
 
@@ -22,6 +23,7 @@ interface Props {
 }
 
 export default function BlogGatedWall({ h2, previewHtml, gate, ctaText, redirectPath, ctaSource, position }: Props) {
+  const router = useRouter();
   const sectionRef = useRef<HTMLElement | null>(null);
   const viewFired = useRef(false);
 
@@ -69,8 +71,9 @@ export default function BlogGatedWall({ h2, previewHtml, gate, ctaText, redirect
       ctaName: source,
       category: 'signup',
       pagePath: redirectPath || window.location.pathname,
+      router,
     });
-  }, [gate, redirectPath, ctaSource]);
+  }, [gate, redirectPath, ctaSource, router]);
 
   const isPremium = gate === 'premium';
   const label = isPremium ? '프리미엄 회원 전용' : '로그인 후 전체 보기';

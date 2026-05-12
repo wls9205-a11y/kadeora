@@ -14,7 +14,7 @@
  * z-index: 90 (InstallBanner 100 보다 아래, BlogFloatingBar 50 보다 위)
  */
 import { useEffect, useState } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
 import { trackCTA } from '@/lib/analytics';
 import { trackCtaAndNavigate } from '@/lib/cta-navigate';
@@ -28,6 +28,7 @@ declare global { interface Window { kd_install_banner_active?: boolean } }
 export default function StickySignupBar() {
   const { userId, loading } = useAuth();
   const pathname = usePathname();
+  const router = useRouter();
   const [visible, setVisible] = useState(false);
   const [installActive, setInstallActive] = useState(false);
 
@@ -97,7 +98,7 @@ export default function StickySignupBar() {
       </span>
       <button
         type="button"
-        onClick={() => trackCtaAndNavigate({ href: loginUrl, ctaName: 'sticky_signup_bar', pagePath: pathname })}
+        onClick={() => trackCtaAndNavigate({ href: loginUrl, ctaName: 'sticky_signup_bar', pagePath: pathname, router })}
         style={{
           flexShrink: 0,
           padding: '8px 16px',

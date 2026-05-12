@@ -10,6 +10,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { trackCtaClick } from '@/lib/cta-track';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { getVariant, trackAbView, trackAbClick } from '@/lib/analytics/abTest';
@@ -54,6 +55,7 @@ function fireView(ctaName: string) {
 }
 
 export default function BlogEarlyGateTeaser({ slug, enabled = true, hasGatedContent: hasGatedProp, isLoggedInHint }: Props) {
+  const router = useRouter();
   const [config, setConfig] = useState<TeaserConfig | null>(null);
   const [isAuth, setIsAuth] = useState<boolean | null>(typeof isLoggedInHint === 'boolean' ? isLoggedInHint : null);
   const [hasGated, setHasGated] = useState<boolean | null>(typeof hasGatedProp === 'boolean' ? hasGatedProp : null);
@@ -204,6 +206,7 @@ export default function BlogEarlyGateTeaser({ slug, enabled = true, hasGatedCont
       ctaName: config.cta_name,
       category: 'signup',
       pagePath: window.location.pathname,
+      router,
     });
   };
 

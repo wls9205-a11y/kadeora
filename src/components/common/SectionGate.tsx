@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { trackCtaAndNavigate } from '@/lib/cta-navigate';
 
 export type GateLevel = 'free' | 'login' | 'premium';
@@ -70,6 +71,7 @@ function GatedSection({
   isPremiumGate: boolean;
   children: React.ReactNode;
 }) {
+  const router = useRouter();
   const ref = useRef<HTMLDivElement>(null);
   const viewed = useRef(false);
 
@@ -169,6 +171,7 @@ function GatedSection({
               ctaName,
               category: 'signup',
               pagePath: typeof window !== 'undefined' ? window.location.pathname : undefined,
+              router,
             });
           }}
           style={{

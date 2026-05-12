@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { trackCTA } from '@/lib/analytics';
 import { getVariant, trackAbView, trackAbClick } from '@/lib/analytics/abTest';
@@ -25,6 +26,7 @@ const EXPERIMENT = 'apt_alert_cta_v223';
  * 양 variant 모두 trackCTA('apt_alert_cta') + trackAb*(EXPERIMENT, variant) 동시 추적.
  */
 export default function BlogAptAlertCTA({ aptName, siteSlug, category = 'apt', loginUrl }: Props) {
+  const router = useRouter();
   const [status, setStatus] = useState<'idle' | 'loading' | 'done' | 'login_required'>('idle');
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
   const [variant, setVariant] = useState<'A' | 'B' | null>(null);
@@ -68,7 +70,7 @@ export default function BlogAptAlertCTA({ aptName, siteSlug, category = 'apt', l
   const handleAlert = async () => {
     if (variant) trackAbClick(EXPERIMENT, variant, { logged_in: isLoggedIn, category });
     if (!isLoggedIn) {
-      trackCtaAndNavigate({ href: loginUrl, ctaName: 'apt_alert_cta' });
+      trackCtaAndNavigate({ href: loginUrl, ctaName: 'apt_alert_cta', router });
       return;
     }
     trackCTA('click', 'apt_alert_cta');

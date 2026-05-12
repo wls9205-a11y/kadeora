@@ -10,7 +10,7 @@
  * - 카카오 48px 네이티브 버튼 (아이콘 좌측 고정, 텍스트 중앙)
  * - "다른 방법으로 가입하기" 보조 링크
  */
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
 import { useEffect, useRef, useState, ReactNode } from 'react';
 import { trackCTA } from '@/lib/analytics';
@@ -50,6 +50,7 @@ const DEFAULTS: Record<string, { title: string; desc: string }> = {
 export default function LoginGate({ children, feature, title, description, blurHeight = 200, overlayText }: LoginGateProps) {
   const { userId, loading } = useAuth();
   const pathname = usePathname();
+  const router = useRouter();
   const tracked = useRef(false);
   const [mounted, setMounted] = useState(false);
   const d = DEFAULTS[feature] || DEFAULTS.ai_analysis;
@@ -103,7 +104,7 @@ export default function LoginGate({ children, feature, title, description, blurH
       {/* 카카오 네이티브 버튼 (48px, 아이콘 좌측 고정, 텍스트 중앙) */}
       <button
         type="button"
-        onClick={() => trackCtaAndNavigate({ href: loginUrl, ctaName: `login_gate_${feature}`, pagePath: pathname })}
+        onClick={() => trackCtaAndNavigate({ href: loginUrl, ctaName: `login_gate_${feature}`, pagePath: pathname, router })}
         style={{
           display: 'flex', width: '100%', height: 48, borderRadius: 12,
           background: '#FEE500', alignItems: 'center', justifyContent: 'center',
@@ -123,7 +124,7 @@ export default function LoginGate({ children, feature, title, description, blurH
       <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.16)', textAlign: 'center', marginTop: 10 }}>
         <button
           type="button"
-          onClick={() => trackCtaAndNavigate({ href: altUrl, ctaName: `login_gate_${feature}_alt`, pagePath: pathname })}
+          onClick={() => trackCtaAndNavigate({ href: altUrl, ctaName: `login_gate_${feature}_alt`, pagePath: pathname, router })}
           style={{ color: 'rgba(255,255,255,0.16)', textDecoration: 'underline', textUnderlineOffset: '3px', background: 'none', border: 'none', padding: 0, cursor: 'pointer', font: 'inherit' }}
         >
           다른 방법으로 가입하기

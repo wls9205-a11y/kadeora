@@ -2,12 +2,13 @@
 import { useAuth } from '@/components/AuthProvider';
 import { trackCTA } from '@/lib/analytics';
 import { trackCtaAndNavigate } from '@/lib/cta-navigate';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 
 export default function KakaoHeroCTA() {
   const { userId, loading } = useAuth();
   const pathname = usePathname();
+  const router = useRouter();
   const [stats, setStats] = useState({ totalViews: 690000, dailyVisitors: 1300 });
 
   useEffect(() => {
@@ -103,7 +104,7 @@ export default function KakaoHeroCTA() {
           {/* 카카오 버튼 */}
           <button
             type="button"
-            onClick={() => trackCtaAndNavigate({ href: loginUrl, ctaName: 'kakao_hero', pagePath: pathname })}
+            onClick={() => trackCtaAndNavigate({ href: loginUrl, ctaName: 'kakao_hero', pagePath: pathname, router })}
             style={{
               display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'center', gap: 10,
               background: '#FEE500', color: '#191919', borderRadius: 'var(--radius-card)',

@@ -6,7 +6,7 @@
  * 카카오 네이티브 버튼 + "다른 방법으로 가입하기" 링크
  */
 import { useEffect, useCallback } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { trackCTA } from '@/lib/analytics';
 import { trackCtaAndNavigate } from '@/lib/cta-navigate';
 
@@ -20,6 +20,7 @@ interface Props {
 
 export default function KakaoBottomSheet({ open, onClose, feature = 'star', title, description }: Props) {
   const pathname = usePathname();
+  const router = useRouter();
   const loginUrl = `/login?redirect=${encodeURIComponent(pathname)}&source=kakao_sheet_${feature}`;
   const altUrl = `/login?redirect=${encodeURIComponent(pathname)}&source=kakao_sheet_${feature}_alt`;
 
@@ -62,7 +63,7 @@ export default function KakaoBottomSheet({ open, onClose, feature = 'star', titl
 
         <button
           type="button"
-          onClick={() => trackCtaAndNavigate({ href: loginUrl, ctaName: `kakao_sheet_${feature}`, pagePath: pathname })}
+          onClick={() => trackCtaAndNavigate({ href: loginUrl, ctaName: `kakao_sheet_${feature}`, pagePath: pathname, router })}
           style={{
             display: 'flex', width: '100%', height: 48, borderRadius: 12,
             background: '#FEE500', alignItems: 'center', justifyContent: 'center',
@@ -81,7 +82,7 @@ export default function KakaoBottomSheet({ open, onClose, feature = 'star', titl
         <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.16)', textAlign: 'center', marginTop: 12 }}>
           <button
             type="button"
-            onClick={() => trackCtaAndNavigate({ href: altUrl, ctaName: `kakao_sheet_${feature}_alt`, pagePath: pathname })}
+            onClick={() => trackCtaAndNavigate({ href: altUrl, ctaName: `kakao_sheet_${feature}_alt`, pagePath: pathname, router })}
             style={{ color: 'rgba(255,255,255,0.16)', textDecoration: 'underline', textUnderlineOffset: '3px', background: 'none', border: 'none', padding: 0, cursor: 'pointer', font: 'inherit' }}
           >
             다른 방법으로 가입하기
