@@ -72,6 +72,13 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url, 308);
   }
 
+  // s268: /apt/subscription/{id} → /apt/{id} (RPC hardcode 잔존, 404 fix)
+  if (pathname.startsWith('/apt/subscription/')) {
+    const url = request.nextUrl.clone();
+    url.pathname = pathname.replace('/apt/subscription/', '/apt/');
+    return NextResponse.redirect(url, 308);
+  }
+
   // ── [L1-6] Crawler retry throttle ──
   // 같은 크롤러가 10초 내 같은 URL을 3회+ 재요청하면 304로 즉시 응답 → 크롤 예산 보호
   // ── [L1-7] Bot edge cache ──
