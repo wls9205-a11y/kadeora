@@ -1,4 +1,35 @@
 
+## s267_b — OAuth callback session cookie propagation fix (2026-05-12 KST)
+
+### Root cause 확정
+- Supabase Auth log 2026-05-12 05:53:40 UTC: `msg="Redirecting to external provider" path=/authorize provider=kakao referer=https://kadeora.app/auth/callback?...`
+- popup_signup_modal CTR 4.04% baseline 유지 (24 clicks / 14d) → 컴포넌트 정상
+- 그러나 auth.users 0 in 72h. 4 cta_click → 0 signup = OAuth flow 절단
+- **/auth/callback 의 cookieStore.set() (cookies()/next/headers API) 가 NextResponse.redirect() 응답에 Set-Cookie 헤더 미전파**
+- session cookie 누락 → next page anon → 사용자 재시도 → /authorize 무한 시도 → loop
+- d9821169 (5/8) 코드 frozen 상태 + Next 15 cookies API edge case 의 잠재 bug 로 추정
+
+### Fix (src/app/auth/callback/route.ts 단일 파일)
+- `cookies()`/`cookieStore.set` → **`NextResponse.cookies.set()` 명시 패턴** 전환
+- pendingResponse (NextResponse.next()) 에 cookies adapter set → exchangeCodeForSession 이 session cookie 명시 attach
+- 함수 끝 finalResponse 생성 시 pendingResponse.cookies.getAll() 을 finalResponse 에 복사
+- `export const dynamic = 'force-dynamic'` + `export const runtime = 'nodejs'` 추가 (static caching / Edge 런타임 회피)
+
+### s266_a-c 회고 (false fix)
+- s263 Phase 2.2 setTimeout 200ms — false root cause
+- s264-b sendBeacon — false root cause
+- s266_b router 옵셔널 — false root cause
+- s266_c 8 callers router.push refactor — false root cause
+- popup_signup_modal click 정상 (4.04% CTR maintained). 진짜 break 는 click 후 OAuth → session 단계.
+
+### 검증 SQL (deploy 후 자연 트래픽)
+```sql
+SELECT count(*) FROM auth.users
+WHERE created_at > NOW() - INTERVAL '1 hour'
+  AND raw_app_meta_data->>'provider' = 'kakao';
+```
+기대: ≥ 1 (loop 끊김).
+
 ## s266_c — 8 callers router.push refactor — mobile sendBeacon abort 완전 해소 (2026-05-12 KST)
 
 ### 회귀 데이터 (s266_b 후 24h)

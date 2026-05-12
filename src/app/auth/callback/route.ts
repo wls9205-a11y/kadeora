@@ -1,25 +1,31 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, type NextRequest } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
 import { createHash } from 'crypto';
+
+// s267_b: OAuth callback infinite loop 회귀 fix — NextResponse.cookies 명시 패턴 으로
+// session cookie 가 redirect 응답에 attach 보장. 기존 cookies()/cookieStore.set 은 Next 15
+// Route Handler + NextResponse.redirect 조합에서 Set-Cookie 헤더 미전파 케이스 존재 →
+// session 누락 → 사용자 재시도 → /auth/callback → /login → Kakao 클릭 → /authorize 반복.
+// 60h+ 가입 0건 (popup_signup_modal CTR 4.04% 유지인데 auth.users 0) 의 root cause.
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 /**
  * Frictionless OAuth callback
  *
  * Flow:
- *   1) exchangeCodeForSession
+ *   1) exchangeCodeForSession → response.cookies 에 session cookie 명시 set
  *   2) complete_signup_frictionless RPC 1-shot (trigger 가 이미 onboarded=true 프로필 생성)
  *   3) signup_attempts UPDATE (oauth_callback_at, profile_created_at, success=true)
  *   4) 원래 redirect 로 즉시 이동 — /onboarding 강제 리디렉트 제거
  */
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
   const redirect = searchParams.get('redirect') ?? '/feed';
   // s188: source 가 실제로 URL 에 없을 때 'direct' 디폴트로 가리지 않도록 분리.
   const sourceParam = searchParams.get('source');
   const source = sourceParam ?? 'direct';
-  const cookieStore = await cookies();
   // s196: 모바일 OAuth callback drop 75% 진단 — UA/provider/code 존재 여부 로깅
   const ua = request.headers.get('user-agent') || '';
   const isMobile = /Mobile|Android|iPhone|iPad|iPod/i.test(ua);
@@ -40,14 +46,22 @@ export async function GET(request: Request) {
     return NextResponse.redirect(`${origin}/login?error=auth_failed`);
   }
 
+  // s267_b: response 를 미리 생성하고 cookies adapter 가 직접 response.cookies 에 set.
+  // 결과적으로 exchangeCodeForSession 이후 session cookie 가 redirect 응답에 명시 attach.
+  // Placeholder response — 실제 redirect 는 함수 끝에서 destination 으로 cookies 복사.
+  let pendingResponse = NextResponse.next();
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        getAll() { try { return cookieStore.getAll(); } catch { return []; } },
+        getAll() { return request.cookies.getAll(); },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options));
+          cookiesToSet.forEach(({ name, value, options }) => {
+            request.cookies.set(name, value);
+            pendingResponse.cookies.set(name, value, options as Record<string, unknown>);
+          });
         },
       },
     },
@@ -206,5 +220,13 @@ export async function GET(request: Request) {
     : safeRedirect;
   // s260 P0: ?welcome=1 부착 — WelcomeToast 가 신규 가입 직후 토스트 표시.
   const sep = dest.includes('?') ? '&' : '?';
-  return NextResponse.redirect(`${origin}${dest}${sep}welcome=1`);
+
+  // s267_b: pendingResponse 에 누적된 session cookies 를 destination redirect 에 복사.
+  // exchangeCodeForSession 이 set 한 sb-* auth-token cookies 가 보존되어야 다음 page
+  // 에서 user logged-in 상태로 인식. 누락 시 anon → /login 회귀 → OAuth 루프.
+  const finalResponse = NextResponse.redirect(`${origin}${dest}${sep}welcome=1`);
+  pendingResponse.cookies.getAll().forEach((c) => {
+    finalResponse.cookies.set(c);
+  });
+  return finalResponse;
 }
