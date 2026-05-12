@@ -76,9 +76,9 @@ export default function ProfileTabs({ profileId, posts, isOwner }: Props) {
 
   const loadWatchStocks = async () => {
     if (watchStocksLoaded) return;
-    const { data: wl } = await sb.from('stock_watchlist').select('symbol').eq('user_id', profileId);
+    const { data: wl } = await sb.from('user_watchlist').select('item_id').eq('user_id', profileId).eq('item_type', 'stock');
     if (wl && wl.length > 0) {
-      const symbols = wl.map((w: any) => w.symbol);
+      const symbols = wl.map((w: any) => w.item_id);
       const { data: stocks } = await sb.from('stock_quotes').select('symbol, name, market, price, change_pct, currency').in('symbol', symbols);
       setWatchStocks(stocks ?? []);
     }

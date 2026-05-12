@@ -8,12 +8,13 @@ export async function GET() {
     const { data: { user } } = await sb.auth.getUser();
     if (!user) return NextResponse.json({ symbols: [] });
 
-    const { data } = await sb.from('stock_watchlist')
-      .select('symbol')
+    const { data } = await sb.from('user_watchlist')
+      .select('item_id')
       .eq('user_id', user.id)
+      .eq('item_type', 'stock')
       .order('created_at', { ascending: false });
 
-    return NextResponse.json({ symbols: (data || []).map((d) => d.symbol) });
+    return NextResponse.json({ symbols: (data || []).map((d) => d.item_id) });
   } catch { return NextResponse.json({ symbols: [] }); }
 }
 
