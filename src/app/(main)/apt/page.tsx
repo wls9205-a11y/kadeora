@@ -21,7 +21,8 @@ import type { AptIssueScore } from '@/lib/issue/types';
 export const revalidate = 60;
 export const maxDuration = 10;
 
-const CAROUSEL_ENABLED = process.env.NEXT_PUBLIC_CAROUSEL_ENABLED === 'true';
+// s268: env 토글 폐기 — 마감/신규/재개발 캐러셀 always-on. Vercel env 의존 제거.
+const CAROUSEL_ENABLED = true;
 
 export async function generateMetadata({ searchParams }: { searchParams: Promise<{ region?: string }> }): Promise<Metadata> {
   const sp = await searchParams;
@@ -320,10 +321,37 @@ export default async function AptPage({ searchParams }: { searchParams?: Promise
         <DDayAlertCTA source="apt_dday_alert" redirect="/apt" />
       </Block>
 
-      {/* 3. 신규 공고 — cascade */}
+      {/* 3. 신규 공고 — cascade + s268 캐러셀 */}
       <Block title={headerForTier('🆕 신규 공고 (24h)', freshTier)} subtitle="공고 등재 24시간 내" href="/apt/subscription?sort=newest">
         {blocks.fresh.length === 0 ? (
           <EmptyState icon="🆕" title="신규 공고 없음" description="cascade 폴백에도 결과가 없습니다." cta={{ label: '전국 보기', href: '/apt' }} />
+        ) : CAROUSEL_ENABLED ? (
+          <AptHScroll ariaLabel="신규 공고">
+            {blocks.fresh.map((s, i) => {
+              const dday = s.rcept_endde
+                ? Math.ceil((new Date(s.rcept_endde).getTime() - Date.now()) / 86400_000)
+                : null;
+              const sRaw = s as Record<string, unknown>;
+              return (
+                <div key={s.id} style={{ flex: '0 0 auto', position: 'relative' }}>
+                  <AptThumbnailCard
+                    id={s.id}
+                    name={s.house_nm}
+                    location={(sRaw.sigungu as string | undefined) || s.region_nm}
+                    households={(sRaw.households as number | undefined) ?? null}
+                    dday={dday}
+                    href={`/apt/${s.id}`}
+                    priority={i < 2}
+                  />
+                  {s.tier && s.tier !== 'L1' ? (
+                    <span style={{ position: 'absolute', top: 6, right: 6 }}>
+                      <TierBadge tier={s.tier} />
+                    </span>
+                  ) : null}
+                </div>
+              );
+            })}
+          </AptHScroll>
         ) : (
           blocks.fresh.map((s) => (
             <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 6, margin: '0 3px' }}>
@@ -343,10 +371,21 @@ export default async function AptPage({ searchParams }: { searchParams?: Promise
         ) : blocks.unsoldHot.map((u) => <UnsoldHotRow key={u.id} u={u} />)}
       </Block>
 
-      {/* 5. 재개발 — cascade */}
+      {/* 5. 재개발 — cascade + s268 캐러셀 (RowComp 유지 + AptHScroll wrap) */}
       <Block title={headerForTier('🏗️ 재개발 단계 변경', redevTier)} subtitle="최근 단계 변경 단지" href="/apt/redev">
         {blocks.redevStage.length === 0 ? (
           <EmptyState icon="🏗️" title="최근 단계 변경 없음" description="cascade 폴백에도 결과가 없습니다." cta={{ label: '전국 보기', href: '/apt' }} />
+        ) : CAROUSEL_ENABLED ? (
+          <AptHScroll ariaLabel="재개발 단계 변경">
+            {blocks.redevStage.map((r) => (
+              <div key={r.id} style={{ flex: '0 0 auto', minWidth: 280, position: 'relative', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <div style={{ flex: 1 }}>
+                  <RedevRowComp r={r} />
+                </div>
+                {r.tier && r.tier !== 'L1' ? <TierBadge tier={r.tier} /> : null}
+              </div>
+            ))}
+          </AptHScroll>
         ) : (
           blocks.redevStage.map((r) => (
             <div key={r.id} style={{ display: 'flex', alignItems: 'center', gap: 6, margin: '0 3px' }}>
