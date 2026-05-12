@@ -1,4 +1,34 @@
 
+## s266_b — cta-navigate.ts sendBeacon abort 회귀 fix (2026-05-12 KST)
+
+### 회귀 진단 (s266_a)
+- 60+ hours 신규 가입 0건 (last: 2026-05-09 08:49 UTC).
+- conversion_events 72h: trackCtaAndNavigate 기반 8 CTA (sticky_signup_bar 189v/0c, related_blog_section 100/0, login_gate_apt_analysis 88/0, blog_early_teaser 76/0, blog_gated_login 71/0, apt_alert_cta 37/0, apt_gate_ai_analysis 31/0, login_gate_apt_trade_alert 23/0) 모두 **0 click**.
+- 대조: popup_signup_modal (Link + raw sendBeacon) 81v/4c (4.9% CTR), nav_login_button 정상.
+- Root cause: `window.location.href = p.href` 즉시 unload → 모바일 (특히 iOS Safari) queued sendBeacon abort.
+
+### Fix (단일 파일 src/lib/cta-navigate.ts)
+- CtaNavigateProps 에 `router?: AppRouterInstance` 옵셔널 추가.
+- router 있으면 `router.push()` (client-side, no unload — sendBeacon 안전 flush).
+- 없으면 `setTimeout(50)` 후 `window.location.href` (d9821169 working state 복원).
+- `trackCTA()` 위임 복원 (user_events queue + 보조 conversion_events 누락 해소).
+- pagePath 옵셔널 보존 (4 callers backward compat).
+
+### Architecture Rule #96 갱신
+sendBeacon 단독 X. 패턴: Link onClick (popup_signup_modal 검증) > router.push > setTimeout 50ms fallback.
+
+### 검증 SQL (deploy 후 10분)
+```sql
+SELECT cta_name, COUNT(*) FROM conversion_events
+WHERE event_type='cta_click' AND created_at >= NOW() - INTERVAL '10 minutes'
+GROUP BY cta_name;
+```
+기대: trackCtaAndNavigate 기반 8 CTA 클릭 회복.
+
+### 후속 (s266_c 계획)
+- 8 callers 점진 마이그: `useRouter()` 호출 → `router` 전달 (sticky_signup_bar 부터).
+- 또는 popup_signup_modal 패턴 (`<Link onClick={...}>`) 으로 전면 refactor.
+
 ## s265-c — apt 통합 carousel rendering 본격 + s265_a2 RPC schema (2026-05-10 KST)
 
 ### s265_a2 (선행, Supabase MCP 적용)
