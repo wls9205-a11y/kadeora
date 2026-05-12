@@ -15,6 +15,7 @@
 //   s263 Phase 2.2 (8c336cc1): 50 → 200ms (모바일 sendBeacon abort 미해결)
 //   s264-b (69843fbc): setTimeout 제거 (sendBeacon 단독 — abort 잔존)
 //   s266_b: router.push 우선 + setTimeout 50ms fallback + trackCTA 위임
+//   s267: sendBeacon → fetch keepalive (s266_c router refactor 후 5/8~5/11 click 0건 → s218 trackCTA keepalive 패턴 통일)
 
 import type { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 import { trackCTA } from '@/lib/analytics';
@@ -42,9 +43,14 @@ export function trackCtaAndNavigate(p: CtaNavigateProps) {
       gate_position: p.gatePosition ?? null,
       page_path: p.pagePath ?? window.location.pathname,
     });
-    if (typeof navigator !== 'undefined' && typeof navigator.sendBeacon === 'function') {
-      navigator.sendBeacon('/api/events/cta', new Blob([payload], { type: 'application/json' }));
-    }
+    // s267: sendBeacon → fetch keepalive (모바일 Safari page transition abort 회피)
+    // /api/events/cta route.ts L23 req.text() 호환 → Content-Type: text/plain
+    fetch('/api/events/cta', {
+      method: 'POST',
+      body: payload,
+      keepalive: true,
+      headers: { 'Content-Type': 'text/plain' },
+    }).catch(() => {});
   } catch { /* swallow */ }
 
   // 2. trackCTA — user_events queue + 보조 conversion_events (d9821169 패턴 복원).
