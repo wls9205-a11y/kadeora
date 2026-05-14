@@ -1,4 +1,17 @@
 
+### s268 — 회원가입 funnel P0 fix (2026-05-15)
+**진단:** signup_attempts 30일 156/93 (drop 40.4%, oauth_start 63건). 디바이스별 모바일 49.2% / 네이버 인앱 48.4% / 데스크톱 24.5%. auth.flow_state 30일 50+건 시작, code_issued 0건 = Kakao→Supabase PKCE code 발급 zero.
+**코드 fix (배포):**
+- supabase-browser: flowType=pkce + cookieOptions(sameSite=lax/secure) 명시
+- useInAppBrowser: WebView 패턴 다양화 (SM-S916N 케이스)
+- (auth)/login/page: 서버 사이드 UA 사전 차단 — client hydration race 제거
+**PENDING 수동 점검 (가장 의심):**
+- [ ] Kakao Dev Console > Redirect URI: `https://tezftxakuwhsclarprlz.supabase.co/auth/v1/callback` 등록 확인 ⚠️
+- [ ] Supabase Dashboard > Auth URL Configuration: Redirect URLs allowlist 에 `https://kadeora.app/**` 포함 확인
+- [ ] Kakao Dev Console > 동의항목: profile_nickname / profile_image 활성 확인
+- [ ] 점검 후 모바일 1건 테스트 가입 → auth.flow_state.auth_code_issued_at NOT NULL 확인
+**Architecture Rule #63 후보:** auth.flow_state.code_issued 7일+ NULL = Kakao/Supabase redirect URL mismatch 1순위 진단.
+
 ## s267_b — OAuth callback session cookie propagation fix (2026-05-12 KST)
 
 ### Root cause 확정
