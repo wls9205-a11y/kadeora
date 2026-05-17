@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { SITE_URL } from '@/lib/constants';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import RegionAutoSelect from '@/components/apt/RegionAutoSelect';
-import AptRecentFeed from '@/components/apt/AptRecentFeed';
+import AptRecentFeed, { type FeedStats } from '@/components/apt/AptRecentFeed';
 import type { FeedItem } from '@/components/apt/AptFeedCard';
 
 export const revalidate = 60;
@@ -41,20 +41,25 @@ export async function generateMetadata({
   };
 }
 
-async function fetchInitialFeed(region: string): Promise<FeedItem[]> {
+async function fetchInitialData(region: string): Promise<{ items: FeedItem[]; stats: FeedStats | null }> {
   const sb = getSupabaseAdmin();
   try {
-    const { data, error } = await (sb as any).rpc('get_apt_recent_feed', {
-      p_region: region,
-      p_category: 'all',
-      p_limit: 20,
-      p_cursor: null,
-      p_cursor_id: null,
-    });
-    if (error) return [];
-    return Array.isArray(data) ? (data as FeedItem[]) : [];
+    // s269c: items + stats 병렬 fetch
+    const [feedRes, statsRes] = await Promise.all([
+      (sb as any).rpc('get_apt_recent_feed', {
+        p_region: region,
+        p_category: 'all',
+        p_limit: 20,
+        p_cursor: null,
+        p_cursor_id: null,
+      }),
+      (sb as any).rpc('get_apt_feed_stats', { p_region: region }),
+    ]);
+    const items = Array.isArray(feedRes?.data) ? (feedRes.data as FeedItem[]) : [];
+    const stats = (statsRes?.data && typeof statsRes.data === 'object') ? (statsRes.data as FeedStats) : null;
+    return { items, stats };
   } catch {
-    return [];
+    return { items: [], stats: null };
   }
 }
 
@@ -66,7 +71,7 @@ export default async function AptPage({
   const sp = (await searchParams) || {};
   const region = sp.region?.trim() || '전국';
   const isAutoRegion = !sp.region;
-  const initialItems = await fetchInitialFeed(region);
+  const { items: initialItems, stats } = await fetchInitialData(region);
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '8px 6px 24px' }}>
@@ -91,7 +96,7 @@ export default async function AptPage({
         </Link>
       </div>
 
-      <AptRecentFeed initialItems={initialItems} region={region} />
+      <AptRecentFeed initialItems={initialItems} region={region} stats={stats ?? undefined} />
 
       <section style={{ marginTop: 24, padding: '0 6px' }}>
         <h2 style={{ fontSize: 14, fontWeight: 700, margin: '0 0 10px' }}>도구</h2>

@@ -11,6 +11,15 @@
 **Architecture Rule 후보 #64:** /apt 메인 정렬 = created_at desc. 마감임박은 D-day 뱃지로만.
 **Legacy 백업:** `src/_legacy/s269/apt_page_v0.tsx`
 
+### s269c — /apt 피드 카테고리 카운트 + 24h/7d hybrid 카운터 (2026-05-17)
+**컨셉:** 발견성 강화 — chip 안 카테고리별 total / 상단 fresh 카운터 hybrid.
+**변경:**
+- `get_apt_feed_stats(p_region)` RPC: jsonb 반환 — `totals` (all/sub/unsold/redev) + `fresh` (window 24h 우선, 0 이면 7d fallback)
+- AptRecentFeed: chip 안 `(N)` 카운트 + 상단 "최근 X시간/일 N건 신규 등록" 배너
+- page.tsx: `fetchInitialFeed` → `fetchInitialData` (Promise.all 로 items+stats 병렬)
+**데이터 (deploy 시점):** 전국 totals.all=3,153 / fresh.window=7d / count=44 (24h=0 → 7d fallback). 서울 totals.all=243 / 7d count=2.
+**Architecture Rule #65 후보:** /apt 피드 상단 fresh 카운터는 24h>0 우선, 아니면 7d fallback, 둘 다 0 이면 hide.
+
 ### s269b — stable composite cursor (2026-05-17)
 **문제:** unsold/redev 각 bulk insert (동일 timestamp 수십~수백건) → 단일 `created_at < cursor` 페이지 경계에서 skip/dup 위험.
 **Fix:**

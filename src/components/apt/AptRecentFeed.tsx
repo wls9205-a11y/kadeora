@@ -5,6 +5,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import AptFeedCard, { type FeedItem } from './AptFeedCard';
 
+export type FeedStats = {
+  region: string;
+  totals: { all: number; subscription: number; unsold: number; redev: number };
+  fresh: { window: '24h' | '7d' | null; count: number };
+};
+
 type Category = 'all' | 'subscription' | 'unsold' | 'redev';
 
 const CATEGORIES: { key: Category; label: string }[] = [
@@ -17,9 +23,10 @@ const CATEGORIES: { key: Category; label: string }[] = [
 type Props = {
   initialItems: FeedItem[];
   region: string;
+  stats?: FeedStats;
 };
 
-export default function AptRecentFeed({ initialItems, region }: Props) {
+export default function AptRecentFeed({ initialItems, region, stats }: Props) {
   const [items, setItems] = useState<FeedItem[]>(initialItems);
   const [category, setCategory] = useState<Category>('all');
   const [loading, setLoading] = useState(false);
@@ -110,16 +117,44 @@ export default function AptRecentFeed({ initialItems, region }: Props) {
               }}
             >
               {c.label}
+              {stats ? (
+                <span style={{
+                  marginLeft: 6,
+                  fontSize: 11,
+                  opacity: active ? 0.7 : 0.55,
+                  fontWeight: 400,
+                }}>
+                  {(stats.totals as Record<string, number>)[c.key] ?? 0}
+                </span>
+              ) : null}
             </button>
           );
         })}
       </div>
     ),
-    [category]
+    [category, stats]
   );
 
   return (
     <section>
+      {stats && stats.fresh.window && stats.fresh.count > 0 ? (
+        <div style={{
+          margin: '4px 6px 0',
+          padding: '8px 12px',
+          fontSize: 12,
+          color: 'var(--text-primary, #111827)',
+          background: 'var(--bg-elevated, #F9FAFB)',
+          border: '1px solid var(--border-base, #E5E7EB)',
+          borderRadius: 8,
+          display: 'flex', alignItems: 'center', gap: 6,
+        }}>
+          <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10B981' }} />
+          <span style={{ fontWeight: 500 }}>
+            {stats.fresh.window === '24h' ? '최근 24시간' : '최근 7일'}{' '}
+            <strong style={{ color: '#0F766E' }}>{stats.fresh.count}건</strong> 신규 등록
+          </span>
+        </div>
+      ) : null}
       {chipBar}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 6px 10px', fontSize: 12, color: 'var(--text-secondary, #6B7280)' }}>
         <span>최근 등록 · {region}</span>
