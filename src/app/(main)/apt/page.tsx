@@ -49,6 +49,7 @@ async function fetchInitialFeed(region: string): Promise<FeedItem[]> {
       p_category: 'all',
       p_limit: 20,
       p_cursor: null,
+      p_cursor_id: null,
     });
     if (error) return [];
     return Array.isArray(data) ? (data as FeedItem[]) : [];

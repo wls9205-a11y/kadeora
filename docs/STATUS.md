@@ -11,6 +11,17 @@
 **Architecture Rule 후보 #64:** /apt 메인 정렬 = created_at desc. 마감임박은 D-day 뱃지로만.
 **Legacy 백업:** `src/_legacy/s269/apt_page_v0.tsx`
 
+### s269b — stable composite cursor (2026-05-17)
+**문제:** unsold/redev 각 bulk insert (동일 timestamp 수십~수백건) → 단일 `created_at < cursor` 페이지 경계에서 skip/dup 위험.
+**Fix:**
+- RPC signature 확장: `p_cursor_id text DEFAULT NULL` 추가
+- 각 CTE: `ORDER BY created_at DESC, id DESC` (bigint id 안정 정렬)
+- cursor predicate: `created_at < p_cursor OR (created_at = p_cursor AND prefixed_id < p_cursor_id)`
+- 외부 ORDER BY: `created_at DESC NULLS LAST, id DESC` (prefixed text id 글로벌 tiebreak)
+- API/클라이언트: `cursor_id` 마지막 row.id 전달
+**검증:** p1 끝 `sub_763293@5/15` → p2 시작 `sub_763292@5/15` 동일 시각 안전. 10건 dup/skip 0.
+**Tradeoff:** lexical text id 비교 (수치적 단조 X). 동일 timestamp 내 sub_9 vs sub_100 노출 순서가 numeric 과 다르지만, 사용자 UI 표시는 "X일 전 등록" 이라 무영향.
+
 ### s268 — 회원가입 funnel P0 fix (2026-05-15)
 **진단:** signup_attempts 30일 156/93 (drop 40.4%, oauth_start 63건). 디바이스별 모바일 49.2% / 네이버 인앱 48.4% / 데스크톱 24.5%. auth.flow_state 30일 50+건 시작, code_issued 0건 = Kakao→Supabase PKCE code 발급 zero.
 **코드 fix (배포):**

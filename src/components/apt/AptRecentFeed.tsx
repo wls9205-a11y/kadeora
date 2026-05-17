@@ -51,12 +51,14 @@ export default function AptRecentFeed({ initialItems, region }: Props) {
     if (loading || !hasMore || items.length === 0) return;
     setLoading(true);
     try {
-      const lastCursor = items[items.length - 1]?.created_at;
+      const last = items[items.length - 1];
       const u = new URL('/api/apt/recent-feed', window.location.origin);
       u.searchParams.set('region', region);
       u.searchParams.set('category', category);
       u.searchParams.set('limit', '20');
-      if (lastCursor) u.searchParams.set('cursor', lastCursor);
+      if (last?.created_at) u.searchParams.set('cursor', last.created_at);
+      // s269b: composite cursor (created_at, id) — 동일 시각 bulk insert 안전.
+      if (last?.id) u.searchParams.set('cursor_id', last.id);
       const res = await fetch(u.toString()).then((r) => r.json());
       const next: FeedItem[] = res?.items ?? [];
       if (next.length === 0) {
