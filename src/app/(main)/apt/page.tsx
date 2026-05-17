@@ -44,7 +44,6 @@ export async function generateMetadata({
 async function fetchInitialData(region: string): Promise<{ items: FeedItem[]; stats: FeedStats | null }> {
   const sb = getSupabaseAdmin();
   try {
-    // s269c: items + stats 병렬 fetch
     const [feedRes, statsRes] = await Promise.all([
       (sb as any).rpc('get_apt_recent_feed', {
         p_region: region,
@@ -55,10 +54,21 @@ async function fetchInitialData(region: string): Promise<{ items: FeedItem[]; st
       }),
       (sb as any).rpc('get_apt_feed_stats', { p_region: region }),
     ]);
+    // s269d: server-side 진단 logging — 한 번만 보고 다음 commit 에서 제거 권장
+    if (feedRes?.error) {
+      console.error('[s269d/recent-feed] error:', JSON.stringify(feedRes.error));
+    }
+    if (statsRes?.error) {
+      console.error('[s269d/stats] error:', JSON.stringify(statsRes.error));
+    }
+    console.log('[s269d] region=' + region
+      + ' feed.count=' + (Array.isArray(feedRes?.data) ? feedRes.data.length : 'non-array')
+      + ' stats.has=' + (statsRes?.data ? 'yes' : 'no'));
     const items = Array.isArray(feedRes?.data) ? (feedRes.data as FeedItem[]) : [];
     const stats = (statsRes?.data && typeof statsRes.data === 'object') ? (statsRes.data as FeedStats) : null;
     return { items, stats };
-  } catch {
+  } catch (e: any) {
+    console.error('[s269d] caught:', e?.message ?? String(e), e?.stack);
     return { items: [], stats: null };
   }
 }
