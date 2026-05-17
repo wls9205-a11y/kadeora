@@ -1,4 +1,16 @@
 
+### s269 — /apt 메인 V1 통합 피드 전환 (2026-05-15)
+**컨셉:** 기존 5블록 → 시간순 통합 피드 단일 흐름. 발견 모델 강화. 가독성 우선.
+**구조:**
+- `get_apt_recent_feed` RPC: v_apt_card_subscription/unsold/redev UNION ALL + created_at desc, cursor 페이지네이션
+- AptFeedCard: 풀-width 균등 카드 (이미지 160px + 카테고리 색 뱃지 + D-day 보조 뱃지)
+- AptRecentFeed: 카테고리 chip + IntersectionObserver 무한 스크롤
+- /api/apt/recent-feed: cursor 기반 next page (maxDuration=10)
+- /apt/page.tsx: SSR 첫 20건 + 도구 4개 푸터
+**데이터:** subscription 2,769 / unsold 181 / redev 203 (모두 created_at NOT NULL)
+**Architecture Rule 후보 #64:** /apt 메인 정렬 = created_at desc. 마감임박은 D-day 뱃지로만.
+**Legacy 백업:** `src/_legacy/s269/apt_page_v0.tsx`
+
 ### s268 — 회원가입 funnel P0 fix (2026-05-15)
 **진단:** signup_attempts 30일 156/93 (drop 40.4%, oauth_start 63건). 디바이스별 모바일 49.2% / 네이버 인앱 48.4% / 데스크톱 24.5%. auth.flow_state 30일 50+건 시작, code_issued 0건 = Kakao→Supabase PKCE code 발급 zero.
 **코드 fix (배포):**
