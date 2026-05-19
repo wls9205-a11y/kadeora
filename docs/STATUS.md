@@ -11,6 +11,20 @@
 **Architecture Rule 후보 #64:** /apt 메인 정렬 = created_at desc. 마감임박은 D-day 뱃지로만.
 **Legacy 백업:** `src/_legacy/s269/apt_page_v0.tsx`
 
+### s269d — /apt V2 컴팩트 디자인 + force-dynamic (2026-05-17)
+**컨셉:** 발견(discovery) 모델 강화. 마감임박 청약 Hero 카드 (top 1) + 2열 그리드 (한 화면 8건). 카테고리 그라데이션 fallback + floating badges.
+**구조:**
+- `get_apt_hero_pick(p_region)` RPC: 마감임박 청약 top 1, jsonb 반환. urgency_score 70+ 면 HOT 표시
+- `get_apt_recent_feed_v2(5-arg)` RPC: 기존 feed + is_new (7d) + is_urgent (D-3) 컬럼 추가. price 만 단위 (이미 만 단위, /10000 제거)
+- AptHeroCard 신규: 110-130px 이미지 + 좌상 카테고리/HOT + 우상 좋아요 + 우하 D-day
+- AptFeedCard V2: 92px 이미지 + 카테고리 색 그라데이션 fallback (단조로운 회색 → 카테고리별 톤) + floating badges
+- AptRecentFeed: 2-col grid, chip 카운트 + 7d fresh 배너 + 무한 스크롤
+- page.tsx: `export const dynamic = 'force-dynamic'` (Architecture Rule #66) + Hero/Feed/Stats Promise.all 병렬
+**핫픽스:** s269c production /apt 빈 페이지 = SSG cache empty 영구화 → force-dynamic 으로 매 request fresh SSR
+**데이터 (deploy 시점):** hero (전국) = 청주 한양립스 더 벨루체 D-1 urgency=90. feed = redev 5건 mixed (NEW)
+**Architecture Rule #66:** /apt 같은 RPC 의존 페이지는 build 시점 PostgREST schema timing race 회피 위해 `force-dynamic` 명시. revalidate 만으로 부족.
+**Legacy:** `src/_legacy/s269/apt_page_v0.tsx`
+
 ### s269c — /apt 피드 카테고리 카운트 + 24h/7d hybrid 카운터 (2026-05-17)
 **컨셉:** 발견성 강화 — chip 안 카테고리별 total / 상단 fresh 카운터 hybrid.
 **변경:**

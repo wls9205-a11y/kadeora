@@ -1,6 +1,6 @@
 'use client';
-// s269: V1 통합 피드 컨테이너. 카테고리 chip + IntersectionObserver 무한 스크롤.
-// Architecture Rule #14: 모든 hook 은 early return 위에.
+// s269d V2: 2-col grid + 카테고리 chip + fresh 배너 + 무한 스크롤.
+// Architecture Rule #14: 모든 hook unconditionally at top.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import AptFeedCard, { type FeedItem } from './AptFeedCard';
@@ -14,10 +14,10 @@ export type FeedStats = {
 type Category = 'all' | 'subscription' | 'unsold' | 'redev';
 
 const CATEGORIES: { key: Category; label: string }[] = [
-  { key: 'all',          label: '전체' },
+  { key: 'all', label: '전체' },
   { key: 'subscription', label: '청약' },
-  { key: 'unsold',       label: '미분양' },
-  { key: 'redev',        label: '재개발' },
+  { key: 'unsold', label: '미분양' },
+  { key: 'redev', label: '재개발' },
 ];
 
 type Props = {
@@ -27,153 +27,144 @@ type Props = {
 };
 
 export default function AptRecentFeed({ initialItems, region, stats }: Props) {
-  const [items, setItems] = useState<FeedItem[]>(initialItems);
   const [category, setCategory] = useState<Category>('all');
+  const [items, setItems] = useState<FeedItem[]>(initialItems);
   const [loading, setLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(initialItems.length >= 20);
+  const [done, setDone] = useState(false);
+  const seenIds = useRef<Set<string>>(new Set(initialItems.map(i => i.id)));
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    let cancelled = false;
     if (category === 'all') {
       setItems(initialItems);
-      setHasMore(initialItems.length >= 20);
-      return;
+      seenIds.current = new Set(initialItems.map(i => i.id));
+      setDone(initialItems.length === 0);
+    } else {
+      const filtered = initialItems.filter(i => i.section === category);
+      setItems(filtered);
+      seenIds.current = new Set(filtered.map(i => i.id));
+      setDone(false);
     }
-    setLoading(true);
-    fetch(`/api/apt/recent-feed?region=${encodeURIComponent(region)}&category=${category}&limit=20`)
-      .then((r) => r.json())
-      .then((res: { items?: FeedItem[] }) => {
-        if (cancelled) return;
-        const next = res.items ?? [];
-        setItems(next);
-        setHasMore(next.length >= 20);
-      })
-      .catch(() => { if (!cancelled) setHasMore(false); })
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
-  }, [category, region, initialItems]);
+  }, [category, initialItems]);
 
-  const loadMore = useCallback(async () => {
-    if (loading || !hasMore || items.length === 0) return;
+  const fetchMore = useCallback(async () => {
+    if (loading || done) return;
     setLoading(true);
     try {
       const last = items[items.length - 1];
-      const u = new URL('/api/apt/recent-feed', window.location.origin);
-      u.searchParams.set('region', region);
-      u.searchParams.set('category', category);
-      u.searchParams.set('limit', '20');
-      if (last?.created_at) u.searchParams.set('cursor', last.created_at);
-      // s269b: composite cursor (created_at, id) — 동일 시각 bulk insert 안전.
-      if (last?.id) u.searchParams.set('cursor_id', last.id);
-      const res = await fetch(u.toString()).then((r) => r.json());
-      const next: FeedItem[] = res?.items ?? [];
-      if (next.length === 0) {
-        setHasMore(false);
-      } else {
-        setItems((cur) => {
-          const seen = new Set(cur.map((x) => x.id));
-          const filtered = next.filter((x) => !seen.has(x.id));
-          if (filtered.length === 0) { setHasMore(false); return cur; }
-          return [...cur, ...filtered];
-        });
-        if (next.length < 20) setHasMore(false);
-      }
+      const params = new URLSearchParams({
+        region, category, limit: '20',
+      });
+      if (last?.created_at) params.set('cursor', last.created_at);
+      if (last?.id) params.set('cursor_id', last.id);
+      const res = await fetch(`/api/apt/recent-feed?${params}`);
+      const data = await res.json();
+      const next = (data?.items ?? []) as FeedItem[];
+      const fresh = next.filter(i => !seenIds.current.has(i.id));
+      fresh.forEach(i => seenIds.current.add(i.id));
+      setItems(prev => [...prev, ...fresh]);
+      if (next.length === 0 || fresh.length === 0) setDone(true);
     } catch {
-      setHasMore(false);
+      setDone(true);
     } finally {
       setLoading(false);
     }
-  }, [items, loading, hasMore, region, category]);
+  }, [items, region, category, loading, done]);
 
   useEffect(() => {
-    if (!sentinelRef.current || !hasMore) return;
-    const target = sentinelRef.current;
-    const obs = new IntersectionObserver(
-      (entries) => { if (entries[0]?.isIntersecting) loadMore(); },
-      { rootMargin: '200px' }
+    const node = sentinelRef.current;
+    if (!node) return;
+    const observer = new IntersectionObserver(
+      entries => { if (entries[0].isIntersecting) fetchMore(); },
+      { rootMargin: '120px' }
     );
-    obs.observe(target);
-    return () => obs.disconnect();
-  }, [loadMore, hasMore]);
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [fetchMore]);
 
-  const chipBar = useMemo(
-    () => (
-      <div style={{ display: 'flex', gap: 6, overflowX: 'auto', padding: '8px 6px 10px', WebkitOverflowScrolling: 'touch' }}>
-        {CATEGORIES.map((c) => {
-          const active = category === c.key;
-          return (
-            <button
-              key={c.key}
-              type="button"
-              onClick={() => setCategory(c.key)}
-              style={{
-                fontSize: 13, padding: '6px 12px', borderRadius: 999,
-                background: active ? 'var(--text-primary, #111827)' : 'transparent',
-                color: active ? 'var(--bg-surface, #FFFFFF)' : 'var(--text-secondary, #6B7280)',
-                border: active ? '1px solid var(--text-primary, #111827)' : '1px solid var(--border-base, #E5E7EB)',
-                whiteSpace: 'nowrap', cursor: 'pointer',
-                fontWeight: active ? 500 : 400,
-              }}
-            >
-              {c.label}
-              {stats ? (
-                <span style={{
-                  marginLeft: 6,
-                  fontSize: 11,
-                  opacity: active ? 0.7 : 0.55,
-                  fontWeight: 400,
-                }}>
-                  {(stats.totals as Record<string, number>)[c.key] ?? 0}
-                </span>
-              ) : null}
-            </button>
-          );
-        })}
-      </div>
-    ),
-    [category, stats]
-  );
+  const chipBar = useMemo(() => (
+    <div style={{
+      display: 'flex', gap: 5, overflowX: 'auto',
+      padding: '10px 6px 4px', WebkitOverflowScrolling: 'touch',
+    }}>
+      {CATEGORIES.map(c => {
+        const active = category === c.key;
+        const count = stats ? (stats.totals as Record<string, number>)[c.key] ?? 0 : null;
+        return (
+          <button key={c.key} type="button"
+            onClick={() => setCategory(c.key)}
+            style={{
+              fontSize: 11.5, padding: '4px 10px', borderRadius: 999,
+              background: active ? 'var(--text-primary, #111827)' : 'transparent',
+              color: active ? 'var(--bg-surface, #FFFFFF)' : 'var(--text-secondary, #6B7280)',
+              border: '0.5px solid',
+              borderColor: active ? 'var(--text-primary, #111827)' : 'var(--border-base, #E5E7EB)',
+              whiteSpace: 'nowrap', cursor: 'pointer',
+              fontWeight: active ? 500 : 400,
+              display: 'flex', alignItems: 'center', gap: 4,
+            }}>
+            {c.label}
+            {count !== null && (
+              <span style={{ fontSize: 10, opacity: active ? 0.7 : 0.55, fontWeight: 400 }}>
+                {count.toLocaleString()}
+              </span>
+            )}
+          </button>
+        );
+      })}
+    </div>
+  ), [category, stats]);
 
   return (
     <section>
-      {stats && stats.fresh.window && stats.fresh.count > 0 ? (
+      {stats && stats.fresh.window && stats.fresh.count > 0 && (
         <div style={{
-          margin: '4px 6px 0',
-          padding: '8px 12px',
-          fontSize: 12,
-          color: 'var(--text-primary, #111827)',
-          background: 'var(--bg-elevated, #F9FAFB)',
-          border: '1px solid var(--border-base, #E5E7EB)',
-          borderRadius: 8,
+          margin: '4px 6px 0', padding: '8px 12px',
+          fontSize: 11.5, color: '#0F6E56',
+          background: '#E1F5EE', borderRadius: 6,
           display: 'flex', alignItems: 'center', gap: 6,
         }}>
-          <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10B981' }} />
-          <span style={{ fontWeight: 500 }}>
-            {stats.fresh.window === '24h' ? '최근 24시간' : '최근 7일'}{' '}
-            <strong style={{ color: '#0F766E' }}>{stats.fresh.count}건</strong> 신규 등록
+          <span style={{ fontSize: 12 }}>✨</span>
+          <span>
+            최근 {stats.fresh.window === '24h' ? '24시간' : '7일'}{' '}
+            <strong style={{ color: '#04342C', fontWeight: 500 }}>{stats.fresh.count}건</strong> 신규 등록
           </span>
         </div>
-      ) : null}
-      {chipBar}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 6px 10px', fontSize: 12, color: 'var(--text-secondary, #6B7280)' }}>
-        <span>최근 등록 · {region}</span>
-        <span style={{ fontSize: 11 }}>최신순</span>
-      </div>
-
-      {items.length === 0 && !loading ? (
-        <div style={{ padding: '40px 16px', textAlign: 'center', color: 'var(--text-tertiary, #9CA3AF)', fontSize: 13 }}>
-          이 카테고리에 최근 등록된 단지가 없어요
-        </div>
-      ) : (
-        <div style={{ padding: '0 6px' }}>
-          {items.map((it, i) => <AptFeedCard key={it.id} item={it} priority={i < 2} />)}
-        </div>
       )}
-
-      <div ref={sentinelRef} style={{ padding: '20px 16px', textAlign: 'center', fontSize: 12, color: 'var(--text-tertiary, #9CA3AF)' }}>
-        {loading ? '불러오는 중...' : hasMore ? ' ' : '— 끝 —'}
+      {chipBar}
+      <div style={{
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        padding: '4px 8px 8px', fontSize: 10.5, color: 'var(--text-tertiary, #9CA3AF)',
+      }}>
+        <span>최근 등록 · {region}</span>
+        <span>최신순</span>
       </div>
+      <div style={{
+        display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, padding: '0 6px 10px',
+      }}>
+        {items.map(item => (
+          <AptFeedCard key={item.id} item={item} />
+        ))}
+      </div>
+      {items.length === 0 && (
+        <div style={{
+          padding: '40px 16px', textAlign: 'center',
+          color: 'var(--text-tertiary, #9CA3AF)', fontSize: 13,
+        }}>이 카테고리에 최근 등록된 단지가 없어요</div>
+      )}
+      <div ref={sentinelRef} aria-hidden="true" style={{ height: 1 }} />
+      {loading && (
+        <div style={{
+          padding: '12px 16px', textAlign: 'center',
+          color: 'var(--text-tertiary, #9CA3AF)', fontSize: 11.5,
+        }}>불러오는 중…</div>
+      )}
+      {done && items.length > 0 && (
+        <div style={{
+          padding: '20px 16px', textAlign: 'center', fontSize: 11.5,
+          color: 'var(--text-tertiary, #9CA3AF)',
+        }}>— 끝 —</div>
+      )}
     </section>
   );
 }

@@ -1,172 +1,110 @@
-// s269: V1 균등 피드 카드. 풀-width, 이미지 160px, 카테고리 색 뱃지 + 메타.
-// 무한 스크롤 안의 단일 단위. 카테고리 토글되어도 동일한 카드 구조 유지.
+'use client';
+// s269d V2: 2-col grid card. 90px 이미지 + 카테고리 그라데이션 fallback + floating badges.
 
 import Link from 'next/link';
-import Image from 'next/image';
 
 export type FeedItem = {
   id: string;
   section: 'subscription' | 'unsold' | 'redev' | string;
   badge_label: string;
-  badge_color: 'amber' | 'coral' | 'green' | 'blue' | 'purple';
+  badge_color: 'blue' | 'coral' | 'purple' | string;
   title: string;
-  region?: string | null;
-  meta?: string | null;
-  image_url?: string | null;
-  href?: string | null;
-  dday?: number | null;
-  created_at: string;
+  region: string | null;
+  meta: string | null;
+  image_url: string | null;
+  href: string;
+  dday: number | null;
+  is_new: boolean;
+  is_urgent: boolean;
+  created_at: string | null;
 };
 
-const BADGE_COLORS: Record<string, [string, string]> = {
-  amber:  ['#FAEEDA', '#854F0B'],
-  coral:  ['#FAECE7', '#993C1D'],
-  green:  ['#E1F5EE', '#085041'],
-  blue:   ['#E6F1FB', '#0C447C'],
-  purple: ['#EEEDFE', '#3C3489'],
+const CATEGORY_STYLE: Record<string, { bg: string; color: string }> = {
+  blue:   { bg: 'linear-gradient(135deg, #E6F1FB 0%, #B5D4F4 100%)', color: '#185FA5' },
+  coral:  { bg: 'linear-gradient(135deg, #FAECE7 0%, #F5C4B3 100%)', color: '#993C1D' },
+  purple: { bg: 'linear-gradient(135deg, #EEEDFE 0%, #CECBF6 100%)', color: '#534AB7' },
 };
 
-const FALLBACK_COLORS = ['#FCA5A5', '#FDBA74', '#FCD34D', '#86EFAC', '#7DD3FC', '#A5B4FC', '#F0ABFC'];
-
-function fallbackColor(id: string): string {
-  let h = 0;
-  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
-  return FALLBACK_COLORS[h % FALLBACK_COLORS.length];
-}
-
-function relativeTime(iso: string): string {
-  const t = new Date(iso).getTime();
-  if (Number.isNaN(t)) return '';
-  const diffSec = (Date.now() - t) / 1000;
-  if (diffSec < 60) return '방금';
-  if (diffSec < 3600) return `${Math.floor(diffSec / 60)}분 전`;
-  if (diffSec < 86400) return `${Math.floor(diffSec / 3600)}시간 전`;
-  if (diffSec < 86400 * 7) return `${Math.floor(diffSec / 86400)}일 전`;
-  if (diffSec < 86400 * 30) return `${Math.floor(diffSec / 86400 / 7)}주 전`;
-  return `${Math.floor(diffSec / 86400 / 30)}달 전`;
-}
-
-const SECTION_LABEL: Record<string, string> = {
-  subscription: '청약',
-  unsold: '미분양',
-  redev: '재개발',
+const BADGE_TEXT_COLOR: Record<string, string> = {
+  blue: '#0C447C',
+  coral: '#993C1D',
+  purple: '#3C3489',
 };
 
-function ddayChip(d: number | null | undefined): { bg: string; fg: string; label: string } | null {
-  if (d == null) return null;
-  if (d < 0)   return { bg: '#F3F4F6', fg: '#4B5563', label: '마감' };
-  if (d <= 3)  return { bg: '#DC2626', fg: '#FFFFFF', label: `D-${d}` };
-  if (d <= 7)  return { bg: '#FEE2E2', fg: '#991B1B', label: `D-${d}` };
-  return null;
+function categoryIcon(section: string): string {
+  if (section === 'subscription') return '🏢';
+  if (section === 'unsold') return '🏠';
+  if (section === 'redev') return '🏗';
+  return '🏢';
 }
 
-export default function AptFeedCard({ item, priority = false }: { item: FeedItem; priority?: boolean }) {
-  const [bg, fg] = BADGE_COLORS[item.badge_color] ?? BADGE_COLORS.blue;
-  const sectionLabel = SECTION_LABEL[item.section] ?? item.section;
-  const href = item.href ?? '#';
-  const placeholderBg = fallbackColor(item.id);
-  const dchip = ddayChip(item.dday);
+export default function AptFeedCard({ item }: { item: FeedItem }) {
+  const style = CATEGORY_STYLE[item.badge_color] ?? CATEGORY_STYLE.blue;
+  const badgeColor = BADGE_TEXT_COLOR[item.badge_color] ?? BADGE_TEXT_COLOR.blue;
 
   return (
-    <Link
-      href={href}
-      style={{
-        display: 'block',
-        textDecoration: 'none',
-        color: 'inherit',
-        border: '1px solid var(--border-base, #E5E7EB)',
-        borderRadius: 8,
-        overflow: 'hidden',
-        background: 'var(--bg-surface, #FFFFFF)',
-        marginBottom: 10,
-      }}
-    >
-      <div
-        style={{
-          position: 'relative',
-          width: '100%',
-          height: 160,
-          background: item.image_url ? '#F3F4F6' : placeholderBg,
-        }}
-      >
-        {item.image_url ? (
-          <Image
-            src={item.image_url}
-            alt={item.title}
-            fill
-            sizes="(max-width: 720px) 100vw, 720px"
-            style={{ objectFit: 'cover' }}
-            priority={priority}
-          />
-        ) : (
-          <div
-            aria-hidden="true"
-            style={{
-              position: 'absolute', inset: 0,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 40, opacity: 0.4,
-            }}
-          >
-            🏢
+    <Link href={item.href} style={{
+      display: 'block',
+      background: 'var(--bg-surface, #FFFFFF)',
+      border: '0.5px solid var(--border-base, #E5E7EB)',
+      borderRadius: 8,
+      overflow: 'hidden',
+      textDecoration: 'none',
+      color: 'inherit',
+    }}>
+      <div style={{
+        position: 'relative',
+        height: 92,
+        background: item.image_url
+          ? `url(${item.image_url}) center/cover`
+          : style.bg,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        color: style.color, fontSize: 26,
+      }}>
+        {!item.image_url && <span style={{ opacity: 0.7 }}>{categoryIcon(item.section)}</span>}
+        <div style={{ position: 'absolute', top: 6, left: 6 }}>
+          <span style={{
+            fontSize: 10, padding: '2px 6px', borderRadius: 3, fontWeight: 500,
+            background: 'rgba(255,255,255,0.92)', color: badgeColor,
+          }}>{item.badge_label}</span>
+        </div>
+        {item.is_new && (
+          <div style={{ position: 'absolute', top: 6, right: 6 }}>
+            <span style={{
+              fontSize: 9, padding: '2px 5px', borderRadius: 3, fontWeight: 500,
+              background: '#1D9E75', color: 'white', letterSpacing: '0.3px',
+            }}>NEW</span>
           </div>
         )}
-        <div
-          style={{
-            position: 'absolute', top: 10, left: 10,
-            display: 'flex', gap: 4, flexWrap: 'wrap',
-          }}
-        >
-          <span
-            style={{
-              fontSize: 11, padding: '2px 8px', borderRadius: 999,
-              background: bg, color: fg, fontWeight: 500,
-            }}
-          >
-            {sectionLabel}
-          </span>
-          {item.badge_label && item.badge_label !== sectionLabel && (
-            <span
-              style={{
-                fontSize: 11, padding: '2px 8px', borderRadius: 999,
-                background: 'rgba(255,255,255,0.95)',
-                color: '#111827', fontWeight: 500,
-              }}
-            >
-              {item.badge_label}
-            </span>
-          )}
-        </div>
-        {dchip && (
-          <div style={{ position: 'absolute', top: 10, right: 10 }}>
-            <span
-              style={{
-                fontSize: 11, padding: '2px 8px', borderRadius: 999,
-                background: dchip.bg, color: dchip.fg, fontWeight: 500,
-              }}
-            >
-              {dchip.label}
+        {item.dday !== null && item.dday !== undefined && (
+          <div style={{ position: 'absolute', bottom: 6, right: 6 }}>
+            <span style={{
+              fontSize: 9.5, padding: '2px 6px', borderRadius: 3, fontWeight: 500,
+              background: item.is_urgent ? '#E24B4A' : 'rgba(0,0,0,0.7)',
+              color: 'white',
+            }}>
+              {item.dday < 0 ? '마감' : `D-${item.dday}`}
             </span>
           </div>
         )}
       </div>
-
-      <div style={{ padding: '12px 14px' }}>
-        <p style={{ fontSize: 14, fontWeight: 600, margin: '0 0 4px', color: 'var(--text-primary, #111827)' }}>
-          {item.title}
-        </p>
-        <p style={{ fontSize: 12, color: 'var(--text-secondary, #6B7280)', margin: 0 }}>
-          {item.region}
-          {item.meta ? <span style={{ margin: '0 6px' }}>·</span> : null}
-          {item.meta}
-        </p>
-        <div
-          style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            marginTop: 10, fontSize: 11, color: 'var(--text-tertiary, #9CA3AF)',
-          }}
-        >
-          <span>{relativeTime(item.created_at)} 등록</span>
-        </div>
+      <div style={{ padding: '8px 9px 10px' }}>
+        <div style={{
+          fontSize: 12, fontWeight: 500, lineHeight: 1.3,
+          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          color: 'var(--text-primary, #111827)',
+          marginBottom: 3,
+        }}>{item.title}</div>
+        {item.region && (
+          <div style={{
+            fontSize: 10.5, color: 'var(--text-secondary, #6B7280)', marginBottom: 4,
+          }}>{item.region}</div>
+        )}
+        {item.meta && (
+          <div style={{
+            fontSize: 11.5, fontWeight: 500, color: 'var(--text-primary, #111827)',
+          }}>{item.meta}</div>
+        )}
       </div>
     </Link>
   );
