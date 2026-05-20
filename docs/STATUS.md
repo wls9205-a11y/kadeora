@@ -11,6 +11,56 @@
 **Architecture Rule 후보 #64:** /apt 메인 정렬 = created_at desc. 마감임박은 D-day 뱃지로만.
 **Legacy 백업:** `src/_legacy/s269/apt_page_v0.tsx`
 
+### s269f — chip 카테고리 색 강조 + Architecture Rule 정식화 (2026-05-17)
+**컨셉:** chip active 시 카테고리 톤 적용으로 시각 hierarchy 강화.
+**변경:**
+- AptRecentFeed.tsx: active chip 색 — 전체 검정 / 청약 blue (#185FA5) / 미분양 coral (#993C1D) / 재개발 purple (#534AB7)
+- inactive chip 은 기존 회색 border 유지 (대비)
+- Architecture Rule #66~#70 정식 발효 (아래 섹션 참조)
+
+---
+
+## Architecture Rules 누적 (s269 시리즈)
+
+기존 Rule #1~#65 는 별도 (s195~s268 누적). s269 시리즈에서 추가된 5개:
+
+### Rule #66: SSG empty cache 영구화 회피
+RPC 의존 페이지는 `export const dynamic = 'force-dynamic'` 명시. revalidate=60 만으로 부족.
+- **근거:** build 시점 PostgREST schema timing race 또는 RPC 실패 시 empty 응답이 SSG cache 에 영구화. 매 request fresh SSR 로 회피
+- **적용:** /apt page.tsx (s269d 발효)
+- **확인 방법:** production HTML 의 `x-vercel-cache: MISS` + `initialItems` 비어있지 않음
+
+### Rule #67: Claude Code git push 표준 패턴
+`!` prefix git push 명령은 **항상** `2>&1 | tee /tmp/push.log; cat /tmp/push.log` 패턴 사용.
+- **근거:** 단독 `git push origin main` 은 약 70-80% 확률 stdout 잘려서 Claude (chat) 가 결과 확인 못함. tee + cat 패턴은 8/8 성공
+- **표준 명령:** `! cd ~/kadeora && git push origin main 2>&1 | tee /tmp/push.log; cat /tmp/push.log`
+
+### Rule #68: Functional index 필수
+view 의 LEFT JOIN 에 `replace()` / `lower()` / `trim()` 등 함수 표현식 사용 시 같은 표현식 functional index 필수.
+- **근거:** `apt_complex_profiles.replace(apt_name, ' ', '')` join 인덱스 부재로 view 12,758ms → functional index 추가 후 81ms (157배)
+- **적용:** `idx_apt_complex_region_normalized_name`, `idx_apt_sites_region_normalized_name` (s269d)
+- **추가 후 ANALYZE 필수** — planner 통계 갱신
+
+### Rule #69: RPC 시그니처 변경 3단 패턴
+RPC 의 반환 컬럼/시그니처 변경 후 `DROP FUNCTION + CREATE FUNCTION + NOTIFY pgrst 'reload schema'` 3단계 적용.
+- **근거:** CREATE OR REPLACE 또는 단순 NOTIFY 만으로는 PostgREST schema cache invalidation 실패. v2 RPC 가 cache miss 되어 호출 0건 (s269d)
+- **표준 패턴:**
+  ```sql
+  DROP FUNCTION IF EXISTS public.X(...);
+  CREATE FUNCTION public.X(...) ...;
+  REVOKE ALL ON FUNCTION ... FROM PUBLIC, anon, authenticated;
+  GRANT EXECUTE ON FUNCTION ... TO service_role;
+  NOTIFY pgrst, 'reload schema';
+  ```
+
+### Rule #70: Bulk insert dominate 회피
+카테고리별 데이터 분포 불균형 (bulk insert) 시 `created_at desc` 단일 정렬은 bulk 카테고리가 무조건 dominate. 카테고리 quota 강제 필수.
+- **근거:** redev 35건 동시 bulk insert 로 /apt 첫 20건 모두 redev. subscription 24건 active 가 0건 노출 (s269d)
+- **패턴:** RPC 내부 카테고리별 LIMIT 사용 + 외부 ORDER BY 의 카테고리 우선순위 CASE
+- **적용:** /apt subscription 12 + redev 6 + unsold 2 (60/30/10 quota, s269e)
+
+---
+
 ### s269e — /apt 컴팩트 + 청약 quota + dedupe (2026-05-17)
 **컨셉:** 청약 노출 강화 (60% quota) + 카드 컴팩트화 (한 화면 8→12+) + Hero/Grid dedupe.
 **RPC 변경:**

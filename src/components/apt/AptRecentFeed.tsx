@@ -20,6 +20,14 @@ const CATEGORIES: { key: Category; label: string }[] = [
   { key: 'redev', label: '재개발' },
 ];
 
+// s269f: 카테고리별 active 색 — 청약 blue / 미분양 coral / 재개발 purple / 전체 검정
+const CATEGORY_ACTIVE_COLOR: Record<Category, string> = {
+  all: 'var(--text-primary, #111827)',
+  subscription: '#185FA5',
+  unsold: '#993C1D',
+  redev: '#534AB7',
+};
+
 type Props = {
   initialItems: FeedItem[];
   region: string;
@@ -95,10 +103,10 @@ export default function AptRecentFeed({ initialItems, region, stats }: Props) {
             onClick={() => setCategory(c.key)}
             style={{
               fontSize: 11.5, padding: '4px 10px', borderRadius: 999,
-              background: active ? 'var(--text-primary, #111827)' : 'transparent',
+              background: active ? CATEGORY_ACTIVE_COLOR[c.key] : 'transparent',
               color: active ? 'var(--bg-surface, #FFFFFF)' : 'var(--text-secondary, #6B7280)',
               border: '0.5px solid',
-              borderColor: active ? 'var(--text-primary, #111827)' : 'var(--border-base, #E5E7EB)',
+              borderColor: active ? CATEGORY_ACTIVE_COLOR[c.key] : 'var(--border-base, #E5E7EB)',
               whiteSpace: 'nowrap', cursor: 'pointer',
               fontWeight: active ? 500 : 400,
               display: 'flex', alignItems: 'center', gap: 4,
