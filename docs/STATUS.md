@@ -11,6 +11,41 @@
 **Architecture Rule 후보 #64:** /apt 메인 정렬 = created_at desc. 마감임박은 D-day 뱃지로만.
 **Legacy 백업:** `src/_legacy/s269/apt_page_v0.tsx`
 
+### s270 — 4영역 면밀 검토 + P0 fix 일괄 (2026-05-20)
+**컨셉:** Node 의 "전부다 완벽하게 한꺼번에 병렬로" 요청. 회원가입/부동산/이슈/어드민 4영역 진단 + 즉시 fix.
+
+**검토 결과:**
+1. 🚨 **회원가입 11일 dead** (5-09 이후) — root cause: s268 commit `2df30037` (5-14 11:35 KST) 이후 flow_state 시도 4건/일 → 0.17건/일 (96% 감소). useInAppBrowser UA 패턴 또는 PKCE cookieOptions 의심. → **git revert 진행**
+2. 🚨 **부동산 옛 단지 노출** — view created_at 이 DB import 시점 (분양 시점 아님). 30일간 갱신된 2770건 중 95% (2622건) 가 2026년 이전 분양. → **RPC date_start 우선 정렬 + 마감 후 14일 청약 제외 적용**
+3. 🚨 **이슈 publish 87% drop** — funnel 1.7% (1229 감지 → 21 발행). HOURLY_LIMIT gate 62건 차단 + manual draft 76건 대기 + auto_published 단 2건. → **hourly_limit 80→200 + validate_blog_post 미래 schedule 제외 적용**
+4. ⚠️ **어드민 대시보드** — `v_admin_signup_diagnostic` 가 매일 ❌ 진단 중이지만 알림 안 옴. → **check_signup_zero_alert() + pg_cron 17 * * * * 자동 발송 등록**
+
+**SQL fix 4종 적용 완료:**
+- `get_apt_recent_feed_v2` (s270): ORDER BY 마감임박 + date_start desc, 14일 지난 마감 청약 필터
+- `check_signup_zero_alert()` + pg_cron `check-signup-alert` 매 시간
+- `blog_publish_config` hourly/daily 80→200
+- `validate_blog_post` (s270): hourly_count 카운트 범위 = 과거 1시간 ~ NOW+1시간 (미래 schedule posts 제외)
+
+**Code change:** s268 commit `2df30037` revert (PKCE + UA pre-block 제거, 회원가입 복구)
+
+**Architecture Rule 추가 (#71~#73):**
+
+### Rule #71: 회원가입 dead 자동 감지
+auth.users 의 마지막 created_at 이 3일+ 지났으면 admin_alerts critical 자동 발송. pg_cron 매 시간 `check_signup_zero_alert()` 실행. 단순 view 의존하지 말고 trigger insert 로 알림.
+
+### Rule #72: View 의 created_at 이 "import 시점" 일 때 정렬 위험
+RPC ORDER BY 시 view 의 created_at 는 DB import 시점이라 옛 데이터도 위로 올라옴. 실제 의미 있는 시간 컬럼 (date_start, published_at 등) 우선 + created_at tie-break 패턴 사용. + 만료된 row 명시적 필터.
+
+### Rule #73: 미래 schedule timestamp 와 rate limit
+blog_posts.created_at 같은 미래 schedule 컬럼은 rate limit trigger 에서 카운트 범위 명시 (`NOW() ± 1 hour` 등). `created_at >= NOW() - 1h` 만 쓰면 무한 미래 schedule 다 잡혀서 limit fail.
+
+**P0 commit:** git revert 2df30037 (s268)
+
+**[PENDING] Node 직접:**
+1. Kakao Dev Console + Supabase Dashboard URL 점검 (revert 후 모바일 49% drop 다시 발생할 수 있음)
+2. 이슈 publish 의 manual draft 76건 검토 후 일괄 auto_publish 승격 검토
+3. unsold/redev cron 의 created_at 신선도 (각각 1달/2일 전 마지막 import)
+
 ### s269f — chip 카테고리 색 강조 + Architecture Rule 정식화 (2026-05-17)
 **컨셉:** chip active 시 카테고리 톤 적용으로 시각 hierarchy 강화.
 **변경:**
