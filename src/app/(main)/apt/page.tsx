@@ -61,7 +61,9 @@ async function fetchPageData(region: string): Promise<{
     if (feedRes?.error) console.error('[apt/feed] error:', JSON.stringify(feedRes.error));
     if (statsRes?.error) console.error('[apt/stats] error:', JSON.stringify(statsRes.error));
     const hero = (heroRes?.data && typeof heroRes.data === 'object') ? (heroRes.data as HeroData) : null;
-    const items = Array.isArray(feedRes?.data) ? (feedRes.data as FeedItem[]) : [];
+    const heroId = (hero as any)?.id as string | undefined;
+    const rawItems = Array.isArray(feedRes?.data) ? (feedRes.data as FeedItem[]) : [];
+    const items = heroId ? rawItems.filter(it => it.id !== heroId) : rawItems;
     const stats = (statsRes?.data && typeof statsRes.data === 'object') ? (statsRes.data as FeedStats) : null;
     console.log('[apt/page] region=' + region + ' hero=' + (hero ? 'yes' : 'no') + ' items=' + items.length + ' stats=' + (stats ? 'yes' : 'no'));
     return { hero, items, stats };

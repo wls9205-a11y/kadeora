@@ -11,6 +11,20 @@
 **Architecture Rule 후보 #64:** /apt 메인 정렬 = created_at desc. 마감임박은 D-day 뱃지로만.
 **Legacy 백업:** `src/_legacy/s269/apt_page_v0.tsx`
 
+### s269e — /apt 컴팩트 + 청약 quota + dedupe (2026-05-17)
+**컨셉:** 청약 노출 강화 (60% quota) + 카드 컴팩트화 (한 화면 8→12+) + Hero/Grid dedupe.
+**RPC 변경:**
+- `get_apt_recent_feed_v2`: 첫 페이지 카테고리 quota (sub 12 + redev 6 + unsold 2)
+  - subscription: 마감임박 (D-day 0~30) ORDER BY dday ASC + created_at DESC
+  - 외부 ORDER BY: subscription 마감임박 > subscription > redev > unsold > created_at
+  - 무한 스크롤 (cursor != NULL) 은 기존 mixed 정렬 유지
+**컴포넌트 변경:**
+- AptFeedCard: 이미지 92→72px, padding 8/9→6/7px, font 12→11.5px, gap 줄임. 카드 ~150→~115px
+- AptHeroCard: 이미지 130→100px, padding 11/13→8/11px, font 14.5→13.5px. 카드 ~210→~165px
+- page.tsx: hero.id 와 동일한 grid item 자동 제외 (dedupe)
+**데이터 (s269e 시점):** 청주 한양립스 D-0 (Hero) / 부산 두산위브 D-0 / 경기 중앙하이츠 D-0 / 인천 더샵 송도그란테르 G5 1~6블록 D-1 (5건) ... 마감임박 청약 다양하게 노출
+**Architecture Rule #70:** 카테고리별 데이터 분포 불균형 (one bulk insert 가 정렬 dominate) 시 quota 강제 필수. created_at desc 단일 정렬은 bulk 들어온 카테고리가 무조건 이김.
+
 ### s269d — /apt V2 컴팩트 디자인 + force-dynamic (2026-05-17)
 **컨셉:** 발견(discovery) 모델 강화. 마감임박 청약 Hero 카드 (top 1) + 2열 그리드 (한 화면 8건). 카테고리 그라데이션 fallback + floating badges.
 **구조:**

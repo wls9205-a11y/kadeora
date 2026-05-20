@@ -1,5 +1,5 @@
 'use client';
-// s269d V2: Hero 카드 (마감임박 청약 top 1)
+// s269e V2.1: 컴팩트 Hero. 이미지 130→100px, padding 축소.
 
 import Link from 'next/link';
 
@@ -22,7 +22,7 @@ export default function AptHeroCard({ data }: { data: HeroData }) {
   return (
     <Link href={data.href} style={{
       display: 'block',
-      margin: '4px 0 12px',
+      margin: '4px 0 10px',
       borderRadius: 8,
       overflow: 'hidden',
       border: '0.5px solid var(--border-base, #E5E7EB)',
@@ -32,37 +32,37 @@ export default function AptHeroCard({ data }: { data: HeroData }) {
     }}>
       <div style={{
         position: 'relative',
-        height: 130,
+        height: 100,
         background: data.image_url
           ? `url(${data.image_url}) center/cover, linear-gradient(135deg, #B5D4F4 0%, #378ADD 100%)`
           : 'linear-gradient(135deg, #B5D4F4 0%, #378ADD 100%)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        color: '#042C53', fontSize: 40,
+        color: '#042C53', fontSize: 32,
       }}>
         {!data.image_url && <span style={{ opacity: 0.55 }}>🏢</span>}
-        <div style={{ position: 'absolute', top: 10, left: 10, display: 'flex', gap: 4 }}>
+        <div style={{ position: 'absolute', top: 7, left: 7, display: 'flex', gap: 3 }}>
           <span style={{
-            fontSize: 11, padding: '2px 7px', borderRadius: 3, fontWeight: 500,
+            fontSize: 10, padding: '2px 6px', borderRadius: 3, fontWeight: 500,
             background: 'rgba(255,255,255,0.92)', color: '#0C447C',
           }}>청약</span>
           {data.urgency_score >= 70 && (
             <span style={{
-              fontSize: 10, padding: '2px 6px', borderRadius: 3, fontWeight: 500,
+              fontSize: 9, padding: '2px 5px', borderRadius: 3, fontWeight: 500,
               background: '#E24B4A', color: 'white', letterSpacing: '0.3px',
             }}>HOT</span>
           )}
         </div>
         <div style={{
-          position: 'absolute', top: 8, right: 8,
-          width: 30, height: 30, borderRadius: '50%',
+          position: 'absolute', top: 6, right: 6,
+          width: 24, height: 24, borderRadius: '50%',
           background: 'rgba(255,255,255,0.92)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 14, color: '#6B7280',
+          fontSize: 12, color: '#6B7280',
         }}>♡</div>
         {data.dday !== null && data.dday !== undefined && (
           <div style={{
-            position: 'absolute', bottom: 10, right: 10,
-            fontSize: 11, padding: '4px 9px', borderRadius: 4, fontWeight: 500,
+            position: 'absolute', bottom: 7, right: 7,
+            fontSize: 10, padding: '3px 7px', borderRadius: 4, fontWeight: 500,
             background: data.is_urgent ? '#E24B4A' : 'rgba(0,0,0,0.65)',
             color: 'white',
           }}>
@@ -70,30 +70,30 @@ export default function AptHeroCard({ data }: { data: HeroData }) {
           </div>
         )}
       </div>
-      <div style={{ padding: '11px 13px 13px' }}>
+      <div style={{ padding: '8px 11px 11px' }}>
         <div style={{
           display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
-          marginBottom: 4, gap: 8,
+          marginBottom: 3, gap: 8,
         }}>
           <div style={{
-            fontSize: 14.5, fontWeight: 500, lineHeight: 1.25,
+            fontSize: 13.5, fontWeight: 500, lineHeight: 1.25,
             color: 'var(--text-primary, #111827)',
           }}>{data.title}</div>
           {data.region && (
             <div style={{
-              fontSize: 11.5, color: 'var(--text-secondary, #6B7280)', flexShrink: 0,
+              fontSize: 11, color: 'var(--text-secondary, #6B7280)', flexShrink: 0,
             }}>{data.region}</div>
           )}
         </div>
         {data.meta_primary && (
           <div style={{
-            fontSize: 12.5, fontWeight: 500, color: 'var(--text-primary, #111827)',
-            marginTop: 3,
+            fontSize: 11.5, fontWeight: 500, color: 'var(--text-primary, #111827)',
+            marginTop: 2,
           }}>
             {data.meta_primary}
             {data.meta_secondary && (
               <span style={{
-                color: 'var(--text-secondary, #6B7280)', fontWeight: 400, fontSize: 11.5,
+                color: 'var(--text-secondary, #6B7280)', fontWeight: 400, fontSize: 11,
               }}> · {data.meta_secondary}</span>
             )}
           </div>

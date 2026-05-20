@@ -1,5 +1,5 @@
 'use client';
-// s269d V2: 2-col grid card. 90px 이미지 + 카테고리 그라데이션 fallback + floating badges.
+// s269e V2.1: 컴팩트 그리드 카드. 이미지 92→72px, padding/font/gap 축소.
 
 import Link from 'next/link';
 
@@ -26,9 +26,7 @@ const CATEGORY_STYLE: Record<string, { bg: string; color: string }> = {
 };
 
 const BADGE_TEXT_COLOR: Record<string, string> = {
-  blue: '#0C447C',
-  coral: '#993C1D',
-  purple: '#3C3489',
+  blue: '#0C447C', coral: '#993C1D', purple: '#3C3489',
 };
 
 function categoryIcon(section: string): string {
@@ -47,39 +45,37 @@ export default function AptFeedCard({ item }: { item: FeedItem }) {
       display: 'block',
       background: 'var(--bg-surface, #FFFFFF)',
       border: '0.5px solid var(--border-base, #E5E7EB)',
-      borderRadius: 8,
+      borderRadius: 7,
       overflow: 'hidden',
       textDecoration: 'none',
       color: 'inherit',
     }}>
       <div style={{
         position: 'relative',
-        height: 92,
-        background: item.image_url
-          ? `url(${item.image_url}) center/cover`
-          : style.bg,
+        height: 72,
+        background: item.image_url ? `url(${item.image_url}) center/cover` : style.bg,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        color: style.color, fontSize: 26,
+        color: style.color, fontSize: 22,
       }}>
         {!item.image_url && <span style={{ opacity: 0.7 }}>{categoryIcon(item.section)}</span>}
-        <div style={{ position: 'absolute', top: 6, left: 6 }}>
+        <div style={{ position: 'absolute', top: 5, left: 5 }}>
           <span style={{
-            fontSize: 10, padding: '2px 6px', borderRadius: 3, fontWeight: 500,
+            fontSize: 9.5, padding: '1.5px 5px', borderRadius: 3, fontWeight: 500,
             background: 'rgba(255,255,255,0.92)', color: badgeColor,
           }}>{item.badge_label}</span>
         </div>
         {item.is_new && (
-          <div style={{ position: 'absolute', top: 6, right: 6 }}>
+          <div style={{ position: 'absolute', top: 5, right: 5 }}>
             <span style={{
-              fontSize: 9, padding: '2px 5px', borderRadius: 3, fontWeight: 500,
+              fontSize: 8.5, padding: '1.5px 4px', borderRadius: 3, fontWeight: 500,
               background: '#1D9E75', color: 'white', letterSpacing: '0.3px',
             }}>NEW</span>
           </div>
         )}
         {item.dday !== null && item.dday !== undefined && (
-          <div style={{ position: 'absolute', bottom: 6, right: 6 }}>
+          <div style={{ position: 'absolute', bottom: 5, right: 5 }}>
             <span style={{
-              fontSize: 9.5, padding: '2px 6px', borderRadius: 3, fontWeight: 500,
+              fontSize: 9, padding: '1.5px 5px', borderRadius: 3, fontWeight: 500,
               background: item.is_urgent ? '#E24B4A' : 'rgba(0,0,0,0.7)',
               color: 'white',
             }}>
@@ -88,21 +84,22 @@ export default function AptFeedCard({ item }: { item: FeedItem }) {
           </div>
         )}
       </div>
-      <div style={{ padding: '8px 9px 10px' }}>
+      <div style={{ padding: '6px 8px 8px' }}>
         <div style={{
-          fontSize: 12, fontWeight: 500, lineHeight: 1.3,
+          fontSize: 11.5, fontWeight: 500, lineHeight: 1.25,
           overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
           color: 'var(--text-primary, #111827)',
-          marginBottom: 3,
+          marginBottom: 2,
         }}>{item.title}</div>
         {item.region && (
           <div style={{
-            fontSize: 10.5, color: 'var(--text-secondary, #6B7280)', marginBottom: 4,
+            fontSize: 10, color: 'var(--text-secondary, #6B7280)', marginBottom: 2,
           }}>{item.region}</div>
         )}
         {item.meta && (
           <div style={{
-            fontSize: 11.5, fontWeight: 500, color: 'var(--text-primary, #111827)',
+            fontSize: 11, fontWeight: 500, color: 'var(--text-primary, #111827)',
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
           }}>{item.meta}</div>
         )}
       </div>
