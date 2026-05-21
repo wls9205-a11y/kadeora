@@ -11,6 +11,32 @@
 **Architecture Rule 후보 #64:** /apt 메인 정렬 = created_at desc. 마감임박은 D-day 뱃지로만.
 **Legacy 백업:** `src/_legacy/s269/apt_page_v0.tsx`
 
+### s273-cc — apt HOURLY_LIMIT stale backlog 재시도 route (2026-05-21)
+**컨셉:** s271/s272-fix-2 에서 발견된 apt HOURLY_LIMIT stale 1,059건 (blog_post_id IS NULL) batch re-INSERT 인프라.
+
+**상황:**
+- 7d window: apt 1059건 (5-08 ~ 5-20) draft_* 컬럼 enrichment 완료 but INSERT 차단
+- s270 hourly_limit 80→200 으로 게이트 통과 가능 상태
+- 단순 UPDATE 안 됨 — INSERT 자체가 차단되어 blog_post_id 미생성
+
+**구현:**
+- `/api/admin/issue-retry-stale/route.ts` 신설 (admin Bearer auth)
+- POST: batch (default 50, max 200) 만큼 stale picking → safeBlogInsert (issue-draft 와 동일 패턴) → issue_alerts.blog_post_id UPDATE
+- GET: 진단용, backlog 카운트만 반환
+- 카테고리 query param (default apt), final_score desc + created_at asc 우선
+- meta_description/meta_keywords/cover_image 는 draft 컬럼에서 재구성
+- Vercel cron 100/100 한도 (Rule #86) → cron slot 사용 안함, manual/external trigger 만
+
+**실행 계획:**
+1. push + deploy 후 사용자 수동 curl: `curl -X POST -H "Authorization: Bearer $CRON_SECRET" 'https://kadeora.app/api/admin/issue-retry-stale?batch=200'` 반복 5~6회
+2. 또는 다음 세션에 pg_cron + pg_net.http_post 매 15분 자동화 (CRON_SECRET vault 등록 후)
+3. 완료 기준: `?category=apt` GET 결과 backlog < 50
+
+**진단 (s273-cc 시작 시점):**
+- backlog 1059 (handoff 616 + 시간 경과 +443)
+- oldest_kst: 2026-05-08 15:30, newest_kst: 2026-05-20 16:46
+- 처리 ROI: +1059 published → 7d apt pub_rate 3.6% → ~80% 추정
+
 ### s272 — STATION_APT publish-scheduler + unsold cron 주기화 (2026-05-21)
 **컨셉:** s271 admin_alerts 발행된 4건 중 즉시 fix 가능한 2건 처리.
 
