@@ -91,7 +91,9 @@ async function processBatch(req: NextRequest, batchSize: number): Promise<Result
         category: blogCategory as any,
         tags,
         source_type: 'auto_issue',
-        cron_type: 'issue-retry-stale',
+        // s273-cc fix: 'issue-manual' 로 마킹 → validate_blog_post v_is_issue_cron=true →
+        // apt 카테고리 NO_MAP 게이트 우회 (이 backlog 는 issue-draft 가 만들었던 것).
+        cron_type: 'issue-manual',
         source_ref: (issue.source_urls || [])[0],
         meta_description: metaDesc.length >= 20 ? metaDesc : `${metaDesc} — ${issue.draft_title}`.slice(0, 160),
         meta_keywords: tags.join(','),
