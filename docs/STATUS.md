@@ -11,6 +11,45 @@
 **Architecture Rule 후보 #64:** /apt 메인 정렬 = created_at desc. 마감임박은 D-day 뱃지로만.
 **Legacy 백업:** `src/_legacy/s269/apt_page_v0.tsx`
 
+### s272 — STATION_APT publish-scheduler + unsold cron 주기화 (2026-05-21)
+**컨셉:** s271 admin_alerts 발행된 4건 중 즉시 fix 가능한 2건 처리.
+
+**1. STATION_APT_NO_PUBLISHER (warning) → fix**
+- 문제: blog_posts.created_at 미래 schedule (26+건) 도래 시 publish flip 없음 → 영원히 stale
+- ⚠️ Vercel cron 100/100 한도 도달 (memory rule #86) → pg_cron 으로 전환
+- 신규 SQL func `publish_scheduled_blog_posts()` + pg_cron jobid 156 `publish-scheduled-blog` (매 15분)
+- 부산물 route `/api/cron/publish-scheduled` 신설 (manual trigger 용, vercel.json 등록 X — slot 차지 안함)
+- 즉시 manual run: **198건 flip** (handoff doc 26건 보다 큰 backlog, 전부 published)
+
+**2. UNSOLD_CRON_DEAD (warning) → fix**
+- 문제: `crawl-unsold-molit` schedule `"0 7 1 * *"` (매월 1일 1회) — 너무 드물어서 33일 stale
+- vercel.json 수정: `"0 7 * * 1"` (매주 월요일 07:00 UTC)
+- 코드 변경 없음 (route 자체는 정상)
+
+**3. REDEV_BULK_PATTERN (info) → 다음 세션**
+- 진단: `crawl-nationwide-redev` route 가 14개 시도 × N 시군구를 한 cron 실행 안에서 전량 upsert → bulk insert
+- 진짜 fix: stateful pagination (어디까지 처리했는지 cursor 보존). non-trivial — 다음 세션.
+
+**4. H: stock draft 23건 편중 → 다음 세션**
+- 진단: score_breakdown 분석 결과 stock 은 항상 28-37 범위. 단일매체+2 / 뉴스소스+8 / 키워드+5~10 / 엔티티매칭 가끔. base_score 낮고 stock 특화 가산점 부재.
+- 진짜 fix: scoring engine 의 stock 가산 룰 신설 또는 admin draft 리뷰 큐 UI. non-trivial — 다음 세션.
+
+**Architecture Rule 추가 (#74~#75):**
+
+### Rule #74: cron 의 미래 schedule + publish-flip 동시 등록 필수
+cron 이 `blog_posts.created_at` 미래 일자로 insert 하는 경우, 반드시 publish-scheduled (또는 등가) cron 도 동시 등록 필수. created_at 은 row 의 실제 insert 시점이어야 하며, schedule 정보는 published_at + is_published 조합으로 표현. **위반 시 영원히 stale.**
+
+### Rule #75: 외부 API 의존 import cron 신선도 monitoring 필수
+외부 API 의존 import cron 은 마지막 import > 7d 시 admin_alerts WARN 자동 발행 함수 + pg_cron 등록 필수. 단순 view 의존하지 말고 trigger insert 로 알림. (s271 `check_signup_zero_alert()` 와 동일 패턴, unsold/redev 모니터링 후속 작업)
+
+### s271 — signup auto-archive + publish funnel 정상화 (2026-05-20, claude.ai)
+- 회원가입: 24h 0건 (deploy 후 4h 경과). Node 직접 검증 대기 (alert: SIGNUP_VERIFY_PENDING)
+- HOURLY_LIMIT: stale 21건 retry (B), s270 config fix (80→200) 성공 확인 (A)
+- D: auto 8 sync + draft 6 (score≥40) promote → auto_published 1→36
+- `check_signup_zero_alert()` v2: 신규 가입 <24h 감지 시 active SIGNUP_DEAD alert auto-archive + `SIGNUP_RESUMED` info alert 발행 (Rule #71 보강)
+- 발견 & alert 발행 (s272 대상): UNSOLD_CRON_DEAD, REDEV_BULK_PATTERN, STATION_APT_NO_PUBLISHER
+- draft 33건 (score<40): stock 23건 편중 — scoring engine 점검 필요
+
 ### s270 — 4영역 면밀 검토 + P0 fix 일괄 (2026-05-20)
 **컨셉:** Node 의 "전부다 완벽하게 한꺼번에 병렬로" 요청. 회원가입/부동산/이슈/어드민 4영역 진단 + 즉시 fix.
 

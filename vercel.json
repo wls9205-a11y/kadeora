@@ -38,7 +38,7 @@
     },
     {
       "path": "/api/cron/crawl-unsold-molit",
-      "schedule": "0 7 1 * *"
+      "schedule": "0 7 * * 1"
     },
     {
       "path": "/api/cron/crawl-apt-trade",
