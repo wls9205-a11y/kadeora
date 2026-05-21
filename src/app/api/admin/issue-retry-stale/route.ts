@@ -128,7 +128,12 @@ async function processBatch(req: NextRequest, batchSize: number): Promise<Result
           result.samples.push({ id: issue.id, title: String(issue.draft_title).slice(0, 40), outcome: 'inserted' });
         }
       } else {
-        // failed — keep block_reason as-is so next attempt can decide
+        // s273-cc fix #2: skip 시 block_reason 명확화 → 다음 picking pool 에서 제외
+        // (안 그러면 HOURLY_LIMIT 그대로 남아 동일 row 무한 회전)
+        await (sb as any)
+          .from('issue_alerts')
+          .update({ block_reason: `retry_skipped:${insertResult.reason ?? 'unknown'}` })
+          .eq('id', issue.id);
         result.skipped++;
         if (result.samples.length < 5) {
           result.samples.push({
