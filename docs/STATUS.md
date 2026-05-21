@@ -35,7 +35,31 @@
 **진단 (s273-cc 시작 시점):**
 - backlog 1059 (handoff 616 + 시간 경과 +443)
 - oldest_kst: 2026-05-08 15:30, newest_kst: 2026-05-20 16:46
-- 처리 ROI: +1059 published → 7d apt pub_rate 3.6% → ~80% 추정
+
+**최종 결과 (s273-cc 종료):**
+- backlog 1,059 → **0** (100% 정리)
+- 실제 신규 INSERT: **1,046건** (1,059 중 13건 = pg_trgm similar_title 진짜 거절)
+- 5단계 fix round (debug 1.5h):
+  1. `e57f10a9` — route 신설
+  2. `00decc7b` — `cron_type='issue-manual'` (NO_MAP 우회 시도 → **CRON_TYPE_DAILY_LIMIT 60** 에 막힘, 51 inserted)
+  3. `3c6bfd62` — skip 시 `block_reason='retry_skipped:${reason}'` UPDATE (picking pool 무한 회전 방지)
+  4. `c6c2c1d5` — `cron_type='issue-retry-stale'` revert (DB-side 화이트리스트 + daily_limit_by_type 500 적용 후, 18 inserted)
+  5. **`dbee99ff`** — `priority_score=100` + picking OR 확장 (TS-side `daily_limit` 우회 + 584건 부활) → **938 inserted 단번에**
+
+**진짜 root cause (회고):** Two-tier limit — `validate_blog_post` (DB trigger) 와 `safeBlogInsert` (TS layer) 둘 다 daily/hourly/cron_type 한도를 별도로 강제. DB-side fix 만으로는 TS layer 가 잡음. `priority_score≥70` 이 양쪽 동시 escape hatch.
+
+**부산물 발견 (회고):** `safeBlogInsert` 가 trigger P0001 exception (DUPLICATE_TITLE/SLUG/품질게이트/HOURLY/DAILY/CRON_TYPE_DAILY_LIMIT) 을 모두 `'duplicate_slug'` 로 misclassify → 디버깅 5 round 의 80% 가 이 misclassification 때문. → **s274-cc 권고: reason 그대로 전달**.
+
+### Architecture Rule 신설 (s273-cc 회고)
+
+#### Rule #78: Two-tier limit 인지 + escape hatch
+quality gate 가 DB trigger + TS layer 양쪽에 있는 경우 (validate_blog_post + safeBlogInsert 등) fix 시 둘 다 적용 필요. **공통 escape hatch (priority_score≥70)** 활용해 일괄 우회 가능. backlog 류 retry route 는 priority_score 강제 권장.
+
+#### Rule #79: Skip 시 block_reason 명확화 필수
+picking-pool 기반 retry route 는 skip 시 block_reason 을 명시적으로 다른 값 (예: `retry_skipped:${reason}`) 으로 UPDATE 해야 함. 안 하면 동일 row 가 매 picking 마다 또 잡혀 무한 회전 (run1 inserted N / run2~6 0 패턴 = 이 버그 시그너처).
+
+#### Rule #80 (s274-cc 권고): Error reason fallback 금지
+`safeBlogInsert` / 비슷한 insert wrapper 에서 P0001 trigger exception 을 단일 reason 으로 묶지 말 것. RAISE EXCEPTION 메시지 그대로 (`HOURLY_LIMIT`, `NO_MAP`, `DUPLICATE_TITLE` 등) 전달 필수 — 디버깅 round-trip 80% 감소.
 
 ### s272 — STATION_APT publish-scheduler + unsold cron 주기화 (2026-05-21)
 **컨셉:** s271 admin_alerts 발행된 4건 중 즉시 fix 가능한 2건 처리.
