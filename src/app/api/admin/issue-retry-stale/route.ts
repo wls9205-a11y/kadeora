@@ -56,7 +56,9 @@ async function processBatch(req: NextRequest, batchSize: number): Promise<Result
     .from('issue_alerts')
     .select('id, category, draft_title, draft_content, draft_slug, draft_keywords, source_urls, summary, final_score, publish_decision')
     .is('blog_post_id', null)
-    .ilike('block_reason', '%HOURLY_LIMIT%')
+    // s273-cc fix #4: HOURLY_LIMIT (원래) + retry_skipped:daily_limit (priority_score 0 시절 잔여)
+    // 둘 다 picking. similar_title 등은 진짜 거절이라 제외.
+    .or('block_reason.ilike.%HOURLY_LIMIT%,block_reason.ilike.retry_skipped:daily_limit%')
     .not('draft_title', 'is', null)
     .not('draft_content', 'is', null)
     .not('draft_slug', 'is', null)
@@ -102,7 +104,11 @@ async function processBatch(req: NextRequest, batchSize: number): Promise<Result
         cover_image: coverImage,
         image_alt: `${issue.draft_title} — 카더라 분석`,
         is_published: false,
-        priority_score: Math.min(100, Math.max(0, Number(issue.final_score) || 0)),
+        // s273-cc fix #4: priority_score=100 강제 (issue-retry-stale 전용 escape hatch).
+        // safeBlogInsert 의 TS-side daily_create_limit + validate_blog_post 의
+        // DAILY/HOURLY/CRON_TYPE_DAILY_LIMIT 모두 우회 (>=70 이면 v_is_priority=true).
+        // 이 backlog 는 이미 final_score 검증 + draft enrichment 완료된 retry 라 안전.
+        priority_score: 100,
       } as any);
 
       let blogPostId: number | null = insertResult.id ? Number(insertResult.id) : null;
