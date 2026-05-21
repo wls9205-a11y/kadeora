@@ -91,9 +91,11 @@ async function processBatch(req: NextRequest, batchSize: number): Promise<Result
         category: blogCategory as any,
         tags,
         source_type: 'auto_issue',
-        // s273-cc fix: 'issue-manual' 로 마킹 → validate_blog_post v_is_issue_cron=true →
-        // apt 카테고리 NO_MAP 게이트 우회 (이 backlog 는 issue-draft 가 만들었던 것).
-        cron_type: 'issue-manual',
+        // s273-cc fix #3: 'issue-retry-stale' 전용 — DB-side 에서 화이트리스트 +
+        // daily_limit_by_type.issue-retry-stale=500 등록됨. fix #1 의 'issue-manual'
+        // 은 CRON_TYPE_DAILY_LIMIT 60/60 에 걸려 60건 후 모두 fail (safeBlogInsert
+        // 가 misclassify 해서 'duplicate_slug' 로 표기 — 진짜 사유는 60건 한도).
+        cron_type: 'issue-retry-stale',
         source_ref: (issue.source_urls || [])[0],
         meta_description: metaDesc.length >= 20 ? metaDesc : `${metaDesc} — ${issue.draft_title}`.slice(0, 160),
         meta_keywords: tags.join(','),
