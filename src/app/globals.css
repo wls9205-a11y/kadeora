@@ -1,4 +1,4 @@
-/* s208 apt-tabs: 스코프된 토큰/유틸리티 (--aptr-*) — 기존 카더라 토큰과 충돌 X. */
+/* s208 apt-tabs: 스코프된 토큰/유틸리티 (--aptr-*) — 기존 카더라 토큰과 충돌 X. s273-cc: tailwind config darkMode cache bust. */
 @import "../styles/apt-tabs.css";
 
 /* Pretendard font loaded via <link> in layout.tsx for better LCP */
