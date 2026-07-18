@@ -17,8 +17,16 @@
   **큐 status 전이 + net._http_response 는 claude.ai 가 프로덕션에서 검증**(로컬 env 없음).
 - env `INDEXNOW_KEY`: **미설정 확정**(9ms no-op = 빈 키 early-return 근거). fallback(호스팅 키)로
   해소. 유지보수 위해 Vercel env 등록 권장(선택). 검증파일 public/3a23…675.txt=200.
-- **staged 롤아웃**(commit 49e58ba7): urgent/batch `BATCH_SIZE` 100/500→**10**. 포털 응답
-  확인 후 100/500 복원 예정. 3,726건 한 번에 안 푼다.
+- **키 resolve 직접 실측**(임시 진단 endpoint 39ab9315→365b64a1 즉시 삭제·404 확인):
+  env `INDEXNOW_KEY` **설정됨 + 값=`3a23de…5675`(올바른 키)**, resolved 키의 .txt=200 +
+  내용 byte-exact 일치. **no-op 위험 없음 확정**. (사용자 우려 "env가 옛 키로 오버라이드"는 반증)
+- **staged 검증 통과**(49e58ba7, BATCH_SIZE 10): submitted 2,214→2,379(+165), last_submit
+  5/08→오늘, status 실제 전이. 포털 실측 indexnow.org/bing 200. → **BATCH_SIZE 100/500 복원**(8821078c).
+- **dedup(옵션 A)**(8821078c): `UNIQUE(url,status)` 충돌 — pending 을 submitted 로 UPDATE 시
+  같은 url 의 submitted 쌍둥이(71일 반복 큐잉, 3,519 dup 중 78 pending stuck)와 (url,submitted)
+  중복 → UPDATE 막힘. **성공 시 쌍둥이 있는 pending 은 UPDATE 대신 삭제(이미 색인됨), 나머지만
+  submitted 로 UPDATE.** 응답 `{submitted, deduped}`.
+- ⏭ 다음: claude.ai 가 전량 배치 정상 드레인 확인 → **failed 7,927 배치 리셋**(500건씩, 키 고쳐졌으니 유효).
 - **같은 근본원인 추가 수정**(commit 26d705c4): `indexnow-new-content`(5a7b…→404) +
   `blog-auto-publish`(kadeora-indexnow-key→404) 키를 호스팅 키로 교정. (큐와 무관·bounded.)
 - ⚠️ 남은 같은 패턴(플래그): `search-engine-ping` `INDEXNOW_KEY||''` 빈 키(저가치·homepage ping).
