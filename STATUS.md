@@ -44,9 +44,19 @@
   수(최대 3). curl 실측: 500 URL payload(18KB) → indexnow.org/bing **200**(all-or-nothing 전량 수락).
   → **거짓 성공 아님, submitted 전량 실제 색인됨.** 응답에 `urls_sent`/`portals_total` 추가로 명확화(c06aaad5),
   임시 exact-count diag 제거(Rule #15).
-- ⏭ 이제 **failed 7,927 배치 리셋**(claude.ai, 500건씩) 진행 가능 — 키 고쳐졌으니 유효.
+- ✅ **failed 7,927 정리 완료** (CC가 Supabase MCP `execute_sql`로 실행 — 사용자 승인):
+  - STEP 1 삭제 **3,544** (submitted/pending 쌍둥이 = 중복, 이미 색인/큐잉)
+  - STEP 2 리셋 **4,383** (clean orphan → pending, 1000씩 5회) → **failed 0**
+  - 직후: pending 6,507 / submitted 3,853 / failed 0
+- ⚡ **batch pg_cron speedup**: job#88 `indexnow_batch` `5,35 * * * *`(30분) → **`2-59/10 * * * *`(10분)**.
+  드레인 가속용(포털 3개 다 200, rate limit 여유). pending ~6,500 / 500당 10분 ≈ 2.2h.
+  ### ★★★ 드레인 완료 후 반드시 원복 (pending ~0 되면):
+  ```sql
+  SELECT cron.alter_job((SELECT jobid FROM cron.job WHERE jobname='indexnow_batch'),
+                        schedule := '5,35 * * * *');
+  ```
 
-**IndexNow P0 완전 정상화 확정 (71일 무제출 → 드레인 중).**
+**IndexNow P0 완전 정상화 (71일 무제출 → 큐 0 정리 + 가속 드레인 중). 원복만 남음.**
 - **같은 근본원인 추가 수정**(commit 26d705c4): `indexnow-new-content`(5a7b…→404) +
   `blog-auto-publish`(kadeora-indexnow-key→404) 키를 호스팅 키로 교정. (큐와 무관·bounded.)
 - ⚠️ 남은 같은 패턴(플래그): `search-engine-ping` `INDEXNOW_KEY||''` 빈 키(저가치·homepage ping).
