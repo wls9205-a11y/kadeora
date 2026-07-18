@@ -30,10 +30,15 @@
 ### 검증 현황 (2026-07-18 ~06:00 claude.ai 실측)
 - ✅ **urgent pending 154 → 0** (전부 처리 완료), submitted +165, last_submit 71일 만에 오늘 갱신.
 - ✅ 키 resolve 검증 통과 + 진단 라우트 삭제(404) 확인. 배포 `053169be`(dpl_7FWM/9YC3) 반영 중.
-- ⏳ **dedup 미검증**: 05:35 batch 는 배포 직전 코드. 신코드 첫 batch = **06:05**(batch 5·35분 30분 주기).
-  normal pending 3,573 + dedup 대상 79 가 06:05 대기. 검증 3종: (1) duplicate key 에러 0
-  (2) 응답 `deduped` 카운트 (3) submitted↑/pending↓.
-- ⏭ 06:05 dedup 확인되면 → **failed 7,927 배치 리셋**(claude.ai, 500건씩, 키 고쳐졌으니 유효).
+- ❌→✅ **06:05 batch(500) 실패 → 원인·수정 완료**(a19b55bc): 응답 `{submitted:500,deduped:0}`
+  지만 records_updated=0, pending 안 줄고 attempt_count=0. **근본원인**: dedup twin 조회
+  `.in('url',[500 긴 URL])` 가 PostgREST URI 길이 한도(~8KB) 초과 → 빈 결과 → twin 79건 놓침
+  → UPDATE 가 500건 전부 submitted 시도, 79건 `(url,submitted)` UNIQUE 충돌 → **원자 UPDATE
+  전체 실패 → 드레인 0**. urgent(100)는 한도 안이라 정상이었음(SELECT/WHERE 자체는 정상).
+  → **수정**: `markIndexNowSubmitted()` 공유 헬퍼가 **50개씩 청크**로 dedup+UPDATE+DELETE
+  (`.in()` URI 안전) + **실제 처리 건수 반환**. `accepted`→`portals_ok`(URL 아니라 엔드포인트 수) 개명.
+- ⏭ 다음 batch(신코드 a19b55bc)에서 재검증: duplicate key 0 / `deduped` 실값 / submitted↑·pending↓
+  → 확인되면 **failed 7,927 배치 리셋**(claude.ai, 500건씩).
 - **같은 근본원인 추가 수정**(commit 26d705c4): `indexnow-new-content`(5a7b…→404) +
   `blog-auto-publish`(kadeora-indexnow-key→404) 키를 호스팅 키로 교정. (큐와 무관·bounded.)
 - ⚠️ 남은 같은 패턴(플래그): `search-engine-ping` `INDEXNOW_KEY||''` 빈 키(저가치·homepage ping).
