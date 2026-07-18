@@ -34,30 +34,22 @@ async function handler(req: NextRequest) {
       .order('queued_at', { ascending: true })
       .limit(BATCH_SIZE);
     if (selErr) console.error('[indexnow-batch] select failed:', selErr.message);
-    if (!rows || rows.length === 0) return NextResponse.json({ success: true, selected: 0, submitted: 0 });
+    if (!rows || rows.length === 0) return NextResponse.json({ success: true, submitted: 0 });
 
     const urls = rows.map((r: any) => r.url).filter(Boolean);
     const result = await submitIndexNow(urls);
 
-    // portals_ok/portals_total = 2xx 낸 포털 엔드포인트 수 / 전체(3). URL 수가 아니다 —
-    // 각 포털은 urls 전량을 한 요청에 받는다(IndexNow all-or-nothing, 200=전량 수락).
-    // 성공 시 청크 dedup+UPDATE → 실제 처리 건수 반환.
+    // 성공 시 청크 dedup+UPDATE(긴 URL .in() URI 한도 회피) → 실제 처리 건수 반환.
     if (result.ok) {
       const { submitted, deduped } = await markIndexNowSubmitted(admin, rows as { id: unknown; url: string }[]);
-      return NextResponse.json({
-        success: true, selected: rows.length, urls_sent: urls.length,
-        submitted, deduped, portals_ok: result.accepted, portals_total: result.attempted, status: 'submitted',
-      });
+      return NextResponse.json({ success: true, submitted, deduped, status: 'submitted' });
     }
 
     const { error: updErr } = await (admin as any).from('indexnow_queue').update({
       status: 'failed', submitted_at: new Date().toISOString(), response_code: 0, attempt_count: 1,
     }).in('id', rows.map((r: any) => r.id));
     if (updErr) console.error('[indexnow-batch] queue update failed:', updErr.message);
-    return NextResponse.json({
-      success: true, selected: rows.length, urls_sent: urls.length,
-      submitted: 0, portals_ok: result.accepted, portals_total: result.attempted, status: 'failed',
-    });
+    return NextResponse.json({ success: true, submitted: 0, status: 'failed' });
   } catch (err: any) {
     return NextResponse.json({ success: false, error: err?.message || 'internal' }, { status: 500 });
   } finally {
