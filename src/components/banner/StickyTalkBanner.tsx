@@ -2,16 +2,16 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import Image from 'next/image';
 import { track } from '@/lib/analytics';
 
 const KAKAO_URL = 'https://open.kakao.com/o/gk8TBGyh';
 
+/** 배너 높이(px). 상단 spacer 와 반드시 일치. Navigation 등 소비처에서 import 해 쓸 것. */
+export const STICKY_BANNER_HEIGHT = 52;
+
 /**
- * 인라인 배너가 들어가는 라우트.
- * 이 라우트에서는 상단 sticky 를 렌더하지 않는다 (같은 페이지 중복 방지).
- * 인라인이 우선하는 이유: 콘텐츠 문맥 내 배너의 전환율이 높고,
- * 상단 고정은 어차피 스크롤로 사라짐.
+ * 인라인 배너가 들어가는 라우트 — 여기선 상단 배너를 렌더하지 않는다.
+ * 같은 페이지에 배너가 둘 뜨는 걸 막는다. 인라인이 우선.
  */
 const INLINE_ROUTES = [
   /^\/blog\/[^/]+$/,
@@ -19,17 +19,20 @@ const INLINE_ROUTES = [
   /^\/apt\/complex\/[^/]+$/,
 ];
 
-// 헤더(Navigation <header>)가 `sticky top:0 z-index:100` 이라 배너와 top:0 에서 겹친다.
-// 헤더 top 을 이 CSS 변수로 오프셋 → 배너가 보일 때는 헤더가 배너 높이만큼 내려가
-// 나란히 쌓이고, 배너가 숨으면 0px 로 되돌아가 헤더가 top:0 로 복귀(빈틈 없음).
-// 배너가 없는 라우트에서는 변수 미설정 → 헤더는 var(...,0px) 기본값으로 기존과 동일.
-const HEADER_OFFSET_VAR = '--talk-banner-h';
+const YELLOW = '#FED346';
+const INK = '#2B1616';
+const INK_SOFT = '#6B4A16';
 
+// 디자인 B(순수 CSS, 52px)를 position:fixed 로 구현한다.
+// 이유: globals.css 의 `html,body{overflow-x:hidden}` 가 position:sticky 를 앱 전역에서
+// 깨뜨려(스크롤 시 pin 안 됨 — 기존 Navigation 헤더도 동일) sticky 로는 "스크롤 다운 숨김/
+// 업 복귀" 가 동작하지 않는다(2026-07-18 프로덕션 실측). fixed 는 overflow 영향을 받지
+// 않으므로 pin·hide·show 가 정상 동작한다. fixed 는 flow 에서 빠지므로 같은 높이의 spacer 로
+// 아래 콘텐츠(Navigation 포함)를 밀어 겹침을 방지한다 → Navigation top 조정 불필요.
 export default function StickyTalkBanner() {
   const pathname = usePathname() ?? '';
   const [visible, setVisible] = useState(true);
   const lastY = useRef(0);
-  const bannerRef = useRef<HTMLDivElement>(null);
 
   const hasInline = INLINE_ROUTES.some((r) => r.test(pathname));
 
@@ -42,11 +45,8 @@ export default function StickyTalkBanner() {
       ticking = true;
       requestAnimationFrame(() => {
         const y = window.scrollY;
-        if (y < 80) {
-          setVisible(true); // 최상단 근처에선 항상 표시
-        } else if (Math.abs(y - lastY.current) > 10) {
-          setVisible(y < lastY.current); // 위로 스크롤 = 표시
-        }
+        if (y < 80) setVisible(true);
+        else if (Math.abs(y - lastY.current) > 10) setVisible(y < lastY.current);
         lastY.current = y;
         ticking = false;
       });
@@ -56,38 +56,6 @@ export default function StickyTalkBanner() {
     return () => window.removeEventListener('scroll', onScroll);
   }, [hasInline]);
 
-  // 헤더 오프셋 동기화: 배너 렌더 높이를 CSS 변수로 발행.
-  // 배너 표시 → 헤더가 그만큼 내려감 / 배너 숨김·언마운트 → 0 으로 복귀.
-  useEffect(() => {
-    const root = document.documentElement;
-    const reset = () => root.style.setProperty(HEADER_OFFSET_VAR, '0px');
-
-    if (hasInline) {
-      reset();
-      return reset; // 이 라우트에선 배너 없음 → 헤더 top:0
-    }
-
-    const el = bannerRef.current;
-    const apply = () => {
-      const h = visible && el ? el.offsetHeight : 0;
-      root.style.setProperty(HEADER_OFFSET_VAR, `${h}px`);
-    };
-    apply();
-    // ResizeObserver: next/image 로드 시점 높이 변화(특히 모바일 크롭 소스)·회전·
-    // 브레이크포인트 전환까지 반영해 헤더 오프셋이 항상 실제 배너 높이와 일치.
-    let ro: ResizeObserver | undefined;
-    if (el && typeof ResizeObserver !== 'undefined') {
-      ro = new ResizeObserver(apply);
-      ro.observe(el);
-    }
-    window.addEventListener('resize', apply);
-    return () => {
-      ro?.disconnect();
-      window.removeEventListener('resize', apply);
-      reset(); // 언마운트/라우트 이동 시 헤더 오프셋 초기화
-    };
-  }, [visible, hasInline]);
-
   if (hasInline) return null;
 
   const handleClick = () => {
@@ -95,37 +63,62 @@ export default function StickyTalkBanner() {
   };
 
   return (
-    <div
-      ref={bannerRef}
-      className={`sticky top-0 z-30 w-full transition-transform duration-300 ${
-        visible ? 'translate-y-0' : '-translate-y-full'
-      }`}
-      style={{ backgroundColor: '#FED346' }}
-    >
+    <>
+      {/* spacer — fixed 배너가 덮는 최상단 공간을 flow 에서 확보(콘텐츠 겹침 방지) */}
+      <div aria-hidden="true" style={{ height: STICKY_BANNER_HEIGHT }} />
       <a
         href={KAKAO_URL}
         target="_blank"
         rel="noopener noreferrer"
-        aria-label="부정공 TALK — 부동산 정보 공유 카톡방 열기 (새 창)"
+        aria-label="부정공 톡 — 부동산 정보 공유 카톡방 열기 (새 창)"
         onClick={handleClick}
-        className="mx-auto block max-w-[955px]"
+        className={`fixed left-0 top-0 z-30 flex w-full items-center gap-[11px] px-4 no-underline transition-transform duration-300 ${
+          visible ? 'translate-y-0' : '-translate-y-full'
+        }`}
+        style={{ background: YELLOW, height: STICKY_BANNER_HEIGHT }}
       >
-        {/* 모바일(≤640px)은 크롭 버전, 그 이상은 원본 */}
-        <picture>
-          <source
-            media="(max-width: 640px)"
-            srcSet="/banners/bujeonggong-talk-mobile.webp"
-          />
-          <Image
-            src="/banners/bujeonggong-talk.webp"
-            alt="부정공 TALK — 부동산 정보 공유 카톡방"
-            width={955}
-            height={235}
-            quality={82}
-            className="h-auto w-full"
-          />
-        </picture>
+        <span
+          className="flex flex-none items-center justify-center rounded-full"
+          style={{ width: 26, height: 26, background: INK }}
+          aria-hidden="true"
+        >
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke={YELLOW}
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M3 20l1.3-3.9A9 8 0 1 1 7.7 19L3 20" />
+          </svg>
+        </span>
+
+        <span
+          className="flex-none whitespace-nowrap text-[14.5px] font-medium tracking-[-0.01em]"
+          style={{ color: INK }}
+        >
+          부정공 톡
+        </span>
+
+        <span
+          className="hidden overflow-hidden text-ellipsis whitespace-nowrap text-[13px] sm:inline"
+          style={{ color: INK_SOFT }}
+        >
+          부동산 정보 공유방
+        </span>
+
+        <span className="flex-1" />
+
+        <span
+          className="flex-none whitespace-nowrap rounded-full px-[14px] py-[6px] text-[12.5px] font-medium"
+          style={{ background: INK, color: YELLOW }}
+        >
+          무료 입장
+        </span>
       </a>
-    </div>
+    </>
   );
 }

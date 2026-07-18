@@ -1,3 +1,24 @@
+## [banner v2] 2026-07-18 — sticky 배너 디자인 B(순수 CSS) + position:fixed 로 스크롤 동작 살림
+
+디자인 B 확정(카카오 노랑, 52px, 순수 CSS — 이미지 폐기). `files (56)` 신규 컴포넌트로
+`StickyTalkBanner.tsx` 덮어씀. `STICKY_BANNER_HEIGHT=52` export.
+
+**핵심 판단(사용자 "기존 구조 보고 판단해라" 위임)**: 델리버된 컴포넌트는 `position:sticky`
+지만, `globals.css` 의 `html,body{overflow-x:hidden}` 가 sticky 를 앱 전역에서 깨뜨려
+(기존 Navigation 헤더도 pin 안 됨 — 이전 프로덕션 실측) sticky 로는 "스크롤 다운 숨김/업
+복귀" 가 동작 안 함. → **`position:fixed` + 동일 높이 spacer** 로 구현(디자인/카피/높이/
+export 는 그대로). fixed 는 overflow 영향 없어 pin·hide·show 정상. spacer 가 콘텐츠를
+밀어 겹침 방지 → **Navigation top 조정 불필요, 이전 var(--talk-banner-h) 변경은 되돌려
+Navigation 원복**(top:0).
+
+- 트래킹: sticky `handleClick` → `track('banner_click','bujeonggong_talk',{slot:'sticky',page_path})`.
+- 인라인(blog/apt/complex)·InlineTalkBanner·webp 원본은 이전 커밋 그대로 유지.
+- sticky-slim*.webp 없음(삭제 불필요).
+
+검증: type-check clean, build 성공. 스크롤 hide/show·375px 는 배포 후 프로덕션 스모크.
+
+---
+
 ## [banner] 2026-07-18 — 부정공 TALK 배너 통합 (claude.ai 에셋/컴포넌트 → 레포 연결)
 
 에셋 4개 복사: `public/banners/bujeonggong-talk{,-mobile}.webp`,
