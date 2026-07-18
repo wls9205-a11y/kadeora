@@ -1,3 +1,36 @@
+## [P0 indexnow + P1 banner-D] 2026-07-18 — 전수조사 후 유일 미해결(IndexNow) 수정
+
+### P0 — IndexNow 71일 조용한 실패 수정 (commit 003a3924)
+증상: indexnow-urgent 가 9ms 에 `submitted:100` 반환하는데 실제 제출 0, urgent pending
+154건 attempt_count=0. 앱 코드 근본원인 2개 (DB 결백 — claude.ai 실측):
+1. `lib/indexnow.ts` 가 `INDEXNOW_KEY || ''` (fallback 없음) → env 미설정 시 submitIndexNow
+   가 no-op(9ms). **호스팅 키 `3a23def313e1b1283822c54a0f9a5675`**(public/*.txt=200,
+   indexnow-full-sweep/mass 가 쓰는 키)를 fallback 으로. 라이브 포털 실측: api.indexnow.org
+   200 / bing 200 / naver 422(포털측). → 이 lib 를 쓰는 모든 호출부(blog-publish-queue,
+   issue-draft, api/indexnow, indexnow-backfill, issues/publish)도 동시 복구.
+2. 라우트가 `status:'sent'` 기록 — CHECK(pending/submitted/success/failed/skipped)에 없어
+   UPDATE 가 조용히 실패 → 행이 pending/attempt_count=0 에 영구 고착, 그런데도 라우트는
+   submitted:urls.length(가짜 성공) 반환. (s258 회귀: 주석에 'submitted'→'sent' 로 바꿨다고
+   명시돼 있음.) → 되돌려 `submitted`, 실제 포털 결과로 `submitted`/`failed` 확정.
+- submitIndexNow 가 `{ok,accepted,attempted}` 반환하도록 변경(하위호환, 기존 호출부 영향 0).
+- 검증: 키·포털 수락 curl 실측 + type-check/build. **큐 status 전이 + net._http_response 는
+  claude.ai 가 프로덕션에서 검증**(로컬 Supabase env/CRON_SECRET 없음).
+- ⚠️ P0 범위 밖(플래그만): `indexnow-new-content`(키 5a7b…→404), `blog-auto-publish`
+  (kadeora-indexnow-key→404) 도 같은 근본원인(틀린/미호스팅 키). 별도 수정 필요.
+- ⚠️ failed 7,927 리셋은 이 수정 동작 확인 후 (claude.ai, 500건씩).
+
+### P1 — 배너 최종본 (design D, 이미 라이브 fe7324c1)
+플랜의 "현재 prod=88861795"는 stale. design D(항상 고정 + "부동산 정보 공유방" +
+MEMBER_COUNT=1240 + 라이브 점)는 이미 fe7324c1 로 배포됨. banner-z.mjs 재실측 결과
+**z-30 은 여전히 겹침**(헤더가 배너 덮음, scrollY 20/40, 모바일+데스크톱) — 원인은 배너
+숨김이 아니라 헤더(sticky 깨져 흐름 안)가 fixed 배너를 뚫고 올라오는 것. → **z-[110] 유지**.
+인라인 배너 blog/apt/complex 기존 삽입 유지. MEMBER_COUNT 는 사용자가 실값 교체 예정.
+
+### P2 — 손대지 않음 (근거: 트래픽 적어 실익 없음)
+커넥션 31/90, auth_rls_initplan 114, blog_no_cover 17 — 트래픽 회복 후로 미룸.
+
+---
+
 ## [banner v2] 2026-07-18 — sticky 배너 디자인 B(순수 CSS) + position:fixed 로 스크롤 동작 살림
 
 디자인 B 확정(카카오 노랑, 52px, 순수 CSS — 이미지 폐기). `files (56)` 신규 컴포넌트로
