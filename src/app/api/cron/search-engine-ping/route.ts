@@ -21,7 +21,8 @@ async function handler(_req: NextRequest) {
   return NextResponse.json(
     await withCronLogging('search-engine-ping', async () => {
       // s258 patch #11: Google ping deprecated → naver indexnow + google sitemap notify 유지
-      const indexNowKey = process.env.INDEXNOW_KEY || '';
+      // 호스팅 키로 통일 (빈 키면 naver-indexnow ping 이 71일째 no-op). 타 route 와 동일.
+      const indexNowKey = process.env.INDEXNOW_KEY || '3a23def313e1b1283822c54a0f9a5675';
       const results = await Promise.all([
         pingOne(`https://www.google.com/ping?sitemap=${encodeURIComponent(SITEMAP)}`, 'google'),
         pingOne(
