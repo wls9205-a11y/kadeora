@@ -11,9 +11,7 @@ export const runtime = 'nodejs';
 export const maxDuration = 60;
 
 const LOCK_KEY = 'indexnow-batch';
-// staged 롤아웃: 검증 단계 소량(10). 3,726건 한 번에 풀지 않는다.
-// claude.ai 가 포털 응답 확인 후 500 으로 복원.
-const BATCH_SIZE = 10;
+const BATCH_SIZE = 500;
 
 async function handler(req: NextRequest) {
   if (!verifyCronAuth(req as any)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -39,19 +37,36 @@ async function handler(req: NextRequest) {
 
     const urls = rows.map((r: any) => r.url).filter(Boolean);
     const result = await submitIndexNow(urls);
+    const nowIso = new Date().toISOString();
 
-    // 실제 포털 수락 결과로 status 확정. 'sent' 는 CHECK 위반 → s258 회귀를 되돌림.
-    // lib fallback 키로 no-op 도 해소. 진짜 제출 결과가 status 에 반영된다.
-    const newStatus = result.ok ? 'submitted' : 'failed';
+    // status 는 실제 포털 수락 결과. 'sent'(CHECK 위반, s258 회귀)를 'submitted'/'failed' 로.
+    if (result.ok) {
+      // 옵션 A dedup: UNIQUE(url,status) — 같은 url 이 이미 'submitted' 면(쌍둥이) pending 을
+      // submitted 로 UPDATE 시 충돌 → 색인은 이미 됐으니 UPDATE 대신 삭제(dedup).
+      const { data: twins } = await (admin as any).from('indexnow_queue')
+        .select('url').eq('status', 'submitted').in('url', urls);
+      const twinUrls = new Set((twins || []).map((t: any) => t.url));
+      const dupIds = rows.filter((r: any) => twinUrls.has(r.url)).map((r: any) => r.id);
+      const freshIds = rows.filter((r: any) => !twinUrls.has(r.url)).map((r: any) => r.id);
+
+      if (freshIds.length) {
+        const { error: updErr } = await (admin as any).from('indexnow_queue').update({
+          status: 'submitted', submitted_at: nowIso, response_code: 200, attempt_count: 1,
+        }).in('id', freshIds);
+        if (updErr) console.error('[indexnow-batch] queue update failed:', updErr.message);
+      }
+      if (dupIds.length) {
+        const { error: delErr } = await (admin as any).from('indexnow_queue').delete().in('id', dupIds);
+        if (delErr) console.error('[indexnow-batch] dedup delete failed:', delErr.message);
+      }
+      return NextResponse.json({ success: true, submitted: freshIds.length, deduped: dupIds.length, accepted: result.accepted, status: 'submitted' });
+    }
+
     const { error: updErr } = await (admin as any).from('indexnow_queue').update({
-      status: newStatus,
-      submitted_at: new Date().toISOString(),
-      response_code: result.ok ? 200 : 0,
-      attempt_count: 1,
+      status: 'failed', submitted_at: nowIso, response_code: 0, attempt_count: 1,
     }).in('id', rows.map((r: any) => r.id));
     if (updErr) console.error('[indexnow-batch] queue update failed:', updErr.message);
-
-    return NextResponse.json({ success: true, submitted: result.ok ? urls.length : 0, accepted: result.accepted, status: newStatus });
+    return NextResponse.json({ success: true, submitted: 0, accepted: result.accepted, status: 'failed' });
   } catch (err: any) {
     return NextResponse.json({ success: false, error: err?.message || 'internal' }, { status: 500 });
   } finally {

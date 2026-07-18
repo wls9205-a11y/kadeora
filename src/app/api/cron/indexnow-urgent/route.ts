@@ -13,9 +13,7 @@ export const runtime = 'nodejs';
 export const maxDuration = 60;
 
 const LOCK_KEY = 'indexnow-urgent';
-// staged 롤아웃: 71일 무제출 수정 직후 포털 응답 검증 단계라 소량(10)만 흘린다.
-// claude.ai 가 net._http_response 로 200/202 확인 후 100 으로 복원.
-const BATCH_SIZE = 10;
+const BATCH_SIZE = 100;
 
 async function handler(req: NextRequest) {
   if (!verifyCronAuth(req as any)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -40,20 +38,37 @@ async function handler(req: NextRequest) {
 
     const urls = rows.map((r: any) => r.url).filter(Boolean);
     const result = await submitIndexNow(urls);
+    const nowIso = new Date().toISOString();
 
-    // 실제 포털 수락 결과로 status 확정. 'sent' 는 CHECK 위반(허용: pending/submitted/
-    // success/failed/skipped) → s258 회귀를 되돌림. submitIndexNow 가 no-op(키 누락)이던
-    // 것도 lib fallback 키로 해소. 이제 진짜 제출 결과가 status 에 반영된다.
-    const newStatus = result.ok ? 'submitted' : 'failed';
+    // status 는 실제 포털 수락 결과. 'sent'(CHECK 위반, s258 회귀)를 'submitted'/'failed' 로.
+    if (result.ok) {
+      // 옵션 A dedup: UNIQUE(url,status) 때문에 같은 url 이 이미 'submitted' 로 존재하면(쌍둥이)
+      // 이 pending 을 submitted 로 UPDATE 하면 (url,submitted) 충돌로 UPDATE 가 막힌다.
+      // 중복은 색인 관점에서 이미 처리됐으므로 UPDATE 대신 삭제(dedup)한다. (71일 반복 큐잉 잔재)
+      const { data: twins } = await (admin as any).from('indexnow_queue')
+        .select('url').eq('status', 'submitted').in('url', urls);
+      const twinUrls = new Set((twins || []).map((t: any) => t.url));
+      const dupIds = rows.filter((r: any) => twinUrls.has(r.url)).map((r: any) => r.id);
+      const freshIds = rows.filter((r: any) => !twinUrls.has(r.url)).map((r: any) => r.id);
+
+      if (freshIds.length) {
+        const { error: updErr } = await (admin as any).from('indexnow_queue').update({
+          status: 'submitted', submitted_at: nowIso, response_code: 200, attempt_count: 1,
+        }).in('id', freshIds);
+        if (updErr) console.error('[indexnow-urgent] queue update failed:', updErr.message);
+      }
+      if (dupIds.length) {
+        const { error: delErr } = await (admin as any).from('indexnow_queue').delete().in('id', dupIds);
+        if (delErr) console.error('[indexnow-urgent] dedup delete failed:', delErr.message);
+      }
+      return NextResponse.json({ success: true, submitted: freshIds.length, deduped: dupIds.length, accepted: result.accepted, status: 'submitted' });
+    }
+
     const { error: updErr } = await (admin as any).from('indexnow_queue').update({
-      status: newStatus,
-      submitted_at: new Date().toISOString(),
-      response_code: result.ok ? 200 : 0,
-      attempt_count: 1,
+      status: 'failed', submitted_at: nowIso, response_code: 0, attempt_count: 1,
     }).in('id', rows.map((r: any) => r.id));
     if (updErr) console.error('[indexnow-urgent] queue update failed:', updErr.message);
-
-    return NextResponse.json({ success: true, submitted: result.ok ? urls.length : 0, accepted: result.accepted, status: newStatus });
+    return NextResponse.json({ success: true, submitted: 0, accepted: result.accepted, status: 'failed' });
   } catch (err: any) {
     return NextResponse.json({ success: false, error: err?.message || 'internal' }, { status: 500 });
   } finally {
