@@ -11,7 +11,9 @@ export const runtime = 'nodejs';
 export const maxDuration = 60;
 
 const LOCK_KEY = 'indexnow-batch';
-const BATCH_SIZE = 500;
+// staged 롤아웃: 검증 단계 소량(10). 3,726건 한 번에 풀지 않는다.
+// claude.ai 가 포털 응답 확인 후 500 으로 복원.
+const BATCH_SIZE = 10;
 
 async function handler(req: NextRequest) {
   if (!verifyCronAuth(req as any)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

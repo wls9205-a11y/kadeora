@@ -13,7 +13,9 @@ export const runtime = 'nodejs';
 export const maxDuration = 60;
 
 const LOCK_KEY = 'indexnow-urgent';
-const BATCH_SIZE = 100;
+// staged 롤아웃: 71일 무제출 수정 직후 포털 응답 검증 단계라 소량(10)만 흘린다.
+// claude.ai 가 net._http_response 로 200/202 확인 후 100 으로 복원.
+const BATCH_SIZE = 10;
 
 async function handler(req: NextRequest) {
   if (!verifyCronAuth(req as any)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
