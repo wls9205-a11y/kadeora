@@ -64,6 +64,60 @@ export async function submitIndexNow(urls: string[]): Promise<IndexNowResult> {
 }
 
 /**
+ * 제출 성공한 pending 행들을 status='submitted' 로 마킹 + UNIQUE(url,status) dedup.
+ *
+ * ⚠️ 청크 필수: `.in('url', [...])` / `.in('id', [...])` 는 GET 쿼리스트링이라 500개 긴 URL 을
+ * 한 번에 넣으면 PostgREST URI 길이 한도(~8KB)를 넘겨 조용히 빈 결과가 된다(2026-07-18 batch
+ * 500 에서 dedup 조회가 통째로 실패 → 충돌 UPDATE 원자 실패 → 드레인 0). 50개씩 처리한다.
+ *
+ * dedup(옵션 A): 같은 url 이 이미 'submitted' 로 있으면(쌍둥이) 이 pending 은 색인상 중복이라
+ * UPDATE 대신 삭제. 나머지 fresh 만 submitted 로 UPDATE. 실제 처리 건수를 반환한다.
+ */
+export async function markIndexNowSubmitted(
+  admin: any,
+  rows: { id: unknown; url: string }[],
+): Promise<{ submitted: number; deduped: number }> {
+  const nowIso = new Date().toISOString();
+  const CHUNK = 50; // 긴 URL × 50 ≈ 5KB < PostgREST URI 한도
+  let submitted = 0;
+  let deduped = 0;
+
+  for (let i = 0; i < rows.length; i += CHUNK) {
+    const chunk = rows.slice(i, i + CHUNK);
+    const chunkUrls = chunk.map((r) => r.url);
+
+    const { data: twins, error: twinErr } = await admin
+      .from('indexnow_queue')
+      .select('url')
+      .eq('status', 'submitted')
+      .in('url', chunkUrls);
+    if (twinErr) {
+      console.error('[indexnow] twin lookup failed:', twinErr.message);
+      continue; // 이 청크만 스킵 (다음 실행에서 재시도)
+    }
+
+    const twinUrls = new Set((twins || []).map((t: { url: string }) => t.url));
+    const dupIds = chunk.filter((r) => twinUrls.has(r.url)).map((r) => r.id);
+    const freshIds = chunk.filter((r) => !twinUrls.has(r.url)).map((r) => r.id);
+
+    if (freshIds.length) {
+      const { error } = await admin
+        .from('indexnow_queue')
+        .update({ status: 'submitted', submitted_at: nowIso, response_code: 200, attempt_count: 1 })
+        .in('id', freshIds);
+      if (error) console.error('[indexnow] submitted update failed:', error.message);
+      else submitted += freshIds.length;
+    }
+    if (dupIds.length) {
+      const { error } = await admin.from('indexnow_queue').delete().in('id', dupIds);
+      if (error) console.error('[indexnow] dedup delete failed:', error.message);
+      else deduped += dupIds.length;
+    }
+  }
+  return { submitted, deduped };
+}
+
+/**
  * 단일 URL IndexNow — 개별 포스트 발행 시
  */
 export async function submitIndexNowSingle(path: string) {
