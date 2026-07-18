@@ -1,3 +1,40 @@
+## [hotfix-522 r2] 2026-07-18 — DB 진단 정정 후 앱 코드 후속 + IndexNow
+
+DB 진단 정정 (claude.ai 실측):
+- 504 원인 = **쿼리 속도가 아니라 동시 커넥션 개수**. 개별 쿼리는 빠름
+  (apt_subscriptions ILIKE 8.2ms, apt_sites region 0.8ms). max_connections=90.
+- 진짜 근본: statement_timeout=120s(함수는 30~60s) + idle timeout 0 + kill_slow_queries()
+  가 authenticator(=PostgREST 전 트래픽)를 보호목록에 넣어 좀비를 못 죽임 → 단방향 누적.
+- DB 핫픽스는 claude.ai 가 **검증본(hotfix-522-db-VERIFIED.sql)** 으로 처리:
+  kill_slow_queries authenticator 보호 제거 + role statement_timeout(anon/auth 8s,
+  service_role 55s) + kill cron 1분. → 내가 넘긴 미검증 `docs/_setup/hotfix-522-db.sql`
+  은 **폐기(삭제)**. RPC 통합 함수도 폐기(개별 쿼리 빠르므로 불필요).
+
+앱 코드 (요청당 동시 커넥션 수 축소 — 개수 목표):
+1. `apt/[id]/page.tsx` — fan-out 8-wide → **2-wide 4웨이브**, 렌더당 peak 동시 커넥션 8→2.
+2. `apt/complex/[name]/page.tsx` — 4-wide → **2-wide 2웨이브**, peak 4→2.
+3. `indexnow-new-content` 504 — 엔드포인트 fetch 에 timeout 부재 → 포털 hang 시 60s 블록.
+   per-fetch `AbortSignal.timeout(8000)` + 3개 병렬(최악 24s→8s). `lib/indexnow.ts`
+   submitIndexNow 에도 동일 timeout(urgent/batch 크론 hang 방지).
+4. cron_logs id=undefined 고아 — 이전 커밋 `27fe862f` 의 cron-logger.ts 수정이 유일 경로.
+   (blog-generate-images/cron-lock/cron-log 는 이미 `if(!logId) return` 가드). 배포 대기.
+
+▶ Item: indexnow 71일 조용한 실패 — **진범 = DB 트리거 (claude.ai 처리, 앱 무관)**:
+- (내 앞선 진단 3개 오진 정정) 154 stuck 은 진짜 urgent(is_urgent=true/priority=1),
+  pg_cron 살아있음(indexnow_urgent job#87 / indexnow_batch job#88 등록+active),
+  드레인도 이미 돎(02:19·02:24 submitted:100 2회). vercel.json cron 만석은 무관.
+- **진짜 원인**: 트리거 `fn_indexnow_queue_status_safety` 가 `status:='sent'` 를 쓰는데
+  CHECK 제약은 'sent' 를 안 받아(pending/submitted/success/failed/skipped) UPDATE 가
+  통째로 롤백. 포털 제출은 성공하는데 큐 기록만 안 됨 → 같은 URL 무한 재제출.
+  증거: failed 7,927건 attempt_count=99, pending 오히려 증가, last_submit 5/08 고정.
+- 수정: 트리거 'sent'→'submitted' (CHECK 정합). DB 영역이라 **claude.ai 가 처리**
+  (hotfix-522-db-VERIFIED.sql STEP 4). **앱 코드는 IndexNow 로직 건드리지 않음** —
+  유지하는 건 오직 504 방어용 AbortSignal.timeout(위 3번)뿐.
+
+검증: type-check clean, build 컴파일 성공(559 pages, placeholder env). push 대기.
+
+---
+
 ## [hotfix-522] 2026-07-18 — 프로덕션 전면 522 (DB 커넥션풀 포화) 코드레벨 대응
 
 배경:

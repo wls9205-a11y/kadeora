@@ -159,7 +159,8 @@ export default async function ComplexDetailPage({ params }: Props) {
 
   // 관련 블로그 + 전월세 + 사이트이미지 — 병렬 조회
   const searchTerm = sanitizeSearchQuery(decoded.length > 4 ? decoded.slice(0, 4) : decoded, 20);
-  const [blogsR, rentR, siteR, relatedR] = await Promise.allSettled([
+  // 522 hotfix: 4-wide 동시 fetch → 2+2 웨이브로 분할해 렌더당 peak 동시 커넥션 4→2. 출력 불변.
+  const [blogsR, rentR] = await Promise.allSettled([
     sb.from('blog_posts').select('slug,title,view_count,published_at')
       .eq('is_published', true).or(`title.ilike.%${searchTerm}%,title.ilike.%${region.slice(0,2)} 부동산%`)
       .order('view_count', { ascending: false }).limit(3),
@@ -168,6 +169,8 @@ export default async function ComplexDetailPage({ params }: Props) {
       .eq('apt_name', decoded)
       .order('deal_date', { ascending: false })
       .limit(100),
+  ]);
+  const [siteR, relatedR] = await Promise.allSettled([
     (sb as any).from('apt_sites').select('slug, images, page_views, comment_count, interest_count')
       .ilike('name', `%${decoded}%`).eq('is_active', true).limit(1).maybeSingle(),
     // 같은 지역 관련 단지 (내부 링크 강화)

@@ -33,10 +33,12 @@ export async function submitIndexNow(urls: string[]) {
 
     await Promise.allSettled(
       endpoints.map(ep =>
+        // 504 hotfix: per-fetch timeout — 포털 hang 이 함수 maxDuration 을 잡아먹지 않도록
         fetch(ep, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json; charset=utf-8' },
           body: JSON.stringify(payload),
+          signal: AbortSignal.timeout(8000),
         }).catch(() => {})
       )
     );

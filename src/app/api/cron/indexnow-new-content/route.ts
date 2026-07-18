@@ -61,17 +61,21 @@ export async function GET(_req: NextRequest) {
       urlList: urls,
     };
 
-    let submitted = 0;
-    for (const ep of endpoints) {
-      try {
-        const r = await fetch(ep, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
-        if (r.ok || r.status === 200 || r.status === 202) submitted++;
-      } catch { /* skip */ }
-    }
+    // 504 hotfix: 엔드포인트 fetch 에 timeout 이 없어 포털 하나가 hang 하면
+    // maxDuration(60s)까지 블록 → 504. per-fetch 8s AbortSignal + 3개 병렬로
+    // 최악 대기를 24s(순차)→8s(병렬)로 축소.
+    const results = await Promise.allSettled(
+      endpoints.map(ep => fetch(ep, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(8000),
+      })),
+    );
+    const submitted = results.filter(
+      (x): x is PromiseFulfilledResult<Response> =>
+        x.status === 'fulfilled' && (x.value.ok || x.value.status === 202),
+    ).length;
 
     return { processed: urls.length, metadata: { endpoints: submitted, apt: aptR.data?.length || 0, stock: stockR.data?.length || 0, blog: blogR.data?.length || 0 } };
   });
