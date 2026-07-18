@@ -6,7 +6,8 @@ export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
 import { SITE_URL } from '@/lib/constants';
-const INDEXNOW_KEY = process.env.INDEXNOW_KEY || '5a7b3c1d2e4f6a8b9c0d1e2f3a4b5c6d';
+// 호스팅된 키로 교정 (기존 5a7b… 는 미호스팅 → .txt 404 → 포털 거부). public/3a23…675.txt = 200.
+const INDEXNOW_KEY = process.env.INDEXNOW_KEY || '3a23def313e1b1283822c54a0f9a5675';
 
 export async function GET(_req: NextRequest) {
   const result = await withCronLogging('indexnow-new-content', async () => {

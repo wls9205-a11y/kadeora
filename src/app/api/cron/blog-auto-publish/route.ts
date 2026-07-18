@@ -69,7 +69,9 @@ export async function GET(req: NextRequest) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             host: 'kadeora.app',
-            key: process.env.INDEXNOW_KEY || 'kadeora-indexnow-key',
+            // 호스팅된 키로 교정 (kadeora-indexnow-key 는 미호스팅 → 404). 기본 keyLocation
+            // (kadeora.app/{key}.txt) 이 3a23…675.txt=200 로 해소.
+            key: process.env.INDEXNOW_KEY || '3a23def313e1b1283822c54a0f9a5675',
             urlList: urls,
           }),
         }).catch(() => {});
