@@ -37,8 +37,16 @@
   전체 실패 → 드레인 0**. urgent(100)는 한도 안이라 정상이었음(SELECT/WHERE 자체는 정상).
   → **수정**: `markIndexNowSubmitted()` 공유 헬퍼가 **50개씩 청크**로 dedup+UPDATE+DELETE
   (`.in()` URI 안전) + **실제 처리 건수 반환**. `accepted`→`portals_ok`(URL 아니라 엔드포인트 수) 개명.
-- ⏭ 다음 batch(신코드 a19b55bc)에서 재검증: duplicate key 0 / `deduped` 실값 / submitted↑·pending↓
-  → 확인되면 **failed 7,927 배치 리셋**(claude.ai, 500건씩).
+- ✅ **07:05/07:35 batch 확정**: `selected:500`(SELECT 완벽), `submitted:497/487`, `deduped:3/13`,
+  pending 3,588→2,593(드레인), submitted +984. status 전이 정상. **dedup 청크 수정(a19b55bc) 성공.**
+- ✅ **`portals_ok:3` 의미 확정 = "포털 엔드포인트 3개 성공"**(indexnow.org/naver/bing), *URL 3개 아님*.
+  lib 는 500 URL 을 한 요청 body.urlList 에 통째로 보내고(포털당 1요청), `accepted`=2xx 낸 엔드포인트
+  수(최대 3). curl 실측: 500 URL payload(18KB) → indexnow.org/bing **200**(all-or-nothing 전량 수락).
+  → **거짓 성공 아님, submitted 전량 실제 색인됨.** 응답에 `urls_sent`/`portals_total` 추가로 명확화(c06aaad5),
+  임시 exact-count diag 제거(Rule #15).
+- ⏭ 이제 **failed 7,927 배치 리셋**(claude.ai, 500건씩) 진행 가능 — 키 고쳐졌으니 유효.
+
+**IndexNow P0 완전 정상화 확정 (71일 무제출 → 드레인 중).**
 - **같은 근본원인 추가 수정**(commit 26d705c4): `indexnow-new-content`(5a7b…→404) +
   `blog-auto-publish`(kadeora-indexnow-key→404) 키를 호스팅 키로 교정. (큐와 무관·bounded.)
 - ⚠️ 남은 같은 패턴(플래그): `search-engine-ping` `INDEXNOW_KEY||''` 빈 키(저가치·homepage ping).
