@@ -1,3 +1,34 @@
+## [banner] 2026-07-18 — 부정공 TALK 배너 통합 (claude.ai 에셋/컴포넌트 → 레포 연결)
+
+에셋 4개 복사: `public/banners/bujeonggong-talk{,-mobile}.webp`,
+`src/components/banner/{Sticky,Inline}TalkBanner.tsx`. (원본은 로컬 Downloads —
+`/mnt/user-data/outputs/` 는 claude.ai 샌드박스 경로라 이 머신엔 없음.)
+
+연결 3곳:
+1. 상단 sticky — `ClientShell.tsx` 의 `<Navigation/>` 바로 위에 `<StickyTalkBanner/>`.
+   **z-index 충돌 해결**: 헤더(`Navigation` <header>)가 `sticky top:0 z:100` 이라
+   배너(z-30)와 top:0 에서 겹침. 헤더 `top` 을 `var(--talk-banner-h, 0px)` 로 바꾸고
+   배너가 자기 높이를 이 변수에 발행(보이면 헤더가 그만큼 내려가 나란히 stack,
+   숨으면 0 복귀). 배너 없는 라우트/미마운트 시 기본값 0px → 기존과 동일(blast radius 0).
+2. 인라인 — `apt/[id]`(AptBlogStack↔AptCompareTable 사이), `apt/complex/[name]`
+   (설명 섹션↔AptLocationMini 사이), `blog/[slug]`.
+3. 트래킹 — 두 컴포넌트 `handleClick` 에서 `track('banner_click','bujeonggong_talk',
+   {slot, page_path})` (`@/lib/analytics`). InlineTalkBanner 는 이를 위해 'use client' 전환.
+
+중복 방지: StickyTalkBanner `INLINE_ROUTES` 정규식이 blog/apt/complex 에서 상단 배너를
+렌더 안 함(그대로 사용).
+
+⚠️ 미완/판단 필요 — **blog 인라인은 "본문 중간" 이 아니라 "본문 진입부(TOC/차트 직후)"**.
+본문은 4개 렌더 경로(isBot / BlogGatedRenderer / BlogTossGate / SmartSectionGate)로
+갈리는데 실사용자 경로는 gate 컴포넌트 내부에서 HTML 을 렌더 → 진짜 중간 분할은 그 3개
+전환율-critical 컴포넌트를 수정해야 함. 장애 직후 blast radius 고려해 보류하고 안전한
+진입부에 배치(하단 AdSlot 과 250px+ 이격, isBot 제외). 진짜 중간이 필요하면 gate 수정 필요.
+
+검증: type-check clean, build 성공. 스크롤 숨김/복귀·375px 는 로컬 env(Supabase 키) 없어
+프로덕션/프리뷰 스모크 필요.
+
+---
+
 ## [hotfix-522 r2] 2026-07-18 — DB 진단 정정 후 앱 코드 후속 + IndexNow
 
 DB 진단 정정 (claude.ai 실측):

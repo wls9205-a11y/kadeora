@@ -212,7 +212,9 @@ export function Navigation() {
     <>
       {/* ── 헤더 ── */}
       <header style={{
-        position: 'sticky', top: 0, zIndex: 100,
+        // top 오프셋: StickyTalkBanner 가 있을 때 배너 높이만큼 내려감(--talk-banner-h).
+        // 배너 없는 라우트/미마운트 시 기본값 0px → 기존 동작과 동일 (blast radius 0).
+        position: 'sticky', top: 'var(--talk-banner-h, 0px)', zIndex: 100,
         background: theme === 'light' ? 'rgba(255,255,255,0.92)' : 'rgba(13,23,48,0.88)',
         backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
         borderBottom: '1px solid var(--border)',

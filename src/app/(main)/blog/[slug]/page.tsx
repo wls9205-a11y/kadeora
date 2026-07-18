@@ -59,6 +59,7 @@ import SmartSectionGate from '@/components/SmartSectionGate';
 import BlogAptAlertCTA from '@/components/BlogAptAlertCTA';
 import YMYLBanner from '@/components/YMYLBanner';
 import BigEventCharts from '@/components/blog/BigEventCharts';
+import InlineTalkBanner from '@/components/banner/InlineTalkBanner';
 import { AdSlot } from '@/components/ads/AdSlot';
 // NewsletterSubscribe 삭제 — 카카오 CTA로 통합
 
@@ -1082,6 +1083,12 @@ export default async function BlogDetailPage({ params }: Props) {
 
         {/* [BIG-EVENT-CHARTS] 연결된 big_event가 있으면 본문 위에 3종 차트 자동 렌더 */}
         {bigEventId ? <BigEventCharts eventId={bigEventId} /> : null}
+
+        {/* 부정공 TALK 인라인 배너 — 본문 진입부(TOC/차트 직후).
+            DB 본문 미수정 · 렌더 시점 삽입. 하단 AdSlot 과 250px+ 이격.
+            ⚠️ 진짜 "본문 중간" 분할은 4개 렌더 경로(isBot/BlogGatedRenderer/
+            BlogTossGate/SmartSectionGate) 를 각각 수정해야 해 blast radius 큼 → 보류. */}
+        {!isBot && <InlineTalkBanner />}
 
         {/* 본문 — 봇: 전체, gated_sections 있으면 Gated 렌더, 로그인: TossGate, 비로그인: 전체 공개 */}
         {isBot ? (

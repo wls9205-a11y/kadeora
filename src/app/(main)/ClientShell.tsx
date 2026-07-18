@@ -41,6 +41,8 @@ import SignupPopupModal from '@/components/signup/SignupPopupModal';
 import CtaGlobalTracker from '@/components/CtaGlobalTracker';
 import PageViewTracker from '@/components/PageViewTracker';
 import BehaviorTracker from '@/components/BehaviorTracker';
+// 부정공 TALK 상단 배너 — usePathname/scroll 사용(SSR-safe), 헤더 위에 마운트.
+import StickyTalkBanner from '@/components/banner/StickyTalkBanner';
 
 const Navigation             = dynamic(() => import('@/components/Navigation').then(m => m.Navigation),     { ssr: false });
 const NoticeBanner           = dynamic(() => import('@/components/NoticeBanner'),                            { ssr: false });
@@ -72,6 +74,7 @@ export default function ClientShell({ children, serverLoggedIn }: Props) {
       <AuthProvider serverLoggedIn={serverLoggedIn}>
         <TopLoadingBar />
         <VitalsReporter />
+        <StickyTalkBanner />
         <Navigation />
         <NoticeBanner />
         <AdBanner />

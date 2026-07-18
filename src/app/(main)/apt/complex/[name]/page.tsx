@@ -18,6 +18,7 @@ import AptDDayCard from '@/components/apt/detail/AptDDayCard';
 import AptKpiGrid from '@/components/apt/detail/AptKpiGrid';
 import AptScheduleTimeline from '@/components/apt/detail/AptScheduleTimeline';
 import AptLocationMini from '@/components/apt/detail/AptLocationMini';
+import InlineTalkBanner from '@/components/banner/InlineTalkBanner';
 
 const AptPriceTrendChart = nextDynamic(() => import('@/components/charts/AptPriceTrendChart'));
 const AptReviewSection = nextDynamic(() => import('@/components/AptReviewSection'));
@@ -557,6 +558,9 @@ export default async function ComplexDetailPage({ params }: Props) {
           {areaStats.length > 0 && <> {areaStats.length}개 면적 타입에서 {tradeList.length}건의 거래가 확인됩니다.</>}
         </p>
       </section>
+
+      {/* 부정공 TALK 인라인 배너 — 상세 섹션 사이 (렌더 시점 삽입) */}
+      <InlineTalkBanner />
 
       <AptLocationMini
         address={profile?.address ?? null}

@@ -31,6 +31,7 @@ import LifecycleTimeline from '@/components/apt/LifecycleTimeline';
 import CheongakMatchCard from '@/components/apt/CheongakMatchCard';
 import AptBlogStack from '@/components/apt/AptBlogStack';
 import AptCompareTable from '@/components/apt/AptCompareTable';
+import InlineTalkBanner from '@/components/banner/InlineTalkBanner';
 import AptSidebar from '@/components/apt/AptSidebar';
 import AptPriceTrendCard from '@/components/apt/AptPriceTrendCard';
 import AptDDayCard from '@/components/apt/detail/AptDDayCard';
@@ -593,6 +594,8 @@ export default async function AptUnifiedPage({ params }: Props) {
             totalUnits={site?.total_units ?? null}
           />
           <AptBlogStack slug={slug} />
+          {/* 부정공 TALK 인라인 배너 — 상세 섹션 사이 (렌더 시점 삽입) */}
+          <InlineTalkBanner />
           <AptCompareTable
             slug={slug}
             currentSite={{
