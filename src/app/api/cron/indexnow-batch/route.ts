@@ -24,7 +24,22 @@ async function handler(req: NextRequest) {
   if (!lockOk) return NextResponse.json({ success: true, skipped: true, reason: 'pg_lock_held' });
 
   try {
-    const { data: rows } = await (admin as any)
+    // 진단(임시): batch 가 왜 pending 을 못 집는지 규명. pending 을 is_urgent 값별로 카운트.
+    // 가설: normal 행이 is_urgent=NULL 이면 .eq('is_urgent',false) 가 NULL 을 안 잡아 selected=0.
+    const pendingCount = async (f?: (b: any) => any): Promise<number> => {
+      let q = (admin as any).from('indexnow_queue').select('id', { count: 'exact', head: true }).eq('status', 'pending');
+      if (f) q = f(q);
+      const { count } = await q;
+      return count ?? -1;
+    };
+    const [pendTotal, pendFalse, pendNull, pendTrue] = await Promise.all([
+      pendingCount(),
+      pendingCount((q) => q.eq('is_urgent', false)),
+      pendingCount((q) => q.is('is_urgent', null)),
+      pendingCount((q) => q.eq('is_urgent', true)),
+    ]);
+
+    const { data: rows, error: selErr } = await (admin as any)
       .from('indexnow_queue')
       .select('id, url')
       .eq('status', 'pending')
@@ -33,23 +48,31 @@ async function handler(req: NextRequest) {
       .order('priority', { ascending: true })
       .order('queued_at', { ascending: true })
       .limit(BATCH_SIZE);
-    if (!rows || rows.length === 0) return NextResponse.json({ success: true, submitted: 0 });
+
+    const diag = {
+      pending_total: pendTotal, pending_false: pendFalse, pending_null: pendNull, pending_true: pendTrue,
+      selected: rows?.length ?? 0, select_error: selErr?.message ?? null,
+    };
+    console.log('[indexnow-batch] DIAG', JSON.stringify(diag));
+
+    if (!rows || rows.length === 0) return NextResponse.json({ success: true, submitted: 0, diag });
 
     const urls = rows.map((r: any) => r.url).filter(Boolean);
     const result = await submitIndexNow(urls);
+    console.log('[indexnow-batch] submit', JSON.stringify(result));
 
-    // status 는 실제 포털 수락 결과. 'sent'(CHECK 위반, s258 회귀)를 'submitted'/'failed' 로.
-    // 성공 시 청크 단위 dedup+UPDATE (긴 URL .in() URI 한도 회피) → 실제 처리 건수 반환.
+    // status 는 실제 포털 수락 결과. 성공 시 청크 dedup+UPDATE → 실제 처리 건수 반환.
     if (result.ok) {
       const { submitted, deduped } = await markIndexNowSubmitted(admin, rows as { id: unknown; url: string }[]);
-      return NextResponse.json({ success: true, submitted, deduped, portals_ok: result.accepted, status: 'submitted' });
+      console.log('[indexnow-batch] marked', JSON.stringify({ submitted, deduped }));
+      return NextResponse.json({ success: true, submitted, deduped, portals_ok: result.accepted, status: 'submitted', diag });
     }
 
     const { error: updErr } = await (admin as any).from('indexnow_queue').update({
       status: 'failed', submitted_at: new Date().toISOString(), response_code: 0, attempt_count: 1,
     }).in('id', rows.map((r: any) => r.id));
     if (updErr) console.error('[indexnow-batch] queue update failed:', updErr.message);
-    return NextResponse.json({ success: true, submitted: 0, portals_ok: result.accepted, status: 'failed' });
+    return NextResponse.json({ success: true, submitted: 0, portals_ok: result.accepted, status: 'failed', diag });
   } catch (err: any) {
     return NextResponse.json({ success: false, error: err?.message || 'internal' }, { status: 500 });
   } finally {
