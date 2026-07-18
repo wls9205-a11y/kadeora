@@ -36,17 +36,20 @@ async function handler(req: NextRequest) {
     if (!rows || rows.length === 0) return NextResponse.json({ success: true, submitted: 0 });
 
     const urls = rows.map((r: any) => r.url).filter(Boolean);
-    await submitIndexNow(urls);
+    const result = await submitIndexNow(urls);
 
-    // s258 patch #8: status 'submitted' → 'sent' (실시간 sent 마킹), response_code 200 명시
-    await (admin as any).from('indexnow_queue').update({
-      status: 'sent',
+    // 실제 포털 수락 결과로 status 확정. 'sent' 는 CHECK 위반 → s258 회귀를 되돌림.
+    // lib fallback 키로 no-op 도 해소. 진짜 제출 결과가 status 에 반영된다.
+    const newStatus = result.ok ? 'submitted' : 'failed';
+    const { error: updErr } = await (admin as any).from('indexnow_queue').update({
+      status: newStatus,
       submitted_at: new Date().toISOString(),
-      response_code: 200,
+      response_code: result.ok ? 200 : 0,
       attempt_count: 1,
     }).in('id', rows.map((r: any) => r.id));
+    if (updErr) console.error('[indexnow-batch] queue update failed:', updErr.message);
 
-    return NextResponse.json({ success: true, submitted: urls.length });
+    return NextResponse.json({ success: true, submitted: result.ok ? urls.length : 0, accepted: result.accepted, status: newStatus });
   } catch (err: any) {
     return NextResponse.json({ success: false, error: err?.message || 'internal' }, { status: 500 });
   } finally {

@@ -2,11 +2,20 @@
  * IndexNow — Bing/Yandex/Naver에 URL 즉시 색인 요청
  * 블로그 발행, 게시글 작성 시 호출
  */
-const INDEXNOW_KEY = process.env.INDEXNOW_KEY || '';
+// 호스팅된 IndexNow 키 (public/3a23def313e1b1283822c54a0f9a5675.txt = 200).
+// env 미설정 시 no-op 되던 게 indexnow-urgent/batch 71일 무제출의 원인 → 실측 검증된
+// 호스팅 키를 fallback 으로. (api.indexnow.org / bing 200 확인, naver 422 는 포털측 이슈)
+const INDEXNOW_KEY = process.env.INDEXNOW_KEY || '3a23def313e1b1283822c54a0f9a5675';
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
 
-export async function submitIndexNow(urls: string[]) {
-  if (!INDEXNOW_KEY || !urls.length) return;
+export interface IndexNowResult {
+  ok: boolean;       // 하나 이상의 포털이 수락(2xx)
+  accepted: number;  // 수락한 (batch×endpoint) 수
+  attempted: number; // 시도한 (batch×endpoint) 수
+}
+
+export async function submitIndexNow(urls: string[]): Promise<IndexNowResult> {
+  if (!INDEXNOW_KEY || !urls.length) return { ok: false, accepted: 0, attempted: 0 };
 
   const fullUrls = urls.map(u => u.startsWith('http') ? u : `${SITE}${u}`);
 
@@ -23,6 +32,8 @@ export async function submitIndexNow(urls: string[]) {
     'https://www.bing.com/indexnow',
   ];
 
+  let accepted = 0;
+  let attempted = 0;
   for (const batch of batches) {
     const payload = {
       host: new URL(SITE).hostname,
@@ -31,7 +42,7 @@ export async function submitIndexNow(urls: string[]) {
       urlList: batch,
     };
 
-    await Promise.allSettled(
+    const settled = await Promise.allSettled(
       endpoints.map(ep =>
         // 504 hotfix: per-fetch timeout — 포털 hang 이 함수 maxDuration 을 잡아먹지 않도록
         fetch(ep, {
@@ -39,12 +50,17 @@ export async function submitIndexNow(urls: string[]) {
           headers: { 'Content-Type': 'application/json; charset=utf-8' },
           body: JSON.stringify(payload),
           signal: AbortSignal.timeout(8000),
-        }).catch(() => {})
+        })
       )
     );
+    for (const s of settled) {
+      attempted++;
+      if (s.status === 'fulfilled' && (s.value.ok || s.value.status === 200 || s.value.status === 202)) accepted++;
+    }
     // 배치 간 200ms 딜레이 (rate limit 방지)
     if (batches.length > 1) await new Promise(r => setTimeout(r, 200));
   }
+  return { ok: accepted > 0, accepted, attempted };
 }
 
 /**
