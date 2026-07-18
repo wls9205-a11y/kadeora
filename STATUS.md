@@ -23,10 +23,17 @@
 - **staged 검증 통과**(49e58ba7, BATCH_SIZE 10): submitted 2,214→2,379(+165), last_submit
   5/08→오늘, status 실제 전이. 포털 실측 indexnow.org/bing 200. → **BATCH_SIZE 100/500 복원**(8821078c).
 - **dedup(옵션 A)**(8821078c): `UNIQUE(url,status)` 충돌 — pending 을 submitted 로 UPDATE 시
-  같은 url 의 submitted 쌍둥이(71일 반복 큐잉, 3,519 dup 중 78 pending stuck)와 (url,submitted)
+  같은 url 의 submitted 쌍둥이(71일 반복 큐잉, 3,519 dup 중 78~79 pending stuck)와 (url,submitted)
   중복 → UPDATE 막힘. **성공 시 쌍둥이 있는 pending 은 UPDATE 대신 삭제(이미 색인됨), 나머지만
   submitted 로 UPDATE.** 응답 `{submitted, deduped}`.
-- ⏭ 다음: claude.ai 가 전량 배치 정상 드레인 확인 → **failed 7,927 배치 리셋**(500건씩, 키 고쳐졌으니 유효).
+
+### 검증 현황 (2026-07-18 ~06:00 claude.ai 실측)
+- ✅ **urgent pending 154 → 0** (전부 처리 완료), submitted +165, last_submit 71일 만에 오늘 갱신.
+- ✅ 키 resolve 검증 통과 + 진단 라우트 삭제(404) 확인. 배포 `053169be`(dpl_7FWM/9YC3) 반영 중.
+- ⏳ **dedup 미검증**: 05:35 batch 는 배포 직전 코드. 신코드 첫 batch = **06:05**(batch 5·35분 30분 주기).
+  normal pending 3,573 + dedup 대상 79 가 06:05 대기. 검증 3종: (1) duplicate key 에러 0
+  (2) 응답 `deduped` 카운트 (3) submitted↑/pending↓.
+- ⏭ 06:05 dedup 확인되면 → **failed 7,927 배치 리셋**(claude.ai, 500건씩, 키 고쳐졌으니 유효).
 - **같은 근본원인 추가 수정**(commit 26d705c4): `indexnow-new-content`(5a7b…→404) +
   `blog-auto-publish`(kadeora-indexnow-key→404) 키를 호스팅 키로 교정. (큐와 무관·bounded.)
 - ⚠️ 남은 같은 패턴(플래그): `search-engine-ping` `INDEXNOW_KEY||''` 빈 키(저가치·homepage ping).
