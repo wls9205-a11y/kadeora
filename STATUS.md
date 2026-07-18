@@ -13,10 +13,15 @@
    submitted:urls.length(가짜 성공) 반환. (s258 회귀: 주석에 'submitted'→'sent' 로 바꿨다고
    명시돼 있음.) → 되돌려 `submitted`, 실제 포털 결과로 `submitted`/`failed` 확정.
 - submitIndexNow 가 `{ok,accepted,attempted}` 반환하도록 변경(하위호환, 기존 호출부 영향 0).
-- 검증: 키·포털 수락 curl 실측 + type-check/build. **큐 status 전이 + net._http_response 는
-  claude.ai 가 프로덕션에서 검증**(로컬 Supabase env/CRON_SECRET 없음).
-- ⚠️ P0 범위 밖(플래그만): `indexnow-new-content`(키 5a7b…→404), `blog-auto-publish`
-  (kadeora-indexnow-key→404) 도 같은 근본원인(틀린/미호스팅 키). 별도 수정 필요.
+- 검증: 키·포털 수락 curl 실측(indexnow.org/bing 200, naver 422) + type-check/build.
+  **큐 status 전이 + net._http_response 는 claude.ai 가 프로덕션에서 검증**(로컬 env 없음).
+- env `INDEXNOW_KEY`: **미설정 확정**(9ms no-op = 빈 키 early-return 근거). fallback(호스팅 키)로
+  해소. 유지보수 위해 Vercel env 등록 권장(선택). 검증파일 public/3a23…675.txt=200.
+- **staged 롤아웃**(commit 49e58ba7): urgent/batch `BATCH_SIZE` 100/500→**10**. 포털 응답
+  확인 후 100/500 복원 예정. 3,726건 한 번에 안 푼다.
+- **같은 근본원인 추가 수정**(commit 26d705c4): `indexnow-new-content`(5a7b…→404) +
+  `blog-auto-publish`(kadeora-indexnow-key→404) 키를 호스팅 키로 교정. (큐와 무관·bounded.)
+- ⚠️ 남은 같은 패턴(플래그): `search-engine-ping` `INDEXNOW_KEY||''` 빈 키(저가치·homepage ping).
 - ⚠️ failed 7,927 리셋은 이 수정 동작 확인 후 (claude.ai, 500건씩).
 
 ### P1 — 배너 최종본 (design D, 이미 라이브 fe7324c1)
