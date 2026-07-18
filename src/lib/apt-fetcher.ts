@@ -392,7 +392,8 @@ export async function fetchPriceBands(region: string, sigungu: string | null): P
     let q: any = (sb as any).from('apt_sites').select('price_max').eq('is_active', true).not('price_max', 'is', null);
     if (region && region !== '전국') q = q.eq('region', region);
     if (sigungu) q = q.eq('sigungu', sigungu);
-    q = q.limit(5000);
+    // 522 hotfix: price band 분포 계산용 샘플 — 5000→2000 로 축소 (커넥션 홀드 시간 단축)
+    q = q.limit(2000);
     const { data } = await q;
     const rows = (data as { price_max: number }[]) || [];
 
@@ -427,7 +428,8 @@ export async function fetchBuildersHub(region: string, limit = 6): Promise<Build
     const sb = getSupabaseAdmin();
     let q: any = (sb as any).from('apt_sites').select('builder, popularity_score').eq('is_active', true);
     if (region && region !== '전국') q = q.eq('region', region);
-    q = q.not('builder', 'is', null).neq('builder', '').limit(8000);
+    // 522 hotfix: 상위 시공사 집계 샘플 — 8000→3000 로 축소 (커넥션 홀드 시간 단축)
+    q = q.not('builder', 'is', null).neq('builder', '').limit(3000);
     const { data } = await q;
     if (!Array.isArray(data)) return [];
 

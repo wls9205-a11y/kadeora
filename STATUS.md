@@ -1,3 +1,41 @@
+## [hotfix-522] 2026-07-18 — 프로덕션 전면 522 (DB 커넥션풀 포화) 코드레벨 대응
+
+배경:
+- 프로덕션 전면 522 (Cloudflare→origin 커넥션 타임아웃). 원인 = 애플리케이션 코드에
+  의한 DB 커넥션풀 포화. `max_connections = 90`. **pg_cron 은 5/28 부터 사망 상태라 무관.**
+- 제약: DB 접속 불가 → 코드레벨만 수정. 새 마이그레이션/RPC 생성 불가(claude.ai 담당).
+
+수정 (앱 코드 4건 — 커넥션 압력 즉시 완화):
+1. `src/lib/cron-logger.ts` — `withCronLogging` insert 응답에서 id 를 못 받으면
+   후속 UPDATE 를 **스킵**. 기존엔 `.eq('id', log?.id as string)` 가 `?id=eq.undefined`
+   로 나가 풀 포화 시 커넥션을 추가 소비하는 피드백 루프였음 (로그의 `?id=eq.undefined` 정체).
+2. `src/app/(main)/apt/[id]/page.tsx` — 8-wide `Promise.allSettled`(Rule #49 위반)를
+   **4+4 두 웨이브로 분할** → 렌더당 peak 동시 커넥션 8→4. 출력 불변.
+3. `src/lib/daily-report-data.ts` — 구별 시세 `apt_complex_profiles` 조회 `limit(10000)`→
+   `limit(2000)`. SSR request-path 커넥션 홀드 시간 단축.
+4. `src/lib/apt-fetcher.ts` — `fetchPriceBands` 5000→2000, `fetchBuildersHub` 8000→3000
+   (JS 집계 샘플 축소, 커넥션 홀드 단축).
+
+DB 필요 → 적용 대기 (`docs/_setup/hotfix-522-db.sql`, claude.ai 검토 후 적용):
+5. `statement_timeout` < 함수 maxDuration — anon/authenticated 12s, service_role 120s.
+   maxDuration 30s 에 함수는 죽지만 SQL 은 계속 살아 orphan 커넥션 되는 문제 차단.
+   (⚠️ 앱 코드로는 세션 statement_timeout 설정 불가 → DB 롤 설정 필수)
+6. `get_apt_detail_bundle` RPC — apt/[id] fan-out 을 1회 왕복으로 근본 통합(위 2번의 후속).
+7. `get_daily_gu_prices` RPC — daily 구별 시세를 DB-side GROUP BY 로(위 3번의 후속, 선택).
+
+미해결 finding (scope 밖 — 추가 지시 대기):
+- `daily-report-data.ts fetchDailyReportData` 는 30-wide `Promise.all` + 순차 10쿼리.
+  daily/[region] SSR(ISR 60s)에서 콜드 스톰 시 렌더당 최대 40 커넥션 스파이크.
+  → 웨이브 분할 또는 snapshot(daily-report-snapshot cron) read 전환 권장.
+- `vercel.json` catch-all `api/**:30` 이 코드 `export const maxDuration` 를 override
+  (analysis-refresh 300, apt-crawl-pricing 300, admin/batch-ops 300 등 → 30 으로 cap).
+  Rule #18. 5번 statement_timeout 과 함께 orphan 커넥션 유발.
+
+검증: `npm run type-check` clean. `npm run build` 컴파일 성공(559 pages) — 로컬 env 없어
+prerender 는 placeholder env 로 통과 확인. 스모크는 배포 후 프로덕션에서.
+
+---
+
 ## [s260] 2026-05-08 — 회원가입 funnel + 전방위 stabilize 일괄 적용 (production main)
 
 브랜치: `main` · commit `1d528d51`

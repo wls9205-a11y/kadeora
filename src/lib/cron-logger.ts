@@ -64,25 +64,32 @@ export async function withCronLogging(
     .select('id')
     .single();
 
+  // 522 hotfix: insert 응답에서 id 를 못 받으면(풀 포화 시 insert 가 조용히 실패)
+  // 이후 UPDATE 가 `?id=eq.undefined` 로 나가 커넥션을 추가 소비하는 피드백 루프가 됨.
+  // id 가 없으면 PATCH 자체를 스킵한다.
+  const logId: string | null = (log?.id as string | undefined) ?? null;
+
   const startTime = Date.now();
 
   try {
     const result = await fn();
     const duration = Date.now() - startTime;
 
-    await supabase
-      .from('cron_logs')
-      .update({
-        status: 'success',
-        finished_at: new Date().toISOString(),
-        duration_ms: duration,
-        records_processed: result.processed || 0,
-        records_created: result.created || 0,
-        records_updated: result.updated || 0,
-        records_failed: result.failed || 0,
-        metadata: result.metadata || {},
-      })
-      .eq('id', log?.id as string);
+    if (logId) {
+      await supabase
+        .from('cron_logs')
+        .update({
+          status: 'success',
+          finished_at: new Date().toISOString(),
+          duration_ms: duration,
+          records_processed: result.processed || 0,
+          records_created: result.created || 0,
+          records_updated: result.updated || 0,
+          records_failed: result.failed || 0,
+          metadata: result.metadata || {},
+        })
+        .eq('id', logId);
+    }
 
     // API 사용량 추적
     if (result.metadata?.api_name) {
@@ -105,15 +112,17 @@ export async function withCronLogging(
       });
     } catch {}
 
-    await supabase
-      .from('cron_logs')
-      .update({
-        status: 'failed',
-        finished_at: new Date().toISOString(),
-        duration_ms: duration,
-        error_message: error.message?.substring(0, 1000),
-      })
-      .eq('id', log?.id as string);
+    if (logId) {
+      await supabase
+        .from('cron_logs')
+        .update({
+          status: 'failed',
+          finished_at: new Date().toISOString(),
+          duration_ms: duration,
+          error_message: error.message?.substring(0, 1000),
+        })
+        .eq('id', logId);
+    }
 
     await supabase.from('admin_alerts').insert({
       type: 'cron_fail',

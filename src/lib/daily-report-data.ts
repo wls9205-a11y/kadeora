@@ -119,12 +119,14 @@ export async function fetchDailyReportData(region: ReportRegion): Promise<DailyR
       .select('stage')
       .eq('region', region).eq('is_active', true),
 
-    // 6. 구별 시세
+    // 6. 구별 시세 — 522 hotfix: SSR request-path 에서 10000행 조회는 커넥션을 오래 물어
+    //    풀(max_connections 90)을 잠식. 구별 평균 계산에는 2000 샘플로 충분.
+    //    (근본 해결: DB-side GROUP BY RPC 로 전환 — docs/_setup/hotfix-522-db.sql 참고)
     (sb as any).from('apt_complex_profiles')
       .select('sigungu, latest_sale_price, latest_jeonse_price')
       .eq('region_nm', region)
       .gt('latest_sale_price', 0)
-      .limit(10000),
+      .limit(2000),
 
     // 7. 단지백과 수
     (sb as any).from('apt_complex_profiles')
