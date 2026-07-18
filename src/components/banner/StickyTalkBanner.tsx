@@ -72,7 +72,7 @@ export default function StickyTalkBanner() {
         rel="noopener noreferrer"
         aria-label="부정공 톡 — 부동산 정보 공유 카톡방 열기 (새 창)"
         onClick={handleClick}
-        className={`fixed left-0 top-0 z-30 flex w-full items-center gap-[11px] px-4 no-underline transition-transform duration-300 ${
+        className={`fixed left-0 top-0 z-[110] flex w-full items-center gap-[11px] px-4 no-underline transition-transform duration-300 ${
           visible ? 'translate-y-0' : '-translate-y-full'
         }`}
         style={{ background: YELLOW, height: STICKY_BANNER_HEIGHT }}
