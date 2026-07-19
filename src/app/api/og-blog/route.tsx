@@ -257,7 +257,9 @@ export async function GET(req: NextRequest) {
         'Access-Control-Allow-Origin': '*',
         'Cross-Origin-Resource-Policy': 'cross-origin',
         'X-OG-Card': String(card),
-        'X-OG-Slug': slug || 'fallback',
+        // 헤더는 ByteString(0-255)만 허용 — 한글 슬러그를 그대로 넣으면 throw → catch → fallback.
+        // encodeURIComponent 로 ASCII 화 (이미지 본문의 한글은 정상, 헤더만 인코딩).
+        'X-OG-Slug': encodeURIComponent(slug || 'fallback'),
       },
     });
   } catch (err) {

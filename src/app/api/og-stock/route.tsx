@@ -343,8 +343,9 @@ export async function GET(req: NextRequest) {
         'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800',
         'Access-Control-Allow-Origin': '*',
         'Cross-Origin-Resource-Policy': 'cross-origin',
-        'X-OG-Card': card,
-        'X-OG-Symbol': symbol || 'fallback',
+        // 헤더 ByteString 안전 — card/symbol 은 쿼리 파생 문자열이라 non-ASCII 가능. ASCII 화.
+        'X-OG-Card': encodeURIComponent(card),
+        'X-OG-Symbol': encodeURIComponent(symbol || 'fallback'),
       },
     });
   } catch (err) {

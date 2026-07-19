@@ -554,7 +554,7 @@ export async function GET(req: NextRequest) {
       if (cardEl) {
         const _cardImg = new ImageResponse(cardEl, { width:1200, height:630, ...opts });
         const _cardBuf = await _cardImg.arrayBuffer();
-        return new Response(_cardBuf, { headers: { 'Content-Type':'image/png', 'X-OG-Card': card, ...CACHE } });
+        return new Response(_cardBuf, { headers: { 'Content-Type':'image/png', 'X-OG-Card': encodeURIComponent(card || ''), ...CACHE } });
       }
     }
 

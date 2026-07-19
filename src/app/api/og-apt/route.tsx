@@ -349,7 +349,8 @@ export async function GET(req: NextRequest) {
         'Access-Control-Allow-Origin': '*',
         'Cross-Origin-Resource-Policy': 'cross-origin',
         'X-OG-Card': String(card),
-        'X-OG-Slug': slug || 'fallback',
+        // 헤더는 ByteString(0-255)만 허용 — 한글 슬러그 직접 삽입 시 throw → fallback. ASCII 화.
+        'X-OG-Slug': encodeURIComponent(slug || 'fallback'),
       },
     });
   } catch (err) {
