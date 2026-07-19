@@ -1,3 +1,18 @@
+## [ByteString 종결 실증] 2026-07-19 — 한글 슬러그 55%(5,149건) 경로 차단 확인
+
+사용자 DB 교차: 발행글 9,389 중 한글 슬러그 5,149(54.8%). 이 전부에 아침 수정
+(encodeURIComponent)이 실제 적용되는지 실증:
+- **48/48 real**: og-blog(4 슬러그×카드1~6) + og-apt(구버전서 ByteString 났던 서초자이르네·
+  목포-수창해뜨레 등 4×6) 전부 200 + fallback 아님. 응답헤더 raw 非ASCII 0.
+- **로그**: 수정 후 구간(01:14Z~, ee1d76a2 배포 00:40Z 뒤) ByteString **0건**. 로그에 보이던
+  ByteString 에러(og-blog/og-apt 대량)는 `group_by deploymentId`로 갈라보니 전부
+  **구버전 dpl_BwbYfaPp(f4eecf0d, 수정 전)** + 타임스탬프 00:40Z 이전. lookback 윈도우에 옛
+  배포가 남아 "아직 뜨는 것처럼" 보였을 뿐.
+- 교훈: 로그 에러는 결론 전에 **deploymentId로 귀속** + since를 fix 시점 이후로 잘라 확인.
+- 잔여: 구버전이 2h 내 소량 트래픽(10건, 전부 pre-fix). 크롤러 캐시 → 네이버/카톡 강제 재크롤 권장.
+
+---
+
 ## [OG 네이버 최적화 전수조사] 2026-07-19 — 오진 정정 + 실결함 2건 수정 (commit 4737c3bd)
 
 지시서 최우선 가설(og:image 상대경로 → "소스 노출")은 **오진**. claude.ai 가 egress 차단
