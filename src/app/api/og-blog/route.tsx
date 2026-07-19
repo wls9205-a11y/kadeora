@@ -95,19 +95,30 @@ function renderCover(post: BlogRow): React.ReactElement {
   const catKey = safeStr(post.category);
   const cat = catKey && OG_CAT[catKey] ? OG_CAT[catKey].label : '카더라';
   const sub = safeStr(post.sub_category);
-  const titleFS = title.length > 30 ? 36 : title.length > 22 ? 44 : title.length > 14 ? 56 : 68;
+  // 반응형 제목 크기 — 긴 한글 제목(40자+)도 3~4줄 안에 들어오도록 세분화.
+  const len = title.length;
+  const titleFS = len > 44 ? 30 : len > 36 ? 36 : len > 28 ? 42 : len > 20 ? 50 : len > 12 ? 60 : 70;
   return (
     <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: 56 }}>
-      <div style={{ display: 'flex', gap: 8 }}>
-        <div style={{ background: '#FAC775', color: '#1A1A18', fontSize: 22, fontWeight: 800, padding: '6px 16px', borderRadius: 999 }}>{cat}</div>
-        {sub && <div style={{ background: 'rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: 22, fontWeight: 700, padding: '6px 16px', borderRadius: 999 }}>{sub}</div>}
+      {/* 상단: 카테고리 배지(좌) + 브랜드 마크(우, 고정) */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <div style={{ background: '#FAC775', color: '#1A1A18', fontSize: 23, fontWeight: 800, padding: '7px 18px', borderRadius: 999 }}>{cat}</div>
+          {sub && <div style={{ background: 'rgba(255,255,255,0.14)', color: '#FFFFFF', fontSize: 22, fontWeight: 700, padding: '7px 16px', borderRadius: 999 }}>{sub}</div>}
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+          <div style={{ width: 26, height: 26, borderRadius: 7, background: '#FAC775' }} />
+          <div style={{ fontSize: 24, fontWeight: 900, color: '#FFFFFF', letterSpacing: -0.5 }}>카더라</div>
+        </div>
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-        <div style={{ width: 56, height: 4, background: '#FAC775' }} />
-        <div style={{ fontSize: titleFS, fontWeight: 900, color: '#FFFFFF', lineHeight: 1.15, letterSpacing: -1.5 }}>{title}</div>
+      {/* 제목 — 대비 강화용 그림자 */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div style={{ width: 60, height: 5, borderRadius: 3, background: '#FAC775' }} />
+        <div style={{ fontSize: titleFS, fontWeight: 900, color: '#FFFFFF', lineHeight: 1.18, letterSpacing: -1.5, textShadow: '0 2px 12px rgba(0,0,0,0.45)' }}>{title}</div>
       </div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'rgba(255,255,255,0.55)', fontSize: 18, fontWeight: 700 }}>
-        <span>카더라 · {fmtDate(post.published_at || post.created_at)}</span>
+      {/* 하단: 날짜 + 도메인 */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'rgba(255,255,255,0.58)', fontSize: 18, fontWeight: 700 }}>
+        <span>{fmtDate(post.published_at || post.created_at)}</span>
         <span>kadeora.app</span>
       </div>
     </div>
