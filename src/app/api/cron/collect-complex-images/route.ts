@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronAuth } from '@/lib/cron-auth';
+import { cleanScrapedAlt } from '@/lib/clean-image-alt';
 
 export const maxDuration = 300;
 export const runtime = 'nodejs';
@@ -105,7 +106,7 @@ async function handler(_req: NextRequest) {
       // updated_at 만 갱신 → selector 가 images IS NULL 조건이면 자연 재시도.
       if (!imgs.length){await (sb as any).from('apt_complex_profiles').update({updated_at:new Date().toISOString()}).eq('id',row.id);skipped++;return;}
       await (sb as any).from('apt_complex_profiles').update({
-        images:imgs.map(m=>({url:m.url,thumbnail:m.thumbnail,source:m.source,caption:m.title,collected_at:new Date().toISOString()})),
+        images:imgs.map(m=>({url:m.url,thumbnail:m.thumbnail,source:m.source,caption:cleanScrapedAlt(m.title,row.apt_name),collected_at:new Date().toISOString()})),
         updated_at:new Date().toISOString()
       }).eq('id',row.id);
       collected++;

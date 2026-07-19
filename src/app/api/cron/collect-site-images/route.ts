@@ -3,6 +3,7 @@ export const maxDuration = 300;
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronAuth } from '@/lib/cron-auth';
+import { cleanScrapedAlt } from '@/lib/clean-image-alt';
 
 const NAVER_CLIENT_ID = process.env.NAVER_CLIENT_ID;
 const NAVER_CLIENT_SECRET = process.env.NAVER_CLIENT_SECRET;
@@ -188,7 +189,7 @@ async function handler(_req: NextRequest) {
           url: img.url,
           thumbnail: img.thumbnail,
           source: img.source,
-          caption: img.title,
+          caption: cleanScrapedAlt(img.title, site.name),
           collected_at: new Date().toISOString(),
         }));
 

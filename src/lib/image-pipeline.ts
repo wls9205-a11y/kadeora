@@ -17,6 +17,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { hydrateImage, type HydrateResult } from '@/lib/image-hydrate';
+import { cleanScrapedAlt } from '@/lib/clean-image-alt';
 import { SITE_URL } from '@/lib/constants';
 
 const NAVER_CLIENT_ID = process.env.NAVER_CLIENT_ID || '';
@@ -197,7 +198,8 @@ export async function collectCandidates(
       if (candidates.some((c) => c.url === it.url)) continue;
       candidates.push({
         url: it.url,
-        alt: it.alt || post.title,
+        // 스크랩 title(it.alt)이 KB부동산 등 깨진 alt(undefined/중복/빈 단지명)면 post.title 로 대체
+        alt: cleanScrapedAlt(it.alt, post.title),
         source: 'naver',
       });
     }
@@ -341,7 +343,7 @@ export async function hydrateAndRecord(
         p_position: position,
         p_image_url: res.url,
         p_image_kind: 'storage_real',
-        p_alt_text: (cand.alt || post.title).slice(0, 200),
+        p_alt_text: cleanScrapedAlt(cand.alt, post.title),
         p_caption: (cand.caption || `출처: ${cand.source}`).slice(0, 200),
         p_storage_path: res.storagePath,
       });
