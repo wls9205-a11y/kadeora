@@ -95,9 +95,10 @@ function renderCover(post: BlogRow): React.ReactElement {
   const catKey = safeStr(post.category);
   const cat = catKey && OG_CAT[catKey] ? OG_CAT[catKey].label : '카더라';
   const sub = safeStr(post.sub_category);
-  // 반응형 제목 크기 — 긴 한글 제목(40자+)도 3~4줄 안에 들어오도록 세분화.
+  // 반응형 제목 크기 — 630×630 정방형(네이버 1:1 크롭 대응) 기준. 네이버 검색결과는 ~120px 로
+  // 축소되므로 제목이 프레임을 최대한 채우도록 상향. 긴 제목(48자+)도 4줄 안에 수용.
   const len = title.length;
-  const titleFS = len > 44 ? 30 : len > 36 ? 36 : len > 28 ? 42 : len > 20 ? 50 : len > 12 ? 60 : 70;
+  const titleFS = len > 48 ? 38 : len > 40 ? 44 : len > 32 ? 50 : len > 24 ? 58 : len > 14 ? 68 : 78;
   return (
     <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: 56 }}>
       {/* 상단: 카테고리 배지(좌) + 브랜드 마크(우, 고정) */}
@@ -111,10 +112,10 @@ function renderCover(post: BlogRow): React.ReactElement {
           <div style={{ fontSize: 24, fontWeight: 900, color: '#FFFFFF', letterSpacing: -0.5 }}>카더라</div>
         </div>
       </div>
-      {/* 제목 — 대비 강화용 그림자 */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-        <div style={{ width: 60, height: 5, borderRadius: 3, background: '#FAC775' }} />
-        <div style={{ fontSize: titleFS, fontWeight: 900, color: '#FFFFFF', lineHeight: 1.18, letterSpacing: -1.5, textShadow: '0 2px 12px rgba(0,0,0,0.45)' }}>{title}</div>
+      {/* 제목 — 남는 세로 공간을 채워 정중앙 배치(네이버 1:1 크롭 안전). 대비 강화용 그림자. */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 20, paddingTop: 24, paddingBottom: 24 }}>
+        <div style={{ width: 64, height: 6, borderRadius: 3, background: '#FAC775' }} />
+        <div style={{ fontSize: titleFS, fontWeight: 900, color: '#FFFFFF', lineHeight: 1.2, letterSpacing: -1.5, textShadow: '0 2px 12px rgba(0,0,0,0.45)' }}>{title}</div>
       </div>
       {/* 하단: 날짜 + 도메인 */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'rgba(255,255,255,0.58)', fontSize: 18, fontWeight: 700 }}>

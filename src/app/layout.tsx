@@ -73,9 +73,10 @@ export const metadata: Metadata = {
     'geo.placename': '대한민국',
     'geo.position': '35.1796;129.0756',
     'ICBM': '35.1796, 129.0756',
-    'og:image:alt': '카더라 — 부동산·주식 정보 플랫폼',
-    'og:image:width': '1200',
-    'og:image:height': '630',
+    // s264: 전역 og:image:width/height/alt 제거. 여기서 name="og:image:width"=1200 을 강제하면
+    // 페이지별 openGraph.images 가 내보내는 property="og:image:width"=630 (정방형 카드)과 충돌 →
+    // 네이버/페북이 landscape(1200×630) 로 기대해 정방형 이미지를 letterbox/오크롭. 치수는 각
+    // 페이지 openGraph.images 가 이미지별로 정확히 제공하므로 전역 강제는 불필요·유해.
   },
 };
 
