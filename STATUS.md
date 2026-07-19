@@ -1,3 +1,27 @@
+## [OG 네이버 최적화 전수조사] 2026-07-19 — 오진 정정 + 실결함 2건 수정 (commit 4737c3bd)
+
+지시서 최우선 가설(og:image 상대경로 → "소스 노출")은 **오진**. claude.ai 가 egress 차단
+(403 allowlist)으로 DB의 `og_cards.url`(100% 상대경로 `/api/og-blog?..`)만 관측했으나,
+CC 로컬 실렌더(egress 정상)로 실제 배포 HTML `View Source` 검증:
+
+- **og:image 는 모든 페이지 타입에서 이미 절대경로**. `generateMetadata` 가 `c.url.startsWith('http') ? c.url : ${SITE}${c.url}` 로 절대화(`SITE_URL=https://kadeora.app`). 실측:
+  blog=`https://kadeora.app/api/og-blog?..`(630×630), apt/complex=절대 실사진, apt/[id]=`${SITE_URL}` 프리픽스. → **상대경로 결함 없음**. "소스 노출"은 ByteString-era fallback(직전 `ee1d76a2`로 해결) 잔상으로 추정.
+- **네이버 1:1 크롭도 비이슈**: og-blog 는 이미 `SIDE=630` **630×630 정방형**, 제목 세로 중앙 밴드. 6-card 글(백필 후 100%)은 정방형 cover 가 첫 이미지(primary). 크롭 손실 없음.
+
+실제 결함 2건만 수정:
+1. **전역 og:image 치수 충돌** — `layout.tsx` `other` 의 `name="og:image:width"=1200/height=630/alt`
+   3줄 제거. 페이지별 openGraph.images 가 내보내는 `property="og:image:width"=630`(정방형)과
+   **모든 페이지에서 공존·충돌** → 크롤러가 landscape 로 기대해 정방형 카드 letterbox/오크롭 위험.
+   치수는 이미지별로 이미 정확 제공 → 전역 강제는 불필요·유해. (실측: 라이브 HTML 에 두 세트 공존 확인)
+2. **커버 가독성** — og-blog `renderCover`: 제목이 남는 세로공간 채워 정중앙(flex:1+center),
+   폰트 상향(30~70 → 38~78). 네이버 검색결과 ~120px 축소 실측(sharp 다운스케일)에서 제목 비중 상향.
+
+검증: blog/apt/apt-complex og:image 라이브 grep(전부 https://), og-blog card 1/2/6 실렌더 캡처
+(x-og-fallback none — ByteString 수정 유지), 120px 썸네일 다운스케일 캡처, tsc exit 0.
+(로컬 full build 는 .env.local 에 Supabase 키 부재로 prerender 단계만 실패 — 코드 컴파일 정상, Vercel 정상.)
+
+---
+
 ## [OG 전수조사] 2026-07-19 — ByteString 버그·OG 개선·og_cards 백필
 
 1. **IndexNow speedup 원복**: batch pg_cron `2-59/10`(10분) → `5,35`(30분). 드레인 완료(failed 0).
