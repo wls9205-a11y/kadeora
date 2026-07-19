@@ -1,3 +1,27 @@
+## [OG 전수조사] 2026-07-19 — ByteString 버그·OG 개선·og_cards 백필
+
+1. **IndexNow speedup 원복**: batch pg_cron `2-59/10`(10분) → `5,35`(30분). 드레인 완료(failed 0).
+2. **OG ByteString 버그 (최우선)** — `ee1d76a2`: `/api/og-blog` 등이 200 반환하지만 응답 헤더
+   `X-OG-Slug`에 한글 슬러그를 raw 로 넣어 `Cannot convert to ByteString (45908)` throw → catch →
+   **fallback 이미지(숨은 실패)**. 헤더는 ByteString(0-255)만 허용. 쿼리 파생 헤더값(slug/symbol/card)을
+   `encodeURIComponent`로 감쌈 — og-blog/og-apt/og-stock/og. 이미지 본문(satori) 한글은 정상, 헤더만.
+   실측 검증: 한글 슬러그 글 → fallback 헤더 사라지고 real 이미지 반환.
+3. **OG 개선** — `e075f554`: og-blog `renderCover`(공유 메인 카드) — 브랜드 마크(우상단 고정),
+   반응형 제목 7단계(44자+ 대응), 제목 그림자. before/after 실렌더 비교 완료.
+4. **og_cards 백필** — `3dfab7e3` + SQL(MCP): 발행글 26%(2,463)가 `og_cards='[]'`로 발행됨 —
+   **생성 코드가 아예 없었음**(6,926은 일회성 백필, 이후 전부 빈 채). 근본 수정:
+   - `src/lib/blog-og-cards.ts` `buildBlogOgCards(slug,title)` — 기존 6-card 구조 결정적 재현.
+   - `/api/cron/blog-og-cards` — 빈 og_cards 채우는 크론(신규글 대응) + `og_cards_updated_at` 기록.
+     pg_cron `blog_og_cards` (jobid 159, 매시 :47) 등록.
+   - SQL 백필: 2,463 전량 populated(has_cards 9,389, empty 0) + og_cards_updated_at 전량 채움(NULL 0,
+     기존 6,926은 published_at 프록시).
+5. **배너 최종본**: design D(항상고정 + "부동산 정보 공유방" + fixed z-[110]) 이미 라이브(`fe7324c1`).
+   할 일 없음 — MEMBER_COUNT 실값만 사용자 몫.
+
+DB 쓰기는 사용자 승인 하에 CC가 Supabase MCP `execute_sql`로 실행(IndexNow 리셋 + og_cards 백필 + pg_cron).
+
+---
+
 ## [P0 indexnow + P1 banner-D] 2026-07-18 — 전수조사 후 유일 미해결(IndexNow) 수정
 
 ### P0 — IndexNow 71일 조용한 실패 수정 (commit 003a3924)
