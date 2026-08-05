@@ -173,7 +173,7 @@ ${strategyText}
 
 ### 관련 정보
 
-- [청약 일정 확인 →](/apt/subscriptions)
+- [청약 일정 확인 →](/apt)
 - [카더라 블로그 →](/blog?category=apt)
 
 > 본 콘텐츠는 한국부동산원 청약홈 공공데이터 기반이며, 정확한 경쟁률과 청약 조건은 청약홈(applyhome.co.kr)에서 확인하세요. 투자 권유가 아닙니다.`;

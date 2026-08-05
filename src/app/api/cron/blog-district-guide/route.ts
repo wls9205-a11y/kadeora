@@ -258,7 +258,7 @@ function buildContent(
   parts.push('### 관련 정보');
   parts.push('');
   parts.push(`- [카더라 아파트 정보 →](/apt)`);
-  parts.push(`- [청약 정보 →](/apt/subscriptions)`);
+  parts.push(`- [청약 정보 →](/apt)`);
   parts.push(
     `- [${region} 아파트 실거래 →](${SITE_URL}/blog?category=apt&region=${encodeURIComponent(region)})`,
   );

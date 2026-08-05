@@ -868,7 +868,7 @@ function renderAptTop(apts: any[], region: string | null, sigungu: string | null
         <Link href={sigungu ? `/apt?region=${encodeURIComponent(region || '')}&sigungu=${encodeURIComponent(sigungu)}` : region ? `/apt?region=${encodeURIComponent(region)}` : '/apt'} style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)', textDecoration: 'none' }}>
           {sigungu ? `${sigungu} 전체` : region ? `${region} 전체` : '전체 현장 보기'} →
         </Link>
-        <Link href="/apt/subscription" style={{
+        <Link href={sigungu ? `/apt?region=${encodeURIComponent(region || '')}&sigungu=${encodeURIComponent(sigungu)}` : region ? `/apt?region=${encodeURIComponent(region)}` : '/apt'} style={{
           fontSize: 11, fontWeight: 600, padding: '5px 12px', borderRadius: 6,
           background: '#0F6E56', color: '#fff', textDecoration: 'none',
         }}>
@@ -958,7 +958,7 @@ function renderAptBottom(apts: any[], region: string | null, sigungu: string | n
         <Link href={region ? `/apt?region=${encodeURIComponent(region)}` : '/apt'} style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)', textDecoration: 'none' }}>
           {region ? `${region} 전체 현장` : '전체 현장 보기'} →
         </Link>
-        <Link href="/apt/subscription" style={{
+        <Link href={region ? `/apt?region=${encodeURIComponent(region)}` : '/apt'} style={{
           fontSize: 11, fontWeight: 600, padding: '5px 12px', borderRadius: 6,
           background: '#059669', color: '#fff', textDecoration: 'none',
         }}>

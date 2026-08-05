@@ -258,7 +258,7 @@ function buildContent(
   // Internal links
   parts.push('### 관련 정보');
   parts.push('');
-  parts.push(`- [청약 일정 →](${SITE_URL}/apt/subscriptions)`);
+  parts.push(`- [청약 일정 →](${SITE_URL}/apt)`);
   parts.push(`- [카더라 블로그 →](${SITE_URL}/blog?category=apt)`);
   parts.push('');
 

@@ -147,7 +147,7 @@ ${subscriptions.length > 0 ? `## 청약 접수 일정\n\n${label}에 접수가 �
 
 ## 관련 정보
 
-- [아파트 청약 일정 전체 보기](${SITE_URL}/apt/subscriptions)
+- [아파트 청약 일정 전체 보기](${SITE_URL}/apt)
 - [주식 시세 확인](${SITE_URL}/stock)
 - [블로그 더 보기](${SITE_URL}/blog)
 

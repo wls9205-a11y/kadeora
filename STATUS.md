@@ -1,3 +1,58 @@
+## [Phase 0] 2026-08-05 — naver 신디케이션 사망진단 + 색인현황 + 404분류 + 슬로우크론 완화
+
+### 1. naver_syndication 04-20 중단 — 원인 2건 확정 (복구는 자격증명 필요 — 미실행)
+- **naver-blog-content (적재 크론)**: `fc12668b`(04-12)에서 **의도적 제거** — Vercel Pro 크론 100개
+  한도 초과로 `blog-publish-queue + IndexNow` 대체 전략 채택. pg_cron/vercel.json 어디에도 등록 없음
+  (grep 3중 확인: cron.job 0건, vercel.json 0건, god-mode 관리자 수동트리거만 잔존). 04-20 이후 신규
+  행 0건은 이 의도적 폐기의 자연스러운 결과 — **버그 아님**.
+- **naver-cafe-publish (발행 크론)**: pg_cron 없이 vercel.json `0 9,21 * * *`로 지금도 정상 실행 중이나
+  `records_processed=0`이 매 실행 "success"로 기록(72회+ 연속 확인). 실제 원인: `oauth_tokens` 테이블에
+  `naver_cafe` 행이 0건 → `getValidAccessToken()`이 null 반환 → `oauth_not_configured`로 조용히 no-op.
+  cafe_pending 51건 / blog_pending 57건이 무기한 대기 중.
+  **자격증명은 실재함** — Vercel prod env에 `NAVER_CAFE_ACCESS_TOKEN`/`REFRESH_TOKEN`/`CLIENT_ID`/
+  `CLIENT_SECRET`/`ID`/`MENU_ID` 전부 등록(115일 전) 확인. 코드가 env 대신 DB(`oauth_tokens`)만 읽도록
+  리팩터된 이후 그 값들을 DB로 옮기는 단계가 누락된 것으로 추정.
+  **복구 미실행**: `vercel env pull`로 평문 시크릿을 읽어 DB에 INSERT하는 절차가 안전 classifier에
+  의해 차단됨(정상 동작) — 시크릿 노출 우회 시도 안 함. **사용자가 어드민 NaverPublishTab에서
+  재등록**하거나, 직접 `vercel env pull` 후 `oauth_tokens` upsert 필요.
+
+### 2. 네이버 색인 현황 — 조회 불가 확정 (자격증명 완전 부재)
+- `naver-sc-sync`(jobid 141, 매일 실행)가 72회+ 연속 `naver_sc_credentials_missing`로 실패.
+- `naver_sc_daily` 테이블 **완전히 비어있음**(max_date NULL) — 단 1회도 성공 적재된 적 없음.
+- `vercel env ls production` 확인: `NAVER_SC_CLIENT_ID`/`NAVER_SC_CLIENT_SECRET`/`NAVER_SC_PROPERTY_ID`
+  **전부 미등록**(`NAVER_CLIENT_ID`/`SECRET`은 존재하나 코드가 요구하는 변수명과 다름 — 별개 항목).
+  → Search Advisor Open API 자체를 호출할 자격증명이 없어 현재 색인 수 조회 불가. 네이버 서치어드바이저
+  사이트 등록 + Open API 키 발급이 선행되어야 함(사용자 액션).
+
+### 3. 404 분류 (24h, Vercel runtime logs, top requestPath 1211종)
+- **봇/스테일크롤 (다수, 조치 없음)**: `/apt/complex/{"url":...,"source":"naver",...}` 계열
+  (137/52/21/... 건) — DB(`apt_sites`/`apt_complex_profiles`) 실측 결과 현재 데이터에 이런 JSON
+  오염 0건, edge-middleware가 `cache=HIT`으로 응답 — **과거에 이미 고쳐진 버그의 잔여 크롤 트래픽**.
+  현재 코드가 재생산하지 않음 확인 → 방치.
+- **내부링크 깨짐 (수정 완료, 아래 참조)**: `/apt/subscription`(단수, id 없음) 14건 — 페이지 자체가
+  존재하지 않는데(`/apt/[id]`만 존재) `BlogMentionCard.tsx` 2곳이 하드코딩 링크.
+- **기타 (조치 안 함, 범위 밖)**: `/apt/null`, `/null`, `/daily/전국` 등 소량 — 개별 추적 필요하나
+  이번 세션 범위(내부링크 카테고리) 밖.
+
+**수정**: `BlogMentionCard.tsx` 두 곳의 "청약 일정 보기" CTA `href="/apt/subscription"` →
+형제 링크와 동일한 region-aware `/apt` 링크로 교체(사이트에 청약 전용 페이지가 없고 `/apt`가
+청약·미분양·재개발 통합 허브임을 확인). 동일 원인으로 신규 발행 블로그 글에 계속 주입되던
+`/apt/subscriptions`(복수, 이 역시 미존재 경로) 링크를 생성하는 6개 콘텐츠 크론
+(`blog-life-guide`×6, `blog-competition-rate`, `blog-comparison`, `blog-builder-analysis`,
+`blog-district-guide`, `blog-invest-calendar`)도 `/apt`로 정정 — 향후 생성 글부터 반영
+(기존 발행 글 `blog_posts` 데이터는 미수정, 지시사항 준수).
+
+### 4. 슬로우 크론 완화 (pg_cron, 삭제 없음)
+- `replace_blog_body_og`(jobid 125): 평균 4.9s/최대 12s, `*/15 * * * *`(96회/일) → **`*/60 * * * *`**(24회/일).
+- `refresh-mv-seo-portal-stats`(jobid 53): 평균 9.5s/최대 12.5s, `40 */2 * * *`(12회/일) → **`40 */6 * * *`**(4회/일).
+- 검증: `cron.job` 재조회로 두 schedule 반영 확인.
+
+### 검증
+- `npx tsc --noEmit`: 수정 파일 7개 관련 에러 0건 (기존 미설치 패키지 에러 14건은 무관 pre-existing).
+- `git diff --stat`: 7 files changed, 13(+)/13(-) — 지시 범위 내 최소 변경.
+
+---
+
 ## [ByteString 종결 실증] 2026-07-19 — 한글 슬러그 55%(5,149건) 경로 차단 확인
 
 사용자 DB 교차: 발행글 9,389 중 한글 슬러그 5,149(54.8%). 이 전부에 아침 수정

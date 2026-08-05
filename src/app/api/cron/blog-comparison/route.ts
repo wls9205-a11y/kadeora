@@ -173,7 +173,7 @@ function buildAptContent(a: AptSideStats, b: AptSideStats): string {
   parts.push('### 관련 정보');
   parts.push('');
   parts.push(`- [아파트 정보 보기 →](${SITE_URL}/apt)`);
-  parts.push(`- [청약 정보 보기 →](${SITE_URL}/apt/subscriptions)`);
+  parts.push(`- [청약 정보 보기 →](${SITE_URL}/apt)`);
   parts.push('');
 
   parts.push('---');
