@@ -10,8 +10,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
 import { setOAuthToken, getValidAccessToken, listOAuthProviders, deleteOAuthProvider } from '@/lib/naver/oauth-store';
-import { postCafeArticle } from '@/lib/naver/cafe-client';
-import { SITE_URL } from '@/lib/constants';
 
 export const dynamic = 'force-dynamic';
 
@@ -65,35 +63,13 @@ export async function PUT(req: NextRequest) {
   const auth = await requireAdmin(); if ('error' in auth) return auth.error;
   let body: any;
   try { body = await req.json(); } catch { return NextResponse.json({ error: 'invalid_json' }, { status: 400 }); }
-  const { provider, action, testSubject, testContent } = body;
+  const { provider, action } = body;
   if (!provider) return NextResponse.json({ error: 'provider_required' }, { status: 400 });
 
   if (action === 'refresh') {
     // 강제 갱신
     const result = await getValidAccessToken(provider);
     return NextResponse.json({ ok: !!result, ...result });
-  }
-
-  if (action === 'test_post') {
-    // 테스트 발행
-    const tokenInfo = await getValidAccessToken(provider);
-    if (!tokenInfo) return NextResponse.json({ error: 'oauth_not_configured' }, { status: 400 });
-    if (provider !== 'naver_cafe') {
-      return NextResponse.json({ error: 'test_post_only_for_naver_cafe' }, { status: 400 });
-    }
-
-    const cafeId = String(tokenInfo.meta.cafeId || '');
-    const menuId = String(tokenInfo.meta.menuId || '');
-    if (!cafeId || !menuId) return NextResponse.json({ error: 'cafe_or_menu_id_missing' }, { status: 400 });
-
-    const subject = testSubject || `[테스트] 카더라 카페 발행 테스트 ${new Date().toLocaleString('ko-KR')}`;
-    const content = testContent || `<p>안녕하세요. 카더라 자동 발행 한글 테스트입니다.</p><p>이모지: 🏠 📊 💰 — 가나다라마바사</p><p><a href="${SITE_URL}">카더라 (kadeora.app)</a></p>`;
-
-    const result = await postCafeArticle({
-      accessToken: tokenInfo.token,
-      cafeId, menuId, subject, content,
-    });
-    return NextResponse.json(result);
   }
 
   return NextResponse.json({ error: 'unknown_action' }, { status: 400 });

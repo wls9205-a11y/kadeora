@@ -1,3 +1,32 @@
+## [Phase 0 후속] 2026-08-05 — naver-cafe-publish 코드 삭제 (Rule #19 3중 확인 완료)
+
+이전 Phase 0 진단([Phase 0] 항목 참조)에서 `naver-cafe-publish`가 oauth_tokens 미시딩으로
+영구 no-op임을 확인 후, 사용자 지시로 관련 코드 전체 삭제.
+
+**Rule #19 3중 확인**: pg_cron 등록 0건(vercel.json 크론으로만 존재) / cron_logs 30일 36회
+실행(전부 oauth_not_configured no-op) / src grep로 호출부 전량 확인 후 진행.
+
+**삭제**:
+- `src/app/api/cron/naver-cafe-publish/route.ts` (크론 라우트 본체)
+- `src/lib/naver/cafe-client.ts` (`postCafeArticle` — 삭제 후 사용처 0건 확인)
+- `src/lib/naver/cafe-html.ts` (`toNaverCafeHtml`/`appendSourceBox` — 사용처 0건 확인)
+- `vercel.json` 크론 엔트리 1건 (100→**99개**)
+- `god-mode/route.ts` 수동 트리거 목록의 항목 1줄
+
+**부분 수정 (유지 범위 명확화)**: `admin/naver-oauth/route.ts`는 provider-agnostic 공용 OAuth
+관리 라우트(GET/POST/PUT refresh/DELETE)라 대부분 유지, `action==='test_post'` 분기(naver_cafe
+전용 테스트발행 + `postCafeArticle` import)만 제거. `lib/naver/oauth-store.ts`는 공용 모듈이라
+미변경.
+
+**미변경 (지시 범위 밖)**: `naver_syndication`/`oauth_tokens` 테이블 데이터, `admin/naver-syndication/*`
+큐 조회 라우트(별개 기능).
+
+**검증**: 잔여 grep(`naver-cafe-publish|cafe-client|cafe-html|postCafeArticle|toNaverCafeHtml|
+appendSourceBox`) 0건. `npx tsc --noEmit` 관련 에러 0(기존 미설치 패키지 에러 14건은 무관).
+vercel.json 크론 100→99개.
+
+---
+
 ## [Phase 0] 2026-08-05 — naver 신디케이션 사망진단 + 색인현황 + 404분류 + 슬로우크론 완화
 
 ### 1. naver_syndication 04-20 중단 — 원인 2건 확정 (복구는 자격증명 필요 — 미실행)

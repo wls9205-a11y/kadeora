@@ -393,10 +393,6 @@
       "schedule": "10 20 * * 2-6"
     },
     {
-      "path": "/api/cron/naver-cafe-publish",
-      "schedule": "0 9,21 * * *"
-    },
-    {
       "path": "/api/cron/apt-summary-gen",
       "schedule": "10 * * * *"
     }

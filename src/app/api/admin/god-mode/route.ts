@@ -152,7 +152,6 @@ const CRON_GROUPS = {
     '/api/cron/blog-upcoming-projects',
     '/api/cron/blog-cleanup-padding',
     '/api/cron/blog-data-update',
-    '/api/cron/naver-cafe-publish',
     '/api/cron/seed-chat',
     '/api/cron/seed-comments',
     // 세션 113 추가 — 주식 마스터플랜
