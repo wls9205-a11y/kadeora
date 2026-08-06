@@ -25,8 +25,6 @@ type Props = {
   regions: RegionCount[];
   /** 실제로 적용된 지역 ('전국' 포함) */
   current: string;
-  /** 전국 칩에 붙일 총 카드 수 */
-  totalCards: number;
 };
 
 const CHIP_BASE: React.CSSProperties = {
@@ -47,7 +45,7 @@ const CHIP_BASE: React.CSSProperties = {
   lineHeight: 1.25,
 };
 
-export default function RegionChips({ regions, current, totalCards }: Props) {
+export default function RegionChips({ regions, current }: Props) {
   // RPC 가 못 준 지역(공고 이력이 아예 없는 시·도)도 칩은 나와야 한다 — 0 으로 채운다.
   const byName = new Map(regions.map((r) => [r.region, r]));
   const full: RegionCount[] = KR_REGIONS_17.map(
@@ -99,15 +97,16 @@ export default function RegionChips({ regions, current, totalCards }: Props) {
           scrollbarWidth: 'none',
         }}
       >
-        <RegionChip name="전국" count={totalCards} active={current === '전국'} hasLive />
+        {/* 전국 = 시·도 live 의 합. 헤더의 '접수중 N건' 과 같은 값이라 읽는 사람이
+            경기1 + 부산1 + 세종1 = 전국3 으로 검산할 수 있다. */}
+        <RegionChip name="전국" count={liveTotal} active={current === '전국'} />
         {full.map((r) => (
           <RegionChip
             key={r.region}
             name={r.region}
-            count={r.live > 0 ? r.live : r.recent}
+            count={r.live}
             active={current === r.region}
-            hasLive={r.live > 0}
-            dim={r.live === 0 && r.recent === 0}
+            dim={r.live === 0}
           />
         ))}
       </div>
@@ -115,17 +114,21 @@ export default function RegionChips({ regions, current, totalCards }: Props) {
   );
 }
 
+/**
+ * 숫자 슬롯에는 '접수중(live)' 하나만 넣는다.
+ * live 와 recent 를 같은 자리에 색만 바꿔 넣었더니 '인천 12'(최근 60일)가
+ * '경기 1'(접수중)보다 많아 보이는 오독이 생겼다. 색이 의미를 다 짊어지면 안 된다.
+ * recent 는 정렬 순서에만 쓰고 화면에는 내보내지 않는다.
+ */
 function RegionChip({
   name,
   count,
   active,
-  hasLive,
   dim = false,
 }: {
   name: string;
   count: number;
   active: boolean;
-  hasLive: boolean;
   dim?: boolean;
 }) {
   const href = name === '전국' ? '/apt' : `/apt?region=${encodeURIComponent(name)}`;
@@ -150,30 +153,21 @@ function RegionChip({
       href={href}
       onClick={() => setStoredRegion(name)}
       aria-current={active ? 'true' : undefined}
-      aria-label={
-        count > 0
-          ? `${name} 청약 ${count}건`
-          : `${name} 진행 중인 청약 없음`
-      }
+      aria-label={count > 0 ? `${name} 접수중 ${count}건` : `${name} 접수중인 청약 없음`}
       style={style}
       scroll={false}
     >
       <span style={{ fontSize: 12.5, fontWeight: active ? 700 : 600 }}>{name}</span>
       <span
+        aria-hidden
         style={{
           fontSize: 10.5,
           fontWeight: 700,
-          color: active
-            ? 'var(--bg-base, #050a18)'
-            : hasLive
-              ? '#f87171'
-              : dim
-                ? 'var(--text-disabled, #334466)'
-                : 'var(--text-tertiary, #8ba3c0)',
+          color: active ? 'var(--bg-base, #050a18)' : '#f87171',
           opacity: active ? 0.75 : 1,
         }}
       >
-        {count > 0 ? count : '–'}
+        {count > 0 ? count : ' '}
       </span>
     </Link>
   );

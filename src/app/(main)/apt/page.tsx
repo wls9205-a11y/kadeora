@@ -93,7 +93,7 @@ export default async function AptPage({
       {isAutoRegion && <RegionAutoSelect />}
 
       {/* 지역 선택 — 인라인 칩. 페이지 이동 없이 목록만 갱신된다. */}
-      <RegionChips regions={hub.regions} current={hub.region} totalCards={hub.counts.cards} />
+      <RegionChips regions={hub.regions} current={hub.region} />
 
       {hub.region_fallback ? (
         <p
