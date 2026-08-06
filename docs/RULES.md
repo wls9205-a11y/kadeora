@@ -92,6 +92,12 @@
 - **#99** Cross-section unified carousel RPC 응답 schema 통일 의무 — 여러 도메인 섹션 (미분양/청약/재개발/Fresh/Score 등) 을 하나의 carousel 에 합치는 RPC 는 모든 섹션이 공통 평탄 필드를 갖도록 통일 (`id`, `section`, `title`, `region`, `sigungu`, `meta`, `image_url`, `href`, `badge_label`, `badge_color`, `tier`, optional `empty`). data wrapper / nested object / per-section 다른 컬럼명 금지. 클라이언트가 section 별 분기 없이 단일 카드 컴포넌트로 렌더 가능해야 함. DISTINCT id 보장 (cross-section 중복 방지). placeholder 가 필요한 슬롯은 `empty: true` 로 표시.
 - **#100** 청약 데이터 fetch 시 `rcept_endde >= CURRENT_DATE` active filter 필수 — 마감된 청약을 "신규" 라벨로 노출하면 사용자 신뢰도 회복 불가. RPC / view / page-level fetch 모두 active 필터 적용 (`get_apt_fresh_cascade` 는 s265_a2 에서 보강). 6년 전 (예: 2020) 청약이 신규 carousel 에 떠 있는 회귀가 발견되면 신뢰성 P0 — 즉시 RPC 수정 + filter 적용.
 
+## 청약 퍼스트 (s273 추가)
+- **#101** 청약 상태 판정은 `src/lib/apt/subscription-status.ts` 단일 정의 — 페이지/컴포넌트에서 `rcept_endde >= today` 같은 날짜 비교 직접 작성 금지. 상태 7종(`open`/`upcoming`/`scheduled`/`announced_wait`/`contract`/`leftover`/`closed`)과 정렬 가중치(open 0 → upcoming 1 → announced_wait 2 → contract 3 → scheduled 4 → leftover 5 → closed 6)를 함수로만 얻을 것. **SQL 쪽 미러**는 `get_apt_subscription_hub` 안의 CASE — 한쪽을 고치면 반드시 양쪽 동기화. 날짜 비교는 `Date` 객체가 아니라 `'YYYY-MM-DD'` 문자열 사전순으로 (Vercel UTC / 로컬 KST 하루 밀림 방지).
+- **#102** 단지명 표시는 `formatComplexName(region, name)` 경유 — `` `${region} ${name}` `` 직접 조합 금지. `region_nm='세종'` + `house_nm='세종 우미 린 …'` 이 "세종 세종 우미 린" 으로 찍히던 회귀(s273). 광역시/도 풀네임↔축약 별칭까지 양방향 비교한다 ('경상남도'의 축약은 '경상'이 아니라 '경남').
+- **#103** `blog_posts.metadata.apt_id` = `apt_subscriptions.id` 규약. /apt '관련 청약 분석'이 이 키로 조회. 기입은 pg_cron `kadeora-series-autopublish`(job 160 → `fn_series_autopublish_tick()`)가 발행 시점에 자동, 소급은 `scripts/backfill-blog-apt-id.mjs`. 매칭은 **제목이 공고명을 통째로 포함**하는 strict 매칭만 — 느슨한 매칭은 '힐스테이트 아이코닉' → 무관한 힐스테이트 140건 오매핑을 만든다. 못 찾으면 NULL 로 둔다. 기입은 `metadata` 병합만, 본문/발행상태 불변 (Rule #76).
+- **#104** `export const revalidate` 는 리터럴만 — import 한 상수를 쓰면 Next segment config 정적 분석이 `Unknown identifier` 로 빌드를 깬다. `searchParams` 를 읽는 라우트는 dynamic 으로 강등돼 page-level revalidate 가 무력화되므로, 실제 ISR 은 데이터 레이어의 `unstable_cache({ revalidate })` 로 건다 (s273 /apt 패턴).
+
 ## 워크플로
 - **#11** `docs/STATUS.md`는 매 세션 prepend + commit/push 필수
 - 두 PC 동시 작업: `git stash && git pull --rebase origin main && git stash pop` 의무

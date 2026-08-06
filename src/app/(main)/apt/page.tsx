@@ -1,18 +1,39 @@
-// s269d V2: /apt 통합 피드. Hero (마감임박 청약 top 1) + 2-col grid.
-// Architecture Rule #66: force-dynamic — SSG empty cache 영구화 회피.
+// s273 — /apt 청약 퍼스트 재설계.
+//
+// 구성: ① SubscriptionTimeline 히어로 ② 도구칩 4종 ③ 청약 카드 리스트
+//       ④ 이번 주 청약 결과 ⑤ 관련 블로그 분석
+//
+// 데이터는 get_apt_subscription_hub 단일 RPC 하나로 끝낸다 (Architecture Rule #49).
+// 기존 3-RPC Promise.all (hero/feed/stats) 을 대체.
+//
+// 캐시: ISR 900초. 다만 이 라우트는 searchParams(region) 를 읽어 Next 15 가
+// dynamic 으로 강등시키므로 page-level revalidate 만으로는 실제 캐시가 안 걸린다.
+// 그래서 데이터 레이어(lib/apt/hub.ts)에서 unstable_cache 로 900초를 직접 건다.
+// 이 조합이 Rule #66 (빈 응답이 SSG 캐시에 영구화되는 회귀) 도 같이 막는다 —
+// 결과가 비면 캐시 경로를 건너뛰고 매 요청 재시도한다.
+//
 // Legacy: src/_legacy/s269/apt_page_v0.tsx
 
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { SITE_URL } from '@/lib/constants';
-import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { getAptHub } from '@/lib/apt/hub';
+import { getRelatedBlogs } from '@/lib/apt/related-blogs';
+import { buildSubscriptionEvents, buildSubscriptionItemList } from '@/lib/apt/subscription-schema';
 import RegionAutoSelect from '@/components/apt/RegionAutoSelect';
-import AptHeroCard, { type HeroData } from '@/components/apt/AptHeroCard';
-import AptRecentFeed, { type FeedStats } from '@/components/apt/AptRecentFeed';
-import type { FeedItem } from '@/components/apt/AptFeedCard';
+import SubscriptionTimeline from '@/components/apt/SubscriptionTimeline';
+import SubscriptionCard from '@/components/apt/SubscriptionCard';
+import SubscriptionResults from '@/components/apt/SubscriptionResults';
+import AptToolChips from '@/components/apt/AptToolChips';
+import AptRelatedBlogs from '@/components/apt/AptRelatedBlogs';
+import EmptyState from '@/components/ui/EmptyState';
 
-export const dynamic = 'force-dynamic';
-export const maxDuration = 10;
+// Next 는 segment config 를 정적 분석하므로 리터럴이어야 한다 (import 식별자 불가).
+// lib/apt/hub.ts 의 APT_HUB_REVALIDATE_SECONDS 와 같은 값으로 유지할 것.
+export const revalidate = 900;
+export const maxDuration = 15;
+
+const BASE_TITLE = '전국 아파트 청약 일정·경쟁률 — 오늘의 접수중 단지';
 
 export async function generateMetadata({
   searchParams,
@@ -20,57 +41,31 @@ export async function generateMetadata({
   searchParams: Promise<{ region?: string }>;
 }): Promise<Metadata> {
   const sp = await searchParams;
-  const regionLabel = sp.region ?? '전국';
-  const baseTitle = sp.region
-    ? `${regionLabel} 부동산 — 청약·미분양·재개발`
-    : '아파트 청약·미분양·재개발';
+  const regionLabel = sp.region?.trim() || '전국';
+  const title = sp.region
+    ? `${regionLabel} 아파트 청약 일정·경쟁률 — 오늘의 접수중 단지`
+    : BASE_TITLE;
+  const description =
+    `${regionLabel} 아파트 청약 접수 일정과 경쟁률을 한 화면에. ` +
+    '접수중·접수임박 단지를 D-day 순으로 정리하고, 마감된 단지는 1순위 경쟁률과 가점컷까지 확인하세요.';
+
   return {
-    title: baseTitle,
-    description: `${regionLabel} 청약·미분양·재개발 최근 등록 단지를 한 흐름으로. 마감임박 단지 우선 노출.`,
+    title,
+    description,
     alternates: {
       canonical: sp.region
         ? `${SITE_URL}/apt?region=${encodeURIComponent(sp.region)}`
         : `${SITE_URL}/apt`,
     },
     openGraph: {
-      title: baseTitle, siteName: '카더라', locale: 'ko_KR', type: 'website',
-      url: `${SITE_URL}/apt`,
+      title,
+      description,
+      siteName: '카더라',
+      locale: 'ko_KR',
+      type: 'website',
+      url: sp.region ? `${SITE_URL}/apt?region=${encodeURIComponent(sp.region)}` : `${SITE_URL}/apt`,
     },
   };
-}
-
-async function fetchPageData(region: string): Promise<{
-  hero: HeroData | null;
-  items: FeedItem[];
-  stats: FeedStats | null;
-}> {
-  const sb = getSupabaseAdmin();
-  try {
-    const [heroRes, feedRes, statsRes] = await Promise.all([
-      (sb as any).rpc('get_apt_hero_pick', { p_region: region }),
-      (sb as any).rpc('get_apt_recent_feed_v2', {
-        p_region: region,
-        p_category: 'all',
-        p_limit: 20,
-        p_cursor: null,
-        p_cursor_id: null,
-      }),
-      (sb as any).rpc('get_apt_feed_stats', { p_region: region }),
-    ]);
-    if (heroRes?.error) console.error('[apt/hero] error:', JSON.stringify(heroRes.error));
-    if (feedRes?.error) console.error('[apt/feed] error:', JSON.stringify(feedRes.error));
-    if (statsRes?.error) console.error('[apt/stats] error:', JSON.stringify(statsRes.error));
-    const hero = (heroRes?.data && typeof heroRes.data === 'object') ? (heroRes.data as HeroData) : null;
-    const heroId = (hero as any)?.id as string | undefined;
-    const rawItems = Array.isArray(feedRes?.data) ? (feedRes.data as FeedItem[]) : [];
-    const items = heroId ? rawItems.filter(it => it.id !== heroId) : rawItems;
-    const stats = (statsRes?.data && typeof statsRes.data === 'object') ? (statsRes.data as FeedStats) : null;
-    console.log('[apt/page] region=' + region + ' hero=' + (hero ? 'yes' : 'no') + ' items=' + items.length + ' stats=' + (stats ? 'yes' : 'no'));
-    return { hero, items, stats };
-  } catch (e: any) {
-    console.error('[apt/page] caught:', e?.message ?? String(e));
-    return { hero: null, items: [], stats: null };
-  }
 }
 
 export default async function AptPage({
@@ -81,66 +76,117 @@ export default async function AptPage({
   const sp = (await searchParams) || {};
   const region = sp.region?.trim() || '전국';
   const isAutoRegion = !sp.region;
-  const { hero, items, stats } = await fetchPageData(region);
+
+  const hub = await getAptHub(region);
+
+  // 관련 블로그는 지금 노출 중인 단지 기준으로 뽑는다 (metadata.apt_id 매핑, s273 규약)
+  const visibleIds = [...hub.cards, ...hub.results].map((it) => it.id);
+  const relatedBlogs = await getRelatedBlogs(visibleIds);
+
+  const events = buildSubscriptionEvents(hub.cards);
+  const itemList = hub.cards.length > 0 ? buildSubscriptionItemList(hub.cards, hub.region) : null;
 
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: '8px 6px 24px' }}>
-      <h1 className="sr-only">{region} 아파트 — 청약 / 미분양 / 재개발</h1>
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: '8px 6px 28px' }}>
+      <h1 className="sr-only">{hub.region} 아파트 청약 일정 · 경쟁률</h1>
 
       {isAutoRegion && <RegionAutoSelect />}
 
-      <div style={{
-        position: 'sticky', top: 44, zIndex: 10,
-        padding: '8px 6px', margin: '0 -6px 4px',
-        background: 'var(--bg-surface-translucent, rgba(255,255,255,0.92))',
-        backdropFilter: 'blur(8px)',
-        borderBottom: '1px solid var(--border-base, #E5E7EB)',
-        fontSize: 13,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      }}>
-        <span style={{ fontWeight: 500 }}>📍 {region}</span>
-        <Link href="/apt/region" style={{
-          fontSize: 11.5, color: 'var(--text-secondary, #6B7280)', textDecoration: 'none',
-        }}>지역 변경 →</Link>
+      {/* 지역 바 */}
+      <div
+        style={{
+          position: 'sticky',
+          top: 44,
+          zIndex: 10,
+          padding: '8px 6px',
+          margin: '0 -6px 10px',
+          background: 'var(--bg-surface-translucent, rgba(255,255,255,0.92))',
+          backdropFilter: 'blur(8px)',
+          borderBottom: '1px solid var(--border-base, #e5e7eb)',
+          fontSize: 13,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
+        <span style={{ fontWeight: 500 }}>📍 {hub.region}</span>
+        <Link
+          href="/apt/region"
+          style={{ fontSize: 11.5, color: 'var(--text-secondary, #6b7280)', textDecoration: 'none' }}
+        >
+          지역 변경 →
+        </Link>
       </div>
 
-      {hero && (
-        <div style={{ padding: '0 6px' }}>
-          <AptHeroCard data={hero} />
-        </div>
-      )}
+      {hub.region_fallback ? (
+        <p
+          style={{
+            margin: '0 6px 12px',
+            padding: '7px 10px',
+            borderRadius: 6,
+            background: 'var(--bg-elevated, #f9fafb)',
+            border: '1px solid var(--border-base, #e5e7eb)',
+            fontSize: 11.5,
+            color: 'var(--text-secondary, #6b7280)',
+          }}
+        >
+          {hub.requested_region}에 진행 예정인 청약이 없어 전국 일정을 보여드립니다.
+        </p>
+      ) : null}
 
-      <AptRecentFeed
-        initialItems={items}
-        region={region}
-        stats={stats ?? undefined}
-      />
+      {/* ① 청약 타임라인 히어로 */}
+      <SubscriptionTimeline items={hub.timeline} region={hub.region} />
 
-      <section style={{ marginTop: 24, padding: '0 6px' }}>
-        <h2 style={{ fontSize: 14, fontWeight: 500, margin: '0 0 10px' }}>도구</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
-          {[
-            { href: '/apt/map',      label: '지도',      icon: '🗺️' },
-            { href: '/apt/diagnose', label: '청약 진단', icon: '🏥' },
-            { href: '/apt/compare',  label: '단지 비교', icon: '⚖️' },
-            { href: '/apt/search',   label: '통합 검색', icon: '🔍' },
-          ].map(t => (
-            <Link key={t.href} href={t.href} style={{
-              display: 'flex', alignItems: 'center', gap: 8,
-              padding: '12px 14px',
-              border: '0.5px solid var(--border-base, #E5E7EB)',
-              borderRadius: 8,
-              background: 'var(--bg-surface, #FFFFFF)',
-              color: 'var(--text-primary, #111827)',
-              textDecoration: 'none',
-              fontSize: 13, fontWeight: 500,
-            }}>
-              <span style={{ fontSize: 18 }}>{t.icon}</span>
-              {t.label}
-            </Link>
-          ))}
+      {/* ② 도구 칩 — 데이터가 0건인 날에도 항상 노출 */}
+      <AptToolChips />
+
+      {/* ③ 청약 카드 리스트 */}
+      <section style={{ padding: '0 6px' }} aria-labelledby="apt-cards-heading">
+        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 10 }}>
+          <h2 id="apt-cards-heading" style={{ fontSize: 15, fontWeight: 700, margin: 0 }}>
+            청약
+          </h2>
+          <span style={{ fontSize: 11, color: 'var(--text-tertiary, #9ca3af)' }}>
+            상태 → 마감 임박 순
+          </span>
         </div>
+
+        {hub.cards.length > 0 ? (
+          <div style={{ display: 'grid', gap: 9 }}>
+            {hub.cards.map((it) => (
+              <SubscriptionCard key={it.id} item={it} />
+            ))}
+          </div>
+        ) : (
+          <EmptyState
+            icon="🏗️"
+            title="지금 접수중인 청약이 없습니다"
+            description="새 공고가 뜨면 이 자리에 바로 올라옵니다. 위 도구로 미리 가점을 확인해 두세요."
+            cta={{ label: '청약 가점 계산기 열기', href: '/apt/diagnose' }}
+          />
+        )}
       </section>
+
+      {/* ④ 이번 주 청약 결과 */}
+      <SubscriptionResults items={hub.results} />
+
+      {/* ⑤ 관련 블로그 분석 */}
+      <AptRelatedBlogs posts={relatedBlogs} />
+
+      {/* SEO: 접수중/예정 단지 Event + ItemList */}
+      {events.map((ev, i) => (
+        <script
+          key={`apt-event-${i}`}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(ev) }}
+        />
+      ))}
+      {itemList ? (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(itemList) }}
+        />
+      ) : null}
     </div>
   );
 }

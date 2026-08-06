@@ -1,3 +1,53 @@
+### s273-apt — /apt 청약 퍼스트 재설계 (2026-08-06)
+**컨셉:** /apt 를 "청약 먼저" 화면으로 재구성. 통합 피드(청약/미분양/재개발 혼재) → 청약 단독 흐름 + 도구 진입 + 결과/분석 연결.
+
+**구조 (5블록):**
+① `SubscriptionTimeline` 히어로 — 상태 배지 + D-day, 가로 스크롤 12칸
+② `AptToolChips` 4종 — 청약 진단 / 가점 계산기 / 지도 / 단지 비교 (데이터 0건인 날에도 항상 노출)
+③ `SubscriptionCard` 리스트 — 상태 → D-day 정렬. 단지명·지역·세대수·평당 분양가·1순위 접수일·배지·마감 후 경쟁률/가점컷
+④ `SubscriptionResults` — 최근 7일 마감 단지
+⑤ `AptRelatedBlogs` — `metadata.apt_id` 매핑 기반 청약 분석글
+
+**RPC:** `get_apt_subscription_hub(p_region)` 단일 진입 (Rule #49). 타임라인+카드+결과 3블록 jsonb.
+- SECURITY INVOKER + `SET search_path = public, pg_temp` (#56), PUBLIC/anon/authenticated REVOKE 후 명시 GRANT (#63/#95)
+- 지역 0건 시 전국 cascade + `region_fallback` 플래그 (#97) — 제주 요청 → 전국 반환 검증
+- 기존 3-RPC (`get_apt_hero_pick` + `get_apt_recent_feed_v2` + `get_apt_feed_stats`) Promise.all 대체
+
+**상태 유틸:** `src/lib/apt/subscription-status.ts` 신설 (단위 테스트 39 케이스).
+- 7종: open / upcoming(접수 7일 전) / scheduled / announced_wait / contract / leftover / closed
+- 정렬 가중치: open 0 → upcoming 1 → announced_wait 2 → contract 3 → scheduled 4 → leftover 5 → closed 6
+- 날짜 비교는 `'YYYY-MM-DD'` 문자열 사전순 (Date 객체 쓰면 Vercel UTC / 로컬 KST 하루 밀림)
+- 특별공급 시작일이 1순위보다 이르면 그쪽을 실질 접수 개시일로 사용
+
+**버그 fix — "세종 세종 우미린":** `formatComplexName(region, name)` 도입. `region_nm='세종'` + `house_nm='세종 우미 린 …'` 중복 prefix 제거. 광역시/도 풀네임↔축약 별칭 양방향 비교 ('경상남도'의 축약은 '경상'이 아니라 '경남').
+
+**알림 CTA:** 카드 인라인 `🔔 알림받기`. 로그인 → `POST /api/apt/interest` (기존 관심단지 시스템), 비로그인 → 카카오 가입 모달 `source=apt_sub_card`. 모달 CTA 는 Next `<Link>` — sendBeacon flush 안전 (#96).
+
+**블로그 매핑 (신규 규약):** `blog_posts.metadata.apt_id` = `apt_subscriptions.id`
+- `fn_blog_match_apt_id(title)` — 제목이 공고명을 통째로 포함하는 **strict** 매칭만
+- `fn_blog_assign_apt_id(post_id)` — metadata 병합만, 본문/발행상태 불변 (#76)
+- pg_cron job 160 `kadeora-series-autopublish` 인라인 SQL → `fn_series_autopublish_tick()` 로 교체 (발행 + indexnow + apt_id 자동 기입). 스케줄/jobid 동일
+- `scripts/backfill-blog-apt-id.mjs` 신설. 14편(110742~110755) 실행 → **5건 기입 / 9건 매칭없음**
+  - 기입: 110744→836042(두산위브더제니스 대연), 110746→1311(블랑 써밋 74), 110748→711055(울산신복역 비스타 메트로), 110749→821879(센트레빌 아스테리움 거제), 110751→821880(더샵 트리센트)
+  - 미매칭 9건은 전부 **분양 전망/재개발 글로 아직 청약 공고가 없는 단지** (오티에르 해운대, 복산1구역, 초량 호반써밋, 더폴 금정, 힐스테이트 아이코닉, BIFC 시그니처, 디에이치 아센테르, 아크로 라로체, 일광 더에스). 느슨한 매칭을 쓰면 '힐스테이트 아이코닉' → 무관한 힐스테이트 140건으로 오매핑되므로 의도적으로 NULL 유지
+- `idx_blog_posts_metadata_apt_id` 부분 인덱스 추가
+
+**SEO:** title `전국 아파트 청약 일정·경쟁률 — 오늘의 접수중 단지`. 접수중/예정 단지 `Event` JSON-LD (`startDate`/`endDate` = 접수 시작/마감) + `ItemList`. 접수일이 없는 건은 Event 로 내보내지 않음 (무효 항목 방지).
+
+**캐시:** ISR 900초. 단, `searchParams(region)` 를 읽어 Next 15 가 dynamic 강등 → page-level `revalidate` 무력화. 실제 ISR 은 `lib/apt/hub.ts` 의 `unstable_cache({ revalidate: 900 })` 로 건다. 결과가 비면 캐시 경로를 건너뛰고 매 요청 재시도 → Rule #66 (빈 응답 SSG 영구화) 회귀 방지.
+
+**부수 수정:** `/apt/compare` 랜딩 신설. 기존엔 `[slugs]` 만 있어 도구칩이 가리키던 `/apt/compare` 가 404 였다. `[slugs]` 는 `apt_complex_profiles.apt_name` 정확 일치 2개를 요구하므로, 랜딩이 내려주는 쌍은 전부 DB 실재 단지명으로만 구성.
+
+**데이터 현실 (2026-08-06 기준 — 발견 사항):**
+- **접수중(open) 0건.** 전국에서 오늘 접수중인 청약이 없다. 8/10 시작 3건(한강 푸르지오 리버프론트 2,432세대 / 세종 우미 린 센터파크 676 / 두산위브더제니스 대연 176)이 upcoming. 빈 상태 처리가 실제로 발동하는 상황이라 도구칩+타임라인 상시 노출 요건이 그대로 유효
+- **`price_per_pyeong` 계열 3컬럼 최근 90일 채움률 0%** → 카드는 '분양가 미공개' 폴백 (Rule #93)
+- **경쟁률 파이프라인 정지.** `apt_competition_rates` 0행, `apt_subscriptions.competition_rate_1st` 는 2026-04-17 이후 갱신 없음(197/2836, 최근 90일 0건). RPC/UI 는 값이 들어오면 즉시 표시되도록 join 을 걸어뒀고, 현재는 결과 블록이 상태 배지로 폴백. **수집 복구는 별건 과제**
+
+**Architecture Rules 추가:** #101(상태 판정 단일 정의 + SQL 미러 동기화) #102(단지명 지역 prefix 중복 제거) #103(metadata.apt_id 규약, strict 매칭) #104(revalidate 리터럴 + searchParams dynamic 강등 시 데이터 레이어 캐시)
+
+**검증:** `npm run build` exit 0 (562 pages) / 신규 단위 테스트 39/39 통과.
+**기존 실패 1건 (본 작업과 무관):** `validations.test.ts > PostCreateSchema > rejects short title` — `src/lib/validations.ts` 와 해당 테스트 모두 미변경. main 기존 실패로 별도 처리 필요.
+
 
 ### s269 — /apt 메인 V1 통합 피드 전환 (2026-05-15)
 **컨셉:** 기존 5블록 → 시간순 통합 피드 단일 흐름. 발견 모델 강화. 가독성 우선.
