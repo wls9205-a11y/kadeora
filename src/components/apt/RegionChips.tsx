@@ -144,7 +144,9 @@ function RegionChip({
     : {
         ...CHIP_BASE,
         background: 'var(--bg-surface, #0d1730)',
-        color: dim ? 'var(--text-disabled, #334466)' : 'var(--text-primary, #f2f5fa)',
+        // 접수중 0건 지역도 여전히 누를 수 있는 링크다.
+        // --text-disabled 를 쓰면 비활성 컨트롤로 보여서 tertiary 까지만 낮춘다.
+        color: dim ? 'var(--text-tertiary, #8ba3c0)' : 'var(--text-primary, #f2f5fa)',
         borderColor: 'var(--border, #1e3258)',
       };
 
