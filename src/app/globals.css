@@ -445,6 +445,9 @@ html.font-large {
   --bg-sunken:     #030710;
   --bg-hover:      #132040;
   --bg-active:     #1A2D52;
+  /* s273b: sticky/backdrop-blur 바 배경. 정의가 없어 소비처에서 rgba(255,255,255,.92)
+     로 폴백되면서 다크 테마에 흰 배경 + 흰 글씨가 나오던 회귀 (Rule #94). */
+  --bg-surface-translucent: rgba(13, 23, 48, 0.92);
   --border:        #1E3258;
   --border-strong: #2A4470;
   --border-focus:  #5B93FF;
@@ -553,6 +556,7 @@ html.theme-light {
   --bg-sunken:     #E8ECF0;
   --bg-hover:      #EEF1F5;
   --bg-active:     #E2E6EC;
+  --bg-surface-translucent: rgba(255, 255, 255, 0.92);
   --border:        #D4DAE3;
   --border-strong: #B8C2D0;
   --border-focus:  #4A8AF7;

@@ -40,6 +40,13 @@ export interface AptHubItem {
   pblanc_url: string | null;
 }
 
+/** 지역 칩용 집계. 현재 선택 지역과 무관하게 항상 전국 17개 시·도 기준. */
+export interface AptHubRegionCount {
+  region: string;
+  live: number;
+  recent: number;
+}
+
 export interface AptHubPayload {
   region: string;
   requested_region: string;
@@ -48,6 +55,7 @@ export interface AptHubPayload {
   timeline: AptHubItem[];
   cards: AptHubItem[];
   results: AptHubItem[];
+  regions: AptHubRegionCount[];
   counts: { timeline: number; cards: number; results: number };
 }
 
@@ -59,6 +67,7 @@ export const EMPTY_HUB: AptHubPayload = {
   timeline: [],
   cards: [],
   results: [],
+  regions: [],
   counts: { timeline: 0, cards: 0, results: 0 },
 };
 
@@ -84,6 +93,7 @@ function normalize(raw: unknown): AptHubPayload {
     timeline,
     cards,
     results,
+    regions: Array.isArray(r.regions) ? (r.regions as AptHubRegionCount[]) : [],
     counts: {
       timeline: timeline.length,
       cards: cards.length,

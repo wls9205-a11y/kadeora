@@ -15,12 +15,12 @@
 // Legacy: src/_legacy/s269/apt_page_v0.tsx
 
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { SITE_URL } from '@/lib/constants';
 import { getAptHub } from '@/lib/apt/hub';
 import { getRelatedBlogs } from '@/lib/apt/related-blogs';
 import { buildSubscriptionEvents, buildSubscriptionItemList } from '@/lib/apt/subscription-schema';
 import RegionAutoSelect from '@/components/apt/RegionAutoSelect';
+import RegionChips from '@/components/apt/RegionChips';
 import SubscriptionTimeline from '@/components/apt/SubscriptionTimeline';
 import SubscriptionCard from '@/components/apt/SubscriptionCard';
 import SubscriptionResults from '@/components/apt/SubscriptionResults';
@@ -92,31 +92,8 @@ export default async function AptPage({
 
       {isAutoRegion && <RegionAutoSelect />}
 
-      {/* 지역 바 */}
-      <div
-        style={{
-          position: 'sticky',
-          top: 44,
-          zIndex: 10,
-          padding: '8px 6px',
-          margin: '0 -6px 10px',
-          background: 'var(--bg-surface-translucent, rgba(255,255,255,0.92))',
-          backdropFilter: 'blur(8px)',
-          borderBottom: '1px solid var(--border-base, #e5e7eb)',
-          fontSize: 13,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}
-      >
-        <span style={{ fontWeight: 500 }}>📍 {hub.region}</span>
-        <Link
-          href="/apt/region"
-          style={{ fontSize: 11.5, color: 'var(--text-secondary, #6b7280)', textDecoration: 'none' }}
-        >
-          지역 변경 →
-        </Link>
-      </div>
+      {/* 지역 선택 — 인라인 칩. 페이지 이동 없이 목록만 갱신된다. */}
+      <RegionChips regions={hub.regions} current={hub.region} totalCards={hub.counts.cards} />
 
       {hub.region_fallback ? (
         <p
