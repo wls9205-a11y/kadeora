@@ -102,7 +102,7 @@ export default async function AptPage({
             padding: '7px 10px',
             borderRadius: 6,
             background: 'var(--bg-elevated, #f9fafb)',
-            border: '1px solid var(--border-base, #e5e7eb)',
+            border: '1px solid var(--border, #1e3258)',
             fontSize: 11.5,
             color: 'var(--text-secondary, #6b7280)',
           }}

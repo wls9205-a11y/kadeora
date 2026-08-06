@@ -69,7 +69,7 @@ export default function SubscriptionTimeline({
                 display: 'block',
                 padding: '10px 11px',
                 borderRadius: 10,
-                border: '1px solid var(--border-base, #e5e7eb)',
+                border: '1px solid var(--border, #1e3258)',
                 background: 'var(--bg-surface, #ffffff)',
                 textDecoration: 'none',
                 color: 'var(--text-primary, #111827)',

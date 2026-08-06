@@ -29,7 +29,7 @@ export default function AptToolChips() {
               alignItems: 'center',
               gap: 9,
               padding: '11px 12px',
-              border: '1px solid var(--border-base, #e5e7eb)',
+              border: '1px solid var(--border, #1e3258)',
               borderRadius: 10,
               background: 'var(--bg-surface, #ffffff)',
               color: 'var(--text-primary, #111827)',

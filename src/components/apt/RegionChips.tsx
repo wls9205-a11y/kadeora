@@ -79,7 +79,8 @@ export default function RegionChips({ regions, current }: Props) {
           ) : null}
         </h2>
         <Link
-          href="/apt/region"
+          // 현재 지역을 넘겨 전체 목록에서도 어디를 보고 있는지 표시되게 한다
+          href={current === '전국' ? '/apt/region' : `/apt/region?region=${encodeURIComponent(current)}`}
           style={{ fontSize: 11.5, color: 'var(--text-secondary, #b8ccdf)', textDecoration: 'none' }}
         >
           전체 17개 →

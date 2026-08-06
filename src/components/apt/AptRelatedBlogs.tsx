@@ -35,7 +35,7 @@ export default function AptRelatedBlogs({ posts }: { posts: RelatedBlogPost[] })
               gap: 9,
               padding: '10px 11px',
               borderRadius: 8,
-              border: '1px solid var(--border-base, #e5e7eb)',
+              border: '1px solid var(--border, #1e3258)',
               background: 'var(--bg-surface, #ffffff)',
               color: 'var(--text-primary, #111827)',
               textDecoration: 'none',

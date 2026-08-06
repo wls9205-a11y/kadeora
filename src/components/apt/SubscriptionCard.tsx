@@ -56,7 +56,7 @@ export default function SubscriptionCard({ item }: { item: AptHubItem }) {
   return (
     <article
       style={{
-        border: '1px solid var(--border-base, #e5e7eb)',
+        border: '1px solid var(--border, #1e3258)',
         borderRadius: 10,
         background: 'var(--bg-surface, #ffffff)',
         padding: '11px 12px',
@@ -110,7 +110,7 @@ export default function SubscriptionCard({ item }: { item: AptHubItem }) {
             marginBottom: 9,
             borderRadius: 6,
             background: 'var(--bg-elevated, #f9fafb)',
-            border: '1px solid var(--border-base, #e5e7eb)',
+            border: '1px solid var(--border, #1e3258)',
           }}
         >
           {item.competition_rate != null ? (
