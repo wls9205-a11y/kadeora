@@ -96,6 +96,12 @@
 - **#101** 청약 상태 판정은 `src/lib/apt/subscription-status.ts` 단일 정의 — 페이지/컴포넌트에서 `rcept_endde >= today` 같은 날짜 비교 직접 작성 금지. 상태 7종(`open`/`upcoming`/`scheduled`/`announced_wait`/`contract`/`leftover`/`closed`)과 정렬 가중치(open 0 → upcoming 1 → announced_wait 2 → contract 3 → scheduled 4 → leftover 5 → closed 6)를 함수로만 얻을 것. **SQL 쪽 미러**는 `get_apt_subscription_hub` 안의 CASE — 한쪽을 고치면 반드시 양쪽 동기화. 날짜 비교는 `Date` 객체가 아니라 `'YYYY-MM-DD'` 문자열 사전순으로 (Vercel UTC / 로컬 KST 하루 밀림 방지).
 - **#102** 단지명 표시는 `formatComplexName(region, name)` 경유 — `` `${region} ${name}` `` 직접 조합 금지. `region_nm='세종'` + `house_nm='세종 우미 린 …'` 이 "세종 세종 우미 린" 으로 찍히던 회귀(s273). 광역시/도 풀네임↔축약 별칭까지 양방향 비교한다 ('경상남도'의 축약은 '경상'이 아니라 '경남').
 - **#103** `blog_posts.metadata.apt_id` = `apt_subscriptions.id` 규약. /apt '관련 청약 분석'이 이 키로 조회. 기입은 pg_cron `kadeora-series-autopublish`(job 160 → `fn_series_autopublish_tick()`)가 발행 시점에 자동, 소급은 `scripts/backfill-blog-apt-id.mjs`. 매칭은 **제목이 공고명을 통째로 포함**하는 strict 매칭만 — 느슨한 매칭은 '힐스테이트 아이코닉' → 무관한 힐스테이트 140건 오매핑을 만든다. 못 찾으면 NULL 로 둔다. 기입은 `metadata` 병합만, 본문/발행상태 불변 (Rule #76).
+- **#105** `var(--x, fallback)` 의 변수명은 **globals.css 에 실재하는지 확인 후 사용**. 오타/추측 이름은 에러 없이 fallback 으로 조용히 넘어가는데, 이 프로젝트의 fallback 은 대부분 라이트 테마 값(`#e5e7eb`, `rgba(255,255,255,.92)`)이라 **다크 기본 테마에서 그대로 사고**가 난다. s273 에서 두 번 당함 — `--bg-surface-translucent`(미정의 → 흰 배경 + 흰 글씨), `--border-base`(미정의 → 다크 배경에 밝은 회색 테두리 9곳). 실재하는 이름은 `--border` / `--bg-surface` / `--bg-elevated` / `--bg-base` / `--text-primary|secondary|tertiary|disabled`. 신규 컴포넌트 작성 후 검증:
+  ```bash
+  grep -oh -- "--[a-z0-9-]*" <파일들> | sort -u | while read v; do
+    grep -q -- "  $v:" src/app/globals.css || echo "UNDEFINED $v"; done
+  ```
+  더 확실한 검증은 배포 후 `getComputedStyle(el).borderColor` 실측 (Rule #94 보강).
 - **#104** `export const revalidate` 는 리터럴만 — import 한 상수를 쓰면 Next segment config 정적 분석이 `Unknown identifier` 로 빌드를 깬다. `searchParams` 를 읽는 라우트는 dynamic 으로 강등돼 page-level revalidate 가 무력화되므로, 실제 ISR 은 데이터 레이어의 `unstable_cache({ revalidate })` 로 건다 (s273 /apt 패턴).
 
 ## 워크플로

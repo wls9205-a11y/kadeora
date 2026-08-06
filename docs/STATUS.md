@@ -1,3 +1,27 @@
+### s273c — 지역 목록 페이지 정리 + 미정의 CSS 변수 일괄 제거 (2026-08-06)
+
+**① `--border-base` 미정의 — s273b 와 같은 부류를 내가 또 심었음**
+s273 신규 컴포넌트 6개 파일 9곳이 `var(--border-base, #e5e7eb)` 를 썼는데 실재하는 이름은 `--border` 다. 다크 배경에 밝은 회색 테두리로 폴백되고 있었다. 전부 `var(--border, #1e3258)` 로 교체.
+s273 파일 전체 CSS 변수 감사 실시 → 나머지 8개(`--bg-base` `--bg-elevated` `--bg-surface` `--text-primary|secondary|tertiary|disabled`)는 정의 확인.
+**배포 후 실측 검증:** `getComputedStyle(article).borderColor === rgb(30,50,88)` = `#1E3258` 적용 확인.
+→ **Architecture Rule #105** 신설 (변수명 실재 확인 + grep 검증 스니펫).
+
+**② `/apt/region` 재작성**
+- **이모지 제거.** 🌳충북 vs 🌲전남, 🍎경북, 🌅경남 — 이모지로 시·도를 구분할 수 있는 사람은 없다. 장식이 정보 자리를 먹고 있었으므로 그 자리에 건수를 넣음.
+- **'접수중인 지역' / '그 외 지역' 2그룹 분리.** 오늘 기준 17곳 중 접수중은 경기·부산·세종 3곳뿐(대구·대전은 60일 내에도 0). 빈 지역을 눌러 전국 폴백으로 튕기던 허탕 해소.
+- '그 외' 는 최근 60일 물량 desc 정렬 + `최근 N` 표기, 0건은 `—`.
+- **현재 보고 있는 지역 반전 표시.** RegionChips 가 `/apt/region?region=X` 로 전달.
+- **FAB 가림 해소.** `paddingBottom: 88` (레이아웃 72px 위에 추가). 실측: 마지막 카드 bottom 696px < FAB top 724px → 28px 여유.
+- 카운트는 `getAptHub('전국')` 재사용 — /apt 와 `unstable_cache` 키를 공유하므로 대부분 캐시 히트, 추가 DB 왕복 없음.
+- 전국 카드 링크 `/apt?region=전국` → `/apt` (칩과 통일).
+
+**검증 방법 주의 (자체 회고):** `fullPage: true` 스크린샷은 `position: fixed` 요소를 페이지 중간에 그린다. 첫 캡처에서 하단 네비/FAB 이 카드 위에 겹쳐 보였지만 **캡처 아티팩트**였다. 겹침 판정은 뷰포트 캡처 + `getBoundingClientRect()` 실측으로 할 것. 스크롤 하단 도달 시 뜨는 가입 모달은 기존 동작(비로그인 scroll 50% 트리거)이며 이번 변경과 무관 — `kd_popup_signup_dismissed` 를 미리 세팅하면 억제된다.
+
+**미조치 (보고만):** `AptHeroCard` / `AptRecentFeed` 는 s273 재작성으로 활성 참조 0 이 된 고아 컴포넌트 (`AptFeedCard` 는 `AptRecentFeed` 에서만 참조). 삭제는 요청 범위 밖이라 보존. `AptHeaderV5` + `RegionSheetV5`(검색·즐겨찾기·최근·현재위치 완비) 는 `_legacy` 에서만 참조 — C안 바텀시트 채택 시 재작성 없이 부활 가능.
+
+**커밋:** fe0d646a
+**검증:** build exit 0 (562p) / 단위 테스트 39/39 / 다크·라이트 양 테마 / 테두리색 실측 / FAB 여백 실측.
+
 ### s273b — /apt 지역 선택 가독성 개선 (2026-08-06)
 **발단:** 지역 셀렉 섹션 가독성 개선 요청 → 실화면 점검 결과 색상 버그 1건 + UX 문제 3건.
 
