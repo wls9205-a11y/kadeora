@@ -51,19 +51,22 @@ function Logo(size: number) {
    컬러 헤더띠 → 정보바 → 제목 → 컬러 KPI바
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 function D1(C: OgCategoryToken, title: string, sub: string, author: string, ff: string) {
+  // s280: 검색결과/카톡 미리보기는 100~300px 폭으로 축소돼서 뜬다 — 제목 폰트를 크게 키우고
+  // 상하단 바 두께를 줄여 텍스트가 캔버스를 최대한 채우도록 재조정 (기존엔 중앙 50%가 빈 여백).
+  const titleFS = title.length > 22 ? 62 : title.length > 16 ? 72 : 84;
   return (
     <div style={{ width:'100%', height:'100%', display:'flex', flexDirection:'column', overflow:'hidden', background:'#060606', fontFamily: ff }}>
       {/* 스트라이프1: 컬러 헤더 */}
-      <div style={{ background: C.color, height:72, display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0 48px', flexShrink:0 }}>
+      <div style={{ background: C.color, height:64, display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0 48px', flexShrink:0 }}>
         <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-          {Logo(26)}<span style={{ fontSize: 21, fontWeight:900, color:'#000' }}>카더라</span>
+          {Logo(24)}<span style={{ fontSize: 19, fontWeight:900, color:'#000' }}>카더라</span>
         </div>
-        <span style={{ fontSize: 19, fontWeight:900, color:'#000', letterSpacing:1 }}>{C.icon}  {C.label.toUpperCase()}</span>
+        <span style={{ fontSize: 17, fontWeight:900, color:'#000', letterSpacing:1 }}>{C.icon}  {C.label.toUpperCase()}</span>
       </div>
       {/* 스트라이프2: 메타 바 */}
-      <div style={{ background:'#111', height:52, display:'flex', alignItems:'center', padding:'0 48px', gap:16, flexShrink:0, borderBottom:'0.5px solid rgba(255,255,255,.06)' }}>
+      <div style={{ background:'#111', height:40, display:'flex', alignItems:'center', padding:'0 48px', gap:16, flexShrink:0, borderBottom:'0.5px solid rgba(255,255,255,.06)' }}>
         {author && <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-          <div style={{ width: 24, height: 24, borderRadius:'50%', background:`linear-gradient(135deg,${C.color},#2563eb)`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:900, color:'#fff' }}>
+          <div style={{ width: 20, height: 20, borderRadius:'50%', background:`linear-gradient(135deg,${C.color},#2563eb)`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:9, fontWeight:900, color:'#fff' }}>
             {author[0].toUpperCase()}
           </div>
           <span style={{ fontSize:12, color:'#6b7280' }}>{author}</span>
@@ -73,18 +76,15 @@ function D1(C: OgCategoryToken, title: string, sub: string, author: string, ff: 
           <div style={{ width:5, height:5, borderRadius:'50%', background:'#00FF87', boxShadow:'0 0 5px #00FF87' }} />
           <span style={{ fontSize:11, color:'rgba(255,255,255,.25)', letterSpacing:.5 }}>LIVE</span>
         </div>
-        <span style={{ fontSize:11, fontWeight:700, color:C.color, padding:'3px 12px', borderRadius: 6, background:C.dim, border:`0.5px solid ${C.color}50` }}>kadeora.app</span>
+        <span style={{ fontSize:11, fontWeight:700, color:C.color }}>kadeora.app</span>
       </div>
-      {/* 스트라이프3: 제목 */}
+      {/* 스트라이프3: 제목 — 캔버스 최대 활용 */}
       <div style={{ flex:1, display:'flex', flexDirection:'column', justifyContent:'center', padding:'0 48px' }}>
-        <div style={{ fontSize: title.length > 22 ? 38 : title.length > 16 ? 44 : 50, fontWeight:900, color:'#fff', lineHeight:1.18, letterSpacing:-1.5 }}>{title}</div>
-        {sub && <div style={{ fontSize: 18, color:'#6b7280', marginTop:14, lineHeight:1.55 }}>{sub}</div>}
+        <div style={{ fontSize: titleFS, fontWeight:900, color:'#fff', lineHeight:1.12, letterSpacing:-2, wordBreak:'keep-all' }}>{title}</div>
+        {sub && <div style={{ fontSize: 20, color:'#8b93a1', marginTop:18, lineHeight:1.5 }}>{sub}</div>}
       </div>
-      {/* 스트라이프4: KPI 바 */}
-      <div style={{ background:C.dim, borderTop:`0.5px solid ${C.color}30`, height:58, display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0 48px', flexShrink:0 }}>
-        <span style={{ fontSize:13, fontWeight:900, color:C.color }}>{C.icon}  {C.label}</span>
-        <span style={{ fontSize:11, color:'rgba(255,255,255,.2)', fontWeight:700 }}>kadeora.app</span>
-      </div>
+      {/* 스트라이프4: 얇은 액센트 바 */}
+      <div style={{ background:C.color, height:10, flexShrink:0 }} />
     </div>
   );
 }
@@ -95,7 +95,9 @@ function D1(C: OgCategoryToken, title: string, sub: string, author: string, ff: 
    우 60% = 다크 그라디언트 (카테고리 뱃지 + 제목 + 부제 + LIVE 바)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 function D2(C: OgCategoryToken, title: string, sub: string, author: string, ff: string) {
-  const titleFS = title.length > 22 ? 28 : title.length > 16 ? 34 : 40;
+  // s280: 검색결과 썸네일은 초소형으로 축소돼서 뜬다 — 제목을 크게, 좌측 아이콘도 키워
+  // 색 블록만으로도 카테고리가 즉시 식별되게 함.
+  const titleFS = title.length > 22 ? 46 : title.length > 16 ? 56 : 66;
   const bg = `linear-gradient(150deg, ${C.bg[0]} 0%, ${C.bg[1]} 55%, ${C.bg[2]} 100%)`;
   return (
     <div style={{ width:'100%', height:'100%', display:'flex', overflow:'hidden', fontFamily: ff }}>
@@ -109,11 +111,11 @@ function D2(C: OgCategoryToken, title: string, sub: string, author: string, ff: 
         </div>
 
         {/* 중앙: 대형 이모지 + 카테고리 */}
-        <div style={{ position:'relative', zIndex:1, display:'flex', flexDirection:'column', alignItems:'center', gap:10 }}>
-          <span style={{ fontSize:62, lineHeight:1 }}>{C.icon}</span>
+        <div style={{ position:'relative', zIndex:1, display:'flex', flexDirection:'column', alignItems:'center', gap:14 }}>
+          <span style={{ fontSize:88, lineHeight:1 }}>{C.icon}</span>
           <div style={{ textAlign:'center' }}>
-            <div style={{ fontSize:19, fontWeight:900, color:'#000', letterSpacing:-0.3 }}>{C.label}</div>
-            <div style={{ fontSize:10, fontWeight:700, color:'rgba(0,0,0,0.42)', letterSpacing:2, marginTop:3 }}>{C.code}</div>
+            <div style={{ fontSize:25, fontWeight:900, color:'#000', letterSpacing:-0.3 }}>{C.label}</div>
+            <div style={{ fontSize:11, fontWeight:700, color:'rgba(0,0,0,0.42)', letterSpacing:2, marginTop:4 }}>{C.code}</div>
           </div>
         </div>
 
@@ -183,7 +185,7 @@ function D2(C: OgCategoryToken, title: string, sub: string, author: string, ff: 
    왼쪽: 카테고리+저자 / 오른쪽: 제목
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 function D3(C: OgCategoryToken, title: string, sub: string, author: string, ff: string) {
-  const titleFS = title.length > 22 ? 34 : title.length > 16 ? 40 : 46;
+  const titleFS = title.length > 22 ? 44 : title.length > 16 ? 52 : 60;
   return (
     <div style={{ width:'100%', height:'100%', position:'relative', overflow:'hidden', background:'#0A0A0A', display:'flex', fontFamily: ff }}>
       {/* 대각선 컬러 삼각형 */}
@@ -223,7 +225,7 @@ function D3(C: OgCategoryToken, title: string, sub: string, author: string, ff: 
    좌: 순수 컬러 패널 / 우: 흰 배경 + 타이포
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 function D4(C: OgCategoryToken, title: string, sub: string, author: string, ff: string) {
-  const titleFS = title.length > 22 ? 30 : title.length > 16 ? 36 : 42;
+  const titleFS = title.length > 22 ? 40 : title.length > 16 ? 48 : 56;
   return (
     <div style={{ width:'100%', height:'100%', display:'flex', overflow:'hidden', fontFamily: ff }}>
       {/* 왼쪽 컬러 패널 */}
@@ -264,7 +266,7 @@ function D4(C: OgCategoryToken, title: string, sub: string, author: string, ff: 
    순수 블랙 + 사선 줄무늬 + 네온 타이포
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 function D5(C: OgCategoryToken, title: string, sub: string, author: string, ff: string) {
-  const titleFS = title.length > 22 ? 38 : title.length > 16 ? 44 : 52;
+  const titleFS = title.length > 22 ? 52 : title.length > 16 ? 62 : 72;
   return (
     <div style={{ width:'100%', height:'100%', background:'#000', overflow:'hidden', position:'relative', display:'flex', flexDirection:'column', fontFamily: ff }}>
       {/* 헤더 */}
@@ -452,7 +454,7 @@ function CardRegion(C: OgCategoryToken, title: string, ff: string) {
       <div style={{ flex:1, display:'flex', flexDirection:'row', flexWrap:'wrap', gap:12, alignContent:'flex-start' }}>
         {regions.map((r, i) => (
           <div key={r} style={{
-            width:'calc(25% - 9px)', padding:'18px 14px', display:'flex', flexDirection:'column', justifyContent:'center', alignItems:'center',
+            width:'23%', padding:'18px 14px', display:'flex', flexDirection:'column', justifyContent:'center', alignItems:'center',
             background: i === 0 ? `${C.color}28` : `${C.color}10`,
             border: i === 0 ? `1px solid ${C.color}` : `1px solid ${C.color}30`,
             borderRadius:12,
@@ -475,7 +477,7 @@ function CardRegion(C: OgCategoryToken, title: string, ff: string) {
    배경 전체가 컬러 그라디언트 + 반투명 카드
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 function D6(C: OgCategoryToken, title: string, sub: string, author: string, ff: string) {
-  const titleFS = title.length > 22 ? 36 : title.length > 16 ? 42 : 48;
+  const titleFS = title.length > 22 ? 48 : title.length > 16 ? 58 : 68;
   const bg = `linear-gradient(135deg, ${C.bg[0]} 0%, ${C.bg[1]} 45%, ${C.bg[2]} 100%)`;
   return (
     <div style={{ width:'100%', height:'100%', overflow:'hidden', position:'relative', background:bg, display:'flex', flexDirection:'column', fontFamily: ff }}>
@@ -582,16 +584,20 @@ export async function GET(req: NextRequest) {
       return new Response(_homeBuf, { headers: { 'Content-Type':'image/png', ...CACHE } });
     }
 
-    /* s241 W3: design 함수 lazy 호출 + per-design try/catch — D1~D6 중 어느 게 throw 하는지 식별. */
+    /* s280: s241 디버깅 때 전부 D1로 임시 우회해놓고 원복이 안 돼있던 버그 수정 —
+       design 파라미터를 받아도 D2~D6 는 죽은 코드였고 실제로는 항상 D1(텍스트 제일 작고
+       여백 제일 큰 디자인)만 렌더링되고 있었음. 검색결과/카톡 미리보기에서 썸네일이
+       휑하게 보이던 핵심 원인. */
     let el: any;
     try {
       switch (design) {
-        case '2': el = D1(C, titleTrim, subTrim, author, ff); break;
-        case '3': el = D1(C, titleTrim, subTrim, author, ff); break;
-        case '4': el = D1(C, titleTrim, subTrim, author, ff); break;
-        case '5': el = D1(C, titleTrim, subTrim, author, ff); break;
-        case '6': el = D1(C, titleTrim, subTrim, author, ff); break;
-        default:  el = D1(C, titleTrim, subTrim, author, ff); break;
+        case '1': el = D1(C, titleTrim, subTrim, author, ff); break;
+        case '2': el = D2(C, titleTrim, subTrim, author, ff); break;
+        case '3': el = D3(C, titleTrim, subTrim, author, ff); break;
+        case '4': el = D4(C, titleTrim, subTrim, author, ff); break;
+        case '5': el = D5(C, titleTrim, subTrim, author, ff); break;
+        case '6': el = D6(C, titleTrim, subTrim, author, ff); break;
+        default:  el = D2(C, titleTrim, subTrim, author, ff); break;
       }
     } catch (designErr) {
       console.error('[og] design-fn-throw design=', design, 'msg=', (designErr as Error)?.message?.slice(0, 80));

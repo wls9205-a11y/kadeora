@@ -71,6 +71,18 @@ const fmtCap = (n: number | null | undefined, ccy?: string | null): string => {
   return `${n.toLocaleString()}원`;
 };
 
+/* s280: ▲▼ 유니코드 화살표는 NotoSansKR-Bold.woff 서브셋에 없어 Satori 가 매번 dynamic
+   font fetch 를 시도했고, 이 서버리스 환경에서 항상 400 실패 → 카드 렌더링 자체가
+   throw 하고 폴백(심볼만 표시)으로 떨어지던 근본 원인 중 하나. 폰트에 의존하지 않는
+   순수 SVG 삼각형으로 교체. */
+function ArrowIcon({ dir, color, size = 20 }: { dir: 'up' | 'down' | 'flat'; color: string; size?: number }) {
+  if (dir === 'flat') {
+    return <svg width={size} height={size * 0.3} viewBox="0 0 20 6" style={{ display:'flex' }}><rect width="20" height="6" rx="3" fill={color} /></svg>;
+  }
+  const points = dir === 'up' ? '10,2 18,16 2,16' : '10,18 2,4 18,4';
+  return <svg width={size} height={size} viewBox="0 0 20 20" style={{ display:'flex' }}><polygon points={points} fill={color} /></svg>;
+}
+
 /* ── 5 카드 레이아웃 (1200×630) ── */
 
 function PriceCard(q: QuoteRow, ff: string) {
@@ -80,11 +92,11 @@ function PriceCard(q: QuoteRow, ff: string) {
   const isUp = chg > 0;
   const isDown = chg < 0;
   const accent = isUp ? '#FF4D4D' : isDown ? '#3478F6' : '#9CA3AF';
-  const arrow = isUp ? '▲' : isDown ? '▼' : '–';
+  const arrowDir: 'up' | 'down' | 'flat' = isUp ? 'up' : isDown ? 'down' : 'flat';
   const bg = `linear-gradient(135deg, #050811 0%, #0B1428 50%, #0F1B3E 100%)`;
   return (
     <div style={{ width:'100%', height:'100%', display:'flex', flexDirection:'column', background:bg, fontFamily: ff, padding:'52px 60px', position:'relative', overflow:'hidden' }}>
-      <div style={{ position:'absolute', top:'-25%', right:'-10%', width:'55%', aspectRatio:'1', borderRadius:'50%', background:`radial-gradient(circle,${accent}22 0%,transparent 65%)`, display:'flex' }} />
+      <div style={{ position:'absolute', top:-160, right:-120, width:660, height:660, borderRadius:'50%', background:`radial-gradient(circle,${accent}22 0%,transparent 65%)`, display:'flex' }} />
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', position:'relative', zIndex:2 }}>
         <div style={{ display:'flex', alignItems:'center', gap:10 }}>
           <span style={{ fontSize:24, fontWeight:900, color:'#00E5FF', letterSpacing:-.5 }}>카더라</span>
@@ -99,7 +111,10 @@ function PriceCard(q: QuoteRow, ff: string) {
         <div style={{ display:'flex', alignItems:'baseline', gap:20 }}>
           <div style={{ fontSize:96, fontWeight:900, color:'#fff', letterSpacing:-3, lineHeight:1 }}>{price > 0 ? fmtCur(price, q.currency) : '-'}</div>
           {chg !== 0 && (
-            <div style={{ fontSize:36, fontWeight:900, color:accent, letterSpacing:-1 }}>{arrow} {Math.abs(chg).toFixed(2)}%</div>
+            <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+              <ArrowIcon dir={arrowDir} color={accent} size={30} />
+              <span style={{ fontSize:36, fontWeight:900, color:accent, letterSpacing:-1 }}>{Math.abs(chg).toFixed(2)}%</span>
+            </div>
           )}
         </div>
       </div>
@@ -115,7 +130,9 @@ function ChartCard(q: QuoteRow, ff: string) {
   const name = safeStr(q.name) || q.symbol;
   const chg = Number(q.change_pct) || 0;
   const isUp = chg > 0;
-  const accent = isUp ? '#FF4D4D' : chg < 0 ? '#3478F6' : '#9CA3AF';
+  const isDown = chg < 0;
+  const accent = isUp ? '#FF4D4D' : isDown ? '#3478F6' : '#9CA3AF';
+  const arrowDir: 'up' | 'down' | 'flat' = isUp ? 'up' : isDown ? 'down' : 'flat';
   const bg = `linear-gradient(160deg, #050811 0%, #0F1B3E 100%)`;
   // 미니 스파크라인 placeholder — 가짜 7포인트 생성, sign of chg 결정
   const seed = (q.symbol || '').charCodeAt(0) || 50;
@@ -134,7 +151,10 @@ function ChartCard(q: QuoteRow, ff: string) {
         </div>
         <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end' }}>
           <div style={{ fontSize:36, fontWeight:900, color:'#fff', letterSpacing:-1 }}>{Number(q.price) ? fmtCur(Number(q.price), q.currency) : '-'}</div>
-          <div style={{ fontSize:18, fontWeight:900, color:accent }}>{isUp ? '▲' : chg < 0 ? '▼' : '–'} {Math.abs(chg).toFixed(2)}%</div>
+          <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+            <ArrowIcon dir={arrowDir} color={accent} size={16} />
+            <span style={{ fontSize:18, fontWeight:900, color:accent }}>{Math.abs(chg).toFixed(2)}%</span>
+          </div>
         </div>
       </div>
       <div style={{ flex:1, display:'flex', position:'relative', background:'rgba(255,255,255,.03)', border:'1px solid rgba(255,255,255,.08)', borderRadius:14, padding:24 }}>
@@ -182,7 +202,7 @@ function FinancialCard(q: QuoteRow, ff: string) {
       <div style={{ flex:1, display:'flex', flexDirection:'row', flexWrap:'wrap', gap:16 }}>
         {cells.map(([k, v, sub], i) => (
           <div key={i} style={{
-            width:'calc(50% - 8px)', flexGrow:1, padding:'24px 28px',
+            width:'48%', padding:'24px 28px',
             background:'rgba(255,255,255,.05)', border:'1px solid rgba(255,224,0,.25)', borderRadius:16,
             display:'flex', flexDirection:'column', justifyContent:'center',
           }}>
@@ -245,9 +265,9 @@ function FlowCard(q: QuoteRow, ff: string) {
 function AICard(q: QuoteRow, ff: string) {
   const name = safeStr(q.name) || q.symbol;
   const chg = Number(q.change_pct) || 0;
-  const sentiment = chg > 1 ? { lab: '긍정', color: '#00FF87', emoji: '▲' }
-                   : chg < -1 ? { lab: '주의', color: '#FF6B1A', emoji: '▼' }
-                   : { lab: '중립', color: '#FFE000', emoji: '=' };
+  const sentiment: { lab: string; color: string; dir: 'up' | 'down' | 'flat' } = chg > 1 ? { lab: '긍정', color: '#00FF87', dir: 'up' }
+                   : chg < -1 ? { lab: '주의', color: '#FF6B1A', dir: 'down' }
+                   : { lab: '중립', color: '#FFE000', dir: 'flat' };
   const summary = chg > 1
     ? `최근 강세 흐름이 이어지고 있습니다. 단기 모멘텀과 거래량 동향을 함께 점검하세요.`
     : chg < -1
@@ -256,14 +276,14 @@ function AICard(q: QuoteRow, ff: string) {
   const bg = `linear-gradient(150deg, #060B1F 0%, #0C1638 50%, #1B0E3A 100%)`;
   return (
     <div style={{ width:'100%', height:'100%', display:'flex', flexDirection:'column', background:bg, fontFamily: ff, padding:'52px 60px', position:'relative', overflow:'hidden' }}>
-      <div style={{ position:'absolute', top:'-30%', left:'-15%', width:'60%', aspectRatio:'1', borderRadius:'50%', background:`radial-gradient(circle,${sentiment.color}22 0%,transparent 65%)`, display:'flex' }} />
+      <div style={{ position:'absolute', top:-190, left:-180, width:720, height:720, borderRadius:'50%', background:`radial-gradient(circle,${sentiment.color}22 0%,transparent 65%)`, display:'flex' }} />
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', position:'relative', zIndex:2, marginBottom:24 }}>
         <div style={{ display:'flex', flexDirection:'column' }}>
           <div style={{ fontSize:16, color:'#C084FC', fontWeight:900, letterSpacing:2, marginBottom:6 }}>AI · 한줄 분석</div>
           <div style={{ fontSize:40, fontWeight:900, color:'#fff', letterSpacing:-1, lineHeight:1.05 }}>{name}</div>
         </div>
         <div style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 20px', background:`${sentiment.color}22`, border:`1px solid ${sentiment.color}80`, borderRadius:999 }}>
-          <span style={{ fontSize:18 }}>{sentiment.emoji}</span>
+          <ArrowIcon dir={sentiment.dir} color={sentiment.color} size={18} />
           <span style={{ fontSize:18, fontWeight:900, color:sentiment.color, letterSpacing:1 }}>{sentiment.lab}</span>
         </div>
       </div>
