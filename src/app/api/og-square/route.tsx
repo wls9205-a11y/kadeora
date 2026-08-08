@@ -97,8 +97,9 @@ export async function GET(req: NextRequest) {
           /* title 이 있으면 — 실제 공유 대상(종목/단지/글 등)을 최대 크기로 표시 */
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 36px' }}>
             <span style={{ fontSize: 15, color: C.color, fontWeight: 700, letterSpacing: 2, marginBottom: 16 }}>{C.icon}  {C.label.toUpperCase()}</span>
-            <div style={{ fontSize: titleLine2 ? 56 : 68, fontWeight: 900, color: '#ffffff', lineHeight: 1.14, letterSpacing: -2, wordBreak: 'keep-all' }}>
-              {titleLine2 ? (<>{titleLine1}<br />{titleLine2}</>) : titleLine1}
+            <div style={{ display: 'flex', flexDirection: 'column', fontSize: titleLine2 ? 56 : 68, fontWeight: 900, color: '#ffffff', lineHeight: 1.14, letterSpacing: -2, wordBreak: 'keep-all' }}>
+              <span>{titleLine1}</span>
+              {titleLine2 && <span>{titleLine2}</span>}
             </div>
           </div>
         ) : (
@@ -106,7 +107,7 @@ export async function GET(req: NextRequest) {
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 36px', gap: 10 }}>
             <span style={{ fontSize: 16, color: C.color, fontWeight: 700, letterSpacing: 2 }}>{KPI.kw.toUpperCase()}</span>
             <span style={{ fontSize: 84, fontWeight: 900, color: '#fff', lineHeight: 0.95, letterSpacing: -3 }}>{KPI.kwv}</span>
-            <div style={{ fontSize: 20, color: '#6b7280', marginTop: 8 }}>{C.label} · 카더라에서 확인하세요</div>
+            <div style={{ display: 'flex', fontSize: 20, color: '#6b7280', marginTop: 8 }}>{C.label} · 카더라에서 확인하세요</div>
           </div>
         )}
 

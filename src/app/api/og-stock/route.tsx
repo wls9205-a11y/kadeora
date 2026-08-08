@@ -106,7 +106,7 @@ function PriceCard(q: QuoteRow, ff: string) {
         </div>
       </div>
       <div style={{ flex:1, display:'flex', flexDirection:'column', justifyContent:'center', position:'relative', zIndex:2 }}>
-        <div style={{ fontSize:24, color:'rgba(255,255,255,.55)', fontWeight:700, marginBottom:8, letterSpacing:1 }}>{q.symbol} · {safeStr(q.sector) || '주식'}</div>
+        <div style={{ display:'flex', fontSize:24, color:'rgba(255,255,255,.55)', fontWeight:700, marginBottom:8, letterSpacing:1 }}>{q.symbol} · {safeStr(q.sector) || '주식'}</div>
         <div style={{ fontSize:name.length > 14 ? 56 : 72, fontWeight:900, color:'#fff', letterSpacing:-2, lineHeight:1.05, marginBottom:18 }}>{name}</div>
         <div style={{ display:'flex', alignItems:'baseline', gap:20 }}>
           <div style={{ fontSize:96, fontWeight:900, color:'#fff', letterSpacing:-3, lineHeight:1 }}>{price > 0 ? fmtCur(price, q.currency) : '-'}</div>
@@ -146,7 +146,7 @@ function ChartCard(q: QuoteRow, ff: string) {
     <div style={{ width:'100%', height:'100%', display:'flex', flexDirection:'column', background:bg, fontFamily: ff, padding:'48px 56px' }}>
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:20 }}>
         <div style={{ display:'flex', flexDirection:'column' }}>
-          <div style={{ fontSize:18, color:'rgba(255,255,255,.55)', fontWeight:700, letterSpacing:1, marginBottom:4 }}>{q.symbol} · CHART</div>
+          <div style={{ display:'flex', fontSize:18, color:'rgba(255,255,255,.55)', fontWeight:700, letterSpacing:1, marginBottom:4 }}>{q.symbol} · CHART</div>
           <div style={{ fontSize:42, fontWeight:900, color:'#fff', letterSpacing:-1, lineHeight:1 }}>{name}</div>
         </div>
         <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end' }}>
@@ -196,7 +196,7 @@ function FinancialCard(q: QuoteRow, ff: string) {
         <div style={{ display:'flex', flexDirection:'column' }}>
           <div style={{ fontSize:16, color:'#FFE000', fontWeight:900, letterSpacing:2, marginBottom:6 }}>FINANCIAL · 재무 핵심</div>
           <div style={{ fontSize:42, fontWeight:900, color:'#fff', letterSpacing:-1, lineHeight:1.05 }}>{name}</div>
-          <div style={{ fontSize:16, color:'rgba(255,255,255,.45)', fontWeight:700, marginTop:4 }}>{q.symbol} · {safeStr(q.sector) || '-'}</div>
+          <div style={{ display:'flex', fontSize:16, color:'rgba(255,255,255,.45)', fontWeight:700, marginTop:4 }}>{q.symbol} · {safeStr(q.sector) || '-'}</div>
         </div>
       </div>
       <div style={{ flex:1, display:'flex', flexDirection:'row', flexWrap:'wrap', gap:16 }}>
@@ -236,7 +236,7 @@ function FlowCard(q: QuoteRow, ff: string) {
         <div style={{ display:'flex', flexDirection:'column' }}>
           <div style={{ fontSize:16, color:ACC, fontWeight:900, letterSpacing:2, marginBottom:6 }}>FLOW · 수급 동향</div>
           <div style={{ fontSize:40, fontWeight:900, color:'#fff', letterSpacing:-1, lineHeight:1.05 }}>{name}</div>
-          <div style={{ fontSize:16, color:'rgba(255,255,255,.45)', fontWeight:700, marginTop:4 }}>{q.symbol} · 매매주체별</div>
+          <div style={{ display:'flex', fontSize:16, color:'rgba(255,255,255,.45)', fontWeight:700, marginTop:4 }}>{q.symbol} · 매매주체별</div>
         </div>
         <div style={{ display:'flex', alignItems:'center', gap:8, padding:'7px 16px', background:`${ACC}1a`, border:`1px solid ${ACC}55`, borderRadius:999 }}>
           <span style={{ fontSize:14, fontWeight:900, color:ACC, letterSpacing:1 }}>실시간</span>
@@ -303,7 +303,7 @@ function FallbackCard(symbol: string | null, ff: string) {
   const stockAccent = OG_CAT.stock.color;
   return (
     <div style={{ width:'100%', height:'100%', display:'flex', flexDirection:'column', background:'#0F1B3E', fontFamily: ff, padding:'56px 64px', justifyContent:'space-between' }}>
-      <div style={{ fontSize:22, color:stockAccent, fontWeight:900, letterSpacing:2 }}>{OG_CAT.stock.icon} 카더라 주식</div>
+      <div style={{ display:'flex', fontSize:22, color:stockAccent, fontWeight:900, letterSpacing:2 }}>{OG_CAT.stock.icon} 카더라 주식</div>
       <div style={{ display:'flex', flexDirection:'column', gap:18 }}>
         <div style={{ width:60, height:5, background:stockAccent, borderRadius:999 }} />
         <div style={{ fontSize:64, fontWeight:900, color:'#fff', letterSpacing:-2, lineHeight:1.05 }}>{symbol || '주식 종목'}</div>

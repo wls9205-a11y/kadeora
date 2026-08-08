@@ -113,7 +113,7 @@ function D2(C: OgCategoryToken, title: string, sub: string, author: string, ff: 
         {/* 중앙: 대형 이모지 + 카테고리 */}
         <div style={{ position:'relative', zIndex:1, display:'flex', flexDirection:'column', alignItems:'center', gap:14 }}>
           <span style={{ fontSize:88, lineHeight:1 }}>{C.icon}</span>
-          <div style={{ textAlign:'center' }}>
+          <div style={{ display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center' }}>
             <div style={{ fontSize:25, fontWeight:900, color:'#000', letterSpacing:-0.3 }}>{C.label}</div>
             <div style={{ fontSize:11, fontWeight:700, color:'rgba(0,0,0,0.42)', letterSpacing:2, marginTop:4 }}>{C.code}</div>
           </div>
@@ -192,12 +192,12 @@ function D3(C: OgCategoryToken, title: string, sub: string, author: string, ff: 
       <div style={{ position:'absolute', top:0, left:0, width:0, height:0, borderStyle:'solid', borderWidth:'630px 520px 0 0', borderColor:`${C.color} transparent transparent transparent`, display:'flex' }} />
       {/* 왼쪽 컨텐츠 */}
       <div style={{ position:'absolute', top:0, left:0, width:'42%', height:'100%', display:'flex', flexDirection:'column', justifyContent:'space-between', padding:'32px 28px', zIndex:2 }}>
-        <div>
+        <div style={{ display:'flex', flexDirection:'column' }}>
           <div style={{ display:'flex', alignItems:'center', gap: 8, marginBottom:20 }}>
             {Logo(20)}<span style={{ fontSize:13, fontWeight:900, color:'#000' }}>카더라</span>
           </div>
           <div style={{ fontSize:11, fontWeight:700, color:'rgba(0,0,0,.5)', letterSpacing:2, marginBottom:4 }}>{C.code}</div>
-          <div style={{ fontSize: 18, fontWeight:900, color:'#000' }}>{C.label}  {C.icon}</div>
+          <div style={{ display:'flex', fontSize: 18, fontWeight:900, color:'#000' }}>{C.label}  {C.icon}</div>
         </div>
         {author && (
           <div style={{ display:'flex', alignItems:'center', gap: 8 }}>
@@ -230,12 +230,12 @@ function D4(C: OgCategoryToken, title: string, sub: string, author: string, ff: 
     <div style={{ width:'100%', height:'100%', display:'flex', overflow:'hidden', fontFamily: ff }}>
       {/* 왼쪽 컬러 패널 */}
       <div style={{ width:'42%', background:C.color, display:'flex', flexDirection:'column', justifyContent:'space-between', padding:'32px 28px', position:'relative', overflow:'hidden' }}>
-        <div style={{ position:'relative', zIndex:1 }}>
+        <div style={{ display:'flex', flexDirection:'column', position:'relative', zIndex:1 }}>
           <div style={{ display:'flex', alignItems:'center', gap: 8, marginBottom:16 }}>
             {Logo(20)}<span style={{ fontSize:13, fontWeight:900, color:'rgba(0,0,0,.6)' }}>카더라</span>
           </div>
           <div style={{ fontSize:11, fontWeight:700, color:'rgba(0,0,0,.4)', letterSpacing:2 }}>{C.code}</div>
-          <div style={{ fontSize: 19, fontWeight:900, color:'#000', marginTop:4 }}>{C.label}  {C.icon}</div>
+          <div style={{ display:'flex', fontSize: 19, fontWeight:900, color:'#000', marginTop:4 }}>{C.label}  {C.icon}</div>
         </div>
         {author && (
           <div style={{ position:'relative', zIndex:1, display:'flex', alignItems:'center', gap: 8 }}>
@@ -248,7 +248,7 @@ function D4(C: OgCategoryToken, title: string, sub: string, author: string, ff: 
       {/* 오른쪽 흰 패널 */}
       <div style={{ flex:1, background:'#fff', display:'flex', flexDirection:'column', justifyContent:'space-between', padding:'28px 32px' }}>
         <div style={{ display:'flex', justifyContent:'flex-end' }}>{Logo(20)}</div>
-        <div>
+        <div style={{ display:'flex', flexDirection:'column' }}>
           <div style={{ width:28, height:3, background:C.color, borderRadius: 999, marginBottom:16 }} />
           <div style={{ fontSize:titleFS, fontWeight:900, color:'#111', lineHeight:1.18, letterSpacing:-.8, marginBottom:10 }}>{title}</div>
           {sub && <div style={{ fontSize:13, color:'#9ca3af', lineHeight:1.55 }}>{sub}</div>}
