@@ -362,7 +362,6 @@ export async function generateMetadata({ params }: Props) {
         'naver:description': descClean,
         'dg:plink': `${SITE}/blog/${slug}`,
         'article:section': section,
-        'robots': 'max-image-preview:large, max-snippet:-1, max-video-preview:-1',
         'article:tag': [section, ...(post.tags ?? []).slice(0, 8), post.category === 'stock' ? '주가,배당금,실적,전망' : post.category === 'apt' ? '실거래가,시세,청약,분양가' : '투자,재테크'].filter(Boolean).join(','),
         'article:published_time': post.published_at || post.created_at,
         'article:modified_time': post.updated_at || post.published_at || post.created_at,
