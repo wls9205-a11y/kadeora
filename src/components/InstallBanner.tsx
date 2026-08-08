@@ -102,7 +102,7 @@ export default function InstallBanner() {
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-xs)', flexShrink: 0 }}>
           <button onClick={() => { hap('light'); handleInstall(); }} style={{
-            padding: '8px 14px', background: 'var(--bg-primary)', color: 'var(--brand)',
+            padding: '8px 14px', background: 'var(--bg-base)', color: 'var(--brand)',
             border: 'none', borderRadius: 'var(--radius-sm)', fontSize: 'var(--fs-sm)', fontWeight: 800, cursor: 'pointer',
           }}>{isIOS ? '방법 보기' : '📲 설치하기'}</button>
           <button onClick={handleDismiss} style={{

@@ -112,7 +112,7 @@ export default async function GlossaryTermPage({ params }: { params: Promise<{ s
       }) }} />
 
       <nav style={{ fontSize: '13px', color: 'var(--text-tertiary)', marginBottom: '16px' }}>
-        <Link href="/glossary" style={{ color: 'var(--primary)', textDecoration: 'none' }}>용어사전</Link>
+        <Link href="/glossary" style={{ color: 'var(--brand)', textDecoration: 'none' }}>용어사전</Link>
         <span style={{ margin: '0 6px' }}>›</span>
         <span>{term.term}</span>
       </nav>
@@ -122,7 +122,7 @@ export default async function GlossaryTermPage({ params }: { params: Promise<{ s
       </h1>
 
       <div style={{
-        background: 'var(--bg-secondary)',
+        background: 'var(--bg-surface)',
         borderRadius: '12px',
         padding: '20px 24px',
         marginBottom: '24px',
@@ -144,7 +144,7 @@ export default async function GlossaryTermPage({ params }: { params: Promise<{ s
         <div style={{ marginBottom: '24px' }}>
           <h2 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '8px' }}>예시</h2>
           <div style={{
-            background: 'var(--bg-tertiary, #f0f0f0)',
+            background: 'var(--bg-elevated, #f0f0f0)',
             padding: '14px 18px',
             borderRadius: '8px',
             fontSize: '14px',
@@ -167,11 +167,11 @@ export default async function GlossaryTermPage({ params }: { params: Promise<{ s
                 href={`/glossary/${r.slug}`}
                 style={{
                   padding: '6px 14px',
-                  background: 'var(--bg-secondary)',
+                  background: 'var(--bg-surface)',
                   borderRadius: '20px',
                   fontSize: '13px',
                   textDecoration: 'none',
-                  color: 'var(--primary)',
+                  color: 'var(--brand)',
                   border: '1px solid var(--border)',
                 }}
               >
@@ -193,7 +193,7 @@ export default async function GlossaryTermPage({ params }: { params: Promise<{ s
                 href={`/glossary/${s.slug}`}
                 style={{
                   padding: '6px 14px',
-                  background: 'var(--bg-secondary)',
+                  background: 'var(--bg-surface)',
                   borderRadius: '20px',
                   fontSize: '13px',
                   textDecoration: 'none',
@@ -222,7 +222,7 @@ export default async function GlossaryTermPage({ params }: { params: Promise<{ s
           href="/glossary"
           style={{
             padding: '10px 28px',
-            background: 'var(--primary)',
+            background: 'var(--brand)',
             color: '#fff',
             borderRadius: '8px',
             textDecoration: 'none',

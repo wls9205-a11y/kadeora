@@ -44,7 +44,7 @@ export default function AptFeedCard({ item }: { item: FeedItem }) {
     <Link href={item.href} style={{
       display: 'block',
       background: 'var(--bg-surface, #FFFFFF)',
-      border: '0.5px solid var(--border-base, #E5E7EB)',
+      border: '0.5px solid var(--border, #E5E7EB)',
       borderRadius: 7,
       overflow: 'hidden',
       textDecoration: 'none',

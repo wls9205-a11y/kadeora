@@ -90,14 +90,14 @@
       "label": "카더라 메인"
     },
     {
-      "src": "/images/previews/stock.png",
+      "src": "/images/previews/stock-preview.png",
       "sizes": "390x844",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "주식 시세"
     },
     {
-      "src": "/images/previews/feed.png",
+      "src": "/images/previews/feed-preview.png",
       "sizes": "390x844",
       "type": "image/png",
       "form_factor": "narrow",

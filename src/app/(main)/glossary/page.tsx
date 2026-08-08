@@ -79,7 +79,7 @@ export default async function GlossaryPage() {
 
       {Object.entries(grouped).map(([cat, items]) => (
         <section key={cat} style={{ marginBottom: '28px' }}>
-          <h2 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '10px', color: 'var(--primary)' }}>
+          <h2 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '10px', color: 'var(--brand)' }}>
             {CATEGORY_LABELS[cat] || cat}
           </h2>
           <div style={{
@@ -94,7 +94,7 @@ export default async function GlossaryPage() {
                 style={{
                   display: 'block',
                   padding: '12px 14px',
-                  background: 'var(--bg-secondary)',
+                  background: 'var(--bg-surface)',
                   borderRadius: '8px',
                   textDecoration: 'none',
                   color: 'inherit',

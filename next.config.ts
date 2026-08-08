@@ -16,6 +16,13 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   serverExternalPackages: ['pdf-parse'],
 
+  // s280: streaming metadata 비활성화 — /stock, /blog, /discuss/[id], /feed 등 generateMetadata가
+  // DB 조회로 느려지는 페이지에서 title/OG/canonical/robots가 실제 <head> 밖(body 스트리밍 영역)에
+  // 렌더링되어 카카오톡/네이버 등 JS 미실행 크롤러에 노출 안 되는 문제 확인.
+  // Vercel 엣지 캐시가 User-Agent별로 분리되지 않아 Next 기본 htmlLimitedBots(Googlebot 등)도
+  // 무력화됨 — 전체 UA에 대해 항상 blocking metadata를 강제해 근본 차단.
+  htmlLimitedBots: /.*/,
+
   // s263 Phase 2.1: og-stock / og-blog 회귀 — public/fonts trace 누락 시 satori 가
   // dynamic font fetch 시도 → "Failed to load dynamic font" → 매 분 5건 burst → 302 redirect.
   // 모든 og-* 라우트에 폰트 trace 명시.

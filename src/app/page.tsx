@@ -17,6 +17,9 @@ export const metadata: Metadata = {
   title: '카더라 — 오늘의 이슈 종목·청약·블로그',
   description: '오늘 가장 변동성 큰 종목, 마감 임박 청약, 인기 블로그를 한 화면에. 카더라 이슈 엔진 v1.',
   alternates: { canonical: SITE },
+  // s280: 홈은 (main) 라우트 그룹 밖이라 (main)/layout.tsx의 robots를 상속받지 못하고,
+  // 루트 layout은 의도적으로 robots를 비워둠 — 사이트 최중요 페이지에 robots 메타가 아예 없던 문제.
+  robots: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large', 'max-video-preview': -1 },
   openGraph: {
     title: '카더라 — 오늘의 이슈',
     description: '주식 시세, 아파트 청약, 미분양·재개발·실거래가, 커뮤니티 토론을 한 곳에서.',

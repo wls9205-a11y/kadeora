@@ -46,7 +46,6 @@ import BlogEarlyGateTeaser from '@/components/blog/BlogEarlyGateTeaser';
 import RelatedBlogsSection from '@/components/blog/RelatedBlogsSection';
 // s184: BlogSocialBar 제거 — 본문 직후 ShareButtons 1세트로 통합.
 import BlogFooterMeta from '@/components/blog/BlogFooterMeta';
-import BlogPostSchema from '@/components/schema/BlogPostSchema';
 import CardCarousel from '@/components/og/CardCarousel';
 // s189: AI Overview / 음성검색 인용 + YouTube 영상 schema
 import SpeakableSchema from '@/components/schema/SpeakableSchema';
@@ -901,29 +900,6 @@ export default async function BlogDetailPage({ params }: Props) {
       {datasetSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(datasetSchema) }} />}
       {eventSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(eventSchema) }} />}
 
-      <BlogPostSchema
-        post={{
-          slug: post.slug,
-          title: post.title,
-          excerpt: post.excerpt ?? null,
-          meta_description: post.meta_description ?? null,
-          category: post.category ?? null,
-          sub_category: post.sub_category ?? null,
-          cover_image: post.cover_image ?? null,
-          author_name: post.author_name ?? null,
-          author_role: post.author_role ?? null,
-          published_at: post.published_at ?? null,
-          created_at: post.created_at ?? null,
-          updated_at: post.updated_at ?? null,
-          rewritten_at: post.rewritten_at ?? null,
-          tags: post.tags ?? null,
-          og_cards: (post as any).og_cards ?? null,
-          faqs: null,
-          hub_cta_target: (post as any).hub_cta_target ?? null,
-          hub_apt_slug: (post as any).hub_apt_slug ?? null,
-        }}
-        origin={SITE}
-      />
       <CardCarousel
         slug={post.slug}
         name={post.title}

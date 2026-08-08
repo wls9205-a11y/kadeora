@@ -483,6 +483,7 @@ html.font-large {
   /* 시맨틱 액센트 (카테고리/상태별) — 세션70: 밝기 +10% */
   --accent-green:   #36F0B0;
   --accent-green-bg: rgba(54,240,176,0.12);
+  --accent-green-border: rgba(54,240,176,0.24);
   --accent-purple:  #C4A5FF;
   --accent-purple-bg: rgba(196,165,255,0.12);
   --accent-orange:  #FFB050;
@@ -587,6 +588,7 @@ html.theme-light {
   --stock-flat:     #6B7280;
   --accent-green:   #059669;
   --accent-green-bg: rgba(5,150,105,0.10);
+  --accent-green-border: rgba(5,150,105,0.20);
   --accent-purple:  #7C3AED;
   --accent-purple-bg: rgba(124,58,237,0.10);
   --accent-orange:  #EA580C;

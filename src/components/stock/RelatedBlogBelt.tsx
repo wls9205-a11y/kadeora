@@ -47,7 +47,7 @@ export default async function RelatedBlogBelt({ symbol, stockName }: Props) {
         </h2>
         <Link
           href={`/blog?q=${encodeURIComponent(stockName)}`}
-          style={{ fontSize: '12px', color: 'var(--primary)', textDecoration: 'none' }}
+          style={{ fontSize: '12px', color: 'var(--brand)', textDecoration: 'none' }}
         >
           더보기 →
         </Link>
@@ -65,7 +65,7 @@ export default async function RelatedBlogBelt({ symbol, stockName }: Props) {
               display: 'flex',
               gap: '10px',
               padding: '10px 12px',
-              background: 'var(--bg-secondary)',
+              background: 'var(--bg-surface)',
               borderRadius: 'var(--radius-md, 8px)',
               textDecoration: 'none',
               color: 'inherit',
@@ -83,7 +83,7 @@ export default async function RelatedBlogBelt({ symbol, stockName }: Props) {
                   borderRadius: '6px',
                   objectFit: 'cover',
                   flexShrink: 0,
-                  background: 'var(--bg-tertiary)',
+                  background: 'var(--bg-elevated)',
                 }}
                 loading="lazy"
               />
