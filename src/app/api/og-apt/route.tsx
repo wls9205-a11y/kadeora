@@ -107,12 +107,12 @@ function renderCover(site: AptRow): React.ReactElement {
     <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: 56 }}>
       <div style={{ display: 'flex', gap: 8 }}>
         <div style={{ background: '#FAC775', color: '#1A1A18', fontSize: 22, fontWeight: 800, padding: '6px 16px', borderRadius: 999 }}>{stLabel}</div>
-        {lcLabel && <div style={{ background: 'rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: 22, fontWeight: 700, padding: '6px 16px', borderRadius: 999 }}>{lcLabel}</div>}
+        {lcLabel ? <div style={{ background: 'rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: 22, fontWeight: 700, padding: '6px 16px', borderRadius: 999 }}>{lcLabel}</div> : null}
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         <div style={{ width: 56, height: 4, background: '#FAC775' }} />
         <div style={{ fontSize: nameFS, fontWeight: 900, color: '#FFFFFF', lineHeight: 1.1, letterSpacing: -2 }}>{site.name}</div>
-        {region && <div style={{ fontSize: 26, color: 'rgba(255,255,255,0.66)', fontWeight: 600 }}>{region}</div>}
+        {region ? <div style={{ fontSize: 26, color: 'rgba(255,255,255,0.66)', fontWeight: 600 }}>{region}</div> : null}
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'rgba(255,255,255,0.55)', fontSize: 18, fontWeight: 700 }}>
         <span>kadeora.app</span>
@@ -224,12 +224,12 @@ function renderPlace(site: AptRow): React.ReactElement {
         <div style={{ fontSize: 22, color: 'rgba(255,255,255,0.66)', fontWeight: 600, lineHeight: 1.4 }}>{site.address || site.dong || ''}</div>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {site.nearby_station && (
+        {site.nearby_station ? (
           <div style={{ display: 'flex', fontSize: 18, color: '#FFFFFF', fontWeight: 700 }}>역 {site.nearby_station}</div>
-        )}
-        {site.school_district && (
+        ) : null}
+        {site.school_district ? (
           <div style={{ display: 'flex', fontSize: 18, color: '#FFFFFF', fontWeight: 700 }}>학교 {site.school_district}</div>
-        )}
+        ) : null}
         <div style={{ fontSize: 16, color: 'rgba(255,255,255,0.55)', fontWeight: 700, marginTop: 4 }}>kadeora.app</div>
       </div>
     </div>

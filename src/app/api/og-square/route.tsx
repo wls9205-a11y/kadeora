@@ -99,7 +99,7 @@ export async function GET(req: NextRequest) {
             <span style={{ fontSize: 15, color: C.color, fontWeight: 700, letterSpacing: 2, marginBottom: 16 }}>{C.icon}  {C.label.toUpperCase()}</span>
             <div style={{ display: 'flex', flexDirection: 'column', fontSize: titleLine2 ? 56 : 68, fontWeight: 900, color: '#ffffff', lineHeight: 1.14, letterSpacing: -2, wordBreak: 'keep-all' }}>
               <span>{titleLine1}</span>
-              {titleLine2 && <span>{titleLine2}</span>}
+              {titleLine2 ? <span>{titleLine2}</span> : null}
             </div>
           </div>
         ) : (

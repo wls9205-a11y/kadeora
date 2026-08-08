@@ -105,7 +105,7 @@ function renderCover(post: BlogRow): React.ReactElement {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ display: 'flex', gap: 8 }}>
           <div style={{ background: '#FAC775', color: '#1A1A18', fontSize: 23, fontWeight: 800, padding: '7px 18px', borderRadius: 999 }}>{cat}</div>
-          {sub && <div style={{ background: 'rgba(255,255,255,0.14)', color: '#FFFFFF', fontSize: 22, fontWeight: 700, padding: '7px 16px', borderRadius: 999 }}>{sub}</div>}
+          {sub ? <div style={{ background: 'rgba(255,255,255,0.14)', color: '#FFFFFF', fontSize: 22, fontWeight: 700, padding: '7px 16px', borderRadius: 999 }}>{sub}</div> : null}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
           <div style={{ width: 26, height: 26, borderRadius: 7, background: '#FAC775' }} />

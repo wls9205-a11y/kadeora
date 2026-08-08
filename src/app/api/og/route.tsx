@@ -65,12 +65,12 @@ function D1(C: OgCategoryToken, title: string, sub: string, author: string, ff: 
       </div>
       {/* 스트라이프2: 메타 바 */}
       <div style={{ background:'#111', height:40, display:'flex', alignItems:'center', padding:'0 48px', gap:16, flexShrink:0, borderBottom:'0.5px solid rgba(255,255,255,.06)' }}>
-        {author && <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+        {author ? <div style={{ display:'flex', alignItems:'center', gap:8 }}>
           <div style={{ width: 20, height: 20, borderRadius:'50%', background:`linear-gradient(135deg,${C.color},#2563eb)`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:9, fontWeight:900, color:'#fff' }}>
             {author[0].toUpperCase()}
           </div>
           <span style={{ fontSize:12, color:'#6b7280' }}>{author}</span>
-        </div>}
+        </div> : null}
         <div style={{ flex:1, height:1, background:'rgba(255,255,255,.05)' }} />
         <div style={{ display:'flex', alignItems:'center', gap:6 }}>
           <div style={{ width:5, height:5, borderRadius:'50%', background:'#00FF87', boxShadow:'0 0 5px #00FF87' }} />
@@ -81,7 +81,7 @@ function D1(C: OgCategoryToken, title: string, sub: string, author: string, ff: 
       {/* 스트라이프3: 제목 — 캔버스 최대 활용 */}
       <div style={{ flex:1, display:'flex', flexDirection:'column', justifyContent:'center', padding:'0 48px' }}>
         <div style={{ fontSize: titleFS, fontWeight:900, color:'#fff', lineHeight:1.12, letterSpacing:-2, wordBreak:'keep-all' }}>{title}</div>
-        {sub && <div style={{ fontSize: 20, color:'#8b93a1', marginTop:18, lineHeight:1.5 }}>{sub}</div>}
+        {sub ? <div style={{ fontSize: 20, color:'#8b93a1', marginTop:18, lineHeight:1.5 }}>{sub}</div> : null}
       </div>
       {/* 스트라이프4: 얇은 액센트 바 */}
       <div style={{ background:C.color, height:10, flexShrink:0 }} />
@@ -114,14 +114,14 @@ function D2(C: OgCategoryToken, title: string, sub: string, author: string, ff: 
         <div style={{ position:'relative', zIndex:1, display:'flex', flexDirection:'column', alignItems:'center', gap:14 }}>
           <span style={{ fontSize:88, lineHeight:1 }}>{C.icon}</span>
           <div style={{ display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center' }}>
-            <div style={{ fontSize:25, fontWeight:900, color:'#000', letterSpacing:-0.3 }}>{C.label}</div>
-            <div style={{ fontSize:11, fontWeight:700, color:'rgba(0,0,0,0.42)', letterSpacing:2, marginTop:4 }}>{C.code}</div>
+            <div style={{ display:'flex', fontSize:25, fontWeight:900, color:'#000', letterSpacing:-0.3 }}>{C.label}</div>
+            <div style={{ display:'flex', fontSize:11, fontWeight:700, color:'rgba(0,0,0,0.42)', letterSpacing:2, marginTop:4 }}>{C.code}</div>
           </div>
         </div>
 
         {/* 하단: kadeora.app */}
-        <div style={{ position:'relative', zIndex:1 }}>
-          <div style={{ fontSize: 10, fontWeight:700, color:'rgba(0,0,0,0.28)', letterSpacing:0.5 }}>kadeora.app</div>
+        <div style={{ display:'flex', position:'relative', zIndex:1 }}>
+          <div style={{ display:'flex', fontSize: 10, fontWeight:700, color:'rgba(0,0,0,0.28)', letterSpacing:0.5 }}>kadeora.app</div>
         </div>
       </div>
 
@@ -139,17 +139,17 @@ function D2(C: OgCategoryToken, title: string, sub: string, author: string, ff: 
         {/* 중앙: 컬러 언더라인 + 제목 + 부제 */}
         <div style={{ display:'flex', flexDirection:'column', gap:0 }}>
           {/* 컬러 언더라인 24px */}
-          <div style={{ width:24, height:3, background:C.color, borderRadius: 999, marginBottom:18 }} />
+          <div style={{ display:'flex', width:24, height:3, background:C.color, borderRadius: 999, marginBottom:18 }} />
           {/* 제목 */}
-          <div style={{ fontSize:titleFS, fontWeight:900, color:'#ffffff', lineHeight:1.18, letterSpacing:-0.8, marginBottom:14, wordBreak:'keep-all' }}>
+          <div style={{ display:'flex', fontSize:titleFS, fontWeight:900, color:'#ffffff', lineHeight:1.18, letterSpacing:-0.8, marginBottom:14, wordBreak:'keep-all' }}>
             {title}
           </div>
           {/* 부제 */}
-          {sub && (
-            <div style={{ fontSize:15, color:'rgba(255,255,255,0.38)', lineHeight:1.6, letterSpacing:-0.1 }}>
+          {sub ? (
+            <div style={{ display:'flex', fontSize:15, color:'rgba(255,255,255,0.38)', lineHeight:1.6, letterSpacing:-0.1 }}>
               {sub}
             </div>
-          )}
+          ) : null}
         </div>
 
         {/* 하단: LIVE + 저자 + kadeora.app */}
@@ -160,7 +160,7 @@ function D2(C: OgCategoryToken, title: string, sub: string, author: string, ff: 
               <div style={{ width:6, height:6, borderRadius:'50%', background:'#00FF87' }} />
               <span style={{ fontSize:10, color:'rgba(255,255,255,0.25)', fontWeight:600, letterSpacing:0.5 }}>LIVE</span>
             </div>
-            {author && (
+            {author ? (
               <div style={{ display:'flex', alignItems:'center', gap:8 }}>
                 <div style={{ width:1, height:12, background:'rgba(255,255,255,0.12)' }} />
                 <div style={{ display:'flex', alignItems:'center', gap:6 }}>
@@ -170,7 +170,7 @@ function D2(C: OgCategoryToken, title: string, sub: string, author: string, ff: 
                   <span style={{ fontSize:11, color:'rgba(255,255,255,0.35)' }}>{author}</span>
                 </div>
               </div>
-            )}
+            ) : null}
           </div>
           <span style={{ fontSize:10, color:'rgba(255,255,255,0.18)', fontWeight:700, letterSpacing:0.3 }}>kadeora.app</span>
         </div>
@@ -199,19 +199,19 @@ function D3(C: OgCategoryToken, title: string, sub: string, author: string, ff: 
           <div style={{ fontSize:11, fontWeight:700, color:'rgba(0,0,0,.5)', letterSpacing:2, marginBottom:4 }}>{C.code}</div>
           <div style={{ display:'flex', fontSize: 18, fontWeight:900, color:'#000' }}>{C.label}  {C.icon}</div>
         </div>
-        {author && (
+        {author ? (
           <div style={{ display:'flex', alignItems:'center', gap: 8 }}>
             <div style={{ width:24, height:24, borderRadius:'50%', background:'rgba(0,0,0,.2)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:11, fontWeight:900, color:'#000' }}>{author[0].toUpperCase()}</div>
             <span style={{ fontSize:12, color:'rgba(0,0,0,.55)' }}>{author}</span>
           </div>
-        )}
+        ) : null}
         <div style={{ fontSize: 10, color:'rgba(0,0,0,.3)', fontWeight:700 }}>kadeora.app</div>
       </div>
       {/* 오른쪽 컨텐츠 */}
       <div style={{ position:'absolute', top:0, right:0, width:'58%', height:'100%', display:'flex', flexDirection:'column', justifyContent:'center', padding:'32px 36px 32px 48px', zIndex:2 }}>
         <div style={{ width:28, height:2, background:C.color, borderRadius: 999, marginBottom:18 }} />
         <div style={{ fontSize:titleFS, fontWeight:900, color:'#fff', lineHeight:1.18, letterSpacing:-1, marginBottom:12 }}>{title}</div>
-        {sub && <div style={{ fontSize:14, color:'#4b5563', lineHeight:1.55 }}>{sub}</div>}
+        {sub ? <div style={{ fontSize:14, color:'#4b5563', lineHeight:1.55 }}>{sub}</div> : null}
         <div style={{ display:'flex', alignItems:'center', gap:6, marginTop:20 }}>
           <span style={{ fontSize:11, color:C.color, fontWeight:700, padding:'3px 10px', background:C.dim, border:`1px solid ${C.color}50`, borderRadius:4 }}>{C.label}</span>
         </div>
@@ -237,12 +237,12 @@ function D4(C: OgCategoryToken, title: string, sub: string, author: string, ff: 
           <div style={{ fontSize:11, fontWeight:700, color:'rgba(0,0,0,.4)', letterSpacing:2 }}>{C.code}</div>
           <div style={{ display:'flex', fontSize: 19, fontWeight:900, color:'#000', marginTop:4 }}>{C.label}  {C.icon}</div>
         </div>
-        {author && (
+        {author ? (
           <div style={{ position:'relative', zIndex:1, display:'flex', alignItems:'center', gap: 8 }}>
             <div style={{ width:26, height:26, borderRadius:'50%', background:'rgba(0,0,0,.15)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:12, fontWeight:900, color:'#000' }}>{author[0].toUpperCase()}</div>
             <span style={{ fontSize:12, color:'rgba(0,0,0,.55)' }}>{author}</span>
           </div>
-        )}
+        ) : null}
         <div style={{ position:'relative', zIndex:1, fontSize: 10, color:'rgba(0,0,0,.3)', fontWeight:700 }}>kadeora.app</div>
       </div>
       {/* 오른쪽 흰 패널 */}
@@ -251,7 +251,7 @@ function D4(C: OgCategoryToken, title: string, sub: string, author: string, ff: 
         <div style={{ display:'flex', flexDirection:'column' }}>
           <div style={{ width:28, height:3, background:C.color, borderRadius: 999, marginBottom:16 }} />
           <div style={{ fontSize:titleFS, fontWeight:900, color:'#111', lineHeight:1.18, letterSpacing:-.8, marginBottom:10 }}>{title}</div>
-          {sub && <div style={{ fontSize:13, color:'#9ca3af', lineHeight:1.55 }}>{sub}</div>}
+          {sub ? <div style={{ fontSize:13, color:'#9ca3af', lineHeight:1.55 }}>{sub}</div> : null}
         </div>
         <div style={{ borderTop:'1px solid #f3f4f6', paddingTop:12, display:'flex', justifyContent:'flex-end' }}>
           <span style={{ fontSize:11, color:'#d1d5db', fontWeight:700 }}>kadeora.app</span>
@@ -283,7 +283,7 @@ function D5(C: OgCategoryToken, title: string, sub: string, author: string, ff: 
       <div style={{ flex:1, display:'flex', flexDirection:'column', justifyContent:'center', padding:'0 40px', position:'relative', zIndex:2 }}>
         <div style={{ width:24, height:2, background:C.color, borderRadius: 999, marginBottom:16, boxShadow:`0 0 8px ${C.color}` }} />
         <div style={{ fontSize:titleFS, fontWeight:900, color:'#fff', lineHeight:1.14, letterSpacing:-1.2, marginBottom:12 }}>{title}</div>
-        {sub && <div style={{ fontSize:15, color:'#374151', lineHeight:1.55 }}>{sub}</div>}
+        {sub ? <div style={{ fontSize:15, color:'#374151', lineHeight:1.55 }}>{sub}</div> : null}
       </div>
       {/* 하단 */}
       <div style={{ display:'flex', alignItems:'center', padding:'14px 40px 20px', position:'relative', zIndex:2, borderTop:`1px solid ${C.color}20` }}>
@@ -497,7 +497,7 @@ function D6(C: OgCategoryToken, title: string, sub: string, author: string, ff: 
           <span style={{ fontSize:12, color:'rgba(255,255,255,.5)', letterSpacing:1.5, fontWeight:700 }}>{C.code}</span>
         </div>
         <div style={{ fontSize:titleFS, fontWeight:900, color:'#fff', lineHeight:1.15, letterSpacing:-1.2, marginBottom:12 }}>{title}</div>
-        {sub && <div style={{ fontSize:16, color:'rgba(255,255,255,.5)', lineHeight:1.55 }}>{sub}</div>}
+        {sub ? <div style={{ fontSize:16, color:'rgba(255,255,255,.5)', lineHeight:1.55 }}>{sub}</div> : null}
       </div>
       {/* 하단 */}
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'16px 44px 22px', position:'relative', zIndex:2 }}>
