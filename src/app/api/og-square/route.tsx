@@ -112,7 +112,7 @@ export async function GET(req: NextRequest) {
         )}
 
         {/* 스트라이프 하단: 얇은 액센트 바 */}
-        <div style={{ background: C.color, height: 10, flexShrink: 0 }} />
+        <div style={{ display:'flex', background: C.color, height: 10, flexShrink: 0 }} />
 
       </div>,
       { width: 630, height: 630, ...opts }

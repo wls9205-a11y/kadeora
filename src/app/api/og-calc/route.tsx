@@ -79,7 +79,7 @@ export async function GET(req: NextRequest) {
         </div>
 
         {/* 라벨 */}
-        <div style={{ fontSize: 32, fontWeight: 500, color: '#cbd5e1', marginTop: 30, lineHeight: 1.3 }}>
+        <div style={{ display:'flex', fontSize: 32, fontWeight: 500, color: '#cbd5e1', marginTop: 30, lineHeight: 1.3 }}>
           {label}
         </div>
 

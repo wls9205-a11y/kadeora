@@ -53,14 +53,14 @@ export async function GET(req: NextRequest) {
     }}>
       {/* 헤더 */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
-        <div style={{ background: cat.accent, color: '#000', padding: '4px 14px', borderRadius: '20px', fontSize: '18px', fontWeight: 700 }}>
+        <div style={{ display:'flex', background: cat.accent, color: '#000', padding: '4px 14px', borderRadius: '20px', fontSize: '18px', fontWeight: 700 }}>
           {cat.label}
         </div>
-        <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.5)' }}>kadeora.app</div>
+        <div style={{ display:'flex', fontSize: '14px', color: 'rgba(255,255,255,0.5)' }}>kadeora.app</div>
       </div>
 
       {/* 제목 */}
-      <div style={{ fontSize: '32px', fontWeight: 700, lineHeight: 1.3, marginBottom: '32px', maxWidth: '90%' }}>
+      <div style={{ display:'flex', fontSize: '32px', fontWeight: 700, lineHeight: 1.3, marginBottom: '32px', maxWidth: '90%' }}>
         {title.slice(0, 50)}
       </div>
 
@@ -72,16 +72,16 @@ export async function GET(req: NextRequest) {
             background: 'rgba(255,255,255,0.06)', borderRadius: '12px', padding: '16px 24px',
             borderLeft: `3px solid ${cat.accent}`,
           }}>
-            <div style={{ fontSize: '18px', color: 'rgba(255,255,255,0.8)' }}>{item.label}</div>
-            <div style={{ fontSize: '24px', fontWeight: 700, color: cat.accent }}>{item.value}</div>
+            <div style={{ display:'flex', fontSize: '18px', color: 'rgba(255,255,255,0.8)' }}>{item.label}</div>
+            <div style={{ display:'flex', fontSize: '24px', fontWeight: 700, color: cat.accent }}>{item.value}</div>
           </div>
         ))}
       </div>
 
       {/* 푸터 */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '24px', paddingTop: '16px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-        <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.4)' }}>카더라 — 부동산·주식·재테크 정보</div>
-        <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.4)' }}>{new Date().toISOString().slice(0, 10)}</div>
+        <div style={{ display:'flex', fontSize: '14px', color: 'rgba(255,255,255,0.4)' }}>카더라 — 부동산·주식·재테크 정보</div>
+        <div style={{ display:'flex', fontSize: '14px', color: 'rgba(255,255,255,0.4)' }}>{new Date().toISOString().slice(0, 10)}</div>
       </div>
     </div>
   );
