@@ -227,6 +227,8 @@ button, input, select, textarea { font-family: inherit; }
   --fs-lg: 21px;
   --fs-xl: 24px;
   --fs-2xl: 32px;
+  /* s280: --font-mono 미정의였음 (globals.css 자체 blog-content code 규칙 포함 다수 곳에서 폴백만 타던 상태) */
+  --font-mono: 'SF Mono', 'Consolas', 'Menlo', monospace;
 }
 
 html.font-small {
@@ -494,6 +496,7 @@ html.font-large {
   --accent-red-bg:  rgba(255,120,120,0.12);
   --accent-blue:    #7CC0FF;
   --accent-blue-bg: rgba(124,192,255,0.12);
+  --accent-cyan:    #22D3EE;
 
   /* Stock colors — KR (빨강↑ 파랑↓) */
   --stock-kr-up:        #FF5252;
@@ -543,6 +546,7 @@ html.font-large {
   --shadow-md: 0 2px 8px rgba(0,0,0,0.6);
   --shadow-lg: 0 8px 24px rgba(0,0,0,0.7);
   --shadow-xl: 0 16px 40px rgba(0,0,0,0.8);
+  --shadow-color: rgba(0,0,0,0.4);
 }
 
 /* 다크모드 단일 테마 — 라이트모드 제거됨 */
@@ -599,6 +603,7 @@ html.theme-light {
   --accent-red-bg:  rgba(220,38,38,0.10);
   --accent-blue:    #2563EB;
   --accent-blue-bg: rgba(37,99,235,0.10);
+  --accent-cyan:    #0891B2;
 
   /* Stock colors — KR */
   --stock-kr-up:        #D32F2F;
@@ -647,6 +652,7 @@ html.theme-light {
   --shadow-md: 0 2px 8px rgba(0,0,0,0.10);
   --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
   --shadow-xl: 0 16px 40px rgba(0,0,0,0.15);
+  --shadow-color: rgba(0,0,0,0.15);
   color-scheme: light;
 }
 /* s239 W6: body/html !important 제거 — specificity 충돌 풀면서 component override 가능. input/textarea 는 third-party 호환 위해 keep. */

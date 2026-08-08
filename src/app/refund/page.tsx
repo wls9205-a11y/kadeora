@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   alternates: { canonical: SITE_URL + '/refund' },
   title: '환불정책',
   description: '카더라 환불 및 청약철회 정책',
+  robots: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large', 'max-video-preview': -1 },
   openGraph: { title: '환불정책', description: '카더라 환불 및 청약철회 정책', url: `${SITE_URL}/refund`, siteName: '카더라', locale: 'ko_KR', type: 'website' },
 };
 

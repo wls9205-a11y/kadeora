@@ -149,7 +149,7 @@ export default async function GlossaryTermPage({ params }: { params: Promise<{ s
             borderRadius: '8px',
             fontSize: '14px',
             lineHeight: 1.7,
-            fontFamily: 'var(--monospace-font, monospace)',
+            fontFamily: 'var(--font-mono, monospace)',
           }}>
             {term.example}
           </div>
