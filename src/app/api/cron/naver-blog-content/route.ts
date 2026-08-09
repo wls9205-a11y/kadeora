@@ -1,5 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { withCronLogging } from '@/lib/cron-logger';
+import { withCronAuth } from '@/lib/cron-auth';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { SITE_URL, AI_MODEL_HAIKU, ANTHROPIC_VERSION } from '@/lib/constants';
 
@@ -169,7 +170,7 @@ JSON만 출력하세요. 다른 텍스트 없이.`;
   }
 }
 
-export async function GET(req: NextRequest) {
+export const GET = withCronAuth(async () => {
   const result = await withCronLogging('naver-blog-content', doWork);
   return NextResponse.json(result);
-}
+});
