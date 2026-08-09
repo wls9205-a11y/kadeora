@@ -95,18 +95,37 @@ async function fetchByTab(tab: string, limit = 30): Promise<{ kind: 'issue' | 'p
     return { kind: 'plain', rows: (data ?? []) as StockRow[] };
   }
   if (tab === 'foreign') {
-    // stock_investor_flow 최신 날짜의 (foreign_buy - foreign_sell) DESC top N
-    // → join 으로 stock_quotes 메타 첨부
+    // s274 정확성 수정.
+    //
+    // 이전 구현은 날짜 필터 없이 date DESC 로 limit*2(=60) 행을 가져왔다.
+    // stock_investor_flow 는 하루 10행만 쌓이므로 그 60행은 실제로 6영업일치가
+    // 섞인 집합이었고, map 이 심볼별 '여러 날 중 최대 net' 을 골라서
+    // "오늘 외국인 순매수" 라는 라벨과 다른 값을 보여주고 있었다.
+    // 정렬 키도 net 이 아니라 foreign_buy(총매수) 였다 — 매수·매도가 둘 다 큰
+    // 종목이 상위를 차지하고 실제 순매수 종목이 밀려났다.
+    //
+    // 최신 날짜를 먼저 찾고 그 날짜만 조회한다. 하루 10행이라 전량 가져와
+    // net 정렬이 근사 없이 정확하다.
+    const { data: latest } = await (sb as any).from('stock_investor_flow')
+      .select('date').order('date', { ascending: false }).limit(1).maybeSingle();
+    if (!latest?.date) return { kind: 'plain', rows: [] };
+
     const { data: flow } = await (sb as any).from('stock_investor_flow')
-      .select('symbol, foreign_buy, foreign_sell, date')
-      .order('date', { ascending: false })
-      .order('foreign_buy', { ascending: false }).limit(limit * 2);
+      .select('symbol, foreign_buy, foreign_sell')
+      .eq('date', latest.date)
+      .limit(limit);
+    // 탭 이름이 '외국인 순매수 상위' 이므로 순매도(net<=0) 종목은 넣지 않는다.
+    // 예: 2026-08-07 기준 000660 은 net -100,000 인데 구현 결함 탓에 순매수
+    // 2위로 표시되고 있었다. 건수가 적어지더라도 틀린 부호를 보이는 것보다 낫다.
+    //
+    // 참고: stock_investor_flow 는 하루 10행만 적재되므로 이 탭은 구조적으로
+    // 최대 10종목이다. 더 넓히려면 수집 크론 쪽을 손봐야 한다.
     const map = new Map<string, number>();
     for (const r of (flow ?? []) as { symbol: string; foreign_buy: number | null; foreign_sell: number | null }[]) {
       const net = (r.foreign_buy ?? 0) - (r.foreign_sell ?? 0);
-      if (!map.has(r.symbol) || net > (map.get(r.symbol) ?? 0)) map.set(r.symbol, net);
+      if (net > 0) map.set(r.symbol, net);
     }
-    const symbols = Array.from(map.entries()).sort((a, b) => b[1] - a[1]).slice(0, limit).map((e) => e[0]);
+    const symbols = Array.from(map.entries()).sort((a, b) => b[1] - a[1]).map((e) => e[0]);
     if (symbols.length === 0) return { kind: 'plain', rows: [] };
     const { data: q } = await (sb as any).from('stock_quotes').select(baseCols)
       .in('symbol', symbols);
