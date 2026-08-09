@@ -274,11 +274,11 @@
     },
     {
       "path": "/api/cron/blog-apt-v2",
-      "schedule": "0 8 * * 3,6"
+      "schedule": "0 8 * * 3"
     },
     {
       "path": "/api/cron/blog-stock-v2",
-      "schedule": "0 10 * * 2,5"
+      "schedule": "0 10 * * 2"
     },
     {
       "path": "/api/cron/blog-publish-queue",
