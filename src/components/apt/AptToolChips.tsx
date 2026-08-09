@@ -10,7 +10,26 @@ const TOOLS = [
   { href: '/apt/compare', label: '단지 비교', icon: '⚖️', desc: '조건 비교' },
 ] as const;
 
-export default function AptToolChips() {
+type Props = {
+  /** 현재 선택된 시·도. '전국' 이면 재개발 허브 인덱스로 보낸다. */
+  region?: string;
+};
+
+// s274 — /apt/redev/{지역} 은 네이버 유입 2위(30일 188건, 울산 단독 99건) 인데
+// 드로어 메뉴에서 한 번 링크될 뿐 /apt 본문에서 연결되지 않았다. 지역 문맥을 살려 붙인다.
+export default function AptToolChips({ region }: Props = {}) {
+  const redevHref =
+    region && region !== '전국' ? `/apt/redev/${encodeURIComponent(region)}` : '/apt/redev';
+  const tools = [
+    ...TOOLS,
+    {
+      href: redevHref,
+      label: region && region !== '전국' ? `${region} 재개발` : '재개발·재건축',
+      icon: '🏗️',
+      desc: '정비사업 단계·현황',
+    },
+  ];
+
   return (
     <nav aria-label="청약 도구" style={{ margin: '0 0 18px', padding: '0 6px' }}>
       <div
@@ -20,7 +39,7 @@ export default function AptToolChips() {
           gap: 8,
         }}
       >
-        {TOOLS.map((t) => (
+        {tools.map((t) => (
           <Link
             key={t.href}
             href={t.href}

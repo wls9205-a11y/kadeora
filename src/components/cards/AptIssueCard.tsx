@@ -48,11 +48,12 @@ export default function AptIssueCard({ data, commentCount = 0, commentHot = fals
         padding: '6px 9px',
         margin: 3,
         borderRadius: 6,
-        background: '#FFFFFF',
+        // s274 Rule #94 — StockIssueCard 와 동일. 인라인 hex 는 테마로 덮이지 않는다.
+        background: 'var(--bg-surface, #0D1730)',
         borderLeft: `3px solid ${bar}`,
         boxShadow: '0 1px 1px rgba(0,0,0,0.04)',
         textDecoration: 'none',
-        color: '#111827',
+        color: 'var(--text-primary, #F2F5FA)',
       }}
     >
       {/* Row 1: [score] [name] [pyeong] [dday chip] */}
@@ -62,7 +63,7 @@ export default function AptIssueCard({ data, commentCount = 0, commentHot = fals
           {data.house_nm}
         </span>
         {data.price_per_pyeong ? (
-          <span style={{ fontSize: 11.5, fontVariantNumeric: 'tabular-nums', color: '#374151' }}>
+          <span style={{ fontSize: 11.5, fontVariantNumeric: 'tabular-nums', color: 'var(--text-secondary, #B8CCDF)' }}>
             {formatPyeong(data.price_per_pyeong)}
           </span>
         ) : null}
@@ -84,7 +85,7 @@ export default function AptIssueCard({ data, commentCount = 0, commentHot = fals
 
       {/* Row 2 */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
-        <span style={{ fontSize: 11, color: '#6B7280', whiteSpace: 'nowrap' }}>
+        <span style={{ fontSize: 11, color: 'var(--text-tertiary, #8BA3C0)', whiteSpace: 'nowrap' }}>
           {data.region_nm ?? ''}
           {data.mdatrgbn_nm ? ` · ${data.mdatrgbn_nm}` : ''}
           {data.competition_rate_1st ? ` · ${data.competition_rate_1st.toFixed(1)}:1` : ''}

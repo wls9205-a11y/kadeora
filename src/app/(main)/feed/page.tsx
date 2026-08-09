@@ -1,7 +1,13 @@
 import type { Metadata } from 'next';
 import { SITE_URL } from '@/lib/constants';
 import LoginGate from '@/components/LoginGate';
-export const metadata: Metadata = {
+
+// s274 — 정적 metadata → generateMetadata.
+// getPublicPosts 가 타임아웃/빈 결과로 DEMO_POSTS 폴백을 타면 그 응답이 revalidate=60
+// ISR 캐시에 그대로 박히고, 그 60초에 Yeti 가 걸리면 데모 글이 실제 콘텐츠로 색인된다.
+// 폴백일 때만 noindex 를 내보내야 하므로 metadata 도 같은 쿼리 결과를 봐야 한다.
+// React cache() 로 감싸서 generateMetadata 와 페이지가 쿼리를 한 번만 실행한다.
+const BASE_METADATA: Metadata = {
   title: '커뮤니티 피드',
   description: '주식, 부동산, 청약, 재테크 소문과 정보를 나누는 카더라 커뮤니티. 실시간 투자 이야기를 나누세요.',
   alternates: { canonical: SITE_URL + '/feed' },
@@ -28,7 +34,7 @@ export const metadata: Metadata = {
   },
   twitter: { card: 'summary_large_image', title: '카더라 커뮤니티 피드', description: '주식·부동산·청약 실시간 소식' },
 };
-import { Suspense } from 'react';
+import { Suspense, cache } from 'react';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { DEMO_POSTS } from '@/lib/constants';
@@ -45,24 +51,26 @@ const withTimeout = <T,>(p: PromiseLike<T>, ms = 5000): Promise<T | null> =>
 
 type SortKey = 'latest' | 'popular' | 'comments';
 
-async function getPosts(category: string, region: string = 'all', sort: SortKey = 'latest', userId?: string) {
+// 팔로잉 피드: 내가 팔로우하는 유저의 글만. 로그인 전용이라 색인 대상이 아니다.
+async function getFollowingPosts(userId?: string) {
+  if (!userId) return null;
   const sb = await createSupabaseServer();
+  const { data: follows } = await sb.from('follows').select('followee_id').eq('follower_id', userId);
+  const ids = (follows ?? []).map((f: { followee_id: string }) => f.followee_id);
+  if (ids.length === 0) return [] as unknown as PostWithProfile[];
+  const { data } = await sb.from('posts')
+    .select('id,title,excerpt,category,created_at,likes_count,comments_count,view_count,bookmarks_count,is_pinned,is_anonymous,author_id,region_id,images,tags,stock_tags,apt_tags,post_type,profiles!posts_author_id_fkey(id,nickname,avatar_url,grade)')
+    .eq('is_deleted', false)
+    .in('author_id', ids)
+    .order('created_at', { ascending: false })
+    .limit(30);
+  return (data ?? []) as unknown as PostWithProfile[];
+}
 
-  // 팔로잉 피드: 내가 팔로우하는 유저의 글만
-  if (category === 'following') {
-    if (!userId) return null;
-    const { data: follows } = await sb.from('follows').select('followee_id').eq('follower_id', userId);
-    const ids = (follows ?? []).map((f: { followee_id: string }) => f.followee_id);
-    if (ids.length === 0) return [] as unknown as PostWithProfile[];
-    const { data } = await sb.from('posts')
-      .select('id,title,excerpt,category,created_at,likes_count,comments_count,view_count,bookmarks_count,is_pinned,is_anonymous,author_id,region_id,images,tags,stock_tags,apt_tags,post_type,profiles!posts_author_id_fkey(id,nickname,avatar_url,grade)')
-      .eq('is_deleted', false)
-      .in('author_id', ids)
-      .order('created_at', { ascending: false })
-      .limit(30);
-    return (data ?? []) as unknown as PostWithProfile[];
-  }
-
+// cache() — 같은 인자로 호출되면 요청 내에서 한 번만 실행. generateMetadata 와 페이지
+// 본문이 동일한 결과(= 폴백 여부까지)를 보게 하려는 목적.
+const getPublicPosts = cache(async (category: string, region: string, sort: SortKey) => {
+  const sb = await createSupabaseServer();
   const orderCol = sort === 'popular' ? 'likes_count' : sort === 'comments' ? 'comments_count' : 'created_at';
   let q = sb.from('posts')
     .select('id,title,excerpt,category,created_at,likes_count,comments_count,view_count,bookmarks_count,is_pinned,is_anonymous,author_id,region_id,images,tags,stock_tags,apt_tags,post_type,profiles!posts_author_id_fkey(id,nickname,avatar_url,grade)')
@@ -77,14 +85,38 @@ async function getPosts(category: string, region: string = 'all', sort: SortKey 
   const data = (result as { data?: PostWithProfile[] } | null)?.data;
   if (!data || data.length === 0) return null;
   return data as unknown as PostWithProfile[];
-}
+});
 
 
 interface Props { searchParams: Promise<{ category?: string; region?: string; sort?: string }>; }
 
+function parseParams(sp: { category?: string; region?: string; sort?: string }) {
+  const category = sp.category ?? 'all';
+  const region = sp.region ?? 'all';
+  const sort = sp.sort ?? 'latest';
+  const validSort = (['latest', 'popular', 'comments'] as SortKey[]).includes(sort as SortKey)
+    ? (sort as SortKey)
+    : 'latest';
+  return { category, region, validSort };
+}
+
+export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
+  const { category, region, validSort } = parseParams(await searchParams);
+
+  // 팔로잉 탭은 로그인 전용 → 항상 noindex. 그 외에는 실제 글이 하나라도 있을 때만 색인.
+  if (category === 'following') {
+    return { ...BASE_METADATA, robots: { index: false, follow: true } };
+  }
+  let hasRealPosts = false;
+  try {
+    hasRealPosts = (await getPublicPosts(category, region, validSort)) != null;
+  } catch { /* 조회 실패 = 폴백 렌더 = noindex */ }
+
+  return hasRealPosts ? BASE_METADATA : { ...BASE_METADATA, robots: { index: false, follow: true } };
+}
+
 export default async function FeedPage({ searchParams }: Props) {
-  const { category = 'all', region = 'all', sort = 'latest' } = await searchParams;
-  const validSort = (['latest', 'popular', 'comments'] as SortKey[]).includes(sort as SortKey) ? sort as SortKey : 'latest';
+  const { category, region, validSort } = parseParams(await searchParams);
 
   // 로그인 여부 확인 (팔로잉 탭 + AnonymousFeedHero 양쪽에서 사용)
   let userId: string | undefined;
@@ -107,7 +139,11 @@ export default async function FeedPage({ searchParams }: Props) {
     }
   }
 
-  const postsData = await Promise.allSettled([getPosts(category, region, validSort, userId)]);
+  const postsData = await Promise.allSettled([
+    category === 'following'
+      ? getFollowingPosts(userId)
+      : getPublicPosts(category, region, validSort),
+  ]);
   const posts = postsData[0].status === 'fulfilled' && postsData[0].value != null ? postsData[0].value : category === 'all' ? DEMO_POSTS : DEMO_POSTS.filter(p => p.category === category);
   return (
     <Suspense>

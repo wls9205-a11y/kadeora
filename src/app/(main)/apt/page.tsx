@@ -114,8 +114,8 @@ export default async function AptPage({
       {/* ① 청약 타임라인 히어로 */}
       <SubscriptionTimeline items={hub.timeline} region={hub.region} />
 
-      {/* ② 도구 칩 — 데이터가 0건인 날에도 항상 노출 */}
-      <AptToolChips />
+      {/* ② 도구 칩 — 데이터가 0건인 날에도 항상 노출. 재개발 칩은 현재 지역을 따라간다. */}
+      <AptToolChips region={hub.region} />
 
       {/* ③ 청약 카드 리스트 */}
       <section style={{ padding: '0 6px' }} aria-labelledby="apt-cards-heading">

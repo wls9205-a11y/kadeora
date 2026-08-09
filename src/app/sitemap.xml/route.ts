@@ -42,7 +42,26 @@ export async function GET() {
     blogChunks = 4;
   }
   const BLOG_IDS = Array.from({ length: blogChunks }, (_, i) => 8 + i);
-  const ALL_IDS = [...FIXED_IDS_PRE_BLOG, ...BLOG_IDS, ...FIXED_IDS_POST_BLOG];
+
+  // s274: 31 (인기 계산기 결과, view_count>5 && 미만료) 은 조건을 만족하는 행이 없으면
+  // URL 0개짜리 빈 사이트맵이 되는데, 그게 인덱스에 실려 서치어드바이저에서 오류로 잡힌다.
+  // 실제로 채워질 때만 인덱스에 올린다. 조회 실패 시엔 보수적으로 제외.
+  let hasPopularCalcResults = false;
+  try {
+    const sb = getSupabaseAdmin();
+    const { count } = await (sb as any).from('calc_results')
+      .select('short_id', { count: 'exact', head: true })
+      .gt('view_count', 5)
+      .gt('expires_at', new Date().toISOString());
+    hasPopularCalcResults = (count ?? 0) > 0;
+  } catch {
+    hasPopularCalcResults = false;
+  }
+  const POST_BLOG_IDS = hasPopularCalcResults
+    ? FIXED_IDS_POST_BLOG
+    : FIXED_IDS_POST_BLOG.filter((id) => id !== 31);
+
+  const ALL_IDS = [...FIXED_IDS_PRE_BLOG, ...BLOG_IDS, ...POST_BLOG_IDS];
 
   const subSitemaps = ALL_IDS.map(id => `  <sitemap>
     <loc>${SITE_URL}/sitemap/${id}.xml</loc>

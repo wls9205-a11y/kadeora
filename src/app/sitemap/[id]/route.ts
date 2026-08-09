@@ -66,8 +66,11 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
     const staticPaths = [
       '', '/feed', '/hot', '/stock', '/apt', '/discuss', '/blog', '/about',
       '/guide', '/search', '/faq', '/terms', '/privacy', '/refund', '/shop',
-      '/grades', '/apt/map', '/apt/diagnose', '/apt/complex', '/apt/redev', '/stock/compare', '/blog/series',
-      '/apt/data', '/stock/data', '/stock/search', '/stock/dividend', '/stock/movers', '/stock/themes',
+      // s274: '/apt/map' 과 '/apt/data' 는 robots.txt 에서 Disallow (s235 dead route) 인데
+      // 사이트맵에는 남아 있어 "차단된 URL 을 제출" 경고가 뜬다. 사이트맵에서 제외.
+      // (사용자용 링크는 유지 — Disallow 는 크롤러에만 적용된다.)
+      '/grades', '/apt/diagnose', '/apt/complex', '/apt/redev', '/stock/compare', '/blog/series',
+      '/stock/data', '/stock/search', '/stock/dividend', '/stock/movers', '/stock/themes',
       '/stock/market/kospi', '/stock/market/kosdaq', '/stock/market/nyse', '/stock/market/nasdaq',
       '/stock/short-selling', '/stock/signals',
       '/calc', '/press', '/glossary', '/premium',

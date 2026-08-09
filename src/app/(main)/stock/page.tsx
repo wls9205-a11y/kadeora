@@ -5,7 +5,6 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { SITE_URL } from '@/lib/constants';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import StockIssueCard from '@/components/cards/StockIssueCard';
 import StockIssueCardV2 from '@/components/cards/v2/StockIssueCardV2';
@@ -42,6 +41,7 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
     title: m.title,
     description: m.description,
     alternates: { canonical: m.canonical },
+    ...(m.noindex ? { robots: { index: false, follow: true } } : {}),
     openGraph: {
       title: m.title,
       description: m.description,
@@ -169,9 +169,10 @@ export default async function StockPage({ searchParams }: { searchParams: Promis
             position: 'sticky', top: 44, zIndex: 10,
             display: 'flex', flexWrap: 'wrap', gap: 4,
             padding: '8px 6px', margin: '0 -6px 8px',
-            background: 'rgba(255,255,255,0.92)',
+            // s274 Rule #94 — 다크 테마에서 흰 띠가 나오던 하드코딩 제거.
+            background: 'var(--bg-surface-translucent, rgba(13,23,48,0.92))',
             backdropFilter: 'blur(8px)',
-            borderBottom: '1px solid #E5E7EB',
+            borderBottom: '1px solid var(--border, #1E3258)',
           }}
         >
           {TAB_LABELS.map((t) => {
@@ -188,8 +189,9 @@ export default async function StockPage({ searchParams }: { searchParams: Promis
                   borderRadius: 999,
                   fontSize: 12,
                   fontWeight: active ? 700 : 600,
-                  background: active ? '#111827' : '#F3F4F6',
-                  color: active ? '#FFFFFF' : '#374151',
+                  background: active ? 'var(--brand, #4A8AF7)' : 'var(--bg-elevated, #132040)',
+                  color: active ? '#FFFFFF' : 'var(--text-secondary, #B8CCDF)',
+                  border: '1px solid var(--border, #1E3258)',
                   textDecoration: 'none',
                   whiteSpace: 'nowrap',
                 }}
@@ -243,16 +245,16 @@ function PlainList({ rows, tab }: { rows: StockRow[]; tab: string }) {
             style={{
               display: 'flex', alignItems: 'center', gap: 8,
               padding: '8px 9px', margin: 3, borderRadius: 6,
-              background: '#FFFFFF', borderLeft: `3px solid ${stockBarColor(tone)}`,
+              background: 'var(--bg-surface, #0D1730)', borderLeft: `3px solid ${stockBarColor(tone)}`,
               boxShadow: '0 1px 1px rgba(0,0,0,0.04)',
-              textDecoration: 'none', color: '#111827',
+              textDecoration: 'none', color: 'var(--text-primary, #F2F5FA)',
             }}
           >
             <span style={{ flex: 1, minWidth: 0, fontSize: 12.5, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {r.name}
             </span>
-            <span style={{ fontSize: 11, color: '#6B7280', whiteSpace: 'nowrap' }}>{r.market}</span>
-            <span style={{ fontSize: 11.5, fontVariantNumeric: 'tabular-nums', color: '#374151', whiteSpace: 'nowrap' }}>
+            <span style={{ fontSize: 11, color: 'var(--text-tertiary, #8BA3C0)', whiteSpace: 'nowrap' }}>{r.market}</span>
+            <span style={{ fontSize: 11.5, fontVariantNumeric: 'tabular-nums', color: 'var(--text-secondary, #B8CCDF)', whiteSpace: 'nowrap' }}>
               {r.price ? Number(r.price).toLocaleString() : '-'}
             </span>
             <span style={{ ...chip, padding: '1px 6px', borderRadius: 3, fontSize: 11, lineHeight: 1.4, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
@@ -267,7 +269,7 @@ function PlainList({ rows, tab }: { rows: StockRow[]; tab: string }) {
 
 function Empty({ label }: { label: string }) {
   return (
-    <div style={{ padding: 16, margin: 3, borderRadius: 6, background: '#F9FAFB', border: '1px solid #E5E7EB', fontSize: 12, color: '#9CA3AF', textAlign: 'center' }}>
+    <div style={{ padding: 16, margin: 3, borderRadius: 6, background: 'var(--bg-surface, #0D1730)', border: '1px solid var(--border, #1E3258)', fontSize: 12, color: 'var(--text-tertiary, #8BA3C0)', textAlign: 'center' }}>
       {label}
     </div>
   );
