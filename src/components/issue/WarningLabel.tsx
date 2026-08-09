@@ -11,21 +11,14 @@ type Props = {
 export default function WarningLabel({ warning }: Props) {
   if (!warning || !WARNING_LABELS[warning]) return null;
   return (
+    // s274 — 레이아웃은 .kd-chip--warn, 색은 WARNING_STYLE 그대로 변수 전달.
     <span
+      className="kd-chip kd-chip--warn"
       style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 2,
-        padding: '1px 6px',
-        borderRadius: 3,
-        fontSize: 11,
-        fontWeight: 600,
-        lineHeight: 1.4,
-        background: WARNING_STYLE.background,
-        color: WARNING_STYLE.color,
-        border: `1px solid ${WARNING_STYLE.border}`,
-        whiteSpace: 'nowrap',
-      }}
+        '--kd-c-bg': WARNING_STYLE.background,
+        '--kd-c-fg': WARNING_STYLE.color,
+        '--kd-c-bd': WARNING_STYLE.border,
+      } as React.CSSProperties}
       role="status"
     >
       <span aria-hidden>⚠️</span>

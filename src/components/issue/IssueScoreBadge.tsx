@@ -11,24 +11,11 @@ type Props = {
 export default function IssueScoreBadge({ score, size = 'sm' }: Props) {
   const v = scoreToDisplay(score);
   const tone = v >= 70 ? '#DC2626' : v >= 50 ? '#EF4444' : '#6B7280';
-  const fontSize = size === 'md' ? 13 : 11.5;
+  // s274 — 레이아웃은 .kd-badge (components.css), 색만 변수로.
   return (
     <span
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minWidth: size === 'md' ? 32 : 26,
-        height: size === 'md' ? 22 : 18,
-        padding: '0 6px',
-        borderRadius: 4,
-        background: tone,
-        color: '#FFFFFF',
-        fontSize,
-        fontWeight: 700,
-        fontVariantNumeric: 'tabular-nums',
-        lineHeight: 1,
-      }}
+      className={size === 'md' ? 'kd-badge kd-badge--md' : 'kd-badge'}
+      style={{ '--kd-c-bg': tone } as React.CSSProperties}
       aria-label={`이슈 점수 ${v}`}
     >
       {v}

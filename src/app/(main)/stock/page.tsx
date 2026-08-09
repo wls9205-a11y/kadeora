@@ -181,19 +181,9 @@ export default async function StockPage({ searchParams }: { searchParams: Promis
         <h1 className="sr-only">주식 시세 — {TAB_LABELS.find((t) => t.key === tab)?.label ?? '이슈'}</h1>
 
         {/* Sticky tab bar */}
-        <nav
-          role="tablist"
-          aria-label="주식 정렬"
-          style={{
-            position: 'sticky', top: 44, zIndex: 10,
-            display: 'flex', flexWrap: 'wrap', gap: 4,
-            padding: '8px 6px', margin: '0 -6px 8px',
-            // s274 Rule #94 — 다크 테마에서 흰 띠가 나오던 하드코딩 제거.
-            background: 'var(--bg-surface-translucent, rgba(13,23,48,0.92))',
-            backdropFilter: 'blur(8px)',
-            borderBottom: '1px solid var(--border, #1E3258)',
-          }}
-        >
+        {/* s274 — 인라인 style → .kd-tabbar/.kd-tab (components.css).
+            활성 상태 색은 CSS 의 [aria-selected='true'] 가 처리한다. */}
+        <nav role="tablist" aria-label="주식 정렬" className="kd-tabbar">
           {TAB_LABELS.map((t) => {
             const active = t.key === tab;
             return (
@@ -203,17 +193,7 @@ export default async function StockPage({ searchParams }: { searchParams: Promis
                 aria-selected={active}
                 href={t.key === 'issue' ? '/stock' : `/stock?tab=${t.key}`}
                 prefetch={false}
-                style={{
-                  padding: '5px 10px',
-                  borderRadius: 999,
-                  fontSize: 12,
-                  fontWeight: active ? 700 : 600,
-                  background: active ? 'var(--brand, #4A8AF7)' : 'var(--bg-elevated, #132040)',
-                  color: active ? '#FFFFFF' : 'var(--text-secondary, #B8CCDF)',
-                  border: '1px solid var(--border, #1E3258)',
-                  textDecoration: 'none',
-                  whiteSpace: 'nowrap',
-                }}
+                className="kd-tab"
               >
                 {t.label}
               </Link>
@@ -261,24 +241,18 @@ function PlainList({ rows, tab }: { rows: StockRow[]; tab: string }) {
           <Link
             key={r.symbol}
             href={`/stock/${r.symbol}`}
+            className="kd-lc kd-lc--row"
             style={{
-              display: 'flex', alignItems: 'center', gap: 8,
-              padding: '8px 9px', margin: 3, borderRadius: 6,
-              background: 'var(--bg-surface, #0D1730)', borderLeft: `3px solid ${stockBarColor(tone)}`,
-              boxShadow: '0 1px 1px rgba(0,0,0,0.04)',
-              textDecoration: 'none', color: 'var(--text-primary, #F2F5FA)',
-            }}
+              '--kd-bar': stockBarColor(tone),
+              '--kd-chip-bg': chip.background,
+              '--kd-chip-fg': chip.color,
+              '--kd-chip-fw': chip.fontWeight,
+            } as React.CSSProperties}
           >
-            <span style={{ flex: 1, minWidth: 0, fontSize: 12.5, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {r.name}
-            </span>
-            <span style={{ fontSize: 11, color: 'var(--text-tertiary, #8BA3C0)', whiteSpace: 'nowrap' }}>{r.market}</span>
-            <span style={{ fontSize: 11.5, fontVariantNumeric: 'tabular-nums', color: 'var(--text-secondary, #B8CCDF)', whiteSpace: 'nowrap' }}>
-              {r.price ? Number(r.price).toLocaleString() : '-'}
-            </span>
-            <span style={{ ...chip, padding: '1px 6px', borderRadius: 3, fontSize: 11, lineHeight: 1.4, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
-              {formatChangePct(r.change_pct)}
-            </span>
+            <span className="kd-lc-name">{r.name}</span>
+            <span className="kd-lc-meta">{r.market}</span>
+            <span className="kd-lc-num">{r.price ? Number(r.price).toLocaleString() : '-'}</span>
+            <span className="kd-lc-chip">{formatChangePct(r.change_pct)}</span>
           </Link>
         );
       })}
@@ -288,7 +262,7 @@ function PlainList({ rows, tab }: { rows: StockRow[]; tab: string }) {
 
 function Empty({ label }: { label: string }) {
   return (
-    <div style={{ padding: 16, margin: 3, borderRadius: 6, background: 'var(--bg-surface, #0D1730)', border: '1px solid var(--border, #1E3258)', fontSize: 12, color: 'var(--text-tertiary, #8BA3C0)', textAlign: 'center' }}>
+    <div className="kd-empty">
       {label}
     </div>
   );

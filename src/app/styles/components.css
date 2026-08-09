@@ -106,3 +106,162 @@
 /* 포커스 접근성 */
 *:focus-visible { outline: 2px solid var(--brand) !important; outline-offset: 2px !important; }
 
+
+/* ========================================
+   s274 — 이슈/시세 리스트 카드
+   ----------------------------------------
+   /stock 페이지가 405KB 였고 그중 인라인 style 이 262KB(65%) 였다.
+   StockIssueCard 는 'use client' 라 style 객체가 HTML 속성과 RSC flight
+   payload 양쪽에 두 번 직렬화된다. 30행이면 그게 곧 페이지 무게가 된다.
+
+   레이아웃/타이포는 전부 여기로 옮기고, 색만 카드 루트의 CSS 변수로 받는다.
+   색 값의 출처는 여전히 lib/stockColor 의 stockBarColor/stockChipStyle 이라
+   Architecture Rule #83 (hex 직접 사용 금지) 은 그대로 유지된다.
+   ======================================== */
+
+.kd-lc {
+  display: block;
+  padding: 6px 9px;
+  margin: 3px;
+  border-radius: 6px;
+  background: var(--bg-surface, #0D1730);
+  border-left: 3px solid var(--kd-bar, var(--border-strong));
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+  text-decoration: none;
+  color: var(--text-primary, #F2F5FA);
+}
+
+/* PlainList 행 — 1줄짜리라 상하 패딩만 다르다 */
+.kd-lc--row { display: flex; align-items: center; gap: 8px; padding: 8px 9px; }
+
+.kd-lc-r1 { display: flex; align-items: center; gap: 6px; }
+.kd-lc-r2 { display: flex; align-items: center; gap: 4px; margin-top: 2px; }
+
+.kd-lc-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 12.5px;
+  font-weight: 500;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.kd-lc-num {
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary, #B8CCDF);
+  white-space: nowrap;
+}
+
+.kd-lc-meta {
+  font-size: 11px;
+  color: var(--text-tertiary, #8BA3C0);
+  white-space: nowrap;
+}
+
+.kd-lc-spacer { flex: 1; }
+
+/* 등락 칩 — 배경/글자색/굵기는 stockChipStyle 이 준 값을 변수로 받는다 */
+.kd-lc-chip {
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 11px;
+  line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  background: var(--kd-chip-bg);
+  color: var(--kd-chip-fg);
+  font-weight: var(--kd-chip-fw, 600);
+}
+
+/* /stock 탭 바 */
+.kd-tabbar {
+  position: sticky;
+  top: 44px;
+  z-index: 10;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 8px 6px;
+  margin: 0 -6px 8px;
+  background: var(--bg-surface-translucent, rgba(13, 23, 48, 0.92));
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border, #1E3258);
+}
+
+.kd-tab {
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--bg-elevated, #132040);
+  color: var(--text-secondary, #B8CCDF);
+  border: 1px solid var(--border, #1E3258);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.kd-tab[aria-selected='true'] {
+  background: var(--brand, #4A8AF7);
+  color: #FFFFFF;
+  font-weight: 700;
+}
+
+.kd-empty {
+  padding: 16px;
+  margin: 3px;
+  border-radius: 6px;
+  background: var(--bg-surface, #0D1730);
+  border: 1px solid var(--border, #1E3258);
+  font-size: 12px;
+  color: var(--text-tertiary, #8BA3C0);
+  text-align: center;
+}
+
+/* ── 카드 내부 칩/배지 ──────────────────────────────────────
+   style attr 집계상 카드 껍데기(30회)보다 이 칩들이 훨씬 큰 비중이었다:
+   inline-flex 60회, 칩 배경 74+70+13회, font-size 11.5px 160회.
+   색은 여전히 REASON_CHIP_STYLE / WARNING_STYLE / 컴포넌트 로직이 결정하고
+   여기서는 --kd-c-* 변수로만 받는다.
+
+   주의: 카드 등락칩(.kd-lc-chip)은 --kd-chip-* 를 쓴다. 변수명을 분리해야
+   자식 칩이 자기 색을 안 정했을 때 카드 색을 상속하는 사고가 안 난다. */
+
+.kd-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 11px;
+  line-height: 1.4;
+  font-weight: var(--kd-c-fw, 600);
+  white-space: nowrap;
+  background: var(--kd-c-bg);
+  color: var(--kd-c-fg);
+}
+
+.kd-chip--num  { font-variant-numeric: tabular-nums; }
+.kd-chip--warn { gap: 2px; border: 1px solid var(--kd-c-bd); }
+
+.kd-chips { display: inline-flex; flex-wrap: wrap; gap: 3px; }
+
+.kd-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 4px;
+  background: var(--kd-c-bg);
+  color: #FFFFFF;
+  font-size: 11.5px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.kd-badge--md { min-width: 32px; height: 22px; font-size: 13px; }

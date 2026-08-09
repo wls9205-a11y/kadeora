@@ -42,55 +42,37 @@ export default function StockIssueCard({ data, commentCount = 0, commentHot = fa
   const bar = stockBarColor(tone);
   const url = href ?? `/stock/${data.symbol}`;
 
+  // s274 — 레이아웃/타이포는 .kd-lc* 클래스(components.css)로 옮겼다.
+  // 이 컴포넌트는 'use client' 라 style 객체가 HTML 속성 + RSC flight payload
+  // 양쪽에 직렬화되는데, 30행이 깔리는 /stock 에서 그게 페이지 무게의 대부분이었다.
+  // 색은 여전히 stockBarColor/stockChipStyle 이 만든 값을 변수로만 넘긴다 (Rule #83).
   return (
     <Link
       href={url}
+      className="kd-lc"
       style={{
-        display: 'block',
-        padding: '6px 9px',
-        margin: 3,
-        borderRadius: 6,
-        // s274 Rule #94 — 인라인 하드코딩 hex 는 테마 CSS 로 덮이지 않는다.
-        // 기본 테마가 dark(--bg-base #050A18) 인데 카드만 흰색으로 남아 있던 회귀.
-        background: 'var(--bg-surface, #0D1730)',
-        borderLeft: `3px solid ${bar}`,
-        boxShadow: '0 1px 1px rgba(0,0,0,0.04)',
-        textDecoration: 'none',
-        color: 'var(--text-primary, #F2F5FA)',
-      }}
+        '--kd-bar': bar,
+        '--kd-chip-bg': chip.background,
+        '--kd-chip-fg': chip.color,
+        '--kd-chip-fw': chip.fontWeight,
+      } as React.CSSProperties}
     >
       {/* Row 1: [score] [name] [price] [chip] */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+      <div className="kd-lc-r1">
         <IssueScoreBadge score={data.score} />
-        <span style={{ flex: 1, fontSize: 12.5, fontWeight: 500, lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {data.name}
-        </span>
-        <span style={{ fontSize: 11.5, fontVariantNumeric: 'tabular-nums', color: 'var(--text-secondary, #B8CCDF)' }}>
-          {formatPrice(data.price)}
-        </span>
-        <span
-          style={{
-            ...chip,
-            padding: '1px 6px',
-            borderRadius: 3,
-            fontSize: 11,
-            lineHeight: 1.4,
-            fontVariantNumeric: 'tabular-nums',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          {formatChangePct(data.change_pct)}
-        </span>
+        <span className="kd-lc-name">{data.name}</span>
+        <span className="kd-lc-num">{formatPrice(data.price)}</span>
+        <span className="kd-lc-chip">{formatChangePct(data.change_pct)}</span>
       </div>
 
       {/* Row 2: [meta] [reason chips] [warning] [comment] */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
-        <span style={{ fontSize: 11, color: 'var(--text-tertiary, #8BA3C0)', whiteSpace: 'nowrap' }}>
+      <div className="kd-lc-r2">
+        <span className="kd-lc-meta">
           {data.market}
           {data.sector ? ` · ${data.sector}` : ''}
           {data.volume ? ` · ${formatVolume(data.volume)}` : ''}
         </span>
-        <span style={{ flex: 1 }} />
+        <span className="kd-lc-spacer" />
         <IssueReasonChips reasons={data.reasons} max={3} />
         <WarningLabel warning={data.warning} />
         <CommentChip count={commentCount} hot={commentHot} />

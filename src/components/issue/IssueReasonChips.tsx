@@ -18,22 +18,15 @@ export default function IssueReasonChips({ reasons, max = 4 }: Props) {
     .slice(0, max);
   if (visible.length === 0) return null;
   return (
-    <span style={{ display: 'inline-flex', flexWrap: 'wrap', gap: 3 }}>
+    // s274 — 레이아웃은 .kd-chips/.kd-chip, 색은 REASON_CHIP_STYLE 그대로 변수 전달.
+    <span className="kd-chips">
       {visible.map((r) => {
         const style = REASON_CHIP_STYLE[r.tag];
         return (
           <span
             key={r.tag}
-            style={{
-              padding: '1px 6px',
-              borderRadius: 3,
-              fontSize: 11,
-              fontWeight: 600,
-              lineHeight: 1.4,
-              background: style.background,
-              color: style.color,
-              whiteSpace: 'nowrap',
-            }}
+            className="kd-chip"
+            style={{ '--kd-c-bg': style.background, '--kd-c-fg': style.color } as React.CSSProperties}
           >
             {REASON_LABELS[r.tag]}
           </span>

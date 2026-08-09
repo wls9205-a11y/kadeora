@@ -40,57 +40,36 @@ export default function AptIssueCard({ data, commentCount = 0, commentHot = fals
     data.dday != null && data.dday <= 30 ? '#F59E0B' : '#9CA3AF';
   const url = href ?? `/apt/subscription/${data.id}`;
 
+  // s274 — StockIssueCard 와 동일하게 .kd-lc* 클래스로 이동. 색만 변수로 전달.
   return (
     <Link
       href={url}
+      className="kd-lc"
       style={{
-        display: 'block',
-        padding: '6px 9px',
-        margin: 3,
-        borderRadius: 6,
-        // s274 Rule #94 — StockIssueCard 와 동일. 인라인 hex 는 테마로 덮이지 않는다.
-        background: 'var(--bg-surface, #0D1730)',
-        borderLeft: `3px solid ${bar}`,
-        boxShadow: '0 1px 1px rgba(0,0,0,0.04)',
-        textDecoration: 'none',
-        color: 'var(--text-primary, #F2F5FA)',
-      }}
+        '--kd-bar': bar,
+        '--kd-chip-bg': dchip.background,
+        '--kd-chip-fg': dchip.color,
+        '--kd-chip-fw': dchip.fontWeight,
+      } as React.CSSProperties}
     >
       {/* Row 1: [score] [name] [pyeong] [dday chip] */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+      <div className="kd-lc-r1">
         <IssueScoreBadge score={data.score} />
-        <span style={{ flex: 1, fontSize: 12.5, fontWeight: 500, lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {data.house_nm}
-        </span>
+        <span className="kd-lc-name">{data.house_nm}</span>
         {data.price_per_pyeong ? (
-          <span style={{ fontSize: 11.5, fontVariantNumeric: 'tabular-nums', color: 'var(--text-secondary, #B8CCDF)' }}>
-            {formatPyeong(data.price_per_pyeong)}
-          </span>
+          <span className="kd-lc-num">{formatPyeong(data.price_per_pyeong)}</span>
         ) : null}
-        <span
-          style={{
-            background: dchip.background,
-            color: dchip.color,
-            fontWeight: dchip.fontWeight,
-            padding: '1px 6px',
-            borderRadius: 3,
-            fontSize: 11,
-            lineHeight: 1.4,
-            whiteSpace: 'nowrap',
-          }}
-        >
-          {dchip.label}
-        </span>
+        <span className="kd-lc-chip">{dchip.label}</span>
       </div>
 
       {/* Row 2 */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
-        <span style={{ fontSize: 11, color: 'var(--text-tertiary, #8BA3C0)', whiteSpace: 'nowrap' }}>
+      <div className="kd-lc-r2">
+        <span className="kd-lc-meta">
           {data.region_nm ?? ''}
           {data.mdatrgbn_nm ? ` · ${data.mdatrgbn_nm}` : ''}
           {data.competition_rate_1st ? ` · ${data.competition_rate_1st.toFixed(1)}:1` : ''}
         </span>
-        <span style={{ flex: 1 }} />
+        <span className="kd-lc-spacer" />
         <IssueReasonChips reasons={data.reasons} max={3} />
         <WarningLabel warning={data.warning} />
         <CommentChip count={commentCount} hot={commentHot} />
