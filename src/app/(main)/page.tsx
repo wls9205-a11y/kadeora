@@ -35,6 +35,67 @@ export const metadata: Metadata = {
 
 const DOMESTIC_MARKETS = ['KOSPI', 'KOSDAQ'];
 
+type HotBlogRow = HomeData['hot_blog'][number] & { readers?: number };
+
+/**
+ * 실제로 읽히는 블로그 글 3개.
+ *
+ * get_home_data 의 hot_blog 는 priority_score, view_count 순인데 view_count 가
+ * 신뢰할 수 없다 — /api/blog/view 에 봇 필터가 없어서 크롤러가 그대로 누적됐다.
+ * 실제로 view_count 상위 12개 중 11개가 30일 사람 조회 0이었다.
+ *
+ * 그래서 page_views(bot_type='human') 를 직접 집계한다. 블로그 사람 조회는
+ * 30일에 200건 안팎이라 전량 가져와 JS 에서 세도 부담이 없고, 홈은 ISR 60초라
+ * 이 쿼리는 분당 1회 이하로만 돈다.
+ */
+async function fetchHotBlogs(
+  sb: ReturnType<typeof getSupabaseAdmin>,
+  fallback: HomeData['hot_blog'],
+): Promise<HotBlogRow[]> {
+  try {
+    const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    const { data: views } = await (sb as any)
+      .from('page_views')
+      .select('path')
+      .eq('bot_type', 'human')
+      .like('path', '/blog/%')
+      .gt('created_at', since)
+      .limit(2000);
+
+    const tally = new Map<string, number>();
+    for (const r of (views ?? []) as { path: string }[]) {
+      // 저장된 path 는 URL 인코딩 상태다 (한글 slug 다수). 디코딩해야 slug 와 맞는다.
+      const raw = r.path.slice('/blog/'.length).split(/[?#]/)[0];
+      if (!raw) continue;
+      let slug = raw;
+      try { slug = decodeURIComponent(raw); } catch { /* 잘못된 인코딩은 원문 유지 */ }
+      tally.set(slug, (tally.get(slug) ?? 0) + 1);
+    }
+    if (tally.size === 0) return fallback;
+
+    // 비공개/삭제된 글이 섞일 수 있어 넉넉히 뽑고 조회 후 잘라낸다.
+    const ranked = [...tally.entries()].sort((a, b) => b[1] - a[1]).slice(0, 12);
+    const { data: posts } = await (sb as any)
+      .from('blog_posts')
+      .select('slug,title,excerpt,cover_image,view_count,category,published_at')
+      .in('slug', ranked.map(([s]) => s))
+      .eq('is_published', true);
+
+    const bySlug = new Map((posts ?? []).map((p: any) => [p.slug, p]));
+    const hot = ranked
+      .map(([slug, readers]) => {
+        const p = bySlug.get(slug);
+        return p ? ({ ...p, readers } as HotBlogRow) : null;
+      })
+      .filter(Boolean) as HotBlogRow[];
+
+    return hot.length > 0 ? hot.slice(0, 3) : fallback;
+  } catch (e) {
+    console.error('[home] hot blog tally failed:', e);
+    return fallback;
+  }
+}
+
 type HeroLink = { href: string; hero: NonNullable<HomeData['hero_issue']> };
 
 /**
@@ -76,7 +137,7 @@ async function fetchHome(): Promise<{
   domestic: StockIssueScore[];
   overseas: StockIssueScore[];
   apts: AptIssueScore[];
-  blogs: HomeData['hot_blog'];
+  blogs: HotBlogRow[];
 }> {
   const sb = getSupabaseAdmin();
   try {
@@ -94,13 +155,16 @@ async function fetchHome(): Promise<{
         .order('score', { ascending: false, nullsFirst: false }).limit(5),
     ]);
     const homeData: HomeData | null = home?.data ?? null;
-    const hero = await resolveHeroLink(sb, homeData?.hero_issue ?? null);
+    const [hero, blogs] = await Promise.all([
+      resolveHeroLink(sb, homeData?.hero_issue ?? null),
+      fetchHotBlogs(sb, homeData?.hot_blog ?? []),
+    ]);
     return {
       hero,
       domestic: (domesticRes?.data ?? []) as StockIssueScore[],
       overseas: (overseasRes?.data ?? []) as StockIssueScore[],
       apts: (aptRes?.data ?? []) as AptIssueScore[],
-      blogs: homeData?.hot_blog ?? [],
+      blogs,
     };
   } catch (e) {
     console.error('[home] fetch failed:', e);
@@ -239,8 +303,10 @@ export default async function HomePage() {
                   <span style={{ fontSize: 12.5, fontWeight: 600, lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>
                     {b.title}
                   </span>
+                  {/* s274 — 누적 view_count 는 봇이 섞여 있어 표기하지 않는다.
+                      집계가 된 경우에만 '최근 30일 실제 독자 수' 를 보여준다. */}
                   <span style={{ display: 'block', fontSize: 11, color: 'var(--text-tertiary, #8BA3C0)', marginTop: 2 }}>
-                    {b.category ?? ''}{b.view_count ? ` · 조회 ${b.view_count.toLocaleString()}` : ''}
+                    {b.category ?? ''}{b.readers ? ` · 최근 30일 ${b.readers.toLocaleString()}명` : ''}
                   </span>
                 </span>
               </Link>
