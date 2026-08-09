@@ -2,6 +2,7 @@ import { sanitizeHtml } from '@/lib/sanitize-html';
 import Link from 'next/link';
 import { CALC_REGISTRY, CATEGORIES, findCalc, getCategoryLabel } from '@/lib/calc/registry';
 import CalcEngine from '@/components/calc/CalcEngine';
+import CalcNextSteps from '@/components/calc/CalcNextSteps';
 import Disclaimer from '@/components/Disclaimer';
 import ShareButtons from '@/components/ShareButtons';
 import LoginGate from '@/components/LoginGate';
@@ -172,6 +173,10 @@ export default async function CalcPage({ params }: { params: Promise<{ category:
           </div>
         </div>
       )}
+
+      {/* s274 — 계산 이후 동선. 네이버 유입의 50% 가 계산기로 들어와 80% 가
+          1페이지만 보고 이탈하던 구간이라, 관련 계산기 다음에 서비스 본체로 잇는다. */}
+      <CalcNextSteps category={category} />
 
       {/* 회원가입 유도 — LoginGate 기능 게이팅 (세션 108) */}
       <LoginGate feature="calc_save" blurHeight={80}>
