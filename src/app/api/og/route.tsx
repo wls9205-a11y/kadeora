@@ -623,10 +623,10 @@ export async function GET(req: NextRequest) {
       design: new URL(req.url).searchParams.get('design'),
       category: new URL(req.url).searchParams.get('category'),
     });
-    console.error('[og] cls=', cls);
-    for (let i = 0; i < msg.length; i += 80) console.error('[og] m' + (i / 80) + '=', msg.slice(i, i + 80));
-    for (let i = 0; i < Math.min(stk.length, 480); i += 80) console.error('[og] s' + (i / 80) + '=', stk.slice(i, i + 80));
-    for (let i = 0; i < inp.length; i += 80) console.error('[og] i' + (i / 80) + '=', inp.slice(i, i + 80));
+    // s270: 80자 chunk 분할 → 3행 통합 — 분할 출력이 Vercel 에러 그룹을 파편화하던 문제 (행당 300자는 4KB 제한 내 안전)
+    console.error(`[og] cls=${cls} msg=${msg.slice(0, 300)}`);
+    if (stk) console.error(`[og] stack=${stk.slice(0, 300)}`);
+    console.error(`[og] input=${inp.slice(0, 300)}`);
     const cat = new URL(req.url).searchParams.get('category') ?? 'default';
     const fb: Record<string,string> = { stock:`${SITE}/images/brand/kadeora-wide.png`, apt:`${SITE}/images/brand/kadeora-full.png`, default:`${SITE}/images/brand/kadeora-hero.png` };
     return Response.redirect(fb[cat] ?? fb.default, 302);

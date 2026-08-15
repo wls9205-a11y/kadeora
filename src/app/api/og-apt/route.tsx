@@ -219,7 +219,10 @@ function renderPlace(site: AptRow): React.ReactElement {
     <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', padding: 56, justifyContent: 'space-between' }}>
       <div style={{ display:'flex', fontSize: 24, color: 'rgba(255,255,255,0.66)', fontWeight: 700, letterSpacing: 2 }}>PLACE · 입지</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-        <div style={{ width: 96, height: 96, borderRadius: 999, background: 'rgba(255,255,255,0.12)', border: '3px solid #FAC775', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 48 }}>●</div>
+        {/* s270: 글리프 ● 제거 — NotoSansKR 서브셋에 U+25CF 없음 → satori dynamic font fetch 400 (7일 5,758회). 순수 CSS 원으로 대체 (Rule #47 확장: 도형도 글리프 대신 CSS) */}
+        <div style={{ width: 96, height: 96, borderRadius: 999, background: 'rgba(255,255,255,0.12)', border: '3px solid #FAC775', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: 40, height: 40, borderRadius: 999, background: '#FAC775', display: 'flex' }} />
+        </div>
         <div style={{ display:'flex', fontSize: 38, fontWeight: 900, color: '#FFFFFF', lineHeight: 1.15 }}>{region || '주소 정보'}</div>
         <div style={{ display:'flex', fontSize: 22, color: 'rgba(255,255,255,0.66)', fontWeight: 600, lineHeight: 1.4 }}>{site.address || site.dong || ''}</div>
       </div>
@@ -354,12 +357,10 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (err) {
-    // s239-p1: console.error 분할 (Vercel log 1 row 길이 제한 — 단일 호출 시 stack 잘림)
+    // s270: 분할 로그 5행 → 3행 통합 — 분할 출력이 Vercel 에러 그룹을 파편화하던 문제 (행당 300자는 4KB 제한 내 안전)
     const e = err as Error;
-    console.error('[og-apt] message=', e?.message);
-    console.error('[og-apt] stack=', e?.stack);
-    console.error('[og-apt] class=', e?.constructor?.name);
-    console.error('[og-apt] code=', (err as any)?.code);
+    console.error(`[og-apt] cls=${e?.constructor?.name} code=${(err as any)?.code ?? 'n/a'} msg=${(e?.message ?? '').slice(0, 300)}`);
+    if (e?.stack) console.error(`[og-apt] stack=${e.stack.slice(0, 300)}`);
     console.error('[og-apt] input=', JSON.stringify({ slug, card, fontLoaded: !!fontData, hasSite: !!site, siteType: site?.site_type, nameLen: site?.name?.length }));
     // s263 Phase 2.1++: redirect 302 제거. simple ImageResponse fallback.
     try {

@@ -3,6 +3,7 @@ import { NextRequest } from 'next/server';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { OG_CAT as CAT } from '@/lib/og-tokens';
+import { sanitizeForOG } from '@/lib/og-sanitize';
 
 export const runtime = 'nodejs';
 export const maxDuration = 30;
@@ -64,7 +65,8 @@ export async function GET(req: NextRequest) {
     };
 
     const sp       = new URL(req.url).searchParams;
-    const title    = sp.get('title') ?? '';
+    // s270: sanitizeForOG 적용 — 서브셋 외 글자가 satori dynamic font fetch 400 유발 (og-blog/og-apt와 동일 규칙)
+    const title    = sanitizeForOG(sp.get('title') ?? '');
     const category = sp.get('category') ?? 'blog';
 
     const C   = CAT[category] ?? CAT.blog;

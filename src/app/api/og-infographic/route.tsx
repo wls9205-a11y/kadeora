@@ -2,6 +2,7 @@ import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { sanitizeForOG } from '@/lib/og-sanitize';
 
 export const runtime = 'nodejs';
 
@@ -24,10 +25,11 @@ function loadFont(): ArrayBuffer | null {
 export async function GET(req: NextRequest) {
   const s = req.nextUrl.searchParams;
   const type = s.get('type') || 'summary';
-  const title = s.get('title') || '카더라 분석';
+  // s270: sanitizeForOG 적용 — 서브셋 외 글자가 satori dynamic font fetch 400 유발
+  const title = sanitizeForOG(s.get('title') || '카더라 분석');
   const items = (s.get('items') || '').split(',').filter(Boolean).map(i => {
     const [label, value] = i.split(':');
-    return { label: label || '', value: value || '' };
+    return { label: sanitizeForOG(label || ''), value: sanitizeForOG(value || '') };
   });
   const category = s.get('category') || 'stock';
 

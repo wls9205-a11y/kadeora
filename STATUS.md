@@ -1,3 +1,34 @@
+## [s270] 2026-08-15 — 전수조사 후속: OG dynamic font 400 근절 + 로그 통합 + related-blogs 재시도
+
+**배경**: Vercel 런타임 에러 7일 전수조사에서 `/api/og-apt` "Failed to load dynamic font for ●"
+400 에러 5,758회(1,696 users) + `�` 변형 934회(og-blog/apt/square/infographic) 확인.
+DB측 조치(autopublish 함수 패치·발행 3편 복구, fn_cron_failure_watch 신설, 크론 130/145
+스케줄 분산)는 웹 채팅 세션에서 Supabase 직접 수리 완료 — 이 커밋은 코드측 수정분.
+
+**수정**:
+1. `og-apt/route.tsx` — PLACE 카드에 하드코딩된 글리프 `●` 제거 → 순수 CSS 원으로 대체.
+   NotoSansKR-Bold.woff 서브셋에 U+25CF가 없어 satori가 매 렌더마다 Google Fonts dynamic
+   fetch(400)를 시도하던 것이 5,758회 에러의 근원. sanitizer는 데이터만 거르고 템플릿
+   자체 글리프는 못 거른다. (Rule #47 확장: 도형도 글리프 대신 CSS)
+2. `og-square/route.tsx`, `og-infographic/route.tsx` — `sanitizeForOG` 미적용 라우트에 적용
+   (title/items). `�` 계열 dynamic font 400 차단.
+3. `og-stock/route.tsx` — 매 요청 DIAG console.error → console.log 강등 (주 ~2,000행이
+   에러 클러스터 오염). 80자 chunk 분할 에러(m0~/s0~) → 2행 통합.
+4. `og/route.tsx`, `og-apt/route.tsx` — 동일하게 chunk 분할 로그 → 3행 통합 (에러 그룹
+   15개 → 3개로 수렴, 행당 300자는 Vercel 4KB 행 제한 내 안전).
+5. `lib/apt/related-blogs.ts` — 'TypeError: fetch failed'(7일 106회, 일시 커넥션 실패)에
+   1회 재시도(300ms 고정 지연) 추가. 폭주 방지 위해 재시도 1회로 제한.
+
+**미수정**: url.parse DEP0169 경고는 web-push@3.6.7 의존성 내부 — 자체 코드 아님, 무해.
+
+**검증**: `npx tsc --noEmit` 0 에러. 배포 후 확인 필요: /api/og-apt?card=place 렌더(CSS 원),
+Vercel 에러 클러스터 og-apt font 400 소멸 여부(24h), [og-stock] DIAG error 레벨 소멸.
+
+**남은 사용자 조치**: Anthropic API 크레딧 충전(issue-draft 7/31부터 정지), Kakao geocode
+키 403 원인 확인, GitHub PAT 로테이션(remote 평문 ghp_ revoke).
+
+---
+
 ## [Phase 0 후속] 2026-08-05 — naver-cafe-publish 코드 삭제 (Rule #19 3중 확인 완료)
 
 이전 Phase 0 진단([Phase 0] 항목 참조)에서 `naver-cafe-publish`가 oauth_tokens 미시딩으로

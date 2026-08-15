@@ -329,8 +329,8 @@ export async function GET(req: NextRequest) {
   const ff = fontData ? 'NotoSansKR, sans-serif' : 'sans-serif';
 
   // s263 Phase 2.1 후속: 진단 logging — single line 으로 모든 컨텍스트 노출.
-  // og-blog 회복 / og-stock 잔존 → trace 외 다른 root cause 식별 위해.
-  console.error(
+  // s270: console.error → console.log 강등 — 매 요청 기록되어 Vercel 에러 클러스터 오염 (주 ~2,000행)
+  console.log(
     `[og-stock] DIAG fontLoaded=${!!fontData} fontBytes=${fontData?.byteLength ?? 0} ` +
     `runtime=${process.env.NEXT_RUNTIME ?? 'unset'} cwd=${process.cwd()} ` +
     `card=${card} symbol=${symbol ?? 'null'}`
@@ -375,14 +375,11 @@ export async function GET(req: NextRequest) {
     const msg = (e?.message ?? 'n/a');
     const cls = (e?.constructor?.name ?? 'n/a');
     const code = (e as { code?: string })?.code ?? 'n/a';
-    console.error(`[og-stock] cls=${cls} code=${code} fontLoaded=${!!fontData} hasQuote=${!!quote} symbol=${symbol ?? 'null'} card=${card}`);
-    for (let i = 0; i < msg.length && i < 800; i += 80) {
-      console.error(`[og-stock] m${i / 80}=${msg.slice(i, i + 80)}`);
-    }
+    // s270: 80자 chunk 분할(m0~m9/s0~s5) → 2행 통합 — 분할 출력이 Vercel 에러 그룹 15개로 파편화되던 문제.
+    // Vercel 로그 행 제한은 4KB 수준이므로 300자 단일 행은 안전.
+    console.error(`[og-stock] cls=${cls} code=${code} fontLoaded=${!!fontData} hasQuote=${!!quote} symbol=${symbol ?? 'null'} card=${card} msg=${msg.slice(0, 300)}`);
     const stk = (e?.stack ?? '');
-    for (let i = 0; i < Math.min(stk.length, 480); i += 80) {
-      console.error(`[og-stock] s${i / 80}=${stk.slice(i, i + 80)}`);
-    }
+    if (stk) console.error(`[og-stock] stack=${stk.slice(0, 300)}`);
     // s263 Phase 2.1++: redirect 302 제거. simple ImageResponse fallback (1200x630, 영문).
     try {
       const fbImg = new ImageResponse(
