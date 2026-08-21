@@ -20,8 +20,8 @@ export async function generateStaticParams() {
     return rows
       .filter(r => r.region && r.sigungu && r.site_type)
       .map(r => ({
-        region: encodeURIComponent(r.region),
-        sigungu: encodeURIComponent(r.sigungu),
+        region: r.region,
+        sigungu: r.sigungu,
         category: r.site_type,
       }));
   } catch (err) {
