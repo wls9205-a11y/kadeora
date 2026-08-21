@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import ShareButtons from '@/components/ShareButtons';
 import { notFound } from 'next/navigation';
+import { REGIONS } from '@/lib/regions';
 
 async function SigunguLinks({ region }: { region: string }) {
   const sb = getSupabaseAdmin();
@@ -27,14 +28,6 @@ async function SigunguLinks({ region }: { region: string }) {
     </section>
   );
 }
-
-const REGIONS = [
-  '서울', '부산', '대구', '인천', '광주', '대전', '울산', '세종',
-  '경기', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주',
-  // 주요 시군구
-  '강남구', '서초구', '송파구', '마포구', '용산구', '성남시', '수원시',
-  '고양시', '화성시', '평택시', '해운대구', '부산진구', '동래구',
-];
 
 interface Props { params: Promise<{ region: string }> }
 
@@ -175,9 +168,7 @@ export default async function RegionLandingPage({ params }: Props) {
   const { region } = await params;
   const decoded = decodeURIComponent(region);
 
-  if (!REGIONS.some(r => decoded.includes(r) || r.includes(decoded))) {
-    notFound();
-  }
+  if (!REGIONS.includes(decoded as any)) notFound();
 
   const data = await fetchRegionData(decoded);
 

@@ -10,6 +10,7 @@
 - #64 generateStaticParams는 디코딩된 원본 값을 반환한다. 인코딩은 Next.js가 한다
 - #65 설정 파일은 확장자 하나만 유지한다
 - #66 모든 텍스트 파일은 BOM 없는 UTF-8. npm run check:bom으로 검사
+- #67 generateStaticParams 수정 시 대상 배열의 실제 내용과 가드 조건을 함께 확인한다. tsc 통과는 빌드 성공을 보장하지 않는다
 
 ### 다음
 - S0 배포 후 라이브 검증 (아래 명령)
