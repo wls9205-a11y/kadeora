@@ -99,28 +99,28 @@ function PriceCard(q: QuoteRow, ff: string) {
       <div style={{ position:'absolute', top:-160, right:-120, width:660, height:660, borderRadius:'50%', background:`radial-gradient(circle,${accent}22 0%,transparent 65%)`, display:'flex' }} />
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', position:'relative', zIndex:2 }}>
         <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-          <span style={{ fontSize:24, fontWeight:900, color:'#00E5FF', letterSpacing:-.5 }}>카더라</span>
+          <span style={{ fontSize: 24, fontWeight:900, color:'#00E5FF', letterSpacing:-.5 }}>카더라</span>
         </div>
         <div style={{ display:'flex', alignItems:'center', gap:8, padding:'7px 16px', background:`${accent}22`, border:`1px solid ${accent}66`, borderRadius:999 }}>
-          <span style={{ fontSize:14, fontWeight:900, color:accent, letterSpacing:1 }}>PRICE · 실시간</span>
+          <span style={{ fontSize: 14, fontWeight:900, color:accent, letterSpacing:1 }}>PRICE · 실시간</span>
         </div>
       </div>
       <div style={{ flex:1, display:'flex', flexDirection:'column', justifyContent:'center', position:'relative', zIndex:2 }}>
-        <div style={{ display:'flex', fontSize:24, color:'rgba(255,255,255,.55)', fontWeight:700, marginBottom:8, letterSpacing:1 }}>{q.symbol} · {safeStr(q.sector) || '주식'}</div>
+        <div style={{ display:'flex', fontSize: 24, color:'rgba(255,255,255,.55)', fontWeight:700, marginBottom:8, letterSpacing:1 }}>{q.symbol} · {safeStr(q.sector) || '주식'}</div>
         <div style={{ display:'flex', fontSize:name.length > 14 ? 56 : 72, fontWeight:900, color:'#fff', letterSpacing:-2, lineHeight:1.05, marginBottom:18 }}>{name}</div>
         <div style={{ display:'flex', alignItems:'baseline', gap:20 }}>
-          <div style={{ display:'flex', fontSize:96, fontWeight:900, color:'#fff', letterSpacing:-3, lineHeight:1 }}>{price > 0 ? fmtCur(price, q.currency) : '-'}</div>
+          <div style={{ display:'flex', fontSize: 96, fontWeight:900, color:'#fff', letterSpacing:-3, lineHeight:1 }}>{price > 0 ? fmtCur(price, q.currency) : '-'}</div>
           {chg !== 0 && (
             <div style={{ display:'flex', alignItems:'center', gap:10 }}>
               <ArrowIcon dir={arrowDir} color={accent} size={30} />
-              <span style={{ fontSize:36, fontWeight:900, color:accent, letterSpacing:-1 }}>{Math.abs(chg).toFixed(2)}%</span>
+              <span style={{ fontSize: 36, fontWeight:900, color:accent, letterSpacing:-1 }}>{Math.abs(chg).toFixed(2)}%</span>
             </div>
           )}
         </div>
       </div>
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', position:'relative', zIndex:2, paddingTop:14, borderTop:'0.5px solid rgba(255,255,255,.12)' }}>
-        <span style={{ fontSize:14, color:'rgba(255,255,255,.45)', fontWeight:700 }}>시가총액 {fmtCap(q.market_cap, q.currency)}</span>
-        <span style={{ fontSize:14, color:'rgba(255,255,255,.35)', fontWeight:700 }}>kadeora.app/stock/{q.symbol}</span>
+        <span style={{ fontSize: 14, color:'rgba(255,255,255,.45)', fontWeight:700 }}>시가총액 {fmtCap(q.market_cap, q.currency)}</span>
+        <span style={{ fontSize: 14, color:'rgba(255,255,255,.35)', fontWeight:700 }}>kadeora.app/stock/{q.symbol}</span>
       </div>
     </div>
   );
@@ -146,14 +146,14 @@ function ChartCard(q: QuoteRow, ff: string) {
     <div style={{ width:'100%', height:'100%', display:'flex', flexDirection:'column', background:bg, fontFamily: ff, padding:'48px 56px' }}>
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:20 }}>
         <div style={{ display:'flex', flexDirection:'column' }}>
-          <div style={{ display:'flex', fontSize:18, color:'rgba(255,255,255,.55)', fontWeight:700, letterSpacing:1, marginBottom:4 }}>{q.symbol} · CHART</div>
-          <div style={{ display:'flex', fontSize:42, fontWeight:900, color:'#fff', letterSpacing:-1, lineHeight:1 }}>{name}</div>
+          <div style={{ display:'flex', fontSize: 18, color:'rgba(255,255,255,.55)', fontWeight:700, letterSpacing:1, marginBottom:4 }}>{q.symbol} · CHART</div>
+          <div style={{ display:'flex', fontSize: 42, fontWeight:900, color:'#fff', letterSpacing:-1, lineHeight:1 }}>{name}</div>
         </div>
         <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end' }}>
-          <div style={{ display:'flex', fontSize:36, fontWeight:900, color:'#fff', letterSpacing:-1 }}>{Number(q.price) ? fmtCur(Number(q.price), q.currency) : '-'}</div>
+          <div style={{ display:'flex', fontSize: 36, fontWeight:900, color:'#fff', letterSpacing:-1 }}>{Number(q.price) ? fmtCur(Number(q.price), q.currency) : '-'}</div>
           <div style={{ display:'flex', alignItems:'center', gap:6 }}>
             <ArrowIcon dir={arrowDir} color={accent} size={16} />
-            <span style={{ fontSize:18, fontWeight:900, color:accent }}>{Math.abs(chg).toFixed(2)}%</span>
+            <span style={{ fontSize: 18, fontWeight:900, color:accent }}>{Math.abs(chg).toFixed(2)}%</span>
           </div>
         </div>
       </div>
@@ -170,8 +170,8 @@ function ChartCard(q: QuoteRow, ff: string) {
         </svg>
       </div>
       <div style={{ display:'flex', justifyContent:'space-between', marginTop:14 }}>
-        <span style={{ fontSize:13, color:'rgba(255,255,255,.45)', fontWeight:700 }}>최근 추세 · 시각화</span>
-        <span style={{ fontSize:13, color:'rgba(255,255,255,.35)', fontWeight:700 }}>kadeora.app/stock/{q.symbol}</span>
+        <span style={{ fontSize: 13, color:'rgba(255,255,255,.45)', fontWeight:700 }}>최근 추세 · 시각화</span>
+        <span style={{ fontSize: 13, color:'rgba(255,255,255,.35)', fontWeight:700 }}>kadeora.app/stock/{q.symbol}</span>
       </div>
     </div>
   );
@@ -194,9 +194,9 @@ function FinancialCard(q: QuoteRow, ff: string) {
     <div style={{ width:'100%', height:'100%', display:'flex', flexDirection:'column', background:bg, fontFamily: ff, padding:'48px 56px' }}>
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:24 }}>
         <div style={{ display:'flex', flexDirection:'column' }}>
-          <div style={{ display:'flex', fontSize:16, color:'#FFE000', fontWeight:900, letterSpacing:2, marginBottom:6 }}>FINANCIAL · 재무 핵심</div>
-          <div style={{ display:'flex', fontSize:42, fontWeight:900, color:'#fff', letterSpacing:-1, lineHeight:1.05 }}>{name}</div>
-          <div style={{ display:'flex', fontSize:16, color:'rgba(255,255,255,.45)', fontWeight:700, marginTop:4 }}>{q.symbol} · {safeStr(q.sector) || '-'}</div>
+          <div style={{ display:'flex', fontSize: 16, color:'#FFE000', fontWeight:900, letterSpacing:2, marginBottom:6 }}>FINANCIAL · 재무 핵심</div>
+          <div style={{ display:'flex', fontSize: 42, fontWeight:900, color:'#fff', letterSpacing:-1, lineHeight:1.05 }}>{name}</div>
+          <div style={{ display:'flex', fontSize: 16, color:'rgba(255,255,255,.45)', fontWeight:700, marginTop:4 }}>{q.symbol} · {safeStr(q.sector) || '-'}</div>
         </div>
       </div>
       <div style={{ flex:1, display:'flex', flexDirection:'row', flexWrap:'wrap', gap:16 }}>
@@ -206,15 +206,15 @@ function FinancialCard(q: QuoteRow, ff: string) {
             background:'rgba(255,255,255,.05)', border:'1px solid rgba(255,224,0,.25)', borderRadius:16,
             display:'flex', flexDirection:'column', justifyContent:'center',
           }}>
-            <div style={{ display:'flex', fontSize:15, color:'rgba(255,224,0,.85)', fontWeight:900, letterSpacing:1.5, marginBottom:8 }}>{k}</div>
-            <div style={{ display:'flex', fontSize:42, fontWeight:900, color:'#fff', letterSpacing:-1.5, lineHeight:1, marginBottom:6 }}>{v}</div>
-            <div style={{ display:'flex', fontSize:14, color:'rgba(255,255,255,.45)', fontWeight:700 }}>{sub}</div>
+            <div style={{ display:'flex', fontSize: 15, color:'rgba(255,224,0,.85)', fontWeight:900, letterSpacing:1.5, marginBottom:8 }}>{k}</div>
+            <div style={{ display:'flex', fontSize: 42, fontWeight:900, color:'#fff', letterSpacing:-1.5, lineHeight:1, marginBottom:6 }}>{v}</div>
+            <div style={{ display:'flex', fontSize: 14, color:'rgba(255,255,255,.45)', fontWeight:700 }}>{sub}</div>
           </div>
         ))}
       </div>
       <div style={{ display:'flex', justifyContent:'space-between', marginTop:16 }}>
-        <span style={{ fontSize:13, color:'rgba(255,255,255,.45)', fontWeight:700 }}>실시간 재무 지표</span>
-        <span style={{ fontSize:13, color:'rgba(255,255,255,.35)', fontWeight:700 }}>kadeora.app/stock/{q.symbol}</span>
+        <span style={{ fontSize: 13, color:'rgba(255,255,255,.45)', fontWeight:700 }}>실시간 재무 지표</span>
+        <span style={{ fontSize: 13, color:'rgba(255,255,255,.35)', fontWeight:700 }}>kadeora.app/stock/{q.symbol}</span>
       </div>
     </div>
   );
@@ -234,29 +234,29 @@ function FlowCard(q: QuoteRow, ff: string) {
     <div style={{ width:'100%', height:'100%', display:'flex', flexDirection:'column', background:bg, fontFamily: ff, padding:'48px 56px' }}>
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:22 }}>
         <div style={{ display:'flex', flexDirection:'column' }}>
-          <div style={{ display:'flex', fontSize:16, color:ACC, fontWeight:900, letterSpacing:2, marginBottom:6 }}>FLOW · 수급 동향</div>
-          <div style={{ display:'flex', fontSize:40, fontWeight:900, color:'#fff', letterSpacing:-1, lineHeight:1.05 }}>{name}</div>
-          <div style={{ display:'flex', fontSize:16, color:'rgba(255,255,255,.45)', fontWeight:700, marginTop:4 }}>{q.symbol} · 매매주체별</div>
+          <div style={{ display:'flex', fontSize: 16, color:ACC, fontWeight:900, letterSpacing:2, marginBottom:6 }}>FLOW · 수급 동향</div>
+          <div style={{ display:'flex', fontSize: 40, fontWeight:900, color:'#fff', letterSpacing:-1, lineHeight:1.05 }}>{name}</div>
+          <div style={{ display:'flex', fontSize: 16, color:'rgba(255,255,255,.45)', fontWeight:700, marginTop:4 }}>{q.symbol} · 매매주체별</div>
         </div>
         <div style={{ display:'flex', alignItems:'center', gap:8, padding:'7px 16px', background:`${ACC}1a`, border:`1px solid ${ACC}55`, borderRadius:999 }}>
-          <span style={{ fontSize:14, fontWeight:900, color:ACC, letterSpacing:1 }}>실시간</span>
+          <span style={{ fontSize: 14, fontWeight:900, color:ACC, letterSpacing:1 }}>실시간</span>
         </div>
       </div>
       <div style={{ flex:1, display:'flex', flexDirection:'column', gap:14 }}>
         {flows.map((f) => (
           <div key={f.who} style={{ display:'flex', alignItems:'center', gap:18, padding:'18px 24px', background:'rgba(255,255,255,.04)', border:`1px solid ${f.color}40`, borderRadius:14 }}>
-            <div style={{ display:'flex', width:80, fontSize:20, fontWeight:900, color:'#fff', letterSpacing:-.3 }}>{f.who}</div>
+            <div style={{ display:'flex', width:80, fontSize: 20, fontWeight:900, color:'#fff', letterSpacing:-.3 }}>{f.who}</div>
             <div style={{ flex:1, display:'flex', alignItems:'center', gap:10 }}>
               <div style={{ width:8, height:8, borderRadius:'50%', background:f.color, boxShadow:`0 0 8px ${f.color}` }} />
-              <span style={{ fontSize:18, color:'rgba(255,255,255,.7)', fontWeight:700 }}>{f.dir}</span>
+              <span style={{ fontSize: 18, color:'rgba(255,255,255,.7)', fontWeight:700 }}>{f.dir}</span>
             </div>
-            <div style={{ display:'flex', fontSize:22, fontWeight:900, color:f.color, letterSpacing:-.5 }}>{f.val}</div>
+            <div style={{ display:'flex', fontSize: 22, fontWeight:900, color:f.color, letterSpacing:-.5 }}>{f.val}</div>
           </div>
         ))}
       </div>
       <div style={{ display:'flex', justifyContent:'space-between', marginTop:16 }}>
-        <span style={{ fontSize:13, color:'rgba(255,255,255,.45)', fontWeight:700 }}>외국인·기관·개인 매매동향</span>
-        <span style={{ fontSize:13, color:'rgba(255,255,255,.35)', fontWeight:700 }}>kadeora.app/stock/{q.symbol}</span>
+        <span style={{ fontSize: 13, color:'rgba(255,255,255,.45)', fontWeight:700 }}>외국인·기관·개인 매매동향</span>
+        <span style={{ fontSize: 13, color:'rgba(255,255,255,.35)', fontWeight:700 }}>kadeora.app/stock/{q.symbol}</span>
       </div>
     </div>
   );
@@ -279,21 +279,21 @@ function AICard(q: QuoteRow, ff: string) {
       <div style={{ position:'absolute', top:-190, left:-180, width:720, height:720, borderRadius:'50%', background:`radial-gradient(circle,${sentiment.color}22 0%,transparent 65%)`, display:'flex' }} />
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', position:'relative', zIndex:2, marginBottom:24 }}>
         <div style={{ display:'flex', flexDirection:'column' }}>
-          <div style={{ display:'flex', fontSize:16, color:'#C084FC', fontWeight:900, letterSpacing:2, marginBottom:6 }}>AI · 한줄 분석</div>
-          <div style={{ display:'flex', fontSize:40, fontWeight:900, color:'#fff', letterSpacing:-1, lineHeight:1.05 }}>{name}</div>
+          <div style={{ display:'flex', fontSize: 16, color:'#C084FC', fontWeight:900, letterSpacing:2, marginBottom:6 }}>AI · 한줄 분석</div>
+          <div style={{ display:'flex', fontSize: 40, fontWeight:900, color:'#fff', letterSpacing:-1, lineHeight:1.05 }}>{name}</div>
         </div>
         <div style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 20px', background:`${sentiment.color}22`, border:`1px solid ${sentiment.color}80`, borderRadius:999 }}>
           <ArrowIcon dir={sentiment.dir} color={sentiment.color} size={18} />
-          <span style={{ fontSize:18, fontWeight:900, color:sentiment.color, letterSpacing:1 }}>{sentiment.lab}</span>
+          <span style={{ fontSize: 18, fontWeight:900, color:sentiment.color, letterSpacing:1 }}>{sentiment.lab}</span>
         </div>
       </div>
       <div style={{ flex:1, display:'flex', flexDirection:'column', justifyContent:'center', position:'relative', zIndex:2 }}>
         <div style={{ display:'flex', width:48, height:5, background:sentiment.color, borderRadius:999, marginBottom:24 }} />
-        <div style={{ display:'flex', fontSize:36, fontWeight:800, color:'#fff', lineHeight:1.45, letterSpacing:-.8, wordBreak:'keep-all' }}>{summary}</div>
+        <div style={{ display:'flex', fontSize: 36, fontWeight:800, color:'#fff', lineHeight:1.45, letterSpacing:-.8, wordBreak:'keep-all' }}>{summary}</div>
       </div>
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', position:'relative', zIndex:2, paddingTop:14, borderTop:'0.5px solid rgba(255,255,255,.1)' }}>
-        <span style={{ fontSize:14, color:'rgba(255,255,255,.45)', fontWeight:700 }}>{q.symbol} · AI 종목 한줄평</span>
-        <span style={{ fontSize:14, color:'rgba(255,255,255,.35)', fontWeight:700 }}>kadeora.app/stock/{q.symbol}</span>
+        <span style={{ fontSize: 14, color:'rgba(255,255,255,.45)', fontWeight:700 }}>{q.symbol} · AI 종목 한줄평</span>
+        <span style={{ fontSize: 14, color:'rgba(255,255,255,.35)', fontWeight:700 }}>kadeora.app/stock/{q.symbol}</span>
       </div>
     </div>
   );
@@ -303,15 +303,15 @@ function FallbackCard(symbol: string | null, ff: string) {
   const stockAccent = OG_CAT.stock.color;
   return (
     <div style={{ width:'100%', height:'100%', display:'flex', flexDirection:'column', background:'#0F1B3E', fontFamily: ff, padding:'56px 64px', justifyContent:'space-between' }}>
-      <div style={{ display:'flex', fontSize:22, color:stockAccent, fontWeight:900, letterSpacing:2 }}>{OG_CAT.stock.icon} 카더라 주식</div>
+      <div style={{ display:'flex', fontSize: 22, color:stockAccent, fontWeight:900, letterSpacing:2 }}>{OG_CAT.stock.icon} 카더라 주식</div>
       <div style={{ display:'flex', flexDirection:'column', gap:18 }}>
         <div style={{ display:'flex', width:60, height:5, background:stockAccent, borderRadius:999 }} />
-        <div style={{ display:'flex', fontSize:64, fontWeight:900, color:'#fff', letterSpacing:-2, lineHeight:1.05 }}>{symbol || '주식 종목'}</div>
-        <div style={{ display:'flex', fontSize:22, color:'rgba(255,255,255,.55)', fontWeight:700 }}>실시간 시세 · 차트 · 수급 · 재무 · AI 분석</div>
+        <div style={{ display:'flex', fontSize: 64, fontWeight:900, color:'#fff', letterSpacing:-2, lineHeight:1.05 }}>{symbol || '주식 종목'}</div>
+        <div style={{ display:'flex', fontSize: 22, color:'rgba(255,255,255,.55)', fontWeight:700 }}>실시간 시세 · 차트 · 수급 · 재무 · AI 분석</div>
       </div>
       <div style={{ display:'flex', justifyContent:'space-between' }}>
-        <span style={{ fontSize:14, color:'rgba(255,255,255,.45)', fontWeight:700 }}>KOSPI · KOSDAQ · NASDAQ</span>
-        <span style={{ fontSize:14, color:'rgba(255,255,255,.35)', fontWeight:700 }}>kadeora.app</span>
+        <span style={{ fontSize: 14, color:'rgba(255,255,255,.45)', fontWeight:700 }}>KOSPI · KOSDAQ · NASDAQ</span>
+        <span style={{ fontSize: 14, color:'rgba(255,255,255,.35)', fontWeight:700 }}>kadeora.app</span>
       </div>
     </div>
   );

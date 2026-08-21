@@ -266,38 +266,90 @@ html.font-large {
   --fs-2xl: 36px;
 }
 
-/* 세션70: 인라인 font-size 강제 스케일링
-   React renders: style="font-size: 13px" (with space after colon)
-   SSR HTML may have: fontSize:13 (camelCase)
-   Both patterns must be matched */
+/* 세션70+s5: 인라인 font-size 강제 스케일링.
+   실측(.next/server/app/*.html): SSR 직렬화는 공백 없음 — style="font-size:13px".
+   CSSOM 을 거친 뒤(하이드레이션/클라이언트 갱신)에는 공백이 붙는다 — "font-size: 13px".
+   기존 규칙은 공백 있는 표기만 잡아서, 같은 10px 라도 SSR 상태에서는 안 걸리고
+   하이드레이션 뒤에만 걸렸다. 이것이 화면마다·요소마다 크기가 갈리던 직접 원인이다.
+   두 표기를 모두 매칭한다.
+   ※ 이 패치는 증상 억제제다. 근본은 인라인 하드코딩이며 S5-2 에서 토큰으로 흡수한다. */
 
 /* ── ROOT: 작은 인라인 사이즈 끌어올리기 ── */
-[style*="font-size: 9px"]  { font-size: 11px !important; }
-[style*="font-size: 10px"] { font-size: 12px !important; }
-[style*="font-size: 11px"] { font-size: 13px !important; }
-[style*="font-size: 12px"] { font-size: 14px !important; }
-[style*="font-size: 13px"] { font-size: 15px !important; }
-[style*="font-size: 14px"] { font-size: 16px !important; }
-[style*="font-size: 15px"] { font-size: 16px !important; }
+[style*="font-size: 9px"],
+[style*="font-size:9px"]  { font-size: 11px !important; }
+[style*="font-size: 10px"],
+[style*="font-size:10px"] { font-size: 12px !important; }
+[style*="font-size: 11px"],
+[style*="font-size:11px"] { font-size: 13px !important; }
+[style*="font-size: 12px"],
+[style*="font-size:12px"] { font-size: 14px !important; }
+[style*="font-size: 13px"],
+[style*="font-size:13px"] { font-size: 15px !important; }
+[style*="font-size: 14px"],
+[style*="font-size:14px"] { font-size: 16px !important; }
+[style*="font-size: 15px"],
+[style*="font-size:15px"] { font-size: 16px !important; }
 
 /* ── font-large: 더 크게 ── */
-html.font-large [style*="font-size: 9px"]  { font-size: 13px !important; }
-html.font-large [style*="font-size: 10px"] { font-size: 14px !important; }
-html.font-large [style*="font-size: 11px"] { font-size: 15px !important; }
-html.font-large [style*="font-size: 12px"] { font-size: 16px !important; }
-html.font-large [style*="font-size: 13px"] { font-size: 17px !important; }
-html.font-large [style*="font-size: 14px"] { font-size: 18px !important; }
-html.font-large [style*="font-size: 15px"] { font-size: 19px !important; }
-html.font-large [style*="font-size: 16px"] { font-size: 20px !important; }
+html.font-large [style*="font-size: 9px"],
+[style*="font-size:9px"]  { font-size: 13px !important; }
+html.font-large [style*="font-size: 10px"],
+[style*="font-size:10px"] { font-size: 14px !important; }
+html.font-large [style*="font-size: 11px"],
+[style*="font-size:11px"] { font-size: 15px !important; }
+html.font-large [style*="font-size: 12px"],
+[style*="font-size:12px"] { font-size: 16px !important; }
+html.font-large [style*="font-size: 13px"],
+[style*="font-size:13px"] { font-size: 17px !important; }
+html.font-large [style*="font-size: 14px"],
+[style*="font-size:14px"] { font-size: 18px !important; }
+html.font-large [style*="font-size: 15px"],
+[style*="font-size:15px"] { font-size: 19px !important; }
+html.font-large [style*="font-size: 16px"],
+[style*="font-size:16px"] { font-size: 20px !important; }
 
 /* ── font-small: 축소 ── */
-html.font-small [style*="font-size: 16px"] { font-size: 14px !important; }
-html.font-small [style*="font-size: 15px"] { font-size: 13px !important; }
-html.font-small [style*="font-size: 14px"] { font-size: 12px !important; }
-html.font-small [style*="font-size: 13px"] { font-size: 12px !important; }
-html.font-small [style*="font-size: 12px"] { font-size: 11px !important; }
-html.font-small [style*="font-size: 11px"] { font-size: 10px !important; }
-html.font-small [style*="font-size: 10px"] { font-size: 10px !important; }
+html.font-small [style*="font-size: 16px"],
+[style*="font-size:16px"] { font-size: 14px !important; }
+html.font-small [style*="font-size: 15px"],
+[style*="font-size:15px"] { font-size: 13px !important; }
+html.font-small [style*="font-size: 14px"],
+[style*="font-size:14px"] { font-size: 12px !important; }
+html.font-small [style*="font-size: 13px"],
+[style*="font-size:13px"] { font-size: 12px !important; }
+html.font-small [style*="font-size: 12px"],
+[style*="font-size:12px"] { font-size: 11px !important; }
+html.font-small [style*="font-size: 11px"],
+[style*="font-size:11px"] { font-size: 10px !important; }
+html.font-small [style*="font-size: 10px"],
+[style*="font-size:10px"] { font-size: 10px !important; }
+
+
+/* ── s5: Tailwind 텍스트 클래스 편입 ──
+   text-xs(12px)·text-[Npx] 는 인라인이 아니라 위 [style*=] 규칙에 안 걸린다.
+   같은 크기인데 인라인만 커지던 불일치를 없애기 위해 동일 스케일을 건다. */
+.text-\[9px\]    { font-size: 11px !important; }
+.text-\[10px\]   { font-size: 12px !important; }
+.text-\[11px\]   { font-size: 13px !important; }
+.text-\[12px\], .text-\[12\.5px\] { font-size: 14px !important; }
+.text-\[13px\]   { font-size: 15px !important; }
+.text-\[14px\]   { font-size: 16px !important; }
+.text-xs         { font-size: 14px !important; }
+
+html.font-large .text-\[9px\]  { font-size: 13px !important; }
+html.font-large .text-\[10px\] { font-size: 14px !important; }
+html.font-large .text-\[11px\] { font-size: 15px !important; }
+html.font-large .text-\[12px\], html.font-large .text-\[12\.5px\] { font-size: 16px !important; }
+html.font-large .text-\[13px\] { font-size: 17px !important; }
+html.font-large .text-\[14px\] { font-size: 18px !important; }
+html.font-large .text-xs        { font-size: 16px !important; }
+
+html.font-small .text-\[14px\] { font-size: 12px !important; }
+html.font-small .text-\[13px\] { font-size: 12px !important; }
+html.font-small .text-\[12px\], html.font-small .text-\[12\.5px\] { font-size: 11px !important; }
+html.font-small .text-\[11px\] { font-size: 10px !important; }
+html.font-small .text-\[10px\] { font-size: 10px !important; }
+html.font-small .text-xs        { font-size: 12px !important; }
 
 /* font-large/small 레이아웃 보정 */
 html.font-large input, html.font-large textarea, html.font-large select { font-size: 20px !important; }

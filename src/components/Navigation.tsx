@@ -272,7 +272,7 @@ export function Navigation() {
                 {/* 모바일 검색 (로그인) */}
                 <Link href="/search" className="md:hidden" aria-label="검색" style={{
                   width:36, height:36, display:'flex', alignItems:'center', justifyContent:'center',
-                  borderRadius:'50%', color:'var(--text-secondary)', textDecoration:'none', fontSize:16,
+                  borderRadius:'50%', color:'var(--text-secondary)', textDecoration:'none', fontSize: 16,
                   background:'var(--bg-hover)', border:'1px solid var(--border)',
                 }}><Search size={18} /></Link>
 
@@ -282,7 +282,7 @@ export function Navigation() {
                   alignItems:'center', justifyContent:'center',
                   borderRadius:'50%',
                   background:'var(--bg-hover)', border:'1px solid var(--border)',
-                  color:'var(--text-primary)', textDecoration:'none', fontSize:16,
+                  color:'var(--text-primary)', textDecoration:'none', fontSize: 16,
                   transition:'border-color 0.12s',
                 }}
                   onMouseEnter={e=>(e.currentTarget.style.borderColor='var(--border-strong)')}
@@ -309,7 +309,7 @@ export function Navigation() {
                     display:'flex', alignItems:'center', gap: 6,
                     height:34, padding:'0 10px', borderRadius: 'var(--radius-pill)',
                     background:'var(--bg-hover)', border:'1px solid var(--border)',
-                    color:'var(--text-primary)', fontSize:13, cursor:'pointer',
+                    color:'var(--text-primary)', fontSize: 13, cursor:'pointer',
                     transition:'border-color 0.12s', position:'relative',
                   }}
                     onMouseEnter={e=>(e.currentTarget.style.borderColor='var(--border-strong)')}
@@ -337,7 +337,7 @@ export function Navigation() {
                         position:'absolute', top:-4, right:-4,
                         minWidth:16, height:16, borderRadius: 'var(--radius-sm)',
                         background:'var(--accent-red)', color:'#fff',
-                        fontSize:10, fontWeight:800,
+                        fontSize: 10, fontWeight:800,
                         display:'flex', alignItems:'center', justifyContent:'center',
                         padding:'0 4px', border:'2px solid var(--nav-bg)',
                       }}>
@@ -392,7 +392,7 @@ export function Navigation() {
                       ))}
                       {/* 글씨 크기 */}
                       <div style={{ padding:'9px 16px', borderBottom:'1px solid var(--border)' }}>
-                        <div style={{ fontSize:12, color:'var(--text-tertiary)', marginBottom:6, fontWeight:600 }}>글씨 크기</div>
+                        <div style={{ fontSize: 12, color:'var(--text-tertiary)', marginBottom:6, fontWeight:600 }}>글씨 크기</div>
                         <div style={{ display:'flex', gap: 'var(--sp-xs)' }}>
                           {([['small','작게'],['medium','보통'],['large','크게']] as const).map(([val, label]) => (
                             <button key={val} onClick={() => handleFontSize(val)} aria-label={`글씨 크기 ${label}`} aria-pressed={fontSize === val} style={{
@@ -406,7 +406,7 @@ export function Navigation() {
                       </div>
                       <button onClick={handleLogout} aria-label="로그아웃" style={{
                         display:'block', width:'100%', padding:'11px 16px',
-                        color:'var(--error)', fontSize:14,
+                        color:'var(--error)', fontSize: 14,
                         background:'transparent', border:'none',
                         cursor:'pointer', textAlign:'left', transition:'background 0.1s',
                       }}
@@ -422,7 +422,7 @@ export function Navigation() {
                 {/* 모바일 검색 (비로그인) */}
                 <Link href="/search" className="md:hidden" aria-label="검색" style={{
                   width:36, height:36, display:'flex', alignItems:'center', justifyContent:'center',
-                  borderRadius:'50%', color:'var(--text-secondary)', textDecoration:'none', fontSize:16,
+                  borderRadius:'50%', color:'var(--text-secondary)', textDecoration:'none', fontSize: 16,
                   background:'var(--bg-hover)', border:'1px solid var(--border)',
                 }}><Search size={18} /></Link>
                 <Link
@@ -499,7 +499,7 @@ export function Navigation() {
             }}>
               {active && <span style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:24, height:2.5, borderRadius: 4, background:'var(--brand)' }} />}
               <item.Icon size={18} strokeWidth={active ? 2.5 : 1.8} />
-              <span style={{ fontSize:10, fontWeight: active ? 700 : 500, lineHeight:1.2 }}>{item.label}</span>
+              <span style={{ fontSize: 10, fontWeight: active ? 700 : 500, lineHeight:1.2 }}>{item.label}</span>
             </Link>
           );
         })}
@@ -518,7 +518,7 @@ export function Navigation() {
         >
           {moreOpen && <span style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:24, height:2.5, borderRadius: 4, background:'var(--brand)' }} />}
           <MoreHorizontal size={18} strokeWidth={moreOpen ? 2.5 : 1.8} />
-          <span style={{ fontSize:10, fontWeight: moreOpen ? 700 : 500, lineHeight:1.2 }}>더보기</span>
+          <span style={{ fontSize: 10, fontWeight: moreOpen ? 700 : 500, lineHeight:1.2 }}>더보기</span>
         </button>
       </nav>
 
@@ -547,7 +547,7 @@ export function Navigation() {
           }}>
             {/* 헤더 */}
             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom: 16 }}>
-              <span style={{ fontSize:15, fontWeight:800, color:'var(--text-primary)', letterSpacing:'-0.3px' }}>더보기</span>
+              <span style={{ fontSize: 15, fontWeight:800, color:'var(--text-primary)', letterSpacing:'-0.3px' }}>더보기</span>
               <button onClick={() => setMoreOpen(false)} style={{
                 width: 32, height: 32, borderRadius:'50%', background:'var(--bg-hover)', border:'none',
                 color:'var(--text-tertiary)', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center',
@@ -590,14 +590,14 @@ export function Navigation() {
                   <Link href={`/profile/${userId}`} onClick={() => setMoreOpen(false)} style={{
                     flex:1, padding:'10px 0', borderRadius: 'var(--radius-md)',
                     background:'var(--bg-hover)', color:'var(--text-primary)',
-                    fontSize:12, fontWeight:600, textDecoration:'none', border:'1px solid var(--border)',
+                    fontSize: 12, fontWeight:600, textDecoration:'none', border:'1px solid var(--border)',
                     display:'flex', alignItems:'center', justifyContent:'center',
                   }}>내 프로필</Link>
                   <Link href="/notifications" onClick={() => setMoreOpen(false)} style={{
                     flex:1, padding:'10px 0', borderRadius: 'var(--radius-md)',
                     background: unread > 0 ? 'var(--brand)' : 'var(--bg-hover)',
                     color: unread > 0 ? '#fff' : 'var(--text-primary)',
-                    fontSize:12, fontWeight:600, textDecoration:'none', border: unread > 0 ? 'none' : '1px solid var(--border)',
+                    fontSize: 12, fontWeight:600, textDecoration:'none', border: unread > 0 ? 'none' : '1px solid var(--border)',
                     display:'flex', alignItems:'center', justifyContent:'center',
                   }}>알림{unread > 0 ? ` ${unread}` : ''}</Link>
                 </>
@@ -645,20 +645,20 @@ export function Navigation() {
                   <Link href={`/profile/${userId}`} onClick={() => setMoreOpen(false)} style={{
                     flex:1, padding:'10px 0', borderRadius: 'var(--radius-md)',
                     background:'var(--bg-hover)', color:'var(--text-primary)',
-                    fontSize:12, fontWeight:600, textDecoration:'none', border:'1px solid var(--border)',
+                    fontSize: 12, fontWeight:600, textDecoration:'none', border:'1px solid var(--border)',
                     display:'flex', alignItems:'center', justifyContent:'center',
                   }}>내 프로필</Link>
                   <Link href="/write" onClick={() => setMoreOpen(false)} style={{
                     flex:1, padding:'10px 0', borderRadius: 'var(--radius-md)',
                     background:'var(--bg-hover)', color:'var(--text-primary)',
-                    fontSize:12, fontWeight:600, textDecoration:'none', border:'1px solid var(--border)',
+                    fontSize: 12, fontWeight:600, textDecoration:'none', border:'1px solid var(--border)',
                     display:'flex', alignItems:'center', justifyContent:'center',
                   }}>글쓰기</Link>
                   <Link href="/notifications" onClick={() => setMoreOpen(false)} style={{
                     flex:1, padding:'10px 0', borderRadius: 'var(--radius-md)',
                     background: unread > 0 ? 'var(--brand)' : 'var(--bg-hover)',
                     color: unread > 0 ? '#fff' : 'var(--text-primary)',
-                    fontSize:12, fontWeight:600, textDecoration:'none', border: unread > 0 ? 'none' : '1px solid var(--border)',
+                    fontSize: 12, fontWeight:600, textDecoration:'none', border: unread > 0 ? 'none' : '1px solid var(--border)',
                     display:'flex', alignItems:'center', justifyContent:'center',
                   }}>알림{unread > 0 ? ` ${unread}` : ''}</Link>
                 </>

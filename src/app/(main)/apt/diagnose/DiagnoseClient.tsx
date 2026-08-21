@@ -53,15 +53,15 @@ export default function DiagnoseClient() {
     :total>=25?{t:'추첨제 + 특별공급',d:'추첨제와 특별공급에 집중하세요.',i:['85㎡ 초과 추첨제 40% 활용','생애최초 특별공급 (소득 기준)','신혼부부 특별공급 (혼인 7년 이내)']}
     :{t:'특별공급 집중',d:'특별공급 자격을 우선 확인하세요.',i:['신혼부부/생애최초/다자녀 특별공급','추첨제 85㎡ 초과 물량','무주택기간·통장 기간 꾸준히 쌓기']};
 
-  const chip=(active:boolean)=>({padding:'9px 0',borderRadius: 'var(--radius-md)',border:'none',cursor:'pointer',fontWeight:600 as const,fontSize:13,background:active?'var(--brand)':'var(--bg-hover)',color:active?'var(--text-inverse, #fff)':'var(--text-secondary)',flex:1,textAlign:'center' as const});
+  const chip=(active:boolean)=>({padding:'9px 0',borderRadius: 'var(--radius-md)',border:'none',cursor:'pointer',fontWeight:600 as const,fontSize: 13,background:active?'var(--brand)':'var(--bg-hover)',color:active?'var(--text-inverse, #fff)':'var(--text-secondary)',flex:1,textAlign:'center' as const});
   const steps=['기본 정보','무주택기간','부양가족','통장 기간'];
   const ctr=(n:number,set:(v:number)=>void,min:number,max:number,label:string,sub?:string)=>(
     <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:14}}>
-      <div><span style={{fontSize:13,color:'var(--text-primary)'}}>{label}</span>{sub&&<span style={{fontSize:10,color:'var(--text-tertiary)',display:'block'}}>{sub}</span>}</div>
+      <div><span style={{fontSize: 13,color:'var(--text-primary)'}}>{label}</span>{sub&&<span style={{fontSize: 10,color:'var(--text-tertiary)',display:'block'}}>{sub}</span>}</div>
       <div style={{display:'flex',alignItems:'center',gap:8}}>
-        <button onClick={()=>set(Math.max(min,n-1))} style={{width:32,height:32,borderRadius: 'var(--radius-md)',border:'1px solid var(--border)',background:'var(--bg-hover)',color:'var(--text-primary)',cursor:'pointer',fontSize:16}}>-</button>
-        <span style={{fontSize:16,fontWeight:800,minWidth:24,textAlign:'center'}}>{n}</span>
-        <button onClick={()=>set(Math.min(max,n+1))} style={{width:32,height:32,borderRadius: 'var(--radius-md)',border:'1px solid var(--border)',background:'var(--bg-hover)',color:'var(--text-primary)',cursor:'pointer',fontSize:16}}>+</button>
+        <button onClick={()=>set(Math.max(min,n-1))} style={{width:32,height:32,borderRadius: 'var(--radius-md)',border:'1px solid var(--border)',background:'var(--bg-hover)',color:'var(--text-primary)',cursor:'pointer',fontSize: 16}}>-</button>
+        <span style={{fontSize: 16,fontWeight:800,minWidth:24,textAlign:'center'}}>{n}</span>
+        <button onClick={()=>set(Math.min(max,n+1))} style={{width:32,height:32,borderRadius: 'var(--radius-md)',border:'1px solid var(--border)',background:'var(--bg-hover)',color:'var(--text-primary)',cursor:'pointer',fontSize: 16}}>+</button>
       </div>
     </div>
   );
@@ -73,73 +73,73 @@ export default function DiagnoseClient() {
       {!showResult&&(
         <>
           <div style={{display:'flex',gap:4,marginBottom:20}}>
-            {steps.map((s,i)=><button key={i} onClick={()=>setStep(i)} style={{flex:1,padding:'8px 0',borderRadius: 'var(--radius-md)',border:'none',cursor:'pointer',background:step===i?'var(--brand)':'var(--bg-hover)',color:step===i?'var(--text-inverse, #fff)':'var(--text-tertiary)',fontSize:11,fontWeight:700}}><span style={{display:'block',fontSize:14,marginBottom:1}}>{i+1}</span>{s}</button>)}
+            {steps.map((s,i)=><button key={i} onClick={()=>setStep(i)} style={{flex:1,padding:'8px 0',borderRadius: 'var(--radius-md)',border:'none',cursor:'pointer',background:step===i?'var(--brand)':'var(--bg-hover)',color:step===i?'var(--text-inverse, #fff)':'var(--text-tertiary)',fontSize: 11,fontWeight:700}}><span style={{display:'block',fontSize: 14,marginBottom:1}}>{i+1}</span>{s}</button>)}
           </div>
 
           {step===0&&<div style={card}>
-            <label style={{fontSize:13,fontWeight:700,color:'var(--text-secondary)',display:'block',marginBottom:8}}>만 나이</label>
+            <label style={{fontSize: 13,fontWeight:700,color:'var(--text-secondary)',display:'block',marginBottom:8}}>만 나이</label>
             <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:20}}>
               <input type="range" min={19} max={65} value={age} onChange={e=>setAge(+e.target.value)} style={{flex:1,accentColor:'var(--brand)'}}/>
-              <span style={{fontSize:20,fontWeight:800,minWidth:60,textAlign:'right'}}>{age}세</span>
+              <span style={{fontSize: 20,fontWeight:800,minWidth:60,textAlign:'right'}}>{age}세</span>
             </div>
-            <label style={{fontSize:13,fontWeight:700,color:'var(--text-secondary)',display:'block',marginBottom:8}}>혼인 여부</label>
+            <label style={{fontSize: 13,fontWeight:700,color:'var(--text-secondary)',display:'block',marginBottom:8}}>혼인 여부</label>
             <div style={{display:'flex',gap:6,marginBottom:20}}>
               {[['yes','기혼'],['no','미혼']].map(([v,l])=><button key={v} onClick={()=>setMarried(v)} style={chip(married===v)}>{l}</button>)}
             </div>
-            {!canCount&&<div style={{padding:'10px 12px',borderRadius: 'var(--radius-md)',background:'rgba(239,68,68,0.08)',border:'1px solid rgba(239,68,68,0.2)',fontSize:12,color:'var(--accent-red)',lineHeight:1.6}}>만 30세 미만 미혼자는 무주택기간이 인정되지 않습니다.</div>}
+            {!canCount&&<div style={{padding:'10px 12px',borderRadius: 'var(--radius-md)',background:'rgba(239,68,68,0.08)',border:'1px solid rgba(239,68,68,0.2)',fontSize: 12,color:'var(--accent-red)',lineHeight:1.6}}>만 30세 미만 미혼자는 무주택기간이 인정되지 않습니다.</div>}
           </div>}
 
           {step===1&&<div style={card}>
-            <label style={{fontSize:13,fontWeight:700,color:'var(--text-secondary)',display:'block',marginBottom:4}}>무주택기간 (만점 32점)</label>
-            <p style={{fontSize:11,color:'var(--text-tertiary)',margin:'0 0 12px',lineHeight:1.5}}>{married==='yes'?'혼인신고일 또는 만 30세 중 빠른 날부터 산정':age>=30?'만 30세부터 산정':'만 30세 미만 미혼 → 0점'}</p>
+            <label style={{fontSize: 13,fontWeight:700,color:'var(--text-secondary)',display:'block',marginBottom:4}}>무주택기간 (만점 32점)</label>
+            <p style={{fontSize: 11,color:'var(--text-tertiary)',margin:'0 0 12px',lineHeight:1.5}}>{married==='yes'?'혼인신고일 또는 만 30세 중 빠른 날부터 산정':age>=30?'만 30세부터 산정':'만 30세 미만 미혼 → 0점'}</p>
             {canCount?<>
               <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:12}}>
                 <input type="range" min={0} max={15} value={housingYears} onChange={e=>setHousingYears(+e.target.value)} style={{flex:1,accentColor:'var(--brand)'}}/>
-                <span style={{fontSize:20,fontWeight:800,minWidth:50,textAlign:'right'}}>{housingYears}년</span>
+                <span style={{fontSize: 20,fontWeight:800,minWidth:50,textAlign:'right'}}>{housingYears}년</span>
               </div>
-              <div style={{display:'flex',justifyContent:'space-between'}}><span style={{fontSize:12,color:'var(--text-tertiary)'}}>주택공급규칙 별표1</span><span style={{fontSize:16,fontWeight:800,color:'var(--brand)'}}>{hs}점 / 32점</span></div>
-            </>:<div style={{padding:16,textAlign:'center',color:'var(--text-tertiary)',fontSize:14}}>무주택기간 산정 불가 (만 30세 미만 미혼)</div>}
+              <div style={{display:'flex',justifyContent:'space-between'}}><span style={{fontSize: 12,color:'var(--text-tertiary)'}}>주택공급규칙 별표1</span><span style={{fontSize: 16,fontWeight:800,color:'var(--brand)'}}>{hs}점 / 32점</span></div>
+            </>:<div style={{padding:16,textAlign:'center',color:'var(--text-tertiary)',fontSize: 14}}>무주택기간 산정 불가 (만 30세 미만 미혼)</div>}
           </div>}
 
           {step===2&&<div style={card}>
-            <label style={{fontSize:13,fontWeight:700,color:'var(--text-secondary)',display:'block',marginBottom:4}}>부양가족 수 (만점 35점)</label>
-            <p style={{fontSize:11,color:'var(--text-tertiary)',margin:'0 0 14px',lineHeight:1.5}}>본인 제외 · 배우자 포함 · 직계존속 3년 이상 등재 · 미혼 직계비속</p>
-            {married==='yes'&&<div style={{marginBottom:14}}><div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}><span style={{fontSize:13}}>배우자</span><div style={{display:'flex',gap:4}}>{[0,1].map(n=><button key={n} onClick={()=>setSpouse(n)} style={{...chip(spouse===n),minWidth:50,flex:'none'}}>{n?'포함':'미포함'}</button>)}</div></div></div>}
+            <label style={{fontSize: 13,fontWeight:700,color:'var(--text-secondary)',display:'block',marginBottom:4}}>부양가족 수 (만점 35점)</label>
+            <p style={{fontSize: 11,color:'var(--text-tertiary)',margin:'0 0 14px',lineHeight:1.5}}>본인 제외 · 배우자 포함 · 직계존속 3년 이상 등재 · 미혼 직계비속</p>
+            {married==='yes'&&<div style={{marginBottom:14}}><div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}><span style={{fontSize: 13}}>배우자</span><div style={{display:'flex',gap:4}}>{[0,1].map(n=><button key={n} onClick={()=>setSpouse(n)} style={{...chip(spouse===n),minWidth:50,flex:'none'}}>{n?'포함':'미포함'}</button>)}</div></div></div>}
             {ctr(children,setChildren,0,6,'미혼 자녀')}
             {ctr(parents,setParents,0,4,'직계존속 (부모/조부모)','3년 이상 주민등록 등재')}
             {ctr(siblings,setSiblings,0,4,'미혼 형제·자매','무주택 + 부모 사망 시')}
             <div style={{borderTop:'1px solid var(--border)',paddingTop:12,display:'flex',justifyContent:'space-between'}}>
-              <span style={{fontSize:13,color:'var(--text-secondary)'}}>합계: <strong>{fc}명</strong></span>
-              <span style={{fontSize:16,fontWeight:800,color:'var(--brand)'}}>{fs}점 / 35점</span>
+              <span style={{fontSize: 13,color:'var(--text-secondary)'}}>합계: <strong>{fc}명</strong></span>
+              <span style={{fontSize: 16,fontWeight:800,color:'var(--brand)'}}>{fs}점 / 35점</span>
             </div>
           </div>}
 
           {step===3&&<div style={card}>
-            <label style={{fontSize:13,fontWeight:700,color:'var(--text-secondary)',display:'block',marginBottom:4}}>내 청약통장 가입기간 (만점 17점)</label>
+            <label style={{fontSize: 13,fontWeight:700,color:'var(--text-secondary)',display:'block',marginBottom:4}}>내 청약통장 가입기간 (만점 17점)</label>
             <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:16}}>
               <input type="range" min={0} max={15} step={1} value={bankYears} onChange={e=>setBankYears(+e.target.value)} style={{flex:1,accentColor:'var(--brand)'}}/>
-              <span style={{fontSize:20,fontWeight:800,minWidth:50,textAlign:'right'}}>{bankYears}년</span>
+              <span style={{fontSize: 20,fontWeight:800,minWidth:50,textAlign:'right'}}>{bankYears}년</span>
             </div>
             {married==='yes'&&<>
-              <label style={{fontSize:13,fontWeight:700,color:'var(--text-secondary)',display:'block',marginBottom:4}}>배우자 청약통장 가입기간</label>
-              <p style={{fontSize:10,color:'var(--text-tertiary)',margin:'0 0 8px'}}>배우자 통장 50% 인정, 최대 3점 합산 (규칙 제28조)</p>
+              <label style={{fontSize: 13,fontWeight:700,color:'var(--text-secondary)',display:'block',marginBottom:4}}>배우자 청약통장 가입기간</label>
+              <p style={{fontSize: 10,color:'var(--text-tertiary)',margin:'0 0 8px'}}>배우자 통장 50% 인정, 최대 3점 합산 (규칙 제28조)</p>
               <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:12}}>
                 <input type="range" min={0} max={15} step={1} value={spouseBankYears} onChange={e=>setSpouseBankYears(+e.target.value)} style={{flex:1,accentColor:'var(--accent-purple, #A78BFA)'}}/>
-                <span style={{fontSize:16,fontWeight:800,minWidth:50,textAlign:'right'}}>{spouseBankYears}년</span>
+                <span style={{fontSize: 16,fontWeight:800,minWidth:50,textAlign:'right'}}>{spouseBankYears}년</span>
               </div>
             </>}
             <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-              <span style={{fontSize:12,color:'var(--text-tertiary)'}}>내 {myBank}점{spouseBank>0?` + 배우자 ${spouseBank}점`:''}</span>
-              <span style={{fontSize:16,fontWeight:800,color:'var(--brand)'}}>{bs}점 / 17점</span>
+              <span style={{fontSize: 12,color:'var(--text-tertiary)'}}>내 {myBank}점{spouseBank>0?` + 배우자 ${spouseBank}점`:''}</span>
+              <span style={{fontSize: 16,fontWeight:800,color:'var(--brand)'}}>{bs}점 / 17점</span>
             </div>
           </div>}
 
           <div style={{...card,display:'flex',alignItems:'center',justifyContent:'space-between'}}>
-            <div><div style={{fontSize:11,color:'var(--text-tertiary)'}}>현재 예상 가점</div><div style={{fontSize:28,fontWeight:900,color:grade.c}}>{total}<span style={{fontSize:14}}>점</span></div></div>
+            <div><div style={{fontSize: 11,color:'var(--text-tertiary)'}}>현재 예상 가점</div><div style={{fontSize: 28,fontWeight:900,color:grade.c}}>{total}<span style={{fontSize: 14}}>점</span></div></div>
             <div style={{display:'flex',gap:6}}>
-              {step>0&&<button onClick={()=>setStep(step-1)} style={{padding:'10px 18px',borderRadius: 'var(--radius-md)',border:'1px solid var(--border)',background:'var(--bg-hover)',color:'var(--text-primary)',cursor:'pointer',fontWeight:600,fontSize:13}}>이전</button>}
-              {step<3?<button onClick={()=>setStep(step+1)} style={{padding:'10px 18px',borderRadius: 'var(--radius-md)',border:'none',background:'var(--brand)',color:'var(--text-inverse, #fff)',cursor:'pointer',fontWeight:700,fontSize:13}}>다음</button>
-              :<button onClick={()=>{setShowResult(true);trackFeature('calc_result',{calculator:'apt_score',total})}} style={{padding:'10px 24px',borderRadius: 'var(--radius-md)',border:'none',background:'var(--brand)',color:'var(--text-inverse, #fff)',cursor:'pointer',fontWeight:700,fontSize:14}}>결과 보기</button>}
+              {step>0&&<button onClick={()=>setStep(step-1)} style={{padding:'10px 18px',borderRadius: 'var(--radius-md)',border:'1px solid var(--border)',background:'var(--bg-hover)',color:'var(--text-primary)',cursor:'pointer',fontWeight:600,fontSize: 13}}>이전</button>}
+              {step<3?<button onClick={()=>setStep(step+1)} style={{padding:'10px 18px',borderRadius: 'var(--radius-md)',border:'none',background:'var(--brand)',color:'var(--text-inverse, #fff)',cursor:'pointer',fontWeight:700,fontSize: 13}}>다음</button>
+              :<button onClick={()=>{setShowResult(true);trackFeature('calc_result',{calculator:'apt_score',total})}} style={{padding:'10px 24px',borderRadius: 'var(--radius-md)',border:'none',background:'var(--brand)',color:'var(--text-inverse, #fff)',cursor:'pointer',fontWeight:700,fontSize: 14}}>결과 보기</button>}
             </div>
           </div>
         </>
@@ -148,15 +148,15 @@ export default function DiagnoseClient() {
       {showResult&&(
         <>
           <div className="diagnose-result" style={{...card,textAlign:'center',padding:28}}>
-            <div style={{fontSize:12,color:'var(--text-tertiary)',marginBottom:4}}>내 청약 가점</div>
-            <div style={{fontSize:56,fontWeight:900,color:grade.c,lineHeight:1}}>{total}</div>
-            <div style={{fontSize:14,fontWeight:600,color:grade.c,marginTop:4,marginBottom:16}}>{grade.l} · 상위 {Math.max(1,100-pct)}%</div>
+            <div style={{fontSize: 12,color:'var(--text-tertiary)',marginBottom:4}}>내 청약 가점</div>
+            <div style={{fontSize: 56,fontWeight:900,color:grade.c,lineHeight:1}}>{total}</div>
+            <div style={{fontSize: 14,fontWeight:600,color:grade.c,marginTop:4,marginBottom:16}}>{grade.l} · 상위 {Math.max(1,100-pct)}%</div>
             <div style={{display:'flex',gap:8,justifyContent:'center',marginBottom:16}}>
               {[{l:'무주택',s:hs,m:32,c:'var(--accent-blue, #60A5FA)'},{l:'부양가족',s:fs,m:35,c:'var(--accent-green)'},{l:'통장',s:bs,m:17,c:'var(--accent-yellow)'}].map(i=>(
                 <div key={i.l} style={{flex:1,padding:'10px 8px',borderRadius: 'var(--radius-md)',background:'var(--bg-hover)',border:'1px solid var(--border)'}}>
-                  <div style={{fontSize:11,color:'var(--text-tertiary)',marginBottom:4}}>{i.l}</div>
-                  <div style={{fontSize:20,fontWeight:800,color:i.c}}>{i.s}</div>
-                  <div style={{fontSize:10,color:'var(--text-tertiary)'}}>/ {i.m}점</div>
+                  <div style={{fontSize: 11,color:'var(--text-tertiary)',marginBottom:4}}>{i.l}</div>
+                  <div style={{fontSize: 20,fontWeight:800,color:i.c}}>{i.s}</div>
+                  <div style={{fontSize: 10,color:'var(--text-tertiary)'}}>/ {i.m}점</div>
                   <div style={{height:3,borderRadius: 4,background:'var(--bg-hover)',marginTop:6,overflow:'hidden'}}><div style={{height:'100%',width:`${(i.s/i.m)*100}%`,background:i.c,borderRadius: 4}}/></div>
                 </div>
               ))}
@@ -168,26 +168,26 @@ export default function DiagnoseClient() {
                 if(typeof window!=='undefined'&&(window as unknown as Record<string,unknown>).Kakao){try{((window as unknown as Record<string,unknown>).Kakao as Record<string,unknown> as {Share:{sendDefault:(o:unknown)=>void}}).Share.sendDefault({objectType:'feed',content:{title:'청약 가점 진단 결과',description:text.slice(0,100),imageUrl:`${url.replace('/apt/diagnose','')}/api/og?title=${encodeURIComponent('청약 가점 '+total+'점')}`,link:{mobileWebUrl:url,webUrl:url}}});}catch{navigator.share?.({title:'청약 가점 진단',text,url}).catch(()=>{});}}
                 else if(navigator.share)navigator.share({title:'청약 가점 진단 결과',text,url}).catch(()=>{});
                 else navigator.clipboard.writeText(text+'\n'+url).then(()=>alert('복사되었습니다!'));
-              }} style={{padding:'10px 20px',borderRadius: 'var(--radius-md)',border:'none',cursor:'pointer',background:'var(--brand)',color:'#fff',fontSize:13,fontWeight:700}}>결과 공유</button>
-              <button onClick={()=>setShowResult(false)} style={{padding:'10px 20px',borderRadius: 'var(--radius-md)',border:'1px solid var(--border)',cursor:'pointer',background:'var(--bg-hover)',color:'var(--text-secondary)',fontSize:13,fontWeight:600}}>다시 계산</button>
+              }} style={{padding:'10px 20px',borderRadius: 'var(--radius-md)',border:'none',cursor:'pointer',background:'var(--brand)',color:'#fff',fontSize: 13,fontWeight:700}}>결과 공유</button>
+              <button onClick={()=>setShowResult(false)} style={{padding:'10px 20px',borderRadius: 'var(--radius-md)',border:'1px solid var(--border)',cursor:'pointer',background:'var(--bg-hover)',color:'var(--text-secondary)',fontSize: 13,fontWeight:600}}>다시 계산</button>
             </div>
           </div>
 
           {userId ? (<>
           <div style={{...card,borderLeft:'3px solid var(--brand)',borderRadius:'0 12px 12px 0'}}>
-            <div style={{fontSize:15,fontWeight:800,marginBottom:8}}>추천 전략: {strategy.t}</div>
-            <div style={{fontSize:13,color:'var(--text-secondary)',lineHeight:1.7,marginBottom:12}}>{strategy.d}</div>
-            {strategy.i.map((item,i)=><div key={i} style={{display:'flex',gap:8,marginBottom:6,fontSize:13,color:'var(--text-secondary)'}}><span style={{color:'var(--brand)',flexShrink:0}}>•</span><span style={{lineHeight:1.5}}>{item}</span></div>)}
+            <div style={{fontSize: 15,fontWeight:800,marginBottom:8}}>추천 전략: {strategy.t}</div>
+            <div style={{fontSize: 13,color:'var(--text-secondary)',lineHeight:1.7,marginBottom:12}}>{strategy.d}</div>
+            {strategy.i.map((item,i)=><div key={i} style={{display:'flex',gap:8,marginBottom:6,fontSize: 13,color:'var(--text-secondary)'}}><span style={{color:'var(--brand)',flexShrink:0}}>•</span><span style={{lineHeight:1.5}}>{item}</span></div>)}
           </div>
 
           <div style={card}>
-            <div style={{fontSize:15,fontWeight:800,marginBottom:4}}>지역별 당첨 가능성</div>
-            <div style={{fontSize:11,color:'var(--text-tertiary)',marginBottom:14}}>최근 청약 실적 기반 추정 · 단지별 차이 있음</div>
+            <div style={{fontSize: 15,fontWeight:800,marginBottom:4}}>지역별 당첨 가능성</div>
+            <div style={{fontSize: 11,color:'var(--text-tertiary)',marginBottom:14}}>최근 청약 실적 기반 추정 · 단지별 차이 있음</div>
             <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill, minmax(95px, 1fr))',gap:4}}>
               {CUTS.map(c=>{const w=total>=c.avg;const p=total>=c.min;return(
                 <div key={c.r} style={{padding:'8px 10px',borderRadius: 'var(--radius-md)',textAlign:'center',background:w?'rgba(52,211,153,0.06)':p?'rgba(251,191,36,0.06)':'var(--bg-hover)',border:`1px solid ${w?'rgba(52,211,153,0.2)':p?'rgba(251,191,36,0.2)':'var(--border)'}`}}>
-                  <div style={{fontSize:13,fontWeight:700,marginBottom:2}}>{c.r}</div>
-                  <div style={{fontSize:10,color:w?'var(--accent-green)':p?'var(--accent-yellow)':'var(--accent-red)',fontWeight:600}}>{w?'유리':p?'가능':'어려움'}</div>
+                  <div style={{fontSize: 13,fontWeight:700,marginBottom:2}}>{c.r}</div>
+                  <div style={{fontSize: 10,color:w?'var(--accent-green)':p?'var(--accent-yellow)':'var(--accent-red)',fontWeight:600}}>{w?'유리':p?'가능':'어려움'}</div>
                   <div style={{fontSize: 10,color:'var(--text-tertiary)'}}>avg {c.avg}점</div>
                 </div>
               );})}
@@ -195,27 +195,27 @@ export default function DiagnoseClient() {
           </div>
 
           <div style={card}>
-            <div style={{fontSize:15,fontWeight:800,marginBottom:12}}>가점 올리는 법</div>
+            <div style={{fontSize: 15,fontWeight:800,marginBottom:12}}>가점 올리는 법</div>
             {[hs<32&&`무주택기간: ${housingYears}년 → ${Math.min(15,housingYears+3)}년이면 +${gs(HT,Math.min(15,housingYears+3))-hs}점`,
               fs<35&&'부양가족: 배우자·직계존속·비속 무주택 확인 후 주민등록 등재',
               bs<17&&`청약통장: 유지만 하면 매년 +1점. ${Math.ceil(15-bankYears)}년 후 만점`,
               married==='yes'&&spouseBank===0&&'배우자 통장 합산: 배우자 청약통장도 50% 인정(최대 3점)',
               total<40&&'85㎡ 초과 주택은 추첨제 40% — 가점 낮아도 당첨 가능',
               '신혼부부·생애최초 특별공급은 가점 무관, 소득·자산 기준',
-            ].filter(Boolean).map((tip,i)=><div key={i} style={{display:'flex',gap:8,marginBottom:8,fontSize:13,color:'var(--text-secondary)',lineHeight:1.6}}><span style={{color:'var(--accent-yellow)',flexShrink:0,fontWeight:700,fontSize:11}}>TIP</span><span>{tip}</span></div>)}
+            ].filter(Boolean).map((tip,i)=><div key={i} style={{display:'flex',gap:8,marginBottom:8,fontSize: 13,color:'var(--text-secondary)',lineHeight:1.6}}><span style={{color:'var(--accent-yellow)',flexShrink:0,fontWeight:700,fontSize: 11}}>TIP</span><span>{tip}</span></div>)}
           </div>
           </>) : (
           <div style={{...card,textAlign:'center',padding:24,background:'linear-gradient(135deg, rgba(59,123,246,0.06), rgba(139,92,246,0.06))',border:'1px solid rgba(59,123,246,0.15)'}}>
-            <div style={{fontSize:15,fontWeight:800,color:'var(--text-primary)',marginBottom:6}}>🔒 맞춤 전략·지역별 커트라인·가점 올리는 법</div>
-            <div style={{fontSize:12,color:'var(--text-secondary)',marginBottom:16,lineHeight:1.6}}>카카오 가입하면 내 점수에 맞는 추천 전략,<br/>지역별 당첨 가능성, 가점 올리는 꿀팁을 볼 수 있어요</div>
-            <Link href="/login?redirect=/apt/diagnose&source=calc_gate" style={{display:'inline-block',padding:'12px 36px',borderRadius:30,background:'#FEE500',color:'#191919',fontWeight:800,fontSize:14,textDecoration:'none'}}>카카오로 3초 만에 열기</Link>
-            <div style={{fontSize:11,color:'var(--text-tertiary)',marginTop:10}}>가입 즉시 이용 · 스팸 없음</div>
+            <div style={{fontSize: 15,fontWeight:800,color:'var(--text-primary)',marginBottom:6}}>🔒 맞춤 전략·지역별 커트라인·가점 올리는 법</div>
+            <div style={{fontSize: 12,color:'var(--text-secondary)',marginBottom:16,lineHeight:1.6}}>카카오 가입하면 내 점수에 맞는 추천 전략,<br/>지역별 당첨 가능성, 가점 올리는 꿀팁을 볼 수 있어요</div>
+            <Link href="/login?redirect=/apt/diagnose&source=calc_gate" style={{display:'inline-block',padding:'12px 36px',borderRadius:30,background:'#FEE500',color:'#191919',fontWeight:800,fontSize: 14,textDecoration:'none'}}>카카오로 3초 만에 열기</Link>
+            <div style={{fontSize: 11,color:'var(--text-tertiary)',marginTop:10}}>가입 즉시 이용 · 스팸 없음</div>
           </div>
           )}
 
           <div style={{display:'flex',gap:8,marginBottom:24}}>
-            <Link href="/apt" style={{flex:1,display:'block',textAlign:'center',padding:'12px 0',background:'var(--brand)',color:'#fff',borderRadius: 'var(--radius-md)',fontSize:14,fontWeight:700,textDecoration:'none'}}>청약 일정 보기</Link>
-            <Link href="/apt?tab=ongoing" style={{flex:1,display:'block',textAlign:'center',padding:'12px 0',background:'var(--bg-surface)',color:'var(--text-primary)',borderRadius: 'var(--radius-md)',fontSize:14,fontWeight:700,textDecoration:'none',border:'1px solid var(--border)'}}>분양중 현장</Link>
+            <Link href="/apt" style={{flex:1,display:'block',textAlign:'center',padding:'12px 0',background:'var(--brand)',color:'#fff',borderRadius: 'var(--radius-md)',fontSize: 14,fontWeight:700,textDecoration:'none'}}>청약 일정 보기</Link>
+            <Link href="/apt?tab=ongoing" style={{flex:1,display:'block',textAlign:'center',padding:'12px 0',background:'var(--bg-surface)',color:'var(--text-primary)',borderRadius: 'var(--radius-md)',fontSize: 14,fontWeight:700,textDecoration:'none',border:'1px solid var(--border)'}}>분양중 현장</Link>
           </div>
         </>
       )}

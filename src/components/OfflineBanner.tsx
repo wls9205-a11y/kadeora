@@ -22,7 +22,7 @@ export default function OfflineBanner() {
     <div role="alert" aria-live="assertive" style={{
       position:'fixed', top:0, left:0, right:0, zIndex: 100,
       backgroundColor:'var(--warning)', color:'var(--text-primary)',
-      textAlign:'center', padding:'8px 16px', fontSize:14, fontWeight:600
+      textAlign:'center', padding:'8px 16px', fontSize: 14, fontWeight:600
     }}>
       📡 인터넷 연결이 끊겼습니다. 연결을 확인해주세요.
     </div>
