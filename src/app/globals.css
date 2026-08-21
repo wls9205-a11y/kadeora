@@ -536,8 +536,10 @@ html.font-large {
   --border-strong: #B8C2D0;
   --border-focus:  #4A8AF7;
   --text-primary:   #111827;
-  --text-secondary: #4B5563;
-  --text-tertiary:  #556070;  /* s6: 4.31 → 5.69 (WCAG 4.5:1, bg-elevated 기준) */
+  --text-secondary: #374151;  /* s8: 6.74 → 9.19 */
+  --text-tertiary:  #4B5563;  /* s8: 5.69 → 6.74. 회색 계열이 본문색의 2배(2,180건)라
+                                 개별 대비가 통과해도 화면 전체가 흐리게 읽혔다.
+                                 primary #111827 → secondary #374151 → tertiary #4B5563 3단 위계 유지 */
   --text-disabled:  #C8CDD4;
   --text-inverse:   #FFFFFF;
   --text-link:      #2563EB;
