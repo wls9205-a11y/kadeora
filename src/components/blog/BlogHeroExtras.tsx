@@ -51,12 +51,12 @@ export default function BlogHeroExtras({ tldr, keyPoints, readingMinutes, readin
 
       {points.length > 0 && (
         <div style={{
-          border: '1px solid rgba(255,255,255,0.08)',
+          border: '1px solid var(--border)',
           borderRadius: 8,
           padding: 14,
-          background: 'rgba(255,255,255,0.02)',
+          background: 'var(--bg-surface)',
         }}>
-          <div style={{ fontSize: 12, fontWeight: 800, color: 'rgba(255,255,255,0.7)', marginBottom: 10, letterSpacing: '-0.3px' }}>
+          <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--text-secondary)', marginBottom: 10, letterSpacing: '-0.3px' }}>
             📌 한눈에 보기
           </div>
           <div style={{

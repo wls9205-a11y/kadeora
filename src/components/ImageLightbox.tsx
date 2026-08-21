@@ -75,6 +75,7 @@ export default function ImageLightbox({ images, initialIndex, onClose }: Props) 
       onTouchEnd={onTouchEnd}
       style={{
         position: 'fixed', inset: 0, zIndex: 99999,
+        /* s8: 다크 서피스 — 여기 rgba(255,255,255,*) 흰 글자는 의도된 값이다. 토큰화 대상 아님 */
         background: 'rgba(0,0,0,0.95)',
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
         touchAction: 'pan-y',

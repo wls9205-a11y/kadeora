@@ -54,6 +54,7 @@ export default function TossBottomBanner() {
       position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 9999,
       padding: '10px 16px', display: 'flex', alignItems: 'center',
       justifyContent: 'space-between', gap: 10,
+      /* s8: 다크 서피스 — 여기 rgba(255,255,255,*) 흰 글자는 의도된 값이다. 토큰화 대상 아님 */
       background: '#191F28',
       borderTop: '1px solid rgba(255,255,255,0.06)',
       boxShadow: '0 -4px 24px rgba(0,0,0,0.2)',

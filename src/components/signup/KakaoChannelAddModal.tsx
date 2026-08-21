@@ -144,6 +144,7 @@ export default function KakaoChannelAddModal({ triggerOnMount = true }: Props) {
         <div
           onClick={(e) => e.stopPropagation()}
           style={{
+            /* s8: 다크 서피스 — 여기 rgba(255,255,255,*) 흰 글자는 의도된 값이다. 토큰화 대상 아님 */
             background: '#0F1729', borderRadius: 20, padding: '28px 22px 22px',
             width: '100%', maxWidth: 340, position: 'relative',
             border: '1px solid rgba(254,229,0,0.3)',

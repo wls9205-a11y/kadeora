@@ -635,6 +635,7 @@ export default async function ComplexDetailPage({ params }: Props) {
         {/* 매매 메인 카드 */}
         <div style={{
           gridColumn: '1 / -1', borderRadius: 'var(--radius-lg)', padding: '18px 20px',
+          /* s8: 다크 서피스 — 여기 rgba(255,255,255,*) 흰 글자는 의도된 값이다. 토큰화 대상 아님 */
           background: 'linear-gradient(135deg, rgba(15,27,62,0.95) 0%, rgba(37,99,235,0.85) 100%)',
           border: '1px solid rgba(59,123,246,0.2)', position: 'relative', overflow: 'hidden',
         }}>

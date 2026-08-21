@@ -48,6 +48,7 @@ export default function KakaoBottomSheet({ open, onClose, feature = 'star', titl
     >
       <div style={{
         width: '100%', maxWidth: 440,
+        /* s8: 다크 서피스 — 여기 rgba(255,255,255,*) 흰 글자는 의도된 값이다. 토큰화 대상 아님 */
         background: '#0C1528', borderRadius: '20px 20px 0 0',
         padding: '24px 20px calc(20px + env(safe-area-inset-bottom, 0px))',
         animation: 'ksSlideUp .25s ease-out',

@@ -35,6 +35,7 @@ export default function StockTreemap({ stocks, isKR }: Props) {
   const upC = stockUpHex(isKR);
   const dnC = stockDownHex(isKR);
 
+  /* s8: 다크 서피스 — 여기 rgba(255,255,255,*) 흰 글자는 의도된 값이다. 토큰화 대상 아님 */
   const cellColor = (avg: number) => {
     if (Math.abs(avg) < 0.2) return { bg: '#1A2540', border: '#1A2540' };
     const intensity = Math.min(Math.abs(avg) / 5, 1);

@@ -777,7 +777,7 @@ export default async function AptUnifiedPage({ params }: Props) {
                   <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-xs)' }}>{region} {site?.sigungu || ''}</div>
                   <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 900, color: 'var(--text-primary)', lineHeight: 1.2, wordBreak: 'keep-all' }}>{name}</div>
                   {/* s2: 세대수는 아래 공급 정보 표에서 1회만 표기한다 */}
-                  <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginTop: 'var(--sp-xs)' }}>{site?.builder || sub?.constructor_nm || ''}</div>
+                  <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 'var(--sp-xs)' }}>{site?.builder || sub?.constructor_nm || ''}</div>
                 </div>
                 {badgeEl}
               </div>

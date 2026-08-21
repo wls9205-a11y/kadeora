@@ -155,6 +155,7 @@ function KakaoSignupModal({
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
+          /* s8: 다크 서피스 — 여기 rgba(255,255,255,*) 흰 글자는 의도된 값이다. 토큰화 대상 아님 */
           background: 'linear-gradient(180deg, #1a1030 0%, #0f1729 100%)',
           borderRadius: 20,
           padding: '26px 22px 20px',
