@@ -44,6 +44,8 @@ import BlogEndCTA from '@/components/blog/BlogEndCTA';
 import BlogEarlyGateTeaser from '@/components/blog/BlogEarlyGateTeaser';
 // s183: SignupPopupModal import 제거 — SmartSectionGate(60%) + StickySignupBar 와 중복.
 import RelatedBlogsSection from '@/components/blog/RelatedBlogsSection';
+import LeadForm from '@/components/apt/LeadForm';
+import { isLeadEligible } from '@/lib/apt/lead-eligibility';
 // s184: BlogSocialBar 제거 — 본문 직후 ShareButtons 1세트로 통합.
 import BlogFooterMeta from '@/components/blog/BlogFooterMeta';
 import CardCarousel from '@/components/og/CardCarousel';
@@ -821,6 +823,26 @@ export default async function BlogDetailPage({ params }: Props) {
     })),
   } : null;
 
+  // S4-4 P1: 글이 가리키는 현장이 대상 단계면 하단에 알림 신청 폼을 붙인다.
+  //
+  // 블로그 상세는 트래픽이 가장 많은 라우트라 조회를 얹는 데 조심한다.
+  // - hub_apt_slug 가 null 이면 조회 자체를 하지 않는다 (발행 글의 80%가 여기 해당)
+  // - 기존 Promise.allSettled 뭉치에 합치지 않는다 (Rule #49 — /apt/[id] 504 의 원인이었다)
+  // - slug 단건 조회라 인덱스를 탄다
+  let leadSite: { slug: string; name: string } | null = null;
+  if (post.hub_apt_slug) {
+    try {
+      const { data: ls } = await (sb as any)
+        .from('apt_sites')
+        .select('slug, name, lifecycle_stage')
+        .eq('slug', post.hub_apt_slug)
+        .maybeSingle();
+      if (ls && isLeadEligible(ls.lifecycle_stage)) leadSite = { slug: ls.slug, name: ls.name };
+    } catch {
+      /* 조회 실패는 본문 렌더를 막지 않는다 — 폼만 생략한다 */
+    }
+  }
+
   // s261: Event schema (청약 일정) — apt 카테고리 + 단지명 매칭 시 청약 이벤트 카드 노출
   let eventSchema: any = null;
   if (post.category === 'apt' || post.category === 'unsold') {
@@ -1355,6 +1377,10 @@ export default async function BlogDetailPage({ params }: Props) {
           )}
         </div>
       </div>
+
+      {/* S4-4 P1: 본문 하단 / 관련 글 위. 블로그에는 상단 앵커를 넣지 않는다 —
+          읽는 흐름을 끊지 않고, 상세 페이지처럼 스크롤이 길지도 않다. */}
+      {leadSite && <LeadForm siteSlug={leadSite.slug} siteName={leadSite.name} variant="blog" />}
 
       {/* s184: 추천 글 + RelatedContentCard — 댓글 아래로 이동 */}
       {!isBot && (

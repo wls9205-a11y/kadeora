@@ -29,6 +29,8 @@ type LeadFormProps = {
   siteName: string; // apt_sites.name
   /** 현장별 공급 평형. 페이지가 house_type_info 에서 파생해 내려준다 (현장마다 다름). */
   typeOptions?: string[];
+  /** 놓이는 자리에 따라 설명 한 줄만 바뀐다. 제목·버튼·동의 문구는 동일하다. */
+  variant?: 'detail' | 'blog';
 };
 
 type LeadPayload = {
@@ -165,7 +167,7 @@ const honeypotStyle: CSSProperties = {
   pointerEvents: 'none',
 };
 
-export default function LeadForm({ siteSlug, siteName, typeOptions = [] }: LeadFormProps) {
+export default function LeadForm({ siteSlug, siteName, typeOptions = [], variant = 'detail' }: LeadFormProps) {
   const mountedAt = useRef(Date.now());
   const draftKey = `${DRAFT_PREFIX}${siteSlug}`;
   const pendingKey = `${PENDING_PREFIX}${siteSlug}`;
@@ -417,7 +419,9 @@ export default function LeadForm({ siteSlug, siteName, typeOptions = [] }: LeadF
       <div style={{ padding: '14px' }}>
         <SectionHeader eyebrow="NOTIFY" title="관심 현장 알림 신청" />
         <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0 0 14px' }}>
-          {siteName}의 분양가·일정 변동을 가장 먼저 알려드립니다.
+          {variant === 'blog'
+            ? `이 글에서 다룬 ${siteName}의 일정 변동을 알림으로 받아보세요.`
+            : `${siteName}의 분양가·일정 변동을 가장 먼저 알려드립니다.`}
         </p>
 
         <form onSubmit={handleSubmit} noValidate style={{ position: 'relative' }}>

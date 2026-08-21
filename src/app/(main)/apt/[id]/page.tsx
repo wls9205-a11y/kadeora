@@ -20,6 +20,7 @@ import AptImageGallery from '@/components/AptImageGallery';
 import SimilarAptsSection from '@/components/apt/SimilarAptsSection';
 import LeadForm from '@/components/apt/LeadForm';
 import LeadFormAnchor from '@/components/apt/LeadFormAnchor';
+import { isLeadEligible } from '@/lib/apt/lead-eligibility';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
 import { getDisplayInterestCount, formatInterestText, formatInterestOrViews } from '@/lib/interest-utils';
 import { headers } from 'next/headers';
@@ -491,9 +492,9 @@ export default async function AptUnifiedPage({ params }: Props) {
   const sType = site?.site_type || (sub ? 'subscription' : unsold ? 'unsold' : redev ? 'redevelopment' : trades.length > 0 ? 'trade' : 'subscription');
   const features = Array.isArray(site?.key_features) ? site.key_features : [];
 
-  // S4-2: 리드폼 노출 여부 — 앵커와 폼이 같은 조건으로 뜨고 같이 사라져야 한다.
-  // P0: 트라비스 단일 현장 검증용. P2에서 전 현장 확산 시 제거
-  const showLeadForm = site?.slug === '엄궁역-트라비스-하늘채';
+  // S4-4 P2: 슬러그 하드코딩을 걷어내고 생애주기 단계로 판정한다.
+  // 앵커와 폼이 같은 조건으로 뜨고 같이 사라져야 하므로 플래그는 하나만 둔다.
+  const showLeadForm = !!site?.slug && isLeadEligible(site.lifecycle_stage);
   // 희망 타입 선택지는 모집공고 원본(house_type_info)의 type 앞 숫자(전용면적)에서 파생한다.
   // apt_sites 에 area_types 류 컬럼이 없고, 현장마다 평형이 달라 하드코딩하지 않는다.
   const leadTypeOptions: string[] = Array.from(

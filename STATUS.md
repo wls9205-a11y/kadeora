@@ -38,6 +38,57 @@ S5 감사의 '14px 미만 2,093건'은 소스값이지 렌더값이 아니었다
 - /apt 목록 · /apt/busan 카드가 세로로 늘어나 어색하지 않은지
 - 바텀 내비 · 헤더 텍스트 넘침 여부
 - 전체적으로 읽기 편해졌는지. 1.58 도 넓으면 1.5 로 되돌린다
+## S4-4 (2026-08-21) — 리드폼 확산: 블로그 삽입(P1) + 전 현장 적용(P2)
+
+- `src/lib/apt/lead-eligibility.ts` 신설. 상세(P2)·블로그(P1)가 같은 판정을 쓴다
+- P2: `/apt/[id]` 의 트라비스 슬러그 하드코딩 가드 제거 → `isLeadEligible(site.lifecycle_stage)`.
+  `lifecycle_stage` 는 이미 `APT_COLS` 에 있었다 (S0 `data_quality_score` 누락 유형 아님)
+- P1: 블로그 상세에서 `hub_apt_slug` → `apt_sites` 단건 조회 후 대상 단계일 때만 본문 하단
+  (관련 글 위)에 폼. 상단 앵커는 넣지 않는다
+- `LeadFormProps.variant?: 'detail' | 'blog'` 추가 — 설명 한 줄만 분기. 컴포넌트 복제 없음.
+  블로그는 `typeOptions` 를 넘기지 않아 `선택 안 함 / 미정` 2개만 뜬다
+- `LeadForm` / `LeadFormAnchor` 내부 로직은 손대지 않았다
+
+### 지시서 전제 정정 2건 (실측)
+
+**1. 트라비스가 `move_in_ready` 라 지시서 목록으로는 폼이 사라졌다.**
+
+지시서 §5 검증 항목은 "트라비스(`unsold_active` 계열) → 앵커+폼 둘 다 보임" 인데 실제 단계는
+`move_in_ready` 다. 지시서의 5단계 목록을 그대로 쓰면 §5 검증 대상 4건(트라비스 상세 +
+블로그 92501/48502/41519)이 **전부 폼 없음**이 된다. 셋 다 `hub_apt_slug` 가 트라비스다.
+
+`fn_refresh_lifecycle_stage()` 정의를 보면 `move_in_ready` 는 "입주 준비"가 아니라
+**계약 체결 기간 종료**(`v_today > cntrct_cncls_endde`)다. 입주월이 지났으면 `post_move_in`,
+이번 달이면 `move_in_started` 가 CASE 에서 먼저 걸리기 때문에, `move_in_ready` 720건은
+**전부 입주예정이 미래**다 (202609~203104, 과거 0건). 분양가·일정 알림이 유효한 구간이라
+사용자 확인 후 대상에 포함했다.
+
+| | 지시서 5단계 | move_in_ready 포함 (채택) |
+|---|---|---|
+| 현장 | 463 | **1,183** |
+| 발행 블로그 | 199 | **354** |
+
+**2. 블로그 도달 범위는 319편이 아니다.** 지시서 5단계 기준 실측 199편, 채택안 기준 354편.
+(발행 8,833 / `hub_apt_slug` 보유 1,790 / 해석 가능 1,790 — 끊긴 참조 0 은 지시서와 일치)
+
+### 성능
+
+- `hub_apt_slug` 가 null 이면 조회 자체를 하지 않는다 (발행 글의 80%)
+- 기존 병렬 뭉치에 합치지 않았다. 애초에 이 파일에는 `Promise.all(Settled)` 가 없어
+  순차 `await` 단건 조회로 들어간다 (Rule #49)
+- `apt_sites.slug` 에 유니크 인덱스 + 보조 인덱스 존재 확인
+- 빌드 46s → 40s (증가 없음). `/blog/[slug]` first-load 337 → 342 kB (LeadForm 클라이언트 번들분)
+
+### 검증
+
+단계 판정 8건 DB 실측: 트라비스 O / 명륜자이(landmark) X / landmark X / post_move_in X /
+move_in_started X / subscription_open O / unsold_active O / site_planning O.
+
+블로그 렌더 6건 헤드리스: 트라비스 연결 글 2건 폼 O·앵커 X, `hub_apt_slug` null 2건 폼 X,
+비대상 단계 연결 2건 폼 X. blog variant 문구·희망타입 2개 노출 확인.
+
+`/apt/[id]` 는 로컬에서 여전히 전부 404 (`.env.local` service-role placeholder) — P2 실물 렌더는
+배포 후 확인 필요.
 
 ---
 
