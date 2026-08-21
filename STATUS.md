@@ -1,3 +1,23 @@
+## S0 (2026-08-21) — 색인 차단 해소
+
+- apt/[id]: APT_COLS에 data_quality_score 누락 → 상세 약 5,800개 전부 noindex였음. 해소
+- apt/region/[region]: generateStaticParams 사전 인코딩 → 지역 허브 17개 404였음. 해소
+- PageViewTracker에 theme_mode 계측 추가 (S1 착수 판단용)
+- tailwind.config.js 삭제, BOM 정리, check:bom 스크립트 추가
+
+### Architecture Rule 추가
+- #63 select()에 없는 컬럼을 as any로 읽지 않는다. 조건 분기에 쓰는 컬럼은 반드시 조회 목록에 포함
+- #64 generateStaticParams는 디코딩된 원본 값을 반환한다. 인코딩은 Next.js가 한다
+- #65 설정 파일은 확장자 하나만 유지한다
+- #66 모든 텍스트 파일은 BOM 없는 UTF-8. npm run check:bom으로 검사
+
+### 다음
+- S0 배포 후 라이브 검증 (아래 명령)
+- 14일간 GSC 노출수 관찰. 감소 시 중단·재논의
+- theme_mode 수집 1주 후 S1 착수 판단 (다크 25% 초과 시 중단)
+
+---
+
 ## [s270] 2026-08-15 — 전수조사 후속: OG dynamic font 400 근절 + 로그 통합 + related-blogs 재시도
 
 **배경**: Vercel 런타임 에러 7일 전수조사에서 `/api/og-apt` "Failed to load dynamic font for ●"
