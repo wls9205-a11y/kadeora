@@ -241,8 +241,8 @@ export default function UsersListClient() {
                 <td style={{ padding: 8, textAlign: 'right', color: 'var(--text-secondary)' }}>{u.grade_title || u.grade || '—'}</td>
                 <td style={{ padding: 8 }}>
                   <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
-                    {u.is_seed && <span style={{ fontSize: 9, padding: '1px 6px', borderRadius: 4, background: 'rgba(251,146,60,0.12)', color: '#fb923c', fontWeight: 700 }}>시드</span>}
-                    {u.is_admin && <span style={{ fontSize: 9, padding: '1px 6px', borderRadius: 4, background: 'rgba(139,92,246,0.12)', color: '#a78bfa', fontWeight: 700 }}>어드민</span>}
+                    {u.is_seed && <span style={{ fontSize: 9, padding: '1px 6px', borderRadius: 4, background: 'rgba(251,146,60,0.12)', color: 'var(--accent-orange)', fontWeight: 700 }}>시드</span>}
+                    {u.is_admin && <span style={{ fontSize: 9, padding: '1px 6px', borderRadius: 4, background: 'rgba(139,92,246,0.12)', color: 'var(--accent-purple)', fontWeight: 700 }}>어드민</span>}
                     {u.kakao_channel_added && <span style={{ fontSize: 9, padding: '1px 6px', borderRadius: 4, background: 'rgba(254,229,0,0.12)', color: '#fde047', fontWeight: 700 }}>채널</span>}
                     {u.is_banned && <span style={{ fontSize: 9, padding: '1px 6px', borderRadius: 4, background: 'rgba(248,113,113,0.12)', color: 'var(--accent-red)', fontWeight: 700 }}>차단</span>}
                     {u.is_deleted && <span style={{ fontSize: 9, padding: '1px 6px', borderRadius: 4, background: 'rgba(0,0,0,0.3)', color: 'var(--text-tertiary)', fontWeight: 700 }}>삭제</span>}

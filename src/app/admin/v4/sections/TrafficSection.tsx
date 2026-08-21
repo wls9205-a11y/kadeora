@@ -166,7 +166,7 @@ export default function TrafficSection() {
             {[
               { k: 'mobile',  label: '모바일',  v: dev.mobile ?? 0, color: 'var(--accent-green)' },
               { k: 'desktop', label: '데스크탑', v: dev.desktop ?? 0, color: 'var(--brand)' },
-              { k: 'tablet',  label: '태블릿',   v: dev.tablet ?? 0, color: '#fb923c' },
+              { k: 'tablet',  label: '태블릿',   v: dev.tablet ?? 0, color: 'var(--accent-orange)' },
             ].map(it => {
               const pct = devTotal > 0 ? Math.round((it.v / devTotal) * 100) : 0;
               return (

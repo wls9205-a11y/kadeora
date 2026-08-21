@@ -527,7 +527,7 @@ function HourlyChart({ rows }: { rows: any[] }) {
     { key: 'visits',       label: '방문',     color: 'var(--brand)', pick: (r) => n(r?.visits ?? r?.uv ?? r?.unique_visitors) },
     { key: 'cta_clicks',   label: 'CTA 클릭', color: '#fbbf24', pick: (r) => n(r?.cta_clicks ?? r?.clicks) },
     { key: 'signups_real', label: '실 가입',  color: 'var(--accent-green)', pick: (r) => n(r?.signups_real ?? r?.signups ?? r?.real_signups) },
-    { key: 'signups_seed', label: '시드',     color: '#9ca3af', pick: (r) => n(r?.signups_seed ?? r?.seed_signups) },
+    { key: 'signups_seed', label: '시드',     color: 'var(--text-tertiary)', pick: (r) => n(r?.signups_seed ?? r?.seed_signups) },
   ];
   const all: number[] = [];
   for (const s of series) for (const r of sorted) all.push(s.pick(r));
@@ -581,7 +581,7 @@ function UserTable({ rows }: { rows: UserRow[] }) {
             <Td>{created}</Td>
             <Td>
               <span style={{ fontSize: 11, color: 'var(--text-primary)' }}>{r.email ?? '—'}</span>
-              {seed && <span style={{ marginLeft: 6, fontSize: 9, padding: '1px 6px', borderRadius: 4, background: 'rgba(156,163,175,0.20)', color: '#9ca3af' }}>seed</span>}
+              {seed && <span style={{ marginLeft: 6, fontSize: 9, padding: '1px 6px', borderRadius: 4, background: 'rgba(156,163,175,0.20)', color: 'var(--text-tertiary)' }}>seed</span>}
             </Td>
             <Td>{r.signup_source ?? '—'}</Td>
             <Td align="right">{r.has_profile === true ? '✓' : r.has_profile === false ? '×' : '—'}</Td>

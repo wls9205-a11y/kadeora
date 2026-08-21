@@ -125,7 +125,7 @@ export default function SandboxIssueCards() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section style={{ marginBottom: 16 }}>
-      <h2 style={{ fontSize: 12, fontWeight: 700, color: '#6B7280', marginBottom: 6 }}>{title}</h2>
+      <h2 style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-tertiary)', marginBottom: 6 }}>{title}</h2>
       <div>{children}</div>
     </section>
   );
