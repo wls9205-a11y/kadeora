@@ -76,6 +76,7 @@ export default function BlogFloatingBar({ slug, title, category }: Props) {
       position: 'fixed', bottom: 24, left: '50%', transform: `translateX(-50%) translateY(${visible ? 0 : 20}px)`,
       zIndex: 50, display: 'flex', gap: 8, padding: '8px 12px',
       borderRadius: 20,
+      /* s6-2: 다크 바다. 아래 아이콘 색은 어두운 배경 전용 값이며 토큰화 대상이 아니다 */
       background: 'rgba(15,20,35,0.95)', backdropFilter: 'blur(16px)',
       border: '1px solid rgba(255,255,255,0.12)',
       boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
@@ -86,7 +87,7 @@ export default function BlogFloatingBar({ slug, title, category }: Props) {
         display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px',
         borderRadius: 14, border: 'none', cursor: 'pointer',
         background: saved ? 'rgba(245,158,11,0.2)' : 'rgba(245,158,11,0.08)',
-        color: saved ? '#fbbf24' : 'var(--warning)',
+        color: saved ? '#fbbf24' : '#f59e0b',
         fontSize: 13, fontWeight: 700, transition: 'all 0.15s',
         fontFamily: 'inherit',
       }}>
@@ -98,7 +99,7 @@ export default function BlogFloatingBar({ slug, title, category }: Props) {
         display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px',
         borderRadius: 14, border: 'none', cursor: 'pointer',
         background: 'rgba(59,130,246,0.08)',
-        color: 'var(--brand)',
+        color: '#60a5fa',
         fontSize: 13, fontWeight: 700, transition: 'all 0.15s',
         fontFamily: 'inherit',
       }}>
@@ -110,7 +111,7 @@ export default function BlogFloatingBar({ slug, title, category }: Props) {
         display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px',
         borderRadius: 14, border: 'none', cursor: 'pointer',
         background: shared ? 'rgba(34,197,94,0.2)' : 'rgba(34,197,94,0.08)',
-        color: shared ? '#4ade80' : 'var(--accent-green)',
+        color: shared ? '#4ade80' : '#22c55e',
         fontSize: 13, fontWeight: 700, transition: 'all 0.15s',
         fontFamily: 'inherit',
       }}>

@@ -274,7 +274,7 @@ export default function SmartSectionGate({
                     display: 'flex', alignItems: 'center', gap: 8,
                     fontSize: 12, color: 'rgba(224,232,240,0.75)', padding: '4px 0',
                   }}>
-                    <span style={{ color: 'var(--accent-green)', fontSize: 13 }}>✓</span>
+                    <span style={{ color: '#4ade80', fontSize: 13 }}>✓</span>
                     {b}
                   </div>
                 ))}
@@ -292,7 +292,7 @@ export default function SmartSectionGate({
                     display: 'flex', alignItems: 'center', gap: 8,
                     fontSize: 12, color: 'rgba(224,232,240,0.75)', padding: '4px 0',
                   }}>
-                    <span style={{ color: 'var(--accent-green)', fontSize: 13 }}>✓</span>
+                    <span style={{ color: '#4ade80', fontSize: 13 }}>✓</span>
                     {b}
                   </div>
                 ))}
