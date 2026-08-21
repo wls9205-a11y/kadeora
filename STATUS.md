@@ -15,10 +15,17 @@
   테마 클래스 소멸로 기존 판별식이 항상 dark를 반환하게 됐고, 토글은 없앴지만 kd_theme 값은
   브라우저에 남아 있어 기존 사용자 선호 분포를 계속 수집할 수 있음
 - --kakao-bg/--kakao-text는 카카오 브랜드 고정색이라 미변경
+- (후속) layout.tsx의 `<html className="dark">` 제거 + 사문화된 `.dark` 규칙 39건 삭제.
+  ThemeProvider가 라이트 선택 시 dark 클래스를 떼주던 구조였는데 Provider만 지워서
+  다크 전용 보정 39건이 라이트 화면에 상시 적용되던 상태였음.
+  특히 [style*='color:#991B1B'] → #F09595, [style*='color:#7F1D1D'] → #F4A4A4 2건은
+  밝은 배경에서 가독성 파괴. tailwind.config.ts의 darkMode:'class'는 dark: 변형 0건이라 유지
 
 ### Architecture Rule 추가
 - #68 테마는 라이트 단일이다. dark:, prefers-color-scheme, data-theme, theme-light 를 새로 쓰지 않는다
 - #69 의도적으로 어두운 서피스는 --ink-* 토큰을 쓴다. 하드코딩 hex 금지
+- #70 테마 장치를 제거할 때는 클래스를 붙이는 쪽(layout)과 그 클래스에 걸린 CSS 규칙을
+  함께 확인한다. Provider만 지우면 클래스가 영구 고착된다
 
 ### 다음
 - 배포 후 라이트 렌더 육안 확인 (피드·단지 상세·블로그·검색·어드민)

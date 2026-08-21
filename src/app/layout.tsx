@@ -89,7 +89,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko" className="dark" suppressHydrationWarning>
+    <html lang="ko" suppressHydrationWarning>
       <head>
         {/* 세션 150: CLS 방지 — pretendard preconnect + preload (폰트 swap FOUT 최소화) */}
         <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />

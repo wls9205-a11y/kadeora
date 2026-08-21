@@ -595,79 +595,6 @@ body {
   overflow-wrap: break-word;
 }
 
-/* ========================================
-   다크모드 강제 오버라이드
-   ======================================== */
-.dark [style*="background-color: white"],
-.dark [style*="background-color: #fff"],
-.dark [style*="background-color: #ffffff"],
-.dark [style*="background: white"],
-.dark [style*="background: #fff"],
-.dark [style*="background: #ffffff"],
-.dark [style*="background-color: rgb(255, 255, 255)"] {
-  background-color: var(--bg-surface) !important;
-}
-.dark [style*="color: black"],
-.dark [style*="color: #000"],
-.dark [style*="color: #000000"],
-.dark [style*="color: #333"],
-.dark [style*="color: #222"],
-.dark [style*="color: #111"],
-.dark [style*="color: rgb(0, 0, 0)"] {
-  color: var(--text-primary) !important;
-}
-
-/* Tailwind 다크모드 클래스 오버라이드 */
-.dark .bg-white          { background-color: var(--bg-surface) !important; }
-.dark .bg-gray-50        { background-color: var(--bg-base) !important; }
-.dark .bg-gray-100       { background-color: var(--bg-hover) !important; }
-.dark .bg-gray-200       { background-color: var(--bg-active) !important; }
-.dark .bg-gray-800       { background-color: var(--bg-surface) !important; }
-.dark .bg-gray-900       { background-color: var(--bg-base) !important; }
-.dark .text-gray-900     { color: var(--text-primary) !important; }
-.dark .text-gray-800     { color: var(--text-primary) !important; }
-.dark .text-gray-700     { color: var(--text-secondary) !important; }
-.dark .text-gray-600     { color: var(--text-secondary) !important; }
-.dark .text-gray-500     { color: var(--text-tertiary) !important; }
-.dark .text-gray-400     { color: var(--text-tertiary) !important; }
-.dark .text-black        { color: var(--text-primary) !important; }
-.dark .text-white        { color: var(--text-inverse) !important; }
-.dark .border-gray-200   { border-color: var(--border) !important; }
-.dark .border-gray-300   { border-color: var(--border-strong) !important; }
-.dark .border-gray-100   { border-color: var(--border) !important; }
-.dark .divide-gray-200 > * + * { border-color: var(--border) !important; }
-.dark .divide-gray-100 > * + * { border-color: var(--border) !important; }
-.dark .shadow,
-.dark .shadow-sm,
-.dark .shadow-md,
-.dark .shadow-lg { box-shadow: var(--shadow-md) !important; }
-
-/* 인풋/텍스트에어리어 */
-.dark input,
-.dark textarea,
-.dark select {
-  background-color: var(--bg-sunken) !important;
-  color: var(--text-primary) !important;
-  border-color: var(--border) !important;
-}
-.dark input::placeholder,
-.dark textarea::placeholder { color: var(--text-tertiary) !important; }
-.dark input:focus,
-.dark textarea:focus,
-.dark select:focus {
-  border-color: var(--border-focus) !important;
-  outline: 2px solid var(--brand);
-  outline-offset: 2px;
-}
-
-/* 카드/패널 다크모드 border */
-.dark .rounded-lg,
-.dark .rounded-xl,
-.dark .rounded-2xl {
-  border-color: var(--border);
-}
-
-
 /* ━━━ 세션51: 진화 강화 ━━━ */
 
 /* 15. 카드 호버 시 좌측 카테고리 컬러 보더 */
@@ -2037,42 +1964,6 @@ a, span, p, div {
   .apt-kpi-card { padding: 10px 12px; }
   .apt-kpi-number { font-size: 18px; }
 }
-
-/* ─────────────────────────────────────────────────────────────────────
-   Phase F-lite (s262) — dark mode catch-all 확장.
-   기존 line 750 catch-all 은 소문자 + 스페이스 syntax (`background: #fff`)
-   만 매칭. ISSUE ENGINE Phase E 카드들이 대문자 + 스페이스 없는 syntax
-   (`background:#FFFFFF`) 사용 → 미스매치. 확장 selector 로 cover.
-   CSS only, JSX 0 수정. 회귀 리스크 거의 0.
-   ───────────────────────────────────────────────────────────────────── */
-.dark [style*="background:#FFFFFF"],
-.dark [style*="background:#FFF"],
-.dark [style*="background-color:#FFFFFF"],
-.dark [style*="background:rgba(255,255,255"]
-{ background-color: var(--bg-surface) !important; }
-
-.dark [style*="color:#111827"],
-.dark [style*="color:#1F2937"],
-.dark [style*="color:#374151"]
-{ color: var(--text-primary) !important; }
-
-.dark [style*="color:#6B7280"],
-.dark [style*="color:#9CA3AF"]
-{ color: var(--text-secondary) !important; }
-
-.dark [style*="border:1px solid #E5E7EB"],
-.dark [style*="border-bottom:1px solid #E5E7EB"]
-{ border-color: var(--border) !important; }
-
-.dark [style*="background:#FEE2E2"] { background-color: rgba(220,38,38,0.18) !important; }
-.dark [style*="color:#991B1B"]      { color: #F09595 !important; }
-.dark [style*="background:#FECACA"] { background-color: rgba(220,38,38,0.22) !important; }
-.dark [style*="color:#7F1D1D"]      { color: #F4A4A4 !important; }
-.dark [style*="background:#F9FAFB"] { background-color: var(--bg-elevated) !important; }
-.dark [style*="background:#F3F4F6"] { background-color: var(--bg-hover) !important; }
-.dark [style*="color:#4B5563"]      { color: var(--text-secondary) !important; }
-.dark [style*="background:#FEF2F2"] { background-color: rgba(220,38,38,0.10) !important; }
-.dark [style*="border:1px solid #FCA5A5"] { border-color: rgba(220,38,38,0.30) !important; }
 
 /* ========================================
    S1: 라이트 단일화 — 구 라이트 전용 오버라이드를 무조건 적용으로 승격
