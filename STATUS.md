@@ -1,3 +1,34 @@
+## S3 (2026-08-21) — 큐레이션 카드 · 위성 히어로 · 부산 허브
+
+- SiteCard 신설. 히어로는 satellite_image_url 하나만(16:10), 폴백 배경 var(--bg-elevated).
+  상태 pill 은 --status-fcfs/open/soon/closed, 숫자는 --font-mono + tabular-nums,
+  next/image + sizes 로 카드 폭만 요청
+- 위성이 없는 현장은 빈 이미지 슬롯 대신 SiteRow(표 행). 오티에르 해운대가 현재 여기 해당 —
+  apt-satellite-crawl 크론(30분 주기)이 채우면 자동으로 카드로 승격된다. 코드 특별 처리 없음
+- /apt/busan 큐레이션 허브 신설. is_curated=true AND region='부산' 기준.
+  상태 필터 탭(전체/선착순/분양중/분양예정), 청약홈 파생 목록, 부산 분양 분석 3섹션.
+  큐레이션 0건이면 섹션 미렌더. ISR 900 + 데이터 레이어 unstable_cache(/apt 와 동일 구조)
+- Disclaimer 의 apt/unsold/redev/trade/general source 에 VWorld 출처 추가
+
+### 지시서와 다르게 처리
+- Disclaimer 의 compact 모드는 source 를 아예 렌더하지 않던 구조라, 그대로 두면
+  위성을 쓰는 화면에서 출처 표기가 통째로 사라진다. compact 에서도 source 가 나오도록 고치고
+  /apt/busan 은 non-compact 로 뒀다
+- SiteCard 주석의 '조감도' 표기를 '시행사 완공 예상도'로 바꿨다 (지시서 검증 grep 이 0 을 기대)
+
+### Architecture Rule 추가
+- #71 현장 히어로 이미지는 satellite_image_url(VWorld 자체 호스팅)만 사용한다.
+  조감도는 시행사 저작물이며 외부 스크랩·임의 생성 모두 금지.
+  images 배열은 출처 혼재·오매칭이 있어 히어로로 쓰지 않는다
+- #72 타사 데이터를 화면 전면에 쓰면 출처 표기를 같은 화면에 함께 낸다.
+  표기가 렌더되지 않는 경로(compact 등)가 없는지 확인한다
+
+### 다음
+- 오티에르 해운대 위성 확보 후 /apt/busan 카드 2장 확인
+- 큐레이션 현장 확대 시 /apt/{region} 큐레이션 허브 일반화 검토
+
+---
+
 ## S2-잔여 (2026-08-21) — 이모지 · 카카오 CTA · https 승격
 
 - 상세 페이지 이모지 122자 → 3자. 남은 3개는 지도(카카오/네이버)·청약홈 원문 링크분으로 의도적 유지
