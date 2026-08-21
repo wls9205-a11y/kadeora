@@ -2,12 +2,11 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { Home, TrendingUp, Building2, Search, Bell, User as UserIcon, PenSquare, LogOut, FileText, MoreHorizontal, Settings, Sun, Moon, Download } from 'lucide-react';
+import { Home, TrendingUp, Building2, Search, Bell, User as UserIcon, PenSquare, LogOut, FileText, MoreHorizontal, Settings, Download } from 'lucide-react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useAuth } from '@/components/AuthProvider';
 import { haptic } from '@/lib/haptic';
 import { isTossMode } from '@/lib/toss-mode';
-import { useTheme } from '@/components/ThemeProvider';
 import LiveActivityIndicator from '@/components/LiveActivityIndicator';
 import UniversalSearchBar from '@/components/search/UniversalSearchBar';
 
@@ -101,14 +100,12 @@ export function Navigation() {
     }).catch(() => {});
     return () => clearInterval(timer);
   }, []);
-  const { theme, toggleTheme } = useTheme();
 
   // 초기화: 토스 모드 + 폰트 사이즈 (1회)
   useEffect(() => {
     // 토스 모드 감지
     if (isTossMode()) {
       setTossModeState(true);
-      document.documentElement.setAttribute('data-theme', 'light');
       document.documentElement.classList.add('toss-mode');
     }
     // 폰트 사이즈 복원
@@ -213,7 +210,7 @@ export function Navigation() {
       {/* ── 헤더 ── */}
       <header style={{
         position: 'sticky', top: 0, zIndex: 100,
-        background: theme === 'light' ? 'rgba(255,255,255,0.92)' : 'rgba(13,23,48,0.88)',
+        background: 'rgba(255,255,255,0.92)',
         backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
         borderBottom: '1px solid var(--border)',
       }}>
@@ -407,23 +404,6 @@ export function Navigation() {
                           ))}
                         </div>
                       </div>
-                      {/* 테마 전환 */}
-                      <div style={{ padding:'9px 16px', borderBottom:'1px solid var(--border)' }}>
-                        <div style={{ fontSize:12, color:'var(--text-tertiary)', marginBottom:6, fontWeight:600 }}>화면 테마</div>
-                        <div style={{ display:'flex', gap: 'var(--sp-xs)' }}>
-                          {([['dark','다크 모드', Moon],['light','라이트 모드', Sun]] as const).map(([val, label, Icon]) => (
-                            <button key={val} onClick={theme !== val ? toggleTheme : undefined} style={{
-                              flex:1, padding:'5px 0', borderRadius: 'var(--radius-xs)',
-                              fontWeight: theme === val ? 700 : 400, border:'none', cursor:'pointer',
-                              background: theme === val ? 'var(--brand)' : 'var(--bg-hover)',
-                              color: theme === val ? 'var(--text-inverse)' : 'var(--text-secondary)',
-                              display:'flex', alignItems:'center', justifyContent:'center', gap:4, fontSize:12,
-                            }}>
-                              <Icon size={13} />{label}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
                       <button onClick={handleLogout} aria-label="로그아웃" style={{
                         display:'block', width:'100%', padding:'11px 16px',
                         color:'var(--error)', fontSize:14,
@@ -500,7 +480,7 @@ export function Navigation() {
       {/* ── 모바일 하단 탭바 ── */}
       <nav style={{
         position:'fixed', bottom:0, left:0, right:0, zIndex: 100,
-        background: theme === 'light' ? 'rgba(255,255,255,0.95)' : 'rgba(13,23,48,0.92)',
+        background: 'rgba(255,255,255,0.95)',
         backdropFilter:'blur(16px)', WebkitBackdropFilter:'blur(16px)',
         borderTop:'1px solid var(--nav-border)',
         display:'flex', alignItems:'flex-end', justifyContent:'space-around',
@@ -605,15 +585,6 @@ export function Navigation() {
             })}
             {/* 하단 액션 바 */}
             <div style={{ paddingTop: 12, display:'flex', gap: 6 }}>
-              <button onClick={toggleTheme} style={{
-                flex:1, padding:'10px 0', borderRadius: 'var(--radius-md)',
-                background:'var(--bg-hover)', color:'var(--text-primary)',
-                fontSize:12, fontWeight:600, border:'1px solid var(--border)', cursor:'pointer',
-                display:'flex', alignItems:'center', justifyContent:'center', gap: 6,
-              }}>
-                {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
-                {theme === 'dark' ? '라이트' : '다크'}
-              </button>
               {userId && (
                 <>
                   <Link href={`/profile/${userId}`} onClick={() => setMoreOpen(false)} style={{
@@ -669,15 +640,6 @@ export function Navigation() {
               );
             })}
             <div style={{ paddingTop: 12, display:'flex', gap: 6 }}>
-              <button onClick={toggleTheme} style={{
-                flex:1, padding:'10px 0', borderRadius: 'var(--radius-md)',
-                background:'var(--bg-hover)', color:'var(--text-primary)',
-                fontSize:12, fontWeight:600, border:'1px solid var(--border)', cursor:'pointer',
-                display:'flex', alignItems:'center', justifyContent:'center', gap: 6,
-              }}>
-                {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
-                {theme === 'dark' ? '라이트' : '다크'}
-              </button>
               {userId && (
                 <>
                   <Link href={`/profile/${userId}`} onClick={() => setMoreOpen(false)} style={{

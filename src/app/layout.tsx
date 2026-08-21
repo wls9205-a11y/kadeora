@@ -5,7 +5,6 @@ import './styles/components.css';
 import './styles/blog.css';
 import './styles/responsive.css';
 import OfflineBanner from '@/components/OfflineBanner';
-import { ThemeProvider } from '@/components/ThemeProvider';
 import { VercelAnalytics } from '@/components/common/Analytics';
 import Script from 'next/script';
 import KakaoInit from '@/components/KakaoInit';
@@ -85,7 +84,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   userScalable: true,
-  themeColor: '#050A18',
+  themeColor: '#F5F7FA',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -124,8 +123,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="카더라" />
         <meta name="mobile-web-app-capable" content="yes" />
-        {/* 다크모드 강제 적용 */}
-        <script dangerouslySetInnerHTML={{ __html: `(function(){var t=localStorage.getItem('kd_theme');if(t==='light'){document.documentElement.classList.add('theme-light');document.documentElement.classList.remove('dark');}else{document.documentElement.classList.add('dark');}})();` }} />
         {/* 글씨크기 SSR 적용 */}
         <script dangerouslySetInnerHTML={{ __html: `try{var fs=localStorage.getItem('kd_font_size');if(fs&&['small','medium','large'].indexOf(fs)>=0){var cl=document.documentElement.classList;cl.remove('font-small','font-medium','font-large');cl.add('font-'+fs);}}catch(e){}` }} />
         {/* Kakao SDK — KakaoInit 컴포넌트에서 next/script로 로드 (중복 방지) */}
@@ -214,13 +211,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <style dangerouslySetInnerHTML={{ __html: `.skip-to-content:focus{position:fixed!important;left:16px!important;top:16px!important;width:auto!important;height:auto!important;overflow:visible!important}` }} />
         {/* 글로벌 PWA 설치 프롬프트 캡처 — 어디서든 window.__pwaPrompt 로 접근 */}
         <script dangerouslySetInnerHTML={{ __html: `window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();window.__pwaPrompt=e;});` }} />
-        <ThemeProvider>
         <TossModeInit />
         <TossBottomBanner />
         <OfflineBanner />
         <KakaoInit />
         {children}
-        </ThemeProvider>
         {/* GA4 — 세션 141: 호스팅어 분리로 env 기반 ID. 미설정 시 스크립트 로드 안함 */}
         {process.env.NEXT_PUBLIC_GA_ID ? (
           <>
