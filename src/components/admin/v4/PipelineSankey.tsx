@@ -35,7 +35,7 @@ export default function PipelineSankey({ rows }: { rows: Row[] }) {
 
   if (data.length === 0) {
     return (
-      <div style={{ fontSize: 12, color: 'var(--text-tertiary, #888)', padding: 24, textAlign: 'center' }}>
+      <div style={{ fontSize: 12, color: 'var(--text-tertiary)', padding: 24, textAlign: 'center' }}>
         24h 이슈 큐 데이터 없음
       </div>
     );

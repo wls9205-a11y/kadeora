@@ -37,10 +37,10 @@ export default async function CriticalAlertBar() {
             <strong style={{ fontSize: 13, color: isCritical ? 'var(--accent-red)' : '#fbbf24', fontWeight: 800 }}>
               {a.title}
             </strong>
-            <span style={{ fontSize: 12, color: 'var(--text-secondary, #ccc)' }}>
+            <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
               {a.detail}
             </span>
-            <span style={{ marginLeft: 'auto', fontSize: 11, color: 'var(--text-tertiary, #888)' }}>→</span>
+            <span style={{ marginLeft: 'auto', fontSize: 11, color: 'var(--text-tertiary)' }}>→</span>
           </a>
         );
       })}

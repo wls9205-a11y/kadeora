@@ -63,7 +63,7 @@ function InputField({ input, value, onChange, values }: { input: CalcInput; valu
               <button key={String(opt.value)} onClick={() => onChange(opt.value)}
                 style={{ flex: 1, padding: '9px 0', borderRadius: 'var(--radius-md)', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 13,
                   background: value === opt.value ? 'var(--brand)' : 'var(--bg-hover)',
-                  color: value === opt.value ? 'var(--text-inverse, #fff)' : 'var(--text-secondary)' }}>
+                  color: value === opt.value ? 'var(--text-inverse)' : 'var(--text-secondary)' }}>
                 {opt.label}
               </button>
             ))}

@@ -72,8 +72,8 @@ function MetricCard({
         wordBreak: 'keep-all',
       }}
     >
-      <div style={{ fontSize: 11, color: 'var(--text-tertiary, #888)', fontWeight: 600 }}>{label}</div>
-      <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary, #fff)', fontVariantNumeric: 'tabular-nums' }}>
+      <div style={{ fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 600 }}>{label}</div>
+      <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>
         {value}
       </div>
       {delta && (
@@ -82,7 +82,7 @@ function MetricCard({
         </div>
       )}
       {sublabel && (
-        <div style={{ fontSize: 10, color: 'var(--text-tertiary, #888)' }}>{sublabel}</div>
+        <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{sublabel}</div>
       )}
       {sparkline && (
         <div style={{ marginTop: 4, color: 'var(--text-secondary, #aaa)' }}>
@@ -108,7 +108,7 @@ export default async function NorthStarCard() {
 
   return (
     <section aria-label="North Star 핵심 지표" style={{ marginBottom: 18 }}>
-      <h2 style={{ fontSize: 14, fontWeight: 700, marginBottom: 10, color: 'var(--text-primary, #fff)' }}>
+      <h2 style={{ fontSize: 14, fontWeight: 700, marginBottom: 10, color: 'var(--text-primary)' }}>
         🌟 North Star (오늘)
       </h2>
       <div

@@ -23,17 +23,17 @@ const KNOWN_EXPERIMENTS: ExperimentSpec[] = [
 ];
 
 function ctrTone(ctr: number | null): string {
-  if (ctr === null) return 'var(--text-tertiary, #888)';
+  if (ctr === null) return 'var(--text-tertiary)';
   if (ctr >= 5) return '#22c55e';
   if (ctr >= 1) return '#fbbf24';
   return '#ef4444';
 }
 
 function deltaTone(delta: number | null, significant: boolean | null): string {
-  if (delta === null || !significant) return 'var(--text-tertiary, #888)';
+  if (delta === null || !significant) return 'var(--text-tertiary)';
   if (delta > 0) return '#22c55e';
   if (delta < 0) return '#ef4444';
-  return 'var(--text-tertiary, #888)';
+  return 'var(--text-tertiary)';
 }
 
 async function fetchExperiment(sb: ReturnType<typeof getSupabaseAdmin>, name: string): Promise<AbRow[]> {
@@ -58,10 +58,10 @@ export default async function AbExperimentViewer({
   if (active.length === 0) {
     return (
       <section aria-label="A/B 실험" style={{ marginBottom: 18 }}>
-        <h2 style={{ fontSize: 14, fontWeight: 700, marginBottom: 6, color: 'var(--text-primary, #fff)' }}>
+        <h2 style={{ fontSize: 14, fontWeight: 700, marginBottom: 6, color: 'var(--text-primary)' }}>
           🧪 A/B 실험 ({windowDays}일)
         </h2>
-        <div style={{ fontSize: 11, color: 'var(--text-tertiary, #888)' }}>
+        <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
           진행 중 실험 없음. 등록된 실험: {experiments.map((e) => e.name).join(', ')}
         </div>
       </section>
@@ -70,7 +70,7 @@ export default async function AbExperimentViewer({
 
   return (
     <section aria-label="A/B 실험" style={{ marginBottom: 18 }}>
-      <h2 style={{ fontSize: 14, fontWeight: 700, marginBottom: 10, color: 'var(--text-primary, #fff)' }}>
+      <h2 style={{ fontSize: 14, fontWeight: 700, marginBottom: 10, color: 'var(--text-primary)' }}>
         🧪 A/B 실험 ({windowDays}일)
       </h2>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -84,9 +84,9 @@ export default async function AbExperimentViewer({
               borderRadius: 'var(--radius-md, 10px)',
             }}
           >
-            <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary, #fff)', marginBottom: 8, wordBreak: 'keep-all' }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8, wordBreak: 'keep-all' }}>
               {spec.label}
-              <span style={{ marginLeft: 8, fontSize: 10, color: 'var(--text-tertiary, #888)', fontFamily: 'monospace' }}>
+              <span style={{ marginLeft: 8, fontSize: 10, color: 'var(--text-tertiary)', fontFamily: 'monospace' }}>
                 {spec.name}
               </span>
             </div>
@@ -107,7 +107,7 @@ export default async function AbExperimentViewer({
                   const vs = r.vs_control_pct === null ? null : Number(r.vs_control_pct);
                   return (
                     <tr key={r.variant} style={{ borderTop: '1px solid var(--border)' }}>
-                      <td style={{ padding: '6px 10px', fontWeight: 700, color: 'var(--text-primary, #fff)' }}>{r.variant}</td>
+                      <td style={{ padding: '6px 10px', fontWeight: 700, color: 'var(--text-primary)' }}>{r.variant}</td>
                       <td style={{ padding: '6px 10px', textAlign: 'right', color: 'var(--text-secondary)' }}>{Number(r.views).toLocaleString()}</td>
                       <td style={{ padding: '6px 10px', textAlign: 'right', color: 'var(--text-secondary)' }}>{Number(r.clicks).toLocaleString()}</td>
                       <td style={{ padding: '6px 10px', textAlign: 'right', fontWeight: 700, color: ctrTone(ctr) }}>
@@ -116,7 +116,7 @@ export default async function AbExperimentViewer({
                       <td style={{ padding: '6px 10px', textAlign: 'right', fontWeight: 700, color: deltaTone(vs, r.significant) }}>
                         {r.variant === 'A' ? '—' : vs === null ? '—' : `${vs >= 0 ? '+' : ''}${vs.toFixed(1)}%`}
                       </td>
-                      <td style={{ padding: '6px 10px', textAlign: 'center', color: r.significant ? 'var(--accent-green)' : 'var(--text-tertiary, #888)', fontSize: 11 }}>
+                      <td style={{ padding: '6px 10px', textAlign: 'center', color: r.significant ? 'var(--accent-green)' : 'var(--text-tertiary)', fontSize: 11 }}>
                         {r.significant ? '✓' : '—'}
                       </td>
                     </tr>

@@ -6,10 +6,10 @@ interface Item { label: string; value: React.ReactNode; tone?: 'red' | 'green' |
 interface Props { items: Item[] }
 
 const TONE_COLOR: Record<NonNullable<Item['tone']>, string> = {
-  red:     'var(--accent-red, #f87171)',
-  green:   'var(--accent-green, #34d399)',
+  red:     'var(--accent-red)',
+  green:   'var(--accent-green)',
   orange:  'var(--accent-orange, #fb923c)',
-  default: 'var(--text-primary, #fff)',
+  default: 'var(--text-primary)',
 };
 
 export default function KPIStrip({ items }: Props) {
@@ -22,7 +22,7 @@ export default function KPIStrip({ items }: Props) {
     }}>
       {items.map((it, i) => (
         <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-          <span style={{ color: 'var(--text-tertiary, #888)', fontWeight: 600 }}>{it.label}</span>
+          <span style={{ color: 'var(--text-tertiary)', fontWeight: 600 }}>{it.label}</span>
           <span style={{ color: TONE_COLOR[it.tone ?? 'default'], fontWeight: 800 }}>{it.value}</span>
         </div>
       ))}

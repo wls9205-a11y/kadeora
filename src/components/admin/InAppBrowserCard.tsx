@@ -76,14 +76,14 @@ export default function InAppBrowserCard() {
               const isBlocked = DANGER_BROWSERS.has(b.browser_type);
               return (
                 <tr key={b.browser_type} style={{ borderBottom: '1px solid var(--border)' }}>
-                  <td style={{ padding: '6px 8px', fontWeight: 700, color: 'var(--text-primary, #fff)' }}>
+                  <td style={{ padding: '6px 8px', fontWeight: 700, color: 'var(--text-primary)' }}>
                     {isBlocked && <span style={{ color: 'var(--accent-red)', marginRight: 4 }}>🚫</span>}
                     {b.browser_type}
                   </td>
-                  <td style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-secondary, #888)' }}>{b.attempts.toLocaleString()}</td>
-                  <td style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-secondary, #888)' }}>{b.oauth_started.toLocaleString()}</td>
-                  <td style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-secondary, #888)' }}>{b.oauth_callback.toLocaleString()}</td>
-                  <td style={{ padding: '6px 8px', textAlign: 'right', fontWeight: 700, color: 'var(--text-primary, #fff)' }}>{b.success.toLocaleString()}</td>
+                  <td style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-secondary)' }}>{b.attempts.toLocaleString()}</td>
+                  <td style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-secondary)' }}>{b.oauth_started.toLocaleString()}</td>
+                  <td style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-secondary)' }}>{b.oauth_callback.toLocaleString()}</td>
+                  <td style={{ padding: '6px 8px', textAlign: 'right', fontWeight: 700, color: 'var(--text-primary)' }}>{b.success.toLocaleString()}</td>
                   <td style={{ padding: '6px 8px', textAlign: 'right', fontWeight: 800, color: badgeColor(b.success_pct, b.attempts) }}>
                     {b.success_pct.toFixed(1)}%
                   </td>
@@ -113,10 +113,10 @@ export default function InAppBrowserCard() {
               <tbody>
                 {data.daily.map((r, i) => (
                   <tr key={`${r.day}-${r.browser_type}-${i}`} style={{ borderBottom: '1px solid var(--border)' }}>
-                    <td style={{ padding: '4px 6px', color: 'var(--text-secondary, #888)' }}>{r.day}</td>
-                    <td style={{ padding: '4px 6px', color: 'var(--text-primary, #fff)' }}>{r.browser_type}</td>
-                    <td style={{ padding: '4px 6px', textAlign: 'right', color: 'var(--text-secondary, #888)' }}>{r.attempts}</td>
-                    <td style={{ padding: '4px 6px', textAlign: 'right', color: 'var(--text-primary, #fff)' }}>{r.success}</td>
+                    <td style={{ padding: '4px 6px', color: 'var(--text-secondary)' }}>{r.day}</td>
+                    <td style={{ padding: '4px 6px', color: 'var(--text-primary)' }}>{r.browser_type}</td>
+                    <td style={{ padding: '4px 6px', textAlign: 'right', color: 'var(--text-secondary)' }}>{r.attempts}</td>
+                    <td style={{ padding: '4px 6px', textAlign: 'right', color: 'var(--text-primary)' }}>{r.success}</td>
                     <td style={{ padding: '4px 6px', textAlign: 'right', fontWeight: 700, color: badgeColor(Number(r.success_pct ?? 0), r.attempts) }}>
                       {r.success_pct != null ? `${Number(r.success_pct).toFixed(1)}%` : '-'}
                     </td>

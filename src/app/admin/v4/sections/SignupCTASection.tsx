@@ -26,12 +26,12 @@ interface Props {
 }
 
 const sectionTitleStyle: React.CSSProperties = {
-  fontSize: 14, fontWeight: 800, color: 'var(--text-primary, #fff)',
+  fontSize: 14, fontWeight: 800, color: 'var(--text-primary)',
   marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8,
 };
 
 const subTitleStyle: React.CSSProperties = {
-  fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary, #888)',
+  fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary)',
   textTransform: 'uppercase', marginTop: 14, marginBottom: 6, letterSpacing: 0.4,
 };
 
@@ -72,7 +72,7 @@ export default function SignupCTASection({ data, ctrAvg }: Props) {
           {(broken.items ?? []).slice(0, 6).map(c => (
             <div key={c.cta_name} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, padding: '6px 8px', borderRadius: 6, background: 'rgba(0,0,0,0.2)' }}>
               <code style={{ fontSize: 12, fontWeight: 700, color: 'var(--accent-red)' }}>{c.cta_name}</code>
-              <span style={{ fontSize: 11, color: 'var(--text-secondary, #ccc)' }}>
+              <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
                 노출 <strong>{c.views_24h ?? 0}</strong> · 클릭 <strong>{c.clicks_24h ?? 0}</strong>
               </span>
             </div>
@@ -81,14 +81,14 @@ export default function SignupCTASection({ data, ctrAvg }: Props) {
       </AlertCard>
 
       <details style={{ marginTop: 12 }}>
-        <summary style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary, #ccc)', cursor: 'pointer' }}>
+        <summary style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', cursor: 'pointer' }}>
           저조 CTA ({weak.count ?? 0}) ▼
         </summary>
         <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 4, fontSize: 11 }}>
           {(weak.items ?? []).slice(0, 12).map(c => (
             <div key={c.cta_name} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 8px', borderRadius: 4, background: 'rgba(0,0,0,0.2)' }}>
-              <code style={{ color: 'var(--text-secondary, #ccc)' }}>{c.cta_name}</code>
-              <span style={{ color: 'var(--text-tertiary, #888)' }}>
+              <code style={{ color: 'var(--text-secondary)' }}>{c.cta_name}</code>
+              <span style={{ color: 'var(--text-tertiary)' }}>
                 노출 {c.views_24h ?? 0} / 클릭 {c.clicks_24h ?? 0} {c.ctr != null ? `· ${c.ctr}%` : ''}
               </span>
             </div>
@@ -100,11 +100,11 @@ export default function SignupCTASection({ data, ctrAvg }: Props) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         {stages.map((s, i) => (
           <div key={s.label} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 10px', borderRadius: 6, background: 'rgba(0,0,0,0.18)' }}>
-            <div style={{ width: 16, fontSize: 10, color: 'var(--text-tertiary, #888)' }}>{i + 1}</div>
-            <code style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary, #ccc)', flex: 1 }}>{s.label}</code>
-            <strong style={{ fontSize: 13, color: 'var(--text-primary, #fff)', minWidth: 40, textAlign: 'right' }}>{s.value ?? 0}</strong>
+            <div style={{ width: 16, fontSize: 10, color: 'var(--text-tertiary)' }}>{i + 1}</div>
+            <code style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', flex: 1 }}>{s.label}</code>
+            <strong style={{ fontSize: 13, color: 'var(--text-primary)', minWidth: 40, textAlign: 'right' }}>{s.value ?? 0}</strong>
             {i > 0 && s.drop != null && s.drop > 0 && (
-              <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--accent-red, #f87171)' }}>
+              <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--accent-red)' }}>
                 -{s.drop} {s.dropLabel}
               </span>
             )}
@@ -116,7 +116,7 @@ export default function SignupCTASection({ data, ctrAvg }: Props) {
       <div style={{ overflowX: 'auto', maxWidth: '100%' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
           <thead>
-            <tr style={{ color: 'var(--text-tertiary, #888)', textAlign: 'left' }}>
+            <tr style={{ color: 'var(--text-tertiary)', textAlign: 'left' }}>
               <th style={{ padding: 6 }}>출처</th>
               <th style={{ padding: 6 }}>제공사</th>
               <th style={{ padding: 6, textAlign: 'right' }}>시도</th>
@@ -127,11 +127,11 @@ export default function SignupCTASection({ data, ctrAvg }: Props) {
           <tbody>
             {(data.source_provider_matrix ?? []).slice(0, 12).map((r, i) => (
               <tr key={`${r.source}-${r.provider}-${i}`} style={{ borderTop: '1px solid var(--border)' }}>
-                <td style={{ padding: 6 }}><code style={{ color: 'var(--text-secondary, #ccc)' }}>{r.source}</code></td>
-                <td style={{ padding: 6, color: 'var(--text-tertiary, #888)' }}>{r.provider}</td>
+                <td style={{ padding: 6 }}><code style={{ color: 'var(--text-secondary)' }}>{r.source}</code></td>
+                <td style={{ padding: 6, color: 'var(--text-tertiary)' }}>{r.provider}</td>
                 <td style={{ padding: 6, textAlign: 'right' }}>{r.attempts}</td>
                 <td style={{ padding: 6, textAlign: 'right' }}>{r.successes}</td>
-                <td style={{ padding: 6, textAlign: 'right', color: r.success_pct >= 30 ? 'var(--accent-green, #34d399)' : 'var(--text-secondary, #ccc)' }}>{r.success_pct}%</td>
+                <td style={{ padding: 6, textAlign: 'right', color: r.success_pct >= 30 ? 'var(--accent-green)' : 'var(--text-secondary)' }}>{r.success_pct}%</td>
               </tr>
             ))}
           </tbody>

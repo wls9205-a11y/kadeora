@@ -14,15 +14,15 @@ interface Props {
 }
 
 const HEALTH_BORDER: Record<Health, string> = {
-  critical: 'var(--accent-red, #f87171)',
+  critical: 'var(--accent-red)',
   warn:     'var(--accent-orange, #fb923c)',
-  ok:       'var(--accent-green, #34d399)',
+  ok:       'var(--accent-green)',
 };
 
 const DELTA_COLOR: Record<NonNullable<Props['deltaColor']>, string> = {
-  red:      'var(--accent-red, #f87171)',
-  green:    'var(--accent-green, #34d399)',
-  tertiary: 'var(--text-tertiary, #888)',
+  red:      'var(--accent-red)',
+  green:    'var(--accent-green)',
+  tertiary: 'var(--text-tertiary)',
 };
 
 export default function AdminKPI({ label, value, delta, deltaColor = 'tertiary', drilldown, health, unit }: Props) {
@@ -35,14 +35,14 @@ export default function AdminKPI({ label, value, delta, deltaColor = 'tertiary',
       borderLeft,
       minWidth: 0, display: 'flex', flexDirection: 'column', gap: 4,
     }}>
-      <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-tertiary, #888)', letterSpacing: 0.3, textTransform: 'uppercase' }}>
+      <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-tertiary)', letterSpacing: 0.3, textTransform: 'uppercase' }}>
         {label}
       </div>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-        <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary, #fff)', lineHeight: 1 }}>
+        <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1 }}>
           {value}
         </div>
-        {unit && <span style={{ fontSize: 11, color: 'var(--text-tertiary, #888)' }}>{unit}</span>}
+        {unit && <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{unit}</span>}
       </div>
       {delta !== undefined && delta !== null && (
         <div style={{ fontSize: 11, fontWeight: 600, color: DELTA_COLOR[deltaColor] }}>

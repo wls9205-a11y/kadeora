@@ -185,11 +185,11 @@ export default function WatchlistWidget() {
       <summary style={{ cursor: 'pointer', listStyle: 'none' }}>
       {/* 헤더 */}
       <header style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-        <h2 style={{ margin: 0, fontSize: 13, fontWeight: 800, color: 'var(--text-primary, #fff)', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-          <span aria-hidden style={{ fontSize: 10, color: 'var(--text-tertiary, #888)' }}>▸</span>
+        <h2 style={{ margin: 0, fontSize: 13, fontWeight: 800, color: 'var(--text-primary)', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+          <span aria-hidden style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>▸</span>
           🏠 관심 등록 현황
         </h2>
-        <span style={{ fontSize: 11, color: 'var(--text-tertiary, #888)' }}>
+        <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
           watchlist (apt+stock) + 분양현장 leadgen · 자연/자동 분리
         </span>
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -204,7 +204,7 @@ export default function WatchlistWidget() {
             style={{
               fontSize: 11, fontWeight: 700, padding: '6px 12px', borderRadius: 6,
               background: siteOpen ? 'rgba(96,165,250,0.16)' : 'transparent',
-              color: siteOpen ? 'var(--brand)' : 'var(--text-secondary, #ccc)',
+              color: siteOpen ? 'var(--brand)' : 'var(--text-secondary)',
               border: '1px solid var(--border)', cursor: 'pointer',
             }}
           >
@@ -214,7 +214,7 @@ export default function WatchlistWidget() {
             onClick={fetchData}
             style={{
               fontSize: 11, fontWeight: 700, padding: '6px 10px', borderRadius: 6,
-              background: 'transparent', color: 'var(--text-secondary, #ccc)',
+              background: 'transparent', color: 'var(--text-secondary)',
               border: '1px solid var(--border)', cursor: 'pointer',
             }}
           >↻</button>
@@ -223,7 +223,7 @@ export default function WatchlistWidget() {
       </summary>
 
       {loading && !data && (
-        <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-tertiary, #888)', fontSize: 12 }}>로드 중…</div>
+        <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-tertiary)', fontSize: 12 }}>로드 중…</div>
       )}
       {err && !loading && (
         <div style={{ padding: 10, fontSize: 12, color: 'var(--accent-red)', background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.4)', borderRadius: 8 }}>
@@ -275,7 +275,7 @@ export default function WatchlistWidget() {
               padding: '10px 12px', borderRadius: 8,
               background: 'rgba(96,165,250,0.06)', border: '1px solid rgba(96,165,250,0.2)',
             }}>
-              <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--text-tertiary, #888)', letterSpacing: 1, marginBottom: 6 }}>
+              <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--text-tertiary)', letterSpacing: 1, marginBottom: 6 }}>
                 🏢 분양현장 LEADGEN — 회원 {fmtNum(si.members)} · 게스트 {fmtNum(si.guests)} · 알림 ON {fmtNum(si.notif_enabled)} · 단지 {fmtNum(si.distinct_sites)}
               </div>
               <SiteList rows={si.top_sites ?? []} />
@@ -284,7 +284,7 @@ export default function WatchlistWidget() {
 
           {/* B) 14일 막대 (total 회색 + organic 녹색 오버레이) */}
           <div>
-            <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--text-tertiary, #888)', letterSpacing: 1, marginBottom: 6 }}>
+            <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--text-tertiary)', letterSpacing: 1, marginBottom: 6 }}>
               14D DAILY <span style={{ marginLeft: 6, color: 'var(--text-tertiary, #9ca3af)', fontWeight: 700 }}>■ total</span>
               <span style={{ marginLeft: 4, color: 'var(--accent-green)', fontWeight: 700 }}>■ organic</span>
             </div>
@@ -299,13 +299,13 @@ export default function WatchlistWidget() {
 
           {/* D) 최근 자연 등록 */}
           <div>
-            <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--text-tertiary, #888)', letterSpacing: 1, marginBottom: 6 }}>
+            <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--text-tertiary)', letterSpacing: 1, marginBottom: 6 }}>
               최근 자연 등록 (10)
             </div>
             <RecentList rows={recent} />
           </div>
 
-          <div style={{ fontSize: 10, color: 'var(--text-tertiary, #888)', textAlign: 'right' }}>
+          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', textAlign: 'right' }}>
             avg/user {Number(wl.avg_per_user ?? 0).toFixed(2)} · organic avg/user {Number(wl.organic_avg_per_user ?? 0).toFixed(2)} ·
             {' '}generated {data.generated_at ? new Date(data.generated_at).toLocaleTimeString('ko-KR') : '—'}
             {lastFetch && <> · 갱신 {new Date(lastFetch).toLocaleTimeString('ko-KR')} · 30s 자동</>}
@@ -326,11 +326,11 @@ function KpiTile({ label, value, delta, sub, highlight, muted }: { label: string
       border: '1px solid var(--border)',
       opacity: muted ? 0.75 : 1,
     }}>
-      <div style={{ fontSize: 9, fontWeight: 800, color: 'var(--text-tertiary, #888)', letterSpacing: 1 }}>{label}</div>
+      <div style={{ fontSize: 9, fontWeight: 800, color: 'var(--text-tertiary)', letterSpacing: 1 }}>{label}</div>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginTop: 2 }}>
         <span style={{
           fontSize: 22, fontWeight: 900, letterSpacing: -0.5,
-          color: highlight ? 'var(--accent-green)' : 'var(--text-primary, #fff)',
+          color: highlight ? 'var(--accent-green)' : 'var(--text-primary)',
         }}>{fmtNum(value)}</span>
         {delta != null && (
           <span style={{ fontSize: 10, fontWeight: 800, color: deltaColor(delta) }}>
@@ -349,7 +349,7 @@ function KpiTile({ label, value, delta, sub, highlight, muted }: { label: string
 
 function DailyBars({ rows }: { rows: DailyRow[] }) {
   if (!rows || rows.length === 0) {
-    return <div style={{ padding: 16, textAlign: 'center', color: 'var(--text-tertiary, #888)', fontSize: 11 }}>14일 데이터 없음</div>;
+    return <div style={{ padding: 16, textAlign: 'center', color: 'var(--text-tertiary)', fontSize: 11 }}>14일 데이터 없음</div>;
   }
   // 날짜 ascending
   const sorted = [...rows].sort((a, b) => String(a.date ?? '').localeCompare(String(b.date ?? '')));
@@ -390,16 +390,16 @@ function DailyBars({ rows }: { rows: DailyRow[] }) {
         {/* date labels — 첫/중/끝만 */}
         {sorted.length > 0 && (
           <>
-            <text x={PADX} y={H - 1} fontSize={9} fill="var(--text-tertiary, #888)">{(sorted[0].date ?? '').slice(5)}</text>
+            <text x={PADX} y={H - 1} fontSize={9} fill="var(--text-tertiary)">{(sorted[0].date ?? '').slice(5)}</text>
             {sorted.length > 1 && (
-              <text x={W - PADX} y={H - 1} fontSize={9} textAnchor="end" fill="var(--text-tertiary, #888)">
+              <text x={W - PADX} y={H - 1} fontSize={9} textAnchor="end" fill="var(--text-tertiary)">
                 {(sorted[sorted.length - 1].date ?? '').slice(5)}
               </text>
             )}
           </>
         )}
       </svg>
-      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, color: 'var(--text-tertiary, #888)', marginTop: 2 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, color: 'var(--text-tertiary)', marginTop: 2 }}>
         <span>{sorted.length}일</span>
         <span>최대 total {fmtNum(max)}</span>
       </div>
@@ -410,9 +410,9 @@ function DailyBars({ rows }: { rows: DailyRow[] }) {
 function TopColumn({ title, rows, emptyMsg }: { title: string; rows: TopRow[]; emptyMsg: string }) {
   return (
     <div>
-      <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--text-tertiary, #888)', letterSpacing: 1, marginBottom: 6 }}>{title}</div>
+      <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--text-tertiary)', letterSpacing: 1, marginBottom: 6 }}>{title}</div>
       {!rows || rows.length === 0 ? (
-        <div style={{ padding: 12, fontSize: 11, color: 'var(--text-tertiary, #888)', textAlign: 'center', background: 'var(--bg-base)', borderRadius: 6, border: '1px solid var(--border)' }}>{emptyMsg}</div>
+        <div style={{ padding: 12, fontSize: 11, color: 'var(--text-tertiary)', textAlign: 'center', background: 'var(--bg-base)', borderRadius: 6, border: '1px solid var(--border)' }}>{emptyMsg}</div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           {rows.slice(0, 10).map((r, i) => {
@@ -425,13 +425,13 @@ function TopColumn({ title, rows, emptyMsg }: { title: string; rows: TopRow[]; e
                 padding: '6px 10px', borderRadius: 6,
                 background: 'var(--bg-base)', border: '1px solid var(--border)',
               }}>
-                <span style={{ fontSize: 10, fontWeight: 800, color: i < 3 ? 'var(--brand, #2563EB)' : 'var(--text-tertiary, #888)', textAlign: 'right' }}>
+                <span style={{ fontSize: 10, fontWeight: 800, color: i < 3 ? 'var(--brand, #2563EB)' : 'var(--text-tertiary)', textAlign: 'right' }}>
                   {i + 1}
                 </span>
-                <span style={{ fontSize: 11, color: 'var(--text-primary, #fff)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 600 }}>
+                <span style={{ fontSize: 11, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 600 }}>
                   {r.name ?? '—'}
                 </span>
-                <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-secondary, #ccc)', whiteSpace: 'nowrap' }}>
+                <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
                   {showSplit
                     ? <>총 {fmtNum(users)} <span style={{ color: 'var(--accent-green)', fontWeight: 700 }}>(자연 {fmtNum(organicUsers)})</span></>
                     : <span style={{ color: 'var(--accent-green)' }}>{fmtNum(organicUsers)}명</span>}
@@ -447,7 +447,7 @@ function TopColumn({ title, rows, emptyMsg }: { title: string; rows: TopRow[]; e
 
 function RecentList({ rows }: { rows: RecentRow[] }) {
   if (!rows || rows.length === 0) {
-    return <div style={{ padding: 16, textAlign: 'center', color: 'var(--text-tertiary, #888)', fontSize: 11 }}>최근 자연 등록 없음</div>;
+    return <div style={{ padding: 16, textAlign: 'center', color: 'var(--text-tertiary)', fontSize: 11 }}>최근 자연 등록 없음</div>;
   }
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -459,10 +459,10 @@ function RecentList({ rows }: { rows: RecentRow[] }) {
             padding: '6px 10px', borderRadius: 6,
             background: 'var(--bg-base)', border: '1px solid var(--border)',
           }}>
-            <span style={{ fontSize: 10, color: 'var(--text-tertiary, #888)', whiteSpace: 'nowrap' }}>
+            <span style={{ fontSize: 10, color: 'var(--text-tertiary)', whiteSpace: 'nowrap' }}>
               {fmtKstDateHm(r.created_at)}
             </span>
-            <span style={{ fontSize: 11, color: 'var(--text-primary, #fff)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 600 }}>
+            <span style={{ fontSize: 11, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 600 }}>
               {r.user_nickname || r.user_email_masked || '—'}
             </span>
             <span style={{ fontSize: 9, fontWeight: 800,
@@ -470,7 +470,7 @@ function RecentList({ rows }: { rows: RecentRow[] }) {
               background: isApt ? 'rgba(96,165,250,0.18)' : 'rgba(251,191,36,0.16)',
               color: isApt ? 'var(--brand)' : '#fbbf24',
             }}>{isApt ? '단지' : '종목'}</span>
-            <span style={{ fontSize: 11, color: 'var(--text-secondary, #ccc)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 180 }}>
+            <span style={{ fontSize: 11, color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 180 }}>
               {r.item_name ?? '—'}
             </span>
           </div>
@@ -482,7 +482,7 @@ function RecentList({ rows }: { rows: RecentRow[] }) {
 
 function SiteList({ rows }: { rows: SiteRow[] }) {
   if (!rows || rows.length === 0) {
-    return <div style={{ padding: 12, textAlign: 'center', color: 'var(--text-tertiary, #888)', fontSize: 11 }}>분양현장 등록 없음</div>;
+    return <div style={{ padding: 12, textAlign: 'center', color: 'var(--text-tertiary)', fontSize: 11 }}>분양현장 등록 없음</div>;
   }
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -492,14 +492,14 @@ function SiteList({ rows }: { rows: SiteRow[] }) {
           padding: '5px 10px', borderRadius: 5,
           background: 'rgba(0,0,0,0.18)', border: '1px solid rgba(96,165,250,0.18)',
         }}>
-          <span style={{ fontSize: 10, fontWeight: 800, color: 'var(--text-tertiary, #888)', textAlign: 'right' }}>{i + 1}</span>
-          <span style={{ fontSize: 11, color: 'var(--text-primary, #fff)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 600 }}>
+          <span style={{ fontSize: 10, fontWeight: 800, color: 'var(--text-tertiary)', textAlign: 'right' }}>{i + 1}</span>
+          <span style={{ fontSize: 11, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 600 }}>
             {r.site_name ?? '—'}
           </span>
-          <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-secondary, #ccc)', whiteSpace: 'nowrap' }}>
+          <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
             👤 {fmtNum(r.members)} {n(r.guests) > 0 && <span style={{ color: '#fbbf24' }}>· 게스트 {fmtNum(r.guests)}</span>}
           </span>
-          <span style={{ fontSize: 9, color: 'var(--text-tertiary, #888)', whiteSpace: 'nowrap' }}>
+          <span style={{ fontSize: 9, color: 'var(--text-tertiary)', whiteSpace: 'nowrap' }}>
             {fmtKstHm(r.last_added)}
           </span>
         </div>

@@ -79,7 +79,7 @@ export default function AptQuickFilters({ filters, topBuilders }: Props) {
           <span style={{
             fontSize: 10, fontWeight: 800,
             padding: '1px 6px', borderRadius: 999,
-            background: 'var(--brand)', color: 'var(--text-inverse, #fff)',
+            background: 'var(--brand)', color: 'var(--text-inverse)',
           }}>
             {[filters.price, filters.size, filters.builder].filter(Boolean).length}
           </span>
@@ -148,7 +148,7 @@ function pillStyle(active: boolean): React.CSSProperties {
     padding: '6px 12px', borderRadius: 999,
     fontSize: 12, fontWeight: 700,
     background: active ? 'var(--brand)' : 'var(--bg-hover)',
-    color: active ? 'var(--text-inverse, #fff)' : 'var(--text-secondary)',
+    color: active ? 'var(--text-inverse)' : 'var(--text-secondary)',
     border: `1px solid ${active ? 'var(--brand)' : 'var(--border)'}`,
     cursor: 'pointer',
     transition: 'background var(--transition-fast), color var(--transition-fast)',

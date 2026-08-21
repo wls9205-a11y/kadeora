@@ -24,7 +24,7 @@ export default function AdminPage() {
         <CronUnifiedPanel />
       </div>
       <div style={{ marginTop: 24, paddingTop: 16, borderTop: '1px solid var(--border)' }}>
-        <h2 style={{ fontSize: 12, color: 'var(--text-tertiary, #888)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12 }}>참조 데이터</h2>
+        <h2 style={{ fontSize: 12, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12 }}>참조 데이터</h2>
         <NorthStarCard />
         <CtaPerformanceTable windowDays={30} />
         <AbExperimentViewer windowDays={14} />

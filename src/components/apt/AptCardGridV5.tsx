@@ -36,7 +36,7 @@ export default async function AptCardGridV5({ filters, moreHref, perPage = 12 }:
 
   if (rows.length === 0) {
     return (
-      <section aria-label="단지 목록" style={{ marginTop: 8, padding: 24, textAlign: 'center', color: 'var(--text-secondary, #888)', fontSize: 12, background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border)', borderRadius: 12 }}>
+      <section aria-label="단지 목록" style={{ marginTop: 8, padding: 24, textAlign: 'center', color: 'var(--text-secondary)', fontSize: 12, background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border)', borderRadius: 12 }}>
         해당 지역·카테고리에 단지가 없습니다.
       </section>
     );
@@ -45,7 +45,7 @@ export default async function AptCardGridV5({ filters, moreHref, perPage = 12 }:
   return (
     <section aria-label="단지 목록" style={{ marginTop: 8 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 4px', marginBottom: 8 }}>
-        <span style={{ fontSize: 11, color: 'var(--text-secondary, #888)', fontWeight: 700 }}>{label} · {rows.length}</span>
+        <span style={{ fontSize: 11, color: 'var(--text-secondary)', fontWeight: 700 }}>{label} · {rows.length}</span>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 6 }}>
         {rows.map((r) => {
@@ -58,7 +58,7 @@ export default async function AptCardGridV5({ filters, moreHref, perPage = 12 }:
               </div>
               <div style={{ padding: '7px 9px 9px' }}>
                 <div style={{ fontSize: 12, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.name}</div>
-                <div style={{ fontSize: 10, color: 'var(--text-secondary, #888)', marginTop: 2 }}>{[r.region, r.sigungu].filter(Boolean).join(' ')}</div>
+                <div style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 2 }}>{[r.region, r.sigungu].filter(Boolean).join(' ')}</div>
                 <div style={{ fontSize: 11, fontWeight: 700, marginTop: 3 }}>{priceLabel(r)}</div>
               </div>
             </Link>
@@ -74,7 +74,7 @@ export default async function AptCardGridV5({ filters, moreHref, perPage = 12 }:
               borderRadius: 999,
               border: '1px solid var(--border-strong, #3a3b45)',
               background: 'var(--bg-elevated, #1f2028)',
-              color: 'var(--text-primary, #fff)',
+              color: 'var(--text-primary)',
               fontSize: 12,
               fontWeight: 700,
               textDecoration: 'none',

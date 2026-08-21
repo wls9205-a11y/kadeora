@@ -36,7 +36,7 @@ export default function AlertCard({ severity, title, hideWhenEmpty, count, child
           </span>
         )}
       </div>
-      {children && <div style={{ fontSize: 12, color: 'var(--text-secondary, #ccc)' }}>{children}</div>}
+      {children && <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{children}</div>}
       {actions && <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>{actions}</div>}
     </div>
   );

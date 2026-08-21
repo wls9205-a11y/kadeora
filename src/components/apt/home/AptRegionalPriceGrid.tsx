@@ -53,7 +53,7 @@ function fmtPrice(p: number | null): string {
 function fmtChange(v: number | null): { label: string; color: string } | null {
   if (v == null || !isFinite(v) || Math.abs(v) < 0.05) return null;
   if (v > 0) return { label: `▲ ${v.toFixed(1)}%`, color: 'var(--accent-red, #DC2626)' };
-  return { label: `▼ ${Math.abs(v).toFixed(1)}%`, color: 'var(--accent-blue, #3B82F6)' };
+  return { label: `▼ ${Math.abs(v).toFixed(1)}%`, color: 'var(--accent-blue)' };
 }
 
 export default function AptRegionalPriceGrid({ region, sigunguTrends }: Props) {

@@ -21,7 +21,7 @@ interface TrafficData {
 }
 
 const subTitleStyle: React.CSSProperties = {
-  fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary, #888)',
+  fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary)',
   textTransform: 'uppercase', marginTop: 14, marginBottom: 6, letterSpacing: 0.4,
 };
 
@@ -72,7 +72,7 @@ export default function TrafficSection() {
       padding: 16, borderRadius: 'var(--radius-lg, 14px)',
       background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border)',
     }}>
-      <h2 style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary, #fff)', marginTop: 0, marginBottom: 10 }}>
+      <h2 style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)', marginTop: 0, marginBottom: 10 }}>
         🌐 실시간 트래픽
       </h2>
 
@@ -101,7 +101,7 @@ export default function TrafficSection() {
               style={{
                 flex: '1 0 auto', minWidth: 12,
                 height: `${Math.max(4, heightPct)}%`,
-                background: 'linear-gradient(180deg, var(--accent, #3b82f6) 0%, rgba(59,130,246,0.4) 100%)',
+                background: 'linear-gradient(180deg, var(--accent) 0%, rgba(59,130,246,0.4) 100%)',
                 borderRadius: '2px 2px 0 0',
               }}
             />
@@ -116,7 +116,7 @@ export default function TrafficSection() {
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
               <thead>
-                <tr style={{ color: 'var(--text-tertiary, #888)', textAlign: 'left' }}>
+                <tr style={{ color: 'var(--text-tertiary)', textAlign: 'left' }}>
                   <th style={{ padding: 6 }}>경로</th>
                   <th style={{ padding: 6, textAlign: 'right' }}>PV</th>
                   <th style={{ padding: 6, textAlign: 'right' }}>UV</th>
@@ -126,10 +126,10 @@ export default function TrafficSection() {
                 {top.slice(0, 10).map((p, i) => (
                   <tr key={i} style={{ borderTop: '1px solid var(--border)' }}>
                     <td style={{ padding: 6, maxWidth: 240, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      <code style={{ color: 'var(--text-secondary, #ccc)' }}>{decodePath(p.path)}</code>
+                      <code style={{ color: 'var(--text-secondary)' }}>{decodePath(p.path)}</code>
                     </td>
                     <td style={{ padding: 6, textAlign: 'right', fontWeight: 700 }}>{p.pv}</td>
-                    <td style={{ padding: 6, textAlign: 'right', color: 'var(--text-tertiary, #888)' }}>{p.uv}</td>
+                    <td style={{ padding: 6, textAlign: 'right', color: 'var(--text-tertiary)' }}>{p.uv}</td>
                   </tr>
                 ))}
               </tbody>
@@ -146,11 +146,11 @@ export default function TrafficSection() {
               const pct = total > 0 ? Math.round((r.cnt / total) * 100) : 0;
               return (
                 <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11 }}>
-                  <span style={{ minWidth: 80, color: 'var(--text-secondary, #ccc)' }}>{r.referrer}</span>
+                  <span style={{ minWidth: 80, color: 'var(--text-secondary)' }}>{r.referrer}</span>
                   <div style={{ flex: 1, height: 6, background: 'rgba(255,255,255,0.05)', borderRadius: 3, overflow: 'hidden' }}>
-                    <div style={{ width: `${pct}%`, height: '100%', background: 'var(--accent, #3b82f6)' }} />
+                    <div style={{ width: `${pct}%`, height: '100%', background: 'var(--accent)' }} />
                   </div>
-                  <span style={{ minWidth: 40, textAlign: 'right', color: 'var(--text-primary, #fff)', fontWeight: 700 }}>{r.cnt}</span>
+                  <span style={{ minWidth: 40, textAlign: 'right', color: 'var(--text-primary)', fontWeight: 700 }}>{r.cnt}</span>
                 </div>
               );
             })}
@@ -171,11 +171,11 @@ export default function TrafficSection() {
               const pct = devTotal > 0 ? Math.round((it.v / devTotal) * 100) : 0;
               return (
                 <div key={it.k} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11 }}>
-                  <span style={{ minWidth: 60, color: 'var(--text-secondary, #ccc)' }}>{it.label}</span>
+                  <span style={{ minWidth: 60, color: 'var(--text-secondary)' }}>{it.label}</span>
                   <div style={{ flex: 1, height: 6, background: 'rgba(255,255,255,0.05)', borderRadius: 3, overflow: 'hidden' }}>
                     <div style={{ width: `${pct}%`, height: '100%', background: it.color }} />
                   </div>
-                  <span style={{ minWidth: 60, textAlign: 'right', color: 'var(--text-primary, #fff)', fontWeight: 700 }}>{it.v} ({pct}%)</span>
+                  <span style={{ minWidth: 60, textAlign: 'right', color: 'var(--text-primary)', fontWeight: 700 }}>{it.v} ({pct}%)</span>
                 </div>
               );
             })}
@@ -190,8 +190,8 @@ export default function TrafficSection() {
                 background: 'var(--bg-surface, #1a1b22)', border: '1px solid var(--border)',
                 fontSize: 11,
               }}>
-                <code style={{ color: 'var(--text-secondary, #ccc)' }}>{k}</code>
-                <span style={{ marginLeft: 6, color: 'var(--text-primary, #fff)', fontWeight: 700 }}>{v}</span>
+                <code style={{ color: 'var(--text-secondary)' }}>{k}</code>
+                <span style={{ marginLeft: 6, color: 'var(--text-primary)', fontWeight: 700 }}>{v}</span>
               </div>
             ))}
           </div>

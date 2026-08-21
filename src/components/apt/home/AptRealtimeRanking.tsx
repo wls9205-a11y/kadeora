@@ -10,7 +10,7 @@ function fmtChange(v: any): { label: string; color: string } | null {
   const n = Number(v);
   if (!isFinite(n) || n === 0) return null;
   if (n > 0) return { label: `▲ ${n.toFixed(0)}%`, color: 'var(--accent-red, #DC2626)' };
-  return { label: `▼ ${Math.abs(n).toFixed(0)}%`, color: 'var(--accent-blue, #3B82F6)' };
+  return { label: `▼ ${Math.abs(n).toFixed(0)}%`, color: 'var(--accent-blue)' };
 }
 
 export default function AptRealtimeRanking({ sites }: Props) {

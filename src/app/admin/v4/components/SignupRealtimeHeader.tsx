@@ -25,10 +25,10 @@ interface Tile {
 }
 
 const TONE: Record<NonNullable<Tile['tone']>, { color: string; bg: string }> = {
-  red:     { color: 'var(--accent-red, #f87171)',    bg: 'rgba(248,113,113,0.06)' },
-  green:   { color: 'var(--accent-green, #34d399)',  bg: 'rgba(52,211,153,0.06)'  },
+  red:     { color: 'var(--accent-red)',    bg: 'rgba(248,113,113,0.06)' },
+  green:   { color: 'var(--accent-green)',  bg: 'rgba(52,211,153,0.06)'  },
   orange:  { color: 'var(--accent-orange, #fb923c)', bg: 'rgba(251,146,60,0.06)'  },
-  default: { color: 'var(--text-primary, #fff)',     bg: 'transparent'             },
+  default: { color: 'var(--text-primary)',     bg: 'transparent'             },
 };
 
 export default function SignupRealtimeHeader() {
@@ -115,14 +115,14 @@ export default function SignupRealtimeHeader() {
             display: 'flex', flexDirection: 'column', gap: 2,
             minWidth: 0,
           }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-tertiary, #888)', textTransform: 'uppercase', letterSpacing: 0.3 }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: 0.3 }}>
               {t.label}
             </div>
             <div style={{ fontSize: 18, fontWeight: 800, color: tone.color, lineHeight: 1.1 }}>
               {t.value}
             </div>
             {t.sub != null && (
-              <div style={{ fontSize: 10, color: 'var(--text-tertiary, #888)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <div style={{ fontSize: 10, color: 'var(--text-tertiary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {t.sub}
               </div>
             )}

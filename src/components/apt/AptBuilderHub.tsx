@@ -61,13 +61,13 @@ export default function AptBuilderHub(props: Props) {
                 display: 'flex', flexDirection: 'column', gap: 3,
                 padding: '12px 12px', textAlign: 'left',
                 background: active ? 'var(--brand)' : 'var(--bg-surface)',
-                color: active ? 'var(--text-inverse, #fff)' : 'inherit',
+                color: active ? 'var(--text-inverse)' : 'inherit',
                 border: `1px solid ${active ? 'var(--brand)' : 'var(--border)'}`,
                 borderRadius: 12, cursor: 'pointer',
                 transition: 'transform 100ms ease, box-shadow 100ms ease',
               }}
             >
-              <span style={{ fontSize: 13, fontWeight: 800, color: active ? 'var(--text-inverse, #fff)' : 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <span style={{ fontSize: 13, fontWeight: 800, color: active ? 'var(--text-inverse)' : 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {shortBuilder(b.builder)}
               </span>
               <span style={{ fontSize: 11, color: active ? 'rgba(255,255,255,0.85)' : 'var(--text-tertiary)' }}>

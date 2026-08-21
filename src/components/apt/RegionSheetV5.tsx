@@ -78,7 +78,7 @@ export default function RegionSheetV5({ onClose, sido, currentRegion }: Props) {
             placeholder="지역 검색"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            style={{ flex: 1, padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary, #fff)', fontSize: 12, outline: 'none', height: 32 }}
+            style={{ flex: 1, padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 12, outline: 'none', height: 32 }}
           />
           <button
             onClick={useGeo}
@@ -91,7 +91,7 @@ export default function RegionSheetV5({ onClose, sido, currentRegion }: Props) {
           <button
             onClick={onClose}
             aria-label="닫기"
-            style={{ width: 32, height: 32, border: 0, background: 'transparent', cursor: 'pointer', padding: 0, color: 'var(--text-secondary, #888)', flexShrink: 0, fontSize: 16 }}
+            style={{ width: 32, height: 32, border: 0, background: 'transparent', cursor: 'pointer', padding: 0, color: 'var(--text-secondary)', flexShrink: 0, fontSize: 16 }}
           >✕</button>
         </div>
 
@@ -100,7 +100,7 @@ export default function RegionSheetV5({ onClose, sido, currentRegion }: Props) {
             <div style={{ fontSize: 10, color: 'var(--text-tertiary, #666)', marginBottom: 4, padding: '0 2px' }}>즐겨찾기</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
               {favs.map((name) => (
-                <button key={name} onClick={() => pick(name)} style={{ padding: '5px 10px', borderRadius: 999, border: '1px solid var(--border)', background: 'transparent', fontSize: 11, color: 'var(--text-primary, #fff)', cursor: 'pointer' }}>⭐ {name}</button>
+                <button key={name} onClick={() => pick(name)} style={{ padding: '5px 10px', borderRadius: 999, border: '1px solid var(--border)', background: 'transparent', fontSize: 11, color: 'var(--text-primary)', cursor: 'pointer' }}>⭐ {name}</button>
               ))}
             </div>
           </div>
@@ -111,7 +111,7 @@ export default function RegionSheetV5({ onClose, sido, currentRegion }: Props) {
             <div style={{ fontSize: 10, color: 'var(--text-tertiary, #666)', marginBottom: 4, padding: '0 2px' }}>최근 본 지역</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
               {recents.map((name) => (
-                <button key={name} onClick={() => pick(name)} style={{ padding: '5px 10px', borderRadius: 999, border: '1px solid var(--border)', background: 'transparent', fontSize: 11, color: 'var(--text-primary, #fff)', cursor: 'pointer' }}>{name}</button>
+                <button key={name} onClick={() => pick(name)} style={{ padding: '5px 10px', borderRadius: 999, border: '1px solid var(--border)', background: 'transparent', fontSize: 11, color: 'var(--text-primary)', cursor: 'pointer' }}>{name}</button>
               ))}
             </div>
           </div>
@@ -134,7 +134,7 @@ export default function RegionSheetV5({ onClose, sido, currentRegion }: Props) {
                 onClick={() => pick(s.name)}
               >
                 <span style={{ fontSize: 12, fontWeight: 700 }}>{s.name}</span>
-                <span style={{ fontSize: 10, color: 'var(--text-secondary, #888)' }}>{s.count.toLocaleString()}</span>
+                <span style={{ fontSize: 10, color: 'var(--text-secondary)' }}>{s.count.toLocaleString()}</span>
                 <button
                   onClick={(e) => { e.stopPropagation(); toggleFav(s.name); }}
                   aria-label="즐겨찾기"
@@ -144,11 +144,11 @@ export default function RegionSheetV5({ onClose, sido, currentRegion }: Props) {
             );
           })}
         </div>
-        {filtered.length === 0 && <div style={{ padding: 16, textAlign: 'center', color: 'var(--text-secondary, #888)', fontSize: 11 }}>검색 결과 없음</div>}
+        {filtered.length === 0 && <div style={{ padding: 16, textAlign: 'center', color: 'var(--text-secondary)', fontSize: 11 }}>검색 결과 없음</div>}
 
         <button
           onClick={() => pick('전국')}
-          style={{ width: '100%', marginTop: 10, padding: 10, borderRadius: 8, border: 0, background: 'var(--bg-base)', cursor: 'pointer', fontSize: 12, fontWeight: 700, color: 'var(--text-primary, #fff)' }}
+          style={{ width: '100%', marginTop: 10, padding: 10, borderRadius: 8, border: 0, background: 'var(--bg-base)', cursor: 'pointer', fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}
         >전국 보기</button>
       </div>
     </div>

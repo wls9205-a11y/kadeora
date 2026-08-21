@@ -46,7 +46,7 @@ export default function AptHeaderV5({ region, totalCount, imminentCount, cat, si
           >
             <span aria-hidden style={{ flexShrink: 0, opacity: 0.6 }}>📍</span>
             <span style={{ fontSize: 13, fontWeight: 500, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{region}</span>
-            <span style={{ fontSize: 11, color: 'var(--text-secondary, #888)' }}>{totalCount.toLocaleString()}</span>
+            <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{totalCount.toLocaleString()}</span>
           </button>
           <Link href="/apt/search" aria-label="검색" className="touch-target" style={{ width: 40, height: 40, borderRadius: 10, border: '1px solid var(--border)', background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, textDecoration: 'none' }}>🔍</Link>
           <Link href="/apt/map" aria-label="지도" className="touch-target" style={{ width: 40, height: 40, borderRadius: 10, border: '1px solid var(--border)', background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, textDecoration: 'none' }}>🗺</Link>
@@ -62,9 +62,9 @@ export default function AptHeaderV5({ region, totalCount, imminentCount, cat, si
                   style={{
                     padding: '6px 11px',
                     borderRadius: 999,
-                    border: '1px solid ' + (active ? 'var(--text-primary, #fff)' : 'var(--border)'),
-                    background: active ? 'var(--text-primary, #fff)' : 'transparent',
-                    color: active ? 'var(--bg-base)' : (t.warn ? '#fbbf24' : 'var(--text-primary, #fff)'),
+                    border: '1px solid ' + (active ? 'var(--text-primary)' : 'var(--border)'),
+                    background: active ? 'var(--text-primary)' : 'transparent',
+                    color: active ? 'var(--bg-base)' : (t.warn ? '#fbbf24' : 'var(--text-primary)'),
                     fontSize: 12,
                     fontWeight: active ? 700 : 400,
                     cursor: 'pointer',

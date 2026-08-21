@@ -89,7 +89,7 @@ export default function ConsentExpiryAlerts() {
       >
         {busy ? '발송 중…' : '재확인 메시지 발송'}
       </button>
-      {msg && <span style={{ fontSize: 11, color: 'var(--text-tertiary, #888)' }}>{msg}</span>}
+      {msg && <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{msg}</span>}
     </section>
   );
 }

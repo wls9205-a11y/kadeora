@@ -56,7 +56,7 @@ export default async function SendHistory() {
         {err && <span style={{ fontSize: 11, color: 'var(--accent-red)' }}>로드 실패: {err}</span>}
       </div>
       {rows.length === 0 && !err && (
-        <div style={{ fontSize: 12, color: 'var(--text-tertiary, #888)' }}>발송 이력이 없습니다.</div>
+        <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>발송 이력이 없습니다.</div>
       )}
       {rows.length > 0 && (
         <div style={{ overflow: 'auto' }}>
@@ -70,7 +70,7 @@ export default async function SendHistory() {
                       textAlign: 'left',
                       padding: '6px 8px',
                       borderBottom: '1px solid var(--border)',
-                      color: 'var(--text-tertiary, #888)',
+                      color: 'var(--text-tertiary)',
                       fontWeight: 700,
                     }}
                   >
@@ -100,7 +100,7 @@ export default async function SendHistory() {
                   <td style={{ padding: '6px 8px', borderBottom: '1px solid var(--border)' }}>
                     {r.blocked ?? 0}
                   </td>
-                  <td style={{ padding: '6px 8px', borderBottom: '1px solid var(--border)', color: 'var(--text-tertiary, #888)' }}>
+                  <td style={{ padding: '6px 8px', borderBottom: '1px solid var(--border)', color: 'var(--text-tertiary)' }}>
                     {fmtReasons(r.block_reasons)}
                   </td>
                 </tr>

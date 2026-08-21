@@ -24,7 +24,7 @@ export default function CarouselDistribution({ posDist }: { posDist: number[] })
                   {cnt.toLocaleString()}
                 </td>
                 <td style={{ padding: '4px 8px' }}>
-                  <div style={{ height: 10, background: abnormal ? '#ef4444' : 'var(--brand, #3b82f6)', width: `${pct}%`, borderRadius: 2 }} />
+                  <div style={{ height: 10, background: abnormal ? '#ef4444' : 'var(--brand)', width: `${pct}%`, borderRadius: 2 }} />
                 </td>
               </tr>
             );

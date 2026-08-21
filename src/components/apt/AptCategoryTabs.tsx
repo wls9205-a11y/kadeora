@@ -77,7 +77,7 @@ export default function AptCategoryTabs({ current, region, sigungu, countByCateg
                 padding: '8px 14px', borderRadius: 999,
                 fontSize: 12, fontWeight: active ? 800 : 600,
                 background: active ? 'var(--brand)' : 'var(--bg-hover)',
-                color: active ? 'var(--text-inverse, #fff)' : 'var(--text-secondary)',
+                color: active ? 'var(--text-inverse)' : 'var(--text-secondary)',
                 border: `1px solid ${active ? 'var(--brand)' : 'var(--border)'}`,
                 cursor: 'pointer',
                 transition: 'background var(--transition-fast), color var(--transition-fast)',
@@ -90,7 +90,7 @@ export default function AptCategoryTabs({ current, region, sigungu, countByCateg
                   fontSize: 10, fontWeight: 700,
                   padding: '1px 6px', borderRadius: 999,
                   background: active ? 'rgba(255,255,255,0.22)' : 'var(--bg-base)',
-                  color: active ? 'var(--text-inverse, #fff)' : 'var(--text-tertiary)',
+                  color: active ? 'var(--text-inverse)' : 'var(--text-tertiary)',
                 }}>
                   {count.toLocaleString()}
                 </span>

@@ -47,7 +47,7 @@ export default function AptHeroSearch({ region, sigungu }: Props) {
           style={{
             padding: '12px 18px', borderRadius: 12,
             fontSize: 13, fontWeight: 800,
-            background: 'var(--brand)', color: 'var(--text-inverse, #fff)',
+            background: 'var(--brand)', color: 'var(--text-inverse)',
             border: 'none', cursor: 'pointer', whiteSpace: 'nowrap',
           }}
         >🔍 검색</button>

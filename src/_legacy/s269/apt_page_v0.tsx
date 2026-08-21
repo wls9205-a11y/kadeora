@@ -228,7 +228,7 @@ export default async function AptPage({ searchParams }: { searchParams?: Promise
                   href={item.href}
                   style={{
                     flex: '0 0 144px',
-                    background: 'var(--bg-surface, #fff)',
+                    background: 'var(--bg-surface)',
                     borderRadius: 8,
                     border: '1px solid var(--border, #e5e7eb)',
                     overflow: 'hidden',

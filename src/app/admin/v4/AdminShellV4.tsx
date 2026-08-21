@@ -64,7 +64,7 @@ export default function AdminShellV4() {
     <div style={{
       maxWidth: 1400, margin: '0 auto', padding: 'clamp(12px, 3vw, 24px)',
       display: 'flex', flexDirection: 'column', gap: 14,
-      color: 'var(--text-primary, #fff)',
+      color: 'var(--text-primary)',
       background: 'var(--bg-base)',
       minHeight: '100vh',
     }}>
@@ -90,7 +90,7 @@ export default function AdminShellV4() {
           style={{
             marginLeft: 'auto', fontSize: 11, fontWeight: 700,
             padding: '6px 12px', borderRadius: 6,
-            background: 'transparent', color: 'var(--text-secondary, #ccc)',
+            background: 'transparent', color: 'var(--text-secondary)',
             border: '1px solid var(--border)', textDecoration: 'none',
           }}
         >📊 가입 플로우 진단</a>
@@ -99,7 +99,7 @@ export default function AdminShellV4() {
           style={{
             fontSize: 11, fontWeight: 700,
             padding: '6px 12px', borderRadius: 6,
-            background: 'transparent', color: 'var(--text-secondary, #ccc)',
+            background: 'transparent', color: 'var(--text-secondary)',
             border: '1px solid var(--border)', textDecoration: 'none',
           }}
         >📨 카카오 마케팅</a>
@@ -114,14 +114,14 @@ export default function AdminShellV4() {
           <a key={m.href} href={m.href} style={{
             fontSize: 11, fontWeight: 700,
             padding: '6px 12px', borderRadius: 6,
-            background: 'transparent', color: 'var(--text-secondary, #ccc)',
+            background: 'transparent', color: 'var(--text-secondary)',
             border: '1px solid var(--border)', textDecoration: 'none',
           }}>{m.label}</a>
         ))}
         <button onClick={fetchData} style={{
           fontSize: 11, fontWeight: 700,
           padding: '6px 12px', borderRadius: 6, cursor: 'pointer',
-          background: 'transparent', color: 'var(--text-secondary, #ccc)',
+          background: 'transparent', color: 'var(--text-secondary)',
           border: '1px solid var(--border)',
         }}>↻ 새로고침</button>
       </header>
@@ -131,7 +131,7 @@ export default function AdminShellV4() {
       <WatchlistWidget />
 
       {loading && !data && (
-        <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-tertiary, #888)' }}>
+        <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-tertiary)' }}>
           로드 중…
         </div>
       )}
@@ -160,7 +160,7 @@ export default function AdminShellV4() {
           <TrafficSection />
 
           <div style={{
-            padding: '6px 10px', fontSize: 10, color: 'var(--text-tertiary, #888)',
+            padding: '6px 10px', fontSize: 10, color: 'var(--text-tertiary)',
             textAlign: 'right',
           }}>
             생성 시각: {data.generated_at ?? '—'}

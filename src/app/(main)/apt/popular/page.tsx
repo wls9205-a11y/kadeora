@@ -51,13 +51,13 @@ export default async function AptPopularPage({ searchParams }: { searchParams?: 
     <>
       <header style={{ padding: '12px 4px 4px' }}>
         <h1 style={{ fontSize: 18, fontWeight: 800, margin: 0 }}>🔥 지금 인기 단지</h1>
-        <p style={{ fontSize: 12, color: 'var(--text-secondary, #888)', margin: '4px 0 0' }}>
+        <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '4px 0 0' }}>
           {region ? `${region} · ` : ''}{total.toLocaleString()}개 단지 · {page}/{totalPages} 페이지
         </p>
       </header>
 
       {rows.length === 0 ? (
-        <section style={{ marginTop: 16, padding: 24, textAlign: 'center', color: 'var(--text-secondary, #888)', fontSize: 12, background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border)', borderRadius: 12 }}>
+        <section style={{ marginTop: 16, padding: 24, textAlign: 'center', color: 'var(--text-secondary)', fontSize: 12, background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border)', borderRadius: 12 }}>
           표시할 단지가 없습니다.
         </section>
       ) : (

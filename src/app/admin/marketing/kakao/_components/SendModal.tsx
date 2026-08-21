@@ -112,7 +112,7 @@ export default function SendModal({
           borderRadius: 'var(--radius-md, 10px)',
           background: 'var(--bg-elevated, #1f2028)',
           border: '1px solid var(--border)',
-          color: 'var(--text-primary, #fff)',
+          color: 'var(--text-primary)',
           display: 'flex',
           flexDirection: 'column',
           gap: 12,
@@ -124,7 +124,7 @@ export default function SendModal({
             onClick={onClose}
             style={{
               background: 'transparent',
-              color: 'var(--text-tertiary, #888)',
+              color: 'var(--text-tertiary)',
               border: 'none',
               fontSize: 18,
               cursor: 'pointer',
@@ -151,7 +151,7 @@ export default function SendModal({
         )}
 
         <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <span style={{ fontSize: 11, color: 'var(--text-tertiary, #888)' }}>제목</span>
+          <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>제목</span>
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
@@ -160,14 +160,14 @@ export default function SendModal({
               padding: '8px 10px',
               borderRadius: 6,
               background: 'var(--bg-base)',
-              color: 'var(--text-primary, #fff)',
+              color: 'var(--text-primary)',
               border: '1px solid var(--border)',
             }}
           />
         </label>
 
         <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <span style={{ fontSize: 11, color: 'var(--text-tertiary, #888)' }}>본문</span>
+          <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>본문</span>
           <textarea
             value={body}
             onChange={(e) => setBody(e.target.value)}
@@ -177,7 +177,7 @@ export default function SendModal({
               padding: '8px 10px',
               borderRadius: 6,
               background: 'var(--bg-base)',
-              color: 'var(--text-primary, #fff)',
+              color: 'var(--text-primary)',
               border: '1px solid var(--border)',
               resize: 'vertical',
               fontFamily: 'inherit',
@@ -193,7 +193,7 @@ export default function SendModal({
             border: '1px solid var(--border)',
           }}
         >
-          <div style={{ fontSize: 11, color: 'var(--text-tertiary, #888)', marginBottom: 4 }}>미리보기</div>
+          <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 4 }}>미리보기</div>
           <pre
             style={{
               margin: 0,
@@ -201,7 +201,7 @@ export default function SendModal({
               whiteSpace: 'pre-wrap',
               wordBreak: 'break-word',
               fontFamily: 'inherit',
-              color: 'var(--text-primary, #fff)',
+              color: 'var(--text-primary)',
             }}
           >
             {preview}
@@ -249,7 +249,7 @@ export default function SendModal({
               borderRadius: 6,
               cursor: 'pointer',
               background: 'transparent',
-              color: 'var(--text-secondary, #ccc)',
+              color: 'var(--text-secondary)',
               border: '1px solid var(--border)',
             }}
           >
@@ -264,9 +264,9 @@ export default function SendModal({
               padding: '8px 14px',
               borderRadius: 6,
               cursor: busy ? 'wait' : 'pointer',
-              background: 'var(--accent, #3b82f6)',
+              background: 'var(--accent)',
               color: '#fff',
-              border: '1px solid var(--accent, #3b82f6)',
+              border: '1px solid var(--accent)',
               opacity: busy ? 0.6 : 1,
             }}
           >

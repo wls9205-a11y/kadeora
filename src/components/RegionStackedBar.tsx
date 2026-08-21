@@ -36,11 +36,11 @@ interface Props {
 }
 
 const KPI_CFG = [
-  { key: 'sub', label: '청약정보', c: 'var(--accent-blue, #3B82F6)' },
-  { key: 'ongoing', label: '분양중', c: 'var(--accent-green, #22C55E)' },
-  { key: 'unsold', label: '미분양', c: 'var(--accent-red, #EF4444)' },
+  { key: 'sub', label: '청약정보', c: 'var(--accent-blue)' },
+  { key: 'ongoing', label: '분양중', c: 'var(--accent-green)' },
+  { key: 'unsold', label: '미분양', c: 'var(--accent-red)' },
   { key: 'redev', label: '재건축', c: 'var(--accent-purple, #8B5CF6)' },
-  { key: 'trade', label: '실거래', c: 'var(--accent-yellow, #F59E0B)' },
+  { key: 'trade', label: '실거래', c: 'var(--accent-yellow)' },
   { key: 'complex', label: '단지백과', c: 'var(--brand, #3B7BF6)' },
 ] as const;
 
@@ -158,11 +158,11 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 4 }}>
             {([
-              { v: exp.sub, l: '청약', c: 'var(--accent-blue, #3B82F6)', tab: 'sub' },
-              { v: exp.ongoing, l: '분양', c: 'var(--accent-green, #22C55E)', tab: 'ongoing' },
-              { v: exp.unsold, l: '미분양', c: 'var(--accent-red, #EF4444)', tab: 'unsold' },
+              { v: exp.sub, l: '청약', c: 'var(--accent-blue)', tab: 'sub' },
+              { v: exp.ongoing, l: '분양', c: 'var(--accent-green)', tab: 'ongoing' },
+              { v: exp.unsold, l: '미분양', c: 'var(--accent-red)', tab: 'unsold' },
               { v: exp.redev, l: '재건축', c: 'var(--accent-purple, #8B5CF6)', tab: 'redev' },
-              { v: exp.trade, l: '실거래', c: 'var(--accent-yellow, #F59E0B)', tab: 'trade' },
+              { v: exp.trade, l: '실거래', c: 'var(--accent-yellow)', tab: 'trade' },
             ] as const).map((item, idx) => (
               <button key={idx} onClick={() => onTabChange?.(item.tab)} style={{
                 textAlign: 'center', padding: '3px 2px', borderRadius: 'var(--radius-sm)',

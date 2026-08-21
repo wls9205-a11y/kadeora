@@ -48,11 +48,11 @@ export default function IssuePipelineSection({ data }: Props) {
       background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border)',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10, flexWrap: 'wrap' }}>
-        <h2 style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary, #fff)', margin: 0 }}>
+        <h2 style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
           🔄 이슈 파이프라인
         </h2>
-        <span style={{ fontSize: 11, color: 'var(--text-tertiary, #888)' }}>
-          마지막 오케스트레이터: <strong style={{ color: 'var(--text-secondary, #ccc)' }}>{relTime(data.last_orchestrator_at)}</strong>
+        <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
+          마지막 오케스트레이터: <strong style={{ color: 'var(--text-secondary)' }}>{relTime(data.last_orchestrator_at)}</strong>
         </span>
         <button
           onClick={runOrchestrator}
@@ -60,7 +60,7 @@ export default function IssuePipelineSection({ data }: Props) {
           style={{
             marginLeft: 'auto', fontSize: 11, fontWeight: 700,
             padding: '6px 12px', borderRadius: 6, cursor: running ? 'wait' : 'pointer',
-            background: 'var(--accent, #3b82f6)', color: '#fff', border: 'none',
+            background: 'var(--accent)', color: '#fff', border: 'none',
             opacity: running ? 0.6 : 1,
           }}
         >
@@ -69,7 +69,7 @@ export default function IssuePipelineSection({ data }: Props) {
       </div>
 
       {result && (
-        <div style={{ fontSize: 11, color: 'var(--text-secondary, #ccc)', padding: '6px 10px', background: 'rgba(59,130,246,0.08)', borderRadius: 6, marginBottom: 10 }}>
+        <div style={{ fontSize: 11, color: 'var(--text-secondary)', padding: '6px 10px', background: 'rgba(59,130,246,0.08)', borderRadius: 6, marginBottom: 10 }}>
           {result}
         </div>
       )}

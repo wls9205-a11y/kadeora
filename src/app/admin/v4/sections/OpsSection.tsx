@@ -28,13 +28,13 @@ export default function OpsSection({ data }: Props) {
       background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border)',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-        <h2 style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary, #fff)', margin: 0 }}>⚙️ 운영</h2>
+        <h2 style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>⚙️ 운영</h2>
         <button
           onClick={() => setGodOpen(v => !v)}
           style={{
             marginLeft: 'auto', fontSize: 11, fontWeight: 700,
             padding: '6px 10px', borderRadius: 6, border: '1px solid var(--border)',
-            background: 'transparent', color: 'var(--text-secondary, #ccc)', cursor: 'pointer',
+            background: 'transparent', color: 'var(--text-secondary)', cursor: 'pointer',
           }}
         >
           🛠️ 일괄 최신화
@@ -53,9 +53,9 @@ export default function OpsSection({ data }: Props) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4, maxHeight: 220, overflowY: 'auto' }}>
             {failed.slice(0, 12).map(f => (
               <div key={f.name} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, padding: '5px 8px', borderRadius: 6, background: 'rgba(0,0,0,0.18)' }}>
-                <code style={{ fontSize: 11, color: 'var(--text-secondary, #ccc)' }}>{f.name}</code>
+                <code style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{f.name}</code>
                 <span style={{ fontSize: 11, color: 'var(--accent-orange, #fb923c)', fontWeight: 700 }}>×{f.fail_count}</span>
-                <span style={{ fontSize: 10, color: 'var(--text-tertiary, #888)', maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <span style={{ fontSize: 10, color: 'var(--text-tertiary)', maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {f.last_error?.trim() || '—'}
                 </span>
               </div>
@@ -75,13 +75,13 @@ export default function OpsSection({ data }: Props) {
             display: 'flex', flexDirection: 'column', gap: 12, overflowY: 'auto',
           }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <strong style={{ fontSize: 14, color: 'var(--text-primary, #fff)' }}>🛠️ 일괄 최신화</strong>
-              <button onClick={() => setGodOpen(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-tertiary, #888)', cursor: 'pointer', fontSize: 14 }}>✕</button>
+              <strong style={{ fontSize: 14, color: 'var(--text-primary)' }}>🛠️ 일괄 최신화</strong>
+              <button onClick={() => setGodOpen(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 14 }}>✕</button>
             </div>
-            <p style={{ fontSize: 12, color: 'var(--text-secondary, #ccc)', margin: 0 }}>
+            <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: 0 }}>
               긴급 운영 액션 — 다음 단계에서 채워질 예정. 현재는 파이프라인 즉시 실행만 노출.
             </p>
-            <a href="/api/admin/issues/run-pipeline" style={{ fontSize: 12, color: 'var(--accent, #3b82f6)', textDecoration: 'none' }}>
+            <a href="/api/admin/issues/run-pipeline" style={{ fontSize: 12, color: 'var(--accent)', textDecoration: 'none' }}>
               POST /api/admin/issues/run-pipeline →
             </a>
           </div>

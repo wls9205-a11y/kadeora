@@ -93,7 +93,7 @@ export default function HomeSiteCard({ row, variant = 'popular' }: Props) {
         <div style={{ fontSize: 12, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {row.name}
         </div>
-        <div style={{ fontSize: 10, color: 'var(--text-secondary, #888)', marginTop: 2 }}>
+        <div style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 2 }}>
           {[row.region, row.sigungu].filter(Boolean).join(' ')}
         </div>
         {variant === 'popular' && (

@@ -68,7 +68,7 @@ const cardStyle: React.CSSProperties = {
 };
 
 const subTitle: React.CSSProperties = {
-  fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary, #888)',
+  fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary)',
   textTransform: 'uppercase', marginTop: 14, marginBottom: 6, letterSpacing: 0.4,
 };
 
@@ -104,14 +104,14 @@ export default function UserDetailClient({ userId }: { userId: string }) {
     <div style={{
       maxWidth: 1200, margin: '0 auto', padding: 'clamp(12px, 3vw, 24px)',
       display: 'flex', flexDirection: 'column', gap: 14,
-      color: 'var(--text-primary, #fff)', background: 'var(--bg-base)',
+      color: 'var(--text-primary)', background: 'var(--bg-base)',
       minHeight: '100vh',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-        <Link href="/admin/users" style={{ fontSize: 12, color: 'var(--text-tertiary, #888)', textDecoration: 'none' }}>← 유저 목록</Link>
+        <Link href="/admin/users" style={{ fontSize: 12, color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 유저 목록</Link>
       </div>
 
-      {loading && !data && <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-tertiary, #888)' }}>로드 중…</div>}
+      {loading && !data && <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-tertiary)' }}>로드 중…</div>}
       {err && <div style={{ ...cardStyle, color: 'var(--accent-red)', borderColor: 'rgba(248,113,113,0.4)' }}>오류: {err}</div>}
 
       {data && (
@@ -123,14 +123,14 @@ export default function UserDetailClient({ userId }: { userId: string }) {
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={p.avatar_url} alt="" style={{ width: 56, height: 56, borderRadius: '50%', objectFit: 'cover' }} />
               ) : (
-                <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'var(--bg-surface, #1a1b22)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, color: 'var(--text-tertiary, #888)' }}>
+                <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'var(--bg-surface, #1a1b22)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, color: 'var(--text-tertiary)' }}>
                   {(p.nickname || p.full_name || '?').slice(0, 1)}
                 </div>
               )}
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 18, fontWeight: 800 }}>{p.nickname || '—'}</div>
                 {p.full_name && p.full_name !== p.nickname && (
-                  <div style={{ fontSize: 12, color: 'var(--text-tertiary, #888)' }}>{p.full_name}</div>
+                  <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>{p.full_name}</div>
                 )}
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 4 }}>
                   {p.provider && <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 999, background: p.provider === 'kakao' ? 'rgba(254,229,0,0.12)' : 'rgba(66,133,244,0.12)', color: p.provider === 'kakao' ? '#fde047' : 'var(--brand)', fontWeight: 700 }}>{p.provider}</span>}
@@ -138,13 +138,13 @@ export default function UserDetailClient({ userId }: { userId: string }) {
                   {p.is_admin && <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 999, background: 'rgba(139,92,246,0.12)', color: '#a78bfa', fontWeight: 700 }}>어드민</span>}
                   {p.kakao_channel_added && <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 999, background: 'rgba(254,229,0,0.12)', color: '#fde047', fontWeight: 700 }}>카카오 채널</span>}
                   {p.is_banned && <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 999, background: 'rgba(248,113,113,0.12)', color: 'var(--accent-red)', fontWeight: 700 }}>차단</span>}
-                  {p.is_deleted && <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 999, background: 'rgba(0,0,0,0.3)', color: 'var(--text-tertiary, #888)', fontWeight: 700 }}>삭제됨</span>}
+                  {p.is_deleted && <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 999, background: 'rgba(0,0,0,0.3)', color: 'var(--text-tertiary)', fontWeight: 700 }}>삭제됨</span>}
                 </div>
               </div>
               {isAdmin && (
                 <div style={{ display: 'flex', gap: 6 }}>
-                  <button disabled style={{ padding: '6px 12px', fontSize: 11, borderRadius: 6, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-tertiary, #888)', cursor: 'not-allowed', opacity: 0.6 }}>차단 (s208 예정)</button>
-                  <button disabled style={{ padding: '6px 12px', fontSize: 11, borderRadius: 6, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-tertiary, #888)', cursor: 'not-allowed', opacity: 0.6 }}>삭제 (s208 예정)</button>
+                  <button disabled style={{ padding: '6px 12px', fontSize: 11, borderRadius: 6, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-tertiary)', cursor: 'not-allowed', opacity: 0.6 }}>차단 (s208 예정)</button>
+                  <button disabled style={{ padding: '6px 12px', fontSize: 11, borderRadius: 6, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-tertiary)', cursor: 'not-allowed', opacity: 0.6 }}>삭제 (s208 예정)</button>
                 </div>
               )}
             </div>
@@ -163,8 +163,8 @@ export default function UserDetailClient({ userId }: { userId: string }) {
                 { k: 'followers',   label: '팔로워',   v: (p.followers_count ?? 0).toLocaleString() },
               ].map(r => (
                 <div key={r.k} style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
-                  <span style={{ fontSize: 10, color: 'var(--text-tertiary, #888)', textTransform: 'uppercase' }}>{r.label}</span>
-                  <span style={{ color: 'var(--text-secondary, #ccc)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{String(r.v)}</span>
+                  <span style={{ fontSize: 10, color: 'var(--text-tertiary)', textTransform: 'uppercase' }}>{r.label}</span>
+                  <span style={{ color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{String(r.v)}</span>
                 </div>
               ))}
             </div>
@@ -183,7 +183,7 @@ export default function UserDetailClient({ userId }: { userId: string }) {
                 padding: 12, borderRadius: 8,
                 background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border)',
               }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-tertiary, #888)', textTransform: 'uppercase' }}>{kp.label}</div>
+                <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase' }}>{kp.label}</div>
                 <div style={{ fontSize: kp.small ? 13 : 18, fontWeight: 800, marginTop: 4 }}>{kp.v}</div>
               </div>
             ))}
@@ -194,11 +194,11 @@ export default function UserDetailClient({ userId }: { userId: string }) {
             <div style={cardStyle}>
               <div style={subTitle}>최근 페이지뷰 (30개)</div>
               <div style={{ maxHeight: 360, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 4 }}>
-                {pvs.length === 0 && <div style={{ color: 'var(--text-tertiary, #888)', fontSize: 12 }}>없음</div>}
+                {pvs.length === 0 && <div style={{ color: 'var(--text-tertiary)', fontSize: 12 }}>없음</div>}
                 {pvs.map((v, i) => (
                   <div key={i} style={{ padding: '4px 8px', borderRadius: 4, background: 'rgba(0,0,0,0.18)', display: 'flex', justifyContent: 'space-between', gap: 8, fontSize: 11 }}>
-                    <code style={{ color: 'var(--text-secondary, #ccc)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 220 }}>{decodePath(v.path)}</code>
-                    <span style={{ color: 'var(--text-tertiary, #888)', flexShrink: 0 }}>
+                    <code style={{ color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 220 }}>{decodePath(v.path)}</code>
+                    <span style={{ color: 'var(--text-tertiary)', flexShrink: 0 }}>
                       {v.category && <span style={{ marginRight: 4, fontSize: 9, padding: '0 4px', borderRadius: 3, background: 'rgba(255,255,255,0.06)' }}>{v.category}</span>}
                       {fmtDate(v.at)}
                     </span>
@@ -210,14 +210,14 @@ export default function UserDetailClient({ userId }: { userId: string }) {
             <div style={cardStyle}>
               <div style={subTitle}>포인트 히스토리 (20개)</div>
               <div style={{ maxHeight: 360, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 4 }}>
-                {points.length === 0 && <div style={{ color: 'var(--text-tertiary, #888)', fontSize: 12 }}>없음</div>}
+                {points.length === 0 && <div style={{ color: 'var(--text-tertiary)', fontSize: 12 }}>없음</div>}
                 {points.map((pt, i) => (
                   <div key={i} style={{ padding: '4px 8px', borderRadius: 4, background: 'rgba(0,0,0,0.18)', display: 'flex', justifyContent: 'space-between', gap: 8, fontSize: 11 }}>
-                    <span style={{ color: 'var(--text-secondary, #ccc)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{pt.reason || '—'}</span>
-                    <span style={{ color: (pt.points ?? 0) >= 0 ? 'var(--accent-green, #34d399)' : 'var(--accent-red, #f87171)', fontWeight: 700 }}>
+                    <span style={{ color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{pt.reason || '—'}</span>
+                    <span style={{ color: (pt.points ?? 0) >= 0 ? 'var(--accent-green)' : 'var(--accent-red)', fontWeight: 700 }}>
                       {(pt.points ?? 0) >= 0 ? '+' : ''}{pt.points ?? 0}
                     </span>
-                    <span style={{ color: 'var(--text-tertiary, #888)' }}>{fmtDate(pt.at)}</span>
+                    <span style={{ color: 'var(--text-tertiary)' }}>{fmtDate(pt.at)}</span>
                   </div>
                 ))}
               </div>
@@ -229,14 +229,14 @@ export default function UserDetailClient({ userId }: { userId: string }) {
             <div style={cardStyle}>
               <div style={subTitle}>최근 게시물 (10개)</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                {posts.length === 0 && <div style={{ color: 'var(--text-tertiary, #888)', fontSize: 12 }}>없음</div>}
+                {posts.length === 0 && <div style={{ color: 'var(--text-tertiary)', fontSize: 12 }}>없음</div>}
                 {posts.map((po, i) => (
                   <div key={i} style={{ padding: '6px 8px', borderRadius: 4, background: 'rgba(0,0,0,0.18)', fontSize: 11 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
-                      <span style={{ color: 'var(--text-primary, #fff)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{po.title || '(제목 없음)'}</span>
-                      <span style={{ color: 'var(--text-tertiary, #888)', flexShrink: 0 }}>{fmtDate(po.created_at)}</span>
+                      <span style={{ color: 'var(--text-primary)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{po.title || '(제목 없음)'}</span>
+                      <span style={{ color: 'var(--text-tertiary)', flexShrink: 0 }}>{fmtDate(po.created_at)}</span>
                     </div>
-                    {po.category && <span style={{ fontSize: 9, padding: '1px 5px', borderRadius: 3, background: 'rgba(255,255,255,0.06)', color: 'var(--text-tertiary, #888)' }}>{po.category}</span>}
+                    {po.category && <span style={{ fontSize: 9, padding: '1px 5px', borderRadius: 3, background: 'rgba(255,255,255,0.06)', color: 'var(--text-tertiary)' }}>{po.category}</span>}
                   </div>
                 ))}
               </div>
@@ -245,12 +245,12 @@ export default function UserDetailClient({ userId }: { userId: string }) {
             <div style={cardStyle}>
               <div style={subTitle}>최근 댓글 (10개)</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                {comments.length === 0 && <div style={{ color: 'var(--text-tertiary, #888)', fontSize: 12 }}>없음</div>}
+                {comments.length === 0 && <div style={{ color: 'var(--text-tertiary)', fontSize: 12 }}>없음</div>}
                 {comments.map((c, i) => (
                   <div key={i} style={{ padding: '6px 8px', borderRadius: 4, background: 'rgba(0,0,0,0.18)', fontSize: 11 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
-                      <span style={{ color: 'var(--text-secondary, #ccc)' }}>{c.content || '(내용 없음)'}</span>
-                      <span style={{ color: 'var(--text-tertiary, #888)', flexShrink: 0 }}>{fmtDate(c.created_at)}</span>
+                      <span style={{ color: 'var(--text-secondary)' }}>{c.content || '(내용 없음)'}</span>
+                      <span style={{ color: 'var(--text-tertiary)', flexShrink: 0 }}>{fmtDate(c.created_at)}</span>
                     </div>
                   </div>
                 ))}

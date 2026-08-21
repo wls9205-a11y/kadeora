@@ -11,7 +11,7 @@ interface CtaRow {
 }
 
 function ctrTone(ctr: number | null): string {
-  if (ctr === null) return 'var(--text-tertiary, #888)';
+  if (ctr === null) return 'var(--text-tertiary)';
   if (ctr >= 5) return '#22c55e';   // 좋음
   if (ctr >= 1) return '#fbbf24';   // 평범
   return '#ef4444';                 // 의심
@@ -43,7 +43,7 @@ export default async function CtaPerformanceTable({ windowDays = 30 }: { windowD
 
   return (
     <section aria-label="CTA 성능 비교" style={{ marginBottom: 18 }}>
-      <h2 style={{ fontSize: 14, fontWeight: 700, marginBottom: 10, color: 'var(--text-primary, #fff)' }}>
+      <h2 style={{ fontSize: 14, fontWeight: 700, marginBottom: 10, color: 'var(--text-primary)' }}>
         📊 CTA 성능 ({windowDays}일, {rows.length}개)
       </h2>
       <div
@@ -70,7 +70,7 @@ export default async function CtaPerformanceTable({ windowDays = 30 }: { windowD
               const ctr = r.ctr_pct === null ? null : Number(r.ctr_pct);
               return (
                 <tr key={r.cta_name} style={{ borderTop: '1px solid var(--border)' }}>
-                  <td style={{ padding: '10px 12px', fontFamily: 'monospace', color: 'var(--text-primary, #fff)', wordBreak: 'break-all' }}>
+                  <td style={{ padding: '10px 12px', fontFamily: 'monospace', color: 'var(--text-primary)', wordBreak: 'break-all' }}>
                     {r.cta_name}
                   </td>
                   <td style={{ padding: '10px 12px', textAlign: 'right', color: 'var(--text-secondary)', fontVariantNumeric: 'tabular-nums' }}>

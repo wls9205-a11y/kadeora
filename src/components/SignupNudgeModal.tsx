@@ -167,7 +167,7 @@ export default function SignupNudgeModal() {
     >
       <div
         style={{
-          background: 'var(--bg-surface, #fff)', color: 'var(--text-primary, #111)',
+          background: 'var(--bg-surface)', color: 'var(--text-primary, #111)',
           borderRadius: 20, maxWidth: 420, width: '100%',
           padding: 'clamp(20px, 5vw, 28px)',
           boxShadow: '0 24px 64px rgba(0,0,0,0.4)',
@@ -198,7 +198,7 @@ export default function SignupNudgeModal() {
             3초 만에 가입하고 시작하세요
           </h2>
           <p style={{ margin: '8px 0 0', fontSize: 'var(--fs-sm, 13px)', color: 'var(--text-secondary, #666)' }}>
-            지금 <strong style={{ color: 'var(--brand, #ef4444)' }}>{activeUsers.toLocaleString('ko-KR')}명</strong>이 활동 중 · 커뮤니티 글 <strong>{communityPosts.toLocaleString('ko-KR')}+</strong>
+            지금 <strong style={{ color: 'var(--brand)' }}>{activeUsers.toLocaleString('ko-KR')}명</strong>이 활동 중 · 커뮤니티 글 <strong>{communityPosts.toLocaleString('ko-KR')}+</strong>
           </p>
         </div>
 

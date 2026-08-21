@@ -93,7 +93,7 @@ export default function AptHeroLarge({ site, region, sigungu }: Props) {
               position: 'absolute', top: 10, right: 10,
               padding: '4px 10px', borderRadius: 999,
               fontSize: 10, fontWeight: 700,
-              background: 'var(--brand)', color: 'var(--text-inverse, #fff)',
+              background: 'var(--brand)', color: 'var(--text-inverse)',
             }}>
               {caption}
             </span>

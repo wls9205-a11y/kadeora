@@ -128,7 +128,7 @@ export default function AnonymousFeedHero({ data }: { data: HomepageData | null 
                   background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10,
                 }}
               >
-                <div style={{ fontSize: 11, color: 'var(--accent-red, #ef4444)', fontWeight: 700, marginBottom: 4 }}>
+                <div style={{ fontSize: 11, color: 'var(--accent-red)', fontWeight: 700, marginBottom: 4 }}>
                   D-{apt.days_left} · {apt.region_nm}
                 </div>
                 <div style={{ fontSize: 'var(--fs-sm, 13px)', fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>

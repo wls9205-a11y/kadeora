@@ -44,10 +44,10 @@ export default function SegmentSavedList({
       }}
     >
       <h2 style={{ fontSize: 13, fontWeight: 800, margin: 0 }}>저장된 세그먼트</h2>
-      {loading && <div style={{ fontSize: 12, color: 'var(--text-tertiary, #888)' }}>로드 중…</div>}
+      {loading && <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>로드 중…</div>}
       {err && <div style={{ fontSize: 12, color: 'var(--accent-red)' }}>실패: {err}</div>}
       {!loading && items.length === 0 && !err && (
-        <div style={{ fontSize: 12, color: 'var(--text-tertiary, #888)' }}>저장된 세그먼트가 없습니다.</div>
+        <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>저장된 세그먼트가 없습니다.</div>
       )}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         {items.map((it) => (
@@ -61,7 +61,7 @@ export default function SegmentSavedList({
               cursor: 'pointer',
               background: 'var(--bg-base)',
               border: '1px solid var(--border)',
-              color: 'var(--text-primary, #fff)',
+              color: 'var(--text-primary)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
@@ -71,13 +71,13 @@ export default function SegmentSavedList({
             <div style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
               <span style={{ fontSize: 12, fontWeight: 700 }}>{it.name}</span>
               {it.updated_at && (
-                <span style={{ fontSize: 10, color: 'var(--text-tertiary, #888)' }}>
+                <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>
                   {new Date(it.updated_at).toLocaleString()}
                 </span>
               )}
             </div>
             {it.count != null && (
-              <span style={{ fontSize: 11, color: 'var(--text-tertiary, #888)' }}>
+              <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
                 {it.count.toLocaleString()}명
               </span>
             )}

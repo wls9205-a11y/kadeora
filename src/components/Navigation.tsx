@@ -450,7 +450,7 @@ export function Navigation() {
                   className="touch-target"
                   style={{
                     height:34, padding:'0 16px', borderRadius: 'var(--radius-pill)',
-                    background:'var(--brand)', color:'var(--text-inverse, #fff)',
+                    background:'var(--brand)', color:'var(--text-inverse)',
                     display:'flex', alignItems:'center',
                     textDecoration:'none', fontSize:'var(--fs-sm)', fontWeight:700,
                     letterSpacing:'-0.2px',

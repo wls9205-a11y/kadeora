@@ -151,7 +151,7 @@ export default function AptMainGrid(props: Props) {
                     position: 'absolute', top: 8, right: 8,
                     padding: '3px 8px', borderRadius: 999,
                     fontSize: 9, fontWeight: 800,
-                    background: 'var(--brand)', color: 'var(--text-inverse, #fff)',
+                    background: 'var(--brand)', color: 'var(--text-inverse)',
                   }}>
                     {caption}
                   </span>

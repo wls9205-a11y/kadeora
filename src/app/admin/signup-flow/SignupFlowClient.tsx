@@ -233,7 +233,7 @@ export default function SignupFlowClient() {
         background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border)',
       }}>
         <h1 style={{ margin: 0, fontSize: 16, fontWeight: 800 }}>📊 가입 플로우 진단</h1>
-        <span style={{ fontSize: 11, color: 'var(--text-tertiary, #888)' }}>
+        <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
           dropped_step / OAuth / source 별 funnel 회귀 모니터링
         </span>
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -242,7 +242,7 @@ export default function SignupFlowClient() {
               ⚠ rpc 부분 실패 {data.errors.length}건
             </span>
           )}
-          <span style={{ fontSize: 10, color: 'var(--text-tertiary, #888)' }}>
+          <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>
             {lastFetch ? `${fmtTime(new Date(lastFetch).toISOString())} · 30s 자동` : '로드 중'}
           </span>
           <button onClick={fetchData} style={btnGhost()}>↻ 새로고침</button>
@@ -368,7 +368,7 @@ export default function SignupFlowClient() {
             <UserTable rows={userRows} />
           </Section>
 
-          <div style={{ padding: '6px 10px', fontSize: 10, color: 'var(--text-tertiary, #888)', textAlign: 'right' }}>
+          <div style={{ padding: '6px 10px', fontSize: 10, color: 'var(--text-tertiary)', textAlign: 'right' }}>
             생성 시각: {data.generated_at ?? '—'}
           </div>
         </>
@@ -389,7 +389,7 @@ function Section({ title, subtitle, children }: { title: string; subtitle?: stri
     }}>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 12 }}>
         <h2 style={{ margin: 0, fontSize: 13, fontWeight: 800 }}>{title}</h2>
-        {subtitle && <span style={{ fontSize: 11, color: 'var(--text-tertiary, #888)' }}>{subtitle}</span>}
+        {subtitle && <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{subtitle}</span>}
       </div>
       {children}
     </section>
@@ -548,7 +548,7 @@ function HourlyChart({ rows }: { rows: any[] }) {
         {sorted.map((r, i) => {
           const hh = n(r?.hour ?? r?.hh);
           if (hh % 4 !== 0) return null;
-          return <text key={i} x={xAt(i)} y={H - 2} fontSize={9} textAnchor="middle" fill="var(--text-tertiary, #888)">{hh}h</text>;
+          return <text key={i} x={xAt(i)} y={H - 2} fontSize={9} textAnchor="middle" fill="var(--text-tertiary)">{hh}h</text>;
         })}
         {/* lines */}
         {series.map((s) => {
@@ -600,7 +600,7 @@ function btnGhost(disabled: boolean = false): React.CSSProperties {
     fontSize: 11, fontWeight: 700,
     padding: '6px 12px', borderRadius: 6,
     background: 'transparent',
-    color: disabled ? 'var(--text-tertiary, #555)' : 'var(--text-secondary, #ccc)',
+    color: disabled ? 'var(--text-tertiary, #555)' : 'var(--text-secondary)',
     border: '1px solid var(--border)',
     cursor: disabled ? 'not-allowed' : 'pointer',
     opacity: disabled ? 0.5 : 1,

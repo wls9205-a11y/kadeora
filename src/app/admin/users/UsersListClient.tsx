@@ -119,7 +119,7 @@ export default function UsersListClient() {
     padding: '6px 10px', borderRadius: 6,
     border: '1px solid var(--border)',
     background: 'var(--bg-surface, #1a1b22)',
-    color: 'var(--text-primary, #fff)', fontSize: 12,
+    color: 'var(--text-primary)', fontSize: 12,
     outline: 'none',
   };
 
@@ -127,11 +127,11 @@ export default function UsersListClient() {
     <div style={{
       maxWidth: 1400, margin: '0 auto', padding: 'clamp(12px, 3vw, 24px)',
       display: 'flex', flexDirection: 'column', gap: 12,
-      color: 'var(--text-primary, #fff)', background: 'var(--bg-base)',
+      color: 'var(--text-primary)', background: 'var(--bg-base)',
       minHeight: '100vh',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-        <Link href="/admin" style={{ fontSize: 12, color: 'var(--text-tertiary, #888)', textDecoration: 'none' }}>← 어드민</Link>
+        <Link href="/admin" style={{ fontSize: 12, color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 어드민</Link>
         <h1 style={{ margin: 0, fontSize: 18, fontWeight: 800 }}>유저 ({total.toLocaleString()})</h1>
       </div>
 
@@ -146,7 +146,7 @@ export default function UsersListClient() {
         />
         <button type="submit" style={{
           ...inputStyle, cursor: 'pointer',
-          background: 'var(--accent, #3b82f6)', color: '#fff', border: 'none', fontWeight: 700,
+          background: 'var(--accent)', color: '#fff', border: 'none', fontWeight: 700,
         }}>검색</button>
         {search && (
           <button type="button" onClick={() => { setSearchInput(''); updateParams({ search: null, page: '1' }); }}
@@ -163,9 +163,9 @@ export default function UsersListClient() {
             style={{
               padding: '5px 12px', borderRadius: 999, fontSize: 12, fontWeight: 700,
               cursor: 'pointer',
-              background: filter === f.key ? 'var(--accent, #3b82f6)' : 'transparent',
-              color: filter === f.key ? '#fff' : 'var(--text-secondary, #ccc)',
-              border: `1px solid ${filter === f.key ? 'var(--accent, #3b82f6)' : 'var(--border)'}`,
+              background: filter === f.key ? 'var(--accent)' : 'transparent',
+              color: filter === f.key ? '#fff' : 'var(--text-secondary)',
+              border: `1px solid ${filter === f.key ? 'var(--accent)' : 'var(--border)'}`,
             }}
           >{f.label}</button>
         ))}
@@ -173,7 +173,7 @@ export default function UsersListClient() {
 
       {/* 정렬 */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}>
-        <span style={{ color: 'var(--text-tertiary, #888)' }}>정렬</span>
+        <span style={{ color: 'var(--text-tertiary)' }}>정렬</span>
         <select
           value={sort}
           onChange={(e) => updateParams({ sort: e.target.value, page: '1' })}
@@ -193,7 +193,7 @@ export default function UsersListClient() {
       }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12, minWidth: 900 }}>
           <thead>
-            <tr style={{ color: 'var(--text-tertiary, #888)', textAlign: 'left', borderBottom: '1px solid var(--border)' }}>
+            <tr style={{ color: 'var(--text-tertiary)', textAlign: 'left', borderBottom: '1px solid var(--border)' }}>
               <th style={{ padding: 8, textAlign: 'left' }}>유저</th>
               <th style={{ padding: 8 }}>제공사</th>
               <th style={{ padding: 8 }}>가입</th>
@@ -216,14 +216,14 @@ export default function UsersListClient() {
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={u.avatar_url} alt="" style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover' }} />
                     ) : (
-                      <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--bg-surface, #1a1b22)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, color: 'var(--text-tertiary, #888)' }}>
+                      <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--bg-surface, #1a1b22)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, color: 'var(--text-tertiary)' }}>
                         {(u.nickname || u.full_name || '?').slice(0, 1)}
                       </div>
                     )}
                     <div style={{ minWidth: 0 }}>
-                      <div style={{ fontWeight: 700, color: 'var(--text-primary, #fff)' }}>{u.nickname || '—'}</div>
+                      <div style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{u.nickname || '—'}</div>
                       {u.full_name && u.full_name !== u.nickname && (
-                        <div style={{ fontSize: 10, color: 'var(--text-tertiary, #888)' }}>{u.full_name}</div>
+                        <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{u.full_name}</div>
                       )}
                     </div>
                   </div>
@@ -232,27 +232,27 @@ export default function UsersListClient() {
                   <span style={{
                     padding: '2px 8px', borderRadius: 999, fontSize: 10, fontWeight: 700,
                     background: u.provider === 'kakao' ? 'rgba(254,229,0,0.12)' : u.provider === 'google' ? 'rgba(66,133,244,0.12)' : 'rgba(255,255,255,0.06)',
-                    color: u.provider === 'kakao' ? '#fde047' : u.provider === 'google' ? 'var(--brand)' : 'var(--text-tertiary, #888)',
+                    color: u.provider === 'kakao' ? '#fde047' : u.provider === 'google' ? 'var(--brand)' : 'var(--text-tertiary)',
                   }}>{u.provider || '—'}</span>
                 </td>
-                <td style={{ padding: 8, color: 'var(--text-secondary, #ccc)' }}>{fmtDate(u.created_at)}</td>
-                <td style={{ padding: 8, color: 'var(--text-secondary, #ccc)' }}>{relTime(u.last_active_at)}</td>
+                <td style={{ padding: 8, color: 'var(--text-secondary)' }}>{fmtDate(u.created_at)}</td>
+                <td style={{ padding: 8, color: 'var(--text-secondary)' }}>{relTime(u.last_active_at)}</td>
                 <td style={{ padding: 8, textAlign: 'right', fontWeight: 700 }}>{(u.points ?? 0).toLocaleString()}</td>
-                <td style={{ padding: 8, textAlign: 'right', color: 'var(--text-secondary, #ccc)' }}>{u.grade_title || u.grade || '—'}</td>
+                <td style={{ padding: 8, textAlign: 'right', color: 'var(--text-secondary)' }}>{u.grade_title || u.grade || '—'}</td>
                 <td style={{ padding: 8 }}>
                   <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
                     {u.is_seed && <span style={{ fontSize: 9, padding: '1px 6px', borderRadius: 4, background: 'rgba(251,146,60,0.12)', color: '#fb923c', fontWeight: 700 }}>시드</span>}
                     {u.is_admin && <span style={{ fontSize: 9, padding: '1px 6px', borderRadius: 4, background: 'rgba(139,92,246,0.12)', color: '#a78bfa', fontWeight: 700 }}>어드민</span>}
                     {u.kakao_channel_added && <span style={{ fontSize: 9, padding: '1px 6px', borderRadius: 4, background: 'rgba(254,229,0,0.12)', color: '#fde047', fontWeight: 700 }}>채널</span>}
                     {u.is_banned && <span style={{ fontSize: 9, padding: '1px 6px', borderRadius: 4, background: 'rgba(248,113,113,0.12)', color: 'var(--accent-red)', fontWeight: 700 }}>차단</span>}
-                    {u.is_deleted && <span style={{ fontSize: 9, padding: '1px 6px', borderRadius: 4, background: 'rgba(0,0,0,0.3)', color: 'var(--text-tertiary, #888)', fontWeight: 700 }}>삭제</span>}
+                    {u.is_deleted && <span style={{ fontSize: 9, padding: '1px 6px', borderRadius: 4, background: 'rgba(0,0,0,0.3)', color: 'var(--text-tertiary)', fontWeight: 700 }}>삭제</span>}
                   </div>
                 </td>
               </tr>
             ))}
             {users.length === 0 && !loading && (
               <tr>
-                <td colSpan={7} style={{ padding: 30, textAlign: 'center', color: 'var(--text-tertiary, #888)' }}>해당 조건의 유저가 없습니다.</td>
+                <td colSpan={7} style={{ padding: 30, textAlign: 'center', color: 'var(--text-tertiary)' }}>해당 조건의 유저가 없습니다.</td>
               </tr>
             )}
           </tbody>
@@ -266,7 +266,7 @@ export default function UsersListClient() {
           onClick={() => updateParams({ page: String(Math.max(1, page - 1)) })}
           style={{ ...inputStyle, cursor: page <= 1 ? 'not-allowed' : 'pointer', opacity: page <= 1 ? 0.4 : 1 }}
         >← 이전</button>
-        <span style={{ padding: '6px 12px', color: 'var(--text-secondary, #ccc)', fontWeight: 700 }}>
+        <span style={{ padding: '6px 12px', color: 'var(--text-secondary)', fontWeight: 700 }}>
           {page} / {lastPage}
         </span>
         <button

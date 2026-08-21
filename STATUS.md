@@ -1,3 +1,50 @@
+## S6 (2026-08-21) — 가독성 · 대비 · 폰트
+
+- (A) 색 토큰 대비 교정 7종 + 추가 3건. WCAG 2.1 상대휘도 공식으로 재계산해
+  --bg-base #F5F7FA / --bg-surface #FFFFFF / --bg-elevated #F0F2F5 셋 모두에서
+  교체 후 최저 대비가 4.5:1 을 넘는 것을 확인했다
+    --warning #D97706→#92400E(2.84→6.32) · --accent-yellow #CA8A04→#854D0E(2.62→6.11)
+    --accent-orange #EA580C→#9A3412(3.17→6.52) · --accent-green #059669→#065F46(3.36→6.85)
+    --accent-cyan #0891B2→#155E75(3.28→6.48) · --accent-red/--error #DC2626→#991B1B(4.31→7.41)
+    --text-tertiary #6B7280→#556070(4.31→5.69)
+- (B) 다크 전제 하드코딩 전경색 133건을 토큰으로. background/border 로 쓰인 같은 hex 는 미변경
+- (C) globals.css 의 local() 전용 @font-face 삭제 (CDN 정의만 남김),
+  --font-sans / --font-serif 정의 추가. 서체는 Pretendard 유지
+- 죽은 다크 폴백 var(--token, #hex) 337건 66파일 제거 (S5-2 잔여분)
+
+### 지시서 목록 밖이지만 함께 처리
+- --success 도 #059669 였다. --accent-green 과 같은 값인데 텍스트로 5곳 쓰여서 같이 교정.
+  안 고치면 같은 색이 곳에 따라 읽히고 안 읽히게 된다
+- --blog-disclaimer-border 하드코딩 #D97706 → var(--warning) 참조.
+  보더라 대비 대상은 아니지만 --warning 과 짝이라 값을 따라가게 뒀다
+- (main)/page.tsx '오늘의 이슈' 라벨이 --accent-orange-light(2.50)를 텍스트로 쓰고 있어
+  --accent-orange 로 교체 (지시서의 light 계열 조항)
+
+### 제외 판정 (파일을 열어 배경을 확인)
+- KakaoHeroCTA #34D399 — var(--ink-bg-deep) 잉크 블록 위 텍스트라 민트가 맞다
+- SignupPopupModal #60A5FA — #1a1030→#0F1729 다크 모달 위 텍스트
+- src/app/api/** · og-* · opengraph-image — ImageResponse 생성물
+- --stock-up/--stock-down #DC2626/#2563EB — 국내 증시 색 관례라 별도 판단이 필요하다
+- #fff·#FFFFFF·#FEE500 — 지시서 경고대로 대상 아님
+
+### 남은 것
+- 인라인 fontSize 3,064건 (14px 미만 2,093, 10~11px 1,158). 별도 과제
+- #fbbf24·#fde047·#4ade80·#86EFAC·#FCA5A5·#FB923C 등 지시서 목록 밖 밝은 계열이
+  텍스트로 남아 있다. 같은 검사를 다시 돌릴 필요가 있다
+
+### Architecture Rule 추가
+- #79 텍스트 색은 WCAG 4.5:1 을 --bg-base·--bg-surface·--bg-elevated 셋 모두에서
+  충족해야 한다. Tailwind 400~500 계열은 밝은 배경에서 미달하므로 텍스트로 쓰지 않는다
+- #80 웹폰트 @font-face 는 한 곳에서만 선언한다. 같은 family 를 중복 선언하면
+  캐스케이드에 따라 로컬 전용 선언이 CDN 정의를 덮을 수 있다
+
+### 다음 — 실기기 확인 필요
+- 개발자도구 Network 에 pretendard woff2 가 받아지는지
+- 상태 pill(접수중·임박)과 경고 문구가 이전보다 또렷한지
+- 어두웠던 민트·연빨강 글자가 사라졌는지
+
+---
+
 ## S5-2 (2026-08-21) — 터치 타깃 · 컨테이너 폭 · 부수 정리
 
 - (E) globals.css 에 .touch-target 유틸 신설 — 투명 ::after 로 히트 영역만 44px 확보.

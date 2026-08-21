@@ -74,7 +74,7 @@ export default function LandmarkCard({ row }: { row: LandmarkRow }) {
         <div style={{ fontSize: 12, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {row.name}
         </div>
-        <div style={{ fontSize: 10, color: 'var(--text-secondary, #888)', marginTop: 2 }}>
+        <div style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 2 }}>
           {subtitle}{row.built_year ? ` · ${row.built_year}년` : ''}
           {row.total_units ? ` · ${row.total_units.toLocaleString()}세대` : ''}
         </div>

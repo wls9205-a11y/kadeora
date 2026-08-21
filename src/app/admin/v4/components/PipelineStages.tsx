@@ -29,9 +29,9 @@ const SHORT: Record<string, string> = {
 function statusColor(stat: StageStat): string {
   const fail = stat?.fail ?? 0;
   const ok = stat?.ok ?? 0;
-  if (ok === 0 && fail === 0) return 'var(--text-tertiary, #888)';
+  if (ok === 0 && fail === 0) return 'var(--text-tertiary)';
   if (fail > 0)               return 'var(--accent-orange, #fb923c)';
-  return 'var(--accent-green, #34d399)';
+  return 'var(--accent-green)';
 }
 
 export default function PipelineStages({ stages, order = DEFAULT_ORDER }: Props) {
@@ -53,11 +53,11 @@ export default function PipelineStages({ stages, order = DEFAULT_ORDER }: Props)
             border: `1px solid ${color}33`, borderLeft: `3px solid ${color}`,
             display: 'flex', flexDirection: 'column', gap: 3,
           }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-tertiary, #888)', textTransform: 'uppercase' }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase' }}>
               {SHORT[k] ?? k}
             </div>
             <div style={{ fontSize: 12, fontWeight: 700, color }}>
-              성공 {st?.ok ?? 0} <span style={{ color: 'var(--text-tertiary, #888)', fontWeight: 500 }}>·</span> 실패 {st?.fail ?? 0}
+              성공 {st?.ok ?? 0} <span style={{ color: 'var(--text-tertiary)', fontWeight: 500 }}>·</span> 실패 {st?.fail ?? 0}
             </div>
           </div>
         );

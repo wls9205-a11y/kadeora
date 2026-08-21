@@ -116,7 +116,7 @@ export default function SegmentBuilder({
             padding: '6px 10px',
             borderRadius: 6,
             background: 'var(--bg-base)',
-            color: 'var(--text-primary, #fff)',
+            color: 'var(--text-primary)',
             border: '1px solid var(--border)',
             width: 180,
           }}
@@ -193,7 +193,7 @@ export default function SegmentBuilder({
           border: '1px solid var(--border)',
         }}
       >
-        <div style={{ fontSize: 11, color: 'var(--text-tertiary, #888)', marginBottom: 6 }}>
+        <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 6 }}>
           매칭 결과
           {loading && <span style={{ marginLeft: 8 }}>로드 중…</span>}
           {err && <span style={{ marginLeft: 8, color: 'var(--accent-red)' }}>실패: {err}</span>}
@@ -213,7 +213,7 @@ export default function SegmentBuilder({
                         textAlign: 'left',
                         padding: '4px 6px',
                         borderBottom: '1px solid var(--border)',
-                        color: 'var(--text-tertiary, #888)',
+                        color: 'var(--text-tertiary)',
                       }}
                     >
                       {c}
@@ -258,7 +258,7 @@ export default function SegmentBuilder({
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-      <span style={{ fontSize: 11, color: 'var(--text-tertiary, #888)' }}>{label}</span>
+      <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{label}</span>
       {children}
     </div>
   );
@@ -289,9 +289,9 @@ function ChipGroup({
               padding: '5px 10px',
               borderRadius: 999,
               cursor: 'pointer',
-              background: on ? 'var(--accent, #3b82f6)' : 'transparent',
-              color: on ? '#fff' : 'var(--text-secondary, #ccc)',
-              border: `1px solid ${on ? 'var(--accent, #3b82f6)' : 'var(--border)'}`,
+              background: on ? 'var(--accent)' : 'transparent',
+              color: on ? '#fff' : 'var(--text-secondary)',
+              border: `1px solid ${on ? 'var(--accent)' : 'var(--border)'}`,
             }}
           >
             {single && on ? '● ' : ''}
@@ -324,9 +324,9 @@ function Toggle({
           padding: '5px 10px',
           borderRadius: 999,
           cursor: 'pointer',
-          background: value ? 'var(--accent, #3b82f6)' : 'transparent',
-          color: value ? '#fff' : 'var(--text-secondary, #ccc)',
-          border: `1px solid ${value ? 'var(--accent, #3b82f6)' : 'var(--border)'}`,
+          background: value ? 'var(--accent)' : 'transparent',
+          color: value ? '#fff' : 'var(--text-secondary)',
+          border: `1px solid ${value ? 'var(--accent)' : 'var(--border)'}`,
         }}
       >
         {onLabel}
@@ -339,9 +339,9 @@ function Toggle({
           padding: '5px 10px',
           borderRadius: 999,
           cursor: 'pointer',
-          background: !value ? 'var(--accent, #3b82f6)' : 'transparent',
-          color: !value ? '#fff' : 'var(--text-secondary, #ccc)',
-          border: `1px solid ${!value ? 'var(--accent, #3b82f6)' : 'var(--border)'}`,
+          background: !value ? 'var(--accent)' : 'transparent',
+          color: !value ? '#fff' : 'var(--text-secondary)',
+          border: `1px solid ${!value ? 'var(--accent)' : 'var(--border)'}`,
         }}
       >
         {offLabel}
@@ -357,8 +357,8 @@ function btnStyle(variant: 'primary' | 'default'): React.CSSProperties {
     padding: '8px 14px',
     borderRadius: 6,
     cursor: 'pointer',
-    background: variant === 'primary' ? 'var(--accent, #3b82f6)' : 'transparent',
-    color: variant === 'primary' ? '#fff' : 'var(--text-secondary, #ccc)',
-    border: `1px solid ${variant === 'primary' ? 'var(--accent, #3b82f6)' : 'var(--border)'}`,
+    background: variant === 'primary' ? 'var(--accent)' : 'transparent',
+    color: variant === 'primary' ? '#fff' : 'var(--text-secondary)',
+    border: `1px solid ${variant === 'primary' ? 'var(--accent)' : 'var(--border)'}`,
   };
 }

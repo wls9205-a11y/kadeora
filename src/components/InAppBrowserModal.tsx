@@ -133,14 +133,14 @@ export default function InAppBrowserModal({ type, onClose, href }: Props) {
           background: 'var(--bg-elevated, #1f2028)', borderRadius: 18,
           border: '1px solid rgba(254,229,0,0.25)',
           boxShadow: '0 24px 64px rgba(0,0,0,0.5)',
-          color: 'var(--text-primary, #fff)',
+          color: 'var(--text-primary)',
         }}
       >
         <div style={{ fontSize: 36, textAlign: 'center', marginBottom: 6 }}>⚠️</div>
         <div style={{ fontSize: 16, fontWeight: 800, textAlign: 'center', marginBottom: 8, lineHeight: 1.45 }}>
           {label} 에서는 카카오·구글 로그인이<br />차단되어 있어요
         </div>
-        <p style={{ fontSize: 12, color: 'var(--text-secondary, #888)', textAlign: 'center', lineHeight: 1.6, margin: '0 0 18px' }}>
+        <p style={{ fontSize: 12, color: 'var(--text-secondary)', textAlign: 'center', lineHeight: 1.6, margin: '0 0 18px' }}>
           외부 브라우저(크롬/사파리)에서 열어주시면<br />3초 안에 가입을 완료할 수 있어요.
         </p>
 
@@ -162,7 +162,7 @@ export default function InAppBrowserModal({ type, onClose, href }: Props) {
           style={{
             width: '100%', padding: '11px 18px', borderRadius: 10,
             border: '1px solid var(--border, #D4DAE3)',
-            background: 'transparent', color: 'var(--text-primary, #fff)',
+            background: 'transparent', color: 'var(--text-primary)',
             fontWeight: 700, fontSize: 13, cursor: 'pointer',
           }}
         >
@@ -171,7 +171,7 @@ export default function InAppBrowserModal({ type, onClose, href }: Props) {
 
         <div style={{ marginTop: 14, padding: '10px 12px', borderRadius: 8, background: 'var(--bg-base, #F5F7FA)', border: '1px solid var(--border, #D4DAE3)' }}>
           <div style={{ fontSize: 11, color: 'var(--text-tertiary, #666)', marginBottom: 4, fontWeight: 600 }}>대안</div>
-          <div style={{ fontSize: 11, color: 'var(--text-secondary, #888)', lineHeight: 1.6 }}>
+          <div style={{ fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
             우상단 "…" 메뉴 → "외부 브라우저로 열기" 또는 "Chrome/Safari 에서 열기" 선택
           </div>
         </div>

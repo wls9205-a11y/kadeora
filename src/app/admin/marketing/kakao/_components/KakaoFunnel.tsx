@@ -92,14 +92,14 @@ export default function KakaoFunnel({
                 borderRadius: 8,
                 background: 'var(--bg-base)',
                 border: '1px solid var(--border)',
-                color: 'var(--text-primary, #fff)',
+                color: 'var(--text-primary)',
                 cursor: 'pointer',
                 display: 'flex',
                 flexDirection: 'column',
                 gap: 4,
               }}
             >
-              <span style={{ fontSize: 11, color: 'var(--text-tertiary, #888)' }}>{c.label}</span>
+              <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{c.label}</span>
               <span style={{ fontSize: 22, fontWeight: 800 }}>
                 {v == null ? '—' : v.toLocaleString()}
               </span>
