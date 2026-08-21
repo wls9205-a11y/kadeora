@@ -1,3 +1,29 @@
+## S1 (2026-08-21) — 라이트 단일 모드 전환
+
+- globals.css: html.theme-light(91) / html[data-theme="light"](22) 변수 블록을 :root로 승격(113건 덮어쓰기).
+  남은 html.theme-light 오버라이드 45건은 선택자에서 테마 클래스만 떼어 무조건 적용으로 승격(파일 끝 배치),
+  html.theme-light.dark 2건은 사문화되어 삭제. theme-light/data-theme 잔여 0
+- 신규 토큰: --ink-*(5) / --status-*(4) / --rail-*(5). 신규 색상 도입 0건 (기존 다크값 승계 또는 var() 참조)
+- ThemeProvider.tsx 삭제. layout의 kd_theme 부트스트랩 스크립트·래퍼 제거 → FOUC 소멸.
+  themeColor 메타 정적 #F5F7FA 고정
+- Navigation: 테마 전환 UI 1곳·토글 버튼 2곳·useTheme·data-theme 강제 제거
+- TossModeInit: data-theme 강제 제거 (toss-mode 클래스만 유지)
+- apt-tabs.css: [data-theme="dark"] 2블록 + prefers-color-scheme:dark 2블록 삭제
+- dark: 변형 184개 토큰 제거(14파일). 사전 점검에서 고아 dark: 0건 확인 —
+  라이트 모드 렌더 결과와 동일
+- PageViewTracker: theme_mode 를 'light' 상수화 (테마 클래스 소멸로 판별식이 항상 dark를 반환하게 됨)
+- --kakao-bg/--kakao-text는 카카오 브랜드 고정색이라 미변경
+
+### Architecture Rule 추가
+- #68 테마는 라이트 단일이다. dark:, prefers-color-scheme, data-theme, theme-light 를 새로 쓰지 않는다
+- #69 의도적으로 어두운 서피스는 --ink-* 토큰을 쓴다. 하드코딩 hex 금지
+
+### 다음
+- 배포 후 라이트 렌더 육안 확인 (피드·단지 상세·블로그·검색·어드민)
+- theme_mode='light' 고정 이후 GA4 지표는 S1 전후 비교용으로만 사용
+
+---
+
 ## S0 (2026-08-21) — 색인 차단 해소
 
 - apt/[id]: APT_COLS에 data_quality_score 누락 → 상세 약 5,800개 전부 noindex였음. 해소

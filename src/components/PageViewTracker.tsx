@@ -36,7 +36,7 @@ export default function PageViewTracker() {
       const w = window as any;
       if (typeof w.gtag === 'function') {
         w.gtag('event', 'page_view', {
-          theme_mode: document.documentElement.classList.contains('theme-light') ? 'light' : 'dark',
+          theme_mode: 'light', // S1: 라이트 단일 모드 — 테마 클래스 소멸로 상수화
           page_path: pathname,
           page_location: `https://kadeora.app${pathname}`,
         });

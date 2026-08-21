@@ -114,8 +114,7 @@
   margin: 20px 0 8px;
 }
 
-/* ── 라이트모드: html.theme-light 클래스로 처리 (globals.css) ── */
-/* @media (prefers-color-scheme: light) 사용 금지 — OS 설정과 앱 테마 충돌 */
+/* ── S1: 라이트 단일 모드 — 색상은 globals.css :root 토큰이 담당 ── */
 
 /* ── 모바일 가독성 ── */
 @media (max-width: 480px) {
