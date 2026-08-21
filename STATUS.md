@@ -1,3 +1,41 @@
+## S5-2 (2026-08-21) — 터치 타깃 · 컨테이너 폭 · 부수 정리
+
+- (E) globals.css 에 .touch-target 유틸 신설 — 투명 ::after 로 히트 영역만 44px 확보.
+  시각 크기는 그대로 둔다(height 를 키우면 헤더·툴바가 밀린다). 15개소 적용
+- (F) --container-max: 720px 토큰 신설. 560 → 480(4건), 780 → 토큰(5건),
+  900 → 토큰(5건), 960 → 900(2건). 1400·1200·480 미변경
+- 서브픽셀 보더 0.5px → 1px 56건 27파일
+- S1 잔존 다크 폴백값 145건 43파일 제거 + 직접 사용분 4곳 토큰화
+
+### 900/960 판단 근거 (파일을 열어 확인)
+- 900 유지 — apt/data · stock/data:
+  auto-fit minmax(140px)/minmax(260px) 다열 데이터 대시보드. 720 으로 줄이면 열이 접힌다
+- 720 으로 — apt/big-events(단일 ul 목록) · apt/redev · apt/redev/[region] 2곳
+  (minmax(140px)/minmax(80px) 타일, 720 에서도 열수 유지) · calc(minmax(200px) → 3열 유지)
+- 960 → 900 — apt/complex(도넛 svg + repeat(3,1fr) 스펙 표) · apt/map(지도는 넓을수록 유리)
+
+### 지시서와 다르게 처리
+- letterSpacing: 0.5px 23건은 1px 로 바꾸지 않았다. 자간이지 보더가 아니고,
+  바꾸면 자간이 두 배가 되는 시각 회귀다. Rule #55~#62 는 보더 규칙이다
+- ProfileTabs:161(스피너)·PortfolioTab:211(아이콘 컨테이너)은 onClick 이 없는
+  비상호작용 요소라 터치 타깃 대상에서 제외
+- BigEventCharts 의 maxWidth 560 은 컨테이너가 아니라 svg 차트 폭이라 제외
+- api/apt-img/route.tsx 의 #0c1629 유지 — og-* 와 같은 ImageResponse 생성 이미지이고,
+  프록시 이미지 뒤 레터박스 배경이라 다크가 의도된 값이다
+
+### 남은 같은 계열 (다음 범위)
+- var(--bg-elevated, #1f2028) · var(--bg-surface, #1a1b22) · var(--text-primary, #fff)
+  같은 죽은 폴백이 어드민 위주로 남아 있다. 지시서 hex 목록 밖이라 이번엔 손대지 않았다
+- D(인라인 fontSize 3,064건) 여전히 미착수
+
+### Architecture Rule 추가
+- #77 상호작용 요소의 히트 영역은 최소 44px. 시각 크기를 키우는 대신
+  padding 또는 투명 히트영역(.touch-target)으로 확보한다
+- #78 컨테이너 최대폭은 --container-max(720) 기준.
+  어드민(1400)·앱셸(1200)·좁은 폼(480)·데이터 대시보드(900)만 예외로 허용한다
+
+---
+
 ## S5 (2026-08-21) — 반응형 · 타이포 정합성
 
 - (B) input/textarea/select 에 font-size: max(16px, var(--fs-sm)) 전역 적용.
