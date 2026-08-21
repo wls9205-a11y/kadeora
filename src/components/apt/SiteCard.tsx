@@ -73,7 +73,7 @@ function StatusPill({ status }: { status: string | null }) {
         alignItems: 'center',
         padding: '3px 9px',
         borderRadius: 4,
-        fontSize: 11,
+        fontSize: 'var(--fs-xs)',
         fontWeight: 700,
         lineHeight: 1.4,
         whiteSpace: 'nowrap',
@@ -94,9 +94,12 @@ export default function SiteCard({ site }: { site: CuratedSite }) {
   return (
     <Link
       href={href}
+      className="site-card"
       style={{
         display: 'flex',
         flexDirection: 'column',
+        width: '100%',
+        maxWidth: 640,
         border: '1px solid var(--border)',
         borderRadius: 10,
         overflow: 'hidden',
@@ -117,7 +120,7 @@ export default function SiteCard({ site }: { site: CuratedSite }) {
             src={site.satellite_image_url}
             alt={`${site.name} 위성 사진`}
             fill
-            sizes="(max-width: 640px) 100vw, 400px"
+            sizes="(max-width: 767px) 100vw, 400px"
             style={{ objectFit: 'cover' }}
           />
         ) : null}
@@ -138,7 +141,7 @@ export default function SiteCard({ site }: { site: CuratedSite }) {
               style={{
                 padding: '3px 9px',
                 borderRadius: 4,
-                fontSize: 11,
+                fontSize: 'var(--fs-xs)',
                 fontWeight: 600,
                 whiteSpace: 'nowrap',
                 background: 'var(--bg-surface-translucent)',
@@ -151,8 +154,9 @@ export default function SiteCard({ site }: { site: CuratedSite }) {
         </div>
       </div>
 
-      <div style={{ padding: '10px 12px 12px' }}>
+      <div className="site-card-body" style={{ padding: '10px 12px 12px' }}>
         <div
+          className="site-card-title"
           style={{
             fontSize: 'var(--fs-lg)',
             fontWeight: 700,
@@ -186,7 +190,7 @@ export default function SiteCard({ site }: { site: CuratedSite }) {
         ) : null}
 
         {price ? (
-          <div style={{ ...MONO, fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', marginTop: 9 }}>
+          <div style={{ ...MONO, fontSize: 'var(--fs-lg)', fontWeight: 700, color: 'var(--text-primary)', marginTop: 9 }}>
             {price}
           </div>
         ) : null}
@@ -201,6 +205,19 @@ export default function SiteCard({ site }: { site: CuratedSite }) {
           <LifecycleRail stage={site.lifecycle_stage} size="mini" />
         </div>
       </div>
+
+      <style>{`
+        .site-card-title {
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+        @media (max-width: 480px) {
+          .site-card-body { padding: 9px 10px 10px; }
+          .site-card-title { -webkit-line-clamp: 3; }
+        }
+      `}</style>
     </Link>
   );
 }
