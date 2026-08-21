@@ -36,6 +36,7 @@ export default function PageViewTracker() {
       const w = window as any;
       if (typeof w.gtag === 'function') {
         w.gtag('event', 'page_view', {
+          theme_mode: document.documentElement.classList.contains('theme-light') ? 'light' : 'dark',
           page_path: pathname,
           page_location: `https://kadeora.app${pathname}`,
         });
