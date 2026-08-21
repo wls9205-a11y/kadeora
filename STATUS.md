@@ -1,3 +1,46 @@
+## S5 (2026-08-21) — 반응형 · 타이포 정합성
+
+- (B) input/textarea/select 에 font-size: max(16px, var(--fs-sm)) 전역 적용.
+  기존 하한은 @media (max-width: 640px) 안에만 있어 641px 이상 뷰포트에서는
+  iOS 포커스 자동 확대가 그대로 일어났다. 기본 상태 값 변화 없음
+- (G) SiteCard·SectionHeader 의 fontSize 11/18 하드코딩 → var(--fs-xs)/var(--fs-lg).
+  SiteCard 에 width:100% + maxWidth:640 명시, @media (max-width:480px) 추가,
+  next/image sizes 경계 640 → 767
+- (A) 인라인 스케일링 규칙 22개에 공백 없는 표기 셀렉터 병기 +
+  Tailwind text-xs·text-[Npx] 20종 스케일 규칙 추가 + JSX fontSize 표기 통일 211건
+- (C) 브레이크포인트 15종 → 11종. 380·420·540 → 480 흡수,
+  max-width: 768px → 767px 로 768 이중 적용 해소
+
+### 감사 진단과 실측이 달랐던 것 (A)
+지시서는 "JSX 의 `fontSize:13`(공백 없음) 표기가 매칭 안 된다"고 봤으나,
+JSX 소스의 객체 키 뒤 공백은 렌더 결과에 영향이 없다. 실제 원인은 직렬화 경로 차이다.
+`.next/server/app/*.html` 실측 결과 **SSR 은 공백 없이** `style="font-size:13px"` 로 내보내고,
+CSSOM 을 거친 뒤에만 `font-size: 13px` 로 공백이 붙는다.
+즉 기존 규칙 22개는 **SSR 상태에서 하나도 매칭되지 않았고** 하이드레이션 뒤에만 걸렸다.
+같은 크기라도 요소·시점마다 결과가 갈리던 직접 원인이 이것이다. 두 표기를 모두 매칭하도록 고쳤다.
+
+### 범위에서 뺀 것
+- D(인라인 하드코딩 3,064건)는 지시서가 명시적으로 제외. 미착수
+- max-width: 320px 6건은 유지. 380·420 처럼 480 으로 흡수하면 bottom-nav 9px,
+  지역 타일 3열 같은 '극소 화면' 보정이 390~430px 일반 폰에도 적용돼 회귀가 된다.
+  지시서 커밋 제목의 목표치(15종 → 11종)와도 일치한다
+- 768/769·899/900·1200 정리는 지시서대로 2차로 미룸
+- E(터치 타깃 46건), F(컨테이너 maxWidth 8종)는 이번 커밋 분할에 없어 미착수
+
+### Architecture Rule 추가
+- #75 신규 코드에서 인라인 fontSize 숫자값을 쓰지 않는다. var(--fs-*) 사용.
+  기존 3,064건은 화면 단위로 점진 흡수
+- #76 브레이크포인트는 480 / 767 / 768 / 1024 네 종을 기본으로 한다.
+  max 와 min 경계가 같은 값으로 겹치지 않게 한다(767 ↔ 768)
+
+### 다음 — 실기기 확인 필요 (코드로 판정 불가)
+- iOS 입력창 탭 시 확대되지 않는지
+- /apt/busan 360px 폭에서 카드 가로 넘침 여부
+- 같은 카드 안 글자 크기 균일 여부 (커밋3 검증)
+- PWA/앱인토스와 모바일 웹 비교 — 여전히 다르면 웹뷰 전용 CSS 존재
+
+---
+
 ## S4 (2026-08-21) — 리드폼 P0: 관심 현장 알림 신청 (트라비스 단일 현장)
 
 - `src/components/apt/LeadForm.tsx` 신설. 상세 페이지 FAQ 아래 / 관련 섹션 위에 삽입.
@@ -33,6 +76,37 @@
   으로 15px 렌더된다. 저장소 전역 규칙이라 `!important` 로 뚫지 않고 그대로 둠
 - `/apt/[id]` 는 로컬에서 전부 404 (`.env.local` 의 service-role 키가 placeholder). 트라비스 페이지
   렌더 확인은 배포 후에만 가능. 컴포넌트 자체는 /privacy 에 임시 마운트해 헤드리스로 30항목 검증 후 복원
+
+---
+
+## S3 (2026-08-21) — 큐레이션 카드 · 위성 히어로 · 부산 허브
+
+- SiteCard 신설. 히어로는 satellite_image_url 하나만(16:10), 폴백 배경 var(--bg-elevated).
+  상태 pill 은 --status-fcfs/open/soon/closed, 숫자는 --font-mono + tabular-nums,
+  next/image + sizes 로 카드 폭만 요청
+- 위성이 없는 현장은 빈 이미지 슬롯 대신 SiteRow(표 행). 오티에르 해운대가 현재 여기 해당 —
+  apt-satellite-crawl 크론(30분 주기)이 채우면 자동으로 카드로 승격된다. 코드 특별 처리 없음
+- /apt/busan 큐레이션 허브 신설. is_curated=true AND region='부산' 기준.
+  상태 필터 탭(전체/선착순/분양중/분양예정), 청약홈 파생 목록, 부산 분양 분석 3섹션.
+  큐레이션 0건이면 섹션 미렌더. ISR 900 + 데이터 레이어 unstable_cache(/apt 와 동일 구조)
+- Disclaimer 의 apt/unsold/redev/trade/general source 에 VWorld 출처 추가
+
+### 지시서와 다르게 처리
+- Disclaimer 의 compact 모드는 source 를 아예 렌더하지 않던 구조라, 그대로 두면
+  위성을 쓰는 화면에서 출처 표기가 통째로 사라진다. compact 에서도 source 가 나오도록 고치고
+  /apt/busan 은 non-compact 로 뒀다
+- SiteCard 주석의 '조감도' 표기를 '시행사 완공 예상도'로 바꿨다 (지시서 검증 grep 이 0 을 기대)
+
+### Architecture Rule 추가
+- #71 현장 히어로 이미지는 satellite_image_url(VWorld 자체 호스팅)만 사용한다.
+  조감도는 시행사 저작물이며 외부 스크랩·임의 생성 모두 금지.
+  images 배열은 출처 혼재·오매칭이 있어 히어로로 쓰지 않는다
+- #72 타사 데이터를 화면 전면에 쓰면 출처 표기를 같은 화면에 함께 낸다.
+  표기가 렌더되지 않는 경로(compact 등)가 없는지 확인한다
+
+### 다음
+- 오티에르 해운대 위성 확보 후 /apt/busan 카드 2장 확인
+- 큐레이션 현장 확대 시 /apt/{region} 큐레이션 허브 일반화 검토
 
 ---
 

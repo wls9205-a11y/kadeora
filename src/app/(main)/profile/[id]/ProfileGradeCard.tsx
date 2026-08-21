@@ -124,18 +124,18 @@ export default function ProfileGradeCard({ profileId, isOwner, gradeNum, gradeCo
         <div style={{ marginTop:16, background:'var(--bg-base)', border:'1px solid var(--border)', borderRadius: 'var(--radius-card)', padding:16 }}>
           <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:10 }}>
             <div>
-              <div style={{ fontSize:15, fontWeight:700, color:'var(--text-primary)' }}>📅 출석 체크</div>
-              <div style={{ fontSize:12, color:'var(--text-tertiary)', marginTop:2 }}>
+              <div style={{ fontSize: 15, fontWeight:700, color:'var(--text-primary)' }}>📅 출석 체크</div>
+              <div style={{ fontSize: 12, color:'var(--text-tertiary)', marginTop:2 }}>
                 🔥 {attendance.streak}일 연속 · 총 {attendance.total_days}일 출석
               </div>
             </div>
             {attendance.already_today ? (
-              <span style={{ padding:'8px 16px', borderRadius: 'var(--radius-xl)', background:'var(--bg-hover)', color:'var(--text-tertiary)', fontSize:13, fontWeight:600 }}>
+              <span style={{ padding:'8px 16px', borderRadius: 'var(--radius-xl)', background:'var(--bg-hover)', color:'var(--text-tertiary)', fontSize: 13, fontWeight:600 }}>
                 ✅ 출석 완료
               </span>
             ) : (
               <button onClick={handleCheckIn} disabled={checkingIn}
-                style={{ padding:'8px 16px', borderRadius: 'var(--radius-xl)', border:'none', background:'var(--brand)', color:'var(--text-inverse)', fontSize:13, fontWeight:700, cursor:'pointer' }}>
+                style={{ padding:'8px 16px', borderRadius: 'var(--radius-xl)', border:'none', background:'var(--brand)', color:'var(--text-inverse)', fontSize: 13, fontWeight:700, cursor:'pointer' }}>
                 {checkingIn ? '...' : '📅 출석 +10P'}
               </button>
             )}

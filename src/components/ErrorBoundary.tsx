@@ -25,7 +25,7 @@ export default class ErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.hasError) return this.props.fallback ?? (
       <div style={{ textAlign:'center', padding:'60px 20px' }}>
-        <div style={{ fontSize:48, marginBottom:16 }}>⚠️</div>
+        <div style={{ fontSize: 48, marginBottom:16 }}>⚠️</div>
         <h2 style={{ color:'var(--text-primary)', margin:'0 0 8px' }}>문제가 발생했습니다</h2>
         <p style={{ color:'var(--text-secondary)', marginBottom:24 }}>{this.state.error?.message}</p>
         <button onClick={() => this.setState({ hasError: false })} style={{

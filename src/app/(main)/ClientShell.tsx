@@ -121,7 +121,7 @@ export default function ClientShell({ children, serverLoggedIn }: Props) {
           maxWidth: 1200, margin: '0 auto', padding: '0 24px 40px',
         }}>
           <div style={{borderTop:'1px solid var(--border)', paddingTop:16, fontSize: 'var(--fs-xs)', color:'var(--text-tertiary)', textAlign:'center', lineHeight:1.9}}>
-            <nav style={{display:'flex', justifyContent:'center', gap:16, flexWrap:'wrap', marginBottom:12, fontSize:11}}>
+            <nav style={{display:'flex', justifyContent:'center', gap:16, flexWrap:'wrap', marginBottom:12, fontSize: 11}}>
               <a href="/stock" style={{color:'var(--text-secondary)',textDecoration:'none'}}>주식</a>
               <a href="/stock/dividend" style={{color:'var(--text-secondary)',textDecoration:'none'}}>배당주</a>
               <a href="/stock/themes" style={{color:'var(--text-secondary)',textDecoration:'none'}}>테마주</a>

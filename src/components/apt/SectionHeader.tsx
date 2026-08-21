@@ -35,7 +35,7 @@ export default function SectionHeader({ eyebrow, title, id, meta }: SectionHeade
         <div
           style={{
             fontFamily: 'var(--font-mono)',
-            fontSize: 11,
+            fontSize: 'var(--fs-xs)',
             letterSpacing: '.14em',
             textTransform: 'uppercase',
             color: 'var(--brand)',
@@ -66,7 +66,7 @@ export default function SectionHeader({ eyebrow, title, id, meta }: SectionHeade
       {meta ? (
         <span
           style={{
-            fontSize: 11,
+            fontSize: 'var(--fs-xs)',
             color: 'var(--text-tertiary)',
             whiteSpace: 'nowrap',
             flexShrink: 0,
