@@ -36,7 +36,7 @@ export default function KakaoHeroCTA() {
       maxWidth: 440, width: '100%', margin: '0 auto', padding: '0 16px',
     }}>
       <div style={{
-        background: '#050A18', borderRadius: 'var(--radius-xl)', overflow: 'hidden',
+        background: 'var(--ink-bg-deep)', borderRadius: 'var(--radius-xl)', overflow: 'hidden',
         position: 'relative', padding: '28px 24px 24px',
       }}>
         {/* 글로우 */}

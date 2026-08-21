@@ -20,6 +20,16 @@
   다크 전용 보정 39건이 라이트 화면에 상시 적용되던 상태였음.
   특히 [style*='color:#991B1B'] → #F09595, [style*='color:#7F1D1D'] → #F4A4A4 2건은
   밝은 배경에서 가독성 파괴. tailwind.config.ts의 darkMode:'class'는 dark: 변형 0건이라 유지
+- (후속2) 다크 잔재 전수 정리:
+  - manifest.json theme_color/background_color #08102A → #F5F7FA (PWA 스플래시·주소창이 다크였음)
+  - FirstMissionBanner #10B981 → var(--accent-green). 흰 배경 대비 약 2.4:1로 WCAG AA 미달이었음
+  - KakaoHeroCTA #050A18 → var(--ink-bg-deep), NoticeBanner #120E16/#050A18 →
+    var(--ink-bg)/var(--ink-bg-deep). 의도적 잉크 블록이라 값 유지하고 토큰화만
+  - 낡은 다크 폴백값: SmartSectionGate #050A18, InAppBrowserModal #0d0e14/#2a2b35(2곳) 교체
+  - 이미지 플레이스홀더: AptImageGallery 폴백 카드·갤러리 컨테이너, .hero-img → var(--bg-elevated).
+    폴백 카드는 흰 텍스트 전제였으므로 텍스트도 var(--text-primary)/var(--text-tertiary)로 함께 전환.
+    .hero-img::after 어두운 오버레이는 이미지 위 텍스트 가독성용이라 유지
+  - InterestRegistration 생년월일 input colorScheme 'dark' → 'light'
 
 ### Architecture Rule 추가
 - #68 테마는 라이트 단일이다. dark:, prefers-color-scheme, data-theme, theme-light 를 새로 쓰지 않는다

@@ -156,8 +156,8 @@ export default function NoticeBanner() {
         onClick={handleClick}
       >
         {/* 좌/우 페이드 그라데이션 */}
-        <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 40, background: `linear-gradient(to right, ${notice.bg_color || (tier === 'urgent' ? '#120E16' : tier === 'premium' ? '#050A18' : 'var(--bg-sunken)')}, transparent)`, zIndex: 2, pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', right: notices.length > 1 ? 44 : 0, top: 0, bottom: 0, width: 40, background: `linear-gradient(to left, ${notice.bg_color || (tier === 'urgent' ? '#120E16' : tier === 'premium' ? '#050A18' : 'var(--bg-sunken)')}, transparent)`, zIndex: 2, pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 40, background: `linear-gradient(to right, ${notice.bg_color || (tier === 'urgent' ? 'var(--ink-bg)' : tier === 'premium' ? 'var(--ink-bg-deep)' : 'var(--bg-sunken)')}, transparent)`, zIndex: 2, pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', right: notices.length > 1 ? 44 : 0, top: 0, bottom: 0, width: 40, background: `linear-gradient(to left, ${notice.bg_color || (tier === 'urgent' ? 'var(--ink-bg)' : tier === 'premium' ? 'var(--ink-bg-deep)' : 'var(--bg-sunken)')}, transparent)`, zIndex: 2, pointerEvents: 'none' }} />
 
         {/* 스크롤 텍스트 */}
         <div

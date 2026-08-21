@@ -11,8 +11,8 @@
     "browser"
   ],
   "orientation": "portrait-primary",
-  "background_color": "#08102A",
-  "theme_color": "#08102A",
+  "background_color": "#F5F7FA",
+  "theme_color": "#F5F7FA",
   "lang": "ko",
   "dir": "ltr",
   "categories": [

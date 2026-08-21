@@ -161,7 +161,7 @@ export default function InAppBrowserModal({ type, onClose, href }: Props) {
           onClick={handleCopy}
           style={{
             width: '100%', padding: '11px 18px', borderRadius: 10,
-            border: '1px solid var(--border, #2a2b35)',
+            border: '1px solid var(--border, #D4DAE3)',
             background: 'transparent', color: 'var(--text-primary, #fff)',
             fontWeight: 700, fontSize: 13, cursor: 'pointer',
           }}
@@ -169,7 +169,7 @@ export default function InAppBrowserModal({ type, onClose, href }: Props) {
           {copied ? '✅ 주소 복사 완료' : '📋 현재 주소 복사하기'}
         </button>
 
-        <div style={{ marginTop: 14, padding: '10px 12px', borderRadius: 8, background: 'var(--bg-base, #0d0e14)', border: '1px solid var(--border, #2a2b35)' }}>
+        <div style={{ marginTop: 14, padding: '10px 12px', borderRadius: 8, background: 'var(--bg-base, #F5F7FA)', border: '1px solid var(--border, #D4DAE3)' }}>
           <div style={{ fontSize: 11, color: 'var(--text-tertiary, #666)', marginBottom: 4, fontWeight: 600 }}>대안</div>
           <div style={{ fontSize: 11, color: 'var(--text-secondary, #888)', lineHeight: 1.6 }}>
             우상단 "…" 메뉴 → "외부 브라우저로 열기" 또는 "Chrome/Safari 에서 열기" 선택

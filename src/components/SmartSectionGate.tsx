@@ -226,7 +226,7 @@ export default function SmartSectionGate({
       }} />
 
       {/* 게이트 카드 */}
-      <div data-cta="content-gate" style={{ background: 'var(--bg-base, #050A18)', padding: '0 16px 32px' }}>
+      <div data-cta="content-gate" style={{ background: 'var(--bg-base, #F5F7FA)', padding: '0 16px 32px' }}>
         <div style={{
           maxWidth: 400, width: '100%', margin: '0 auto',
           padding: '22px 20px', borderRadius: 16, boxSizing: 'border-box' as const,
