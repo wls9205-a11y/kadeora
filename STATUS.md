@@ -11,7 +11,9 @@
 - apt-tabs.css: [data-theme="dark"] 2블록 + prefers-color-scheme:dark 2블록 삭제
 - dark: 변형 184개 토큰 제거(14파일). 사전 점검에서 고아 dark: 0건 확인 —
   라이트 모드 렌더 결과와 동일
-- PageViewTracker: theme_mode 를 'light' 상수화 (테마 클래스 소멸로 판별식이 항상 dark를 반환하게 됨)
+- PageViewTracker: theme_mode 를 localStorage.kd_theme 기반으로 변경 (light/dark/unset).
+  테마 클래스 소멸로 기존 판별식이 항상 dark를 반환하게 됐고, 토글은 없앴지만 kd_theme 값은
+  브라우저에 남아 있어 기존 사용자 선호 분포를 계속 수집할 수 있음
 - --kakao-bg/--kakao-text는 카카오 브랜드 고정색이라 미변경
 
 ### Architecture Rule 추가
@@ -20,7 +22,7 @@
 
 ### 다음
 - 배포 후 라이트 렌더 육안 확인 (피드·단지 상세·블로그·검색·어드민)
-- theme_mode='light' 고정 이후 GA4 지표는 S1 전후 비교용으로만 사용
+- theme_mode 는 light/dark/unset 3값. unset = 한 번도 테마를 바꾼 적 없는 사용자
 
 ---
 
@@ -41,7 +43,9 @@
 ### 다음
 - S0 배포 후 라이브 검증 (아래 명령)
 - 14일간 GSC 노출수 관찰. 감소 시 중단·재논의
-- theme_mode 수집 1주 후 S1 착수 판단 (다크 25% 초과 시 중단)
+- ~~theme_mode 수집 1주 후 S1 착수 판단 (다크 25% 초과 시 중단)~~ →
+  계측 당일 착수했으므로 사전 데이터 없음. localStorage.kd_theme 기반 사후 관측으로 대체.
+  롤백 지점 pre-s1-20260821.
 
 ---
 
