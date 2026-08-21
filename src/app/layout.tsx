@@ -198,7 +198,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           sameAs: [
             'https://blog.naver.com/silreit',
             'https://cafe.naver.com/kadeoraapp',
-            'http://pf.kakao.com/_NFxdxhX',
+            'https://pf.kakao.com/_NFxdxhX',
           ],
           knowsAbout: ['부동산', '주식', '아파트 청약', '재개발', '미분양', 'AI 주식 분석', '실거래가', '분양', '재테크'],
           slogan: '아파트 청약·재개발, 주식 시세·AI 종목 분석을 한곳에서',

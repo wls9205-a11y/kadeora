@@ -1,3 +1,24 @@
+## S2-잔여 (2026-08-21) — 이모지 · 카카오 CTA · https 승격
+
+- 상세 페이지 이모지 122자 → 3자. 남은 3개는 지도(카카오/네이버)·청약홈 원문 링크분으로 의도적 유지
+  - 섹션 h2 8개를 SectionHeader eyebrow 로 교체: SUPPLY/LOCATION/SCHEDULE/NOTICE/COMMENTS/FAQ/ANALYSIS/NEARBY
+  - eyebrow 문구가 지시서에 없는 나머지 h2 9개는 이모지만 제거하고 apt-section-title 유지
+  - 데이터 라벨 이모지 47줄 제거. KpiCards.icon 필드, tier.emoji, devType.icon,
+    categoryIcons 맵은 필드째 삭제 (빈 문자열을 남기지 않음)
+  - 아이콘 라이브러리 신규 도입 0건
+- 카카오 채널 ID 를 constants 단일 출처로: KAKAO_CHANNEL_ID / _URL / _CHAT_URL
+  KakaoChannelAddModal · MarketingConsentModal 이 import 하도록 변경 (같은 값 2곳 박힘 해소)
+- 상세 보조 CTA 추가: InterestRegisterHero 안에 '카카오톡 문의' 텍스트 링크
+  (pf.kakao.com/_NFxdxhX/chat). 주 CTA(관심 등록)와 경쟁하지 않도록 버튼이 아닌 링크
+- layout.tsx Organization JSON-LD sameAs 의 pf.kakao.com http → https. 전수 확인 결과 이 1건뿐
+
+### Architecture Rule 추가
+- #73 이모지를 UI 라벨·아이콘으로 쓰지 않는다. OS별 렌더가 다르고 스크린리더가 오낭독한다.
+  외부 링크 식별용은 예외
+- #74 외부 서비스 식별자(채널 ID·계정 ID)는 constants 한 곳에서만 정의한다
+
+---
+
 ## S2 (2026-08-21) — 카드 · 진행 눈금자
 
 - LifecycleRail 신설. 단계 결정 우선순위: apt_subscriptions 날짜 파생 > lifecycle_stage > 미표시.

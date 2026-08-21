@@ -4,8 +4,9 @@ import { useEffect, useState } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useToast } from '@/components/Toast';
 import { trackCTA } from '@/lib/analytics';
+import { KAKAO_CHANNEL_ID } from '@/lib/constants';
 
-const CHANNEL_PUBLIC_ID = '_NFxdxhX';
+const CHANNEL_PUBLIC_ID = KAKAO_CHANNEL_ID;
 
 type Props = {
   userId: string;

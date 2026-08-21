@@ -232,3 +232,11 @@ export const GRADE_TITLES: Record<number, string> = {
   1:'새싹',2:'정보통',3:'동네어른',4:'소문난집',5:'인플루언서',
   6:'빅마우스',7:'찐고수',8:'전설',9:'신의경지',10:'카더라신',
 };
+
+/**
+ * 카카오톡 채널 공개 ID. KakaoChannelAddModal / MarketingConsentModal /
+ * 단지 상세 1:1 문의 CTA 가 같은 값을 쓴다. 값이 세 곳에 박히지 않도록 여기서만 정의한다.
+ */
+export const KAKAO_CHANNEL_ID = '_NFxdxhX';
+export const KAKAO_CHANNEL_URL = `https://pf.kakao.com/${KAKAO_CHANNEL_ID}`;
+export const KAKAO_CHANNEL_CHAT_URL = `${KAKAO_CHANNEL_URL}/chat`;

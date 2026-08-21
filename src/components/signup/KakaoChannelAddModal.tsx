@@ -3,8 +3,9 @@
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
+import { KAKAO_CHANNEL_ID } from '@/lib/constants';
 
-const CHANNEL_ID = '_NFxdxhX';
+const CHANNEL_ID = KAKAO_CHANNEL_ID;
 const STORAGE_KEY = 'kd_channel_modal_dismissed';
 const COOLDOWN_MS = 7 * 24 * 60 * 60 * 1000;
 

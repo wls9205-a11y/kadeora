@@ -5,7 +5,6 @@ interface KpiCard {
   v: string;
   sub: string;
   c: string;
-  icon: string;
   bar: number;
   barColor: string;
   scrollTo: string | null;
@@ -41,7 +40,6 @@ export default function KpiCards({ cards }: { cards: KpiCard[] }) {
               <svg width="8" height="8" viewBox="0 0 12 12" fill="none" stroke={s.barColor || 'var(--text-tertiary)'} strokeWidth="2"><path d="M6 2v8M3 7l3 3 3-3"/></svg>
             </span>
           )}
-          <div style={{ fontSize: 16, marginBottom: 2 }}>{s.icon}</div>
           <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 2 }}>{s.l}</div>
           <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: s.c, lineHeight: 1.2, whiteSpace: 'pre-line' }}>{s.v}</div>
           {s.sub && <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2, lineHeight: 1.3, whiteSpace: 'pre-line' }}>{s.sub}</div>}
