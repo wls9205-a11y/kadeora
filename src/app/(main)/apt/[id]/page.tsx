@@ -19,6 +19,7 @@ import Disclaimer from '@/components/Disclaimer';
 import AptImageGallery from '@/components/AptImageGallery';
 import SimilarAptsSection from '@/components/apt/SimilarAptsSection';
 import LeadForm from '@/components/apt/LeadForm';
+import LeadFormAnchor from '@/components/apt/LeadFormAnchor';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
 import { getDisplayInterestCount, formatInterestText, formatInterestOrViews } from '@/lib/interest-utils';
 import { headers } from 'next/headers';
@@ -489,6 +490,22 @@ export default async function AptUnifiedPage({ params }: Props) {
   const { site, sub, unsold, redev, trades, relatedBlogs, relatedPosts, nearbySites, sameBuilderSites, regionBenchmark, regionTrades, complexProfiles, name, region, sigungu, slug, analysisText } = d!;
   const sType = site?.site_type || (sub ? 'subscription' : unsold ? 'unsold' : redev ? 'redevelopment' : trades.length > 0 ? 'trade' : 'subscription');
   const features = Array.isArray(site?.key_features) ? site.key_features : [];
+
+  // S4-2: 리드폼 노출 여부 — 앵커와 폼이 같은 조건으로 뜨고 같이 사라져야 한다.
+  // P0: 트라비스 단일 현장 검증용. P2에서 전 현장 확산 시 제거
+  const showLeadForm = site?.slug === '엄궁역-트라비스-하늘채';
+  // 희망 타입 선택지는 모집공고 원본(house_type_info)의 type 앞 숫자(전용면적)에서 파생한다.
+  // apt_sites 에 area_types 류 컬럼이 없고, 현장마다 평형이 달라 하드코딩하지 않는다.
+  const leadTypeOptions: string[] = Array.from(
+    new Set(
+      (Array.isArray(sub?.house_type_info) ? (sub.house_type_info as any[]) : [])
+        .map(t => Number(String(t?.type ?? '').split('.')[0]))
+        .filter(n => Number.isFinite(n) && n > 0)
+    )
+  )
+    .sort((a, b) => a - b)
+    .map(n => `${n}㎡`);
+
   const dbFaq = Array.isArray(site?.faq_items) ? site.faq_items as { q: string; a: string }[] : [];
   // DB FAQ가 없으면 자동 생성 (네이버 FAQ 리치스니펫 확보)
   const faq: { q: string; a: string }[] = dbFaq.length > 0 ? dbFaq : [
@@ -785,6 +802,9 @@ export default async function AptUnifiedPage({ params }: Props) {
           {(site?.developer || sub?.developer_nm) && <span style={{ color: 'var(--text-tertiary)' }}>{site?.developer || sub?.developer_nm}</span>}
           {(site?.nearby_station || sub?.nearest_station) && <span style={{ color: 'var(--accent-blue)' }}>{site?.nearby_station || sub?.nearest_station}</span>}
         </div>
+
+        {/* S4-2: 상단 컴팩트 진입 바 — 스펙 표 위. 폼 전체는 하단에 유지하고 스크롤로 연결한다 */}
+        {showLeadForm && <LeadFormAnchor />}
         {(sub?.ai_summary || site?.description) && (
           <SectionGate
             sectionKey="ai_analysis"
@@ -1953,9 +1973,8 @@ export default async function AptUnifiedPage({ params }: Props) {
       {/* FAQ */}
       {faq.length > 0 && <div className="apt-card"><SectionHeader eyebrow="FAQ" title="자주 묻는 질문" />{faq.map((f, i) => <details key={i} style={{ borderBottom: i < faq.length - 1 ? '1px solid var(--border)' : 'none', padding: '10px 0' }}><summary style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', cursor: 'pointer', listStyle: 'none', display: 'flex', justifyContent: 'space-between' }}><span>{f.q}</span><span style={{ color: 'var(--text-tertiary)' }}>+</span></summary><p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.7, margin: '6px 0 0' }}>{f.a}</p></details>)}</div>}
 
-      {/* 관심 현장 알림 신청 */}
-      {/* P0: 트라비스 단일 현장 검증용. P2에서 전 현장 확산 시 제거 */}
-      {site?.slug === '엄궁역-트라비스-하늘채' && <LeadForm siteSlug={site.slug} siteName={site.name} />}
+      {/* 관심 현장 알림 신청 — 상단 앵커의 스크롤 목적지 */}
+      {showLeadForm && site && <LeadForm siteSlug={site.slug} siteName={site.name} typeOptions={leadTypeOptions} />}
 
       {/* Related posts */}
       {relatedPosts.length > 0 && <div className="apt-card"><SectionHeader eyebrow="COMMENTS" title="커뮤니티 게시글" />{relatedPosts.map((p: Record<string, any>) => <Link key={p.id} href={`/feed/${p.id}`} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none', color: 'inherit', fontSize: 'var(--fs-sm)' }}><span style={{ color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</span><span style={{ color: 'var(--text-tertiary)', flexShrink: 0, marginLeft: 8, fontSize: 'var(--fs-xs)' }}>댓글 {p.comments_count || 0}</span></Link>)}</div>}
