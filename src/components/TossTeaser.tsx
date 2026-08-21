@@ -35,7 +35,7 @@ export default function TossTeaser({
         onClick={handleOpen}
         style={{
           background: 'none', border: 'none', cursor: 'pointer',
-          color: '#3182F6', fontWeight: 700, fontSize: 13,
+          color: 'var(--brand)', fontWeight: 700, fontSize: 13,
           padding: '4px 0', fontFamily: 'inherit',
           display: 'inline-flex', alignItems: 'center', gap: 4,
         }}

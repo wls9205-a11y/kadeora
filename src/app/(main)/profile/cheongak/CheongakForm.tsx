@@ -167,7 +167,7 @@ export default function CheongakForm({ initial }: Props) {
           style={{ padding: '12px 24px', borderRadius: 999, background: pending ? 'var(--bg-hover)' : 'var(--brand)', color: pending ? 'var(--text-tertiary)' : 'var(--text-inverse)', fontWeight: 800, fontSize: 14, border: 'none', cursor: pending ? 'default' : 'pointer' }}
         >{pending ? '저장 중...' : '저장'}</button>
         {msg && <span style={{ fontSize: 13, color: 'var(--success, #00FF87)', fontWeight: 700 }}>✓ {msg}</span>}
-        {err && <span style={{ fontSize: 13, color: '#FF6B6B', fontWeight: 700 }}>✗ {err}</span>}
+        {err && <span style={{ fontSize: 13, color: 'var(--accent-red)', fontWeight: 700 }}>✗ {err}</span>}
       </div>
     </section>
   );

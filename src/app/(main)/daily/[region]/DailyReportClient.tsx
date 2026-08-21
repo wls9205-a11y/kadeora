@@ -713,7 +713,7 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
           {/* VS 배틀 */}
           {d.hotTopics.vsBattles.map((v, i) => (
             <div key={`vs-${i}`} style={{ marginBottom: 8, padding: '8px 10px', borderRadius: 8, background: 'rgba(139,92,246,0.06)', border: '1px solid rgba(139,92,246,0.12)' }}>
-              <div style={{ fontSize: 10, fontWeight: 700, color: '#8B5CF6', marginBottom: 4 }}>⚔️ VS 배틀 ({v.total}명 참여)</div>
+              <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--accent-purple)', marginBottom: 4 }}>⚔️ VS 배틀 ({v.total}명 참여)</div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <div style={{ flex: 1, textAlign: 'center' }}>
                   <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>{v.option_a}</div>

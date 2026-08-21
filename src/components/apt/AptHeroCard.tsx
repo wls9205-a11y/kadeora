@@ -57,7 +57,7 @@ export default function AptHeroCard({ data }: { data: HeroData }) {
           width: 24, height: 24, borderRadius: '50%',
           background: 'rgba(255,255,255,0.92)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 12, color: '#6B7280',
+          fontSize: 12, color: 'var(--text-tertiary)',
         }}>♡</div>
         {data.dday !== null && data.dday !== undefined && (
           <div style={{

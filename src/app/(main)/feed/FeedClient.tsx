@@ -67,9 +67,9 @@ function stripHtml(text: string): string {
 
 const CAT_STYLE: Record<string, { label: string; color: string; bg: string }> = {
   apt:   { label: '부동산',  color: '#2EE8A5', bg: 'rgba(52,211,153,0.1)' },
-  stock: { label: '주식',    color: '#38BDF8', bg: 'rgba(56,189,248,0.1)' },
+  stock: { label: '주식',    color: 'var(--brand)', bg: 'rgba(56,189,248,0.1)' },
   local: { label: '우리동네',color: '#FFD43B', bg: 'rgba(251,191,36,0.1)' },
-  free:  { label: '자유',    color: '#B794FF', bg: 'rgba(167,139,250,0.1)' },
+  free:  { label: '자유',    color: 'var(--accent-purple)', bg: 'rgba(167,139,250,0.1)' },
 };
 
 export default function FeedClient({
@@ -493,7 +493,7 @@ export default function FeedClient({
                       <span style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: 12 }}>{displayName}</span>
                       <span style={{ fontSize: 10, color: gradeColor(post.profiles?.grade ?? 1) }}>{gradeEmoji}</span>
                       <span style={{ fontSize: 10, padding: '1px 5px', borderRadius: 4, background: cat.bg, color: cat.color, fontWeight: 700 }}>{cat.label}</span>
-                      {postType === 'short' && <span style={{ fontSize: 9, padding: '1px 4px', borderRadius: 3, background: 'rgba(168,85,247,0.1)', color: '#A855F7', fontWeight: 700 }}>한마디</span>}
+                      {postType === 'short' && <span style={{ fontSize: 9, padding: '1px 4px', borderRadius: 3, background: 'rgba(168,85,247,0.1)', color: 'var(--accent-purple)', fontWeight: 700 }}>한마디</span>}
                       <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{timeAgo(post.created_at)}</span>
                     </div>
                   </div>

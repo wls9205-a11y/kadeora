@@ -332,7 +332,7 @@ const pillarBadgeStyle: React.CSSProperties = {
   padding: '2px 6px',
   borderRadius: 4,
   background: 'rgba(168,85,247,0.15)',
-  color: '#a78bfa',
+  color: 'var(--accent-purple)',
   flexShrink: 0,
 };
 

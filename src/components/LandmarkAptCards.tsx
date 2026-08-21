@@ -27,7 +27,7 @@ export default function LandmarkAptCards() {
             <div style={{ padding: '8px 12px' }}>
               <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.name}</div>
               <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>{a.region} {a.district}</div>
-              {a.avg_price_100m && <div style={{ fontSize: 12, fontWeight: 600, color: '#E24B4A', marginTop: 4 }}>{a.avg_price_100m}</div>}
+              {a.avg_price_100m && <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--accent-red)', marginTop: 4 }}>{a.avg_price_100m}</div>}
               {a.nearby_station && <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}>🚇 {a.nearby_station}</div>}
             </div>
           </Link>

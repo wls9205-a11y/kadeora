@@ -952,7 +952,7 @@ export default async function AptUnifiedPage({ params }: Props) {
       </div>
 
       {/* Features */}
-      {features.length > 0 && <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 14 }}>{features.map((f: any, i: number) => <span key={i} style={{ padding: '4px 10px', borderRadius: 'var(--radius-lg)', fontSize: 'var(--fs-xs)', fontWeight: 600, background: 'rgba(59,123,246,0.1)', color: '#6CB4FF', border: '1px solid rgba(59,123,246,0.15)' }}>{String(f)}</span>)}</div>}
+      {features.length > 0 && <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 14 }}>{features.map((f: any, i: number) => <span key={i} style={{ padding: '4px 10px', borderRadius: 'var(--radius-lg)', fontSize: 'var(--fs-xs)', fontWeight: 600, background: 'rgba(59,123,246,0.1)', color: 'var(--brand)', border: '1px solid rgba(59,123,246,0.15)' }}>{String(f)}</span>)}</div>}
 
       {/* 분양가 범위 바 + D-day 위젯 */}
       {((site?.price_min && site?.price_max) || sub) && (
@@ -968,7 +968,7 @@ export default async function AptUnifiedPage({ params }: Props) {
             const ppMax = sub?.price_per_pyeong_max || 0;
             const isEstimated = sub?.price_source === 'estimated';
             // 가격 등급 (만원 단위)
-            const tier = pAvg >= 120000 ? { label: '12억+', color: '#FF6B6B' } : pAvg >= 90000 ? { label: '9억대', color: '#FB923C' } : pAvg >= 60000 ? { label: '6억대', color: '#FBBF24' } : pAvg >= 30000 ? { label: '3억대', color: 'var(--brand)' } : { label: '3억 미만', color: 'var(--accent-green)' };
+            const tier = pAvg >= 120000 ? { label: '12억+', color: 'var(--accent-red)' } : pAvg >= 90000 ? { label: '9억대', color: 'var(--accent-orange)' } : pAvg >= 60000 ? { label: '6억대', color: '#FBBF24' } : pAvg >= 30000 ? { label: '3억대', color: 'var(--brand)' } : { label: '3억 미만', color: 'var(--accent-green)' };
             return (
               <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-sm)' }}>
@@ -1242,7 +1242,7 @@ export default async function AptUnifiedPage({ params }: Props) {
             const dev = sub.developer_nm || site?.developer || '';
             const isJohap = dev.includes('조합') || dev.includes('정비');
             const isPublic = dev.includes('공사') || dev.includes('LH') || dev.includes('SH');
-            const devType = isJohap ? { label: '재개발/재건축 조합', color: '#FB923C' } : isPublic ? { label: '공공 시행', color: 'var(--accent-green)' } : null;
+            const devType = isJohap ? { label: '재개발/재건축 조합', color: 'var(--accent-orange)' } : isPublic ? { label: '공공 시행', color: 'var(--accent-green)' } : null;
             if (!devType) return null;
             return (
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, marginBottom: 'var(--sp-sm)', padding: '4px 10px', borderRadius: 'var(--radius-xs)', background: `${devType.color}12`, fontSize: 11 }}>
@@ -1700,7 +1700,7 @@ export default async function AptUnifiedPage({ params }: Props) {
         <div className="apt-card"><h2 className="apt-section-title">재개발 진행 현황</h2>
           <div className="apt-stages">{STAGES.map((s, i) => <div key={s} style={{ background: i <= ci ? (i === ci ? '#B794FF' : 'rgba(183,148,255,0.2)') : 'var(--bg-hover)', color: i === ci ? 'var(--bg-base)' : i < ci ? '#B794FF' : 'var(--text-tertiary)' }}>{s.replace('사업시행인가', '시행인가').replace('정비구역지정', '구역지정')}</div>)}</div>
           <div style={{ height: 8, background: 'var(--border)', borderRadius: 4, overflow: 'hidden', marginBottom: 6 }}><div style={{ height: '100%', width: `${pct}%`, borderRadius: 4, background: '#B794FF' }} /></div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}><span>구역지정</span><span style={{ color: '#B794FF', fontWeight: 700 }}>{redevStage} ({pct}%)</span><span>준공</span></div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}><span>구역지정</span><span style={{ color: 'var(--accent-purple)', fontWeight: 700 }}>{redevStage} ({pct}%)</span><span>준공</span></div>
           {redev.ai_summary && <div style={{ marginTop: 10, padding: 'var(--sp-md) var(--card-p)', borderRadius: 'var(--radius-md)', background: 'linear-gradient(135deg, var(--accent-blue-bg), rgba(52,211,153,0.06))', border: '1px solid rgba(96,165,250,0.15)' }}><div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--accent-blue)', marginBottom: 3 }}>AI 분석</div><div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', lineHeight: 1.5 }}>{redev.ai_summary}</div></div>}
           {[redev.constructor && ['시공사', redev.constructor], redev.developer && ['시행사', redev.developer], redev.total_households && ['세대수', `${redev.total_households.toLocaleString()}세대`], (redev as any).area_sqm && ['면적', `${((redev as any).area_sqm / 1000).toFixed(0)}천m²`]].filter(Boolean).map(([l, v]: [string, string]) => <div key={l} style={{ ...rw, borderBottom: 'none' }}><span style={rl}>{l}</span><span style={rv}>{v}</span></div>)}
           {redev.notes && !redev.ai_summary && <div style={{ padding: '6px 8px', borderLeft: '2px solid rgba(183,148,255,0.25)', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.5, marginTop: 6 }}>{redev.notes}</div>}

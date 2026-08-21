@@ -235,7 +235,7 @@ export default async function RegionLandingPage({ params }: Props) {
             const items = [
               { label: '청약', count: data.subscriptions.length, color: 'var(--accent-blue)' },
               { label: '실거래', count: data.transactions.length, color: 'var(--accent-green)' },
-              { label: '재개발', count: data.redevelopments.length, color: '#FB923C' },
+              { label: '재개발', count: data.redevelopments.length, color: 'var(--accent-orange)' },
               { label: '미분양', count: data.unsolds.length, color: 'var(--accent-red)' },
             ];
             const total = items.reduce((s, i) => s + i.count, 0) || 1;
@@ -266,7 +266,7 @@ export default async function RegionLandingPage({ params }: Props) {
           {[
             { icon: '📋', label: '청약', count: data.subscriptions.length, max: 500, color: 'var(--accent-blue)' },
             { icon: '💰', label: '실거래', count: data.transactions.length, max: 1000, color: 'var(--accent-green)' },
-            { icon: '🏗️', label: '재개발', count: data.redevelopments.length, max: 50, color: '#FB923C' },
+            { icon: '🏗️', label: '재개발', count: data.redevelopments.length, max: 50, color: 'var(--accent-orange)' },
             { icon: '🏚️', label: '미분양', count: data.unsolds.length, max: 50, color: 'var(--accent-red)' },
           ].map(s => (
             <div key={s.label} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '10px 12px' }}>

@@ -58,7 +58,7 @@ export default function StockIssueCardV2({ data, commentCount = 0, commentHot = 
           <span style={{ fontSize: 12.5, fontWeight: 500, lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {data.name}
           </span>
-          <span style={{ fontSize: 11, color: '#9CA3AF', lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          <span style={{ fontSize: 11, color: 'var(--text-tertiary)', lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             {data.market}{data.sector ? ` · ${data.sector}` : ''}
           </span>
         </span>

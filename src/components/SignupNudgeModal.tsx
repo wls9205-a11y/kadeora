@@ -249,7 +249,7 @@ export default function SignupNudgeModal() {
         </button>
 
         {loginError && (
-          <p style={{ margin: '0 0 12px', padding: '8px 12px', background: 'rgba(239, 68, 68, 0.1)', color: '#dc2626', borderRadius: 8, fontSize: 'var(--fs-xs, 12px)', textAlign: 'center' }}>
+          <p style={{ margin: '0 0 12px', padding: '8px 12px', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--accent-red)', borderRadius: 8, fontSize: 'var(--fs-xs, 12px)', textAlign: 'center' }}>
             {loginError}
           </p>
         )}

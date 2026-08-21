@@ -177,7 +177,7 @@ export default async function RegionRedevPage({ params }: Props) {
           <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 600 }}>전체 구역</div>
         </div>
         {redevCount > 0 && <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 18, fontWeight: 900, color: '#8B5CF6' }}>{redevCount}</div>
+          <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--accent-purple)' }}>{redevCount}</div>
           <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 600 }}>재개발</div>
         </div>}
         {rebuildCount > 0 && <div style={{ textAlign: 'center' }}>

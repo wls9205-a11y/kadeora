@@ -122,7 +122,7 @@ export default function AptThumbnailCard({
           {name}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 1 }}>
-          <span style={{ fontSize: 11, color: '#6B7280', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <span style={{ fontSize: 11, color: 'var(--text-tertiary)', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {location ?? ''}
             {houseTy ? ` · ${houseTy}` : ''}
           </span>

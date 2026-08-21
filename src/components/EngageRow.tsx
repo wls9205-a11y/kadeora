@@ -27,7 +27,7 @@ export default function EngageRow({ views, comments, interest, style }: EngageRo
         <span style={{ width: 1, height: 14, background: 'var(--border)' }} />
       )}
       {(comments !== undefined && comments > 0) && (
-        <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 'var(--fs-sm)', fontWeight: 700, color: '#A78BFA' }}>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--accent-purple)' }}>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           {fmt(comments)}
         </span>

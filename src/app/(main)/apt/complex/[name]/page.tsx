@@ -678,7 +678,7 @@ export default async function ComplexDetailPage({ params }: Props) {
           borderLeft: '3px solid #f97316',
         }}>
           <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 600, marginBottom: 'var(--sp-xs)' }}>🧡 월세</div>
-          <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 900, color: '#f97316' }}>
+          <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 900, color: 'var(--accent-orange)' }}>
             {latestMonthly ? `${latestMonthly.monthly_rent}만` : '—'}
           </div>
           {latestMonthly && <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}>보증 {fmtAmount(latestMonthly.deposit)}</div>}
@@ -793,7 +793,7 @@ export default async function ComplexDetailPage({ params }: Props) {
                     color: isJeonse ? 'var(--brand)' : '#f97316',
                   }}>{isJeonse ? '전세' : '월세'}</span>
                   <span style={{ fontWeight: 800, color: 'var(--text-primary)' }}>
-                    {fmtAmount(r.deposit)}{!isJeonse && r.monthly_rent > 0 ? <span style={{ color: '#f97316' }}>/{r.monthly_rent}만</span> : ''}
+                    {fmtAmount(r.deposit)}{!isJeonse && r.monthly_rent > 0 ? <span style={{ color: 'var(--accent-orange)' }}>/{r.monthly_rent}만</span> : ''}
                   </span>
                 </div>
               </div>

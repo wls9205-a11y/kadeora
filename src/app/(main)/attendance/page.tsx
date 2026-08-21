@@ -93,7 +93,7 @@ export default function AttendancePage() {
         {reward && (
           <div style={{
             marginTop: 12, padding: 10, borderRadius: 'var(--radius-md)',
-            background: 'rgba(16,185,129,0.1)', color: '#10B981', fontSize: 13, fontWeight: 600,
+            background: 'rgba(16,185,129,0.1)', color: 'var(--accent-green)', fontSize: 13, fontWeight: 600,
           }}>
             🎉 +{reward.points}P {reward.bonus && `(${reward.bonus})`}
           </div>

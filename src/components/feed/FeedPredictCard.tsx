@@ -81,7 +81,7 @@ export default function FeedPredictCard({ post }: { post: PostWithProfile }) {
             <span style={{ fontSize: 12, color: 'var(--text-primary)', fontWeight: 600 }}>{nickname}</span>
             <span style={{
               padding: '1px 5px', borderRadius: 4, fontSize: 9, fontWeight: 700,
-              background: 'rgba(168,85,247,0.1)', color: '#A855F7',
+              background: 'rgba(168,85,247,0.1)', color: 'var(--accent-purple)',
             }}>🔮 예측</span>
           </div>
           <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{timeAgo(post.created_at)}</span>

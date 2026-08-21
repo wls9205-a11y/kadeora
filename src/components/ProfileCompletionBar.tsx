@@ -51,7 +51,7 @@ export default function ProfileCompletionBar() {
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
         <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>프로필 완성도 {pct}%</span>
-        <span style={{ fontSize: 11, color: '#10B981', fontWeight: 600 }}>자기소개 작성하면 +200P 🎁</span>
+        <span style={{ fontSize: 11, color: 'var(--accent-green)', fontWeight: 600 }}>자기소개 작성하면 +200P 🎁</span>
       </div>
       <div style={{ height: 6, borderRadius: 4, background: 'var(--bg-hover)', overflow: 'hidden', marginBottom: 8 }}>
         <div style={{ height: '100%', width: `${pct}%`, background: pct === 100 ? '#10B981' : '#3B82F6', borderRadius: 4, transition: 'width 0.5s' }} />
@@ -62,7 +62,7 @@ export default function ProfileCompletionBar() {
           return isDone ? (
             <span key={s.key} style={{
               padding: '3px 8px', borderRadius: 'var(--radius-md)', fontSize: 10, fontWeight: 600,
-              background: 'rgba(16,185,129,0.1)', color: '#10B981',
+              background: 'rgba(16,185,129,0.1)', color: 'var(--accent-green)',
               border: '1px solid rgba(16,185,129,0.2)',
             }}>
               ✓ {s.label}

@@ -134,7 +134,7 @@ export function InterestRegisterHero({ aptId, aptName, aptSlug, status, isLogged
         카카오톡 문의
       </a>
       {err && (
-        <div style={{ width: '100%', fontSize: 12, color: '#FF6B6B', marginTop: 4 }}>{err}</div>
+        <div style={{ width: '100%', fontSize: 12, color: 'var(--accent-red)', marginTop: 4 }}>{err}</div>
       )}
       {/* Phase 5 B2: 등록 완료 후 가점 매칭 follow-up CTA */}
       {done && isLoggedIn && (

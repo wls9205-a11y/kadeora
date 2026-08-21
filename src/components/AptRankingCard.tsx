@@ -3,11 +3,11 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
 const TYPES = [
-  { key: 'price_up', label: '🔥 상승률 TOP', color: '#E24B4A' },
-  { key: 'price_down', label: '📉 하락률 TOP', color: '#3B7BF6' },
+  { key: 'price_up', label: '🔥 상승률 TOP', color: 'var(--accent-red)' },
+  { key: 'price_down', label: '📉 하락률 TOP', color: 'var(--brand)' },
   { key: 'trade_volume', label: '📊 거래량 TOP', color: 'var(--accent-green)' },
   { key: 'jeonse_ratio', label: '🏠 전세가율 TOP', color: '#FBB724' },
-  { key: 'expensive', label: '💎 최고가 TOP', color: '#B794FF' },
+  { key: 'expensive', label: '💎 최고가 TOP', color: 'var(--accent-purple)' },
 ];
 
 interface Apt { apt_name: string; sigungu: string; region_nm: string; latest_sale_price: number; avg_sale_price_pyeong: number; price_change_1y: number; sale_count_1y: number; jeonse_ratio: number; }
