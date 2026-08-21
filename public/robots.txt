@@ -37,7 +37,9 @@ Disallow: /apt/feed
 Disallow: /apt/unsold-deals
 Disallow: /apt/big-events
 Disallow: /apt/tabs
-Disallow: /apt/data
+# s280: /apt/data 는 위 공통 섹션에 Allow: /apt/data 로 명시돼있고 실제로 title/설명/
+# canonical/JSON-LD 7개가 다 갖춰진 정상 콘텐츠 페이지 — s235 dead-routes 정리 때
+# 잘못 같이 묶여 Allow/Disallow 충돌이 나던 것을 제거.
 
 # ===== Google =====
 User-agent: Googlebot
@@ -181,6 +183,7 @@ Disallow: /api/
 
 # ===== Sitemaps =====
 Sitemap: https://kadeora.app/sitemap.xml
+Sitemap: https://kadeora.app/image-sitemap.xml
 Sitemap: https://kadeora.app/news-sitemap.xml
 Sitemap: https://kadeora.app/sitemap-region-hubs.xml
 Host: https://kadeora.app

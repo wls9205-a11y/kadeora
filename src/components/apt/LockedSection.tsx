@@ -45,12 +45,12 @@ export function LockedSection({
         {children}
       </div>
       <div className="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-sm rounded-xl">
-        <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 max-w-sm shadow-xl border border-slate-200 dark:border-slate-700 mx-4">
+        <div className="bg-white rounded-2xl p-6 max-w-sm shadow-xl border border-slate-200 mx-4">
           <div className="text-2xl mb-2" aria-hidden="true">
             ⬢
           </div>
-          <h3 className="font-bold text-base mb-1 text-slate-900 dark:text-slate-100">{label}</h3>
-          <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+          <h3 className="font-bold text-base mb-1 text-slate-900">{label}</h3>
+          <p className="text-sm text-slate-600 mb-4">
             1탭 가입하면 즉시 확인 + D-day 알림 무료
           </p>
           <button

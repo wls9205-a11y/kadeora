@@ -85,13 +85,13 @@ export function PrimaryCTABar({
           onClick={() => !submitting && setOpen(false)}
         >
           <div
-            className="bg-white dark:bg-slate-900 w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl"
+            className="bg-white w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             {!done ? (
               <>
                 <h3 className="font-bold text-lg mb-1">관심 단지 등록</h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                <p className="text-sm text-slate-600 mb-4">
                   <b>{siteName}</b> 청약 D-day, 당첨자 발표 등 주요 일정을 카카오톡으로 알려드립니다.
                 </p>
 
@@ -113,13 +113,13 @@ export function PrimaryCTABar({
                     onChange={(e) => setConsentThirdParty(e.target.checked)}
                     className="mt-1"
                   />
-                  <span className="text-sm text-slate-600 dark:text-slate-400">
+                  <span className="text-sm text-slate-600">
                     (선택) 분양 대행사에 정보 제공 동의 — 모델하우스 방문·평형 안내
                   </span>
                 </label>
 
                 {error && (
-                  <div className="text-sm text-red-600 dark:text-red-400 mb-3">{error}</div>
+                  <div className="text-sm text-red-600 mb-3">{error}</div>
                 )}
 
                 <button
@@ -142,7 +142,7 @@ export function PrimaryCTABar({
                   ✓
                 </div>
                 <h3 className="font-bold text-lg mb-1">등록 완료</h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400">
+                <p className="text-sm text-slate-600">
                   카카오톡 알림으로 일정을 안내드립니다 · 50P 적립
                 </p>
               </div>

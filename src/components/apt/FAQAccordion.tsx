@@ -15,11 +15,11 @@ export function FAQAccordion({ faqs }: { faqs: Array<{ q: string; a: string }> }
         return (
           <div
             key={idx}
-            className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden bg-white dark:bg-slate-900"
+            className="border border-slate-200 rounded-xl overflow-hidden bg-white"
           >
             <button
               onClick={() => setOpenIdx(isOpen ? null : idx)}
-              className="w-full text-left flex items-center justify-between gap-2 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50"
+              className="w-full text-left flex items-center justify-between gap-2 px-4 py-3 hover:bg-slate-50"
               aria-expanded={isOpen}
             >
               <span className="font-medium text-sm sm:text-base">{f.q}</span>
@@ -33,7 +33,7 @@ export function FAQAccordion({ faqs }: { faqs: Array<{ q: string; a: string }> }
               </span>
             </button>
             {isOpen && (
-              <div className="px-4 pb-4 pt-1 text-sm text-slate-600 dark:text-slate-300 leading-relaxed border-t border-slate-100 dark:border-slate-800">
+              <div className="px-4 pb-4 pt-1 text-sm text-slate-600 leading-relaxed border-t border-slate-100">
                 {f.a}
               </div>
             )}

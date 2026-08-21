@@ -54,9 +54,9 @@ export default function AdBanner() {
   const ad = ads[index];
 
   const badgeStyles: Record<string, { bg: string; color: string }> = {
-    ad:       { bg: 'var(--bg-warning, #78350F)', color: 'var(--text-warning, #FBBF24)' },
-    urgent:   { bg: 'var(--bg-danger, #7F1D1D)',  color: 'var(--text-danger, #FCA5A5)' },
-    upcoming: { bg: 'var(--bg-info, #1E3A5F)',     color: 'var(--text-info, #60A5FA)' },
+    ad:       { bg: 'var(--warning-bg)', color: 'var(--warning)' },
+    urgent:   { bg: 'var(--error-bg)',   color: 'var(--error)' },
+    upcoming: { bg: 'var(--info-bg)',    color: 'var(--info)' },
   };
   const bs = badgeStyles[ad.badgeType] || badgeStyles.upcoming;
 
@@ -92,8 +92,8 @@ export default function AdBanner() {
                 {ad.subtitle.split(' · ').map((s, i) => (
                   <span key={i} style={{
                     fontSize: 10, padding: '3px 8px', borderRadius: 'var(--radius-sm)', fontWeight: 500,
-                    color: i === 0 ? 'var(--text-info)' : i === 1 ? 'var(--text-success)' : 'var(--text-tertiary)',
-                    background: i === 0 ? 'var(--bg-info)' : i === 1 ? 'var(--bg-success)' : 'var(--bg-hover)',
+                    color: i === 0 ? 'var(--info)' : i === 1 ? 'var(--success)' : 'var(--text-tertiary)',
+                    background: i === 0 ? 'var(--info-bg)' : i === 1 ? 'var(--success-bg)' : 'var(--bg-hover)',
                   }}>{s}</span>
                 ))}
               </div>

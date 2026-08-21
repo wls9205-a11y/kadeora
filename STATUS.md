@@ -1,3 +1,152 @@
+## S2-잔여 (2026-08-21) — 이모지 · 카카오 CTA · https 승격
+
+- 상세 페이지 이모지 122자 → 3자. 남은 3개는 지도(카카오/네이버)·청약홈 원문 링크분으로 의도적 유지
+  - 섹션 h2 8개를 SectionHeader eyebrow 로 교체: SUPPLY/LOCATION/SCHEDULE/NOTICE/COMMENTS/FAQ/ANALYSIS/NEARBY
+  - eyebrow 문구가 지시서에 없는 나머지 h2 9개는 이모지만 제거하고 apt-section-title 유지
+  - 데이터 라벨 이모지 47줄 제거. KpiCards.icon 필드, tier.emoji, devType.icon,
+    categoryIcons 맵은 필드째 삭제 (빈 문자열을 남기지 않음)
+  - 아이콘 라이브러리 신규 도입 0건
+- 카카오 채널 ID 를 constants 단일 출처로: KAKAO_CHANNEL_ID / _URL / _CHAT_URL
+  KakaoChannelAddModal · MarketingConsentModal 이 import 하도록 변경 (같은 값 2곳 박힘 해소)
+- 상세 보조 CTA 추가: InterestRegisterHero 안에 '카카오톡 문의' 텍스트 링크
+  (pf.kakao.com/_NFxdxhX/chat). 주 CTA(관심 등록)와 경쟁하지 않도록 버튼이 아닌 링크
+- layout.tsx Organization JSON-LD sameAs 의 pf.kakao.com http → https. 전수 확인 결과 이 1건뿐
+
+### Architecture Rule 추가
+- #73 이모지를 UI 라벨·아이콘으로 쓰지 않는다. OS별 렌더가 다르고 스크린리더가 오낭독한다.
+  외부 링크 식별용은 예외
+- #74 외부 서비스 식별자(채널 ID·계정 ID)는 constants 한 곳에서만 정의한다
+
+---
+
+## S2 (2026-08-21) — 카드 · 진행 눈금자
+
+- LifecycleRail 신설. 단계 결정 우선순위: apt_subscriptions 날짜 파생 > lifecycle_stage > 미표시.
+  날짜 비교는 'YYYY-MM-DD' 문자열 사전순 (Date 객체 UTC/KST 밀림 회피)
+  레일 미표시 site_type: unsold_active / landmark_active / active_trade / redevelopment_active
+- SectionHeader/SectionLink 신설. /apt 4개 섹션을 eyebrow(Mono·uppercase·--brand) + H2 + 텍스트링크로 통일
+- SubscriptionCard/AptCardCompact 하단에 미니 레일, 숫자에 --font-mono + tabular-nums
+- subscription-badge: hex 12개 제거 → 상태 토큰(--status-open/soon/fcfs/closed) 매핑
+- 상세 페이지: H1 2개 → 1개(AptHero h1 → div), 세대수 5회 → 규모/일반분양 2행(공급 정보 표),
+  일정 3벌 → 풀 레일 1 + 날짜표 1, 관심등록 전체 폼(알림·가점)은 접이식으로 하단 이동
+- CARDERA → KADEORA 오탈자 2건 수정 (AptPriceTrendCard, LifecycleTimeline)
+- 분양가 미공개 시 지역 평균 대체값 제거 — 하이엔드 현장에 지역 전체 평균을 붙이면 오정보
+
+### 지시서와 다르게 처리
+- var(--rule) 은 정의된 적 없는 토큰이라 기존 var(--border) 사용 (신규 색 도입 0건 규칙 준수)
+- '카카오톡 문의' 보조 CTA 는 채널 URL 이 코드베이스에 없어 신설하지 않음.
+  기존 KakaoDirectShare 를 그대로 두고, 나머지 CTA 만 접거나 하단 이동
+- /apt 섹션 제목에는 원래 이모지가 없어 제거할 대상이 없었음 (상세 페이지 h2 이모지는 S2 범위 밖)
+
+### Architecture Rule 추가
+- #71 생애주기 단계는 저장값보다 일정 날짜에서 파생한 값을 우선한다. 둘 다 없으면 렌더하지 않는다
+- #72 같은 사실(세대수·일정)은 한 화면에서 한 번만 표기한다. 중복은 정보가 아니라 소음이다
+
+### 다음
+- S3에서 조감도/이미지 데이터 확보 후 카드 이미지 슬롯 추가
+- 상세 페이지 나머지 h2 이모지 정리
+
+---
+
+## S1 (2026-08-21) — 라이트 단일 모드 전환
+
+- globals.css: html.theme-light(91) / html[data-theme="light"](22) 변수 블록을 :root로 승격(113건 덮어쓰기).
+  남은 html.theme-light 오버라이드 45건은 선택자에서 테마 클래스만 떼어 무조건 적용으로 승격(파일 끝 배치),
+  html.theme-light.dark 2건은 사문화되어 삭제. theme-light/data-theme 잔여 0
+- 신규 토큰: --ink-*(5) / --status-*(4) / --rail-*(5). 신규 색상 도입 0건 (기존 다크값 승계 또는 var() 참조)
+- ThemeProvider.tsx 삭제. layout의 kd_theme 부트스트랩 스크립트·래퍼 제거 → FOUC 소멸.
+  themeColor 메타 정적 #F5F7FA 고정
+- Navigation: 테마 전환 UI 1곳·토글 버튼 2곳·useTheme·data-theme 강제 제거
+- TossModeInit: data-theme 강제 제거 (toss-mode 클래스만 유지)
+- apt-tabs.css: [data-theme="dark"] 2블록 + prefers-color-scheme:dark 2블록 삭제
+- dark: 변형 184개 토큰 제거(14파일). 사전 점검에서 고아 dark: 0건 확인 —
+  라이트 모드 렌더 결과와 동일
+- PageViewTracker: theme_mode 를 localStorage.kd_theme 기반으로 변경 (light/dark/unset).
+  테마 클래스 소멸로 기존 판별식이 항상 dark를 반환하게 됐고, 토글은 없앴지만 kd_theme 값은
+  브라우저에 남아 있어 기존 사용자 선호 분포를 계속 수집할 수 있음
+- --kakao-bg/--kakao-text는 카카오 브랜드 고정색이라 미변경
+- (후속) layout.tsx의 `<html className="dark">` 제거 + 사문화된 `.dark` 규칙 39건 삭제.
+  ThemeProvider가 라이트 선택 시 dark 클래스를 떼주던 구조였는데 Provider만 지워서
+  다크 전용 보정 39건이 라이트 화면에 상시 적용되던 상태였음.
+  특히 [style*='color:#991B1B'] → #F09595, [style*='color:#7F1D1D'] → #F4A4A4 2건은
+  밝은 배경에서 가독성 파괴. tailwind.config.ts의 darkMode:'class'는 dark: 변형 0건이라 유지
+- (후속2) 다크 잔재 전수 정리:
+  - manifest.json theme_color/background_color #08102A → #F5F7FA (PWA 스플래시·주소창이 다크였음)
+  - FirstMissionBanner #10B981 → var(--accent-green). 흰 배경 대비 약 2.4:1로 WCAG AA 미달이었음
+  - KakaoHeroCTA #050A18 → var(--ink-bg-deep), NoticeBanner #120E16/#050A18 →
+    var(--ink-bg)/var(--ink-bg-deep). 의도적 잉크 블록이라 값 유지하고 토큰화만
+  - 낡은 다크 폴백값: SmartSectionGate #050A18, InAppBrowserModal #0d0e14/#2a2b35(2곳) 교체
+  - 이미지 플레이스홀더: AptImageGallery 폴백 카드·갤러리 컨테이너, .hero-img → var(--bg-elevated).
+    폴백 카드는 흰 텍스트 전제였으므로 텍스트도 var(--text-primary)/var(--text-tertiary)로 함께 전환.
+    .hero-img::after 어두운 오버레이는 이미지 위 텍스트 가독성용이라 유지
+  - InterestRegistration 생년월일 input colorScheme 'dark' → 'light'
+
+### Architecture Rule 추가
+- #68 테마는 라이트 단일이다. dark:, prefers-color-scheme, data-theme, theme-light 를 새로 쓰지 않는다
+- #69 의도적으로 어두운 서피스는 --ink-* 토큰을 쓴다. 하드코딩 hex 금지
+- #70 테마 장치를 제거할 때는 클래스를 붙이는 쪽(layout)과 그 클래스에 걸린 CSS 규칙을
+  함께 확인한다. Provider만 지우면 클래스가 영구 고착된다
+
+### 다음
+- 배포 후 라이트 렌더 육안 확인 (피드·단지 상세·블로그·검색·어드민)
+- theme_mode 는 light/dark/unset 3값. unset = 한 번도 테마를 바꾼 적 없는 사용자
+
+---
+
+## S0 (2026-08-21) — 색인 차단 해소
+
+- apt/[id]: APT_COLS에 data_quality_score 누락 → 상세 약 5,800개 전부 noindex였음. 해소
+- apt/region/[region]: generateStaticParams 사전 인코딩 → 지역 허브 17개 404였음. 해소
+- PageViewTracker에 theme_mode 계측 추가 (S1 착수 판단용)
+- tailwind.config.js 삭제, BOM 정리, check:bom 스크립트 추가
+
+### Architecture Rule 추가
+- #63 select()에 없는 컬럼을 as any로 읽지 않는다. 조건 분기에 쓰는 컬럼은 반드시 조회 목록에 포함
+- #64 generateStaticParams는 디코딩된 원본 값을 반환한다. 인코딩은 Next.js가 한다
+- #65 설정 파일은 확장자 하나만 유지한다
+- #66 모든 텍스트 파일은 BOM 없는 UTF-8. npm run check:bom으로 검사
+- #67 generateStaticParams 수정 시 대상 배열의 실제 내용과 가드 조건을 함께 확인한다. tsc 통과는 빌드 성공을 보장하지 않는다
+
+### 다음
+- S0 배포 후 라이브 검증 (아래 명령)
+- 14일간 GSC 노출수 관찰. 감소 시 중단·재논의
+- ~~theme_mode 수집 1주 후 S1 착수 판단 (다크 25% 초과 시 중단)~~ →
+  계측 당일 착수했으므로 사전 데이터 없음. localStorage.kd_theme 기반 사후 관측으로 대체.
+  롤백 지점 pre-s1-20260821.
+
+---
+
+## [s270] 2026-08-15 — 전수조사 후속: OG dynamic font 400 근절 + 로그 통합 + related-blogs 재시도
+
+**배경**: Vercel 런타임 에러 7일 전수조사에서 `/api/og-apt` "Failed to load dynamic font for ●"
+400 에러 5,758회(1,696 users) + `�` 변형 934회(og-blog/apt/square/infographic) 확인.
+DB측 조치(autopublish 함수 패치·발행 3편 복구, fn_cron_failure_watch 신설, 크론 130/145
+스케줄 분산)는 웹 채팅 세션에서 Supabase 직접 수리 완료 — 이 커밋은 코드측 수정분.
+
+**수정**:
+1. `og-apt/route.tsx` — PLACE 카드에 하드코딩된 글리프 `●` 제거 → 순수 CSS 원으로 대체.
+   NotoSansKR-Bold.woff 서브셋에 U+25CF가 없어 satori가 매 렌더마다 Google Fonts dynamic
+   fetch(400)를 시도하던 것이 5,758회 에러의 근원. sanitizer는 데이터만 거르고 템플릿
+   자체 글리프는 못 거른다. (Rule #47 확장: 도형도 글리프 대신 CSS)
+2. `og-square/route.tsx`, `og-infographic/route.tsx` — `sanitizeForOG` 미적용 라우트에 적용
+   (title/items). `�` 계열 dynamic font 400 차단.
+3. `og-stock/route.tsx` — 매 요청 DIAG console.error → console.log 강등 (주 ~2,000행이
+   에러 클러스터 오염). 80자 chunk 분할 에러(m0~/s0~) → 2행 통합.
+4. `og/route.tsx`, `og-apt/route.tsx` — 동일하게 chunk 분할 로그 → 3행 통합 (에러 그룹
+   15개 → 3개로 수렴, 행당 300자는 Vercel 4KB 행 제한 내 안전).
+5. `lib/apt/related-blogs.ts` — 'TypeError: fetch failed'(7일 106회, 일시 커넥션 실패)에
+   1회 재시도(300ms 고정 지연) 추가. 폭주 방지 위해 재시도 1회로 제한.
+
+**미수정**: url.parse DEP0169 경고는 web-push@3.6.7 의존성 내부 — 자체 코드 아님, 무해.
+
+**검증**: `npx tsc --noEmit` 0 에러. 배포 후 확인 필요: /api/og-apt?card=place 렌더(CSS 원),
+Vercel 에러 클러스터 og-apt font 400 소멸 여부(24h), [og-stock] DIAG error 레벨 소멸.
+
+**남은 사용자 조치**: Anthropic API 크레딧 충전(issue-draft 7/31부터 정지), Kakao geocode
+키 403 원인 확인, GitHub PAT 로테이션(remote 평문 ghp_ revoke).
+
+---
+
 ## [Phase 0 후속] 2026-08-05 — naver-cafe-publish 코드 삭제 (Rule #19 3중 확인 완료)
 
 이전 Phase 0 진단([Phase 0] 항목 참조)에서 `naver-cafe-publish`가 oauth_tokens 미시딩으로

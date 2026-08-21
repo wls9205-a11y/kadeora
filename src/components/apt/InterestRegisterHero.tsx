@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { KAKAO_CHANNEL_CHAT_URL } from '@/lib/constants';
 
 interface Props {
   aptId: string | number;
@@ -116,6 +117,22 @@ export function InterestRegisterHero({ aptId, aptName, aptSlug, status, isLogged
       >
         {done ? '✓ 등록 완료' : loading ? '등록 중…' : isLoggedIn ? '관심 등록' : '로그인하고 등록'}
       </button>
+      {/* s2-잔여: 보조 CTA 는 카카오톡 1:1 문의 하나뿐이다. 주 CTA(관심 등록)와 경쟁시키지 않도록
+           버튼이 아닌 텍스트 링크로 둔다. 채널 ID 는 constants 단일 출처. */}
+      <a
+        href={KAKAO_CHANNEL_CHAT_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{
+          fontSize: 12,
+          fontWeight: 600,
+          color: 'var(--text-secondary)',
+          textDecoration: 'none',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        카카오톡 문의
+      </a>
       {err && (
         <div style={{ width: '100%', fontSize: 12, color: '#FF6B6B', marginTop: 4 }}>{err}</div>
       )}

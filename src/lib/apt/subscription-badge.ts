@@ -5,23 +5,26 @@
 import type { CSSProperties } from 'react';
 import {
   STATUS_LABEL,
-  STATUS_TONE,
   type SubscriptionStatus,
 } from '@/lib/apt/subscription-status';
 
-type Tone = (typeof STATUS_TONE)[SubscriptionStatus];
-
-const TONE_STYLE: Record<Tone, { bg: string; fg: string; border: string }> = {
-  red:    { bg: '#fef2f2', fg: '#b91c1c', border: '#fecaca' },
-  amber:  { bg: '#fffbeb', fg: '#b45309', border: '#fde68a' },
-  blue:   { bg: '#eff6ff', fg: '#1d4ed8', border: '#bfdbfe' },
-  green:  { bg: '#ecfdf5', fg: '#047857', border: '#a7f3d0' },
-  purple: { bg: '#f5f3ff', fg: '#6d28d9', border: '#ddd6fe' },
-  gray:   { bg: '#f9fafb', fg: '#4b5563', border: '#e5e7eb' },
+/**
+ * s2 — 배지 색을 토큰으로. hex 직접 사용 0건 (Architecture Rule #83).
+ * 상태 토큰 매핑: 접수중 --status-open · 임박 --status-soon ·
+ * 선착순(무순위) --status-fcfs · 마감 --status-closed.
+ */
+const STATUS_STYLE: Record<SubscriptionStatus, { bg: string; fg: string; border: string }> = {
+  open:           { bg: 'var(--accent-green-bg)',  fg: 'var(--status-open)',   border: 'var(--accent-green-border)' },
+  upcoming:       { bg: 'var(--accent-orange-bg)', fg: 'var(--status-soon)',   border: 'var(--border)' },
+  scheduled:      { bg: 'var(--accent-blue-bg)',   fg: 'var(--accent-blue)',   border: 'var(--border)' },
+  announced_wait: { bg: 'var(--accent-purple-bg)', fg: 'var(--accent-purple)', border: 'var(--border)' },
+  contract:       { bg: 'var(--accent-green-bg)',  fg: 'var(--accent-green)',  border: 'var(--accent-green-border)' },
+  leftover:       { bg: 'var(--brand-bg)',         fg: 'var(--status-fcfs)',   border: 'var(--brand-border)' },
+  closed:         { bg: 'var(--bg-elevated)',      fg: 'var(--status-closed)', border: 'var(--border)' },
 };
 
 export function statusBadgeStyle(status: SubscriptionStatus): CSSProperties {
-  const t = TONE_STYLE[STATUS_TONE[status]];
+  const t = STATUS_STYLE[status];
   return {
     display: 'inline-flex',
     alignItems: 'center',
@@ -32,6 +35,7 @@ export function statusBadgeStyle(status: SubscriptionStatus): CSSProperties {
     fontWeight: 700,
     lineHeight: 1.4,
     whiteSpace: 'nowrap',
+    fontVariantNumeric: 'tabular-nums',
     background: t.bg,
     color: t.fg,
     border: `1px solid ${t.border}`,
@@ -72,6 +76,8 @@ export function ddayStyle(dday: number | null): CSSProperties {
     fontSize: 11,
     fontWeight: 700,
     whiteSpace: 'nowrap',
-    color: urgent ? '#b91c1c' : soon ? '#b45309' : 'var(--text-secondary, #6b7280)',
+    fontFamily: 'var(--font-mono)',
+    fontVariantNumeric: 'tabular-nums',
+    color: urgent ? 'var(--accent-red)' : soon ? 'var(--status-soon)' : 'var(--text-secondary)',
   };
 }

@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   alternates: { canonical: SITE_URL + '/terms' },
   title: '이용약관',
   description: '카더라 서비스 이용약관',
+  robots: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large', 'max-video-preview': -1 },
   openGraph: { title: '이용약관', description: '카더라 서비스 이용약관', url: `${SITE_URL}/terms`, siteName: '카더라', locale: 'ko_KR', type: 'website' },
 };
 

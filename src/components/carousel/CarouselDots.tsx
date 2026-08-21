@@ -1,5 +1,5 @@
 // s262 Phase E — Carousel dots indicator.
-// 활성 14×6, 비활성 6×6, gap 5. 색 #DC2626 / var(--color-border-secondary).
+// 활성 14×6, 비활성 6×6, gap 5. 색 #DC2626 / var(--border-strong).
 
 type Props = {
   count: number;
@@ -35,7 +35,7 @@ export default function CarouselDots({ count, active, onJump }: Props) {
               width: isActive ? 14 : 6,
               height: 6,
               borderRadius: 3,
-              background: isActive ? '#DC2626' : 'var(--color-border-secondary, #E5E7EB)',
+              background: isActive ? '#DC2626' : 'var(--border-strong, #E5E7EB)',
               transition: 'width 160ms, background 160ms',
               padding: 0,
               border: 'none',

@@ -104,18 +104,18 @@ function renderCover(post: BlogRow): React.ReactElement {
       {/* 상단: 카테고리 배지(좌) + 브랜드 마크(우, 고정) */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ display: 'flex', gap: 8 }}>
-          <div style={{ background: '#FAC775', color: '#1A1A18', fontSize: 23, fontWeight: 800, padding: '7px 18px', borderRadius: 999 }}>{cat}</div>
-          {sub && <div style={{ background: 'rgba(255,255,255,0.14)', color: '#FFFFFF', fontSize: 22, fontWeight: 700, padding: '7px 16px', borderRadius: 999 }}>{sub}</div>}
+          <div style={{ display:'flex', background: '#FAC775', color: '#1A1A18', fontSize: 23, fontWeight: 800, padding: '7px 18px', borderRadius: 999 }}>{cat}</div>
+          {sub ? <div style={{ display:'flex', background: 'rgba(255,255,255,0.14)', color: '#FFFFFF', fontSize: 22, fontWeight: 700, padding: '7px 16px', borderRadius: 999 }}>{sub}</div> : null}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-          <div style={{ width: 26, height: 26, borderRadius: 7, background: '#FAC775' }} />
-          <div style={{ fontSize: 24, fontWeight: 900, color: '#FFFFFF', letterSpacing: -0.5 }}>카더라</div>
+          <div style={{ display:'flex', width: 26, height: 26, borderRadius: 7, background: '#FAC775' }} />
+          <div style={{ display:'flex', fontSize: 24, fontWeight: 900, color: '#FFFFFF', letterSpacing: -0.5 }}>카더라</div>
         </div>
       </div>
       {/* 제목 — 남는 세로 공간을 채워 정중앙 배치(네이버 1:1 크롭 안전). 대비 강화용 그림자. */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 20, paddingTop: 24, paddingBottom: 24 }}>
-        <div style={{ width: 64, height: 6, borderRadius: 3, background: '#FAC775' }} />
-        <div style={{ fontSize: titleFS, fontWeight: 900, color: '#FFFFFF', lineHeight: 1.2, letterSpacing: -1.5, textShadow: '0 2px 12px rgba(0,0,0,0.45)' }}>{title}</div>
+        <div style={{ display:'flex', width: 64, height: 6, borderRadius: 3, background: '#FAC775' }} />
+        <div style={{ display:'flex', fontSize: titleFS, fontWeight: 900, color: '#FFFFFF', lineHeight: 1.2, letterSpacing: -1.5, textShadow: '0 2px 12px rgba(0,0,0,0.45)' }}>{title}</div>
       </div>
       {/* 하단: 날짜 + 도메인 */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'rgba(255,255,255,0.58)', fontSize: 18, fontWeight: 700 }}>
@@ -140,7 +140,7 @@ function renderKeyPoints(post: BlogRow, card: number): React.ReactElement {
 
   return (
     <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', padding: 56, justifyContent: 'space-between' }}>
-      <div style={{ fontSize: 22, color: 'rgba(255,255,255,0.55)', fontWeight: 700, letterSpacing: 2 }}>{sectionTitle.toUpperCase()}</div>
+      <div style={{ display:'flex', fontSize: 22, color: 'rgba(255,255,255,0.55)', fontWeight: 700, letterSpacing: 2 }}>{sectionTitle.toUpperCase()}</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         {!useTldr ? (
           sliceArr.map((kp: any, i: number) => {
@@ -153,12 +153,12 @@ function renderKeyPoints(post: BlogRow, card: number): React.ReactElement {
             return (
               <div key={i} style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
                 <div style={{ flexShrink: 0, width: 36, height: 36, borderRadius: 8, background: '#FAC775', color: '#1A1A18', fontSize: 20, fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{num}</div>
-                <div style={{ fontSize: 26, fontWeight: 700, color: '#FFFFFF', lineHeight: 1.4, letterSpacing: -0.5 }}>{text.slice(0, 90)}</div>
+                <div style={{ display:'flex', fontSize: 26, fontWeight: 700, color: '#FFFFFF', lineHeight: 1.4, letterSpacing: -0.5 }}>{text.slice(0, 90)}</div>
               </div>
             );
           })
         ) : (
-          <div style={{ fontSize: 26, fontWeight: 600, color: 'rgba(255,255,255,0.85)', lineHeight: 1.5 }}>{tldrSrc ? tldrSrc.slice(0, 200) : '본문에서 자세히 확인하세요.'}</div>
+          <div style={{ display:'flex', fontSize: 26, fontWeight: 600, color: 'rgba(255,255,255,0.85)', lineHeight: 1.5 }}>{tldrSrc ? tldrSrc.slice(0, 200) : '본문에서 자세히 확인하세요.'}</div>
         )}
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'rgba(255,255,255,0.55)', fontSize: 16, fontWeight: 700 }}>
@@ -184,16 +184,16 @@ function renderCta(post: BlogRow): React.ReactElement {
   const buttonLabel = slug ? '단지 페이지로 →' : (hasTarget ? '더 알아보기 →' : '카더라 둘러보기 →');
   return (
     <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', padding: 56, justifyContent: 'space-between' }}>
-      <div style={{ fontSize: 22, color: 'rgba(26,26,24,0.55)', fontWeight: 800, letterSpacing: 2 }}>NEXT · 더 알아보기</div>
+      <div style={{ display:'flex', fontSize: 22, color: 'rgba(26,26,24,0.55)', fontWeight: 800, letterSpacing: 2 }}>NEXT · 더 알아보기</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-        <div style={{ width: 56, height: 4, background: '#1A1A18' }} />
-        <div style={{ fontSize: 32, fontWeight: 700, color: 'rgba(26,26,24,0.66)', letterSpacing: -0.5 }}>{headline}</div>
-        <div style={{ fontSize: target.length > 14 ? 56 : 72, fontWeight: 900, color: '#1A1A18', letterSpacing: -2.5, lineHeight: 1.05 }}>{target.slice(0, 24)}</div>
-        <div style={{ fontSize: 22, color: 'rgba(26,26,24,0.66)', fontWeight: 700 }}>{ctaUrl}</div>
+        <div style={{ display:'flex', width: 56, height: 4, background: '#1A1A18' }} />
+        <div style={{ display:'flex', fontSize: 32, fontWeight: 700, color: 'rgba(26,26,24,0.66)', letterSpacing: -0.5 }}>{headline}</div>
+        <div style={{ display:'flex', fontSize: target.length > 14 ? 56 : 72, fontWeight: 900, color: '#1A1A18', letterSpacing: -2.5, lineHeight: 1.05 }}>{target.slice(0, 24)}</div>
+        <div style={{ display:'flex', fontSize: 22, color: 'rgba(26,26,24,0.66)', fontWeight: 700 }}>{ctaUrl}</div>
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ background: '#1A1A18', color: '#FAC775', fontSize: 26, fontWeight: 900, padding: '14px 28px', borderRadius: 999, letterSpacing: -0.5 }}>{buttonLabel}</div>
-        <div style={{ fontSize: 18, color: '#1A1A18', fontWeight: 800 }}>kadeora.app</div>
+        <div style={{ display:'flex', background: '#1A1A18', color: '#FAC775', fontSize: 26, fontWeight: 900, padding: '14px 28px', borderRadius: 999, letterSpacing: -0.5 }}>{buttonLabel}</div>
+        <div style={{ display:'flex', fontSize: 18, color: '#1A1A18', fontWeight: 800 }}>kadeora.app</div>
       </div>
     </div>
   );
@@ -202,12 +202,12 @@ function renderCta(post: BlogRow): React.ReactElement {
 function renderFallback(slug: string | null): React.ReactElement {
   return (
     <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', padding: 56, justifyContent: 'space-between', background: '#1A1A18' }}>
-      <div style={{ fontSize: 22, color: '#FAC775', fontWeight: 800 }}>카더라 블로그</div>
+      <div style={{ display:'flex', fontSize: 22, color: '#FAC775', fontWeight: 800 }}>카더라 블로그</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-        <div style={{ width: 56, height: 4, background: '#FAC775' }} />
-        <div style={{ fontSize: 64, fontWeight: 900, color: '#FFFFFF', lineHeight: 1.1, letterSpacing: -2 }}>{slug ? slug : '카더라 콘텐츠'}</div>
+        <div style={{ display:'flex', width: 56, height: 4, background: '#FAC775' }} />
+        <div style={{ display:'flex', fontSize: 64, fontWeight: 900, color: '#FFFFFF', lineHeight: 1.1, letterSpacing: -2 }}>{slug ? slug : '카더라 콘텐츠'}</div>
       </div>
-      <div style={{ fontSize: 18, color: 'rgba(255,255,255,0.55)', fontWeight: 700 }}>kadeora.app · 주식·부동산·재테크</div>
+      <div style={{ display:'flex', fontSize: 18, color: 'rgba(255,255,255,0.55)', fontWeight: 700 }}>kadeora.app · 주식·부동산·재테크</div>
     </div>
   );
 }
@@ -293,8 +293,8 @@ export async function GET(req: NextRequest) {
       const fbImg = new ImageResponse(
         (
           <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#0F1B3E', color: '#fff', fontFamily: 'sans-serif' }}>
-            <div style={{ fontSize: 28, color: '#FBBF24', letterSpacing: 4, marginBottom: 16, fontWeight: 900 }}>KADEORA</div>
-            <div style={{ fontSize: 56, fontWeight: 900, letterSpacing: -1 }}>blog</div>
+            <div style={{ display:'flex', fontSize: 28, color: '#FBBF24', letterSpacing: 4, marginBottom: 16, fontWeight: 900 }}>KADEORA</div>
+            <div style={{ display:'flex', fontSize: 56, fontWeight: 900, letterSpacing: -1 }}>blog</div>
           </div>
         ),
         { width: SIDE, height: SIDE },

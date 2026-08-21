@@ -20,7 +20,7 @@ const REACTIONS = [
 type ReactionKey = typeof REACTIONS[number]['key'];
 
 const REACTION_COLORS: Record<string, string> = {
-  like: 'var(--text-brand)',
+  like: 'var(--brand)',
   fire: 'var(--accent-red)',
   think: 'var(--accent-yellow)',
   surprise: 'var(--accent-green)',

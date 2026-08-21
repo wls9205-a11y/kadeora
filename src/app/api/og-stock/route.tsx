@@ -71,6 +71,18 @@ const fmtCap = (n: number | null | undefined, ccy?: string | null): string => {
   return `${n.toLocaleString()}원`;
 };
 
+/* s280: ▲▼ 유니코드 화살표는 NotoSansKR-Bold.woff 서브셋에 없어 Satori 가 매번 dynamic
+   font fetch 를 시도했고, 이 서버리스 환경에서 항상 400 실패 → 카드 렌더링 자체가
+   throw 하고 폴백(심볼만 표시)으로 떨어지던 근본 원인 중 하나. 폰트에 의존하지 않는
+   순수 SVG 삼각형으로 교체. */
+function ArrowIcon({ dir, color, size = 20 }: { dir: 'up' | 'down' | 'flat'; color: string; size?: number }) {
+  if (dir === 'flat') {
+    return <svg width={size} height={size * 0.3} viewBox="0 0 20 6" style={{ display:'flex' }}><rect width="20" height="6" rx="3" fill={color} /></svg>;
+  }
+  const points = dir === 'up' ? '10,2 18,16 2,16' : '10,18 2,4 18,4';
+  return <svg width={size} height={size} viewBox="0 0 20 20" style={{ display:'flex' }}><polygon points={points} fill={color} /></svg>;
+}
+
 /* ── 5 카드 레이아웃 (1200×630) ── */
 
 function PriceCard(q: QuoteRow, ff: string) {
@@ -80,11 +92,11 @@ function PriceCard(q: QuoteRow, ff: string) {
   const isUp = chg > 0;
   const isDown = chg < 0;
   const accent = isUp ? '#FF4D4D' : isDown ? '#3478F6' : '#9CA3AF';
-  const arrow = isUp ? '▲' : isDown ? '▼' : '–';
+  const arrowDir: 'up' | 'down' | 'flat' = isUp ? 'up' : isDown ? 'down' : 'flat';
   const bg = `linear-gradient(135deg, #050811 0%, #0B1428 50%, #0F1B3E 100%)`;
   return (
     <div style={{ width:'100%', height:'100%', display:'flex', flexDirection:'column', background:bg, fontFamily: ff, padding:'52px 60px', position:'relative', overflow:'hidden' }}>
-      <div style={{ position:'absolute', top:'-25%', right:'-10%', width:'55%', aspectRatio:'1', borderRadius:'50%', background:`radial-gradient(circle,${accent}22 0%,transparent 65%)`, display:'flex' }} />
+      <div style={{ position:'absolute', top:-160, right:-120, width:660, height:660, borderRadius:'50%', background:`radial-gradient(circle,${accent}22 0%,transparent 65%)`, display:'flex' }} />
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', position:'relative', zIndex:2 }}>
         <div style={{ display:'flex', alignItems:'center', gap:10 }}>
           <span style={{ fontSize:24, fontWeight:900, color:'#00E5FF', letterSpacing:-.5 }}>카더라</span>
@@ -94,12 +106,15 @@ function PriceCard(q: QuoteRow, ff: string) {
         </div>
       </div>
       <div style={{ flex:1, display:'flex', flexDirection:'column', justifyContent:'center', position:'relative', zIndex:2 }}>
-        <div style={{ fontSize:24, color:'rgba(255,255,255,.55)', fontWeight:700, marginBottom:8, letterSpacing:1 }}>{q.symbol} · {safeStr(q.sector) || '주식'}</div>
-        <div style={{ fontSize:name.length > 14 ? 56 : 72, fontWeight:900, color:'#fff', letterSpacing:-2, lineHeight:1.05, marginBottom:18 }}>{name}</div>
+        <div style={{ display:'flex', fontSize:24, color:'rgba(255,255,255,.55)', fontWeight:700, marginBottom:8, letterSpacing:1 }}>{q.symbol} · {safeStr(q.sector) || '주식'}</div>
+        <div style={{ display:'flex', fontSize:name.length > 14 ? 56 : 72, fontWeight:900, color:'#fff', letterSpacing:-2, lineHeight:1.05, marginBottom:18 }}>{name}</div>
         <div style={{ display:'flex', alignItems:'baseline', gap:20 }}>
-          <div style={{ fontSize:96, fontWeight:900, color:'#fff', letterSpacing:-3, lineHeight:1 }}>{price > 0 ? fmtCur(price, q.currency) : '-'}</div>
+          <div style={{ display:'flex', fontSize:96, fontWeight:900, color:'#fff', letterSpacing:-3, lineHeight:1 }}>{price > 0 ? fmtCur(price, q.currency) : '-'}</div>
           {chg !== 0 && (
-            <div style={{ fontSize:36, fontWeight:900, color:accent, letterSpacing:-1 }}>{arrow} {Math.abs(chg).toFixed(2)}%</div>
+            <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+              <ArrowIcon dir={arrowDir} color={accent} size={30} />
+              <span style={{ fontSize:36, fontWeight:900, color:accent, letterSpacing:-1 }}>{Math.abs(chg).toFixed(2)}%</span>
+            </div>
           )}
         </div>
       </div>
@@ -115,7 +130,9 @@ function ChartCard(q: QuoteRow, ff: string) {
   const name = safeStr(q.name) || q.symbol;
   const chg = Number(q.change_pct) || 0;
   const isUp = chg > 0;
-  const accent = isUp ? '#FF4D4D' : chg < 0 ? '#3478F6' : '#9CA3AF';
+  const isDown = chg < 0;
+  const accent = isUp ? '#FF4D4D' : isDown ? '#3478F6' : '#9CA3AF';
+  const arrowDir: 'up' | 'down' | 'flat' = isUp ? 'up' : isDown ? 'down' : 'flat';
   const bg = `linear-gradient(160deg, #050811 0%, #0F1B3E 100%)`;
   // 미니 스파크라인 placeholder — 가짜 7포인트 생성, sign of chg 결정
   const seed = (q.symbol || '').charCodeAt(0) || 50;
@@ -129,12 +146,15 @@ function ChartCard(q: QuoteRow, ff: string) {
     <div style={{ width:'100%', height:'100%', display:'flex', flexDirection:'column', background:bg, fontFamily: ff, padding:'48px 56px' }}>
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:20 }}>
         <div style={{ display:'flex', flexDirection:'column' }}>
-          <div style={{ fontSize:18, color:'rgba(255,255,255,.55)', fontWeight:700, letterSpacing:1, marginBottom:4 }}>{q.symbol} · CHART</div>
-          <div style={{ fontSize:42, fontWeight:900, color:'#fff', letterSpacing:-1, lineHeight:1 }}>{name}</div>
+          <div style={{ display:'flex', fontSize:18, color:'rgba(255,255,255,.55)', fontWeight:700, letterSpacing:1, marginBottom:4 }}>{q.symbol} · CHART</div>
+          <div style={{ display:'flex', fontSize:42, fontWeight:900, color:'#fff', letterSpacing:-1, lineHeight:1 }}>{name}</div>
         </div>
         <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end' }}>
-          <div style={{ fontSize:36, fontWeight:900, color:'#fff', letterSpacing:-1 }}>{Number(q.price) ? fmtCur(Number(q.price), q.currency) : '-'}</div>
-          <div style={{ fontSize:18, fontWeight:900, color:accent }}>{isUp ? '▲' : chg < 0 ? '▼' : '–'} {Math.abs(chg).toFixed(2)}%</div>
+          <div style={{ display:'flex', fontSize:36, fontWeight:900, color:'#fff', letterSpacing:-1 }}>{Number(q.price) ? fmtCur(Number(q.price), q.currency) : '-'}</div>
+          <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+            <ArrowIcon dir={arrowDir} color={accent} size={16} />
+            <span style={{ fontSize:18, fontWeight:900, color:accent }}>{Math.abs(chg).toFixed(2)}%</span>
+          </div>
         </div>
       </div>
       <div style={{ flex:1, display:'flex', position:'relative', background:'rgba(255,255,255,.03)', border:'1px solid rgba(255,255,255,.08)', borderRadius:14, padding:24 }}>
@@ -174,21 +194,21 @@ function FinancialCard(q: QuoteRow, ff: string) {
     <div style={{ width:'100%', height:'100%', display:'flex', flexDirection:'column', background:bg, fontFamily: ff, padding:'48px 56px' }}>
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:24 }}>
         <div style={{ display:'flex', flexDirection:'column' }}>
-          <div style={{ fontSize:16, color:'#FFE000', fontWeight:900, letterSpacing:2, marginBottom:6 }}>FINANCIAL · 재무 핵심</div>
-          <div style={{ fontSize:42, fontWeight:900, color:'#fff', letterSpacing:-1, lineHeight:1.05 }}>{name}</div>
-          <div style={{ fontSize:16, color:'rgba(255,255,255,.45)', fontWeight:700, marginTop:4 }}>{q.symbol} · {safeStr(q.sector) || '-'}</div>
+          <div style={{ display:'flex', fontSize:16, color:'#FFE000', fontWeight:900, letterSpacing:2, marginBottom:6 }}>FINANCIAL · 재무 핵심</div>
+          <div style={{ display:'flex', fontSize:42, fontWeight:900, color:'#fff', letterSpacing:-1, lineHeight:1.05 }}>{name}</div>
+          <div style={{ display:'flex', fontSize:16, color:'rgba(255,255,255,.45)', fontWeight:700, marginTop:4 }}>{q.symbol} · {safeStr(q.sector) || '-'}</div>
         </div>
       </div>
       <div style={{ flex:1, display:'flex', flexDirection:'row', flexWrap:'wrap', gap:16 }}>
         {cells.map(([k, v, sub], i) => (
           <div key={i} style={{
-            width:'calc(50% - 8px)', flexGrow:1, padding:'24px 28px',
+            width:'48%', padding:'24px 28px',
             background:'rgba(255,255,255,.05)', border:'1px solid rgba(255,224,0,.25)', borderRadius:16,
             display:'flex', flexDirection:'column', justifyContent:'center',
           }}>
-            <div style={{ fontSize:15, color:'rgba(255,224,0,.85)', fontWeight:900, letterSpacing:1.5, marginBottom:8 }}>{k}</div>
-            <div style={{ fontSize:42, fontWeight:900, color:'#fff', letterSpacing:-1.5, lineHeight:1, marginBottom:6 }}>{v}</div>
-            <div style={{ fontSize:14, color:'rgba(255,255,255,.45)', fontWeight:700 }}>{sub}</div>
+            <div style={{ display:'flex', fontSize:15, color:'rgba(255,224,0,.85)', fontWeight:900, letterSpacing:1.5, marginBottom:8 }}>{k}</div>
+            <div style={{ display:'flex', fontSize:42, fontWeight:900, color:'#fff', letterSpacing:-1.5, lineHeight:1, marginBottom:6 }}>{v}</div>
+            <div style={{ display:'flex', fontSize:14, color:'rgba(255,255,255,.45)', fontWeight:700 }}>{sub}</div>
           </div>
         ))}
       </div>
@@ -214,9 +234,9 @@ function FlowCard(q: QuoteRow, ff: string) {
     <div style={{ width:'100%', height:'100%', display:'flex', flexDirection:'column', background:bg, fontFamily: ff, padding:'48px 56px' }}>
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:22 }}>
         <div style={{ display:'flex', flexDirection:'column' }}>
-          <div style={{ fontSize:16, color:ACC, fontWeight:900, letterSpacing:2, marginBottom:6 }}>FLOW · 수급 동향</div>
-          <div style={{ fontSize:40, fontWeight:900, color:'#fff', letterSpacing:-1, lineHeight:1.05 }}>{name}</div>
-          <div style={{ fontSize:16, color:'rgba(255,255,255,.45)', fontWeight:700, marginTop:4 }}>{q.symbol} · 매매주체별</div>
+          <div style={{ display:'flex', fontSize:16, color:ACC, fontWeight:900, letterSpacing:2, marginBottom:6 }}>FLOW · 수급 동향</div>
+          <div style={{ display:'flex', fontSize:40, fontWeight:900, color:'#fff', letterSpacing:-1, lineHeight:1.05 }}>{name}</div>
+          <div style={{ display:'flex', fontSize:16, color:'rgba(255,255,255,.45)', fontWeight:700, marginTop:4 }}>{q.symbol} · 매매주체별</div>
         </div>
         <div style={{ display:'flex', alignItems:'center', gap:8, padding:'7px 16px', background:`${ACC}1a`, border:`1px solid ${ACC}55`, borderRadius:999 }}>
           <span style={{ fontSize:14, fontWeight:900, color:ACC, letterSpacing:1 }}>실시간</span>
@@ -225,12 +245,12 @@ function FlowCard(q: QuoteRow, ff: string) {
       <div style={{ flex:1, display:'flex', flexDirection:'column', gap:14 }}>
         {flows.map((f) => (
           <div key={f.who} style={{ display:'flex', alignItems:'center', gap:18, padding:'18px 24px', background:'rgba(255,255,255,.04)', border:`1px solid ${f.color}40`, borderRadius:14 }}>
-            <div style={{ width:80, fontSize:20, fontWeight:900, color:'#fff', letterSpacing:-.3 }}>{f.who}</div>
+            <div style={{ display:'flex', width:80, fontSize:20, fontWeight:900, color:'#fff', letterSpacing:-.3 }}>{f.who}</div>
             <div style={{ flex:1, display:'flex', alignItems:'center', gap:10 }}>
               <div style={{ width:8, height:8, borderRadius:'50%', background:f.color, boxShadow:`0 0 8px ${f.color}` }} />
               <span style={{ fontSize:18, color:'rgba(255,255,255,.7)', fontWeight:700 }}>{f.dir}</span>
             </div>
-            <div style={{ fontSize:22, fontWeight:900, color:f.color, letterSpacing:-.5 }}>{f.val}</div>
+            <div style={{ display:'flex', fontSize:22, fontWeight:900, color:f.color, letterSpacing:-.5 }}>{f.val}</div>
           </div>
         ))}
       </div>
@@ -245,9 +265,9 @@ function FlowCard(q: QuoteRow, ff: string) {
 function AICard(q: QuoteRow, ff: string) {
   const name = safeStr(q.name) || q.symbol;
   const chg = Number(q.change_pct) || 0;
-  const sentiment = chg > 1 ? { lab: '긍정', color: '#00FF87', emoji: '▲' }
-                   : chg < -1 ? { lab: '주의', color: '#FF6B1A', emoji: '▼' }
-                   : { lab: '중립', color: '#FFE000', emoji: '=' };
+  const sentiment: { lab: string; color: string; dir: 'up' | 'down' | 'flat' } = chg > 1 ? { lab: '긍정', color: '#00FF87', dir: 'up' }
+                   : chg < -1 ? { lab: '주의', color: '#FF6B1A', dir: 'down' }
+                   : { lab: '중립', color: '#FFE000', dir: 'flat' };
   const summary = chg > 1
     ? `최근 강세 흐름이 이어지고 있습니다. 단기 모멘텀과 거래량 동향을 함께 점검하세요.`
     : chg < -1
@@ -256,20 +276,20 @@ function AICard(q: QuoteRow, ff: string) {
   const bg = `linear-gradient(150deg, #060B1F 0%, #0C1638 50%, #1B0E3A 100%)`;
   return (
     <div style={{ width:'100%', height:'100%', display:'flex', flexDirection:'column', background:bg, fontFamily: ff, padding:'52px 60px', position:'relative', overflow:'hidden' }}>
-      <div style={{ position:'absolute', top:'-30%', left:'-15%', width:'60%', aspectRatio:'1', borderRadius:'50%', background:`radial-gradient(circle,${sentiment.color}22 0%,transparent 65%)`, display:'flex' }} />
+      <div style={{ position:'absolute', top:-190, left:-180, width:720, height:720, borderRadius:'50%', background:`radial-gradient(circle,${sentiment.color}22 0%,transparent 65%)`, display:'flex' }} />
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', position:'relative', zIndex:2, marginBottom:24 }}>
         <div style={{ display:'flex', flexDirection:'column' }}>
-          <div style={{ fontSize:16, color:'#C084FC', fontWeight:900, letterSpacing:2, marginBottom:6 }}>AI · 한줄 분석</div>
-          <div style={{ fontSize:40, fontWeight:900, color:'#fff', letterSpacing:-1, lineHeight:1.05 }}>{name}</div>
+          <div style={{ display:'flex', fontSize:16, color:'#C084FC', fontWeight:900, letterSpacing:2, marginBottom:6 }}>AI · 한줄 분석</div>
+          <div style={{ display:'flex', fontSize:40, fontWeight:900, color:'#fff', letterSpacing:-1, lineHeight:1.05 }}>{name}</div>
         </div>
         <div style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 20px', background:`${sentiment.color}22`, border:`1px solid ${sentiment.color}80`, borderRadius:999 }}>
-          <span style={{ fontSize:18 }}>{sentiment.emoji}</span>
+          <ArrowIcon dir={sentiment.dir} color={sentiment.color} size={18} />
           <span style={{ fontSize:18, fontWeight:900, color:sentiment.color, letterSpacing:1 }}>{sentiment.lab}</span>
         </div>
       </div>
       <div style={{ flex:1, display:'flex', flexDirection:'column', justifyContent:'center', position:'relative', zIndex:2 }}>
-        <div style={{ width:48, height:5, background:sentiment.color, borderRadius:999, marginBottom:24 }} />
-        <div style={{ fontSize:36, fontWeight:800, color:'#fff', lineHeight:1.45, letterSpacing:-.8, wordBreak:'keep-all' }}>{summary}</div>
+        <div style={{ display:'flex', width:48, height:5, background:sentiment.color, borderRadius:999, marginBottom:24 }} />
+        <div style={{ display:'flex', fontSize:36, fontWeight:800, color:'#fff', lineHeight:1.45, letterSpacing:-.8, wordBreak:'keep-all' }}>{summary}</div>
       </div>
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', position:'relative', zIndex:2, paddingTop:14, borderTop:'0.5px solid rgba(255,255,255,.1)' }}>
         <span style={{ fontSize:14, color:'rgba(255,255,255,.45)', fontWeight:700 }}>{q.symbol} · AI 종목 한줄평</span>
@@ -283,11 +303,11 @@ function FallbackCard(symbol: string | null, ff: string) {
   const stockAccent = OG_CAT.stock.color;
   return (
     <div style={{ width:'100%', height:'100%', display:'flex', flexDirection:'column', background:'#0F1B3E', fontFamily: ff, padding:'56px 64px', justifyContent:'space-between' }}>
-      <div style={{ fontSize:22, color:stockAccent, fontWeight:900, letterSpacing:2 }}>{OG_CAT.stock.icon} 카더라 주식</div>
+      <div style={{ display:'flex', fontSize:22, color:stockAccent, fontWeight:900, letterSpacing:2 }}>{OG_CAT.stock.icon} 카더라 주식</div>
       <div style={{ display:'flex', flexDirection:'column', gap:18 }}>
-        <div style={{ width:60, height:5, background:stockAccent, borderRadius:999 }} />
-        <div style={{ fontSize:64, fontWeight:900, color:'#fff', letterSpacing:-2, lineHeight:1.05 }}>{symbol || '주식 종목'}</div>
-        <div style={{ fontSize:22, color:'rgba(255,255,255,.55)', fontWeight:700 }}>실시간 시세 · 차트 · 수급 · 재무 · AI 분석</div>
+        <div style={{ display:'flex', width:60, height:5, background:stockAccent, borderRadius:999 }} />
+        <div style={{ display:'flex', fontSize:64, fontWeight:900, color:'#fff', letterSpacing:-2, lineHeight:1.05 }}>{symbol || '주식 종목'}</div>
+        <div style={{ display:'flex', fontSize:22, color:'rgba(255,255,255,.55)', fontWeight:700 }}>실시간 시세 · 차트 · 수급 · 재무 · AI 분석</div>
       </div>
       <div style={{ display:'flex', justifyContent:'space-between' }}>
         <span style={{ fontSize:14, color:'rgba(255,255,255,.45)', fontWeight:700 }}>KOSPI · KOSDAQ · NASDAQ</span>
@@ -309,8 +329,8 @@ export async function GET(req: NextRequest) {
   const ff = fontData ? 'NotoSansKR, sans-serif' : 'sans-serif';
 
   // s263 Phase 2.1 후속: 진단 logging — single line 으로 모든 컨텍스트 노출.
-  // og-blog 회복 / og-stock 잔존 → trace 외 다른 root cause 식별 위해.
-  console.error(
+  // s270: console.error → console.log 강등 — 매 요청 기록되어 Vercel 에러 클러스터 오염 (주 ~2,000행)
+  console.log(
     `[og-stock] DIAG fontLoaded=${!!fontData} fontBytes=${fontData?.byteLength ?? 0} ` +
     `runtime=${process.env.NEXT_RUNTIME ?? 'unset'} cwd=${process.cwd()} ` +
     `card=${card} symbol=${symbol ?? 'null'}`
@@ -355,21 +375,18 @@ export async function GET(req: NextRequest) {
     const msg = (e?.message ?? 'n/a');
     const cls = (e?.constructor?.name ?? 'n/a');
     const code = (e as { code?: string })?.code ?? 'n/a';
-    console.error(`[og-stock] cls=${cls} code=${code} fontLoaded=${!!fontData} hasQuote=${!!quote} symbol=${symbol ?? 'null'} card=${card}`);
-    for (let i = 0; i < msg.length && i < 800; i += 80) {
-      console.error(`[og-stock] m${i / 80}=${msg.slice(i, i + 80)}`);
-    }
+    // s270: 80자 chunk 분할(m0~m9/s0~s5) → 2행 통합 — 분할 출력이 Vercel 에러 그룹 15개로 파편화되던 문제.
+    // Vercel 로그 행 제한은 4KB 수준이므로 300자 단일 행은 안전.
+    console.error(`[og-stock] cls=${cls} code=${code} fontLoaded=${!!fontData} hasQuote=${!!quote} symbol=${symbol ?? 'null'} card=${card} msg=${msg.slice(0, 300)}`);
     const stk = (e?.stack ?? '');
-    for (let i = 0; i < Math.min(stk.length, 480); i += 80) {
-      console.error(`[og-stock] s${i / 80}=${stk.slice(i, i + 80)}`);
-    }
+    if (stk) console.error(`[og-stock] stack=${stk.slice(0, 300)}`);
     // s263 Phase 2.1++: redirect 302 제거. simple ImageResponse fallback (1200x630, 영문).
     try {
       const fbImg = new ImageResponse(
         (
           <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#0F1B3E', color: '#fff', fontFamily: 'sans-serif' }}>
-            <div style={{ fontSize: 28, color: '#FBBF24', letterSpacing: 4, marginBottom: 16, fontWeight: 900 }}>KADEORA</div>
-            <div style={{ fontSize: 64, fontWeight: 900, letterSpacing: -1 }}>{symbol || 'stock'}</div>
+            <div style={{ display:'flex', fontSize: 28, color: '#FBBF24', letterSpacing: 4, marginBottom: 16, fontWeight: 900 }}>KADEORA</div>
+            <div style={{ display:'flex', fontSize: 64, fontWeight: 900, letterSpacing: -1 }}>{symbol || 'stock'}</div>
           </div>
         ),
         { width: 1200, height: 630 },

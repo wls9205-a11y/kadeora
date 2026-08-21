@@ -23,6 +23,20 @@ export interface RelatedBlogPost {
 
 const REVALIDATE = 900;
 
+// s270: 'TypeError: fetch failed' (일시적 커넥션 실패, 7일 106회) 대응 — 1회 재시도.
+// DB 과부하 시 폭주를 막기 위해 재시도는 1회·300ms 고정 지연으로 제한한다.
+async function withRetry<T = any>(fn: () => PromiseLike<T>): Promise<T> {
+  try {
+    return await fn();
+  } catch (e: any) {
+    if (String(e?.message ?? e).includes('fetch failed')) {
+      await new Promise((r) => setTimeout(r, 300));
+      return await fn();
+    }
+    throw e;
+  }
+}
+
 async function fetchRelatedUncached(aptIds: number[]): Promise<RelatedBlogPost[]> {
   try {
     const sb = getSupabaseAdmin();
@@ -32,13 +46,13 @@ async function fetchRelatedUncached(aptIds: number[]): Promise<RelatedBlogPost[]
     if (aptIds.length > 0) {
       // PostgREST 에서 jsonb 필드 비교는 ->> (text) 로 해야 한다.
       // -> 는 jsonb 를 반환해서 int 배열과 타입이 안 맞는다.
-      const { data, error } = await (sb as any)
+      const { data, error } = await withRetry<any>(() => (sb as any)
         .from('blog_posts')
         .select('id, slug, title, published_at, metadata')
         .eq('is_published', true)
         .in('metadata->>apt_id', aptIds.map(String))
         .order('published_at', { ascending: false })
-        .limit(6);
+        .limit(6));
       if (error) {
         console.error('[apt/related-blogs] mapped query error:', error.message);
       } else {
@@ -55,13 +69,13 @@ async function fetchRelatedUncached(aptIds: number[]): Promise<RelatedBlogPost[]
     if (mapped.length >= 4) return mapped.slice(0, 6);
 
     // 2) 부족하면 최근 청약 카테고리 분석글로 채운다 (빈 섹션 방지 — Rule #97)
-    const { data: recent, error: recentErr } = await (sb as any)
+    const { data: recent, error: recentErr } = await withRetry<any>(() => (sb as any)
       .from('blog_posts')
       .select('id, slug, title, published_at, metadata')
       .eq('is_published', true)
       .eq('category', 'apt')
       .order('published_at', { ascending: false })
-      .limit(12);
+      .limit(12));
 
     if (recentErr) {
       console.error('[apt/related-blogs] recent query error:', recentErr.message);

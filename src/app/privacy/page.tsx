@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: '개인정보처리방침',
   description: '카더라 개인정보처리방침',
   alternates: { canonical: `${SITE_URL}/privacy` },
+  robots: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large', 'max-video-preview': -1 },
   openGraph: { title: '개인정보처리방침', description: '카더라 개인정보처리방침', url: `${SITE_URL}/privacy`, siteName: '카더라', locale: 'ko_KR', type: 'website' },
 };
 

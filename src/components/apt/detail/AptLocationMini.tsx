@@ -12,7 +12,7 @@ export default function AptLocationMini({ address, latitude, longitude, nearbySt
   const hasCoords = typeof latitude === 'number' && typeof longitude === 'number';
 
   return (
-    <div className="apt-location-mini" style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: '10px 12px', borderRadius: 'var(--radius-md)', background: 'var(--bg-card)', border: '1px solid var(--border)', margin: '12px 0' }}>
+    <div className="apt-location-mini" style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: '10px 12px', borderRadius: 'var(--radius-md)', background: 'var(--bg-surface)', border: '1px solid var(--border)', margin: '12px 0' }}>
       {hasCoords && (
         <div
           className="apt-location-map-placeholder"

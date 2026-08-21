@@ -3,6 +3,7 @@ import { NextRequest } from 'next/server';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { OG_CAT as CAT } from '@/lib/og-tokens';
+import { sanitizeForOG } from '@/lib/og-sanitize';
 
 export const runtime = 'nodejs';
 export const maxDuration = 30;
@@ -64,7 +65,8 @@ export async function GET(req: NextRequest) {
     };
 
     const sp       = new URL(req.url).searchParams;
-    const title    = sp.get('title') ?? '';
+    // s270: sanitizeForOG 적용 — 서브셋 외 글자가 satori dynamic font fetch 400 유발 (og-blog/og-apt와 동일 규칙)
+    const title    = sanitizeForOG(sp.get('title') ?? '');
     const category = sp.get('category') ?? 'blog';
 
     const C   = CAT[category] ?? CAT.blog;
@@ -74,71 +76,45 @@ export async function GET(req: NextRequest) {
     const titleLine1 = title.length > 18 ? title.slice(0, 18) : title;
     const titleLine2 = title.length > 18 ? (title.slice(18, 36).length > 18 ? title.slice(18, 35) + '…' : title.slice(18)) : '';
 
+    /* s280: Satori(next/og)는 CSS 변수(var(--fs-lg) 등)를 해석 못 함 — globals.css 토큰이
+       아니라 리터럴 px 값을 써야 함. 또한 title 이 있어도 화면 대부분을 차지하는 큰 수치
+       영역은 항상 사이트 전체 통계("1,800종목+")만 보여줘서 실제 공유 대상(특정 종목 등)과
+       무관한 이미지가 나가던 문제 — title 유무에 따라 레이아웃을 분기해 title 이 있으면
+       제목을 최대로 키워 보여주고, 없을 때만 카테고리 통계를 메인으로 노출. */
+    const hasTitle = titleLine1.length > 0;
+
     const _sqImg = new ImageResponse(
-      /* ──────────────────────────────────────────────────────────
-         630×630 수평 스트라이프 (1:1 전용)
-         ┌──────────────────────────────────────┐
-         │ [컬러 헤더] 카더라   카테고리.이모지  │ ← 13%
-         ├──────────────────────────────────────┤
-         │ [수치 띠]  핵심수치 대형              │ ← 20%
-         ├──────────────────────────────────────┤
-         │                                      │
-         │  제목 (대형, 900 weight)              │ ← 35%
-         │                                      │
-         ├──────────────────────────────────────┤
-         │ [KPI 3개 수평]                        │ ← 18%
-         └──────────────────────────────────────┘
-      ────────────────────────────────────────────────────────── */
       <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#050505', fontFamily: ff }}>
 
         {/* 스트라이프 1: 컬러 헤더 */}
-        <div style={{ background: C.color, padding: '0 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0, height: 72 }}>
+        <div style={{ background: C.color, padding: '0 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0, height: 64 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <LogoSVG size={26} />
-            <span style={{ fontSize: 'var(--fs-lg)', fontWeight: 900, color: '#000' }}>카더라</span>
+            <LogoSVG size={24} />
+            <span style={{ fontSize: 20, fontWeight: 900, color: '#000' }}>카더라</span>
           </div>
-          <span style={{ fontSize: 'var(--fs-lg)', fontWeight: 900, color: '#000', letterSpacing: 1 }}>{C.icon}  {C.code}</span>
+          <span style={{ fontSize: 20, fontWeight: 900, color: '#000', letterSpacing: 1 }}>{C.icon}  {C.code}</span>
         </div>
 
-        {/* 스트라이프 2: 핵심 수치 */}
-        <div style={{ background: '#0D0D0D', padding: '0 32px', display: 'flex', alignItems: 'center', gap: '4%', flexShrink: 0, height: 120, borderBottom: '0.5px solid rgba(255,255,255,0.06)' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <span style={{ fontSize: 13, color: C.color, fontWeight: 700, letterSpacing: 2 }}>{KPI.kw.toUpperCase()}</span>
-            <span style={{ fontSize: 56, fontWeight: 900, color: '#fff', lineHeight: 0.85, letterSpacing: -3 }}>{KPI.kwv}</span>
-          </div>
-          <div style={{ flex: 1, height: 2, background: `linear-gradient(90deg, ${C.color}80, transparent)`, borderRadius: 99 }} />
-          <span style={{ fontSize: 52 }}>{C.icon}</span>
-        </div>
-
-        {/* 스트라이프 3: 제목 (메인 중앙) */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 32px' }}>
-          <div style={{ fontSize: title ? 38 : 44, fontWeight: 900, color: '#ffffff', lineHeight: 1.18, letterSpacing: -1.5, wordBreak: 'keep-all' }}>
-            {title ? (
-              titleLine2 ? (
-                <>{titleLine1}<br />{titleLine2}</>
-              ) : titleLine1
-            ) : (
-              C.label
-            )}
-          </div>
-          {!title && (
-            <div style={{ fontSize: 16, color: '#6b7280', marginTop: 12 }}>카더라에서 확인하세요</div>
-          )}
-        </div>
-
-        {/* 스트라이프 4: KPI 하단 */}
-        <div style={{ background: C.dim, borderTop: `0.5px solid ${C.color}35`, padding: '0 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-around', flexShrink: 0, height: 90 }}>
-          {[
-            { n: '7,600편+', l: '블로그' },
-            { n: '실시간',    l: '업데이트' },
-            { n: '무료',      l: '이용' },
-          ].map((k, i, a) => (
-            <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-              <span style={{ fontSize: 'var(--fs-lg)', fontWeight: 900, color: C.color, lineHeight: 1 }}>{k.n}</span>
-              <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', fontWeight: 600, letterSpacing: 1 }}>{k.l}</span>
+        {hasTitle ? (
+          /* title 이 있으면 — 실제 공유 대상(종목/단지/글 등)을 최대 크기로 표시 */
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 36px' }}>
+            <span style={{ fontSize: 15, color: C.color, fontWeight: 700, letterSpacing: 2, marginBottom: 16 }}>{C.icon}  {C.label.toUpperCase()}</span>
+            <div style={{ display: 'flex', flexDirection: 'column', fontSize: titleLine2 ? 56 : 68, fontWeight: 900, color: '#ffffff', lineHeight: 1.14, letterSpacing: -2, wordBreak: 'keep-all' }}>
+              <span>{titleLine1}</span>
+              {titleLine2 ? <span>{titleLine2}</span> : null}
             </div>
-          ))}
-        </div>
+          </div>
+        ) : (
+          /* title 없음 — 카테고리 대표 통계를 메인으로 */
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 36px', gap: 10 }}>
+            <span style={{ fontSize: 16, color: C.color, fontWeight: 700, letterSpacing: 2 }}>{KPI.kw.toUpperCase()}</span>
+            <span style={{ fontSize: 84, fontWeight: 900, color: '#fff', lineHeight: 0.95, letterSpacing: -3 }}>{KPI.kwv}</span>
+            <div style={{ display: 'flex', fontSize: 20, color: '#6b7280', marginTop: 8 }}>{C.label} · 카더라에서 확인하세요</div>
+          </div>
+        )}
+
+        {/* 스트라이프 하단: 얇은 액센트 바 */}
+        <div style={{ display:'flex', background: C.color, height: 10, flexShrink: 0 }} />
 
       </div>,
       { width: 630, height: 630, ...opts }

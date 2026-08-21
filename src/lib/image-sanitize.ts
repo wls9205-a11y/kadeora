@@ -20,6 +20,7 @@ export const BLOCKED_IMG_HOSTS: readonly string[] = [
 // 패턴 기반 차단 (http 혼합 콘텐츠 등).
 const BLOCKED_PATTERNS: readonly RegExp[] = [
   /^http:\/\//i, // Next.js https 강제
+  /%22|"/, // s280: 외부 소스(네이버 dthumb 프록시 등)에서 src= 파라미터에 리터럴 따옴표가 새어들어온 손상 URL 차단
 ];
 
 export function isSafeImg(url: string | null | undefined): boolean {

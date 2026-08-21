@@ -68,13 +68,12 @@ export async function GET() {
     <lastmod>${now}</lastmod>
   </sitemap>`).join('\n');
 
+  // image-sitemap.xml 은 그 자체가 sitemapindex(하위 50개 urlset)라서 여기 자식으로 넣으면
+  // "index가 index를 참조" 하는 구조가 되어 sitemap 프로토콜 위반 (Google이 무시함).
+  // robots.txt 에 독립 Sitemap: 라인으로 별도 제출한다.
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${subSitemaps}
-  <sitemap>
-    <loc>${SITE_URL}/image-sitemap.xml</loc>
-    <lastmod>${now}</lastmod>
-  </sitemap>
   <sitemap>
     <loc>${SITE_URL}/news-sitemap.xml</loc>
     <lastmod>${now}</lastmod>

@@ -47,7 +47,7 @@ export default function AptScheduleTimeline({ specialDate, rank1Date, rank2Date,
   ];
 
   return (
-    <div className="apt-timeline" style={{ position: 'relative', padding: '16px 12px', margin: '12px 0', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)' }}>
+    <div className="apt-timeline" style={{ position: 'relative', padding: '16px 12px', margin: '12px 0', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)' }}>
       <div className="apt-timeline-line" style={{ position: 'absolute', left: 22, top: 24, bottom: 24, width: 2, background: 'var(--border)' }} />
       {steps.map((s, i) => {
         const next = steps[i + 1]?.date;
@@ -60,7 +60,7 @@ export default function AptScheduleTimeline({ specialDate, rank1Date, rank2Date,
               style={{
                 width: 14, height: 14, borderRadius: '50%',
                 background: dotColor,
-                border: state === 'active' ? '3px solid var(--brand-bg)' : '2px solid var(--bg-card)',
+                border: state === 'active' ? '3px solid var(--brand-bg)' : '2px solid var(--bg-surface)',
                 boxShadow: state === 'active' ? '0 0 0 3px var(--brand)' : 'none',
                 zIndex: 1, marginLeft: 4,
               }}

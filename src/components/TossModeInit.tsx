@@ -5,7 +5,7 @@ import { isTossMode, initTossNavigation } from '@/lib/toss-mode';
 /**
  * 토스 앱인토스 미니앱 초기화 (v2)
  * 
- * 1. html에 data-theme="light" + class="toss-mode" 추가
+ * 1. html에 class="toss-mode" 추가
  * 2. CSS로 자체 헤더/하단탭/설치배너/CTA/백버튼 숨김
  * 3. body padding 제거 (토스 네이티브 내비바 영역)
  * 4. 뒤로가기 히스토리 관리 — 최초화면에서 앱 종료
@@ -15,7 +15,6 @@ export default function TossModeInit() {
     if (!isTossMode()) return;
 
     const html = document.documentElement;
-    html.setAttribute('data-theme', 'light');
     html.classList.add('toss-mode');
 
     // 뒤로가기 히스토리 관리 초기화

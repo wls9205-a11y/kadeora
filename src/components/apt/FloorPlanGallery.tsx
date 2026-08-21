@@ -23,7 +23,7 @@ export function FloorPlanGallery({
 
   if (!types || types.length === 0) {
     return (
-      <div className="text-sm text-slate-500 dark:text-slate-400 text-center py-8">
+      <div className="text-sm text-slate-500 text-center py-8">
         평면도 자료가 준비 중입니다
       </div>
     );
@@ -38,11 +38,11 @@ export function FloorPlanGallery({
             <button
               key={`${t.type}-${idx}`}
               onClick={() => imageUrl && setActiveIdx(idx)}
-              className="text-left bg-slate-50 dark:bg-slate-800 rounded-xl p-3 hover:shadow-md transition-shadow"
+              className="text-left bg-slate-50 rounded-xl p-3 hover:shadow-md transition-shadow"
               disabled={!imageUrl}
             >
               {imageUrl ? (
-                <div className="aspect-square relative rounded-lg overflow-hidden mb-2 bg-white dark:bg-slate-700">
+                <div className="aspect-square relative rounded-lg overflow-hidden mb-2 bg-white">
                   <Image
                     src={imageUrl}
                     alt={`${t.type} 평면도`}
@@ -52,17 +52,17 @@ export function FloorPlanGallery({
                   />
                 </div>
               ) : (
-                <div className="aspect-square rounded-lg mb-2 bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-xs text-slate-500">
+                <div className="aspect-square rounded-lg mb-2 bg-slate-200 flex items-center justify-center text-xs text-slate-500">
                   평면도 준비중
                 </div>
               )}
               <div className="text-sm font-bold">{t.type || '—'}</div>
-              <div className="text-xs text-slate-600 dark:text-slate-400">
+              <div className="text-xs text-slate-600">
                 {t.area ? `${parseFloat(String(t.area)).toFixed(1)}㎡` : ''}
                 {t.supply ? ` · ${t.supply}세대` : ''}
               </div>
               {t.price_max && (
-                <div className="text-xs font-semibold text-slate-700 dark:text-slate-300 mt-1">
+                <div className="text-xs font-semibold text-slate-700 mt-1">
                   최고 {(t.price_max / 10000).toFixed(2)}억
                 </div>
               )}

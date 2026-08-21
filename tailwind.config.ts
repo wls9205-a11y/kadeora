@@ -1,11 +1,7 @@
 import type { Config } from 'tailwindcss'
 
 const config: Config = {
-  content: [
-    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
-  ],
+  content: ['./src/**/*.{js,ts,jsx,tsx,mdx}'],
   // s273-cc Issue C fix: darkMode 'class' 명시 — TSX 의 dark: 119건 변형이 prod CSS 에 컴파일되도록.
   // 이전엔 darkMode 미설정 → Tailwind v3+ default media 모드 → .dark\: 0건 컴파일.
   darkMode: 'class',

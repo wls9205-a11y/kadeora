@@ -26,6 +26,7 @@ import SubscriptionCard from '@/components/apt/SubscriptionCard';
 import SubscriptionResults from '@/components/apt/SubscriptionResults';
 import AptToolChips from '@/components/apt/AptToolChips';
 import AptRelatedBlogs from '@/components/apt/AptRelatedBlogs';
+import SectionHeader from '@/components/apt/SectionHeader';
 import EmptyState from '@/components/ui/EmptyState';
 
 // Next 는 segment config 를 정적 분석하므로 리터럴이어야 한다 (import 식별자 불가).
@@ -119,14 +120,12 @@ export default async function AptPage({
 
       {/* ③ 청약 카드 리스트 */}
       <section style={{ padding: '0 6px' }} aria-labelledby="apt-cards-heading">
-        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 10 }}>
-          <h2 id="apt-cards-heading" style={{ fontSize: 15, fontWeight: 700, margin: 0 }}>
-            청약
-          </h2>
-          <span style={{ fontSize: 11, color: 'var(--text-tertiary, #9ca3af)' }}>
-            상태 → 마감 임박 순
-          </span>
-        </div>
+        <SectionHeader
+          id="apt-cards-heading"
+          eyebrow="FEATURED — 분양중"
+          title="청약"
+          meta="상태 → 마감 임박 순"
+        />
 
         {hub.cards.length > 0 ? (
           <div style={{ display: 'grid', gap: 9 }}>

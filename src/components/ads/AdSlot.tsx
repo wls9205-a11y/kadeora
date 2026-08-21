@@ -39,7 +39,7 @@ export function AdSlot({
 
   return (
     <div className={className} style={{ margin: '24px 0', minHeight: 100, ...style }}>
-      <div style={{ fontSize: 11, color: 'var(--text-muted)', textAlign: 'center', marginBottom: 4 }}>
+      <div style={{ fontSize: 11, color: 'var(--text-tertiary)', textAlign: 'center', marginBottom: 4 }}>
         광고
       </div>
       <ins

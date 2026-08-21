@@ -60,7 +60,7 @@ export default async function RelatedStocks({ symbol, sector, market, marketCap 
                 display: 'flex',
                 flexDirection: 'column',
                 padding: '10px 12px',
-                background: 'var(--bg-secondary)',
+                background: 'var(--bg-surface)',
                 borderRadius: 'var(--radius-md, 8px)',
                 textDecoration: 'none',
                 color: 'inherit',

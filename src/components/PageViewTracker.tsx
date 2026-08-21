@@ -36,6 +36,8 @@ export default function PageViewTracker() {
       const w = window as any;
       if (typeof w.gtag === 'function') {
         w.gtag('event', 'page_view', {
+          // S1: 토글은 제거했지만 kd_theme 값은 브라우저에 남아 있다 — 기존 선호 분포를 계속 수집
+          theme_mode: (() => { try { return localStorage.getItem('kd_theme') || 'unset'; } catch { return 'unset'; } })(),
           page_path: pathname,
           page_location: `https://kadeora.app${pathname}`,
         });

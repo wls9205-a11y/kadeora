@@ -182,7 +182,7 @@ export default async function SignalsPage() {
                       href={`/stock/${signal.symbol}`}
                       style={{
                         display: 'block',
-                        background: 'var(--bg-secondary)',
+                        background: 'var(--bg-surface)',
                         borderRadius: 'var(--radius-md, 8px)',
                         padding: '14px 16px',
                         textDecoration: 'none',

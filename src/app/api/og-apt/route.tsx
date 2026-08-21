@@ -106,13 +106,13 @@ function renderCover(site: AptRow): React.ReactElement {
   return (
     <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: 56 }}>
       <div style={{ display: 'flex', gap: 8 }}>
-        <div style={{ background: '#FAC775', color: '#1A1A18', fontSize: 22, fontWeight: 800, padding: '6px 16px', borderRadius: 999 }}>{stLabel}</div>
-        {lcLabel && <div style={{ background: 'rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: 22, fontWeight: 700, padding: '6px 16px', borderRadius: 999 }}>{lcLabel}</div>}
+        <div style={{ display:'flex', background: '#FAC775', color: '#1A1A18', fontSize: 22, fontWeight: 800, padding: '6px 16px', borderRadius: 999 }}>{stLabel}</div>
+        {lcLabel ? <div style={{ display:'flex', background: 'rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: 22, fontWeight: 700, padding: '6px 16px', borderRadius: 999 }}>{lcLabel}</div> : null}
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-        <div style={{ width: 56, height: 4, background: '#FAC775' }} />
-        <div style={{ fontSize: nameFS, fontWeight: 900, color: '#FFFFFF', lineHeight: 1.1, letterSpacing: -2 }}>{site.name}</div>
-        {region && <div style={{ fontSize: 26, color: 'rgba(255,255,255,0.66)', fontWeight: 600 }}>{region}</div>}
+        <div style={{ display:'flex', width: 56, height: 4, background: '#FAC775' }} />
+        <div style={{ display:'flex', fontSize: nameFS, fontWeight: 900, color: '#FFFFFF', lineHeight: 1.1, letterSpacing: -2 }}>{site.name}</div>
+        {region ? <div style={{ display:'flex', fontSize: 26, color: 'rgba(255,255,255,0.66)', fontWeight: 600 }}>{region}</div> : null}
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'rgba(255,255,255,0.55)', fontSize: 18, fontWeight: 700 }}>
         <span>kadeora.app</span>
@@ -147,10 +147,10 @@ function renderMetric(site: AptRow): React.ReactElement {
   }
   return (
     <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', padding: 56, justifyContent: 'space-between' }}>
-      <div style={{ fontSize: 24, color: 'rgba(255,255,255,0.66)', fontWeight: 700, letterSpacing: 2 }}>{label.toUpperCase()}</div>
+      <div style={{ display:'flex', fontSize: 24, color: 'rgba(255,255,255,0.66)', fontWeight: 700, letterSpacing: 2 }}>{label.toUpperCase()}</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <div style={{ fontSize: value.length > 10 ? 76 : 110, fontWeight: 900, color: '#FFFFFF', letterSpacing: -3, lineHeight: 1 }}>{value}</div>
-        <div style={{ fontSize: 24, color: 'rgba(255,255,255,0.55)', fontWeight: 600 }}>{sub}</div>
+        <div style={{ display:'flex', fontSize: value.length > 10 ? 76 : 110, fontWeight: 900, color: '#FFFFFF', letterSpacing: -3, lineHeight: 1 }}>{value}</div>
+        <div style={{ display:'flex', fontSize: 24, color: 'rgba(255,255,255,0.55)', fontWeight: 600 }}>{sub}</div>
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'rgba(255,255,255,0.55)', fontSize: 18, fontWeight: 700 }}>
         <span>{site.name}</span>
@@ -165,10 +165,10 @@ function renderUnits(site: AptRow): React.ReactElement {
   const features: string[] = Array.isArray(site.key_features) ? site.key_features.slice(0, 3) : [];
   return (
     <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', padding: 56, justifyContent: 'space-between' }}>
-      <div style={{ fontSize: 24, color: 'rgba(255,255,255,0.66)', fontWeight: 700, letterSpacing: 2 }}>UNITS · 평형</div>
+      <div style={{ display:'flex', fontSize: 24, color: 'rgba(255,255,255,0.66)', fontWeight: 700, letterSpacing: 2 }}>UNITS · 평형</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-        <div style={{ fontSize: 130, fontWeight: 900, color: '#FFFFFF', letterSpacing: -4, lineHeight: 1 }}>{total ? total.toLocaleString() : '—'}</div>
-        <div style={{ fontSize: 28, color: 'rgba(255,255,255,0.66)', fontWeight: 600 }}>총 세대수</div>
+        <div style={{ display:'flex', fontSize: 130, fontWeight: 900, color: '#FFFFFF', letterSpacing: -4, lineHeight: 1 }}>{total ? total.toLocaleString() : '—'}</div>
+        <div style={{ display:'flex', fontSize: 28, color: 'rgba(255,255,255,0.66)', fontWeight: 600 }}>총 세대수</div>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {features.length > 0
@@ -178,7 +178,7 @@ function renderUnits(site: AptRow): React.ReactElement {
                 <span>{String(f).slice(0, 40)}</span>
               </div>
             ))
-          : <div style={{ fontSize: 18, color: 'rgba(255,255,255,0.45)', fontWeight: 600 }}>평형별 상세는 단지 페이지 참조</div>}
+          : <div style={{ display:'flex', fontSize: 18, color: 'rgba(255,255,255,0.45)', fontWeight: 600 }}>평형별 상세는 단지 페이지 참조</div>}
       </div>
     </div>
   );
@@ -200,10 +200,10 @@ function renderTiming(site: AptRow): React.ReactElement {
   }
   return (
     <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', padding: 56, justifyContent: 'space-between' }}>
-      <div style={{ fontSize: 24, color: 'rgba(255,255,255,0.66)', fontWeight: 700, letterSpacing: 2 }}>{title.toUpperCase()}</div>
+      <div style={{ display:'flex', fontSize: 24, color: 'rgba(255,255,255,0.66)', fontWeight: 700, letterSpacing: 2 }}>{title.toUpperCase()}</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <div style={{ fontSize: value.length > 8 ? 76 : 110, fontWeight: 900, color: '#FFFFFF', letterSpacing: -3, lineHeight: 1 }}>{value}</div>
-        <div style={{ fontSize: 24, color: 'rgba(255,255,255,0.55)', fontWeight: 600 }}>{sub}</div>
+        <div style={{ display:'flex', fontSize: value.length > 8 ? 76 : 110, fontWeight: 900, color: '#FFFFFF', letterSpacing: -3, lineHeight: 1 }}>{value}</div>
+        <div style={{ display:'flex', fontSize: 24, color: 'rgba(255,255,255,0.55)', fontWeight: 600 }}>{sub}</div>
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'rgba(255,255,255,0.55)', fontSize: 18, fontWeight: 700 }}>
         <span>{site.name}</span>
@@ -217,20 +217,23 @@ function renderPlace(site: AptRow): React.ReactElement {
   const region = [site.region, site.sigungu].filter(Boolean).join(' ');
   return (
     <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', padding: 56, justifyContent: 'space-between' }}>
-      <div style={{ fontSize: 24, color: 'rgba(255,255,255,0.66)', fontWeight: 700, letterSpacing: 2 }}>PLACE · 입지</div>
+      <div style={{ display:'flex', fontSize: 24, color: 'rgba(255,255,255,0.66)', fontWeight: 700, letterSpacing: 2 }}>PLACE · 입지</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-        <div style={{ width: 96, height: 96, borderRadius: 999, background: 'rgba(255,255,255,0.12)', border: '3px solid #FAC775', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 48 }}>●</div>
-        <div style={{ fontSize: 38, fontWeight: 900, color: '#FFFFFF', lineHeight: 1.15 }}>{region || '주소 정보'}</div>
-        <div style={{ fontSize: 22, color: 'rgba(255,255,255,0.66)', fontWeight: 600, lineHeight: 1.4 }}>{site.address || site.dong || ''}</div>
+        {/* s270: 글리프 ● 제거 — NotoSansKR 서브셋에 U+25CF 없음 → satori dynamic font fetch 400 (7일 5,758회). 순수 CSS 원으로 대체 (Rule #47 확장: 도형도 글리프 대신 CSS) */}
+        <div style={{ width: 96, height: 96, borderRadius: 999, background: 'rgba(255,255,255,0.12)', border: '3px solid #FAC775', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: 40, height: 40, borderRadius: 999, background: '#FAC775', display: 'flex' }} />
+        </div>
+        <div style={{ display:'flex', fontSize: 38, fontWeight: 900, color: '#FFFFFF', lineHeight: 1.15 }}>{region || '주소 정보'}</div>
+        <div style={{ display:'flex', fontSize: 22, color: 'rgba(255,255,255,0.66)', fontWeight: 600, lineHeight: 1.4 }}>{site.address || site.dong || ''}</div>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {site.nearby_station && (
-          <div style={{ fontSize: 18, color: '#FFFFFF', fontWeight: 700 }}>역 {site.nearby_station}</div>
-        )}
-        {site.school_district && (
-          <div style={{ fontSize: 18, color: '#FFFFFF', fontWeight: 700 }}>학교 {site.school_district}</div>
-        )}
-        <div style={{ fontSize: 16, color: 'rgba(255,255,255,0.55)', fontWeight: 700, marginTop: 4 }}>kadeora.app</div>
+        {site.nearby_station ? (
+          <div style={{ display: 'flex', fontSize: 18, color: '#FFFFFF', fontWeight: 700 }}>역 {site.nearby_station}</div>
+        ) : null}
+        {site.school_district ? (
+          <div style={{ display: 'flex', fontSize: 18, color: '#FFFFFF', fontWeight: 700 }}>학교 {site.school_district}</div>
+        ) : null}
+        <div style={{ display:'flex', fontSize: 16, color: 'rgba(255,255,255,0.55)', fontWeight: 700, marginTop: 4 }}>kadeora.app</div>
       </div>
     </div>
   );
@@ -245,26 +248,26 @@ function renderSpec(site: AptRow): React.ReactElement {
   ];
   return (
     <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', padding: 56, justifyContent: 'space-between' }}>
-      <div style={{ fontSize: 24, color: 'rgba(255,255,255,0.66)', fontWeight: 700, letterSpacing: 2 }}>SPEC · 단지 스펙</div>
+      <div style={{ display:'flex', fontSize: 24, color: 'rgba(255,255,255,0.66)', fontWeight: 700, letterSpacing: 2 }}>SPEC · 단지 스펙</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
         <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.16)' }}>
           <div style={{ flex: 1, padding: '20px 16px 20px 0', display: 'flex', flexDirection: 'column', gap: 6, borderRight: '1px solid rgba(255,255,255,0.16)' }}>
-            <div style={{ fontSize: 16, color: 'rgba(255,255,255,0.55)', fontWeight: 700 }}>{cells[0].label}</div>
-            <div style={{ fontSize: 44, color: '#FFFFFF', fontWeight: 900, letterSpacing: -1 }}>{cells[0].value}</div>
+            <div style={{ display:'flex', fontSize: 16, color: 'rgba(255,255,255,0.55)', fontWeight: 700 }}>{cells[0].label}</div>
+            <div style={{ display:'flex', fontSize: 44, color: '#FFFFFF', fontWeight: 900, letterSpacing: -1 }}>{cells[0].value}</div>
           </div>
           <div style={{ flex: 1, padding: '20px 0 20px 16px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <div style={{ fontSize: 16, color: 'rgba(255,255,255,0.55)', fontWeight: 700 }}>{cells[1].label}</div>
-            <div style={{ fontSize: 32, color: '#FFFFFF', fontWeight: 900, letterSpacing: -1 }}>{cells[1].value}</div>
+            <div style={{ display:'flex', fontSize: 16, color: 'rgba(255,255,255,0.55)', fontWeight: 700 }}>{cells[1].label}</div>
+            <div style={{ display:'flex', fontSize: 32, color: '#FFFFFF', fontWeight: 900, letterSpacing: -1 }}>{cells[1].value}</div>
           </div>
         </div>
         <div style={{ display: 'flex' }}>
           <div style={{ flex: 1, padding: '20px 16px 20px 0', display: 'flex', flexDirection: 'column', gap: 6, borderRight: '1px solid rgba(255,255,255,0.16)' }}>
-            <div style={{ fontSize: 16, color: 'rgba(255,255,255,0.55)', fontWeight: 700 }}>{cells[2].label}</div>
-            <div style={{ fontSize: 32, color: '#FFFFFF', fontWeight: 900, letterSpacing: -1 }}>{cells[2].value}</div>
+            <div style={{ display:'flex', fontSize: 16, color: 'rgba(255,255,255,0.55)', fontWeight: 700 }}>{cells[2].label}</div>
+            <div style={{ display:'flex', fontSize: 32, color: '#FFFFFF', fontWeight: 900, letterSpacing: -1 }}>{cells[2].value}</div>
           </div>
           <div style={{ flex: 1, padding: '20px 0 20px 16px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <div style={{ fontSize: 16, color: 'rgba(255,255,255,0.55)', fontWeight: 700 }}>{cells[3].label}</div>
-            <div style={{ fontSize: 32, color: '#FAC775', fontWeight: 900, letterSpacing: -1 }}>{cells[3].value}</div>
+            <div style={{ display:'flex', fontSize: 16, color: 'rgba(255,255,255,0.55)', fontWeight: 700 }}>{cells[3].label}</div>
+            <div style={{ display:'flex', fontSize: 32, color: '#FAC775', fontWeight: 900, letterSpacing: -1 }}>{cells[3].value}</div>
           </div>
         </div>
       </div>
@@ -280,13 +283,13 @@ function renderFallback(slug: string | null): React.ReactElement {
   const aptLabel = OG_CAT.apt.label;
   return (
     <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', padding: 56, justifyContent: 'space-between', background: '#1A1A18' }}>
-      <div style={{ fontSize: 22, color: '#FAC775', fontWeight: 800 }}>카더라 · kadeora.app</div>
+      <div style={{ display:'flex', fontSize: 22, color: '#FAC775', fontWeight: 800 }}>카더라 · kadeora.app</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-        <div style={{ width: 56, height: 4, background: '#FAC775' }} />
-        <div style={{ fontSize: 64, fontWeight: 900, color: '#FFFFFF', lineHeight: 1.1, letterSpacing: -2 }}>단지 정보</div>
-        <div style={{ fontSize: 22, color: 'rgba(255,255,255,0.66)', fontWeight: 600 }}>{slug ? `slug=${slug}` : `대한민국 ${aptLabel} 커뮤니티`}</div>
+        <div style={{ display:'flex', width: 56, height: 4, background: '#FAC775' }} />
+        <div style={{ display:'flex', fontSize: 64, fontWeight: 900, color: '#FFFFFF', lineHeight: 1.1, letterSpacing: -2 }}>단지 정보</div>
+        <div style={{ display:'flex', fontSize: 22, color: 'rgba(255,255,255,0.66)', fontWeight: 600 }}>{slug ? `slug=${slug}` : `대한민국 ${aptLabel} 커뮤니티`}</div>
       </div>
-      <div style={{ fontSize: 18, color: 'rgba(255,255,255,0.55)', fontWeight: 700 }}>주식·부동산 소리소문 커뮤니티</div>
+      <div style={{ display:'flex', fontSize: 18, color: 'rgba(255,255,255,0.55)', fontWeight: 700 }}>주식·부동산 소리소문 커뮤니티</div>
     </div>
   );
 }
@@ -354,20 +357,18 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (err) {
-    // s239-p1: console.error 분할 (Vercel log 1 row 길이 제한 — 단일 호출 시 stack 잘림)
+    // s270: 분할 로그 5행 → 3행 통합 — 분할 출력이 Vercel 에러 그룹을 파편화하던 문제 (행당 300자는 4KB 제한 내 안전)
     const e = err as Error;
-    console.error('[og-apt] message=', e?.message);
-    console.error('[og-apt] stack=', e?.stack);
-    console.error('[og-apt] class=', e?.constructor?.name);
-    console.error('[og-apt] code=', (err as any)?.code);
+    console.error(`[og-apt] cls=${e?.constructor?.name} code=${(err as any)?.code ?? 'n/a'} msg=${(e?.message ?? '').slice(0, 300)}`);
+    if (e?.stack) console.error(`[og-apt] stack=${e.stack.slice(0, 300)}`);
     console.error('[og-apt] input=', JSON.stringify({ slug, card, fontLoaded: !!fontData, hasSite: !!site, siteType: site?.site_type, nameLen: site?.name?.length }));
     // s263 Phase 2.1++: redirect 302 제거. simple ImageResponse fallback.
     try {
       const fbImg = new ImageResponse(
         (
           <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#0F1B3E', color: '#fff', fontFamily: 'sans-serif' }}>
-            <div style={{ fontSize: 28, color: '#FBBF24', letterSpacing: 4, marginBottom: 16, fontWeight: 900 }}>KADEORA</div>
-            <div style={{ fontSize: 56, fontWeight: 900, letterSpacing: -1 }}>apt</div>
+            <div style={{ display:'flex', fontSize: 28, color: '#FBBF24', letterSpacing: 4, marginBottom: 16, fontWeight: 900 }}>KADEORA</div>
+            <div style={{ display:'flex', fontSize: 56, fontWeight: 900, letterSpacing: -1 }}>apt</div>
           </div>
         ),
         { width: SIDE, height: SIDE },

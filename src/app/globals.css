@@ -227,6 +227,8 @@ button, input, select, textarea { font-family: inherit; }
   --fs-lg: 21px;
   --fs-xl: 24px;
   --fs-2xl: 32px;
+  /* s280: --font-mono 미정의였음 (globals.css 자체 blog-content code 규칙 포함 다수 곳에서 폴백만 타던 상태) */
+  --font-mono: 'SF Mono', 'Consolas', 'Menlo', monospace;
 }
 
 html.font-small {
@@ -413,7 +415,7 @@ html.font-large {
 
 /* Dark Mode Only — 딥 네이비 다크모드 (세션70: 가독성 대폭 개선) */
 :root {
-  --bg-base:       #050A18;
+  --bg-base:       #F5F7FA;
 
   /* ─── 디자인 토큰 ─── */
   --radius-xs: 4px;
@@ -440,122 +442,13 @@ html.font-large {
   --z-toast: 100;
   --z-tooltip: 110;
   --z-overlay: 200;
-  --bg-surface:    #0D1730;
-  --bg-elevated:   #132040;
-  --bg-sunken:     #030710;
-  --bg-hover:      #132040;
-  --bg-active:     #1A2D52;
-  /* s273b: sticky/backdrop-blur 바 배경. 정의가 없어 소비처에서 rgba(255,255,255,.92)
-     로 폴백되면서 다크 테마에 흰 배경 + 흰 글씨가 나오던 회귀 (Rule #94). */
-  --bg-surface-translucent: rgba(13, 23, 48, 0.92);
-  --border:        #1E3258;
-  --border-strong: #2A4470;
-  --border-focus:  #5B93FF;
-  --text-primary:   #F2F5FA;
-  --text-secondary: #B8CCDF;
-  --text-tertiary:  #8BA3C0;
-  --text-disabled:  #334466;
-  --text-inverse:   #050A18;
-  --text-link:      #7CC0FF;
-  --brand:          #4A8AF7;
-  --brand-hover:    #6BA2FF;
-  --brand-light:    #182D5C;
-  --brand-bg:       rgba(74,138,247,0.12);
-  --brand-border:   rgba(74,138,247,0.24);
-  --accent-blue-light:  #99C8FF;
-  --accent-orange-light: #FFC07A;
-  --brand-dark:     #2556C4;
-  --kakao-bg:       #FEE500;
-  --kakao-text:     #191919;
-  --success:        #36F0B0;
-  --success-bg:     #08241C;
-  --warning:        #FFD94A;
-  --warning-bg:     #1E1B0A;
-  --error:          #FF7878;
-  --error-bg:       #2A1010;
-  --info:           #7CC0FF;
-  --info-bg:        #0B1E30;
-  --font-base:      15px;
-  /* 주식 시세 */
-  --stock-up:       #FF7878;
-  --stock-down:     #7CC0FF;
-  --stock-flat:     #B8CCDF;
-  /* 시맨틱 액센트 (카테고리/상태별) — 세션70: 밝기 +10% */
-  --accent-green:   #36F0B0;
-  --accent-green-bg: rgba(54,240,176,0.12);
-  --accent-purple:  #C4A5FF;
-  --accent-purple-bg: rgba(196,165,255,0.12);
-  --accent-orange:  #FFB050;
-  --accent-orange-bg: rgba(255,176,80,0.12);
-  --accent-yellow:  #FFE04A;
-  --accent-yellow-bg: rgba(255,224,74,0.12);
-  --accent-red:     #FF7878;
-  --accent-red-bg:  rgba(255,120,120,0.12);
-  --accent-blue:    #7CC0FF;
-  --accent-blue-bg: rgba(124,192,255,0.12);
-
-  /* Stock colors — KR (빨강↑ 파랑↓) */
-  --stock-kr-up:        #FF5252;
-  --stock-kr-up-bg:     rgba(255,82,82,0.10);
-  --stock-kr-up-strong: #FF8A8A;
-  --stock-kr-down:      #42A5F5;
-  --stock-kr-down-bg:   rgba(66,165,245,0.10);
-  --stock-kr-down-strong:#90CAF9;
-  /* Stock colors — US (초록↑ 빨강↓) */
-  --stock-us-up:        #66BB6A;
-  --stock-us-up-bg:     rgba(102,187,106,0.10);
-  --stock-us-up-strong: #A5D6A7;
-  --stock-us-down:      #EF5350;
-  --stock-us-down-bg:   rgba(239,83,80,0.10);
-  --stock-us-down-strong:#EF9A9A;
-  /* Stock flat */
-  --stock-flat:         #9E9E9E;
-  --stock-flat-bg:      rgba(158,158,158,0.08);
-  /* Investor colors */
-  --stock-foreign:      #FFB74D;
-  --stock-foreign-bg:   rgba(255,183,77,0.10);
-  --stock-inst:         #AB47BC;
-  --stock-inst-bg:      rgba(171,71,188,0.10);
-  --stock-retail:       #26C6DA;
-  --stock-retail-bg:    rgba(38,198,218,0.10);
-  /* AI signal & sentiment */
-  --stock-bullish:      #66BB6A;
-  --stock-bullish-bg:   rgba(102,187,106,0.10);
-  --stock-bearish:      #EF5350;
-  --stock-bearish-bg:   rgba(239,83,80,0.10);
-  --stock-positive:     #66BB6A;
-  --stock-positive-bg:  rgba(102,187,106,0.10);
-  --stock-negative:     #EF5350;
-  --stock-negative-bg:  rgba(239,83,80,0.10);
-  --stock-neutral:      #9E9E9E;
-  --stock-neutral-bg:   rgba(158,158,158,0.08);
-  /* Market status */
-  --stock-market-open:  #66BB6A;
-  --stock-market-open-bg: rgba(102,187,106,0.10);
-  --stock-market-closed:#9E9E9E;
-  --stock-market-closed-bg: rgba(158,158,158,0.08);
-  /* 네비게이션 */
-  --nav-bg:         #0D1730;
-  --nav-border:     #1E3258;
-  --nav-text:       #F2F5FA;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.5);
-  --shadow-md: 0 2px 8px rgba(0,0,0,0.6);
-  --shadow-lg: 0 8px 24px rgba(0,0,0,0.7);
-  --shadow-xl: 0 16px 40px rgba(0,0,0,0.8);
-}
-
-/* 다크모드 단일 테마 — 라이트모드 제거됨 */
-
-/* ========================================
-   세션70: 화이트(라이트) 모드 — html.theme-light
-   ======================================== */
-html.theme-light {
-  --bg-base:       #F5F7FA;
   --bg-surface:    #FFFFFF;
   --bg-elevated:   #F0F2F5;
   --bg-sunken:     #E8ECF0;
   --bg-hover:      #EEF1F5;
   --bg-active:     #E2E6EC;
+  /* s273b: sticky/backdrop-blur 바 배경. 정의가 없어 소비처에서 rgba(255,255,255,.92)
+     로 폴백되면서 다크 테마에 흰 배경 + 흰 글씨가 나오던 회귀 (Rule #94). */
   --bg-surface-translucent: rgba(255, 255, 255, 0.92);
   --border:        #D4DAE3;
   --border-strong: #B8C2D0;
@@ -574,6 +467,8 @@ html.theme-light {
   --accent-blue-light:  #60A5FA;
   --accent-orange-light: #F97316;
   --brand-dark:     #1E40AF;
+  --kakao-bg:       #FEE500;
+  --kakao-text:     #191919;
   --success:        #059669;
   --success-bg:     rgba(5,150,105,0.08);
   --warning:        #D97706;
@@ -582,11 +477,15 @@ html.theme-light {
   --error-bg:       rgba(220,38,38,0.08);
   --info:           #2563EB;
   --info-bg:        rgba(37,99,235,0.08);
+  --font-base:      15px;
+  /* 주식 시세 */
   --stock-up:       #DC2626;
   --stock-down:     #2563EB;
-  --stock-flat:     #6B7280;
+  --stock-flat:     #B8CCDF;
+  /* 시맨틱 액센트 (카테고리/상태별) — 세션70: 밝기 +10% */
   --accent-green:   #059669;
   --accent-green-bg: rgba(5,150,105,0.10);
+  --accent-green-border: rgba(5,150,105,0.20);
   --accent-purple:  #7C3AED;
   --accent-purple-bg: rgba(124,58,237,0.10);
   --accent-orange:  #EA580C;
@@ -597,15 +496,16 @@ html.theme-light {
   --accent-red-bg:  rgba(220,38,38,0.10);
   --accent-blue:    #2563EB;
   --accent-blue-bg: rgba(37,99,235,0.10);
+  --accent-cyan:    #0891B2;
 
-  /* Stock colors — KR */
+  /* Stock colors — KR (빨강↑ 파랑↓) */
   --stock-kr-up:        #D32F2F;
   --stock-kr-up-bg:     rgba(211,47,47,0.08);
   --stock-kr-up-strong: #C62828;
   --stock-kr-down:      #1976D2;
   --stock-kr-down-bg:   rgba(25,118,210,0.08);
   --stock-kr-down-strong:#1565C0;
-  /* Stock colors — US */
+  /* Stock colors — US (초록↑ 빨강↓) */
   --stock-us-up:        #2E7D32;
   --stock-us-up-bg:     rgba(46,125,50,0.08);
   --stock-us-up-strong: #1B5E20;
@@ -638,6 +538,7 @@ html.theme-light {
   --stock-market-open-bg: rgba(46,125,50,0.06);
   --stock-market-closed:#757575;
   --stock-market-closed-bg: rgba(117,117,117,0.06);
+  /* 네비게이션 */
   --nav-bg:         #FFFFFF;
   --nav-border:     #D4DAE3;
   --nav-text:       #111827;
@@ -645,90 +546,36 @@ html.theme-light {
   --shadow-md: 0 2px 8px rgba(0,0,0,0.10);
   --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
   --shadow-xl: 0 16px 40px rgba(0,0,0,0.15);
+  --shadow-color: rgba(0,0,0,0.15);
   color-scheme: light;
+
+  /* S1: 잉크(의도적 다크 서피스) 토큰 — 기존 다크값 승계 */
+  --ink-bg:        #0D1730;
+  --ink-bg-deep:   #050A18;
+  --ink-text:      #F2F5FA;
+  --ink-text-dim:  #8BA3C0;
+  --ink-border:    #1E3258;
+
+  /* S1: 청약 상태 토큰 */
+  --status-open:   var(--accent-green);
+  --status-soon:   var(--accent-orange);
+  --status-fcfs:   var(--brand);
+  --status-closed: var(--text-tertiary);
+
+  /* S1: 진행 레일 토큰 */
+  --rail-done:     var(--text-tertiary);
+  --rail-now:      var(--brand);
+  --rail-todo:     var(--border);
+  --rail-h:        4px;
+  --rail-h-lg:     6px;
 }
+
+/* S1: 라이트 단일 테마 — 다크모드 제거됨 */
+
+/* ========================================
+   S1: 라이트 단일 모드 — 라이트 값은 :root로 승격됨
+   ======================================== */
 /* s239 W6: body/html !important 제거 — specificity 충돌 풀면서 component override 가능. input/textarea 는 third-party 호환 위해 keep. */
-html.theme-light body {
-  background: #F5F7FA;
-  color: #111827;
-}
-html.theme-light input,
-html.theme-light textarea,
-html.theme-light select {
-  background-color: #FFFFFF !important;
-  color: #111827 !important;
-  border-color: #D4DAE3 !important;
-}
-html.theme-light input::placeholder,
-html.theme-light textarea::placeholder { color: #9CA3AF !important; }
-html.theme-light input:focus,
-html.theme-light textarea:focus,
-html.theme-light select:focus {
-  border-color: #2563EB !important;
-  outline: 2px solid rgba(37,99,235,0.3);
-  outline-offset: 1px;
-}
-/* 라이트모드 헤더/네비 배경 */
-html.theme-light header {
-  background: rgba(255,255,255,0.92) !important;
-  border-bottom-color: #D4DAE3 !important;
-}
-html.theme-light nav[class*="md:hidden"] {
-  background: rgba(255,255,255,0.95) !important;
-  border-top-color: #D4DAE3 !important;
-}
-/* 라이트모드 카드 그림자 */
-html.theme-light .kd-card,
-html.theme-light .kd-feed-card,
-html.theme-light .apt-card {
-  background: #FFFFFF;
-  border-color: #E5E7EB;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-}
-/* 라이트모드 글래스모피즘 */
-html.theme-light .kd-glass {
-  background: rgba(255,255,255,0.85);
-  border-color: rgba(37,99,235,0.10);
-}
-/* 라이트모드: 스크롤바 */
-html.theme-light ::-webkit-scrollbar-thumb { background: #C8CDD4; }
-html.theme-light ::-webkit-scrollbar-thumb:hover { background: #9CA3AF; }
-/* 라이트모드: dark 클래스 오버라이드 무효화 */
-html.theme-light.dark .bg-white { background-color: #FFFFFF !important; }
-html.theme-light.dark input,
-html.theme-light.dark textarea,
-html.theme-light.dark select {
-  background-color: #FFFFFF !important;
-  color: #111827 !important;
-  border-color: #D4DAE3 !important;
-}
-/* 라이트모드: 블로그 본문 — 프리미엄 가독성 */
-html.theme-light .blog-content { color: #2d3748; }
-html.theme-light .blog-content p { color: #2d3748; }
-html.theme-light .blog-content li { color: #2d3748; }
-html.theme-light .blog-content li::marker { color: var(--brand); }
-html.theme-light .blog-content strong { color: #1a202c; }
-html.theme-light .blog-content h2 { color: #1a202c; border-bottom: none; }
-html.theme-light .blog-content h3 { color: #2d3748; border-left-color: var(--brand); }
-html.theme-light .blog-content blockquote { background: rgba(37,99,235,0.03); border-color: rgba(37,99,235,0.08); color: #4a5568; }
-html.theme-light .blog-content blockquote::before { color: var(--brand); }
-html.theme-light .blog-content blockquote p { color: #4a5568; }
-html.theme-light .blog-content code { background: var(--bg-hover); color: var(--accent-purple); border-color: var(--border); }
-html.theme-light .blog-content pre { background: var(--bg-surface); border-color: var(--border); }
-html.theme-light .blog-content pre code { color: var(--text-primary); }
-html.theme-light .blog-content th { background: rgba(37,99,235,0.04); color: var(--text-secondary); border-bottom-color: var(--border); }
-html.theme-light .blog-content td { color: #2d3748; }
-html.theme-light .blog-content td:last-child { color: #1a202c; }
-html.theme-light .blog-content tr:nth-child(even) td { background: rgba(0,0,0,0.015); }
-html.theme-light .blog-content table { border-color: rgba(0,0,0,0.06); }
-html.theme-light .blog-content a { color: var(--brand); }
-html.theme-light .blog-content hr { border-top-color: rgba(0,0,0,0.06); }
-html.theme-light .blog-content .highlight-box { background: rgba(5,150,105,0.03); border-color: rgba(5,150,105,0.08); }
-/* 라이트모드: 드롭다운/바텀시트 */
-html.theme-light [style*="boxShadow"] { box-shadow: 0 4px 20px rgba(0,0,0,0.08) !important; }
-/* 라이트모드: 호버 피드백 */
-html.theme-light .kd-feed-card:hover { background: #F3F4F6 !important; }
-html.theme-light .kd-card-hover:hover { border-color: #93C5FD !important; }
 
 /* ========================================
    기본 리셋
@@ -747,79 +594,6 @@ body {
   word-break: keep-all;
   overflow-wrap: break-word;
 }
-
-/* ========================================
-   다크모드 강제 오버라이드
-   ======================================== */
-.dark [style*="background-color: white"],
-.dark [style*="background-color: #fff"],
-.dark [style*="background-color: #ffffff"],
-.dark [style*="background: white"],
-.dark [style*="background: #fff"],
-.dark [style*="background: #ffffff"],
-.dark [style*="background-color: rgb(255, 255, 255)"] {
-  background-color: var(--bg-surface) !important;
-}
-.dark [style*="color: black"],
-.dark [style*="color: #000"],
-.dark [style*="color: #000000"],
-.dark [style*="color: #333"],
-.dark [style*="color: #222"],
-.dark [style*="color: #111"],
-.dark [style*="color: rgb(0, 0, 0)"] {
-  color: var(--text-primary) !important;
-}
-
-/* Tailwind 다크모드 클래스 오버라이드 */
-.dark .bg-white          { background-color: var(--bg-surface) !important; }
-.dark .bg-gray-50        { background-color: var(--bg-base) !important; }
-.dark .bg-gray-100       { background-color: var(--bg-hover) !important; }
-.dark .bg-gray-200       { background-color: var(--bg-active) !important; }
-.dark .bg-gray-800       { background-color: var(--bg-surface) !important; }
-.dark .bg-gray-900       { background-color: var(--bg-base) !important; }
-.dark .text-gray-900     { color: var(--text-primary) !important; }
-.dark .text-gray-800     { color: var(--text-primary) !important; }
-.dark .text-gray-700     { color: var(--text-secondary) !important; }
-.dark .text-gray-600     { color: var(--text-secondary) !important; }
-.dark .text-gray-500     { color: var(--text-tertiary) !important; }
-.dark .text-gray-400     { color: var(--text-tertiary) !important; }
-.dark .text-black        { color: var(--text-primary) !important; }
-.dark .text-white        { color: var(--text-inverse) !important; }
-.dark .border-gray-200   { border-color: var(--border) !important; }
-.dark .border-gray-300   { border-color: var(--border-strong) !important; }
-.dark .border-gray-100   { border-color: var(--border) !important; }
-.dark .divide-gray-200 > * + * { border-color: var(--border) !important; }
-.dark .divide-gray-100 > * + * { border-color: var(--border) !important; }
-.dark .shadow,
-.dark .shadow-sm,
-.dark .shadow-md,
-.dark .shadow-lg { box-shadow: var(--shadow-md) !important; }
-
-/* 인풋/텍스트에어리어 */
-.dark input,
-.dark textarea,
-.dark select {
-  background-color: var(--bg-sunken) !important;
-  color: var(--text-primary) !important;
-  border-color: var(--border) !important;
-}
-.dark input::placeholder,
-.dark textarea::placeholder { color: var(--text-tertiary) !important; }
-.dark input:focus,
-.dark textarea:focus,
-.dark select:focus {
-  border-color: var(--border-focus) !important;
-  outline: 2px solid var(--brand);
-  outline-offset: 2px;
-}
-
-/* 카드/패널 다크모드 border */
-.dark .rounded-lg,
-.dark .rounded-xl,
-.dark .rounded-2xl {
-  border-color: var(--border);
-}
-
 
 /* ━━━ 세션51: 진화 강화 ━━━ */
 
@@ -1572,7 +1346,7 @@ body {
   height: 120px;
   position: relative;
   overflow: hidden;
-  background: #1a2744;
+  background: var(--bg-elevated);
 }
 .hero-img::after {
   content: '';
@@ -1734,42 +1508,7 @@ html.font-large [style*="gridTemplateColumns"] > * {
   transition: font-size 0.15s ease;
 }
 
-/* 세션70: 라이트모드 오버레이/배경 보정 */
-html.theme-light [style*="rgba(0,0,0,0.5)"],
-html.theme-light [style*="rgba(0, 0, 0, 0.5)"] {
-  background-color: rgba(0,0,0,0.25) !important;
-}
-/* 라이트모드: 네비 드롭다운/바텀시트 그림자 강화 */
-html.theme-light [style*="boxShadow: 0 8px"],
-html.theme-light [style*="box-shadow: 0 8px"] {
-  box-shadow: 0 8px 32px rgba(0,0,0,0.12) !important;
-}
-/* 라이트모드: 플로팅 CTA 배경 */
-html.theme-light [style*="box-shadow: 0 8px 32px rgba(0,0,0,0.3)"] {
-  box-shadow: 0 8px 24px rgba(0,0,0,0.12) !important;
-}
-/* 라이트모드: 주식 시세 색상 대비 강화 */
-html.theme-light .stock-up { color: #DC2626 !important; }
-html.theme-light .stock-down { color: #2563EB !important; }
 
-/* 라이트모드: 메가폰/NoticeBanner 가시성 보정 */
-html.theme-light [style*="background: linear-gradient(90deg, #050A18"] {
-  background: linear-gradient(90deg, #FFF8E1 0%, #FFFBF0 50%, #FFF8E1 100%) !important;
-}
-html.theme-light [style*="background: linear-gradient(90deg, #120E16"] {
-  background: linear-gradient(90deg, #FFF0F0 0%, #FFF5F5 50%, #FFF0F0 100%) !important;
-}
-html.theme-light [style*="linear-gradient(to right, #050A18"],
-html.theme-light [style*="linear-gradient(to left, #050A18"] {
-  background: linear-gradient(to right, #FFF8E1, transparent) !important;
-}
-html.theme-light [style*="linear-gradient(to right, #120E16"],
-html.theme-light [style*="linear-gradient(to left, #120E16"] {
-  background: linear-gradient(to right, #FFF0F0, transparent) !important;
-}
-/* 라이트모드: 메가폰 텍스트 가시성 */
-html.theme-light [style*="rgba(251,191,36"] { color: #B45309 !important; }
-html.theme-light [style*="rgba(248,113,113"] { color: #DC2626 !important; }
 
 /* 블로그 테이블 모바일 overflow 글로벌 */
 .blog-content table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
@@ -2028,16 +1767,6 @@ a, span, p, div {
    s170 — Blog 비주얼 토큰 + h2 액센트 바
    ────────────────────────────────── */
 :root {
-  --blog-hero-glow: rgba(59,130,246,0.08);
-  --blog-carousel-bg: var(--bg-base);
-  --blog-info-box-bg: rgba(59,130,246,0.06);
-  --blog-info-box-border: rgba(59,130,246,0.15);
-  --blog-tag-bg: rgba(59,123,246,0.08);
-  --blog-tag-color: var(--brand, #60A5FA);
-  --blog-disclaimer-border: #F59E0B;
-}
-
-html[data-theme="light"] {
   --blog-hero-glow: rgba(37,99,235,0.04);
   --blog-carousel-bg: var(--bg-elevated);
   --blog-info-box-bg: rgba(37,99,235,0.04);
@@ -2076,35 +1805,17 @@ html[data-theme="light"] {
   --kd-radius-lg: 10px;
 
   /* 텍스트 3단계 */
-  --kd-text-1: #F5F5F2;
-  --kd-text-2: #B8B6B0;
-  --kd-text-3: #8A8985;
-
-  /* 배경/보더 */
-  --kd-bg-page: #0F0F0E;
-  --kd-bg-card: #1C1C1A;
-  --kd-bg-soft: #161614;
-  --kd-border: #3A3A37;
-
-  /* 카더라 시그니처 노랑 (Phase 9: #FFC957) */
-  --kd-accent: #FFC957;
-  --kd-accent-soft: rgba(255,201,87,0.12);
-  --kd-accent-border: rgba(255,201,87,0.30);
-  --kd-accent-bg: #412402;
-  --kd-success: #7EE0BA;
-  --kd-warning: #FFC957;
-  --kd-danger: #FFB5B5;
-  --kd-live: #FF6B6B;
-}
-
-html[data-theme="light"] {
   --kd-text-1: #1A1A18;
   --kd-text-2: #6B6A65;
   --kd-text-3: #8A8985;
+
+  /* 배경/보더 */
   --kd-bg-page: #FAFAF7;
   --kd-bg-card: #FFFFFF;
   --kd-bg-soft: #F5F5F2;
   --kd-border: #E5E5E0;
+
+  /* 카더라 시그니처 노랑 (Phase 9: #FFC957) */
   --kd-accent: #7A4F0A;
   --kd-accent-soft: #FFF6E5;
   --kd-accent-border: #F5D88A;
@@ -2254,38 +1965,101 @@ html[data-theme="light"] {
   .apt-kpi-number { font-size: 18px; }
 }
 
-/* ─────────────────────────────────────────────────────────────────────
-   Phase F-lite (s262) — dark mode catch-all 확장.
-   기존 line 750 catch-all 은 소문자 + 스페이스 syntax (`background: #fff`)
-   만 매칭. ISSUE ENGINE Phase E 카드들이 대문자 + 스페이스 없는 syntax
-   (`background:#FFFFFF`) 사용 → 미스매치. 확장 selector 로 cover.
-   CSS only, JSX 0 수정. 회귀 리스크 거의 0.
-   ───────────────────────────────────────────────────────────────────── */
-.dark [style*="background:#FFFFFF"],
-.dark [style*="background:#FFF"],
-.dark [style*="background-color:#FFFFFF"],
-.dark [style*="background:rgba(255,255,255"]
-{ background-color: var(--bg-surface) !important; }
-
-.dark [style*="color:#111827"],
-.dark [style*="color:#1F2937"],
-.dark [style*="color:#374151"]
-{ color: var(--text-primary) !important; }
-
-.dark [style*="color:#6B7280"],
-.dark [style*="color:#9CA3AF"]
-{ color: var(--text-secondary) !important; }
-
-.dark [style*="border:1px solid #E5E7EB"],
-.dark [style*="border-bottom:1px solid #E5E7EB"]
-{ border-color: var(--border) !important; }
-
-.dark [style*="background:#FEE2E2"] { background-color: rgba(220,38,38,0.18) !important; }
-.dark [style*="color:#991B1B"]      { color: #F09595 !important; }
-.dark [style*="background:#FECACA"] { background-color: rgba(220,38,38,0.22) !important; }
-.dark [style*="color:#7F1D1D"]      { color: #F4A4A4 !important; }
-.dark [style*="background:#F9FAFB"] { background-color: var(--bg-elevated) !important; }
-.dark [style*="background:#F3F4F6"] { background-color: var(--bg-hover) !important; }
-.dark [style*="color:#4B5563"]      { color: var(--text-secondary) !important; }
-.dark [style*="background:#FEF2F2"] { background-color: rgba(220,38,38,0.10) !important; }
-.dark [style*="border:1px solid #FCA5A5"] { border-color: rgba(220,38,38,0.30) !important; }
+/* ========================================
+   S1: 라이트 단일화 — 구 라이트 전용 오버라이드를 무조건 적용으로 승격
+   (선택자에서 테마 클래스만 제거, 선언값은 그대로. 캐스케이드 유지를 위해 파일 끝에 배치)
+   ======================================== */
+body {
+  background: #F5F7FA;
+  color: #111827;
+}
+input,
+textarea,
+select {
+  background-color: #FFFFFF !important;
+  color: #111827 !important;
+  border-color: #D4DAE3 !important;
+}
+input::placeholder,
+textarea::placeholder { color: #9CA3AF !important; }
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: #2563EB !important;
+  outline: 2px solid rgba(37,99,235,0.3);
+  outline-offset: 1px;
+}
+header {
+  background: rgba(255,255,255,0.92) !important;
+  border-bottom-color: #D4DAE3 !important;
+}
+nav[class*="md:hidden"] {
+  background: rgba(255,255,255,0.95) !important;
+  border-top-color: #D4DAE3 !important;
+}
+.kd-card,
+.kd-feed-card,
+.apt-card {
+  background: #FFFFFF;
+  border-color: #E5E7EB;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.kd-glass {
+  background: rgba(255,255,255,0.85);
+  border-color: rgba(37,99,235,0.10);
+}
+::-webkit-scrollbar-thumb { background: #C8CDD4; }
+::-webkit-scrollbar-thumb:hover { background: #9CA3AF; }
+.blog-content { color: #2d3748; }
+.blog-content p { color: #2d3748; }
+.blog-content li { color: #2d3748; }
+.blog-content li::marker { color: var(--brand); }
+.blog-content strong { color: #1a202c; }
+.blog-content h2 { color: #1a202c; border-bottom: none; }
+.blog-content h3 { color: #2d3748; border-left-color: var(--brand); }
+.blog-content blockquote { background: rgba(37,99,235,0.03); border-color: rgba(37,99,235,0.08); color: #4a5568; }
+.blog-content blockquote::before { color: var(--brand); }
+.blog-content blockquote p { color: #4a5568; }
+.blog-content code { background: var(--bg-hover); color: var(--accent-purple); border-color: var(--border); }
+.blog-content pre { background: var(--bg-surface); border-color: var(--border); }
+.blog-content pre code { color: var(--text-primary); }
+.blog-content th { background: rgba(37,99,235,0.04); color: var(--text-secondary); border-bottom-color: var(--border); }
+.blog-content td { color: #2d3748; }
+.blog-content td:last-child { color: #1a202c; }
+.blog-content tr:nth-child(even) td { background: rgba(0,0,0,0.015); }
+.blog-content table { border-color: rgba(0,0,0,0.06); }
+.blog-content a { color: var(--brand); }
+.blog-content hr { border-top-color: rgba(0,0,0,0.06); }
+.blog-content .highlight-box { background: rgba(5,150,105,0.03); border-color: rgba(5,150,105,0.08); }
+[style*="boxShadow"] { box-shadow: 0 4px 20px rgba(0,0,0,0.08) !important; }
+.kd-feed-card:hover { background: #F3F4F6 !important; }
+.kd-card-hover:hover { border-color: #93C5FD !important; }
+[style*="rgba(0,0,0,0.5)"],
+[style*="rgba(0, 0, 0, 0.5)"] {
+  background-color: rgba(0,0,0,0.25) !important;
+}
+[style*="boxShadow: 0 8px"],
+[style*="box-shadow: 0 8px"] {
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12) !important;
+}
+[style*="box-shadow: 0 8px 32px rgba(0,0,0,0.3)"] {
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12) !important;
+}
+.stock-up { color: #DC2626 !important; }
+.stock-down { color: #2563EB !important; }
+[style*="background: linear-gradient(90deg, #050A18"] {
+  background: linear-gradient(90deg, #FFF8E1 0%, #FFFBF0 50%, #FFF8E1 100%) !important;
+}
+[style*="background: linear-gradient(90deg, #120E16"] {
+  background: linear-gradient(90deg, #FFF0F0 0%, #FFF5F5 50%, #FFF0F0 100%) !important;
+}
+[style*="linear-gradient(to right, #050A18"],
+[style*="linear-gradient(to left, #050A18"] {
+  background: linear-gradient(to right, #FFF8E1, transparent) !important;
+}
+[style*="linear-gradient(to right, #120E16"],
+[style*="linear-gradient(to left, #120E16"] {
+  background: linear-gradient(to right, #FFF0F0, transparent) !important;
+}
+[style*="rgba(251,191,36"] { color: #B45309 !important; }
+[style*="rgba(248,113,113"] { color: #DC2626 !important; }

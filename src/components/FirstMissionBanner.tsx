@@ -77,7 +77,7 @@ export default function FirstMissionBanner() {
         ))}
       </div>
       {allDone && (
-        <div style={{ marginTop: 8, padding: '6px 10px', borderRadius: 'var(--radius-sm)', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)', fontSize: 11, color: '#10B981', fontWeight: 600, textAlign: 'center' }}>
+        <div style={{ marginTop: 8, padding: '6px 10px', borderRadius: 'var(--radius-sm)', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)', fontSize: 11, color: 'var(--accent-green)', fontWeight: 600, textAlign: 'center' }}>
           🎉 보너스 200P 지급 완료!
         </div>
       )}

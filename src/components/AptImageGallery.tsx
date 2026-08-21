@@ -119,11 +119,11 @@ export default function AptImageGallery({ images, name, region, badges }: {
       <div style={{
         position: 'relative', borderRadius: 'var(--radius-lg)', overflow: 'hidden', marginBottom: 14,
         height: 140,
-        background: 'linear-gradient(135deg, #0c1629 0%, #1a3050 50%, #1e3a8a 100%)',
+        background: 'var(--bg-elevated)',
       }}>
         <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '12px 14px' }}>
-          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginBottom: 'var(--sp-xs)' }}>{region}</div>
-          <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 900, color: '#fff', lineHeight: 1.2, wordBreak: 'keep-all' }}>{name}</div>
+          <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-xs)' }}>{region}</div>
+          <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 900, color: 'var(--text-primary)', lineHeight: 1.2, wordBreak: 'keep-all' }}>{name}</div>
         </div>
         {badges}
       </div>
@@ -132,7 +132,7 @@ export default function AptImageGallery({ images, name, region, badges }: {
 
   return (
     <>
-      <div style={{ marginBottom: 10, borderRadius: 'var(--radius-card)', overflow: 'hidden', background: '#0c1629' }}>
+      <div style={{ marginBottom: 10, borderRadius: 'var(--radius-card)', overflow: 'hidden', background: 'var(--bg-elevated)' }}>
         {/* 모바일: 스와이프 갤러리 */}
         <div className="md:hidden">
           <div

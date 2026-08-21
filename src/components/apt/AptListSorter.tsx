@@ -82,8 +82,8 @@ export default function AptListSorter({
             className={[
               "rounded-full px-3 py-1.5 text-xs font-medium transition",
               active
-                ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700",
+                ? "bg-gray-900 text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200",
               isPending ? "opacity-50" : "",
             ].join(" ")}
           >

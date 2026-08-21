@@ -101,7 +101,7 @@ export default async function AptPriceTrendCard({ region, sigungu, aptName, pric
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
         <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: 0.5 }}>인근 시세 트렌드</span>
         <span style={{ fontSize: 9, fontWeight: 800, color: 'var(--kd-accent)', padding: '2px 8px', borderRadius: 999, background: 'var(--kd-accent-soft)', border: '1px solid var(--kd-accent-border)', letterSpacing: 0.5 }}>
-          CARDERA
+          KADEORA
         </span>
       </div>
 

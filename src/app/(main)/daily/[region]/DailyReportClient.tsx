@@ -209,7 +209,7 @@ interface Props {
 
 function fmt(n: number) { return n >= 10000 ? (n / 10000).toFixed(1) + '억' : n.toLocaleString() + '만'; }
 function fmtB(n: number) { return n >= 1e12 ? (n / 1e12).toFixed(1) + 'T' : n >= 1e9 ? (n / 1e9).toFixed(0) + 'B' : n.toLocaleString(); }
-function pctColor(v: number | null) { return !v ? 'var(--text-tertiary)' : v > 0 ? 'var(--accent-red)' : 'var(--text-brand)'; }
+function pctColor(v: number | null) { return !v ? 'var(--text-tertiary)' : v > 0 ? 'var(--accent-red)' : 'var(--brand)'; }
 function pctStr(v: number | null) { return v == null ? '-' : (v > 0 ? '+' : '') + v.toFixed(1) + '%'; }
 
 // VIP Gold 컬러 팔레트
@@ -893,7 +893,7 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
                   <span style={{
                     fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '3px 8px', borderRadius: 'var(--radius-xs)',
                     background: s.status === '접수중' ? 'rgba(16,185,129,0.08)' : 'rgba(59,130,246,0.08)',
-                    color: s.status === '접수중' ? 'var(--accent-green)' : 'var(--text-brand)',
+                    color: s.status === '접수중' ? 'var(--accent-green)' : 'var(--brand)',
                   }}>{s.status}</span>
                   {s.region_nm === d.region && <span style={{ fontSize: 10, fontWeight: 800, color: 'var(--accent-yellow)' }}>내 지역</span>}
                 </div>
@@ -926,7 +926,7 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
                     <span>
                       <span style={{ color: 'var(--accent-red)', fontWeight: 600 }}>{fmt(g.sale)}</span>
                       <span style={{ color: 'var(--text-tertiary)', margin: '0 3px' }}>·</span>
-                      <span style={{ color: 'var(--text-brand)' }}>{fmt(g.jeonse)}</span>
+                      <span style={{ color: 'var(--brand)' }}>{fmt(g.jeonse)}</span>
                       <span style={{ color: g.jeonse_ratio >= 68 ? 'var(--accent-green)' : 'var(--text-tertiary)', marginLeft: 4, fontSize: 12 }}>{g.jeonse_ratio}%</span>
                     </span>
                   </div>
@@ -994,7 +994,7 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
               <div style={{ display: 'flex', gap: 1, marginBottom: 'var(--sp-xs)' }}>
                 {d.redevStages.map((st, i) => {
                   const total = d.redevStages.reduce((s, x) => s + x.cnt, 0);
-                  const colors = ['var(--text-tertiary)', 'var(--text-brand)', '#7C3AED', 'var(--accent-yellow)', 'var(--accent-green)', 'var(--accent-green)'];
+                  const colors = ['var(--text-tertiary)', 'var(--brand)', '#7C3AED', 'var(--accent-yellow)', 'var(--accent-green)', 'var(--accent-green)'];
                   return (
                     <div key={st.stage} style={{
                       flex: Math.max(st.cnt / total, 0.08), height: 16, borderRadius: 4,

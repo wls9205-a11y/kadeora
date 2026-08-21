@@ -117,7 +117,7 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 8 }}>
         <div>
           <label style={lbl}>생년월일 <span style={{ color: 'var(--error)' }}>*</span></label>
-          <input type="date" value={birthDate} onChange={e => setBirthDate(e.target.value)} style={{ ...inp, colorScheme: 'dark' }} />
+          <input type="date" value={birthDate} onChange={e => setBirthDate(e.target.value)} style={{ ...inp, colorScheme: 'light' }} />
         </div>
         <div>
           <label style={lbl}>거주 시/도 <span style={{ color: 'var(--error)' }}>*</span></label>

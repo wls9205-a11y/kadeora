@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import type { RelatedBlogPost } from '@/lib/apt/related-blogs';
+import SectionHeader, { SectionLink } from '@/components/apt/SectionHeader';
 
 function fmtDate(d: string | null): string {
   if (!d) return '';
@@ -15,14 +16,11 @@ export default function AptRelatedBlogs({ posts }: { posts: RelatedBlogPost[] })
 
   return (
     <section style={{ margin: '24px 0 0', padding: '0 6px' }} aria-labelledby="apt-blogs-heading">
-      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 10 }}>
-        <h2 id="apt-blogs-heading" style={{ fontSize: 15, fontWeight: 700, margin: 0 }}>
-          관련 청약 분석
-        </h2>
-        <Link href="/blog" style={{ fontSize: 11, color: 'var(--text-secondary, #6b7280)', textDecoration: 'none' }}>
-          전체 보기 →
-        </Link>
-      </div>
+      <SectionHeader
+        id="apt-blogs-heading"
+        eyebrow="ANALYSIS — 관련 분석"
+        title="관련 청약 분석"
+      />
 
       <div style={{ display: 'grid', gap: 7 }}>
         {posts.map((p) => (
@@ -69,6 +67,8 @@ export default function AptRelatedBlogs({ posts }: { posts: RelatedBlogPost[] })
           </Link>
         ))}
       </div>
+
+      <SectionLink href="/blog">청약 분석 전체 보기</SectionLink>
     </section>
   );
 }

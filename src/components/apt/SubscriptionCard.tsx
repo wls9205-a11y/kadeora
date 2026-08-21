@@ -7,6 +7,7 @@ import { aptHref, type AptHubItem } from '@/lib/apt/hub';
 import { formatComplexName, formatRegionShortSafe } from '@/lib/apt/subscription-status';
 import { statusBadgeStyle, statusLabel, ddayLabel, ddayStyle } from '@/lib/apt/subscription-badge';
 import SubscriptionAlertButton from '@/components/apt/SubscriptionAlertButton';
+import LifecycleRail from '@/components/apt/LifecycleRail';
 
 function fmtDate(d: string | null): string | null {
   if (!d) return null;
@@ -24,7 +25,7 @@ function fmtPricePerPyeong(v: number | null): string {
   return `평당 ${Math.round(v).toLocaleString('ko-KR')}만원`;
 }
 
-function Meta({ label, value }: { label: string; value: string }) {
+function Meta({ label, value, numeric = true }: { label: string; value: string; numeric?: boolean }) {
   return (
     <div style={{ display: 'flex', gap: 5, alignItems: 'baseline', minWidth: 0 }}>
       <span style={{ fontSize: 10.5, color: 'var(--text-tertiary, #9ca3af)', flexShrink: 0 }}>{label}</span>
@@ -33,6 +34,8 @@ function Meta({ label, value }: { label: string; value: string }) {
           fontSize: 11.5,
           color: 'var(--text-secondary, #4b5563)',
           fontWeight: 600,
+          fontFamily: numeric ? 'var(--font-mono)' : undefined,
+          fontVariantNumeric: numeric ? 'tabular-nums' : undefined,
           overflow: 'hidden',
           textOverflow: 'ellipsis',
           whiteSpace: 'nowrap',
@@ -114,22 +117,37 @@ export default function SubscriptionCard({ item }: { item: AptHubItem }) {
           }}
         >
           {item.competition_rate != null ? (
-            <span style={{ fontSize: 11.5, fontWeight: 700, color: '#b91c1c' }}>
+            <span style={{ fontSize: 11.5, fontWeight: 700, fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums', color: 'var(--accent-red)' }}>
               1순위 {Number(item.competition_rate).toFixed(1)}대 1
             </span>
           ) : null}
           {item.min_score != null ? (
-            <span style={{ fontSize: 11.5, fontWeight: 700, color: '#1d4ed8' }}>
+            <span style={{ fontSize: 11.5, fontWeight: 700, fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums', color: 'var(--accent-blue)' }}>
               가점컷 {item.min_score}점
             </span>
           ) : null}
           {item.total_applicants != null ? (
-            <span style={{ fontSize: 11.5, color: 'var(--text-secondary, #6b7280)' }}>
+            <span style={{ fontSize: 11.5, fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums', color: 'var(--text-secondary, #6b7280)' }}>
               접수 {item.total_applicants.toLocaleString('ko-KR')}건
             </span>
           ) : null}
         </div>
       ) : null}
+
+      <div style={{ marginBottom: 9 }}>
+        <LifecycleRail
+          stage={null}
+          dates={{
+            rcept_bgnde: item.rcept_bgnde,
+            rcept_endde: item.rcept_endde,
+            spsply_rcept_bgnde: item.spsply_rcept_bgnde,
+            przwner_presnatn_de: item.przwner_presnatn_de,
+            cntrct_cncls_bgnde: item.cntrct_cncls_bgnde,
+            cntrct_cncls_endde: item.cntrct_cncls_endde,
+          }}
+          size="mini"
+        />
+      </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <SubscriptionAlertButton aptName={item.house_nm ?? name} compact />

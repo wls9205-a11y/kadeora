@@ -81,13 +81,13 @@ export default function ResidenceNudgeModal() {
         </h3>
         <p style={{ fontSize: 14, color: 'var(--text-secondary)', margin: '0 0 20px', lineHeight: 1.5 }}>
           동네 청약 마감일·가격 변동·재개발 진행 알림을 보내드릴게요.<br />
-          <strong style={{ color: 'var(--accent)' }}>30초면 끝나요.</strong>
+          <strong style={{ color: 'var(--brand)' }}>30초면 끝나요.</strong>
         </p>
         <button
           onClick={goSettings}
           type="button"
           style={{
-            width: '100%', padding: '14px', background: 'var(--accent)', color: 'white',
+            width: '100%', padding: '14px', background: 'var(--brand)', color: 'white',
             border: 'none', borderRadius: 12, fontSize: 15, fontWeight: 800, cursor: 'pointer',
           }}
         >
