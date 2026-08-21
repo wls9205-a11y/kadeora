@@ -89,6 +89,12 @@ export function deriveStageFromDates(
 
   // 그 외 = 접수기간 중. 단, 판정 근거가 될 날짜가 하나도 없으면 파생 불가.
   if (!start && !end && !announce && !contractStart && !contractEnd) return null;
+
+  // 접수는 끝났는데 발표·계약·입주 날짜가 하나도 없으면 그 뒤를 알 수 없다.
+  // 여기서 subscription_open 을 반환하면 마감된 단지를 '청약중'으로 칠하게 되므로
+  // 파생을 포기하고 저장된 lifecycle_stage 로 넘긴다.
+  if (end && today > end && !announce && !contractStart && !contractEnd && !moveIn) return null;
+
   return 'subscription_open';
 }
 

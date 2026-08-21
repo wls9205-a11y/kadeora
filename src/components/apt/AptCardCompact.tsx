@@ -21,6 +21,7 @@ import {
   formatTag,
   TAG_TONE_CLASS,
 } from "@/lib/apt/card-format";
+import LifecycleRail from "@/components/apt/LifecycleRail";
 
 const CATEGORY_HREF: Record<AptCardCategory, (slug: string) => string> = {
   subscription: (s) => `/apt/${encodeURIComponent(s)}`,
@@ -32,6 +33,21 @@ const CATEGORY_HREF: Record<AptCardCategory, (slug: string) => string> = {
 
 const PLACEHOLDER_IMAGE = "/images/apt-placeholder.png";
 
+/**
+ * s2 — 카드 status 를 레일 단계로. AptCard 는 발표/계약/입주 날짜를 들고 있지 않아
+ * 날짜 파생만으로는 마감 이후를 구분하지 못한다. status 를 폴백 stage 로 넘긴다.
+ * 청약 라인이 아닌 카테고리는 NON_SUBSCRIPTION 단계로 보내 레일을 감춘다.
+ */
+const STATUS_STAGE: Record<string, string | null> = {
+  ongoing: 'subscription_open',
+  upcoming: 'pre_announcement',
+  closed: 'award_announced',
+  unsold: 'unsold_active',
+  redev: 'redevelopment_active',
+  existing: 'active_trade',
+  unknown: null,
+};
+
 export default function AptCardCompact({
   card,
   category,
@@ -42,12 +58,17 @@ export default function AptCardCompact({
   priority?: boolean;
 }) {
   const dday = formatDday(card.dday_end);
-  const ddayToneClass = {
-    urgent: "bg-red-500 text-white",
-    soon:   "bg-amber-500 text-white",
-    normal: "bg-gray-100 text-gray-700",
-    past:   "bg-gray-200 text-gray-500",
-    none:   "hidden",
+  // D-day pill 색 — hex/Tailwind 팔레트 대신 상태 토큰만 사용.
+  // 이 pill 은 상태(접수중/선착순)가 아니라 마감까지 남은 일수 축이라,
+  // 임박(urgent)=--status-soon, 여유 있는 접수중(soon)=--status-open,
+  // 그 밖(normal)=브랜드 톤, 지남(past)=--status-closed 로 맞춘다.
+  // 상태 자체의 4색 매핑은 subscription-badge.ts 의 STATUS_STYLE 이 담당한다.
+  const ddayToneStyle = {
+    urgent: { background: 'var(--status-soon)', color: 'var(--text-inverse)' },
+    soon:   { background: 'var(--status-open)', color: 'var(--text-inverse)' },
+    normal: { background: 'var(--brand-bg)',    color: 'var(--status-fcfs)' },
+    past:   { background: 'var(--bg-elevated)', color: 'var(--status-closed)' },
+    none:   undefined,
   }[dday.tone];
 
   const href = CATEGORY_HREF[category](card.slug_id || String(card.id));
@@ -71,7 +92,8 @@ export default function AptCardCompact({
         {/* 좌상단 D-day 배지 */}
         {dday.tone !== "none" && (
           <div
-            className={`absolute left-2 top-2 rounded-md px-2 py-1 text-xs font-bold tabular-nums ${ddayToneClass}`}
+            className="absolute left-2 top-2 rounded-md px-2 py-1 text-xs font-bold tabular-nums"
+            style={{ ...ddayToneStyle, fontFamily: 'var(--font-mono)' }}
           >
             {dday.label}
           </div>
@@ -114,14 +136,14 @@ export default function AptCardCompact({
         {(card.date_start || card.date_end) && (
           <p className="text-xs text-gray-700">
             <span className="text-gray-400">청약</span>{" "}
-            <span className="tabular-nums">
+            <span className="tabular-nums" style={{ fontFamily: 'var(--font-mono)' }}>
               {formatDateRange(card.date_start, card.date_end)}
             </span>
           </p>
         )}
 
         {/* (4) 세대수 · 평형 라인업 */}
-        <p className="text-xs text-gray-700">
+        <p className="text-xs text-gray-700 tabular-nums" style={{ fontFamily: 'var(--font-mono)' }}>
           {formatHouseholds(card.households)}
           {card.area_lineup && card.area_lineup.length > 0 && (
             <>
@@ -137,17 +159,26 @@ export default function AptCardCompact({
         {(card.price_per_pyeong || card.supply_min || card.supply_max) && (
           <p className="mt-auto pt-1 text-sm">
             {card.price_per_pyeong ? (
-              <span className="font-bold text-gray-900">
+              <span className="font-bold text-gray-900 tabular-nums" style={{ fontFamily: 'var(--font-mono)' }}>
                 {formatPricePerPyeong(card.price_per_pyeong)}
               </span>
             ) : null}
             {(card.supply_min || card.supply_max) && (
-              <span className="ml-2 text-xs text-gray-500 tabular-nums">
+              <span className="ml-2 text-xs text-gray-500 tabular-nums" style={{ fontFamily: 'var(--font-mono)' }}>
                 ({formatSupplyRange(card.supply_min, card.supply_max)})
               </span>
             )}
           </p>
         )}
+
+        {/* 분양 진행 눈금자 — 청약 라인이 아니면 스스로 null 을 반환한다 */}
+        <div className="pt-2">
+          <LifecycleRail
+            stage={STATUS_STAGE[card.status] ?? null}
+            dates={{ rcept_bgnde: card.date_start, rcept_endde: card.date_end }}
+            size="mini"
+          />
+        </div>
       </div>
     </Link>
   );
