@@ -531,7 +531,7 @@ html.font-large {
   --border-focus:  #4A8AF7;
   --text-primary:   #111827;
   --text-secondary: #4B5563;
-  --text-tertiary:  #6B7280;
+  --text-tertiary:  #556070;  /* s6: 4.31 → 5.69 (WCAG 4.5:1, bg-elevated 기준) */
   --text-disabled:  #C8CDD4;
   --text-inverse:   #FFFFFF;
   --text-link:      #2563EB;
@@ -545,11 +545,11 @@ html.font-large {
   --brand-dark:     #1E40AF;
   --kakao-bg:       #FEE500;
   --kakao-text:     #191919;
-  --success:        #059669;
+  --success:        #065F46;  /* s6: --accent-green 과 동일 값이었고 텍스트로 5곳 쓰인다 */
   --success-bg:     rgba(5,150,105,0.08);
-  --warning:        #D97706;
+  --warning:        #92400E;
   --warning-bg:     rgba(217,119,6,0.08);
-  --error:          #DC2626;
+  --error:          #991B1B;
   --error-bg:       rgba(220,38,38,0.08);
   --info:           #2563EB;
   --info-bg:        rgba(37,99,235,0.08);
@@ -559,20 +559,20 @@ html.font-large {
   --stock-down:     #2563EB;
   --stock-flat:     #B8CCDF;
   /* 시맨틱 액센트 (카테고리/상태별) — 세션70: 밝기 +10% */
-  --accent-green:   #059669;
+  --accent-green:   #065F46;
   --accent-green-bg: rgba(5,150,105,0.10);
   --accent-green-border: rgba(5,150,105,0.20);
   --accent-purple:  #7C3AED;
   --accent-purple-bg: rgba(124,58,237,0.10);
-  --accent-orange:  #EA580C;
+  --accent-orange:  #9A3412;
   --accent-orange-bg: rgba(234,88,12,0.10);
-  --accent-yellow:  #CA8A04;
+  --accent-yellow:  #854D0E;
   --accent-yellow-bg: rgba(202,138,4,0.10);
-  --accent-red:     #DC2626;
+  --accent-red:     #991B1B;
   --accent-red-bg:  rgba(220,38,38,0.10);
   --accent-blue:    #2563EB;
   --accent-blue-bg: rgba(37,99,235,0.10);
-  --accent-cyan:    #0891B2;
+  --accent-cyan:    #155E75;
 
   /* Stock colors — KR (빨강↑ 파랑↓) */
   --stock-kr-up:        #D32F2F;
@@ -1849,7 +1849,7 @@ a, span, p, div {
   --blog-info-box-border: rgba(37,99,235,0.1);
   --blog-tag-bg: rgba(37,99,235,0.06);
   --blog-tag-color: var(--brand, #2563EB);
-  --blog-disclaimer-border: #D97706;
+  --blog-disclaimer-border: var(--warning);
 }
 
 /* h2 좌측 컬러 액센트 바 */

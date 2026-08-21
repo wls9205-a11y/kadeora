@@ -200,7 +200,7 @@ export default async function HomePage() {
           color: 'var(--text-primary, #F2F5FA)',
         }}
       >
-        <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--accent-orange-light, #FFC07A)', letterSpacing: 0.4, marginBottom: 4 }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--accent-orange)', letterSpacing: 0.4, marginBottom: 4 }}>
           오늘의 이슈
         </div>
         {/* h1 은 sr-only 가 아니라 실제로 보이는 제목이어야 한다 — 히어로 타이틀이 곧 h1. */}
