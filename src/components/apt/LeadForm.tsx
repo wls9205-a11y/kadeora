@@ -289,7 +289,7 @@ export default function LeadForm({ siteSlug, siteName }: LeadFormProps) {
     return (
       <section
         className="apt-card"
-        style={{ borderRadius: 'var(--radius-card)', border: '0.5px solid var(--border)', padding: '20px 14px' }}
+        style={{ borderRadius: 'var(--radius-card)', border: '1px solid var(--border)', padding: '20px 14px' }}
       >
         <p style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.7, margin: 0 }}>
           신청이 접수되었습니다. 확인 후 순차적으로 안내드리겠습니다.
@@ -301,7 +301,7 @@ export default function LeadForm({ siteSlug, siteName }: LeadFormProps) {
   return (
     <section
       className="apt-card"
-      style={{ borderRadius: 'var(--radius-card)', border: '0.5px solid var(--border)', padding: '16px 14px' }}
+      style={{ borderRadius: 'var(--radius-card)', border: '1px solid var(--border)', padding: '16px 14px' }}
     >
       <h2 style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 4px' }}>
         관심 현장 알림 신청
