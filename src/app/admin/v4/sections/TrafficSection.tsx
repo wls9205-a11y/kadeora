@@ -164,8 +164,8 @@ export default function TrafficSection() {
           <div style={subTitleStyle}>기기 분포 24시간</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             {[
-              { k: 'mobile',  label: '모바일',  v: dev.mobile ?? 0, color: '#34d399' },
-              { k: 'desktop', label: '데스크탑', v: dev.desktop ?? 0, color: '#60a5fa' },
+              { k: 'mobile',  label: '모바일',  v: dev.mobile ?? 0, color: 'var(--accent-green)' },
+              { k: 'desktop', label: '데스크탑', v: dev.desktop ?? 0, color: 'var(--brand)' },
               { k: 'tablet',  label: '태블릿',   v: dev.tablet ?? 0, color: '#fb923c' },
             ].map(it => {
               const pct = devTotal > 0 ? Math.round((it.v / devTotal) * 100) : 0;

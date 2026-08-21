@@ -84,7 +84,7 @@ function RegionCard({
           style={{
             fontSize: 11,
             fontWeight: 700,
-            color: current ? 'var(--bg-base)' : '#f87171',
+            color: current ? 'var(--bg-base)' : 'var(--accent-red)',
             opacity: current ? 0.8 : 1,
           }}
         >

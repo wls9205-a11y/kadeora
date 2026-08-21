@@ -55,7 +55,7 @@ export default function BlogTossGate({
         <div style={{ fontWeight: 800, fontSize: 16, color: '#191F28', marginBottom: 6 }}>
           전체 글은 카더라에서
         </div>
-        <div style={{ fontSize: 13, color: '#8B95A1', marginBottom: 14, lineHeight: 1.5 }}>
+        <div style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 14, lineHeight: 1.5 }}>
           {title.length > 30 ? title.slice(0, 30) + '...' : title}
         </div>
         <button

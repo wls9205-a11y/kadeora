@@ -196,7 +196,7 @@ export default function SegmentBuilder({
         <div style={{ fontSize: 11, color: 'var(--text-tertiary, #888)', marginBottom: 6 }}>
           매칭 결과
           {loading && <span style={{ marginLeft: 8 }}>로드 중…</span>}
-          {err && <span style={{ marginLeft: 8, color: '#f87171' }}>실패: {err}</span>}
+          {err && <span style={{ marginLeft: 8, color: 'var(--accent-red)' }}>실패: {err}</span>}
         </div>
         <div style={{ fontSize: 22, fontWeight: 800 }}>
           {preview?.count == null ? '—' : preview.count.toLocaleString()}명

@@ -157,7 +157,7 @@ export default function SignupFunnelWidget() {
         <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-tertiary, #888)', fontSize: 12 }}>로드 중…</div>
       )}
       {err && !loading && (
-        <div style={{ padding: 10, fontSize: 12, color: '#f87171', background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.4)', borderRadius: 8 }}>
+        <div style={{ padding: 10, fontSize: 12, color: 'var(--accent-red)', background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.4)', borderRadius: 8 }}>
           위젯 데이터 가져오기 실패: {err}
         </div>
       )}
@@ -182,8 +182,8 @@ export default function SignupFunnelWidget() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
             <div>
               <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--text-tertiary, #888)', letterSpacing: 1, marginBottom: 6 }}>
-                8H TREND <span style={{ marginLeft: 6, color: '#60a5fa', fontWeight: 700 }}>● 방문</span>
-                <span style={{ marginLeft: 6, color: '#34d399', fontWeight: 700 }}>● 가입</span>
+                8H TREND <span style={{ marginLeft: 6, color: 'var(--brand)', fontWeight: 700 }}>● 방문</span>
+                <span style={{ marginLeft: 6, color: 'var(--accent-green)', fontWeight: 700 }}>● 가입</span>
               </div>
               <Sparkline rows={spark} />
             </div>
@@ -216,7 +216,7 @@ function KpiTile({ label, value, delta, highlight }: { label: string; value: num
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginTop: 2 }}>
         <span style={{
           fontSize: 22, fontWeight: 900, letterSpacing: -0.5,
-          color: highlight ? '#34d399' : 'var(--text-primary, #fff)',
+          color: highlight ? 'var(--accent-green)' : 'var(--text-primary, #fff)',
         }}>{fmtNum(value)}</span>
         {delta != null && (
           <span style={{ fontSize: 10, fontWeight: 800, color: deltaColor(delta) }}>

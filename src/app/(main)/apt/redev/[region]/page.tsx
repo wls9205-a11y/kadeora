@@ -181,15 +181,15 @@ export default async function RegionRedevPage({ params }: Props) {
           <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 600 }}>재개발</div>
         </div>}
         {rebuildCount > 0 && <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 18, fontWeight: 900, color: '#F59E0B' }}>{rebuildCount}</div>
+          <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--warning)' }}>{rebuildCount}</div>
           <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 600 }}>재건축</div>
         </div>}
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 18, fontWeight: 900, color: avgProgress >= 50 ? '#34D399' : '#FB923C' }}>{avgProgress}%</div>
+          <div style={{ fontSize: 18, fontWeight: 900, color: avgProgress >= 50 ? 'var(--accent-green)' : '#FB923C' }}>{avgProgress}%</div>
           <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 600 }}>평균 진행률</div>
         </div>
         {lateStageCnt > 0 && <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 18, fontWeight: 900, color: '#34D399' }}>{lateStageCnt}</div>
+          <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--accent-green)' }}>{lateStageCnt}</div>
           <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 600 }}>착공↑</div>
         </div>}
       </div>

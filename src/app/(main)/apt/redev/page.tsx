@@ -183,7 +183,7 @@ export default async function RedevLandingPage() {
             <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', marginBottom: 4, borderRadius: 'var(--radius-sm)', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
               <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', flex: 1 }}>{c.district_name}</span>
               <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{c.region}</span>
-              {c.previous_stage && <span style={{ fontSize: 11, color: '#EF4444' }}>{c.previous_stage}</span>}
+              {c.previous_stage && <span style={{ fontSize: 11, color: 'var(--accent-red)' }}>{c.previous_stage}</span>}
               {c.previous_stage && <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>→</span>}
               <span style={{ fontSize: 11, fontWeight: 700, color: STAGE_COLORS[c.stage] || '#10B981' }}>{c.stage}</span>
             </div>

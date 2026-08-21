@@ -91,7 +91,7 @@ export default function TossTeaser({
         <div style={{ fontWeight: 800, fontSize: 16, color: '#191F28', marginBottom: 6 }}>
           전체 콘텐츠는 카더라에서
         </div>
-        <div style={{ fontSize: 13, color: '#8B95A1', marginBottom: 16, lineHeight: 1.5 }}>
+        <div style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 16, lineHeight: 1.5 }}>
           {subtitle || '투자 정보 블로그, 실시간 종목 시세\n무료 가입하고 전부 확인하세요'}
         </div>
         <button
@@ -132,7 +132,7 @@ export default function TossTeaser({
           {label}
         </div>
         {subtitle && (
-          <div style={{ fontSize: 12, color: '#8B95A1', marginTop: 2 }}>{subtitle}</div>
+          <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 2 }}>{subtitle}</div>
         )}
       </div>
       <div style={{
@@ -188,7 +188,7 @@ export function TossFunnelGate({
       {arr}
       <div style={{ padding: '4px 0' }}>
         <div style={{
-          textAlign: 'center', fontSize: 12, color: '#8B95A1',
+          textAlign: 'center', fontSize: 12, color: 'var(--text-tertiary)',
           marginBottom: 8,
         }}>
           {countText}

@@ -299,7 +299,7 @@ export default function SignupFlowClient() {
                     <Td align="right">{fmtNum(r.clicks)}</Td>
                     <Td align="right">{fmtNum(r.signups)}</Td>
                     <Td align="right">
-                      <span style={{ color: r.rate >= 30 ? '#34d399' : r.rate >= 10 ? '#fbbf24' : '#f87171', fontWeight: 700 }}>
+                      <span style={{ color: r.rate >= 30 ? 'var(--accent-green)' : r.rate >= 10 ? '#fbbf24' : 'var(--accent-red)', fontWeight: 700 }}>
                         {fmtPct(r.rate)}
                       </span>
                     </Td>
@@ -403,7 +403,7 @@ function Banner({ tone = 'default', children }: { tone?: 'default' | 'danger'; c
       padding: 14, borderRadius: 10,
       background: dangerC ? 'rgba(248,113,113,0.08)' : 'var(--bg-elevated)',
       border: dangerC ? '1px solid rgba(248,113,113,0.4)' : '1px solid var(--border)',
-      color: dangerC ? '#f87171' : 'var(--text-tertiary)',
+      color: dangerC ? 'var(--accent-red)' : 'var(--text-tertiary)',
       fontSize: 12,
     }}>{children}</div>
   );
@@ -478,7 +478,7 @@ function Td({ children, align = 'left', highlight = false }: { children: React.R
     <td style={{
       padding: '8px 10px', textAlign: align,
       borderBottom: '1px solid var(--border)',
-      color: highlight ? '#f87171' : 'inherit',
+      color: highlight ? 'var(--accent-red)' : 'inherit',
       fontWeight: highlight ? 800 : 500,
     }}>{children}</td>
   );
@@ -524,9 +524,9 @@ function HourlyChart({ rows }: { rows: any[] }) {
 
   const W = 720, H = 200, PADX = 30, PADY = 16;
   const series: { key: string; label: string; color: string; pick: (r: any) => number }[] = [
-    { key: 'visits',       label: '방문',     color: '#60a5fa', pick: (r) => n(r?.visits ?? r?.uv ?? r?.unique_visitors) },
+    { key: 'visits',       label: '방문',     color: 'var(--brand)', pick: (r) => n(r?.visits ?? r?.uv ?? r?.unique_visitors) },
     { key: 'cta_clicks',   label: 'CTA 클릭', color: '#fbbf24', pick: (r) => n(r?.cta_clicks ?? r?.clicks) },
-    { key: 'signups_real', label: '실 가입',  color: '#34d399', pick: (r) => n(r?.signups_real ?? r?.signups ?? r?.real_signups) },
+    { key: 'signups_real', label: '실 가입',  color: 'var(--accent-green)', pick: (r) => n(r?.signups_real ?? r?.signups ?? r?.real_signups) },
     { key: 'signups_seed', label: '시드',     color: '#9ca3af', pick: (r) => n(r?.signups_seed ?? r?.seed_signups) },
   ];
   const all: number[] = [];

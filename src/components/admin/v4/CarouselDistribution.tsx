@@ -20,7 +20,7 @@ export default function CarouselDistribution({ posDist }: { posDist: number[] })
             return (
               <tr key={position} style={{ borderBottom: '1px solid var(--border)' }}>
                 <td style={{ padding: '4px 8px' }}>{position}</td>
-                <td style={{ padding: '4px 8px', textAlign: 'right', fontWeight: abnormal ? 800 : 400, color: abnormal ? '#ef4444' : 'inherit' }}>
+                <td style={{ padding: '4px 8px', textAlign: 'right', fontWeight: abnormal ? 800 : 400, color: abnormal ? 'var(--accent-red)' : 'inherit' }}>
                   {cnt.toLocaleString()}
                 </td>
                 <td style={{ padding: '4px 8px' }}>

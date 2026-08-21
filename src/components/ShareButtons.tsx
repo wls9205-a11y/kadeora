@@ -290,7 +290,7 @@ function ShareGrid({ platforms, share, copied }: { platforms: Platform[]; share:
             {p.id === 'copy' && copied ? '✓' : p.emoji}
           </div>
           <span style={{ fontSize: 10, color: 'var(--text-secondary)' }}>{p.id === 'copy' && copied ? '복사됨!' : p.label}</span>
-          {p.isNew && <span style={{ position: 'absolute', top: -4, right: -4, fontSize: 10, background: '#EF4444', color: '#fff', padding: '1px 4px', borderRadius: 4, fontWeight: 700 }}>N</span>}
+          {p.isNew && <span style={{ position: 'absolute', top: -4, right: -4, fontSize: 10, background: 'var(--accent-red)', color: '#fff', padding: '1px 4px', borderRadius: 4, fontWeight: 700 }}>N</span>}
         </button>
       ))}
     </div>

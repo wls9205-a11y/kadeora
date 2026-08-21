@@ -96,7 +96,7 @@ function StockRow({ symbol, stockMap, extra }: { symbol: string; stockMap: Recor
           <span style={{
             marginLeft: '8px',
             fontSize: '13px',
-            color: Number(stock.change_pct) >= 0 ? '#ef4444' : '#3b82f6',
+            color: Number(stock.change_pct) >= 0 ? 'var(--accent-red)' : 'var(--brand)',
           }}>
             {Number(stock.change_pct) >= 0 ? '+' : ''}{Number(stock.change_pct).toFixed(1)}%
           </span>
@@ -164,7 +164,7 @@ export default async function ShortSellingPage() {
           {/* 공매도 과열 종목 */}
           {overheat.length > 0 && (
             <section>
-              <h2 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '8px', color: '#ef4444' }}>
+              <h2 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '8px', color: 'var(--accent-red)' }}>
                 🔥 공매도 과열 종목 ({overheat.length}건)
               </h2>
               <div style={{ border: '1px solid var(--border)', borderRadius: '8px', overflow: 'hidden' }}>
@@ -174,7 +174,7 @@ export default async function ShortSellingPage() {
                     symbol={item.symbol}
                     stockMap={stockMap}
                     extra={
-                      <span style={{ color: '#ef4444', fontWeight: 600 }}>
+                      <span style={{ color: 'var(--accent-red)', fontWeight: 600 }}>
                         ~{item.overheat_until}까지
                       </span>
                     }
@@ -217,7 +217,7 @@ export default async function ShortSellingPage() {
                   symbol={item.symbol}
                   stockMap={stockMap}
                   extra={
-                    <span style={{ color: '#ef4444', fontWeight: 600 }}>
+                    <span style={{ color: 'var(--accent-red)', fontWeight: 600 }}>
                       +{Number(item.change_1d).toFixed(1)}%
                     </span>
                   }
@@ -238,7 +238,7 @@ export default async function ShortSellingPage() {
                   symbol={item.symbol}
                   stockMap={stockMap}
                   extra={
-                    <span style={{ color: '#3b82f6', fontWeight: 600 }}>
+                    <span style={{ color: 'var(--brand)', fontWeight: 600 }}>
                       {Number(item.change_1d).toFixed(1)}%
                     </span>
                   }

@@ -84,7 +84,7 @@ export default function RegionSheetV5({ onClose, sido, currentRegion }: Props) {
             onClick={useGeo}
             aria-label="내 위치"
             disabled={geoLoading}
-            style={{ padding: '0 10px', height: 32, borderRadius: 8, border: '1px solid var(--border-strong, #3a3b45)', background: 'transparent', cursor: 'pointer', fontSize: 11, fontWeight: 700, color: '#60a5fa', flexShrink: 0 }}
+            style={{ padding: '0 10px', height: 32, borderRadius: 8, border: '1px solid var(--border-strong, #3a3b45)', background: 'transparent', cursor: 'pointer', fontSize: 11, fontWeight: 700, color: 'var(--brand)', flexShrink: 0 }}
           >
             {geoLoading ? '…' : '📍'}
           </button>

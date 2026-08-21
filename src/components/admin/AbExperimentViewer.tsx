@@ -116,7 +116,7 @@ export default async function AbExperimentViewer({
                       <td style={{ padding: '6px 10px', textAlign: 'right', fontWeight: 700, color: deltaTone(vs, r.significant) }}>
                         {r.variant === 'A' ? '—' : vs === null ? '—' : `${vs >= 0 ? '+' : ''}${vs.toFixed(1)}%`}
                       </td>
-                      <td style={{ padding: '6px 10px', textAlign: 'center', color: r.significant ? '#22c55e' : 'var(--text-tertiary, #888)', fontSize: 11 }}>
+                      <td style={{ padding: '6px 10px', textAlign: 'center', color: r.significant ? 'var(--accent-green)' : 'var(--text-tertiary, #888)', fontSize: 11 }}>
                         {r.significant ? '✓' : '—'}
                       </td>
                     </tr>

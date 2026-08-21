@@ -34,7 +34,7 @@ export default async function CriticalAlertBar() {
             }}
           >
             <span style={{ fontSize: 16 }}>{isCritical ? '🚨' : '⚠️'}</span>
-            <strong style={{ fontSize: 13, color: isCritical ? '#ef4444' : '#fbbf24', fontWeight: 800 }}>
+            <strong style={{ fontSize: 13, color: isCritical ? 'var(--accent-red)' : '#fbbf24', fontWeight: 800 }}>
               {a.title}
             </strong>
             <span style={{ fontSize: 12, color: 'var(--text-secondary, #ccc)' }}>

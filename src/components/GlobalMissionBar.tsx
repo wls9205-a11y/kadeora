@@ -132,7 +132,7 @@ export default function GlobalMissionBar() {
                   <span style={{ fontSize: 13 }}>
                     {isDone ? '✅' : m.icon} {m.label}
                   </span>
-                  <span style={{ fontSize: 12, color: isDone ? '#22c55e' : 'var(--brand)', fontWeight: 600 }}>
+                  <span style={{ fontSize: 12, color: isDone ? 'var(--accent-green)' : 'var(--brand)', fontWeight: 600 }}>
                     {isDone ? '완료' : `+${m.reward}P`}
                   </span>
                 </Link>

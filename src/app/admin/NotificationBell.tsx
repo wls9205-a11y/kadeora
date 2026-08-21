@@ -155,7 +155,7 @@ export default function NotificationBell() {
             <button
               onClick={markAll}
               disabled={loading || unread === 0}
-              style={{ fontSize: 11, color: '#60A5FA', background: 'transparent', border: 'none', cursor: unread === 0 ? 'default' : 'pointer' }}
+              style={{ fontSize: 11, color: 'var(--brand)', background: 'transparent', border: 'none', cursor: unread === 0 ? 'default' : 'pointer' }}
             >
               모두 읽음
             </button>

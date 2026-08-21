@@ -204,7 +204,7 @@ export default function WatchlistWidget() {
             style={{
               fontSize: 11, fontWeight: 700, padding: '6px 12px', borderRadius: 6,
               background: siteOpen ? 'rgba(96,165,250,0.16)' : 'transparent',
-              color: siteOpen ? '#60a5fa' : 'var(--text-secondary, #ccc)',
+              color: siteOpen ? 'var(--brand)' : 'var(--text-secondary, #ccc)',
               border: '1px solid var(--border)', cursor: 'pointer',
             }}
           >
@@ -226,7 +226,7 @@ export default function WatchlistWidget() {
         <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-tertiary, #888)', fontSize: 12 }}>로드 중…</div>
       )}
       {err && !loading && (
-        <div style={{ padding: 10, fontSize: 12, color: '#f87171', background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.4)', borderRadius: 8 }}>
+        <div style={{ padding: 10, fontSize: 12, color: 'var(--accent-red)', background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.4)', borderRadius: 8 }}>
           위젯 데이터 가져오기 실패: {err}
         </div>
       )}
@@ -286,7 +286,7 @@ export default function WatchlistWidget() {
           <div>
             <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--text-tertiary, #888)', letterSpacing: 1, marginBottom: 6 }}>
               14D DAILY <span style={{ marginLeft: 6, color: 'var(--text-tertiary, #9ca3af)', fontWeight: 700 }}>■ total</span>
-              <span style={{ marginLeft: 4, color: '#34d399', fontWeight: 700 }}>■ organic</span>
+              <span style={{ marginLeft: 4, color: 'var(--accent-green)', fontWeight: 700 }}>■ organic</span>
             </div>
             <DailyBars rows={daily} />
           </div>
@@ -330,7 +330,7 @@ function KpiTile({ label, value, delta, sub, highlight, muted }: { label: string
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginTop: 2 }}>
         <span style={{
           fontSize: 22, fontWeight: 900, letterSpacing: -0.5,
-          color: highlight ? '#34d399' : 'var(--text-primary, #fff)',
+          color: highlight ? 'var(--accent-green)' : 'var(--text-primary, #fff)',
         }}>{fmtNum(value)}</span>
         {delta != null && (
           <span style={{ fontSize: 10, fontWeight: 800, color: deltaColor(delta) }}>
@@ -433,8 +433,8 @@ function TopColumn({ title, rows, emptyMsg }: { title: string; rows: TopRow[]; e
                 </span>
                 <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-secondary, #ccc)', whiteSpace: 'nowrap' }}>
                   {showSplit
-                    ? <>총 {fmtNum(users)} <span style={{ color: '#34d399', fontWeight: 700 }}>(자연 {fmtNum(organicUsers)})</span></>
-                    : <span style={{ color: '#34d399' }}>{fmtNum(organicUsers)}명</span>}
+                    ? <>총 {fmtNum(users)} <span style={{ color: 'var(--accent-green)', fontWeight: 700 }}>(자연 {fmtNum(organicUsers)})</span></>
+                    : <span style={{ color: 'var(--accent-green)' }}>{fmtNum(organicUsers)}명</span>}
                 </span>
               </div>
             );
@@ -468,7 +468,7 @@ function RecentList({ rows }: { rows: RecentRow[] }) {
             <span style={{ fontSize: 9, fontWeight: 800,
               padding: '1px 6px', borderRadius: 999,
               background: isApt ? 'rgba(96,165,250,0.18)' : 'rgba(251,191,36,0.16)',
-              color: isApt ? '#60a5fa' : '#fbbf24',
+              color: isApt ? 'var(--brand)' : '#fbbf24',
             }}>{isApt ? '단지' : '종목'}</span>
             <span style={{ fontSize: 11, color: 'var(--text-secondary, #ccc)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 180 }}>
               {r.item_name ?? '—'}

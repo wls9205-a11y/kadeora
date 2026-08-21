@@ -232,7 +232,7 @@ export default function UsersListClient() {
                   <span style={{
                     padding: '2px 8px', borderRadius: 999, fontSize: 10, fontWeight: 700,
                     background: u.provider === 'kakao' ? 'rgba(254,229,0,0.12)' : u.provider === 'google' ? 'rgba(66,133,244,0.12)' : 'rgba(255,255,255,0.06)',
-                    color: u.provider === 'kakao' ? '#fde047' : u.provider === 'google' ? '#60a5fa' : 'var(--text-tertiary, #888)',
+                    color: u.provider === 'kakao' ? '#fde047' : u.provider === 'google' ? 'var(--brand)' : 'var(--text-tertiary, #888)',
                   }}>{u.provider || '—'}</span>
                 </td>
                 <td style={{ padding: 8, color: 'var(--text-secondary, #ccc)' }}>{fmtDate(u.created_at)}</td>
@@ -244,7 +244,7 @@ export default function UsersListClient() {
                     {u.is_seed && <span style={{ fontSize: 9, padding: '1px 6px', borderRadius: 4, background: 'rgba(251,146,60,0.12)', color: '#fb923c', fontWeight: 700 }}>시드</span>}
                     {u.is_admin && <span style={{ fontSize: 9, padding: '1px 6px', borderRadius: 4, background: 'rgba(139,92,246,0.12)', color: '#a78bfa', fontWeight: 700 }}>어드민</span>}
                     {u.kakao_channel_added && <span style={{ fontSize: 9, padding: '1px 6px', borderRadius: 4, background: 'rgba(254,229,0,0.12)', color: '#fde047', fontWeight: 700 }}>채널</span>}
-                    {u.is_banned && <span style={{ fontSize: 9, padding: '1px 6px', borderRadius: 4, background: 'rgba(248,113,113,0.12)', color: '#f87171', fontWeight: 700 }}>차단</span>}
+                    {u.is_banned && <span style={{ fontSize: 9, padding: '1px 6px', borderRadius: 4, background: 'rgba(248,113,113,0.12)', color: 'var(--accent-red)', fontWeight: 700 }}>차단</span>}
                     {u.is_deleted && <span style={{ fontSize: 9, padding: '1px 6px', borderRadius: 4, background: 'rgba(0,0,0,0.3)', color: 'var(--text-tertiary, #888)', fontWeight: 700 }}>삭제</span>}
                   </div>
                 </td>

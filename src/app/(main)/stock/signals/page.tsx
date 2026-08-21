@@ -200,7 +200,7 @@ export default async function SignalsPage() {
                           padding: '2px 8px',
                           borderRadius: '12px',
                           background: signal.strength >= 7 ? 'rgba(239,68,68,0.1)' : 'rgba(59,130,246,0.1)',
-                          color: signal.strength >= 7 ? '#ef4444' : '#3b82f6',
+                          color: signal.strength >= 7 ? 'var(--accent-red)' : 'var(--brand)',
                           fontWeight: 600,
                         }}>
                           강도 {signal.strength}/10
@@ -210,7 +210,7 @@ export default async function SignalsPage() {
                       {stock && (
                         <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: '0 0 6px' }}>
                           {stock.price?.toLocaleString()}원
-                          <span style={{ color: Number(stock.change_pct) >= 0 ? '#ef4444' : '#3b82f6', marginLeft: '6px' }}>
+                          <span style={{ color: Number(stock.change_pct) >= 0 ? 'var(--accent-red)' : 'var(--brand)', marginLeft: '6px' }}>
                             {Number(stock.change_pct) >= 0 ? '+' : ''}{Number(stock.change_pct).toFixed(1)}%
                           </span>
                         </p>

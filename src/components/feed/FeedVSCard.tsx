@@ -84,7 +84,7 @@ export default function FeedVSCard({ post }: { post: PostWithProfile }) {
             <span style={{ fontSize: 12, color: 'var(--text-primary)', fontWeight: 600 }}>{nickname}</span>
             <span style={{
               padding: '1px 5px', borderRadius: 4, fontSize: 9, fontWeight: 700,
-              background: 'rgba(245,158,11,0.1)', color: '#F59E0B',
+              background: 'rgba(245,158,11,0.1)', color: 'var(--warning)',
             }}>⚔️ VS</span>
           </div>
           <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{timeAgo(post.created_at)}</span>

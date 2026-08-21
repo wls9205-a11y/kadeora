@@ -33,9 +33,9 @@ export default function InAppBrowserCard() {
     return () => { cancelled = true; };
   }, []);
 
-  if (err) return <div style={{ padding: 16, color: '#ef4444', fontSize: 12 }}>인앱 funnel 로드 실패: {err}</div>;
+  if (err) return <div style={{ padding: 16, color: 'var(--accent-red)', fontSize: 12 }}>인앱 funnel 로드 실패: {err}</div>;
   if (!data) return <div style={{ padding: 16, color: 'var(--text-tertiary, #666)', fontSize: 12 }}>인앱 funnel 로딩 중…</div>;
-  if (!data.ok) return <div style={{ padding: 16, color: '#ef4444', fontSize: 12 }}>{data.error || '데이터 없음'}</div>;
+  if (!data.ok) return <div style={{ padding: 16, color: 'var(--accent-red)', fontSize: 12 }}>{data.error || '데이터 없음'}</div>;
 
   const browsers = data.by_browser;
   const totalAttempts = browsers.reduce((s, b) => s + b.attempts, 0);
@@ -77,7 +77,7 @@ export default function InAppBrowserCard() {
               return (
                 <tr key={b.browser_type} style={{ borderBottom: '1px solid var(--border)' }}>
                   <td style={{ padding: '6px 8px', fontWeight: 700, color: 'var(--text-primary, #fff)' }}>
-                    {isBlocked && <span style={{ color: '#ef4444', marginRight: 4 }}>🚫</span>}
+                    {isBlocked && <span style={{ color: 'var(--accent-red)', marginRight: 4 }}>🚫</span>}
                     {b.browser_type}
                   </td>
                   <td style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-secondary, #888)' }}>{b.attempts.toLocaleString()}</td>

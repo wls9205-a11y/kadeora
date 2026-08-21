@@ -71,7 +71,7 @@ export default function SignupCTASection({ data, ctrAvg }: Props) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           {(broken.items ?? []).slice(0, 6).map(c => (
             <div key={c.cta_name} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, padding: '6px 8px', borderRadius: 6, background: 'rgba(0,0,0,0.2)' }}>
-              <code style={{ fontSize: 12, fontWeight: 700, color: '#f87171' }}>{c.cta_name}</code>
+              <code style={{ fontSize: 12, fontWeight: 700, color: 'var(--accent-red)' }}>{c.cta_name}</code>
               <span style={{ fontSize: 11, color: 'var(--text-secondary, #ccc)' }}>
                 노출 <strong>{c.views_24h ?? 0}</strong> · 클릭 <strong>{c.clicks_24h ?? 0}</strong>
               </span>

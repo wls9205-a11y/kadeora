@@ -141,7 +141,7 @@ export default function SendModal({
               borderRadius: 8,
               background: 'rgba(248,113,113,0.12)',
               border: '1px solid rgba(248,113,113,0.5)',
-              color: '#f87171',
+              color: 'var(--accent-red)',
               fontSize: 12,
               fontWeight: 700,
             }}
@@ -209,7 +209,7 @@ export default function SendModal({
         </div>
 
         {err && (
-          <div style={{ fontSize: 12, color: '#f87171' }}>발송 실패: {err}</div>
+          <div style={{ fontSize: 12, color: 'var(--accent-red)' }}>발송 실패: {err}</div>
         )}
 
         {result && (

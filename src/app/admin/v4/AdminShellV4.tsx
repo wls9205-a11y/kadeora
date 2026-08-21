@@ -140,7 +140,7 @@ export default function AdminShellV4() {
         <div style={{
           padding: 14, borderRadius: 'var(--radius-md, 10px)',
           background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.4)',
-          color: '#f87171', fontSize: 12,
+          color: 'var(--accent-red)', fontSize: 12,
         }}>
           데이터 가져오기 실패: {err}
         </div>

@@ -86,7 +86,7 @@ export default function BlogFloatingBar({ slug, title, category }: Props) {
         display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px',
         borderRadius: 14, border: 'none', cursor: 'pointer',
         background: saved ? 'rgba(245,158,11,0.2)' : 'rgba(245,158,11,0.08)',
-        color: saved ? '#fbbf24' : '#f59e0b',
+        color: saved ? '#fbbf24' : 'var(--warning)',
         fontSize: 13, fontWeight: 700, transition: 'all 0.15s',
         fontFamily: 'inherit',
       }}>
@@ -98,7 +98,7 @@ export default function BlogFloatingBar({ slug, title, category }: Props) {
         display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px',
         borderRadius: 14, border: 'none', cursor: 'pointer',
         background: 'rgba(59,130,246,0.08)',
-        color: '#60a5fa',
+        color: 'var(--brand)',
         fontSize: 13, fontWeight: 700, transition: 'all 0.15s',
         fontFamily: 'inherit',
       }}>
@@ -110,7 +110,7 @@ export default function BlogFloatingBar({ slug, title, category }: Props) {
         display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px',
         borderRadius: 14, border: 'none', cursor: 'pointer',
         background: shared ? 'rgba(34,197,94,0.2)' : 'rgba(34,197,94,0.08)',
-        color: shared ? '#4ade80' : '#22c55e',
+        color: shared ? '#4ade80' : 'var(--accent-green)',
         fontSize: 13, fontWeight: 700, transition: 'all 0.15s',
         fontFamily: 'inherit',
       }}>

@@ -112,7 +112,7 @@ export default function UserDetailClient({ userId }: { userId: string }) {
       </div>
 
       {loading && !data && <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-tertiary, #888)' }}>로드 중…</div>}
-      {err && <div style={{ ...cardStyle, color: '#f87171', borderColor: 'rgba(248,113,113,0.4)' }}>오류: {err}</div>}
+      {err && <div style={{ ...cardStyle, color: 'var(--accent-red)', borderColor: 'rgba(248,113,113,0.4)' }}>오류: {err}</div>}
 
       {data && (
         <>
@@ -133,11 +133,11 @@ export default function UserDetailClient({ userId }: { userId: string }) {
                   <div style={{ fontSize: 12, color: 'var(--text-tertiary, #888)' }}>{p.full_name}</div>
                 )}
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 4 }}>
-                  {p.provider && <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 999, background: p.provider === 'kakao' ? 'rgba(254,229,0,0.12)' : 'rgba(66,133,244,0.12)', color: p.provider === 'kakao' ? '#fde047' : '#60a5fa', fontWeight: 700 }}>{p.provider}</span>}
+                  {p.provider && <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 999, background: p.provider === 'kakao' ? 'rgba(254,229,0,0.12)' : 'rgba(66,133,244,0.12)', color: p.provider === 'kakao' ? '#fde047' : 'var(--brand)', fontWeight: 700 }}>{p.provider}</span>}
                   {p.is_seed && <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 999, background: 'rgba(251,146,60,0.12)', color: '#fb923c', fontWeight: 700 }}>시드</span>}
                   {p.is_admin && <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 999, background: 'rgba(139,92,246,0.12)', color: '#a78bfa', fontWeight: 700 }}>어드민</span>}
                   {p.kakao_channel_added && <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 999, background: 'rgba(254,229,0,0.12)', color: '#fde047', fontWeight: 700 }}>카카오 채널</span>}
-                  {p.is_banned && <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 999, background: 'rgba(248,113,113,0.12)', color: '#f87171', fontWeight: 700 }}>차단</span>}
+                  {p.is_banned && <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 999, background: 'rgba(248,113,113,0.12)', color: 'var(--accent-red)', fontWeight: 700 }}>차단</span>}
                   {p.is_deleted && <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 999, background: 'rgba(0,0,0,0.3)', color: 'var(--text-tertiary, #888)', fontWeight: 700 }}>삭제됨</span>}
                 </div>
               </div>

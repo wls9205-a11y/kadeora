@@ -624,11 +624,11 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
         <div style={{ background: 'var(--bg-surface)', borderRadius: 'var(--radius-card)', border: '1px solid var(--border)', padding: '16px', marginBottom: 8 }}>
           <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 10 }}>🌡️ 시장 심리 지수</div>
           <div style={{ textAlign: 'center', marginBottom: 10 }}>
-            <span style={{ fontSize: 32, fontWeight: 900, color: d.marketSentiment.score >= 60 ? '#22C55E' : d.marketSentiment.score <= 40 ? '#EF4444' : 'var(--text-secondary)' }}>
+            <span style={{ fontSize: 32, fontWeight: 900, color: d.marketSentiment.score >= 60 ? 'var(--accent-green)' : d.marketSentiment.score <= 40 ? 'var(--accent-red)' : 'var(--text-secondary)' }}>
               {d.marketSentiment.score}
             </span>
             <span style={{ fontSize: 13, color: 'var(--text-secondary)', marginLeft: 4 }}>/ 100</span>
-            <div style={{ fontSize: 12, fontWeight: 700, color: d.marketSentiment.score >= 70 ? '#22C55E' : d.marketSentiment.score >= 55 ? '#86EFAC' : d.marketSentiment.score >= 45 ? 'var(--text-tertiary)' : d.marketSentiment.score >= 30 ? '#FCA5A5' : '#EF4444', marginTop: 4 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: d.marketSentiment.score >= 70 ? 'var(--accent-green)' : d.marketSentiment.score >= 55 ? '#86EFAC' : d.marketSentiment.score >= 45 ? 'var(--text-tertiary)' : d.marketSentiment.score >= 30 ? '#FCA5A5' : 'var(--accent-red)', marginTop: 4 }}>
               {d.marketSentiment.score >= 70 ? '🟢 탐욕' : d.marketSentiment.score >= 55 ? '🟡 낙관' : d.marketSentiment.score >= 45 ? '⚪ 중립' : d.marketSentiment.score >= 30 ? '🟠 불안' : '🔴 공포'}
             </div>
           </div>
@@ -639,9 +639,9 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
             <span>극도의 공포</span><span>중립</span><span>극도의 탐욕</span>
           </div>
           <div style={{ display: 'flex', gap: 8, marginTop: 10, justifyContent: 'center' }}>
-            <span style={{ fontSize: 11, color: '#22C55E' }}>긍정 {d.marketSentiment.positive}건</span>
+            <span style={{ fontSize: 11, color: 'var(--accent-green)' }}>긍정 {d.marketSentiment.positive}건</span>
             <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>중립 {d.marketSentiment.neutral}건</span>
-            <span style={{ fontSize: 11, color: '#EF4444' }}>부정 {d.marketSentiment.negative}건</span>
+            <span style={{ fontSize: 11, color: 'var(--accent-red)' }}>부정 {d.marketSentiment.negative}건</span>
           </div>
         </div>
       )}
@@ -653,21 +653,21 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
             {/* 주식 급등 */}
             <div>
-              <div style={{ fontSize: 11, fontWeight: 700, color: '#EF4444', marginBottom: 6 }}>🔴 급등 종목</div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--accent-red)', marginBottom: 6 }}>🔴 급등 종목</div>
               {d.priceChanges.stockUp.map((s, i) => (
                 <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, padding: '3px 0', borderBottom: '1px solid var(--border)' }}>
                   <span style={{ color: 'var(--text-primary)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '60%' }}>{s.name}</span>
-                  <span style={{ color: '#EF4444', fontWeight: 700 }}>+{s.change_pct.toFixed(1)}%</span>
+                  <span style={{ color: 'var(--accent-red)', fontWeight: 700 }}>+{s.change_pct.toFixed(1)}%</span>
                 </div>
               ))}
             </div>
             {/* 주식 급락 */}
             <div>
-              <div style={{ fontSize: 11, fontWeight: 700, color: '#3B82F6', marginBottom: 6 }}>🔵 급락 종목</div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--brand)', marginBottom: 6 }}>🔵 급락 종목</div>
               {d.priceChanges.stockDown.map((s, i) => (
                 <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, padding: '3px 0', borderBottom: '1px solid var(--border)' }}>
                   <span style={{ color: 'var(--text-primary)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '60%' }}>{s.name}</span>
-                  <span style={{ color: '#3B82F6', fontWeight: 700 }}>{s.change_pct.toFixed(1)}%</span>
+                  <span style={{ color: 'var(--brand)', fontWeight: 700 }}>{s.change_pct.toFixed(1)}%</span>
                 </div>
               ))}
             </div>
@@ -677,25 +677,25 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
             <div style={{ marginTop: 10 }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                 <div>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: '#EF4444', marginBottom: 6 }}>🏠 시세 상승 단지</div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--accent-red)', marginBottom: 6 }}>🏠 시세 상승 단지</div>
                   {d.priceChanges.aptUp.map((a, i) => (
                     <div key={i} style={{ fontSize: 11, padding: '3px 0', borderBottom: '1px solid var(--border)' }}>
                       <div style={{ fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.name}</div>
                       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                         <span style={{ color: 'var(--text-tertiary)' }}>{a.sigungu}</span>
-                        <span style={{ color: '#EF4444', fontWeight: 700 }}>+{a.change_pct.toFixed(1)}%</span>
+                        <span style={{ color: 'var(--accent-red)', fontWeight: 700 }}>+{a.change_pct.toFixed(1)}%</span>
                       </div>
                     </div>
                   ))}
                 </div>
                 <div>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: '#3B82F6', marginBottom: 6 }}>🏠 시세 하락 단지</div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--brand)', marginBottom: 6 }}>🏠 시세 하락 단지</div>
                   {d.priceChanges.aptDown.map((a, i) => (
                     <div key={i} style={{ fontSize: 11, padding: '3px 0', borderBottom: '1px solid var(--border)' }}>
                       <div style={{ fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.name}</div>
                       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                         <span style={{ color: 'var(--text-tertiary)' }}>{a.sigungu}</span>
-                        <span style={{ color: '#3B82F6', fontWeight: 700 }}>{a.change_pct.toFixed(1)}%</span>
+                        <span style={{ color: 'var(--brand)', fontWeight: 700 }}>{a.change_pct.toFixed(1)}%</span>
                       </div>
                     </div>
                   ))}
@@ -717,12 +717,12 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <div style={{ flex: 1, textAlign: 'center' }}>
                   <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>{v.option_a}</div>
-                  <div style={{ fontSize: 16, fontWeight: 900, color: v.a_pct >= v.b_pct ? '#EF4444' : 'var(--text-tertiary)' }}>{v.a_pct}%</div>
+                  <div style={{ fontSize: 16, fontWeight: 900, color: v.a_pct >= v.b_pct ? 'var(--accent-red)' : 'var(--text-tertiary)' }}>{v.a_pct}%</div>
                 </div>
                 <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-tertiary)' }}>VS</div>
                 <div style={{ flex: 1, textAlign: 'center' }}>
                   <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>{v.option_b}</div>
-                  <div style={{ fontSize: 16, fontWeight: 900, color: v.b_pct >= v.a_pct ? '#3B82F6' : 'var(--text-tertiary)' }}>{v.b_pct}%</div>
+                  <div style={{ fontSize: 16, fontWeight: 900, color: v.b_pct >= v.a_pct ? 'var(--brand)' : 'var(--text-tertiary)' }}>{v.b_pct}%</div>
                 </div>
               </div>
             </div>
@@ -730,7 +730,7 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
           {/* 예측 */}
           {d.hotTopics.predictions.map((p, i) => (
             <div key={`pred-${i}`} style={{ marginBottom: 8, padding: '8px 10px', borderRadius: 8, background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.12)' }}>
-              <div style={{ fontSize: 10, fontWeight: 700, color: '#F59E0B', marginBottom: 4 }}>🔮 예측 ({p.total}명 참여)</div>
+              <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--warning)', marginBottom: 4 }}>🔮 예측 ({p.total}명 참여)</div>
               <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)' }}>{p.title}</div>
               <div style={{ height: 6, borderRadius: 4, background: 'var(--bg-hover)', overflow: 'hidden', marginTop: 6 }}>
                 <div style={{ height: '100%', width: `${p.agree_pct}%`, borderRadius: 4, background: '#F59E0B' }} />

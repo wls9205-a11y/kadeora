@@ -45,7 +45,7 @@ export default function SegmentSavedList({
     >
       <h2 style={{ fontSize: 13, fontWeight: 800, margin: 0 }}>저장된 세그먼트</h2>
       {loading && <div style={{ fontSize: 12, color: 'var(--text-tertiary, #888)' }}>로드 중…</div>}
-      {err && <div style={{ fontSize: 12, color: '#f87171' }}>실패: {err}</div>}
+      {err && <div style={{ fontSize: 12, color: 'var(--accent-red)' }}>실패: {err}</div>}
       {!loading && items.length === 0 && !err && (
         <div style={{ fontSize: 12, color: 'var(--text-tertiary, #888)' }}>저장된 세그먼트가 없습니다.</div>
       )}

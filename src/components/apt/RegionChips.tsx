@@ -166,7 +166,7 @@ function RegionChip({
         style={{
           fontSize: 10.5,
           fontWeight: 700,
-          color: active ? 'var(--bg-base)' : '#f87171',
+          color: active ? 'var(--bg-base)' : 'var(--accent-red)',
           opacity: active ? 0.75 : 1,
         }}
       >

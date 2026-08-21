@@ -966,7 +966,7 @@ export default async function AptUnifiedPage({ params }: Props) {
                 {/* 평균 + 평당가 */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10 }}>
                   <span style={{ color: 'var(--text-tertiary)' }}>평균 <strong style={{ color: 'var(--text-primary)' }}>{fmtAmount(pAvg)}</strong></span>
-                  {pyeongPrice > 0 && <span style={{ color: 'var(--accent-purple)' }}>평당 <strong>{ppMin > 0 && ppMax > 0 ? `${ppMin.toLocaleString()}~${ppMax.toLocaleString()}만` : `${pyeongPrice.toLocaleString()}만`}</strong>{ppMin > 0 && ppMax > 0 ? <span style={{ fontSize: 10, color: 'var(--text-tertiary)', marginLeft: 3 }}>(평균 {pyeongPrice.toLocaleString()}만)</span> : <span style={{ fontSize: 10, color: 'var(--text-tertiary)', marginLeft: 3 }}>(최고가 기준)</span>}{isEstimated && <span style={{ fontSize: 10, marginLeft: 4, padding: '1px 4px', borderRadius: 4, background: 'rgba(245,158,11,0.15)', color: '#F59E0B', fontWeight: 600 }}>추정</span>}</span>}
+                  {pyeongPrice > 0 && <span style={{ color: 'var(--accent-purple)' }}>평당 <strong>{ppMin > 0 && ppMax > 0 ? `${ppMin.toLocaleString()}~${ppMax.toLocaleString()}만` : `${pyeongPrice.toLocaleString()}만`}</strong>{ppMin > 0 && ppMax > 0 ? <span style={{ fontSize: 10, color: 'var(--text-tertiary)', marginLeft: 3 }}>(평균 {pyeongPrice.toLocaleString()}만)</span> : <span style={{ fontSize: 10, color: 'var(--text-tertiary)', marginLeft: 3 }}>(최고가 기준)</span>}{isEstimated && <span style={{ fontSize: 10, marginLeft: 4, padding: '1px 4px', borderRadius: 4, background: 'rgba(245,158,11,0.15)', color: 'var(--warning)', fontWeight: 600 }}>추정</span>}</span>}
                 </div>
               </div>
             );
@@ -1034,7 +1034,7 @@ export default async function AptUnifiedPage({ params }: Props) {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
             {/* 학군 */}
             <div style={{ padding: '10px', borderRadius: 'var(--radius-sm)', background: 'rgba(59,130,246,0.04)', border: '1px solid rgba(59,130,246,0.1)' }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: '#3B82F6', marginBottom: 6 }}>학군</div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--brand)', marginBottom: 6 }}>학군</div>
               {Array.isArray(sub.schools) && sub.schools.length > 0 ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                   {(sub.schools as { name: string; distance?: string }[]).slice(0, 3).map((s, i) => (
@@ -1052,7 +1052,7 @@ export default async function AptUnifiedPage({ params }: Props) {
             </div>
             {/* 교통 */}
             <div style={{ padding: '10px', borderRadius: 'var(--radius-sm)', background: 'rgba(34,197,94,0.04)', border: '1px solid rgba(34,197,94,0.1)' }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: '#22C55E', marginBottom: 6 }}>교통</div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--accent-green)', marginBottom: 6 }}>교통</div>
               {Array.isArray(sub.stations) && sub.stations.length > 0 ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                   {(sub.stations as { name: string; walk_min?: number }[]).slice(0, 3).map((s, i) => (
@@ -1088,7 +1088,7 @@ export default async function AptUnifiedPage({ params }: Props) {
           <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', marginBottom: 14 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
               <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{region} 시세 비교 ({regionBenchmark.count}개 현장)</span>
-              <span style={{ fontSize: 10, fontWeight: 600, color: diff > 10 ? '#F87171' : diff < -10 ? '#34D399' : 'var(--text-tertiary)', background: diff > 10 ? 'rgba(248,113,113,0.1)' : diff < -10 ? 'rgba(52,211,153,0.1)' : 'var(--bg-hover)', padding: '1px 6px', borderRadius: 4 }}>
+              <span style={{ fontSize: 10, fontWeight: 600, color: diff > 10 ? 'var(--accent-red)' : diff < -10 ? 'var(--accent-green)' : 'var(--text-tertiary)', background: diff > 10 ? 'rgba(248,113,113,0.1)' : diff < -10 ? 'rgba(52,211,153,0.1)' : 'var(--bg-hover)', padding: '1px 6px', borderRadius: 4 }}>
                 {diff > 0 ? `+${diff}%` : `${diff}%`} {diff > 10 ? '고가' : diff < -10 ? '저가' : '평균'}
               </span>
             </div>
@@ -1148,7 +1148,7 @@ export default async function AptUnifiedPage({ params }: Props) {
           <div className="apt-card" style={{ background: premium > 0 ? 'rgba(248,113,113,0.03)' : 'rgba(52,211,153,0.03)', border: `1px solid ${premium > 0 ? 'rgba(248,113,113,0.15)' : 'rgba(52,211,153,0.15)'}` }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
               <h2 className="apt-section-title" style={{ margin: 0 }}>분양가 vs 실거래가</h2>
-              <span style={{ fontSize: 12, fontWeight: 800, color: premium > 0 ? 'var(--accent-red)' : '#34D399', background: premium > 0 ? 'rgba(248,113,113,0.1)' : 'rgba(52,211,153,0.1)', padding: '3px 8px', borderRadius: 'var(--radius-sm)' }}>
+              <span style={{ fontSize: 12, fontWeight: 800, color: premium > 0 ? 'var(--accent-red)' : 'var(--accent-green)', background: premium > 0 ? 'rgba(248,113,113,0.1)' : 'rgba(52,211,153,0.1)', padding: '3px 8px', borderRadius: 'var(--radius-sm)' }}>
                 {premium > 0 ? `+${premium}% 프리미엄` : premium < 0 ? `${premium}% 저평가` : '시세 동일'}
               </span>
             </div>
@@ -1160,7 +1160,7 @@ export default async function AptUnifiedPage({ params }: Props) {
               </div>
               {/* 실거래 범위 */}
               <div style={{ position: 'absolute', top: 44, left: `${pct(tradeMin)}%`, width: `${pct(tradeMax) - pct(tradeMin)}%`, height: 20, borderRadius: 'var(--radius-xs)', background: premium > 0 ? 'rgba(248,113,113,0.15)' : 'rgba(52,211,153,0.15)', border: `1.5px solid ${premium > 0 ? '#F87171' : '#34D399'}` }}>
-                <div style={{ position: 'absolute', bottom: -14, left: '50%', transform: 'translateX(-50%)', fontSize: 10, fontWeight: 600, color: premium > 0 ? '#F87171' : '#34D399', whiteSpace: 'nowrap' }}>실거래가</div>
+                <div style={{ position: 'absolute', bottom: -14, left: '50%', transform: 'translateX(-50%)', fontSize: 10, fontWeight: 600, color: premium > 0 ? 'var(--accent-red)' : 'var(--accent-green)', whiteSpace: 'nowrap' }}>실거래가</div>
               </div>
               {/* 분양 평균 마커 */}
               <div style={{ position: 'absolute', top: 4, left: `${pct(supplyAvg)}%`, width: 2, height: 28, background: 'var(--brand)', transform: 'translateX(-50%)' }} />
@@ -1175,8 +1175,8 @@ export default async function AptUnifiedPage({ params }: Props) {
                 <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{fmtAmount(site.price_min)} ~ {fmtAmount(site.price_max)}</div>
               </div>
               <div style={{ background: premium > 0 ? 'rgba(248,113,113,0.05)' : 'rgba(52,211,153,0.05)', borderRadius: 'var(--radius-xs)', padding: '8px 10px', textAlign: 'center' }}>
-                <div style={{ fontSize: 10, color: premium > 0 ? '#F87171' : '#34D399', fontWeight: 600, marginBottom: 2 }}>실거래 평균 ({amounts.length}건)</div>
-                <div style={{ fontSize: 14, fontWeight: 800, color: premium > 0 ? '#F87171' : '#34D399' }}>{fmtAmount(tradeAvg)}</div>
+                <div style={{ fontSize: 10, color: premium > 0 ? 'var(--accent-red)' : 'var(--accent-green)', fontWeight: 600, marginBottom: 2 }}>실거래 평균 ({amounts.length}건)</div>
+                <div style={{ fontSize: 14, fontWeight: 800, color: premium > 0 ? 'var(--accent-red)' : 'var(--accent-green)' }}>{fmtAmount(tradeAvg)}</div>
                 <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{fmtAmount(tradeMin)} ~ {fmtAmount(tradeMax)}</div>
               </div>
             </div>
@@ -1208,7 +1208,7 @@ export default async function AptUnifiedPage({ params }: Props) {
               return (
                 <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '10px 12px' }}>
                   <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 3 }}>입주까지</div>
-                  <div style={{ fontSize: 14, fontWeight: 800, color: months <= 6 ? '#34D399' : months <= 24 ? 'var(--brand)' : 'var(--text-primary)' }}>{timeStr}</div>
+                  <div style={{ fontSize: 14, fontWeight: 800, color: months <= 6 ? 'var(--accent-green)' : months <= 24 ? 'var(--brand)' : 'var(--text-primary)' }}>{timeStr}</div>
                   <div style={{ height: 3, borderRadius: 4, background: 'var(--border)', marginTop: 'var(--sp-xs)', overflow: 'hidden' }}>
                     <div style={{ height: '100%', width: `${pct}%`, borderRadius: 4, background: months <= 6 ? '#34D399' : months <= 24 ? 'var(--brand)' : 'var(--accent-purple)' }} />
                   </div>
@@ -1380,8 +1380,8 @@ export default async function AptUnifiedPage({ params }: Props) {
                 {/* 핵심 시설 요약 뱃지 */}
                 {(sub.has_fitness || sub.has_daycare) && (
                   <div style={{ display: 'flex', gap: 4, marginTop: 6 }}>
-                    {sub.has_fitness && <span style={{ fontSize: 10, padding: '3px 8px', borderRadius: 4, background: 'rgba(239,68,68,0.08)', color: '#EF4444', fontWeight: 600 }}>피트니스 있음</span>}
-                    {sub.has_daycare && <span style={{ fontSize: 10, padding: '3px 8px', borderRadius: 4, background: 'rgba(245,158,11,0.08)', color: '#F59E0B', fontWeight: 600 }}>어린이집 있음</span>}
+                    {sub.has_fitness && <span style={{ fontSize: 10, padding: '3px 8px', borderRadius: 4, background: 'rgba(239,68,68,0.08)', color: 'var(--accent-red)', fontWeight: 600 }}>피트니스 있음</span>}
+                    {sub.has_daycare && <span style={{ fontSize: 10, padding: '3px 8px', borderRadius: 4, background: 'rgba(245,158,11,0.08)', color: 'var(--warning)', fontWeight: 600 }}>어린이집 있음</span>}
                   </div>
                 )}
               </div>
@@ -1427,13 +1427,13 @@ export default async function AptUnifiedPage({ params }: Props) {
                 {sub.energy_grade && (
                   <div style={{ padding: '8px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)' }}>
                     <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>에너지 효율</div>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: '#22C55E', marginTop: 2 }}>{sub.energy_grade}</div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--accent-green)', marginTop: 2 }}>{sub.energy_grade}</div>
                   </div>
                 )}
                 {sub.zero_energy_cert && (
                   <div style={{ padding: '8px', borderRadius: 'var(--radius-sm)', background: 'rgba(34,197,94,0.04)', border: '1px solid rgba(34,197,94,0.15)' }}>
                     <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>제로에너지</div>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: '#22C55E', marginTop: 2 }}>{sub.zero_energy_cert}</div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--accent-green)', marginTop: 2 }}>{sub.zero_energy_cert}</div>
                   </div>
                 )}
                 {sub.estimated_mgmt_fee && (
@@ -1502,7 +1502,7 @@ export default async function AptUnifiedPage({ params }: Props) {
                             <td style={{ padding: '6px', textAlign: 'right', fontWeight: 700, color: 'var(--text-primary)' }}>{total}</td>
                             {hasPrice && <td style={{ padding: '6px', textAlign: 'right' }}>
                               <div style={{ fontWeight: 700, color: 'var(--accent-blue)' }}>{priceMin > 0 && priceMin !== price ? <><span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{priceMin >= 10000 ? `${(priceMin / 10000).toFixed(1)}억` : `${priceMin.toLocaleString()}`}~</span>{price >= 10000 ? `${(price / 10000).toFixed(1)}억` : `${price.toLocaleString()}만`}</> : price >= 10000 ? `${(price / 10000).toFixed(1)}억` : `${price.toLocaleString()}만`}</div>
-                              {ppyeong > 0 && <div style={{ fontSize: 10, color: 'var(--accent-purple)' }}>평당 {ppyeong.toLocaleString()}만 <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>({priceAvg > 0 ? '평균' : '최고가'})</span>{priceMin > 0 && typeEstimated && sub?.price_source === 'estimated' ? <span style={{ fontSize: 7, marginLeft: 3, padding: '0px 3px', borderRadius: 4, background: 'rgba(245,158,11,0.15)', color: '#F59E0B', fontWeight: 600 }}>추정</span> : null}</div>}
+                              {ppyeong > 0 && <div style={{ fontSize: 10, color: 'var(--accent-purple)' }}>평당 {ppyeong.toLocaleString()}만 <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>({priceAvg > 0 ? '평균' : '최고가'})</span>{priceMin > 0 && typeEstimated && sub?.price_source === 'estimated' ? <span style={{ fontSize: 7, marginLeft: 3, padding: '0px 3px', borderRadius: 4, background: 'rgba(245,158,11,0.15)', color: 'var(--warning)', fontWeight: 600 }}>추정</span> : null}</div>}
                             </td>}
                           </tr>
                         );
@@ -1717,7 +1717,7 @@ export default async function AptUnifiedPage({ params }: Props) {
               <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>기존 아파트</div>
             </div>
             <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '8px', textAlign: 'center' }}>
-              <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>이 분양 평당가 <span style={{ fontSize: 7 }}>(평균가)</span>{sub?.price_source === 'estimated' ? <span style={{ fontSize: 7, marginLeft: 2, padding: '0px 3px', borderRadius: 4, background: 'rgba(245,158,11,0.15)', color: '#F59E0B', fontWeight: 600 }}>추정</span> : null}</div>
+              <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>이 분양 평당가 <span style={{ fontSize: 7 }}>(평균가)</span>{sub?.price_source === 'estimated' ? <span style={{ fontSize: 7, marginLeft: 2, padding: '0px 3px', borderRadius: 4, background: 'rgba(245,158,11,0.15)', color: 'var(--warning)', fontWeight: 600 }}>추정</span> : null}</div>
               <div style={{ fontSize: 14, fontWeight: 800, color: myPpyeong > avgPyeong ? 'var(--accent-red)' : 'var(--accent-green)' }}>{myPpyeong > 0 ? `${myPpyeong.toLocaleString()}만` : '-'}</div>
               <div style={{ fontSize: 10, color: myPpyeong > avgPyeong ? 'var(--accent-red)' : 'var(--accent-green)' }}>{avgPyeong > 0 && myPpyeong > 0 ? (myPpyeong > avgPyeong ? `+${Math.round((myPpyeong - avgPyeong) / avgPyeong * 100)}%` : `${Math.round((myPpyeong - avgPyeong) / avgPyeong * 100)}%`) : ''}</div>
             </div>
@@ -1872,7 +1872,7 @@ export default async function AptUnifiedPage({ params }: Props) {
             const mn = Math.min(...amounts);
             const latest = amounts[0] || 0;
             const trend = latest > avg ? '↑' : latest < avg ? '↓' : '→';
-            const tColor = latest > avg ? '#34D399' : latest < avg ? '#F87171' : 'var(--text-tertiary)';
+            const tColor = latest > avg ? 'var(--accent-green)' : latest < avg ? 'var(--accent-red)' : 'var(--text-tertiary)';
             return (
               <div className="kd-grid-4" style={{ gap: 'var(--sp-xs)', marginBottom: 10 }}>
                 {[

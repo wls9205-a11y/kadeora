@@ -101,7 +101,7 @@ export default function FeedPredictCard({ post }: { post: PostWithProfile }) {
         background: isUp ? 'rgba(34,197,94,0.06)' : 'rgba(239,68,68,0.06)',
       }}>
         <span style={{ fontSize: 14 }}>{isUp ? '📈' : '📉'}</span>
-        <span style={{ fontSize: 12, fontWeight: 700, color: isUp ? '#22C55E' : '#EF4444' }}>{prediction.target}</span>
+        <span style={{ fontSize: 12, fontWeight: 700, color: isUp ? 'var(--accent-green)' : 'var(--accent-red)' }}>{prediction.target}</span>
         <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>· {prediction.deadline}까지</span>
       </div>
 
@@ -110,15 +110,15 @@ export default function FeedPredictCard({ post }: { post: PostWithProfile }) {
           padding: '10px 14px', borderRadius: 'var(--radius-sm)', marginTop: 4,
           background: prediction.result ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)',
           textAlign: 'center', fontSize: 14, fontWeight: 700,
-          color: prediction.result ? '#22C55E' : '#EF4444',
+          color: prediction.result ? 'var(--accent-green)' : 'var(--accent-red)',
         }}>
           {prediction.result ? '🎯 적중!' : '❌ 미적중'}
         </div>
       ) : (
         <div style={{ display: 'flex', gap: 6 }}>
           {[
-            { label: '동의', agree: true, cnt: agreeCount, color: '#22C55E', icon: '👍' },
-            { label: '반대', agree: false, cnt: disagreeCount, color: '#EF4444', icon: '👎' },
+            { label: '동의', agree: true, cnt: agreeCount, color: 'var(--accent-green)', icon: '👍' },
+            { label: '반대', agree: false, cnt: disagreeCount, color: 'var(--accent-red)', icon: '👎' },
           ].map(o => (
             <button key={o.label} onClick={() => handleVote(o.agree)} disabled={myVote !== null} style={{
               flex: 1, padding: '8px 12px', borderRadius: 'var(--radius-sm)',

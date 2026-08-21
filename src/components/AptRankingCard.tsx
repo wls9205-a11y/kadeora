@@ -5,7 +5,7 @@ import Link from 'next/link';
 const TYPES = [
   { key: 'price_up', label: '🔥 상승률 TOP', color: '#E24B4A' },
   { key: 'price_down', label: '📉 하락률 TOP', color: '#3B7BF6' },
-  { key: 'trade_volume', label: '📊 거래량 TOP', color: '#34D399' },
+  { key: 'trade_volume', label: '📊 거래량 TOP', color: 'var(--accent-green)' },
   { key: 'jeonse_ratio', label: '🏠 전세가율 TOP', color: '#FBB724' },
   { key: 'expensive', label: '💎 최고가 TOP', color: '#B794FF' },
 ];

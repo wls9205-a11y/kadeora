@@ -77,7 +77,7 @@ export default async function RelatedStocks({ symbol, sector, market, marketCap 
                 fontSize: '13px',
                 fontWeight: 600,
                 marginTop: '4px',
-                color: pct >= 0 ? '#ef4444' : '#3b82f6',
+                color: pct >= 0 ? 'var(--accent-red)' : 'var(--brand)',
               }}>
                 {Number(s.price).toLocaleString()}
                 <span style={{ fontSize: '11px', marginLeft: '4px' }}>

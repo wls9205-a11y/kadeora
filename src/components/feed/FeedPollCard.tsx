@@ -93,7 +93,7 @@ export default function FeedPollCard({ post }: { post: PostWithProfile }) {
             <span style={{ fontSize: 12, color: 'var(--text-primary)', fontWeight: 600 }}>{nickname}</span>
             <span style={{
               padding: '1px 5px', borderRadius: 4, fontSize: 9, fontWeight: 700,
-              background: 'rgba(34,197,94,0.1)', color: '#22C55E',
+              background: 'rgba(34,197,94,0.1)', color: 'var(--accent-green)',
             }}>📊 투표</span>
           </div>
           <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{timeAgo(post.created_at)}</span>
@@ -128,10 +128,10 @@ export default function FeedPollCard({ post }: { post: PostWithProfile }) {
                 transition: 'width 0.5s', borderRadius: 'var(--radius-sm)',
               }} />}
               <div style={{ position: 'relative', display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ fontSize: 12, fontWeight: sel ? 600 : 400, color: sel ? '#22C55E' : 'var(--text-primary)' }}>
+                <span style={{ fontSize: 12, fontWeight: sel ? 600 : 400, color: sel ? 'var(--accent-green)' : 'var(--text-primary)' }}>
                   {sel && '✓ '}{opt.label}
                 </span>
-                {show && <span style={{ fontSize: 11, fontWeight: 700, color: sel ? '#22C55E' : 'var(--text-tertiary)' }}>{pct}%</span>}
+                {show && <span style={{ fontSize: 11, fontWeight: 700, color: sel ? 'var(--accent-green)' : 'var(--text-tertiary)' }}>{pct}%</span>}
               </div>
             </button>
           );

@@ -742,7 +742,7 @@ export default async function BlogDetailPage({ params }: Props) {
     const loginUrl = `/login?redirect=${encodeURIComponent(`/blog/${slug}`)}&source=${src}`;
     return `<div style="margin:20px 0;padding:20px;border-radius:12px;background:linear-gradient(135deg,rgba(20,32,56,0.98),rgba(10,18,34,0.99));border:1px solid rgba(59,123,246,0.2);position:relative;overflow:hidden">` +
       `<div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,${isApt ? '#3b7bf6,#22c55e' : '#3b7bf6,#a78bfa'})"></div>` +
-      `<div style="position:absolute;top:14px;right:14px;font-size:10px;padding:2px 8px;border-radius:4px;background:rgba(34,197,94,0.12);color:#22c55e;font-weight:600">무료</div>` +
+      `<div style="position:absolute;top:14px;right:14px;font-size:10px;padding:2px 8px;border-radius:4px;background:rgba(34,197,94,0.12);color:var(--accent-green);font-weight:600">무료</div>` +
       `<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">` +
         `<div style="width:32px;height:32px;border-radius:8px;background:rgba(59,123,246,0.12);display:flex;align-items:center;justify-content:center;font-size:15px">${icon}</div>` +
         `<div style="font-size:15px;font-weight:600;color:#e8e6e3">${title}</div>` +

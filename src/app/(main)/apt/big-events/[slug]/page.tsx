@@ -54,9 +54,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 function scoreTone(score: number | null | undefined): { color: string; bg: string; label: string } {
   const n = Number(score ?? 0);
-  if (n >= 70) return { color: '#22c55e', bg: 'rgba(34,197,94,0.12)', label: '높음' };
+  if (n >= 70) return { color: 'var(--accent-green)', bg: 'rgba(34,197,94,0.12)', label: '높음' };
   if (n >= 50) return { color: '#eab308', bg: 'rgba(234,179,8,0.12)', label: '보통' };
-  return { color: '#ef4444', bg: 'rgba(239,68,68,0.12)', label: '낮음' };
+  return { color: 'var(--accent-red)', bg: 'rgba(239,68,68,0.12)', label: '낮음' };
 }
 
 export default async function BigEventDetailPage({ params }: Props) {
@@ -254,7 +254,7 @@ export default async function BigEventDetailPage({ params }: Props) {
               return (
                 <li key={m.id} style={{ padding: '8px 10px', border: '1px solid var(--border)', borderRadius: 8, background: 'var(--bg-surface)' }}>
                   <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
-                    {critical ? <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 4, background: 'rgba(239,68,68,0.12)', color: '#ef4444' }}>중요</span> : null}
+                    {critical ? <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 4, background: 'rgba(239,68,68,0.12)', color: 'var(--accent-red)' }}>중요</span> : null}
                     <a href={url} rel="nofollow noopener" target="_blank" style={{ fontSize: 12, color: 'var(--text-primary)', textDecoration: 'none' }}>
                       {title}
                     </a>

@@ -58,8 +58,8 @@ const FAQ = [
   { q: '확성기는 프로 전용인가요?', a: '아니요. 확성기는 모든 유저가 구매 가능한 1회성 아이템입니다.' },
 ];
 
-function Check() { return <span style={{ display: 'inline-block', width: 18, height: 18, borderRadius: '50%', background: 'rgba(52,211,153,0.15)', color: '#34D399', fontSize: 12, lineHeight: '18px', textAlign: 'center', fontWeight: 700 }}>✓</span>; }
-function Cross() { return <span style={{ display: 'inline-block', width: 18, height: 18, borderRadius: '50%', background: 'rgba(248,113,113,0.1)', color: '#F87171', fontSize: 10, lineHeight: '18px', textAlign: 'center' }}>✕</span>; }
+function Check() { return <span style={{ display: 'inline-block', width: 18, height: 18, borderRadius: '50%', background: 'rgba(52,211,153,0.15)', color: 'var(--accent-green)', fontSize: 12, lineHeight: '18px', textAlign: 'center', fontWeight: 700 }}>✓</span>; }
+function Cross() { return <span style={{ display: 'inline-block', width: 18, height: 18, borderRadius: '50%', background: 'rgba(248,113,113,0.1)', color: 'var(--accent-red)', fontSize: 10, lineHeight: '18px', textAlign: 'center' }}>✕</span>; }
 function fmt(n: number) { return n.toLocaleString(); }
 
 export default function ShopPage() {

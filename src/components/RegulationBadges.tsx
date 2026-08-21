@@ -16,10 +16,10 @@ type Level = 'danger' | 'warning' | 'safe' | 'info';
 
 function getBadgeStyle(level: Level) {
   const map = {
-    danger: { bg: 'rgba(239,68,68,0.1)', color: '#EF4444', border: 'rgba(239,68,68,0.2)' },
-    warning: { bg: 'rgba(245,158,11,0.1)', color: '#F59E0B', border: 'rgba(245,158,11,0.2)' },
-    safe: { bg: 'rgba(34,197,94,0.1)', color: '#22C55E', border: 'rgba(34,197,94,0.2)' },
-    info: { bg: 'rgba(59,130,246,0.1)', color: '#3B82F6', border: 'rgba(59,130,246,0.2)' },
+    danger: { bg: 'rgba(239,68,68,0.1)', color: 'var(--accent-red)', border: 'rgba(239,68,68,0.2)' },
+    warning: { bg: 'rgba(245,158,11,0.1)', color: 'var(--warning)', border: 'rgba(245,158,11,0.2)' },
+    safe: { bg: 'rgba(34,197,94,0.1)', color: 'var(--accent-green)', border: 'rgba(34,197,94,0.2)' },
+    info: { bg: 'rgba(59,130,246,0.1)', color: 'var(--brand)', border: 'rgba(59,130,246,0.2)' },
   };
   return map[level];
 }

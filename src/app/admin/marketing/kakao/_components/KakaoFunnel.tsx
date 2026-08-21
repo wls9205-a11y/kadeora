@@ -71,7 +71,7 @@ export default function KakaoFunnel({
     >
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
         <h2 style={{ fontSize: 13, fontWeight: 800, margin: 0 }}>퍼널</h2>
-        {err && <span style={{ fontSize: 11, color: '#f87171' }}>로드 실패: {err}</span>}
+        {err && <span style={{ fontSize: 11, color: 'var(--accent-red)' }}>로드 실패: {err}</span>}
       </div>
       <div
         style={{
