@@ -1,3 +1,51 @@
+## S8 (2026-08-21) — 회색 텍스트 가독성
+
+- (A) 회색 토큰 단계별 강화. 정의 블록은 :root 한 곳뿐이다
+  (html.font-* 스코프는 크기·간격만 재정의하고 색은 다루지 않는다)
+    --text-secondary #4B5563 → #374151 (6.74 → 9.19)
+    --text-tertiary  #556070 → #4B5563 (5.69 → 6.74)
+  tertiary 를 기존 secondary 값으로 올리는 게 핵심. 회색 계열 2,180건이 본문색
+  1,128건의 두 배라, 개별 대비가 통과해도 화면의 3분의 2가 회색이라 흐리게 읽혔다.
+  secondary 를 함께 내려 3단 위계 유지 (surface 기준 17.74 / 10.31 / 7.56)
+- (B) 회색 × opacity 텍스트 5건 제거. 실효 대비 2.66~3.58 → 토큰값 그대로
+- (C) 밝은 배경 위 반투명 흰 글자 2건 교체, 122건은 제외 판정
+
+### B 제외 4건
+- FeedClient:502 · ReportButton:74 — transition: opacity 가 같이 있는 호버 효과
+- UserDetailClient:146,147 — disabled 버튼. opacity 는 비활성 어포던스이고
+  비활성 컨트롤은 WCAG 대비 기준 적용 대상이 아니다
+
+지시서 목록 중 AptHeaderV5:49(📍) · big-events:103,114('/') · blog/series:54(아이콘)은
+텍스트가 아니라 제외. AptHomeHero:64 · CriticalAlertBar:43 · BigEventCharts:196 은
+해당 위치에 opacity 가 없었다.
+
+### C 교체 2건 — 둘 다 앞선 작업이 남긴 잔재
+- apt/[id] 이미지 없는 폴백 카드의 시공사 줄. S5-2 에서 카드 배경을 var(--bg-elevated)로
+  바꾸며 지역·단지명은 토큰화했는데 이 줄만 흰 글자로 남아 있었다
+- BlogHeroExtras '한눈에 보기' 박스. 배경 rgba(255,255,255,0.02)·보더
+  rgba(255,255,255,0.08) 이라 라이트에서 상자 자체가 안 보였다. 텍스트·배경·보더를
+  함께 토큰화
+
+### C 제외 122건
+api/**(og-*·apt-img) 77 · 다크 모달/시트/바 9파일 · 채도 높은 배경 위 흰 글자
+(SectorHeatmap·PortfolioSimulator·InstallBanner·apt/complex 히어로) ·
+다크 차트(StockTreemap) · 이미지 오버레이(AptImageGallery 워터마크·캡션 등).
+다크 판정 9파일에 표식 주석을 남겼다.
+
+### Architecture Rule 추가
+- #85 대비를 잴 때 color hex 만 보지 않는다. opacity 와 rgba 알파가 실효 대비를
+  추가로 깎는다. --text-tertiary × opacity 0.6 = 2.87 로 3:1 도 미달이다
+- #86 4.5:1 은 '읽을 수 있다'의 하한이다. 회색 토큰이 본문색보다 많이 쓰이면
+  개별 대비가 통과해도 화면 전체가 흐리게 읽힌다. 위계를 유지하되 회색 단계 자체를
+  어둡게 잡는다
+
+### 다음 — 실기기 확인 필요
+- 회색 글자가 또렷해졌는지. 특히 카드 메타(시공사·지역·세대수), 블로그 날짜·조회수,
+  하단 고지 문구 — 전부 --text-tertiary 자리다
+- 너무 진해 위계가 사라졌으면 --text-tertiary 를 #4F5A69 로 중간 조정
+
+---
+
 ## S6-3 (2026-08-21) — 가독성 마무리: 행간 · 크기 하한
 
 globals.css 두 블록만 건드렸다. 인라인 lineHeight/fontSize 는 하나도 바꾸지 않았다.
