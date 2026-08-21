@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { aptHref, type AptHubItem } from '@/lib/apt/hub';
 import { formatComplexName } from '@/lib/apt/subscription-status';
 import { statusBadgeStyle, statusLabel, ddayLabel, ddayStyle } from '@/lib/apt/subscription-badge';
+import SectionHeader from '@/components/apt/SectionHeader';
 
 function shortDate(d: string | null): string {
   if (!d) return '';
@@ -33,15 +34,12 @@ export default function SubscriptionTimeline({
           marginBottom: 8,
         }}
       >
-        <h2
+        <SectionHeader
           id="apt-timeline-heading"
-          style={{ fontSize: 15, fontWeight: 700, margin: 0, color: 'var(--text-primary, #111827)' }}
-        >
-          청약 타임라인
-        </h2>
-        <span style={{ fontSize: 11, color: 'var(--text-tertiary, #9ca3af)' }}>
-          {region} · {items.length}개 단지
-        </span>
+          eyebrow="TIMELINE — 청약 일정"
+          title="청약 타임라인"
+          meta={`${region} · ${items.length}개 단지`}
+        />
       </div>
 
       <div

@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { aptHref, type AptHubItem } from '@/lib/apt/hub';
 import { formatComplexName } from '@/lib/apt/subscription-status';
 import { statusBadgeStyle, statusLabel } from '@/lib/apt/subscription-badge';
+import SectionHeader from '@/components/apt/SectionHeader';
 
 function fmtDate(d: string | null): string {
   if (!d) return '';
@@ -21,12 +22,12 @@ export default function SubscriptionResults({ items }: { items: AptHubItem[] }) 
 
   return (
     <section style={{ margin: '24px 0 0', padding: '0 6px' }} aria-labelledby="apt-results-heading">
-      <h2 id="apt-results-heading" style={{ fontSize: 15, fontWeight: 700, margin: '0 0 4px' }}>
-        이번 주 청약 결과
-      </h2>
-      <p style={{ fontSize: 11, color: 'var(--text-tertiary, #9ca3af)', margin: '0 0 10px' }}>
-        최근 7일 안에 접수가 끝난 {items.length}개 단지
-      </p>
+      <SectionHeader
+        id="apt-results-heading"
+        eyebrow="RESULTS — 이번 주"
+        title="이번 주 청약 결과"
+        meta={`최근 7일 · ${items.length}개 단지`}
+      />
 
       <div style={{ display: 'grid', gap: 7 }}>
         {items.map((it) => {
