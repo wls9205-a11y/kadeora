@@ -265,7 +265,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
               </div>
             </div>
           </div>
-          <button onClick={e => { e.preventDefault(); e.stopPropagation(); toggleWatchlist(s.symbol); }} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '8px 6px', fontSize: 16, color: isWatched ? 'var(--accent-yellow)' : 'var(--text-tertiary)', flexShrink: 0, opacity: isWatched ? 1 : 0.5, minWidth: 36, minHeight: 36, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <button onClick={e => { e.preventDefault(); e.stopPropagation(); toggleWatchlist(s.symbol); }} className="touch-target" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '8px 6px', fontSize: 16, color: isWatched ? 'var(--accent-yellow)' : 'var(--text-tertiary)', flexShrink: 0, opacity: isWatched ? 1 : 0.5, minWidth: 36, minHeight: 36, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             {isWatched ? '★' : '☆'}
           </button>
         </div>
@@ -1217,7 +1217,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
                               </div>
                             </div>
                           </div>
-                          <button onClick={e => { e.preventDefault(); e.stopPropagation(); toggleWatchlist(s.symbol); }} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '8px 6px', fontSize: 16, color: isWatched ? 'var(--accent-yellow)' : 'var(--text-tertiary)', flexShrink: 0, opacity: isWatched ? 1 : 0.5, minWidth: 36, minHeight: 36, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <button onClick={e => { e.preventDefault(); e.stopPropagation(); toggleWatchlist(s.symbol); }} className="touch-target" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '8px 6px', fontSize: 16, color: isWatched ? 'var(--accent-yellow)' : 'var(--text-tertiary)', flexShrink: 0, opacity: isWatched ? 1 : 0.5, minWidth: 36, minHeight: 36, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             {isWatched ? '★' : '☆'}
                           </button>
                         </div>

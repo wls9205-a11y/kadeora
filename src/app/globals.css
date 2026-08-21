@@ -357,6 +357,23 @@ html.font-small input, html.font-small textarea, html.font-small select { font-s
 
 /* font-large: 버튼 패딩 확대 */
 html.font-large button { min-height: var(--touch-min); }
+
+/* s5-2 (Rule #77): 상호작용 요소의 히트 영역만 44px 로 넓힌다.
+   시각 크기는 그대로 두고 투명 ::after 로 덮는다 — height 를 키우면 헤더·툴바가 밀린다.
+   배지·칩처럼 누를 수 없는 요소에는 붙이지 않는다. */
+.touch-target { position: relative; }
+.touch-target::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  min-width: 44px;
+  min-height: 44px;
+}
+
 html.font-large .kd-tab-btn, html.font-large .kd-sort-btn { padding: 8px 14px !important; }
 
 /* font-large: 그리드 카드 오버플로 방어 */

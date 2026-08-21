@@ -305,7 +305,7 @@ export function Navigation() {
 
                 {/* 유저 메뉴 */}
                 <div style={{ position:'relative' }}>
-                  <button onClick={(e) => { e.stopPropagation(); setMenuOpen(!menuOpen); setMoreOpen(false); }} aria-label="사용자 메뉴" style={{
+                  <button onClick={(e) => { e.stopPropagation(); setMenuOpen(!menuOpen); setMoreOpen(false); }} aria-label="사용자 메뉴" className="touch-target" style={{
                     display:'flex', alignItems:'center', gap: 6,
                     height:34, padding:'0 10px', borderRadius: 'var(--radius-pill)',
                     background:'var(--bg-hover)', border:'1px solid var(--border)',
@@ -447,6 +447,7 @@ export function Navigation() {
                       }
                     } catch {}
                   }}
+                  className="touch-target"
                   style={{
                     height:34, padding:'0 16px', borderRadius: 'var(--radius-pill)',
                     background:'var(--brand)', color:'var(--text-inverse, #fff)',
@@ -461,7 +462,7 @@ export function Navigation() {
                 >로그인</Link>
                 <Link
                   href={`/login?redirect=${encodeURIComponent(pathname)}&source=nav_signup`}
-                  className="hidden md:flex"
+                  className="hidden md:flex touch-target"
                   style={{
                     height:34, padding:'0 14px', borderRadius: 'var(--radius-pill)',
                     border:'1px solid var(--brand)', color:'var(--brand)', background:'transparent',

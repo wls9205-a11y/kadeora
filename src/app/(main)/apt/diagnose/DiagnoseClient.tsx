@@ -59,9 +59,9 @@ export default function DiagnoseClient() {
     <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:14}}>
       <div><span style={{fontSize: 13,color:'var(--text-primary)'}}>{label}</span>{sub&&<span style={{fontSize: 10,color:'var(--text-tertiary)',display:'block'}}>{sub}</span>}</div>
       <div style={{display:'flex',alignItems:'center',gap:8}}>
-        <button onClick={()=>set(Math.max(min,n-1))} style={{width:32,height:32,borderRadius: 'var(--radius-md)',border:'1px solid var(--border)',background:'var(--bg-hover)',color:'var(--text-primary)',cursor:'pointer',fontSize: 16}}>-</button>
+        <button onClick={()=>set(Math.max(min,n-1))} className="touch-target" style={{width:32,height:32,borderRadius: 'var(--radius-md)',border:'1px solid var(--border)',background:'var(--bg-hover)',color:'var(--text-primary)',cursor:'pointer',fontSize: 16}}>-</button>
         <span style={{fontSize: 16,fontWeight:800,minWidth:24,textAlign:'center'}}>{n}</span>
-        <button onClick={()=>set(Math.min(max,n+1))} style={{width:32,height:32,borderRadius: 'var(--radius-md)',border:'1px solid var(--border)',background:'var(--bg-hover)',color:'var(--text-primary)',cursor:'pointer',fontSize: 16}}>+</button>
+        <button onClick={()=>set(Math.min(max,n+1))} className="touch-target" style={{width:32,height:32,borderRadius: 'var(--radius-md)',border:'1px solid var(--border)',background:'var(--bg-hover)',color:'var(--text-primary)',cursor:'pointer',fontSize: 16}}>+</button>
       </div>
     </div>
   );

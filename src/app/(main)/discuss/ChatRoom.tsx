@@ -171,7 +171,7 @@ export default function ChatRoom({ user, myNickname, room = 'lounge' }: { user: 
               <div style={{ display: 'flex', gap: 10, padding: '8px 12px', borderRadius: 'var(--radius-sm)', transition: 'background 0.1s' }}
                 onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-hover)')}
                 onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
-                <div onClick={() => openSheet(p)} style={{ width: 34, height: 34, borderRadius: '50%', background: avc(msg.user_id), color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-sm)', fontWeight: 800, flexShrink: 0, cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }}>{nick[0]}</div>
+                <div onClick={() => openSheet(p)} className="touch-target" style={{ width: 34, height: 34, borderRadius: '50%', background: avc(msg.user_id), color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-sm)', fontWeight: 800, flexShrink: 0, cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }}>{nick[0]}</div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
                     <span onClick={() => openSheet(p)} style={{ fontWeight: 700, fontSize: 'var(--fs-sm)', cursor: 'pointer', color: 'var(--text-primary)' }}>{nick}</span>
@@ -206,7 +206,7 @@ export default function ChatRoom({ user, myNickname, room = 'lounge' }: { user: 
                       <div key={reply.id} style={{ display: 'flex', gap: 'var(--sp-sm)', padding: '6px 8px', borderRadius: 'var(--radius-xs)', transition: 'background 0.1s' }}
                         onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-hover)')}
                         onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
-                        <div onClick={() => openSheet(rp)} style={{ width: 24, height: 24, borderRadius: '50%', background: avc(reply.user_id), color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xs)', fontWeight: 800, flexShrink: 0, cursor: 'pointer' }}>{rNick[0]}</div>
+                        <div onClick={() => openSheet(rp)} className="touch-target" style={{ width: 24, height: 24, borderRadius: '50%', background: avc(reply.user_id), color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xs)', fontWeight: 800, flexShrink: 0, cursor: 'pointer' }}>{rNick[0]}</div>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', marginBottom: 1 }}>
                             <span onClick={() => openSheet(rp)} style={{ fontWeight: 700, fontSize: 'var(--fs-sm)', cursor: 'pointer', color: 'var(--text-primary)' }}>{rNick}</span>

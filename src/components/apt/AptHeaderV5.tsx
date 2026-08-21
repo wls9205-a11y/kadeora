@@ -48,8 +48,8 @@ export default function AptHeaderV5({ region, totalCount, imminentCount, cat, si
             <span style={{ fontSize: 13, fontWeight: 500, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{region}</span>
             <span style={{ fontSize: 11, color: 'var(--text-secondary, #888)' }}>{totalCount.toLocaleString()}</span>
           </button>
-          <Link href="/apt/search" aria-label="검색" style={{ width: 36, height: 36, borderRadius: 10, border: '0.5px solid var(--border, #2a2b35)', background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, textDecoration: 'none' }}>🔍</Link>
-          <Link href="/apt/map" aria-label="지도" style={{ width: 36, height: 36, borderRadius: 10, border: '0.5px solid var(--border, #2a2b35)', background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, textDecoration: 'none' }}>🗺</Link>
+          <Link href="/apt/search" aria-label="검색" className="touch-target" style={{ width: 40, height: 40, borderRadius: 10, border: '1px solid var(--border)', background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, textDecoration: 'none' }}>🔍</Link>
+          <Link href="/apt/map" aria-label="지도" className="touch-target" style={{ width: 40, height: 40, borderRadius: 10, border: '1px solid var(--border)', background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, textDecoration: 'none' }}>🗺</Link>
         </div>
         <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
           <div style={{ display: 'flex', gap: 4, padding: '8px 12px', minWidth: 'max-content' }}>

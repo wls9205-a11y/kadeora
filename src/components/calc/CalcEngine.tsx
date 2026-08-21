@@ -86,9 +86,11 @@ function InputField({ input, value, onChange, values }: { input: CalcInput; valu
           <label style={label}>{input.label}</label>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <button onClick={() => onChange(Math.max(input.min || 0, Number(value) - 1))}
+              className="touch-target"
               style={{ width: 36, height: 36, borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: 18 }}>−</button>
             <span style={{ fontSize: 18, fontWeight: 800, minWidth: 30, textAlign: 'center' }}>{value}</span>
             <button onClick={() => onChange(Math.min(input.max || 99, Number(value) + 1))}
+              className="touch-target"
               style={{ width: 36, height: 36, borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: 18 }}>+</button>
           </div>
         </div>

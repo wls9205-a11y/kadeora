@@ -287,7 +287,7 @@ export default async function BlogPage({ searchParams }: Props) {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <SectionShareButton section="blog" label="투자 정보 블로그 7,600편+" pagePath="/blog" />
-          <Link href="/blog?sort=popular" style={{ width: 32, height: 32, borderRadius: 'var(--radius-sm)', background: 'var(--bg-surface)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', fontSize: 14 }}>🔥</Link>
+          <Link href="/blog?sort=popular" className="touch-target" style={{ width: 32, height: 32, borderRadius: 'var(--radius-sm)', background: 'var(--bg-surface)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', fontSize: 14 }}>🔥</Link>
         </div>
       </div>
 

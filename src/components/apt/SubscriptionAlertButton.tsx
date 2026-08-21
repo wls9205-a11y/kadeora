@@ -168,6 +168,7 @@ function KakaoSignupModal({
         <button
           onClick={onClose}
           aria-label="닫기"
+          className="touch-target"
           style={{
             position: 'absolute',
             top: 10,
