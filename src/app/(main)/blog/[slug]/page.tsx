@@ -931,9 +931,9 @@ export default async function BlogDetailPage({ params }: Props) {
       <VideoObjectSchema videos={extractVideosFromContent(post.content || '', post.title)} />
 
       <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 20, flexWrap: 'wrap', letterSpacing: '0.3px' }}>
-        <Link href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)', opacity: 0.7 }}>홈</Link>
+        <Link href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>홈</Link>
         <span style={{ opacity: 0.3 }}>/</span>
-        <Link href="/blog" style={{ textDecoration: 'none', color: 'var(--text-tertiary)', opacity: 0.7 }}>블로그</Link>
+        <Link href="/blog" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>블로그</Link>
         {post.category && <><span style={{ opacity: 0.3 }}>/</span><Link href={`/blog?category=${post.category}`} style={{ textDecoration: 'none', color: catStyle.color, fontWeight: 600 }}>{({ stock: '주식', apt: '청약', unsold: '미분양', finance: '재테크', general: '생활' } as Record<string, string>)[post.category] || post.category}</Link></>}
       </nav>
 

@@ -597,7 +597,7 @@ export default function FeedClient({
                   {/* 팔로우 힌트 */}
                   {activeCategory !== 'following' && !post.is_anonymous && post.author_id && post.author_id !== currentUserId && (
                     <Link href={`/profile/${post.author_id}`}
-                      style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 4, fontSize: 10, color: 'var(--text-tertiary)', textDecoration: 'none', opacity: 0.6 }}>
+                      style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 4, fontSize: 10, color: 'var(--text-tertiary)', textDecoration: 'none' }}>
                       <Users size={10} /> 팔로우
                     </Link>
                   )}

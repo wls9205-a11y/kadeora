@@ -101,7 +101,7 @@ function RegionCard({
           최근 {recent}
         </span>
       ) : (
-        <span style={{ fontSize: 10.5, color: 'var(--text-tertiary)', opacity: 0.7 }}>—</span>
+        <span style={{ fontSize: 10.5, color: 'var(--text-tertiary)' }}>—</span>
       )}
     </Link>
   );
