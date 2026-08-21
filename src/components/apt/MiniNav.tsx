@@ -39,7 +39,7 @@ export function MiniNav() {
   };
 
   return (
-    <nav className="sticky top-0 z-30 bg-white/90 dark:bg-slate-950/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 -mx-4 px-4">
+    <nav className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200 -mx-4 px-4">
       <div className="flex gap-1 overflow-x-auto py-2 scrollbar-hide">
         {SECTIONS.map((s) => (
           <button
@@ -47,8 +47,8 @@ export function MiniNav() {
             onClick={() => handleClick(s.id)}
             className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
               active === s.id
-                ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-black'
-                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                ? 'bg-slate-900 text-white'
+                : 'text-slate-600 hover:bg-slate-100'
             }`}
           >
             {s.label}

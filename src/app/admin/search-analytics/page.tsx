@@ -60,7 +60,7 @@ export default async function AdminSearchAnalytics() {
 
       {/* Health 요약 */}
       <section className="mb-8">
-        <h2 className="mb-3 text-sm font-bold text-gray-700 dark:text-gray-300">📊 헬스 요약</h2>
+        <h2 className="mb-3 text-sm font-bold text-gray-700">📊 헬스 요약</h2>
         {health ? (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <Stat label="검색 24h" value={health.searches_24h} />
@@ -88,15 +88,15 @@ export default async function AdminSearchAnalytics() {
 
       {/* 인기 검색어 */}
       <section className="mb-8">
-        <h2 className="mb-3 text-sm font-bold text-gray-700 dark:text-gray-300">
+        <h2 className="mb-3 text-sm font-bold text-gray-700">
           🔥 인기 검색어 (최근 30일)
         </h2>
         {topKeywords.length === 0 ? (
           <p className="text-sm text-gray-500">데이터 없음</p>
         ) : (
-          <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-800">
+          <div className="overflow-x-auto rounded-lg border border-gray-200">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 dark:bg-gray-900">
+              <thead className="bg-gray-50">
                 <tr>
                   <th className="p-2 text-left">키워드</th>
                   <th className="p-2 text-right">24h</th>
@@ -109,7 +109,7 @@ export default async function AdminSearchAnalytics() {
               </thead>
               <tbody>
                 {topKeywords.map((k) => (
-                  <tr key={k.keyword} className="border-t border-gray-200 dark:border-gray-800">
+                  <tr key={k.keyword} className="border-t border-gray-200">
                     <td className="p-2 font-medium">{k.keyword}</td>
                     <td className="p-2 text-right tabular-nums">{k.d1_count}</td>
                     <td className="p-2 text-right tabular-nums">{k.d7_count}</td>
@@ -133,7 +133,7 @@ export default async function AdminSearchAnalytics() {
 
       {/* Zero-result (SEO 발굴) */}
       <section className="mb-8">
-        <h2 className="mb-1 text-sm font-bold text-gray-700 dark:text-gray-300">
+        <h2 className="mb-1 text-sm font-bold text-gray-700">
           ❓ 결과 0 키워드 (SEO 발굴)
         </h2>
         <p className="mb-3 text-xs text-gray-500">
@@ -142,9 +142,9 @@ export default async function AdminSearchAnalytics() {
         {zeroKeywords.length === 0 ? (
           <p className="text-sm text-gray-500">결과 0 키워드 없음 (또는 results_count NULL — 30일 누적 데이터 필요)</p>
         ) : (
-          <div className="overflow-x-auto rounded-lg border border-amber-200 dark:border-amber-900">
+          <div className="overflow-x-auto rounded-lg border border-amber-200">
             <table className="w-full text-sm">
-              <thead className="bg-amber-50 dark:bg-amber-950/30">
+              <thead className="bg-amber-50">
                 <tr>
                   <th className="p-2 text-left">키워드</th>
                   <th className="p-2 text-right">검색 횟수</th>
@@ -154,7 +154,7 @@ export default async function AdminSearchAnalytics() {
               </thead>
               <tbody>
                 {zeroKeywords.map((k) => (
-                  <tr key={k.keyword} className="border-t border-amber-200 dark:border-amber-900">
+                  <tr key={k.keyword} className="border-t border-amber-200">
                     <td className="p-2 font-medium">{k.keyword}</td>
                     <td className="p-2 text-right tabular-nums">{k.search_count}</td>
                     <td className="p-2 text-right tabular-nums">{k.unique_users}</td>
@@ -179,12 +179,12 @@ function Stat({ label, value, suffix = "", tone = "ok" }: {
   tone?: "ok" | "danger";
 }) {
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-3 dark:border-gray-800 dark:bg-gray-900">
+    <div className="rounded-lg border border-gray-200 bg-white p-3">
       <p className="text-[11px] text-gray-500">{label}</p>
       <p
         className={[
           "mt-1 text-xl font-bold tabular-nums",
-          tone === "danger" ? "text-red-600 dark:text-red-400" : "text-gray-900 dark:text-gray-50",
+          tone === "danger" ? "text-red-600" : "text-gray-900",
         ].join(" ")}
       >
         {value}
@@ -196,10 +196,10 @@ function Stat({ label, value, suffix = "", tone = "ok" }: {
 
 function HeatBadge({ level }: { level: string }) {
   const styles: Record<string, string> = {
-    hot:      "bg-red-100 text-red-700 dark:bg-red-950/30 dark:text-red-300",
-    trending: "bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:text-amber-300",
-    steady:   "bg-blue-100 text-blue-700 dark:bg-blue-950/30 dark:text-blue-300",
-    normal:   "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400",
+    hot:      "bg-red-100 text-red-700",
+    trending: "bg-amber-100 text-amber-700",
+    steady:   "bg-blue-100 text-blue-700",
+    normal:   "bg-gray-100 text-gray-600",
   };
   return (
     <span className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${styles[level] ?? styles.normal}`}>

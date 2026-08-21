@@ -45,8 +45,8 @@ export default function AptCardCompact({
   const ddayToneClass = {
     urgent: "bg-red-500 text-white",
     soon:   "bg-amber-500 text-white",
-    normal: "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200",
-    past:   "bg-gray-200 text-gray-500 dark:bg-gray-800 dark:text-gray-500",
+    normal: "bg-gray-100 text-gray-700",
+    past:   "bg-gray-200 text-gray-500",
     none:   "hidden",
   }[dday.tone];
 
@@ -56,10 +56,10 @@ export default function AptCardCompact({
   return (
     <Link
       href={href}
-      className="group flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white transition hover:shadow-lg hover:-translate-y-0.5 dark:border-gray-800 dark:bg-gray-900"
+      className="group flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white transition hover:shadow-lg hover:-translate-y-0.5"
     >
       {/* 이미지 영역 */}
-      <div className="relative aspect-[4/3] w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
+      <div className="relative aspect-[4/3] w-full overflow-hidden bg-gray-100">
         <Image
           src={card.cover_image_url || PLACEHOLDER_IMAGE}
           alt={card.name}
@@ -97,23 +97,23 @@ export default function AptCardCompact({
       {/* 텍스트 영역 — 컴팩트 (5 줄) */}
       <div className="flex flex-1 flex-col gap-1.5 p-3 text-sm">
         {/* (1) 단지명 */}
-        <h3 className="line-clamp-1 font-bold text-gray-900 dark:text-gray-50">
+        <h3 className="line-clamp-1 font-bold text-gray-900">
           {card.name}
         </h3>
 
         {/* (2) 지역 · 시공사 */}
-        <p className="line-clamp-1 text-xs text-gray-500 dark:text-gray-400">
+        <p className="line-clamp-1 text-xs text-gray-500">
           {formatRegionShort(card.region)}
           {card.builder && card.builder !== "-" && (
-            <span className="mx-1.5 text-gray-300 dark:text-gray-600">·</span>
+            <span className="mx-1.5 text-gray-300">·</span>
           )}
           {card.builder !== "-" && <span>{card.builder}</span>}
         </p>
 
         {/* (3) 청약 일정 */}
         {(card.date_start || card.date_end) && (
-          <p className="text-xs text-gray-700 dark:text-gray-300">
-            <span className="text-gray-400 dark:text-gray-500">청약</span>{" "}
+          <p className="text-xs text-gray-700">
+            <span className="text-gray-400">청약</span>{" "}
             <span className="tabular-nums">
               {formatDateRange(card.date_start, card.date_end)}
             </span>
@@ -121,12 +121,12 @@ export default function AptCardCompact({
         )}
 
         {/* (4) 세대수 · 평형 라인업 */}
-        <p className="text-xs text-gray-700 dark:text-gray-300">
+        <p className="text-xs text-gray-700">
           {formatHouseholds(card.households)}
           {card.area_lineup && card.area_lineup.length > 0 && (
             <>
-              <span className="mx-1.5 text-gray-300 dark:text-gray-600">·</span>
-              <span className="text-gray-500 dark:text-gray-400">
+              <span className="mx-1.5 text-gray-300">·</span>
+              <span className="text-gray-500">
                 {formatAreaLineup(card.area_lineup)}
               </span>
             </>
@@ -137,12 +137,12 @@ export default function AptCardCompact({
         {(card.price_per_pyeong || card.supply_min || card.supply_max) && (
           <p className="mt-auto pt-1 text-sm">
             {card.price_per_pyeong ? (
-              <span className="font-bold text-gray-900 dark:text-gray-50">
+              <span className="font-bold text-gray-900">
                 {formatPricePerPyeong(card.price_per_pyeong)}
               </span>
             ) : null}
             {(card.supply_min || card.supply_max) && (
-              <span className="ml-2 text-xs text-gray-500 dark:text-gray-400 tabular-nums">
+              <span className="ml-2 text-xs text-gray-500 tabular-nums">
                 ({formatSupplyRange(card.supply_min, card.supply_max)})
               </span>
             )}

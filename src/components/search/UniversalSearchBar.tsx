@@ -195,13 +195,13 @@ export default function UniversalSearchBar({
         onClick={() => setOpen(true)}
         aria-label="검색 열기"
         className={[
-          "flex w-full items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-2 text-sm text-gray-500 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800",
+          "flex w-full items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-2 text-sm text-gray-500 transition hover:bg-gray-50",
           className,
         ].join(" ")}
       >
         <SearchIcon />
         <span className="line-clamp-1 flex-1 text-left">{placeholder}</span>
-        <kbd className="hidden rounded border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-[10px] text-gray-500 sm:inline dark:border-gray-700 dark:bg-gray-800">
+        <kbd className="hidden rounded border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-[10px] text-gray-500 sm:inline">
           ⌘K
         </kbd>
       </button>
@@ -215,11 +215,11 @@ export default function UniversalSearchBar({
           onClick={() => setOpen(false)}
         >
           <div
-            className="w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-gray-900"
+            className="w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             {/* 검색 입력 */}
-            <div className="flex items-center gap-3 border-b border-gray-200 px-4 py-3 dark:border-gray-800">
+            <div className="flex items-center gap-3 border-b border-gray-200 px-4 py-3">
               <SearchIcon />
               <input
                 ref={inputRef}
@@ -229,7 +229,7 @@ export default function UniversalSearchBar({
                 onKeyDown={onKeyDown}
                 placeholder={placeholder}
                 aria-label="검색어 입력"
-                className="flex-1 bg-transparent text-base outline-none placeholder:text-gray-400 dark:text-gray-50"
+                className="flex-1 bg-transparent text-base outline-none placeholder:text-gray-400"
               />
               {loading && <SpinnerIcon />}
               {q && (
@@ -240,7 +240,7 @@ export default function UniversalSearchBar({
                     inputRef.current?.focus();
                   }}
                   aria-label="입력 지우기"
-                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                  className="text-gray-400 hover:text-gray-600"
                 >
                   ✕
                 </button>
@@ -270,7 +270,7 @@ export default function UniversalSearchBar({
                           <button
                             key={`r-${kw}`}
                             onClick={() => goToResultsPage(kw)}
-                            className="rounded-full bg-gray-100 px-3 py-1 text-xs hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
+                            className="rounded-full bg-gray-100 px-3 py-1 text-xs hover:bg-gray-200"
                           >
                             {kw}
                           </button>
@@ -286,7 +286,7 @@ export default function UniversalSearchBar({
                           <button
                             key={`t-${kw}`}
                             onClick={() => goToResultsPage(kw)}
-                            className="rounded-full bg-blue-50 px-3 py-1 text-xs text-blue-700 hover:bg-blue-100 dark:bg-blue-950/30 dark:text-blue-300 dark:hover:bg-blue-950/50"
+                            className="rounded-full bg-blue-50 px-3 py-1 text-xs text-blue-700 hover:bg-blue-100"
                           >
                             {kw}
                           </button>
@@ -364,12 +364,12 @@ function ResultsPanel({
                     className={[
                       "flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left transition",
                       isActive
-                        ? "bg-blue-50 dark:bg-blue-950/30"
-                        : "hover:bg-gray-50 dark:hover:bg-gray-800",
+                        ? "bg-blue-50"
+                        : "hover:bg-gray-50",
                     ].join(" ")}
                   >
                     {item.cover_image_url ? (
-                      <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-md bg-gray-100 dark:bg-gray-800">
+                      <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-md bg-gray-100">
                         <Image
                           src={item.cover_image_url}
                           alt=""
@@ -379,12 +379,12 @@ function ResultsPanel({
                         />
                       </span>
                     ) : (
-                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-gray-100 text-lg dark:bg-gray-800">
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-gray-100 text-lg">
                         {meta.emoji}
                       </span>
                     )}
                     <span className="min-w-0 flex-1">
-                      <span className="line-clamp-1 text-sm font-medium text-gray-900 dark:text-gray-50">
+                      <span className="line-clamp-1 text-sm font-medium text-gray-900">
                         {item.title}
                       </span>
                       {item.subtitle && (
@@ -398,7 +398,7 @@ function ResultsPanel({
                         "ml-2 rounded px-1.5 py-0.5 text-[10px] font-bold tabular-nums",
                         item.dday <= 3 ? "bg-red-500 text-white"
                           : item.dday <= 7 ? "bg-amber-500 text-white"
-                          : "bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200",
+                          : "bg-gray-200 text-gray-700",
                       ].join(" ")}>
                         D-{item.dday}
                       </span>
@@ -419,7 +419,7 @@ function ResultsPanel({
       {resp.total > sections.reduce((sum, s) => sum + s.items.length, 0) && (
         <button
           onClick={onSeeAll}
-          className="mt-2 w-full rounded-lg border border-gray-200 px-3 py-2 text-center text-xs text-gray-700 hover:bg-gray-50 dark:border-gray-800 dark:text-gray-300 dark:hover:bg-gray-800"
+          className="mt-2 w-full rounded-lg border border-gray-200 px-3 py-2 text-center text-xs text-gray-700 hover:bg-gray-50"
         >
           "{resp.query}" 전체 결과 ({resp.total}+) 보기 →
         </button>

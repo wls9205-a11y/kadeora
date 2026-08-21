@@ -79,14 +79,14 @@ export default async function AptSearchPage({ searchParams }: Props) {
     <div className="mx-auto max-w-3xl p-4 sm:p-6">
       <header className="mb-4">
         <h1 className="text-xl font-bold">
-          "<span className="text-blue-600 dark:text-blue-400">{q}</span>" 부동산 검색
+          "<span className="text-blue-600">{q}</span>" 부동산 검색
           <span className="ml-2 text-sm font-normal text-gray-500">
             {total > 0 ? `${total}건` : "결과 없음"}
           </span>
         </h1>
         <p className="mt-1 text-xs text-gray-500">
           전체 카테고리 통합 검색은
-          <Link href={`/search?q=${encodeURIComponent(q)}`} className="ml-1 text-blue-600 underline dark:text-blue-400">
+          <Link href={`/search?q=${encodeURIComponent(q)}`} className="ml-1 text-blue-600 underline">
             /search 페이지
           </Link>
           에서.
@@ -95,14 +95,14 @@ export default async function AptSearchPage({ searchParams }: Props) {
 
       {total === 0 && (
         <div className="py-12 text-center">
-          <p className="text-base text-gray-700 dark:text-gray-300">검색 결과가 없습니다.</p>
+          <p className="text-base text-gray-700">검색 결과가 없습니다.</p>
         </div>
       )}
 
       <div className="space-y-6">
         {sections.map(({ key, items, meta }) => (
           <section key={key}>
-            <h2 className="mb-2 text-sm font-bold text-gray-700 dark:text-gray-300">
+            <h2 className="mb-2 text-sm font-bold text-gray-700">
               <span className="mr-1">{meta.emoji}</span>
               {meta.label}
               <span className="ml-1.5 text-xs font-normal text-gray-400">({items.length})</span>
@@ -112,10 +112,10 @@ export default async function AptSearchPage({ searchParams }: Props) {
                 <li key={`${key}-${item.id}`}>
                   <Link
                     href={item.url}
-                    className="flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-2.5 transition hover:shadow-md dark:border-gray-800 dark:bg-gray-900"
+                    className="flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-2.5 transition hover:shadow-md"
                   >
                     {item.cover_image_url ? (
-                      <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-md bg-gray-100 dark:bg-gray-800">
+                      <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-md bg-gray-100">
                         <Image
                           src={item.cover_image_url}
                           alt=""
@@ -125,12 +125,12 @@ export default async function AptSearchPage({ searchParams }: Props) {
                         />
                       </span>
                     ) : (
-                      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md bg-gray-100 text-xl dark:bg-gray-800">
+                      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md bg-gray-100 text-xl">
                         {meta.emoji}
                       </span>
                     )}
                     <span className="min-w-0 flex-1">
-                      <span className="line-clamp-1 text-sm font-medium text-gray-900 dark:text-gray-50">
+                      <span className="line-clamp-1 text-sm font-medium text-gray-900">
                         {item.title}
                       </span>
                       {item.subtitle && (

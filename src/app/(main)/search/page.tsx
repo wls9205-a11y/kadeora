@@ -98,7 +98,7 @@ export default async function SearchPage({ searchParams }: Props) {
     <div className="mx-auto max-w-3xl p-4 sm:p-6">
       <header className="mb-4">
         <h1 className="text-xl font-bold">
-          "<span className="text-blue-600 dark:text-blue-400">{q}</span>" 검색 결과
+          "<span className="text-blue-600">{q}</span>" 검색 결과
           <span className="ml-2 text-sm font-normal text-gray-500">
             {total > 0 ? `${total}건` : "결과 없음"}
           </span>
@@ -115,7 +115,7 @@ export default async function SearchPage({ searchParams }: Props) {
 
       {/* 카테고리 탭 */}
       {sectionData.length > 0 && (
-        <nav className="mb-4 flex flex-wrap gap-1.5 border-b border-gray-200 pb-1 dark:border-gray-800">
+        <nav className="mb-4 flex flex-wrap gap-1.5 border-b border-gray-200 pb-1">
           <TabLink q={q} tab="all" current={tab} label={`전체 (${total})`} />
           {sectionData.map((s) => (
             <TabLink
@@ -132,7 +132,7 @@ export default async function SearchPage({ searchParams }: Props) {
       {/* 결과 없음 */}
       {total === 0 && !rpcError && (
         <div className="py-16 text-center">
-          <p className="text-base text-gray-700 dark:text-gray-300">검색 결과가 없습니다.</p>
+          <p className="text-base text-gray-700">검색 결과가 없습니다.</p>
           <p className="mt-2 text-sm text-gray-500">다른 키워드를 시도해보세요.</p>
           <p className="mt-4 text-xs text-gray-400">
             💡 단지명, 지역, 종목명, 블로그 키워드 등으로 검색 가능합니다.
@@ -142,7 +142,7 @@ export default async function SearchPage({ searchParams }: Props) {
 
       {/* 에러 */}
       {rpcError && (
-        <div className="my-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/30 dark:text-red-300">
+        <div className="my-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
           검색 중 일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.
         </div>
       )}
@@ -151,7 +151,7 @@ export default async function SearchPage({ searchParams }: Props) {
       <div className="space-y-6">
         {visibleSections.map(({ key, items, meta }) => (
           <section key={key}>
-            <h2 className="mb-2 text-sm font-bold text-gray-700 dark:text-gray-300">
+            <h2 className="mb-2 text-sm font-bold text-gray-700">
               <span className="mr-1">{meta.emoji}</span>
               {meta.label}
               <span className="ml-1.5 text-xs font-normal text-gray-400">({items.length})</span>
@@ -161,10 +161,10 @@ export default async function SearchPage({ searchParams }: Props) {
                 <li key={`${key}-${item.id}`}>
                   <Link
                     href={item.url}
-                    className="flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-2.5 transition hover:shadow-md dark:border-gray-800 dark:bg-gray-900"
+                    className="flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-2.5 transition hover:shadow-md"
                   >
                     {item.cover_image_url ? (
-                      <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-md bg-gray-100 dark:bg-gray-800">
+                      <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-md bg-gray-100">
                         <Image
                           src={item.cover_image_url}
                           alt=""
@@ -174,12 +174,12 @@ export default async function SearchPage({ searchParams }: Props) {
                         />
                       </span>
                     ) : (
-                      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md bg-gray-100 text-xl dark:bg-gray-800">
+                      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md bg-gray-100 text-xl">
                         {meta.emoji}
                       </span>
                     )}
                     <span className="min-w-0 flex-1">
-                      <span className="line-clamp-1 text-sm font-medium text-gray-900 dark:text-gray-50">
+                      <span className="line-clamp-1 text-sm font-medium text-gray-900">
                         {item.title}
                       </span>
                       {item.subtitle && (
@@ -193,7 +193,7 @@ export default async function SearchPage({ searchParams }: Props) {
                         "ml-1 rounded px-1.5 py-0.5 text-[10px] font-bold tabular-nums",
                         item.dday <= 3 ? "bg-red-500 text-white"
                           : item.dday <= 7 ? "bg-amber-500 text-white"
-                          : "bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200",
+                          : "bg-gray-200 text-gray-700",
                       ].join(" ")}>
                         D-{item.dday}
                       </span>
@@ -220,8 +220,8 @@ function TabLink({ q, tab, current, label }: {
       className={[
         "rounded-full px-3 py-1.5 text-xs font-medium transition",
         active
-          ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900"
-          : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700",
+          ? "bg-gray-900 text-white"
+          : "bg-gray-100 text-gray-700 hover:bg-gray-200",
       ].join(" ")}
     >
       {label}
