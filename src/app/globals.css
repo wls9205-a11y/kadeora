@@ -1,13 +1,11 @@
 /* s208 apt-tabs: 스코프된 토큰/유틸리티 (--aptr-*) — 기존 카더라 토큰과 충돌 X. s273-cc: tailwind config darkMode cache bust. */
 @import "../styles/apt-tabs.css";
 
-/* Pretendard font loaded via <link> in layout.tsx for better LCP */
-/* 세션 150 CLS: swap → optional (FOIT 허용, reflow 방지). Pretendard 로드 실패 시 system-ui 유지하며 layout shift 차단. */
-@font-face {
-  font-family: 'Pretendard Variable';
-  font-display: optional;
-  src: local('Pretendard Variable'), local('Pretendard');
-}
+/* Pretendard 는 layout.tsx 의 CDN <link> 한 곳에서만 로드한다 (Rule #80).
+   s6: 여기 있던 local() 전용 @font-face 를 삭제했다. CDN CSS 는 unicode-range 로
+   쪼갠 다수의 @font-face 를 정의하는데, 이 선언은 unicode-range 가 없어 전 범위를 덮었다.
+   캐스케이드에서 이쪽이 이기면 Pretendard 미설치 기기가 웹폰트를 받고도
+   시스템 폰트로 떨어진다. */
 
 @tailwind base;
 @tailwind components;
@@ -233,6 +231,9 @@ input, textarea, select { font-size: max(16px, var(--fs-sm)); }
   --fs-xl: 24px;
   --fs-2xl: 32px;
   /* s280: --font-mono 미정의였음 (globals.css 자체 blog-content code 규칙 포함 다수 곳에서 폴백만 타던 상태) */
+  /* s6: apt-tabs.css 가 참조하는데 정의가 없었다 (Rule #105 재발) */
+  --font-sans: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-serif: ui-serif, Georgia, serif;
   --font-mono: 'SF Mono', 'Consolas', 'Menlo', monospace;
 }
 
