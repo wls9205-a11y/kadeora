@@ -78,7 +78,7 @@ export default async function RegionRedevPage({ params }: Props) {
   // 데이터 없는 지역 → 404 대신 준비중 페이지 (sitemap 404 방지)
   if (total === 0) {
     return (
-      <div style={{ maxWidth: 900, margin: '0 auto', padding: '60px 16px', textAlign: 'center' }}>
+      <div style={{ maxWidth: 'var(--container-max)', margin: '0 auto', padding: '60px 16px', textAlign: 'center' }}>
         <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 4 }}>
           <Link href="/apt/redev" style={{ color: 'var(--brand)', textDecoration: 'none' }}>전국 재개발·재건축</Link> → {decodedRegion}
         </div>
@@ -151,7 +151,7 @@ export default async function RegionRedevPage({ params }: Props) {
   };
 
   return (
-    <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 16px' }}>
+    <div style={{ maxWidth: 'var(--container-max)', margin: '0 auto', padding: '0 16px' }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />

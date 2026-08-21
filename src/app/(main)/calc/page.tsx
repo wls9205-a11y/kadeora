@@ -54,7 +54,7 @@ export default function CalcHubPage() {
           image: `${SITE_URL}/api/og?title=` + encodeURIComponent(c.title) + '&design=2&category=calc',
         })),
       })}} />
-    <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
+    <div style={{ maxWidth: 'var(--container-max)', margin: '0 auto', padding: '0 var(--sp-lg)' }}>
       <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 900, marginBottom: 4, letterSpacing: '-0.5px' }}>무료 계산기 모음</h1>
       <p style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 24 }}>세금 · 부동산 · 주식 · 대출 · 연금 — {CALC_REGISTRY.length}종 무료 제공</p>
 

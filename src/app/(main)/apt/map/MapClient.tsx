@@ -196,7 +196,7 @@ export default function MapClient() {
   const [sdkError, setSdkError] = useState(!kakaoKey);
 
   return (
-    <div style={{ maxWidth: 960, margin: '0 auto', padding: '0 12px' }}>
+    <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 12px' }}>
       {kakaoKey && <Script
         src={`https://dapi.kakao.com/v2/maps/sdk.js?appkey=${kakaoKey}&libraries=services,clusterer&autoload=false`}
         strategy="afterInteractive"

@@ -66,7 +66,7 @@ export default function RegionSheetV5({ onClose, sido, currentRegion }: Props) {
     >
       <div
         style={{
-          width: '100%', maxWidth: 560, maxHeight: '85vh', overflowY: 'auto',
+          width: '100%', maxWidth: 480, maxHeight: '85vh', overflowY: 'auto',
           background: 'var(--bg-elevated, #1f2028)', borderTopLeftRadius: 16, borderTopRightRadius: 16,
           padding: 14,
         }}

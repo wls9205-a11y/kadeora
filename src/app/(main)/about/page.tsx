@@ -69,7 +69,7 @@ export default async function AboutPage() {
               부동산·주식 정보 플랫폼
             </span>
           </h1>
-          <p style={{ fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.7, maxWidth: 560, margin: '0 auto' }}>
+          <p style={{ fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.7, maxWidth: 480, margin: '0 auto' }}>
             <strong>카더라(kadeora.app)</strong>는 &ldquo;~라 카더라&rdquo;라는 부산 사투리에서 이름을 따온
             대한민국 부동산·주식 정보 플랫폼입니다.
             아파트 청약·재개발·실거래가부터 주식 시세·AI 종목 분석, 투자 커뮤니티까지

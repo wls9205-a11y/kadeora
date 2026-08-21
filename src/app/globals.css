@@ -398,6 +398,8 @@ html.font-small button { min-height: 36px; }
   --btn-h: 46px;
   --card-p: 16px;
   --touch-min: 46px;
+  /* s5-2 (Rule #78): 본문 컨테이너 기준 폭. 어드민(1400)·앱셸(1200)·좁은 폼(480)만 예외 */
+  --container-max: 720px;
 }
 
 html.font-small {

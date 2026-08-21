@@ -76,7 +76,7 @@ export default function ConsultantRegister() {
 
   if (loading) return <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-tertiary)' }}>로딩 중...</div>;
   if (!user) return (
-    <div style={{ maxWidth: 560, margin: '0 auto', padding: '40px 16px', textAlign: 'center' }}>
+    <div style={{ maxWidth: 480, margin: '0 auto', padding: '40px 16px', textAlign: 'center' }}>
       <div style={{ fontSize: 48, marginBottom: 'var(--sp-lg)' }}>🏢</div>
       <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>분양 상담사 등록</h1>
       <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-2xl)' }}>로그인 후 분양 상담사로 등록하고, 프리미엄 리스팅으로 고객을 만나세요.</p>
@@ -88,7 +88,7 @@ export default function ConsultantRegister() {
   const input = { width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', boxSizing: 'border-box' as const };
 
   return (
-    <div style={{ maxWidth: 560, margin: '0 auto', padding: '0 16px 40px' }}>
+    <div style={{ maxWidth: 480, margin: '0 auto', padding: '0 16px 40px' }}>
       <Link href="/apt" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textDecoration: 'none', display: 'inline-block', marginBottom: 'var(--sp-lg)' }}>← 부동산</Link>
 
       {/* 헤더 */}

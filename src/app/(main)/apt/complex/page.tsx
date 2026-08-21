@@ -96,7 +96,7 @@ export default async function ComplexPage({ searchParams }: { searchParams: Prom
   const donutTotal = ageDonut.reduce((s, a) => s + a.count, 0);
 
   return (
-    <article style={{ maxWidth: 960, margin: '0 auto', padding: '0 14px 80px' }}>
+    <article style={{ maxWidth: 900, margin: '0 auto', padding: '0 14px 80px' }}>
       {/* JSON-LD */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org', '@type': 'CollectionPage',
