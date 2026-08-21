@@ -699,9 +699,9 @@ export default async function BlogDetailPage({ params }: Props) {
     .replace(/<p>\s*<\/p>/g, '')
     // 연속 <br> 정리
     .replace(/(<br\s*\/?>){3,}/g, '<br><br>')
-    // ── 다크모드 보호: 인라인 color/background-color 제거 ──
-    // AI 생성 콘텐츠에 style="color:#333" 같은 하드코딩 색상이 포함되면
-    // 다크모드(#050A18 배경)에서 텍스트가 보이지 않음
+    // ── 본문 색상 보호: 인라인 color/background-color 제거 ──
+    // AI 생성 콘텐츠에 style="color:#333" 같은 하드코딩 색상이 섞이면
+    // 페이지 토큰과 충돌해 대비가 깨진다
     .replace(/\bcolor\s*:\s*#[0-9a-fA-F]{3,8}\s*;?/gi, '')
     .replace(/\bcolor\s*:\s*(black|white|gray|grey|rgb\([^)]*\))\s*;?/gi, '')
     .replace(/\bbackground-color\s*:\s*#[0-9a-fA-F]{3,8}\s*;?/gi, '')
@@ -749,7 +749,7 @@ export default async function BlogDetailPage({ params }: Props) {
       `</div>` +
       `<div style="font-size:13px;color:#8b95a5;line-height:1.5;margin-bottom:12px">${desc}</div>` +
       `<div style="display:flex;gap:5px;margin-bottom:14px;flex-wrap:wrap">` +
-        tags.map(t => `<span style="font-size:11px;padding:3px 7px;border-radius:4px;background:rgba(59,123,246,0.08);color:#6da0f0;border:0.5px solid rgba(59,123,246,0.15)">${t}</span>`).join('') +
+        tags.map(t => `<span style="font-size:11px;padding:3px 7px;border-radius:4px;background:rgba(59,123,246,0.08);color:#6da0f0;border:1px solid rgba(59,123,246,0.15)">${t}</span>`).join('') +
       `</div>` +
       `<a href="${loginUrl}" onclick="try{fetch('/api/track',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({event_type:'cta_click',cta_name:'blog_inline_cta',page_path:location.pathname,visitor_id:localStorage.getItem('kd_visitor_id')}),keepalive:true})}catch(e){}" style="display:block;width:100%;padding:10px;border-radius:8px;background:#3b7bf6;color:#fff;font-size:13px;font-weight:500;text-decoration:none;text-align:center;box-sizing:border-box">카카오로 3초 만에 시작하기</a>` +
     `</div>`;

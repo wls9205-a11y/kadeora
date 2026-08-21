@@ -56,7 +56,7 @@ export default function SignupCTASection({ data, ctrAvg }: Props) {
   return (
     <section style={{
       padding: 16, borderRadius: 'var(--radius-lg, 14px)',
-      background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border, #2a2b35)',
+      background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border)',
     }}>
       <h2 style={sectionTitleStyle}>🎯 가입 & CTA</h2>
 
@@ -126,7 +126,7 @@ export default function SignupCTASection({ data, ctrAvg }: Props) {
           </thead>
           <tbody>
             {(data.source_provider_matrix ?? []).slice(0, 12).map((r, i) => (
-              <tr key={`${r.source}-${r.provider}-${i}`} style={{ borderTop: '1px solid var(--border, #2a2b35)' }}>
+              <tr key={`${r.source}-${r.provider}-${i}`} style={{ borderTop: '1px solid var(--border)' }}>
                 <td style={{ padding: 6 }}><code style={{ color: 'var(--text-secondary, #ccc)' }}>{r.source}</code></td>
                 <td style={{ padding: 6, color: 'var(--text-tertiary, #888)' }}>{r.provider}</td>
                 <td style={{ padding: 6, textAlign: 'right' }}>{r.attempts}</td>

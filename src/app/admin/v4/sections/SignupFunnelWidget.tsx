@@ -108,7 +108,7 @@ export default function SignupFunnelWidget() {
       aria-label="가입 진단 위젯"
       style={{
         padding: '14px 16px', borderRadius: 12,
-        background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border, #2a2b35)',
+        background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border)',
         display: 'flex', flexDirection: 'column', gap: 14,
       }}
     >
@@ -139,7 +139,7 @@ export default function SignupFunnelWidget() {
               fontSize: 11, fontWeight: 700,
               padding: '6px 12px', borderRadius: 6,
               background: 'transparent', color: 'var(--text-secondary, #ccc)',
-              border: '1px solid var(--border, #2a2b35)', textDecoration: 'none',
+              border: '1px solid var(--border)', textDecoration: 'none',
             }}
           >📊 상세 진단</a>
           <button
@@ -147,7 +147,7 @@ export default function SignupFunnelWidget() {
             style={{
               fontSize: 11, fontWeight: 700, padding: '6px 10px', borderRadius: 6,
               background: 'transparent', color: 'var(--text-secondary, #ccc)',
-              border: '1px solid var(--border, #2a2b35)', cursor: 'pointer',
+              border: '1px solid var(--border)', cursor: 'pointer',
             }}
           >↻</button>
         </div>
@@ -209,8 +209,8 @@ function KpiTile({ label, value, delta, highlight }: { label: string; value: num
   return (
     <div style={{
       padding: '10px 12px', borderRadius: 8,
-      background: highlight ? 'rgba(52,211,153,0.06)' : 'var(--bg-base, #0d0e14)',
-      border: '1px solid var(--border, #2a2b35)',
+      background: highlight ? 'rgba(52,211,153,0.06)' : 'var(--bg-base)',
+      border: '1px solid var(--border)',
     }}>
       <div style={{ fontSize: 9, fontWeight: 800, color: 'var(--text-tertiary, #888)', letterSpacing: 1 }}>{label}</div>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginTop: 2 }}>
@@ -312,7 +312,7 @@ function RecentList({ rows }: { rows: RecentSignup[] }) {
         <div key={i} style={{
           display: 'grid', gridTemplateColumns: '1fr auto auto', gap: 8, alignItems: 'center',
           padding: '6px 10px', borderRadius: 6,
-          background: 'var(--bg-base, #0d0e14)', border: '1px solid var(--border, #2a2b35)',
+          background: 'var(--bg-base)', border: '1px solid var(--border)',
         }}>
           <span style={{ fontSize: 11, color: 'var(--text-primary, #fff)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {r.email_masked || '—'}

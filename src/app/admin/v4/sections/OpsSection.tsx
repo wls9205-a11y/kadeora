@@ -25,7 +25,7 @@ export default function OpsSection({ data }: Props) {
   return (
     <section style={{
       padding: 16, borderRadius: 'var(--radius-lg, 14px)',
-      background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border, #2a2b35)',
+      background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border)',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
         <h2 style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary, #fff)', margin: 0 }}>⚙️ 운영</h2>
@@ -33,7 +33,7 @@ export default function OpsSection({ data }: Props) {
           onClick={() => setGodOpen(v => !v)}
           style={{
             marginLeft: 'auto', fontSize: 11, fontWeight: 700,
-            padding: '6px 10px', borderRadius: 6, border: '1px solid var(--border, #2a2b35)',
+            padding: '6px 10px', borderRadius: 6, border: '1px solid var(--border)',
             background: 'transparent', color: 'var(--text-secondary, #ccc)', cursor: 'pointer',
           }}
         >
@@ -71,7 +71,7 @@ export default function OpsSection({ data }: Props) {
         >
           <div onClick={e => e.stopPropagation()} style={{
             width: 'min(420px, 92vw)', height: '100%', padding: 20,
-            background: 'var(--bg-surface, #1a1b22)', borderLeft: '1px solid var(--border, #2a2b35)',
+            background: 'var(--bg-surface, #1a1b22)', borderLeft: '1px solid var(--border)',
             display: 'flex', flexDirection: 'column', gap: 12, overflowY: 'auto',
           }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>

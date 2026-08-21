@@ -54,7 +54,7 @@ export default function BlogFooterMeta({ tags, category, createdAt, updatedAt, r
                 borderRadius: 999,
                 background: 'var(--blog-tag-bg, rgba(59,123,246,0.08))',
                 color: 'var(--blog-tag-color, var(--brand))',
-                border: '0.5px solid var(--blog-info-box-border, rgba(59,123,246,0.15))',
+                border: '1px solid var(--blog-info-box-border, rgba(59,123,246,0.15))',
                 textDecoration: 'none',
                 fontWeight: 600,
                 letterSpacing: '-0.2px',

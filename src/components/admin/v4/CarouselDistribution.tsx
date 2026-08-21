@@ -7,7 +7,7 @@ export default function CarouselDistribution({ posDist }: { posDist: number[] })
     <div style={{ width: '100%' }}>
       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
         <thead>
-          <tr style={{ borderBottom: '1px solid var(--border, #2a2b35)' }}>
+          <tr style={{ borderBottom: '1px solid var(--border)' }}>
             <th style={{ textAlign: 'left', padding: '6px 8px' }}>position</th>
             <th style={{ textAlign: 'right', padding: '6px 8px' }}>cnt</th>
             <th style={{ textAlign: 'left', padding: '6px 8px' }}>분포</th>
@@ -18,7 +18,7 @@ export default function CarouselDistribution({ posDist }: { posDist: number[] })
             const abnormal = position === 7 && cnt > max * 0.5;
             const pct = (cnt / max) * 100;
             return (
-              <tr key={position} style={{ borderBottom: '0.5px solid var(--border, #2a2b35)' }}>
+              <tr key={position} style={{ borderBottom: '1px solid var(--border)' }}>
                 <td style={{ padding: '4px 8px' }}>{position}</td>
                 <td style={{ padding: '4px 8px', textAlign: 'right', fontWeight: abnormal ? 800 : 400, color: abnormal ? '#ef4444' : 'inherit' }}>
                   {cnt.toLocaleString()}

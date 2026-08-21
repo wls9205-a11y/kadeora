@@ -78,13 +78,13 @@ export default function RegionSheetV5({ onClose, sido, currentRegion }: Props) {
             placeholder="지역 검색"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            style={{ flex: 1, padding: '8px 10px', borderRadius: 8, border: '0.5px solid var(--border, #2a2b35)', background: 'var(--bg-base, #0d0e14)', color: 'var(--text-primary, #fff)', fontSize: 12, outline: 'none', height: 32 }}
+            style={{ flex: 1, padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary, #fff)', fontSize: 12, outline: 'none', height: 32 }}
           />
           <button
             onClick={useGeo}
             aria-label="내 위치"
             disabled={geoLoading}
-            style={{ padding: '0 10px', height: 32, borderRadius: 8, border: '0.5px solid var(--border-strong, #3a3b45)', background: 'transparent', cursor: 'pointer', fontSize: 11, fontWeight: 700, color: '#60a5fa', flexShrink: 0 }}
+            style={{ padding: '0 10px', height: 32, borderRadius: 8, border: '1px solid var(--border-strong, #3a3b45)', background: 'transparent', cursor: 'pointer', fontSize: 11, fontWeight: 700, color: '#60a5fa', flexShrink: 0 }}
           >
             {geoLoading ? '…' : '📍'}
           </button>
@@ -100,7 +100,7 @@ export default function RegionSheetV5({ onClose, sido, currentRegion }: Props) {
             <div style={{ fontSize: 10, color: 'var(--text-tertiary, #666)', marginBottom: 4, padding: '0 2px' }}>즐겨찾기</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
               {favs.map((name) => (
-                <button key={name} onClick={() => pick(name)} style={{ padding: '5px 10px', borderRadius: 999, border: '0.5px solid var(--border, #2a2b35)', background: 'transparent', fontSize: 11, color: 'var(--text-primary, #fff)', cursor: 'pointer' }}>⭐ {name}</button>
+                <button key={name} onClick={() => pick(name)} style={{ padding: '5px 10px', borderRadius: 999, border: '1px solid var(--border)', background: 'transparent', fontSize: 11, color: 'var(--text-primary, #fff)', cursor: 'pointer' }}>⭐ {name}</button>
               ))}
             </div>
           </div>
@@ -111,7 +111,7 @@ export default function RegionSheetV5({ onClose, sido, currentRegion }: Props) {
             <div style={{ fontSize: 10, color: 'var(--text-tertiary, #666)', marginBottom: 4, padding: '0 2px' }}>최근 본 지역</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
               {recents.map((name) => (
-                <button key={name} onClick={() => pick(name)} style={{ padding: '5px 10px', borderRadius: 999, border: '0.5px solid var(--border, #2a2b35)', background: 'transparent', fontSize: 11, color: 'var(--text-primary, #fff)', cursor: 'pointer' }}>{name}</button>
+                <button key={name} onClick={() => pick(name)} style={{ padding: '5px 10px', borderRadius: 999, border: '1px solid var(--border)', background: 'transparent', fontSize: 11, color: 'var(--text-primary, #fff)', cursor: 'pointer' }}>{name}</button>
               ))}
             </div>
           </div>
@@ -127,7 +127,7 @@ export default function RegionSheetV5({ onClose, sido, currentRegion }: Props) {
                 style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                   padding: '9px 10px', borderRadius: 8, cursor: 'pointer',
-                  border: '0.5px solid ' + (isCur ? '#3b82f6' : 'var(--border, #2a2b35)'),
+                  border: '1px solid ' + (isCur ? '#3b82f6' : 'var(--border)'),
                   background: isCur ? 'rgba(59,130,246,0.15)' : 'transparent',
                   position: 'relative',
                 }}
@@ -148,7 +148,7 @@ export default function RegionSheetV5({ onClose, sido, currentRegion }: Props) {
 
         <button
           onClick={() => pick('전국')}
-          style={{ width: '100%', marginTop: 10, padding: 10, borderRadius: 8, border: 0, background: 'var(--bg-base, #0d0e14)', cursor: 'pointer', fontSize: 12, fontWeight: 700, color: 'var(--text-primary, #fff)' }}
+          style={{ width: '100%', marginTop: 10, padding: 10, borderRadius: 8, border: 0, background: 'var(--bg-base)', cursor: 'pointer', fontSize: 12, fontWeight: 700, color: 'var(--text-primary, #fff)' }}
         >전국 보기</button>
       </div>
     </div>

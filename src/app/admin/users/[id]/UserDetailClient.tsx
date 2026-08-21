@@ -64,7 +64,7 @@ const cardStyle: React.CSSProperties = {
   padding: 14,
   borderRadius: 'var(--radius-md, 10px)',
   background: 'var(--bg-elevated, #1f2028)',
-  border: '1px solid var(--border, #2a2b35)',
+  border: '1px solid var(--border)',
 };
 
 const subTitle: React.CSSProperties = {
@@ -104,7 +104,7 @@ export default function UserDetailClient({ userId }: { userId: string }) {
     <div style={{
       maxWidth: 1200, margin: '0 auto', padding: 'clamp(12px, 3vw, 24px)',
       display: 'flex', flexDirection: 'column', gap: 14,
-      color: 'var(--text-primary, #fff)', background: 'var(--bg-base, #0d0e14)',
+      color: 'var(--text-primary, #fff)', background: 'var(--bg-base)',
       minHeight: '100vh',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
@@ -143,8 +143,8 @@ export default function UserDetailClient({ userId }: { userId: string }) {
               </div>
               {isAdmin && (
                 <div style={{ display: 'flex', gap: 6 }}>
-                  <button disabled style={{ padding: '6px 12px', fontSize: 11, borderRadius: 6, border: '1px solid var(--border, #2a2b35)', background: 'transparent', color: 'var(--text-tertiary, #888)', cursor: 'not-allowed', opacity: 0.6 }}>차단 (s208 예정)</button>
-                  <button disabled style={{ padding: '6px 12px', fontSize: 11, borderRadius: 6, border: '1px solid var(--border, #2a2b35)', background: 'transparent', color: 'var(--text-tertiary, #888)', cursor: 'not-allowed', opacity: 0.6 }}>삭제 (s208 예정)</button>
+                  <button disabled style={{ padding: '6px 12px', fontSize: 11, borderRadius: 6, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-tertiary, #888)', cursor: 'not-allowed', opacity: 0.6 }}>차단 (s208 예정)</button>
+                  <button disabled style={{ padding: '6px 12px', fontSize: 11, borderRadius: 6, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-tertiary, #888)', cursor: 'not-allowed', opacity: 0.6 }}>삭제 (s208 예정)</button>
                 </div>
               )}
             </div>
@@ -181,7 +181,7 @@ export default function UserDetailClient({ userId }: { userId: string }) {
             ].map((kp, i) => (
               <div key={i} style={{
                 padding: 12, borderRadius: 8,
-                background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border, #2a2b35)',
+                background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border)',
               }}>
                 <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-tertiary, #888)', textTransform: 'uppercase' }}>{kp.label}</div>
                 <div style={{ fontSize: kp.small ? 13 : 18, fontWeight: 800, marginTop: 4 }}>{kp.v}</div>

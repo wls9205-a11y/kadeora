@@ -146,7 +146,7 @@ export default function KakaoChannelAddModal({ triggerOnMount = true }: Props) {
           style={{
             background: '#0F1729', borderRadius: 20, padding: '28px 22px 22px',
             width: '100%', maxWidth: 340, position: 'relative',
-            border: '0.5px solid rgba(254,229,0,0.3)',
+            border: '1px solid rgba(254,229,0,0.3)',
             boxShadow: '0 24px 60px rgba(0,0,0,0.5)',
             animation: 'kd-channel-card-in 280ms cubic-bezier(0.16,1,0.3,1) forwards',
           }}

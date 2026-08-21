@@ -31,7 +31,7 @@ interface NoticeData {
 const TIER_STYLES: Record<string, { color: string; bg: string; glow: string; icon: string; speed: number }> = {
   free:     { color: 'var(--accent-green)', bg: 'var(--bg-sunken)', glow: 'none', icon: '📡', speed: 35 },
   standard: { color: 'var(--accent-green)', bg: 'var(--bg-sunken)', glow: 'none', icon: '📡', speed: 30 },
-  premium:  { color: 'var(--accent-yellow)', bg: 'linear-gradient(90deg, #050A18 0%, #080E1A 50%, #050A18 100%)', glow: '0 0 8px rgba(251,191,36,0.3)', icon: '⭐', speed: 28 },
+  premium:  { color: 'var(--accent-yellow)', bg: 'linear-gradient(90deg, var(--ink-bg-deep) 0%, var(--ink-bg) 50%, var(--ink-bg-deep) 100%)', glow: '0 0 8px rgba(251,191,36,0.3)', icon: '⭐', speed: 28 },
   urgent:   { color: 'var(--accent-red)', bg: 'linear-gradient(90deg, #120E16 0%, #150D12 50%, #120E16 100%)', glow: '0 0 12px rgba(248,113,113,0.4)', icon: '🚨', speed: 22 },
 };
 

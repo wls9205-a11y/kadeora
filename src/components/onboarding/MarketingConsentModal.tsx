@@ -146,7 +146,7 @@ export default function MarketingConsentModal({ userId, isOpen, onClose }: Props
             background: 'linear-gradient(180deg, #1a1030 0%, #0F1729 100%)',
             borderRadius: 20, padding: '28px 22px 22px',
             width: '100%', maxWidth: 360, position: 'relative',
-            border: '0.5px solid rgba(254,229,0,0.25)',
+            border: '1px solid rgba(254,229,0,0.25)',
             boxShadow: '0 24px 60px rgba(0,0,0,0.5)',
             animation: closing
               ? 'kd-mc-card-out 200ms cubic-bezier(0.16,1,0.3,1) forwards'
@@ -173,7 +173,7 @@ export default function MarketingConsentModal({ userId, isOpen, onClose }: Props
               display: 'flex', alignItems: 'flex-start', gap: 10,
               padding: '12px 12px',
               background: 'rgba(255,255,255,0.04)',
-              border: '0.5px solid rgba(255,255,255,0.08)',
+              border: '1px solid rgba(255,255,255,0.08)',
               borderRadius: 12,
               marginBottom: 8,
               cursor: 'pointer',
@@ -200,7 +200,7 @@ export default function MarketingConsentModal({ userId, isOpen, onClose }: Props
               display: 'flex', alignItems: 'flex-start', gap: 10,
               padding: '12px 12px',
               background: 'rgba(254,229,0,0.06)',
-              border: '0.5px solid rgba(254,229,0,0.2)',
+              border: '1px solid rgba(254,229,0,0.2)',
               borderRadius: 12,
               marginBottom: 10,
               cursor: 'pointer',

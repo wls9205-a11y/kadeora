@@ -80,7 +80,7 @@ export default async function AbExperimentViewer({
             style={{
               padding: 12,
               background: 'var(--bg-elevated, #1f2028)',
-              border: '1px solid var(--border, #2a2b35)',
+              border: '1px solid var(--border)',
               borderRadius: 'var(--radius-md, 10px)',
             }}
           >
@@ -91,7 +91,7 @@ export default async function AbExperimentViewer({
               </span>
             </div>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12, fontVariantNumeric: 'tabular-nums' }}>
-              <thead style={{ background: 'var(--bg-hover, #2a2b35)' }}>
+              <thead style={{ background: 'var(--bg-hover)' }}>
                 <tr>
                   <th style={{ padding: '6px 10px', textAlign: 'left', color: 'var(--text-secondary)', fontWeight: 600 }}>Variant</th>
                   <th style={{ padding: '6px 10px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 600 }}>View</th>
@@ -106,7 +106,7 @@ export default async function AbExperimentViewer({
                   const ctr = r.ctr_pct === null ? null : Number(r.ctr_pct);
                   const vs = r.vs_control_pct === null ? null : Number(r.vs_control_pct);
                   return (
-                    <tr key={r.variant} style={{ borderTop: '1px solid var(--border, #2a2b35)' }}>
+                    <tr key={r.variant} style={{ borderTop: '1px solid var(--border)' }}>
                       <td style={{ padding: '6px 10px', fontWeight: 700, color: 'var(--text-primary, #fff)' }}>{r.variant}</td>
                       <td style={{ padding: '6px 10px', textAlign: 'right', color: 'var(--text-secondary)' }}>{Number(r.views).toLocaleString()}</td>
                       <td style={{ padding: '6px 10px', textAlign: 'right', color: 'var(--text-secondary)' }}>{Number(r.clicks).toLocaleString()}</td>

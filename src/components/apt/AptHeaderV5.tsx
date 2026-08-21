@@ -37,12 +37,12 @@ export default function AptHeaderV5({ region, totalCount, imminentCount, cat, si
 
   return (
     <>
-      <section style={{ background: 'var(--bg-elevated, #1f2028)', border: '0.5px solid var(--border, #2a2b35)', borderRadius: 12, overflow: 'hidden' }}>
-        <div style={{ padding: '10px 12px', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '0.5px solid var(--border, #2a2b35)' }}>
+      <section style={{ background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
+        <div style={{ padding: '10px 12px', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '1px solid var(--border)' }}>
           <button
             onClick={() => setOpen(true)}
             aria-label="지역 선택"
-            style={{ flex: 1, minWidth: 0, padding: '8px 10px', borderRadius: 10, border: '0.5px solid var(--border-strong, #3a3b45)', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, textAlign: 'left' }}
+            style={{ flex: 1, minWidth: 0, padding: '8px 10px', borderRadius: 10, border: '1px solid var(--border-strong, #3a3b45)', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, textAlign: 'left' }}
           >
             <span aria-hidden style={{ flexShrink: 0, opacity: 0.6 }}>📍</span>
             <span style={{ fontSize: 13, fontWeight: 500, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{region}</span>
@@ -62,9 +62,9 @@ export default function AptHeaderV5({ region, totalCount, imminentCount, cat, si
                   style={{
                     padding: '6px 11px',
                     borderRadius: 999,
-                    border: '0.5px solid ' + (active ? 'var(--text-primary, #fff)' : 'var(--border, #2a2b35)'),
+                    border: '1px solid ' + (active ? 'var(--text-primary, #fff)' : 'var(--border)'),
                     background: active ? 'var(--text-primary, #fff)' : 'transparent',
-                    color: active ? 'var(--bg-base, #0d0e14)' : (t.warn ? '#fbbf24' : 'var(--text-primary, #fff)'),
+                    color: active ? 'var(--bg-base)' : (t.warn ? '#fbbf24' : 'var(--text-primary, #fff)'),
                     fontSize: 12,
                     fontWeight: active ? 700 : 400,
                     cursor: 'pointer',

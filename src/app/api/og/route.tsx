@@ -64,7 +64,7 @@ function D1(C: OgCategoryToken, title: string, sub: string, author: string, ff: 
         <span style={{ fontSize: 17, fontWeight:900, color:'#000', letterSpacing:1 }}>{C.icon}  {C.label.toUpperCase()}</span>
       </div>
       {/* 스트라이프2: 메타 바 */}
-      <div style={{ background:'#111', height:40, display:'flex', alignItems:'center', padding:'0 48px', gap:16, flexShrink:0, borderBottom:'0.5px solid rgba(255,255,255,.06)' }}>
+      <div style={{ background:'#111', height:40, display:'flex', alignItems:'center', padding:'0 48px', gap:16, flexShrink:0, borderBottom:'1px solid rgba(255,255,255,.06)' }}>
         {author ? <div style={{ display:'flex', alignItems:'center', gap:8 }}>
           <div style={{ width: 20, height: 20, borderRadius:'50%', background:`linear-gradient(135deg,${C.color},#2563eb)`, display:'flex', alignItems:'center', justifyContent:'center', fontSize: 9, fontWeight:900, color:'#fff' }}>
             {author[0].toUpperCase()}

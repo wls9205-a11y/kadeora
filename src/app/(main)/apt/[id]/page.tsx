@@ -753,11 +753,11 @@ export default async function AptUnifiedPage({ params }: Props) {
               <div style={{
                 position: 'relative', borderRadius: 'var(--radius-lg)', overflow: 'hidden', marginBottom: 14,
                 height: 140,
-                background: 'linear-gradient(135deg, #0c1629 0%, #1a3050 50%, #1e3a8a 100%)',
+                background: 'var(--bg-elevated)',
               }}>
                 <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '12px 14px' }}>
-                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginBottom: 'var(--sp-xs)' }}>{region} {site?.sigungu || ''}</div>
-                  <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 900, color: '#fff', lineHeight: 1.2, wordBreak: 'keep-all' }}>{name}</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-xs)' }}>{region} {site?.sigungu || ''}</div>
+                  <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 900, color: 'var(--text-primary)', lineHeight: 1.2, wordBreak: 'keep-all' }}>{name}</div>
                   {/* s2: 세대수는 아래 공급 정보 표에서 1회만 표기한다 */}
                   <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginTop: 'var(--sp-xs)' }}>{site?.builder || sub?.constructor_nm || ''}</div>
                 </div>

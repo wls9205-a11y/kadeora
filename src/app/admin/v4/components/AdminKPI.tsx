@@ -31,7 +31,7 @@ export default function AdminKPI({ label, value, delta, deltaColor = 'tertiary',
     <div style={{
       padding: 12, borderRadius: 'var(--radius-md, 10px)',
       background: 'var(--bg-surface, #1a1b22)',
-      border: '1px solid var(--border, #2a2b35)',
+      border: '1px solid var(--border)',
       borderLeft,
       minWidth: 0, display: 'flex', flexDirection: 'column', gap: 4,
     }}>

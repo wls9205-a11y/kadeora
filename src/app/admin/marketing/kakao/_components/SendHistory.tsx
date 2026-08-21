@@ -48,7 +48,7 @@ export default async function SendHistory() {
         padding: 14,
         borderRadius: 'var(--radius-md, 10px)',
         background: 'var(--bg-elevated, #1f2028)',
-        border: '1px solid var(--border, #2a2b35)',
+        border: '1px solid var(--border)',
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
@@ -69,7 +69,7 @@ export default async function SendHistory() {
                     style={{
                       textAlign: 'left',
                       padding: '6px 8px',
-                      borderBottom: '1px solid var(--border, #2a2b35)',
+                      borderBottom: '1px solid var(--border)',
                       color: 'var(--text-tertiary, #888)',
                       fontWeight: 700,
                     }}
@@ -82,25 +82,25 @@ export default async function SendHistory() {
             <tbody>
               {rows.map((r, i) => (
                 <tr key={r.id ?? i}>
-                  <td style={{ padding: '6px 8px', borderBottom: '1px solid var(--border, #2a2b35)' }}>
+                  <td style={{ padding: '6px 8px', borderBottom: '1px solid var(--border)' }}>
                     {r.sent_at ? new Date(r.sent_at).toLocaleString() : '—'}
                   </td>
-                  <td style={{ padding: '6px 8px', borderBottom: '1px solid var(--border, #2a2b35)' }}>
+                  <td style={{ padding: '6px 8px', borderBottom: '1px solid var(--border)' }}>
                     {r.campaign ?? '—'}
                   </td>
-                  <td style={{ padding: '6px 8px', borderBottom: '1px solid var(--border, #2a2b35)' }}>
+                  <td style={{ padding: '6px 8px', borderBottom: '1px solid var(--border)' }}>
                     {r.segment ?? '—'}
                   </td>
-                  <td style={{ padding: '6px 8px', borderBottom: '1px solid var(--border, #2a2b35)' }}>
+                  <td style={{ padding: '6px 8px', borderBottom: '1px solid var(--border)' }}>
                     {r.attempted ?? 0}
                   </td>
-                  <td style={{ padding: '6px 8px', borderBottom: '1px solid var(--border, #2a2b35)' }}>
+                  <td style={{ padding: '6px 8px', borderBottom: '1px solid var(--border)' }}>
                     {r.delivered ?? 0}
                   </td>
-                  <td style={{ padding: '6px 8px', borderBottom: '1px solid var(--border, #2a2b35)' }}>
+                  <td style={{ padding: '6px 8px', borderBottom: '1px solid var(--border)' }}>
                     {r.blocked ?? 0}
                   </td>
-                  <td style={{ padding: '6px 8px', borderBottom: '1px solid var(--border, #2a2b35)', color: 'var(--text-tertiary, #888)' }}>
+                  <td style={{ padding: '6px 8px', borderBottom: '1px solid var(--border)', color: 'var(--text-tertiary, #888)' }}>
                     {fmtReasons(r.block_reasons)}
                   </td>
                 </tr>

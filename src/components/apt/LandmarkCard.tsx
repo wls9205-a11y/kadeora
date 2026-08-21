@@ -33,7 +33,7 @@ export default function LandmarkCard({ row }: { row: LandmarkRow }) {
       href={href}
       style={{
         background: 'var(--bg-elevated, #1f2028)',
-        border: '0.5px solid var(--border, #2a2b35)',
+        border: '1px solid var(--border)',
         borderRadius: 10,
         overflow: 'hidden',
         textDecoration: 'none',
@@ -45,7 +45,7 @@ export default function LandmarkCard({ row }: { row: LandmarkRow }) {
       <div
         style={{
           aspectRatio: '4 / 3',
-          background: `center/cover no-repeat url('${thumb}'), var(--bg-base, #0d0e14)`,
+          background: `center/cover no-repeat url('${thumb}'), var(--bg-base)`,
           position: 'relative',
         }}
       >

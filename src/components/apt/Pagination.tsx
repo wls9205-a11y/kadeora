@@ -33,9 +33,9 @@ export default function Pagination({ basePath, page, totalPages, query }: Props)
 
   const btn = (active: boolean): React.CSSProperties => ({
     minWidth: 32, padding: '6px 10px', borderRadius: 8,
-    border: '0.5px solid var(--border, #2a2b35)',
+    border: '1px solid var(--border)',
     background: active ? 'var(--text-primary, #fff)' : 'transparent',
-    color: active ? 'var(--bg-base, #0d0e14)' : 'var(--text-primary, #fff)',
+    color: active ? 'var(--bg-base)' : 'var(--text-primary, #fff)',
     fontSize: 12, fontWeight: active ? 800 : 600,
     textDecoration: 'none', textAlign: 'center',
   });

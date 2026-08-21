@@ -98,7 +98,7 @@ export default function SignupRealtimeHeader() {
       padding: 10,
       borderRadius: 'var(--radius-md, 10px)',
       background: 'var(--bg-elevated, #1f2028)',
-      border: '1px solid var(--border, #2a2b35)',
+      border: '1px solid var(--border)',
       opacity: loading && !data ? 0.6 : 1,
       transition: 'opacity 0.2s',
     }}>
@@ -109,7 +109,7 @@ export default function SignupRealtimeHeader() {
             padding: '8px 10px',
             borderRadius: 8,
             background: tone.bg,
-            border: '1px solid var(--border, #2a2b35)',
+            border: '1px solid var(--border)',
             cursor: t.href ? 'pointer' : 'default',
             transition: 'transform 0.1s',
             display: 'flex', flexDirection: 'column', gap: 2,

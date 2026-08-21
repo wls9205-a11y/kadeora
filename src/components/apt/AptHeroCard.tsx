@@ -25,7 +25,7 @@ export default function AptHeroCard({ data }: { data: HeroData }) {
       margin: '4px 0 10px',
       borderRadius: 8,
       overflow: 'hidden',
-      border: '0.5px solid var(--border, #E5E7EB)',
+      border: '1px solid var(--border, #E5E7EB)',
       background: 'var(--bg-surface, #FFFFFF)',
       textDecoration: 'none',
       color: 'inherit',

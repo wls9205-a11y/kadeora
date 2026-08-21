@@ -23,11 +23,11 @@ export default function HealthRing({ score, size = 64, label = '헬스 점수' }
     <div style={{
       display: 'flex', alignItems: 'center', gap: 8,
       padding: '6px 10px', borderRadius: 'var(--radius-md, 10px)',
-      background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border, #2a2b35)',
+      background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border)',
     }}>
       <div style={{ position: 'relative', width: size, height: size }}>
         <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ transform: 'rotate(-90deg)' }}>
-          <circle cx={size / 2} cy={size / 2} r={r} stroke="var(--border, #2a2b35)" strokeWidth={4} fill="none" />
+          <circle cx={size / 2} cy={size / 2} r={r} stroke="var(--border)" strokeWidth={4} fill="none" />
           <circle
             cx={size / 2} cy={size / 2} r={r}
             stroke={color} strokeWidth={4} fill="none"

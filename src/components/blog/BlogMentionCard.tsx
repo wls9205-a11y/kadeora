@@ -518,12 +518,12 @@ function renderStockTop(stocks: any[], sparklines: Record<string, number[]>) {
   return (
     <div style={{
       borderRadius: 14, overflow: 'hidden', margin: '0 0 20px',
-      border: '0.5px solid var(--border)',
+      border: '1px solid var(--border)',
       background: 'var(--bg-surface, var(--bg-secondary))',
     }}>
       {/* 헤더 */}
       <div style={{
-        padding: '11px 14px 10px', borderBottom: '0.5px solid var(--border)',
+        padding: '11px 14px 10px', borderBottom: '1px solid var(--border)',
         display: 'flex', alignItems: 'center', gap: 8,
       }}>
         <span style={{ width: 3, height: 15, borderRadius: 2, background: '#378ADD' }} />
@@ -552,7 +552,7 @@ function renderStockTop(stocks: any[], sparklines: Record<string, number[]>) {
               href={`/stock/${s.symbol}`}
               style={{
                 flexShrink: 0, width: 152, borderRadius: 10, overflow: 'hidden',
-                border: `0.5px solid ${isSeed ? '#85B7EB' : 'var(--border)'}`,
+                border: `1px solid ${isSeed ? '#85B7EB' : 'var(--border)'}`,
                 textDecoration: 'none', color: 'inherit',
                 background: 'var(--bg-surface, var(--bg-secondary))',
                 display: 'flex', flexDirection: 'column',
@@ -634,7 +634,7 @@ function renderStockTop(stocks: any[], sparklines: Record<string, number[]>) {
 
       {/* 푸터 */}
       <div style={{
-        padding: '8px 14px 10px', borderTop: '0.5px solid var(--border)',
+        padding: '8px 14px 10px', borderTop: '1px solid var(--border)',
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
       }}>
         <Link href={`/stock/compare?a=${stocks[0]?.symbol || ''}`} style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)', textDecoration: 'none' }}>
@@ -664,14 +664,14 @@ function renderStockBottom(stocks: any[]) {
   return (
     <div style={{
       borderRadius: 14, overflow: 'hidden', margin: '16px 0',
-      border: '0.5px solid var(--border)',
+      border: '1px solid var(--border)',
       background: 'var(--bg-surface, var(--bg-secondary))',
     }}>
       <div style={{
         display: 'flex', alignItems: 'center', gap: 6,
         padding: '9px 12px 8px', fontSize: 12, fontWeight: 600,
         color: 'var(--text-primary)',
-        borderBottom: '0.5px solid var(--border)',
+        borderBottom: '1px solid var(--border)',
       }}>
         <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#3B82F6', display: 'inline-block', flexShrink: 0 }} />
         이 글과 관련된 종목
@@ -686,7 +686,7 @@ function renderStockBottom(stocks: any[]) {
               href={`/stock/${s.symbol}`}
               style={{
                 flexShrink: 0, width: 142, borderRadius: 10, overflow: 'hidden',
-                border: '0.5px solid var(--border)', textDecoration: 'none', color: 'inherit',
+                border: '1px solid var(--border)', textDecoration: 'none', color: 'inherit',
                 background: 'var(--bg-surface, var(--bg-secondary))', display: 'block',
                 position: 'relative',
               }}
@@ -738,7 +738,7 @@ function renderStockBottom(stocks: any[]) {
         })}
       </div>
       <div style={{
-        padding: '7px 12px 8px', borderTop: '0.5px solid var(--border)',
+        padding: '7px 12px 8px', borderTop: '1px solid var(--border)',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
         <Link href={`/stock/compare?a=${stocks[0]?.symbol || ''}`} style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)', textDecoration: 'none' }}>
@@ -760,11 +760,11 @@ function renderAptTop(apts: any[], region: string | null, sigungu: string | null
   return (
     <div style={{
       borderRadius: 14, overflow: 'hidden', margin: '0 0 20px',
-      border: '0.5px solid var(--border)',
+      border: '1px solid var(--border)',
       background: 'var(--bg-surface, var(--bg-secondary))',
     }}>
       <div style={{
-        padding: '11px 14px 10px', borderBottom: '0.5px solid var(--border)',
+        padding: '11px 14px 10px', borderBottom: '1px solid var(--border)',
         display: 'flex', alignItems: 'center', gap: 8,
       }}>
         <span style={{ width: 3, height: 15, borderRadius: 2, background: '#0F6E56' }} />
@@ -803,7 +803,7 @@ function renderAptTop(apts: any[], region: string | null, sigungu: string | null
               href={href}
               style={{
                 flexShrink: 0, width: 152, borderRadius: 10, overflow: 'hidden',
-                border: `0.5px solid ${isSeed ? '#5DCAA5' : 'var(--border)'}`,
+                border: `1px solid ${isSeed ? '#5DCAA5' : 'var(--border)'}`,
                 textDecoration: 'none', color: 'inherit',
                 background: 'var(--bg-surface, var(--bg-secondary))',
                 display: 'block',
@@ -862,7 +862,7 @@ function renderAptTop(apts: any[], region: string | null, sigungu: string | null
       </div>
 
       <div style={{
-        padding: '8px 14px 10px', borderTop: '0.5px solid var(--border)',
+        padding: '8px 14px 10px', borderTop: '1px solid var(--border)',
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
       }}>
         <Link href={sigungu ? `/apt?region=${encodeURIComponent(region || '')}&sigungu=${encodeURIComponent(sigungu)}` : region ? `/apt?region=${encodeURIComponent(region)}` : '/apt'} style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)', textDecoration: 'none' }}>
@@ -884,14 +884,14 @@ function renderAptBottom(apts: any[], region: string | null, sigungu: string | n
   return (
     <div style={{
       borderRadius: 14, overflow: 'hidden', margin: '16px 0',
-      border: '0.5px solid var(--border)',
+      border: '1px solid var(--border)',
       background: 'var(--bg-surface, var(--bg-secondary))',
     }}>
       <div style={{
         display: 'flex', alignItems: 'center', gap: 6,
         padding: '9px 12px 8px', fontSize: 12, fontWeight: 600,
         color: 'var(--text-primary)',
-        borderBottom: '0.5px solid var(--border)',
+        borderBottom: '1px solid var(--border)',
       }}>
         <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10B981', display: 'inline-block', flexShrink: 0 }} />
         이 글과 관련된 아파트{sigungu ? ` · ${sigungu}` : region ? ` · ${region}` : ''}
@@ -918,7 +918,7 @@ function renderAptBottom(apts: any[], region: string | null, sigungu: string | n
               href={href}
               style={{
                 flexShrink: 0, width: 136, borderRadius: 10, overflow: 'hidden',
-                border: '0.5px solid var(--border)', textDecoration: 'none', color: 'inherit',
+                border: '1px solid var(--border)', textDecoration: 'none', color: 'inherit',
                 background: 'var(--bg-surface, var(--bg-secondary))', display: 'block',
               }}
             >
@@ -952,7 +952,7 @@ function renderAptBottom(apts: any[], region: string | null, sigungu: string | n
         })}
       </div>
       <div style={{
-        padding: '7px 12px 8px', borderTop: '0.5px solid var(--border)',
+        padding: '7px 12px 8px', borderTop: '1px solid var(--border)',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
         <Link href={region ? `/apt?region=${encodeURIComponent(region)}` : '/apt'} style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)', textDecoration: 'none' }}>

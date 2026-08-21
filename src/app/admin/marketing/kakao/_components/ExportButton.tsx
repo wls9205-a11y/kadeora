@@ -56,7 +56,7 @@ export default function ExportButton({
         cursor: busy ? 'wait' : 'pointer',
         background: 'transparent',
         color: 'var(--text-secondary, #ccc)',
-        border: '1px solid var(--border, #2a2b35)',
+        border: '1px solid var(--border)',
         opacity: busy ? 0.6 : 1,
       }}
     >

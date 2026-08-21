@@ -199,7 +199,7 @@ export default function SignupPopupModal({
             width: '100%',
             maxWidth: 340,
             position: 'relative',
-            border: '0.5px solid rgba(254,229,0,0.25)',
+            border: '1px solid rgba(254,229,0,0.25)',
             boxShadow: '0 24px 60px rgba(0, 0, 0, 0.5)',
             animation: closing
               ? 'kd-popup-card-out 200ms cubic-bezier(0.16,1,0.3,1) forwards'
@@ -234,7 +234,7 @@ export default function SignupPopupModal({
               style={{
                 display: 'inline-block',
                 background: 'rgba(254,229,0,0.1)',
-                border: '0.5px solid rgba(254,229,0,0.3)',
+                border: '1px solid rgba(254,229,0,0.3)',
                 color: '#FEE500',
                 fontSize: 11,
                 padding: '4px 12px',
@@ -283,7 +283,7 @@ export default function SignupPopupModal({
               style={{
                 flex: 1,
                 background: 'rgba(59,123,246,0.1)',
-                border: '0.5px solid rgba(59,123,246,0.25)',
+                border: '1px solid rgba(59,123,246,0.25)',
                 borderRadius: 10,
                 padding: '10px 6px',
                 textAlign: 'center',
@@ -298,7 +298,7 @@ export default function SignupPopupModal({
               style={{
                 flex: 1,
                 background: 'rgba(34,197,94,0.1)',
-                border: '0.5px solid rgba(34,197,94,0.25)',
+                border: '1px solid rgba(34,197,94,0.25)',
                 borderRadius: 10,
                 padding: '10px 6px',
                 textAlign: 'center',
@@ -313,7 +313,7 @@ export default function SignupPopupModal({
               style={{
                 flex: 1,
                 background: 'rgba(254,229,0,0.1)',
-                border: '0.5px solid rgba(254,229,0,0.3)',
+                border: '1px solid rgba(254,229,0,0.3)',
                 borderRadius: 10,
                 padding: '10px 6px',
                 textAlign: 'center',

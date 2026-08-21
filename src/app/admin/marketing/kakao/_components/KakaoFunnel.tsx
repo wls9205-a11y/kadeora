@@ -66,7 +66,7 @@ export default function KakaoFunnel({
         padding: 14,
         borderRadius: 'var(--radius-md, 10px)',
         background: 'var(--bg-elevated, #1f2028)',
-        border: '1px solid var(--border, #2a2b35)',
+        border: '1px solid var(--border)',
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
@@ -90,8 +90,8 @@ export default function KakaoFunnel({
                 textAlign: 'left',
                 padding: 12,
                 borderRadius: 8,
-                background: 'var(--bg-base, #0d0e14)',
-                border: '1px solid var(--border, #2a2b35)',
+                background: 'var(--bg-base)',
+                border: '1px solid var(--border)',
                 color: 'var(--text-primary, #fff)',
                 cursor: 'pointer',
                 display: 'flex',

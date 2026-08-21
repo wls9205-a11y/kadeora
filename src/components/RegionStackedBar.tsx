@@ -110,7 +110,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
               style={{
                 padding: '6px 4px', borderRadius: 'var(--radius-sm)', textAlign: 'center', cursor: 'pointer',
                 background: isAct ? 'var(--bg-hover)' : 'var(--bg-surface)',
-                border: `0.5px solid ${isAct ? 'var(--brand)' : 'var(--border)'}`,
+                border: `1px solid ${isAct ? 'var(--brand)' : 'var(--border)'}`,
                 transition: 'all 0.15s',
               }}>
               <div style={{ fontSize: 16, fontWeight: 800, color: k.c, fontVariantNumeric: 'tabular-nums', lineHeight: 1.2 }}>

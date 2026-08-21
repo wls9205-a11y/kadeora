@@ -65,14 +65,14 @@ export default function AdminShellV4() {
       maxWidth: 1400, margin: '0 auto', padding: 'clamp(12px, 3vw, 24px)',
       display: 'flex', flexDirection: 'column', gap: 14,
       color: 'var(--text-primary, #fff)',
-      background: 'var(--bg-base, #0d0e14)',
+      background: 'var(--bg-base)',
       minHeight: '100vh',
     }}>
       {/* Sticky 헤더 */}
       <header style={{
         position: 'sticky', top: 0, zIndex: 100,
         padding: '10px 12px', borderRadius: 'var(--radius-md, 10px)',
-        background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border, #2a2b35)',
+        background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border)',
         backdropFilter: 'blur(8px)',
         display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap',
       }}>
@@ -91,7 +91,7 @@ export default function AdminShellV4() {
             marginLeft: 'auto', fontSize: 11, fontWeight: 700,
             padding: '6px 12px', borderRadius: 6,
             background: 'transparent', color: 'var(--text-secondary, #ccc)',
-            border: '1px solid var(--border, #2a2b35)', textDecoration: 'none',
+            border: '1px solid var(--border)', textDecoration: 'none',
           }}
         >📊 가입 플로우 진단</a>
         <a
@@ -100,7 +100,7 @@ export default function AdminShellV4() {
             fontSize: 11, fontWeight: 700,
             padding: '6px 12px', borderRadius: 6,
             background: 'transparent', color: 'var(--text-secondary, #ccc)',
-            border: '1px solid var(--border, #2a2b35)', textDecoration: 'none',
+            border: '1px solid var(--border)', textDecoration: 'none',
           }}
         >📨 카카오 마케팅</a>
         {/* s258: Health 5개 페이지 */}
@@ -115,14 +115,14 @@ export default function AdminShellV4() {
             fontSize: 11, fontWeight: 700,
             padding: '6px 12px', borderRadius: 6,
             background: 'transparent', color: 'var(--text-secondary, #ccc)',
-            border: '1px solid var(--border, #2a2b35)', textDecoration: 'none',
+            border: '1px solid var(--border)', textDecoration: 'none',
           }}>{m.label}</a>
         ))}
         <button onClick={fetchData} style={{
           fontSize: 11, fontWeight: 700,
           padding: '6px 12px', borderRadius: 6, cursor: 'pointer',
           background: 'transparent', color: 'var(--text-secondary, #ccc)',
-          border: '1px solid var(--border, #2a2b35)',
+          border: '1px solid var(--border)',
         }}>↻ 새로고침</button>
       </header>
 

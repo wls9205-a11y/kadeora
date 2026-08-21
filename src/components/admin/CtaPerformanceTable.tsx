@@ -49,14 +49,14 @@ export default async function CtaPerformanceTable({ windowDays = 30 }: { windowD
       <div
         style={{
           background: 'var(--bg-elevated, #1f2028)',
-          border: '1px solid var(--border, #2a2b35)',
+          border: '1px solid var(--border)',
           borderRadius: 'var(--radius-md, 10px)',
           overflow: 'hidden',
           overflowX: 'auto',
         }}
       >
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12, minWidth: 540 }}>
-          <thead style={{ background: 'var(--bg-hover, #2a2b35)' }}>
+          <thead style={{ background: 'var(--bg-hover)' }}>
             <tr>
               <th style={{ padding: '10px 12px', textAlign: 'left', color: 'var(--text-secondary)', fontWeight: 600 }}>CTA</th>
               <th style={{ padding: '10px 12px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 600 }}>View</th>
@@ -69,7 +69,7 @@ export default async function CtaPerformanceTable({ windowDays = 30 }: { windowD
             {rows.map((r) => {
               const ctr = r.ctr_pct === null ? null : Number(r.ctr_pct);
               return (
-                <tr key={r.cta_name} style={{ borderTop: '1px solid var(--border, #2a2b35)' }}>
+                <tr key={r.cta_name} style={{ borderTop: '1px solid var(--border)' }}>
                   <td style={{ padding: '10px 12px', fontFamily: 'monospace', color: 'var(--text-primary, #fff)', wordBreak: 'break-all' }}>
                     {r.cta_name}
                   </td>

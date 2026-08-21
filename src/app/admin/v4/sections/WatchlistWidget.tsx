@@ -177,7 +177,7 @@ export default function WatchlistWidget() {
       aria-label="관심 등록 위젯"
       style={{
         padding: '14px 16px', borderRadius: 12,
-        background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border, #2a2b35)',
+        background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border)',
         display: 'flex', flexDirection: 'column', gap: 14,
       }}
     >
@@ -205,7 +205,7 @@ export default function WatchlistWidget() {
               fontSize: 11, fontWeight: 700, padding: '6px 12px', borderRadius: 6,
               background: siteOpen ? 'rgba(96,165,250,0.16)' : 'transparent',
               color: siteOpen ? '#60a5fa' : 'var(--text-secondary, #ccc)',
-              border: '1px solid var(--border, #2a2b35)', cursor: 'pointer',
+              border: '1px solid var(--border)', cursor: 'pointer',
             }}
           >
             🏢 분양현장 {fmtNum(si.total)} ({fmtNum(si.last_24h)})
@@ -215,7 +215,7 @@ export default function WatchlistWidget() {
             style={{
               fontSize: 11, fontWeight: 700, padding: '6px 10px', borderRadius: 6,
               background: 'transparent', color: 'var(--text-secondary, #ccc)',
-              border: '1px solid var(--border, #2a2b35)', cursor: 'pointer',
+              border: '1px solid var(--border)', cursor: 'pointer',
             }}
           >↻</button>
         </div>
@@ -322,8 +322,8 @@ function KpiTile({ label, value, delta, sub, highlight, muted }: { label: string
   return (
     <div style={{
       padding: '10px 12px', borderRadius: 8,
-      background: highlight ? 'rgba(52,211,153,0.06)' : 'var(--bg-base, #0d0e14)',
-      border: '1px solid var(--border, #2a2b35)',
+      background: highlight ? 'rgba(52,211,153,0.06)' : 'var(--bg-base)',
+      border: '1px solid var(--border)',
       opacity: muted ? 0.75 : 1,
     }}>
       <div style={{ fontSize: 9, fontWeight: 800, color: 'var(--text-tertiary, #888)', letterSpacing: 1 }}>{label}</div>
@@ -366,7 +366,7 @@ function DailyBars({ rows }: { rows: DailyRow[] }) {
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H} preserveAspectRatio="none" style={{ display: 'block', minWidth: 320 }}>
         {[0.25, 0.5, 0.75, 1].map((p) => {
           const y = H - PADY - p * (H - 2 * PADY);
-          return <line key={p} x1={PADX} x2={W - PADX} y1={y} y2={y} stroke="var(--border, #2a2b35)" strokeDasharray="2 4" strokeWidth={1} />;
+          return <line key={p} x1={PADX} x2={W - PADX} y1={y} y2={y} stroke="var(--border)" strokeDasharray="2 4" strokeWidth={1} />;
         })}
         {sorted.map((r, i) => {
           const total = n(r.total);
@@ -412,7 +412,7 @@ function TopColumn({ title, rows, emptyMsg }: { title: string; rows: TopRow[]; e
     <div>
       <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--text-tertiary, #888)', letterSpacing: 1, marginBottom: 6 }}>{title}</div>
       {!rows || rows.length === 0 ? (
-        <div style={{ padding: 12, fontSize: 11, color: 'var(--text-tertiary, #888)', textAlign: 'center', background: 'var(--bg-base, #0d0e14)', borderRadius: 6, border: '1px solid var(--border, #2a2b35)' }}>{emptyMsg}</div>
+        <div style={{ padding: 12, fontSize: 11, color: 'var(--text-tertiary, #888)', textAlign: 'center', background: 'var(--bg-base)', borderRadius: 6, border: '1px solid var(--border)' }}>{emptyMsg}</div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           {rows.slice(0, 10).map((r, i) => {
@@ -423,7 +423,7 @@ function TopColumn({ title, rows, emptyMsg }: { title: string; rows: TopRow[]; e
               <div key={(r.item_id ?? r.name ?? '') + i} style={{
                 display: 'grid', gridTemplateColumns: '20px 1fr auto', gap: 8, alignItems: 'center',
                 padding: '6px 10px', borderRadius: 6,
-                background: 'var(--bg-base, #0d0e14)', border: '1px solid var(--border, #2a2b35)',
+                background: 'var(--bg-base)', border: '1px solid var(--border)',
               }}>
                 <span style={{ fontSize: 10, fontWeight: 800, color: i < 3 ? 'var(--brand, #2563EB)' : 'var(--text-tertiary, #888)', textAlign: 'right' }}>
                   {i + 1}
@@ -457,7 +457,7 @@ function RecentList({ rows }: { rows: RecentRow[] }) {
           <div key={i} style={{
             display: 'grid', gridTemplateColumns: '78px 1fr auto auto', gap: 8, alignItems: 'center',
             padding: '6px 10px', borderRadius: 6,
-            background: 'var(--bg-base, #0d0e14)', border: '1px solid var(--border, #2a2b35)',
+            background: 'var(--bg-base)', border: '1px solid var(--border)',
           }}>
             <span style={{ fontSize: 10, color: 'var(--text-tertiary, #888)', whiteSpace: 'nowrap' }}>
               {fmtKstDateHm(r.created_at)}

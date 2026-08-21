@@ -17,7 +17,7 @@ export default function KPIStrip({ items }: Props) {
     <div style={{
       display: 'flex', gap: 14, flexWrap: 'wrap',
       padding: '6px 10px', borderRadius: 'var(--radius-md, 10px)',
-      background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border, #2a2b35)',
+      background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border)',
       fontSize: 12,
     }}>
       {items.map((it, i) => (

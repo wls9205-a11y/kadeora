@@ -105,7 +105,7 @@ export default function AptRecentFeed({ initialItems, region, stats }: Props) {
               fontSize: 11.5, padding: '4px 10px', borderRadius: 999,
               background: active ? CATEGORY_ACTIVE_COLOR[c.key] : 'transparent',
               color: active ? 'var(--bg-surface, #FFFFFF)' : 'var(--text-secondary, #6B7280)',
-              border: '0.5px solid',
+              border: '1px solid',
               borderColor: active ? CATEGORY_ACTIVE_COLOR[c.key] : 'var(--border, #E5E7EB)',
               whiteSpace: 'nowrap', cursor: 'pointer',
               fontWeight: active ? 500 : 400,

@@ -13,7 +13,7 @@ export default function KakaoMarketingPage() {
         margin: '0 auto',
         padding: 'clamp(12px, 3vw, 24px)',
         color: 'var(--text-primary, #fff)',
-        background: 'var(--bg-base, #0d0e14)',
+        background: 'var(--bg-base)',
         minHeight: '100vh',
         display: 'flex',
         flexDirection: 'column',
@@ -29,7 +29,7 @@ export default function KakaoMarketingPage() {
           padding: '10px 12px',
           borderRadius: 'var(--radius-md, 10px)',
           background: 'var(--bg-elevated, #1f2028)',
-          border: '1px solid var(--border, #2a2b35)',
+          border: '1px solid var(--border)',
         }}
       >
         <Link

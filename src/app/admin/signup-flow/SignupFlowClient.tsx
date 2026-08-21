@@ -223,14 +223,14 @@ export default function SignupFlowClient() {
       maxWidth: 1400, margin: '0 auto', padding: 'clamp(12px, 3vw, 24px)',
       display: 'flex', flexDirection: 'column', gap: 16,
       color: 'var(--text-primary, #e5e7eb)',
-      background: 'var(--bg-base, #0d0e14)',
+      background: 'var(--bg-base)',
       minHeight: '100vh',
     }}>
       {/* 헤더 */}
       <header style={{
         display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap',
         padding: '12px 14px', borderRadius: 10,
-        background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border, #2a2b35)',
+        background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border)',
       }}>
         <h1 style={{ margin: 0, fontSize: 16, fontWeight: 800 }}>📊 가입 플로우 진단</h1>
         <span style={{ fontSize: 11, color: 'var(--text-tertiary, #888)' }}>
@@ -385,7 +385,7 @@ function Section({ title, subtitle, children }: { title: string; subtitle?: stri
   return (
     <section style={{
       padding: '14px 16px', borderRadius: 10,
-      background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border, #2a2b35)',
+      background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border)',
     }}>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 12 }}>
         <h2 style={{ margin: 0, fontSize: 13, fontWeight: 800 }}>{title}</h2>
@@ -542,7 +542,7 @@ function HourlyChart({ rows }: { rows: any[] }) {
         {/* y grid */}
         {[0.25, 0.5, 0.75, 1].map((p) => {
           const y = H - PADY - p * (H - 2 * PADY);
-          return <line key={p} x1={PADX} x2={W - PADX} y1={y} y2={y} stroke="var(--border, #2a2b35)" strokeDasharray="2 4" strokeWidth={1} />;
+          return <line key={p} x1={PADX} x2={W - PADX} y1={y} y2={y} stroke="var(--border)" strokeDasharray="2 4" strokeWidth={1} />;
         })}
         {/* x labels every 4h */}
         {sorted.map((r, i) => {
@@ -601,7 +601,7 @@ function btnGhost(disabled: boolean = false): React.CSSProperties {
     padding: '6px 12px', borderRadius: 6,
     background: 'transparent',
     color: disabled ? 'var(--text-tertiary, #555)' : 'var(--text-secondary, #ccc)',
-    border: '1px solid var(--border, #2a2b35)',
+    border: '1px solid var(--border)',
     cursor: disabled ? 'not-allowed' : 'pointer',
     opacity: disabled ? 0.5 : 1,
   };

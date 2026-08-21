@@ -52,7 +52,7 @@ export default async function CronUnifiedPanel() {
     <details
       style={{
         padding: '12px 14px', borderRadius: 10,
-        background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border, #2a2b35)',
+        background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border)',
         marginTop: 12,
       }}
     >
@@ -69,7 +69,7 @@ export default async function CronUnifiedPanel() {
           </h3>
           <div style={{ maxHeight: 300, overflowY: 'auto', fontSize: 11 }}>
             {vercelCrons.map(c => (
-              <div key={c.path} style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', borderBottom: '1px solid var(--border, #2a2b35)', gap: 8 }}>
+              <div key={c.path} style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', borderBottom: '1px solid var(--border)', gap: 8 }}>
                 <code style={{ color: 'var(--text-secondary, #ccc)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.path.replace('/api/cron/', '')}</code>
                 <span style={{ color: 'var(--text-tertiary, #888)', fontSize: 10, whiteSpace: 'nowrap' }}>{c.schedule}</span>
               </div>
@@ -82,7 +82,7 @@ export default async function CronUnifiedPanel() {
           </h3>
           <div style={{ maxHeight: 300, overflowY: 'auto', fontSize: 11 }}>
             {pgCrons.map(c => (
-              <div key={c.jobname} style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', borderBottom: '1px solid var(--border, #2a2b35)', gap: 8 }}>
+              <div key={c.jobname} style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', borderBottom: '1px solid var(--border)', gap: 8 }}>
                 <code style={{ color: 'var(--text-secondary, #ccc)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.cron_name}</code>
                 <span style={{ color: 'var(--text-tertiary, #888)', fontSize: 10, whiteSpace: 'nowrap' }}>{c.schedule}</span>
               </div>

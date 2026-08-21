@@ -28,7 +28,7 @@ export default function ContentHealthSection({ data }: Props) {
   return (
     <section style={{
       padding: 16, borderRadius: 'var(--radius-lg, 14px)',
-      background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border, #2a2b35)',
+      background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border)',
     }}>
       <h2 style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary, #fff)', marginTop: 0, marginBottom: 10 }}>
         📚 콘텐츠 위생
@@ -63,7 +63,7 @@ export default function ContentHealthSection({ data }: Props) {
               const pct = b.pct ?? 0;
               const color = pct >= 70 ? 'var(--accent-green, #34d399)' : pct >= 30 ? 'var(--accent-orange, #fb923c)' : 'var(--accent-red, #f87171)';
               return (
-                <tr key={c} style={{ borderTop: '1px solid var(--border, #2a2b35)' }}>
+                <tr key={c} style={{ borderTop: '1px solid var(--border)' }}>
                   <td style={{ padding: 6 }}><code style={{ color: 'var(--text-secondary, #ccc)' }}>{c}</code></td>
                   <td style={{ padding: 6, textAlign: 'right' }}>{(b.mapped ?? 0).toLocaleString()}</td>
                   <td style={{ padding: 6, textAlign: 'right', color: 'var(--text-tertiary, #888)' }}>{(b.total ?? 0).toLocaleString()}</td>

@@ -118,7 +118,7 @@ function PriceCard(q: QuoteRow, ff: string) {
           )}
         </div>
       </div>
-      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', position:'relative', zIndex:2, paddingTop:14, borderTop:'0.5px solid rgba(255,255,255,.12)' }}>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', position:'relative', zIndex:2, paddingTop:14, borderTop:'1px solid rgba(255,255,255,.12)' }}>
         <span style={{ fontSize: 14, color:'rgba(255,255,255,.45)', fontWeight:700 }}>시가총액 {fmtCap(q.market_cap, q.currency)}</span>
         <span style={{ fontSize: 14, color:'rgba(255,255,255,.35)', fontWeight:700 }}>kadeora.app/stock/{q.symbol}</span>
       </div>
@@ -291,7 +291,7 @@ function AICard(q: QuoteRow, ff: string) {
         <div style={{ display:'flex', width:48, height:5, background:sentiment.color, borderRadius:999, marginBottom:24 }} />
         <div style={{ display:'flex', fontSize: 36, fontWeight:800, color:'#fff', lineHeight:1.45, letterSpacing:-.8, wordBreak:'keep-all' }}>{summary}</div>
       </div>
-      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', position:'relative', zIndex:2, paddingTop:14, borderTop:'0.5px solid rgba(255,255,255,.1)' }}>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', position:'relative', zIndex:2, paddingTop:14, borderTop:'1px solid rgba(255,255,255,.1)' }}>
         <span style={{ fontSize: 14, color:'rgba(255,255,255,.45)', fontWeight:700 }}>{q.symbol} · AI 종목 한줄평</span>
         <span style={{ fontSize: 14, color:'rgba(255,255,255,.35)', fontWeight:700 }}>kadeora.app/stock/{q.symbol}</span>
       </div>

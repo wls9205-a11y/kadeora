@@ -117,7 +117,7 @@ export default function UsersListClient() {
 
   const inputStyle: React.CSSProperties = {
     padding: '6px 10px', borderRadius: 6,
-    border: '1px solid var(--border, #2a2b35)',
+    border: '1px solid var(--border)',
     background: 'var(--bg-surface, #1a1b22)',
     color: 'var(--text-primary, #fff)', fontSize: 12,
     outline: 'none',
@@ -127,7 +127,7 @@ export default function UsersListClient() {
     <div style={{
       maxWidth: 1400, margin: '0 auto', padding: 'clamp(12px, 3vw, 24px)',
       display: 'flex', flexDirection: 'column', gap: 12,
-      color: 'var(--text-primary, #fff)', background: 'var(--bg-base, #0d0e14)',
+      color: 'var(--text-primary, #fff)', background: 'var(--bg-base)',
       minHeight: '100vh',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
@@ -165,7 +165,7 @@ export default function UsersListClient() {
               cursor: 'pointer',
               background: filter === f.key ? 'var(--accent, #3b82f6)' : 'transparent',
               color: filter === f.key ? '#fff' : 'var(--text-secondary, #ccc)',
-              border: `1px solid ${filter === f.key ? 'var(--accent, #3b82f6)' : 'var(--border, #2a2b35)'}`,
+              border: `1px solid ${filter === f.key ? 'var(--accent, #3b82f6)' : 'var(--border)'}`,
             }}
           >{f.label}</button>
         ))}
@@ -186,14 +186,14 @@ export default function UsersListClient() {
       {/* 표 */}
       <div style={{
         borderRadius: 'var(--radius-md, 10px)',
-        border: '1px solid var(--border, #2a2b35)',
+        border: '1px solid var(--border)',
         background: 'var(--bg-elevated, #1f2028)',
         overflowX: 'auto',
         opacity: loading ? 0.6 : 1,
       }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12, minWidth: 900 }}>
           <thead>
-            <tr style={{ color: 'var(--text-tertiary, #888)', textAlign: 'left', borderBottom: '1px solid var(--border, #2a2b35)' }}>
+            <tr style={{ color: 'var(--text-tertiary, #888)', textAlign: 'left', borderBottom: '1px solid var(--border)' }}>
               <th style={{ padding: 8, textAlign: 'left' }}>유저</th>
               <th style={{ padding: 8 }}>제공사</th>
               <th style={{ padding: 8 }}>가입</th>
@@ -208,7 +208,7 @@ export default function UsersListClient() {
               <tr
                 key={u.id}
                 onClick={() => router.push(`/admin/users/${u.id}`)}
-                style={{ cursor: 'pointer', borderTop: '1px solid var(--border, #2a2b35)' }}
+                style={{ cursor: 'pointer', borderTop: '1px solid var(--border)' }}
               >
                 <td style={{ padding: 8 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

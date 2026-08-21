@@ -43,7 +43,7 @@ export default function AptHomeHero({ region, sigungu, kpis }: Props) {
             padding: '6px 12px',
             borderRadius: 999,
             background: 'rgba(255,255,255,0.05)',
-            border: '0.5px solid var(--border)',
+            border: '1px solid var(--border)',
             color: 'var(--text-primary)',
             textDecoration: 'none',
             fontSize: 12,

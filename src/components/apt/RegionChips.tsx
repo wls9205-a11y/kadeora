@@ -138,7 +138,7 @@ function RegionChip({
     ? {
         ...CHIP_BASE,
         background: 'var(--text-primary, #f2f5fa)',
-        color: 'var(--bg-base, #050a18)',
+        color: 'var(--bg-base)',
         borderColor: 'var(--text-primary, #f2f5fa)',
         fontWeight: 700,
       }
@@ -166,7 +166,7 @@ function RegionChip({
         style={{
           fontSize: 10.5,
           fontWeight: 700,
-          color: active ? 'var(--bg-base, #050a18)' : '#f87171',
+          color: active ? 'var(--bg-base)' : '#f87171',
           opacity: active ? 0.75 : 1,
         }}
       >

@@ -63,7 +63,7 @@ function MetricCard({
       style={{
         padding: '14px 16px',
         background: 'var(--bg-elevated, #1f2028)',
-        border: '1px solid var(--border, #2a2b35)',
+        border: '1px solid var(--border)',
         borderRadius: 'var(--radius-md, 10px)',
         display: 'flex',
         flexDirection: 'column',

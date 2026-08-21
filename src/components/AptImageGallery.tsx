@@ -147,7 +147,7 @@ export default function AptImageGallery({ images, name, region, badges }: {
             {visibleImages.map((img, i) => (
               <div key={i} style={{ flex: '0 0 100%', scrollSnapAlign: 'start', position: 'relative' }}>
                 <div
-                  style={{ position: 'relative', height: 220, overflow: 'hidden', background: '#0c1629', cursor: 'pointer' }}
+                  style={{ position: 'relative', height: 220, overflow: 'hidden', background: 'var(--bg-elevated)', cursor: 'pointer' }}
                   onClick={() => setLightbox(i)}
                 >
                   <img

@@ -111,7 +111,7 @@ export default function SendModal({
           padding: 18,
           borderRadius: 'var(--radius-md, 10px)',
           background: 'var(--bg-elevated, #1f2028)',
-          border: '1px solid var(--border, #2a2b35)',
+          border: '1px solid var(--border)',
           color: 'var(--text-primary, #fff)',
           display: 'flex',
           flexDirection: 'column',
@@ -159,9 +159,9 @@ export default function SendModal({
               fontSize: 13,
               padding: '8px 10px',
               borderRadius: 6,
-              background: 'var(--bg-base, #0d0e14)',
+              background: 'var(--bg-base)',
               color: 'var(--text-primary, #fff)',
-              border: '1px solid var(--border, #2a2b35)',
+              border: '1px solid var(--border)',
             }}
           />
         </label>
@@ -176,9 +176,9 @@ export default function SendModal({
               fontSize: 13,
               padding: '8px 10px',
               borderRadius: 6,
-              background: 'var(--bg-base, #0d0e14)',
+              background: 'var(--bg-base)',
               color: 'var(--text-primary, #fff)',
-              border: '1px solid var(--border, #2a2b35)',
+              border: '1px solid var(--border)',
               resize: 'vertical',
               fontFamily: 'inherit',
             }}
@@ -189,8 +189,8 @@ export default function SendModal({
           style={{
             padding: 10,
             borderRadius: 8,
-            background: 'var(--bg-base, #0d0e14)',
-            border: '1px solid var(--border, #2a2b35)',
+            background: 'var(--bg-base)',
+            border: '1px solid var(--border)',
           }}
         >
           <div style={{ fontSize: 11, color: 'var(--text-tertiary, #888)', marginBottom: 4 }}>미리보기</div>
@@ -250,7 +250,7 @@ export default function SendModal({
               cursor: 'pointer',
               background: 'transparent',
               color: 'var(--text-secondary, #ccc)',
-              border: '1px solid var(--border, #2a2b35)',
+              border: '1px solid var(--border)',
             }}
           >
             취소

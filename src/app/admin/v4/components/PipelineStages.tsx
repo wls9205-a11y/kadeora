@@ -40,7 +40,7 @@ export default function PipelineStages({ stages, order = DEFAULT_ORDER }: Props)
     <div style={{
       display: 'flex', gap: 6, flexWrap: 'wrap',
       padding: 10, borderRadius: 'var(--radius-md, 10px)',
-      background: 'var(--bg-surface, #1a1b22)', border: '1px solid var(--border, #2a2b35)',
+      background: 'var(--bg-surface, #1a1b22)', border: '1px solid var(--border)',
     }}>
       {items.map(k => {
         const st = stages[k];

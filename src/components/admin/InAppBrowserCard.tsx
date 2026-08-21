@@ -47,7 +47,7 @@ export default function InAppBrowserCard() {
   return (
     <section
       aria-label="인앱 브라우저 가입 funnel"
-      style={{ background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border, #2a2b35)', borderRadius: 12, padding: 16, marginTop: 16 }}
+      style={{ background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginTop: 16 }}
     >
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
         <h2 style={{ fontSize: 14, fontWeight: 800, margin: 0 }}>📱 인앱 브라우저 가입 funnel (14d)</h2>
@@ -59,7 +59,7 @@ export default function InAppBrowserCard() {
       <div style={{ overflowX: 'auto' }}>
         <table style={{ width: '100%', fontSize: 11, borderCollapse: 'collapse' }}>
           <thead>
-            <tr style={{ borderBottom: '1.5px solid var(--border, #2a2b35)' }}>
+            <tr style={{ borderBottom: '1.5px solid var(--border)' }}>
               <th style={{ padding: '6px 8px', textAlign: 'left', color: 'var(--text-tertiary, #666)', fontWeight: 700 }}>브라우저</th>
               <th style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-tertiary, #666)', fontWeight: 700 }}>시도</th>
               <th style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-tertiary, #666)', fontWeight: 700 }}>OAuth 시작</th>
@@ -75,7 +75,7 @@ export default function InAppBrowserCard() {
             {browsers.map(b => {
               const isBlocked = DANGER_BROWSERS.has(b.browser_type);
               return (
-                <tr key={b.browser_type} style={{ borderBottom: '1px solid var(--border, #2a2b35)' }}>
+                <tr key={b.browser_type} style={{ borderBottom: '1px solid var(--border)' }}>
                   <td style={{ padding: '6px 8px', fontWeight: 700, color: 'var(--text-primary, #fff)' }}>
                     {isBlocked && <span style={{ color: '#ef4444', marginRight: 4 }}>🚫</span>}
                     {b.browser_type}
@@ -102,7 +102,7 @@ export default function InAppBrowserCard() {
           <div style={{ marginTop: 8, maxHeight: 240, overflowY: 'auto', overflowX: 'auto' }}>
             <table style={{ width: '100%', fontSize: 10, borderCollapse: 'collapse' }}>
               <thead>
-                <tr style={{ borderBottom: '1px solid var(--border, #2a2b35)' }}>
+                <tr style={{ borderBottom: '1px solid var(--border)' }}>
                   <th style={{ padding: '4px 6px', textAlign: 'left', color: 'var(--text-tertiary, #666)' }}>날짜</th>
                   <th style={{ padding: '4px 6px', textAlign: 'left', color: 'var(--text-tertiary, #666)' }}>브라우저</th>
                   <th style={{ padding: '4px 6px', textAlign: 'right', color: 'var(--text-tertiary, #666)' }}>시도</th>
@@ -112,7 +112,7 @@ export default function InAppBrowserCard() {
               </thead>
               <tbody>
                 {data.daily.map((r, i) => (
-                  <tr key={`${r.day}-${r.browser_type}-${i}`} style={{ borderBottom: '0.5px solid var(--border, #2a2b35)' }}>
+                  <tr key={`${r.day}-${r.browser_type}-${i}`} style={{ borderBottom: '1px solid var(--border)' }}>
                     <td style={{ padding: '4px 6px', color: 'var(--text-secondary, #888)' }}>{r.day}</td>
                     <td style={{ padding: '4px 6px', color: 'var(--text-primary, #fff)' }}>{r.browser_type}</td>
                     <td style={{ padding: '4px 6px', textAlign: 'right', color: 'var(--text-secondary, #888)' }}>{r.attempts}</td>

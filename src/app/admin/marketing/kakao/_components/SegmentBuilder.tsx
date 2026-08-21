@@ -99,7 +99,7 @@ export default function SegmentBuilder({
         padding: 14,
         borderRadius: 'var(--radius-md, 10px)',
         background: 'var(--bg-elevated, #1f2028)',
-        border: '1px solid var(--border, #2a2b35)',
+        border: '1px solid var(--border)',
         display: 'flex',
         flexDirection: 'column',
         gap: 12,
@@ -115,9 +115,9 @@ export default function SegmentBuilder({
             fontSize: 12,
             padding: '6px 10px',
             borderRadius: 6,
-            background: 'var(--bg-base, #0d0e14)',
+            background: 'var(--bg-base)',
             color: 'var(--text-primary, #fff)',
-            border: '1px solid var(--border, #2a2b35)',
+            border: '1px solid var(--border)',
             width: 180,
           }}
         />
@@ -189,8 +189,8 @@ export default function SegmentBuilder({
           marginTop: 4,
           padding: 10,
           borderRadius: 8,
-          background: 'var(--bg-base, #0d0e14)',
-          border: '1px solid var(--border, #2a2b35)',
+          background: 'var(--bg-base)',
+          border: '1px solid var(--border)',
         }}
       >
         <div style={{ fontSize: 11, color: 'var(--text-tertiary, #888)', marginBottom: 6 }}>
@@ -212,7 +212,7 @@ export default function SegmentBuilder({
                       style={{
                         textAlign: 'left',
                         padding: '4px 6px',
-                        borderBottom: '1px solid var(--border, #2a2b35)',
+                        borderBottom: '1px solid var(--border)',
                         color: 'var(--text-tertiary, #888)',
                       }}
                     >
@@ -225,7 +225,7 @@ export default function SegmentBuilder({
                 {sample.slice(0, 10).map((row, i) => (
                   <tr key={i}>
                     {sampleCols.map((c) => (
-                      <td key={c} style={{ padding: '4px 6px', borderBottom: '1px solid var(--border, #2a2b35)' }}>
+                      <td key={c} style={{ padding: '4px 6px', borderBottom: '1px solid var(--border)' }}>
                         {String(row[c] ?? '')}
                       </td>
                     ))}
@@ -291,7 +291,7 @@ function ChipGroup({
               cursor: 'pointer',
               background: on ? 'var(--accent, #3b82f6)' : 'transparent',
               color: on ? '#fff' : 'var(--text-secondary, #ccc)',
-              border: `1px solid ${on ? 'var(--accent, #3b82f6)' : 'var(--border, #2a2b35)'}`,
+              border: `1px solid ${on ? 'var(--accent, #3b82f6)' : 'var(--border)'}`,
             }}
           >
             {single && on ? '● ' : ''}
@@ -326,7 +326,7 @@ function Toggle({
           cursor: 'pointer',
           background: value ? 'var(--accent, #3b82f6)' : 'transparent',
           color: value ? '#fff' : 'var(--text-secondary, #ccc)',
-          border: `1px solid ${value ? 'var(--accent, #3b82f6)' : 'var(--border, #2a2b35)'}`,
+          border: `1px solid ${value ? 'var(--accent, #3b82f6)' : 'var(--border)'}`,
         }}
       >
         {onLabel}
@@ -341,7 +341,7 @@ function Toggle({
           cursor: 'pointer',
           background: !value ? 'var(--accent, #3b82f6)' : 'transparent',
           color: !value ? '#fff' : 'var(--text-secondary, #ccc)',
-          border: `1px solid ${!value ? 'var(--accent, #3b82f6)' : 'var(--border, #2a2b35)'}`,
+          border: `1px solid ${!value ? 'var(--accent, #3b82f6)' : 'var(--border)'}`,
         }}
       >
         {offLabel}
@@ -359,6 +359,6 @@ function btnStyle(variant: 'primary' | 'default'): React.CSSProperties {
     cursor: 'pointer',
     background: variant === 'primary' ? 'var(--accent, #3b82f6)' : 'transparent',
     color: variant === 'primary' ? '#fff' : 'var(--text-secondary, #ccc)',
-    border: `1px solid ${variant === 'primary' ? 'var(--accent, #3b82f6)' : 'var(--border, #2a2b35)'}`,
+    border: `1px solid ${variant === 'primary' ? 'var(--accent, #3b82f6)' : 'var(--border)'}`,
   };
 }

@@ -23,7 +23,7 @@ export default function AdminPage() {
       <div style={{ marginTop: 16 }}>
         <CronUnifiedPanel />
       </div>
-      <div style={{ marginTop: 24, paddingTop: 16, borderTop: '1px solid var(--border, #2a2b35)' }}>
+      <div style={{ marginTop: 24, paddingTop: 16, borderTop: '1px solid var(--border)' }}>
         <h2 style={{ fontSize: 12, color: 'var(--text-tertiary, #888)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12 }}>참조 데이터</h2>
         <NorthStarCard />
         <CtaPerformanceTable windowDays={30} />

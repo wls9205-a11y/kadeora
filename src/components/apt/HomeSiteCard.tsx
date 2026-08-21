@@ -59,7 +59,7 @@ export default function HomeSiteCard({ row, variant = 'popular' }: Props) {
       href={`/apt/${encodeURIComponent(row.slug)}`}
       style={{
         background: 'var(--bg-elevated, #1f2028)',
-        border: '0.5px solid var(--border, #2a2b35)',
+        border: '1px solid var(--border)',
         borderRadius: 10,
         overflow: 'hidden',
         textDecoration: 'none',
@@ -68,7 +68,7 @@ export default function HomeSiteCard({ row, variant = 'popular' }: Props) {
         flexDirection: 'column',
       }}
     >
-      <div style={{ aspectRatio: '4 / 3', background: `center/cover no-repeat url('${thumb}'), var(--bg-base, #0d0e14)`, position: 'relative' }}>
+      <div style={{ aspectRatio: '4 / 3', background: `center/cover no-repeat url('${thumb}'), var(--bg-base)`, position: 'relative' }}>
         <span
           style={{
             position: 'absolute', top: 5, left: 5, fontSize: 9, padding: '2px 6px',
