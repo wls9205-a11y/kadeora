@@ -15,7 +15,7 @@ export default function PrivacyPage() {
       style={{ maxWidth: 720, margin: '0 auto', padding: '40px 20px', backgroundColor: 'var(--bg-base)', color: 'var(--text-primary)' }}
     >
       <h1 style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, marginBottom: 'var(--sp-sm)', color: 'var(--text-primary)' }}>개인정보처리방침</h1>
-      <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 40 }}>시행일: 2026년 3월 24일 (v2.0)</p>
+      <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 40 }}>시행일: 2026년 8월 21일 (v2.1)</p>
 
       <section style={{ marginBottom: 32 }}>
         <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, marginBottom: 'var(--sp-sm)', color: 'var(--text-primary)' }}>1. 수집 항목</h2>
@@ -23,6 +23,7 @@ export default function PrivacyPage() {
           <li>필수 항목: 이메일, 닉네임</li>
           <li>카카오·구글 로그인 시: 이메일, 프로필명</li>
           <li>관심단지 등록 시 (비회원): 이름, 전화번호, 생년월일, 거주 지역(시군구)</li>
+          <li>관심 현장 알림 신청 시: 이름, 연락처</li>
           <li>온보딩 시: 관심 분야, 연령대, 거주 지역</li>
           <li>자동 수집 항목: IP 주소, 쿠키, 서비스 이용 기록, 접속 기기 정보</li>
         </ul>
@@ -34,6 +35,7 @@ export default function PrivacyPage() {
           <li>회원 관리 및 본인 확인</li>
           <li>서비스 제공 및 운영</li>
           <li>관심 현장 분양 정보 제공 및 일정 알림</li>
+          <li>분양 현장 정보 안내 및 문의 응대</li>
           <li>맞춤 콘텐츠 추천 (거주 지역 기반)</li>
           <li>부정 이용 방지 및 비인가 사용 탐지</li>
         </ul>
@@ -49,11 +51,24 @@ export default function PrivacyPage() {
           <li>통신비밀보호법: 인터넷 로그기록자료 3개월</li>
           <li>관심단지 등록 정보: 동의 철회 시 또는 수집 목적 달성 후 5일 이내 파기</li>
           <li>개인정보 동의 이력: 동의 증빙을 위해 동의 철회 후 3년 보관</li>
+          <li>관심 현장 알림 신청 정보(이름, 연락처): 수집일로부터 6개월, 경과 시 파기</li>
         </ul>
       </section>
 
       <section style={{ marginBottom: 32 }}>
-        <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, marginBottom: 'var(--sp-sm)', color: 'var(--text-primary)' }}>4. 제3자 제공</h2>
+        <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, marginBottom: 'var(--sp-sm)', color: 'var(--text-primary)' }}>4. 파기 절차 및 방법</h2>
+        <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.8 }}>
+          보유 기간이 지나거나 처리 목적이 달성된 개인정보는 지체 없이 파기합니다.
+        </p>
+        <ul style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.8, paddingLeft: 20, marginTop: 8 }}>
+          <li>파기 절차: 파기 사유가 발생한 개인정보를 선정하고, 개인정보 보호책임자의 확인을 거쳐 파기합니다.</li>
+          <li>전자적 파일 형태: 복구 및 재생이 불가능한 방법으로 영구 삭제합니다.</li>
+          <li>출력물 등 종이 형태: 분쇄하거나 소각하여 파기합니다.</li>
+        </ul>
+      </section>
+
+      <section style={{ marginBottom: 32 }}>
+        <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, marginBottom: 'var(--sp-sm)', color: 'var(--text-primary)' }}>5. 제3자 제공</h2>
         <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.8 }}>
           카더라는 이용자의 별도 동의 없이 개인정보를 제3자에게 제공하지 않습니다. 다만 아래의 경우에는 예외로 합니다.
         </p>
@@ -64,14 +79,32 @@ export default function PrivacyPage() {
       </section>
 
       <section style={{ marginBottom: 32 }}>
-        <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, marginBottom: 'var(--sp-sm)', color: 'var(--text-primary)' }}>5. 만 14세 미만 아동</h2>
+        <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, marginBottom: 'var(--sp-sm)', color: 'var(--text-primary)' }}>6. 처리 위탁 및 국외 이전</h2>
+        <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.8 }}>
+          카더라는 서비스 제공을 위해 아래와 같이 개인정보 처리 업무를 위탁하고 있으며, 이 과정에서 개인정보가 국외로 이전됩니다.
+        </p>
+        <ul style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.8, paddingLeft: 20, marginTop: 8 }}>
+          <li>이전받는 자: Google LLC (Google Sheets / Google Apps Script)</li>
+          <li>이전되는 국가: 미국</li>
+          <li>이전 항목: 이름, 연락처, 신청 시각 및 신청 경로 정보</li>
+          <li>이전 목적: 신청 내역의 저장 및 담당자 알림 발송</li>
+          <li>이전 일시 및 방법: 이용자가 신청서를 제출하는 시점에 암호화된 통신(HTTPS)으로 전송</li>
+          <li>보유·이용 기간: 위 &quot;3. 보유 기간&quot;에 따른 기간까지</li>
+        </ul>
+        <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.8, marginTop: 8 }}>
+          이용자는 국외 이전을 거부할 수 있으며, 이 경우 관심 현장 알림 신청은 이용할 수 없습니다. 거부 의사는 아래 개인정보 보호책임자 연락처로 전달해 주세요.
+        </p>
+      </section>
+
+      <section style={{ marginBottom: 32 }}>
+        <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, marginBottom: 'var(--sp-sm)', color: 'var(--text-primary)' }}>7. 만 14세 미만 아동</h2>
         <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.8 }}>
           카더라는 만 14세 미만 아동의 개인정보를 수집하지 않습니다. 관심단지 등록 시 생년월일을 확인하여 만 14세 미만인 경우 등록이 거부됩니다. (개인정보 보호법 제22조의2)
         </p>
       </section>
 
       <section style={{ marginBottom: 32 }}>
-        <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, marginBottom: 'var(--sp-sm)', color: 'var(--text-primary)' }}>6. 개인정보의 안전성 확보 조치</h2>
+        <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, marginBottom: 'var(--sp-sm)', color: 'var(--text-primary)' }}>8. 개인정보의 안전성 확보 조치</h2>
         <ul style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.8, paddingLeft: 20 }}>
           <li>전화번호는 AES-256-GCM 암호화하여 저장합니다.</li>
           <li>HTTPS 암호화 통신을 사용합니다.</li>
@@ -81,7 +114,7 @@ export default function PrivacyPage() {
       </section>
 
       <section style={{ marginBottom: 32 }}>
-        <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, marginBottom: 'var(--sp-sm)', color: 'var(--text-primary)' }}>7. 쿠키 사용</h2>
+        <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, marginBottom: 'var(--sp-sm)', color: 'var(--text-primary)' }}>9. 쿠키 사용</h2>
         <ul style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.8, paddingLeft: 20 }}>
           <li>사용 목적: 로그인 유지 및 이용자 설정 저장</li>
           <li>쿠키 거부 방법: 브라우저 설정에서 쿠키를 거부할 수 있습니다. 다만, 거부 시 일부 서비스 이용이 제한될 수 있습니다.</li>
@@ -89,15 +122,27 @@ export default function PrivacyPage() {
       </section>
 
       <section style={{ marginBottom: 32 }}>
-        <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, marginBottom: 'var(--sp-sm)', color: 'var(--text-primary)' }}>8. 이용자 권리</h2>
+        <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, marginBottom: 'var(--sp-sm)', color: 'var(--text-primary)' }}>10. 광고성 정보 수신</h2>
         <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.8 }}>
-          이용자는 언제든지 자신의 개인정보에 대해 열람, 정정, 삭제, 처리 정지를 요구할 수 있습니다.
-          요청은 아래 개인정보 삭제 요청 이메일을 통해 접수할 수 있으며, 지체 없이 조치하겠습니다.
+          분양 정보 문자 등 광고성 정보 수신은 필수 항목이 아닌 별도의 선택 동의 사항입니다.
+          동의하지 않아도 관심 현장 알림 신청을 포함한 서비스 이용에는 어떠한 제한도 없습니다.
+          동의 이후에도 언제든지 아래 연락처를 통해 수신 동의를 철회할 수 있습니다.
         </p>
       </section>
 
       <section style={{ marginBottom: 32 }}>
-        <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, marginBottom: 'var(--sp-sm)', color: 'var(--text-primary)' }}>9. 개인정보 삭제 요청</h2>
+        <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, marginBottom: 'var(--sp-sm)', color: 'var(--text-primary)' }}>11. 이용자 권리</h2>
+        <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.8 }}>
+          이용자는 언제든지 자신의 개인정보에 대해 열람, 정정, 삭제, 처리 정지를 요구할 수 있습니다.
+          요청은{' '}
+          <a href="mailto:kadeora.app@gmail.com" style={{ color: 'var(--brand)' }}>kadeora.app@gmail.com</a>
+          {' '}으로 접수할 수 있으며, 접수일로부터 10일 이내에 조치하고 그 결과를 회신드립니다.
+          이용자는 개인정보 보호법 제35조 내지 제37조에 따른 권리 행사를 대리인을 통해서도 할 수 있습니다.
+        </p>
+      </section>
+
+      <section style={{ marginBottom: 32 }}>
+        <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, marginBottom: 'var(--sp-sm)', color: 'var(--text-primary)' }}>12. 개인정보 삭제 요청</h2>
         <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.8 }}>
           개인정보 삭제를 원하시는 경우 아래 이메일로 요청해 주세요.{' '}
           <a href="mailto:kadeora.app@gmail.com" style={{ color: 'var(--brand)' }}>kadeora.app@gmail.com</a>
@@ -105,11 +150,17 @@ export default function PrivacyPage() {
       </section>
 
       <section>
-        <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, marginBottom: 'var(--sp-sm)', color: 'var(--text-primary)' }}>10. 개인정보보호 책임자</h2>
+        <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, marginBottom: 'var(--sp-sm)', color: 'var(--text-primary)' }}>13. 개인정보 보호책임자</h2>
         <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.8 }}>
-          이메일:{' '}
-          <a href="mailto:kadeora.app@gmail.com" style={{ color: 'var(--brand)' }}>kadeora.app@gmail.com</a>
+          개인정보 처리에 관한 업무를 총괄해서 책임지고, 처리와 관련한 이용자의 불만 처리 및 피해 구제를 담당합니다.
         </p>
+        <ul style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.8, paddingLeft: 20, marginTop: 8 }}>
+          <li>개인정보 보호책임자: 카더라 운영팀</li>
+          <li>
+            이메일:{' '}
+            <a href="mailto:kadeora.app@gmail.com" style={{ color: 'var(--brand)' }}>kadeora.app@gmail.com</a>
+          </li>
+        </ul>
       </section>
     </main>
   );

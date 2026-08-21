@@ -15,7 +15,10 @@ const CSP_DIRECTIVES = [
   // http: 제거 (safeImg 블랙리스트 와 정합 — 혼합 콘텐츠 차단).
   "img-src 'self' data: blob: https:",
   "font-src 'self' https://cdn.jsdelivr.net",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://vitals.vercel-insights.com https://va.vercel-scripts.com https://cdn.jsdelivr.net https://*.kakao.com https://*.kakaocdn.net https://*.daumcdn.net https://accounts.google.com https://*.tosspayments.com https://*.sentry.io https://*.upstash.io https://open.er-api.com https://www.google-analytics.com https://*.google-analytics.com https://*.googletagmanager.com https://www.google.com https://google.com https://googleads.g.doubleclick.net https://www.googleadservices.com https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://*.adtrafficquality.google",
+  // S4: script.google.com = 리드폼 Apps Script 웹앱(/exec). googleusercontent 는 /exec 가
+  // 302 로 넘기는 최종 응답 호스트이며, CSP 는 리다이렉트 홉마다 검사하므로 둘 다 필요하다.
+  // 빠져 있으면 fetch 가 CORS 이전 단계에서 'TypeError: Failed to fetch' 로 차단된다.
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://vitals.vercel-insights.com https://va.vercel-scripts.com https://cdn.jsdelivr.net https://*.kakao.com https://*.kakaocdn.net https://*.daumcdn.net https://accounts.google.com https://*.tosspayments.com https://*.sentry.io https://*.upstash.io https://open.er-api.com https://www.google-analytics.com https://*.google-analytics.com https://*.googletagmanager.com https://www.google.com https://google.com https://googleads.g.doubleclick.net https://www.googleadservices.com https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://*.adtrafficquality.google https://script.google.com https://script.googleusercontent.com",
   "frame-src 'self' https://kauth.kakao.com https://accounts.google.com https://*.tosspayments.com https://*.googlesyndication.com https://googleads.g.doubleclick.net",
   "frame-ancestors 'self' https://*.tossmini.com",
   "base-uri 'self'",

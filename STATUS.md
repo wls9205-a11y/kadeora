@@ -1,3 +1,41 @@
+## S4 (2026-08-21) — 리드폼 P0: 관심 현장 알림 신청 (트라비스 단일 현장)
+
+- `src/components/apt/LeadForm.tsx` 신설. 상세 페이지 FAQ 아래 / 관련 섹션 위에 삽입.
+  슬러그 가드 `site?.slug === '엄궁역-트라비스-하늘채'` 는 P0 검증용 임시 코드 (P2 확산 시 제거)
+- `NEXT_PUBLIC_LEAD_ENDPOINT` 미설정이면 컴포넌트가 null 반환 — 폼만 뜨고 제출이 실패하는 상태 방지
+- Content-Type `text/plain;charset=utf-8` 고정. `application/json` 이면 OPTIONS preflight 가 발생하고
+  Apps Script 는 OPTIONS 에 응답할 수 없어 CORS 로 전부 차단된다. `mode:'no-cors'` 도 쓰지 않음
+- 허니팟(`company`)은 `display:none` 대신 화면 밖 배치 + tabIndex -1 + aria-hidden
+- 임시 보관 `kd_lead_draft:{slug}` — 전송 성공 응답 이후에만 삭제. 미전송분은 `kd_lead_pending:{slug}`
+  에 넣고 다음 마운트에서 조용히 1회 재전송 (UI 표시 없음)
+- 재시도 300 → 900 → 2700ms. 3회 모두 실패해도 접수된 것처럼 안내하지 않음
+- 개인정보처리방침 v2.1: 파기 절차·국외 이전(Google LLC, 미국)·광고성 정보 수신 3개 절 신설,
+  수집 항목/목적/보유 기간(6개월)/정보주체 권리 연락처 보강. 13개 절로 재번호
+
+### 지시서와 달라진 곳 (3건)
+
+- **CSP `connect-src` 에 `script.google.com` + `script.googleusercontent.com` 추가** (middleware.ts).
+  지시서에 없던 항목인데 이게 없으면 폼이 전혀 동작하지 않는다. 브라우저가 CORS 판정 이전에
+  CSP 로 차단해 `TypeError: Failed to fetch` 가 난다 — Content-Type 을 아무리 맞춰도 소용없음.
+  `/exec` 가 302 로 googleusercontent 로 넘기고 CSP 는 리다이렉트 홉마다 검사하므로 두 호스트 다 필요.
+  헤드리스 실측으로 추가 전 `Failed to fetch` → 추가 후 200 + 본문 판독 확인
+- **`--text-danger` → `--error`**. `--text-danger` 는 globals.css 에 없는 이름이라 그대로 쓰면
+  값 없이 상속색으로 렌더된다 (Rule #94 재발). `bg-surface-2` 도 `--surface-2` 가 저장소 어디에도
+  정의돼 있지 않아 `.apt-card` 관행대로 `--bg-surface` 사용
+- **`ok:true` 만으로 성공 처리하지 않음.** 서버는 필터에 걸린 요청도 200 + `ok:true` 로 답하고
+  `skipped` 사유만 덧붙인다 (실측 `{"ok":true,"skipped":"too_fast"}`). ok 만 보면 걸러진 신청이
+  접수된 것으로 안내된다. `skipped` 를 판정에 포함하고, 서버가 판정을 내린 건은 재시도하지 않음
+  (거절된 payload 가 pending 에 영구 잔존하는 것도 함께 차단). 허니팟만 예외로 성공 화면 유지
+
+### 알려진 제약
+
+- 오류 메시지는 13px 로 작성했으나 globals.css:274 의 접근성 하한(`[style*="font-size: 13px"]` → 15px)
+  으로 15px 렌더된다. 저장소 전역 규칙이라 `!important` 로 뚫지 않고 그대로 둠
+- `/apt/[id]` 는 로컬에서 전부 404 (`.env.local` 의 service-role 키가 placeholder). 트라비스 페이지
+  렌더 확인은 배포 후에만 가능. 컴포넌트 자체는 /privacy 에 임시 마운트해 헤드리스로 30항목 검증 후 복원
+
+---
+
 ## S2-잔여 (2026-08-21) — 이모지 · 카카오 CTA · https 승격
 
 - 상세 페이지 이모지 122자 → 3자. 남은 3개는 지도(카카오/네이버)·청약홈 원문 링크분으로 의도적 유지
