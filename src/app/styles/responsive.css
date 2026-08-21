@@ -495,7 +495,7 @@ html.font-small .kd-list-item { padding: var(--sp-xs) 0; }
    ══════════════════════════════════════ */
 
 /* 모바일: < 769px */
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   /* 모바일 상단 바 표시 */
   .admin-mobile-bar { display: flex !important; }
 

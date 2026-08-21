@@ -706,13 +706,13 @@ body {
 /* ━━━ 세션58: 모바일 반응형 전면 강화 ━━━ */
 
 /* 부동산 탭 그리드 — 모바일에서 2열→1열 */
-@media (max-width: 420px) {
+@media (max-width: 480px) {
   .mc-g2 { grid-template-columns: 1fr !important; }
 }
 
 /* 부동산 카드 내부 패딩 최적화 */
 .apt-card { padding: 12px 14px; border-radius: 10px; background: var(--bg-surface); border: 1px solid var(--border); margin-bottom: 8px; }
-@media (max-width: 380px) {
+@media (max-width: 480px) {
   .apt-card { padding: 10px 12px; }
 }
 
@@ -724,13 +724,13 @@ body {
 }
 
 /* KPI 3열 그리드 — 좁은 화면에서 간격 축소 */
-@media (max-width: 380px) {
+@media (max-width: 480px) {
   .kpi-row { gap: 4px !important; }
   .kpi-row > div { padding: 6px 4px !important; }
 }
 
 /* 도넛 차트 + 범례 — 모바일 스택 */
-@media (max-width: 420px) {
+@media (max-width: 480px) {
   .region-overview-layout { flex-direction: column !important; }
   .region-overview-layout > div:first-child { max-width: 160px; margin: 0 auto 8px; }
 }
@@ -740,25 +740,25 @@ body {
   .donut-card-grid { font-size: 0.95em; gap: 2px !important; }
   .donut-card-grid > div { padding: 4px 3px !important; }
 }
-@media (max-width: 380px) {
+@media (max-width: 480px) {
   .donut-card-grid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; gap: 1px !important; }
   .donut-card-grid > div { padding: 3px 2px !important; }
 }
 
 /* 탭 세그먼트 — 작은 화면에서 폰트 축소 */
-@media (max-width: 380px) {
+@media (max-width: 480px) {
   .kd-tab-segment { font-size: 11px !important; }
   .kd-tab-segment > button { padding: 6px 4px !important; }
 }
 
 /* 공유 버튼 — 모바일에서 간격 조정 */
-@media (max-width: 420px) {
+@media (max-width: 480px) {
   .share-buttons { gap: 4px !important; }
   .share-buttons button { padding: 4px 8px !important; font-size: 11px !important; }
 }
 
 /* 타임라인 단계 — 모바일 텍스트 축소 */
-@media (max-width: 380px) {
+@media (max-width: 480px) {
   .tl-step { font-size: 8px !important; }
 }
 
@@ -767,7 +767,7 @@ body {
 .kd-scroll-row::-webkit-scrollbar { display: none; }
 
 /* 카드 내 flex 줄바꿈 */
-@media (max-width: 420px) {
+@media (max-width: 480px) {
   .card-flex-wrap { flex-wrap: wrap !important; }
 }
 
@@ -777,7 +777,7 @@ body {
 }
 
 /* 하단 CTA 버튼 — 모바일 풀너비 */
-@media (max-width: 420px) {
+@media (max-width: 480px) {
   .cta-row { flex-direction: column !important; }
   .cta-row > a, .cta-row > button { width: 100% !important; text-align: center !important; }
 }
@@ -1314,7 +1314,7 @@ body {
    ═══════════════════════════════════════════ */
 
 /* 캘린더 7열 — 모바일 글꼴/패딩 축소 */
-@media (max-width: 380px) {
+@media (max-width: 480px) {
   .kd-cal-grid { font-size: 10px !important; gap: 1px !important; }
   .kd-cal-grid > div { padding: 2px !important; }
 }
@@ -1324,7 +1324,7 @@ body {
 @media (max-width: 480px) {
   .kd-kpi-5 { grid-template-columns: repeat(3, 1fr); }
 }
-@media (max-width: 380px) {
+@media (max-width: 480px) {
   .kd-kpi-5 { grid-template-columns: repeat(2, 1fr); }
 }
 
@@ -1340,7 +1340,7 @@ body {
 
 /* 3열 → 모바일 2열 */
 .kd-grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
-@media (max-width: 420px) {
+@media (max-width: 480px) {
   .kd-grid-3 { grid-template-columns: repeat(2, 1fr); }
 }
 
@@ -1355,12 +1355,12 @@ body {
 @media (max-width: 480px) {
   .kd-grid-6 { grid-template-columns: repeat(3, 1fr) !important; }
 }
-@media (max-width: 380px) {
+@media (max-width: 480px) {
   .kd-grid-6 { grid-template-columns: repeat(2, 1fr) !important; }
 }
 
 /* 5열 지역 타일 → 모바일 4열 / 극소 3열 */
-@media (max-width: 380px) {
+@media (max-width: 480px) {
   .kd-region-grid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
 }
 @media (max-width: 320px) {
@@ -1368,7 +1368,7 @@ body {
 }
 
 /* 프로필 통계 4열 → 모바일 2열 */
-@media (max-width: 380px) {
+@media (max-width: 480px) {
   .kd-stats-4 { grid-template-columns: repeat(2, 1fr) !important; }
 }
 
@@ -1383,7 +1383,7 @@ body {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--sp-sm);
 }
-@media (max-width: 540px) {
+@media (max-width: 480px) {
   .listing-grid-2col { grid-template-columns: 1fr; }
 }
 
@@ -1510,7 +1510,7 @@ body {
 }
 /* 히어로 카드 — 단지백과 2열 */
 .hero-img-sm { height: 90px; }
-@media (max-width: 540px) {
+@media (max-width: 480px) {
   .hero-img { height: 100px; }
   .hero-img-sm { height: 80px; }
   .hero-name { font-size: 14px; }
@@ -1554,7 +1554,7 @@ html.font-large [style*="gridTemplateColumns"] > * {
 }
 
 /* font-large: KPI 그리드 모바일에서 2열로 전환 */
-@media (max-width: 420px) {
+@media (max-width: 480px) {
   html.font-large [style*="repeat(4"] {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
@@ -1600,7 +1600,7 @@ table { max-width: 100%; }
 }
 
 /* 모바일 320px: 3열 그리드도 2열로 */
-@media (max-width: 380px) {
+@media (max-width: 480px) {
   [style*="grid-template-columns: repeat(3"] {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
@@ -1612,7 +1612,7 @@ table { max-width: 100%; }
 }
 
 /* FeedStatusBar: 초소형 화면 대응 */
-@media (max-width: 380px) {
+@media (max-width: 480px) {
   .feed-status-bar {
     font-size: 10px !important;
     gap: 2px !important;
@@ -1624,7 +1624,7 @@ table { max-width: 100%; }
 }
 
 /* 피드 카드: 투표/VS/예측 카드 패딩 축소 */
-@media (max-width: 420px) {
+@media (max-width: 480px) {
   .feed-poll-card, .feed-vs-card, .feed-predict-card {
     padding: 10px !important;
   }
@@ -1727,7 +1727,7 @@ a, span, p, div {
 }
 
 /* 모바일: 카드 내 숫자 텍스트 축소 */
-@media (max-width: 380px) {
+@media (max-width: 480px) {
   .kd-counter { font-size: 14px !important; }
 }
 
@@ -1750,14 +1750,14 @@ a, span, p, div {
 }
 
 /* QuickPostBar: 모바일 대응 */
-@media (max-width: 420px) {
+@media (max-width: 480px) {
   .quick-post-bar input {
     font-size: 13px !important;
   }
 }
 
 /* HotTopicBar: 모바일 pill 크기 */
-@media (max-width: 380px) {
+@media (max-width: 480px) {
   .hot-topic-pill {
     font-size: 11px !important;
     padding: 4px 8px !important;
@@ -1774,7 +1774,7 @@ a, span, p, div {
 }
 
 /* 종목 상세: 가격 헤더 모바일 */
-@media (max-width: 420px) {
+@media (max-width: 480px) {
   .stock-price-header {
     font-size: 28px !important;
   }
