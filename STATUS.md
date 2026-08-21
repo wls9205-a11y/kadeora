@@ -53,6 +53,36 @@ html.font-small [style*="font-size: 12px"],
 ### Architecture Rule 추가
 - #81 셀렉터 리스트에서 `html.font-*` 같은 상태 prefix 는 **콤마로 나뉜 선택자마다** 붙인다.
   한 곳만 붙이면 나머지가 전역 규칙이 되어 조용히 우선순위를 뒤집는다
+## S6-2 (2026-08-21) — 잔여 전경색 토큰화 + S6 회귀 수정
+
+- 사용자 화면 32건 21파일 + 어드민 8건 5파일 = 40건 교체.
+  color: 지정만, background/border 는 미변경
+- S6 회귀 4건 되돌림 (아래)
+
+### 다크 배경 판정으로 제외 (파일을 열어 배경을 확인)
+- components/apt/AptHero.tsx 2건 — 히어로 배경이 #0F0F0E 다크 잉크.
+  #B4B2A9 는 그 위 보조 텍스트다
+- components/signup/SignupPopupModal.tsx 1건 — #1a1030→#0F1729 다크 모달
+- app/admin/NotificationBell.tsx 4건 — 드롭다운이 rgba(10,16,30,0.98) 다크 패널.
+  현재 어디에서도 import 되지 않는 사문화 컴포넌트이기도 하다
+- lib/og-tokens.ts 1건 · lib/constants.ts 5건 — 생성 이미지 팔레트 / 공용 상수라
+  소비처 배경이 제각각이다. 지시서 목록에도 없어 미변경
+
+### S6 회귀 4건 — 배경을 안 보고 hex 만 보고 친 결과
+S6 커밋2 가 건드린 파일 전체를 다크 배경 기준으로 재점검했다.
+- NotificationBell #60A5FA → var(--brand) 로 바뀌어 대비 5.9 → 2.6.
+  var(--accent-blue-light)(같은 값)로 원복
+- BlogFloatingBar 3건 — rgba(15,20,35,0.95) 다크 바 위. #f59e0b·#60a5fa·#22c55e 원복
+- SmartSectionGate 2건 — rgba(12,21,40,0.97) 다크 게이트 위. #4ade80 로
+- 두 파일에 다크 서피스 표식 주석을 남겨 다음 일괄 치환이 같은 실수를 반복하지 않게 했다
+
+### Architecture Rule 추가
+- #81 하드코딩 색의 대비를 잴 때 색 자체의 밝기를 먼저 본다. 밝기 0.45 이상인 값은
+  어두운 배경 전용 텍스트이므로 밝은 배경 기준 대비가 낮게 나오는 것이 정상이며
+  교체 대상이 아니다
+- #82 색을 일괄 치환할 때는 hex 가 아니라 그 요소가 놓인 배경을 먼저 확인한다.
+  다크 서피스가 남아 있는 화면(잉크 블록·모달·플로팅 바·게이트)에서는
+  밝은 값이 정답이다
 
 ---
 
