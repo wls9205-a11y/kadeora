@@ -273,7 +273,8 @@ export default async function BusanAptPage({
         </section>
       )}
 
-      <Disclaimer type="apt" compact />
+      {/* s3: compact 가 아니어야 source(VWorld 출처)까지 렌더된다 */}
+      <Disclaimer type="apt" />
     </div>
   );
 }
