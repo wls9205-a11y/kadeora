@@ -41,7 +41,7 @@ interface Props { params: Promise<{ region: string }> }
 const sb = () => getSupabaseAdmin();
 
 export async function generateStaticParams() {
-  return REGIONS.map(r => ({ region: encodeURIComponent(r) }));
+  return REGIONS.map(r => ({ region: r }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
