@@ -156,7 +156,6 @@ export default function GatedStockSection({ sectionKey, pageType = 'symbol', chi
   return (
     <section
       ref={sectionRef}
-      className="kadeora-paywall"
       data-gate-section={sectionKey}
       data-gate-level={gate?.gate_level || 'login'}
       style={{ margin: '20px 0' }}

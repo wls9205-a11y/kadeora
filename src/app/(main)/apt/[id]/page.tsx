@@ -24,9 +24,6 @@ import { isLeadEligible } from '@/lib/apt/lead-eligibility';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
 import { getDisplayInterestCount, formatInterestText, formatInterestOrViews } from '@/lib/interest-utils';
 import { headers } from 'next/headers';
-import { isBot } from '@/lib/seo/isBot';
-import { SectionGate } from '@/components/common/SectionGate';
-import { PaywallMarker } from '@/components/seo/PaywallMarker';
 import AptSiteSchema from '@/components/schema/AptSiteSchema';
 import CardCarousel from '@/components/og/CardCarousel';
 import AptHero from '@/components/apt/AptHero';
@@ -542,8 +539,6 @@ export default async function AptUnifiedPage({ params }: Props) {
   } catch {}
   const isLoggedInApt = !!aptUser;
   const isPremiumApt = false;
-  const aptUA = (await headers()).get('user-agent');
-  const isBotVisit = isBot(aptUA);
   const unsoldRate = unsold?.tot_supply_hshld_co ? Math.round(((unsold.tot_unsold_hshld_co ?? 0) / unsold.tot_supply_hshld_co) * 100) : null;
 
   const aptItemListJsonLd = buildAptJsonLd({
@@ -685,7 +680,6 @@ export default async function AptUnifiedPage({ params }: Props) {
         origin={SITE_URL}
       />
 
-      <PaywallMarker hasGatedContent={true} schemaType="RealEstateListing" />
 
       {/* JSON-LD 1: RealEstateListing */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'RealEstateListing', name, description: site?.description || `${region} ${name}`, url: `${SITE_URL}/apt/${slug}`, address: { '@type': 'PostalAddress', addressRegion: region, addressLocality: site?.sigungu || '', streetAddress: site?.address || sub?.hssply_adres || '', addressCountry: 'KR' }, ...(site?.total_units || sub?.tot_supply_hshld_co ? { numberOfRooms: site?.total_units || sub?.tot_supply_hshld_co } : {}), ...(site?.latitude && site?.longitude ? { geo: { '@type': 'GeoCoordinates', latitude: site.latitude, longitude: site.longitude } } : {}), ...(site?.builder || sub?.constructor_nm ? { brand: { '@type': 'Organization', name: site?.builder || sub?.constructor_nm } } : {}), ...(site?.price_min || site?.price_max ? { offers: { '@type': 'AggregateOffer', priceCurrency: 'KRW', ...(site?.price_min ? { lowPrice: site.price_min * 10000 } : {}), ...(site?.price_max ? { highPrice: site.price_max * 10000 } : {}), offerCount: site?.total_units || 1 } } : {}) }) }} />
@@ -807,22 +801,10 @@ export default async function AptUnifiedPage({ params }: Props) {
         {/* S4-2: 상단 컴팩트 진입 바 — 스펙 표 위. 폼 전체는 하단에 유지하고 스크롤로 연결한다 */}
         {showLeadForm && <LeadFormAnchor />}
         {(sub?.ai_summary || site?.description) && (
-          <SectionGate
-            sectionKey="ai_analysis"
-            level="login"
-            previewLines={5}
-            ctaName="apt_gate_ai_analysis"
-            ctaText="1초 로그인하고 전체 분석 보기"
-            redirectPath={`/apt/${slug}`}
-            isLoggedIn={isLoggedInApt}
-            isPremium={isPremiumApt}
-            isBot={isBotVisit}
-          >
             <div style={{ padding: 'var(--sp-md) var(--card-p)', borderRadius: 'var(--radius-md)', background: 'linear-gradient(135deg, var(--brand-bg), rgba(139,92,246,0.06))', border: '1px solid var(--brand-border)' }}>
               <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--brand)', marginBottom: 3 }}>AI 분석</div>
               <div className="site-description" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', lineHeight: 1.6 }}>{sub?.ai_summary || site?.description}</div>
             </div>
-          </SectionGate>
         )}
       </div>
 
@@ -1707,20 +1689,9 @@ export default async function AptUnifiedPage({ params }: Props) {
           {redev.notes && !redev.ai_summary && <div style={{ padding: '6px 8px', borderLeft: '2px solid rgba(183,148,255,0.25)', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.5, marginTop: 6 }}>{redev.notes}</div>}
         </div>); })()}
 
-      {/* 주변 아파트 시세 비교 (단지백과 데이터) — 비로그인 blur */}
+      {/* 주변 아파트 시세 비교 (단지백과 데이터) */}
       {complexProfiles.length > 0 && (site?.price_min || site?.price_max) && (
-      <SectionGate
-        sectionKey="apt_price_compare"
-        level="login"
-        previewLines={6}
-        ctaName="apt_gate_price_compare"
-        ctaText="1초 로그인하고 시세 비교 전체 보기"
-        redirectPath={`/apt/${slug}`}
-        isLoggedIn={isLoggedInApt}
-        isPremium={isPremiumApt}
-        isBot={isBotVisit}
-      >
-      {(() => {
+      (() => {
         const avgPyeong = complexProfiles.filter((c: any) => c.avg_sale_price_pyeong > 0).reduce((s: number, c: any, _: number, a: any[]) => s + c.avg_sale_price_pyeong / a.length, 0);
         const avgJeonse = complexProfiles.filter((c: any) => c.jeonse_ratio && Number(c.jeonse_ratio) > 0);
         const avgJeonseRatio = avgJeonse.length > 0 ? Math.round(avgJeonse.reduce((s: number, c: any) => s + Number(c.jeonse_ratio), 0) / avgJeonse.length) : 0;
@@ -1789,23 +1760,11 @@ export default async function AptUnifiedPage({ params }: Props) {
           </div>
         </div>
         );
-      })()}
-      </SectionGate>
+      })()
       )}
 
-      {/* 같은 지역 최근 실거래 비교 — 비로그인 blur */}
+      {/* 같은 지역 최근 실거래 비교 */}
       {regionTrades.length > 0 && (site?.price_min || site?.price_max) && (
-        <SectionGate
-          sectionKey="apt_trade_compare"
-          level="login"
-          previewLines={6}
-          ctaName="apt_gate_trade_compare"
-          ctaText="1초 로그인하고 실거래 비교 전체 보기"
-          redirectPath={`/apt/${slug}`}
-          isLoggedIn={isLoggedInApt}
-          isPremium={isPremiumApt}
-          isBot={isBotVisit}
-        >
         <div className="apt-card">
           <h2 className="apt-section-title">{sigungu || region} 최근 실거래 비교</h2>
           <p style={{ fontSize: 11, color: 'var(--text-tertiary)', margin: '0 0 8px' }}>같은 지역 아파트 최근 실거래가와 비교합니다.</p>
@@ -1836,7 +1795,6 @@ export default async function AptUnifiedPage({ params }: Props) {
             <SectionShareButton section="apt-trade-compare" label={`${sigungu || region} 최근 실거래 vs ${name} 분양가 비교`} pagePath={`/apt/${slug}`} />
           </div>
         </div>
-        </SectionGate>
       )}
 
       {/* 주변 시설 (nearby_facilities) — 크롤러 가시적 텍스트 */}

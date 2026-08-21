@@ -35,14 +35,11 @@ import ReadingProgress from '@/components/ReadingProgress';
 import BlogMetricCards from '@/components/BlogMetricCards';
 // s184: BlogHeroImage 제거 (대표 이미지 1장 inline 으로 대체). ImageLightbox 도 미사용.
 import NextArticleFloat from '@/components/NextArticleFloat';
-import BlogTossGate from '@/components/BlogTossGate';
 import RelatedContentCard from '@/components/RelatedContentCard';
 import BlogMentionCard from '@/components/blog/BlogMentionCard';
 import BlogHeroExtras from '@/components/blog/BlogHeroExtras';
-import BlogGatedRenderer from '@/components/blog/BlogGatedRenderer';
 import BlogEndCTA from '@/components/blog/BlogEndCTA';
-import BlogEarlyGateTeaser from '@/components/blog/BlogEarlyGateTeaser';
-// s183: SignupPopupModal import 제거 — SmartSectionGate(60%) + StickySignupBar 와 중복.
+// s183: SignupPopupModal import 제거. (s7-1 에서 게이트가 전면 제거돼 StickySignupBar 만 남음)
 import RelatedBlogsSection from '@/components/blog/RelatedBlogsSection';
 import LeadForm from '@/components/apt/LeadForm';
 import { isLeadEligible } from '@/lib/apt/lead-eligibility';
@@ -53,10 +50,8 @@ import CardCarousel from '@/components/og/CardCarousel';
 import SpeakableSchema from '@/components/schema/SpeakableSchema';
 import VideoObjectSchema, { extractVideosFromContent } from '@/components/schema/VideoObjectSchema';
 // s184: BlogImageCarousel 제거 — 캐러셀 자체 폐지.
-// s185: BlogMidGate 제거 — SmartSectionGate(60% 무료3회) + StickySignupBar(300px) 와 중복.
-// s183: SmartSectionGate 복귀 (s108 에 LoginGate 로 전환했었으나 비로그인 가입 유도가 사실상 0개로
-// 떨어져 4/22 신규가입 0건. 60% 게이트 + 무료 3회 미터링 + 봇 SEO 보호 형태로 재도입.)
-import SmartSectionGate from '@/components/SmartSectionGate';
+// s185: BlogMidGate 제거. (s7-1 에서 나머지 게이트도 전면 제거)
+// s7-1: 게이트 전면 제거 — 봇/사람 분기 없이 전문을 렌더한다 (클로킹 해소).
 import BlogAptAlertCTA from '@/components/BlogAptAlertCTA';
 import YMYLBanner from '@/components/YMYLBanner';
 import BigEventCharts from '@/components/blog/BigEventCharts';
@@ -406,15 +401,11 @@ export default async function BlogDetailPage({ params }: Props) {
     if (be?.id) bigEventId = be.id;
   } catch {}
 
-  // 봇 감지 — SEO 크롤러에게는 전체 본문 제공
-  const headersList = await headers();
-  const ua = headersList.get('user-agent') || '';
-  const isBot = /googlebot|bingbot|yandex|baiduspider|yeti|naverbot|daumoa|daumcrawler|slurp|msnbot|ahrefsbot|semrushbot|dotbot|petalbot|facebot|twitterbot|linkedinbot|kakaotalk-scrap|applebot|seznambot/i.test(ua);
 
   // CTA 소셜프루프 데이터
   let userCount = 66;
   let todaySignups = 0;
-  if (!isBot && !isLoggedIn) {
+  if (!isLoggedIn) {
     try {
       const { count: uc } = await sb.from("profiles").select("id", { count: "exact", head: true }).eq("is_seed", false);
       userCount = uc ?? 66;
@@ -662,15 +653,6 @@ export default async function BlogDetailPage({ params }: Props) {
       interactionType: 'https://schema.org/ReadAction',
       userInteractionCount: post.view_count ?? 0,
     },
-    // 비로그인 사용자에게 본문 55%만 표시 → Google 구조화데이터 가이드라인 준수
-    isAccessibleForFree: isLoggedIn || isBot,
-    ...(!isLoggedIn && !isBot ? {
-      hasPart: {
-        '@type': 'WebPageElement',
-        isAccessibleForFree: false,
-        cssSelector: '.kadeora-paywall',
-      },
-    } : {}),
   };
 
   const breadcrumbLd = {
@@ -730,7 +712,7 @@ export default async function BlogDetailPage({ params }: Props) {
 
   // 비로그인 유저: 본문 상단(첫 H2 뒤)에 청약/종목 알림 CTA 주입
   const alertCtaHtml = (() => {
-    if (isBot || isLoggedIn) return '';
+    if (isLoggedIn) return '';
     const isApt = post.category === 'apt';
     const isStock = post.category === 'stock' || post.category === 'finance';
     if (!isApt && !isStock) return '';
@@ -764,10 +746,6 @@ export default async function BlogDetailPage({ params }: Props) {
       htmlFull = htmlFull.slice(0, h2Match.index) + alertCtaHtml + htmlFull.slice(h2Match.index);
     }
   }
-  const cutoff = Math.floor(htmlFull.length * 0.7);
-  const htmlTruncated = htmlFull.slice(0, cutoff);
-  const tossCutoff = Math.floor(htmlFull.length * 0.3);
-  const htmlTossShort = htmlFull.slice(0, tossCutoff);
 
   // 목차 추출
   const toc = extractToc(htmlFull);
@@ -1009,13 +987,6 @@ export default async function BlogDetailPage({ params }: Props) {
             <span aria-hidden>·</span>
             <span>👀 {(post.view_count ?? 0).toLocaleString()}</span>
           </div>
-          {/* Early Gate Teaser — 무조건 마운트 (클라이언트에서 hasGated/isAuth 체크).
-              게이트 트리거 전에 무료 N/3 인디케이터를 노출해야 하므로 본문 위 유지. */}
-          <BlogEarlyGateTeaser
-            slug={slug}
-            hasGatedContent={!!(post as any).has_gated_content}
-            isLoggedInHint={isLoggedIn}
-          />
         </div>
 
         {seriesInfo && (() => {
@@ -1082,36 +1053,14 @@ export default async function BlogDetailPage({ params }: Props) {
         {bigEventId ? <BigEventCharts eventId={bigEventId} /> : null}
 
         {/* 부정공 TALK 인라인 배너 — 본문 진입부(TOC/차트 직후).
-            DB 본문 미수정 · 렌더 시점 삽입. 하단 AdSlot 과 250px+ 이격.
-            ⚠️ 진짜 "본문 중간" 분할은 4개 렌더 경로(isBot/BlogGatedRenderer/
-            BlogTossGate/SmartSectionGate) 를 각각 수정해야 해 blast radius 큼 → 보류. */}
-        {!isBot && <InlineTalkBanner />}
+            DB 본문 미수정 · 렌더 시점 삽입. 하단 AdSlot 과 250px+ 이격. */}
+        <InlineTalkBanner />
 
-        {/* 본문 — 봇: 전체, gated_sections 있으면 Gated 렌더, 로그인: TossGate, 비로그인: 전체 공개 */}
-        {isBot ? (
-          <div className="blog-content" itemProp="articleBody" dangerouslySetInnerHTML={{ __html: sanitizeHtml(htmlFull) }} />
-        ) : (post as any).has_gated_content ? (
-          <BlogGatedRenderer
-            content={post.content}
-            gatedSections={(post as any).gated_sections}
-            isLoggedIn={isLoggedIn}
-            isPremium={false}
-            slug={slug}
-          />
-        ) : isLoggedIn ? (
-          <BlogTossGate htmlFull={htmlFull} htmlShort={htmlTossShort} slug={slug} title={post.title} />
-        ) : (
-          // 비로그인 + 봇 아님 + has_gated_content 없음: 무료 3회까지는 전문, 4번째부터 60% 게이트.
-          <SmartSectionGate
-            htmlContent={sanitizeHtml(htmlFull)}
-            slug={slug}
-            category={post.category}
-            isBot={isBot}
-          />
-        )}
+        {/* 본문 — s7-1: 게이트 제거. 방문자·크롤러 구분 없이 전문을 그대로 렌더한다. */}
+        <div className="blog-content" itemProp="articleBody" dangerouslySetInnerHTML={{ __html: sanitizeHtml(htmlFull) }} />
 
         {/* AdSense 본문 하단 광고 (Rule #45) */}
-        {!isBot && <AdSlot />}
+        <AdSlot />
 
         {/* s184: 본문 직후 — 단일 공유 버튼 세트 (8개 플랫폼) + 북마크. 페이지 내 공유 UI 는 이 한 곳뿐. */}
         <div style={{
@@ -1125,7 +1074,7 @@ export default async function BlogDetailPage({ params }: Props) {
         </div>
 
         {/* 관심단지 알림 CTA — apt/unsold 카테고리 + 단지명 있을 때 (봇 제외) */}
-        {!isBot && (post.category === 'apt' || post.category === 'unsold') && post.tags?.[0] && (
+        {(post.category === 'apt' || post.category === 'unsold') && post.tags?.[0] && (
           <BlogAptAlertCTA
             aptName={post.tags[0]}
             siteSlug={relatedSites?.[0]?.slug}
@@ -1310,21 +1259,20 @@ export default async function BlogDetailPage({ params }: Props) {
           <BlogActions blogPostId={post.id} initialHelpfulCount={post.helpful_count ?? 0} />
         </div>
 
-        {/* s185: BlogMidGate 제거 — SmartSectionGate (60% 무료 3회 미터링) + StickySignupBar (300px scroll) 와 동일 영역 CTA 중복. "최대 2개" 원칙 위배. */}
+        {/* s185: BlogMidGate 제거. s7-1 에서 게이트 전면 제거 */}
 
         {/* s184: RelatedBlogsSection 도 댓글 아래로 이동 — 본문 흐름 보호. */}
 
         {/* Session D: 본문 끝 CTA (비로그인만) */}
-        {!isBot && !isLoggedIn && <BlogEndCTA slug={slug} isLoggedIn={false} />}
-        {/* s183: SignupPopupModal 제거 — SmartSectionGate (60%) + StickySignupBar (스크롤 300px+) 와 중복.
-            "동시 화면 CTA 최대 2개" 원칙. 과거 동시 6개 팝업 회귀 방지. */}
+        {!isLoggedIn && <BlogEndCTA slug={slug} isLoggedIn={false} />}
+        {/* s183: SignupPopupModal 제거. s7-1 에서 게이트 전면 제거 */}
 
         {/* s172: BlogFooterMeta 댓글 직후로 이동 (article 외부) */}
       </article>
 
       {/* 플로팅 액션바 — 로그인 유저 전용 (저장/알림/공유 engagement 바).
           비로그인은 StickySignupBar 가 하단 자리를 차지하므로 중복 방지. */}
-      {!isBot && isLoggedIn && <BlogFloatingBar slug={slug} title={post.title} category={post.category} />}
+      {isLoggedIn && <BlogFloatingBar slug={slug} title={post.title} category={post.category} />}
 
       {/* 댓글 섹션 — D안 컴팩트 리스트 */}
       <BlogCommentCTA commentCount={comments.length} />
@@ -1383,7 +1331,7 @@ export default async function BlogDetailPage({ params }: Props) {
       {leadSite && <LeadForm siteSlug={leadSite.slug} siteName={leadSite.name} variant="blog" />}
 
       {/* s184: 추천 글 + RelatedContentCard — 댓글 아래로 이동 */}
-      {!isBot && (
+      {(
         <div style={{ marginTop: 24 }}>
           <RelatedBlogsSection blogId={post.id} />
           <RelatedContentCard type="blog" showSignup={false} />

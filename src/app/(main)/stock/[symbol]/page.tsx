@@ -10,7 +10,6 @@ import { createSupabaseServer } from '@/lib/supabase-server';
 import { notFound } from 'next/navigation';
 import RelatedContentCard from '@/components/RelatedContentCard';
 import GatedStockSection from '@/components/stock/GatedStockSection';
-import { PaywallMarker } from '@/components/seo/PaywallMarker';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import ShareButtons from '@/components/ShareButtons';
@@ -185,7 +184,6 @@ export default async function StockDetailPage({ params }: Props) {
 
   return (
     <article style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
-      <PaywallMarker hasGatedContent={true} schemaType="FinancialProduct" />
       {/* JSON-LD 1: FinancialProduct + ExchangeRateSpecification */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org',

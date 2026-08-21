@@ -43,6 +43,72 @@ api/**(og-*·apt-img) 77 · 다크 모달/시트/바 9파일 · 채도 높은 �
 - 회색 글자가 또렷해졌는지. 특히 카드 메타(시공사·지역·세대수), 블로그 날짜·조회수,
   하단 고지 문구 — 전부 --text-tertiary 자리다
 - 너무 진해 위계가 사라졌으면 --text-tertiary 를 #4F5A69 로 중간 조정
+## S7-1 (2026-08-21) — 게이트 전면 제거: 클로킹 해소
+
+**푸시 2026-08-21 09:35 KST** (배포 완료 시각은 Vercel 대시보드 기준으로 별도 확인)
+- 이전 30일 게이트 성과: 노출 939 / 클릭 8 (0.85%), 동기간 전체 가입 7
+- 관찰 대상: GSC 노출·클릭 14일, 네이버 웹문서 6키워드, 리드 유입량, 가입 전환
+- **S0 색인 개방 관찰 기간과 중첩**. 이후 GSC 변화를 해석할 때 두 변경을 구분할 근거는 이 날짜뿐이다
+
+### 무엇이 클로킹이었나
+
+`isBot(user-agent)` 으로 갈라 봇에게만 전문을 줬다. 구글은 유료화 콘텐츠를 허용하지만
+구조화데이터 선언이 전제인데 `apt/[id]` 는 선언이 0건이었고, `blog/[slug]` 는 선언한
+`.kadeora-paywall` 을 비로그인 기본 경로(`SmartSectionGate`)가 쓰지 않아 불일치였다.
+네이버·다음에는 유료화 프로토콜 자체가 없어 국내 검색 기준으로는 예외 없이 클로킹이었다.
+
+### 변경
+
+- `apt/[id]`: `SectionGate` 3곳(ai_analysis / apt_price_compare / apt_trade_compare) 제거,
+  자식만 직접 렌더. `isBot` import · `isBotVisit` · 죽은 `aptUA` 제거
+- `blog/[slug]`: 렌더 4갈래(isBot / BlogGatedRenderer / BlogTossGate / SmartSectionGate) →
+  **단일 경로**. 봇 경로가 이미 `htmlFull` 전문이었으므로 그것으로 통일.
+  인라인 `isBot` 정규식, `!isBot` 조건 7곳, 죽은 절단 변수 4개 제거
+- `isAccessibleForFree` / `hasPart` JSON-LD 를 **같은 커밋에서** 제거.
+  게이트를 없애면서 유료화 선언만 남기면 거짓 선언이 되어 더 나쁘다
+- 컴포넌트 7개 파일째 삭제: `SmartSectionGate` `SectionGate` `BlogGatedRenderer`
+  `BlogGatedWall` `BlogEarlyGateTeaser` `BlogTossGate` `PaywallMarker`
+- 삭제된 컴포넌트를 "현행 대체재"로 가리키던 주석 5곳 갱신 (다시 import 되는 것을 막는다)
+
+### 지시서 범위 밖이었지만 손댄 곳 2건
+
+- **`stock/[symbol]`의 `PaywallMarker`** — 지시서 §1 에 없었으나 `PaywallMarker.tsx` 를
+  삭제하려면 이 참조도 지워야 했다. 이 라우트의 게이트(`GatedStockSection`)는 그대로 두었다
+- **`GatedStockSection` 의 `className="kadeora-paywall"`** — CSS 정의가 없는
+  스키마 선택자 전용 클래스다. `PaywallMarker` 를 지운 뒤로는 아무도 참조하지 않는
+  dangling 표식이라 클래스만 제거했다. 게이트 동작(`data-gate-section`·`gate_level`·
+  `IntersectionObserver`)은 손대지 않았다 — `GatedStockSection` 제거는 여전히 별도 판단 사항
+
+### 검증
+
+- `grep isBot` (src/app) 0건 / `isAccessibleForFree`·`kadeora-paywall`·`hasPart` 0건 /
+  삭제 컴포넌트 참조 0건
+- `SectionGate` 제거로 `apt/[id]` 1694행의 JSX children 중괄호가 불법이 돼 타입 에러 3건이
+  났다. `{(() => {…})()}` → `(() => {…})()` 로 전환해 해소 (빌드만으로는 못 잡고 tsc 가 잡음)
+- 사람 UA vs Googlebot 응답 비교 — 4개 글에서 본문 텍스트 길이 완전 일치.
+  `has_gated_content` 글 3편도 전문 렌더 확인 (4783 / 5388 / 5224자)
+- 남은 차이는 React 스트리밍 페이로드(`self.__next_f.push`) 청크 순서뿐. 전체 길이 동일
+
+### first-load 변화 (리스크 #5 대응)
+
+| 라우트 | 이전 | 이후 |
+|---|---|---|
+| `/blog/[slug]` | 39.7 kB / 342 kB | **11.3 kB / 314 kB** |
+| `/apt/[id]` | 12.9 kB / 332 kB | 12 kB / 331 kB |
+| `/stock/[symbol]` | 15.9 kB / 327 kB | 15.9 kB / 327 kB |
+
+비로그인에게 전문 HTML 이 늘었지만 게이트 JS(클라이언트 컴포넌트 + IntersectionObserver +
+localStorage)가 빠져 **순감**했다.
+
+### 부수 이득
+
+`SectionGate` 의 `linear-gradient(to top, var(--bg-base, #0b1220) …)` 하드코딩 페이드가
+S1 라이트 전환 후 흰 배경에 남색 그라디언트를 깔고 있었다. `SmartSectionGate` 의
+`rgba(224,232,240,…)` 계열 다크 하드코딩과 함께 컴포넌트째 사라졌다.
+
+### 롤백
+
+`git tag pre-s7-20260821` = `1c21ee00`
 
 ---
 
