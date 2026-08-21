@@ -54,9 +54,10 @@ export default function AptHero({ site, interestCount }: Props) {
           <span style={{ fontSize: 12, color: '#B4B2A9', fontWeight: 600 }}>{region}</span>
         )}
       </div>
-      <h1 style={{ margin: 0, fontSize: 22, fontWeight: 500, color: '#FFFFFF', lineHeight: 1.25, letterSpacing: -0.5, wordBreak: 'keep-all' }}>
+      {/* s2: 상세 페이지의 h1 은 본문 헤더 하나뿐이다. 여기는 시각적 제목이라 div. */}
+      <div style={{ margin: 0, fontSize: 22, fontWeight: 500, color: '#FFFFFF', lineHeight: 1.25, letterSpacing: -0.5, wordBreak: 'keep-all' }}>
         {site.name}
-      </h1>
+      </div>
       <div style={{ marginTop: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 10, flexWrap: 'wrap' }}>
         {meta.length > 0 && (
           <div style={{ fontSize: 12, color: '#B4B2A9', fontWeight: 500, lineHeight: 1.5 }}>

@@ -1,3 +1,32 @@
+## S2 (2026-08-21) — 카드 · 진행 눈금자
+
+- LifecycleRail 신설. 단계 결정 우선순위: apt_subscriptions 날짜 파생 > lifecycle_stage > 미표시.
+  날짜 비교는 'YYYY-MM-DD' 문자열 사전순 (Date 객체 UTC/KST 밀림 회피)
+  레일 미표시 site_type: unsold_active / landmark_active / active_trade / redevelopment_active
+- SectionHeader/SectionLink 신설. /apt 4개 섹션을 eyebrow(Mono·uppercase·--brand) + H2 + 텍스트링크로 통일
+- SubscriptionCard/AptCardCompact 하단에 미니 레일, 숫자에 --font-mono + tabular-nums
+- subscription-badge: hex 12개 제거 → 상태 토큰(--status-open/soon/fcfs/closed) 매핑
+- 상세 페이지: H1 2개 → 1개(AptHero h1 → div), 세대수 5회 → 규모/일반분양 2행(공급 정보 표),
+  일정 3벌 → 풀 레일 1 + 날짜표 1, 관심등록 전체 폼(알림·가점)은 접이식으로 하단 이동
+- CARDERA → KADEORA 오탈자 2건 수정 (AptPriceTrendCard, LifecycleTimeline)
+- 분양가 미공개 시 지역 평균 대체값 제거 — 하이엔드 현장에 지역 전체 평균을 붙이면 오정보
+
+### 지시서와 다르게 처리
+- var(--rule) 은 정의된 적 없는 토큰이라 기존 var(--border) 사용 (신규 색 도입 0건 규칙 준수)
+- '카카오톡 문의' 보조 CTA 는 채널 URL 이 코드베이스에 없어 신설하지 않음.
+  기존 KakaoDirectShare 를 그대로 두고, 나머지 CTA 만 접거나 하단 이동
+- /apt 섹션 제목에는 원래 이모지가 없어 제거할 대상이 없었음 (상세 페이지 h2 이모지는 S2 범위 밖)
+
+### Architecture Rule 추가
+- #71 생애주기 단계는 저장값보다 일정 날짜에서 파생한 값을 우선한다. 둘 다 없으면 렌더하지 않는다
+- #72 같은 사실(세대수·일정)은 한 화면에서 한 번만 표기한다. 중복은 정보가 아니라 소음이다
+
+### 다음
+- S3에서 조감도/이미지 데이터 확보 후 카드 이미지 슬롯 추가
+- 상세 페이지 나머지 h2 이모지 정리
+
+---
+
 ## S1 (2026-08-21) — 라이트 단일 모드 전환
 
 - globals.css: html.theme-light(91) / html[data-theme="light"](22) 변수 블록을 :root로 승격(113건 덮어쓰기).
