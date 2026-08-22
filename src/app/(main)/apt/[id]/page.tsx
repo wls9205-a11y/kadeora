@@ -41,7 +41,6 @@ import AptScheduleTimeline from '@/components/apt/detail/AptScheduleTimeline';
 import AptLocationMini from '@/components/apt/detail/AptLocationMini';
 
 const AptPriceTrendChart = dynamic(() => import('@/components/charts/AptPriceTrendChart'));
-const InterestRegistration = dynamic(() => import('@/components/InterestRegistration'));
 import RelatedContentCard from '@/components/RelatedContentCard';
 import LoginGate from '@/components/LoginGate';
 import AptBookmarkButton from '@/components/AptBookmarkButton';
@@ -571,13 +570,16 @@ export default async function AptUnifiedPage({ params }: Props) {
         />
       )}
 
-      <InterestRegisterHero
-        aptId={site?.id ?? slug}
-        aptName={name}
-        aptSlug={slug}
-        status={subSt}
-        isLoggedIn={isLoggedInApt}
-      />
+      {/* id: KPI '관심' 타일의 scrollTo 목적지. s7-3 에서 하단 전체폼을 없애며 이리로 옮겼다 */}
+      <div id="interest-section" style={{ scrollMarginTop: 60 }}>
+        <InterestRegisterHero
+          aptId={site?.id ?? slug}
+          aptName={name}
+          aptSlug={slug}
+          status={subSt}
+          isLoggedIn={isLoggedInApt}
+        />
+      </div>
 
       <CardCarousel slug={slug} name={name} cards={site?.og_cards as any} />
 
@@ -1601,22 +1603,6 @@ export default async function AptUnifiedPage({ params }: Props) {
       {/* 관심단지 등록 CTA — AI 분석 바로 아래 (노출 극대화) */}
       {/* 댓글 섹션 */}
       {site?.slug && <AptCommentSection slug={site.slug} siteName={name} />}
-
-      {/* s2: 주 CTA 는 상단 InterestRegisterHero(관심 등록) 하나.
-           알림 6단계 토글·가점 입력이 들어있는 전체 폼은 접어서 하단에 둔다. */}
-      <div id="interest-section" style={{ scrollMarginTop: 60 }}>
-        {site?.id && (
-          <details className="apt-card" style={{ padding: '12px 14px' }}>
-            <summary style={{ cursor: 'pointer', listStyle: 'none', fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span>알림 설정 · 청약 가점 입력</span>
-              <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>+</span>
-            </summary>
-            <div style={{ marginTop: 10 }}>
-              <InterestRegistration siteId={site.id} siteName={name} interestCount={site.interest_count || 0} slug={slug} totalSupply={site?.total_units || sub?.tot_supply_hshld_co || null} />
-            </div>
-          </details>
-        )}
-      </div>
 
       {/* Competition rate */}
       {sub?.competition_rate_1st && Number(sub.competition_rate_1st) > 0 && (

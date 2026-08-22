@@ -1,6 +1,6 @@
 'use client';
 
-// S4 P0 — 관심 현장 알림 신청 폼. (S4-2: 필드 4개 · 입력 예시 · 시인성)
+// S4 P0 — 분양 정보 안내 신청 폼. (S4-2: 필드 4개 · 입력 예시 · 시인성 / S7-3: 문구 분리)
 // 서버(Apps Script 웹앱: 시트 기록 + 메일 알림 + Supabase 백업)는 이미 검증 완료 상태다.
 //
 // Content-Type 은 반드시 text/plain;charset=utf-8 이어야 한다.
@@ -413,15 +413,15 @@ export default function LeadForm({ siteSlug, siteName, typeOptions = [], variant
           borderBottom: '1px solid var(--kd-accent-border)',
         }}
       >
-        알림 신청 · 무료
+        분양 정보 안내 · 무료
       </div>
 
       <div style={{ padding: '14px' }}>
-        <SectionHeader eyebrow="NOTIFY" title="관심 현장 알림 신청" />
+        <SectionHeader eyebrow="CONTACT" title="분양 정보 안내 신청" />
         <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0 0 14px' }}>
           {variant === 'blog'
-            ? `이 글에서 다룬 ${siteName}의 일정 변동을 알림으로 받아보세요.`
-            : `${siteName}의 분양가·일정 변동을 가장 먼저 알려드립니다.`}
+            ? `이 글에서 다룬 ${siteName}의 분양 정보를 담당자가 안내해 드립니다.`
+            : '담당자가 직접 연락드려 잔여 세대·일정을 안내합니다.'}
         </p>
 
         <form onSubmit={handleSubmit} noValidate style={{ position: 'relative' }}>

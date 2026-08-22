@@ -38,7 +38,7 @@ export function formatInterestOrViews(
 }
 
 /**
- * InterestRegistration용: 0명이면 숫자 대신 행동유도
+ * 관심 등록 표시용: 0명이면 숫자 대신 행동유도
  */
 export function formatInterestText(
   realCount: number,

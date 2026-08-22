@@ -67,8 +67,8 @@ export function InterestRegisterHero({ aptId, aptName, aptSlug, status, isLogged
       style={{
         margin: '12px 0 16px',
         padding: '14px 16px',
-        background: 'linear-gradient(135deg, rgba(0,255,135,0.08), rgba(0,229,255,0.08))',
-        border: '1px solid rgba(0,255,135,0.18)',
+        background: 'var(--bg-surface)',
+        border: '1px solid var(--border)',
         borderRadius: 12,
         display: 'flex',
         alignItems: 'center',
@@ -77,7 +77,7 @@ export function InterestRegisterHero({ aptId, aptName, aptSlug, status, isLogged
       }}
     >
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 2 }}>
+        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 2 }}>
           관심 단지로 저장
           {statusLabel && (
             <span
@@ -85,8 +85,8 @@ export function InterestRegisterHero({ aptId, aptName, aptSlug, status, isLogged
                 marginLeft: 8,
                 padding: '2px 8px',
                 borderRadius: 999,
-                background: 'rgba(0,255,135,0.16)',
-                color: '#00FF87',
+                background: 'var(--brand-bg)',
+                color: 'var(--brand)',
                 fontSize: 11,
                 fontWeight: 700,
               }}
@@ -95,8 +95,8 @@ export function InterestRegisterHero({ aptId, aptName, aptSlug, status, isLogged
             </span>
           )}
         </div>
-        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', wordBreak: 'keep-all' }}>
-          {aptName} 청약·일정 알림 받기
+        <div style={{ fontSize: 12, color: 'var(--text-tertiary)', wordBreak: 'keep-all' }}>
+          카더라 계정에 저장하고 청약 일정을 앱으로 받아보세요
         </div>
       </div>
       <button
@@ -106,8 +106,8 @@ export function InterestRegisterHero({ aptId, aptName, aptSlug, status, isLogged
         style={{
           padding: '10px 18px',
           borderRadius: 999,
-          background: done ? 'rgba(0,255,135,0.2)' : '#00FF87',
-          color: done ? '#00FF87' : '#000',
+          background: done ? 'var(--brand-bg)' : 'var(--kakao-bg)',
+          color: done ? 'var(--brand)' : 'var(--kakao-text)',
           fontWeight: 800,
           fontSize: 13,
           border: 'none',
@@ -115,7 +115,7 @@ export function InterestRegisterHero({ aptId, aptName, aptSlug, status, isLogged
           whiteSpace: 'nowrap',
         }}
       >
-        {done ? '✓ 등록 완료' : loading ? '등록 중…' : isLoggedIn ? '관심 등록' : '로그인하고 등록'}
+        {done ? '저장 완료' : loading ? '저장 중…' : isLoggedIn ? '관심 단지 저장' : '로그인하고 저장'}
       </button>
       {/* s2-잔여: 보조 CTA 는 카카오톡 1:1 문의 하나뿐이다. 주 CTA(관심 등록)와 경쟁시키지 않도록
            버튼이 아닌 텍스트 링크로 둔다. 채널 ID 는 constants 단일 출처. */}

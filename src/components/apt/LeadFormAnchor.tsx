@@ -59,8 +59,8 @@ export default function LeadFormAnchor() {
           wordBreak: 'keep-all',
         }}
       >
-        <span className="kd-lead-anchor-full">분양가·일정 변동을 가장 먼저 받아보세요</span>
-        <span className="kd-lead-anchor-short">분양가·일정 알림 받기</span>
+        <span className="kd-lead-anchor-full">잔여 세대·일정을 담당자가 직접 안내해 드립니다</span>
+        <span className="kd-lead-anchor-short">분양 정보 안내 받기</span>
       </span>
       <button
         type="button"
@@ -74,7 +74,7 @@ export default function LeadFormAnchor() {
           fontWeight: 700,
         }}
       >
-        알림 신청 →
+        안내 신청 →
       </button>
     </div>
   );
