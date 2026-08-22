@@ -13,7 +13,10 @@ export const maxDuration = 30;
 export const dynamic = "force-dynamic";
 
 const NAVER_OPENAPI_BASE = "https://openapi.naver.com/v1/search";
-const OUR_DOMAIN = "kadeora.app";
+// blog 소스는 네이버 블로그 검색이라 kadeora.app 로는 구조적으로 절대 매칭되지 않는다.
+// 지금까지 blog 순위가 전량 권외로 나온 것은 순위가 없어서가 아니라 찾을 대상이 없어서였다.
+// 계정명까지 포함해 좁게 매칭한다 — naver.com 만으로 완화하면 남의 글이 잡힌다.
+const OUR_DOMAINS = ["kadeora.app", "blog.naver.com/kadeoraapp"] as const;
 const DISPLAY = 100;
 const SOURCES = ["webkr", "blog"] as const;
 type Source = (typeof SOURCES)[number];
@@ -53,7 +56,9 @@ async function fetchRank(
   }
   const json = (await res.json()) as any;
   const items: any[] = Array.isArray(json?.items) ? json.items : [];
-  const idx = items.findIndex((it) => typeof it?.link === "string" && it.link.includes(OUR_DOMAIN));
+  const idx = items.findIndex(
+    (it) => typeof it?.link === "string" && OUR_DOMAINS.some((d) => it.link.includes(d))
+  );
 
   return {
     date,
