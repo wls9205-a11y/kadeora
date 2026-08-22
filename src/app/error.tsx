@@ -13,7 +13,7 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
         <p style={{ color: 'var(--text-secondary)', marginBottom: 24, fontSize: 'var(--fs-base)' }}>잠시 후 다시 시도해주세요</p>
         <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
           <button onClick={reset} style={{ padding: '10px 22px', borderRadius: 10, border: 'none', background: 'var(--brand)', color: '#fff', fontWeight: 700, fontSize: 'var(--fs-base)', cursor: 'pointer' }}>다시 시도</button>
-          <Link href="/feed" style={{ padding: '10px 22px', borderRadius: 10, border: '1px solid var(--border)', color: 'var(--text-secondary)', fontSize: 'var(--fs-base)', textDecoration: 'none' }}>홈으로</Link>
+          <Link href="/" style={{ padding: '10px 22px', borderRadius: 10, border: '1px solid var(--border)', color: 'var(--text-secondary)', fontSize: 'var(--fs-base)', textDecoration: 'none' }}>홈으로</Link>
         </div>
       </div>
     </div>

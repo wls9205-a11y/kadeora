@@ -167,7 +167,9 @@ function LoginForm({ redirect }: LoginFormProps) {
 }
 
 export default function LoginClient() {
-  const [redirect, setRedirect] = useState('/feed');
+  // r4-P7: 홈이 / 가 됐다. 피드는 하단 탭에서 빠져 /more 안으로 들어갔으므로
+  // 로그인 후 기본 랜딩이 피드면 탭 어디에도 걸리지 않는 화면에 떨어진다.
+  const [redirect, setRedirect] = useState('/');
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const r = params.get('redirect');

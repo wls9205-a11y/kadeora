@@ -22,7 +22,7 @@ export const runtime = 'nodejs';
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
-  const redirect = searchParams.get('redirect') ?? '/feed';
+  const redirect = searchParams.get('redirect') ?? '/';
   // s188: source 가 실제로 URL 에 없을 때 'direct' 디폴트로 가리지 않도록 분리.
   const sourceParam = searchParams.get('source');
   const source = sourceParam ?? 'direct';
@@ -39,7 +39,9 @@ export async function GET(request: NextRequest) {
     if (/^\/[\t\r\n\v\f ]/.test(p)) return false;
     return true;
   };
-  const safeRedirect = isSafeInternalPath(redirect) ? redirect : '/feed';
+  // r4-P7: 기본 랜딩을 홈으로. isSafeInternalPath('/') 는 통과한다
+  // (startsWith('/') 참, '//' · '/\\' · '/<공백>' 아님).
+  const safeRedirect = isSafeInternalPath(redirect) ? redirect : '/';
 
   if (!code) {
     console.warn(`[auth/callback] missing_code mobile=${isMobile} source="${source}" — redirect to /login?error=auth_failed`);

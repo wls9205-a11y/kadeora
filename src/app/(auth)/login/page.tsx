@@ -37,7 +37,7 @@ export default async function LoginPage({
         && !target.startsWith('//')
         && !target.startsWith('/\\')
         && !/^\/[\t\r\n\v\f ]/.test(target);
-      redirect(isSafe ? target : '/feed');
+      redirect(isSafe ? target : '/');
     }
   } catch (e: any) {
     // redirect() throws NEXT_REDIRECT — must re-throw

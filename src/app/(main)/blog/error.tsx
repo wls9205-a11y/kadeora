@@ -14,7 +14,7 @@ export default function ErrorPage({ error, reset }: { error: Error; reset: () =>
         <button onClick={reset} style={{ padding: 'var(--sp-md) var(--sp-xl)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer' }}>
           다시 시도
         </button>
-        <Link href="/feed" style={{ padding: 'var(--sp-md) var(--sp-xl)', borderRadius: 'var(--radius-md)', background: 'var(--brand)', color: 'var(--text-inverse)', fontSize: 'var(--fs-sm)', fontWeight: 600, textDecoration: 'none' }}>
+        <Link href="/" style={{ padding: 'var(--sp-md) var(--sp-xl)', borderRadius: 'var(--radius-md)', background: 'var(--brand)', color: 'var(--text-inverse)', fontSize: 'var(--fs-sm)', fontWeight: 600, textDecoration: 'none' }}>
           홈으로
         </Link>
       </div>

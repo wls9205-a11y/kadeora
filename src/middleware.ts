@@ -282,10 +282,10 @@ export async function middleware(request: NextRequest) {
       ]);
       const adminProfile = (adminResult as { data: Record<string, unknown> | null })?.data;
       if (!adminProfile?.is_admin) {
-        return NextResponse.redirect(new URL('/feed', request.url));
+        return NextResponse.redirect(new URL('/', request.url));
       }
     } catch {
-      return NextResponse.redirect(new URL('/feed', request.url));
+      return NextResponse.redirect(new URL('/', request.url));
     }
   }
 

@@ -36,7 +36,7 @@ export default function OnboardingClient() {
   const [isPWA, setIsPWA] = useState(false);
   const router = useRouter();
   const params = useSearchParams();
-  const returnUrl = params.get('return') || '/feed';
+  const returnUrl = params.get('return') || '/';
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
