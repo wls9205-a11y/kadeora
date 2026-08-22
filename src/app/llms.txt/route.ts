@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { SITE_URL } from '@/lib/constants';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { CALC_REGISTRY } from '@/lib/calc/registry';
 
 export const revalidate = 86400; // 24시간 캐시
 
@@ -10,7 +12,61 @@ export const revalidate = 86400; // 24시간 캐시
  * sitemap.xml = 검색 엔진에게 "모든 페이지 목록"
  * llms.txt = AI 모델에게 "이 사이트는 이런 곳이고, 핵심 콘텐츠는 여기야"
  */
+// s8: 하드코딩 수치가 실제와 크게 어긋나 있었다 (블로그 59,400+ → 실제 8,775).
+// llms.txt · /about · 실제 DB 가 서로 다른 숫자를 말하던 상태라 DB 에서 직접 센다.
+// 라우트가 이미 revalidate 86400 이라 매 요청 부담은 없다.
+const FALLBACK = {
+  blog: 8775, stocks: 1846, subs: 2851, sites: 5924,
+  complex: 34544, trades: 726054, posts: 12909,
+};
+
+async function counts() {
+  try {
+    const sb = getSupabaseAdmin();
+    const one = async (t: string, f?: (q: any) => any) => {
+      let q = (sb as any).from(t).select('*', { count: 'exact', head: true });
+      if (f) q = f(q);
+      const { count } = await q;
+      return typeof count === 'number' ? count : null;
+    };
+    const [blog, stocks, subs, sites, complex, trades, posts] = await Promise.all([
+      one('blog_posts', (q: any) => q.eq('is_published', true)),
+      one('stock_quotes'), one('apt_subscriptions'), one('apt_sites'),
+      one('apt_complex_profiles'), one('apt_transactions'), one('posts'),
+    ]);
+    return {
+      blog: blog ?? FALLBACK.blog, stocks: stocks ?? FALLBACK.stocks,
+      subs: subs ?? FALLBACK.subs, sites: sites ?? FALLBACK.sites,
+      complex: complex ?? FALLBACK.complex, trades: trades ?? FALLBACK.trades,
+      posts: posts ?? FALLBACK.posts,
+    };
+  } catch {
+    // DB 장애로 llms.txt 자체가 죽지 않게 한다 (리스크 #4)
+    return FALLBACK;
+  }
+}
+
 export async function GET() {
+  const c = await counts();
+  const n = (v: number) => v.toLocaleString('ko-KR');
+  // 계산기 수는 레지스트리에서 직접 센다 — 142 와 145 가 코드 곳곳에 섞여 있었다.
+  const calcCount = CALC_REGISTRY.length;
+  const calcCatCount = new Set(CALC_REGISTRY.map((c) => c.category)).size;
+  // 카테고리 목록도 레지스트리에서 만든다 — 하드코딩본은 연말정산이 두 번 나오고
+  // 주식/투자·쇼핑/소비가 빠져 있었으며, CATEGORIES.count 합(150)도 실제와 어긋났다.
+  const calcCategories = (() => {
+    const byCat = new Map<string, { label: string; n: number; ex: string[] }>();
+    for (const c of CALC_REGISTRY) {
+      const cur = byCat.get(c.category) || { label: c.categoryLabel, n: 0, ex: [] };
+      cur.n += 1;
+      if (cur.ex.length < 3) cur.ex.push(c.titleShort || c.title);
+      byCat.set(c.category, cur);
+    }
+    return [...byCat.values()]
+      .sort((a, b) => b.n - a.n)
+      .map((v) => `- ${v.label} (${v.n}종): ${v.ex.join(", ")} 등`)
+      .join('\n');
+  })();
   const content = `# 카더라 (kadeora.app)
 
 > 카더라는 대한민국 부동산·주식·재테크 정보 커뮤니티입니다. 아파트 청약, 주식 시세, AI 블로그, 무료 계산기, 실시간 토론 기능을 제공합니다. 모든 서비스는 한국어로 제공되며, 대한민국 사용자를 대상으로 합니다.
@@ -26,21 +82,21 @@ export async function GET() {
 
 ## 핵심 데이터 규모
 
-- 블로그: 59,400+ 편 (AI 생성 + DB 데이터 기반, 매일 증가)
-- 주식 종목: 1,846개 (KOSPI, KOSDAQ, NYSE, NASDAQ)
-- 아파트 청약: 2,713건 (공공데이터포털 API 실시간 동기화)
-- 분양사이트: 5,783개 (전국 아파트 분양 정보)
-- 단지백과: 34,537개 (아파트 상세 정보, 실거래가·전세가율·거래량)
-- 실거래 데이터: 497,413건 (국토교통부 실거래가 공개시스템)
+- 블로그: ${n(c.blog)}편 (발행 기준, AI 생성 + DB 데이터 기반, 매일 증가)
+- 주식 종목: ${n(c.stocks)}개 (KOSPI, KOSDAQ, NYSE, NASDAQ)
+- 아파트 청약: ${n(c.subs)}건 (공공데이터포털 API 실시간 동기화)
+- 분양사이트: ${n(c.sites)}개 (전국 아파트 분양 정보)
+- 단지백과: ${n(c.complex)}개 (아파트 상세 정보, 실거래가·전세가율·거래량)
+- 실거래 데이터: ${n(c.trades)}건 (국토교통부 실거래가 공개시스템)
 - 시군구 허브: 260개 (시군구별 아파트 시세 분석)
 - 동 허브: 2,800+ 개 (동별 아파트 시세 분석)
-- 무료 계산기: 142종 (세금, 부동산, 투자, 급여, 대출 등 15개 카테고리)
-- 커뮤니티 게시글: 5,198편
+- 무료 계산기: ${calcCount}종 (세금, 부동산, 투자, 급여, 대출 등 ${calcCatCount}개 카테고리)
+- 커뮤니티 게시글: ${n(c.posts)}편
 
 ## 주요 섹션
 
 ### 주식 시세 (/stock)
-KOSPI, KOSDAQ, NYSE, NASDAQ 1,846개 종목의 시세를 제공합니다. 금융위원회 공공데이터 API(국내)와 Yahoo Finance(해외)를 데이터 소스로 사용합니다.
+KOSPI, KOSDAQ, NYSE, NASDAQ ${n(c.stocks)}개 종목의 시세를 제공합니다. 금융위원회 공공데이터 API(국내)와 Yahoo Finance(해외)를 데이터 소스로 사용합니다.
 
 - [실시간 주식 시세](${SITE_URL}/stock): 종목 목록, 섹터 히트맵, AI 브리핑
 - [종목 상세](${SITE_URL}/stock/005930): 개별 종목 시세, 차트, AI 분석, 수급 동향 (예: 삼성전자)
@@ -51,8 +107,8 @@ KOSPI, KOSDAQ, NYSE, NASDAQ 1,846개 종목의 시세를 제공합니다. 금융
 아파트 청약, 분양, 미분양, 재개발, 실거래 정보를 제공합니다. 국토교통부, 공공데이터포털, 한국부동산원 등의 공공 API를 데이터 소스로 사용합니다.
 
 - [청약 정보](${SITE_URL}/apt): 전국 아파트 청약 일정, 경쟁률, 당첨 가점
-- [분양사이트](${SITE_URL}/apt/sites): 5,783개 아파트 분양 상세 정보
-- [단지백과](${SITE_URL}/apt/complex): 34,537개 아파트 단지 상세 (시세, 전세가율, 거래량)
+- [분양사이트](${SITE_URL}/apt/sites): ${n(c.sites)}개 아파트 분양 상세 정보
+- [단지백과](${SITE_URL}/apt/complex): ${n(c.complex)}개 아파트 단지 상세 (시세, 전세가율, 거래량)
 - [시군구별 시세](${SITE_URL}/apt/area/서울/강남구): 260개 시군구별 아파트 시세 비교
 - [동별 시세](${SITE_URL}/apt/area/서울/강남구/반포동): 2,800+ 동별 아파트 시세
 - [청약 진단](${SITE_URL}/apt/diagnose): 청약 가점 계산 + 당첨 확률 분석
@@ -60,13 +116,13 @@ KOSPI, KOSDAQ, NYSE, NASDAQ 1,846개 종목의 시세를 제공합니다. 금융
 - [실거래가 검색](${SITE_URL}/apt/search): 전국 아파트 실거래가 검색
 
 #### 부동산 URL 패턴
-- 단지별 상세: ${SITE_URL}/apt/{단지슬러그} (5,783개)
-- 단지백과: ${SITE_URL}/apt/complex/{단지명} (34,537개)
+- 단지별 상세: ${SITE_URL}/apt/{단지슬러그} (${n(c.sites)}개)
+- 단지백과: ${SITE_URL}/apt/complex/{단지명} (${n(c.complex)}개)
 - 시군구 허브: ${SITE_URL}/apt/area/{광역시도}/{시군구} (260개)
 - 동 허브: ${SITE_URL}/apt/area/{광역시도}/{시군구}/{동} (2,800+개)
 
 #### 부동산 핵심 데이터 (공공데이터 기반)
-- 전국 아파트 단지: 34,537개 (실거래가 보유 26,813개)
+- 전국 아파트 단지: ${n(c.complex)}개 (실거래가 보유 26,813개)
 - 전국 실거래 데이터: 497,413건
 - 데이터 출처: 국토교통부 실거래가 공개시스템, 한국부동산원, 청약홈
 
@@ -79,24 +135,10 @@ AI 기반으로 생성된 59,000+ 편의 부동산·주식·재테크 분석 블
 - RSS: ${SITE_URL}/feed.xml
 
 ### 계산기 (/calc)
-세금, 부동산, 투자, 급여, 대출 등 142종의 무료 온라인 계산기입니다. 2026년 최신 세법과 요율을 반영합니다.
+세금, 부동산, 투자, 급여, 대출 등 ${calcCount}종의 무료 온라인 계산기입니다. 2026년 최신 세법과 요율을 반영합니다.
 
-- [계산기 전체](${SITE_URL}/calc): 15개 카테고리 142종
-- 부동산 세금 (11종): 취득세, 양도소득세, 종합부동산세, 재산세 등
-- 소득세 (12종): 종합소득세, 근로소득세, 기타소득세 등
-- 금융/투자 (8종): 양도소득세, 배당세, 해외주식세 등
-- 상속/증여 (6종): 상속세, 증여세, 가업승계 등
-- 연말정산 (10종): 신용카드, 의료비, 교육비 공제 등
-- 부동산 (16종): 전세자금, 중도금, DSR, 분양가 등
-- 급여/노동 (12종): 실수령액, 퇴직금, 4대보험 등
-- 대출/예적금 (8종): 원리금 균등, 체증식, 적금 이자 등
-- 연금/은퇴 (8종): 국민연금, 퇴직연금, 연금저축 등
-- 자동차 (7종): 자동차세, 보험료, 리스 비교 등
-- 생활/건강 (12종): BMI, 기초대사량, 칼로리 등
-- 법률/가정 (6종): 양육비, 위자료, 법정이자 등
-- 군대/교육 (6종): 전역일, 학점 변환 등
-- 사업자 세금 (8종): 법인세, 부가세, 간이과세 등
-- 연말정산 (10종): 신용카드, 의료비, 교육비 공제 등
+- [계산기 전체](${SITE_URL}/calc): ${calcCatCount}개 카테고리 ${calcCount}종
+${calcCategories}
 
 ### 커뮤니티 (/feed)
 주식, 부동산, 재테크 관련 실시간 사용자 게시글과 토론입니다.
