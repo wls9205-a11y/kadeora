@@ -1,3 +1,66 @@
+## S7-5 + 소품 (2026-08-22) — 네이버 채널 정정 · 순위 추적 확장 · 잔여 2건
+
+작은 커밋 3개. 각각 독립적이라 분리했다.
+
+### 1. 네이버 블로그 채널 정정 (`f6329d8b`)
+
+- `layout.tsx` `sameAs`: `blog.naver.com/silreit` → `kadeoraapp`.
+  틀린 계정을 선언하면 실제 운영 블로그가 브랜드 엔티티에 묶이지 않고, 남의 계정을
+  우리 채널이라 주장하는 셈이 된다. 카페 URL 은 그대로 뒀다
+- `naver-sc-sync`: `OUR_DOMAIN = "kadeora.app"` 단일 → `OUR_DOMAINS` 배열.
+  `blog` 소스는 네이버 블로그 검색이라 `kadeora.app` 로는 **구조적으로 절대 매칭되지 않았다.**
+  blog 순위가 전량 권외였던 것은 순위가 없어서가 아니라 찾을 대상이 없어서였다
+- 계정명까지 포함해 좁게 매칭한다. `naver.com` 만으로 완화하면 남의 글이 잡힌다.
+  `m.blog.naver.com` 응답 가능성은 배포 후 실제 응답을 보고 판단한다 — 추측으로 넓히지 않는다
+
+**주의:** root `src/app/layout.tsx` 는 평소 수정 금지 대상(meta/font blast radius)이다.
+이번 건은 지시서가 파일·행을 특정한 `sameAs` 문자열 1줄 교체라 진행했다.
+
+### 2. `gsc-sync` 적재 실패 로깅 (`6ca15291`)
+
+`if (!error) inserted += payload.length;` 형태라 적재가 전부 실패해도 응답은 `ok:true` 이고
+런타임 로그에 아무것도 남지 않았다. 실패 시 `console.error` + 응답에 `failed_batches` 추가.
+`inserted` 만 보면 0 인지 실패인지 구분이 안 된다.
+
+#### 같은 패턴 전수 (범위 밖 — 목록만)
+
+`if (!error)` 로 조용히 넘어가는 곳이 **크론 24개 46곳**에 더 있다.
+
+```
+apt-backfill-details(2) backlink-sync blog-cleanup-padding blog-inject-images
+blog-internal-links crawl-apt-rent crawl-apt-resale crawl-apt-subscription
+crawl-apt-trade crawl-busan-redev crawl-gyeonggi-redev(2) crawl-nationwide-redev
+crawl-seoul-redev(2) data-quality-fix invest-calendar-refresh issue-detect
+issue-preempt(4) krx-short-selling(2) programmatic-seo-consume redev-geocode(2)
+redev-verify-households seo-content-boost seo-excerpt-fill seo-internal-links
+stock-crawl(2) stock-desc-gen stock-discover stock-flow-crawl stock-flow-signals
+stock-hero-refresh stock-news-crawl stock-price sync-apt-sites(4)
+```
+
+이 중 `error` 를 아예 참조조차 안 하는(로그·집계 흔적 0) 파일이 20개다. 적재 실패가
+전부 조용히 사라지는 구조라 별도 정리가 필요하다.
+
+### 3. 상태 배지 대비 (`<이 커밋>`)
+
+현장 유형 배지 5종이 전부 다크 전제 하드코딩이었다. **알파를 흰 배경에 합성해 실측**(Rule #85):
+
+| 배지 | 이전 | 이후 |
+|---|---|---|
+| subscription | #2EE8A5 → **1.38:1** | `--accent-green` 6.84:1 |
+| redevelopment | #B794FF → 2.14:1 | `--accent-purple` 4.91:1 |
+| unsold | #FF6B6B → 2.39:1 | `--accent-red` 7.11:1 |
+| landmark/complex | #38BDF8 → 1.91:1 | `--accent-cyan` 6.31:1 |
+| trade | #FBBF24 → 1.54:1 | `--accent-yellow` 6.21:1 |
+
+지시서가 지목한 `분양` 배지가 최악(1.38:1)이었다 — 합성하면 배경과 사실상 구분되지 않는다.
+
+- 새 토큰을 만들지 않고 `globals.css` 의 기존 accent 세트로 매핑했다
+- `--accent-cyan` 은 `-bg` 짝이 없어 같은 계열인 `--accent-blue-bg` 를 썼다 (6.31:1)
+- 상태 배지 `SB.open` 은 `color`/`border` 가 이미 토큰인데 `bg` 만 하드코딩으로 남아 있어
+  함께 교체했다. `upcoming`/`closed` 는 이미 토큰이라 손대지 않았다
+
+---
+
 ## S7-2 (2026-08-22) — 이미지 소스 교체: 뉴스 스크랩 제거, 자체 호스팅 전환
 
 트라비스 상세 갤러리가 `t1.daumcdn.net`(다음 뉴스 썸네일)과 `consumernews.co.kr`(컨슈머뉴스)

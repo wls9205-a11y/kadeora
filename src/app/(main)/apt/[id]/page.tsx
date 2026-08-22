@@ -471,8 +471,10 @@ const rw: React.CSSProperties = { display: 'flex', justifyContent: 'space-betwee
 const rl: React.CSSProperties = { color: 'var(--text-tertiary)', flexShrink: 0, whiteSpace: 'nowrap' };
 const rv: React.CSSProperties = { color: 'var(--text-primary)', fontWeight: 600, textAlign: 'right', wordBreak: 'keep-all', overflowWrap: 'break-word', minWidth: 0 };
 const tLabel: Record<string, string> = { subscription: '분양', redevelopment: '재개발', unsold: '미분양', landmark: '랜드마크', complex: '기존단지', trade: '실거래' };
-const tBg: Record<string, string> = { subscription: 'rgba(52,211,153,0.2)', redevelopment: 'rgba(183,148,255,0.15)', unsold: 'rgba(255,107,107,0.15)', landmark: 'rgba(56,189,248,0.15)', complex: 'rgba(56,189,248,0.15)', trade: 'rgba(251,191,36,0.15)' };
-const tClr: Record<string, string> = { subscription: '#2EE8A5', redevelopment: '#B794FF', unsold: '#FF6B6B', landmark: '#38BDF8', complex: '#38BDF8', trade: '#FBBF24' };
+// s7-5: 다크 전제 하드코딩 → 기존 accent 토큰. 흰 배경 합성 실측으로 전부 4.5:1 이상.
+// (이전 값은 1.38~2.39:1 — 알파를 합성하면 배경과 거의 구분되지 않았다. Rule #85/#86)
+const tBg: Record<string, string> = { subscription: 'var(--accent-green-bg)', redevelopment: 'var(--accent-purple-bg)', unsold: 'var(--accent-red-bg)', landmark: 'var(--accent-blue-bg)', complex: 'var(--accent-blue-bg)', trade: 'var(--accent-yellow-bg)' };
+const tClr: Record<string, string> = { subscription: 'var(--accent-green)', redevelopment: 'var(--accent-purple)', unsold: 'var(--accent-red)', landmark: 'var(--accent-cyan)', complex: 'var(--accent-cyan)', trade: 'var(--accent-yellow)' };
 const STAGES = ['정비구역지정', '조합설립', '사업시행인가', '관리처분', '착공', '준공'];
 
 export default async function AptUnifiedPage({ params }: Props) {
@@ -539,7 +541,7 @@ export default async function AptUnifiedPage({ params }: Props) {
   const subSt = sub ? (!sub.rcept_bgnde ? 'upcoming' : today >= sub.rcept_bgnde && today <= sub.rcept_endde ? 'open' : today < sub.rcept_bgnde ? 'upcoming' : 'closed') : null;
   const dDay = sub?.rcept_endde ? Math.ceil((new Date(sub.rcept_endde).getTime() - new Date(today).getTime()) / 86400000) : null;
   const SB: Record<string, { label: string; bg: string; color: string; border: string }> = {
-    open: { label: '접수중', bg: 'rgba(52,211,153,0.2)', color: 'var(--accent-green)', border: 'var(--accent-green)' },
+    open: { label: '접수중', bg: 'var(--accent-green-bg)', color: 'var(--accent-green)', border: 'var(--accent-green)' },
     upcoming: { label: '접수예정', bg: 'var(--accent-yellow-bg)', color: 'var(--accent-yellow)', border: 'var(--accent-yellow)' },
     closed: { label: '마감', bg: 'transparent', color: 'var(--text-tertiary)', border: 'var(--border)' },
   };
