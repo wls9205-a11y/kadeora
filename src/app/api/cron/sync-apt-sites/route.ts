@@ -274,8 +274,9 @@ async function handler(_req: NextRequest) {
   try {
     try { await sb.rpc('refresh_all_site_scores'); } catch {}
 
-    const { data: allSites } = await sb.from('apt_sites')
-      .select('id, name, site_type, region, sigungu, total_units, price_min, price_max, source_ids, description, faq_items, images, latitude, longitude, nearby_station, builder, developer, move_in_date, address, key_features')
+    // hero_image_url 은 DB 에는 있으나 생성된 database.ts 에 아직 없다 — 저장소 관행대로 캐스팅.
+    const { data: allSites } = await (sb as any).from('apt_sites')
+      .select('id, name, site_type, region, sigungu, total_units, price_min, price_max, source_ids, description, faq_items, images, hero_image_url, satellite_image_url, latitude, longitude, nearby_station, builder, developer, move_in_date, address, key_features')
       .limit(10000);
 
     const scoreGroups = new Map<number, string[]>();
@@ -310,7 +311,10 @@ async function handler(_req: NextRequest) {
       if (s.key_features && Array.isArray(s.key_features) && s.key_features.length >= 2) score += 2;
 
       // 미디어 (최대 5)
-      if (s.images && Array.isArray(s.images) && s.images.length >= 1) score += 5;
+      // s7-2: 기준이 images 였는데 그 배열은 뉴스 스크랩이라 화면에서 뺐다.
+      // 그대로 두면 "화면에 없는 이미지로 점수를 받는" 상태가 되므로 실제 표시되는
+      // 자체 호스팅 이미지로 옮긴다. sitemap 편입선(25) 교차는 양방향 0건으로 실측 확인.
+      if (s.hero_image_url || s.satellite_image_url) score += 5;
 
       // 위치 (최대 13)
       if (s.latitude && s.longitude) score += 5;
