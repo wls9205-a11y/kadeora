@@ -125,6 +125,7 @@ async function handler(req: NextRequest) {
     const rows = (body?.rows || []) as any[];
 
     let inserted = 0;
+    let failedBatches = 0;
     for (let i = 0; i < rows.length; i += 500) {
       const batch = rows.slice(i, i + 500);
       const payload = batch.map((r) => ({
@@ -139,10 +140,16 @@ async function handler(req: NextRequest) {
         position: r.position || 0,
       }));
       const { error } = await (sb as any).from('gsc_search_analytics').insert(payload);
-      if (!error) inserted += payload.length;
+      if (error) {
+        // 삼키면 적재가 전부 실패해도 응답은 ok:true 고 런타임 로그에 아무것도 안 남는다.
+        failedBatches++;
+        console.error('[gsc-sync] insert fail', error.message?.slice(0, 200));
+      } else {
+        inserted += payload.length;
+      }
     }
 
-    return NextResponse.json({ ok: true, date_range: [start, end], rows: rows.length, inserted });
+    return NextResponse.json({ ok: true, date_range: [start, end], rows: rows.length, inserted, failed_batches: failedBatches });
   } catch (e: any) {
     return NextResponse.json({ ok: true, skipped: 'exception', err: String(e?.message || '').slice(0, 120) });
   }
