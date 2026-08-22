@@ -6,6 +6,7 @@ import { Suspense } from 'react';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { SITE_URL } from '@/lib/constants';
 import StockIssueCard from '@/components/cards/StockIssueCard';
 import StockIssueCardV2 from '@/components/cards/v2/StockIssueCardV2';
 import IssueGateCard from '@/components/cta/IssueGateCard';
@@ -49,6 +50,8 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
       locale: 'ko_KR',
       type: 'website',
       url: m.canonical,
+      // s8: images 누락으로 공유 시 이미지 없는 링크로 나갔다. 기존 생성기 재사용.
+      images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent(m.title)}&category=stock&design=2`, width: 1200, height: 630, alt: m.title }],
     },
   };
 }
