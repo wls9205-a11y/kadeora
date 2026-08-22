@@ -21,8 +21,8 @@ button, input, select, textarea { font-family: inherit; }
 input, textarea, select { font-size: max(16px, var(--fs-sm)); }
 .sidebar-wrapper { display: none; }
 .right-panel-wrapper { display: none; }
-@media (min-width: 900px) { .sidebar-wrapper { display: block; } }
-@media (min-width: 1200px) { .right-panel-wrapper { display: block; } }
+@media (min-width: 1024px) { .sidebar-wrapper { display: block; } }
+@media (min-width: 1280px) { .right-panel-wrapper { display: block; } }
 
 /* 카드 호버 효과 */
 @media (hover: hover) {
@@ -89,7 +89,7 @@ input, textarea, select { font-size: max(16px, var(--fs-sm)); }
 }
 
 /* 태블릿 사이드바 숨김 */
-@media (min-width: 768px) and (max-width: 899px) {
+@media (min-width: 768px) and (max-width: 1023px) {
   .sidebar-wrapper { display: none; }
   .right-panel-wrapper { display: none; }
 }
@@ -406,6 +406,10 @@ html.font-small button { min-height: 36px; }
   --touch-min: 46px;
   /* s5-2 (Rule #78): 본문 컨테이너 기준 폭. 어드민(1400)·앱셸(1200)·좁은 폼(480)만 예외 */
   --container-max: 720px;
+  /* r4-P3: 용도별 컨테이너 폭. --container-max 는 --container-read 로 승계 */
+  --container-read: 720px;   /* 읽는 본문 */
+  --container-grid: 1120px;  /* 카드 그리드 블록 */
+  --container-shell: 1200px; /* 앱셸 */
 }
 
 html.font-small {
