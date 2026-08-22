@@ -76,6 +76,7 @@ async function handler(req: NextRequest) {
         .from('blog_posts')
         .update({ content: result.markdown })
         .eq('id', p.id);
+      if (error) console.error('[blog-inject-images] insert fail', error.message?.slice(0, 200));
       if (!error) {
         updated++;
         totalInserts += result.inserted;

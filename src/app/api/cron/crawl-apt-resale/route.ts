@@ -98,7 +98,12 @@ export async function GET(req: NextRequest) {
           const { error } = await supabase
             .from('apt_resale_rights')
             .upsert(rows, { onConflict: 'apt_name,deal_date,floor,exclusive_area' });
-          if (error) throw error;
+          // s9-3 의 런타임 로그 줄은 남기고, 여기서는 throw 까지 한다 —
+          // 그래야 withCronLogging 이 status='failed' 로 기록한다 (R4 P2-1).
+          if (error) {
+            console.error('[crawl-apt-resale] upsert fail', error.message?.slice(0, 200));
+            throw error;
+          }
           count += rows.length;
         }
       }

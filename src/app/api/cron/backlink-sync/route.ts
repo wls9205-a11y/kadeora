@@ -27,7 +27,8 @@ async function handler(req: NextRequest) {
           { domain: r.domain, url: r.url || null, anchor: r.anchor || null, source: 'referrer_log', last_seen: new Date().toISOString() },
           { onConflict: 'domain,url' }
         );
-      if (!error) upserted++;
+      if (error) console.error('[backlink-sync] insert fail', error.message?.slice(0, 200));
+      else upserted++;
     }
     return NextResponse.json({ ok: true, upserted });
   } catch (e: any) {

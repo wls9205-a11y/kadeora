@@ -119,7 +119,8 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
           // @ts-expect-error supabase update type
           .update({ latitude: coords.lat, longitude: coords.lng })
           .eq('id', p.id);
-        if (!error) redevUpdated++;
+        if (error) console.error('[redev-geocode] insert fail', error.message?.slice(0, 200));
+        else redevUpdated++;
       }
       await new Promise(r => setTimeout(r, 200));
     }
@@ -156,6 +157,7 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
         const { error } = await sb.from('apt_sites')
           .update({ latitude: coords.lat, longitude: coords.lng, updated_at: new Date().toISOString() })
           .eq('id', s.id);
+        if (error) console.error('[redev-geocode] insert fail', error.message?.slice(0, 200));
         if (!error) siteUpdated++;
         else { siteFailed++; if (!firstError) firstError = `DB: ${error.message}`; }
       } else {

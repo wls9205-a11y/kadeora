@@ -78,7 +78,8 @@ export async function GET(req: NextRequest) {
         url: `${SITE_URL}/stock/${note.symbol}`,
         published_at: new Date().toISOString(),
       });
-      if (!error) created++;
+      if (error) console.error('[stock-news-crawl] insert fail', error.message?.slice(0, 200));
+      else created++;
     }
 
     return { processed: targetStocks.length, created, failed: 0, metadata: { mode } };

@@ -61,7 +61,8 @@ export async function GET() {
             .update({ avg_sale_price_pyeong: avg, updated_at: new Date().toISOString() })
             .eq('apt_name', name)
             .or('avg_sale_price_pyeong.is.null,avg_sale_price_pyeong.eq.0');
-          if (!error) stats.pyeong++;
+          if (error) console.error('[data-quality-fix] insert fail', error.message?.slice(0, 200));
+          else stats.pyeong++;
           lastName = name;
           processedNames++;
         }

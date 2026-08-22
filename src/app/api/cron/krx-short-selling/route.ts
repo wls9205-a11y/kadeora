@@ -58,6 +58,7 @@ export async function GET(req: NextRequest) {
             short_ratio: parseFloat(item.CVSRTSELL_TRDVAL_WT || item.str_pct || '0'),
           }, { onConflict: 'symbol,trade_date' });
 
+          if (error) console.error('[krx-short-selling] insert fail', error.message?.slice(0, 200));
           if (!error) shortCreated++;
           else failed++;
         }
@@ -114,6 +115,7 @@ export async function GET(req: NextRequest) {
             balance_amount: parseInt(item.LEND_BAL_AMT || item.bal_amt || '0'),
           }, { onConflict: 'symbol,trade_date' });
 
+          if (error) console.error('[krx-short-selling] insert fail', error.message?.slice(0, 200));
           if (!error) lendingCreated++;
           else failed++;
         }

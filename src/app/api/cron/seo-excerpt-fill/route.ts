@@ -36,7 +36,8 @@ export async function GET(req: NextRequest) {
 
         if (excerpt.length >= 30) {
           const { error } = await (sb as any).from('blog_posts').update({ excerpt }).eq('id', post.id);
-          if (!error) updated++;
+          if (error) console.error('[seo-excerpt-fill] insert fail', error.message?.slice(0, 200));
+          else updated++;
         }
       } catch { continue; }
     }

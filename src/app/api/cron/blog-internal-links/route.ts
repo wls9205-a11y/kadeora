@@ -103,7 +103,8 @@ export async function GET(req: NextRequest) {
         const { error } = await (sb as any).from('blog_posts')
           .update({ related_slugs: slugs })
           .eq('id', post.id);
-        if (!error) updated++;
+        if (error) console.error('[blog-internal-links] insert fail', error.message?.slice(0, 200));
+        else updated++;
       } catch { continue; }
     }
 

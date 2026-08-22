@@ -116,7 +116,8 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
             const { error } = await supabase
               .from('redevelopment_projects')
               .upsert(row, { onConflict: 'district_name,region' });
-            if (!error) totalCreated++;
+            if (error) console.error('[crawl-nationwide-redev] insert fail', error.message?.slice(0, 200));
+            else totalCreated++;
           }
 
           regionCount += itemList.length;

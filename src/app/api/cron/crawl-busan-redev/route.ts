@@ -111,7 +111,8 @@ export async function GET(req: NextRequest) {
     for (let i = 0; i < mapped.length; i += 100) {
       const batch = mapped.slice(i, i + 100);
       const { error } = await supabase.from('redevelopment_projects').insert(batch);
-      if (!error) inserted += batch.length;
+      if (error) console.error('[crawl-busan-redev] insert fail', error.message?.slice(0, 200));
+      else inserted += batch.length;
     }
 
     return {

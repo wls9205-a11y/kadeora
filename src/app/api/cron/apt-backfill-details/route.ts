@@ -83,7 +83,8 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
         const { error } = await sb.from('apt_subscriptions')
           .update({ ...cleanDetails, updated_at: new Date().toISOString() })
           .eq('house_manage_no', houseNo);
-        if (!error) {
+        if (error) console.error('[apt-backfill-details] insert fail', error.message?.slice(0, 200));
+        else {
           updated++;
           missingMap.delete(houseNo);
         }
@@ -113,7 +114,8 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
           const { error } = await sb.from('apt_subscriptions')
             .update({ ...cleanDetails, updated_at: new Date().toISOString() })
             .eq('house_manage_no', houseNo);
-          if (!error) { updated++; missingMap.delete(houseNo); }
+          if (error) console.error('[apt-backfill-details] insert fail', error.message?.slice(0, 200));
+          else { updated++; missingMap.delete(houseNo); }
         }
       }
     } catch {}

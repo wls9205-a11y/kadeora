@@ -29,7 +29,8 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
       const linkSection = `\n\n## 📊 관련 분석\n\n${related.map((r: any) => `- [${r.title}](/blog/${r.slug})`).join('\n')}\n`;
       const { error } = await sb.from('blog_posts')
         .update({ content: post.content + linkSection }).eq('id', post.id);
-      if (!error) linked++;
+      if (error) console.error('[seo-internal-links] insert fail', error.message?.slice(0, 200));
+      else linked++;
     }
 
     return { processed: posts.length, updated: linked };

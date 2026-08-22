@@ -97,7 +97,8 @@ async function detectNewSubscriptions(sb: any): Promise<any[]> {
       detected_at: new Date().toISOString(),
     });
 
-    if (!error) {
+    if (error) console.error('[issue-preempt] insert fail', error.message?.slice(0, 200));
+    else {
       results.push({ type: 'subscription', name: sub.house_nm, score: finalScore });
     }
   }
@@ -183,7 +184,8 @@ async function detectUncoveredSites(sb: any): Promise<any[]> {
       detected_at: new Date().toISOString(),
     });
 
-    if (!error) {
+    if (error) console.error('[issue-preempt] insert fail', error.message?.slice(0, 200));
+    else {
       results.push({ type: 'uncovered', name: site.name, score: Math.round(score * 1.25) });
       created++;
     }
@@ -302,7 +304,8 @@ async function detectNaverSpikes(sb: any): Promise<any[]> {
           detected_at: new Date().toISOString(),
         });
 
-        if (!error) {
+        if (error) console.error('[issue-preempt] insert fail', error.message?.slice(0, 200));
+        else {
           results.push({ type: 'naver_spike', name: site.name, spike: Math.round(spikeRatio), score: finalScore });
         }
       }
@@ -391,7 +394,8 @@ async function detectTrendingKeywordGaps(sb: any): Promise<any[]> {
         detected_at: new Date().toISOString(),
       });
 
-      if (!error) {
+      if (error) console.error('[issue-preempt] insert fail', error.message?.slice(0, 200));
+      else {
         results.push({ type: 'trending_gap', keyword: t.keyword, heat: t.heat_score, score: finalScore });
       }
     }

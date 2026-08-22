@@ -20,7 +20,8 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
       const ids = thinPosts.map((p: any) => p.id);
       const { error } = await sb.from('blog_posts')
         .update({ is_published: false }).in('id', ids);
-      if (!error) unpublished = ids.length;
+      if (error) console.error('[seo-content-boost] insert fail', error.message?.slice(0, 200));
+      else unpublished = ids.length;
     }
 
     return { processed: unpublished, updated: unpublished };
