@@ -18,7 +18,10 @@ export function useTalkView<T extends HTMLElement>(slot: TalkSlot, props: TalkTr
 
   useEffect(() => {
     const el = ref.current;
-    if (!el || typeof IntersectionObserver === 'undefined') {
+    // ref 가 안 붙었다면 배너가 렌더되지 않았거나(라우트 제외) 집계 대상이 아닌 인스턴스다.
+    // 여기서 기록하면 화면에 없던 배너까지 노출로 잡혀 클릭률이 실제보다 낮게 나온다.
+    if (!el) return;
+    if (typeof IntersectionObserver === 'undefined') {
       trackTalkView(slot, propsRef.current);
       return;
     }
