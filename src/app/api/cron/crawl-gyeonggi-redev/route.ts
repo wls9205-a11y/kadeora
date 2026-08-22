@@ -122,7 +122,8 @@ export async function GET(req: NextRequest) {
         for (const seed of allSeeds) {
           // @ts-expect-error supabase insert type
           const { error } = await supabase.from('redevelopment_projects').insert(seed);
-          if (!error) seedInserted++;
+          if (error) console.error('[crawl-gyeonggi-redev] insert fail', error.message?.slice(0, 200));
+          else seedInserted++;
         }
         inserted = seedInserted;
       } else {
@@ -184,6 +185,7 @@ export async function GET(req: NextRequest) {
     for (let i = 0; i < mapped.length; i += 100) {
       const batch = mapped.slice(i, i + 100);
       const { error } = await supabase.from('redevelopment_projects').insert(batch);
+      if (error) console.error('[crawl-gyeonggi-redev] insert fail', error.message?.slice(0, 200));
       if (!error) inserted += batch.length;
       else insertErrors.push(error.message);
     }

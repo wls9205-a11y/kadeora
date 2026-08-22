@@ -37,7 +37,8 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
         .update({ content: cleaned })
         .eq('id', post.id);
 
-      if (!error) totalCleaned++;
+      if (error) console.error('[blog-cleanup-padding] insert fail', error.message?.slice(0, 200));
+      else totalCleaned++;
     }
   }
 

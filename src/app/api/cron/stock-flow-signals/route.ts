@@ -222,7 +222,8 @@ export async function GET(req: NextRequest) {
         metadata: signal.metadata,
       });
 
-      if (!error) created++;
+      if (error) console.error('[stock-flow-signals] insert fail', error.message?.slice(0, 200));
+      else created++;
     }
 
     return {

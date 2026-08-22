@@ -74,7 +74,8 @@ export async function GET(req: NextRequest) {
         foreign_buy: flow.foreign_buy || 0, foreign_sell: flow.foreign_sell || 0,
         inst_buy: flow.inst_buy || 0, inst_sell: flow.inst_sell || 0,
       });
-      if (!error) created++;
+      if (error) console.error('[stock-flow-crawl] insert fail', error.message?.slice(0, 200));
+      else created++;
     }
 
     return { processed: targets.length, created, failed: 0, metadata: { mode } };

@@ -69,7 +69,8 @@ JSON 배열만 응답. 각 항목: {"title":"이벤트명","description":"설명
                 importance: ev.importance || 'medium',
                 country: ev.country || 'KR',
               });
-              if (!error) created++;
+              if (error) console.error('[invest-calendar-refresh] insert fail', error.message?.slice(0, 200));
+              else created++;
             }
           }
         }

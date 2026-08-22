@@ -79,7 +79,8 @@ export async function GET(req: NextRequest) {
               .upsert(rows, { onConflict: 'apt_name,sigungu,dong,exclusive_area,deal_date,floor,rent_type,deposit', ignoreDuplicates: true })
               .select('id');
 
-            if (!error) {
+            if (error) console.error('[crawl-apt-rent] insert fail', error.message?.slice(0, 200));
+            else {
               inserted += data?.length || 0;
               skipped += rows.length - (data?.length || 0);
             }

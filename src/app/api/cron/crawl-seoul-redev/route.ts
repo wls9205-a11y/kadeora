@@ -142,6 +142,7 @@ export async function GET(req: NextRequest) {
         onConflict: 'external_id',
         ignoreDuplicates: false,
       });
+      if (error) console.error('[crawl-seoul-redev] insert fail', error.message?.slice(0, 200));
       if (!error) upserted += batch.length;
       else insertErrors.push(error.message);
     }
@@ -151,6 +152,7 @@ export async function GET(req: NextRequest) {
       for (let i = 0; i < withoutExtId.length; i += 100) {
         const batch = withoutExtId.slice(i, i + 100);
         const { error } = await (supabase as any).from('redevelopment_projects').insert(batch);
+        if (error) console.error('[crawl-seoul-redev] insert fail', error.message?.slice(0, 200));
         if (!error) inserted += batch.length;
         else insertErrors.push(error.message);
       }

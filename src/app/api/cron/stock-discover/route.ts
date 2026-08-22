@@ -242,7 +242,8 @@ async function handler() {
     for (let i = 0; i < newStocks.length; i += 50) {
       const batch = newStocks.slice(i, i + 50);
       const { error } = await sb.from('stock_quotes').upsert(batch, { onConflict: 'symbol', ignoreDuplicates: true });
-      if (!error) added += batch.length;
+      if (error) console.error('[stock-discover] insert fail', error.message?.slice(0, 200));
+      else added += batch.length;
     }
   }
 

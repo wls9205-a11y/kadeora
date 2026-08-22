@@ -92,6 +92,7 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
         // @ts-expect-error supabase update type
         .update({ total_households: households })
         .eq('id', p.id);
+      if (error) console.error('[redev-verify-households] insert fail', error.message?.slice(0, 200));
       if (!error) updated++;
       else failed++;
     }

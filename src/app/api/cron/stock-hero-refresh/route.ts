@@ -166,7 +166,8 @@ export async function GET(req: NextRequest) {
         active_from: now.toISOString(),
         active_until: new Date(now.getTime() + 24 * 3600000).toISOString(),
       });
-      if (!error) created++;
+      if (error) console.error('[stock-hero-refresh] insert fail', error.message?.slice(0, 200));
+      else created++;
     }
 
     return {

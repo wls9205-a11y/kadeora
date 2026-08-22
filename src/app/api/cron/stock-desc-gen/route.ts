@@ -80,7 +80,8 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
               const idx = item.n - 1;
               if (idx >= 0 && idx < aiBatch.length && item.desc) {
                 const { error } = await sb.from('stock_quotes').update({ description: item.desc }).eq('symbol', aiBatch[idx].symbol);
-                if (!error) { updated++; mode = 'ai+template'; }
+                if (error) console.error('[stock-desc-gen] insert fail', error.message?.slice(0, 200));
+                else { updated++; mode = 'ai+template'; }
               }
             }
           }

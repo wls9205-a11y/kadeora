@@ -206,7 +206,8 @@ export async function GET(req: NextRequest) {
             updated_at: now,
           }));
           const { error } = await supabase.from('stock_quotes').upsert(batch, { onConflict: 'symbol' });
-          if (!error) totalCreated += batch.length;
+          if (error) console.error('[stock-crawl] insert fail', error.message?.slice(0, 200));
+          else totalCreated += batch.length;
         }
       }
     }
@@ -228,7 +229,8 @@ export async function GET(req: NextRequest) {
             updated_at: now,
           }));
           const { error } = await supabase.from('stock_quotes').upsert(batch, { onConflict: 'symbol' });
-          if (!error) totalCreated += batch.length;
+          if (error) console.error('[stock-crawl] insert fail', error.message?.slice(0, 200));
+          else totalCreated += batch.length;
         }
       }
     }

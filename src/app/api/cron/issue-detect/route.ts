@@ -519,7 +519,8 @@ async function handler(_req: NextRequest) {
       detected_at: new Date().toISOString(),
     });
 
-    if (!error) {
+    if (error) console.error('[issue-detect] insert fail', error.message?.slice(0, 200));
+    else {
       results.push({
         title: candidate.title,
         score: score.final_score,

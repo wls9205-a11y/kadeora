@@ -67,6 +67,7 @@ export async function GET(req: NextRequest) {
         // @ts-expect-error supabase upsert type
         .upsert(rows,  { onConflict: 'symbol,date' });
 
+      if (error) console.error('[stock-price] insert fail', error.message?.slice(0, 200));
       if (!error) {
         created += rows.length;
       } else {

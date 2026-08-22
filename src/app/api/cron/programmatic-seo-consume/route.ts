@@ -32,7 +32,8 @@ async function handler(req: NextRequest) {
         .from('programmatic_seo_queue')
         .update({ status: 'ready', content_ready: true, completed_at: new Date().toISOString() })
         .eq('id', r.id);
-      if (!error) activated++;
+      if (error) console.error('[programmatic-seo-consume] insert fail', error.message?.slice(0, 200));
+      else activated++;
     }
     return NextResponse.json({ ok: true, activated });
   } catch {

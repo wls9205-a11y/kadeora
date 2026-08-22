@@ -44,7 +44,8 @@ async function handler(_req: NextRequest) {
         sitemap_wave: s.rcept_bgnde && s.rcept_bgnde >= '2026-01-01' ? 1 : 2,
         updated_at: new Date().toISOString(),
       }, { onConflict: 'slug', ignoreDuplicates: false });
-      if (!error) inserted++;
+      if (error) console.error('[sync-apt-sites] insert fail', error.message?.slice(0, 200));
+      else inserted++;
     }
   } catch (e: unknown) { errors.push(`sub: ${errMsg(e)}`); }
 
@@ -98,7 +99,8 @@ async function handler(_req: NextRequest) {
       // 배치 삽입 (50건씩)
       for (let i = 0; i < newRows.length; i += 50) {
         const { error } = await sb.from('apt_sites').upsert(newRows.slice(i, i + 50), { onConflict: 'slug', ignoreDuplicates: true });
-        if (!error) inserted += Math.min(50, newRows.length - i);
+        if (error) console.error('[sync-apt-sites] insert fail', error.message?.slice(0, 200));
+        else inserted += Math.min(50, newRows.length - i);
       }
       // 업데이트는 10건씩 병렬
       for (let i = 0; i < updateOps.length; i += 10) {
@@ -186,6 +188,7 @@ async function handler(_req: NextRequest) {
         const { error } = await sb.from('apt_sites').upsert(rows, {
           onConflict: 'slug', ignoreDuplicates: true,
         });
+        if (error) console.error('[sync-apt-sites] insert fail', error.message?.slice(0, 200));
         if (!error) tradeInserted += rows.length;
         else errors.push(`trade-batch-${i}: ${error.message}`);
       }
@@ -257,7 +260,8 @@ async function handler(_req: NextRequest) {
       // 배치 삽입
       for (let i = 0; i < newRows.length; i += 50) {
         const { error } = await sb.from('apt_sites').upsert(newRows.slice(i, i + 50), { onConflict: 'slug', ignoreDuplicates: true });
-        if (!error) unsoldInserted += Math.min(50, newRows.length - i);
+        if (error) console.error('[sync-apt-sites] insert fail', error.message?.slice(0, 200));
+        else unsoldInserted += Math.min(50, newRows.length - i);
       }
       // 업데이트 10건씩 병렬
       for (let i = 0; i < updateOps.length; i += 10) {

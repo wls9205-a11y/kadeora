@@ -80,7 +80,8 @@ export async function GET(req: NextRequest) {
           .from('apt_subscriptions')
           .upsert(mapped, { onConflict: 'house_manage_no' })
           .select('id');
-        if (!error) totalSynced += data?.length || mapped.length;
+        if (error) console.error('[crawl-apt-subscription] insert fail', error.message?.slice(0, 200));
+        else totalSynced += data?.length || mapped.length;
 
         // 마지막 페이지면 중단
         if (items.length < 500) break;

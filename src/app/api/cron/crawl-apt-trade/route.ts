@@ -158,7 +158,8 @@ export async function GET(req: NextRequest) {
         })).filter(r => r.deal_amount > 0 && r.deal_date);
         if (rows.length > 0) {
           const { error } = await supabase.from('apt_transactions').insert(rows);
-          if (!error) count += rows.length;
+          if (error) console.error('[crawl-apt-trade] insert fail', error.message?.slice(0, 200));
+          else count += rows.length;
         }
       }
       return count;
