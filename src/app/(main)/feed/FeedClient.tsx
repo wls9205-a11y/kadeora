@@ -76,7 +76,7 @@ export default function FeedClient({
   posts: initialPosts,
   activeCategory,
   activeRegion = 'all',
-  activeSort = 'latest',
+  activeSort = 'popular',
 }: Props) {
   const router = useRouter();
   const pathname = usePathname();
@@ -244,7 +244,7 @@ export default function FeedClient({
     const merged = { category: activeCategory, region: activeRegion, sort: activeSort, ...params };
     if (merged.category && merged.category !== 'all') p.set('category', merged.category);
     if (merged.region && merged.region !== 'all' && merged.category === 'local') p.set('region', merged.region);
-    if (merged.sort && merged.sort !== 'latest') p.set('sort', merged.sort);
+    if (merged.sort && merged.sort !== 'popular') p.set('sort', merged.sort);
     const qs = p.toString();
     return `/feed${qs ? `?${qs}` : ''}`;
   };
@@ -265,13 +265,13 @@ export default function FeedClient({
     return all;
   }, [posts, activeTag]);
 
+  // r4-P4: 우리동네(4개월째 새 글 0건) · 팔로잉(사람 작성자 0명) 탭 제거.
+  // local 카테고리 자체는 DB에 보존한다(과거 글 339건) — ?category=local 직접 진입은 계속 동작한다.
   const categories = [
-    { key: 'all',       label: '전체',    icon: '📋' },
-    { key: 'stock',     label: '주식',    icon: '📊' },
-    { key: 'apt',       label: '부동산',  icon: '🏢' },
-    { key: 'local',     label: '우리동네',icon: '📍' },
-    { key: 'free',      label: '자유',    icon: '💬' },
-    { key: 'following', label: '팔로잉',  icon: '👥' },
+    { key: 'all',   label: '전체',   icon: '📋' },
+    { key: 'stock', label: '주식',   icon: '📊' },
+    { key: 'apt',   label: '부동산', icon: '🏢' },
+    { key: 'free',  label: '자유',   icon: '💬' },
   ];
 
   const sortOptions: { key: SortKey; label: string; icon: React.ReactNode }[] = [
