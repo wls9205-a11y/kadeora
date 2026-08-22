@@ -196,7 +196,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           address: { '@type': 'PostalAddress', addressCountry: 'KR', addressRegion: '부산광역시', addressLocality: '연제구', streetAddress: '연동로 27, 405호', postalCode: '47571' },
           contactPoint: { '@type': 'ContactPoint', contactType: 'customer service', email: 'kadeora.app@gmail.com', telephone: '+82-10-5001-1382', availableLanguage: 'Korean' },
           sameAs: [
-            'https://blog.naver.com/silreit',
+            'https://blog.naver.com/kadeoraapp',
             'https://cafe.naver.com/kadeoraapp',
             'https://pf.kakao.com/_NFxdxhX',
           ],

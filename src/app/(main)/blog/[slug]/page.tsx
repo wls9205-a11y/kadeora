@@ -14,7 +14,7 @@ import LoginGate from '@/components/LoginGate';
 import BlogFloatingBar from '@/components/BlogFloatingBar';
 import ShareButtons from '@/components/ShareButtons';
 // s184: KakaoShareButton 제거 — ShareButtons (8 플랫폼) 안에 카카오 포함됨.
-import BlogFaqAccordion from '@/components/BlogFaqAccordion';
+import FAQBlock from '@/components/detail/FAQBlock';
 import BlogToc from '@/components/BlogToc';
 import BlogActions from '@/components/BlogActions';
 import BlogBookmarkButton from '@/components/BlogBookmarkButton';
@@ -792,14 +792,9 @@ export default async function BlogDetailPage({ params }: Props) {
     license: 'https://creativecommons.org/licenses/by-nc/4.0/',
   } : null;
 
-    const showFaq = faqItems.length >= 1;  // 1개 이상이면 FAQ 스키마 출력 (JSON-LD 리치스니펫 극대화)
-  const faqSchema = showFaq && faqItems.length > 0 ? {
-    '@context': 'https://schema.org', '@type': 'FAQPage',
-    mainEntity: faqItems.map(f => ({
-      '@type': 'Question', name: f.question,
-      acceptedAnswer: { '@type': 'Answer', text: f.answer },
-    })),
-  } : null;
+  // r4-P6: FAQPage JSON-LD 는 FAQBlock 이 같은 배열에서 함께 낸다.
+  // 여기서 별도로 만들지 않는다 — 두 벌이 되면 화면과 구조화 데이터가 갈라진다.
+  const showFaq = faqItems.length >= 1;
 
   // S4-4 P1: 글이 가리키는 현장이 대상 단계면 하단에 알림 신청 폼을 붙인다.
   //
@@ -895,7 +890,6 @@ export default async function BlogDetailPage({ params }: Props) {
       ))}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
-      {faqSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />}
       {howtoSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howtoSchema) }} />}
       {datasetSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(datasetSchema) }} />}
       {eventSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(eventSchema) }} />}
@@ -1139,8 +1133,18 @@ export default async function BlogDetailPage({ params }: Props) {
           </div>
         )}
 
-        {/* FAQ 아코디언 */}
-        {showFaq && <BlogFaqAccordion items={faqItems} />}
+        {/* FAQ — 화면 문구와 FAQPage JSON-LD 를 같은 배열에서 낸다 */}
+        {showFaq && (
+          <section aria-labelledby="blog-sec-faq" style={{ marginTop: 'var(--sp-xl)' }}>
+            <h2
+              id="blog-sec-faq"
+              style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 var(--sp-sm)' }}
+            >
+              자주 묻는 질문
+            </h2>
+            <FAQBlock items={faqItems.map((f) => ({ q: f.question, a: f.answer }))} />
+          </section>
+        )}
 
         {/* 세션70: 본문 중간 회원가입 유도 */}
 
@@ -1184,7 +1188,7 @@ export default async function BlogDetailPage({ params }: Props) {
 
         {/* s213: 이 글 정보 — 작성자 / 카테고리 / 출처. 태그는 BlogFooterMeta(article 외부)에서 노출. */}
         <section
-          aria-label="이 글 정보"
+          aria-labelledby="blog-sec-meta"
           style={{
             marginTop: 'var(--sp-md)', padding: '12px 14px',
             borderRadius: 'var(--radius-md)',
@@ -1192,6 +1196,7 @@ export default async function BlogDetailPage({ params }: Props) {
             fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.7,
           }}
         >
+          <h2 id="blog-sec-meta" style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)', margin: 0 }}>이 글 정보</h2>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
             {/* 작성자 */}
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
@@ -1232,8 +1237,8 @@ export default async function BlogDetailPage({ params }: Props) {
           }).filter((i: { label: string; url: string }) => i.label && /^https?:\/\//i.test(i.url));
           if (items.length === 0) return null;
           return (
-            <section style={{ marginTop: 'var(--sp-xl)', padding: '14px 16px', borderRadius: 'var(--radius-md)', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
-              <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px' }}>📚 참고자료</h2>
+            <section aria-labelledby="blog-sec-refs" style={{ marginTop: 'var(--sp-xl)', padding: 'var(--sp-md) var(--card-p)', borderRadius: 'var(--radius-md)', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
+              <h2 id="blog-sec-refs" style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 var(--sp-sm)' }}>참고자료</h2>
               <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.8 }}>
                 {items.map((r: { label: string; url: string }, i: number) => (
                   <li key={i}>
@@ -1444,8 +1449,9 @@ export default async function BlogDetailPage({ params }: Props) {
 
       {/* 이번주 인기글 */}
       {related.length > 0 && (
-        <div style={{ marginBottom: 'var(--sp-xl)' }}>
-          <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>🔥 이번주 인기글</h2>
+        <section aria-labelledby="blog-sec-popular" style={{ marginBottom: 'var(--sp-xl)' }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--fs-xs)', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--brand)', fontWeight: 600, marginBottom: 3 }}>POPULAR — 이번주</div>
+          <h2 id="blog-sec-popular" style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 var(--sp-sm)' }}>이번주 인기글</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {related.slice(0, 3).map((r: any, i: number) => (
               <Link key={r.slug} href={`/blog/${r.slug}`} style={{
@@ -1458,13 +1464,14 @@ export default async function BlogDetailPage({ params }: Props) {
               </Link>
             ))}
           </div>
-        </div>
+        </section>
       )}
 
       {/* 관련 글 */}
       {(related ?? []).length > 0 && (
-        <div style={{ marginBottom: 'var(--sp-xl)' }}>
-          <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10, margin: '0 0 10px' }}>📚 관련 글</h2>
+        <section aria-labelledby="blog-sec-related" style={{ marginBottom: 'var(--sp-xl)' }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--fs-xs)', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--brand)', fontWeight: 600, marginBottom: 3 }}>RELATED — 함께 보기</div>
+          <h2 id="blog-sec-related" style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 var(--sp-sm)' }}>관련 글</h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 'var(--sp-sm)' }}>
             {related!.slice(0, 4).map((r: any) => (
               <Link key={r.slug} href={`/blog/${r.slug}`} className="kd-feed-card" style={{ display: 'block', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-surface)', textDecoration: 'none', transition: 'border-color var(--transition-fast)' }}>
@@ -1476,7 +1483,7 @@ export default async function BlogDetailPage({ params }: Props) {
               </Link>
             ))}
           </div>
-        </div>
+        </section>
       )}
 
       {/* 관련 부동산 현장 (내부 링크 SEO) */}
