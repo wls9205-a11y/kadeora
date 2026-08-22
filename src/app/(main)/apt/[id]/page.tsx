@@ -570,17 +570,6 @@ export default async function AptUnifiedPage({ params }: Props) {
         />
       )}
 
-      {/* id: KPI '관심' 타일의 scrollTo 목적지. s7-3 에서 하단 전체폼을 없애며 이리로 옮겼다 */}
-      <div id="interest-section" style={{ scrollMarginTop: 60 }}>
-        <InterestRegisterHero
-          aptId={site?.id ?? slug}
-          aptName={name}
-          aptSlug={slug}
-          status={subSt}
-          isLoggedIn={isLoggedInApt}
-        />
-      </div>
-
       <CardCarousel slug={slug} name={name} cards={site?.og_cards as any} />
 
       {/* Phase 6: 차별화 무기 6 컴포넌트 */}
@@ -808,6 +797,17 @@ export default async function AptUnifiedPage({ params }: Props) {
               <div className="site-description" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', lineHeight: 1.6 }}>{sub?.ai_summary || site?.description}</div>
             </div>
         )}
+      </div>
+
+      {/* id: KPI '관심' 타일의 scrollTo 목적지. s7-3 에서 하단 전체폼을 없애며 이리로 옮겼다 */}
+      <div id="interest-section" style={{ scrollMarginTop: 60 }}>
+        <InterestRegisterHero
+          aptId={site?.id ?? slug}
+          aptName={name}
+          aptSlug={slug}
+          status={subSt}
+          isLoggedIn={isLoggedInApt}
+        />
       </div>
 
 
@@ -1133,6 +1133,10 @@ export default async function AptUnifiedPage({ params }: Props) {
           </div>
         ); 
       })()}
+
+      {/* s7-4: 조감도·공급정보·일정을 본 직후가 관심 최고점이다. 정보가 먼저 나오므로
+           리드팜 구조가 되지 않는다. LeadFormAnchor 의 스크롤 목적지도 이리로 당겨진다. */}
+      {showLeadForm && site && <LeadForm siteSlug={site.slug} siteName={site.name} typeOptions={leadTypeOptions} />}
 
       {/* 분양가 vs 실거래가 비교 (두 데이터 모두 있을 때) */}
       {site?.price_min && site?.price_max && trades.length > 0 && (() => {
@@ -1600,7 +1604,6 @@ export default async function AptUnifiedPage({ params }: Props) {
         </LoginGate>
       )}
 
-      {/* 관심단지 등록 CTA — AI 분석 바로 아래 (노출 극대화) */}
       {/* 댓글 섹션 */}
       {site?.slug && <AptCommentSection slug={site.slug} siteName={name} />}
 
@@ -1917,9 +1920,6 @@ export default async function AptUnifiedPage({ params }: Props) {
 
       {/* FAQ */}
       {faq.length > 0 && <div className="apt-card"><SectionHeader eyebrow="FAQ" title="자주 묻는 질문" />{faq.map((f, i) => <details key={i} style={{ borderBottom: i < faq.length - 1 ? '1px solid var(--border)' : 'none', padding: '10px 0' }}><summary style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', cursor: 'pointer', listStyle: 'none', display: 'flex', justifyContent: 'space-between' }}><span>{f.q}</span><span style={{ color: 'var(--text-tertiary)' }}>+</span></summary><p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.7, margin: '6px 0 0' }}>{f.a}</p></details>)}</div>}
-
-      {/* 관심 현장 알림 신청 — 상단 앵커의 스크롤 목적지 */}
-      {showLeadForm && site && <LeadForm siteSlug={site.slug} siteName={site.name} typeOptions={leadTypeOptions} />}
 
       {/* Related posts */}
       {relatedPosts.length > 0 && <div className="apt-card"><SectionHeader eyebrow="COMMENTS" title="커뮤니티 게시글" />{relatedPosts.map((p: Record<string, any>) => <Link key={p.id} href={`/feed/${p.id}`} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none', color: 'inherit', fontSize: 'var(--fs-sm)' }}><span style={{ color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</span><span style={{ color: 'var(--text-tertiary)', flexShrink: 0, marginLeft: 8, fontSize: 'var(--fs-xs)' }}>댓글 {p.comments_count || 0}</span></Link>)}</div>}
