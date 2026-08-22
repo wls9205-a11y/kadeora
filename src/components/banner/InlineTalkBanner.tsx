@@ -1,10 +1,8 @@
 'use client';
 
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
-import { track } from '@/lib/analytics';
-
-const KAKAO_URL = 'https://open.kakao.com/o/gk8TBGyh';
+import { KAKAO_TALK_URL, trackTalkClick } from '@/lib/talk-banner';
+import { useTalkView } from './useTalkView';
 
 type Props = {
   /** 추가 여백/스타일 조정용 */
@@ -12,27 +10,27 @@ type Props = {
 };
 
 /**
- * 콘텐츠 내 인라인 배너.
+ * 콘텐츠 내 인라인 이미지 배너 — 현재는 블로그 상세 전용.
  * 클릭 트래킹(user_events)을 위해 'use client' + onClick.
  *
  * ⚠️ DB 본문에 삽입 금지. 반드시 렌더 시점에 컴포넌트로 끼울 것.
  * ⚠️ AdSense 유닛과 최소 250px 간격 확보.
+ *
+ * s-v2: /apt/[id] 에서는 걷어냈다. 30일 1클릭 — 광고처럼 보이고 현장 맥락이 없다.
+ *       상세에서는 SiteTalkCTA(텍스트·현장명 포함)가 이 자리를 대신한다.
+ *       블로그는 이번 범위 밖이라 그대로 둔다.
  */
 export default function InlineTalkBanner({ className = '' }: Props) {
-  const pathname = usePathname() ?? '';
-
-  const handleClick = () => {
-    track('banner_click', 'bujeonggong_talk', { slot: 'inline', page_path: pathname });
-  };
+  const viewRef = useTalkView<HTMLDivElement>('inline');
 
   return (
-    <div className={`my-8 ${className}`}>
+    <div ref={viewRef} className={`my-8 ${className}`}>
       <a
-        href={KAKAO_URL}
+        href={KAKAO_TALK_URL}
         target="_blank"
         rel="noopener noreferrer"
         aria-label="부정공 TALK — 부동산 정보 공유 카톡방 열기 (새 창)"
-        onClick={handleClick}
+        onClick={() => trackTalkClick('inline')}
         className="block overflow-hidden rounded-xl shadow-sm transition-shadow hover:shadow-md"
       >
         <picture>

@@ -1,31 +1,29 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { track } from '@/lib/analytics';
-
-const KAKAO_URL = 'https://open.kakao.com/o/gk8TBGyh';
+import {
+  KAKAO_TALK_URL,
+  TALK_MEMBER_COUNT,
+  trackTalkClick,
+} from '@/lib/talk-banner';
+import { useTalkView } from './useTalkView';
 
 /** 배너 높이(px). spacer 와 공유. */
 export const STICKY_BANNER_HEIGHT = 52;
 
 /**
- * 오픈채팅 참여자 수 — 수동 갱신.
- * 카카오가 API 를 제공하지 않아 직접 넣는다.
+ * 인라인 '이미지' 배너가 들어가는 라우트 — 여기선 상단 배너를 렌더하지 않는다.
  *
- * ⚠️ 갱신 안 하면 숫자가 낡아 신뢰를 깎는다. 월 1회는 확인할 것.
- *    카톡방 우측 상단 참여자 수를 보고 아래 상수와 이 주석의 날짜를 같이 고친다.
+ * s-v2: /apt/[id] 를 목록에서 뺐다.
+ *   30일 실측 — 카톡방 진입 클릭 7건 중 6건이 이 상단 배너에서 나왔고 인라인 이미지는 1건이다.
+ *   그 6건을 만든 슬롯을 트래픽 상위 페이지에서 끄고 있었다.
+ *   상세 본문의 이미지 배너는 현장 맥락 텍스트 CTA(SiteTalkCTA)로 교체했으므로
+ *   상단(방 일반)과 본문(현장 맥락)은 중복이 아니라 역할 분담이다.
  *
- * 마지막 갱신: 2026-07-18
- */
-const MEMBER_COUNT = 1240;
-
-/**
- * 인라인 배너가 들어가는 라우트 — 여기선 상단 배너를 렌더하지 않는다.
- * 같은 페이지에 배너가 둘 뜨는 걸 막는다. 인라인이 우선.
+ * 블로그·complex 는 이번 범위 밖 — 이미지 인라인 배너가 그대로라 제외를 유지한다.
  */
 const INLINE_ROUTES = [
   /^\/blog\/[^/]+$/,
-  /^\/apt\/[^/]+$/,
   /^\/apt\/complex\/[^/]+$/,
 ];
 
@@ -36,17 +34,19 @@ const LIVE = '#1FA463';
 
 export default function StickyTalkBanner() {
   const pathname = usePathname() ?? '';
+  const hidden = INLINE_ROUTES.some((r) => r.test(pathname));
 
-  if (INLINE_ROUTES.some((r) => r.test(pathname))) return null;
+  // 훅은 조기 반환보다 위에서 무조건 호출한다 (훅 순서 규칙).
+  // 렌더하지 않는 라우트에서는 ref 가 붙지 않아 노출도 기록되지 않는다.
+  const viewRef = useTalkView<HTMLAnchorElement>('sticky');
+
+  if (hidden) return null;
 
   const handleClick = () => {
-    track('banner_click', 'bujeonggong_talk', {
-      slot: 'sticky',
-      page_path: pathname,
-    });
+    trackTalkClick('sticky');
   };
 
-  const count = MEMBER_COUNT.toLocaleString();
+  const count = TALK_MEMBER_COUNT.toLocaleString();
 
   return (
     <>
@@ -54,7 +54,8 @@ export default function StickyTalkBanner() {
       <div aria-hidden="true" style={{ height: STICKY_BANNER_HEIGHT }} />
 
       <a
-        href={KAKAO_URL}
+        ref={viewRef}
+        href={KAKAO_TALK_URL}
         target="_blank"
         rel="noopener noreferrer"
         aria-label={`부동산 정보 공유방 — 현재 ${count}명 참여 중인 오픈 카톡방. 새 창으로 열기`}

@@ -33,7 +33,9 @@ import SpecTable from '@/components/detail/SpecTable';
 import CheongakMatchCard from '@/components/apt/CheongakMatchCard';
 import AptBlogStack from '@/components/apt/AptBlogStack';
 import AptCompareTable from '@/components/apt/AptCompareTable';
-import InlineTalkBanner from '@/components/banner/InlineTalkBanner';
+import SiteTalkCTA from '@/components/banner/SiteTalkCTA';
+import TalkInlineLink from '@/components/banner/TalkInlineLink';
+import AptTalkBottomBar from '@/components/apt/AptTalkBottomBar';
 import AptSidebar from '@/components/apt/AptSidebar';
 import AptPriceTrendCard from '@/components/apt/AptPriceTrendCard';
 import AptDDayCard from '@/components/apt/detail/AptDDayCard';
@@ -89,7 +91,7 @@ async function resolveParam(rawId: string) {
 
 async function fetchUnifiedData(slug: string) {
   const sb = getSupabaseAdmin();
-  const APT_COLS = 'id,slug,name,site_type,region,sigungu,dong,address,description,seo_title,seo_description,builder,developer,total_units,built_year,move_in_date,status,is_active,content_score,interest_count,page_views,comment_count,images,satellite_image_url,og_image_url,key_features,faq_items,nearby_facilities,nearby_station,school_district,price_min,price_max,price_comparison,search_trend,latitude,longitude,source_ids,created_at,updated_at,og_cards,hero_image_url,hero_image_source,hero_image_credit,lifecycle_stage,review_score,review_count,faqs,data_quality_score';
+  const APT_COLS = 'id,slug,name,site_type,region,sigungu,dong,address,description,seo_title,seo_description,builder,developer,total_units,built_year,move_in_date,status,is_active,content_score,interest_count,page_views,comment_count,images,satellite_image_url,og_image_url,key_features,faq_items,nearby_facilities,nearby_station,school_district,price_min,price_max,price_comparison,search_trend,latitude,longitude,source_ids,created_at,updated_at,og_cards,hero_image_url,hero_image_source,hero_image_credit,lifecycle_stage,review_score,review_count,faqs,data_quality_score,remaining_units,general_units,official_url,discount_pct,agent_kakao_url';
 
   // Phase 1: apt_sites — exact slug → multi-stage fuzzy fallback
   let { data: site } = await (sb as any).from('apt_sites').select(APT_COLS).eq('slug', slug).maybeSingle();
@@ -467,6 +469,28 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 function fmtAmount(n: number | null) { if (!n) return '-'; return n >= 10000 ? `${(n / 10000).toFixed(1)}억` : `${n.toLocaleString()}만`; }
 function fmtYM(s: string | null) { if (!s) return null; return `${s.slice(0, 4)}년 ${parseInt(s.slice(4, 6))}월`; }
 
+/**
+ * s-v2 2번 블록 — 한 줄 요약.
+ * analysis_text 는 채움률 100% 라 어느 현장을 열어도 이 블록이 비지 않는다.
+ * HTML 이므로 태그를 걷어내고 앞 n문장만 쓴다 (전문은 8번 접힘 블록에 그대로 남는다).
+ */
+function firstSentences(html: string | null, n: number): string | null {
+  if (!html) return null;
+  const text = html
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (!text) return null;
+  // 마침표/물음표/느낌표 뒤 공백을 문장 경계로 본다. 소수점(3.3㎡)은 뒤에 공백이 없어 안 걸린다.
+  const parts = text.split(/(?<=[.!?])\s+/).filter(Boolean);
+  const out = parts.slice(0, n).join(' ').trim();
+  return out.length >= 20 ? out : null;
+}
+
 const ct: React.CSSProperties = { fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)', display: 'flex', alignItems: 'center', gap: 6, margin: '0 0 8px' };
 const tLabel: Record<string, string> = { subscription: '분양', redevelopment: '재개발', unsold: '미분양', landmark: '랜드마크', complex: '기존단지', trade: '실거래' };
 // s7-5: 다크 전제 하드코딩 → 기존 accent 토큰. 흰 배경 합성 실측으로 전부 4.5:1 이상.
@@ -643,8 +667,9 @@ export default async function AptUnifiedPage({ params }: Props) {
             totalUnits={site?.total_units ?? null}
           />
           <AptBlogStack slug={slug} />
-          {/* 부정공 TALK 인라인 배너 — 상세 섹션 사이 (렌더 시점 삽입) */}
-          <InlineTalkBanner />
+          {/* s-v2: 여기 있던 InlineTalkBanner(955×235 이미지)를 걷어냈다.
+               30일 1클릭 — 광고처럼 보이고 어느 현장을 봐도 같은 그림이라 맥락이 없다.
+               현장 맥락 CTA(SiteTalkCTA)가 6번 블록에서 이 역할을 대신한다. */}
           <AptCompareTable
             slug={slug}
             currentSite={{
@@ -827,24 +852,21 @@ export default async function AptUnifiedPage({ params }: Props) {
 
         {/* S4-2: 상단 컴팩트 진입 바 — 스펙 표 위. 폼 전체는 하단에 유지하고 스크롤로 연결한다 */}
         {showLeadForm && <LeadFormAnchor />}
-        {(sub?.ai_summary || site?.description) && (
+        {/* ── 2번 블록 · 한 줄 요약 ──
+             analysis_text(100%) > ai_summary > description 순.
+             앞 소스가 비는 현장에서도 블록이 사라지지 않도록 3단으로 받친다. */}
+        {(() => {
+          const summary = firstSentences(analysisText, 3) || sub?.ai_summary || site?.description;
+          if (!summary) return null;
+          return (
             <div style={{ padding: 'var(--sp-md) var(--card-p)', borderRadius: 'var(--radius-md)', background: 'linear-gradient(135deg, var(--brand-bg), var(--accent-purple-bg))', border: '1px solid var(--brand-border)' }}>
               <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--brand)', marginBottom: 3 }}>AI 분석</div>
-              <div className="site-description" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', lineHeight: 1.6 }}>{sub?.ai_summary || site?.description}</div>
+              <div className="site-description" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', lineHeight: 1.6 }}>{summary}</div>
             </div>
-        )}
+          );
+        })()}
       </div>
 
-      {/* id: KPI '관심' 타일의 scrollTo 목적지. s7-3 에서 하단 전체폼을 없애며 이리로 옮겼다 */}
-      <div id="interest-section" style={{ scrollMarginTop: 60 }}>
-        <InterestRegisterHero
-          aptId={site?.id ?? slug}
-          aptName={name}
-          aptSlug={slug}
-          status={subSt}
-          isLoggedIn={isLoggedInApt}
-        />
-      </div>
 
 
       {/* s2: 공급 정보 스펙 표 — 시공사/위치/규모/일반분양/분양가/입주/상태를 여기 한 곳에서만 쓴다.
@@ -860,30 +882,45 @@ export default async function AptUnifiedPage({ params }: Props) {
         const priceStr = (() => {
           const lo = site?.price_min || unsold?.sale_price_min || 0;
           const hi = site?.price_max || 0;
-          if (!lo && !hi) return '분양가 미공개';
+          // s-v2: 여기서 '분양가 미공개' 문자열을 만들지 않는다. null 로 흘려보내
+          //   아래 `미공개` 규칙 한 곳에서만 처리한다 (표기 두 벌 금지).
+          if (!lo && !hi) return null;
           if (lo && hi && lo !== hi) return `${fmtAmount(lo)} ~ ${fmtAmount(hi)}`;
           return fmtAmount(lo || hi);
         })();
+        // s-v2: 일반분양은 총공급으로 대체하지 않는다. 총공급 = 특별공급 + 일반공급이라
+        //   둘을 같은 숫자로 쓰면 '규모' 행과 똑같은 값이 두 번 나오고 오정보가 된다.
+        //   general_units(직접 입력) > house_type_info 합계 > 없으면 미공개.
+        const generalUnits = Number((site as any)?.general_units || 0) || gen;
+        // s-v2: 행은 항상 7개다. null 이어도 행을 빼지 않고 값 칸을 `미공개` 로 채운다.
+        //   현장마다 행이 들쭉날쭉하면 첫 화면이 현장마다 달라진다. 규격화의 핵심.
         const rows: Array<[string, string | null]> = [
           ['시공사', site?.builder || sub?.constructor_nm || null],
           ['위치', [region, site?.sigungu, site?.dong].filter(Boolean).join(' ') || sub?.hssply_adres || null],
           ['규모', scale],
-          ['일반분양', gen > 0 ? `${gen.toLocaleString()}세대` : (totalUnits > 0 ? `${totalUnits.toLocaleString()}세대` : null)],
+          ['일반분양', generalUnits > 0 ? `${generalUnits.toLocaleString()}세대` : null],
           ['분양가', priceStr],
           ['입주', fmtYM(site?.move_in_date || sub?.mvn_prearnge_ym) || null],
           ['상태', subSt ? SB[subSt].label : tLabel[sType]],
         ];
-        const shown = rows.filter((r) => r[1]);
-        if (shown.length === 0) return null;
+        // 첫 번째 빈 행에서만 노출을 센다 — 행마다 세면 한 페이지에서 노출이 부풀려진다.
+        const firstEmpty = rows.find((r) => !r[1])?.[0] ?? null;
         return (
           <section aria-labelledby="apt-sec-h1" className="apt-card" id="supply-section" style={{ scrollMarginTop: 60 }}>
             <SectionHeader id="apt-sec-h1" eyebrow="SUPPLY" title="공급 정보" />
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--fs-sm)' }}>
               <tbody>
-                {shown.map(([l, v], i) => (
-                  <tr key={l} style={{ borderBottom: i < shown.length - 1 ? '1px solid var(--border)' : 'none' }}>
+                {rows.map(([l, v], i) => (
+                  <tr key={l} style={{ borderBottom: i < rows.length - 1 ? '1px solid var(--border)' : 'none' }}>
                     <th scope="row" style={{ textAlign: 'left', fontWeight: 400, color: 'var(--text-tertiary)', padding: '7px 0', whiteSpace: 'nowrap' }}>{l}</th>
-                    <td style={{ textAlign: 'right', fontWeight: 600, color: 'var(--text-primary)', padding: '7px 0', fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>{v}</td>
+                    <td style={{ textAlign: 'right', fontWeight: 600, color: 'var(--text-primary)', padding: '7px 0', fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>
+                      {v ?? (
+                        <span style={{ fontWeight: 400, fontFamily: 'var(--font-sans)' }}>
+                          <span style={{ color: 'var(--text-tertiary)' }}>미공개 · </span>
+                          <TalkInlineLink slot="supply_table" siteSlug={slug} field={l} countView={l === firstEmpty} />
+                        </span>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -962,21 +999,45 @@ export default async function AptUnifiedPage({ params }: Props) {
 
       {/* Location */}
       <section aria-labelledby="apt-sec-h2" className="apt-card"><SectionHeader id="apt-sec-h2" eyebrow="LOCATION" title="위치 정보" />
-        {/* r4-P6: 흩어져 있던 라벨-값 표를 SpecTable 한 벌로. 빈 값 행은 자동 제외된다. */}
-        <SpecTable rows={[
-          { label: '주소', value: site?.address || sub?.hssply_adres || redev?.address },
-          { label: '최근접역', value: site?.nearby_station || sub?.nearest_station },
-          { label: '학군', value: site?.school_district || sub?.nearest_school },
-          { label: '비고', value: redev?.notes },
-        ]} />
+        {/* r4-P6: 흩어져 있던 라벨-값 표를 SpecTable 한 벌로.
+             s-v2: keepEmpty 로 규칙을 반전 — 행을 빼지 않고 `미공개` 로 채운다.
+             s-v2 A-4: '입지 분석 — 학군·교통' 별도 섹션을 없애고 여기로 흡수했다.
+               school_district·nearby_station 은 채움률 0% 였고, 실제 값은
+               모집공고 파생인 sub.schools[]·sub.stations[] 에만 있었다. */}
+        {(() => {
+          const schools = Array.isArray(sub?.schools) ? (sub.schools as { name: string; distance?: string }[]) : [];
+          const stations = Array.isArray(sub?.stations) ? (sub.stations as { name: string; walk_min?: number }[]) : [];
+          const schoolText = schools.length > 0
+            ? schools.slice(0, 3).map(s => [s.name, s.distance].filter(Boolean).join(' ')).join(' · ')
+            : (site?.school_district || sub?.nearest_school || null);
+          const stationText = stations.length > 0
+            ? stations.slice(0, 3).map(s => [s.name, s.walk_min ? `도보 ${s.walk_min}분` : ''].filter(Boolean).join(' ')).join(' · ')
+            : (site?.nearby_station || sub?.nearest_station || null);
+          return (
+            <SpecTable
+              keepEmpty
+              emptyValue={(label) => (
+                <span>
+                  <span style={{ color: 'var(--text-tertiary)' }}>미공개 · </span>
+                  <TalkInlineLink slot="supply_table" siteSlug={slug} field={label} />
+                </span>
+              )}
+              rows={[
+                { label: '주소', value: site?.address || sub?.hssply_adres || redev?.address },
+                { label: '최근접역', value: stationText },
+                { label: '학군', value: schoolText },
+                // 비고는 재개발 현장에만 있는 항목이라 고정 7행 규칙 밖에 둔다.
+                ...(redev?.notes ? [{ label: '비고', value: redev.notes as React.ReactNode }] : []),
+              ]}
+            />
+          );
+        })()}
         <div style={{ display: 'flex', gap: 6, marginTop: 10 }}>
           <a href={`https://map.kakao.com/?q=${encodeURIComponent(site?.address || sub?.hssply_adres || redev?.address || name)}`} target="_blank" rel="noopener noreferrer" style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>🗺️ 카카오맵</a>
           <a href={`https://map.naver.com/p/search/${encodeURIComponent(site?.address || sub?.hssply_adres || redev?.address || name)}`} target="_blank" rel="noopener noreferrer" style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>🗺️ 네이버지도</a>
         </div>
       </section>
 
-      {/* Features */}
-      {features.length > 0 && <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 14 }}>{features.map((f: any, i: number) => <span key={i} style={{ padding: '4px 10px', borderRadius: 'var(--radius-lg)', fontSize: 'var(--fs-xs)', fontWeight: 600, background: 'var(--brand-bg)', color: 'var(--brand)', border: '1px solid var(--brand-bg)' }}>{String(f)}</span>)}</div>}
 
       {/* 분양가 범위 바 + D-day 위젯 */}
       {((site?.price_min && site?.price_max) || sub) && (
@@ -1040,81 +1101,12 @@ export default async function AptUnifiedPage({ params }: Props) {
         </div>
       )}
 
-      {/* 규제 요약 — 전매/거주/재당첨 신호등 */}
-      {sub && (sub.transfer_limit_years || sub.residence_obligation_years || sub.rewin_limit_years || sub.is_price_limit || sub.loan_rate) && (
-        <div style={{ marginBottom: 14 }}>
-          <RegulationBadges
-            transferLimitYears={sub.transfer_limit_years}
-            residenceYears={sub.residence_obligation_years}
-            rewinLimitYears={sub.rewin_limit_years}
-            isSpeculativeZone={sub.is_speculative_zone}
-            isRegulatedArea={sub.is_regulated_area}
-            isPriceLimit={sub.is_price_limit}
-            loanRate={sub.loan_rate}
-            contractDate={sub.cntrct_cncls_bgnde}
-          />
-        </div>
-      )}
 
-      {/* 실입주 총비용 시뮬레이터 */}
-      {sub && Array.isArray(sub.house_type_info) && sub.house_type_info.length > 0 && sub.house_type_info.some((t: any) => t.lttot_top_amount > 0) && (
-        <div style={{ marginBottom: 14 }}>
-          {/* C3: ContentLock wrapper 제거 (656v / 0c) */}
-          <CostSimulator
-            types={sub.house_type_info}
-            options={Array.isArray(sub.options_list) ? sub.options_list : []}
-            siteName={name}
-            priceSource={sub.price_source}
-          />
-        </div>
-      )}
 
       {/* 납부 일정 — 모집공고 핵심 요약 섹션 내부로 통합 (중복 제거) */}
 
-      {/* 입지 분석 — 학군·교통 */}
-      {sub && ((Array.isArray(sub.schools) && sub.schools.length > 0) || (Array.isArray(sub.stations) && sub.stations.length > 0) || sub.nearest_school || sub.nearest_station) && (
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '12px 14px', marginBottom: 14 }}>
-          <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 10 }}>입지 분석</div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-            {/* 학군 */}
-            <div style={{ padding: '10px', borderRadius: 'var(--radius-sm)', background: 'var(--brand-bg)', border: '1px solid var(--brand-bg)' }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--brand)', marginBottom: 6 }}>학군</div>
-              {Array.isArray(sub.schools) && sub.schools.length > 0 ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                  {(sub.schools as { name: string; distance?: string }[]).slice(0, 3).map((s, i) => (
-                    <div key={i} style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
-                      <span style={{ fontWeight: 600 }}>{s.name}</span>
-                      {s.distance && <span style={{ color: 'var(--text-tertiary)', marginLeft: 4 }}>{s.distance}</span>}
-                    </div>
-                  ))}
-                </div>
-              ) : sub.nearest_school ? (
-                <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{sub.nearest_school}</div>
-              ) : (
-                <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>정보 없음</div>
-              )}
-            </div>
-            {/* 교통 */}
-            <div style={{ padding: '10px', borderRadius: 'var(--radius-sm)', background: 'var(--accent-green-bg)', border: '1px solid var(--accent-green-bg)' }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--accent-green)', marginBottom: 6 }}>교통</div>
-              {Array.isArray(sub.stations) && sub.stations.length > 0 ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                  {(sub.stations as { name: string; walk_min?: number }[]).slice(0, 3).map((s, i) => (
-                    <div key={i} style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
-                      <span style={{ fontWeight: 600 }}>{s.name}</span>
-                      {s.walk_min && <span style={{ color: 'var(--text-tertiary)', marginLeft: 4 }}>도보 {s.walk_min}분</span>}
-                    </div>
-                  ))}
-                </div>
-              ) : sub.nearest_station ? (
-                <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{sub.nearest_station}</div>
-              ) : (
-                <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>정보 없음</div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      {/* s-v2 A-4: 죽은 섹션 정리 — school_district·nearby_station 채움률 0%.
+           남은 실값(sub.schools[]·sub.stations[])은 4번 블록 위치 정보 표로 흡수했다. */}
 
       {/* 지역 시세 비교 — 이 현장이 지역에서 어디 위치하는지 */}
       {regionBenchmark && (site?.price_min || site?.price_max || trades.length > 0) && (() => {
@@ -1172,11 +1164,94 @@ export default async function AptUnifiedPage({ params }: Props) {
           </section>
         ); 
       })()}
+      {/* ── 6번 블록 · 현장 맥락 카톡 CTA — 주 전환 지점 ──
+           v1 의 리드폼 1순위 자리를 카톡방 진입에 넘긴다.
+           30일 실측: 카톡방 클릭 7건(sticky 6 / inline 1) vs leads 누적 1건.
+           리드폼은 없애지 않고 8번 블록 뒤로 내린다 — 전화 통화를 원하는 층의 유일한 경로이고,
+           오픈채팅 URL 이 파라미터를 못 받아 '누가·어느 현장에서' 를 남기는 경로도 폼뿐이다. */}
+      <SiteTalkCTA
+        siteName={name}
+        siteSlug={slug}
+        remainingUnits={(site as any)?.remaining_units ?? null}
+        priceUndisclosed={!site?.price_min && !site?.price_max && !unsold?.sale_price_min}
+      />
 
-      {/* s7-4: 조감도·공급정보·일정을 본 직후가 관심 최고점이다. 정보가 먼저 나오므로
-           리드팜 구조가 되지 않는다. LeadFormAnchor 의 스크롤 목적지도 이리로 당겨진다. */}
-      {showLeadForm && site && <LeadForm siteSlug={site.slug} siteName={site.name} typeOptions={leadTypeOptions} />}
+      {/* ── 7번 블록 · 핵심 포인트 + FAQ ── */}
+      {features.length > 0 && (
+        <section aria-labelledby="apt-sec-h9" className="apt-card">
+          <SectionHeader id="apt-sec-h9" eyebrow="POINTS" title="핵심 포인트" />
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            {features.map((f: any, i: number) => (
+              <span key={i} style={{ padding: '4px 10px', borderRadius: 'var(--radius-lg)', fontSize: 'var(--fs-xs)', fontWeight: 600, background: 'var(--brand-bg)', color: 'var(--brand)', border: '1px solid var(--brand-bg)' }}>{String(f)}</span>
+            ))}
+          </div>
+        </section>
+      )}
 
+      {faq.length > 0 && (
+        <section aria-labelledby="apt-sec-h5" className="apt-card">
+          <SectionHeader id="apt-sec-h5" eyebrow="FAQ" title="자주 묻는 질문" />
+          {faq.map((f, i) => (
+            <details key={i} style={{ borderBottom: '1px solid var(--border)', padding: '10px 0' }}>
+              <summary style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', cursor: 'pointer', listStyle: 'none', display: 'flex', justifyContent: 'space-between' }}>
+                <span>{f.q}</span><span style={{ color: 'var(--text-tertiary)' }}>+</span>
+              </summary>
+              <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.7, margin: '6px 0 0' }}>{f.a}</p>
+            </details>
+          ))}
+          {/* 마지막 항목은 방으로 보낸다. FAQ JSON-LD 는 위 faq 배열로만 만들어지므로
+              이 항목은 구조화데이터에 들어가지 않는다 (리치결과 정책상 안전). */}
+          <details style={{ padding: '10px 0' }}>
+            <summary style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', cursor: 'pointer', listStyle: 'none', display: 'flex', justifyContent: 'space-between' }}>
+              <span>여기에 없는 내용은 어디에 물어보나요?</span><span style={{ color: 'var(--text-tertiary)' }}>+</span>
+            </summary>
+            <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.7, margin: '6px 0 0' }}>
+              {name} 관련 질문은 부동산 정보 공유방에서 받고 있습니다. 잔여 세대·동호수·할인 조건처럼 공고에 없는 내용도 방에서 확인할 수 있습니다.{' '}
+              <TalkInlineLink slot="faq" siteSlug={slug} label="정보 공유방 참여하기 →" countView />
+            </p>
+          </details>
+        </section>
+      )}
+
+      {/* ── 8번 블록 · 상세 데이터 더보기 (접힘) ──
+           삭제가 아니라 접기다. 조건부 언마운트로 구현하지 말 것 —
+           DOM 에서 사라지면 색인 대상 텍스트가 통째로 없어진다.
+           <details> 는 닫혀 있어도 자식이 DOM 에 그대로 남는다.
+           id="stats-section": KPI '조회수' 타일의 scrollTo 목적지.
+           안쪽(관련 분석 블로그)에 두면 닫힌 details 안이라 레이아웃이 없어 스크롤이 먹지 않는다. */}
+      <details id="stats-section" className="apt-card" style={{ scrollMarginTop: 60 }}>
+        <summary style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', cursor: 'pointer', listStyle: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span>상세 데이터 더보기</span>
+          <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>펼치기 +</span>
+        </summary>
+        <div style={{ marginTop: 'var(--sp-md)' }}>
+      {/* 규제 요약 — 전매/거주/재당첨 신호등 */}
+      {sub && (sub.transfer_limit_years || sub.residence_obligation_years || sub.rewin_limit_years || sub.is_price_limit || sub.loan_rate) && (
+        <div style={{ marginBottom: 14 }}>
+          <RegulationBadges
+            transferLimitYears={sub.transfer_limit_years}
+            residenceYears={sub.residence_obligation_years}
+            rewinLimitYears={sub.rewin_limit_years}
+            isSpeculativeZone={sub.is_speculative_zone}
+            isRegulatedArea={sub.is_regulated_area}
+            isPriceLimit={sub.is_price_limit}
+            loanRate={sub.loan_rate}
+            contractDate={sub.cntrct_cncls_bgnde}
+          />
+        </div>
+      )}
+      {/* 실입주 총비용 시뮬레이터 */}
+      {sub && Array.isArray(sub.house_type_info) && sub.house_type_info.length > 0 && sub.house_type_info.some((t: any) => t.lttot_top_amount > 0) && (
+        <div style={{ marginBottom: 14 }}>
+          {/* C3: ContentLock wrapper 제거 (656v / 0c) */}
+          <CostSimulator
+            types={sub.house_type_info}
+            options={Array.isArray(sub.options_list) ? sub.options_list : []}
+            siteName={name}
+            priceSource={sub.price_source}
+          />
+        </div>
+      )}
       {/* 분양가 vs 실거래가 비교 (두 데이터 모두 있을 때) */}
       {site?.price_min && site?.price_max && trades.length > 0 && (() => {
         const amounts = trades.map((t: any) => Number(t.deal_amount)).filter((a: number) => a > 0);
@@ -1642,10 +1717,6 @@ export default async function AptUnifiedPage({ params }: Props) {
         </section>
         </LoginGate>
       )}
-
-      {/* 댓글 섹션 */}
-      {site?.slug && <AptCommentSection slug={site.slug} siteName={name} />}
-
       {/* Competition rate */}
       {sub?.competition_rate_1st && Number(sub.competition_rate_1st) > 0 && (
         <section className="apt-card" aria-labelledby="apt-sec-3" style={{ background: 'var(--accent-purple-bg)', border: '1px solid var(--accent-purple-bg)' }}>
@@ -1954,23 +2025,39 @@ export default async function AptUnifiedPage({ params }: Props) {
           <Link href={`/apt/complex/${encodeURIComponent(name)}`} style={{ display: 'block', textAlign: 'center', marginTop: 10, padding: '8px 0', borderRadius: 'var(--radius-sm)', background: 'var(--brand-bg)', color: 'var(--brand)', fontSize: 'var(--fs-sm)', fontWeight: 600, textDecoration: 'none' }}>전체 실거래 내역 보기 →</Link>
         </section>
       )}
+      {/* Related posts */}
+      {relatedPosts.length > 0 && <section aria-labelledby="apt-sec-h6" className="apt-card"><SectionHeader id="apt-sec-h6" eyebrow="COMMENTS" title="커뮤니티 게시글" />{relatedPosts.map((p: Record<string, any>) => <Link key={p.id} href={`/feed/${p.id}`} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none', color: 'inherit', fontSize: 'var(--fs-sm)' }}><span style={{ color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</span><span style={{ color: 'var(--text-tertiary)', flexShrink: 0, marginLeft: 8, fontSize: 'var(--fs-xs)' }}>댓글 {p.comments_count || 0}</span></Link>)}</section>}
 
+      {/* Related blogs */}
+      {relatedBlogs.length > 0 && <section aria-labelledby="apt-sec-h7" className="apt-card"><SectionHeader id="apt-sec-h7" eyebrow="ANALYSIS" title="관련 분석 블로그" />{relatedBlogs.map((b: Record<string, any>) => <Link key={b.slug} href={`/blog/${b.slug}`} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none', color: 'inherit', fontSize: 'var(--fs-sm)' }}><span style={{ color: 'var(--text-primary)', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.title}</span><span style={{ color: 'var(--text-tertiary)', flexShrink: 0, marginLeft: 8, fontSize: 'var(--fs-xs)' }}>{(b.view_count || 0).toLocaleString()}</span></Link>)}</section>}
+        </div>
+      </details>
+
+      {/* s7-4: 조감도·공급정보·일정을 본 직후가 관심 최고점이다. 정보가 먼저 나오므로
+           리드팜 구조가 되지 않는다. LeadFormAnchor 의 스크롤 목적지도 이리로 당겨진다. */}
+      {showLeadForm && site && <LeadForm siteSlug={site.slug} siteName={site.name} typeOptions={leadTypeOptions} />}
+      {/* 댓글 섹션 */}
+      {site?.slug && <AptCommentSection slug={site.slug} siteName={name} />}
       {/* 비로그인 가입 유도 CTA — InlineCTA */}
       {!aptUser && <RelatedContentCard type="apt" entityName={name} />}
 
       {/* Comments */}
       {/* C3: ContentLock wrapper 제거 */}
       {sub && <div className="apt-card"><AptCommentInline houseKey={sub.house_manage_no || String(sub.id)} houseNm={name} houseType="sub" /></div>}
+      {/* id: KPI '관심' 타일의 scrollTo 목적지. s7-3 에서 하단 전체폼을 없애며 이리로 옮겼다 */}
+      <div id="interest-section" style={{ scrollMarginTop: 60 }}>
+        <InterestRegisterHero
+          aptId={site?.id ?? slug}
+          aptName={name}
+          aptSlug={slug}
+          status={subSt}
+          isLoggedIn={isLoggedInApt}
+        />
+      </div>
 
-      {/* FAQ */}
-      {faq.length > 0 && <section aria-labelledby="apt-sec-h5" className="apt-card"><SectionHeader id="apt-sec-h5" eyebrow="FAQ" title="자주 묻는 질문" />{faq.map((f, i) => <details key={i} style={{ borderBottom: i < faq.length - 1 ? '1px solid var(--border)' : 'none', padding: '10px 0' }}><summary style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', cursor: 'pointer', listStyle: 'none', display: 'flex', justifyContent: 'space-between' }}><span>{f.q}</span><span style={{ color: 'var(--text-tertiary)' }}>+</span></summary><p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.7, margin: '6px 0 0' }}>{f.a}</p></details>)}</section>}
-
-      {/* Related posts */}
-      {relatedPosts.length > 0 && <section aria-labelledby="apt-sec-h6" className="apt-card"><SectionHeader id="apt-sec-h6" eyebrow="COMMENTS" title="커뮤니티 게시글" />{relatedPosts.map((p: Record<string, any>) => <Link key={p.id} href={`/feed/${p.id}`} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none', color: 'inherit', fontSize: 'var(--fs-sm)' }}><span style={{ color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</span><span style={{ color: 'var(--text-tertiary)', flexShrink: 0, marginLeft: 8, fontSize: 'var(--fs-xs)' }}>댓글 {p.comments_count || 0}</span></Link>)}</section>}
-
-      {/* Related blogs */}
-      {relatedBlogs.length > 0 && <section aria-labelledby="apt-sec-h7" className="apt-card" id="stats-section" style={{ scrollMarginTop: 60 }}><SectionHeader id="apt-sec-h7" eyebrow="ANALYSIS" title="관련 분석 블로그" />{relatedBlogs.map((b: Record<string, any>) => <Link key={b.slug} href={`/blog/${b.slug}`} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none', color: 'inherit', fontSize: 'var(--fs-sm)' }}><span style={{ color: 'var(--text-primary)', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.title}</span><span style={{ color: 'var(--text-tertiary)', flexShrink: 0, marginLeft: 8, fontSize: 'var(--fs-xs)' }}>{(b.view_count || 0).toLocaleString()}</span></Link>)}</section>}
-
+      {/* B-3: 모바일 하단 고정 바. 6번 블록이 뷰포트에 들어오면 스스로 숨는다.
+           하단 탭바(z-100)·글쓰기 FAB(z-99)와의 겹침은 컴포넌트 안에서 처리한다. */}
+      <AptTalkBottomBar siteSlug={slug} showLeadForm={showLeadForm} />
       {/* Nearby sites (internal linking SEO) */}
       {nearbySites.length > 0 && <section aria-labelledby="apt-sec-h8" className="apt-card"><SectionHeader id="apt-sec-h8" eyebrow="NEARBY" title={`${region} 다른 현장`} /><div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 'var(--sp-sm)' }}>{nearbySites.map((ns: Record<string, any>) => <Link key={ns.slug} href={`/apt/${ns.slug}`} className="kd-card" style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: 10, textDecoration: 'none', color: 'inherit', overflow: 'hidden' }}><div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 2 }}>{ns.name}</div><div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ns.sigungu || ns.region} · {ns.total_units ? `${ns.total_units}세대` : ''} · {tLabel[ns.site_type]}</div></Link>)}</div></section>}
 

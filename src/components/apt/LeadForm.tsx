@@ -47,6 +47,15 @@ type LeadPayload = {
   sourceDomain: string;
   company: string;
   query: Record<string, string>;
+  /**
+   * s-v2 B-7: 1차 접수와 추가 정보 전송을 잇는 키. 두 요청에 같은 값이 들어간다.
+   * ⚠️ 오픈채팅과 달리 폼은 '누가·어느 현장에서' 가 남는 유일한 경로다 — 이 키까지 있어야
+   *    2차 전송을 1차 행에 병합할 수 있다. 병합은 서버(Apps Script) 쪽 작업이고,
+   *    그 전까지 2차 전송은 followUp:true 가 붙은 별도 행으로 쌓인다.
+   */
+  leadRef: string;
+  /** true 면 이미 접수된 건의 보충 정보다. 새 리드로 세지 말 것. */
+  followUp: boolean;
 };
 
 type FieldErrors = { name?: string; phone?: string; birthDate?: string; consent?: string };
@@ -183,6 +192,21 @@ export default function LeadForm({ siteSlug, siteName, typeOptions = [], variant
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
+  // s-v2 B-7: 성공 화면의 선택 입력 상태
+  const [extraSending, setExtraSending] = useState(false);
+  const [extraDone, setExtraDone] = useState(false);
+  const [extraError, setExtraError] = useState<string | null>(null);
+
+  // 1차/2차 요청을 잇는 키. 폼 인스턴스당 1개.
+  const leadRefRef = useRef<string>('');
+  if (!leadRefRef.current) {
+    leadRefRef.current =
+      typeof crypto !== 'undefined' && 'randomUUID' in crypto
+        ? crypto.randomUUID()
+        : `lr_${Math.random().toString(36).slice(2)}${Date.now().toString(36)}`;
+  }
+  // 2차 전송에 1차와 같은 본문을 실어야 서버가 어느 건인지 알 수 있다.
+  const sentPayloadRef = useRef<LeadPayload | null>(null);
 
   // 복원이 끝나기 전에 저장 effect 가 돌면 빈 값으로 초안을 덮어쓴다.
   const restored = useRef(false);
@@ -294,17 +318,15 @@ export default function LeadForm({ siteSlug, siteName, typeOptions = [], variant
     if (errors.phone) setErrors(prev => ({ ...prev, phone: undefined }));
   }
 
+  // s-v2 B-7: 1차 접수는 이름·연락처·동의 3개만 본다.
+  // 생년월일·희망타입은 접수 후 선택 입력으로 내려갔다 — 여기서 검사하지 않는다.
   const validate = useCallback((): FieldErrors => {
     const next: FieldErrors = {};
     if (!name.trim()) next.name = '이름을 입력해 주세요';
     if (onlyDigits(phone).length < 11) next.phone = '연락처 11자리를 모두 입력해 주세요';
-    // 생년월일은 선택 항목 — 비어 있으면 통과시키고, 값이 있을 때만 자릿수를 본다.
-    if (birthDate && birthDate.length !== 6 && birthDate.length !== 8) {
-      next.birthDate = '6자리 또는 8자리 숫자로 입력해 주세요';
-    }
     if (!consent) next.consent = '개인정보 수집 동의가 필요합니다';
     return next;
-  }, [name, phone, birthDate, consent]);
+  }, [name, phone, consent]);
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -335,7 +357,10 @@ export default function LeadForm({ siteSlug, siteName, typeOptions = [], variant
       // 특정 키만 고르지 않는다 — 네이버 광고 파라미터·utm 해석은 서버 몫이고,
       // 새 파라미터가 생겨도 이 코드는 그대로 둘 수 있다.
       query: Object.fromEntries(new URLSearchParams(window.location.search)),
+      leadRef: leadRefRef.current,
+      followUp: false,
     };
+    sentPayloadRef.current = payload;
 
     let outcome: PostOutcome = 'failed';
     for (let attempt = 0; attempt <= RETRY_DELAYS.length; attempt++) {
@@ -376,21 +401,116 @@ export default function LeadForm({ siteSlug, siteName, typeOptions = [], variant
     margin: '2rem 0',
   };
 
+  // s-v2 B-7: 접수 뒤 선택 입력. 이미 접수는 끝났으므로 여기서 실패해도 신청은 유효하다.
+  async function handleExtraSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (extraSending) return;
+    if (birthDate && birthDate.length !== 6 && birthDate.length !== 8) {
+      setErrors(prev => ({ ...prev, birthDate: '6자리 또는 8자리 숫자로 입력해 주세요' }));
+      return;
+    }
+    if (!birthDate && !desiredType) return; // 둘 다 비었으면 보낼 게 없다
+
+    const base = sentPayloadRef.current;
+    if (!base) return;
+
+    setExtraError(null);
+    setExtraSending(true);
+    let outcome: PostOutcome = 'failed';
+    try {
+      outcome = await postLead({ ...base, birthDate, desiredType, followUp: true });
+    } catch {
+      outcome = 'failed';
+    }
+    setExtraSending(false);
+    if (outcome === 'recorded' || outcome === 'silent-drop') {
+      lsRemove(draftKey);
+      setExtraDone(true);
+      return;
+    }
+    setExtraError('추가 정보 전송에 실패했습니다. 신청 자체는 이미 접수되었습니다.');
+  }
+
   if (done) {
     return (
       <section id={LEAD_FORM_ID} style={shell}>
-        <p
-          style={{
-            fontSize: 'var(--fs-sm)',
-            fontWeight: 600,
-            color: 'var(--text-primary)',
-            lineHeight: 1.7,
-            margin: 0,
-            padding: '20px 14px',
-          }}
-        >
-          신청이 접수되었습니다. 확인 후 순차적으로 안내드리겠습니다.
-        </p>
+        <div style={{ padding: '20px 14px' }}>
+          <p style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.7, margin: 0 }}>
+            신청이 접수되었습니다. 확인 후 순차적으로 안내드리겠습니다.
+          </p>
+
+          {extraDone ? (
+            <p style={{ ...hintStyle, marginTop: 12 }}>추가 정보가 함께 전달되었습니다.</p>
+          ) : (
+            <>
+              <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.7, margin: '14px 0 10px' }}>
+                아래는 선택 사항입니다. 알려주시면 청약 가점·평형까지 함께 확인해 안내드립니다.
+              </p>
+              <form onSubmit={handleExtraSubmit} noValidate>
+                <div className="kd-lead-grid" style={{ marginBottom: 12 }}>
+                  <div>
+                    <label htmlFor="kd-lead-birth" style={labelStyle}>생년월일</label>
+                    <input
+                      id="kd-lead-birth"
+                      type="text"
+                      inputMode="numeric"
+                      value={birthDate}
+                      onChange={e => {
+                        setBirthDate(onlyDigits(e.target.value).slice(0, 8));
+                        if (errors.birthDate) setErrors(prev => ({ ...prev, birthDate: undefined }));
+                      }}
+                      placeholder="19850314 또는 850314"
+                      autoComplete="bday"
+                      style={fieldStyle}
+                    />
+                    {errors.birthDate
+                      ? <p style={errorStyle}>{errors.birthDate}</p>
+                      : <p style={hintStyle}>청약 가점 상담에만 사용됩니다</p>}
+                  </div>
+
+                  <div>
+                    <label htmlFor="kd-lead-type" style={labelStyle}>희망 타입</label>
+                    <select
+                      id="kd-lead-type"
+                      value={desiredType}
+                      onChange={e => setDesiredType(e.target.value)}
+                      style={fieldStyle}
+                    >
+                      <option value="">선택 안 함</option>
+                      {typeOptions.map(t => <option key={t} value={t}>{t}</option>)}
+                      <option value="미정">미정</option>
+                    </select>
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={extraSending || (!birthDate && !desiredType)}
+                  className="kd-btn"
+                  style={{
+                    width: '100%',
+                    height: 'var(--btn-h)',
+                    fontSize: 'var(--fs-sm)',
+                    borderRadius: 'var(--radius-sm)',
+                    border: '1px solid var(--border)',
+                    background: 'var(--bg-hover)',
+                    color: 'var(--text-primary)',
+                    opacity: extraSending || (!birthDate && !desiredType) ? 0.6 : 1,
+                    cursor: extraSending ? 'default' : 'pointer',
+                  }}
+                >
+                  {extraSending ? '전송 중…' : '추가 정보 보내기'}
+                </button>
+                {extraError && <p style={{ ...errorStyle, marginTop: 8 }}>{extraError}</p>}
+              </form>
+            </>
+          )}
+        </div>
+
+        <style>{`
+          .kd-lead-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
+          @media (max-width: 480px) { .kd-lead-grid { grid-template-columns: minmax(0, 1fr); } }
+        `}</style>
       </section>
     );
   }
@@ -460,42 +580,9 @@ export default function LeadForm({ siteSlug, siteName, typeOptions = [], variant
               : <p style={hintStyle}>숫자만 입력하셔도 자동으로 하이픈이 붙습니다</p>}
           </div>
 
-          <div className="kd-lead-grid" style={{ marginBottom: 12 }}>
-            <div>
-              <label htmlFor="kd-lead-birth" style={labelStyle}>생년월일</label>
-              <input
-                id="kd-lead-birth"
-                type="text"
-                inputMode="numeric"
-                value={birthDate}
-                onChange={e => {
-                  setBirthDate(onlyDigits(e.target.value).slice(0, 8));
-                  if (errors.birthDate) setErrors(prev => ({ ...prev, birthDate: undefined }));
-                }}
-                placeholder="19850314 또는 850314"
-                autoComplete="bday"
-                style={fieldStyle}
-              />
-              {errors.birthDate
-                ? <p style={errorStyle}>{errors.birthDate}</p>
-                : <p style={hintStyle}>6자리 또는 8자리 · 청약 가점 상담에만 사용됩니다</p>}
-            </div>
-
-            <div>
-              <label htmlFor="kd-lead-type" style={labelStyle}>희망 타입</label>
-              <select
-                id="kd-lead-type"
-                value={desiredType}
-                onChange={e => setDesiredType(e.target.value)}
-                style={fieldStyle}
-              >
-                <option value="">선택 안 함</option>
-                {typeOptions.map(t => <option key={t} value={t}>{t}</option>)}
-                <option value="미정">미정</option>
-              </select>
-              <p style={hintStyle}>아직 정하지 않으셨다면 비워두셔도 됩니다</p>
-            </div>
-          </div>
+          {/* s-v2 B-7: 생년월일·희망타입은 여기서 뺐다.
+               필드 4개는 접수 전에 물어보기엔 많다 — 접수 후 선택 입력으로 내렸다.
+               (fn_insert_lead 가 이미 null 을 허용해 DB 변경은 없다) */}
 
           {/* 허니팟 — 사람에게는 보이지 않는다 */}
           <input
