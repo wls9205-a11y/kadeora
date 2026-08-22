@@ -135,19 +135,29 @@ export async function GET(req: NextRequest) {
     let updated = 0;
     let eligible = 0;
     let failed = 0;
+    const updateErrors: string[] = [];
     const scoreDist: Record<string, number> = { 'S(80+)': 0, 'A(65-79)': 0, 'B(40-64)': 0, 'C(<40)': 0 };
 
     for (const post of posts) {
       try {
         const { score, details, eligible: isEligible } = scorePost(post);
 
-        await (sb as any).from('blog_posts').update({
+        // r4-P10-1: 반환값을 안 보면 update 가 전부 실패해도 success 로 보고된다.
+        // 이 프로젝트에서 네 번째로 확인된 침묵 실패 패턴이다
+        // (crawl-apt-resale · gsc-sync · batch-rewrite-submit 에 이어).
+        const { error: upErr } = await (sb as any).from('blog_posts').update({
           quality_score: score,
           quality_details: details,
           quality_checked_at: new Date().toISOString(),
           auto_publish_eligible: isEligible,
           content_length: post.content_length || (post.content || '').length,
         }).eq('id', post.id);
+        if (upErr) {
+          failed++;
+          if (updateErrors.length < 3) updateErrors.push(upErr.message ?? String(upErr));
+          console.error('[blog-quality-score] update fail', post.id, upErr.message?.slice(0, 200));
+          continue;
+        }
 
         updated++;
         if (isEligible) eligible++;
@@ -165,7 +175,11 @@ export async function GET(req: NextRequest) {
       created: eligible,
       updated,
       failed,
-      metadata: { eligible_count: eligible, score_distribution: scoreDist },
+      metadata: {
+        eligible_count: eligible,
+        score_distribution: scoreDist,
+        ...(updateErrors.length ? { update_errors: updateErrors } : {}),
+      },
     };
   });
 

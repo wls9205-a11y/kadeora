@@ -68,8 +68,10 @@ export async function GET(req: NextRequest) {
 
     // Mark as restore candidates
     const ids = candidates.map(c => c.id);
+    // r4-P10-2: restore_candidate 로 올린 뒤 재평가가 걸려야
+    // blog-quality-score 가 auto_publish_eligible 을 다시 판정한다.
     await (admin as any).from('blog_posts')
-      .update({ seo_tier: 'restore_candidate' })
+      .update({ seo_tier: 'restore_candidate', quality_checked_at: null })
       .in('id', ids);
 
     return {

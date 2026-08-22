@@ -43,7 +43,13 @@ export async function GET(req: NextRequest) {
       const tier = score >= 70 ? 'S' : score >= 50 ? 'A' : score >= 30 ? 'B' : score >= 15 ? 'C' : 'D';
 
       if (p.seo_tier !== tier) {
-        await (admin as any).from('blog_posts').update({ seo_score: score, seo_tier: tier }).eq('id', p.id);
+        // r4-P10-2: 티어가 바뀌면 재평가 계기로 삼는다.
+        // blog-quality-score 는 quality_checked_at 이 NULL 이거나 30일 경과한 글만 보므로,
+        // 여기서 NULL 로 되돌리지 않으면 티어가 올라가도 auto_publish_eligible 이 false 로 남아
+        // blog-auto-publish 가 후보 0건을 본다. (batch-rewrite-poll · blog-enrich-rewrite 와 같은 관용)
+        await (admin as any).from('blog_posts')
+          .update({ seo_score: score, seo_tier: tier, quality_checked_at: null })
+          .eq('id', p.id);
         updated++;
       }
     }

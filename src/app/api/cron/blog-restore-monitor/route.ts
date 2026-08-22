@@ -44,16 +44,22 @@ export async function GET(req: NextRequest) {
     for (const post of toCheck) {
       if ((post.view_count || 0) >= MIN_VIEWS) {
         // Keep — upgrade tier
+        // r4-P10-2: 티어를 A 로 올려도 재평가가 걸리지 않으면 auto_publish_eligible 이
+        // false 로 남는다. 복원 파이프라인이 반쪽이던 직접 원인이다.
         await (admin as any).from('blog_posts')
-          .update({ seo_tier: 'A' })
+          .update({ seo_tier: 'A', quality_checked_at: null })
           .eq('id', post.id);
         kept++;
       } else {
         // Re-unpublish with cooldown marker
+        // r4-P10-2: cooldown 으로 내릴 때도 재평가를 건다. 이게 없으면 직전 검사에서
+        // 세워진 auto_publish_eligible=true 가 남아 blog-auto-publish 가 곧바로 다시
+        // 발행하는 왕복이 생긴다.
         await (admin as any).from('blog_posts')
           .update({
             is_published: false,
             seo_tier: 'cooldown',
+            quality_checked_at: null,
             updated_at: new Date().toISOString(),
           })
           .eq('id', post.id);
