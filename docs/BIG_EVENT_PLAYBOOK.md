@@ -443,8 +443,8 @@ OG 이미지 확장:
 ## 12. 즉시 실행 체크리스트
 
 ### 자동 (이 문서 commit 후 바로)
-- [x] DB 노영진 → 카더라 브랜드팀 19건 롤백
-- [x] 코드 내 노영진 3곳 제거
+- [x] DB 대표자 실명 → 카더라 브랜드팀 19건 롤백
+- [x] 코드 내 대표자 실명 3곳 제거
 - [x] CLAUDE_CODE_PHASE1.md L0-1/L0-2 재설계 (브랜드 기반)
 - [ ] `big_event_registry` 테이블 생성 (다음 마이그레이션)
 - [ ] `big_event_milestones` + `big_event_assets` 테이블

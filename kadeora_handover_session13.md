@@ -16,7 +16,7 @@
 | DB | Supabase (PostgreSQL 17, ap-northeast-2) |
 | 인증 | Supabase Auth (카카오 OAuth) |
 | 결제 | 토스페이먼츠 (상점 전용, 테스트키) |
-| 사업자 | 카더라 / 278-57-00801 / 대표 노영진 |
+| 사업자 | 카더라 |
 
 ---
 

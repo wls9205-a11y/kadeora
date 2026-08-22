@@ -15,7 +15,7 @@
 | Supabase 프로젝트 ID | tezftxakuwhsclarprlz (서울 리전) |
 | Vercel 프로젝트 ID | prj_2nDcTjEcgAEew1wYdvVF57VljxJQ |
 | Vercel 팀 ID | team_oKdq68eA7PwgcxFs61wGPZ7j |
-| 사업자등록번호 | 278-57-00801 (대표: 노영진) |
+| 사업자등록번호 | (비공개) |
 | 이메일 | kadeora.app@gmail.com |
 
 ---

@@ -138,10 +138,10 @@
 
 #### [L0-2] ❌ SKIP — 이미 처리됨
 **상태**: Claude 챗에서 DB 레벨로 처리 완료:
-- 기존 `author_name` "노영진" 19건 → 카테고리별 "카더라 부동산팀/주식팀/재테크팀"으로 롤백
-- 코드 파일(`constants.ts`, `layout.tsx`, `llms.txt`) 3곳 모두 노영진 제거 완료
+- 기존 `author_name` "대표자 실명" 19건 → 카테고리별 "카더라 부동산팀/주식팀/재테크팀"으로 롤백
+- 코드 파일(`constants.ts`, `layout.tsx`, `llms.txt`) 3곳 모두 대표자 실명 제거 완료
 - **중요**: 이 작업 건드리지 말고 skip. author_name은 **가상팀명 7종 유지** (카더라 브랜드).
-- `blog-rewrite` / `blog-enrich` cron이 향후 author_name 채울 때도 카테고리별 팀명 사용할 것 (노영진 금지)
+- `blog-rewrite` / `blog-enrich` cron이 향후 author_name 채울 때도 카테고리별 팀명 사용할 것 (대표자 실명 금지)
 
 #### [L0-5] E-E-A-T: 외부 인용·출처 자동 주입
 **작업**:

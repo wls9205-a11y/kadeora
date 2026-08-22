@@ -31,7 +31,7 @@
 | Supabase project_id | `tezftxakuwhsclarprlz` |
 | Vercel team_id | `team_oKdq68eA7PwgcxFs61wGPZ7j` |
 | Vercel project_id | `prj_2nDcTjEcgAEew1wYdvVF57VljxJQ` |
-| 사업자등록번호 | 278-57-00801 |
+| 사업자등록번호 | (비공개) |
 
 ---
 

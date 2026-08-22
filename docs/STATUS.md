@@ -6577,7 +6577,7 @@ dart-ingest-daily      0 6 * * *
 
 ### Node 수동 대기
 1. Kakao Developers OPEN_MAP_AND_LOCAL 활성화
-2. 네이버 스마트플레이스 등록 (사업자번호 278-57-00801)
+2. 네이버 스마트플레이스 등록 (사업자번호는 등록 시 직접 입력)
 3. 네이버 서치어드바이저 사이트맵 재제출
 4. DART API key 재발급 (필요시)
 
@@ -7303,7 +7303,7 @@ HTTP 403 {"errorType":"NotAuthorizedError","message":"App(카더라) disabled OP
 ### 남은 Pending (다음 세션)
 - Batch API 결과 poll + 적용 로직 (2~3일 내 결과 반환 예정)
 - Kakao Local API 403 해결 후 8건 geocoding 재시도
-- 네이버 스마트플레이스 수동 등록 (사업자번호 278-57-00801)
+- 네이버 스마트플레이스 수동 등록 (사업자번호는 등록 시 직접 입력)
 - 네이버 블로그 개설 + OAuth 토큰 발급
 - FAQ Phase 2: AI 생성으로 포스트당 FAQ 자동 붙이기 (콘텐츠 없는 5,700+ 편 대상)
 - CWV 1주 baseline 확보 후 LCP < 2.5s 최적화
@@ -7563,10 +7563,10 @@ Claude Code에서 `docs/CLAUDE_CODE_PHASE1.md` 읽고 논스톱으로 L1-5, L1-6
 
 ### L0 권위 (E-E-A-T)
 - `[L0-1]` 저자 프로필 페이지 신규
-  - `/about/authors` (목록) + `/about/authors/node` (노영진 상세)
+  - `/about/authors` (목록) + `/about/authors/node` (대표자 실명 상세)
   - JSON-LD Person + BreadcrumbList, 전문 영역/편집 원칙
 - `[L0-2]` 저자 체제 재편 (DB 마이그레이션)
-  - manual 글 `author_name = '노영진'`, `author_role = '카더라 설립자, 부동산·주식 데이터 분석'` 일괄 UPDATE
+  - manual 글 `author_name = '대표자 실명'`, `author_role = '카더라 설립자, 부동산·주식 데이터 분석'` 일괄 UPDATE
   - auto 계열 author_role에 `(AI 자동 생성)` 멱등 append
   - blog/[slug] JSON-LD author.url: manual ↔ `/about/authors/node` 링크
 - `[L0-5]` source_ref auto-inject + 참고자료 섹션
@@ -7606,7 +7606,7 @@ Claude Code에서 `docs/CLAUDE_CODE_PHASE1.md` 읽고 논스톱으로 L1-5, L1-6
 - `get_related_posts(bigint, text, text[], int)` 신규 RPC
 - `get_blog_sidebar_bundle(bigint, text, text[], timestamptz)` 신규 RPC
 - `blog_publish_config`: title_similarity_threshold 0.2 → 0.35 / daily_publish_limit 15 → 25
-- blog_posts.author_name/role: manual → 노영진 통일 / auto → AI-assisted + sub_category 세분화
+- blog_posts.author_name/role: manual → 대표자 실명 통일 / auto → AI-assisted + sub_category 세분화
 
 ## 🚀 다음 단계
 - Vercel 배포 모니터링 (`/blog/*` timeout 시간당 감소 여부)
@@ -7619,7 +7619,7 @@ Claude Code에서 `docs/CLAUDE_CODE_PHASE1.md` 읽고 논스톱으로 L1-5, L1-6
 
 # 세션 136 (2026-04-19) — 카더라 브랜드 통일 + Big Event 시스템 구축
 
-## 🎯 세션 135 직후 긴급 교정 (Node 지시: "노영진 → 모두 카더라")
+## 🎯 세션 135 직후 긴급 교정 (Node 지시: "대표자 실명 → 모두 카더라")
 
 ### 교정된 항목
 - `/about/authors/node/page.tsx` **삭제** (개인 프로필 개념 제거)
