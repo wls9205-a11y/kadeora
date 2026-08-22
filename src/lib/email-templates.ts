@@ -134,7 +134,7 @@ export function reEngagementEmail({
     <a href="${SITE_URL}/notifications/settings?utm_source=email" style="color:#64748B;text-decoration:underline;">알림 설정</a>
   </p>
   <p style="font-size:11px;color:#CBD5E1;margin:16px 0 0;">
-    © 2026 카더라 · 부산광역시 연제구 연동로 27
+    © 2026 카더라
   </p>
 </td></tr>
 

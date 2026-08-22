@@ -20,7 +20,7 @@
 
 import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
-import { CONTACT_EMAIL, CONTACT_PHONE, BIZ_INFO_LINE, BIZ_ADDRESS_LINE, BIZ_CONTACT_LINE } from '@/lib/constants';
+import { CONTACT_EMAIL } from '@/lib/constants';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import TopLoadingBar from '@/components/TopLoadingBar';
 import ScrollToTop from '@/components/ScrollToTop';
@@ -139,10 +139,7 @@ export default function ClientShell({ children, serverLoggedIn }: Props) {
               <a href="/press" style={{color:'var(--text-secondary)',textDecoration:'none'}}>보도자료</a>
               <a href="/about" style={{color:'var(--text-secondary)',textDecoration:'none'}}>소개</a>
             </nav>
-            <p style={{fontWeight:600, color:'var(--text-secondary)', marginBottom:4}}>사업자 정보</p>
-            <p>{BIZ_INFO_LINE}</p>
-            <p>{BIZ_ADDRESS_LINE}</p>
-            <p>{BIZ_CONTACT_LINE}</p>
+            <p>문의: {CONTACT_EMAIL}</p>
             <p style={{marginTop:4}}>© 2026 <a href="/about" style={{color:'var(--text-secondary)',textDecoration:'none',fontWeight:600}}>카더라</a>. All rights reserved.</p>
           </div>
         </footer>
@@ -164,6 +161,3 @@ function SignupPopupModalMount() {
   return <SignupPopupModal isLoggedIn={!!userId} />;
 }
 
-// CONTACT_EMAIL/PHONE 는 footer 에서 직접 사용 안 하지만 import 보존 (다른 의존 가능성).
-void CONTACT_EMAIL;
-void CONTACT_PHONE;

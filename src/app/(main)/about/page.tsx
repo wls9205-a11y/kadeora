@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { SITE_URL, CONTACT_EMAIL, CONTACT_PHONE, BIZ_NAME, BIZ_OWNER, BIZ_NUMBER, BIZ_ADDRESS } from '@/lib/constants';
+import { SITE_URL, CONTACT_EMAIL, BIZ_NAME } from '@/lib/constants';
 import { fetchSocialProof, fmtSocial } from '@/lib/social-proof';
 
 export const metadata: Metadata = {
@@ -52,9 +52,7 @@ export default async function AboutPage() {
           logo: `${SITE_URL}/icons/icon-512.png`,
           description: '부동산·주식 정보 플랫폼 — 아파트 청약, 재개발, 주식 시세, AI 종목 분석',
           foundingDate: '2024',
-          founder: { '@type': 'Person', name: BIZ_OWNER },
-          address: { '@type': 'PostalAddress', addressCountry: 'KR', addressRegion: '부산광역시', addressLocality: '연제구', streetAddress: '연동로 27, 405호' },
-          contactPoint: { '@type': 'ContactPoint', contactType: 'customer service', email: CONTACT_EMAIL, telephone: `+82-${CONTACT_PHONE}` },
+          contactPoint: { '@type': 'ContactPoint', contactType: 'customer service', email: CONTACT_EMAIL },
           sameAs: [],
           knowsAbout: ['부동산 투자', '주식 투자', '아파트 청약', '재개발', 'AI 주식 분석'],
         },
@@ -133,9 +131,8 @@ export default async function AboutPage() {
 
         {/* Contact */}
         <div style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-tertiary)', lineHeight: 1.8 }}>
-          <p style={{ margin: '0 0 4px' }}>상호명: {BIZ_NAME} | 대표자: {BIZ_OWNER} | 사업자등록번호: {BIZ_NUMBER}</p>
-          <p style={{ margin: '0 0 4px' }}>사업장: {BIZ_ADDRESS}</p>
-          <p style={{ margin: 0 }}>이메일: {CONTACT_EMAIL} | 전화: {CONTACT_PHONE}</p>
+          <p style={{ margin: '0 0 4px' }}>상호명: {BIZ_NAME}</p>
+          <p style={{ margin: 0 }}>이메일: {CONTACT_EMAIL}</p>
         </div>
       </div>
     </>

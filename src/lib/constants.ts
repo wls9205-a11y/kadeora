@@ -3,7 +3,6 @@
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
 /** 연락처 */
 export const CONTACT_EMAIL = 'kadeora.app@gmail.com';
-export const CONTACT_PHONE = '010-5001-1382';
 
 /** AI 모델 — 최신 (2026-04 기준)
  *  실시간 변경 가능: app_config.ai_models 에서 오버라이드 (lib/app-config.ts getAIModel)
@@ -17,16 +16,8 @@ export const ANTHROPIC_VERSION = '2023-06-01';
 
 // Demo data uses simplified shapes for SSR fallbacks — typed loosely
 
-/** 사업자 정보 — 법적 고지에 사용 */
+/** 브랜드명 */
 export const BIZ_NAME = '카더라';
-export const BIZ_OWNER = '노영진';
-export const BIZ_NUMBER = '278-57-00801';
-export const BIZ_ADDRESS = '부산광역시 연제구 연동로 27, 405호';
-
-/** 사업자 정보 한줄 (footer용) */
-export const BIZ_INFO_LINE = `상호명: ${BIZ_NAME} | 대표자: ${BIZ_OWNER} | 사업자등록번호: ${BIZ_NUMBER}`;
-export const BIZ_ADDRESS_LINE = `사업장 주소: ${BIZ_ADDRESS}`;
-export const BIZ_CONTACT_LINE = `전화: ${CONTACT_PHONE} | 이메일: ${CONTACT_EMAIL}`;
 
 /** 관리자 인프라 상수 — 어드민 대시보드 전체에서 참조 */
 export const ADMIN_INFRA = {

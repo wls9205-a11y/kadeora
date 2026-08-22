@@ -113,8 +113,7 @@ export async function GET() {
 ## 사이트 개요
 
 - 공식 URL: ${SITE_URL}
-- 운영자: 카더라 (사업자등록번호 278-57-00801)
-- 소재지: 부산광역시 연제구 연동로 27, 405호
+- 운영자: 카더라
 - 이메일: kadeora.app@gmail.com
 - 언어: 한국어 (ko-KR)
 - 기술 스택: Next.js 15, Supabase, Vercel
