@@ -19,7 +19,9 @@ import { useAuth } from '@/components/AuthProvider';
 import { trackCTA } from '@/lib/analytics';
 import { trackCtaAndNavigate } from '@/lib/cta-navigate';
 
-const EXCLUDED = ['/', '/login', '/auth', '/onboarding', '/admin', '/terms', '/privacy'];
+// r4-P9: /calc 추가. 30일 820노출 0클릭 — 네이버에서 계산하러 온 사람에게
+// 가입을 권하는 자리가 아니다. 화면만 가린다. (/calc 밖은 968노출 3클릭 1가입이라 유지)
+const EXCLUDED = ['/', '/login', '/auth', '/onboarding', '/admin', '/terms', '/privacy', '/calc'];
 const CLOSE_KEY = 'kd_sticky_bar_closed';
 const CLOSE_TTL_MS = 24 * 60 * 60 * 1000;
 

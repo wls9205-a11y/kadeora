@@ -19,6 +19,7 @@
  */
 
 import dynamic from 'next/dynamic';
+import { usePathname } from 'next/navigation';
 import { CONTACT_EMAIL, CONTACT_PHONE, BIZ_INFO_LINE, BIZ_ADDRESS_LINE, BIZ_CONTACT_LINE } from '@/lib/constants';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import TopLoadingBar from '@/components/TopLoadingBar';
@@ -154,7 +155,12 @@ export default function ClientShell({ children, serverLoggedIn }: Props) {
 // AuthProvider 트리 내부에 마운트되는 작은 어댑터.
 function SignupPopupModalMount() {
   const { userId, loading } = useAuth();
+  const pathname = usePathname();
   if (loading) return null;
+  // r4-P9: 계산기에서는 띄우지 않는다. 네이버 유입 절반이 계산기로 들어오는데
+  // 그 화면은 이미 login_gate_calc_save 가 가입을 한 번 권하고 있다.
+  // (30일 /calc 265노출 2클릭 · /calc 밖 291노출 6클릭 — 밖은 그대로 둔다)
+  if (pathname === '/calc' || pathname.startsWith('/calc/')) return null;
   return <SignupPopupModal isLoggedIn={!!userId} />;
 }
 

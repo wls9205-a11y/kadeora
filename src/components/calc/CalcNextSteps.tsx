@@ -1,4 +1,8 @@
+'use client';
 // s274 — 계산기 → 서비스 본체 연결 블록.
+//
+// r4-P9: 'use client' 로 전환했다. 이 블록의 클릭이 0인지 적은지조차 몰라
+// 위치를 옮겨도 효과를 판정할 수 없었다. 정적 매핑은 그대로라 DB 조회는 여전히 없다.
 //
 // 배경: 계산기는 네이버 유입의 50% (30일 550건 / 401명) 를 혼자 책임지는데,
 // 네이버 방문자의 80% 가 1페이지만 보고 이탈한다. 계산이 끝난 사람에게
@@ -8,7 +12,10 @@
 // 사이트에서 가장 빠른 축인데, 여기에 쿼리를 붙이면 그 장점을 깎는다.
 // 카테고리 → 목적지 정적 매핑으로 충분하다.
 
+import { useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { trackCTA } from '@/lib/analytics';
 
 type Step = { href: string; label: string; desc: string; icon: string };
 
@@ -62,6 +69,11 @@ type Props = {
 // 붙이려면 조회가 필요한데 그건 이 컴포넌트를 정적으로 둔 이유와 상충한다.
 export default function CalcNextSteps({ category }: Props) {
   const steps = BY_CATEGORY[category] ?? COMMUNITY_STEPS;
+  const pathname = usePathname();
+
+  useEffect(() => {
+    trackCTA('view', 'calc_next_steps', { page_path: pathname, category });
+  }, [pathname, category]);
 
   return (
     <section
@@ -89,6 +101,7 @@ export default function CalcNextSteps({ category }: Props) {
           <Link
             key={s.href}
             href={s.href}
+            onClick={() => trackCTA('click', 'calc_next_steps', { page_path: pathname, category, href: s.href })}
             style={{
               display: 'flex',
               alignItems: 'center',

@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { CALC_REGISTRY, CATEGORIES, findCalc, getCategoryLabel } from '@/lib/calc/registry';
 import CalcEngine from '@/components/calc/CalcEngine';
 import CalcNextSteps from '@/components/calc/CalcNextSteps';
+import CalcLeadCta from '@/components/calc/CalcLeadCta';
 import Disclaimer from '@/components/Disclaimer';
 import ShareButtons from '@/components/ShareButtons';
 import LoginGate from '@/components/LoginGate';
@@ -139,6 +140,15 @@ export default async function CalcPage({ params }: { params: Promise<{ category:
         <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>계산 결과를 공유해보세요</span>
       </div>
 
+      {/* r4-P9-4 — 부동산 맥락 계산기에만. 결과 직후, 다음 동선 위. */}
+      <CalcLeadCta category={category} slug={slug} />
+
+      {/* r4-P9-2 — 계산 이후 동선을 결과 바로 아래로 올린다.
+          이전엔 FAQ·관련 계산기 다음이라 모바일에서 세 번 스크롤해야 나왔다.
+          사용자가 목적을 달성한 직후가 다음 행동을 제안할 유일한 순간이다.
+          FAQ 는 SEO 콘텐츠라 페이지에 그대로 두고 순서만 내린다. */}
+      <CalcNextSteps category={category} />
+
       {/* SEO 콘텐츠: 본문 (seoContent) */}
       {calc.seoContent && (
         <div className="blog-content" style={{ marginTop: 28 }} dangerouslySetInnerHTML={{ __html: sanitizeHtml(calc.seoContent) }} />
@@ -173,10 +183,6 @@ export default async function CalcPage({ params }: { params: Promise<{ category:
           </div>
         </div>
       )}
-
-      {/* s274 — 계산 이후 동선. 네이버 유입의 50% 가 계산기로 들어와 80% 가
-          1페이지만 보고 이탈하던 구간이라, 관련 계산기 다음에 서비스 본체로 잇는다. */}
-      <CalcNextSteps category={category} />
 
       {/* 회원가입 유도 — LoginGate 기능 게이팅 (세션 108) */}
       <LoginGate feature="calc_save" blurHeight={80}>
