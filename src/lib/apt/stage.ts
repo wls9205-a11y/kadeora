@@ -11,6 +11,7 @@
 
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { isIndexable } from '@/lib/apt/indexable';
+import { fetchBatched } from '@/lib/db/fetchBatched';
 
 export const STAGE_KEYS = ['planned', 'offering', 'new', 'existing', 'redev'] as const;
 export type StageKey = (typeof STAGE_KEYS)[number];
@@ -143,32 +144,42 @@ export async function fetchIndexableStagePairs(): Promise<Array<{ stage: StageKe
   const out: Array<{ stage: StageKey; region: string; count: number }> = [];
 
   try {
-    const [sitesRes, subsRes] = await Promise.all([
-      (sb as any)
-        .from('apt_sites')
-        .select('region, lifecycle_stage')
-        .eq('is_active', true)
-        .not('lifecycle_stage', 'is', null)
-        .limit(20000),
-      (sb as any)
-        .from('apt_subscriptions')
-        .select('region_nm')
-        .not('slug', 'is', null)
-        .limit(20000),
+    // PostgREST 기본 db-max-rows=1000 — limit(20000) 은 1000행만 준다.
+    // 배치로 다 긁지 않으면 (stage, region) 건수가 과소 집계돼 색인 대상이 잘려나간다.
+    const [sitesRows, subsRows] = await Promise.all([
+      fetchBatched<{ region: string; lifecycle_stage: string }>((off, lim) =>
+        (sb as any)
+          .from('apt_sites')
+          .select('region, lifecycle_stage')
+          .eq('is_active', true)
+          .not('lifecycle_stage', 'is', null)
+          .order('id', { ascending: true })
+          .range(off, off + lim - 1),
+        20000,
+      ),
+      fetchBatched<{ region_nm: string }>((off, lim) =>
+        (sb as any)
+          .from('apt_subscriptions')
+          .select('region_nm')
+          .not('slug', 'is', null)
+          .order('id', { ascending: true })
+          .range(off, off + lim - 1),
+        20000,
+      ),
     ]);
 
     const stageOf = new Map<string, StageKey>();
     for (const k of STAGE_KEYS) for (const ls of STAGES[k].lifecycles) stageOf.set(ls, k);
 
     const counts = new Map<string, number>();
-    for (const r of ((sitesRes as any)?.data ?? []) as any[]) {
+    for (const r of sitesRows as any[]) {
       const k = stageOf.get(r.lifecycle_stage);
       // offering 은 apt_sites 를 쓰지 않는다 (전국 31건뿐)
       if (!k || k === 'offering' || !isStageRegion(r.region)) continue;
       const key = `${k}|${r.region}`;
       counts.set(key, (counts.get(key) ?? 0) + 1);
     }
-    for (const r of ((subsRes as any)?.data ?? []) as any[]) {
+    for (const r of subsRows as any[]) {
       if (!isStageRegion(r.region_nm)) continue;
       const key = `offering|${r.region_nm}`;
       counts.set(key, (counts.get(key) ?? 0) + 1);

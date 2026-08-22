@@ -4,7 +4,7 @@ import { SITE_URL as BASE } from '@/lib/constants';
 import { fetchBatched, POSTGREST_BATCH } from '@/lib/db/fetchBatched';
 // r4-P5-4: 신규 경로는 sitemap.xml 인덱스를 건드리지 않도록 id=0 에 싣는다.
 import { fetchIndexableStagePairs } from '@/lib/apt/stage';
-import { listArchiveMonths } from '@/app/(main)/blog/archive/[month]/page';
+import { listArchiveMonths } from '@/lib/blog/archive';
 
 export const revalidate = 3600;
 export const dynamic = 'force-dynamic'; // s168: 빌드타임 DB 호출 제거

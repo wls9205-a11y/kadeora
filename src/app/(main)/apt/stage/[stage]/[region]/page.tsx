@@ -59,7 +59,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!isIndexable(rows.length)) return { robots: { index: false, follow: false } };
 
   const url = urlOf(stage, region);
-  const title = `${region} ${def.label} 아파트 ${rows.length.toLocaleString()}곳 | 카더라`;
+  // (main)/layout 의 `%s | 카더라` 템플릿이 붙는다 — 여기서 브랜드를 또 넣지 않는다.
+  const title = `${region} ${def.label} 아파트 ${rows.length.toLocaleString()}곳`;
   const description = def.describe(region, rows.length);
 
   return {

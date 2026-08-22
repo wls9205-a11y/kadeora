@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   description: DESC,
   alternates: { canonical: `${SITE_URL}/stock/domestic` },
   openGraph: {
-    title: `${TITLE} | 카더라`,
+    title: TITLE,
     description: DESC,
     url: `${SITE_URL}/stock/domestic`,
     siteName: '카더라',

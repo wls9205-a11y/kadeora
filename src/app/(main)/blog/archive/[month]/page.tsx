@@ -11,8 +11,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { SITE_URL } from '@/lib/constants';
-import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { isIndexable, INDEX_MIN } from '@/lib/apt/indexable';
+import { MONTH_RE, VIEW_P90, VIEW_P75, fetchMonth, listArchiveMonths } from '@/lib/blog/archive';
 import HubHero from '@/components/detail/HubHero';
 import PostCard from '@/components/cards/v3/PostCard';
 
@@ -20,73 +20,8 @@ export const revalidate = 3600;
 export const dynamicParams = true;
 export const maxDuration = 30;
 
-const VIEW_P90 = 182;
-const VIEW_P75 = 35;
-const MONTH_RE = /^\d{4}-(0[1-9]|1[0-2])$/;
-
 interface Props {
   params: Promise<{ month: string }>;
-}
-
-interface ArchiveRow {
-  slug: string;
-  title: string;
-  excerpt: string | null;
-  category: string | null;
-  published_at: string | null;
-  view_count: number | null;
-  cover_image: string | null;
-  image_alt: string | null;
-}
-
-function monthBounds(month: string) {
-  const [y, m] = month.split('-').map(Number);
-  const start = new Date(Date.UTC(y, m - 1, 1));
-  const end = new Date(Date.UTC(m === 12 ? y + 1 : y, m === 12 ? 0 : m, 1));
-  return { start: start.toISOString(), end: end.toISOString() };
-}
-
-async function fetchMonth(month: string): Promise<ArchiveRow[]> {
-  const { start, end } = monthBounds(month);
-  const sb = getSupabaseAdmin();
-  const { data } = await (sb as any)
-    .from('blog_posts')
-    .select('slug, title, excerpt, category, published_at, view_count, cover_image, image_alt')
-    .eq('is_published', true)
-    .not('published_at', 'is', null)
-    .gte('published_at', start)
-    .lt('published_at', end)
-    .order('view_count', { ascending: false, nullsFirst: false })
-    .limit(300);
-  return ((data ?? []) as ArchiveRow[]).filter((r) => r.slug && r.title);
-}
-
-/** 발행 이력이 있는 월 목록. 사이트맵과 같은 기준을 쓴다. */
-export async function listArchiveMonths(): Promise<string[]> {
-  try {
-    const sb = getSupabaseAdmin();
-    const { data } = await (sb as any)
-      .from('blog_posts')
-      .select('published_at')
-      .eq('is_published', true)
-      .not('published_at', 'is', null)
-      .order('published_at', { ascending: false })
-      .limit(20000);
-    const counts = new Map<string, number>();
-    for (const r of ((data ?? []) as any[])) {
-      const m = String(r.published_at).slice(0, 7);
-      if (!MONTH_RE.test(m)) continue;
-      counts.set(m, (counts.get(m) ?? 0) + 1);
-    }
-    return [...counts.entries()]
-      .filter(([, n]) => isIndexable(n))
-      .map(([m]) => m)
-      .sort()
-      .reverse();
-  } catch (err) {
-    console.error('[blog/archive months]', err);
-    return [];
-  }
 }
 
 export async function generateStaticParams() {
@@ -104,7 +39,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const [y, m] = month.split('-');
   const url = `${SITE_URL}/blog/archive/${month}`;
-  const title = `${y}년 ${Number(m)}월 블로그 ${rows.length.toLocaleString()}편 | 카더라`;
+  // (main)/layout 의 `%s | 카더라` 템플릿이 붙는다 — 여기서 브랜드를 또 넣지 않는다.
+  const title = `${y}년 ${Number(m)}월 블로그 ${rows.length.toLocaleString()}편`;
   const description = `카더라가 ${y}년 ${Number(m)}월에 발행한 부동산·주식 분석 글 ${rows.length.toLocaleString()}편을 모았습니다.`;
 
   return {
