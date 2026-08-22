@@ -1,4 +1,4 @@
-export const maxDuration = 60;
+export const maxDuration = 120;
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { NextRequest, NextResponse } from 'next/server';
 import { withCronLogging } from '@/lib/cron-logger';
@@ -38,6 +38,19 @@ function parseXmlItems(xml: string): Record<string, any>[] {
   return items;
 }
 
+/**
+ * data.go.kr 은 HTTP 200 으로 에러를 돌려준다. 본문의 결과 코드를 봐야 실패를 안다.
+ * 정상: <resultCode>00</resultCode> 또는 000. 그 외 값이면 실패로 본다.
+ * 코드 태그가 아예 없는 응답은 판정하지 않는다(파서가 item 0건으로 흡수).
+ */
+function assertApiOk(xml: string, label: string, ym: string): void {
+  const code = xml.match(/<(?:resultCode|returnReasonCode)>\s*([^<]*?)\s*<\//)?.[1];
+  if (code == null) return;
+  if (code === '00' || code === '000') return;
+  const msg = xml.match(/<(?:resultMsg|returnAuthMsg|errMsg)>\s*([^<]*?)\s*<\//)?.[1] ?? '';
+  throw new Error(`data.go.kr ${label} ${ym} resultCode=${code}${msg ? ` (${msg})` : ''}`);
+}
+
 export async function GET(req: NextRequest) {
   try {
   const authHeader = req.headers.get('authorization');
@@ -45,12 +58,15 @@ export async function GET(req: NextRequest) {
   if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-  const apiKey = process.env.BUSAN_DATA_API_KEY;
-  if (!apiKey) return NextResponse.json({ error: 'BUSAN_DATA_API_KEY not set' }, { status: 200 });
 
   const supabase = getSupabaseAdmin();
 
   const result = await withCronLogging('crawl-apt-resale', async () => {
+    // 키 부재는 래퍼 안에서 throw 해야 cron_logs 에 failed 로 남는다.
+    // 래퍼 밖 early-return 이던 시절엔 실행 흔적조차 남지 않았다.
+    const apiKey = process.env.BUSAN_DATA_API_KEY;
+    if (!apiKey) throw new Error('BUSAN_DATA_API_KEY not set');
+
     const now = new Date();
     const months: string[] = [];
     for (let m = 1; m <= now.getMonth() + 1; m++) {
@@ -66,7 +82,9 @@ export async function GET(req: NextRequest) {
       for (const ym of months) {
         const url = `https://apis.data.go.kr/1613000/RTMSDataSvcSilvTrade/getRTMSDataSvcSilvTrade?serviceKey=${encodeURIComponent(apiKey!)}&LAWD_CD=${lawdCd}&DEAL_YMD=${ym}&pageNo=1&numOfRows=1000`;
         const res = await fetch(url);
+        if (!res.ok) throw new Error(`data.go.kr ${label} ${ym} HTTP ${res.status}`);
         const xml = await res.text();
+        assertApiOk(xml, label, ym);
         const items = parseXmlItems(xml);
         const rows = items.map(it => ({
           apt_name: it.apt_name, region_nm: regionPart, sigungu: sigunguPart, dong: it.dong,
@@ -76,24 +94,47 @@ export async function GET(req: NextRequest) {
           floor: it.floor, source: 'molit_resale',
         })).filter(r => r.deal_amount > 0 && r.deal_date);
         if (rows.length > 0) {
-          const { error } = await supabase.from('apt_resale_rights').insert(rows);
-          if (!error) count += rows.length;
+          // 같은 달을 다시 긁어도 중복이 쌓이지 않게 upsert (DB 유니크 인덱스 존재)
+          const { error } = await supabase
+            .from('apt_resale_rights')
+            .upsert(rows, { onConflict: 'apt_name,deal_date,floor,exclusive_area' });
+          if (error) throw error;
+          count += rows.length;
         }
       }
       return count;
     }
 
-    // 전체 병렬 처리 (15개 시군구 한번에)
+    // Rule #49: 동시 호출 수를 늘리지 않는다 (allSettled 확장은 504 이력 있음)
     const results = await Promise.allSettled(entries.map(([name, code]) => fetchOne(name, code)));
+    let failed = 0;
+    const errors: string[] = [];
     for (const r of results) {
-      if (r.status === 'fulfilled') totalInserted += r.value;
+      if (r.status === 'fulfilled') {
+        totalInserted += r.value;
+      } else {
+        failed += 1;
+        const msg = r.reason instanceof Error ? r.reason.message : String(r.reason);
+        if (errors.length < 3) errors.push(msg);
+        console.error('[cron/crawl-apt-resale] entry failed:', msg);
+      }
+    }
+
+    // 전건 실패는 부분 실패가 아니라 크론 실패다. 무효 키를 success 로 덮지 않는다.
+    if (failed === entries.length) {
+      throw new Error(`all ${failed} entries failed — ${errors[0] ?? 'unknown'}`);
     }
 
     return {
       processed: entries.length,
       created: totalInserted,
-      failed: 0,
-      metadata: { api_name: 'data_go_kr', api_calls: entries.length * 2, months },
+      failed,
+      metadata: {
+        api_name: 'data_go_kr',
+        api_calls: entries.length * months.length,
+        months,
+        ...(errors.length ? { sample_errors: errors } : {}),
+      },
     };
   });
 

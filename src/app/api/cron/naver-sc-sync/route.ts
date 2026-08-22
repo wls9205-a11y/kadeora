@@ -13,7 +13,17 @@ export const maxDuration = 30;
 export const dynamic = "force-dynamic";
 
 const NAVER_OPENAPI_BASE = "https://openapi.naver.com/v1/search";
-const OUR_DOMAIN = "kadeora.app";
+// blog 소스가 전량 권외였던 건 순위가 없어서가 아니라 찾을 대상이 없어서였다.
+// 공식 네이버 블로그는 blog.naver.com/kadeoraapp — naver.com 으로 넓히면 남의 글이 잡힌다.
+const OUR_DOMAINS = ["kadeora.app", "blog.naver.com/kadeoraapp"] as const;
+
+// 네이버는 m.blog.naver.com/kadeoraapp 로도 돌려준다 — 위 문자열의 부분일치로 함께 걸린다.
+// PostView.naver?blogId=kadeoraapp 형태는 경로가 달라 별도로 본다.
+function matchesOurSite(link: unknown): boolean {
+  if (typeof link !== "string") return false;
+  if (OUR_DOMAINS.some((d) => link.includes(d))) return true;
+  return /[?&]blogId=kadeoraapp(?:&|$)/.test(link);
+}
 const DISPLAY = 100;
 const SOURCES = ["webkr", "blog"] as const;
 type Source = (typeof SOURCES)[number];
@@ -53,7 +63,7 @@ async function fetchRank(
   }
   const json = (await res.json()) as any;
   const items: any[] = Array.isArray(json?.items) ? json.items : [];
-  const idx = items.findIndex((it) => typeof it?.link === "string" && it.link.includes(OUR_DOMAIN));
+  const idx = items.findIndex((it) => matchesOurSite(it?.link));
 
   return {
     date,
