@@ -1,5 +1,4 @@
 'use client';
-import GatedStockSection from '@/components/stock/GatedStockSection';
 import { stockColor, stockUpColor, stockDownColor, investorColor, investorBg, signalColor, signalBg, sentimentColor, sentimentBg, isKRMarket } from '@/lib/stockColor';
 import type { StockPriceHistory, StockNews, InvestorFlow, Disclosure, AIComment } from '@/types/stock';
 import { useState, useEffect } from 'react';
@@ -277,16 +276,13 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
 
       {/* 차트 — technical_indicators 게이트 적용 */}
       {tab === 'chart' && (
-        <GatedStockSection sectionKey="technical_indicators" pageType="symbol" fallbackTitle={`${stockName} 기술적 지표`}>
           <ChartTab priceHistory={priceHistory} currency={currency} />
-        </GatedStockSection>
       )}
 
       {/* 수급 — investor_flow 게이트 적용 */}
       {tab === 'flow' && (
-        <GatedStockSection sectionKey="investor_flow" pageType="symbol" fallbackTitle={`${stockName} 투자자 동향`}>
         <div className="kd-card">
-          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-md)' }}>📊 투자자별 수급</div>
+          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-md)' }}>투자자별 수급</div>
           {investorFlow.length > 0 && (() => {
             const totalForeign = investorFlow.reduce((s: number, d) => s + ((d.foreign_buy || 0) - (d.foreign_sell || 0)), 0);
             const totalInst = investorFlow.reduce((s: number, d) => s + ((d.inst_buy || 0) - (d.inst_sell || 0)), 0);
@@ -376,7 +372,6 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
             );
           })()}
         </div>
-        </GatedStockSection>
       )}
 
       {/* 뉴스 */}

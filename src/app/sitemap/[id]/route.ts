@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { SITE_URL as BASE } from '@/lib/constants';
 import { fetchBatched, POSTGREST_BATCH } from '@/lib/db/fetchBatched';
+// r4-P5-4: 신규 경로는 sitemap.xml 인덱스를 건드리지 않도록 id=0 에 싣는다.
+import { fetchIndexableStagePairs } from '@/lib/apt/stage';
+import { listArchiveMonths } from '@/lib/blog/archive';
 
 export const revalidate = 3600;
 export const dynamic = 'force-dynamic'; // s168: 빌드타임 DB 호출 제거
@@ -73,7 +76,9 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
       '/stock/data', '/stock/search', '/stock/dividend', '/stock/movers', '/stock/themes',
       '/stock/market/kospi', '/stock/market/kosdaq', '/stock/market/nyse', '/stock/market/nasdaq',
       '/stock/short-selling', '/stock/signals',
-      '/calc', '/press', '/glossary', '/premium',
+      '/calc', '/press', '/glossary', '/premium', '/more',
+      // r4-P5-3: 주식 국내/해외 2분할
+      '/stock/domestic', '/stock/overseas',
       // 지역별 재개발 SEO 페이지
       ...['서울','경기','부산','인천','대구','광주','대전','울산','경남','경북','충남','충북','전남','전북','강원','제주','세종'].map(r => `/apt/redev/${encodeURIComponent(r)}`),
     ];
@@ -125,6 +130,34 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
         ...THEME_REGIONS.map(r => ({ url: `${BASE}/apt/theme/${t}?region=${encodeURIComponent(r)}`, lastModified: now, changeFrequency: 'weekly' as string, priority: 0.7 })),
       ]),
     ];
+
+    // r4-P5-4: lifecycle 축 + 블로그 월별 아카이브.
+    // isIndexable 통과분만 싣는다 — 페이지 본문 가드와 같은 함수를 쓴다.
+    // 실패해도 나머지 사이트맵은 나가야 하므로 개별 try 로 감싼다.
+    try {
+      const pairs = await fetchIndexableStagePairs();
+      for (const p of pairs) {
+        entries.push({
+          url: `${BASE}/apt/stage/${p.stage}/${encodeURIComponent(p.region)}`,
+          lastModified: now,
+          changeFrequency: p.stage === 'offering' ? 'daily' : 'weekly',
+          priority: p.stage === 'offering' ? 0.85 : 0.75,
+        });
+      }
+    } catch (e) { console.error('[sitemap/0] apt stage', e); }
+
+    try {
+      const months = await listArchiveMonths();
+      for (const m of months) {
+        entries.push({
+          url: `${BASE}/blog/archive/${m}`,
+          lastModified: now,
+          changeFrequency: 'monthly',
+          priority: 0.6,
+        });
+      }
+    } catch (e) { console.error('[sitemap/0] blog archive', e); }
+
     return xmlResponse(entries);
   }
 

@@ -12,6 +12,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { SITE_URL as SITE } from '@/lib/constants';
 import StockIssueCard from '@/components/cards/StockIssueCard';
 import AptIssueCard from '@/components/cards/AptIssueCard';
+import SectionHeader from '@/components/apt/SectionHeader';
 import type { StockIssueScore, AptIssueScore } from '@/lib/issue/types';
 import type { HomeData } from '@/lib/home/contracts';
 
@@ -248,7 +249,7 @@ export default async function HomePage() {
 
       {/* 이슈 종목 — 국내 TOP 5 */}
       <section style={{ marginBottom: 18 }}>
-        <SectionHeader title="📈 국내 이슈 종목" href="/stock?tab=issue" more="전체" />
+        <SectionHeader eyebrow="DOMESTIC — 코스피·코스닥" title="국내 이슈 종목" id="home-domestic" meta={<Link href="/stock?tab=issue" style={{ color: 'var(--text-tertiary)', textDecoration: 'none' }}>전체 →</Link>} />
         {domestic.length === 0 ? (
           <Empty label="이슈 점수 데이터 준비 중" />
         ) : (
@@ -259,14 +260,14 @@ export default async function HomePage() {
       {/* 이슈 종목 — 해외 TOP 3 */}
       {overseas.length > 0 && (
         <section style={{ marginBottom: 18 }}>
-          <SectionHeader title="🌎 해외 이슈 종목" href="/stock?tab=issue" more="전체" />
+          <SectionHeader eyebrow="OVERSEAS — 뉴욕증시" title="해외 이슈 종목" id="home-overseas" meta={<Link href="/stock?tab=issue" style={{ color: 'var(--text-tertiary)', textDecoration: 'none' }}>전체 →</Link>} />
           {overseas.map((s) => <StockIssueCard key={s.symbol} data={s} />)}
         </section>
       )}
 
       {/* 이슈 단지 TOP 5 */}
       <section style={{ marginBottom: 18 }}>
-        <SectionHeader title="🏢 이슈 단지" href="/apt" more="전체" />
+        <SectionHeader eyebrow="APT — 오늘의 단지" title="이슈 단지" id="home-apt" meta={<Link href="/apt" style={{ color: 'var(--text-tertiary)', textDecoration: 'none' }}>전체 →</Link>} />
         {apts.length === 0 ? (
           <Empty label="이슈 단지 데이터 준비 중" />
         ) : (
@@ -276,7 +277,7 @@ export default async function HomePage() {
 
       {/* 인기 블로그 3 */}
       <section style={{ marginBottom: 18 }}>
-        <SectionHeader title="📰 인기 블로그" href="/blog" more="전체" />
+        <SectionHeader eyebrow="BLOG — 많이 읽은 글" title="인기 블로그" id="home-blog" meta={<Link href="/blog" style={{ color: 'var(--text-tertiary)', textDecoration: 'none' }}>전체 →</Link>} />
         {blogs.length === 0 ? (
           <Empty label="블로그 준비 중" />
         ) : (
@@ -328,17 +329,6 @@ function HeroBody({ hero }: { hero: NonNullable<HomeData['hero_issue']> }) {
         </div>
       ) : null}
     </>
-  );
-}
-
-function SectionHeader({ title, href, more }: { title: string; href: string; more: string }) {
-  return (
-    <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', padding: '0 6px 6px' }}>
-      <h2 style={{ fontSize: 14, fontWeight: 700, margin: 0, color: 'var(--text-primary, #F2F5FA)' }}>{title}</h2>
-      <Link href={href} style={{ fontSize: 11.5, color: 'var(--text-tertiary, #8BA3C0)', textDecoration: 'none' }}>
-        {more} →
-      </Link>
-    </div>
   );
 }
 

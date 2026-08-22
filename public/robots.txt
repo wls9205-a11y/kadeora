@@ -29,6 +29,8 @@ Disallow: /*?q=
 Disallow: /*?sort=
 Disallow: /*?utm_
 Disallow: /*?ref=
+# r4: 정비 유형·단계 쿼리는 색인 대상이 아니다
+Disallow: /apt/redev/*?
 # s8: dead routes 는 각 페이지 metadata 의 robots:{index:false} 로 처리한다.
 #     여기서 Disallow 하면 구글이 그 noindex 를 읽지 못해 URL 만 색인된다.
 #     /apt/feed · /apt/tabs 는 라우트 자체가 없어 줄만 삭제.
@@ -56,6 +58,8 @@ Disallow: /*?q=
 Disallow: /*?sort=
 Disallow: /*?utm_
 Disallow: /*?ref=
+# r4: 정비 유형·단계 쿼리는 색인 대상이 아니다
+Disallow: /apt/redev/*?
 Disallow: /write
 Disallow: /login
 Disallow: /signup
@@ -97,6 +101,8 @@ Disallow: /*?q=
 Disallow: /*?sort=
 Disallow: /*?utm_
 Disallow: /*?ref=
+# r4: 정비 유형·단계 쿼리는 색인 대상이 아니다
+Disallow: /apt/redev/*?
 Disallow: /write
 Disallow: /login
 Disallow: /signup
@@ -126,6 +132,8 @@ Disallow: /*?q=
 Disallow: /*?sort=
 Disallow: /*?utm_
 Disallow: /*?ref=
+# r4: 정비 유형·단계 쿼리는 색인 대상이 아니다
+Disallow: /apt/redev/*?
 Disallow: /write
 Disallow: /login
 Disallow: /signup
@@ -155,6 +163,8 @@ Disallow: /*?q=
 Disallow: /*?sort=
 Disallow: /*?utm_
 Disallow: /*?ref=
+# r4: 정비 유형·단계 쿼리는 색인 대상이 아니다
+Disallow: /apt/redev/*?
 Disallow: /write
 Disallow: /login
 Disallow: /signup
@@ -179,6 +189,8 @@ Disallow: /*?q=
 Disallow: /*?sort=
 Disallow: /*?utm_
 Disallow: /*?ref=
+# r4: 정비 유형·단계 쿼리는 색인 대상이 아니다
+Disallow: /apt/redev/*?
 Disallow: /write
 Disallow: /login
 Disallow: /signup

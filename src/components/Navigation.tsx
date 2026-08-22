@@ -2,7 +2,8 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { Home, TrendingUp, Building2, Search, Bell, User as UserIcon, PenSquare, LogOut, FileText, MoreHorizontal, Settings, Download } from 'lucide-react';
+import { Home, TrendingUp, Building2, Search, Bell, User as UserIcon, PenSquare, LogOut, FileText, MoreHorizontal, Settings, Download,
+  MessageSquare, MessagesSquare, BarChart3, Flame, Library, Calculator, BellRing, LayoutGrid, MapPin, Lightbulb, CalendarCheck } from 'lucide-react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useAuth } from '@/components/AuthProvider';
 import { haptic } from '@/lib/haptic';
@@ -11,52 +12,30 @@ import LiveActivityIndicator from '@/components/LiveActivityIndicator';
 import UniversalSearchBar from '@/components/search/UniversalSearchBar';
 
 const NAV_ITEMS = [
-  { href: '/feed',    label: '피드',   Icon: Home },
-  { href: '/stock',   label: '주식',   Icon: TrendingUp },
+  { href: '/',        label: '홈',     Icon: Home },
   { href: '/apt',     label: '부동산', Icon: Building2 },
+  { href: '/stock',   label: '주식',   Icon: TrendingUp },
   { href: '/blog',    label: '블로그', Icon: FileText },
 ];
 
 const MOBILE_TABS = [
-  { href: '/feed',    label: '피드',   Icon: Home },
-  { href: '/stock',   label: '주식',   Icon: TrendingUp },
+  { href: '/',        label: '홈',     Icon: Home },
   { href: '/apt',     label: '부동산', Icon: Building2 },
+  { href: '/stock',   label: '주식',   Icon: TrendingUp },
   { href: '/blog',    label: '블로그', Icon: FileText },
 ];
 
-const MORE_ITEMS: { href: string; emoji: string; label: string; sub?: string; group: string }[] = [
-  // 투자 정보
-  { href: '/daily',            emoji: '📊', label: '데일리 리포트', sub: '매일 시장 요약', group: '투자 정보' },
-  { href: '/hot',             emoji: '🔥', label: '이번주 HOT', sub: '인기 글 모아보기', group: '투자 정보' },
-  { href: '/blog',            emoji: '📰', label: '블로그', sub: '7,600+ 분석 글', group: '투자 정보' },
-  { href: '/blog/series',     emoji: '📚', label: '시리즈', sub: '주제별 연재 모음', group: '투자 정보' },
-  { href: '/discuss',         emoji: '💬', label: '라운지 토론', sub: 'A vs B 투표·토론', group: '투자 정보' },
-  // 주식
-  { href: '/stock/compare',   emoji: '⚖️', label: '종목 비교', sub: '핵심 지표 비교', group: '주식' },
-  { href: '/stock/search',    emoji: '🔍', label: '종목 검색', sub: '1,800+종목 필터', group: '주식' },
-  { href: '/stock/dividend',  emoji: '💎', label: '배당주 TOP', sub: '고배당 종목 순위', group: '주식' },
-  { href: '/stock/movers',    emoji: '📈', label: '급등락', sub: '실시간 등락률', group: '주식' },
-  { href: '/stock/themes',    emoji: '🎯', label: '테마주', sub: '섹터별 관련주', group: '주식' },
-  { href: '/stock/data',      emoji: '📥', label: '주식 통계', sub: '시장 데이터', group: '주식' },
-  // 부동산
-  { href: '/apt/complex',     emoji: '🏢', label: '단지백과', sub: '34,500+ 단지 시세', group: '부동산' },
-  { href: '/apt/search',      emoji: '🔍', label: '실거래 검색', sub: '전국 실거래가', group: '부동산' },
-  { href: '/apt/map',         emoji: '🗺️', label: '부동산 지도', sub: '지도로 한눈에', group: '부동산' },
-  { href: '/apt/redev',       emoji: '🏗️', label: '재개발·재건축', sub: '정비사업 현황', group: '부동산' },
-  { href: '/apt/diagnose',    emoji: '🎯', label: '가점 진단', sub: '청약 가점 계산', group: '부동산' },
-  { href: '/apt/data',        emoji: '📥', label: '부동산 통계', sub: '공공 데이터', group: '부동산' },
-  // 도구
-  { href: '/calc',            emoji: '🧮', label: '계산기', sub: '부동산·세금 계산', group: '도구' },
-  // 설정
-  { href: '/notifications/settings', emoji: '🔔', label: '알림 설정', sub: '푸시·이메일·카카오', group: '설정' },
-  { href: '/settings/region',       emoji: '📍', label: '우리동네 설정', sub: '지역 설정·변경', group: '설정' },
-  { href: '/settings/interests',    emoji: '💡', label: '관심사 설정', sub: '맞춤 피드 설정', group: '설정' },
-  { href: '/attendance',     emoji: '🌱', label: '출석 체크', sub: '매일 포인트 적립', group: '설정' },
-  { href: '/guide',           emoji: '📖', label: '가이드북', sub: '이용 방법 안내', group: '설정' },
-  { href: '/guide#install',   emoji: '📲', label: '앱 설치 가이드', sub: 'PWA 홈화면 추가', group: '설정' },
-  { href: '/grades',          emoji: '🏅', label: '등급 안내', sub: '등급별 혜택', group: '설정' },
-  { href: '/about',           emoji: 'ℹ️', label: '서비스 소개', sub: '카더라 소개', group: '설정' },
-  { href: '/faq',             emoji: '❓', label: 'FAQ', sub: '자주 묻는 질문', group: '설정' },
+type MoreItem = { href: string; Icon: React.ComponentType<{ size?: number; style?: React.CSSProperties }>; label: string; sub?: string };
+
+const MORE_ITEMS: MoreItem[] = [
+  { href: '/feed',                   Icon: MessageSquare,  label: '피드',          sub: '커뮤니티 글' },
+  { href: '/daily',                  Icon: BarChart3,      label: '데일리 리포트', sub: '매일 시장 요약' },
+  { href: '/hot',                    Icon: Flame,          label: '이번주 HOT',    sub: '인기 글' },
+  { href: '/discuss',                Icon: MessagesSquare, label: '라운지 토론',   sub: 'A vs B 투표' },
+  { href: '/blog/series',            Icon: Library,        label: '시리즈',        sub: '주제별 연재' },
+  { href: '/calc',                   Icon: Calculator,     label: '계산기',        sub: '부동산·세금' },
+  { href: '/notifications/settings', Icon: BellRing,       label: '알림 설정',     sub: '푸시·이메일' },
+  { href: '/more',                   Icon: LayoutGrid,     label: '전체 메뉴',     sub: '모든 페이지' },
 ];
 
 const KadeoraLogo = ({ size = 28 }: { size?: number }) => (
@@ -219,7 +198,7 @@ export function Navigation() {
           height: 44, display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)',
         }}>
           {/* 로고 */}
-          <Link href="/feed" style={{ display:'flex', alignItems:'center', gap:6, textDecoration:'none', flexShrink:0, marginRight:2 }}>
+          <Link href="/" style={{ display:'flex', alignItems:'center', gap:6, textDecoration:'none', flexShrink:0, marginRight:2 }}>
             <KadeoraLogo size={26} />
             <span style={{ fontWeight:800, fontSize:'var(--fs-sm)', color:'var(--brand)', letterSpacing:-0.5 }}>
               카더라
@@ -379,6 +358,10 @@ export function Navigation() {
                         { href:'/write',              label:'글쓰기', LIcon: PenSquare },
                         { href:'/notifications',      label:`알림${unread>0?` (${unread})`:''}`, LIcon: Bell },
                         { href:'/notifications/settings', label:'알림 설정', LIcon: Settings },
+                        // r4-P4: 더보기 서랍의 '설정' 그룹에서 승계
+                        { href:'/settings/region',    label:'우리동네 설정', LIcon: MapPin },
+                        { href:'/settings/interests', label:'관심사 설정',   LIcon: Lightbulb },
+                        { href:'/attendance',         label:'출석 체크',     LIcon: CalendarCheck },
                       ].map(item => (
                         <Link key={item.href} href={item.href} onClick={()=>setMenuOpen(false)} style={{
                           display:'flex', alignItems:'center', gap: 'var(--sp-sm)', padding:'11px 16px',
@@ -538,7 +521,7 @@ export function Navigation() {
       {moreOpen && (
         <div style={{ position:'fixed', inset:0, zIndex: 9999 }}>
           <div style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.5)' }} onClick={() => setMoreOpen(false)} />
-          {/* 모바일: 바텀 시트 — 리디자인 */}
+          {/* 모바일: 바텀 시트 — r4-P4: 5그룹 27건에서 평평한 8건으로 */}
           <div className="md:hidden" style={{
             position:'absolute', bottom:60, left:8, right:8,
             maxWidth: 400, marginLeft: 'auto', marginRight: 'auto',
@@ -546,45 +529,31 @@ export function Navigation() {
             borderRadius: 'var(--radius-lg)', padding:'16px 14px 12px', boxShadow:'0 -8px 32px rgba(0,0,0,0.3)',
             maxHeight:'72vh', overflowY:'auto',
           }}>
-            {/* 헤더 */}
             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom: 16 }}>
               <span style={{ fontSize: 15, fontWeight:800, color:'var(--text-primary)', letterSpacing:'-0.3px' }}>더보기</span>
-              <button onClick={() => setMoreOpen(false)} style={{
+              <button onClick={() => setMoreOpen(false)} aria-label="더보기 닫기" style={{
                 width: 32, height: 32, borderRadius:'50%', background:'var(--bg-hover)', border:'none',
                 color:'var(--text-tertiary)', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center',
               }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
               </button>
             </div>
-            {(['투자 정보','주식','부동산','도구','설정'] as const).map((group, gi) => {
-              const items = MORE_ITEMS.filter(i => i.group === group);
-              return (
-                <div key={group} style={{ marginBottom: gi < 3 ? 12 : 0 }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary)', marginBottom: 8, paddingLeft: 2 }}>{group}</div>
-                  <div style={{ display:'grid', gridTemplateColumns:'repeat(4, 1fr)', gap: 4 }}>
-                    {items.map(item => (
-                      <Link key={item.href} href={item.href} onClick={() => setMoreOpen(false)} style={{
-                        display:'flex', flexDirection:'column', alignItems:'center', gap: 6,
-                        padding:'14px 6px 12px', borderRadius: 'var(--radius-card)', textDecoration:'none',
-                        color:'var(--text-primary)', position:'relative', background:'var(--bg-hover)',
-                      }}
-                        onMouseEnter={e => (e.currentTarget.style.background = 'var(--border)')}
-                        onMouseLeave={e => (e.currentTarget.style.background = 'var(--bg-hover)')}
-                      >
-                        <span style={{ fontSize: 22, lineHeight:1 }}>{item.emoji}</span>
-                        <span style={{ fontSize: 12, fontWeight:600, textAlign:'center', lineHeight: 1.25, color:'var(--text-secondary)', wordBreak:'keep-all' }}>{item.label}</span>
-                        {item.sub && <span style={{ fontSize: 10, color:'var(--text-tertiary)', textAlign:'center', lineHeight:1.2, marginTop: -2 }}>{item.sub}</span>}
-                        {item.emoji === '🔔' && unread > 0 && (
-                          <span style={{ position: 'absolute', top: 4, right: 4, minWidth: 16, height: 16, borderRadius: 'var(--radius-md)', background: 'var(--accent-red)', color: '#fff', fontSize: 10, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px' }}>{unread > 9 ? '9+' : unread}</span>
-                        )}
-                      </Link>
-                    ))}
-                  </div>
-                  {gi < 3 && <div style={{ height:1, background:'var(--border)', margin:'12px 0 0', opacity:0.5 }} />}
-                </div>
-              );
-            })}
-            {/* 하단 액션 바 */}
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(4, 1fr)', gap: 4 }}>
+                {MORE_ITEMS.map(item => (
+                  <Link key={item.href} href={item.href} onClick={() => setMoreOpen(false)} style={{
+                    display:'flex', flexDirection:'column', alignItems:'center', gap: 6,
+                    padding:'14px 6px 12px', borderRadius: 'var(--radius-card)', textDecoration:'none',
+                    color:'var(--text-primary)', background:'var(--bg-hover)',
+                  }}
+                    onMouseEnter={e => (e.currentTarget.style.background = 'var(--border)')}
+                    onMouseLeave={e => (e.currentTarget.style.background = 'var(--bg-hover)')}
+                  >
+                    <item.Icon size={16} style={{ color:'var(--text-tertiary)' }} />
+                    <span style={{ fontSize: 12, fontWeight:600, textAlign:'center', lineHeight: 1.25, color:'var(--text-secondary)', wordBreak:'keep-all' }}>{item.label}</span>
+                    {item.sub && <span style={{ fontSize: 10, color:'var(--text-tertiary)', textAlign:'center', lineHeight:1.2, marginTop: -2 }}>{item.sub}</span>}
+                  </Link>
+                ))}
+            </div>
             <div style={{ paddingTop: 12, display:'flex', gap: 6 }}>
               {userId && (
                 <>
@@ -605,7 +574,7 @@ export function Navigation() {
               )}
             </div>
           </div>
-          {/* 데스크탑: 상단 드롭다운 — 리디자인 */}
+          {/* 데스크탑: 상단 드롭다운 */}
           <div className="hidden md:block" style={{
             position:'absolute', top:52, right:16,
             width: 420,
@@ -613,33 +582,21 @@ export function Navigation() {
             borderRadius: 'var(--radius-card)', padding:'16px 14px', boxShadow:'0 8px 32px rgba(0,0,0,0.25)',
             maxHeight:'75vh', overflowY:'auto',
           }}>
-            {(['투자 정보','주식','부동산','도구','설정'] as const).map((group, gi) => {
-              const items = MORE_ITEMS.filter(i => i.group === group);
-              return (
-                <div key={group} style={{ marginBottom: gi < 3 ? 12 : 0 }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary)', marginBottom: 8, paddingLeft: 2 }}>{group}</div>
-                  <div style={{ display:'grid', gridTemplateColumns:'repeat(4, 1fr)', gap: 4 }}>
-                    {items.map(item => (
-                      <Link key={item.href + '-d'} href={item.href} onClick={() => setMoreOpen(false)} style={{
-                        display:'flex', flexDirection:'column', alignItems:'center', gap: 6,
-                        padding:'14px 6px 12px', borderRadius: 'var(--radius-card)', textDecoration:'none',
-                        color:'var(--text-primary)', position:'relative', background:'var(--bg-hover)',
-                      }}
-                        onMouseEnter={e => (e.currentTarget.style.background = 'var(--border)')}
-                        onMouseLeave={e => (e.currentTarget.style.background = 'var(--bg-hover)')}
-                      >
-                        <span style={{ fontSize: 22, lineHeight:1 }}>{item.emoji}</span>
-                        <span style={{ fontSize: 12, fontWeight:600, textAlign:'center', lineHeight: 1.25, color:'var(--text-secondary)' }}>{item.label}</span>
-                        {item.emoji === '🔔' && unread > 0 && (
-                          <span style={{ position: 'absolute', top: 4, right: 4, minWidth: 16, height: 16, borderRadius: 'var(--radius-md)', background: 'var(--accent-red)', color: '#fff', fontSize: 10, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px' }}>{unread > 9 ? '9+' : unread}</span>
-                        )}
-                      </Link>
-                    ))}
-                  </div>
-                  {gi < 3 && <div style={{ height:1, background:'var(--border)', margin:'12px 0 0', opacity:0.5 }} />}
-                </div>
-              );
-            })}
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(4, 1fr)', gap: 4 }}>
+                {MORE_ITEMS.map(item => (
+                  <Link key={item.href + '-d'} href={item.href} onClick={() => setMoreOpen(false)} style={{
+                    display:'flex', flexDirection:'column', alignItems:'center', gap: 6,
+                    padding:'14px 6px 12px', borderRadius: 'var(--radius-card)', textDecoration:'none',
+                    color:'var(--text-primary)', background:'var(--bg-hover)',
+                  }}
+                    onMouseEnter={e => (e.currentTarget.style.background = 'var(--border)')}
+                    onMouseLeave={e => (e.currentTarget.style.background = 'var(--bg-hover)')}
+                  >
+                    <item.Icon size={16} style={{ color:'var(--text-tertiary)' }} />
+                    <span style={{ fontSize: 12, fontWeight:600, textAlign:'center', lineHeight: 1.25, color:'var(--text-secondary)', wordBreak:'keep-all' }}>{item.label}</span>
+                  </Link>
+                ))}
+            </div>
             <div style={{ paddingTop: 12, display:'flex', gap: 6 }}>
               {userId && (
                 <>

@@ -93,10 +93,11 @@ interface Props { searchParams: Promise<{ category?: string; region?: string; so
 function parseParams(sp: { category?: string; region?: string; sort?: string }) {
   const category = sp.category ?? 'all';
   const region = sp.region ?? 'all';
-  const sort = sp.sort ?? 'latest';
+  // r4-P4: 기본 정렬 인기순. 조회 0인 시드 글이 최신순 상단을 덮던 걸 막는다.
+  const sort = sp.sort ?? 'popular';
   const validSort = (['latest', 'popular', 'comments'] as SortKey[]).includes(sort as SortKey)
     ? (sort as SortKey)
-    : 'latest';
+    : 'popular';
   return { category, region, validSort };
 }
 
