@@ -29,6 +29,8 @@ Disallow: /*?q=
 Disallow: /*?sort=
 Disallow: /*?utm_*
 Disallow: /*?ref=
+# r4: 정비 유형·단계 쿼리는 색인 대상이 아니다
+Disallow: /apt/redev/*?
 # s235: dead routes (PV<25/30d)
 Disallow: /apt/map
 Disallow: /apt/popular
