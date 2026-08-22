@@ -27,18 +27,13 @@ Disallow: /notifications
 Disallow: /search?
 Disallow: /*?q=
 Disallow: /*?sort=
-Disallow: /*?utm_*
+Disallow: /*?utm_
 Disallow: /*?ref=
 # r4: 정비 유형·단계 쿼리는 색인 대상이 아니다
 Disallow: /apt/redev/*?
-# s235: dead routes (PV<25/30d)
-Disallow: /apt/map
-Disallow: /apt/popular
-Disallow: /apt/landmark
-Disallow: /apt/feed
-Disallow: /apt/unsold-deals
-Disallow: /apt/big-events
-Disallow: /apt/tabs
+# s8: dead routes 는 각 페이지 metadata 의 robots:{index:false} 로 처리한다.
+#     여기서 Disallow 하면 구글이 그 noindex 를 읽지 못해 URL 만 색인된다.
+#     /apt/feed · /apt/tabs 는 라우트 자체가 없어 줄만 삭제.
 # s280: /apt/data 는 위 공통 섹션에 Allow: /apt/data 로 명시돼있고 실제로 title/설명/
 # canonical/JSON-LD 7개가 다 갖춰진 정상 콘텐츠 페이지 — s235 dead-routes 정리 때
 # 잘못 같이 묶여 Allow/Disallow 충돌이 나던 것을 제거.
@@ -53,10 +48,25 @@ Allow: /api/og
 Allow: /api/og-chart
 Allow: /api/og-infographic
 Allow: /images/
-Crawl-delay: 0
 Disallow: /admin/
 Disallow: /api/cron
 Disallow: /api/admin
+# s8: robots.txt 는 가장 구체적인 그룹 하나만 적용한다 — * 의 규칙이 상속되지 않아
+#     아래 파셋·비색인 경로를 전용 그룹마다 복제한다.
+Disallow: /search?
+Disallow: /*?q=
+Disallow: /*?sort=
+Disallow: /*?utm_
+Disallow: /*?ref=
+# r4: 정비 유형·단계 쿼리는 색인 대상이 아니다
+Disallow: /apt/redev/*?
+Disallow: /write
+Disallow: /login
+Disallow: /signup
+Disallow: /onboarding
+Disallow: /consultant/
+Disallow: /notifications
+Disallow: /payment/
 
 User-agent: Googlebot-Image
 Allow: /api/og
@@ -84,6 +94,22 @@ Crawl-delay: 0
 Disallow: /admin/
 Disallow: /api/cron
 Disallow: /api/admin
+# s8: robots.txt 는 가장 구체적인 그룹 하나만 적용한다 — * 의 규칙이 상속되지 않아
+#     아래 파셋·비색인 경로를 전용 그룹마다 복제한다.
+Disallow: /search?
+Disallow: /*?q=
+Disallow: /*?sort=
+Disallow: /*?utm_
+Disallow: /*?ref=
+# r4: 정비 유형·단계 쿼리는 색인 대상이 아니다
+Disallow: /apt/redev/*?
+Disallow: /write
+Disallow: /login
+Disallow: /signup
+Disallow: /onboarding
+Disallow: /consultant/
+Disallow: /notifications
+Disallow: /payment/
 
 # ===== Bing =====
 User-agent: Bingbot
@@ -96,10 +122,25 @@ Allow: /api/og-square
 Allow: /api/og-chart
 Allow: /api/og-infographic
 Allow: /images/
-Crawl-delay: 0
 Disallow: /admin/
 Disallow: /api/cron
 Disallow: /api/admin
+# s8: robots.txt 는 가장 구체적인 그룹 하나만 적용한다 — * 의 규칙이 상속되지 않아
+#     아래 파셋·비색인 경로를 전용 그룹마다 복제한다.
+Disallow: /search?
+Disallow: /*?q=
+Disallow: /*?sort=
+Disallow: /*?utm_
+Disallow: /*?ref=
+# r4: 정비 유형·단계 쿼리는 색인 대상이 아니다
+Disallow: /apt/redev/*?
+Disallow: /write
+Disallow: /login
+Disallow: /signup
+Disallow: /onboarding
+Disallow: /consultant/
+Disallow: /notifications
+Disallow: /payment/
 
 # ===== Daum =====
 User-agent: DaumCrawler
@@ -115,6 +156,22 @@ Crawl-delay: 1
 Disallow: /admin/
 Disallow: /api/cron
 Disallow: /api/admin
+# s8: robots.txt 는 가장 구체적인 그룹 하나만 적용한다 — * 의 규칙이 상속되지 않아
+#     아래 파셋·비색인 경로를 전용 그룹마다 복제한다.
+Disallow: /search?
+Disallow: /*?q=
+Disallow: /*?sort=
+Disallow: /*?utm_
+Disallow: /*?ref=
+# r4: 정비 유형·단계 쿼리는 색인 대상이 아니다
+Disallow: /apt/redev/*?
+Disallow: /write
+Disallow: /login
+Disallow: /signup
+Disallow: /onboarding
+Disallow: /consultant/
+Disallow: /notifications
+Disallow: /payment/
 
 # ===== Zum =====
 User-agent: ZumBot
@@ -125,6 +182,22 @@ Allow: /calc/
 Crawl-delay: 2
 Disallow: /admin/
 Disallow: /api/
+# s8: robots.txt 는 가장 구체적인 그룹 하나만 적용한다 — * 의 규칙이 상속되지 않아
+#     아래 파셋·비색인 경로를 전용 그룹마다 복제한다.
+Disallow: /search?
+Disallow: /*?q=
+Disallow: /*?sort=
+Disallow: /*?utm_
+Disallow: /*?ref=
+# r4: 정비 유형·단계 쿼리는 색인 대상이 아니다
+Disallow: /apt/redev/*?
+Disallow: /write
+Disallow: /login
+Disallow: /signup
+Disallow: /onboarding
+Disallow: /consultant/
+Disallow: /notifications
+Disallow: /payment/
 
 # ===== AI Crawlers =====
 User-agent: GPTBot

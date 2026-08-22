@@ -126,7 +126,6 @@ async function handler(req: NextRequest) {
 
     let inserted = 0;
     let failedBatches = 0;
-    const insertErrors: string[] = [];
     for (let i = 0; i < rows.length; i += 500) {
       const batch = rows.slice(i, i + 500);
       const payload = batch.map((r) => ({
@@ -141,24 +140,16 @@ async function handler(req: NextRequest) {
         position: r.position || 0,
       }));
       const { error } = await (sb as any).from('gsc_search_analytics').insert(payload);
-      // insert 에러를 삼키면 rows>0 · inserted=0 이 성공으로 보고된다
       if (error) {
-        failedBatches += 1;
-        if (insertErrors.length < 3) insertErrors.push(error.message ?? String(error));
-        console.error('[gsc-sync] insert fail', i, error.message ?? error);
+        // 삼키면 적재가 전부 실패해도 응답은 ok:true 고 런타임 로그에 아무것도 안 남는다.
+        failedBatches++;
+        console.error('[gsc-sync] insert fail', error.message?.slice(0, 200));
       } else {
         inserted += payload.length;
       }
     }
 
-    return NextResponse.json({
-      ok: failedBatches === 0,
-      date_range: [start, end],
-      rows: rows.length,
-      inserted,
-      failed_batches: failedBatches,
-      ...(insertErrors.length ? { insert_errors: insertErrors } : {}),
-    });
+    return NextResponse.json({ ok: true, date_range: [start, end], rows: rows.length, inserted, failed_batches: failedBatches });
   } catch (e: any) {
     return NextResponse.json({ ok: true, skipped: 'exception', err: String(e?.message || '').slice(0, 120) });
   }

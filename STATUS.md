@@ -1,3 +1,138 @@
+## S8 (2026-08-22) — SEO · GEO · OG 개선 (커밋 4개)
+
+### 1. 블로그 OG 이미지 (`b00940c9`)
+
+발행 8,775편 **전부**가 `og_cards` 6장을 가져 `cards.length === 6` 분기가 항상 먼저
+return 했고, 630×630 정사각만 나가면서 `twitter:card='summary_large_image'` 와 모순됐다.
+`/apt/[id]` 에서 S7-2 로 고친 것과 동일한 구조 결함.
+
+단순히 실사를 앞으로 올릴 수 없었다 — `cover_image` 8,775편 중 **2,154편이 외부 스크랩**이고
+호스트가 250종을 넘는다(`imgnews.naver.net` 892편 최다). 화이트리스트로 분기했다.
+
+- `isSafeCover`: `kadeora.supabase.co` · `/api/og` 두 패턴만 통과. **블랙리스트로 뒤집지 않는다**
+- 안전 커버 6,604편(75%)은 1200×630 승격 / 외부 2,154편은 생성 카드로 대체
+  (노출 면적 동일, 저작권 노출 없음)
+- `og:image` 와 `twitter:images` 가 같은 배열을 쓴다 — 두 곳에 복제돼 있던 로직 통합
+- 실측 3케이스(supabase·뉴스·생성) 전부 og:image 7장 · width 1200 · 뉴스 호스트 0건
+
+### 2. 죽은 라우트 색인 처리 (`9d6e3ef4`)
+
+초안의 "전용 그룹에 Disallow 복제" 권고를 폐기하고 반대로 갔다. 5개 라우트가 자기 메타에서
+`index:true` 를 선언 중이라, 크롤을 막으면 구글이 그 `noindex` 를 **읽을 수 없다.**
+
+- 5개 → `robots: { index: false, follow: true }`, robots.txt 의 Disallow 7줄 제거
+- `/apt/feed` `/apt/tabs` 는 **라우트 자체가 없어** 줄만 삭제
+- 파셋·비색인 12종을 Googlebot·Yeti·Bingbot·DaumCrawler·ZumBot **각 그룹에 복제**.
+  robots.txt 는 가장 구체적인 그룹 하나만 적용하므로 `*` 의 규칙을 이 5종이 전원 무시하고 있었다
+- `Crawl-delay: 0` 은 Googlebot·Bingbot 에서만 삭제. **Yeti 는 네이버가 실제로 존중하므로 유지**
+  (지시서도 두 엔진만 지목했다)
+- 실측: 5개 전부 HTTP 200 + noindex, `/apt`·`/blog` 대조군 영향 0, robots 문법 오류 0
+
+### 3. llms.txt 동적 생성 (`83b6b81c`)
+
+| | 표기 | 실제 |
+|---|---|---|
+| 블로그 | 59,400+ | **8,775** |
+| 실거래 | 497,413 | **726,054** |
+| 커뮤니티 | 5,198 | **12,909** |
+| 청약 | 2,713 | **2,851** |
+| 계산기 | 142/145 혼재 | **140** |
+
+- DB 에서 직접 센다(`revalidate 86400`). DB 장애 시 하드코딩 폴백 (리스크 #4)
+- 계산기 수·카테고리 수·**카테고리 목록**을 `CALC_REGISTRY` 에서 생성.
+  하드코딩 목록은 연말정산이 두 번 나오고 **주식/투자·쇼핑/소비가 빠져** 있었으며,
+  헤더는 "15개 카테고리"인데 실제 **16개**였다. `CATEGORIES.count` 합(150)도 어긋났다
+- `public/llms.txt` 삭제 (라우트와 중복, 내용 낡음)
+
+### 4. OG·메타 누락 (`7a205f79`)
+
+**4-1 은 전건이 실재했다** — `/apt` `/stock` `/apt/busan` `/apt/region` 이 `openGraph` 는
+있는데 `images` 가 없었다. 기존 `/api/og` 를 1200×630 으로 붙였다.
+
+**4-2/4-3 은 5개 중 1개만 실제 대상이었다.**
+
+| 라우트 | 판정 |
+|---|---|
+| `/apt/sites` | `permanentRedirect` 스텁 — 렌더되지 않아 metadata 무의미 |
+| `/apt/sites/[slug]` | 같음. 미들웨어도 308 처리 중 |
+| `/daily` | `layout.tsx` 에 이미 metadata 존재, `index:false` |
+| `/apt/unsold/[id]` | 리다이렉트 페이지. "metadata is ignored by 308" 주석대로 의도된 제거 |
+| `/apt/unsold` | **실제 누락** → title·description·canonical·openGraph 추가 |
+
+지시서가 "llms.txt 가 5,783개라고 홍보하는 바로 그 페이지"라 한 `/apt/sites` 는 `/apt` 로
+308 되는 스텁이었다. llms.txt 링크를 `/apt` 로 직접 연결했다.
+
+### 남은 것 (범위 밖)
+
+- **블로그 본문 외부 이미지 2,154편** — OG 는 막았지만 본문에는 남아 있다.
+  `/apt/[id]` 처럼 위성으로 대체할 수단이 블로그엔 없어 별도 트랙 필요
+- `Event` + `Offer` 스키마, description 93자 — 후순위
+
+---
+
+## S7-5 + 소품 (2026-08-22) — 네이버 채널 정정 · 순위 추적 확장 · 잔여 2건
+
+작은 커밋 3개. 각각 독립적이라 분리했다.
+
+### 1. 네이버 블로그 채널 정정 (`f6329d8b`)
+
+- `layout.tsx` `sameAs`: `blog.naver.com/silreit` → `kadeoraapp`.
+  틀린 계정을 선언하면 실제 운영 블로그가 브랜드 엔티티에 묶이지 않고, 남의 계정을
+  우리 채널이라 주장하는 셈이 된다. 카페 URL 은 그대로 뒀다
+- `naver-sc-sync`: `OUR_DOMAIN = "kadeora.app"` 단일 → `OUR_DOMAINS` 배열.
+  `blog` 소스는 네이버 블로그 검색이라 `kadeora.app` 로는 **구조적으로 절대 매칭되지 않았다.**
+  blog 순위가 전량 권외였던 것은 순위가 없어서가 아니라 찾을 대상이 없어서였다
+- 계정명까지 포함해 좁게 매칭한다. `naver.com` 만으로 완화하면 남의 글이 잡힌다.
+  `m.blog.naver.com` 응답 가능성은 배포 후 실제 응답을 보고 판단한다 — 추측으로 넓히지 않는다
+
+**주의:** root `src/app/layout.tsx` 는 평소 수정 금지 대상(meta/font blast radius)이다.
+이번 건은 지시서가 파일·행을 특정한 `sameAs` 문자열 1줄 교체라 진행했다.
+
+### 2. `gsc-sync` 적재 실패 로깅 (`6ca15291`)
+
+`if (!error) inserted += payload.length;` 형태라 적재가 전부 실패해도 응답은 `ok:true` 이고
+런타임 로그에 아무것도 남지 않았다. 실패 시 `console.error` + 응답에 `failed_batches` 추가.
+`inserted` 만 보면 0 인지 실패인지 구분이 안 된다.
+
+#### 같은 패턴 전수 (범위 밖 — 목록만)
+
+`if (!error)` 로 조용히 넘어가는 곳이 **크론 24개 46곳**에 더 있다.
+
+```
+apt-backfill-details(2) backlink-sync blog-cleanup-padding blog-inject-images
+blog-internal-links crawl-apt-rent crawl-apt-resale crawl-apt-subscription
+crawl-apt-trade crawl-busan-redev crawl-gyeonggi-redev(2) crawl-nationwide-redev
+crawl-seoul-redev(2) data-quality-fix invest-calendar-refresh issue-detect
+issue-preempt(4) krx-short-selling(2) programmatic-seo-consume redev-geocode(2)
+redev-verify-households seo-content-boost seo-excerpt-fill seo-internal-links
+stock-crawl(2) stock-desc-gen stock-discover stock-flow-crawl stock-flow-signals
+stock-hero-refresh stock-news-crawl stock-price sync-apt-sites(4)
+```
+
+이 중 `error` 를 아예 참조조차 안 하는(로그·집계 흔적 0) 파일이 20개다. 적재 실패가
+전부 조용히 사라지는 구조라 별도 정리가 필요하다.
+
+### 3. 상태 배지 대비 (`<이 커밋>`)
+
+현장 유형 배지 5종이 전부 다크 전제 하드코딩이었다. **알파를 흰 배경에 합성해 실측**(Rule #85):
+
+| 배지 | 이전 | 이후 |
+|---|---|---|
+| subscription | #2EE8A5 → **1.38:1** | `--accent-green` 6.84:1 |
+| redevelopment | #B794FF → 2.14:1 | `--accent-purple` 4.91:1 |
+| unsold | #FF6B6B → 2.39:1 | `--accent-red` 7.11:1 |
+| landmark/complex | #38BDF8 → 1.91:1 | `--accent-cyan` 6.31:1 |
+| trade | #FBBF24 → 1.54:1 | `--accent-yellow` 6.21:1 |
+
+지시서가 지목한 `분양` 배지가 최악(1.38:1)이었다 — 합성하면 배경과 사실상 구분되지 않는다.
+
+- 새 토큰을 만들지 않고 `globals.css` 의 기존 accent 세트로 매핑했다
+- `--accent-cyan` 은 `-bg` 짝이 없어 같은 계열인 `--accent-blue-bg` 를 썼다 (6.31:1)
+- 상태 배지 `SB.open` 은 `color`/`border` 가 이미 토큰인데 `bg` 만 하드코딩으로 남아 있어
+  함께 교체했다. `upcoming`/`closed` 는 이미 토큰이라 손대지 않았다
+
+---
+
 ## S7-2 (2026-08-22) — 이미지 소스 교체: 뉴스 스크랩 제거, 자체 호스팅 전환
 
 트라비스 상세 갤러리가 `t1.daumcdn.net`(다음 뉴스 썸네일)과 `consumernews.co.kr`(컨슈머뉴스)

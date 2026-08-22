@@ -26,7 +26,8 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
   return {
     title, description: desc,
     alternates: { canonical },
-    robots: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' as const },
+    // s8: PV 미달 죽은 라우트. robots.txt 로 막으면 이 noindex 를 못 읽어 URL 만 색인된다.
+    robots: { index: false, follow: true },
     openGraph: { title, description: desc, url: canonical, siteName: '카더라', locale: 'ko_KR', type: 'website' },
   };
 }

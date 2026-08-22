@@ -33,6 +33,8 @@ export async function generateMetadata(): Promise<Metadata> {
       title: '지역별 아파트 청약 — 카더라',
       description: '17개 시·도별 접수중 청약 단지 수',
       url: `${SITE_URL}/apt/region`,
+      // s8: images 누락으로 공유 시 이미지 없는 링크로 나갔다. 기존 생성기 재사용.
+      images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent('지역별 아파트 청약')}&category=apt&design=2`, width: 1200, height: 630, alt: '지역별 아파트 청약' }],
       siteName: '카더라',
       locale: 'ko_KR',
       type: 'website',

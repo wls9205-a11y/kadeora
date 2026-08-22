@@ -255,8 +255,16 @@ export async function generateMetadata({ params }: Props) {
   const slug = decodeURIComponent(rawSlug);
   const post = await getPostBySlug(slug);
   if (!post) notFound();
-    const ogImage = post.cover_image || `${SITE}/api/og?title=${encodeURIComponent(post.title)}&category=${post.category}&author=${encodeURIComponent(post.author_name || '카더라')}&design=2`;
-    const ogSquare = `${SITE}/api/og-square?title=${encodeURIComponent(post.title)}&category=${post.category}&author=${encodeURIComponent(post.author_name || '카더라')}`;
+
+    // s8: cover_image 8,775편 중 2,154편이 외부 스크랩(imgnews.naver.net 892 등 250여 호스트)이다.
+    // OG 첫 자리에 올리면 남의 저작물을 카카오톡·검색 대표 이미지로 내보내게 된다.
+    // 화이트리스트로만 통과시킨다 — 블랙리스트로 뒤집으면 신규 호스트가 그대로 샌다.
+    const isSafeCover = (u?: string | null) =>
+      !!u && (u.includes('kadeora.supabase.co') || u.includes('/api/og'));
+    // 외부 커버는 생성 카드로 대체한다. 노출 면적(1200x630)은 그대로 확보된다.
+    const heroOg = isSafeCover(post.cover_image)
+      ? post.cover_image!
+      : `${SITE}/api/og?title=${encodeURIComponent(post.title)}&category=${post.category}&author=${encodeURIComponent(post.author_name || '카더라')}&design=2`;
     // 네이버/구글 통일 설명문 (meta_description > excerpt > title)
     const desc = (post.meta_description && post.meta_description.length >= 30)
       ? post.meta_description
@@ -264,6 +272,28 @@ export async function generateMetadata({ params }: Props) {
         ? post.excerpt
         : post.title;
     const descClean = desc.replace(/[\n\r#*_|]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160);
+
+    // s8: 발행 8,775편 전부가 og_cards 6장을 가져 cards.length === 6 분기가 항상 먼저 return 했고,
+    // 그 결과 630x630 정사각만 나가면서 twitter:card='summary_large_image' 와 모순됐다.
+    // (카카오톡·트위터에서 좌우가 잘리거나 작은 썸네일로 강등된다. /apt/[id] 와 같은 구조 결함)
+    // 대형 카드를 0번에 두고 기존 6장을 뒤에 붙인다. og:image 와 twitter:images 가 같은 배열을 쓴다.
+    const ogImages = (() => {
+      const cards = Array.isArray(post.og_cards) ? post.og_cards : [];
+      const abs = (u: any) => (typeof u === 'string' && u.startsWith('http') ? u : `${SITE}${u || ''}`);
+      const cardImgs = cards.length === 6
+        ? cards.map((c: any) => ({ url: abs(c?.url), width: 630, height: 630, alt: c?.alt || post.image_alt || post.title }))
+        : (post.category === 'apt' || post.category === 'unsold') && post.slug
+          // s261: apt 는 og_cards 가 비어도 og-apt 6장 폴백 (CardCarousel 과 동일 로직)
+          ? ['cover', 'metric', 'units', 'timing', 'place', 'spec'].map((type, i) => ({
+              url: `${SITE}/api/og-apt?slug=${encodeURIComponent(post.slug)}&card=${i + 1}&v=1`,
+              width: 630, height: 630, alt: `${post.title} ${type}`,
+            }))
+          : [];
+      return [
+        { url: heroOg, width: 1200, height: 630, alt: post.image_alt || descClean || post.title },
+        ...cardImgs,
+      ];
+    })();
     const brandSuffix = post.category === 'stock' ? '카더라 주식' : post.category === 'apt' ? '카더라 부동산' : post.category === 'unsold' ? '카더라 부동산' : '카더라';
   // 세션 146 C4: metadata.noindex=true 이면 robots meta 반영 (얇은 콘텐츠)
   const isNoindex = post.metadata && typeof post.metadata === 'object' && (post.metadata as any).noindex === true;
@@ -291,54 +321,12 @@ export async function generateMetadata({ params }: Props) {
       tags: post.tags ?? [],
       section: post.category === 'stock' ? '주식' : post.category === 'apt' ? '부동산' : post.category === 'unsold' ? '미분양' : '재테크',
       url: `${SITE}/blog/${slug}`,
-      images: (() => {
-        const cards = Array.isArray(post.og_cards) ? post.og_cards : [];
-        if (cards.length === 6) {
-          return cards.map((c: any) => ({
-            url: typeof c?.url === 'string' && c.url.startsWith('http') ? c.url : `${SITE}${c?.url || ''}`,
-            width: 630,
-            height: 630,
-            alt: c?.alt || post.image_alt || post.title,
-          }));
-        }
-        // s261: apt 카테고리는 og_cards 비어있어도 og-apt 6장 fallback (CardCarousel과 동일 로직)
-        if ((post.category === 'apt' || post.category === 'unsold') && post.slug) {
-          const fallbackTypes = ['cover', 'metric', 'units', 'timing', 'place', 'spec'];
-          return [
-            { url: ogImage, width: 1200, height: 630, alt: post.image_alt || descClean || post.title },
-            ...fallbackTypes.map((type, i) => ({
-              url: `${SITE}/api/og-apt?slug=${encodeURIComponent(post.slug)}&card=${i + 1}&v=1`,
-              width: 630,
-              height: 630,
-              alt: `${post.title} ${type}`,
-            })),
-            { url: ogSquare, width: 630, height: 630, alt: post.image_alt || descClean || post.title },
-          ];
-        }
-        return [
-          { url: ogImage, width: 1200, height: 630, alt: post.image_alt || descClean || post.title },
-          { url: ogSquare, width: 630, height: 630, alt: post.image_alt || descClean || post.title },
-        ];
-      })(),
+      images: ogImages,
     },
     twitter: {
       card: 'summary_large_image' as const,
-      images: (() => {
-        const cards = Array.isArray(post.og_cards) ? post.og_cards : [];
-        if (cards.length === 6) {
-          return cards.map((c: any) => typeof c?.url === 'string' && c.url.startsWith('http') ? c.url : `${SITE}${c?.url || ''}`).filter(Boolean);
-        }
-        // s261: apt 카테고리 fallback (twitter)
-        if ((post.category === 'apt' || post.category === 'unsold') && post.slug) {
-          const fallbackTypes = ['cover', 'metric', 'units', 'timing', 'place', 'spec'];
-          return [
-            ogImage,
-            ...fallbackTypes.map((_, i) => `${SITE}/api/og-apt?slug=${encodeURIComponent(post.slug)}&card=${i + 1}&v=1`),
-            ogSquare,
-          ];
-        }
-        return [ogImage, ogSquare];
-      })(),
+      // s8: og:image 와 같은 배열. 두 곳에 복제돼 있던 로직을 하나로 합쳤다.
+      images: ogImages.map((i) => i.url),
     },
     other: (() => {
       const allText = `${post.title} ${(post.tags ?? []).join(' ')}`;

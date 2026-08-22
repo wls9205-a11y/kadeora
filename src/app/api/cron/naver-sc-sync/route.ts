@@ -13,12 +13,13 @@ export const maxDuration = 30;
 export const dynamic = "force-dynamic";
 
 const NAVER_OPENAPI_BASE = "https://openapi.naver.com/v1/search";
-// blog 소스가 전량 권외였던 건 순위가 없어서가 아니라 찾을 대상이 없어서였다.
-// 공식 네이버 블로그는 blog.naver.com/kadeoraapp — naver.com 으로 넓히면 남의 글이 잡힌다.
+// blog 소스는 네이버 블로그 검색이라 kadeora.app 로는 구조적으로 절대 매칭되지 않는다.
+// 지금까지 blog 순위가 전량 권외로 나온 것은 순위가 없어서가 아니라 찾을 대상이 없어서였다.
+// 계정명까지 포함해 좁게 매칭한다 — naver.com 만으로 완화하면 남의 글이 잡힌다.
 const OUR_DOMAINS = ["kadeora.app", "blog.naver.com/kadeoraapp"] as const;
 
-// 네이버는 m.blog.naver.com/kadeoraapp 로도 돌려준다 — 위 문자열의 부분일치로 함께 걸린다.
-// PostView.naver?blogId=kadeoraapp 형태는 경로가 달라 별도로 본다.
+// r4: m.blog.naver.com/kadeoraapp 은 위 문자열의 부분일치로 함께 걸린다.
+// PostView.naver?blogId=kadeoraapp 형태만 경로가 달라 별도로 본다.
 function matchesOurSite(link: unknown): boolean {
   if (typeof link !== "string") return false;
   if (OUR_DOMAINS.some((d) => link.includes(d))) return true;

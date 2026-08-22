@@ -11,7 +11,8 @@ export const metadata: Metadata = {
   title: '부동산 지도',
   description: '전국 청약·분양·재개발·미분양 정보를 지도에서 한눈에 확인하세요. 지역별 시세, 청약 일정, 미분양 현황까지.',
   alternates: { canonical: SITE_URL + '/apt/map' },
-  robots: { index: true, follow: true, 'max-snippet': -1 as const, 'max-image-preview': 'large' as const },
+  // s8: PV 미달 죽은 라우트. robots.txt 로 막으면 이 noindex 를 못 읽어 URL 만 색인된다.
+  robots: { index: false, follow: true },
   openGraph: {
     title: '부동산 지도',
     description: '전국 청약·분양·재개발·미분양 지도 보기',

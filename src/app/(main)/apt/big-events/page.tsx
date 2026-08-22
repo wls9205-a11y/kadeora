@@ -19,7 +19,8 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'ko_KR',
   },
-  robots: { index: true, follow: true },
+  // s8: PV 미달 죽은 라우트. robots.txt 로 막으면 이 noindex 를 못 읽어 URL 만 색인된다.
+  robots: { index: false, follow: true },
 };
 
 const STAGE_LABEL: Record<number, string> = {
