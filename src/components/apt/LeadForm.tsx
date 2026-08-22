@@ -27,7 +27,11 @@ export const LEAD_FORM_ID = 'lead-form';
 type LeadFormProps = {
   siteSlug: string; // apt_sites.slug — leads ↔ apt_sites 조인 키
   siteName: string; // apt_sites.name
-  /** 현장별 공급 평형. 페이지가 house_type_info 에서 파생해 내려준다 (현장마다 다름). */
+  /**
+   * 현장별 공급 평형. 페이지가 house_type_info 에서 파생해 내려준다 (현장마다 다름).
+   * s-v2: 희망 타입 선택이 폼에서 빠지며 지금은 쓰이지 않는다.
+   * 2차 전송 복구 시 그대로 필요하므로 prop 계약은 유지한다 (페이지도 계속 내려준다).
+   */
   typeOptions?: string[];
   /** 놓이는 자리에 따라 설명 한 줄만 바뀐다. 제목·버튼·동의 문구는 동일하다. */
   variant?: 'detail' | 'blog';
@@ -48,14 +52,24 @@ type LeadPayload = {
   company: string;
   query: Record<string, string>;
   /**
-   * s-v2 B-7: 1차 접수와 추가 정보 전송을 잇는 키. 두 요청에 같은 값이 들어간다.
-   * ⚠️ 오픈채팅과 달리 폼은 '누가·어느 현장에서' 가 남는 유일한 경로다 — 이 키까지 있어야
-   *    2차 전송을 1차 행에 병합할 수 있다. 병합은 서버(Apps Script) 쪽 작업이고,
-   *    그 전까지 2차 전송은 followUp:true 가 붙은 별도 행으로 쌓인다.
+   * s-v2 B-7: 접수 건 식별 키. 지금은 1차 전송에만 실린다.
+   *
+   * 2차(추가 정보) 전송은 제거했다 — `fn_insert_lead` 가
+   * `on conflict (dedupe_key) do update set inquiry_count = inquiry_count + 1` 이라
+   * 같은 이름·전화로 한 번 더 POST 하면 선택 입력을 성실히 채운 리드가 전부
+   * '재문의(repeat)' 로 기록되고 status 도 new 로 리셋된다.
+   * 시트 중복 행과 메일은 지우면 되지만 재문의 카운터는 복구가 안 된다.
+   *
+   * 되살릴 때 순서:
+   *   1) fn_update_lead_followup(leadRef, birth_date, desired_type) 신설
+   *      — inquiry_count·status 미변경, anon EXECUTE 만
+   *   2) Apps Script 에 followUp 분기 — leadRef 로 행 찾아 열만 UPDATE,
+   *      메일 미발송, fn_insert_lead 호출 안 함
+   *      (재배포는 반드시 '배포 관리 → 수정 → 새 버전'. '새 배포' 는 /exec 주소가 바뀐다)
+   *   3) 성공 화면 버튼 재활성화
+   * 그 준비로 이 키는 남겨둔다.
    */
   leadRef: string;
-  /** true 면 이미 접수된 건의 보충 정보다. 새 리드로 세지 말 것. */
-  followUp: boolean;
 };
 
 type FieldErrors = { name?: string; phone?: string; birthDate?: string; consent?: string };
@@ -176,7 +190,8 @@ const honeypotStyle: CSSProperties = {
   pointerEvents: 'none',
 };
 
-export default function LeadForm({ siteSlug, siteName, typeOptions = [], variant = 'detail' }: LeadFormProps) {
+// typeOptions 는 의도적으로 구조분해하지 않는다 — 위 주석 참조 (계약만 유지).
+export default function LeadForm({ siteSlug, siteName, variant = 'detail' }: LeadFormProps) {
   const mountedAt = useRef(Date.now());
   const draftKey = `${DRAFT_PREFIX}${siteSlug}`;
   const pendingKey = `${PENDING_PREFIX}${siteSlug}`;
@@ -192,12 +207,8 @@ export default function LeadForm({ siteSlug, siteName, typeOptions = [], variant
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
-  // s-v2 B-7: 성공 화면의 선택 입력 상태
-  const [extraSending, setExtraSending] = useState(false);
-  const [extraDone, setExtraDone] = useState(false);
-  const [extraError, setExtraError] = useState<string | null>(null);
 
-  // 1차/2차 요청을 잇는 키. 폼 인스턴스당 1개.
+  // 접수 건 식별 키. 폼 인스턴스당 1개. (2차 전송 복구 시 그대로 쓴다)
   const leadRefRef = useRef<string>('');
   if (!leadRefRef.current) {
     leadRefRef.current =
@@ -205,8 +216,6 @@ export default function LeadForm({ siteSlug, siteName, typeOptions = [], variant
         ? crypto.randomUUID()
         : `lr_${Math.random().toString(36).slice(2)}${Date.now().toString(36)}`;
   }
-  // 2차 전송에 1차와 같은 본문을 실어야 서버가 어느 건인지 알 수 있다.
-  const sentPayloadRef = useRef<LeadPayload | null>(null);
 
   // 복원이 끝나기 전에 저장 effect 가 돌면 빈 값으로 초안을 덮어쓴다.
   const restored = useRef(false);
@@ -358,9 +367,7 @@ export default function LeadForm({ siteSlug, siteName, typeOptions = [], variant
       // 새 파라미터가 생겨도 이 코드는 그대로 둘 수 있다.
       query: Object.fromEntries(new URLSearchParams(window.location.search)),
       leadRef: leadRefRef.current,
-      followUp: false,
     };
-    sentPayloadRef.current = payload;
 
     let outcome: PostOutcome = 'failed';
     for (let attempt = 0; attempt <= RETRY_DELAYS.length; attempt++) {
@@ -401,116 +408,26 @@ export default function LeadForm({ siteSlug, siteName, typeOptions = [], variant
     margin: '2rem 0',
   };
 
-  // s-v2 B-7: 접수 뒤 선택 입력. 이미 접수는 끝났으므로 여기서 실패해도 신청은 유효하다.
-  async function handleExtraSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    if (extraSending) return;
-    if (birthDate && birthDate.length !== 6 && birthDate.length !== 8) {
-      setErrors(prev => ({ ...prev, birthDate: '6자리 또는 8자리 숫자로 입력해 주세요' }));
-      return;
-    }
-    if (!birthDate && !desiredType) return; // 둘 다 비었으면 보낼 게 없다
-
-    const base = sentPayloadRef.current;
-    if (!base) return;
-
-    setExtraError(null);
-    setExtraSending(true);
-    let outcome: PostOutcome = 'failed';
-    try {
-      outcome = await postLead({ ...base, birthDate, desiredType, followUp: true });
-    } catch {
-      outcome = 'failed';
-    }
-    setExtraSending(false);
-    if (outcome === 'recorded' || outcome === 'silent-drop') {
-      lsRemove(draftKey);
-      setExtraDone(true);
-      return;
-    }
-    setExtraError('추가 정보 전송에 실패했습니다. 신청 자체는 이미 접수되었습니다.');
-  }
-
+  // s-v2: 성공 화면의 '추가 정보 보내기'(2차 POST)는 제거했다.
+  //   fn_insert_lead 가 dedupe_key 충돌 시 inquiry_count 를 올리고 status 를 new 로 되돌린다.
+  //   같은 이름·전화로 한 번 더 보내면 선택 입력을 성실히 채운 리드가 전부 '재문의' 로 기록되고,
+  //   재문의 카운터는 관심도 신호라 오염되면 복구가 안 된다.
+  //   생년월일·희망타입은 상담 통화에서 받는다. 복구 순서는 LeadPayload.leadRef 주석 참조.
   if (done) {
     return (
       <section id={LEAD_FORM_ID} style={shell}>
-        <div style={{ padding: '20px 14px' }}>
-          <p style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.7, margin: 0 }}>
-            신청이 접수되었습니다. 확인 후 순차적으로 안내드리겠습니다.
-          </p>
-
-          {extraDone ? (
-            <p style={{ ...hintStyle, marginTop: 12 }}>추가 정보가 함께 전달되었습니다.</p>
-          ) : (
-            <>
-              <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.7, margin: '14px 0 10px' }}>
-                아래는 선택 사항입니다. 알려주시면 청약 가점·평형까지 함께 확인해 안내드립니다.
-              </p>
-              <form onSubmit={handleExtraSubmit} noValidate>
-                <div className="kd-lead-grid" style={{ marginBottom: 12 }}>
-                  <div>
-                    <label htmlFor="kd-lead-birth" style={labelStyle}>생년월일</label>
-                    <input
-                      id="kd-lead-birth"
-                      type="text"
-                      inputMode="numeric"
-                      value={birthDate}
-                      onChange={e => {
-                        setBirthDate(onlyDigits(e.target.value).slice(0, 8));
-                        if (errors.birthDate) setErrors(prev => ({ ...prev, birthDate: undefined }));
-                      }}
-                      placeholder="19850314 또는 850314"
-                      autoComplete="bday"
-                      style={fieldStyle}
-                    />
-                    {errors.birthDate
-                      ? <p style={errorStyle}>{errors.birthDate}</p>
-                      : <p style={hintStyle}>청약 가점 상담에만 사용됩니다</p>}
-                  </div>
-
-                  <div>
-                    <label htmlFor="kd-lead-type" style={labelStyle}>희망 타입</label>
-                    <select
-                      id="kd-lead-type"
-                      value={desiredType}
-                      onChange={e => setDesiredType(e.target.value)}
-                      style={fieldStyle}
-                    >
-                      <option value="">선택 안 함</option>
-                      {typeOptions.map(t => <option key={t} value={t}>{t}</option>)}
-                      <option value="미정">미정</option>
-                    </select>
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={extraSending || (!birthDate && !desiredType)}
-                  className="kd-btn"
-                  style={{
-                    width: '100%',
-                    height: 'var(--btn-h)',
-                    fontSize: 'var(--fs-sm)',
-                    borderRadius: 'var(--radius-sm)',
-                    border: '1px solid var(--border)',
-                    background: 'var(--bg-hover)',
-                    color: 'var(--text-primary)',
-                    opacity: extraSending || (!birthDate && !desiredType) ? 0.6 : 1,
-                    cursor: extraSending ? 'default' : 'pointer',
-                  }}
-                >
-                  {extraSending ? '전송 중…' : '추가 정보 보내기'}
-                </button>
-                {extraError && <p style={{ ...errorStyle, marginTop: 8 }}>{extraError}</p>}
-              </form>
-            </>
-          )}
-        </div>
-
-        <style>{`
-          .kd-lead-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
-          @media (max-width: 480px) { .kd-lead-grid { grid-template-columns: minmax(0, 1fr); } }
-        `}</style>
+        <p
+          style={{
+            fontSize: 'var(--fs-sm)',
+            fontWeight: 600,
+            color: 'var(--text-primary)',
+            lineHeight: 1.7,
+            margin: 0,
+            padding: '20px 14px',
+          }}
+        >
+          신청이 접수되었습니다. 확인 후 순차적으로 안내드리겠습니다.
+        </p>
       </section>
     );
   }

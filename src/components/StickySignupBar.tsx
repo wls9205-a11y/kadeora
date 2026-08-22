@@ -11,7 +11,7 @@
  *   - localStorage(kd_sticky_bar_closed) 가 24h 이내가 아님
  *   - InstallBanner 활성 중이 아님 (window.kd_install_banner_active 체크)
  *
- * z-index: 90 (InstallBanner 100 보다 아래, BlogFloatingBar 50 보다 위)
+ * z-index: 90 (InstallBanner 100 보다 아래). BlogFloatingBar(z-50)는 s-v2 에서 제거됨.
  */
 import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';

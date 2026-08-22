@@ -2,14 +2,23 @@
 
 // 현장 상세 모바일 하단 고정 바 — 2분할. 주(카톡방) / 보조(상담 신청).
 //
-// 겹침 정리 (Navigation.tsx 실측):
-//   하단 탭바   position:fixed bottom:0  z-index:100  minHeight 56 + paddingBottom safe-area
-//   글쓰기 FAB  bottom: calc(68px + safe-area)  z-index:99  right:16
-// 이 바는 탭바 바로 위(62px + safe-area)에 z-index 98 로 깔고,
-// 같은 세로 구간을 쓰는 FAB 는 이 바가 떠 있는 동안만 위로 밀어낸다.
-// FAB 는 전역 컴포넌트라 선택자가 없어 aria-label 로 잡는다 (인라인 style 을 이기려면 !important).
+// 하단 점유 요소 지도 (실측):
+//   TossBottomBanner/TossTeaser  z-9999  bottom 0 전폭
+//   Navigation 하단 탭바          z-100   bottom 0 · 62px
+//   Navigation 글쓰기 FAB         z-99    bottom 68 · 52×52 · right 16
+//   이 바                         z-98    bottom 62 · 56px 전폭
+//   ScrollToTop                   z-98    bottom 130 · 40×40 · right 16
+//   InstallBanner/SmartPushPrompt z-90    bottom 0
+//
+// 이 바는 탭바 바로 위에 눕고, 같은 세로 구간을 쓰는 FAB·ScrollToTop 을
+// 바가 떠 있는 동안만 STACK_OFFSET 만큼 통째로 밀어 올린다.
+// 둘을 같은 값으로 밀어야 원래 간격(FAB 68~120 / ScrollToTop 130~170)이 유지된다.
+// FAB 만 밀면 ScrollToTop(130~170)과 정면으로 겹친다.
+// 전역 컴포넌트라 클래스 선택자가 없어 aria-label 로 잡는다 (인라인 style 을 이기려면 !important).
 //
 // 6번 블록(SiteTalkCTA)이 화면에 들어오면 숨는다 — 같은 제안이 두 번 겹쳐 보이지 않게.
+// 이 바는 /apt/[id] 에서만 렌더되고 body 클래스는 언마운트 시 제거하므로
+// 블로그 등 다른 라우트에는 영향이 없다.
 
 import { useEffect, useState } from 'react';
 import { KAKAO_TALK_URL, trackTalkClick } from '@/lib/talk-banner';
@@ -21,6 +30,11 @@ import { LEAD_FORM_ID } from '@/components/apt/LeadForm';
 export const TALK_BOTTOM_BAR_HEIGHT = 56;
 /** 하단 탭바가 차지하는 높이(safe-area 제외). */
 const NAV_HEIGHT = 62;
+/** 바가 떠 있을 때 FAB·ScrollToTop 을 밀어 올리는 양 (바 높이 + 간격). */
+const STACK_OFFSET = TALK_BOTTOM_BAR_HEIGHT + 6;
+/** 원래 bottom 값 — Navigation.tsx / ScrollToTop.tsx 인라인 style 기준. */
+const FAB_BOTTOM = 68;
+const SCROLL_TOP_BOTTOM = 130;
 
 const YELLOW = '#FED346';
 const INK = '#2B1616';
@@ -69,7 +83,10 @@ export default function AptTalkBottomBar({ siteSlug, showLeadForm = false }: Apt
     <>
       <style>{`
         body.kd-has-talk-bar a[aria-label="글쓰기"] {
-          bottom: calc(${NAV_HEIGHT + TALK_BOTTOM_BAR_HEIGHT + 6}px + env(safe-area-inset-bottom)) !important;
+          bottom: calc(${FAB_BOTTOM + STACK_OFFSET}px + env(safe-area-inset-bottom)) !important;
+        }
+        body.kd-has-talk-bar button[aria-label="맨 위로 스크롤"] {
+          bottom: calc(${SCROLL_TOP_BOTTOM + STACK_OFFSET}px + env(safe-area-inset-bottom)) !important;
         }
       `}</style>
 

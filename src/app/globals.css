@@ -716,11 +716,11 @@ body {
 .blog-detail-main { min-width: 0; }
 .blog-detail-side { display: none; }
 
-/* 블로그 본문 가독성 */
-.blog-content { font-size: 17px; line-height: 1.85; word-break: keep-all; }
-.blog-content h2 { margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border); font-size: 22px; }
+/* 블로그 본문 가독성
+   본문 타이포(.blog-content / p / h2)는 styles/blog.css 로 수렴했다.
+   blog.css 가 뒤에 로드되어 항상 이기므로 여기 남은 중복 정의는 전부 죽은 코드였고,
+   "globals 를 고쳤는데 화면이 안 바뀐다" 의 원인이었다. h3 장식만 남긴다. */
 .blog-content h3 { font-size: 18px; border-left: 3px solid var(--brand); padding-left: 10px; margin-top: 28px; }
-.blog-content p { margin: 0 0 16px; }
 .blog-content table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; }
 .blog-content th { background: var(--bg-surface); padding: 10px 12px; text-align: left; font-weight: 600; font-size: 13px; border-bottom: 1px solid var(--border); }
 .blog-content td { padding: 8px 12px; border-bottom: 1px solid var(--border); }
@@ -817,35 +817,13 @@ body {
   .cta-row > a, .cta-row > button { width: 100% !important; text-align: center !important; }
 }
 
-/* ═══ 블로그 본문 — 종합 타이포그래피 시스템 ═══ */
-.blog-content {
-  font-size: 16.5px;
-  line-height: 2.05;
-  letter-spacing: -0.1px;
-  word-break: keep-all;
-  overflow-wrap: break-word;
-  color: #d4dde8;
-}
-.blog-content p {
-  margin: 0 0 24px;
-  font-size: 16.5px;
-  line-height: 2.05;
-  color: #d4dde8;
-}
-.blog-content h2 {
-  font-size: 22px;
-  font-weight: 700;
-  color: #eef2f7;
-  margin: 52px 0 18px;
-  padding-bottom: 0;
-  border-bottom: none;
-  letter-spacing: -0.5px;
-  line-height: 1.5;
-}
+/* ═══ 블로그 본문 — 종합 타이포그래피 시스템 ═══
+   .blog-content / .blog-content p / h2 의 타이포·색 정의는 styles/blog.css 로 옮겼다.
+   같은 선언을 두 파일에 두면 뒤에 로드되는 blog.css 가 항상 이겨서 여기 수정이 묻힌다. */
 .blog-content h3 {
   font-size: 18px;
   font-weight: 600;
-  color: #e0e8f0;
+  color: var(--text-primary);
   margin: 36px 0 14px;
   letter-spacing: -0.3px;
   line-height: 1.45;
@@ -878,7 +856,7 @@ body {
   font-size: 16px;
   line-height: 2.0;
   margin-bottom: 8px;
-  color: #d4dde8;
+  color: var(--text-secondary);
 }
 .blog-content li::marker { color: var(--brand, #4A8AF7); }
 
@@ -892,7 +870,7 @@ body {
   font-size: 15.5px;
   font-style: italic;
   line-height: 1.85;
-  color: #a8bdd4;
+  color: var(--text-secondary);
   position: relative;
 }
 .blog-content blockquote::before {
@@ -909,7 +887,7 @@ body {
 .blog-content blockquote p {
   padding-left: 16px;
   margin-bottom: 0;
-  color: #a8bdd4;
+  color: var(--text-secondary);
 }
 .blog-content blockquote p:last-child { margin-bottom: 0; }
 
@@ -938,9 +916,9 @@ body {
   padding: 12px 16px;
   border-bottom: 1px solid rgba(255,255,255,0.04);
   line-height: 1.6;
-  color: #d4dde8;
+  color: var(--text-secondary);
 }
-.blog-content td:last-child { font-weight: 500; color: #e0e8f0; }
+.blog-content td:last-child { font-weight: 500; color: var(--text-primary); }
 .blog-content tr:last-child td { border-bottom: none; }
 .blog-content tr:nth-child(even) td { background: rgba(255,255,255,0.012); }
 
@@ -990,10 +968,11 @@ body {
   margin: 28px 0;
 }
 
-/* 모바일 블로그 반응형 */
+/* 모바일 블로그 반응형
+   .blog-content / .blog-content p 의 모바일 타이포도 blog.css 로 수렴했다.
+   미디어쿼리는 특이도를 올리지 않으므로 여기 두면 뒤에 로드되는 blog.css 의
+   기본 규칙(16px)에 그대로 져서 죽은 코드가 된다 — 실제로 그랬다. */
 @media (max-width: 640px) {
-  .blog-content { font-size: 15.5px; line-height: 1.9; }
-  .blog-content p { margin-bottom: 20px; font-size: 15.5px; }
   .blog-content h2 { margin-top: 40px; margin-bottom: 14px; font-size: 20px; }
   .blog-content h3 { margin-top: 28px; font-size: 16.5px; padding: 6px 0 6px 12px; }
   .blog-content table { font-size: 12.5px; display: block; overflow-x: auto; }
@@ -2102,6 +2081,10 @@ nav[class*="md:hidden"] {
 }
 ::-webkit-scrollbar-thumb { background: #C8CDD4; }
 ::-webkit-scrollbar-thumb:hover { background: #9CA3AF; }
+/* ⚠️ 아래 .blog-content 규칙들은 실제로 적용되지 않는다.
+   styles/blog.css 가 layout.tsx 에서 뒤에 로드되어 동일 특이도 싸움에서 항상 이긴다.
+   블로그 본문 색을 바꾸려면 여기가 아니라 styles/blog.css 를 고칠 것.
+   (이 착각으로 본문 대비 수정이 세 번 헛돌았다) */
 .blog-content { color: #2d3748; }
 .blog-content p { color: #2d3748; }
 .blog-content li { color: #2d3748; }

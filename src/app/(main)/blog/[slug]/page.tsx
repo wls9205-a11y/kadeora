@@ -11,7 +11,6 @@ import { injectInternalLinks } from '@/lib/blog-auto-link';
 import BlogCommentInput from '@/components/BlogCommentInput';
 import BlogCommentCTA from '@/components/BlogCommentCTA';
 import LoginGate from '@/components/LoginGate';
-import BlogFloatingBar from '@/components/BlogFloatingBar';
 import ShareButtons from '@/components/ShareButtons';
 // s184: KakaoShareButton 제거 — ShareButtons (8 플랫폼) 안에 카카오 포함됨.
 import FAQBlock from '@/components/detail/FAQBlock';
@@ -1266,9 +1265,6 @@ export default async function BlogDetailPage({ params }: Props) {
         {/* s172: BlogFooterMeta 댓글 직후로 이동 (article 외부) */}
       </article>
 
-      {/* 플로팅 액션바 — 로그인 유저 전용 (저장/알림/공유 engagement 바).
-          비로그인은 StickySignupBar 가 하단 자리를 차지하므로 중복 방지. */}
-      {isLoggedIn && <BlogFloatingBar slug={slug} title={post.title} category={post.category} />}
 
       {/* 댓글 섹션 — D안 컴팩트 리스트 */}
       <BlogCommentCTA commentCount={comments.length} />
