@@ -29,6 +29,7 @@ export const maxDuration = 30;
 // 향후 headers/cookies 호출을 분리하면 ISR 복원 가능.
 export const dynamic = 'force-dynamic';
 import { SITE_URL as SITE } from '@/lib/constants';
+import { isSafeImage, blogHeroImage } from '@/lib/blog/safe-image';
 import { enhanceBlogVisuals } from '@/lib/blog-visual-enhancer';
 import ReadingProgress from '@/components/ReadingProgress';
 // BlogSidebar removed — TOC inline + tools/metrics below article
@@ -256,15 +257,9 @@ export async function generateMetadata({ params }: Props) {
   const post = await getPostBySlug(slug);
   if (!post) notFound();
 
-    // s8: cover_image 8,775편 중 2,154편이 외부 스크랩(imgnews.naver.net 892 등 250여 호스트)이다.
-    // OG 첫 자리에 올리면 남의 저작물을 카카오톡·검색 대표 이미지로 내보내게 된다.
-    // 화이트리스트로만 통과시킨다 — 블랙리스트로 뒤집으면 신규 호스트가 그대로 샌다.
-    const isSafeCover = (u?: string | null) =>
-      !!u && (u.includes('kadeora.supabase.co') || u.includes('/api/og'));
-    // 외부 커버는 생성 카드로 대체한다. 노출 면적(1200x630)은 그대로 확보된다.
-    const heroOg = isSafeCover(post.cover_image)
-      ? post.cover_image!
-      : `${SITE}/api/og?title=${encodeURIComponent(post.title)}&category=${post.category}&author=${encodeURIComponent(post.author_name || '카더라')}&design=2`;
+    // s9: 판정을 @/lib/blog/safe-image 로 옮겼다. S8 은 이 로직을 여기 지역 상수로 두는
+    // 바람에 openGraph·twitter 에만 적용되고 JSON-LD 세 곳이 외부 이미지를 그대로 내보냈다.
+    const heroOg = blogHeroImage(post);
     // 네이버/구글 통일 설명문 (meta_description > excerpt > title)
     const desc = (post.meta_description && post.meta_description.length >= 30)
       ? post.meta_description
@@ -598,14 +593,19 @@ export default async function BlogDetailPage({ params }: Props) {
     url: `${SITE}/blog/${slug}`,
     image: [
       // 실제 본문 이미지 (텍스트 없는 사진 → 네이버 이미지 캐러셀 우대)
-      ...contentImages.map((img: { url: string; alt: string }) => ({
-        '@type': 'ImageObject' as const,
-        url: img.url,
-        caption: img.alt || post.title,
-      })),
+      // s9: 자체 호스팅분만 남긴다. BlogPosting.image[] 는 "이게 이 글의 이미지다"라고
+      // 검색엔진에 명시 선언하는 자리라 OG 보다 강한 신호다 — 남의 언론사 사진을
+      // 우리 콘텐츠 대표 이미지로 적극 제출하고 있었다. 캐러셀 노출 감소는 의도된 결과.
+      ...contentImages
+        .filter((img: { url: string }) => isSafeImage(img.url))
+        .map((img: { url: string; alt: string }) => ({
+          '@type': 'ImageObject' as const,
+          url: img.url,
+          caption: img.alt || post.title,
+        })),
       {
         '@type': 'ImageObject',
-        url: post.cover_image || `${SITE}/api/og?title=${encodeURIComponent(post.title)}&category=${post.category}&design=2`,
+        url: blogHeroImage(post),
         width: 1200, height: 630,
         caption: post.image_alt || post.title,
       },
@@ -757,7 +757,7 @@ export default async function BlogDetailPage({ params }: Props) {
     name: post.title,
     description: descClean,
     step: howtoSteps.slice(0, 8),
-    image: post.cover_image || `${SITE}/api/og?title=${encodeURIComponent(post.title)}&category=${post.category}&design=2`,
+    image: blogHeroImage(post), // s9: 외부 커버 차단
   } : null;
 
   
@@ -854,7 +854,7 @@ export default async function BlogDetailPage({ params }: Props) {
               price: '0',
             },
             url: `${SITE}/blog/${slug}`,
-            image: post.cover_image || `${SITE}/api/og?title=${encodeURIComponent(post.title)}&category=apt&design=2`,
+            image: blogHeroImage(post), // s9: 외부 커버 차단
           };
           break;
         }
@@ -911,7 +911,10 @@ export default async function BlogDetailPage({ params }: Props) {
         {post.cover_image && (() => {
           const ogSquareUrl = `${SITE}/api/og-square?title=${encodeURIComponent(post.title)}&category=${post.category}&author=${encodeURIComponent(post.author_name || '카더라')}`;
           const ogMainUrl = `${SITE}/api/og?title=${encodeURIComponent((post.title || '').slice(0, 40))}&category=${post.category}&design=2`;
-          const coverUrl = post.cover_image.startsWith('/') ? `${SITE}${post.cover_image}` : post.cover_image;
+          // s9: 외부 스크랩 커버는 갤러리 대표로 내보내지 않는다. blogHeroImage 가
+          // 안전하면 커버를, 아니면 생성 카드를 준다 (BlogPosting.image[] 와 같은 판정).
+          const safeCover = blogHeroImage(post);
+          const coverUrl = safeCover.startsWith('/') ? `${SITE}${safeCover}` : safeCover;
           const cards = Array.isArray((post as any).og_cards) ? (post as any).og_cards : [];
 
           // s261: og_cards 6장 우선, 없으면 apt 카테고리는 og-apt 6장 fallback
