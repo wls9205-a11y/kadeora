@@ -18,6 +18,7 @@ export const revalidate = 86400; // 24시간 캐시
 const FALLBACK = {
   blog: 8775, stocks: 1846, subs: 2851, sites: 5924,
   complex: 34544, trades: 726054, posts: 12909,
+  priced: 26835, sigunguHubs: 191, dongHubs: 1440,
 };
 
 async function counts() {
@@ -29,16 +30,54 @@ async function counts() {
       const { count } = await q;
       return typeof count === 'number' ? count : null;
     };
-    const [blog, stocks, subs, sites, complex, trades, posts] = await Promise.all([
+    const [blog, stocks, subs, sites, complex, trades, posts, priced] = await Promise.all([
       one('blog_posts', (q: any) => q.eq('is_published', true)),
       one('stock_quotes'), one('apt_subscriptions'), one('apt_sites'),
       one('apt_complex_profiles'), one('apt_transactions'), one('posts'),
+      one('apt_complex_profiles', (q: any) => q.not('latest_sale_price', 'is', null)),
     ]);
+    // 지역 허브 수는 sitemap/[id] 와 정확히 같은 기준으로 센다 (시군구 10개+ / 동 5개+ 단지).
+    // PostgREST 는 기본 1k 에서 잘리므로 range 로 나눠 받는다 (사이트맵과 동일한 우회).
+    // 하루 한 번 재생성이라 34k 행 1회 페치는 부담이 되지 않는다.
+    let sigunguHubs = FALLBACK.sigunguHubs;
+    let dongHubs = FALLBACK.dongHubs;
+    try {
+      const rows: Array<{ region_nm: string | null; sigungu: string | null; dong: string | null }> = [];
+      for (let off = 0; off < 100000; off += 1000) {
+        const { data } = await (sb as any).from('apt_complex_profiles')
+          .select('region_nm, sigungu, dong')
+          .not('age_group', 'is', null)
+          .order('apt_name', { ascending: true })
+          .range(off, off + 999);
+        if (!data?.length) break;
+        rows.push(...data);
+        if (data.length < 1000) break;
+      }
+      if (rows.length > 0) {
+        const sg = new Map<string, number>();
+        const dg = new Map<string, number>();
+        for (const r of rows) {
+          if (r.sigungu) {
+            const k = `${r.region_nm}|${r.sigungu}`;
+            sg.set(k, (sg.get(k) || 0) + 1);
+          }
+          if (r.dong) {
+            const k = `${r.region_nm}|${r.sigungu}|${r.dong}`;
+            dg.set(k, (dg.get(k) || 0) + 1);
+          }
+        }
+        sigunguHubs = [...sg.values()].filter((v) => v >= 10).length;
+        dongHubs = [...dg.values()].filter((v) => v >= 5).length;
+      }
+    } catch {
+      // 집계 실패 시 폴백 유지 — llms.txt 자체는 계속 나가야 한다
+    }
     return {
       blog: blog ?? FALLBACK.blog, stocks: stocks ?? FALLBACK.stocks,
       subs: subs ?? FALLBACK.subs, sites: sites ?? FALLBACK.sites,
       complex: complex ?? FALLBACK.complex, trades: trades ?? FALLBACK.trades,
-      posts: posts ?? FALLBACK.posts,
+      posts: posts ?? FALLBACK.posts, priced: priced ?? FALLBACK.priced,
+      sigunguHubs, dongHubs,
     };
   } catch {
     // DB 장애로 llms.txt 자체가 죽지 않게 한다 (리스크 #4)
@@ -88,8 +127,8 @@ export async function GET() {
 - 분양사이트: ${n(c.sites)}개 (전국 아파트 분양 정보)
 - 단지백과: ${n(c.complex)}개 (아파트 상세 정보, 실거래가·전세가율·거래량)
 - 실거래 데이터: ${n(c.trades)}건 (국토교통부 실거래가 공개시스템)
-- 시군구 허브: 260개 (시군구별 아파트 시세 분석)
-- 동 허브: 2,800+ 개 (동별 아파트 시세 분석)
+- 시군구 허브: ${n(c.sigunguHubs)}개 (시군구별 아파트 시세 분석)
+- 동 허브: ${n(c.dongHubs)}개 (동별 아파트 시세 분석)
 - 무료 계산기: ${calcCount}종 (세금, 부동산, 투자, 급여, 대출 등 ${calcCatCount}개 카테고리)
 - 커뮤니티 게시글: ${n(c.posts)}편
 
@@ -109,8 +148,8 @@ KOSPI, KOSDAQ, NYSE, NASDAQ ${n(c.stocks)}개 종목의 시세를 제공합니�
 - [청약 정보](${SITE_URL}/apt): 전국 아파트 청약 일정, 경쟁률, 당첨 가점
 - [분양사이트](${SITE_URL}/apt): ${n(c.sites)}개 아파트 분양 상세 정보
 - [단지백과](${SITE_URL}/apt/complex): ${n(c.complex)}개 아파트 단지 상세 (시세, 전세가율, 거래량)
-- [시군구별 시세](${SITE_URL}/apt/area/서울/강남구): 260개 시군구별 아파트 시세 비교
-- [동별 시세](${SITE_URL}/apt/area/서울/강남구/반포동): 2,800+ 동별 아파트 시세
+- [시군구별 시세](${SITE_URL}/apt/area/서울/강남구): ${n(c.sigunguHubs)}개 시군구별 아파트 시세 비교
+- [동별 시세](${SITE_URL}/apt/area/서울/강남구/반포동): ${n(c.dongHubs)}개 동별 아파트 시세
 - [청약 진단](${SITE_URL}/apt/diagnose): 청약 가점 계산 + 당첨 확률 분석
 - [지역별 분석](${SITE_URL}/apt/region/서울): 시도별 부동산 시장 현황
 - [실거래가 검색](${SITE_URL}/apt/search): 전국 아파트 실거래가 검색
@@ -118,16 +157,16 @@ KOSPI, KOSDAQ, NYSE, NASDAQ ${n(c.stocks)}개 종목의 시세를 제공합니�
 #### 부동산 URL 패턴
 - 단지별 상세: ${SITE_URL}/apt/{단지슬러그} (${n(c.sites)}개)
 - 단지백과: ${SITE_URL}/apt/complex/{단지명} (${n(c.complex)}개)
-- 시군구 허브: ${SITE_URL}/apt/area/{광역시도}/{시군구} (260개)
-- 동 허브: ${SITE_URL}/apt/area/{광역시도}/{시군구}/{동} (2,800+개)
+- 시군구 허브: ${SITE_URL}/apt/area/{광역시도}/{시군구} (${n(c.sigunguHubs)}개)
+- 동 허브: ${SITE_URL}/apt/area/{광역시도}/{시군구}/{동} (${n(c.dongHubs)}개)
 
 #### 부동산 핵심 데이터 (공공데이터 기반)
-- 전국 아파트 단지: ${n(c.complex)}개 (실거래가 보유 26,813개)
-- 전국 실거래 데이터: 497,413건
+- 전국 아파트 단지: ${n(c.complex)}개 (실거래가 보유 ${n(c.priced)}개)
+- 전국 실거래 데이터: ${n(c.trades)}건
 - 데이터 출처: 국토교통부 실거래가 공개시스템, 한국부동산원, 청약홈
 
 ### 블로그 (/blog)
-AI 기반으로 생성된 59,000+ 편의 부동산·주식·재테크 분석 블로그입니다. DB의 실제 데이터(시세, 청약 정보, 거래 내역)를 기반으로 작성됩니다.
+AI 기반으로 생성된 ${n(c.blog)}편(발행 기준)의 부동산·주식·재테크 분석 블로그입니다. DB의 실제 데이터(시세, 청약 정보, 거래 내역)를 기반으로 작성됩니다.
 
 - [블로그 목록](${SITE_URL}/blog): 카테고리별 블로그 (부동산, 주식, 금융, 미분양, 종합)
 - [블로그 시리즈](${SITE_URL}/blog/series): 주제별 연재 콘텐츠
