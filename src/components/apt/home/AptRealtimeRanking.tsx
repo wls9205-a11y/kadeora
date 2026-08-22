@@ -51,7 +51,6 @@ export default function AptRealtimeRanking({ sites }: Props) {
             cover_image_url: s.cover_image_url,
             satellite_image_url: s.satellite_image_url,
             og_image_url: s.og_image_url,
-            images: s.images,
             name,
           });
           const pop =

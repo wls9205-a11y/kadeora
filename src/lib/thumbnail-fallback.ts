@@ -27,21 +27,27 @@ function firstImageUrl(images: unknown): string | null {
 }
 
 export interface AptSiteThumbRow {
+  hero_image_url?: string | null;        // s7-2: 시행사 서면 허락분. 자체 호스팅 중 최우선
   cover_image_url?: string | null;       // s214 C4: 5컬럼군 100% NULL — backfill 시 우선 사용
   satellite_image_url?: string | null;
   og_image_url?: string | null;
-  images?: unknown;
   name?: string | null;
 }
 
-/** apt_sites: cover > satellite > og > images[0] > OG generator */
+/**
+ * apt_sites: hero > cover > satellite > og > OG generator
+ *
+ * s7-2: images[0] 단계를 뺐다. 그 배열은 뉴스 스크랩(t1.daumcdn.net·언론사 도메인)이라
+ * 썸네일로 내보내면 남의 언론사 사진이 카카오톡·검색 미리보기에 걸린다.
+ * 컬럼은 보존하되 이 체인에서는 쓰지 않는다. (aptComplexThumb 은 별도 판단 — 손대지 않음)
+ */
 export function aptSiteThumb(row: AptSiteThumbRow | null | undefined): string {
   if (!row) return ogFallback('아파트', 'apt');
   return (
-    (row.cover_image_url && row.cover_image_url.length > 10 ? row.cover_image_url : null)
+    (row.hero_image_url && row.hero_image_url.length > 10 ? row.hero_image_url : null)
+    ?? (row.cover_image_url && row.cover_image_url.length > 10 ? row.cover_image_url : null)
     ?? (row.satellite_image_url && row.satellite_image_url.length > 10 ? row.satellite_image_url : null)
     ?? (row.og_image_url && row.og_image_url.length > 10 ? row.og_image_url : null)
-    ?? firstImageUrl(row.images)
     ?? ogFallback(row.name || '아파트', 'apt')
   );
 }

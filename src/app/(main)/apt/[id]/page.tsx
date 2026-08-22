@@ -88,7 +88,7 @@ async function resolveParam(rawId: string) {
 
 async function fetchUnifiedData(slug: string) {
   const sb = getSupabaseAdmin();
-  const APT_COLS = 'id,slug,name,site_type,region,sigungu,dong,address,description,seo_title,seo_description,builder,developer,total_units,built_year,move_in_date,status,is_active,content_score,interest_count,page_views,comment_count,images,satellite_image_url,og_image_url,key_features,faq_items,nearby_facilities,nearby_station,school_district,price_min,price_max,price_comparison,search_trend,latitude,longitude,source_ids,created_at,updated_at,og_cards,lifecycle_stage,review_score,review_count,faqs,data_quality_score';
+  const APT_COLS = 'id,slug,name,site_type,region,sigungu,dong,address,description,seo_title,seo_description,builder,developer,total_units,built_year,move_in_date,status,is_active,content_score,interest_count,page_views,comment_count,images,satellite_image_url,og_image_url,key_features,faq_items,nearby_facilities,nearby_station,school_district,price_min,price_max,price_comparison,search_trend,latitude,longitude,source_ids,created_at,updated_at,og_cards,hero_image_url,hero_image_source,hero_image_credit,lifecycle_stage,review_score,review_count,faqs,data_quality_score';
 
   // Phase 1: apt_sites — exact slug → multi-stage fuzzy fallback
   let { data: site } = await (sb as any).from('apt_sites').select(APT_COLS).eq('slug', slug).maybeSingle();
@@ -371,14 +371,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const builder = d.site?.builder || d.sub?.constructor_nm || '';
     const desc = d.site?.seo_description || `${d.region} ${d.site?.sigungu || ''} ${d.name} ${uStr} ${builder}. 모집공고 요약, 분양가격, 청약일정, 견본주택, 실거래가까지 한눈에.`.trim();
     // s214 C4: cover_image_url 추가. 5컬럼군 100% NULL → backfill 후 우선 사용.
-    // chain: cover > satellite > og_image_url > images[0] > OG generator
+    // s7-2: images[0] 를 뺐다 — 뉴스 스크랩이라 카카오톡·검색 미리보기에 남의 언론사
+    // 사진이 걸린다. chain: hero > cover > satellite > og_image_url > OG generator
     const ogImg = aptSiteThumb({
+      hero_image_url: (d.site as any)?.hero_image_url,
       cover_image_url: (d.site as any)?.cover_image_url,
       satellite_image_url: d.site?.satellite_image_url,
       og_image_url: d.site?.og_image_url,
-      images: d.site?.images as any,
       name: d.name,
     });
+    // 생성 카드가 아니라 실제 사진을 들고 있는가. 있으면 OG 0번 자리를 실사에 내준다.
+    const hasRealPhoto = !!(
+      (d.site as any)?.hero_image_url || (d.site as any)?.cover_image_url || d.site?.satellite_image_url
+    );
 
     const priceStr = d.site?.price_min && d.site?.price_max
       ? ` ${d.site.price_min >= 10000 ? `${(d.site.price_min/10000).toFixed(1)}억` : `${d.site.price_min.toLocaleString()}만`}~${d.site.price_max >= 10000 ? `${(d.site.price_max/10000).toFixed(1)}억` : `${d.site.price_max.toLocaleString()}만`}`
@@ -391,19 +396,25 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       openGraph: { title, description: desc, url: `${SITE_URL}/apt/${resolved.slug}`, siteName: '카더라', locale: 'ko_KR', type: 'article', images: (() => {
         const cards = Array.isArray(d.site?.og_cards) ? d.site.og_cards : [];
         if (cards.length === 6) {
-          return cards.map((c: any) => ({
+          const cardImgs = cards.map((c: any) => ({
             url: typeof c?.url === 'string' && c.url.startsWith('http') ? c.url : `${SITE_URL}${c?.url || ''}`,
             width: 630,
             height: 630,
             alt: c?.alt || d.name,
           }));
+          // s7-2: 카드 6장 분기가 실사를 통째로 건너뛰고 있었다(97.9%).
+          // 실사가 있으면 0번 자리에 놓고 카드를 뒤에 붙인다. 없으면 기존 동작 그대로.
+          return hasRealPhoto
+            ? [{ url: ogImg, width: 1200, height: 630, alt: `${d.name} 항공 이미지` }, ...cardImgs]
+            : cardImgs;
         }
         return [{ url: ogImg, width: 1200, height: 630, alt: `${d.name} 분양정보` }, { url: `${SITE_URL}/api/og-apt?slug=${encodeURIComponent(resolved.slug)}&card=1&v=1`, width: 630, height: 630, alt: d.name }];
       })() },
       twitter: { card: 'summary_large_image', title, description: desc, site: '@kadeora_app', images: (() => {
         const cards = Array.isArray(d.site?.og_cards) ? d.site.og_cards : [];
         if (cards.length === 6) {
-          return cards.map((c: any) => typeof c?.url === 'string' && c.url.startsWith('http') ? c.url : `${SITE_URL}${c?.url || ''}`).filter(Boolean);
+          const cardUrls = cards.map((c: any) => typeof c?.url === 'string' && c.url.startsWith('http') ? c.url : `${SITE_URL}${c?.url || ''}`).filter(Boolean);
+          return hasRealPhoto ? [ogImg, ...cardUrls] : cardUrls;
         }
         return [ogImg];
       })() },
@@ -490,6 +501,13 @@ export default async function AptUnifiedPage({ params }: Props) {
 
   // S4-4 P2: 슬러그 하드코딩을 걷어내고 생애주기 단계로 판정한다.
   // 앵커와 폼이 같은 조건으로 뜨고 같이 사라져야 하므로 플래그는 하나만 둔다.
+  // s7-2: 구조화데이터용 이미지.
+  //  - heroPhotoUrl: image[] 0번. 조감도(hero) > 위성. 큰 이미지라 위성도 읽힌다
+  //  - developerHeroUrl: thumbnailUrl 용. 검색 썸네일은 작아 위성이 얼룩으로 보이므로
+  //    시행사 허락 실사가 있을 때만 쓰고, 없으면 생성 카드(og-square)로 둔다
+  const heroPhotoUrl: string | null = (site as any)?.hero_image_url || site?.satellite_image_url || null;
+  const developerHeroUrl: string | null = (site as any)?.hero_image_url || null;
+
   const showLeadForm = !!site?.slug && isLeadEligible(site.lifecycle_stage);
   // 희망 타입 선택지는 모집공고 원본(house_type_info)의 type 앞 숫자(전용면적)에서 파생한다.
   // apt_sites 에 area_types 류 컬럼이 없고, 현장마다 평형이 달라 하드코딩하지 않는다.
@@ -698,7 +716,7 @@ export default async function AptUnifiedPage({ params }: Props) {
       {sub?.rcept_bgnde && new Date(sub.rcept_endde || sub.rcept_bgnde) >= new Date() && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'Event', name: `${name} 청약 접수`, startDate: sub.rcept_bgnde, endDate: sub.rcept_endde, eventStatus: 'https://schema.org/EventScheduled', eventAttendanceMode: 'https://schema.org/OnlineEventAttendanceMode', location: { '@type': 'VirtualLocation', url: `${SITE_URL}/apt/${slug}` }, organizer: { '@type': 'Organization', name: site?.builder || sub.constructor_nm || '청약홈', url: sub.pblanc_url || SITE_URL }, image: `${SITE_URL}/api/og?title=${encodeURIComponent(name)}&design=2&subtitle=${encodeURIComponent('청약 접수')}` }) }} />}
 
       {/* JSON-LD 5: Article + SpeakableSpecification (voice search, Google Discover) */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'Article', headline: `${name} ${tLabel[sType] || '분양'} 정보`, description: site?.description || `${region} ${name}`, url: `${SITE_URL}/apt/${slug}`, datePublished: site?.created_at || sub?.fetched_at || new Date().toISOString(), dateModified: site?.updated_at || new Date().toISOString(), author: { '@type': 'Organization', name: '카더라', url: SITE_URL }, publisher: { '@type': 'Organization', name: '카더라', url: SITE_URL, logo: { '@type': 'ImageObject', url: `${SITE_URL}/icons/icon-192.png`, width: 192, height: 192 } }, image: [{ '@type': 'ImageObject', url: `${SITE_URL}/api/og-square?title=${encodeURIComponent(name)}&category=apt`, width: 630, height: 630 }, { '@type': 'ImageObject', url: `${SITE_URL}/api/og-apt?slug=${encodeURIComponent(slug)}&card=1`, width: 630, height: 630, name: `${name} 분양 인포그래픽` }, { '@type': 'ImageObject', url: `${SITE_URL}/api/og?title=${encodeURIComponent(name)}&design=2&subtitle=${encodeURIComponent(region)}`, width: 1200, height: 630 }], thumbnailUrl: `${SITE_URL}/api/og-square?title=${encodeURIComponent(name)}&category=apt`, mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE_URL}/apt/${slug}` }, speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.site-description'] } }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'Article', headline: `${name} ${tLabel[sType] || '분양'} 정보`, description: site?.description || `${region} ${name}`, url: `${SITE_URL}/apt/${slug}`, datePublished: site?.created_at || sub?.fetched_at || new Date().toISOString(), dateModified: site?.updated_at || new Date().toISOString(), author: { '@type': 'Organization', name: '카더라', url: SITE_URL }, publisher: { '@type': 'Organization', name: '카더라', url: SITE_URL, logo: { '@type': 'ImageObject', url: `${SITE_URL}/icons/icon-192.png`, width: 192, height: 192 } }, image: [...(heroPhotoUrl ? [{ '@type': 'ImageObject', url: heroPhotoUrl, width: 1200, height: 630, name: `${name} 항공 이미지` }] : []), { '@type': 'ImageObject', url: `${SITE_URL}/api/og-apt?slug=${encodeURIComponent(slug)}&card=1`, width: 630, height: 630, name: `${name} 분양 인포그래픽` }, { '@type': 'ImageObject', url: `${SITE_URL}/api/og?title=${encodeURIComponent(name)}&design=2&subtitle=${encodeURIComponent(region)}`, width: 1200, height: 630 }], thumbnailUrl: developerHeroUrl || `${SITE_URL}/api/og-square?title=${encodeURIComponent(name)}&category=apt`, mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE_URL}/apt/${slug}` }, speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.site-description'] } }) }} />
 
       {/* JSON-LD 6: Product (price range → Google price chip in SERP) */}
       {/* Product 스키마 제거 — ApartmentComplex+RealEstateListing으로 대체됨 */}
@@ -729,11 +747,21 @@ export default async function AptUnifiedPage({ params }: Props) {
 
       {/* 이미지 갤러리 — 워터마크 + 반응형 (모바일 스와이프 / 데스크탑 그리드) */}
       {(() => {
-        const dbImages = Array.isArray(site?.images) ? site.images.slice(0, 7).map((img: any) => ({
-          url: typeof img === 'string' ? img : img?.url || img?.link || '',
-          caption: typeof img === 'string' ? undefined : img?.caption,
-        })).filter((img: any) => img.url) : [];
-        const ogUrl = `${SITE_URL}/api/og?title=${encodeURIComponent(name)}&design=2&category=apt&subtitle=${encodeURIComponent(region)}`;
+        // s7-2: apt_sites.images 는 뉴스 스크랩(t1.daumcdn.net·언론사 도메인)이라 갤러리와
+        // JSON-LD 에서 뺐다. 남의 언론사 사진이 첫 화면 대표 이미지로 나가고 있었다.
+        // 컬럼 자체는 보존한다 — 화면에서만 쓰지 않는다.
+        //   1순위 hero_image_url      시행사 서면 허락분 (현재 0장, 배관만)
+        //   2순위 satellite_image_url 자체 호스팅
+        //   3순위 없음 → 갤러리 미렌더. 생성 카드로 채우지 않는다 (이미지가 있는 척이 된다)
+        const heroSrc = (site as any)?.hero_image_url || site?.satellite_image_url || '';
+        const heroIsDeveloper = (site as any)?.hero_image_source === 'developer' && (site as any)?.hero_image_url;
+        // 위성 사진이지 조감도가 아니다 — 표기를 섞지 않는다.
+        const heroCredit = heroIsDeveloper
+          ? ((site as any)?.hero_image_credit || name)
+          : '항공 이미지 · 국토교통부 공간정보 오픈플랫폼(VWorld)';
+        const dbImages = heroSrc
+          ? [{ url: heroSrc, caption: heroIsDeveloper ? heroCredit : `${name} 항공 이미지` }]
+          : [];
         const badgeEl = (
           <div style={{ position: 'absolute', top: 10, left: 12, display: 'flex', gap: 'var(--sp-xs)', flexWrap: 'wrap', zIndex: 2 }}>
             {subSt && <span style={{ fontSize: 10, padding: '3px 10px', borderRadius: 'var(--radius-card)', background: SB[subSt].bg.replace('0.15', '0.85'), color: '#fff', fontWeight: 700 }}>{SB[subSt].label}{dDay !== null ? ` D${dDay > 0 ? '-' + dDay : dDay === 0 ? '-Day' : '+' + Math.abs(dDay)}` : ''}</span>}
@@ -743,15 +771,22 @@ export default async function AptUnifiedPage({ params }: Props) {
         );
         return (
           <>
-            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-              '@context': 'https://schema.org', '@type': 'ImageGallery', name: `${name} ${tLabel[sType]} 이미지`,
-              about: { '@type': 'ApartmentComplex', name, address: { '@type': 'PostalAddress', addressRegion: region } },
-              image: dbImages.length > 0
-                ? dbImages.map((img: any, i: number) => ({ '@type': 'ImageObject', url: img.url, name: img.caption || `${name} — ${region}`, position: i + 1 }))
-                : [{ '@type': 'ImageObject', url: ogUrl, name: `${name} — ${region}`, width: 1200, height: 630, position: 1 }],
-            })}} />
+            {/* s7-2: 빈 image[] 를 선언하느니 블록을 내지 않는다.
+                뉴스 URL·언론사 caption 이 구조화데이터에서 사라지는 지점이기도 하다. */}
+            {dbImages.length > 0 && (
+              <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+                '@context': 'https://schema.org', '@type': 'ImageGallery', name: `${name} ${tLabel[sType]} 이미지`,
+                about: { '@type': 'ApartmentComplex', name, address: { '@type': 'PostalAddress', addressRegion: region } },
+                image: dbImages.map((img: any, i: number) => ({ '@type': 'ImageObject', url: img.url, name: img.caption || `${name} — ${region}`, position: i + 1 })),
+              })}} />
+            )}
             {dbImages.length > 0 ? (
-              <AptImageGallery images={dbImages} name={name} region={region} badges={badgeEl} />
+              <>
+                <AptImageGallery images={dbImages} name={name} region={region} badges={badgeEl} />
+                <div style={{ fontSize: 12, color: 'var(--text-tertiary)', margin: '-8px 0 14px', lineHeight: 1.5 }}>
+                  {heroCredit}
+                </div>
+              </>
             ) : (
               <div style={{
                 position: 'relative', borderRadius: 'var(--radius-lg)', overflow: 'hidden', marginBottom: 14,

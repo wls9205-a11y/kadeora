@@ -1,3 +1,76 @@
+## S7-2 (2026-08-22) — 이미지 소스 교체: 뉴스 스크랩 제거, 자체 호스팅 전환
+
+트라비스 상세 갤러리가 `t1.daumcdn.net`(다음 뉴스 썸네일)과 `consumernews.co.kr`(컨슈머뉴스)
+사진을 첫 화면 대표 이미지로 띄우고 있었다. 그 URL 들이 언론사 `caption` 까지 붙어
+`ImageGallery` JSON-LD 에 그대로 선언돼 있었다. 저작권 노출이자 품질 문제다.
+
+### 리스크 #1 이 현실이었다 — `APT_COLS` 에 `hero_image_*` 3개가 없었다
+
+DB 에는 `hero_image_url` `hero_image_source` `hero_image_credit` 가 존재하는데
+`APT_COLS`(91행) 에 빠져 있었다. 그대로 뒀으면 항상 `undefined` 로 읽혀
+**전 현장에서 갤러리가 사라졌을 것**이다 (S0 `data_quality_score` 누락과 같은 유형).
+착수 첫 단계로 확인해 추가했다.
+
+### 변경
+
+- 갤러리 소스: `apt_sites.images` → `hero_image_url` > `satellite_image_url` > 없으면 미렌더.
+  생성 카드로 채우지 않는다 — 갤러리 자리의 텍스트 카드는 "이미지가 있는 척"이 된다
+- `ImageGallery` JSON-LD: 배열이 비면 블록 자체를 렌더하지 않는다. 뉴스 URL·언론사 caption 소멸
+- `aptSiteThumb()`: `hero > cover > satellite > og > 생성 카드`. **`firstImageUrl(row.images)` 제거**
+- OG·트위터: `og_cards.length === 6` 분기가 실사를 통째로 건너뛰고 있었다(97.9%).
+  실사 보유 시 0번 자리에 넣고 카드 6장을 뒤에 붙인다. 실사가 없으면 기존 동작 그대로
+- Article JSON-LD `image[]`: 실사 0번 + `og-square` 제거(같은 카드를 두 번 선언할 이유가 없다).
+  `thumbnailUrl` 은 검색 썸네일이 작아 위성이 얼룩으로 보이므로 **시행사 실사가 있을 때만**
+  쓰고 없으면 생성 카드 — 위성은 넣지 않는다
+- 갤러리 하단 12px 출처: `항공 이미지 · 국토교통부 공간정보 오픈플랫폼(VWorld)`.
+  `hero_image_source === 'developer'` 면 `hero_image_credit`. **`조감도` 라고 쓰지 않는다 — 위성이다**
+
+### 지시서 밖에서 손댄 곳
+
+`AptSiteThumbRow.images` 필드와 이를 넘기던 호출처 2곳(`AptImminentCarousel`,
+`AptRealtimeRanking`)을 제거했다. 체인에서 뺀 뒤로는 무시되는 값이지만, 남겨두면
+"아직 쓰이는 값"으로 읽혀 되살아난다. 타입 단계에서 막았다.
+`aptComplexThumb` 은 지시서대로 손대지 않았다(`firstImageUrl` 정의도 그쪽 때문에 유지).
+
+### 리스크 #5 — `content_score` 는 `images` 로 미디어 5점을 준다
+
+`api/cron/sync-apt-sites/route.ts:313`
+
+```ts
+if (s.images && Array.isArray(s.images) && s.images.length >= 1) score += 5;
+```
+
+화면에서 `images` 를 뺐으므로 그대로 두면 **화면에 없는 이미지로 점수를 받는** 상태가 된다.
+기준을 `hero_image_url`/`satellite_image_url` 로 옮겼다.
+
+sitemap 편입 임계값(`content_score >= 25`) 교차를 먼저 실측했다 — **양방향 0건**.
+현재 5,924개 전부 25 이상이고, ±5 로 임계값을 넘나드는 현장이 없어 색인 영향이 없다.
+영향이 0인 것을 확인한 뒤 별도 커밋으로 분리했다.
+
+| | 현장 수 | 점수 변화 |
+|---|---|---|
+| `images` + 위성 | 5,329 | 0 (계속 +5) |
+| `images` 만 | 68 | −5 |
+| 위성만 | 520 | +5 |
+| 둘 다 없음 | 7 | 0 |
+
+### 영향 규모 (DB 실측 — 지시서와 일치)
+
+손실 68건(원래 타사 저작물), 개선 520건(이제 갤러리에 나타남). 순이득.
+`hero_image_url` 보유는 현재 0건이라 실질 대표 이미지는 전부 위성이다.
+
+### 검증
+
+tsc 0 / build 0 / BOM 0. `aptSiteThumb` 내 `firstImageUrl` 0건,
+apt 상세에서 `site.images` 참조 0건.
+
+`/apt/[id]` 는 로컬에서 404(`.env.local` service-role placeholder)라 **HTML 실측은 배포 후**에
+해야 한다. 트라비스 페이지에서 `t1.daumcdn.net`·`consumernews.co.kr` 0건,
+갤러리 첫 이미지가 `supabase.co/storage/.../satellite/`, `og:image` 첫 값 동일,
+`ImageGallery` JSON-LD 언론사 caption 0건을 확인할 것.
+
+---
+
 ## S7-4 (2026-08-22) — 섹션 재배치 (B안: 회원 CTA 는 히어로 아래 유지)
 
 ### 지시서 전제 정정 — `AptHero` 는 조감도가 아니다
