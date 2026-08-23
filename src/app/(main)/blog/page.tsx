@@ -35,6 +35,10 @@ const CAT_META: Record<string, { title: string; desc: string }> = {
   unsold: { title: '미분양 블로그 — 전국 미분양 현황·분석', desc: '전국 미분양 아파트 현황, 투자 분석, 할인 분양 정보를 월간 업데이트합니다.' },
   finance: { title: '재테크 블로그 — 투자·절약·자산관리', desc: '재테크 기본 원칙부터 실전 투자 전략까지, 자산 관리 정보를 제공합니다.' },
   general: { title: '생활 정보 블로그 — 우리동네 소식', desc: '알아두면 유용한 생활 정보, 동네 소식, 정책 변경 사항을 안내합니다.' },
+  // v4-C5: 대분류 3개. 레거시 6개 값은 위에 그대로 남는다.
+  realestate: { title: '부동산 블로그 — 청약·미분양·재개발', desc: '전국 아파트 청약 일정, 미분양 현황, 재개발 진행 단계를 한 곳에서 확인하세요.' },
+  redev: { title: '재개발 블로그 — 정비사업 진행 현황', desc: '전국 재개발·재건축 구역의 진행 단계와 일정을 정리합니다.' },
+  life: { title: '재테크·생활 블로그 — 투자·절약·동네 소식', desc: '재테크 기본 원칙부터 실전 투자 전략, 알아두면 유용한 생활 정보까지.' },
 };
 
 const SUB_CATS: Record<string, { key: string; label: string }[]> = {
@@ -61,6 +65,26 @@ const SUB_CATS: Record<string, { key: string; label: string }[]> = {
     { key: 'invest', label: '투자' },
   ],
 };
+
+/**
+ * 그룹 탭의 서브칩 = 멤버들의 합집합 (key 중복 제거, 먼저 나온 라벨 유지).
+ * ⚠️ 서브칩 목록을 발행량 집계로 바꾸는 것은 C9 다. 여기서는 매핑만 잇는다.
+ */
+function subCatsFor(category: string): { key: string; label: string }[] | null {
+  if (SUB_CATS[category]) return SUB_CATS[category];
+  const members = CAT_GROUPS[category];
+  if (!members) return null;
+  const seen = new Set<string>();
+  const out: { key: string; label: string }[] = [];
+  for (const m of members) {
+    for (const sc of SUB_CATS[m] ?? []) {
+      if (seen.has(sc.key)) continue;
+      seen.add(sc.key);
+      out.push(sc);
+    }
+  }
+  return out.length > 0 ? out : null;
+}
 
 interface PageProps { searchParams: Promise<{ category?: string; sort?: string; q?: string; page?: string; sub?: string }> }
 
@@ -109,17 +133,53 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
   };
 }
 
+// v4-C5-1: 탭을 대분류 4개로 접는다. 이모지는 제거 (C5-3).
+//
+// 실측 발행량 — apt 4,730 · stock 2,906 · unsold 507 · redev 287 · finance 263 · general 66.
+// redev 287편은 탭이 없어 **어느 경로로도 도달할 수 없었다.** 부동산 그룹에 넣어 살린다.
+//
+// ⚠️ 기존 ?category= 6개 값(apt·stock·unsold·redev·finance·general)은 계속 받는다.
+//    탭 UI 만 4개로 접고 내부 매핑을 유지한다 — 파라미터를 바꾸면 색인된 URL 이 전부 죽는다.
 const CATS = [
-  { key: 'all', label: '전체', icon: '📋' },
-  { key: 'stock', label: '주식', icon: '📈' },
-  { key: 'apt', label: '청약', icon: '🏠' },
-  { key: 'unsold', label: '미분양', icon: '🏚️' },
-  { key: 'finance', label: '재테크', icon: '💰' },
-  { key: 'general', label: '생활', icon: '📰' },
+  { key: 'all',        label: '전체' },
+  { key: 'realestate', label: '부동산' },
+  { key: 'stock',      label: '주식' },
+  { key: 'life',       label: '재테크·생활' },
 ];
 
+/** 탭 키 → 실제 blog_posts.category 값들. 여기 없는 키는 레거시 단일값으로 취급한다. */
+const CAT_GROUPS: Record<string, string[]> = {
+  realestate: ['apt', 'unsold', 'redev'],
+  stock: ['stock'],
+  life: ['finance', 'general'],
+};
+
+/** 레거시 단일 category 값 → 어느 탭이 활성인지. */
+const CAT_TO_TAB: Record<string, string> = {
+  apt: 'realestate', unsold: 'realestate', redev: 'realestate',
+  stock: 'stock',
+  finance: 'life', general: 'life',
+};
+
+/**
+ * ?category= 값을 실제 조회 대상으로 푼다.
+ * null 이면 전체 (필터 없음). 알 수 없는 값도 전체로 떨어뜨린다 — 빈 목록보다 낫다.
+ */
+function resolveCategories(category: string): string[] | null {
+  if (!category || category === 'all') return null;
+  if (CAT_GROUPS[category]) return CAT_GROUPS[category];
+  if (CAT_TO_TAB[category]) return [category];
+  return null;
+}
+
+/** 행 배지용 — 글 하나의 실제 category 라벨. 탭 라벨과 다르다. */
+const POST_CAT_LABEL: Record<string, string> = {
+  stock: '주식', apt: '청약', unsold: '미분양', redev: '재개발', finance: '재테크', general: '생활',
+};
+
 const CAT_COLORS: Record<string, string> = {
-  stock: 'var(--accent-blue)', apt: 'var(--accent-green)', unsold: 'var(--accent-red)', finance: 'var(--accent-purple)', general: 'var(--text-tertiary)',
+  stock: 'var(--accent-blue)', apt: 'var(--accent-green)', unsold: 'var(--accent-red)',
+  redev: 'var(--accent-orange)', finance: 'var(--accent-purple)', general: 'var(--text-tertiary)',
 };
 
 interface Props { searchParams: Promise<{ category?: string; sort?: string; q?: string; page?: string; sub?: string }> }
@@ -177,7 +237,11 @@ export default async function BlogPage({ searchParams }: Props) {
     .select('id, slug, title, excerpt, category, sub_category, tags, created_at, view_count, cover_image, image_alt, published_at, reading_time_min, comment_count, helpful_count, rewritten_at')
     .eq('is_published', true)
     .or(`published_at.is.null,published_at.lte.${now}`);
-  if (category !== 'all') q2 = q2.eq('category', category);
+  // v4-C5: 그룹 탭이면 .in(), 레거시 단일값이면 .eq() 와 같은 결과가 나온다.
+  const activeCats = resolveCategories(category);
+  if (activeCats) {
+    q2 = activeCats.length === 1 ? q2.eq('category', activeCats[0]) : q2.in('category', activeCats);
+  }
   if (sub) q2 = q2.eq('sub_category', sub);
   if (q) { const sq = sanitizeSearchQuery(q, 100); if (sq) q2 = q2.or(`title.ilike.%${sq}%,excerpt.ilike.%${sq}%`); }
   if (sort === 'popular') {
@@ -216,7 +280,9 @@ export default async function BlogPage({ searchParams }: Props) {
       .select('id, slug, title, category')
       .eq('is_published', true)
       .or(`published_at.is.null,published_at.lte.${now}`);
-    if (category !== 'all') nq = nq.eq('category', category);
+    if (activeCats) {
+      nq = activeCats.length === 1 ? nq.eq('category', activeCats[0]) : nq.in('category', activeCats);
+    }
     if (sub) nq = nq.eq('sub_category', sub);
     if (sort === 'popular') nq = nq.order('view_count', { ascending: false });
     else nq = nq.order('created_at', { ascending: false });
@@ -241,7 +307,13 @@ export default async function BlogPage({ searchParams }: Props) {
     } catch {}
   }
 
-  const catLabel = CATS.find(c => c.key === category)?.label || '전체';
+  // 탭에 붙는 건수 — 그룹은 멤버 합산. countMap 은 실제 category 별 집계다.
+  const tabCount = (key: string): number => {
+    if (key === 'all') return countMap.all || 0;
+    return (CAT_GROUPS[key] ?? [key]).reduce((sum, c) => sum + (countMap[c] || 0), 0);
+  };
+  const activeTab = category === 'all' ? 'all' : (CAT_TO_TAB[category] ?? (CAT_GROUPS[category] ? category : 'all'));
+  const catLabel = CATS.find(c => c.key === activeTab)?.label || '전체';
   const breadcrumbLd = {
     '@context': 'https://schema.org', '@type': 'BreadcrumbList',
     itemListElement: [
@@ -314,14 +386,14 @@ export default async function BlogPage({ searchParams }: Props) {
         {CATS.map(c => (
           <Link key={c.key} href={`/blog${c.key !== 'all' ? `?category=${c.key}` : ''}${sort !== 'latest' ? `${c.key !== 'all' ? '&' : '?'}sort=${sort}` : ''}${q ? `${c.key !== 'all' || sort !== 'latest' ? '&' : '?'}q=${q}` : ''}`}
             style={{
-              padding: '8px 14px', fontSize: 'var(--fs-sm)', fontWeight: category === c.key ? 700 : 500,
-              color: category === c.key ? 'var(--brand)' : 'var(--text-tertiary)',
+              padding: '8px 14px', minHeight: 44, fontSize: 'var(--fs-sm)', fontWeight: activeTab === c.key ? 700 : 500,
+              color: activeTab === c.key ? 'var(--brand)' : 'var(--text-tertiary)',
               textDecoration: 'none', flexShrink: 0,
-              borderBottom: category === c.key ? '2px solid var(--brand)' : '2px solid transparent',
+              borderBottom: activeTab === c.key ? '2px solid var(--brand)' : '2px solid transparent',
               display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', transition: 'all var(--transition-fast)',
             }}>
             {c.label}
-            <span style={{ fontSize: 'var(--fs-xs)', opacity: 0.6 }}>{countMap[c.key] || 0}</span>
+            <span style={{ fontSize: 'var(--fs-xs)', opacity: 0.6 }}>{tabCount(c.key)}</span>
           </Link>
         ))}
         <Link href="/blog/series" style={{
@@ -335,7 +407,7 @@ export default async function BlogPage({ searchParams }: Props) {
       </div>
 
       {/* 서브카테고리 칩 */}
-      {category !== 'all' && SUB_CATS[category] && (
+      {category !== 'all' && subCatsFor(category) && (
         <div style={{ display: 'flex', gap: 6, marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none' }}>
           <Link href={`/blog?category=${category}${sort !== 'latest' ? `&sort=${sort}` : ''}${q ? `&q=${q}` : ''}`}
             style={{
@@ -346,7 +418,7 @@ export default async function BlogPage({ searchParams }: Props) {
             }}>
             전체
           </Link>
-          {SUB_CATS[category].map(sc => (
+          {(subCatsFor(category) ?? []).map(sc => (
             <Link key={sc.key} href={`/blog?category=${category}&sub=${sc.key}${sort !== 'latest' ? `&sort=${sort}` : ''}${q ? `&q=${q}` : ''}`}
               style={{
                 padding: '4px 12px', borderRadius: 'var(--radius-pill)', fontSize: 'var(--fs-xs)', fontWeight: sub === sc.key ? 700 : 500,
@@ -402,7 +474,7 @@ export default async function BlogPage({ searchParams }: Props) {
               <span style={{ fontSize: 11, fontWeight: 800, color: i === 0 ? 'var(--brand)' : 'var(--text-tertiary)', width: 16, textAlign: 'center', flexShrink: 0 }}>{i + 1}</span>
               <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</span>
               <span style={{ fontSize: 10, color: CAT_COLORS[p.category] || 'var(--text-tertiary)', fontWeight: 700, flexShrink: 0 }}>
-                {CATS.find(c => c.key === p.category)?.label || p.category}
+                {POST_CAT_LABEL[p.category] || p.category}
               </span>
               <span style={{ fontSize: 10, color: 'var(--text-tertiary)', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>👀{p.view_count}</span>
             </Link>
@@ -431,7 +503,7 @@ export default async function BlogPage({ searchParams }: Props) {
                 : postImageMap[p.id]
                   ? safeImg(postImageMap[p.id], { title: (p.title || '').slice(0, 40), category: p.category || 'blog', design: 1 })
                   : null}
-              catLabel={CATS.find(c => c.key === p.category)?.label || p.category || '분석'}
+              catLabel={POST_CAT_LABEL[p.category] || p.category || '분석'}
               catColor={CAT_COLORS[p.category] || 'var(--text-tertiary)'}
             />
           ))}
@@ -454,7 +526,7 @@ export default async function BlogPage({ searchParams }: Props) {
           </div>
           {(posts ?? []).map((p: any) => {
             const catColor = CAT_COLORS[p.category] || 'var(--text-tertiary)';
-            const catLabel = CATS.find(c => c.key === p.category)?.label || p.category;
+            const catLabel = POST_CAT_LABEL[p.category] || p.category;
             const readMin = p.reading_time_min || 3;
             const d = new Date(p.created_at || Date.now());
             const now = Date.now();
