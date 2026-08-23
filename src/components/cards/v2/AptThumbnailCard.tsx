@@ -3,6 +3,7 @@
 // thumbnail null → deterministic 색 + 🏢 placeholder (id 기반 hash).
 
 import Link from 'next/link';
+import { aptHref } from '@/lib/apt/hub';
 import Image from 'next/image';
 import IssueScoreBadge from '@/components/issue/IssueScoreBadge';
 import CommentChip from '@/components/comments/CommentChip';
@@ -62,7 +63,11 @@ export default function AptThumbnailCard({
   thumbnailUrl, houseTy, href, priority = false,
 }: Props) {
   const priceFb = fmtPriceOrFallback(price, households);
-  const url = href ?? `/apt/subscription/${id}`;
+  // v8-A2: /apt/subscription/{id} 는 실재하지 않는 라우트다.
+  //   middleware:78 이 308 로 /apt/{id} 로 넘기지만, 그 {id} 는 apt_subscriptions 의
+  //   숫자 id 라 apt_sites.slug 와 맞지 않는다 — 결국 목적지를 못 찾는다.
+  //   /apt 목록·홈 행과 같은 aptHref 로 통일한다 (site_slug 없으면 이름 기반 slug 생성).
+  const url = href ?? aptHref({ house_nm: name, house_manage_no: null, id: Number(id) });
   const dchip = ddayChip(dday);
   const bg = fallbackColor(id);
 
