@@ -38,12 +38,22 @@ async function counts() {
     ]);
     // 지역 허브 수는 sitemap/[id] 와 정확히 같은 기준으로 센다 (시군구 10개+ / 동 5개+ 단지).
     // PostgREST 는 기본 1k 에서 잘리므로 range 로 나눠 받는다 (사이트맵과 동일한 우회).
-    // 하루 한 번 재생성이라 34k 행 1회 페치는 부담이 되지 않는다.
+    //
+    // ⚠️ 이 루프는 빌드를 막을 수 있다. 34k 행을 1,000행씩 **순차로** 긁는 34회 왕복이라
+    //    Next 의 정적 생성 타임아웃(60초)에 걸린다 — 2026-08-23 배포가 여기서 3회 재시도 끝에
+    //    "Export encountered an error on /llms.txt/route" 로 죽었다.
+    //    llms.txt 는 AI 모델용 사이트 요약이고 허브 **개수**는 부수 정보다.
+    //    정확한 숫자 하나 때문에 배포 전체를 잃지 않는다 —
+    //    예산을 넘기면 그 시점까지 받은 행으로 세고, 한 행도 못 받았으면 FALLBACK 을 쓴다.
     let sigunguHubs = FALLBACK.sigunguHubs;
     let dongHubs = FALLBACK.dongHubs;
     try {
+      const started = Date.now();
+      const BUDGET_MS = 20_000;
+      let truncated = false;
       const rows: Array<{ region_nm: string | null; sigungu: string | null; dong: string | null }> = [];
       for (let off = 0; off < 100000; off += 1000) {
+        if (Date.now() - started > BUDGET_MS) { truncated = true; break; }
         const { data } = await (sb as any).from('apt_complex_profiles')
           .select('region_nm, sigungu, dong')
           .not('age_group', 'is', null)
@@ -53,7 +63,10 @@ async function counts() {
         rows.push(...data);
         if (data.length < 1000) break;
       }
-      if (rows.length > 0) {
+      // 잘린 집계는 실제보다 작게 나온다. 틀린 숫자를 말하느니 FALLBACK 을 쓴다.
+      if (truncated) {
+        console.warn(`[llms.txt] 허브 집계 예산 초과 — ${rows.length}행에서 중단, FALLBACK 사용`);
+      } else if (rows.length > 0) {
         const sg = new Map<string, number>();
         const dg = new Map<string, number>();
         for (const r of rows) {
