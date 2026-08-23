@@ -492,8 +492,9 @@ export default async function BlogPage({ searchParams }: Props) {
             </Link>
           ))}
         </div>
+        {/* v7-D2: 데스크탑에서는 레일의 '태그' 패널이 대신한다 (같은 목록 두 벌 방지). */}
         {popularTags.length > 0 && (
-          <div style={{ display: 'flex', gap: 'var(--sp-xs)', overflow: 'hidden' }}>
+          <div className="kd-lg-hide" style={{ display: 'flex', gap: 'var(--sp-xs)', overflow: 'hidden' }}>
             {popularTags.slice(0, 4).map((t: any) => (
               <Link key={t.tag} href={`/blog?q=${encodeURIComponent(t.tag)}`}
                 style={{ fontSize: 10, color: 'var(--text-tertiary)', padding: '3px 8px', borderRadius: 'var(--radius-md)', background: 'var(--bg-surface)', border: '1px solid var(--border)', whiteSpace: 'nowrap', textDecoration: 'none' }}>
@@ -709,7 +710,18 @@ export default async function BlogPage({ searchParams }: Props) {
 
       {/* v3 커밋5 · 데스크탑 우측 레일 (≥1024px). '시리즈' 패널은 모바일에서
            카테고리 탭의 시리즈 링크와 중복이라 레일 안에만 둔다. */}
-      <aside className="kd-list-rail" aria-label="블로그 바로가기">
+      {/* v7-D2 · 데스크탑 우측 레일 (≥1024px). ①인기 글 ②시리즈 ③태그 ④서비스.
+           순서를 지시대로 인기 글 먼저로 바꿨다 — 시리즈보다 먼저 눌린다.
+           전부 이미 받은 데이터라 새 조회 0건. */}
+      <aside className="kd-list-rail" aria-label="블로그 요약">
+        {(popularPosts ?? []).length > 0 && (
+          <div className="kd-rail-panel">
+            <h2>인기 글</h2>
+            {(popularPosts ?? []).slice(0, 6).map((p: any) => (
+              <Link key={p.id} href={`/blog/${p.slug}`}>{p.title}</Link>
+            ))}
+          </div>
+        )}
         {topSeries.length > 0 && (
           <div className="kd-rail-panel">
             <h2>시리즈</h2>
@@ -718,12 +730,35 @@ export default async function BlogPage({ searchParams }: Props) {
             ))}
           </div>
         )}
-        {(popularPosts ?? []).length > 0 && (
+        {popularTags.length > 0 && (
           <div className="kd-rail-panel">
-            <h2>인기 글</h2>
-            {(popularPosts ?? []).slice(0, 6).map((p: any) => (
-              <Link key={p.id} href={`/blog/${p.slug}`}>{p.title}</Link>
-            ))}
+            <h2>태그</h2>
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+              {popularTags.slice(0, 12).map((t) => (
+                <Link
+                  key={t.tag}
+                  href={`/blog?q=${encodeURIComponent(t.tag)}`}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 3,
+                    minHeight: 30,
+                    padding: '0 10px',
+                    borderRadius: 'var(--radius-pill)',
+                    border: '1px solid var(--border)',
+                    background: 'var(--bg-sunken)',
+                    color: 'var(--text-secondary)',
+                    fontSize: 11,
+                    fontWeight: 600,
+                    textDecoration: 'none',
+                    borderBottom: '1px solid var(--border)',
+                  }}
+                >
+                  #{t.tag}
+                  <span style={{ fontSize: 9.5, opacity: 0.6 }}>{t.cnt}</span>
+                </Link>
+              ))}
+            </div>
           </div>
         )}
         <div className="kd-rail-panel">
