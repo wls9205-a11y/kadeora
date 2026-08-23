@@ -73,13 +73,25 @@ IndexNow 256건은 **301 라이브 확인 뒤** 큐잉했다.
 
 트리거를 INSERT 까지 확장하고 `note`·`source_url` 을 옮기게 하면 이 우회는 걷어낼 수 있다 — DB 담당 판단.
 
-### 남은 검증 (DB 응답 불가로 보류)
+### 제약 검증 (실측 완료)
 
-Supabase 가 단순 `count(*)` 까지 타임아웃 중이라 아래를 못 찍었다. 복구되면 실측한다.
-- `stage_source` 에 `'admin:machine'` 을 막는 CHECK 가 있는지
-  (기존 값이 `migration:…` 이라 자유 텍스트로 보이고, 막히더라도 500 으로 **드러난다**)
-- 어드민 7단계가 `lifecycle_stage` CHECK 안에 있는지
-  (`mgmt_approved` 등 5개는 이미 저장돼 있고 `site_planning`·`pre_announcement` 는 원래 14값에 포함)
+| 대상 | 결과 |
+|---|---|
+| `lifecycle_stage` CHECK | 19값. 어드민 7단계 **전부 포함** |
+| `stage_source` CHECK | **없음** — 자유 텍스트. `admin:machine` 안전 |
+| `confidence` CHECK | **없음** — 자유 텍스트 |
+| `site_type` CHECK | `redevelopment` 포함 |
+| `status` CHECK | `upcoming/open/closed/active/completed`. insert 가 값을 안 줘 DEFAULT `active` 로 들어간다 |
+| `apt_site_events` | PK·FK 뿐. `event_type`·`confidence` 에 CHECK 없음 |
+
+> 조회 중 MCP 가 여러 번 `Connection terminated` 를 냈다. **DB 부하가 아니라 관리 API 통로의
+> 간헐적 끊김이고 재시도하면 통과한다** (2026-08-24 확인: 잠금 0 · 대기 0 ·
+> idle in transaction 0 · 연결 40개 전부 정상 풀). 쿼리를 단순화하거나 조회를 포기하고
+> 우회하지 말 것 — 그대로 조회하고 재시도한다.
+
+> 어드민 화면이 다루는 단계를 **공고 전 7단계로 제한한 것은 제품 판단**이다(DB 우회가 아니다).
+> 청약·입주 단계는 모집공고와 크론이 정한다 — 사람이 손으로 되돌리면 다음 크론이 덮고
+> 그 사이 화면이 두 번 바뀐다.
 
 ---
 
