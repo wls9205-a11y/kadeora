@@ -185,8 +185,30 @@ const QUICK_LINKS: { href: string; label: string }[] = [
   { href: '/feed',         label: '커뮤니티' },
 ];
 
+/**
+ * v7-D1 — 라운지(피드) 최신 3줄. 텍스트만 — 홈에서 커뮤니티는 '살아 있다' 만 보이면 된다.
+ * posts_safe 는 is_deleted·신고 처리를 이미 걸러 둔 읽기 뷰다.
+ * 실패하면 블록만 빠지고 나머지는 그대로 렌더된다.
+ */
+async function fetchLounge(): Promise<{ id: string; title: string; comments_count: number | null }[]> {
+  try {
+    const sb = getSupabaseAdmin();
+    const { data } = await (sb as any)
+      .from('posts_safe')
+      .select('id, title, comments_count')
+      .order('created_at', { ascending: false })
+      .limit(3);
+    return (data ?? []) as { id: string; title: string; comments_count: number | null }[];
+  } catch {
+    return [];
+  }
+}
+
 export default async function HomePage() {
-  const { hero, domestic, overseas, apts, blogs } = await fetchHome();
+  const [{ hero, domestic, overseas, apts, blogs }, lounge] = await Promise.all([
+    fetchHome(),
+    fetchLounge(),
+  ]);
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '8px 6px 24px' }}>
@@ -247,6 +269,16 @@ export default async function HomePage() {
         ))}
       </nav>
 
+      {/* 이슈 단지 TOP 5 */}
+      <section style={{ marginBottom: 18 }}>
+        <SectionHeader eyebrow="APT — 오늘의 단지" title="이슈 단지" id="home-apt" meta={<Link href="/apt" style={{ color: 'var(--text-tertiary)', textDecoration: 'none' }}>전체 →</Link>} />
+        {apts.length === 0 ? (
+          <Empty label="이슈 단지 데이터 준비 중" />
+        ) : (
+          apts.map((a) => <AptIssueCard key={a.id} data={a} />)
+        )}
+      </section>
+
       {/* 이슈 종목 — 국내 TOP 5 */}
       <section style={{ marginBottom: 18 }}>
         <SectionHeader eyebrow="DOMESTIC — 코스피·코스닥" title="국내 이슈 종목" id="home-domestic" meta={<Link href="/stock?tab=issue" style={{ color: 'var(--text-tertiary)', textDecoration: 'none' }}>전체 →</Link>} />
@@ -264,16 +296,6 @@ export default async function HomePage() {
           {overseas.map((s) => <StockIssueCard key={s.symbol} data={s} />)}
         </section>
       )}
-
-      {/* 이슈 단지 TOP 5 */}
-      <section style={{ marginBottom: 18 }}>
-        <SectionHeader eyebrow="APT — 오늘의 단지" title="이슈 단지" id="home-apt" meta={<Link href="/apt" style={{ color: 'var(--text-tertiary)', textDecoration: 'none' }}>전체 →</Link>} />
-        {apts.length === 0 ? (
-          <Empty label="이슈 단지 데이터 준비 중" />
-        ) : (
-          apts.map((a) => <AptIssueCard key={a.id} data={a} />)
-        )}
-      </section>
 
       {/* 인기 블로그 3 */}
       <section style={{ marginBottom: 18 }}>
@@ -315,6 +337,37 @@ export default async function HomePage() {
           </div>
         )}
       </section>
+
+      {/* v7-D1 · 라운지 — 피드 최신 3줄. 텍스트만.
+           홈에서 커뮤니티는 '살아 있다' 만 보이면 된다. 카드로 키우면
+           우선순위(부동산 > 주식 > 블로그 > 피드)와 어긋난다.
+           ⚠️ /discuss 빈 채팅창은 여기 되살리지 않는다 — 30일 방문 데스크탑 2·모바일 2 다.
+              대화 0건인 채팅창 상시 노출은 '여기 아무도 없다' 를 보여주는 것과 같다. */}
+      {lounge.length > 0 && (
+        <section style={{ marginBottom: 18 }}>
+          <SectionHeader
+            eyebrow="LOUNGE — 커뮤니티"
+            title="라운지"
+            id="home-lounge"
+            meta={<Link href="/feed" style={{ color: 'var(--text-tertiary)', textDecoration: 'none' }}>전체 →</Link>}
+          />
+          <div style={{ margin: '0 3px' }}>
+            {lounge.map((p) => (
+              <Link
+                key={p.id}
+                href={`/feed/${p.id}`}
+                className="kd-lrow"
+                style={{ textDecoration: 'none', color: 'inherit', gridTemplateColumns: 'minmax(0, 1fr) auto' }}
+              >
+                <span className="kd-lrow-t">{p.title}</span>
+                <span className="kd-lrow-r" style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)' }}>
+                  {(p.comments_count ?? 0) > 0 ? `댓글 ${p.comments_count}` : ''}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }
