@@ -15,13 +15,9 @@ import Link from 'next/link';
 import { aptHref, type AptHubItem } from '@/lib/apt/hub';
 import { formatComplexName, formatRegionShortSafe } from '@/lib/apt/subscription-status';
 import { rowStatusChip, statusLabel } from '@/lib/apt/subscription-badge';
+import { thumbKind } from '@/lib/apt/hero-priority';
 import LifecycleRail from '@/components/apt/LifecycleRail';
 import SubscriptionAlertButton from '@/components/apt/SubscriptionAlertButton';
-
-/** 자체 호스팅 위성 이미지인지. 출처 문구가 갈린다 — 표기를 섞지 않는다. */
-function isSatellite(url: string): boolean {
-  return url.includes('/satellite/');
-}
 
 function fmtToday(d: string): string {
   const [, m, day] = (d || '').split('-');
@@ -119,9 +115,9 @@ export default function AptCurationCard({ item, today }: { item: AptHubItem; tod
 
       {item.thumb_url && (
         <p style={{ margin: '8px 0 0', fontSize: 9.5, lineHeight: 1.4, color: 'var(--text-tertiary)' }}>
-          {isSatellite(item.thumb_url)
-            ? '항공 이미지 · 국토교통부 공간정보 오픈플랫폼(VWorld)'
-            : '이미지 제공 · 시행사'}
+          {thumbKind(item.thumb_url) === 'hero'
+            ? '조감도 제공 · 시행사 (수령 출처는 상세에 표기)'
+            : '항공 이미지 · 국토교통부 공간정보 오픈플랫폼(VWorld)'}
         </p>
       )}
     </article>

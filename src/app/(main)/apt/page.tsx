@@ -33,6 +33,7 @@ import SigunguChips from '@/components/apt/SigunguChips';
 import AptStatusChips, { type AptStatusKey } from '@/components/apt/AptStatusChips';
 import AptHubRail from '@/components/apt/AptHubRail';
 import { sigunguCounts, sigunguOf } from '@/lib/apt/sigungu';
+import { pickCuration } from '@/lib/apt/hero-priority';
 import AptCurationCard from '@/components/apt/AptCurationCard';
 import EmptyState from '@/components/ui/EmptyState';
 
@@ -131,10 +132,13 @@ export default async function AptPage({
   // ⚠️ 이 3건을 아래 목록에서 빼지 않는다. AptHubItem 에 apt_sites 조인 키가 없어
   //    프론트만으로는 판별이 불가능하고, 이름 문자열 매칭 우회는 금지다.
   //    get_apt_subscription_hub 에 플래그가 붙은 뒤에 처리한다 (DB 는 채팅 담당).
-  // v4-C7-1: 큐레이션은 위성 보유분만. 여기는 크게 나가므로 이니셜 블록으로 채우지 않는다
+  // v5-V5: 큐레이션은 조감도(1순위) 보유분을 앞으로 당긴 뒤 위성으로 채운다.
+  //   ⚠️ 우대는 weight 가 같은 동순위 구간 안에서만 준다 — 조감도가 있다고
+  //      마감된 현장이 접수중보다 위로 오면 안 된다 (preferHero 참조).
+  //   이미지가 아예 없는 현장은 넣지 않는다. 크게 나가므로 이니셜 블록으로 채우지 않는다
   //   ('있는 척' 이 되는 건 큰 이미지 자리다 — 목록 64px 칸과 판단 기준이 다르다).
   //   보유분이 3건에 못 미치면 있는 만큼만 낸다 (없는 자리를 만들지 않는다).
-  const curated = cards.filter((it) => !!it.thumb_url).slice(0, 3);
+  const curated = pickCuration(cards, 3);
 
   // v4-C6: 조회 창이 60일보다 넓으면 반드시 밝힌다.
   //   안 밝히면 6개월 전 공고가 오늘 것처럼 보인다.
