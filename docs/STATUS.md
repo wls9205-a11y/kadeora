@@ -1,3 +1,53 @@
+### S10-2 — 알림 체계 UI 연결 (2026-08-23)
+
+DB 정리(4-2, 채팅 담당)가 끝난 상태에서 UI 를 붙였다. 이 커밋 전까지 `admin_alerts` 를
+**읽는 코드가 0개**였다 — 크론 6개 + `cron-logger` 가 쓰기만 하고 아무도 보지 않았다.
+
+**신설**
+- `src/lib/admin/alert-severity.ts` — 심각도 정규화(표시 전용). DB 값은 건드리지 않는다.
+  critical/error/high → 심각, warning/medium → 주의, 그 외 → 정보.
+- `src/app/api/admin/alerts/route.ts` — `requireAdmin` 가드.
+  `GET ?archived=0|1&severity=critical|warning|info&limit=`(기본 50, 최대 200),
+  `PATCH {id} | {all:true}` → `archived=true, archived_at=now()`.
+  구조는 `notifications/route.ts` 를 그대로 따랐다.
+- `src/app/admin/alerts/` — 경보함 화면. 탭(살아있음/심각/아카이브), 레벨 배지,
+  message 2줄 클램프, 행별 아카이브, 일괄 아카이브는 확인 모달 경유.
+- `src/app/admin/v4/components/AlertsHeaderLink.tsx` — 헤더 `🔔 경보함 (N)`.
+  N 은 살아있는 critical급. **주기 폴링 없음**(마운트 1회 + 탭 복귀 시) — 헤더에 요청을
+  하나 더 심으면 S10-5(폴링 완화)와 정면으로 부딪힌다.
+
+**변경**
+- `CriticalAlertBar` — **구조·RPC 호출 그대로**. 하드코딩 색만 토큰화:
+  `rgba(239,68,68,0.12)` → `--accent-red-bg`, `#fbbf24`/`rgba(251,191,36,…)` → `--warning`/`--warning-bg`,
+  `borderRadius: 8` → `--radius-sm`. 새 API 를 바에 붙이지 않았다(DB 가 집계해 내려줌).
+- `AdminShellV4` — 헤더에 경보함 링크(링크군 선두) + `NotificationBell`(최우측) 마운트.
+  벨은 여태 어디에도 마운트돼 있지 않았다.
+
+**설계 판단 — 벨과 경보함을 합치지 않았다**
+`notification_bell` 은 `target_user_id` 별 개인 수신함(어드민 3계정에 108/32/16 로 갈림)이고
+`admin_alerts` 는 계정 구분 없는 시스템 경보다. 계통이 달라 한 화면에 합치면 건수가
+계정마다 달라지는 이유를 설명할 수 없게 된다.
+
+**`is_read` 를 쓰지 않은 이유**
+1,009건 전량 미읽음이라 정보량이 0이다. 트리아지 신호는 `archived` 를 쓴다
+(아카이브 크론 2개가 14일 경과분을 자동으로 넘긴다). API 에 `is_read` 경로를 아예 열지 않았다.
+
+**검증**
+- 무인증 `GET`·`PATCH /api/admin/alerts` → **401** (로컬 프로덕션 서버 실측)
+- `/admin/alerts` → 307 → `/login?redirect=%2Fadmin%2Falerts` (미들웨어 보호 확인)
+- 집계 로직을 읽기 전용 SQL 로 대조: `live_total 126 = critical 19 + warning 27 + info 80`.
+  API 의 info 는 여집합(`total - critical - warning`)으로 계산해 `not in` 결과와 정확히 일치한다.
+  목록 방식이면 미지의 severity 어휘가 어디에도 안 잡힌다.
+- `npx tsc --noEmit` PASS / `npm run build` PASS / 신규·변경 파일 lint 0건
+- 라우트 생성 확인: `ƒ /admin/alerts`, `ƒ /api/admin/alerts`
+
+**지시서 전제 오류: 없음** (live 126 / critical급 19 실측 일치)
+
+**발견했지만 범위 밖 (기록만)**
+- `admin_alerts.severity` 의 살아있는 행 distinct 는 **4종**이다(7종은 아카이브 포함 전체 기준).
+  정규화 테이블은 7종을 모두 커버하되 catch-all 을 여집합으로 둬서 새 어휘가 생겨도 '정보'로 잡힌다.
+- 헤더 링크가 이제 8개 → 9개다. S10-5-C 의 `☰ 메뉴` 접기가 더 급해졌다.
+
 ### S10-0.5 — 미정의 토큰 `--accent` 로 안 보이던 버튼 복구 (2026-08-23)
 
 `--accent` 는 `globals.css` 에 정의가 없고 폴백도 없다. `var(--accent)` 는 computed-value 단계에서

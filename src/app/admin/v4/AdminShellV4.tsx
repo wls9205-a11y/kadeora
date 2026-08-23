@@ -2,6 +2,8 @@
 import { useEffect, useState, useCallback } from 'react';
 import HealthRing from './components/HealthRing';
 import KPIStrip from './components/KPIStrip';
+import AlertsHeaderLink from './components/AlertsHeaderLink';
+import NotificationBell from '../NotificationBell';
 import SignupRealtimeHeader from './components/SignupRealtimeHeader';
 import SignupFunnelWidget from './sections/SignupFunnelWidget';
 import WatchlistWidget from './sections/WatchlistWidget';
@@ -85,10 +87,15 @@ export default function AdminShellV4() {
           { label: '재방문',   value: `${h.return_rate_pct ?? 0}%`, tone: (h.return_rate_pct ?? 0) >= 50 ? 'green' : 'orange' },
           { label: 'CTR',      value: `${h.ctr_avg_pct ?? 0}%`, tone: (h.ctr_avg_pct ?? 0) >= 2 ? 'green' : 'orange' },
         ]} />
+        {/* [S10-2] 경보함 링크 — 링크군 선두에서 우측 정렬을 시작한다.
+             벨(notification_bell)과 경보함(admin_alerts)은 다른 계통이다 —
+             벨은 target_user_id 별 개인 수신함(어드민 3계정에 108/32/16 로 갈려 있다),
+             경보함은 계정 구분 없는 시스템 경보. 둘을 합치지 말 것. */}
+        <span style={{ marginLeft: 'auto' }}><AlertsHeaderLink /></span>
         <a
           href="/admin/signup-flow"
           style={{
-            marginLeft: 'auto', fontSize: 11, fontWeight: 700,
+            fontSize: 11, fontWeight: 700,
             padding: '6px 12px', borderRadius: 6,
             background: 'transparent', color: 'var(--text-secondary)',
             border: '1px solid var(--border)', textDecoration: 'none',
@@ -124,6 +131,8 @@ export default function AdminShellV4() {
           background: 'transparent', color: 'var(--text-secondary)',
           border: '1px solid var(--border)',
         }}>↻ 새로고침</button>
+        {/* 벨은 링크가 아니라 위젯이라 최우측에 둔다 (자체 드롭다운을 연다). */}
+        <NotificationBell />
       </header>
 
       <SignupRealtimeHeader />
