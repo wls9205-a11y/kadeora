@@ -8,7 +8,8 @@ import { safeImg } from '@/lib/image-sanitize';
 import EmptyState from '@/components/EmptyState';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
 import SectionShareButton from '@/components/SectionShareButton';
-import FallbackThumb from '@/components/FallbackThumb';
+import CurationCarousel from '@/components/ui/CurationCarousel';
+import BlogCurationCard from '@/components/blog/BlogCurationCard';
 // s205-W2: HeroCard "오늘의 블로그" 제거 — 14d /blog 1,176 PV, 카드 클릭 1건. fetchBlogHero / getSupabaseAdmin 도 함께 제거.
 
 function highlightTitle(title: string, query: string): React.ReactNode {
@@ -263,8 +264,13 @@ export default async function BlogPage({ searchParams }: Props) {
     })),
   } : null;
 
+  // v3 커밋5 · 큐레이션 3건 — 인기글 우선, 없으면 최신 3편.
+  // ⚠️ 여기 올린 3편을 아래 목록에서 빼지 않는다 (중복 허용, 이름 매칭 우회 금지).
+  const curated: any[] = ((popularPosts ?? []).length >= 3 ? (popularPosts ?? []) : (posts ?? [])).slice(0, 3);
+
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
+    <div className="kd-list" style={{ padding: '0 var(--sp-lg) 28px' }}>
+      <div className="kd-list-main">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       {itemListLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }} />}
       {/* JSON-LD: FAQPage */}
@@ -411,7 +417,28 @@ export default async function BlogPage({ searchParams }: Props) {
         </div>
       )}
 
-      {/* 글 목록 — 에디토리얼 타임라인 */}
+      {/* v3 커밋5 · 큐레이션 3건 */}
+      {pageNum === 1 && !q && curated.length === 3 && (
+        <CurationCarousel
+          title="이번 주 읽을 글"
+          items={curated.map((p: any) => (
+            <BlogCurationCard
+              key={p.id}
+              post={p}
+              img={postImageMap[p.id]}
+              cover={p.cover_image && !String(p.cover_image).includes('/api/og')
+                ? safeImg(p.cover_image, { title: (p.title || '').slice(0, 40), category: p.category || 'blog', design: 1 })
+                : postImageMap[p.id]
+                  ? safeImg(postImageMap[p.id], { title: (p.title || '').slice(0, 40), category: p.category || 'blog', design: 1 })
+                  : null}
+              catLabel={CATS.find(c => c.key === p.category)?.label || p.category || '분석'}
+              catColor={CAT_COLORS[p.category] || 'var(--text-tertiary)'}
+            />
+          ))}
+        />
+      )}
+
+      {/* 글 목록 — .kd-lrow */}
       {(posts ?? []).length === 0 ? (
         <EmptyState
           icon={q ? '🔍' : '📝'}
@@ -419,8 +446,13 @@ export default async function BlogPage({ searchParams }: Props) {
           description={q ? '다른 검색어로 시도해보세요' : '곧 새로운 분석이 올라옵니다'}
         />
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-          {(posts ?? []).map((p: any, idx: number) => {
+        <div>
+          <div className="kd-lhead" aria-hidden="true">
+            <span>분류</span>
+            <span>제목</span>
+            <span>발행</span>
+          </div>
+          {(posts ?? []).map((p: any) => {
             const catColor = CAT_COLORS[p.category] || 'var(--text-tertiary)';
             const catLabel = CATS.find(c => c.key === p.category)?.label || p.category;
             const readMin = p.reading_time_min || 3;
@@ -428,50 +460,39 @@ export default async function BlogPage({ searchParams }: Props) {
             const now = Date.now();
             const diff = now - d.getTime();
             const dateStr = diff < 86400000 ? '오늘' : diff < 172800000 ? '어제' : diff < 604800000 ? `${Math.floor(diff / 86400000)}일 전` : d.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' });
-            const rank = (pageNum - 1) * perPage + idx + 1;
             const isHot = (p.view_count ?? 0) >= 100;
             return (
-              <Link key={p.id} href={`/blog/${p.slug}`} className="kd-feed-card" style={{
-                display: 'flex', alignItems: 'center', gap: 8, padding: '9px 6px',
-                textDecoration: 'none', color: 'inherit',
-                borderBottom: '1px solid rgba(30,50,88,0.25)',
-              }}>
-                {/* 순위 */}
-                <span style={{ fontSize: 10, fontWeight: 800, color: isHot ? 'var(--accent-red)' : 'var(--text-tertiary)', width: 18, textAlign: 'center', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>{rank}</span>
-                {/* 썸네일 */}
-                {(() => {
-                  const hasRealCover = p.cover_image && !String(p.cover_image).includes('/api/og');
-                  const hasMappedImg = !!postImageMap[p.id];
-                  if (!hasRealCover && !hasMappedImg) {
-                    return (
-                      <div style={{ width: 80, height: 56, borderRadius: 'var(--radius-sm)', overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-hover)' }}>
-                        <FallbackThumb name={p.title || ''} size={56} />
-                      </div>
-                    );
-                  }
-                  return (
-                    <div style={{ width: 80, height: 56, borderRadius: 'var(--radius-sm)', overflow: 'hidden', flexShrink: 0, background: 'var(--bg-hover)' }}>
-                      <img src={safeImg(hasRealCover ? p.cover_image : postImageMap[p.id], { title: (p.title || '').slice(0, 40), category: p.category || 'blog', design: (idx % 6) + 1 })} alt={p.title || "블로그 썸네일"} width={80} height={56} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} loading="lazy" decoding="async" />
-                    </div>
-                  );
-                })()}
-                {/* 본문 */}
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
-                    <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 5px', borderRadius: 4, background: `${catColor}12`, color: catColor, flexShrink: 0 }}>{catLabel}</span>
-                    <h2 className="blog-card-title" style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.3, margin: 0, display: 'inline' }}>{q ? highlightTitle(p.title, q) : p.title}</h2>
-                    {isHot && <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--accent-red)', flexShrink: 0 }}>HOT</span>}
-                  </div>
-                  {p.excerpt && <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.3, marginBottom: 2 }}>{p.excerpt}</div>}
-                  <div style={{ display: 'flex', gap: 8, fontSize: 10, color: 'var(--text-tertiary)' }}>
-                    <span>{readMin}분</span>
-                    <span>👀 {p.view_count > 0 ? p.view_count.toLocaleString() : 0}</span>
-                    {(p.comment_count || 0) > 0 && <span>💬 {p.comment_count}</span>}
-                    {(p.helpful_count || 0) > 0 && <span style={{ color: 'var(--accent-green)' }}>👍 {p.helpful_count}</span>}
-                  </div>
-                </div>
-                {/* 날짜 */}
-                <span style={{ fontSize: 10, color: 'var(--text-tertiary)', flexShrink: 0, whiteSpace: 'nowrap', paddingTop: 2 }}>{dateStr}</span>
+              // v3 커밋5: 요약(excerpt)을 뺐다 — 모바일에서 16건 전부 한 줄 말줄임으로 잘려
+              // 정보 구실을 못 했다. 그 폭을 제목 2줄에 몰아준다.
+              // 좌측 칩 = 분류, 우측 = 발행일 + 읽는 시간.
+              <Link key={p.id} href={`/blog/${p.slug}`} className="kd-lrow" style={{ textDecoration: 'none', color: 'inherit' }}>
+                <span
+                  className="kd-lrow-k"
+                  style={{ background: `${catColor}1A`, color: catColor }}
+                >
+                  {catLabel}
+                </span>
+
+                <span style={{ minWidth: 0 }}>
+                  <h2 className="kd-lrow-t is-two" style={{ margin: 0 }}>
+                    {q ? highlightTitle(p.title, q) : p.title}
+                  </h2>
+                  {(isHot || (p.comment_count || 0) > 0 || (p.helpful_count || 0) > 0) && (
+                    <span className="kd-lrow-m">
+                      {isHot && <span className="kd-lrow-m-fix" style={{ color: 'var(--accent-red)', fontWeight: 700 }}>HOT</span>}
+                      <span className="kd-lrow-m-fix">👀 {p.view_count > 0 ? p.view_count.toLocaleString() : 0}</span>
+                      {(p.comment_count || 0) > 0 && <span className="kd-lrow-m-fix">💬 {p.comment_count}</span>}
+                      {(p.helpful_count || 0) > 0 && <span className="kd-lrow-m-fix" style={{ color: 'var(--accent-green)' }}>👍 {p.helpful_count}</span>}
+                    </span>
+                  )}
+                </span>
+
+                <span className="kd-lrow-r">
+                  {dateStr}
+                  <span style={{ display: 'block', marginTop: 1, fontSize: 10, fontWeight: 600, color: 'var(--text-tertiary)' }}>
+                    {readMin}분
+                  </span>
+                </span>
               </Link>
             );
           })}
@@ -571,6 +592,35 @@ export default async function BlogPage({ searchParams }: Props) {
           </Link>
         )}
       </div>
+      </div>
+
+      {/* v3 커밋5 · 데스크탑 우측 레일 (≥1024px). '시리즈' 패널은 모바일에서
+           카테고리 탭의 시리즈 링크와 중복이라 레일 안에만 둔다. */}
+      <aside className="kd-list-rail" aria-label="블로그 바로가기">
+        {topSeries.length > 0 && (
+          <div className="kd-rail-panel">
+            <h2>시리즈</h2>
+            {topSeries.slice(0, 6).map((sr: any) => (
+              <Link key={sr.slug} href={`/blog/series/${sr.slug}`}>{sr.title} · {sr.post_count}편</Link>
+            ))}
+          </div>
+        )}
+        {(popularPosts ?? []).length > 0 && (
+          <div className="kd-rail-panel">
+            <h2>인기 글</h2>
+            {(popularPosts ?? []).slice(0, 6).map((p: any) => (
+              <Link key={p.id} href={`/blog/${p.slug}`}>{p.title}</Link>
+            ))}
+          </div>
+        )}
+        <div className="kd-rail-panel">
+          <h2>카더라 서비스</h2>
+          <Link href="/apt">부동산 청약</Link>
+          <Link href="/stock">주식 시세</Link>
+          <Link href="/apt/complex">단지백과</Link>
+          <Link href="/apt/diagnose">가점 계산기</Link>
+        </div>
+      </aside>
     </div>
   );
 }

@@ -413,3 +413,121 @@
   /* 2단에서는 점프바의 좌우 상쇄 마진이 컬럼 사이 간격을 파먹는다 */
   .kd-jumpbar { margin-inline: 0 !important; padding-inline: 0 !important; }
 }
+
+/* ── v3 커밋5 · 목록 상단 큐레이션 캐러셀 ────────────────────
+   모바일 가로 스냅 / 데스크탑 3열. 진행 점과 01/03 은 모바일 전용이다. */
+
+.kd-cur { margin: 0 0 var(--sp-md); }
+
+.kd-cur-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.kd-cur-title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: -.02em;
+  color: var(--text-primary);
+}
+.kd-cur-count {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+.kd-cur-track {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.kd-cur-track::-webkit-scrollbar { display: none; }
+.kd-cur-cell {
+  flex: 0 0 100%;
+  min-width: 0;
+  scroll-snap-align: start;
+}
+
+.kd-cur-dots {
+  display: flex;
+  gap: 5px;
+  justify-content: center;
+  padding: 8px 0 0;
+}
+.kd-cur-dot {
+  width: 6px;
+  height: 6px;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: var(--bg-sunken);
+  cursor: pointer;
+  transition: width var(--transition-normal), background var(--transition-normal);
+}
+.kd-cur-dot.is-on { width: 16px; background: var(--brand); }
+
+@media (min-width: 768px) {
+  /* 3장뿐이라 데스크탑에서는 넘길 것이 없다 — 한 번에 편다 */
+  .kd-cur-track { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); overflow: visible; }
+  .kd-cur-cell { flex: none; }
+  .kd-cur-count, .kd-cur-dots { display: none; }
+}
+
+/* ── v3 커밋5 · 목록 페이지 데스크탑 2단 ──────────────────────
+   현장 상세(.kd-detail)와 같은 규격. 레일 폭 300px. */
+
+.kd-list { max-width: 720px; margin: 0 auto; padding: 8px 6px 28px; }
+.kd-list-main { min-width: 0; }
+.kd-list-rail { display: none; }
+
+@media (min-width: 1024px) {
+  .kd-list {
+    max-width: var(--container-grid);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 24px;
+    align-items: start;
+  }
+  .kd-list-rail { display: block; min-width: 0; position: sticky; top: 61px; }
+}
+
+/* 레일 패널. '관련 분석'·'시리즈'·'테마' 는 모바일에서 하단 탭과 중복이라 숨긴다
+   (.kd-rail-panel 자체가 ≥1024px 에서만 보이는 레일 안에 있으므로 자동으로 지켜진다). */
+.kd-rail-panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  margin-bottom: 12px;
+}
+.kd-rail-panel h2 {
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  color: var(--text-tertiary);
+}
+.kd-rail-panel a {
+  display: block;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--text-primary);
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.kd-rail-panel a:last-child { border-bottom: 0; }

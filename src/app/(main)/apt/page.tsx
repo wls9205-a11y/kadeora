@@ -15,6 +15,7 @@
 // Legacy: src/_legacy/s269/apt_page_v0.tsx
 
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { SITE_URL } from '@/lib/constants';
 import { getAptHub } from '@/lib/apt/hub';
 import { getRelatedBlogs } from '@/lib/apt/related-blogs';
@@ -27,6 +28,8 @@ import SubscriptionResults from '@/components/apt/SubscriptionResults';
 import AptToolChips from '@/components/apt/AptToolChips';
 import AptRelatedBlogs from '@/components/apt/AptRelatedBlogs';
 import SectionHeader from '@/components/apt/SectionHeader';
+import CurationCarousel from '@/components/ui/CurationCarousel';
+import AptCurationCard from '@/components/apt/AptCurationCard';
 import EmptyState from '@/components/ui/EmptyState';
 
 // Next 는 segment config 를 정적 분석하므로 리터럴이어야 한다 (import 식별자 불가).
@@ -89,8 +92,15 @@ export default async function AptPage({
   const events = buildSubscriptionEvents(hub.cards);
   const itemList = hub.cards.length > 0 ? buildSubscriptionItemList(hub.cards, hub.region) : null;
 
+  // 큐레이션 3건 — 목록 상단. RPC 에 큐레이션 플래그가 없어(hub.ts:20) 정렬 상위 3건을 쓴다.
+  // ⚠️ 이 3건을 아래 목록에서 빼지 않는다. AptHubItem 에 apt_sites 조인 키가 없어
+  //    프론트만으로는 판별이 불가능하고, 이름 문자열 매칭 우회는 금지다.
+  //    get_apt_subscription_hub 에 플래그가 붙은 뒤에 처리한다 (DB 는 채팅 담당).
+  const curated = hub.cards.slice(0, 3);
+
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: '8px 6px 28px' }}>
+    <div className="kd-list">
+      <div className="kd-list-main">
       <h1 className="sr-only">{hub.region} 아파트 청약 일정 · 경쟁률</h1>
 
       {isAutoRegion && <RegionAutoSelect />}
@@ -120,6 +130,18 @@ export default async function AptPage({
       {/* ② 도구 칩 — 데이터가 0건인 날에도 항상 노출. 재개발 칩은 현재 지역을 따라간다. */}
       <AptToolChips region={hub.region} />
 
+      {/* ②-2 큐레이션 3건 */}
+      {curated.length > 0 && (
+        <div style={{ padding: '0 6px' }}>
+          <CurationCarousel
+            title={`${hub.region} 지금 주목할 청약`}
+            items={curated.map((it) => (
+              <AptCurationCard key={it.id} item={it} today={hub.today} />
+            ))}
+          />
+        </div>
+      )}
+
       {/* ③ 청약 카드 리스트 */}
       <section style={{ padding: '0 6px' }} aria-labelledby="apt-cards-heading">
         <SectionHeader
@@ -130,7 +152,12 @@ export default async function AptPage({
         />
 
         {hub.cards.length > 0 ? (
-          <div style={{ display: 'grid', gap: 9 }}>
+          <div>
+            <div className="kd-lhead" aria-hidden="true">
+              <span>상태</span>
+              <span>단지</span>
+              <span>규모</span>
+            </div>
             {hub.cards.map((it) => (
               <SubscriptionCard key={it.id} item={it} />
             ))}
@@ -165,6 +192,28 @@ export default async function AptPage({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(itemList) }}
         />
       ) : null}
+      </div>
+
+      {/* v3 커밋5 · 데스크탑 우측 레일 (≥1024px). '관련 분석' 패널은 모바일에서
+           하단 탭·본문 블록과 중복이라 레일 안에만 둔다. */}
+      <aside className="kd-list-rail" aria-label="청약 요약">
+        {relatedBlogs.length > 0 && (
+          <div className="kd-rail-panel">
+            <h2>관련 분석</h2>
+            {relatedBlogs.slice(0, 6).map((b: { slug: string; title: string }) => (
+              <Link key={b.slug} href={`/blog/${b.slug}`}>{b.title}</Link>
+            ))}
+          </div>
+        )}
+        <div className="kd-rail-panel">
+          <h2>바로가기</h2>
+          <Link href="/apt/diagnose">청약 가점 계산기</Link>
+          <Link href="/apt/ranking">청약 경쟁률 랭킹</Link>
+          <Link href="/apt/unsold">미분양 현황</Link>
+          <Link href="/apt/map">분양 지도</Link>
+          <Link href="/apt/complex">단지 백과</Link>
+        </div>
+      </aside>
     </div>
   );
 }

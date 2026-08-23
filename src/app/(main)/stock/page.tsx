@@ -7,16 +7,12 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { SITE_URL } from '@/lib/constants';
-import StockIssueCard from '@/components/cards/StockIssueCard';
 import StockIssueCardV2 from '@/components/cards/v2/StockIssueCardV2';
 import IssueGateCard from '@/components/cta/IssueGateCard';
 import StockTabCarousel from '@/components/carousel/StockTabCarousel';
-import {
-  getStockTone,
-  stockChipStyle,
-  stockBarColor,
-  formatChangePct,
-} from '@/lib/stockColor';
+import CurationCarousel from '@/components/ui/CurationCarousel';
+import StockCurationCard from '@/components/stock/StockCurationCard';
+import StockListRow from '@/components/stock/StockListRow';
 import { stockTabMeta, stockItemListJsonLd } from '@/lib/seo/per-tab-meta';
 import type { StockIssueScore } from '@/lib/issue/types';
 
@@ -180,7 +176,8 @@ export default async function StockPage({ searchParams }: { searchParams: Promis
   const { kind, rows } = await fetchByTab(tab, 30);
   return (
     <Suspense>
-      <div style={{ maxWidth: 720, margin: '0 auto', padding: '8px 6px 24px' }}>
+      <div className="kd-list">
+        <div className="kd-list-main">
         <h1 className="sr-only">주식 시세 — {TAB_LABELS.find((t) => t.key === tab)?.label ?? '이슈'}</h1>
 
         {/* Sticky tab bar */}
@@ -204,11 +201,41 @@ export default async function StockPage({ searchParams }: { searchParams: Promis
           })}
         </nav>
 
+        {/* v3 커밋5 · 큐레이션 3건 — 이슈 탭에서만. 점수의 근거를 여기서 편다. */}
+        {kind === 'issue' && (rows as StockIssueScore[]).length > 0 && (
+          <CurationCarousel
+            title="지금 이슈 상위"
+            items={(rows as StockIssueScore[]).slice(0, 3).map((s) => (
+              <StockCurationCard key={s.symbol} data={s} />
+            ))}
+          />
+        )}
+
         {kind === 'issue' ? (
           <IssueList rows={rows as StockIssueScore[]} />
         ) : (
           <PlainList rows={rows as StockRow[]} tab={tab} />
         )}
+        </div>
+
+        {/* v3 커밋5 · 데스크탑 우측 레일 (≥1024px). '테마' 패널은 하단 탭과 중복이라
+             모바일에서는 렌더되지 않는다 (.kd-list-rail). */}
+        <aside className="kd-list-rail" aria-label="주식 바로가기">
+          <div className="kd-rail-panel">
+            <h2>테마</h2>
+            <Link href="/stock/themes">테마별 종목</Link>
+            <Link href="/stock/sector/반도체">섹터 — 반도체</Link>
+            <Link href="/stock/movers">급등락 상세</Link>
+            <Link href="/stock/signals">시그널</Link>
+          </div>
+          <div className="kd-rail-panel">
+            <h2>바로가기</h2>
+            <Link href="/stock/compare">종목 비교</Link>
+            <Link href="/stock/short-selling">공매도 현황</Link>
+            <Link href="/stock/overseas">해외 증시</Link>
+            <Link href="/stock/search">종목 검색</Link>
+          </div>
+        </aside>
       </div>
     </Suspense>
   );
@@ -222,10 +249,30 @@ function IssueList({ rows }: { rows: StockIssueScore[] }) {
   // 로그인 사용자에게는 6번째 카드부터 정상 노출.
   return (
     <div>
-      {rows.slice(0, 5).map((s) => <StockIssueCard key={s.symbol} data={s} />)}
+      <div className="kd-lhead" aria-hidden="true">
+        <span>점수</span>
+        <span>종목 · 이슈 근거</span>
+        <span>현재가</span>
+      </div>
+      {rows.slice(0, 5).map((s) => <IssueRow key={s.symbol} data={s} />)}
       <IssueGateCard source="issue_gate_stock" redirect="/stock" totalCount={rows.length} />
-      {rows.slice(5).map((s) => <StockIssueCard key={s.symbol} data={s} />)}
+      {rows.slice(5).map((s) => <IssueRow key={s.symbol} data={s} />)}
     </div>
+  );
+}
+
+function IssueRow({ data }: { data: StockIssueScore }) {
+  return (
+    <StockListRow
+      symbol={data.symbol}
+      name={data.name}
+      price={data.price}
+      changePct={data.change_pct}
+      score={data.score}
+      reasons={data.reasons}
+      warning={data.warning}
+      meta={data.sector}
+    />
   );
 }
 
@@ -237,28 +284,22 @@ function PlainList({ rows, tab }: { rows: StockRow[]; tab: string }) {
   }
   return (
     <div>
-      {rows.map((r) => {
-        const tone = getStockTone(r.change_pct);
-        const chip = stockChipStyle(tone);
-        return (
-          <Link
-            key={r.symbol}
-            href={`/stock/${r.symbol}`}
-            className="kd-lc kd-lc--row"
-            style={{
-              '--kd-bar': stockBarColor(tone),
-              '--kd-chip-bg': chip.background,
-              '--kd-chip-fg': chip.color,
-              '--kd-chip-fw': chip.fontWeight,
-            } as React.CSSProperties}
-          >
-            <span className="kd-lc-name">{r.name}</span>
-            <span className="kd-lc-meta">{r.market}</span>
-            <span className="kd-lc-num">{r.price ? Number(r.price).toLocaleString() : '-'}</span>
-            <span className="kd-lc-chip">{formatChangePct(r.change_pct)}</span>
-          </Link>
-        );
-      })}
+      <div className="kd-lhead" aria-hidden="true">
+        <span>순위</span>
+        <span>종목</span>
+        <span>현재가</span>
+      </div>
+      {rows.map((r, i) => (
+        <StockListRow
+          key={r.symbol}
+          symbol={r.symbol}
+          name={r.name}
+          price={r.price}
+          changePct={r.change_pct}
+          rank={i + 1}
+          meta={r.sector ?? null}
+        />
+      ))}
     </div>
   );
 }

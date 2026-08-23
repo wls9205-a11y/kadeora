@@ -81,3 +81,31 @@ export function ddayStyle(dday: number | null): CSSProperties {
     color: urgent ? 'var(--accent-red)' : soon ? 'var(--status-soon)' : 'var(--text-secondary)',
   };
 }
+
+/**
+ * v3 커밋5 — 목록 행 좌측 상태 칩 (.kd-lrow-k).
+ *
+ * 기존 D-day 칩은 8건 중 5건이 '상시' 라 정보가 0이었다. 상태를 먼저 말하고,
+ * 실제로 날짜가 임박한 건에서만 D-n 으로 바꾼다.
+ *
+ * 반환 tone 은 .kd-lrow-k 의 변형 클래스명과 1:1 이다 (is-hot/is-on/is-rest/is-soon).
+ */
+export function rowStatusChip(
+  status: SubscriptionStatus,
+  dday: number | null,
+): { label: string; tone: '' | 'is-hot' | 'is-on' | 'is-rest' | 'is-soon' } {
+  // 무순위·선착순은 날짜가 아니라 성격이 정보다.
+  if (status === 'leftover') return { label: '무순', tone: 'is-rest' };
+
+  const near = dday !== null && dday >= 0 && dday <= 7;
+  if (near) {
+    const label = dday === 0 ? 'D-Day' : `D-${dday}`;
+    return { label, tone: dday! <= 3 ? 'is-hot' : 'is-soon' };
+  }
+
+  if (status === 'open') return { label: '접수중', tone: 'is-on' };
+  if (status === 'upcoming' || status === 'scheduled') return { label: '예정', tone: 'is-soon' };
+  if (status === 'announced_wait') return { label: '발표', tone: 'is-soon' };
+  if (status === 'contract') return { label: '계약', tone: 'is-on' };
+  return { label: '마감', tone: '' };
+}
