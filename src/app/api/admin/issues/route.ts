@@ -1,7 +1,14 @@
 import { NextResponse } from 'next/server';
+import { requireAdmin } from '@/lib/admin-auth';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 export async function GET() {
+  // [S10-0] middleware 는 pathname.startsWith('/admin') 만 검사한다 —
+  //   /api/admin/* 은 그 대상이 아니라 라우트마다 가드를 직접 걸어야 한다.
+  //   이 핸들러는 draft 전문 100건을 반환하므로 무인증이면 미발행 원고가 그대로 새어나간다.
+  const auth = await requireAdmin();
+  if ('error' in auth) return auth.error;
+
   const sb = getSupabaseAdmin();
   // KST 기준 오늘 시작 (UTC+9)
   const kstNow = new Date(Date.now() + 9 * 60 * 60 * 1000);

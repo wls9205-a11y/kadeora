@@ -1,10 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdmin } from '@/lib/admin-auth';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { submitIndexNow } from '@/lib/indexnow';
 import { SITE_URL } from '@/lib/constants';
 
 export async function POST(req: NextRequest) {
+  // [S10-0] 이 핸들러는 블로그를 실제로 발행하고 IndexNow 에 제출한다.
+  //   무인증이면 외부에서 임의 원고를 라이브로 올리고 검색엔진에 밀어넣을 수 있다.
+  //   5개 대상 중 가장 위험한 라우트.
+  const auth = await requireAdmin();
+  if ('error' in auth) return auth.error;
+
   const sb = getSupabaseAdmin();
   const { issue_id } = await req.json();
   if (!issue_id) return NextResponse.json({ error: 'issue_id required' }, { status: 400 });

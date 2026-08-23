@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdmin } from '@/lib/admin-auth';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 export async function POST(req: NextRequest) {
+  // [S10-0] 자동발행 on/off·최소점수·차단 카테고리를 바꾸는 엔드포인트다.
+  //   무인증이면 외부에서 블로그 자동발행 정책을 그대로 뒤집을 수 있다.
+  const auth = await requireAdmin();
+  if ('error' in auth) return auth.error;
+
   const sb = getSupabaseAdmin();
   const body = await req.json();
 
