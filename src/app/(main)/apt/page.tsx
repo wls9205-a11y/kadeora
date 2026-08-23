@@ -29,6 +29,8 @@ import AptToolChips from '@/components/apt/AptToolChips';
 import AptRelatedBlogs from '@/components/apt/AptRelatedBlogs';
 import SectionHeader from '@/components/apt/SectionHeader';
 import CurationCarousel from '@/components/ui/CurationCarousel';
+import SigunguChips from '@/components/apt/SigunguChips';
+import { sigunguCounts, sigunguOf } from '@/lib/apt/sigungu';
 import AptCurationCard from '@/components/apt/AptCurationCard';
 import EmptyState from '@/components/ui/EmptyState';
 
@@ -42,7 +44,7 @@ const BASE_TITLE = '전국 아파트 청약 일정·경쟁률 — 오늘의 접�
 export async function generateMetadata({
   searchParams,
 }: {
-  searchParams: Promise<{ region?: string }>;
+  searchParams: Promise<{ region?: string; sgg?: string }>;
 }): Promise<Metadata> {
   const sp = await searchParams;
   const regionLabel = sp.region?.trim() || '전국';
@@ -77,20 +79,28 @@ export async function generateMetadata({
 export default async function AptPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ region?: string }>;
+  searchParams?: Promise<{ region?: string; sgg?: string }>;
 }) {
   const sp = (await searchParams) || {};
   const region = sp.region?.trim() || '전국';
+  const sgg = sp.sgg?.trim() || '';
   const isAutoRegion = !sp.region;
 
   const hub = await getAptHub(region);
 
+  // v4-C8: 시군구 칩은 hub.cards 에서 뽑는다 — 조회가 늘지 않고, 목록에 실제로 있는
+  //   시군구만 나온다 (부산 16개 구를 전부 내면 C3 에서 고친 문제가 반복된다).
+  //   ⚠️ 시·도가 '전국' 이면 시군구를 내지 않는다 — 전국 단위로는 칩이 수백 개가 된다.
+  const sggItems = region === '전국' ? [] : sigunguCounts(hub.cards);
+  const activeSgg = sggItems.some((x) => x.name === sgg) ? sgg : '';
+  const cards = activeSgg ? hub.cards.filter((it) => sigunguOf(it.supply_addr) === activeSgg) : hub.cards;
+
   // 관련 블로그는 지금 노출 중인 단지 기준으로 뽑는다 (metadata.apt_id 매핑, s273 규약)
-  const visibleIds = [...hub.cards, ...hub.results].map((it) => it.id);
+  const visibleIds = [...cards, ...hub.results].map((it) => it.id);
   const relatedBlogs = await getRelatedBlogs(visibleIds);
 
-  const events = buildSubscriptionEvents(hub.cards);
-  const itemList = hub.cards.length > 0 ? buildSubscriptionItemList(hub.cards, hub.region) : null;
+  const events = buildSubscriptionEvents(cards);
+  const itemList = cards.length > 0 ? buildSubscriptionItemList(cards, hub.region) : null;
 
   // 큐레이션 3건 — 목록 상단. RPC 에 큐레이션 플래그가 없어(hub.ts:20) 정렬 상위 3건을 쓴다.
   // ⚠️ 이 3건을 아래 목록에서 빼지 않는다. AptHubItem 에 apt_sites 조인 키가 없어
@@ -99,7 +109,7 @@ export default async function AptPage({
   // v4-C7-1: 큐레이션은 위성 보유분만. 여기는 크게 나가므로 이니셜 블록으로 채우지 않는다
   //   ('있는 척' 이 되는 건 큰 이미지 자리다 — 목록 64px 칸과 판단 기준이 다르다).
   //   보유분이 3건에 못 미치면 있는 만큼만 낸다 (없는 자리를 만들지 않는다).
-  const curated = hub.cards.filter((it) => !!it.thumb_url).slice(0, 3);
+  const curated = cards.filter((it) => !!it.thumb_url).slice(0, 3);
 
   // v4-C6: 조회 창이 60일보다 넓으면 반드시 밝힌다.
   //   안 밝히면 6개월 전 공고가 오늘 것처럼 보인다.
@@ -108,9 +118,10 @@ export default async function AptPage({
     : hub.window_days >= 180 ? '최근 6개월'
     : hub.window_days > 60 ? `최근 ${hub.window_days}일`
     : null;
+  const scopeLabel = activeSgg || hub.region;
   const cardsMeta = windowLabel
-    ? `${hub.region} · ${windowLabel} ${hub.counts.cards}곳`
-    : '상태 → 마감 임박 순';
+    ? `${scopeLabel} · ${windowLabel} ${cards.length}곳`
+    : `${scopeLabel} · 상태 → 마감 임박 순`;
 
   return (
     <div className="kd-list">
@@ -121,6 +132,11 @@ export default async function AptPage({
 
       {/* 지역 선택 — 인라인 칩. 페이지 이동 없이 목록만 갱신된다. */}
       <RegionChips regions={hub.regions} current={hub.region} />
+
+      {/* v4-C8: 시·도 아래 2단. 정렬은 C3 과 같이 가나다 고정. */}
+      {sggItems.length > 0 && (
+        <SigunguChips region={hub.region} items={sggItems} current={activeSgg} />
+      )}
 
       {/* v4-C6: 지역을 버리고 전국으로 갈아타던 폴백이 없어졌다.
            17개 시·도 중 11곳이 접수중 0건이라 그 폴백은 사실상 상시 발동 중이었고,
@@ -195,14 +211,14 @@ export default async function AptPage({
           meta={cardsMeta}
         />
 
-        {hub.cards.length > 0 ? (
+        {cards.length > 0 ? (
           <div>
             <div className="kd-lhead" aria-hidden="true">
               <span>상태</span>
               <span>단지</span>
               <span>규모</span>
             </div>
-            {hub.cards.map((it) => (
+            {cards.map((it) => (
               <SubscriptionCard key={it.id} item={it} />
             ))}
           </div>
