@@ -42,29 +42,56 @@ const CAT_META: Record<string, { title: string; desc: string }> = {
   life: { title: '재테크·생활 블로그 — 투자·절약·동네 소식', desc: '재테크 기본 원칙부터 실전 투자 전략, 알아두면 유용한 생활 정보까지.' },
 };
 
+/**
+ * v4-C9 — 서브칩을 실제 발행 데이터로 교체.
+ *
+ * ⚠️ 이전 하드코딩 목록(market·analysis·theme·weekly·subscription·trade·redev·
+ *    competition·guide·trend·region·saving·tax·invest)은 **14개 전부 발행 0편이었다.**
+ *    실측(2026-08-23) — 각 키로 `.eq('sub_category', k)` 하면 매칭 0.
+ *    즉 /blog 의 서브칩은 어느 것을 눌러도 빈 목록이 나오고 있었다.
+ *
+ * 아래는 `select category, sub_category, count(*) ... having count(*) >= 30` 실측 스냅샷이다.
+ * key 는 blog_posts.sub_category 의 실제 값 그대로여야 한다 — 라벨만 바꾸면 또 0건이 된다.
+ *
+ * ⚠️ 스냅샷이므로 시간이 지나면 낡는다. (category, sub_category, cnt) 집계 뷰가 생기면
+ *    이 상수를 지우고 그 뷰에서 뽑을 것. 현재 그런 뷰는 없다 —
+ *    v_blog_category_groups 는 그룹 단위(6행)라 서브칩 용도로 쓸 수 없다.
+ *
+ * ⚠️ 분류 체계가 두 세대 섞여 있다. apt 에 '청약·분양'(891)과 'cheongak'(94)·
+ *    'preempt_coverage'(104)·'lotto_cheongak'(33)이 공존한다. 겹쳐 보이더라도 숨기지 않는다 —
+ *    숨기면 231편이 다시 도달 불가가 된다 (C5 에서 redev 287편이 그랬다).
+ *    정리는 DB 쪽 taxonomy 통합 과제다.
+ */
 const SUB_CATS: Record<string, { key: string; label: string }[]> = {
-  stock: [
-    { key: 'market', label: '시황' },
-    { key: 'analysis', label: '종목분석' },
-    { key: 'theme', label: '테마' },
-    { key: 'weekly', label: '주간리뷰' },
-  ],
   apt: [
-    { key: 'subscription', label: '청약' },
-    { key: 'trade', label: '실거래' },
-    { key: 'redev', label: '재개발' },
-    { key: 'competition', label: '경쟁률' },
-    { key: 'guide', label: '가이드' },
+    { key: 'lotto_cheongak', label: '로또청약' },
+    { key: '부동산일반', label: '부동산일반' },
+    { key: 'preempt_coverage', label: '신규분양' },
+    { key: '실거래·시세', label: '실거래·시세' },
+    { key: 'cheongak', label: '청약가이드' },
+    { key: '청약·분양', label: '청약·분양' },
   ],
   unsold: [
-    { key: 'trend', label: '추이' },
-    { key: 'region', label: '지역별' },
+    { key: '단지별분석', label: '단지별분석' },
+    { key: '미분양현황', label: '미분양현황' },
+  ],
+  redev: [
+    { key: '재개발·재건축', label: '재개발·재건축' },
+  ],
+  stock: [
+    { key: '국내주식', label: '국내주식' },
+    { key: '목표주가', label: '목표주가' },
+    { key: '배당분석', label: '배당분석' },
+    { key: '비교분석', label: '비교분석' },
+    { key: '섹터전망', label: '섹터전망' },
+    { key: '수급분석', label: '수급분석' },
+    { key: '종목분석', label: '종목분석' },
+    { key: '해외주식', label: '해외주식' },
   ],
   finance: [
-    { key: 'saving', label: '저축' },
-    { key: 'tax', label: '세금' },
-    { key: 'invest', label: '투자' },
+    { key: '재테크일반', label: '재테크일반' },
   ],
+  // general(66편)은 30편 이상 서브가 없다 — 칩을 내지 않는다.
 };
 
 /**
@@ -84,6 +111,8 @@ function subCatsFor(category: string): { key: string; label: string }[] | null {
       out.push(sc);
     }
   }
+  // 가나다 고정 — 건수 순으로 두면 발행량이 바뀔 때마다 칩 순서가 바뀐다 (C3 과 같은 원칙).
+  out.sort((a, b) => a.label.localeCompare(b.label, 'ko'));
   return out.length > 0 ? out : null;
 }
 
