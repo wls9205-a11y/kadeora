@@ -7,6 +7,25 @@ interface Props {
   sourceRef?: string | null;
 }
 
+/**
+ * v8-B1 — 계산기는 이름 하나로 부른다.
+ *
+ * 같은 /calc 를 카테고리마다 '투자 계산기' · '금융 계산기' · '계산기' 로 다르게 부르고
+ * 설명·CTA 도 제각각이었다. 한 화면에 셋이 같이 뜨지는 않지만, 글을 옮겨 다니면
+ * 같은 목적지가 매번 다른 이름으로 보인다.
+ *
+ * ⚠️ 계산기는 네이버 검색으로 직접 들어오는 독립 유입원이다
+ *    (30일 실측 1,249건 · 69%). 라우트·사이트맵은 건드리지 않는다 —
+ *    여기서 정리하는 것은 내부 링크의 '이름' 뿐이다.
+ */
+const CALC_WIDGET = {
+  title: '계산기',
+  desc: '대출·수익률·세금을 한곳에서',
+  href: '/calc',
+  icon: '🧮',
+  cta: '계산기 열기',
+} as const;
+
 const WIDGET_CONFIG: Record<string, { title: string; desc: string; href: string; icon: string; cta: string }[]> = {
   apt: [
     { title: '아파트 검색', desc: '관심 단지의 실거래가·시세를 확인하세요', href: '/apt/search', icon: '🔍', cta: '단지 검색하기' },
@@ -14,21 +33,21 @@ const WIDGET_CONFIG: Record<string, { title: string; desc: string; href: string;
   ],
   stock: [
     { title: '종목 시세', desc: '실시간 시세와 AI 분석을 확인하세요', href: '/stock', icon: '📈', cta: '종목 보기' },
-    { title: '투자 계산기', desc: '수익률·세금 계산을 해보세요', href: '/calc', icon: '🧮', cta: '계산기 열기' },
+    { ...CALC_WIDGET },
   ],
   unsold: [
     { title: '미분양 현황', desc: '전국 미분양 아파트를 지역별로 확인', href: '/apt/search', icon: '🏚️', cta: '미분양 검색' },
     { title: '청약 가점 계산', desc: '내 가점으로 당첨 가능성 확인', href: '/apt/diagnose', icon: '✅', cta: '가점 계산하기' },
   ],
   finance: [
-    { title: '금융 계산기', desc: '대출·이자·연금·절세 계산을 한곳에서', href: '/calc', icon: '🧮', cta: '계산기 모음' },
+    { ...CALC_WIDGET },
     { title: '주식 시세', desc: '관심 종목 시세와 AI 투자 분석', href: '/stock', icon: '📈', cta: '종목 보기' },
   ],
 };
 
 const DEFAULT_WIDGETS = [
   { title: '카더라 둘러보기', desc: '주식·부동산·청약 정보를 한곳에서', href: '/feed', icon: '🏠', cta: '피드 보기' },
-  { title: '계산기', desc: '대출·수익률·세금 계산', href: '/calc', icon: '🧮', cta: '계산기 열기' },
+  { ...CALC_WIDGET },
 ];
 
 export default function BlogServiceWidget({ category, tags, sourceRef }: Props) {

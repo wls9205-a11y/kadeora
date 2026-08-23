@@ -161,6 +161,19 @@ export default function SiteDetailRail({
           </div>
         </div>
       )}
+
+      {/* v8-B2 · 계산기 — 분양 리드와 맞물리는 3종만.
+           급여·군인·상속·쇼핑 계산기는 분양 상담과 무관해 현장 상세에 링크하지 않는다.
+           ⚠️ 계산기는 네이버 검색 직접 유입이 30일 1,249건(69%)인 독립 유입원이다 —
+              여기서 하는 것은 내부 링크 추가뿐이고 라우트·사이트맵은 건드리지 않는다. */}
+      <div style={panel}>
+        <h2 style={panelTitle}>계산기</h2>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          <Link href="/calc/real-estate" style={chip}>부동산</Link>
+          <Link href="/calc/property-tax" style={chip}>부동산 세금</Link>
+          <Link href="/calc/loan" style={chip}>대출</Link>
+        </div>
+      </div>
     </>
   );
 }
