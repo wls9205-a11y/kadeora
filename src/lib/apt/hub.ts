@@ -58,11 +58,6 @@ export interface AptHubPayload {
   region: string;
   requested_region: string;
   /**
-   * @deprecated v4-C6 — RPC 가 항상 false 를 반환한다. 지역을 버리고 전국으로
-   * 갈아타는 폴백 자체가 없어졌다. 다음 정리 때 필드를 지운다.
-   */
-  region_fallback: boolean;
-  /**
    * 선택 지역에 최근 1년 공고가 아예 없을 때만 true.
    * 이때도 region 은 요청 지역 그대로다 — 목록만 비어 있다.
    */
@@ -84,7 +79,6 @@ export interface AptHubPayload {
 export const EMPTY_HUB: AptHubPayload = {
   region: '전국',
   requested_region: '전국',
-  region_fallback: false,
   region_empty: true,
   window_days: 60,
   today: '',
@@ -120,7 +114,6 @@ function normalize(raw: unknown): AptHubPayload {
   return {
     region: r.region ?? '전국',
     requested_region: r.requested_region ?? r.region ?? '전국',
-    region_fallback: Boolean(r.region_fallback),
     region_empty: Boolean(r.region_empty),
     // RPC 가 안 주면 60 으로 떨어뜨린다 — 0 이면 화면이 '최근 0일' 을 말한다.
     window_days: Number(r.window_days) > 0 ? Number(r.window_days) : 60,
