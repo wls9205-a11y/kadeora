@@ -569,3 +569,25 @@
 .kd-lrow-badge.is-on   { background: var(--accent-green-bg);  color: var(--accent-green); }
 .kd-lrow-badge.is-rest { background: var(--accent-orange-bg); color: var(--accent-orange); }
 .kd-lrow-badge.is-soon { background: var(--accent-blue-bg);   color: var(--brand); }
+
+/* ── v4-C7-3 · 주식 목록 좌측 스파크라인 ─────────────────────
+   종목 사진은 데이터가 0건이고 로고는 상표 문제가 있다.
+   데이터가 없어도 같은 64×40 을 차지한다 — 빈 칸이면 행 정렬이 종목마다 달라진다. */
+
+.kd-lrow--spark { padding: 6px 2px; min-height: 56px; }
+
+.kd-lrow-spark {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 40px;
+}
+/* 시세 이력이 없는 종목 — 평평한 선 한 줄 */
+.kd-lrow-spark-flat {
+  display: block;
+  width: 44px;
+  height: 1px;
+  background: var(--border);
+}

@@ -4,12 +4,17 @@
 // 정작 종목별로 다른 정보(이슈 근거)가 들어갈 폭을 먹고 있었다.
 // 그 폭은 가운데 메타 한 줄(이슈 근거 칩)에 몰아준다.
 //
-// 좌측 칩: 이슈 탭은 점수, 그 외 탭은 순위. 점수 80 이상은 is-hot(--accent-red-bg).
+// v4-C7-3: 좌측 64×40 자리는 스파크라인이 가져갔다. 종목 사진은 데이터가 0건이고
+//    로고는 상표 문제가 있다 — 등락 색(--accent-red/--accent-blue)이 그대로 시각 신호가 된다.
+//    점수·순위는 제목 줄 앞 배지로 옮겼다 (C7-1/C7-2 와 같은 이동).
+//    ⚠️ 데이터가 없어도 같은 64×40 을 차지한다. 빈 칸을 허용하면 행 정렬이 무너진다.
+//    점수 80 이상은 배지가 is-hot(--accent-red-bg).
 //
 // ⚠️ StockIssueCard(홈에서도 쓰는 카드)를 고치지 않고 /stock 전용 행을 새로 뒀다.
 //    같은 컴포넌트를 바꾸면 홈 화면까지 같이 바뀐다 — 이번 범위 밖이다.
 
 import Link from 'next/link';
+import MiniSparkline from '@/components/MiniSparkline';
 import { getStockTone, stockChipStyle, formatChangePct } from '@/lib/stockColor';
 import { scoreToDisplay } from '@/lib/issue/calc';
 import IssueReasonChips from '@/components/issue/IssueReasonChips';
@@ -32,10 +37,16 @@ export type StockListRowProps = {
   warning?: IssueWarning | null;
   /** 이슈 근거가 없는 탭의 대체 메타 (섹터 등). 시장명·종목코드는 넣지 않는다. */
   meta?: string | null;
+  /**
+   * 좌측 스파크라인용 종가 배열. 2점 미만이면 그리지 않는다.
+   * 이슈 탭은 stock_issue_scores.sparkline_5d (5거래일, 실측 보유율 1229/1805),
+   * 그 외 탭은 stock_price_history 최근 7거래일.
+   */
+  spark?: number[] | null;
 };
 
 export default function StockListRow({
-  symbol, name, price, changePct, score, rank, reasons, warning, meta,
+  symbol, name, price, changePct, score, rank, reasons, warning, meta, spark,
 }: StockListRowProps) {
   const tone = getStockTone(changePct);
   const chip = stockChipStyle(tone);
@@ -43,14 +54,28 @@ export default function StockListRow({
   const display = isIssue ? scoreToDisplay(score) : 0;
   const hot = isIssue && display >= HOT_SCORE;
 
+  const points = Array.isArray(spark) ? spark.filter((v) => typeof v === 'number' && Number.isFinite(v)) : [];
+  const hasSpark = points.length >= 2;
+  const badge = isIssue ? String(display) : rank != null ? String(rank) : '';
+
   return (
-    <Link href={`/stock/${symbol}`} className="kd-lrow" style={{ textDecoration: 'none', color: 'inherit' }}>
-      <span className={hot ? 'kd-lrow-k is-hot' : 'kd-lrow-k'}>
-        {isIssue ? display : rank ?? ''}
+    <Link href={`/stock/${symbol}`} className="kd-lrow kd-lrow--spark" style={{ textDecoration: 'none', color: 'inherit' }}>
+      <span className="kd-lrow-spark" aria-hidden="true">
+        {hasSpark ? (
+          <MiniSparkline data={points} color={chip.color} width={64} height={40} />
+        ) : (
+          // 데이터 없음 — 같은 64×40 을 지키되 평평한 선으로 '값 없음' 을 말한다
+          <span className="kd-lrow-spark-flat" />
+        )}
       </span>
 
       <span style={{ minWidth: 0 }}>
-        <span className="kd-lrow-t">{name}</span>
+        <span className="kd-lrow-t">
+          {badge && (
+            <span className={hot ? 'kd-lrow-badge is-hot' : 'kd-lrow-badge'}>{badge}</span>
+          )}
+          {name}
+        </span>
         <span className="kd-lrow-m">
           {reasons && reasons.length > 0 ? (
             <span className="kd-lrow-m-fix"><IssueReasonChips reasons={reasons} max={4} /></span>

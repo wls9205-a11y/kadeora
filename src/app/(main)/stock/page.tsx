@@ -174,6 +174,11 @@ export default async function StockPage({ searchParams }: { searchParams: Promis
 
   // Legacy single-tab UI (flag off, default)
   const { kind, rows } = await fetchByTab(tab, 30);
+  // 이슈 탭은 행에 sparkline_5d 가 이미 있어 추가 조회를 하지 않는다.
+  const sparks =
+    kind === 'plain'
+      ? await fetchSparklines((rows as StockRow[]).map((r) => r.symbol))
+      : {};
   return (
     <Suspense>
       <div className="kd-list">
@@ -214,7 +219,7 @@ export default async function StockPage({ searchParams }: { searchParams: Promis
         {kind === 'issue' ? (
           <IssueList rows={rows as StockIssueScore[]} />
         ) : (
-          <PlainList rows={rows as StockRow[]} tab={tab} />
+          <PlainList rows={rows as StockRow[]} tab={tab} sparks={sparks} />
         )}
         </div>
 
@@ -239,6 +244,42 @@ export default async function StockPage({ searchParams }: { searchParams: Promis
       </div>
     </Suspense>
   );
+}
+
+/**
+ * v4-C7-3: 목록 좌측 스파크라인용 최근 종가.
+ *
+ * 이슈 탭은 stock_issue_scores.sparkline_5d 가 이미 행에 실려 있어 조회가 필요 없다.
+ * 그 외 탭(stock_quotes 기반)은 이력이 없으므로 여기서 한 번만 가져온다.
+ *
+ * Rule #15 — count 쿼리 없음. Rule #16 — 이 라우트는 maxDuration=10 이 이미 걸려 있다.
+ * 30심볼 × 최대 7행이라 .in() 한 번으로 끝난다. 실패하면 스파크라인만 빠지고
+ * 목록은 그대로 렌더된다 (좌측 칸은 평평한 선으로 자리를 지킨다).
+ */
+async function fetchSparklines(symbols: string[]): Promise<Record<string, number[]>> {
+  if (symbols.length === 0) return {};
+  try {
+    const sb = getSupabaseAdmin();
+    const since = new Date(Date.now() - 14 * 86400_000).toISOString().slice(0, 10);
+    const { data } = await (sb as any)
+      .from('stock_price_history')
+      .select('symbol, date, close_price')
+      .in('symbol', symbols)
+      .gte('date', since)
+      .order('date', { ascending: true });
+
+    const out: Record<string, number[]> = {};
+    for (const r of (data ?? []) as { symbol: string; close_price: number | null }[]) {
+      const v = Number(r.close_price);
+      if (!Number.isFinite(v)) continue;
+      (out[r.symbol] ??= []).push(v);
+    }
+    // 최근 7거래일만 남긴다 — 14일 창은 휴장일을 감안한 여유다.
+    for (const k of Object.keys(out)) out[k] = out[k].slice(-7);
+    return out;
+  } catch {
+    return {};
+  }
 }
 
 function IssueList({ rows }: { rows: StockIssueScore[] }) {
@@ -272,11 +313,12 @@ function IssueRow({ data }: { data: StockIssueScore }) {
       reasons={data.reasons}
       warning={data.warning}
       meta={data.sector}
+      spark={data.sparkline_5d}
     />
   );
 }
 
-function PlainList({ rows, tab }: { rows: StockRow[]; tab: string }) {
+function PlainList({ rows, tab, sparks }: { rows: StockRow[]; tab: string; sparks?: Record<string, number[]> }) {
   if (rows.length === 0) {
     return (
       <Empty label={tab === 'watch' ? '로그인하면 관심 종목을 볼 수 있어요' : '데이터 준비 중'} />
@@ -298,6 +340,7 @@ function PlainList({ rows, tab }: { rows: StockRow[]; tab: string }) {
           changePct={r.change_pct}
           rank={i + 1}
           meta={r.sector ?? null}
+          spark={sparks?.[r.symbol] ?? null}
         />
       ))}
     </div>
