@@ -3,7 +3,6 @@
 // default = 이슈 (stock_issue_scores). 비로그인 시 6번째 카드 자리에 IssueGateCard 노출.
 // s262 Phase E (CAROUSEL v1): NEXT_PUBLIC_CAROUSEL_ENABLED 시 swipe carousel 모드.
 import { Suspense } from 'react';
-import Link from 'next/link';
 import type { Metadata } from 'next';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { SITE_URL } from '@/lib/constants';
@@ -15,6 +14,7 @@ import StockCurationCard from '@/components/stock/StockCurationCard';
 import StockListRow from '@/components/stock/StockListRow';
 import StockFilterBars from '@/components/stock/StockFilterBars';
 import StockIndexStrip, { type StripData, type MarketBreadth } from '@/components/stock/StockIndexStrip';
+import StockHubRail, { type MoverRow } from '@/components/stock/StockHubRail';
 import { stockTabMeta, stockItemListJsonLd } from '@/lib/seo/per-tab-meta';
 import type { StockIssueScore } from '@/lib/issue/types';
 import {
@@ -120,6 +120,29 @@ async function fetchStrip(): Promise<StripData> {
     /* 스트립이 실패해도 목록은 그대로 렌더된다 */
   }
   return out;
+}
+
+/**
+ * v7-C3 — 레일용 급등·급락 각 4건. 전체 시장 기준이라 본문 필터와 무관하게 고정이다
+ * (레일은 '지금 시장이 어떤가' 를 답하는 자리다).
+ */
+async function fetchMovers(): Promise<{ gainers: MoverRow[]; losers: MoverRow[] }> {
+  try {
+    const sb = getSupabaseAdmin();
+    const cols = 'symbol,name,change_pct';
+    const [up, down] = await Promise.all([
+      (sb as any).from('stock_quotes').select(cols).eq('is_active', true)
+        .order('change_pct', { ascending: false, nullsFirst: false }).limit(4),
+      (sb as any).from('stock_quotes').select(cols).eq('is_active', true)
+        .order('change_pct', { ascending: true, nullsFirst: false }).limit(4),
+    ]);
+    return {
+      gainers: (up?.data ?? []) as MoverRow[],
+      losers: (down?.data ?? []) as MoverRow[],
+    };
+  } catch {
+    return { gainers: [], losers: [] };
+  }
 }
 
 /** v7-C1 — 테마 칩 목록. 최신 날짜 · is_hot 우선 · 12개. 실패하면 빈 배열(줄이 사라진다). */
@@ -317,10 +340,11 @@ export default async function StockPage({
   }
 
   // 기본 UI (캐러셀 플래그 off)
-  const [{ kind, rows }, themes, strip] = await Promise.all([
+  const [{ kind, rows }, themes, strip, movers] = await Promise.all([
     fetchStocks(params, 30),
     fetchThemeNames(),
     fetchStrip(),
+    fetchMovers(),
   ]);
   // 이슈 탭은 행에 sparkline_5d 가 이미 있어 추가 조회를 하지 않는다.
   const sparks =
@@ -359,23 +383,17 @@ export default async function StockPage({
         )}
         </div>
 
-        {/* v3 커밋5 · 데스크탑 우측 레일 (≥1024px). '테마' 패널은 하단 탭과 중복이라
-             모바일에서는 렌더되지 않는다 (.kd-list-rail). */}
-        <aside className="kd-list-rail" aria-label="주식 바로가기">
-          <div className="kd-rail-panel">
-            <h2>테마</h2>
-            <Link href="/stock/themes">테마별 종목</Link>
-            <Link href="/stock/sector/반도체">섹터 — 반도체</Link>
-            <Link href="/stock/movers">급등락 상세</Link>
-            <Link href="/stock/signals">시그널</Link>
-          </div>
-          <div className="kd-rail-panel">
-            <h2>바로가기</h2>
-            <Link href="/stock/compare">종목 비교</Link>
-            <Link href="/stock/short-selling">공매도 현황</Link>
-            <Link href="/stock/overseas">해외 증시</Link>
-            <Link href="/stock/search">종목 검색</Link>
-          </div>
+        {/* v7-C3 · 데스크탑 우측 레일 (≥1024px). 전역 RightPanel 대체 —
+             레일은 페이지가 소유한다 (/apt 의 AptHubRail 과 같은 패턴).
+             ①시장 지수 ②급등·급락 ③테마 ④바로가기. */}
+        <aside className="kd-list-rail" aria-label="주식 요약">
+          <StockHubRail
+            params={params}
+            strip={strip}
+            gainers={movers.gainers}
+            losers={movers.losers}
+            themes={themes}
+          />
         </aside>
       </div>
     </Suspense>
