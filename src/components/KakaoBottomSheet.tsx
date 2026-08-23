@@ -59,7 +59,7 @@ export default function KakaoBottomSheet({ open, onClose, feature = 'star', titl
           {title || '회원 전용 기능이에요'}
         </div>
         <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', marginBottom: 20, textAlign: 'center' }}>
-          {description || '가입하면 바로 이용할 수 있어요'}
+          {description || '로그인하면 바로 이용할 수 있습니다'}
         </div>
 
         <button
@@ -67,7 +67,7 @@ export default function KakaoBottomSheet({ open, onClose, feature = 'star', titl
           onClick={() => trackCtaAndNavigate({ href: loginUrl, ctaName: `kakao_sheet_${feature}`, pagePath: pathname, router })}
           style={{
             display: 'flex', width: '100%', height: 48, borderRadius: 12,
-            background: '#FEE500', alignItems: 'center', justifyContent: 'center',
+            background: 'var(--kakao-bg)', alignItems: 'center', justifyContent: 'center',
             position: 'relative', textDecoration: 'none', boxSizing: 'border-box',
             border: 'none', cursor: 'pointer', padding: 0,
           }}
@@ -76,7 +76,7 @@ export default function KakaoBottomSheet({ open, onClose, feature = 'star', titl
             <path d="M255.5 48C141.1 48 48 126.1 48 222.4c0 62.2 38.7 116.7 97 149.8l-24.1 89.7c-2.1 7.9 6.8 14.4 13.7 9.9l101.2-65.2c7.2 1 14.6 1.5 22.2 1.5 114.4 0 207.5-78.1 207.5-174.4S369.9 48 255.5 48z" />
           </svg>
           <span style={{ fontSize: 15, color: 'rgba(0,0,0,0.85)', fontWeight: 500 }}>
-            카카오톡으로 3초 만에 가입하기
+            카카오톡으로 로그인
           </span>
         </button>
 
@@ -86,7 +86,7 @@ export default function KakaoBottomSheet({ open, onClose, feature = 'star', titl
             onClick={() => trackCtaAndNavigate({ href: altUrl, ctaName: `kakao_sheet_${feature}_alt`, pagePath: pathname, router })}
             style={{ color: 'rgba(255,255,255,0.16)', textDecoration: 'underline', textUnderlineOffset: '3px', background: 'none', border: 'none', padding: 0, cursor: 'pointer', font: 'inherit' }}
           >
-            다른 방법으로 가입하기
+            다른 방법으로 로그인
           </button>
         </div>
       </div>

@@ -1711,9 +1711,11 @@ export default async function AptUnifiedPage({ params }: Props) {
         </figcaption>
       </figure>
 
-      {/* AI 종합 분석 — SSR (봇=전체, 비로그인=블러) */}
+      {/* AI 종합 분석 — 전문 공개.
+           v4-C4-3: LoginGate(feature="apt_analysis") 해제. 30일 181뷰짜리 게이트가
+           같은 화면의 리드폼과 경쟁하고 있었다. 현장 상세의 1순위 전환은 폼이다.
+           ⚠️ GatedStockSection·blog_gated_login 은 범위 밖 — 같이 풀지 말 것. */}
       {analysisText && (
-        <LoginGate feature="apt_analysis" title={`${name} 종합 분석`} description="이 단지의 시세 전망과 투자 분석을 확인하세요">
         <section className="apt-card" aria-labelledby="apt-sec-2" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
           <h2 id="apt-sec-2" className="apt-section-title">{name} 종합 분석</h2>
           <div className="apt-analysis-content" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.85 }}
@@ -1730,7 +1732,6 @@ export default async function AptUnifiedPage({ params }: Props) {
             데이터: 국토교통부·청약홈·카더라 자체 수집
           </div>
         </section>
-        </LoginGate>
       )}
       {/* Competition rate */}
       {sub?.competition_rate_1st && Number(sub.competition_rate_1st) > 0 && (

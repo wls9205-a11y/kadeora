@@ -25,7 +25,7 @@ export function BookmarkButton({ postId }: Props) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ postId }),
       });
-      if (!res.ok) { error('로그인이 필요합니다'); return; }
+      if (!res.ok) { error('저장하려면 로그인이 필요합니다'); return; }
       const data = await res.json();
       setBookmarked(data.bookmarked);
       success(data.bookmarked ? '북마크에 저장했습니다' : '북마크를 해제했습니다');

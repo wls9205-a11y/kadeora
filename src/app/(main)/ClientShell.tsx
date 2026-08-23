@@ -19,7 +19,6 @@
  */
 
 import dynamic from 'next/dynamic';
-import { usePathname } from 'next/navigation';
 import { CONTACT_EMAIL } from '@/lib/constants';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import TopLoadingBar from '@/components/TopLoadingBar';
@@ -28,12 +27,7 @@ import ScrollToTop from '@/components/ScrollToTop';
 // → 모든 (main) 페이지의 본문이 SSR 안되고 RSC payload 로만 전송 (h1/h2 0개, SEO 무의미).
 // 두 provider 는 useEffect 안에서만 브라우저 API 사용 → SSR-safe. 직접 import 로 전환.
 import { ToastProvider } from '@/components/Toast';
-import { AuthProvider, useAuth } from '@/components/AuthProvider';
-// s223: SignupPopupModal mount 복구. s183 에서 blog/[slug] 에서 제거된 후 어디에도
-// 마운트되지 않아 4/27 이후 popup_signup_modal cta_view = 0. 항상 마운트되는 ClientShell
-// 자식으로 직접 import (트래커 3종과 동일 패턴) — useAuth 어댑터로 isLoggedIn prop 공급.
-import SignupPopupModal from '@/components/signup/SignupPopupModal';
-
+import { AuthProvider } from '@/components/AuthProvider';
 // s209 fix(track-regression): listener-only 트래커 3종은 dynamic({ssr:false}) 격리 해제.
 // 이 셋은 useEffect 안에서 document-level click listener / fetch beacon 만 attach 하고
 // 항상 null 을 렌더한다. 즉 SSR HTML 은 변하지 않으면서, 메인 청크에 묶여 hydrate 즉시
@@ -114,7 +108,6 @@ export default function ClientShell({ children, serverLoggedIn }: Props) {
         <KakaoChannelAddModal triggerOnMount={true} />
         <MarketingConsentModalMount />
         <ResidenceNudgeModal />
-        <SignupPopupModalMount />
         <WelcomeToast />
         <ScrollToTop />
         <SmartPushPrompt />
@@ -148,16 +141,8 @@ export default function ClientShell({ children, serverLoggedIn }: Props) {
   );
 }
 
-// useAuth 는 AuthProvider 자식에서만 호출 가능 → ClientShell top-level 이 아닌
-// AuthProvider 트리 내부에 마운트되는 작은 어댑터.
-function SignupPopupModalMount() {
-  const { userId, loading } = useAuth();
-  const pathname = usePathname();
-  if (loading) return null;
-  // r4-P9: 계산기에서는 띄우지 않는다. 네이버 유입 절반이 계산기로 들어오는데
-  // 그 화면은 이미 login_gate_calc_save 가 가입을 한 번 권하고 있다.
-  // (30일 /calc 265노출 2클릭 · /calc 밖 291노출 6클릭 — 밖은 그대로 둔다)
-  if (pathname === '/calc' || pathname.startsWith('/calc/')) return null;
-  return <SignupPopupModal isLoggedIn={!!userId} />;
-}
+// v4-C4-1: SignupPopupModalMount 제거.
+// 30일 실측 — popup_signup_modal 551노출 / dismiss 488 (88.6% 가 닫힘).
+// 그 압박의 결과가 30일 신규 가입 7명이다. 그리고 이제 1순위 전환 목표는
+// 고객등록 폼(리드폼)이라 가입 유도가 폼과 경쟁해서는 안 된다.
 

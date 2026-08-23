@@ -4,7 +4,15 @@
  *
  * 목표: 일 608 방문자 중 0.34% 로그인 페이지 진입 → 가입 동선 강화 (1% → 3%)
  * 트리거: localStorage.pv_count >= 3 + signup_nudge_dismissed_at 미존재
- * 노출 빈도: 7일에 1회 (dismissed_at 기록 후)
+ * 노출 빈도: 14일에 1회 (dismissed_at 기록 후)
+ *
+ * v4-C4: 전역 가입 모달을 이 한 벌로 줄였다 (SignupPopupModal 제거).
+ *   3페이지뷰가 스크롤 %보다 관심 신호로서 근거가 낫다.
+ *   쿨다운 7일 → 14일, 현장 상세(/apt/{slug})에서는 아예 띄우지 않는다 —
+ *   그 화면의 1순위 전환은 리드폼이고 가입 유도가 그것과 경쟁하면 안 된다.
+ *
+ * ⚠️ 2026-08-23 현재 이 컴포넌트는 어디에도 마운트돼 있지 않다.
+ *   되살리려면 ClientShell 의 AuthProvider 트리 안에 <SignupNudgeModal /> 한 줄.
  *
  * 데이터 소스: get_signup_value_props() RPC (SECURITY DEFINER + EXCEPTION 핸들러)
  *   → value_props 5개 + real_active_users + community_post_count + apt_active_count
@@ -12,7 +20,9 @@
  * 가입 path: 카카오 1-tap (현재 가입의 79% 경로) 강조
  */
 import { useEffect, useState, useCallback } from 'react';
+import { usePathname } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
+import { isAptSiteDetailPath } from '@/lib/apt/is-site-detail';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { errMsg } from '@/lib/error-utils';
 
@@ -35,7 +45,7 @@ const PV_KEY = 'kd_pv_count';
 const DISMISSED_KEY = 'kd_signup_nudge_dismissed_at';
 const SHOWN_KEY = 'kd_signup_nudge_shown_at';
 const TRIGGER_THRESHOLD = 3;
-const COOLDOWN_DAYS = 7;
+const COOLDOWN_DAYS = 14;
 
 // 기본 value_props (RPC 실패 시 fallback)
 const DEFAULT_PROPS: ValueProp[] = [
@@ -46,6 +56,8 @@ const DEFAULT_PROPS: ValueProp[] = [
 
 export default function SignupNudgeModal() {
   const { userId, loading: authLoading } = useAuth();
+  // Rule #14 — 훅은 조기 반환보다 위에서 무조건 호출한다.
+  const pathname = usePathname() ?? '';
   const [show, setShow] = useState(false);
   const [props, setProps] = useState<SignupValueProps | null>(null);
   const [loginLoading, setLoginLoading] = useState<'kakao' | 'google' | null>(null);
@@ -55,6 +67,8 @@ export default function SignupNudgeModal() {
   useEffect(() => {
     if (authLoading || userId) return; // 로그인 사용자는 무시
     if (typeof window === 'undefined') return;
+    // v4-C4-2: 현장 상세는 리드폼이 1순위 전환이다. 가입 모달을 겹치지 않는다.
+    if (isAptSiteDetailPath(pathname)) return;
 
     try {
       // 7일 cooldown 체크
@@ -195,7 +209,7 @@ export default function SignupNudgeModal() {
         <div style={{ textAlign: 'center', marginBottom: 20 }}>
           <div style={{ fontSize: 32, marginBottom: 8 }}>🚀</div>
           <h2 id="signup-nudge-title" style={{ margin: 0, fontSize: 'clamp(18px, 5vw, 22px)', fontWeight: 900, color: 'var(--text-primary)' }}>
-            3초 만에 가입하고 시작하세요
+            저장·알림은 로그인 후 이용할 수 있습니다
           </h2>
           <p style={{ margin: '8px 0 0', fontSize: 'var(--fs-sm, 13px)', color: 'var(--text-secondary, #666)' }}>
             지금 <strong style={{ color: 'var(--brand)' }}>{activeUsers.toLocaleString('ko-KR')}명</strong>이 활동 중 · 커뮤니티 글 <strong>{communityPosts.toLocaleString('ko-KR')}+</strong>
@@ -210,7 +224,7 @@ export default function SignupNudgeModal() {
             width: '100%', padding: '14px 20px', marginBottom: 10,
             borderRadius: 12, border: 'none',
             cursor: loginLoading ? 'not-allowed' : 'pointer',
-            background: '#FEE500', color: '#191919',
+            background: 'var(--kakao-bg)', color: '#191919',
             fontWeight: 800, fontSize: 'var(--fs-md, 15px)',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
             opacity: loginLoading === 'google' ? 0.5 : 1,
@@ -223,7 +237,7 @@ export default function SignupNudgeModal() {
           ) : (
             <span style={{ fontSize: 18 }}>💬</span>
           )}
-          {loginLoading === 'kakao' ? '로그인 중...' : '카카오로 3초 가입'}
+          {loginLoading === 'kakao' ? '로그인 중...' : '카카오로 로그인'}
         </button>
 
         {/* Google 보조 옵션 */}
