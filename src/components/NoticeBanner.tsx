@@ -2,6 +2,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import Avatar from '@/components/Avatar';
+import { isReadable } from '@/lib/ui/contrast';
 
 interface NoticeData {
   id: number;
@@ -41,6 +42,9 @@ export default function NoticeBanner() {
   const [showSheet, setShowSheet] = useState(false);
   const [mounted, setMounted] = useState(false);
   const impressionLogged = useRef<Set<number>>(new Set());
+  // v7-V8: 광고주 지정 색이 읽히는지 판정한 결과. CSS 변수를 getComputedStyle 로 펴야 해서
+  //   마운트 뒤에만 잴 수 있다. 재기 전에는 안전한 쪽(기본색)으로 둔다.
+  const [colorOk, setColorOk] = useState({ text: false, bg: false });
   useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
@@ -97,6 +101,34 @@ export default function NoticeBanner() {
     return () => clearInterval(timer);
   }, [notices.length]);
 
+  /**
+   * v7-V8 — 광고주 지정 색 대비 검사.
+   *
+   * site_notices.text_color / bg_color 는 광고주 입력값이다(유료 배너 기능).
+   * 실제로 다크 시절 색 #00ff88 이 남아 라이트 배경 위에서 1.13:1 로 안 보였다.
+   * DB 값은 고쳤지만 다음 광고주가 또 넣는다.
+   *
+   * ⚠️ 차단이 아니라 폴백이다 — 저장은 그대로 두고 표시만 방어한다.
+   * ⚠️ 배경도 사용자 지정이므로 **배경을 먼저 판정하고, 통과한 배경 기준으로** 글자를 잰다.
+   *    떨어진 배경 위에서 글자를 재면 실제로 보이는 조합과 다른 값을 재게 된다.
+   * ⚠️ 그라디언트처럼 못 재는 값은 통과시키지 않는다 (기본색으로 떨어진다).
+   */
+  useEffect(() => {
+    if (!mounted || notices.length === 0) return;
+    const n = notices[currentIdx];
+    if (!n) return;
+    const tierStyle = TIER_STYLES[n.tier || 'free'] || TIER_STYLES.free;
+
+    // 1) 배경: 사용자 지정이 읽을 수 있는 값인지. 티어 기본이 그라디언트면 잴 수 없다.
+    const bgOk = !!n.bg_color && isReadable(tierStyle.color, n.bg_color, 'var(--bg-base)');
+    const effectiveBg = bgOk ? n.bg_color! : tierStyle.bg;
+
+    // 2) 글자: 확정된 배경 기준으로 잰다.
+    const textOk = !!n.text_color && isReadable(n.text_color, effectiveBg, 'var(--bg-base)');
+
+    setColorOk({ text: textOk, bg: bgOk });
+  }, [mounted, notices, currentIdx]);
+
   // 노출 카운트 추적
   useEffect(() => {
     if (notices.length === 0) return;
@@ -114,12 +146,11 @@ export default function NoticeBanner() {
   const notice = notices[currentIdx];
   const tier = notice.tier || 'free';
   const style = TIER_STYLES[tier] || TIER_STYLES.free;
-  const textColor = notice.text_color || style.color;
-  const bgStyle = notice.bg_color
-    ? { background: notice.bg_color }
-    : style.bg.startsWith('linear')
-      ? { background: style.bg }
-      : { background: style.bg };
+  // v7-V8: 대비 검사를 통과한 사용자 색만 쓴다. 나머지는 티어 기본색.
+  //   colorOk 는 마운트 뒤에 채워지므로 첫 페인트는 항상 기본색이다 (안전한 쪽).
+  const safeBgColor = colorOk.bg ? notice.bg_color : null;
+  const textColor = colorOk.text && notice.text_color ? notice.text_color : style.color;
+  const bgStyle = { background: safeBgColor || style.bg };
 
   const handleClick = () => {
     // 클릭 카운트 추적
@@ -156,8 +187,8 @@ export default function NoticeBanner() {
         onClick={handleClick}
       >
         {/* 좌/우 페이드 그라데이션 */}
-        <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 40, background: `linear-gradient(to right, ${notice.bg_color || (tier === 'urgent' ? 'var(--ink-bg)' : tier === 'premium' ? 'var(--ink-bg-deep)' : 'var(--bg-sunken)')}, transparent)`, zIndex: 2, pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', right: notices.length > 1 ? 44 : 0, top: 0, bottom: 0, width: 40, background: `linear-gradient(to left, ${notice.bg_color || (tier === 'urgent' ? 'var(--ink-bg)' : tier === 'premium' ? 'var(--ink-bg-deep)' : 'var(--bg-sunken)')}, transparent)`, zIndex: 2, pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 40, background: `linear-gradient(to right, ${safeBgColor || (tier === 'urgent' ? 'var(--ink-bg)' : tier === 'premium' ? 'var(--ink-bg-deep)' : 'var(--bg-sunken)')}, transparent)`, zIndex: 2, pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', right: notices.length > 1 ? 44 : 0, top: 0, bottom: 0, width: 40, background: `linear-gradient(to left, ${safeBgColor || (tier === 'urgent' ? 'var(--ink-bg)' : tier === 'premium' ? 'var(--ink-bg-deep)' : 'var(--bg-sunken)')}, transparent)`, zIndex: 2, pointerEvents: 'none' }} />
 
         {/* 스크롤 텍스트 */}
         <div
