@@ -14,6 +14,7 @@ import CurationCarousel from '@/components/ui/CurationCarousel';
 import StockCurationCard from '@/components/stock/StockCurationCard';
 import StockListRow from '@/components/stock/StockListRow';
 import StockFilterBars from '@/components/stock/StockFilterBars';
+import StockIndexStrip, { type StripData, type MarketBreadth } from '@/components/stock/StockIndexStrip';
 import { stockTabMeta, stockItemListJsonLd } from '@/lib/seo/per-tab-meta';
 import type { StockIssueScore } from '@/lib/issue/types';
 import {
@@ -67,6 +68,59 @@ type StockRow = {
   market_cap?: number | null;
   sector?: string | null;
 };
+
+/**
+ * v7-C2 — 상단 지수 스트립 데이터.
+ *
+ * ⚠️ 코스피·코스닥 지수 레벨은 DB 에 없다 (적재 테이블·크론 자체가 없다).
+ *    없는 값을 지어내지 않고, 같은 화면에서 실제로 답할 수 있는 등락 종목 수를 낸다.
+ *
+ * 활성 1,805행 × (market, change_pct) 2컬럼이라 가볍고, revalidate=60 이라
+ * 분당 1회로 묶인다. Rule #15 — count 쿼리를 쓰지 않는다 (stock_quotes 는 1,846행이라
+ * exact count 허용 범위 밖이다). 행을 받아 JS 에서 센다.
+ */
+async function fetchStrip(): Promise<StripData> {
+  const empty: MarketBreadth = { up: 0, down: 0, flat: 0, avg: null };
+  const out: StripData = { kospi: { ...empty }, kosdaq: { ...empty }, usdkrw: null, usdkrwAt: null };
+  try {
+    const sb = getSupabaseAdmin();
+    const [quotesR, fxR] = await Promise.all([
+      (sb as any).from('stock_quotes').select('market, change_pct').eq('is_active', true),
+      (sb as any).from('exchange_rates').select('rates, updated_at').eq('base_currency', 'USD')
+        .order('updated_at', { ascending: false }).limit(1).maybeSingle(),
+    ]);
+
+    const sums: Record<string, { n: number; total: number }> = {
+      KOSPI: { n: 0, total: 0 },
+      KOSDAQ: { n: 0, total: 0 },
+    };
+    for (const r of ((quotesR?.data ?? []) as { market: string | null; change_pct: number | null }[])) {
+      const key = r.market === 'KOSPI' ? 'kospi' : r.market === 'KOSDAQ' ? 'kosdaq' : null;
+      if (!key) continue;
+      const v = Number(r.change_pct);
+      const b = out[key];
+      if (!Number.isFinite(v) || v === 0) b.flat++;
+      else if (v > 0) b.up++;
+      else b.down++;
+      if (Number.isFinite(v)) {
+        const acc = sums[r.market as string];
+        acc.n++;
+        acc.total += v;
+      }
+    }
+    out.kospi.avg = sums.KOSPI.n > 0 ? sums.KOSPI.total / sums.KOSPI.n : null;
+    out.kosdaq.avg = sums.KOSDAQ.n > 0 ? sums.KOSDAQ.total / sums.KOSDAQ.n : null;
+
+    const krw = Number((fxR?.data?.rates as Record<string, unknown> | undefined)?.KRW);
+    if (Number.isFinite(krw) && krw > 0) {
+      out.usdkrw = krw;
+      out.usdkrwAt = fxR?.data?.updated_at ?? null;
+    }
+  } catch {
+    /* 스트립이 실패해도 목록은 그대로 렌더된다 */
+  }
+  return out;
+}
 
 /** v7-C1 — 테마 칩 목록. 최신 날짜 · is_hot 우선 · 12개. 실패하면 빈 배열(줄이 사라진다). */
 async function fetchThemeNames(): Promise<string[]> {
@@ -263,9 +317,10 @@ export default async function StockPage({
   }
 
   // 기본 UI (캐러셀 플래그 off)
-  const [{ kind, rows }, themes] = await Promise.all([
+  const [{ kind, rows }, themes, strip] = await Promise.all([
     fetchStocks(params, 30),
     fetchThemeNames(),
+    fetchStrip(),
   ]);
   // 이슈 탭은 행에 sparkline_5d 가 이미 있어 추가 조회를 하지 않는다.
   const sparks =
@@ -280,6 +335,9 @@ export default async function StockPage({
           {marketLabel(params.market)} 주식 — {sortLabel(params.sort)}
           {params.theme ? ` · ${params.theme}` : ''}
         </h1>
+
+        {/* v7-C2: 지수 스트립 3칸 한 줄 */}
+        <StockIndexStrip data={strip} />
 
         {/* v7-C1: 단일 축 탭 7개 → 시장 × 정렬 2축 (+ 테마 선택) */}
         <StockFilterBars params={params} themes={themes} />
