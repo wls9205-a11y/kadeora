@@ -16,7 +16,8 @@ import ShareButtons from '@/components/ShareButtons';
 import SectionShareButton from '@/components/SectionShareButton';
 import KakaoDirectShare from '@/components/KakaoDirectShare';
 import Disclaimer from '@/components/Disclaimer';
-import AptImageGallery from '@/components/AptImageGallery';
+import SiteHero from '@/components/apt/SiteHero';
+import SiteJumpBar, { SECTION_SCROLL_MARGIN } from '@/components/apt/SiteJumpBar';
 import SimilarAptsSection from '@/components/apt/SimilarAptsSection';
 import LeadForm from '@/components/apt/LeadForm';
 import { isLeadEligible } from '@/lib/apt/lead-eligibility';
@@ -770,23 +771,22 @@ export default async function AptUnifiedPage({ params }: Props) {
         <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{name}</span>
       </nav>
 
-      {/* 이미지 갤러리 — 워터마크 + 반응형 (모바일 스와이프 / 데스크탑 그리드) */}
+      {/* v3 커밋3 · 히어로 — 최상단 전폭 대형. h1 은 이 캡션 안에 하나만 있다.
+           캡션을 따로 만들고 h1 을 sr-only 로 남기면 같은 문구가 두 번 나온다. */}
       {(() => {
-        // s7-2: apt_sites.images 는 뉴스 스크랩(t1.daumcdn.net·언론사 도메인)이라 갤러리와
+        // s7-2: apt_sites.images 는 뉴스 스크랩(t1.daumcdn.net·언론사 도메인)이라 히어로와
         // JSON-LD 에서 뺐다. 남의 언론사 사진이 첫 화면 대표 이미지로 나가고 있었다.
         // 컬럼 자체는 보존한다 — 화면에서만 쓰지 않는다.
         //   1순위 hero_image_url      시행사 서면 허락분 (현재 0장, 배관만)
         //   2순위 satellite_image_url 자체 호스팅
-        //   3순위 없음 → 갤러리 미렌더. 생성 카드로 채우지 않는다 (이미지가 있는 척이 된다)
+        //   3순위 없음 → 사진 자리를 만들지 않는다. 생성 카드로 채우지 않는다
+        //           (이미지가 있는 척이 된다 — s7-2 결정). 같은 비율의 텍스트 폴백만 낸다.
         const heroSrc = (site as any)?.hero_image_url || site?.satellite_image_url || '';
         const heroIsDeveloper = (site as any)?.hero_image_source === 'developer' && (site as any)?.hero_image_url;
         // 위성 사진이지 조감도가 아니다 — 표기를 섞지 않는다.
         const heroCredit = heroIsDeveloper
           ? ((site as any)?.hero_image_credit || name)
           : '항공 이미지 · 국토교통부 공간정보 오픈플랫폼(VWorld)';
-        const dbImages = heroSrc
-          ? [{ url: heroSrc, caption: heroIsDeveloper ? heroCredit : `${name} 항공 이미지` }]
-          : [];
         const badgeEl = (
           <div style={{ position: 'absolute', top: 10, left: 12, display: 'flex', gap: 'var(--sp-xs)', flexWrap: 'wrap', zIndex: 2 }}>
             {subSt && <span style={{ fontSize: 10, padding: '3px 10px', borderRadius: 'var(--radius-card)', background: SB[subSt].bg.replace('0.15', '0.85'), color: 'var(--text-inverse)', fontWeight: 700 }}>{SB[subSt].label}{dDay !== null ? ` D${dDay > 0 ? '-' + dDay : dDay === 0 ? '-Day' : '+' + Math.abs(dDay)}` : ''}</span>}
@@ -794,42 +794,51 @@ export default async function AptUnifiedPage({ params }: Props) {
             {redevStage && <span style={{ fontSize: 10, padding: '3px 10px', borderRadius: 'var(--radius-card)', background: 'var(--accent-yellow)', color: 'var(--text-inverse)', fontWeight: 700 }}>{redevStage}</span>}
           </div>
         );
+        // 보조줄 — 위치 · 시공사 · 세대수. APT_COLS 에 이미 들어 있는 컬럼만 쓴다.
+        //   ⚠️ 여기에 새 컬럼을 쓰려면 APT_COLS(94행)에 먼저 넣을 것.
+        //      s7-2 때 hero_image_url 3컬럼이 빠져 전 현장 히어로가 소실될 뻔했다.
+        const heroLoc = [region, site?.sigungu, site?.dong].filter(Boolean).join(' ') || sub?.hssply_adres || '';
+        const heroUnits = Number(site?.total_units || sub?.tot_supply_hshld_co || 0);
+        const heroSub = [
+          heroLoc,
+          site?.builder || sub?.constructor_nm,
+          heroUnits > 0 ? `${heroUnits.toLocaleString()}세대` : null,
+        ].filter(Boolean).join(' · ');
         return (
           <>
-            {/* s7-2: 빈 image[] 를 선언하느니 블록을 내지 않는다.
-                뉴스 URL·언론사 caption 이 구조화데이터에서 사라지는 지점이기도 하다. */}
-            {dbImages.length > 0 && (
+            {/* LCP. 위성 webp 1024px 가 전폭 최상단으로 오면 이 이미지가 LCP 요소다.
+                React 19 가 head 로 끌어올린다 — SiteHero 의 eager/fetchPriority 와 짝이다. */}
+            {heroSrc && <link rel="preload" as="image" href={heroSrc} fetchPriority="high" />}
+            {/* s7-2: 빈 image[] 를 선언하느니 블록을 내지 않는다. */}
+            {heroSrc && (
               <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
                 '@context': 'https://schema.org', '@type': 'ImageGallery', name: `${name} ${tLabel[sType]} 이미지`,
                 about: { '@type': 'ApartmentComplex', name, address: { '@type': 'PostalAddress', addressRegion: region } },
-                image: dbImages.map((img: any, i: number) => ({ '@type': 'ImageObject', url: img.url, name: img.caption || `${name} — ${region}`, position: i + 1 })),
+                image: [{ '@type': 'ImageObject', url: heroSrc, name: heroIsDeveloper ? heroCredit : `${name} 항공 이미지`, position: 1 }],
               })}} />
             )}
-            {dbImages.length > 0 ? (
-              <>
-                <AptImageGallery images={dbImages} name={name} region={region} badges={badgeEl} />
-                <div style={{ fontSize: 12, color: 'var(--text-tertiary)', margin: '-8px 0 14px', lineHeight: 1.5 }}>
-                  {heroCredit}
-                </div>
-              </>
-            ) : (
-              <div style={{
-                position: 'relative', borderRadius: 'var(--radius-lg)', overflow: 'hidden', marginBottom: 14,
-                height: 140,
-                background: 'var(--bg-elevated)',
-              }}>
-                <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '12px 14px' }}>
-                  <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-xs)' }}>{region} {site?.sigungu || ''}</div>
-                  <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 900, color: 'var(--text-primary)', lineHeight: 1.2, wordBreak: 'keep-all' }}>{name}</div>
-                  {/* s2: 세대수는 아래 공급 정보 표에서 1회만 표기한다 */}
-                  <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 'var(--sp-xs)' }}>{site?.builder || sub?.constructor_nm || ''}</div>
-                </div>
-                {badgeEl}
-              </div>
-            )}
+            <SiteHero src={heroSrc} name={name} region={region} credit={heroCredit} badges={badgeEl}>
+              <h1 style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, margin: 0, lineHeight: 1.2, letterSpacing: '-.03em', wordBreak: 'keep-all', overflowWrap: 'break-word', color: 'inherit' }}>{name}</h1>
+              {heroSub && (
+                <p style={{ fontSize: 12.5, fontWeight: 600, lineHeight: 1.45, margin: '5px 0 0', opacity: 0.92, wordBreak: 'keep-all', color: 'inherit' }}>{heroSub}</p>
+              )}
+            </SiteHero>
           </>
         );
       })()}
+
+      {/* v3 커밋3 · 섹션 점프 바. 칩이 가리키는 섹션이 실제로 렌더될 때만 칩을 낸다 —
+           빈 앵커는 눌러도 아무 일이 없어 바 전체의 신뢰를 깎는다. */}
+      <SiteJumpBar
+        items={[
+          { id: 'supply-section',   label: '공급 정보',     show: true },
+          { id: 'location-section', label: '위치',          show: true },
+          { id: 'movein-section',   label: '분양 일정',     show: !!sub },
+          { id: 'points-section',   label: '핵심 포인트',   show: features.length > 0 },
+          { id: 'faq-section',      label: '자주 묻는 질문', show: faq.length > 0 },
+          { id: 'notice-section',   label: '모집공고',      show: !!sub },
+        ]}
+      />
 
       {/* Header */}
       <div style={{ marginBottom: 'var(--sp-lg)' }}>
@@ -839,7 +848,7 @@ export default async function AptUnifiedPage({ params }: Props) {
           {redevStage && <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-xl)', fontSize: 'var(--fs-xs)', fontWeight: 600, background: 'var(--accent-yellow-bg)', color: 'var(--accent-yellow)' }}>{redevStage}</span>}
           {sub?.competition_rate_1st && Number(sub.competition_rate_1st) > 0 && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--accent-purple)', background: 'var(--accent-purple-bg)', padding: '3px 8px', borderRadius: 'var(--radius-md)' }}>{Number(sub.competition_rate_1st).toFixed(1)}:1</span>}
         </div>
-        <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '6px 0 2px', lineHeight: 1.3, wordBreak: 'keep-all', overflowWrap: 'break-word' }}>{name}</h1>
+        {/* v3 커밋3: h1 은 히어로 캡션으로 올라갔다. 여기서 다시 내지 않는다 (h1 은 1개). */}
 
         {/* 위치 + 시공사 통합 카드 */}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8, fontSize: 12 }}>
@@ -910,7 +919,7 @@ export default async function AptUnifiedPage({ params }: Props) {
         // 첫 번째 빈 행에서만 노출을 센다 — 행마다 세면 한 페이지에서 노출이 부풀려진다.
         const firstEmpty = rows.find((r) => !r[1])?.[0] ?? null;
         return (
-          <section aria-labelledby="apt-sec-h1" className="apt-card" id="supply-section" style={{ scrollMarginTop: 60 }}>
+          <section aria-labelledby="apt-sec-h1" className="apt-card" id="supply-section" style={{ scrollMarginTop: SECTION_SCROLL_MARGIN }}>
             <SectionHeader id="apt-sec-h1" eyebrow="SUPPLY" title="공급 정보" />
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--fs-sm)' }}>
               <tbody>
@@ -980,7 +989,7 @@ export default async function AptUnifiedPage({ params }: Props) {
         return (
           <>
             <KpiCards cards={cards} />
-            <div id="supply-section" style={{ scrollMarginTop: 60 }}>
+            <div id="supply-detail-section" style={{ scrollMarginTop: SECTION_SCROLL_MARGIN }}>
             <ComplexScale
               totalHouseholds={totalHouseholds}
               supplyUnits={totalUnits}
@@ -1002,7 +1011,7 @@ export default async function AptUnifiedPage({ params }: Props) {
       <AptLocationMini address={site?.address ?? sub?.hssply_adres ?? undefined} latitude={site?.latitude ?? undefined} longitude={site?.longitude ?? undefined} nearbyStation={site?.nearby_station ?? sub?.nearest_station ?? undefined} schoolDistrict={site?.school_district ?? sub?.nearest_school ?? undefined} />
 
       {/* Location */}
-      <section aria-labelledby="apt-sec-h2" className="apt-card"><SectionHeader id="apt-sec-h2" eyebrow="LOCATION" title="위치 정보" />
+      <section aria-labelledby="apt-sec-h2" className="apt-card" id="location-section" style={{ scrollMarginTop: SECTION_SCROLL_MARGIN }}><SectionHeader id="apt-sec-h2" eyebrow="LOCATION" title="위치 정보" />
         {/* r4-P6: 흩어져 있던 라벨-값 표를 SpecTable 한 벌로.
              s-v2: keepEmpty 로 규칙을 반전 — 행을 빼지 않고 `미공개` 로 채운다.
              s-v2 A-4: '입지 분석 — 학군·교통' 별도 섹션을 없애고 여기로 흡수했다.
@@ -1045,7 +1054,7 @@ export default async function AptUnifiedPage({ params }: Props) {
 
       {/* 분양가 범위 바 + D-day 위젯 */}
       {((site?.price_min && site?.price_max) || sub) && (
-        <div id="price-section" style={{ display: 'grid', gridTemplateColumns: (site?.price_min && site?.price_max && sub) ? 'minmax(0,1fr) minmax(0,1fr)' : '1fr', gap: 6, marginBottom: 14, scrollMarginTop: 60 }}>
+        <div id="price-section" style={{ display: 'grid', gridTemplateColumns: (site?.price_min && site?.price_max && sub) ? 'minmax(0,1fr) minmax(0,1fr)' : '1fr', gap: 6, marginBottom: 14, scrollMarginTop: SECTION_SCROLL_MARGIN }}>
           {/* 분양가 범위 바 — 시각 강화 */}
           {site?.price_min && site?.price_max && (() => {
             const pMin = site.price_min;
@@ -1161,7 +1170,7 @@ export default async function AptUnifiedPage({ params }: Props) {
         // 시공사/시행사/입주/총공급은 공급 정보 표가 이미 담당한다.
         const rows = [['분양유형', sub.mdatrgbn_nm], ['특별공급', sub.spsply_rcept_bgnde ? `${sub.spsply_rcept_bgnde} ~ ${sub.spsply_rcept_endde || ''}` : null], ['1순위', sub.rcept_bgnde], ['2순위', sub.rcept_endde && sub.rcept_endde !== sub.rcept_bgnde ? sub.rcept_endde : null], ['당첨자발표', sub.przwner_presnatn_de], ['계약', sub.cntrct_cncls_bgnde ? `${sub.cntrct_cncls_bgnde} ~ ${sub.cntrct_cncls_endde}` : null], ['분양가상한제', sub.is_price_limit ? '적용' : '미적용']].filter(r => r[1]);
         return (
-          <section aria-labelledby="apt-sec-h3" className="apt-card" id="movein-section" style={{ scrollMarginTop: 60 }}>
+          <section aria-labelledby="apt-sec-h3" className="apt-card" id="movein-section" style={{ scrollMarginTop: SECTION_SCROLL_MARGIN }}>
             <SectionHeader id="apt-sec-h3" eyebrow="SCHEDULE" title="분양 일정" />
             {/* 상세 행 */}
             <SpecTable rows={rows.map(([l, v]) => ({ label: l as string, value: v as React.ReactNode }))} />
@@ -1182,7 +1191,7 @@ export default async function AptUnifiedPage({ params }: Props) {
 
       {/* ── 7번 블록 · 핵심 포인트 + FAQ ── */}
       {features.length > 0 && (
-        <section aria-labelledby="apt-sec-h9" className="apt-card">
+        <section aria-labelledby="apt-sec-h9" className="apt-card" id="points-section" style={{ scrollMarginTop: SECTION_SCROLL_MARGIN }}>
           <SectionHeader id="apt-sec-h9" eyebrow="POINTS" title="핵심 포인트" />
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {features.map((f: any, i: number) => (
@@ -1193,7 +1202,7 @@ export default async function AptUnifiedPage({ params }: Props) {
       )}
 
       {faq.length > 0 && (
-        <section aria-labelledby="apt-sec-h5" className="apt-card">
+        <section aria-labelledby="apt-sec-h5" className="apt-card" id="faq-section" style={{ scrollMarginTop: SECTION_SCROLL_MARGIN }}>
           <SectionHeader id="apt-sec-h5" eyebrow="FAQ" title="자주 묻는 질문" />
           {faq.map((f, i) => (
             <details key={i} style={{ borderBottom: '1px solid var(--border)', padding: '10px 0' }}>
@@ -1223,7 +1232,7 @@ export default async function AptUnifiedPage({ params }: Props) {
            <details> 는 닫혀 있어도 자식이 DOM 에 그대로 남는다.
            id="stats-section": KPI '조회수' 타일의 scrollTo 목적지.
            안쪽(관련 분석 블로그)에 두면 닫힌 details 안이라 레이아웃이 없어 스크롤이 먹지 않는다. */}
-      <details id="stats-section" className="apt-card" style={{ scrollMarginTop: 60 }}>
+      <details id="stats-section" className="apt-card" style={{ scrollMarginTop: SECTION_SCROLL_MARGIN }}>
         <summary style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', cursor: 'pointer', listStyle: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <span>상세 데이터 더보기</span>
           <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>펼치기 +</span>
@@ -1313,7 +1322,7 @@ export default async function AptUnifiedPage({ params }: Props) {
 
       {/* 모집공고 핵심 요약 — 통합 카드 */}
       {sub && (
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: '16px', marginBottom: 'var(--sp-md)' }}>
+        <div id="notice-section" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: '16px', marginBottom: 'var(--sp-md)', scrollMarginTop: SECTION_SCROLL_MARGIN }}>
           <section aria-labelledby="apt-sec-h4" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--sp-md)' }}>
             <SectionHeader id="apt-sec-h4" eyebrow="NOTICE" title="모집공고 핵심 요약" />
           </section>
@@ -2046,7 +2055,7 @@ export default async function AptUnifiedPage({ params }: Props) {
       {/* C3: ContentLock wrapper 제거 */}
       {sub && <div className="apt-card"><AptCommentInline houseKey={sub.house_manage_no || String(sub.id)} houseNm={name} houseType="sub" /></div>}
       {/* id: KPI '관심' 타일의 scrollTo 목적지. s7-3 에서 하단 전체폼을 없애며 이리로 옮겼다 */}
-      <div id="interest-section" style={{ scrollMarginTop: 60 }}>
+      <div id="interest-section" style={{ scrollMarginTop: SECTION_SCROLL_MARGIN }}>
         <InterestRegisterHero
           aptId={site?.id ?? slug}
           aptName={name}
