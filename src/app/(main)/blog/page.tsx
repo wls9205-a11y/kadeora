@@ -143,7 +143,15 @@ const CATS = [
   { key: 'life',       label: '재테크·생활' },
 ];
 
-/** 탭 키 → 실제 blog_posts.category 값들. 여기 없는 키는 레거시 단일값으로 취급한다. */
+/**
+ * 탭 키 → 실제 blog_posts.category 값들.
+ *
+ * ⚠️ 묶는 규칙의 원본은 DB 의 `fn_blog_group(category)` 이고 이 상수는 사본이다.
+ *    목록 조회는 뷰의 group_key(=그 함수)를 쓰므로 사본을 타지 않는다.
+ *    여기는 탭 건수 합산(tabCount)과 서브칩 합산(subCatsFromView)에만 쓴다 —
+ *    둘 다 category 별 집계를 프론트에서 더하는 자리라 매핑이 필요하다.
+ *    함수에 카테고리가 추가되면 이 상수도 같이 고칠 것 (증상: 탭 건수만 어긋난다).
+ */
 const CAT_GROUPS: Record<string, string[]> = {
   realestate: ['apt', 'unsold', 'redev'],
   stock: ['stock'],
@@ -260,9 +268,16 @@ export default async function BlogPage({ searchParams }: Props) {
     .select('id, slug, title, excerpt, category, sub_category, tags, created_at, view_count, cover_image, image_alt, published_at, reading_time_min, comment_count, helpful_count, rewritten_at')
     .eq('is_published', true)
     .or(`published_at.is.null,published_at.lte.${now}`);
-  // v4-C5: 그룹 탭이면 .in(), 레거시 단일값이면 .eq() 와 같은 결과가 나온다.
+  // v4-C9(3차): 그룹 탭은 뷰의 group_key 로 건다 — 묶는 규칙의 원본은 DB 의
+  //   fn_blog_group 이고 프론트의 CAT_GROUPS 는 탭 건수 합산용 사본이다.
+  //   .in('category', CAT_GROUPS[...]) 로 걸면 그 함수에 카테고리가 하나 추가됐을 때
+  //   프론트만 모르고 그 글들이 다시 도달 불가가 된다 (C5 의 redev 287편이 그랬다).
+  //   fn_blog_group 의 ELSE 는 'life' 라 새 카테고리는 자동으로 재테크·생활에 들어온다.
+  //   레거시 단일값(?category=apt 등)은 그대로 category 로 건다.
   const activeCats = resolveCategories(category);
-  if (activeCats) {
+  if (CAT_GROUPS[category]) {
+    q2 = q2.eq('group_key', category);
+  } else if (activeCats) {
     q2 = activeCats.length === 1 ? q2.eq('category', activeCats[0]) : q2.in('category', activeCats);
   }
   // sub 는 정규화 이름이다. 뷰가 sub_norm 을 직접 주므로 한 줄로 끝난다.
@@ -304,7 +319,9 @@ export default async function BlogPage({ searchParams }: Props) {
       .select('id, slug, title, category')
       .eq('is_published', true)
       .or(`published_at.is.null,published_at.lte.${now}`);
-    if (activeCats) {
+    if (CAT_GROUPS[category]) {
+      nq = nq.eq('group_key', category);
+    } else if (activeCats) {
       nq = activeCats.length === 1 ? nq.eq('category', activeCats[0]) : nq.in('category', activeCats);
     }
     if (sub) nq = nq.eq('sub_norm', sub);
