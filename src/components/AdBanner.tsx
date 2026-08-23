@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { isAptSiteDetailPath } from '@/lib/apt/is-site-detail';
 
 interface AdItem {
   id: string;
@@ -24,15 +25,24 @@ export default function AdBanner() {
   // Phase 9b-3: 부동산 청약 광고 캐러셀이라 /apt 컨텍스트에서만 노출.
   // /stock /blog /feed 등에 부동산 청약 D-day 카드 노출되어 페이지 정체성 흐림 → 제한.
   const isAptContext = pathname?.startsWith('/apt') ?? false;
+  // v10: 현장 상세에서는 **무료 재고(다른 현장 청약 카드)** 를 내지 않는다.
+  //   두산위브 페이지 맨 위에 '오남역 서희스타힐스' 가 뜨는 것이 그것이다 — 맥락이 맞지 않는다.
+  //   ⚠️ 유료(isPaid)는 그대로 남긴다. 지금 popup_ads 는 0건이라 실질 효과는 무료 제외뿐이지만,
+  //      유료 재고가 생겼을 때 최대 트래픽 페이지에서 조용히 사라지면 안 된다.
+  const paidOnly = isAptSiteDetailPath(pathname ?? '');
 
   useEffect(() => {
     if (!isAptContext) { setAds([]); return; }
     // s206: 8s timeout — 504 silent fallback (catch 에서 setState 안 함 → 광고 미노출, ErrorBoundary 안 깨짐).
     fetch('/api/ads', { signal: AbortSignal.timeout(8000) })
       .then(r => (r.ok ? r.json() : Promise.reject(r.status)))
-      .then(d => { if (Array.isArray(d?.ads) && d.ads.length > 0) setAds(d.ads); })
+      .then(d => {
+        if (!Array.isArray(d?.ads) || d.ads.length === 0) return;
+        const list = paidOnly ? (d.ads as AdItem[]).filter(a => a.isPaid) : (d.ads as AdItem[]);
+        if (list.length > 0) setAds(list);
+      })
       .catch(() => {});
-  }, [isAptContext]);
+  }, [isAptContext, paidOnly]);
 
   // s205: hook 은 early return 위에서 무조건 호출 — 이전엔 isAptContext early return
   // 뒤에 useCallback + useEffect 가 있어 hook count 5 ↔ 7 변동 → React #310 발생.

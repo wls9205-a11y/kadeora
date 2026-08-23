@@ -5,6 +5,8 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 interface Props {
   slug: string;
   builder?: string | null;
+  /** v10-B8: 비로그인에는 알림 토글 6줄을 내지 않는다. */
+  isLoggedIn?: boolean;
 }
 
 interface NearbyRow {
@@ -33,7 +35,7 @@ const ALERT_TYPES = [
   { key: 'lifecycle', label: 'lifecycle 단계 변경', defaultOn: false },
 ];
 
-export default async function AptSidebar({ slug, builder }: Props) {
+export default async function AptSidebar({ slug, builder, isLoggedIn = false }: Props) {
   const sb = getSupabaseAdmin();
   // s227: v_apt_nearby_sites view (24만 rows window 함수, 평균 750ms) →
   //         get_apt_nearby_sites RPC (직접 region/sigungu join, 3ms 검증).
@@ -55,53 +57,40 @@ export default async function AptSidebar({ slug, builder }: Props) {
 
   return (
     <aside aria-label="단지 사이드바" className="apt-sidebar">
-      {/* 1. 알림 받기 — Phase 4 6단계 */}
+      {/* v10-B8: 비로그인에 ON/OFF 6줄을 내지 않는다 — 켤 수 없는 토글 6줄은
+           설정처럼 보이지만 아무것도 안 되는 화면이다. 한 줄 안내 + 로그인 링크로 줄이고
+           토글은 로그인 상태에서만 편다. */}
       <section style={cardCss}>
-        <div style={titleCss}>
-          <span>알림 받기</span>
-          <span style={{ fontSize: 9, fontWeight: 800, color: 'var(--kd-accent)', padding: '2px 6px', borderRadius: 999, background: 'var(--kd-accent-soft)', border: '1px solid var(--kd-accent-border)' }}>
-            6단계
-          </span>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          {ALERT_TYPES.map(a => (
-            <div key={a.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 11 }}>
-              <span style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>
-                <span style={{ color: a.defaultOn ? 'var(--kd-accent)' : 'var(--text-tertiary)', marginRight: 6, fontSize: 14 }}>{a.defaultOn ? '●' : '○'}</span>
-                {a.label}
-              </span>
-              <span style={{ color: a.defaultOn ? 'var(--kd-accent)' : 'var(--text-tertiary)', fontWeight: 800, fontSize: 10 }}>
-                {a.defaultOn ? 'ON' : 'OFF'}
-              </span>
+        <div style={titleCss}><span>알림 받기</span></div>
+        {isLoggedIn ? (
+          <>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {ALERT_TYPES.map(a => (
+                <div key={a.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 11 }}>
+                  <span style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>
+                    <span style={{ color: a.defaultOn ? 'var(--kd-accent)' : 'var(--text-tertiary)', marginRight: 6, fontSize: 14 }}>{a.defaultOn ? '●' : '○'}</span>
+                    {a.label}
+                  </span>
+                  <span style={{ color: a.defaultOn ? 'var(--kd-accent)' : 'var(--text-tertiary)', fontWeight: 800, fontSize: 10 }}>
+                    {a.defaultOn ? 'ON' : 'OFF'}
+                  </span>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-        <div style={{ marginTop: 10, fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 600 }}>
-          관심 등록 후 마이페이지에서 변경
-        </div>
+            <div style={{ marginTop: 10, fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 600 }}>
+              마이페이지에서 변경
+            </div>
+          </>
+        ) : (
+          <p style={{ margin: 0, fontSize: 11.5, lineHeight: 1.6, color: 'var(--text-secondary)' }}>
+            모델하우스 오픈 · 청약 D-3 · 분양가 변동 알림을 받을 수 있습니다.{' '}
+            <Link href="/login" style={{ color: 'var(--kd-accent)', fontWeight: 700, textDecoration: 'none' }}>로그인 →</Link>
+          </p>
+        )}
       </section>
 
-      {/* 2. 인근 단지 */}
-      {nearby.length > 0 && (
-        <section style={cardCss}>
-          <div style={titleCss}>
-            <span>인근 단지</span>
-            <span style={{ fontSize: 9, color: 'var(--text-tertiary)', fontWeight: 600 }}>top {nearby.length}</span>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {nearby.map(n => (
-              <Link key={n.nearby_slug} href={`/apt/${encodeURIComponent(n.nearby_slug)}`} style={{ textDecoration: 'none' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 6 }}>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {n.nearby_name}
-                  </span>
-                  {n.nearby_dong && <span style={{ fontSize: 10, color: 'var(--text-tertiary)', flexShrink: 0 }}>{n.nearby_dong}</span>}
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
+      {/* v10-B5: '인근 단지' 삭제 — 인근 단지 비교표(AptCompareTable)와 내용이 겹친다.
+           탐색은 우측 레일의 '같은 지역 현장' 이 담당한다. */}
 
       {/* 3. 같은 시공사 */}
       {builder && siblings.length > 0 && (

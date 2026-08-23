@@ -14,6 +14,7 @@
 
 import { useState } from 'react';
 import ImageLightbox from '@/components/ImageLightbox';
+import { initialsOf, toneOf } from '@/components/ui/ListThumb';
 
 /** http:// → https:// 강제 변환 (Mixed Content 방지) */
 function toHttps(url: string): string {
@@ -105,13 +106,30 @@ export default function SiteHero({ src, name, region, credit, badges, children }
         ) : (
           // 사진 없는 현장 — 위성 미보유 520건 + 좌표 없음 75건. 드문 경우가 아니다.
           // 같은 비율을 지켜 목록 → 상세 사이 레이아웃 점프를 없앤다.
+          // v10-D: 이니셜 블록. 목록 64×64 와 같은 규칙(이름 앞 2자 + 이름 해시 색)을 쓰되
+          //   전폭에서는 글자만 키운다. 판정을 두 벌로 만들지 않으려 ListThumb 의 헬퍼를 그대로 쓴다.
+          //   ⚠️ aspect-ratio 는 .kd-hero 가 잡으므로 4/3·21/9 어디서도 비율이 깨지지 않는다.
           <div
             aria-hidden="true"
             style={{
               position: 'absolute', inset: 0,
-              background: 'linear-gradient(160deg, var(--bg-elevated), var(--bg-sunken))',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: toneOf(name).bg,
             }}
-          />
+          >
+            <span
+              style={{
+                fontSize: 'clamp(48px, 12vw, 96px)',
+                fontWeight: 800,
+                letterSpacing: '-.05em',
+                lineHeight: 1,
+                color: toneOf(name).fg,
+                opacity: 0.5,
+              }}
+            >
+              {initialsOf(name)}
+            </span>
+          </div>
         )}
 
         {/* 배지 — 좌상단 */}

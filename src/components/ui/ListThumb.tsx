@@ -22,7 +22,7 @@ const TONES = [
   { bg: 'var(--accent-red-bg)', fg: 'var(--accent-red)' },
 ];
 
-function toneOf(seed: string) {
+export function toneOf(seed: string) {
   let h = 0;
   for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
   return TONES[h % TONES.length];
@@ -32,7 +32,7 @@ function toneOf(seed: string) {
  * 이니셜 2글자. 괄호 안 부기(공공분양·1블록 등)와 앞뒤 공백을 걷고 앞 2자.
  * 한글은 한 글자가 이미 음절이라 2자면 충분히 구별된다.
  */
-function initialsOf(name: string): string {
+export function initialsOf(name: string): string {
   const clean = (name || '')
     .replace(/[[(（【].*?[\])）】]/g, '')
     .replace(/\s+/g, ' ')

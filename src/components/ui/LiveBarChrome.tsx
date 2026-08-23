@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import LiveBar from '@/components/ui/LiveBar';
+import { isAptSiteDetailPath } from '@/lib/apt/is-site-detail';
 
 // (main) layout 에 한 번만 mount.
 // /apt, /stock, /blog, /feed 4개 진입점에서만 실시간 텍스트를 fetch 해 LiveBar 로 노출한다.
@@ -17,6 +18,10 @@ const PAGES = [
 
 function pageOf(pathname: string | null): string | null {
   if (!pathname) return null;
+  // v10: 현장 상세에서는 내지 않는다. '실시간 · 5,916 단지 · 청약 2,853건' 은
+  //   목록용 지표라 특정 현장을 보는 화면과 맥락이 맞지 않는다.
+  //   /apt/busan·/apt/map 같은 허브는 그대로 둔다 — 헬퍼로 상세만 가른다.
+  if (isAptSiteDetailPath(pathname)) return null;
   for (const p of PAGES) if (p.match.test(pathname)) return p.page;
   return null;
 }

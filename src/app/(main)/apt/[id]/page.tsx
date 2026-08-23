@@ -11,37 +11,29 @@ import { notFound, permanentRedirect } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import dynamic from 'next/dynamic';
-import AptCommentInline from '@/components/AptCommentInline';
 import ShareButtons from '@/components/ShareButtons';
 import SectionShareButton from '@/components/SectionShareButton';
 import KakaoDirectShare from '@/components/KakaoDirectShare';
 import Disclaimer from '@/components/Disclaimer';
 import SiteHero from '@/components/apt/SiteHero';
 import SiteJumpBar, { SECTION_SCROLL_MARGIN } from '@/components/apt/SiteJumpBar';
+import AptKeyMetrics from '@/components/apt/detail/AptKeyMetrics';
 import SiteDetailRail from '@/components/apt/SiteDetailRail';
-import SimilarAptsSection from '@/components/apt/SimilarAptsSection';
 import LeadForm from '@/components/apt/LeadForm';
 import { isLeadEligible } from '@/lib/apt/lead-eligibility';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
-import { getDisplayInterestCount, formatInterestText, formatInterestOrViews } from '@/lib/interest-utils';
 import { headers } from 'next/headers';
 import AptSiteSchema from '@/components/schema/AptSiteSchema';
-import CardCarousel from '@/components/og/CardCarousel';
-import AptHero from '@/components/apt/AptHero';
 import LifecycleRail from '@/components/apt/LifecycleRail';
 import SectionHeader from '@/components/apt/SectionHeader';
 import SpecTable from '@/components/detail/SpecTable';
 import CheongakMatchCard from '@/components/apt/CheongakMatchCard';
 import AptBlogStack from '@/components/apt/AptBlogStack';
 import AptCompareTable from '@/components/apt/AptCompareTable';
-import SiteTalkCTA from '@/components/banner/SiteTalkCTA';
 import TalkInlineLink from '@/components/banner/TalkInlineLink';
 import SiteActionBar from '@/components/apt/SiteActionBar';
 import AptSidebar from '@/components/apt/AptSidebar';
 import AptPriceTrendCard from '@/components/apt/AptPriceTrendCard';
-import AptDDayCard from '@/components/apt/detail/AptDDayCard';
-import AptKpiGrid from '@/components/apt/detail/AptKpiGrid';
-import AptScheduleTimeline from '@/components/apt/detail/AptScheduleTimeline';
 import AptLocationMini from '@/components/apt/detail/AptLocationMini';
 
 const AptPriceTrendChart = dynamic(() => import('@/components/charts/AptPriceTrendChart'));
@@ -51,8 +43,20 @@ import AptBookmarkButton from '@/components/AptBookmarkButton';
 const RegulationBadges = dynamic(() => import('@/components/RegulationBadges'));
 const CostSimulator = dynamic(() => import('@/components/CostSimulator'));
 // C3: ContentLock 제거
-const KpiCards = dynamic(() => import('@/components/apt/KpiCards'));
-const ComplexScale = dynamic(() => import('@/components/apt/ComplexScale'));
+/** v10-B1: AptHero 에서 이관. 히어로 좌상단 배지에 쓴다. */
+const LIFECYCLE_LABEL: Record<string, string> = {
+  site_planning: '부지계획',
+  pre_announcement: '분양 예고',
+  model_house_open: '모델하우스 오픈',
+  special_supply: '특별공급',
+  subscription_open: '청약 진행',
+  contract: '계약',
+  construction: '시공',
+  pre_move_in: '입주 예정',
+  move_in: '입주',
+  resale: '실거래',
+};
+
 const AptCommentSection = dynamic(() => import('@/components/apt/AptCommentSection'));
 
 export const revalidate = 3600;
@@ -614,83 +618,6 @@ export default async function AptUnifiedPage({ params }: Props) {
         />
       )}
 
-      <CardCarousel slug={slug} name={name} cards={site?.og_cards as any} />
-
-      {/* Phase 6: 차별화 무기 6 컴포넌트 */}
-      <AptHero
-        site={{
-          name,
-          region: site?.region ?? region,
-          sigungu: site?.sigungu ?? sigungu,
-          dong: site?.dong ?? null,
-          builder: site?.builder ?? sub?.constructor_nm ?? null,
-          total_units: site?.total_units ?? sub?.tot_supply_hshld_co ?? null,
-          lifecycle_stage: (site as any)?.lifecycle_stage ?? null,
-        }}
-        interestCount={site?.interest_count ?? null}
-      />
-
-      <div className="apt-phase6-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 280px', gap: 12, margin: '0 0 16px' }}>
-        <main style={{ minWidth: 0 }}>
-          {(() => {
-            const rail = (
-              <LifecycleRail
-                stage={(site as any)?.lifecycle_stage ?? null}
-                dates={sub ? {
-                  rcept_bgnde: sub.rcept_bgnde,
-                  rcept_endde: sub.rcept_endde,
-                  spsply_rcept_bgnde: sub.spsply_rcept_bgnde,
-                  przwner_presnatn_de: sub.przwner_presnatn_de,
-                  cntrct_cncls_bgnde: sub.cntrct_cncls_bgnde,
-                  cntrct_cncls_endde: sub.cntrct_cncls_endde,
-                  mvn_prearnge_ym: sub.mvn_prearnge_ym,
-                } : undefined}
-                size="full"
-                moveInLabel={fmtYM(site?.move_in_date || sub?.mvn_prearnge_ym) || undefined}
-              />
-            );
-            if (!rail) return null;
-            return (
-              <section aria-labelledby="apt-sec-rail" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', margin: '0 0 var(--sp-md)' }}>
-                <h2 id="apt-sec-rail" style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)', margin: 0 }}>단지 진행 단계</h2>
-                <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: 0.5, marginBottom: 10 }}>단지 진행 단계</div>
-                {rail}
-              </section>
-            );
-          })()}
-          <CheongakMatchCard isLoggedIn={isLoggedInApt} myScore={aptUserCheongakScore} aptName={name} />
-          <AptPriceTrendCard
-            region={site?.region ?? region}
-            sigungu={site?.sigungu ?? sigungu}
-            aptName={name}
-            currentLifecycle={(site as any)?.lifecycle_stage ?? null}
-            priceMin={site?.price_min ?? null}
-            priceMax={site?.price_max ?? null}
-            totalUnits={site?.total_units ?? null}
-          />
-          <AptBlogStack slug={slug} />
-          {/* s-v2: 여기 있던 InlineTalkBanner(955×235 이미지)를 걷어냈다.
-               30일 1클릭 — 광고처럼 보이고 어느 현장을 봐도 같은 그림이라 맥락이 없다.
-               현장 맥락 CTA(SiteTalkCTA)가 6번 블록에서 이 역할을 대신한다. */}
-          <AptCompareTable
-            slug={slug}
-            currentSite={{
-              name,
-              total_units: site?.total_units ?? null,
-              price_min: site?.price_min ?? null,
-              price_max: site?.price_max ?? null,
-              lifecycle_stage: (site as any)?.lifecycle_stage ?? null,
-              popularity_score: (site as any)?.popularity_score ?? null,
-            }}
-          />
-        </main>
-        <AptSidebar slug={slug} builder={site?.builder ?? sub?.constructor_nm ?? null} />
-      </div>
-      <style>{`
-        @media (max-width: 768px) {
-          .apt-phase6-grid { grid-template-columns: 1fr !important; }
-        }
-      `}</style>
 
       <AptSiteSchema
         site={{
@@ -773,6 +700,8 @@ export default async function AptUnifiedPage({ params }: Props) {
         <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{name}</span>
       </nav>
 
+      {/* v10-B1: AptHero 를 지우면서 lifecycle 라벨만 히어로 배지로 이관했다.
+           검정 헤더가 단지명·세대수·시공사를 다시 그리고 있었는데 전부 히어로 캡션·지표 4칸과 중복이었다. */}
       {/* v3 커밋3 · 히어로 — 최상단 전폭 대형. h1 은 이 캡션 안에 하나만 있다.
            캡션을 따로 만들고 h1 을 sr-only 로 남기면 같은 문구가 두 번 나온다. */}
       {(() => {
@@ -789,8 +718,12 @@ export default async function AptUnifiedPage({ params }: Props) {
         const heroCredit = heroIsDeveloper
           ? ((site as any)?.hero_image_credit || name)
           : '항공 이미지 · 국토교통부 공간정보 오픈플랫폼(VWorld)';
+        const lifecycleLabel = (site as any)?.lifecycle_stage
+          ? (LIFECYCLE_LABEL[(site as any).lifecycle_stage] ?? null)
+          : null;
         const badgeEl = (
           <div style={{ position: 'absolute', top: 10, left: 12, display: 'flex', gap: 'var(--sp-xs)', flexWrap: 'wrap', zIndex: 2 }}>
+            {lifecycleLabel && <span style={{ fontSize: 10, padding: '3px 10px', borderRadius: 'var(--radius-card)', background: 'rgba(9,13,20,.72)', color: '#FFFFFF', fontWeight: 700 }}>{lifecycleLabel}</span>}
             {subSt && <span style={{ fontSize: 10, padding: '3px 10px', borderRadius: 'var(--radius-card)', background: SB[subSt].bg.replace('0.15', '0.85'), color: 'var(--text-inverse)', fontWeight: 700 }}>{SB[subSt].label}{dDay !== null ? ` D${dDay > 0 ? '-' + dDay : dDay === 0 ? '-Day' : '+' + Math.abs(dDay)}` : ''}</span>}
             {sub?.is_price_limit && <span style={{ fontSize: 10, padding: '3px 10px', borderRadius: 'var(--radius-card)', background: 'var(--accent-purple)', color: 'var(--text-inverse)', fontWeight: 700 }}>상한제</span>}
             {redevStage && <span style={{ fontSize: 10, padding: '3px 10px', borderRadius: 'var(--radius-card)', background: 'var(--accent-yellow)', color: 'var(--text-inverse)', fontWeight: 700 }}>{redevStage}</span>}
@@ -840,6 +773,20 @@ export default async function AptUnifiedPage({ params }: Props) {
           { id: 'faq-section',      label: '자주 묻는 질문', show: faq.length > 0 },
           { id: 'notice-section',   label: '모집공고',      show: !!sub },
         ]}
+      />
+
+      {/* ── v10 §3 · 핵심 지표 4칸 ──
+           분양가·세대수·입주·D-day 는 **페이지에 여기 한 번만** 나온다.
+           실측에서 세대수 5회·분양가 5회·입주 3회 반복이었다 (AptHero·KpiCards·
+           AptKpiGrid·ComplexScale·AptDDayCard). 그 다섯을 이 한 벌로 대체했다.
+           공급 정보 표의 같은 행은 남긴다 — 표는 원장 성격이라 예외다. */}
+      <AptKeyMetrics
+        priceMin={site?.price_min}
+        priceMax={site?.price_max}
+        totalUnits={site?.total_units ?? sub?.tot_supply_hshld_co}
+        moveInDate={site?.move_in_date ?? sub?.mvn_prearnge_ym}
+        receiptStart={sub?.rcept_bgnde ?? null}
+        receiptEnd={sub?.rcept_endde ?? null}
       />
 
       {/* Header */}
@@ -937,17 +884,22 @@ export default async function AptUnifiedPage({ params }: Props) {
                   <tr key={l} style={{ borderBottom: i < rows.length - 1 ? '1px solid var(--border)' : 'none' }}>
                     <th scope="row" style={{ textAlign: 'left', fontWeight: 400, color: 'var(--text-tertiary)', padding: '7px 0', whiteSpace: 'nowrap' }}>{l}</th>
                     <td style={{ textAlign: 'right', fontWeight: 600, color: 'var(--text-primary)', padding: '7px 0', fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>
-                      {v ?? (
-                        <span style={{ fontWeight: 400, fontFamily: 'var(--font-sans)' }}>
-                          <span style={{ color: 'var(--text-tertiary)' }}>미공개 · </span>
-                          <TalkInlineLink slot="supply_table" siteSlug={slug} field={l} countView={l === firstEmpty} />
-                        </span>
-                      )}
+                      {/* v10-B6: 행마다 '방에서 물어보기' 를 반복하면 표가 어지럽다.
+                          표에서는 '미공개' 만 두고 링크는 표 아래 한 줄로 모은다. */}
+                      {v ?? <span style={{ fontWeight: 400, fontFamily: 'var(--font-sans)', color: 'var(--text-tertiary)' }}>미공개</span>}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+            {/* v10-B6: 표 안에 흩어져 있던 '방에서 물어보기' 를 여기 한 줄로 모은다.
+                미공개 행이 하나라도 있을 때만 낸다 — 다 채워진 현장에 물어볼 것을 만들지 않는다. */}
+            {firstEmpty && (
+              <p style={{ margin: '10px 0 0', fontSize: 11.5, lineHeight: 1.6, color: 'var(--text-tertiary)' }}>
+                미공개 항목은 공고 확정 전이라 표에 없습니다.{' '}
+                <TalkInlineLink slot="supply_table" siteSlug={slug} field={firstEmpty} countView label="방에서 물어보기 →" />
+              </p>
+            )}
           </section>
         );
       })()}
@@ -962,62 +914,10 @@ export default async function AptUnifiedPage({ params }: Props) {
       </div>
 
       {/* Key metrics — 시각 강화 대시보드 */}
-      {(() => {
-        const totalUnits = Number(site?.total_units || sub?.tot_supply_hshld_co || 0);
-        const types = Array.isArray(sub?.house_type_info) ? sub.house_type_info : [];
-        const generalSupply = types.reduce((s: number, t: any) => s + (t.supply || 0), 0);
-        const specialSupply = types.reduce((s: number, t: any) => s + (t.spsply_hshldco || 0), 0);
-        const totalHouseholds = Number(sub?.total_households || 0);
+      {/* v10-B2: KPI 타일 5개(분양가·입주예정·조회수·댓글·관심)와 '단지 규모' 블록 삭제.
+           분양가·입주는 §3 지표 4칸이 대신하고, 조회수·댓글은 값이 0~한 자리라 §B-3 로 걷었다.
+           단지 규모는 '단지 전체 총세대수 = 확인중' 이고 '이번 분양 공급세대수' 는 지표 4칸과 같은 값이었다. */}
 
-        const commentCount = site?.comment_count || 0;
-        const pageViews = site?.page_views || 0;
-        const cards = [
-          // s2: 세대수 KPI 카드 제거 — 공급 정보 표의 '규모' 행과 중복이었다.
-          { l: sub ? '분양가' : '시세', v: (() => {
-            const pMin = site?.price_min || unsold?.sale_price_min || 0;
-            const pMax = site?.price_max || 0;
-            if (!pMin && !pMax) return '-';
-            const fmt = (n: number) => n >= 10000 ? `${(n / 10000).toFixed(1)}억` : `${n.toLocaleString()}만`;
-            if (pMin && pMax && pMin !== pMax) return `${fmt(pMin)}~\n${fmt(pMax)}`;
-            return fmt(pMin || pMax);
-          })(), sub: '', c: 'var(--brand)', bar: 0, barColor: 'var(--brand)', scrollTo: 'price-section' },
-          { l: '입주예정', v: fmtYM(site?.move_in_date || sub?.mvn_prearnge_ym) || '-', sub: (() => {
-            const ym = site?.move_in_date || sub?.mvn_prearnge_ym;
-            if (!ym || ym.length < 6) return '';
-            const tY = parseInt(ym.slice(0, 4)); const tM = parseInt(ym.slice(4, 6));
-            const now = new Date(Date.now() + 9 * 60 * 60 * 1000);
-            const diffM = (tY - now.getFullYear()) * 12 + (tM - (now.getMonth() + 1));
-            if (diffM <= 0) return '';
-            const y = Math.floor(diffM / 12); const m = diffM % 12;
-            return y > 0 ? `약 ${y}년${m > 0 ? ` ${m}개월` : ''} 후` : `약 ${m}개월 후`;
-          })(), c: 'var(--accent-green)', bar: 0, barColor: 'var(--accent-green)', scrollTo: 'movein-section' },
-          { l: '조회수', v: pageViews > 0 ? pageViews.toLocaleString() : '-', sub: '', c: 'var(--accent-cyan)', bar: Math.min(pageViews / 5000 * 100, 100), barColor: 'var(--accent-cyan)', scrollTo: 'stats-section' },
-          { l: '댓글', v: commentCount > 0 ? `${commentCount}` : '0', sub: '클릭하여 작성', c: 'var(--accent-purple)', bar: Math.min(commentCount / 50 * 100, 100), barColor: 'var(--accent-purple)', scrollTo: 'comment-section' },
-          { l: unsold ? '미분양' : '관심', v: unsold ? `${(unsold.tot_unsold_hshld_co || 0).toLocaleString()}호` : formatInterestOrViews(site?.interest_count || 0, pageViews).value, sub: unsold ? '' : '클릭하여 등록', c: unsold ? 'var(--accent-red)' : 'var(--accent-yellow)', icon: unsold ? '' : '', bar: unsold ? Math.min((unsold.tot_unsold_hshld_co || 0) / 500 * 100, 100) : Math.min((pageViews || site?.interest_count || 1) / (Math.max(site?.total_units || sub?.tot_supply_hshld_co || 100, 100)) * 100, 100), barColor: unsold ? 'var(--accent-red)' : 'var(--accent-yellow)', scrollTo: unsold ? null : 'interest-section' },
-        ];
-
-        return (
-          <>
-            <KpiCards cards={cards} />
-            <div id="supply-detail-section" style={{ scrollMarginTop: SECTION_SCROLL_MARGIN }}>
-            <ComplexScale
-              totalHouseholds={totalHouseholds}
-              supplyUnits={totalUnits}
-              generalSupply={generalSupply}
-              specialSupply={specialSupply}
-              dongCount={Number(sub?.total_dong_count || sub?.total_dong_co || 0)}
-              maxFloor={Number(sub?.max_floor || 0)}
-              parkingCount={Number(sub?.parking_total || sub?.parking_co || 0)}
-            />
-            </div>
-          </>
-        );
-      })()}
-
-      {/* s236: detail summary cards */}
-      <AptDDayCard targetDate={(site as any)?.rcept_endde || (site as any)?.subscription_open_date || sub?.rcept_endde} ctaHref="#" />
-      <AptKpiGrid priceMin={site?.price_min} priceMax={site?.price_max} totalUnits={site?.total_units ?? sub?.tot_supply_hshld_co} moveInDate={site?.move_in_date ?? sub?.mvn_prearnge_ym} builderRating={(site as any)?.builder_rating ?? (site as any)?.review_score} />
-      <AptScheduleTimeline specialDate={(site as any)?.special_supply_date || sub?.spsply_rcept_de} rank1Date={(site as any)?.rank1_date || sub?.rcept_bgnde} rank2Date={(site as any)?.rank2_date || sub?.rcept_endde} announceDate={(site as any)?.announce_date || sub?.przwner_presnatn_de} />
       <AptLocationMini address={site?.address ?? sub?.hssply_adres ?? undefined} latitude={site?.latitude ?? undefined} longitude={site?.longitude ?? undefined} nearbyStation={site?.nearby_station ?? sub?.nearest_station ?? undefined} schoolDistrict={site?.school_district ?? sub?.nearest_school ?? undefined} />
 
       {/* Location */}
@@ -1039,12 +939,7 @@ export default async function AptUnifiedPage({ params }: Props) {
           return (
             <SpecTable
               keepEmpty
-              emptyValue={(label) => (
-                <span>
-                  <span style={{ color: 'var(--text-tertiary)' }}>미공개 · </span>
-                  <TalkInlineLink slot="supply_table" siteSlug={slug} field={label} />
-                </span>
-              )}
+              emptyValue={() => <span style={{ color: 'var(--text-tertiary)' }}>미공개</span>}
               rows={[
                 { label: '주소', value: site?.address || sub?.hssply_adres || redev?.address },
                 { label: '최근접역', value: stationText },
@@ -1062,67 +957,6 @@ export default async function AptUnifiedPage({ params }: Props) {
       </section>
 
 
-      {/* 분양가 범위 바 + D-day 위젯 */}
-      {((site?.price_min && site?.price_max) || sub) && (
-        <div id="price-section" style={{ display: 'grid', gridTemplateColumns: (site?.price_min && site?.price_max && sub) ? 'minmax(0,1fr) minmax(0,1fr)' : '1fr', gap: 6, marginBottom: 14, scrollMarginTop: SECTION_SCROLL_MARGIN }}>
-          {/* 분양가 범위 바 — 시각 강화 */}
-          {site?.price_min && site?.price_max && (() => {
-            const pMin = site.price_min;
-            const pMax = site.price_max;
-            const pAvg = Math.round((pMin + pMax) / 2);
-            // 전용면적 기반 평당가 추정
-            const pyeongPrice = sub?.price_per_pyeong_avg || Math.round(pAvg / 34);
-            const ppMin = sub?.price_per_pyeong_min || 0;
-            const ppMax = sub?.price_per_pyeong_max || 0;
-            const isEstimated = sub?.price_source === 'estimated';
-            // 가격 등급 (만원 단위)
-            const tier = pAvg >= 120000 ? { label: '12억+', color: 'var(--accent-red)' } : pAvg >= 90000 ? { label: '9억대', color: 'var(--accent-orange)' } : pAvg >= 60000 ? { label: '6억대', color: 'var(--accent-yellow)' } : pAvg >= 30000 ? { label: '3억대', color: 'var(--brand)' } : { label: '3억 미만', color: 'var(--accent-green)' };
-            return (
-              <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-sm)' }}>
-                  <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>분양가</span>
-                  <span style={{ fontSize: 10, fontWeight: 600, color: tier.color, background: `${tier.color}15`, padding: '1px 6px', borderRadius: 4 }}>{tier.label}</span>
-                </div>
-                {/* 가격 범위 바 */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-                  <span style={{ fontSize: 12, color: 'var(--accent-blue)', fontWeight: 700, minWidth: 42 }}>{fmtAmount(pMin)}</span>
-                  <div style={{ flex: 1, height: 10, borderRadius: 'var(--radius-sm)', background: 'linear-gradient(90deg, var(--accent-blue-bg), var(--brand), var(--accent-red-bg))', position: 'relative' }}>
-                    <div style={{ position: 'absolute', top: -1, left: '50%', width: 12, height: 12, borderRadius: '50%', background: 'var(--brand)', border: '2px solid var(--bg-surface)', transform: 'translateX(-50%)', boxShadow: '0 0 4px var(--brand-border)' }} />
-                  </div>
-                  <span style={{ fontSize: 12, color: 'var(--accent-red)', fontWeight: 700, minWidth: 42, textAlign: 'right' }}>{fmtAmount(pMax)}</span>
-                </div>
-                {/* 평균 + 평당가 */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10 }}>
-                  <span style={{ color: 'var(--text-tertiary)' }}>평균 <strong style={{ color: 'var(--text-primary)' }}>{fmtAmount(pAvg)}</strong></span>
-                  {pyeongPrice > 0 && <span style={{ color: 'var(--accent-purple)' }}>평당 <strong>{ppMin > 0 && ppMax > 0 ? `${ppMin.toLocaleString()}~${ppMax.toLocaleString()}만` : `${pyeongPrice.toLocaleString()}만`}</strong>{ppMin > 0 && ppMax > 0 ? <span style={{ fontSize: 10, color: 'var(--text-tertiary)', marginLeft: 3 }}>(평균 {pyeongPrice.toLocaleString()}만)</span> : <span style={{ fontSize: 10, color: 'var(--text-tertiary)', marginLeft: 3 }}>(최고가 기준)</span>}{isEstimated && <span style={{ fontSize: 10, marginLeft: 4, padding: '1px 4px', borderRadius: 4, background: 'var(--accent-orange-bg)', color: 'var(--warning)', fontWeight: 600 }}>추정</span>}</span>}
-                </div>
-              </div>
-            );
-          })()}
-          {/* D-day 카운트다운 */}
-          {sub && (() => {
-            const now = new Date();
-            const milestones = [
-              { label: '청약접수', date: sub.rcept_bgnde },
-              { label: '당첨발표', date: sub.przwner_presnatn_de },
-              { label: '계약시작', date: sub.cntrct_cncls_bgnde },
-              { label: '입주예정', date: sub.mvn_prearnge_ym ? `${sub.mvn_prearnge_ym.slice(0, 4)}-${sub.mvn_prearnge_ym.slice(4, 6)}-01` : null },
-            ].filter(m => m.date);
-            const next = milestones.find(m => m.date && new Date(m.date) >= now) || milestones[milestones.length - 1];
-            if (!next?.date) return null;
-            const dday = Math.ceil((new Date(next.date).getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-            return (
-              <div style={{ background: dday <= 7 ? 'var(--accent-red-bg)' : dday <= 30 ? 'var(--accent-yellow-bg)' : 'var(--bg-surface)', border: `1px solid ${dday <= 7 ? 'var(--accent-red-bg)' : dday <= 30 ? 'var(--accent-yellow-bg)' : 'var(--border)'}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', textAlign: 'center' }}>
-                <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-xs)' }}>{next.label}까지</div>
-                <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 900, color: dday <= 0 ? 'var(--accent-green)' : dday <= 7 ? 'var(--accent-red)' : dday <= 30 ? 'var(--accent-yellow)' : 'var(--brand)' }}>
-                  {dday <= 0 ? '진행중' : `D-${dday}`}
-                </div>
-                <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}>{next.date}</div>
-              </div>
-            );
-          })()}
-        </div>
-      )}
 
 
 
@@ -1187,17 +1021,6 @@ export default async function AptUnifiedPage({ params }: Props) {
           </section>
         ); 
       })()}
-      {/* ── 6번 블록 · 현장 맥락 카톡 CTA — 주 전환 지점 ──
-           v1 의 리드폼 1순위 자리를 카톡방 진입에 넘긴다.
-           30일 실측: 카톡방 클릭 7건(sticky 6 / inline 1) vs leads 누적 1건.
-           리드폼은 없애지 않고 8번 블록 뒤로 내린다 — 전화 통화를 원하는 층의 유일한 경로이고,
-           오픈채팅 URL 이 파라미터를 못 받아 '누가·어느 현장에서' 를 남기는 경로도 폼뿐이다. */}
-      <div className="kd-lg-hide"><SiteTalkCTA
-        siteName={name}
-        siteSlug={slug}
-        remainingUnits={(site as any)?.remaining_units ?? null}
-        priceUndisclosed={!site?.price_min && !site?.price_max && !unsold?.sale_price_min}
-      /></div>
 
       {/* ── 7번 블록 · 핵심 포인트 + FAQ ── */}
       {features.length > 0 && (
@@ -1242,6 +1065,125 @@ export default async function AptUnifiedPage({ params }: Props) {
            <details> 는 닫혀 있어도 자식이 DOM 에 그대로 남는다.
            id="stats-section": KPI '조회수' 타일의 scrollTo 목적지.
            안쪽(관련 분석 블로그)에 두면 닫힌 details 안이라 레이아웃이 없어 스크롤이 먹지 않는다. */}
+      {/* ── v10 §7 · 단지 진행 단계 · 청약 가점 매칭 ──
+           히어로·지표·리드폼·정보 표를 본 다음에 온다. 이전에는 이 묶음이 페이지 최상단에 있어
+           '이 현장이 뭔가' 를 알기 전에 진행 단계부터 보게 됐다. */}
+        {(() => {
+          const rail = (
+            <LifecycleRail
+              stage={(site as any)?.lifecycle_stage ?? null}
+              dates={sub ? {
+                rcept_bgnde: sub.rcept_bgnde,
+                rcept_endde: sub.rcept_endde,
+                spsply_rcept_bgnde: sub.spsply_rcept_bgnde,
+                przwner_presnatn_de: sub.przwner_presnatn_de,
+                cntrct_cncls_bgnde: sub.cntrct_cncls_bgnde,
+                cntrct_cncls_endde: sub.cntrct_cncls_endde,
+                mvn_prearnge_ym: sub.mvn_prearnge_ym,
+              } : undefined}
+              size="full"
+              moveInLabel={fmtYM(site?.move_in_date || sub?.mvn_prearnge_ym) || undefined}
+            />
+          );
+          if (!rail) return null;
+          return (
+            <section aria-labelledby="apt-sec-rail" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', margin: '0 0 var(--sp-md)' }}>
+              <h2 id="apt-sec-rail" style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)', margin: 0 }}>단지 진행 단계</h2>
+              <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: 0.5, marginBottom: 10 }}>단지 진행 단계</div>
+              {rail}
+            </section>
+          );
+        })()}
+        <CheongakMatchCard isLoggedIn={isLoggedInApt} myScore={aptUserCheongakScore} aptName={name} />
+
+      {/* ── v10 §8 · 시세 트렌드 · 분양가 분포 · 인근 단지 비교 ── */}
+        <AptPriceTrendCard
+          region={site?.region ?? region}
+          sigungu={site?.sigungu ?? sigungu}
+          aptName={name}
+          currentLifecycle={(site as any)?.lifecycle_stage ?? null}
+          priceMin={site?.price_min ?? null}
+          priceMax={site?.price_max ?? null}
+          totalUnits={site?.total_units ?? null}
+        />
+      {/* 분양가 범위 바 + D-day 위젯 */}
+      {((site?.price_min && site?.price_max) || sub) && (
+        <div id="price-section" style={{ display: 'grid', gridTemplateColumns: (site?.price_min && site?.price_max && sub) ? 'minmax(0,1fr) minmax(0,1fr)' : '1fr', gap: 6, marginBottom: 14, scrollMarginTop: SECTION_SCROLL_MARGIN }}>
+          {/* 분양가 범위 바 — 시각 강화 */}
+          {site?.price_min && site?.price_max && (() => {
+            const pMin = site.price_min;
+            const pMax = site.price_max;
+            const pAvg = Math.round((pMin + pMax) / 2);
+            // 전용면적 기반 평당가 추정
+            const pyeongPrice = sub?.price_per_pyeong_avg || Math.round(pAvg / 34);
+            const ppMin = sub?.price_per_pyeong_min || 0;
+            const ppMax = sub?.price_per_pyeong_max || 0;
+            const isEstimated = sub?.price_source === 'estimated';
+            // 가격 등급 (만원 단위)
+            const tier = pAvg >= 120000 ? { label: '12억+', color: 'var(--accent-red)' } : pAvg >= 90000 ? { label: '9억대', color: 'var(--accent-orange)' } : pAvg >= 60000 ? { label: '6억대', color: 'var(--accent-yellow)' } : pAvg >= 30000 ? { label: '3억대', color: 'var(--brand)' } : { label: '3억 미만', color: 'var(--accent-green)' };
+            return (
+              <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-sm)' }}>
+                  <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>분양가</span>
+                  <span style={{ fontSize: 10, fontWeight: 600, color: tier.color, background: `${tier.color}15`, padding: '1px 6px', borderRadius: 4 }}>{tier.label}</span>
+                </div>
+                {/* 가격 범위 바 */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+                  <span style={{ fontSize: 12, color: 'var(--accent-blue)', fontWeight: 700, minWidth: 42 }}>{fmtAmount(pMin)}</span>
+                  <div style={{ flex: 1, height: 10, borderRadius: 'var(--radius-sm)', background: 'linear-gradient(90deg, var(--accent-blue-bg), var(--brand), var(--accent-red-bg))', position: 'relative' }}>
+                    <div style={{ position: 'absolute', top: -1, left: '50%', width: 12, height: 12, borderRadius: '50%', background: 'var(--brand)', border: '2px solid var(--bg-surface)', transform: 'translateX(-50%)', boxShadow: '0 0 4px var(--brand-border)' }} />
+                  </div>
+                  <span style={{ fontSize: 12, color: 'var(--accent-red)', fontWeight: 700, minWidth: 42, textAlign: 'right' }}>{fmtAmount(pMax)}</span>
+                </div>
+                {/* 평균 + 평당가 */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10 }}>
+                  <span style={{ color: 'var(--text-tertiary)' }}>평균 <strong style={{ color: 'var(--text-primary)' }}>{fmtAmount(pAvg)}</strong></span>
+                  {pyeongPrice > 0 && <span style={{ color: 'var(--accent-purple)' }}>평당 <strong>{ppMin > 0 && ppMax > 0 ? `${ppMin.toLocaleString()}~${ppMax.toLocaleString()}만` : `${pyeongPrice.toLocaleString()}만`}</strong>{ppMin > 0 && ppMax > 0 ? <span style={{ fontSize: 10, color: 'var(--text-tertiary)', marginLeft: 3 }}>(평균 {pyeongPrice.toLocaleString()}만)</span> : <span style={{ fontSize: 10, color: 'var(--text-tertiary)', marginLeft: 3 }}>(최고가 기준)</span>}{isEstimated && <span style={{ fontSize: 10, marginLeft: 4, padding: '1px 4px', borderRadius: 4, background: 'var(--accent-orange-bg)', color: 'var(--warning)', fontWeight: 600 }}>추정</span>}</span>}
+                </div>
+              </div>
+            );
+          })()}
+          {/* D-day 카운트다운 */}
+          {sub && (() => {
+            const now = new Date();
+            const milestones = [
+              { label: '청약접수', date: sub.rcept_bgnde },
+              { label: '당첨발표', date: sub.przwner_presnatn_de },
+              { label: '계약시작', date: sub.cntrct_cncls_bgnde },
+              { label: '입주예정', date: sub.mvn_prearnge_ym ? `${sub.mvn_prearnge_ym.slice(0, 4)}-${sub.mvn_prearnge_ym.slice(4, 6)}-01` : null },
+            ].filter(m => m.date);
+            const next = milestones.find(m => m.date && new Date(m.date) >= now) || milestones[milestones.length - 1];
+            if (!next?.date) return null;
+            const dday = Math.ceil((new Date(next.date).getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+            return (
+              <div style={{ background: dday <= 7 ? 'var(--accent-red-bg)' : dday <= 30 ? 'var(--accent-yellow-bg)' : 'var(--bg-surface)', border: `1px solid ${dday <= 7 ? 'var(--accent-red-bg)' : dday <= 30 ? 'var(--accent-yellow-bg)' : 'var(--border)'}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', textAlign: 'center' }}>
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-xs)' }}>{next.label}까지</div>
+                <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 900, color: dday <= 0 ? 'var(--accent-green)' : dday <= 7 ? 'var(--accent-red)' : dday <= 30 ? 'var(--accent-yellow)' : 'var(--brand)' }}>
+                  {dday <= 0 ? '진행중' : `D-${dday}`}
+                </div>
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}>{next.date}</div>
+              </div>
+            );
+          })()}
+        </div>
+      )}
+        <AptCompareTable
+          slug={slug}
+          currentSite={{
+            name,
+            total_units: site?.total_units ?? null,
+            price_min: site?.price_min ?? null,
+            price_max: site?.price_max ?? null,
+            lifecycle_stage: (site as any)?.lifecycle_stage ?? null,
+            popularity_score: (site as any)?.popularity_score ?? null,
+          }}
+        />
+        <AptBlogStack slug={slug} />
+
+      {/* v10-B5/B8: 알림 6단계와 인근 단지 top3 를 걷어낸 사이드바.
+           280px 컬럼을 없애고 본문 폭으로 편다 — 남은 것은 같은 시공사 링크뿐이다. */}
+      <AptSidebar slug={slug} builder={site?.builder ?? sub?.constructor_nm ?? null} isLoggedIn={isLoggedInApt} />
+
       <details id="stats-section" className="apt-card" style={{ scrollMarginTop: SECTION_SCROLL_MARGIN }}>
         <summary style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', cursor: 'pointer', listStyle: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <span>상세 데이터 더보기</span>
@@ -1330,6 +1272,48 @@ export default async function AptUnifiedPage({ params }: Props) {
         );
       })()}
 
+
+      {/* Competition rate */}
+
+      {/* 인포그래픽 이미지 — 네이버/구글 이미지 검색 크롤링용 */}
+      <figure style={{ margin: '0 0 var(--sp-md)', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--border)' }}>
+        <img
+          src={`${SITE_URL}/api/og-square?title=${encodeURIComponent(name)}&category=apt`}
+          alt={`${name} ${region} ${site?.sigungu || ''} 분양가 ${site?.price_min ? `${(site.price_min/10000).toFixed(1)}억` : ''} ${site?.price_max ? `${(site.price_max/10000).toFixed(1)}억` : ''} 세대수 ${site?.total_units || ''} 시공사 ${site?.builder || ''} 청약 분양 입주 인포그래픽 2026`}
+          width={1200} height={630}
+          style={{ width: '100%', height: 'auto', display: 'block' }}
+          loading="lazy"
+        />
+        <figcaption style={{ fontSize: 11, color: 'var(--text-tertiary)', padding: '6px 12px', background: 'var(--bg-surface)', textAlign: 'center' }}>
+          {name} 분양 핵심 정보 · 카더라
+        </figcaption>
+      </figure>
+
+      {/* AI 종합 분석 — 전문 공개.
+           v4-C4-3: LoginGate(feature="apt_analysis") 해제. 30일 181뷰짜리 게이트가
+           같은 화면의 리드폼과 경쟁하고 있었다. 현장 상세의 1순위 전환은 폼이다.
+           ⚠️ GatedStockSection·blog_gated_login 은 범위 밖 — 같이 풀지 말 것. */}
+      {analysisText && (
+        <section className="apt-card" aria-labelledby="apt-sec-2" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
+          <h2 id="apt-sec-2" className="apt-section-title">{name} 종합 분석</h2>
+          <div className="apt-analysis-content" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.85 }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml((analysisText as string)
+              .replace(/^## (.+)$/gm, '<h3 style="font-size:15px;font-weight:700;color:var(--text-primary);margin:18px 0 8px">$1</h3>')
+              .replace(/^### (.+)$/gm, '<h4 style="font-size:14px;font-weight:600;color:var(--text-primary);margin:14px 0 6px">$1</h4>')
+              .replace(/\*\*(.+?)\*\*/g, '<strong style="color:var(--text-primary)">$1</strong>')
+              .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" style="color:var(--brand);text-decoration:underline">$1</a>')
+              .replace(/\n\n/g, '</p><p style="margin:0 0 10px">')
+              .replace(/\n/g, '<br/>')
+            )}}
+          />
+          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 12, paddingTop: 8, borderTop: '1px solid var(--border)' }}>
+            데이터: 국토교통부·청약홈·카더라 자체 수집
+          </div>
+        </section>
+      )}
+
+      {/* v10 §10: 모집공고는 AI 종합 분석 뒤로 내렸다.
+           읽는 흐름이 '판단(분석) → 원문 확인(공고)' 순이라 원문 요약이 마지막이다. */}
       {/* 모집공고 핵심 요약 — 통합 카드 */}
       {sub && (
         <div id="notice-section" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: '16px', marginBottom: 'var(--sp-md)', scrollMarginTop: SECTION_SCROLL_MARGIN }}>
@@ -1704,44 +1688,6 @@ export default async function AptUnifiedPage({ params }: Props) {
       )}
 
       {/* Competition rate */}
-
-      {/* 인포그래픽 이미지 — 네이버/구글 이미지 검색 크롤링용 */}
-      <figure style={{ margin: '0 0 var(--sp-md)', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--border)' }}>
-        <img
-          src={`${SITE_URL}/api/og-square?title=${encodeURIComponent(name)}&category=apt`}
-          alt={`${name} ${region} ${site?.sigungu || ''} 분양가 ${site?.price_min ? `${(site.price_min/10000).toFixed(1)}억` : ''} ${site?.price_max ? `${(site.price_max/10000).toFixed(1)}억` : ''} 세대수 ${site?.total_units || ''} 시공사 ${site?.builder || ''} 청약 분양 입주 인포그래픽 2026`}
-          width={1200} height={630}
-          style={{ width: '100%', height: 'auto', display: 'block' }}
-          loading="lazy"
-        />
-        <figcaption style={{ fontSize: 11, color: 'var(--text-tertiary)', padding: '6px 12px', background: 'var(--bg-surface)', textAlign: 'center' }}>
-          {name} 분양 핵심 정보 · 카더라
-        </figcaption>
-      </figure>
-
-      {/* AI 종합 분석 — 전문 공개.
-           v4-C4-3: LoginGate(feature="apt_analysis") 해제. 30일 181뷰짜리 게이트가
-           같은 화면의 리드폼과 경쟁하고 있었다. 현장 상세의 1순위 전환은 폼이다.
-           ⚠️ GatedStockSection·blog_gated_login 은 범위 밖 — 같이 풀지 말 것. */}
-      {analysisText && (
-        <section className="apt-card" aria-labelledby="apt-sec-2" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
-          <h2 id="apt-sec-2" className="apt-section-title">{name} 종합 분석</h2>
-          <div className="apt-analysis-content" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.85 }}
-            dangerouslySetInnerHTML={{ __html: sanitizeHtml((analysisText as string)
-              .replace(/^## (.+)$/gm, '<h3 style="font-size:15px;font-weight:700;color:var(--text-primary);margin:18px 0 8px">$1</h3>')
-              .replace(/^### (.+)$/gm, '<h4 style="font-size:14px;font-weight:600;color:var(--text-primary);margin:14px 0 6px">$1</h4>')
-              .replace(/\*\*(.+?)\*\*/g, '<strong style="color:var(--text-primary)">$1</strong>')
-              .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" style="color:var(--brand);text-decoration:underline">$1</a>')
-              .replace(/\n\n/g, '</p><p style="margin:0 0 10px">')
-              .replace(/\n/g, '<br/>')
-            )}}
-          />
-          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 12, paddingTop: 8, borderTop: '1px solid var(--border)' }}>
-            데이터: 국토교통부·청약홈·카더라 자체 수집
-          </div>
-        </section>
-      )}
-      {/* Competition rate */}
       {sub?.competition_rate_1st && Number(sub.competition_rate_1st) > 0 && (
         <section className="apt-card" aria-labelledby="apt-sec-3" style={{ background: 'var(--accent-purple-bg)', border: '1px solid var(--accent-purple-bg)' }}>
           <h2 id="apt-sec-3" className="apt-section-title">청약 경쟁률</h2>
@@ -2062,9 +2008,7 @@ export default async function AptUnifiedPage({ params }: Props) {
       {/* 비로그인 가입 유도 CTA — InlineCTA */}
       {!aptUser && <RelatedContentCard type="apt" entityName={name} />}
 
-      {/* Comments */}
-      {/* C3: ContentLock wrapper 제거 */}
-      {sub && <div className="apt-card"><AptCommentInline houseKey={sub.house_manage_no || String(sub.id)} houseNm={name} houseType="sub" /></div>}
+      {/* v10-B3: 한줄평(AptCommentInline)은 댓글과 역할이 같고 둘 다 빈 입력창이라 하나로 합쳤다. */}
       {/* id: KPI '관심' 타일의 scrollTo 목적지. s7-3 에서 하단 전체폼을 없애며 이리로 옮겼다 */}
       <div id="interest-section" style={{ scrollMarginTop: SECTION_SCROLL_MARGIN }}>
         <InterestRegisterHero
@@ -2104,8 +2048,7 @@ export default async function AptUnifiedPage({ params }: Props) {
 
       {/* 프로 업셀 — 결제 시스템 출시 전까지 비공개 */}
 
-      {/* v2.0 Week1 C1: 유사 단지 6개 그리드 (get_similar_apts RPC) */}
-      {site?.id && <SimilarAptsSection aptSiteId={site.id} limit={6} />}
+      {/* v10-B5: '비슷한 단지 6개' 삭제 — 인근 단지 비교표와 내용이 겹치고 위성 썸네일 6장이 무겁다. */}
 
       <Disclaimer type="apt" />
       <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textAlign: 'center', margin: '8px 0 40px', lineHeight: 1.6 }}>데이터 출처: 국토교통부 · 청약홈 · 한국부동산원 · 각 지자체</p>
