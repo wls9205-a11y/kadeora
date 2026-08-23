@@ -71,7 +71,7 @@ export default function RegionChips({ regions, current }: Props) {
         }}
       >
         <h2 style={{ fontSize: 13, fontWeight: 700, margin: 0, color: 'var(--text-primary, #f2f5fa)' }}>
-          📍 지역
+          지역
           {liveTotal > 0 ? (
             <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-tertiary, #8ba3c0)', marginLeft: 6 }}>
               접수중 {liveTotal}건

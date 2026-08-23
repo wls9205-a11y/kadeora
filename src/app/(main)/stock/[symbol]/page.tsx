@@ -739,7 +739,7 @@ export default async function StockDetailPage({ params }: Props) {
           ⚔️ 다른 종목과 비교
         </Link>
         <Link href="/discuss?tab=stock" style={{ flex: 1, textAlign: 'center', padding: 12, background: 'var(--brand)', borderRadius: 'var(--radius-md)', textDecoration: 'none', fontSize: 13, fontWeight: 700, color: '#fff' }}>
-          💬 주식방 토론 참여
+          주식방 토론 참여
         </Link>
       </div>
     </article>
