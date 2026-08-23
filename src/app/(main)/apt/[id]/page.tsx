@@ -16,6 +16,9 @@ import KakaoDirectShare from '@/components/KakaoDirectShare';
 import Disclaimer from '@/components/Disclaimer';
 import SiteHero from '@/components/apt/SiteHero';
 import SiteJumpBar, { SECTION_SCROLL_MARGIN } from '@/components/apt/SiteJumpBar';
+// V15 B — 접이식 섹션. <details> 라 닫혀 있어도 자식이 DOM 에 남는다(색인 유지).
+import DetailSection from '@/components/apt/detail/DetailSection';
+import AccordionEnhancer from '@/components/apt/detail/AccordionEnhancer';
 import AptKeyMetrics from '@/components/apt/detail/AptKeyMetrics';
 import SiteDetailRail from '@/components/apt/SiteDetailRail';
 import LeadForm from '@/components/apt/LeadForm';
@@ -29,7 +32,7 @@ import { lifecycleLabel as stageLabel } from '@/lib/apt/lifecycle-label';
 // V13 A-3 — 진행 이력. 청약홈에도 아실에도 없는 정보다.
 import { fetchSiteEvents } from '@/lib/apt/site-events';
 // V15 C — 세대수 두 축(분양 공급 / 단지 전체). total_units 는 어느 쪽인지 알 수 없다.
-import { resolveUnits, unitCell } from '@/lib/apt/units';
+import { resolveUnits, unitsSummary } from '@/lib/apt/units';
 import SiteHistoryTimeline from '@/components/apt/SiteHistoryTimeline';
 import SectionHeader from '@/components/apt/SectionHeader';
 import SpecTable from '@/components/detail/SpecTable';
@@ -574,6 +577,16 @@ export default async function AptUnifiedPage({ params }: Props) {
     ...(sub ? [{ q: `${name} 견본주택(모델하우스) 위치는 어디인가요?`, a: `${name}의 견본주택(모델하우스) ${sub.model_house_addr ? `주소는 ${sub.model_house_addr}입니다.` : '위치는 입주자모집공고문에서 확인할 수 있습니다.'} 청약홈에서 모집공고 원문을 확인하세요.` }] : []),
   ].filter(f => f.a.trim().length > 10);
   const redevStage = (site?.source_ids as Record<string, string>)?.redev_stage || redev?.stage;
+
+  // V15 B: '경쟁률 · 시세 · 실거래' 아코디언에 실릴 게 하나라도 있는가.
+  //   안쪽 블록이 전부 조건부라 이 판정 없이는 빈 아코디언이 남는다.
+  const hasMarketBlocks =
+    Number(sub?.competition_rate_1st ?? 0) > 0 ||
+    !!unsold ||
+    !!(redev && redevStage) ||
+    complexProfiles.length > 0 ||
+    trades.length > 0 ||
+    !!site?.nearby_facilities;
   const noindex = site ? (site.content_score ?? 0) < 40 : false;
 
   const today = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
@@ -779,16 +792,22 @@ export default async function AptUnifiedPage({ params }: Props) {
       })()}
 
       {/* v3 커밋3 · 섹션 점프 바. 칩이 가리키는 섹션이 실제로 렌더될 때만 칩을 낸다 —
-           빈 앵커는 눌러도 아무 일이 없어 바 전체의 신뢰를 깎는다. */}
+           빈 앵커는 눌러도 아무 일이 없어 바 전체의 신뢰를 깎는다.
+           V15 B: 순서를 아코디언 순서와 맞췄다. 칩을 누르면 AccordionEnhancer 가
+           해당 섹션을 열고 스크롤한다 — 이전에는 '모집공고' 칩이 닫힌 details 안을
+           가리켜 눌러도 아무 일이 없었다. */}
       <SiteJumpBar
         items={[
           { id: 'supply-section',   label: '공급 정보',     show: true },
-          { id: 'history-section',  label: '진행 이력',     show: siteEvents.length > 0 },
           { id: 'location-section', label: '위치',          show: true },
           { id: 'movein-section',   label: '분양 일정',     show: !!sub },
+          { id: 'history-section',  label: '진행 이력',     show: siteEvents.length > 0 },
           { id: 'points-section',   label: '핵심 포인트',   show: features.length > 0 },
           { id: 'faq-section',      label: '자주 묻는 질문', show: faq.length > 0 },
+          { id: 'price-section',    label: '시세·분양가',   show: true },
+          { id: 'stats-section',    label: '상세 데이터',   show: true },
           { id: 'notice-section',   label: '모집공고',      show: !!sub },
+          { id: 'market-section',   label: '경쟁률·실거래', show: hasMarketBlocks },
         ]}
       />
 
@@ -829,11 +848,31 @@ export default async function AptUnifiedPage({ params }: Props) {
              앞 소스가 비는 현장에서도 블록이 사라지지 않도록 3단으로 받친다. */}
         {(() => {
           const summary = firstSentences(analysisText, 3) || sub?.ai_summary || site?.description;
-          if (!summary) return null;
+          // ── V15 B-2 · 접이식 밖 요약 ──
+          //   본문 섹션이 전부 접히면 구글은 접힌 콘텐츠를 인덱싱하지만
+          //   네이버는 접힘 처리 문서화가 약하다. 핵심 사실 한 줄을 접이식 **밖**에 남긴다.
+          //   AI 요약이 없는 현장에서도 이 줄은 남아야 하므로 별도로 만든다.
+          const facts = [
+            [region, site?.sigungu, site?.dong].filter(Boolean).join(' ') || sub?.hssply_adres || null,
+            site?.builder || sub?.constructor_nm ? `시공 ${site?.builder || sub?.constructor_nm}` : null,
+            unitsSummary(units),
+            fmtYM(site?.move_in_date || sub?.mvn_prearnge_ym) ? `입주 ${fmtYM(site?.move_in_date || sub?.mvn_prearnge_ym)}` : null,
+            stageLabel((site as any)?.lifecycle_stage),
+          ].filter(Boolean).join(' · ');
+          if (!summary && !facts) return null;
           return (
             <div style={{ padding: 'var(--sp-md) var(--card-p)', borderRadius: 'var(--radius-md)', background: 'linear-gradient(135deg, var(--brand-bg), var(--accent-purple-bg))', border: '1px solid var(--brand-border)' }}>
-              <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--brand)', marginBottom: 3 }}>AI 분석</div>
-              <div className="site-description" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', lineHeight: 1.6 }}>{summary}</div>
+              {summary && (
+                <>
+                  <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--brand)', marginBottom: 3 }}>AI 분석</div>
+                  <div className="site-description" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', lineHeight: 1.6 }}>{summary}</div>
+                </>
+              )}
+              {facts && (
+                <p style={{ margin: summary ? '8px 0 0' : 0, paddingTop: summary ? 8 : 0, borderTop: summary ? '1px solid var(--brand-border)' : 'none', fontSize: 'var(--fs-xs)', lineHeight: 1.6, color: 'var(--text-secondary)', wordBreak: 'keep-all' }}>
+                  {facts}
+                </p>
+              )}
             </div>
           );
         })()}
@@ -891,8 +930,7 @@ export default async function AptUnifiedPage({ params }: Props) {
         // 첫 번째 빈 행에서만 노출을 센다 — 행마다 세면 한 페이지에서 노출이 부풀려진다.
         const firstEmpty = rows.find((r) => !r[1])?.[0] ?? null;
         return (
-          <section aria-labelledby="apt-sec-h1" className="apt-card" id="supply-section" style={{ scrollMarginTop: SECTION_SCROLL_MARGIN }}>
-            <SectionHeader id="apt-sec-h1" title="공급 정보" />
+          <DetailSection id="supply-section" title="공급 정보" defaultOpen>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--fs-sm)' }}>
               <tbody>
                 {rows.map(([l, v], i) => (
@@ -929,7 +967,7 @@ export default async function AptUnifiedPage({ params }: Props) {
                 <TalkInlineLink slot="supply_table" siteSlug={slug} field={firstEmpty} countView label="방에서 물어보기 →" />
               </p>
             )}
-          </section>
+          </DetailSection>
         );
       })()}
 
@@ -950,7 +988,7 @@ export default async function AptUnifiedPage({ params }: Props) {
       <AptLocationMini address={site?.address ?? sub?.hssply_adres ?? undefined} latitude={site?.latitude ?? undefined} longitude={site?.longitude ?? undefined} nearbyStation={site?.nearby_station ?? sub?.nearest_station ?? undefined} schoolDistrict={site?.school_district ?? sub?.nearest_school ?? undefined} />
 
       {/* Location */}
-      <section aria-labelledby="apt-sec-h2" className="apt-card" id="location-section" style={{ scrollMarginTop: SECTION_SCROLL_MARGIN }}><SectionHeader id="apt-sec-h2" title="위치 정보" />
+      <DetailSection id="location-section" title="위치 정보" openOnDesktop>
         {/* r4-P6: 흩어져 있던 라벨-값 표를 SpecTable 한 벌로.
              s-v2: keepEmpty 로 규칙을 반전 — 행을 빼지 않고 `미공개` 로 채운다.
              s-v2 A-4: '입지 분석 — 학군·교통' 별도 섹션을 없애고 여기로 흡수했다.
@@ -983,7 +1021,7 @@ export default async function AptUnifiedPage({ params }: Props) {
           <a href={`https://map.kakao.com/?q=${encodeURIComponent(site?.address || sub?.hssply_adres || redev?.address || name)}`} target="_blank" rel="noopener noreferrer" style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>🗺️ 카카오맵</a>
           <a href={`https://map.naver.com/p/search/${encodeURIComponent(site?.address || sub?.hssply_adres || redev?.address || name)}`} target="_blank" rel="noopener noreferrer" style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>🗺️ 네이버지도</a>
         </div>
-      </section>
+      </DetailSection>
 
 
 
@@ -1043,57 +1081,52 @@ export default async function AptUnifiedPage({ params }: Props) {
         // 시공사/시행사/입주/총공급은 공급 정보 표가 이미 담당한다.
         const rows = [['분양유형', sub.mdatrgbn_nm], ['특별공급', sub.spsply_rcept_bgnde ? `${sub.spsply_rcept_bgnde} ~ ${sub.spsply_rcept_endde || ''}` : null], ['1순위', sub.rcept_bgnde], ['2순위', sub.rcept_endde && sub.rcept_endde !== sub.rcept_bgnde ? sub.rcept_endde : null], ['당첨자발표', sub.przwner_presnatn_de], ['계약', sub.cntrct_cncls_bgnde ? `${sub.cntrct_cncls_bgnde} ~ ${sub.cntrct_cncls_endde}` : null], ['분양가상한제', sub.is_price_limit ? '적용' : '미적용']].filter(r => r[1]);
         return (
-          <section aria-labelledby="apt-sec-h3" className="apt-card" id="movein-section" style={{ scrollMarginTop: SECTION_SCROLL_MARGIN }}>
-            <SectionHeader id="apt-sec-h3" title="분양 일정" />
+          <DetailSection id="movein-section" title="분양 일정" openOnDesktop>
             {/* 상세 행 */}
             <SpecTable rows={rows.map(([l, v]) => ({ label: l as string, value: v as React.ReactNode }))} />
-          </section>
+          </DetailSection>
         ); 
       })()}
 
       {/* ── 7번 블록 · 핵심 포인트 + FAQ ── */}
       {features.length > 0 && (
-        <section aria-labelledby="apt-sec-h9" className="apt-card" id="points-section" style={{ scrollMarginTop: SECTION_SCROLL_MARGIN }}>
-          <SectionHeader id="apt-sec-h9" title="핵심 포인트" />
+        <DetailSection id="points-section" title="핵심 포인트">
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {features.map((f: any, i: number) => (
               <span key={i} style={{ padding: '4px 10px', borderRadius: 'var(--radius-lg)', fontSize: 'var(--fs-xs)', fontWeight: 600, background: 'var(--brand-bg)', color: 'var(--brand)', border: '1px solid var(--brand-bg)' }}>{String(f)}</span>
             ))}
           </div>
-        </section>
+        </DetailSection>
       )}
 
       {faq.length > 0 && (
-        <section aria-labelledby="apt-sec-h5" className="apt-card" id="faq-section" style={{ scrollMarginTop: SECTION_SCROLL_MARGIN }}>
-          <SectionHeader id="apt-sec-h5" title="자주 묻는 질문" />
+        <DetailSection id="faq-section" title="자주 묻는 질문" meta={`${faq.length}개`}>
+          {/* V15 B: 항목별 <details> 를 걷어냈다. 아코디언 안 아코디언이 되면
+              답 하나 보는 데 두 번 눌러야 한다. 섹션이 이미 접이식이라 여기서는 편다. */}
           {faq.map((f, i) => (
-            <details key={i} style={{ borderBottom: '1px solid var(--border)', padding: '10px 0' }}>
-              <summary style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', cursor: 'pointer', listStyle: 'none', display: 'flex', justifyContent: 'space-between' }}>
-                <span>{f.q}</span><span style={{ color: 'var(--text-tertiary)' }}>+</span>
-              </summary>
+            <div key={i} style={{ borderBottom: '1px solid var(--border)', padding: '10px 0' }}>
+              <h3 style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>{f.q}</h3>
               <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.7, margin: '6px 0 0' }}>{f.a}</p>
-            </details>
+            </div>
           ))}
           {/* 마지막 항목은 방으로 보낸다. FAQ JSON-LD 는 위 faq 배열로만 만들어지므로
               이 항목은 구조화데이터에 들어가지 않는다 (리치결과 정책상 안전). */}
-          <details style={{ padding: '10px 0' }}>
-            <summary style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', cursor: 'pointer', listStyle: 'none', display: 'flex', justifyContent: 'space-between' }}>
-              <span>여기에 없는 내용은 어디에 물어보나요?</span><span style={{ color: 'var(--text-tertiary)' }}>+</span>
-            </summary>
+          <div style={{ padding: '10px 0' }}>
+            <h3 style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>여기에 없는 내용은 어디에 물어보나요?</h3>
             <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.7, margin: '6px 0 0' }}>
               {name} 관련 질문은 부동산 정보 공유방에서 받고 있습니다. 잔여 세대·동호수·할인 조건처럼 공고에 없는 내용도 방에서 확인할 수 있습니다.{' '}
               <TalkInlineLink slot="faq" siteSlug={slug} label="정보 공유방 참여하기 →" countView />
             </p>
-          </details>
-        </section>
+          </div>
+        </DetailSection>
       )}
 
-      {/* ── 8번 블록 · 상세 데이터 더보기 (접힘) ──
-           삭제가 아니라 접기다. 조건부 언마운트로 구현하지 말 것 —
-           DOM 에서 사라지면 색인 대상 텍스트가 통째로 없어진다.
-           <details> 는 닫혀 있어도 자식이 DOM 에 그대로 남는다.
-           id="stats-section": KPI '조회수' 타일의 scrollTo 목적지.
-           안쪽(관련 분석 블로그)에 두면 닫힌 details 안이라 레이아웃이 없어 스크롤이 먹지 않는다. */}
+      {/* ── V15 B · 접이식 안 접이식을 없앴다 ──
+           여기 있던 '상세 데이터 더보기' <details> 하나가 827줄을 삼키고 있었다 —
+           모집공고·경쟁률·실거래·관련 글까지 전부 그 안이라, 점프바로 눌러도
+           닫힌 details 안이라 레이아웃이 없어 스크롤이 먹지 않았다.
+           평평하게 펴서 형제 아코디언 네 벌로 나눈다.
+           id="stats-section" 은 유지한다 — KPI '조회수' 타일의 scrollTo 목적지다. */}
       {/* ── v10 §7 · 단지 진행 단계 · 청약 가점 매칭 ──
            히어로·지표·리드폼·정보 표를 본 다음에 온다. 이전에는 이 묶음이 페이지 최상단에 있어
            '이 현장이 뭔가' 를 알기 전에 진행 단계부터 보게 됐다. */}
@@ -1129,23 +1162,19 @@ export default async function AptUnifiedPage({ params }: Props) {
              ⚠️ 0건이면 섹션을 렌더하지 않는다 — 지금은 대부분 0건이다.
              ⚠️ 등급(확정·추정·카더라)을 반드시 함께 낸다. 감추면 표시·광고법 문제가 된다. */}
         {siteEvents.length > 0 && (
-          <section
-            aria-labelledby="apt-sec-history"
-            id="history-section"
-            className="apt-card"
-            style={{ scrollMarginTop: SECTION_SCROLL_MARGIN }}
-          >
-            <SectionHeader id="apt-sec-history" title="진행 이력" meta={`${siteEvents.length}건`} />
+          <DetailSection id="history-section" title="진행 이력" meta={`${siteEvents.length}건`} openOnDesktop>
             <SiteHistoryTimeline events={siteEvents} />
             <p style={{ fontSize: 10.5, lineHeight: 1.55, color: 'var(--text-tertiary)', margin: '2px 0 0' }}>
               확정은 고시·공시 원문, 추정은 복수 언론, 카더라는 업계·조합 전언입니다. 일정과 계획은 바뀔 수 있습니다.
             </p>
-          </section>
+          </DetailSection>
         )}
 
         <CheongakMatchCard isLoggedIn={isLoggedInApt} myScore={aptUserCheongakScore} aptName={name} />
 
-      {/* ── v10 §8 · 시세 트렌드 · 분양가 분포 · 인근 단지 비교 ── */}
+      {/* ── v10 §8 · 시세 트렌드 · 분양가 분포 · 인근 단지 비교 ──
+           V15 B: 한 아코디언으로 묶는다. 셋 다 '얼마인가' 를 다루는 같은 질문이다. */}
+      <DetailSection id="price-section" title="시세 · 분양가" openOnDesktop>
         <AptPriceTrendCard
           region={site?.region ?? region}
           sigungu={site?.sigungu ?? sigungu}
@@ -1153,11 +1182,11 @@ export default async function AptUnifiedPage({ params }: Props) {
           currentLifecycle={(site as any)?.lifecycle_stage ?? null}
           priceMin={site?.price_min ?? null}
           priceMax={site?.price_max ?? null}
-          totalUnits={site?.total_units ?? null}
+          totalUnits={units.complex ?? units.supply}
         />
       {/* 분양가 범위 바 + D-day 위젯 */}
       {((site?.price_min && site?.price_max) || sub) && (
-        <div id="price-section" style={{ display: 'grid', gridTemplateColumns: (site?.price_min && site?.price_max && sub) ? 'minmax(0,1fr) minmax(0,1fr)' : '1fr', gap: 6, marginBottom: 14, scrollMarginTop: SECTION_SCROLL_MARGIN }}>
+        <div style={{ display: 'grid', gridTemplateColumns: (site?.price_min && site?.price_max && sub) ? 'minmax(0,1fr) minmax(0,1fr)' : '1fr', gap: 6, marginBottom: 14 }}>
           {/* 분양가 범위 바 — 시각 강화 */}
           {site?.price_min && site?.price_max && (() => {
             const pMin = site.price_min;
@@ -1220,7 +1249,7 @@ export default async function AptUnifiedPage({ params }: Props) {
           slug={slug}
           currentSite={{
             name,
-            total_units: site?.total_units ?? null,
+            total_units: units.supply ?? units.complex ?? null,
             price_min: site?.price_min ?? null,
             price_max: site?.price_max ?? null,
             lifecycle_stage: (site as any)?.lifecycle_stage ?? null,
@@ -1228,17 +1257,13 @@ export default async function AptUnifiedPage({ params }: Props) {
           }}
         />
         <AptBlogStack slug={slug} />
+      </DetailSection>
 
       {/* v10-B5/B8: 알림 6단계와 인근 단지 top3 를 걷어낸 사이드바.
            280px 컬럼을 없애고 본문 폭으로 편다 — 남은 것은 같은 시공사 링크뿐이다. */}
       <AptSidebar slug={slug} builder={site?.builder ?? sub?.constructor_nm ?? null} isLoggedIn={isLoggedInApt} />
 
-      <details id="stats-section" className="apt-card" style={{ scrollMarginTop: SECTION_SCROLL_MARGIN }}>
-        <summary style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', cursor: 'pointer', listStyle: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span>상세 데이터 더보기</span>
-          <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>펼치기 +</span>
-        </summary>
-        <div style={{ marginTop: 'var(--sp-md)' }}>
+      <DetailSection id="stats-section" title="상세 데이터">
       {/* 규제 요약 — 전매/거주/재당첨 신호등 */}
       {sub && (sub.transfer_limit_years || sub.residence_obligation_years || sub.rewin_limit_years || sub.is_price_limit || sub.loan_rate) && (
         <div style={{ marginBottom: 14 }}>
@@ -1361,14 +1386,15 @@ export default async function AptUnifiedPage({ params }: Props) {
         </section>
       )}
 
+      </DetailSection>
+
       {/* v10 §10: 모집공고는 AI 종합 분석 뒤로 내렸다.
-           읽는 흐름이 '판단(분석) → 원문 확인(공고)' 순이라 원문 요약이 마지막이다. */}
-      {/* 모집공고 핵심 요약 — 통합 카드 */}
+           읽는 흐름이 '판단(분석) → 원문 확인(공고)' 순이라 원문 요약이 마지막이다.
+           V15 B: 상세 데이터 안에 들어 있던 것을 형제 아코디언으로 꺼냈다 —
+           점프바 '모집공고' 칩이 닫힌 details 안을 가리키고 있었다. */}
       {sub && (
-        <div id="notice-section" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: '16px', marginBottom: 'var(--sp-md)', scrollMarginTop: SECTION_SCROLL_MARGIN }}>
-          <section aria-labelledby="apt-sec-h4" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--sp-md)' }}>
-            <SectionHeader id="apt-sec-h4" title="모집공고 핵심 요약" />
-          </section>
+        <DetailSection id="notice-section" title="모집공고 핵심 요약">
+          <div>
 
           {/* AI 분석 — 상단 히어로에 이미 표시되므로 중복 제거 */}
 
@@ -1733,8 +1759,14 @@ export default async function AptUnifiedPage({ params }: Props) {
             <SectionShareButton section="announcement" label={`${name} 모집공고 요약`} text={`${name} 입주자모집공고 핵심 요약 — ${sub.constructor_nm || site?.builder || ''} 시공, ${sub.tot_supply_hshld_co || site?.total_units || ''}세대`} pagePath={`/apt/${slug}`} />
             {sub.pblanc_url && <a href={sub.pblanc_url} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 'var(--radius-md)', background: 'var(--accent-green-bg)', border: '1px solid var(--accent-green-border)', color: 'var(--accent-green)', fontSize: 13, fontWeight: 700, textDecoration: 'none' }}>청약홈 원문</a>}
           </div>
-        </div>
+          </div>
+        </DetailSection>
       )}
+
+      {/* V15 B · 경쟁률 · 시세 · 실거래 —
+           내용이 하나도 없으면 아코디언 자체를 렌더하지 않는다. 빈 껍데기 금지. */}
+      {hasMarketBlocks && (
+        <DetailSection id="market-section" title="경쟁률 · 시세 · 실거래">
 
       {/* Competition rate */}
       {sub?.competition_rate_1st && Number(sub.competition_rate_1st) > 0 && (
@@ -2044,13 +2076,24 @@ export default async function AptUnifiedPage({ params }: Props) {
           <Link href={`/apt/complex/${encodeURIComponent(name)}`} style={{ display: 'block', textAlign: 'center', marginTop: 10, padding: '8px 0', borderRadius: 'var(--radius-sm)', background: 'var(--brand-bg)', color: 'var(--brand)', fontSize: 'var(--fs-sm)', fontWeight: 600, textDecoration: 'none' }}>전체 실거래 내역 보기 →</Link>
         </section>
       )}
+        </DetailSection>
+      )}
+
+      {/* V15 B · 커뮤니티 · 관련 글 */}
+      {(relatedPosts.length > 0 || relatedBlogs.length > 0) && (
+        <DetailSection id="related-section" title="커뮤니티 · 관련 분석">
+
       {/* Related posts */}
       {relatedPosts.length > 0 && <section aria-labelledby="apt-sec-h6" className="apt-card"><SectionHeader id="apt-sec-h6" title="커뮤니티 게시글" />{relatedPosts.map((p: Record<string, any>) => <Link key={p.id} href={`/feed/${p.id}`} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none', color: 'inherit', fontSize: 'var(--fs-sm)' }}><span style={{ color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</span><span style={{ color: 'var(--text-tertiary)', flexShrink: 0, marginLeft: 8, fontSize: 'var(--fs-xs)' }}>댓글 {p.comments_count || 0}</span></Link>)}</section>}
 
       {/* Related blogs */}
       {relatedBlogs.length > 0 && <section aria-labelledby="apt-sec-h7" className="apt-card"><SectionHeader id="apt-sec-h7" title="관련 분석 블로그" />{relatedBlogs.map((b: Record<string, any>) => <Link key={b.slug} href={`/blog/${b.slug}`} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none', color: 'inherit', fontSize: 'var(--fs-sm)' }}><span style={{ color: 'var(--text-primary)', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.title}</span><span style={{ color: 'var(--text-tertiary)', flexShrink: 0, marginLeft: 8, fontSize: 'var(--fs-xs)' }}>{(b.view_count || 0).toLocaleString()}</span></Link>)}</section>}
-        </div>
-      </details>
+        </DetailSection>
+      )}
+
+      {/* V15 B · 접이식 점진 향상. open 속성만 건드린다 (콘텐츠는 손대지 않는다).
+           히어로가 LCP 라 그 근처가 아니라 여기서 마운트한다. */}
+      <AccordionEnhancer />
 
       {/* 댓글 섹션 */}
       {site?.slug && <AptCommentSection slug={site.slug} siteName={name} />}
