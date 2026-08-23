@@ -98,6 +98,17 @@ export default async function AptPage({
   //    get_apt_subscription_hub 에 플래그가 붙은 뒤에 처리한다 (DB 는 채팅 담당).
   const curated = hub.cards.slice(0, 3);
 
+  // v4-C6: 조회 창이 60일보다 넓으면 반드시 밝힌다.
+  //   안 밝히면 6개월 전 공고가 오늘 것처럼 보인다.
+  const windowLabel =
+    hub.window_days >= 365 ? '최근 1년'
+    : hub.window_days >= 180 ? '최근 6개월'
+    : hub.window_days > 60 ? `최근 ${hub.window_days}일`
+    : null;
+  const cardsMeta = windowLabel
+    ? `${hub.region} · ${windowLabel} ${hub.counts.cards}곳`
+    : '상태 → 마감 임박 순';
+
   return (
     <div className="kd-list">
       <div className="kd-list-main">
@@ -108,19 +119,49 @@ export default async function AptPage({
       {/* 지역 선택 — 인라인 칩. 페이지 이동 없이 목록만 갱신된다. */}
       <RegionChips regions={hub.regions} current={hub.region} />
 
-      {hub.region_fallback ? (
+      {/* v4-C6: 지역을 버리고 전국으로 갈아타던 폴백이 없어졌다.
+           17개 시·도 중 11곳이 접수중 0건이라 그 폴백은 사실상 상시 발동 중이었고,
+           사용자는 부산을 눌렀는데 전국 목록을 보고 있었다.
+           이제 조회 창을 60 → 180 → 365 로 넓히고, 그래도 없으면 비었다고 말한다. */}
+      {hub.region_empty ? (
         <p
           style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
             margin: '0 6px 12px',
-            padding: '7px 10px',
+            padding: '9px 10px',
             borderRadius: 6,
-            background: 'var(--bg-elevated, #f9fafb)',
-            border: '1px solid var(--border, #1e3258)',
+            background: 'var(--bg-elevated)',
+            border: '1px solid var(--border)',
             fontSize: 11.5,
-            color: 'var(--text-secondary, #6b7280)',
+            color: 'var(--text-secondary)',
           }}
         >
-          {hub.requested_region}에 진행 예정인 청약이 없어 전국 일정을 보여드립니다.
+          <span style={{ flex: 1, minWidth: 0 }}>
+            {hub.requested_region}에는 최근 1년 청약 공고가 없습니다
+          </span>
+          {/* 자동 전환이 아니라 링크다 — 고른 지역을 말없이 바꾸지 않는다 */}
+          <Link
+            href="/apt"
+            scroll={false}
+            style={{
+              flexShrink: 0,
+              display: 'inline-flex',
+              alignItems: 'center',
+              minHeight: 32,
+              padding: '0 12px',
+              borderRadius: 'var(--radius-pill)',
+              background: 'var(--brand)',
+              color: '#FFFFFF',
+              fontSize: 11.5,
+              fontWeight: 700,
+              textDecoration: 'none',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            전국 보기
+          </Link>
         </p>
       ) : null}
 
@@ -148,7 +189,7 @@ export default async function AptPage({
           id="apt-cards-heading"
           eyebrow="FEATURED — 분양중"
           title="청약"
-          meta="상태 → 마감 임박 순"
+          meta={cardsMeta}
         />
 
         {hub.cards.length > 0 ? (
