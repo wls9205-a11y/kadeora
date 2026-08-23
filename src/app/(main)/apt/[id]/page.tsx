@@ -18,6 +18,7 @@ import KakaoDirectShare from '@/components/KakaoDirectShare';
 import Disclaimer from '@/components/Disclaimer';
 import SiteHero from '@/components/apt/SiteHero';
 import SiteJumpBar, { SECTION_SCROLL_MARGIN } from '@/components/apt/SiteJumpBar';
+import SiteDetailRail from '@/components/apt/SiteDetailRail';
 import SimilarAptsSection from '@/components/apt/SimilarAptsSection';
 import LeadForm from '@/components/apt/LeadForm';
 import { isLeadEligible } from '@/lib/apt/lead-eligibility';
@@ -601,7 +602,8 @@ export default async function AptUnifiedPage({ params }: Props) {
   }).find(s => s['@type'] === 'ItemList');
 
   return (
-    <article style={{ maxWidth: 'var(--container-read)', margin: '0 auto', padding: '0 var(--sp-lg)' }} itemScope itemType='https://schema.org/ApartmentComplex'>
+    <article className="kd-detail" itemScope itemType='https://schema.org/ApartmentComplex'>
+      <div className="kd-detail-main">
       {noindex && <meta name="robots" content="noindex,follow" />}
       {site?.id && <AptViewTracker siteId={site.id} />}
 
@@ -1182,12 +1184,12 @@ export default async function AptUnifiedPage({ params }: Props) {
            30일 실측: 카톡방 클릭 7건(sticky 6 / inline 1) vs leads 누적 1건.
            리드폼은 없애지 않고 8번 블록 뒤로 내린다 — 전화 통화를 원하는 층의 유일한 경로이고,
            오픈채팅 URL 이 파라미터를 못 받아 '누가·어느 현장에서' 를 남기는 경로도 폼뿐이다. */}
-      <SiteTalkCTA
+      <div className="kd-lg-hide"><SiteTalkCTA
         siteName={name}
         siteSlug={slug}
         remainingUnits={(site as any)?.remaining_units ?? null}
         priceUndisclosed={!site?.price_min && !site?.price_max && !unsold?.sale_price_min}
-      />
+      /></div>
 
       {/* ── 7번 블록 · 핵심 포인트 + FAQ ── */}
       {features.length > 0 && (
@@ -2070,10 +2072,10 @@ export default async function AptUnifiedPage({ params }: Props) {
            하단 탭바(z-100)·글쓰기 FAB(z-99)와의 겹침은 컴포넌트 안에서 처리한다. */}
       <SiteActionBar siteSlug={slug} showLeadForm={showLeadForm} />
       {/* Nearby sites (internal linking SEO) */}
-      {nearbySites.length > 0 && <section aria-labelledby="apt-sec-h8" className="apt-card"><SectionHeader id="apt-sec-h8" eyebrow="NEARBY" title={`${region} 다른 현장`} /><div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 'var(--sp-sm)' }}>{nearbySites.map((ns: Record<string, any>) => <Link key={ns.slug} href={`/apt/${ns.slug}`} className="kd-card" style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: 10, textDecoration: 'none', color: 'inherit', overflow: 'hidden' }}><div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 2 }}>{ns.name}</div><div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ns.sigungu || ns.region} · {ns.total_units ? `${ns.total_units}세대` : ''} · {tLabel[ns.site_type]}</div></Link>)}</div></section>}
+      {nearbySites.length > 0 && <section aria-labelledby="apt-sec-h8" className="apt-card kd-lg-hide"><SectionHeader id="apt-sec-h8" eyebrow="NEARBY" title={`${region} 다른 현장`} /><div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 'var(--sp-sm)' }}>{nearbySites.map((ns: Record<string, any>) => <Link key={ns.slug} href={`/apt/${ns.slug}`} className="kd-card" style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: 10, textDecoration: 'none', color: 'inherit', overflow: 'hidden' }}><div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 2 }}>{ns.name}</div><div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ns.sigungu || ns.region} · {ns.total_units ? `${ns.total_units}세대` : ''} · {tLabel[ns.site_type]}</div></Link>)}</div></section>}
 
       {/* 지역 허브 내부 링크 */}
-      {(region || sigungu) && <div className="apt-card" style={{ padding: '12px 14px' }}><div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+      {(region || sigungu) && <div className="apt-card kd-lg-hide" style={{ padding: '12px 14px' }}><div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
         {region && <Link href={`/apt/region/${encodeURIComponent(region)}`} style={{ padding: '5px 12px', background: 'var(--bg-hover)', borderRadius: 20, textDecoration: 'none', fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600 }}>{region} 부동산</Link>}
         {region && sigungu && <Link href={`/apt/area/${encodeURIComponent(region)}/${encodeURIComponent(sigungu)}`} style={{ padding: '5px 12px', background: 'var(--bg-hover)', border: '1px solid var(--accent-blue)', borderRadius: 20, textDecoration: 'none', fontSize: 11, color: 'var(--accent-blue)', fontWeight: 600 }}>{sigungu} 시세</Link>}
         {region && sigungu && site?.dong && <Link href={`/apt/area/${encodeURIComponent(region)}/${encodeURIComponent(sigungu)}/${encodeURIComponent(site.dong)}`} style={{ padding: '5px 12px', background: 'var(--bg-hover)', borderRadius: 20, textDecoration: 'none', fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600 }}>{site.dong} 아파트</Link>}
@@ -2098,6 +2100,21 @@ export default async function AptUnifiedPage({ params }: Props) {
 
       <Disclaimer type="apt" />
       <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textAlign: 'center', margin: '8px 0 40px', lineHeight: 1.6 }}>데이터 출처: 국토교통부 · 청약홈 · 한국부동산원 · 각 지자체</p>
+      </div>
+
+      {/* v3 커밋4 · 데스크탑 우측 레일 (≥1024px). 모바일에서는 CSS 로 렌더되지 않는다.
+           ①리드폼 진입 ②카톡(부가) ③같은 지역 현장 ④바로가기 — 상세의 1순위는 폼이다. */}
+      <aside className="kd-detail-rail" aria-label="현장 요약">
+        <SiteDetailRail
+          siteSlug={slug}
+          siteName={name}
+          region={region}
+          sigungu={site?.sigungu}
+          dong={site?.dong}
+          showLeadForm={showLeadForm}
+          nearby={nearbySites}
+        />
+      </aside>
     </article>
   );
 }

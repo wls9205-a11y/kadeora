@@ -30,6 +30,7 @@ export const TALK_MEMBER_COUNT = 1240;
  *   site_cta     현장 상세 6번 블록 — 현장 맥락 텍스트 CTA
  *   supply_table 공급/위치 정보 표의 `미공개` 칸 인라인 링크
  *   bottom_bar   모바일 하단 고정 바
+ *   rail         현장 상세 데스크탑 우측 레일 (v3 커밋4 · ≥1024px 에서만 렌더)
  *   faq          FAQ 마지막 항목
  *   inline       블로그 본문 이미지 배너 (레거시)
  */
@@ -38,6 +39,7 @@ export type TalkSlot =
   | 'site_cta'
   | 'supply_table'
   | 'bottom_bar'
+  | 'rail'
   | 'faq'
   | 'inline';
 

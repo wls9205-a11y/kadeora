@@ -29,6 +29,7 @@ export default function SiteJumpBar({ items }: { items: JumpItem[] }) {
   return (
     <nav
       aria-label="섹션 바로가기"
+      className="kd-jumpbar"
       style={{
         position: 'sticky',
         top: HEADER_HEIGHT,
