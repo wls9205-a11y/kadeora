@@ -7,11 +7,10 @@
 // 데이터: stock_issue_scores / apt_issue_scores 직접 query + get_home_data hero/blog
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import Image from 'next/image';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { SITE_URL as SITE } from '@/lib/constants';
-import StockIssueCard from '@/components/cards/StockIssueCard';
-import AptIssueCard from '@/components/cards/AptIssueCard';
+import StockListRow from '@/components/stock/StockListRow';
+import { HomeAptRow, HomeBlogRow } from '@/components/home/HomeListRows';
 import SectionHeader from '@/components/apt/SectionHeader';
 import type { StockIssueScore, AptIssueScore } from '@/lib/issue/types';
 import type { HomeData } from '@/lib/home/contracts';
@@ -275,7 +274,7 @@ export default async function HomePage() {
         {apts.length === 0 ? (
           <Empty label="이슈 단지 데이터 준비 중" />
         ) : (
-          apts.map((a) => <AptIssueCard key={a.id} data={a} />)
+          apts.map((a) => <HomeAptRow key={a.id} data={a} />)
         )}
       </section>
 
@@ -285,7 +284,20 @@ export default async function HomePage() {
         {domestic.length === 0 ? (
           <Empty label="이슈 점수 데이터 준비 중" />
         ) : (
-          domestic.map((s) => <StockIssueCard key={s.symbol} data={s} />)
+          domestic.map((s) => (
+            <StockListRow
+              key={s.symbol}
+              symbol={s.symbol}
+              name={s.name}
+              price={s.price}
+              changePct={s.change_pct}
+              score={s.score}
+              reasons={s.reasons}
+              warning={s.warning}
+              meta={s.sector}
+              spark={s.sparkline_5d}
+            />
+          ))
         )}
       </section>
 
@@ -293,7 +305,20 @@ export default async function HomePage() {
       {overseas.length > 0 && (
         <section style={{ marginBottom: 18 }}>
           <SectionHeader eyebrow="OVERSEAS — 뉴욕증시" title="해외 이슈 종목" id="home-overseas" meta={<Link href="/stock?tab=issue" style={{ color: 'var(--text-tertiary)', textDecoration: 'none' }}>전체 →</Link>} />
-          {overseas.map((s) => <StockIssueCard key={s.symbol} data={s} />)}
+          {overseas.map((s) => (
+            <StockListRow
+              key={s.symbol}
+              symbol={s.symbol}
+              name={s.name}
+              price={s.price}
+              changePct={s.change_pct}
+              score={s.score}
+              reasons={s.reasons}
+              warning={s.warning}
+              meta={s.sector}
+              spark={s.sparkline_5d}
+            />
+          ))}
         </section>
       )}
 
@@ -303,36 +328,12 @@ export default async function HomePage() {
         {blogs.length === 0 ? (
           <Empty label="블로그 준비 중" />
         ) : (
-          <div style={{ display: 'grid', gap: 6 }}>
+          <div>
             {blogs.map((b) => (
-              <Link
+              <HomeBlogRow
                 key={b.slug}
-                href={`/blog/${b.slug}`}
-                style={{
-                  display: 'flex', gap: 10, padding: 8, margin: 3,
-                  borderRadius: 'var(--radius-sm, 6px)',
-                  background: 'var(--bg-surface, #0D1730)',
-                  border: '1px solid var(--border, #1E3258)',
-                  textDecoration: 'none',
-                  color: 'var(--text-primary, #F2F5FA)',
-                }}
-              >
-                {b.cover_image ? (
-                  <span style={{ position: 'relative', width: 64, height: 48, flexShrink: 0, borderRadius: 4, overflow: 'hidden', background: 'var(--bg-sunken, #030710)' }}>
-                    <Image src={b.cover_image} alt="" fill sizes="64px" style={{ objectFit: 'cover' }} />
-                  </span>
-                ) : null}
-                <span style={{ minWidth: 0, flex: 1 }}>
-                  <span style={{ fontSize: 12.5, fontWeight: 600, lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>
-                    {b.title}
-                  </span>
-                  {/* s274 — 누적 view_count 는 봇이 섞여 있어 표기하지 않는다.
-                      집계가 된 경우에만 '최근 30일 실제 독자 수' 를 보여준다. */}
-                  <span style={{ display: 'block', fontSize: 11, color: 'var(--text-tertiary, #8BA3C0)', marginTop: 2 }}>
-                    {b.category ?? ''}{b.readers ? ` · 최근 30일 ${b.readers.toLocaleString()}명` : ''}
-                  </span>
-                </span>
-              </Link>
+                post={{ slug: b.slug, title: b.title, cover_image: b.cover_image, category: b.category, readers: b.readers }}
+              />
             ))}
           </div>
         )}

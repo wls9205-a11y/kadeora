@@ -7,6 +7,7 @@ import IssueScoreBadge from '@/components/issue/IssueScoreBadge';
 import IssueReasonChips from '@/components/issue/IssueReasonChips';
 import WarningLabel from '@/components/issue/WarningLabel';
 import CommentChip from '@/components/comments/CommentChip';
+import { aptHref } from '@/lib/apt/hub';
 import type { AptIssueScore } from '@/lib/issue/types';
 
 type Props = {
@@ -38,7 +39,10 @@ export default function AptIssueCard({ data, commentCount = 0, commentHot = fals
     data.dday != null && data.dday >= 0 && data.dday <= 3 ? '#DC2626' :
     data.dday != null && data.dday <= 7  ? '#EF4444' :
     data.dday != null && data.dday <= 30 ? '#F59E0B' : '#9CA3AF';
-  const url = href ?? `/apt/subscription/${data.id}`;
+  // v7-D1: /apt/subscription 라우트는 존재하지 않는다 (src/app/(main)/apt 에 없음) —
+  //   이 기본값을 쓰던 홈 카드 5건이 전부 404 로 가고 있었다.
+  //   /apt 목록·홈 행과 같은 aptHref 로 통일한다.
+  const url = href ?? aptHref({ house_nm: data.house_nm, house_manage_no: null, id: data.id });
 
   // s274 — StockIssueCard 와 동일하게 .kd-lc* 클래스로 이동. 색만 변수로 전달.
   return (
