@@ -10,8 +10,12 @@ import React from 'react';
 import Link from 'next/link';
 
 export interface SectionHeaderProps {
-  /** 라틴 대문자. 예: 'FEATURED — 분양중' */
-  eyebrow: string;
+  /**
+   * 라틴 대문자. 예: 'FEATURED — 분양중'
+   * v3: 선택 항목. 상세 페이지(apt/[id] · stock/[symbol])는 넘기지 않는다 —
+   * eyebrow 7개가 연속으로 나오면 리듬이 아니라 소음이다. 목록은 그대로 쓴다.
+   */
+  eyebrow?: string;
   /** 한글 제목. 이모지를 넣지 않는다. */
   title: string;
   /** h2 의 id — 상위 section 의 aria-labelledby 와 짝을 맞춘다. */
@@ -32,22 +36,24 @@ export default function SectionHeader({ eyebrow, title, id, meta }: SectionHeade
       }}
     >
       <div style={{ minWidth: 0 }}>
-        <div
-          style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: 'var(--fs-xs)',
-            letterSpacing: '.14em',
-            textTransform: 'uppercase',
-            color: 'var(--brand)',
-            fontWeight: 600,
-            marginBottom: 3,
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-          }}
-        >
-          {eyebrow}
-        </div>
+        {eyebrow ? (
+          <div
+            style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: 'var(--fs-xs)',
+              letterSpacing: '.14em',
+              textTransform: 'uppercase',
+              color: 'var(--brand)',
+              fontWeight: 600,
+              marginBottom: 3,
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
+          >
+            {eyebrow}
+          </div>
+        ) : null}
         <h2
           id={id}
           style={{
