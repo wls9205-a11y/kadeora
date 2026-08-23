@@ -56,9 +56,13 @@ export function aptBlockMeta(blockKey: string | undefined) {
   };
 }
 
-// ItemList JSON-LD — 상위 5개 종목 / 단지.
+// ItemList JSON-LD — 상위 5개 종목.
+//
+// v8: aptItemListJsonLd 는 삭제했다. 호출부가 0건인데 안에 /apt/subscription/{id} —
+// 실재하지 않는 라우트가 남아 있었다. 지금 색인에 나가지는 않지만 누가 되살리면
+// 죽은 URL 을 구조화 데이터로 제출하게 된다 (AptThumbnailCard·AptIssueCard 와 같은 유형).
+// /apt 의 ItemList 는 lib/apt/subscription-schema.ts 가 aptHref() 로 이미 만들고 있다.
 type StockItem = { symbol: string; name: string; price?: number | null };
-type AptItem = { id: number | string; house_nm: string; region_nm?: string | null };
 
 export function stockItemListJsonLd(tabLabel: string, items: StockItem[]) {
   return {
@@ -71,21 +75,6 @@ export function stockItemListJsonLd(tabLabel: string, items: StockItem[]) {
       position: i + 1,
       name: `${s.name} (${s.symbol})`,
       url: `${SITE_URL}/stock/${s.symbol}`,
-    })),
-  };
-}
-
-export function aptItemListJsonLd(blockLabel: string, items: AptItem[]) {
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'ItemList',
-    name: `카더라 부동산 ${blockLabel} TOP ${Math.min(items.length, 5)}`,
-    numberOfItems: Math.min(items.length, 5),
-    itemListElement: items.slice(0, 5).map((a, i) => ({
-      '@type': 'ListItem',
-      position: i + 1,
-      name: `${a.house_nm}${a.region_nm ? ` (${a.region_nm})` : ''}`,
-      url: `${SITE_URL}/apt/subscription/${a.id}`,
     })),
   };
 }
