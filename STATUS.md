@@ -83,18 +83,32 @@ guide·trend·region·saving·tax·invest)로 `.eq('sub_category', k)` 하면 �
 **C6-2 `17a7af24` — `region_fallback` 제거.** RPC payload 에서 사라진 것을 직접 확인하고
 `hub.ts` 3곳(필드·EMPTY_HUB·normalize) 정리. `grep -rn` 0건.
 
+**C9-3 `5480f726` — `SUB_NORM_ALIASES` 거울 제거 (해결).**
+`v_blog_posts_listing`(blog_posts.* + sub_norm + group_key)가 생겨 사본을 통째로 지웠다.
+`.in('sub_category', subNormRaws(sub))` → **`.eq('sub_norm', sub)` 한 줄**.
+본문 목록과 다음 페이지 미리보기 두 쿼리 모두 뷰로 옮겼다.
+이제 칩 건수(`v_blog_subcat_counts`)와 목록 건수(`v_blog_posts_listing`)가
+**같은 함수 하나(`fn_blog_subcat_norm`)에서 나온다 — 구조적으로 어긋날 수 없다.**
+표현식 인덱스 `idx_blog_posts_sub_norm` 으로 인덱스 스캔(실측 6.4ms).
+생성 컬럼을 안 쓴 것은 의도 — 함수를 고쳐도 저장값이 재계산되지 않아 드리프트가 더 조용해진다.
+권한 확인(Rule #17): anon·authenticated·service_role SELECT — 공개 콘텐츠 목록이라 의도대로.
+
+**C9-4 `13b6380c` — 그룹 탭 필터도 `group_key` 로 (지시 범위 밖 추가 정리).**
+같은 이유다. 묶는 규칙의 원본은 `fn_blog_group` 인데 목록 조회가 프론트 상수
+`CAT_GROUPS` 를 타고 있었다. 그 함수에 카테고리가 추가되면 프론트만 모르고 그 글들이
+다시 도달 불가가 된다 — **C5 의 redev 287편이 정확히 그 증상이었다.**
+그룹 탭은 `.eq('group_key', category)`, 레거시 단일값은 그대로 `category`.
+`fn_blog_group` 의 ELSE 가 `'life'` 라 새 카테고리는 자동으로 재테크·생활에 들어온다.
+`CAT_GROUPS` 는 탭 건수·서브칩 합산에만 남는다 (증상이 남더라도 탭 건수만 어긋나고
+목록은 어긋나지 않는다).
+
 ### 남은 것 (DB 담당 범위)
 
-1. **`SUB_NORM_ALIASES` 사본 제거** — 현재 `blog/page.tsx` 가 DB 의
-   `fn_blog_subcat_norm` CASE 문을 거울처럼 들고 있다. PostgREST 로는 프론트에서 그
-   함수를 호출할 수 없고 목록 조회는 원본 `sub_category` 를 걸러야 해서 생긴 사본이다.
-   둘 중 하나가 생기면 사본을 통째로 지우고 `.eq('sub_norm', sub)` 한 줄이 된다:
-   (a) `blog_posts.sub_norm` 생성 컬럼(GENERATED ALWAYS AS … STORED) + 인덱스
-   (b) `sub_norm` 으로 필터되는 글 목록 뷰
-   **드리프트 증상: 칩 건수와 실제 목록 건수가 어긋난다.**
-2. blog `sub_category` taxonomy 통합 — 뷰가 정규화로 덮고는 있으나 원본은 여전히
+1. blog `sub_category` taxonomy 통합 — 뷰가 정규화로 덮고는 있으나 원본은 여전히
    두 세대(`청약·분양` / `cheongak`·`preempt_coverage`·`lotto_cheongak`)가 공존한다
-3. 검색 결과 품질 — 청약 항목 404·끝난 공고 상위 (C2 는 진입점만 손댔다)
+2. 검색 결과 품질 — 청약 항목 404·끝난 공고 상위 (C2 는 진입점만 손댔다)
+3. `CAT_GROUPS` 잔여 사본 — 탭 건수 합산용. `fn_blog_group` 기준 그룹별 발행 수를
+   주는 집계가 있으면 이것도 없앨 수 있다 (우선순위 낮음 — 목록에는 영향 없다)
 
 ### 미검증 (브라우저 실측 필요)
 
