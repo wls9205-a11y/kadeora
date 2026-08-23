@@ -13,8 +13,13 @@ import StockTabCarousel from '@/components/carousel/StockTabCarousel';
 import CurationCarousel from '@/components/ui/CurationCarousel';
 import StockCurationCard from '@/components/stock/StockCurationCard';
 import StockListRow from '@/components/stock/StockListRow';
+import StockFilterBars from '@/components/stock/StockFilterBars';
 import { stockTabMeta, stockItemListJsonLd } from '@/lib/seo/per-tab-meta';
 import type { StockIssueScore } from '@/lib/issue/types';
+import {
+  resolveParams, marketValues, sortLabel, marketLabel,
+  type StockParams,
+} from '@/lib/stock/filters';
 
 export const revalidate = 60;
 export const maxDuration = 10;
@@ -63,37 +68,115 @@ type StockRow = {
   sector?: string | null;
 };
 
-async function fetchByTab(tab: string, limit = 30): Promise<{ kind: 'issue' | 'plain'; rows: StockIssueScore[] | StockRow[] }> {
-  const sb = getSupabaseAdmin();
-  if (tab === 'issue') {
+/** v7-C1 — 테마 칩 목록. 최신 날짜 · is_hot 우선 · 12개. 실패하면 빈 배열(줄이 사라진다). */
+async function fetchThemeNames(): Promise<string[]> {
+  try {
+    const sb = getSupabaseAdmin();
+    const { data: latest } = await (sb as any)
+      .from('stock_themes').select('date').order('date', { ascending: false }).limit(1).maybeSingle();
+    if (!latest?.date) return [];
     const { data } = await (sb as any)
-      .from('stock_issue_scores').select('*').is('warning', null)
-      .order('score', { ascending: false, nullsFirst: false }).limit(limit);
+      .from('stock_themes')
+      .select('theme_name, is_hot')
+      .eq('date', latest.date)
+      .order('is_hot', { ascending: false })
+      .limit(12);
+    return Array.from(new Set(((data ?? []) as { theme_name: string }[]).map((t) => t.theme_name).filter(Boolean)));
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * v7-C1 — 테마에 속한 심볼. stock_themes 는 하루 한 벌 갱신되고 테마당 3~7종목이다.
+ * 테마를 안 고르면 조회하지 않는다. 실패하면 null 을 돌려 필터를 걸지 않는다
+ * (테마 조회 실패가 목록 전체를 비우면 안 된다).
+ */
+async function themeSymbols(theme: string): Promise<string[] | null> {
+  if (!theme) return null;
+  try {
+    const sb = getSupabaseAdmin();
+    const { data } = await (sb as any)
+      .from('stock_themes')
+      .select('related_symbols, date')
+      .eq('theme_name', theme)
+      .order('date', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    const syms = Array.isArray(data?.related_symbols) ? (data.related_symbols as string[]) : [];
+    return syms.length > 0 ? syms : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * v7-C1: 시장 × 정렬(× 테마) 2축 조회.
+ *
+ * 시장은 stock_issue_scores·stock_quotes 양쪽에 market 컬럼이 있어 같은 방식으로 걸린다.
+ * 실측값은 KOSPI / KOSDAQ / NYSE / NASDAQ 4종뿐이라 해외 = NYSE+NASDAQ 이다.
+ */
+async function fetchStocks(
+  params: StockParams,
+  limit = 30,
+): Promise<{ kind: 'issue' | 'plain'; rows: StockIssueScore[] | StockRow[] }> {
+  const sb = getSupabaseAdmin();
+  const { sort, theme } = params;
+  const markets = marketValues(params.market);
+  const syms = await themeSymbols(theme);
+
+  /** 두 테이블에 같은 방식으로 붙는 공통 필터. */
+  const applyFilters = (q: any) => {
+    let out = q;
+    if (markets) out = out.in('market', markets);
+    if (syms) out = out.in('symbol', syms);
+    return out;
+  };
+
+  if (sort === 'issue') {
+    let q = (sb as any).from('stock_issue_scores').select('*').is('warning', null);
+    q = applyFilters(q);
+    const { data } = await q.order('score', { ascending: false, nullsFirst: false }).limit(limit);
     return { kind: 'issue', rows: (data ?? []) as StockIssueScore[] };
   }
-  // 그 외 탭은 stock_quotes 직접 query
+
   const baseCols = 'symbol,name,market,price,change_pct,volume,market_cap,sector';
-  if (tab === 'mcap') {
-    const { data } = await (sb as any).from('stock_quotes').select(baseCols)
-      .eq('is_active', true).order('market_cap', { ascending: false, nullsFirst: false }).limit(limit);
+  const quotes = () => applyFilters((sb as any).from('stock_quotes').select(baseCols).eq('is_active', true));
+
+  if (sort === 'mcap') {
+    const { data } = await quotes().order('market_cap', { ascending: false, nullsFirst: false }).limit(limit);
     return { kind: 'plain', rows: (data ?? []) as StockRow[] };
   }
-  if (tab === 'gain') {
-    const { data } = await (sb as any).from('stock_quotes').select(baseCols)
-      .eq('is_active', true).order('change_pct', { ascending: false, nullsFirst: false }).limit(limit);
+  if (sort === 'gain') {
+    const { data } = await quotes().order('change_pct', { ascending: false, nullsFirst: false }).limit(limit);
     return { kind: 'plain', rows: (data ?? []) as StockRow[] };
   }
-  if (tab === 'loss') {
-    const { data } = await (sb as any).from('stock_quotes').select(baseCols)
-      .eq('is_active', true).order('change_pct', { ascending: true, nullsFirst: false }).limit(limit);
+  if (sort === 'loss') {
+    const { data } = await quotes().order('change_pct', { ascending: true, nullsFirst: false }).limit(limit);
     return { kind: 'plain', rows: (data ?? []) as StockRow[] };
   }
-  if (tab === 'volume') {
-    const { data } = await (sb as any).from('stock_quotes').select(baseCols)
-      .eq('is_active', true).order('volume', { ascending: false, nullsFirst: false }).limit(limit);
+  if (sort === 'volume') {
+    const { data } = await quotes().order('volume', { ascending: false, nullsFirst: false }).limit(limit);
     return { kind: 'plain', rows: (data ?? []) as StockRow[] };
   }
-  if (tab === 'foreign') {
+  if (sort === 'foreign') return fetchForeign(sb, limit, markets, syms);
+  // 'watch' 는 클라이언트 세션이 필요하다 — 비로그인 시 빈 배열
+  return { kind: 'plain', rows: [] };
+}
+
+/** 레거시 탭 프리페치용 (캐러셀 모드에서만 쓴다). */
+async function fetchByTab(tab: string, limit = 30): Promise<{ kind: 'issue' | 'plain'; rows: StockIssueScore[] | StockRow[] }> {
+  return fetchStocks({ market: 'all', sort: tab as StockParams['sort'], theme: '' }, limit);
+}
+
+async function fetchForeign(
+  sb: ReturnType<typeof getSupabaseAdmin>,
+  limit: number,
+  markets: readonly string[] | null,
+  syms: string[] | null,
+): Promise<{ kind: 'issue' | 'plain'; rows: StockIssueScore[] | StockRow[] }> {
+  const baseCols = 'symbol,name,market,price,change_pct,volume,market_cap,sector';
+
     // s274 정확성 수정.
     //
     // 이전 구현은 날짜 필터 없이 date DESC 로 limit*2(=60) 행을 가져왔다.
@@ -126,18 +209,25 @@ async function fetchByTab(tab: string, limit = 30): Promise<{ kind: 'issue' | 'p
     }
     const symbols = Array.from(map.entries()).sort((a, b) => b[1] - a[1]).map((e) => e[0]);
     if (symbols.length === 0) return { kind: 'plain', rows: [] };
-    const { data: q } = await (sb as any).from('stock_quotes').select(baseCols)
-      .in('symbol', symbols);
-    const rows = (q ?? []) as StockRow[];
-    rows.sort((a, b) => (map.get(b.symbol) ?? 0) - (map.get(a.symbol) ?? 0));
-    return { kind: 'plain', rows };
-  }
-  // 'watch' 탭은 클라이언트 필요 (user 세션) — 비로그인 시 빈 배열
-  return { kind: 'plain', rows: [] };
+    // v7-C1: 시장·테마 필터를 여기에도 건다. 안 걸면 '코스닥 + 외인' 이 전체 결과를 준다.
+    let qq = (sb as any).from('stock_quotes').select(baseCols).in('symbol', symbols);
+    if (markets) qq = qq.in('market', markets);
+    if (syms) qq = qq.in('symbol', syms);
+    const { data: q } = await qq;
+  const rows = (q ?? []) as StockRow[];
+  rows.sort((a, b) => (map.get(b.symbol) ?? 0) - (map.get(a.symbol) ?? 0));
+  return { kind: 'plain', rows };
 }
 
-export default async function StockPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
+export default async function StockPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string; market?: string; sort?: string; theme?: string }>;
+}) {
   const sp = await searchParams;
+  // v7-C1: ?market= ?sort= ?theme= 3축. 기존 ?tab= 은 sort 로 매핑해 계속 받는다
+  //   (색인·북마크가 걸려 있다).
+  const params = resolveParams(sp);
   const tab = (sp.tab ?? 'issue') as string;
 
   // s262 Phase E: CAROUSEL 모드 — 7 탭 모두 prefetch + Embla carousel
@@ -172,8 +262,11 @@ export default async function StockPage({ searchParams }: { searchParams: Promis
     );
   }
 
-  // Legacy single-tab UI (flag off, default)
-  const { kind, rows } = await fetchByTab(tab, 30);
+  // 기본 UI (캐러셀 플래그 off)
+  const [{ kind, rows }, themes] = await Promise.all([
+    fetchStocks(params, 30),
+    fetchThemeNames(),
+  ]);
   // 이슈 탭은 행에 sparkline_5d 가 이미 있어 추가 조회를 하지 않는다.
   const sparks =
     kind === 'plain'
@@ -183,28 +276,13 @@ export default async function StockPage({ searchParams }: { searchParams: Promis
     <Suspense>
       <div className="kd-list">
         <div className="kd-list-main">
-        <h1 className="sr-only">주식 시세 — {TAB_LABELS.find((t) => t.key === tab)?.label ?? '이슈'}</h1>
+        <h1 className="sr-only">
+          {marketLabel(params.market)} 주식 — {sortLabel(params.sort)}
+          {params.theme ? ` · ${params.theme}` : ''}
+        </h1>
 
-        {/* Sticky tab bar */}
-        {/* s274 — 인라인 style → .kd-tabbar/.kd-tab (components.css).
-            활성 상태 색은 CSS 의 [aria-selected='true'] 가 처리한다. */}
-        <nav role="tablist" aria-label="주식 정렬" className="kd-tabbar">
-          {TAB_LABELS.map((t) => {
-            const active = t.key === tab;
-            return (
-              <Link
-                key={t.key}
-                role="tab"
-                aria-selected={active}
-                href={t.key === 'issue' ? '/stock' : `/stock?tab=${t.key}`}
-                prefetch={false}
-                className="kd-tab"
-              >
-                {t.label}
-              </Link>
-            );
-          })}
-        </nav>
+        {/* v7-C1: 단일 축 탭 7개 → 시장 × 정렬 2축 (+ 테마 선택) */}
+        <StockFilterBars params={params} themes={themes} />
 
         {/* v3 커밋5 · 큐레이션 3건 — 이슈 탭에서만. 점수의 근거를 여기서 편다. */}
         {kind === 'issue' && (rows as StockIssueScore[]).length > 0 && (
