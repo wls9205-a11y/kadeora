@@ -6,15 +6,18 @@
 //
 // ⚠️ 메타 줄에 세대수를 넣지 말 것 — 넣으면 뒤 항목이 항상 잘린다. 세대수는 우측 열이 맡는다.
 // ⚠️ 좌측 상태 칩이 생겼으므로 본문 상태 배지는 중복이다 (삭제됨).
-// ⚠️ AptHubItem 에는 시공사 필드가 없다 (hub.ts:20). 설계안의 `지역 · 시공사` 중
-//    시공사 자리는 1순위 접수일로 채웠다 — 없는 값을 추측해 채우지 않는다.
-//    시공사를 넣으려면 get_apt_subscription_hub RPC 에 컬럼 추가가 선행돼야 한다.
+// v4-C7-1: 좌측 칸을 썸네일 64×64 로 바꾸고 상태 칩은 제목 줄 앞 배지로 옮겼다.
+//    썸네일이 없어도 같은 64×64 이니셜 블록이 자리를 지킨다 — 보유율 지역 편차가 커서
+//    (부산 94% · 경기 33%) 빈 칸을 허용하면 행 정렬이 지역마다 달라진다.
+// v4-C6: RPC 가 builder 를 실어 주면서 메타 줄이 설계안대로 `지역 · 시공사` 가 됐다.
+//    시공사가 없는 현장만 1순위 접수일로 떨어진다.
 
 import Link from 'next/link';
 import { aptHref, type AptHubItem } from '@/lib/apt/hub';
 import { formatComplexName, formatRegionShortSafe } from '@/lib/apt/subscription-status';
 import { rowStatusChip } from '@/lib/apt/subscription-badge';
 import LifecycleRail from '@/components/apt/LifecycleRail';
+import ListThumb from '@/components/ui/ListThumb';
 
 function fmtDate(d: string | null): string | null {
   if (!d) return null;
@@ -33,16 +36,22 @@ export default function SubscriptionCard({ item }: { item: AptHubItem }) {
   const rate = isAfterReceipt && item.competition_rate != null ? Number(item.competition_rate) : null;
 
   const recept = fmtDate(item.rcept_bgnde);
-  const meta = [formatRegionShortSafe(item.region_nm), recept ? `1순위 ${recept}` : null]
+  const meta = [
+    formatRegionShortSafe(item.region_nm),
+    item.builder || (recept ? `1순위 ${recept}` : null),
+  ]
     .filter(Boolean)
     .join(' · ');
 
   return (
-    <Link href={href} className="kd-lrow" style={{ textDecoration: 'none', color: 'inherit' }}>
-      <span className={chip.tone ? `kd-lrow-k ${chip.tone}` : 'kd-lrow-k'}>{chip.label}</span>
+    <Link href={href} className="kd-lrow kd-lrow--thumb" style={{ textDecoration: 'none', color: 'inherit' }}>
+      <ListThumb src={item.thumb_url} name={item.house_nm || name} />
 
       <span style={{ minWidth: 0 }}>
-        <span className="kd-lrow-t">{name}</span>
+        <span className="kd-lrow-t">
+          <span className={chip.tone ? `kd-lrow-badge ${chip.tone}` : 'kd-lrow-badge'}>{chip.label}</span>
+          {name}
+        </span>
         <span className="kd-lrow-m">
           <span>{meta}</span>
           <span className="kd-lrow-m-fix" style={{ display: 'inline-flex', width: 62 }}>

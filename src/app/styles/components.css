@@ -531,3 +531,41 @@
   white-space: nowrap;
 }
 .kd-rail-panel a:last-child { border-bottom: 0; }
+
+/* ── v4-C7 · 목록 좌측 썸네일 ─────────────────────────────────
+   이미지가 있든 없든 같은 64×64 를 차지한다. 보유율 지역 편차가 커서
+   (부산 94% · 경기 33%) 빈 칸을 허용하면 행 정렬이 지역마다 달라진다. */
+
+.kd-lrow-thumb {
+  flex-shrink: 0;
+  display: block;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+}
+
+/* 썸네일이 붙은 행 — 높이 상한 72px (썸네일 64 + 상하 여백 8). */
+.kd-lrow--thumb {
+  padding: 4px 2px;
+  min-height: 72px;
+}
+
+/* 제목 줄 앞으로 옮긴 상태 배지. 좌측 칩 자리는 썸네일이 가져갔다. */
+.kd-lrow-badge {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-right: 5px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: var(--bg-sunken);
+  color: var(--text-tertiary);
+  font-size: 9.5px;
+  font-weight: 800;
+  line-height: 1.5;
+  vertical-align: 1px;
+  white-space: nowrap;
+}
+.kd-lrow-badge.is-hot  { background: var(--accent-red-bg);    color: var(--accent-red); }
+.kd-lrow-badge.is-on   { background: var(--accent-green-bg);  color: var(--accent-green); }
+.kd-lrow-badge.is-rest { background: var(--accent-orange-bg); color: var(--accent-orange); }
+.kd-lrow-badge.is-soon { background: var(--accent-blue-bg);   color: var(--brand); }

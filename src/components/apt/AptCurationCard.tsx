@@ -2,10 +2,10 @@
 //
 // 목록 행(.kd-lrow)이 못 담는 것만 담는다: D-day, 7칸 진행 레일, 확인 날짜, 알림 CTA.
 //
-// ⚠️ 설계안의 'VWorld 출처' 는 넣지 못했다. AptHubItem(hub.ts:20)에는 이미지도
-//    apt_sites 조인 키도 없어 위성 이미지와 그 출처를 알 방법이 없다.
-//    출처 표기 없이 위성 이미지를 그리는 것은 하지 않는다 — 없는 값을 만들지 않는다.
-//    이미지를 넣으려면 get_apt_subscription_hub RPC 에 컬럼 추가가 선행돼야 한다.
+// v4-C7-1: RPC 가 thumb_url 을 실어 주면서 이미지와 출처가 들어왔다.
+//    /apt 페이지가 thumb_url 보유분만 큐레이션으로 넘긴다 — 여기는 크게 나가는 자리라
+//    이니셜 블록으로 채우지 않는다 ('있는 척' 이 되는 건 큰 이미지 자리다).
+//    ⚠️ 출처 표기 없이 위성 이미지를 그리지 않는다. VWorld 는 출처 명시가 이용 조건이다.
 //
 // ⚠️ 여기 올라온 3건을 아래 목록에서 빼지 않는다. 프론트만으로 불가능하고
 //    이름 문자열 매칭으로 빼는 우회는 금지다. 중복을 허용하고
@@ -17,6 +17,11 @@ import { formatComplexName, formatRegionShortSafe } from '@/lib/apt/subscription
 import { rowStatusChip, statusLabel } from '@/lib/apt/subscription-badge';
 import LifecycleRail from '@/components/apt/LifecycleRail';
 import SubscriptionAlertButton from '@/components/apt/SubscriptionAlertButton';
+
+/** 자체 호스팅 위성 이미지인지. 출처 문구가 갈린다 — 표기를 섞지 않는다. */
+function isSatellite(url: string): boolean {
+  return url.includes('/satellite/');
+}
 
 function fmtToday(d: string): string {
   const [, m, day] = (d || '').split('-');
@@ -41,6 +46,24 @@ export default function AptCurationCard({ item, today }: { item: AptHubItem; tod
         padding: '12px 13px',
       }}
     >
+      {item.thumb_url && (
+        <Link
+          href={aptHref(item)}
+          style={{ display: 'block', margin: '-12px -13px 10px', aspectRatio: '16 / 9', background: 'var(--bg-elevated)', overflow: 'hidden' }}
+        >
+          <img
+            src={item.thumb_url}
+            alt=""
+            width={480}
+            height={270}
+            loading="lazy"
+            decoding="async"
+            referrerPolicy="no-referrer"
+            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+          />
+        </Link>
+      )}
+
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 7 }}>
         <span className={chip.tone ? `kd-lrow-k ${chip.tone}` : 'kd-lrow-k'} style={{ width: 'auto', padding: '4px 8px' }}>
           {chip.label}
@@ -64,6 +87,7 @@ export default function AptCurationCard({ item, today }: { item: AptHubItem; tod
       <p style={{ margin: '0 0 9px', fontSize: 11, color: 'var(--text-tertiary)', lineHeight: 1.45 }}>
         {[
           formatRegionShortSafe(item.region_nm),
+          item.builder,
           item.households ? `${item.households.toLocaleString('ko-KR')}세대` : null,
         ].filter(Boolean).join(' · ')}
       </p>
@@ -92,6 +116,14 @@ export default function AptCurationCard({ item, today }: { item: AptHubItem; tod
           </span>
         )}
       </div>
+
+      {item.thumb_url && (
+        <p style={{ margin: '8px 0 0', fontSize: 9.5, lineHeight: 1.4, color: 'var(--text-tertiary)' }}>
+          {isSatellite(item.thumb_url)
+            ? '항공 이미지 · 국토교통부 공간정보 오픈플랫폼(VWorld)'
+            : '이미지 제공 · 시행사'}
+        </p>
+      )}
     </article>
   );
 }
