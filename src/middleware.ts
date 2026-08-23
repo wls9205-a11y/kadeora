@@ -1,6 +1,8 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { isValidKrRegion, isoToKrRegion } from '@/lib/region-detection';
+// V15 A-1: 병합된 구 slug 256건. 자동 생성 파일 — scripts/gen-merged-slugs.mjs 참조.
+import { survivorSlug } from '@/lib/apt/merged-slugs';
 
 const PROTECTED_PATHS = ['/write', '/payment', '/profile', '/notifications', '/admin'];
 const PUBLIC_PATHS = ['/login', '/auth', '/onboarding', '/terms', '/privacy', '/faq'];
@@ -80,6 +82,38 @@ export async function middleware(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = pathname.replace('/apt/subscription/', '/apt/');
     return NextResponse.redirect(url, 308);
+  }
+
+  // ── V15 A-1: 병합된 구 slug → 생존 slug (301 permanent) ──
+  //
+  // 중복 256쌍을 병합하면서 진 쪽 행이 is_active=false 가 됐다. 그 slug 로 들어오면
+  // 상세 페이지가 404 를 낸다 — 색인과 블로그 내부 링크가 거기 걸려 있다.
+  //
+  // ⚠️ 308 이 아니라 301 이다. 영구 이동이고 검색엔진이 색인을 옮겨야 한다.
+  //    (Next 의 permanentRedirect() 는 308 만 낼 수 있어 여기서 처리한다.)
+  // ⚠️ 정적 맵이다. DB 를 요청마다 때리지 않는다 — 256건이라 번들 부담이 없다.
+  //    apt_site_merges 가 바뀌면 scripts/gen-merged-slugs.mjs 를 다시 돌릴 것.
+  //
+  // 한 토막짜리 경로만 본다 — /apt/{slug} 형태다. /apt/pipeline·/apt/archive 같은
+  // 정적 세그먼트는 맵에 없어 어차피 걸리지 않지만, 하위 경로까지 훑을 이유가 없다.
+  if (pathname.startsWith('/apt/')) {
+    const rest = pathname.slice('/apt/'.length);
+    if (rest && !rest.includes('/')) {
+      // 한글 slug 라 요청은 퍼센트 인코딩으로 온다. 맵의 키는 원문이다.
+      let key = rest;
+      try {
+        key = decodeURIComponent(rest);
+      } catch {
+        // 위 XSS 가드가 이미 걸러내지만, 여기서도 원문 그대로 두고 넘어간다.
+      }
+      const survivor = survivorSlug(key);
+      if (survivor) {
+        const url = request.nextUrl.clone();
+        url.pathname = `/apt/${encodeURIComponent(survivor)}`;
+        // 쿼리스트링은 clone() 이 그대로 들고 온다 (유입 파라미터 n_query·NaPm 보존).
+        return NextResponse.redirect(url, 301);
+      }
+    }
   }
 
   // ── [L1-6] Crawler retry throttle ──

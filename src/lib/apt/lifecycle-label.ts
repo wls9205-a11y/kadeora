@@ -49,7 +49,11 @@ export const LIFECYCLE_LABEL: Record<string, string> = {
 
   // 입주 이후
   pre_move_in: '입주 예정',
-  move_in_ready: '입주 준비',
+  // ⚠️ move_in_ready 는 이름과 달리 "입주 준비" 가 아니라 "계약 체결 기간 종료" 다.
+  //    실측 720건 전부 입주예정 202609~203104(과거 0건) — 입주는 아직 미래다.
+  //    이 단계는 리드폼 노출 대상이라 파워링크 랜딩에도 뜬다. '입주 준비' 로 쓰면
+  //    광고 랜딩에서 사실과 다른 말을 하게 된다 (lib/apt/lead-eligibility.ts 참조).
+  move_in_ready: '입주 예정',
   move_in: '입주',
   move_in_started: '입주중',
   post_move_in: '입주 후',

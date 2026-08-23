@@ -26,12 +26,11 @@ export const APT_PIPELINE_REVALIDATE_SECONDS = 900;
 /** /apt 섹션에 낼 건수. 전체는 /apt/pipeline 이 받는다. */
 export const PIPELINE_SECTION_LIMIT = 8;
 
-/**
- * RPC 의 하드 상한. get_apt_pipeline 이 `least(greatest(p_limit,1),60)` 으로 클램프한다.
- * ⚠️ 전국 총계는 209건이라 전체 보기 페이지도 60건까지만 낼 수 있다.
- *    페이지네이션은 RPC 에 오프셋이 붙은 뒤의 일이다 (DB 담당). 지금은 총계를 솔직히 밝힌다.
- */
+/** RPC 의 하드 상한. get_apt_pipeline 이 `least(greatest(p_limit,1),60)` 으로 클램프한다. */
 export const PIPELINE_MAX_LIMIT = 60;
+
+/** 전체 보기 한 페이지 크기. RPC 의 p_page 오프셋과 짝이다. */
+export const PIPELINE_PAGE_SIZE = 30;
 
 /** 부산·울산·경남을 한 덩어리로 부르는 이름. RPC 가 이 문자열을 특별 취급한다. */
 export const BUGYEONG = '부울경';
@@ -72,42 +71,62 @@ export interface AptPipelineItem {
 
 export interface AptPipelinePayload {
   region: string;
-  /** 필터에 걸린 전체 건수. items.length 는 limit 로 잘린 값이다. */
+  /** 필터에 걸린 전체 건수. items.length 는 이 페이지 몫이다. */
   total: number;
+  page: number;
+  page_size: number;
+  total_pages: number;
   items: AptPipelineItem[];
 }
 
-export const EMPTY_PIPELINE: AptPipelinePayload = { region: BUGYEONG, total: 0, items: [] };
+export const EMPTY_PIPELINE: AptPipelinePayload = {
+  region: BUGYEONG,
+  total: 0,
+  page: 1,
+  page_size: PIPELINE_PAGE_SIZE,
+  total_pages: 0,
+  items: [],
+};
 
-function normalize(raw: unknown, region: string): AptPipelinePayload {
-  if (!raw || typeof raw !== 'object') return { ...EMPTY_PIPELINE, region };
+function normalize(raw: unknown, region: string, limit: number): AptPipelinePayload {
+  if (!raw || typeof raw !== 'object') return { ...EMPTY_PIPELINE, region, page_size: limit };
   const r = raw as Partial<AptPipelinePayload>;
   return {
     region: r.region ?? region,
     total: Number(r.total) || 0,
+    page: Number(r.page) > 0 ? Number(r.page) : 1,
+    page_size: Number(r.page_size) > 0 ? Number(r.page_size) : limit,
+    total_pages: Number(r.total_pages) || 0,
     items: Array.isArray(r.items) ? (r.items as AptPipelineItem[]) : [],
   };
 }
 
-async function fetchPipelineUncached(region: string, limit: number): Promise<AptPipelinePayload> {
+async function fetchPipelineUncached(
+  region: string,
+  limit: number,
+  page: number,
+): Promise<AptPipelinePayload> {
   try {
     const sb = getSupabaseAdmin();
+    // ⚠️ 3인자 필수. 2인자 오버로드는 DB 담당이 DROP 했다 (모호성 제거).
     const { data, error } = await (sb as any).rpc('get_apt_pipeline', {
       p_region: region,
       p_limit: limit,
+      p_page: page,
     });
     if (error) {
       console.error('[apt/pipeline] rpc error:', JSON.stringify(error));
-      return { ...EMPTY_PIPELINE, region };
+      return { ...EMPTY_PIPELINE, region, page, page_size: limit };
     }
-    const payload = normalize(data, region);
+    const payload = normalize(data, region, limit);
     console.log(
-      `[apt/pipeline] region=${region} limit=${limit} items=${payload.items.length} total=${payload.total}`,
+      `[apt/pipeline] region=${region} page=${payload.page}/${payload.total_pages} ` +
+        `items=${payload.items.length} total=${payload.total}`,
     );
     return payload;
   } catch (e: any) {
     console.error('[apt/pipeline] caught:', e?.message ?? String(e));
-    return { ...EMPTY_PIPELINE, region };
+    return { ...EMPTY_PIPELINE, region, page, page_size: limit };
   }
 }
 
@@ -120,11 +139,13 @@ const fetchPipelineCached = unstable_cache(fetchPipelineUncached, ['apt-pipeline
 export async function getAptPipeline(
   region: string,
   limit: number = PIPELINE_SECTION_LIMIT,
+  page: number = 1,
 ): Promise<AptPipelinePayload> {
   const capped = Math.min(Math.max(limit, 1), PIPELINE_MAX_LIMIT);
-  const cached = await fetchPipelineCached(region, capped);
+  const safePage = Math.max(1, Math.floor(page) || 1);
+  const cached = await fetchPipelineCached(region, capped, safePage);
   if (cached.items.length > 0) return cached;
-  return fetchPipelineUncached(region, capped);
+  return fetchPipelineUncached(region, capped, safePage);
 }
 
 /** 현장 상세 링크. slug 가 없으면 상세가 없는 것이므로 링크를 만들지 않는다. */

@@ -3,9 +3,8 @@
 // /apt 섹션은 8건만 낸다. 그 아래 '전체 보기 →' 가 여기로 온다.
 // 지역 전환(전국 · 부울경 · 17개 시·도)은 이 페이지가 받는다.
 //
-// ⚠️ get_apt_pipeline 은 p_limit 을 60 으로 클램프한다. 전국 총계는 209건이라
-//    이 페이지도 60건까지만 낼 수 있다. 총계를 감추지 않고 "209곳 중 60곳" 으로 밝힌다 —
-//    페이지네이션은 RPC 에 오프셋이 붙은 다음의 일이다 (DB 담당).
+// V14: RPC 에 p_page 가 붙어 전 건수를 페이지로 넘긴다 (전국 206건 · 7페이지).
+// 정렬·페이지 조합은 같은 목록의 순열이라 2페이지부터는 색인 대상이 아니다.
 
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -14,7 +13,7 @@ import {
   getAptPipeline,
   normalizePipelineRegion,
   BUGYEONG,
-  PIPELINE_MAX_LIMIT,
+  PIPELINE_PAGE_SIZE,
 } from '@/lib/apt/pipeline';
 import PipelineCard from '@/components/apt/PipelineCard';
 import SectionHeader from '@/components/apt/SectionHeader';
@@ -24,7 +23,7 @@ import { KR_REGIONS_17 } from '@/lib/region-storage';
 export const revalidate = 900;
 export const maxDuration = 15;
 
-type SP = { region?: string };
+type SP = { region?: string; page?: string };
 
 const DESCRIBE =
   '모집공고가 아직 없는 현장입니다. 조합설립·시공사 선정·사업시행인가·착공 단계를 ' +
@@ -33,13 +32,18 @@ const DESCRIBE =
 export async function generateMetadata({ searchParams }: { searchParams: Promise<SP> }): Promise<Metadata> {
   const sp = await searchParams;
   const region = normalizePipelineRegion(sp.region);
-  const title = `${region} 공고 전 아파트 현장 — 조합설립·시공사 선정·착공 단계`;
+  const pageNum = Math.max(1, Number(sp.page) || 1);
+  const title = pageNum > 1
+    ? `${region} 공고 전 아파트 현장 (${pageNum}페이지)`
+    : `${region} 공고 전 아파트 현장 — 조합설립·시공사 선정·착공 단계`;
   const qs = `?region=${encodeURIComponent(region)}`;
 
   return {
     title,
     description: DESCRIBE,
+    // canonical 은 항상 1페이지다 — 2페이지부터는 같은 목록의 순열이다.
     alternates: { canonical: `${SITE_URL}/apt/pipeline${qs}` },
+    ...(pageNum > 1 ? { robots: { index: false, follow: true } } : {}),
     openGraph: {
       title,
       description: DESCRIBE,
@@ -83,17 +87,17 @@ const ROW: React.CSSProperties = {
 export default async function AptPipelinePage({ searchParams }: { searchParams?: Promise<SP> }) {
   const sp = (await searchParams) || {};
   const region = normalizePipelineRegion(sp.region);
-  const data = await getAptPipeline(region, PIPELINE_MAX_LIMIT);
+  const pageNum = Math.max(1, Number(sp.page) || 1);
+  const data = await getAptPipeline(region, PIPELINE_PAGE_SIZE, pageNum);
   const now = Date.now();
 
-  const href = (r: string) => `/apt/pipeline?region=${encodeURIComponent(r)}`;
-  // 잘려 나간 건수를 감추지 않는다.
+  /** 지역을 바꾸면 1페이지로 돌아간다 — 7페이지에서 부산을 고르면 빈 화면이 나온다. */
+  const href = (r: string, page = 1) =>
+    `/apt/pipeline?region=${encodeURIComponent(r)}${page > 1 ? `&page=${page}` : ''}`;
   const meta =
-    data.total > data.items.length
-      ? `${data.total.toLocaleString('ko-KR')}곳 중 ${data.items.length}곳`
-      : data.total > 0
-        ? `${data.total.toLocaleString('ko-KR')}곳`
-        : undefined;
+    data.total > 0
+      ? `${data.total.toLocaleString('ko-KR')}곳${data.total_pages > 1 ? ` · ${data.page}/${data.total_pages}` : ''}`
+      : undefined;
 
   return (
     <div className="kd-list">
@@ -136,11 +140,6 @@ export default async function AptPipelinePage({ searchParams }: { searchParams?:
               {data.items.map((it) => (
                 <PipelineCard key={it.id} item={it} now={now} />
               ))}
-              {data.total > data.items.length && (
-                <p style={{ fontSize: 11, color: 'var(--text-tertiary)', margin: '10px 2px 0' }}>
-                  진행 단계가 앞선 순서로 {data.items.length}곳을 먼저 보여줍니다. 지역을 좁히면 더 많이 볼 수 있습니다.
-                </p>
-              )}
             </div>
           ) : (
             <EmptyState
@@ -151,6 +150,24 @@ export default async function AptPipelinePage({ searchParams }: { searchParams?:
             />
           )}
         </section>
+
+        {data.total_pages > 1 && (
+          <nav aria-label="페이지" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 10, margin: '18px 0 8px' }}>
+            {data.page > 1 ? (
+              <Link href={href(region, data.page - 1)} style={{ ...CHIP, background: 'var(--bg-surface)', color: 'var(--text-secondary)', minHeight: 40, padding: '0 16px' }}>
+                ← 이전
+              </Link>
+            ) : null}
+            <span style={{ fontSize: 12, color: 'var(--text-tertiary)', fontVariantNumeric: 'tabular-nums' }}>
+              {data.page} / {data.total_pages}
+            </span>
+            {data.page < data.total_pages ? (
+              <Link href={href(region, data.page + 1)} style={{ ...CHIP, background: 'var(--brand)', borderColor: 'var(--brand)', color: '#FFFFFF', fontWeight: 700, minHeight: 40, padding: '0 16px' }}>
+                다음 →
+              </Link>
+            ) : null}
+          </nav>
+        )}
       </div>
     </div>
   );
