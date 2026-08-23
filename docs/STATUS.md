@@ -1,3 +1,37 @@
+### S10-0 — 무인증 어드민 API 봉인 (2026-08-23)
+
+`src/middleware.ts` 는 `pathname.startsWith('/admin')` 만 검사한다. `/api/admin/*` 은 그 대상이 아니므로
+라우트마다 가드를 직접 걸어야 하는데, 5개가 `getSupabaseAdmin()`(service_role, RLS 우회)을 쓰면서
+인증 검사가 전혀 없었다. 각 핸들러 첫 줄에 `requireAdmin()` 삽입.
+
+| 라우트 | 메서드 | 무인증 시 가능했던 일 |
+|---|---|---|
+| `issues/publish` | POST | 블로그 실제 발행 + IndexNow 제출 |
+| `issues/config` | POST | 자동발행 on/off·최소점수·차단 카테고리 변경 |
+| `issues/skip` | POST | 이슈 상태 변경 |
+| `issues` | GET | draft 전문 100건 노출 |
+| `naver-syndication/[id]` | GET | 신디케이션 콘텐츠 전문 노출 |
+
+**검증(로컬 프로덕션 서버 실측):** 무인증 요청 5개 전부 `401 {"error":"Unauthorized"}`.
+`npx tsc --noEmit` PASS / `npm run build` PASS.
+**회귀 없음 근거:** 5개 엔드포인트의 `src` 내 호출자 0건을 전수 확인. 어드민 화면이 쓰는 이슈 관련
+엔드포인트는 `issues/run-pipeline` 하나뿐이고 그건 이미 가드가 있었다.
+**롤백:** tag `pre-s10-20260823` (d29d31b4)
+
+**지시서 전제와 다른 점 (실물 기준으로 정정)**
+- `/api/admin` 라우트 총계는 96개가 아니라 **95개**.
+- 무인증 라우트는 5개가 아니라 **6개**. 추가분은 `api/admin/satellite/route.ts`(GET/POST).
+  다만 이 라우트는 410 고정 응답이고 `getSupabaseAdmin()` 을 아예 쓰지 않아 노출되는 데이터가 없다.
+  S10-0(=service_role 무인증 봉인) 성격이 아니므로 가드를 넣지 않았다. S10-4-D 삭제 후보로 이미 등재돼 있다.
+
+**S10-1 중 Claude Code 몫:** `src/lib/bot-classify.ts` 상단에 정본 규약 주석만 추가(로직 변경 없음).
+사람 = `bot_type === 'human'`. 빈 문자열/NULL 기준 금지. 뷰 3개 정정은 채팅(DB) 담당이라 SQL 미실행.
+
+**발견했지만 범위 밖이라 손대지 않은 것**
+- `src/app/admin/v4/sections/OpsSection.tsx:84` 가 `var(--accent)` 를 쓰는데 `globals.css` 에 그 이름의
+  정의가 없다 → 색이 빈 값으로 떨어져 상속색으로 렌더된다. `--border-base`(s273c)·`--text-danger`와 같은 부류.
+  S10-5-B(죽은 다크 폴백 정리)에서 같이 처리하는 게 맞다.
+
 ### s273c — 지역 목록 페이지 정리 + 미정의 CSS 변수 일괄 제거 (2026-08-06)
 
 **① `--border-base` 미정의 — s273b 와 같은 부류를 내가 또 심었음**
