@@ -36,6 +36,11 @@ import { sigunguCounts, sigunguOf } from '@/lib/apt/sigungu';
 import { pickCuration } from '@/lib/apt/hero-priority';
 import AptCurationCard from '@/components/apt/AptCurationCard';
 import EmptyState from '@/components/ui/EmptyState';
+// V13 A-1 — 공고 전 현장. 허브 RPC 가 apt_subscriptions 전용이라 활성 현장의 절반이
+//   이 목록에 닿지 못했다. get_apt_pipeline 은 공고 없는 현장만 내므로 위 목록과 겹치지 않는다.
+import { getAptPipeline, normalizePipelineRegion, BUGYEONG, BUGYEONG_REGIONS, PIPELINE_SECTION_LIMIT } from '@/lib/apt/pipeline';
+import PipelineCard from '@/components/apt/PipelineCard';
+import { SectionLink } from '@/components/apt/SectionHeader';
 
 // Next 는 segment config 를 정적 분석하므로 리터럴이어야 한다 (import 식별자 불가).
 // lib/apt/hub.ts 의 APT_HUB_REVALIDATE_SECONDS 와 같은 값으로 유지할 것.
@@ -90,7 +95,17 @@ export default async function AptPage({
   const st = sp.st?.trim() || '';
   const isAutoRegion = !sp.region;
 
-  const hub = await getAptHub(region);
+  // V13 A-1: 공고 전 현장은 허브와 별개 RPC 다. 두 조회는 서로 기다릴 이유가 없다.
+  //   지역 규칙 — 부산·울산·경남 중 하나를 고르면 벨트 전체(부울경)를 묶어서 본다.
+  //   '전국'(자동 선택 포함)일 때도 부울경으로 좁힌다: 전국 209곳을 8칸에 담으면
+  //   수도권 대형 현장이 전부 밀어내 부울경 집중이라는 목적 자체가 사라진다.
+  const pipelineRegion = normalizePipelineRegion(
+    region === '전국' || (BUGYEONG_REGIONS as readonly string[]).includes(region) ? BUGYEONG : region,
+  );
+  const [hub, pipeline] = await Promise.all([
+    getAptHub(region),
+    getAptPipeline(pipelineRegion, PIPELINE_SECTION_LIMIT),
+  ]);
 
   // v4-C8: 시군구 칩은 hub.cards 에서 뽑는다 — 조회가 늘지 않고, 목록에 실제로 있는
   //   시군구만 나온다 (부산 16개 구를 전부 내면 C3 에서 고친 문제가 반복된다).
@@ -124,6 +139,10 @@ export default async function AptPage({
   // 관련 블로그는 지금 노출 중인 단지 기준으로 뽑는다 (metadata.apt_id 매핑, s273 규약)
   const visibleIds = [...cards, ...hub.results].map((it) => it.id);
   const relatedBlogs = await getRelatedBlogs(visibleIds);
+
+  // NEW 배지(단계 변경 30일 이내) 기준 시각. 행마다 Date.now() 를 부르면
+  //   한 렌더 안에서 기준이 갈린다. 한 번 찍어 내려보낸다.
+  const pipelineNow = Date.now();
 
   const events = buildSubscriptionEvents(cards);
   const itemList = cards.length > 0 ? buildSubscriptionItemList(cards, hub.region) : null;
@@ -281,6 +300,36 @@ export default async function AptPage({
           />
         )}
       </section>
+
+      {/* ③-2 · V13 A-1 공고 전 현장.
+           청약 목록 바로 다음 자리다 — "지금 접수중" 을 다 본 사람이 다음으로 묻는 게
+           "그럼 아직 공고 안 난 데는?" 이다.
+           ⚠️ 데이터가 없으면 섹션을 통째로 렌더하지 않는다. 빈 껍데기를 만들지 않는다. */}
+      {pipeline.items.length > 0 && (
+        <section style={{ padding: '0 6px' }} aria-labelledby="apt-pipeline-heading">
+          <SectionHeader
+            id="apt-pipeline-heading"
+            eyebrow="PIPELINE — 공고 전"
+            title="공고 전 현장"
+            meta={`${pipeline.region} ${pipeline.total.toLocaleString('ko-KR')}곳 · 진행 단계순`}
+          />
+
+          <div>
+            <div className="kd-lhead" aria-hidden="true">
+              <span />
+              <span>현장</span>
+              <span>규모</span>
+            </div>
+            {pipeline.items.map((it) => (
+              <PipelineCard key={it.id} item={it} now={pipelineNow} />
+            ))}
+          </div>
+
+          <SectionLink href={`/apt/pipeline?region=${encodeURIComponent(pipeline.region)}`}>
+            공고 전 현장 전체 보기
+          </SectionLink>
+        </section>
+      )}
 
       {/* ④ 이번 주 청약 결과 */}
       <SubscriptionResults items={hub.results} />

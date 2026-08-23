@@ -25,6 +25,11 @@ import { sanitizeSearchQuery } from '@/lib/sanitize';
 import { headers } from 'next/headers';
 import AptSiteSchema from '@/components/schema/AptSiteSchema';
 import LifecycleRail from '@/components/apt/LifecycleRail';
+// V13 A-2: 단계 라벨 단일 원본. 히어로 배지가 쓴다.
+import { lifecycleLabel as stageLabel } from '@/lib/apt/lifecycle-label';
+// V13 A-3 — 진행 이력. 청약홈에도 아실에도 없는 정보다.
+import { fetchSiteEvents } from '@/lib/apt/site-events';
+import SiteHistoryTimeline from '@/components/apt/SiteHistoryTimeline';
 import SectionHeader from '@/components/apt/SectionHeader';
 import SpecTable from '@/components/detail/SpecTable';
 import CheongakMatchCard from '@/components/apt/CheongakMatchCard';
@@ -43,19 +48,6 @@ import AptBookmarkButton from '@/components/AptBookmarkButton';
 const RegulationBadges = dynamic(() => import('@/components/RegulationBadges'));
 const CostSimulator = dynamic(() => import('@/components/CostSimulator'));
 // C3: ContentLock 제거
-/** v10-B1: AptHero 에서 이관. 히어로 좌상단 배지에 쓴다. */
-const LIFECYCLE_LABEL: Record<string, string> = {
-  site_planning: '부지계획',
-  pre_announcement: '분양 예고',
-  model_house_open: '모델하우스 오픈',
-  special_supply: '특별공급',
-  subscription_open: '청약 진행',
-  contract: '계약',
-  construction: '시공',
-  pre_move_in: '입주 예정',
-  move_in: '입주',
-  resale: '실거래',
-};
 
 const AptCommentSection = dynamic(() => import('@/components/apt/AptCommentSection'));
 
@@ -144,10 +136,16 @@ async function fetchUnifiedData(slug: string) {
   const sourceIds = (site?.source_ids || {}) as Record<string, string>;
 
   // SEO 분석 텍스트 (database.ts에 없는 컬럼 — as any 패턴)
+  //   V13 A-3: 진행 이력을 같은 왕복에 묶는다. 둘 다 site.id 가 정해진 뒤라야 한다.
   let analysisText: string | null = null;
+  let siteEvents: Awaited<ReturnType<typeof fetchSiteEvents>> = [];
   if (site?.id) {
-    const { data: at } = await (sb as any).from('apt_sites').select('analysis_text').eq('id', site.id).maybeSingle();
-    analysisText = at?.analysis_text || null;
+    const [atR, evR] = await Promise.all([
+      (sb as any).from('apt_sites').select('analysis_text').eq('id', site.id).maybeSingle(),
+      fetchSiteEvents(site.id),
+    ]);
+    analysisText = atR?.data?.analysis_text || null;
+    siteEvents = evR;
   }
 
   // Phase 2: 소스 데이터 병렬 조회 (sub + unsold + redev 동시)
@@ -357,7 +355,7 @@ async function fetchUnifiedData(slug: string) {
     mergedRelatedBlogs = mergedRelatedBlogs.slice(0, 8);
   }
 
-  return { site, sub, unsold, redev, trades, relatedBlogs: mergedRelatedBlogs, relatedPosts, nearbySites, sameBuilderSites, regionBenchmark, regionTrades, complexProfiles, name, region, sigungu, slug, analysisText };
+  return { site, sub, unsold, redev, trades, relatedBlogs: mergedRelatedBlogs, relatedPosts, nearbySites, sameBuilderSites, regionBenchmark, regionTrades, complexProfiles, name, region, sigungu, slug, analysisText, siteEvents };
 }
 
 // generateStaticParams 제거 — 전량 ISR on-demand (revalidate=3600)
@@ -524,7 +522,7 @@ export default async function AptUnifiedPage({ params }: Props) {
     notFound();
   }
   if (!d) notFound();
-  const { site, sub, unsold, redev, trades, relatedBlogs, relatedPosts, nearbySites, sameBuilderSites, regionBenchmark, regionTrades, complexProfiles, name, region, sigungu, slug, analysisText } = d!;
+  const { site, sub, unsold, redev, trades, relatedBlogs, relatedPosts, nearbySites, sameBuilderSites, regionBenchmark, regionTrades, complexProfiles, name, region, sigungu, slug, analysisText, siteEvents } = d!;
   const sType = site?.site_type || (sub ? 'subscription' : unsold ? 'unsold' : redev ? 'redevelopment' : trades.length > 0 ? 'trade' : 'subscription');
   const features = Array.isArray(site?.key_features) ? site.key_features : [];
 
@@ -718,12 +716,10 @@ export default async function AptUnifiedPage({ params }: Props) {
         const heroCredit = heroIsDeveloper
           ? ((site as any)?.hero_image_credit || name)
           : '항공 이미지 · 국토교통부 공간정보 오픈플랫폼(VWorld)';
-        const lifecycleLabel = (site as any)?.lifecycle_stage
-          ? (LIFECYCLE_LABEL[(site as any).lifecycle_stage] ?? null)
-          : null;
+        const lifecycleBadge = stageLabel((site as any)?.lifecycle_stage);
         const badgeEl = (
           <div style={{ position: 'absolute', top: 10, left: 12, display: 'flex', gap: 'var(--sp-xs)', flexWrap: 'wrap', zIndex: 2 }}>
-            {lifecycleLabel && <span style={{ fontSize: 10, padding: '3px 10px', borderRadius: 'var(--radius-card)', background: 'rgba(9,13,20,.72)', color: '#FFFFFF', fontWeight: 700 }}>{lifecycleLabel}</span>}
+            {lifecycleBadge && <span style={{ fontSize: 10, padding: '3px 10px', borderRadius: 'var(--radius-card)', background: 'rgba(9,13,20,.72)', color: '#FFFFFF', fontWeight: 700 }}>{lifecycleBadge}</span>}
             {subSt && <span style={{ fontSize: 10, padding: '3px 10px', borderRadius: 'var(--radius-card)', background: SB[subSt].bg.replace('0.15', '0.85'), color: 'var(--text-inverse)', fontWeight: 700 }}>{SB[subSt].label}{dDay !== null ? ` D${dDay > 0 ? '-' + dDay : dDay === 0 ? '-Day' : '+' + Math.abs(dDay)}` : ''}</span>}
             {sub?.is_price_limit && <span style={{ fontSize: 10, padding: '3px 10px', borderRadius: 'var(--radius-card)', background: 'var(--accent-purple)', color: 'var(--text-inverse)', fontWeight: 700 }}>상한제</span>}
             {redevStage && <span style={{ fontSize: 10, padding: '3px 10px', borderRadius: 'var(--radius-card)', background: 'var(--accent-yellow)', color: 'var(--text-inverse)', fontWeight: 700 }}>{redevStage}</span>}
@@ -767,6 +763,7 @@ export default async function AptUnifiedPage({ params }: Props) {
       <SiteJumpBar
         items={[
           { id: 'supply-section',   label: '공급 정보',     show: true },
+          { id: 'history-section',  label: '진행 이력',     show: siteEvents.length > 0 },
           { id: 'location-section', label: '위치',          show: true },
           { id: 'movein-section',   label: '분양 일정',     show: !!sub },
           { id: 'points-section',   label: '핵심 포인트',   show: features.length > 0 },
@@ -1094,6 +1091,26 @@ export default async function AptUnifiedPage({ params }: Props) {
             </section>
           );
         })()}
+        {/* ── V13 A-3 · 진행 이력 ──
+             청약홈에도 아실에도 없는 정보다. 고시·공시·취재가 언제 무엇을 바꿨는지가
+             "세대수는 줄고 층수는 올랐다" 같은 판단의 재료다.
+             ⚠️ 0건이면 섹션을 렌더하지 않는다 — 지금은 대부분 0건이다.
+             ⚠️ 등급(확정·추정·카더라)을 반드시 함께 낸다. 감추면 표시·광고법 문제가 된다. */}
+        {siteEvents.length > 0 && (
+          <section
+            aria-labelledby="apt-sec-history"
+            id="history-section"
+            className="apt-card"
+            style={{ scrollMarginTop: SECTION_SCROLL_MARGIN }}
+          >
+            <SectionHeader id="apt-sec-history" title="진행 이력" meta={`${siteEvents.length}건`} />
+            <SiteHistoryTimeline events={siteEvents} />
+            <p style={{ fontSize: 10.5, lineHeight: 1.55, color: 'var(--text-tertiary)', margin: '2px 0 0' }}>
+              확정은 고시·공시 원문, 추정은 복수 언론, 카더라는 업계·조합 전언입니다. 일정과 계획은 바뀔 수 있습니다.
+            </p>
+          </section>
+        )}
+
         <CheongakMatchCard isLoggedIn={isLoggedInApt} myScore={aptUserCheongakScore} aptName={name} />
 
       {/* ── v10 §8 · 시세 트렌드 · 분양가 분포 · 인근 단지 비교 ── */}

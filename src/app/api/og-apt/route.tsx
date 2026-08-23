@@ -31,18 +31,8 @@ const SITE_TYPE_LABEL: Record<string, string> = {
   complex: '단지',
 };
 
-const LIFECYCLE_LABEL: Record<string, string> = {
-  site_planning: '부지계획',
-  pre_announcement: '분양예정',
-  model_house_open: '견본주택',
-  special_supply: '특별공급',
-  subscription_open: '청약접수',
-  contract: '계약',
-  construction: '시공',
-  pre_move_in: '입주예정',
-  move_in: '입주',
-  resale: '실거래',
-};
+// V13 A-2: 단계 라벨 단일 원본 (lib/apt/lifecycle-label.ts).
+import { LIFECYCLE_LABEL } from '@/lib/apt/lifecycle-label';
 
 function fmtAmount(n: number | null | undefined): string {
   if (n == null || n === 0) return '—';

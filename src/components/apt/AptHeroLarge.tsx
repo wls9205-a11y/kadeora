@@ -4,15 +4,9 @@ import Link from 'next/link';
 import { pickBestAptImage, pickImageCaption } from '@/lib/aptImage';
 import type { AptSiteRow } from '@/lib/apt-fetcher';
 import AptImagePlaceholder from '@/components/apt/_shared/AptImagePlaceholder';
+// V13 A-2: 단계 라벨은 lib/apt/lifecycle-label.ts 단일 원본을 쓴다 (공고 전 4단계 포함).
+import { lifecycleLabel } from '@/lib/apt/lifecycle-label';
 
-const LIFECYCLE_LABEL: Record<string, string> = {
-  site_planning: '부지계획', pre_announcement: '분양 예고',
-  model_house_open: '모델하우스', special_supply: '특별공급',
-  subscription_open: '청약 진행', contract: '계약',
-  construction: '시공', pre_move_in: '입주 예정',
-  move_in: '입주', resale: '실거래', unsold_active: '미분양',
-  award_announced: '당첨자 발표', post_move_in: '입주 후',
-};
 
 interface Props {
   site: AptSiteRow;
@@ -31,7 +25,7 @@ export default function AptHeroLarge({ site, region, sigungu }: Props) {
   const thumb = isSatellite(rawThumb) ? null : rawThumb;
   const showOgBadge = isOgFallback(thumb);
   const caption = pickImageCaption(site.images);
-  const lifecycle = site.lifecycle_stage ? (LIFECYCLE_LABEL[site.lifecycle_stage] || site.lifecycle_stage) : null;
+  const lifecycle = lifecycleLabel(site.lifecycle_stage);
   const sub = [site.region, site.sigungu, site.dong].filter(Boolean).join(' ');
 
   return (

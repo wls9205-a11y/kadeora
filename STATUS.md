@@ -1,3 +1,92 @@
+## V13 1단계 (2026-08-23) — 보이게 만들기 (A-1 · A-2 · A-3)
+
+롤백 지점 `pre-v13-20260823`.
+
+### 왜
+
+활성 현장 5,916곳 중 **2,975곳(50.3%)에 모집공고가 없다**. `/apt` 목록의 원본
+`get_apt_subscription_hub` 는 `apt_subscriptions` 전용이라 이 절반이 한 건도 나오지 않았다.
+상세 페이지는 있는데 **도달 경로가 없었다.** 어드민으로 넣어도 DART 로 잡아도 화면에 안 나온다 —
+그래서 이게 1순위다.
+
+### A-1 · 공고 전 현장 섹션
+
+| 파일 | 역할 |
+|---|---|
+| `src/lib/apt/pipeline.ts` | `get_apt_pipeline` RPC 래퍼. `unstable_cache` 900초, 빈 응답은 캐시에 굳히지 않음(Rule #66) |
+| `src/components/apt/PipelineCard.tsx` | 목록 행. `SubscriptionCard` 와 같은 `.kd-lrow--thumb` |
+| `src/app/(main)/apt/pipeline/page.tsx` | 전체 보기 + 지역 전환(부울경 · 전국 · 17개 시·도) |
+| `src/app/(main)/apt/page.tsx` | 청약 목록과 '이번 주 결과' 사이에 섹션 삽입 |
+
+- 섹션 8건 · 전체 보기는 60건. 허브와 **중복 없음**(RPC 가 공고 없는 현장만 낸다)
+- 좌측 배지가 청약 상태가 아니라 **단계명**(착공·관리처분인가·사업시행인가…)
+- `stage_updated_at` 30일 이내면 `NEW` 배지. 기준 시각은 페이지에서 한 번 찍어 내려보낸다
+- 데이터 0건이면 **섹션을 통째로 렌더하지 않는다**
+- 지역 규칙: 부산·울산·경남 중 하나를 고르면 벨트 전체(부울경). `전국`(자동 선택 포함)도 부울경으로 좁힌다 —
+  전국 209곳을 8칸에 담으면 수도권 대형 현장이 부울경을 전부 밀어낸다
+
+### A-2 · 단계 라벨
+
+라벨 맵이 **4곳에 복사**돼 있었고 값도 서로 달랐다(`분양 예고` vs `분양예정`).
+`src/lib/apt/lifecycle-label.ts` 를 단일 원본으로 만들고 `AptHero` · `AptHeroLarge` ·
+`apt/[id]` · `api/og-apt` 를 전부 여기로 물렸다.
+
+공고 전 **5단계**: 조합설립 · 시공사 선정 · 사업시행인가 · **관리처분인가** · 착공.
+`mgmt_approved` 는 V13 원안 4단계에 없었다 — 이주·철거 직전이자 조합원 분양이 확정되는 단계라
+실무에서 가장 중요한 분기 중 하나다(2026-08-23 추가).
+
+> **부수 효과**: 현장 상세 히어로 배지가 이제 `입주 후` · `입주 준비` · `미분양` 등도 표시한다.
+> 이전에는 `apt/[id]` 의 로컬 맵에 그 키들이 없어 배지가 아예 안 떴다 (`AptHeroLarge` 는 떴다).
+> 맵을 합치면서 정렬됐다. 사실 관계는 맞고, 같은 값이 목록·OG 와 이제 일치한다.
+
+### A-3 · 현장 상세 진행 이력
+
+| 파일 | 역할 |
+|---|---|
+| `src/lib/apt/site-events.ts` | `apt_site_events` 조회 + `confirmedOnly()`(G-1 광고 분기용) |
+| `src/components/apt/SiteHistoryTimeline.tsx` | 세로 타임라인 |
+| `src/app/(main)/apt/[id]/page.tsx` | §7 진행 단계 자리에 배치 + 점프바 항목 추가 |
+
+- **0건이면 렌더하지 않는다.** 조회는 `analysis_text` 와 같은 왕복에 묶어 새 라운드트립 0회
+- 등급 표기: `확정` 검정 · `추정` 회색 · `카더라 · 미확인` 연회색
+- `source` 가 `migration:*` 이면 출처를 말하지 않는다 — 물으면 답이 없는 내부 이관 흔적이다
+- `source_url` 이 있으면 원문 링크(`nofollow noopener`)
+
+### ⚠️ DB 쪽에 남은 것
+
+**`get_apt_pipeline` 이 `mgmt_approved` 를 안 낸다.** RPC 의 `lifecycle_stage IN (...)` 목록과
+`weight` CASE 양쪽에 `mgmt_approved` 가 빠져 있다. 실측 2026-08-23:
+
+| | 현재 | 있어야 할 값 |
+|---|---|---|
+| 부울경 | 34 | 40 |
+| 관리처분인가 누락 | 6곳 | — |
+
+`/apt/부산-감만1-재개발`(관리처분인가)이 목록에 나오지 않는다. 프론트는 값이 실려 오는 즉시
+그리도록 이미 열려 있다 — RPC 두 줄만 고치면 된다.
+
+```sql
+-- IN 목록에 추가
+AND s.lifecycle_stage IN ('site_planning','pre_announcement',
+                          'union_established','constructor_selected',
+                          'plan_approved','mgmt_approved','construction')
+-- weight CASE: 착공 0 → 관리처분 1 → 사업시행인가 2 → 시공사선정 3 → 공고예정 4 → 조합설립 5
+WHEN 'construction' THEN 0 WHEN 'mgmt_approved' THEN 1 WHEN 'plan_approved' THEN 2
+WHEN 'constructor_selected' THEN 3 WHEN 'pre_announcement' THEN 4 WHEN 'union_established' THEN 5
+```
+
+**페이지네이션 없음.** RPC 가 `p_limit` 을 60 으로 클램프한다. 전국 총계 209건이라
+전체 보기도 60건까지다. 감추지 않고 `209곳 중 60곳` 으로 밝힌다 — 오프셋이 붙으면 푼다.
+
+### 지시서와 다르게 한 것
+
+**`/apt` 섹션을 `부울경` 고정이 아니라 선택 지역을 따르게 했다.**
+지시서는 `get_apt_pipeline('부울경')` 호출이라고만 적었지만, `/apt` 에는 지역 칩이 있다.
+서울을 고른 사람에게 부울경 목록을 보여주면 칩이 거짓말이 된다.
+부산·울산·경남·전국 → 부울경, 그 외 → 고른 지역. 섹션 헤더가 어느 지역인지 항상 밝힌다.
+
+---
+
 ## V10 (2026-08-23) — 현장 상세 재정렬 (단일 커밋 `967a4c47`)
 
 롤백 지점 `pre-v10-20260823`. 큰 재배치라 **한 커밋** — 부분 revert 가 의미 없다.

@@ -1,17 +1,7 @@
 import React from 'react';
+// V13 A-2: 단계 라벨 단일 원본.
+import { lifecycleLabel } from '@/lib/apt/lifecycle-label';
 
-const LIFECYCLE_LABEL: Record<string, string> = {
-  site_planning: '부지계획',
-  pre_announcement: '분양 예고',
-  model_house_open: '모델하우스 오픈',
-  special_supply: '특별공급',
-  subscription_open: '청약 진행',
-  contract: '계약',
-  construction: '시공',
-  pre_move_in: '입주 예정',
-  move_in: '입주',
-  resale: '실거래',
-};
 
 interface Props {
   site: {
@@ -28,7 +18,7 @@ interface Props {
 
 export default function AptHero({ site, interestCount }: Props) {
   const region = [site.region, site.sigungu, site.dong].filter(Boolean).join(' ');
-  const lifecycle = site.lifecycle_stage ? LIFECYCLE_LABEL[site.lifecycle_stage] || site.lifecycle_stage : null;
+  const lifecycle = lifecycleLabel(site.lifecycle_stage);
   const meta: string[] = [];
   if (site.builder) meta.push(site.builder);
   if (site.total_units) meta.push(`${site.total_units.toLocaleString()}세대`);
