@@ -42,6 +42,9 @@ import EmptyState from '@/components/ui/EmptyState';
 //   이 목록에 닿지 못했다. get_apt_pipeline 은 공고 없는 현장만 내므로 위 목록과 겹치지 않는다.
 import { getAptPipeline, normalizePipelineRegion, BUGYEONG, BUGYEONG_REGIONS, PIPELINE_SECTION_LIMIT } from '@/lib/apt/pipeline';
 import PipelineCard from '@/components/apt/PipelineCard';
+// V16 E-3 — 이번 주 움직인 현장. 카더라가 남보다 빠르다는 걸 보여주는 자리다.
+import { getAptRecentMoves } from '@/lib/apt/recent-moves';
+import RecentMovesStrip from '@/components/apt/RecentMovesStrip';
 import { SectionLink } from '@/components/apt/SectionHeader';
 
 // Next 는 segment config 를 정적 분석하므로 리터럴이어야 한다 (import 식별자 불가).
@@ -104,9 +107,11 @@ export default async function AptPage({
   const pipelineRegion = normalizePipelineRegion(
     region === '전국' || (BUGYEONG_REGIONS as readonly string[]).includes(region) ? BUGYEONG : region,
   );
-  const [hub, pipeline] = await Promise.all([
+  const [hub, pipeline, recentMoves] = await Promise.all([
     getAptHub(region),
     getAptPipeline(pipelineRegion, PIPELINE_SECTION_LIMIT),
+    // 움직인 현장도 파이프라인과 같은 지역 규칙을 따른다 — 두 섹션이 다른 지역을 말하면 안 된다.
+    getAptRecentMoves(pipelineRegion),
   ]);
 
   // v4-C8: 시군구 칩은 hub.cards 에서 뽑는다 — 조회가 늘지 않고, 목록에 실제로 있는
@@ -257,6 +262,11 @@ export default async function AptPage({
 
       {/* ① 청약 타임라인 히어로 */}
       <SubscriptionTimeline items={hub.timeline} region={hub.region} />
+
+      {/* ①-2 · V16 E-3 이번 주 움직인 현장.
+           히어로 바로 다음 = 콘텐츠 스택의 맨 위다. 여기가 비면 아무것도 그리지 않는다 —
+           "움직인 현장 없음" 을 내지 않는다. */}
+      <RecentMovesStrip items={recentMoves} region={pipeline.region} now={pipelineNow} />
 
       {/* ② 도구 칩 — 데이터가 0건인 날에도 항상 노출. 재개발 칩은 현재 지역을 따라간다. */}
       <AptToolChips region={hub.region} />

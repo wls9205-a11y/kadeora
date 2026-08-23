@@ -47,7 +47,7 @@ type Admin = ReturnType<typeof getSupabaseAdmin>;
  * 청약·입주 단계는 모집공고와 크론이 정한다 — 사람이 손으로 되돌리면 다음 크론이 덮고,
  * 그 사이 화면이 두 번 바뀐다.
  */
-export const ADMIN_STAGES = [
+const ADMIN_STAGES = [
   ...PIPELINE_STAGES,
   'site_planning',
   'pre_announcement',
