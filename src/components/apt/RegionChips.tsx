@@ -21,7 +21,7 @@ export interface RegionCount {
 }
 
 type Props = {
-  /** RPC 가 준 17개 시·도 집계 (live desc 정렬) */
+  /** RPC 가 준 17개 시·도 집계 (정렬은 여기서 다시 한다) */
   regions: RegionCount[];
   /** 실제로 적용된 지역 ('전국' 포함) */
   current: string;
@@ -52,10 +52,18 @@ export default function RegionChips({ regions, current }: Props) {
     (name) => byName.get(name) ?? { region: name, live: 0, recent: 0 },
   );
 
-  // 청약 진행 중 → 최근 물량 많은 순 → 이름. 빈 지역은 자연스럽게 뒤로 밀린다.
-  full.sort(
-    (a, b) => b.live - a.live || b.recent - a.recent || a.region.localeCompare(b.region, 'ko'),
-  );
+  // v4-C3: [접수중 1건 이상 · 가나다] → [나머지 · 가나다].
+  //
+  // 이전 정렬은 live DESC → recent DESC → 이름이라 접수 건수가 바뀔 때마다
+  // 칩 순서가 매일 바뀌었다. 사용자는 '부산' 을 찾으려고 매번 처음 보는 배열을 훑는다.
+  // 2그룹 구분은 유지하되 그룹 내부는 가나다 고정 — 위치 기억이 성립해야 한다.
+  // 접수 건수는 순서가 아니라 칩 안 배지가 말한다.
+  // recent 는 이제 정렬에도 쓰지 않는다 (그룹 판정은 live 만).
+  full.sort((a, b) => {
+    const aLive = a.live > 0 ? 0 : 1;
+    const bLive = b.live > 0 ? 0 : 1;
+    return aLive - bLive || a.region.localeCompare(b.region, 'ko');
+  });
 
   const liveTotal = full.reduce((s, r) => s + r.live, 0);
 
