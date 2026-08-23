@@ -68,13 +68,33 @@ guide·trend·region·saving·tax·invest)로 `.eq('sub_category', k)` 하면 �
 `region_fallback` 은 전 지역 false. 썸네일 보유율 지역 편차가 커서 이니셜 블록이
 같은 64×64 를 차지하도록 한 것이 맞다 — 빈 칸을 허용하면 행 정렬이 지역마다 달라진다.
 
+### 후속 (같은 차수에 처리 — 커밋 2개)
+
+**C9-2 `cfffd532` — 서브칩을 `v_blog_subcat_counts` 뷰로 교체.**
+실측 스냅샷 상수를 지우고 뷰에서 직접 뽑는다. 뷰의 `group_key`(realestate/stock/life)가
+탭 키와 그대로 맞는다. 임계값 30편 → 부동산 6종 · 주식 8종 · 재테크 1종.
+`청약·분양` 891 → **1,131편** (영문 구형 231 + 파편 9 흡수).
+
+목록 필터를 `.eq()` → `.in(subNormRaws(sub))` 로 바꿨다. 뷰는 정규화 이름으로 집계하지만
+`blog_posts.sub_category` 에는 원본 값이 그대로 있어서, `.eq('sub_category','청약·분양')`
+이면 구형 231편이 빠져 칩 건수와 목록이 어긋난다.
+**15개 칩 전부 `.in(raws)` 결과가 뷰 집계와 정확히 일치함을 SQL 로 대조 확인했다.**
+
+**C6-2 `17a7af24` — `region_fallback` 제거.** RPC payload 에서 사라진 것을 직접 확인하고
+`hub.ts` 3곳(필드·EMPTY_HUB·normalize) 정리. `grep -rn` 0건.
+
 ### 남은 것 (DB 담당 범위)
 
-1. `(category, sub_category, cnt)` 집계 뷰 → C9 상수를 그 뷰로 교체
-2. blog `sub_category` taxonomy 통합 — apt 에 `청약·분양`(891)과 `cheongak`(94)·
-   `preempt_coverage`(104)·`lotto_cheongak`(33)이 두 세대로 공존한다
-3. `AptHubPayload.region_fallback` 제거 (현재 @deprecated, RPC 는 항상 false)
-4. 검색 결과 품질 — 청약 항목 404·끝난 공고 상위 (C2 는 진입점만 손댔다)
+1. **`SUB_NORM_ALIASES` 사본 제거** — 현재 `blog/page.tsx` 가 DB 의
+   `fn_blog_subcat_norm` CASE 문을 거울처럼 들고 있다. PostgREST 로는 프론트에서 그
+   함수를 호출할 수 없고 목록 조회는 원본 `sub_category` 를 걸러야 해서 생긴 사본이다.
+   둘 중 하나가 생기면 사본을 통째로 지우고 `.eq('sub_norm', sub)` 한 줄이 된다:
+   (a) `blog_posts.sub_norm` 생성 컬럼(GENERATED ALWAYS AS … STORED) + 인덱스
+   (b) `sub_norm` 으로 필터되는 글 목록 뷰
+   **드리프트 증상: 칩 건수와 실제 목록 건수가 어긋난다.**
+2. blog `sub_category` taxonomy 통합 — 뷰가 정규화로 덮고는 있으나 원본은 여전히
+   두 세대(`청약·분양` / `cheongak`·`preempt_coverage`·`lotto_cheongak`)가 공존한다
+3. 검색 결과 품질 — 청약 항목 404·끝난 공고 상위 (C2 는 진입점만 손댔다)
 
 ### 미검증 (브라우저 실측 필요)
 
