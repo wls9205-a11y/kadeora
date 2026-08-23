@@ -6,16 +6,23 @@
 // 세대수 5회 · 분양가 5회 · 입주 3회. AptHero·KpiCards·AptKpiGrid·ComplexScale·
 // AptDDayCard 가 각자 같은 숫자를 다시 그렸다. 그 다섯을 이 한 벌로 대체한다.
 //
+// V15 C-3: 세대수 칸은 '세대수 176' 이 아니라 '분양 공급 176 / 총 258세대' 로 낸다.
+// 무엇을 세는 숫자인지 밝히지 않으면 경쟁률의 분모(분양 공급)와 단지 규모(단지 전체)가
+// 섞인다. 실측 2,800쌍 중 2,698(96.4%)이 total_units 에 공급 수치를 담고 있었다.
+//
 // 공급 정보 표에는 입주·세대수 행이 남는다 — 표는 원장(ledger) 성격이라 예외다.
 // 값이 없으면 칸을 '미공개' 로 두되 칸 수는 4로 고정한다: 현장마다 칸 수가 달라지면
 // 첫 화면이 현장마다 달라진다 (규격화의 핵심 — s-v2 공급 정보 표와 같은 원칙).
 
 import { toDateKey, todayKST } from '@/lib/apt/subscription-status';
+// V15 C-3: 세대수는 '분양 공급' 과 '단지 전체' 두 축이다. 어느 쪽인지 라벨이 밝힌다.
+import { unitCell, type UnitCounts } from '@/lib/apt/units';
 
 type Props = {
   priceMin?: number | null;   // 만원
   priceMax?: number | null;   // 만원
-  totalUnits?: number | null;
+  /** 세대수 두 축. lib/apt/units.ts 의 resolveUnits() 결과를 그대로 넘긴다. */
+  units: UnitCounts;
   /** 'YYYY-MM' 또는 'YYYYMM' */
   moveInDate?: string | null;
   /** 접수 마감일 (YYYY-MM-DD). D-day 계산 기준. */
@@ -116,9 +123,10 @@ function Cell({ label, value, note, accent }: { label: string; value: string; no
 }
 
 export default function AptKeyMetrics({
-  priceMin, priceMax, totalUnits, moveInDate, receiptEnd, receiptStart,
+  priceMin, priceMax, units, moveInDate, receiptEnd, receiptStart,
 }: Props) {
   const price = priceText(priceMin, priceMax);
+  const unit = unitCell(units);
   const move = moveInText(moveInDate);
   const dday = ddayCell(receiptStart, receiptEnd);
 
@@ -136,7 +144,7 @@ export default function AptKeyMetrics({
       }}
     >
       <Cell label="분양가" value={price ?? '미공개'} note={price ? '세대별 상이' : undefined} accent={!!price} />
-      <Cell label="세대수" value={totalUnits && totalUnits > 0 ? `${totalUnits.toLocaleString('ko-KR')}` : '미공개'} note={totalUnits && totalUnits > 0 ? '세대' : undefined} />
+      <Cell label={unit.label} value={unit.value} note={unit.note} />
       <Cell label="입주" value={move ?? '미정'} note={move ? '예정' : undefined} />
       <div style={{ ...CELL, borderRight: 0 }}>
         <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-tertiary)', marginBottom: 3 }}>청약</div>

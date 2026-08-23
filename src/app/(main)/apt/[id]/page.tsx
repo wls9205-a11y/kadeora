@@ -5,7 +5,6 @@ import { sanitizeHtml } from '@/lib/sanitize-html';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { SITE_URL } from '@/lib/constants';
-import { aptSiteThumb } from '@/lib/thumbnail-fallback';
 import { generateAptSlug, isNumericId, isUuid } from '@/lib/apt-slug';
 import { notFound, permanentRedirect } from 'next/navigation';
 import Link from 'next/link';
@@ -29,6 +28,8 @@ import LifecycleRail from '@/components/apt/LifecycleRail';
 import { lifecycleLabel as stageLabel } from '@/lib/apt/lifecycle-label';
 // V13 A-3 — 진행 이력. 청약홈에도 아실에도 없는 정보다.
 import { fetchSiteEvents } from '@/lib/apt/site-events';
+// V15 C — 세대수 두 축(분양 공급 / 단지 전체). total_units 는 어느 쪽인지 알 수 없다.
+import { resolveUnits, unitCell } from '@/lib/apt/units';
 import SiteHistoryTimeline from '@/components/apt/SiteHistoryTimeline';
 import SectionHeader from '@/components/apt/SectionHeader';
 import SpecTable from '@/components/detail/SpecTable';
@@ -88,7 +89,7 @@ async function resolveParam(rawId: string) {
 
 async function fetchUnifiedData(slug: string) {
   const sb = getSupabaseAdmin();
-  const APT_COLS = 'id,slug,name,site_type,region,sigungu,dong,address,description,seo_title,seo_description,builder,developer,total_units,built_year,move_in_date,status,is_active,content_score,interest_count,page_views,comment_count,images,satellite_image_url,og_image_url,key_features,faq_items,nearby_facilities,nearby_station,school_district,price_min,price_max,price_comparison,search_trend,latitude,longitude,source_ids,created_at,updated_at,og_cards,hero_image_url,hero_image_source,hero_image_credit,lifecycle_stage,review_score,review_count,faqs,data_quality_score,remaining_units,general_units,official_url,discount_pct,agent_kakao_url';
+  const APT_COLS = 'id,slug,name,site_type,region,sigungu,dong,address,description,seo_title,seo_description,builder,developer,total_units,supply_units,complex_units,built_year,move_in_date,status,is_active,content_score,interest_count,page_views,comment_count,images,satellite_image_url,og_image_url,key_features,faq_items,nearby_facilities,nearby_station,school_district,price_min,price_max,price_comparison,search_trend,latitude,longitude,source_ids,created_at,updated_at,og_cards,hero_image_url,hero_image_source,hero_image_credit,lifecycle_stage,review_score,review_count,faqs,data_quality_score,remaining_units,general_units,official_url,discount_pct,agent_kakao_url';
 
   // Phase 1: apt_sites — exact slug → multi-stage fuzzy fallback
   let { data: site } = await (sb as any).from('apt_sites').select(APT_COLS).eq('slug', slug).maybeSingle();
@@ -376,20 +377,30 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const uStr = units ? `${Number(units).toLocaleString()}세대` : '';
     const builder = d.site?.builder || d.sub?.constructor_nm || '';
     const desc = d.site?.seo_description || `${d.region} ${d.site?.sigungu || ''} ${d.name} ${uStr} ${builder}. 모집공고 요약, 분양가격, 청약일정, 견본주택, 실거래가까지 한눈에.`.trim();
-    // s214 C4: cover_image_url 추가. 5컬럼군 100% NULL → backfill 후 우선 사용.
-    // s7-2: images[0] 를 뺐다 — 뉴스 스크랩이라 카카오톡·검색 미리보기에 남의 언론사
-    // 사진이 걸린다. chain: hero > cover > satellite > og_image_url > OG generator
-    const ogImg = aptSiteThumb({
-      hero_image_url: (d.site as any)?.hero_image_url,
-      cover_image_url: (d.site as any)?.cover_image_url,
-      satellite_image_url: d.site?.satellite_image_url,
-      og_image_url: d.site?.og_image_url,
-      name: d.name,
-    });
-    // 생성 카드가 아니라 실제 사진을 들고 있는가. 있으면 OG 0번 자리를 실사에 내준다.
-    const hasRealPhoto = !!(
-      (d.site as any)?.hero_image_url || (d.site as any)?.cover_image_url || d.site?.satellite_image_url
-    );
+    // ── V15 D-2 · og:image 0번은 반드시 가로 1200×630 ──
+    //
+    // (여기 있던 aptSiteThumb 호출을 걷어냈다. 그 체인의 최종 폴백이 /api/og-square 라
+    //  정사각 URL 에 1200×630 을 선언해 내보내고 있었다.)
+    //
+    // aptSiteThumb 의 최종 폴백은 /api/og-square(정사각)인데 코드가 그 URL 에
+    // width:1200 height:630 을 붙여 내보내고 있었다. 카카오톡·네이버는 선언값이 아니라
+    // 실제 비율을 보므로, 정사각이 0번이면 큰 카드가 아니라 작은 썸네일로 뜬다.
+    // og_cards 6장 분기에서도 실사가 없으면 630×630 카드가 0번이었다.
+    //
+    // 조감도(hero)가 있으면 조감도가 1순위다 — 공유 카드가 완전히 달라진다.
+    const heroUrl = (d.site as any)?.hero_image_url as string | undefined;
+    const ogWide =
+      (heroUrl && heroUrl.length > 10 ? heroUrl : null) ??
+      ((d.site as any)?.cover_image_url || null) ??
+      (d.site?.satellite_image_url || null) ??
+      (d.site?.og_image_url || null) ??
+      `${SITE_URL}/api/og?title=${encodeURIComponent(d.name)}&category=apt&design=2&subtitle=${encodeURIComponent(d.region || '')}`;
+    const ogWideAlt = heroUrl
+      ? `${d.name} 조감도`
+      : d.site?.satellite_image_url
+        ? `${d.name} 항공 이미지`
+        : `${d.name} 분양정보`;
+    const OG_WIDE = { url: ogWide, width: 1200, height: 630, alt: ogWideAlt };
 
     const priceStr = d.site?.price_min && d.site?.price_max
       ? ` ${d.site.price_min >= 10000 ? `${(d.site.price_min/10000).toFixed(1)}억` : `${d.site.price_min.toLocaleString()}만`}~${d.site.price_max >= 10000 ? `${(d.site.price_max/10000).toFixed(1)}억` : `${d.site.price_max.toLocaleString()}만`}`
@@ -409,20 +420,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             alt: c?.alt || d.name,
           }));
           // s7-2: 카드 6장 분기가 실사를 통째로 건너뛰고 있었다(97.9%).
-          // 실사가 있으면 0번 자리에 놓고 카드를 뒤에 붙인다. 없으면 기존 동작 그대로.
-          return hasRealPhoto
-            ? [{ url: ogImg, width: 1200, height: 630, alt: `${d.name} 항공 이미지` }, ...cardImgs]
-            : cardImgs;
+          // V15 D-2: 실사가 없어도 0번은 가로 카드다 — 정사각이 0번이면 공유 면적을 잃는다.
+          return [OG_WIDE, ...cardImgs];
         }
-        return [{ url: ogImg, width: 1200, height: 630, alt: `${d.name} 분양정보` }, { url: `${SITE_URL}/api/og-apt?slug=${encodeURIComponent(resolved.slug)}&card=1&v=1`, width: 630, height: 630, alt: d.name }];
+        return [OG_WIDE, { url: `${SITE_URL}/api/og-apt?slug=${encodeURIComponent(resolved.slug)}&card=1&v=1`, width: 630, height: 630, alt: d.name }];
       })() },
       twitter: { card: 'summary_large_image', title, description: desc, site: '@kadeora_app', images: (() => {
         const cards = Array.isArray(d.site?.og_cards) ? d.site.og_cards : [];
         if (cards.length === 6) {
           const cardUrls = cards.map((c: any) => typeof c?.url === 'string' && c.url.startsWith('http') ? c.url : `${SITE_URL}${c?.url || ''}`).filter(Boolean);
-          return hasRealPhoto ? [ogImg, ...cardUrls] : cardUrls;
+          // summary_large_image 는 가로 카드를 전제한다. 0번을 정사각으로 두면 잘린다.
+          return [ogWide, ...cardUrls];
         }
-        return [ogImg];
+        return [ogWide];
       })() },
       other: {
         'article:published_time': d.site?.created_at || d.sub?.fetched_at || '',
@@ -535,6 +545,10 @@ export default async function AptUnifiedPage({ params }: Props) {
   const heroPhotoUrl: string | null = (site as any)?.hero_image_url || site?.satellite_image_url || null;
   const developerHeroUrl: string | null = (site as any)?.hero_image_url || null;
 
+  // V15 C-3: 세대수는 페이지 전체가 이 한 벌을 쓴다. 축이 갈린 값을 곳곳에서
+  //   다시 조합하면 같은 현장에서 다른 숫자가 나온다 (V10 이 고친 중복의 재발).
+  const units = resolveUnits(site as any, sub as any);
+
   const showLeadForm = !!site?.slug && isLeadEligible(site.lifecycle_stage);
   // 희망 타입 선택지는 모집공고 원본(house_type_info)의 type 앞 숫자(전용면적)에서 파생한다.
   // apt_sites 에 area_types 류 컬럼이 없고, 현장마다 평형이 달라 하드코딩하지 않는다.
@@ -553,9 +567,9 @@ export default async function AptUnifiedPage({ params }: Props) {
   const faq: { q: string; a: string }[] = dbFaq.length > 0 ? dbFaq : [
     { q: `${name} 위치가 어디인가요?`, a: `${name}은(는) ${region} ${site?.sigungu || ''} ${site?.dong || site?.address || ''}에 위치해 있습니다. ${site?.nearby_station || sub?.nearest_station ? `최근접 역은 ${site?.nearby_station || sub?.nearest_station}입니다.` : ''}` },
     ...(sub?.rcept_bgnde ? [{ q: `${name} 청약 일정은 언제인가요?`, a: `${name}의 청약 접수 기간은 ${sub.rcept_bgnde} ~ ${sub.rcept_endde || ''}입니다. ${sub.przwner_presnatn_de ? `당첨자 발표일은 ${sub.przwner_presnatn_de}입니다.` : ''} ${sub.mvn_prearnge_ym ? `입주 예정은 ${fmtYM(sub.mvn_prearnge_ym)}입니다.` : ''}` }] : []),
-    { q: `${name} 시공사(건설사)는 어디인가요?`, a: `${name}의 시공사는 ${site?.builder || sub?.constructor_nm || '미정'}입니다. ${site?.developer || sub?.developer_nm ? `시행사는 ${site?.developer || sub?.developer_nm}입니다.` : ''} ${sub?.total_households ? `총 ${sub.total_households}세대 규모이며, ` : ''}공급 ${site?.total_units || sub?.tot_supply_hshld_co || '미정'}세대입니다.` },
+    { q: `${name} 시공사(건설사)는 어디인가요?`, a: `${name}의 시공사는 ${site?.builder || sub?.constructor_nm || '미정'}입니다. ${site?.developer || sub?.developer_nm ? `시행사는 ${site?.developer || sub?.developer_nm}입니다.` : ''} ${units.complex ? `총 ${units.complex.toLocaleString()}세대 규모이며, ` : ''}이번 분양 공급은 ${units.supply ? `${units.supply.toLocaleString()}세대` : '미확인'}입니다.` },
     ...(site?.price_min || site?.price_max ? [{ q: `${name} 분양가는 얼마인가요?`, a: `${name}의 분양가는 ${site?.price_min ? fmtAmount(site.price_min) : ''}${site?.price_min && site?.price_max ? ' ~ ' : ''}${site?.price_max ? fmtAmount(site.price_max) : ''} (최고분양가 기준)입니다. 타입별 상세 분양가는 아래 평형별 공급 테이블에서 확인하세요.` }] : []),
-    ...(sub ? [{ q: `${name} 모집공고 핵심 내용은 무엇인가요?`, a: `${name}의 입주자모집공고 핵심 내용: ${sub.is_price_limit ? '분양가상한제 적용, ' : ''}${sub.constructor_nm || site?.builder ? `시공사 ${sub.constructor_nm || site?.builder}, ` : ''}총 ${sub.tot_supply_hshld_co || site?.total_units || '미정'}세대 공급. ${sub.mvn_prearnge_ym ? `입주 예정 ${fmtYM(sub.mvn_prearnge_ym)}.` : ''} 카더라에서 모집공고 핵심 요약을 확인하세요.` }] : []),
+    ...(sub ? [{ q: `${name} 모집공고 핵심 내용은 무엇인가요?`, a: `${name}의 입주자모집공고 핵심 내용: ${sub.is_price_limit ? '분양가상한제 적용, ' : ''}${sub.constructor_nm || site?.builder ? `시공사 ${sub.constructor_nm || site?.builder}, ` : ''}${units.supply ? `${units.supply.toLocaleString()}세대 공급` : '공급 세대수 미확인'}. ${sub.mvn_prearnge_ym ? `입주 예정 ${fmtYM(sub.mvn_prearnge_ym)}.` : ''} 카더라에서 모집공고 핵심 요약을 확인하세요.` }] : []),
     ...(sub?.is_price_limit !== undefined ? [{ q: `${name}은 분양가상한제 적용 현장인가요?`, a: `${name}은(는) 분양가상한제 ${sub.is_price_limit ? '적용 현장입니다. 분양가상한제 적용 시 전매제한 및 거주의무 등의 규제가 적용될 수 있습니다.' : '미적용 현장입니다.'}` }] : []),
     ...(sub ? [{ q: `${name} 견본주택(모델하우스) 위치는 어디인가요?`, a: `${name}의 견본주택(모델하우스) ${sub.model_house_addr ? `주소는 ${sub.model_house_addr}입니다.` : '위치는 입주자모집공고문에서 확인할 수 있습니다.'} 청약홈에서 모집공고 원문을 확인하세요.` }] : []),
   ].filter(f => f.a.trim().length > 10);
@@ -595,7 +609,8 @@ export default async function AptUnifiedPage({ params }: Props) {
     address: site?.address ?? sub?.hssply_adres ?? null,
     description: site?.description ?? null,
     builder: site?.builder ?? sub?.constructor_nm ?? null,
-    total_units: site?.total_units ?? sub?.tot_supply_hshld_co ?? null,
+    supply_units: units.supply,
+    complex_units: units.complex,
     price_min: site?.price_min ?? null,
     price_max: site?.price_max ?? null,
     latitude: site?.latitude ?? null,
@@ -628,7 +643,8 @@ export default async function AptUnifiedPage({ params }: Props) {
           address: site?.address ?? sub?.hssply_adres ?? null,
           description: site?.description ?? null,
           builder: site?.builder ?? sub?.constructor_nm ?? null,
-          total_units: site?.total_units ?? sub?.tot_supply_hshld_co ?? null,
+          supply_units: units.supply,
+          complex_units: units.complex,
           price_min: site?.price_min ?? null,
           price_max: site?.price_max ?? null,
           latitude: site?.latitude ?? null,
@@ -644,7 +660,7 @@ export default async function AptUnifiedPage({ params }: Props) {
 
 
       {/* JSON-LD 1: RealEstateListing */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'RealEstateListing', name, description: site?.description || `${region} ${name}`, url: `${SITE_URL}/apt/${slug}`, address: { '@type': 'PostalAddress', addressRegion: region, addressLocality: site?.sigungu || '', streetAddress: site?.address || sub?.hssply_adres || '', addressCountry: 'KR' }, ...(site?.total_units || sub?.tot_supply_hshld_co ? { numberOfRooms: site?.total_units || sub?.tot_supply_hshld_co } : {}), ...(site?.latitude && site?.longitude ? { geo: { '@type': 'GeoCoordinates', latitude: site.latitude, longitude: site.longitude } } : {}), ...(site?.builder || sub?.constructor_nm ? { brand: { '@type': 'Organization', name: site?.builder || sub?.constructor_nm } } : {}), ...(site?.price_min || site?.price_max ? { offers: { '@type': 'AggregateOffer', priceCurrency: 'KRW', ...(site?.price_min ? { lowPrice: site.price_min * 10000 } : {}), ...(site?.price_max ? { highPrice: site.price_max * 10000 } : {}), offerCount: site?.total_units || 1 } } : {}) }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'RealEstateListing', name, description: site?.description || `${region} ${name}`, url: `${SITE_URL}/apt/${slug}`, address: { '@type': 'PostalAddress', addressRegion: region, addressLocality: site?.sigungu || '', streetAddress: site?.address || sub?.hssply_adres || '', addressCountry: 'KR' }, ...(site?.latitude && site?.longitude ? { geo: { '@type': 'GeoCoordinates', latitude: site.latitude, longitude: site.longitude } } : {}), ...(site?.builder || sub?.constructor_nm ? { brand: { '@type': 'Organization', name: site?.builder || sub?.constructor_nm } } : {}), ...(site?.price_min || site?.price_max ? { offers: { '@type': 'AggregateOffer', priceCurrency: 'KRW', ...(site?.price_min ? { lowPrice: site.price_min * 10000 } : {}), ...(site?.price_max ? { highPrice: site.price_max * 10000 } : {}), ...(units.supply ? { offerCount: units.supply } : {}) } } : {}) }) }} />
 
       {/* JSON-LD 2: FAQ */}
       {faq.length > 0 && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faq.map(f => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) }) }} />}
@@ -661,7 +677,9 @@ export default async function AptUnifiedPage({ params }: Props) {
         url: `${SITE_URL}/apt/${slug}`,
         address: { '@type': 'PostalAddress', addressCountry: 'KR', addressRegion: region, addressLocality: sigungu || '', streetAddress: site?.address || sub?.hssply_adres || '' },
         ...(site?.latitude && site?.longitude ? { geo: { '@type': 'GeoCoordinates', latitude: site.latitude, longitude: site.longitude } } : {}),
-        ...(site?.total_units ? { numberOfRooms: site.total_units } : {}),
+        // V15 D-1: 여기 있던 numberOfRooms(=total_units)를 걷어냈다. 방 개수가 아니라
+        //   세대수였고 96% 가 일반분양 수치였다. Residence 에는 세대수를 담을 유효한
+        //   프로퍼티가 없다 — 단지 규모는 위 ApartmentComplex 그래프가 맡는다.
         image: `${SITE_URL}/api/og?title=${encodeURIComponent(name)}&design=2&category=apt`,
       }) }} />}
 
@@ -729,11 +747,13 @@ export default async function AptUnifiedPage({ params }: Props) {
         //   ⚠️ 여기에 새 컬럼을 쓰려면 APT_COLS(94행)에 먼저 넣을 것.
         //      s7-2 때 hero_image_url 3컬럼이 빠져 전 현장 히어로가 소실될 뻔했다.
         const heroLoc = [region, site?.sigungu, site?.dong].filter(Boolean).join(' ') || sub?.hssply_adres || '';
-        const heroUnits = Number(site?.total_units || sub?.tot_supply_hshld_co || 0);
+        // V15 C: 히어로는 단지 규모를 말한다 — 단지 전체가 있으면 그것을,
+        //   없으면 분양 공급을 이름 붙여 낸다. 라벨 없는 '176세대' 는 오독을 부른다.
         const heroSub = [
           heroLoc,
           site?.builder || sub?.constructor_nm,
-          heroUnits > 0 ? `${heroUnits.toLocaleString()}세대` : null,
+          units.complex ? `총 ${units.complex.toLocaleString()}세대`
+            : units.supply ? `분양 ${units.supply.toLocaleString()}세대` : null,
         ].filter(Boolean).join(' · ');
         return (
           <>
@@ -780,7 +800,7 @@ export default async function AptUnifiedPage({ params }: Props) {
       <AptKeyMetrics
         priceMin={site?.price_min}
         priceMax={site?.price_max}
-        totalUnits={site?.total_units ?? sub?.tot_supply_hshld_co}
+        units={units}
         moveInDate={site?.move_in_date ?? sub?.mvn_prearnge_ym}
         receiptStart={sub?.rcept_bgnde ?? null}
         receiptEnd={sub?.rcept_endde ?? null}
@@ -841,11 +861,6 @@ export default async function AptUnifiedPage({ params }: Props) {
       {(() => {
         const types = Array.isArray(sub?.house_type_info) ? sub.house_type_info : [];
         const gen = types.reduce((s: number, t: any) => s + (t.supply || 0), 0);
-        const totalUnits = Number(site?.total_units || sub?.tot_supply_hshld_co || 0);
-        const totalHouseholds = Number(sub?.total_households || 0);
-        const scale = totalHouseholds > 0
-          ? `${totalHouseholds.toLocaleString()}세대`
-          : totalUnits > 0 ? `${totalUnits.toLocaleString()}세대` : null;
         const priceStr = (() => {
           const lo = site?.price_min || unsold?.sale_price_min || 0;
           const hi = site?.price_max || 0;
@@ -861,10 +876,13 @@ export default async function AptUnifiedPage({ params }: Props) {
         const generalUnits = Number((site as any)?.general_units || 0) || gen;
         // s-v2: 행은 항상 7개다. null 이어도 행을 빼지 않고 값 칸을 `미공개` 로 채운다.
         //   현장마다 행이 들쭉날쭉하면 첫 화면이 현장마다 달라진다. 규격화의 핵심.
+        // V15 C-3: '규모' 한 행이 두 축을 뭉개고 있었다 (total_households 없으면 total_units 폴백 —
+        //   96%가 공급 수치라 단지 전체 자리에 분양 수치가 들어갔다). 두 행으로 가른다.
         const rows: Array<[string, string | null]> = [
           ['시공사', site?.builder || sub?.constructor_nm || null],
           ['위치', [region, site?.sigungu, site?.dong].filter(Boolean).join(' ') || sub?.hssply_adres || null],
-          ['규모', scale],
+          ['단지 전체', units.complex ? `${units.complex.toLocaleString()}세대` : null],
+          ['분양 공급', units.supply ? `${units.supply.toLocaleString()}세대` : null],
           ['일반분양', generalUnits > 0 ? `${generalUnits.toLocaleString()}세대` : null],
           ['분양가', priceStr],
           ['입주', fmtYM(site?.move_in_date || sub?.mvn_prearnge_ym) || null],
@@ -889,6 +907,20 @@ export default async function AptUnifiedPage({ params }: Props) {
                 ))}
               </tbody>
             </table>
+            {/* V15 C-3 · 근거 블록.
+                두 숫자가 다른 이유를 말하지 않으면 "표가 틀렸다" 로 읽힌다.
+                두 축이 모두 있을 때만 낸다 — 한쪽뿐이면 비교할 게 없다. */}
+            {units.supply && units.complex && units.supply !== units.complex && (
+              <p style={{ margin: '10px 0 0', padding: '9px 10px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-sunken)', fontSize: 11.5, lineHeight: 1.6, color: 'var(--text-secondary)' }}>
+                <b style={{ color: 'var(--text-primary)' }}>분양 공급 {units.supply.toLocaleString()}</b>
+                {' · '}
+                <b style={{ color: 'var(--text-primary)' }}>단지 전체 {units.complex.toLocaleString()}</b>
+                <br />
+                경쟁률·분양가는 <b>이번 분양 공급</b> 기준이고, 단지 규모·관리비는 <b>단지 전체</b> 기준입니다.
+                차이는 조합원 분양분입니다.
+              </p>
+            )}
+
             {/* v10-B6: 표 안에 흩어져 있던 '방에서 물어보기' 를 여기 한 줄로 모은다.
                 미공개 행이 하나라도 있을 때만 낸다 — 다 채워진 현장에 물어볼 것을 만들지 않는다. */}
             {firstEmpty && (

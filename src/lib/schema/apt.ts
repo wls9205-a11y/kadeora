@@ -10,7 +10,12 @@ export interface AptForSchema {
   address?: string | null;
   description?: string | null;
   builder?: string | null;
+  /** @deprecated V15 C — 어느 축인지 알 수 없다. supply_units/complex_units 를 쓸 것. */
   total_units?: number | null;
+  /** 이번 분양 공급(일반분양 + 특별공급). offers.offerCount 의 근거. */
+  supply_units?: number | null;
+  /** 단지 전체(조합원분 포함). 자연어 description 에만 쓴다. */
+  complex_units?: number | null;
   price_min?: number | null;
   price_max?: number | null;
   latitude?: number | null;
@@ -64,7 +69,9 @@ function buildRealEstateListing(apt: AptForSchema): JsonLd {
           priceCurrency: 'KRW',
           ...(apt.price_min ? { lowPrice: apt.price_min * 10000 } : {}),
           ...(apt.price_max ? { highPrice: apt.price_max * 10000 } : {}),
-          offerCount: apt.total_units || 1,
+          // V15 D-1: 분양 대상 수다 — 단지 전체가 아니라 이번 분양 공급.
+          //   값이 없으면 키를 아예 빼고, 1 로 지어내지 않는다.
+          ...(apt.supply_units ? { offerCount: apt.supply_units } : {}),
         }
       : undefined;
   const schemaImages = buildSchemaImages(apt.images);
@@ -82,7 +89,9 @@ function buildRealEstateListing(apt: AptForSchema): JsonLd {
       streetAddress: apt.address || '',
       addressCountry: 'KR',
     },
-    ...(apt.total_units ? { numberOfRooms: apt.total_units } : {}),
+    // V15 D-1: numberOfRooms 는 "한 매물의 방 개수" 지 단지 세대수가 아니다.
+    //   프로퍼티 자체가 틀렸고 96% 가 일반분양 수치였다. 제거한다 —
+    //   단지 규모는 아래 ItemList 와 본문 자연어가 맡는다.
     ...(apt.latitude && apt.longitude
       ? { geo: { '@type': 'GeoCoordinates', latitude: apt.latitude, longitude: apt.longitude } }
       : {}),
@@ -104,8 +113,11 @@ function buildItemList(apt: AptForSchema): JsonLd {
     });
   }
   if (apt.builder) items.push({ '@type': 'ListItem', position: pos++, name: '시공사', value: apt.builder });
-  if (apt.total_units)
-    items.push({ '@type': 'ListItem', position: pos++, name: '세대수', value: `${apt.total_units}세대` });
+  // V15 C: 두 축을 각각 이름 붙여 낸다. 합쳐서 '세대수' 로 내면 오독이 남는다.
+  if (apt.supply_units)
+    items.push({ '@type': 'ListItem', position: pos++, name: '분양 공급', value: `${apt.supply_units.toLocaleString()}세대` });
+  if (apt.complex_units)
+    items.push({ '@type': 'ListItem', position: pos++, name: '단지 전체', value: `${apt.complex_units.toLocaleString()}세대` });
   if (apt.price_min || apt.price_max) {
     const priceText =
       apt.price_min && apt.price_max

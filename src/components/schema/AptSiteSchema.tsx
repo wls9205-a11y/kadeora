@@ -23,7 +23,10 @@ interface AptSiteSchemaProps {
     address?: string | null;
     description?: string | null;
     builder?: string | null;
+    /** @deprecated V15 C — 어느 축인지 알 수 없다. */
     total_units?: number | null;
+    supply_units?: number | null;
+    complex_units?: number | null;
     price_min?: number | null;
     price_max?: number | null;
     latitude?: number | null;
@@ -55,8 +58,11 @@ export default function AptSiteSchema({ site, origin }: AptSiteSchemaProps) {
   const hasOffer = site.price_min != null || site.price_max != null;
   const faqs: FaqItem[] = Array.isArray(site.faqs) ? site.faqs.filter(f => f && f.q && f.a) : [];
 
+  // V15 D-1: 'Apartment' 는 개별 세대다. 이 엔티티는 단지 전체를 가리키므로
+  //   ApartmentComplex 가 맞고, 그래야 numberOfAccommodationUnits(단지 세대수)를
+  //   쓸 수 있다. 페이지 루트도 이미 itemType=ApartmentComplex 로 선언하고 있다.
   const apartment: Record<string, any> = {
-    '@type': 'Apartment',
+    '@type': 'ApartmentComplex',
     '@id': `${url}#apartment`,
     name: site.name,
     url,
@@ -69,7 +75,9 @@ export default function AptSiteSchema({ site, origin }: AptSiteSchemaProps) {
       streetAddress: site.address || undefined,
     },
   };
-  if (site.total_units) apartment.numberOfRooms = site.total_units;
+  // V15 D-1: numberOfRooms 는 방 개수다. 단지 세대수를 담으면 틀린 값을 학습시킨다.
+  //   ApartmentComplex 에는 numberOfAccommodationUnits 가 맞는 자리다.
+  if (site.complex_units) apartment.numberOfAccommodationUnits = site.complex_units;
   if (hasGeo) apartment.geo = { '@type': 'GeoCoordinates', latitude: site.latitude, longitude: site.longitude };
   if (site.builder) apartment.brand = { '@type': 'Organization', name: site.builder };
 
