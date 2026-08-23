@@ -9,7 +9,7 @@
  *
  *  Fix: layout 을 서버 component 로 단순화하고, hook-heavy + 공통 chrome 을
  *  본 ClientShell 로 이동. AuthProvider / ToastProvider / Navigation /
- *  RightPanel / Tracker 류 등 SSR 에 의미 없는 컴포넌트 모두 { ssr: false } 로
+ *  Tracker 류 등 SSR 에 의미 없는 컴포넌트 모두 { ssr: false } 로
  *  격리 → SSR HTML 에는 children (페이지 본문) 만 직렬화 → SEO 영향 없음, hydrate
  *  단계에서 chrome 채워짐.
  *
@@ -42,7 +42,6 @@ import StickyTalkBanner from '@/components/banner/StickyTalkBanner';
 const Navigation             = dynamic(() => import('@/components/Navigation').then(m => m.Navigation),     { ssr: false });
 const NoticeBanner           = dynamic(() => import('@/components/NoticeBanner'),                            { ssr: false });
 const AdBanner               = dynamic(() => import('@/components/AdBanner'),                                { ssr: false });
-const RightPanel             = dynamic(() => import('@/components/RightPanel'),                              { ssr: false });
 const LiveBarChrome          = dynamic(() => import('@/components/ui/LiveBarChrome'),                        { ssr: false });
 const ProfileCompleteBanner  = dynamic(() => import('@/components/ProfileCompleteBanner'),                   { ssr: false });
 const GlobalMissionBar       = dynamic(() => import('@/components/GlobalMissionBar'),                        { ssr: false });
@@ -93,9 +92,6 @@ export default function ClientShell({ children, serverLoggedIn }: Props) {
               {children}
             </ErrorBoundary>
           </main>
-          <div className="right-panel-wrapper">
-            <RightPanel />
-          </div>
         </div>
         <InstallBanner />
         <PWAInstallTracker />

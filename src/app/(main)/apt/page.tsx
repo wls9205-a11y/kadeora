@@ -31,6 +31,7 @@ import SectionHeader from '@/components/apt/SectionHeader';
 import CurationCarousel from '@/components/ui/CurationCarousel';
 import SigunguChips from '@/components/apt/SigunguChips';
 import AptStatusChips, { type AptStatusKey } from '@/components/apt/AptStatusChips';
+import AptHubRail from '@/components/apt/AptHubRail';
 import { sigunguCounts, sigunguOf } from '@/lib/apt/sigungu';
 import AptCurationCard from '@/components/apt/AptCurationCard';
 import EmptyState from '@/components/ui/EmptyState';
@@ -142,6 +143,18 @@ export default async function AptPage({
     : hub.window_days >= 180 ? '최근 6개월'
     : hub.window_days > 60 ? `최근 ${hub.window_days}일`
     : null;
+  // v5-V2: 레일 데이터는 전부 이미 받은 payload 에서 만든다 — 새 조회 0건.
+  //   마감 임박 = dday 가 남아 있는 것 중 가까운 순 5건.
+  const imminent = [...hub.cards]
+    .filter((it) => it.dday !== null && it.dday >= 0 && it.dday <= 14)
+    .sort((a, b) => (a.dday ?? 99) - (b.dday ?? 99))
+    .slice(0, 5);
+  // 지역 칩은 접수중이 있는 곳만. 가나다 고정 (C3 과 같은 원칙).
+  const railRegions = hub.regions
+    .filter((r) => r.live > 0)
+    .map((r) => ({ region: r.region, live: r.live }))
+    .sort((a, b) => a.region.localeCompare(b.region, 'ko'));
+
   const stLabel = activeSt === 'open' ? '접수중' : activeSt === 'soon' ? '임박 D-7' : activeSt === 'leftover' ? '무순위' : '';
   const scopeLabel = [activeSgg || hub.region, stLabel].filter(Boolean).join(' · ');
   const cardsMeta = windowLabel
@@ -287,25 +300,16 @@ export default async function AptPage({
       ) : null}
       </div>
 
-      {/* v3 커밋5 · 데스크탑 우측 레일 (≥1024px). '관련 분석' 패널은 모바일에서
-           하단 탭·본문 블록과 중복이라 레일 안에만 둔다. */}
+      {/* v5-V2 · 데스크탑 우측 레일 (≥1024px). 전역 RightPanel 대체 —
+           레일은 페이지가 소유한다 (/apt/[id] 의 SiteDetailRail 과 같은 패턴).
+           ①마감 임박 ②지역 바로가기 ③관련 분석 ④바로가기. 새 조회 0건. */}
       <aside className="kd-list-rail" aria-label="청약 요약">
-        {relatedBlogs.length > 0 && (
-          <div className="kd-rail-panel">
-            <h2>관련 분석</h2>
-            {relatedBlogs.slice(0, 6).map((b: { slug: string; title: string }) => (
-              <Link key={b.slug} href={`/blog/${b.slug}`}>{b.title}</Link>
-            ))}
-          </div>
-        )}
-        <div className="kd-rail-panel">
-          <h2>바로가기</h2>
-          <Link href="/apt/diagnose">청약 가점 계산기</Link>
-          <Link href="/apt/ranking">청약 경쟁률 랭킹</Link>
-          <Link href="/apt/unsold">미분양 현황</Link>
-          <Link href="/apt/map">분양 지도</Link>
-          <Link href="/apt/complex">단지 백과</Link>
-        </div>
+        <AptHubRail
+          region={hub.region}
+          imminent={imminent}
+          regions={railRegions}
+          blogs={relatedBlogs}
+        />
       </aside>
     </div>
   );

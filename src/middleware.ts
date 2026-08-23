@@ -232,7 +232,7 @@ export async function middleware(request: NextRequest) {
     // - s-maxage=300: Edge 5분 캐시 (Vercel CDN 이 동일 응답 재사용 → TTFB 안정)
     // - stale-while-revalidate=600: 캐시 만료 후 10분간 stale 응답 허용 (백그라운드 재생성)
     //
-    // 페이지 본문은 SSR 이지만 chrome (Sidebar/Nav/RightPanel) 은 ssr:false 로
+    // 페이지 본문은 SSR 이지만 chrome (Nav 등) 은 ssr:false 로
     // hydrate 단계에서만 user-specific 콘텐츠 렌더 → 동일 SSR HTML 모든 사용자 공유 가능.
     response.headers.set('Cache-Control', 'public, max-age=0, s-maxage=300, stale-while-revalidate=600');
     // CSP + 보안 헤더

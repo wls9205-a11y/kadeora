@@ -469,7 +469,6 @@ html.font-small .kd-list-item { padding: var(--sp-xs) 0; }
   background: #F0F1F3;
 }
 /* 토스 모드 레이아웃 조정 */
-.toss-mode .right-panel-wrapper,
 .toss-mode footer { display: none !important; }
 .toss-mode main { padding-bottom: 16px !important; min-height: 100vh !important; }
 
