@@ -6,7 +6,7 @@ import { createSupabaseServer } from '@/lib/supabase-server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { SITE_URL } from '@/lib/constants';
 import { generateAptSlug, isNumericId, isUuid } from '@/lib/apt-slug';
-import { notFound, permanentRedirect } from 'next/navigation';
+import { notFound, permanentRedirect, redirect } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import dynamic from 'next/dynamic';
@@ -117,23 +117,41 @@ async function fetchUnifiedData(slug: string) {
       }
     }
 
-    // Stage 4: Korean-only ilike search on apt_sites.name (min 2 chars)
-    if (!site && koreanOnly.length >= 2) {
-      const searchTerm = koreanOnly.slice(0, 20);
+    // ── V16 C · Stage 4·5 는 "정확히 1건일 때만" 채택한다 ──
+    //
+    // 이전 규칙은 한글 2자만 있으면 %검색어% 부분 일치로 content_score 1등을 그냥 집었다.
+    //   /apt/자이   → %자이%   → 아무 자이 단지
+    //   /apt/래미안 → %래미안% → 아무 래미안
+    // 오타 링크·크롤러가 만든 URL 이 거의 무한히 200 이 되고, 사용자는 엉뚱한 현장을 본다.
+    // 파워링크 랜딩에서 이게 나면 그대로 손실이다.
+    // (DART 매칭에 "부분 문자열 금지" 를 건 것과 같은 이유다 — 이 페이지가 이미 그 방식이었다.)
+    //
+    // limit(2) 로 받아 2건 이상이면 포기한다. 후보가 여럿이면 어느 쪽인지 알 수 없고,
+    // 모르면서 하나를 고르는 것이 못 찾는 것보다 나쁘다.
+    const FUZZY_MIN = 4;
+    /** 정확히 1건일 때만 돌려준다. 2건 이상이면 null. */
+    const soleMatch = async (col: 'name' | 'slug', pattern: string) => {
       const { data } = await (sb as any).from('apt_sites').select(APT_COLS)
-        .ilike('name', `%${searchTerm}%`).eq('is_active', true)
-        .order('content_score', { ascending: false }).limit(1).maybeSingle();
-      if (data) site = data;
+        .ilike(col, pattern).eq('is_active', true)
+        .order('content_score', { ascending: false }).limit(2);
+      const rows = Array.isArray(data) ? data : [];
+      if (rows.length !== 1) {
+        if (rows.length > 1) console.warn(`[apt/resolve] 후보 다수 — ${col} ~ ${pattern}, 채택하지 않음`);
+        return null;
+      }
+      return rows[0];
+    };
+
+    // Stage 4: 한글만 남긴 이름 부분 일치 (최소 4자)
+    if (!site && koreanOnly.length >= FUZZY_MIN) {
+      site = (await soleMatch('name', `%${koreanOnly.slice(0, 20)}%`)) ?? site;
     }
 
-    // Stage 5: slug word-parts ilike on apt_sites.slug (동성로-sk-leaders-view → %동성로%sk%leaders%view%)
+    // Stage 5: slug 토막 사이를 % 로 이은 패턴 (동성로-sk-leaders-view → %동성로%sk%leaders%view%)
     if (!site) {
       const slugWords = slug.split('-').filter(w => w.length > 0).join('%');
-      if (slugWords.length > 3) {
-        const { data } = await (sb as any).from('apt_sites').select(APT_COLS)
-          .ilike('slug', `%${slugWords}%`).eq('is_active', true)
-          .order('content_score', { ascending: false }).limit(1).maybeSingle();
-        if (data) site = data;
+      if (slugWords.length >= FUZZY_MIN) {
+        site = (await soleMatch('slug', `%${slugWords}%`)) ?? site;
       }
     }
   }
@@ -536,6 +554,16 @@ export default async function AptUnifiedPage({ params }: Props) {
   }
   if (!d) notFound();
   const { site, sub, unsold, redev, trades, relatedBlogs, relatedPosts, nearbySites, sameBuilderSites, regionBenchmark, regionTrades, complexProfiles, name, region, sigungu, slug, analysisText, siteEvents } = d!;
+
+  // ── V16 C · 아무것도 못 찾았으면 검색으로 보낸다 ──
+  //
+  // Stage 4·5 를 "정확히 1건" 으로 좁힌 뒤의 짝이다. 예전에는 부분 일치가 뭐라도
+  // 하나 집어와서 오타 URL 도 200 이 됐다. 이제는 정말 못 찾는 경우가 생기는데,
+  // 그때 notFound() 로 막다른 길을 주지 않는다 — 사용자는 실재하는 이름을 쳤을 수 있다.
+  // /apt/search 는 noindex,follow 라 무한 색인 경로가 만들어지지 않는다.
+  if (!site && !sub && !unsold && !redev) {
+    redirect(`/apt/search?q=${encodeURIComponent(resolved!.slug!.replace(/-/g, ' '))}`);
+  }
   const sType = site?.site_type || (sub ? 'subscription' : unsold ? 'unsold' : redev ? 'redevelopment' : trades.length > 0 ? 'trade' : 'subscription');
   const features = Array.isArray(site?.key_features) ? site.key_features : [];
 
