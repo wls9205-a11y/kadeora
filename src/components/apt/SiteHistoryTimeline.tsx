@@ -54,6 +54,8 @@ function sourceLabel(source: string | null): string | null {
   if (source.startsWith('migration:')) return null;
   if (source === 'dart') return 'DART 공시';
   if (source === 'admin') return '카더라 확인';
+  // V16 D: 머신 토큰 경로(pg_net 대량 입력). 사람이 직접 확인한 것과 구분한다.
+  if (source === 'admin:machine') return '카더라 확인(자동)';
   if (source === 'cron') return null;
   return source;
 }
