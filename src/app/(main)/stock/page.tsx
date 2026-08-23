@@ -1,4 +1,6 @@
-// s262 Phase C — Issue Engine v1 /stock (legacy: src/_legacy/s262/stock_page_v0.tsx)
+// s262 Phase C — Issue Engine v1 /stock
+// (v8-A1: 이전 UI 스냅샷 _legacy/s262/stock_page_v0.tsx + StockClient + TrendingKeywords 삭제.
+//  셋이 사슬로 물려 도달 불가 사문이었다 — 필요하면 git history 에서 꺼낸다.)
 // 7 sub-tab: 이슈/시총/급등/급락/거래폭증/외인/관심
 // default = 이슈 (stock_issue_scores). 비로그인 시 6번째 카드 자리에 IssueGateCard 노출.
 // s262 Phase E (CAROUSEL v1): NEXT_PUBLIC_CAROUSEL_ENABLED 시 swipe carousel 모드.
