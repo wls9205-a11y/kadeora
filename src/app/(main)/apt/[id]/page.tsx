@@ -882,7 +882,15 @@ export default async function AptUnifiedPage({ params }: Props) {
            히어로(커밋3)로 현장을 먼저 보여준 직후가 그 경로를 여는 자리다.
            leadTypeOptions 는 위(538행 근처)에서 계산되므로 선언 순서 문제 없음.
            ⚠️ InterestRegisterHero(회원 CTA)와 인접시키지 말 것 — s7-3 결정. */}
-      {showLeadForm && site && <LeadForm siteSlug={site.slug} siteName={site.name} typeOptions={leadTypeOptions} />}
+      {showLeadForm && site && (
+        <LeadForm
+          siteSlug={site.slug}
+          siteName={site.name}
+          typeOptions={leadTypeOptions}
+          region={site.region}
+          sigungu={site.sigungu}
+        />
+      )}
 
       {/* s2: 공급 정보 스펙 표 — 시공사/위치/규모/일반분양/분양가/입주/상태를 여기 한 곳에서만 쓴다.
            이전에는 히어로·KPI·분양일정·모집공고요약에 세대수가 5회, 일정이 3벌 흩어져 있었다. */}

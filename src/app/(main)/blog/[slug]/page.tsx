@@ -789,7 +789,7 @@ export default async function BlogDetailPage({ params }: Props) {
   // - hub_apt_slug 가 null 이면 조회 자체를 하지 않는다 (발행 글의 80%가 여기 해당)
   // - 기존 Promise.allSettled 뭉치에 합치지 않는다 (Rule #49 — /apt/[id] 504 의 원인이었다)
   // - slug 단건 조회라 인덱스를 탄다
-  let leadSite: { slug: string; name: string } | null = null;
+  let leadSite: { slug: string; name: string; region: string | null; sigungu: string | null } | null = null;
   // v3 커밋6: '이 글이 다루는 현장' 행은 lead 대상 단계가 아니어도 낸다 —
   //   지금까지 블로그에서 현장 페이지로 가는 동선이 아예 없었다.
   let hubSite: { slug: string; name: string; region: string | null } | null = null;
@@ -797,11 +797,11 @@ export default async function BlogDetailPage({ params }: Props) {
     try {
       const { data: ls } = await (sb as any)
         .from('apt_sites')
-        .select('slug, name, region, lifecycle_stage')
+        .select('slug, name, region, sigungu, lifecycle_stage')
         .eq('slug', post.hub_apt_slug)
         .maybeSingle();
       if (ls) hubSite = { slug: ls.slug, name: ls.name, region: ls.region ?? null };
-      if (ls && isLeadEligible(ls.lifecycle_stage)) leadSite = { slug: ls.slug, name: ls.name };
+      if (ls && isLeadEligible(ls.lifecycle_stage)) leadSite = { slug: ls.slug, name: ls.name, region: ls.region ?? null, sigungu: ls.sigungu ?? null };
     } catch {
       /* 조회 실패는 본문 렌더를 막지 않는다 — 폼만 생략한다 */
     }
@@ -1347,7 +1347,15 @@ export default async function BlogDetailPage({ params }: Props) {
 
       {/* S4-4 P1: 본문 하단 / 관련 글 위. 블로그에는 상단 앵커를 넣지 않는다 —
           읽는 흐름을 끊지 않고, 상세 페이지처럼 스크롤이 길지도 않다. */}
-      {leadSite && <LeadForm siteSlug={leadSite.slug} siteName={leadSite.name} variant="blog" />}
+      {leadSite && (
+        <LeadForm
+          siteSlug={leadSite.slug}
+          siteName={leadSite.name}
+          region={leadSite.region}
+          sigungu={leadSite.sigungu}
+          variant="blog"
+        />
+      )}
 
       {/* s184: 추천 글 + RelatedContentCard — 댓글 아래로 이동 */}
       {(

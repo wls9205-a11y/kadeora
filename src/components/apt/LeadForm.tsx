@@ -14,6 +14,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { CSSProperties, ChangeEvent, FormEvent } from 'react';
 import SectionHeader from '@/components/apt/SectionHeader';
+import { SITE_URL } from '@/lib/constants';
 
 const ENDPOINT = process.env.NEXT_PUBLIC_LEAD_ENDPOINT || '';
 const DRAFT_PREFIX = 'kd_lead_draft:';
@@ -29,6 +30,13 @@ export const LEAD_FORM_ID = 'lead-form';
 
 /** 희망 타입 기본값. select 는 항상 이 값으로 시작한다 (추가 조작 없이 제출 가능). */
 const TYPE_UNDECIDED = '미정';
+
+/**
+ * v6-5: 분양 라인 문의 유형. 미처리 24시간 경보가 이 값으로 대상을 좁힌다.
+ * 2단계에서 기축(landmark_active) 폼이 '지역DB' 를 쓰게 되므로 상수로 둔다.
+ */
+const INQUIRY_TYPE_SALES = '분양상담';
+
 
 /**
  * 모집공고에 평형 목록이 없는 현장(36.7%)에서 쓰는 표준 목록.
@@ -50,6 +58,13 @@ type LeadFormProps = {
    * select 자체는 어느 현장에서나 항상 렌더한다. 옵션 내용만 갈린다.
    */
   typeOptions?: string[];
+  /**
+   * v6-4: 어느 지역 현장인지. 시트를 훑을 때 이름만으로는 구분이 안 된다
+   * (현장이 수백 개다). apt_sites.region/sigungu 채움률 98.2%.
+   * ⚠️ 값이 없으면 빈 문자열로 보내고 폼을 막지 않는다 — 지역이 없다고 리드를 잃으면 안 된다.
+   */
+  region?: string | null;
+  sigungu?: string | null;
   /** 놓이는 자리에 따라 설명 한 줄만 바뀐다. 제목·버튼·동의 문구는 동일하다. */
   variant?: 'detail' | 'blog';
 };
@@ -64,6 +79,30 @@ type LeadPayload = {
   dwellMs: number;
   siteSlug: string;
   siteName: string;
+  /**
+   * v6-4: 시트·DB 에 같이 남길 지역 정보.
+   *
+   * ⚠️ Apps Script 가 site_slug 로 Supabase 를 다시 조회하게 만들지 않는다.
+   *    리드 도달이 이 경로 최대 리스크인데 왕복을 하나 더 얹으면 조회 실패가 곧 리드 유실이다.
+   *    페이지가 이미 값을 갖고 있으니 같이 보낸다.
+   */
+  region: string;
+  sigungu: string;
+  /**
+   * fn_insert_lead 의 p_interest_region 에 그대로 넣을 값 — `"부산 사상구"` 형태.
+   * 시트 열(시·도 / 시군구)은 따로 쓰고 이건 DB 용이다.
+   * Apps Script 가 문자열을 조립하지 않게 여기서 미리 만든다 —
+   * 조립 규칙이 두 곳에 생기면 한쪽만 고치게 된다. 둘 중 하나가 비면 있는 쪽만 들어간다.
+   */
+  interestRegion: string;
+  /** 시트에서 바로 열 수 있는 현장 링크. */
+  siteUrl: string;
+  /**
+   * v6-5: 문의 유형. 지금은 '분양상담' 고정이다.
+   * 미처리 24시간 경보가 이 값으로 대상을 좁히므로 비면 분리가 깨진다.
+   * 2단계에서 기축(landmark_active) 폼이 '지역DB' 를 쓴다.
+   */
+  inquiryType: string;
   entryPath: string;
   sourceDomain: string;
   company: string;
@@ -207,7 +246,7 @@ const honeypotStyle: CSSProperties = {
   pointerEvents: 'none',
 };
 
-export default function LeadForm({ siteSlug, siteName, typeOptions, variant = 'detail' }: LeadFormProps) {
+export default function LeadForm({ siteSlug, siteName, typeOptions, region, sigungu, variant = 'detail' }: LeadFormProps) {
   const mountedAt = useRef(Date.now());
   const draftKey = `${DRAFT_PREFIX}${siteSlug}`;
   const pendingKey = `${PENDING_PREFIX}${siteSlug}`;
@@ -385,6 +424,9 @@ export default function LeadForm({ siteSlug, siteName, typeOptions, variant = 'd
     setSendError(null);
     setSending(true);
 
+    const regionText = (region ?? '').trim();
+    const sigunguText = (sigungu ?? '').trim();
+
     const payload: LeadPayload = {
       name,
       phone, // 원본 그대로. 정규화는 서버가 한다
@@ -395,6 +437,13 @@ export default function LeadForm({ siteSlug, siteName, typeOptions, variant = 'd
       dwellMs: Date.now() - mountedAt.current, // 3초 미만 판정은 서버가 한다 — 여기서 막지 않는다
       siteSlug,
       siteName,
+      // 빈 값이어도 그대로 보낸다. 폼을 막지 않는다.
+      region: regionText,
+      sigungu: sigunguText,
+      interestRegion: [regionText, sigunguText].filter(Boolean).join(' '),
+      // 시트에서 바로 열 수 있게 절대 URL 로. 판정은 constants 한 곳(SITE_URL)만 쓴다.
+      siteUrl: siteSlug ? `${SITE_URL.replace(/\/$/, '')}/apt/${encodeURIComponent(siteSlug)}` : '',
+      inquiryType: INQUIRY_TYPE_SALES,
       entryPath: window.location.pathname,
       sourceDomain: window.location.hostname,
       company,
