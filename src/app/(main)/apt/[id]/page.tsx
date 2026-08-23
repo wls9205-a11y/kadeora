@@ -28,7 +28,7 @@ import { headers } from 'next/headers';
 import AptSiteSchema from '@/components/schema/AptSiteSchema';
 import LifecycleRail from '@/components/apt/LifecycleRail';
 // V13 A-2: 단계 라벨 단일 원본. 히어로 배지가 쓴다.
-import { lifecycleLabel as stageLabel } from '@/lib/apt/lifecycle-label';
+import { lifecycleLabel as stageLabel, isPipelineStage } from '@/lib/apt/lifecycle-label';
 // V13 A-3 — 진행 이력. 청약홈에도 아실에도 없는 정보다.
 import { fetchSiteEvents } from '@/lib/apt/site-events';
 // V15 C — 세대수 두 축(분양 공급 / 단지 전체). total_units 는 어느 쪽인지 알 수 없다.
@@ -580,6 +580,12 @@ export default async function AptUnifiedPage({ params }: Props) {
   //   다시 조합하면 같은 현장에서 다른 숫자가 나온다 (V10 이 고친 중복의 재발).
   const units = resolveUnits(site as any, sub as any);
 
+  // V17 F-2: 공고 전 현장은 값이 "없는" 게 아니라 "아직 정해지지 않은" 것이다.
+  //   PIPELINE_STAGES + 부지계획·분양 예고 = 공고 전 7단계.
+  const lc = (site as any)?.lifecycle_stage ?? '';
+  const preAnnouncement =
+    !sub && (isPipelineStage(lc) || lc === 'site_planning' || lc === 'pre_announcement');
+
   const showLeadForm = !!site?.slug && isLeadEligible(site.lifecycle_stage);
   // 희망 타입 선택지는 모집공고 원본(house_type_info)의 type 앞 숫자(전용면적)에서 파생한다.
   // apt_sites 에 area_types 류 컬럼이 없고, 현장마다 평형이 달라 하드코딩하지 않는다.
@@ -848,6 +854,7 @@ export default async function AptUnifiedPage({ params }: Props) {
         priceMin={site?.price_min}
         priceMax={site?.price_max}
         units={units}
+        preAnnouncement={preAnnouncement}
         moveInDate={site?.move_in_date ?? sub?.mvn_prearnge_ym}
         receiptStart={sub?.rcept_bgnde ?? null}
         receiptEnd={sub?.rcept_endde ?? null}
@@ -1008,7 +1015,9 @@ export default async function AptUnifiedPage({ params }: Props) {
                     <td style={{ textAlign: 'right', fontWeight: 600, color: 'var(--text-primary)', padding: '7px 0', fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>
                       {/* v10-B6: 행마다 '방에서 물어보기' 를 반복하면 표가 어지럽다.
                           표에서는 '미공개' 만 두고 링크는 표 아래 한 줄로 모은다. */}
-                      {v ?? <span style={{ fontWeight: 400, fontFamily: 'var(--font-sans)', color: 'var(--text-tertiary)' }}>미공개</span>}
+                      {/* V17 F-2: 공고 전이면 '미정'. 아직 정해지지 않은 것을 '미공개' 라 하면
+                          누군가 알고 감추는 것처럼 읽힌다. */}
+                      {v ?? <span style={{ fontWeight: 400, fontFamily: 'var(--font-sans)', color: 'var(--text-tertiary)' }}>{preAnnouncement ? '미정' : '미공개'}</span>}
                     </td>
                   </tr>
                 ))}
@@ -1018,7 +1027,9 @@ export default async function AptUnifiedPage({ params }: Props) {
                 미공개 행이 하나라도 있을 때만 낸다 — 다 채워진 현장에 물어볼 것을 만들지 않는다. */}
             {firstEmpty && (
               <p style={{ margin: '10px 0 0', fontSize: 11.5, lineHeight: 1.6, color: 'var(--text-tertiary)' }}>
-                미공개 항목은 공고 확정 전이라 표에 없습니다.{' '}
+                {preAnnouncement
+                  ? '분양가와 일정은 모집공고가 나와야 확정됩니다.'
+                  : '미공개 항목은 공고 확정 전이라 표에 없습니다.'}{' '}
                 <TalkInlineLink slot="supply_table" siteSlug={slug} field={firstEmpty} countView label="방에서 물어보기 →" />
               </p>
             )}

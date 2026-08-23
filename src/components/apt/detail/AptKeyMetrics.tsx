@@ -23,6 +23,13 @@ type Props = {
   priceMax?: number | null;   // 만원
   /** 세대수 두 축. lib/apt/units.ts 의 resolveUnits() 결과를 그대로 넘긴다. */
   units: UnitCounts;
+  /**
+   * V17 F-2: 공고 전 현장인가.
+   * 값이 없는 이유가 다르다 — 공고 전은 **아직 정해지지 않은** 것이고(미정),
+   * 공고 후는 **공개하지 않은** 것이다(미공개). 같은 말로 쓰면 둘 다 거짓말이 된다.
+   * ⚠️ 추정치를 채워 넣지 않는다 (표시·광고법).
+   */
+  preAnnouncement?: boolean;
   /** 'YYYY-MM' 또는 'YYYYMM' */
   moveInDate?: string | null;
   /** 접수 마감일 (YYYY-MM-DD). D-day 계산 기준. */
@@ -123,8 +130,9 @@ function Cell({ label, value, note, accent }: { label: string; value: string; no
 }
 
 export default function AptKeyMetrics({
-  priceMin, priceMax, units, moveInDate, receiptEnd, receiptStart,
+  priceMin, priceMax, units, moveInDate, receiptEnd, receiptStart, preAnnouncement = false,
 }: Props) {
+  const blank = preAnnouncement ? '미정' : '미공개';
   const price = priceText(priceMin, priceMax);
   const unit = unitCell(units);
   const move = moveInText(moveInDate);
@@ -143,9 +151,14 @@ export default function AptKeyMetrics({
         overflow: 'hidden',
       }}
     >
-      <Cell label="분양가" value={price ?? '미공개'} note={price ? '세대별 상이' : undefined} accent={!!price} />
+      <Cell
+        label="분양가"
+        value={price ?? blank}
+        note={price ? '세대별 상이' : preAnnouncement ? '공고 후 확정' : undefined}
+        accent={!!price}
+      />
       <Cell label={unit.label} value={unit.value} note={unit.note} />
-      <Cell label="입주" value={move ?? '미정'} note={move ? '예정' : undefined} />
+      <Cell label="입주" value={move ?? '미정'} note={move ? '예정' : preAnnouncement ? '공고 후 확정' : undefined} />
       <div style={{ ...CELL, borderRight: 0 }}>
         <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-tertiary)', marginBottom: 3 }}>청약</div>
         <div style={{ fontSize: 15, fontWeight: 800, lineHeight: 1.25, letterSpacing: '-.03em', color: dday.value.startsWith('D-') ? 'var(--accent-red)' : 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>
