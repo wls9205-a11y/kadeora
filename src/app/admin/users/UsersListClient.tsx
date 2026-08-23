@@ -146,7 +146,7 @@ export default function UsersListClient() {
         />
         <button type="submit" style={{
           ...inputStyle, cursor: 'pointer',
-          background: 'var(--accent)', color: '#fff', border: 'none', fontWeight: 700,
+          background: 'var(--brand)', color: '#fff', border: 'none', fontWeight: 700,
         }}>검색</button>
         {search && (
           <button type="button" onClick={() => { setSearchInput(''); updateParams({ search: null, page: '1' }); }}
@@ -163,9 +163,9 @@ export default function UsersListClient() {
             style={{
               padding: '5px 12px', borderRadius: 999, fontSize: 12, fontWeight: 700,
               cursor: 'pointer',
-              background: filter === f.key ? 'var(--accent)' : 'transparent',
+              background: filter === f.key ? 'var(--brand)' : 'transparent',
               color: filter === f.key ? '#fff' : 'var(--text-secondary)',
-              border: `1px solid ${filter === f.key ? 'var(--accent)' : 'var(--border)'}`,
+              border: `1px solid ${filter === f.key ? 'var(--brand)' : 'var(--border)'}`,
             }}
           >{f.label}</button>
         ))}

@@ -264,9 +264,9 @@ export default function SendModal({
               padding: '8px 14px',
               borderRadius: 6,
               cursor: busy ? 'wait' : 'pointer',
-              background: 'var(--accent)',
+              background: 'var(--brand)',
               color: '#fff',
-              border: '1px solid var(--accent)',
+              border: '1px solid var(--brand)',
               opacity: busy ? 0.6 : 1,
             }}
           >

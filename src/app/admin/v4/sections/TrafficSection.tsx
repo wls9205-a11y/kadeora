@@ -101,7 +101,7 @@ export default function TrafficSection() {
               style={{
                 flex: '1 0 auto', minWidth: 12,
                 height: `${Math.max(4, heightPct)}%`,
-                background: 'linear-gradient(180deg, var(--accent) 0%, rgba(59,130,246,0.4) 100%)',
+                background: 'linear-gradient(180deg, var(--brand) 0%, rgba(59,130,246,0.4) 100%)',
                 borderRadius: '2px 2px 0 0',
               }}
             />
@@ -148,7 +148,7 @@ export default function TrafficSection() {
                 <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11 }}>
                   <span style={{ minWidth: 80, color: 'var(--text-secondary)' }}>{r.referrer}</span>
                   <div style={{ flex: 1, height: 6, background: 'rgba(255,255,255,0.05)', borderRadius: 3, overflow: 'hidden' }}>
-                    <div style={{ width: `${pct}%`, height: '100%', background: 'var(--accent)' }} />
+                    <div style={{ width: `${pct}%`, height: '100%', background: 'var(--brand)' }} />
                   </div>
                   <span style={{ minWidth: 40, textAlign: 'right', color: 'var(--text-primary)', fontWeight: 700 }}>{r.cnt}</span>
                 </div>

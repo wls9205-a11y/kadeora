@@ -289,9 +289,9 @@ function ChipGroup({
               padding: '5px 10px',
               borderRadius: 999,
               cursor: 'pointer',
-              background: on ? 'var(--accent)' : 'transparent',
+              background: on ? 'var(--brand)' : 'transparent',
               color: on ? '#fff' : 'var(--text-secondary)',
-              border: `1px solid ${on ? 'var(--accent)' : 'var(--border)'}`,
+              border: `1px solid ${on ? 'var(--brand)' : 'var(--border)'}`,
             }}
           >
             {single && on ? '● ' : ''}
@@ -324,9 +324,9 @@ function Toggle({
           padding: '5px 10px',
           borderRadius: 999,
           cursor: 'pointer',
-          background: value ? 'var(--accent)' : 'transparent',
+          background: value ? 'var(--brand)' : 'transparent',
           color: value ? '#fff' : 'var(--text-secondary)',
-          border: `1px solid ${value ? 'var(--accent)' : 'var(--border)'}`,
+          border: `1px solid ${value ? 'var(--brand)' : 'var(--border)'}`,
         }}
       >
         {onLabel}
@@ -339,9 +339,9 @@ function Toggle({
           padding: '5px 10px',
           borderRadius: 999,
           cursor: 'pointer',
-          background: !value ? 'var(--accent)' : 'transparent',
+          background: !value ? 'var(--brand)' : 'transparent',
           color: !value ? '#fff' : 'var(--text-secondary)',
-          border: `1px solid ${!value ? 'var(--accent)' : 'var(--border)'}`,
+          border: `1px solid ${!value ? 'var(--brand)' : 'var(--border)'}`,
         }}
       >
         {offLabel}
@@ -357,8 +357,8 @@ function btnStyle(variant: 'primary' | 'default'): React.CSSProperties {
     padding: '8px 14px',
     borderRadius: 6,
     cursor: 'pointer',
-    background: variant === 'primary' ? 'var(--accent)' : 'transparent',
+    background: variant === 'primary' ? 'var(--brand)' : 'transparent',
     color: variant === 'primary' ? '#fff' : 'var(--text-secondary)',
-    border: `1px solid ${variant === 'primary' ? 'var(--accent)' : 'var(--border)'}`,
+    border: `1px solid ${variant === 'primary' ? 'var(--brand)' : 'var(--border)'}`,
   };
 }

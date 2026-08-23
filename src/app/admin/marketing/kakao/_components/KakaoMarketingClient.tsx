@@ -62,9 +62,9 @@ export default function KakaoMarketingClient() {
             padding: '8px 14px',
             borderRadius: 6,
             cursor: 'pointer',
-            background: 'var(--accent)',
+            background: 'var(--brand)',
             color: '#fff',
-            border: '1px solid var(--accent)',
+            border: '1px solid var(--brand)',
           }}
         >
           📤 직접 발송

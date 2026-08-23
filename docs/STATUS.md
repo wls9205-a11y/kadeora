@@ -1,3 +1,51 @@
+### S10-0.5 — 미정의 토큰 `--accent` 로 안 보이던 버튼 복구 (2026-08-23)
+
+`--accent` 는 `globals.css` 에 정의가 없고 폴백도 없다. `var(--accent)` 는 computed-value 단계에서
+무효가 되어 `background` 는 transparent, `border` 단축속성은 border-style none 으로 떨어진다.
+그 버튼들이 전부 `color: '#fff'` 이라 **흰 배경 위 흰 글씨 = 실질적으로 안 보이는 버튼**이었다.
+
+`var(--accent)` → `var(--brand)`(#2563EB, `:root` 정의 확인) 19건 전량 치환.
+
+| 파일 | 건수 | 대표 피해 |
+|---|---|---|
+| `marketing/kakao/_components/SegmentBuilder.tsx` | 8 | 토글·프라이머리 버튼 |
+| `users/UsersListClient.tsx` | 3 | `검색` 버튼 |
+| `v4/sections/TrafficSection.tsx` | 2 | 막대 그래프 (그라디언트 포함) |
+| `marketing/kakao/_components/SendModal.tsx` | 2 | **`발송`** (배경+테두리 동시 무효) |
+| `marketing/kakao/_components/KakaoMarketingClient.tsx` | 2 | **`📤 직접 발송`** |
+| `v4/sections/OpsSection.tsx` | 1 | 링크 색 |
+| `v4/sections/IssuePipelineSection.tsx` | 1 | **`⚡ 오케스트레이터 즉시 실행`** |
+
+**대비 실측 (Rule #86 하한 4.5:1)**
+```
+#fff on --brand #2563EB          5.17:1  통과   ← 수정 후
+#fff on 무효 배경(=흰 배경)        1.00:1  미달   ← 수정 전
+--brand on --bg-base  #F5F7FA    4.82:1  통과   ← OpsSection 링크색
+```
+
+**검증**
+- `grep -rn "var(--accent)" src` → **0건**. 빌드 번들(`.next/static/chunks`)에서도 0건
+- `--accent-red`/`-green`/`-orange`/`-purple`/`-blue-light` 계열은 무손상(정확 일치 치환)
+- `npx tsc --noEmit` PASS / `npm run build` PASS
+
+**전수 감사 (같은 부류 재발 방지)**
+어드민(`src/app/admin/**`, `src/components/admin/**`)이 쓰는 CSS 변수 **17종 / 529건**을 추출해
+`globals.css` 정의 181종과 대조 → **미정의 0건**. 감사 로직은 수정 전 상태에서 `--accent` 를
+정확히 잡아내는 것으로 검증했다.
+```
+comm -23 <(grep -rhoE 'var\(--[a-zA-Z0-9-]+' src/app/admin src/components/admin | sed 's/var(//' | sort -u) \
+         <(grep -oE '^\s*--[a-zA-Z0-9-]+:' src/app/globals.css | tr -d ' :' | sort -u)
+```
+지시서가 함께 확인하라고 한 `--border-base`·`--text-danger` 는 둘 다 미정의이지만
+**사용처 0건**(s273c 에서 이미 정리됨)이라 조치 불필요.
+
+**발견했지만 범위 밖 (기록만)**
+- `--brand` 정의가 두 벌이다: `:root` `#2563EB` / `.toss-mode` `#3182F6`(`styles/responsive.css:456`).
+  `.toss-mode` 는 `TossModeInit`(root layout)이 토스 인앱 브라우저에서만 `<html>` 에 붙이므로
+  어드민 실사용 경로는 `#2563EB` 다. 다만 **토스 모드에서는 `#fff` 대비가 3.71:1 로 하한 미달**이고,
+  이건 어드민만이 아니라 `--brand` 배경 + 흰 글씨를 쓰는 전 화면에 해당하는 선재 조건이다.
+  S10 범위 밖 — 별도 판단 필요.
+
 ### S10-0 — 무인증 어드민 API 봉인 (2026-08-23)
 
 `src/middleware.ts` 는 `pathname.startsWith('/admin')` 만 검사한다. `/api/admin/*` 은 그 대상이 아니므로

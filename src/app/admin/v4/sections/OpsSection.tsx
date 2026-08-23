@@ -81,7 +81,7 @@ export default function OpsSection({ data }: Props) {
             <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: 0 }}>
               긴급 운영 액션 — 다음 단계에서 채워질 예정. 현재는 파이프라인 즉시 실행만 노출.
             </p>
-            <a href="/api/admin/issues/run-pipeline" style={{ fontSize: 12, color: 'var(--accent)', textDecoration: 'none' }}>
+            <a href="/api/admin/issues/run-pipeline" style={{ fontSize: 12, color: 'var(--brand)', textDecoration: 'none' }}>
               POST /api/admin/issues/run-pipeline →
             </a>
           </div>
