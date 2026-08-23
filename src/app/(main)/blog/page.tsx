@@ -4,11 +4,12 @@ import Link from 'next/link';
 // s240 W1: createSupabaseServer (cookies 의존) → getSupabaseAdmin (cookie-free) 전환.
 // 메인 페이지 anonymous SSR — RLS 우회 OK. cache-control public 회복.
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
-import { safeImg } from '@/lib/image-sanitize';
 import EmptyState from '@/components/EmptyState';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
 import SectionShareButton from '@/components/SectionShareButton';
 import CurationCarousel from '@/components/ui/CurationCarousel';
+import ListThumb from '@/components/ui/ListThumb';
+import { isSafeImage, blogHeroImage } from '@/lib/blog/safe-image';
 import BlogCurationCard from '@/components/blog/BlogCurationCard';
 // s205-W2: HeroCard "오늘의 블로그" 제거 — 14d /blog 1,176 PV, 카드 클릭 1건. fetchBlogHero / getSupabaseAdmin 도 함께 제거.
 
@@ -176,6 +177,18 @@ function resolveCategories(category: string): string[] | null {
 const POST_CAT_LABEL: Record<string, string> = {
   stock: '주식', apt: '청약', unsold: '미분양', redev: '재개발', finance: '재테크', general: '생활',
 };
+
+/**
+ * 목록 좌측 64px 썸네일 URL. 없으면 null → ListThumb 이 이니셜 블록을 그린다.
+ * 판정은 safe-image.ts 의 isSafeImage 하나만 쓴다 (새 함수 금지 — 판정이 갈린다).
+ * postImageMap 은 본문에서 뽑아 둔 이미지라 같은 화이트리스트를 통과해야 한다.
+ */
+function listThumb(p: { id: string | number; cover_image?: string | null }, map?: Record<string | number, string>): string | null {
+  if (isSafeImage(p.cover_image)) return p.cover_image!;
+  const fromBody = map?.[p.id];
+  if (isSafeImage(fromBody)) return fromBody!;
+  return null;
+}
 
 const CAT_COLORS: Record<string, string> = {
   stock: 'var(--accent-blue)', apt: 'var(--accent-green)', unsold: 'var(--accent-red)',
@@ -498,11 +511,8 @@ export default async function BlogPage({ searchParams }: Props) {
               key={p.id}
               post={p}
               img={postImageMap[p.id]}
-              cover={p.cover_image && !String(p.cover_image).includes('/api/og')
-                ? safeImg(p.cover_image, { title: (p.title || '').slice(0, 40), category: p.category || 'blog', design: 1 })
-                : postImageMap[p.id]
-                  ? safeImg(postImageMap[p.id], { title: (p.title || '').slice(0, 40), category: p.category || 'blog', design: 1 })
-                  : null}
+              // 큐레이션은 16:9 큰 슬롯이라 생성 카드가 읽힌다 (목록 64px 과 판단이 다르다).
+              cover={listThumb(p, postImageMap) ?? blogHeroImage(p)}
               catLabel={POST_CAT_LABEL[p.category] || p.category || '분석'}
               catColor={CAT_COLORS[p.category] || 'var(--text-tertiary)'}
             />
@@ -520,7 +530,7 @@ export default async function BlogPage({ searchParams }: Props) {
       ) : (
         <div>
           <div className="kd-lhead" aria-hidden="true">
-            <span>분류</span>
+            <span />
             <span>제목</span>
             <span>발행</span>
           </div>
@@ -537,16 +547,18 @@ export default async function BlogPage({ searchParams }: Props) {
               // v3 커밋5: 요약(excerpt)을 뺐다 — 모바일에서 16건 전부 한 줄 말줄임으로 잘려
               // 정보 구실을 못 했다. 그 폭을 제목 2줄에 몰아준다.
               // 좌측 칩 = 분류, 우측 = 발행일 + 읽는 시간.
-              <Link key={p.id} href={`/blog/${p.slug}`} className="kd-lrow" style={{ textDecoration: 'none', color: 'inherit' }}>
-                <span
-                  className="kd-lrow-k"
-                  style={{ background: `${catColor}1A`, color: catColor }}
-                >
-                  {catLabel}
-                </span>
+              <Link key={p.id} href={`/blog/${p.slug}`} className="kd-lrow kd-lrow--thumb" style={{ textDecoration: 'none', color: 'inherit' }}>
+                {/* v4-C7-2: 판정은 safe-image.ts 한 곳에서만 한다 — 새 함수를 만들면
+                    OG 판정과 목록 판정이 갈린다. 외부 스크랩(발행분 24.7%)은 통과시키지 않는다.
+                    ⚠️ 폴백을 생성 OG 카드로 두지 않았다 (C7-1 과 같은 이유):
+                       텍스트 카드라 64px 에서 글씨가 안 보인다. 같은 크기 이니셜 블록이 낫다. */}
+                <ListThumb src={listThumb(p, postImageMap)} name={p.title || ''} />
 
                 <span style={{ minWidth: 0 }}>
                   <h2 className="kd-lrow-t is-two" style={{ margin: 0 }}>
+                    <span className="kd-lrow-badge" style={{ background: `${catColor}1A`, color: catColor }}>
+                      {catLabel}
+                    </span>
                     {q ? highlightTitle(p.title, q) : p.title}
                   </h2>
                   {(isHot || (p.comment_count || 0) > 0 || (p.helpful_count || 0) > 0) && (
