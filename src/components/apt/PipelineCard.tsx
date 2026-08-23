@@ -12,6 +12,7 @@
 import Link from 'next/link';
 import { lifecycleLabel } from '@/lib/apt/lifecycle-label';
 import { isRecentStageChange, pipelineHref, type AptPipelineItem } from '@/lib/apt/pipeline';
+import { unitCell } from '@/lib/apt/units';
 import ListThumb from '@/components/ui/ListThumb';
 
 /** 등급 표기. confirmed 는 기본값이라 말하지 않는다 — 말하면 전 행에 붙어 정보가 0이 된다. */
@@ -40,6 +41,8 @@ export default function PipelineCard({ item, now }: { item: AptPipelineItem; now
   const stage = lifecycleLabel(item.status);
   const isNew = isRecentStageChange(item.stage_updated_at, now);
   const note = item.confidence ? CONFIDENCE_NOTE[item.confidence] : undefined;
+  // 공고 전 현장이라 '미공개' 가 아니라 '미정' 이다 — 아직 정해지지 않았다 (V17 F-2).
+  const units = unitCell({ supply: item.supply_units, complex: item.complex_units });
 
   const meta = [
     item.region_nm,
@@ -67,14 +70,18 @@ export default function PipelineCard({ item, now }: { item: AptPipelineItem; now
         </span>
       </span>
 
+      {/* V17: RPC 가 두 축을 따로 실어 준다. 어느 쪽 숫자인지 밝히지 않으면
+          경쟁률의 분모(분양 공급)와 단지 규모(단지 전체)가 섞인다 (V15 C 와 같은 규칙). */}
       <span className="kd-lrow-r">
-        {item.households ? (
-          <>
-            {item.households.toLocaleString('ko-KR')}
-            <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-tertiary)' }}>세대</span>
-          </>
+        {units.value === '미확인' ? (
+          <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-tertiary)' }}>미정</span>
         ) : (
-          <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-tertiary)' }}>미공개</span>
+          <>
+            {units.value}
+            <span style={{ display: 'block', fontSize: 9.5, fontWeight: 600, color: 'var(--text-tertiary)', lineHeight: 1.3 }}>
+              {units.note ?? '세대'}
+            </span>
+          </>
         )}
       </span>
     </>

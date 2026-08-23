@@ -57,7 +57,12 @@ export interface AptPipelineItem {
   site_slug: string | null;
   region_nm: string | null;
   supply_addr: string | null;
+  /** coalesce(supply_units, complex_units, total_units) — 게이트 판정에 쓰인 값. */
   households: number | null;
+  /** 이번 분양 공급(일반분양+특별공급). 없을 수 있다. */
+  supply_units: number | null;
+  /** 단지 전체(조합원분 포함). 없을 수 있다. */
+  complex_units: number | null;
   builder: string | null;
   thumb_url: string | null;
   /** apt_sites.lifecycle_stage 원문. 라벨은 lib/apt/lifecycle-label.ts 가 붙인다. */
@@ -71,7 +76,12 @@ export interface AptPipelineItem {
 
 export interface AptPipelinePayload {
   region: string;
-  /** 필터에 걸린 전체 건수. items.length 는 이 페이지 몫이다. */
+  /**
+   * V17 F-1: RPC 가 목록 노출 조건(이력·시공사·세대수·위치 중 2개 이상)을 적용했는가.
+   * 구버전 RPC 와 구분하는 표식이다 — false 면 total 이 게이트 이전 값이라는 뜻이다.
+   */
+  gated: boolean;
+  /** 게이트를 통과한 전체 건수. items.length 는 이 페이지 몫이다. */
   total: number;
   page: number;
   page_size: number;
@@ -81,6 +91,7 @@ export interface AptPipelinePayload {
 
 export const EMPTY_PIPELINE: AptPipelinePayload = {
   region: BUGYEONG,
+  gated: false,
   total: 0,
   page: 1,
   page_size: PIPELINE_PAGE_SIZE,
@@ -93,6 +104,7 @@ function normalize(raw: unknown, region: string, limit: number): AptPipelinePayl
   const r = raw as Partial<AptPipelinePayload>;
   return {
     region: r.region ?? region,
+    gated: r.gated === true,
     total: Number(r.total) || 0,
     page: Number(r.page) > 0 ? Number(r.page) : 1,
     page_size: Number(r.page_size) > 0 ? Number(r.page_size) : limit,
@@ -121,7 +133,7 @@ async function fetchPipelineUncached(
     const payload = normalize(data, region, limit);
     console.log(
       `[apt/pipeline] region=${region} page=${payload.page}/${payload.total_pages} ` +
-        `items=${payload.items.length} total=${payload.total}`,
+        `items=${payload.items.length} total=${payload.total} gated=${payload.gated}`,
     );
     return payload;
   } catch (e: any) {

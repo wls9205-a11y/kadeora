@@ -42,8 +42,6 @@ import EmptyState from '@/components/ui/EmptyState';
 //   이 목록에 닿지 못했다. get_apt_pipeline 은 공고 없는 현장만 내므로 위 목록과 겹치지 않는다.
 import { getAptPipeline, normalizePipelineRegion, BUGYEONG, BUGYEONG_REGIONS, PIPELINE_SECTION_LIMIT } from '@/lib/apt/pipeline';
 import PipelineCard from '@/components/apt/PipelineCard';
-// V17 F-1: 진행 이력·시공사·세대수·위치 중 2개 이상일 때만 목록에 낸다.
-import { filterByComposition } from '@/lib/apt/pipeline-gate';
 // V16 E-3 — 이번 주 움직인 현장. 카더라가 남보다 빠르다는 걸 보여주는 자리다.
 import { getAptRecentMoves } from '@/lib/apt/recent-moves';
 import RecentMovesStrip from '@/components/apt/RecentMovesStrip';
@@ -109,10 +107,10 @@ export default async function AptPage({
   const pipelineRegion = normalizePipelineRegion(
     region === '전국' || (BUGYEONG_REGIONS as readonly string[]).includes(region) ? BUGYEONG : region,
   );
-  const [hub, pipelineRaw, recentMoves] = await Promise.all([
+  const [hub, pipeline, recentMoves] = await Promise.all([
     getAptHub(region),
-    // V17 F-1: 게이트에서 절반 가까이 떨어진다(실측 206 → 93). 8칸을 채우려면 넉넉히 받아야 한다.
-    getAptPipeline(pipelineRegion, PIPELINE_SECTION_LIMIT * 3),
+    // V17 F-1 게이트는 RPC 안에 있다(gated: true) — 받은 건 그대로 낸다.
+    getAptPipeline(pipelineRegion, PIPELINE_SECTION_LIMIT),
     // 움직인 현장도 파이프라인과 같은 지역 규칙을 따른다 — 두 섹션이 다른 지역을 말하면 안 된다.
     getAptRecentMoves(pipelineRegion),
   ]);
@@ -149,11 +147,6 @@ export default async function AptPage({
   // 관련 블로그는 지금 노출 중인 단지 기준으로 뽑는다 (metadata.apt_id 매핑, s273 규약)
   const visibleIds = [...cards, ...hub.results].map((it) => it.id);
   const relatedBlogs = await getRelatedBlogs(visibleIds);
-
-  // V17 F-1 · 빈 껍데기 현장을 목록에서 뺀다.
-  //   ⚠️ total 은 RPC 가 게이트 없이 센 값이라 여기서 쓰지 않는다 — 아래 meta 참조.
-  const pipelineItems = (await filterByComposition(pipelineRaw.items)).slice(0, PIPELINE_SECTION_LIMIT);
-  const pipeline = { ...pipelineRaw, items: pipelineItems };
 
   // NEW 배지(단계 변경 30일 이내) 기준 시각. 행마다 Date.now() 를 부르면
   //   한 렌더 안에서 기준이 갈린다. 한 번 찍어 내려보낸다.
@@ -331,7 +324,7 @@ export default async function AptPage({
             id="apt-pipeline-heading"
             eyebrow="PIPELINE — 공고 전"
             title="공고 전 현장"
-            meta={`${pipeline.region} · 진행 단계순`}
+            meta={`${pipeline.region} ${pipeline.total.toLocaleString('ko-KR')}곳 · 진행 단계순`}
           />
 
           <div>

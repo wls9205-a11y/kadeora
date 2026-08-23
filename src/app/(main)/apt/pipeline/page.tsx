@@ -16,9 +16,6 @@ import {
   PIPELINE_PAGE_SIZE,
 } from '@/lib/apt/pipeline';
 import PipelineCard from '@/components/apt/PipelineCard';
-// V17 F-1: /apt 섹션과 **같은 게이트**를 쓴다. 두 화면이 다른 기준이면
-//   같은 현장이 한쪽에만 나온다.
-import { filterByComposition } from '@/lib/apt/pipeline-gate';
 import SectionHeader from '@/components/apt/SectionHeader';
 import EmptyState from '@/components/ui/EmptyState';
 import { KR_REGIONS_17 } from '@/lib/region-storage';
@@ -91,22 +88,17 @@ export default async function AptPipelinePage({ searchParams }: { searchParams?:
   const sp = (await searchParams) || {};
   const region = normalizePipelineRegion(sp.region);
   const pageNum = Math.max(1, Number(sp.page) || 1);
-  const raw = await getAptPipeline(region, PIPELINE_PAGE_SIZE, pageNum);
-  // V17 F-1 · 조건 미달 현장을 뺀다.
-  //   ⚠️ 게이트가 RPC 안이 아니라 여기 있어서 **페이지마다 건수가 들쭉날쭉하다.**
-  //      total/total_pages 는 게이트 이전 값이라 페이지 이동에는 그대로 쓰고,
-  //      "N곳" 총계로는 쓰지 않는다. RPC 에 조건이 들어가면 이 주석과 함께 정리한다.
-  const items = await filterByComposition(raw.items);
-  const data = { ...raw, items };
+  // V17 F-1 게이트는 RPC 안에 있다(gated: true). total·total_pages 가 게이트 이후 값이라
+  //   그대로 쓴다 — 쪽마다 건수가 들쭉날쭉하던 문제도 같이 사라졌다.
+  const data = await getAptPipeline(region, PIPELINE_PAGE_SIZE, pageNum);
   const now = Date.now();
 
   /** 지역을 바꾸면 1페이지로 돌아간다 — 7페이지에서 부산을 고르면 빈 화면이 나온다. */
   const href = (r: string, page = 1) =>
     `/apt/pipeline?region=${encodeURIComponent(r)}${page > 1 ? `&page=${page}` : ''}`;
-  // 게이트 이후 건수만 말한다. 게이트 이전 total 을 내면 목록보다 큰 숫자가 나온다.
   const meta =
-    data.items.length > 0
-      ? `${data.items.length}곳${data.total_pages > 1 ? ` · ${data.page}/${data.total_pages}쪽` : ''}`
+    data.total > 0
+      ? `${data.total.toLocaleString('ko-KR')}곳${data.total_pages > 1 ? ` · ${data.page}/${data.total_pages}쪽` : ''}`
       : undefined;
 
   return (
@@ -140,8 +132,6 @@ export default async function AptPipelinePage({ searchParams }: { searchParams?:
             {DESCRIBE} 진행 이력·시공사·세대수·위치 중 2개 이상이 확인된 현장만 싣습니다.
           </p>
 
-          {/* 게이트 때문에 이 페이지가 통째로 빌 수 있다. 다음 쪽에는 있을 수 있으므로
-              "없습니다" 대신 페이지 이동을 남겨 둔다 (아래 nav 는 그대로 렌더된다). */}
           {data.items.length > 0 ? (
             <div>
               <div className="kd-lhead" aria-hidden="true">
@@ -156,16 +146,8 @@ export default async function AptPipelinePage({ searchParams }: { searchParams?:
           ) : (
             <EmptyState
               icon="🏗️"
-              title={
-                data.total_pages > 1
-                  ? `${data.page}쪽에는 보여줄 현장이 없습니다`
-                  : `${region}에 공고 전 현장이 없습니다`
-              }
-              description={
-                data.total_pages > 1
-                  ? '진행 이력·시공사·세대수·위치 중 2개 이상이 확인된 현장만 싣습니다. 다음 쪽을 보세요.'
-                  : '지역을 바꿔보세요. 단계가 바뀌는 즉시 이 목록에 올라옵니다.'
-              }
+              title={`${region}에 공고 전 현장이 없습니다`}
+              description="지역을 바꿔보세요. 단계가 바뀌는 즉시 이 목록에 올라옵니다."
               cta={{ label: `${BUGYEONG} 공고 전 현장 보기`, href: href(BUGYEONG) }}
             />
           )}
