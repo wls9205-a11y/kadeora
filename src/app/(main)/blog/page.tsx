@@ -56,6 +56,9 @@ const SUB_MIN_POSTS = 30;
  * 영문 구형 키(cheongak·preempt_coverage·lotto_cheongak 등)가 '청약·분양' 으로 흡수돼
  * 891 → 1,131편이 된다.
  *
+ * 목록 조회도 같은 정규화를 쓰는 v_blog_posts_listing 뷰를 본다.
+ * 칩 건수와 목록 건수가 한 함수(fn_blog_subcat_norm)에서 나오므로 어긋날 수 없다.
+ *
  * 그룹 탭은 멤버 category 의 같은 sub_norm 을 합산한다
  * (예: 재개발·재건축 = apt 26 + redev 274 = 300).
  */
@@ -77,39 +80,6 @@ function subCatsFromView(rows: SubcatRow[], category: string): { key: string; la
     .sort((a, b) => a.label.localeCompare(b.label, 'ko'));
 
   return out.length > 0 ? out : null;
-}
-
-/**
- * 정규화 이름(sub_norm) → 실제 blog_posts.sub_category 값들.
- *
- * ⚠️ 이 목록은 DB 의 `fn_blog_subcat_norm(text,text)` CASE 문을 거울처럼 옮긴 것이다.
- *    그 함수가 유일한 원본이고, 여기는 사본이다 — 함수를 고치면 여기도 같이 고쳐야 한다.
- *
- *    거울이 필요한 이유: 뷰는 정규화된 이름으로 집계해 주지만, 목록 조회는
- *    PostgREST 로 `blog_posts.sub_category`(원본 값) 를 걸러야 한다.
- *    프론트에서 함수를 호출할 방법이 없어 역매핑을 들고 있어야 한다.
- *
- *    ⇒ 이 사본을 없애려면 DB 쪽에 둘 중 하나가 필요하다:
- *       (a) blog_posts 에 sub_norm 생성 컬럼(GENERATED ALWAYS AS ... STORED) + 인덱스
- *       (b) sub_norm 으로 필터되는 글 목록 뷰
- *       둘 중 하나가 생기면 아래 상수와 subNormRaws() 를 통째로 지우고
- *       `.eq('sub_norm', sub)` 한 줄로 바꾸면 된다.
- *
- *    드리프트 증상: 칩의 건수(뷰 기준)와 실제 목록 건수가 어긋난다.
- */
-const SUB_NORM_ALIASES: Record<string, string[]> = {
-  '청약·분양': ['cheongak', 'lotto_cheongak', 'preempt_coverage', '청약', '청약결과', '청약전략', '분양', '분양권', '분양예정'],
-  '실거래·시세': ['price_change'],
-  '재개발·재건축': ['redevelopment', '재개발'],
-  '부동산일반': ['apt_general', 'jeonse_crisis', 'policy_change'],
-  '증시일반': ['stock_general', 'rate_decision', 'earnings', 'rights_issue', 'price_surge', 'ma', '합병', 'trending_gap'],
-  '재테크일반': ['fx_change', 'economy_general'],
-  '생활정보': ['trending_gap'],
-};
-
-/** 정규화 이름으로 조회할 때 실제로 걸러야 하는 원본 값 목록. 자기 자신도 포함한다 (ELSE p_sub). */
-function subNormRaws(subNorm: string): string[] {
-  return [subNorm, ...(SUB_NORM_ALIASES[subNorm] ?? [])];
 }
 
 interface PageProps { searchParams: Promise<{ category?: string; sort?: string; q?: string; page?: string; sub?: string }> }
@@ -280,7 +250,13 @@ export default async function BlogPage({ searchParams }: Props) {
 
   // 메인 쿼리
   const now = new Date().toISOString();
-  let q2 = sb.from('blog_posts')
+  // v4-C9(3차): 목록을 v_blog_posts_listing 뷰에서 읽는다.
+  //   blog_posts.* + sub_norm + group_key 라 컬럼은 그대로 쓰면서 sub_norm 으로 바로 거른다.
+  //   이전 차수의 SUB_NORM_ALIASES 거울(=fn_blog_subcat_norm 사본)은 이걸로 없앴다.
+  //   표현식 인덱스 idx_blog_posts_sub_norm 이 붙어 있어 인덱스 스캔으로 탄다.
+  //   생성 컬럼을 쓰지 않은 것은 의도다 — 함수를 고쳐도 저장값이 재계산되지 않아
+  //   드리프트가 오히려 더 조용해진다.
+  let q2 = (sb as any).from('v_blog_posts_listing')
     .select('id, slug, title, excerpt, category, sub_category, tags, created_at, view_count, cover_image, image_alt, published_at, reading_time_min, comment_count, helpful_count, rewritten_at')
     .eq('is_published', true)
     .or(`published_at.is.null,published_at.lte.${now}`);
@@ -289,9 +265,8 @@ export default async function BlogPage({ searchParams }: Props) {
   if (activeCats) {
     q2 = activeCats.length === 1 ? q2.eq('category', activeCats[0]) : q2.in('category', activeCats);
   }
-  // v4-C9(2차): sub 는 정규화 이름(sub_norm)이다. 원본 값 여러 개가 한 이름으로 접히므로
-  //   .eq() 가 아니라 .in() 으로 건다 — .eq() 면 '청약·분양' 에서 구형 231편이 빠진다.
-  if (sub) q2 = q2.in('sub_category', subNormRaws(sub));
+  // sub 는 정규화 이름이다. 뷰가 sub_norm 을 직접 주므로 한 줄로 끝난다.
+  if (sub) q2 = q2.eq('sub_norm', sub);
   if (q) { const sq = sanitizeSearchQuery(q, 100); if (sq) q2 = q2.or(`title.ilike.%${sq}%,excerpt.ilike.%${sq}%`); }
   if (sort === 'popular') {
     q2 = q2.order('view_count', { ascending: false });
@@ -325,14 +300,14 @@ export default async function BlogPage({ searchParams }: Props) {
   // 다음 페이지 미리보기
   let nextPagePosts: any[] = [];
   try {
-    let nq = sb.from('blog_posts')
+    let nq = (sb as any).from('v_blog_posts_listing')
       .select('id, slug, title, category')
       .eq('is_published', true)
       .or(`published_at.is.null,published_at.lte.${now}`);
     if (activeCats) {
       nq = activeCats.length === 1 ? nq.eq('category', activeCats[0]) : nq.in('category', activeCats);
     }
-    if (sub) nq = nq.in('sub_category', subNormRaws(sub));
+    if (sub) nq = nq.eq('sub_norm', sub);
     if (sort === 'popular') nq = nq.order('view_count', { ascending: false });
     else nq = nq.order('created_at', { ascending: false });
     nq = nq.range(pageNum * perPage, pageNum * perPage + 4);
