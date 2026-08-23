@@ -36,54 +36,30 @@ async function counts() {
       one('apt_complex_profiles'), one('apt_transactions'), one('posts'),
       one('apt_complex_profiles', (q: any) => q.not('latest_sale_price', 'is', null)),
     ]);
-    // 지역 허브 수는 sitemap/[id] 와 정확히 같은 기준으로 센다 (시군구 10개+ / 동 5개+ 단지).
-    // PostgREST 는 기본 1k 에서 잘리므로 range 로 나눠 받는다 (사이트맵과 동일한 우회).
+    // 지역 허브 수 — sitemap/[id] 와 같은 기준(시군구 ≥10 · 동 ≥5, age_group IS NOT NULL).
     //
-    // ⚠️ 이 루프는 빌드를 막을 수 있다. 34k 행을 1,000행씩 **순차로** 긁는 34회 왕복이라
-    //    Next 의 정적 생성 타임아웃(60초)에 걸린다 — 2026-08-23 배포가 여기서 3회 재시도 끝에
-    //    "Export encountered an error on /llms.txt/route" 로 죽었다.
-    //    llms.txt 는 AI 모델용 사이트 요약이고 허브 **개수**는 부수 정보다.
-    //    정확한 숫자 하나 때문에 배포 전체를 잃지 않는다 —
-    //    예산을 넘기면 그 시점까지 받은 행으로 세고, 한 행도 못 받았으면 FALLBACK 을 쓴다.
+    // ⚠️ 여기 있던 34k행 페이지네이션(range(off) 34~100 왕복)이 Next 의 정적 생성
+    //    타임아웃 60초를 넘겨 2026-08-23 배포를 통째로 죽였다. 급한 불은 20초 예산으로
+    //    껐지만 그 방식은 **데이터가 커질수록 항상 예산을 넘겨 영원히 FALLBACK 상수만
+    //    내보내게 된다** — 원인(왕복 수)이 그대로였기 때문이다.
+    //    DB 담당이 같은 임계값·같은 필터로 집계 RPC 를 만들어 한 번 호출로 끝낸다 (실측 500ms).
+    //
+    // ⚠️ 같은 range(off) 패턴이 src/app/sitemap/[id]/route.ts 에도 8곳 있지만 그 파일은
+    //    force-dynamic 이라 빌드타임 프리렌더 대상이 아니다. 손대지 않는다.
     let sigunguHubs = FALLBACK.sigunguHubs;
     let dongHubs = FALLBACK.dongHubs;
     try {
-      const started = Date.now();
-      const BUDGET_MS = 20_000;
-      let truncated = false;
-      const rows: Array<{ region_nm: string | null; sigungu: string | null; dong: string | null }> = [];
-      for (let off = 0; off < 100000; off += 1000) {
-        if (Date.now() - started > BUDGET_MS) { truncated = true; break; }
-        const { data } = await (sb as any).from('apt_complex_profiles')
-          .select('region_nm, sigungu, dong')
-          .not('age_group', 'is', null)
-          .order('apt_name', { ascending: true })
-          .range(off, off + 999);
-        if (!data?.length) break;
-        rows.push(...data);
-        if (data.length < 1000) break;
-      }
-      // 잘린 집계는 실제보다 작게 나온다. 틀린 숫자를 말하느니 FALLBACK 을 쓴다.
-      if (truncated) {
-        console.warn(`[llms.txt] 허브 집계 예산 초과 — ${rows.length}행에서 중단, FALLBACK 사용`);
-      } else if (rows.length > 0) {
-        const sg = new Map<string, number>();
-        const dg = new Map<string, number>();
-        for (const r of rows) {
-          if (r.sigungu) {
-            const k = `${r.region_nm}|${r.sigungu}`;
-            sg.set(k, (sg.get(k) || 0) + 1);
-          }
-          if (r.dong) {
-            const k = `${r.region_nm}|${r.sigungu}|${r.dong}`;
-            dg.set(k, (dg.get(k) || 0) + 1);
-          }
-        }
-        sigunguHubs = [...sg.values()].filter((v) => v >= 10).length;
-        dongHubs = [...dg.values()].filter((v) => v >= 5).length;
-      }
-    } catch {
-      // 집계 실패 시 폴백 유지 — llms.txt 자체는 계속 나가야 한다
+      const { data: hub, error } = await (sb as any).rpc('get_llms_hub_counts');
+      if (error) throw new Error(error.message);
+      // RPC 가 값을 못 주면 0 으로 덮지 않는다 — 0 은 "허브가 없다" 는 거짓말이 된다.
+      const sg = Number(hub?.sigungu_hubs);
+      const dg = Number(hub?.dong_hubs);
+      if (Number.isFinite(sg) && sg > 0) sigunguHubs = sg;
+      if (Number.isFinite(dg) && dg > 0) dongHubs = dg;
+    } catch (e: any) {
+      // 집계 실패 시 폴백 유지 — llms.txt 자체는 계속 나가야 한다.
+      // 조용히 폴백하면 숫자가 낡은 걸 아무도 모른다.
+      console.warn('[llms.txt] get_llms_hub_counts 실패, FALLBACK 사용:', e?.message ?? String(e));
     }
     return {
       blog: blog ?? FALLBACK.blog, stocks: stocks ?? FALLBACK.stocks,
