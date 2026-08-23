@@ -8,7 +8,7 @@
  *  edge case 발생.
  *
  *  Fix: layout 을 서버 component 로 단순화하고, hook-heavy + 공통 chrome 을
- *  본 ClientShell 로 이동. AuthProvider / ToastProvider / Navigation / Sidebar /
+ *  본 ClientShell 로 이동. AuthProvider / ToastProvider / Navigation /
  *  RightPanel / Tracker 류 등 SSR 에 의미 없는 컴포넌트 모두 { ssr: false } 로
  *  격리 → SSR HTML 에는 children (페이지 본문) 만 직렬화 → SEO 영향 없음, hydrate
  *  단계에서 chrome 채워짐.
@@ -42,7 +42,6 @@ import StickyTalkBanner from '@/components/banner/StickyTalkBanner';
 const Navigation             = dynamic(() => import('@/components/Navigation').then(m => m.Navigation),     { ssr: false });
 const NoticeBanner           = dynamic(() => import('@/components/NoticeBanner'),                            { ssr: false });
 const AdBanner               = dynamic(() => import('@/components/AdBanner'),                                { ssr: false });
-const Sidebar                = dynamic(() => import('@/components/Sidebar'),                                 { ssr: false });
 const RightPanel             = dynamic(() => import('@/components/RightPanel'),                              { ssr: false });
 const LiveBarChrome          = dynamic(() => import('@/components/ui/LiveBarChrome'),                        { ssr: false });
 const ProfileCompleteBanner  = dynamic(() => import('@/components/ProfileCompleteBanner'),                   { ssr: false });
@@ -73,10 +72,11 @@ export default function ClientShell({ children, serverLoggedIn }: Props) {
         <Navigation />
         <NoticeBanner />
         <AdBanner />
-        <div style={{ display: 'flex', maxWidth: 1340, margin: '0 auto', gap: 24, padding: '0 clamp(12px, 3vw, 24px)', alignItems: 'flex-start' }}>
-          <div className="sidebar-wrapper">
-            <Sidebar />
-          </div>
+        {/* v5-V1: 좌측 Sidebar 제거. 링크 14개가 하단 탭 4개 + /more 와 통째로 중복이었고
+             데스크탑(≥1024px)에서만 보이는데 /apt 데스크탑 비중은 30% 다
+             (30일 실측 데스크탑 351 / 모바일 829). 상단 헤더 네비가 주 동선이고
+             나머지는 /more 가 받는다. */}
+        <div style={{ display: 'flex', maxWidth: 'var(--container-grid)', margin: '0 auto', gap: 24, padding: '0 clamp(12px, 3vw, 24px)', alignItems: 'flex-start' }}>
           <main id="main-content" style={{
             flex: 1, minWidth: 0,
             paddingTop: 'clamp(12px,3vw,20px)',

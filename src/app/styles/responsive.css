@@ -421,15 +421,6 @@ html.font-small .kd-list-item { padding: var(--sp-xs) 0; }
   }
 }
 
-/* ═══ 데스크톱 사이드바-콘텐츠 간격 ═══ */
-@media (min-width: 900px) {
-  .sidebar-wrapper {
-    position: sticky;
-    top: 52px;
-    padding-top: var(--space-lg);
-  }
-}
-
 /* ═══ 면적 최적화 — 과다 영역 축소 ═══ */
 /* 블로그 카드 높이 축소 */
 /* 미분양/분양 카드 — 즐겨찾기(★) 영역 축소 */
@@ -478,7 +469,6 @@ html.font-small .kd-list-item { padding: var(--sp-xs) 0; }
   background: #F0F1F3;
 }
 /* 토스 모드 레이아웃 조정 */
-.toss-mode .sidebar-wrapper,
 .toss-mode .right-panel-wrapper,
 .toss-mode footer { display: none !important; }
 .toss-mode main { padding-bottom: 16px !important; min-height: 100vh !important; }

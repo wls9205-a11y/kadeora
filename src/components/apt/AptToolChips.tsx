@@ -20,6 +20,9 @@ type Props = {
 export default function AptToolChips({ region }: Props = {}) {
   const redevHref =
     region && region !== '전국' ? `/apt/redev/${encodeURIComponent(region)}` : '/apt/redev';
+  // v5-V1: 좌측 Sidebar 의 부동산 분류 중 '전용 라우트가 있는' 두 개를 여기로 옮겼다.
+  //   (상태로 표현되는 접수중·임박·무순위는 AptStatusChips 가 받는다.
+  //    '모델하우스' 는 데이터가 없어 옮기지 않았다 — 없는 필터를 만들지 않는다.)
   const tools = [
     ...TOOLS,
     {
@@ -28,6 +31,8 @@ export default function AptToolChips({ region }: Props = {}) {
       icon: '🏗️',
       desc: '정비사업 단계·현황',
     },
+    { href: '/apt/unsold', label: '미분양·줍줍', icon: '⚠️', desc: '전국 미분양 현황' },
+    { href: '/apt/complex', label: '실거래·시세', icon: '📊', desc: '단지 백과·실거래' },
   ];
 
   return (

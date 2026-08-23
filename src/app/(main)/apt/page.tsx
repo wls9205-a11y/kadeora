@@ -30,6 +30,7 @@ import AptRelatedBlogs from '@/components/apt/AptRelatedBlogs';
 import SectionHeader from '@/components/apt/SectionHeader';
 import CurationCarousel from '@/components/ui/CurationCarousel';
 import SigunguChips from '@/components/apt/SigunguChips';
+import AptStatusChips, { type AptStatusKey } from '@/components/apt/AptStatusChips';
 import { sigunguCounts, sigunguOf } from '@/lib/apt/sigungu';
 import AptCurationCard from '@/components/apt/AptCurationCard';
 import EmptyState from '@/components/ui/EmptyState';
@@ -44,7 +45,7 @@ const BASE_TITLE = '전국 아파트 청약 일정·경쟁률 — 오늘의 접�
 export async function generateMetadata({
   searchParams,
 }: {
-  searchParams: Promise<{ region?: string; sgg?: string }>;
+  searchParams: Promise<{ region?: string; sgg?: string; st?: string }>;
 }): Promise<Metadata> {
   const sp = await searchParams;
   const regionLabel = sp.region?.trim() || '전국';
@@ -79,11 +80,12 @@ export async function generateMetadata({
 export default async function AptPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ region?: string; sgg?: string }>;
+  searchParams?: Promise<{ region?: string; sgg?: string; st?: string }>;
 }) {
   const sp = (await searchParams) || {};
   const region = sp.region?.trim() || '전국';
   const sgg = sp.sgg?.trim() || '';
+  const st = sp.st?.trim() || '';
   const isAutoRegion = !sp.region;
 
   const hub = await getAptHub(region);
@@ -93,7 +95,29 @@ export default async function AptPage({
   //   ⚠️ 시·도가 '전국' 이면 시군구를 내지 않는다 — 전국 단위로는 칩이 수백 개가 된다.
   const sggItems = region === '전국' ? [] : sigunguCounts(hub.cards);
   const activeSgg = sggItems.some((x) => x.name === sgg) ? sgg : '';
-  const cards = activeSgg ? hub.cards.filter((it) => sigunguOf(it.supply_addr) === activeSgg) : hub.cards;
+  const sggCards = activeSgg ? hub.cards.filter((it) => sigunguOf(it.supply_addr) === activeSgg) : hub.cards;
+
+  // v5-V1: 좌측 Sidebar 의 부동산 분류를 여기 상태 필터로 흡수했다.
+  //   이미 받은 카드에서 거르므로 조회가 늘지 않고, 건수 0인 칩은 렌더되지 않는다.
+  const matchStatus = (it: (typeof sggCards)[number], key: string): boolean => {
+    if (key === 'open') return it.status === 'open';
+    if (key === 'soon') return it.dday !== null && it.dday >= 0 && it.dday <= 7;
+    if (key === 'leftover') return it.status === 'leftover';
+    return true;
+  };
+  const statusCounts: Record<AptStatusKey, number> = {
+    open: sggCards.filter((it) => matchStatus(it, 'open')).length,
+    soon: sggCards.filter((it) => matchStatus(it, 'soon')).length,
+    leftover: sggCards.filter((it) => matchStatus(it, 'leftover')).length,
+  };
+  const activeSt = (['open', 'soon', 'leftover'] as const).includes(st as AptStatusKey) && statusCounts[st as AptStatusKey] > 0 ? st : '';
+  const cards = activeSt ? sggCards.filter((it) => matchStatus(it, activeSt)) : sggCards;
+
+  // 칩 링크가 지역·시군구 선택을 잃지 않도록 현재 쿼리를 물려준다.
+  const baseQuery = [
+    region !== '전국' ? `region=${encodeURIComponent(region)}` : '',
+    activeSgg ? `sgg=${encodeURIComponent(activeSgg)}` : '',
+  ].filter(Boolean).join('&');
 
   // 관련 블로그는 지금 노출 중인 단지 기준으로 뽑는다 (metadata.apt_id 매핑, s273 규약)
   const visibleIds = [...cards, ...hub.results].map((it) => it.id);
@@ -118,7 +142,8 @@ export default async function AptPage({
     : hub.window_days >= 180 ? '최근 6개월'
     : hub.window_days > 60 ? `최근 ${hub.window_days}일`
     : null;
-  const scopeLabel = activeSgg || hub.region;
+  const stLabel = activeSt === 'open' ? '접수중' : activeSt === 'soon' ? '임박 D-7' : activeSt === 'leftover' ? '무순위' : '';
+  const scopeLabel = [activeSgg || hub.region, stLabel].filter(Boolean).join(' · ');
   const cardsMeta = windowLabel
     ? `${scopeLabel} · ${windowLabel} ${cards.length}곳`
     : `${scopeLabel} · 상태 → 마감 임박 순`;
@@ -137,6 +162,14 @@ export default async function AptPage({
       {sggItems.length > 0 && (
         <SigunguChips region={hub.region} items={sggItems} current={activeSgg} />
       )}
+
+      {/* v5-V1: 상태 필터 — 좌측 Sidebar 의 부동산 분류 흡수처 */}
+      <AptStatusChips
+        counts={statusCounts}
+        total={sggCards.length}
+        current={activeSt}
+        baseQuery={baseQuery}
+      />
 
       {/* v4-C6: 지역을 버리고 전국으로 갈아타던 폴백이 없어졌다.
            17개 시·도 중 11곳이 접수중 0건이라 그 폴백은 사실상 상시 발동 중이었고,

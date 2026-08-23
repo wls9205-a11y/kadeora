@@ -19,9 +19,7 @@ button, input, select, textarea { font-family: inherit; }
    font-small(14px)일 때만 16px 로 바닥이 잡힌다. 시각적 축소 없이 확대만 막는다.
    html.font-large / html.font-small 의 !important override 는 그대로 우선한다. */
 input, textarea, select { font-size: max(16px, var(--fs-sm)); }
-.sidebar-wrapper { display: none; }
 .right-panel-wrapper { display: none; }
-@media (min-width: 1024px) { .sidebar-wrapper { display: block; } }
 @media (min-width: 1280px) { .right-panel-wrapper { display: block; } }
 
 /* 카드 호버 효과 */
@@ -88,9 +86,8 @@ input, textarea, select { font-size: max(16px, var(--fs-sm)); }
   touch-action: manipulation;
 }
 
-/* 태블릿 사이드바 숨김 */
+/* 태블릿 우측 패널 숨김 */
 @media (min-width: 768px) and (max-width: 1023px) {
-  .sidebar-wrapper { display: none; }
   .right-panel-wrapper { display: none; }
 }
 
