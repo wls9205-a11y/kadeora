@@ -27,6 +27,10 @@ export const LEAD_ELIGIBLE_STAGES = [
   // 이번 달이면 move_in_started 로 먼저 걸리기 때문이다. 분양가·일정 알림이 유효한 구간이라
   // 대상에 포함한다. P0 라이브 검증 현장(엄궁역 트라비스 하늘채)도 이 단계다.
   'move_in_ready',
+  // v6-3: 입주월이 이번 달인 현장. 잔여 세대가 남아 있을 수 있어 상담이 유효하다.
+  // 1,182 → 1,208 (+26). 그 외 단계는 건드리지 않는다 —
+  // landmark_active 는 2단계에서 별도 문구(지역DB)로 다룬다.
+  'move_in_started',
 ] as const;
 
 // landmark_active 는 이름과 달리 분양 현장이 아니라 지역 대장 기축 아파트다(수완자이·명륜자이 등).
