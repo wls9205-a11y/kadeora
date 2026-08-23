@@ -1,3 +1,91 @@
+## V16 E-1·E-2 (2026-08-24) — DART 정비사업 필터
+
+지시서의 「제목에서 판별」은 성립하지 않는다(전제 정정 확인됨). `report_nm` 은
+`단일판매ㆍ공급계약체결` 고정 서식명이고 구역명·계약금액은 **본문**에 있다.
+그래서 본문을 받아 판정한다.
+
+| 파일 | 역할 |
+|---|---|
+| `lib/dart/filing-body.ts` | `document.xml`(ZIP) 수신 · 압축 해제 · EUC-KR 디코딩 · 태그 제거 |
+| `lib/dart/redev-match.ts` | 건설사 판별 · 구역명 추출 · 매칭 규칙 (순수 함수) |
+| `lib/dart/redev-pipeline.ts` | 공시 한 건 처리 — 자동 반영 / 큐 / 폐기 |
+| `api/cron/dart-ingest/route.ts` | 후보 수집 + 처리 호출 |
+| `__tests__/dart-redev-match.test.ts` | 회귀 18건 |
+
+### 판정 규칙
+
+```
+1차 필터   corp_name 이 건설사 AND 본문에 '구역' 또는 '정비사업'
+           → 둘 다 아니면 큐에도 넣지 않고 버린다
+자동 반영   구역명이 apt_sites.name 또는 name_variants 와 정확 일치
+           AND corp_name 이 그 현장 builder 와 일치     ← 이 둘이 2개 조건
+           → confidence='confirmed', stage_source='dart', source_url=공시 링크, 즉시 IndexNow
+그 외       검수 큐
+```
+
+**본문 조건이 조선·전자를 떨어뜨리는 유일한 방어선이다.** 실측 오탐원 —
+HJ중공업 14 · 삼성중공업 9 · 한화오션 7 · 현대오토에버 6. 이름만 보면 걸린다.
+`isConstructionCorp` 에 부정 목록(`중공업|오션|조선|해양|오토에버|전자|…`)을 따로 둔 것도
+같은 이유지만, 그게 새더라도 본문 조건에서 걸러진다.
+
+### 지킨 것
+
+- **부분 일치 금지.** 구역명은 정확 일치만. 표기 흔들림(공백·괄호·대소문자)만 흡수한다
+- 같은 구역명 현장이 둘이면 **고르지 않는다** — 모르면서 하나를 고르는 게 못 찾는 것보다 나쁘다
+- **`stage_locked` 현장은 건드리지 않는다.** 사람이 손으로 정한 단계를 공시가 덮으면 안 된다
+- 본문 수신 실패는 **자동 반영으로 넘어가지 않는다.** 큐로 보낸다
+- 트리거가 만든 `stage_change` 행에 `source_url`·`note` 를 얹는다(행을 더 만들지 않는다)
+
+### 왜 `dart-ingest` 안에서 하나
+
+별도 크론으로 빼면 15분이 한 번 더 붙어 30분 목표를 넘긴다. 대신 본문 왕복을
+**메인 루프 밖**에서 처리하고 한 번에 8건으로 상한을 둔다 — 정정 공시가 몰린 날
+본문 왕복이 `maxDuration` 을 잡아먹어 수집 자체가 끊기면 안 된다.
+실측 빈도는 하루 1~2건이다(건설사 공급계약 90일 100건).
+
+### ZIP 을 직접 푼 이유
+
+`opendart` 의 `document.xml` 은 ZIP 을 주는데 저장소에 zip 라이브러리가 없다.
+의존성을 하나 늘리는 것보다 `node:zlib` 의 `inflateRawSync` 로 local file header 를
+훑는 40줄을 소유하는 쪽을 골랐다. DART 가 쓰는 압축은 stored(0)/deflate(8) 둘뿐이다.
+edge case 를 만나면 `fflate` 로 갈아타는 건 `filing-body.ts` 안에서 끝나는 교체다.
+
+### ⚠️ DB 담당 — 검수 큐 테이블이 아직 없다
+
+없으면 **경고만 남기고 크론은 계속 돈다**(자동 반영 경로는 지금도 동작한다).
+다만 애매한 건이 어디에도 안 남는다. 아래 DDL 이 들어오면 바로 쌓인다.
+
+```sql
+create table if not exists public.apt_stage_review_queue (
+  id           bigserial primary key,
+  rcept_no     text not null,
+  corp_name    text,
+  report_nm    text,
+  source_url   text,
+  zone_candidates jsonb not null default '[]'::jsonb,
+  reason       text,
+  proposed_stage text,
+  status       text not null default 'pending'
+               check (status in ('pending','approved','rejected')),
+  resolved_site_id uuid references public.apt_sites(id) on delete set null,
+  resolved_at  timestamptz,
+  created_at   timestamptz not null default now()
+);
+create unique index if not exists apt_stage_review_queue_rcept_pending
+  on public.apt_stage_review_queue (rcept_no) where status = 'pending';
+```
+
+⚠️ `DART_API_KEY` 는 Vercel 환경에만 있어 **본문 응답을 로컬에서 못 찍었다.**
+ZIP 파싱과 EUC-KR 디코딩은 배포 후 `dart-ingest` 로그의
+`redev_candidates` / `redev_auto` / `redev_queued` / `redev_discarded` 로 확인해야 한다.
+
+### 곁다리
+
+vitest 는 `src/__tests__/**` 만 수집한다(`vitest.config.ts`). 테스트를 lib 옆에 두면
+조용히 실행되지 않는다 — 저장소 관례대로 `src/__tests__/` 에 뒀다.
+
+---
+
 ## V16 E-3 (2026-08-24) — 이번 주 움직인 현장 · ⚠️ DART 필터는 전제가 성립하지 않는다
 
 ### E-3 · 이번 주 움직인 현장

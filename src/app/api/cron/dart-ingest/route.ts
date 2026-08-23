@@ -3,6 +3,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
 import { withCronAuthFlex } from '@/lib/cron-auth';
+// V16 E-1: 정비사업 공급계약 공시 → 시공사 선정 자동 반영.
+import { isConstructionCorp, isSupplyContract } from '@/lib/dart/redev-match';
+import { processRedevFiling, type RedevFiling } from '@/lib/dart/redev-pipeline';
 
 /**
  * DART (전자공시시스템) 신규 공시 수집 크론
@@ -93,6 +96,9 @@ async function handler(_req: NextRequest) {
 
     let created = 0;
     let failed = 0;
+    // V16 E-1: 정비사업 후보. 본문 수신이 붙으므로 메인 루프 밖에서 따로 처리한다 —
+    //   여기서 왕복을 섞으면 공시 100건 루프가 그 지연을 다 뒤집어쓴다.
+    const redevCandidates: RedevFiling[] = [];
     // s239 Phase 2.1: importance>=7 인 신규 dart_filing 을 issue_alerts 로도 자동 연결.
     // issue-preempt 의 apt_sites_gap INSERT 패턴 차용 (base_score / multiplier / score_breakdown).
     let issuesCreated = 0;
@@ -132,6 +138,19 @@ async function handler(_req: NextRequest) {
         continue;
       }
       created++;
+
+      // V16 E-1 · 1차 필터의 절반 — 건설사 + 공급계약 체결.
+      //   나머지 절반(본문에 구역/정비사업)은 본문을 받아야 볼 수 있어 아래에서 판정한다.
+      //   ⚠️ 이름만으로는 조선·전자가 섞인다(HJ중공업·삼성중공업·한화오션·현대오토에버).
+      //      본문 조건에서 떨어진 건 큐에도 넣지 않고 버린다.
+      if (isConstructionCorp(item.corp_name) && isSupplyContract(item.report_nm)) {
+        redevCandidates.push({
+          rcept_no: item.rcept_no,
+          corp_name: item.corp_name ?? '',
+          report_nm: item.report_nm ?? '',
+          filed_at: filedAtIso,
+        });
+      }
 
       // s239 Phase 2.1: 큰 이벤트 (importance>=7) 만 issue_alerts INSERT.
       // 임원매매(6) / 일반 보고서(4-5) 는 noise — skip.
@@ -195,11 +214,36 @@ async function handler(_req: NextRequest) {
       }
     }
 
+    // ── V16 E-1 · 정비사업 반영 ──
+    //   실측 빈도는 하루 1~2건이다 (건설사 공급계약 90일 100건). 그래도 상한을 둔다 —
+    //   정정 공시가 몰린 날 본문 왕복이 크론 maxDuration 을 잡아먹으면 수집 자체가 끊긴다.
+    const REDEV_CAP = 8;
+    let redevAuto = 0, redevQueued = 0, redevDiscarded = 0;
+    if (redevCandidates.length > 0 && apiKey) {
+      for (const f of redevCandidates.slice(0, REDEV_CAP)) {
+        try {
+          const r = await processRedevFiling(f, apiKey);
+          if (r.kind === 'auto') redevAuto++;
+          else if (r.kind === 'queue') redevQueued++;
+          else redevDiscarded++;
+        } catch (e: any) {
+          // 한 건이 실패해도 수집 결과를 되돌리지 않는다.
+          console.error('[dart-ingest] redev 처리 실패', f.rcept_no, e?.message ?? String(e));
+          redevQueued++;
+        }
+      }
+    }
+
     return {
       processed: items.length,
       created,
       failed,
-      metadata: { api_name: 'dart', api_calls: 1, issues_created: issuesCreated, issues_skipped_dup: issuesSkipped },
+      metadata: {
+        api_name: 'dart', api_calls: 1,
+        issues_created: issuesCreated, issues_skipped_dup: issuesSkipped,
+        redev_candidates: redevCandidates.length,
+        redev_auto: redevAuto, redev_queued: redevQueued, redev_discarded: redevDiscarded,
+      },
     };
   });
 
