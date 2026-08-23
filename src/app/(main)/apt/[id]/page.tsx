@@ -931,6 +931,47 @@ export default async function AptUnifiedPage({ params }: Props) {
         const firstEmpty = rows.find((r) => !r[1])?.[0] ?? null;
         return (
           <DetailSection id="supply-section" title="공급 정보" defaultOpen>
+            {/* ── V15 C-3 · 세대수 근거 블록 ──
+                표보다 위다. 두 숫자가 왜 다른지 먼저 말하지 않으면 표가 틀린 것으로 읽힌다.
+                ⚠️ complex_units 가 없으면 숫자를 지어내지 말고 '미확인' 으로 둔다.
+                   apt_complex_profiles 는 34,544건 중 96건만 값이 있어 못 채운다. */}
+            {(units.supply || units.complex) && (
+              <div style={{ marginBottom: 12, padding: 10, borderRadius: 9, background: 'var(--accent-blue-bg)', border: '1px solid var(--accent-blue-bg)' }}>
+                {([
+                  { label: '분양 공급', hint: '경쟁률 · 분양가 기준', value: units.supply },
+                  { label: '단지 전체', hint: '규모 · 관리비 기준', value: units.complex },
+                ] as const).map((row, i) => (
+                  <div
+                    key={row.label}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      padding: i === 0 ? '0 0 7px' : '7px 0 0',
+                      borderTop: i === 0 ? 'none' : '1px dashed var(--border)',
+                    }}
+                  >
+                    <span style={{ flex: 1, minWidth: 0 }}>
+                      <span style={{ display: 'block', fontSize: 11, fontWeight: 700, color: 'var(--accent-blue)', lineHeight: 1.3 }}>{row.label}</span>
+                      <span style={{ display: 'block', fontSize: 9, color: 'var(--text-tertiary)', lineHeight: 1.4, marginTop: 1 }}>{row.hint}</span>
+                    </span>
+                    {row.value ? (
+                      <span style={{ flexShrink: 0, fontSize: 16, fontWeight: 800, letterSpacing: '-.04em', color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>
+                        {row.value.toLocaleString('ko-KR')}
+                        <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-tertiary)', marginLeft: 2 }}>세대</span>
+                      </span>
+                    ) : (
+                      <span style={{ flexShrink: 0, fontSize: 12, color: 'var(--text-tertiary)' }}>미확인</span>
+                    )}
+                  </div>
+                ))}
+                <p style={{ margin: '7px 0 0', paddingTop: 6, borderTop: '1px dashed var(--border)', fontSize: 9.5, lineHeight: 1.55, color: 'var(--text-tertiary)', wordBreak: 'keep-all' }}>
+                  {units.supply && units.complex
+                    ? '차이는 조합원 분양분입니다. 경쟁률·분양가는 이번 분양 공급 기준, 단지 규모·관리비는 단지 전체 기준입니다.'
+                    : '한쪽만 확인된 현장입니다. 확인되지 않은 값은 추정하지 않습니다.'}
+                </p>
+              </div>
+            )}
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--fs-sm)' }}>
               <tbody>
                 {rows.map(([l, v], i) => (
@@ -945,20 +986,6 @@ export default async function AptUnifiedPage({ params }: Props) {
                 ))}
               </tbody>
             </table>
-            {/* V15 C-3 · 근거 블록.
-                두 숫자가 다른 이유를 말하지 않으면 "표가 틀렸다" 로 읽힌다.
-                두 축이 모두 있을 때만 낸다 — 한쪽뿐이면 비교할 게 없다. */}
-            {units.supply && units.complex && units.supply !== units.complex && (
-              <p style={{ margin: '10px 0 0', padding: '9px 10px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-sunken)', fontSize: 11.5, lineHeight: 1.6, color: 'var(--text-secondary)' }}>
-                <b style={{ color: 'var(--text-primary)' }}>분양 공급 {units.supply.toLocaleString()}</b>
-                {' · '}
-                <b style={{ color: 'var(--text-primary)' }}>단지 전체 {units.complex.toLocaleString()}</b>
-                <br />
-                경쟁률·분양가는 <b>이번 분양 공급</b> 기준이고, 단지 규모·관리비는 <b>단지 전체</b> 기준입니다.
-                차이는 조합원 분양분입니다.
-              </p>
-            )}
-
             {/* v10-B6: 표 안에 흩어져 있던 '방에서 물어보기' 를 여기 한 줄로 모은다.
                 미공개 행이 하나라도 있을 때만 낸다 — 다 채워진 현장에 물어볼 것을 만들지 않는다. */}
             {firstEmpty && (

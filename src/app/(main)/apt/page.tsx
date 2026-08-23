@@ -12,7 +12,9 @@
 // 이 조합이 Rule #66 (빈 응답이 SSG 캐시에 영구화되는 회귀) 도 같이 막는다 —
 // 결과가 비면 캐시 경로를 건너뛰고 매 요청 재시도한다.
 //
-// Legacy: src/_legacy/s269/apt_page_v0.tsx
+// s269 이전 UI 스냅샷(_legacy/s269/apt_page_v0.tsx)은 V15 에서 삭제했다 —
+// 그 뒤로 스키마가 바뀌어(supply_units/complex_units 분리 · lifecycle_stage 5단계 ·
+// apt_site_merges) 되살려도 동작하지 않는다. 되돌릴 수 없는 롤백 참조는 함정이다.
 
 import type { Metadata } from 'next';
 import Link from 'next/link';

@@ -49,9 +49,11 @@ export default function DetailSection({
       style={{ scrollMarginTop: SECTION_SCROLL_MARGIN }}
     >
       <summary className="kd-acc-sum">
+        {/* 좌측 ▶ — 열리면 90도. 문자로 두면 폰트에 따라 크기가 튀지만
+            선을 그리는 것보다 스크린리더 무시(aria-hidden)가 명확하다. */}
+        <span className="kd-acc-caret" aria-hidden="true">▶</span>
         <h2 className="kd-acc-title">{title}</h2>
         {meta ? <span className="kd-acc-meta">{meta}</span> : null}
-        <span className="kd-acc-chev" aria-hidden="true" />
       </summary>
       <div className="kd-acc-body">{children}</div>
     </details>

@@ -1,3 +1,68 @@
+## V15 2단계-c (2026-08-23) — B 시각 마감 · 죽은 롤백 참조 제거
+
+### 아코디언 안 카드 안 카드 — 범위 지정 override
+
+```css
+.kd-acc-body .apt-card{
+  border:0; background:transparent; box-shadow:none;
+  border-radius:0; padding-left:0; padding-right:0;
+}
+```
+클래스를 벗기지 않는다. **인라인 스타일이 CSS 를 이기므로** 색 있는 카드
+(경쟁률 보라 · 분양가 대비 빨강/초록)는 자기 배경과 패딩을 그대로 지킨다.
+클래스를 제거하면 패딩까지 잃지만 이 방식은 잃지 않는다.
+좌우 패딩은 아코디언 본문이 갖고 내부 카드는 0.
+
+### 섹션 헤더
+
+| | |
+|---|---|
+| 높이 | 40px · 전체가 클릭 영역 |
+| 좌측 `▶` | 11px `--text-tertiary` · 열리면 90도 `.18s` |
+| `h2` | 13px / 800 / `letter-spacing -.03em` |
+| 우측 카운트 | 10px `--text-tertiary` |
+| 하단 | 1px `--border` |
+
+닫힌 상태에서는 하단 선을 투명으로 둔다 — 헤더가 카드의 전부인데 선을 그리면
+허공에 밑줄이 남는다.
+
+### 세대수 근거 블록 — 표 **위**로
+
+`--accent-blue-bg` · 1px 테두리 · radius 9px · padding 10px.
+2행 (`분양 공급` / `단지 전체`), 행 사이 1px dashed, 하단 점선 위 안내문 9.5px.
+라벨 11px/700 `--accent-blue` + 보조설명 9px, 숫자 우측 16px/800 `-.04em`.
+
+**`complex_units` 가 null 이면 숫자 자리에 `미확인` 12px `--text-tertiary`.**
+추정하지 않는다 — `apt_complex_profiles` 는 34,544건 중 96건만 값이 있다.
+
+이전에는 두 축이 모두 있고 값이 다를 때만 냈는데, 이제 한쪽만 있어도 낸다.
+"한쪽만 확인된 현장입니다" 를 말하는 게 아무 말도 안 하는 것보다 낫다.
+
+### 진행 이력 타임라인
+
+- 좌측 세로선 1.5px `--border` · 점 7px + 표면색 테두리 2px + 링 1.5px
+- **확정만 `--brand` 점**, 추정·카더라는 `--text-tertiary` — 눈금만 훑고 확정으로 읽으면 안 된다
+- 날짜 9.5px/700 · 제목 12px/800 · 출처 10px
+- 등급 배지 9px/800 — 확정 `green-bg` / 추정 `orange-bg` / 카더라 `sunken`
+
+> 명세의 "흰 테두리 2px" 는 `var(--bg-surface)` 로 넣었다. 흰색을 직접 쓰면
+> 다크 모드에서 점 주위가 흰 구멍이 된다. 선을 끊어 점을 앞으로 내는 목적은 같다.
+
+### 죽은 롤백 참조 삭제
+
+`src/components/cards/v2/AptThumbnailCard.tsx` · `src/_legacy/s269/apt_page_v0.tsx`.
+
+그 legacy 는 s269 시절 롤백 참조인데 그 뒤로 스키마가 바뀌었다 —
+`supply_units`/`complex_units` 분리 · `lifecycle_stage` 5단계 추가 · `apt_site_merges`.
+지금 되살려도 동작하지 않는다. **되돌릴 수 없는 롤백 참조는 참조가 아니라 함정이다.**
+죽은 `/apt/subscription/` 링크를 들고 있던 마지막 파일이기도 하다 —
+삭제 후 그 경로는 middleware 의 308 규칙과 무관한 API 라우트에만 남는다.
+
+`_legacy/s262/apt_page_v0.tsx` 는 손대지 않았다. `lib/seo/per-tab-meta.ts:63` 의
+`AptThumbnailCard` 언급은 주석이고 같은 유형의 버그를 설명하는 문장이라 남긴다.
+
+---
+
 ## V15 2단계-b (2026-08-23) — 현장 상세 접이식 재설계 (B)
 
 ### 무엇이 문제였나
