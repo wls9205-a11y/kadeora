@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { Home, TrendingUp, Building2, Search, Bell, User as UserIcon, PenSquare, LogOut, FileText, MoreHorizontal, Settings, Download,
+import { Home, TrendingUp, Building2, Bell, PenSquare, LogOut, FileText, MoreHorizontal, Settings,
   MessageSquare, MessagesSquare, BarChart3, Flame, Library, Calculator, BellRing, LayoutGrid, MapPin, Lightbulb, CalendarCheck } from 'lucide-react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useAuth } from '@/components/AuthProvider';
@@ -209,6 +209,7 @@ export function Navigation() {
           <div className="hidden md:flex" style={{ flex:1, maxWidth:360, minWidth:160 }}>
             <UniversalSearchBar
               placeholder={trendingKw ? `인기 · ${trendingKw}` : '종목, 청약, 블로그 검색...'}
+              hotkey
             />
           </div>
 
@@ -246,15 +247,15 @@ export function Navigation() {
               {(unread > 0) && <span style={{ position:'absolute', top:0, right:0, width:8, height:8, borderRadius:'50%', background:'var(--accent-red)', border:'2px solid var(--nav-bg)' }} />}
             </button>
 
+            {/* v4-C2: 모바일 검색 — 로그인/비로그인 분기에 같은 링크가 두 벌 있던 것을
+                여기 한 벌로 합쳤다. /search 로 페이지 이동하던 동작을 데스크탑과 같은
+                UniversalSearchBar 모달로 바꾼다 (같은 아이콘이 기기마다 다르게 동작했다).
+                ⌘K 리스너는 데스크탑 인스턴스가 소유한다 — hotkey={false}.
+                /search·/apt/search·/stock/search 라우트는 그대로 유지 (직접 진입·색인 대상). */}
+            <UniversalSearchBar className="md:hidden" variant="icon" hotkey={false} />
+
             {userId ? (
               <>
-                {/* 모바일 검색 (로그인) */}
-                <Link href="/search" className="md:hidden" aria-label="검색" style={{
-                  width:36, height:36, display:'flex', alignItems:'center', justifyContent:'center',
-                  borderRadius:'50%', color:'var(--text-secondary)', textDecoration:'none', fontSize: 16,
-                  background:'var(--bg-hover)', border:'1px solid var(--border)',
-                }}><Search size={18} /></Link>
-
                 {/* 알림 (데스크탑 전용 — 모바일은 더보기 시트 + 아바타 뱃지) */}
                 <Link href="/notifications" aria-label="알림" className="hidden md:flex" style={{
                   position:'relative', width:40, height:40,
@@ -402,12 +403,6 @@ export function Navigation() {
               </>
             ) : (
               <>
-                {/* 모바일 검색 (비로그인) */}
-                <Link href="/search" className="md:hidden" aria-label="검색" style={{
-                  width:36, height:36, display:'flex', alignItems:'center', justifyContent:'center',
-                  borderRadius:'50%', color:'var(--text-secondary)', textDecoration:'none', fontSize: 16,
-                  background:'var(--bg-hover)', border:'1px solid var(--border)',
-                }}><Search size={18} /></Link>
                 <Link
                   href={`/login?redirect=${encodeURIComponent(pathname)}&source=nav`}
                   onClick={() => {

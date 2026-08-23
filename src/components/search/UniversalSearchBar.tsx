@@ -17,11 +17,26 @@ import {
 type Props = {
   placeholder?: string;
   className?: string;
+  /**
+   * trigger 모양. 'bar' 는 헤더 가운데 들어가는 알약 입력창,
+   * 'icon' 은 헤더 우측 액션 줄에 들어가는 36×36 원형 버튼(모바일).
+   * 모달·타이프어헤드 동작은 둘이 완전히 같다 — 모바일만 /search 로
+   * 페이지 이동하던 v3 이전 동작을 여기로 흡수한다.
+   */
+  variant?: "bar" | "icon";
+  /**
+   * ⌘K 단축키 리스너를 이 인스턴스가 소유할지.
+   * 헤더에 bar·icon 두 인스턴스가 동시에 마운트되므로 한쪽만 true 여야 한다.
+   * 둘 다 true 면 keydown 이 두 번 잡혀 숨은 인스턴스의 모달까지 같이 열린다.
+   */
+  hotkey?: boolean;
 };
 
 export default function UniversalSearchBar({
   placeholder = "단지·종목·지역·블로그 검색",
   className = "",
+  variant = "bar",
+  hotkey = true,
 }: Props) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -38,6 +53,7 @@ export default function UniversalSearchBar({
 
   // ⌘K / Ctrl+K 단축키
   useEffect(() => {
+    if (!hotkey) return;
     function onKey(e: KeyboardEvent) {
       const isCmd = (e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k";
       if (isCmd) {
@@ -50,7 +66,7 @@ export default function UniversalSearchBar({
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open]);
+  }, [open, hotkey]);
 
   // 모달 열림 시 입력 포커스 + recent 로드
   useEffect(() => {
@@ -190,21 +206,41 @@ export default function UniversalSearchBar({
   return (
     <>
       {/* 헤더에 들어가는 trigger */}
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        aria-label="검색 열기"
-        className={[
-          "flex w-full items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-2 text-sm text-gray-500 transition hover:bg-gray-50",
-          className,
-        ].join(" ")}
-      >
-        <SearchIcon />
-        <span className="line-clamp-1 flex-1 text-left">{placeholder}</span>
-        <kbd className="hidden rounded border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-[10px] text-gray-500 sm:inline">
-          ⌘K
-        </kbd>
-      </button>
+      {variant === "icon" ? (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          aria-label="검색 열기"
+          className={className}
+          style={{
+            width: 36, height: 36, flexShrink: 0,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            borderRadius: "50%",
+            background: "var(--bg-hover)",
+            border: "1px solid var(--border)",
+            color: "var(--text-secondary)",
+            cursor: "pointer",
+          }}
+        >
+          <SearchIcon />
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          aria-label="검색 열기"
+          className={[
+            "flex w-full items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-2 text-sm text-gray-500 transition hover:bg-gray-50",
+            className,
+          ].join(" ")}
+        >
+          <SearchIcon />
+          <span className="line-clamp-1 flex-1 text-left">{placeholder}</span>
+          <kbd className="hidden rounded border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-[10px] text-gray-500 sm:inline">
+            ⌘K
+          </kbd>
+        </button>
+      )}
 
       {/* 모달 */}
       {open && (
