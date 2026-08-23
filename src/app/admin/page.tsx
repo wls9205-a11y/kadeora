@@ -4,6 +4,7 @@ import CronUnifiedPanel from '@/components/admin/CronUnifiedPanel';
 import NorthStarCard from '@/components/admin/NorthStarCard';
 import CtaPerformanceTable from '@/components/admin/CtaPerformanceTable';
 import AbExperimentViewer from '@/components/admin/AbExperimentViewer';
+import AptCoverUploader from '@/components/admin/AptCoverUploader';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: '미션 컨트롤 — 카더라' };
@@ -20,6 +21,8 @@ export default function AdminPage() {
     <div style={{ maxWidth: 1400, margin: '0 auto', padding: 'clamp(12px, 3vw, 24px)' }}>
       <CriticalAlertBar />
       <AdminShellV4 />
+      {/* v5-V4: 조감도 업로드. hero_image_url 0건은 정책이 아니라 넣을 화면이 없어서였다. */}
+      <AptCoverUploader />
       <div style={{ marginTop: 16 }}>
         <CronUnifiedPanel />
       </div>
