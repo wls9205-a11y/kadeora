@@ -21,16 +21,33 @@ const PENDING_PREFIX = 'kd_lead_pending:';
 // 최초 1회 즉시 전송 후, 실패하면 이 간격만큼 쉬고 재시도 (총 3회 재시도)
 const RETRY_DELAYS = [300, 900, 2700];
 
-/** 하단 전체 폼의 앵커 id — LeadFormAnchor 가 이 id 로 스크롤한다. */
+/**
+ * 하단 전체 폼의 앵커 id — 하단 액션바·레일 진입 카드가 이 id 로 스크롤한다.
+ * ⚠️ 값을 바꾸지 말 것.
+ */
 export const LEAD_FORM_ID = 'lead-form';
+
+/** 희망 타입 기본값. select 는 항상 이 값으로 시작한다 (추가 조작 없이 제출 가능). */
+const TYPE_UNDECIDED = '미정';
+
+/**
+ * 모집공고에 평형 목록이 없는 현장(36.7%)에서 쓰는 표준 목록.
+ * 국민주택 규모 경계(85㎡)를 사이에 두고 실제 공급이 몰리는 구간이다.
+ *
+ * ⚠️ 단위(㎡)를 문자열에 포함한다. 페이지가 내려주는 typeOptions 도 이미
+ *    `${n}㎡` 형태라(apt/[id] 539행) 렌더 시 단위를 덧붙이면 '59㎡㎡' 가 된다.
+ *    옵션 값이 곧 시트·DB 에 남는 값이므로 사람이 읽는 문자열 그대로 쓴다.
+ */
+const STANDARD_TYPES = ['59㎡', '74㎡', '84㎡', '101㎡', '114㎡ 이상'];
 
 type LeadFormProps = {
   siteSlug: string; // apt_sites.slug — leads ↔ apt_sites 조인 키
   siteName: string; // apt_sites.name
   /**
    * 현장별 공급 평형. 페이지가 house_type_info 에서 파생해 내려준다 (현장마다 다름).
-   * s-v2: 희망 타입 선택이 폼에서 빠지며 지금은 쓰이지 않는다.
-   * 2차 전송 복구 시 그대로 필요하므로 prop 계약은 유지한다 (페이지도 계속 내려준다).
+   * v6-1: 다시 쓴다. 비어 있으면 STANDARD_TYPES 로 떨어진다 —
+   * 최근 1년 376건 중 238건(63.3%)만 평형 목록이 있고 138건(36.7%)은 없다.
+   * select 자체는 어느 현장에서나 항상 렌더한다. 옵션 내용만 갈린다.
    */
   typeOptions?: string[];
   /** 놓이는 자리에 따라 설명 한 줄만 바뀐다. 제목·버튼·동의 문구는 동일하다. */
@@ -190,16 +207,31 @@ const honeypotStyle: CSSProperties = {
   pointerEvents: 'none',
 };
 
-// typeOptions 는 의도적으로 구조분해하지 않는다 — 위 주석 참조 (계약만 유지).
-export default function LeadForm({ siteSlug, siteName, variant = 'detail' }: LeadFormProps) {
+export default function LeadForm({ siteSlug, siteName, typeOptions, variant = 'detail' }: LeadFormProps) {
   const mountedAt = useRef(Date.now());
   const draftKey = `${DRAFT_PREFIX}${siteSlug}`;
   const pendingKey = `${PENDING_PREFIX}${siteSlug}`;
 
+  /**
+   * v6-2: 희망 타입 옵션. '현장마다 폼이 다르다' 의 구조적 원인이 여기였다.
+   *   공고 있음(63.3%) → 그 현장 실제 평형 + 미정
+   *   공고 없음(36.7%) → 표준 목록 + 미정
+   * select 는 어느 현장에서나 항상 렌더한다 — 화면은 같은 4칸이고 옵션만 갈린다.
+   * 그건 '양식이 다른 것' 이 아니라 정상이다.
+   */
+  const hasSiteTypes = Array.isArray(typeOptions) && typeOptions.length > 0;
+  const typeChoices = (() => {
+    const base = hasSiteTypes ? typeOptions! : STANDARD_TYPES;
+    // 중복·빈 값 제거 후 '미정' 을 맨 앞에 고정한다 (기본값이라 첫 자리가 맞다).
+    const uniq = Array.from(new Set(base.map(t => String(t).trim()).filter(t => t && t !== TYPE_UNDECIDED)));
+    return [TYPE_UNDECIDED, ...uniq];
+  })();
+
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [birthDate, setBirthDate] = useState('');
-  const [desiredType, setDesiredType] = useState('');
+  // 기본값이 '미정' 이라 사용자가 손대지 않아도 제출된다 (추가 조작 0).
+  const [desiredType, setDesiredType] = useState(TYPE_UNDECIDED);
   const [consent, setConsent] = useState(false);
   const [marketingOk, setMarketingOk] = useState(false);
   const [company, setCompany] = useState(''); // 허니팟
@@ -232,7 +264,8 @@ export default function LeadForm({ siteSlug, siteName, variant = 'detail' }: Lea
         if (typeof d.name === 'string') setName(d.name);
         if (typeof d.phone === 'string') setPhone(d.phone);
         if (typeof d.birthDate === 'string') setBirthDate(d.birthDate);
-        if (typeof d.desiredType === 'string') setDesiredType(d.desiredType);
+        // 빈 문자열 초안(구버전)으로 기본값을 덮어쓰지 않는다.
+        if (typeof d.desiredType === 'string' && d.desiredType) setDesiredType(d.desiredType);
         if (typeof d.consent === 'boolean') setConsent(d.consent);
         if (typeof d.marketingOk === 'boolean') setMarketingOk(d.marketingOk);
       } catch {
@@ -327,15 +360,17 @@ export default function LeadForm({ siteSlug, siteName, variant = 'detail' }: Lea
     if (errors.phone) setErrors(prev => ({ ...prev, phone: undefined }));
   }
 
-  // s-v2 B-7: 1차 접수는 이름·연락처·동의 3개만 본다.
-  // 생년월일·희망타입은 접수 후 선택 입력으로 내려갔다 — 여기서 검사하지 않는다.
+  // v6-1: 이름·연락처·생년월일·동의를 본다.
+  //   생년월일은 청약 자격·가점 확인에 바로 쓰이므로 필수다.
+  //   희망 타입은 기본값이 '미정' 이라 검사 대상이 아니다.
   const validate = useCallback((): FieldErrors => {
     const next: FieldErrors = {};
     if (!name.trim()) next.name = '이름을 입력해 주세요';
     if (onlyDigits(phone).length < 11) next.phone = '연락처 11자리를 모두 입력해 주세요';
+    if (onlyDigits(birthDate).length !== 6) next.birthDate = '생년월일 6자리를 입력해 주세요';
     if (!consent) next.consent = '개인정보 수집 동의가 필요합니다';
     return next;
-  }, [name, phone, consent]);
+  }, [name, phone, birthDate, consent]);
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -497,9 +532,47 @@ export default function LeadForm({ siteSlug, siteName, variant = 'detail' }: Lea
               : <p style={hintStyle}>숫자만 입력하셔도 자동으로 하이픈이 붙습니다</p>}
           </div>
 
-          {/* s-v2 B-7: 생년월일·희망타입은 여기서 뺐다.
-               필드 4개는 접수 전에 물어보기엔 많다 — 접수 후 선택 입력으로 내렸다.
-               (fn_insert_lead 가 이미 null 을 허용해 DB 변경은 없다) */}
+          {/* v6-1: 생년월일·희망타입 복원. state·payload·DB 컬럼·시트 전송은 계속 살아 있었고
+               입력칸만 s-v2 B-7 에서 빠져 있었다. 화면은 어느 현장에서나 같은 4칸이다. */}
+          <div className="kd-lead-grid" style={{ marginBottom: 12 }}>
+            <div>
+              <label htmlFor="kd-lead-birth" style={labelStyle}>생년월일</label>
+              <input
+                id="kd-lead-birth"
+                type="text"
+                inputMode="numeric"
+                value={birthDate}
+                onChange={e => {
+                  setBirthDate(onlyDigits(e.target.value).slice(0, 6));
+                  if (errors.birthDate) setErrors(prev => ({ ...prev, birthDate: undefined }));
+                }}
+                placeholder="920502"
+                maxLength={6}
+                autoComplete="bday"
+                style={fieldStyle}
+              />
+              {errors.birthDate
+                ? <p style={errorStyle}>{errors.birthDate}</p>
+                : <p style={hintStyle}>6자리 (청약 자격·가점 확인용)</p>}
+            </div>
+
+            <div>
+              <label htmlFor="kd-lead-type" style={labelStyle}>희망 타입</label>
+              <select
+                id="kd-lead-type"
+                value={desiredType}
+                onChange={e => setDesiredType(e.target.value)}
+                style={fieldStyle}
+              >
+                {typeChoices.map(t => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </select>
+              <p style={hintStyle}>
+                {hasSiteTypes ? '이 현장 공급 평형' : '정해지지 않았으면 미정으로 두세요'}
+              </p>
+            </div>
+          </div>
 
           {/* 허니팟 — 사람에게는 보이지 않는다 */}
           <input
