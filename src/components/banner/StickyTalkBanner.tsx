@@ -7,6 +7,7 @@ import {
   trackTalkClick,
 } from '@/lib/talk-banner';
 import { useTalkView } from './useTalkView';
+import { isAptSiteDetailPath } from '@/lib/apt/is-site-detail';
 
 /** 배너 높이(px). spacer 와 공유. */
 export const STICKY_BANNER_HEIGHT = 52;
@@ -34,7 +35,13 @@ const LIVE = '#1FA463';
 
 export default function StickyTalkBanner() {
   const pathname = usePathname() ?? '';
-  const hidden = INLINE_ROUTES.some((r) => r.test(pathname));
+  // v3 커밋6: 현장 상세에서는 끈다.
+  //   노란 전폭 52px 띠가 최상단을 차지하면 '현장 이미지를 최상단에 크게' 와
+  //   '폼 우선, 카톡 부가' 가 정면으로 부딪힌다. 그 자리는 리드폼이 대신한다.
+  //   잃는 것은 30일 기준 카톡 클릭 6건 — 배포 전 기준선을 STATUS.md 에 남겼다.
+  //   ⚠️ INLINE_ROUTES 에 /^\/apt\/[^/]+$/ 를 밀어넣지 말 것.
+  //      /apt/busan·/apt/map 같은 허브까지 같이 잡힌다. 헬퍼를 쓴다.
+  const hidden = INLINE_ROUTES.some((r) => r.test(pathname)) || isAptSiteDetailPath(pathname);
 
   // 훅은 조기 반환보다 위에서 무조건 호출한다 (훅 순서 규칙).
   // 렌더하지 않는 라우트에서는 ref 가 붙지 않아 노출도 기록되지 않는다.

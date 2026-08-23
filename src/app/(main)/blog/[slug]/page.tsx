@@ -14,7 +14,7 @@ import LoginGate from '@/components/LoginGate';
 import ShareButtons from '@/components/ShareButtons';
 // s184: KakaoShareButton 제거 — ShareButtons (8 플랫폼) 안에 카카오 포함됨.
 import FAQBlock from '@/components/detail/FAQBlock';
-import BlogToc from '@/components/BlogToc';
+import BlogTocList from '@/components/blog/BlogTocList';
 import BlogActions from '@/components/BlogActions';
 import BlogBookmarkButton from '@/components/BlogBookmarkButton';
 import BlogServiceWidget from '@/components/BlogServiceWidget';
@@ -790,13 +790,17 @@ export default async function BlogDetailPage({ params }: Props) {
   // - 기존 Promise.allSettled 뭉치에 합치지 않는다 (Rule #49 — /apt/[id] 504 의 원인이었다)
   // - slug 단건 조회라 인덱스를 탄다
   let leadSite: { slug: string; name: string } | null = null;
+  // v3 커밋6: '이 글이 다루는 현장' 행은 lead 대상 단계가 아니어도 낸다 —
+  //   지금까지 블로그에서 현장 페이지로 가는 동선이 아예 없었다.
+  let hubSite: { slug: string; name: string; region: string | null } | null = null;
   if (post.hub_apt_slug) {
     try {
       const { data: ls } = await (sb as any)
         .from('apt_sites')
-        .select('slug, name, lifecycle_stage')
+        .select('slug, name, region, lifecycle_stage')
         .eq('slug', post.hub_apt_slug)
         .maybeSingle();
+      if (ls) hubSite = { slug: ls.slug, name: ls.name, region: ls.region ?? null };
       if (ls && isLeadEligible(ls.lifecycle_stage)) leadSite = { slug: ls.slug, name: ls.name };
     } catch {
       /* 조회 실패는 본문 렌더를 막지 않는다 — 폼만 생략한다 */
@@ -1026,10 +1030,14 @@ export default async function BlogDetailPage({ params }: Props) {
         {/* s184: BlogImageCarousel 제거 — 캐러셀 자체 폐지. */}
         {/* s184: 본문 위 KakaoShareButton + ShareButtons + BlogBookmarkButton 행 제거 — 본문 직후로 이동. */}
 
-        {/* 목차 (모바일: 인라인, 데스크탑: 사이드바) */}
-        <div className="blog-toc-inline">
-          {toc.length >= 3 && <BlogToc toc={toc} />}
-        </div>
+        {/* v3 커밋6 · 목차 — 모바일은 접이식, 데스크탑은 우측 레일(아래 aside).
+             기존 sticky 칩 바는 본문 폭을 먹어 세로 목록으로 바꿨다. */}
+        {toc.length >= 3 && (
+          <details className="blog-toc-details">
+            <summary>목차</summary>
+            <BlogTocList toc={toc} />
+          </details>
+        )}
 
         {/* s184: YMYLBanner 본문 위 → 하단 <details> 로 이동. 본문 직전에 면책 노출은 신뢰 저하. */}
 
@@ -1318,6 +1326,25 @@ export default async function BlogDetailPage({ params }: Props) {
         </div>
       </div>
 
+      {/* v3 커밋6: 이 글이 다루는 현장 — 블로그에서 현장 페이지로 가는 동선이 없었다.
+          hub_apt_slug 가 있는 글에만 낸다 (발행 8,833편 중 1,790편). */}
+      {hubSite && (
+        <Link
+          href={`/apt/${hubSite.slug}`}
+          className="kd-lrow"
+          style={{ textDecoration: 'none', color: 'inherit', marginTop: 20, borderTop: '1px solid var(--border)' }}
+        >
+          <span className="kd-lrow-k is-soon">현장</span>
+          <span style={{ minWidth: 0 }}>
+            <span className="kd-lrow-t">{hubSite.name}</span>
+            <span className="kd-lrow-m">
+              <span>{[hubSite.region, '분양 정보 · 공급 · 일정'].filter(Boolean).join(' · ')}</span>
+            </span>
+          </span>
+          <span className="kd-lrow-r" style={{ fontWeight: 600, color: 'var(--text-tertiary)' }}>보기 ›</span>
+        </Link>
+      )}
+
       {/* S4-4 P1: 본문 하단 / 관련 글 위. 블로그에는 상단 앵커를 넣지 않는다 —
           읽는 흐름을 끊지 않고, 상세 페이지처럼 스크롤이 길지도 않다. */}
       {leadSite && <LeadForm siteSlug={leadSite.slug} siteName={leadSite.name} variant="blog" />}
@@ -1568,6 +1595,35 @@ export default async function BlogDetailPage({ params }: Props) {
       )}
 
       </div>
+
+      {/* v3 커밋6 · 데스크탑 우측 레일 (≥1024px). 목차를 여기로 빼 본문 폭을 확보한다.
+           ⚠️ 리드폼은 여기 두지 않았다. 페이지에 form 이 두 벌이 되면 id("lead-form" /
+              "kd-lead-name")도 두 벌이 되고, 리드 도달이 이 작업의 최대 리스크다.
+              레일에 실제 폼을 넣으려면 LeadForm 에 id 접두사 prop 이 먼저 필요하다.
+           ⚠️ 블로그에는 폼으로 가는 앵커를 넣지 않는다 (기존 규약). */}
+      <aside className="blog-detail-rail" aria-label="이 글 살펴보기">
+        {toc.length >= 3 && (
+          <div className="kd-rail-panel">
+            <h2>목차</h2>
+            <BlogTocList toc={toc} />
+          </div>
+        )}
+        {hubSite && (
+          <div className="kd-rail-panel">
+            <h2>이 글이 다루는 현장</h2>
+            <Link href={`/apt/${hubSite.slug}`}>{hubSite.name}</Link>
+            {hubSite.region && <Link href={`/apt/region/${encodeURIComponent(hubSite.region)}`}>{hubSite.region} 분양 현장</Link>}
+          </div>
+        )}
+        {sidebarRelatedLinks.length > 0 && (
+          <div className="kd-rail-panel">
+            <h2>함께 보기</h2>
+            {sidebarRelatedLinks.slice(0, 6).map((link, i) => (
+              <Link key={i} href={link.href}>{link.title}</Link>
+            ))}
+          </div>
+        )}
+      </aside>
     </div>
   );
 }

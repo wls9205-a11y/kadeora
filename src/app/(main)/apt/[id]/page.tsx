@@ -922,7 +922,7 @@ export default async function AptUnifiedPage({ params }: Props) {
         const firstEmpty = rows.find((r) => !r[1])?.[0] ?? null;
         return (
           <section aria-labelledby="apt-sec-h1" className="apt-card" id="supply-section" style={{ scrollMarginTop: SECTION_SCROLL_MARGIN }}>
-            <SectionHeader id="apt-sec-h1" eyebrow="SUPPLY" title="공급 정보" />
+            <SectionHeader id="apt-sec-h1" title="공급 정보" />
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--fs-sm)' }}>
               <tbody>
                 {rows.map(([l, v], i) => (
@@ -1013,7 +1013,7 @@ export default async function AptUnifiedPage({ params }: Props) {
       <AptLocationMini address={site?.address ?? sub?.hssply_adres ?? undefined} latitude={site?.latitude ?? undefined} longitude={site?.longitude ?? undefined} nearbyStation={site?.nearby_station ?? sub?.nearest_station ?? undefined} schoolDistrict={site?.school_district ?? sub?.nearest_school ?? undefined} />
 
       {/* Location */}
-      <section aria-labelledby="apt-sec-h2" className="apt-card" id="location-section" style={{ scrollMarginTop: SECTION_SCROLL_MARGIN }}><SectionHeader id="apt-sec-h2" eyebrow="LOCATION" title="위치 정보" />
+      <section aria-labelledby="apt-sec-h2" className="apt-card" id="location-section" style={{ scrollMarginTop: SECTION_SCROLL_MARGIN }}><SectionHeader id="apt-sec-h2" title="위치 정보" />
         {/* r4-P6: 흩어져 있던 라벨-값 표를 SpecTable 한 벌로.
              s-v2: keepEmpty 로 규칙을 반전 — 행을 빼지 않고 `미공개` 로 채운다.
              s-v2 A-4: '입지 분석 — 학군·교통' 별도 섹션을 없애고 여기로 흡수했다.
@@ -1173,7 +1173,7 @@ export default async function AptUnifiedPage({ params }: Props) {
         const rows = [['분양유형', sub.mdatrgbn_nm], ['특별공급', sub.spsply_rcept_bgnde ? `${sub.spsply_rcept_bgnde} ~ ${sub.spsply_rcept_endde || ''}` : null], ['1순위', sub.rcept_bgnde], ['2순위', sub.rcept_endde && sub.rcept_endde !== sub.rcept_bgnde ? sub.rcept_endde : null], ['당첨자발표', sub.przwner_presnatn_de], ['계약', sub.cntrct_cncls_bgnde ? `${sub.cntrct_cncls_bgnde} ~ ${sub.cntrct_cncls_endde}` : null], ['분양가상한제', sub.is_price_limit ? '적용' : '미적용']].filter(r => r[1]);
         return (
           <section aria-labelledby="apt-sec-h3" className="apt-card" id="movein-section" style={{ scrollMarginTop: SECTION_SCROLL_MARGIN }}>
-            <SectionHeader id="apt-sec-h3" eyebrow="SCHEDULE" title="분양 일정" />
+            <SectionHeader id="apt-sec-h3" title="분양 일정" />
             {/* 상세 행 */}
             <SpecTable rows={rows.map(([l, v]) => ({ label: l as string, value: v as React.ReactNode }))} />
           </section>
@@ -1194,7 +1194,7 @@ export default async function AptUnifiedPage({ params }: Props) {
       {/* ── 7번 블록 · 핵심 포인트 + FAQ ── */}
       {features.length > 0 && (
         <section aria-labelledby="apt-sec-h9" className="apt-card" id="points-section" style={{ scrollMarginTop: SECTION_SCROLL_MARGIN }}>
-          <SectionHeader id="apt-sec-h9" eyebrow="POINTS" title="핵심 포인트" />
+          <SectionHeader id="apt-sec-h9" title="핵심 포인트" />
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {features.map((f: any, i: number) => (
               <span key={i} style={{ padding: '4px 10px', borderRadius: 'var(--radius-lg)', fontSize: 'var(--fs-xs)', fontWeight: 600, background: 'var(--brand-bg)', color: 'var(--brand)', border: '1px solid var(--brand-bg)' }}>{String(f)}</span>
@@ -1205,7 +1205,7 @@ export default async function AptUnifiedPage({ params }: Props) {
 
       {faq.length > 0 && (
         <section aria-labelledby="apt-sec-h5" className="apt-card" id="faq-section" style={{ scrollMarginTop: SECTION_SCROLL_MARGIN }}>
-          <SectionHeader id="apt-sec-h5" eyebrow="FAQ" title="자주 묻는 질문" />
+          <SectionHeader id="apt-sec-h5" title="자주 묻는 질문" />
           {faq.map((f, i) => (
             <details key={i} style={{ borderBottom: '1px solid var(--border)', padding: '10px 0' }}>
               <summary style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', cursor: 'pointer', listStyle: 'none', display: 'flex', justifyContent: 'space-between' }}>
@@ -1326,7 +1326,7 @@ export default async function AptUnifiedPage({ params }: Props) {
       {sub && (
         <div id="notice-section" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: '16px', marginBottom: 'var(--sp-md)', scrollMarginTop: SECTION_SCROLL_MARGIN }}>
           <section aria-labelledby="apt-sec-h4" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--sp-md)' }}>
-            <SectionHeader id="apt-sec-h4" eyebrow="NOTICE" title="모집공고 핵심 요약" />
+            <SectionHeader id="apt-sec-h4" title="모집공고 핵심 요약" />
           </section>
 
           {/* AI 분석 — 상단 히어로에 이미 표시되므로 중복 제거 */}
@@ -2041,10 +2041,10 @@ export default async function AptUnifiedPage({ params }: Props) {
         </section>
       )}
       {/* Related posts */}
-      {relatedPosts.length > 0 && <section aria-labelledby="apt-sec-h6" className="apt-card"><SectionHeader id="apt-sec-h6" eyebrow="COMMENTS" title="커뮤니티 게시글" />{relatedPosts.map((p: Record<string, any>) => <Link key={p.id} href={`/feed/${p.id}`} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none', color: 'inherit', fontSize: 'var(--fs-sm)' }}><span style={{ color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</span><span style={{ color: 'var(--text-tertiary)', flexShrink: 0, marginLeft: 8, fontSize: 'var(--fs-xs)' }}>댓글 {p.comments_count || 0}</span></Link>)}</section>}
+      {relatedPosts.length > 0 && <section aria-labelledby="apt-sec-h6" className="apt-card"><SectionHeader id="apt-sec-h6" title="커뮤니티 게시글" />{relatedPosts.map((p: Record<string, any>) => <Link key={p.id} href={`/feed/${p.id}`} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none', color: 'inherit', fontSize: 'var(--fs-sm)' }}><span style={{ color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</span><span style={{ color: 'var(--text-tertiary)', flexShrink: 0, marginLeft: 8, fontSize: 'var(--fs-xs)' }}>댓글 {p.comments_count || 0}</span></Link>)}</section>}
 
       {/* Related blogs */}
-      {relatedBlogs.length > 0 && <section aria-labelledby="apt-sec-h7" className="apt-card"><SectionHeader id="apt-sec-h7" eyebrow="ANALYSIS" title="관련 분석 블로그" />{relatedBlogs.map((b: Record<string, any>) => <Link key={b.slug} href={`/blog/${b.slug}`} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none', color: 'inherit', fontSize: 'var(--fs-sm)' }}><span style={{ color: 'var(--text-primary)', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.title}</span><span style={{ color: 'var(--text-tertiary)', flexShrink: 0, marginLeft: 8, fontSize: 'var(--fs-xs)' }}>{(b.view_count || 0).toLocaleString()}</span></Link>)}</section>}
+      {relatedBlogs.length > 0 && <section aria-labelledby="apt-sec-h7" className="apt-card"><SectionHeader id="apt-sec-h7" title="관련 분석 블로그" />{relatedBlogs.map((b: Record<string, any>) => <Link key={b.slug} href={`/blog/${b.slug}`} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none', color: 'inherit', fontSize: 'var(--fs-sm)' }}><span style={{ color: 'var(--text-primary)', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.title}</span><span style={{ color: 'var(--text-tertiary)', flexShrink: 0, marginLeft: 8, fontSize: 'var(--fs-xs)' }}>{(b.view_count || 0).toLocaleString()}</span></Link>)}</section>}
         </div>
       </details>
 
@@ -2072,7 +2072,7 @@ export default async function AptUnifiedPage({ params }: Props) {
            하단 탭바(z-100)·글쓰기 FAB(z-99)와의 겹침은 컴포넌트 안에서 처리한다. */}
       <SiteActionBar siteSlug={slug} showLeadForm={showLeadForm} />
       {/* Nearby sites (internal linking SEO) */}
-      {nearbySites.length > 0 && <section aria-labelledby="apt-sec-h8" className="apt-card kd-lg-hide"><SectionHeader id="apt-sec-h8" eyebrow="NEARBY" title={`${region} 다른 현장`} /><div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 'var(--sp-sm)' }}>{nearbySites.map((ns: Record<string, any>) => <Link key={ns.slug} href={`/apt/${ns.slug}`} className="kd-card" style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: 10, textDecoration: 'none', color: 'inherit', overflow: 'hidden' }}><div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 2 }}>{ns.name}</div><div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ns.sigungu || ns.region} · {ns.total_units ? `${ns.total_units}세대` : ''} · {tLabel[ns.site_type]}</div></Link>)}</div></section>}
+      {nearbySites.length > 0 && <section aria-labelledby="apt-sec-h8" className="apt-card kd-lg-hide"><SectionHeader id="apt-sec-h8" title={`${region} 다른 현장`} /><div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 'var(--sp-sm)' }}>{nearbySites.map((ns: Record<string, any>) => <Link key={ns.slug} href={`/apt/${ns.slug}`} className="kd-card" style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: 10, textDecoration: 'none', color: 'inherit', overflow: 'hidden' }}><div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 2 }}>{ns.name}</div><div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ns.sigungu || ns.region} · {ns.total_units ? `${ns.total_units}세대` : ''} · {tLabel[ns.site_type]}</div></Link>)}</div></section>}
 
       {/* 지역 허브 내부 링크 */}
       {(region || sigungu) && <div className="apt-card kd-lg-hide" style={{ padding: '12px 14px' }}><div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>

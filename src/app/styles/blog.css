@@ -217,3 +217,61 @@
 @media (max-width: 320px) {
   .listing-grid-2col { grid-template-columns: 1fr; }
 }
+
+/* ── v3 커밋6 · 블로그 상세 데스크탑 2단 ──────────────────────
+   목차를 우측 레일로 빼 본문 폭을 확보한다. 모바일은 <details> 접이식. */
+
+.blog-detail-main { min-width: 0; }
+/* 레일은 모바일에서도 DOM 에 남지만 여기서는 접이식 목차만 보인다 — 아래 참조 */
+.blog-detail-rail { display: none; }
+
+/* 순수 앵커 목차의 착지 위치. Navigation <header> 45 + 여유. */
+.blog-content h2,
+.blog-content h3 { scroll-margin-top: 60px; }
+
+.blog-toc-details {
+  margin: 0 0 var(--sp-lg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  padding: 0 12px;
+}
+.blog-toc-details > summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text-primary);
+  cursor: pointer;
+  list-style: none;
+}
+.blog-toc-details > summary::-webkit-details-marker { display: none; }
+.blog-toc-details > summary::after {
+  content: '▾';
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+.blog-toc-details[open] > summary::after { content: '▴'; }
+.blog-toc-details > nav { padding: 0 0 10px; border-top: 1px solid var(--border); }
+
+@media (min-width: 1024px) {
+  .blog-detail-layout {
+    max-width: var(--container-grid);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 28px;
+    align-items: start;
+  }
+  .blog-detail-rail {
+    display: block;
+    min-width: 0;
+    position: sticky;
+    top: 61px;
+    max-height: calc(100vh - 80px);
+    overflow-y: auto;
+  }
+  /* 데스크탑에서는 레일 목차가 대신한다 */
+  .blog-toc-details { display: none; }
+}

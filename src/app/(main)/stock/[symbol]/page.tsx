@@ -403,7 +403,7 @@ export default async function StockDetailPage({ params }: Props) {
 
       {/* 투자 요약 (네이버 크롤러 가시적 텍스트) */}
       <section aria-labelledby="stock-sec-1" className="stock-investment-summary" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--card-p) var(--sp-lg)', marginBottom: 'var(--sp-md)' }}>
-        <h2 id="stock-sec-1" style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px' }}>📋 {s.name} ({symbol}) 종목 요약</h2>
+        <h2 id="stock-sec-1" style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px' }}>{s.name} ({symbol}) 종목 요약</h2>
         <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0 0 8px', wordBreak: 'keep-all' }}>
           {s.name}({symbol})은 {s.market} 시장에 상장된 {s.sector || '종목'}입니다.
           {!isStale && <> 현재가는 {fmtPrice(Number(s.price), s.currency ?? undefined)}이며, 전일 대비 {isUp ? '상승' : isDown ? '하락' : '보합'}({isUp ? '+' : ''}{changePct.toFixed(2)}%)했습니다.</>}
@@ -536,7 +536,7 @@ export default async function StockDetailPage({ params }: Props) {
       {/* 최신 뉴스 요약 (서버 렌더링) */}
       {(newsR.data ?? []).length > 0 && (
         <section aria-labelledby="stock-sec-4" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--card-p) var(--sp-lg)', marginBottom: 'var(--sp-md)' }}>
-          <h2 id="stock-sec-4" style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 10px' }}>📰 {s.name} 최신 뉴스</h2>
+          <h2 id="stock-sec-4" style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 10px' }}>{s.name} 최신 뉴스</h2>
           {/* 감성 분석 요약 바 */}
           {(() => {
             const all = (newsR.data ?? []) as any[];
@@ -612,7 +612,7 @@ export default async function StockDetailPage({ params }: Props) {
       {/* 공시 요약 (서버 렌더링) */}
       {(discR.data ?? []).length > 0 && (
         <section aria-labelledby="stock-sec-6" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--card-p) var(--sp-lg)', marginBottom: 'var(--sp-md)' }}>
-          <h2 id="stock-sec-6" style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px' }}>📄 {s.name} 최근 공시</h2>
+          <h2 id="stock-sec-6" style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px' }}>{s.name} 최근 공시</h2>
           {(discR.data ?? []).slice(0, 3).map((d: any) => (
             <div key={d.id} style={{ padding: '4px 0', borderBottom: '1px solid var(--border)', fontSize: 12, color: 'var(--text-secondary)' }}>
               <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{d.title}</span>
@@ -658,7 +658,7 @@ export default async function StockDetailPage({ params }: Props) {
       {/* 관련 블로그 — with share */}
       {(relatedBlogsR.data ?? []).length > 0 && (
         <div className="kd-card">
-          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>📰 {s.name} 관련 분석</div>
+          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>{s.name} 관련 분석</div>
           {(relatedBlogsR.data ?? []).map((blog: any) => (
             <Link key={blog.slug} href={`/blog/${blog.slug}`} className="kd-feed-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', textDecoration: 'none', color: 'inherit', padding: '8px 4px', borderRadius: 'var(--radius-xs)', transition: 'background var(--transition-fast)', borderBottom: '1px solid var(--border)' }}>
               <div style={{ flex: 1, minWidth: 0 }}>
@@ -675,7 +675,7 @@ export default async function StockDetailPage({ params }: Props) {
 
       {/* 자주 묻는 질문 (본문 렌더링 — 네이버 FAQ 리치스니펫) */}
       <section aria-labelledby="stock-sec-7" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--card-p) var(--sp-lg)', marginBottom: 'var(--sp-md)' }}>
-        <h2 id="stock-sec-7" style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 10px' }}>❓ {s.name} 자주 묻는 질문</h2>
+        <h2 id="stock-sec-7" style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 10px' }}>{s.name} 자주 묻는 질문</h2>
         {[
           { q: `${s.name}(${symbol}) 현재 주가는 얼마인가요?`, a: `${s.name}(${symbol})의 현재가는 ${fmtPrice(Number(s.price), s.currency ?? undefined)}이며, 전일 대비 ${changePct >= 0 ? '+' : ''}${changePct.toFixed(2)}% ${isUp ? '상승' : isDown ? '하락' : '보합'}했습니다. ${s.market} 상장 종목으로 시가총액은 ${Number(s.market_cap) > 0 ? fmtCap(Number(s.market_cap), s.currency ?? undefined) : '확인 중'}입니다.` },
           { q: `${s.name} 52주 최고가·최저가는?`, a: high52 && low52 ? `${s.name}의 52주 최고가는 ${s.currency === 'USD' ? '$' : '₩'}${high52.toLocaleString()}, 최저가는 ${s.currency === 'USD' ? '$' : '₩'}${low52.toLocaleString()}입니다. 현재가는 52주 범위 내 ${Math.round(((Number(s.price)-low52)/(high52-low52))*100)}% 위치에 있습니다.` : `${s.name}의 52주 고저 정보는 카더라 차트 탭에서 확인할 수 있습니다.` },
