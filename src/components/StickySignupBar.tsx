@@ -18,6 +18,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
 import { trackCTA } from '@/lib/analytics';
 import { trackCtaAndNavigate } from '@/lib/cta-navigate';
+import { isAptSiteDetailPath } from '@/lib/apt/is-site-detail';
 
 // r4-P9: /calc 추가. 30일 820노출 0클릭 — 네이버에서 계산하러 온 사람에게
 // 가입을 권하는 자리가 아니다. 화면만 가린다. (/calc 밖은 968노출 3클릭 1가입이라 유지)
@@ -41,6 +42,11 @@ export default function StickySignupBar() {
   useEffect(() => {
     if (loading || userId) return;
     if (EXCLUDED.includes(pathname) || EXCLUDED.some(p => p !== '/' && pathname.startsWith(p + '/'))) return;
+    // v3 커밋2: 현장 상세는 SiteActionBar(bottom 62 · z-98)가 하단을 쓴다.
+    //   이 바(bottom 56 · z-90)와 자리가 겹쳐 둘 중 하나가 반쯤 가린다 — 상세에서는 이쪽이 비켜준다.
+    //   EXCLUDED 에 '/apt' 를 넣는 방식은 쓰지 말 것: startsWith('/apt/') 가
+    //   /apt/busan·/apt/map 같은 허브까지 전부 죽인다.
+    if (isAptSiteDetailPath(pathname)) return;
 
     try {
       const closedAt = parseInt(localStorage.getItem(CLOSE_KEY) || '0', 10);

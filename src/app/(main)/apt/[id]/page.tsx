@@ -19,7 +19,6 @@ import Disclaimer from '@/components/Disclaimer';
 import AptImageGallery from '@/components/AptImageGallery';
 import SimilarAptsSection from '@/components/apt/SimilarAptsSection';
 import LeadForm from '@/components/apt/LeadForm';
-import LeadFormAnchor from '@/components/apt/LeadFormAnchor';
 import { isLeadEligible } from '@/lib/apt/lead-eligibility';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
 import { getDisplayInterestCount, formatInterestText, formatInterestOrViews } from '@/lib/interest-utils';
@@ -35,7 +34,7 @@ import AptBlogStack from '@/components/apt/AptBlogStack';
 import AptCompareTable from '@/components/apt/AptCompareTable';
 import SiteTalkCTA from '@/components/banner/SiteTalkCTA';
 import TalkInlineLink from '@/components/banner/TalkInlineLink';
-import AptTalkBottomBar from '@/components/apt/AptTalkBottomBar';
+import SiteActionBar from '@/components/apt/SiteActionBar';
 import AptSidebar from '@/components/apt/AptSidebar';
 import AptPriceTrendCard from '@/components/apt/AptPriceTrendCard';
 import AptDDayCard from '@/components/apt/detail/AptDDayCard';
@@ -850,8 +849,6 @@ export default async function AptUnifiedPage({ params }: Props) {
           {(site?.nearby_station || sub?.nearest_station) && <span style={{ color: 'var(--accent-blue)' }}>{site?.nearby_station || sub?.nearest_station}</span>}
         </div>
 
-        {/* S4-2: 상단 컴팩트 진입 바 — 스펙 표 위. 폼 전체는 하단에 유지하고 스크롤로 연결한다 */}
-        {showLeadForm && <LeadFormAnchor />}
         {/* ── 2번 블록 · 한 줄 요약 ──
              analysis_text(100%) > ai_summary > description 순.
              앞 소스가 비는 현장에서도 블록이 사라지지 않도록 3단으로 받친다. */}
@@ -868,6 +865,13 @@ export default async function AptUnifiedPage({ params }: Props) {
       </div>
 
 
+
+      {/* v3 커밋2: 리드폼을 공급 정보 바로 앞으로 올린다.
+           오픈채팅 URL 은 파라미터를 못 받는다 — '누가·어느 현장에서' 가 남는 경로는 폼뿐이다.
+           히어로(커밋3)로 현장을 먼저 보여준 직후가 그 경로를 여는 자리다.
+           leadTypeOptions 는 위(538행 근처)에서 계산되므로 선언 순서 문제 없음.
+           ⚠️ InterestRegisterHero(회원 CTA)와 인접시키지 말 것 — s7-3 결정. */}
+      {showLeadForm && site && <LeadForm siteSlug={site.slug} siteName={site.name} typeOptions={leadTypeOptions} />}
 
       {/* s2: 공급 정보 스펙 표 — 시공사/위치/규모/일반분양/분양가/입주/상태를 여기 한 곳에서만 쓴다.
            이전에는 히어로·KPI·분양일정·모집공고요약에 세대수가 5회, 일정이 3벌 흩어져 있었다. */}
@@ -2033,9 +2037,6 @@ export default async function AptUnifiedPage({ params }: Props) {
         </div>
       </details>
 
-      {/* s7-4: 조감도·공급정보·일정을 본 직후가 관심 최고점이다. 정보가 먼저 나오므로
-           리드팜 구조가 되지 않는다. LeadFormAnchor 의 스크롤 목적지도 이리로 당겨진다. */}
-      {showLeadForm && site && <LeadForm siteSlug={site.slug} siteName={site.name} typeOptions={leadTypeOptions} />}
       {/* 댓글 섹션 */}
       {site?.slug && <AptCommentSection slug={site.slug} siteName={name} />}
       {/* 비로그인 가입 유도 CTA — InlineCTA */}
@@ -2055,9 +2056,10 @@ export default async function AptUnifiedPage({ params }: Props) {
         />
       </div>
 
-      {/* B-3: 모바일 하단 고정 바. 6번 블록이 뷰포트에 들어오면 스스로 숨는다.
+      {/* v3 커밋2: 모바일 하단 고정 바 — 좌(주) 리드폼 / 우(부) 카톡.
+           리드폼이 뷰포트에 들어오면 스스로 숨는다.
            하단 탭바(z-100)·글쓰기 FAB(z-99)와의 겹침은 컴포넌트 안에서 처리한다. */}
-      <AptTalkBottomBar siteSlug={slug} showLeadForm={showLeadForm} />
+      <SiteActionBar siteSlug={slug} showLeadForm={showLeadForm} />
       {/* Nearby sites (internal linking SEO) */}
       {nearbySites.length > 0 && <section aria-labelledby="apt-sec-h8" className="apt-card"><SectionHeader id="apt-sec-h8" eyebrow="NEARBY" title={`${region} 다른 현장`} /><div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 'var(--sp-sm)' }}>{nearbySites.map((ns: Record<string, any>) => <Link key={ns.slug} href={`/apt/${ns.slug}`} className="kd-card" style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: 10, textDecoration: 'none', color: 'inherit', overflow: 'hidden' }}><div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 2 }}>{ns.name}</div><div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ns.sigungu || ns.region} · {ns.total_units ? `${ns.total_units}세대` : ''} · {tLabel[ns.site_type]}</div></Link>)}</div></section>}
 
