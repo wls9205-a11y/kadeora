@@ -281,6 +281,36 @@ export default async function AptPage({
       {/* ④ 이번 주 청약 결과 */}
       <SubscriptionResults items={hub.results} />
 
+      {/* v5-V3: 지난 공고 진입점. 허브는 최근(60/180/365)만 보여주므로
+           이 링크가 없으면 그 이전 2,842건을 아무도 찾지 못한다. */}
+      <div style={{ padding: '0 6px', margin: '0 0 var(--sp-md)' }}>
+        <Link
+          href={region !== '전국' ? `/apt/archive?region=${encodeURIComponent(region)}` : '/apt/archive'}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 8,
+            minHeight: 48,
+            padding: '0 14px',
+            borderRadius: 'var(--radius-md)',
+            border: '1px solid var(--border)',
+            background: 'var(--bg-surface)',
+            textDecoration: 'none',
+          }}
+        >
+          <span style={{ minWidth: 0 }}>
+            <span style={{ display: 'block', fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
+              지난 공고 더보기
+            </span>
+            <span style={{ display: 'block', fontSize: 11, color: 'var(--text-tertiary)', marginTop: 1 }}>
+              마감된 청약의 경쟁률·가점컷을 연도별로
+            </span>
+          </span>
+          <span aria-hidden style={{ flexShrink: 0, fontSize: 13, color: 'var(--text-tertiary)' }}>→</span>
+        </Link>
+      </div>
+
       {/* ⑤ 관련 블로그 분석 */}
       <AptRelatedBlogs posts={relatedBlogs} />
 
