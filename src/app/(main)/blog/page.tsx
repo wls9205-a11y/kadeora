@@ -42,78 +42,74 @@ const CAT_META: Record<string, { title: string; desc: string }> = {
   life: { title: '재테크·생활 블로그 — 투자·절약·동네 소식', desc: '재테크 기본 원칙부터 실전 투자 전략, 알아두면 유용한 생활 정보까지.' },
 };
 
-/**
- * v4-C9 — 서브칩을 실제 발행 데이터로 교체.
- *
- * ⚠️ 이전 하드코딩 목록(market·analysis·theme·weekly·subscription·trade·redev·
- *    competition·guide·trend·region·saving·tax·invest)은 **14개 전부 발행 0편이었다.**
- *    실측(2026-08-23) — 각 키로 `.eq('sub_category', k)` 하면 매칭 0.
- *    즉 /blog 의 서브칩은 어느 것을 눌러도 빈 목록이 나오고 있었다.
- *
- * 아래는 `select category, sub_category, count(*) ... having count(*) >= 30` 실측 스냅샷이다.
- * key 는 blog_posts.sub_category 의 실제 값 그대로여야 한다 — 라벨만 바꾸면 또 0건이 된다.
- *
- * ⚠️ 스냅샷이므로 시간이 지나면 낡는다. (category, sub_category, cnt) 집계 뷰가 생기면
- *    이 상수를 지우고 그 뷰에서 뽑을 것. 현재 그런 뷰는 없다 —
- *    v_blog_category_groups 는 그룹 단위(6행)라 서브칩 용도로 쓸 수 없다.
- *
- * ⚠️ 분류 체계가 두 세대 섞여 있다. apt 에 '청약·분양'(891)과 'cheongak'(94)·
- *    'preempt_coverage'(104)·'lotto_cheongak'(33)이 공존한다. 겹쳐 보이더라도 숨기지 않는다 —
- *    숨기면 231편이 다시 도달 불가가 된다 (C5 에서 redev 287편이 그랬다).
- *    정리는 DB 쪽 taxonomy 통합 과제다.
- */
-const SUB_CATS: Record<string, { key: string; label: string }[]> = {
-  apt: [
-    { key: 'lotto_cheongak', label: '로또청약' },
-    { key: '부동산일반', label: '부동산일반' },
-    { key: 'preempt_coverage', label: '신규분양' },
-    { key: '실거래·시세', label: '실거래·시세' },
-    { key: 'cheongak', label: '청약가이드' },
-    { key: '청약·분양', label: '청약·분양' },
-  ],
-  unsold: [
-    { key: '단지별분석', label: '단지별분석' },
-    { key: '미분양현황', label: '미분양현황' },
-  ],
-  redev: [
-    { key: '재개발·재건축', label: '재개발·재건축' },
-  ],
-  stock: [
-    { key: '국내주식', label: '국내주식' },
-    { key: '목표주가', label: '목표주가' },
-    { key: '배당분석', label: '배당분석' },
-    { key: '비교분석', label: '비교분석' },
-    { key: '섹터전망', label: '섹터전망' },
-    { key: '수급분석', label: '수급분석' },
-    { key: '종목분석', label: '종목분석' },
-    { key: '해외주식', label: '해외주식' },
-  ],
-  finance: [
-    { key: '재테크일반', label: '재테크일반' },
-  ],
-  // general(66편)은 30편 이상 서브가 없다 — 칩을 내지 않는다.
-};
+/** v_blog_subcat_counts 한 행. group_key 는 이 파일의 탭 키(realestate/stock/life)와 같다. */
+type SubcatRow = { group_key: string; category: string; sub_norm: string; cnt: number };
+
+/** 서브칩 노출 하한. 이보다 적으면 칩만 늘고 고를 이유가 없다. */
+const SUB_MIN_POSTS = 30;
 
 /**
- * 그룹 탭의 서브칩 = 멤버들의 합집합 (key 중복 제거, 먼저 나온 라벨 유지).
- * ⚠️ 서브칩 목록을 발행량 집계로 바꾸는 것은 C9 다. 여기서는 매핑만 잇는다.
+ * v4-C9(2차) — 서브칩을 v_blog_subcat_counts 뷰에서 뽑는다.
+ *
+ * 1차에서는 실측 스냅샷을 상수로 박았다. 뷰가 생겼으므로 상수를 지우고 여기서만 읽는다.
+ * 뷰는 `fn_blog_subcat_norm(category, sub_category)` 로 정규화한 값을 준다 —
+ * 영문 구형 키(cheongak·preempt_coverage·lotto_cheongak 등)가 '청약·분양' 으로 흡수돼
+ * 891 → 1,131편이 된다.
+ *
+ * 그룹 탭은 멤버 category 의 같은 sub_norm 을 합산한다
+ * (예: 재개발·재건축 = apt 26 + redev 274 = 300).
  */
-function subCatsFor(category: string): { key: string; label: string }[] | null {
-  if (SUB_CATS[category]) return SUB_CATS[category];
-  const members = CAT_GROUPS[category];
+function subCatsFromView(rows: SubcatRow[], category: string): { key: string; label: string; cnt: number }[] | null {
+  const members = CAT_GROUPS[category] ?? (CAT_TO_TAB[category] ? [category] : null);
   if (!members) return null;
-  const seen = new Set<string>();
-  const out: { key: string; label: string }[] = [];
-  for (const m of members) {
-    for (const sc of SUB_CATS[m] ?? []) {
-      if (seen.has(sc.key)) continue;
-      seen.add(sc.key);
-      out.push(sc);
-    }
+
+  const agg = new Map<string, number>();
+  for (const r of rows) {
+    if (!members.includes(r.category)) continue;
+    if (!r.sub_norm) continue;
+    agg.set(r.sub_norm, (agg.get(r.sub_norm) ?? 0) + Number(r.cnt || 0));
   }
-  // 가나다 고정 — 건수 순으로 두면 발행량이 바뀔 때마다 칩 순서가 바뀐다 (C3 과 같은 원칙).
-  out.sort((a, b) => a.label.localeCompare(b.label, 'ko'));
+
+  const out = [...agg.entries()]
+    .filter(([, cnt]) => cnt >= SUB_MIN_POSTS)
+    .map(([key, cnt]) => ({ key, label: key, cnt }))
+    // 가나다 고정 — 발행량 순으로 두면 칩 순서가 발행할 때마다 바뀐다 (C3·C8 과 같은 원칙).
+    .sort((a, b) => a.label.localeCompare(b.label, 'ko'));
+
   return out.length > 0 ? out : null;
+}
+
+/**
+ * 정규화 이름(sub_norm) → 실제 blog_posts.sub_category 값들.
+ *
+ * ⚠️ 이 목록은 DB 의 `fn_blog_subcat_norm(text,text)` CASE 문을 거울처럼 옮긴 것이다.
+ *    그 함수가 유일한 원본이고, 여기는 사본이다 — 함수를 고치면 여기도 같이 고쳐야 한다.
+ *
+ *    거울이 필요한 이유: 뷰는 정규화된 이름으로 집계해 주지만, 목록 조회는
+ *    PostgREST 로 `blog_posts.sub_category`(원본 값) 를 걸러야 한다.
+ *    프론트에서 함수를 호출할 방법이 없어 역매핑을 들고 있어야 한다.
+ *
+ *    ⇒ 이 사본을 없애려면 DB 쪽에 둘 중 하나가 필요하다:
+ *       (a) blog_posts 에 sub_norm 생성 컬럼(GENERATED ALWAYS AS ... STORED) + 인덱스
+ *       (b) sub_norm 으로 필터되는 글 목록 뷰
+ *       둘 중 하나가 생기면 아래 상수와 subNormRaws() 를 통째로 지우고
+ *       `.eq('sub_norm', sub)` 한 줄로 바꾸면 된다.
+ *
+ *    드리프트 증상: 칩의 건수(뷰 기준)와 실제 목록 건수가 어긋난다.
+ */
+const SUB_NORM_ALIASES: Record<string, string[]> = {
+  '청약·분양': ['cheongak', 'lotto_cheongak', 'preempt_coverage', '청약', '청약결과', '청약전략', '분양', '분양권', '분양예정'],
+  '실거래·시세': ['price_change'],
+  '재개발·재건축': ['redevelopment', '재개발'],
+  '부동산일반': ['apt_general', 'jeonse_crisis', 'policy_change'],
+  '증시일반': ['stock_general', 'rate_decision', 'earnings', 'rights_issue', 'price_surge', 'ma', '합병', 'trending_gap'],
+  '재테크일반': ['fx_change', 'economy_general'],
+  '생활정보': ['trending_gap'],
+};
+
+/** 정규화 이름으로 조회할 때 실제로 걸러야 하는 원본 값 목록. 자기 자신도 포함한다 (ELSE p_sub). */
+function subNormRaws(subNorm: string): string[] {
+  return [subNorm, ...(SUB_NORM_ALIASES[subNorm] ?? [])];
 }
 
 interface PageProps { searchParams: Promise<{ category?: string; sort?: string; q?: string; page?: string; sub?: string }> }
@@ -235,7 +231,7 @@ export default async function BlogPage({ searchParams }: Props) {
 
   // 카테고리 건수 + 인기글 + 인기태그 — 병렬 조회
   const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString();
-  const [catCountsR, popularR, tagsR] = await Promise.allSettled([
+  const [catCountsR, popularR, tagsR, subcatR] = await Promise.allSettled([
     sb.rpc('blog_category_counts'),
     sb.from('blog_posts')
       .select('id, slug, title, category, view_count, cover_image')
@@ -244,7 +240,16 @@ export default async function BlogPage({ searchParams }: Props) {
       .order('view_count', { ascending: false })
       .limit(5),
     pageNum === 1 && !q ? sb.rpc('blog_popular_tags', { limit_count: 20 }) : Promise.resolve({ data: [] }),
+    // v4-C9(2차): 서브칩 원본. 6행짜리 집계 뷰라 가볍다.
+    // types/database.ts 는 손대지 않는다(보호 대상) — 새 뷰라 생성 타입에 없어 as any 로 받는다.
+    // 리포 다른 곳(apt_sites 조회 등)도 같은 패턴이다.
+    (sb as any).from('v_blog_subcat_counts').select('group_key, category, sub_norm, cnt'),
   ]);
+
+  const subcatRows: SubcatRow[] =
+    subcatR.status === 'fulfilled' ? ((subcatR.value as any)?.data ?? []) : [];
+  // 뷰 조회가 실패하면 서브칩만 사라지고 목록은 그대로 렌더된다.
+  const subChips = category !== 'all' ? subCatsFromView(subcatRows, category) : null;
 
   const catCountsRaw = catCountsR.status === 'fulfilled' ? catCountsR.value?.data : [];
   const countMap: Record<string, number> = { all: 0 };
@@ -284,7 +289,9 @@ export default async function BlogPage({ searchParams }: Props) {
   if (activeCats) {
     q2 = activeCats.length === 1 ? q2.eq('category', activeCats[0]) : q2.in('category', activeCats);
   }
-  if (sub) q2 = q2.eq('sub_category', sub);
+  // v4-C9(2차): sub 는 정규화 이름(sub_norm)이다. 원본 값 여러 개가 한 이름으로 접히므로
+  //   .eq() 가 아니라 .in() 으로 건다 — .eq() 면 '청약·분양' 에서 구형 231편이 빠진다.
+  if (sub) q2 = q2.in('sub_category', subNormRaws(sub));
   if (q) { const sq = sanitizeSearchQuery(q, 100); if (sq) q2 = q2.or(`title.ilike.%${sq}%,excerpt.ilike.%${sq}%`); }
   if (sort === 'popular') {
     q2 = q2.order('view_count', { ascending: false });
@@ -325,7 +332,7 @@ export default async function BlogPage({ searchParams }: Props) {
     if (activeCats) {
       nq = activeCats.length === 1 ? nq.eq('category', activeCats[0]) : nq.in('category', activeCats);
     }
-    if (sub) nq = nq.eq('sub_category', sub);
+    if (sub) nq = nq.in('sub_category', subNormRaws(sub));
     if (sort === 'popular') nq = nq.order('view_count', { ascending: false });
     else nq = nq.order('created_at', { ascending: false });
     nq = nq.range(pageNum * perPage, pageNum * perPage + 4);
@@ -449,7 +456,7 @@ export default async function BlogPage({ searchParams }: Props) {
       </div>
 
       {/* 서브카테고리 칩 */}
-      {category !== 'all' && subCatsFor(category) && (
+      {subChips && (
         <div style={{ display: 'flex', gap: 6, marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none' }}>
           <Link href={`/blog?category=${category}${sort !== 'latest' ? `&sort=${sort}` : ''}${q ? `&q=${q}` : ''}`}
             style={{
@@ -460,7 +467,7 @@ export default async function BlogPage({ searchParams }: Props) {
             }}>
             전체
           </Link>
-          {(subCatsFor(category) ?? []).map(sc => (
+          {subChips.map(sc => (
             <Link key={sc.key} href={`/blog?category=${category}&sub=${sc.key}${sort !== 'latest' ? `&sort=${sort}` : ''}${q ? `&q=${q}` : ''}`}
               style={{
                 padding: '4px 12px', borderRadius: 'var(--radius-pill)', fontSize: 'var(--fs-xs)', fontWeight: sub === sc.key ? 700 : 500,
@@ -469,6 +476,7 @@ export default async function BlogPage({ searchParams }: Props) {
                 textDecoration: 'none', flexShrink: 0, border: 'none',
               }}>
               {sc.label}
+              <span style={{ marginLeft: 4, fontSize: 10, opacity: 0.65 }}>{sc.cnt}</span>
             </Link>
           ))}
         </div>
