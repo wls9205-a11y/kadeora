@@ -33,7 +33,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
 import { verifyCronAuth } from '@/lib/cron-auth';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
-import { generateAptSlug } from '@/lib/apt-slug';
+import { generateAptSlugStrict } from '@/lib/apt-slug';
 import { PIPELINE_STAGES, lifecycleLabel } from '@/lib/apt/lifecycle-label';
 import { KR_REGIONS_17 } from '@/lib/region-storage';
 
@@ -212,7 +212,9 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const newSlug = generateAptSlug(name);
+    // V18 A: 여기는 아래에서 중복을 확인하고 만드는 **순수 신규** 경로다.
+    //   기존 행을 이 값으로 조회하지 않으므로 strict 를 쓸 수 있다.
+    const newSlug = generateAptSlugStrict(name);
     if (!newSlug) return NextResponse.json({ ok: false, error: 'slug_generation_failed' }, { status: 400 });
 
     // 같은 slug 가 이미 있으면 만들지 않는다 — 중복 256쌍을 만든 것이 이 경로다.
