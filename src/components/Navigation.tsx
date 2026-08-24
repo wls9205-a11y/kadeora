@@ -13,15 +13,17 @@ import UniversalSearchBar from '@/components/search/UniversalSearchBar';
 
 const NAV_ITEMS = [
   { href: '/',        label: '홈',     Icon: Home },
-  { href: '/apt',     label: '부동산', Icon: Building2 },
+  // §I-4 순서만 교체 — 아이콘·라우트·활성 판정은 그대로.
   { href: '/stock',   label: '주식',   Icon: TrendingUp },
+  { href: '/apt',     label: '부동산', Icon: Building2 },
   { href: '/blog',    label: '블로그', Icon: FileText },
 ];
 
 const MOBILE_TABS = [
   { href: '/',        label: '홈',     Icon: Home },
-  { href: '/apt',     label: '부동산', Icon: Building2 },
+  // §I-4 하단 탭. 데스크톱 NAV_ITEMS 와 순서를 맞춘다 — 한쪽만 바꾸면 화면마다 달라진다.
   { href: '/stock',   label: '주식',   Icon: TrendingUp },
+  { href: '/apt',     label: '부동산', Icon: Building2 },
   { href: '/blog',    label: '블로그', Icon: FileText },
 ];
 

@@ -42,7 +42,6 @@ import StickyTalkBanner from '@/components/banner/StickyTalkBanner';
 const Navigation             = dynamic(() => import('@/components/Navigation').then(m => m.Navigation),     { ssr: false });
 const NoticeBanner           = dynamic(() => import('@/components/NoticeBanner'),                            { ssr: false });
 const AdBanner               = dynamic(() => import('@/components/AdBanner'),                                { ssr: false });
-const LiveBarChrome          = dynamic(() => import('@/components/ui/LiveBarChrome'),                        { ssr: false });
 const ProfileCompleteBanner  = dynamic(() => import('@/components/ProfileCompleteBanner'),                   { ssr: false });
 const GlobalMissionBar       = dynamic(() => import('@/components/GlobalMissionBar'),                        { ssr: false });
 const StickySignupBar        = dynamic(() => import('@/components/StickySignupBar'),                         { ssr: false });
@@ -88,7 +87,6 @@ export default function ClientShell({ children, serverLoggedIn }: Props) {
             <ErrorBoundary>
               <ProfileCompleteBanner />
               <GlobalMissionBar />
-              <LiveBarChrome />
               {children}
             </ErrorBoundary>
           </main>

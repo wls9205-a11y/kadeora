@@ -397,7 +397,6 @@ export default async function BlogPage({ searchParams }: Props) {
       })}} />
       {/* speakable — 네이버 음성검색 */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebPage', name: '카더라 블로그', speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.blog-summary'] } }) }} />
-      {/* LiveBar 는 (main)/layout 의 LiveBarChrome 으로 통합. */}
       {/* s205-W2: HeroCard "오늘의 블로그" 제거. */}
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 14, paddingTop: 4 }}>
         <div>
