@@ -168,14 +168,64 @@ interface BlogInsertData {
   meta_keywords?: string;
   is_published?: boolean;
   priority_score?: number; // s261: 선점 우선순위 (>=70 시 daily_limit 우회)
+  /**
+   * ADDENDUM §2-2: 글 → 현장 허브 연결. 미지정이면 본문의 첫 유효 `/apt/<슬러그>` 링크로 자동 세팅한다.
+   * 블로그 하단 리드폼/CTA 가 이 값이 있어야 렌더된다.
+   */
+  hub_apt_slug?: string | null;
 }
 
 interface SafeInsertResult {
   success: boolean;
-  reason?: 'duplicate_slug' | 'similar_title' | 'daily_limit' | 'content_too_short' | 'error';
+  reason?: 'duplicate_slug' | 'similar_title' | 'daily_limit' | 'content_too_short' | 'no_site_link' | 'error';
   id?: string;
   similarTo?: string;
   message?: string;
+  /** 본문에서 뽑아낸 현장 슬러그 (게이트 통과분). hub_apt_slug 자동 세팅에 쓴 값이다. */
+  siteSlugs?: string[];
+}
+
+/* ═══════════ ADDENDUM §2-2 · 발행 게이트 ═══════════ */
+
+/**
+ * 부동산 카테고리 글은 반드시 현장 상세로 흘러야 한다.
+ *
+ * 실측(2026-08-24): 발행 8,751편 중 hub_apt_slug 가 붙은 것은 1,751편(20%)뿐이고,
+ * 인바운드 링크가 0개인 현장이 3,497 / 5,687 이다. 글은 쌓이는데 현장으로 흐르지 않는다.
+ * 최종 목표는 리드 수집이고, 리드폼은 현장 상세와 (hub_apt_slug 가 붙은) 블로그 하단에만 있다.
+ * 현장 링크가 없는 부동산 글은 트래픽만 쓰고 끝난다 — 그래서 **발행 자체를 막는다.**
+ *
+ * ⚠️ 기존 8,740편은 건드리지 않는다. 신규만 100% 현장으로 흐르게 하는 게이트다.
+ */
+const LEAD_BEARING_CATEGORIES = new Set(['apt', 'unsold']);
+
+/**
+ * 본문에서 현장 상세 링크의 슬러그만 뽑는다.
+ *
+ * ⚠️ 허브 링크(`/apt`, `/apt?tab=ongoing`)는 세지 않는다 — enrichContent 가 모든 글에
+ *    `[카더라 청약 일정 확인](/apt)` 을 자동으로 넣기 때문에, 허브를 인정하면 게이트가
+ *    100% 통과해 아무것도 막지 못한다. 반드시 `/apt/<슬러그>` 형태만 센다.
+ * ⚠️ `/apt/map` `/apt/archive` `/apt/pipeline` 등 실제 라우트도 슬러그가 아니므로 뺀다.
+ */
+const APT_NON_SITE_SEGMENTS = new Set([
+  'map', 'archive', 'pipeline', 'region', 'busan', 'complex', 'redev', 'diagnose', 'subscription',
+]);
+
+export function extractAptSiteSlugs(content: string): string[] {
+  const out = new Set<string>();
+  // 마크다운 링크와 raw href 양쪽을 본다. 슬러그는 한글을 포함하므로 문자 클래스로 자르지 않고
+  // 구분자(`)`, `"`, `'`, 공백, `#`, `?`)까지를 슬러그로 본다.
+  const re = /(?:\]\(|href=["'])\/apt\/([^)"'\s#?]+)/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(content)) !== null) {
+    let slug = m[1];
+    try { slug = decodeURIComponent(slug); } catch { /* 인코딩 깨진 링크 — 원문 그대로 */ }
+    slug = slug.replace(/\/+$/, '');
+    if (!slug || slug.includes('/')) continue;          // /apt/redev/부산 같은 2단 경로 제외
+    if (APT_NON_SITE_SEGMENTS.has(slug)) continue;
+    out.add(slug);
+  }
+  return [...out];
 }
 
 // config 캐시 (크론 1회 실행 내 재사용)
@@ -244,6 +294,38 @@ export async function safeBlogInsert(
       }
     }
 
+    // ── ADDENDUM §2-2: 발행 게이트 — 부동산 글은 현장 링크가 없으면 발행하지 않는다 ──
+    //
+    // 게이트는 두 겹이다.
+    //   (1) 본문에 `/apt/<슬러그>` 링크가 하나도 없으면 중단
+    //   (2) 링크는 있는데 그 슬러그가 apt_sites 에 없으면(=404 로 흘려보내는 링크) 중단
+    // 통과한 첫 유효 슬러그는 hub_apt_slug 로 자동 승격한다 — 블로그 하단 리드폼/CTA 가
+    // 이 값이 있을 때만 렌더되므로(blog/[slug]/page.tsx:1331), 이 한 줄이 곧 리드 동선이다.
+    let siteSlugs: string[] = [];
+    let hubAptSlug: string | null = data.hub_apt_slug ?? null;
+
+    if (LEAD_BEARING_CATEGORIES.has(data.category)) {
+      const linked = extractAptSiteSlugs(enrichedContent);
+      if (linked.length === 0) {
+        console.warn(`[safeBlogInsert] §2-2 발행 게이트 차단(현장 링크 0개): "${data.title?.slice(0, 40)}" (${data.category}/${data.cron_type ?? '-'})`);
+        return { success: false, reason: 'no_site_link', message: 'NO_APT_SITE_LINK' };
+      }
+
+      const { data: known } = await admin
+        .from('apt_sites')
+        .select('slug')
+        .in('slug', linked.slice(0, 20));
+
+      siteSlugs = (known ?? []).map((r: any) => r.slug);
+      if (siteSlugs.length === 0) {
+        console.warn(`[safeBlogInsert] §2-2 발행 게이트 차단(링크는 있으나 실존 현장 0개): "${data.title?.slice(0, 40)}" → ${linked.slice(0, 3).join(', ')}`);
+        return { success: false, reason: 'no_site_link', message: 'APT_SITE_LINK_NOT_FOUND' };
+      }
+
+      // 본문 등장 순서를 유지해 첫 번째(=가장 주된) 현장을 허브로 삼는다.
+      if (!hubAptSlug) hubAptSlug = linked.find((s) => siteSlugs.includes(s)) ?? siteSlugs[0];
+    }
+
     // 6. 커버 이미지 자동 생성 (미제공 시)
     const authorMap: Record<string, string> = {
       stock: '카더라+주식팀', apt: '카더라+부동산팀', unsold: '카더라+부동산팀',
@@ -276,6 +358,7 @@ export async function safeBlogInsert(
         is_published: data.is_published ?? false,
         published_at: data.is_published ? new Date().toISOString() : null,
         priority_score: data.priority_score ?? 0, // s261: 선점 우선순위
+        ...(hubAptSlug ? { hub_apt_slug: hubAptSlug } : {}), // §2-2: 리드 동선
     };
 
     const { data: inserted, error } = await admin
@@ -304,7 +387,7 @@ export async function safeBlogInsert(
       return { success: false, reason: 'duplicate_slug' };
     }
 
-    return { success: true, id: inserted[0]?.id };
+    return { success: true, id: inserted[0]?.id, siteSlugs };
   } catch (err: any) {
     const msg = err?.message || '';
     // 트리거 race condition은 조용히 처리
