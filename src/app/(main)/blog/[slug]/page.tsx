@@ -789,7 +789,8 @@ export default async function BlogDetailPage({ params }: Props) {
   // - hub_apt_slug 가 null 이면 조회 자체를 하지 않는다 (발행 글의 80%가 여기 해당)
   // - 기존 Promise.allSettled 뭉치에 합치지 않는다 (Rule #49 — /apt/[id] 504 의 원인이었다)
   // - slug 단건 조회라 인덱스를 탄다
-  let leadSite: { slug: string; name: string; region: string | null; sigungu: string | null } | null = null;
+  // ONESHOT §C-1: 단계별 문구를 쓰려면 lifecycle_stage 도 들고 와야 한다.
+  let leadSite: { slug: string; name: string; region: string | null; sigungu: string | null; lifecycle_stage: string | null } | null = null;
   // v3 커밋6: '이 글이 다루는 현장' 행은 lead 대상 단계가 아니어도 낸다 —
   //   지금까지 블로그에서 현장 페이지로 가는 동선이 아예 없었다.
   let hubSite: { slug: string; name: string; region: string | null } | null = null;
@@ -801,7 +802,7 @@ export default async function BlogDetailPage({ params }: Props) {
         .eq('slug', post.hub_apt_slug)
         .maybeSingle();
       if (ls) hubSite = { slug: ls.slug, name: ls.name, region: ls.region ?? null };
-      if (ls && isLeadEligible(ls.lifecycle_stage)) leadSite = { slug: ls.slug, name: ls.name, region: ls.region ?? null, sigungu: ls.sigungu ?? null };
+      if (ls && isLeadEligible(ls.lifecycle_stage)) leadSite = { slug: ls.slug, name: ls.name, region: ls.region ?? null, sigungu: ls.sigungu ?? null, lifecycle_stage: ls.lifecycle_stage ?? null };
     } catch {
       /* 조회 실패는 본문 렌더를 막지 않는다 — 폼만 생략한다 */
     }
@@ -1353,6 +1354,7 @@ export default async function BlogDetailPage({ params }: Props) {
           siteName={leadSite.name}
           region={leadSite.region}
           sigungu={leadSite.sigungu}
+          lifecycleStage={leadSite.lifecycle_stage}
           variant="blog"
         />
       )}

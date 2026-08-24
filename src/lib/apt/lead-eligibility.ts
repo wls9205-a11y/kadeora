@@ -31,6 +31,21 @@ export const LEAD_ELIGIBLE_STAGES = [
   // 1,182 → 1,208 (+26). 그 외 단계는 건드리지 않는다 —
   // landmark_active 는 2단계에서 별도 문구(지역DB)로 다룬다.
   'move_in_started',
+
+  // ── ONESHOT §C0 · 정비사업 단계 ──
+  //
+  // 이 6단계에 폼이 없어 **유입 1위 페이지가 리드를 못 받고 있었다.**
+  // `울산 남구 달동 재개발`(조합설립)은 네이버 유입 48건에 CTA 완료 1건이 난 페이지인데
+  // 폼이 없었다. 공고 전이라 분양가도 일정도 없지만 — **그래서** 사람들이 물어본다.
+  //
+  // ⚠️ 문구를 함께 갈라야 한다. 공고 전에 '분양 정보 안내' 는 어색하다.
+  //    lib/apt/lead-copy.ts 가 단계별 문구를 낸다. 폼만 켜고 문구를 두면 전환이 안 난다.
+  'union_established',    // 조합설립
+  'constructor_selected', // 시공사 선정
+  'plan_approved',        // 사업시행인가
+  'mgmt_approved',        // 관리처분인가
+  'construction',         // 착공
+  'contract_signing',     // 계약
 ] as const;
 
 // landmark_active 는 이름과 달리 분양 현장이 아니라 지역 대장 기축 아파트다(수완자이·명륜자이 등).

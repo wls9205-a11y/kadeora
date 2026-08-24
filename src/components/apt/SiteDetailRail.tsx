@@ -18,6 +18,7 @@ import Link from 'next/link';
 import { KAKAO_TALK_URL, trackTalkClick } from '@/lib/talk-banner';
 import { useTalkView } from '@/components/banner/useTalkView';
 import { LEAD_FORM_ID } from '@/components/apt/LeadForm';
+import { leadCopy } from '@/lib/apt/lead-copy';
 
 const KAKAO_INK = '#191919';
 
@@ -32,6 +33,8 @@ export type RailNearby = {
 export type SiteDetailRailProps = {
   siteSlug: string;
   siteName: string;
+  /** ONESHOT §C-1: 단계별 문구 */
+  lifecycleStage?: string | null;
   region: string;
   sigungu?: string | null;
   dong?: string | null;
@@ -56,7 +59,7 @@ const panelTitle: React.CSSProperties = {
 };
 
 export default function SiteDetailRail({
-  siteSlug, siteName, region, sigungu, dong, showLeadForm, nearby,
+  siteSlug, siteName, region, sigungu, dong, showLeadForm, nearby, lifecycleStage,
 }: SiteDetailRailProps) {
   const talkRef = useTalkView<HTMLAnchorElement>('rail', { site_slug: siteSlug });
 
@@ -66,7 +69,7 @@ export default function SiteDetailRail({
       {showLeadForm && (
         <div style={{ ...panel, borderColor: 'var(--brand)', background: 'var(--brand-bg)' }}>
           <p style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 4px', lineHeight: 1.4, wordBreak: 'keep-all' }}>
-            {siteName} 분양 정보 안내
+            {siteName} {leadCopy(lifecycleStage).band.replace(' · 무료', '')}
           </p>
           <p style={{ fontSize: 11.5, color: 'var(--text-secondary)', margin: '0 0 10px', lineHeight: 1.5, wordBreak: 'keep-all' }}>
             잔여 세대·일정을 담당자가 직접 안내해 드립니다.

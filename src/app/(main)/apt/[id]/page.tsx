@@ -958,6 +958,7 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
           typeOptions={leadTypeOptions}
           region={site.region}
           sigungu={site.sigungu}
+          lifecycleStage={lc}
         />
       )}
 
@@ -2212,7 +2213,7 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
       {/* v3 커밋2: 모바일 하단 고정 바 — 좌(주) 리드폼 / 우(부) 카톡.
            리드폼이 뷰포트에 들어오면 스스로 숨는다.
            하단 탭바(z-100)·글쓰기 FAB(z-99)와의 겹침은 컴포넌트 안에서 처리한다. */}
-      <SiteActionBar siteSlug={slug} showLeadForm={showLeadForm} />
+      <SiteActionBar siteSlug={slug} showLeadForm={showLeadForm} lifecycleStage={lc} />
       {/* Nearby sites (internal linking SEO) */}
       {nearbySites.length > 0 && <section aria-labelledby="apt-sec-h8" className="apt-card kd-lg-hide"><SectionHeader id="apt-sec-h8" title={`${region} 다른 현장`} /><div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 'var(--sp-sm)' }}>{nearbySites.map((ns: Record<string, any>) => <Link key={ns.slug} href={`/apt/${ns.slug}`} className="kd-card" style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: 10, textDecoration: 'none', color: 'inherit', overflow: 'hidden' }}><div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 2 }}>{ns.name}</div><div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ns.sigungu || ns.region} · {ns.total_units ? `${ns.total_units}세대` : ''} · {tLabel[ns.site_type]}</div></Link>)}</div></section>}
 
@@ -2254,6 +2255,7 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
           dong={site?.dong}
           showLeadForm={showLeadForm}
           nearby={nearbySites}
+          lifecycleStage={lc}
         />
       </aside>
     </article>

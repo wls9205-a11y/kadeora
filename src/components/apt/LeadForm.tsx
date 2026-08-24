@@ -15,6 +15,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { CSSProperties, ChangeEvent, FormEvent } from 'react';
 import SectionHeader from '@/components/apt/SectionHeader';
 import { SITE_URL } from '@/lib/constants';
+import { leadCopy } from '@/lib/apt/lead-copy';
 
 const ENDPOINT = process.env.NEXT_PUBLIC_LEAD_ENDPOINT || '';
 const DRAFT_PREFIX = 'kd_lead_draft:';
@@ -67,6 +68,8 @@ type LeadFormProps = {
   sigungu?: string | null;
   /** 놓이는 자리에 따라 설명 한 줄만 바뀐다. 제목·버튼·동의 문구는 동일하다. */
   variant?: 'detail' | 'blog';
+  /** ONESHOT §C-1: 단계별 문구. 공고 전에 '분양 정보 안내' 는 어색하다. */
+  lifecycleStage?: string | null;
 };
 
 type LeadPayload = {
@@ -246,7 +249,9 @@ const honeypotStyle: CSSProperties = {
   pointerEvents: 'none',
 };
 
-export default function LeadForm({ siteSlug, siteName, typeOptions, region, sigungu, variant = 'detail' }: LeadFormProps) {
+export default function LeadForm({ siteSlug, siteName, typeOptions, region, sigungu, variant = 'detail', lifecycleStage }: LeadFormProps) {
+  // ONESHOT §C-1: 단계별 문구 한 벌. 세 화면(폼·액션바·레일)이 같은 말을 해야 한다.
+  const copy = leadCopy(lifecycleStage, siteName);
   const mountedAt = useRef(Date.now());
   const draftKey = `${DRAFT_PREFIX}${siteSlug}`;
   const pendingKey = `${PENDING_PREFIX}${siteSlug}`;
@@ -443,7 +448,9 @@ export default function LeadForm({ siteSlug, siteName, typeOptions, region, sigu
       interestRegion: [regionText, sigunguText].filter(Boolean).join(' '),
       // 시트에서 바로 열 수 있게 절대 URL 로. 판정은 constants 한 곳(SITE_URL)만 쓴다.
       siteUrl: siteSlug ? `${SITE_URL.replace(/\/$/, '')}/apt/${encodeURIComponent(siteSlug)}` : '',
-      inquiryType: INQUIRY_TYPE_SALES,
+      // ONESHOT §C-1: 공고 전은 '진행상황알림' 이다. 미처리 경보가 '분양상담' 으로
+      //   대상을 좁히므로 섞이면 응대 우선순위가 흐려진다.
+      inquiryType: copy.inquiryType,
       entryPath: window.location.pathname,
       sourceDomain: window.location.hostname,
       company,
@@ -534,15 +541,15 @@ export default function LeadForm({ siteSlug, siteName, typeOptions, region, sigu
           borderBottom: '1px solid var(--kd-accent-border)',
         }}
       >
-        분양 정보 안내 · 무료
+        {copy.band}
       </div>
 
       <div style={{ padding: '14px' }}>
-        <SectionHeader eyebrow="CONTACT" title="분양 정보 안내 신청" />
+        <SectionHeader eyebrow="CONTACT" title={copy.cta} />
         <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0 0 14px' }}>
           {variant === 'blog'
             ? `이 글에서 다룬 ${siteName}의 분양 정보를 담당자가 안내해 드립니다.`
-            : '담당자가 직접 연락드려 잔여 세대·일정을 안내합니다.'}
+            : copy.lede}
         </p>
 
         <form onSubmit={handleSubmit} noValidate style={{ position: 'relative' }}>

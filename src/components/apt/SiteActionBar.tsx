@@ -23,6 +23,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { KAKAO_TALK_URL, trackTalkClick, trackTalkView } from '@/lib/talk-banner';
 import { LEAD_FORM_ID } from '@/components/apt/LeadForm';
+import { leadCopy } from '@/lib/apt/lead-copy';
 
 /** 바 높이(px). 스페이서와 공유. */
 export const SITE_ACTION_BAR_HEIGHT = 48;
@@ -47,9 +48,12 @@ export type SiteActionBarProps = {
   siteSlug: string;
   /** 리드폼이 실제로 페이지에 렌더될 때만 주 버튼을 띄운다. */
   showLeadForm?: boolean;
+  /** ONESHOT §C-1: 단계별 문구. 세 화면이 같은 말을 해야 한다. */
+  lifecycleStage?: string | null;
 };
 
-export default function SiteActionBar({ siteSlug, showLeadForm = false }: SiteActionBarProps) {
+export default function SiteActionBar({ siteSlug, showLeadForm = false, lifecycleStage }: SiteActionBarProps) {
+  const copy = leadCopy(lifecycleStage);
   // 리드폼이 화면에 들어오면 접는다 — 폼을 보고 있는데 '폼으로 가기' 를 띄우지 않는다.
   const [visible, setVisible] = useState(true);
   const [seen, setSeen] = useState(false);
@@ -147,7 +151,7 @@ export default function SiteActionBar({ siteSlug, showLeadForm = false }: SiteAc
               boxShadow: '0 4px 16px rgba(37,99,235,0.28)',
             }}
           >
-            <span style={{ fontSize: 14, fontWeight: 700, lineHeight: 1.2 }}>분양 정보 안내 신청</span>
+            <span style={{ fontSize: 14, fontWeight: 700, lineHeight: 1.2 }}>{copy.cta}</span>
             <span style={{ fontSize: 10.5, fontWeight: 600, lineHeight: 1.2, color: SUB_FG }}>담당자 직접 연락</span>
           </button>
         )}
