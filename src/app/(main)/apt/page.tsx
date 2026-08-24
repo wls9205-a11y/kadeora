@@ -23,7 +23,6 @@ import { getAptHub } from '@/lib/apt/hub';
 import { getRelatedBlogs } from '@/lib/apt/related-blogs';
 import { buildSubscriptionEvents, buildSubscriptionItemList } from '@/lib/apt/subscription-schema';
 import RegionAutoSelect from '@/components/apt/RegionAutoSelect';
-import RegionChips from '@/components/apt/RegionChips';
 import SubscriptionTimeline from '@/components/apt/SubscriptionTimeline';
 import SubscriptionCard from '@/components/apt/SubscriptionCard';
 import SubscriptionResults from '@/components/apt/SubscriptionResults';
@@ -32,7 +31,7 @@ import AptRelatedBlogs from '@/components/apt/AptRelatedBlogs';
 import SectionHeader from '@/components/apt/SectionHeader';
 import CurationCarousel from '@/components/ui/CurationCarousel';
 import SigunguChips from '@/components/apt/SigunguChips';
-import AptStatusChips, { type AptStatusKey } from '@/components/apt/AptStatusChips';
+import AptFilterRow, { type AptStatusKey } from '@/components/apt/AptFilterRow';
 import AptHubRail from '@/components/apt/AptHubRail';
 import { sigunguCounts, sigunguOf } from '@/lib/apt/sigungu';
 import { pickCuration } from '@/lib/apt/hero-priority';
@@ -199,21 +198,20 @@ export default async function AptPage({
 
       {isAutoRegion && <RegionAutoSelect />}
 
-      {/* 지역 선택 — 인라인 칩. 페이지 이동 없이 목록만 갱신된다. */}
-      <RegionChips regions={hub.regions} current={hub.region} />
+      {/* §I-2 지역·상태를 한 줄로. 이전에는 헤더 줄 + 지역 줄 + 상태 줄로 세로를 셋이 먹었다. */}
+      <AptFilterRow
+        regions={hub.regions}
+        currentRegion={hub.region}
+        counts={statusCounts}
+        total={sggCards.length}
+        currentStatus={activeSt}
+        baseQuery={baseQuery}
+      />
 
       {/* v4-C8: 시·도 아래 2단. 정렬은 C3 과 같이 가나다 고정. */}
       {sggItems.length > 0 && (
         <SigunguChips region={hub.region} items={sggItems} current={activeSgg} />
       )}
-
-      {/* v5-V1: 상태 필터 — 좌측 Sidebar 의 부동산 분류 흡수처 */}
-      <AptStatusChips
-        counts={statusCounts}
-        total={sggCards.length}
-        current={activeSt}
-        baseQuery={baseQuery}
-      />
 
       {/* v4-C6: 지역을 버리고 전국으로 갈아타던 폴백이 없어졌다.
            17개 시·도 중 11곳이 접수중 0건이라 그 폴백은 사실상 상시 발동 중이었고,
@@ -269,9 +267,6 @@ export default async function AptPage({
            "움직인 현장 없음" 을 내지 않는다. */}
       <RecentMovesStrip items={recentMoves} region={pipeline.region} now={pipelineNow} />
 
-      {/* ② 도구 칩 — 데이터가 0건인 날에도 항상 노출. 재개발 칩은 현재 지역을 따라간다. */}
-      <AptToolChips region={hub.region} />
-
       {/* ②-2 큐레이션 3건 */}
       {curated.length > 0 && (
         <div style={{ padding: '0 6px' }}>
@@ -283,6 +278,10 @@ export default async function AptPage({
           />
         </div>
       )}
+
+      {/* §I-3 도구 칩. 7개가 첫 화면 절반을 먹어 청약 타임라인·현장 목록보다 위에 있었다.
+           `지금 주목할 청약` 아래로 내린다 — **위치만**. 링크·라우트는 그대로다. */}
+      <AptToolChips region={hub.region} />
 
       {/* ③ 청약 카드 리스트 */}
       <section style={{ padding: '0 6px' }} aria-labelledby="apt-cards-heading">
