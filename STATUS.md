@@ -1,3 +1,74 @@
+## 마스터 §4 (2026-08-24) — 부산 정비사업 API 필드 매핑
+
+344건을 받아 0건을 저장하던 원인은 **필드 매핑 하나**였다. 크론 등록·API 키 모두 정상이었다.
+
+### `generationJoo` 판정 — **세대수다** (조합원 수 아님)
+
+크론 로그의 `sampleRow` 를 5회분 뒤져 **서로 다른 3개 구역**을 확보해 대조했다.
+
+| areaName | `generationJoo` | `guildMemNum` | step |
+|---|---|---|---|
+| 명서1 재개발 | 785 | 785 | 조합설립인가 |
+| **금사1 재개발** | **2,635** | **0** | 추진위원회 구성 |
+| 괘법1 재개발 | 1 | 1 | 추진위원회 구성 |
+
+**금사1 이 결정적이다.** 조합이 아직 없어 `guildMemNum` 이 0 인데 `generationJoo` 는 2,635 다.
+조합원 수라면 0 이어야 한다. 필드명(generation = 세대)과도 맞는다.
+
+⚠️ **다만 괘법1 의 `1` 처럼 채워지지 않은 값이 섞인다.** 정비구역 세대수가 1일 수는 없다.
+→ 하한 **30세대** 를 두고, 그 아래는 **넣지 않는다.** 지어내지 않는 것과 같은 원칙이다.
+판정 근거(`gen_eq_guild`·`gen_with_zero_guild`·`gen_below_threshold`)를 **매 실행 metadata 에
+기록**한다 — 다음 사람이 다시 추측하지 않도록 전 344행 기준 분포가 남는다.
+
+### 매핑
+
+| API | → | 비고 |
+|---|---|---|
+| `areaName` | `district_name` | **폴백 제거.** 없으면 행을 건너뛴다 |
+| `step` | `stage` | 모르는 값은 `기타` 로 뭉개지 않고 **원문 유지** + 미매핑 목록을 로그에 |
+| `contractor`·`engineer`·`architect` | 동명 컬럼 | `미정`·`없음`·`-` → null |
+| `generationJoo` | `total_households` | 위 판정 + 하한 30 |
+| `guildMemNum` | `guild_member_num` | |
+| `areaUnit` | `area_sqm` | |
+| `location` | `address` | |
+| `viewImgPath` | `view_img_url` | **조감도** |
+| `panoImgPath`·`loctImgPath`·`placeImgPath` | `pano_img_url`·`loct_img_url`·`place_img_url` | 지시서는 `_path` 라 했으나 실제 컬럼은 `_url` |
+| `aCode` | `external_code` | upsert 기준 |
+
+### ⚠️ 이미지 URL 은 http 로 오는데 그 호스트는 http 를 거부한다
+
+```
+https://dynamice.busan.go.kr/…/BARA_….jpg   200 · image/jpeg · 400KB
+http://dynamice.busan.go.kr/…/BARA_….jpg    401
+```
+API 가 주는 값은 `http://` 다. 그대로 저장하면 **전부 401** 이고, 우리 CSP 가
+`img-src … https:` 라 어차피 차단된다. → **https 로 올려 저장한다.**
+
+또 `panoImgPath` 가 `http://…/busi_ara/` 처럼 **디렉터리만** 오는 경우가 있다.
+확장자가 없으면 이미지가 아니므로 버린다.
+
+### full refresh → upsert
+
+`delete` 후 `insert` 라 insert 가 실패하면 데이터가 사라지는데 `created:0` 으로만 보여 조용했다.
+`external_code` 기준 upsert 로 바꾸고 **실패를 `failed` 로 세어 올린다.**
+`external_code` 가 없는 행은 유일성 기준이 없어 넣지 않는다 — 매 실행 중복이 쌓이는 것보다 낫다.
+`sigungu` 는 API 가 주지 않아 **null 로 둔다.** 지어내지 않는다.
+
+### ⚠️ `crawl-nationwide-redev` 는 원인이 다르다
+
+지시서는 "같은 원인일 가능성 높음" 이라 했지만 로그를 보면 다르다.
+
+```
+{"광주_남구":{"status":400,"statusText":"Bad Request"}, "대구_동구":{"status":400}, … 전 시군구 400}
+```
+
+매핑 이전에 **요청 자체가 400** 이다. 엔드포인트가 국토부 `1613000/MntncBizInfoSvc` 인데
+키는 `BUSAN_DATA_API_KEY`(부산 서비스 키)를 쓰고 있다 — 그 서비스에 **활용 신청이 안 돼 있거나
+파라미터가 틀린 것**이지 필드 매핑 문제가 아니다. data.go.kr 에서 해당 서비스 신청 상태를
+확인해야 고칠 수 있어 이번엔 손대지 않았다.
+
+---
+
 ## 마스터 §1 · §2 · §3 (2026-08-24)
 
 ### §1 리드 알림 — 최악 48시간 → 최악 15분
