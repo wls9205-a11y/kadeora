@@ -169,14 +169,38 @@ export default async function FeedDetailPage({ params }: Props) {
       // 관련 부동산 현장 (apt 카테고리)
       if (postData.category === 'apt') {
         try {
-          const keywords = (postData.title || '').split(/\s+/).filter((w: string) => w.length >= 2).slice(0, 2);
-          if (keywords.length > 0) {
-            const orQuery = keywords.map((k: string) => `name.ilike.%${k}%`).join(',');
-            const { data: sitesData } = await sb.from('apt_sites').select('slug, name, site_type, region, sigungu')
-              .eq('is_active', true).or(orQuery).gte('content_score', 25)
-              .order('interest_count', { ascending: false }).limit(3);
-            if (sitesData?.length) related = [...related, ...sitesData.map((s: Record<string, any>) => ({ ...s, _type: 'site' }))];
+          // ── ADDENDUM §1 · apt_tags 를 먼저 쓴다 ──
+          //
+          // 이전에는 **제목을 2글자씩 잘라 name.ilike.%키워드%** 로 찾고 있었다.
+          // §1-3 이 금지한 부분 문자열 매칭 그대로다 — `서울 재건축…` 같은 제목이면
+          // 이름에 '서울'이 든 아무 현장이나 딸려온다.
+          //
+          // 글이 어느 현장을 말하는지는 apt_tags 가 이미 정확히 알고 있다(슬러그 정확 일치).
+          // 이것이 피드 → 현장 → 리드폼 동선의 실제 통로다. 태그가 있으면 그것만 쓰고,
+          // 없을 때만 예전 방식으로 떨어진다.
+          const tagged: string[] = Array.isArray((postData as any).apt_tags)
+            ? (postData as any).apt_tags.filter((s: unknown): s is string => typeof s === 'string' && !!s)
+            : [];
+
+          let sitesData: Record<string, any>[] | null = null;
+
+          if (tagged.length > 0) {
+            const { data } = await sb.from('apt_sites').select('slug, name, site_type, region, sigungu')
+              .eq('is_active', true).in('slug', tagged.slice(0, 6))
+              .order('interest_count', { ascending: false }).limit(6);
+            sitesData = data;
+          } else {
+            const keywords = (postData.title || '').split(/\s+/).filter((w: string) => w.length >= 2).slice(0, 2);
+            if (keywords.length > 0) {
+              const orQuery = keywords.map((k: string) => `name.ilike.%${k}%`).join(',');
+              const { data } = await sb.from('apt_sites').select('slug, name, site_type, region, sigungu')
+                .eq('is_active', true).or(orQuery).gte('content_score', 25)
+                .order('interest_count', { ascending: false }).limit(3);
+              sitesData = data;
+            }
           }
+
+          if (sitesData?.length) related = [...related, ...sitesData.map((s: Record<string, any>) => ({ ...s, _type: 'site' }))];
         } catch {}
       }
 
@@ -224,15 +248,40 @@ export default async function FeedDetailPage({ params }: Props) {
         if (blogData?.length) relatedBlogs = blogData;
       } catch {}
 
-      // 자동 링킹용 엔티티 사전 (인기 종목 + 현장)
+      // 자동 링킹용 엔티티 사전 (이 글의 태그 현장 + 인기 종목·현장)
+      //
+      // ⚠️ ADDENDUM §1 — 여기가 `apt_tags` 가 죽어 있던 지점이다.
+      //    사전이 `content_score >= 25` + `page_views` 상위 **150건**으로만 만들어져,
+      //    글이 명시적으로 태그한 현장이라도 전국 상위 150 안에 없으면 본문에서
+      //    이름이 링크가 되지 않았다. 태그를 채워도 클릭 통로가 안 생기던 이유다.
+      //    → 이 글이 태그한 현장을 **사전 맨 앞에** 넣는다. 긴 이름 우선 규칙이
+      //      renderContent 안에 이미 있어 겹침 처리도 그대로 동작한다.
+      //
+      // ⚠️ 본문에 `[이름](/apt/슬러그)` 마크다운을 넣는 방식은 쓰지 않는다.
+      //    renderContent 는 URL·해시태그·엔티티명만 처리하고 **마크다운을 파싱하지 않는다.**
+      //    넣으면 화면에 대괄호가 그대로 보인다.
       try {
-        const [{ data: topStocks }, { data: topApts }] = await Promise.all([
+        const tagged: string[] = Array.isArray((postData as any).apt_tags)
+          ? (postData as any).apt_tags.filter((s: unknown): s is string => typeof s === 'string' && !!s)
+          : [];
+
+        const [{ data: topStocks }, { data: topApts }, { data: taggedApts }] = await Promise.all([
           sb.from('stock_quotes').select('symbol, name').eq('is_active', true).gt('price', 0).order('volume', { ascending: false, nullsFirst: false }).limit(150),
           sb.from('apt_sites').select('slug, name').eq('is_active', true).gte('content_score', 25).order('page_views', { ascending: false, nullsFirst: false }).limit(150),
+          tagged.length > 0
+            ? sb.from('apt_sites').select('slug, name').eq('is_active', true).in('slug', tagged.slice(0, 20))
+            : Promise.resolve({ data: [] as any[] }),
         ]);
+
+        const apts = [
+          ...(taggedApts || []).map((a: any) => ({ name: a.name, slug: a.slug })),
+          ...(topApts || []).map((a: any) => ({ name: a.name, slug: a.slug })),
+        ];
+        // 같은 슬러그가 양쪽에 있으면 앞의 것(=태그분)만 남긴다.
+        const seenSlug = new Set<string>();
         entityMap = {
           stocks: (topStocks || []).map((s: any) => ({ name: s.name, symbol: s.symbol })),
-          apts: (topApts || []).map((a: any) => ({ name: a.name, slug: a.slug })),
+          apts: apts.filter((a) => (seenSlug.has(a.slug) ? false : (seenSlug.add(a.slug), true))),
         };
       } catch {}
     }

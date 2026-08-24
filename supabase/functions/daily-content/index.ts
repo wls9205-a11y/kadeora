@@ -183,6 +183,14 @@ async function slotTrades(kstDate: string): Promise<Draft | null> {
     return `· ${r.apt_name}${area}${fl} — ${won(Number(r.deal_amount))} (${r.deal_date})\n  ${[r.region_nm, r.sigungu].filter(Boolean).join(' ')}`;
   });
 
+  // ── ADDENDUM §1-3 · 실거래 슬롯의 apt_tags ──
+  //
+  // apt_transactions 에는 slug 가 없고 `해운대두산위브더제니스` 처럼 apt_sites.name 과
+  // 표기가 다르다. **정확 일치로만** 붙이고, 못 찾으면 태그 없이 둔다.
+  // ⚠️ 부분 문자열 매칭 금지 — `자이`·`푸르지오` 같은 조각이 엉뚱한 현장을 끌어온다.
+  const names = [...new Set(rows.map((r: any) => String(r.apt_name ?? '').trim()).filter(Boolean))];
+  const aptTags = names.length > 0 ? await resolveSlugsExact(names) : [];
+
   return {
     category: 'apt',
     title: `${kstDate} 부울경 최근 2주 고가 실거래 ${rows.length}건`,
@@ -190,9 +198,49 @@ async function slotTrades(kstDate: string): Promise<Draft | null> {
       `부산·울산·경남에서 최근 2주 사이 신고된 거래 중 금액 상위입니다.\n\n${lines.join('\n')}\n\n` +
       `국토교통부 실거래 신고 기준이라 계약일과 신고일이 다를 수 있습니다.`,
     hashtags: ['부울경실거래', '아파트시세'],
-    aptTags: [],
+    aptTags,
     bugyeong: true,
   };
+}
+
+/**
+ * 아파트명 → slug. **정확 일치만** 인정한다.
+ *   1) apt_sites.name 정확 일치
+ *   2) apt_sites.name_variants 배열에 그 문자열이 원소로 들어 있는 경우
+ * 둘 다 아니면 버린다. 부분 문자열·유사도 매칭은 하지 않는다.
+ */
+async function resolveSlugsExact(names: string[]): Promise<string[]> {
+  const out = new Set<string>();
+
+  const { data: byName } = await supabase
+    .from('apt_sites')
+    .select('slug, name')
+    .eq('is_active', true)
+    .in('name', names);
+  const matched = new Set<string>();
+  for (const r of byName ?? []) {
+    out.add((r as any).slug);
+    matched.add((r as any).name);
+  }
+
+  const rest = names.filter((n) => !matched.has(n));
+  if (rest.length === 0) return [...out];
+
+  // overlaps 로 후보만 좁힌 뒤, 배열 원소가 **정확히** 같은지 코드에서 다시 확인한다.
+  const { data: byVariant } = await supabase
+    .from('apt_sites')
+    .select('slug, name_variants')
+    .eq('is_active', true)
+    .overlaps('name_variants', rest);
+  for (const r of byVariant ?? []) {
+    const variants: unknown = (r as any).name_variants;
+    if (!Array.isArray(variants)) continue;
+    if (variants.some((v) => typeof v === 'string' && rest.includes(v.trim()))) {
+      out.add((r as any).slug);
+    }
+  }
+
+  return [...out];
 }
 
 /* ───────────────────────── 주식 · 잡담 (각 3일에 한 번) ───────────────────────── */
