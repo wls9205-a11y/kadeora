@@ -814,15 +814,46 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
         // s7-2: apt_sites.images 는 뉴스 스크랩(t1.daumcdn.net·언론사 도메인)이라 히어로와
         // JSON-LD 에서 뺐다. 남의 언론사 사진이 첫 화면 대표 이미지로 나가고 있었다.
         // 컬럼 자체는 보존한다 — 화면에서만 쓰지 않는다.
-        //   1순위 hero_image_url      시행사 서면 허락분 (현재 0장, 배관만)
-        //   2순위 satellite_image_url 자체 호스팅
-        //   3순위 없음 → 사진 자리를 만들지 않는다. 생성 카드로 채우지 않는다
-        //           (이미지가 있는 척이 된다 — s7-2 결정). 같은 비율의 텍스트 폴백만 낸다.
-        const heroSrc = (site as any)?.hero_image_url || site?.satellite_image_url || '';
-        const heroIsDeveloper = (site as any)?.hero_image_source === 'developer' && (site as any)?.hero_image_url;
-        // 위성 사진이지 조감도가 아니다 — 표기를 섞지 않는다.
-        const heroCredit = heroIsDeveloper
-          ? ((site as any)?.hero_image_credit || name)
+        // ── ADDENDUM §6-4 · 히어로 우선순위 ──
+        //   1순위 hero_image_url      조감도·시행사 제공분. **실측 156장** (2026-08-25)
+        //   2순위 og-apt 생성 카드     ⚠️ 기축은 건너뛴다 (아래)
+        //   3순위 satellite_image_url 항공 이미지. 실측 5,707장
+        //   4순위 없음 → 같은 비율의 텍스트 폴백
+        //
+        // ⚠️ 이전 주석의 `hero_image_url (현재 0장, 배관만)` 은 낡은 값이었다.
+        //    지금 156장이고, 그중 기축(post_move_in·landmark_active)에 걸린 것은 3장뿐이다.
+        //
+        // ⚠️ 기축은 카드를 건너뛰고 위성을 그대로 쓴다 (리스크 8).
+        //    준공된 단지에서 항공 사진은 '없어서 대신 넣는 그림'이 아니라 그 자체가 정보다.
+        //    분양 현장에서만 위성이 얼룩으로 보여 카드가 나은 것이다.
+        //
+        // ⚠️ s7-2 의 "생성 카드로 채우지 말 것" 은 여기서 철회된다.
+        //    그때 걱정은 '사진이 있는 척'이었는데, og-apt 카드는 사진으로 오인되지 않는
+        //    생성 그래픽이고 목록 썸네일(get_apt_pipeline 의 thumb_mode
+        //    'card_before_satellite')과 **같은 이미지**다. 목록과 상세가 달라지지 않는다.
+        const lcStage = (site as any)?.lifecycle_stage as string | null | undefined;
+        const isExistingComplex = lcStage === 'post_move_in' || lcStage === 'landmark_active';
+        const devHeroSrc = ((site as any)?.hero_image_url as string | undefined) || '';
+        const satSrc = site?.satellite_image_url || '';
+        // ⚠️ card 파라미터는 라우트에서 1~6 으로 클램프된다. RPC 가 쓰는 card=0 과 같은 그림이다.
+        const cardSrc = `${SITE_URL}/api/og-apt?slug=${encodeURIComponent(slug)}&card=1`;
+
+        const heroKind: 'developer' | 'satellite' | 'card' | 'none' =
+          devHeroSrc ? 'developer'
+          : isExistingComplex ? (satSrc ? 'satellite' : 'none')
+          : 'card';
+
+        const heroSrc =
+          heroKind === 'developer' ? devHeroSrc
+          : heroKind === 'satellite' ? satSrc
+          : heroKind === 'card' ? cardSrc
+          : '';
+
+        const heroIsDeveloper = (site as any)?.hero_image_source === 'developer' && !!devHeroSrc;
+        // 위성 사진이지 조감도가 아니다 — 표기를 섞지 않는다. 카드는 사진이 아니라 출처 표기가 없다.
+        const heroCredit =
+          heroKind === 'card' ? ''
+          : heroIsDeveloper ? ((site as any)?.hero_image_credit || name)
           : '항공 이미지 · 국토교통부 공간정보 오픈플랫폼(VWorld)';
         const lifecycleBadge = stageLabel((site as any)?.lifecycle_stage);
         const badgeEl = (
@@ -850,15 +881,17 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
             {/* LCP. 위성 webp 1024px 가 전폭 최상단으로 오면 이 이미지가 LCP 요소다.
                 React 19 가 head 로 끌어올린다 — SiteHero 의 eager/fetchPriority 와 짝이다. */}
             {heroSrc && <link rel="preload" as="image" href={heroSrc} fetchPriority="high" />}
-            {/* s7-2: 빈 image[] 를 선언하느니 블록을 내지 않는다. */}
-            {heroSrc && (
+            {/* s7-2: 빈 image[] 를 선언하느니 블록을 내지 않는다.
+                ⚠️ 생성 카드는 ImageGallery 에 넣지 않는다 — 현장을 찍은 사진이 아니다.
+                   `${name} 항공 이미지` 라는 이름이 붙으면 구조화 데이터가 거짓말을 한다. */}
+            {heroSrc && heroKind !== 'card' && (
               <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
                 '@context': 'https://schema.org', '@type': 'ImageGallery', name: `${name} ${tLabel[sType]} 이미지`,
                 about: { '@type': 'ApartmentComplex', name, address: { '@type': 'PostalAddress', addressRegion: region } },
                 image: [{ '@type': 'ImageObject', url: heroSrc, name: heroIsDeveloper ? heroCredit : `${name} 항공 이미지`, position: 1 }],
               })}} />
             )}
-            <SiteHero src={heroSrc} name={displayName} region={region} credit={heroCredit} badges={badgeEl}>
+            <SiteHero src={heroSrc} name={displayName} region={region} credit={heroCredit} badges={badgeEl} variant={heroKind === 'card' ? 'card' : 'photo'}>
               <h1 style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, margin: 0, lineHeight: 1.2, letterSpacing: '-.03em', wordBreak: 'keep-all', overflowWrap: 'break-word', color: 'inherit' }}>{displayName}</h1>
               {heroSub && (
                 <p style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, lineHeight: 1.45, margin: '5px 0 0', opacity: 0.92, wordBreak: 'keep-all', color: 'inherit' }}>{heroSub}</p>
