@@ -5,7 +5,7 @@ import { withCronLogging } from '@/lib/cron-logger';
 import { withCronAuthFlex } from '@/lib/cron-auth';
 // V16 E-1: 정비사업 공급계약 공시 → 시공사 선정 자동 반영.
 import { isConstructionCorp, isSupplyContract } from '@/lib/dart/redev-match';
-import { processRedevFiling, type RedevFiling } from '@/lib/dart/redev-pipeline';
+import { processRedevFiling, REVIEW_TABLE, type RedevFiling } from '@/lib/dart/redev-pipeline';
 
 /**
  * DART (전자공시시스템) 신규 공시 수집 크론
@@ -234,6 +234,44 @@ async function handler(_req: NextRequest) {
       }
     }
 
+    // ── 본문 수신 실패로 큐에 갇힌 건 재시도 ──
+    //
+    // 이전에는 본문을 못 받으면 그 행이 pending 으로 **영원히** 남았다. 재시도 경로가 없어
+    // 실측 3건(DL이앤씨·동부건설)이 zone_candidates=[] 인 채 멈춰 있었고,
+    // 구역명 후보가 비어 있으니 사람이 맞음/틀림을 누를 재료도 없었다.
+    //
+    // 일시적 실패(타임아웃·5xx)면 다음 실행에서 열리고, 애초에 정비사업이 아니면
+    // bodyMentionsRedev 가 걸러 discarded 로 닫힌다 — 어느 쪽이든 큐가 정리된다.
+    // ⚠️ 상한을 둔다. 영구 실패건이 쌓이면 매 실행 본문 왕복이 크론을 잡아먹는다.
+    const RETRY_CAP = 5;
+    let redevRetried = 0, redevRetryResolved = 0;
+    if (apiKey) {
+      // database.ts 가 apt_stage_review_queue 를 아직 모른다 (저장소 as any 관례).
+      const { data: stuck } = await (supabase as any)
+        .from(REVIEW_TABLE)
+        .select('rcept_no, corp_name, report_nm, filed_at')
+        .eq('status', 'pending')
+        .like('reason', 'body_fetch_failed%')
+        .order('created_at', { ascending: true })
+        .limit(RETRY_CAP);
+
+      for (const q of (stuck ?? []) as any[]) {
+        // 방금 위 루프에서 처리한 건은 건너뛴다 — 같은 실행에서 두 번 왕복하지 않는다.
+        if (redevCandidates.some((c: any) => c.rcept_no === q.rcept_no)) continue;
+        redevRetried++;
+        try {
+          const r = await processRedevFiling(
+            { rcept_no: q.rcept_no, corp_name: q.corp_name, report_nm: q.report_nm, filed_at: q.filed_at },
+            apiKey,
+          );
+          if (r.kind !== 'queue') redevRetryResolved++;
+          else if (!r.reason.startsWith('body_fetch_failed')) redevRetryResolved++;
+        } catch (e: any) {
+          console.error('[dart-ingest] redev 재시도 실패', q.rcept_no, e?.message ?? String(e));
+        }
+      }
+    }
+
     return {
       processed: items.length,
       created,
@@ -243,6 +281,7 @@ async function handler(_req: NextRequest) {
         issues_created: issuesCreated, issues_skipped_dup: issuesSkipped,
         redev_candidates: redevCandidates.length,
         redev_auto: redevAuto, redev_queued: redevQueued, redev_discarded: redevDiscarded,
+        redev_retried: redevRetried, redev_retry_resolved: redevRetryResolved,
       },
     };
   });

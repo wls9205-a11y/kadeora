@@ -18,7 +18,7 @@ import {
 } from '@/lib/dart/redev-match';
 
 /** 검수 큐 테이블. 없으면 경고만 남기고 넘어간다 (DDL 은 STATUS.md 참조). */
-const REVIEW_TABLE = 'apt_stage_review_queue';
+export const REVIEW_TABLE = 'apt_stage_review_queue';
 
 /** 공급계약 공시가 알리는 단계는 하나다 — 시공사 선정. */
 const TARGET_STAGE = 'constructor_selected';
@@ -55,17 +55,49 @@ async function candidatesForZone(admin: any, zone: string): Promise<CandidateSit
   return out.filter((s) => (seen.has(s.id) ? false : (seen.add(s.id), true)));
 }
 
+/**
+ * 재처리 결과 사람이 볼 필요가 없어진 pending 행을 닫는다.
+ * ⚠️ 삭제하지 않는다 — 왜 빠졌는지가 남아야 다음에 같은 판단을 다시 하지 않는다.
+ */
+async function dropPending(admin: any, rceptNo: string, reason: string) {
+  await admin
+    .from(REVIEW_TABLE)
+    .update({ status: 'discarded', reason, resolved_at: new Date().toISOString(), reviewed_by: 'system' })
+    .eq('rcept_no', rceptNo)
+    .eq('status', 'pending');
+}
+
 async function enqueue(admin: any, f: RedevFiling, outcome: Extract<MatchOutcome, { kind: 'queue' }>) {
-  const { error } = await admin.from(REVIEW_TABLE).insert({
+  const row = {
     rcept_no: f.rcept_no,
     corp_name: f.corp_name,
     report_nm: f.report_nm,
     source_url: dartUrl(f.rcept_no),
+    // ⚠️ 이걸 안 실어서 큐 3건이 전부 filed_at=null 이었다. 「30분 이내」 목표를 잴 수 없었다.
+    //    ⚠️ DART 의 rcept_dt 는 **날짜만** 준다(시각 없음). filed_at 만으로는 분 단위를 못 잰다 —
+    //       실제 경과는 created_at(우리가 수집한 시각) ↔ resolved_at 으로 봐야 한다.
+    filed_at: f.filed_at,
     zone_candidates: outcome.zones,
     reason: outcome.reason,
     proposed_stage: TARGET_STAGE,
     status: 'pending',
-  });
+  };
+
+  // ⚠️ upsert 를 쓰지 않는다. rcept_no 유니크가 **부분 인덱스**다
+  //    (apt_stage_review_queue_rcept_pending … WHERE status='pending').
+  //    ON CONFLICT (rcept_no) 는 부분 인덱스를 추론하지 못해 42P10 으로 죽는다 —
+  //    서울 크롤러의 idx_redev_external_id 와 같은 함정이다. 명시적으로 가른다.
+  const { data: existing } = await admin
+    .from(REVIEW_TABLE)
+    .select('id')
+    .eq('rcept_no', f.rcept_no)
+    .eq('status', 'pending')
+    .maybeSingle();
+
+  const { error } = existing
+    ? await admin.from(REVIEW_TABLE).update(row).eq('id', existing.id)
+    : await admin.from(REVIEW_TABLE).insert(row);
+
   if (error) {
     // 테이블이 아직 없어도 크론을 죽이지 않는다. 다만 조용히 넘기지도 않는다.
     console.warn(`[dart/redev] 검수 큐 적재 실패 (${f.rcept_no}): ${error.message}`);
@@ -80,17 +112,27 @@ export async function processRedevFiling(f: RedevFiling, apiKey: string): Promis
   // database.ts 가 lifecycle_stage·apt_site_events 를 아직 모른다 (저장소 as any 관례).
   const admin = getSupabaseAdmin() as any;
 
-  const body = await fetchFilingBody(f.rcept_no, apiKey);
-  if (!body) {
+  const fetched = await fetchFilingBody(f.rcept_no, apiKey);
+  if (!fetched.ok) {
     // 본문을 못 받았으면 자동 반영으로 넘어가지 않는다. 사람이 본다.
-    await enqueue(admin, f, { kind: 'queue', reason: 'body_fetch_failed', zones: [] });
-    return { kind: 'queue', reason: 'body_fetch_failed' };
+    // ⚠️ 원인을 reason 에 그대로 싣는다. `body_fetch_failed` 만으로는 401 인지 ZIP 파싱
+    //    실패인지 EUC-KR 인지 알 수 없어 큐 3건을 아무도 판단하지 못했다.
+    //    런타임 로그는 하루면 사라지므로 **행에 남겨야** 한다.
+    const reason = `body_fetch_failed:${fetched.reason}${fetched.detail ? ` (${fetched.detail})` : ''}`.slice(0, 300);
+    await enqueue(admin, f, { kind: 'queue', reason, zones: [] });
+    return { kind: 'queue', reason };
   }
+  const body = fetched.text;
 
-  // ⚠️ 1차 필터의 나머지 절반. 이게 조선·전자를 떨어뜨린다 —
+  // ⚠️ 1차 필터의 나머지 절반. 이게 조선·전자·인프라를 떨어뜨린다 —
   //    실측 오탐원: HJ중공업 · 삼성중공업 · 한화오션 · 현대오토에버.
+  //    DL이앤씨·동부건설의 `단일판매ㆍ공급계약체결` 도 철도·인프라(수서~광주 복선전철 등)가
+  //    많다. 본문이 안 열리는 동안은 이 필터가 작동하지 못해 전부 큐로 흘렀다.
   //    여기 걸리면 **큐에도 넣지 않고 버린다.**
   if (!bodyMentionsRedev(body)) {
+    // 본문이 안 열리던 시절에 큐로 들어간 행이 있으면 여기서 정리한다.
+    // 사람이 볼 필요가 없어진 건을 pending 으로 남겨 두면 큐가 인프라 공시로 채워진다.
+    await dropPending(admin, f.rcept_no, 'body_not_redev');
     return { kind: 'discard', reason: 'body_not_redev' };
   }
 

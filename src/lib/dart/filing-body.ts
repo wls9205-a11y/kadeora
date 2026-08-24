@@ -100,39 +100,65 @@ export function stripTags(xml: string): string {
 }
 
 /**
- * 공시 본문 텍스트. 실패하면 null — 호출부는 그때 검수 큐로 보낸다.
- * 본문을 못 받았다고 자동 반영으로 넘어가면 안 된다.
+ * 본문 수신 결과.
+ *
+ * ⚠️ 이전 판은 실패를 전부 `null` 로 뭉개고 원인은 console.warn 에만 남겼다.
+ *    Vercel 런타임 로그는 보존 기간이 짧아(Pro 1일) 하루만 지나면 사라진다.
+ *    실측: 검수 큐 3건이 전부 `body_fetch_failed` 인데 401 인지 ZIP 파싱 실패인지
+ *    EUC-KR 인지 알 방법이 없었다. **원인을 값으로 돌려준다.**
  */
-export async function fetchFilingBody(rceptNo: string, apiKey: string): Promise<string | null> {
-  if (!rceptNo || !apiKey) return null;
+export type FilingBodyResult =
+  | { ok: true; text: string }
+  | { ok: false; reason: string; detail?: string };
+
+/** 큐 reason 에 그대로 실리므로 짧고 기계가 읽을 수 있게 만든다. */
+function fail(reason: string, detail?: string): FilingBodyResult {
+  return { ok: false, reason, detail: detail?.slice(0, 200) };
+}
+
+/**
+ * 공시 본문 텍스트.
+ *
+ * 엔드포인트는 opendart 의 `document.xml` 이다 — 뷰어 HTML(dsaf001/main.do)이 아니다.
+ * 뷰어는 dcmNo·eleId 를 JS 로 채워서 정적 파싱이 불가능하고 본문 글자도 없다.
+ * ⚠️ 이 URL 을 뷰어로 바꾸지 말 것.
+ */
+export async function fetchFilingBody(rceptNo: string, apiKey: string): Promise<FilingBodyResult> {
+  if (!rceptNo) return fail('no_rcept_no');
+  if (!apiKey) return fail('no_api_key');
   try {
     const res = await fetch(`${DOC_URL}?crtfc_key=${apiKey}&rcept_no=${encodeURIComponent(rceptNo)}`, {
       signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     });
-    if (!res.ok) {
-      console.warn(`[dart/body] ${rceptNo} http ${res.status}`);
-      return null;
-    }
+    if (!res.ok) return fail(`http_${res.status}`);
 
     // 키 오류·문서 없음은 ZIP 이 아니라 JSON/XML 로 온다.
     const ctype = res.headers.get('content-type') ?? '';
     const raw = Buffer.from(await res.arrayBuffer());
-    if (raw.length === 0 || raw.length > MAX_ZIP_BYTES) {
-      console.warn(`[dart/body] ${rceptNo} 크기 이상 ${raw.length}`);
-      return null;
-    }
-    if (raw.readUInt32LE(0) !== LOCAL_SIG) {
-      console.warn(`[dart/body] ${rceptNo} ZIP 아님 (${ctype}) ${raw.subarray(0, 120).toString('utf8')}`);
-      return null;
+    if (raw.length === 0) return fail('empty_body');
+    if (raw.length > MAX_ZIP_BYTES) return fail('too_large', String(raw.length));
+
+    if (raw.length < 4 || raw.readUInt32LE(0) !== LOCAL_SIG) {
+      // ⚠️ 여기가 가장 흔한 실패다. opendart 는 인증키 오류·문서 없음을 **HTTP 200 + XML**
+      //    로 답한다(<status>013</status> 조회된 데이터가 없습니다 등).
+      //    그 status 코드가 원인을 그대로 말해주므로 반드시 실어 올린다.
+      const head = raw.subarray(0, 400).toString('utf8');
+      const status = /<status>([^<]+)<\/status>/.exec(head)?.[1];
+      const message = /<message>([^<]+)<\/message>/.exec(head)?.[1];
+      return fail(
+        status ? `opendart_${status}` : 'not_zip',
+        `${ctype} ${message ?? head.replace(/\s+/g, ' ').slice(0, 160)}`,
+      );
     }
 
     const entries = unzipEntries(raw);
-    if (entries.length === 0) return null;
+    if (entries.length === 0) return fail('unzip_empty', `${raw.length}B`);
 
     const text = entries.map((e) => stripTags(decode(e))).join(' ').slice(0, MAX_TEXT_CHARS);
-    return text.length > 0 ? text : null;
+    if (text.length === 0) return fail('empty_text', `entries=${entries.length}`);
+    return { ok: true, text };
   } catch (e: any) {
-    console.warn(`[dart/body] ${rceptNo} 실패:`, e?.message ?? String(e));
-    return null;
+    const msg = String(e?.message ?? e);
+    return fail(/timeout|abort/i.test(msg) ? 'timeout' : 'exception', msg);
   }
 }
