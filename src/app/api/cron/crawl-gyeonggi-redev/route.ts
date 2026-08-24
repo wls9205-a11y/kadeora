@@ -22,7 +22,7 @@ import { withCronLogging } from '@/lib/cron-logger';
  *   ZONE_AR                      구역면적       → area_sqm
  *   BIZ_STEP_NM                  사업단계       → stage
  *   EXISTNG_HOUSNG_HSHLD_CNT     기존 세대수    → existing_households
- *   EXISTNG_HOUSNG_COMPLTN_PERD  기존 준공연도  → ⚠️ 받을 컬럼이 없다 (아래)
+ *   EXISTNG_HOUSNG_COMPLTN_PERD  기존 준공연도  → built_year (533건 중 293건만 4자리 연도)
  *   ASOCNTMB_CNT                 조합원 수      → guild_member_num
  *   BIZ_IMPLMNTR_NM              사업시행자     → developer  (조합이다. constructor 아님)
  *   CHRGPSN_TELNO                담당자 전화    → phone
@@ -39,10 +39,15 @@ import { withCronLogging } from '@/lib/cron-logger';
  *   3. **위경도가 없다.** 앞서 매핑했던 REFINE_WGS84_LAT 계열은 이 응답에 존재하지 않는다.
  *      지어내지 않는다 — 좌표는 LOCPLC_ADDR 지오코딩(redev-geocode) 몫이다.
  *
- * ■ ⚠️ EXISTNG_HOUSNG_COMPLTN_PERD(기존 준공연도)는 넣을 곳이 없다.
- *   redevelopment_projects 에 built_year 컬럼이 없다(실측 51열 확인).
- *   notes 에 밀어넣지 않고 **버린다.** 재건축 연한 판단에 쓸모가 있으니
- *   컬럼이 생기면 이 줄 아래 한 줄만 추가하면 된다.
+ * ■ DB 담당이 크론 실행 전에 미리 뚫어놓은 것 (2026-08-25) — 이 두 가지 덕분에 첫 실행이 산다
+ *   1. built_year 컬럼 추가 + CHECK (1950~2100).
+ *      ⚠️ 범위를 넘으면 행이 통째로 거부되므로 yearOrNull() 이 먼저 막는다.
+ *   2. stage CHECK 에 경기 원문 5종 추가(예정구역·추진위원회·청산·정비구역·사업시행).
+ *      실측 분포를 미리 받아 확인한 결과다. 그대로 돌렸으면 9종 중 5종이 CHECK 밖이라
+ *      부산처럼 배치가 통째로 죽었다.
+ *
+ * ■ ⚠️ project_type CHECK 는 여전히 재개발·재건축 2종뿐인데 BIZ_TYPE_NM 에는
+ *   `주거환경개선` 이 48건 있다. project_type='재개발' + sub_type='주거환경개선' 으로 흡수한다.
  *
  * ■ ⚠️ 533건에는 준공·이전고시된 기축이 섞여 있다.
  *   이 크론은 redevelopment_projects 에 담기만 한다. apt_sites 승격은 별도이며
@@ -72,6 +77,22 @@ function intOrNull(v: unknown, max = 1_000_000): number | null {
   if (n === null) return null;
   const i = Math.round(n);
   return i > 0 && i < max ? i : null;
+}
+
+/**
+ * 기존주택 준공연도 → built_year.
+ * ⚠️ DB 에 `redev_built_year_range` CHECK (1950~2100) 가 걸려 있다. 범위를 넘으면
+ *    행이 통째로 거부되므로 **여기서 막고 null 로 보낸다.**
+ *    "1978", "1978년", "1978.05" 처럼 4자리 연도로 시작하는 것만 인정한다 —
+ *    "1978~1982" 같은 구간 표기도 앞 연도를 취한다.
+ */
+function yearOrNull(v: unknown): number | null {
+  const s = clean(v);
+  if (!s) return null;
+  const m = s.match(/(19|20)\d{2}/);
+  if (!m) return null;
+  const y = Number(m[0]);
+  return y >= 1950 && y <= 2100 ? y : null;
 }
 
 /** YYYY-MM-DD / YYYYMMDD / YYYY.MM.DD → date 문자열. 못 읽으면 null. */
@@ -172,31 +193,60 @@ function qualifyName(name: string, sigungu: string | null): string {
 /* ═══════════ 단계 정규화 ═══════════ */
 
 /**
- * redevelopment_projects.stage CHECK 허용 17종 중 이 크론이 쓰는 값만 낸다.
- * ⚠️ 목록 밖 값을 만들면 CHECK 위반으로 행이 통째로 거부된다 — 부산에서 `추진위원회` 로 겪었다.
+ * redevelopment_projects_stage_check 의 허용 목록 22종을 **그대로 옮긴 것**.
+ *
+ * ⚠️ DB 담당이 경기 실측 분포를 보고 원문 5종(예정구역·추진위원회·청산·정비구역·사업시행)을
+ *    CHECK 에 추가했다. 그러므로 **정규화하지 말고 원문 그대로 넣는다.**
+ *
+ *    부산의 `추진위원회 구성` → `추진위원회` 가 정확히 그 함정이었다. 코드가 "정리"한 값이
+ *    목록 밖으로 나가 배치가 통째로 죽었다. 여기서는 반대 방향의 손실도 막는다 —
+ *    `추진위원회` 를 `조합설립` 으로 접으면 조합설립 전 단계 39건이 사라진다.
+ *
+ * 실측 분포 (533건):
+ *   예정구역 166 · 준공 164 · 조합설립 41 · 추진위원회 39 · 관리처분 34
+ *   착공 33 · 청산 22 · 정비구역 21 · 사업시행 13
  */
 const ALLOWED_STAGES = new Set([
-  '정비구역지정', '조합설립', '사업시행인가', '관리처분', '착공', '준공', '해제', '기타',
+  '정비구역지정', '조합설립', '사업시행인가', '관리처분', '착공', '준공', '기타', '조사 중',
+  '예정구역지정', '정비계획 수립 및 정비구역 지정', '추진위원회 구성', '조합설립인가',
+  '건축심의 및 통합심의', '사업시행계획인가', '관리처분계획', '해제', '조합해산',
+  // 경기 원문 5종 (2026-08-25 추가)
+  '예정구역', '추진위원회', '청산', '정비구역', '사업시행',
 ]);
 
-function normalizeStage(raw: string | null): { value: string; unknown?: string } {
+/**
+ * 원문이 CHECK 목록에 있으면 **손대지 않는다.**
+ * 목록 밖일 때만 최소한으로 접고, 그때도 원문을 unmapped 로 남긴다.
+ */
+function resolveStage(raw: string | null): { value: string; unknown?: string } {
   const s = clean(raw);
-  if (!s) return { value: '정비구역지정' };
-  if (/준공|완료|입주|사용승인|이전고시/.test(s)) return { value: '준공' };
-  if (/착공|공사|시공/.test(s)) return { value: '착공' };
-  if (/관리처분/.test(s)) return { value: '관리처분' };
-  if (/사업시행|시행인가/.test(s)) return { value: '사업시행인가' };
-  if (/조합설립|조합인가|추진위/.test(s)) return { value: '조합설립' };
-  if (/해제|취소|중단/.test(s)) return { value: '해제' };
-  if (/구역지정|정비구역|정비계획|안전진단|예비평가/.test(s)) return { value: '정비구역지정' };
-  // 모르는 값은 '기타' 로 보내고 **원문을 기록한다.** 조용히 기본값으로 흡수하지 않는다.
+  if (!s) return { value: '기타', unknown: '(null)' };
+  if (ALLOWED_STAGES.has(s)) return { value: s };
+
+  // 여기부터는 목록에 없는 값이다. 접되 원문을 반드시 남긴다.
+  if (/준공|완료|입주|사용승인|이전고시/.test(s)) return { value: '준공', unknown: s };
+  if (/착공|공사|시공/.test(s)) return { value: '착공', unknown: s };
+  if (/관리처분/.test(s)) return { value: '관리처분', unknown: s };
+  if (/사업시행|시행인가/.test(s)) return { value: '사업시행인가', unknown: s };
+  if (/조합설립|조합인가/.test(s)) return { value: '조합설립', unknown: s };
+  if (/추진위/.test(s)) return { value: '추진위원회', unknown: s };
+  if (/해제|취소|중단/.test(s)) return { value: '해제', unknown: s };
+  if (/구역지정|정비구역|정비계획|안전진단|예비평가/.test(s)) return { value: '정비구역지정', unknown: s };
   return { value: '기타', unknown: s };
 }
 
-function projectTypeOf(rawType: string | null, name: string): string {
-  const s = `${rawType ?? ''} ${name}`;
-  if (/재건축/.test(s)) return '재건축';
-  return '재개발'; // CHECK 는 재개발·재건축 둘만 허용한다
+/**
+ * ⚠️ project_type CHECK 는 재개발·재건축 **2종만** 허용한다.
+ *    경기 BIZ_TYPE_NM 실측에는 `주거환경개선` 이 48건 있다 — 그대로 넣으면 48건이 거부된다.
+ *    서울에서 쓴 방식대로 project_type 은 '재개발' 로 흡수하고 원래 유형은 sub_type 에 남긴다.
+ */
+function projectTypeOf(rawType: string | null, name: string): { project_type: string; sub_type: string | null } {
+  const t = clean(rawType) ?? '';
+  const s = `${t} ${name}`;
+  if (/재건축/.test(s)) return { project_type: '재건축', sub_type: t || '주택재건축' };
+  if (/주거환경개선/.test(s)) return { project_type: '재개발', sub_type: '주거환경개선' };
+  if (/도시환경|도시정비/.test(s)) return { project_type: '재개발', sub_type: '도시환경정비' };
+  return { project_type: '재개발', sub_type: t || '주택재개발' };
 }
 
 /* ═══════════ 라우트 ═══════════ */
@@ -296,26 +346,31 @@ export async function GET(req: NextRequest) {
       // ⚠️ 포털 라벨은 '현추진상황'이지만 그 키(NOW_PROPLSN_MATR_DESC)는 실측에서 전부 null 이다.
       //    단계는 BIZ_STEP_NM 을 쓴다. 라벨과 키가 다른 대표 사례라 이 줄을 바꾸지 말 것.
       const rawStage = clean(pick(r, ['BIZ_STEP_NM']));
-      const { value: rawMapped, unknown } = normalizeStage(rawStage);
+      const { value: resolved, unknown } = resolveStage(rawStage);
       if (unknown) unmappedStages.add(unknown);
-      // 최종 가드 — 정규화가 어떤 이유로든 목록 밖 값을 내면 여기서 막는다.
+      // 최종 가드 — 어떤 이유로든 목록 밖 값이 남으면 여기서 막는다.
       // CHECK 위반은 행을 통째로 날리므로 '기타'로 흡수하는 편이 낫다(원문은 unmapped_stages 에 남는다).
-      const stage = ALLOWED_STAGES.has(rawMapped) ? rawMapped : '기타';
+      const stage = ALLOWED_STAGES.has(resolved) ? resolved : '기타';
 
       const newBuild = sumNewBuildUnits(r);
       if (newBuild === null) missingNewBuild++;
+
+      const { project_type, sub_type } = projectTypeOf(clean(pick(r, ['BIZ_TYPE_NM'])), districtName);
 
       mapped.push({
         district_name: districtName,
         region: '경기',
         sigungu,
-        project_type: projectTypeOf(clean(pick(r, ['BIZ_TYPE_NM'])), districtName),
+        project_type,
+        sub_type,
         stage,
         address: clean(pick(r, ['LOCPLC_ADDR'])),
         area_sqm: num(pick(r, ['ZONE_AR'])),
         // ⚠️ 총세대수 필드가 응답에 없다. 신축 평형별 4개를 합산한다 (실측 117+685+476+85=1,363).
         total_households: newBuild,
         existing_households: intOrNull(pick(r, ['EXISTNG_HOUSNG_HSHLD_CNT'])),
+        // 533건 중 293건만 4자리 연도다. 나머지는 null 이거나 형식이 다르다 — 통과분만 넣는다.
+        built_year: yearOrNull(pick(r, ['EXISTNG_HOUSNG_COMPLTN_PERD'])),
         guild_member_num: intOrNull(pick(r, ['ASOCNTMB_CNT']), 100_000),
         // ⚠️ 사업시행자는 조합이지 시공사가 아니다. constructor 에 넣지 않는다.
         developer: clean(pick(r, ['BIZ_IMPLMNTR_NM'])),
@@ -346,9 +401,11 @@ export async function GET(req: NextRequest) {
 
     const stageCounts: Record<string, number> = {};
     const typeCounts: Record<string, number> = {};
+    const subTypeCounts: Record<string, number> = {};
     for (const m of payload) {
       stageCounts[m.stage] = (stageCounts[m.stage] ?? 0) + 1;
       typeCounts[m.project_type] = (typeCounts[m.project_type] ?? 0) + 1;
+      if (m.sub_type) subTypeCounts[m.sub_type] = (subTypeCounts[m.sub_type] ?? 0) + 1;
     }
 
     /* ── 5) upsert — 배치 실패 시 한 건씩 재시도해 실패한 행만 센다 ── */
@@ -397,6 +454,8 @@ export async function GET(req: NextRequest) {
         unmapped_stages: [...unmappedStages],
         stage_values: stageCounts,
         project_type_values: typeCounts,
+        sub_type_values: subTypeCounts,
+        with_built_year: payload.filter((m) => m.built_year).length,
         missing_new_build: missingNewBuild,
         with_guild_member: payload.filter((m) => m.guild_member_num).length,
         with_phone: payload.filter((m) => m.phone).length,
