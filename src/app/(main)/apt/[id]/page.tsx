@@ -30,7 +30,9 @@ import LifecycleRail from '@/components/apt/LifecycleRail';
 // V13 A-2: 단계 라벨 단일 원본. 히어로 배지가 쓴다.
 import { lifecycleLabel as stageLabel, isPipelineStage } from '@/lib/apt/lifecycle-label';
 // V13 A-3 — 진행 이력. 청약홈에도 아실에도 없는 정보다.
-import { fetchSiteEvents } from '@/lib/apt/site-events';
+import { fetchSiteEvents, confirmedOnly } from '@/lib/apt/site-events';
+// 마스터 §2 — 광고 랜딩에 미확인 정보를 렌더하지 않는다. 심사 반려 한 번이면 계정이 묶인다.
+import { shouldHideUnconfirmed, isConfirmed } from '@/lib/apt/ad-safety';
 // V15 C — 세대수 두 축(분양 공급 / 단지 전체). total_units 는 어느 쪽인지 알 수 없다.
 import { resolveUnits, unitsSummary } from '@/lib/apt/units';
 import SiteHistoryTimeline from '@/components/apt/SiteHistoryTimeline';
@@ -57,7 +59,11 @@ const AptCommentSection = dynamic(() => import('@/components/apt/AptCommentSecti
 
 export const revalidate = 3600;
 export const maxDuration = 60;
-interface Props { params: Promise<{ id: string }> }
+interface Props {
+  params: Promise<{ id: string }>;
+  /** 마스터 §2 — 광고 유입 파라미터 판정용. 이 라우트는 이미 dynamic 이라 비용이 없다. */
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}
 
 async function resolveParam(rawId: string) {
   const decoded = decodeURIComponent(rawId);
@@ -533,8 +539,9 @@ const tBg: Record<string, string> = { subscription: 'var(--accent-green-bg)', re
 const tClr: Record<string, string> = { subscription: 'var(--accent-green)', redevelopment: 'var(--accent-purple)', unsold: 'var(--accent-red)', landmark: 'var(--accent-cyan)', complex: 'var(--accent-cyan)', trade: 'var(--accent-yellow)' };
 const STAGES = ['정비구역지정', '조합설립', '사업시행인가', '관리처분', '착공', '준공'];
 
-export default async function AptUnifiedPage({ params }: Props) {
+export default async function AptUnifiedPage({ params, searchParams }: Props) {
   const { id } = await params;
+  const sp = (await searchParams) ?? undefined;
 
   let resolved;
   try {
@@ -553,7 +560,7 @@ export default async function AptUnifiedPage({ params }: Props) {
     notFound();
   }
   if (!d) notFound();
-  const { site, sub, unsold, redev, trades, relatedBlogs, relatedPosts, nearbySites, sameBuilderSites, regionBenchmark, regionTrades, complexProfiles, name, region, sigungu, slug, analysisText, siteEvents } = d!;
+  const { site, sub, unsold, redev, trades, relatedBlogs, relatedPosts, nearbySites, sameBuilderSites, regionBenchmark, regionTrades, complexProfiles, name, region, sigungu, slug, analysisText, siteEvents: siteEventsRaw } = d!;
 
   // ── V16 C · 아무것도 못 찾았으면 검색으로 보낸다 ──
   //
@@ -576,9 +583,34 @@ export default async function AptUnifiedPage({ params }: Props) {
   const heroPhotoUrl: string | null = (site as any)?.hero_image_url || site?.satellite_image_url || null;
   const developerHeroUrl: string | null = (site as any)?.hero_image_url || null;
 
+
+  // ── 마스터 §2 · 광고 랜딩 분기 ──
+  //
+  // 리드폼이 뜨는 페이지는 **파라미터와 무관하게** 광고 문맥으로 본다.
+  // 유입 파라미터로만 가르면 심사자가 랜딩 URL 을 직접 열었을 때 미확인 정보가 그대로 보인다.
+  // (앱 안에 광고 유입 판정이 없다 — resolveChannel() 은 리드 엔드포인트 쪽이라
+  //  서버 렌더 시점에 쓸 수 없다.)
+  const showLeadForm = !!site?.slug && isLeadEligible(site.lifecycle_stage);
+  const hideUnconfirmed = shouldHideUnconfirmed(showLeadForm, sp);
+
+  // 현장 행의 등급이 미확정이면 별칭 크론이 채웠을 수 있는 세대수·시공사를 내리지 않는다.
+  // ⚠️ 지어내지 않는 것과 같은 원칙이다 — 모르면 '미확인' 으로 둔다.
+  const siteUnconfirmed = hideUnconfirmed && !isConfirmed((site as any)?.confidence);
+
+  // 마스터 §2: 광고 문맥이면 확정 이력만 남긴다. 추정·카더라·등급 없음은 렌더하지 않는다.
+  const siteEvents = hideUnconfirmed ? confirmedOnly(siteEventsRaw) : siteEventsRaw;
+
+  // 시공사도 페이지 전체가 한 벌을 쓴다 (여섯 곳에 흩어져 있던 것을 모았다).
+  // ⚠️ 마스터 §2: 현장 행 등급이 미확정이면 별칭 크론이 채웠을 수 있어 쓰지 않는다.
+  //    모집공고(sub)의 시공사는 공고 원문이라 등급과 무관하게 남긴다.
+  const builderName = (siteUnconfirmed ? null : site?.builder) || sub?.constructor_nm;
   // V15 C-3: 세대수는 페이지 전체가 이 한 벌을 쓴다. 축이 갈린 값을 곳곳에서
   //   다시 조합하면 같은 현장에서 다른 숫자가 나온다 (V10 이 고친 중복의 재발).
-  const units = resolveUnits(site as any, sub as any);
+  const unitsRaw = resolveUnits(site as any, sub as any);
+  // 모집공고(sub)에서 온 값은 공고 원문이라 등급과 무관하게 확정이다. 현장 행 값만 가린다.
+  const units = siteUnconfirmed
+    ? resolveUnits(null, sub as any)
+    : unitsRaw;
 
   // V17 F-2: 공고 전 현장은 값이 "없는" 게 아니라 "아직 정해지지 않은" 것이다.
   //   PIPELINE_STAGES + 부지계획·분양 예고 = 공고 전 7단계.
@@ -586,7 +618,6 @@ export default async function AptUnifiedPage({ params }: Props) {
   const preAnnouncement =
     !sub && (isPipelineStage(lc) || lc === 'site_planning' || lc === 'pre_announcement');
 
-  const showLeadForm = !!site?.slug && isLeadEligible(site.lifecycle_stage);
   // 희망 타입 선택지는 모집공고 원본(house_type_info)의 type 앞 숫자(전용면적)에서 파생한다.
   // apt_sites 에 area_types 류 컬럼이 없고, 현장마다 평형이 달라 하드코딩하지 않는다.
   const leadTypeOptions: string[] = Array.from(
@@ -604,7 +635,7 @@ export default async function AptUnifiedPage({ params }: Props) {
   const faq: { q: string; a: string }[] = dbFaq.length > 0 ? dbFaq : [
     { q: `${name} 위치가 어디인가요?`, a: `${name}은(는) ${region} ${site?.sigungu || ''} ${site?.dong || site?.address || ''}에 위치해 있습니다. ${site?.nearby_station || sub?.nearest_station ? `최근접 역은 ${site?.nearby_station || sub?.nearest_station}입니다.` : ''}` },
     ...(sub?.rcept_bgnde ? [{ q: `${name} 청약 일정은 언제인가요?`, a: `${name}의 청약 접수 기간은 ${sub.rcept_bgnde} ~ ${sub.rcept_endde || ''}입니다. ${sub.przwner_presnatn_de ? `당첨자 발표일은 ${sub.przwner_presnatn_de}입니다.` : ''} ${sub.mvn_prearnge_ym ? `입주 예정은 ${fmtYM(sub.mvn_prearnge_ym)}입니다.` : ''}` }] : []),
-    { q: `${name} 시공사(건설사)는 어디인가요?`, a: `${name}의 시공사는 ${site?.builder || sub?.constructor_nm || '미정'}입니다. ${site?.developer || sub?.developer_nm ? `시행사는 ${site?.developer || sub?.developer_nm}입니다.` : ''} ${units.complex ? `총 ${units.complex.toLocaleString()}세대 규모이며, ` : ''}이번 분양 공급은 ${units.supply ? `${units.supply.toLocaleString()}세대` : '미확인'}입니다.` },
+    { q: `${name} 시공사(건설사)는 어디인가요?`, a: `${name}의 시공사는 ${builderName || '미정'}입니다. ${site?.developer || sub?.developer_nm ? `시행사는 ${site?.developer || sub?.developer_nm}입니다.` : ''} ${units.complex ? `총 ${units.complex.toLocaleString()}세대 규모이며, ` : ''}이번 분양 공급은 ${units.supply ? `${units.supply.toLocaleString()}세대` : '미확인'}입니다.` },
     ...(site?.price_min || site?.price_max ? [{ q: `${name} 분양가는 얼마인가요?`, a: `${name}의 분양가는 ${site?.price_min ? fmtAmount(site.price_min) : ''}${site?.price_min && site?.price_max ? ' ~ ' : ''}${site?.price_max ? fmtAmount(site.price_max) : ''} (최고분양가 기준)입니다. 타입별 상세 분양가는 아래 평형별 공급 테이블에서 확인하세요.` }] : []),
     ...(sub ? [{ q: `${name} 모집공고 핵심 내용은 무엇인가요?`, a: `${name}의 입주자모집공고 핵심 내용: ${sub.is_price_limit ? '분양가상한제 적용, ' : ''}${sub.constructor_nm || site?.builder ? `시공사 ${sub.constructor_nm || site?.builder}, ` : ''}${units.supply ? `${units.supply.toLocaleString()}세대 공급` : '공급 세대수 미확인'}. ${sub.mvn_prearnge_ym ? `입주 예정 ${fmtYM(sub.mvn_prearnge_ym)}.` : ''} 카더라에서 모집공고 핵심 요약을 확인하세요.` }] : []),
     ...(sub?.is_price_limit !== undefined ? [{ q: `${name}은 분양가상한제 적용 현장인가요?`, a: `${name}은(는) 분양가상한제 ${sub.is_price_limit ? '적용 현장입니다. 분양가상한제 적용 시 전매제한 및 거주의무 등의 규제가 적용될 수 있습니다.' : '미적용 현장입니다.'}` }] : []),
@@ -707,7 +738,7 @@ export default async function AptUnifiedPage({ params }: Props) {
 
 
       {/* JSON-LD 1: RealEstateListing */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'RealEstateListing', name, description: site?.description || `${region} ${name}`, url: `${SITE_URL}/apt/${slug}`, address: { '@type': 'PostalAddress', addressRegion: region, addressLocality: site?.sigungu || '', streetAddress: site?.address || sub?.hssply_adres || '', addressCountry: 'KR' }, ...(site?.latitude && site?.longitude ? { geo: { '@type': 'GeoCoordinates', latitude: site.latitude, longitude: site.longitude } } : {}), ...(site?.builder || sub?.constructor_nm ? { brand: { '@type': 'Organization', name: site?.builder || sub?.constructor_nm } } : {}), ...(site?.price_min || site?.price_max ? { offers: { '@type': 'AggregateOffer', priceCurrency: 'KRW', ...(site?.price_min ? { lowPrice: site.price_min * 10000 } : {}), ...(site?.price_max ? { highPrice: site.price_max * 10000 } : {}), ...(units.supply ? { offerCount: units.supply } : {}) } } : {}) }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'RealEstateListing', name, description: site?.description || `${region} ${name}`, url: `${SITE_URL}/apt/${slug}`, address: { '@type': 'PostalAddress', addressRegion: region, addressLocality: site?.sigungu || '', streetAddress: site?.address || sub?.hssply_adres || '', addressCountry: 'KR' }, ...(site?.latitude && site?.longitude ? { geo: { '@type': 'GeoCoordinates', latitude: site.latitude, longitude: site.longitude } } : {}), ...(builderName ? { brand: { '@type': 'Organization', name: builderName } } : {}), ...(site?.price_min || site?.price_max ? { offers: { '@type': 'AggregateOffer', priceCurrency: 'KRW', ...(site?.price_min ? { lowPrice: site.price_min * 10000 } : {}), ...(site?.price_max ? { highPrice: site.price_max * 10000 } : {}), ...(units.supply ? { offerCount: units.supply } : {}) } } : {}) }) }} />
 
       {/* JSON-LD 2: FAQ */}
       {faq.length > 0 && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faq.map(f => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) }) }} />}
@@ -798,7 +829,7 @@ export default async function AptUnifiedPage({ params }: Props) {
         //   없으면 분양 공급을 이름 붙여 낸다. 라벨 없는 '176세대' 는 오독을 부른다.
         const heroSub = [
           heroLoc,
-          site?.builder || sub?.constructor_nm,
+          builderName,
           units.complex ? `총 ${units.complex.toLocaleString()}세대`
             : units.supply ? `분양 ${units.supply.toLocaleString()}세대` : null,
         ].filter(Boolean).join(' · ');
@@ -873,7 +904,7 @@ export default async function AptUnifiedPage({ params }: Props) {
         {/* 위치 + 시공사 통합 카드 */}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8, fontSize: 12 }}>
           <span style={{ color: 'var(--text-tertiary)' }}>{[region, site?.sigungu, site?.dong].filter(Boolean).join(' ') || sub?.hssply_adres || ''}</span>
-          {(site?.builder || sub?.constructor_nm) && <Link href={`/apt/builder/${encodeURIComponent(site?.builder || sub?.constructor_nm || '')}`} style={{ color: 'var(--text-tertiary)', textDecoration: 'none' }}>{site?.builder || sub?.constructor_nm}</Link>}
+          {(builderName) && <Link href={`/apt/builder/${encodeURIComponent(builderName || '')}`} style={{ color: 'var(--text-tertiary)', textDecoration: 'none' }}>{builderName}</Link>}
           {(site?.developer || sub?.developer_nm) && <span style={{ color: 'var(--text-tertiary)' }}>{site?.developer || sub?.developer_nm}</span>}
           {(site?.nearby_station || sub?.nearest_station) && <span style={{ color: 'var(--accent-blue)' }}>{site?.nearby_station || sub?.nearest_station}</span>}
         </div>
@@ -889,7 +920,7 @@ export default async function AptUnifiedPage({ params }: Props) {
           //   AI 요약이 없는 현장에서도 이 줄은 남아야 하므로 별도로 만든다.
           const facts = [
             [region, site?.sigungu, site?.dong].filter(Boolean).join(' ') || sub?.hssply_adres || null,
-            site?.builder || sub?.constructor_nm ? `시공 ${site?.builder || sub?.constructor_nm}` : null,
+            builderName ? `시공 ${builderName}` : null,
             unitsSummary(units),
             fmtYM(site?.move_in_date || sub?.mvn_prearnge_ym) ? `입주 ${fmtYM(site?.move_in_date || sub?.mvn_prearnge_ym)}` : null,
             stageLabel((site as any)?.lifecycle_stage),
@@ -953,7 +984,7 @@ export default async function AptUnifiedPage({ params }: Props) {
         // V15 C-3: '규모' 한 행이 두 축을 뭉개고 있었다 (total_households 없으면 total_units 폴백 —
         //   96%가 공급 수치라 단지 전체 자리에 분양 수치가 들어갔다). 두 행으로 가른다.
         const rows: Array<[string, string | null]> = [
-          ['시공사', site?.builder || sub?.constructor_nm || null],
+          ['시공사', builderName || null],
           ['위치', [region, site?.sigungu, site?.dong].filter(Boolean).join(' ') || sub?.hssply_adres || null],
           ['단지 전체', units.complex ? `${units.complex.toLocaleString()}세대` : null],
           ['분양 공급', units.supply ? `${units.supply.toLocaleString()}세대` : null],
@@ -2198,7 +2229,7 @@ export default async function AptUnifiedPage({ params }: Props) {
           최종 업데이트: {new Date(site?.updated_at || sub?.fetched_at || Date.now()).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}
         </time>
         <div style={{ display: 'flex', gap: 'var(--sp-xs)', flexWrap: 'wrap' }}>
-          {[region, site?.sigungu, tLabel[sType], site?.builder || sub?.constructor_nm, '아파트'].filter(Boolean).slice(0, 4).map(tag => (
+          {[region, site?.sigungu, tLabel[sType], builderName, '아파트'].filter(Boolean).slice(0, 4).map(tag => (
             <Link key={tag} href={`/search?q=${encodeURIComponent(String(tag))}`} style={{ padding: '3px 8px', borderRadius: 'var(--radius-card)', background: 'var(--bg-hover)', color: 'var(--text-tertiary)', fontSize: 10, textDecoration: 'none' }}>#{tag}</Link>
           ))}
         </div>

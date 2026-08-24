@@ -1,5 +1,9 @@
 import type { Metadata, Viewport } from 'next';
 import { SITE_URL } from '@/lib/constants';
+// 마스터 §3 — Pretendard 자체 호스팅. 예전에는 jsdelivr 스타일시트를 <link> 로 물고 있었고
+// 그게 **크로스 도메인 렌더링 차단**이라 FCP 3.5초 · LCP 4.8초의 주범이었다.
+// 번들로 들어오면서 스타일시트 요청 자체가 사라진다.
+import './styles/pretendard.css';
 import './globals.css';
 import './styles/components.css';
 import './styles/blog.css';
@@ -91,17 +95,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ko" suppressHydrationWarning>
       <head>
-        {/* 세션 150: CLS 방지 — pretendard preconnect + preload (폰트 swap FOUT 최소화) */}
-        <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+        {/* 마스터 §3: jsdelivr 폰트 스타일시트를 걷어냈다 (자체 호스팅 — styles/pretendard.css).
+             ⚠️ preconnect 도 함께 지운다. 더 이상 그 도메인에서 받을 게 없는데 남겨 두면
+                쓰지도 않을 연결을 미리 여는 낭비가 된다. */}
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="icon" href="/favicon.png" type="image/png" sizes="32x32" />
         {/* Preconnect — 주요 외부 도메인 DNS/TLS 선행 연결 (LCP 개선) */}
         {/* s239 W3: env var 우선, 미설정 시 hardcoded fallback */}
         <link rel="preconnect" href={process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'https://tezftxakuwhsclarprlz.supabase.co'} />
         <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'https://tezftxakuwhsclarprlz.supabase.co'} />
-        <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
-        <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
         <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
         <link rel="dns-prefetch" href="https://dapi.kakao.com" />

@@ -43,6 +43,15 @@ const CONFIDENCE: Record<
     badgeBg: 'var(--bg-sunken)',
     badgeFg: 'var(--text-tertiary)',
   },
+  // ⚠️ 등급이 비어 있는 이벤트가 실측 13건 있다 (트리거가 현장의 null confidence 를 그대로 옮긴다).
+  //    이걸 '확정' 으로 그리면 근거 없는 정보에 확정 딱지를 붙이게 된다.
+  unknown: {
+    label: '미확인',
+    dot: 'var(--text-tertiary)',
+    ring: 'var(--bg-sunken)',
+    badgeBg: 'var(--bg-sunken)',
+    badgeFg: 'var(--text-tertiary)',
+  },
 };
 
 /**
@@ -99,7 +108,8 @@ export default function SiteHistoryTimeline({ events }: { events: AptSiteEvent[]
     <ol style={{ listStyle: 'none', margin: 0, padding: 0 }}>
       {events.map((e, i) => {
         const { title, detail } = describe(e);
-        const grade = CONFIDENCE[e.confidence ?? 'confirmed'] ?? CONFIDENCE.confirmed;
+        // 모르는 값·빈 값은 '미확인' 이다. 확정으로 떨어뜨리지 않는다.
+        const grade = CONFIDENCE[e.confidence ?? ''] ?? CONFIDENCE.unknown;
         const src = sourceLabel(e.source);
         const isLast = i === events.length - 1;
 

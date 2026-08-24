@@ -7,6 +7,7 @@
 // (크론·어드민·DART 어디서 바뀌든). 그래서 여기서 별도로 insert 하지 않는다.
 
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { isConfirmed } from '@/lib/apt/ad-safety';
 
 /** 화면에 낼 이력 상한. 이보다 길어지면 타임라인이 아니라 로그가 된다. */
 export const SITE_EVENT_LIMIT = 20;
@@ -61,5 +62,8 @@ export async function fetchSiteEvents(
  * 네이버 검색광고 심사는 광고 내용과 랜딩 일치를 본다. 심사 반려 한 번이면 계정이 묶인다.
  */
 export function confirmedOnly(events: AptSiteEvent[]): AptSiteEvent[] {
-  return events.filter((e) => (e.confidence ?? 'confirmed') === 'confirmed');
+  // ⚠️ null 을 확정으로 치지 않는다. 실측 13건이 등급 없이 들어와 있고
+  //    (트리거가 현장의 null confidence 를 그대로 옮긴다),
+  //    등급을 모르는 것과 원문으로 확인한 것은 다르다.
+  return events.filter((e) => isConfirmed(e.confidence));
 }

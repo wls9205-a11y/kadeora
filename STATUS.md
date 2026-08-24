@@ -1,3 +1,77 @@
+## 마스터 §1 · §2 · §3 (2026-08-24)
+
+### §1 리드 알림 — 최악 48시간 → 최악 15분
+
+실측으로 지시서 진단을 전부 확인했다: 임계값 `interval '24 hours'` · 크론 168 `35 0 * * *`(하루 1회).
+
+| | 전 | 후 |
+|---|---|---|
+| 임계값 | 24시간 | **30분** |
+| 크론 168 | 하루 1회 | **`*/15 * * * *`** |
+| 미처리 severity | `warning` | **`critical`** |
+| 신규 리드 즉시 알림 | 없음 | **트리거 `trg_lead_new_alert`** |
+
+- 임계값을 상수(`c_threshold`/`c_label`) 하나로 뽑았다. 기존엔 `24 hours` 가 조건문과 문구
+  4곳에 흩어져 있어 한쪽만 고치면 "24시간 넘게…" 라 말하면서 30분 기준으로 도는 상태가 된다
+- `warning` 은 `CriticalAlertBar` 에 안 뜬다 — 알림이 있어도 안 보이면 없는 것과 같다
+- 신규는 폴링이 아니라 트리거다. `status<>'new'`(테스트)는 건너뛴다
+- 적용 직후 실행 검증: `[critical] 미처리 분양상담 1건 … 772분 경과 · 두산위브더제니스 대연`
+
+범위는 `admin_alerts` + `CriticalAlertBar` 까지다. 외부 발송(알림톡·SMS)은 하지 않는다.
+§1-2 어드민 리드 화면은 건너뛴다(리드 1건, 경보로 보인다).
+
+### §2 광고 랜딩 분기
+
+⚠️ **`resolveChannel()` 은 저장소에 없다.** 리드 엔드포인트(Apps Script) 쪽이라
+서버 렌더 시점에 쓸 수 없다 — 즉 **앱 안에 광고 유입 판정이 없었다.**
+
+그래서 유입 파라미터에만 걸지 않았다. 파라미터로만 가르면 **심사자가 랜딩 URL 을 직접
+열었을 때 미확인 정보가 그대로 보인다.** 지시서의 근거("리드폼이 붙어 광고 성격이 명확")를
+그대로 기준으로 삼아 **리드폼이 뜨는 페이지는 전부** 광고 문맥으로 본다.
+유입 파라미터(`n_query`·`NaPm`·`utm_source=naver`)는 OR 조건으로 더한다.
+
+`lib/apt/ad-safety.ts` — `isAdTrafficContext` · `shouldHideUnconfirmed` · `isConfirmed`.
+
+가리는 것
+- **진행 이력** — `confirmedOnly()` 로 확정만
+- **세대수** — 현장 행 등급이 미확정이면 `resolveUnits(null, sub)` 로 공고 값만 남긴다
+- **시공사** — 여섯 곳에 흩어져 있던 `site?.builder || sub?.constructor_nm` 를
+  `builderName` 한 벌로 모으고 같은 게이트를 걸었다 (11곳 치환)
+
+모집공고(`sub`)에서 온 값은 **공고 원문이라 등급과 무관하게 남긴다.**
+
+> ⚠️ **`confidence = null` 을 확정으로 치던 버그를 같이 고쳤다.**
+> 실측 `apt_site_events` 99건 중 **13건이 등급 없음**인데, 코드가 `?? 'confirmed'` 로
+> 확정 처리하고 있었다 — 근거 없는 정보에 확정 딱지를 붙이는 셈이다.
+> `confirmedOnly` 는 명시적 `'confirmed'` 만 통과시키고, 타임라인에는 `미확인` 등급을 새로 뒀다.
+
+실측 미확정: `apt_site_events` 26/99 · `apt_sites` 27/5,687. 잃는 건 작고 심사 리스크는 0이 된다.
+
+### §3 폰트 자체 호스팅
+
+`layout.tsx:96` 의 jsdelivr `<link rel="stylesheet">` 가 **크로스 도메인 렌더링 차단**이었다.
+
+⚠️ **`next/font/local` 을 쓸 수 없다.** Pretendard 다이내믹 서브셋은 `unicode-range` 로 갈린
+@font-face 가 **92개**인데 `next/font/local` 은 src 별 unicode-range 를 받지 않는다.
+서브셋을 버리고 단일 variable(1.2MB)로 가면 자체 호스팅해도 첫 화면이 더 느려진다.
+
+→ `scripts/fetch-pretendard.mjs` 로 92개 woff2(2.82MB)를 `public/fonts/pretendard/` 에 받고,
+@font-face 는 `src/app/styles/pretendard.css` 로 **번들 CSS 에 넣었다.**
+**스타일시트 요청 자체가 사라진다.** 브라우저는 실제로 쓰는 유니코드 구간만 받는다.
+
+- 중복 `preconnect`(95·103행) 둘 다 제거 — 받을 게 없는데 연결을 미리 여는 낭비다
+- `font-display: swap` 은 원본 그대로
+- 빌드 산출물 확인: 번들 CSS 에 `Pretendard Variable` 포함 · `/fonts/pretendard/…woff2` 참조 ·
+  jsdelivr 폰트 참조는 webpack 캐시에만 잔존
+
+> CSP 의 `font-src`/`style-src` jsdelivr 항목은 **건드리지 않았다.** 허용 목록이라 남아도
+> 무해하고, `script-src` 쪽 사용처를 확인하지 않은 채 조이면 다른 게 깨질 수 있다.
+
+⚠️ **CLS 0.213 은 아직 판단하지 않았다.** 지시서대로 "폰트 고친 뒤 재측정" 이다.
+`size-adjust` 값을 추정으로 넣으면 오히려 어긋난다 — 재측정 결과를 보고 정한다.
+
+---
+
 ## V19 A (2026-08-24) — 301 맵 재생성 · strict 규칙 전면 전환
 
 ### 301 맵 256 → 416건
