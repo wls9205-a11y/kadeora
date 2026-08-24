@@ -15,6 +15,7 @@ import SectionShareButton from '@/components/SectionShareButton';
 import KakaoDirectShare from '@/components/KakaoDirectShare';
 import Disclaimer from '@/components/Disclaimer';
 import SiteHero from '@/components/apt/SiteHero';
+import { displayNameOf, regionedName, regionSuffix, stripDupRegionPrefix, swapLeadingName } from '@/lib/apt/seo-name';
 import SiteJumpBar, { SECTION_SCROLL_MARGIN } from '@/components/apt/SiteJumpBar';
 // V15 B — 접이식 섹션. <details> 라 닫혀 있어도 자식이 DOM 에 남는다(색인 유지).
 import DetailSection from '@/components/apt/detail/DetailSection';
@@ -98,7 +99,7 @@ async function resolveParam(rawId: string) {
 
 async function fetchUnifiedData(slug: string) {
   const sb = getSupabaseAdmin();
-  const APT_COLS = 'id,slug,name,site_type,region,sigungu,dong,address,description,seo_title,seo_description,builder,developer,total_units,supply_units,complex_units,built_year,move_in_date,status,is_active,content_score,interest_count,page_views,comment_count,images,satellite_image_url,og_image_url,key_features,faq_items,nearby_facilities,nearby_station,school_district,price_min,price_max,price_comparison,search_trend,latitude,longitude,source_ids,created_at,updated_at,og_cards,hero_image_url,hero_image_source,hero_image_credit,lifecycle_stage,review_score,review_count,faqs,data_quality_score,remaining_units,general_units,official_url,discount_pct,agent_kakao_url';
+  const APT_COLS = 'id,slug,name,display_name,site_type,region,sigungu,dong,address,description,seo_title,seo_description,builder,developer,total_units,supply_units,complex_units,built_year,move_in_date,status,is_active,content_score,interest_count,page_views,comment_count,images,satellite_image_url,og_image_url,key_features,faq_items,nearby_facilities,nearby_station,school_district,price_min,price_max,price_comparison,search_trend,latitude,longitude,source_ids,created_at,updated_at,og_cards,hero_image_url,hero_image_source,hero_image_credit,lifecycle_stage,review_score,review_count,faqs,data_quality_score,remaining_units,general_units,official_url,discount_pct,agent_kakao_url';
 
   // Phase 1: apt_sites — exact slug → multi-stage fuzzy fallback
   let { data: site } = await (sb as any).from('apt_sites').select(APT_COLS).eq('slug', slug).maybeSingle();
@@ -309,6 +310,8 @@ async function fetchUnifiedData(slug: string) {
 
   const name = sub?.house_nm || site?.name || unsold?.house_nm || redev?.district_name || slug.replace(/-/g, ' ');
   const region = sub?.region_nm || site?.region || unsold?.region_nm || redev?.region || '';
+  // ONESHOT §B-5 — 화면·메타에 쓰는 이름. name·slug 는 손대지 않는다(공공API 매칭 키·색인).
+  const displayName = displayNameOf((site as any)?.display_name, name);
 
   // Phase 3: 관련 데이터 전부 병렬 (trades + blogs + posts + nearby + view increment)
   const termBlog = sanitizeSearchQuery(name.length > 4 ? name.slice(0, 4) : name, 20);
@@ -383,7 +386,7 @@ async function fetchUnifiedData(slug: string) {
     mergedRelatedBlogs = mergedRelatedBlogs.slice(0, 8);
   }
 
-  return { site, sub, unsold, redev, trades, relatedBlogs: mergedRelatedBlogs, relatedPosts, nearbySites, sameBuilderSites, regionBenchmark, regionTrades, complexProfiles, name, region, sigungu, slug, analysisText, siteEvents };
+  return { site, sub, unsold, redev, trades, relatedBlogs: mergedRelatedBlogs, relatedPosts, nearbySites, sameBuilderSites, regionBenchmark, regionTrades, complexProfiles, name, displayName, region, sigungu, slug, analysisText, siteEvents };
 }
 
 // generateStaticParams 제거 — 전량 ISR on-demand (revalidate=3600)
@@ -399,11 +402,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
     const tl: Record<string, string> = { subscription: '분양정보 · 청약일정', redevelopment: '재개발 · 진행현황', unsold: '미분양 현황', trade: '실거래가 · 시세', landmark: '시세 · 분석' };
     const st = d.site?.site_type || (d.sub ? 'subscription' : d.unsold ? 'unsold' : d.trades?.length ? 'trade' : 'redevelopment');
-    const title = d.site?.seo_title || `${d.name} ${tl[st] || '부동산 정보'}`;
+    const dn = d.displayName;
+    // §B-5 저장된 seo_title 은 name 으로 만들어져 지역이 빠져 있다. 앞머리 이름만 갈아끼운다 —
+    // 통째로 버리면 꼬리(`— 분양가·청약일정·입주시기 2026`)를 잃는다.
+    const title = d.site?.seo_title
+      ? swapLeadingName(d.site.seo_title, d.name, dn)
+      : `${dn} ${tl[st] || '부동산 정보'}`;
     const units = d.site?.total_units || d.sub?.tot_supply_hshld_co;
     const uStr = units ? `${Number(units).toLocaleString()}세대` : '';
     const builder = d.site?.builder || d.sub?.constructor_nm || '';
-    const desc = d.site?.seo_description || `${d.region} ${d.site?.sigungu || ''} ${d.name} ${uStr} ${builder}. 모집공고 요약, 분양가격, 청약일정, 견본주택, 실거래가까지 한눈에.`.trim();
+    // §B-5 저장된 설명은 그대로 쓰되 앞머리 지역 중복만 걷어낸다 — 실측 344건이
+    // `울산 남구 울산 남구 달동 재개발` 꼴이었다. 5,521건을 통째로 갈아엎지 않는다.
+    const desc = d.site?.seo_description
+      ? stripDupRegionPrefix(d.site.seo_description, d.region, d.site?.sigungu)
+      : `${regionedName(dn, d.region, d.site?.sigungu)} ${uStr} ${builder}. 모집공고 요약, 분양가격, 청약일정, 견본주택, 실거래가까지 한눈에.`.replace(/ {2,}/g, ' ').trim();
     // ── V15 D-2 · og:image 0번은 반드시 가로 1200×630 ──
     //
     // (여기 있던 aptSiteThumb 호출을 걷어냈다. 그 체인의 최종 폴백이 /api/og-square 라
@@ -434,7 +446,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       : '';
     const metadata: Metadata = {
       // s212 P0-B: '| 카더라' 제거 — root layout template '%s | 카더라' 가 자동 추가하므로 explicit 표기 시 중복.
-      title: `${title}${priceStr} — ${d.region}`, description: desc,
+      title: `${title}${priceStr}${regionSuffix(title, d.region)}`, description: desc,
       alternates: { canonical: `${SITE_URL}/apt/${resolved.slug}` },
       robots: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' as const, 'max-video-preview': -1, googleBot: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' as const } },
       openGraph: { title, description: desc, url: `${SITE_URL}/apt/${resolved.slug}`, siteName: '카더라', locale: 'ko_KR', type: 'article', images: (() => {
@@ -560,7 +572,7 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
     notFound();
   }
   if (!d) notFound();
-  const { site, sub, unsold, redev, trades, relatedBlogs, relatedPosts, nearbySites, sameBuilderSites, regionBenchmark, regionTrades, complexProfiles, name, region, sigungu, slug, analysisText, siteEvents: siteEventsRaw } = d!;
+  const { site, sub, unsold, redev, trades, relatedBlogs, relatedPosts, nearbySites, sameBuilderSites, regionBenchmark, regionTrades, complexProfiles, name, displayName, region, sigungu, slug, analysisText, siteEvents: siteEventsRaw } = d!;
 
   // ── V16 C · 아무것도 못 찾았으면 검색으로 보낸다 ──
   //
@@ -738,19 +750,19 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
 
 
       {/* JSON-LD 1: RealEstateListing */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'RealEstateListing', name, description: site?.description || `${region} ${name}`, url: `${SITE_URL}/apt/${slug}`, address: { '@type': 'PostalAddress', addressRegion: region, addressLocality: site?.sigungu || '', streetAddress: site?.address || sub?.hssply_adres || '', addressCountry: 'KR' }, ...(site?.latitude && site?.longitude ? { geo: { '@type': 'GeoCoordinates', latitude: site.latitude, longitude: site.longitude } } : {}), ...(builderName ? { brand: { '@type': 'Organization', name: builderName } } : {}), ...(site?.price_min || site?.price_max ? { offers: { '@type': 'AggregateOffer', priceCurrency: 'KRW', ...(site?.price_min ? { lowPrice: site.price_min * 10000 } : {}), ...(site?.price_max ? { highPrice: site.price_max * 10000 } : {}), ...(units.supply ? { offerCount: units.supply } : {}) } } : {}) }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'RealEstateListing', name: displayName, description: site?.description || `${region} ${name}`, url: `${SITE_URL}/apt/${slug}`, address: { '@type': 'PostalAddress', addressRegion: region, addressLocality: site?.sigungu || '', streetAddress: site?.address || sub?.hssply_adres || '', addressCountry: 'KR' }, ...(site?.latitude && site?.longitude ? { geo: { '@type': 'GeoCoordinates', latitude: site.latitude, longitude: site.longitude } } : {}), ...(builderName ? { brand: { '@type': 'Organization', name: builderName } } : {}), ...(site?.price_min || site?.price_max ? { offers: { '@type': 'AggregateOffer', priceCurrency: 'KRW', ...(site?.price_min ? { lowPrice: site.price_min * 10000 } : {}), ...(site?.price_max ? { highPrice: site.price_max * 10000 } : {}), ...(units.supply ? { offerCount: units.supply } : {}) } } : {}) }) }} />
 
       {/* JSON-LD 2: FAQ */}
       {faq.length > 0 && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faq.map(f => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) }) }} />}
 
       {/* JSON-LD 3: Breadcrumb */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '부동산', item: `${SITE_URL}/apt` }, ...(region ? [{ '@type': 'ListItem', position: 3, name: region, item: `${SITE_URL}/apt/region/${encodeURIComponent(region)}` }] : []), { '@type': 'ListItem', position: region ? 4 : 3, name }] }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '부동산', item: `${SITE_URL}/apt` }, ...(region ? [{ '@type': 'ListItem', position: 3, name: region, item: `${SITE_URL}/apt/region/${encodeURIComponent(region)}` }] : []), { '@type': 'ListItem', position: region ? 4 : 3, name: displayName }] }) }} />
 
       {/* JSON-LD 4: Place + Residence (Google Maps + 네이버 지도 연동) */}
       {(site?.latitude || sub?.hssply_adres) && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org',
         '@type': 'Residence',
-        name: name,
+        name: displayName,
         description: site?.description || `${region} ${sigungu} ${name}`,
         url: `${SITE_URL}/apt/${slug}`,
         address: { '@type': 'PostalAddress', addressCountry: 'KR', addressRegion: region, addressLocality: sigungu || '', streetAddress: site?.address || sub?.hssply_adres || '' },
@@ -765,7 +777,7 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
       {sub?.rcept_bgnde && new Date(sub.rcept_endde || sub.rcept_bgnde) >= new Date() && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'Event', name: `${name} 청약 접수`, startDate: sub.rcept_bgnde, endDate: sub.rcept_endde, eventStatus: 'https://schema.org/EventScheduled', eventAttendanceMode: 'https://schema.org/OnlineEventAttendanceMode', location: { '@type': 'VirtualLocation', url: `${SITE_URL}/apt/${slug}` }, organizer: { '@type': 'Organization', name: site?.builder || sub.constructor_nm || '청약홈', url: sub.pblanc_url || SITE_URL }, image: `${SITE_URL}/api/og?title=${encodeURIComponent(name)}&design=2&subtitle=${encodeURIComponent('청약 접수')}` }) }} />}
 
       {/* JSON-LD 5: Article + SpeakableSpecification (voice search, Google Discover) */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'Article', headline: `${name} ${tLabel[sType] || '분양'} 정보`, description: site?.description || `${region} ${name}`, url: `${SITE_URL}/apt/${slug}`, datePublished: site?.created_at || sub?.fetched_at || new Date().toISOString(), dateModified: site?.updated_at || new Date().toISOString(), author: { '@type': 'Organization', name: '카더라', url: SITE_URL }, publisher: { '@type': 'Organization', name: '카더라', url: SITE_URL, logo: { '@type': 'ImageObject', url: `${SITE_URL}/icons/icon-192.png`, width: 192, height: 192 } }, image: [...(heroPhotoUrl ? [{ '@type': 'ImageObject', url: heroPhotoUrl, width: 1200, height: 630, name: `${name} 항공 이미지` }] : []), { '@type': 'ImageObject', url: `${SITE_URL}/api/og-apt?slug=${encodeURIComponent(slug)}&card=1`, width: 630, height: 630, name: `${name} 분양 인포그래픽` }, { '@type': 'ImageObject', url: `${SITE_URL}/api/og?title=${encodeURIComponent(name)}&design=2&subtitle=${encodeURIComponent(region)}`, width: 1200, height: 630 }], thumbnailUrl: developerHeroUrl || `${SITE_URL}/api/og-square?title=${encodeURIComponent(name)}&category=apt`, mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE_URL}/apt/${slug}` }, speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.site-description'] } }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'Article', headline: `${displayName} ${tLabel[sType] || '분양'} 정보`, description: site?.description || `${region} ${name}`, url: `${SITE_URL}/apt/${slug}`, datePublished: site?.created_at || sub?.fetched_at || new Date().toISOString(), dateModified: site?.updated_at || new Date().toISOString(), author: { '@type': 'Organization', name: '카더라', url: SITE_URL }, publisher: { '@type': 'Organization', name: '카더라', url: SITE_URL, logo: { '@type': 'ImageObject', url: `${SITE_URL}/icons/icon-192.png`, width: 192, height: 192 } }, image: [...(heroPhotoUrl ? [{ '@type': 'ImageObject', url: heroPhotoUrl, width: 1200, height: 630, name: `${name} 항공 이미지` }] : []), { '@type': 'ImageObject', url: `${SITE_URL}/api/og-apt?slug=${encodeURIComponent(slug)}&card=1`, width: 630, height: 630, name: `${name} 분양 인포그래픽` }, { '@type': 'ImageObject', url: `${SITE_URL}/api/og?title=${encodeURIComponent(name)}&design=2&subtitle=${encodeURIComponent(region)}`, width: 1200, height: 630 }], thumbnailUrl: developerHeroUrl || `${SITE_URL}/api/og-square?title=${encodeURIComponent(name)}&category=apt`, mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE_URL}/apt/${slug}` }, speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.site-description'] } }) }} />
 
       {/* JSON-LD 6: Product (price range → Google price chip in SERP) */}
       {/* Product 스키마 제거 — ApartmentComplex+RealEstateListing으로 대체됨 */}
@@ -846,8 +858,8 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
                 image: [{ '@type': 'ImageObject', url: heroSrc, name: heroIsDeveloper ? heroCredit : `${name} 항공 이미지`, position: 1 }],
               })}} />
             )}
-            <SiteHero src={heroSrc} name={name} region={region} credit={heroCredit} badges={badgeEl}>
-              <h1 style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, margin: 0, lineHeight: 1.2, letterSpacing: '-.03em', wordBreak: 'keep-all', overflowWrap: 'break-word', color: 'inherit' }}>{name}</h1>
+            <SiteHero src={heroSrc} name={displayName} region={region} credit={heroCredit} badges={badgeEl}>
+              <h1 style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, margin: 0, lineHeight: 1.2, letterSpacing: '-.03em', wordBreak: 'keep-all', overflowWrap: 'break-word', color: 'inherit' }}>{displayName}</h1>
               {heroSub && (
                 <p style={{ fontSize: 12.5, fontWeight: 600, lineHeight: 1.45, margin: '5px 0 0', opacity: 0.92, wordBreak: 'keep-all', color: 'inherit' }}>{heroSub}</p>
               )}
