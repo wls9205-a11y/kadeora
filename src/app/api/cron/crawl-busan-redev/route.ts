@@ -2,6 +2,8 @@ export const maxDuration = 60;
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { NextRequest, NextResponse } from 'next/server';
 import { withCronLogging } from '@/lib/cron-logger';
+// 단계·유형 정리는 lib 에 둔다 — route 는 임의 심볼을 export 할 수 없어 테스트가 불가능하다.
+import { normalizeStage, projectTypeOf } from '@/lib/redev/busan-stage';
 
 /**
  * 마스터 §4 — 부산 정비사업 현황 (공공데이터포털).
@@ -47,20 +49,6 @@ function imgUrl(v: unknown): string | null {
   if (!/\.(jpe?g|png|webp|gif)$/i.test(s)) return null;
   return s.replace(/^http:\/\//i, 'https://');
 }
-
-/**
- * 단계 정규화. 화면의 STAGES 축(정비구역지정·조합설립·사업시행인가·관리처분·착공·준공)에 맞춘다.
- * ⚠️ 모르는 값은 '기타' 로 뭉개지 않고 **원문을 그대로 둔다.** 고시 단계명은 그 자체가 정보다.
- *    대신 metadata 에 미매핑 값을 남겨 다음 실행 때 맵을 늘릴 수 있게 한다.
- */
-const STAGE_MAP: Record<string, string> = {
-  '정비구역지정': '정비구역지정',
-  '추진위원회 구성': '추진위원회', '추진위원회구성': '추진위원회', '추진위원회승인': '추진위원회',
-  '조합설립인가': '조합설립', '조합설립': '조합설립',
-  '사업시행인가': '사업시행인가',
-  '관리처분계획인가': '관리처분', '관리처분인가': '관리처분',
-  '착공': '착공', '준공': '준공', '이전고시': '준공',
-};
 
 /**
  * `generationJoo` 판정 — 세대수인가 조합원 수인가.
@@ -144,8 +132,8 @@ export async function GET(req: NextRequest) {
         if (!districtName) { skippedNoName++; continue; }
 
         const rawStage = clean(r.step);
-        const stage = rawStage ? (STAGE_MAP[rawStage] ?? rawStage) : null;
-        if (rawStage && !STAGE_MAP[rawStage]) unmappedStages.add(rawStage);
+        const { value: stage, unknown } = normalizeStage(rawStage);
+        if (unknown) unmappedStages.add(unknown);
 
         const gen = num(r.generationJoo);
         const guild = num(r.guildMemNum);
@@ -158,7 +146,7 @@ export async function GET(req: NextRequest) {
           district_name: districtName,
           region: '부산',
           sigungu: null, // API 가 구·군을 따로 주지 않는다. 지어내지 않는다.
-          project_type: districtName.includes('재건축') ? '재건축' : '재개발',
+          project_type: projectTypeOf(districtName),
           stage,
           total_households: households(r.generationJoo),
           guild_member_num: num(r.guildMemNum) ?? 0,
@@ -184,6 +172,16 @@ export async function GET(req: NextRequest) {
       const withCode = mapped.filter((m) => m.external_code);
       const skippedNoCode = mapped.length - withCode.length;
 
+      // 실제로 stage 에 넣는 값의 분포. CHECK 위반이 나면 어떤 문자열이 거부됐는지
+      // 이것만 보면 바로 안다 — 예전에는 오류 메시지에 값이 없어 추측할 수밖에 없었다.
+      const stageCounts: Record<string, number> = {};
+      for (const m of mapped) {
+        const k = m.stage ?? '(null)';
+        stageCounts[k] = (stageCounts[k] ?? 0) + 1;
+      }
+      const typeCounts: Record<string, number> = {};
+      for (const m of mapped) typeCounts[m.project_type] = (typeCounts[m.project_type] ?? 0) + 1;
+
       let upserted = 0;
       let failed = 0;
       const errors: string[] = [];
@@ -192,12 +190,29 @@ export async function GET(req: NextRequest) {
         const { error } = await supabase
           .from('redevelopment_projects')
           .upsert(batch, { onConflict: 'external_code' });
-        if (error) {
-          // ⚠️ 실패를 세어 올린다. 예전에는 실패해도 created 0 으로만 보여 조용했다.
-          failed += batch.length;
-          if (errors.length < 3) errors.push(error.message.slice(0, 200));
-        } else {
+        if (!error) {
           upserted += batch.length;
+          continue;
+        }
+
+        // ⚠️ 배치가 통째로 실패하면 어느 행이 문제인지 모른다. 한 건씩 다시 넣어
+        //    **실패한 행만** 세고 그 행의 값(단계·유형·이름)을 오류에 실어 올린다.
+        //    344건이 조용히 0건이 되던 상황을 두 번 만들지 않는다.
+        for (const row of batch) {
+          const { error: rowErr } = await supabase
+            .from('redevelopment_projects')
+            .upsert(row, { onConflict: 'external_code' });
+          if (!rowErr) {
+            upserted++;
+            continue;
+          }
+          failed++;
+          if (errors.length < 5) {
+            errors.push(
+              `${rowErr.message.slice(0, 160)} | stage=${JSON.stringify(row.stage)} ` +
+                `type=${JSON.stringify(row.project_type)} name=${JSON.stringify(row.district_name)}`,
+            );
+          }
         }
       }
 
@@ -217,6 +232,8 @@ export async function GET(req: NextRequest) {
           gen_eq_guild: genEqGuild,
           gen_with_zero_guild: genGtGuildWithZero,
           gen_below_threshold: genImplausible,
+          stage_values: stageCounts,
+          project_type_values: typeCounts,
           households_threshold: MIN_PLAUSIBLE_HOUSEHOLDS,
           with_view_img: mapped.filter((m) => m.view_img_url).length,
           errors,
