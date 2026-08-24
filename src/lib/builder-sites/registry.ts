@@ -79,7 +79,9 @@ export const BUILDER_SITES: BuilderSite[] = [
  * 2026-08-24 robots 실측: 전부 `Allow: /`
  *   hauterre.co.kr(포스코 오티에르) · www.thesharp.co.kr(포스코 더샵) ·
  *   weveapt.co.kr(두산위브) · poscoenc.com
- *   doosanenc.com 은 `Disallow: /kr/` — 한국어 경로를 쓰려면 다른 경로를 찾아야 한다.
+ *
+ * ⚠️ `doosanenc.com` 은 `Disallow: /kr/` 이라 후보에서 뺐다.
+ *    **두산은 weveapt.co.kr 만 쓴다.** robots 를 우회하지 않는다.
  */
 export const BUILDER_SITE_CANDIDATES = [
   'hauterre.co.kr',

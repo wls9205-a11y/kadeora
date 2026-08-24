@@ -67,6 +67,8 @@ export function parseUnitsCell(raw: string): UnitsCell {
 
 export interface BuilderSiteCard {
   name: string;
+  /** 상세 페이지 번호 (data-no). 조감도는 목록 썸네일이 아니라 상세에서 가져온다. */
+  detailNo: string | null;
   /** 현장 위치 원문 (지번까지). 지역 대조에 쓴다. */
   address: string | null;
   saleDate: string | null;
@@ -150,6 +152,7 @@ export function parseBuilderList(html: string, baseUrl: string): BuilderSiteCard
 
     out.push({
       name,
+      detailNo: /data-no="(\d+)"/i.exec(block)?.[1] ?? null,
       address,
       saleDate: labelValue(block, '시기'),
       units: parseUnitsCell(unitsRaw ?? ''),
