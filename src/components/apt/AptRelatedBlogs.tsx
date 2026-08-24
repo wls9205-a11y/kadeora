@@ -39,7 +39,7 @@ export default function AptRelatedBlogs({ posts }: { posts: RelatedBlogPost[] })
               textDecoration: 'none',
             }}
           >
-            <span aria-hidden style={{ fontSize: 15, flexShrink: 0 }}>
+            <span aria-hidden style={{ fontSize: 'var(--fs-sm)', flexShrink: 0 }}>
               📄
             </span>
             <span style={{ minWidth: 0, flex: 1 }}>
@@ -49,7 +49,7 @@ export default function AptRelatedBlogs({ posts }: { posts: RelatedBlogPost[] })
                   WebkitLineClamp: 2,
                   WebkitBoxOrient: 'vertical',
                   overflow: 'hidden',
-                  fontSize: 12.5,
+                  fontSize: 'var(--fs-xs)',
                   fontWeight: 600,
                   lineHeight: 1.45,
                   wordBreak: 'keep-all',
@@ -58,7 +58,7 @@ export default function AptRelatedBlogs({ posts }: { posts: RelatedBlogPost[] })
                 {p.title}
               </span>
               {p.published_at ? (
-                <span style={{ display: 'block', fontSize: 10.5, color: 'var(--text-tertiary, #9ca3af)', marginTop: 3 }}>
+                <span style={{ display: 'block', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary, #9ca3af)', marginTop: 3 }}>
                   {fmtDate(p.published_at)}
                   {p.apt_id ? ' · 단지 분석' : ''}
                 </span>

@@ -13,7 +13,7 @@ const CHIP: React.CSSProperties = {
   minHeight: 32,
   padding: '0 11px',
   borderRadius: 'var(--radius-pill)',
-  fontSize: 11.5,
+  fontSize: 'var(--fs-xs)',
   fontWeight: 600,
   textDecoration: 'none',
   border: '1px solid var(--border)',
@@ -60,7 +60,7 @@ export default function SigunguChips({
           aria-current={current === it.name ? 'true' : undefined}
         >
           {it.name}
-          <span style={{ fontSize: 10, opacity: current === it.name ? 0.8 : 0.6 }}>{it.count}</span>
+          <span style={{ fontSize: 'var(--fs-xs)', opacity: current === it.name ? 0.8 : 0.6 }}>{it.count}</span>
         </Link>
       ))}
     </div>

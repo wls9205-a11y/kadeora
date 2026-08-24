@@ -75,15 +75,15 @@ export default function SubscriptionCard({ item }: { item: AptHubItem }) {
         {rate != null ? (
           <>
             {rate.toFixed(1)}
-            <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-tertiary)' }}>:1</span>
+            <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-tertiary)' }}>:1</span>
           </>
         ) : item.households ? (
           <>
             {item.households.toLocaleString('ko-KR')}
-            <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-tertiary)' }}>세대</span>
+            <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-tertiary)' }}>세대</span>
           </>
         ) : (
-          <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-tertiary)' }}>미공개</span>
+          <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-tertiary)' }}>미공개</span>
         )}
       </span>
     </Link>

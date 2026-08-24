@@ -60,12 +60,12 @@ export default function AptToolChips({ region }: Props = {}) {
               textDecoration: 'none',
             }}
           >
-            <span aria-hidden style={{ fontSize: 19, lineHeight: 1 }}>
+            <span aria-hidden style={{ fontSize: 'var(--fs-md)', lineHeight: 1 }}>
               {t.icon}
             </span>
             <span style={{ minWidth: 0 }}>
-              <span style={{ display: 'block', fontSize: 12.5, fontWeight: 700 }}>{t.label}</span>
-              <span style={{ display: 'block', fontSize: 10.5, color: 'var(--text-tertiary, #9ca3af)', marginTop: 1 }}>
+              <span style={{ display: 'block', fontSize: 'var(--fs-xs)', fontWeight: 700 }}>{t.label}</span>
+              <span style={{ display: 'block', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary, #9ca3af)', marginTop: 1 }}>
                 {t.desc}
               </span>
             </span>

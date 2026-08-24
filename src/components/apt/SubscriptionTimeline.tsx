@@ -80,7 +80,7 @@ export default function SubscriptionTimeline({
 
               <div
                 style={{
-                  fontSize: 12.5,
+                  fontSize: 'var(--fs-xs)',
                   fontWeight: 700,
                   lineHeight: 1.35,
                   display: '-webkit-box',
@@ -94,11 +94,11 @@ export default function SubscriptionTimeline({
                 {name}
               </div>
 
-              <div style={{ fontSize: 11, color: 'var(--text-secondary, #6b7280)', marginTop: 6 }}>
+              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary, #6b7280)', marginTop: 6 }}>
                 {it.rcept_bgnde ? `접수 ${shortDate(it.rcept_bgnde)}~${shortDate(it.rcept_endde)}` : '일정 미정'}
               </div>
               {it.households ? (
-                <div style={{ fontSize: 11, color: 'var(--text-tertiary, #9ca3af)', marginTop: 2 }}>
+                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary, #9ca3af)', marginTop: 2 }}>
                   {it.households.toLocaleString('ko-KR')}세대
                 </div>
               ) : null}

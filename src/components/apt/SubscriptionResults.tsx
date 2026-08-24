@@ -52,7 +52,7 @@ export default function SubscriptionResults({ items }: { items: AptHubItem[] }) 
               <div style={{ minWidth: 0, flex: 1 }}>
                 <div
                   style={{
-                    fontSize: 12.5,
+                    fontSize: 'var(--fs-xs)',
                     fontWeight: 700,
                     lineHeight: 1.4,
                     overflow: 'hidden',
@@ -62,7 +62,7 @@ export default function SubscriptionResults({ items }: { items: AptHubItem[] }) 
                 >
                   {name}
                 </div>
-                <div style={{ fontSize: 10.5, color: 'var(--text-tertiary, #9ca3af)', marginTop: 2 }}>
+                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary, #9ca3af)', marginTop: 2 }}>
                   {fmtDate(it.rcept_endde)} 마감
                   {it.households ? ` · ${it.households.toLocaleString('ko-KR')}세대` : ''}
                 </div>
@@ -71,12 +71,12 @@ export default function SubscriptionResults({ items }: { items: AptHubItem[] }) 
               {hasNumbers ? (
                 <div style={{ textAlign: 'right', flexShrink: 0 }}>
                   {it.competition_rate != null ? (
-                    <div style={{ fontSize: 13, fontWeight: 700, color: '#b91c1c' }}>
+                    <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: '#b91c1c' }}>
                       {Number(it.competition_rate).toFixed(1)}대 1
                     </div>
                   ) : null}
                   {it.min_score != null ? (
-                    <div style={{ fontSize: 10.5, color: '#1d4ed8', marginTop: 1 }}>가점컷 {it.min_score}점</div>
+                    <div style={{ fontSize: 'var(--fs-xs)', color: '#1d4ed8', marginTop: 1 }}>가점컷 {it.min_score}점</div>
                   ) : null}
                 </div>
               ) : (

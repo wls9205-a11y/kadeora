@@ -67,7 +67,7 @@ export default function RegionAutoSelect() {
         border: '1px solid var(--border)',
       }}
     >
-      <span style={{ flex: 1, minWidth: 0, fontSize: 11.5, color: 'var(--text-secondary)' }}>
+      <span style={{ flex: 1, minWidth: 0, fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)' }}>
         이전에 {suggested}{eulReul(suggested)} 보셨습니다
       </span>
       <Link
@@ -82,7 +82,7 @@ export default function RegionAutoSelect() {
           borderRadius: 'var(--radius-pill)',
           background: 'var(--brand)',
           color: '#FFFFFF',
-          fontSize: 11.5,
+          fontSize: 'var(--fs-xs)',
           fontWeight: 700,
           textDecoration: 'none',
           whiteSpace: 'nowrap',

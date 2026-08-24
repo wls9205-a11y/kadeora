@@ -74,11 +74,11 @@ export default function PipelineCard({ item, now }: { item: AptPipelineItem; now
           경쟁률의 분모(분양 공급)와 단지 규모(단지 전체)가 섞인다 (V15 C 와 같은 규칙). */}
       <span className="kd-lrow-r">
         {units.value === '미확인' ? (
-          <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-tertiary)' }}>미정</span>
+          <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-tertiary)' }}>미정</span>
         ) : (
           <>
             {units.value}
-            <span style={{ display: 'block', fontSize: 9.5, fontWeight: 600, color: 'var(--text-tertiary)', lineHeight: 1.3 }}>
+            <span style={{ display: 'block', fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-tertiary)', lineHeight: 1.3 }}>
               {units.note ?? '세대'}
             </span>
           </>

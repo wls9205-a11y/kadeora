@@ -43,11 +43,11 @@ export default function RecentMovesStrip({
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 8, marginBottom: 8 }}>
         <h2
           id="apt-moves-heading"
-          style={{ margin: 0, fontSize: 13, fontWeight: 800, letterSpacing: '-.03em', color: 'var(--text-primary)' }}
+          style={{ margin: 0, fontSize: 'var(--fs-sm)', fontWeight: 800, letterSpacing: '-.03em', color: 'var(--text-primary)' }}
         >
           이번 주 움직인 현장
         </h2>
-        <span style={{ fontSize: 10, color: 'var(--text-tertiary)', whiteSpace: 'nowrap' }}>
+        <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', whiteSpace: 'nowrap' }}>
           {region} · 최근 7일
         </span>
       </div>
@@ -90,7 +90,7 @@ export default function RecentMovesStrip({
                     style={{
                       padding: '1.5px 5px',
                       borderRadius: 3,
-                      fontSize: 9,
+                      fontSize: 'var(--fs-xs)',
                       fontWeight: 800,
                       background: tone.bg,
                       color: tone.fg,
@@ -98,13 +98,13 @@ export default function RecentMovesStrip({
                   >
                     {tone.label}
                   </span>
-                  {when && <span style={{ fontSize: 9.5, fontWeight: 700, color: 'var(--text-tertiary)' }}>{when}</span>}
+                  {when && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-tertiary)' }}>{when}</span>}
                 </span>
 
                 <span
                   style={{
                     display: 'block',
-                    fontSize: 12.5,
+                    fontSize: 'var(--fs-xs)',
                     fontWeight: 800,
                     letterSpacing: '-.02em',
                     lineHeight: 1.35,
@@ -120,7 +120,7 @@ export default function RecentMovesStrip({
                 <span
                   style={{
                     display: 'block',
-                    fontSize: 10.5,
+                    fontSize: 'var(--fs-xs)',
                     lineHeight: 1.45,
                     color: 'var(--brand)',
                     fontWeight: 700,
@@ -138,7 +138,7 @@ export default function RecentMovesStrip({
                   <span
                     style={{
                       display: 'block',
-                      fontSize: 10,
+                      fontSize: 'var(--fs-xs)',
                       color: 'var(--text-tertiary)',
                       marginTop: 2,
                       overflow: 'hidden',

@@ -228,7 +228,7 @@ export default async function AptPage({
             borderRadius: 6,
             background: 'var(--bg-elevated)',
             border: '1px solid var(--border)',
-            fontSize: 11.5,
+            fontSize: 'var(--fs-xs)',
             color: 'var(--text-secondary)',
           }}
         >
@@ -248,7 +248,7 @@ export default async function AptPage({
               borderRadius: 'var(--radius-pill)',
               background: 'var(--brand)',
               color: '#FFFFFF',
-              fontSize: 11.5,
+              fontSize: 'var(--fs-xs)',
               fontWeight: 700,
               textDecoration: 'none',
               whiteSpace: 'nowrap',
@@ -365,14 +365,14 @@ export default async function AptPage({
           }}
         >
           <span style={{ minWidth: 0 }}>
-            <span style={{ display: 'block', fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
+            <span style={{ display: 'block', fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>
               지난 공고 더보기
             </span>
-            <span style={{ display: 'block', fontSize: 11, color: 'var(--text-tertiary)', marginTop: 1 }}>
+            <span style={{ display: 'block', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 1 }}>
               마감된 청약의 경쟁률·가점컷을 연도별로
             </span>
           </span>
-          <span aria-hidden style={{ flexShrink: 0, fontSize: 13, color: 'var(--text-tertiary)' }}>→</span>
+          <span aria-hidden style={{ flexShrink: 0, fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>→</span>
         </Link>
       </div>
 

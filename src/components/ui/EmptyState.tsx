@@ -23,14 +23,14 @@ export default function EmptyState({ icon = '📭', title, description, cta }: P
         margin: '3px 3px 6px',
       }}
     >
-      <div style={{ fontSize: 28, color: 'var(--text-tertiary, #9CA3AF)', marginBottom: 8, lineHeight: 1 }}>
+      <div style={{ fontSize: 'var(--fs-2xl)', color: 'var(--text-tertiary, #9CA3AF)', marginBottom: 8, lineHeight: 1 }}>
         {icon}
       </div>
-      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary, #111827)' }}>
+      <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary, #111827)' }}>
         {title}
       </div>
       {description ? (
-        <div style={{ fontSize: 11.5, color: 'var(--text-secondary, #6B7280)', marginTop: 4, lineHeight: 1.5 }}>
+        <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary, #6B7280)', marginTop: 4, lineHeight: 1.5 }}>
           {description}
         </div>
       ) : null}
@@ -40,7 +40,7 @@ export default function EmptyState({ icon = '📭', title, description, cta }: P
           style={{
             display: 'inline-block',
             marginTop: 10,
-            fontSize: 12,
+            fontSize: 'var(--fs-xs)',
             fontWeight: 600,
             color: 'var(--brand, #2563EB)',
             textDecoration: 'none',

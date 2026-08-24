@@ -61,14 +61,14 @@ export default function AptHubRail({
                 border: '1px solid var(--border)',
                 background: r.region === region ? 'var(--brand)' : 'var(--bg-sunken)',
                 color: r.region === region ? '#FFFFFF' : 'var(--text-secondary)',
-                fontSize: 11.5,
+                fontSize: 'var(--fs-xs)',
                 fontWeight: r.region === region ? 700 : 600,
                 textDecoration: 'none',
               }}
             >
               {r.region}
               {r.live > 0 && (
-                <span style={{ fontSize: 10, opacity: r.region === region ? 0.85 : 0.65 }}>{r.live}</span>
+                <span style={{ fontSize: 'var(--fs-xs)', opacity: r.region === region ? 0.85 : 0.65 }}>{r.live}</span>
               )}
             </Link>
           ))}
