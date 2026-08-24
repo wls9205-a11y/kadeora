@@ -177,11 +177,16 @@ export function getStatusWeight(status: SubscriptionStatus): number {
  */
 export function getStatusDday(
   row: SubscriptionLike,
-  status: SubscriptionStatus = getSubscriptionStatus(row),
+  // ⚠️ 기본값을 getSubscriptionStatus(row) 로 두면 **뒤에 오는 today 를 참조하지 못한다.**
+  //    호출부가 today 를 넘겨도 상태 판정만 실제 오늘로 되어, 날짜를 고정한
+  //    테스트·시뮬레이션에서 D-day 와 상태가 서로 다른 날을 말한다.
+  //    기본값을 없애고 본문에서 today 와 함께 푼다.
+  status?: SubscriptionStatus,
   today: string = todayKST(),
 ): number | null {
+  const resolved = status ?? getSubscriptionStatus(row, today);
   const target = (() => {
-    switch (status) {
+    switch (resolved) {
       case 'open':
         return toDateKey(row.rcept_endde);
       case 'upcoming':

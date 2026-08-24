@@ -1,3 +1,44 @@
+## V17 — 기존 실패 테스트 2건 수정 (2026-08-24)
+
+두 건 다 테스트가 아니라 **구현이 틀렸다.** 146건 전부 통과.
+
+### ① `getStatusDday` — 기본 인자가 뒤 인자를 못 본다
+
+```ts
+// 전
+status: SubscriptionStatus = getSubscriptionStatus(row),
+today: string = todayKST(),
+```
+기본값이 평가될 때 뒤에 오는 `today` 는 아직 초기화 전이라 참조할 수 없다.
+그래서 호출부가 `today` 를 넘겨도 **상태 판정만 실제 오늘로** 되고,
+D-day 와 상태가 서로 다른 날을 말한다. 날짜를 고정한 테스트·시뮬레이션에서 드러난다.
+
+```ts
+// 후
+status?: SubscriptionStatus,
+today: string = todayKST(),
+...
+const resolved = status ?? getSubscriptionStatus(row, today);
+```
+`getSubscriptionStatus` 는 원래 `today` 를 받는다 — 연결만 안 돼 있었다.
+
+> **지금 화면에는 영향이 없다.** `getStatusDday`·`compareBySubscriptionStatus` 는
+> 외부 호출부가 0건이고, 내부 호출 2곳은 `status` 를 명시로 넘긴다.
+> 그래도 export 된 함수라 다음 사용자가 같은 함정을 밟는다.
+
+### ② `PostCreateSchema.title` — 1자 제목을 받고 있었다
+
+`min(1)` → `min(2, '제목을 2자 이상 입력해주세요')`.
+테스트가 1자 거부를 기대하는 게 맞다 — 제목 한 글자를 허용할 이유가 없다.
+
+> ⚠️ `PostCreateSchema` 가 **`lib/validations.ts` 와 `lib/schemas.ts` 두 곳에 있다.**
+> 실제로 쓰이는 건 `validations.ts`(`api/posts/route.ts` 가 그걸 import)이고
+> `schemas.ts` 쪽은 **import 하는 곳이 0건**이다(`title.min(1)`·`max(100)`·category 목록도 다르다).
+> 이번엔 쓰이는 쪽만 고쳤다. 죽은 사본 정리는 별건으로 둔다 —
+> V15 에서 지운 `AptThumbnailCard` 와 같은 유형이다.
+
+---
+
 ## V17 F-1 후속 (2026-08-24) — 게이트를 RPC 로 이관
 
 DB 담당이 목록 노출 조건을 `get_apt_pipeline` 안으로 옮겼다. 프론트 게이트를 걷어냈다.

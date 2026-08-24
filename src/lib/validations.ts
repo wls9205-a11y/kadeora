@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 // 게시글 작성
 export const PostCreateSchema = z.object({
-  title: z.string().min(1, '제목을 입력해주세요').max(150, '제목은 150자 이하'),
+  title: z.string().min(2, '제목을 2자 이상 입력해주세요').max(150, '제목은 150자 이하'),
   content: z.string().min(5, '내용은 5자 이상').max(5000, '내용은 5000자 이하'),
   category: z.enum(['stock', 'apt', 'local', 'free']).default('free'),
   tag: z.string().max(50).optional().nullable(),
