@@ -101,8 +101,24 @@ async function handler(req: NextRequest) {
   const end = new Date(Date.now() - 2 * 24 * 3600_000).toISOString().slice(0, 10);
   const start = new Date(Date.now() - 5 * 24 * 3600_000).toISOString().slice(0, 10);
 
-  try {
-    const apiUrl = `https://www.googleapis.com/webmasters/v3/sites/${encodeURIComponent(SITE_URL)}/searchAnalytics/query`;
+  /**
+   * ── 2026-08-25 · 4개월 공백(2026-04-22 이후)의 원인 ──
+   *
+   * 실측: OAuth 는 정상이다(어제 19:17 갱신 성공, last_error 없음). API 도 4xx 를 내지 않는다.
+   * 그런데 응답이 `rows: 0` 이다 — 즉 **속성은 열리는데 그 속성에 데이터가 없다.**
+   *
+   * GSC 속성은 두 종류이고 **서로 다른 데이터**를 갖는다:
+   *   URL 접두어  `https://kadeora.app/`   ← 지금 코드가 보던 것
+   *   도메인      `sc-domain:kadeora.app`
+   * 도메인 속성으로 옮겨 재인증하면 URL 접두어 속성은 살아 있되 0행이 된다.
+   * 잘못된 속성이면 보통 403 이지만, **존재하되 비어 있으면 200 + 0행**이라 조용하다.
+   *
+   * → 지정 속성이 0행이면 **접근 가능한 속성 목록을 실제로 조회해** 같은 호스트의
+   *   다른 속성으로 한 번 재시도하고, 무엇을 썼는지 응답에 남긴다.
+   *   추측으로 상수를 바꾸지 않는다 — 다음 사람이 또 4개월을 잃지 않게 한다.
+   */
+  const queryGsc = async (property: string) => {
+    const apiUrl = `https://www.googleapis.com/webmasters/v3/sites/${encodeURIComponent(property)}/searchAnalytics/query`;
     const res = await fetch(apiUrl, {
       method: 'POST',
       headers: {
@@ -118,11 +134,63 @@ async function handler(req: NextRequest) {
     });
     if (!res.ok) {
       const txt = await res.text();
-      console.error('[gsc-sync] api fail', res.status, txt.slice(0, 300));
-      return NextResponse.json({ ok: true, skipped: `gsc_api_${res.status}` });
+      console.error('[gsc-sync] api fail', property, res.status, txt.slice(0, 300));
+      return { ok: false as const, status: res.status };
     }
     const body = await res.json();
-    const rows = (body?.rows || []) as any[];
+    return { ok: true as const, rows: (body?.rows || []) as any[] };
+  };
+
+  /** 이 계정이 실제로 접근 가능한 속성 목록. 추측 대신 물어본다. */
+  const listProperties = async (): Promise<string[]> => {
+    try {
+      const res = await fetch('https://www.googleapis.com/webmasters/v3/sites', {
+        headers: { Authorization: `Bearer ${access}` },
+      });
+      if (!res.ok) return [];
+      const body = await res.json();
+      return ((body?.siteEntry || []) as any[])
+        .map((s) => String(s?.siteUrl || ''))
+        .filter(Boolean);
+    } catch {
+      return [];
+    }
+  };
+
+  try {
+    let usedProperty = SITE_URL;
+    let availableProperties: string[] | undefined;
+
+    let attempt = await queryGsc(usedProperty);
+    if (!attempt.ok) {
+      availableProperties = await listProperties();
+      return NextResponse.json({
+        ok: true,
+        skipped: `gsc_api_${attempt.status}`,
+        property: usedProperty,
+        available_properties: availableProperties,
+      });
+    }
+
+    if (attempt.rows.length === 0) {
+      // 0행이면 속성이 비었을 수 있다. 같은 호스트의 다른 속성을 딱 한 번 시도한다.
+      availableProperties = await listProperties();
+      const host = SITE_URL.replace(/^sc-domain:/, '').replace(/^https?:\/\//, '').replace(/\/$/, '');
+      const alt = availableProperties.find(
+        (p) =>
+          p !== usedProperty &&
+          p.replace(/^sc-domain:/, '').replace(/^https?:\/\//, '').replace(/\/$/, '') === host,
+      );
+      if (alt) {
+        const retry = await queryGsc(alt);
+        if (retry.ok && retry.rows.length > 0) {
+          usedProperty = alt;
+          attempt = retry;
+        }
+      }
+    }
+
+    const rows = attempt.rows;
 
     let inserted = 0;
     let failedBatches = 0;
@@ -149,7 +217,16 @@ async function handler(req: NextRequest) {
       }
     }
 
-    return NextResponse.json({ ok: true, date_range: [start, end], rows: rows.length, inserted, failed_batches: failedBatches });
+    return NextResponse.json({
+      ok: true,
+      date_range: [start, end],
+      property: usedProperty,
+      // 0행일 때만 채워진다. 어떤 속성이 열려 있는지 보이면 원인이 바로 잡힌다.
+      ...(availableProperties ? { available_properties: availableProperties } : {}),
+      rows: rows.length,
+      inserted,
+      failed_batches: failedBatches,
+    });
   } catch (e: any) {
     return NextResponse.json({ ok: true, skipped: 'exception', err: String(e?.message || '').slice(0, 120) });
   }

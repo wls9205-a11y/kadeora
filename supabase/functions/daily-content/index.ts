@@ -18,10 +18,24 @@
 // ⚠️ `apt_tags` 를 채운다. 피드 → 현장 페이지 → 리드폼 동선이 없으면
 //    피드는 트래픽만 쓰고 끝난다 (30일 신규 2,678건이 전부 비어 있었다).
 //
+// ── ⚠️ 호출 구조 (이걸 모르면 글이 3배로 나온다) ──
+// 크론이 **하루 세 번** 부르고 매번 슬롯을 지정한다.
+//   jobid 12 content-slot-a  23 22 * * *  {"slot":"A"}  07:23 KST
+//   jobid 13 content-slot-b  47  1 * * *  {"slot":"B"}  10:47 KST
+//   jobid 14 content-slot-c  31  3 * * *  {"slot":"C"}  12:31 KST
+// 이전 판은 이 파라미터를 **읽지 않아** 호출마다 전 슬롯을 만들었다.
+// A/B/C 를 가르지 않으면 하루 3 × 5 = 15건이 나온다.
+//
 // ── 비율 ──
-// 부동산 3슬롯은 매일, 주식·잡담은 3일에 한 번씩 (요일 오프셋으로 겹치지 않게).
+// 슬롯당 부동산 1건(A·B·C), 주식·잡담은 3일에 한 번씩 A·C 에 얹는다.
 // 3일 기준 부동산 9 · 주식 1 · 잡담 1 = **82 / 9 / 9**.
 // ⚠️ 주식·잡담을 0 으로 만들지 않는다. 커뮤니티가 한 주제만 있으면 죽는다.
+//
+// ── ⚠️ 배포 ──
+// 이 파일은 `npm run build` 로 나가지 않는다. 고친 뒤 반드시:
+//   supabase functions deploy daily-content
+// 2026-08-24 01:47 까지 나오던 `경기도 3기 신도시…`·`서울 재건축…` 하드코딩 템플릿은
+// **옛 배포본**이 낸 것이다(레포에는 그 문자열이 없다). 배포가 밀리면 코드가 잠들어 있다.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
@@ -282,7 +296,37 @@ function slotFree(kstDate: string): Draft {
 
 /* ───────────────────────── 실행 ───────────────────────── */
 
-Deno.serve(async () => {
+/**
+ * ⚠️ 크론은 **하루 세 번** 이 함수를 부르고, 매번 `{"slot":"A"|"B"|"C"}` 를 보낸다.
+ *
+ *   jobid 12  content-slot-a  23 22 * * *  → 07:23 KST
+ *   jobid 13  content-slot-b  47  1 * * *  → 10:47 KST
+ *   jobid 14  content-slot-c  31  3 * * *  → 12:31 KST
+ *
+ * 이전 판은 이 파라미터를 **읽지 않아** 호출마다 전 슬롯을 만들었다.
+ * 그대로 두면 하루 3 × 5 = **15건**이 나온다. 반드시 슬롯을 갈라 한 번에 하나만 만든다.
+ *
+ * 주식·잡담은 부동산 슬롯에 얹어 3일에 한 번씩만 나가게 한다.
+ *   3일 기준 부동산 9(A·B·C × 3일) · 주식 1 · 잡담 1 = 82 / 9 / 9.
+ * ⚠️ 주식·잡담을 0 으로 만들지 않는다. 커뮤니티가 한 주제만 있으면 죽는다.
+ */
+type Slot = 'A' | 'B' | 'C' | 'ALL';
+
+function parseSlot(raw: unknown): Slot {
+  const s = typeof raw === 'string' ? raw.trim().toUpperCase() : '';
+  return s === 'A' || s === 'B' || s === 'C' ? s : 'ALL';
+}
+
+Deno.serve(async (req: Request) => {
+  // 본문이 없거나 JSON 이 아니어도 죽지 않는다 — 수동 호출(curl)도 받아야 한다.
+  let slot: Slot = 'ALL';
+  try {
+    const body = await req.json();
+    slot = parseSlot((body as any)?.slot);
+  } catch {
+    slot = 'ALL';
+  }
+
   const kstDate = new Intl.DateTimeFormat('ko-KR', {
     timeZone: 'Asia/Seoul',
     year: 'numeric',
@@ -297,13 +341,21 @@ Deno.serve(async () => {
   // 3일 주기 오프셋. 주식과 잡담이 같은 날 겹치지 않게 어긋나 있다.
   const dayIndex = Math.floor(Date.now() / 86_400_000);
 
-  const drafts: Array<Draft | null> = [
-    await slotSubscriptions(kstDate),
-    await slotStageChanges(kstDate),
-    await slotTrades(kstDate),
-    dayIndex % 3 === 0 ? await slotStock(kstDate) : null,
-    dayIndex % 3 === 1 ? slotFree(kstDate) : null,
-  ];
+  // 슬롯당 부동산 1건. 주식·잡담은 3일에 한 번씩 서로 다른 슬롯에 얹는다.
+  //   A + (3일마다 주식) · B · C + (3일마다 잡담)
+  const drafts: Array<Draft | null> = [];
+
+  if (slot === 'A' || slot === 'ALL') {
+    drafts.push(await slotSubscriptions(kstDate));
+    if (dayIndex % 3 === 0) drafts.push(await slotStock(kstDate));
+  }
+  if (slot === 'B' || slot === 'ALL') {
+    drafts.push(await slotStageChanges(kstDate));
+  }
+  if (slot === 'C' || slot === 'ALL') {
+    drafts.push(await slotTrades(kstDate));
+    if (dayIndex % 3 === 1) drafts.push(slotFree(kstDate));
+  }
 
   let created = 0;
   let skippedNoData = 0;
@@ -354,6 +406,7 @@ Deno.serve(async () => {
   const body = {
     success: true,
     date: kstDate,
+    slot,
     created,
     skipped_no_data: skippedNoData,
     skipped_duplicate: skippedDuplicate,
