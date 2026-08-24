@@ -102,12 +102,12 @@ const CELL: React.CSSProperties = {
 function Cell({ label, value, note, accent }: { label: string; value: string; note?: string; accent?: boolean }) {
   return (
     <div style={CELL}>
-      <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-tertiary)', marginBottom: 3, letterSpacing: '.02em' }}>
+      <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-tertiary)', marginBottom: 3, letterSpacing: '.02em' }}>
         {label}
       </div>
       <div
         style={{
-          fontSize: 15,
+          fontSize: 'var(--fs-sm)',
           fontWeight: 800,
           lineHeight: 1.25,
           letterSpacing: '-.03em',
@@ -121,7 +121,7 @@ function Cell({ label, value, note, accent }: { label: string; value: string; no
         {value}
       </div>
       {note && (
-        <div style={{ fontSize: 9.5, color: 'var(--text-tertiary)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {note}
         </div>
       )}
@@ -160,11 +160,11 @@ export default function AptKeyMetrics({
       <Cell label={unit.label} value={unit.value} note={unit.note} />
       <Cell label="입주" value={move ?? '미정'} note={move ? '예정' : preAnnouncement ? '공고 후 확정' : undefined} />
       <div style={{ ...CELL, borderRight: 0 }}>
-        <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-tertiary)', marginBottom: 3 }}>청약</div>
-        <div style={{ fontSize: 15, fontWeight: 800, lineHeight: 1.25, letterSpacing: '-.03em', color: dday.value.startsWith('D-') ? 'var(--accent-red)' : 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>
+        <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-tertiary)', marginBottom: 3 }}>청약</div>
+        <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, lineHeight: 1.25, letterSpacing: '-.03em', color: dday.value.startsWith('D-') ? 'var(--accent-red)' : 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>
           {dday.value}
         </div>
-        <div style={{ fontSize: 9.5, color: 'var(--text-tertiary)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {dday.note}
         </div>
       </div>

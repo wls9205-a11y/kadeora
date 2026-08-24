@@ -48,7 +48,7 @@ export default function RelatedContentCard({ type, entityName, showSignup }: Pro
       marginTop: 16, padding: 14, borderRadius: 'var(--radius-card)',
       background: 'var(--bg-surface)', border: '1px solid var(--border)',
     }}>
-      <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>
+      <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>
         📊 함께 보면 좋은 콘텐츠
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -60,12 +60,12 @@ export default function RelatedContentCard({ type, entityName, showSignup }: Pro
               borderRadius: 'var(--radius-md)', background: 'var(--bg-hover)', textDecoration: 'none',
               border: '1px solid var(--border)', transition: 'border-color 0.15s',
             }}>
-            <span style={{ fontSize: 22, flexShrink: 0 }}>{l.icon}</span>
+            <span style={{ fontSize: 'var(--fs-xl)', flexShrink: 0 }}>{l.icon}</span>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{l.title}</div>
-              <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>{l.desc}</div>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>{l.title}</div>
+              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>{l.desc}</div>
             </div>
-            <span style={{ fontSize: 12, color: 'var(--text-tertiary)', flexShrink: 0 }}>→</span>
+            <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexShrink: 0 }}>→</span>
           </Link>
         ))}
       </div>
@@ -75,7 +75,7 @@ export default function RelatedContentCard({ type, entityName, showSignup }: Pro
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
             marginTop: 10, padding: '10px', borderRadius: 'var(--radius-md)',
             background: 'rgba(59,123,246,0.06)', border: '1px solid rgba(59,123,246,0.12)',
-            fontSize: 12, fontWeight: 700, color: 'var(--brand)', textDecoration: 'none',
+            fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--brand)', textDecoration: 'none',
           }}>
           🔔 무료 가입하고 알림 받기
         </Link>

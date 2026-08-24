@@ -57,7 +57,7 @@ export default function SiteJumpBar({ items }: { items: JumpItem[] }) {
               borderRadius: 'var(--radius-pill)',
               background: 'var(--bg-sunken)',
               color: 'var(--text-secondary)',
-              fontSize: 12.5,
+              fontSize: 'var(--fs-xs)',
               fontWeight: 600,
               whiteSpace: 'nowrap',
               textDecoration: 'none',

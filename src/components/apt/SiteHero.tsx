@@ -35,7 +35,7 @@ const WatermarkSm = () => (
       <circle cx="36" cy="36" r="7" fill="rgba(255,255,255,0.85)" />
       <circle cx="54" cy="36" r="7" fill="rgba(255,255,255,0.85)" />
     </svg>
-    <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.8)', fontWeight: 500 }}>kadeora.app</span>
+    <span style={{ fontSize: 'var(--fs-xs)', color: 'rgba(255,255,255,0.8)', fontWeight: 500 }}>kadeora.app</span>
   </div>
 );
 
@@ -140,7 +140,7 @@ export default function SiteHero({ src, name, region, credit, badges, children }
           <div
             style={{
               position: 'absolute', right: 12, bottom: 8, zIndex: 2, maxWidth: '60%',
-              fontSize: 10.5, lineHeight: 1.4, textAlign: 'right',
+              fontSize: 'var(--fs-xs)', lineHeight: 1.4, textAlign: 'right',
               color: 'rgba(255,255,255,0.86)',
               textShadow: '0 1px 2px rgba(0,0,0,0.5)',
               overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',

@@ -51,7 +51,7 @@ const panel: React.CSSProperties = {
 };
 
 const panelTitle: React.CSSProperties = {
-  fontSize: 11,
+  fontSize: 'var(--fs-xs)',
   fontWeight: 800,
   letterSpacing: '.08em',
   color: 'var(--text-tertiary)',
@@ -68,10 +68,10 @@ export default function SiteDetailRail({
       {/* ① 리드폼 진입 */}
       {showLeadForm && (
         <div style={{ ...panel, borderColor: 'var(--brand)', background: 'var(--brand-bg)' }}>
-          <p style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 4px', lineHeight: 1.4, wordBreak: 'keep-all' }}>
+          <p style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 4px', lineHeight: 1.4, wordBreak: 'keep-all' }}>
             {siteName} {leadCopy(lifecycleStage).band.replace(' · 무료', '')}
           </p>
-          <p style={{ fontSize: 11.5, color: 'var(--text-secondary)', margin: '0 0 10px', lineHeight: 1.5, wordBreak: 'keep-all' }}>
+          <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', margin: '0 0 10px', lineHeight: 1.5, wordBreak: 'keep-all' }}>
             잔여 세대·일정을 담당자가 직접 안내해 드립니다.
           </p>
           <a
@@ -80,7 +80,7 @@ export default function SiteDetailRail({
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               minHeight: 44, borderRadius: 'var(--radius-sm)',
               background: 'var(--brand)', color: '#FFFFFF',
-              fontSize: 13.5, fontWeight: 700, textDecoration: 'none',
+              fontSize: 'var(--fs-sm)', fontWeight: 700, textDecoration: 'none',
             }}
           >
             안내 신청하기
@@ -114,10 +114,10 @@ export default function SiteDetailRail({
           </svg>
         </span>
         <span style={{ minWidth: 0 }}>
-          <span style={{ display: 'block', fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.35 }}>
+          <span style={{ display: 'block', fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.35 }}>
             부정공 카톡방
           </span>
-          <span style={{ display: 'block', fontSize: 11.5, color: 'var(--text-tertiary)', lineHeight: 1.45, wordBreak: 'keep-all' }}>
+          <span style={{ display: 'block', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', lineHeight: 1.45, wordBreak: 'keep-all' }}>
             공고 전 소식·잔여 동호수를 카톡으로
           </span>
         </span>
@@ -136,10 +136,10 @@ export default function SiteDetailRail({
                 borderBottom: '1px solid var(--border)',
               }}
             >
-              <span style={{ display: 'block', fontSize: 12.5, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <span style={{ display: 'block', fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {ns.name}
               </span>
-              <span style={{ display: 'block', fontSize: 10.5, color: 'var(--text-tertiary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <span style={{ display: 'block', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {[ns.sigungu || ns.region, ns.total_units ? `${ns.total_units.toLocaleString()}세대` : null].filter(Boolean).join(' · ')}
               </span>
             </Link>
@@ -189,7 +189,7 @@ const chip: React.CSSProperties = {
   borderRadius: 'var(--radius-pill)',
   background: 'var(--bg-sunken)',
   color: 'var(--text-secondary)',
-  fontSize: 11.5,
+  fontSize: 'var(--fs-xs)',
   fontWeight: 600,
   textDecoration: 'none',
 };

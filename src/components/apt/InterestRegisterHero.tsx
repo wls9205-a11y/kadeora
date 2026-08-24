@@ -77,7 +77,7 @@ export function InterestRegisterHero({ aptId, aptName, aptSlug, status, isLogged
       }}
     >
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 2 }}>
+        <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 2 }}>
           관심 단지로 저장
           {statusLabel && (
             <span
@@ -87,7 +87,7 @@ export function InterestRegisterHero({ aptId, aptName, aptSlug, status, isLogged
                 borderRadius: 999,
                 background: 'var(--brand-bg)',
                 color: 'var(--brand)',
-                fontSize: 11,
+                fontSize: 'var(--fs-xs)',
                 fontWeight: 700,
               }}
             >
@@ -95,7 +95,7 @@ export function InterestRegisterHero({ aptId, aptName, aptSlug, status, isLogged
             </span>
           )}
         </div>
-        <div style={{ fontSize: 12, color: 'var(--text-tertiary)', wordBreak: 'keep-all' }}>
+        <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', wordBreak: 'keep-all' }}>
           카더라 계정에 저장하고 청약 일정을 앱으로 받아보세요
         </div>
       </div>
@@ -109,7 +109,7 @@ export function InterestRegisterHero({ aptId, aptName, aptSlug, status, isLogged
           background: done ? 'var(--brand-bg)' : 'var(--kakao-bg)',
           color: done ? 'var(--brand)' : 'var(--kakao-text)',
           fontWeight: 800,
-          fontSize: 13,
+          fontSize: 'var(--fs-sm)',
           border: 'none',
           cursor: loading || done ? 'default' : 'pointer',
           whiteSpace: 'nowrap',
@@ -124,7 +124,7 @@ export function InterestRegisterHero({ aptId, aptName, aptSlug, status, isLogged
         target="_blank"
         rel="noopener noreferrer"
         style={{
-          fontSize: 12,
+          fontSize: 'var(--fs-xs)',
           fontWeight: 600,
           color: 'var(--text-secondary)',
           textDecoration: 'none',
@@ -134,16 +134,16 @@ export function InterestRegisterHero({ aptId, aptName, aptSlug, status, isLogged
         카카오톡 문의
       </a>
       {err && (
-        <div style={{ width: '100%', fontSize: 12, color: 'var(--accent-red)', marginTop: 4 }}>{err}</div>
+        <div style={{ width: '100%', fontSize: 'var(--fs-xs)', color: 'var(--accent-red)', marginTop: 4 }}>{err}</div>
       )}
       {/* Phase 5 B2: 등록 완료 후 가점 매칭 follow-up CTA */}
       {done && isLoggedIn && (
         <div style={{ width: '100%', marginTop: 4, padding: '8px 10px', background: 'rgba(250,199,117,0.08)', border: '1px solid rgba(250,199,117,0.3)', borderRadius: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-          <span style={{ fontSize: 12, color: 'var(--text-secondary)', fontWeight: 600 }}>
+          <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', fontWeight: 600 }}>
             <span style={{ color: '#FAC775', marginRight: 4 }}>★</span>
             가점 입력하면 매칭 단지 자동 알림
           </span>
-          <Link href="/profile/cheongak" style={{ fontSize: 12, fontWeight: 800, color: '#FAC775', textDecoration: 'none' }}>입력하기 →</Link>
+          <Link href="/profile/cheongak" style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, color: '#FAC775', textDecoration: 'none' }}>입력하기 →</Link>
         </div>
       )}
     </div>

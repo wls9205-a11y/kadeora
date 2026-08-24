@@ -215,7 +215,7 @@ const labelStyle: CSSProperties = {
 // 스펙의 --text-danger 는 globals.css 에 없는 이름이라 그대로 쓰면 값이 없어
 // 상속색으로 렌더된다 (Rule #94). 실재 토큰은 --error (#DC2626).
 const errorStyle: CSSProperties = {
-  fontSize: 13,
+  fontSize: 'var(--fs-sm)',
   color: 'var(--error)',
   lineHeight: 1.5,
   margin: '4px 0 0',
@@ -223,7 +223,7 @@ const errorStyle: CSSProperties = {
 
 // 스펙의 --text-muted 도 미정의. 저장소의 보조 텍스트 토큰은 --text-tertiary.
 const hintStyle: CSSProperties = {
-  fontSize: 12,
+  fontSize: 'var(--fs-xs)',
   color: 'var(--text-tertiary)',
   lineHeight: 1.5,
   margin: '4px 0 0',
@@ -233,7 +233,7 @@ const badgeBase: CSSProperties = {
   flexShrink: 0,
   padding: '1px 6px',
   borderRadius: 'var(--radius-pill)',
-  fontSize: 11,
+  fontSize: 'var(--fs-xs)',
   fontWeight: 700,
   lineHeight: 1.6,
 };
@@ -535,7 +535,7 @@ export default function LeadForm({ siteSlug, siteName, typeOptions, region, sigu
         style={{
           background: 'var(--kd-accent-bg)',
           color: 'var(--kd-accent)',
-          fontSize: 13,
+          fontSize: 'var(--fs-sm)',
           fontWeight: 700,
           padding: '7px 14px',
           borderBottom: '1px solid var(--kd-accent-border)',
@@ -702,7 +702,7 @@ export default function LeadForm({ siteSlug, siteName, typeOptions, region, sigu
 
           {sendError && <p style={{ ...errorStyle, marginTop: 8 }}>{sendError}</p>}
 
-          <p style={{ fontSize: 11, color: 'var(--text-tertiary)', lineHeight: 1.6, margin: '10px 0 0' }}>
+          <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', lineHeight: 1.6, margin: '10px 0 0' }}>
             작성 내용은 전송 성공 전까지 기기에 임시 보관됩니다
           </p>
         </form>

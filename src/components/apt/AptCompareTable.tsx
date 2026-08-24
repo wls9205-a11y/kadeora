@@ -103,16 +103,16 @@ export default async function AptCompareTable({ slug, currentSite }: Props) {
       style={{ margin: '0 0 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}
     >
       <div style={{ padding: '10px 14px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: 0.5 }}>인근 단지 비교</span>
-        <span style={{ fontSize: 9, color: 'var(--text-tertiary)', fontWeight: 600 }}>총 {rows.length}곳</span>
+        <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: 0.5 }}>인근 단지 비교</span>
+        <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 600 }}>총 {rows.length}곳</span>
       </div>
-      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--fs-xs)' }}>
         <thead>
           <tr style={{ background: 'var(--bg-hover)' }}>
-            <th style={{ textAlign: 'left', padding: '8px 12px', fontWeight: 800, color: 'var(--text-tertiary)', fontSize: 10 }}>단지</th>
-            <th style={{ textAlign: 'right', padding: '8px 12px', fontWeight: 800, color: 'var(--text-tertiary)', fontSize: 10 }}>분양가</th>
-            <th style={{ textAlign: 'right', padding: '8px 12px', fontWeight: 800, color: 'var(--text-tertiary)', fontSize: 10 }}>세대</th>
-            <th style={{ textAlign: 'right', padding: '8px 12px', fontWeight: 800, color: 'var(--text-tertiary)', fontSize: 10 }}>등급</th>
+            <th style={{ textAlign: 'left', padding: '8px 12px', fontWeight: 800, color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)' }}>단지</th>
+            <th style={{ textAlign: 'right', padding: '8px 12px', fontWeight: 800, color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)' }}>분양가</th>
+            <th style={{ textAlign: 'right', padding: '8px 12px', fontWeight: 800, color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)' }}>세대</th>
+            <th style={{ textAlign: 'right', padding: '8px 12px', fontWeight: 800, color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)' }}>등급</th>
           </tr>
         </thead>
         <tbody>
@@ -124,7 +124,7 @@ export default async function AptCompareTable({ slug, currentSite }: Props) {
               <tr key={r.slug + i} style={{ background: bg }}>
                 <td style={{ ...cell, fontWeight: r.isCurrent ? 800 : 600, color: 'var(--text-primary)' }}>
                   {r.isCurrent ? (
-                    <span>{r.name} <span style={{ fontSize: 9, fontWeight: 800, color: 'var(--kd-accent)', marginLeft: 4 }}>★ 현재</span></span>
+                    <span>{r.name} <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, color: 'var(--kd-accent)', marginLeft: 4 }}>★ 현재</span></span>
                   ) : (
                     <Link href={`/apt/${encodeURIComponent(r.slug)}`} style={{ textDecoration: 'none', color: 'var(--text-primary)' }}>
                       {r.name}

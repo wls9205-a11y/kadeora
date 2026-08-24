@@ -53,7 +53,7 @@ export default async function AptSidebar({ slug, builder, isLoggedIn = false }: 
   const siblings = ((siblingsRes as any)?.data ?? []) as SiblingRow[];
 
   const cardCss: React.CSSProperties = { background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14, margin: '0 0 12px' };
-  const titleCss: React.CSSProperties = { fontSize: 11, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: 0.5, marginBottom: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' };
+  const titleCss: React.CSSProperties = { fontSize: 'var(--fs-xs)', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: 0.5, marginBottom: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' };
 
   return (
     <aside aria-label="단지 사이드바" className="apt-sidebar">
@@ -66,23 +66,23 @@ export default async function AptSidebar({ slug, builder, isLoggedIn = false }: 
           <>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               {ALERT_TYPES.map(a => (
-                <div key={a.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 11 }}>
+                <div key={a.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 'var(--fs-xs)' }}>
                   <span style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>
-                    <span style={{ color: a.defaultOn ? 'var(--kd-accent)' : 'var(--text-tertiary)', marginRight: 6, fontSize: 14 }}>{a.defaultOn ? '●' : '○'}</span>
+                    <span style={{ color: a.defaultOn ? 'var(--kd-accent)' : 'var(--text-tertiary)', marginRight: 6, fontSize: 'var(--fs-sm)' }}>{a.defaultOn ? '●' : '○'}</span>
                     {a.label}
                   </span>
-                  <span style={{ color: a.defaultOn ? 'var(--kd-accent)' : 'var(--text-tertiary)', fontWeight: 800, fontSize: 10 }}>
+                  <span style={{ color: a.defaultOn ? 'var(--kd-accent)' : 'var(--text-tertiary)', fontWeight: 800, fontSize: 'var(--fs-xs)' }}>
                     {a.defaultOn ? 'ON' : 'OFF'}
                   </span>
                 </div>
               ))}
             </div>
-            <div style={{ marginTop: 10, fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 600 }}>
+            <div style={{ marginTop: 10, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 600 }}>
               마이페이지에서 변경
             </div>
           </>
         ) : (
-          <p style={{ margin: 0, fontSize: 11.5, lineHeight: 1.6, color: 'var(--text-secondary)' }}>
+          <p style={{ margin: 0, fontSize: 'var(--fs-xs)', lineHeight: 1.6, color: 'var(--text-secondary)' }}>
             모델하우스 오픈 · 청약 D-3 · 분양가 변동 알림을 받을 수 있습니다.{' '}
             <Link href="/login" style={{ color: 'var(--kd-accent)', fontWeight: 700, textDecoration: 'none' }}>로그인 →</Link>
           </p>
@@ -97,16 +97,16 @@ export default async function AptSidebar({ slug, builder, isLoggedIn = false }: 
         <section style={cardCss}>
           <div style={titleCss}>
             <span>{builder}</span>
-            <span style={{ fontSize: 9, color: 'var(--text-tertiary)', fontWeight: 600 }}>다른 단지</span>
+            <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 600 }}>다른 단지</span>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {siblings.map(s => (
               <Link key={s.sibling_slug} href={`/apt/${encodeURIComponent(s.sibling_slug)}`} style={{ textDecoration: 'none' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 6 }}>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {s.sibling_name}
                   </span>
-                  {s.sibling_sigungu && <span style={{ fontSize: 10, color: 'var(--text-tertiary)', flexShrink: 0 }}>{s.sibling_sigungu}</span>}
+                  {s.sibling_sigungu && <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexShrink: 0 }}>{s.sibling_sigungu}</span>}
                 </div>
               </Link>
             ))}

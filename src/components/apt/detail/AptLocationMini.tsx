@@ -21,21 +21,21 @@ export default function AptLocationMini({ address, latitude, longitude, nearbySt
             height: 80, borderRadius: 'var(--radius-sm)',
             background: 'linear-gradient(135deg, rgba(59,123,246,0.08), rgba(139,92,246,0.06))',
             border: '1px dashed var(--border)',
-            fontSize: 28,
+            fontSize: 'var(--fs-2xl)',
           }}
         >
           📍
         </div>
       )}
-      <div style={{ fontSize: 13, color: 'var(--text-primary)', fontWeight: 600 }}>{address}</div>
+      <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', fontWeight: 600 }}>{address}</div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
         {nearbyStation && (
-          <span style={{ fontSize: 11, padding: '3px 8px', borderRadius: 'var(--radius-xl)', background: 'var(--bg-hover)', color: 'var(--text-secondary)' }}>
+          <span style={{ fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 'var(--radius-xl)', background: 'var(--bg-hover)', color: 'var(--text-secondary)' }}>
             🚉 {nearbyStation}
           </span>
         )}
         {schoolDistrict && (
-          <span style={{ fontSize: 11, padding: '3px 8px', borderRadius: 'var(--radius-xl)', background: 'var(--bg-hover)', color: 'var(--text-secondary)' }}>
+          <span style={{ fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 'var(--radius-xl)', background: 'var(--bg-hover)', color: 'var(--text-secondary)' }}>
             🎓 {schoolDistrict}
           </span>
         )}

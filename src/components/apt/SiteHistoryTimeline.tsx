@@ -127,7 +127,7 @@ export default function SiteHistoryTimeline({ events }: { events: AptSiteEvent[]
             <time
               dateTime={e.occurred_at}
               style={{
-                fontSize: 9.5,
+                fontSize: 'var(--fs-xs)',
                 fontWeight: 700,
                 lineHeight: 1.5,
                 color: 'var(--text-tertiary)',
@@ -176,7 +176,7 @@ export default function SiteHistoryTimeline({ events }: { events: AptSiteEvent[]
               <span
                 style={{
                   display: 'block',
-                  fontSize: 12,
+                  fontSize: 'var(--fs-xs)',
                   fontWeight: 800,
                   letterSpacing: '-.02em',
                   color: 'var(--text-primary)',
@@ -196,7 +196,7 @@ export default function SiteHistoryTimeline({ events }: { events: AptSiteEvent[]
                 <span
                   style={{
                     display: 'block',
-                    fontSize: 11,
+                    fontSize: 'var(--fs-xs)',
                     lineHeight: 1.55,
                     color: 'var(--text-secondary)',
                     marginTop: 2,
@@ -213,7 +213,7 @@ export default function SiteHistoryTimeline({ events }: { events: AptSiteEvent[]
                     flexShrink: 0,
                     padding: '1.5px 5px',
                     borderRadius: 3,
-                    fontSize: 9,
+                    fontSize: 'var(--fs-xs)',
                     fontWeight: 800,
                     lineHeight: 1.4,
                     background: grade.badgeBg,
@@ -226,7 +226,7 @@ export default function SiteHistoryTimeline({ events }: { events: AptSiteEvent[]
                   <span
                     style={{
                       minWidth: 0,
-                      fontSize: 10,
+                      fontSize: 'var(--fs-xs)',
                       lineHeight: 1.4,
                       color: 'var(--text-tertiary)',
                       overflow: 'hidden',
