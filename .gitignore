@@ -49,3 +49,6 @@ next-env.d.ts
 *.ps1
 
 .vercel
+
+# Supabase CLI 임시 파일 (functions deploy 시 생성)
+supabase/.temp/
