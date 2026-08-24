@@ -8,7 +8,7 @@
 //    confidence='confirmed' 로 화면에 나가고 광고 랜딩까지 흘러간다.
 
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
-import { fetchFilingBody } from '@/lib/dart/filing-body';
+import { fetchFilingBody, isTerminalBodyFailure } from '@/lib/dart/filing-body';
 import {
   bodyMentionsRedev,
   extractZoneNames,
@@ -114,11 +114,19 @@ export async function processRedevFiling(f: RedevFiling, apiKey: string): Promis
 
   const fetched = await fetchFilingBody(f.rcept_no, apiKey);
   if (!fetched.ok) {
-    // 본문을 못 받았으면 자동 반영으로 넘어가지 않는다. 사람이 본다.
     // ⚠️ 원인을 reason 에 그대로 싣는다. `body_fetch_failed` 만으로는 401 인지 ZIP 파싱
     //    실패인지 EUC-KR 인지 알 수 없어 큐 3건을 아무도 판단하지 못했다.
     //    런타임 로그는 하루면 사라지므로 **행에 남겨야** 한다.
     const reason = `body_fetch_failed:${fetched.reason}${fetched.detail ? ` (${fetched.detail})` : ''}`.slice(0, 300);
+
+    // 다시 시도해도 같은 결과인 실패는 큐에 남기지 않는다 — 사람이 봐도 누를 게 없다.
+    // 013(문서 없음)은 [기재정정] 공시에서 흔하고 **정상 상황**이다.
+    if (isTerminalBodyFailure(fetched.reason)) {
+      await dropPending(admin, f.rcept_no, reason);
+      return { kind: 'discard', reason };
+    }
+
+    // 나머지(키 오류·한도·점검·타임아웃)는 상황이 바뀌면 열린다. 재시도 대상으로 남긴다.
     await enqueue(admin, f, { kind: 'queue', reason, zones: [] });
     return { kind: 'queue', reason };
   }

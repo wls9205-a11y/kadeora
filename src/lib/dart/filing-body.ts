@@ -117,6 +117,31 @@ function fail(reason: string, detail?: string): FilingBodyResult {
 }
 
 /**
+ * opendart 상태 코드 (공식 체계) — 실측 확인:
+ * 잘못된 키로 호출하면 **HTTP 200 · XML 126바이트**로 아래를 돌려준다.
+ *   <result><status>010</status><message>등록되지 않은 인증키입니다.</message></result>
+ *
+ *   010 등록되지 않은 인증키      키 문제. 코드로 못 고친다
+ *   011 사용할 수 없는 키(미신청·만료)
+ *   013 조회된 데이터 없음        그 공시에 문서가 없다. **정상 상황이다**
+ *   020 요청 제한 초과(일 20,000)
+ *   100 필드 부적절(rcept_no 형식)
+ *   800 시스템 점검
+ *
+ * ⚠️ 013 은 [기재정정] 공시에서 흔하다 — 원문 문서가 별도 rcept_no 를 갖는 경우가 있다.
+ */
+
+/** 다시 시도해도 결과가 같은 실패. 큐에 남겨도 사람이 할 게 없다 → 닫는다. */
+export function isTerminalBodyFailure(reason: string): boolean {
+  return reason === 'opendart_013' || reason === 'opendart_100' || reason === 'no_rcept_no';
+}
+
+/** 요청 한도 초과. 같은 실행에서 더 두드리면 한도만 태운다 → 이번 회차는 멈춘다. */
+export function isRateLimited(reason: string): boolean {
+  return reason === 'opendart_020';
+}
+
+/**
  * 공시 본문 텍스트.
  *
  * 엔드포인트는 opendart 의 `document.xml` 이다 — 뷰어 HTML(dsaf001/main.do)이 아니다.

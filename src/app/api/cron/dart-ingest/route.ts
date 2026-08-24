@@ -245,6 +245,7 @@ async function handler(_req: NextRequest) {
     // ⚠️ 상한을 둔다. 영구 실패건이 쌓이면 매 실행 본문 왕복이 크론을 잡아먹는다.
     const RETRY_CAP = 5;
     let redevRetried = 0, redevRetryResolved = 0;
+    let redevRetryHalted: string | null = null;
     if (apiKey) {
       // database.ts 가 apt_stage_review_queue 를 아직 모른다 (저장소 as any 관례).
       const { data: stuck } = await (supabase as any)
@@ -266,6 +267,13 @@ async function handler(_req: NextRequest) {
           );
           if (r.kind !== 'queue') redevRetryResolved++;
           else if (!r.reason.startsWith('body_fetch_failed')) redevRetryResolved++;
+
+          // ⚠️ 일 20,000건 한도를 넘긴 상태다. 더 두드리면 한도만 태우고 결과는 같다.
+          //    이번 회차는 여기서 멈춘다 — 다음 실행(15분 뒤)에 이어서 한다.
+          if (r.kind === 'queue' && r.reason.includes('opendart_020')) {
+            redevRetryHalted = 'rate_limited';
+            break;
+          }
         } catch (e: any) {
           console.error('[dart-ingest] redev 재시도 실패', q.rcept_no, e?.message ?? String(e));
         }
@@ -282,6 +290,7 @@ async function handler(_req: NextRequest) {
         redev_candidates: redevCandidates.length,
         redev_auto: redevAuto, redev_queued: redevQueued, redev_discarded: redevDiscarded,
         redev_retried: redevRetried, redev_retry_resolved: redevRetryResolved,
+        redev_retry_halted: redevRetryHalted,
       },
     };
   });
