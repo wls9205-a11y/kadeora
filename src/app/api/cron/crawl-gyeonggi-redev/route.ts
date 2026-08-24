@@ -4,39 +4,52 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withCronLogging } from '@/lib/cron-logger';
 
 /**
- * ADDENDUM §4-2 — 경기·인천 435건.
+ * ADDENDUM §4-2 — 경기 정비사업.
  *
- * 이전 구현은 서비스명 4개를 **추측**해서 전부 ERROR-310(해당하는 서비스를 찾을 수 없습니다)을
- * 받고 시드 35건으로 폴백하고 있었다. 추측을 한 번 더 하지 않는다.
+ * 이전 구현은 서비스명 4개(Ggcleanupbiz · UrbanMntncBizInfo · URBMNTNCBIZ · GgClnupBsnsSttus)를
+ * **추측**해 전부 ERROR-310 을 받고 시드 35건으로 조용히 폴백하고 있었다.
  *
- * ■ 소스 (2026-08-25 확인)
- *   경기데이터드림 「일반 정비 사업 추진 현황」
- *   infId=S62GFEEN7JMLMA0PH6CF19108891
- *   운영: 경기도 도시재생과. 시군별 데이터셋(안양 15150142 · 하남 15150356 · 고양
- *   15085976/15085975)은 전부 이 도 단위 자료의 부분집합이다.
+ * ■ 소스 — 확정 (DB 담당이 직접 호출해 INFO-000 확인, 2026-08-25)
+ *   https://openapi.gg.go.kr/GenrlimprvBizpropls?KEY=...&Type=json&pIndex=1&pSize=N
+ *   경기데이터드림 「일반 정비 사업 추진 현황」 (infId=S62GFEEN7JMLMA0PH6CF19108891)
+ *   list_total_count = 533
  *
- * ■ 필드 (안양 15150142 실측 42열 — 도 단위도 같은 스키마다)
- *   시군명 · 사업단계 · 사업유형 · 정비구역명 · 위치 · 위도 · 경도 · 구역면적
- *   기존주택(준공년도 · 동수 · 세대수)
- *   사업시행세대수총계 · 조합원분양세대수 · 일반분양세대수 · 임대세대수
- *   토지등소유자수 · 조합원수 · 사업시행자
- *   조합설립인가/사업시행인가/관리처분인가/착공/일반분양/준공 일자
- *   현추진상황 · 담당부서
+ * ■ ⚠️ 실측 응답 키 — 포털의 한글 라벨과 다르다. 아래가 진짜다.
+ *   SIGUN_NM                     시군명        → sigungu
+ *   BIZ_TYPE_NM                  재개발/재건축  → project_type
+ *   IMPRV_ZONE_NM                구역명        → district_name  ("원당주공2단지" 같은 단지명이 온다)
+ *   LOCPLC_ADDR                  주소          → address
+ *   ZONE_AR                      구역면적       → area_sqm
+ *   BIZ_STEP_NM                  사업단계       → stage
+ *   EXISTNG_HOUSNG_HSHLD_CNT     기존 세대수    → existing_households
+ *   EXISTNG_HOUSNG_COMPLTN_PERD  기존 준공연도  → ⚠️ 받을 컬럼이 없다 (아래)
+ *   ASOCNTMB_CNT                 조합원 수      → guild_member_num
+ *   BIZ_IMPLMNTR_NM              사업시행자     → developer  (조합이다. constructor 아님)
+ *   CHRGPSN_TELNO                담당자 전화    → phone
+ *   NWCNST_HUSNG_LTUTAR*_DESC    신축 평형별 세대수 4구간 → 합산해서 total_households
+ *   날짜 8종  SAFE_DIAGNS_DE · ASSOCTN_FOUND_CONFMTN_DE · BIZ_IMPLMTN_CONFMTN_DE
+ *            MANAGE_DISPOSIT_CONFMTN_DE · STRCONTR_DE · GENRL_LOTOUT_DE
+ *            COMPLTN_DE · TRANSFR_NOTIFC_DE
  *
- *   부산보다 낫다 — **위경도**가 있어 지도에 바로 올라가고, **세대수가 3종으로 분리**돼 있다.
+ * ■ ⚠️ 함정 3가지 (전부 실측으로 확인된 것)
+ *   1. NOW_PROPLSN_MATR_DESC(포털 라벨 '현추진상황')는 **전부 null 이다.**
+ *      단계는 BIZ_STEP_NM 을 쓴다. 라벨만 보고 매핑하면 단계가 통째로 빈다.
+ *   2. 총세대수 단일 필드가 **없다.** NWCNST_HUSNG_LTUTAR* 4구간을 합산해야 한다.
+ *      실측 표본 117 + 685 + 476 + 85 = 1,363.
+ *   3. **위경도가 없다.** 앞서 매핑했던 REFINE_WGS84_LAT 계열은 이 응답에 존재하지 않는다.
+ *      지어내지 않는다 — 좌표는 LOCPLC_ADDR 지오코딩(redev-geocode) 몫이다.
  *
- * ■ ⚠️ 서비스명(영문 식별자)은 아직 확정되지 않았다
- *   data.gg.go.kr 는 검색 URL 이 500 을 뱉고 상세 페이지는 JS 렌더라 외부에서 못 읽는다.
- *   그래서 **이름을 코드에 박지 않는다.**
- *     1순위  ?service=<이름>        — 한 번 태워보고 확정할 때 쓴다 (재배포 불필요)
- *     2순위  GYEONGGI_REDEV_SERVICE 환경변수
- *     3순위  없으면 **아무것도 시도하지 않고** 무엇이 필요한지 응답에 적어 돌려준다
- *   틀린 이름으로 조용히 폴백하지 않는다. 그게 435건을 반년 방치한 방식이다.
+ * ■ ⚠️ EXISTNG_HOUSNG_COMPLTN_PERD(기존 준공연도)는 넣을 곳이 없다.
+ *   redevelopment_projects 에 built_year 컬럼이 없다(실측 51열 확인).
+ *   notes 에 밀어넣지 않고 **버린다.** 재건축 연한 판단에 쓸모가 있으니
+ *   컬럼이 생기면 이 줄 아래 한 줄만 추가하면 된다.
  *
- * ■ 응답 키도 추측하지 않는다
- *   포털에 보이는 것은 한글 컬럼 라벨이고 API 가 실제로 내려주는 키는 다르다.
- *   pick() 이 영문 후보와 한글 라벨을 모두 훑고, 첫 실행이 response_keys 와
- *   sample_row 를 metadata 에 실어 준다. 매핑은 그 값을 보고 확정한다.
+ * ■ ⚠️ 533건에는 준공·이전고시된 기축이 섞여 있다.
+ *   이 크론은 redevelopment_projects 에 담기만 한다. apt_sites 승격은 별도이며
+ *   그때 stage='준공' 을 post_move_in 으로 보내거나 제외해야 한다.
+ *
+ * ■ ⚠️ 인천은 이 API 에 없다. 시·도가 다르다. 별도 소스가 필요하다.
+ *   기존 incheon_seed 15건은 건드리지 않는다.
  */
 
 /* ═══════════ 값 유틸 ═══════════ */
@@ -88,6 +101,36 @@ function pick(row: Record<string, any>, candidates: string[]): any {
   return null;
 }
 
+/**
+ * 총세대수 — 응답에 단일 필드가 없다. 신축 평형별 세대수를 합산해야 한다.
+ *
+ * 키가 `NWCNST_HUSNG_LTUTAR4060M_DESC` 처럼 평형 구간을 이름에 담고 있고 구간이
+ * 4개(40~60 · 60~85 · 85~135 · 135초과)다. **정확한 접미사를 외워 쓰지 않고 접두사로 훑는다** —
+ * 구간이 하나 늘거나 이름이 바뀌어도 합계가 조용히 틀리지 않는다.
+ * 실측 표본: 117 + 685 + 476 + 85 = 1,363.
+ *
+ * ⚠️ 이름이 `_DESC` 라 숫자가 아닌 설명이 들어올 수 있다. 순수 숫자로 읽히는 값만 더하고,
+ *    하나도 못 읽으면 0 이 아니라 null 을 낸다 (0세대와 "모름"은 다르다).
+ */
+const NEWBUILD_KEY_PREFIX = 'NWCNST_HUSNG_LTUTAR';
+
+function sumNewBuildUnits(row: Record<string, any>): number | null {
+  let total = 0;
+  let hit = 0;
+  for (const [k, v] of Object.entries(row)) {
+    if (!k.toUpperCase().startsWith(NEWBUILD_KEY_PREFIX)) continue;
+    const s = clean(v);
+    if (!s) continue;
+    if (!/^[0-9,]+$/.test(s)) continue; // 설명 문자열은 버린다
+    const n = Number(s.replace(/,/g, ''));
+    if (!Number.isFinite(n) || n < 0) continue;
+    total += n;
+    hit++;
+  }
+  if (hit === 0) return null;
+  return total > 0 && total < 1_000_000 ? total : null;
+}
+
 /* ═══════════ 구역명 정제 (§4-1 ⑤ 와 같은 규칙) ═══════════ */
 
 const GENERIC_NAMES = new Set([
@@ -95,7 +138,15 @@ const GENERIC_NAMES = new Set([
   '정비구역지정', '도시환경정비구역', '재개발', '재건축', '지구', '구역',
 ]);
 const FRAGMENT_RE = /^제?\s*\d+\s*(구역|지구|블록|단지)$/;
-const MIN_NAME_LEN = 5;
+
+/**
+ * ⚠️ 서울(5자)보다 낮게 잡는다.
+ * 서울 upisRebuild 의 짧은 이름은 '정비구역' 같은 **분류값**이었지만,
+ * 경기 IMPRV_ZONE_NM 은 "원당주공2단지" 같은 **실제 단지명**이라 "장미마을"(4자)처럼
+ * 짧아도 유효한 이름이 있다. 조각·분류값은 FRAGMENT_RE / GENERIC_NAMES 가 이미 잡는다.
+ * 5자로 두면 멀쩡한 단지를 조용히 버린다.
+ */
+const MIN_NAME_LEN = 3;
 
 function sanitizeName(raw: string | null): string | null {
   if (!raw) return null;
@@ -160,21 +211,12 @@ export async function GET(req: NextRequest) {
   const apiKey = process.env.GYEONGGI_DATA_API_KEY;
   if (!apiKey) return NextResponse.json({ error: 'GYEONGGI_DATA_API_KEY not set' }, { status: 200 });
 
-  // ⚠️ 서비스명은 추측하지 않는다. 위 주석 참고.
+  // 서비스명 확정 — DB 담당이 직접 호출해 INFO-000 · list_total_count 533 을 확인했다.
+  // 재정의는 여전히 가능하게 둔다(스키마가 바뀌면 ?service= 로 바로 갈아끼운다).
   const service =
     req.nextUrl.searchParams.get('service')?.trim() ||
     process.env.GYEONGGI_REDEV_SERVICE?.trim() ||
-    '';
-
-  if (!service) {
-    return NextResponse.json({
-      ok: false,
-      error: 'SERVICE_NAME_REQUIRED',
-      how: '?service=<영문서비스명> 로 한 번 태우거나 GYEONGGI_REDEV_SERVICE 환경변수를 설정하세요.',
-      where: 'data.gg.go.kr 「일반 정비 사업 추진 현황」 infId=S62GFEEN7JMLMA0PH6CF19108891 의 오픈API 탭',
-      note: '이전 후보 4개(Ggcleanupbiz · UrbanMntncBizInfo · URBMNTNCBIZ · GgClnupBsnsSttus)는 전부 ERROR-310 이었습니다. 추측으로 재시도하지 않습니다.',
-    }, { status: 200 });
-  }
+    'GenrlimprvBizpropls';
 
   const supabase = getSupabaseAdmin();
 
@@ -229,6 +271,7 @@ export async function GET(req: NextRequest) {
     let skippedNoName = 0;
     let skippedBadName = 0;
     let qualified = 0;
+    let missingNewBuild = 0;
     const badNameSamples: string[] = [];
     const unmappedStages = new Set<string>();
 
@@ -237,8 +280,8 @@ export async function GET(req: NextRequest) {
     for (const r of allRows) {
       if (!r || typeof r !== 'object') continue;
 
-      const sigungu = clean(pick(r, ['SIGUN_NM', 'SIGUNGU_NM', 'CITY_NM', '시군명', '시군구명']));
-      const rawName = clean(pick(r, ['MNTNC_ZONE_NM', 'RGN_NM', 'ZONE_NM', 'BIZ_NM', '정비구역명', '구역명']));
+      const sigungu = clean(pick(r, ['SIGUN_NM']));
+      const rawName = clean(pick(r, ['IMPRV_ZONE_NM']));
       const name = sanitizeName(rawName);
 
       if (!name) {
@@ -250,33 +293,35 @@ export async function GET(req: NextRequest) {
       const districtName = qualifyName(name, sigungu);
       if (districtName !== name) qualified++;
 
-      const rawStage = clean(pick(r, ['PRSNT_PRGRS_STTUS', 'BIZ_STEP', 'STEP_NM', '현추진상황', '사업단계']));
+      // ⚠️ 포털 라벨은 '현추진상황'이지만 그 키(NOW_PROPLSN_MATR_DESC)는 실측에서 전부 null 이다.
+      //    단계는 BIZ_STEP_NM 을 쓴다. 라벨과 키가 다른 대표 사례라 이 줄을 바꾸지 말 것.
+      const rawStage = clean(pick(r, ['BIZ_STEP_NM']));
       const { value: rawMapped, unknown } = normalizeStage(rawStage);
       if (unknown) unmappedStages.add(unknown);
       // 최종 가드 — 정규화가 어떤 이유로든 목록 밖 값을 내면 여기서 막는다.
       // CHECK 위반은 행을 통째로 날리므로 '기타'로 흡수하는 편이 낫다(원문은 unmapped_stages 에 남는다).
       const stage = ALLOWED_STAGES.has(rawMapped) ? rawMapped : '기타';
 
-      const lat = num(pick(r, ['REFINE_WGS84_LAT', 'LAT', 'Y_COORD', '위도']));
-      const lng = num(pick(r, ['REFINE_WGS84_LOGT', 'LOGT', 'LNG', 'X_COORD', '경도']));
+      const newBuild = sumNewBuildUnits(r);
+      if (newBuild === null) missingNewBuild++;
 
       mapped.push({
         district_name: districtName,
         region: '경기',
         sigungu,
-        project_type: projectTypeOf(clean(pick(r, ['BIZ_TYPE', 'MNTNC_BIZ_TYPE', '사업유형'])), districtName),
+        project_type: projectTypeOf(clean(pick(r, ['BIZ_TYPE_NM'])), districtName),
         stage,
-        address: clean(pick(r, ['LOCPLC', 'LOC', 'ADRES', '위치', '소재지'])),
-        area_sqm: num(pick(r, ['ZONE_AR', 'AREA', '구역면적', '구역면적제곱미터'])),
-        // 세대수는 3종이 분리돼 있다. 총계를 total, 기존을 existing 으로.
-        total_households: intOrNull(pick(r, ['BIZ_IMPLMT_HSHLD_SUM', 'TOT_HSHLD_CO', '사업시행세대수총계'])),
-        existing_households: intOrNull(pick(r, ['EXSTNG_HOUSE_HSHLD_CO', '기존주택세대수'])),
-        total_dong: intOrNull(pick(r, ['EXSTNG_HOUSE_DONG_CO', '기존주택동수']), 1000),
-        // ⚠️ 사업시행자는 조합·시행자이지 시공사가 아니다. constructor 에 넣지 않는다.
-        developer: clean(pick(r, ['BIZ_IMPLMTR', 'IMPLMTR_NM', '사업시행자'])),
-        approval_date: dateOrNull(pick(r, ['BIZ_IMPLMT_ATHZ_DE', '사업시행인가일자'])),
-        latitude: lat !== null && lat > 33 && lat < 39 ? lat : null,
-        longitude: lng !== null && lng > 124 && lng < 132 ? lng : null,
+        address: clean(pick(r, ['LOCPLC_ADDR'])),
+        area_sqm: num(pick(r, ['ZONE_AR'])),
+        // ⚠️ 총세대수 필드가 응답에 없다. 신축 평형별 4개를 합산한다 (실측 117+685+476+85=1,363).
+        total_households: newBuild,
+        existing_households: intOrNull(pick(r, ['EXISTNG_HOUSNG_HSHLD_CNT'])),
+        guild_member_num: intOrNull(pick(r, ['ASOCNTMB_CNT']), 100_000),
+        // ⚠️ 사업시행자는 조합이지 시공사가 아니다. constructor 에 넣지 않는다.
+        developer: clean(pick(r, ['BIZ_IMPLMNTR_NM'])),
+        phone: clean(pick(r, ['CHRGPSN_TELNO'])),
+        approval_date: dateOrNull(pick(r, ['BIZ_IMPLMTN_CONFMTN_DE'])),
+        // ⚠️ 위경도가 응답에 없다. 지어내지 않는다 — LOCPLC_ADDR 지오코딩은 별도 크론(redev-geocode)의 몫이다.
         source: 'gyeonggi_opendata',
         is_active: true,
         updated_at: new Date().toISOString(),
@@ -352,7 +397,9 @@ export async function GET(req: NextRequest) {
         unmapped_stages: [...unmappedStages],
         stage_values: stageCounts,
         project_type_values: typeCounts,
-        with_latlng: payload.filter((m) => m.latitude && m.longitude).length,
+        missing_new_build: missingNewBuild,
+        with_guild_member: payload.filter((m) => m.guild_member_num).length,
+        with_phone: payload.filter((m) => m.phone).length,
         with_households: payload.filter((m) => m.total_households).length,
         with_developer: payload.filter((m) => m.developer).length,
         upsert_on: 'district_name,region',
