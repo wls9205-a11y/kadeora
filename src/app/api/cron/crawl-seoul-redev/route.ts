@@ -77,6 +77,39 @@ function clean(v: unknown): string | null {
   return s ? s : null;
 }
 
+/**
+ * §4-1 ⑤ — 구역명 정제.
+ *
+ * 825건 실측에서 나온 것:
+ *   - 이름에 줄바꿈이 박혀 있다  "장교구역 제6지구\n\n도시환경정비구역"
+ *   - 이름이 조각이다            "1구역" "2지구" "11지구" (10건)
+ *   - 이름이 분류값이다          "정비구역" "기타지구" 등 4자 이하 (25건)
+ *
+ * 이런 값으로 현장을 만들면 「서울 1구역」 같은 빈 페이지가 생긴다.
+ * §7-3 — 지어내지 않고, 못 쓸 이름이면 넣지 않는다.
+ */
+const GENERIC_NAMES = new Set([
+  '정비구역', '기타지구', '기타', '미상', '해당없음', '없음',
+  '정비구역지정', '도시환경정비구역', '재개발', '재건축', '지구', '구역',
+]);
+
+/** 숫자+구역/지구 만으로 된 조각 이름. "1구역" "11지구" "제3구역" */
+const FRAGMENT_RE = /^제?\s*\d+\s*(구역|지구|블록|단지)$/;
+
+const MIN_NAME_LEN = 5;
+
+function sanitizeDistrictName(raw: string | null): string | null {
+  if (!raw) return null;
+  // 줄바꿈·탭·연속 공백을 공백 하나로 접는다. 줄바꿈이 그대로 남으면 slug 와 제목이 깨진다.
+  const s = raw.replace(/\s+/g, ' ').trim();
+  if (!s) return null;
+  if (GENERIC_NAMES.has(s)) return null;
+  if (FRAGMENT_RE.test(s)) return null;
+  // 4자 이하는 분류값이거나 조각이다. 실측 25건이 전부 그랬다.
+  if (s.length < MIN_NAME_LEN) return null;
+  return s;
+}
+
 function guessStage(row: Record<string, any>): string {
   const text = [
     row.STEP_SE_NM, row.STTUS_NM, row.BSNS_STEP_NM, row.PRGRS_STTUS,
@@ -178,6 +211,8 @@ export async function GET(req: NextRequest) {
 
     /* ── 매핑 ── */
     let skippedNoName = 0;
+    let skippedBadName = 0;
+    const badNameSamples: string[] = [];
     let skippedBadStage = 0;
     const mapped: Record<string, any>[] = [];
 
@@ -185,8 +220,13 @@ export async function GET(req: NextRequest) {
       // ⚠️ 이름이 없으면 건너뛴다. '미상' 을 만들지 않는다 —
       //    (district_name, region) 이 유니크라 '미상' 이 서울 전체에서 1건만 살아남고
       //    나머지는 조용히 서로를 덮어쓴다.
-      const districtName = clean(r.RGN_NM) || clean(r.PSTN_NM);
-      if (!districtName) { skippedNoName++; continue; }
+      const rawName = clean(r.RGN_NM) || clean(r.PSTN_NM);
+      const districtName = sanitizeDistrictName(rawName);
+      if (!districtName) {
+        if (rawName) { skippedBadName++; if (badNameSamples.length < 10) badNameSamples.push(rawName.slice(0, 60)); }
+        else skippedNoName++;
+        continue;
+      }
 
       const typeInfo = getProjectType(r.SCLSF || '') || { project_type: '재개발', sub_type: '주택재개발' };
 
@@ -327,6 +367,8 @@ export async function GET(req: NextRequest) {
         collapsed_by_name: collapsedByName,
         skipped_curated: skippedCurated,
         skipped_no_name: skippedNoName,
+        skipped_bad_name: skippedBadName,
+        bad_name_samples: badNameSamples,
         skipped_bad_stage: skippedBadStage,
         with_ext_id: payload.filter((m) => m.external_id).length,
         without_ext_id: payload.filter((m) => !m.external_id).length,
