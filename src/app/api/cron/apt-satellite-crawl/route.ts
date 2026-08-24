@@ -30,6 +30,34 @@ function lonLatToTile(lon: number, lat: number, zoom: number): { x: number; y: n
   return { x, y };
 }
 
+/**
+ * ADDENDUM §3-3 — 줌을 단지 규모에 맞춘다.
+ *
+ * 지금까지 전 현장이 zoom 17 고정이었다. WMTS 한 타일은 항상 같은 픽셀 수인데
+ * 줌이 1 내려갈 때마다 타일이 덮는 실제 면적은 **4배**가 된다. 그래서 고정 줌이면
+ *   큰 단지(2,000세대) → 단지가 타일 밖으로 잘린다
+ *   작은 단지(100세대) → 단지는 점만 하고 주변 도로·산이 화면을 채운다
+ * 둘 다 "얼룩" 으로 보이는 원인이다. 조감도가 없는 4,483건이 여기 해당한다.
+ *
+ * 세대수로 부지 크기를 대략 추정한다. 정밀할 필요가 없다 — 한 단계만 맞아도
+ * 단지가 프레임 안에 들어온다.
+ *   ~300세대    z18  (약 0.6km 폭)
+ *   ~1,200세대  z17  (약 1.2km) ← 기존 기본값
+ *   ~3,000세대  z16  (약 2.4km)
+ *   그 이상      z15
+ * ⚠️ 세대수를 모르면 **기존 17 을 그대로 쓴다.** 추정으로 더 나빠지게 하지 않는다.
+ * ⚠️ complex_units(단지 전체) 를 우선 본다. total_units 는 일반분양 수치인 경우가 많아
+ *    단지 규모를 과소평가한다.
+ */
+function zoomForUnits(units: unknown): number {
+  const n = Number(units);
+  if (!Number.isFinite(n) || n <= 0) return 17;
+  if (n <= 300) return 18;
+  if (n <= 1200) return 17;
+  if (n <= 3000) return 16;
+  return 15;
+}
+
 async function fetchVworldTile(lat: number, lon: number, zoom = 17): Promise<Buffer | null> {
   if (!VWORLD_KEY) return null;
   const { x, y } = lonLatToTile(lon, lat, zoom);
@@ -67,7 +95,7 @@ async function handler(req: NextRequest) {
   try {
     const { data: sites } = await (admin as any)
       .from('apt_sites')
-      .select('id, name, latitude, longitude')
+      .select('id, name, latitude, longitude, complex_units, total_units')
       .is('satellite_image_url', null)
       .not('latitude', 'is', null)
       .not('longitude', 'is', null)
@@ -90,7 +118,7 @@ async function handler(req: NextRequest) {
         continue;
       }
 
-      const buf = await fetchVworldTile(lat, lon, 17);
+      const buf = await fetchVworldTile(lat, lon, zoomForUnits(site.complex_units ?? site.total_units));
       if (!buf) {
         stats.failed++;
         failures.push(`${site.id}:fetch`);

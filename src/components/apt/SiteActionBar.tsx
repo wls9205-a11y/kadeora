@@ -24,6 +24,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { KAKAO_TALK_URL, trackTalkClick, trackTalkView } from '@/lib/talk-banner';
 import { LEAD_FORM_ID } from '@/components/apt/LeadForm';
 import { leadCopy } from '@/lib/apt/lead-copy';
+import { trackLeadClick, trackLeadView } from '@/lib/apt/lead-track';
 
 /** 바 높이(px). 스페이서와 공유. */
 export const SITE_ACTION_BAR_HEIGHT = 48;
@@ -61,6 +62,8 @@ export default function SiteActionBar({ siteSlug, showLeadForm = false, lifecycl
   const hasForm = showLeadForm && !!ENDPOINT;
 
   const jumpToForm = useCallback(() => {
+    // §5-3: 어느 자리가 폼으로 사람을 보내는지. 스크롤 실패해도 클릭은 일어난 일이라 먼저 센다.
+    trackLeadClick('bottom_bar', { site_slug: siteSlug, lifecycle_stage: lifecycleStage });
     const form = document.getElementById(LEAD_FORM_ID);
     if (!form) return;
     form.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -69,7 +72,7 @@ export default function SiteActionBar({ siteSlug, showLeadForm = false, lifecycl
     window.setTimeout(() => {
       document.getElementById('kd-lead-name')?.focus({ preventScroll: true });
     }, 600);
-  }, []);
+  }, [siteSlug, lifecycleStage]);
 
   useEffect(() => {
     if (!hasForm) return;
@@ -90,7 +93,9 @@ export default function SiteActionBar({ siteSlug, showLeadForm = false, lifecycl
     if (!visible || seen) return;
     setSeen(true);
     trackTalkView('bottom_bar', { site_slug: siteSlug });
-  }, [visible, seen, siteSlug]);
+    // §5-3: 리드폼 진입점 노출은 폼이 있는 현장에서만 센다. 없는 현장까지 세면 분모가 부푼다.
+    if (hasForm) trackLeadView('bottom_bar', { site_slug: siteSlug, lifecycle_stage: lifecycleStage });
+  }, [visible, seen, siteSlug, hasForm, lifecycleStage]);
 
   // 바가 떠 있는 동안만 FAB·ScrollToTop 을 밀어 올린다.
   useEffect(() => {

@@ -16,6 +16,7 @@ import type { CSSProperties, ChangeEvent, FormEvent } from 'react';
 import SectionHeader from '@/components/apt/SectionHeader';
 import { SITE_URL } from '@/lib/constants';
 import { leadCopy } from '@/lib/apt/lead-copy';
+import { trackLeadSubmit, trackLeadView } from '@/lib/apt/lead-track';
 
 const ENDPOINT = process.env.NEXT_PUBLIC_LEAD_ENDPOINT || '';
 const DRAFT_PREFIX = 'kd_lead_draft:';
@@ -253,6 +254,29 @@ export default function LeadForm({ siteSlug, siteName, typeOptions, region, sigu
   // ONESHOT §C-1: 단계별 문구 한 벌. 세 화면(폼·액션바·레일)이 같은 말을 해야 한다.
   const copy = leadCopy(lifecycleStage, siteName);
   const mountedAt = useRef(Date.now());
+
+  // §5-3: 본문 폼이 **실제로 화면에 들어온 순간**만 노출로 센다.
+  // ⚠️ 마운트 시점에 세지 않는다 — 폼은 페이지 하단에 있어 대부분의 방문자는 보지 못한다.
+  //    마운트로 세면 분모가 부풀어 전환율이 실제보다 낮게 나온다.
+  useEffect(() => {
+    if (typeof IntersectionObserver === 'undefined') return;
+    const el = document.getElementById(LEAD_FORM_ID);
+    if (!el) return;
+    let fired = false;
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (!e.isIntersecting || fired) continue;
+          fired = true;
+          trackLeadView('body', { site_slug: siteSlug, lifecycle_stage: lifecycleStage });
+          io.disconnect();
+        }
+      },
+      { threshold: 0.2 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [siteSlug, lifecycleStage]);
   const draftKey = `${DRAFT_PREFIX}${siteSlug}`;
   const pendingKey = `${PENDING_PREFIX}${siteSlug}`;
 
@@ -476,6 +500,11 @@ export default function LeadForm({ siteSlug, siteName, typeOptions, region, sigu
     if (outcome === 'recorded' || outcome === 'silent-drop') {
       lsRemove(draftKey);
       lsRemove(pendingKey);
+      // §5-3: 실제로 기록된 건만 전환으로 센다.
+      // ⚠️ silent-drop 은 허니팟(봇)이다 — 성공 화면은 보여주되 전환에는 넣지 않는다.
+      if (outcome === 'recorded') {
+        trackLeadSubmit('body', { site_slug: siteSlug, lifecycle_stage: lifecycleStage });
+      }
       setDone(true);
       return;
     }
