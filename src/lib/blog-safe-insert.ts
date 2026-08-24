@@ -1,5 +1,6 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { generateMetaDesc, generateMetaKeywords, generateImageAlt } from '@/lib/blog-seo-utils';
+import { isLeadEligible } from '@/lib/apt/lead-eligibility';
 
 /**
  * 블로그 글을 안전하게 INSERT하는 유틸리티 (v3)
@@ -313,8 +314,9 @@ export async function safeBlogInsert(
 
       const { data: known } = await admin
         .from('apt_sites')
-        .select('slug')
-        .in('slug', linked.slice(0, 20));
+        .select('slug, lifecycle_stage')
+        .in('slug', linked.slice(0, 20))
+        .eq('is_active', true);
 
       siteSlugs = (known ?? []).map((r: any) => r.slug);
       if (siteSlugs.length === 0) {
@@ -322,8 +324,21 @@ export async function safeBlogInsert(
         return { success: false, reason: 'no_site_link', message: 'APT_SITE_LINK_NOT_FOUND' };
       }
 
-      // 본문 등장 순서를 유지해 첫 번째(=가장 주된) 현장을 허브로 삼는다.
-      if (!hubAptSlug) hubAptSlug = linked.find((s) => siteSlugs.includes(s)) ?? siteSlugs[0];
+      // 허브는 **리드폼이 뜨는 현장을 우선**으로 고른다.
+      //
+      // ⚠️ 단순히 "본문 첫 링크" 로 하면 안 된다. 백필 실측(1,494편)에서 첫 링크의 대부분이
+      //    기축 아파트였다 — 청천마을성원 99편·상아해미안1차 90편처럼 시세 글이 참조로 건 링크다.
+      //    post_move_in / landmark_active 는 LEAD_ELIGIBLE_STAGES 밖이라 허브로 잡아도
+      //    리드폼이 뜨지 않는다. 1,494편 중 리드 가능 현장을 가리킨 것은 416편뿐이었다.
+      //    → 리드 가능 현장이 하나라도 링크돼 있으면 그것을, 없으면 첫 유효 링크를 쓴다.
+      if (!hubAptSlug) {
+        const stageOf = new Map<string, string | null>(
+          (known ?? []).map((r: any) => [r.slug, r.lifecycle_stage]),
+        );
+        const inOrder = linked.filter((s) => siteSlugs.includes(s));
+        hubAptSlug =
+          inOrder.find((s) => isLeadEligible(stageOf.get(s))) ?? inOrder[0] ?? siteSlugs[0];
+      }
     }
 
     // 6. 커버 이미지 자동 생성 (미제공 시)
