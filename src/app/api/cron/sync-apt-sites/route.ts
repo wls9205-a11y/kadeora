@@ -2,16 +2,20 @@ import { errMsg } from '@/lib/error-utils';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronAuth } from '@/lib/cron-auth';
-import { generateAptSlug } from '@/lib/apt-slug';
+import { generateAptSlugStrict } from '@/lib/apt-slug';
 
 export const maxDuration = 300;
 
-// V18 A: 여기 있던 사본을 걷어내고 lib/apt-slug.ts 원본을 쓴다 (로직 동일, 동작 불변).
+// V18 A: 여기 있던 사본을 걷어내고 lib/apt-slug.ts 원본을 쓴다.
+// V19 A: DB 담당이 깨진 slug 160행을 정리해 **활성 깨진 slug 가 0** 이 됐다.
+//        이 값은 생성뿐 아니라 62·211행에서 기존 행 조회에도 쓰이므로 전환 전에 실측했다.
 //
-// ⚠️ **strict 로 바꾸지 말 것.** 이 값은 생성뿐 아니라 62·211행에서 **기존 행 조회에도**
-//    쓰인다. 규칙을 바꾸면 느슨한 값으로 저장된 활성 160행을 못 찾아
-//    같은 현장이 매 실행마다 새로 생긴다. 정리하려면 DB 쪽 slug 마이그레이션이 먼저다.
-const makeSlug = generateAptSlug;
+//   활성 5,660행 중 느슨한 규칙이 깨진 결과를 내는 이름은 **2건뿐**이고,
+//   둘 다 로마숫자(Ⅰ·Ⅱ)가 지워져 후행 하이픈이 남는 경우다.
+//     '테넌바움294 Ⅰ'  저장 slug `테넌바움294`  → strict 가 **일치**한다 (loose 는 불일치)
+//     '오산 … 그랜빌 Ⅱ' 저장 slug 가 옛 규칙 형태라 어느 쪽이든 불일치 (변화 없음)
+//   즉 전환으로 좋아지는 게 1건, 나빠지는 게 0건이다.
+const makeSlug = generateAptSlugStrict;
 
 const extractSigungu = (addr: string | null) =>
   addr?.match(/(?:시|도)\s+(\S+구|\S+시|\S+군)/)?.[1] || null;

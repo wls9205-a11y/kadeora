@@ -123,11 +123,18 @@ if (TSV) {
     }
   }
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  // 서비스 키가 없으면 anon 으로 떨어진다.
+  //   apt_site_merges·apt_sites 는 읽기가 열려 있어 이 스크립트에 필요한 두 조회가 다 된다.
+  //   로컬 .env.local 의 SERVICE_ROLE 은 placeholder 라 이 폴백이 없으면
+  //   맵을 손으로 옮겨 적게 된다 — 416쌍을 전사하다 한 글자 틀리면 301 이 404 가 된다.
+  const svc = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const key = svc && !svc.startsWith('local-') ? svc : anon;
   if (!url || !key) {
-    console.error('[gen-merged-slugs] NEXT_PUBLIC_SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY 필요');
+    console.error('[gen-merged-slugs] NEXT_PUBLIC_SUPABASE_URL 과 SERVICE_ROLE 또는 ANON 키가 필요합니다');
     process.exit(1);
   }
+  console.log(`[gen-merged-slugs] key=${key === svc ? 'service_role' : 'anon'}`);
   const sb = createClient(url, key, { auth: { persistSession: false } });
 
   /** PostgREST 기본 db-max-rows=1000 — 지금은 256건이지만 배치로 긁는다. */
