@@ -418,7 +418,25 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
       .limit(BATCH_SIZE);
 
     if (!targets?.length) {
-      return { processed: 0, failed: 0, priceFound: 0, fieldsTotal: 0, remaining: 0, metadata: { message: 'PDF 가격 파싱 완료!' } };
+      // [패치 P4 §2] "완료!" 는 오해를 부른다 — 이 크론이 30일 내내 그렇게 보고했지만
+      //   실제로는 «상위 단계가 막혀 대상이 0건» 이었다. 게이트가
+      //   announcement_pdf_url is not null 인데 apt-parse-announcement 가 그 값을
+      //   못 채우고 있었다(contact_tel 컬럼 부재 → PGRST204 로 update 전량 실패).
+      //   대기 중인 상위 단계가 있으면 그것을 함께 알린다.
+      const { count: upstream } = await (sb as any).from('apt_subscriptions')
+        .select('id', { count: 'exact', head: true })
+        .is('announcement_parsed_at', null)
+        .not('pblanc_url', 'is', null).neq('pblanc_url', '');
+      const waiting = upstream || 0;
+      return {
+        processed: 0, failed: 0, priceFound: 0, fieldsTotal: 0, remaining: 0,
+        metadata: {
+          message: waiting > 0
+            ? `대상 0건 · 상위 대기 ${waiting}건 (apt-parse-announcement)`
+            : '대상 0건 · 상위 대기 없음',
+          upstream_waiting: waiting,
+        },
+      };
     }
 
     const { count: remaining } = await (sb as any).from('apt_subscriptions')
