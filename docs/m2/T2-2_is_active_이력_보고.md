@@ -133,3 +133,79 @@ B-2 에서 나는 이 둘을 **일부러 합치지 않았다** — DL건설은 �
 **건드리지 않고 보고만 한다.**
 
 `두산에너빌리티 → 두산건설` 도 같은 성격이다(에너빌리티는 발전 설비, 건설은 별개 법인).
+
+---
+
+# 실행 결과 (2026-08-25 · 승인 후)
+
+승인대로 **RPC 를 먼저 고치고 트리거를 나중에** 붙였다.
+
+## 1단계 — 게이트 필터 (`m3_pipeline_gate_filter_stage_change`)
+
+`get_apt_pipeline` 의 「진행 이력」 신호를 `event_type = 'stage_change'` 로 좁혔다.
+그 한 줄 외에는 함수의 어떤 것도 바꾸지 않았다.
+
+| | 전국 | 부울경 | 부산 |
+|---|---|---|---|
+| 변경 전 | 417 | 360 | 344 |
+| 변경 후 | **417** | **360** | **344** |
+
+**한 건도 바뀌지 않았다.** 현재 `apt_site_events` 429행이 전부 `stage_change` 라
+이 필터는 오늘 시점에 순수한 무동작이다 — 넣기 가장 안전한 시점이었다.
+
+> ⚠️ `src/lib/apt/pipeline-gate.ts` 주석의 기준값(전국 93 · 부울경 35 · 부산 21,
+> 2026-08-24)은 **낡았다.** 지금은 417 / 360 / 344 다. 게이트가 헐거워진 게 아니라
+> 모집단이 커졌다(정비사업 277건 승격). 그 주석의 숫자로 검증하면 틀린 결론이 난다.
+
+## 2단계 — 트리거 (`m3_t2_2_log_apt_active_change`)
+
+```
+log_apt_active_change()          AFTER UPDATE OF is_active
+trg_apt_active_change            FOR EACH ROW
+```
+
+스키마는 그대로 두고 실재 컬럼에 얹었다.
+
+| 담을 것 | 컬럼 |
+|---|---|
+| 이전 / 이후 | `from_value` / `to_value` |
+| 배치명 또는 manual | `source` ← `app.actor`, 미선언 시 `unknown` |
+| 사유 | `note` ← `app.reason` |
+| 시각 | `occurred_at` = `now()` |
+
+## 검증 (T2 §2.4)
+
+| 항목 | 결과 |
+|---|---|
+| `is_active` 토글 → 이벤트 1건 | ✓ |
+| `is_active` 외 컬럼만 변경 → 0건 | ✓ |
+| 같은 값으로 다시 써도 0건 (`IS DISTINCT FROM` 가드) | ✓ |
+| `set_config('app.actor', …)` 가 `source` 에 반영 | ✓ |
+| 시험 행 원복 | ✓ `is_active=false` |
+| 기존 소비처 — `get_apt_recent_moves` | ✓ 4건 정상 |
+| 게이트 수치 유지 | ✓ 417 / 360 |
+| B-4 「병합표 미등재」 0 유지 | ✓ |
+
+시험으로 생긴 `active_change` 2건은 **지우지 않았다.** 실제로 토글이 있었던 게 맞고,
+이력 테이블에서 행을 지우는 선례를 만들지 않는 편이 낫다.
+`source='test:t2-2-verification'` 으로 라벨이 붙어 있다.
+
+## 알려진 한계
+
+한 트랜잭션 안에서 `is_active` 를 여러 번 바꾸면 `occurred_at` 이 전부 같다
+(`now()` 는 트랜잭션 시각이다). 순서는 `id` 로 가른다.
+
+## 배치가 지켜야 할 것
+
+```sql
+SELECT set_config('app.actor',  'cron:apt-quality-prune', true);
+SELECT set_config('app.reason', 'content_score < 25', true);
+-- 같은 트랜잭션 안에서 UPDATE 해야 실린다 (is_local = true)
+```
+
+선언하지 않으면 `unknown` 이 남는다. 그것도 정보다 — 사람이 콘솔에서 껐다는 뜻이다.
+
+## 별도 티켓으로 넘긴 것
+
+시공사 사전 충돌(`디엘건설 → DL이앤씨`, `두산에너빌리티 → 두산건설`)은
+지시대로 **기존 사전이 이기는 상태 그대로** 두었다.
