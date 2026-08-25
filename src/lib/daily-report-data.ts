@@ -141,7 +141,8 @@ export async function fetchDailyReportData(region: ReportRegion): Promise<DailyR
       .order('market_cap', { ascending: false })
       .limit(10),
 
-    // 10. 섹터 — DB-side 집계 RPC. 2,000행 → 39행(실측).
+    // 10. 섹터 — DB-side 집계 RPC. 2,000행 → 24행(실측).
+    //     RPC 가 집계·±30% 이상치 제외·품질 필터(>=3종목 · >5조)까지 전부 맡는다.
     (sb as any).rpc('get_daily_sector_stats'),
 
     // 11. 글로벌
