@@ -142,13 +142,52 @@ const TRAIL = /\s*[（(]?\s*20\d{2}\s*년?\s*\d{0,2}\s*월?\s*\d?\s*주?\s*[)）
 const CUT = /[—–|:：(\[（]/;                 // '-'는 제외 — 범천1-1, 반여3-1 이 잘린다
 const DROP = ['총정리', '완벽 가이드', '가이드', '한눈에', '모아보기', '정리', '분석', '전망',
   '비교', '해석', '최신', '동향', '핫이슈', '체크포인트', '선점', '시장 영향',
-  '계약 전', '청약 선점', '급상승'];
+  '계약 전', '청약 선점', '급상승',
+  // T2: 카더라가 붙인 정형 접미사. '투자 분석' '단지 분석' '시세 현황' '실거래가 리포트'
+  // ⚠️ '투자' 는 «뒤에 공백이 올 때만» 뗀다. 맨 '투자' 로 두면 이름 안을 자른다 —
+  //    실측: '디디아이엘브이씨위탁관리모부동산투자회사' → '…모부동산' + '회사' 로 갈라져 48px.
+  '리포트', '현황', '투자 ', '단지'];
+
+/**
+ * T2 — 아파트 브랜드 사전. 띄어쓰기 없는 단지명을 «의미 경계»에서 자르기 위한 것이다.
+ *
+ * 왜 필요한가: splitLong 이 글자 수 절반에서 기계적으로 잘라 이런 결과가 나왔다.
+ *   디엠씨해링턴플레 / 이스엔에이치에프      Lulul / emon
+ *   에스아이팰리 / 스강동센텀               울산뉴시티에 / 일린의뜰1차
+ * 원인은 정비구역명이 아니라 «띄어쓰기 없는 단지명»이었다.
+ * '디엠씨해링턴플레이스엔에이치에프' 가 16자 한 어절이다.
+ *
+ * ⚠️ 긴 것이 앞에 와야 한다. 순서가 곧 우선순위다 —
+ *    '해링턴플레이스' 가 '해링턴' 보다 먼저 잡혀야 한다.
+ */
+const BRANDS = [
+  '해링턴플레이스', '해링턴타워', '에일린의뜰', '더스카이시티', '스카이시티', '리버파크',
+  'e편한세상', '이편한세상', '베르디움', '센트레빌', '한신더휴', '스위트엠', '디에트르',
+  '아이파크', '롯데캐슬', '더플래티넘', '플래티넘', '포레나', '트리마제', '하이베뉴',
+  '힐스테이트', '푸르지오', '래미안', '스위첸', '데시앙', '유보라', '리슈빌', '어울림',
+  '코아루', '캐스빌', '하이빌', '노르웨이숲', '대광로제비앙', '로제비앙', '제일풍경채',
+  '풍경채', '아너스빌', '한라비발디', '비발디', '서희스타힐스', '스타힐스', '금강펜테리움',
+  '내안애', '퍼스트힐', '팰리스', '하이씨티', '더테라스', '스타클래스', '아침도시', '브라운스톤',
+  '모아엘가', '모아미래도', '에듀퍼스트', '수자인', '파르세나', '뉴스테이', '르네상스', '메세나폴리스',
+  '트리니티', '엘크루', '더퍼스트', '센트럴파크', '에듀포레',
+  '펜테리움', '우미린', '린스트라우스', '휴먼시아', '파크리오', '자이르네',
+  '더샵', '자이', '위브', '아너스', '부영', '포레', '캐슬', '파크', '시티',
+];
+
+// 동·호 나열은 단지명이 아니다. '205동206동207동' '101,102동' 은 통째로 뺀다.
+const DONG_RUN = /(\d{1,4}\s*[,~·]?\s*)?(\d{1,4}동\s*){2,}/g;
+const DONG_TAIL = /\s*\d{1,4}(\s*[,~·]\s*\d{1,4})*\s*동\s*$/;
 const REGION = /^(서울|부산|대구|인천|광주|대전|울산|세종|경기|강원|충북|충남|전북|전남|경북|경남|제주|부울경|전국)$/;
 // 이 어절만 남으면 무의미 — 앞에서 잘린 결과가 기능어뿐인 경우
 const STOP = /^(이번|주|월|년|현장|움직인|곳|등|및|외|그|더|것|수|중)$/;
 
 function clean(s: unknown): string {
   let t = String(s || '').trim().replace(TRAIL, '');
+  // T2: 동 나열과 끝의 '아파트' 는 판독에 보태는 게 없다.
+  // ⚠️ DONG_RUN 을 CUT 절단보다 먼저 돌린다 — '…205동206동207동 시세' 처럼
+  //    나열이 CUT 문자 앞에 있는 경우가 대부분이다.
+  t = t.replace(DONG_RUN, ' ').replace(DONG_TAIL, ' ');
+  t = t.replace(/아파트(?=\s|$)/g, ' ');
   const m = t.match(CUT);
   if (m && m.index !== undefined && m.index > 1) t = t.slice(0, m.index);
   t = t.replace(TRAIL, '');
@@ -165,10 +204,87 @@ function clean(s: unknown): string {
     .trim();
 }
 
+/**
+ * T2 — 긴 한 어절을 «의미 경계»에서 자른다.
+ *
+ * 이전 구현은 `Math.ceil(w.length/2)` 로 글자 수 절반에서 기계적으로 잘랐다.
+ * 그래서 '디엠씨해링턴플레 / 이스엔에이치에프' 같은 결과가 나왔고,
+ * T1 보고의 「60px 미만」과 「어절 반토막」은 별개 티켓이 아니라 이 하나가 원인이었다.
+ *
+ * ⚠️ 정규식 lookbehind zero-width 를 쓰지 말 것. `(?<=[동리])(?=[가-힣]{4,})` 형태가
+ *    실제로 무한루프를 냈다. 아래는 인덱스 순회다 — 그대로 둔다.
+ * ⚠️ 브랜드를 못 찾고 11자 미만이면 자르지 않는다. 폰트를 줄이는 편이 낫다.
+ * ⚠️ 영문을 글자 수로 자르지 않는다. 하이픈·대문자 경계만 — 'Lulul / emon' 전례.
+ */
 function splitLong(w: string): string[] {
   if (w.length <= 8) return [w];
-  const h = Math.ceil(w.length / 2);
-  return [w.slice(0, h), w.slice(h)];
+
+  // 영문은 의미 경계에서만. 없으면 그대로 둔다.
+  if (!/[가-힣]/.test(w)) {
+    if (w.length <= 10) return [w];
+    const byHyphen = w.split(/[-–—]/).filter(Boolean);
+    if (byHyphen.length >= 2) return byHyphen.slice(0, 3);
+    // 소문자→대문자 경계에 구분자를 끼워 넣고 그것으로 자른다.
+    // ⚠️ 소스에 보이지 않는 제어문자를 직접 박지 않는다 — 포매터·git 필터에 유실되면
+    //    split 구분자가 사라져 글자 단위로 쪼개진다.
+    const SEP = String.fromCharCode(1);
+    const byCase = w.replace(/([a-z])([A-Z])/g, `$1${SEP}$2`).split(SEP);
+    if (byCase.length >= 2) return byCase.slice(0, 3);
+    return [w];
+  }
+
+  // 브랜드 토큰 경계 (긴 것 우선 — BRANDS 순서가 곧 우선순위)
+  for (const b of BRANDS) {
+    const i = w.indexOf(b);
+    if (i < 0) continue;
+    const head = w.slice(0, i);
+    const tail = w.slice(i + b.length);
+    const out: string[] = [];
+    if (head.length >= 2) out.push(head);
+    out.push(tail.length && tail.length <= 4 ? b + tail : b);
+    if (tail.length > 4) out.push(tail);
+    if (out.length >= 2) {
+      // ⚠️ 브랜드가 «끝»에 붙어 있으면 머리가 통째로 남는다.
+      //    실측: '옥정중앙역중흥S-클래스센텀시티' → 머리 13자 + '시티' = 41px.
+      //    머리가 아직 길면 한 번 더 가른다.
+      if (out[0].length >= 11) {
+        const sub = splitByIndex(out[0]);
+        if (sub.length >= 2) out.splice(0, 1, ...sub);
+      }
+      return out.slice(0, 3);
+    }
+  }
+
+  // 브랜드를 못 찾아도 11자를 넘으면 630 캔버스에서 52px 미만이 되어 읽히지 않는다.
+  if (w.length >= 11) {
+    const parts = splitByIndex(w);
+    if (parts.length >= 2) return parts;
+  }
+  return [w];   // 의미 없는 지점에서 쪼개느니 폰트를 줄인다
+}
+
+/**
+ * 브랜드 사전이 못 잡은 긴 어절을 «점수가 가장 높은 한 지점»에서 가른다.
+ *
+ * ⚠️ 정규식 lookbehind zero-width 를 쓰지 말 것 — `(?<=[동리])(?=[가-힣]{4,})` 형태가
+ *    실제로 무한루프를 냈다. 인덱스 순회로 둔다.
+ */
+function splitByIndex(w: string): string[] {
+  if (w.length < 8) return [w];
+  const mid = Math.round(w.length / 2);
+  const SUF = '동리읍면구시군로가';            // 지역 접미 뒤가 경계일 확률이 높다
+  let best = -1;
+  let bestScore = -1;
+  for (let i = 3; i <= w.length - 3; i++) {
+    const prev = w[i - 1];
+    const cur = w[i];
+    if ('의에애스시제로은는이가을를도만'.includes(cur)) continue;   // 조각이 조사·파편으로 시작
+    let score = /[0-9]/.test(cur) && !/[0-9]/.test(prev) ? 3
+      : SUF.includes(prev) ? 2 : 1;
+    score = score * 10 - Math.abs(i - mid);                        // 중앙에 가까울수록 가산
+    if (score > bestScore) { bestScore = score; best = i; }
+  }
+  return best > 0 ? [w.slice(0, best), w.slice(best)] : [w];
 }
 
 /**
@@ -236,6 +352,19 @@ export function titleLines(raw: unknown): string[] {
 
     if (!words.length) return [original.slice(0, 6) || '카더라'];      // 폴백
     if (words.length === 1) return splitLong(words[0]);
+
+    // T2 — 어절이 여럿이어도 «가장 긴 것»이 10자를 넘으면 그것만 쪼개 최장줄을 낮춘다.
+    // fitFontSize 는 최장줄 길이로 폰트를 정하므로, 짧은 어절이 몇 개 붙어 있어도
+    // 16자짜리 하나가 남아 있으면 48px 까지 떨어진다.
+    {
+      let li = 0;
+      for (let i = 1; i < words.length; i++) if (words[i].length > words[li].length) li = i;
+      if (words[li].length >= 10) {
+        const parts = splitLong(words[li]);
+        if (parts.length >= 2) words = words.slice(0, li).concat(parts, words.slice(li + 1));
+      }
+    }
+
     if (words.length === 2) {
       const out = words.flatMap(splitLong);
       return out.slice(0, 3);
