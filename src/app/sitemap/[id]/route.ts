@@ -212,19 +212,27 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
   if (id === 3) {
     try {
       const sb = getSupabaseAdmin();
-      // s214 #3: PostgREST 1000 cap 우회 — fetchBatched 로 7,184 posts 모두 (seed 필터 후 SEO 품질 보호)
-      const data = await fetchBatched<any>((off, lim) =>
+      // [§8] 시드 제외를 «DB 쿼리로» 내린다.
+      //
+      //   이전 구현은 fetchBatched(..., 10000) 로 최신 1만 건을 먼저 가져온 뒤
+      //   애플리케이션에서 시드를 걸렀다. posts 는 12,825건(미삭제)이고 그중
+      //   12,524건이 시드라, 오래된 2,825건이 «시드 판정 전에» 잘려나가면서
+      //   실유저 글 300건 중 188건이 사이트맵에서 통째로 빠져 있었다.
+      //   (검증 2026-08-25 — 최신 1만 건 중 실유저 글 112건 = 라이브 사이트맵 113건.)
+      //
+      //   한도만 올리면 posts 가 더 쌓일 때 같은 방식으로 또 터진다.
+      //   profiles!inner 조인 필터로 «거른 뒤 페이징» 하도록 순서를 뒤집었다.
+      //   is_seed 는 null 이 없음을 확인했으므로 eq(false) 로 정확히 갈린다.
+      //   시드 12,524건 제외 자체는 의도된 품질 게이트이므로 그대로 유지한다.
+      const filtered = await fetchBatched<any>((off, lim) =>
         sb.from('posts')
-          .select('id, slug, updated_at, created_at, author_id')
+          .select('id, slug, updated_at, created_at, profiles!inner(is_seed)')
           .eq('is_deleted', false)
+          .eq('profiles.is_seed', false)
           .order('created_at', { ascending: false })
           .range(off, off + lim - 1),
         10000,
       );
-      // 시드 유저 목록 조회 (1000 cap 안 걸림 — seed 유저 적음)
-      const { data: seedUsers } = await sb.from('profiles').select('id').eq('is_seed', true);
-      const seedIds = new Set((seedUsers || []).map((u: any) => u.id));
-      const filtered = data.filter((p: any) => !seedIds.has(p.author_id));
       return xmlResponse(filtered.map((p: any) => ({
         url: `${BASE}/feed/${p.slug || p.id}`,
         lastModified: p.updated_at || p.created_at || now,
