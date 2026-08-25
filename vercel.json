@@ -629,6 +629,12 @@
     "src/app/api/cron/naver-blog-content/*.ts": {
       "maxDuration": 300
     },
+    "src/app/api/cron/naver-sc-sync/*.ts": {
+      "maxDuration": 120
+    },
+    "src/app/api/cron/apt-card-build/*.ts": {
+      "maxDuration": 300
+    },
     "src/app/api/cron/auto-verify-households/*.ts": {
       "maxDuration": 120
     },
