@@ -84,6 +84,32 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url, 308);
   }
 
+  // ── [애드덤2 §F] /apt/redev?stage=… → /apt/redev (301) ──
+  //
+  // 이 페이지는 searchParams 를 «전혀 읽지 않는다». `?stage=` 가 붙어도 내용이
+  // 같아서 순수 중복 URL 만 만들어낸다. 그런데 robots meta 는 index,follow 라
+  // 네이버에 그대로 색인될 수 있다 — Yeti 는 canonical 을 무시하고,
+  // robots.txt 의 `Disallow: /apt/redev/*?` 도 와일드카드라 신뢰할 수 없다.
+  //
+  // generateMetadata 로 noindex 를 내보내려면 searchParams 를 읽어야 하고
+  // 그러면 revalidate=3600 ISR 이 깨진다. 그래서 메타가 아니라 «URL 자체» 를 없앤다.
+  // 미들웨어 301 은 ISR 을 건드리지 않고, 색인을 정규 URL 로 합친다.
+  //
+  // 추적 파라미터는 남긴다 — 유입 귀속이 깨지면 안 되고, `/*?utm_` 은 robots.txt
+  // 에서 이미 차단돼 색인되지 않는다.
+  if (pathname === '/apt/redev' && request.nextUrl.search) {
+    const KEEP = /^(utm_|ref$|n_query$|NaPm$|gclid$|fbclid$)/i;
+    const params = request.nextUrl.searchParams;
+    const hasFacet = [...params.keys()].some(k => !KEEP.test(k));
+    if (hasFacet) {
+      const url = request.nextUrl.clone();
+      const kept = new URLSearchParams();
+      params.forEach((v, k) => { if (KEEP.test(k)) kept.set(k, v); });
+      url.search = kept.toString();
+      return NextResponse.redirect(url, 301);
+    }
+  }
+
   // ── V15 A-1: 병합된 구 slug → 생존 slug (301 permanent) ──
   //
   // 중복 256쌍을 병합하면서 진 쪽 행이 is_active=false 가 됐다. 그 slug 로 들어오면
