@@ -399,7 +399,9 @@ export default function UniversalSearchBar({
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 p-4 pt-16 sm:pt-24"
+          // 상단 고정(items-start pt-16)이면 패널이 64px 지점에서 시작해
+          // 노란 배너 + 헤더(약 150px)를 덮었다. 세로 중앙으로 둔다.
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
           onClick={() => setOpen(false)}
         >
           <div

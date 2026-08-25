@@ -61,6 +61,10 @@ export default function AptCoverUploader() {
   const [searching, setSearching] = useState(false);
   const [selected, setSelected] = useState<Site | null>(null);
   const [credit, setCredit] = useState('');
+  // M4 §B-2a — 출처 페이지 URL. 크레딧이 '누구' 라면 이건 '어느 페이지' 다.
+  // apt_sites.official_url 에 함께 저장한다 — 시공사 페이지 연결이 1건뿐인 게
+  // 조감도 수집을 막고 있는 병목이라, 올릴 때 같이 채워 둔다.
+  const [officialUrl, setOfficialUrl] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string>('');
   const [busy, setBusy] = useState(false);
@@ -105,6 +109,7 @@ export default function AptCoverUploader() {
   const pick = useCallback((s: Site) => {
     setSelected(s);
     setCredit(s.hero_image_credit || '');
+    setOfficialUrl((s as { official_url?: string | null }).official_url || '');
     setMsg(null);
     setItems([]);
     setQ('');
@@ -126,6 +131,7 @@ export default function AptCoverUploader() {
       const fd = new FormData();
       fd.append('slug', selected.slug);
       fd.append('credit', credit.trim());
+      if (officialUrl.trim()) fd.append('officialUrl', officialUrl.trim());
       fd.append('file', file);
       const res = await fetch('/api/admin/apt-cover', { method: 'POST', body: fd });
       const json = await res.json();
@@ -146,7 +152,7 @@ export default function AptCoverUploader() {
     } finally {
       setBusy(false);
     }
-  }, [selected, credit, file]);
+  }, [selected, credit, officialUrl, file]);
 
   const removeCover = useCallback(async () => {
     if (!selected) return;
@@ -277,6 +283,21 @@ export default function AptCoverUploader() {
           />
           <p style={{ margin: '4px 0 12px', fontSize: 10.5, color: 'var(--text-tertiary)' }}>
             이 문구가 상세 페이지 이미지 하단에 출처로 표시됩니다.
+          </p>
+
+          <label style={LABEL} htmlFor="kd-cover-official">
+            출처 페이지 URL (선택) — 어디서 받았는지
+          </label>
+          <input
+            id="kd-cover-official"
+            type="url"
+            value={officialUrl}
+            onChange={(e) => setOfficialUrl(e.target.value)}
+            placeholder="예: https://www.ihanulche.co.kr/sale/view/1083"
+            style={INPUT}
+          />
+          <p style={{ margin: '4px 0 12px', fontSize: 10.5, color: 'var(--text-tertiary)' }}>
+            apt_sites.official_url 에 함께 저장됩니다. 나중에 「이 사진 어디서 왔냐」에 답할 근거입니다.
           </p>
 
           <label style={LABEL} htmlFor="kd-cover-file">이미지 (JPG · PNG · WEBP)</label>

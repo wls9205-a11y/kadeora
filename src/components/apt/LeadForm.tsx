@@ -679,9 +679,7 @@ export default function LeadForm({
               autoComplete="tel"
               style={fieldStyle}
             />
-            {errors.phone
-              ? <p style={errorStyle}>{errors.phone}</p>
-              : <p style={hintStyle}>숫자만 입력하셔도 자동으로 하이픈이 붙습니다</p>}
+            {errors.phone && <p style={errorStyle}>{errors.phone}</p>}
           </div>
 
           {/* C-4 관심 지역 — 홈에서만, 그리고 필수다.
@@ -729,9 +727,7 @@ export default function LeadForm({
                 autoComplete="bday"
                 style={fieldStyle}
               />
-              {errors.birthDate
-                ? <p style={errorStyle}>{errors.birthDate}</p>
-                : <p style={hintStyle}>6자리 (청약 자격·가점 확인용)</p>}
+              {errors.birthDate && <p style={errorStyle}>{errors.birthDate}</p>}
             </div>
 
             <div>
@@ -746,9 +742,7 @@ export default function LeadForm({
                   <option key={t} value={t}>{t}</option>
                 ))}
               </select>
-              <p style={hintStyle}>
-                {hasSiteTypes ? '이 현장 공급 평형' : '정해지지 않았으면 미정으로 두세요'}
-              </p>
+              {hasSiteTypes && <p style={hintStyle}>이 현장 공급 평형</p>}
             </div>
           </div>
 
@@ -824,9 +818,6 @@ export default function LeadForm({
 
           {sendError && <p style={{ ...errorStyle, marginTop: 8 }}>{sendError}</p>}
 
-          <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', lineHeight: 1.6, margin: '10px 0 0' }}>
-            작성 내용은 전송 성공 전까지 기기에 임시 보관됩니다
-          </p>
         </form>
       </div>
     </section>

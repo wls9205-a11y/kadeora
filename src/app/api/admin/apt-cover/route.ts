@@ -41,6 +41,9 @@ const BUCKET = 'apt-covers';
 const MAX_WIDTH = 1600;
 /** 버킷 한도 2MB. 변환 후에도 넘으면 품질을 한 단계 낮춰 재시도한다. */
 const BUCKET_LIMIT = 2 * 1024 * 1024;
+/** 최소 가로. 이보다 작으면 상세 히어로에서 흐려진다 (M4 §B-2a). */
+const MIN_WIDTH = 800;
+
 /** 입력 원본 상한 — 변환 전에 거른다. sharp 에 큰 버퍼를 밀어넣지 않는다. */
 const MAX_INPUT = 25 * 1024 * 1024;
 /** 원격 이미지 수신 제한시간. 라우트 maxDuration 30 안에서 변환 시간을 남긴다. */
@@ -95,7 +98,22 @@ async function storeCover(
   site: { id: number; slug: string; name: string },
   input: Buffer,
   credit: string,
+  officialUrl: string,
 ): Promise<NextResponse> {
+  // M4 §B-2a — 최소 폭 검사. 작은 이미지를 올리면 상세 히어로에서 흐려진다.
+  // ⚠️ resize 는 withoutEnlargement 라 작은 원본을 키워 주지 않는다. 여기서 걸러야 한다.
+  try {
+    const meta = await sharp(input, { failOn: 'none' }).metadata();
+    if ((meta.width ?? 0) < MIN_WIDTH) {
+      return NextResponse.json(
+        { error: `가로 ${MIN_WIDTH}px 이상이어야 합니다 (받은 이미지 ${meta.width ?? 0}px)` },
+        { status: 400 },
+      );
+    }
+  } catch {
+    return NextResponse.json({ error: '이미지 정보를 읽을 수 없습니다' }, { status: 400 });
+  }
+
   let webp: Buffer;
   try {
     const base = sharp(input, { failOn: 'none' })
@@ -133,13 +151,22 @@ async function storeCover(
   // 쿼리로 버전을 붙여 즉시 갱신되게 한다.
   const versioned = `${publicUrl}?v=${Date.now()}`;
 
-  // 3필드는 항상 함께 쓴다. 하나라도 빠지면 출처 없는 사진이 화면에 나간다.
+  // 필드는 항상 «함께» 쓴다. 하나라도 빠지면 출처 없는 사진이 화면에 나간다.
+  //
+  // ⚠️ M4 §B-2a — hero_license_tier='confirmed' 가 반드시 있어야 한다.
+  //    이게 없으면 tier 가 null 로 남고, canUseHeroImage 는 null 을 review 와 같이 다뤄
+  //    «리드폼이 뜨는 상세에서 이미지를 뺀다». 허락받아 올린 사진이 정작 안 보인다.
+  //    이 경로는 사람이 허락 출처를 적어 넣은 것만 통과하므로 confirmed 가 맞다.
+  // ⚠️ official_url 은 "이거 어디서 왔냐" 에 답하기 위한 것이다. 크레딧은 누구인지,
+  //    이건 어느 페이지인지를 남긴다. 빈 값이면 기존 값을 덮지 않는다.
   const { error: updErr } = await (admin as any)
     .from('apt_sites')
     .update({
       hero_image_url: versioned,
       hero_image_source: 'developer',
       hero_image_credit: credit,
+      hero_license_tier: 'confirmed',
+      ...(officialUrl ? { official_url: officialUrl } : {}),
     })
     .eq('id', site.id);
   if (updErr) {
@@ -203,6 +230,9 @@ async function ingestFromUrl(req: NextRequest, admin: Admin): Promise<NextRespon
   const slug = (body.slug || '').trim();
   const credit = (body.credit || '').trim();
   const url = (body.url || '').trim();
+  // M4 §B-2a — 출처 페이지 URL. 크레딧이 '누구' 라면 이건 '어느 페이지' 다.
+  // 비워 두면 이미지를 받아온 url 을 그대로 출처로 남긴다 (그게 곧 출처 페이지다).
+  const officialUrl = ((body as { officialUrl?: string }).officialUrl || url || '').trim();
 
   if (!slug) return NextResponse.json({ error: 'slug 가 필요합니다' }, { status: 400 });
   // 출처가 없으면 받아오지도 않는다. 허락 근거 없는 이미지가 쌓이는 것이 최대 리스크다.
@@ -252,7 +282,7 @@ async function ingestFromUrl(req: NextRequest, admin: Admin): Promise<NextRespon
     return NextResponse.json({ error: `원본이 너무 큽니다 (${Math.round(buf.length / 1024 / 1024)}MB · 상한 25MB)` }, { status: 400 });
   }
 
-  return storeCover(admin, site, buf, credit);
+  return storeCover(admin, site, buf, credit, officialUrl);
 }
 
 /* ─────────────────────────── multipart 업로드 경로 ─────────────────────────── */
@@ -267,6 +297,8 @@ async function uploadFromForm(req: NextRequest, admin: Admin): Promise<NextRespo
 
   const slug = String(form.get('slug') || '').trim();
   const credit = String(form.get('credit') || '').trim();
+  // M4 §B-2a — 출처 페이지 URL. 크레딧이 '누구' 라면 이건 '어느 페이지' 다.
+  const officialUrl = String(form.get('officialUrl') || '').trim();
   const file = form.get('file');
 
   if (!slug) return NextResponse.json({ error: '현장을 선택하세요' }, { status: 400 });
@@ -283,7 +315,7 @@ async function uploadFromForm(req: NextRequest, admin: Admin): Promise<NextRespo
   const site = await findSite(admin, slug);
   if (!site) return NextResponse.json({ error: '현장을 찾을 수 없습니다' }, { status: 404 });
 
-  return storeCover(admin, site, Buffer.from(await file.arrayBuffer()), credit);
+  return storeCover(admin, site, Buffer.from(await file.arrayBuffer()), credit, officialUrl);
 }
 
 /* ──────────────────────────────── 핸들러 ──────────────────────────────── */
