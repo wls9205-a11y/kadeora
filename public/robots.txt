@@ -94,11 +94,15 @@ Crawl-delay: 0
 Disallow: /admin/
 Disallow: /api/cron
 Disallow: /api/admin
-# s8: robots.txt 는 가장 구체적인 그룹 하나만 적용한다 — * 의 규칙이 상속되지 않아
-#     아래 파셋·비색인 경로를 전용 그룹마다 복제한다.
-Disallow: /search?
-Disallow: /*?q=
-Disallow: /*?sort=
+# [§6 / S8-② 철회] Yeti 에서 파셋 Disallow 3건(/search? · /*?q= · /*?sort=)을 «의도적으로» 뺐다.
+#   S8-② 는 파셋 규칙을 Yeti 그룹에 복제하라고 했지만 2026-08-25 실측에서 무력함이 확인됐다 —
+#   `Disallow: /*?sort=` 가 있는데도 `/blog?sort=popular` 가 네이버에 실제로 색인돼 있었다
+#   (Yeti 와일드카드 지원 불안정). 더 나쁜 건, 크롤을 막으면 Yeti 가 페이지의 noindex 메타를
+#   «읽지 못해» URL 만 색인된 상태로 굳는다는 점이다.
+#   그래서 파셋 차단은 robots.txt 가 아니라 noindex 메타로 한다 (src/lib/seo/facet.ts).
+#   여기서는 크롤을 허용해야 그 메타가 전달된다. 구글용 파셋 규칙은 Googlebot 그룹에 그대로 남아 있다.
+#   남겨둔 것 — /*?utm_ · /*?ref= 는 고유 콘텐츠가 없는 추적 파라미터라 차단이 맞고,
+#   /apt/redev/*? 는 해당 페이지가 아직 noindex 를 안 내보내서 유지한다(후속 과제).
 Disallow: /*?utm_
 Disallow: /*?ref=
 # r4: 정비 유형·단계 쿼리는 색인 대상이 아니다

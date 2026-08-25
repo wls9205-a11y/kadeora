@@ -19,6 +19,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { SITE_URL } from '@/lib/constants';
+import { facetRobots, aptFacetCanonical } from '@/lib/seo/facet';
 import { getAptHub } from '@/lib/apt/hub';
 import { getRelatedBlogs } from '@/lib/apt/related-blogs';
 import { buildSubscriptionEvents, buildSubscriptionItemList } from '@/lib/apt/subscription-schema';
@@ -67,14 +68,19 @@ export async function generateMetadata({
     `${regionLabel} 아파트 청약 접수 일정과 경쟁률을 한 화면에. ` +
     '접수중·접수임박 단지를 D-day 순으로 정리하고, 마감된 단지는 1순위 경쟁률과 가점컷까지 확인하세요.';
 
+  // [§6 / R11] 필터 조합 URL 은 전부 색인에서 뺀다.
+  //   리뉴얼(부동산 β안)이 `?region=`·`?sgg=`·`?st=` 조합을 대량으로 만들어낸다.
+  //   부울경만 해도 39시군구 × 상태 5 = 195조합이다. 선반영하지 않으면
+  //   2026-08-25 실측에서 확인한 «파셋이 노출의 31.5% 잠식» 을 확대 재생산한다.
+  //   색인 자산은 파라미터가 아니라 경로형 허브(`/apt/region/*`·`/apt/area/*`)이므로
+  //   canonical 을 그쪽으로 보내 링크 가치만 넘긴다.
+  const canonical = aptFacetCanonical(sp);
+
   return {
     title,
     description,
-    alternates: {
-      canonical: sp.region
-        ? `${SITE_URL}/apt?region=${encodeURIComponent(sp.region)}`
-        : `${SITE_URL}/apt`,
-    },
+    alternates: { canonical },
+    ...facetRobots(sp),
     openGraph: {
       title,
       description,

@@ -10,6 +10,7 @@ import SectionShareButton from '@/components/SectionShareButton';
 import CurationCarousel from '@/components/ui/CurationCarousel';
 import ListThumb from '@/components/ui/ListThumb';
 import { isSafeImage, blogHeroImage } from '@/lib/blog/safe-image';
+import { facetRobots } from '@/lib/seo/facet';
 import BlogCurationCard from '@/components/blog/BlogCurationCard';
 // s205-W2: HeroCard "오늘의 블로그" 제거 — 14d /blog 1,176 PV, 카드 클릭 1건. fetchBlogHero / getSupabaseAdmin 도 함께 제거.
 
@@ -85,7 +86,11 @@ function subCatsFromView(rows: SubcatRow[], category: string): { key: string; la
 interface PageProps { searchParams: Promise<{ category?: string; sort?: string; q?: string; page?: string; sub?: string }> }
 
 export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
-  const { category = 'all', page = '1', q } = await searchParams;
+  // [§6] 파셋 판정은 «들어온 파라미터 전부» 를 봐야 한다. 아래 구조분해로 뽑는
+  //      category/page/q 만 보면 `?tag=` 같은 미지의 파라미터를 놓친다 —
+  //      실제로 `/blog?tag=이씨에스` 가 그렇게 네이버에 색인됐다.
+  const sp = await searchParams;
+  const { category = 'all', page = '1', q } = sp;
   const meta = CAT_META[category] || CAT_META.all;
   const pageNum = parseInt(page) || 1;
   const suffix = pageNum > 1 ? ` (${pageNum}페이지)` : '';
@@ -116,7 +121,9 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
     },
     openGraph: { title: meta.title, description: meta.desc, url: canonical, siteName: '카더라', locale: 'ko_KR', type: 'website', images: ogImages },
     twitter: { card: 'summary_large_image' as const, title: meta.title, description: meta.desc, images: ogImages },
-    ...(pageNum > 1 || q ? { robots: { index: false, follow: true } } : {}),
+    // [§6] canonical 의존 금지 — Yeti 는 rel=canonical 을 무시하고 noindex 만 따른다.
+    //      기본값이 아닌 쿼리 파라미터가 하나라도 붙으면 파셋으로 보고 색인에서 뺀다.
+    ...facetRobots(sp),
     other: {
       'naver:written_time': new Date().toISOString(),
       'naver:updated_time': new Date().toISOString().slice(0, 10) + 'T00:00:00Z',

@@ -25,6 +25,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: `${s.title} — 시리즈`,
     description: s.description || `${s.title} 시리즈 전체 글 모아보기. 카더라 블로그에서 주제별 심층 분석을 읽어보세요.`,
     alternates: { canonical: `${SITE_URL}/blog/series/${slug}` },
+    // [§6] 시리즈 상세는 색인에서 뺀다.
+    //   실측(2026-08-25): 네이버 노출 200건 중 32건(16.0%)을 `/blog/series/*` 가
+    //   먹는데(subscription-analysis 9회·trade-analysis 8회) 정작 30일 실유입은
+    //   13히트/8페이지, 그중 네이버 유입은 1건이다. 개별 글 자리를 뺏기만 한다.
+    //   목록 인덱스 `/blog/series` 는 사이트맵 자산이므로 색인 유지 — 여기만 뺀다.
+    robots: { index: false, follow: true },
     openGraph: {
       title: `📚 ${s.title} 시리즈`,
       description: s.description || `${s.title} 시리즈 전체 글 모아보기`,
