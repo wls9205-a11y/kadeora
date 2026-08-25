@@ -5,6 +5,7 @@ import { withCronLogging } from '@/lib/cron-logger';
 import { withCronAuthFlex } from '@/lib/cron-auth';
 import { safeBlogInsert, extractAptSiteSlugs } from '@/lib/blog-safe-insert';
 import { recordSiteLinks } from '@/lib/blog/site-links';
+import { rotateAnchor } from '@/lib/blog/anchor';
 import { lifecycleLabel } from '@/lib/apt/lifecycle-label';
 
 /**
@@ -89,11 +90,9 @@ interface Digest {
  * ⚠️ 링크 대상은 항상 /apt/{slug} 다 — 앵커만 바뀐다.
  */
 function anchor(item: DigestItem, i: number): string {
-  const pool = [item.name, ...(item.variants ?? [])].filter(
-    (v): v is string => typeof v === 'string' && v.trim().length >= 3,
-  );
-  if (pool.length === 0) return item.slug;
-  return pool[i % pool.length];
+  // ⚠️ 3자 하한만으로는 부족하다. variants 에 `부산`·`푸르지오` 같은 광범위 토큰이 섞여 있어
+  //    그대로 쓰면 브랜드·지역 일반 검색어에 엉뚱한 현장이 매달린다 (lib/blog/anchor.ts).
+  return rotateAnchor(item.name, item.variants, i);
 }
 
 /**

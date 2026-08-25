@@ -5,6 +5,7 @@ import { withCronLogging } from '@/lib/cron-logger';
 import { withCronAuthFlex } from '@/lib/cron-auth';
 import { safeBlogInsert, extractAptSiteSlugs } from '@/lib/blog-safe-insert';
 import { recordSiteLinks } from '@/lib/blog/site-links';
+import { rotateAnchor } from '@/lib/blog/anchor';
 import { lifecycleLabel } from '@/lib/apt/lifecycle-label';
 import { fitTitle } from '@/lib/blog/title-fit';
 
@@ -75,11 +76,9 @@ interface Movers {
 }
 
 /** 앵커 회전. 같은 앵커 반복은 과최적화 신호다. 링크 대상은 항상 /apt/{slug}. */
-function anchor(item: MoverItem, i: number): string {
-  const pool = [item.name, ...(item.variants ?? [])].filter(
-    (v): v is string => typeof v === 'string' && v.trim().length >= 3,
-  );
-  return pool.length === 0 ? item.slug : pool[i % pool.length];
+function anchor(item: { name: string; variants: unknown }, i: number): string {
+  // ⚠️ variants 에 광범위 토큰(`부산`·`푸르지오`)이 섞여 있다. lib/blog/anchor.ts 가 거른다.
+  return rotateAnchor(item.name, item.variants, i);
 }
 
 /** ⚠️ 확정이 아니면 단정하지 않는다 (표시광고법). */

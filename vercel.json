@@ -213,6 +213,10 @@
       "schedule": "0 22 * * 1"
     },
     {
+      "path": "/api/cron/blog-lead-line",
+      "schedule": "30 22 * * 3"
+    },
+    {
       "path": "/api/cron/blog-apt-v2",
       "schedule": "0 8 * * 3"
     },
