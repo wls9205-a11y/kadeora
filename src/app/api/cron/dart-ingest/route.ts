@@ -244,13 +244,15 @@ async function handler(_req: NextRequest) {
     // bodyMentionsRedev 가 걸러 discarded 로 닫힌다 — 어느 쪽이든 큐가 정리된다.
     // ⚠️ 상한을 둔다. 영구 실패건이 쌓이면 매 실행 본문 왕복이 크론을 잡아먹는다.
     const RETRY_CAP = 5;
-    let redevRetried = 0, redevRetryResolved = 0;
+    let redevRetried = 0, redevRetryWritten = 0, redevRetryUnchanged = 0;
     let redevRetryHalted: string | null = null;
+    const retryFailSamples: string[] = [];
     if (apiKey) {
       // database.ts 가 apt_stage_review_queue 를 아직 모른다 (저장소 as any 관례).
       const { data: stuck } = await (supabase as any)
         .from(REVIEW_TABLE)
-        .select('rcept_no, corp_name, report_nm, filed_at')
+        // ⚠️ reason 을 함께 읽는다. 재처리 뒤 값이 실제로 바뀌었는지 대조하는 기준이다.
+        .select('rcept_no, corp_name, report_nm, filed_at, reason')
         .eq('status', 'pending')
         .like('reason', 'body_fetch_failed%')
         .order('created_at', { ascending: true })
@@ -265,8 +267,27 @@ async function handler(_req: NextRequest) {
             { rcept_no: q.rcept_no, corp_name: q.corp_name, report_nm: q.report_nm, filed_at: q.filed_at },
             apiKey,
           );
-          if (r.kind !== 'queue') redevRetryResolved++;
-          else if (!r.reason.startsWith('body_fetch_failed')) redevRetryResolved++;
+          // ⚠️ 반환한 kind 로 세지 않는다. **DB 를 다시 읽어 실제로 바뀌었는지 본다.**
+          //    이전 판은 kind 만 보고 resolved:3 을 냈는데 DB 는 3건 다 pending 그대로였다.
+          //    (status CHECK 에 없는 'discarded' 를 쓰다 23514 가 조용히 삼켜진 상태였다.)
+          //    부산 created:0 · 서울 deduped 938/created 0 과 같은 함정이다 —
+          //    성공 카운터는 시도 횟수가 아니라 쓰기 결과에서 뽑는다.
+          const { data: after } = await (supabase as any)
+            .from(REVIEW_TABLE)
+            .select('status, reason')
+            .eq('rcept_no', q.rcept_no)
+            .order('id', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+          const changed = !!after && (after.status !== 'pending' || after.reason !== q.reason);
+          if (changed) redevRetryWritten++;
+          else {
+            redevRetryUnchanged++;
+            if (retryFailSamples.length < 3) {
+              retryFailSamples.push(`${q.rcept_no}:${r.kind}:${('reason' in r ? r.reason : '').slice(0, 80)}`);
+            }
+          }
 
           // ⚠️ 일 20,000건 한도를 넘긴 상태다. 더 두드리면 한도만 태우고 결과는 같다.
           //    이번 회차는 여기서 멈춘다 — 다음 실행(15분 뒤)에 이어서 한다.
@@ -289,8 +310,10 @@ async function handler(_req: NextRequest) {
         issues_created: issuesCreated, issues_skipped_dup: issuesSkipped,
         redev_candidates: redevCandidates.length,
         redev_auto: redevAuto, redev_queued: redevQueued, redev_discarded: redevDiscarded,
-        redev_retried: redevRetried, redev_retry_resolved: redevRetryResolved,
+        redev_retried: redevRetried, redev_retry_written: redevRetryWritten,
         redev_retry_halted: redevRetryHalted,
+        redev_retry_unchanged: redevRetryUnchanged,
+        redev_retry_fail_samples: retryFailSamples,
       },
     };
   });

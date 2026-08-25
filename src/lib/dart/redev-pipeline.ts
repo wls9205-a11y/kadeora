@@ -30,9 +30,16 @@ export interface RedevFiling {
   filed_at: string | null;
 }
 
+/**
+ * ⚠️ `wrote` 는 **DB 가 실제로 바뀌었는가**다. 반환한 kind 가 아니라 이 값으로 센다.
+ *
+ * 오늘 같은 함정을 세 번 밟았다 — 부산 `created:0 failed:0`, 서울 `deduped 938 created 0`,
+ * 그리고 이 큐의 `redev_retry_resolved:3` 인데 DB 는 그대로. 전부 **시도 횟수를 성공으로**
+ * 세고 있었다. 쓰기 결과에서 카운터를 뽑는다.
+ */
 export type RedevResult =
-  | { kind: 'discard'; reason: string }
-  | { kind: 'queue'; reason: string }
+  | { kind: 'discard'; reason: string; wrote: boolean }
+  | { kind: 'queue'; reason: string; wrote: boolean }
   | { kind: 'auto'; slug: string; changed: boolean };
 
 const dartUrl = (rceptNo: string) => `https://dart.fss.or.kr/dsaf001/main.do?rcpNo=${rceptNo}`;
@@ -56,18 +63,44 @@ async function candidatesForZone(admin: any, zone: string): Promise<CandidateSit
 }
 
 /**
- * 재처리 결과 사람이 볼 필요가 없어진 pending 행을 닫는다.
- * ⚠️ 삭제하지 않는다 — 왜 빠졌는지가 남아야 다음에 같은 판단을 다시 하지 않는다.
+ * 큐 status 허용값. DB CHECK 를 그대로 옮긴 것이다.
+ *   apt_stage_review_queue_status_check
+ *   CHECK (status = ANY (ARRAY['pending','approved','rejected']))
+ *
+ * ⚠️ `discarded` 는 **허용값이 아니다.** 처음에 그 값을 썼다가 CHECK 위반(23514)이
+ *    조용히 삼켜져 큐 3건이 그대로 pending 으로 남았다 —
+ *    카운터는 resolved:3 이라고 말하는데 DB 는 하나도 안 바뀐 상태였다.
+ *    목록 밖 값을 쓰지 말 것. 늘리려면 DB CHECK 를 먼저 넓혀야 한다.
  */
-async function dropPending(admin: any, rceptNo: string, reason: string) {
-  await admin
+const CLOSED_STATUS = 'rejected';
+
+/**
+ * 재처리 결과 사람이 볼 필요가 없어진 pending 행을 닫는다.
+ * ⚠️ 삭제하지 않는다 — 왜 빠졌는지가 reason 에 남아야 다음에 같은 판단을 다시 하지 않는다.
+ * ⚠️ **쓰기 결과를 반환한다.** 삼키면 "처리했다" 는 거짓 카운터가 만들어진다.
+ */
+async function dropPending(admin: any, rceptNo: string, reason: string): Promise<boolean> {
+  const { data, error } = await admin
     .from(REVIEW_TABLE)
-    .update({ status: 'discarded', reason, resolved_at: new Date().toISOString(), reviewed_by: 'system' })
+    .update({
+      status: CLOSED_STATUS,
+      reason,
+      resolved_at: new Date().toISOString(),
+      reviewed_by: 'system',
+    })
     .eq('rcept_no', rceptNo)
-    .eq('status', 'pending');
+    .eq('status', 'pending')
+    .select('id');
+
+  if (error) {
+    console.warn(`[dart/redev] 큐 종결 실패 (${rceptNo}): ${error.message}`);
+    return false;
+  }
+  // 원래 pending 행이 없었으면 0건이다. 신규 공시라면 정상이다.
+  return (data?.length ?? 0) > 0;
 }
 
-async function enqueue(admin: any, f: RedevFiling, outcome: Extract<MatchOutcome, { kind: 'queue' }>) {
+async function enqueue(admin: any, f: RedevFiling, outcome: Extract<MatchOutcome, { kind: 'queue' }>): Promise<boolean> {
   const row = {
     rcept_no: f.rcept_no,
     corp_name: f.corp_name,
@@ -94,14 +127,17 @@ async function enqueue(admin: any, f: RedevFiling, outcome: Extract<MatchOutcome
     .eq('status', 'pending')
     .maybeSingle();
 
-  const { error } = existing
-    ? await admin.from(REVIEW_TABLE).update(row).eq('id', existing.id)
-    : await admin.from(REVIEW_TABLE).insert(row);
+  // ⚠️ 쓰기 결과를 확인한다. 삼키면 "큐에 넣었다" 는 거짓 카운터가 만들어진다.
+  const { data, error } = existing
+    ? await admin.from(REVIEW_TABLE).update(row).eq('id', existing.id).select('id')
+    : await admin.from(REVIEW_TABLE).insert(row).select('id');
 
   if (error) {
     // 테이블이 아직 없어도 크론을 죽이지 않는다. 다만 조용히 넘기지도 않는다.
     console.warn(`[dart/redev] 검수 큐 적재 실패 (${f.rcept_no}): ${error.message}`);
+    return false;
   }
+  return (data?.length ?? 0) > 0;
 }
 
 /**
@@ -122,13 +158,13 @@ export async function processRedevFiling(f: RedevFiling, apiKey: string): Promis
     // 다시 시도해도 같은 결과인 실패는 큐에 남기지 않는다 — 사람이 봐도 누를 게 없다.
     // 013(문서 없음)은 [기재정정] 공시에서 흔하고 **정상 상황**이다.
     if (isTerminalBodyFailure(fetched.reason)) {
-      await dropPending(admin, f.rcept_no, reason);
-      return { kind: 'discard', reason };
+      const wrote = await dropPending(admin, f.rcept_no, reason);
+      return { kind: 'discard', reason, wrote };
     }
 
     // 나머지(키 오류·한도·점검·타임아웃)는 상황이 바뀌면 열린다. 재시도 대상으로 남긴다.
-    await enqueue(admin, f, { kind: 'queue', reason, zones: [] });
-    return { kind: 'queue', reason };
+    const wrote = await enqueue(admin, f, { kind: 'queue', reason, zones: [] });
+    return { kind: 'queue', reason, wrote };
   }
   const body = fetched.text;
 
@@ -140,14 +176,14 @@ export async function processRedevFiling(f: RedevFiling, apiKey: string): Promis
   if (!bodyMentionsRedev(body)) {
     // 본문이 안 열리던 시절에 큐로 들어간 행이 있으면 여기서 정리한다.
     // 사람이 볼 필요가 없어진 건을 pending 으로 남겨 두면 큐가 인프라 공시로 채워진다.
-    await dropPending(admin, f.rcept_no, 'body_not_redev');
-    return { kind: 'discard', reason: 'body_not_redev' };
+    const wrote = await dropPending(admin, f.rcept_no, 'body_not_redev');
+    return { kind: 'discard', reason: 'body_not_redev', wrote };
   }
 
   const zones = extractZoneNames(body);
   if (zones.length === 0) {
-    await enqueue(admin, f, { kind: 'queue', reason: 'no_zone_in_body', zones: [] });
-    return { kind: 'queue', reason: 'no_zone_in_body' };
+    const wrote = await enqueue(admin, f, { kind: 'queue', reason: 'no_zone_in_body', zones: [] });
+    return { kind: 'queue', reason: 'no_zone_in_body', wrote };
   }
 
   const candidates: CandidateSite[] = [];
@@ -155,10 +191,13 @@ export async function processRedevFiling(f: RedevFiling, apiKey: string): Promis
 
   const outcome = matchSite(zones, f.corp_name, candidates);
   if (outcome.kind === 'queue') {
-    await enqueue(admin, f, outcome);
-    return { kind: 'queue', reason: outcome.reason };
+    const wrote = await enqueue(admin, f, outcome);
+    return { kind: 'queue', reason: outcome.reason, wrote };
   }
-  if (outcome.kind === 'discard') return outcome;
+  if (outcome.kind === 'discard') {
+    // 매칭 단계에서 버려도 이미 큐에 있던 행은 닫는다.
+    return { ...outcome, wrote: await dropPending(admin, f.rcept_no, outcome.reason) };
+  }
 
   /* ── 자동 반영 ── */
   // ⚠️ 이미 잠긴 현장은 건드리지 않는다. 사람이 손으로 정한 단계를 공시가 덮으면 안 된다.
@@ -178,8 +217,8 @@ export async function processRedevFiling(f: RedevFiling, apiKey: string): Promis
   }).eq('id', outcome.siteId);
   if (updErr) {
     console.warn(`[dart/redev] 반영 실패 (${f.rcept_no}): ${updErr.message}`);
-    await enqueue(admin, f, { kind: 'queue', reason: `update_failed:${updErr.message}`, zones });
-    return { kind: 'queue', reason: 'update_failed' };
+    const wrote = await enqueue(admin, f, { kind: 'queue', reason: `update_failed:${updErr.message}`, zones });
+    return { kind: 'queue', reason: 'update_failed', wrote };
   }
 
   if (changed) {
