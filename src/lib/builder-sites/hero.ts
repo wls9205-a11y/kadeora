@@ -54,9 +54,19 @@ const MAX_CANDIDATES = 12;
  *      280x280   main_visual_deco_img_01.jpg  ← 크기로 걸린다
  *    measureFirstUsable 은 통과한 **첫 장**을 쓰므로, 이름을 안 보면
  *    달력 배경이 「대우건설 조감도」credit 을 달고 현장 페이지에 올라간다.
- *    이 파일의 규칙은 전부 "확실하지 않으면 건너뛴다" 쪽이다 — 여기도 같다.
  */
 const CHROME_ASSET = /(?:^|[/_-])(?:bg|background|btn|button|icon|ico|logo|bi|deco|popup|layer|banner|calendar|arrow|dot|bullet|sprite|pattern|patt|thumb|nav|menu|footer|header|loading|spinner)(?:[/_.-]|$)/i;
+
+/**
+ * 조감도로 볼 수 있는 파일명 패턴. **허용목록이다 — 여기 없으면 쓰지 않는다.**
+ *
+ * ⚠️ 화면 자산을 뺀 것만으로는 부족했다. 남은 첫 통과분이
+ *    `ls_intro_feature.webp`(1851x1234) 였는데 **조경·커뮤니티 렌더지 조감도가 아니다.**
+ *    그게 현장 페이지 히어로에 「단지 조감도」처럼 올라가면 사실과 다르다.
+ *    이름으로 조감도인지 확신할 수 없으면 **그 사이트는 이미지 없이 둔다.**
+ *    빈 손으로 두는 쪽이 틀린 사진을 올리는 것보다 낫다 — 이 파일의 원칙 그대로다.
+ */
+const HERO_HINT = /(?:bird|aerial|조감|view|main_visual)/i;
 
 export function pickHeroCandidates(
   html: string,
@@ -94,7 +104,12 @@ export function pickHeroCandidates(
     if (u.origin !== new URL(baseUrl).origin) continue;
     // ⚠️ `/upload/` 를 요구하지 않는 소스에서는 경로가 걸러 주는 게 없다.
     //    화면 자산 이름을 명시적으로 뺀다 — 안 그러면 달력 배경이 조감도로 나간다(실측).
-    if (!requireUploadPath && CHROME_ASSET.test(u.pathname)) continue;
+    if (!requireUploadPath) {
+      // ⚠️ 순서가 중요하다 — 허용목록을 먼저 통과해도 화면 자산이면 버린다.
+      //    `main_visual_deco_img_01` 은 힌트(main_visual)를 갖지만 deco 다.
+      if (!HERO_HINT.test(u.pathname)) continue;
+      if (CHROME_ASSET.test(u.pathname)) continue;
+    }
     if (seen.has(abs)) continue;
     seen.add(abs);
     out.push(abs);

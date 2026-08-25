@@ -114,13 +114,12 @@ function anchor(item: DigestItem, i: number): string {
   return rotateAnchor(item.name, item.variants, i, item.builder);
 }
 
-/** `(주)DL이앤씨` 와 `DL이앤씨` 를 같은 회사로 본다. 안 하면 목록에 둘 다 나온다(실측). */
-function normalizeBuilder(b: string): string {
-  return b
-    .replace(/^\s*(\(주\)|㈜|주식회사)\s*/, '')
-    .replace(/\s*(\(주\)|㈜)\s*$/, '')
-    .trim();
-}
+// ⚠️ 여기서 시공사명을 **정규화하지 않는다.** DB 에 `trg_normalize_builder`
+//    BEFORE INSERT/UPDATE 트리거가 걸려 있다((주)·㈜·주식회사 제거 · 포스코건설→포스코이앤씨
+//    · 지에스건설→GS건설 · 디엘이앤씨→DL이앤씨 · 숫자만이면 NULL).
+//    실측 2026-08-25: 활성 3,027건 중 접두어 0 · 옛 사명 0 · 숫자만 0.
+//    한때 `(주)DL이앤씨` 와 `DL이앤씨` 가 목록에 둘 다 나와 여기서 접두어를 떼고 있었는데,
+//    이제 원본이 깨끗하다. 같은 규칙을 두 곳에 두면 한쪽만 고치게 된다.
 
 /**
  * 세대수 서술.
@@ -268,7 +267,8 @@ function processSection(kind: '재건축' | '재개발', d: Digest, items: Diges
       items
         .map((it) => (it.builder ?? '').trim())
         .filter((b) => b.length > 0)
-        .flatMap((b) => b.split(/[,&]/).map((s) => normalizeBuilder(s)))
+        // 한 칸에 두 곳이 들어간 경우만 나눈다(`SK, 현대건설`). 표기 정리는 DB 몫이다.
+        .flatMap((b) => b.split(/[,&]/).map((s) => s.trim()))
         .filter((b) => b.length > 1),
     ),
   ];
