@@ -11,6 +11,7 @@
 
 import Link from 'next/link';
 import { lifecycleLabel } from '@/lib/apt/lifecycle-label';
+import SiteThumb from '@/components/apt/SiteThumb';
 
 export interface RecentMove {
   slug: string;
@@ -29,6 +30,8 @@ export interface RecentMove {
   complex_units: number | null;
   builder: string | null;
   confidence: string | null;
+  /** 라이선스 판정. review·판정 전은 리드폼이 뜨는 자리에서 쓰지 않는다. */
+  hero_license_tier?: string | null;
   /** 조감도 → 카드(?ratio=1x1) → 위성. 히어로 체인과 같다. */
   thumb_url: string | null;
   occurred_at: string | null;
@@ -82,37 +85,17 @@ export default function RecentMoves({ items }: { items: RecentMove[] }) {
                 color: 'inherit',
               }}
             >
-              {/* ⚠️ thumb_url 은 /api/og-apt 로 시작하는 생성 이미지다.
-                  next/image 로 감싸지 않는다 — 최적화 대상이 아니고 이미 규격이 고정이다. */}
-              {m.thumb_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={m.thumb_url}
-                  alt=""
-                  width={56}
-                  height={56}
-                  loading="lazy"
-                  decoding="async"
-                  style={{
-                    width: 56,
-                    height: 56,
-                    flexShrink: 0,
-                    borderRadius: 'var(--radius-sm, 8px)',
-                    objectFit: 'cover',
-                    background: 'var(--bg-elevated)',
-                  }}
-                />
-              ) : (
-                <div
-                  style={{
-                    width: 56,
-                    height: 56,
-                    flexShrink: 0,
-                    borderRadius: 'var(--radius-sm, 8px)',
-                    background: 'var(--bg-elevated)',
-                  }}
-                />
-              )}
+              {/* ⚠️ thumb_url 을 그대로 <img src> 에 박지 않는다 — 마지막 폴백이
+                  `/api/og-apt?slug=…` 라 한 화면에 satori 렌더가 그 수만큼 돈다.
+                  SiteThumb 이 생성 카드 URL 이면 HTTP 없이 CSS 로 그린다. */}
+              <SiteThumb
+                slug={m.slug}
+                name={m.name}
+                thumbUrl={m.thumb_url}
+                lifecycleStage={m.lifecycle_stage}
+                heroLicenseTier={m.hero_license_tier}
+                size={56}
+              />
 
               <div style={{ minWidth: 0, flex: 1 }}>
                 <div

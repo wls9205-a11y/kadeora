@@ -15,6 +15,7 @@ import SectionHeader from '@/components/apt/SectionHeader';
 import UniversalSearchBar from '@/components/search/UniversalSearchBar';
 import RecentMoves, { type RecentMove } from '@/components/home/RecentMoves';
 import LeadForm from '@/components/apt/LeadForm';
+import { BUGYEONG_REGIONS } from '@/lib/apt/pipeline';
 import type { StockIssueScore, AptIssueScore } from '@/lib/issue/types';
 import type { HomeData } from '@/lib/home/contracts';
 
@@ -154,7 +155,11 @@ async function fetchHome(): Promise<{
       (sb as any).from('stock_issue_scores').select('*').is('warning', null)
         .not('market', 'in', `(${DOMESTIC_MARKETS.join(',')})`)
         .order('score', { ascending: false, nullsFirst: false }).limit(3),
+      // ⚠️ 지역 필터가 없어 홈 이슈 단지 TOP5 가 **광주·전북·경기·경남·경기** 였다(실측).
+      //    카더라 커버리지는 부울경이고, 리드도 부울경에서만 받는다 —
+      //    경기 현장을 홈에 걸어 두면 클릭은 나가는데 응대할 수 없다.
       (sb as any).from('apt_issue_scores').select('*').is('warning', null)
+        .in('region_nm', HOME_REGIONS)
         .order('score', { ascending: false, nullsFirst: false }).limit(5),
     ]);
     const homeData: HomeData | null = home?.data ?? null;
@@ -187,8 +192,12 @@ const QUICK_LINKS: { href: string; label: string }[] = [
   { href: '/feed',         label: '커뮤니티' },
 ];
 
-/** 홈이 다루는 지역. 부울경이 카더라의 실제 커버리지다. */
-const HOME_REGIONS = ['부산', '울산', '경남'];
+/**
+ * 홈이 다루는 지역. 부울경이 카더라의 실제 커버리지다.
+ * ⚠️ 여기서 배열을 새로 쓰지 않는다 — lib/apt/pipeline.ts 의 BUGYEONG_REGIONS 가 원본이다.
+ *    같은 목록이 두 곳에 있으면 한쪽만 고치게 된다.
+ */
+const HOME_REGIONS = [...BUGYEONG_REGIONS];
 
 /**
  * H1-2 — 최근 움직인 현장.
