@@ -238,7 +238,7 @@ export default function UniversalSearchBar({
           className={className}
           style={{
             width: "100%",
-            height: 52,
+            height: 56,
             display: "flex",
             alignItems: "center",
             gap: 10,
@@ -255,7 +255,7 @@ export default function UniversalSearchBar({
           <span
             style={{
               flex: 1,
-              fontSize: 16,
+              fontSize: 17,
               lineHeight: 1.2,
               overflow: "hidden",
               textOverflow: "ellipsis",
