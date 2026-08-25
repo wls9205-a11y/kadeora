@@ -5,8 +5,13 @@ import { withCronLogging } from '@/lib/cron-logger';
 import { withCronAuthFlex } from '@/lib/cron-auth';
 import { safeBlogInsert, extractAptSiteSlugs } from '@/lib/blog-safe-insert';
 import { recordSiteLinks } from '@/lib/blog/site-links';
-import { rotateAnchor } from '@/lib/blog/anchor';
-import { lifecycleLabel } from '@/lib/apt/lifecycle-label';
+import {
+  buildBody,
+  decideSplit,
+  pickRepresentatives,
+  type Digest,
+  type DigestItem,
+} from '@/lib/blog/district-body';
 
 /**
  * ADDENDUM §4-1 — 구·군별 정비사업 현황 (월간).
@@ -61,40 +66,6 @@ const MAX_POSTS = 20;
 /** 본문에 실을 현장 수 상한. 50개를 넘기면 글이 목록이 된다. */
 const MAX_ITEMS = 40;
 
-interface DigestItem {
-  slug: string;
-  name: string;
-  raw_name: string | null;
-  stage: string | null;
-  builder: string | null;
-  supply_units: number | null;
-  complex_units: number | null;
-  dong: string | null;
-  has_image: boolean;
-  confidence: string | null;
-  variants: string[] | null;
-  /** 재개발 · 재건축 · 가로주택정비 · 정비사업 · 기타. ⚠️ 컬럼이 아니라 이름에서 판정한 값이다. */
-  project_type?: string | null;
-  /** blog_site_links 기준 인바운드. 대상 선정에 쓴다. */
-  inbound?: number | null;
-}
-
-interface Digest {
-  region: string;
-  sigungu: string;
-  total: number;
-  rich: number;
-  publishable: boolean;
-  items: DigestItem[];
-  redev_count?: number;
-  rebuild_count?: number;
-  other_count?: number;
-  /** 재건축 >= 5 이면 true. 별도 글로 뗄지 판단. */
-  split_rebuild?: boolean;
-  /** 제목에 쓸 대표 유형. */
-  dominant_type?: string | null;
-}
-
 /**
  * 한 현장이 「정보 2개 이상」 게이트를 통과하는가.
  *
@@ -124,143 +95,6 @@ function typeLabel(t: string | null | undefined): string {
   return v === '재개발' || v === '재건축' ? v : '정비사업';
 }
 
-/**
- * 앵커 텍스트. **같은 글 안에서 같은 문구를 반복하지 않는다.**
- * variants 를 인덱스로 돌려 쓰고, 없으면 name 으로 떨어진다.
- * ⚠️ 링크 대상은 항상 /apt/{slug} 다 — 앵커만 바뀐다.
- */
-function anchor(item: DigestItem, i: number): string {
-  // ⚠️ 3자 하한만으로는 부족하다. variants 에 `부산`·`푸르지오` 같은 광범위 토큰이 섞여 있어
-  //    그대로 쓰면 브랜드·지역 일반 검색어에 엉뚱한 현장이 매달린다 (lib/blog/anchor.ts).
-  return rotateAnchor(item.name, item.variants, i);
-}
-
-/**
- * 세대수 서술.
- * ⚠️ confidence 가 confirmed 가 아니면 단정하지 않는다.
- *    complex_units(단지 전체)를 우선 쓰고, 없으면 supply_units 를 **이름 붙여** 쓴다 —
- *    라벨 없는 '176세대' 는 총세대수로 오독된다.
- */
-function unitsPhrase(item: DigestItem): string | null {
-  const confirmed = item.confidence === 'confirmed';
-  const soft = confirmed ? '' : ' 예정';
-  if (item.complex_units && item.complex_units > 0) {
-    return `총 ${item.complex_units.toLocaleString('ko-KR')}세대${soft}`;
-  }
-  if (item.supply_units && item.supply_units > 0) {
-    return `일반분양 ${item.supply_units.toLocaleString('ko-KR')}세대${soft}`;
-  }
-  return null;
-}
-
-/** 시공사 서술. 확정이 아니면 「알려짐」을 붙인다. */
-function builderPhrase(item: DigestItem): string | null {
-  if (!item.builder) return null;
-  return item.confidence === 'confirmed' ? item.builder : `${item.builder}(알려짐)`;
-}
-
-/**
- * 단계 한 줄 설명.
- * ⚠️ 그 구에 **실제로 있는 단계만** 낸다. 전 구에 같은 문단을 깔면 15편이 서로
- *    중복 콘텐츠가 된다. 구마다 단계 구성이 달라 이 방식이면 자연히 갈린다.
- */
-const STAGE_NOTE: Record<string, string> = {
-  construction: '철거·착공에 들어간 구역입니다. 일반분양 시기가 가장 가깝습니다.',
-  mgmt_approved: '관리처분인가를 받은 구역입니다. 조합원 분담금과 일반분양 물량이 확정되는 단계입니다.',
-  plan_approved: '사업시행인가 단계입니다. 세대수·용적률 등 사업 규모가 정해집니다.',
-  constructor_selected: '시공사를 선정한 구역입니다. 브랜드와 공사비가 정해지는 시점입니다.',
-  union_established: '조합설립인가를 받은 구역입니다. 사업시행인가까지는 통상 수년이 걸립니다.',
-  site_planning: '정비구역 지정·계획 단계입니다. 일정 변동 폭이 가장 큽니다.',
-  pre_announcement: '모집공고를 앞둔 구역입니다.',
-};
-
-function buildBody(d: Digest, items: DigestItem[], movedSlugs: Set<string>, ym: string): string {
-  const lines: string[] = [];
-
-  lines.push(
-    `${d.region} ${d.sigungu}에서 진행 중인 재개발·재건축 구역을 ${ym} 기준으로 정리했습니다. ` +
-      `모집공고 전 단계까지 포함해 ${d.total}곳입니다.`,
-  );
-
-  /* ── 구 단위 요약 — 전부 계산된 사실이다. 구마다 값이 달라 중복이 되지 않는다 ── */
-  const byStage = new Map<string, number>();
-  for (const it of items) {
-    const label = lifecycleLabel(it.stage) ?? '진행 중';
-    byStage.set(label, (byStage.get(label) ?? 0) + 1);
-  }
-  const dist = [...byStage.entries()].map(([k, v]) => `${k} ${v}곳`).join(' · ');
-  if (dist) {
-    lines.push('');
-    lines.push(`단계별로는 ${dist} 입니다.`);
-  }
-
-  const unitList = items
-    .map((it) => it.complex_units ?? it.supply_units ?? 0)
-    .filter((n) => n > 0);
-  if (unitList.length >= 2) {
-    const sum = unitList.reduce((a, b) => a + b, 0);
-    const max = items
-      .filter((it) => (it.complex_units ?? it.supply_units ?? 0) === Math.max(...unitList))[0];
-    lines.push(
-      `세대수가 확인된 ${unitList.length}곳을 합치면 약 ${sum.toLocaleString('ko-KR')}세대 규모이고, ` +
-        `가장 큰 곳은 ${max?.raw_name || max?.name}입니다.`,
-    );
-  }
-
-  const withBuilder = items.filter((it) => it.builder).length;
-  if (withBuilder > 0) {
-    lines.push(
-      `시공사가 정해진 구역은 ${withBuilder}곳입니다. ` +
-        `나머지는 아직 선정 전이거나 공개되지 않았습니다.`,
-    );
-  }
-
-  if (movedSlugs.size > 0) {
-    lines.push('');
-    lines.push(`## 이번 달 단계가 바뀐 구역`);
-    lines.push('');
-    const moved = items.filter((it) => movedSlugs.has(it.slug));
-    moved.forEach((it, i) => {
-      const stage = lifecycleLabel(it.stage) ?? '진행 중';
-      lines.push(`- [${anchor(it, i)}](/apt/${it.slug}) — ${stage}`);
-    });
-  }
-
-  // 단계별로 묶는다. items 는 이미 단계순이라 순서를 유지하며 헤딩만 끼운다.
-  lines.push('');
-  lines.push(`## 구역별 진행 현황`);
-
-  let lastStage: string | null = null;
-  items.forEach((it, i) => {
-    const stage = lifecycleLabel(it.stage) ?? '진행 중';
-    if (stage !== lastStage) {
-      lines.push('');
-      lines.push(`### ${stage}`);
-      lines.push('');
-      const note = it.stage ? STAGE_NOTE[it.stage] : null;
-      if (note) { lines.push(note); lines.push(''); }
-      lastStage = stage;
-    }
-    const bits = [builderPhrase(it), unitsPhrase(it), it.dong].filter(Boolean);
-    lines.push(`- [${anchor(it, i)}](/apt/${it.slug})${bits.length > 0 ? ` — ${bits.join(' · ')}` : ''}`);
-  });
-
-  if (d.total > items.length) {
-    lines.push('');
-    lines.push(
-      `그 밖에 ${d.total - items.length}곳이 더 있습니다. ` +
-        `[${d.region} 정비사업 전체 보기](/apt/redev/${encodeURIComponent(d.region)})`,
-    );
-  }
-
-  lines.push('');
-  lines.push(
-    `단계와 세대수는 고시·공시 원문과 조합 공개 자료를 기준으로 하며, 확정되지 않은 항목은 「예정」·「알려짐」으로 표시했습니다. ` +
-      `구역별 상세는 각 링크에서 확인하실 수 있습니다.`,
-  );
-
-  return lines.join('\n');
-}
 
 async function handler(_req: NextRequest) {
   const result = await withCronLogging('blog-district-redev', async () => {
@@ -349,11 +183,16 @@ async function handler(_req: NextRequest) {
        *
        *   본편  = 재개발 + 가로주택정비 + 기타
        *   분리편 = 재건축만
+       *
+       * ⚠️ 분리는 **양쪽이 다 글이 될 때만** 한다. 판단은 decideSplit 안에 있다 —
+       *    첫 실행에서 too_thin 14건을 낸 게 정확히 이 결정이라 테스트로 잠가 뒀다.
        */
-      const isRebuild = (it: DigestItem) => (it.project_type ?? '').trim() === '재건축';
-      const split = d.split_rebuild === true;
-      const mainItems = split ? all.filter((it) => !isRebuild(it)) : all;
-      const rebuildItems = split ? all.filter(isRebuild) : [];
+      const dec = decideSplit(d, all, ym, movedAll, minContentLength);
+      const { split, mainItems, rebuildItems } = dec;
+      if (dec.revertedMessage) {
+        skippedReasons.split_reverted = (skippedReasons.split_reverted ?? 0) + 1;
+        skippedMessages.push(dec.revertedMessage);
+      }
 
       /** 한 편을 내보낸다. 신규는 insert, 있으면 갱신. */
       const emit = async (
@@ -432,7 +271,11 @@ async function handler(_req: NextRequest) {
         const orderedMain = [...mainItems].sort(
           (a, b) => Number(movedMain.has(b.slug)) - Number(movedMain.has(a.slug)),
         );
-        const top3 = orderedMain.slice(0, 3).map((i) => i.raw_name || i.name).filter(Boolean).join(', ');
+        // ⚠️ 브랜드명 단독 행을 대표로 쓰지 않는다. 실측:
+        //    「부산진구 재개발 총정리 — 아크로 라로체, 범천1-1 재개발, 부산 범천1-1구역 재개발」
+        //    ① 아크로 라로체는 구역명이 아니라 분양 브랜드다
+        //    ② 범천1-1 이 표기만 다른 채 두 번 올라왔다 (병합됐지만 정규화 DISTINCT 로 재발을 막는다)
+        const top3 = pickRepresentatives(orderedMain, dst.region, 3).join(', ');
         // ⚠️ 분리했으면 본편의 대표 유형은 재건축이 아니다. 남은 것으로 다시 정한다.
         const kind = split ? '재개발' : typeLabel(d.dominant_type);
         await emit(
@@ -458,11 +301,7 @@ async function handler(_req: NextRequest) {
         //    접미어를 남기면 `A 재건축, B 재건축` 이 되어 본편과 토큰이 다시 겹친다.
         //    ⚠️ `소규모` 를 같이 떼야 한다. 원 이름이 `신서면아파트 소규모재건축` 이라
         //       `재건축` 만 떼면 `신서면아파트 소규모` 라는 꼬리가 제목에 남는다.
-        const top2 = orderedRe
-          .slice(0, 2)
-          .map((i) => (i.raw_name || i.name).replace(/\s*(소규모)?\s*재건축\s*$/, '').trim())
-          .filter(Boolean)
-          .join(', ');
+        const top2 = pickRepresentatives(orderedRe, dst.region, 2, true).join(', ');
         await emit(
           'rebuild',
           // ⚠️ slug 도 본편과 달라야 한다. 같으면 URL 충돌이다.
