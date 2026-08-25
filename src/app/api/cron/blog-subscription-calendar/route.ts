@@ -4,6 +4,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
 import { withCronAuthFlex } from '@/lib/cron-auth';
 import { safeBlogInsert, extractAptSiteSlugs } from '@/lib/blog-safe-insert';
+import { recordSiteLinks } from '@/lib/blog/site-links';
 
 /**
  * ADDENDUM §4-2 + §4-3 — 분양예정 + 청약 캘린더 (한 글로 묶음).
@@ -215,6 +216,8 @@ async function handler(req: NextRequest) {
           skipped.update_failed = (skipped.update_failed ?? 0) + 1;
           continue;
         }
+        // §G-1: 갱신분도 대장에 적는다.
+        await recordSiteLinks(admin, existingPost.id, content);
         refreshed++;
         details.push({ region, refreshed: true, links: extractAptSiteSlugs(content).length, title });
         continue;

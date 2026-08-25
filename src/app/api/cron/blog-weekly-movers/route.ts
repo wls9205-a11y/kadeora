@@ -4,6 +4,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
 import { withCronAuthFlex } from '@/lib/cron-auth';
 import { safeBlogInsert, extractAptSiteSlugs } from '@/lib/blog-safe-insert';
+import { recordSiteLinks } from '@/lib/blog/site-links';
 import { lifecycleLabel } from '@/lib/apt/lifecycle-label';
 import { fitTitle } from '@/lib/blog/title-fit';
 
@@ -270,6 +271,8 @@ async function handler(req: NextRequest) {
         .select('id');
       // ⚠️ 영향 행 수를 본다. 0건이면 갱신했다고 세지 않는다.
       const wrote = !updErr && (upd?.length ?? 0) > 0;
+      // §G-1: 본문이 바뀌면 링크도 바뀐다. 대장을 같이 갱신한다.
+      if (wrote) await recordSiteLinks(admin, existingPost.id, content);
       return {
         processed: m.total,
         created: 0,

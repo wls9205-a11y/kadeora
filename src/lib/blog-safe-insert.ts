@@ -1,6 +1,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { generateMetaDesc, generateMetaKeywords, generateImageAlt } from '@/lib/blog-seo-utils';
 import { isLeadEligible } from '@/lib/apt/lead-eligibility';
+import { recordSiteLinks } from '@/lib/blog/site-links';
 
 /**
  * 블로그 글을 안전하게 INSERT하는 유틸리티 (v3)
@@ -402,7 +403,21 @@ export async function safeBlogInsert(
       return { success: false, reason: 'duplicate_slug' };
     }
 
-    return { success: true, id: inserted[0]?.id, siteSlugs };
+    // ── ADDENDUM §G-1 · 링크 대장에 적는다 ──
+    // ⚠️ 여기서 안 적으면 「인바운드 0개」 집계가 hub 1개만 세게 되고,
+    //    이미 링크가 많은 현장에 또 글을 쓰는 대상 선정이 돈다.
+    //    본문 LIKE 전체 스캔은 타임아웃이라 **발행 시점에 적어 두는 것이 유일한 경로**다.
+    // ⚠️ 실패해도 발행을 되돌리지 않는다. 대장은 집계용이고 글은 이미 들어갔다.
+    const blogId = inserted[0]?.id;
+    if (blogId) {
+      try {
+        await recordSiteLinks(admin, blogId, enrichedContent);
+      } catch (e: any) {
+        console.warn(`[safeBlogInsert] site-links 기록 실패 ${data.slug}: ${e?.message ?? e}`);
+      }
+    }
+
+    return { success: true, id: blogId, siteSlugs };
   } catch (err: any) {
     const msg = err?.message || '';
     // 트리거 race condition은 조용히 처리

@@ -4,6 +4,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
 import { withCronAuthFlex } from '@/lib/cron-auth';
 import { safeBlogInsert, extractAptSiteSlugs } from '@/lib/blog-safe-insert';
+import { recordSiteLinks } from '@/lib/blog/site-links';
 import { lifecycleLabel } from '@/lib/apt/lifecycle-label';
 
 /**
@@ -15,7 +16,10 @@ import { lifecycleLabel } from '@/lib/apt/lifecycle-label';
  *   현장 상세 노출  1,711 · 클릭 41 · CTR 2.4%
  * 목표는 "글을 더 쓰는 것"이 아니라 **현장 페이지로 링크를 흘려보내는 것**이다.
  * 이 글 한 편이 한 구의 현장 10~50곳으로 링크를 뿌린다.
- * 인바운드 0개 현장 4,178건을 줄이는 가장 효율 좋은 경로다.
+ *
+ * ⚠️ 「인바운드 0개 4,178건」은 **틀린 숫자였다**(§G-1). hub_apt_slug 만 세면
+ *    글당 대표 1개뿐이라 본문 링크를 못 센다. blog_site_links 전체 백필 후 실측:
+ *    링크 5,271 · 커버 현장 855 · hub 합집합 기준 **인바운드 0개 = 3,809 / 6,049**.
  *
  * ── 재료 ──
  * get_district_redev_digest(region, sigungu) 가 전부 준다.
@@ -342,6 +346,9 @@ async function handler(_req: NextRequest) {
           skippedReasons.update_failed = (skippedReasons.update_failed ?? 0) + 1;
           continue;
         }
+        // §G-1: 본문이 바뀌면 링크도 바뀐다. 대장을 같이 갱신하지 않으면
+        //       집계가 첫 발행 시점에 멈춘다.
+        await recordSiteLinks(admin, existingPost.id, content);
         refreshed++;
         titles.push(`(갱신) ${title}`);
         continue;
