@@ -84,6 +84,7 @@ interface AptRow {
   name: string;
   /** ⚠️ §A-3: 표시는 이걸 우선한다. 456건에 붙어 있다. 없으면 name 으로 떨어진다. */
   display_name?: string | null;
+  curated_status?: string | null;
   /** 단지 전체 / 일반분양. 히어로 우측 지표에 쓴다 — 라벨 없이 쓰지 않는다. */
   complex_units?: number | null;
   supply_units?: number | null;
@@ -114,10 +115,58 @@ async function fetchSite(slug: string): Promise<AptRow | null> {
     const sb = getSupabaseAdmin();
     // ⚠️ §A: display_name·complex_units·supply_units 를 함께 읽는다.
     //    이 셋이 없으면 히어로 우측이 비고 이름이 행정 명칭으로 나간다.
-    const cols = 'slug,name,display_name,site_type,region,sigungu,dong,address,builder,developer,total_units,complex_units,supply_units,built_year,move_in_date,price_min,price_max,latitude,longitude,nearby_station,school_district,description,key_features,lifecycle_stage,interest_count';
+    // [P2 §2] curated_status 를 함께 읽는다 — 단계 태그 색 판정의 1순위다.
+    const cols = 'slug,name,display_name,curated_status,site_type,region,sigungu,dong,address,builder,developer,total_units,complex_units,supply_units,built_year,move_in_date,price_min,price_max,latitude,longitude,nearby_station,school_district,description,key_features,lifecycle_stage,interest_count';
     const { data } = await (sb as any).from('apt_sites').select(cols).eq('slug', slug).maybeSingle();
     return sanitizeRowForOG(data ?? null) as AptRow | null;
   } catch { return null; }
+}
+
+/* ───────────────────────── [패치 P2 §1·§2] 브랜드 규격 ─────────────────────────
+ *
+ * ⚠️ 이 블록은 «리베이스에서 한 번 소실됐다».
+ *    6f8f13c7 을 원격 채택으로 처리하면서 원격에 네이비가 없다는 것을 확인하지 않아
+ *    옛 6버킷 색으로 되돌아갔다. 확정 규격은 여기에서만 읽는다.
+ *
+ * §1 배경 — 브랜드 네이비 «하나» 로 고정.
+ *   출발점이던 노랑 #FFD400 안은 폐기됐다 — 노랑 위 흰 글씨는 명도차가 부족해
+ *   64px 로 줄면 뭉갠다. 원본은 그림자를 두껍게 넣어 버텼지만 축소되면 안 먹는다.
+ *
+ * §2 단계 구분은 배경이 아니라 «상단 말풍선 태그 색» 으로 가른다.
+ *   "일색이면 목록에서 썸네일이 서로 구분되지 않는다" 는 문제는 네이비에도 남는다.
+ *   그렇다고 배경을 5색으로 쪼개면 네이비를 채택한 이유 자체가 사라진다.
+ *
+ * ⚠️ 적용 범위는 «브랜드 노출면» 뿐 — 목록 썸네일(card 1)과 히어로.
+ *    card 2~6 은 정보 카드 캐러셀이라 축이 달라 P2 가 다룬 적이 없다. 건드리지 않는다.
+ * ⚠️ ratio 계약 · tracking() 자간 · HEAVY 그림자는 원격 구현을 그대로 쓴다.
+ */
+const CARD_BG = 'linear-gradient(160deg, #0B2A6B 0%, #123A8F 55%, #2563EB 100%)';
+
+const REDEV_STAGES = new Set([
+  'union_established', 'constructor_selected', 'plan_approved', 'mgmt_approved', 'construction',
+]);
+const SELLING = new Set(['분양중', '선착순', '잔여세대']);
+const RESALE = new Set(['분양완료', '입주예정']);
+
+type CardTag = { bg: string; fg: string; label: string };
+
+/**
+ * 단계 → 태그 색. curated_status 우선, 없으면 lifecycle_stage.
+ * ⚠️ 표에 없는 조합은 기축 태그 + warn. 조용히 배정하지 않는다 —
+ *    move_in_ready 를 '입주 임박' 으로 오분류한 전례가 있다.
+ */
+function tagFor(site: AptRow | null): CardTag {
+  const cs = site?.curated_status?.trim() || null;
+  const stage = site?.lifecycle_stage?.trim() || null;
+  if (cs && SELLING.has(cs)) return { bg: '#FFC53D', fg: '#0B2A6B', label: '분양' };
+  if (cs === '분양예정') return { bg: '#7DD3FC', fg: '#0B2A6B', label: '분양예정' };
+  if (cs === '미분양') return { bg: '#FDA4AF', fg: '#4A1B0C', label: '미분양' };
+  if (!cs && stage && REDEV_STAGES.has(stage)) return { bg: '#C4B5FD', fg: '#26215C', label: '정비' };
+  if ((cs && RESALE.has(cs)) || stage === 'landmark_active') {
+    return { bg: '#CBD5E1', fg: '#0F1B2D', label: '기축' };
+  }
+  console.warn(`[og-apt] 미분류 상태 — curated_status=${cs ?? 'null'} lifecycle_stage=${stage ?? 'null'} → 기축 태그 폴백`);
+  return { bg: '#CBD5E1', fg: '#0F1B2D', label: '기축' };
 }
 
 function bgFor(card: number, site: AptRow | null): string {
@@ -137,13 +186,14 @@ function bgFor(card: number, site: AptRow | null): string {
 
 function renderCover(site: AptRow): React.ReactElement {
   const region = [site.region, site.sigungu, site.dong].filter(Boolean).join(' ');
-  const stLabel = SITE_TYPE_LABEL[site.site_type] || '단지';
+  const coverTag = tagFor(site);
   const lcLabel = site.lifecycle_stage ? LIFECYCLE_LABEL[site.lifecycle_stage] : null;
   const nameFS = site.name.length > 14 ? 56 : site.name.length > 10 ? 70 : 84;
   return (
     <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: 56 }}>
       <div style={{ display: 'flex', gap: 8 }}>
-        <div style={{ display:'flex', background: '#FAC775', color: '#1A1A18', fontSize: 22, fontWeight: 800, padding: '6px 16px', borderRadius: 999 }}>{stLabel}</div>
+        {/* [P2 §2] 목록 썸네일의 상단 태그가 단계를 가른다. 배경이 네이비 고정이라 여기서만 구분된다. */}
+        <div style={{ display:'flex', background: coverTag.bg, color: coverTag.fg, fontSize: 22, fontWeight: 800, padding: '6px 16px', borderRadius: 999 }}>{coverTag.label}</div>
         {lcLabel ? <div style={{ display:'flex', background: 'rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: 22, fontWeight: 700, padding: '6px 16px', borderRadius: 999 }}>{lcLabel}</div> : null}
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -176,6 +226,7 @@ function renderHero(site: AptRow, ratio: RatioKey): React.ReactElement {
   const wide = ratio === '21x9';
   const name = displayNameOf(site);
   const lcLabel = site.lifecycle_stage ? LIFECYCLE_LABEL[site.lifecycle_stage] : null;
+  const heroTag = tagFor(site);
 
   // ⚠️ 지역 중복 제거 — display_name 이 이미 시군구를 품고 있는 경우가 많다.
   //    실측: display_name '부산진구 아크로 라로체' + 배지 '부산 부산진구' → 「부산진구」가 두 번.
@@ -211,13 +262,20 @@ function renderHero(site: AptRow, ratio: RatioKey): React.ReactElement {
     <div style={{ width: '100%', height: '100%', display: 'flex', padding: pad, gap: wide ? 56 : 40 }}>
       {/* 좌 — 이름 블록 */}
       <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', flex: 1, gap: 18 }}>
-        {region ? (
-          <div style={{ display: 'flex' }}>
-            <div style={{ display: 'flex', background: '#FAC775', color: '#1A1A18', fontSize: 26, fontWeight: 800, padding: '7px 20px', borderRadius: 999, letterSpacing: tracking(26) }}>
+        {/* ⚠️ 단계 태그를 `region ?` 안에 넣지 말 것.
+            지역 배지는 display_name 이 이미 시군구를 품으면 «사라진다»(중복 제거).
+            안에 넣었더니 21x9 5건 중 3건에서 태그가 통째로 빠졌다(실측 0px).
+            배경이 네이비 고정이라 단계는 이 태그로만 보이므로 항상 그린다. */}
+        <div style={{ display: 'flex' }}>
+          {region ? (
+            <div style={{ display: 'flex', background: '#FAC775', color: '#1A1A18', fontSize: 26, fontWeight: 800, padding: '7px 20px', borderRadius: 999, letterSpacing: tracking(26), marginRight: 10 }}>
               {region}
             </div>
+          ) : null}
+          <div style={{ display: 'flex', background: heroTag.bg, color: heroTag.fg, fontSize: 26, fontWeight: 800, padding: '7px 20px', borderRadius: 999, letterSpacing: tracking(26) }}>
+            {heroTag.label}
           </div>
-        ) : null}
+        </div>
 
         <div style={{ display: 'flex', width: 72, height: 6, background: '#FAC775' }} />
 
@@ -518,6 +576,10 @@ export async function GET(req: NextRequest) {
 
   // s205-W9: body 구성 + ImageResponse 모두 단일 try 로 wrapping → 어떤 필드 throw 도 fallback 으로 다운그레이드.
   try {
+    // [P2 §1] 브랜드 노출면 = 목록 썸네일(card 1) + 히어로. 여기만 네이비 고정.
+    //   card 2~6 은 정보 카드 캐러셀이라 축이 달라 원래 색을 유지한다.
+    const isBrandSurface = ratio !== '1x1' || card === 1;
+
     let body: React.ReactElement;
     if (!site) {
       body = renderFallback(slug, ratio);
@@ -539,7 +601,7 @@ export async function GET(req: NextRequest) {
     }
 
     const wrapped = (
-      <div style={{ width: '100%', height: '100%', display: 'flex', background: bgFor(card, site), fontFamily: ff }}>
+      <div style={{ width: '100%', height: '100%', display: 'flex', background: isBrandSurface ? CARD_BG : bgFor(card, site), fontFamily: ff }}>
         {body}
       </div>
     );
