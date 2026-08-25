@@ -646,18 +646,6 @@
     "src/app/api/cron/blog-restore-*/*.ts": {
       "maxDuration": 120
     },
-    "src/app/api/cron/blog-restore-candidate/*.ts": {
-      "maxDuration": 120
-    },
-    "src/app/api/cron/blog-restore-monitor/*.ts": {
-      "maxDuration": 120
-    },
-    "src/app/api/cron/blog-enrich-rewrite/*.ts": {
-      "maxDuration": 300
-    },
-    "src/app/api/cron/blog-upcoming-projects/*.ts": {
-      "maxDuration": 300
-    },
     "src/app/api/cron/blog-data-update/*.ts": {
       "maxDuration": 120
     },
