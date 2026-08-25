@@ -104,9 +104,11 @@ async function handler(_req: NextRequest) {
           seoUrls.push(`${SITE_URL}/apt/theme/${t}`);
         }
         // 건설사 상위 20
-        const { data: bd } = await sb.from('apt_sites').select('builder').eq('is_active', true).not('builder', 'is', null).neq('builder', '');
+        // ⚠️ M2 B-2: 허브가 contains(builder_normalized) 로 조회한다. 원문을 실으면
+        //    컨소시엄 문자열이 그대로 URL 이 되어 빈 페이지를 색인 요청하게 된다.
+        const { data: bd } = await sb.from('apt_sites').select('builder_normalized').eq('is_active', true).not('builder_normalized', 'is', null);
         const bMap = new Map<string, number>();
-        for (const r of (bd || [])) { if (r.builder) bMap.set(r.builder, (bMap.get(r.builder) || 0) + 1); }
+        for (const r of (bd || [])) { for (const b of ((r as { builder_normalized: string[] | null }).builder_normalized ?? [])) bMap.set(b, (bMap.get(b) || 0) + 1); }
         const topBuilders = Array.from(bMap.entries()).sort((a, b) => b[1] - a[1]).slice(0, 20);
         for (const [b] of topBuilders) { seoUrls.push(`${SITE_URL}/apt/builder/${encodeURIComponent(b)}`); }
         // 단지백과 (최근 거래 활발한 100개)

@@ -101,7 +101,7 @@ async function resolveParam(rawId: string) {
 
 async function fetchUnifiedData(slug: string) {
   const sb = getSupabaseAdmin();
-  const APT_COLS = 'id,slug,name,display_name,site_type,region,sigungu,dong,address,description,seo_title,seo_description,builder,developer,total_units,supply_units,complex_units,built_year,move_in_date,status,is_active,content_score,interest_count,page_views,comment_count,images,satellite_image_url,og_image_url,key_features,faq_items,nearby_facilities,nearby_station,school_district,price_min,price_max,price_comparison,search_trend,latitude,longitude,source_ids,created_at,updated_at,og_cards,hero_image_url,hero_image_source,hero_image_credit,hero_license_tier,lifecycle_stage,review_score,review_count,faqs,data_quality_score,remaining_units,general_units,official_url,discount_pct,agent_kakao_url';
+  const APT_COLS = 'id,slug,name,display_name,site_type,region,sigungu,dong,address,description,seo_title,seo_description,builder,builder_normalized,developer,total_units,supply_units,complex_units,built_year,move_in_date,status,is_active,content_score,interest_count,page_views,comment_count,images,satellite_image_url,og_image_url,key_features,faq_items,nearby_facilities,nearby_station,school_district,price_min,price_max,price_comparison,search_trend,latitude,longitude,source_ids,created_at,updated_at,og_cards,hero_image_url,hero_image_source,hero_image_credit,hero_license_tier,lifecycle_stage,review_score,review_count,faqs,data_quality_score,remaining_units,general_units,official_url,discount_pct,agent_kakao_url';
 
   // Phase 1: apt_sites — exact slug → multi-stage fuzzy fallback
   let { data: site } = await (sb as any).from('apt_sites').select(APT_COLS).eq('slug', slug).maybeSingle();
@@ -664,6 +664,11 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
   // ⚠️ 마스터 §2: 현장 행 등급이 미확정이면 별칭 크론이 채웠을 수 있어 쓰지 않는다.
   //    모집공고(sub)의 시공사는 공고 원문이라 등급과 무관하게 남긴다.
   const builderName = (siteUnconfirmed ? null : site?.builder) || sub?.constructor_nm;
+  // M2 B-2 — 시공사 허브로 보낼 정규화 이름. 표시 문구는 원문(builderName)을 그대로 쓰고
+  // 링크 대상만 이 배열을 쓴다. 미확인 현장은 시공사를 단정하지 않으므로 링크도 걸지 않는다.
+  const builderLinkNames: string[] = siteUnconfirmed
+    ? []
+    : ((site as { builder_normalized?: string[] | null } | null)?.builder_normalized ?? []);
   // V15 C-3: 세대수는 페이지 전체가 이 한 벌을 쓴다. 축이 갈린 값을 곳곳에서
   //   다시 조합하면 같은 현장에서 다른 숫자가 나온다 (V10 이 고친 중복의 재발).
   const unitsRaw = resolveUnits(site as any, sub as any);
@@ -1030,7 +1035,16 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
         {/* 위치 + 시공사 통합 카드 */}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8, fontSize: 'var(--fs-xs)' }}>
           <span style={{ color: 'var(--text-tertiary)' }}>{[region, site?.sigungu, site?.dong].filter(Boolean).join(' ') || sub?.hssply_adres || ''}</span>
-          {(builderName) && <Link href={`/apt/builder/${encodeURIComponent(builderName || '')}`} style={{ color: 'var(--text-tertiary)', textDecoration: 'none' }}>{builderName}</Link>}
+          {/* M2 B-2: 허브 링크는 정규화 이름으로 건다.
+              ⚠️ 예전에는 builder 원문을 그대로 URL 에 넣었다. 컨소시엄 행이면
+                 `/apt/builder/GS건설, SK에코플랜트` 로 나가 빈 페이지(notFound)가 됐다.
+              ⚠️ 정규화 결과가 없으면(공고 constructor_nm 만 있는 경우) 링크를 걸지 않고
+                 텍스트로 둔다 — 404 로 보내는 것보다 낫다. */}
+          {builderLinkNames.length > 0
+            ? builderLinkNames.map(b => (
+                <Link key={b} href={`/apt/builder/${encodeURIComponent(b)}`} style={{ color: 'var(--text-tertiary)', textDecoration: 'none' }}>{b}</Link>
+              ))
+            : builderName && <span style={{ color: 'var(--text-tertiary)' }}>{builderName}</span>}
           {(site?.developer || sub?.developer_nm) && <span style={{ color: 'var(--text-tertiary)' }}>{site?.developer || sub?.developer_nm}</span>}
           {(site?.nearby_station || sub?.nearest_station) && <span style={{ color: 'var(--accent-blue)' }}>{site?.nearby_station || sub?.nearest_station}</span>}
         </div>

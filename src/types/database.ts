@@ -719,6 +719,7 @@ export type Database = {
           analysis_generated_at: string | null
           analysis_text: string | null
           builder: string | null
+          builder_normalized: string[] | null
           built_year: number | null
           comment_count: number
           content_score: number | null
@@ -769,6 +770,7 @@ export type Database = {
           analysis_generated_at?: string | null
           analysis_text?: string | null
           builder?: string | null
+          builder_normalized?: string[] | null
           built_year?: number | null
           comment_count?: number
           content_score?: number | null
@@ -819,6 +821,7 @@ export type Database = {
           analysis_generated_at?: string | null
           analysis_text?: string | null
           builder?: string | null
+          builder_normalized?: string[] | null
           built_year?: number | null
           comment_count?: number
           content_score?: number | null

@@ -11,11 +11,20 @@ export const maxDuration = 30;
 
 interface Props { params: Promise<{ name: string }> }
 
+// M2 B-2 — 원문 완전일치(.eq('builder', …))에서 정규화 배열 포함(contains)으로 바꿨다.
+//
+// ⚠️ 원문 일치는 컨소시엄 행을 통째로 놓쳤다. builder 에 쉼표가 있는 행이 265개고,
+//    "GS건설, SK에코플랜트" 는 GS건설 허브에도 SK에코플랜트 허브에도 안 잡혔다.
+//    표기 변형(지에스건설 vs GS건설)보다 이쪽이 크다.
+//    실측: 금호건설 27 → 69 · SK에코플랜트 15 → 40 · HDC현대산업개발 45 → 75.
+//
+// ⚠️ builder_normalized 는 normalize_builder(builder) 를 트리거가 동기화한다.
+//    사전을 고치면 백필을 다시 돌려야 한다 (docs/m2/B-2_시공사정규화.md).
 const fetchBuilder = cache(async (builder: string) => {
   const sb = getSupabaseAdmin();
   const { data: sites } = await sb.from('apt_sites')
     .select('slug, name, region, sigungu, site_type, total_units, price_min, price_max, built_year, move_in_date, status, interest_count, images')
-    .eq('is_active', true).eq('builder', builder)
+    .eq('is_active', true).contains('builder_normalized', [builder])
     .order('interest_count', { ascending: false }).limit(200);
   return sites || [];
 });

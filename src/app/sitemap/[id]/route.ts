@@ -343,14 +343,20 @@ ${complexXml}
       for (const r of dd) { const k = `${r.region_nm}|${r.sigungu}|${r.dong}`; dMap.set(k, (dMap.get(k) || 0) + 1); }
       for (const [k, c] of dMap) { if (c < 5) continue; const [reg, sg, dg] = k.split('|'); if (!reg || !sg || !dg) continue; entries.push({ url: `${BASE}/apt/area/${encodeURIComponent(reg)}/${encodeURIComponent(sg)}/${encodeURIComponent(dg)}`, lastModified: now, changeFrequency: 'monthly', priority: c > 30 ? 0.7 : 0.6 }); }
       // 건설사 (3개+ 현장만)
-      const bd = await fetchBatched<{ builder: string | null }>((off, lim) =>
-        sb.from('apt_sites').select('builder').eq('is_active', true)
-          .not('builder', 'is', null).neq('builder', '')
+      // ⚠️ M2 B-2: 원문 builder 가 아니라 builder_normalized 를 센다.
+      //    허브가 contains(builder_normalized) 로 조회하므로 사이트맵이 원문을 그대로
+      //    실으면 "GS건설, SK에코플랜트" 같은 URL 을 내보내게 되고 그 페이지는 비어 있다.
+      //    세는 단위도 달라진다 — 컨소시엄 행은 참여사 각각에 1건씩 잡힌다.
+      const bd = await fetchBatched<{ builder_normalized: string[] | null }>((off, lim) =>
+        sb.from('apt_sites').select('builder_normalized').eq('is_active', true)
+          .not('builder_normalized', 'is', null)
           .order('id', { ascending: true }).range(off, off + lim - 1),
         20000,
       );
       const bMap = new Map<string, number>();
-      for (const r of bd) { if (r.builder) bMap.set(r.builder, (bMap.get(r.builder) || 0) + 1); }
+      for (const r of bd) {
+        for (const b of (r.builder_normalized ?? [])) bMap.set(b, (bMap.get(b) || 0) + 1);
+      }
       for (const [b, c] of bMap) { if (c < 3) continue; entries.push({ url: `${BASE}/apt/builder/${encodeURIComponent(b)}`, lastModified: now, changeFrequency: 'monthly', priority: c > 20 ? 0.75 : 0.6 }); }
       // 비교 페이지 — 인기 시군구 상위 단지 조합 (스팸 방지: 최대 200개)
       try {
