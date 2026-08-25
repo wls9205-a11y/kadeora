@@ -73,6 +73,10 @@ interface DigestItem {
   has_image: boolean;
   confidence: string | null;
   variants: string[] | null;
+  /** 재개발 · 재건축 · 가로주택정비 · 정비사업 · 기타. ⚠️ 컬럼이 아니라 이름에서 판정한 값이다. */
+  project_type?: string | null;
+  /** blog_site_links 기준 인바운드. 대상 선정에 쓴다. */
+  inbound?: number | null;
 }
 
 interface Digest {
@@ -82,6 +86,42 @@ interface Digest {
   rich: number;
   publishable: boolean;
   items: DigestItem[];
+  redev_count?: number;
+  rebuild_count?: number;
+  other_count?: number;
+  /** 재건축 >= 5 이면 true. 별도 글로 뗄지 판단. */
+  split_rebuild?: boolean;
+  /** 제목에 쓸 대표 유형. */
+  dominant_type?: string | null;
+}
+
+/**
+ * 한 현장이 「정보 2개 이상」 게이트를 통과하는가.
+ *
+ * ⚠️ digest 의 `rich` 는 **구 전체 기준**이다. 재건축만 떼면 그 부분집합으로 다시 세야 한다 —
+ *    안 그러면 재건축 5건 중 정보가 하나도 없는 구가 통과해 빈 글이 나간다.
+ * ⚠️ builder 가 빈 문자열('')로 오는 경우가 있다(실측). 존재 여부로 세지 말 것.
+ */
+function richCount(items: DigestItem[]): number {
+  return items.filter((it) => {
+    let n = 0;
+    if (it.builder && it.builder.trim()) n++;
+    if ((it.complex_units ?? 0) > 0 || (it.supply_units ?? 0) > 0) n++;
+    if (it.has_image) n++;
+    if (it.dong && it.dong.trim()) n++;
+    return n >= 2;
+  }).length;
+}
+
+/** 부분집합이 글이 될 만한가. digest 의 publishable 과 같은 기준(total>=5 AND rich>=2). */
+function subsetPublishable(items: DigestItem[]): boolean {
+  return items.length >= 5 && richCount(items) >= 2;
+}
+
+/** 제목에 쓸 유형 라벨. 모르면 「정비사업」으로 떨어진다 — 지어내지 않는다. */
+function typeLabel(t: string | null | undefined): string {
+  const v = (t ?? '').trim();
+  return v === '재개발' || v === '재건축' ? v : '정비사업';
 }
 
 /**
@@ -304,9 +344,14 @@ async function handler(_req: NextRequest) {
       const ordered = [...items].sort((a, b) => Number(moved.has(b.slug)) - Number(moved.has(a.slug)));
       const top3 = ordered.slice(0, 3).map((i) => i.raw_name || i.name).filter(Boolean).join(', ');
 
-      // 제목: `{시·도} {구} 재개발 총정리` 를 앞에 둔다 — 유입 실증 패턴이 이 형태다.
+      // 제목: `{시·도} {구} {유형} 총정리` 를 앞에 둔다 — 유입 실증 패턴이 이 형태다.
       // 대표 구역명 3개가 구별 고유 트라이그램을 만들어 구끼리 차단되지 않게 한다(실측 0.426).
-      const title = `${dst.region} ${dst.sigungu} 재개발 총정리 — ${top3} 등 ${d.total}곳 (${ym})`;
+      //
+      // ⚠️ 유형을 `재개발` 로 박아 두면 **재건축 검색을 통째로 놓친다.**
+      //    실측 해운대구: 재개발 3 · 재건축 19 인데 제목이 「재개발 총정리」였다.
+      //    dominant_type 을 쓰면 해운대구는 「재건축 총정리」가 되어 그 검색을 잡는다.
+      const kind = typeLabel(d.dominant_type);
+      const title = `${dst.region} ${dst.sigungu} ${kind} 총정리 — ${top3} 등 ${d.total}곳 (${ym})`;
 
       // ⚠️ slug 에 월을 넣지 않는다. 구별 URL 하나를 고정하고 매월 갈아끼운다.
       const slug = `${dst.region}-${dst.sigungu}-정비사업-총정리`.replace(/\s+/g, '-').toLowerCase();
