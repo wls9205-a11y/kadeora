@@ -80,6 +80,15 @@ type LeadFormProps = {
   variant?: 'detail' | 'blog' | 'home';
   /** ONESHOT §C-1: 단계별 문구. 공고 전에 '분양 정보 안내' 는 어색하다. */
   lifecycleStage?: string | null;
+  /**
+   * C-4: 홈 폼의 「관심 지역」 선택지. `variant='home'` 에서만 쓰이고 **필수 입력**이 된다.
+   *
+   * ⚠️ 여기서 ['부산','울산','경남'] 을 새로 쓰지 않는다 — 원본은
+   *    `lib/apt/pipeline.ts` 의 BUGYEONG_REGIONS 다. 그런데 그 파일은 `next/cache` 를
+   *    import 해서 클라이언트 번들에 들어갈 수 없다. 그래서 서버 컴포넌트(홈)가
+   *    읽어 prop 으로 내려 준다. 목록이 두 곳에 생기지 않게 하는 유일한 방법이다.
+   */
+  regionChoices?: readonly string[];
 };
 
 type LeadPayload = {
@@ -156,7 +165,7 @@ type LeadPayload = {
   leadRef: string;
 };
 
-type FieldErrors = { name?: string; phone?: string; birthDate?: string; consent?: string };
+type FieldErrors = { name?: string; phone?: string; birthDate?: string; consent?: string; homeRegion?: string };
 
 const sleep = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms));
 
@@ -282,8 +291,13 @@ export default function LeadForm({
   sigungu,
   variant = 'detail',
   lifecycleStage,
+  regionChoices,
 }: LeadFormProps) {
   const isHome = variant === 'home';
+  // 홈인데 선택지가 안 내려왔으면 셀렉트를 필수로 걸 수 없다. 폼을 막는 대신
+  // 지역 칸만 빠지고 나머지는 그대로 돈다 — 리드를 놓치는 쪽이 더 비싸다.
+  const homeRegions = isHome ? (regionChoices ?? []) : [];
+  const needsRegion = homeRegions.length > 0;
   // ONESHOT §C-1: 단계별 문구 한 벌. 세 화면(폼·액션바·레일)이 같은 말을 해야 한다.
   // H1-3: 홈은 단계가 없다 — stage 로 고르지 않고 홈 한 벌을 그대로 쓴다.
   const copy = isHome ? leadCopyForHome() : leadCopy(lifecycleStage, siteName);
@@ -337,6 +351,8 @@ export default function LeadForm({
   const [birthDate, setBirthDate] = useState('');
   // 기본값이 '미정' 이라 사용자가 손대지 않아도 제출된다 (추가 조작 0).
   const [desiredType, setDesiredType] = useState(TYPE_UNDECIDED);
+  // C-4: 홈 폼의 관심 지역. 상세·블로그는 region prop 이 있어 쓰지 않는다.
+  const [homeRegion, setHomeRegion] = useState('');
   const [consent, setConsent] = useState(false);
   const [marketingOk, setMarketingOk] = useState(false);
   const [company, setCompany] = useState(''); // 허니팟
@@ -371,6 +387,14 @@ export default function LeadForm({
         if (typeof d.birthDate === 'string') setBirthDate(d.birthDate);
         // 빈 문자열 초안(구버전)으로 기본값을 덮어쓰지 않는다.
         if (typeof d.desiredType === 'string' && d.desiredType) setDesiredType(d.desiredType);
+        // C-4: 초안의 지역이 지금 내려온 선택지에 없으면 버린다 — 셀렉트에 없는 값이
+        //      state 에 남으면 화면은 빈칸인데 검증은 통과하는 상태가 된다.
+        {
+          const draftRegion = (d as { homeRegion?: unknown }).homeRegion;
+          if (typeof draftRegion === 'string' && homeRegions.includes(draftRegion)) {
+            setHomeRegion(draftRegion);
+          }
+        }
         if (typeof d.consent === 'boolean') setConsent(d.consent);
         if (typeof d.marketingOk === 'boolean') setMarketingOk(d.marketingOk);
       } catch {
@@ -383,8 +407,8 @@ export default function LeadForm({
   // 입력값이 바뀔 때마다 임시 보관. 삭제는 전송 성공 응답을 받은 뒤에만 한다.
   useEffect(() => {
     if (!restored.current) return;
-    lsSet(draftKey, JSON.stringify({ name, phone, birthDate, desiredType, consent, marketingOk }));
-  }, [draftKey, name, phone, birthDate, desiredType, consent, marketingOk]);
+    lsSet(draftKey, JSON.stringify({ name, phone, birthDate, desiredType, homeRegion, consent, marketingOk }));
+  }, [draftKey, name, phone, birthDate, desiredType, homeRegion, consent, marketingOk]);
 
   // 서식 적용 후 캐럿을 원래 자리로 되돌린다 (앞쪽 숫자 개수를 기준으로 위치를 다시 찾는다).
   useEffect(() => {
@@ -473,9 +497,11 @@ export default function LeadForm({
     if (!name.trim()) next.name = '이름을 입력해 주세요';
     if (onlyDigits(phone).length < 11) next.phone = '연락처 11자리를 모두 입력해 주세요';
     if (onlyDigits(birthDate).length !== 6) next.birthDate = '생년월일 6자리를 입력해 주세요';
+    // C-4: 홈은 가리킬 현장이 없다. 지역까지 비면 담당자가 전화를 걸 근거가 없어진다.
+    if (needsRegion && !homeRegion.trim()) next.homeRegion = '관심 지역을 선택해 주세요';
     if (!consent) next.consent = '개인정보 수집 동의가 필요합니다';
     return next;
-  }, [name, phone, birthDate, consent]);
+  }, [name, phone, birthDate, consent, needsRegion, homeRegion]);
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -490,8 +516,9 @@ export default function LeadForm({
     setSendError(null);
     setSending(true);
 
-    const regionText = (region ?? '').trim();
-    const sigunguText = (sigungu ?? '').trim();
+    // 홈은 사용자가 고른 값이 곧 관심 지역이다. 상세·블로그는 현장의 region 을 그대로 쓴다.
+    const regionText = (isHome ? homeRegion : (region ?? '')).trim();
+    const sigunguText = (isHome ? '' : (sigungu ?? '')).trim();
 
     const payload: LeadPayload = {
       name,
@@ -656,6 +683,32 @@ export default function LeadForm({
               ? <p style={errorStyle}>{errors.phone}</p>
               : <p style={hintStyle}>숫자만 입력하셔도 자동으로 하이픈이 붙습니다</p>}
           </div>
+
+          {/* C-4 관심 지역 — 홈에서만, 그리고 필수다.
+              ⚠️ 상세·블로그에는 렌더하지 않는다. 그쪽은 현장이 곧 지역이라
+                 사용자에게 다시 묻는 칸이 되고, 폼만 길어진다. */}
+          {needsRegion && (
+            <div style={{ marginBottom: 12 }}>
+              <label htmlFor="kd-lead-region" style={labelStyle}>관심 지역</label>
+              <select
+                id="kd-lead-region"
+                value={homeRegion}
+                onChange={e => {
+                  setHomeRegion(e.target.value);
+                  if (errors.homeRegion) setErrors(prev => ({ ...prev, homeRegion: undefined }));
+                }}
+                style={fieldStyle}
+              >
+                <option value="">선택해 주세요</option>
+                {homeRegions.map(r => (
+                  <option key={r} value={r}>{r}</option>
+                ))}
+              </select>
+              {errors.homeRegion
+                ? <p style={errorStyle}>{errors.homeRegion}</p>
+                : <p style={hintStyle}>담당자가 해당 지역 현장으로 안내해 드립니다</p>}
+            </div>
+          )}
 
           {/* v6-1: 생년월일·희망타입 복원. state·payload·DB 컬럼·시트 전송은 계속 살아 있었고
                입력칸만 s-v2 B-7 에서 빠져 있었다. 화면은 어느 현장에서나 같은 4칸이다. */}
