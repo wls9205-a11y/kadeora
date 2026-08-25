@@ -1,0 +1,3 @@
+# 네이버 대량관리 원본 템플릿 — CP949 + CRLF.
+# git 개행/인코딩 변환이 닿으면 sa.py 의 header() 가 6행을 못 읽는다.
+templates/*.csv -text

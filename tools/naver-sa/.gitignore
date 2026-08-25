@@ -1,0 +1,6 @@
+out/
+bids.csv
+groups.csv
+gid.csv
+sa_state.json
+__pycache__/
