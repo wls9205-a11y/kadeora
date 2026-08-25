@@ -257,12 +257,16 @@ export default async function HomePage() {
         {/* ⚠️ hotkey={false} 필수 — 헤더의 bar 인스턴스가 이미 ⌘K 를 소유한다.
          *    둘 다 true 면 keydown 이 두 번 잡혀 모달이 두 개 열린다.
          *    (Navigation.tsx 의 icon 인스턴스도 같은 이유로 false 다.) */}
-        {/* H3-2: 회전 문구는 실제 현장명이다. 데이터가 없으면 placeholder 로 조용히 되돌아간다. */}
+        {/* H3-2: 회전 문구는 실제 현장명이다. 데이터가 없으면 placeholder 로 조용히 되돌아간다.
+            H3-3: 모달 추천 칩도 같은 목록을 쓴다 — trending_keywords 를 홈에서만 끊는다.
+                  다른 페이지의 검색 모달은 지금처럼 trending 을 쓴다. */}
         <UniversalSearchBar
           variant="hero"
           hotkey={false}
           placeholder="단지명·지역·재개발 구역"
           rotatingPlaceholders={curatedNames}
+          suggestions={curatedNames}
+          suggestionLabel="주목받는 현장"
         />
 
         {/* 숫자는 fetchCounts 에서 온다. 0이면 문장에서 통째로 뺀다 —

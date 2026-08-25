@@ -5,6 +5,7 @@
 // Enter → /search?q=... 결과 페이지
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import { shortSiteName } from "@/lib/apt/short-name";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import {
@@ -44,6 +45,19 @@ type Props = {
    *    데이터 조회가 실패해도 검색창은 평소대로 보여야 한다.
    */
   rotatingPlaceholders?: string[];
+  /**
+   * H3-3 — 모달의 추천 칩을 이 목록으로 «대체»한다. 넘기면 /api/search/trending 을 아예 부르지 않는다.
+   *
+   * 왜: trending_keywords 상위 12건이 전부 heat_score 100 이라 순위가 없고,
+   * `2026` `아파트` 처럼 검색어가 아닌 값과 부울경 밖인 `경기` `서울` 이 섞여 있다.
+   * 누른 사람이 무엇을 기대해야 할지 모르는 값이다.
+   *
+   * ⚠️ 홈에서만 넘긴다. 다른 페이지의 검색 모달은 지금처럼 trending 을 쓴다 —
+   *    테이블·크론은 그대로 두고 «홈에서 참조만» 끊는 것이다.
+   */
+  suggestions?: string[];
+  /** 추천 칩 제목. suggestions 를 넘길 때 내용에 맞춰 바꾼다. */
+  suggestionLabel?: string;
 };
 
 /** 회전 한 바퀴 간격. 더 빠르면 읽기 전에 바뀐다. */
@@ -57,6 +71,8 @@ export default function UniversalSearchBar({
   variant = "bar",
   hotkey = true,
   rotatingPlaceholders,
+  suggestions,
+  suggestionLabel = "인기 검색어",
 }: Props) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -113,6 +129,9 @@ export default function UniversalSearchBar({
 
   const heroText = canRotate ? rotateList[rotIdx] ?? placeholder : placeholder;
 
+  /** 모달 추천 칩. 넘겨받은 목록이 있으면 그게 이기고, 없으면 기존 trending 을 쓴다. */
+  const chips = suggestions && suggestions.length > 0 ? suggestions : trending;
+
   // ⌘K / Ctrl+K 단축키
   useEffect(() => {
     if (!hotkey) return;
@@ -145,6 +164,9 @@ export default function UniversalSearchBar({
   // /api/search/trending 응답이 [{ keyword, heat_score }] 형태일 때 객체가 그대로
   // children 으로 박혀 "Objects are not valid as a React child" 폭발하던 버그.
   useEffect(() => {
+    // H3-3: 추천 칩을 넘겨받았으면 trending 을 «부르지도» 않는다.
+    // 쓰지 않을 응답을 위해 모달을 열 때마다 요청을 태울 이유가 없다.
+    if (suggestions && suggestions.length > 0) return;
     if (!open || trending.length > 0) return;
     fetch("/api/search/trending")
       .then((r) => (r.ok ? r.json() : null))
@@ -167,7 +189,7 @@ export default function UniversalSearchBar({
         setTrending(keywords);
       })
       .catch(() => {});
-  }, [open, trending.length]);
+  }, [open, trending.length, suggestions]);
 
   // 검색 (debounce 200ms)
   const runSearch = useCallback((query: string) => {
@@ -427,17 +449,20 @@ export default function UniversalSearchBar({
                       </div>
                     </div>
                   )}
-                  {trending.length > 0 && (
+                  {chips.length > 0 && (
                     <div>
-                      <h3 className="mb-2 text-xs font-bold text-gray-500">🔥 인기 검색어</h3>
+                      <h3 className="mb-2 text-xs font-bold text-gray-500">🔥 {suggestionLabel}</h3>
                       <div className="flex flex-wrap gap-2">
-                        {trending.map((kw) => (
+                        {/* ⚠️ 칩 글씨는 줄여도 «검색어는 원문» 을 보낸다.
+                            '센트레빌 거제' 로 검색하면 결과가 나오지 않는다. */}
+                        {chips.map((kw) => (
                           <button
                             key={`t-${kw}`}
                             onClick={() => goToResultsPage(kw)}
+                            title={kw}
                             className="rounded-full bg-blue-50 px-3 py-1 text-xs text-blue-700 hover:bg-blue-100"
                           >
-                            {kw}
+                            {shortSiteName(kw)}
                           </button>
                         ))}
                       </div>
