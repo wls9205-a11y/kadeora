@@ -171,19 +171,57 @@ function splitLong(w: string): string[] {
   return [w.slice(0, h), w.slice(h)];
 }
 
+/**
+ * 정비구역 관형 표기를 줄이고 어절 경계를 살린다.
+ *
+ * 정비구역·지구 이름은 공식 표기가 길어 한 어절이 14자까지 간다.
+ * '마포로제1구역제19-1지구' 는 fitFontSize 가 41px 을 내고, 그건 120px 썸네일에서
+ * 8px 이라 읽히지 않는다 — T1 의 본래 목적이 판독이므로 여기서 잡는다.
+ *
+ *   1) 관형 '제' 를 뗀다 — 제1구역 → 1구역. 뒤가 숫자일 때만이라
+ *      '제일건설' '제주' 같은 이름은 건드리지 않는다.
+ *   2) 구역/지구 뒤에 이름이 «이어붙어» 있으면 어절로 가른다.
+ *      '오룡지구한국아델리움' → '오룡지구' '한국아델리움'
+ *   3) 끝에 붙은 긴 사업유형(6자 이상)만 따로 뗀다.
+ *      '청량리3재정비촉진구역' → '청량리3' '재정비촉진구역'
+ *
+ * ⚠️ 3)에 맨 '구역'·'지구' 를 넣지 말 것. '범천1-1구역' 이 '범천1-1' + '구역' 으로
+ *    갈라져 «구역» 한 줄이 생긴다. 6자 이상 복합어만 대상이다.
+ * ⚠️ 이름 자체를 줄이지 않는다. 글자를 버리는 게 아니라 줄을 나누는 것뿐이다.
+ */
+const REDEV_UNIT = /(재정비촉진구역|재정비촉진지구|도시환경정비구역|도시환경정비지구|주택재개발정비구역|주택재건축정비구역|주택재개발정비지구|주택재건축정비지구|재개발정비구역|재건축정비구역|재개발정비지구|재건축정비지구|소규모재건축|가로주택정비|주거환경개선)$/;
+
+function splitRedevUnit(w: string): string[] {
+  const t = w.replace(/제(?=\d)/g, '');                  // 1) 관형 '제'
+  const parts = t.replace(/(구역|지구)(?=[0-9A-Za-z가-힣])/g, '$1 ').split(' '); // 2)
+  return parts.flatMap((p) => {                          // 3)
+    const m = p.match(REDEV_UNIT);
+    if (!m) return [p];
+    const head = p.slice(0, p.length - m[1].length);
+    // 머리가 비었거나 숫자 한 자뿐이면 자르지 않는다. '1주택재개발정비지구' 의 '1' 은
+    // 제1의 '1' 이라 떼면 숫자 하나가 한 줄을 차지한다.
+    if (/^\d?$/.test(head)) return [p];
+    return [head, m[1]];
+  }).filter(Boolean);
+}
+
+/** 1글자 기능어를 앞 어절에 붙인다: '이번 주' → '이번주'. 구역 분리 뒤에도 다시 돌린다. */
+function mergeSingles(words: string[]): string[] {
+  const out: string[] = [];
+  for (const w of words) {
+    if (w.length <= 1 && out.length) out[out.length - 1] += w;
+    else out.push(w);
+  }
+  return out;
+}
+
 /** 블로그 제목 → 썸네일 2~3줄. 4줄 이상 금지, 말줄임표 금지. */
 export function titleLines(raw: unknown): string[] {
   try {
     const original = String(raw || '').trim();
     let words = clean(original).split(' ').filter(Boolean);
 
-    // 1글자 기능어는 앞 어절에 붙인다: '이번 주' → '이번주'
-    const merged: string[] = [];
-    for (const w of words) {
-      if (w.length <= 1 && merged.length) merged[merged.length - 1] += w;
-      else merged.push(w);
-    }
-    words = merged;
+    words = mergeSingles(words);
 
     // 지역 접두어 제거 — 어절 4개 이상일 때만. 떼고 나서 기능어만 남으면 되돌린다
     if (words.length >= 4 && REGION.test(words[0])) {
@@ -192,6 +230,9 @@ export function titleLines(raw: unknown): string[] {
     }
     // 중점은 어절 경계로 — '진주·봉황아파트' → '진주' '봉황아파트'
     words = words.flatMap((w) => w.split('·')).filter(Boolean);
+    // 정비구역 관형 표기 축약 — 14자 한 어절이 폰트를 41px 까지 끌어내린다.
+    // 분리가 1글자 조각을 만들 수 있으므로 병합을 한 번 더 돌린다
+    words = mergeSingles(words.flatMap(splitRedevUnit).filter(Boolean));
 
     if (!words.length) return [original.slice(0, 6) || '카더라'];      // 폴백
     if (words.length === 1) return splitLong(words[0]);
