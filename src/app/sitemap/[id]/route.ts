@@ -226,13 +226,23 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
       //   시드 12,524건 제외 자체는 의도된 품질 게이트이므로 그대로 유지한다.
       const filtered = await fetchBatched<any>((off, lim) =>
         sb.from('posts')
-          .select('id, slug, updated_at, created_at, profiles!inner(is_seed)')
+          // FK 이름을 «반드시» 명시한다. `profiles!inner` 로만 쓰면 PGRST201 로 죽는다 —
+          // posts↔profiles 는 직접 FK 말고도 bookmarks·post_downvotes·post_likes 를 통한
+          // 다대다 경로가 있어서 PostgREST 가 관계를 특정하지 못한다.
+          // fetchBatched 가 error 를 조용히 삼키고 [] 를 돌려주므로 사이트맵이 0건이 된다.
+          .select('id, slug, updated_at, created_at, profiles!posts_author_id_fkey!inner(is_seed)')
           .eq('is_deleted', false)
           .eq('profiles.is_seed', false)
           .order('created_at', { ascending: false })
           .range(off, off + lim - 1),
         10000,
       );
+      // fetchBatched 는 PostgREST error 를 삼키고 [] 를 돌려준다. 그래서 쿼리가
+      // 깨져도 «빈 사이트맵이 200 으로» 나가 정상처럼 보인다 — 실제로 PGRST201
+      // 때문에 300건이 0건으로 나간 적이 있다. 0건은 항상 이상 신호이므로 남긴다.
+      if (filtered.length === 0) {
+        console.error('[sitemap/3] 커뮤니티 글 0건 — 쿼리 실패 의심(PostgREST 관계·필터 확인)');
+      }
       return xmlResponse(filtered.map((p: any) => ({
         url: `${BASE}/feed/${p.slug || p.id}`,
         lastModified: p.updated_at || p.created_at || now,
