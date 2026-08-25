@@ -19,6 +19,7 @@
  */
 
 import dynamic from 'next/dynamic';
+import { usePathname } from 'next/navigation';
 import { CONTACT_EMAIL } from '@/lib/constants';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import TopLoadingBar from '@/components/TopLoadingBar';
@@ -61,6 +62,10 @@ interface Props {
 }
 
 export default function ClientShell({ children, serverLoggedIn }: Props) {
+  // H3-4 — 홈 첫 화면에서 감출 것들의 판정.
+  // ⚠️ 컴포넌트를 지우지 않는다. 렌더만 끊는다 — 다른 화면에서는 그대로 쓴다.
+  const isHome = usePathname() === '/';
+
   return (
     <ToastProvider>
       <AuthProvider serverLoggedIn={serverLoggedIn}>
@@ -68,7 +73,13 @@ export default function ClientShell({ children, serverLoggedIn }: Props) {
         <VitalsReporter />
         <StickyTalkBanner />
         <Navigation />
-        <NoticeBanner />
+        {/* H3-4: 홈에서는 마퀴를 감춘다. 문장이 잘려서 시작하고 이모지가 셋이라
+             첫 화면에서 검색창으로 가는 시선을 가로챈다.
+             ⚠️ 유료 공지 시스템이다(site_notices.is_paid·tier·max_impressions).
+                현재 활성 공지는 id=3 하나이고 is_paid=false·tier=free 라 홈에서 감춰도
+                유료 노출 손실이 없다. 유료 공지가 들어오면 이 판단을 다시 봐야 한다.
+             ⚠️ 노란 공유방 배너는 StickyTalkBanner 로 «별개» 컴포넌트다. 건드리지 않았다. */}
+        {!isHome && <NoticeBanner />}
         <AdBanner />
         {/* v5-V1: 좌측 Sidebar 제거. 링크 14개가 하단 탭 4개 + /more 와 통째로 중복이었고
              데스크탑(≥1024px)에서만 보이는데 /apt 데스크탑 비중은 30% 다

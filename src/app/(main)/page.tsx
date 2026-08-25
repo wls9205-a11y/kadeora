@@ -6,8 +6,11 @@
 //   3 최근 본 현장      localStorage 칩 3 — 없으면 미렌더
 //   4 지금 계약 가능한 현장  카드 4장
 //   5 최근 움직인 현장   단계 변경·신규 등록 4건
-//   6 리드폼            관심 지역 필수
-//   7 지역별 보기        시도 + 주요 구군, 건수 배지
+//   6 지역별 보기        시도 + 주요 구군, 건수 배지
+//
+// ⚠️ 홈 리드폼은 걷어냈다. LeadForm 의 variant='home' 코드와 관심 지역 셀렉트는
+//    그대로 남아 있다 — 되살릴 때 <LeadForm variant="home" regionChoices={HOME_REGIONS} /> 한 줄이면 된다.
+//    /apt/[id] 상세의 리드폼은 그대로다.
 //
 // ⚠️ 이슈 종목(국내·해외) · 이슈 단지 · 인기 블로그 · 라운지(피드) 섹션을 걷어냈다.
 //    **컴포넌트 파일은 지우지 않았다** — StockListRow · HomeAptRow · HomeBlogRow 는
@@ -26,7 +29,6 @@ import UniversalSearchBar from '@/components/search/UniversalSearchBar';
 import RecentlyViewed from '@/components/home/RecentlyViewed';
 import DealCards, { type DealSite } from '@/components/home/DealCards';
 import RecentMoves, { type RecentMove } from '@/components/home/RecentMoves';
-import LeadForm from '@/components/apt/LeadForm';
 import { BUGYEONG_REGIONS } from '@/lib/apt/pipeline';
 
 export const revalidate = 60;
@@ -308,18 +310,7 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* ── 6 리드폼 ──
-       * 현장 블록 바로 뒤에 둔다 — 방금 현장을 본 사람에게 묻는 자리다.
-       * ⚠️ siteSlug 없이 보낸다. `leads.site_slug` 는 nullable 이라 그대로 들어간다.
-       * ⚠️ 전송 경로는 상세와 완전히 같다 — LeadForm → NEXT_PUBLIC_LEAD_ENDPOINT →
-       *    Apps Script → 시트 + Supabase. `register-interest` 라우트가 아니다.
-       * ⚠️ regionChoices 를 여기서 내려 주는 이유: LeadForm 은 클라이언트 컴포넌트라
-       *    `lib/apt/pipeline`(next/cache 사용)을 import 할 수 없다. 목록 원본은 하나로 둔다. */}
-      <section style={{ marginBottom: 18 }}>
-        <LeadForm variant="home" regionChoices={HOME_REGIONS} />
-      </section>
-
-      {/* ── 7 지역별 보기 ──
+      {/* ── 6 지역별 보기 ──
        * ⚠️ 건수 하드코딩 금지. 히어로 부제와 같은 쿼리(fetchCounts)에서 온다.
        * ⚠️ 링크는 실재가 확인된 라우트만 쓴다 —
        *    /apt/region/[region] · /apt/region/[region]/[sigungu]. */}

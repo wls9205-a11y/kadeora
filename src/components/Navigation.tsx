@@ -57,6 +57,8 @@ const KadeoraLogo = ({ size = 28 }: { size?: number }) => (
 
 export function Navigation() {
   const pathname  = usePathname();
+  /** H3-4 — 홈에서만 감출 것들의 판정. 홈은 hero 검색창이 그 역할을 대신한다. */
+  const isHome = pathname === '/';
   const router    = useRouter();
   const { userId, profile } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -230,7 +232,9 @@ export function Navigation() {
           {/* 우측 액션 */}
           <div style={{ marginLeft:'auto', display:'flex', alignItems:'center', gap:6 }}>
 
-            <LiveActivityIndicator />
+            {/* H3-4: 홈에서는 감춘다. 첫 화면에서 검색창 위 공간을 먹는데
+                방문자에게 주는 정보가 없다. 다른 화면에서는 그대로 둔다. */}
+            {!isHome && <LiveActivityIndicator />}
             {/* 더보기 (데스크탑 전용 — 모바일은 하단 탭바에 있음) */}
             <button
               onClick={(e) => { e.stopPropagation(); setMoreOpen(!moreOpen); setMenuOpen(false); }}
@@ -254,7 +258,9 @@ export function Navigation() {
                 UniversalSearchBar 모달로 바꾼다 (같은 아이콘이 기기마다 다르게 동작했다).
                 ⌘K 리스너는 데스크탑 인스턴스가 소유한다 — hotkey={false}.
                 /search·/apt/search·/stock/search 라우트는 그대로 유지 (직접 진입·색인 대상). */}
-            <UniversalSearchBar className="md:hidden" variant="icon" hotkey={false} />
+            {/* H3-4: 홈에는 바로 아래 hero 검색창이 있어 중복이다 — 무엇을 눌러야 할지 헷갈린다.
+                ⚠️ 다른 페이지에서는 «유일한» 검색 진입점이므로 반드시 남긴다. */}
+            {!isHome && <UniversalSearchBar className="md:hidden" variant="icon" hotkey={false} />}
 
             {userId ? (
               <>

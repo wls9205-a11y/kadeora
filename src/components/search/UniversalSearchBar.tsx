@@ -129,6 +129,23 @@ export default function UniversalSearchBar({
 
   const heroText = canRotate ? rotateList[rotIdx] ?? placeholder : placeholder;
 
+  /* ── H3-5 키보드 안내는 «키보드가 있는 기기» 에서만 ──
+   * 모바일에는 ↑↓·Enter·ESC 가 없다. 안 되는 조작을 안내하면 화면만 좁아진다.
+   * ⚠️ 브레이크포인트를 새로 만들지 않는다(§6) — pointer 특성으로 가른다.
+   *    폭이 아니라 «입력 장치» 가 판단 기준이라 태블릿+키보드 같은 경우도 맞게 걸린다.
+   * ⚠️ SSR 에서는 알 수 없으므로 첫 렌더에 숨기고 mount 후 켠다. 반대로 하면
+   *    모바일에서 잠깐 보였다 사라진다.
+   */
+  const [hasKeyboard, setHasKeyboard] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") return;
+    const mq = window.matchMedia("(pointer: fine)");
+    const sync = () => setHasKeyboard(mq.matches);
+    sync();
+    mq.addEventListener?.("change", sync);
+    return () => mq.removeEventListener?.("change", sync);
+  }, []);
+
   /** 모달 추천 칩. 넘겨받은 목록이 있으면 그게 이기고, 없으면 기존 trending 을 쓴다. */
   const chips = suggestions && suggestions.length > 0 ? suggestions : trending;
 
@@ -468,9 +485,11 @@ export default function UniversalSearchBar({
                       </div>
                     </div>
                   )}
-                  <div className="px-1 pt-2 text-[11px] text-gray-400">
-                    ↑↓ 선택 · Enter 이동 · ESC 닫기
-                  </div>
+                  {hasKeyboard && (
+                    <div className="px-1 pt-2 text-[11px] text-gray-400">
+                      ↑↓ 선택 · Enter 이동 · ESC 닫기
+                    </div>
+                  )}
                 </div>
               )}
 

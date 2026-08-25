@@ -274,7 +274,10 @@ async function detectNaverSpikes(sb: any): Promise<any[]> {
 
         const { error } = await (sb as any).from('issue_alerts').insert({
           title: `[급상승] ${site.name} 검색량 ${Math.round(spikeRatio)}% 급증 — ${site.region}`,
-          summary: `네이버 검색량 ${Math.round(spikeRatio)}% 급증 감지. ${site.name} (${site.region}) ${site.total_units || '?'}세대.${blogCount === 0 ? ' 카더라 블로그 미존재 — 선점 기회.' : ''}`,
+          // ⚠️ 방문자가 읽는 문장이다. 내부 지표명('heat score')·테이블명·운영 메모('선점 기회')를
+          //    넣지 않는다. 선점 여부는 issue_alerts 에 컬럼이 없어 문장에서 뺐다 —
+          //    어드민에서 보려면 별도 컬럼이 필요하다(스키마 변경이라 지시 없이 만들지 않았다).
+          summary: `${site.name} 검색이 최근 ${Math.round(spikeRatio)}% 늘었습니다. ${site.region}${site.total_units ? ` · ${site.total_units}세대` : ''}.`,
           category: 'apt',
           sub_category: 'search_spike',
           issue_type: 'search_spike',
@@ -368,8 +371,9 @@ async function detectTrendingKeywordGaps(sb: any): Promise<any[]> {
       const cat = t.category === 'search' ? 'general' : t.category;
 
       const { error } = await (sb as any).from('issue_alerts').insert({
-        title: `[급상승] ${t.keyword} — heat ${Math.round(t.heat_score)}`,
-        summary: `trending_keywords에서 heat score ${Math.round(t.heat_score)}로 감지된 급상승 키워드. 카더라 블로그 미존재 — 선점 기회.`,
+        // ⚠️ 제목에도 내부 지표(heat)를 노출하지 않는다.
+        title: `[급상승] ${t.keyword}`,
+        summary: `${t.keyword} 검색이 하루 만에 크게 늘었습니다.`,
         category: cat,
         sub_category: 'trending_gap',
         issue_type: 'search_spike',
