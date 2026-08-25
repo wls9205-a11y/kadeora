@@ -4,108 +4,100 @@
  * 카카오톡 / 네이버 블로그 / 페이스북 공유 시 결과값이 큰 이미지로 노출
  * → 자연 백링크 + CTR 폭증
  *
+ * T1 §3.1: 확정 규격(A안) 적용. 계산기명은 §2 로 추출한다.
+ *   - 배경 9색 테마 맵(#0a1f1c 등)을 브랜드 네이비 하나로 통일
+ *   - 이모지 8종(🏠💼📈📊💰🏦🎁👴) 제거 — satori 이모지 금지(§4)
+ *   - 결과값은 이 카드의 «본체» 라 유지하되 골드는 여기 한 곳만 쓴다(§1.4).
+ *     그래서 제목 강조줄은 accent={-1} 로 끈다.
+ *
  * Edge runtime 대신 Node 런타임 사용 (한글 폰트 fs.readFileSync)
  */
 
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
-import fs from 'node:fs';
-import path from 'node:path';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { sanitizeForOG } from '@/lib/og-sanitize';
+import { barColor, titleLines, fitFontSize, BRAND_BG_SOLID, GOLD } from '@/lib/og/brand';
+import { BrandCard } from '@/lib/og/frame';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-let fontDataCache: Buffer | null = null;
-let fontDataBoldCache: Buffer | null = null;
+const W = 1200;
+const H = 630;
 
-function loadFonts() {
-  if (!fontDataCache) {
-    try {
-      const fontPath = path.join(process.cwd(), 'public', 'fonts', 'Pretendard-Medium.otf');
-      if (fs.existsSync(fontPath)) fontDataCache = fs.readFileSync(fontPath);
-    } catch {}
-  }
-  if (!fontDataBoldCache) {
-    try {
-      const fontPath = path.join(process.cwd(), 'public', 'fonts', 'Pretendard-Bold.otf');
-      if (fs.existsSync(fontPath)) fontDataBoldCache = fs.readFileSync(fontPath);
-    } catch {}
-  }
+/**
+ * ⚠️ 원래는 public/fonts/Pretendard-{Medium,Bold}.otf 를 읽었는데 그 파일들이 없다
+ *    (public/fonts 에는 NotoSansKR-Bold.woff 와 pretendard/*.woff2 서브셋뿐).
+ *    existsSync 가드에 걸려 조용히 fonts: undefined 로 넘어가고 있었다 — 한글이 폰트
+ *    없이 렌더되면 satori 가 외부 dynamic font fetch 를 시도하고, 이 서버리스 환경에서는
+ *    항상 실패한다(s248/s280 과 같은 원인). 나머지 8개 생성기와 같은 폰트로 맞춘다.
+ */
+let _fontCache: ArrayBuffer | null = null;
+function loadFont(): ArrayBuffer | null {
+  if (_fontCache) return _fontCache;
+  try {
+    const buf = readFileSync(join(process.cwd(), 'public/fonts/NotoSansKR-Bold.woff'));
+    _fontCache = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
+    return _fontCache;
+  } catch { return null; }
 }
 
 export async function GET(req: NextRequest) {
   const u = req.nextUrl;
-  const slug = u.searchParams.get('slug') || 'calc';
-  const result = u.searchParams.get('result') || '';
+  const result = sanitizeForOG(u.searchParams.get('result') || '');
+  // 호출부는 rec.result.main.label ?? calc.titleShort 를 넘긴다 — 이게 계산기명이다
   const label = u.searchParams.get('label') || '계산 결과';
   const category = u.searchParams.get('category') || 'real-estate';
 
-  loadFonts();
-  const fonts: any[] = [];
-  if (fontDataCache) fonts.push({ name: 'Pretendard', data: fontDataCache, weight: 500, style: 'normal' });
-  if (fontDataBoldCache) fonts.push({ name: 'Pretendard', data: fontDataBoldCache, weight: 800, style: 'normal' });
+  const fontData = loadFont();
+  const fontOpts = fontData
+    ? { fonts: [{ name: 'NotoSansKR', data: fontData, style: 'normal' as const, weight: 700 as const }] }
+    : {};
+  const ff = fontData ? 'NotoSansKR, sans-serif' : 'sans-serif';
 
-  // 카테고리별 컬러
-  const themeMap: Record<string, { bg: string; accent: string; emoji: string }> = {
-    'real-estate':    { bg: '#0f172a', accent: '#3b82f6', emoji: '🏠' },
-    'property-tax':   { bg: '#0f172a', accent: '#3b82f6', emoji: '🏠' },
-    'income-tax':     { bg: '#1a0e2c', accent: '#a855f7', emoji: '💼' },
-    'finance-tax':    { bg: '#0a1f1c', accent: '#10b981', emoji: '📈' },
-    'investment':     { bg: '#0a1f1c', accent: '#10b981', emoji: '📊' },
-    'salary':         { bg: '#1f0a0a', accent: '#f59e0b', emoji: '💰' },
-    'loan':           { bg: '#0a1929', accent: '#06b6d4', emoji: '🏦' },
-    'inheritance':    { bg: '#1a0a1a', accent: '#ec4899', emoji: '🎁' },
-    'pension':        { bg: '#1a160a', accent: '#eab308', emoji: '👴' },
-  };
-  const t = themeMap[category] || themeMap['real-estate'];
+  // ⚠️ 원문 → titleLines → 줄 단위 sanitize 순서. 먼저 씻으면 em dash 가 '-' 로 바뀌어
+  //    §2 절단이 안 먹는다('-' 는 범천1-1 때문에 절단 문자에서 일부러 빠져 있다).
+  const lines = titleLines(label).map((l) => sanitizeForOG(l) || l);
+  const bar = barColor({ category: 'finance', subCategory: category, title: label });
+
+  // 계산기명은 부제 역할이라 눌러 잡고, 결과값이 화면을 지배한다.
+  const resultFS = result ? fitFontSize([result], W, Math.round(H * 0.55)) : 0;
+
+  const below = result ? (
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'center',
+        textAlign: 'center',
+        whiteSpace: 'nowrap',
+        marginTop: Math.round(H * 0.045),
+        fontSize: resultFS,
+        fontWeight: 800,
+        lineHeight: 1.05,
+        letterSpacing: -resultFS * 0.046,
+        color: GOLD,
+      }}
+    >
+      {result}
+    </div>
+  ) : null;
 
   return new ImageResponse(
     (
-      <div style={{
-        display: 'flex', width: '100%', height: '100%',
-        background: t.bg, color: '#fff', flexDirection: 'column', padding: 60,
-        fontFamily: 'Pretendard, sans-serif', position: 'relative',
-      }}>
-        {/* 그라디언트 오버레이 */}
-        <div style={{
-          position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-          background: `radial-gradient(ellipse at top right, ${t.accent}30, transparent 60%)`,
-        }} />
-
-        {/* 헤더 */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 28, color: t.accent, fontWeight: 800 }}>
-          <span style={{ fontSize: 36 }}>{t.emoji}</span>
-          <span>카더라 계산기</span>
-        </div>
-
-        {/* 라벨 */}
-        <div style={{ display:'flex', fontSize: 32, fontWeight: 500, color: '#cbd5e1', marginTop: 30, lineHeight: 1.3 }}>
-          {label}
-        </div>
-
-        {/* 결과 (큰 강조) */}
-        <div style={{
-          fontSize: result.length > 12 ? 88 : 120,
-          fontWeight: 800, color: t.accent, marginTop: 16,
-          letterSpacing: '-2px', lineHeight: 1.1,
-          textShadow: `0 4px 20px ${t.accent}40`,
-        }}>
-          {result}
-        </div>
-
-        {/* 하단 */}
-        <div style={{
-          marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          fontSize: 22, color: '#94a3b8',
-        }}>
-          <span>📊 무료 · 회원가입 불필요 · 145종</span>
-          <span style={{ fontWeight: 800, color: '#f1f5f9' }}>kadeora.app</span>
-        </div>
+      <div style={{ width: '100%', height: '100%', display: 'flex', fontFamily: ff, background: BRAND_BG_SOLID }}>
+        <BrandCard
+          lines={lines}
+          frame={W}
+          height={H}
+          bar={bar}
+          below={below}
+          titleScale={result ? 0.38 : 1}
+          accent={result ? -1 : undefined}
+        />
       </div>
     ),
-    {
-      width: 1200, height: 630,
-      fonts: fonts.length > 0 ? fonts : undefined,
-    }
+    { width: W, height: H, ...fontOpts },
   );
 }

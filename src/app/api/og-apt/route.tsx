@@ -6,6 +6,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { OG_CAT } from '@/lib/og-tokens';
 import { SITE_URL } from '@/lib/constants';
 import { sanitizeRowForOG } from '@/lib/og-sanitize';
+import { brandSurface, BRAND_BG_SOLID, GOLD } from '@/lib/og/brand';
 
 export const runtime = 'nodejs';
 export const maxDuration = 30;
@@ -140,7 +141,14 @@ async function fetchSite(slug: string): Promise<AptRow | null> {
  *    card 2~6 은 정보 카드 캐러셀이라 축이 달라 P2 가 다룬 적이 없다. 건드리지 않는다.
  * ⚠️ ratio 계약 · tracking() 자간 · HEAVY 그림자는 원격 구현을 그대로 쓴다.
  */
-const CARD_BG = 'linear-gradient(160deg, #0B2A6B 0%, #123A8F 55%, #2563EB 100%)';
+/**
+ * [T1 §1.1] 배경은 9개 생성기 공용 상수 하나만 읽는다 — brandSurface().
+ * P2 가 세운 네이비 방향은 그대로고, 각도·스톱·좌상단 광원만 확정본에 맞췄다
+ * (160deg/55% → 158deg/52% + BRAND_GLOW).
+ * ⚠️ 여기에 색 상수를 다시 적지 말 것. 이 블록은 리베이스에서 한 번 소실됐고,
+ *    그때 원격에 네이비가 없다는 걸 확인하지 않아 옛 6버킷 색으로 되돌아갔다.
+ *    단일 원본은 src/lib/og/brand.ts 다.
+ */
 
 const REDEV_STAGES = new Set([
   'union_established', 'constructor_selected', 'plan_approved', 'mgmt_approved', 'construction',
@@ -197,7 +205,7 @@ function renderCover(site: AptRow): React.ReactElement {
         {lcLabel ? <div style={{ display:'flex', background: 'rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: 22, fontWeight: 700, padding: '6px 16px', borderRadius: 999 }}>{lcLabel}</div> : null}
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-        <div style={{ display:'flex', width: 56, height: 4, background: '#FAC775' }} />
+        <div style={{ display:'flex', width: 56, height: 4, background: GOLD }} />
         <div style={{ display:'flex', fontSize: nameFS, fontWeight: 900, color: '#FFFFFF', lineHeight: 1.1, letterSpacing: -2 }}>{site.name}</div>
         {region ? <div style={{ display:'flex', fontSize: 26, color: 'rgba(255,255,255,0.66)', fontWeight: 600 }}>{region}</div> : null}
       </div>
@@ -268,7 +276,7 @@ function renderHero(site: AptRow, ratio: RatioKey): React.ReactElement {
             배경이 네이비 고정이라 단계는 이 태그로만 보이므로 항상 그린다. */}
         <div style={{ display: 'flex' }}>
           {region ? (
-            <div style={{ display: 'flex', background: '#FAC775', color: '#1A1A18', fontSize: 26, fontWeight: 800, padding: '7px 20px', borderRadius: 999, letterSpacing: tracking(26), marginRight: 10 }}>
+            <div style={{ display: 'flex', background: GOLD, color: '#1A1A18', fontSize: 26, fontWeight: 800, padding: '7px 20px', borderRadius: 999, letterSpacing: tracking(26), marginRight: 10 }}>
               {region}
             </div>
           ) : null}
@@ -277,7 +285,7 @@ function renderHero(site: AptRow, ratio: RatioKey): React.ReactElement {
           </div>
         </div>
 
-        <div style={{ display: 'flex', width: 72, height: 6, background: '#FAC775' }} />
+        <div style={{ display: 'flex', width: 72, height: 6, background: GOLD }} />
 
         <div
           style={{
@@ -385,7 +393,7 @@ function renderUnits(site: AptRow): React.ReactElement {
         {features.length > 0
           ? features.map((f, i) => (
               <div key={i} style={{ fontSize: 18, color: 'rgba(255,255,255,0.85)', fontWeight: 600, display: 'flex', gap: 8 }}>
-                <span style={{ color: '#FAC775' }}>•</span>
+                <span style={{ color: GOLD }}>•</span>
                 <span>{String(f).slice(0, 40)}</span>
               </div>
             ))
@@ -431,8 +439,8 @@ function renderPlace(site: AptRow): React.ReactElement {
       <div style={{ display:'flex', fontSize: 24, color: 'rgba(255,255,255,0.66)', fontWeight: 700, letterSpacing: 2 }}>PLACE · 입지</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
         {/* s270: 글리프 ● 제거 — NotoSansKR 서브셋에 U+25CF 없음 → satori dynamic font fetch 400 (7일 5,758회). 순수 CSS 원으로 대체 (Rule #47 확장: 도형도 글리프 대신 CSS) */}
-        <div style={{ width: 96, height: 96, borderRadius: 999, background: 'rgba(255,255,255,0.12)', border: '3px solid #FAC775', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ width: 40, height: 40, borderRadius: 999, background: '#FAC775', display: 'flex' }} />
+        <div style={{ width: 96, height: 96, borderRadius: 999, background: 'rgba(255,255,255,0.12)', border: `3px solid ${GOLD}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: 40, height: 40, borderRadius: 999, background: GOLD, display: 'flex' }} />
         </div>
         <div style={{ display:'flex', fontSize: 38, fontWeight: 900, color: '#FFFFFF', lineHeight: 1.15 }}>{region || '주소 정보'}</div>
         <div style={{ display:'flex', fontSize: 22, color: 'rgba(255,255,255,0.66)', fontWeight: 600, lineHeight: 1.4 }}>{site.address || site.dong || ''}</div>
@@ -478,7 +486,7 @@ function renderSpec(site: AptRow): React.ReactElement {
           </div>
           <div style={{ flex: 1, padding: '20px 0 20px 16px', display: 'flex', flexDirection: 'column', gap: 6 }}>
             <div style={{ display:'flex', fontSize: 16, color: 'rgba(255,255,255,0.55)', fontWeight: 700 }}>{cells[3].label}</div>
-            <div style={{ display:'flex', fontSize: 32, color: '#FAC775', fontWeight: 900, letterSpacing: -1 }}>{cells[3].value}</div>
+            <div style={{ display:'flex', fontSize: 32, color: GOLD, fontWeight: 900, letterSpacing: -1 }}>{cells[3].value}</div>
           </div>
         </div>
       </div>
@@ -497,6 +505,11 @@ function renderSpec(site: AptRow): React.ReactElement {
  *    §A 가 지적한 화면이 정확히 이 모습이었다(DB 조회 실패 시에도 같은 그림이 나간다).
  *    가로에서는 좌우로 갈라 균형을 맞춘다.
  */
+/**
+ * 단지를 못 찾았을 때. 커버·히어로 자리에 그대로 노출되므로 배경을 «칠하지 않는다» —
+ * 감싸는 wrapper 의 brandSurface() 가 비쳐야 §1.1 네이비가 나온다.
+ * (실측: 여기 남아 있던 #1A1A18 이 21x9 히어로에서 브랜드 배경을 통째로 덮고 있었다.)
+ */
 function renderFallback(slug: string | null, ratio: RatioKey = '1x1'): React.ReactElement {
   const aptLabel = OG_CAT.apt.label;
   const wide = ratio !== '1x1';
@@ -504,7 +517,7 @@ function renderFallback(slug: string | null, ratio: RatioKey = '1x1'): React.Rea
 
   const left = (
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', flex: 1, gap: 16 }}>
-      <div style={{ display: 'flex', width: wide ? 72 : 56, height: wide ? 6 : 4, background: '#FAC775' }} />
+      <div style={{ display: 'flex', width: wide ? 72 : 56, height: wide ? 6 : 4, background: GOLD }} />
       <div style={{ display: 'flex', fontSize: titleFS, color: '#FFFFFF', lineHeight: 1.1, letterSpacing: tracking(titleFS), ...HEAVY }}>
         단지 정보
       </div>
@@ -516,8 +529,8 @@ function renderFallback(slug: string | null, ratio: RatioKey = '1x1'): React.Rea
 
   if (!wide) {
     return (
-      <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', padding: 56, justifyContent: 'space-between', background: '#1A1A18' }}>
-        <div style={{ display: 'flex', fontSize: 22, color: '#FAC775', fontWeight: 800 }}>카더라 · kadeora.app</div>
+      <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', padding: 56, justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', fontSize: 22, color: GOLD, fontWeight: 800 }}>카더라 · kadeora.app</div>
         {left}
         <div style={{ display: 'flex', fontSize: 18, color: 'rgba(255,255,255,0.55)', fontWeight: 700 }}>주식·부동산 소리소문 커뮤니티</div>
       </div>
@@ -525,7 +538,7 @@ function renderFallback(slug: string | null, ratio: RatioKey = '1x1'): React.Rea
   }
 
   return (
-    <div style={{ width: '100%', height: '100%', display: 'flex', padding: 72, gap: 56, background: '#1A1A18' }}>
+    <div style={{ width: '100%', height: '100%', display: 'flex', padding: 72, gap: 56 }}>
       {left}
       <div
         style={{
@@ -538,7 +551,7 @@ function renderFallback(slug: string | null, ratio: RatioKey = '1x1'): React.Rea
           paddingLeft: 56,
         }}
       >
-        <div style={{ display: 'flex', fontSize: 30, color: '#FAC775', fontWeight: 800, letterSpacing: tracking(30) }}>
+        <div style={{ display: 'flex', fontSize: 30, color: GOLD, fontWeight: 800, letterSpacing: tracking(30) }}>
           카더라 · kadeora.app
         </div>
         <div style={{ display: 'flex', fontSize: 22, color: 'rgba(255,255,255,0.55)', fontWeight: 700 }}>
@@ -578,7 +591,8 @@ export async function GET(req: NextRequest) {
   try {
     // [P2 §1] 브랜드 노출면 = 목록 썸네일(card 1) + 히어로. 여기만 네이비 고정.
     //   card 2~6 은 정보 카드 캐러셀이라 축이 달라 원래 색을 유지한다.
-    const isBrandSurface = ratio !== '1x1' || card === 1;
+    // 폴백(site 없음)도 커버 자리에 뜨므로 브랜드 서피스로 친다.
+    const isBrandSurface = !site || ratio !== '1x1' || card === 1;
 
     let body: React.ReactElement;
     if (!site) {
@@ -601,7 +615,16 @@ export async function GET(req: NextRequest) {
     }
 
     const wrapped = (
-      <div style={{ width: '100%', height: '100%', display: 'flex', background: isBrandSurface ? CARD_BG : bgFor(card, site), fontFamily: ff }}>
+      <div
+        style={{
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          fontFamily: ff,
+          // [T1 §1.1] 브랜드 노출면은 광원 + 그라디언트 2겹. 카드 2~6 은 원래 단색 유지.
+          ...(isBrandSurface ? brandSurface() : { background: bgFor(card, site) }),
+        }}
+      >
         {body}
       </div>
     );
@@ -633,8 +656,8 @@ export async function GET(req: NextRequest) {
     try {
       const fbImg = new ImageResponse(
         (
-          <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#0F1B3E', color: '#fff', fontFamily: 'sans-serif' }}>
-            <div style={{ display:'flex', fontSize: 28, color: '#FBBF24', letterSpacing: 4, marginBottom: 16, fontWeight: 900 }}>KADEORA</div>
+          <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: BRAND_BG_SOLID, color: '#fff', fontFamily: 'sans-serif' }}>
+            <div style={{ display:'flex', fontSize: 28, color: GOLD, letterSpacing: 4, marginBottom: 16, fontWeight: 900 }}>KADEORA</div>
             <div style={{ display:'flex', fontSize: 56, fontWeight: 900, letterSpacing: -1 }}>apt</div>
           </div>
         ),

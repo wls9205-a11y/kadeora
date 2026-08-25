@@ -4,26 +4,19 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import { OG_CAT as CAT } from '@/lib/og-tokens';
 import { sanitizeForOG } from '@/lib/og-sanitize';
+import { SITE_URL as SITE } from '@/lib/constants';
+import { barColor, titleLines, BRAND_BG_SOLID, GOLD } from '@/lib/og/brand';
+import { BrandCard } from '@/lib/og/frame';
 
 export const runtime = 'nodejs';
 export const maxDuration = 30;
 
-// og-square: 630×630 — 네이버 모바일 1:1 크롭 전용
-// 모든 핵심 정보가 중앙 100%에 집중 → 크롭 손실 없음
+// og-square: 630×630 — 네이버 모바일 1:1 크롭 전용.
+// T1 §3.1: 확정 규격(A안) 적용. 검색결과에서 ~120px 로 축소돼 뜨므로 제목이
+// 프레임을 채워야 한다. 기존 레이아웃(컬러 헤더 + 로고 + 카테고리 통계 KPI)은
+// 전부 걷어냈다 — 축소되면 로고·통계는 읽히지도 않으면서 제목 자리만 먹었다.
 
-// 카테고리별 대표 수치 (제목 없이 수치를 자동 표시)
-const CAT_KPI: Record<string, { kw: string; kwv: string }> = {
-  apt:     { kw: '분양데이터', kwv: '5,500건+' },
-  stock:   { kw: '종목수',     kwv: '1,800종목+' },
-  finance: { kw: '절세가이드', kwv: '7,600편+' },
-  unsold:  { kw: '미분양데이터', kwv: '전국현황' },
-  blog:    { kw: '블로그',     kwv: '7,600편+' },
-  general: { kw: '정보',       kwv: '실시간' },
-  local:   { kw: '지역정보',   kwv: '우리동네' },
-  free:    { kw: '커뮤니티',   kwv: '실시간' },
-};
-
-import { SITE_URL as SITE } from '@/lib/constants';
+const SIDE = 630;
 
 /* ── 폰트: Node.js fs.readFileSync — 100% 확실 ── */
 let _fontCache: ArrayBuffer | null = null;
@@ -34,23 +27,6 @@ function loadFont(): ArrayBuffer | null {
     _fontCache = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
     return _fontCache;
   } catch { return null; }
-}
-
-function LogoSVG({ size }: { size: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 72 72">
-      <defs>
-        <linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#0F1B3E" />
-          <stop offset="100%" stopColor="#2563EB" />
-        </linearGradient>
-      </defs>
-      <rect width="72" height="72" rx="18" fill="url(#lg)" />
-      <circle cx="18" cy="36" r="7" fill="white" />
-      <circle cx="36" cy="36" r="7" fill="white" />
-      <circle cx="54" cy="36" r="7" fill="white" />
-    </svg>
-  );
 }
 
 export async function GET(req: NextRequest) {
@@ -64,65 +40,43 @@ export async function GET(req: NextRequest) {
       'Access-Control-Allow-Origin': '*',
     };
 
-    const sp       = new URL(req.url).searchParams;
-    // s270: sanitizeForOG 적용 — 서브셋 외 글자가 satori dynamic font fetch 400 유발 (og-blog/og-apt와 동일 규칙)
-    const title    = sanitizeForOG(sp.get('title') ?? '');
+    const sp = new URL(req.url).searchParams;
     const category = sp.get('category') ?? 'blog';
+    // ⚠️ 원문을 sanitizeForOG 로 먼저 씻지 말 것 — em dash 가 '-' 로 바뀌면서 §2 절단이
+    //    안 먹는다('-' 는 범천1-1 때문에 절단 문자에서 일부러 빠져 있다).
+    //    원문 → titleLines → 줄 단위 sanitize 순서다.
+    const raw = sp.get('title') ?? '';
+    // 제목이 없으면 카테고리 라벨이 곧 내용이다 (기존 KPI 통계 화면 대체)
+    const source = raw.trim() || (CAT[category]?.label ?? '카더라');
 
-    const C   = CAT[category] ?? CAT.blog;
-    const KPI = CAT_KPI[category] ?? CAT_KPI.blog;
-
-    // 제목 처리 — 정사각형은 짧게 (최대 20자 × 2줄)
-    const titleLine1 = title.length > 18 ? title.slice(0, 18) : title;
-    const titleLine2 = title.length > 18 ? (title.slice(18, 36).length > 18 ? title.slice(18, 35) + '…' : title.slice(18)) : '';
-
-    /* s280: Satori(next/og)는 CSS 변수(var(--fs-lg) 등)를 해석 못 함 — globals.css 토큰이
-       아니라 리터럴 px 값을 써야 함. 또한 title 이 있어도 화면 대부분을 차지하는 큰 수치
-       영역은 항상 사이트 전체 통계("1,800종목+")만 보여줘서 실제 공유 대상(특정 종목 등)과
-       무관한 이미지가 나가던 문제 — title 유무에 따라 레이아웃을 분기해 title 이 있으면
-       제목을 최대로 키워 보여주고, 없을 때만 카테고리 통계를 메인으로 노출. */
-    const hasTitle = titleLine1.length > 0;
+    const lines = titleLines(source).map((l) => sanitizeForOG(l) || l);
+    const bar = barColor({ category, title: source });
 
     const _sqImg = new ImageResponse(
-      <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#050505', fontFamily: ff }}>
-
-        {/* 스트라이프 1: 컬러 헤더 */}
-        <div style={{ background: C.color, padding: '0 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0, height: 64 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <LogoSVG size={24} />
-            <span style={{ fontSize: 20, fontWeight: 900, color: '#000' }}>카더라</span>
-          </div>
-          <span style={{ fontSize: 20, fontWeight: 900, color: '#000', letterSpacing: 1 }}>{C.icon}  {C.code}</span>
-        </div>
-
-        {hasTitle ? (
-          /* title 이 있으면 — 실제 공유 대상(종목/단지/글 등)을 최대 크기로 표시 */
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 36px' }}>
-            <span style={{ fontSize: 15, color: C.color, fontWeight: 700, letterSpacing: 2, marginBottom: 16 }}>{C.icon}  {C.label.toUpperCase()}</span>
-            <div style={{ display: 'flex', flexDirection: 'column', fontSize: titleLine2 ? 56 : 68, fontWeight: 900, color: '#ffffff', lineHeight: 1.14, letterSpacing: -2, wordBreak: 'keep-all' }}>
-              <span>{titleLine1}</span>
-              {titleLine2 ? <span>{titleLine2}</span> : null}
-            </div>
-          </div>
-        ) : (
-          /* title 없음 — 카테고리 대표 통계를 메인으로 */
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 36px', gap: 10 }}>
-            <span style={{ fontSize: 16, color: C.color, fontWeight: 700, letterSpacing: 2 }}>{KPI.kw.toUpperCase()}</span>
-            <span style={{ fontSize: 84, fontWeight: 900, color: '#fff', lineHeight: 0.95, letterSpacing: -3 }}>{KPI.kwv}</span>
-            <div style={{ display: 'flex', fontSize: 20, color: '#6b7280', marginTop: 8 }}>{C.label} · 카더라에서 확인하세요</div>
-          </div>
-        )}
-
-        {/* 스트라이프 하단: 얇은 액센트 바 */}
-        <div style={{ display:'flex', background: C.color, height: 10, flexShrink: 0 }} />
-
+      <div style={{ width: '100%', height: '100%', display: 'flex', fontFamily: ff, background: BRAND_BG_SOLID }}>
+        <BrandCard lines={lines} frame={SIDE} bar={bar} />
       </div>,
-      { width: 630, height: 630, ...opts }
+      { width: SIDE, height: SIDE, ...opts },
     );
     const _sqBuf = await _sqImg.arrayBuffer();
     return new Response(_sqBuf, { headers: { 'Content-Type': 'image/png', 'X-Content-Type-Options': 'nosniff', ...CACHE } });
-
-  } catch {
-    return Response.redirect(`${SITE}/images/brand/kadeora-hero.png`, 302);
+  } catch (err) {
+    console.error(`[og-square] cls=${(err as Error)?.constructor?.name} msg=${((err as Error)?.message ?? '').slice(0, 300)}`);
+    // 폰트·한글 의존성 없는 최후 폴백 — 미리보기에 무엇이라도 뜨게 한다
+    try {
+      const fbImg = new ImageResponse(
+        (
+          <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: BRAND_BG_SOLID, color: '#fff', fontFamily: 'sans-serif' }}>
+            <div style={{ display: 'flex', fontSize: 28, color: GOLD, letterSpacing: 4, fontWeight: 900 }}>KADEORA</div>
+          </div>
+        ),
+        { width: SIDE, height: SIDE },
+      );
+      return new Response(await fbImg.arrayBuffer(), {
+        headers: { 'Content-Type': 'image/png', 'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=900', 'X-OG-Fallback': '1' },
+      });
+    } catch {
+      return Response.redirect(`${SITE}/images/brand/kadeora-hero.png`, 302);
+    }
   }
 }

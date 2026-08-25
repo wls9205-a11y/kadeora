@@ -35,21 +35,45 @@ export interface BrandCardOpts {
   below?: React.ReactElement | null;
   /** below 가 있으면 제목이 부제 역할이라 폰트를 눌러야 한다. */
   titleScale?: number;
+  /**
+   * 골드 강조줄 인덱스 override. -1 이면 제목에 골드가 없다.
+   * ⚠️ below 에 골드를 쓸 때는 반드시 -1 을 넘길 것 — §1.4 는 골드 한 곳만 허용한다.
+   */
+  accent?: number;
 }
 
 export function BrandCard({
   lines,
   frame,
   height,
-  bar,
+  bar: barColorHex,
   below = null,
   titleScale = 1,
+  accent,
 }: BrandCardOpts): React.ReactElement {
   const h = height ?? frame;
   const safeLines = (Array.isArray(lines) && lines.length ? lines : ['카더라']).slice(0, 3);
-  const acc = accentIndex(safeLines);
-  const fs = fitFontSize(safeLines, frame, h) * titleScale;
+  const acc = accent === undefined ? accentIndex(safeLines) : accent;
   const pad = frame * 0.055;
+
+  // §1.5 브랜드는 «짧은 변» 기준으로 잡는다. frame(가로) 을 그대로 쓰면 1200×630 에서
+  // KADEORA 가 48px 이 돼 630 정사각(25px)과 크기가 어긋나고 세로도 잡아먹는다.
+  const shortSide = Math.min(frame, h);
+  const bar = barHeight(frame, h);
+  const brandRow = shortSide * 0.040 * 1.2 + shortSide * 0.045;
+
+  /**
+   * §1.3 은 byHeight 를 frame × 0.84 로 잡는다. 정사각에서는 띠(2.6%)+브랜드 줄을 빼고도
+   * 남지만, 1200×630 처럼 가로가 길면 byWidth 가 커져 byHeight 가 그대로 채택되고
+   * 84% × lineHeight 1.05 = 88% 가 실제 여백을 넘겨 «제목이 KADEORA 를 덮는다»
+   * (실측: og-calc '취득세 계산기'). 그래서 실제 제목 상자를 넘지 않게 눌러 잡는다.
+   * ⚠️ min 이라 §1.3 값보다 커지지 않는다 — 630 정사각 검증표는 그대로 유지된다.
+   */
+  const titleBox = Math.max(1, h - bar - brandRow);
+  const fs = Math.min(
+    fitFontSize(safeLines, frame, h),
+    titleBox / (safeLines.length * 1.05),
+  ) * titleScale;
 
   return (
     <div
@@ -67,8 +91,8 @@ export function BrandCard({
         style={{
           display: 'flex',
           width: '100%',
-          height: barHeight(frame, h),
-          background: bar,
+          height: bar,
+          background: barColorHex,
           flexShrink: 0,
         }}
       />
@@ -107,11 +131,11 @@ export function BrandCard({
           display: 'flex',
           width: '100%',
           justifyContent: 'center',
-          paddingBottom: frame * 0.045,
+          paddingBottom: shortSide * 0.045,
           flexShrink: 0,
         }}
       >
-        <div style={brandStyle(frame)}>{BRAND_WORDMARK}</div>
+        <div style={brandStyle(shortSide)}>{BRAND_WORDMARK}</div>
       </div>
     </div>
   );
