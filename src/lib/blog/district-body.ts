@@ -8,6 +8,7 @@
 
 import { rotateAnchor } from '@/lib/blog/anchor';
 import { lifecycleLabel } from '@/lib/apt/lifecycle-label';
+import { josa } from '@/lib/ko/josa';
 
 export interface DigestItem {
   slug: string;
@@ -108,21 +109,9 @@ export function pickRepresentatives(
  *    그대로 쓰면 브랜드·지역 일반 검색어에 엉뚱한 현장이 매달린다 (lib/blog/anchor.ts).
  */
 function anchor(item: DigestItem, i: number): string {
-  // ⚠️ variants 에 **시공사명으로 만든 변형**이 섞여 있다. 실측:
-  //    `부산 수정5 재개발` → variants 에 `동구 대우건설` 이 있어 그게 앵커로 나갔다.
-  //    `- [동구 대우건설](/apt/부산-수정5-재개발)` — 시공사 일반 검색어에 엉뚱한 현장이 매달린다.
-  //    앵커 가드(lib/blog/anchor.ts)가 막으려는 바로 그 문제인데, 길이 기준만으로는 안 걸린다.
-  //    현장 이름에 시공사가 들어있지 않은데 변형에만 들어있으면 그 변형은 버린다.
-  const tokens = (item.builder ?? '')
-    .split(/[,&]/)
-    .map((s) => s.trim())
-    .filter((s) => s.length > 1 && !item.name.includes(s));
-  const vs = Array.isArray(item.variants) ? item.variants : [];
-  const cleaned =
-    tokens.length > 0
-      ? vs.filter((v) => typeof v === 'string' && !tokens.some((t) => v.includes(t)))
-      : vs;
-  return rotateAnchor(item.name, cleaned, i);
+  // ⚠️ variants 에 **시공사명으로 만든 변형**이 섞여 있다(실측 `동구 대우건설`).
+  //    배제 규칙은 앵커 가드 안에 있다 — builder 를 넘기기만 하면 된다.
+  return rotateAnchor(item.name, item.variants, i, item.builder);
 }
 
 /** `(주)DL이앤씨` 와 `DL이앤씨` 를 같은 회사로 본다. 안 하면 목록에 둘 다 나온다(실측). */
@@ -284,20 +273,26 @@ function processSection(kind: '재건축' | '재개발', d: Digest, items: Diges
     ),
   ];
   if (builders.length >= 2) {
-    lines.push(`시공사로는 ${builders.slice(0, 5).join(' · ')} 등이 참여하고 있습니다.`);
+    const shown = builders.slice(0, 5);
+    const more = builders.length > shown.length;
+    // ⚠️ 이름 뒤 조사는 받침으로 갈린다 — 그대로 이어붙이면 `한국토지주택공사이 참여하고` 가 나간다(실측).
+    const tail = more ? '등이' : josa(shown[shown.length - 1], '이/가');
+    lines.push(`시공사로는 ${shown.join(' · ')}${more ? ' ' : ''}${tail} 참여하고 있습니다.`);
   }
 
-  // ⚠️ dong 이 채워진 곳이 몇 안 되면 쓰지 않는다. 14곳 중 1곳만 값이 있는데
-  //    「행정동으로는 초량동 1곳에 몰려 있습니다」라고 쓰면 사실과 다른 인상을 준다(실측).
+  // ⚠️ **커버리지가 절반 미만이면 이 문장을 쓰지 않는다.**
+  //    14곳 중 1곳만 dong 값이 있는데 「행정동으로는 초량동 1곳에 몰려 있습니다」라고 쓰면
+  //    나머지 13곳이 다른 동인 것처럼 읽힌다 — 사실과 다른 인상이다(실측).
+  //    부분 데이터로 전체를 서술하는 문장은 전부 이 함정을 갖는다.
   const byDong = new Map<string, number>();
   for (const it of items) {
     const dg = (it.dong ?? '').trim();
     if (dg) byDong.set(dg, (byDong.get(dg) ?? 0) + 1);
   }
   const dongKnown = [...byDong.values()].reduce((a, b) => a + b, 0);
-  if (dongKnown >= 3) {
+  if (dongKnown >= 3 && dongKnown * 2 >= n) {
     const top = [...byDong.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3);
-    lines.push(`행정동이 확인된 ${dongKnown}곳은 ${top.map(([k, v]) => `${k} ${v}곳`).join(' · ')}입니다.`);
+    lines.push(`행정동으로는 ${top.map(([k, v]) => `${k} ${v}곳`).join(' · ')}입니다.`);
   }
 
   // 소규모·가로주택은 절차가 실제로 다르다. 비중이 구마다 달라 문장도 갈린다.

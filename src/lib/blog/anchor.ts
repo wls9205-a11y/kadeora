@@ -27,17 +27,42 @@ const MIN_RATIO = 0.6;
  * 이 현장을 식별하기에 충분한 앵커 후보만 남긴다.
  * ⚠️ 항상 원 이름을 첫 번째로 둔다 — 후보가 하나도 없어도 앵커는 만들어져야 한다.
  */
-export function anchorPool(name: string, variants: unknown): string[] {
+/**
+ * 시공사명이 든 변형을 앵커 후보에서 뺀다.
+ *
+ * ⚠️ 실측: `부산 수정5 재개발` 의 name_variants 에 `동구 대우건설` 이 들어 있어
+ *    `- [동구 대우건설](/apt/부산-수정5-재개발)` 이 그대로 나갔다.
+ *    길이 기준(MIN_RATIO)만으로는 안 걸린다 — 글자 수는 충분하기 때문이다.
+ *    시공사 일반 검색어에 엉뚱한 현장이 매달리는, 이 파일이 막으려는 바로 그 문제다.
+ *
+ * ⚠️ **현장 이름에 시공사가 들어있으면 빼지 않는다.** `해운대 아이파크` 처럼
+ *    브랜드가 곧 현장명인 경우가 있어, 그때까지 버리면 앵커가 원 이름 하나로 줄어든다.
+ */
+function builderTokens(builder: string | null | undefined, name: string): string[] {
+  return (builder ?? '')
+    .split(/[,&/]/)
+    .map((s) => s.replace(/^\s*(\(주\)|㈜|주식회사)\s*/, '').trim())
+    .filter((s) => s.length > 1 && !name.includes(s));
+}
+
+export function anchorPool(
+  name: string,
+  variants: unknown,
+  builder?: string | null,
+): string[] {
   const base = (name ?? '').trim();
   const list = Array.isArray(variants) ? variants : [];
   const minLen = Math.max(MIN_ANCHOR_LEN, Math.ceil(base.replace(/\s+/g, '').length * MIN_RATIO));
+  const bad = builderTokens(builder, base);
 
   const ok = list
     .filter((v): v is string => typeof v === 'string')
     .map((v) => v.trim())
     .filter((v) => v.length > 0 && v.replace(/\s+/g, '').length >= minLen)
     // 하이픈 슬러그 형태(`창원-의창-푸르지오`)는 사람이 읽는 문구가 아니다.
-    .filter((v) => !/^[\w가-힣]+(-[\w가-힣]+)+$/.test(v));
+    .filter((v) => !/^[\w가-힣]+(-[\w가-힣]+)+$/.test(v))
+    // 시공사명이 든 변형은 그 현장을 가리키는 문구가 아니다.
+    .filter((v) => !bad.some((t) => v.includes(t)));
 
   // ⚠️ 중복 판정에서 **공백을 지우지 말 것.**
   //    `창원 의창 푸르지오` 와 `창원의창푸르지오` 를 같은 것으로 접으면 풀이 1개가 되고,
@@ -53,7 +78,12 @@ export function anchorPool(name: string, variants: unknown): string[] {
 }
 
 /** 인덱스로 돌려 쓴다. 링크 대상은 항상 슬러그 — 앵커만 바뀐다. */
-export function rotateAnchor(name: string, variants: unknown, i: number): string {
-  const pool = anchorPool(name, variants);
+export function rotateAnchor(
+  name: string,
+  variants: unknown,
+  i: number,
+  builder?: string | null,
+): string {
+  const pool = anchorPool(name, variants, builder);
   return pool.length === 0 ? name : pool[i % pool.length];
 }

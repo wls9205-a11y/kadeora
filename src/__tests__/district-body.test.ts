@@ -52,6 +52,31 @@ describe('buildBody — 문턱을 넘는다', () => {
     expect(pick(a)[0]).not.toBe(pick(b)[0]);
   });
 
+  it('행정동 커버리지가 절반 미만이면 그 문장을 쓰지 않는다', () => {
+    // 동구는 14곳 중 1곳만 dong 값이 있다. 「초량동 1곳에 몰려 있습니다」라고 쓰면
+    // 나머지 13곳이 다른 동인 것처럼 읽힌다 — 사실과 다른 인상이다.
+    expect(buildBody(동구, 동구.items, NONE, YM)).not.toContain('행정동으로는');
+  });
+
+  it('커버리지가 충분하면 쓴다', () => {
+    // 해운대구 재개발 6곳 중 3곳에 dong 값이 있다(전부 중동).
+    const redev = 해운대구.items.filter((i) => i.project_type !== '재건축');
+    const body = buildBody({ ...해운대구, total: redev.length }, redev, NONE, YM);
+    expect(body).toContain('행정동으로는 중동 3곳입니다');
+  });
+
+  it('시공사 목록 뒤 조사가 받침을 따른다', () => {
+    // 실제로 「한국토지주택공사이 참여하고」 가 나갔다.
+    const body = buildBody(해운대구, 해운대구.items, NONE, YM);
+    expect(body).toContain('한국토지주택공사가 참여하고');
+    expect(body).not.toContain('공사이 참여');
+  });
+
+  it('시공사명으로 만든 변형을 앵커로 쓰지 않는다', () => {
+    // 실제로 `- [동구 대우건설](/apt/부산-수정5-재개발)` 이 나갔다.
+    expect(buildBody(동구, 동구.items, NONE, YM)).not.toContain('[동구 대우건설]');
+  });
+
   it('연한을 숫자로 지어내지 않는다 — built_year 가 재건축 현장 전체에서 0건이다', () => {
     const body = buildBody(해운대구, 해운대구.items, NONE, YM);
     expect(body).toContain('대부분 30년입니다');
