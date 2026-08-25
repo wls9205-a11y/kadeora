@@ -427,19 +427,40 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     // og_cards 6장 분기에서도 실사가 없으면 630×630 카드가 0번이었다.
     //
     // 조감도(hero)가 있으면 조감도가 1순위다 — 공유 카드가 완전히 달라진다.
+    // [패치 P3 §2] og:image 를 목록·상세 히어로와 «같은 체인» 으로 통일한다.
+    //   1순위 hero_image_url  2순위 기축이면 satellite  3순위 카드(size=hero, 21:9)
+    //
+    //   잠금이 풀린 근거 — hero_image_url 179건 전량이 부산광역시 정비사업 공공데이터
+    //   개방 API(viewImgPath) 174 · 코오롱글로벌 4 · 두산건설 1 이다. 스크랩이 아니다.
+    //
+    // ⚠️ 폭·높이를 «아는 것만» 신고한다.
+    //    바로 위 주석이 경고하듯 카카오톡·네이버는 선언값이 아니라 실제 비율을 본다.
+    //    - 카드는 1260×540 으로 확정이라 그대로 적는다
+    //    - 위성은 1024×1024 «정사각» 이다(apt-satellite-crawl 이 그렇게 굽는다).
+    //      여기에 1200×630 을 붙이던 것이 기존 코드였고, 그게 '큰 카드가 아니라 작은
+    //      썸네일로 뜨는' 원인이다. 정사각은 정사각으로 신고한다
+    //    - 실사(hero_image_url)는 치수를 모른다. 모르면 «적지 않는다» — 틀린 값을
+    //      적는 것보다 낫다
+    // ⚠️ 21:9 는 카카오톡이 전제하는 1200×630 과 비율이 다르다. 잘림 여부는 실물
+    //    확인이 필요하다. 그래서 1번 자리에 1200×630 생성 카드를 남겨 뒀다.
     const heroUrl = (d.site as any)?.hero_image_url as string | undefined;
-    const ogWide =
-      (heroUrl && heroUrl.length > 10 ? heroUrl : null) ??
-      ((d.site as any)?.cover_image_url || null) ??
-      (d.site?.satellite_image_url || null) ??
-      (d.site?.og_image_url || null) ??
-      `${SITE_URL}/api/og?title=${encodeURIComponent(d.name)}&category=apt&design=2&subtitle=${encodeURIComponent(d.region || '')}`;
-    const ogWideAlt = heroUrl
-      ? `${d.name} 조감도`
-      : d.site?.satellite_image_url
-        ? `${d.name} 항공 이미지`
-        : `${d.name} 분양정보`;
-    const OG_WIDE = { url: ogWide, width: 1200, height: 630, alt: ogWideAlt };
+    const lcStageMeta = (d.site as any)?.lifecycle_stage as string | null | undefined;
+    const isGichukMeta = lcStageMeta === 'post_move_in' || lcStageMeta === 'landmark_active';
+    const satUrlMeta = d.site?.satellite_image_url || null;
+    const cardWideUrl = `${SITE_URL}/api/og-apt?slug=${encodeURIComponent(resolved.slug)}&size=hero&card=1`;
+
+    const OG_WIDE =
+      heroUrl && heroUrl.length > 10
+        ? { url: heroUrl, alt: `${d.name} 조감도` }
+        : isGichukMeta && satUrlMeta
+          ? { url: satUrlMeta, width: 1024, height: 1024, alt: `${d.name} 항공 이미지` }
+          : { url: cardWideUrl, width: 1260, height: 540, alt: `${d.name} 대표 이미지` };
+
+    // 1200×630 예비 — 21:9 가 잘리는 클라이언트를 위한 안전판.
+    const OG_LEGACY_WIDE = {
+      url: `${SITE_URL}/api/og?title=${encodeURIComponent(d.name)}&category=apt&design=2&subtitle=${encodeURIComponent(d.region || '')}`,
+      width: 1200, height: 630, alt: `${d.name} 분양정보`,
+    };
 
     const priceStr = d.site?.price_min && d.site?.price_max
       ? ` ${d.site.price_min >= 10000 ? `${(d.site.price_min/10000).toFixed(1)}억` : `${d.site.price_min.toLocaleString()}만`}~${d.site.price_max >= 10000 ? `${(d.site.price_max/10000).toFixed(1)}억` : `${d.site.price_max.toLocaleString()}만`}`
@@ -460,18 +481,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
           }));
           // s7-2: 카드 6장 분기가 실사를 통째로 건너뛰고 있었다(97.9%).
           // V15 D-2: 실사가 없어도 0번은 가로 카드다 — 정사각이 0번이면 공유 면적을 잃는다.
-          return [OG_WIDE, ...cardImgs];
+          // [P3 §2] 1번은 1200×630 예비 — 21:9 가 잘리는 클라이언트를 위한 안전판.
+          return [OG_WIDE, OG_LEGACY_WIDE, ...cardImgs];
         }
-        return [OG_WIDE, { url: `${SITE_URL}/api/og-apt?slug=${encodeURIComponent(resolved.slug)}&card=1&v=1`, width: 630, height: 630, alt: d.name }];
+        return [OG_WIDE, OG_LEGACY_WIDE, { url: `${SITE_URL}/api/og-apt?slug=${encodeURIComponent(resolved.slug)}&card=1&v=1`, width: 630, height: 630, alt: d.name }];
       })() },
       twitter: { card: 'summary_large_image', title, description: desc, site: '@kadeora_app', images: (() => {
         const cards = Array.isArray(d.site?.og_cards) ? d.site.og_cards : [];
         if (cards.length === 6) {
           const cardUrls = cards.map((c: any) => typeof c?.url === 'string' && c.url.startsWith('http') ? c.url : `${SITE_URL}${c?.url || ''}`).filter(Boolean);
           // summary_large_image 는 가로 카드를 전제한다. 0번을 정사각으로 두면 잘린다.
-          return [ogWide, ...cardUrls];
+          // [P3 §2] OG_WIDE 는 객체라 url 만 뽑는다. 1번은 1200×630 예비.
+          return [OG_WIDE.url, OG_LEGACY_WIDE.url, ...cardUrls];
         }
-        return [ogWide];
+        return [OG_WIDE.url, OG_LEGACY_WIDE.url];
       })() },
       other: {
         'article:published_time': d.site?.created_at || d.sub?.fetched_at || '',
@@ -592,7 +615,17 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
   //  - heroPhotoUrl: image[] 0번. 조감도(hero) > 위성. 큰 이미지라 위성도 읽힌다
   //  - developerHeroUrl: thumbnailUrl 용. 검색 썸네일은 작아 위성이 얼룩으로 보이므로
   //    시행사 허락 실사가 있을 때만 쓰고, 없으면 생성 카드(og-square)로 둔다
-  const heroPhotoUrl: string | null = (site as any)?.hero_image_url || site?.satellite_image_url || null;
+  // [패치 P3 §2] 히어로·og:image 와 «같은 체인» 으로 맞춘다.
+  //   이전 구현은 기축이 아닌 현장에서도 위성을 2순위로 썼다 — 그러면 분양 현장의
+  //   JSON-LD image[] 만 위성이 되어 화면(카드)과 구조화 데이터가 어긋난다.
+  //   3순위 카드까지 넣어 «항상 무언가는 있게» 한다(이전엔 null 이 될 수 있었다).
+  const isGichukLd = (site as any)?.lifecycle_stage === 'post_move_in'
+    || (site as any)?.lifecycle_stage === 'landmark_active';
+  const heroPhotoUrl: string | null =
+    (site as any)?.hero_image_url
+    || (isGichukLd ? site?.satellite_image_url : null)
+    || (site?.slug ? `${SITE_URL}/api/og-apt?slug=${encodeURIComponent(site.slug)}&size=hero&card=1` : null)
+    || null;
   const developerHeroUrl: string | null = (site as any)?.hero_image_url || null;
 
 
