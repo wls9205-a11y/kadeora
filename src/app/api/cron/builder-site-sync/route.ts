@@ -260,6 +260,14 @@ async function handler(_req: NextRequest) {
           continue;
         }
 
+        // ⚠️ noListImageReason 은 **여기서 끊지 않는다.** 목록 이미지만 못 쓰는 것이고
+        //    전용 홈페이지 경로는 아래에서 그대로 탄다(푸르지오). 둘을 한 필드로 묶어 뒀더니
+        //    조감도의 가장 큰 미개척지가 통째로 막혀 있었다.
+        if (site.noListImageReason) {
+          skippedImages[`list:${site.noListImageReason}`] =
+            (skippedImages[`list:${site.noListImageReason}`] ?? 0) + 1;
+        }
+
         // 목록 이미지가 **실제 URL** 인 소스(롯데캐슬 data-attr)는 상세를 열 필요가 없다.
         // 크기 검증(1200px 미만 제외)은 measureFirstUsable 이 그대로 한다.
         if (site.profile === 'data-attr' && card.imageUrl) {
@@ -304,8 +312,21 @@ async function handler(_req: NextRequest) {
           continue;
         }
 
-        const picked = await measureFirstUsable(pickHeroCandidates(html, pageUrl));
-        if (!picked) continue;
+        // ⚠️ 경로 필터는 소스마다 다르다. 하늘채 상세는 `/upload/` 아래지만
+        //    전용 홈페이지는 제각각이라 강제하면 후보가 0건이 된다(실측 arkone 14장 중 0).
+        //    aGrade=false(외부 전용 홈페이지)일 때는 크기 게이트로 거른다.
+        const requireUploadPath = site.heroRequiresUploadPath ?? aGrade;
+        const candidates = pickHeroCandidates(html, pageUrl, { requireUploadPath });
+        if (candidates.length === 0) {
+          skippedImages.no_candidate_image = (skippedImages.no_candidate_image ?? 0) + 1;
+          continue;
+        }
+        const picked = await measureFirstUsable(candidates);
+        if (!picked) {
+          // ⚠️ "후보는 있었는데 전부 작았다" 와 "후보가 없었다" 는 다른 실패다. 갈라 센다.
+          skippedImages.all_candidates_too_small = (skippedImages.all_candidates_too_small ?? 0) + 1;
+          continue;
+        }
 
         // ② credit 은 시공사명만. 화면에 그대로 나간다 — URL·수집일·경로를 넣지 않는다.
         const coverRes = await fetch(new URL('/api/admin/apt-cover', process.env.NEXT_PUBLIC_SITE_URL ?? 'https://kadeora.app').toString(), {

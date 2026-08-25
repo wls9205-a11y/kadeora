@@ -42,10 +42,31 @@ export interface BuilderSite {
   /** POST 로 받아야 하는 목록(ajax-card). 기본은 GET. */
   method?: 'GET' | 'POST';
   /**
-   * ⚠️ 이 소스에서 **이미지를 쓰지 않는 이유**. 값이 있으면 조감도 수집을 건너뛴다.
+   * ⚠️ 이 소스에서 **이미지를 아예 쓰지 않는 이유**. 값이 있으면 조감도 수집을 통째로 건너뛴다.
    *    빈 결과를 "수집했다" 고 기록하지 않기 위해 이유를 코드에 남긴다.
    */
   noImageReason?: string;
+  /**
+   * ⚠️ **목록에만** 이미지가 없는 이유. noImageReason 과 다르다 —
+   *    이 값이 있으면 목록 이미지는 쓰지 않되 **전용 홈페이지 경로는 계속 탄다.**
+   *
+   *    둘을 한 필드로 묶어 놨더니 푸르지오가 통째로 막혀 있었다. 실측하면
+   *    분양계획 표는 전용 홈페이지 링크를 주고(prugio-lakecity.com · arkone-prugio.com
+   *    · prugio-riverfront.com · summitclavion.com · summitthehill.com),
+   *    그중 둘은 A등급 판정(robots + 푸터 시공사명 AND 사업자등록번호)을 실제로 통과한다.
+   */
+  noListImageReason?: string;
+  /**
+   * 조감도 후보를 고를 때 `/upload/` 경로만 볼지.
+   *
+   * ⚠️ 기본 true 는 **하늘채 기준**이다. 그 사이트는 사진이 전부 `/upload/` 아래라
+   *    로고·아이콘·배너를 그 한 줄로 걸러낼 수 있었다.
+   * ⚠️ 전용 홈페이지는 경로가 제각각이다(실측 `/resources/img/…` · `/bon/img/…` · `/img/…`).
+   *    `/upload/` 를 요구하면 후보가 **0건**이 된다 — arkone 14장 중 0, riverfront 57장 중 0.
+   *    그래서 전용 홈페이지에서는 경로 대신 **크기 게이트(1200px 미만 탈락)**로 거른다.
+   *    로고·버튼은 1200px 를 못 넘기고 svg·gif 는 애초에 후보가 아니다.
+   */
+  heroRequiresUploadPath?: boolean;
   /**
    * ⚠️ 이 소스에서 **세대수를 쓰지 않는 이유**. 값이 있으면 세대수를 저장하지 않는다.
    */
@@ -105,8 +126,16 @@ export const BUILDER_SITES: BuilderSite[] = [
     listUrl: 'https://www.prugio.com/sale/plan.aspx',
     profile: 'plan-table',
     kind: 'sale',
-    // 표에 이미지가 없다. 각 단지 분양홈페이지는 외부 도메인이라 A등급이 아니다.
-    noImageReason: 'plan_table_has_no_images',
+    // ⚠️ 표 자체에는 이미지가 없다. 하지만 **전용 홈페이지 링크는 준다** —
+    //    그래서 noImageReason(전면 차단)이 아니라 noListImageReason 이다.
+    //    2026-08-25 실측: 표에서 전용 홈페이지 5곳이 나오고,
+    //      arkone-prugio.com     robots 허용 · 사업자등록번호 ✓ · 「대우건설」 ✓ → A등급
+    //      prugio-riverfront.com robots 허용 · 사업자등록번호 ✓ · 「대우건설」 ✓ → A등급
+    //      summitclavion.com     「대우건설」 없음 → verifyBrandFooter 가 거른다(정상)
+    //      prugio-lakecity.com   /gate/index.asp 인트로 게이트라 푸터가 없다 → 거른다(정상)
+    noListImageReason: 'plan_table_has_no_images',
+    // 전용 홈페이지는 자산 경로가 제각각이다. 경로가 아니라 크기로 거른다.
+    heroRequiresUploadPath: false,
   },
   {
     key: 'lotte-castle-lots',

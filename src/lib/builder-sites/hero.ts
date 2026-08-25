@@ -39,23 +39,66 @@ const UA = 'Mozilla/5.0 (compatible; kadeora-bot)';
  *    사이트가 og:image 에 조감도를 넣어 준다는 보장이 없다.
  * 업로드 경로(`/upload/`)의 사진만 후보로 본다. 로고·아이콘·배너는 그 경로에 없다.
  */
-export function pickHeroCandidates(html: string, baseUrl: string): string[] {
+/**
+ * 후보 상한. 전용 홈페이지는 이미지가 수십 장이라(riverfront 57장) 전부 받으면
+ * 크론 한 번이 수백 MB 를 당긴다. 큰 이미지는 대개 앞쪽에 있다.
+ */
+const MAX_CANDIDATES = 12;
+
+/**
+ * 화면 자산(조감도가 아닌 것) 이름 패턴.
+ *
+ * ⚠️ **크기만으로는 못 거른다.** 2026-08-25 실측(prugio-riverfront.com):
+ *      13x13     popup_closeBtn.v100.png      ← 크기로 걸린다
+ *      1920x950  main_calendar_bg.jpg         ← **크기를 통과한다. 달력 배경이다.**
+ *      280x280   main_visual_deco_img_01.jpg  ← 크기로 걸린다
+ *    measureFirstUsable 은 통과한 **첫 장**을 쓰므로, 이름을 안 보면
+ *    달력 배경이 「대우건설 조감도」credit 을 달고 현장 페이지에 올라간다.
+ *    이 파일의 규칙은 전부 "확실하지 않으면 건너뛴다" 쪽이다 — 여기도 같다.
+ */
+const CHROME_ASSET = /(?:^|[/_-])(?:bg|background|btn|button|icon|ico|logo|bi|deco|popup|layer|banner|calendar|arrow|dot|bullet|sprite|pattern|patt|thumb|nav|menu|footer|header|loading|spinner)(?:[/_.-]|$)/i;
+
+export function pickHeroCandidates(
+  html: string,
+  baseUrl: string,
+  opts: { requireUploadPath?: boolean } = {},
+): string[] {
+  const requireUploadPath = opts.requireUploadPath !== false;
   const flat = html.replace(/\r?\n/g, ' ');
   const out: string[] = [];
   const seen = new Set<string>();
-  for (const m of flat.matchAll(/<img[^>]*src="([^"]+)"/gi)) {
+  // 작은따옴표 속성도 받는다 — 전용 홈페이지는 마크업 스타일이 제각각이다.
+  for (const m of flat.matchAll(/<img[^>]*src=["']([^"']+)["']/gi)) {
     const raw = m[1];
-    if (!/\/upload\//i.test(raw)) continue;
+    // ⚠️ `/upload/` 강제는 **하늘채 기준**이다. 전용 홈페이지는 경로가 제각각이라
+    //    (`/resources/img/…` · `/bon/img/…`) 강제하면 후보가 0건이 된다(실측).
+    //    그쪽에서는 크기 게이트(1200px)가 로고·버튼을 걸러 준다.
+    if (requireUploadPath && !/\/upload\//i.test(raw)) continue;
     if (/\.(svg|gif)(\?|$)/i.test(raw)) continue;
+    if (/^data:/i.test(raw)) continue;
+    // ⚠️ 실제 이미지 확장자만 받는다. 실측에서 `item.img` 라는 **템플릿 자리표시자**가
+    //    후보로 올라왔다 — 점이 있다고 주소인 게 아니다.
+    if (!/\.(jpe?g|png|webp)(\?|$)/i.test(raw)) continue;
     let abs: string;
+    let u: URL;
     try {
       abs = new URL(raw, baseUrl).toString();
+      u = new URL(abs);
     } catch {
       continue;
     }
+    if (u.protocol !== 'http:' && u.protocol !== 'https:') continue;
+    // ⚠️ **동일 출처만.** 실측에서 `facebook.com/tr?id=…` 추적 픽셀이 후보로 잡혔다.
+    //    남의 도메인 이미지를 「시공사 공식 사이트」credit 으로 올리면 출처가 거짓이 된다 —
+    //    이 파일이 지키려는 바로 그 선이다.
+    if (u.origin !== new URL(baseUrl).origin) continue;
+    // ⚠️ `/upload/` 를 요구하지 않는 소스에서는 경로가 걸러 주는 게 없다.
+    //    화면 자산 이름을 명시적으로 뺀다 — 안 그러면 달력 배경이 조감도로 나간다(실측).
+    if (!requireUploadPath && CHROME_ASSET.test(u.pathname)) continue;
     if (seen.has(abs)) continue;
     seen.add(abs);
     out.push(abs);
+    if (out.length >= MAX_CANDIDATES) break;
   }
   return out;
 }
