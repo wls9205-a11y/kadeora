@@ -315,6 +315,8 @@ async function handler(_req: NextRequest) {
     const skippedReasons: Record<string, number> = {};
     const titles: string[] = [];
     const thinDistricts: string[] = [];
+    // ⚠️ reason 만으로는 원인을 못 찾는다. 원문을 함께 남긴다.
+    const skippedMessages: string[] = [];
 
     for (const dst of districts) {
       if (created + refreshed >= MAX_POSTS) break;
@@ -334,88 +336,144 @@ async function handler(_req: NextRequest) {
       // ⚠️ 여기가 핵심 가드다. total 만 보고 발행하면 빈 글이 나간다.
       if (!d.publishable) { skippedNotPublishable++; continue; }
 
-      const items = (d.items ?? []).slice(0, MAX_ITEMS);
-      if (items.length === 0) { skippedNotPublishable++; continue; }
+      const all = (d.items ?? []).slice(0, MAX_ITEMS);
+      if (all.length === 0) { skippedNotPublishable++; continue; }
 
-      const moved = new Set<string>(items.map((i) => i.slug).filter((s) => movedAll.has(s)));
+      /* ── 재건축 분리 ──
+       *
+       * ⚠️ 두 글이 **겹치면 안 된다.** 자기잠식이기도 하고, 제목 중복으로 둘째 글이 막히기도 한다.
+       *    실측: 본편이 재건축을 앞에 세우고 있어 대표 3곳이 같아지고,
+       *          「해운대구 재건축 총정리 — 재송2 재건축, 반여4 재건축…」 이
+       *          기존 본편과 **유사도 0.81** 로 차단됐다(임계 0.4).
+       *    본편에서 재건축을 빼면 대표 3곳이 저절로 달라져 두 문제가 같이 풀린다.
+       *
+       *   본편  = 재개발 + 가로주택정비 + 기타
+       *   분리편 = 재건축만
+       */
+      const isRebuild = (it: DigestItem) => (it.project_type ?? '').trim() === '재건축';
+      const split = d.split_rebuild === true;
+      const mainItems = split ? all.filter((it) => !isRebuild(it)) : all;
+      const rebuildItems = split ? all.filter(isRebuild) : [];
 
-      // ⚠️ 그달 바뀐 구역을 대표 3개의 앞자리에 세운다 —
-      //    제목이 달마다 실제로 달라지고, 읽는 사람에게도 그게 새 정보다.
-      const ordered = [...items].sort((a, b) => Number(moved.has(b.slug)) - Number(moved.has(a.slug)));
-      const top3 = ordered.slice(0, 3).map((i) => i.raw_name || i.name).filter(Boolean).join(', ');
+      /** 한 편을 내보낸다. 신규는 insert, 있으면 갱신. */
+      const emit = async (
+        kind: string,
+        pSlug: string,
+        pTitle: string,
+        pItems: DigestItem[],
+        pExcerpt: string,
+        pTags: string[],
+      ) => {
+        const movedSet = new Set<string>(pItems.map((i) => i.slug).filter((s) => movedAll.has(s)));
+        const body = buildBody({ ...d, total: pItems.length }, pItems, movedSet, ym);
 
-      // 제목: `{시·도} {구} {유형} 총정리` 를 앞에 둔다 — 유입 실증 패턴이 이 형태다.
-      // 대표 구역명 3개가 구별 고유 트라이그램을 만들어 구끼리 차단되지 않게 한다(실측 0.426).
-      //
-      // ⚠️ 유형을 `재개발` 로 박아 두면 **재건축 검색을 통째로 놓친다.**
-      //    실측 해운대구: 재개발 3 · 재건축 19 인데 제목이 「재개발 총정리」였다.
-      //    dominant_type 을 쓰면 해운대구는 「재건축 총정리」가 되어 그 검색을 잡는다.
-      const kind = typeLabel(d.dominant_type);
-      const title = `${dst.region} ${dst.sigungu} ${kind} 총정리 — ${top3} 등 ${d.total}곳 (${ym})`;
-
-      // ⚠️ slug 에 월을 넣지 않는다. 구별 URL 하나를 고정하고 매월 갈아끼운다.
-      const slug = `${dst.region}-${dst.sigungu}-정비사업-총정리`.replace(/\s+/g, '-').toLowerCase();
-
-      const content = buildBody(d, items, moved, ym);
-      const excerpt = `${dst.region} ${dst.sigungu} 재개발·재건축 ${d.total}곳의 ${ym} 기준 진행 단계와 시공사·세대수를 구역별로 정리했습니다.`;
-
-      // ⚠️ 본문이 얇으면 여기서 멈춘다. safeBlogInsert 의 content_too_short 로 떨어지게 두면
-      //    "왜 이 구만 안 나왔는지" 가 버그처럼 보인다. 실측: 부산 중구(5곳)가 유일하게 걸린다.
-      //    현장이 적은 구는 링크가 적어 글로서도 얇다 — publishable 가드와 같은 취지로 여기서 끊는다.
-      //    (하한을 올리려면 get_district_redev_digest 의 publishable 조건을 고쳐야 한다.)
-      if (content.length < minContentLength) {
-        thinDistricts.push(`${dst.region} ${dst.sigungu}(${items.length}곳·${content.length}자)`);
-        skippedReasons.too_thin = (skippedReasons.too_thin ?? 0) + 1;
-        continue;
-      }
-
-      /* ── 이미 있으면 갱신, 없으면 신규 ── */
-      const { data: existingPost } = await admin
-        .from('blog_posts').select('id, is_published').eq('slug', slug).maybeSingle();
-
-      if (existingPost) {
-        // §2-2 게이트와 같은 규칙을 여기서도 지킨다 — 현장 링크가 없으면 갱신하지 않는다.
-        const linked = extractAptSiteSlugs(content);
-        if (linked.length === 0) {
-          skippedReasons.no_site_link = (skippedReasons.no_site_link ?? 0) + 1;
-          continue;
+        // ⚠️ 본문이 얇으면 여기서 멈춘다. safeBlogInsert 의 content_too_short 로 떨어지게 두면
+        //    "왜 이것만 안 나왔는지" 가 버그처럼 보인다.
+        if (body.length < minContentLength) {
+          thinDistricts.push(`${dst.region} ${dst.sigungu}/${kind}(${pItems.length}곳·${body.length}자)`);
+          skippedReasons.too_thin = (skippedReasons.too_thin ?? 0) + 1;
+          return;
         }
-        const { data: upd, error: updErr } = await admin
-          .from('blog_posts')
-          .update({ title, content, excerpt, updated_at: new Date().toISOString() })
-          .eq('id', existingPost.id)
-          .select('id');
-        // ⚠️ 영향 행 수를 확인한다. 0건이면 갱신했다고 세지 않는다.
-        if (updErr || (upd?.length ?? 0) === 0) {
-          skippedReasons.update_failed = (skippedReasons.update_failed ?? 0) + 1;
-          continue;
+
+        const { data: existingPost } = await admin
+          .from('blog_posts').select('id').eq('slug', pSlug).maybeSingle();
+
+        if (existingPost) {
+          // §2-2 게이트와 같은 규칙 — 현장 링크가 없으면 갱신하지 않는다.
+          if (extractAptSiteSlugs(body).length === 0) {
+            skippedReasons.no_site_link = (skippedReasons.no_site_link ?? 0) + 1;
+            return;
+          }
+          const { data: upd, error: updErr } = await admin
+            .from('blog_posts')
+            .update({ title: pTitle, content: body, excerpt: pExcerpt, updated_at: new Date().toISOString() })
+            .eq('id', existingPost.id)
+            .select('id');
+          // ⚠️ 영향 행 수를 확인한다. 0건이면 갱신했다고 세지 않는다.
+          if (updErr || (upd?.length ?? 0) === 0) {
+            skippedReasons.update_failed = (skippedReasons.update_failed ?? 0) + 1;
+            return;
+          }
+          // §G-1: 본문이 바뀌면 링크도 바뀐다. 대장을 같이 갱신한다.
+          await recordSiteLinks(admin, existingPost.id, body);
+          refreshed++;
+          titles.push(`(갱신) ${pTitle}`);
+          return;
         }
-        // §G-1: 본문이 바뀌면 링크도 바뀐다. 대장을 같이 갱신하지 않으면
-        //       집계가 첫 발행 시점에 멈춘다.
-        await recordSiteLinks(admin, existingPost.id, content);
-        refreshed++;
-        titles.push(`(갱신) ${title}`);
-        continue;
-      }
 
-      const res = await safeBlogInsert(admin, {
-        slug,
-        title,
-        content,
-        excerpt,
-        category: 'apt',
-        tags: [dst.region, dst.sigungu, '재개발', '재건축', '정비사업'],
-        source_type: 'auto',
-        cron_type: CRON_TYPE,
-        // ⚠️ hub_apt_slug 는 넘기지 않는다. safeBlogInsert 가 본문 링크 중
-        //    **리드폼이 뜨는 현장**을 우선해 고른다 (§2-2 후속). 여기서 지정하면 그 규칙을 우회한다.
-      });
+        const res = await safeBlogInsert(admin, {
+          slug: pSlug,
+          title: pTitle,
+          content: body,
+          excerpt: pExcerpt,
+          category: 'apt',
+          tags: pTags,
+          source_type: 'auto',
+          cron_type: CRON_TYPE,
+          // ⚠️ hub_apt_slug 는 넘기지 않는다. safeBlogInsert 가 본문 링크 중
+          //    **리드폼이 뜨는 현장**을 우선해 고른다 (§2-2 후속).
+        });
 
-      if (res.success) {
-        created++;
-        titles.push(title);
+        if (res.success) {
+          created++;
+          titles.push(pTitle);
+        } else {
+          skippedReasons[res.reason ?? 'unknown'] = (skippedReasons[res.reason ?? 'unknown'] ?? 0) + 1;
+          // ⚠️ reason 만으로는 원인을 못 찾는다 — TITLE_TOO_LONG 이 duplicate_slug 로 뭉개진 전례가 있다.
+          skippedMessages.push(`${dst.sigungu}/${kind}: ${res.reason}${res.message ? ` (${res.message.slice(0, 120)})` : ''}`);
+        }
+      };
+
+      /* ── 본편 ── */
+      // ⚠️ 부분집합 게이트를 다시 계산한다. digest 의 rich 는 구 전체 기준이라
+      //    재건축을 빼고 나면 남은 것이 얇을 수 있다.
+      if (subsetPublishable(mainItems)) {
+        const movedMain = new Set<string>(mainItems.map((i) => i.slug).filter((s) => movedAll.has(s)));
+        const orderedMain = [...mainItems].sort(
+          (a, b) => Number(movedMain.has(b.slug)) - Number(movedMain.has(a.slug)),
+        );
+        const top3 = orderedMain.slice(0, 3).map((i) => i.raw_name || i.name).filter(Boolean).join(', ');
+        // ⚠️ 분리했으면 본편의 대표 유형은 재건축이 아니다. 남은 것으로 다시 정한다.
+        const kind = split ? '재개발' : typeLabel(d.dominant_type);
+        await emit(
+          'main',
+          `${dst.region}-${dst.sigungu}-정비사업-총정리`.replace(/\s+/g, '-').toLowerCase(),
+          `${dst.region} ${dst.sigungu} ${kind} 총정리 — ${top3} 등 ${mainItems.length}곳 (${ym})`,
+          mainItems,
+          `${dst.region} ${dst.sigungu} ${kind} ${mainItems.length}곳의 ${ym} 기준 진행 단계와 시공사·세대수를 구역별로 정리했습니다.`,
+          [dst.region, dst.sigungu, '재개발', '정비사업'],
+        );
       } else {
-        skippedReasons[res.reason ?? 'unknown'] = (skippedReasons[res.reason ?? 'unknown'] ?? 0) + 1;
+        skippedNotPublishable++;
+      }
+
+      /* ── 재건축 분리편 ── */
+      if (split && subsetPublishable(rebuildItems)) {
+        const movedRe = new Set<string>(rebuildItems.map((i) => i.slug).filter((s) => movedAll.has(s)));
+        const orderedRe = [...rebuildItems].sort(
+          (a, b) => Number(movedRe.has(b.slug)) - Number(movedRe.has(a.slug)),
+        );
+        // ⚠️ 제목형을 본편과 다르게 한다 (실측으로 통과 확인된 형태).
+        //    「총정리」→「단지 현황」 · 대표 3곳 → **2곳** · 항목의 `재건축` 접미어 제거.
+        //    접미어를 남기면 `A 재건축, B 재건축` 이 되어 본편과 토큰이 다시 겹친다.
+        //    ⚠️ `소규모` 를 같이 떼야 한다. 원 이름이 `신서면아파트 소규모재건축` 이라
+        //       `재건축` 만 떼면 `신서면아파트 소규모` 라는 꼬리가 제목에 남는다.
+        const top2 = orderedRe
+          .slice(0, 2)
+          .map((i) => (i.raw_name || i.name).replace(/\s*(소규모)?\s*재건축\s*$/, '').trim())
+          .filter(Boolean)
+          .join(', ');
+        await emit(
+          'rebuild',
+          // ⚠️ slug 도 본편과 달라야 한다. 같으면 URL 충돌이다.
+          `${dst.region}-${dst.sigungu}-재건축-현황`.replace(/\s+/g, '-').toLowerCase(),
+          `${dst.region} ${dst.sigungu} 재건축 단지 현황 — ${top2} 등 ${rebuildItems.length}곳 (${ym})`,
+          rebuildItems,
+          `${dst.region} ${dst.sigungu}에서 재건축이 진행 중인 단지 ${rebuildItems.length}곳의 ${ym} 기준 단계와 시공사·세대수를 정리했습니다.`,
+          [dst.region, dst.sigungu, '재건축', '정비사업'],
+        );
+      } else if (split) {
+        skippedReasons.rebuild_not_publishable = (skippedReasons.rebuild_not_publishable ?? 0) + 1;
       }
     }
 
@@ -429,6 +487,7 @@ async function handler(_req: NextRequest) {
         refreshed,
         skipped_not_publishable: skippedNotPublishable,
         thin_districts: thinDistricts,
+        skipped_messages: skippedMessages,
         skipped_reasons: skippedReasons,
         moved_sites_this_month: movedAll.size,
         titles,
