@@ -101,7 +101,7 @@ export default function RecentMoves({ items }: { items: RecentMove[] }) {
                 <div
                   style={{
                     fontSize: 14,
-                    fontWeight: 700,
+                    fontWeight: 600,
                     lineHeight: 1.3,
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
@@ -114,7 +114,7 @@ export default function RecentMoves({ items }: { items: RecentMove[] }) {
                   <span
                     style={{
                       fontSize: 11,
-                      fontWeight: 700,
+                      fontWeight: 500,
                       padding: '2px 6px',
                       borderRadius: 'var(--radius-pill, 999px)',
                       whiteSpace: 'nowrap',

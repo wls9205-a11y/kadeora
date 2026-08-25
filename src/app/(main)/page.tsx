@@ -242,7 +242,7 @@ export default async function HomePage() {
         <h1
           style={{
             fontSize: 22,
-            fontWeight: 500,
+            fontWeight: 600,
             letterSpacing: -0.4,
             lineHeight: 1.35,
             margin: '0 0 12px',
@@ -373,7 +373,7 @@ const chipStyle: React.CSSProperties = {
   padding: '5px 10px',
   borderRadius: 'var(--radius-pill)',
   fontSize: 12,
-  fontWeight: 600,
+  fontWeight: 500,
   background: 'var(--bg-surface)',
   border: '1px solid var(--border)',
   color: 'var(--text-secondary)',

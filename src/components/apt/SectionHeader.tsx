@@ -44,7 +44,7 @@ export default function SectionHeader({ eyebrow, title, id, meta }: SectionHeade
               letterSpacing: '.14em',
               textTransform: 'uppercase',
               color: 'var(--brand)',
-              fontWeight: 600,
+              fontWeight: 500,
               marginBottom: 3,
               whiteSpace: 'nowrap',
               overflow: 'hidden',
@@ -58,7 +58,7 @@ export default function SectionHeader({ eyebrow, title, id, meta }: SectionHeade
           id={id}
           style={{
             fontSize: 'var(--fs-xl)',
-            fontWeight: 700,
+            fontWeight: 600,
             letterSpacing: '-.02em',
             lineHeight: 1.25,
             margin: 0,

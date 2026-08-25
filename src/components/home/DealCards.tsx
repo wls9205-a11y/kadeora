@@ -51,7 +51,12 @@ function tagOf(row: DealSite): { label: string; bg: string; fg: string } | null 
     case '잔여세대':
       return { label: '잔여세대', bg: 'var(--accent-red-bg)', fg: 'var(--accent-red)' };
     case '분양중':
-      return { label: '분양중', bg: 'var(--accent-blue-bg)', fg: 'var(--accent-blue)' };
+      // ⚠️ fg 로 --accent-blue(#2563EB)를 쓰면 제 배경(10% 틴트) 위에서 대비가 4.49 다 —
+      //    4.5:1 하한에 0.01 모자란다. TY1-2 에서 이 배지 굵기를 800→500 으로 낮췄으니
+      //    얇아진 만큼 더 불리하다. 형제 토큰(주황 #9A3412 · 빨강 #991B1B)은 둘 다
+      //    «어두운 변형» 인데 accent-blue 만 밝은 브랜드색이라 혼자 어긋나 있었다.
+      //    --brand-dark(#1E40AF)로 맞추면 7.57 이고 세 배지의 농도도 나란해진다.
+      return { label: '분양중', bg: 'var(--accent-blue-bg)', fg: 'var(--brand-dark)' };
     default:
       return null;
   }
@@ -105,7 +110,7 @@ export default function DealCards({ items }: { items: DealSite[] }) {
                     top: 6,
                     left: 6,
                     fontSize: 10,
-                    fontWeight: 800,
+                    fontWeight: 500,
                     padding: '2px 7px',
                     borderRadius: 'var(--radius-pill)',
                     background: tag.bg,
@@ -122,7 +127,7 @@ export default function DealCards({ items }: { items: DealSite[] }) {
               <div
                 style={{
                   fontSize: 13,
-                  fontWeight: 700,
+                  fontWeight: 600,
                   lineHeight: 1.3,
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
@@ -133,7 +138,7 @@ export default function DealCards({ items }: { items: DealSite[] }) {
                 {row.name}
               </div>
               <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 3 }}>{where}</div>
-              <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginTop: 2 }}>
+              <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-secondary)', marginTop: 2 }}>
                 {priceLine(row)}
               </div>
             </div>

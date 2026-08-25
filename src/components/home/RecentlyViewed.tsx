@@ -27,7 +27,7 @@ export default function RecentlyViewed({ limit = 3 }: { limit?: number }) {
       <div
         style={{
           fontSize: 11,
-          fontWeight: 700,
+          fontWeight: 500,
           color: 'var(--text-tertiary)',
           letterSpacing: 0.3,
           padding: '0 3px',
@@ -46,7 +46,7 @@ export default function RecentlyViewed({ limit = 3 }: { limit?: number }) {
               padding: '5px 10px',
               borderRadius: 'var(--radius-pill)',
               fontSize: 12,
-              fontWeight: 600,
+              fontWeight: 500,
               background: 'var(--bg-surface)',
               border: '1px solid var(--border)',
               color: 'var(--text-secondary)',
