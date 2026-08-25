@@ -25,6 +25,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import sharp from 'sharp';
 import { verifyCronAuth } from '@/lib/cron-auth';
+import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { SITE_URL } from '@/lib/constants';
 
@@ -102,90 +103,97 @@ async function handler(req: NextRequest) {
   const { data: lockOk } = await (admin as any).rpc('acquire_cron_lock', {
     p_lock_key: LOCK_KEY, p_holder: holder, p_ttl_seconds: 300,
   });
+  // ⚠️ pg 락 스킵은 «실행이 아니다» — withCronLogging 바깥에서 끊어 cron_logs 에
+  //    빈 줄이 쌓이지 않게 한다.
   if (!lockOk) return NextResponse.json({ success: true, skipped: true, reason: 'pg_lock_held' });
 
   try {
-    const cols = 'id, slug, lifecycle_stage, satellite_image_url, hero_image_url';
+    // [후속] withCronLogging 을 건다. 이 크론은 지금까지 cron_logs 에 «한 줄도»
+    //   남기지 않아, 10분마다 도는데도 성공했는지 실패했는지 볼 방법이 없었다.
+    //   그동안은 check_card_build_progress() 로 DB 가 대신 감시했다.
+    //   throw 는 래퍼가 status='failed' + error_message 로 기록한다.
+    const result = await withCronLogging('apt-card-build', async () => {
+      const cols = 'id, slug, lifecycle_stage, satellite_image_url, hero_image_url';
 
-    // 1 순위 — 분양라인·정비·미분양. 3 종 전부 굽는다.
-    // ⚠️ lifecycle_stage 가 NULL 인 행을 «놓치지 않도록» or() 로 명시한다.
-    //    PostgREST 의 not.in 은 SQL 3 값 논리를 그대로 따라 NULL 을 조용히 떨어뜨린다.
-    //    실측 2026-08-25 — 그 NULL 이 48 건이고 전부 활성이라 목록에 뜬다.
-    //    빠뜨리면 그 48 건만 온디맨드 og-apt 호출로 남아 R1 이 그대로 재현된다.
-    const { data: tier1, error: e1 } = await (admin as any)
-      .from('apt_sites')
-      .select(cols)
-      .eq('is_active', true)
-      .is('hero_image_url', null)
-      .is('card_image_built_at', null)
-      .or(`lifecycle_stage.is.null,lifecycle_stage.not.in.(${GICHUK.join(',')})`)
-      .limit(BATCH_SIZE);
-    if (e1) throw new Error(`tier1_query_failed: ${e1.message}`);
-
-    // 2 순위 — 기축인데 위성도 실사도 없는 것. sq 만.
-    const remaining = Math.max(0, BATCH_SIZE - (tier1?.length || 0));
-    let tier2: any[] = [];
-    if (remaining > 0) {
-      const { data, error: e2 } = await (admin as any)
+      // 1 순위 — 분양라인·정비·미분양. 3 종 전부 굽는다.
+      // ⚠️ lifecycle_stage 가 NULL 인 행을 «놓치지 않도록» or() 로 명시한다.
+      //    PostgREST 의 not.in 은 SQL 3 값 논리를 그대로 따라 NULL 을 조용히 떨어뜨린다.
+      //    실측 2026-08-25 — 그 NULL 이 48 건이고 전부 활성이라 목록에 뜬다.
+      //    빠뜨리면 그 48 건만 온디맨드 og-apt 호출로 남아 R1 이 그대로 재현된다.
+      const { data: tier1, error: e1 } = await (admin as any)
         .from('apt_sites')
         .select(cols)
         .eq('is_active', true)
-        .in('lifecycle_stage', GICHUK)
-        .is('satellite_image_url', null)
         .is('hero_image_url', null)
         .is('card_image_built_at', null)
-        .limit(remaining);
-      if (e2) throw new Error(`tier2_query_failed: ${e2.message}`);
-      tier2 = data || [];
-    }
+        .or(`lifecycle_stage.is.null,lifecycle_stage.not.in.(${GICHUK.join(',')})`)
+        .limit(BATCH_SIZE);
+      if (e1) throw new Error(`tier1_query_failed: ${e1.message}`);
 
-    const jobs: { site: any; sizes: RatioKey[] }[] = [
-      // 1순위는 3규격 전부 — 목록(sq) · 데스크탑 히어로(hero) · 모바일 히어로(heroM).
-      ...(tier1 || []).map((s: any) => ({ site: s, sizes: ['1x1', '4x3', '21x9'] as RatioKey[] })),
-      // 2순위는 목록에만 쓰이므로 sq 만.
-      ...tier2.map((s: any) => ({ site: s, sizes: ['1x1'] as RatioKey[] })),
-    ];
+      // 2 순위 — 기축인데 위성도 실사도 없는 것. sq 만.
+      const remaining = Math.max(0, BATCH_SIZE - (tier1?.length || 0));
+      let tier2: any[] = [];
+      if (remaining > 0) {
+        const { data, error: e2 } = await (admin as any)
+          .from('apt_sites')
+          .select(cols)
+          .eq('is_active', true)
+          .in('lifecycle_stage', GICHUK)
+          .is('satellite_image_url', null)
+          .is('hero_image_url', null)
+          .is('card_image_built_at', null)
+          .limit(remaining);
+        if (e2) throw new Error(`tier2_query_failed: ${e2.message}`);
+        tier2 = data || [];
+      }
 
-    if (jobs.length === 0) {
-      return NextResponse.json({ success: true, processed: 0, message: 'nothing to build' });
-    }
+      const jobs: { site: any; sizes: RatioKey[] }[] = [
+        // 1순위는 3규격 전부 — 목록(sq) · 데스크탑 히어로(hero) · 모바일 히어로(heroM).
+        ...(tier1 || []).map((s: any) => ({ site: s, sizes: ['1x1', '4x3', '21x9'] as RatioKey[] })),
+        // 2순위는 목록에만 쓰이므로 sq 만.
+        ...tier2.map((s: any) => ({ site: s, sizes: ['1x1'] as RatioKey[] })),
+      ];
 
-    const stats = { processed: 0, uploaded: 0, failed: 0, tier1: tier1?.length || 0, tier2: tier2.length };
-    const failures: string[] = [];
+      if (jobs.length === 0) {
+        return { processed: 0, created: 0, failed: 0, metadata: { message: 'nothing to build' } };
+      }
 
-    for (const { site, sizes } of jobs) {
-      if (Date.now() - start > PREEMPT_MS) break;
-      stats.processed++;
+      const stats = { processed: 0, uploaded: 0, failed: 0, tier1: tier1?.length || 0, tier2: tier2.length };
+      const failures: string[] = [];
 
-      let sqUrl: string | null = null;
-      let ok = true;
+      for (const { site, sizes } of jobs) {
+        if (Date.now() - start > PREEMPT_MS) break;
+        stats.processed++;
 
-      for (const size of sizes) {
-        const png = await renderCard(site.slug, size);
-        if (!png) {
-          ok = false;
-          failures.push(`${site.id}:${size}:render`);
-          break;
-        }
+        let sqUrl: string | null = null;
+        let ok = true;
 
-        // og-apt 는 PNG 를 낸다. 저장은 webp 로 — 목록 썸네일이라 전송량이 그대로 비용이다.
-        let webp: Buffer;
-        try {
-          webp = await sharp(png, { failOn: 'none' }).webp({ quality: 88, effort: 4 }).toBuffer();
-        } catch (e: any) {
-          ok = false;
-          failures.push(`${site.id}:${size}:sharp:${e?.message || ''}`.slice(0, 120));
-          break;
-        }
+        for (const size of sizes) {
+          const png = await renderCard(site.slug, size);
+          if (!png) {
+            ok = false;
+            failures.push(`${site.id}:${size}:render`);
+            break;
+          }
 
-        const path = `card/${site.id}-${size}.webp`;
-        const { error: upErr } = await admin.storage
-          .from(STORAGE_BUCKET)
-          .upload(path, webp, {
-            contentType: 'image/webp',
-            upsert: true,
-            cacheControl: 'public, max-age=31536000, immutable',
-          });
+          // og-apt 는 PNG 를 낸다. 저장은 webp 로 — 목록 썸네일이라 전송량이 그대로 비용이다.
+          let webp: Buffer;
+          try {
+            webp = await sharp(png, { failOn: 'none' }).webp({ quality: 88, effort: 4 }).toBuffer();
+          } catch (e: any) {
+            ok = false;
+            failures.push(`${site.id}:${size}:sharp:${e?.message || ''}`.slice(0, 120));
+            break;
+          }
+
+          const path = `card/${site.id}-${size}.webp`;
+          const { error: upErr } = await admin.storage
+            .from(STORAGE_BUCKET)
+            .upload(path, webp, {
+              contentType: 'image/webp',
+              upsert: true,
+              cacheControl: 'public, max-age=31536000, immutable',
+    });
         if (upErr) {
           ok = false;
           failures.push(`${site.id}:${size}:upload:${upErr.message || ''}`.slice(0, 120));
@@ -212,14 +220,20 @@ async function handler(req: NextRequest) {
       stats.uploaded++;
     }
 
-    return NextResponse.json({
-      success: true,
-      ...stats,
-      sample_failures: failures.slice(0, 5),
-      elapsed_ms: Date.now() - start,
+    // processed = 손댄 현장 수, created = 실제로 URL 이 박힌 수.
+    //   둘이 갈리면 렌더·업로드가 실패하고 있다는 뜻이다.
+    return {
+      processed: stats.processed,
+      created: stats.uploaded,
+      failed: stats.failed,
+      metadata: {
+        ...stats,
+        sample_failures: failures.slice(0, 5),
+        elapsed_ms: Date.now() - start,
+      },
+    };
     });
-  } catch (err: any) {
-    return NextResponse.json({ success: false, error: err?.message || 'internal' }, { status: 500 });
+    return NextResponse.json(result);
   } finally {
     await (admin as any).rpc('release_cron_lock', { p_lock_key: LOCK_KEY, p_holder: holder });
   }
