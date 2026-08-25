@@ -13,6 +13,8 @@ import StockListRow from '@/components/stock/StockListRow';
 import { HomeAptRow, HomeBlogRow } from '@/components/home/HomeListRows';
 import SectionHeader from '@/components/apt/SectionHeader';
 import UniversalSearchBar from '@/components/search/UniversalSearchBar';
+import RecentMoves, { type RecentMove } from '@/components/home/RecentMoves';
+import LeadForm from '@/components/apt/LeadForm';
 import type { StockIssueScore, AptIssueScore } from '@/lib/issue/types';
 import type { HomeData } from '@/lib/home/contracts';
 
@@ -185,6 +187,60 @@ const QUICK_LINKS: { href: string; label: string }[] = [
   { href: '/feed',         label: '커뮤니티' },
 ];
 
+/** 홈이 다루는 지역. 부울경이 카더라의 실제 커버리지다. */
+const HOME_REGIONS = ['부산', '울산', '경남'];
+
+/**
+ * H1-2 — 최근 움직인 현장.
+ *
+ * ⚠️ `stage_updated_at` 으로 정렬하지 않는다. 대량 시드가 상단을 통째로 덮는다.
+ *    RPC 가 `apt_site_events` 를 본다.
+ * ⚠️ 정렬을 여기서 다시 하지 않는다 — RPC 가 ① stage 우선 ② line_rank 0(청약 라인)
+ *    ③ occurred_at DESC 로 이미 정렬해 준다. 받은 순서를 그대로 넘긴다.
+ */
+async function fetchRecentMoves(): Promise<RecentMove[]> {
+  try {
+    const sb = getSupabaseAdmin();
+    const { data, error } = await (sb as any).rpc('get_apt_recent_moves', {
+      p_region: HOME_REGIONS,
+      p_limit: 6,
+      p_days: 30,
+    });
+    if (error) throw error;
+    return (Array.isArray(data) ? data : []) as RecentMove[];
+  } catch (e) {
+    console.error('[home] recent moves failed:', e);
+    return [];
+  }
+}
+
+/**
+ * H1-4 — 지역 칩 건수.
+ *
+ * ⚠️ 건수를 하드코딩하지 않는다. 숫자가 굳으면 화면이 조용히 거짓말을 한다.
+ * ⚠️ `/apt/[id]` 의 8개짜리 `Promise.allSettled` 뭉치에 합치지 말 것 — 504 전례가 있다.
+ *    여기서도 홈 본체 fetch 와 **분리해서** 돌린다. 실패해도 칩만 빠진다.
+ */
+async function fetchRegionCounts(): Promise<{ region: string; n: number }[]> {
+  try {
+    const sb = getSupabaseAdmin();
+    const rows = await Promise.all(
+      HOME_REGIONS.map(async (region) => {
+        const { count } = await (sb as any)
+          .from('apt_sites')
+          .select('id', { count: 'exact', head: true })
+          .eq('is_active', true)
+          .eq('region', region);
+        return { region, n: count ?? 0 };
+      }),
+    );
+    return rows.filter((r) => r.n > 0);
+  } catch (e) {
+    console.error('[home] region counts failed:', e);
+    return [];
+  }
+}
+
 /**
  * v7-D1 — 라운지(피드) 최신 3줄. 텍스트만 — 홈에서 커뮤니티는 '살아 있다' 만 보이면 된다.
  * posts_safe 는 is_deleted·신고 처리를 이미 걸러 둔 읽기 뷰다.
@@ -205,9 +261,11 @@ async function fetchLounge(): Promise<{ id: string; title: string; comments_coun
 }
 
 export default async function HomePage() {
-  const [{ hero, domestic, overseas, apts, blogs }, lounge] = await Promise.all([
+  const [{ hero, domestic, overseas, apts, blogs }, lounge, moves, regionCounts] = await Promise.all([
     fetchHome(),
     fetchLounge(),
+    fetchRecentMoves(),
+    fetchRegionCounts(),
   ]);
 
   return (
@@ -232,7 +290,7 @@ export default async function HomePage() {
           borderRadius: 'var(--radius-md, 10px)',
           background: 'var(--bg-elevated, #132040)',
           border: '1px solid var(--border, #1E3258)',
-          color: 'var(--text-primary, #F2F5FA)',
+          color: 'var(--text-primary)',
         }}
       >
         <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--accent-orange)', letterSpacing: 0.4, marginBottom: 4 }}>
@@ -241,7 +299,7 @@ export default async function HomePage() {
         {/* h1 은 sr-only 가 아니라 실제로 보이는 제목이어야 한다 — 히어로 타이틀이 곧 h1. */}
         {hero ? (
           hero.href ? (
-            <Link href={hero.href} style={{ color: 'var(--text-primary, #F2F5FA)', textDecoration: 'none' }}>
+            <Link href={hero.href} style={{ color: 'var(--text-primary)', textDecoration: 'none' }}>
               <HeroBody hero={hero.hero} />
             </Link>
           ) : (
@@ -281,6 +339,45 @@ export default async function HomePage() {
         ))}
       </nav>
 
+      {/* H1-4 지역 칩 — 건수는 count 쿼리에서 온다. 하드코딩 금지. */}
+      {regionCounts.length > 0 && (
+        <nav aria-label="지역별 현장" style={{ display: 'flex', flexWrap: 'wrap', gap: 5, padding: '0 3px', marginBottom: 16 }}>
+          {regionCounts.map((r) => (
+            <Link
+              key={r.region}
+              href={`/apt?region=${encodeURIComponent(r.region)}`}
+              style={{
+                padding: '5px 10px',
+                borderRadius: 'var(--radius-pill, 999px)',
+                fontSize: 12,
+                fontWeight: 600,
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border)',
+                color: 'var(--text-secondary)',
+                textDecoration: 'none',
+              }}
+            >
+              {r.region} <span style={{ color: 'var(--text-tertiary)' }}>{r.n.toLocaleString('ko-KR')}</span>
+            </Link>
+          ))}
+        </nav>
+      )}
+
+      {/* H1-2 최근 움직인 현장.
+       * ⚠️ 「신규 등록」과 「단계 변경」을 라벨로 가른다 — 섞어서 「N곳이 움직였다」로
+       *    쓰면 거짓말이 된다(실측: 단계 변경 84 · 신규 등록 345). */}
+      {moves.length > 0 && (
+        <section style={{ marginBottom: 18 }}>
+          <SectionHeader
+            eyebrow="APT — 부산·울산·경남"
+            title="최근 움직인 현장"
+            id="home-moves"
+            meta={<Link href="/apt/redev" style={{ color: 'var(--text-tertiary)', textDecoration: 'none' }}>전체 →</Link>}
+          />
+          <RecentMoves items={moves} />
+        </section>
+      )}
+
       {/* 이슈 단지 TOP 5 */}
       <section style={{ marginBottom: 18 }}>
         <SectionHeader eyebrow="APT — 오늘의 단지" title="이슈 단지" id="home-apt" meta={<Link href="/apt" style={{ color: 'var(--text-tertiary)', textDecoration: 'none' }}>전체 →</Link>} />
@@ -291,49 +388,14 @@ export default async function HomePage() {
         )}
       </section>
 
-      {/* 이슈 종목 — 국내 TOP 5 */}
+      {/* H1-3 홈 리드폼.
+       * 현장 블록(최근 움직인 현장 · 이슈 단지) 바로 뒤에 둔다 — 방금 현장을 본 사람에게 묻는 자리다.
+       * ⚠️ siteSlug 없이 보낸다. `leads.site_slug` 는 nullable 이라 그대로 들어간다.
+       * ⚠️ 전송 경로는 상세와 완전히 같다 — LeadForm → NEXT_PUBLIC_LEAD_ENDPOINT →
+       *    Apps Script → 시트 + Supabase. `register-interest` 라우트가 아니다. */}
       <section style={{ marginBottom: 18 }}>
-        <SectionHeader eyebrow="DOMESTIC — 코스피·코스닥" title="국내 이슈 종목" id="home-domestic" meta={<Link href="/stock?tab=issue" style={{ color: 'var(--text-tertiary)', textDecoration: 'none' }}>전체 →</Link>} />
-        {domestic.length === 0 ? (
-          <Empty label="이슈 점수 데이터 준비 중" />
-        ) : (
-          domestic.map((s) => (
-            <StockListRow
-              key={s.symbol}
-              symbol={s.symbol}
-              name={s.name}
-              price={s.price}
-              changePct={s.change_pct}
-              score={s.score}
-              reasons={s.reasons}
-              warning={s.warning}
-              meta={s.sector}
-              spark={s.sparkline_5d}
-            />
-          ))
-        )}
+        <LeadForm variant="home" />
       </section>
-
-      {/* 이슈 종목 — 해외 TOP 3 */}
-      {overseas.length > 0 && (
-        <section style={{ marginBottom: 18 }}>
-          <SectionHeader eyebrow="OVERSEAS — 뉴욕증시" title="해외 이슈 종목" id="home-overseas" meta={<Link href="/stock?tab=issue" style={{ color: 'var(--text-tertiary)', textDecoration: 'none' }}>전체 →</Link>} />
-          {overseas.map((s) => (
-            <StockListRow
-              key={s.symbol}
-              symbol={s.symbol}
-              name={s.name}
-              price={s.price}
-              changePct={s.change_pct}
-              score={s.score}
-              reasons={s.reasons}
-              warning={s.warning}
-              meta={s.sector}
-              spark={s.sparkline_5d}
-            />
-          ))}
-        </section>
-      )}
 
       {/* 인기 블로그 3 */}
       <section style={{ marginBottom: 18 }}>
@@ -382,6 +444,53 @@ export default async function HomePage() {
           </div>
         </section>
       )}
+      {/* H1-4: 국내·해외 이슈 종목 — 삭제하지 않고 최하단으로.
+        * 홈의 1차 목적은 현장 페이지로 링크를 흘려보내는 것이다(현장 상세 CTR 2.4% vs 블로그 0.09%).
+        * 종목은 유지하되 아파트·블로그 뒤에 둔다. */}
+      {/* 이슈 종목 — 국내 TOP 5 */}
+      <section style={{ marginBottom: 18 }}>
+        <SectionHeader eyebrow="DOMESTIC — 코스피·코스닥" title="국내 이슈 종목" id="home-domestic" meta={<Link href="/stock?tab=issue" style={{ color: 'var(--text-tertiary)', textDecoration: 'none' }}>전체 →</Link>} />
+        {domestic.length === 0 ? (
+          <Empty label="이슈 점수 데이터 준비 중" />
+        ) : (
+          domestic.map((s) => (
+            <StockListRow
+              key={s.symbol}
+              symbol={s.symbol}
+              name={s.name}
+              price={s.price}
+              changePct={s.change_pct}
+              score={s.score}
+              reasons={s.reasons}
+              warning={s.warning}
+              meta={s.sector}
+              spark={s.sparkline_5d}
+            />
+          ))
+        )}
+      </section>
+
+      {/* 이슈 종목 — 해외 TOP 3 */}
+      {overseas.length > 0 && (
+        <section style={{ marginBottom: 18 }}>
+          <SectionHeader eyebrow="OVERSEAS — 뉴욕증시" title="해외 이슈 종목" id="home-overseas" meta={<Link href="/stock?tab=issue" style={{ color: 'var(--text-tertiary)', textDecoration: 'none' }}>전체 →</Link>} />
+          {overseas.map((s) => (
+            <StockListRow
+              key={s.symbol}
+              symbol={s.symbol}
+              name={s.name}
+              price={s.price}
+              changePct={s.change_pct}
+              score={s.score}
+              reasons={s.reasons}
+              warning={s.warning}
+              meta={s.sector}
+              spark={s.sparkline_5d}
+            />
+          ))}
+        </section>
+      )}
+
     </div>
   );
 }

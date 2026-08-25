@@ -15,7 +15,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { CSSProperties, ChangeEvent, FormEvent } from 'react';
 import SectionHeader from '@/components/apt/SectionHeader';
 import { SITE_URL } from '@/lib/constants';
-import { leadCopy } from '@/lib/apt/lead-copy';
+import { leadCopy, leadCopyForHome } from '@/lib/apt/lead-copy';
 import { trackLeadSubmit, trackLeadView } from '@/lib/apt/lead-track';
 
 const ENDPOINT = process.env.NEXT_PUBLIC_LEAD_ENDPOINT || '';
@@ -51,8 +51,13 @@ const INQUIRY_TYPE_SALES = '분양상담';
 const STANDARD_TYPES = ['59㎡', '74㎡', '84㎡', '101㎡', '114㎡ 이상'];
 
 type LeadFormProps = {
-  siteSlug: string; // apt_sites.slug — leads ↔ apt_sites 조인 키
-  siteName: string; // apt_sites.name
+  /**
+   * apt_sites.slug — leads ↔ apt_sites 조인 키.
+   * ⚠️ H1-3: 홈(variant='home')에는 현장이 없어 optional 이다. `leads.site_slug` 는 nullable 이라
+   *    빈 값으로 들어가도 된다(DB 담당 확인). 상세·블로그에서는 그대로 필수처럼 쓴다.
+   */
+  siteSlug?: string;
+  siteName?: string; // apt_sites.name
   /**
    * 현장별 공급 평형. 페이지가 house_type_info 에서 파생해 내려준다 (현장마다 다름).
    * v6-1: 다시 쓴다. 비어 있으면 STANDARD_TYPES 로 떨어진다 —
@@ -67,8 +72,12 @@ type LeadFormProps = {
    */
   region?: string | null;
   sigungu?: string | null;
-  /** 놓이는 자리에 따라 설명 한 줄만 바뀐다. 제목·버튼·동의 문구는 동일하다. */
-  variant?: 'detail' | 'blog';
+  /**
+   * 놓이는 자리에 따라 설명 한 줄만 바뀐다. 제목·버튼·동의 문구는 동일하다.
+   * 'home' 만 예외로 제목·본문 한 벌을 따로 쓴다 — 가리킬 현장이 없기 때문이다.
+   * ⚠️ 검증·전송 경로·재시도는 셋이 완전히 같다. 홈 분기만 얹는다.
+   */
+  variant?: 'detail' | 'blog' | 'home';
   /** ONESHOT §C-1: 단계별 문구. 공고 전에 '분양 정보 안내' 는 어색하다. */
   lifecycleStage?: string | null;
 };
@@ -109,6 +118,21 @@ type LeadPayload = {
   inquiryType: string;
   entryPath: string;
   sourceDomain: string;
+  /**
+   * H1-3: 홈 유입 구분.
+   *
+   * ⚠️ `leads` 에 **`source` 컬럼은 없다.** 실제 컬럼은 `channel` 이고
+   *    `fn_insert_lead(p_channel …)` 로 들어간다(기본값 'organic').
+   *
+   * ⚠️ 이 값이 실제로 저장되려면 **Apps Script 가 payload.channel 을
+   *    p_channel 로 넘겨야 한다.** 지금까지 channel 은 서버가 utm·유입 도메인에서
+   *    스스로 판정해 왔고(실측값 'organic' 4건 · 'utm:kakao' 1건), 프런트가 보낸 적이 없다.
+   *    Apps Script 가 무시하면 이 필드는 그냥 버려진다 — 코드는 실패하지 않는다.
+   *
+   * ⚠️ 그래서 홈 구분은 이 값에만 기대지 않는다. `entryPath` 가 이미 저장되는 값이고
+   *    홈에서는 항상 `'/'` 다. channel 이 안 붙어도 `entry_path='/'` 로 셀 수 있다.
+   */
+  channel?: string;
   company: string;
   query: Record<string, string>;
   /**
@@ -250,9 +274,19 @@ const honeypotStyle: CSSProperties = {
   pointerEvents: 'none',
 };
 
-export default function LeadForm({ siteSlug, siteName, typeOptions, region, sigungu, variant = 'detail', lifecycleStage }: LeadFormProps) {
+export default function LeadForm({
+  siteSlug = '',
+  siteName = '',
+  typeOptions,
+  region,
+  sigungu,
+  variant = 'detail',
+  lifecycleStage,
+}: LeadFormProps) {
+  const isHome = variant === 'home';
   // ONESHOT §C-1: 단계별 문구 한 벌. 세 화면(폼·액션바·레일)이 같은 말을 해야 한다.
-  const copy = leadCopy(lifecycleStage, siteName);
+  // H1-3: 홈은 단계가 없다 — stage 로 고르지 않고 홈 한 벌을 그대로 쓴다.
+  const copy = isHome ? leadCopyForHome() : leadCopy(lifecycleStage, siteName);
   const mountedAt = useRef(Date.now());
 
   // §5-3: 본문 폼이 **실제로 화면에 들어온 순간**만 노출로 센다.
@@ -277,8 +311,11 @@ export default function LeadForm({ siteSlug, siteName, typeOptions, region, sigu
     io.observe(el);
     return () => io.disconnect();
   }, [siteSlug, lifecycleStage]);
-  const draftKey = `${DRAFT_PREFIX}${siteSlug}`;
-  const pendingKey = `${PENDING_PREFIX}${siteSlug}`;
+  // ⚠️ 홈은 siteSlug 가 없다. 빈 문자열을 그대로 쓰면 키가 `kd_lead_draft:` 가 되어
+  //    나중에 다른 무슬러그 변형이 생기면 초안이 섞인다. 자리 이름으로 namespace 를 준다.
+  const storageKey = siteSlug || (isHome ? 'home' : 'unknown');
+  const draftKey = `${DRAFT_PREFIX}${storageKey}`;
+  const pendingKey = `${PENDING_PREFIX}${storageKey}`;
 
   /**
    * v6-2: 희망 타입 옵션. '현장마다 폼이 다르다' 의 구조적 원인이 여기였다.
@@ -477,6 +514,9 @@ export default function LeadForm({ siteSlug, siteName, typeOptions, region, sigu
       inquiryType: copy.inquiryType,
       entryPath: window.location.pathname,
       sourceDomain: window.location.hostname,
+      // ⚠️ 홈에서만 싣는다. 상세·블로그는 지금까지처럼 서버가 판정하게 둔다 —
+      //    기존 경로의 channel 판정을 덮어쓰면 utm 유입 분류가 깨진다.
+      ...(isHome ? { channel: 'home' } : {}),
       company,
       // 특정 키만 고르지 않는다 — 네이버 광고 파라미터·utm 해석은 서버 몫이고,
       // 새 파라미터가 생겨도 이 코드는 그대로 둘 수 있다.
@@ -576,7 +616,7 @@ export default function LeadForm({ siteSlug, siteName, typeOptions, region, sigu
       <div style={{ padding: '14px' }}>
         <SectionHeader eyebrow="CONTACT" title={copy.cta} />
         <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0 0 14px' }}>
-          {variant === 'blog'
+          {variant === 'blog' && siteName
             ? `이 글에서 다룬 ${siteName}의 분양 정보를 담당자가 안내해 드립니다.`
             : copy.lede}
         </p>

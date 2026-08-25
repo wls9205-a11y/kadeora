@@ -10,7 +10,7 @@
 
 import { PIPELINE_STAGES } from '@/lib/apt/lifecycle-label';
 
-export type LeadCopyKind = 'pre_notice' | 'offering' | 'existing';
+export type LeadCopyKind = 'pre_notice' | 'offering' | 'existing' | 'home';
 
 export interface LeadCopy {
   /** 상단 라벨 밴드 */
@@ -59,10 +59,27 @@ const COPY: Record<LeadCopyKind, Omit<LeadCopy, 'cta'> & { cta: (name: string) =
     lede: '이 단지는 입주가 끝난 단지입니다. 같은 지역에서 새로 나오는 분양 정보를 안내해 드립니다.',
     inquiryType: '분양상담',
   },
+  /**
+   * H1-3 홈 리드폼. **현장이 특정되지 않은 유일한 자리**다.
+   * 다른 셋은 「이 현장」을 전제로 말하지만 여기서는 그럴 수 없다 —
+   * 「이 구역」·「이 단지」 같은 지시어를 쓰면 홈에서 가리키는 대상이 없다.
+   */
+  home: {
+    band: '분양 정보 안내 · 무료',
+    cta: () => '관심 현장 분양 정보 받기',
+    lede: '모집공고·분양가·잔여세대가 확정되면 담당자가 먼저 알려드립니다.',
+    inquiryType: '분양상담',
+  },
 };
 
 export function leadCopy(stage: string | null | undefined, siteName = ''): LeadCopy {
   const kind = leadCopyKind(stage);
   const c = COPY[kind];
   return { band: c.band, cta: c.cta(siteName), lede: c.lede, inquiryType: c.inquiryType };
+}
+
+/** 홈 전용 한 벌. 단계가 없으므로 stage 로 고르지 않는다. */
+export function leadCopyForHome(): LeadCopy {
+  const c = COPY.home;
+  return { band: c.band, cta: c.cta(''), lede: c.lede, inquiryType: c.inquiryType };
 }
