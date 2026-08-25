@@ -829,8 +829,14 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
         //
         // ⚠️ s7-2 의 "생성 카드로 채우지 말 것" 은 여기서 철회된다.
         //    그때 걱정은 '사진이 있는 척'이었는데, og-apt 카드는 사진으로 오인되지 않는
-        //    생성 그래픽이고 목록 썸네일(get_apt_pipeline 의 thumb_mode
-        //    'card_before_satellite')과 **같은 이미지**다. 목록과 상세가 달라지지 않는다.
+        //    생성 그래픽이다.
+        //
+        // ⚠️ [패치 P1 §1] 위 문단에 있던 "목록 썸네일과 같은 이미지다" 는 이제 사실이 아니다.
+        //    세 RPC 에서 위성이 통째로 빠졌던 기간에 기축은 목록=카드 / 상세=위성으로
+        //    갈라져 있었다. 지금은 get_apt_subscription_hub·get_apt_archive 의
+        //    thumb_url 이 기축에서 위성을 먼저 보도록 되돌아왔고(get_apt_pipeline 은
+        //    기축을 애초에 포함하지 않는다), 그래서 목록과 상세가 다시 일치한다.
+        //    "같은 이미지" 라는 단정은 지웠다 — RPC 쪽 thumb_url 이 진짜 원본이다.
         const lcStage = (site as any)?.lifecycle_stage as string | null | undefined;
         const isExistingComplex = lcStage === 'post_move_in' || lcStage === 'landmark_active';
         const devHeroSrc = ((site as any)?.hero_image_url as string | undefined) || '';
@@ -842,9 +848,12 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
         const cardSrc = `${SITE_URL}/api/og-apt?slug=${encodeURIComponent(slug)}&ratio=4x3`;
         const cardSrcWide = `${SITE_URL}/api/og-apt?slug=${encodeURIComponent(slug)}&ratio=21x9`;
 
+        // [패치 P1 §4] 기축인데 위성이 «없는» 24 건이 'none' 으로 떨어져 있었다.
+        //   상세는 텍스트 폴백이라 견디지만 목록에는 카드가 나가서 두 화면이 또 갈린다.
+        //   RPC thumb_url 의 마지막 폴백도 카드이므로 여기서도 카드로 맞춘다.
         const heroKind: 'developer' | 'satellite' | 'card' | 'none' =
           devHeroSrc ? 'developer'
-          : isExistingComplex ? (satSrc ? 'satellite' : 'none')
+          : isExistingComplex ? (satSrc ? 'satellite' : 'card')
           : 'card';
 
         const heroSrc =
