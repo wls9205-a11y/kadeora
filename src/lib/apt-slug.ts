@@ -79,11 +79,19 @@ export function generateAptSlugStrict(name: string): string {
  *   남천2-3-삼익비치-재건축  ←→  남천2-3삼익비치-재건축
  * 처럼 같은 현장이 두 행으로 앉는다(2026-08-25 정리한 14쌍이 전부 이 형태).
  *
- * ⚠️ DB 쪽에서 쓰려면 `replace(slug,'-','')` 표현식 인덱스가 필요하다.
- *    인덱스 없이 전수 스캔하면 6,000행을 매번 훑는다.
+ * ── ⚠️ DB 인덱스와 **정확히 같은 규칙이어야 한다** ──
+ *    DB 담당이 만든 표현식 인덱스:
+ *      regexp_replace(lower(slug), '[^가-힣a-z0-9]', '', 'g')
+ *    한때 이 함수는 **하이픈만** 지웠는데, 병합에 쓴 키는 특수문자 전체 제거였다.
+ *    둘이 어긋나면 인덱스를 못 타거나(전수 스캔) 판정이 갈린다.
+ *    한쪽을 고치면 반드시 다른 쪽도 고칠 것.
+ *
+ * ⚠️ `generateAptSlug` 를 거치지 않는다. 그 함수는 공백을 하이픈으로 바꾸는데
+ *    어차피 다 지울 것이라 한 단계가 낭비고, 규칙이 두 겹이 되면 대조가 어렵다.
+ *    이름·slug 어느 쪽을 넣어도 같은 키가 나와야 한다.
  */
 export function slugDupKey(slugOrName: string): string {
-  return generateAptSlug(slugOrName).replace(/-/g, '');
+  return (slugOrName ?? '').toLowerCase().replace(/[^가-힣a-z0-9]/g, '');
 }
 
 /** 느슨한 규칙이 만들어 낸 값이 깨진 형태인가. 로그·점검용. */

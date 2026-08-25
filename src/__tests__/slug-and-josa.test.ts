@@ -44,6 +44,25 @@ describe('generateAptSlugStrict — 구분기호는 지운다, 하이픈으로 �
   });
 });
 
+describe('slugDupKey — DB 표현식 인덱스와 같은 규칙이어야 한다', () => {
+  // ⚠️ 인덱스: regexp_replace(lower(slug), '[^가-힣a-z0-9]', '', 'g')
+  //    한때 이 함수는 하이픈만 지웠는데 병합에 쓴 키는 특수문자 전체 제거였다.
+  //    어긋나면 인덱스를 못 타거나 판정이 갈린다.
+  it('특수문자를 전부 지운다 — 하이픈만이 아니다', () => {
+    expect(slugDupKey('남천2-3(삼익비치) 재건축')).toBe('남천23삼익비치재건축');
+    expect(slugDupKey('광안동 부흥·부광 소규모재건축')).toBe('광안동부흥부광소규모재건축');
+    expect(slugDupKey('구서동(금화,산호,삼산)')).toBe('구서동금화산호삼산');
+  });
+
+  it('대문자를 내린다', () => {
+    expect(slugDupKey('DMC SK VIEW 아이파크포레')).toBe('dmcskview아이파크포레');
+  });
+
+  it('이름과 slug 어느 쪽을 넣어도 같은 키가 나온다', () => {
+    expect(slugDupKey('남천2-3(삼익비치) 재건축')).toBe(slugDupKey('남천2-3-삼익비치-재건축'));
+  });
+});
+
 describe('slugDupKey — 하이픈 위치가 달라도 같은 현장으로 본다', () => {
   // 두 파이프라인(청약 동기화 · 정비사업 승격)의 차이가 하이픈뿐이라는 실측에 기댄다.
   const pairs: [string, string][] = [

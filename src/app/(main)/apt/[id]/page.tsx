@@ -24,6 +24,7 @@ import AptKeyMetrics from '@/components/apt/detail/AptKeyMetrics';
 import SiteDetailRail from '@/components/apt/SiteDetailRail';
 import LeadForm from '@/components/apt/LeadForm';
 import { isLeadEligible } from '@/lib/apt/lead-eligibility';
+import { canUseHeroImage } from '@/lib/apt/hero-license';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
 import { headers } from 'next/headers';
 import AptSiteSchema from '@/components/schema/AptSiteSchema';
@@ -99,7 +100,7 @@ async function resolveParam(rawId: string) {
 
 async function fetchUnifiedData(slug: string) {
   const sb = getSupabaseAdmin();
-  const APT_COLS = 'id,slug,name,display_name,site_type,region,sigungu,dong,address,description,seo_title,seo_description,builder,developer,total_units,supply_units,complex_units,built_year,move_in_date,status,is_active,content_score,interest_count,page_views,comment_count,images,satellite_image_url,og_image_url,key_features,faq_items,nearby_facilities,nearby_station,school_district,price_min,price_max,price_comparison,search_trend,latitude,longitude,source_ids,created_at,updated_at,og_cards,hero_image_url,hero_image_source,hero_image_credit,lifecycle_stage,review_score,review_count,faqs,data_quality_score,remaining_units,general_units,official_url,discount_pct,agent_kakao_url';
+  const APT_COLS = 'id,slug,name,display_name,site_type,region,sigungu,dong,address,description,seo_title,seo_description,builder,developer,total_units,supply_units,complex_units,built_year,move_in_date,status,is_active,content_score,interest_count,page_views,comment_count,images,satellite_image_url,og_image_url,key_features,faq_items,nearby_facilities,nearby_station,school_district,price_min,price_max,price_comparison,search_trend,latitude,longitude,source_ids,created_at,updated_at,og_cards,hero_image_url,hero_image_source,hero_image_credit,hero_license_tier,lifecycle_stage,review_score,review_count,faqs,data_quality_score,remaining_units,general_units,official_url,discount_pct,agent_kakao_url';
 
   // Phase 1: apt_sites — exact slug → multi-stage fuzzy fallback
   let { data: site } = await (sb as any).from('apt_sites').select(APT_COLS).eq('slug', slug).maybeSingle();
@@ -443,8 +444,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     //      적는 것보다 낫다
     // ⚠️ 21:9 는 카카오톡이 전제하는 1200×630 과 비율이 다르다. 잘림 여부는 실물
     //    확인이 필요하다. 그래서 1번 자리에 1200×630 생성 카드를 남겨 뒀다.
-    const heroUrl = (d.site as any)?.hero_image_url as string | undefined;
     const lcStageMeta = (d.site as any)?.lifecycle_stage as string | null | undefined;
+    // ⚠️ OG 에도 같은 게이트를 건다. 광고 랜딩 링크가 네이버·카카오에서 미리보기로 펼쳐질 때
+    //    라이선스 미확인 조감도가 그 자리에 뜨면 화면에서 뺀 의미가 없다.
+    const heroUrl = canUseHeroImage({
+      tier: (d.site as any)?.hero_license_tier,
+      lifecycleStage: lcStageMeta,
+    })
+      ? ((d.site as any)?.hero_image_url as string | undefined)
+      : undefined;
     const isGichukMeta = lcStageMeta === 'post_move_in' || lcStageMeta === 'landmark_active';
     const satUrlMeta = d.site?.satellite_image_url || null;
     const cardWideUrl = `${SITE_URL}/api/og-apt?slug=${encodeURIComponent(resolved.slug)}&ratio=21x9&card=1`;
@@ -621,12 +629,18 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
   //   3순위 카드까지 넣어 «항상 무언가는 있게» 한다(이전엔 null 이 될 수 있었다).
   const isGichukLd = (site as any)?.lifecycle_stage === 'post_move_in'
     || (site as any)?.lifecycle_stage === 'landmark_active';
+  // ⚠️ JSON-LD 도 같은 게이트를 탄다. 구조화 데이터로 내보낸 이미지가 검색 결과에 뜨면
+  //    화면에서 뺀 것이 그 자리에 다시 나타난다.
+  const ldHeroOk = canUseHeroImage({
+    tier: (site as any)?.hero_license_tier,
+    lifecycleStage: (site as any)?.lifecycle_stage,
+  });
   const heroPhotoUrl: string | null =
-    (site as any)?.hero_image_url
+    (ldHeroOk ? (site as any)?.hero_image_url : null)
     || (isGichukLd ? site?.satellite_image_url : null)
     || (site?.slug ? `${SITE_URL}/api/og-apt?slug=${encodeURIComponent(site.slug)}&ratio=21x9&card=1` : null)
     || null;
-  const developerHeroUrl: string | null = (site as any)?.hero_image_url || null;
+  const developerHeroUrl: string | null = (ldHeroOk ? (site as any)?.hero_image_url : null) || null;
 
 
   // ── 마스터 §2 · 광고 랜딩 분기 ──
@@ -872,7 +886,16 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
         //    "같은 이미지" 라는 단정은 지웠다 — RPC 쪽 thumb_url 이 진짜 원본이다.
         const lcStage = (site as any)?.lifecycle_stage as string | null | undefined;
         const isExistingComplex = lcStage === 'post_move_in' || lcStage === 'landmark_active';
-        const devHeroSrc = ((site as any)?.hero_image_url as string | undefined) || '';
+        // ⚠️ 라이선스 미확인(review·판정 전) 이미지는 **리드폼이 뜨는 현장에서 쓰지 않는다.**
+        //    별도 광고 랜딩 라우트가 없어 이 페이지가 곧 광고 랜딩이다 (lib/apt/hero-license.ts).
+        //    빠져도 빈 화면이 되지 않는다 — 아래 체인이 카드로 떨어뜨리고 카드는 3규격이 있다.
+        const heroLicenseOk = canUseHeroImage({
+          tier: (site as any)?.hero_license_tier,
+          lifecycleStage: lcStage,
+        });
+        const devHeroSrc = heroLicenseOk
+          ? ((site as any)?.hero_image_url as string | undefined) || ''
+          : '';
         const satSrc = site?.satellite_image_url || '';
         // ── ADDENDUM §A-2 · 비율별 레이아웃 ──
         // ⚠️ 정사각(card=1)을 가로 히어로에 그대로 쓰면 좌우가 텅 빈다 — 실측으로 확인된 문제다.
