@@ -1,4 +1,40 @@
-export const maxDuration = 120;
+// [P5 후속] 완전 순차로 바꾸면서 120 → 300 으로 올렸다.
+//   36지역 × 8개월 = 288회. 요청 간 250ms + 왕복 250ms 가정이면 약 144초라
+//   120 에는 들어가지 않는다. 주간 1회(월 09:00)라 여러 회차로 나눌 수도 없다.
+//   ⚠️ vercel.json 의 개별 오버라이드도 300 으로 함께 올렸다 — 캐치올이
+//      라우트 export 를 덮으므로 한쪽만 고치면 효과가 없다(Rule #18).
+export const maxDuration = 300;
+
+/** 요청 간 최소 간격. data.go.kr 이 동시 호출에 429 로 답한다. */
+const REQUEST_GAP_MS = 250;
+
+/** 429 재시도 상한과 기준 대기(지수 백오프: 1s → 2s → 4s). */
+const MAX_RETRY = 3;
+const BACKOFF_BASE_MS = 1000;
+
+/** maxDuration 300 에 여유를 남기고 끊는다. */
+const PREEMPT_MS = 270_000;
+
+const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
+
+/**
+ * 429·5xx 를 지수 백오프로 재시도한다.
+ * ⚠️ 4xx(429 제외)는 재시도하지 않는다 — 키·파라미터 문제라 기다려도 같다.
+ */
+async function fetchWithBackoff(url: string, label: string): Promise<Response> {
+  let lastStatus = 0;
+  for (let attempt = 0; attempt <= MAX_RETRY; attempt++) {
+    const res = await fetch(url);
+    if (res.ok) return res;
+    lastStatus = res.status;
+    const retriable = res.status === 429 || res.status >= 500;
+    if (!retriable || attempt === MAX_RETRY) return res;
+    const wait = BACKOFF_BASE_MS * Math.pow(2, attempt);
+    console.warn(`[crawl-apt-resale] ${label} HTTP ${res.status} → ${wait}ms 후 재시도 (${attempt + 1}/${MAX_RETRY})`);
+    await sleep(wait);
+  }
+  throw new Error(`unreachable (last ${lastStatus})`);
+}
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { NextRequest, NextResponse } from 'next/server';
 import { withCronLogging } from '@/lib/cron-logger';
@@ -75,13 +111,16 @@ export async function GET(req: NextRequest) {
 
     const entries = Object.entries(LAWD_CODES);
     let totalInserted = 0;
+    const startedAt = Date.now();
 
     async function fetchOne(label: string, lawdCd: string): Promise<number> {
       const [regionPart, sigunguPart] = label.split(' ');
       let count = 0;
-      for (const ym of months) {
+      for (const [i, ym] of months.entries()) {
+        // 첫 요청은 바로, 이후에는 간격을 둔다.
+        if (i > 0 || count > 0 || results.length > 0) await sleep(REQUEST_GAP_MS);
         const url = `https://apis.data.go.kr/1613000/RTMSDataSvcSilvTrade/getRTMSDataSvcSilvTrade?serviceKey=${encodeURIComponent(apiKey!)}&LAWD_CD=${lawdCd}&DEAL_YMD=${ym}&pageNo=1&numOfRows=1000`;
-        const res = await fetch(url);
+        const res = await fetchWithBackoff(url, `${label} ${ym}`);
         if (!res.ok) throw new Error(`data.go.kr ${label} ${ym} HTTP ${res.status}`);
         const xml = await res.text();
         assertApiOk(xml, label, ym);
@@ -110,10 +149,25 @@ export async function GET(req: NextRequest) {
       return count;
     }
 
-    // Rule #49: 동시 호출 수를 늘리지 않는다 (allSettled 확장은 504 이력 있음)
-    const results = await Promise.allSettled(entries.map(([name, code]) => fetchOne(name, code)));
+    // ⚠️ Promise.allSettled 로 36지역을 «동시에» 때리던 것을 순차로 바꿨다.
+    //    지역마다 월 루프가 도니 어느 순간에도 36개 요청이 떠 있었고,
+    //    data.go.kr 이 429 로 답해 apt_resale_rights 가 0건이었다.
+    //    Rule #49 는 동시 호출을 늘리지 말라는 것이고, 줄이는 방향은 그 취지에 맞는다.
+    const results: PromiseSettledResult<number>[] = [];
+    let preempted = false;
+    for (const [name, code] of entries) {
+      if (Date.now() - startedAt > PREEMPT_MS) { preempted = true; break; }
+      try {
+        results.push({ status: 'fulfilled', value: await fetchOne(name, code) });
+      } catch (e) {
+        results.push({ status: 'rejected', reason: e });
+      }
+    }
     let failed = 0;
     const errors: string[] = [];
+    if (preempted) {
+      errors.push(`시간 초과로 ${entries.length - results.length}개 지역을 건너뜀`);
+    }
     for (const r of results) {
       if (r.status === 'fulfilled') {
         totalInserted += r.value;
@@ -136,7 +190,11 @@ export async function GET(req: NextRequest) {
       failed,
       metadata: {
         api_name: 'data_go_kr',
-        api_calls: entries.length * months.length,
+        api_calls: results.length * months.length,
+        regions_done: results.length,
+        regions_total: entries.length,
+        preempted,
+        elapsed_ms: Date.now() - startedAt,
         months,
         ...(errors.length ? { sample_errors: errors } : {}),
       },
