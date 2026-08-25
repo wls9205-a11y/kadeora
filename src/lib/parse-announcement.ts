@@ -326,18 +326,19 @@ export function buildUpdateDict(parsed: Record<string, any>, totSupply?: number)
   const ud: Record<string, any> = { announcement_parsed_at: new Date().toISOString() };
   const fields = [
     'general_supply_total','special_supply_total','supply_breakdown','special_supply_detail',
-    // ⚠️ `contact_tel` 은 «일부러 뺐다». apt_subscriptions 에 그 컬럼이 없다.
+    // ⚠️ `contact_tel` 은 «없는 컬럼 하나가 update 전체를 죽인다» 는 사례로 남았다.
     //
     //   2026-04-28 부터 apt-parse-announcement 가 133건 전부 실패했는데, 원인이
     //   HTML 구조 변경이 아니라 이것이었다. 청약홈이 그 무렵 `tel:` 링크를 넣기
     //   시작하면서 파서가 contact_tel 을 «새로» 뽑기 시작했고, PostgREST 는 없는
     //   컬럼이 하나라도 섞이면 update 전체를 PGRST204 로 거절한다.
     //   그래서 announcement_parsed_at 을 포함한 «나머지 15~17개 필드가 통째로»
-    //   저장되지 않았다. 파서 자체는 지금도 정상이다(표본 3건 실측 확인).
+    //   저장되지 않았다. 파서 자체는 그동안에도 정상이었다(표본 3건 실측 확인).
     //
-    //   파싱은 계속 한다(data.contact_tel 은 살아 있다) — 저장 대상에서만 뺀다.
-    //   컬럼이 생기면 이 줄에 다시 넣을 것.
-    'supply_price_info','move_in_month','developer_nm','constructor_nm','brand_name',
+    //   2026-08-25 apt_subscriptions.contact_tel(text, nullable) 이 추가돼 복구했다.
+    //   이 목록에 필드를 «새로 넣을 때는 컬럼 실재를 먼저 확인할 것» — 여기 한 줄이
+    //   맞지 않으면 이 함수가 만드는 update 가 통째로 실패한다.
+    'supply_price_info','move_in_month','developer_nm','constructor_nm','brand_name','contact_tel',
     'announcement_pdf_url','total_households','total_dong_count','max_floor','min_floor',
     'parking_total','parking_ratio','heating_type','structure_type','exterior_finish',
     'land_area','building_area','floor_area_ratio','building_coverage',
