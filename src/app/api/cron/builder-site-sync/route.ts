@@ -23,7 +23,15 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
 import { withCronAuthFlex } from '@/lib/cron-auth';
 import { BUILDER_SITES, type BuilderSite } from '@/lib/builder-sites/registry';
-import { parseAddress, parseBuilderList, type BuilderSiteCard } from '@/lib/builder-sites/parse';
+import {
+  parseAddress,
+  parseBuilderList,
+  parsePlanTable,
+  parseDataAttrList,
+  parseMobileCardList,
+  parseAjaxCardList,
+  type BuilderSiteCard,
+} from '@/lib/builder-sites/parse';
 import {
   measureFirstUsable,
   pickHeroCandidates,
@@ -44,15 +52,66 @@ const MAX_PAGES = 12;
 const UA = 'Mozilla/5.0 (compatible; kadeora-bot)';
 const norm = (v: string) => v.replace(/\s+/g, '').replace(/[()（）［］[\]]/g, '').toLowerCase();
 
+/**
+ * 프로파일별 파서 분기.
+ *
+ * ⚠️ 여기서 안 갈라면 새 사이트가 **전부 0건**이 된다. 구조가 넷 다 다르다 —
+ *    라벨 표(하늘채) · 단일 표(푸르지오) · data 속성(롯데) · 모바일 카드(더샵) · AJAX(위브).
+ *    "수집했다" 고 기록하면서 아무것도 안 넣는 상태를 만들지 않는다.
+ */
+function parseByProfile(site: BuilderSite, html: string): BuilderSiteCard[] {
+  switch (site.profile) {
+    case 'plan-table': return parsePlanTable(html);
+    case 'data-attr': return parseDataAttrList(html, site.listUrl);
+    case 'mobile-card': return parseMobileCardList(html);
+    case 'ajax-card': return parseAjaxCardList(html);
+    case 'label-table':
+    default: return parseBuilderList(html, site.listUrl);
+  }
+}
+
+/**
+ * 조감도 저장. 목록 이미지 경로와 상세 이미지 경로가 **같은 규칙**을 쓰게 한 곳에 모은다.
+ * ⚠️ credit 은 시공사명만. 화면에 그대로 나가므로 URL·수집일·경로를 넣지 않는다.
+ */
+async function saveHero(slug: string, url: string, builder: string): Promise<boolean> {
+  const res = await fetch(
+    new URL('/api/admin/apt-cover', process.env.NEXT_PUBLIC_SITE_URL ?? 'https://kadeora.app').toString(),
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.CRON_SECRET ?? ''}`,
+      },
+      body: JSON.stringify({ slug, url, credit: builder }),
+      signal: AbortSignal.timeout(60_000),
+    },
+  ).catch(() => null);
+
+  if (!res?.ok) {
+    console.warn(`[builder-sync] 조감도 저장 실패 ${slug}: ${res?.status ?? 'network'}`);
+    return false;
+  }
+  return true;
+}
+
 /** 누적 페이징: currentPage 를 올리며 카드가 늘지 않을 때까지. */
 async function fetchAllCards(site: BuilderSite): Promise<BuilderSiteCard[]> {
   let best: BuilderSiteCard[] = [];
   for (let page = 1; page <= MAX_PAGES; page++) {
     const url = site.pageParam ? `${site.listUrl}?${site.pageParam}=${page}` : site.listUrl;
     try {
-      const res = await fetch(url, { headers: { 'User-Agent': UA }, signal: AbortSignal.timeout(20_000) });
+      const res = await fetch(url, {
+        method: site.method ?? 'GET',
+        headers: {
+          'User-Agent': UA,
+          // AJAX 목록은 XHR 헤더가 없으면 빈 껍데기를 준다.
+          ...(site.method === 'POST' ? { 'X-Requested-With': 'XMLHttpRequest' } : {}),
+        },
+        signal: AbortSignal.timeout(30_000),
+      });
       if (!res.ok) break;
-      const cards = parseBuilderList(await res.text(), site.listUrl);
+      const cards = parseByProfile(site, await res.text());
       // 누적이라 이전보다 늘지 않으면 끝이다.
       if (cards.length <= best.length) {
         best = cards.length > best.length ? cards : best;
@@ -127,11 +186,17 @@ async function handler(_req: NextRequest) {
     let fieldUpdates = 0;
     let imageUpdates = 0;
     let skippedNoMatch = 0;
+    // ⚠️ 못 한 것을 세어 응답에 남긴다. "수집했다" 는 숫자만 보면 왜 0건인지 알 수 없다.
+    let skippedUnits = 0;
+    const skippedImages: Record<string, number> = {};
+    const perSite: Record<string, number> = {};
     const imageLog: Array<{ slug: string; url: string; size: string }> = [];
 
     for (const site of BUILDER_SITES) {
       const cards = await fetchAllCards(site);
       scanned += cards.length;
+      // 사이트별 파싱 건수 — 프로파일이 안 맞으면 여기서 0 이 보인다.
+      perSite[site.key] = cards.length;
 
       for (const card of cards) {
         if (fieldUpdates >= FIELD_CAP && imageUpdates >= IMAGE_CAP) break;
@@ -159,8 +224,16 @@ async function handler(_req: NextRequest) {
 
           // 비어 있을 때만. 시공사가 자기 사이트에 적은 숫자라 A등급이다.
           if (row.builder == null && site.builder) patch.builder = site.builder;
-          if (row.supply_units == null && card.units.supply != null) patch.supply_units = card.units.supply;
-          if (row.complex_units == null && card.units.complex != null) patch.complex_units = card.units.complex;
+          // ⚠️ 세대수를 쓰지 않기로 한 소스는 건너뛴다 (registry.noUnitsReason).
+          //    두산위브는 `<span>세대수</span>2,088 세대` 로 라벨이 하나뿐이라
+          //    단지 전체인지 공급분인지 알 수 없다. 잘못 넣으면 §3-2 가 풀려는
+          //    「176세대 단지로 보이던」 문제를 그대로 재생산한다.
+          if (!site.noUnitsReason) {
+            if (row.supply_units == null && card.units.supply != null) patch.supply_units = card.units.supply;
+            if (row.complex_units == null && card.units.complex != null) patch.complex_units = card.units.complex;
+          } else {
+            skippedUnits++;
+          }
 
           if (Object.keys(patch).length > 0) {
             // ⚠️ lifecycle_stage 는 넣지 않는다. 단계는 DART·어드민만 정한다.
@@ -176,6 +249,28 @@ async function handler(_req: NextRequest) {
         /* ── 조감도 (제약 5가지) ── */
         // ③ 이미 있으면 덮어쓰지 않는다.
         if (imageUpdates >= IMAGE_CAP || row.hero_image_url) continue;
+
+        // ⚠️ 이미지를 못 쓰는 소스는 여기서 끊는다. 이유는 registry 에 적혀 있다.
+        //    빈 손으로 상세를 열어 "수집했다" 고 기록하지 않는다.
+        //      푸르지오  분양계획 표에 이미지가 없다
+        //      더샵      robots 가 /upload/ 를 막는데 이미지가 그 아래다 — 우회하지 않는다
+        //      위브      base64 인라인이라 URL 이 없다
+        if (site.noImageReason) {
+          skippedImages[site.noImageReason] = (skippedImages[site.noImageReason] ?? 0) + 1;
+          continue;
+        }
+
+        // 목록 이미지가 **실제 URL** 인 소스(롯데캐슬 data-attr)는 상세를 열 필요가 없다.
+        // 크기 검증(1200px 미만 제외)은 measureFirstUsable 이 그대로 한다.
+        if (site.profile === 'data-attr' && card.imageUrl) {
+          const direct = await measureFirstUsable([card.imageUrl]);
+          if (!direct) continue;
+          const ok = await saveHero(row.slug, direct.url, site.builder);
+          if (!ok) continue;
+          imageUpdates++;
+          imageLog.push({ slug: row.slug, url: direct.url, size: `${direct.width}x${direct.height}` });
+          continue;
+        }
 
         // ① 목록 썸네일이 아니라 상세의 큰 이미지. 상세가 없으면 전용 홈페이지.
         let pageUrl: string | null = null;
@@ -249,6 +344,11 @@ async function handler(_req: NextRequest) {
         image_updates: imageUpdates,
         field_cap: FIELD_CAP,
         image_cap: IMAGE_CAP,
+        // 사이트별 파싱 건수. 어느 프로파일이 0건인지 여기서 바로 보인다.
+        per_site: perSite,
+        // 못 한 것들 — 이유별로 센다. 0건일 때 "왜" 를 응답만 보고 알 수 있어야 한다.
+        skipped_units: skippedUnits,
+        skipped_images: skippedImages,
         images: imageLog,
       },
     };

@@ -28,13 +28,28 @@ export interface BuilderSite {
   /** 누적 페이징 쿼리 키. 없으면 한 장만 받는다. */
   pageParam?: string;
   /**
-   * 파싱 프로파일.
-   *   'label-table' — 카드 안에 <th>라벨</th><td>값</td> 표가 있는 형태 (하늘채 실측)
+   * 파싱 프로파일. 네 사이트가 구조가 전부 달라 하나로 안 된다 (2026-08-25 실측).
+   *   'label-table' 카드 안 <th>라벨</th><td>값</td> 표        (하늘채)
+   *   'plan-table'  단일 <table> 「분양계획 한눈에 보기」      (푸르지오)
+   *   'data-attr'   카드의 data-* 속성에 세대수 4축            (롯데캐슬)
+   *   'mobile-card' 모바일 목록의 <strong>라벨</strong><em>값</em> (더샵)
+   *   'ajax-card'   POST 로 받는 목록 조각                     (두산위브)
    * 새 사이트가 다른 구조면 프로파일을 추가하고 parse.ts 에서 분기한다.
    */
-  profile: 'label-table';
+  profile: 'label-table' | 'plan-table' | 'data-attr' | 'mobile-card' | 'ajax-card';
   /** 목록에서 확인한 단계. 사이트마다 분양/공사/입주 목록이 갈린다. */
   kind: 'sale' | 'construction' | 'moving';
+  /** POST 로 받아야 하는 목록(ajax-card). 기본은 GET. */
+  method?: 'GET' | 'POST';
+  /**
+   * ⚠️ 이 소스에서 **이미지를 쓰지 않는 이유**. 값이 있으면 조감도 수집을 건너뛴다.
+   *    빈 결과를 "수집했다" 고 기록하지 않기 위해 이유를 코드에 남긴다.
+   */
+  noImageReason?: string;
+  /**
+   * ⚠️ 이 소스에서 **세대수를 쓰지 않는 이유**. 값이 있으면 세대수를 저장하지 않는다.
+   */
+  noUnitsReason?: string;
 }
 
 /**
@@ -68,6 +83,63 @@ export const BUILDER_SITES: BuilderSite[] = [
     pageParam: 'currentPage',
     profile: 'label-table',
     kind: 'moving',
+  },
+
+  /* ── ADDENDUM §3-2 (2026-08-25 구조 실측 완료) ──
+   *
+   * ⚠️ 지시서가 준 경로 중 **3개가 틀렸다.** 아래가 실측 확정본이다.
+   *      thesharp.co.kr/sales/calendar.aspx  → 404 (에러 페이지로 리다이렉트)
+   *      weveapt.co.kr 루트                   → 목록이 AJAX 라 정적 HTML 이 비어 있다
+   *      prugio.com 은 /sale/plan.aspx 가 「분양계획 한눈에 보기」다
+   *
+   * robots 실측:
+   *   prugio.com        Disallow /construction/ /membership/ /myprugio/ → /sale/ 은 허용
+   *   thesharp.co.kr    Disallow /admin_sharp/ /upload/                 → ⚠️ 이미지가 /upload/ 다
+   *   lottecastle.co.kr Allow: /
+   *   weveapt.co.kr     Allow: /
+   */
+  {
+    key: 'daewoo-prugio-plan',
+    builder: '대우건설',
+    brand: '푸르지오',
+    listUrl: 'https://www.prugio.com/sale/plan.aspx',
+    profile: 'plan-table',
+    kind: 'sale',
+    // 표에 이미지가 없다. 각 단지 분양홈페이지는 외부 도메인이라 A등급이 아니다.
+    noImageReason: 'plan_table_has_no_images',
+  },
+  {
+    key: 'lotte-castle-lots',
+    builder: '롯데건설',
+    brand: '롯데캐슬',
+    listUrl: 'https://www.lottecastle.co.kr/aptInfo/lots/list.do',
+    profile: 'data-attr',
+    kind: 'sale',
+    // 네 사이트 중 유일하게 목록 이미지가 실제 URL 이다.
+  },
+  {
+    key: 'posco-thesharp-mobile',
+    builder: '포스코이앤씨',
+    brand: '더샵',
+    // ⚠️ 모바일이다. PC 목록은 세대수를 한 축만 준다 — 모바일이 `총 A세대 (일반분양 B세대)` 를 준다.
+    listUrl: 'https://m.thesharp.co.kr/pages/plan/sales.aspx',
+    profile: 'mobile-card',
+    kind: 'sale',
+    // robots 가 /upload/ 를 막는데 이미지 경로가 /upload/prj/… 다. 우회하지 않는다.
+    noImageReason: 'robots_disallow_upload',
+  },
+  {
+    key: 'doosan-weve-complex',
+    builder: '두산건설',
+    brand: '위브',
+    listUrl: 'https://weveapt.co.kr/lttot/lttotCompl/lttotComplexListAjax.do',
+    profile: 'ajax-card',
+    kind: 'sale',
+    method: 'POST',
+    // 목록 이미지가 data:image/jpg;base64 인라인이다. URL 이 없고 응답이 17.5MB 다.
+    noImageReason: 'base64_inline_no_url',
+    // `<span>세대수</span>2,088 세대` — 라벨이 하나뿐이라 전체/공급 판단 근거가 없다.
+    noUnitsReason: 'single_axis_label_ambiguous',
   },
 ];
 
