@@ -32,7 +32,7 @@ NAVER_SA_CUSTOMER_ID=...
 | `--cats A_분양중,B_분양예정,C_미분양` | 단계 선택. 기축 없이 먼저 돌려볼 때 유용 |
 | `--max-alias 0\|2\|4` | 현장당 별칭 개수. 규모를 좌우한다 (기본 4) |
 | `--bid <원>` | 그룹 기본 입찰가 (기본 80 — 임시값. `bids` 로 실측 후 정할 것) |
-| `--gid <csv>` | 그룹ID 매핑 파일 |
+| `--gid <csv>` | 그룹ID 매핑 파일. **`광고그룹명,grp-...` 2열**짜리 `gid.csv` 다 (`groups.csv` 를 넘기면 0개 로드된다) |
 | `--live` | `apply` 에서만. 없으면 아무것도 만들지 않는다 |
 
 ### 별칭 개수별 전국 규모
@@ -53,8 +53,12 @@ NAVER_SA_CUSTOMER_ID=...
 python sa.py plan  --only 부울경                    # DB만 읽음. 파일 안 만듦. 가장 안전한 첫 실행
 python sa.py bids  --only 부울경                    # 입찰가 실측 → bids.csv. 기축 만들기 전 필수
 python sa.py build --only 부울경 --max-alias 2      # out/ + groups.csv (자리표시 GID_<그룹명>)
-#   → groups.csv 이름대로 네이버에 그룹 생성 → 마지막 열에 그룹ID 채움
-python sa.py build --only 부울경 --max-alias 2 --gid groups.csv   # 완성본
+#   → groups.csv 이름대로 네이버에 그룹 생성
+#   → 「광고그룹명,grp-...」 2열짜리 gid.csv 를 «따로» 만든다
+#     ⚠️ groups.csv 를 그대로 --gid 에 넘기지 말 것. 로더가 2번째 열에서 grp- 를 찾는데
+#        거기엔 키워드 수가 들어 있어 0개가 로드된다 (지금은 그 경우 실행이 멈춘다)
+python sa.py build --only 부울경 --max-alias 2 --gid gid.csv      # 완성본
+#   → 완성본에 GID_ 로 시작하는 행이 0건인지 반드시 확인하고 올린다
 python sa.py verify                                 # 등록 후 연결 URL 전수 대조
 ```
 

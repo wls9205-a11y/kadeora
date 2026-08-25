@@ -391,10 +391,25 @@ def cmd_build(args):
 
     gid = {}
     if args.gid:
+        # ⚠️ 입력 형식은 «광고그룹명,grp-...» 2열이다 (gid.csv).
+        #    groups.csv 를 넘기지 말 것 — 2번째 열이 키워드 수라 아래 조건에 걸리지 않고
+        #    0개가 로드된다. 실수해도 조용히 지나가므로 아래에서 소리를 낸다.
         for r in csv.reader(open(args.gid, encoding="utf-8-sig")):
             if len(r) >= 2 and r[1].strip().startswith("grp-"):
                 gid[r[0].strip()] = r[1].strip()
         print("그룹ID %d개 로드" % len(gid))
+        # 0건은 형식을 잘못 넘긴 것이다. 조용히 자리표시 파일을 내보내면 전량 반려로 이어진다.
+        if not gid:
+            sys.exit("--gid 파일에서 그룹ID를 하나도 못 읽었습니다: %s\n"
+                     "2번째 열이 grp- 로 시작해야 합니다. groups.csv(2번째 열=키워드 수)를 넘기지 마세요.\n"
+                     "  올바른 형식:  광고그룹명,grp-a001-01-000000000000000" % args.gid)
+        # 일부만 채운 건 «그룹별로 나눠 올리는» 정상 사용일 수 있으므로 막지 않고 알린다.
+        missing = [g["name"] for g in groups if g["name"] not in gid]
+        if missing:
+            print("!! ID 없는 그룹 %d개 — 이 그룹 행은 GID_ 자리표시로 나갑니다. 그대로 올리면 반려됩니다:"
+                  % len(missing))
+            for m in missing:
+                print("     %s" % m)
 
     os.makedirs(OUT, exist_ok=True)
 
@@ -429,8 +444,18 @@ def cmd_build(args):
     print("\n광고그룹 %d · 현장 %d · 키워드 %d" %
           (len(groups), sum(len(g["sites"]) for g in groups), len(rows)))
     if not gid:
-        print("자리표시 상태입니다. groups.csv 이름대로 그룹을 만들고 ID를 채운 뒤")
-        print("  python sa.py build --only %s --gid groups.csv" % (args.only or ""))
+        # ⚠️ --gid 는 groups.csv 를 받지 못한다. 아래 로더가 «2번째 열»에서 grp- 를 찾는데
+        #    groups.csv 의 2번째 열은 키워드 수다. 그대로 넘기면 0개가 로드되고
+        #    자리표시가 남은 파일이 조용히 나온다 — 그걸 올리면 전량 반려된다.
+        #    그래서 이름과 ID «둘만» 있는 별도 파일을 쓴다.
+        print("자리표시 상태입니다. groups.csv 이름대로 네이버에 그룹을 만든 뒤,")
+        print("이름과 그룹ID 2열짜리 gid.csv 를 따로 만들어 넘기세요.")
+        print("  gid.csv 예시 (헤더 없이, 쉼표 2열):")
+        for g in groups[:2]:
+            print("    %s,grp-a001-01-000000000000000" % g["name"])
+        print("  python sa.py build --only %s --cats %s --max-alias %d --bid %d --gid gid.csv"
+              % (args.only or "", args.cats or "", args.max_alias, args.bid))
+        print("생성 후 반드시 확인: 완성본에 GID_ 로 시작하는 행이 0건이어야 한다.")
 
 
 def cmd_plan(args):
