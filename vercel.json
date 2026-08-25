@@ -54,7 +54,7 @@
     },
     {
       "path": "/api/cron/stock-theme-daily",
-      "schedule": "50 6 * * 1-5"
+      "schedule": "50 6 * * 2,4"
     },
     {
       "path": "/api/cron/exchange-rate",
@@ -70,7 +70,7 @@
     },
     {
       "path": "/api/cron/stock-naver-sync",
-      "schedule": "*/10 0-6 * * 1-5"
+      "schedule": "0 0-6 * * 1-5"
     },
     {
       "path": "/api/cron/crawl-apt-subscription",
@@ -106,7 +106,7 @@
     },
     {
       "path": "/api/cron/stock-flow-crawl",
-      "schedule": "45 7 * * 1-5"
+      "schedule": "45 7 * * 2,4"
     },
     {
       "path": "/api/cron/sync-apt-sites",
@@ -146,7 +146,7 @@
     },
     {
       "path": "/api/cron/stock-analysis-gen",
-      "schedule": "35 * * * *"
+      "schedule": "35 4 * * *"
     },
     {
       "path": "/api/cron/batch-analysis-submit",
@@ -318,7 +318,7 @@
     },
     {
       "path": "/api/cron/stock-flow-signals",
-      "schedule": "30 7 * * 1-5"
+      "schedule": "30 7 * * 2,4"
     },
     {
       "path": "/api/cron/macro-event-detect",

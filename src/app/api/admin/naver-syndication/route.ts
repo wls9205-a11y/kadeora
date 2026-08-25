@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { requireAdmin } from '@/lib/admin-auth';
+import { isBuulgyeongRegion } from '@/lib/region/buulgyeong';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,7 +28,8 @@ const DAILY_PUBLISH_CAP = 3;
  *   결정이다. hub_apt_slug 로 현장을 붙여 지역·단계를 보여주고 부울경 파이프라인을
  *   맨 위로 올린다.
  */
-const BUULGYEONG = new Set(['부산', '울산', '경남']);
+// [P5 §2] 부울경 판정은 src/lib/region/buulgyeong.ts 단일 원본을 쓴다.
+//   여기 있던 지역 Set 은 그 파일로 옮겼다 — 흩어져 있으면 화면마다 비율이 달라진다.
 
 /** 애드덤1 §3 색 매핑과 «같은» 분류다. 한쪽만 바꾸면 화면과 큐가 어긋난다. */
 const REDEV_STAGES = new Set([
@@ -88,7 +90,7 @@ export async function GET() {
       curated_status: site?.curated_status || null,
       stage_bucket: bucket,
       is_pipeline: isPipeline,
-      is_buulgyeong: !!region && BUULGYEONG.has(region),
+      is_buulgyeong: isBuulgyeongRegion(region),
     };
   });
 

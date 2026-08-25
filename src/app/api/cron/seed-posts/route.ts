@@ -4,6 +4,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { revalidatePath } from 'next/cache';
 import { withCronLogging } from '@/lib/cron-logger';
 import { getFreshnessContext } from '@/lib/blog/freshness-context';
+import { BUULGYEONG_REGIONS, isBuulgyeongRegion } from '@/lib/region/buulgyeong';
 
 /**
  * seed-posts 크론 v4 — 다양하고 자연스러운 피드 게시글
@@ -16,6 +17,39 @@ import { getFreshnessContext } from '@/lib/blog/freshness-context';
  * ✅ 실제 DB 데이터 기반 동적 생성
  * ✅ AI(Haiku)로 자연스러운 변형 + 폴백
  */
+
+/**
+ * [패치 P5 §1] 피드 주제 배분 — «상수 하나».
+ *
+ * 배경 실측(2026-08-25) — 최근 30일 posts 2,543건 전부 시드 계정이고
+ * 부동산은 34.3%, 부울경은 1.6% 였다. 원인은 선정 로직이 아니라 «템플릿 구성» 이다.
+ *   템플릿 free 34 · stock 29 · apt 25(28%) → 실측 비율과 거의 그대로 일치한다.
+ *   무작위 추출이라 템플릿 개수가 곧 결과였다.
+ *
+ * 그래서 템플릿 개수에 기대지 않고 «선정 단계에서» 배분을 강제한다.
+ * 개수를 맞추는 방식은 템플릿을 하나 추가할 때마다 비율이 흔들린다.
+ *
+ * Node 지시 — 피드 부동산 80% 이상, 부울경 포커스.
+ */
+const FEED_MIX: Record<string, number> = { apt: 0.8, stock: 0.1, free: 0.1 };
+
+/** 부울경 우선 비율. 부동산으로 뽑힌 글 중 이만큼은 부울경 소재를 먼저 찾는다. */
+const BUULGYEONG_TARGET = 0.6;
+
+/**
+ * {지역} 토큰에 채울 부울경 지명.
+ *
+ * v_apt_sigungu_count 에서 cnt_pipeline >= 3 인 시군구를 기준으로 골랐다
+ * (부산 14 · 울산 2 · 경남 3). 매물이 실제로 있는 곳만 넣는다 — 파이프라인이
+ * 비어 있는 시군구를 글로 만들면 링크할 현장이 없다.
+ * ⚠️ 여기에 «남구·동구·북구» 류를 넣지 말 것. 다른 시·도에도 있는 이름이라
+ *    부울경 판정(lib/region/buulgyeong.ts)에서 일부러 제외한 값들이다.
+ */
+const BUULGYEONG_SPOTS = [
+  '부산 해운대', '부산 부산진', '부산 연제', '부산 수영', '부산 동래', '부산 사하',
+  '부산 사상', '부산 금정', '부산 영도', '부산 기장', '부산 강서',
+  '울산 울주', '경남 김해', '경남 양산', '경남 창원',
+];
 
 const ANTHROPIC_API = 'https://api.anthropic.com/v1/messages';
 const MODEL = 'claude-haiku-4-5-20251001';
@@ -153,6 +187,40 @@ function getTemplates(): Template[] {
   { baseKey: 'stk_til_isa', category: 'stock', type: 'til',
     prompt: '"오늘 알게 된 것: ISA 비과세 혜택" TIL. 150자',
     fallback: { title: 'TIL: ISA 계좌가 이렇게 좋았어?', content: 'ISA 비과세 혜택이 생각보다 크더라고요. 일반 계좌보다 세금이 확 줄어요. 아직 안 만든 분들 빨리 가입하세요' }},
+
+  // ═══ [P5 §1] 부울경 부동산 — {지역} 토큰으로 시군구가 매번 바뀐다 ═══
+  //   기존 부동산 템플릿 25개는 «지역이 없는» 일반론이라 부울경 글이 0건이었다.
+  //   여기 템플릿은 토큰 하나로 15개 지명 × 타입만큼 변형된다.
+  { baseKey: 'bg_sise_q', category: 'apt', type: 'question',
+    prompt: '"{지역} 아파트 시세 요즘 어때요?" 실거주 기준 질문. 150자',
+    fallback: { title: '{지역} 아파트 시세 요즘 어떤가요?', content: '{지역} 쪽으로 이사 생각 중인데 요즘 시세 흐름이 궁금해요. 최근에 보신 분들 체감상 오르는 분위기인가요 아니면 조정인가요?' }},
+  { baseKey: 'bg_sub_q', category: 'apt', type: 'question',
+    prompt: '"{지역} 분양 예정 단지 어디가 나은지" 질문. 150자',
+    fallback: { title: '{지역} 분양 예정 단지 중에 어디가 나을까요?', content: '{지역}에서 분양 준비 중인 곳들 보고 있는데 입지·분양가 기준으로 어디가 나을지 고민이에요. 청약 넣어보신 분들 의견 궁금합니다' }},
+  { baseKey: 'bg_redev_debate', category: 'apt', type: 'debate',
+    prompt: '"{지역} 재개발 지금 들어가도 되나" 찬반. 180자',
+    fallback: { title: '{지역} 재개발, 지금 들어가도 될까요?', content: '{지역} 정비구역 몇 군데 보고 있는데 단계가 제각각이라 판단이 어렵네요. 조합설립 전에 들어가는 게 나을지 사업시행인가 보고 들어갈지...' }},
+  { baseKey: 'bg_move_review', category: 'apt', type: 'review',
+    prompt: '"{지역} 이사 후기" 실거주 체감. 150자',
+    fallback: { title: '{지역}로 이사한 지 반년 후기', content: '{지역}로 옮긴 지 반년 됐는데 출퇴근이랑 생활권이 생각보다 괜찮아요. 다만 주말에 차 막히는 건 감안해야 하더라고요' }},
+  { baseKey: 'bg_school_q', category: 'apt', type: 'question',
+    prompt: '"{지역} 학군 어떤지" 질문. 140자',
+    fallback: { title: '{지역} 학군 실제로 어떤가요?', content: '아이 학교 때문에 {지역} 보고 있는데 인터넷 정보는 제각각이라... 실제 사시는 분들 체감이 궁금합니다' }},
+  { baseKey: 'bg_unsold_news', category: 'apt', type: 'news_react',
+    prompt: '"{지역} 미분양 물량" 소식 반응. 140자',
+    fallback: { title: '{지역} 미분양 아직 남아있나요?', content: '{지역} 미분양 물량 얘기가 나오던데 지금도 잔여세대 있는 곳 있나요? 할인 조건 붙은 데도 있다고 들었는데' }},
+  { baseKey: 'bg_loan_tip', category: 'apt', type: 'tip',
+    prompt: '"{지역} 매수 시 대출 체크포인트" 팁. 150자',
+    fallback: { title: '{지역} 매수 전 대출 먼저 확인하세요', content: '{지역} 보고 계신 분들, 단지별로 담보인정비율이 달라서 미리 은행 두세 곳 돌아보는 게 낫습니다. 저는 그거 모르고 계약금 넣었다가 고생했어요' }},
+  { baseKey: 'bg_commute_debate', category: 'apt', type: 'debate',
+    prompt: '"{지역} 직주근접 vs 가격" 찬반. 170자',
+    fallback: { title: '{지역} 직주근접 vs 가격, 뭘 택하죠?', content: '{지역} 안에서도 직장 가까운 데는 비싸고 조금 빠지면 확 싸지는데... 출퇴근 30분 더 쓰고 몇 천 아끼는 게 맞는 선택일까요?' }},
+  { baseKey: 'bg_calc_case', category: 'apt', type: 'calc',
+    prompt: '"{지역} 기준 자금계획" 계산 사례. 160자',
+    fallback: { title: '{지역} 기준으로 자금계획 짜봤어요', content: '{지역} 시세 기준으로 계약금·중도금·잔금 나눠서 계산해봤는데 중도금 대출 여부에 따라 필요한 현금이 확 달라지네요. 참고하시라고 공유합니다' }},
+  { baseKey: 'bg_casual_walk', category: 'apt', type: 'casual',
+    prompt: '"{지역} 임장 다녀온 일상" 톤. 140자',
+    fallback: { title: '{지역} 임장 다녀왔습니다', content: '주말에 {지역} 몇 군데 돌아봤어요. 사진으로 보던 거랑 실제 언덕 경사가 다르더라고요. 역시 발품이 답인 듯' }},
 
   // ═══ 부동산 — 토론 ═══
   { baseKey: 'apt_buy_rent', category: 'apt', type: 'debate',
@@ -521,8 +589,11 @@ export async function GET(req: NextRequest) {
         admin.from('stock_quotes').select('symbol, name, price, change_pct, currency')
           .eq('is_active', true).gt('price', 0).order('volume', { ascending: false, nullsFirst: false }).limit(20),
         // 2. 활발한 단지
+        // [P5 §1] 부울경 현장을 먼저 가져온다 — 동적 템플릿이 실제 현장명을 쓰므로
+        //   여기서 지역을 좁히는 것이 가장 직접적인 부울경 공급이다.
         (admin as any).from('apt_sites').select('name, region, sigungu, builder')
           .eq('is_active', true).not('analysis_text', 'is', null)
+          .in('region', BUULGYEONG_REGIONS as unknown as string[])
           .order('page_views', { ascending: false, nullsFirst: false }).limit(20),
         // 3. 최근 인기 블로그
         admin.from('blog_posts').select('id, title, slug, category, view_count')
@@ -541,7 +612,7 @@ export async function GET(req: NextRequest) {
         // 6. 진행 중 청약 (마감 임박순)
         (admin as any).from('apt_subscriptions').select('house_nm, region_nm, tot_supply_hshld_co, rcept_endde, constructor_nm, is_price_limit')
           .gte('rcept_endde', new Date().toISOString().slice(0, 10))
-          .order('rcept_endde', { ascending: true }).limit(10),
+          .order('rcept_endde', { ascending: true }).limit(20),
         // 7. 오늘 주식 뉴스
         (admin as any).from('stock_news').select('title, symbol, source, sentiment_label')
           .gte('created_at', new Date(Date.now() - 24 * 3600000).toISOString())
@@ -681,19 +752,47 @@ export async function GET(req: NextRequest) {
     const results: any[] = [];
     const usedKeysThisRun = new Set<string>();
 
-    for (const user of selectedUsers) {
+    // [P5 §1] 이번 실행의 카테고리 배분을 «미리» 정한다.
+    //   무작위 추출에 맡기면 템플릿 개수 비율이 그대로 결과가 된다(실측 34.3%).
+    //   FEED_MIX 대로 목표 카테고리 목록을 만들고 섞어서 사용자에게 배정한다.
+    const catPlan: string[] = [];
+    for (const [cat, ratio] of Object.entries(FEED_MIX)) {
+      const n = Math.round(selectedUsers.length * ratio);
+      for (let i = 0; i < n; i++) catPlan.push(cat);
+    }
+    while (catPlan.length < selectedUsers.length) catPlan.push('apt'); // 반올림 잔여는 부동산으로
+    catPlan.length = selectedUsers.length;
+    const shuffledPlan = catPlan.sort(() => Math.random() - 0.5);
+
+    // 부울경 소재를 알아보는 판정 — 템플릿의 지역 필드 우선, 없으면 글자.
+    const tplIsBuulgyeong = (t: any) =>
+      isBuulgyeongRegion(t.region)
+      || /부산|울산|경남|해운대|김해|양산|창원|진주|거제|통영|사상|사하|부산진|기장|영도|수영|동래|연제|밀양|울주/
+        .test(`${t.fallback?.title ?? ''} ${t.fallback?.content ?? ''} ${t.prompt ?? ''}`);
+
+    for (const [idx, user] of selectedUsers.entries()) {
       const contentType = selectContentType();
-      let candidates = allTemplates.filter(t =>
-        t.type === contentType && (!t.ageFilter || t.ageFilter === user.age_group) &&
-        !recentTitlePrefixes.has(t.fallback.title.slice(0, 15)) && !usedKeysThisRun.has(t.baseKey)
-      );
-      if (candidates.length === 0) {
-        candidates = allTemplates.filter(t =>
-          !usedKeysThisRun.has(t.baseKey) && (!t.ageFilter || t.ageFilter === user.age_group) &&
-          !recentTitlePrefixes.has(t.fallback.title.slice(0, 15))
-        );
-      }
+      const wantCat = shuffledPlan[idx] ?? 'apt';
+      const usable = (t: any) =>
+        !usedKeysThisRun.has(t.baseKey)
+        && (!t.ageFilter || t.ageFilter === user.age_group)
+        && !recentTitlePrefixes.has(t.fallback.title.slice(0, 15));
+
+      // 1순위 — 목표 카테고리 + 목표 타입. 부동산이면 부울경을 먼저 본다.
+      let candidates = allTemplates.filter(t => t.category === wantCat && t.type === contentType && usable(t));
+      // 2순위 — 목표 카테고리(타입은 포기). 배분이 타입보다 우선이다.
+      if (candidates.length === 0) candidates = allTemplates.filter(t => t.category === wantCat && usable(t));
+      // 3순위 — 카테고리도 못 맞추면 기존 동작대로.
+      if (candidates.length === 0) candidates = allTemplates.filter(t => t.type === contentType && usable(t));
+      if (candidates.length === 0) candidates = allTemplates.filter(usable);
       if (candidates.length === 0) continue;
+
+      // 부동산이면 BUULGYEONG_TARGET 확률로 부울경 후보만 남긴다.
+      // 후보가 없으면 그대로 진행한다 — 억지로 만들지 않는다.
+      if (wantCat === 'apt' && Math.random() < BUULGYEONG_TARGET) {
+        const bg = candidates.filter(tplIsBuulgyeong);
+        if (bg.length > 0) candidates = bg;
+      }
 
       const template = pick(candidates);
       usedKeysThisRun.add(template.baseKey);
@@ -701,9 +800,21 @@ export async function GET(req: NextRequest) {
       const toneKey = `${user.age_group}_${user.gender === 'female' ? 'female' : 'male'}`;
       const tone = TONE[toneKey] || TONE['30대_male'];
 
-      let postContent = await generateWithAI(template.prompt, tone);
+      // [P5 §1] {지역} 토큰을 부울경 시군구로 채운다.
+      //   같은 뼈대라도 지역이 바뀌면 다른 글이 된다 — 템플릿 개수를 늘리지 않고
+      //   변형 수를 시군구 수만큼 곱한다. ⚠️ 다만 «뼈대가 같으면 유사도가 높다».
+      //   check_blog_similarity 계열 판정에 걸리지 않는지 관측할 것.
+      const spot = pick<string>(BUULGYEONG_SPOTS);
+      const fillRegion = (v: string) => v.replace(/\{지역\}/g, spot);
+
+      let postContent = await generateWithAI(fillRegion(template.prompt), tone);
       const aiGenerated = !!postContent;
-      if (!postContent) postContent = { ...template.fallback };
+      if (!postContent) {
+        postContent = {
+          title: fillRegion(template.fallback.title),
+          content: fillRegion(template.fallback.content),
+        };
+      }
 
       if (recentTitlePrefixes.has(postContent.title.slice(0, 15))) continue;
 
