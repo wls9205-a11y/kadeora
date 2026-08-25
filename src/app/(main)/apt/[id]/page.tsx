@@ -24,7 +24,7 @@ import AccordionEnhancer from '@/components/apt/detail/AccordionEnhancer';
 import AptKeyMetrics from '@/components/apt/detail/AptKeyMetrics';
 import SiteDetailRail from '@/components/apt/SiteDetailRail';
 import LeadForm from '@/components/apt/LeadForm';
-import { isLeadEligible } from '@/lib/apt/lead-eligibility';
+import { leadKind } from '@/lib/apt/lead-eligibility';
 import { canUseHeroImage } from '@/lib/apt/hero-license';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
 import { headers } from 'next/headers';
@@ -650,7 +650,16 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
   // 유입 파라미터로만 가르면 심사자가 랜딩 URL 을 직접 열었을 때 미확인 정보가 그대로 보인다.
   // (앱 안에 광고 유입 판정이 없다 — resolveChannel() 은 리드 엔드포인트 쪽이라
   //  서버 렌더 시점에 쓸 수 없다.)
-  const showLeadForm = !!site?.slug && isLeadEligible(site.lifecycle_stage);
+  // M5 §A — 분양(presale) 13단계 + 기축(resale) post_move_in·landmark_active.
+  //
+  // ⚠️ isLeadEligible() 은 그대로 둔다. 블로그 하단·blog-safe-insert·hero-license 가
+  //    같은 판정을 쓰므로 반환값을 바꾸면 기축 블로그에 분양 폼이 붙는다.
+  //    여기서는 leadKind() 로 «넓히기만» 한다.
+  // ⚠️ 이 값은 폼 외에 shouldHideUnconfirmed·액션바·레일도 함께 문다.
+  //    기축도 이제 리드를 받는 페이지이므로 미확정 정보를 감추는 광고 안전장치가
+  //    같이 걸리는 게 맞다 — 보수적인 쪽이다.
+  // ⚠️ lifecycle_stage 가 비면 leadKind 가 null 이라 폼이 안 뜬다. 추정해 채우지 않는다.
+  const showLeadForm = !!site?.slug && leadKind(site.lifecycle_stage) !== null;
   const hideUnconfirmed = shouldHideUnconfirmed(showLeadForm, sp);
 
   // 현장 행의 등급이 미확정이면 별칭 크론이 채웠을 수 있는 세대수·시공사를 내리지 않는다.

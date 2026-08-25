@@ -54,3 +54,36 @@ export const LEAD_ELIGIBLE_STAGES = [
 export function isLeadEligible(stage?: string | null): boolean {
   return !!stage && (LEAD_ELIGIBLE_STAGES as readonly string[]).includes(stage);
 }
+
+/* ── M5 §A-2 — 기축 매물·시세 상담 폼 ───────────────────────────────────
+ *
+ * ⚠️ isLeadEligible() 의 «반환값을 바꾸지 않는다». 블로그 하단(P1)·blog-safe-insert·
+ *    hero-license 가 같은 판정을 쓴다. 바꾸면 기축 블로그 글에 분양 문구 폼이 붙고
+ *    canUseHeroImage 의 광고 게이트 판정까지 함께 흔들린다.
+ *    그래서 «새 함수를 하나 더» 둔다.
+ *
+ * 왜 필요한가: 부울경 폼 없는 662곳이 전부 기축이다. 광고 279곳은 기축 제외
+ * 집합이라 광고비가 새고 있지는 않지만, 662곳은 검색으로 들어오는 페이지다.
+ * `더샵 남양산센텀포레` 를 검색하는 사람은 매매·전세를 알아보는 사람이고 그것도 리드다.
+ */
+
+/** 준공돼 매매·전세가 도는 단계. 분양이 아니라 «매물» 을 묻는 자리다. */
+export const RESALE_STAGES = ['post_move_in', 'landmark_active'] as const;
+
+export type LeadKind = 'presale' | 'resale';
+
+/**
+ * 이 현장에 어떤 폼을 붙일지.
+ *
+ *   presale : LEAD_ELIGIBLE_STAGES 13단계 — 분양·진행상황
+ *   resale  : post_move_in · landmark_active — 매물·시세
+ *   null    : 그 외. 폼을 붙이지 않는다
+ *
+ * ⚠️ lifecycle_stage 가 비어 있으면 null 이다. 단계를 «추정해 채우지 않는다» (M5 §F-21).
+ */
+export function leadKind(stage?: string | null): LeadKind | null {
+  if (!stage) return null;
+  if (isLeadEligible(stage)) return 'presale';
+  if ((RESALE_STAGES as readonly string[]).includes(stage)) return 'resale';
+  return null;
+}

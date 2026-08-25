@@ -10,7 +10,7 @@
 
 import { PIPELINE_STAGES } from '@/lib/apt/lifecycle-label';
 
-export type LeadCopyKind = 'pre_notice' | 'offering' | 'existing' | 'home';
+export type LeadCopyKind = 'pre_notice' | 'offering' | 'existing' | 'home' | 'resale';
 
 export interface LeadCopy {
   /** 상단 라벨 밴드 */
@@ -21,6 +21,12 @@ export interface LeadCopy {
   lede: string;
   /** leads.inquiry_type — 미처리 경보가 '분양상담' 으로 대상을 좁힌다 */
   inquiryType: string;
+  /**
+   * 하단 액션바 버튼 문구. 안 주면 cta 를 그대로 쓴다.
+   * ⚠️ cta 는 폼 «제목» 이자 버튼이다. 둘이 달라야 하는 경우에만 이걸 쓴다 —
+   *    기존 네 종류는 한 문장이 양쪽에 다 맞아서 지정하지 않는다.
+   */
+  button?: string;
 }
 
 /**
@@ -29,12 +35,23 @@ export interface LeadCopy {
  */
 const PRE_NOTICE = new Set<string>([...PIPELINE_STAGES, 'site_planning', 'pre_announcement']);
 
-/** 준공된 기축. 그 지역 분양 정보를 안내한다 — 이 단지를 파는 게 아니다. */
-const EXISTING = new Set(['post_move_in', 'active_trade', 'landmark_active']);
+/**
+ * 준공된 기축. 그 지역 분양 정보를 안내한다 — 이 단지를 파는 게 아니다.
+ *
+ * ⚠️ M5 §A: post_move_in · landmark_active 는 RESALE 로 옮겼다.
+ *    그 둘은 이제 「이 단지 매물·시세」를 묻는다. 여기 남은 active_trade 는
+ *    isLeadEligible 에도 leadKind 에도 없어 «현재 도달하지 않는다» — 나중에
+ *    그 단계를 폼 대상으로 켤 때를 위해 문구만 남겨 둔다.
+ */
+const EXISTING = new Set(['active_trade']);
+
+/** M5 §A — 준공돼 매매·전세가 도는 단지. 분양 문구를 재사용하지 않는다. */
+const RESALE = new Set(['post_move_in', 'landmark_active']);
 
 export function leadCopyKind(stage: string | null | undefined): LeadCopyKind {
   const s = stage ?? '';
   if (PRE_NOTICE.has(s)) return 'pre_notice';
+  if (RESALE.has(s)) return 'resale';
   if (EXISTING.has(s)) return 'existing';
   return 'offering';
 }
@@ -60,6 +77,22 @@ const COPY: Record<LeadCopyKind, Omit<LeadCopy, 'cta'> & { cta: (name: string) =
     inquiryType: '분양상담',
   },
   /**
+   * M5 §A — 기축 매물·시세.
+   *
+   * ⚠️ 분양 문구를 재사용하지 않는다. 입주 2년 지난 아파트에
+   *    「모집공고·분양가가 확정되면 알려드립니다」는 앞뒤가 안 맞는다.
+   *    이 사람은 «지금 사고팔려고» 들어온 사람이다.
+   * ⚠️ inquiryType 이 폼 종류를 가르는 유일한 값이다. channel 에 넣지 않는다 —
+   *    거긴 유입 경로(organic·utm:kakao) 컬럼이라 섞으면 유입 분석이 깨진다.
+   */
+  resale: {
+    band: '매물·시세 상담 · 무료',
+    cta: () => '이 단지 매물·시세 상담',
+    lede: '최근 실거래가와 나온 매물을 담당자가 정리해 드립니다.',
+    inquiryType: '매물상담',
+    button: '상담 신청',
+  },
+  /**
    * H1-3 홈 리드폼. **현장이 특정되지 않은 유일한 자리**다.
    * 다른 셋은 「이 현장」을 전제로 말하지만 여기서는 그럴 수 없다 —
    * 「이 구역」·「이 단지」 같은 지시어를 쓰면 홈에서 가리키는 대상이 없다.
@@ -75,11 +108,11 @@ const COPY: Record<LeadCopyKind, Omit<LeadCopy, 'cta'> & { cta: (name: string) =
 export function leadCopy(stage: string | null | undefined, siteName = ''): LeadCopy {
   const kind = leadCopyKind(stage);
   const c = COPY[kind];
-  return { band: c.band, cta: c.cta(siteName), lede: c.lede, inquiryType: c.inquiryType };
+  return { band: c.band, cta: c.cta(siteName), lede: c.lede, inquiryType: c.inquiryType, button: c.button };
 }
 
 /** 홈 전용 한 벌. 단계가 없으므로 stage 로 고르지 않는다. */
 export function leadCopyForHome(): LeadCopy {
   const c = COPY.home;
-  return { band: c.band, cta: c.cta(''), lede: c.lede, inquiryType: c.inquiryType };
+  return { band: c.band, cta: c.cta(''), lede: c.lede, inquiryType: c.inquiryType, button: c.button };
 }

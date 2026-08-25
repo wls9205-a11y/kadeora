@@ -16,6 +16,7 @@ import type { CSSProperties, ChangeEvent, FormEvent } from 'react';
 import SectionHeader from '@/components/apt/SectionHeader';
 import { SITE_URL } from '@/lib/constants';
 import { leadCopy, leadCopyForHome } from '@/lib/apt/lead-copy';
+import { leadKind } from '@/lib/apt/lead-eligibility';
 import { trackLeadSubmit, trackLeadView } from '@/lib/apt/lead-track';
 
 const ENDPOINT = process.env.NEXT_PUBLIC_LEAD_ENDPOINT || '';
@@ -49,6 +50,13 @@ const INQUIRY_TYPE_SALES = '분양상담';
  *    옵션 값이 곧 시트·DB 에 남는 값이므로 사람이 읽는 문자열 그대로 쓴다.
  */
 const STANDARD_TYPES = ['59㎡', '74㎡', '84㎡', '101㎡', '114㎡ 이상'];
+
+/**
+ * M5 §A-1 — 기축(resale) 폼의 희망 타입.
+ * 준공된 단지에 평형을 묻는 건 의미가 없다. 무엇을 하려는지가 응대에 필요한 정보다.
+ * ⚠️ leads.desired_type 에 그대로 들어간다. CHECK 제약이 없어 값 추가에 스키마 변경이 필요 없다.
+ */
+const RESALE_TYPES = ['매수', '매도', '전월세'];
 
 type LeadFormProps = {
   /**
@@ -338,9 +346,11 @@ export default function LeadForm({
    * select 는 어느 현장에서나 항상 렌더한다 — 화면은 같은 4칸이고 옵션만 갈린다.
    * 그건 '양식이 다른 것' 이 아니라 정상이다.
    */
-  const hasSiteTypes = Array.isArray(typeOptions) && typeOptions.length > 0;
+  // M5 §A — 기축이면 평형이 아니라 매수/매도/전월세를 묻는다.
+  const isResale = leadKind(lifecycleStage) === 'resale';
+  const hasSiteTypes = !isResale && Array.isArray(typeOptions) && typeOptions.length > 0;
   const typeChoices = (() => {
-    const base = hasSiteTypes ? typeOptions! : STANDARD_TYPES;
+    const base = isResale ? RESALE_TYPES : hasSiteTypes ? typeOptions! : STANDARD_TYPES;
     // 중복·빈 값 제거 후 '미정' 을 맨 앞에 고정한다 (기본값이라 첫 자리가 맞다).
     const uniq = Array.from(new Set(base.map(t => String(t).trim()).filter(t => t && t !== TYPE_UNDECIDED)));
     return [TYPE_UNDECIDED, ...uniq];

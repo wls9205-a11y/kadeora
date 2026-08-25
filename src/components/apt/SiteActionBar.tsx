@@ -156,7 +156,7 @@ export default function SiteActionBar({ siteSlug, showLeadForm = false, lifecycl
               boxShadow: '0 4px 16px rgba(37,99,235,0.28)',
             }}
           >
-            <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, lineHeight: 1.2 }}>{copy.cta}</span>
+            <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, lineHeight: 1.2 }}>{copy.button ?? copy.cta}</span>
             <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, lineHeight: 1.2, color: SUB_FG }}>담당자 직접 연락</span>
           </button>
         )}
