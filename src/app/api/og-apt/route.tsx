@@ -22,6 +22,46 @@ function loadFont(): ArrayBuffer | null {
 
 const SIDE = 630;
 
+/**
+ * ADDENDUM §A — 비율별 규격.
+ *
+ * ⚠️ 정사각 카드를 가로 히어로에 그대로 넣어 **좌우가 텅 비어 있었다**(/apt/아크로-라로체 실측).
+ *    목록용 1:1 을 4:3·21:9 에 재사용한 결과다.
+ *    한 이미지를 늘리거나 레터박스로 채우지 않는다 — **넓으면 정보를 더 넣는다.**
+ *
+ *   1x1   목록 썸네일    3줄 가운데 정렬 (기존 카드 6종 그대로)
+ *   4x3   히어로 모바일  좌 3줄 왼쪽정렬 · 우 세대수
+ *   21x9  히어로 데스크탑 〃 여백을 세대수·단계·시공사로 채운다
+ */
+const RATIOS = {
+  '1x1': { w: SIDE, h: SIDE },
+  '4x3': { w: 1200, h: 900 },
+  '21x9': { w: 1680, h: 720 },
+} as const;
+type RatioKey = keyof typeof RATIOS;
+
+/**
+ * §A-3 자간 — 크기 비례.
+ *   36px+   -.055em
+ *   20~35px -.04em
+ *   그 외   -.02em
+ * ⚠️ Satori 는 em 단위 letterSpacing 을 신뢰할 수 없어 px 로 환산한다.
+ */
+function tracking(fs: number): number {
+  const ratio = fs >= 36 ? 0.055 : fs >= 20 ? 0.04 : 0.02;
+  return -(fs * ratio);
+}
+
+/**
+ * §A-3 굵기·외곽선. 900 Black + 그림자 3px.
+ * ⚠️ `-webkit-text-stroke` 는 Satori 지원이 불확실해 그림자로 두께를 만든다.
+ *    서버 렌더라 브라우저 편차가 없다는 점이 오히려 유리하다.
+ */
+const HEAVY = {
+  fontWeight: 900 as const,
+  textShadow: '0 3px 8px rgba(0,0,0,0.55), 0 1px 0 rgba(0,0,0,0.9)',
+};
+
 const SITE_TYPE_LABEL: Record<string, string> = {
   subscription: '분양',
   redevelopment: '재개발',
@@ -42,6 +82,11 @@ function fmtAmount(n: number | null | undefined): string {
 interface AptRow {
   slug: string;
   name: string;
+  /** ⚠️ §A-3: 표시는 이걸 우선한다. 456건에 붙어 있다. 없으면 name 으로 떨어진다. */
+  display_name?: string | null;
+  /** 단지 전체 / 일반분양. 히어로 우측 지표에 쓴다 — 라벨 없이 쓰지 않는다. */
+  complex_units?: number | null;
+  supply_units?: number | null;
   site_type: string;
   region?: string | null;
   sigungu?: string | null;
@@ -67,7 +112,9 @@ interface AptRow {
 async function fetchSite(slug: string): Promise<AptRow | null> {
   try {
     const sb = getSupabaseAdmin();
-    const cols = 'slug,name,site_type,region,sigungu,dong,address,builder,developer,total_units,built_year,move_in_date,price_min,price_max,latitude,longitude,nearby_station,school_district,description,key_features,lifecycle_stage,interest_count';
+    // ⚠️ §A: display_name·complex_units·supply_units 를 함께 읽는다.
+    //    이 셋이 없으면 히어로 우측이 비고 이름이 행정 명칭으로 나간다.
+    const cols = 'slug,name,display_name,site_type,region,sigungu,dong,address,builder,developer,total_units,complex_units,supply_units,built_year,move_in_date,price_min,price_max,latitude,longitude,nearby_station,school_district,description,key_features,lifecycle_stage,interest_count';
     const { data } = await (sb as any).from('apt_sites').select(cols).eq('slug', slug).maybeSingle();
     return sanitizeRowForOG(data ?? null) as AptRow | null;
   } catch { return null; }
@@ -108,6 +155,122 @@ function renderCover(site: AptRow): React.ReactElement {
         <span>kadeora.app</span>
         <span>단지 정보</span>
       </div>
+    </div>
+  );
+}
+
+/** 표시 이름 — display_name 우선, 없으면 name. §A-3 */
+const displayNameOf = (site: AptRow): string => (site.display_name || site.name || '').trim();
+
+/**
+ * §A-2 히어로 레이아웃 (4:3 · 21:9).
+ *
+ * 좌: [지역] · 이름 3줄 · [단계]
+ * 우: 세대수 · 시공사 · 입주/착공
+ *
+ * ⚠️ 정사각 카드를 늘리지 않는다. 넓어진 만큼 **정보를 더 넣는다.**
+ * ⚠️ 세대수는 라벨을 붙인다. 라벨 없는 '176세대' 는 총세대수로 오독된다 —
+ *    complex_units 가 있으면 '총', 없고 supply_units 만 있으면 '일반분양' 이다.
+ */
+function renderHero(site: AptRow, ratio: RatioKey): React.ReactElement {
+  const wide = ratio === '21x9';
+  const name = displayNameOf(site);
+  const lcLabel = site.lifecycle_stage ? LIFECYCLE_LABEL[site.lifecycle_stage] : null;
+
+  // ⚠️ 지역 중복 제거 — display_name 이 이미 시군구를 품고 있는 경우가 많다.
+  //    실측: display_name '부산진구 아크로 라로체' + 배지 '부산 부산진구' → 「부산진구」가 두 번.
+  //    §B-5 에서 제목·설명에 대해 고쳤던 것과 같은 문제가 카드에서 되살아난 것이다.
+  //    이름에 이미 들어 있는 조각은 배지에서 뺀다. 둘 다 들어 있으면 배지를 아예 그리지 않는다.
+  const regionParts = [site.region, site.sigungu]
+    .filter((v): v is string => !!v && v.trim().length > 0)
+    .filter((v) => !name.includes(v));
+  const region = regionParts.join(' ');
+
+  // 이름 길이에 따라 크기를 줄인다. 21:9 는 높이가 낮아 더 보수적으로 잡는다.
+  const base = wide ? 96 : 108;
+  const nameFS = name.length > 18 ? base - 34 : name.length > 12 ? base - 20 : base;
+
+  const units =
+    site.complex_units && site.complex_units > 0
+      ? { label: '총세대수', value: `${site.complex_units.toLocaleString()}세대` }
+      : site.supply_units && site.supply_units > 0
+        ? { label: '일반분양', value: `${site.supply_units.toLocaleString()}세대` }
+        : site.total_units && site.total_units > 0
+          ? { label: '세대수', value: `${site.total_units.toLocaleString()}세대` }
+          : null;
+
+  const stats: { label: string; value: string }[] = [];
+  if (units) stats.push(units);
+  if (site.builder) stats.push({ label: '시공사', value: String(site.builder).slice(0, 18) });
+  if (site.move_in_date) stats.push({ label: '입주', value: String(site.move_in_date).slice(0, 10) });
+  else if (lcLabel) stats.push({ label: '진행', value: lcLabel });
+
+  const pad = wide ? 72 : 64;
+
+  return (
+    <div style={{ width: '100%', height: '100%', display: 'flex', padding: pad, gap: wide ? 56 : 40 }}>
+      {/* 좌 — 이름 블록 */}
+      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', flex: 1, gap: 18 }}>
+        {region ? (
+          <div style={{ display: 'flex' }}>
+            <div style={{ display: 'flex', background: '#FAC775', color: '#1A1A18', fontSize: 26, fontWeight: 800, padding: '7px 20px', borderRadius: 999, letterSpacing: tracking(26) }}>
+              {region}
+            </div>
+          </div>
+        ) : null}
+
+        <div style={{ display: 'flex', width: 72, height: 6, background: '#FAC775' }} />
+
+        <div
+          style={{
+            display: 'flex',
+            fontSize: nameFS,
+            color: '#FFFFFF',
+            lineHeight: 1.08,
+            letterSpacing: tracking(nameFS),
+            ...HEAVY,
+          }}
+        >
+          {name}
+        </div>
+
+        {lcLabel ? (
+          <div style={{ display: 'flex' }}>
+            <div style={{ display: 'flex', background: 'rgba(255,255,255,0.14)', color: '#FFFFFF', fontSize: 26, fontWeight: 800, padding: '7px 20px', borderRadius: 999, letterSpacing: tracking(26) }}>
+              {lcLabel}
+            </div>
+          </div>
+        ) : null}
+      </div>
+
+      {/* 우 — 지표. ⚠️ 비어 있으면 아예 그리지 않는다. 빈 칸이 남는 게 지금 문제다 */}
+      {stats.length > 0 ? (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            gap: wide ? 30 : 26,
+            minWidth: wide ? 420 : 340,
+            borderLeft: '3px solid rgba(255,255,255,0.18)',
+            paddingLeft: wide ? 56 : 40,
+          }}
+        >
+          {stats.map((s) => (
+            <div key={s.label} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <div style={{ display: 'flex', fontSize: 22, color: 'rgba(255,255,255,0.62)', fontWeight: 700, letterSpacing: tracking(22) }}>
+                {s.label}
+              </div>
+              <div style={{ display: 'flex', fontSize: 46, color: '#FFFFFF', letterSpacing: tracking(46), ...HEAVY }}>
+                {s.value}
+              </div>
+            </div>
+          ))}
+          <div style={{ display: 'flex', fontSize: 20, color: 'rgba(255,255,255,0.45)', fontWeight: 700, letterSpacing: tracking(20) }}>
+            kadeora.app
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -269,17 +432,61 @@ function renderSpec(site: AptRow): React.ReactElement {
   );
 }
 
-function renderFallback(slug: string | null): React.ReactElement {
+/**
+ * 폴백 — 현장을 못 찾았을 때.
+ *
+ * ⚠️ 이것도 비율을 봐야 한다. 세로 배치를 21:9 에 그대로 쓰면 **오른쪽 3분의 2가 텅 빈다** —
+ *    §A 가 지적한 화면이 정확히 이 모습이었다(DB 조회 실패 시에도 같은 그림이 나간다).
+ *    가로에서는 좌우로 갈라 균형을 맞춘다.
+ */
+function renderFallback(slug: string | null, ratio: RatioKey = '1x1'): React.ReactElement {
   const aptLabel = OG_CAT.apt.label;
-  return (
-    <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', padding: 56, justifyContent: 'space-between', background: '#1A1A18' }}>
-      <div style={{ display:'flex', fontSize: 22, color: '#FAC775', fontWeight: 800 }}>카더라 · kadeora.app</div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-        <div style={{ display:'flex', width: 56, height: 4, background: '#FAC775' }} />
-        <div style={{ display:'flex', fontSize: 64, fontWeight: 900, color: '#FFFFFF', lineHeight: 1.1, letterSpacing: -2 }}>단지 정보</div>
-        <div style={{ display:'flex', fontSize: 22, color: 'rgba(255,255,255,0.66)', fontWeight: 600 }}>{slug ? `slug=${slug}` : `대한민국 ${aptLabel} 커뮤니티`}</div>
+  const wide = ratio !== '1x1';
+  const titleFS = wide ? 88 : 64;
+
+  const left = (
+    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', flex: 1, gap: 16 }}>
+      <div style={{ display: 'flex', width: wide ? 72 : 56, height: wide ? 6 : 4, background: '#FAC775' }} />
+      <div style={{ display: 'flex', fontSize: titleFS, color: '#FFFFFF', lineHeight: 1.1, letterSpacing: tracking(titleFS), ...HEAVY }}>
+        단지 정보
       </div>
-      <div style={{ display:'flex', fontSize: 18, color: 'rgba(255,255,255,0.55)', fontWeight: 700 }}>주식·부동산 소리소문 커뮤니티</div>
+      <div style={{ display: 'flex', fontSize: wide ? 26 : 22, color: 'rgba(255,255,255,0.66)', fontWeight: 600 }}>
+        {slug ? `slug=${slug}` : `대한민국 ${aptLabel} 커뮤니티`}
+      </div>
+    </div>
+  );
+
+  if (!wide) {
+    return (
+      <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', padding: 56, justifyContent: 'space-between', background: '#1A1A18' }}>
+        <div style={{ display: 'flex', fontSize: 22, color: '#FAC775', fontWeight: 800 }}>카더라 · kadeora.app</div>
+        {left}
+        <div style={{ display: 'flex', fontSize: 18, color: 'rgba(255,255,255,0.55)', fontWeight: 700 }}>주식·부동산 소리소문 커뮤니티</div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ width: '100%', height: '100%', display: 'flex', padding: 72, gap: 56, background: '#1A1A18' }}>
+      {left}
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          gap: 14,
+          minWidth: 420,
+          borderLeft: '3px solid rgba(255,255,255,0.18)',
+          paddingLeft: 56,
+        }}
+      >
+        <div style={{ display: 'flex', fontSize: 30, color: '#FAC775', fontWeight: 800, letterSpacing: tracking(30) }}>
+          카더라 · kadeora.app
+        </div>
+        <div style={{ display: 'flex', fontSize: 22, color: 'rgba(255,255,255,0.55)', fontWeight: 700 }}>
+          주식·부동산 소리소문 커뮤니티
+        </div>
+      </div>
     </div>
   );
 }
@@ -289,6 +496,11 @@ export async function GET(req: NextRequest) {
   const slug = sp.get('slug')?.trim().slice(0, 200) || null;
   const cardRaw = parseInt(sp.get('card') || '1', 10);
   const card = Math.min(6, Math.max(1, isNaN(cardRaw) ? 1 : cardRaw));
+
+  // §A-2 — 비율. 모르는 값은 1x1 로 떨어진다(기존 호출부가 그대로 동작해야 한다).
+  const ratioRaw = (sp.get('ratio') || '1x1').trim();
+  const ratio: RatioKey = ratioRaw in RATIOS ? (ratioRaw as RatioKey) : '1x1';
+  const { w, h } = RATIOS[ratio];
 
   const fontData = loadFont();
   const fontOpts = fontData
@@ -308,7 +520,10 @@ export async function GET(req: NextRequest) {
   try {
     let body: React.ReactElement;
     if (!site) {
-      body = renderFallback(slug);
+      body = renderFallback(slug, ratio);
+    } else if (ratio !== '1x1') {
+      // ⚠️ 가로 비율은 카드 6종을 쓰지 않는다. 정사각 레이아웃을 늘리면 좌우가 빈다.
+      body = renderHero(site, ratio);
     } else if (card === 1) {
       body = renderCover(site);
     } else if (card === 2) {
@@ -331,8 +546,8 @@ export async function GET(req: NextRequest) {
 
 
     const img = new ImageResponse(wrapped, {
-      width: SIDE,
-      height: SIDE,
+      width: w,
+      height: h,
       ...fontOpts,
     });
     return new Response(await img.arrayBuffer(), {

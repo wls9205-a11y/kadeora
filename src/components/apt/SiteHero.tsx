@@ -67,11 +67,18 @@ export type SiteHeroProps = {
    *   ⚠️ 워터마크·라이트박스도 끈다 — 카드에 이미 카더라 브랜딩이 있고 확대할 것이 없다.
    */
   variant?: 'photo' | 'card';
+  /**
+   * 뷰포트별 다른 소스. 생성 카드가 비율마다 **레이아웃이 다르므로**
+   * 한 장을 늘려 쓰지 않고 <picture> 로 고른다 (ADDENDUM §A-2).
+   * ⚠️ 미디어 조건은 .kd-hero 의 CSS 분기(768px)와 같은 값이어야 한다 —
+   *    어긋나면 21:9 이미지를 4:3 상자에 넣게 된다.
+   */
+  sources?: { media: string; src: string }[];
   /** h1 + 보조줄. 서버에서 넘긴다. */
   children: React.ReactNode;
 };
 
-export default function SiteHero({ src, name, region, credit, badges, variant = 'photo', children }: SiteHeroProps) {
+export default function SiteHero({ src, name, region, credit, badges, variant = 'photo', sources, children }: SiteHeroProps) {
   const [lightbox, setLightbox] = useState(false);
   const [failed, setFailed] = useState(false);
 
@@ -98,22 +105,14 @@ export default function SiteHero({ src, name, region, credit, badges, variant = 
         }
 
         /* ── 생성 카드 전용 ──
-           og-apt 는 정사각이다. 21/9 로 눕히면 카드 중앙만 잘려 글자가 사라진다.
-           4:3 을 유지하고 contain 으로 넣되, 남는 좌우는 카드 배경과 같은 남색으로 채워
-           '레터박스'가 아니라 의도된 카드 프레임으로 보이게 한다. */
-        .kd-hero--card { aspect-ratio: 4 / 3; background: #0B2A6B; }
-        @media (min-width: 768px) {
-          .kd-hero--card {
-            aspect-ratio: 4 / 3;
-            max-height: 460px;
-            border-radius: var(--radius-lg);
-            margin-inline: 0;
-          }
-        }
-        .kd-hero--card .kd-hero-img { object-fit: contain; }
-        /* 카드는 그 자체가 캡션을 갖고 있다. 스크림까지 얹으면 두 겹이 된다. */
+           ADDENDUM §A: og-apt 가 이제 비율별로 **다른 레이아웃**을 그린다
+           (4x3 모바일 · 21x9 데스크탑). 컨테이너 비율과 이미지 비율이 같아졌으므로
+           예전의 contain + 남색 레터박스 우회는 걷어냈다 — 늘리거나 채우지 않는다.
+           ⚠️ 이미지 소스는 <picture> 로 갈린다. 아래 sources 참고. */
+        .kd-hero--card .kd-hero-img { object-fit: cover; }
+        /* 카드 안에 이미 캡션이 있다. 스크림을 옅게 둬 두 겹으로 보이지 않게 한다. */
         .kd-hero--card .kd-hero-scrim {
-          background: linear-gradient(transparent 60%, rgba(9,13,20,.72));
+          background: linear-gradient(transparent 70%, rgba(9,13,20,.35));
         }
         /* 캡션 가독성 — 아래쪽 그라데이션. 흰 글자는 이 위에서만 쓴다 */
         .kd-hero-scrim {
@@ -125,20 +124,27 @@ export default function SiteHero({ src, name, region, credit, badges, variant = 
       <div className={isCard ? 'kd-hero kd-hero--card' : 'kd-hero'}>
         {hasImage ? (
           <>
-            <img
-              src={url}
-              alt={isCard ? `${name} ${region} 분양 정보 카드` : `${name} ${region} 현장 이미지`}
-              width={isCard ? 630 : 1280}
-              height={isCard ? 630 : 720}
-              className="kd-hero-img"
-              loading="eager"
-              fetchPriority="high"
-              decoding="async"
-              referrerPolicy="no-referrer"
-              onError={() => setFailed(true)}
-              onClick={isCard ? undefined : () => setLightbox(true)}
-              style={isCard ? undefined : { cursor: 'zoom-in' }}
-            />
+            {/* ⚠️ 카드는 비율마다 레이아웃이 다르다. 한 장을 늘리지 않고 소스를 고른다.
+                sources 가 없으면 기존과 동일하게 단일 <img> 다. */}
+            <picture>
+              {(sources ?? []).map((s) => (
+                <source key={s.media} media={s.media} srcSet={toHttps(s.src)} />
+              ))}
+              <img
+                src={url}
+                alt={isCard ? `${name} ${region} 분양 정보 카드` : `${name} ${region} 현장 이미지`}
+                width={isCard ? 1200 : 1280}
+                height={isCard ? 900 : 720}
+                className="kd-hero-img"
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
+                referrerPolicy="no-referrer"
+                onError={() => setFailed(true)}
+                onClick={isCard ? undefined : () => setLightbox(true)}
+                style={isCard ? undefined : { cursor: 'zoom-in' }}
+              />
+            </picture>
             <div className="kd-hero-scrim" />
             {/* 카드에는 이미 카더라 브랜딩이 들어 있다. 워터마크를 겹치지 않는다. */}
             {!isCard && <WatermarkSm />}

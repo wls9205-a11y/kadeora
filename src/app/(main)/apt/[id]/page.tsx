@@ -835,8 +835,12 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
         const isExistingComplex = lcStage === 'post_move_in' || lcStage === 'landmark_active';
         const devHeroSrc = ((site as any)?.hero_image_url as string | undefined) || '';
         const satSrc = site?.satellite_image_url || '';
-        // ⚠️ card 파라미터는 라우트에서 1~6 으로 클램프된다. RPC 가 쓰는 card=0 과 같은 그림이다.
-        const cardSrc = `${SITE_URL}/api/og-apt?slug=${encodeURIComponent(slug)}&card=1`;
+        // ── ADDENDUM §A-2 · 비율별 레이아웃 ──
+        // ⚠️ 정사각(card=1)을 가로 히어로에 그대로 쓰면 좌우가 텅 빈다 — 실측으로 확인된 문제다.
+        //    이제 og-apt 가 ratio 별로 **다른 레이아웃**을 그린다. 늘리지 않고 소스를 고른다.
+        //    모바일 4:3 · 데스크탑 21:9 — 미디어 조건은 SiteHero 의 768px 분기와 같아야 한다.
+        const cardSrc = `${SITE_URL}/api/og-apt?slug=${encodeURIComponent(slug)}&ratio=4x3`;
+        const cardSrcWide = `${SITE_URL}/api/og-apt?slug=${encodeURIComponent(slug)}&ratio=21x9`;
 
         const heroKind: 'developer' | 'satellite' | 'card' | 'none' =
           devHeroSrc ? 'developer'
@@ -891,7 +895,15 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
                 image: [{ '@type': 'ImageObject', url: heroSrc, name: heroIsDeveloper ? heroCredit : `${name} 항공 이미지`, position: 1 }],
               })}} />
             )}
-            <SiteHero src={heroSrc} name={displayName} region={region} credit={heroCredit} badges={badgeEl} variant={heroKind === 'card' ? 'card' : 'photo'}>
+            <SiteHero
+              src={heroSrc}
+              name={displayName}
+              region={region}
+              credit={heroCredit}
+              badges={badgeEl}
+              variant={heroKind === 'card' ? 'card' : 'photo'}
+              sources={heroKind === 'card' ? [{ media: '(min-width: 768px)', src: cardSrcWide }] : undefined}
+            >
               <h1 style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, margin: 0, lineHeight: 1.2, letterSpacing: '-.03em', wordBreak: 'keep-all', overflowWrap: 'break-word', color: 'inherit' }}>{displayName}</h1>
               {heroSub && (
                 <p style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, lineHeight: 1.45, margin: '5px 0 0', opacity: 0.92, wordBreak: 'keep-all', color: 'inherit' }}>{heroSub}</p>
