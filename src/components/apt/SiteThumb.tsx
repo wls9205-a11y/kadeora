@@ -80,6 +80,24 @@ export interface SiteThumbProps {
   leadContext?: boolean;
   size?: number;
   className?: string;
+  /**
+   * CSS 폴백 카드의 색.
+   *
+   *   'auto'   slug 해시 색상. 목록에서 현장끼리 구분되라고 쓴다(기본).
+   *   'brand'  브랜드 네이비 + 골드. 홈 「지금 계약 가능한 현장」처럼
+   *            카드가 크게 서는 자리에서 쓴다. 미리 구운 card_image_url 과 같은 색이라
+   *            사진 있는 카드와 없는 카드가 한 줄에 섞여도 갈라 보이지 않는다.
+   *
+   * ⚠️ 목록(H2-2)의 기본값을 바꾸지 않는다. 56px 썸네일이 전부 같은 남색이 되면
+   *    현장이 구분되지 않는다.
+   */
+  palette?: 'auto' | 'brand';
+  /**
+   * 가로. 안 주면 size(정사각). 카드 상단처럼 폭을 꽉 채워야 하면 '100%' 를 준다.
+   * ⚠️ '100%' 를 주면 <img> 의 width/height 속성은 붙이지 않는다 — 숫자 속성과
+   *    퍼센트 스타일이 같이 붙으면 브라우저가 종횡비를 잘못 잡는다.
+   */
+  width?: number | string;
 }
 
 export default function SiteThumb({
@@ -92,11 +110,13 @@ export default function SiteThumb({
   leadContext = false,
   size = 56,
   className,
+  palette = 'auto',
+  width,
 }: SiteThumbProps) {
   const src = pickThumbSrc({ thumbUrl, cardImageUrl, lifecycleStage, heroLicenseTier, leadContext });
 
   const box: React.CSSProperties = {
-    width: size,
+    width: width ?? size,
     height: size,
     flexShrink: 0,
     borderRadius: 'var(--radius-sm, 8px)',
@@ -104,13 +124,13 @@ export default function SiteThumb({
   };
 
   if (src) {
+    const fluid = typeof box.width === 'string';
     return (
       // eslint-disable-next-line @next/next/no-img-element
       <img
         src={src}
         alt=""
-        width={size}
-        height={size}
+        {...(fluid ? {} : { width: size, height: size })}
         loading="lazy"
         decoding="async"
         className={className}
@@ -124,6 +144,7 @@ export default function SiteThumb({
   const stage = lifecycleLabel(lifecycleStage);
   // 이름이 길면 앞 두 글자만. 목록 56px 에 문장을 넣으면 뭉개진다.
   const initials = (name || '').replace(/^(부산|울산|경남|서울|경기|대구|인천|광주|대전)\s+/, '').slice(0, 2);
+  const isBrand = palette === 'brand';
 
   return (
     <div
@@ -136,17 +157,28 @@ export default function SiteThumb({
         alignItems: 'center',
         justifyContent: 'center',
         gap: 2,
-        background: `linear-gradient(135deg, hsl(${hue} 42% 34%), hsl(${(hue + 38) % 360} 46% 22%))`,
+        // 브랜드 네이비는 미리 구운 카드(og-apt)와 같은 3색이다. 두 카드가 한 줄에
+        // 섞여도 배경이 갈라지지 않게 값을 맞춰 둔다 — 바꿀 때 og-apt 도 같이 본다.
+        background: isBrand
+          ? 'linear-gradient(135deg, #0B2A6B 0%, #123A8F 55%, #2563EB 100%)'
+          : `linear-gradient(135deg, hsl(${hue} 42% 34%), hsl(${(hue + 38) % 360} 46% 22%))`,
         color: '#fff',
       }}
     >
-      <span style={{ fontSize: Math.round(size * 0.3), fontWeight: 800, lineHeight: 1 }}>
+      <span style={{ fontSize: Math.round(size * (isBrand ? 0.22 : 0.3)), fontWeight: 800, lineHeight: 1 }}>
         {initials}
       </span>
-      {stage && size >= 56 && (
-        <span style={{ fontSize: 8, opacity: 0.85, lineHeight: 1, whiteSpace: 'nowrap' }}>
-          {stage}
+      {isBrand ? (
+        // 브랜드 줄만 골드. 단계는 배경이 아니라 카드 좌상단 태그로 가른다.
+        <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: 1.2, color: '#FFC53D', lineHeight: 1 }}>
+          KADEORA
         </span>
+      ) : (
+        stage && size >= 56 && (
+          <span style={{ fontSize: 8, opacity: 0.85, lineHeight: 1, whiteSpace: 'nowrap' }}>
+            {stage}
+          </span>
+        )
       )}
     </div>
   );

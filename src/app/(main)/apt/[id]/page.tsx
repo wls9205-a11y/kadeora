@@ -1,4 +1,5 @@
 import { AptViewTracker } from '@/components/ViewTracker';
+import RecordRecentView from '@/components/apt/RecordRecentView';
 import { InterestRegisterHero } from '@/components/apt/InterestRegisterHero';
 import { buildAptJsonLd } from '@/lib/schema/apt';
 import { sanitizeHtml } from '@/lib/sanitize-html';
@@ -760,6 +761,9 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
       <div className="kd-detail-main">
       {noindex && <meta name="robots" content="noindex,follow" />}
       {site?.id && <AptViewTracker siteId={site.id} />}
+      {/* 홈 「최근 본 현장」 칩(C-0 블록 3)의 기록원. 화면에는 아무것도 그리지 않는다.
+          ⚠️ 위 Promise.allSettled 뭉치에 넣지 않는다 — 서버 데이터가 아니다(504 전례). */}
+      {slug && name && <RecordRecentView slug={slug} name={name} />}
 
       {aptItemListJsonLd && (
         <script
