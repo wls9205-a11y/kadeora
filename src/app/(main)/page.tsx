@@ -124,6 +124,50 @@ async function fetchRecentMoves(): Promise<RecentMove[]> {
   }
 }
 
+/**
+ * H3-2/H3-3 — 검색창 회전 문구와 칩에 쓸 «실제 현장명».
+ *
+ * ⚠️ `trending_keywords` 를 쓰지 않는다. 상위 12건이 전부 heat_score 100 이라 순위가 없고,
+ *    `2026` `아파트` 처럼 검색어가 아닌 값과 부울경 밖인 `경기` `서울` 이 섞여 있다.
+ *    누르는 사람이 무엇을 기대해야 할지 모르는 값이다.
+ *    (테이블·크론은 그대로 둔다 — 다른 소비처가 있을 수 있다. 홈에서 참조만 끊는다.)
+ *
+ * ⚠️ 이름이 길면 검색창에서 말줄임으로 잘린다. 첫 화면에 잘린 이름이 도는 건
+ *    안 도는 것만 못해서 16자 이하만 고른다 (실측: `울산 다운2지구 우미린 더 시그니처 본청약` 23자).
+ */
+async function fetchCuratedNames(limit = 5): Promise<string[]> {
+  const pick = (rows: { name: string | null }[]) =>
+    rows.map((r) => (r.name ?? '').trim()).filter((n) => n.length >= 2 && n.length <= 16);
+  try {
+    const sb = getSupabaseAdmin();
+    const base = () =>
+      (sb as any)
+        .from('apt_sites')
+        .select('name')
+        .eq('is_active', true)
+        .in('region', HOME_REGIONS)
+        .order('content_score', { ascending: false, nullsFirst: false })
+        .order('total_units', { ascending: false, nullsFirst: false })
+        .limit(40);
+
+    const { data, error } = await base().eq('is_curated', true);
+    if (error) throw error;
+    let names = pick((data ?? []) as { name: string | null }[]);
+
+    // 큐레이션이 모자라면 계약 가능한 현장으로 보충한다.
+    if (names.length < limit) {
+      const { data: more } = await base().in('curated_status', DEAL_STATUSES);
+      for (const n of pick((more ?? []) as { name: string | null }[])) {
+        if (!names.includes(n)) names.push(n);
+      }
+    }
+    return names.slice(0, limit);
+  } catch (e) {
+    console.error('[home] curated names failed:', e);
+    return [];   // 실패해도 검색창은 기본 안내문으로 그대로 뜬다
+  }
+}
+
 interface HomeCounts {
   total: number;
   byRegion: { region: string; n: number }[];
@@ -184,10 +228,11 @@ async function fetchCounts(): Promise<HomeCounts> {
 }
 
 export default async function HomePage() {
-  const [deals, moves, counts] = await Promise.all([
+  const [deals, moves, counts, curatedNames] = await Promise.all([
     fetchDeals(),
     fetchRecentMoves(),
     fetchCounts(),
+    fetchCuratedNames(5),
   ]);
 
   return (
@@ -212,10 +257,12 @@ export default async function HomePage() {
         {/* ⚠️ hotkey={false} 필수 — 헤더의 bar 인스턴스가 이미 ⌘K 를 소유한다.
          *    둘 다 true 면 keydown 이 두 번 잡혀 모달이 두 개 열린다.
          *    (Navigation.tsx 의 icon 인스턴스도 같은 이유로 false 다.) */}
+        {/* H3-2: 회전 문구는 실제 현장명이다. 데이터가 없으면 placeholder 로 조용히 되돌아간다. */}
         <UniversalSearchBar
           variant="hero"
           hotkey={false}
           placeholder="단지명·지역·재개발 구역"
+          rotatingPlaceholders={curatedNames}
         />
 
         {/* 숫자는 fetchCounts 에서 온다. 0이면 문장에서 통째로 뺀다 —

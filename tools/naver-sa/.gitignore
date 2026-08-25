@@ -4,3 +4,7 @@ groups.csv
 gid.csv
 sa_state.json
 __pycache__/
+out_*/
+bids_*.csv
+groups_*.csv
+gid_*.csv

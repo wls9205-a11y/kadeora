@@ -33,13 +33,30 @@ type Props = {
    * 둘 다 true 면 keydown 이 두 번 잡혀 숨은 인스턴스의 모달까지 같이 열린다.
    */
   hotkey?: boolean;
+  /**
+   * H3-2 — hero trigger 의 회전 문구. 실제 현장명을 넣는다.
+   *
+   * 정지한 회색 안내문은 스크롤에 묻힌다. 실제 단지명이 돌아가면
+   * "여기서 단지명을 검색한다" 가 설명 없이 전달된다.
+   *
+   * ⚠️ hero variant 에서만 쓴다. 헤더의 bar·icon 은 그대로 둔다.
+   * ⚠️ 안 넘기거나 1개 이하면 회전하지 않고 placeholder 를 그대로 쓴다 —
+   *    데이터 조회가 실패해도 검색창은 평소대로 보여야 한다.
+   */
+  rotatingPlaceholders?: string[];
 };
+
+/** 회전 한 바퀴 간격. 더 빠르면 읽기 전에 바뀐다. */
+const ROTATE_MS = 2200;
+/** 페이드 아웃에 쓰는 시간. 이만큼 뒤에 텍스트를 갈아 끼운다. */
+const FADE_MS = 220;
 
 export default function UniversalSearchBar({
   placeholder = "단지·종목·지역·블로그 검색",
   className = "",
   variant = "bar",
   hotkey = true,
+  rotatingPlaceholders,
 }: Props) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -53,6 +70,48 @@ export default function UniversalSearchBar({
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+
+  /* ── H3-2 회전 플레이스홀더 ──────────────────────────────────────────── */
+  const rotateList = variant === "hero" ? (rotatingPlaceholders ?? []) : [];
+  const canRotate = rotateList.length > 1;
+  const [rotIdx, setRotIdx] = useState(0);
+  const [rotShown, setRotShown] = useState(true);
+  const fadeRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    if (!canRotate) return;
+    // ⚠️ 타이핑 중이거나 모달이 열려 있으면 돌리지 않는다. 사용자가 글자를 넣고 있는데
+    //    뒤에서 문구가 바뀌면 산만하다. (모달 안 입력창은 기본 placeholder 를 쓴다)
+    if (open || q) return;
+    // ⚠️ 움직임을 줄이겠다고 한 사용자에게는 첫 값으로 고정한다.
+    const reduce =
+      typeof window !== "undefined" &&
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) return;
+
+    const id = setInterval(() => {
+      setRotShown(false);
+      fadeRef.current = setTimeout(() => {
+        setRotIdx((i) => (i + 1) % rotateList.length);
+        setRotShown(true);
+      }, FADE_MS);
+    }, ROTATE_MS);
+
+    // ⚠️ interval 과 «안쪽 timeout» 을 둘 다 정리한다. 홈은 클라이언트 라우팅으로
+    //    드나드는 곳이라 한쪽만 지우면 누수가 쌓인다.
+    return () => {
+      clearInterval(id);
+      if (fadeRef.current) clearTimeout(fadeRef.current);
+    };
+  }, [canRotate, open, q, rotateList.length]);
+
+  // 회전이 멈춘 동안(타이핑·모달·reduced-motion) 문구가 사라진 채로 굳지 않게 되돌린다.
+  useEffect(() => {
+    if (!rotShown && (open || q)) setRotShown(true);
+  }, [open, q, rotShown]);
+
+  const heroText = canRotate ? rotateList[rotIdx] ?? placeholder : placeholder;
 
   // ⌘K / Ctrl+K 단축키
   useEffect(() => {
@@ -235,7 +294,7 @@ export default function UniversalSearchBar({
           type="button"
           onClick={() => setOpen(true)}
           aria-label="검색 열기"
-          className={className}
+          className={["kd-hero-search", className].filter(Boolean).join(" ")}
           style={{
             width: "100%",
             height: 56,
@@ -244,25 +303,38 @@ export default function UniversalSearchBar({
             gap: 10,
             padding: "0 16px",
             borderRadius: "var(--radius-lg)",
-            border: "0.5px solid var(--border-strong)",
+            // H3-1: 첫 화면에서 «여기가 검색창이다» 를 색으로 알린다.
+            // ⚠️ hex 를 직접 쓰지 않는다 — 그림자 rgba 만 예외다(토큰에 그림자 색이 없다).
+            //    rgba(37,99,235) 는 --brand(#2563EB) 와 같은 값이다. 토큰을 바꾸면 여기도 본다.
+            border: "2px solid var(--brand)",
+            boxShadow: "0 4px 14px rgba(37,99,235,0.16)",
             background: "var(--bg-surface)",
             color: "var(--text-secondary)",
             cursor: "pointer",
             textAlign: "left",
           }}
         >
-          <SearchIcon size={19} />
+          {/* SearchIcon 은 stroke="currentColor" 라 감싼 쪽의 color 를 따른다.
+              버튼 전체 color 를 브랜드색으로 바꾸면 placeholder 글씨까지 파래지므로 아이콘만 감싼다. */}
+          <span style={{ display: "flex", color: "var(--brand)" }}>
+            <SearchIcon size={19} />
+          </span>
           <span
             style={{
               flex: 1,
+              // ⚠️ 16px 미만으로 내리지 말 것 (iOS 자동확대). 회전 문구도 이 자리에 들어간다.
               fontSize: 17,
               lineHeight: 1.2,
               overflow: "hidden",
               textOverflow: "ellipsis",
               whiteSpace: "nowrap",
+              // 텍스트 교체 순간을 감추는 페이드. 회전하지 않을 때는 항상 1 이라
+              // transition 이 걸려도 아무 일이 일어나지 않는다.
+              opacity: rotShown ? 1 : 0,
+              transition: `opacity ${FADE_MS}ms ease`,
             }}
           >
-            {placeholder}
+            {heroText}
           </span>
         </button>
       ) : (
