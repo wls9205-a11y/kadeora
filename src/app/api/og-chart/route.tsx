@@ -3,6 +3,7 @@ import { NextRequest } from 'next/server';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { brandSurface, GOLD } from '@/lib/og/brand';
 
 export const runtime = 'nodejs';
 export const maxDuration = 15;
@@ -42,7 +43,7 @@ export async function GET(req: NextRequest) {
       const isKR = s.market === 'KOSPI' || s.market === 'KOSDAQ';
       const price = isKR ? `${Number(s.price || 0).toLocaleString()}원` : `$${Number(s.price || 0).toFixed(2)}`;
       const chg = Number(s.change_pct || 0);
-      const chgColor = chg >= 0 ? '#00FF87' : '#FF4444';
+      const chgColor = chg >= 0 ? '#FF4D4D' : '#3478F6';
       const chgText = `${chg >= 0 ? '+' : ''}${chg.toFixed(2)}%`;
       const cap = Number(s.market_cap) > 0 ? (isKR ? `${(Number(s.market_cap) / 1e12).toFixed(1)}조` : `$${(Number(s.market_cap) / 1e9).toFixed(0)}B`) : '-';
       const per = s.per ? `${Number(s.per).toFixed(1)}배` : '-';
@@ -50,7 +51,7 @@ export async function GET(req: NextRequest) {
       const dy = s.dividend_yield ? `${Number(s.dividend_yield).toFixed(1)}%` : '-';
 
       const buf = await new ImageResponse(
-        <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%', background: '#050A18', padding: '48px 56px', fontFamily: 'NK' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%', padding: '48px 56px', fontFamily: 'NK', ...brandSurface() }}>
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: 20 }}>
             <div style={{ display: 'flex', fontSize: 14, color: '#3B7BF6', background: 'rgba(59,123,246,0.15)', padding: '4px 14px', borderRadius: 20 }}>{s.market}</div>
             <div style={{ display: 'flex', fontSize: 13, color: '#666', marginLeft: 'auto' }}>kadeora.app</div>
@@ -100,15 +101,15 @@ export async function GET(req: NextRequest) {
       const builder = site.builder ? String(site.builder).slice(0, 10) : '-';
 
       const buf = await new ImageResponse(
-        <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%', background: '#050A18', padding: '48px 56px', fontFamily: 'NK' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%', padding: '48px 56px', fontFamily: 'NK', ...brandSurface() }}>
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: 20 }}>
-            <div style={{ display: 'flex', fontSize: 14, color: '#00FF87', background: 'rgba(0,255,135,0.15)', padding: '4px 14px', borderRadius: 20 }}>{site.region} {site.sigungu || ''}</div>
+            <div style={{ display: 'flex', fontSize: 14, color: GOLD, background: 'rgba(255,197,61,0.15)', padding: '4px 14px', borderRadius: 20 }}>{site.region} {site.sigungu || ''}</div>
             <div style={{ display: 'flex', fontSize: 13, color: '#666', marginLeft: 'auto' }}>kadeora.app</div>
           </div>
           <div style={{ display: 'flex', fontSize: 36, fontWeight: 700, color: '#fff', marginBottom: 8 }}>{site.name}</div>
           <div style={{ display: 'flex', fontSize: 18, color: '#888', marginBottom: 32 }}>{builder} | {units} | 입주 {moveIn}</div>
-          <div style={{ display: 'flex', alignItems: 'center', padding: '20px 24px', background: 'rgba(0,255,135,0.08)', borderRadius: '12px', marginBottom: 24 }}>
-            <div style={{ display: 'flex', fontSize: 16, color: '#00FF87', marginRight: 16 }}>분양가</div>
+          <div style={{ display: 'flex', alignItems: 'center', padding: '20px 24px', background: 'rgba(255,197,61,0.10)', borderRadius: '12px', marginBottom: 24 }}>
+            <div style={{ display: 'flex', fontSize: 16, color: GOLD, marginRight: 16 }}>분양가</div>
             <div style={{ display: 'flex', fontSize: 40, fontWeight: 700, color: '#fff' }}>{pMin} ~ {pMax}</div>
           </div>
           <div style={{ display: 'flex', gap: 16, flex: 1 }}>

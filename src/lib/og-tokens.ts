@@ -15,20 +15,37 @@ export interface OgCategoryToken {
   label: string;
   /** 영어 코드 */
   code: string;
-  /** 이모지 */
+  /** 한 글자 표식(집·주·돈 …). ⚠️ 이모지가 아니다 — satori 이모지 금지(T1 §4). */
   icon: string;
 }
 
+/**
+ * [T1 §1.1·§1.2] 색을 확정 팔레트로 갈아끼웠다.
+ *
+ * 이전에는 카테고리마다 네온 한 색(형광 초록·시안·노랑 등)과 «거의 검정» 인
+ * 3-stop 그라디언트를 들고 있었다. 그래서 생성기마다 배경이 달랐고, 검색결과에
+ * 여러 편이 뜨면 색동저고리가 됐다. T1 이 그걸 걷어낸다.
+ *
+ *   color — §1.2 카테고리 띠 색 7종으로 접었다. 네이비 위에서 읽히는 채도다.
+ *   bg    — 전 카테고리 동일한 브랜드 네이비 스톱. «카테고리로 분기하지 않는다»(§6.1).
+ *           이 필드로 gradient 를 만들던 호출부가 그대로 네이비를 얻게 남겨둔다.
+ *   dim   — color 의 18% 반투명. 뱃지 배경용.
+ *
+ * ⚠️ 여기에 네온을 되살리지 말 것. 색이 필요하면 src/lib/og/brand.ts 의
+ *    CATEGORY_BAR 를 보고 계열을 늘린다.
+ */
+const NAVY_STOPS: [string, string, string] = ['#0B2A6B', '#123A8F', '#2563EB'];
+
 export const OG_CAT: Record<string, OgCategoryToken> = {
-  apt:     { color: '#00FF87', dim: 'rgba(0,255,135,0.18)',   bg: ['#010804','#031509','#05230E'], label: '청약·분양',   code: 'APT',     icon: '집' },
-  stock:   { color: '#00E5FF', dim: 'rgba(0,229,255,0.18)',   bg: ['#010508','#031020','#051830'], label: '주식·시세',   code: 'STOCK',   icon: '주' },
-  finance: { color: '#FFE000', dim: 'rgba(255,224,0,0.18)',   bg: ['#070500','#140E00','#201500'], label: '재테크·절세', code: 'FINANCE', icon: '돈' },
-  unsold:  { color: '#FF6B1A', dim: 'rgba(255,107,26,0.18)',  bg: ['#070100','#140500','#210900'], label: '미분양',      code: 'UNSOLD',  icon: '미' },
-  redev:   { color: '#B794FF', dim: 'rgba(183,148,255,0.18)', bg: ['#04030C','#0B0820','#161033'], label: '재개발',      code: 'REDEV',   icon: '재' },
-  general: { color: '#C084FC', dim: 'rgba(192,132,252,0.18)', bg: ['#030108','#080518','#0D0825'], label: '생활정보',   code: 'INFO',    icon: '뉴' },
-  blog:    { color: '#C084FC', dim: 'rgba(192,132,252,0.18)', bg: ['#030108','#080518','#0D0825'], label: '블로그',      code: 'BLOG',    icon: '글' },
-  local:   { color: '#FFD43B', dim: 'rgba(255,212,59,0.18)',  bg: ['#080700','#141000','#201800'], label: '우리동네',   code: 'LOCAL',   icon: '동' },
-  free:    { color: '#F472B6', dim: 'rgba(244,114,182,0.18)', bg: ['#080210','#130820','#1E0F30'], label: '자유',        code: 'FREE',    icon: '톡' },
+  apt:     { color: '#FF8A5B', dim: 'rgba(255,138,91,0.18)',  bg: NAVY_STOPS, label: '청약·분양',   code: 'APT',     icon: '집' },
+  stock:   { color: '#F472B6', dim: 'rgba(244,114,182,0.18)', bg: NAVY_STOPS, label: '주식·시세',   code: 'STOCK',   icon: '주' },
+  finance: { color: '#60A5FA', dim: 'rgba(96,165,250,0.18)',  bg: NAVY_STOPS, label: '재테크·절세', code: 'FINANCE', icon: '돈' },
+  unsold:  { color: '#FBBF6E', dim: 'rgba(251,191,110,0.18)', bg: NAVY_STOPS, label: '미분양',      code: 'UNSOLD',  icon: '미' },
+  redev:   { color: '#A78BFA', dim: 'rgba(167,139,250,0.18)', bg: NAVY_STOPS, label: '재개발',      code: 'REDEV',   icon: '재' },
+  general: { color: '#94A3B8', dim: 'rgba(148,163,184,0.18)', bg: NAVY_STOPS, label: '생활정보',   code: 'INFO',    icon: '뉴' },
+  blog:    { color: '#94A3B8', dim: 'rgba(148,163,184,0.18)', bg: NAVY_STOPS, label: '블로그',      code: 'BLOG',    icon: '글' },
+  local:   { color: '#34D399', dim: 'rgba(52,211,153,0.18)',  bg: NAVY_STOPS, label: '우리동네',   code: 'LOCAL',   icon: '동' },
+  free:    { color: '#94A3B8', dim: 'rgba(148,163,184,0.18)', bg: NAVY_STOPS, label: '자유',        code: 'FREE',    icon: '톡' },
 };
 
 export type OgCategory = keyof typeof OG_CAT;

@@ -3,6 +3,7 @@ import { NextRequest } from 'next/server';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { sanitizeForOG } from '@/lib/og-sanitize';
+import { brandSurface } from '@/lib/og/brand';
 
 export const runtime = 'nodejs';
 
@@ -33,13 +34,20 @@ export async function GET(req: NextRequest) {
   });
   const category = s.get('category') || 'stock';
 
-  const catColor: Record<string, { bg: string; accent: string; label: string }> = {
-    stock: { bg: '#051830', accent: '#00E5FF', label: '주식' },
-    apt: { bg: '#031509', accent: '#00FF87', label: '부동산' },
-    finance: { bg: '#140E00', accent: '#FFE000', label: '재테크' },
-    tax: { bg: '#0D0825', accent: '#C084FC', label: '세금' },
-    economy: { bg: '#070500', accent: '#FF6B1A', label: '경제' },
-    life: { bg: '#080210', accent: '#F472B6', label: '생활' },
+  /**
+   * [T1 §3.2·§6.9] 다색 accent 팔레트는 «정보 구분용» 이라 그대로 둔다.
+   * bg 필드는 배경이 브랜드 네이비로 통일되면서 쓰이지 않게 돼 뺐다 —
+   * 남겨두면 다음 사람이 다시 카테고리별 배경으로 되돌린다(§6.1 금지).
+   * apt 의 네온그린만 교체했다. 네이비 위에서 눈을 찌르고, T1 이
+   * 전 생성기에서 걷어내기로 한 색이다.
+   */
+  const catColor: Record<string, { accent: string; label: string }> = {
+    stock: { accent: '#00E5FF', label: '주식' },
+    apt: { accent: '#34D399', label: '부동산' },
+    finance: { accent: '#FFE000', label: '재테크' },
+    tax: { accent: '#C084FC', label: '세금' },
+    economy: { accent: '#FF6B1A', label: '경제' },
+    life: { accent: '#F472B6', label: '생활' },
   };
   const cat = catColor[category] || catColor.stock;
 
@@ -50,7 +58,8 @@ export async function GET(req: NextRequest) {
   const element = (
     <div style={{
       display: 'flex', flexDirection: 'column', width: '100%', height: '100%',
-      background: `linear-gradient(160deg, ${cat.bg} 0%, #000 100%)`,
+      // [T1 §3.2] 배경만 브랜드 네이비로. 다색 팔레트(accent)는 정보 구분용이라 유지(§6.9).
+      ...brandSurface(),
       padding: '48px 56px', fontFamily: 'NK, sans-serif', color: '#fff',
     }}>
       {/* 헤더 */}

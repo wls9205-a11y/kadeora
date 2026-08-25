@@ -6,6 +6,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { SITE_URL } from '@/lib/constants';
 import { OG_CAT } from '@/lib/og-tokens';
 import { sanitizeForOG } from '@/lib/og-sanitize';
+import { brandSurface, BRAND_BG_SOLID, GOLD } from '@/lib/og/brand';
 
 export const runtime = 'nodejs';
 export const maxDuration = 30;
@@ -93,11 +94,10 @@ function PriceCard(q: QuoteRow, ff: string) {
   const isDown = chg < 0;
   const accent = isUp ? '#FF4D4D' : isDown ? '#3478F6' : '#9CA3AF';
   const arrowDir: 'up' | 'down' | 'flat' = isUp ? 'up' : isDown ? 'down' : 'flat';
-  const bg = `linear-gradient(135deg, #050811 0%, #0B1428 50%, #0F1B3E 100%)`;
   return (
-    <div style={{ width:'100%', height:'100%', display:'flex', flexDirection:'column', background:bg, fontFamily: ff, padding:'52px 60px', position:'relative', overflow:'hidden' }}>
+    <div style={{ width:'100%', height:'100%', display:'flex', flexDirection:'column', ...brandSurface(), fontFamily: ff, padding:'52px 60px', position:'relative', overflow:'hidden' }}>
       <div style={{ position:'absolute', top:-160, right:-120, width:660, height:660, borderRadius:'50%', background:`radial-gradient(circle,${accent}22 0%,transparent 65%)`, display:'flex' }} />
-      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', position:'relative', zIndex:2 }}>
+      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', position:'relative' }}>
         <div style={{ display:'flex', alignItems:'center', gap:10 }}>
           <span style={{ fontSize: 24, fontWeight:900, color:'#00E5FF', letterSpacing:-.5 }}>카더라</span>
         </div>
@@ -105,7 +105,7 @@ function PriceCard(q: QuoteRow, ff: string) {
           <span style={{ fontSize: 14, fontWeight:900, color:accent, letterSpacing:1 }}>PRICE · 실시간</span>
         </div>
       </div>
-      <div style={{ flex:1, display:'flex', flexDirection:'column', justifyContent:'center', position:'relative', zIndex:2 }}>
+      <div style={{ flex:1, display:'flex', flexDirection:'column', justifyContent:'center', position:'relative' }}>
         <div style={{ display:'flex', fontSize: 24, color:'rgba(255,255,255,.55)', fontWeight:700, marginBottom:8, letterSpacing:1 }}>{q.symbol} · {safeStr(q.sector) || '주식'}</div>
         <div style={{ display:'flex', fontSize:name.length > 14 ? 56 : 72, fontWeight:900, color:'#fff', letterSpacing:-2, lineHeight:1.05, marginBottom:18 }}>{name}</div>
         <div style={{ display:'flex', alignItems:'baseline', gap:20 }}>
@@ -118,7 +118,7 @@ function PriceCard(q: QuoteRow, ff: string) {
           )}
         </div>
       </div>
-      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', position:'relative', zIndex:2, paddingTop:14, borderTop:'1px solid rgba(255,255,255,.12)' }}>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', position:'relative', paddingTop:14, borderTop:'1px solid rgba(255,255,255,.12)' }}>
         <span style={{ fontSize: 14, color:'rgba(255,255,255,.45)', fontWeight:700 }}>시가총액 {fmtCap(q.market_cap, q.currency)}</span>
         <span style={{ fontSize: 14, color:'rgba(255,255,255,.35)', fontWeight:700 }}>kadeora.app/stock/{q.symbol}</span>
       </div>
@@ -133,7 +133,6 @@ function ChartCard(q: QuoteRow, ff: string) {
   const isDown = chg < 0;
   const accent = isUp ? '#FF4D4D' : isDown ? '#3478F6' : '#9CA3AF';
   const arrowDir: 'up' | 'down' | 'flat' = isUp ? 'up' : isDown ? 'down' : 'flat';
-  const bg = `linear-gradient(160deg, #050811 0%, #0F1B3E 100%)`;
   // 미니 스파크라인 placeholder — 가짜 7포인트 생성, sign of chg 결정
   const seed = (q.symbol || '').charCodeAt(0) || 50;
   const pts = Array.from({ length: 12 }, (_, i) => {
@@ -143,7 +142,7 @@ function ChartCard(q: QuoteRow, ff: string) {
   const path = pts.map((y, i) => `${i === 0 ? 'M' : 'L'} ${i * (1080 / (pts.length - 1))} ${100 - y}`).join(' ');
   const fillPath = `${path} L 1080 100 L 0 100 Z`;
   return (
-    <div style={{ width:'100%', height:'100%', display:'flex', flexDirection:'column', background:bg, fontFamily: ff, padding:'48px 56px' }}>
+    <div style={{ width:'100%', height:'100%', display:'flex', flexDirection:'column', ...brandSurface(), fontFamily: ff, padding:'48px 56px' }}>
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:20 }}>
         <div style={{ display:'flex', flexDirection:'column' }}>
           <div style={{ display:'flex', fontSize: 18, color:'rgba(255,255,255,.55)', fontWeight:700, letterSpacing:1, marginBottom:4 }}>{q.symbol} · CHART</div>
@@ -189,12 +188,11 @@ function FinancialCard(q: QuoteRow, ff: string) {
     ['배당률', yld, '연간 배당수익률'],
     ['시총', mc, '시가총액'],
   ];
-  const bg = `linear-gradient(150deg, #051028 0%, #0E2552 100%)`;
   return (
-    <div style={{ width:'100%', height:'100%', display:'flex', flexDirection:'column', background:bg, fontFamily: ff, padding:'48px 56px' }}>
+    <div style={{ width:'100%', height:'100%', display:'flex', flexDirection:'column', ...brandSurface(), fontFamily: ff, padding:'48px 56px' }}>
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:24 }}>
         <div style={{ display:'flex', flexDirection:'column' }}>
-          <div style={{ display:'flex', fontSize: 16, color:'#FFE000', fontWeight:900, letterSpacing:2, marginBottom:6 }}>FINANCIAL · 재무 핵심</div>
+          <div style={{ display:'flex', fontSize: 16, color:GOLD, fontWeight:900, letterSpacing:2, marginBottom:6 }}>FINANCIAL · 재무 핵심</div>
           <div style={{ display:'flex', fontSize: 42, fontWeight:900, color:'#fff', letterSpacing:-1, lineHeight:1.05 }}>{name}</div>
           <div style={{ display:'flex', fontSize: 16, color:'rgba(255,255,255,.45)', fontWeight:700, marginTop:4 }}>{q.symbol} · {safeStr(q.sector) || '-'}</div>
         </div>
@@ -222,7 +220,6 @@ function FinancialCard(q: QuoteRow, ff: string) {
 
 function FlowCard(q: QuoteRow, ff: string) {
   const name = safeStr(q.name) || q.symbol;
-  const bg = `linear-gradient(160deg, #07131F 0%, #112138 100%)`;
   const ACC = '#00E5FF';
   // placeholder 수급 데이터 (DB-free). 실제 수치는 detail 페이지에서.
   const flows = [
@@ -231,7 +228,7 @@ function FlowCard(q: QuoteRow, ff: string) {
     { who: '개인', dir: '순매도', val: '약세', color: '#3478F6' },
   ];
   return (
-    <div style={{ width:'100%', height:'100%', display:'flex', flexDirection:'column', background:bg, fontFamily: ff, padding:'48px 56px' }}>
+    <div style={{ width:'100%', height:'100%', display:'flex', flexDirection:'column', ...brandSurface(), fontFamily: ff, padding:'48px 56px' }}>
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:22 }}>
         <div style={{ display:'flex', flexDirection:'column' }}>
           <div style={{ display:'flex', fontSize: 16, color:ACC, fontWeight:900, letterSpacing:2, marginBottom:6 }}>FLOW · 수급 동향</div>
@@ -265,19 +262,20 @@ function FlowCard(q: QuoteRow, ff: string) {
 function AICard(q: QuoteRow, ff: string) {
   const name = safeStr(q.name) || q.symbol;
   const chg = Number(q.change_pct) || 0;
-  const sentiment: { lab: string; color: string; dir: 'up' | 'down' | 'flat' } = chg > 1 ? { lab: '긍정', color: '#00FF87', dir: 'up' }
-                   : chg < -1 ? { lab: '주의', color: '#FF6B1A', dir: 'down' }
-                   : { lab: '중립', color: '#FFE000', dir: 'flat' };
+  // [T1] 등락 색 체계는 PriceCard 와 같다 — 상승 빨강 / 하락 파랑. 의미가 있어 유지(§6.9).
+  //      기존엔 긍정이 네온그린이라 같은 종목이 카드마다 다른 색으로 나갔다.
+  const sentiment: { lab: string; color: string; dir: 'up' | 'down' | 'flat' } = chg > 1 ? { lab: '긍정', color: '#FF4D4D', dir: 'up' }
+                   : chg < -1 ? { lab: '주의', color: '#3478F6', dir: 'down' }
+                   : { lab: '중립', color: '#94A3B8', dir: 'flat' };
   const summary = chg > 1
     ? `최근 강세 흐름이 이어지고 있습니다. 단기 모멘텀과 거래량 동향을 함께 점검하세요.`
     : chg < -1
     ? `단기 조정 구간입니다. 지지선·재무 지표·섹터 흐름을 종합 검토할 시점입니다.`
     : `방향성 탐색 구간입니다. 펀더멘털과 수급을 균형 있게 살펴보세요.`;
-  const bg = `linear-gradient(150deg, #060B1F 0%, #0C1638 50%, #1B0E3A 100%)`;
   return (
-    <div style={{ width:'100%', height:'100%', display:'flex', flexDirection:'column', background:bg, fontFamily: ff, padding:'52px 60px', position:'relative', overflow:'hidden' }}>
+    <div style={{ width:'100%', height:'100%', display:'flex', flexDirection:'column', ...brandSurface(), fontFamily: ff, padding:'52px 60px', position:'relative', overflow:'hidden' }}>
       <div style={{ position:'absolute', top:-190, left:-180, width:720, height:720, borderRadius:'50%', background:`radial-gradient(circle,${sentiment.color}22 0%,transparent 65%)`, display:'flex' }} />
-      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', position:'relative', zIndex:2, marginBottom:24 }}>
+      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', position:'relative', marginBottom:24 }}>
         <div style={{ display:'flex', flexDirection:'column' }}>
           <div style={{ display:'flex', fontSize: 16, color:'#C084FC', fontWeight:900, letterSpacing:2, marginBottom:6 }}>AI · 한줄 분석</div>
           <div style={{ display:'flex', fontSize: 40, fontWeight:900, color:'#fff', letterSpacing:-1, lineHeight:1.05 }}>{name}</div>
@@ -287,11 +285,11 @@ function AICard(q: QuoteRow, ff: string) {
           <span style={{ fontSize: 18, fontWeight:900, color:sentiment.color, letterSpacing:1 }}>{sentiment.lab}</span>
         </div>
       </div>
-      <div style={{ flex:1, display:'flex', flexDirection:'column', justifyContent:'center', position:'relative', zIndex:2 }}>
+      <div style={{ flex:1, display:'flex', flexDirection:'column', justifyContent:'center', position:'relative' }}>
         <div style={{ display:'flex', width:48, height:5, background:sentiment.color, borderRadius:999, marginBottom:24 }} />
         <div style={{ display:'flex', fontSize: 36, fontWeight:800, color:'#fff', lineHeight:1.45, letterSpacing:-.8, wordBreak:'keep-all' }}>{summary}</div>
       </div>
-      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', position:'relative', zIndex:2, paddingTop:14, borderTop:'1px solid rgba(255,255,255,.1)' }}>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', position:'relative', paddingTop:14, borderTop:'1px solid rgba(255,255,255,.1)' }}>
         <span style={{ fontSize: 14, color:'rgba(255,255,255,.45)', fontWeight:700 }}>{q.symbol} · AI 종목 한줄평</span>
         <span style={{ fontSize: 14, color:'rgba(255,255,255,.35)', fontWeight:700 }}>kadeora.app/stock/{q.symbol}</span>
       </div>
@@ -302,7 +300,7 @@ function AICard(q: QuoteRow, ff: string) {
 function FallbackCard(symbol: string | null, ff: string) {
   const stockAccent = OG_CAT.stock.color;
   return (
-    <div style={{ width:'100%', height:'100%', display:'flex', flexDirection:'column', background:'#0F1B3E', fontFamily: ff, padding:'56px 64px', justifyContent:'space-between' }}>
+    <div style={{ width:'100%', height:'100%', display:'flex', flexDirection:'column', fontFamily: ff, padding:'56px 64px', ...brandSurface(), justifyContent:'space-between' }}>
       <div style={{ display:'flex', fontSize: 22, color:stockAccent, fontWeight:900, letterSpacing:2 }}>{OG_CAT.stock.icon} 카더라 주식</div>
       <div style={{ display:'flex', flexDirection:'column', gap:18 }}>
         <div style={{ display:'flex', width:60, height:5, background:stockAccent, borderRadius:999 }} />
@@ -384,8 +382,8 @@ export async function GET(req: NextRequest) {
     try {
       const fbImg = new ImageResponse(
         (
-          <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#0F1B3E', color: '#fff', fontFamily: 'sans-serif' }}>
-            <div style={{ display:'flex', fontSize: 28, color: '#FBBF24', letterSpacing: 4, marginBottom: 16, fontWeight: 900 }}>KADEORA</div>
+          <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: BRAND_BG_SOLID, color: '#fff', fontFamily: 'sans-serif' }}>
+            <div style={{ display:'flex', fontSize: 28, color: GOLD, letterSpacing: 4, marginBottom: 16, fontWeight: 900 }}>KADEORA</div>
             <div style={{ display:'flex', fontSize: 64, fontWeight: 900, letterSpacing: -1 }}>{symbol || 'stock'}</div>
           </div>
         ),

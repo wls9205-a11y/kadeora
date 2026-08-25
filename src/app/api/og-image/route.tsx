@@ -4,6 +4,7 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import { OG_CAT as CAT } from '@/lib/og-tokens';
 import { SITE_URL } from '@/lib/constants';
+import { brandSurface } from '@/lib/og/brand';
 
 export const runtime = 'nodejs';
 export const maxDuration = 30;
@@ -32,7 +33,7 @@ export async function GET(req: NextRequest) {
   const titleFS = title.length > 22 ? 38 : title.length > 16 ? 46 : 54;
 
   const element = (
-    <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', background: '#060606', fontFamily: ff }}>
+    <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', fontFamily: ff, ...brandSurface() }}>
       <div style={{ background: C.color, height: 80, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 56px', flexShrink: 0 }}>
         <span style={{ fontSize: 26, fontWeight: 900, color: '#000' }}>카더라</span>
         <span style={{ fontSize: 22, fontWeight: 900, color: '#000', display: 'flex', alignItems: 'center', gap: 10 }}>
