@@ -205,6 +205,10 @@
       "schedule": "0 21 1 * *"
     },
     {
+      "path": "/api/cron/blog-weekly-movers",
+      "schedule": "30 21 * * 0"
+    },
+    {
       "path": "/api/cron/blog-apt-v2",
       "schedule": "0 8 * * 3"
     },

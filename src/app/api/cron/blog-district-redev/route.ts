@@ -259,12 +259,19 @@ async function handler(_req: NextRequest) {
       .gte('occurred_at', since);
     const movedAll = new Set<string>((events ?? []).map((e: any) => e.site_slug).filter(Boolean));
 
+    // ⚠️ 자동 보강(FAQ·계산기·출처)이 붙기 **전** 본문으로 미리 재기 때문에 보수적이다.
+    //    보강분이 더 붙으므로 이 문턱을 넘으면 실제로는 여유가 있다.
+    const { data: cfg } = await admin
+      .from('blog_publish_config').select('min_content_length').eq('id', 1).maybeSingle();
+    const minContentLength = Number(cfg?.min_content_length ?? 2000);
+
     let checked = 0;
     let skippedNotPublishable = 0;
     let created = 0;
     let refreshed = 0;
     const skippedReasons: Record<string, number> = {};
     const titles: string[] = [];
+    const thinDistricts: string[] = [];
 
     for (const dst of districts) {
       if (created + refreshed >= MAX_POSTS) break;
@@ -303,6 +310,16 @@ async function handler(_req: NextRequest) {
 
       const content = buildBody(d, items, moved, ym);
       const excerpt = `${dst.region} ${dst.sigungu} 재개발·재건축 ${d.total}곳의 ${ym} 기준 진행 단계와 시공사·세대수를 구역별로 정리했습니다.`;
+
+      // ⚠️ 본문이 얇으면 여기서 멈춘다. safeBlogInsert 의 content_too_short 로 떨어지게 두면
+      //    "왜 이 구만 안 나왔는지" 가 버그처럼 보인다. 실측: 부산 중구(5곳)가 유일하게 걸린다.
+      //    현장이 적은 구는 링크가 적어 글로서도 얇다 — publishable 가드와 같은 취지로 여기서 끊는다.
+      //    (하한을 올리려면 get_district_redev_digest 의 publishable 조건을 고쳐야 한다.)
+      if (content.length < minContentLength) {
+        thinDistricts.push(`${dst.region} ${dst.sigungu}(${items.length}곳·${content.length}자)`);
+        skippedReasons.too_thin = (skippedReasons.too_thin ?? 0) + 1;
+        continue;
+      }
 
       /* ── 이미 있으면 갱신, 없으면 신규 ── */
       const { data: existingPost } = await admin
@@ -360,6 +377,7 @@ async function handler(_req: NextRequest) {
         districts_checked: checked,
         refreshed,
         skipped_not_publishable: skippedNotPublishable,
+        thin_districts: thinDistricts,
         skipped_reasons: skippedReasons,
         moved_sites_this_month: movedAll.size,
         titles,
