@@ -343,25 +343,21 @@ export async function fetchDailyReportData(region: ReportRegion): Promise<DailyR
     }))
     .sort((a, b) => b.sale - a.sale);
 
-  // 섹터 — RPC 가 집계해서 준다. JS 집계는 삭제했다.
+  // 섹터 — 집계·이상치 제외·품질 필터를 «전부 RPC 안에서» 한다. 여기서는 형태만 맞춘다.
   //
-  // ⚠️ 다만 «품질 필터는 남긴다». RPC 는 집계만 하고 거르지 않는다 —
-  //    실측 39행 중 종목 3개 미만이 10행, 시총 5조 이하가 11행이고
-  //    필터를 통과하는 건 24행뿐이다. 그대로 쓰면 종목 1개짜리 섹터가
-  //    "오늘 가장 오른 업종" 으로 리포트 맨 위에 올라간다(실측 `운송` 1종목 +4.34%).
-  //    집계를 DB 로 내리는 것과 기준을 낮추는 것은 다른 일이다.
-  // ⚠️ 개별 종목의 ±30% 초과 이상치 제외는 «없어졌다». 행 단위 판정이라
-  //    집계 후에는 복원할 수 없다. 필요하면 RPC 안에서 걸러야 한다.
+  // ⚠️ 필터를 두 곳에 두지 않는다.
+  //    한때 JS 쪽에도 같은 조건(>=3종목 · >5조)을 남겨 뒀는데, 기준이 두 벌이면
+  //    한쪽만 고쳤을 때 «화면과 DB 가 다른 답» 을 내고 그걸 알아채기 어렵다.
+  //    RPC 가 ±30% 이상치 제외까지 맡는다 — 그건 행 단위 판정이라 집계 후에는
+  //    애초에 JS 로 복원할 수 없다.
+  //    실측 대조(2026-08-25): RPC 24행 = 옛 JS 필터 통과분 24행, 최소 3종목 · 최소 5.69조.
   const sectors = ((sectorsR.data || []) as any[])
     .map(r => ({
       sector: r.sector as string,
       cnt: Number(r.symbols) || 0,
       avg_pct: Math.round((Number(r.avg_change) || 0) * 100) / 100,
       cap_t: Math.round((Number(r.total_market_cap) || 0) / 1e12),
-      _cap: Number(r.total_market_cap) || 0,
     }))
-    .filter(v => v.cnt >= 3 && v._cap > 5e12)
-    .map(({ _cap, ...rest }) => rest)
     .sort((a, b) => b.avg_pct - a.avg_pct);
 
   // 주식 TOP 10 + 주간 변동 (별도 쿼리)
