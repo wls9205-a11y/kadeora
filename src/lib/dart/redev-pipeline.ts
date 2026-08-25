@@ -21,7 +21,7 @@ import {
 export const REVIEW_TABLE = 'apt_stage_review_queue';
 
 /** 공급계약 공시가 알리는 단계는 하나다 — 시공사 선정. */
-const TARGET_STAGE = 'constructor_selected';
+export const TARGET_STAGE = 'constructor_selected';
 
 export interface RedevFiling {
   rcept_no: string;
@@ -42,10 +42,10 @@ export type RedevResult =
   | { kind: 'queue'; reason: string; wrote: boolean }
   | { kind: 'auto'; slug: string; changed: boolean };
 
-const dartUrl = (rceptNo: string) => `https://dart.fss.or.kr/dsaf001/main.do?rcpNo=${rceptNo}`;
+export const dartUrl = (rceptNo: string) => `https://dart.fss.or.kr/dsaf001/main.do?rcpNo=${rceptNo}`;
 
 /** 구역명 하나로 후보 현장을 찾는다. name 정확 일치 + name_variants 포함, 둘 다 본다. */
-async function candidatesForZone(admin: any, zone: string): Promise<CandidateSite[]> {
+export async function candidatesForZone(admin: any, zone: string): Promise<CandidateSite[]> {
   const cols = 'id, slug, name, builder, name_variants';
   const out: CandidateSite[] = [];
 
@@ -72,7 +72,7 @@ async function candidatesForZone(admin: any, zone: string): Promise<CandidateSit
  *    카운터는 resolved:3 이라고 말하는데 DB 는 하나도 안 바뀐 상태였다.
  *    목록 밖 값을 쓰지 말 것. 늘리려면 DB CHECK 를 먼저 넓혀야 한다.
  */
-const CLOSED_STATUS = 'rejected';
+export const CLOSED_STATUS = 'rejected';
 
 /**
  * 재처리 결과 사람이 볼 필요가 없어진 pending 행을 닫는다.
@@ -200,12 +200,35 @@ export async function processRedevFiling(f: RedevFiling, apiKey: string): Promis
   }
 
   /* ── 자동 반영 ── */
+  const applied = await applyConstructorSelected(admin, {
+    siteId: outcome.siteId,
+    siteSlug: outcome.siteSlug,
+    zone: outcome.zone,
+    filing: f,
+  });
+  if (!applied.ok) {
+    const wrote = await enqueue(admin, f, { kind: 'queue', reason: `update_failed:${applied.error}`, zones });
+    return { kind: 'queue', reason: 'update_failed', wrote };
+  }
+  return { kind: 'auto', slug: outcome.siteSlug, changed: applied.changed };
+}
+
+/**
+ * 공시 한 건을 현장에 반영한다 — **자동 반영과 어드민 승인이 같은 함수를 쓴다.**
+ *
+ * ⚠️ 두 벌로 만들지 말 것. 크론과 사람이 다른 규칙으로 쓰면 화면에 나가는 값이 갈린다
+ *    (confidence='confirmed' 로 광고 랜딩까지 흘러가는 값이다).
+ */
+export async function applyConstructorSelected(
+  admin: any,
+  args: { siteId: string; siteSlug: string; zone: string; filing: RedevFiling },
+): Promise<{ ok: true; changed: boolean; locked?: boolean } | { ok: false; error: string }> {
+  const { siteId, siteSlug, zone, filing: f } = args;
+
   // ⚠️ 이미 잠긴 현장은 건드리지 않는다. 사람이 손으로 정한 단계를 공시가 덮으면 안 된다.
   const { data: current } = await admin
-    .from('apt_sites').select('lifecycle_stage, stage_locked').eq('id', outcome.siteId).maybeSingle();
-  if (current?.stage_locked) {
-    return { kind: 'auto', slug: outcome.siteSlug, changed: false };
-  }
+    .from('apt_sites').select('lifecycle_stage, stage_locked').eq('id', siteId).maybeSingle();
+  if (current?.stage_locked) return { ok: true, changed: false, locked: true };
 
   const changed = current?.lifecycle_stage !== TARGET_STAGE;
   const { error: updErr } = await admin.from('apt_sites').update({
@@ -214,11 +237,10 @@ export async function processRedevFiling(f: RedevFiling, apiKey: string): Promis
     confidence: 'confirmed',
     confidence_note: `DART ${f.report_nm.trim()} — ${f.corp_name}`,
     updated_at: new Date().toISOString(),
-  }).eq('id', outcome.siteId);
+  }).eq('id', siteId);
   if (updErr) {
     console.warn(`[dart/redev] 반영 실패 (${f.rcept_no}): ${updErr.message}`);
-    const wrote = await enqueue(admin, f, { kind: 'queue', reason: `update_failed:${updErr.message}`, zones });
-    return { kind: 'queue', reason: 'update_failed', wrote };
+    return { ok: false, error: updErr.message };
   }
 
   if (changed) {
@@ -226,18 +248,18 @@ export async function processRedevFiling(f: RedevFiling, apiKey: string): Promis
     // 트리거가 confidence·source 는 옮기지만 source_url·note 는 옮기지 않는다.
     const { data: ev } = await admin
       .from('apt_site_events').select('id')
-      .eq('site_id', outcome.siteId).eq('event_type', 'stage_change')
+      .eq('site_id', siteId).eq('event_type', 'stage_change')
       .order('occurred_at', { ascending: false }).limit(1).maybeSingle();
     if (ev?.id) {
       await admin.from('apt_site_events').update({
         source_url: dartUrl(f.rcept_no),
-        note: `${outcome.zone} 시공사 선정 — ${f.corp_name}`,
+        note: `${zone} 시공사 선정 — ${f.corp_name}`,
       }).eq('id', ev.id);
     }
-    await pingIndexNow(admin, outcome.siteSlug);
+    await pingIndexNow(admin, siteSlug);
   }
 
-  return { kind: 'auto', slug: outcome.siteSlug, changed };
+  return { ok: true, changed };
 }
 
 /** 즉시 색인 핑. 제출은 indexnow-urgent(5분)이 맡는다. */
