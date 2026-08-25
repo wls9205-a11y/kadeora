@@ -3,9 +3,10 @@ import { NextRequest } from 'next/server';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
-import { OG_CAT } from '@/lib/og-tokens';
 import { SITE_URL } from '@/lib/constants';
 import { sanitizeForOG } from '@/lib/og-sanitize';
+import { barColor, titleLines, BRAND_BG_SOLID, GOLD } from '@/lib/og/brand';
+import { BrandCard } from '@/lib/og/frame';
 
 export const runtime = 'nodejs';
 export const maxDuration = 30;
@@ -63,9 +64,12 @@ async function fetchPost(slug: string): Promise<BlogRow | null> {
   } catch { return null; }
 }
 
+/**
+ * 카드 2~6 배경. 본문 갤러리용이라 T1 범위 밖이다(§3.1, §6.8) — 건드리지 않는다.
+ * ⚠️ 카드 1(커버)과 폴백은 §1 브랜드 서피스를 «자기가» 칠한다. 여기로 오지 않는다.
+ */
 function bgFor(card: number, post: BlogRow | null): string {
-  if (card === 6) return '#FAC775'; // CTA amber
-  if (card === 1) return '#1A1A18';
+  if (card === 6) return '#FAC775'; // CTA amber — 카드 6 은 T1 범위 밖(§6.8)
   const cat = post?.category;
   if (card === 2) {
     if (cat === 'apt') return '#085041';
@@ -85,45 +89,27 @@ function safeStr(v: unknown, fallback = ''): string {
   return sanitizeForOG(v) || fallback;
 }
 
-function fmtDate(s?: string | null): string {
-  const v = safeStr(s);
-  return v ? v.slice(0, 10) : '';
-}
-
+/**
+ * T1 §1 — 커버(카드 1). 목록·검색 썸네일이라 네이버에서 ~120px 로 축소돼 뜬다.
+ *
+ * ⚠️ 제목 원문을 sanitizeForOG 로 먼저 씻지 말 것.
+ *    sanitizeForOG 는 U+2014 em dash 를 ASCII '-' 로 바꾸는데, §2 의 절단 문자에서
+ *    '-' 는 «일부러» 빠져 있다(범천1-1, 반여3-1 이 잘려서). 씻고 넣으면 절단이
+ *    통째로 안 먹는다. 원문 → titleLines → 줄 단위 sanitize 순서를 지킨다.
+ *    titleLines 자체 화이트리스트가 이미 한글/영숫자/·/-/공백만 남기므로 안전하다.
+ */
 function renderCover(post: BlogRow): React.ReactElement {
-  const title = safeStr(post.title) || safeStr(post.slug) || '카더라 콘텐츠';
-  const catKey = safeStr(post.category);
-  const cat = catKey && OG_CAT[catKey] ? OG_CAT[catKey].label : '카더라';
-  const sub = safeStr(post.sub_category);
-  // 반응형 제목 크기 — 630×630 정방형(네이버 1:1 크롭 대응) 기준. 네이버 검색결과는 ~120px 로
-  // 축소되므로 제목이 프레임을 최대한 채우도록 상향. 긴 제목(48자+)도 4줄 안에 수용.
-  const len = title.length;
-  const titleFS = len > 48 ? 38 : len > 40 ? 44 : len > 32 ? 50 : len > 24 ? 58 : len > 14 ? 68 : 78;
-  return (
-    <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: 56 }}>
-      {/* 상단: 카테고리 배지(좌) + 브랜드 마크(우, 고정) */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <div style={{ display:'flex', background: '#FAC775', color: '#1A1A18', fontSize: 23, fontWeight: 800, padding: '7px 18px', borderRadius: 999 }}>{cat}</div>
-          {sub ? <div style={{ display:'flex', background: 'rgba(255,255,255,0.14)', color: '#FFFFFF', fontSize: 22, fontWeight: 700, padding: '7px 16px', borderRadius: 999 }}>{sub}</div> : null}
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-          <div style={{ display:'flex', width: 26, height: 26, borderRadius: 7, background: '#FAC775' }} />
-          <div style={{ display:'flex', fontSize: 24, fontWeight: 900, color: '#FFFFFF', letterSpacing: -0.5 }}>카더라</div>
-        </div>
-      </div>
-      {/* 제목 — 남는 세로 공간을 채워 정중앙 배치(네이버 1:1 크롭 안전). 대비 강화용 그림자. */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 20, paddingTop: 24, paddingBottom: 24 }}>
-        <div style={{ display:'flex', width: 64, height: 6, borderRadius: 3, background: '#FAC775' }} />
-        <div style={{ display:'flex', fontSize: titleFS, fontWeight: 900, color: '#FFFFFF', lineHeight: 1.2, letterSpacing: -1.5, textShadow: '0 2px 12px rgba(0,0,0,0.45)' }}>{title}</div>
-      </div>
-      {/* 하단: 날짜 + 도메인 */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'rgba(255,255,255,0.58)', fontSize: 18, fontWeight: 700 }}>
-        <span>{fmtDate(post.published_at || post.created_at)}</span>
-        <span>kadeora.app</span>
-      </div>
-    </div>
-  );
+  const raw = (typeof post.title === 'string' && post.title.trim())
+    ? post.title
+    : (typeof post.slug === 'string' ? post.slug : '');
+  const lines = titleLines(raw).map((l) => sanitizeForOG(l) || l);
+  const bar = barColor({
+    category: post.category,
+    subCategory: post.sub_category,
+    cronType: post.cron_type,
+    title: raw,
+  });
+  return <BrandCard lines={lines} frame={SIDE} bar={bar} />;
 }
 
 function renderKeyPoints(post: BlogRow, card: number): React.ReactElement {
@@ -199,17 +185,10 @@ function renderCta(post: BlogRow): React.ReactElement {
   );
 }
 
+/** 글을 못 찾았을 때. 커버 자리에 그대로 노출되므로 §1 규격을 따른다. */
 function renderFallback(slug: string | null): React.ReactElement {
-  return (
-    <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', padding: 56, justifyContent: 'space-between', background: '#1A1A18' }}>
-      <div style={{ display:'flex', fontSize: 22, color: '#FAC775', fontWeight: 800 }}>카더라 블로그</div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-        <div style={{ display:'flex', width: 56, height: 4, background: '#FAC775' }} />
-        <div style={{ display:'flex', fontSize: 64, fontWeight: 900, color: '#FFFFFF', lineHeight: 1.1, letterSpacing: -2 }}>{slug ? slug : '카더라 콘텐츠'}</div>
-      </div>
-      <div style={{ display:'flex', fontSize: 18, color: 'rgba(255,255,255,0.55)', fontWeight: 700 }}>kadeora.app · 주식·부동산·재테크</div>
-    </div>
-  );
+  const lines = titleLines(slug).map((l) => sanitizeForOG(l) || l);
+  return <BrandCard lines={lines} frame={SIDE} bar={barColor({ title: slug })} />;
 }
 
 export async function GET(req: NextRequest) {
@@ -251,8 +230,19 @@ export async function GET(req: NextRequest) {
   }
 
   try {
+    // §1: 커버(카드 1)와 폴백은 BrandCard 가 자기 배경을 칠한다. 여기서 덧칠하면
+    // 브랜드 네이비 위에 옛 단색이 깔려 그라디언트가 죽는다.
+    const isBrandSurface = !post || card === 1;
     const wrapped = (
-      <div style={{ width: '100%', height: '100%', display: 'flex', background: bgFor(card, post), fontFamily: ff }}>
+      <div
+        style={{
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          fontFamily: ff,
+          ...(isBrandSurface ? { background: BRAND_BG_SOLID } : { background: bgFor(card, post) }),
+        }}
+      >
         {body}
       </div>
     );
@@ -292,8 +282,8 @@ export async function GET(req: NextRequest) {
     try {
       const fbImg = new ImageResponse(
         (
-          <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#0F1B3E', color: '#fff', fontFamily: 'sans-serif' }}>
-            <div style={{ display:'flex', fontSize: 28, color: '#FBBF24', letterSpacing: 4, marginBottom: 16, fontWeight: 900 }}>KADEORA</div>
+          <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: BRAND_BG_SOLID, color: '#fff', fontFamily: 'sans-serif' }}>
+            <div style={{ display:'flex', fontSize: 28, color: GOLD, letterSpacing: 4, marginBottom: 16, fontWeight: 900 }}>KADEORA</div>
             <div style={{ display:'flex', fontSize: 56, fontWeight: 900, letterSpacing: -1 }}>blog</div>
           </div>
         ),
