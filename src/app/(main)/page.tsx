@@ -4,8 +4,10 @@
 //   1 헤더            (main)/layout 의 Navigation
 //   2 히어로           H1 2줄 + 검색바(hero) + 현장 수
 //   3 최근 본 현장      localStorage 칩 3 — 없으면 미렌더
-//   4 지금 계약 가능한 현장  카드 4장
-//   5 최근 움직인 현장   단계 변경·신규 등록 4건
+//   4 많이 보는 현장     조회수 5줄 (더보기 없음 — /apt/popular 가 noindex 죽은 라우트다)
+//   5 지금 계약 가능      미분양·선착순 3줄 (카드 → 텍스트 줄. DealCards 는 남겨 뒀다)
+//   6 최근 움직인 현장   단계 변경·신규 등록 4건
+//   7 재개발·재건축      정비사업 3줄
 //   6 지역별 보기        시도 + 주요 구군, 건수 배지
 //
 // ⚠️ 홈 리드폼은 걷어냈다. LeadForm 의 variant='home' 코드와 관심 지역 셀렉트는
@@ -27,7 +29,8 @@ import { SITE_URL as SITE } from '@/lib/constants';
 import SectionHeader from '@/components/apt/SectionHeader';
 import UniversalSearchBar from '@/components/search/UniversalSearchBar';
 import RecentlyViewed from '@/components/home/RecentlyViewed';
-import DealCards, { type DealSite } from '@/components/home/DealCards';
+import SiteRows, { MoreLink } from '@/components/home/SiteRows';
+import { fetchHomeSections, MIN_ROWS } from '@/lib/home/sections';
 import RecentMoves, { type RecentMove } from '@/components/home/RecentMoves';
 import { BUGYEONG_REGIONS } from '@/lib/apt/pipeline';
 
@@ -73,34 +76,6 @@ const QUICK_LINKS: { href: string; label: string }[] = [
   { href: '/daily',        label: '데일리 리포트' },
   { href: '/feed',         label: '커뮤니티' },
 ];
-
-/**
- * C-2 — 지금 계약 가능한 현장 4곳.
- *
- * ⚠️ `/api/og-apt` 를 부르지 않는다. 미리 구운 `card_image_url` 을 읽고,
- *    비면 DealCards 안의 SiteThumb 이 HTTP 0회로 CSS 카드를 그린다.
- * ⚠️ 위성(`satellite_image_url`)은 아예 select 하지 않는다. 준공 전 현장에 위성을
- *    깔면 아직 없는 건물 자리의 공터가 보인다.
- */
-async function fetchDeals(): Promise<DealSite[]> {
-  try {
-    const sb = getSupabaseAdmin();
-    const { data, error } = await (sb as any)
-      .from('apt_sites')
-      .select('slug,name,region,sigungu,curated_status,lifecycle_stage,price_min,price_max,hero_image_url,card_image_url,hero_license_tier')
-      .eq('is_active', true)
-      .in('region', HOME_REGIONS)
-      .in('curated_status', DEAL_STATUSES)
-      .order('content_score', { ascending: false, nullsFirst: false })
-      .order('total_units', { ascending: false, nullsFirst: false })
-      .limit(4);
-    if (error) throw error;
-    return (data ?? []) as DealSite[];
-  } catch (e) {
-    console.error('[home] deals failed:', e);
-    return [];
-  }
-}
 
 /**
  * C-3 — 최근 움직인 현장.
@@ -230,11 +205,11 @@ async function fetchCounts(): Promise<HomeCounts> {
 }
 
 export default async function HomePage() {
-  const [deals, moves, counts, curatedNames] = await Promise.all([
-    fetchDeals(),
+  const [moves, counts, curatedNames, sections] = await Promise.all([
     fetchRecentMoves(),
     fetchCounts(),
     fetchCuratedNames(5),
+    fetchHomeSections(HOME_REGIONS),
   ]);
 
   return (
@@ -282,35 +257,53 @@ export default async function HomePage() {
       {/* ── 3 최근 본 현장 — 없으면 컴포넌트가 null 을 낸다 ── */}
       <RecentlyViewed limit={3} />
 
-      {/* ── 4 지금 계약 가능한 현장 ── */}
-      {deals.length > 0 && (
+      {/* ── 4 많이 보는 현장 ──
+       * ⚠️ 더보기를 «걸지 않는다». 착지 후보였던 /apt/popular 는 코드 주석에
+       *    「s8: PV 미달 죽은 라우트」로 적혀 있고 robots index:false 다.
+       *    팀이 죽은 라우트로 판정한 곳에 첫 화면 링크를 걸지 않는다. */}
+      {sections.popular.length >= MIN_ROWS && (
         <section style={{ marginBottom: 18 }}>
-          <SectionHeader
-            eyebrow="APT — 부산·울산·경남"
-            title="지금 계약 가능한 현장"
-            id="home-deals"
-            meta={<Link href="/apt" style={{ color: 'var(--text-tertiary)', textDecoration: 'none' }}>전체 →</Link>}
-          />
-          <DealCards items={deals} />
+          <SectionHeader eyebrow="APT — 부산·울산·경남" title="많이 보는 현장" id="home-popular" />
+          <SiteRows items={sections.popular} />
         </section>
       )}
 
-      {/* ── 5 최근 움직인 현장 ──
+      {/* ── 5 지금 계약 가능한 현장 ──
+       * 카드 4장에서 텍스트 3줄로 바꿨다. 카드는 104px, 줄은 42px —
+       * 같은 자리에 세 배가 들어간다. DealCards 는 지우지 않았다(다른 자리에서 쓸 수 있다). */}
+      {sections.deals.length >= MIN_ROWS && (
+        <section style={{ marginBottom: 18 }}>
+          <SectionHeader eyebrow="APT — 미분양·선착순" title="지금 계약 가능" id="home-deals" />
+          <SiteRows items={sections.deals} />
+          <MoreLink href="/apt/unsold" label="미분양·선착순·잔여세대 전체" />
+        </section>
+      )}
+
+      {/* ── 6 최근 움직인 현장 ──
        * ⚠️ 「신규 등록」과 「단계 변경」을 라벨로 가른다 — 섞어서 「N곳이 움직였다」로
-       *    쓰면 거짓말이 된다(실측: 단계 변경 84 · 신규 등록 345). */}
+       *    쓰면 거짓말이 된다(실측: 단계 변경 84 · 신규 등록 345).
+       * ⚠️ 더보기는 /apt 로 보낸다. 거기에 같은 섹션(getAptRecentMoves)이 이미 있어
+       *    맥락이 이어진다. 「전체」가 아니라 「더 보기」로 적는 이유는 /apt 도 섹션이지
+       *    전체 목록이 아니기 때문이다 — 없는 걸 있다고 쓰지 않는다.
+       * ⚠️ /apt/pipeline 을 쓰지 않는다. 그건 「공고 전 현장 전체 보기」라 성격이 다르다. */}
       {moves.length > 0 && (
         <section style={{ marginBottom: 18 }}>
-          <SectionHeader
-            eyebrow="APT — 부산·울산·경남"
-            title="최근 움직인 현장"
-            id="home-moves"
-            meta={<Link href="/apt/redev" style={{ color: 'var(--text-tertiary)', textDecoration: 'none' }}>전체 →</Link>}
-          />
+          <SectionHeader eyebrow="APT — 부산·울산·경남" title="최근 움직인 현장" id="home-moves" />
           <RecentMoves items={moves} />
+          <MoreLink href="/apt" label="부동산 홈에서 더 보기" />
         </section>
       )}
 
-      {/* ── 6 지역별 보기 ──
+      {/* ── 7 재개발·재건축 ── */}
+      {sections.redev.length >= MIN_ROWS && (
+        <section style={{ marginBottom: 18 }}>
+          <SectionHeader eyebrow="APT — 정비사업" title="재개발·재건축" id="home-redev" />
+          <SiteRows items={sections.redev} />
+          <MoreLink href="/apt/redev/부산" label="구역별 진행 단계 전체" />
+        </section>
+      )}
+
+      {/* ── 8 지역별 보기 ──
        * ⚠️ 건수 하드코딩 금지. 히어로 부제와 같은 쿼리(fetchCounts)에서 온다.
        * ⚠️ 링크는 실재가 확인된 라우트만 쓴다 —
        *    /apt/region/[region] · /apt/region/[region]/[sigungu]. */}

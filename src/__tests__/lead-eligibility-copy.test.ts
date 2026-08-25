@@ -75,8 +75,18 @@ describe('§C-1 — 단계별 문구', () => {
     }
   });
 
-  it('기축은 이 단지가 아니라 지역 분양을 안내한다', () => {
-    expect(leadCopy('post_move_in').cta).toBe('이 지역 분양 정보 안내 신청');
+  // M5 §A 로 «의도적으로» 바뀐 부분이다. 원래 이 테스트는
+  //   post_move_in → '이 지역 분양 정보 안내 신청'
+  // 을 못박고 있었다. 그 문구는 기축에서 「이 단지 말고 다른 걸 파는」 말이라
+  // 매매·전세를 알아보러 온 사람에게 맞지 않는다는 판단으로 resale 로 교체했다.
+  // 「이 단지가 아니라 지역을 안내한다」는 원 의도는 active_trade 쪽에 그대로 남아 있다.
+  it('기축은 이제 이 단지의 매물·시세를 묻는다 (M5 §A)', () => {
+    expect(leadCopy('post_move_in').cta).toBe('이 단지 매물·시세 상담');
+    expect(leadCopy('post_move_in').inquiryType).toBe('매물상담');
+  });
+
+  it('existing 계열(active_trade)은 옛 지역 분양 문구를 유지한다', () => {
+    expect(leadCopy('active_trade').cta).toBe('이 지역 분양 정보 안내 신청');
   });
 
   it('공고 전 문의는 분양상담과 구분된다 — 미처리 경보가 분양상담으로 좁히기 때문', () => {
