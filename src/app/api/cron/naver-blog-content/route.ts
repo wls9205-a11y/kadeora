@@ -114,9 +114,15 @@ async function doWork() {
         naver_html: naverContent.html,
         naver_tags: naverContent.tags,
         category: post.category,
-        target: 'both',
+        // [§7 / §2-4] 카페 결합 해제.
+        //   `naver-cafe-publish` 워커는 라우트 파일 자체가 사라졌는데(삭제 확인:
+        //   src/app/api/cron 아래에 해당 route.ts 없음, src/lib 에도 카페 발행 모듈 없음)
+        //   큐는 계속 target='both' + cafe_status='pending' 으로 쌓였다.
+        //   그래서 «카페 단계에서 블로그 발행까지 같이 묶여» 4/17 이후 전량 정지했다.
+        //   신규 행은 처음부터 blog 전용으로 만든다. 기존 87건은 [DB] 큐 해제에서 정리.
+        target: 'blog',
         blog_status: 'pending',
-        cafe_status: 'pending',
+        cafe_status: 'skipped',
       });
 
       success++;
