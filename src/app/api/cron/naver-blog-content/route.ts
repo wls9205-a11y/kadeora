@@ -66,22 +66,31 @@ function siteLinkBlock(sites: { slug: string; name: string }[]): string {
 async function doWork() {
   const sb = getSupabaseAdmin();
 
-  // 이미 발행된 slug 목록
-  const { data: existing } = await (sb as any).from('naver_syndication').select('blog_slug');
-  const existingSlugs = new Set((existing || []).map((e: any) => e.blog_slug));
+  // [애드덤2 §C-2] 후보 선정을 RPC 로 넘긴다.
+  //
+  //   기존 구현은 blog_posts 를 view_count 순 100건 읽고 애플리케이션에서
+  //   naver_syndication 전량을 조회해 중복을 걸렀다. 조회수만 보는 선정이라
+  //   부울경 파이프라인 현장과 무관한 글이 큐를 채웠고, 중복 필터는 매 실행마다
+  //   naver_syndication 을 통째로 끌어왔다.
+  //
+  //   get_syndication_candidates(p_limit) 는 SETOF blog_posts 를 돌려주고
+  //   **이미 신디케이션된 slug 를 자체적으로 걸러낸다** — 그래서 위의 선조회와
+  //   중복 필터를 함께 지웠다. 반환이 blog_posts 행 그대로라 아래 필드 접근
+  //   (slug/title/content/hub_apt_slug 등)은 손댈 필요가 없다.
+  //
+  //   실측(2026-08-25) — p_limit=100 호출 시 100건 반환, 그중 이미 신디케이션된
+  //   건 0, hub_apt_slug 보유 100/100, is_published 100/100.
+  //   RPC 는 DB 담당이 배포했다(security invoker, service_role 만 EXECUTE).
+  //   여기서 재정의·수정하지 않는다.
+  const { data: posts, error: rpcError } = await (sb as any)
+    .rpc('get_syndication_candidates', { p_limit: 100 });
 
-  // 조회수 상위 블로그 포스트 중 미발행분
-  // database.ts 가 hub_apt_slug 를 아직 모른다 (저장소 as any 관례).
-  const { data: posts } = await (sb as any).from('blog_posts')
-    // §2-7: hub_apt_slug 를 함께 읽는다 — 현장 링크의 1순위다.
-    .select('id, slug, title, content, excerpt, category, tags, cover_image, image_alt, author_name, published_at, view_count, meta_description, hub_apt_slug')
-    .eq('is_published', true)
-    .not('published_at', 'is', null)
-    .order('view_count', { ascending: false })
-    .limit(100);
+  if (rpcError) {
+    // 조용히 빈 배치로 끝나면 큐가 마른 것과 구분되지 않는다.
+    throw new Error(`get_syndication_candidates 실패: ${rpcError.message}`);
+  }
 
-  const candidates = (posts || []).filter((p: any) => !existingSlugs.has(p.slug));
-  const batch = candidates.slice(0, BATCH_SIZE);
+  const batch = (posts || []).slice(0, BATCH_SIZE);
 
   if (batch.length === 0) {
     return { processed: 0, metadata: { message: 'No new posts to syndicate' } };
