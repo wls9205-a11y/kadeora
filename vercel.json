@@ -339,6 +339,10 @@
     {
       "path": "/api/cron/naver-blog-content",
       "schedule": "30 6 * * *"
+    },
+    {
+      "path": "/api/cron/apt-card-build",
+      "schedule": "*/10 * * * *"
     }
   ],
   "headers": [
