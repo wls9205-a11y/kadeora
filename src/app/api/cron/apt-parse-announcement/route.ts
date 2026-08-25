@@ -27,8 +27,11 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
       return { processed: 0, created: 0, failed: 0, metadata: { message: '파싱 대상 없음' } };
     }
 
-    let processed = 0, failed = 0;
+    let processed = 0, failed = 0, emptyParse = 0, writeFailed = 0;
     const errors: string[] = [];
+    // 파싱이 비었을 때 HTML 앞부분을 남긴다 — 구조가 어떻게 바뀌었는지 알 방법이
+    // 지금까지 «전혀» 없었다. 최대 2건만.
+    const htmlSamples: string[] = [];
 
     for (const apt of targets) {
       try {
@@ -61,8 +64,39 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
           const html = await res.text();
           const parsed = parseAnnouncementHtml(html);
           Object.assign(ud, buildUpdateDict(parsed, apt.tot_supply_hshld_co));
+
+          // buildUpdateDict 는 항상 announcement_parsed_at 을 넣는다.
+          // 그것 «말고» 아무것도 못 뽑았으면 파싱 실패로 센다.
+          if (Object.keys(ud).filter(k => k !== 'announcement_parsed_at').length === 0) {
+            emptyParse++;
+            const failCount = (apt.parse_fail_count || 0) + 1;
+            const upd: Record<string, any> = { parse_fail_count: failCount };
+            // 빈 파싱에도 3회 기준을 적용한다 — 안 그러면 같은 50건을 영원히 다시 잡는다.
+            if (failCount >= 3) upd.announcement_parsed_at = new Date().toISOString();
+            await (sb as any).from('apt_subscriptions').update(upd).eq('id', apt.id);
+            errors.push(`${apt.house_nm}: 빈 파싱 (fail ${failCount})`);
+            if (htmlSamples.length < 2) htmlSamples.push(`${apt.house_manage_no}: ${html.slice(0, 500)}`);
+            continue;
+          }
         }
-        await (sb as any).from('apt_subscriptions').update(ud).eq('id', apt.id);
+
+        // ⚠️ 영향 행 수를 «반드시» 확인한다.
+        //   .select() 없이 update 만 던지면 PostgREST 오류(없는 컬럼 → PGRST204 등)가
+        //   조용히 삼켜지고 processed++ 가 그대로 돈다. 실제로 4/28 이후 133건이
+        //   그렇게 «8,950건 처리, 결과 0건» 으로 보고됐다. 원인은 contact_tel 컬럼
+        //   부재였고, 없는 컬럼 하나가 update 전체를 원자적으로 실패시켰다.
+        const { data: updated, error: upErr } = await (sb as any)
+          .from('apt_subscriptions').update(ud).eq('id', apt.id).select('id');
+
+        if (upErr || !updated || updated.length === 0) {
+          writeFailed++;
+          const failCount = (apt.parse_fail_count || 0) + 1;
+          const upd: Record<string, any> = { parse_fail_count: failCount };
+          if (failCount >= 3) upd.announcement_parsed_at = new Date().toISOString();
+          await (sb as any).from('apt_subscriptions').update(upd).eq('id', apt.id);
+          errors.push(`${apt.house_nm}: 저장 실패 ${upErr?.code || ''} ${(upErr?.message || '영향 0행').slice(0, 80)}`);
+          continue;
+        }
         processed++;
       } catch (err: any) {
         failed++;
@@ -75,7 +109,21 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
       await new Promise(r => setTimeout(r, 300));
     }
 
-    return { processed, created: processed, failed, metadata: { batch: targets.length, errors: errors.slice(0, 5) } };
+    // processed 는 «실제로 저장된» 건수다. 빈 파싱·저장 실패는 여기 안 들어간다.
+    return {
+      processed,
+      created: processed,
+      failed: failed + emptyParse + writeFailed,
+      metadata: {
+        batch: targets.length,
+        saved: processed,
+        empty_parse: emptyParse,
+        write_failed: writeFailed,
+        fetch_failed: failed,
+        errors: errors.slice(0, 5),
+        html_samples: htmlSamples,
+      },
+    };
   });
 
   return NextResponse.json(result);
