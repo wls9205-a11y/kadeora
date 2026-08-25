@@ -428,14 +428,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     //
     // 조감도(hero)가 있으면 조감도가 1순위다 — 공유 카드가 완전히 달라진다.
     // [패치 P3 §2] og:image 를 목록·상세 히어로와 «같은 체인» 으로 통일한다.
-    //   1순위 hero_image_url  2순위 기축이면 satellite  3순위 카드(size=hero, 21:9)
+    //   1순위 hero_image_url  2순위 기축이면 satellite  3순위 카드(ratio=21x9)
     //
     //   잠금이 풀린 근거 — hero_image_url 179건 전량이 부산광역시 정비사업 공공데이터
     //   개방 API(viewImgPath) 174 · 코오롱글로벌 4 · 두산건설 1 이다. 스크랩이 아니다.
     //
     // ⚠️ 폭·높이를 «아는 것만» 신고한다.
     //    바로 위 주석이 경고하듯 카카오톡·네이버는 선언값이 아니라 실제 비율을 본다.
-    //    - 카드는 1260×540 으로 확정이라 그대로 적는다
+    //    - 카드는 1680×720 으로 확정이라 그대로 적는다
     //    - 위성은 1024×1024 «정사각» 이다(apt-satellite-crawl 이 그렇게 굽는다).
     //      여기에 1200×630 을 붙이던 것이 기존 코드였고, 그게 '큰 카드가 아니라 작은
     //      썸네일로 뜨는' 원인이다. 정사각은 정사각으로 신고한다
@@ -447,14 +447,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const lcStageMeta = (d.site as any)?.lifecycle_stage as string | null | undefined;
     const isGichukMeta = lcStageMeta === 'post_move_in' || lcStageMeta === 'landmark_active';
     const satUrlMeta = d.site?.satellite_image_url || null;
-    const cardWideUrl = `${SITE_URL}/api/og-apt?slug=${encodeURIComponent(resolved.slug)}&size=hero&card=1`;
+    const cardWideUrl = `${SITE_URL}/api/og-apt?slug=${encodeURIComponent(resolved.slug)}&ratio=21x9&card=1`;
 
     const OG_WIDE =
       heroUrl && heroUrl.length > 10
         ? { url: heroUrl, alt: `${d.name} 조감도` }
         : isGichukMeta && satUrlMeta
           ? { url: satUrlMeta, width: 1024, height: 1024, alt: `${d.name} 항공 이미지` }
-          : { url: cardWideUrl, width: 1260, height: 540, alt: `${d.name} 대표 이미지` };
+          : { url: cardWideUrl, width: 1680, height: 720, alt: `${d.name} 대표 이미지` };
 
     // 1200×630 예비 — 21:9 가 잘리는 클라이언트를 위한 안전판.
     const OG_LEGACY_WIDE = {
@@ -624,7 +624,7 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
   const heroPhotoUrl: string | null =
     (site as any)?.hero_image_url
     || (isGichukLd ? site?.satellite_image_url : null)
-    || (site?.slug ? `${SITE_URL}/api/og-apt?slug=${encodeURIComponent(site.slug)}&size=hero&card=1` : null)
+    || (site?.slug ? `${SITE_URL}/api/og-apt?slug=${encodeURIComponent(site.slug)}&ratio=21x9&card=1` : null)
     || null;
   const developerHeroUrl: string | null = (site as any)?.hero_image_url || null;
 

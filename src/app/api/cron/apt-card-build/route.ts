@@ -8,9 +8,9 @@
  *
  * 대상 (패치 P1 §3 으로 5,845 → 1,414 로 축소) —
  *   1 순위  hero_image_url 이 없고 기축(post_move_in·landmark_active)이 아닌 것
- *           → sq(1:1) · hero(21:9) · heroM(4:3) 3 종
+ *           → 1x1(목록) · 4x3(모바일 히어로) · 21x9(데스크탑 히어로) 3 종
  *   2 순위  기축인데 위성도 실사도 없는 것
- *           → sq 만
+ *           → 1x1 만
  *
  *   기축 4,483 건 중 4,459 건은 이미 위성을 갖고 있어 카드가 필요 없다. 준공 단지에서
  *   항공 사진은 '없어서 대신 넣는 그림' 이 아니라 그 자체가 정보다. 원 지시의
@@ -42,15 +42,17 @@ const PREEMPT_MS = 260_000;
 
 const GICHUK = ['post_move_in', 'landmark_active'];
 
-// [패치 P2 §1-1] 규격 재정의 — sq 1:1(목록·기본) / hero 21:9 / heroM 4:3.
-// 이전의 thumb 128 · sq 630 · hero 1200×630 은 폐기됐다.
-type SizeKey = 'sq' | 'hero' | 'heroM';
+// 규격 키는 og-apt 의 `ratio` 파라미터와 «같은 이름·같은 값» 이다.
+// 한때 여기만 size=sq|hero|heroM 를 쓰고 og-apt 는 ratio 를 읽어, 무엇을 넣든
+// 기본값(1x1)이 나가는 상태였다. 이름이 갈리면 조용히 어긋난다.
+// RPC 3종(get_apt_pipeline·subscription_hub·archive)도 ratio=1x1 로 통일됐다.
+type RatioKey = '1x1' | '4x3' | '21x9';
 
 /** og-apt 의 SIZE_SPEC 과 같은 값. 받은 PNG 가 정말 그 크기인지 확인하는 데 쓴다. */
-const EXPECTED_DIM: Record<SizeKey, { w: number; h: number }> = {
-  sq: { w: 512, h: 512 },
-  hero: { w: 1260, h: 540 },
-  heroM: { w: 1200, h: 900 },
+const EXPECTED_DIM: Record<RatioKey, { w: number; h: number }> = {
+  '1x1': { w: 630, h: 630 },
+  '4x3': { w: 1200, h: 900 },
+  '21x9': { w: 1680, h: 720 },
 };
 
 /** PNG IHDR 에서 폭·높이를 읽는다. 실패하면 null. */
@@ -63,8 +65,8 @@ function pngSize(buf: Buffer): { w: number; h: number } | null {
  * og-apt 를 자기 자신에게 호출해 PNG 를 받는다.
  * 카드는 순수 생성 그래픽이라 외부 의존이 없다 — 실패하면 그 현장만 건너뛴다.
  */
-async function renderCard(slug: string, size: SizeKey): Promise<Buffer | null> {
-  const url = `${SITE_URL}/api/og-apt?slug=${encodeURIComponent(slug)}&size=${size}&card=1`;
+async function renderCard(slug: string, size: RatioKey): Promise<Buffer | null> {
+  const url = `${SITE_URL}/api/og-apt?slug=${encodeURIComponent(slug)}&ratio=${size}&card=1`;
   try {
     const res = await fetch(url, { signal: AbortSignal.timeout(20_000), cache: 'no-store' });
     if (!res.ok) return null;
@@ -137,11 +139,11 @@ async function handler(req: NextRequest) {
       tier2 = data || [];
     }
 
-    const jobs: { site: any; sizes: SizeKey[] }[] = [
+    const jobs: { site: any; sizes: RatioKey[] }[] = [
       // 1순위는 3규격 전부 — 목록(sq) · 데스크탑 히어로(hero) · 모바일 히어로(heroM).
-      ...(tier1 || []).map((s: any) => ({ site: s, sizes: ['sq', 'hero', 'heroM'] as SizeKey[] })),
+      ...(tier1 || []).map((s: any) => ({ site: s, sizes: ['1x1', '4x3', '21x9'] as RatioKey[] })),
       // 2순위는 목록에만 쓰이므로 sq 만.
-      ...tier2.map((s: any) => ({ site: s, sizes: ['sq'] as SizeKey[] })),
+      ...tier2.map((s: any) => ({ site: s, sizes: ['1x1'] as RatioKey[] })),
     ];
 
     if (jobs.length === 0) {
@@ -189,7 +191,7 @@ async function handler(req: NextRequest) {
           failures.push(`${site.id}:${size}:upload:${upErr.message || ''}`.slice(0, 120));
           break;
         }
-        if (size === 'sq') {
+        if (size === '1x1') {
           const { data: pub } = admin.storage.from(STORAGE_BUCKET).getPublicUrl(path);
           sqUrl = pub?.publicUrl || null;
         }
