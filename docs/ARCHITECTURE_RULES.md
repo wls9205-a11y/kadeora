@@ -472,3 +472,40 @@ Server Component 페이지의 BAILOUT 진단 + fix 순서:
 - cold start 감소 + 봇 캐시 hit rate 향상.
 - 단지/글 상세 페이지는 `force-static` (Rule #32 / s238 적용).
 - 더 짧은 revalidate (60s) 는 트래픽 적은 페이지 한정 — 봇 hit rate 가 cold start 비용 못 갚음.
+
+## Rule #43 — 중복 생존자를 `content_score` 로 고르지 말 것 (M2 B-4 신설)
+
+**Rule**:
+같은 현장의 중복 행 중 무엇을 남길지(생존자) 정할 때 **`content_score` 를 판정 축으로 쓰지 않는다.**
+판정 축은 **슬러그 품질**이다 — 영문·블록 토큰이 온전한 쪽이 생존자다.
+
+```
+꺼짐  ---아이파크포레                 cs100   ← 점수가 높다
+살음  dmc-sk-view-아이파크포레         cs94    ← 이쪽이 생존자다
+```
+
+**왜**:
+`content_score` 는 은퇴한 행에도 그대로 남는다. 페이지 품질이 아니라 잔여값이다.
+점수로 고르면 **깨진 슬러그가 이긴다** — 토큰이 빠진 쪽이 먼저 만들어져 데이터가 더 쌓여
+있는 경우가 많기 때문이다.
+
+**이미 두 번 사고가 났다**:
+1. V15 A-1 병합 — 생존자 선정에 슬러그 품질 기준이 빠져 **23쌍이 거꾸로** 잡혔다.
+   DB 담당이 방향을 뒤집었고 `src/lib/apt/merged-slugs.ts` 헤더에 기록이 남아 있다.
+2. 지시서 M2 B-4 — "비활성인데 content_score 80+ 30건을 되살려라"로 **같은 기준이 다시 적혔다.**
+   실측하니 219건이었고 그중 210건이 `apt_site_merges.dead_slug` 였다. 그대로 켰다면
+   middleware 가 301 로 넘기고 있는 URL 이 통째로 되살아났다.
+
+**How to apply**:
+- 중복 판정 쿼리를 쓸 때 `ORDER BY content_score DESC` 로 생존자를 고르지 않는다.
+- 생존자 후보가 갈리면 슬러그를 본다. `--` 나 앞뒤 하이픈으로 토큰이 빠진 쪽이 은퇴 대상이다.
+- 이미 `apt_site_merges` 에 등재된 쌍은 **다시 판정하지 않는다.** 그 표가 유일한 근거다.
+- 비활성 행을 되살리기 전에 반드시 확인:
+  `SELECT 1 FROM apt_site_merges WHERE dead_slug = :slug` — 있으면 켜지 않는다.
+- 중복을 정리할 때 순서는 **① 생존자 `name_variants` 에 은퇴자 이름 편입 → ② 은퇴자
+  `is_active=false` → ③ `apt_site_merges` 등록 → ④ `node scripts/gen-merged-slugs.mjs`** 다.
+  ①을 빠뜨리면 구역명 검색어가 사라진다 (`sa.py` 가 `name_variants` 를 키워드로 확장한다).
+- `apt_sites` 에서 `DELETE` 금지. `is_active=false` 로만 은퇴시킨다.
+
+**Discovered**: M2 B-4 (2026-08-25) — 219건 중 조치 대상 0건. 병합표 미등재 9건만
+등록해 404 → 301 로 복구했다. `is_active` 는 한 행도 켜지 않았다.
