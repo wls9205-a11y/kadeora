@@ -325,14 +325,6 @@
       "schedule": "30 11 * * 0-5"
     },
     {
-      "path": "/api/cron/us-premarket-brief",
-      "schedule": "30 12 * * 1-5"
-    },
-    {
-      "path": "/api/cron/us-closing-recap",
-      "schedule": "10 20 * * 2-6"
-    },
-    {
       "path": "/api/cron/apt-summary-gen",
       "schedule": "10 * * * *"
     },
