@@ -12,6 +12,7 @@ import { SITE_URL as SITE } from '@/lib/constants';
 import StockListRow from '@/components/stock/StockListRow';
 import { HomeAptRow, HomeBlogRow } from '@/components/home/HomeListRows';
 import SectionHeader from '@/components/apt/SectionHeader';
+import UniversalSearchBar from '@/components/search/UniversalSearchBar';
 import type { StockIssueScore, AptIssueScore } from '@/lib/issue/types';
 import type { HomeData } from '@/lib/home/contracts';
 
@@ -211,6 +212,18 @@ export default async function HomePage() {
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '8px 6px 24px' }}>
+      {/* H1-1 검색 히어로.
+       * ⚠️ hotkey={false} 필수 — 헤더의 bar 인스턴스가 이미 ⌘K 를 소유한다.
+       *    둘 다 true 면 keydown 이 두 번 잡혀 모달이 두 개 열린다.
+       *    (Navigation.tsx 의 icon 인스턴스도 같은 이유로 false 다.) */}
+      <div style={{ margin: '2px 3px 12px' }}>
+        <UniversalSearchBar
+          variant="hero"
+          hotkey={false}
+          placeholder="단지명·지역·재개발 구역"
+        />
+      </div>
+
       {/* Hero stat bar */}
       <section
         style={{

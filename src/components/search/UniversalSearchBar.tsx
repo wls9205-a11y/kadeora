@@ -20,10 +20,13 @@ type Props = {
   /**
    * trigger 모양. 'bar' 는 헤더 가운데 들어가는 알약 입력창,
    * 'icon' 은 헤더 우측 액션 줄에 들어가는 36×36 원형 버튼(모바일).
-   * 모달·타이프어헤드 동작은 둘이 완전히 같다 — 모바일만 /search 로
+   * 'hero' 는 홈 상단 검색 히어로 (H1-1) — 52px 높이의 넓은 입력창.
+   * 모달·타이프어헤드 동작은 셋이 완전히 같다 — 모바일만 /search 로
    * 페이지 이동하던 v3 이전 동작을 여기로 흡수한다.
+   *
+   * ⚠️ trigger 모양만 다르다. 모달·debounce·정렬에는 손대지 말 것.
    */
-  variant?: "bar" | "icon";
+  variant?: "bar" | "icon" | "hero";
   /**
    * ⌘K 단축키 리스너를 이 인스턴스가 소유할지.
    * 헤더에 bar·icon 두 인스턴스가 동시에 마운트되므로 한쪽만 true 여야 한다.
@@ -223,6 +226,44 @@ export default function UniversalSearchBar({
           }}
         >
           <SearchIcon />
+        </button>
+      ) : variant === "hero" ? (
+        /* H1-1 홈 검색 히어로.
+         * ⚠️ placeholder 를 16px 미만으로 내리지 말 것 — iOS 사파리가 입력창을
+         *    자동 확대해 화면이 튄다. 홈 첫 화면이라 그 튐이 가장 잘 보인다. */
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          aria-label="검색 열기"
+          className={className}
+          style={{
+            width: "100%",
+            height: 52,
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            padding: "0 16px",
+            borderRadius: "var(--radius-lg)",
+            border: "0.5px solid var(--border-strong)",
+            background: "var(--bg-surface)",
+            color: "var(--text-secondary)",
+            cursor: "pointer",
+            textAlign: "left",
+          }}
+        >
+          <SearchIcon size={19} />
+          <span
+            style={{
+              flex: 1,
+              fontSize: 16,
+              lineHeight: 1.2,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {placeholder}
+          </span>
         </button>
       ) : (
         <button
@@ -464,9 +505,9 @@ function ResultsPanel({
   );
 }
 
-function SearchIcon() {
+function SearchIcon({ size = 16 }: { size?: number }) {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
       <circle cx="11" cy="11" r="8" />
       <line x1="21" y1="21" x2="16.65" y2="16.65" />
     </svg>
