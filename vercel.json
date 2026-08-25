@@ -209,6 +209,10 @@
       "schedule": "30 21 * * 0"
     },
     {
+      "path": "/api/cron/blog-subscription-calendar",
+      "schedule": "0 22 * * 1"
+    },
+    {
       "path": "/api/cron/blog-apt-v2",
       "schedule": "0 8 * * 3"
     },

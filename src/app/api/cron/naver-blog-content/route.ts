@@ -3,6 +3,7 @@ import { withCronLogging } from '@/lib/cron-logger';
 import { withCronAuth } from '@/lib/cron-auth';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { SITE_URL, AI_MODEL_HAIKU, ANTHROPIC_VERSION } from '@/lib/constants';
+import { extractAptSiteSlugs } from '@/lib/blog-safe-insert';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -18,6 +19,50 @@ export const maxDuration = 300;
 
 const BATCH_SIZE = 3;
 
+/** 기존 pending 행에 현장 링크를 덧붙일 때의 1회 상한. AI 호출이 없어 가볍다. */
+const BACKFILL_CAP = 40;
+
+/**
+ * ADDENDUM §2-7 — 네이버 → 카더라 **현장** 링크.
+ *
+ * 실측(2026-08-25): 신디케이션 93건 전부 kadeora.app 링크는 있는데
+ * `/apt/` 현장 링크는 **0건**이었다. 하단 CTA 가 전부 /blog/{slug} 로만 가서
+ * 네이버에서 온 사람이 현장 페이지(=리드폼이 있는 곳)에 닿지 못했다.
+ * `오티에르 해운대` 가 네이버 블로그 1위인데 그 트래픽이 리드로 이어지지 않던 이유다.
+ *
+ * blog_posts.hub_apt_slug 가 이미 3,245편에 붙어 있으므로 그 값을 쓴다.
+ * 본문에 다른 현장 링크가 더 있으면 그것도 함께 싣는다(최대 5곳).
+ */
+const NAVER_UTM = 'utm_source=naver_blog&utm_medium=syndication';
+
+/** 네이버 본문에서 현장 링크 블록. 이미 있으면 다시 붙이지 않는다. */
+const SITE_BLOCK_MARK = 'data-kd-sites="1"';
+
+/** 글 → 현장 슬러그. hub_apt_slug 우선, 본문 링크로 보강. */
+function siteSlugsForPost(post: any): string[] {
+  const out: string[] = [];
+  if (typeof post.hub_apt_slug === 'string' && post.hub_apt_slug) out.push(post.hub_apt_slug);
+  for (const s of extractAptSiteSlugs(String(post.content ?? ''))) {
+    if (!out.includes(s)) out.push(s);
+  }
+  return out.slice(0, 5);
+}
+
+/** 현장 링크 블록 HTML. 이름은 DB 에서 가져온 실제 이름을 쓴다 — 슬러그를 노출하지 않는다. */
+function siteLinkBlock(sites: { slug: string; name: string }[]): string {
+  if (sites.length === 0) return '';
+  const items = sites
+    .map(
+      (s) =>
+        `<li><a href="${SITE_URL}/apt/${encodeURIComponent(s.slug)}?${NAVER_UTM}" target="_blank" rel="noopener">${s.name}</a> — 분양가·일정·잔여세대 확인</li>`,
+    )
+    .join('\n');
+  return (
+    `\n<p><br /></p>\n<div ${SITE_BLOCK_MARK}>\n` +
+    `<p>🏠 <strong>이 글에서 다룬 현장</strong></p>\n<ul>\n${items}\n</ul>\n</div>`
+  );
+}
+
 async function doWork() {
   const sb = getSupabaseAdmin();
 
@@ -26,8 +71,10 @@ async function doWork() {
   const existingSlugs = new Set((existing || []).map((e: any) => e.blog_slug));
 
   // 조회수 상위 블로그 포스트 중 미발행분
-  const { data: posts } = await sb.from('blog_posts')
-    .select('id, slug, title, content, excerpt, category, tags, cover_image, image_alt, author_name, published_at, view_count, meta_description')
+  // database.ts 가 hub_apt_slug 를 아직 모른다 (저장소 as any 관례).
+  const { data: posts } = await (sb as any).from('blog_posts')
+    // §2-7: hub_apt_slug 를 함께 읽는다 — 현장 링크의 1순위다.
+    .select('id, slug, title, content, excerpt, category, tags, cover_image, image_alt, author_name, published_at, view_count, meta_description, hub_apt_slug')
     .eq('is_published', true)
     .not('published_at', 'is', null)
     .order('view_count', { ascending: false })
@@ -46,7 +93,19 @@ async function doWork() {
   for (const post of batch) {
     try {
       const naverContent = await generateNaverContent(post);
-      
+
+      // §2-7: 현장 링크 블록을 붙인다. hub_apt_slug + 본문 링크로 최대 5곳.
+      const slugs = siteSlugsForPost(post);
+      if (slugs.length > 0) {
+        const { data: sites } = await (sb as any)
+          .from('apt_sites').select('slug, name, display_name')
+          .eq('is_active', true).in('slug', slugs);
+        const named = (sites ?? []).map((s: any) => ({ slug: s.slug, name: s.display_name || s.name }));
+        // 본문 등장 순서를 유지한다 — 첫 번째가 그 글의 주된 현장이다.
+        named.sort((a: any, b: any) => slugs.indexOf(a.slug) - slugs.indexOf(b.slug));
+        if (named.length > 0) naverContent.html += siteLinkBlock(named);
+      }
+
       await (sb as any).from('naver_syndication').insert({
         blog_post_id: post.id,
         blog_slug: post.slug,
@@ -66,7 +125,61 @@ async function doWork() {
     }
   }
 
-  return { processed: success, metadata: { errors, total: batch.length } };
+  const backfilled = await backfillSiteLinks(sb);
+
+  return { processed: success, metadata: { errors, total: batch.length, ...backfilled } };
+}
+
+/**
+ * §2-7 — 이미 만들어져 pending 으로 대기 중인 행에 현장 링크를 덧붙인다.
+ *
+ * 실측 87건이 4개월째 pending 인데 전부 `/apt/` 링크가 없다. 새로 만드는 것만 고치면
+ * 그 87건은 링크 없는 채로 발행된다. AI 를 다시 부르지 않고 블록만 덧댄다.
+ *
+ * ⚠️ 이미 붙은 행은 건드리지 않는다(SITE_BLOCK_MARK 로 판정). 여러 번 돌아도 중복되지 않는다.
+ * ⚠️ published 는 손대지 않는다 — 네이버에 이미 올라간 글과 DB 가 어긋나면 안 된다.
+ */
+async function backfillSiteLinks(sb: any) {
+  const { data: rows } = await sb
+    .from('naver_syndication')
+    .select('id, blog_slug, naver_html')
+    .eq('blog_status', 'pending')
+    .order('created_at', { ascending: false })
+    .limit(BACKFILL_CAP);
+
+  let scanned = 0;
+  let updated = 0;
+  let noSite = 0;
+
+  for (const r of rows ?? []) {
+    scanned++;
+    const html = String(r.naver_html ?? '');
+    if (html.includes(SITE_BLOCK_MARK) || /\/apt\/[^"'\s]/.test(html)) continue;
+
+    const { data: post } = await sb
+      .from('blog_posts').select('content, hub_apt_slug').eq('slug', r.blog_slug).maybeSingle();
+    if (!post) continue;
+
+    const slugs = siteSlugsForPost(post);
+    if (slugs.length === 0) { noSite++; continue; }
+
+    const { data: sites } = await sb
+      .from('apt_sites').select('slug, name, display_name')
+      .eq('is_active', true).in('slug', slugs);
+    const named = (sites ?? []).map((s: any) => ({ slug: s.slug, name: s.display_name || s.name }));
+    if (named.length === 0) { noSite++; continue; }
+    named.sort((a: any, b: any) => slugs.indexOf(a.slug) - slugs.indexOf(b.slug));
+
+    // ⚠️ 영향 행 수를 확인한다. 삼키면 "붙였다" 는 거짓 카운터가 된다.
+    const { data: upd } = await sb
+      .from('naver_syndication')
+      .update({ naver_html: html + siteLinkBlock(named) })
+      .eq('id', r.id)
+      .select('id');
+    if ((upd?.length ?? 0) > 0) updated++;
+  }
+
+  return { backfill_scanned: scanned, backfill_updated: updated, backfill_no_site: noSite };
 }
 
 async function generateNaverContent(post: any): Promise<{ title: string; html: string; tags: string[] }> {
