@@ -60,7 +60,7 @@ function LoginForm({ redirect }: LoginFormProps) {
   return (
     <div style={{ width: '100%', maxWidth: 400 }}>
       <div style={{ textAlign: 'center', marginBottom: 40 }}>
-        <div style={{ fontSize: 36, fontWeight: 900, color: 'var(--brand)', fontFamily: 'monospace', letterSpacing: '-1px', marginBottom: 'var(--sp-sm)' }}>
+        <div style={{ fontSize: 36, fontWeight: 900, color: 'var(--brand)', fontFamily: 'var(--font-mono)', letterSpacing: '-1px', marginBottom: 'var(--sp-sm)' }}>
           카더라
         </div>
         <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 'var(--fs-base)' }}>아는 사람만 아는 그 정보</p>
@@ -118,10 +118,10 @@ function LoginForm({ redirect }: LoginFormProps) {
         <button
           onClick={() => login('kakao')}
           disabled={!!loading || !inApp.resolved}
-          style={{ width: '100%', padding: '14px 20px', marginBottom: 'var(--sp-md)', borderRadius: 'var(--radius-card)', border: 'none', cursor: loading ? 'not-allowed' : 'pointer', background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)', fontWeight: 700, fontSize: 'var(--fs-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, opacity: loading === 'google' ? 0.5 : 1, transition: 'all 0.15s' }}
+          style={{ width: '100%', padding: '14px 20px', marginBottom: 'var(--sp-md)', borderRadius: 'var(--radius-card)', border: 'none', cursor: loading ? 'not-allowed' : 'pointer', background: 'var(--kakao-bg)', color: 'var(--kakao-text)', fontWeight: 700, fontSize: 'var(--fs-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, opacity: loading === 'google' ? 0.5 : 1, transition: 'all 0.15s' }}
         >
           {loading === 'kakao' ? (
-            <div style={{ width: 24, height: 24, border: '2px solid var(--kakao-text, #191919)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+            <div style={{ width: 24, height: 24, border: '2px solid var(--kakao-text)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
           ) : (
             <svg width="20" height="20" viewBox="0 0 512 512" fill="currentColor">
               <path d="M255.5 48C141.1 48 48 126.1 48 222.4c0 62.2 38.7 116.7 97 149.8l-24.1 89.7c-2.1 7.9 6.8 14.4 13.7 9.9l101.2-65.2c7.2 1 14.6 1.5 22.2 1.5 114.4 0 207.5-78.1 207.5-174.4S369.9 48 255.5 48z"/>

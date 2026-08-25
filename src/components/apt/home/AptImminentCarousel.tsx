@@ -6,9 +6,9 @@ interface Props {
 }
 
 function ddayBg(d: number): string {
-  if (d <= 3) return 'var(--accent-red, #DC2626)';
-  if (d <= 5) return 'var(--accent-orange, #EA580C)';
-  return 'var(--accent-green, #059669)';
+  if (d <= 3) return 'var(--accent-red)';
+  if (d <= 5) return 'var(--accent-orange)';
+  return 'var(--accent-green)';
 }
 
 export default function AptImminentCarousel({ sites }: Props) {

@@ -72,7 +72,7 @@
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 0.88em;
-  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  font-family: var(--font-mono);
   color: var(--accent-purple);
   border: 1px solid var(--border);
 }
@@ -115,7 +115,7 @@
 /* ── FAQ Q&A 스타일 (H3으로 다운그레이드된 Q/A) ── */
 .blog-content h3[id^="q-"],
 .blog-content h3[id^="q."] {
-  border-left: 3px solid var(--accent-blue, #60a5fa);
+  border-left: 3px solid var(--accent-blue);
   background: rgba(59,123,246,0.04);
   padding: 10px 14px;
   border-radius: 0 var(--radius-md) var(--radius-md) 0;

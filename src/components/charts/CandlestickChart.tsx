@@ -128,9 +128,9 @@ export default function CandlestickChart({ data, width = 340, height = 240, show
           return (
             <g key={pct}>
               <line x1={P} x2={width - P} y1={y} y2={y}
-                stroke="var(--border, #152240)" strokeWidth="0.5" strokeDasharray="3,3" opacity="0.5" />
+                stroke="var(--border)" strokeWidth="0.5" strokeDasharray="3,3" opacity="0.5" />
               {(pct === 0 || pct === 0.5 || pct === 1) && (
-                <text x={width - P + 2} y={y + 3} textAnchor="start" fontSize="8" fill="var(--text-tertiary, #7D8DA3)">
+                <text x={width - P + 2} y={y + 3} textAnchor="start" fontSize="8" fill="var(--text-tertiary)">
                   {price >= 10000 ? `${(price / 10000).toFixed(0)}만` : price.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                 </text>
               )}
@@ -158,7 +158,7 @@ export default function CandlestickChart({ data, width = 340, height = 240, show
         {data.map((d, i) => {
           const x = P + i * gapW + gapW / 2;
           const isUp = d.close >= d.open;
-          const color = isUp ? 'var(--stock-up, #f85149)' : 'var(--stock-down, #58a6ff)';
+          const color = isUp ? 'var(--stock-up)' : 'var(--stock-down)';
           const bodyTop = toY(Math.max(d.open, d.close));
           const bodyBottom = toY(Math.min(d.open, d.close));
           const bodyH = Math.max(bodyBottom - bodyTop, 1);
@@ -180,7 +180,7 @@ export default function CandlestickChart({ data, width = 340, height = 240, show
         {showVolume && data.map((d, i) => {
           const x = P + i * gapW + gapW / 2;
           const isUp = d.close >= d.open;
-          const color = isUp ? 'var(--stock-up, #f85149)' : 'var(--stock-down, #58a6ff)';
+          const color = isUp ? 'var(--stock-up)' : 'var(--stock-down)';
           const volPct = (d.volume || 0) / maxVol;
           const barH = Math.max(volPct * volH, 0.5);
           const isActive = selected === i;
@@ -200,7 +200,7 @@ export default function CandlestickChart({ data, width = 340, height = 240, show
           if (i !== 0 && i !== data.length - 1 && i !== Math.floor(data.length / 2)) return null;
           const x = P + i * gapW + gapW / 2;
           return (
-            <text key={d.date} x={x} y={height - 2} textAnchor="middle" fontSize="8" fill="var(--text-tertiary, #7D8DA3)">
+            <text key={d.date} x={x} y={height - 2} textAnchor="middle" fontSize="8" fill="var(--text-tertiary)">
               {d.date.slice(5)}
             </text>
           );

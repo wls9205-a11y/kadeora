@@ -76,7 +76,7 @@ export default function AptPriceTrendUnified(props: Props) {
             <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
               {last.m} · {fmtPriceMan(last.v)}
               {yoyPct !== null && (
-                <span style={{ marginLeft: 6, fontWeight: 800, color: yoyPct >= 0 ? 'var(--accent-red, #DC2626)' : 'var(--accent-blue, #2563EB)' }}>
+                <span style={{ marginLeft: 6, fontWeight: 800, color: yoyPct >= 0 ? 'var(--accent-red)' : 'var(--accent-blue)' }}>
                   {yoyPct >= 0 ? '+' : ''}{yoyPct.toFixed(1)}%
                 </span>
               )}

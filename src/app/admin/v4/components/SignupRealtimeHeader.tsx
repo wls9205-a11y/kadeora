@@ -27,7 +27,7 @@ interface Tile {
 const TONE: Record<NonNullable<Tile['tone']>, { color: string; bg: string }> = {
   red:     { color: 'var(--accent-red)',    bg: 'rgba(248,113,113,0.06)' },
   green:   { color: 'var(--accent-green)',  bg: 'rgba(52,211,153,0.06)'  },
-  orange:  { color: 'var(--accent-orange, #fb923c)', bg: 'rgba(251,146,60,0.06)'  },
+  orange:  { color: 'var(--accent-orange)', bg: 'rgba(251,146,60,0.06)'  },
   default: { color: 'var(--text-primary)',     bg: 'transparent'             },
 };
 
@@ -97,7 +97,7 @@ export default function SignupRealtimeHeader() {
       gap: 8,
       padding: 10,
       borderRadius: 'var(--radius-md, 10px)',
-      background: 'var(--bg-elevated, #1f2028)',
+      background: 'var(--bg-elevated)',
       border: '1px solid var(--border)',
       opacity: loading && !data ? 0.6 : 1,
       transition: 'opacity 0.2s',

@@ -130,7 +130,7 @@ export default function InAppBrowserModal({ type, onClose, href }: Props) {
       <div
         style={{
           width: '100%', maxWidth: 420, padding: '22px 22px 18px',
-          background: 'var(--bg-elevated, #1f2028)', borderRadius: 18,
+          background: 'var(--bg-elevated)', borderRadius: 18,
           border: '1px solid rgba(254,229,0,0.25)',
           boxShadow: '0 24px 64px rgba(0,0,0,0.5)',
           color: 'var(--text-primary)',
@@ -161,7 +161,7 @@ export default function InAppBrowserModal({ type, onClose, href }: Props) {
           onClick={handleCopy}
           style={{
             width: '100%', padding: '11px 18px', borderRadius: 10,
-            border: '1px solid var(--border, #D4DAE3)',
+            border: '1px solid var(--border)',
             background: 'transparent', color: 'var(--text-primary)',
             fontWeight: 700, fontSize: 13, cursor: 'pointer',
           }}
@@ -169,8 +169,8 @@ export default function InAppBrowserModal({ type, onClose, href }: Props) {
           {copied ? '✅ 주소 복사 완료' : '📋 현재 주소 복사하기'}
         </button>
 
-        <div style={{ marginTop: 14, padding: '10px 12px', borderRadius: 8, background: 'var(--bg-base, #F5F7FA)', border: '1px solid var(--border, #D4DAE3)' }}>
-          <div style={{ fontSize: 11, color: 'var(--text-tertiary, #666)', marginBottom: 4, fontWeight: 600 }}>대안</div>
+        <div style={{ marginTop: 14, padding: '10px 12px', borderRadius: 8, background: 'var(--bg-base)', border: '1px solid var(--border)' }}>
+          <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 4, fontWeight: 600 }}>대안</div>
           <div style={{ fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
             우상단 "…" 메뉴 → "외부 브라우저로 열기" 또는 "Chrome/Safari 에서 열기" 선택
           </div>
@@ -181,7 +181,7 @@ export default function InAppBrowserModal({ type, onClose, href }: Props) {
             onClick={onClose}
             style={{
               marginTop: 12, width: '100%', padding: '8px 0', border: 'none', background: 'transparent',
-              color: 'var(--text-tertiary, #666)', fontSize: 11, cursor: 'pointer',
+              color: 'var(--text-tertiary)', fontSize: 11, cursor: 'pointer',
               textDecoration: 'underline', textUnderlineOffset: 2,
             }}
           >

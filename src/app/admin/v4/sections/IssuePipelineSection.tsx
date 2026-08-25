@@ -45,7 +45,7 @@ export default function IssuePipelineSection({ data }: Props) {
   return (
     <section style={{
       padding: 16, borderRadius: 'var(--radius-lg, 14px)',
-      background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border)',
+      background: 'var(--bg-elevated)', border: '1px solid var(--border)',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10, flexWrap: 'wrap' }}>
         <h2 style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
@@ -78,7 +78,7 @@ export default function IssuePipelineSection({ data }: Props) {
 
       <div style={{
         marginTop: 12, padding: 12, borderRadius: 'var(--radius-md, 10px)',
-        background: 'var(--bg-surface, #1a1b22)', border: '1px solid var(--border)',
+        background: 'var(--bg-surface)', border: '1px solid var(--border)',
         display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 8,
       }}>
         <AdminKPI label="7일 발행 합계" value={p7.total ?? 0} />

@@ -28,7 +28,7 @@ export default function ContentHealthSection({ data }: Props) {
   return (
     <section style={{
       padding: 16, borderRadius: 'var(--radius-lg, 14px)',
-      background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border)',
+      background: 'var(--bg-elevated)', border: '1px solid var(--border)',
     }}>
       <h2 style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)', marginTop: 0, marginBottom: 10 }}>
         📚 콘텐츠 위생
@@ -61,7 +61,7 @@ export default function ContentHealthSection({ data }: Props) {
             {cats.map(c => {
               const b = hub[c];
               const pct = b.pct ?? 0;
-              const color = pct >= 70 ? 'var(--accent-green)' : pct >= 30 ? 'var(--accent-orange, #fb923c)' : 'var(--accent-red)';
+              const color = pct >= 70 ? 'var(--accent-green)' : pct >= 30 ? 'var(--accent-orange)' : 'var(--accent-red)';
               return (
                 <tr key={c} style={{ borderTop: '1px solid var(--border)' }}>
                   <td style={{ padding: 6 }}><code style={{ color: 'var(--text-secondary)' }}>{c}</code></td>

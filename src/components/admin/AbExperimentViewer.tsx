@@ -79,14 +79,14 @@ export default async function AbExperimentViewer({
             key={spec.name}
             style={{
               padding: 12,
-              background: 'var(--bg-elevated, #1f2028)',
+              background: 'var(--bg-elevated)',
               border: '1px solid var(--border)',
               borderRadius: 'var(--radius-md, 10px)',
             }}
           >
             <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8, wordBreak: 'keep-all' }}>
               {spec.label}
-              <span style={{ marginLeft: 8, fontSize: 10, color: 'var(--text-tertiary)', fontFamily: 'monospace' }}>
+              <span style={{ marginLeft: 8, fontSize: 10, color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)' }}>
                 {spec.name}
               </span>
             </div>

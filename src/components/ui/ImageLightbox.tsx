@@ -38,8 +38,8 @@ export function ImageLightbox({
             style={{
               overflow: 'hidden',
               borderRadius: 8,
-              background: 'var(--bg-surface, #f4f4f5)',
-              border: '1px solid var(--border, #e4e4e7)',
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--border)',
               padding: 0,
               cursor: 'zoom-in',
               aspectRatio,

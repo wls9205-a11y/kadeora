@@ -590,7 +590,7 @@ export default async function StockDetailPage({ params }: Props) {
               const fmtN = (n: number) => n === 0 ? '-' : `${n > 0 ? '+' : ''}${Math.abs(n) >= 10000 ? `${(n / 10000).toFixed(0)}만` : n.toLocaleString()}`;
               return (
                 <div key={f.date} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11 }}>
-                  <span style={{ width: 42, color: 'var(--text-tertiary)', fontFamily: 'monospace', flexShrink: 0, fontSize: 10 }}>{f.date?.slice(5)}</span>
+                  <span style={{ width: 42, color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)', flexShrink: 0, fontSize: 10 }}>{f.date?.slice(5)}</span>
                   <span style={{ width: 48, textAlign: 'right', flexShrink: 0, fontWeight: 700, color: fNet >= 0 ? upC : downC, fontSize: 10 }}>외 {fmtN(fNet)}</span>
                   <div style={{ flex: 1, height: 16, display: 'flex', alignItems: 'center', position: 'relative' }}>
                     <div style={{ position: 'absolute', left: '50%', width: 1, height: '100%', background: 'var(--border)' }} />

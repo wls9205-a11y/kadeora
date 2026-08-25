@@ -43,8 +43,8 @@ export default function AptFeedCard({ item }: { item: FeedItem }) {
   return (
     <Link href={item.href} style={{
       display: 'block',
-      background: 'var(--bg-surface, #FFFFFF)',
-      border: '1px solid var(--border, #E5E7EB)',
+      background: 'var(--bg-surface)',
+      border: '1px solid var(--border)',
       borderRadius: 7,
       overflow: 'hidden',
       textDecoration: 'none',
@@ -88,17 +88,17 @@ export default function AptFeedCard({ item }: { item: FeedItem }) {
         <div style={{
           fontSize: 11.5, fontWeight: 500, lineHeight: 1.25,
           overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-          color: 'var(--text-primary, #111827)',
+          color: 'var(--text-primary)',
           marginBottom: 2,
         }}>{item.title}</div>
         {item.region && (
           <div style={{
-            fontSize: 10, color: 'var(--text-secondary, #6B7280)', marginBottom: 2,
+            fontSize: 10, color: 'var(--text-secondary)', marginBottom: 2,
           }}>{item.region}</div>
         )}
         {item.meta && (
           <div style={{
-            fontSize: 11, fontWeight: 500, color: 'var(--text-primary, #111827)',
+            fontSize: 11, fontWeight: 500, color: 'var(--text-primary)',
             overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
           }}>{item.meta}</div>
         )}

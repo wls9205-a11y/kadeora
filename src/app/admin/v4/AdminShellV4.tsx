@@ -74,7 +74,7 @@ export default function AdminShellV4() {
       <header style={{
         position: 'sticky', top: 0, zIndex: 100,
         padding: '10px 12px', borderRadius: 'var(--radius-md, 10px)',
-        background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border)',
+        background: 'var(--bg-elevated)', border: '1px solid var(--border)',
         backdropFilter: 'blur(8px)',
         display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap',
       }}>

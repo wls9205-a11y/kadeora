@@ -91,7 +91,7 @@ export default function CheongakMatchCard({ isLoggedIn, myScore, aptName }: Prop
   const diff = myScore - ESTIMATED_MIN_SCORE;
   // 단순 추정: 점수 차이로 확률 매핑 — +20점=99%, +0=50%, -20=10%
   const winPct = Math.round(Math.max(5, Math.min(99, 50 + diff * 2.5)));
-  const successColor = winPct >= 70 ? 'var(--success, #00FF87)' : winPct >= 40 ? 'var(--kd-accent)' : '#FF6B6B';
+  const successColor = winPct >= 70 ? 'var(--success)' : winPct >= 40 ? 'var(--kd-accent)' : '#FF6B6B';
 
   return (
     <section

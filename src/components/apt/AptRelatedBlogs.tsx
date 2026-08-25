@@ -33,9 +33,9 @@ export default function AptRelatedBlogs({ posts }: { posts: RelatedBlogPost[] })
               gap: 9,
               padding: '10px 11px',
               borderRadius: 8,
-              border: '1px solid var(--border, #1e3258)',
-              background: 'var(--bg-surface, #ffffff)',
-              color: 'var(--text-primary, #111827)',
+              border: '1px solid var(--border)',
+              background: 'var(--bg-surface)',
+              color: 'var(--text-primary)',
               textDecoration: 'none',
             }}
           >
@@ -58,7 +58,7 @@ export default function AptRelatedBlogs({ posts }: { posts: RelatedBlogPost[] })
                 {p.title}
               </span>
               {p.published_at ? (
-                <span style={{ display: 'block', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary, #9ca3af)', marginTop: 3 }}>
+                <span style={{ display: 'block', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 3 }}>
                   {fmtDate(p.published_at)}
                   {p.apt_id ? ' · 단지 분석' : ''}
                 </span>

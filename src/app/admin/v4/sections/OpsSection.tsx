@@ -25,7 +25,7 @@ export default function OpsSection({ data }: Props) {
   return (
     <section style={{
       padding: 16, borderRadius: 'var(--radius-lg, 14px)',
-      background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border)',
+      background: 'var(--bg-elevated)', border: '1px solid var(--border)',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
         <h2 style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>⚙️ 운영</h2>
@@ -54,7 +54,7 @@ export default function OpsSection({ data }: Props) {
             {failed.slice(0, 12).map(f => (
               <div key={f.name} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, padding: '5px 8px', borderRadius: 6, background: 'rgba(0,0,0,0.18)' }}>
                 <code style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{f.name}</code>
-                <span style={{ fontSize: 11, color: 'var(--accent-orange, #fb923c)', fontWeight: 700 }}>×{f.fail_count}</span>
+                <span style={{ fontSize: 11, color: 'var(--accent-orange)', fontWeight: 700 }}>×{f.fail_count}</span>
                 <span style={{ fontSize: 10, color: 'var(--text-tertiary)', maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {f.last_error?.trim() || '—'}
                 </span>
@@ -71,7 +71,7 @@ export default function OpsSection({ data }: Props) {
         >
           <div onClick={e => e.stopPropagation()} style={{
             width: 'min(420px, 92vw)', height: '100%', padding: 20,
-            background: 'var(--bg-surface, #1a1b22)', borderLeft: '1px solid var(--border)',
+            background: 'var(--bg-surface)', borderLeft: '1px solid var(--border)',
             display: 'flex', flexDirection: 'column', gap: 12, overflowY: 'auto',
           }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>

@@ -161,7 +161,7 @@ export default function GatedStockSection({ sectionKey, pageType = 'symbol', chi
       style={{ margin: '20px 0' }}
     >
       {(gate?.display_name || fallbackTitle) && (
-        <h3 style={{ fontSize: 18, fontWeight: 800, margin: '0 0 12px', color: 'var(--text-primary, #e5e7eb)' }}>
+        <h3 style={{ fontSize: 18, fontWeight: 800, margin: '0 0 12px', color: 'var(--text-primary)' }}>
           {gate?.display_name || fallbackTitle}
         </h3>
       )}
@@ -173,7 +173,7 @@ export default function GatedStockSection({ sectionKey, pageType = 'symbol', chi
           aria-hidden
           style={{
             position: 'absolute', inset: 'auto 0 0 0', height: 120,
-            background: 'linear-gradient(to top, var(--bg-base, #0b1220) 20%, rgba(11,18,32,0) 100%)',
+            background: 'linear-gradient(to top, var(--bg-base) 20%, rgba(11,18,32,0) 100%)',
             pointerEvents: 'none',
           }}
         />
@@ -189,10 +189,10 @@ export default function GatedStockSection({ sectionKey, pageType = 'symbol', chi
           boxShadow: '0 8px 24px rgba(0,0,0,0.25)',
         }}
       >
-        <div style={{ fontSize: 12, color: 'var(--text-tertiary, #94a3b8)', marginBottom: 6 }}>
+        <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 6 }}>
           🔒 {isPremium ? '프리미엄 회원 전용' : '로그인 후 전체 열람'}
         </div>
-        <div style={{ fontSize: 16, fontWeight: 800, marginBottom: 14, color: 'var(--text-primary, #e5e7eb)', wordBreak: 'keep-all' }}>
+        <div style={{ fontSize: 16, fontWeight: 800, marginBottom: 14, color: 'var(--text-primary)', wordBreak: 'keep-all' }}>
           {gate?.cta_text || '로그인하고 전체 정보 보기'}
         </div>
         <button
@@ -207,7 +207,7 @@ export default function GatedStockSection({ sectionKey, pageType = 'symbol', chi
         >
           {isPremium ? '프리미엄 가입하기' : '카카오로 1초 로그인'}
         </button>
-        <div style={{ fontSize: 11, color: 'var(--text-tertiary, #94a3b8)', marginTop: 10 }}>
+        <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 10 }}>
           가입 즉시 100P 지급 · 언제든 해지 가능
         </div>
       </div>

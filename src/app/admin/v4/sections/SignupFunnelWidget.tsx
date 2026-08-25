@@ -47,7 +47,7 @@ function fmtPct(v: any): string {
 }
 function deltaColor(v: any): string {
   const x = Number(v);
-  if (!Number.isFinite(x) || x === 0) return 'var(--text-tertiary, #9ca3af)';
+  if (!Number.isFinite(x) || x === 0) return 'var(--text-tertiary)';
   return x > 0 ? '#34d399' : '#f87171';
 }
 function healthBadge(s: HealthStatus | undefined): { bg: string; fg: string; label: string } {
@@ -108,7 +108,7 @@ export default function SignupFunnelWidget() {
       aria-label="가입 진단 위젯"
       style={{
         padding: '14px 16px', borderRadius: 12,
-        background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border)',
+        background: 'var(--bg-elevated)', border: '1px solid var(--border)',
         display: 'flex', flexDirection: 'column', gap: 14,
       }}
     >
@@ -317,7 +317,7 @@ function RecentList({ rows }: { rows: RecentSignup[] }) {
           <span style={{ fontSize: 11, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {r.email_masked || '—'}
           </span>
-          <span style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-secondary)', padding: '1px 6px', borderRadius: 3, background: 'var(--bg-elevated, #1f2028)' }}>
+          <span style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-secondary)', padding: '1px 6px', borderRadius: 3, background: 'var(--bg-elevated)' }}>
             {r.source || r.provider || '—'}
           </span>
           <span style={{ fontSize: 10, color: 'var(--text-tertiary)', whiteSpace: 'nowrap' }}>

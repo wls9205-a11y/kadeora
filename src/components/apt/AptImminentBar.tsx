@@ -7,9 +7,9 @@ interface Props {
 }
 
 function ddayColor(d: number): { fg: string; bg: string } {
-  if (d <= 3) return { fg: '#fff', bg: 'var(--accent-red, #DC2626)' };
-  if (d <= 5) return { fg: '#fff', bg: 'var(--accent-orange, #EA580C)' };
-  return { fg: '#fff', bg: 'var(--accent-green, #059669)' };
+  if (d <= 3) return { fg: '#fff', bg: 'var(--accent-red)' };
+  if (d <= 5) return { fg: '#fff', bg: 'var(--accent-orange)' };
+  return { fg: '#fff', bg: 'var(--accent-green)' };
 }
 
 function fmtKstDate(s: string | null): string {

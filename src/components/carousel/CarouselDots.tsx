@@ -35,7 +35,7 @@ export default function CarouselDots({ count, active, onJump }: Props) {
               width: isActive ? 14 : 6,
               height: 6,
               borderRadius: 3,
-              background: isActive ? '#DC2626' : 'var(--border-strong, #E5E7EB)',
+              background: isActive ? '#DC2626' : 'var(--border-strong)',
               transition: 'width 160ms, background 160ms',
               padding: 0,
               border: 'none',

@@ -118,7 +118,7 @@ export default function UsersListClient() {
   const inputStyle: React.CSSProperties = {
     padding: '6px 10px', borderRadius: 6,
     border: '1px solid var(--border)',
-    background: 'var(--bg-surface, #1a1b22)',
+    background: 'var(--bg-surface)',
     color: 'var(--text-primary)', fontSize: 12,
     outline: 'none',
   };
@@ -187,7 +187,7 @@ export default function UsersListClient() {
       <div style={{
         borderRadius: 'var(--radius-md, 10px)',
         border: '1px solid var(--border)',
-        background: 'var(--bg-elevated, #1f2028)',
+        background: 'var(--bg-elevated)',
         overflowX: 'auto',
         opacity: loading ? 0.6 : 1,
       }}>
@@ -216,7 +216,7 @@ export default function UsersListClient() {
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={u.avatar_url} alt="" style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover' }} />
                     ) : (
-                      <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--bg-surface, #1a1b22)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, color: 'var(--text-tertiary)' }}>
+                      <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--bg-surface)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, color: 'var(--text-tertiary)' }}>
                         {(u.nickname || u.full_name || '?').slice(0, 1)}
                       </div>
                     )}

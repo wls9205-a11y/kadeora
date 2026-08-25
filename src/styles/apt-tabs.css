@@ -81,7 +81,7 @@
 }
 
 .aptr-num {
-  font-family: var(--font-mono, ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", monospace);
+  font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
 }
 

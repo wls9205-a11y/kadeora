@@ -98,7 +98,7 @@ export default function SegmentBuilder({
       style={{
         padding: 14,
         borderRadius: 'var(--radius-md, 10px)',
-        background: 'var(--bg-elevated, #1f2028)',
+        background: 'var(--bg-elevated)',
         border: '1px solid var(--border)',
         display: 'flex',
         flexDirection: 'column',

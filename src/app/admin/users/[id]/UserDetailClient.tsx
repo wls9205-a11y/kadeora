@@ -63,7 +63,7 @@ function decodePath(p?: string | null): string {
 const cardStyle: React.CSSProperties = {
   padding: 14,
   borderRadius: 'var(--radius-md, 10px)',
-  background: 'var(--bg-elevated, #1f2028)',
+  background: 'var(--bg-elevated)',
   border: '1px solid var(--border)',
 };
 
@@ -123,7 +123,7 @@ export default function UserDetailClient({ userId }: { userId: string }) {
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={p.avatar_url} alt="" style={{ width: 56, height: 56, borderRadius: '50%', objectFit: 'cover' }} />
               ) : (
-                <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'var(--bg-surface, #1a1b22)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, color: 'var(--text-tertiary)' }}>
+                <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'var(--bg-surface)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, color: 'var(--text-tertiary)' }}>
                   {(p.nickname || p.full_name || '?').slice(0, 1)}
                 </div>
               )}
@@ -181,7 +181,7 @@ export default function UserDetailClient({ userId }: { userId: string }) {
             ].map((kp, i) => (
               <div key={i} style={{
                 padding: 12, borderRadius: 8,
-                background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border)',
+                background: 'var(--bg-elevated)', border: '1px solid var(--border)',
               }}>
                 <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase' }}>{kp.label}</div>
                 <div style={{ fontSize: kp.small ? 13 : 18, fontWeight: 800, marginTop: 4 }}>{kp.v}</div>

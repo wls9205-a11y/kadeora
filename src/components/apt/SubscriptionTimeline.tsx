@@ -67,10 +67,10 @@ export default function SubscriptionTimeline({
                 display: 'block',
                 padding: '10px 11px',
                 borderRadius: 10,
-                border: '1px solid var(--border, #1e3258)',
-                background: 'var(--bg-surface, #ffffff)',
+                border: '1px solid var(--border)',
+                background: 'var(--bg-surface)',
                 textDecoration: 'none',
-                color: 'var(--text-primary, #111827)',
+                color: 'var(--text-primary)',
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6, marginBottom: 6 }}>
@@ -94,11 +94,11 @@ export default function SubscriptionTimeline({
                 {name}
               </div>
 
-              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary, #6b7280)', marginTop: 6 }}>
+              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginTop: 6 }}>
                 {it.rcept_bgnde ? `접수 ${shortDate(it.rcept_bgnde)}~${shortDate(it.rcept_endde)}` : '일정 미정'}
               </div>
               {it.households ? (
-                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary, #9ca3af)', marginTop: 2 }}>
+                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>
                   {it.households.toLocaleString('ko-KR')}세대
                 </div>
               ) : null}

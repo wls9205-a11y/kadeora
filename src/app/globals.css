@@ -821,7 +821,7 @@ body {
   letter-spacing: -0.3px;
   line-height: 1.45;
   padding: 8px 0 8px 14px;
-  border-left: 3px solid var(--brand, #4A8AF7);
+  border-left: 3px solid var(--brand);
 }
 .blog-content h4 {
   font-size: 16px;
@@ -834,7 +834,7 @@ body {
   color: var(--text-primary);
 }
 .blog-content a {
-  color: var(--brand, #3B7BF6);
+  color: var(--brand);
   text-decoration: underline;
   text-underline-offset: 3px;
   text-decoration-thickness: 1px;
@@ -851,7 +851,7 @@ body {
   margin-bottom: 8px;
   color: var(--text-secondary);
 }
-.blog-content li::marker { color: var(--brand, #4A8AF7); }
+.blog-content li::marker { color: var(--brand); }
 
 .blog-content blockquote {
   margin: 28px 0;
@@ -873,7 +873,7 @@ body {
   left: 16px;
   font-size: 32px;
   font-family: Georgia, serif;
-  color: var(--brand, #4A8AF7);
+  color: var(--brand);
   opacity: 0.2;
   line-height: 1;
 }
@@ -916,12 +916,12 @@ body {
 .blog-content tr:nth-child(even) td { background: rgba(255,255,255,0.012); }
 
 .blog-content code {
-  font-family: var(--font-mono, 'SF Mono', monospace);
+  font-family: var(--font-mono);
   font-size: 13px;
   padding: 2px 7px;
   border-radius: 5px;
   background: var(--bg-hover);
-  color: var(--accent-purple, #A78BFA);
+  color: var(--accent-purple);
   border: 1px solid var(--border);
 }
 .blog-content pre {
@@ -1058,9 +1058,9 @@ body {
 .kd-btn:hover { border-color: var(--border-strong); background: var(--bg-hover); }
 .kd-btn:active { transform: scale(0.97); }
 .kd-btn-primary {
-  background: var(--brand, #3B7BF6);
+  background: var(--brand);
   color: #fff;
-  border-color: var(--brand, #3B7BF6);
+  border-color: var(--brand);
 }
 .kd-btn-primary:hover { opacity: 0.9; }
 .kd-btn-sm { padding: 5px 10px; font-size: 12px; }
@@ -1836,7 +1836,7 @@ a, span, p, div {
   --blog-info-box-bg: rgba(37,99,235,0.04);
   --blog-info-box-border: rgba(37,99,235,0.1);
   --blog-tag-bg: rgba(37,99,235,0.06);
-  --blog-tag-color: var(--brand, #2563EB);
+  --blog-tag-color: var(--brand);
   --blog-disclaimer-border: var(--warning);
 }
 
@@ -1999,7 +1999,7 @@ a, span, p, div {
   position: absolute; left: -18px; top: 4px;
   width: 11px; height: 11px; border-radius: 50%;
 }
-.apt-timeline-dot.done { background: var(--accent-green-bg, rgba(34,197,94,0.15)); border: 2px solid var(--accent-green, #22c55e); }
+.apt-timeline-dot.done { background: var(--accent-green-bg, rgba(34,197,94,0.15)); border: 2px solid var(--accent-green); }
 .apt-timeline-dot.active { background: var(--accent-amber-bg, rgba(245,158,11,0.15)); border: 2px solid var(--accent-amber, #f59e0b); }
 .apt-timeline-dot.pending { background: var(--bg-base); border: 1px solid var(--border); }
 

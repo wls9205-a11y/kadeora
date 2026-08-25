@@ -15,7 +15,7 @@ interface Props {
 
 const HEALTH_BORDER: Record<Health, string> = {
   critical: 'var(--accent-red)',
-  warn:     'var(--accent-orange, #fb923c)',
+  warn:     'var(--accent-orange)',
   ok:       'var(--accent-green)',
 };
 
@@ -30,7 +30,7 @@ export default function AdminKPI({ label, value, delta, deltaColor = 'tertiary',
   const card = (
     <div style={{
       padding: 12, borderRadius: 'var(--radius-md, 10px)',
-      background: 'var(--bg-surface, #1a1b22)',
+      background: 'var(--bg-surface)',
       border: '1px solid var(--border)',
       borderLeft,
       minWidth: 0, display: 'flex', flexDirection: 'column', gap: 4,

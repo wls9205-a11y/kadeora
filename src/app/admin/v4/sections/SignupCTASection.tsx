@@ -56,7 +56,7 @@ export default function SignupCTASection({ data, ctrAvg }: Props) {
   return (
     <section style={{
       padding: 16, borderRadius: 'var(--radius-lg, 14px)',
-      background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border)',
+      background: 'var(--bg-elevated)', border: '1px solid var(--border)',
     }}>
       <h2 style={sectionTitleStyle}>🎯 가입 & CTA</h2>
 

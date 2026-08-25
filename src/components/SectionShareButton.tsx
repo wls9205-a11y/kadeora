@@ -15,7 +15,7 @@ interface Props {
 }
 
 const PLATFORMS = [
-  { id: 'kakao', label: '카카오톡', emoji: '💬', bg: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)' },
+  { id: 'kakao', label: '카카오톡', emoji: '💬', bg: 'var(--kakao-bg)', color: 'var(--kakao-text)' },
   { id: 'band', label: '밴드', emoji: '🟢', bg: '#06C755', color: '#fff' },
   { id: 'twitter', label: 'X', emoji: '𝕏', bg: '#1DA1F2', color: '#fff' },
   { id: 'facebook', label: '페이스북', emoji: 'f', bg: '#1877F2', color: '#fff' },
@@ -131,8 +131,8 @@ export default function SectionShareButton({ section, label, text, pagePath }: P
         <button onClick={shareKakao} aria-label="카카오톡으로 공유" title="카카오톡으로 공유하기" style={{
           display: 'inline-flex', alignItems: 'center', gap: 6,
           padding: '6px 10px', borderRadius: 'var(--radius-md)',
-          background: 'var(--kakao-bg, #FEE500)', border: '1px solid rgba(25,25,25,0.1)',
-          color: 'var(--kakao-text, #191919)', cursor: 'pointer', fontSize: 'var(--fs-xs)', fontWeight: 700,
+          background: 'var(--kakao-bg)', border: '1px solid rgba(25,25,25,0.1)',
+          color: 'var(--kakao-text)', cursor: 'pointer', fontSize: 'var(--fs-xs)', fontWeight: 700,
         }}>
           💬 카카오톡
         </button>

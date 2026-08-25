@@ -58,7 +58,7 @@ export default function HomeSiteCard({ row, variant = 'popular' }: Props) {
     <Link
       href={`/apt/${encodeURIComponent(row.slug)}`}
       style={{
-        background: 'var(--bg-elevated, #1f2028)',
+        background: 'var(--bg-elevated)',
         border: '1px solid var(--border)',
         borderRadius: 10,
         overflow: 'hidden',
@@ -102,7 +102,7 @@ export default function HomeSiteCard({ row, variant = 'popular' }: Props) {
           </div>
         )}
         {variant === 'unsold' && row.builder && (
-          <div style={{ fontSize: 10, color: 'var(--text-tertiary, #666)', marginTop: 3 }}>
+          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 3 }}>
             {row.builder}
           </div>
         )}

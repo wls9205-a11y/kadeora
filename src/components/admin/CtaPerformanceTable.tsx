@@ -48,7 +48,7 @@ export default async function CtaPerformanceTable({ windowDays = 30 }: { windowD
       </h2>
       <div
         style={{
-          background: 'var(--bg-elevated, #1f2028)',
+          background: 'var(--bg-elevated)',
           border: '1px solid var(--border)',
           borderRadius: 'var(--radius-md, 10px)',
           overflow: 'hidden',
@@ -70,7 +70,7 @@ export default async function CtaPerformanceTable({ windowDays = 30 }: { windowD
               const ctr = r.ctr_pct === null ? null : Number(r.ctr_pct);
               return (
                 <tr key={r.cta_name} style={{ borderTop: '1px solid var(--border)' }}>
-                  <td style={{ padding: '10px 12px', fontFamily: 'monospace', color: 'var(--text-primary)', wordBreak: 'break-all' }}>
+                  <td style={{ padding: '10px 12px', fontFamily: 'var(--font-mono)', color: 'var(--text-primary)', wordBreak: 'break-all' }}>
                     {r.cta_name}
                   </td>
                   <td style={{ padding: '10px 12px', textAlign: 'right', color: 'var(--text-secondary)', fontVariantNumeric: 'tabular-nums' }}>

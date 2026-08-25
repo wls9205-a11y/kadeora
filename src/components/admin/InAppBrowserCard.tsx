@@ -14,7 +14,7 @@ interface Resp { ok: boolean; daily: DailyRow[]; by_browser: BrowserAgg[]; error
 const DANGER_BROWSERS = new Set(['daum_inapp', 'karrot_inapp', 'social_inapp', 'webview']);
 
 function badgeColor(pct: number, attempts: number): string {
-  if (attempts < 3) return 'var(--text-tertiary, #666)';
+  if (attempts < 3) return 'var(--text-tertiary)';
   if (pct < 20) return '#ef4444';
   if (pct < 40) return '#f59e0b';
   return '#22c55e';
@@ -34,7 +34,7 @@ export default function InAppBrowserCard() {
   }, []);
 
   if (err) return <div style={{ padding: 16, color: 'var(--accent-red)', fontSize: 12 }}>인앱 funnel 로드 실패: {err}</div>;
-  if (!data) return <div style={{ padding: 16, color: 'var(--text-tertiary, #666)', fontSize: 12 }}>인앱 funnel 로딩 중…</div>;
+  if (!data) return <div style={{ padding: 16, color: 'var(--text-tertiary)', fontSize: 12 }}>인앱 funnel 로딩 중…</div>;
   if (!data.ok) return <div style={{ padding: 16, color: 'var(--accent-red)', fontSize: 12 }}>{data.error || '데이터 없음'}</div>;
 
   const browsers = data.by_browser;
@@ -47,11 +47,11 @@ export default function InAppBrowserCard() {
   return (
     <section
       aria-label="인앱 브라우저 가입 funnel"
-      style={{ background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginTop: 16 }}
+      style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginTop: 16 }}
     >
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
         <h2 style={{ fontSize: 14, fontWeight: 800, margin: 0 }}>📱 인앱 브라우저 가입 funnel (14d)</h2>
-        <span style={{ fontSize: 11, color: 'var(--text-tertiary, #666)' }}>
+        <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
           전체 {totalAttempts.toLocaleString()} 시도 · 성공률 {overallPct}% · 인앱 차단군 {blockedPct}%
         </span>
       </div>
@@ -60,17 +60,17 @@ export default function InAppBrowserCard() {
         <table style={{ width: '100%', fontSize: 11, borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ borderBottom: '1.5px solid var(--border)' }}>
-              <th style={{ padding: '6px 8px', textAlign: 'left', color: 'var(--text-tertiary, #666)', fontWeight: 700 }}>브라우저</th>
-              <th style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-tertiary, #666)', fontWeight: 700 }}>시도</th>
-              <th style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-tertiary, #666)', fontWeight: 700 }}>OAuth 시작</th>
-              <th style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-tertiary, #666)', fontWeight: 700 }}>콜백</th>
-              <th style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-tertiary, #666)', fontWeight: 700 }}>성공</th>
-              <th style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-tertiary, #666)', fontWeight: 700 }}>성공률</th>
+              <th style={{ padding: '6px 8px', textAlign: 'left', color: 'var(--text-tertiary)', fontWeight: 700 }}>브라우저</th>
+              <th style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-tertiary)', fontWeight: 700 }}>시도</th>
+              <th style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-tertiary)', fontWeight: 700 }}>OAuth 시작</th>
+              <th style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-tertiary)', fontWeight: 700 }}>콜백</th>
+              <th style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-tertiary)', fontWeight: 700 }}>성공</th>
+              <th style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-tertiary)', fontWeight: 700 }}>성공률</th>
             </tr>
           </thead>
           <tbody>
             {browsers.length === 0 && (
-              <tr><td colSpan={6} style={{ padding: 16, textAlign: 'center', color: 'var(--text-tertiary, #666)' }}>14일 데이터 없음</td></tr>
+              <tr><td colSpan={6} style={{ padding: 16, textAlign: 'center', color: 'var(--text-tertiary)' }}>14일 데이터 없음</td></tr>
             )}
             {browsers.map(b => {
               const isBlocked = DANGER_BROWSERS.has(b.browser_type);
@@ -96,18 +96,18 @@ export default function InAppBrowserCard() {
 
       {data.daily.length > 0 && (
         <details style={{ marginTop: 12 }}>
-          <summary style={{ fontSize: 11, color: 'var(--text-tertiary, #666)', cursor: 'pointer', fontWeight: 600 }}>
+          <summary style={{ fontSize: 11, color: 'var(--text-tertiary)', cursor: 'pointer', fontWeight: 600 }}>
             일별 상세 ({data.daily.length} 행)
           </summary>
           <div style={{ marginTop: 8, maxHeight: 240, overflowY: 'auto', overflowX: 'auto' }}>
             <table style={{ width: '100%', fontSize: 10, borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                  <th style={{ padding: '4px 6px', textAlign: 'left', color: 'var(--text-tertiary, #666)' }}>날짜</th>
-                  <th style={{ padding: '4px 6px', textAlign: 'left', color: 'var(--text-tertiary, #666)' }}>브라우저</th>
-                  <th style={{ padding: '4px 6px', textAlign: 'right', color: 'var(--text-tertiary, #666)' }}>시도</th>
-                  <th style={{ padding: '4px 6px', textAlign: 'right', color: 'var(--text-tertiary, #666)' }}>성공</th>
-                  <th style={{ padding: '4px 6px', textAlign: 'right', color: 'var(--text-tertiary, #666)' }}>성공률</th>
+                  <th style={{ padding: '4px 6px', textAlign: 'left', color: 'var(--text-tertiary)' }}>날짜</th>
+                  <th style={{ padding: '4px 6px', textAlign: 'left', color: 'var(--text-tertiary)' }}>브라우저</th>
+                  <th style={{ padding: '4px 6px', textAlign: 'right', color: 'var(--text-tertiary)' }}>시도</th>
+                  <th style={{ padding: '4px 6px', textAlign: 'right', color: 'var(--text-tertiary)' }}>성공</th>
+                  <th style={{ padding: '4px 6px', textAlign: 'right', color: 'var(--text-tertiary)' }}>성공률</th>
                 </tr>
               </thead>
               <tbody>

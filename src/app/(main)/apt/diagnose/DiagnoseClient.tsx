@@ -124,7 +124,7 @@ export default function DiagnoseClient() {
               <label style={{fontSize: 13,fontWeight:700,color:'var(--text-secondary)',display:'block',marginBottom:4}}>배우자 청약통장 가입기간</label>
               <p style={{fontSize: 10,color:'var(--text-tertiary)',margin:'0 0 8px'}}>배우자 통장 50% 인정, 최대 3점 합산 (규칙 제28조)</p>
               <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:12}}>
-                <input type="range" min={0} max={15} step={1} value={spouseBankYears} onChange={e=>setSpouseBankYears(+e.target.value)} style={{flex:1,accentColor:'var(--accent-purple, #A78BFA)'}}/>
+                <input type="range" min={0} max={15} step={1} value={spouseBankYears} onChange={e=>setSpouseBankYears(+e.target.value)} style={{flex:1,accentColor:'var(--accent-purple)'}}/>
                 <span style={{fontSize: 16,fontWeight:800,minWidth:50,textAlign:'right'}}>{spouseBankYears}년</span>
               </div>
             </>}

@@ -103,7 +103,7 @@ function fmtPct(v: any): string {
 }
 function deltaColor(v: any): string {
   const x = Number(v);
-  if (!Number.isFinite(x) || x === 0) return 'var(--text-tertiary, #9ca3af)';
+  if (!Number.isFinite(x) || x === 0) return 'var(--text-tertiary)';
   return x > 0 ? '#34d399' : '#f87171';
 }
 function fmtKstHm(iso: string | null | undefined): string {
@@ -177,7 +177,7 @@ export default function WatchlistWidget() {
       aria-label="관심 등록 위젯"
       style={{
         padding: '14px 16px', borderRadius: 12,
-        background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border)',
+        background: 'var(--bg-elevated)', border: '1px solid var(--border)',
         display: 'flex', flexDirection: 'column', gap: 14,
       }}
     >
@@ -285,7 +285,7 @@ export default function WatchlistWidget() {
           {/* B) 14일 막대 (total 회색 + organic 녹색 오버레이) */}
           <div>
             <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--text-tertiary)', letterSpacing: 1, marginBottom: 6 }}>
-              14D DAILY <span style={{ marginLeft: 6, color: 'var(--text-tertiary, #9ca3af)', fontWeight: 700 }}>■ total</span>
+              14D DAILY <span style={{ marginLeft: 6, color: 'var(--text-tertiary)', fontWeight: 700 }}>■ total</span>
               <span style={{ marginLeft: 4, color: 'var(--accent-green)', fontWeight: 700 }}>■ organic</span>
             </div>
             <DailyBars rows={daily} />
@@ -339,7 +339,7 @@ function KpiTile({ label, value, delta, sub, highlight, muted }: { label: string
         )}
       </div>
       {sub && (
-        <div style={{ fontSize: 9, color: 'var(--text-tertiary, #9ca3af)', marginTop: 3, lineHeight: 1.4 }}>
+        <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginTop: 3, lineHeight: 1.4 }}>
           {sub}
         </div>
       )}
@@ -425,7 +425,7 @@ function TopColumn({ title, rows, emptyMsg }: { title: string; rows: TopRow[]; e
                 padding: '6px 10px', borderRadius: 6,
                 background: 'var(--bg-base)', border: '1px solid var(--border)',
               }}>
-                <span style={{ fontSize: 10, fontWeight: 800, color: i < 3 ? 'var(--brand, #2563EB)' : 'var(--text-tertiary)', textAlign: 'right' }}>
+                <span style={{ fontSize: 10, fontWeight: 800, color: i < 3 ? 'var(--brand)' : 'var(--text-tertiary)', textAlign: 'right' }}>
                   {i + 1}
                 </span>
                 <span style={{ fontSize: 11, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 600 }}>

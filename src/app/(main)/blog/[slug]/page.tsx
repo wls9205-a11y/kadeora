@@ -1483,7 +1483,7 @@ export default async function BlogDetailPage({ params }: Props) {
                 background: 'var(--bg-surface)', border: '1px solid var(--border)',
                 borderRadius: 'var(--radius-md)', textDecoration: 'none', color: 'inherit',
               }}>
-                <span style={{ fontSize: 18, fontWeight: 700, color: i === 0 ? 'var(--accent-red)' : i === 1 ? 'var(--warning)' : 'var(--text-tertiary, #6b7280)', minWidth: 24 }}>{i + 1}</span>
+                <span style={{ fontSize: 18, fontWeight: 700, color: i === 0 ? 'var(--accent-red)' : i === 1 ? 'var(--warning)' : 'var(--text-tertiary)', minWidth: 24 }}>{i + 1}</span>
                 <span style={{ fontSize: 13, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.title?.slice(0, 40)}</span>
               </Link>
             ))}

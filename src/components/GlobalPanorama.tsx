@@ -52,7 +52,7 @@ export default function GlobalPanorama({ stocks, exchangeRate, briefingKR, brief
             const isUS = s.currency === 'USD';
             const col = pct > 0 ? upC(isUS) : dnC(isUS);
             return (
-              <span key={`${s.symbol}-${i}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '0 14px', fontSize: 10, fontFamily: 'monospace', borderRight: '1px solid var(--border)' }}>
+              <span key={`${s.symbol}-${i}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '0 14px', fontSize: 10, fontFamily: 'var(--font-mono)', borderRight: '1px solid var(--border)' }}>
                 <span style={{ fontWeight: 700, color: 'var(--text-tertiary)' }}>{s.symbol}</span>
                 <span style={{ color: 'var(--text-secondary)' }}>{fmtPrice(s)}</span>
                 <span style={{ fontWeight: 700, color: col }}>{pct > 0 ? '▲' : '▼'}{Math.abs(pct).toFixed(1)}%</span>
@@ -66,15 +66,15 @@ export default function GlobalPanorama({ stocks, exchangeRate, briefingKR, brief
 
       {/* 상단 우측: 시간 */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-sm)' }}>
-        <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-tertiary)', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: 'monospace' }}>글로벌 파노라마</span>
-        <span style={{ fontSize: 10, color: 'var(--text-tertiary)', fontFamily: 'monospace' }}>{ time } KST</span>
+        <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-tertiary)', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: 'var(--font-mono)' }}>글로벌 파노라마</span>
+        <span style={{ fontSize: 10, color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)' }}>{ time } KST</span>
       </div>
 
       {/* 공포탐욕 + VIX */}
       <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 'var(--sp-sm)', marginBottom: 10 }}>
         {/* 공포탐욕 */}
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '10px 12px' }}>
-          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontFamily: 'monospace', marginBottom: 6, display: 'flex', justifyContent: 'space-between' }}>
+          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)', marginBottom: 6, display: 'flex', justifyContent: 'space-between' }}>
             <span>공포탐욕 지수</span><span>CNN</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'flex-end', gap: 10 }}>
@@ -83,7 +83,7 @@ export default function GlobalPanorama({ stocks, exchangeRate, briefingKR, brief
               <div style={{ fontSize: 10, fontWeight: 600, color: fgColor, transition: 'color .4s' }}>{fgLabel}</div>
             </div>
             <div style={{ flex: 1 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 2, fontFamily: 'monospace' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 2, fontFamily: 'var(--font-mono)' }}>
                 <span>공포</span><span>중립</span><span>탐욕</span>
               </div>
               <div style={{ height: 6, borderRadius: 4, overflow: 'hidden', background: 'var(--bg-hover)', display: 'flex' }}>
@@ -101,7 +101,7 @@ export default function GlobalPanorama({ stocks, exchangeRate, briefingKR, brief
 
         {/* 환율 + 심리 요약 */}
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '10px 12px' }}>
-          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontFamily: 'monospace', marginBottom: 6 }}>USD/KRW</div>
+          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)', marginBottom: 6 }}>USD/KRW</div>
           <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-1px', marginBottom: 'var(--sp-xs)' }}>
             {exchangeRate.toLocaleString('ko-KR', { maximumFractionDigits: 0 })}
           </div>
@@ -115,7 +115,7 @@ export default function GlobalPanorama({ stocks, exchangeRate, briefingKR, brief
       {/* 미국 섹터 등락 */}
       {usSectors.length > 0 && (
         <div>
-          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontFamily: 'monospace', marginBottom: 5 }}>미국 섹터</div>
+          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)', marginBottom: 5 }}>미국 섹터</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
             {usSectors.map(sec => {
               const c = sec.avg > 0 ? '#2EE8A5' : '#FF6B6B';
@@ -123,7 +123,7 @@ export default function GlobalPanorama({ stocks, exchangeRate, briefingKR, brief
               return (
                 <div key={sec.name} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '7px 8px' }}>
                   <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 2, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{sec.name}</div>
-                  <div style={{ fontSize: 12, fontWeight: 800, color: c, fontFamily: 'monospace' }}>{sec.avg > 0 ? '+' : ''}{sec.avg.toFixed(1)}%</div>
+                  <div style={{ fontSize: 12, fontWeight: 800, color: c, fontFamily: 'var(--font-mono)' }}>{sec.avg > 0 ? '+' : ''}{sec.avg.toFixed(1)}%</div>
                   <div style={{ height: 2, borderRadius: 1, background: 'var(--bg-hover)', marginTop: 'var(--sp-xs)', overflow: 'hidden' }}>
                     <div style={{ width: `${barW}%`, height: '100%', background: c, opacity: 0.7 }} />
                   </div>

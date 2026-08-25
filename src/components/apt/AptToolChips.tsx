@@ -53,10 +53,10 @@ export default function AptToolChips({ region }: Props = {}) {
               alignItems: 'center',
               gap: 9,
               padding: '11px 12px',
-              border: '1px solid var(--border, #1e3258)',
+              border: '1px solid var(--border)',
               borderRadius: 10,
-              background: 'var(--bg-surface, #ffffff)',
-              color: 'var(--text-primary, #111827)',
+              background: 'var(--bg-surface)',
+              color: 'var(--text-primary)',
               textDecoration: 'none',
             }}
           >
@@ -65,7 +65,7 @@ export default function AptToolChips({ region }: Props = {}) {
             </span>
             <span style={{ minWidth: 0 }}>
               <span style={{ display: 'block', fontSize: 'var(--fs-xs)', fontWeight: 700 }}>{t.label}</span>
-              <span style={{ display: 'block', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary, #9ca3af)', marginTop: 1 }}>
+              <span style={{ display: 'block', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 1 }}>
                 {t.desc}
               </span>
             </span>

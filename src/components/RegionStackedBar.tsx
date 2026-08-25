@@ -39,9 +39,9 @@ const KPI_CFG = [
   { key: 'sub', label: '청약정보', c: 'var(--accent-blue)' },
   { key: 'ongoing', label: '분양중', c: 'var(--accent-green)' },
   { key: 'unsold', label: '미분양', c: 'var(--accent-red)' },
-  { key: 'redev', label: '재건축', c: 'var(--accent-purple, #8B5CF6)' },
+  { key: 'redev', label: '재건축', c: 'var(--accent-purple)' },
   { key: 'trade', label: '실거래', c: 'var(--accent-yellow)' },
-  { key: 'complex', label: '단지백과', c: 'var(--brand, #3B7BF6)' },
+  { key: 'complex', label: '단지백과', c: 'var(--brand)' },
 ] as const;
 
 const DONUT_COLORS = ['#3B82F6', '#22C55E', '#EF4444', '#8B5CF6'];
@@ -161,7 +161,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
               { v: exp.sub, l: '청약', c: 'var(--accent-blue)', tab: 'sub' },
               { v: exp.ongoing, l: '분양', c: 'var(--accent-green)', tab: 'ongoing' },
               { v: exp.unsold, l: '미분양', c: 'var(--accent-red)', tab: 'unsold' },
-              { v: exp.redev, l: '재건축', c: 'var(--accent-purple, #8B5CF6)', tab: 'redev' },
+              { v: exp.redev, l: '재건축', c: 'var(--accent-purple)', tab: 'redev' },
               { v: exp.trade, l: '실거래', c: 'var(--accent-yellow)', tab: 'trade' },
             ] as const).map((item, idx) => (
               <button key={idx} onClick={() => onTabChange?.(item.tab)} style={{

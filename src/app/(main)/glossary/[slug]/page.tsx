@@ -144,12 +144,12 @@ export default async function GlossaryTermPage({ params }: { params: Promise<{ s
         <div style={{ marginBottom: '24px' }}>
           <h2 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '8px' }}>예시</h2>
           <div style={{
-            background: 'var(--bg-elevated, #f0f0f0)',
+            background: 'var(--bg-elevated)',
             padding: '14px 18px',
             borderRadius: '8px',
             fontSize: '14px',
             lineHeight: 1.7,
-            fontFamily: 'var(--font-mono, monospace)',
+            fontFamily: 'var(--font-mono)',
           }}>
             {term.example}
           </div>

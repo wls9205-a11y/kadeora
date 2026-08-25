@@ -25,8 +25,8 @@ export default function AptHeroCard({ data }: { data: HeroData }) {
       margin: '4px 0 10px',
       borderRadius: 8,
       overflow: 'hidden',
-      border: '1px solid var(--border, #E5E7EB)',
-      background: 'var(--bg-surface, #FFFFFF)',
+      border: '1px solid var(--border)',
+      background: 'var(--bg-surface)',
       textDecoration: 'none',
       color: 'inherit',
     }}>
@@ -77,23 +77,23 @@ export default function AptHeroCard({ data }: { data: HeroData }) {
         }}>
           <div style={{
             fontSize: 13.5, fontWeight: 500, lineHeight: 1.25,
-            color: 'var(--text-primary, #111827)',
+            color: 'var(--text-primary)',
           }}>{data.title}</div>
           {data.region && (
             <div style={{
-              fontSize: 11, color: 'var(--text-secondary, #6B7280)', flexShrink: 0,
+              fontSize: 11, color: 'var(--text-secondary)', flexShrink: 0,
             }}>{data.region}</div>
           )}
         </div>
         {data.meta_primary && (
           <div style={{
-            fontSize: 11.5, fontWeight: 500, color: 'var(--text-primary, #111827)',
+            fontSize: 11.5, fontWeight: 500, color: 'var(--text-primary)',
             marginTop: 2,
           }}>
             {data.meta_primary}
             {data.meta_secondary && (
               <span style={{
-                color: 'var(--text-secondary, #6B7280)', fontWeight: 400, fontSize: 11,
+                color: 'var(--text-secondary)', fontWeight: 400, fontSize: 11,
               }}> · {data.meta_secondary}</span>
             )}
           </div>

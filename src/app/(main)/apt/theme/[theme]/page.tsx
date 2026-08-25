@@ -220,7 +220,7 @@ export default async function ThemePage({ params, searchParams }: Props) {
               </div>
               <div style={{ textAlign: 'right', flexShrink: 0, marginLeft: 8 }}>
                 <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-primary)' }}>{p.latest_sale_price ? fmtAmount(p.latest_sale_price) : '-'}</div>
-                <div style={{ fontSize: 10, color: theme.includes('price-up') ? 'var(--accent-green, #16a34a)' : theme.includes('price-down') ? 'var(--accent-red)' : 'var(--text-tertiary)' }}>{t.formatSub(p)}</div>
+                <div style={{ fontSize: 10, color: theme.includes('price-up') ? 'var(--accent-green)' : theme.includes('price-down') ? 'var(--accent-red)' : 'var(--text-tertiary)' }}>{t.formatSub(p)}</div>
               </div>
             </Link>
           ))}

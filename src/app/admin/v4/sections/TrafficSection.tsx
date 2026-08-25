@@ -70,7 +70,7 @@ export default function TrafficSection() {
   return (
     <section style={{
       padding: 16, borderRadius: 'var(--radius-lg, 14px)',
-      background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border)',
+      background: 'var(--bg-elevated)', border: '1px solid var(--border)',
     }}>
       <h2 style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)', marginTop: 0, marginBottom: 10 }}>
         🌐 실시간 트래픽
@@ -88,7 +88,7 @@ export default function TrafficSection() {
       <div style={{
         display: 'flex', alignItems: 'flex-end', gap: 2, height: 80,
         padding: '8px 10px', borderRadius: 8,
-        background: 'var(--bg-surface, #1a1b22)', border: '1px solid var(--border)',
+        background: 'var(--bg-surface)', border: '1px solid var(--border)',
         overflowX: 'auto',
       }}>
         {hourly.map((h, i) => {
@@ -187,7 +187,7 @@ export default function TrafficSection() {
             {catEntries.map(([k, v]) => (
               <div key={k} style={{
                 padding: '4px 10px', borderRadius: 6,
-                background: 'var(--bg-surface, #1a1b22)', border: '1px solid var(--border)',
+                background: 'var(--bg-surface)', border: '1px solid var(--border)',
                 fontSize: 11,
               }}>
                 <code style={{ color: 'var(--text-secondary)' }}>{k}</code>

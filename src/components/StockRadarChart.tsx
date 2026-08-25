@@ -50,7 +50,7 @@ export default function StockRadarChart({ stocks, isKR }: Props) {
 
   return (
     <div style={{ marginBottom: 'var(--sp-md)' }}>
-      <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-tertiary)', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: 'monospace', marginBottom: 'var(--sp-sm)' }}>
+      <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-tertiary)', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: 'var(--font-mono)', marginBottom: 'var(--sp-sm)' }}>
         종목 레이더 비교 (최대 3개)
       </div>
 
@@ -63,7 +63,7 @@ export default function StockRadarChart({ stocks, isKR }: Props) {
             {searchRes.map(s => (
               <button aria-label="닫기" key={s.symbol} onClick={() => { toggle(s.symbol); setSearch(''); }} style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', width: '100%', padding: '7px 10px', background: selected.includes(s.symbol) ? 'var(--brand-bg)' : 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
                 <span style={{ fontSize: 12, color: 'var(--text-primary)', flex: 1 }}>{s.name}</span>
-                <span style={{ fontSize: 10, color: 'var(--text-tertiary)', fontFamily: 'monospace' }}>{s.symbol}</span>
+                <span style={{ fontSize: 10, color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)' }}>{s.symbol}</span>
                 {selected.includes(s.symbol) && <span style={{ fontSize: 10, color: 'var(--brand)' }}>✓</span>}
               </button>
             ))}
@@ -100,7 +100,7 @@ export default function StockRadarChart({ stocks, isKR }: Props) {
               return (
                 <g key={label}>
                   <line x1={CX} y1={CY} x2={x} y2={y} stroke="var(--border)" strokeWidth="0.5" />
-                  <text x={lx} y={ly} textAnchor="middle" dominantBaseline="middle" fontSize="7" fill="var(--text-tertiary)" fontFamily="monospace">{label}</text>
+                  <text x={lx} y={ly} textAnchor="middle" dominantBaseline="middle" fontSize="7" fill="var(--text-tertiary)" fontFamily="var(--font-mono)">{label}</text>
                 </g>
               );
             })}
@@ -130,11 +130,11 @@ export default function StockRadarChart({ stocks, isKR }: Props) {
                   </div>
                   {AXES.map((ax, i) => (
                     <div key={ax} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
-                      <span style={{ fontSize: 10, color: 'var(--text-tertiary)', width: 42, flexShrink: 0, fontFamily: 'monospace' }}>{ax}</span>
+                      <span style={{ fontSize: 10, color: 'var(--text-tertiary)', width: 42, flexShrink: 0, fontFamily: 'var(--font-mono)' }}>{ax}</span>
                       <div style={{ flex: 1, height: 3, background: 'var(--bg-hover)', borderRadius: 4, overflow: 'hidden' }}>
                         <div style={{ width: `${scores[i]}%`, height: '100%', background: col, opacity: 0.7, borderRadius: 4 }} />
                       </div>
-                      <span style={{ fontSize: 10, color: col, width: 24, textAlign: 'right', fontFamily: 'monospace' }}>{Math.round(scores[i])}</span>
+                      <span style={{ fontSize: 10, color: col, width: 24, textAlign: 'right', fontFamily: 'var(--font-mono)' }}>{Math.round(scores[i])}</span>
                     </div>
                   ))}
                 </div>

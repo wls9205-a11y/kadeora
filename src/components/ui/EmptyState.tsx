@@ -15,22 +15,22 @@ export default function EmptyState({ icon = '📭', title, description, cta }: P
   return (
     <div
       style={{
-        background: 'var(--bg-elevated, #F9FAFB)',
-        border: '1px solid var(--border, #E5E7EB)',
+        background: 'var(--bg-elevated)',
+        border: '1px solid var(--border)',
         padding: '28px 16px',
         borderRadius: 8,
         textAlign: 'center',
         margin: '3px 3px 6px',
       }}
     >
-      <div style={{ fontSize: 'var(--fs-2xl)', color: 'var(--text-tertiary, #9CA3AF)', marginBottom: 8, lineHeight: 1 }}>
+      <div style={{ fontSize: 'var(--fs-2xl)', color: 'var(--text-tertiary)', marginBottom: 8, lineHeight: 1 }}>
         {icon}
       </div>
-      <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary, #111827)' }}>
+      <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>
         {title}
       </div>
       {description ? (
-        <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary, #6B7280)', marginTop: 4, lineHeight: 1.5 }}>
+        <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginTop: 4, lineHeight: 1.5 }}>
           {description}
         </div>
       ) : null}
@@ -42,7 +42,7 @@ export default function EmptyState({ icon = '📭', title, description, cta }: P
             marginTop: 10,
             fontSize: 'var(--fs-xs)',
             fontWeight: 600,
-            color: 'var(--brand, #2563EB)',
+            color: 'var(--brand)',
             textDecoration: 'none',
           }}
         >

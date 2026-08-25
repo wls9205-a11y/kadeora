@@ -214,10 +214,10 @@ export default function ComplexClient({ complexes, ageGroups, regions, initialRe
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 1, margin: '0 10px 4px', background: 'var(--border)', borderRadius: 'var(--radius-sm)', overflow: 'hidden', border: '1px solid var(--border)' }}>
                 {[
                   { label: '전세', value: c.jeonse > 0 ? fmtAmount(c.jeonse) : '—', color: 'var(--accent-green)' },
-                  { label: '평당가', value: c.pyeongPrice > 0 ? fmtAmount(c.pyeongPrice) : '—', color: 'var(--accent-purple, #A78BFA)' },
+                  { label: '평당가', value: c.pyeongPrice > 0 ? fmtAmount(c.pyeongPrice) : '—', color: 'var(--accent-purple)' },
                   { label: '갭투자', value: c.lastPrice > 0 && c.jeonse > 0 ? fmtAmount(c.lastPrice - c.jeonse) : '—', color: 'var(--accent-orange)' },
                   { label: '매매', value: c.saleCount > 0 ? `${c.saleCount}건` : '—', color: 'var(--brand)' },
-                  { label: '전월세', value: c.rentCount > 0 ? `${c.rentCount}건` : '—', color: 'var(--accent-cyan, #22D3EE)' },
+                  { label: '전월세', value: c.rentCount > 0 ? `${c.rentCount}건` : '—', color: 'var(--accent-cyan)' },
                   { label: '월세', value: c.monthlyRent > 0 ? `${c.monthlyRent}만` : '—', color: 'var(--text-secondary)' },
                 ].map(p => (
                   <div key={p.label} style={{ textAlign: 'center', padding: '4px 2px', background: 'var(--bg-surface)' }}>

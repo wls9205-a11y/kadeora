@@ -32,7 +32,7 @@ export default function UsersCommunitySection({ data }: Props) {
   return (
     <section style={{
       padding: 16, borderRadius: 'var(--radius-lg, 14px)',
-      background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border)',
+      background: 'var(--bg-elevated)', border: '1px solid var(--border)',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
         <h2 style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
@@ -41,7 +41,7 @@ export default function UsersCommunitySection({ data }: Props) {
         <a href="/admin/users" style={{
           marginLeft: 'auto', fontSize: 11, fontWeight: 700,
           padding: '6px 10px', borderRadius: 6,
-          background: 'var(--bg-surface, #1a1b22)', color: 'var(--text-secondary)',
+          background: 'var(--bg-surface)', color: 'var(--text-secondary)',
           border: '1px solid var(--border)', textDecoration: 'none',
         }}>유저 상세 보기 →</a>
       </div>
@@ -75,7 +75,7 @@ export default function UsersCommunitySection({ data }: Props) {
         ].map(it => (
           <div key={it.k} style={{
             padding: '8px 10px', borderRadius: 6,
-            background: 'var(--bg-surface, #1a1b22)', border: '1px solid var(--border)',
+            background: 'var(--bg-surface)', border: '1px solid var(--border)',
             display: 'flex', flexDirection: 'column', gap: 2,
           }}>
             <span style={{ color: 'var(--text-tertiary)', fontSize: 10, textTransform: 'uppercase', fontWeight: 700 }}>{it.label}</span>

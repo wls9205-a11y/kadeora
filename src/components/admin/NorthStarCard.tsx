@@ -62,7 +62,7 @@ function MetricCard({
       aria-label={label}
       style={{
         padding: '14px 16px',
-        background: 'var(--bg-elevated, #1f2028)',
+        background: 'var(--bg-elevated)',
         border: '1px solid var(--border)',
         borderRadius: 'var(--radius-md, 10px)',
         display: 'flex',
@@ -85,7 +85,7 @@ function MetricCard({
         <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{sublabel}</div>
       )}
       {sparkline && (
-        <div style={{ marginTop: 4, color: 'var(--text-secondary, #aaa)' }}>
+        <div style={{ marginTop: 4, color: 'var(--text-secondary)' }}>
           <Sparkline points={sparkline} />
         </div>
       )}

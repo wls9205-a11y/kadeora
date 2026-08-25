@@ -37,7 +37,7 @@ export default function BlogHeroExtras({ tldr, keyPoints, readingMinutes, readin
           }}
         >
           <span aria-hidden style={{ fontSize: 18, lineHeight: '24px' }}>💡</span>
-          <div style={{ flex: 1, fontSize: 14, color: 'var(--text-primary, #e5e7eb)', lineHeight: 1.6 }}>{tldr}</div>
+          <div style={{ flex: 1, fontSize: 14, color: 'var(--text-primary)', lineHeight: 1.6 }}>{tldr}</div>
           {min && (
             <span style={{
               whiteSpace: 'nowrap',
@@ -73,7 +73,7 @@ export default function BlogHeroExtras({ tldr, keyPoints, readingMinutes, readin
                   background: 'rgba(255,255,255,0.03)',
                   borderRadius: 6,
                   fontSize: 13,
-                  color: 'var(--text-primary, #e5e7eb)',
+                  color: 'var(--text-primary)',
                   lineHeight: 1.5,
                 }}
               >

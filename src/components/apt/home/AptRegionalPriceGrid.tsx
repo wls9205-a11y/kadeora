@@ -52,7 +52,7 @@ function fmtPrice(p: number | null): string {
 
 function fmtChange(v: number | null): { label: string; color: string } | null {
   if (v == null || !isFinite(v) || Math.abs(v) < 0.05) return null;
-  if (v > 0) return { label: `▲ ${v.toFixed(1)}%`, color: 'var(--accent-red, #DC2626)' };
+  if (v > 0) return { label: `▲ ${v.toFixed(1)}%`, color: 'var(--accent-red)' };
   return { label: `▼ ${Math.abs(v).toFixed(1)}%`, color: 'var(--accent-blue)' };
 }
 

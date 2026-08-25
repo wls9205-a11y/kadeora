@@ -36,7 +36,7 @@ export default async function AptCardGridV5({ filters, moreHref, perPage = 12 }:
 
   if (rows.length === 0) {
     return (
-      <section aria-label="단지 목록" style={{ marginTop: 8, padding: 24, textAlign: 'center', color: 'var(--text-secondary)', fontSize: 12, background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border)', borderRadius: 12 }}>
+      <section aria-label="단지 목록" style={{ marginTop: 8, padding: 24, textAlign: 'center', color: 'var(--text-secondary)', fontSize: 12, background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 12 }}>
         해당 지역·카테고리에 단지가 없습니다.
       </section>
     );
@@ -52,7 +52,7 @@ export default async function AptCardGridV5({ filters, moreHref, perPage = 12 }:
           const badge = badgeFor(r);
           const thumb = thumbUrl(r);
           return (
-            <Link key={r.slug} href={`/apt/${encodeURIComponent(r.slug)}`} style={{ background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden', textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column' }}>
+            <Link key={r.slug} href={`/apt/${encodeURIComponent(r.slug)}`} style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden', textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column' }}>
               <div style={{ aspectRatio: '4 / 3', background: `center/cover no-repeat url('${thumb}'), var(--bg-base)`, position: 'relative' }}>
                 {badge && <span style={{ position: 'absolute', top: 5, left: 5, fontSize: 9, padding: '2px 6px', borderRadius: 4, fontWeight: 700, background: badge.bg, color: badge.fg }}>{badge.label}</span>}
               </div>
@@ -72,8 +72,8 @@ export default async function AptCardGridV5({ filters, moreHref, perPage = 12 }:
             style={{
               padding: '9px 18px',
               borderRadius: 999,
-              border: '1px solid var(--border-strong, #3a3b45)',
-              background: 'var(--bg-elevated, #1f2028)',
+              border: '1px solid var(--border-strong)',
+              background: 'var(--bg-elevated)',
               color: 'var(--text-primary)',
               fontSize: 12,
               fontWeight: 700,

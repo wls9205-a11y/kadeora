@@ -8,7 +8,7 @@ interface Props { items: Item[] }
 const TONE_COLOR: Record<NonNullable<Item['tone']>, string> = {
   red:     'var(--accent-red)',
   green:   'var(--accent-green)',
-  orange:  'var(--accent-orange, #fb923c)',
+  orange:  'var(--accent-orange)',
   default: 'var(--text-primary)',
 };
 
@@ -17,7 +17,7 @@ export default function KPIStrip({ items }: Props) {
     <div style={{
       display: 'flex', gap: 14, flexWrap: 'wrap',
       padding: '6px 10px', borderRadius: 'var(--radius-md, 10px)',
-      background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border)',
+      background: 'var(--bg-elevated)', border: '1px solid var(--border)',
       fontSize: 12,
     }}>
       {items.map((it, i) => (

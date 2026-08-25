@@ -22,7 +22,7 @@ const CATEGORIES: { key: Category; label: string }[] = [
 
 // s269f: 카테고리별 active 색 — 청약 blue / 미분양 coral / 재개발 purple / 전체 검정
 const CATEGORY_ACTIVE_COLOR: Record<Category, string> = {
-  all: 'var(--text-primary, #111827)',
+  all: 'var(--text-primary)',
   subscription: '#185FA5',
   unsold: '#993C1D',
   redev: '#534AB7',
@@ -104,9 +104,9 @@ export default function AptRecentFeed({ initialItems, region, stats }: Props) {
             style={{
               fontSize: 11.5, padding: '4px 10px', borderRadius: 999,
               background: active ? CATEGORY_ACTIVE_COLOR[c.key] : 'transparent',
-              color: active ? 'var(--bg-surface, #FFFFFF)' : 'var(--text-secondary, #6B7280)',
+              color: active ? 'var(--bg-surface)' : 'var(--text-secondary)',
               border: '1px solid',
-              borderColor: active ? CATEGORY_ACTIVE_COLOR[c.key] : 'var(--border, #E5E7EB)',
+              borderColor: active ? CATEGORY_ACTIVE_COLOR[c.key] : 'var(--border)',
               whiteSpace: 'nowrap', cursor: 'pointer',
               fontWeight: active ? 500 : 400,
               display: 'flex', alignItems: 'center', gap: 4,
@@ -142,7 +142,7 @@ export default function AptRecentFeed({ initialItems, region, stats }: Props) {
       {chipBar}
       <div style={{
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        padding: '4px 8px 8px', fontSize: 10.5, color: 'var(--text-tertiary, #9CA3AF)',
+        padding: '4px 8px 8px', fontSize: 10.5, color: 'var(--text-tertiary)',
       }}>
         <span>최근 등록 · {region}</span>
         <span>최신순</span>
@@ -157,20 +157,20 @@ export default function AptRecentFeed({ initialItems, region, stats }: Props) {
       {items.length === 0 && (
         <div style={{
           padding: '40px 16px', textAlign: 'center',
-          color: 'var(--text-tertiary, #9CA3AF)', fontSize: 13,
+          color: 'var(--text-tertiary)', fontSize: 13,
         }}>이 카테고리에 최근 등록된 단지가 없어요</div>
       )}
       <div ref={sentinelRef} aria-hidden="true" style={{ height: 1 }} />
       {loading && (
         <div style={{
           padding: '12px 16px', textAlign: 'center',
-          color: 'var(--text-tertiary, #9CA3AF)', fontSize: 11.5,
+          color: 'var(--text-tertiary)', fontSize: 11.5,
         }}>불러오는 중…</div>
       )}
       {done && items.length > 0 && (
         <div style={{
           padding: '20px 16px', textAlign: 'center', fontSize: 11.5,
-          color: 'var(--text-tertiary, #9CA3AF)',
+          color: 'var(--text-tertiary)',
         }}>— 끝 —</div>
       )}
     </section>

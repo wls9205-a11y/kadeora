@@ -496,7 +496,7 @@ export default async function ComplexDetailPage({ params }: Props) {
               Stage {bigEvent.stage ?? '-'} / 7
             </span>
             {bigEvent.constructor_status && bigEvent.constructor_status !== 'confirmed' && (
-              <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 6px', borderRadius: 4, background: 'var(--warning-bg)', color: 'var(--warning, #eab308)' }}>
+              <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 6px', borderRadius: 4, background: 'var(--warning-bg)', color: 'var(--warning)' }}>
                 {bigEvent.constructor_status === 'likely' ? '수주 유력' : '수주 미확정'}
               </span>
             )}

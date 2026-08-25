@@ -30,7 +30,7 @@ function statusColor(stat: StageStat): string {
   const fail = stat?.fail ?? 0;
   const ok = stat?.ok ?? 0;
   if (ok === 0 && fail === 0) return 'var(--text-tertiary)';
-  if (fail > 0)               return 'var(--accent-orange, #fb923c)';
+  if (fail > 0)               return 'var(--accent-orange)';
   return 'var(--accent-green)';
 }
 
@@ -40,7 +40,7 @@ export default function PipelineStages({ stages, order = DEFAULT_ORDER }: Props)
     <div style={{
       display: 'flex', gap: 6, flexWrap: 'wrap',
       padding: 10, borderRadius: 'var(--radius-md, 10px)',
-      background: 'var(--bg-surface, #1a1b22)', border: '1px solid var(--border)',
+      background: 'var(--bg-surface)', border: '1px solid var(--border)',
     }}>
       {items.map(k => {
         const st = stages[k];
@@ -49,7 +49,7 @@ export default function PipelineStages({ stages, order = DEFAULT_ORDER }: Props)
           <div key={k} style={{
             flex: '1 1 96px', minWidth: 90,
             padding: '8px 10px', borderRadius: 'var(--radius-sm, 6px)',
-            background: 'var(--bg-elevated, #1f2028)',
+            background: 'var(--bg-elevated)',
             border: `1px solid ${color}33`, borderLeft: `3px solid ${color}`,
             display: 'flex', flexDirection: 'column', gap: 3,
           }}>

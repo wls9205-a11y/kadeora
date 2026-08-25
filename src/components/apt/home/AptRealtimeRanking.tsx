@@ -9,7 +9,7 @@ function fmtChange(v: any): { label: string; color: string } | null {
   if (v == null) return null;
   const n = Number(v);
   if (!isFinite(n) || n === 0) return null;
-  if (n > 0) return { label: `▲ ${n.toFixed(0)}%`, color: 'var(--accent-red, #DC2626)' };
+  if (n > 0) return { label: `▲ ${n.toFixed(0)}%`, color: 'var(--accent-red)' };
   return { label: `▼ ${Math.abs(n).toFixed(0)}%`, color: 'var(--accent-blue)' };
 }
 
@@ -86,7 +86,7 @@ export default function AptRealtimeRanking({ sites }: Props) {
                     width: 22,
                     fontSize: 16,
                     fontWeight: 900,
-                    color: i < 3 ? 'var(--brand, #FAC775)' : 'var(--text-tertiary)',
+                    color: i < 3 ? 'var(--brand)' : 'var(--text-tertiary)',
                     textAlign: 'center',
                     letterSpacing: -0.5,
                   }}
@@ -143,7 +143,7 @@ export default function AptRealtimeRanking({ sites }: Props) {
                         padding: '2px 6px',
                         borderRadius: 999,
                         background: 'rgba(220,38,38,0.15)',
-                        color: 'var(--accent-red, #DC2626)',
+                        color: 'var(--accent-red)',
                       }}
                     >
                       D-{dday}
@@ -159,7 +159,7 @@ export default function AptRealtimeRanking({ sites }: Props) {
                       style={{
                         fontSize: 11,
                         fontWeight: 800,
-                        color: 'var(--brand, #FAC775)',
+                        color: 'var(--brand)',
                       }}
                     >
                       ★ {pop}

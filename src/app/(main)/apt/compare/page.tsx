@@ -79,7 +79,7 @@ export default async function AptComparePage() {
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '12px 6px 28px' }}>
       <h1 style={{ fontSize: 19, fontWeight: 700, margin: '0 0 6px' }}>아파트 단지 비교</h1>
-      <p style={{ fontSize: 12.5, color: 'var(--text-secondary, #6b7280)', margin: '0 0 18px', lineHeight: 1.6 }}>
+      <p style={{ fontSize: 12.5, color: 'var(--text-secondary)', margin: '0 0 18px', lineHeight: 1.6 }}>
         두 단지의 매매가·전세가율·연차·거래량을 나란히 놓고 봅니다. 아래 인기 조합을 바로 열거나,
         검색에서 단지를 찾아 비교하세요.
       </p>
@@ -90,9 +90,9 @@ export default async function AptComparePage() {
           display: 'inline-block',
           padding: '9px 14px',
           borderRadius: 8,
-          border: '1px solid var(--border, #1e3258)',
-          background: 'var(--bg-surface, #ffffff)',
-          color: 'var(--text-primary, #111827)',
+          border: '1px solid var(--border)',
+          background: 'var(--bg-surface)',
+          color: 'var(--text-primary)',
           fontSize: 12.5,
           fontWeight: 700,
           textDecoration: 'none',
@@ -114,15 +114,15 @@ export default async function AptComparePage() {
                   display: 'block',
                   padding: '11px 12px',
                   borderRadius: 10,
-                  border: '1px solid var(--border, #1e3258)',
-                  background: 'var(--bg-surface, #ffffff)',
-                  color: 'var(--text-primary, #111827)',
+                  border: '1px solid var(--border)',
+                  background: 'var(--bg-surface)',
+                  color: 'var(--text-primary)',
                   textDecoration: 'none',
                 }}
               >
-                <div style={{ fontSize: 10.5, color: 'var(--text-tertiary, #9ca3af)', marginBottom: 3 }}>{region}</div>
+                <div style={{ fontSize: 10.5, color: 'var(--text-tertiary)', marginBottom: 3 }}>{region}</div>
                 <div style={{ fontSize: 13, fontWeight: 700, lineHeight: 1.4, wordBreak: 'keep-all' }}>
-                  {a.apt_name} <span style={{ color: 'var(--text-tertiary, #9ca3af)' }}>vs</span> {b.apt_name}
+                  {a.apt_name} <span style={{ color: 'var(--text-tertiary)' }}>vs</span> {b.apt_name}
                 </div>
               </Link>
             ))}
@@ -133,11 +133,11 @@ export default async function AptComparePage() {
           style={{
             padding: '24px 16px',
             borderRadius: 8,
-            border: '1px solid var(--border, #1e3258)',
-            background: 'var(--bg-elevated, #f9fafb)',
+            border: '1px solid var(--border)',
+            background: 'var(--bg-elevated)',
             textAlign: 'center',
             fontSize: 12.5,
-            color: 'var(--text-secondary, #6b7280)',
+            color: 'var(--text-secondary)',
           }}
         >
           비교 조합을 불러오지 못했습니다. 검색에서 단지를 직접 찾아 비교해 주세요.

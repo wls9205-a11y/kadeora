@@ -52,7 +52,7 @@ export default async function CronUnifiedPanel() {
     <details
       style={{
         padding: '12px 14px', borderRadius: 10,
-        background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border)',
+        background: 'var(--bg-elevated)', border: '1px solid var(--border)',
         marginTop: 12,
       }}
     >

@@ -32,7 +32,7 @@ export default function LandmarkCard({ row }: { row: LandmarkRow }) {
     <Link
       href={href}
       style={{
-        background: 'var(--bg-elevated, #1f2028)',
+        background: 'var(--bg-elevated)',
         border: '1px solid var(--border)',
         borderRadius: 10,
         overflow: 'hidden',
@@ -82,7 +82,7 @@ export default function LandmarkCard({ row }: { row: LandmarkRow }) {
           <div
             style={{
               fontSize: 10,
-              color: 'var(--text-tertiary, #666)',
+              color: 'var(--text-tertiary)',
               marginTop: 4,
               lineHeight: 1.4,
               display: '-webkit-box',

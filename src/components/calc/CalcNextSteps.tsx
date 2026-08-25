@@ -82,17 +82,17 @@ export default function CalcNextSteps({ category }: Props) {
         marginTop: 24,
         padding: '14px 14px 12px',
         borderRadius: 'var(--radius-md, 10px)',
-        background: 'var(--bg-surface, #0D1730)',
-        border: '1px solid var(--border, #1E3258)',
+        background: 'var(--bg-surface)',
+        border: '1px solid var(--border)',
       }}
     >
       <h2
         id="calc-next-heading"
-        style={{ fontSize: 14, fontWeight: 700, margin: '0 0 2px', color: 'var(--text-primary, #F2F5FA)' }}
+        style={{ fontSize: 14, fontWeight: 700, margin: '0 0 2px', color: 'var(--text-primary)' }}
       >
         계산은 끝났고, 다음은
       </h2>
-      <p style={{ fontSize: 11.5, color: 'var(--text-tertiary, #8BA3C0)', margin: '0 0 10px' }}>
+      <p style={{ fontSize: 11.5, color: 'var(--text-tertiary)', margin: '0 0 10px' }}>
         숫자만 보고 끝내지 마세요. 실제 매물·종목·사람들 이야기로 이어집니다.
       </p>
 
@@ -108,20 +108,20 @@ export default function CalcNextSteps({ category }: Props) {
               gap: 10,
               padding: '10px 11px',
               borderRadius: 'var(--radius-sm, 6px)',
-              background: 'var(--bg-elevated, #132040)',
-              border: '1px solid var(--border, #1E3258)',
-              color: 'var(--text-primary, #F2F5FA)',
+              background: 'var(--bg-elevated)',
+              border: '1px solid var(--border)',
+              color: 'var(--text-primary)',
               textDecoration: 'none',
             }}
           >
             <span aria-hidden style={{ fontSize: 18, lineHeight: 1 }}>{s.icon}</span>
             <span style={{ minWidth: 0, flex: 1 }}>
               <span style={{ display: 'block', fontSize: 12.5, fontWeight: 700 }}>{s.label}</span>
-              <span style={{ display: 'block', fontSize: 11, color: 'var(--text-tertiary, #8BA3C0)', marginTop: 1 }}>
+              <span style={{ display: 'block', fontSize: 11, color: 'var(--text-tertiary)', marginTop: 1 }}>
                 {s.desc}
               </span>
             </span>
-            <span aria-hidden style={{ fontSize: 13, color: 'var(--text-tertiary, #8BA3C0)' }}>›</span>
+            <span aria-hidden style={{ fontSize: 13, color: 'var(--text-tertiary)' }}>›</span>
           </Link>
         ))}
       </div>

@@ -28,7 +28,7 @@ export default function KakaoMarketingPage() {
           flexWrap: 'wrap',
           padding: '10px 12px',
           borderRadius: 'var(--radius-md, 10px)',
-          background: 'var(--bg-elevated, #1f2028)',
+          background: 'var(--bg-elevated)',
           border: '1px solid var(--border)',
         }}
       >

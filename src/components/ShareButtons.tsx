@@ -8,7 +8,7 @@ interface Props { title: string; postId?: number | string; content?: string; com
 interface Platform { id: string; label: string; emoji: string; bg: string; color: string; isNew?: boolean; }
 
 const BASE_PLATFORMS: Platform[] = [
-  { id: 'kakao', label: '카카오톡', emoji: '💬', bg: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)' },
+  { id: 'kakao', label: '카카오톡', emoji: '💬', bg: 'var(--kakao-bg)', color: 'var(--kakao-text)' },
   { id: 'naver-blog', label: '네이버 블로그', emoji: 'N', bg: '#03C75A', color: '#fff', isNew: true },
   { id: 'naver-cafe', label: '네이버 카페', emoji: 'N', bg: '#1EC800', color: '#fff', isNew: true },
   { id: 'band', label: '밴드', emoji: '🟢', bg: '#06C755', color: '#fff' },

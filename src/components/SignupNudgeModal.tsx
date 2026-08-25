@@ -181,11 +181,11 @@ export default function SignupNudgeModal() {
     >
       <div
         style={{
-          background: 'var(--bg-surface)', color: 'var(--text-primary, #111)',
+          background: 'var(--bg-surface)', color: 'var(--text-primary)',
           borderRadius: 20, maxWidth: 420, width: '100%',
           padding: 'clamp(20px, 5vw, 28px)',
           boxShadow: '0 24px 64px rgba(0,0,0,0.4)',
-          border: '1px solid var(--border, #e5e7eb)',
+          border: '1px solid var(--border)',
           maxHeight: '90vh', overflowY: 'auto',
           animation: 'kdNudgeSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
         }}
@@ -198,7 +198,7 @@ export default function SignupNudgeModal() {
             position: 'absolute', top: 12, right: 12,
             width: 32, height: 32, borderRadius: '50%', border: 'none',
             background: 'transparent', cursor: 'pointer',
-            color: 'var(--text-tertiary, #999)', fontSize: 20, lineHeight: 1,
+            color: 'var(--text-tertiary)', fontSize: 20, lineHeight: 1,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}
         >
@@ -211,7 +211,7 @@ export default function SignupNudgeModal() {
           <h2 id="signup-nudge-title" style={{ margin: 0, fontSize: 'clamp(18px, 5vw, 22px)', fontWeight: 900, color: 'var(--text-primary)' }}>
             저장·알림은 로그인 후 이용할 수 있습니다
           </h2>
-          <p style={{ margin: '8px 0 0', fontSize: 'var(--fs-sm, 13px)', color: 'var(--text-secondary, #666)' }}>
+          <p style={{ margin: '8px 0 0', fontSize: 'var(--fs-sm, 13px)', color: 'var(--text-secondary)' }}>
             지금 <strong style={{ color: 'var(--brand)' }}>{activeUsers.toLocaleString('ko-KR')}명</strong>이 활동 중 · 커뮤니티 글 <strong>{communityPosts.toLocaleString('ko-KR')}+</strong>
           </p>
         </div>
@@ -246,9 +246,9 @@ export default function SignupNudgeModal() {
           disabled={loginLoading !== null}
           style={{
             width: '100%', padding: '12px 20px', marginBottom: 16,
-            borderRadius: 12, border: '1px solid var(--border, #e5e7eb)',
+            borderRadius: 12, border: '1px solid var(--border)',
             cursor: loginLoading ? 'not-allowed' : 'pointer',
-            background: 'var(--bg-hover, #f9fafb)', color: 'var(--text-primary)',
+            background: 'var(--bg-hover)', color: 'var(--text-primary)',
             fontWeight: 600, fontSize: 'var(--fs-sm, 13px)',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
             opacity: loginLoading === 'kakao' ? 0.5 : 1,
@@ -271,7 +271,7 @@ export default function SignupNudgeModal() {
         {/* 가치 제안 리스트 */}
         <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
           {valueProps.map((p, i) => (
-            <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 'var(--fs-sm, 13px)', color: 'var(--text-secondary, #666)' }}>
+            <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 'var(--fs-sm, 13px)', color: 'var(--text-secondary)' }}>
               <span style={{ fontSize: 18, lineHeight: 1.2, flexShrink: 0 }}>{p.icon}</span>
               <span>
                 <strong style={{ color: 'var(--text-primary)', fontWeight: 700 }}>{p.title}</strong>
@@ -286,7 +286,7 @@ export default function SignupNudgeModal() {
           onClick={handleClose}
           style={{
             width: '100%', padding: '8px', background: 'transparent', border: 'none',
-            cursor: 'pointer', color: 'var(--text-tertiary, #9ca3af)',
+            cursor: 'pointer', color: 'var(--text-tertiary)',
             fontSize: 'var(--fs-xs, 12px)', textDecoration: 'underline',
           }}
         >

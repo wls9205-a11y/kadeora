@@ -58,7 +58,7 @@ export default async function AptLandmarkPage({ searchParams }: { searchParams?:
       </header>
 
       {rows.length === 0 ? (
-        <section style={{ marginTop: 16, padding: 24, textAlign: 'center', color: 'var(--text-secondary)', fontSize: 12, background: 'var(--bg-elevated, #1f2028)', border: '1px solid var(--border)', borderRadius: 12 }}>
+        <section style={{ marginTop: 16, padding: 24, textAlign: 'center', color: 'var(--text-secondary)', fontSize: 12, background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 12 }}>
           표시할 단지가 없습니다.
         </section>
       ) : (

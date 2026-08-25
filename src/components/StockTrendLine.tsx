@@ -65,8 +65,8 @@ export default function StockTrendLine({ data, currency, isKR }: Props) {
   return (
     <div style={{ marginTop: 'var(--sp-sm)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-xs)' }}>
-        <span style={{ fontSize: 10, color: 'var(--text-tertiary)', fontFamily: 'monospace' }}>{sorted.length}일 차트 + 트렌드라인</span>
-        <span style={{ fontSize: 11, fontWeight: 600, color: lineColor, fontFamily: 'monospace' }}>
+        <span style={{ fontSize: 10, color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)' }}>{sorted.length}일 차트 + 트렌드라인</span>
+        <span style={{ fontSize: 11, fontWeight: 600, color: lineColor, fontFamily: 'var(--font-mono)' }}>
           {totalChange > 0 ? '+' : ''}{totalChange.toFixed(2)}% ({sorted.length}일)
         </span>
       </div>
@@ -88,15 +88,15 @@ export default function StockTrendLine({ data, currency, isKR }: Props) {
         {yLabels.map((l, i) => (
           <g key={i}>
             <line x1={PADDING.left - 4} y1={l.y} x2={W - PADDING.right} y2={l.y} stroke="var(--border)" strokeWidth="0.5" />
-            <text x={PADDING.left - 5} y={l.y} textAnchor="end" dominantBaseline="middle" fontSize="7" fill="var(--text-tertiary)" fontFamily="monospace">{currency === 'USD' ? `$${l.val.toFixed(0)}` : `${(l.val / 1000).toFixed(0)}K`}</text>
+            <text x={PADDING.left - 5} y={l.y} textAnchor="end" dominantBaseline="middle" fontSize="7" fill="var(--text-tertiary)" fontFamily="var(--font-mono)">{currency === 'USD' ? `$${l.val.toFixed(0)}` : `${(l.val / 1000).toFixed(0)}K`}</text>
           </g>
         ))}
         {/* X축 날짜 */}
         {[0, Math.floor(sorted.length / 2), sorted.length - 1].map(i => (
-          <text key={i} x={toX(i)} y={H - 4} textAnchor="middle" fontSize="7" fill="var(--text-tertiary)" fontFamily="monospace">{sorted[i].date.slice(5)}</text>
+          <text key={i} x={toX(i)} y={H - 4} textAnchor="middle" fontSize="7" fill="var(--text-tertiary)" fontFamily="var(--font-mono)">{sorted[i].date.slice(5)}</text>
         ))}
         {/* 트렌드 방향 라벨 */}
-        <text x={W - PADDING.right - 2} y={PADDING.top + 6} textAnchor="end" fontSize="7" fill={lineColor} opacity="0.8" fontFamily="monospace">추세↗</text>
+        <text x={W - PADDING.right - 2} y={PADDING.top + 6} textAnchor="end" fontSize="7" fill={lineColor} opacity="0.8" fontFamily="var(--font-mono)">추세↗</text>
       </svg>
     </div>
   );
