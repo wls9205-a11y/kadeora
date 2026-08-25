@@ -21,7 +21,7 @@ export interface DailyReportData {
   redevRebuild: number;
   redevStages: { stage: string; cnt: number }[];
   redevMajor: string[];
-  guPrices: { sigungu: string; sale: number; jeonse: number; jeonse_ratio: number; cnt: number; max_sale: number }[];
+  guPrices: { sigungu: string; sale: number; jeonse: number; jeonse_ratio: number; cnt: number }[];
   complexCount: number;
   sitesCount: number;
   // 주식
@@ -119,14 +119,9 @@ export async function fetchDailyReportData(region: ReportRegion): Promise<DailyR
       .select('stage')
       .eq('region', region).eq('is_active', true),
 
-    // 6. 구별 시세 — 522 hotfix: SSR request-path 에서 10000행 조회는 커넥션을 오래 물어
-    //    풀(max_connections 90)을 잠식. 구별 평균 계산에는 2000 샘플로 충분.
-    //    (근본 해결: DB-side GROUP BY RPC 로 전환 — docs/_setup/hotfix-522-db.sql 참고)
-    (sb as any).from('apt_complex_profiles')
-      .select('sigungu, latest_sale_price, latest_jeonse_price')
-      .eq('region_nm', region)
-      .gt('latest_sale_price', 0)
-      .limit(2000),
+    // 6. 구별 시세 — DB-side GROUP BY RPC. 522 hotfix 주석이 예고한 «근본 해결» 이다.
+    //    2,000행을 받아 JS 로 평균 내던 것을 집계된 16행(부산 실측)으로 바꿨다.
+    (sb as any).rpc('get_daily_gu_prices', { p_region: region }),
 
     // 7. 단지백과 수
     (sb as any).from('apt_complex_profiles')
@@ -146,13 +141,8 @@ export async function fetchDailyReportData(region: ReportRegion): Promise<DailyR
       .order('market_cap', { ascending: false })
       .limit(10),
 
-    // 10. 섹터 — 별도 쿼리 불가하므로 전체 가져와서 JS에서 집계
-    sb.from('stock_quotes')
-      .select('sector, change_pct, market_cap')
-      .in('market', ['KOSPI', 'KOSDAQ'])
-      .gt('price', 0)
-      .not('sector', 'is', null)
-      .limit(2000),
+    // 10. 섹터 — DB-side 집계 RPC. 2,000행 → 39행(실측).
+    (sb as any).rpc('get_daily_sector_stats'),
 
     // 11. 글로벌
     sb.from('stock_quotes')
@@ -340,43 +330,38 @@ export async function fetchDailyReportData(region: ReportRegion): Promise<DailyR
     .filter(s => stageMap.has(s))
     .map(s => ({ stage: s, cnt: stageMap.get(s) || 0 }));
 
-  // 구별 시세 집계
-  const guMap = new Map<string, { total_sale: number; total_jeonse: number; cnt: number; max_sale: number }>();
-  (guR.data || []).forEach((r: any) => {
-    if (!r.sigungu) return; // null sigungu 제외
-    const existing = guMap.get(r.sigungu) || { total_sale: 0, total_jeonse: 0, cnt: 0, max_sale: 0 };
-    guMap.set(r.sigungu, {
-      total_sale: existing.total_sale + r.latest_sale_price,
-      total_jeonse: existing.total_jeonse + (r.latest_jeonse_price || 0),
-      cnt: existing.cnt + 1,
-      max_sale: Math.max(existing.max_sale, r.latest_sale_price),
-    });
-  });
-  const guPrices = Array.from(guMap.entries()).map(([k, v]) => {
-    const sale = Math.round(v.total_sale / v.cnt);
-    const jeonse = Math.round(v.total_jeonse / v.cnt);
-    return { sigungu: k, sale, jeonse, jeonse_ratio: sale > 0 ? Math.round(jeonse * 100 / sale) : 0, cnt: v.cnt, max_sale: v.max_sale };
-  }).sort((a, b) => b.sale - a.sale);
-
-  // 섹터 집계
-  const sectorMap = new Map<string, { total_pct: number; total_cap: number; cnt: number }>();
-  (sectorsR.data || []).forEach((r: any) => {
-    if (!r.sector || Math.abs(r.change_pct) > 30) return;
-    const existing = sectorMap.get(r.sector) || { total_pct: 0, total_cap: 0, cnt: 0 };
-    sectorMap.set(r.sector, {
-      total_pct: existing.total_pct + (r.change_pct || 0),
-      total_cap: existing.total_cap + (r.market_cap || 0),
-      cnt: existing.cnt + 1,
-    });
-  });
-  const sectors = Array.from(sectorMap.entries())
-    .filter(([_, v]) => v.cnt >= 3 && v.total_cap > 5e12)
-    .map(([k, v]) => ({
-      sector: k,
-      cnt: v.cnt,
-      avg_pct: Math.round(v.total_pct / v.cnt * 100) / 100,
-      cap_t: Math.round(v.total_cap / 1e12),
+  // 구별 시세 — RPC 가 이미 집계해서 준다. JS 집계는 삭제했다.
+  // ⚠️ max_sale 은 RPC 반환에 없어 함께 뺐다. 이 파일 안에서만 만들어 넣던 값이고
+  //    바깥 소비처가 없음을 확인했다(grep). 필요해지면 RPC 쪽에 컬럼을 더한다.
+  const guPrices = ((guR.data || []) as any[])
+    .map(r => ({
+      sigungu: r.sigungu as string,
+      sale: Math.round(Number(r.avg_sale) || 0),
+      jeonse: Math.round(Number(r.avg_jeonse) || 0),
+      jeonse_ratio: Math.round(Number(r.jeonse_ratio) || 0),
+      cnt: Number(r.complexes) || 0,
     }))
+    .sort((a, b) => b.sale - a.sale);
+
+  // 섹터 — RPC 가 집계해서 준다. JS 집계는 삭제했다.
+  //
+  // ⚠️ 다만 «품질 필터는 남긴다». RPC 는 집계만 하고 거르지 않는다 —
+  //    실측 39행 중 종목 3개 미만이 10행, 시총 5조 이하가 11행이고
+  //    필터를 통과하는 건 24행뿐이다. 그대로 쓰면 종목 1개짜리 섹터가
+  //    "오늘 가장 오른 업종" 으로 리포트 맨 위에 올라간다(실측 `운송` 1종목 +4.34%).
+  //    집계를 DB 로 내리는 것과 기준을 낮추는 것은 다른 일이다.
+  // ⚠️ 개별 종목의 ±30% 초과 이상치 제외는 «없어졌다». 행 단위 판정이라
+  //    집계 후에는 복원할 수 없다. 필요하면 RPC 안에서 걸러야 한다.
+  const sectors = ((sectorsR.data || []) as any[])
+    .map(r => ({
+      sector: r.sector as string,
+      cnt: Number(r.symbols) || 0,
+      avg_pct: Math.round((Number(r.avg_change) || 0) * 100) / 100,
+      cap_t: Math.round((Number(r.total_market_cap) || 0) / 1e12),
+      _cap: Number(r.total_market_cap) || 0,
+    }))
+    .filter(v => v.cnt >= 3 && v._cap > 5e12)
+    .map(({ _cap, ...rest }) => rest)
     .sort((a, b) => b.avg_pct - a.avg_pct);
 
   // 주식 TOP 10 + 주간 변동 (별도 쿼리)
