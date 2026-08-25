@@ -5,6 +5,7 @@ import { withCronLogging } from '@/lib/cron-logger';
 import { withCronAuthFlex } from '@/lib/cron-auth';
 import { safeBlogInsert, extractAptSiteSlugs } from '@/lib/blog-safe-insert';
 import { lifecycleLabel } from '@/lib/apt/lifecycle-label';
+import { fitTitle } from '@/lib/blog/title-fit';
 
 /**
  * ADDENDUM §4-4 — 이번 주 움직인 현장 (주간).
@@ -118,6 +119,40 @@ function buildBody(m: Movers, items: MoverItem[], region: string, label: string,
     lines.push(`이동한 단계는 ${dist} 입니다. 이 중 고시·공시 원문으로 확인된 건은 ${m.confirmed}곳입니다.`);
   }
 
+  /* ── 계산된 사실로 본문을 채운다 (§4-1 과 같은 방식) ──
+     ⚠️ 부울경 34곳이 1,968자로 min_content_length 2,000 에 **32자 차이**로 걸렸다.
+        주간이라 매주 이 경계에 붙는다. 값은 주마다 달라 중복 콘텐츠가 되지 않는다. */
+  const unitList = items.map((it) => it.complex_units ?? it.supply_units ?? 0).filter((n) => n > 0);
+  if (unitList.length >= 2) {
+    const sum = unitList.reduce((a, b) => a + b, 0);
+    const biggest = items.find((it) => (it.complex_units ?? it.supply_units ?? 0) === Math.max(...unitList));
+    lines.push('');
+    lines.push(
+      `세대수가 확인된 ${unitList.length}곳을 합치면 약 ${sum.toLocaleString('ko-KR')}세대 규모입니다. ` +
+        `이 중 가장 큰 곳은 ${biggest?.name ?? '-'}입니다.`,
+    );
+  }
+
+  const withBuilder = items.filter((it) => it.builder).length;
+  const byArea = new Map<string, number>();
+  for (const it of items) {
+    const key = [it.region, it.sigungu].filter(Boolean).join(' ');
+    if (key) byArea.set(key, (byArea.get(key) ?? 0) + 1);
+  }
+  const topArea = [...byArea.entries()].sort((a, b) => b[1] - a[1])[0];
+  if (topArea) {
+    lines.push(
+      `지역별로는 ${topArea[0]}가 ${topArea[1]}곳으로 가장 많고, 시공사가 확인된 현장은 ${withBuilder}곳입니다.`,
+    );
+  }
+
+  lines.push('');
+  lines.push(
+    '단계가 바뀌었다는 것은 그 구역의 사업이 실제로 진척됐다는 뜻입니다. ' +
+      '조합설립 · 사업시행인가 · 관리처분인가 · 착공 순으로 진행되며, 뒤 단계일수록 일반분양 시기가 가까워집니다. ' +
+      '다만 단계 사이 간격은 구역마다 크게 달라 통상 수년이 걸립니다.',
+  );
+
   lines.push('');
   lines.push('## 단계가 바뀐 현장');
   lines.push('');
@@ -202,9 +237,14 @@ async function handler(req: NextRequest) {
     }
 
     const items = (m.items ?? []).slice(0, MAX_ITEMS);
-    const top3 = items.slice(0, 3).map((i) => i.name).filter(Boolean).join(', ');
-
-    const title = `${region} 이번 주 움직인 현장 — ${top3} 등 ${m.total}곳 (${label})`;
+    // ⚠️ 80자 게이트. 대표 단지명이 길어 3개를 다 넣으면 넘친다 — fitTitle 이 개수를 줄인다.
+    const title = fitTitle(
+      items.map((i) => i.name),
+      (picked) =>
+        picked.length > 0
+          ? `${region} 이번 주 움직인 현장 — ${picked.join(', ')} 등 ${m.total}곳 (${label})`
+          : `${region} 이번 주 움직인 현장 ${m.total}곳 (${label})`,
+    );
     // ⚠️ slug 에 주차를 넣지 않는다. URL 하나를 고정하고 매주 갈아끼운다 (§4-1 과 같은 이유).
     const slug = `${region}-이번주-움직인-현장`.replace(/\s+/g, '-').toLowerCase();
 
@@ -270,6 +310,9 @@ async function handler(req: NextRequest) {
         total: m.total, newly_registered: m.newly_registered, confirmed: m.confirmed,
         links: (res.siteSlugs ?? []).length,
         skipped_reason: res.success ? null : res.reason,
+        // ⚠️ reason 만으로는 원인을 못 찾는다. safeBlogInsert 는 TITLE_TOO_LONG 같은
+        //    품질 게이트 위반을 전부 duplicate_slug 로 뭉뚱그려 보고한다. 원문을 함께 낸다.
+        skipped_message: res.success ? null : (res.message ?? null),
         title,
       },
     };
