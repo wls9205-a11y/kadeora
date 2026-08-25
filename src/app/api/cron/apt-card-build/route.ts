@@ -8,13 +8,13 @@
  *
  * 대상 (패치 P1 §3 으로 5,845 → 1,414 로 축소) —
  *   1 순위  hero_image_url 이 없고 기축(post_move_in·landmark_active)이 아닌 것
- *           → thumb · sq · hero 3 종
+ *           → sq(1:1) · hero(21:9) · heroM(4:3) 3 종
  *   2 순위  기축인데 위성도 실사도 없는 것
- *           → thumb 만
+ *           → sq 만
  *
  *   기축 4,483 건 중 4,459 건은 이미 위성을 갖고 있어 카드가 필요 없다. 준공 단지에서
  *   항공 사진은 '없어서 대신 넣는 그림' 이 아니라 그 자체가 정보다. 원 지시의
- *   "2 순위 5,104 건 × thumb" 는 철회됐다 — 5,080 건은 굽지 않는다.
+ *   "2 순위 5,104 건 × thumb(구 규격)" 는 철회됐다 — 5,080 건은 굽지 않는다.
  *
  * 재생성 —
  *   display_name·lifecycle_stage·curated_status·sigungu·세대수가 바뀌면 DB 쪽에서
@@ -23,6 +23,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import sharp from 'sharp';
 import { verifyCronAuth } from '@/lib/cron-auth';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { SITE_URL } from '@/lib/constants';
@@ -41,13 +42,15 @@ const PREEMPT_MS = 260_000;
 
 const GICHUK = ['post_move_in', 'landmark_active'];
 
-type SizeKey = 'thumb' | 'sq' | 'hero';
+// [패치 P2 §1-1] 규격 재정의 — sq 1:1(목록·기본) / hero 21:9 / heroM 4:3.
+// 이전의 thumb 128 · sq 630 · hero 1200×630 은 폐기됐다.
+type SizeKey = 'sq' | 'hero' | 'heroM';
 
 /** og-apt 의 SIZE_SPEC 과 같은 값. 받은 PNG 가 정말 그 크기인지 확인하는 데 쓴다. */
 const EXPECTED_DIM: Record<SizeKey, { w: number; h: number }> = {
-  thumb: { w: 128, h: 128 },
-  sq: { w: 630, h: 630 },
-  hero: { w: 1200, h: 630 },
+  sq: { w: 512, h: 512 },
+  hero: { w: 1260, h: 540 },
+  heroM: { w: 1200, h: 900 },
 };
 
 /** PNG IHDR 에서 폭·높이를 읽는다. 실패하면 null. */
@@ -72,7 +75,7 @@ async function renderCard(slug: string, size: SizeKey): Promise<Buffer | null> {
     // ⚠️ 받은 그림이 «정말 그 크기인지» 확인한다.
     //   이 크론은 SITE_URL(운영)로 자기 호출을 한다. 롤링 배포 중이라 아직 size 를
     //   모르는 구버전이 응답하면 630×630 이 조용히 돌아오고, 그대로 올리면
-    //   card_image_built_at 이 찍혀 «영구히 잘못된 thumb» 으로 굳는다.
+    //   card_image_built_at 이 찍혀 «영구히 잘못된 크기» 로 굳는다.
     //   size 키를 새로 판 이유가 정확히 이 조용한 실패였다(card=thumb → NaN → 1).
     //   같은 함정을 여기서 반복하지 않는다.
     const dim = pngSize(buf);
@@ -117,7 +120,7 @@ async function handler(req: NextRequest) {
       .limit(BATCH_SIZE);
     if (e1) throw new Error(`tier1_query_failed: ${e1.message}`);
 
-    // 2 순위 — 기축인데 위성도 실사도 없는 것. thumb 만.
+    // 2 순위 — 기축인데 위성도 실사도 없는 것. sq 만.
     const remaining = Math.max(0, BATCH_SIZE - (tier1?.length || 0));
     let tier2: any[] = [];
     if (remaining > 0) {
@@ -135,8 +138,10 @@ async function handler(req: NextRequest) {
     }
 
     const jobs: { site: any; sizes: SizeKey[] }[] = [
-      ...(tier1 || []).map((s: any) => ({ site: s, sizes: ['thumb', 'sq', 'hero'] as SizeKey[] })),
-      ...tier2.map((s: any) => ({ site: s, sizes: ['thumb'] as SizeKey[] })),
+      // 1순위는 3규격 전부 — 목록(sq) · 데스크탑 히어로(hero) · 모바일 히어로(heroM).
+      ...(tier1 || []).map((s: any) => ({ site: s, sizes: ['sq', 'hero', 'heroM'] as SizeKey[] })),
+      // 2순위는 목록에만 쓰이므로 sq 만.
+      ...tier2.map((s: any) => ({ site: s, sizes: ['sq'] as SizeKey[] })),
     ];
 
     if (jobs.length === 0) {
@@ -150,7 +155,7 @@ async function handler(req: NextRequest) {
       if (Date.now() - start > PREEMPT_MS) break;
       stats.processed++;
 
-      let thumbUrl: string | null = null;
+      let sqUrl: string | null = null;
       let ok = true;
 
       for (const size of sizes) {
@@ -160,12 +165,22 @@ async function handler(req: NextRequest) {
           failures.push(`${site.id}:${size}:render`);
           break;
         }
+
+        // og-apt 는 PNG 를 낸다. 저장은 webp 로 — 목록 썸네일이라 전송량이 그대로 비용이다.
+        let webp: Buffer;
+        try {
+          webp = await sharp(png, { failOn: 'none' }).webp({ quality: 88, effort: 4 }).toBuffer();
+        } catch (e: any) {
+          ok = false;
+          failures.push(`${site.id}:${size}:sharp:${e?.message || ''}`.slice(0, 120));
+          break;
+        }
+
         const path = `card/${site.id}-${size}.webp`;
         const { error: upErr } = await admin.storage
           .from(STORAGE_BUCKET)
-          .upload(path, png, {
-            // og-apt 는 PNG 를 낸다. 확장자는 위성과 맞추되 실제 타입은 정확히 적는다.
-            contentType: 'image/png',
+          .upload(path, webp, {
+            contentType: 'image/webp',
             upsert: true,
             cacheControl: 'public, max-age=31536000, immutable',
           });
@@ -174,23 +189,23 @@ async function handler(req: NextRequest) {
           failures.push(`${site.id}:${size}:upload:${upErr.message || ''}`.slice(0, 120));
           break;
         }
-        if (size === 'thumb') {
+        if (size === 'sq') {
           const { data: pub } = admin.storage.from(STORAGE_BUCKET).getPublicUrl(path);
-          thumbUrl = pub?.publicUrl || null;
+          sqUrl = pub?.publicUrl || null;
         }
       }
 
-      if (!ok || !thumbUrl) {
+      if (!ok || !sqUrl) {
         stats.failed++;
         // built_at 을 찍지 않는다 — 다음 회차에 다시 잡혀야 한다.
         continue;
       }
 
-      // card_image_url 은 목록이 실제로 읽는 값이라 thumb 을 가리킨다.
+      // card_image_url 은 목록이 실제로 읽는 값이라 1:1(sq)을 가리킨다.
       // RPC thumb_url 체인의 3 순위가 바로 이 컬럼이다.
       await (admin as any)
         .from('apt_sites')
-        .update({ card_image_url: thumbUrl, card_image_built_at: new Date().toISOString() })
+        .update({ card_image_url: sqUrl, card_image_built_at: new Date().toISOString() })
         .eq('id', site.id);
       stats.uploaded++;
     }
