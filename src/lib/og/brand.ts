@@ -153,7 +153,16 @@ function clean(s: unknown): string {
   if (m && m.index !== undefined && m.index > 1) t = t.slice(0, m.index);
   t = t.replace(TRAIL, '');
   for (const w of DROP) t = t.split(w).join(' ');
-  return t.replace(/[^0-9A-Za-z가-힣·\s\-]/g, ' ').replace(/\s+/g, ' ').trim();
+  return t
+    // ⚠️ 숫자 사이 콤마·소수점을 «살린다». 원안처럼 통째로 공백을 만들면 틀린 수치가
+    //    썸네일에 나간다 — 실측: 17.9% → '17' '9' 로 쪼개진 뒤 그 '9' 가 아래 '1글자
+    //    어절은 앞에 붙인다' 규칙에 먹혀 '179' 가 됐다. 7,981 → '사상최고7' '981'.
+    //    발행 8,747편 중 255편이 이 경로로 깨졌다.
+    .replace(/[^0-9A-Za-z가-힣·,.\s\-]/g, ' ')
+    // 숫자에 붙지 않은 콤마·소수점은 원안대로 공백 ('GS건설, 2년' 의 콤마 등)
+    .replace(/(?<!\d)[,.]|[,.](?!\d)/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 function splitLong(w: string): string[] {
