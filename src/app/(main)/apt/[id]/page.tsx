@@ -716,15 +716,6 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
   ].filter(f => f.a.trim().length > 10);
   const redevStage = (site?.source_ids as Record<string, string>)?.redev_stage || redev?.stage;
 
-  // V15 B: '경쟁률 · 시세 · 실거래' 아코디언에 실릴 게 하나라도 있는가.
-  //   안쪽 블록이 전부 조건부라 이 판정 없이는 빈 아코디언이 남는다.
-  const hasMarketBlocks =
-    Number(sub?.competition_rate_1st ?? 0) > 0 ||
-    !!unsold ||
-    !!(redev && redevStage) ||
-    complexProfiles.length > 0 ||
-    trades.length > 0 ||
-    !!site?.nearby_facilities;
   const noindex = site ? (site.content_score ?? 0) < 40 : false;
 
   const today = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
@@ -1003,21 +994,26 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
            빈 앵커는 눌러도 아무 일이 없어 바 전체의 신뢰를 깎는다.
            V15 B: 순서를 아코디언 순서와 맞췄다. 칩을 누르면 AccordionEnhancer 가
            해당 섹션을 열고 스크롤한다 — 이전에는 '모집공고' 칩이 닫힌 details 안을
-           가리켜 눌러도 아무 일이 없었다. */}
+           가리켜 눌러도 아무 일이 없었다.
+           M6 A-5: 칩 10개를 4개로 줄였다. 섹션 하나에 칩 하나씩 붙이면 바가 가로로
+           흘러넘쳐 '무엇이 어디 있는지' 를 오히려 감춘다. 이제 칩은 A-1 의 네 묶음을
+           가리킨다 — 각 묶음의 선두에 높이 0 앵커(*-group)를 두었다.
+           네 칩 모두 show:true 인 것은 각 묶음에 «조건 없이 렌더되는» 블록이
+           하나씩 있기 때문이다 — ① 핵심 지표 ② 시세·분양가 ③ 청약 가점 매칭
+           ④ 인포그래픽. 그 넷 중 하나라도 조건부로 바뀌면 여기도 같이 고칠 것. */}
       <SiteJumpBar
         items={[
-          { id: 'supply-section',   label: '공급 정보',     show: true },
-          { id: 'location-section', label: '위치',          show: true },
-          { id: 'movein-section',   label: '분양 일정',     show: !!sub },
-          { id: 'history-section',  label: '진행 이력',     show: siteEvents.length > 0 },
-          { id: 'points-section',   label: '핵심 포인트',   show: features.length > 0 },
-          { id: 'faq-section',      label: '자주 묻는 질문', show: faq.length > 0 },
-          { id: 'price-section',    label: '시세·분양가',   show: true },
-          { id: 'stats-section',    label: '상세 데이터',   show: true },
-          { id: 'notice-section',   label: '모집공고',      show: !!sub },
-          { id: 'market-section',   label: '경쟁률·실거래', show: hasMarketBlocks },
+          { id: 'about-group', label: '이 단지', show: true },
+          { id: 'price-group', label: '얼마',    show: true },
+          { id: 'odds-group',  label: '될까',    show: true },
+          { id: 'more-group',  label: '더보기',  show: true },
         ]}
       />
+
+
+      {/* ── M6 A-1 · ① 이 단지가 뭔가 ──
+           점프바 '이 단지' 칩의 목적지. 높이 0 앵커라 레이아웃에 끼어들지 않는다. */}
+      <div id="about-group" aria-hidden="true" style={{ scrollMarginTop: SECTION_SCROLL_MARGIN }} />
 
       {/* ── v10 §3 · 핵심 지표 4칸 ──
            분양가·세대수·입주·D-day 는 **페이지에 여기 한 번만** 나온다.
@@ -1282,50 +1278,6 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
       {/* s-v2 A-4: 죽은 섹션 정리 — school_district·nearby_station 채움률 0%.
            남은 실값(sub.schools[]·sub.stations[])은 4번 블록 위치 정보 표로 흡수했다. */}
 
-      {/* 지역 시세 비교 — 이 현장이 지역에서 어디 위치하는지 */}
-      {regionBenchmark && (site?.price_min || site?.price_max || trades.length > 0) && (() => {
-        const myPrice = site?.price_min && site?.price_max 
-          ? Math.round((site.price_min + site.price_max) / 2)
-          : trades.length > 0 
-            ? Math.round(trades.reduce((s: number, t: any) => s + Number(t.deal_amount), 0) / trades.length)
-            : 0;
-        if (myPrice <= 0) return null;
-        const regionAvg = Math.round((regionBenchmark.avgMin + regionBenchmark.avgMax) / 2);
-        const diff = regionAvg > 0 ? Math.round(((myPrice - regionAvg) / regionAvg) * 100) : 0;
-        const regionRange = regionBenchmark.highest - regionBenchmark.lowest;
-        const position = regionRange > 0 ? Math.min(Math.max(((myPrice - regionBenchmark.lowest) / regionRange) * 100, 2), 98) : 50;
-        return (
-          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', marginBottom: 14 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-              <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{region} 시세 비교 ({regionBenchmark.count}개 현장)</span>
-              <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: diff > 10 ? 'var(--accent-red)' : diff < -10 ? 'var(--accent-green)' : 'var(--text-tertiary)', background: diff > 10 ? 'var(--accent-red-bg)' : diff < -10 ? 'var(--accent-green-bg)' : 'var(--bg-hover)', padding: '1px 6px', borderRadius: 4 }}>
-                {diff > 0 ? `+${diff}%` : `${diff}%`} {diff > 10 ? '고가' : diff < -10 ? '저가' : '평균'}
-              </span>
-            </div>
-            {/* 지역 범위 위치 바 */}
-            <div style={{ position: 'relative', height: 8, borderRadius: 4, background: 'linear-gradient(90deg, var(--accent-green-border), var(--accent-yellow-bg), var(--accent-red-bg))', marginBottom: 'var(--sp-xs)' }}>
-              {/* 지역 평균 마커 */}
-              <div style={{ position: 'absolute', top: -2, left: '50%', width: 2, height: 12, background: 'var(--text-tertiary)', transform: 'translateX(-50%)', borderRadius: 1 }} />
-              {/* 이 현장 위치 */}
-              <div style={{ position: 'absolute', top: -3, left: `${position}%`, width: 14, height: 14, borderRadius: '50%', background: 'var(--brand)', border: '2px solid var(--bg-surface)', transform: 'translateX(-50%)', boxShadow: '0 0 6px var(--brand-border)' }} />
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
-              <span>{fmtAmount(regionBenchmark.lowest)}</span>
-              <span style={{ color: 'var(--text-secondary)' }}>평균 {fmtAmount(regionAvg)}</span>
-              <span>{fmtAmount(regionBenchmark.highest)}</span>
-            </div>
-          </div>
-        );
-      })()}
-
-      {/* s2: 분양가 미공개 시 지역 평균으로 대체하지 않는다.
-           하이엔드 현장에 지역 전체 평균을 붙이면 오정보가 된다. 없으면 없다고만 쓴다. */}
-      {!site?.price_min && !site?.price_max && trades.length === 0 && (
-        <div style={{ background: 'var(--bg-elevated)', border: '1px dashed var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', marginBottom: 14, textAlign: 'center' }}>
-          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 500, color: 'var(--text-secondary)' }}>분양가 미공개</div>
-          <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 3 }}>입주자모집공고 게시 후 공개됩니다</div>
-        </div>
-      )}
       {sub && (() => { 
         // s2: 일정은 이 표 1벌만 남긴다. 진행 상태는 상단 풀 레일이,
         // 시공사/시행사/입주/총공급은 공급 정보 표가 이미 담당한다.
@@ -1338,89 +1290,10 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
         ); 
       })()}
 
-      {/* ── 7번 블록 · 핵심 포인트 + FAQ ── */}
-      {features.length > 0 && (
-        <DetailSection id="points-section" title="핵심 포인트">
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-            {features.map((f: any, i: number) => (
-              <span key={i} style={{ padding: '4px 10px', borderRadius: 'var(--radius-lg)', fontSize: 'var(--fs-xs)', fontWeight: 600, background: 'var(--brand-bg)', color: 'var(--brand)', border: '1px solid var(--brand-bg)' }}>{String(f)}</span>
-            ))}
-          </div>
-        </DetailSection>
-      )}
 
-      {faq.length > 0 && (
-        <DetailSection id="faq-section" title="자주 묻는 질문" meta={`${faq.length}개`}>
-          {/* V15 B: 항목별 <details> 를 걷어냈다. 아코디언 안 아코디언이 되면
-              답 하나 보는 데 두 번 눌러야 한다. 섹션이 이미 접이식이라 여기서는 편다. */}
-          {faq.map((f, i) => (
-            <div key={i} style={{ borderBottom: '1px solid var(--border)', padding: '10px 0' }}>
-              <h3 style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>{f.q}</h3>
-              <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.7, margin: '6px 0 0' }}>{f.a}</p>
-            </div>
-          ))}
-          {/* 마지막 항목은 방으로 보낸다. FAQ JSON-LD 는 위 faq 배열로만 만들어지므로
-              이 항목은 구조화데이터에 들어가지 않는다 (리치결과 정책상 안전). */}
-          <div style={{ padding: '10px 0' }}>
-            <h3 style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>여기에 없는 내용은 어디에 물어보나요?</h3>
-            <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.7, margin: '6px 0 0' }}>
-              {name} 관련 질문은 부동산 정보 공유방에서 받고 있습니다. 잔여 세대·동호수·할인 조건처럼 공고에 없는 내용도 방에서 확인할 수 있습니다.{' '}
-              <TalkInlineLink slot="faq" siteSlug={slug} label="정보 공유방 참여하기 →" countView />
-            </p>
-          </div>
-        </DetailSection>
-      )}
-
-      {/* ── V15 B · 접이식 안 접이식을 없앴다 ──
-           여기 있던 '상세 데이터 더보기' <details> 하나가 827줄을 삼키고 있었다 —
-           모집공고·경쟁률·실거래·관련 글까지 전부 그 안이라, 점프바로 눌러도
-           닫힌 details 안이라 레이아웃이 없어 스크롤이 먹지 않았다.
-           평평하게 펴서 형제 아코디언 네 벌로 나눈다.
-           id="stats-section" 은 유지한다 — KPI '조회수' 타일의 scrollTo 목적지다. */}
-      {/* ── v10 §7 · 단지 진행 단계 · 청약 가점 매칭 ──
-           히어로·지표·리드폼·정보 표를 본 다음에 온다. 이전에는 이 묶음이 페이지 최상단에 있어
-           '이 현장이 뭔가' 를 알기 전에 진행 단계부터 보게 됐다. */}
-        {(() => {
-          const rail = (
-            <LifecycleRail
-              stage={(site as any)?.lifecycle_stage ?? null}
-              dates={sub ? {
-                rcept_bgnde: sub.rcept_bgnde,
-                rcept_endde: sub.rcept_endde,
-                spsply_rcept_bgnde: sub.spsply_rcept_bgnde,
-                przwner_presnatn_de: sub.przwner_presnatn_de,
-                cntrct_cncls_bgnde: sub.cntrct_cncls_bgnde,
-                cntrct_cncls_endde: sub.cntrct_cncls_endde,
-                mvn_prearnge_ym: sub.mvn_prearnge_ym,
-              } : undefined}
-              size="full"
-              moveInLabel={fmtYM(site?.move_in_date || sub?.mvn_prearnge_ym) || undefined}
-            />
-          );
-          if (!rail) return null;
-          return (
-            <section aria-labelledby="apt-sec-rail" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', margin: '0 0 var(--sp-md)' }}>
-              <h2 id="apt-sec-rail" style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)', margin: 0 }}>단지 진행 단계</h2>
-              <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-primary)', letterSpacing: 0.5, marginBottom: 10 }}>단지 진행 단계</div>
-              {rail}
-            </section>
-          );
-        })()}
-        {/* ── V13 A-3 · 진행 이력 ──
-             청약홈에도 아실에도 없는 정보다. 고시·공시·취재가 언제 무엇을 바꿨는지가
-             "세대수는 줄고 층수는 올랐다" 같은 판단의 재료다.
-             ⚠️ 0건이면 섹션을 렌더하지 않는다 — 지금은 대부분 0건이다.
-             ⚠️ 등급(확정·추정·카더라)을 반드시 함께 낸다. 감추면 표시·광고법 문제가 된다. */}
-        {siteEvents.length > 0 && (
-          <DetailSection id="history-section" title="진행 이력" meta={`${siteEvents.length}건`} openOnDesktop>
-            <SiteHistoryTimeline events={siteEvents} />
-            <p style={{ fontSize: 'var(--fs-xs)', lineHeight: 1.55, color: 'var(--text-tertiary)', margin: '2px 0 0' }}>
-              확정은 고시·공시 원문, 추정은 복수 언론, 카더라는 업계·조합 전언입니다. 일정과 계획은 바뀔 수 있습니다.
-            </p>
-          </DetailSection>
-        )}
-
-        <CheongakMatchCard isLoggedIn={isLoggedInApt} myScore={aptUserCheongakScore} aptName={name} />
+      {/* ── M6 A-1 · ② 얼마인가 ──
+           점프바 '얼마' 칩의 목적지. 높이 0 앵커라 레이아웃에 끼어들지 않는다. */}
+      <div id="price-group" aria-hidden="true" style={{ scrollMarginTop: SECTION_SCROLL_MARGIN }} />
 
       {/* ── v10 §8 · 시세 트렌드 · 분양가 분포 · 인근 단지 비교 ──
            V15 B: 한 아코디언으로 묶는다. 셋 다 '얼마인가' 를 다루는 같은 질문이다. */}
@@ -1509,36 +1382,48 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
         <AptBlogStack slug={slug} />
       </DetailSection>
 
-      {/* v10-B5/B8: 알림 6단계와 인근 단지 top3 를 걷어낸 사이드바.
-           280px 컬럼을 없애고 본문 폭으로 편다 — 남은 것은 같은 시공사 링크뿐이다. */}
-      <AptSidebar slug={slug} builder={site?.builder ?? sub?.constructor_nm ?? null} isLoggedIn={isLoggedInApt} />
+      {/* 지역 시세 비교 — 이 현장이 지역에서 어디 위치하는지 */}
+      {regionBenchmark && (site?.price_min || site?.price_max || trades.length > 0) && (() => {
+        const myPrice = site?.price_min && site?.price_max 
+          ? Math.round((site.price_min + site.price_max) / 2)
+          : trades.length > 0 
+            ? Math.round(trades.reduce((s: number, t: any) => s + Number(t.deal_amount), 0) / trades.length)
+            : 0;
+        if (myPrice <= 0) return null;
+        const regionAvg = Math.round((regionBenchmark.avgMin + regionBenchmark.avgMax) / 2);
+        const diff = regionAvg > 0 ? Math.round(((myPrice - regionAvg) / regionAvg) * 100) : 0;
+        const regionRange = regionBenchmark.highest - regionBenchmark.lowest;
+        const position = regionRange > 0 ? Math.min(Math.max(((myPrice - regionBenchmark.lowest) / regionRange) * 100, 2), 98) : 50;
+        return (
+          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', marginBottom: 14 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+              <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{region} 시세 비교 ({regionBenchmark.count}개 현장)</span>
+              <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: diff > 10 ? 'var(--accent-red)' : diff < -10 ? 'var(--accent-green)' : 'var(--text-tertiary)', background: diff > 10 ? 'var(--accent-red-bg)' : diff < -10 ? 'var(--accent-green-bg)' : 'var(--bg-hover)', padding: '1px 6px', borderRadius: 4 }}>
+                {diff > 0 ? `+${diff}%` : `${diff}%`} {diff > 10 ? '고가' : diff < -10 ? '저가' : '평균'}
+              </span>
+            </div>
+            {/* 지역 범위 위치 바 */}
+            <div style={{ position: 'relative', height: 8, borderRadius: 4, background: 'linear-gradient(90deg, var(--accent-green-border), var(--accent-yellow-bg), var(--accent-red-bg))', marginBottom: 'var(--sp-xs)' }}>
+              {/* 지역 평균 마커 */}
+              <div style={{ position: 'absolute', top: -2, left: '50%', width: 2, height: 12, background: 'var(--text-tertiary)', transform: 'translateX(-50%)', borderRadius: 1 }} />
+              {/* 이 현장 위치 */}
+              <div style={{ position: 'absolute', top: -3, left: `${position}%`, width: 14, height: 14, borderRadius: '50%', background: 'var(--brand)', border: '2px solid var(--bg-surface)', transform: 'translateX(-50%)', boxShadow: '0 0 6px var(--brand-border)' }} />
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
+              <span>{fmtAmount(regionBenchmark.lowest)}</span>
+              <span style={{ color: 'var(--text-secondary)' }}>평균 {fmtAmount(regionAvg)}</span>
+              <span>{fmtAmount(regionBenchmark.highest)}</span>
+            </div>
+          </div>
+        );
+      })()}
 
-      <DetailSection id="stats-section" title="상세 데이터">
-      {/* 규제 요약 — 전매/거주/재당첨 신호등 */}
-      {sub && (sub.transfer_limit_years || sub.residence_obligation_years || sub.rewin_limit_years || sub.is_price_limit || sub.loan_rate) && (
-        <div style={{ marginBottom: 14 }}>
-          <RegulationBadges
-            transferLimitYears={sub.transfer_limit_years}
-            residenceYears={sub.residence_obligation_years}
-            rewinLimitYears={sub.rewin_limit_years}
-            isSpeculativeZone={sub.is_speculative_zone}
-            isRegulatedArea={sub.is_regulated_area}
-            isPriceLimit={sub.is_price_limit}
-            loanRate={sub.loan_rate}
-            contractDate={sub.cntrct_cncls_bgnde}
-          />
-        </div>
-      )}
-      {/* 실입주 총비용 시뮬레이터 */}
-      {sub && Array.isArray(sub.house_type_info) && sub.house_type_info.length > 0 && sub.house_type_info.some((t: any) => t.lttot_top_amount > 0) && (
-        <div style={{ marginBottom: 14 }}>
-          {/* C3: ContentLock wrapper 제거 (656v / 0c) */}
-          <CostSimulator
-            types={sub.house_type_info}
-            options={Array.isArray(sub.options_list) ? sub.options_list : []}
-            siteName={name}
-            priceSource={sub.price_source}
-          />
+      {/* s2: 분양가 미공개 시 지역 평균으로 대체하지 않는다.
+           하이엔드 현장에 지역 전체 평균을 붙이면 오정보가 된다. 없으면 없다고만 쓴다. */}
+      {!site?.price_min && !site?.price_max && trades.length === 0 && (
+        <div style={{ background: 'var(--bg-elevated)', border: '1px dashed var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', marginBottom: 14, textAlign: 'center' }}>
+          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 500, color: 'var(--text-secondary)' }}>분양가 미공개</div>
+          <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 3 }}>입주자모집공고 게시 후 공개됩니다</div>
         </div>
       )}
       {/* 분양가 vs 실거래가 비교 (두 데이터 모두 있을 때) */}
@@ -1597,21 +1482,332 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
       })()}
 
 
-      {/* Competition rate */}
+      {/* 주변 아파트 시세 비교 (단지백과 데이터) */}
+      {complexProfiles.length > 0 && (site?.price_min || site?.price_max) && (
+      (() => {
+        const avgPyeong = complexProfiles.filter((c: any) => c.avg_sale_price_pyeong > 0).reduce((s: number, c: any, _: number, a: any[]) => s + c.avg_sale_price_pyeong / a.length, 0);
+        const avgJeonse = complexProfiles.filter((c: any) => c.jeonse_ratio && Number(c.jeonse_ratio) > 0);
+        const avgJeonseRatio = avgJeonse.length > 0 ? Math.round(avgJeonse.reduce((s: number, c: any) => s + Number(c.jeonse_ratio), 0) / avgJeonse.length) : 0;
+        const myPriceMax = site?.price_max || 0;
+        const myPpyeong = (() => { const t = Array.isArray(sub?.house_type_info) ? sub.house_type_info : []; if (!t.length) return 0; const p = t[0]; const ea = parseFloat((p.type || '0').replace(/[A-Za-z]/g, '')); const usePrice = p.lttot_avg_amount || p.lttot_top_amount || 0; return usePrice > 0 && ea > 10 ? Math.round(usePrice / (ea / 3.3058)) : 0; })();
+        return (
+        <section className="apt-card" aria-labelledby="apt-sec-6">
+          <h2 id="apt-sec-6" className="apt-section-title">{sigungu || region} 아파트 시세 비교</h2>
+          <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', margin: '0 0 8px' }}>단지백과 데이터 기반. 같은 지역 기존 아파트와 분양가를 비교합니다.</p>
+          {/* 평당가 + 전세가율 KPI */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0,1fr))', gap: 6, marginBottom: 10 }}>
+            <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '8px', textAlign: 'center' }}>
+              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>지역 평당가 <span style={{ fontSize: 'var(--fs-xs)' }}>(실거래 평균)</span></div>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>{avgPyeong > 0 ? `${Math.round(avgPyeong).toLocaleString()}만` : '-'}</div>
+              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>기존 아파트</div>
+            </div>
+            <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '8px', textAlign: 'center' }}>
+              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>이 분양 평당가 <span style={{ fontSize: 'var(--fs-xs)' }}>(평균가)</span>{sub?.price_source === 'estimated' ? <span style={{ fontSize: 'var(--fs-xs)', marginLeft: 2, padding: '0px 3px', borderRadius: 4, background: 'var(--accent-orange-bg)', color: 'var(--warning)', fontWeight: 600 }}>추정</span> : null}</div>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: myPpyeong > avgPyeong ? 'var(--accent-red)' : 'var(--accent-green)' }}>{myPpyeong > 0 ? `${myPpyeong.toLocaleString()}만` : '-'}</div>
+              <div style={{ fontSize: 'var(--fs-xs)', color: myPpyeong > avgPyeong ? 'var(--accent-red)' : 'var(--accent-green)' }}>{avgPyeong > 0 && myPpyeong > 0 ? (myPpyeong > avgPyeong ? `+${Math.round((myPpyeong - avgPyeong) / avgPyeong * 100)}%` : `${Math.round((myPpyeong - avgPyeong) / avgPyeong * 100)}%`) : ''}</div>
+            </div>
+            <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '8px', textAlign: 'center' }}>
+              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>지역 전세가율</div>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: avgJeonseRatio >= 80 ? 'var(--accent-blue)' : 'var(--text-primary)' }}>{avgJeonseRatio > 0 ? `${avgJeonseRatio}%` : '-'}</div>
+              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>기존 아파트</div>
+            </div>
+          </div>
+          {/* 개별 단지 비교 */}
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', fontSize: 'var(--fs-xs)', borderCollapse: 'collapse' }}>
+              <thead><tr style={{ borderBottom: '1.5px solid var(--border)' }}>
+                <th style={{ padding: '4px 6px', textAlign: 'left', color: 'var(--text-secondary)', fontWeight: 600 }}>단지명</th>
+                <th style={{ padding: '4px 6px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 600 }}>준공</th>
+                <th style={{ padding: '4px 6px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 600 }}>매매가</th>
+                <th style={{ padding: '4px 6px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 600 }}>평당가<span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 400 }}>(실거래)</span></th>
+                <th style={{ padding: '4px 6px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 600 }}>전세가율</th>
+                <th style={{ padding: '4px 6px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 600 }}>전년대비</th>
+              </tr></thead>
+              <tbody>
+                {complexProfiles.slice(0, 6).map((c: any, i: number) => (
+                  <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
+                    <td style={{ padding: '5px 6px', fontWeight: 600, color: 'var(--text-primary)', maxWidth: 100, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.apt_name}</td>
+                    <td style={{ padding: '5px 6px', textAlign: 'right', color: 'var(--text-tertiary)' }}>{c.built_year || '-'}</td>
+                    <td style={{ padding: '5px 6px', textAlign: 'right', fontWeight: 700, color: 'var(--accent-blue)' }}>{fmtAmount(c.latest_sale_price)}</td>
+                    <td style={{ padding: '5px 6px', textAlign: 'right', color: 'var(--text-secondary)' }}>{c.avg_sale_price_pyeong ? `${c.avg_sale_price_pyeong.toLocaleString()}만` : '-'}</td>
+                    <td style={{ padding: '5px 6px', textAlign: 'right', color: Number(c.jeonse_ratio || 0) >= 80 ? 'var(--accent-blue)' : 'var(--text-tertiary)' }}>{c.jeonse_ratio ? `${c.jeonse_ratio}%` : '-'}</td>
+                    <td style={{ padding: '5px 6px', textAlign: 'right', fontWeight: 600, color: Number(c.price_change_1y || 0) > 0 ? 'var(--accent-red)' : Number(c.price_change_1y || 0) < 0 ? 'var(--accent-blue)' : 'var(--text-tertiary)' }}>{c.price_change_1y ? `${Number(c.price_change_1y) > 0 ? '+' : ''}${c.price_change_1y}%` : '-'}</td>
+                  </tr>
+                ))}
+                {myPriceMax > 0 && (
+                  <tr style={{ borderTop: '1.5px solid var(--brand)', background: 'var(--bg-hover)' }}>
+                    <td style={{ padding: '5px 6px', fontWeight: 600, color: 'var(--brand)' }}>{name}</td>
+                    <td style={{ padding: '5px 6px', textAlign: 'right', color: 'var(--text-tertiary)' }}>분양중</td>
+                    <td style={{ padding: '5px 6px', textAlign: 'right', fontWeight: 700, color: 'var(--brand)' }}>{fmtAmount(myPriceMax)}</td>
+                    <td style={{ padding: '5px 6px', textAlign: 'right', fontWeight: 700, color: 'var(--brand)' }}>{myPpyeong > 0 ? `${myPpyeong.toLocaleString()}만` : '-'}</td>
+                    <td style={{ padding: '5px 6px', textAlign: 'right', color: 'var(--text-tertiary)' }}>-</td>
+                    <td style={{ padding: '5px 6px', textAlign: 'right', color: 'var(--text-tertiary)' }}>-</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 6 }}>
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>출처: 단지백과 · 국토교통부 실거래가 공개시스템</div>
+            <SectionShareButton section="apt-price-compare" label={`${name} vs ${sigungu || region} 아파트 시세 비교`} pagePath={`/apt/${slug}`} />
+          </div>
+        </section>
+        );
+      })()
+      )}
 
-      {/* 인포그래픽 이미지 — 네이버/구글 이미지 검색 크롤링용 */}
-      <figure style={{ margin: '0 0 var(--sp-md)', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--border)' }}>
-        <img
-          src={`${SITE_URL}/api/og-square?title=${encodeURIComponent(name)}&category=apt`}
-          alt={`${name} ${region} ${site?.sigungu || ''} 분양가 ${site?.price_min ? `${(site.price_min/10000).toFixed(1)}억` : ''} ${site?.price_max ? `${(site.price_max/10000).toFixed(1)}억` : ''} 세대수 ${site?.total_units || ''} 시공사 ${site?.builder || ''} 청약 분양 입주 인포그래픽 2026`}
-          width={1200} height={630}
-          style={{ width: '100%', height: 'auto', display: 'block' }}
-          loading="lazy"
-        />
-        <figcaption style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', padding: '6px 12px', background: 'var(--bg-surface)', textAlign: 'center' }}>
-          {name} 분양 핵심 정보 · 카더라
-        </figcaption>
-      </figure>
+      {/* 같은 지역 최근 실거래 비교 */}
+      {regionTrades.length > 0 && (site?.price_min || site?.price_max) && (
+        <section className="apt-card" aria-labelledby="apt-sec-7">
+          <h2 id="apt-sec-7" className="apt-section-title">{sigungu || region} 최근 실거래 비교</h2>
+          <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', margin: '0 0 8px' }}>같은 지역 아파트 최근 실거래가와 비교합니다.</p>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', fontSize: 'var(--fs-xs)', borderCollapse: 'collapse' }}>
+              <thead><tr style={{ borderBottom: '1.5px solid var(--border)' }}>
+                <th style={{ padding: '5px 6px', textAlign: 'left', color: 'var(--text-secondary)', fontWeight: 600 }}>단지명</th>
+                <th style={{ padding: '5px 6px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 600 }}>거래일</th>
+                <th style={{ padding: '5px 6px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 600 }}>면적(㎡)</th>
+                <th style={{ padding: '5px 6px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 600 }}>거래가</th>
+                <th style={{ padding: '5px 6px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 600 }}>층</th>
+              </tr></thead>
+              <tbody>
+                {regionTrades.slice(0, 8).map((t: any, i: number) => (
+                  <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
+                    <td style={{ padding: '5px 6px', fontWeight: 600, color: 'var(--text-primary)', maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.apt_name}</td>
+                    <td style={{ padding: '5px 6px', textAlign: 'right', color: 'var(--text-tertiary)' }}>{t.deal_date}</td>
+                    <td style={{ padding: '5px 6px', textAlign: 'right', color: 'var(--text-secondary)' }}>{t.exclusive_area}</td>
+                    <td style={{ padding: '5px 6px', textAlign: 'right', fontWeight: 700, color: 'var(--accent-blue)' }}>{fmtAmount(Number(t.deal_amount))}</td>
+                    <td style={{ padding: '5px 6px', textAlign: 'right', color: 'var(--text-tertiary)' }}>{t.floor}층</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 6 }}>
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>출처: 국토교통부 실거래가 공개시스템</div>
+            <SectionShareButton section="apt-trade-compare" label={`${sigungu || region} 최근 실거래 vs ${name} 분양가 비교`} pagePath={`/apt/${slug}`} />
+          </div>
+        </section>
+      )}
+
+      {/* 실거래 텍스트 요약 (서버 렌더링 — 크롤러용) */}
+      {trades.length > 0 && (
+        <section aria-labelledby="apt-sec-9" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--card-p) var(--sp-lg)', marginBottom: 'var(--sp-md)' }}>
+          <h2 id="apt-sec-9" style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 8px' }}>{name} 실거래 요약</h2>
+          <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, wordBreak: 'keep-all' }}>
+            {name}의 최근 실거래 이력은 총 {trades.length}건입니다.
+            {(() => {
+              const amounts = trades.map((t: any) => Number(t.deal_amount)).filter((a: number) => a > 0);
+              if (amounts.length === 0) return '';
+              const min = Math.min(...amounts);
+              const max = Math.max(...amounts);
+              const avg = Math.round(amounts.reduce((s: number, a: number) => s + a, 0) / amounts.length);
+              return ` 거래 금액은 ${fmtAmount(min)} ~ ${fmtAmount(max)} 범위이며, 평균 ${fmtAmount(avg)}입니다.`;
+            })()}
+            {trades[0]?.deal_date && ` 가장 최근 거래일은 ${trades[0].deal_date}입니다.`}
+          </p>
+        </section>
+      )}
+
+      {/* Transactions */}
+      {trades.length > 0 && (
+        <section className="apt-card" aria-labelledby="apt-sec-10"><h2 id="apt-sec-10" className="apt-section-title">실거래 이력 ({trades.length}건)</h2>
+          {/* 서버 렌더링 통계 요약 (차트 로드 전 즉시 표시) */}
+          {(() => {
+            const amounts = trades.map((t: any) => Number(t.deal_amount)).filter((a: number) => a > 0);
+            if (amounts.length < 2) return null;
+            const avg = Math.round(amounts.reduce((s: number, a: number) => s + a, 0) / amounts.length);
+            const mx = Math.max(...amounts);
+            const mn = Math.min(...amounts);
+            const latest = amounts[0] || 0;
+            const trend = latest > avg ? '↑' : latest < avg ? '↓' : '→';
+            const tColor = latest > avg ? 'var(--accent-green)' : latest < avg ? 'var(--accent-red)' : 'var(--text-tertiary)';
+            return (
+              <div className="kd-grid-4" style={{ gap: 'var(--sp-xs)', marginBottom: 10 }}>
+                {[
+                  { label: '최근', value: fmtAmount(latest), color: tColor, sub: trend },
+                  { label: '평균', value: fmtAmount(avg), color: 'var(--brand)', sub: '' },
+                  { label: '최저', value: fmtAmount(mn), color: 'var(--accent-green)', sub: '' },
+                  { label: '최고', value: fmtAmount(mx), color: 'var(--accent-red)', sub: '' },
+                ].map(s => (
+                  <div key={s.label} style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-xs)', padding: '5px 6px', textAlign: 'center' }}>
+                    <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: s.color }}>{s.value}{s.sub && <span style={{ marginLeft: 2 }}>{s.sub}</span>}</div>
+                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{s.label}</div>
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
+          {/* 층별 · 면적별 분석 */}
+          {trades.length >= 5 && (() => {
+            const vt = trades.filter((t: any) => Number(t.deal_amount) > 0 && Number(t.exclusive_area) > 0);
+            if (vt.length < 5) return null;
+            const fg: Record<string, any[]> = { '저층(1~5)': vt.filter((t: any) => t.floor >= 1 && t.floor <= 5), '중층(6~15)': vt.filter((t: any) => t.floor >= 6 && t.floor <= 15), '고층(16+)': vt.filter((t: any) => t.floor >= 16) };
+            const ag: Record<string, any[]> = {};
+            vt.forEach((t: any) => { const a = Number(t.exclusive_area); const k = a < 60 ? '소형(~59m²)' : a < 85 ? '중형(60~84)' : '대형(85+)'; if (!ag[k]) ag[k] = []; ag[k].push(t); });
+            const avg = (arr: any[]) => arr.length > 0 ? Math.round(arr.reduce((s: number, t: any) => s + Number(t.deal_amount), 0) / arr.length) : 0;
+            return (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginBottom: 10 }}>
+                <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '8px' }}>
+                  <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 4 }}>층별 평균</div>
+                  {Object.entries(fg).filter(([, a]) => a.length > 0).map(([k, arr]) => (
+                    <div key={k} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--fs-xs)', padding: '2px 0' }}>
+                      <span style={{ color: 'var(--text-tertiary)' }}>{k}</span>
+                      <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{fmtAmount(avg(arr))}</span>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '8px' }}>
+                  <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 4 }}>면적별 평균</div>
+                  {Object.entries(ag).filter(([, a]) => a.length > 0).map(([k, arr]) => (
+                    <div key={k} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--fs-xs)', padding: '2px 0' }}>
+                      <span style={{ color: 'var(--text-tertiary)' }}>{k}</span>
+                      <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{fmtAmount(avg(arr))}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
+          <AptPriceTrendChart aptName={name} region={region} />
+          {(() => {
+            const tradeAmts = trades.slice(0, 10).map((t: any) => Number(t.deal_amount));
+            const tradeMax = Math.max(...tradeAmts.filter((a: number) => a > 0), 1);
+            return trades.slice(0, 10).map((t: Record<string, any>, i: number) => (
+              <div key={t.id || i} style={{ display: 'flex', alignItems: 'center', padding: '6px 0', borderBottom: i < Math.min(trades.length, 10) - 1 ? '1px solid var(--border)' : 'none', fontSize: 'var(--fs-sm)', gap: 6 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', gap: 6, marginBottom: 2 }}>
+                    <span style={{ color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)' }}>{t.deal_date}</span>
+                    <span style={{ color: 'var(--text-secondary)', fontSize: 'var(--fs-xs)' }}>{t.exclusive_area}㎡ · {t.floor}층</span>
+                  </div>
+                  <div style={{ height: 4, borderRadius: 4, background: 'var(--bg-hover)', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${tradeMax > 0 ? (Number(t.deal_amount) / tradeMax) * 100 : 0}%`, borderRadius: 4, background: t.deal_amount >= 100000 ? 'var(--accent-red-bg)' : t.deal_amount >= 50000 ? 'var(--accent-orange-bg)' : 'var(--accent-green-border)' }} />
+                  </div>
+                </div>
+                <span style={{ fontWeight: 700, flexShrink: 0, color: t.deal_amount >= 100000 ? 'var(--accent-red)' : t.deal_amount >= 50000 ? 'var(--accent-orange)' : 'var(--accent-green)', minWidth: 48, textAlign: 'right' }}>{fmtAmount(t.deal_amount)}</span>
+              </div>
+            ));
+          })()}
+          <Link href={`/apt/complex/${encodeURIComponent(name)}`} style={{ display: 'block', textAlign: 'center', marginTop: 10, padding: '8px 0', borderRadius: 'var(--radius-sm)', background: 'var(--brand-bg)', color: 'var(--brand)', fontSize: 'var(--fs-sm)', fontWeight: 600, textDecoration: 'none' }}>전체 실거래 내역 보기 →</Link>
+        </section>
+      )}
+
+      {/* ── M6 A-1 · ③ 될 것 같은가 ──
+           점프바 '될까' 칩의 목적지. 높이 0 앵커라 레이아웃에 끼어들지 않는다. */}
+      <div id="odds-group" aria-hidden="true" style={{ scrollMarginTop: SECTION_SCROLL_MARGIN }} />
+
+      {/* Competition rate */}
+      {sub?.competition_rate_1st && Number(sub.competition_rate_1st) > 0 && (
+        <section className="apt-card" aria-labelledby="apt-sec-3" style={{ background: 'var(--accent-purple-bg)', border: '1px solid var(--accent-purple-bg)' }}>
+          <h2 id="apt-sec-3" className="apt-section-title">청약 경쟁률</h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-lg)', marginBottom: 'var(--sp-md)' }}>
+            {/* 원형 게이지 */}
+            <div style={{ position: 'relative', width: 70, height: 70, flexShrink: 0 }}>
+              <svg viewBox="0 0 36 36" style={{ width: '100%', height: '100%', transform: 'rotate(-90deg)' }}>
+                <circle cx="18" cy="18" r="16" fill="none" stroke="var(--accent-purple-bg)" strokeWidth="3" />
+                <circle cx="18" cy="18" r="16" fill="none" stroke="var(--accent-purple)" strokeWidth="3" strokeLinecap="round" strokeDasharray={`${Math.min(Number(sub.competition_rate_1st) * 2, 100)} 100`} />
+              </svg>
+              <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--accent-purple)', lineHeight: 1 }}>{Number(sub.competition_rate_1st).toFixed(1)}</span>
+                <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>: 1</span>
+              </div>
+            </div>
+            <div>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 500, color: 'var(--text-primary)', marginBottom: 2 }}>1순위 평균 경쟁률</div>
+              <div style={{ fontSize: 'var(--fs-xs)', color: Number(sub.competition_rate_1st) >= 30 ? 'var(--accent-red)' : Number(sub.competition_rate_1st) >= 10 ? 'var(--accent-orange)' : 'var(--accent-green)', fontWeight: 600 }}>
+                {Number(sub.competition_rate_1st) >= 30 ? '초고경쟁' : Number(sub.competition_rate_1st) >= 10 ? '높은 경쟁' : Number(sub.competition_rate_1st) >= 3 ? '보통 경쟁' : '낮은 경쟁'}
+              </div>
+            </div>
+          </div>
+          {sub.total_apply_count && sub.supply_count && <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>총 지원 {Number(sub.total_apply_count).toLocaleString()}명 / 공급 {Number(sub.supply_count).toLocaleString()}세대</div>}
+          {sub.house_type_info && Array.isArray(sub.house_type_info) && sub.house_type_info.length > 0 && (
+            <div style={{ marginTop: 'var(--sp-md)', overflowX: 'auto', WebkitOverflowScrolling: 'touch' as const }}>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>평형별 경쟁률</div>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--fs-sm)', minWidth: 300 }}>
+                <thead><tr style={{ borderBottom: '2px solid var(--border)' }}><th style={{ padding: '6px 8px', textAlign: 'left', color: 'var(--text-tertiary)' }}>평형</th><th style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-tertiary)' }}>공급</th><th style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-tertiary)' }}>지원</th><th style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-tertiary)' }}>경쟁률</th></tr></thead>
+                <tbody>{(sub.house_type_info as Record<string, number | string>[]).map((t: Record<string, number | string>, i: number) => <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}><td style={{ padding: '6px 8px', fontWeight: 600, color: 'var(--text-primary)' }}>{t.type || t.area || '-'}</td><td style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-secondary)' }}>{(t.supply || 0).toLocaleString()}</td><td style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-secondary)' }}>{(t.apply || 0).toLocaleString()}</td><td style={{ padding: '6px 8px', textAlign: 'right', fontWeight: 700, color: Number(t.rate || 0) >= 10 ? 'var(--accent-red)' : 'var(--accent-purple)' }}>{t.rate ? `${t.rate}:1` : '-'}</td></tr>)}</tbody>
+              </table>
+            </div>
+          )}
+        </section>
+      )}
+
+      {/* ── v10 §7 · 단지 진행 단계 · 청약 가점 매칭 ──
+           히어로·지표·리드폼·정보 표를 본 다음에 온다. 이전에는 이 묶음이 페이지 최상단에 있어
+           '이 현장이 뭔가' 를 알기 전에 진행 단계부터 보게 됐다. */}
+        {(() => {
+          const rail = (
+            <LifecycleRail
+              stage={(site as any)?.lifecycle_stage ?? null}
+              dates={sub ? {
+                rcept_bgnde: sub.rcept_bgnde,
+                rcept_endde: sub.rcept_endde,
+                spsply_rcept_bgnde: sub.spsply_rcept_bgnde,
+                przwner_presnatn_de: sub.przwner_presnatn_de,
+                cntrct_cncls_bgnde: sub.cntrct_cncls_bgnde,
+                cntrct_cncls_endde: sub.cntrct_cncls_endde,
+                mvn_prearnge_ym: sub.mvn_prearnge_ym,
+              } : undefined}
+              size="full"
+              moveInLabel={fmtYM(site?.move_in_date || sub?.mvn_prearnge_ym) || undefined}
+            />
+          );
+          if (!rail) return null;
+          return (
+            <section aria-labelledby="apt-sec-rail" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', margin: '0 0 var(--sp-md)' }}>
+              <h2 id="apt-sec-rail" style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)', margin: 0 }}>단지 진행 단계</h2>
+              <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-primary)', letterSpacing: 0.5, marginBottom: 10 }}>단지 진행 단계</div>
+              {rail}
+            </section>
+          );
+        })()}
+        {/* ── V13 A-3 · 진행 이력 ──
+             청약홈에도 아실에도 없는 정보다. 고시·공시·취재가 언제 무엇을 바꿨는지가
+             "세대수는 줄고 층수는 올랐다" 같은 판단의 재료다.
+             ⚠️ 0건이면 섹션을 렌더하지 않는다 — 지금은 대부분 0건이다.
+             ⚠️ 등급(확정·추정·카더라)을 반드시 함께 낸다. 감추면 표시·광고법 문제가 된다. */}
+        {siteEvents.length > 0 && (
+          <DetailSection id="history-section" title="진행 이력" meta={`${siteEvents.length}건`} openOnDesktop>
+            <SiteHistoryTimeline events={siteEvents} />
+            <p style={{ fontSize: 'var(--fs-xs)', lineHeight: 1.55, color: 'var(--text-tertiary)', margin: '2px 0 0' }}>
+              확정은 고시·공시 원문, 추정은 복수 언론, 카더라는 업계·조합 전언입니다. 일정과 계획은 바뀔 수 있습니다.
+            </p>
+          </DetailSection>
+        )}
+
+        <CheongakMatchCard isLoggedIn={isLoggedInApt} myScore={aptUserCheongakScore} aptName={name} />
+
+      {/* 규제 요약 — 전매/거주/재당첨 신호등 */}
+      {sub && (sub.transfer_limit_years || sub.residence_obligation_years || sub.rewin_limit_years || sub.is_price_limit || sub.loan_rate) && (
+        <div style={{ marginBottom: 14 }}>
+          <RegulationBadges
+            transferLimitYears={sub.transfer_limit_years}
+            residenceYears={sub.residence_obligation_years}
+            rewinLimitYears={sub.rewin_limit_years}
+            isSpeculativeZone={sub.is_speculative_zone}
+            isRegulatedArea={sub.is_regulated_area}
+            isPriceLimit={sub.is_price_limit}
+            loanRate={sub.loan_rate}
+            contractDate={sub.cntrct_cncls_bgnde}
+          />
+        </div>
+      )}
+      {/* 실입주 총비용 시뮬레이터 */}
+      {sub && Array.isArray(sub.house_type_info) && sub.house_type_info.length > 0 && sub.house_type_info.some((t: any) => t.lttot_top_amount > 0) && (
+        <div style={{ marginBottom: 14 }}>
+          {/* C3: ContentLock wrapper 제거 (656v / 0c) */}
+          <CostSimulator
+            types={sub.house_type_info}
+            options={Array.isArray(sub.options_list) ? sub.options_list : []}
+            siteName={name}
+            priceSource={sub.price_source}
+          />
+        </div>
+      )}
+
+      {/* ── M6 A-1 · ④ 더 알아보기 ──
+           점프바 '더보기' 칩의 목적지. 높이 0 앵커라 레이아웃에 끼어들지 않는다. */}
+      <div id="more-group" aria-hidden="true" style={{ scrollMarginTop: SECTION_SCROLL_MARGIN }} />
 
       {/* AI 종합 분석 — 전문 공개.
            v4-C4-3: LoginGate(feature="apt_analysis") 해제. 30일 181뷰짜리 게이트가
@@ -1636,14 +1832,67 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
         </section>
       )}
 
-      </DetailSection>
+      {/* 인포그래픽 이미지 — 네이버/구글 이미지 검색 크롤링용 */}
+      <figure style={{ margin: '0 0 var(--sp-md)', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--border)' }}>
+        <img
+          src={`${SITE_URL}/api/og-square?title=${encodeURIComponent(name)}&category=apt`}
+          alt={`${name} ${region} ${site?.sigungu || ''} 분양가 ${site?.price_min ? `${(site.price_min/10000).toFixed(1)}억` : ''} ${site?.price_max ? `${(site.price_max/10000).toFixed(1)}억` : ''} 세대수 ${site?.total_units || ''} 시공사 ${site?.builder || ''} 청약 분양 입주 인포그래픽 2026`}
+          width={1200} height={630}
+          style={{ width: '100%', height: 'auto', display: 'block' }}
+          loading="lazy"
+        />
+        <figcaption style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', padding: '6px 12px', background: 'var(--bg-surface)', textAlign: 'center' }}>
+          {name} 분양 핵심 정보 · 카더라
+        </figcaption>
+      </figure>
+
+      {/* ── 7번 블록 · 핵심 포인트 + FAQ ── */}
+      {features.length > 0 && (
+        <DetailSection id="points-section" title="핵심 포인트">
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            {features.map((f: any, i: number) => (
+              <span key={i} style={{ padding: '4px 10px', borderRadius: 'var(--radius-lg)', fontSize: 'var(--fs-xs)', fontWeight: 600, background: 'var(--brand-bg)', color: 'var(--brand)', border: '1px solid var(--brand-bg)' }}>{String(f)}</span>
+            ))}
+          </div>
+        </DetailSection>
+      )}
+
+      {faq.length > 0 && (
+        <DetailSection id="faq-section" title="자주 묻는 질문" meta={`${faq.length}개`}>
+          {/* V15 B: 항목별 <details> 를 걷어냈다. 아코디언 안 아코디언이 되면
+              답 하나 보는 데 두 번 눌러야 한다. 섹션이 이미 접이식이라 여기서는 편다. */}
+          {faq.map((f, i) => (
+            <div key={i} style={{ borderBottom: '1px solid var(--border)', padding: '10px 0' }}>
+              <h3 style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>{f.q}</h3>
+              <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.7, margin: '6px 0 0' }}>{f.a}</p>
+            </div>
+          ))}
+          {/* 마지막 항목은 방으로 보낸다. FAQ JSON-LD 는 위 faq 배열로만 만들어지므로
+              이 항목은 구조화데이터에 들어가지 않는다 (리치결과 정책상 안전). */}
+          <div style={{ padding: '10px 0' }}>
+            <h3 style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>여기에 없는 내용은 어디에 물어보나요?</h3>
+            <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.7, margin: '6px 0 0' }}>
+              {name} 관련 질문은 부동산 정보 공유방에서 받고 있습니다. 잔여 세대·동호수·할인 조건처럼 공고에 없는 내용도 방에서 확인할 수 있습니다.{' '}
+              <TalkInlineLink slot="faq" siteSlug={slug} label="정보 공유방 참여하기 →" countView />
+            </p>
+          </div>
+        </DetailSection>
+      )}
 
       {/* v10 §10: 모집공고는 AI 종합 분석 뒤로 내렸다.
            읽는 흐름이 '판단(분석) → 원문 확인(공고)' 순이라 원문 요약이 마지막이다.
            V15 B: 상세 데이터 안에 들어 있던 것을 형제 아코디언으로 꺼냈다 —
            점프바 '모집공고' 칩이 닫힌 details 안을 가리키고 있었다. */}
+      {/* M6 A-3: 요약줄에 접수기간을 낸다 — 접어 둔 채로도 «언제 것인지» 는 보여야 한다.
+           ⚠️ '공고일'(rcrit_pblanc_de)은 스키마에 없다. rcept_bgnde 는 접수 시작일이지
+              모집공고일이 아니므로 «접수» 라고 적는다. 제목도 '전문' 이 아니라 '핵심 요약' 이다 —
+              이 안에 든 것은 구조화 요약이고 원본은 하단 '청약홈 원문' 링크로 나간다. */}
       {sub && (
-        <DetailSection id="notice-section" title="모집공고 핵심 요약">
+        <DetailSection
+          id="notice-section"
+          title="모집공고 핵심 요약"
+          meta={sub.rcept_bgnde ? `접수 ${sub.rcept_bgnde}${sub.rcept_endde ? ` ~ ${sub.rcept_endde}` : ''}` : undefined}
+        >
           <div>
 
           {/* AI 분석 — 상단 히어로에 이미 표시되므로 중복 제거 */}
@@ -2013,47 +2262,6 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
         </DetailSection>
       )}
 
-      {/* V15 B · 경쟁률 · 시세 · 실거래 —
-           내용이 하나도 없으면 아코디언 자체를 렌더하지 않는다. 빈 껍데기 금지. */}
-      {hasMarketBlocks && (
-        <DetailSection id="market-section" title="경쟁률 · 시세 · 실거래">
-
-      {/* Competition rate */}
-      {sub?.competition_rate_1st && Number(sub.competition_rate_1st) > 0 && (
-        <section className="apt-card" aria-labelledby="apt-sec-3" style={{ background: 'var(--accent-purple-bg)', border: '1px solid var(--accent-purple-bg)' }}>
-          <h2 id="apt-sec-3" className="apt-section-title">청약 경쟁률</h2>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-lg)', marginBottom: 'var(--sp-md)' }}>
-            {/* 원형 게이지 */}
-            <div style={{ position: 'relative', width: 70, height: 70, flexShrink: 0 }}>
-              <svg viewBox="0 0 36 36" style={{ width: '100%', height: '100%', transform: 'rotate(-90deg)' }}>
-                <circle cx="18" cy="18" r="16" fill="none" stroke="var(--accent-purple-bg)" strokeWidth="3" />
-                <circle cx="18" cy="18" r="16" fill="none" stroke="var(--accent-purple)" strokeWidth="3" strokeLinecap="round" strokeDasharray={`${Math.min(Number(sub.competition_rate_1st) * 2, 100)} 100`} />
-              </svg>
-              <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--accent-purple)', lineHeight: 1 }}>{Number(sub.competition_rate_1st).toFixed(1)}</span>
-                <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>: 1</span>
-              </div>
-            </div>
-            <div>
-              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 500, color: 'var(--text-primary)', marginBottom: 2 }}>1순위 평균 경쟁률</div>
-              <div style={{ fontSize: 'var(--fs-xs)', color: Number(sub.competition_rate_1st) >= 30 ? 'var(--accent-red)' : Number(sub.competition_rate_1st) >= 10 ? 'var(--accent-orange)' : 'var(--accent-green)', fontWeight: 600 }}>
-                {Number(sub.competition_rate_1st) >= 30 ? '초고경쟁' : Number(sub.competition_rate_1st) >= 10 ? '높은 경쟁' : Number(sub.competition_rate_1st) >= 3 ? '보통 경쟁' : '낮은 경쟁'}
-              </div>
-            </div>
-          </div>
-          {sub.total_apply_count && sub.supply_count && <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>총 지원 {Number(sub.total_apply_count).toLocaleString()}명 / 공급 {Number(sub.supply_count).toLocaleString()}세대</div>}
-          {sub.house_type_info && Array.isArray(sub.house_type_info) && sub.house_type_info.length > 0 && (
-            <div style={{ marginTop: 'var(--sp-md)', overflowX: 'auto', WebkitOverflowScrolling: 'touch' as const }}>
-              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>평형별 경쟁률</div>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--fs-sm)', minWidth: 300 }}>
-                <thead><tr style={{ borderBottom: '2px solid var(--border)' }}><th style={{ padding: '6px 8px', textAlign: 'left', color: 'var(--text-tertiary)' }}>평형</th><th style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-tertiary)' }}>공급</th><th style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-tertiary)' }}>지원</th><th style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-tertiary)' }}>경쟁률</th></tr></thead>
-                <tbody>{(sub.house_type_info as Record<string, number | string>[]).map((t: Record<string, number | string>, i: number) => <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}><td style={{ padding: '6px 8px', fontWeight: 600, color: 'var(--text-primary)' }}>{t.type || t.area || '-'}</td><td style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-secondary)' }}>{(t.supply || 0).toLocaleString()}</td><td style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-secondary)' }}>{(t.apply || 0).toLocaleString()}</td><td style={{ padding: '6px 8px', textAlign: 'right', fontWeight: 700, color: Number(t.rate || 0) >= 10 ? 'var(--accent-red)' : 'var(--accent-purple)' }}>{t.rate ? `${t.rate}:1` : '-'}</td></tr>)}</tbody>
-              </table>
-            </div>
-          )}
-        </section>
-      )}
-
       {/* Unsold section */}
       {unsold && (
         <section className="apt-card" aria-labelledby="apt-sec-4" style={{ borderLeft: '4px solid var(--accent-red)', borderRadius: 0 }}>
@@ -2094,114 +2302,6 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
           {redev.notes && !redev.ai_summary && <div style={{ padding: '6px 8px', borderLeft: '2px solid var(--accent-purple-bg)', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.5, marginTop: 6 }}>{redev.notes}</div>}
         </section>); })()}
 
-      {/* 주변 아파트 시세 비교 (단지백과 데이터) */}
-      {complexProfiles.length > 0 && (site?.price_min || site?.price_max) && (
-      (() => {
-        const avgPyeong = complexProfiles.filter((c: any) => c.avg_sale_price_pyeong > 0).reduce((s: number, c: any, _: number, a: any[]) => s + c.avg_sale_price_pyeong / a.length, 0);
-        const avgJeonse = complexProfiles.filter((c: any) => c.jeonse_ratio && Number(c.jeonse_ratio) > 0);
-        const avgJeonseRatio = avgJeonse.length > 0 ? Math.round(avgJeonse.reduce((s: number, c: any) => s + Number(c.jeonse_ratio), 0) / avgJeonse.length) : 0;
-        const myPriceMax = site?.price_max || 0;
-        const myPpyeong = (() => { const t = Array.isArray(sub?.house_type_info) ? sub.house_type_info : []; if (!t.length) return 0; const p = t[0]; const ea = parseFloat((p.type || '0').replace(/[A-Za-z]/g, '')); const usePrice = p.lttot_avg_amount || p.lttot_top_amount || 0; return usePrice > 0 && ea > 10 ? Math.round(usePrice / (ea / 3.3058)) : 0; })();
-        return (
-        <section className="apt-card" aria-labelledby="apt-sec-6">
-          <h2 id="apt-sec-6" className="apt-section-title">{sigungu || region} 아파트 시세 비교</h2>
-          <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', margin: '0 0 8px' }}>단지백과 데이터 기반. 같은 지역 기존 아파트와 분양가를 비교합니다.</p>
-          {/* 평당가 + 전세가율 KPI */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0,1fr))', gap: 6, marginBottom: 10 }}>
-            <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '8px', textAlign: 'center' }}>
-              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>지역 평당가 <span style={{ fontSize: 'var(--fs-xs)' }}>(실거래 평균)</span></div>
-              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>{avgPyeong > 0 ? `${Math.round(avgPyeong).toLocaleString()}만` : '-'}</div>
-              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>기존 아파트</div>
-            </div>
-            <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '8px', textAlign: 'center' }}>
-              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>이 분양 평당가 <span style={{ fontSize: 'var(--fs-xs)' }}>(평균가)</span>{sub?.price_source === 'estimated' ? <span style={{ fontSize: 'var(--fs-xs)', marginLeft: 2, padding: '0px 3px', borderRadius: 4, background: 'var(--accent-orange-bg)', color: 'var(--warning)', fontWeight: 600 }}>추정</span> : null}</div>
-              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: myPpyeong > avgPyeong ? 'var(--accent-red)' : 'var(--accent-green)' }}>{myPpyeong > 0 ? `${myPpyeong.toLocaleString()}만` : '-'}</div>
-              <div style={{ fontSize: 'var(--fs-xs)', color: myPpyeong > avgPyeong ? 'var(--accent-red)' : 'var(--accent-green)' }}>{avgPyeong > 0 && myPpyeong > 0 ? (myPpyeong > avgPyeong ? `+${Math.round((myPpyeong - avgPyeong) / avgPyeong * 100)}%` : `${Math.round((myPpyeong - avgPyeong) / avgPyeong * 100)}%`) : ''}</div>
-            </div>
-            <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '8px', textAlign: 'center' }}>
-              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>지역 전세가율</div>
-              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: avgJeonseRatio >= 80 ? 'var(--accent-blue)' : 'var(--text-primary)' }}>{avgJeonseRatio > 0 ? `${avgJeonseRatio}%` : '-'}</div>
-              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>기존 아파트</div>
-            </div>
-          </div>
-          {/* 개별 단지 비교 */}
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', fontSize: 'var(--fs-xs)', borderCollapse: 'collapse' }}>
-              <thead><tr style={{ borderBottom: '1.5px solid var(--border)' }}>
-                <th style={{ padding: '4px 6px', textAlign: 'left', color: 'var(--text-secondary)', fontWeight: 600 }}>단지명</th>
-                <th style={{ padding: '4px 6px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 600 }}>준공</th>
-                <th style={{ padding: '4px 6px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 600 }}>매매가</th>
-                <th style={{ padding: '4px 6px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 600 }}>평당가<span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 400 }}>(실거래)</span></th>
-                <th style={{ padding: '4px 6px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 600 }}>전세가율</th>
-                <th style={{ padding: '4px 6px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 600 }}>전년대비</th>
-              </tr></thead>
-              <tbody>
-                {complexProfiles.slice(0, 6).map((c: any, i: number) => (
-                  <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
-                    <td style={{ padding: '5px 6px', fontWeight: 600, color: 'var(--text-primary)', maxWidth: 100, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.apt_name}</td>
-                    <td style={{ padding: '5px 6px', textAlign: 'right', color: 'var(--text-tertiary)' }}>{c.built_year || '-'}</td>
-                    <td style={{ padding: '5px 6px', textAlign: 'right', fontWeight: 700, color: 'var(--accent-blue)' }}>{fmtAmount(c.latest_sale_price)}</td>
-                    <td style={{ padding: '5px 6px', textAlign: 'right', color: 'var(--text-secondary)' }}>{c.avg_sale_price_pyeong ? `${c.avg_sale_price_pyeong.toLocaleString()}만` : '-'}</td>
-                    <td style={{ padding: '5px 6px', textAlign: 'right', color: Number(c.jeonse_ratio || 0) >= 80 ? 'var(--accent-blue)' : 'var(--text-tertiary)' }}>{c.jeonse_ratio ? `${c.jeonse_ratio}%` : '-'}</td>
-                    <td style={{ padding: '5px 6px', textAlign: 'right', fontWeight: 600, color: Number(c.price_change_1y || 0) > 0 ? 'var(--accent-red)' : Number(c.price_change_1y || 0) < 0 ? 'var(--accent-blue)' : 'var(--text-tertiary)' }}>{c.price_change_1y ? `${Number(c.price_change_1y) > 0 ? '+' : ''}${c.price_change_1y}%` : '-'}</td>
-                  </tr>
-                ))}
-                {myPriceMax > 0 && (
-                  <tr style={{ borderTop: '1.5px solid var(--brand)', background: 'var(--bg-hover)' }}>
-                    <td style={{ padding: '5px 6px', fontWeight: 600, color: 'var(--brand)' }}>{name}</td>
-                    <td style={{ padding: '5px 6px', textAlign: 'right', color: 'var(--text-tertiary)' }}>분양중</td>
-                    <td style={{ padding: '5px 6px', textAlign: 'right', fontWeight: 700, color: 'var(--brand)' }}>{fmtAmount(myPriceMax)}</td>
-                    <td style={{ padding: '5px 6px', textAlign: 'right', fontWeight: 700, color: 'var(--brand)' }}>{myPpyeong > 0 ? `${myPpyeong.toLocaleString()}만` : '-'}</td>
-                    <td style={{ padding: '5px 6px', textAlign: 'right', color: 'var(--text-tertiary)' }}>-</td>
-                    <td style={{ padding: '5px 6px', textAlign: 'right', color: 'var(--text-tertiary)' }}>-</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 6 }}>
-            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>출처: 단지백과 · 국토교통부 실거래가 공개시스템</div>
-            <SectionShareButton section="apt-price-compare" label={`${name} vs ${sigungu || region} 아파트 시세 비교`} pagePath={`/apt/${slug}`} />
-          </div>
-        </section>
-        );
-      })()
-      )}
-
-      {/* 같은 지역 최근 실거래 비교 */}
-      {regionTrades.length > 0 && (site?.price_min || site?.price_max) && (
-        <section className="apt-card" aria-labelledby="apt-sec-7">
-          <h2 id="apt-sec-7" className="apt-section-title">{sigungu || region} 최근 실거래 비교</h2>
-          <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', margin: '0 0 8px' }}>같은 지역 아파트 최근 실거래가와 비교합니다.</p>
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', fontSize: 'var(--fs-xs)', borderCollapse: 'collapse' }}>
-              <thead><tr style={{ borderBottom: '1.5px solid var(--border)' }}>
-                <th style={{ padding: '5px 6px', textAlign: 'left', color: 'var(--text-secondary)', fontWeight: 600 }}>단지명</th>
-                <th style={{ padding: '5px 6px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 600 }}>거래일</th>
-                <th style={{ padding: '5px 6px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 600 }}>면적(㎡)</th>
-                <th style={{ padding: '5px 6px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 600 }}>거래가</th>
-                <th style={{ padding: '5px 6px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 600 }}>층</th>
-              </tr></thead>
-              <tbody>
-                {regionTrades.slice(0, 8).map((t: any, i: number) => (
-                  <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
-                    <td style={{ padding: '5px 6px', fontWeight: 600, color: 'var(--text-primary)', maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.apt_name}</td>
-                    <td style={{ padding: '5px 6px', textAlign: 'right', color: 'var(--text-tertiary)' }}>{t.deal_date}</td>
-                    <td style={{ padding: '5px 6px', textAlign: 'right', color: 'var(--text-secondary)' }}>{t.exclusive_area}</td>
-                    <td style={{ padding: '5px 6px', textAlign: 'right', fontWeight: 700, color: 'var(--accent-blue)' }}>{fmtAmount(Number(t.deal_amount))}</td>
-                    <td style={{ padding: '5px 6px', textAlign: 'right', color: 'var(--text-tertiary)' }}>{t.floor}층</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 6 }}>
-            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>출처: 국토교통부 실거래가 공개시스템</div>
-            <SectionShareButton section="apt-trade-compare" label={`${sigungu || region} 최근 실거래 vs ${name} 분양가 비교`} pagePath={`/apt/${slug}`} />
-          </div>
-        </section>
-      )}
-
       {/* 주변 시설 (nearby_facilities) — 크롤러 가시적 텍스트 */}
       {site?.nearby_facilities && Object.keys(site.nearby_facilities as Record<string, number>).length > 0 && (() => {
         const facilityLabels: Record<string, string> = { mart: '마트', park: '공원', school: '학교', subway: '지하철', hospital: '병원', bank: '은행', pharmacy: '약국', convenience: '편의점', library: '도서관', gym: '체육관' };
@@ -2225,110 +2325,6 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
         );
       })()}
 
-      {/* 실거래 텍스트 요약 (서버 렌더링 — 크롤러용) */}
-      {trades.length > 0 && (
-        <section aria-labelledby="apt-sec-9" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--card-p) var(--sp-lg)', marginBottom: 'var(--sp-md)' }}>
-          <h2 id="apt-sec-9" style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 8px' }}>{name} 실거래 요약</h2>
-          <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, wordBreak: 'keep-all' }}>
-            {name}의 최근 실거래 이력은 총 {trades.length}건입니다.
-            {(() => {
-              const amounts = trades.map((t: any) => Number(t.deal_amount)).filter((a: number) => a > 0);
-              if (amounts.length === 0) return '';
-              const min = Math.min(...amounts);
-              const max = Math.max(...amounts);
-              const avg = Math.round(amounts.reduce((s: number, a: number) => s + a, 0) / amounts.length);
-              return ` 거래 금액은 ${fmtAmount(min)} ~ ${fmtAmount(max)} 범위이며, 평균 ${fmtAmount(avg)}입니다.`;
-            })()}
-            {trades[0]?.deal_date && ` 가장 최근 거래일은 ${trades[0].deal_date}입니다.`}
-          </p>
-        </section>
-      )}
-
-      {/* Transactions */}
-      {trades.length > 0 && (
-        <section className="apt-card" aria-labelledby="apt-sec-10"><h2 id="apt-sec-10" className="apt-section-title">실거래 이력 ({trades.length}건)</h2>
-          {/* 서버 렌더링 통계 요약 (차트 로드 전 즉시 표시) */}
-          {(() => {
-            const amounts = trades.map((t: any) => Number(t.deal_amount)).filter((a: number) => a > 0);
-            if (amounts.length < 2) return null;
-            const avg = Math.round(amounts.reduce((s: number, a: number) => s + a, 0) / amounts.length);
-            const mx = Math.max(...amounts);
-            const mn = Math.min(...amounts);
-            const latest = amounts[0] || 0;
-            const trend = latest > avg ? '↑' : latest < avg ? '↓' : '→';
-            const tColor = latest > avg ? 'var(--accent-green)' : latest < avg ? 'var(--accent-red)' : 'var(--text-tertiary)';
-            return (
-              <div className="kd-grid-4" style={{ gap: 'var(--sp-xs)', marginBottom: 10 }}>
-                {[
-                  { label: '최근', value: fmtAmount(latest), color: tColor, sub: trend },
-                  { label: '평균', value: fmtAmount(avg), color: 'var(--brand)', sub: '' },
-                  { label: '최저', value: fmtAmount(mn), color: 'var(--accent-green)', sub: '' },
-                  { label: '최고', value: fmtAmount(mx), color: 'var(--accent-red)', sub: '' },
-                ].map(s => (
-                  <div key={s.label} style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-xs)', padding: '5px 6px', textAlign: 'center' }}>
-                    <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: s.color }}>{s.value}{s.sub && <span style={{ marginLeft: 2 }}>{s.sub}</span>}</div>
-                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{s.label}</div>
-                  </div>
-                ))}
-              </div>
-            );
-          })()}
-          {/* 층별 · 면적별 분석 */}
-          {trades.length >= 5 && (() => {
-            const vt = trades.filter((t: any) => Number(t.deal_amount) > 0 && Number(t.exclusive_area) > 0);
-            if (vt.length < 5) return null;
-            const fg: Record<string, any[]> = { '저층(1~5)': vt.filter((t: any) => t.floor >= 1 && t.floor <= 5), '중층(6~15)': vt.filter((t: any) => t.floor >= 6 && t.floor <= 15), '고층(16+)': vt.filter((t: any) => t.floor >= 16) };
-            const ag: Record<string, any[]> = {};
-            vt.forEach((t: any) => { const a = Number(t.exclusive_area); const k = a < 60 ? '소형(~59m²)' : a < 85 ? '중형(60~84)' : '대형(85+)'; if (!ag[k]) ag[k] = []; ag[k].push(t); });
-            const avg = (arr: any[]) => arr.length > 0 ? Math.round(arr.reduce((s: number, t: any) => s + Number(t.deal_amount), 0) / arr.length) : 0;
-            return (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginBottom: 10 }}>
-                <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '8px' }}>
-                  <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 4 }}>층별 평균</div>
-                  {Object.entries(fg).filter(([, a]) => a.length > 0).map(([k, arr]) => (
-                    <div key={k} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--fs-xs)', padding: '2px 0' }}>
-                      <span style={{ color: 'var(--text-tertiary)' }}>{k}</span>
-                      <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{fmtAmount(avg(arr))}</span>
-                    </div>
-                  ))}
-                </div>
-                <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '8px' }}>
-                  <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 4 }}>면적별 평균</div>
-                  {Object.entries(ag).filter(([, a]) => a.length > 0).map(([k, arr]) => (
-                    <div key={k} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--fs-xs)', padding: '2px 0' }}>
-                      <span style={{ color: 'var(--text-tertiary)' }}>{k}</span>
-                      <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{fmtAmount(avg(arr))}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            );
-          })()}
-          <AptPriceTrendChart aptName={name} region={region} />
-          {(() => {
-            const tradeAmts = trades.slice(0, 10).map((t: any) => Number(t.deal_amount));
-            const tradeMax = Math.max(...tradeAmts.filter((a: number) => a > 0), 1);
-            return trades.slice(0, 10).map((t: Record<string, any>, i: number) => (
-              <div key={t.id || i} style={{ display: 'flex', alignItems: 'center', padding: '6px 0', borderBottom: i < Math.min(trades.length, 10) - 1 ? '1px solid var(--border)' : 'none', fontSize: 'var(--fs-sm)', gap: 6 }}>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', gap: 6, marginBottom: 2 }}>
-                    <span style={{ color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)' }}>{t.deal_date}</span>
-                    <span style={{ color: 'var(--text-secondary)', fontSize: 'var(--fs-xs)' }}>{t.exclusive_area}㎡ · {t.floor}층</span>
-                  </div>
-                  <div style={{ height: 4, borderRadius: 4, background: 'var(--bg-hover)', overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${tradeMax > 0 ? (Number(t.deal_amount) / tradeMax) * 100 : 0}%`, borderRadius: 4, background: t.deal_amount >= 100000 ? 'var(--accent-red-bg)' : t.deal_amount >= 50000 ? 'var(--accent-orange-bg)' : 'var(--accent-green-border)' }} />
-                  </div>
-                </div>
-                <span style={{ fontWeight: 700, flexShrink: 0, color: t.deal_amount >= 100000 ? 'var(--accent-red)' : t.deal_amount >= 50000 ? 'var(--accent-orange)' : 'var(--accent-green)', minWidth: 48, textAlign: 'right' }}>{fmtAmount(t.deal_amount)}</span>
-              </div>
-            ));
-          })()}
-          <Link href={`/apt/complex/${encodeURIComponent(name)}`} style={{ display: 'block', textAlign: 'center', marginTop: 10, padding: '8px 0', borderRadius: 'var(--radius-sm)', background: 'var(--brand-bg)', color: 'var(--brand)', fontSize: 'var(--fs-sm)', fontWeight: 600, textDecoration: 'none' }}>전체 실거래 내역 보기 →</Link>
-        </section>
-      )}
-        </DetailSection>
-      )}
-
       {/* V15 B · 커뮤니티 · 관련 글 */}
       {(relatedPosts.length > 0 || relatedBlogs.length > 0) && (
         <DetailSection id="related-section" title="커뮤니티 · 관련 분석">
@@ -2340,6 +2336,10 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
       {relatedBlogs.length > 0 && <section aria-labelledby="apt-sec-h7" className="apt-card"><SectionHeader id="apt-sec-h7" title="관련 분석 블로그" />{relatedBlogs.map((b: Record<string, any>) => <Link key={b.slug} href={`/blog/${b.slug}`} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none', color: 'inherit', fontSize: 'var(--fs-sm)' }}><span style={{ color: 'var(--text-primary)', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.title}</span><span style={{ color: 'var(--text-tertiary)', flexShrink: 0, marginLeft: 8, fontSize: 'var(--fs-xs)' }}>{(b.view_count || 0).toLocaleString()}</span></Link>)}</section>}
         </DetailSection>
       )}
+
+      {/* v10-B5/B8: 알림 6단계와 인근 단지 top3 를 걷어낸 사이드바.
+           280px 컬럼을 없애고 본문 폭으로 편다 — 남은 것은 같은 시공사 링크뿐이다. */}
+      <AptSidebar slug={slug} builder={site?.builder ?? sub?.constructor_nm ?? null} isLoggedIn={isLoggedInApt} />
 
       {/* V15 B · 접이식 점진 향상. open 속성만 건드린다 (콘텐츠는 손대지 않는다).
            히어로가 LCP 라 그 근처가 아니라 여기서 마운트한다. */}
