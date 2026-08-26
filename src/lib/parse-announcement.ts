@@ -29,6 +29,15 @@ export function parseAnnouncementHtml(html: string): Record<string, any> {
   const locMatch = html.match(/공급위치[\s\S]{0,200}?<td[^>]*>([\s\S]*?)<\/td>/i);
   if (locMatch) data.supply_location = strip(locMatch[1]);
   const telMatch = html.match(/tel:([0-9-]+)/i);
+  // ⛔ 전화번호 «렌더 금지» 정책 (2026-08-26 확정).
+  //    추출·저장은 «계속» 한다 — 추출 정확도의 교차 검증 수단이고(표본 5/5 가 DB 와 일치),
+  //    내부 영업용으로도 쓴다. 다만 **어떤 화면에도 내보내지 않는다.** `tel:` 링크도 금지다.
+  //
+  //    왜: ① 전화는 «어디서 왔는지 잴 수 없다». 폼은 n_keyword·UTM 이 붙어
+  //           SA3 계측으로 「광고비가 일하는지」가 판정된다. 잴 수 있는 전환만 남긴다.
+  //        ② 타 현장 분양사무소 번호를 동의 없이 게시하는 것 자체가 조심스럽다.
+  //    대신 상세의 CTA 는 「관심고객 등록」(리드폼)과 「방문예약」이 받는다.
+  //    ⚠️ 2026-08-26 기준 렌더 0곳을 확인했다. 앞으로도 0곳이어야 한다.
   if (telMatch) data.contact_tel = telMatch[1];
 
   // 2. 청약일정
