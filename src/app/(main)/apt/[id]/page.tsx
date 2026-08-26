@@ -1682,7 +1682,7 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
               </div>
             );
           })()}
-          <AptPriceTrendChart aptName={name} region={region} />
+          <AptPriceTrendChart aptName={name} region={region} sigungu={sigungu} />
           {(() => {
             const tradeAmts = trades.slice(0, 10).map((t: any) => Number(t.deal_amount));
             const tradeMax = Math.max(...tradeAmts.filter((a: number) => a > 0), 1);

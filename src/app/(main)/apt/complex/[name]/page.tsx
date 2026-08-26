@@ -921,7 +921,7 @@ export default async function ComplexDetailPage({ params }: Props) {
         <AptNearbyCompare aptName={decoded} sigungu={sigungu} region={region} />
 
         {/* 가격 추이 차트 */}
-        <AptPriceTrendChart aptName={decoded} region={region} />
+        <AptPriceTrendChart aptName={decoded} region={region} sigungu={sigungu} />
 
         {/* 주민 리뷰 */}
         <AptReviewSection aptName={decoded} region={region} />

@@ -10,7 +10,13 @@ function fmtPrice(n: number) {
   return `${n.toLocaleString()}만`;
 }
 
-export default function AptPriceTrendChart({ aptName, region }: { aptName: string; region?: string }) {
+/* ⚠️ `region` 과 `sigungu` 를 «둘 다» 넘긴다.
+ *    RPC 는 이제 이름을 «정확일치» 로 본다(옛 `ILIKE '%…%'` 는 부산 「현대」 차트 하나에
+ *    서로 다른 단지 59곳·13개 시군구·2,311건을 합쳐 넣고 있었다).
+ *    그래도 같은 «정확한» 이름이 여러 시도·시군구에 있다 — `현대` 는 최근 1년 부산에만
+ *    9개 시군구 180건이다. 지역 둘을 다 줘야 한 단지가 된다.
+ *    실측: sigungu 를 더해도 매칭이 줄지 않는다(부울경 기축 631곳 → 631곳). */
+export default function AptPriceTrendChart({ aptName, region, sigungu }: { aptName: string; region?: string; sigungu?: string | null }) {
   const [trend, setTrend] = useState<TrendPoint[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -21,6 +27,7 @@ export default function AptPriceTrendChart({ aptName, region }: { aptName: strin
     setLoading(true);
     const params = new URLSearchParams({ name: aptName });
     if (region) params.set('region', region);
+    if (sigungu) params.set('sigungu', sigungu);
     fetch(`/api/apt/price-trend?${params}`)
       .then(r => r.ok ? r.json() : null)
       .then(d => {
@@ -31,7 +38,7 @@ export default function AptPriceTrendChart({ aptName, region }: { aptName: strin
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [aptName, region]);
+  }, [aptName, region, sigungu]);
 
   if (loading) return <SkeletonChart height={180} />;
   if (!trend.length) return null;
