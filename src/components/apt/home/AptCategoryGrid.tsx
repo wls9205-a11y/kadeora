@@ -38,7 +38,7 @@ export default function AptCategoryGrid({ counts }: Props) {
       <h2
         style={{
           fontSize: 14,
-          fontWeight: 800,
+          fontWeight: 600,
           color: 'var(--text-primary)',
           margin: '0 0 8px',
           padding: '0 4px',
@@ -83,7 +83,7 @@ export default function AptCategoryGrid({ counts }: Props) {
               <span
                 style={{
                   fontSize: 12,
-                  fontWeight: 700,
+                  fontWeight: 600,
                   color: 'var(--text-primary)',
                 }}
               >
@@ -93,7 +93,7 @@ export default function AptCategoryGrid({ counts }: Props) {
                 <span
                   style={{
                     fontSize: 10,
-                    fontWeight: 700,
+                    fontWeight: 500,
                     color: 'var(--text-tertiary)',
                   }}
                 >

@@ -18,7 +18,7 @@ export default function AptMapCTA({ disabled = true }: Props) {
           width: '100%', padding: '14px 16px',
           background: 'var(--bg-surface)',
           border: '1px dashed var(--border)', borderRadius: 12,
-          fontSize: 13, fontWeight: 700,
+          fontSize: 13, fontWeight: 600,
           color: 'var(--text-tertiary)',
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
           cursor: disabled ? 'not-allowed' : 'pointer',
@@ -28,7 +28,7 @@ export default function AptMapCTA({ disabled = true }: Props) {
         <span aria-hidden>🗺</span>
         <span>지도에서 보기</span>
         {disabled && (
-          <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 999, background: 'var(--bg-hover)', color: 'var(--text-tertiary)' }}>
+          <span style={{ fontSize: 10, fontWeight: 500, padding: '2px 8px', borderRadius: 999, background: 'var(--bg-hover)', color: 'var(--text-tertiary)' }}>
             곧 출시
           </span>
         )}

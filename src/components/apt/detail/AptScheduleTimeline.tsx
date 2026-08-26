@@ -66,7 +66,7 @@ export default function AptScheduleTimeline({ specialDate, rank1Date, rank2Date,
               }}
             />
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{s.name}</span>
+              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{s.name}</span>
               <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{s.date ? fmtDate(s.date) : '미정'}</span>
             </div>
           </div>

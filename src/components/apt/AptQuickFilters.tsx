@@ -70,14 +70,14 @@ export default function AptQuickFilters({ filters, topBuilders }: Props) {
         style={{
           display: 'flex', alignItems: 'center', gap: 6,
           padding: '6px 0', background: 'transparent', border: 'none',
-          fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', cursor: 'pointer',
+          fontSize: 12, fontWeight: 500, color: 'var(--text-secondary)', cursor: 'pointer',
         }}
       >
         <span aria-hidden>🔧</span>
         <span>필터</span>
         {hasAny && (
           <span style={{
-            fontSize: 10, fontWeight: 800,
+            fontSize: 10, fontWeight: 500,
             padding: '1px 6px', borderRadius: 999,
             background: 'var(--brand)', color: 'var(--text-inverse)',
           }}>
@@ -91,7 +91,7 @@ export default function AptQuickFilters({ filters, topBuilders }: Props) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, paddingBottom: 8 }}>
           {/* 가격대 */}
           <div>
-            <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-tertiary)', marginBottom: 5, letterSpacing: 1 }}>가격대</div>
+            <div style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-tertiary)', marginBottom: 5, letterSpacing: 1 }}>가격대</div>
             <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
               {PRICE_BANDS.map((b) => (
                 <button
@@ -106,7 +106,7 @@ export default function AptQuickFilters({ filters, topBuilders }: Props) {
 
           {/* 평형 */}
           <div>
-            <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-tertiary)', marginBottom: 5, letterSpacing: 1 }}>평형</div>
+            <div style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-tertiary)', marginBottom: 5, letterSpacing: 1 }}>평형</div>
             <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
               {SIZE_BANDS.map((b) => (
                 <button
@@ -122,7 +122,7 @@ export default function AptQuickFilters({ filters, topBuilders }: Props) {
           {/* 시공사 */}
           {topBuilders && topBuilders.length > 0 && (
             <div>
-              <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-tertiary)', marginBottom: 5, letterSpacing: 1 }}>{filters.region} 주요 시공사</div>
+              <div style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-tertiary)', marginBottom: 5, letterSpacing: 1 }}>{filters.region} 주요 시공사</div>
               <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
                 {topBuilders.slice(0, 5).map((b) => (
                   <button
@@ -146,7 +146,7 @@ export default function AptQuickFilters({ filters, topBuilders }: Props) {
 function pillStyle(active: boolean): React.CSSProperties {
   return {
     padding: '6px 12px', borderRadius: 999,
-    fontSize: 12, fontWeight: 700,
+    fontSize: 12, fontWeight: 500,
     background: active ? 'var(--brand)' : 'var(--bg-hover)',
     color: active ? 'var(--text-inverse)' : 'var(--text-secondary)',
     border: `1px solid ${active ? 'var(--brand)' : 'var(--border)'}`,

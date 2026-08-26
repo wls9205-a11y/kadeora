@@ -25,7 +25,7 @@ export default function ComplexScale({
       padding: '14px 12px',
       marginBottom: 14,
     }}>
-      <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
+      <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
         <span>🏗️</span>
         <span>단지 규모</span>
       </div>
@@ -42,7 +42,7 @@ export default function ComplexScale({
         }}>
           <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 4, letterSpacing: 0.5 }}>단지 전체 총세대수</div>
           {totalHouseholds > 0 ? (
-            <div style={{ fontSize: 'var(--fs-md)', fontWeight: 900, color: 'var(--brand)' }}>
+            <div style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--brand)' }}>
               {totalHouseholds.toLocaleString()}<span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600 }}>세대</span>
             </div>
           ) : (
@@ -60,7 +60,7 @@ export default function ComplexScale({
         }}>
           <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 4, letterSpacing: 0.5 }}>이번 분양 공급세대수</div>
           {supplyUnits > 0 ? (
-            <div style={{ fontSize: 'var(--fs-md)', fontWeight: 900, color: 'var(--accent-green)' }}>
+            <div style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--accent-green)' }}>
               {supplyUnits.toLocaleString()}<span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600 }}>세대</span>
             </div>
           ) : (
@@ -94,30 +94,30 @@ export default function ComplexScale({
           <>
             <div style={{ textAlign: 'center', padding: '6px 0' }}>
               <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 2 }}>일반공급</div>
-              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--text-primary)' }}>{generalSupply > 0 ? generalSupply.toLocaleString() : '-'}</div>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>{generalSupply > 0 ? generalSupply.toLocaleString() : '-'}</div>
             </div>
             <div style={{ textAlign: 'center', padding: '6px 0' }}>
               <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 2 }}>특별공급</div>
-              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--text-primary)' }}>{specialSupply > 0 ? specialSupply.toLocaleString() : '-'}</div>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>{specialSupply > 0 ? specialSupply.toLocaleString() : '-'}</div>
             </div>
           </>
         )}
         {dongCount > 0 && (
           <div style={{ textAlign: 'center', padding: '6px 0' }}>
             <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 2 }}>동수</div>
-            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--text-primary)' }}>{dongCount}개동</div>
+            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>{dongCount}개동</div>
           </div>
         )}
         {maxFloor > 0 && (
           <div style={{ textAlign: 'center', padding: '6px 0' }}>
             <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 2 }}>최고층</div>
-            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--text-primary)' }}>{maxFloor}층</div>
+            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>{maxFloor}층</div>
           </div>
         )}
         {parkingCount > 0 && (
           <div style={{ textAlign: 'center', padding: '6px 0' }}>
             <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 2 }}>주차</div>
-            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--text-primary)' }}>{parkingCount.toLocaleString()}대</div>
+            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>{parkingCount.toLocaleString()}대</div>
           </div>
         )}
       </div>

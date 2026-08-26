@@ -24,7 +24,7 @@ export default function AptImminentBar({ sites }: Props) {
       aria-label="청약 임박 D-7"
       style={{ maxWidth: 720, margin: '12px auto', padding: '0 var(--sp-lg)' }}
     >
-      <h2 style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px' }}>
+      <h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 8px' }}>
         ⏰ 청약 임박 D-7 <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)' }}>· {sites.length}곳</span>
       </h2>
       <div
@@ -53,17 +53,17 @@ export default function AptImminentBar({ sites }: Props) {
                 <span style={{
                   display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                   padding: '4px 10px', borderRadius: 999,
-                  fontSize: 12, fontWeight: 800,
+                  fontSize: 12, fontWeight: 500,
                   background: c.bg, color: c.fg,
                 }}>
                   D-{s.days_until_apply}
                 </span>
                 {s.popularity_score && s.popularity_score !== 100 && (
-                  <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--brand)' }}>★ {s.popularity_score}</span>
+                  <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--brand)' }}>★ {s.popularity_score}</span>
                 )}
               </div>
               <div style={{
-                fontSize: 14, fontWeight: 800, color: 'var(--text-primary)',
+                fontSize: 14, fontWeight: 600, color: 'var(--text-primary)',
                 overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                 lineHeight: 1.3,
               }}>

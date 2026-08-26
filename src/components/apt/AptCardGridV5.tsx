@@ -45,7 +45,7 @@ export default async function AptCardGridV5({ filters, moreHref, perPage = 12 }:
   return (
     <section aria-label="단지 목록" style={{ marginTop: 8 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 4px', marginBottom: 8 }}>
-        <span style={{ fontSize: 11, color: 'var(--text-secondary)', fontWeight: 700 }}>{label} · {rows.length}</span>
+        <span style={{ fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600 }}>{label} · {rows.length}</span>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 6 }}>
         {rows.map((r) => {
@@ -54,10 +54,10 @@ export default async function AptCardGridV5({ filters, moreHref, perPage = 12 }:
           return (
             <Link key={r.slug} href={`/apt/${encodeURIComponent(r.slug)}`} style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden', textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column' }}>
               <div style={{ aspectRatio: '4 / 3', background: `center/cover no-repeat url('${thumb}'), var(--bg-base)`, position: 'relative' }}>
-                {badge && <span style={{ position: 'absolute', top: 5, left: 5, fontSize: 9, padding: '2px 6px', borderRadius: 4, fontWeight: 700, background: badge.bg, color: badge.fg }}>{badge.label}</span>}
+                {badge && <span style={{ position: 'absolute', top: 5, left: 5, fontSize: 9, padding: '2px 6px', borderRadius: 4, fontWeight: 500, background: badge.bg, color: badge.fg }}>{badge.label}</span>}
               </div>
               <div style={{ padding: '7px 9px 9px' }}>
-                <div style={{ fontSize: 12, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.name}</div>
+                <div style={{ fontSize: 12, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.name}</div>
                 <div style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 2 }}>{[r.region, r.sigungu].filter(Boolean).join(' ')}</div>
                 <div style={{ fontSize: 11, fontWeight: 700, marginTop: 3 }}>{priceLabel(r)}</div>
               </div>
@@ -76,7 +76,7 @@ export default async function AptCardGridV5({ filters, moreHref, perPage = 12 }:
               background: 'var(--bg-elevated)',
               color: 'var(--text-primary)',
               fontSize: 12,
-              fontWeight: 700,
+              fontWeight: 500,
               textDecoration: 'none',
             }}
           >

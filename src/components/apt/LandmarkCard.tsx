@@ -52,8 +52,11 @@ export default function LandmarkCard({ row }: { row: LandmarkRow }) {
         <span
           style={{
             position: 'absolute', top: 5, left: 5, fontSize: 9, padding: '2px 6px',
-            borderRadius: 4, fontWeight: 700,
-            background: 'rgba(250,199,117,0.18)', color: '#FAC775',
+            borderRadius: 4, fontWeight: 500,
+            // ⚠️ #FAC775 는 제 18% 틴트 위에서 대비 1.44 였다(썸네일 사진 위 배지라
+            //    밝은 사진에서 최악). TY1-3 의 InterestRegisterHero 와 같은 건이다 —
+            //    기존 토큰 --kd-accent(#7A4F0A)로 6.58. 새 토큰은 만들지 않았다.
+            background: 'rgba(250,199,117,0.18)', color: 'var(--kd-accent)',
           }}
         >
           🏆 랜드마크
@@ -62,7 +65,7 @@ export default function LandmarkCard({ row }: { row: LandmarkRow }) {
           <span
             style={{
               position: 'absolute', bottom: 5, right: 5, fontSize: 10, padding: '2px 6px',
-              borderRadius: 4, fontWeight: 700,
+              borderRadius: 4, fontWeight: 500,
               background: 'rgba(0,0,0,0.55)', color: '#fff',
             }}
           >
@@ -71,7 +74,7 @@ export default function LandmarkCard({ row }: { row: LandmarkRow }) {
         )}
       </div>
       <div style={{ padding: '7px 9px 9px' }}>
-        <div style={{ fontSize: 12, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <div style={{ fontSize: 12, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {row.name}
         </div>
         <div style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 2 }}>
@@ -104,7 +107,7 @@ export default function LandmarkCard({ row }: { row: LandmarkRow }) {
                   padding: '1px 6px',
                   borderRadius: 999,
                   background: 'rgba(250,199,117,0.10)',
-                  color: '#FAC775',
+                  color: 'var(--kd-accent)',   // 위와 같은 건 — 10% 틴트 위 1.49 → 6.14
                   fontWeight: 600,
                 }}
               >

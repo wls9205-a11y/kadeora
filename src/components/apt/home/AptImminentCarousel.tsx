@@ -23,7 +23,7 @@ export default function AptImminentCarousel({ sites }: Props) {
       <h2
         style={{
           fontSize: 14,
-          fontWeight: 800,
+          fontWeight: 600,
           color: 'var(--text-primary)',
           margin: '0 0 8px',
           padding: '0 4px',
@@ -92,7 +92,7 @@ export default function AptImminentCarousel({ sites }: Props) {
                       padding: '3px 8px',
                       borderRadius: 999,
                       fontSize: 10,
-                      fontWeight: 800,
+                      fontWeight: 500,
                       background: ddayBg(dday),
                       color: '#fff',
                     }}
@@ -105,7 +105,7 @@ export default function AptImminentCarousel({ sites }: Props) {
                 <span
                   style={{
                     fontSize: 12,
-                    fontWeight: 800,
+                    fontWeight: 600,
                     color: 'var(--text-primary)',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',

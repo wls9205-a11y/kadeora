@@ -75,7 +75,7 @@ export default function AptCategoryTabs({ current, region, sigungu, countByCateg
                 flexShrink: 0,
                 display: 'inline-flex', alignItems: 'center', gap: 5,
                 padding: '8px 14px', borderRadius: 999,
-                fontSize: 12, fontWeight: active ? 800 : 600,
+                fontSize: 12, fontWeight: active ? 600 : 600,
                 background: active ? 'var(--brand)' : 'var(--bg-hover)',
                 color: active ? 'var(--text-inverse)' : 'var(--text-secondary)',
                 border: `1px solid ${active ? 'var(--brand)' : 'var(--border)'}`,
@@ -87,7 +87,7 @@ export default function AptCategoryTabs({ current, region, sigungu, countByCateg
               <span>{t.label}</span>
               {typeof count === 'number' && count > 0 && (
                 <span style={{
-                  fontSize: 10, fontWeight: 700,
+                  fontSize: 10, fontWeight: 500,
                   padding: '1px 6px', borderRadius: 999,
                   background: active ? 'rgba(255,255,255,0.22)' : 'var(--bg-base)',
                   color: active ? 'var(--text-inverse)' : 'var(--text-tertiary)',

@@ -59,11 +59,11 @@ export default function AptStatsKPI({ region, sigungu, kpis }: Props) {
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
-              <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary)' }}>{c.label}</span>
+              <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-tertiary)' }}>{c.label}</span>
               <span aria-hidden style={{ fontSize: 16 }}>{c.emoji}</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
-              <span style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: -1 }}>
+              <span style={{ fontSize: 24, fontWeight: 700, color: 'var(--text-primary)', letterSpacing: -1 }}>
                 {(c.value || 0).toLocaleString()}
               </span>
               <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)' }}>건</span>

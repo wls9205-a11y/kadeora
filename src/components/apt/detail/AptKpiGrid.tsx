@@ -50,7 +50,7 @@ export default function AptKpiGrid({ priceMin, priceMax, totalUnits, moveInDate,
         c.value ? (
           <div key={i} className="apt-kpi-card" style={{ padding: '12px 14px', borderRadius: 'var(--radius-md)', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
             <div style={{ fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 600, marginBottom: 4 }}>{c.label}</div>
-            <div className="apt-kpi-number" style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.2 }}>{c.value}</div>
+            <div className="apt-kpi-number" style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.2 }}>{c.value}</div>
           </div>
         ) : null
       ))}

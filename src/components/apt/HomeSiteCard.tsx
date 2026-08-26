@@ -72,7 +72,7 @@ export default function HomeSiteCard({ row, variant = 'popular' }: Props) {
         <span
           style={{
             position: 'absolute', top: 5, left: 5, fontSize: 9, padding: '2px 6px',
-            borderRadius: 4, fontWeight: 700, background: badge.bg, color: badge.fg,
+            borderRadius: 4, fontWeight: 500, background: badge.bg, color: badge.fg,
           }}
         >
           {badge.label}
@@ -81,8 +81,10 @@ export default function HomeSiteCard({ row, variant = 'popular' }: Props) {
           <span
             style={{
               position: 'absolute', bottom: 5, right: 5, fontSize: 11, padding: '2px 7px',
-              borderRadius: 4, fontWeight: 800,
-              background: 'rgba(239,68,68,0.92)', color: '#fff',
+              borderRadius: 4, fontWeight: 500,
+              // ⚠️ rgba(239,68,68,.92) 위 흰 글씨는 3.46 — 사진 위 가격 배지라 하한 미달이었다.
+                      //    기존 토큰 --accent-red(#991B1B)로 8.31. 새 토큰은 만들지 않았다.
+                      background: 'var(--accent-red)', color: '#fff',
             }}
           >
             {price}
@@ -90,14 +92,14 @@ export default function HomeSiteCard({ row, variant = 'popular' }: Props) {
         )}
       </div>
       <div style={{ padding: '7px 9px 9px' }}>
-        <div style={{ fontSize: 12, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <div style={{ fontSize: 12, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {row.name}
         </div>
         <div style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 2 }}>
           {[row.region, row.sigungu].filter(Boolean).join(' ')}
         </div>
         {variant === 'popular' && (
-          <div style={{ fontSize: 11, fontWeight: 700, marginTop: 3 }}>
+          <div style={{ fontSize: 11, fontWeight: 600, marginTop: 3 }}>
             {price ?? (row.page_views ? `조회 ${row.page_views.toLocaleString()}` : '-')}
           </div>
         )}

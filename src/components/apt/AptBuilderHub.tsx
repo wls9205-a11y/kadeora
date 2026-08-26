@@ -38,7 +38,7 @@ export default function AptBuilderHub(props: Props) {
       aria-label="시공사 hub"
       style={{ maxWidth: 720, margin: '12px auto', padding: '0 var(--sp-lg)' }}
     >
-      <h2 style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px' }}>
+      <h2 style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 8px' }}>
         🏗️ {label === '전국' ? '주요 시공사' : `${label} 주요 시공사`}{' '}
         <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)' }}>· {builders.length}개</span>
       </h2>
@@ -67,14 +67,14 @@ export default function AptBuilderHub(props: Props) {
                 transition: 'transform 100ms ease, box-shadow 100ms ease',
               }}
             >
-              <span style={{ fontSize: 13, fontWeight: 800, color: active ? 'var(--text-inverse)' : 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: active ? 'var(--text-inverse)' : 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {shortBuilder(b.builder)}
               </span>
               <span style={{ fontSize: 11, color: active ? 'rgba(255,255,255,0.85)' : 'var(--text-tertiary)' }}>
                 {region === '전국' ? '' : `${region} `}{b.site_count}건
               </span>
               {b.avg_popularity > 0 && (
-                <span style={{ fontSize: 10, fontWeight: 700, color: active ? 'rgba(255,255,255,0.9)' : 'var(--brand)' }}>
+                <span style={{ fontSize: 10, fontWeight: 500, color: active ? 'rgba(255,255,255,0.9)' : 'var(--brand)' }}>
                   ⭐ 평균 {b.avg_popularity}
                 </span>
               )}

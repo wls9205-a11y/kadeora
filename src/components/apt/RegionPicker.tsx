@@ -158,7 +158,7 @@ export default function RegionPicker({ open, onClose, initialRegion }: Props) {
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           padding: '14px 16px', borderBottom: '1px solid var(--border)',
         }}>
-          <span style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)' }}>지역 선택</span>
+          <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)' }}>지역 선택</span>
           <button
             onClick={onClose}
             aria-label="닫기"
@@ -246,7 +246,7 @@ export default function RegionPicker({ open, onClose, initialRegion }: Props) {
                     onClick={() => setActiveRegion(sido)}
                     style={tileStyle()}
                   >
-                    <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{sido}</span>
+                    <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>{sido}</span>
                     <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{cnt.toLocaleString()}</span>
                   </button>
                 );
@@ -294,7 +294,7 @@ export default function RegionPicker({ open, onClose, initialRegion }: Props) {
 function pillStyle(): React.CSSProperties {
   return {
     padding: '9px 14px', borderRadius: 999,
-    fontSize: 13, fontWeight: 700,
+    fontSize: 13, fontWeight: 500,
     background: 'var(--bg-hover)', color: 'var(--text-secondary)',
     border: '1px solid var(--border)', cursor: 'pointer',
   };

@@ -25,7 +25,7 @@ export default function AptRealtimeRanking({ sites }: Props) {
       <h2
         style={{
           fontSize: 14,
-          fontWeight: 800,
+          fontWeight: 600,
           color: 'var(--text-primary)',
           margin: '0 0 8px',
           padding: '0 4px',
@@ -85,7 +85,7 @@ export default function AptRealtimeRanking({ sites }: Props) {
                     flexShrink: 0,
                     width: 22,
                     fontSize: 16,
-                    fontWeight: 900,
+                    fontWeight: 600,
                     color: i < 3 ? 'var(--brand)' : 'var(--text-tertiary)',
                     textAlign: 'center',
                     letterSpacing: -0.5,
@@ -113,7 +113,7 @@ export default function AptRealtimeRanking({ sites }: Props) {
                   <span
                     style={{
                       fontSize: 13,
-                      fontWeight: 800,
+                      fontWeight: 600,
                       color: 'var(--text-primary)',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
@@ -139,7 +139,7 @@ export default function AptRealtimeRanking({ sites }: Props) {
                     <span
                       style={{
                         fontSize: 10,
-                        fontWeight: 800,
+                        fontWeight: 500,
                         padding: '2px 6px',
                         borderRadius: 999,
                         background: 'rgba(220,38,38,0.15)',
@@ -150,7 +150,7 @@ export default function AptRealtimeRanking({ sites }: Props) {
                     </span>
                   )}
                   {change && (
-                    <span style={{ fontSize: 10, fontWeight: 800, color: change.color }}>
+                    <span style={{ fontSize: 10, fontWeight: 600, color: change.color }}>
                       {change.label}
                     </span>
                   )}
@@ -158,7 +158,7 @@ export default function AptRealtimeRanking({ sites }: Props) {
                     <span
                       style={{
                         fontSize: 11,
-                        fontWeight: 800,
+                        fontWeight: 500,
                         color: 'var(--brand)',
                       }}
                     >

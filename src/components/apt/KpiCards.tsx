@@ -41,7 +41,7 @@ export default function KpiCards({ cards }: { cards: KpiCard[] }) {
             </span>
           )}
           <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 2 }}>{s.l}</div>
-          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: s.c, lineHeight: 1.2, whiteSpace: 'pre-line' }}>{s.v}</div>
+          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: s.c, lineHeight: 1.2, whiteSpace: 'pre-line' }}>{s.v}</div>
           {s.sub && <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2, lineHeight: 1.3, whiteSpace: 'pre-line' }}>{s.sub}</div>}
           {s.bar > 0 && (
             <div style={{ height: 3, borderRadius: 2, background: 'var(--bg-hover)', marginTop: 'var(--sp-xs)', overflow: 'hidden' }}>

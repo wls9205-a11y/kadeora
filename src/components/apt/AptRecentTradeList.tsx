@@ -35,7 +35,7 @@ export default function AptRecentTradeList({ region, sigungu, trades }: Props) {
       aria-label="최근 실거래"
       style={{ maxWidth: 720, margin: '12px auto', padding: '0 var(--sp-lg)' }}
     >
-      <h2 style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px' }}>
+      <h2 style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 8px' }}>
         📊 {label} 최근 실거래 <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)' }}>· {trades.length}건</span>
       </h2>
       <div style={{
@@ -55,7 +55,7 @@ export default function AptRecentTradeList({ region, sigungu, trades }: Props) {
             }}
           >
             <div style={{ minWidth: 0 }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {t.apt_name}
               </div>
               <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}>
@@ -64,7 +64,7 @@ export default function AptRecentTradeList({ region, sigungu, trades }: Props) {
               </div>
             </div>
             <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)' }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>
                 {fmtAmount(t.deal_amount)}
               </div>
               <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}>

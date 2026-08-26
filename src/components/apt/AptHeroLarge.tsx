@@ -58,7 +58,7 @@ export default function AptHeroLarge({ site, region, sigungu }: Props) {
                 <span style={{
                   position: 'absolute', top: 10, right: 10, zIndex: 3,
                   padding: '3px 8px', borderRadius: 6,
-                  fontSize: 10, fontWeight: 700,
+                  fontSize: 10, fontWeight: 500,
                   background: 'rgba(0,0,0,0.55)', color: 'rgba(255,255,255,0.92)',
                   backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)',
                 }}>
@@ -74,7 +74,7 @@ export default function AptHeroLarge({ site, region, sigungu }: Props) {
           <span style={{
             position: 'absolute', top: 10, left: 10,
             padding: '4px 10px', borderRadius: 999,
-            fontSize: 10, fontWeight: 800,
+            fontSize: 10, fontWeight: 500,
             background: 'rgba(0,0,0,0.55)', color: '#fff',
             backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)',
           }}>
@@ -86,7 +86,7 @@ export default function AptHeroLarge({ site, region, sigungu }: Props) {
             <span style={{
               position: 'absolute', top: 10, right: 10,
               padding: '4px 10px', borderRadius: 999,
-              fontSize: 10, fontWeight: 700,
+              fontSize: 10, fontWeight: 500,
               background: 'var(--brand)', color: 'var(--text-inverse)',
             }}>
               {caption}
@@ -107,7 +107,7 @@ export default function AptHeroLarge({ site, region, sigungu }: Props) {
             color: '#fff',
           }}>
             <h2 style={{
-              margin: 0, fontSize: 20, fontWeight: 900, letterSpacing: -0.5, lineHeight: 1.25,
+              margin: 0, fontSize: 20, fontWeight: 700, letterSpacing: -0.5, lineHeight: 1.25,
               textShadow: '0 1px 2px rgba(0,0,0,0.4)',
               overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
             }}>
@@ -155,10 +155,10 @@ function kpiCellStyle(): React.CSSProperties {
 }
 function kpiValueStyle(): React.CSSProperties {
   return {
-    fontSize: 14, fontWeight: 800, color: 'var(--text-primary)',
+    fontSize: 14, fontWeight: 700, color: 'var(--text-primary)',
     overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%',
   };
 }
 function kpiLabelStyle(): React.CSSProperties {
-  return { fontSize: 10, fontWeight: 700, color: 'var(--text-tertiary)', letterSpacing: 1 };
+  return { fontSize: 10, fontWeight: 500, color: 'var(--text-tertiary)', letterSpacing: 1 };
 }

@@ -47,7 +47,7 @@ export default function AptHomeHero({ region, sigungu, kpis }: Props) {
             color: 'var(--text-primary)',
             textDecoration: 'none',
             fontSize: 12,
-            fontWeight: 700,
+            fontWeight: 500,
           }}
         >
           <span aria-hidden>📍</span>
@@ -60,7 +60,7 @@ export default function AptHomeHero({ region, sigungu, kpis }: Props) {
         <span
           style={{
             fontSize: 13,
-            fontWeight: 700,
+            fontWeight: 500,
             color: 'var(--text-tertiary)',
             letterSpacing: 0.3,
           }}
@@ -72,7 +72,7 @@ export default function AptHomeHero({ region, sigungu, kpis }: Props) {
             <span
               style={{
                 fontSize: 36,
-                fontWeight: 900,
+                fontWeight: 700,
                 color: 'var(--text-primary)',
                 letterSpacing: -1.5,
                 lineHeight: 1,
@@ -83,7 +83,7 @@ export default function AptHomeHero({ region, sigungu, kpis }: Props) {
             <span
               style={{
                 fontSize: 16,
-                fontWeight: 800,
+                fontWeight: 500,
                 color: 'var(--text-secondary)',
               }}
             >
@@ -94,7 +94,7 @@ export default function AptHomeHero({ region, sigungu, kpis }: Props) {
           <span
             style={{
               fontSize: 22,
-              fontWeight: 800,
+              fontWeight: 700,
               color: 'var(--text-primary)',
               letterSpacing: -0.5,
             }}

@@ -81,7 +81,7 @@ export default function AptCommentSection({ slug, siteName }: { slug: string; si
 
   return (
     <div className="apt-card" id="comment-section" style={{ scrollMarginTop: 60 }}>
-      <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
+      <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
         💬 댓글 <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--accent-blue)', fontWeight: 600 }}>{top.length}</span>
       </h2>
 
@@ -106,7 +106,7 @@ export default function AptCommentSection({ slug, siteName }: { slug: string; si
             style={{
               padding: '9px 16px', borderRadius: 'var(--radius-sm)', border: 'none',
               background: 'var(--brand)', color: '#fff', fontSize: 'var(--fs-xs)',
-              fontWeight: 700, cursor: submitting ? 'wait' : 'pointer',
+              fontWeight: 500, cursor: submitting ? 'wait' : 'pointer',
               opacity: submitting || input.trim().length < 2 ? 0.5 : 1,
             }}
           >등록</button>
