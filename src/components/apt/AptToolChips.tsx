@@ -8,6 +8,9 @@ const TOOLS = [
   { href: '/apt/diagnose#score', label: '가점 계산기', icon: '🧮', desc: '청약 가점 계산' },
   { href: '/apt/map', label: '지도', icon: '🗺️', desc: '위치로 찾기' },
   { href: '/apt/compare', label: '단지 비교', icon: '⚖️', desc: '조건 비교' },
+  // F1: big-events(청약 캘린더)가 만들어져 있는데 /apt 에서 갈 길이 없었다.
+  //     새 화면을 만드는 게 아니라 «이미 있는 것을 잇는» 작업이다.
+  { href: '/apt/big-events', label: '청약 캘린더', icon: '📅', desc: '이번 달 일정' },
 ] as const;
 
 type Props = {

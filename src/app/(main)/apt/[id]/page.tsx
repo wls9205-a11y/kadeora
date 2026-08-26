@@ -1599,6 +1599,18 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
             <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>출처: 단지백과 · 국토교통부 실거래가 공개시스템</div>
             <SectionShareButton section="apt-price-compare" label={`${name} vs ${sigungu || region} 아파트 시세 비교`} pagePath={`/apt/${slug}`} />
           </div>
+          {/* F1: 이미 만들어 둔 /apt/compare 로 가는 진입점. 이 표에 이름이 있는데
+              비교 페이지로 갈 길이 없었다. 첫 후보 하나만 건다 — 목록을 늘리면
+              색인 대상 조합이 늘어난다(R11: 필터 조합 URL 색인 제외 원칙과 같은 맥락). */}
+          {complexProfiles[0]?.apt_name && complexProfiles[0].apt_name !== name && (
+            <Link
+              href={`/apt/compare/${encodeURIComponent(`${name}-vs-${complexProfiles[0].apt_name}`)}`}
+              style={{ display: 'inline-block', marginTop: 8, fontSize: 'var(--fs-xs)',
+                       fontWeight: 500, color: 'var(--brand)', textDecoration: 'none' }}
+            >
+              {name} vs {complexProfiles[0].apt_name} 자세히 비교 →
+            </Link>
+          )}
         </section>
         );
       })()
