@@ -597,7 +597,11 @@ html.font-large {
   --stock-flat:         #757575;
   --stock-flat-bg:      rgba(117,117,117,0.06);
   /* Investor colors */
-  --stock-foreign:      #E65100;
+  /* ⚠️ #E65100 은 흰 배경 대비 3.79 로 하한 미달이었다 — 이 값은 «본문 글자색» 으로도 쓰인다
+     (StockDetailTabs 340행 범례 · 358행 수급 금액). 형제 둘은 이미 어둡다 —
+     --stock-inst #7B1FA2(8.20) · --stock-retail #00838F(4.52). 이것만 밝았다.
+     색상(H)·채도(S)는 두고 명도만 낮춰 4.82. 새 토큰(-strong)은 만들지 않았다. */
+  --stock-foreign:      #C84700;
   --stock-foreign-bg:   rgba(230,81,0,0.06);
   --stock-inst:         #7B1FA2;
   --stock-inst-bg:      rgba(123,31,162,0.06);

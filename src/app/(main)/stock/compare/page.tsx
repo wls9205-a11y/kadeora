@@ -44,7 +44,7 @@ export default async function StockComparePage() {
 
         {/* SSR 종목 목록 — 크롤러용 (JS 없이도 콘텐츠 노출) */}
         <noscript>
-          <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 8 }}>시가총액 상위 20 종목</h2>
+          <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 8 }}>시가총액 상위 20 종목</h2>
           <table style={{ width: '100%', fontSize: 13, borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border)' }}>

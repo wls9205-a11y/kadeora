@@ -45,7 +45,7 @@ export default async function MoversPage() {
     .sort((a: any, b: any) => Number(a.price) / Number(a.low_52w) - Number(b.price) / Number(b.low_52w))
     .slice(0, 15);
 
-  const ct = { fontSize: 14, fontWeight: 700 as const, color: 'var(--text-primary)', margin: '24px 0 12px' };
+  const ct = { fontSize: 14, fontWeight: 600 as const, color: 'var(--text-primary)', margin: '24px 0 12px' };
   const renderList = (stocks: any[], showPct = true, showVol = false) => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       {(stocks ?? []).map((s: any, i: number) => {
@@ -53,7 +53,7 @@ export default async function MoversPage() {
         const isUp = pct > 0;
         return (
           <Link key={s.symbol} href={`/stock/${s.symbol}`} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', textDecoration: 'none', color: 'inherit', borderRadius: 'var(--radius-xs)', background: i % 2 === 0 ? 'var(--bg-base)' : 'var(--bg-surface)' }}>
-            <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-tertiary)', minWidth: 24 }}>{i + 1}</span>
+            <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-tertiary)', minWidth: 24 }}>{i + 1}</span>
             <span style={{ flex: 1, fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</span>
             <span style={{ fontSize: 12, color: 'var(--text-secondary)', minWidth: 70, textAlign: 'right' }}>{fmtPrice(s.price, s.currency)}</span>
             {showPct && <span style={{ fontSize: 12, fontWeight: 700, minWidth: 60, textAlign: 'right', color: stockColor(pct, isKRMarket(s.market, s.currency)) }}>{isUp ? '+' : ''}{pct.toFixed(2)}%</span>}
@@ -79,7 +79,7 @@ export default async function MoversPage() {
       </nav>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebPage', name: TITLE, url: `${SITE_URL}/stock/movers`, speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', 'section'] } }) }} />
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-        <h1 style={{ fontSize: 'clamp(22px, 5vw, 28px)', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>🔥 급등락 종목</h1>
+        <h1 style={{ fontSize: 'clamp(22px, 5vw, 28px)', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>🔥 급등락 종목</h1>
         <ShareButtons title={TITLE} contentType="stock-page" contentRef="movers" />
       </div>
       <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 20 }}>KOSPI·KOSDAQ 등락률·거래량·52주 신고가/신저가 실시간 업데이트</p>
@@ -107,7 +107,7 @@ export default async function MoversPage() {
         const topL = (losers ?? []).slice(0, 3);
         return (
           <section style={{ marginTop: 24, padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', lineHeight: 1.8, fontSize: 14, color: 'var(--text-secondary)' }}>
-            <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>오늘의 시장 동향</h2>
+            <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 8 }}>오늘의 시장 동향</h2>
             <p>오늘 국내 증시에서 가장 큰 상승률을 보인 종목은 <strong style={{ color: 'var(--accent-red)' }}>{topG[0]?.name}</strong>(+{topG[0]?.change_pct?.toFixed(2)}%)입니다.
             {topG[1]?.name}(+{topG[1]?.change_pct?.toFixed(2)}%), {topG[2]?.name}(+{topG[2]?.change_pct?.toFixed(2)}%)도 강세를 보이고 있습니다.</p>
             <p style={{ marginTop: 8 }}>반면 하락 종목 중에서는 <strong style={{ color: 'var(--accent-blue)' }}>{topL[0]?.name}</strong>({topL[0]?.change_pct?.toFixed(2)}%)이 가장 큰 낙폭을 기록했습니다.

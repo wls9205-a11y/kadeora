@@ -54,7 +54,7 @@ export default async function StockComparePage({ params }: Props) {
   return (
     <article style={{ maxWidth: 720, margin: '0 auto', padding: '16px var(--sp-lg)' }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '주식', item: `${SITE_URL}/stock` }, { '@type': 'ListItem', position: 3, name: `${a.name} vs ${b.name}` }] }) }} />
-      <h1 style={{ fontSize: 'clamp(20px, 5vw, 28px)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 8 }}>{a.name} vs {b.name}</h1>
+      <h1 style={{ fontSize: 'clamp(20px, 5vw, 28px)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 8 }}>{a.name} vs {b.name}</h1>
       <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 16 }}>두 종목의 핵심 투자 지표를 한눈에 비교합니다.</p>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16 }}>
         <figure style={{ margin: 0, borderRadius: 'var(--radius-sm)', overflow: 'hidden', border: '1px solid var(--border)' }}>
@@ -65,7 +65,7 @@ export default async function StockComparePage({ params }: Props) {
         </figure>
       </div>
       <div style={{ borderRadius: 'var(--radius-card)', overflow: 'hidden', border: '1px solid var(--border)' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', background: 'var(--bg-surface)', fontWeight: 700, fontSize: 'var(--fs-sm)' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', background: 'var(--bg-surface)', fontWeight: 500, fontSize: 'var(--fs-sm)' }}>
           <div style={{ ...cs, color: 'var(--text-secondary)' }}>항목</div>
           <div style={{ ...cs, textAlign: 'center' }}><Link href={`/stock/${a.symbol}`} style={{ color: 'var(--brand)', textDecoration: 'none' }}>{a.name}</Link></div>
           <div style={{ ...cs, textAlign: 'center' }}><Link href={`/stock/${b.symbol}`} style={{ color: 'var(--brand)', textDecoration: 'none' }}>{b.name}</Link></div>

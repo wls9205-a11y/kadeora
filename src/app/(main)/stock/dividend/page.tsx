@@ -35,7 +35,7 @@ export default async function DividendPage() {
     .gt('dividend_yield', 0).gt('price', 0)
     .order('dividend_yield', { ascending: false }).limit(30);
 
-  const ct = { fontSize: 14, fontWeight: 700 as const, color: 'var(--text-primary)', margin: '24px 0 12px' };
+  const ct = { fontSize: 14, fontWeight: 600 as const, color: 'var(--text-primary)', margin: '24px 0 12px' };
   const th = { padding: '8px 10px', fontSize: 11, fontWeight: 600 as const, color: 'var(--text-tertiary)', borderBottom: '2px solid var(--border)', textAlign: 'left' as const };
   const td = { padding: '8px 10px', fontSize: 12, borderBottom: '1px solid var(--border)', color: 'var(--text-primary)' };
 
@@ -81,7 +81,7 @@ export default async function DividendPage() {
         <ShareButtons title={TITLE} contentType="stock-page" contentRef="dividend" />
       </div>
 
-      <h1 style={{ fontSize: 'clamp(22px, 5vw, 30px)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 8 }}>📊 고배당주 순위 2026</h1>
+      <h1 style={{ fontSize: 'clamp(22px, 5vw, 30px)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 8 }}>📊 고배당주 순위 2026</h1>
       <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 24, lineHeight: 1.7 }}>
         배당수익률이 높은 종목을 국내·해외로 나누어 정리합니다. 배당수익률은 최근 연간 배당금 기준이며, 투자 판단은 배당 지속성과 재무 건전성을 함께 고려해야 합니다.
       </p>
@@ -100,7 +100,7 @@ export default async function DividendPage() {
         const sectors = [...new Set((krStocks ?? []).map((s: any) => s.sector).filter(Boolean))].slice(0, 5);
         return (
           <section style={{ marginTop: 24, padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', lineHeight: 1.8, fontSize: 14, color: 'var(--text-secondary)' }}>
-            <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>배당주 시장 분석</h2>
+            <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 8 }}>배당주 시장 분석</h2>
             <p>현재 국내 고배당주 1위는 <strong style={{ color: 'var(--text-primary)' }}>{top3[0]?.name}</strong>으로 배당수익률 {top3[0]?.dividend_yield?.toFixed(2)}%를 기록하고 있습니다.
             2위 {top3[1]?.name}({top3[1]?.dividend_yield?.toFixed(2)}%), 3위 {top3[2]?.name}({top3[2]?.dividend_yield?.toFixed(2)}%)가 뒤를 잇고 있습니다.</p>
             <p style={{ marginTop: 8 }}>상위 {(krStocks ?? []).length}개 종목의 평균 배당수익률은 <strong style={{ color: 'var(--text-primary)' }}>{avgYield}%</strong>이며, 주요 업종은 {sectors.join(', ')} 등으로 분포되어 있습니다.

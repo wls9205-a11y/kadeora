@@ -45,7 +45,7 @@ export default async function BlogSeriesPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: [{ '@type': 'Question', name: '카더라 블로그 시리즈란?', acceptedAnswer: { '@type': 'Answer', text: '카더라 블로그 시리즈는 주식, 부동산, 재테크 등 특정 주제를 여러 편에 걸쳐 심층 분석하는 연재 콘텐츠입니다. 순서대로 읽으면 해당 분야를 체계적으로 이해할 수 있습니다.' } }] }) }} />
       <div style={{ marginBottom: 'var(--sp-xl)' }}>
         <Link href="/blog" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 블로그</Link>
-        <h1 style={{ margin: '8px 0 0', fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>📚 시리즈</h1>
+        <h1 style={{ margin: '8px 0 0', fontSize: 'var(--fs-xl)', fontWeight: 600, color: 'var(--text-primary)' }}>📚 시리즈</h1>
         <p style={{ margin: '4px 0 0', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>주제별로 묶어서 읽는 연재 콘텐츠</p>
         <div style={{ marginTop: 8 }}><ShareButtons title="카더라 블로그 시리즈 — 주제별 연재 콘텐츠" contentType="page" contentRef="blog-series" /></div>
       </div>
@@ -71,7 +71,7 @@ export default async function BlogSeriesPage() {
                   {s.category === 'stock' ? '📈' : s.category === 'apt' ? '🏢' : s.category === 'finance' ? '💰' : '📝'}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <h2 style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', margin: 0, lineHeight: 1.3 }}>{s.title}</h2>
+                  <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', margin: 0, lineHeight: 1.3 }}>{s.title}</h2>
                   {s.description && <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '2px 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.description}</p>}
                 </div>
                 <div style={{ position: 'absolute', top: 10, right: 14, fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 'var(--radius-xl)', background: `${catColor}20`, color: catColor, border: `1px solid ${catColor}40` }}>

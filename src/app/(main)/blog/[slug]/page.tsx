@@ -957,14 +957,14 @@ export default async function BlogDetailPage({ params }: Props) {
         <div style={{ marginBottom: 20 }}>
           {/* 카테고리 배지 */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 14 }}>
-            <span style={{ fontSize: 11, fontWeight: 700, padding: '4px 12px', borderRadius: 'var(--radius-xl)', background: catStyle.bg, color: catStyle.color, letterSpacing: '0.3px' }}>
+            <span style={{ fontSize: 11, fontWeight: 500, padding: '4px 12px', borderRadius: 'var(--radius-xl)', background: catStyle.bg, color: catStyle.color, letterSpacing: '0.3px' }}>
               {({ stock: '주식 분석', apt: '청약 분석', unsold: '미분양 분석', finance: '재테크', general: '생활' } as Record<string, string>)[post.category] || post.category}
             </span>
-            {(post.view_count ?? 0) >= 100 && <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 'var(--radius-xl)', background: 'var(--error-bg)', color: 'var(--error)' }}>인기</span>}
-            {post.rewritten_at && <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 'var(--radius-xl)', background: 'var(--success-bg)', color: 'var(--success)' }}>UP</span>}
+            {(post.view_count ?? 0) >= 100 && <span style={{ fontSize: 10, fontWeight: 500, padding: '3px 8px', borderRadius: 'var(--radius-xl)', background: 'var(--error-bg)', color: 'var(--error)' }}>인기</span>}
+            {post.rewritten_at && <span style={{ fontSize: 10, fontWeight: 500, padding: '3px 8px', borderRadius: 'var(--radius-xl)', background: 'var(--success-bg)', color: 'var(--success)' }}>UP</span>}
           </div>
           {/* 제목 */}
-          <h1 style={{ fontSize: 'var(--fs-2xl)', fontWeight: 900, color: 'var(--text-primary)', lineHeight: 1.5, margin: '0 0 10px', wordBreak: 'keep-all', letterSpacing: '-0.5px' }}>{post.title}</h1>
+          <h1 style={{ fontSize: 'var(--fs-2xl)', fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.5, margin: '0 0 10px', wordBreak: 'keep-all', letterSpacing: '-0.5px' }}>{post.title}</h1>
           {/* s213: H1 직후 컴팩트 메타 한 줄 — 큰 저자 카드 / TLDR / key_points / 태그 pills 모두 본문 종료 후 "이 글 정보" 섹션으로 이동.
               독자가 페이지 열자마자 본문 첫 문단까지 스크롤이 짧아짐. */}
           <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 10, fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 16 }}>
@@ -989,7 +989,7 @@ export default async function BlogDetailPage({ params }: Props) {
               background: 'var(--bg-surface)', border: '1px solid var(--border)',
             }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-                <Link href={`/blog/series/${seriesInfo.series.slug}`} style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--brand)', textDecoration: 'none' }}>
+                <Link href={`/blog/series/${seriesInfo.series.slug}`} style={{ fontSize: 'var(--fs-sm)', fontWeight: 500, color: 'var(--brand)', textDecoration: 'none' }}>
                   📚 {seriesInfo.series.title}
                 </Link>
                 <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 600 }}>
@@ -1101,7 +1101,7 @@ export default async function BlogDetailPage({ params }: Props) {
             }}>
               <span style={{ fontSize: 20 }}>🏢</span>
               <div>
-                <div style={{ fontSize: 13, fontWeight: 700 }}>청약 일정 보기</div>
+                <div style={{ fontSize: 13, fontWeight: 600 }}>청약 일정 보기</div>
                 <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>접수중·예정 전체</div>
               </div>
             </a>
@@ -1113,7 +1113,7 @@ export default async function BlogDetailPage({ params }: Props) {
             }}>
               <span style={{ fontSize: 20 }}>🎯</span>
               <div>
-                <div style={{ fontSize: 13, fontWeight: 700 }}>청약 가점 계산</div>
+                <div style={{ fontSize: 13, fontWeight: 600 }}>청약 가점 계산</div>
                 <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>내 당첨 확률은?</div>
               </div>
             </a>
@@ -1125,7 +1125,7 @@ export default async function BlogDetailPage({ params }: Props) {
             }}>
               <span style={{ fontSize: 20 }}>🧮</span>
               <div>
-                <div style={{ fontSize: 13, fontWeight: 700 }}>중개수수료 계산</div>
+                <div style={{ fontSize: 13, fontWeight: 600 }}>중개수수료 계산</div>
                 <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>매매·전세 복비</div>
               </div>
             </a>
@@ -1137,7 +1137,7 @@ export default async function BlogDetailPage({ params }: Props) {
           <section aria-labelledby="blog-sec-faq" style={{ marginTop: 'var(--sp-xl)' }}>
             <h2
               id="blog-sec-faq"
-              style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 var(--sp-sm)' }}
+              style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 var(--sp-sm)' }}
             >
               자주 묻는 질문
             </h2>
@@ -1155,12 +1155,12 @@ export default async function BlogDetailPage({ params }: Props) {
           borderRadius: 'var(--radius-md)', border: '1px dashed rgba(52,211,153,0.15)',
         }}>
           <span style={{ fontSize: 16, marginRight: 6 }}>🎉</span>
-          <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>약 {readingTimeMin}분 읽기 완료</span>
+          <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-primary)' }}>약 {readingTimeMin}분 읽기 완료</span>
           {related.length > 0 && (
             <Link href={`/blog/${related[0].slug}`} style={{
               display: 'inline-block', marginLeft: 8, padding: '4px 12px', borderRadius: 4,
               background: 'var(--brand)', color: '#fff', fontSize: 11,
-              fontWeight: 700, textDecoration: 'none',
+              fontWeight: 500, textDecoration: 'none',
             }}>
               다음 → {related[0].title?.slice(0, 25)}...
             </Link>
@@ -1171,7 +1171,7 @@ export default async function BlogDetailPage({ params }: Props) {
         {/* s213: 요약 보충 자료 — TLDR + 핵심 요약. 본문 위에서 끝으로 이동, default 접힘. */}
         {((post as any).tldr || (Array.isArray((post as any).key_points) && (post as any).key_points.length > 0)) && (
           <details style={{ marginTop: 'var(--sp-md)', padding: '10px 14px', borderRadius: 'var(--radius-md)', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
-            <summary style={{ cursor: 'pointer', fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', listStyle: 'none' }}>
+            <summary style={{ cursor: 'pointer', fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', listStyle: 'none' }}>
               📝 요약 보충 자료 (TLDR · 핵심 요약)
             </summary>
             <div style={{ marginTop: 12 }}>
@@ -1203,7 +1203,7 @@ export default async function BlogDetailPage({ params }: Props) {
                 width: 24, height: 24, borderRadius: '50%',
                 background: 'var(--brand-bg)', color: 'var(--brand)',
                 display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 11, fontWeight: 700, flexShrink: 0,
+                fontSize: 11, fontWeight: 500, flexShrink: 0,
               }}>{(post.author_name || '카더라').charAt(0)}</span>
               <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{post.author_name || '카더라 부동산팀'}</span>
               {post.author_role && <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>· {post.author_role}</span>}
@@ -1237,7 +1237,7 @@ export default async function BlogDetailPage({ params }: Props) {
           if (items.length === 0) return null;
           return (
             <section aria-labelledby="blog-sec-refs" style={{ marginTop: 'var(--sp-xl)', padding: 'var(--sp-md) var(--card-p)', borderRadius: 'var(--radius-md)', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
-              <h2 id="blog-sec-refs" style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 var(--sp-sm)' }}>참고자료</h2>
+              <h2 id="blog-sec-refs" style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 var(--sp-sm)' }}>참고자료</h2>
               <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.8 }}>
                 {items.map((r: { label: string; url: string }, i: number) => (
                   <li key={i}>
@@ -1280,7 +1280,7 @@ export default async function BlogDetailPage({ params }: Props) {
       <div id="blog-comments" style={{ marginBottom: 'var(--sp-xl)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)' }}>댓글</span>
+          <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)' }}>댓글</span>
           <span style={{ fontSize: 13, color: 'var(--text-tertiary)' }}>{comments.length}</span>
         </div>
         <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', margin: '0 0 16px' }}>
@@ -1293,7 +1293,7 @@ export default async function BlogDetailPage({ params }: Props) {
           <BlogCommentInput blogPostId={post.id} />
         ) : (
           <div style={{ padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', textAlign: 'center', marginBottom: 'var(--sp-lg)', fontSize: 14, color: 'var(--text-secondary)' }}>
-            <Link href={`/login?redirect=/blog/${slug}&source=blog_comment`} style={{ color: 'var(--brand)', fontWeight: 700, textDecoration: 'none' }}>로그인</Link>하면 의견을 남길 수 있어요
+            <Link href={`/login?redirect=/blog/${slug}&source=blog_comment`} style={{ color: 'var(--brand)', fontWeight: 500, textDecoration: 'none' }}>로그인</Link>하면 의견을 남길 수 있어요
           </div>
         )}
 
@@ -1303,11 +1303,11 @@ export default async function BlogDetailPage({ params }: Props) {
             const nick = c.author_name || c.profiles?.nickname || '사용자';
             return (
               <div key={c.id} style={{ display: 'flex', gap: 10, padding: '12px 0', borderBottom: '1px solid var(--border)' }}>
-                <div style={{ width: 30, height: 30, borderRadius: '50%', flexShrink: 0, background: getAvatarColor(nick), display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 12, fontWeight: 700 }}>
+                <div style={{ width: 30, height: 30, borderRadius: '50%', flexShrink: 0, background: getAvatarColor(nick), display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 12, fontWeight: 500 }}>
                   {nick[0].toUpperCase()}
                 </div>
                 <div style={{ flex: 1 }}>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{nick}</span>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{nick}</span>
                   <span style={{ fontSize: 12, color: 'var(--text-tertiary)', marginLeft: 6 }}>{timeAgo(c.created_at)}</span>
                   <div style={{ fontSize: 14, color: 'var(--text-primary)', lineHeight: 1.6, marginTop: 3 }}>{c.content}</div>
                   {(c as any).image_url && (
@@ -1384,7 +1384,7 @@ export default async function BlogDetailPage({ params }: Props) {
             <summary style={{
               cursor: 'pointer',
               fontSize: 13,
-              fontWeight: 700,
+              fontWeight: 500,
               color: 'var(--text-tertiary)',
               listStyle: 'none',
             }}>
@@ -1475,7 +1475,7 @@ export default async function BlogDetailPage({ params }: Props) {
       {related.length > 0 && (
         <section aria-labelledby="blog-sec-popular" style={{ marginBottom: 'var(--sp-xl)' }}>
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--fs-xs)', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--brand)', fontWeight: 600, marginBottom: 3 }}>POPULAR — 이번주</div>
-          <h2 id="blog-sec-popular" style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 var(--sp-sm)' }}>이번주 인기글</h2>
+          <h2 id="blog-sec-popular" style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 var(--sp-sm)' }}>이번주 인기글</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {related.slice(0, 3).map((r: any, i: number) => (
               <Link key={r.slug} href={`/blog/${r.slug}`} style={{
@@ -1483,7 +1483,7 @@ export default async function BlogDetailPage({ params }: Props) {
                 background: 'var(--bg-surface)', border: '1px solid var(--border)',
                 borderRadius: 'var(--radius-md)', textDecoration: 'none', color: 'inherit',
               }}>
-                <span style={{ fontSize: 18, fontWeight: 700, color: i === 0 ? 'var(--accent-red)' : i === 1 ? 'var(--warning)' : 'var(--text-tertiary)', minWidth: 24 }}>{i + 1}</span>
+                <span style={{ fontSize: 18, fontWeight: 600, color: i === 0 ? 'var(--accent-red)' : i === 1 ? 'var(--warning)' : 'var(--text-tertiary)', minWidth: 24 }}>{i + 1}</span>
                 <span style={{ fontSize: 13, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.title?.slice(0, 40)}</span>
               </Link>
             ))}
@@ -1495,7 +1495,7 @@ export default async function BlogDetailPage({ params }: Props) {
       {(related ?? []).length > 0 && (
         <section aria-labelledby="blog-sec-related" style={{ marginBottom: 'var(--sp-xl)' }}>
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--fs-xs)', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--brand)', fontWeight: 600, marginBottom: 3 }}>RELATED — 함께 보기</div>
-          <h2 id="blog-sec-related" style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 var(--sp-sm)' }}>관련 글</h2>
+          <h2 id="blog-sec-related" style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 var(--sp-sm)' }}>관련 글</h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 'var(--sp-sm)' }}>
             {related!.slice(0, 4).map((r: any) => (
               <Link key={r.slug} href={`/blog/${r.slug}`} className="kd-feed-card" style={{ display: 'block', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-surface)', textDecoration: 'none', transition: 'border-color var(--transition-fast)' }}>
@@ -1513,11 +1513,11 @@ export default async function BlogDetailPage({ params }: Props) {
       {/* 관련 부동산 현장 (내부 링크 SEO) */}
       {relatedSites.length > 0 && (
         <div style={{ marginBottom: 'var(--sp-xl)' }}>
-          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>🏢 관련 현장 정보</div>
+          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 10 }}>🏢 관련 현장 정보</div>
           <div style={{ display: 'flex', gap: 'var(--sp-sm)', flexWrap: 'wrap' }}>
             {relatedSites.map((s: Record<string, any>) => (
               <Link key={s.slug} href={`/apt/${s.slug}`} style={{ flex: '1 1 calc(33.3% - 6px)', minWidth: 140, padding: '10px 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-surface)', textDecoration: 'none', transition: 'border-color var(--transition-fast)' }}>
-                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</div>
+                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</div>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>{s.region} {s.sigungu || ''}</div>
               </Link>
             ))}
@@ -1528,25 +1528,25 @@ export default async function BlogDetailPage({ params }: Props) {
 
       {/* 세션74: 유용한 도구 + 뉴스레터 */}
       <div style={{ marginBottom: 'var(--sp-xl)' }}>
-        <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>🛠️ 유용한 도구</div>
+        <div style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 10 }}>🛠️ 유용한 도구</div>
         <div style={{ display: 'flex', gap: 'var(--sp-sm)', flexWrap: 'wrap' }}>
           {(post.category === 'apt' || post.category === 'unsold') && (
             <Link href="/apt/diagnose" style={{ flex: '1 1 calc(50% - 4px)', minWidth: 140, padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--brand-border)', background: 'var(--bg-surface)', textDecoration: 'none' }}>
               <div style={{ fontSize: 14, marginBottom: 4 }}>🎯</div>
-              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>청약 가점 계산기</div>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>청약 가점 계산기</div>
               <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>무주택·부양가족·청약통장 가점 자동 계산</div>
             </Link>
           )}
           {post.category === 'stock' && (
             <Link href="/stock/compare" style={{ flex: '1 1 calc(50% - 4px)', minWidth: 140, padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--brand-border)', background: 'var(--bg-surface)', textDecoration: 'none' }}>
               <div style={{ fontSize: 14, marginBottom: 4 }}>⚖️</div>
-              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>종목 비교</div>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>종목 비교</div>
               <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>국내외 종목 핵심 지표 비교</div>
             </Link>
           )}
           <Link href="/apt/complex" style={{ flex: '1 1 calc(50% - 4px)', minWidth: 140, padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-surface)', textDecoration: 'none' }}>
             <div style={{ fontSize: 14, marginBottom: 4 }}>🏘️</div>
-            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>단지백과</div>
+            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>단지백과</div>
             <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>전국 34,500+ 아파트 시세 검색</div>
           </Link>
         </div>
@@ -1556,14 +1556,14 @@ export default async function BlogDetailPage({ params }: Props) {
       {/* 관련 종목 (내부 링크 SEO) */}
       {relatedStocks.length > 0 && (
         <div style={{ marginBottom: 'var(--sp-xl)' }}>
-          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>📈 관련 종목</div>
+          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 10 }}>📈 관련 종목</div>
           <div style={{ display: 'flex', gap: 'var(--sp-sm)', flexWrap: 'wrap' }}>
             {relatedStocks.map((s: Record<string, any>) => {
               const pct = Number(s.change_pct);
               const isUp = pct > 0;
               return (
                 <Link key={s.symbol} href={`/stock/${s.symbol}`} style={{ flex: '1 1 calc(33.3% - 6px)', minWidth: 140, padding: '10px 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-surface)', textDecoration: 'none' }}>
-                  <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>{s.name}</div>
+                  <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{s.name}</div>
                   <div style={{ fontSize: 'var(--fs-xs)', color: isUp ? 'var(--accent-red)' : 'var(--accent-blue)', marginTop: 2 }}>
                     {s.currency === 'USD' ? '$' : '₩'}{Number(s.price).toLocaleString()} {isUp ? '▲' : '▼'}{Math.abs(pct).toFixed(2)}%
                   </div>
@@ -1578,7 +1578,7 @@ export default async function BlogDetailPage({ params }: Props) {
       {/* 핵심 지표 + 도구 — 본문 하단 인라인 (사이드바 대체) */}
       {sidebarMetrics.length > 0 && (
         <div style={{ marginBottom: 16, padding: '12px 14px', borderRadius: 'var(--radius-card)', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>📊 핵심 지표</div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 8 }}>📊 핵심 지표</div>
           <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(sidebarMetrics.length, 4)}, 1fr)`, gap: 8 }}>
             {sidebarMetrics.map((m, i) => (
               <div key={i} style={{ textAlign: 'center', padding: '8px 4px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)' }}>

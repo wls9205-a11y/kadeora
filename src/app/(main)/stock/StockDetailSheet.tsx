@@ -31,10 +31,10 @@ export default function StockDetailSheet({ stock, onClose, isDomestic, isWatched
 
       {/* 가격 + 등락 */}
       <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-card)', padding: 16, marginBottom: 'var(--sp-md)' }}>
-        <div style={{ fontSize: 'var(--fs-2xl)', fontWeight: 900, color: 'var(--text-primary)' }}>
+        <div style={{ fontSize: 'var(--fs-2xl)', fontWeight: 700, color: 'var(--text-primary)' }}>
           {stock.currency === 'USD' ? `$${stock.price?.toFixed(2)}` : `₩${fmt(stock.price)}`}
         </div>
-        <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: stockColor(stock.change_pct ?? 0, isDomestic), marginTop: 'var(--sp-xs)' }}>
+        <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 700, color: stockColor(stock.change_pct ?? 0, isDomestic), marginTop: 'var(--sp-xs)' }}>
           {(stock.change_pct ?? 0) > 0 ? '▲' : '▼'} {stock.change_amt ? `${(stock.change_amt > 0 ? '+' : '')}${fmt(Math.abs(stock.change_amt))}` : ''} ({Math.abs(stock.change_pct ?? 0).toFixed(2)}%)
         </div>
       </div>
@@ -57,10 +57,10 @@ export default function StockDetailSheet({ stock, onClose, isDomestic, isWatched
 
       {/* 관심종목 + 상세 버튼 */}
       <div style={{ display: 'flex', gap: 'var(--sp-sm)' }}>
-        <button onClick={() => onToggleWatchlist(stock.symbol)} style={{ flex: 1, padding: 12, borderRadius: 'var(--radius-sm)', border: `1px solid ${isWatched ? 'var(--accent-yellow)' : 'var(--border)'}`, background: isWatched ? 'rgba(251,191,36,0.08)' : 'var(--bg-hover)', color: isWatched ? '#D97706' : 'var(--text-secondary)', fontWeight: 700, fontSize: 'var(--fs-sm)', cursor: 'pointer', transition: 'all var(--transition-fast)' }}>
+        <button onClick={() => onToggleWatchlist(stock.symbol)} style={{ flex: 1, padding: 12, borderRadius: 'var(--radius-sm)', border: `1px solid ${isWatched ? 'var(--accent-yellow)' : 'var(--border)'}`, background: isWatched ? 'rgba(251,191,36,0.08)' : 'var(--bg-hover)', color: isWatched ? '#D97706' : 'var(--text-secondary)', fontWeight: 500, fontSize: 'var(--fs-sm)', cursor: 'pointer', transition: 'all var(--transition-fast)' }}>
           {isWatched ? '★ 관심 해제' : '☆ 관심 추가'}
         </button>
-        <Link href={`/stock/${encodeURIComponent(stock.symbol)}`} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', background: isDomestic ? 'var(--brand)' : 'var(--accent-blue)', color: 'var(--text-inverse)', padding: 12, borderRadius: 'var(--radius-sm)', textDecoration: 'none', fontWeight: 700, fontSize: 'var(--fs-sm)' }}>
+        <Link href={`/stock/${encodeURIComponent(stock.symbol)}`} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', background: isDomestic ? 'var(--brand)' : 'var(--accent-blue)', color: 'var(--text-inverse)', padding: 12, borderRadius: 'var(--radius-sm)', textDecoration: 'none', fontWeight: 500, fontSize: 'var(--fs-sm)' }}>
           종목 상세 →
         </Link>
       </div>

@@ -251,7 +251,7 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
             return (
               <div className="kd-card" style={{ background: cardBg, border: signalBorder }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-sm)' }}>
-                  <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>🤖 AI 한줄평</span>
+                  <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 500, color: 'var(--text-primary)' }}>🤖 AI 한줄평</span>
                   <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: sigColor, padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: signalBg(aiComment.signal || 'neutral') }}>{signalLabel}</span>
                 </div>
                 <p style={{ fontSize: 'var(--fs-base)', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.6 }}>{aiComment.comment || aiComment.content}</p>
@@ -263,12 +263,12 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
           })()}
           {!aiComment && (
             <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 16, marginBottom: 'var(--sp-lg)', textAlign: 'center' }}>
-              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-xs)' }}>🤖 AI 한줄평</div>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 500, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-xs)' }}>🤖 AI 한줄평</div>
               <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>이 종목의 AI 분석이 준비되면 표시됩니다</div>
             </div>
           )}
           <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-card)', padding: 16, marginBottom: 'var(--sp-lg)' }}>
-            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>🏢 회사 소개</div>
+            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>🏢 회사 소개</div>
             <p style={{ margin: 0, fontSize: 'var(--fs-base)', color: 'var(--text-secondary)', lineHeight: 1.75 }}>{description}</p>
           </div>
         </div>
@@ -282,7 +282,7 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
       {/* 수급 — investor_flow 게이트 적용 */}
       {tab === 'flow' && (
         <div className="kd-card">
-          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-md)' }}>투자자별 수급</div>
+          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 'var(--sp-md)' }}>투자자별 수급</div>
           {investorFlow.length > 0 && (() => {
             const totalForeign = investorFlow.reduce((s: number, d) => s + ((d.foreign_buy || 0) - (d.foreign_sell || 0)), 0);
             const totalInst = investorFlow.reduce((s: number, d) => s + ((d.inst_buy || 0) - (d.inst_sell || 0)), 0);
@@ -290,11 +290,11 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
               <div style={{ display: 'flex', gap: 'var(--sp-md)', marginBottom: 'var(--sp-md)' }}>
                 <div style={{ flex: 1, background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '8px 12px', textAlign: 'center' }}>
                   <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>외국인 누적</div>
-                  <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: investorColor('foreign'), marginTop: 2 }}>{totalForeign >= 0 ? '순매수' : '순매도'} {Math.abs(Math.round(totalForeign / 10000))}만</div>
+                  <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: investorColor('foreign'), marginTop: 2 }}>{totalForeign >= 0 ? '순매수' : '순매도'} {Math.abs(Math.round(totalForeign / 10000))}만</div>
                 </div>
                 <div style={{ flex: 1, background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '8px 12px', textAlign: 'center' }}>
                   <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>기관 누적</div>
-                  <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: investorColor('inst'), marginTop: 2 }}>{totalInst >= 0 ? '순매수' : '순매도'} {Math.abs(Math.round(totalInst / 10000))}만</div>
+                  <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: investorColor('inst'), marginTop: 2 }}>{totalInst >= 0 ? '순매수' : '순매도'} {Math.abs(Math.round(totalInst / 10000))}만</div>
                 </div>
               </div>
             );
@@ -377,7 +377,7 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
       {/* 뉴스 */}
       {tab === 'news' && (
         <div className="kd-card">
-          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>📰 관련 뉴스</div>
+          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 10 }}>📰 관련 뉴스</div>
           {news.length > 0 && (() => {
             const pos = news.filter((n) => n.sentiment_label === 'positive' || n.sentiment === 'positive').length;
             const neg = news.filter((n) => n.sentiment_label === 'negative' || n.sentiment === 'negative').length;
@@ -405,7 +405,7 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
                 <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.4, flex: 1 }}>{n.title}</div>
                 {n.sentiment_label && (
                   <span style={{
-                    fontSize: 'var(--fs-xs)', padding: '1px 6px', borderRadius: 'var(--radius-sm)', fontWeight: 700, flexShrink: 0,
+                    fontSize: 'var(--fs-xs)', padding: '1px 6px', borderRadius: 'var(--radius-sm)', fontWeight: 500, flexShrink: 0,
                     background: sentimentBg(n.sentiment_label || 'neutral'),
                     color: sentimentColor(n.sentiment_label || 'neutral'),
                   }}>
@@ -430,7 +430,7 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
       {tab === 'disclosure' && (
         <div className="kd-card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>📋 최근 공시</div>
+            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)' }}>📋 최근 공시</div>
             <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{disclosures.length}건</span>
           </div>
           {disclosures.length === 0 ? (

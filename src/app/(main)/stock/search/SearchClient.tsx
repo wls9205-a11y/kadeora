@@ -52,7 +52,7 @@ export default function StockSearchClient() {
         <Link href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>홈</Link>›
         <Link href="/stock" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>주식</Link>›<span>검색</span>
       </nav>
-      <h1 style={{ fontSize: 'clamp(22px, 5vw, 28px)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 16 }}>🔍 종목 검색</h1>
+      <h1 style={{ fontSize: 'clamp(22px, 5vw, 28px)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 16 }}>🔍 종목 검색</h1>
 
       {/* Search + Filters */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>

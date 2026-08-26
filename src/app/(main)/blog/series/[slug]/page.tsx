@@ -101,7 +101,7 @@ export default async function SeriesDetailPage({ params }: Props) {
       }) }} />
       <div style={{ marginBottom: 'var(--sp-xl)' }}>
         <Link href="/blog/series" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 시리즈 목록</Link>
-        <h1 style={{ margin: '8px 0 0', fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>📚 {series.title}</h1>
+        <h1 style={{ margin: '8px 0 0', fontSize: 'var(--fs-xl)', fontWeight: 600, color: 'var(--text-primary)' }}>📚 {series.title}</h1>
         {series.description && (
           <p style={{ margin: '6px 0 0', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.6 }}>{series.description}</p>
         )}
@@ -134,7 +134,7 @@ export default async function SeriesDetailPage({ params }: Props) {
               width: 30, height: 30, borderRadius: '50%', flexShrink: 0,
               background: 'var(--brand)', color: 'var(--text-inverse)', display: 'flex',
               alignItems: 'center', justifyContent: 'center',
-              fontSize: 'var(--fs-xs)', fontWeight: 800, zIndex: 1,
+              fontSize: 'var(--fs-xs)', fontWeight: 500, zIndex: 1,
               border: '3px solid var(--bg-base)',
             }}>
               {idx + 1}

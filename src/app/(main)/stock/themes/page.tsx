@@ -62,7 +62,7 @@ export default async function ThemesPage() {
       </nav>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebPage', name: TITLE, url: `${SITE_URL}/stock/themes`, speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', 'section'] } }) }} />
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-        <h1 style={{ fontSize: 'clamp(22px, 5vw, 28px)', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>🎯 테마주 분석</h1>
+        <h1 style={{ fontSize: 'clamp(22px, 5vw, 28px)', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>🎯 테마주 분석</h1>
         <ShareButtons title={TITLE} contentType="stock-page" contentRef="themes" />
       </div>
       <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 24 }}>주요 투자 테마별 관련주 목록과 시세를 정리합니다. 총 {(themes ?? []).length}개 테마.</p>
@@ -76,7 +76,7 @@ export default async function ThemesPage() {
             <div key={theme.id} style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
               <div style={{ padding: '12px 14px', background: 'var(--bg-surface)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
-                  <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>{theme.name}</h2>
+                  <h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>{theme.name}</h2>
                   {theme.description && <p style={{ fontSize: 11, color: 'var(--text-secondary)', margin: '2px 0 0' }}>{theme.description}</p>}
                 </div>
                 <div style={{ textAlign: 'right' }}>
@@ -114,7 +114,7 @@ export default async function ThemesPage() {
       {/* SSR 서술형 분석 — Thin Content 해소 */}
       {(themes ?? []).length > 0 && (
         <section style={{ marginTop: 24, padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', lineHeight: 1.8, fontSize: 14, color: 'var(--text-secondary)' }}>
-          <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>테마주 투자 가이드</h2>
+          <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 8 }}>테마주 투자 가이드</h2>
           <p>현재 카더라에서 추적 중인 테마는 총 <strong style={{ color: 'var(--text-primary)' }}>{(themes ?? []).length}개</strong>입니다.
           테마주 투자는 정책 변화, 기술 트렌드, 글로벌 이벤트에 따라 단기간 높은 수익을 기대할 수 있지만, 테마 소멸 시 급격한 하락 위험도 함께 존재합니다.</p>
           <p style={{ marginTop: 8 }}>각 테마별 대장주와 시가총액 상위 종목을 참고하되, 기업의 실질적인 사업 연관성과 실적 기여도를 반드시 확인해야 합니다.

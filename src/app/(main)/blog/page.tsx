@@ -407,7 +407,7 @@ export default async function BlogPage({ searchParams }: Props) {
       {/* s205-W2: HeroCard "오늘의 블로그" 제거. */}
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 14, paddingTop: 4 }}>
         <div>
-          <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 900, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.5px' }}>블로그</h1>
+          <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 600, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.5px' }}>블로그</h1>
           <p className="blog-summary" style={{ fontSize: 11, color: 'var(--text-tertiary)', margin: '2px 0 0', letterSpacing: '0.3px' }}>매일 업데이트되는 투자 인사이트 · {totalCount.toLocaleString()}편</p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -515,14 +515,14 @@ export default async function BlogPage({ searchParams }: Props) {
       {pageNum === 1 && !q && category === 'all' && (popularPosts ?? []).length > 0 && (
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '10px 12px', marginBottom: 'var(--sp-sm)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-            <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>🔥 인기 글</span>
+            <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)' }}>🔥 인기 글</span>
             <Link href="/blog?sort=popular" style={{ fontSize: 10, color: 'var(--text-tertiary)', textDecoration: 'none', fontWeight: 600 }}>전체보기 →</Link>
           </div>
           {(popularPosts ?? []).slice(0, 3).map((p: any, i: number) => (
             <Link key={p.id} href={`/blog/${p.slug}`} className="kd-feed-card" style={{ display: 'flex', alignItems: 'center', gap: 6, textDecoration: 'none', color: 'inherit', padding: '4px 0', borderBottom: i < 2 ? '1px solid var(--border)' : 'none' }}>
-              <span style={{ fontSize: 11, fontWeight: 800, color: i === 0 ? 'var(--brand)' : 'var(--text-tertiary)', width: 16, textAlign: 'center', flexShrink: 0 }}>{i + 1}</span>
+              <span style={{ fontSize: 11, fontWeight: 600, color: i === 0 ? 'var(--brand)' : 'var(--text-tertiary)', width: 16, textAlign: 'center', flexShrink: 0 }}>{i + 1}</span>
               <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</span>
-              <span style={{ fontSize: 10, color: CAT_COLORS[p.category] || 'var(--text-tertiary)', fontWeight: 700, flexShrink: 0 }}>
+              <span style={{ fontSize: 10, color: CAT_COLORS[p.category] || 'var(--text-tertiary)', fontWeight: 500, flexShrink: 0 }}>
                 {POST_CAT_LABEL[p.category] || p.category}
               </span>
               <span style={{ fontSize: 10, color: 'var(--text-tertiary)', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>👀{p.view_count}</span>
@@ -599,7 +599,7 @@ export default async function BlogPage({ searchParams }: Props) {
                   </h2>
                   {(isHot || (p.comment_count || 0) > 0 || (p.helpful_count || 0) > 0) && (
                     <span className="kd-lrow-m">
-                      {isHot && <span className="kd-lrow-m-fix" style={{ color: 'var(--accent-red)', fontWeight: 700 }}>HOT</span>}
+                      {isHot && <span className="kd-lrow-m-fix" style={{ color: 'var(--accent-red)', fontWeight: 500 }}>HOT</span>}
                       <span className="kd-lrow-m-fix">👀 {p.view_count > 0 ? p.view_count.toLocaleString() : 0}</span>
                       {(p.comment_count || 0) > 0 && <span className="kd-lrow-m-fix">💬 {p.comment_count}</span>}
                       {(p.helpful_count || 0) > 0 && <span className="kd-lrow-m-fix" style={{ color: 'var(--accent-green)' }}>👍 {p.helpful_count}</span>}
@@ -630,20 +630,20 @@ export default async function BlogPage({ searchParams }: Props) {
         }}>
           <span style={{ fontSize: 20, flexShrink: 0 }}>📬</span>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>매일 투자 분석 받아보기</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>매일 투자 분석 받아보기</div>
             <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>가입하면 전체 글 무제한 · 알림까지 무료</div>
           </div>
           <Link href="/login?redirect=/blog" style={{
             padding: '6px 14px', borderRadius: 'var(--radius-pill)',
             background: 'var(--kakao-bg)', color: 'var(--kakao-text)',
-            fontWeight: 700, fontSize: 12, textDecoration: 'none', flexShrink: 0,
+            fontWeight: 500, fontSize: 12, textDecoration: 'none', flexShrink: 0,
           }}>가입</Link>
         </div>
       )}
       {topSeries.length > 0 && (
         <div style={{ marginTop: 'var(--sp-2xl)', padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-sm)' }}>
-            <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>📚 인기 시리즈</span>
+            <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>📚 인기 시리즈</span>
             <Link href="/blog/series" style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>전체 보기 →</Link>
           </div>
           <div style={{ display: 'flex', gap: 'var(--sp-sm)', overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 4 }}>
@@ -664,7 +664,7 @@ export default async function BlogPage({ searchParams }: Props) {
       {/* 다음 페이지 미리보기 */}
       {nextPagePosts.length > 0 && (
         <div style={{ marginTop: 'var(--sp-lg)', padding: 12, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)' }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-sm)' }}>다음 페이지 미리보기</div>
+          <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-sm)' }}>다음 페이지 미리보기</div>
           {nextPagePosts.map((p: any) => (
             <Link key={p.id} href={`/blog/${p.slug}`} style={{
               display: 'block', padding: '4px 0', fontSize: 13, color: 'var(--text-secondary)',
@@ -679,7 +679,7 @@ export default async function BlogPage({ searchParams }: Props) {
 
       {/* 관련 서비스 (내부 링크 — SEO 교차 참조) */}
       <div style={{ padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', marginTop: 'var(--sp-md)' }}>
-        <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>🔗 카더라 서비스</div>
+        <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>🔗 카더라 서비스</div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
           {[
             { href: '/apt', label: '🏠 부동산 청약' },

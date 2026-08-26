@@ -67,7 +67,7 @@ export default async function StockDataPage() {
           <span>›</span>
           <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>통계 자료실</span>
         </nav>
-        <h1 style={{ fontSize: 'var(--fs-2xl)', fontWeight: 900, color: 'var(--text-primary)', marginBottom: 8, letterSpacing: '-0.5px' }}>
+        <h1 style={{ fontSize: 'var(--fs-2xl)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 8, letterSpacing: '-0.5px' }}>
           📈 주식 통계 자료실
         </h1>
         <p style={{ fontSize: 'var(--fs-base)', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: 20 }}>
@@ -88,14 +88,14 @@ export default async function StockDataPage() {
         ].map(k => (
           <div key={k.label} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 14, textAlign: 'center' }}>
             <div style={{ fontSize: 22, marginBottom: 4 }}>{k.emoji}</div>
-            <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)' }}>{k.value}</div>
+            <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 700, color: 'var(--text-primary)' }}>{k.value}</div>
             <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>{k.label}</div>
           </div>
         ))}
       </div>
 
       {/* 다운로드 카테고리 */}
-      <h2 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 14 }}>📥 데이터 카테고리</h2>
+      <h2 style={{ fontSize: 'var(--fs-xl)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 14 }}>📥 데이터 카테고리</h2>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 12, marginBottom: 32 }}>
         {[
           { title: '전 종목 시세 현황', desc: 'KOSPI·KOSDAQ·NYSE·NASDAQ 전 종목의 현재가·시총·등락률', icon: '💹',
@@ -111,14 +111,14 @@ export default async function StockDataPage() {
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
               <span style={{ fontSize: 28 }}>{item.icon}</span>
-              <div style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)' }}>{item.title}</div>
+              <div style={{ fontSize: 'var(--fs-md)', fontWeight: 600, color: 'var(--text-primary)' }}>{item.title}</div>
             </div>
             <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: 12 }}>{item.desc}</div>
             <div style={{ display: 'flex', gap: 8 }}>
               {item.links.map(l => (
                 <a key={l.label} href={l.href} download style={{
                   display: 'inline-flex', alignItems: 'center', gap: 4, padding: '6px 14px',
-                  borderRadius: 'var(--radius-pill)', fontSize: 'var(--fs-xs)', fontWeight: 700,
+                  borderRadius: 'var(--radius-pill)', fontSize: 'var(--fs-xs)', fontWeight: 500,
                   textDecoration: 'none', background: `color-mix(in srgb, ${l.color} 15%, transparent)`,
                   color: l.color, border: `1px solid color-mix(in srgb, ${l.color} 30%, transparent)`,
                 }}>📥 {l.label}</a>
@@ -129,7 +129,7 @@ export default async function StockDataPage() {
       </div>
 
       {/* 마켓별 종목 */}
-      <h2 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 14 }}>🔎 마켓별 종목</h2>
+      <h2 style={{ fontSize: 'var(--fs-xl)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 14 }}>🔎 마켓별 종목</h2>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 8, marginBottom: 32 }}>
         {[
           { market: 'KOSPI', label: '코스피', emoji: '🇰🇷' },
@@ -145,7 +145,7 @@ export default async function StockDataPage() {
           }}>
             <span style={{ fontSize: 20 }}>{m.emoji}</span>
             <div>
-              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700 }}>{m.label}</div>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600 }}>{m.label}</div>
               <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{marketCounts[m.market] || 0}종목</div>
             </div>
           </Link>
@@ -158,7 +158,7 @@ export default async function StockDataPage() {
         background: 'linear-gradient(135deg, var(--brand-bg), var(--accent-purple-bg))',
         border: '1px solid var(--brand-border)',
       }}>
-        <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 6 }}>
+        <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 6 }}>
           AI 종목 분석도 받아보세요
         </div>
         <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 16, lineHeight: 1.6 }}>
@@ -167,7 +167,7 @@ export default async function StockDataPage() {
         <Link href="/login?redirect=/stock/data" style={{
           display: 'inline-block', padding: '12px 32px', borderRadius: 'var(--radius-pill)',
           background: 'var(--kakao-bg)', color: 'var(--kakao-text)',
-          fontWeight: 700, fontSize: 'var(--fs-base)', textDecoration: 'none',
+          fontWeight: 500, fontSize: 'var(--fs-base)', textDecoration: 'none',
         }}>
           카카오로 3초 가입
         </Link>

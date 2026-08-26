@@ -102,7 +102,7 @@ export default async function SignalsPage() {
 
   return (
     <div style={{ maxWidth: '900px', margin: '0 auto', padding: '16px' }}>
-      <h1 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '8px' }}>
+      <h1 style={{ fontSize: '24px', fontWeight: 600, marginBottom: '8px' }}>
         ⚡ 수급 시그널
       </h1>
       <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '24px', lineHeight: 1.6 }}>
