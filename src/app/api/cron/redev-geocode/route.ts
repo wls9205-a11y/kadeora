@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withCronAuth } from '@/lib/cron-auth';
 import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { assertCoordInRegion } from '@/lib/geo/region-bbox';
 
 export const maxDuration = 180;
 
@@ -105,7 +106,11 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
 
     let redevUpdated = 0;
     for (const p of redevTargets) {
-      let coords = p.address ? await geocodeKakao(p.address) : null;
+      // ⚠️ 주소만 던지면 «동명 시군구» 로 간다. 「서구 ○○로 12」는 부산 서구도 대전 서구도
+      //    맞는 말이라 카카오가 가장 그럴듯한 다른 도를 돌려준다. 이게 오염 687건의 원인이다.
+      //    반드시 시도를 앞에 붙인다 — 「부산 서구 ○○로 12」.
+      const addrQ = p.address ? `${p.region || ''} ${p.address}`.trim() : '';
+      let coords = addrQ ? await geocodeKakao(addrQ) : null;
       if (!coords) {
         const q = `${p.region || ''} ${p.sigungu || ''} ${p.district_name}`;
         coords = await geocodeKeyword(q.trim());
@@ -114,10 +119,12 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
         const q = `${p.region || ''} ${p.sigungu || ''} ${p.district_name} 재개발`;
         coords = await geocodeNaver(q.trim());
       }
-      if (coords && coords.lat > 33 && coords.lat < 39 && coords.lng > 124 && coords.lng < 132) {
+      // ⚠️ 전국 박스(33~39/124~132)는 «다른 도» 를 전부 통과시킨다. 시도 bbox 로 건다.
+      const g = coords ? assertCoordInRegion(p.region, coords.lat, coords.lng, `redev-geocode:${p.id}`) : null;
+      if (g?.ok && g.lat != null && g.lng != null) {
         const { error } = await sb.from('redevelopment_projects')
           // @ts-expect-error supabase update type
-          .update({ latitude: coords.lat, longitude: coords.lng })
+          .update({ latitude: g.lat, longitude: g.lng })
           .eq('id', p.id);
         if (error) console.error('[redev-geocode] insert fail', error.message?.slice(0, 200));
         else redevUpdated++;
@@ -156,7 +163,9 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
 
     for (const s of (sites || [])) {
       // 1차: 카카오 주소
-      let coords = s.address ? await geocodeKakao(s.address) : null;
+      // ⚠️ Phase 1 과 같은 이유로 시도를 앞에 붙인다. 주소만 던지면 동명 시군구로 간다.
+      const sAddrQ = s.address ? `${s.region || ''} ${s.address}`.trim() : '';
+      let coords = sAddrQ ? await geocodeKakao(sAddrQ) : null;
 
       // 2차: 카카오 키워드
       if (!coords) {
@@ -170,9 +179,10 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
         coords = await geocodeNaver(q.trim());
       }
 
-      if (coords && coords.lat > 33 && coords.lat < 39 && coords.lng > 124 && coords.lng < 132) {
+      const g2 = coords ? assertCoordInRegion(s.region, coords.lat, coords.lng, `site-geocode:${s.id}`) : null;
+      if (g2?.ok && g2.lat != null && g2.lng != null) {
         const { error } = await sb.from('apt_sites')
-          .update({ latitude: coords.lat, longitude: coords.lng, updated_at: new Date().toISOString() })
+          .update({ latitude: g2.lat, longitude: g2.lng, updated_at: new Date().toISOString() })
           .eq('id', s.id);
         if (error) console.error('[redev-geocode] insert fail', error.message?.slice(0, 200));
         if (!error) siteUpdated++;

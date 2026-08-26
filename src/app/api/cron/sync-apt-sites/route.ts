@@ -1,6 +1,9 @@
 import { errMsg } from '@/lib/error-utils';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+// T1-3: 좌표를 쓰기 «직전» 에 시도 bbox 로 거른다. 부산 현장이 대전에 서던 것이
+//       동명 시군구(중구·서구·동구) 혼동이었다. 거부는 반드시 로그로 남는다.
+import { assertCoordInRegion } from '@/lib/geo/region-bbox';
 import { withCronAuth } from '@/lib/cron-auth';
 import { generateAptSlugStrict } from '@/lib/apt-slug';
 
@@ -114,7 +117,8 @@ async function handler(_req: NextRequest) {
           updateOps.push(() =>
             sb.from('apt_sites').update({
               source_ids: { ...srcIds, redev_id: String(r.id), redev_stage: r.stage },
-              latitude: r.latitude || undefined, longitude: r.longitude || undefined,
+              ...(() => { const g = assertCoordInRegion(r.region, r.latitude, r.longitude, `redev:${r.id}`);
+                          return { latitude: g.lat ?? undefined, longitude: g.lng ?? undefined }; })(),
               updated_at: new Date().toISOString(),
             }).eq('id', existing.id) as unknown as Promise<void>
           );
@@ -126,7 +130,8 @@ async function handler(_req: NextRequest) {
             total_units: r.total_households, builder: r.constructor, developer: r.developer,
             status: 'active', source_ids: { redev_id: String(r.id), redev_stage: r.stage },
             nearby_station: r.nearest_station, school_district: r.nearest_school,
-            latitude: r.latitude, longitude: r.longitude,
+            ...(() => { const g = assertCoordInRegion(r.region, r.latitude, r.longitude, `redev-new:${r.id}`);
+                        return { latitude: g.lat, longitude: g.lng }; })(),
             sitemap_wave: 1, key_features: r.stage ? [r.stage] : [],
           });
         }
@@ -216,7 +221,8 @@ async function handler(_req: NextRequest) {
             total_units: t.total_households || null,
             price_min: prices.length > 0 ? prices[0] : null,
             price_max: prices.length > 0 ? prices[prices.length - 1] : null,
-            latitude: t.latitude || null, longitude: t.longitude || null,
+            ...(() => { const g = assertCoordInRegion(t.region, t.latitude, t.longitude, `trade:${t.name}`);
+                        return { latitude: g.lat, longitude: g.lng }; })(),
             nearby_station: t.nearest_station || null,
             status: 'active' as const,
             source_ids: {
@@ -281,8 +287,8 @@ async function handler(_req: NextRequest) {
               sigungu: u.sigungu_nm || undefined,
               builder: u.constructor_nm || undefined,
               developer: u.developer_nm || undefined,
-              latitude: u.latitude || undefined,
-              longitude: u.longitude || undefined,
+              ...(() => { const g = assertCoordInRegion(u.region_nm, u.latitude, u.longitude, `unsold:${u.id}`);
+                          return { latitude: g.lat ?? undefined, longitude: g.lng ?? undefined }; })(),
               nearby_station: u.nearest_station || undefined,
               updated_at: new Date().toISOString(),
             }).eq('id', existing.id) as unknown as Promise<void>
@@ -295,7 +301,8 @@ async function handler(_req: NextRequest) {
             total_units: u.tot_supply_hshld_co || null,
             price_min: u.sale_price_min || null, price_max: u.sale_price_max || null,
             builder: u.constructor_nm, developer: u.developer_nm,
-            latitude: u.latitude, longitude: u.longitude,
+            ...(() => { const g = assertCoordInRegion(u.region_nm, u.latitude, u.longitude, `unsold-new:${u.id}`);
+                        return { latitude: g.lat, longitude: g.lng }; })(),
             nearby_station: u.nearest_station, status: 'active',
             source_ids: { unsold_id: String(u.id), unsold_count: String(u.tot_unsold_hshld_co || 0) },
             move_in_date: u.completion_ym,
@@ -403,12 +410,86 @@ async function handler(_req: NextRequest) {
       .eq('sitemap_wave', 0);
   } catch {}
 
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // Step 7 (T2-2): redev 링크 «자가치유»
+  //
+  // 2026-08-24 에 redevelopment_projects 가 하루 1,105행 재생성됐고 죽은 참조 33건의
+  // id 가 63341~63375 연속 블록이었다 — 구세대가 통째로 지워지고 새 id 로 다시 만들어진
+  // 흔적이다. 그런데 그 테이블을 DELETE 하는 코드가 저장소에 «없다».
+  //
+  // 즉 재발 조건이 코드 밖(수동·채팅 SQL)에 있다. 그래서 방어를 코드 가드가 아니라
+  // «자가치유» 로 둔다 — 누가 왜 지워도 다음 실행에서 스스로 복구된다.
+  //
+  // 키 우선순위: redev_key(external_code > external_id > 이름|지역) → 이름 일치 → 포기.
+  // ⚠️ 포기할 때 redev_id 를 «제거» 한다. 가짜 +15점을 두지 않는다.
+  // ⚠️ 실패를 조용히 넘기지 않는다 — 이름 변경에 약한 `이름|지역` 키가 몇 건인지
+  //    로그로 드러나야 다음 사람이 안다.
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  let relinked = 0, relinkFailed = 0;
+  try {
+    const { data: broken } = await (sb as any).from('apt_sites')
+      .select('id, name, source_ids')
+      .not('source_ids->>redev_id', 'is', null)
+      .limit(2000);
+
+    const cand = (broken || []) as Array<{ id: string; name: string; source_ids: Record<string, string> }>;
+    if (cand.length > 0) {
+      const ids = Array.from(new Set(cand.map(c => c.source_ids?.redev_id).filter(Boolean)));
+      const alive = new Set<string>();
+      for (let i = 0; i < ids.length; i += 200) {
+        const { data } = await (sb as any).from('redevelopment_projects')
+          .select('id').in('id', ids.slice(i, i + 200));
+        for (const r of (data || [])) alive.add(String(r.id));
+      }
+      const dead = cand.filter(c => !alive.has(String(c.source_ids?.redev_id)));
+
+      for (const s of dead) {
+        const key = s.source_ids?.redev_key || null;
+        let found: any = null;
+        if (key) {
+          // external_code · external_id · 이름|지역 셋 다 유니크 인덱스가 실존한다.
+          const { data: a } = await (sb as any).from('redevelopment_projects')
+            .select('id, stage').eq('external_code', key).maybeSingle();
+          found = a;
+          if (!found && /^\d+$/.test(key)) {
+            const { data: b } = await (sb as any).from('redevelopment_projects')
+              .select('id, stage').eq('external_id', Number(key)).maybeSingle();
+            found = b;
+          }
+        }
+        if (!found) {
+          const { data: c } = await (sb as any).from('redevelopment_projects')
+            .select('id, stage').eq('district_name', s.name).eq('is_active', true).maybeSingle();
+          found = c;
+        }
+        if (found) {
+          await (sb as any).from('apt_sites').update({
+            source_ids: { ...s.source_ids, redev_id: String(found.id), redev_stage: found.stage },
+          }).eq('id', s.id);
+          relinked++;
+        } else {
+          const next = { ...s.source_ids };
+          delete next.redev_id;
+          delete next.redev_stage;
+          await (sb as any).from('apt_sites').update({ source_ids: next }).eq('id', s.id);
+          relinkFailed++;
+          console.error(`[sync-apt-sites] 재링크 실패 → redev_id 제거: ${s.name} (key=${key ?? 'none'})`);
+        }
+      }
+      if (dead.length > 0) {
+        console.info(`[sync-apt-sites] 죽은 redev 링크 ${dead.length}건 · 복구 ${relinked} · 제거 ${relinkFailed}`);
+      }
+    }
+  } catch (e: unknown) { errors.push(`relink: ${errMsg(e)}`); }
+
   const elapsed = Date.now() - start;
 
   return NextResponse.json({
     success: true,
     inserted,
-    redevSkippedNew: skippedNew,   // 신규 생성을 막은 건수. 0 이 아니면 후보가 쌓여 있다는 뜻
+    redevSkippedNew: skippedNew,
+    redevRelinked: relinked,
+    redevRelinkFailed: relinkFailed,   // 신규 생성을 막은 건수. 0 이 아니면 후보가 쌓여 있다는 뜻
     updated,
     scored,
     tradeInserted,
