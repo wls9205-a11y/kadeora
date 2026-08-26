@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { priceChangeCompact, PRICE_CHANGE_COLS } from '@/lib/apt/price-change';
 import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
@@ -45,7 +46,7 @@ export async function GET(req: NextRequest) {
 
         // 최신 시세 조회
         const { data: cp } = await (admin as any).from('apt_complex_profiles')
-          .select('latest_sale_price, latest_sale_date, avg_sale_price_pyeong, jeonse_ratio, price_change_1y')
+          .select(`latest_sale_price, latest_sale_date, avg_sale_price_pyeong, jeonse_ratio, ${PRICE_CHANGE_COLS}`)
           .eq('apt_name', aptName)
           .maybeSingle();
 
@@ -54,7 +55,13 @@ export async function GET(req: NextRequest) {
         // meta_description에 최신 수치 반영
         const priceTxt = cp.avg_sale_price_pyeong ? `평당 ${cp.avg_sale_price_pyeong.toLocaleString()}만원` : '';
         const jeonse = cp.jeonse_ratio ? `전세가율 ${cp.jeonse_ratio}%` : '';
-        const change = cp.price_change_1y !== null ? `1년 ${cp.price_change_1y > 0 ? '+' : ''}${cp.price_change_1y}%` : '';
+        // ⚠️ 이 문자열은 blog_posts.meta_description 으로 «검색 결과에» 나간다.
+        //    평형을 뗀 %는 「단지 전체가 그만큼 움직였다」로 읽힌다 (lib/apt/price-change.ts).
+        //    근거가 없으면 아예 넣지 않는다 — 155자 예산을 거짓말로 채우지 않는다.
+        // ⚠️ 위 조회가 `apt_name` 만으로 단지를 고른다. 같은 이름이 복수 시군구에 걸친
+        //    경우(이름 1,833개)에는 다른 도시 단지를 집을 수 있다 — 별건으로 남아 있다.
+        const pc = priceChangeCompact(cp);
+        const change = pc ? `1년 ${pc}` : '';
         const desc = `${aptName} ${priceTxt} ${jeonse} ${change} — 카더라 부동산 실데이터 분석`.replace(/\s+/g, ' ').trim().slice(0, 155);
 
         await admin.from('blog_posts').update({

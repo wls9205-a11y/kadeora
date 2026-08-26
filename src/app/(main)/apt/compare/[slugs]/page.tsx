@@ -1,5 +1,6 @@
 import LoginGate from '@/components/LoginGate';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { priceChangeCompact, PRICE_CHANGE_COLS } from '@/lib/apt/price-change';
 import { SITE_URL } from '@/lib/constants';
 import Link from 'next/link';
 import type { Metadata } from 'next';
@@ -22,7 +23,7 @@ function parseSlugs(raw: string): [string, string] | null {
 async function fetchComplex(name: string) {
   const sb = getSupabaseAdmin();
   const { data } = await (sb as any).from('apt_complex_profiles')
-    .select('apt_name, region_nm, sigungu, dong, age_group, latest_sale_price, latest_jeonse_price, jeonse_ratio, sale_count_1y, rent_count_1y, built_year, avg_sale_price_pyeong, total_households, price_change_1y, latitude, longitude')
+    .select(`apt_name, region_nm, sigungu, dong, age_group, latest_sale_price, latest_jeonse_price, jeonse_ratio, sale_count_1y, rent_count_1y, built_year, avg_sale_price_pyeong, total_households, latitude, longitude, ${PRICE_CHANGE_COLS}`)
     .eq('apt_name', name).limit(1).maybeSingle();
   return data;
 }
@@ -68,7 +69,9 @@ export default async function ComparePage({ params }: Props) {
     { label: '전세가', va: a.latest_jeonse_price ? fmtAmount(a.latest_jeonse_price) : '-', vb: b.latest_jeonse_price ? fmtAmount(b.latest_jeonse_price) : '-' },
     { label: '전세가율', va: a.jeonse_ratio ? `${a.jeonse_ratio}%` : '-', vb: b.jeonse_ratio ? `${b.jeonse_ratio}%` : '-' },
     { label: '평당가', va: a.avg_sale_price_pyeong ? fmtAmount(a.avg_sale_price_pyeong) : '-', vb: b.avg_sale_price_pyeong ? fmtAmount(b.avg_sale_price_pyeong) : '-' },
-    { label: '1년 가격변동', va: a.price_change_1y != null ? `${Number(a.price_change_1y) > 0 ? '+' : ''}${a.price_change_1y}%` : '-', vb: b.price_change_1y != null ? `${Number(b.price_change_1y) > 0 ? '+' : ''}${b.price_change_1y}%` : '-' },
+    // ⚠️ 평형을 뗀 %를 쓰지 않는다 — 「단지 전체가 그만큼 올랐다」로 읽힌다.
+    //    priceChangeCompact 가 항상 평형을 붙여 낸다 (lib/apt/price-change.ts).
+    { label: '1년 가격변동', va: priceChangeCompact(a) || '-', vb: priceChangeCompact(b) || '-' },
     { label: '1년 매매 거래', va: a.sale_count_1y ? `${a.sale_count_1y}건` : '-', vb: b.sale_count_1y ? `${b.sale_count_1y}건` : '-' },
     { label: '1년 전월세 거래', va: a.rent_count_1y ? `${a.rent_count_1y}건` : '-', vb: b.rent_count_1y ? `${b.rent_count_1y}건` : '-' },
   ];

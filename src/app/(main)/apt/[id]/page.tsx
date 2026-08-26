@@ -26,6 +26,7 @@ import SiteDetailRail from '@/components/apt/SiteDetailRail';
 import LeadForm from '@/components/apt/LeadForm';
 import { leadKind } from '@/lib/apt/lead-eligibility';
 import { canUseHeroImage } from '@/lib/apt/hero-license';
+import { canShowPriceChange, pcArea, priceChangeDirection, PRICE_CHANGE_COLS } from '@/lib/apt/price-change';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
 import { headers } from 'next/headers';
 import AptSiteSchema from '@/components/schema/AptSiteSchema';
@@ -345,7 +346,7 @@ async function fetchUnifiedData(slug: string) {
   const [regionTradesR, complexR] = await Promise.allSettled([
     sigunguSafe ? sb.from('apt_transactions').select('apt_name, deal_date, deal_amount, exclusive_area, floor').ilike('sigungu', `%${sigunguSafe}%`).neq('apt_name', name).order('deal_date', { ascending: false }).limit(10) : Promise.resolve({ data: [] }),
     // 단지백과 — 같은 시군구 기존 아파트 시세 (시세비교/전세가율/평당가)
-    sigunguSafe ? (sb as any).from('apt_complex_profiles').select('apt_name, built_year, latest_sale_price, avg_sale_price_pyeong, latest_jeonse_price, jeonse_ratio, total_households, price_change_1y, sale_count_1y').ilike('sigungu', `%${sigunguSafe}%`).gt('latest_sale_price', 0).order('latest_sale_price', { ascending: false }).limit(10) : Promise.resolve({ data: [] }),
+    sigunguSafe ? (sb as any).from('apt_complex_profiles').select(`apt_name, built_year, latest_sale_price, avg_sale_price_pyeong, latest_jeonse_price, jeonse_ratio, total_households, sale_count_1y, ${PRICE_CHANGE_COLS}`).ilike('sigungu', `%${sigunguSafe}%`).gt('latest_sale_price', 0).order('latest_sale_price', { ascending: false }).limit(10) : Promise.resolve({ data: [] }),
   ]);
 
   const trades = tradesR.status === 'fulfilled' ? (tradesR.value as { data: any })?.data || [] : [];
@@ -1531,7 +1532,19 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
                     <td style={{ padding: '5px 6px', textAlign: 'right', fontWeight: 700, color: 'var(--accent-blue)' }}>{fmtAmount(c.latest_sale_price)}</td>
                     <td style={{ padding: '5px 6px', textAlign: 'right', color: 'var(--text-secondary)' }}>{c.avg_sale_price_pyeong ? `${c.avg_sale_price_pyeong.toLocaleString()}만` : '-'}</td>
                     <td style={{ padding: '5px 6px', textAlign: 'right', color: Number(c.jeonse_ratio || 0) >= 80 ? 'var(--accent-blue)' : 'var(--text-tertiary)' }}>{c.jeonse_ratio ? `${c.jeonse_ratio}%` : '-'}</td>
-                    <td style={{ padding: '5px 6px', textAlign: 'right', fontWeight: 600, color: Number(c.price_change_1y || 0) > 0 ? 'var(--accent-red)' : Number(c.price_change_1y || 0) < 0 ? 'var(--accent-blue)' : 'var(--text-tertiary)' }}>{c.price_change_1y ? `${Number(c.price_change_1y) > 0 ? '+' : ''}${c.price_change_1y}%` : '-'}</td>
+                    {/* ⚠️ %와 «그 %가 어느 평형인지» 를 같이 낸다. 평형을 떼면 단지 전체가
+                        그만큼 움직인 것으로 읽히고, 실측상 그 오독은 4번 중 1번 방향까지 반대다.
+                        단지마다 대표 평형이 달라 표 머리에 못 적는다 — 칸 안에 붙인다. */}
+                    <td style={{ padding: '5px 6px', textAlign: 'right', fontWeight: 600, color: priceChangeDirection(c) === 'up' ? 'var(--accent-red)' : priceChangeDirection(c) === 'down' ? 'var(--accent-blue)' : 'var(--text-tertiary)' }}>
+                      {canShowPriceChange(c) ? (
+                        <>
+                          {`${Number(c.price_change_1y) > 0 ? '+' : ''}${c.price_change_1y}%`}
+                          <span style={{ display: 'block', fontSize: 10, fontWeight: 500, color: 'var(--text-tertiary)', lineHeight: 1.3 }}>
+                            {pcArea(c)}
+                          </span>
+                        </>
+                      ) : '-'}
+                    </td>
                   </tr>
                 ))}
                 {myPriceMax > 0 && (

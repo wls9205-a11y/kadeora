@@ -1,4 +1,5 @@
 import LoginGate from '@/components/LoginGate';
+import { priceChangeSentence } from '@/lib/apt/price-change';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { SITE_URL } from '@/lib/constants';
 import { notFound } from 'next/navigation';
@@ -355,7 +356,7 @@ export default async function ComplexDetailPage({ params }: Props) {
           { '@type': 'Question', name: `${decoded} 전세가율은?`, acceptedAnswer: { '@type': 'Answer', text: `${decoded}의 전세가율은 ${jeonseRatio ? `${jeonseRatio}%` : '정보 없음'}입니다.${jeonseRatio && jeonseRatio > 70 ? ' 전세가율이 높아 갭투자 시 주의가 필요합니다.' : jeonseRatio && jeonseRatio < 50 ? ' 전세가율이 낮아 매매 대비 전세가 저렴한 편입니다.' : ''}` } },
           { '@type': 'Question', name: `${decoded} 최근 거래량은?`, acceptedAnswer: { '@type': 'Answer', text: `${decoded}의 최근 거래 건수는 총 ${tradeList.length}건이며, 면적별로 ${areaStats.slice(0,3).map(a => `${a.area} ${a.count}건`).join(', ')}입니다.` } },
           { '@type': 'Question', name: `${decoded} 어떤 면적이 있나요?`, acceptedAnswer: { '@type': 'Answer', text: `${decoded}에는 ${areaStats.map(a => a.area).join(', ')} 면적의 세대가 있으며, 가장 거래가 활발한 면적은 ${areaStats[0]?.area || '정보 없음'}입니다.` } },
-          { '@type': 'Question', name: `${decoded} 가격 추이는?`, acceptedAnswer: { '@type': 'Answer', text: `${decoded}의 ${monthlyTrend.length > 0 ? `최근 ${monthlyTrend.length}개월 추이: 최저 ${fmtAmount(Math.min(...monthlyTrend.map(m => m.avg)))}에서 최고 ${fmtAmount(Math.max(...monthlyTrend.map(m => m.avg)))}` : '가격 추이 정보가 없습니다'}.${profile?.price_change_1y ? ` 1년 변동률 ${Number(profile.price_change_1y) > 0 ? '+' : ''}${profile.price_change_1y}%.` : ''}` } },
+          { '@type': 'Question', name: `${decoded} 가격 추이는?`, acceptedAnswer: { '@type': 'Answer', text: `${decoded}의 ${monthlyTrend.length > 0 ? `최근 ${monthlyTrend.length}개월 추이: 최저 ${fmtAmount(Math.min(...monthlyTrend.map(m => m.avg)))}에서 최고 ${fmtAmount(Math.max(...monthlyTrend.map(m => m.avg)))}` : '가격 추이 정보가 없습니다'}.${priceChangeSentence(profile ?? {}) ? ` ${priceChangeSentence(profile ?? {})}.` : ''}` } },
           { '@type': 'Question', name: `${decoded} 면적별 평당가는?`, acceptedAnswer: { '@type': 'Answer', text: `${decoded}에는 ${areaStats.length}개 면적 타입이 있으며, 면적별 평당가와 거래 이력을 카더라에서 비교 분석할 수 있습니다.` } },
           { '@type': 'Question', name: `${decoded} 입주 연차는?`, acceptedAnswer: { '@type': 'Answer', text: builtYear ? `${decoded}은 ${builtYear}년 준공으로 현재 ${2026 - builtYear}년차(${profile?.age_group || ''})입니다.` : `${decoded}의 준공 연도 정보는 확인되지 않았습니다.` } },
         ],
@@ -950,7 +951,9 @@ export default async function ComplexDetailPage({ params }: Props) {
             {latestPrice > 0 && ` 최근 매매 실거래가는 ${fmtAmount(latestPrice)}이며, 평균 매매가 ${fmtAmount(avgPrice)}, 최고가 ${fmtAmount(maxPrice)}, 최저가 ${fmtAmount(minPrice)}입니다.`}
             {latestJeonse && ` 전세 시세는 ${fmtAmount(latestJeonse.deposit)}${jeonseRatio ? ` (전세가율 ${jeonseRatio}%)` : ''}이며,`}
             {latestMonthly && ` 월세는 보증금 ${fmtAmount(latestMonthly.deposit)}/월 ${latestMonthly.monthly_rent}만원입니다.`}
-            {profile?.price_change_1y && ` 최근 1년 가격 변동률은 ${Number(profile.price_change_1y) > 0 ? '+' : ''}${profile.price_change_1y}%입니다.`}
+            {/* ⚠️ 평형과 표본을 «같이» 낸다. %만 적으면 단지 전체가 그만큼 움직인 것으로 읽히는데,
+                실측상 그 오독은 4번 중 1번 방향까지 반대다 (lib/apt/price-change.ts). */}
+            {priceChangeSentence(profile ?? {}) && ` ${priceChangeSentence(profile ?? {})}입니다.`}
             {areaStats.length > 0 && ` 거래가 가장 활발한 면적은 ${areaStats[0].area}(${areaStats[0].count}건, 평균 ${fmtAmount(areaStats[0].avg)})입니다.`}
             {` 총 ${tradeList.length}건의 매매 거래와 ${rentTrades.length}건의 전월세 거래가 기록되어 있습니다.`}
           </p>

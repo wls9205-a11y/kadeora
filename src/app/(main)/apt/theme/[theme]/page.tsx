@@ -1,4 +1,5 @@
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { priceChangeListLabel, PRICE_CHANGE_COLS } from '@/lib/apt/price-change';
 import { SITE_URL } from '@/lib/constants';
 import Link from 'next/link';
 import type { Metadata } from 'next';
@@ -23,7 +24,7 @@ const THEMES: Record<string, {
     desc: '전세가율이 낮아 매매 대비 전세가 저렴한 안정적인 아파트 단지입니다. 갭투자 리스크가 적어 실수요자에게 유리합니다.',
     keywords: ['전세가율 낮은 아파트', '안정적인 아파트', '갭투자 안전', '투자 안정'],
     query: (sb, region) => {
-      let q = sb.from('apt_complex_profiles').select('apt_name, region_nm, sigungu, dong, latest_sale_price, latest_jeonse_price, jeonse_ratio, sale_count_1y, built_year, age_group, price_change_1y')
+      let q = sb.from('apt_complex_profiles').select(`apt_name, region_nm, sigungu, dong, latest_sale_price, latest_jeonse_price, jeonse_ratio, sale_count_1y, built_year, age_group, ${PRICE_CHANGE_COLS}`)
         .gt('jeonse_ratio', 0).lt('jeonse_ratio', 45).gt('latest_sale_price', 0).not('age_group', 'is', null)
         .order('jeonse_ratio', { ascending: true }).limit(100);
       if (region) q = q.eq('region_nm', region);
@@ -36,7 +37,7 @@ const THEMES: Record<string, {
     desc: '전세가율이 70% 이상으로 높은 단지입니다. 갭투자 위험이 크며, 역전세 리스크에 주의가 필요합니다.',
     keywords: ['전세가율 높은 아파트', '갭투자 위험', '역전세 위험', '전세가율 70'],
     query: (sb, region) => {
-      let q = sb.from('apt_complex_profiles').select('apt_name, region_nm, sigungu, dong, latest_sale_price, latest_jeonse_price, jeonse_ratio, sale_count_1y, built_year, age_group, price_change_1y')
+      let q = sb.from('apt_complex_profiles').select(`apt_name, region_nm, sigungu, dong, latest_sale_price, latest_jeonse_price, jeonse_ratio, sale_count_1y, built_year, age_group, ${PRICE_CHANGE_COLS}`)
         .gte('jeonse_ratio', 70).gt('latest_sale_price', 0).not('age_group', 'is', null)
         .order('jeonse_ratio', { ascending: false }).limit(100);
       if (region) q = q.eq('region_nm', region);
@@ -46,36 +47,38 @@ const THEMES: Record<string, {
   },
   'price-up': {
     title: '최근 1년 가격 상승 아파트',
-    desc: '최근 1년간 매매가가 상승한 아파트 단지입니다. 상승률 기준 정렬.',
+    desc: '최근 1년간 매매가가 상승한 아파트 단지입니다. 단지마다 «가장 많이 거래된 평형» 하나를 고정해 잰 값이고, 그 순으로 정렬합니다. 표본이 2건뿐인 단지도 있어 상위권일수록 표본 수를 같이 보세요.',
     keywords: ['가격 상승 아파트', '아파트 가격 오른 곳', '부동산 상승', '시세 상승'],
     query: (sb, region) => {
-      let q = sb.from('apt_complex_profiles').select('apt_name, region_nm, sigungu, dong, latest_sale_price, latest_jeonse_price, jeonse_ratio, sale_count_1y, built_year, age_group, price_change_1y')
+      let q = sb.from('apt_complex_profiles').select(`apt_name, region_nm, sigungu, dong, latest_sale_price, latest_jeonse_price, jeonse_ratio, sale_count_1y, built_year, age_group, ${PRICE_CHANGE_COLS}`)
         .gt('price_change_1y', 0).gt('latest_sale_price', 0).not('age_group', 'is', null)
         .order('price_change_1y', { ascending: false }).limit(100);
       if (region) q = q.eq('region_nm', region);
       return q;
     },
-    formatSub: (p) => `+${p.price_change_1y}% 상승`,
+    // ⚠️ 평형을 뗀 %를 쓰지 않는다. 이 목록은 «그 평형» 이 오른 순서지
+    //    「단지가 오른 순서」가 아니다 (lib/apt/price-change.ts 상단 실측).
+    formatSub: (p) => priceChangeListLabel(p) ? `${priceChangeListLabel(p)} 상승` : '',
   },
   'price-down': {
     title: '최근 1년 가격 하락 아파트',
-    desc: '최근 1년간 매매가가 하락한 아파트 단지입니다. 저가 매수 기회를 찾는 투자자에게 참고가 됩니다.',
+    desc: '최근 1년간 매매가가 하락한 아파트 단지입니다. 단지마다 «가장 많이 거래된 평형» 하나를 고정해 잰 값입니다.',
     keywords: ['가격 하락 아파트', '아파트 가격 내린 곳', '급매', '저가 매수'],
     query: (sb, region) => {
-      let q = sb.from('apt_complex_profiles').select('apt_name, region_nm, sigungu, dong, latest_sale_price, latest_jeonse_price, jeonse_ratio, sale_count_1y, built_year, age_group, price_change_1y')
+      let q = sb.from('apt_complex_profiles').select(`apt_name, region_nm, sigungu, dong, latest_sale_price, latest_jeonse_price, jeonse_ratio, sale_count_1y, built_year, age_group, ${PRICE_CHANGE_COLS}`)
         .lt('price_change_1y', 0).gt('latest_sale_price', 0).not('age_group', 'is', null)
         .order('price_change_1y', { ascending: true }).limit(100);
       if (region) q = q.eq('region_nm', region);
       return q;
     },
-    formatSub: (p) => `${p.price_change_1y}% 하락`,
+    formatSub: (p) => priceChangeListLabel(p) ? `${priceChangeListLabel(p)} 하락` : '',
   },
   'new-built': {
     title: '신축 아파트 (5년 이내)',
     desc: '최근 5년 이내 준공된 신축 아파트 단지입니다. 최신 설비와 인프라를 갖추고 있습니다.',
     keywords: ['신축 아파트', '새 아파트', '입주 아파트', '최신 아파트'],
     query: (sb, region) => {
-      let q = sb.from('apt_complex_profiles').select('apt_name, region_nm, sigungu, dong, latest_sale_price, latest_jeonse_price, jeonse_ratio, sale_count_1y, built_year, age_group, price_change_1y')
+      let q = sb.from('apt_complex_profiles').select(`apt_name, region_nm, sigungu, dong, latest_sale_price, latest_jeonse_price, jeonse_ratio, sale_count_1y, built_year, age_group, ${PRICE_CHANGE_COLS}`)
         .eq('age_group', '신축').gt('latest_sale_price', 0)
         .order('latest_sale_price', { ascending: false }).limit(100);
       if (region) q = q.eq('region_nm', region);
@@ -88,7 +91,7 @@ const THEMES: Record<string, {
     desc: '최근 1년간 매매 거래가 활발한 인기 아파트 단지입니다. 거래량이 많을수록 시장 관심도가 높습니다.',
     keywords: ['거래 활발 아파트', '인기 아파트', '거래량 많은', '아파트 거래량'],
     query: (sb, region) => {
-      let q = sb.from('apt_complex_profiles').select('apt_name, region_nm, sigungu, dong, latest_sale_price, latest_jeonse_price, jeonse_ratio, sale_count_1y, built_year, age_group, price_change_1y')
+      let q = sb.from('apt_complex_profiles').select(`apt_name, region_nm, sigungu, dong, latest_sale_price, latest_jeonse_price, jeonse_ratio, sale_count_1y, built_year, age_group, ${PRICE_CHANGE_COLS}`)
         .gt('sale_count_1y', 10).gt('latest_sale_price', 0).not('age_group', 'is', null)
         .order('sale_count_1y', { ascending: false }).limit(100);
       if (region) q = q.eq('region_nm', region);

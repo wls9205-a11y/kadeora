@@ -43,6 +43,7 @@ import BlogEndCTA from '@/components/blog/BlogEndCTA';
 import RelatedBlogsSection from '@/components/blog/RelatedBlogsSection';
 import LeadForm from '@/components/apt/LeadForm';
 import { isLeadEligible } from '@/lib/apt/lead-eligibility';
+import { priceChangeCompact } from '@/lib/apt/price-change';
 // s184: BlogSocialBar 제거 — 본문 직후 ShareButtons 1세트로 통합.
 import BlogFooterMeta from '@/components/blog/BlogFooterMeta';
 import CardCarousel from '@/components/og/CardCarousel';
@@ -535,7 +536,10 @@ export default async function BlogDetailPage({ params }: Props) {
         if (cp.jeonse_ratio) sidebarMetrics.push({ label: '전세가율', value: `${cp.jeonse_ratio}%` });
         if (cp.total_households) sidebarMetrics.push({ label: '세대수', value: `${cp.total_households.toLocaleString()}세대` });
         if (cp.built_year) sidebarMetrics.push({ label: '연식', value: `${new Date().getFullYear() - cp.built_year}년차` });
-        if (cp.price_change_1y !== null && cp.price_change_1y !== undefined) sidebarMetrics.push({ label: '1년 변동', value: `${cp.price_change_1y > 0 ? '+' : ''}${cp.price_change_1y}%` });
+        // ⚠️ 평형이 붙은 형태로만 낸다. 근거 컬럼이 하나라도 없으면 아예 넣지 않는다
+        //    (lib/apt/price-change.ts — 평형 없는 %는 단지 전체 변동으로 오독된다).
+        const pcCompact = priceChangeCompact(cp);
+        if (pcCompact) sidebarMetrics.push({ label: '1년 변동', value: pcCompact });
         // 단지백과 + 시군구 허브 내부 링크 (SEO 크로스링크)
         sidebarRelatedLinks.push({ title: `${aptName} 단지백과`, href: `/apt/complex/${encodeURIComponent(aptName)}` });
         if (cp.region_nm && cp.sigungu) sidebarRelatedLinks.push({ title: `${cp.sigungu} 아파트 시세`, href: `/apt/area/${encodeURIComponent(cp.region_nm)}/${encodeURIComponent(cp.sigungu)}` });

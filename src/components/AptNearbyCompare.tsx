@@ -2,7 +2,14 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
-interface Apt { apt_name: string; latest_sale_price: number; avg_sale_price_pyeong: number; price_change_1y: number; jeonse_ratio: number; sale_count_1y: number; built_year: number; }
+// ⚠️ 「변동률」 열을 «뺐다» (2026-08-26).
+//    `price_change_1y` 는 대표 평형 하나를 고정해 잰 값이라, 평형을 안 붙이면
+//    「단지 전체가 그만큼 움직였다」로 읽힌다 — 실측상 그 오독은 4번 중 1번 방향까지 반대다
+//    (lib/apt/price-change.ts 상단). 그런데 이 표가 쓰는 RPC `get_nearby_apt_compare` 는
+//    근거 컬럼(price_change_area · n_recent · n_past)을 «돌려주지 않는다».
+//    → 근거를 못 붙이므로 숫자를 내지 않는다. 다른 화면 6곳과 같은 규칙이다.
+//    되살리려면 RPC 반환에 위 3개를 추가하면 된다. 그때 priceChangeCompact() 를 쓰면 된다.
+interface Apt { apt_name: string; latest_sale_price: number; avg_sale_price_pyeong: number; jeonse_ratio: number; sale_count_1y: number; built_year: number; }
 
 export default function AptNearbyCompare({ aptName, sigungu }: { aptName: string; sigungu: string }) {
   const [data, setData] = useState<Apt[]>([]);
@@ -24,7 +31,6 @@ export default function AptNearbyCompare({ aptName, sigungu }: { aptName: string
               <th style={{ padding: '6px 8px', textAlign: 'left', fontWeight: 600, color: 'var(--text-tertiary)', fontSize: 11 }}>단지</th>
               <th style={{ padding: '6px 8px', textAlign: 'right', fontWeight: 600, color: 'var(--text-tertiary)', fontSize: 11 }}>최근 매매</th>
               <th style={{ padding: '6px 8px', textAlign: 'right', fontWeight: 600, color: 'var(--text-tertiary)', fontSize: 11 }}>평당가</th>
-              <th style={{ padding: '6px 8px', textAlign: 'right', fontWeight: 600, color: 'var(--text-tertiary)', fontSize: 11 }}>변동률</th>
               <th style={{ padding: '6px 8px', textAlign: 'right', fontWeight: 600, color: 'var(--text-tertiary)', fontSize: 11 }}>거래</th>
             </tr>
           </thead>
@@ -37,9 +43,6 @@ export default function AptNearbyCompare({ aptName, sigungu }: { aptName: string
                 </td>
                 <td style={{ padding: '8px', textAlign: 'right', fontWeight: 600 }}>{fmtP(a.latest_sale_price)}</td>
                 <td style={{ padding: '8px', textAlign: 'right', color: 'var(--text-secondary)' }}>{fmtP(a.avg_sale_price_pyeong)}/평</td>
-                <td style={{ padding: '8px', textAlign: 'right', fontWeight: 600, color: a.price_change_1y > 0 ? '#E24B4A' : a.price_change_1y < 0 ? '#3B7BF6' : 'var(--text-tertiary)' }}>
-                  {a.price_change_1y != null ? `${a.price_change_1y > 0 ? '+' : ''}${a.price_change_1y}%` : '-'}
-                </td>
                 <td style={{ padding: '8px', textAlign: 'right', color: 'var(--text-tertiary)' }}>{a.sale_count_1y}건</td>
               </tr>
             ))}

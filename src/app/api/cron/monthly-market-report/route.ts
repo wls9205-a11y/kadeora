@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { priceChangeCompact, PRICE_CHANGE_COLS } from '@/lib/apt/price-change';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
@@ -50,7 +51,7 @@ export async function GET() {
 
       // 시군구 데이터 집계
       const { data: profiles } = await (sb as any).from('apt_complex_profiles')
-        .select('apt_name, latest_sale_price, latest_jeonse_price, jeonse_ratio, sale_count_1y, age_group, price_change_1y')
+        .select(`apt_name, latest_sale_price, latest_jeonse_price, jeonse_ratio, sale_count_1y, age_group, ${PRICE_CHANGE_COLS}`)
         .eq('region_nm', region).eq('sigungu', sigungu)
         .not('age_group', 'is', null).gt('latest_sale_price', 0)
         .order('sale_count_1y', { ascending: false }).limit(500);
@@ -87,7 +88,7 @@ ${sigungu} 아파트의 평균 매매가는 **${fmtAmt(avgPrice)}**입니다.${a
 
 ## 주요 단지
 
-${top3.map((p: any, i: number) => `${i + 1}. **${p.apt_name}** — 매매가 ${fmtAmt(p.latest_sale_price)}${p.jeonse_ratio ? `, 전세가율 ${p.jeonse_ratio}%` : ''}${p.price_change_1y ? `, 변동률 ${Number(p.price_change_1y) > 0 ? '+' : ''}${p.price_change_1y}%` : ''}`).join('\n')}
+${top3.map((p: any, i: number) => `${i + 1}. **${p.apt_name}** — 매매가 ${fmtAmt(p.latest_sale_price)}${p.jeonse_ratio ? `, 전세가율 ${p.jeonse_ratio}%` : ''}${priceChangeCompact(p) ? `, 변동률 ${priceChangeCompact(p)}` : ''}`).join('\n')}
 
 ## 단지 구성
 

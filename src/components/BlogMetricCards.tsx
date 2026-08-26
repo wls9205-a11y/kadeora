@@ -57,7 +57,11 @@ export default function BlogMetricCards({ metrics }: BlogMetricCardsProps) {
 export function buildAptMetrics(data: any): Metric[] {
   const metrics: Metric[] = [];
   if (data?.avg_sale_price_pyeong) {
-    metrics.push({ label: '평당가', value: `${data.avg_sale_price_pyeong.toLocaleString()}만`, change: data.price_change_1y });
+    // ⚠️ 여기에 `change: data.price_change_1y` 를 «다시 붙이지 말 것».
+    //    두 가지가 어긋난다: ① 그 값은 «매매가» 변동률이지 평당가 변동률이 아니다.
+    //    ② 대표 평형 하나를 고정해 잰 값이라 평형을 안 붙이면 단지 전체 변동으로 읽힌다
+    //    (lib/apt/price-change.ts). 이 함수는 현재 호출되는 곳이 없다 — 되살릴 때 확인할 것.
+    metrics.push({ label: '평당가', value: `${data.avg_sale_price_pyeong.toLocaleString()}만` });
   }
   if (data?.jeonse_ratio) {
     metrics.push({ label: '전세가율', value: `${data.jeonse_ratio}%` });
