@@ -24,15 +24,15 @@ const KNOWN_EXPERIMENTS: ExperimentSpec[] = [
 
 function ctrTone(ctr: number | null): string {
   if (ctr === null) return 'var(--text-tertiary)';
-  if (ctr >= 5) return '#22c55e';
-  if (ctr >= 1) return '#fbbf24';
-  return '#ef4444';
+  if (ctr >= 5) return 'var(--accent-green)';
+  if (ctr >= 1) return 'var(--accent-yellow)';
+  return 'var(--accent-red)';
 }
 
 function deltaTone(delta: number | null, significant: boolean | null): string {
   if (delta === null || !significant) return 'var(--text-tertiary)';
-  if (delta > 0) return '#22c55e';
-  if (delta < 0) return '#ef4444';
+  if (delta > 0) return 'var(--accent-green)';
+  if (delta < 0) return 'var(--accent-red)';
   return 'var(--text-tertiary)';
 }
 
@@ -58,7 +58,7 @@ export default async function AbExperimentViewer({
   if (active.length === 0) {
     return (
       <section aria-label="A/B 실험" style={{ marginBottom: 18 }}>
-        <h2 style={{ fontSize: 14, fontWeight: 700, marginBottom: 6, color: 'var(--text-primary)' }}>
+        <h2 style={{ fontSize: 14, fontWeight: 600, marginBottom: 6, color: 'var(--text-primary)' }}>
           🧪 A/B 실험 ({windowDays}일)
         </h2>
         <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
@@ -70,7 +70,7 @@ export default async function AbExperimentViewer({
 
   return (
     <section aria-label="A/B 실험" style={{ marginBottom: 18 }}>
-      <h2 style={{ fontSize: 14, fontWeight: 700, marginBottom: 10, color: 'var(--text-primary)' }}>
+      <h2 style={{ fontSize: 14, fontWeight: 600, marginBottom: 10, color: 'var(--text-primary)' }}>
         🧪 A/B 실험 ({windowDays}일)
       </h2>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -84,7 +84,7 @@ export default async function AbExperimentViewer({
               borderRadius: 'var(--radius-md, 10px)',
             }}
           >
-            <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8, wordBreak: 'keep-all' }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 8, wordBreak: 'keep-all' }}>
               {spec.label}
               <span style={{ marginLeft: 8, fontSize: 10, color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)' }}>
                 {spec.name}
@@ -107,7 +107,7 @@ export default async function AbExperimentViewer({
                   const vs = r.vs_control_pct === null ? null : Number(r.vs_control_pct);
                   return (
                     <tr key={r.variant} style={{ borderTop: '1px solid var(--border)' }}>
-                      <td style={{ padding: '6px 10px', fontWeight: 700, color: 'var(--text-primary)' }}>{r.variant}</td>
+                      <td style={{ padding: '6px 10px', fontWeight: 500, color: 'var(--text-primary)' }}>{r.variant}</td>
                       <td style={{ padding: '6px 10px', textAlign: 'right', color: 'var(--text-secondary)' }}>{Number(r.views).toLocaleString()}</td>
                       <td style={{ padding: '6px 10px', textAlign: 'right', color: 'var(--text-secondary)' }}>{Number(r.clicks).toLocaleString()}</td>
                       <td style={{ padding: '6px 10px', textAlign: 'right', fontWeight: 700, color: ctrTone(ctr) }}>

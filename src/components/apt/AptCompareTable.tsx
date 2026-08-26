@@ -122,7 +122,7 @@ export default async function AptCompareTable({ slug, currentSite }: Props) {
             const cell: React.CSSProperties = { padding: '10px 12px', borderTop: i > 0 ? '1px solid var(--border)' : 'none' };
             return (
               <tr key={r.slug + i} style={{ background: bg }}>
-                <td style={{ ...cell, fontWeight: r.isCurrent ? 800 : 600, color: 'var(--text-primary)' }}>
+                <td style={{ ...cell, fontWeight: r.isCurrent ? 600 : 500, color: 'var(--text-primary)' }}>
                   {r.isCurrent ? (
                     <span>{r.name} <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 500, color: 'var(--kd-accent)', marginLeft: 4 }}>★ 현재</span></span>
                   ) : (

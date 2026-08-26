@@ -23,7 +23,7 @@ export default function KPIStrip({ items }: Props) {
       {items.map((it, i) => (
         <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
           <span style={{ color: 'var(--text-tertiary)', fontWeight: 600 }}>{it.label}</span>
-          <span style={{ color: TONE_COLOR[it.tone ?? 'default'], fontWeight: 800 }}>{it.value}</span>
+          <span style={{ color: TONE_COLOR[it.tone ?? 'default'], fontWeight: 700 }}>{it.value}</span>
         </div>
       ))}
     </div>

@@ -433,7 +433,7 @@ export default async function BlogPage({ searchParams }: Props) {
         {CATS.map(c => (
           <Link key={c.key} href={`/blog${c.key !== 'all' ? `?category=${c.key}` : ''}${sort !== 'latest' ? `${c.key !== 'all' ? '&' : '?'}sort=${sort}` : ''}${q ? `${c.key !== 'all' || sort !== 'latest' ? '&' : '?'}q=${q}` : ''}`}
             style={{
-              padding: '8px 14px', minHeight: 44, fontSize: 'var(--fs-sm)', fontWeight: activeTab === c.key ? 700 : 500,
+              padding: '8px 14px', minHeight: 44, fontSize: 'var(--fs-sm)', fontWeight: activeTab === c.key ? 600 : 500,
               color: activeTab === c.key ? 'var(--brand)' : 'var(--text-tertiary)',
               textDecoration: 'none', flexShrink: 0,
               borderBottom: activeTab === c.key ? '2px solid var(--brand)' : '2px solid transparent',
@@ -458,7 +458,7 @@ export default async function BlogPage({ searchParams }: Props) {
         <div style={{ display: 'flex', gap: 6, marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none' }}>
           <Link href={`/blog?category=${category}${sort !== 'latest' ? `&sort=${sort}` : ''}${q ? `&q=${q}` : ''}`}
             style={{
-              padding: '4px 12px', borderRadius: 'var(--radius-pill)', fontSize: 'var(--fs-xs)', fontWeight: !sub ? 700 : 500,
+              padding: '4px 12px', borderRadius: 'var(--radius-pill)', fontSize: 'var(--fs-xs)', fontWeight: !sub ? 600 : 500,
               background: !sub ? 'var(--brand)' : 'var(--bg-hover)',
               color: !sub ? 'var(--text-inverse)' : 'var(--text-tertiary)',
               textDecoration: 'none', flexShrink: 0, border: 'none',
@@ -468,7 +468,7 @@ export default async function BlogPage({ searchParams }: Props) {
           {subChips.map(sc => (
             <Link key={sc.key} href={`/blog?category=${category}&sub=${sc.key}${sort !== 'latest' ? `&sort=${sort}` : ''}${q ? `&q=${q}` : ''}`}
               style={{
-                padding: '4px 12px', borderRadius: 'var(--radius-pill)', fontSize: 'var(--fs-xs)', fontWeight: sub === sc.key ? 700 : 500,
+                padding: '4px 12px', borderRadius: 'var(--radius-pill)', fontSize: 'var(--fs-xs)', fontWeight: sub === sc.key ? 600 : 500,
                 background: sub === sc.key ? 'var(--brand)' : 'var(--bg-hover)',
                 color: sub === sc.key ? 'var(--text-inverse)' : 'var(--text-tertiary)',
                 textDecoration: 'none', flexShrink: 0, border: 'none',

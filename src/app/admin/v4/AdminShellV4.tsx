@@ -95,7 +95,7 @@ export default function AdminShellV4() {
         <a
           href="/admin/signup-flow"
           style={{
-            fontSize: 11, fontWeight: 700,
+            fontSize: 11, fontWeight: 500,
             padding: '6px 12px', borderRadius: 6,
             background: 'transparent', color: 'var(--text-secondary)',
             border: '1px solid var(--border)', textDecoration: 'none',
@@ -104,7 +104,7 @@ export default function AdminShellV4() {
         <a
           href="/admin/marketing/kakao"
           style={{
-            fontSize: 11, fontWeight: 700,
+            fontSize: 11, fontWeight: 500,
             padding: '6px 12px', borderRadius: 6,
             background: 'transparent', color: 'var(--text-secondary)',
             border: '1px solid var(--border)', textDecoration: 'none',
@@ -119,14 +119,14 @@ export default function AdminShellV4() {
           { href: '/admin/seo-measurement',     label: '🎯 SEO 측정' },
         ].map(m => (
           <a key={m.href} href={m.href} style={{
-            fontSize: 11, fontWeight: 700,
+            fontSize: 11, fontWeight: 500,
             padding: '6px 12px', borderRadius: 6,
             background: 'transparent', color: 'var(--text-secondary)',
             border: '1px solid var(--border)', textDecoration: 'none',
           }}>{m.label}</a>
         ))}
         <button onClick={fetchData} style={{
-          fontSize: 11, fontWeight: 700,
+          fontSize: 11, fontWeight: 500,
           padding: '6px 12px', borderRadius: 6, cursor: 'pointer',
           background: 'transparent', color: 'var(--text-secondary)',
           border: '1px solid var(--border)',

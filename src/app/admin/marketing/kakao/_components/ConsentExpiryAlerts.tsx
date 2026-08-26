@@ -69,7 +69,7 @@ export default function ConsentExpiryAlerts() {
         flexWrap: 'wrap',
       }}
     >
-      <span style={{ fontSize: 13, fontWeight: 700, color: '#fbbf24' }}>
+      <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--accent-yellow)' }}>
         ⚠ {expiring.toLocaleString()}명이 14일 안에 마케팅 동의 2년 만료
       </span>
       <button
@@ -77,11 +77,11 @@ export default function ConsentExpiryAlerts() {
         disabled={busy}
         style={{
           fontSize: 12,
-          fontWeight: 700,
+          fontWeight: 600,
           padding: '6px 12px',
           borderRadius: 6,
           cursor: busy ? 'wait' : 'pointer',
-          background: '#f59e0b',
+          background: 'var(--accent-yellow)',
           color: '#1a1a1a',
           border: '1px solid #f59e0b',
           opacity: busy ? 0.6 : 1,

@@ -28,11 +28,11 @@ export default function OpsSection({ data }: Props) {
       background: 'var(--bg-elevated)', border: '1px solid var(--border)',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-        <h2 style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>⚙️ 운영</h2>
+        <h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>⚙️ 운영</h2>
         <button
           onClick={() => setGodOpen(v => !v)}
           style={{
-            marginLeft: 'auto', fontSize: 11, fontWeight: 700,
+            marginLeft: 'auto', fontSize: 11, fontWeight: 500,
             padding: '6px 10px', borderRadius: 6, border: '1px solid var(--border)',
             background: 'transparent', color: 'var(--text-secondary)', cursor: 'pointer',
           }}

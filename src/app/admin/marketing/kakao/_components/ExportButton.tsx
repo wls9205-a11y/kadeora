@@ -50,7 +50,7 @@ export default function ExportButton({
       disabled={busy}
       style={{
         fontSize: 12,
-        fontWeight: 700,
+        fontWeight: 500,
         padding: '8px 14px',
         borderRadius: 6,
         cursor: busy ? 'wait' : 'pointer',

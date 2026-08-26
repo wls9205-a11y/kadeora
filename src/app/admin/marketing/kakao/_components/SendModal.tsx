@@ -119,7 +119,7 @@ export default function SendModal({
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <h2 style={{ fontSize: 14, fontWeight: 800, margin: 0 }}>📤 카카오 발송</h2>
+          <h2 style={{ fontSize: 14, fontWeight: 600, margin: 0 }}>📤 카카오 발송</h2>
           <button
             onClick={onClose}
             style={{
@@ -143,7 +143,7 @@ export default function SendModal({
               border: '1px solid rgba(248,113,113,0.5)',
               color: 'var(--accent-red)',
               fontSize: 12,
-              fontWeight: 700,
+              fontWeight: 500,
             }}
           >
             ⚠ 야간 동의 사용자만 발송됩니다 (21:00–07:59)
@@ -244,7 +244,7 @@ export default function SendModal({
             onClick={onClose}
             style={{
               fontSize: 12,
-              fontWeight: 700,
+              fontWeight: 600,
               padding: '8px 14px',
               borderRadius: 6,
               cursor: 'pointer',
@@ -260,7 +260,7 @@ export default function SendModal({
             disabled={busy}
             style={{
               fontSize: 12,
-              fontWeight: 700,
+              fontWeight: 600,
               padding: '8px 14px',
               borderRadius: 6,
               cursor: busy ? 'wait' : 'pointer',

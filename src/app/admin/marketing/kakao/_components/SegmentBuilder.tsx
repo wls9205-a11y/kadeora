@@ -106,7 +106,7 @@ export default function SegmentBuilder({
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <h2 style={{ fontSize: 13, fontWeight: 800, margin: 0 }}>세그먼트 빌더</h2>
+        <h2 style={{ fontSize: 13, fontWeight: 600, margin: 0 }}>세그먼트 빌더</h2>
         <input
           value={segmentName}
           onChange={(e) => onSegmentNameChange(e.target.value)}
@@ -198,7 +198,7 @@ export default function SegmentBuilder({
           {loading && <span style={{ marginLeft: 8 }}>로드 중…</span>}
           {err && <span style={{ marginLeft: 8, color: 'var(--accent-red)' }}>실패: {err}</span>}
         </div>
-        <div style={{ fontSize: 22, fontWeight: 800 }}>
+        <div style={{ fontSize: 22, fontWeight: 700 }}>
           {preview?.count == null ? '—' : preview.count.toLocaleString()}명
         </div>
         {sample.length > 0 && (
@@ -353,7 +353,7 @@ function Toggle({
 function btnStyle(variant: 'primary' | 'default'): React.CSSProperties {
   return {
     fontSize: 12,
-    fontWeight: 700,
+    fontWeight: 500,
     padding: '8px 14px',
     borderRadius: 6,
     cursor: 'pointer',

@@ -13,7 +13,7 @@ interface Props {
 }
 
 const PALETTE: Record<Severity, { bg: string; border: string; text: string; icon: string }> = {
-  critical: { bg: 'rgba(248,113,113,0.08)',  border: 'rgba(248,113,113,0.45)', text: '#f87171', icon: '🚨' },
+  critical: { bg: 'rgba(248,113,113,0.08)',  border: 'rgba(248,113,113,0.45)', text: 'var(--accent-red)', icon: '🚨' },
   warn:     { bg: 'rgba(251,146,60,0.08)',   border: 'rgba(251,146,60,0.4)',   text: '#fb923c', icon: '⚠️' },
   info:     { bg: 'rgba(59,130,246,0.06)',   border: 'rgba(59,130,246,0.3)',   text: '#60a5fa', icon: 'ℹ️' },
 };
@@ -29,9 +29,9 @@ export default function AlertCard({ severity, title, hideWhenEmpty, count, child
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <span style={{ fontSize: 16 }}>{p.icon}</span>
-        <span style={{ fontSize: 13, fontWeight: 800, color: p.text }}>{title}</span>
+        <span style={{ fontSize: 13, fontWeight: 600, color: p.text }}>{title}</span>
         {typeof count === 'number' && (
-          <span style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 700, color: p.text, opacity: 0.85 }}>
+          <span style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 600, color: p.text, opacity: 0.85 }}>
             {count}건
           </span>
         )}

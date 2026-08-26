@@ -11,9 +11,9 @@ type Row = {
   published: number;
 };
 
-const COLOR_OK = "#10b981";
-const COLOR_BLOCK = "#ef4444";
-const COLOR_PENDING = "#f59e0b";
+const COLOR_OK = "var(--accent-green)";
+const COLOR_BLOCK = "var(--accent-red)";
+const COLOR_PENDING = "var(--accent-yellow)";
 
 export default function PipelineSankey({ rows }: { rows: Row[] }) {
   const data = useMemo(() => {

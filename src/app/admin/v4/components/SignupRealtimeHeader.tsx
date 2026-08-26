@@ -115,10 +115,10 @@ export default function SignupRealtimeHeader() {
             display: 'flex', flexDirection: 'column', gap: 2,
             minWidth: 0,
           }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: 0.3 }}>
+            <div style={{ fontSize: 10, fontWeight: 500, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: 0.3 }}>
               {t.label}
             </div>
-            <div style={{ fontSize: 18, fontWeight: 800, color: tone.color, lineHeight: 1.1 }}>
+            <div style={{ fontSize: 18, fontWeight: 700, color: tone.color, lineHeight: 1.1 }}>
               {t.value}
             </div>
             {t.sub != null && (

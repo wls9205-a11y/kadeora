@@ -53,7 +53,7 @@ const chip = (active: boolean): React.CSSProperties => ({
   background: active ? 'var(--brand)' : 'var(--bg-surface)',
   color: active ? '#FFFFFF' : 'var(--text-secondary)',
   fontSize: 13,
-  fontWeight: active ? 700 : 600,
+  fontWeight: active ? 600 : 500,
   cursor: 'pointer',
   whiteSpace: 'nowrap',
 });
@@ -72,7 +72,7 @@ const field: React.CSSProperties = {
 const label: React.CSSProperties = {
   display: 'block',
   fontSize: 11,
-  fontWeight: 800,
+  fontWeight: 500,
   letterSpacing: '.02em',
   color: 'var(--text-tertiary)',
   margin: '0 0 6px',
@@ -183,7 +183,7 @@ export default function StageInputClient() {
 
   return (
     <div style={{ maxWidth: 560, margin: '0 auto', padding: '16px 14px 64px' }}>
-      <h1 style={{ fontSize: 18, fontWeight: 800, margin: '0 0 4px', color: 'var(--text-primary)' }}>
+      <h1 style={{ fontSize: 18, fontWeight: 600, margin: '0 0 4px', color: 'var(--text-primary)' }}>
         현장 단계 한 줄 입력
       </h1>
       <p style={{ fontSize: 12, lineHeight: 1.6, color: 'var(--text-tertiary)', margin: '0 0 18px' }}>
@@ -224,7 +224,7 @@ export default function StageInputClient() {
             }}
           >
             <span style={{ flex: 1, minWidth: 0 }}>
-              <span style={{ display: 'block', fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>
+              <span style={{ display: 'block', fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
                 {picked.name}
               </span>
               <span style={{ display: 'block', fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>
@@ -390,7 +390,7 @@ export default function StageInputClient() {
           background: canSave && !busy ? 'var(--brand)' : 'var(--bg-elevated)',
           color: canSave && !busy ? '#FFFFFF' : 'var(--text-tertiary)',
           fontSize: 15,
-          fontWeight: 800,
+          fontWeight: 500,
           cursor: canSave && !busy ? 'pointer' : 'not-allowed',
         }}
       >

@@ -39,7 +39,7 @@ const PANEL: React.CSSProperties = {
 const LABEL: React.CSSProperties = {
   display: 'block',
   fontSize: 11,
-  fontWeight: 700,
+  fontWeight: 600,
   color: 'var(--text-tertiary)',
   marginBottom: 4,
 };
@@ -181,7 +181,7 @@ export default function AptCoverUploader() {
 
   return (
     <section style={{ ...PANEL, marginTop: 16 }} aria-label="조감도 업로드">
-      <h2 style={{ margin: '0 0 4px', fontSize: 14, fontWeight: 800, color: 'var(--text-primary)' }}>
+      <h2 style={{ margin: '0 0 4px', fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
         조감도 업로드
       </h2>
       <p style={{ margin: '0 0 12px', fontSize: 11.5, lineHeight: 1.6, color: 'var(--text-tertiary)' }}>
@@ -225,7 +225,7 @@ export default function AptCoverUploader() {
                     {[s.region, s.sigungu].filter(Boolean).join(' ')} · {s.slug}
                   </span>
                 </span>
-                <span style={{ flexShrink: 0, fontSize: 10, fontWeight: 700, color: s.hero_image_url ? 'var(--accent-green)' : 'var(--text-tertiary)' }}>
+                <span style={{ flexShrink: 0, fontSize: 10, fontWeight: 500, color: s.hero_image_url ? 'var(--accent-green)' : 'var(--text-tertiary)' }}>
                   {s.hero_image_url ? '조감도 있음' : s.satellite_image_url ? '위성만' : '이미지 없음'}
                 </span>
               </button>
@@ -237,7 +237,7 @@ export default function AptCoverUploader() {
       {/* 선택된 현장 */}
       {selected && (
         <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid var(--border)' }}>
-          <p style={{ margin: '0 0 10px', fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
+          <p style={{ margin: '0 0 10px', fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>
             {selected.name}
             <span style={{ marginLeft: 6, fontSize: 11, fontWeight: 500, color: 'var(--text-tertiary)' }}>{selected.slug}</span>
           </p>
@@ -262,7 +262,7 @@ export default function AptCoverUploader() {
                   marginTop: 8, minHeight: 36, padding: '0 12px',
                   borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)',
                   background: 'var(--bg-base)', color: 'var(--accent-red)',
-                  fontSize: 12, fontWeight: 700, cursor: busy ? 'not-allowed' : 'pointer',
+                  fontSize: 12, fontWeight: 500, cursor: busy ? 'not-allowed' : 'pointer',
                 }}
               >
                 조감도 내리기
@@ -330,7 +330,7 @@ export default function AptCoverUploader() {
               borderRadius: 'var(--radius-sm)', border: 'none',
               background: busy || !credit.trim() || !file ? 'var(--bg-sunken)' : 'var(--brand)',
               color: busy || !credit.trim() || !file ? 'var(--text-tertiary)' : '#FFFFFF',
-              fontSize: 13.5, fontWeight: 700,
+              fontSize: 13.5, fontWeight: 600,
               cursor: busy || !credit.trim() || !file ? 'not-allowed' : 'pointer',
             }}
           >

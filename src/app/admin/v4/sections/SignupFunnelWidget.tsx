@@ -48,13 +48,13 @@ function fmtPct(v: any): string {
 function deltaColor(v: any): string {
   const x = Number(v);
   if (!Number.isFinite(x) || x === 0) return 'var(--text-tertiary)';
-  return x > 0 ? '#34d399' : '#f87171';
+  return x > 0 ? 'var(--accent-green)' : 'var(--accent-red)';
 }
 function healthBadge(s: HealthStatus | undefined): { bg: string; fg: string; label: string } {
   switch (s) {
-    case 'OK':       return { bg: 'rgba(52,211,153,0.14)',  fg: '#34d399', label: 'OK' };
-    case 'WARN':     return { bg: 'rgba(251,191,36,0.16)',  fg: '#fbbf24', label: 'WARN' };
-    case 'CRITICAL': return { bg: 'rgba(248,113,113,0.16)', fg: '#f87171', label: 'CRITICAL' };
+    case 'OK':       return { bg: 'rgba(52,211,153,0.14)',  fg: 'var(--accent-green)', label: 'OK' };
+    case 'WARN':     return { bg: 'rgba(251,191,36,0.16)',  fg: 'var(--accent-yellow)', label: 'WARN' };
+    case 'CRITICAL': return { bg: 'rgba(248,113,113,0.16)', fg: 'var(--accent-red)', label: 'CRITICAL' };
     default:         return { bg: 'rgba(156,163,175,0.18)', fg: '#9ca3af', label: '데이터 부족' };
   }
 }
@@ -114,7 +114,7 @@ export default function SignupFunnelWidget() {
     >
       {/* 헤더 */}
       <header style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-        <h2 style={{ margin: 0, fontSize: 13, fontWeight: 800, color: 'var(--text-primary)' }}>
+        <h2 style={{ margin: 0, fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>
           🎯 가입 진단
         </h2>
         <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
@@ -136,7 +136,7 @@ export default function SignupFunnelWidget() {
           <a
             href="/admin/signup-flow"
             style={{
-              fontSize: 11, fontWeight: 700,
+              fontSize: 11, fontWeight: 500,
               padding: '6px 12px', borderRadius: 6,
               background: 'transparent', color: 'var(--text-secondary)',
               border: '1px solid var(--border)', textDecoration: 'none',
@@ -145,7 +145,7 @@ export default function SignupFunnelWidget() {
           <button
             onClick={fetchData}
             style={{
-              fontSize: 11, fontWeight: 700, padding: '6px 10px', borderRadius: 6,
+              fontSize: 11, fontWeight: 500, padding: '6px 10px', borderRadius: 6,
               background: 'transparent', color: 'var(--text-secondary)',
               border: '1px solid var(--border)', cursor: 'pointer',
             }}
@@ -174,21 +174,21 @@ export default function SignupFunnelWidget() {
 
           {/* B) 24h funnel 미니 막대 */}
           <div>
-            <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--text-tertiary)', letterSpacing: 1, marginBottom: 6 }}>24H FUNNEL</div>
+            <div style={{ fontSize: 10, fontWeight: 500, color: 'var(--text-tertiary)', letterSpacing: 1, marginBottom: 6 }}>24H FUNNEL</div>
             <FunnelMini funnel={funnel} />
           </div>
 
           {/* C+D 두 칼럼 — 8h sparkline + 최근 가입 */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
             <div>
-              <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--text-tertiary)', letterSpacing: 1, marginBottom: 6 }}>
-                8H TREND <span style={{ marginLeft: 6, color: 'var(--brand)', fontWeight: 700 }}>● 방문</span>
-                <span style={{ marginLeft: 6, color: 'var(--accent-green)', fontWeight: 700 }}>● 가입</span>
+              <div style={{ fontSize: 10, fontWeight: 500, color: 'var(--text-tertiary)', letterSpacing: 1, marginBottom: 6 }}>
+                8H TREND <span style={{ marginLeft: 6, color: 'var(--brand)', fontWeight: 500 }}>● 방문</span>
+                <span style={{ marginLeft: 6, color: 'var(--accent-green)', fontWeight: 500 }}>● 가입</span>
               </div>
               <Sparkline rows={spark} />
             </div>
             <div>
-              <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--text-tertiary)', letterSpacing: 1, marginBottom: 6 }}>최근 가입 (5)</div>
+              <div style={{ fontSize: 10, fontWeight: 500, color: 'var(--text-tertiary)', letterSpacing: 1, marginBottom: 6 }}>최근 가입 (5)</div>
               <RecentList rows={recent} />
             </div>
           </div>
@@ -212,14 +212,14 @@ function KpiTile({ label, value, delta, highlight }: { label: string; value: num
       background: highlight ? 'rgba(52,211,153,0.06)' : 'var(--bg-base)',
       border: '1px solid var(--border)',
     }}>
-      <div style={{ fontSize: 9, fontWeight: 800, color: 'var(--text-tertiary)', letterSpacing: 1 }}>{label}</div>
+      <div style={{ fontSize: 9, fontWeight: 500, color: 'var(--text-tertiary)', letterSpacing: 1 }}>{label}</div>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginTop: 2 }}>
         <span style={{
-          fontSize: 22, fontWeight: 900, letterSpacing: -0.5,
+          fontSize: 22, fontWeight: 700, letterSpacing: -0.5,
           color: highlight ? 'var(--accent-green)' : 'var(--text-primary)',
         }}>{fmtNum(value)}</span>
         {delta != null && (
-          <span style={{ fontSize: 10, fontWeight: 800, color: deltaColor(delta) }}>
+          <span style={{ fontSize: 10, fontWeight: 500, color: deltaColor(delta) }}>
             {fmtPct(delta)}
           </span>
         )}
@@ -244,16 +244,16 @@ function FunnelMini({ funnel }: { funnel: Funnel24h }) {
         const prev = i > 0 ? stages[i - 1].v : 0;
         const passRate = prev > 0 ? (s.v / prev) * 100 : null;
         const passColor = passRate == null ? 'var(--text-tertiary)'
-          : passRate >= 70 ? '#34d399'
-          : passRate >= 30 ? '#fbbf24'
-          : '#f87171';
+          : passRate >= 70 ? 'var(--accent-green)'
+          : passRate >= 30 ? 'var(--accent-yellow)'
+          : 'var(--accent-red)';
         return (
           <div key={s.key} style={{ display: 'grid', gridTemplateColumns: '52px 1fr 56px 70px', gap: 8, alignItems: 'center' }}>
-            <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-secondary)' }}>{s.label}</span>
+            <span style={{ fontSize: 10, fontWeight: 500, color: 'var(--text-secondary)' }}>{s.label}</span>
             <div style={{ height: 14, background: 'var(--bg-base)', borderRadius: 3, overflow: 'hidden', border: '1px solid var(--border)' }}>
               <div style={{ width: `${w}%`, height: '100%', background: 'linear-gradient(90deg, #2563EB 0%, #60A5FA 100%)' }} />
             </div>
-            <span style={{ fontSize: 11, fontWeight: 800, textAlign: 'right' }}>{fmtNum(s.v)}</span>
+            <span style={{ fontSize: 11, fontWeight: 700, textAlign: 'right' }}>{fmtNum(s.v)}</span>
             <span style={{ fontSize: 9, fontWeight: 700, color: passColor, textAlign: 'right' }}>
               {passRate == null ? '—' : `통과 ${passRate.toFixed(0)}%`}
             </span>
@@ -290,7 +290,7 @@ function Sparkline({ rows }: { rows: SparkRow[] }) {
         <path d={linePath} stroke="#60a5fa" strokeWidth="1.5" fill="none" strokeLinejoin="round" strokeLinecap="round" />
         {/* signup dots */}
         {sorted.map((_, i) => signups[i] > 0 ? (
-          <circle key={i} cx={xAt(i)} cy={yAt(signups[i])} r={3} fill="#34d399" />
+          <circle key={i} cx={xAt(i)} cy={yAt(signups[i])} r={3} style={{ fill: 'var(--accent-green)' }} />
         ) : null)}
       </svg>
       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, color: 'var(--text-tertiary)', marginTop: 2 }}>
@@ -317,7 +317,7 @@ function RecentList({ rows }: { rows: RecentSignup[] }) {
           <span style={{ fontSize: 11, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {r.email_masked || '—'}
           </span>
-          <span style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-secondary)', padding: '1px 6px', borderRadius: 3, background: 'var(--bg-elevated)' }}>
+          <span style={{ fontSize: 9, fontWeight: 500, color: 'var(--text-secondary)', padding: '1px 6px', borderRadius: 3, background: 'var(--bg-elevated)' }}>
             {r.source || r.provider || '—'}
           </span>
           <span style={{ fontSize: 10, color: 'var(--text-tertiary)', whiteSpace: 'nowrap' }}>
@@ -331,7 +331,7 @@ function RecentList({ rows }: { rows: RecentSignup[] }) {
 
 function badgeStyle(bg: string): React.CSSProperties {
   return {
-    fontSize: 10, fontWeight: 800,
+    fontSize: 10, fontWeight: 500,
     padding: '4px 10px', borderRadius: 999,
     background: bg, letterSpacing: 0.3,
   };

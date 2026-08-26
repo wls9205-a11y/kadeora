@@ -8,9 +8,9 @@ interface Props {
 }
 
 function colorFor(s: number): string {
-  if (s <= 40) return '#f87171';
-  if (s <= 70) return '#fbbf24';
-  return '#34d399';
+  if (s <= 40) return 'var(--accent-red)';
+  if (s <= 70) return 'var(--accent-yellow)';
+  return 'var(--accent-green)';
 }
 
 export default function HealthRing({ score, size = 64, label = '헬스 점수' }: Props) {
@@ -27,10 +27,10 @@ export default function HealthRing({ score, size = 64, label = '헬스 점수' }
     }}>
       <div style={{ position: 'relative', width: size, height: size }}>
         <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ transform: 'rotate(-90deg)' }}>
-          <circle cx={size / 2} cy={size / 2} r={r} stroke="var(--border)" strokeWidth={4} fill="none" />
+          <circle cx={size / 2} cy={size / 2} r={r} style={{ stroke: 'var(--border)' }} strokeWidth={4} fill="none" />
           <circle
             cx={size / 2} cy={size / 2} r={r}
-            stroke={color} strokeWidth={4} fill="none"
+            style={{ stroke: color }} strokeWidth={4} fill="none"
             strokeLinecap="round"
             strokeDasharray={`${dash} ${c - dash}`}
           />
@@ -38,13 +38,13 @@ export default function HealthRing({ score, size = 64, label = '헬스 점수' }
         <div style={{
           position: 'absolute', inset: 0, display: 'flex',
           alignItems: 'center', justifyContent: 'center',
-          fontSize: 16, fontWeight: 900, color: color,
+          fontSize: 16, fontWeight: 700, color: color,
         }}>
           {pct}
         </div>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column' }}>
-        <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-tertiary)', letterSpacing: 0.3, textTransform: 'uppercase' }}>{label}</span>
+        <span style={{ fontSize: 10, fontWeight: 500, color: 'var(--text-tertiary)', letterSpacing: 0.3, textTransform: 'uppercase' }}>{label}</span>
         <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)' }}>/ 100</span>
       </div>
     </div>

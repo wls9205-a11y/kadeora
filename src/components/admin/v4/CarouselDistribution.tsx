@@ -20,11 +20,11 @@ export default function CarouselDistribution({ posDist }: { posDist: number[] })
             return (
               <tr key={position} style={{ borderBottom: '1px solid var(--border)' }}>
                 <td style={{ padding: '4px 8px' }}>{position}</td>
-                <td style={{ padding: '4px 8px', textAlign: 'right', fontWeight: abnormal ? 800 : 400, color: abnormal ? 'var(--accent-red)' : 'inherit' }}>
+                <td style={{ padding: '4px 8px', textAlign: 'right', fontWeight: abnormal ? 700 : 400, color: abnormal ? 'var(--accent-red)' : 'inherit' }}>
                   {cnt.toLocaleString()}
                 </td>
                 <td style={{ padding: '4px 8px' }}>
-                  <div style={{ height: 10, background: abnormal ? '#ef4444' : 'var(--brand)', width: `${pct}%`, borderRadius: 2 }} />
+                  <div style={{ height: 10, background: abnormal ? 'var(--accent-red)' : 'var(--brand)', width: `${pct}%`, borderRadius: 2 }} />
                 </td>
               </tr>
             );

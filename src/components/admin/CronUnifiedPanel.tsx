@@ -56,7 +56,7 @@ export default async function CronUnifiedPanel() {
         marginTop: 12,
       }}
     >
-      <summary style={{ cursor: 'pointer', fontSize: 12, fontWeight: 800, color: 'var(--text-primary)', wordBreak: 'keep-all' }}>
+      <summary style={{ cursor: 'pointer', fontSize: 12, fontWeight: 500, color: 'var(--text-primary)', wordBreak: 'keep-all' }}>
         ⏱️ Cron 통합 뷰 — vercel {totals.vercel} + pg_cron {totals.pgcron} = {totals.total}
         <span style={{ marginLeft: 10, fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)' }}>
           ({Object.entries(byCategory).map(([k, v]) => `${k} ${v}`).join(' · ')})
@@ -64,7 +64,7 @@ export default async function CronUnifiedPanel() {
       </summary>
       <div style={{ marginTop: 10, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 14 }}>
         <div>
-          <h3 style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary)', margin: '0 0 6px' }}>
+          <h3 style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)', margin: '0 0 6px' }}>
             VERCEL.JSON ({totals.vercel})
           </h3>
           <div style={{ maxHeight: 300, overflowY: 'auto', fontSize: 11 }}>
@@ -77,8 +77,8 @@ export default async function CronUnifiedPanel() {
           </div>
         </div>
         <div>
-          <h3 style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary)', margin: '0 0 6px' }}>
-            PG_CRON ({totals.pgcron}) <span style={{ color: '#fbbf24' }}>← 외부 호출!</span>
+          <h3 style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)', margin: '0 0 6px' }}>
+            PG_CRON ({totals.pgcron}) <span style={{ color: 'var(--accent-yellow)' }}>← 외부 호출!</span>
           </h3>
           <div style={{ maxHeight: 300, overflowY: 'auto', fontSize: 11 }}>
             {pgCrons.map(c => (

@@ -12,9 +12,9 @@ interface CtaRow {
 
 function ctrTone(ctr: number | null): string {
   if (ctr === null) return 'var(--text-tertiary)';
-  if (ctr >= 5) return '#22c55e';   // 좋음
-  if (ctr >= 1) return '#fbbf24';   // 평범
-  return '#ef4444';                 // 의심
+  if (ctr >= 5) return 'var(--accent-green)';   // 좋음
+  if (ctr >= 1) return 'var(--accent-yellow)';   // 평범
+  return 'var(--accent-red)';                 // 의심
 }
 
 function fmtTime(iso: string | null): string {
@@ -43,7 +43,7 @@ export default async function CtaPerformanceTable({ windowDays = 30 }: { windowD
 
   return (
     <section aria-label="CTA 성능 비교" style={{ marginBottom: 18 }}>
-      <h2 style={{ fontSize: 14, fontWeight: 700, marginBottom: 10, color: 'var(--text-primary)' }}>
+      <h2 style={{ fontSize: 14, fontWeight: 600, marginBottom: 10, color: 'var(--text-primary)' }}>
         📊 CTA 성능 ({windowDays}일, {rows.length}개)
       </h2>
       <div
@@ -81,7 +81,7 @@ export default async function CtaPerformanceTable({ windowDays = 30 }: { windowD
                   </td>
                   <td
                     style={{
-                      padding: '10px 12px', textAlign: 'right', fontWeight: 700,
+                      padding: '10px 12px', textAlign: 'right', fontWeight: 500,
                       color: ctrTone(ctr),
                       fontVariantNumeric: 'tabular-nums',
                     }}

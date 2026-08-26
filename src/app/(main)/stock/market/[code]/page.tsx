@@ -74,7 +74,7 @@ export default async function MarketPage({ params }: Props) {
       {/* 시장 내비 */}
       <div style={{ display: 'flex', gap: 6, marginBottom: 20, overflowX: 'auto' }}>
         {Object.entries(MARKETS).map(([k, v]) => (
-          <Link key={k} href={`/stock/market/${k}`} style={{ padding: '6px 14px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: k === code.toLowerCase() ? 700 : 500, background: k === code.toLowerCase() ? 'var(--brand)' : 'var(--bg-hover)', color: k === code.toLowerCase() ? '#fff' : 'var(--text-secondary)', textDecoration: 'none', whiteSpace: 'nowrap' }}>
+          <Link key={k} href={`/stock/market/${k}`} style={{ padding: '6px 14px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: k === code.toLowerCase() ? 600 : 500, background: k === code.toLowerCase() ? 'var(--brand)' : 'var(--bg-hover)', color: k === code.toLowerCase() ? '#fff' : 'var(--text-secondary)', textDecoration: 'none', whiteSpace: 'nowrap' }}>
             {v.flag} {v.name}
           </Link>
         ))}

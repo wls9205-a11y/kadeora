@@ -18,8 +18,8 @@ interface NorthStarMetrics {
 }
 
 function deltaColor(today: number, yesterday: number): string {
-  if (today > yesterday) return '#22c55e';
-  if (today < yesterday) return '#ef4444';
+  if (today > yesterday) return 'var(--accent-green)';
+  if (today < yesterday) return 'var(--accent-red)';
   return 'var(--text-tertiary)';
 }
 
@@ -73,7 +73,7 @@ function MetricCard({
       }}
     >
       <div style={{ fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 600 }}>{label}</div>
-      <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>
+      <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>
         {value}
       </div>
       {delta && (
@@ -108,7 +108,7 @@ export default async function NorthStarCard() {
 
   return (
     <section aria-label="North Star 핵심 지표" style={{ marginBottom: 18 }}>
-      <h2 style={{ fontSize: 14, fontWeight: 700, marginBottom: 10, color: 'var(--text-primary)' }}>
+      <h2 style={{ fontSize: 14, fontWeight: 600, marginBottom: 10, color: 'var(--text-primary)' }}>
         🌟 North Star (오늘)
       </h2>
       <div

@@ -52,7 +52,7 @@ export default async function SendHistory() {
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-        <h2 style={{ fontSize: 13, fontWeight: 800, margin: 0 }}>발송 이력</h2>
+        <h2 style={{ fontSize: 13, fontWeight: 600, margin: 0 }}>발송 이력</h2>
         {err && <span style={{ fontSize: 11, color: 'var(--accent-red)' }}>로드 실패: {err}</span>}
       </div>
       {rows.length === 0 && !err && (
@@ -71,7 +71,7 @@ export default async function SendHistory() {
                       padding: '6px 8px',
                       borderBottom: '1px solid var(--border)',
                       color: 'var(--text-tertiary)',
-                      fontWeight: 700,
+                      fontWeight: 500,
                     }}
                   >
                     {c}

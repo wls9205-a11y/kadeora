@@ -183,7 +183,7 @@ export default function LifecycleRail({
                 flex: 1,
                 textAlign: i === 0 ? 'left' : i === labels.length - 1 ? 'right' : 'center',
                 color: i === active ? 'var(--rail-now)' : undefined,
-                fontWeight: i === active ? 700 : 400,
+                fontWeight: i === active ? 600 : 400,
                 whiteSpace: 'nowrap',
               }}
             >

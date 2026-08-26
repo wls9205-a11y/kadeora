@@ -68,7 +68,7 @@ const cardStyle: React.CSSProperties = {
 };
 
 const subTitle: React.CSSProperties = {
-  fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary)',
+  fontSize: 11, fontWeight: 500, color: 'var(--text-tertiary)',
   textTransform: 'uppercase', marginTop: 14, marginBottom: 6, letterSpacing: 0.4,
 };
 
@@ -128,17 +128,17 @@ export default function UserDetailClient({ userId }: { userId: string }) {
                 </div>
               )}
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 18, fontWeight: 800 }}>{p.nickname || '—'}</div>
+                <div style={{ fontSize: 18, fontWeight: 600 }}>{p.nickname || '—'}</div>
                 {p.full_name && p.full_name !== p.nickname && (
                   <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>{p.full_name}</div>
                 )}
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 4 }}>
-                  {p.provider && <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 999, background: p.provider === 'kakao' ? 'rgba(254,229,0,0.12)' : 'rgba(66,133,244,0.12)', color: p.provider === 'kakao' ? '#fde047' : 'var(--brand)', fontWeight: 700 }}>{p.provider}</span>}
-                  {p.is_seed && <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 999, background: 'rgba(251,146,60,0.12)', color: 'var(--accent-orange)', fontWeight: 700 }}>시드</span>}
-                  {p.is_admin && <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 999, background: 'rgba(139,92,246,0.12)', color: 'var(--accent-purple)', fontWeight: 700 }}>어드민</span>}
-                  {p.kakao_channel_added && <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 999, background: 'rgba(254,229,0,0.12)', color: '#fde047', fontWeight: 700 }}>카카오 채널</span>}
-                  {p.is_banned && <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 999, background: 'rgba(248,113,113,0.12)', color: 'var(--accent-red)', fontWeight: 700 }}>차단</span>}
-                  {p.is_deleted && <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 999, background: 'rgba(0,0,0,0.3)', color: 'var(--text-tertiary)', fontWeight: 700 }}>삭제됨</span>}
+                  {p.provider && <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 999, background: p.provider === 'kakao' ? 'rgba(254,229,0,0.12)' : 'rgba(66,133,244,0.12)', color: p.provider === 'kakao' ? 'var(--accent-yellow)' : 'var(--brand)', fontWeight: 500 }}>{p.provider}</span>}
+                  {p.is_seed && <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 999, background: 'rgba(251,146,60,0.12)', color: 'var(--accent-orange)', fontWeight: 500 }}>시드</span>}
+                  {p.is_admin && <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 999, background: 'rgba(139,92,246,0.12)', color: 'var(--accent-purple)', fontWeight: 500 }}>어드민</span>}
+                  {p.kakao_channel_added && <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 999, background: 'rgba(254,229,0,0.12)', color: 'var(--accent-yellow)', fontWeight: 500 }}>카카오 채널</span>}
+                  {p.is_banned && <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 999, background: 'rgba(248,113,113,0.12)', color: 'var(--accent-red)', fontWeight: 500 }}>차단</span>}
+                  {p.is_deleted && <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 999, background: 'var(--bg-sunken)', color: 'var(--text-tertiary)', fontWeight: 500 }}>삭제됨</span>}
                 </div>
               </div>
               {isAdmin && (
@@ -183,8 +183,8 @@ export default function UserDetailClient({ userId }: { userId: string }) {
                 padding: 12, borderRadius: 8,
                 background: 'var(--bg-elevated)', border: '1px solid var(--border)',
               }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase' }}>{kp.label}</div>
-                <div style={{ fontSize: kp.small ? 13 : 18, fontWeight: 800, marginTop: 4 }}>{kp.v}</div>
+                <div style={{ fontSize: 10, fontWeight: 500, color: 'var(--text-tertiary)', textTransform: 'uppercase' }}>{kp.label}</div>
+                <div style={{ fontSize: kp.small ? 13 : 18, fontWeight: 700, marginTop: 4 }}>{kp.v}</div>
               </div>
             ))}
           </div>

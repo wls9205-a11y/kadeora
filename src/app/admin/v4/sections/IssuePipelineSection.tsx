@@ -48,7 +48,7 @@ export default function IssuePipelineSection({ data }: Props) {
       background: 'var(--bg-elevated)', border: '1px solid var(--border)',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10, flexWrap: 'wrap' }}>
-        <h2 style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
+        <h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
           🔄 이슈 파이프라인
         </h2>
         <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
@@ -58,7 +58,7 @@ export default function IssuePipelineSection({ data }: Props) {
           onClick={runOrchestrator}
           disabled={running}
           style={{
-            marginLeft: 'auto', fontSize: 11, fontWeight: 700,
+            marginLeft: 'auto', fontSize: 11, fontWeight: 500,
             padding: '6px 12px', borderRadius: 6, cursor: running ? 'wait' : 'pointer',
             background: 'var(--brand)', color: '#fff', border: 'none',
             opacity: running ? 0.6 : 1,

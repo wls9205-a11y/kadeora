@@ -98,7 +98,7 @@ export default function NotificationBell() {
           borderRadius: '50%',
           border: '1px solid rgba(255,255,255,0.1)',
           background: 'transparent',
-          color: '#94A3B8',
+          color: 'var(--text-tertiary)',
           cursor: 'pointer',
           position: 'relative',
           display: 'flex',
@@ -118,10 +118,12 @@ export default function NotificationBell() {
               height: 16,
               padding: '0 4px',
               borderRadius: 8,
-              background: '#EF4444',
+              // ⚠️ #EF4444 위 흰 글씨는 3.76 으로 하한 미달이었다(9px 배지라 4.5 기준).
+        //    기존 토큰 --accent-red(#991B1B)로 8.31. 새 토큰은 만들지 않았다.
+        background: 'var(--accent-red)',
               color: '#fff',
               fontSize: 9,
-              fontWeight: 800,
+              fontWeight: 500,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -151,7 +153,7 @@ export default function NotificationBell() {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 8px', marginBottom: 4 }}>
-            <strong style={{ fontSize: 12, color: '#E2E8F0' }}>알림 {unread > 0 ? `(${unread})` : ''}</strong>
+            <strong style={{ fontSize: 12, color: 'var(--text-primary)' }}>알림 {unread > 0 ? `(${unread})` : ''}</strong>
             <button
               onClick={markAll}
               disabled={loading || unread === 0}
@@ -169,10 +171,10 @@ export default function NotificationBell() {
                 <>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
                     <span style={{ fontSize: 12 }}>{TYPE_ICON[r.type] || '🔔'}</span>
-                    <strong style={{ fontSize: 12, color: '#E2E8F0', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.title}</strong>
+                    <strong style={{ fontSize: 12, color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.title}</strong>
                     {unreadRow && <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#3B7BF6' }} />}
                   </div>
-                  {r.body ? <div style={{ fontSize: 11, color: '#94A3B8', lineHeight: 1.5, margin: '2px 0 4px' }}>{r.body}</div> : null}
+                  {r.body ? <div style={{ fontSize: 11, color: 'var(--text-tertiary)', lineHeight: 1.5, margin: '2px 0 4px' }}>{r.body}</div> : null}
                   <div style={{ fontSize: 10, color: '#64748b' }}>{fmtTime(r.created_at)}</div>
                 </>
               );

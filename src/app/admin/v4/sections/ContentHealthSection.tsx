@@ -30,7 +30,7 @@ export default function ContentHealthSection({ data }: Props) {
       padding: 16, borderRadius: 'var(--radius-lg, 14px)',
       background: 'var(--bg-elevated)', border: '1px solid var(--border)',
     }}>
-      <h2 style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)', marginTop: 0, marginBottom: 10 }}>
+      <h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', marginTop: 0, marginBottom: 10 }}>
         📚 콘텐츠 위생
       </h2>
 
@@ -42,7 +42,7 @@ export default function ContentHealthSection({ data }: Props) {
       </div>
 
       <div style={{
-        marginTop: 12, fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary)',
+        marginTop: 12, fontSize: 11, fontWeight: 500, color: 'var(--text-tertiary)',
         textTransform: 'uppercase', letterSpacing: 0.4,
       }}>
         카테고리별 허브 매핑

@@ -232,13 +232,13 @@ export default function SignupFlowClient() {
         padding: '12px 14px', borderRadius: 10,
         background: 'var(--bg-elevated)', border: '1px solid var(--border)',
       }}>
-        <h1 style={{ margin: 0, fontSize: 16, fontWeight: 800 }}>📊 가입 플로우 진단</h1>
+        <h1 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>📊 가입 플로우 진단</h1>
         <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
           dropped_step / OAuth / source 별 funnel 회귀 모니터링
         </span>
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 10 }}>
           {data?.errors && data.errors.length > 0 && (
-            <span style={{ fontSize: 10, padding: '3px 8px', borderRadius: 999, background: 'rgba(248,113,113,0.12)', color: '#fca5a5' }} title={data.errors.join('\n')}>
+            <span style={{ fontSize: 10, padding: '3px 8px', borderRadius: 999, background: 'rgba(248,113,113,0.12)', color: 'var(--accent-red)' }} title={data.errors.join('\n')}>
               ⚠ rpc 부분 실패 {data.errors.length}건
             </span>
           )}
@@ -278,8 +278,8 @@ export default function SignupFlowClient() {
                 {droppedSteps.slice(0, 12).map((d) => (
                   <span key={d.step} style={{
                     padding: '6px 12px', borderRadius: 999,
-                    fontSize: 11, fontWeight: 700,
-                    background: 'rgba(248,113,113,0.10)', color: '#fca5a5',
+                    fontSize: 11, fontWeight: 500,
+                    background: 'rgba(248,113,113,0.10)', color: 'var(--accent-red)',
                     border: '1px solid rgba(248,113,113,0.25)',
                   }}>
                     {d.step} <span style={{ marginLeft: 4, opacity: 0.85 }}>{fmtNum(d.count)}</span>
@@ -299,7 +299,7 @@ export default function SignupFlowClient() {
                     <Td align="right">{fmtNum(r.clicks)}</Td>
                     <Td align="right">{fmtNum(r.signups)}</Td>
                     <Td align="right">
-                      <span style={{ color: r.rate >= 30 ? 'var(--accent-green)' : r.rate >= 10 ? '#fbbf24' : 'var(--accent-red)', fontWeight: 700 }}>
+                      <span style={{ color: r.rate >= 30 ? 'var(--accent-green)' : r.rate >= 10 ? 'var(--accent-yellow)' : 'var(--accent-red)', fontWeight: 700 }}>
                         {fmtPct(r.rate)}
                       </span>
                     </Td>
@@ -388,7 +388,7 @@ function Section({ title, subtitle, children }: { title: string; subtitle?: stri
       background: 'var(--bg-elevated)', border: '1px solid var(--border)',
     }}>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 12 }}>
-        <h2 style={{ margin: 0, fontSize: 13, fontWeight: 800 }}>{title}</h2>
+        <h2 style={{ margin: 0, fontSize: 13, fontWeight: 600 }}>{title}</h2>
         {subtitle && <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{subtitle}</span>}
       </div>
       {children}
@@ -420,16 +420,16 @@ function FunnelBars({ rows }: { rows: { label: string; key: string; count: numbe
         const passRate = prev > 0 ? (r.count / prev) * 100 : null;
         const passColor = passRate == null
           ? 'var(--text-tertiary)'
-          : passRate >= 70 ? '#34d399'
-          : passRate >= 30 ? '#fbbf24'
-          : '#f87171';
+          : passRate >= 70 ? 'var(--accent-green)'
+          : passRate >= 30 ? 'var(--accent-yellow)'
+          : 'var(--accent-red)';
         return (
           <div key={r.key} style={{ display: 'grid', gridTemplateColumns: '120px 1fr 80px 90px', gap: 10, alignItems: 'center' }}>
             <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)' }}>{r.label}</span>
             <div style={{ height: 22, background: 'var(--bg-base)', borderRadius: 4, overflow: 'hidden', border: '1px solid var(--border)' }}>
               <div style={{ width: `${w}%`, height: '100%', background: 'linear-gradient(90deg, #2563EB 0%, #60A5FA 100%)' }} />
             </div>
-            <span style={{ fontSize: 12, fontWeight: 800, textAlign: 'right' }}>{fmtNum(r.count)}</span>
+            <span style={{ fontSize: 12, fontWeight: 700, textAlign: 'right' }}>{fmtNum(r.count)}</span>
             <span style={{ fontSize: 10, color: passColor, fontWeight: 700, textAlign: 'right' }} title="이전 단계 대비 통과율">
               {passRate == null ? '—' : `통과 ${passRate.toFixed(0)}%`}
             </span>
@@ -441,11 +441,11 @@ function FunnelBars({ rows }: { rows: { label: string; key: string; count: numbe
 }
 
 function DropCard({ label, pct, num, den, thresholds }: { label: string; pct: number; num: number; den: number; thresholds: { green: number; orange: number } }) {
-  const c = pct >= thresholds.green ? '#34d399' : pct >= thresholds.orange ? '#fbbf24' : '#f87171';
+  const c = pct >= thresholds.green ? 'var(--accent-green)' : pct >= thresholds.orange ? 'var(--accent-yellow)' : 'var(--accent-red)';
   return (
     <div style={{ padding: '12px 14px', borderRadius: 10, background: 'var(--bg-base)', border: '1px solid var(--border)' }}>
-      <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-tertiary)', letterSpacing: 1 }}>{label}</div>
-      <div style={{ fontSize: 24, fontWeight: 900, color: c, marginTop: 4 }}>{fmtPct(pct)}</div>
+      <div style={{ fontSize: 10, fontWeight: 500, color: 'var(--text-tertiary)', letterSpacing: 1 }}>{label}</div>
+      <div style={{ fontSize: 24, fontWeight: 700, color: c, marginTop: 4 }}>{fmtPct(pct)}</div>
       <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}>{fmtNum(num)} / {fmtNum(den)}</div>
     </div>
   );
@@ -460,7 +460,7 @@ function Table({ head, children }: { head: string[]; children: React.ReactNode }
             {head.map((h, i) => (
               <th key={i} style={{
                 textAlign: i === 0 ? 'left' : 'right',
-                padding: '8px 10px', fontSize: 10, fontWeight: 800,
+                padding: '8px 10px', fontSize: 10, fontWeight: 500,
                 color: 'var(--text-tertiary)', borderBottom: '1px solid var(--border)',
                 letterSpacing: 1,
               }}>{h.toUpperCase()}</th>
@@ -479,7 +479,7 @@ function Td({ children, align = 'left', highlight = false }: { children: React.R
       padding: '8px 10px', textAlign: align,
       borderBottom: '1px solid var(--border)',
       color: highlight ? 'var(--accent-red)' : 'inherit',
-      fontWeight: highlight ? 800 : 500,
+      fontWeight: highlight ? 600 : 500,
     }}>{children}</td>
   );
 }
@@ -525,7 +525,7 @@ function HourlyChart({ rows }: { rows: any[] }) {
   const W = 720, H = 200, PADX = 30, PADY = 16;
   const series: { key: string; label: string; color: string; pick: (r: any) => number }[] = [
     { key: 'visits',       label: '방문',     color: 'var(--brand)', pick: (r) => n(r?.visits ?? r?.uv ?? r?.unique_visitors) },
-    { key: 'cta_clicks',   label: 'CTA 클릭', color: '#fbbf24', pick: (r) => n(r?.cta_clicks ?? r?.clicks) },
+    { key: 'cta_clicks',   label: 'CTA 클릭', color: 'var(--accent-yellow)', pick: (r) => n(r?.cta_clicks ?? r?.clicks) },
     { key: 'signups_real', label: '실 가입',  color: 'var(--accent-green)', pick: (r) => n(r?.signups_real ?? r?.signups ?? r?.real_signups) },
     { key: 'signups_seed', label: '시드',     color: 'var(--text-tertiary)', pick: (r) => n(r?.signups_seed ?? r?.seed_signups) },
   ];
@@ -542,13 +542,13 @@ function HourlyChart({ rows }: { rows: any[] }) {
         {/* y grid */}
         {[0.25, 0.5, 0.75, 1].map((p) => {
           const y = H - PADY - p * (H - 2 * PADY);
-          return <line key={p} x1={PADX} x2={W - PADX} y1={y} y2={y} stroke="var(--border)" strokeDasharray="2 4" strokeWidth={1} />;
+          return <line key={p} x1={PADX} x2={W - PADX} y1={y} y2={y} style={{ stroke: 'var(--border)' }} strokeDasharray="2 4" strokeWidth={1} />;
         })}
         {/* x labels every 4h */}
         {sorted.map((r, i) => {
           const hh = n(r?.hour ?? r?.hh);
           if (hh % 4 !== 0) return null;
-          return <text key={i} x={xAt(i)} y={H - 2} fontSize={9} textAnchor="middle" fill="var(--text-tertiary)">{hh}h</text>;
+          return <text key={i} x={xAt(i)} y={H - 2} fontSize={9} textAnchor="middle" style={{ fill: 'var(--text-tertiary)' }}>{hh}h</text>;
         })}
         {/* lines */}
         {series.map((s) => {
@@ -597,7 +597,7 @@ function UserTable({ rows }: { rows: UserRow[] }) {
 // ─── 스타일 헬퍼 ───────────────────────────────────────
 function btnGhost(disabled: boolean = false): React.CSSProperties {
   return {
-    fontSize: 11, fontWeight: 700,
+    fontSize: 11, fontWeight: 500,
     padding: '6px 12px', borderRadius: 6,
     background: 'transparent',
     color: disabled ? 'var(--text-tertiary)' : 'var(--text-secondary)',
@@ -609,7 +609,7 @@ function btnGhost(disabled: boolean = false): React.CSSProperties {
 function selStyle(): React.CSSProperties {
   return {
     padding: '6px 10px', borderRadius: 6,
-    fontSize: 11, fontWeight: 700,
+    fontSize: 11, fontWeight: 500,
     background: 'var(--bg-base)', color: 'var(--text-primary)',
     border: '1px solid var(--border)', cursor: 'pointer', outline: 'none',
   };

@@ -38,7 +38,7 @@ function fmt(iso: string): string {
 }
 
 const btn: React.CSSProperties = {
-  fontSize: 12, fontWeight: 700, padding: '6px 12px', borderRadius: 'var(--radius-sm)',
+  fontSize: 12, fontWeight: 500, padding: '6px 12px', borderRadius: 'var(--radius-sm)',
   border: '1px solid var(--border)', background: 'var(--bg-surface)',
   color: 'var(--text-secondary)', cursor: 'pointer', minHeight: 32,
 };
@@ -107,7 +107,7 @@ export default function AlertsClient() {
 
   return (
     <div style={{ maxWidth: 1100, margin: '0 auto', padding: 'clamp(12px, 3vw, 24px)', color: 'var(--text-primary)' }}>
-      <h1 style={{ fontSize: 20, fontWeight: 800, margin: '0 0 4px' }}>경보함</h1>
+      <h1 style={{ fontSize: 20, fontWeight: 600, margin: '0 0 4px' }}>경보함</h1>
       <p style={{ fontSize: 12, color: 'var(--text-tertiary)', margin: '0 0 14px', lineHeight: 1.6 }}>
         트리아지 기준은 <strong>아카이브</strong>입니다. 읽음 표시는 쓰지 않습니다(전량 미읽음이라 신호가 되지 못합니다).
         14일 경과분은 크론이 자동으로 아카이브합니다.
@@ -124,7 +124,7 @@ export default function AlertsClient() {
           ] as const).map(([label, n, color, bg]) => (
             <div key={label} style={{ padding: '8px 14px', borderRadius: 'var(--radius-md)', background: bg, border: '1px solid var(--border)', minWidth: 92 }}>
               <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{label}</div>
-              <div style={{ fontSize: 18, fontWeight: 800, color }}>{n}</div>
+              <div style={{ fontSize: 18, fontWeight: 700, color }}>{n}</div>
             </div>
           ))}
         </div>
@@ -183,11 +183,11 @@ export default function AlertsClient() {
                   {fmt(r.created_at)}
                 </span>
                 <span style={{
-                  flexShrink: 0, fontSize: 11, fontWeight: 700, padding: '2px 8px',
+                  flexShrink: 0, fontSize: 11, fontWeight: 500, padding: '2px 8px',
                   borderRadius: 'var(--radius-sm)', background: st.bg, color: st.color, marginTop: 1,
                 }}>{st.label}</span>
                 <span style={{ flex: 1, minWidth: 0 }}>
-                  <span style={{ display: 'block', fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', wordBreak: 'break-word' }}>
+                  <span style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', wordBreak: 'break-word' }}>
                     {r.title}
                   </span>
                   <span style={{ display: 'block', fontSize: 11, color: 'var(--text-tertiary)', marginTop: 1 }}>
@@ -227,7 +227,7 @@ export default function AlertsClient() {
             onClick={e => e.stopPropagation()}
             style={{ maxWidth: 420, width: '100%', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 18 }}
           >
-            <h2 id="kd-alert-confirm-title" style={{ fontSize: 15, fontWeight: 800, margin: '0 0 8px' }}>
+            <h2 id="kd-alert-confirm-title" style={{ fontSize: 15, fontWeight: 600, margin: '0 0 8px' }}>
               살아있는 경보 {counts?.total ?? 0}건을 모두 아카이브합니다
             </h2>
             <p style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0 0 16px' }}>

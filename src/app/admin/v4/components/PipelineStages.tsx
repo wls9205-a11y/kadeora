@@ -53,10 +53,10 @@ export default function PipelineStages({ stages, order = DEFAULT_ORDER }: Props)
             border: `1px solid ${color}33`, borderLeft: `3px solid ${color}`,
             display: 'flex', flexDirection: 'column', gap: 3,
           }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase' }}>
+            <div style={{ fontSize: 10, fontWeight: 500, color: 'var(--text-tertiary)', textTransform: 'uppercase' }}>
               {SHORT[k] ?? k}
             </div>
-            <div style={{ fontSize: 12, fontWeight: 700, color }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color }}>
               성공 {st?.ok ?? 0} <span style={{ color: 'var(--text-tertiary)', fontWeight: 500 }}>·</span> 실패 {st?.fail ?? 0}
             </div>
           </div>

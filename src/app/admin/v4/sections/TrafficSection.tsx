@@ -21,7 +21,7 @@ interface TrafficData {
 }
 
 const subTitleStyle: React.CSSProperties = {
-  fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary)',
+  fontSize: 11, fontWeight: 500, color: 'var(--text-tertiary)',
   textTransform: 'uppercase', marginTop: 14, marginBottom: 6, letterSpacing: 0.4,
 };
 
@@ -72,7 +72,7 @@ export default function TrafficSection() {
       padding: 16, borderRadius: 'var(--radius-lg, 14px)',
       background: 'var(--bg-elevated)', border: '1px solid var(--border)',
     }}>
-      <h2 style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)', marginTop: 0, marginBottom: 10 }}>
+      <h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', marginTop: 0, marginBottom: 10 }}>
         🌐 실시간 트래픽
       </h2>
 

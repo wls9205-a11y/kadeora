@@ -43,7 +43,7 @@ export default function SegmentSavedList({
         gap: 10,
       }}
     >
-      <h2 style={{ fontSize: 13, fontWeight: 800, margin: 0 }}>저장된 세그먼트</h2>
+      <h2 style={{ fontSize: 13, fontWeight: 600, margin: 0 }}>저장된 세그먼트</h2>
       {loading && <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>로드 중…</div>}
       {err && <div style={{ fontSize: 12, color: 'var(--accent-red)' }}>실패: {err}</div>}
       {!loading && items.length === 0 && !err && (
@@ -69,7 +69,7 @@ export default function SegmentSavedList({
             }}
           >
             <div style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
-              <span style={{ fontSize: 12, fontWeight: 700 }}>{it.name}</span>
+              <span style={{ fontSize: 12, fontWeight: 600 }}>{it.name}</span>
               {it.updated_at && (
                 <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>
                   {new Date(it.updated_at).toLocaleString()}

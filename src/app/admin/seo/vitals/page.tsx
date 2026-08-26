@@ -30,7 +30,7 @@ export default async function VitalsAdminPage() {
 
   return (
     <div style={{ padding: 24, color: 'var(--text-primary)' }}>
-      <h1 style={{ fontSize: 20, fontWeight: 800, marginBottom: 16 }}>Web Vitals — CLS 범인</h1>
+      <h1 style={{ fontSize: 20, fontWeight: 600, marginBottom: 16 }}>Web Vitals — CLS 범인</h1>
       <table style={{ width: '100%', fontSize: 12, borderCollapse: 'collapse' }}>
         <thead>
           <tr style={{ background: 'var(--bg-hover)' }}>
@@ -52,7 +52,7 @@ export default async function VitalsAdminPage() {
         </tbody>
       </table>
 
-      <h2 style={{ fontSize: 16, fontWeight: 700, margin: '24px 0 12px' }}>LCP 엘리먼트 TOP</h2>
+      <h2 style={{ fontSize: 16, fontWeight: 600, margin: '24px 0 12px' }}>LCP 엘리먼트 TOP</h2>
       <table style={{ width: '100%', fontSize: 12, borderCollapse: 'collapse' }}>
         <thead>
           <tr style={{ background: 'var(--bg-hover)' }}>

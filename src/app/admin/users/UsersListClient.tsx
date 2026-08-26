@@ -132,7 +132,7 @@ export default function UsersListClient() {
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
         <Link href="/admin" style={{ fontSize: 12, color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 어드민</Link>
-        <h1 style={{ margin: 0, fontSize: 18, fontWeight: 800 }}>유저 ({total.toLocaleString()})</h1>
+        <h1 style={{ margin: 0, fontSize: 18, fontWeight: 600 }}>유저 ({total.toLocaleString()})</h1>
       </div>
 
       {/* 검색바 */}
@@ -146,7 +146,7 @@ export default function UsersListClient() {
         />
         <button type="submit" style={{
           ...inputStyle, cursor: 'pointer',
-          background: 'var(--brand)', color: '#fff', border: 'none', fontWeight: 700,
+          background: 'var(--brand)', color: '#fff', border: 'none', fontWeight: 500,
         }}>검색</button>
         {search && (
           <button type="button" onClick={() => { setSearchInput(''); updateParams({ search: null, page: '1' }); }}
@@ -161,7 +161,7 @@ export default function UsersListClient() {
             key={f.key}
             onClick={() => updateParams({ filter: f.key, page: '1' })}
             style={{
-              padding: '5px 12px', borderRadius: 999, fontSize: 12, fontWeight: 700,
+              padding: '5px 12px', borderRadius: 999, fontSize: 12, fontWeight: 500,
               cursor: 'pointer',
               background: filter === f.key ? 'var(--brand)' : 'transparent',
               color: filter === f.key ? '#fff' : 'var(--text-secondary)',
@@ -221,7 +221,7 @@ export default function UsersListClient() {
                       </div>
                     )}
                     <div style={{ minWidth: 0 }}>
-                      <div style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{u.nickname || '—'}</div>
+                      <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{u.nickname || '—'}</div>
                       {u.full_name && u.full_name !== u.nickname && (
                         <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{u.full_name}</div>
                       )}
@@ -230,9 +230,9 @@ export default function UsersListClient() {
                 </td>
                 <td style={{ padding: 8 }}>
                   <span style={{
-                    padding: '2px 8px', borderRadius: 999, fontSize: 10, fontWeight: 700,
+                    padding: '2px 8px', borderRadius: 999, fontSize: 10, fontWeight: 500,
                     background: u.provider === 'kakao' ? 'rgba(254,229,0,0.12)' : u.provider === 'google' ? 'rgba(66,133,244,0.12)' : 'rgba(255,255,255,0.06)',
-                    color: u.provider === 'kakao' ? '#fde047' : u.provider === 'google' ? 'var(--brand)' : 'var(--text-tertiary)',
+                    color: u.provider === 'kakao' ? 'var(--accent-yellow)' : u.provider === 'google' ? 'var(--brand)' : 'var(--text-tertiary)',
                   }}>{u.provider || '—'}</span>
                 </td>
                 <td style={{ padding: 8, color: 'var(--text-secondary)' }}>{fmtDate(u.created_at)}</td>
@@ -241,11 +241,11 @@ export default function UsersListClient() {
                 <td style={{ padding: 8, textAlign: 'right', color: 'var(--text-secondary)' }}>{u.grade_title || u.grade || '—'}</td>
                 <td style={{ padding: 8 }}>
                   <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
-                    {u.is_seed && <span style={{ fontSize: 9, padding: '1px 6px', borderRadius: 4, background: 'rgba(251,146,60,0.12)', color: 'var(--accent-orange)', fontWeight: 700 }}>시드</span>}
-                    {u.is_admin && <span style={{ fontSize: 9, padding: '1px 6px', borderRadius: 4, background: 'rgba(139,92,246,0.12)', color: 'var(--accent-purple)', fontWeight: 700 }}>어드민</span>}
-                    {u.kakao_channel_added && <span style={{ fontSize: 9, padding: '1px 6px', borderRadius: 4, background: 'rgba(254,229,0,0.12)', color: '#fde047', fontWeight: 700 }}>채널</span>}
-                    {u.is_banned && <span style={{ fontSize: 9, padding: '1px 6px', borderRadius: 4, background: 'rgba(248,113,113,0.12)', color: 'var(--accent-red)', fontWeight: 700 }}>차단</span>}
-                    {u.is_deleted && <span style={{ fontSize: 9, padding: '1px 6px', borderRadius: 4, background: 'rgba(0,0,0,0.3)', color: 'var(--text-tertiary)', fontWeight: 700 }}>삭제</span>}
+                    {u.is_seed && <span style={{ fontSize: 9, padding: '1px 6px', borderRadius: 4, background: 'rgba(251,146,60,0.12)', color: 'var(--accent-orange)', fontWeight: 500 }}>시드</span>}
+                    {u.is_admin && <span style={{ fontSize: 9, padding: '1px 6px', borderRadius: 4, background: 'rgba(139,92,246,0.12)', color: 'var(--accent-purple)', fontWeight: 500 }}>어드민</span>}
+                    {u.kakao_channel_added && <span style={{ fontSize: 9, padding: '1px 6px', borderRadius: 4, background: 'rgba(254,229,0,0.12)', color: 'var(--accent-yellow)', fontWeight: 500 }}>채널</span>}
+                    {u.is_banned && <span style={{ fontSize: 9, padding: '1px 6px', borderRadius: 4, background: 'rgba(248,113,113,0.12)', color: 'var(--accent-red)', fontWeight: 500 }}>차단</span>}
+                    {u.is_deleted && <span style={{ fontSize: 9, padding: '1px 6px', borderRadius: 4, background: 'var(--bg-sunken)', color: 'var(--text-tertiary)', fontWeight: 500 }}>삭제</span>}
                   </div>
                 </td>
               </tr>
@@ -266,7 +266,7 @@ export default function UsersListClient() {
           onClick={() => updateParams({ page: String(Math.max(1, page - 1)) })}
           style={{ ...inputStyle, cursor: page <= 1 ? 'not-allowed' : 'pointer', opacity: page <= 1 ? 0.4 : 1 }}
         >← 이전</button>
-        <span style={{ padding: '6px 12px', color: 'var(--text-secondary)', fontWeight: 700 }}>
+        <span style={{ padding: '6px 12px', color: 'var(--text-secondary)', fontWeight: 500 }}>
           {page} / {lastPage}
         </span>
         <button

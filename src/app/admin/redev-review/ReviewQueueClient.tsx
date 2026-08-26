@@ -113,7 +113,7 @@ export default function ReviewQueueClient() {
 
   return (
     <main style={{ maxWidth: 1100, margin: '0 auto', padding: 'var(--sp-lg)' }}>
-      <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, margin: '0 0 4px' }}>정비사업 공시 검수</h1>
+      <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 600, margin: '0 0 4px' }}>정비사업 공시 검수</h1>
       <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', margin: '0 0 16px', lineHeight: 1.6 }}>
         자동 반영이 확신하지 못한 DART 공급계약 공시입니다. 승인하면 해당 현장이 <b>시공사 선정</b>으로 바뀝니다.
         <br />
@@ -130,7 +130,7 @@ export default function ReviewQueueClient() {
               border: tab === t.key ? '1px solid var(--brand)' : '1px solid var(--border)',
               background: tab === t.key ? 'var(--brand)' : 'transparent',
               color: tab === t.key ? '#fff' : 'var(--text-primary)',
-              fontSize: 'var(--fs-sm)', fontWeight: 700,
+              fontSize: 'var(--fs-sm)', fontWeight: 600,
             }}
           >
             {t.label} {counts[t.key] ?? 0}
@@ -162,7 +162,7 @@ export default function ReviewQueueClient() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }} className="mc-g2">
               {/* 좌 — 공시 */}
               <div>
-                <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, marginBottom: 4 }}>{item.corp_name ?? '—'}</div>
+                <div style={{ fontSize: 'var(--fs-base)', fontWeight: 600, marginBottom: 4 }}>{item.corp_name ?? '—'}</div>
                 <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 8 }}>{(item.report_nm ?? '').trim() || '—'}</div>
 
                 <div style={{ fontSize: 'var(--fs-xs)', lineHeight: 1.8, color: 'var(--text-secondary)' }}>
@@ -191,7 +191,7 @@ export default function ReviewQueueClient() {
               <div>
                 {item.status === 'pending' ? (
                   <>
-                    <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, marginBottom: 6 }}>매칭 후보 현장</div>
+                    <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, marginBottom: 6 }}>매칭 후보 현장</div>
                     {item.site_options.length === 0 ? (
                       <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.7, marginBottom: 10 }}>
                         이름이 정확히 일치하는 활성 현장이 없습니다.
@@ -221,14 +221,14 @@ export default function ReviewQueueClient() {
                       <button
                         disabled={busyId === item.id || item.site_options.length === 0}
                         onClick={() => act(item, 'approve')}
-                        style={{ flex: 1, minHeight: 44, borderRadius: 'var(--radius-sm)', border: 'none', background: item.site_options.length === 0 ? 'var(--bg-elevated)' : 'var(--brand)', color: item.site_options.length === 0 ? 'var(--text-tertiary)' : '#fff', fontWeight: 800, fontSize: 'var(--fs-sm)', cursor: item.site_options.length === 0 ? 'not-allowed' : 'pointer' }}
+                        style={{ flex: 1, minHeight: 44, borderRadius: 'var(--radius-sm)', border: 'none', background: item.site_options.length === 0 ? 'var(--bg-elevated)' : 'var(--brand)', color: item.site_options.length === 0 ? 'var(--text-tertiary)' : '#fff', fontWeight: 500, fontSize: 'var(--fs-sm)', cursor: item.site_options.length === 0 ? 'not-allowed' : 'pointer' }}
                       >
                         맞음 — 시공사 선정 반영
                       </button>
                       <button
                         disabled={busyId === item.id}
                         onClick={() => act(item, 'reject')}
-                        style={{ flex: 1, minHeight: 44, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-primary)', fontWeight: 700, fontSize: 'var(--fs-sm)', cursor: 'pointer' }}
+                        style={{ flex: 1, minHeight: 44, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-primary)', fontWeight: 500, fontSize: 'var(--fs-sm)', cursor: 'pointer' }}
                       >
                         틀림
                       </button>
