@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import ShareButtons from '@/components/ShareButtons';
 import { notFound } from 'next/navigation';
+import SiteThumb from '@/components/apt/SiteThumb';
 import { REGIONS } from '@/lib/regions';
 
 async function SigunguLinks({ region }: { region: string }) {
@@ -93,7 +94,7 @@ export const revalidate = 3600;
 async function fetchRegionData(region: string) {
   const s = sb();
 
-  const [subsRes, tradesRes, redevRes, unsoldRes, priceRes, siteImgRes, complexImgRes] = await Promise.all([
+  const [subsRes, tradesRes, redevRes, unsoldRes, priceRes] = await Promise.all([
     s.from('apt_subscriptions')
       .select('id,house_nm,region_nm,rcept_bgnde,rcept_endde,tot_supply_hshld_co,hssply_adres,is_price_limit,constructor_nm,ai_summary,house_type_info,price_per_pyeong_avg,brand_name,project_type,loan_rate,is_regulated_area,developer_nm,total_households')
       .ilike('region_nm', `%${region}%`)
@@ -116,22 +117,54 @@ async function fetchRegionData(region: string) {
       .ilike('region', `%${region}%`).eq('is_active', true)
       .gt('price_min', 0).gt('price_max', 0)
       .limit(50) as unknown as Promise<any>,
-    // 세션 139: 카드 썸네일 맵 (apt_sites + apt_complex_profiles)
-    (s as any).from('apt_sites').select('name, images').ilike('region', `%${region}%`).not('images', 'is', null).limit(500) as unknown as Promise<any>,
-    (s as any).from('apt_complex_profiles').select('apt_name, images').ilike('region_nm', `%${region}%`).not('images', 'is', null).limit(500) as unknown as Promise<any>,
   ]);
 
-  // 세션 139: name → thumbnail 맵 (apt_complex_profiles 1순위, apt_sites 덮어쓰기)
-  const imageMap: Record<string, string> = {};
-  for (const row of ((complexImgRes as any)?.data || []) as any[]) {
-    if (Array.isArray(row.images) && row.images.length > 0 && row.images[0]?.url) {
-      imageMap[row.apt_name] = String(row.images[0].thumbnail || row.images[0].url).replace(/^http:\/\//, 'https://');
-    }
-  }
-  for (const row of ((siteImgRes as any)?.data || []) as any[]) {
-    if (Array.isArray(row.images) && row.images.length > 0 && row.images[0]?.url) {
-      imageMap[row.name] = String(row.images[0].thumbnail || row.images[0].thumb || row.images[0].url).replace(/^http:\/\//, 'https://');
-    }
+  // ── R1 · 지역 허브 썸네일을 hero 체인으로 ──────────────────────────────
+  //
+  // 이전에는 `apt_sites.images` / `apt_complex_profiles.images` 의 첫 항목을 썼다.
+  // 그건 «네이버 뉴스 사진» 을 150px 로 줄인 검색 CDN 핫링크다
+  // (search.pstatic.net/common/?type=b150&src=imgnews.naver.net/...). 부울경만 1,116건.
+  //   ① 저작권 — 언론사 사진이다. S7-2 가 상세·갤러리·JSON-LD 에서 걷어낸 그 부류인데
+  //      지역 허브에만 세션 139~142 의 옛 경로가 남아 있었다.
+  //   ② 광고 심사 — 리드폼이 뜨는 상세와 같은 도메인이다.
+  //   ③ 품질 — type=b150 은 150px 다. 애초에 큰 자리에 못 쓴다.
+  // 그리고 «목록이 상세보다 낡아» 있었다 — 조감도를 가진 현장도 목록은 뉴스 사진을 썼다.
+  //
+  // ⚠️ `images` 컬럼 자체는 지우지 않는다. 화면에서만 쓰지 않는다(S7-2 와 같은 원칙).
+  //
+  // ⚠️ 옛 쿼리의 `.limit(500)` 을 그대로 옮기지 않았다. 그게 조용한 결함이었다 —
+  //    apt_sites 가 부산 864 · 경기 1,412 · 서울 809 행이라 500 넘는 지역은 임의로
+  //    잘려 있었다. 지금은 네 목록에 «실제로 등장한 이름» 만(최대 40개) 조회하므로
+  //    한도라는 개념이 사라진다.
+  //
+  // ⚠️ 조인 키는 «이름» 이다. `apt_subscriptions.slug` 는 `더샵-트리센트-2026000318`
+  //    처럼 공고번호가 붙어 `apt_sites.slug` 와 0/10 매칭이다. 이름이면 8/10 이다.
+  //
+  // ⚠️ 이 때문에 라운드가 둘이 된다(목록 5개 병렬 → 메타 1회). `revalidate = 3600`
+  //    ISR 이라 사용자 체감 지연은 없다. Rule #49 의 「병렬 뭉치에 합치지 말 것」은
+  //    /apt/[id] 대상이고 여기는 해당 없다.
+  const names = Array.from(new Set(([
+    ...((subsRes?.data || []) as any[]).map((r: any) => r.house_nm),
+    ...((tradesRes?.data || []) as any[]).map((r: any) => r.apt_name),
+    ...((redevRes?.data || []) as any[]).map((r: any) => r.district_name),
+    ...((unsoldRes?.data || []) as any[]).map((r: any) => r.house_nm),
+  ].filter(Boolean)) as string[]));
+
+  const metaRes: any = names.length > 0
+    ? await ((s as any).from('apt_sites')
+        .select('name,slug,hero_image_url,card_image_url,satellite_image_url,lifecycle_stage,hero_license_tier')
+        .in('name', names) as unknown as Promise<any>)
+    : { data: [] };
+
+  // ⚠️ 같은 이름이 apt_sites 에 «두 행» 인 경우가 있다 (`알티에로 광안` →
+  //    `알티에로-광안` · `altiero-gwangan`). 단순 루프면 나중 행이 앞 행을 덮어써
+  //    조감도 있는 쪽이 사라질 수 있다. 이미지 보유량으로 점수를 매겨 이긴 쪽만 남긴다.
+  //    (중복 레코드 자체는 병합·삭제하지 않는다 — D1 정합성 트랙 소관.)
+  const siteScore = (x?: SiteMeta) => (x?.hero_image_url ? 2 : 0) + (x?.card_image_url ? 1 : 0);
+  const siteMeta = new Map<string, SiteMeta>();
+  for (const row of ((metaRes?.data || []) as SiteMeta[])) {
+    const prev = siteMeta.get(row.name);
+    if (!prev || siteScore(row) > siteScore(prev)) siteMeta.set(row.name, row);
   }
 
   const priceData = priceRes?.data || [];
@@ -149,14 +182,55 @@ async function fetchRegionData(region: string) {
     redevelopments: redevRes?.data || [],
     unsolds: unsoldRes?.data || [],
     priceStats,
-    imageMap,
+    siteMeta,
   };
 }
 
-// 세션 139: 카드 썸네일 헬퍼 (map 미스 시 og fallback)
-function cardThumb(name: string, imageMap: Record<string, string>, subtitle = '') {
-  if (imageMap[name]) return imageMap[name];
-  return `/api/og?title=${encodeURIComponent(name || '')}&design=2&category=apt${subtitle ? `&subtitle=${encodeURIComponent(subtitle)}` : ''}`;
+/** apt_sites 에서 썸네일에 필요한 것만. */
+interface SiteMeta {
+  name: string;
+  slug: string | null;
+  hero_image_url: string | null;
+  card_image_url: string | null;
+  satellite_image_url: string | null;
+  lifecycle_stage: string | null;
+  hero_license_tier: string | null;
+}
+
+/**
+ * 실물이 있어 위성 사진이 «정확한» 단계.
+ * ⚠️ SiteThumb 의 EXISTING_STAGES 와 같은 값이다(그쪽은 export 하지 않는다).
+ *    준공 전 현장에 위성을 깔면 아직 없는 건물 자리의 공터가 보인다.
+ */
+const EXISTING_STAGES = new Set(['post_move_in', 'active_trade', 'landmark_active']);
+
+/**
+ * 지역 허브 네 섹션이 «같은» 체인을 쓰게 묶어 둔다.
+ *
+ * 순서는 RPC `get_apt_subscription_hub` 의 `thumb_url` 과 같아야 한다 —
+ *   hero_image_url → (기축만) satellite → card_image_url → CSS 카드
+ * RPC 쪽이 진짜 원본이고 여기를 거기에 맞춘다. 한 섹션만 고치지 말 것.
+ *
+ * ⚠️ 매칭 실패(meta === undefined)해도 던지지 않는다. SiteThumb 이 hueOf(slug || name)
+ *    으로 이름만 갖고 CSS 카드를 그린다.
+ * ⚠️ palette 를 넘기지 않는다(기본 'auto'). 'brand' 로 주면 56px 썸네일이 전부 같은
+ *    남색이 돼 현장이 구분되지 않는다 — SiteThumb 주석의 금지사항.
+ * ⚠️ leadContext 도 넘기지 않는다(기본 false). 목록은 광고 랜딩이 아니다.
+ */
+function RegionThumb({ meta, name, w, size }: { meta?: SiteMeta; name: string; w: number; size: number }) {
+  return (
+    <SiteThumb
+      slug={meta?.slug ?? ''}
+      name={name}
+      thumbUrl={meta?.hero_image_url
+        ?? (EXISTING_STAGES.has(meta?.lifecycle_stage ?? '') ? meta?.satellite_image_url : null)}
+      cardImageUrl={meta?.card_image_url}
+      lifecycleStage={meta?.lifecycle_stage}
+      heroLicenseTier={meta?.hero_license_tier}
+      width={w}
+      size={size}
+    />
+  );
 }
 
 function fmtPrice(n: number) {
@@ -324,8 +398,8 @@ export default async function RegionLandingPage({ params }: Props) {
               background: 'var(--bg-surface)', border: '1px solid var(--border)',
               borderRadius: 'var(--radius-md)', marginBottom: 6,
             }}>
-              {/* 세션 139: 카드 썸네일 */}
-              <img src={cardThumb(s.house_nm, data.imageMap, '청약')} alt={`${s.house_nm} 이미지`} width={72} height={54} loading="lazy" decoding="async" referrerPolicy="no-referrer" style={{ width: 72, height: 54, objectFit: 'cover', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', flexShrink: 0 }} />
+              {/* R1: hero 체인 — 청약. 이 자리엔 뉴스 사진 핫링크가 있었다. */}
+              <RegionThumb meta={data.siteMeta.get(s.house_nm)} name={s.house_nm} w={72} size={54} />
               <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
                 <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.house_nm}</span>
@@ -370,8 +444,10 @@ export default async function RegionLandingPage({ params }: Props) {
               background: 'var(--bg-surface)', border: '1px solid var(--border)',
               borderRadius: 'var(--radius-md)', marginBottom: 'var(--sp-xs)',
             }}>
-              {/* 세션 139: 실거래 카드 썸네일 */}
-              <img src={cardThumb(t.apt_name, data.imageMap, '실거래')} alt={`${t.apt_name} 이미지`} width={56} height={42} loading="lazy" decoding="async" referrerPolicy="no-referrer" style={{ width: 56, height: 42, objectFit: 'cover', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', flexShrink: 0 }} />
+              {/* R1: hero 체인 — 실거래. ⚠️ 부산 top10 중 apt_sites 매칭이 1건뿐이다
+                       (apt_transactions.apt_name 은 기축 단지명, apt_sites 는 분양 현장 위주).
+                       썸네일을 없앨지는 Node 확인 대기 — 지시서 §4. 확인 전엔 체인만 끼워 둔다. */}
+              <RegionThumb meta={data.siteMeta.get(t.apt_name)} name={t.apt_name} w={56} size={42} />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{t.apt_name}</div>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{t.deal_date} · {t.exclusive_area}㎡</div>
@@ -397,8 +473,8 @@ export default async function RegionLandingPage({ params }: Props) {
               padding: '8px 14px', background: 'var(--bg-surface)', border: '1px solid var(--border)',
               borderRadius: 'var(--radius-md)', marginBottom: 'var(--sp-xs)',
             }}>
-              {/* 세션 139: 재개발 카드 썸네일 */}
-              <img src={cardThumb(r.district_name, data.imageMap, '재개발')} alt={`${r.district_name} 이미지`} width={56} height={42} loading="lazy" decoding="async" referrerPolicy="no-referrer" style={{ width: 56, height: 42, objectFit: 'cover', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', flexShrink: 0 }} />
+              {/* R1: hero 체인 — 재개발. 부산 11건 중 9건이 조감도로 바뀐다(최대 수확). */}
+              <RegionThumb meta={data.siteMeta.get(r.district_name)} name={r.district_name} w={56} size={42} />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{r.district_name}</div>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{r.region}</div>
@@ -424,8 +500,8 @@ export default async function RegionLandingPage({ params }: Props) {
               padding: '8px 14px', background: 'var(--bg-surface)', border: '1px solid var(--border)',
               borderRadius: 'var(--radius-md)', marginBottom: 'var(--sp-xs)',
             }}>
-              {/* 세션 139: 미분양 카드 썸네일 */}
-              <img src={cardThumb(u.house_nm, data.imageMap, '미분양')} alt={`${u.house_nm} 이미지`} width={56} height={42} loading="lazy" decoding="async" referrerPolicy="no-referrer" style={{ width: 56, height: 42, objectFit: 'cover', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', flexShrink: 0 }} />
+              {/* R1: hero 체인 — 미분양. */}
+              <RegionThumb meta={data.siteMeta.get(u.house_nm)} name={u.house_nm} w={56} size={42} />
               <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', flex: 1, minWidth: 0 }}>{u.house_nm}</div>
               <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--accent-red)', flexShrink: 0 }}>{u.tot_unsold_hshld_co}세대</span>
             </div>
