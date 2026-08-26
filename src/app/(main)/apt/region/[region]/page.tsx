@@ -444,10 +444,13 @@ export default async function RegionLandingPage({ params }: Props) {
               background: 'var(--bg-surface)', border: '1px solid var(--border)',
               borderRadius: 'var(--radius-md)', marginBottom: 'var(--sp-xs)',
             }}>
-              {/* R1: hero 체인 — 실거래. ⚠️ 부산 top10 중 apt_sites 매칭이 1건뿐이다
-                       (apt_transactions.apt_name 은 기축 단지명, apt_sites 는 분양 현장 위주).
-                       썸네일을 없앨지는 Node 확인 대기 — 지시서 §4. 확인 전엔 체인만 끼워 둔다. */}
-              <RegionThumb meta={data.siteMeta.get(t.apt_name)} name={t.apt_name} w={56} size={42} />
+              {/* SA3 §E: 실거래 섹션에는 썸네일을 두지 않는다.
+                  부산 top10 중 apt_sites 매칭이 «1건» 이다 — apt_transactions.apt_name 은
+                  기축 단지명이고 apt_sites 는 분양 현장 위주라 «구조적으로» 안 맞는다.
+                  나머지 9자리는 두 글자짜리 CSS 카드로만 채워져 의미가 없었다.
+                  ⚠️ 청약·재개발·미분양 3개 섹션은 그대로 둔다 —
+                     특히 재개발은 11건 중 9건이 진짜 조감도다(R1 의 최대 수확).
+                     세 섹션의 RegionThumb 을 «같이» 걷어내지 말 것. */}
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{t.apt_name}</div>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{t.deal_date} · {t.exclusive_area}㎡</div>
