@@ -130,13 +130,23 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
     //    redevelopment_projects.address 는 상당수가 «조합 사무실» 이다 —
     //    `못골번영로 16, 흥원빌딩 3층` · `달맞이길117번나길 194, 1동 지하1층` · `용호로 99, 3층`.
     //    사업지가 아니라 사무실 자리에 핀이 서므로 «좌표가 없는 것보다 나쁘다».
-    //    R2-2 가 그런 행에 source_ids.address_source='redev' 를 남겨 두었다(실측 93곳).
-    //    ⛔ 이 필터를 빼지 말 것. 빼면 그 93곳에 틀린 좌표가 박힌다.
+    //    그런 행에는 source_ids.address_source='redev' 표식이 있다 — 실측 136곳
+    //    (R2-2 가 채운 92 + 예전 sync-apt-sites INSERT 경로가 채운 44를 백필).
+    //    44곳은 주소가 redevelopment_projects 것과 «정확히 일치» 하는 것만 골랐다.
+    //    redev_id 가 있다는 것만으로 붙이면 청약홈 주소를 잘못 막는다.
+    //    ⛔ 이 필터를 빼지 말 것. 빼면 그 136곳에 조합 사무실 좌표가 박힌다.
     const { data: sites } = await sb.from('apt_sites')
       .select('id, name, region, sigungu, address')
       .eq('is_active', true)
       .is('latitude', null)
-      .not('source_ids->>address_source', 'eq', 'redev')
+      // ⛔ `.not(col, 'eq', 'redev')` 를 쓰지 말 것. PostgREST 가 `NOT (col = 'redev')` 로
+      //    번역하는데 SQL 3값 논리에서 col 이 NULL 이면 그 식이 TRUE 가 아니라 «NULL» 이라
+      //    표식 없는 행까지 «전부» 걸러진다. 실측으로 좌표 없음 273행 중 크론이 보는 행이
+      //    0 이 됐다 — 92곳을 막으려다 지오코딩 경로를 통째로 죽였다.
+      //    더 나쁜 건 조용하다는 것이다: 로그에 `0 scanned` 가 찍혀 「할 일이 없다」와
+      //    「필터가 깨졌다」가 구분되지 않는다.
+      //    아래 or() 가 `IS DISTINCT FROM 'redev'` 와 같은 뜻이다.
+      .or('source_ids->>address_source.is.null,source_ids->>address_source.neq.redev')
       .order('content_score', { ascending: false })
       .limit(300);
 
