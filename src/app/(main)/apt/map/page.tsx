@@ -9,13 +9,16 @@ import ShareButtons from '@/components/ShareButtons';
 
 export const metadata: Metadata = {
   title: '부동산 지도',
-  description: '전국 청약·분양·재개발·미분양 정보를 지도에서 한눈에 확인하세요. 지역별 시세, 청약 일정, 미분양 현황까지.',
+  // ⚠️ 「지도에서 재개발」은 이제 사실이 아니다 — 재개발 레이어를 내렸다(MapClient 주석).
+  //    재개발은 이 페이지에서 «지역별 건수»로만 보이고, 구역별 진행 단계는 /apt/redev 가 맡는다.
+  //    화면에 없는 걸 메타·구조화 데이터에 남기면 검색 결과와 화면이 어긋난다.
+  description: '전국 청약·분양·미분양을 지도에서 한눈에 확인하세요. 지역별 청약·미분양·재개발 건수와 실거래까지.',
   alternates: { canonical: SITE_URL + '/apt/map' },
   // s8: PV 미달 죽은 라우트. robots.txt 로 막으면 이 noindex 를 못 읽어 URL 만 색인된다.
   robots: { index: false, follow: true },
   openGraph: {
     title: '부동산 지도',
-    description: '전국 청약·분양·재개발·미분양 지도 보기',
+    description: '전국 청약·분양·미분양 지도 · 지역별 재개발 현황',
     url: SITE_URL + '/apt/map',
     siteName: '카더라',
     locale: 'ko_KR',
@@ -26,7 +29,7 @@ export const metadata: Metadata = {
     ],
   },
   twitter: { card: 'summary_large_image' },
-  other: { 'naver:written_time': new Date().toISOString(), 'naver:updated_time': new Date().toISOString(), 'naver:author': '카더라', 'naver:description': '전국 청약·분양·재개발·미분양 지도 보기',
+  other: { 'naver:written_time': new Date().toISOString(), 'naver:updated_time': new Date().toISOString(), 'naver:author': '카더라', 'naver:description': '전국 청약·분양·미분양 지도 · 지역별 재개발 현황',
       'article:section': '부동산', 'dg:plink': SITE_URL + '/apt/map' },
 };
 
@@ -114,13 +117,13 @@ export default async function AptMapPage() {
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "FAQPage", mainEntity: [{ "@type": "Question", name: "지도에서 청약 현장을 볼 수 있나요?", acceptedAnswer: { "@type": "Answer", text: "카더라 부동산 지도에서 전국 청약·분양·미분양·재개발 현장을 확인할 수 있습니다." } }] }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "FAQPage", mainEntity: [{ "@type": "Question", name: "지도에서 청약 현장을 볼 수 있나요?", acceptedAnswer: { "@type": "Answer", text: "카더라 부동산 지도에서 전국 청약·분양·미분양 현장을 확인할 수 있습니다. 재개발·재건축은 지역별 건수로 보고, 구역별 진행 단계는 재개발 허브에서 확인합니다." } }] }) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '부동산', item: SITE_URL + '/apt' }, { '@type': 'ListItem', position: 3, name: '지도' }] }) }} />
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--sp-md)' }}>
           <h1 style={{ position:"absolute", width:1, height:1, overflow:"hidden", clip:"rect(0,0,0,0)" }}>🗺️ 지역별 부동산 현황</h1>
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)' }}>
-            <ShareButtons title="지역별 부동산 현황 — 청약·미분양·재개발 지도" contentType="page" contentRef="apt-map" />
+            <ShareButtons title="지역별 부동산 현황 — 청약·미분양 지도" contentType="page" contentRef="apt-map" />
             <Link href="/apt" style={{ fontSize: 12, color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 부동산</Link>
           </div>
         </div>
