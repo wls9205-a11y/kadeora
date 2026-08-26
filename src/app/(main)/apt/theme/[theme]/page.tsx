@@ -47,11 +47,16 @@ const THEMES: Record<string, {
   },
   'price-up': {
     title: '최근 1년 가격 상승 아파트',
-    desc: '최근 1년간 매매가가 상승한 아파트 단지입니다. 단지마다 «가장 많이 거래된 평형» 하나를 고정해 잰 값이고, 그 순으로 정렬합니다. 표본이 2건뿐인 단지도 있어 상위권일수록 표본 수를 같이 보세요.',
+    desc: '최근 1년간 매매가가 상승한 아파트 단지입니다. 단지마다 «가장 많이 거래된 평형» 하나를 고정해 잰 값이고, 그 순으로 정렬합니다. 최근·직전 각각 5건 이상 거래된 단지만 세웁니다.',
     keywords: ['가격 상승 아파트', '아파트 가격 오른 곳', '부동산 상승', '시세 상승'],
     query: (sb, region) => {
       let q = sb.from('apt_complex_profiles').select(`apt_name, region_nm, sigungu, dong, latest_sale_price, latest_jeonse_price, jeonse_ratio, sale_count_1y, built_year, age_group, ${PRICE_CHANGE_COLS}`)
         .gt('price_change_1y', 0).gt('latest_sale_price', 0).not('age_group', 'is', null)
+        // ⚠️ 이 목록은 변동률로 «정렬» 한다 — 표본 하한을 안 걸면 가장 시끄러운 추정치가
+        //    맨 위로 온다. 저장 하한이 2건이라 실제로 1위가 +93.1%(4건) · 3위가 +64.9%(2건)였다.
+        //    양쪽 5건 이상만 세운다. 남는 단지 상승 1,346곳 — 100개 뽑는 데 13배 여유다.
+        //    ⚠️ 저장값 하한(2건)은 그대로 둔다. 개별 단지 페이지는 2건도 «표본을 밝히고» 보여준다.
+        .gte('price_change_n_recent', 5).gte('price_change_n_past', 5)
         .order('price_change_1y', { ascending: false }).limit(100);
       if (region) q = q.eq('region_nm', region);
       return q;
@@ -67,6 +72,8 @@ const THEMES: Record<string, {
     query: (sb, region) => {
       let q = sb.from('apt_complex_profiles').select(`apt_name, region_nm, sigungu, dong, latest_sale_price, latest_jeonse_price, jeonse_ratio, sale_count_1y, built_year, age_group, ${PRICE_CHANGE_COLS}`)
         .lt('price_change_1y', 0).gt('latest_sale_price', 0).not('age_group', 'is', null)
+        // 상승 목록과 같은 표본 하한 (하락 840곳).
+        .gte('price_change_n_recent', 5).gte('price_change_n_past', 5)
         .order('price_change_1y', { ascending: true }).limit(100);
       if (region) q = q.eq('region_nm', region);
       return q;

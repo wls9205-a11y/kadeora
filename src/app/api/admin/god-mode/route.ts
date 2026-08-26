@@ -68,7 +68,9 @@ const CRON_GROUPS = {
     '/api/cron/auto-verify-households',
     '/api/cron/naver-complex-sync',
     // 세션 108 추가
-    '/api/cron/apt-price-change',
+    // ⚠️ '/api/cron/apt-price-change' 를 지웠다 (2026-08-26). 라우트 파일이 없다 —
+    //    되살리지 말 것. 부르던 RPC `recalc_price_change_1y()` 는 평형이 없어 근거 컬럼과
+    //    어긋난 값을 덮어썼다. 정본은 아래 '/api/cron/price-change-calc' 하나다.
     '/api/cron/redev-enrich',
     '/api/cron/redev-verify-households',
     '/api/cron/daily-report-snapshot',

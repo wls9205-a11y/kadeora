@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { priceChangeCompact, PRICE_CHANGE_COLS } from '@/lib/apt/price-change';
+import { pickProfileByTags } from '@/lib/apt/profile-match';
 import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
@@ -44,12 +45,18 @@ export async function GET(req: NextRequest) {
         const aptName = (post.tags || [])[0];
         if (!aptName) continue;
 
-        // 최신 시세 조회
-        const { data: cp } = await (admin as any).from('apt_complex_profiles')
-          .select(`latest_sale_price, latest_sale_date, avg_sale_price_pyeong, jeonse_ratio, ${PRICE_CHANGE_COLS}`)
+        /* 최신 시세 조회.
+         * ⚠️ `apt_name` «만» 으로 고르면 오집이 난다 — 이름 1,833개가 복수 시군구에 걸쳐 있고
+         *    (한 이름 최대 81곳) 거래 22%가 그 이름들이다. 여기서 고른 시세는 아래에서
+         *    `meta_description` 으로 «검색 결과에» 나가므로, 틀리면 색인에 남는다.
+         *    `.maybeSingle()` 은 그 위험을 «감춘다» — 여러 건이면 조용히 하나를 집는다.
+         * → 후보를 다 받아 태그로 가린다. 못 가리면 이 글은 건너뛴다 (lib/apt/profile-match.ts). */
+        const { data: cps } = await (admin as any).from('apt_complex_profiles')
+          .select(`sigungu, region_nm, latest_sale_price, latest_sale_date, avg_sale_price_pyeong, jeonse_ratio, ${PRICE_CHANGE_COLS}`)
           .eq('apt_name', aptName)
-          .maybeSingle();
+          .limit(20);
 
+        const cp = pickProfileByTags(cps as any[], post.tags as string[]);
         if (!cp || !cp.latest_sale_price) continue;
 
         // meta_description에 최신 수치 반영
