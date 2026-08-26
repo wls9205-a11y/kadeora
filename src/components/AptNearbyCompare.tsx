@@ -18,12 +18,17 @@ interface Apt {
   price_change_n_recent: number | null; price_change_n_past: number | null;
 }
 
-export default function AptNearbyCompare({ aptName, sigungu }: { aptName: string; sigungu: string }) {
+export default function AptNearbyCompare({ aptName, sigungu, region }: { aptName: string; sigungu: string; region?: string | null }) {
   const [data, setData] = useState<Apt[]>([]);
   useEffect(() => {
-    fetch(`/api/public/apt-nearby?apt=${encodeURIComponent(aptName)}&sigungu=${encodeURIComponent(sigungu)}`)
-      .then(r => r.json()).then(d => setData(d.data || [])).catch(() => {});
-  }, [aptName, sigungu]);
+    /* ⚠️ region 없이 부르지 않는다 — 시군구 이름이 전국에서 유일하지 않아
+     *    부산 북구 단지의 주변에 대구 북구 단지가 섞인다(라우트 주석 참조).
+     *    라우트가 400 을 내지만 요청 자체를 안 보내는 게 맞다. */
+    if (!region) return;
+    const qs = new URLSearchParams({ apt: aptName, sigungu, region });
+    fetch(`/api/public/apt-nearby?${qs}`)
+      .then(r => r.ok ? r.json() : null).then(d => setData(d?.data || [])).catch(() => {});
+  }, [aptName, sigungu, region]);
 
   if (!data.length) return null;
   const fmtP = (v: number) => !v ? '-' : v >= 10000 ? `${(v / 10000).toFixed(1)}억` : `${v.toLocaleString()}만`;
