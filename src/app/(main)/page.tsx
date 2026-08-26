@@ -46,6 +46,7 @@ import UniversalSearchBar from '@/components/search/UniversalSearchBar';
 import RecentlyViewed from '@/components/home/RecentlyViewed';
 import SiteRows, { MoreLink } from '@/components/home/SiteRows';
 import { fetchHomeSections, MIN_ROWS } from '@/lib/home/sections';
+import { fetchAll } from '@/lib/db/fetchBatched';
 import { buildHomeChips, CHIP_LIMIT } from '@/lib/home/chips';
 import DealHeroCard, { pickDealHero } from '@/components/home/DealHeroCard';
 import WeeklyTrades from '@/components/home/WeeklyTrades';
@@ -165,22 +166,23 @@ interface HomeCounts {
  * ⚠️ 히어로 숫자와 칩 숫자를 각각 세지 않는다 — 두 번 세면 반드시 갈라진다.
  * ⚠️ `/apt/[id]` 의 8개짜리 `Promise.allSettled` 뭉치에 합치지 말 것 (504 전례).
  *    여기서도 홈 본체 fetch 와 분리해 돌린다. 실패하면 히어로 부제와 칩만 빠진다.
- * ⚠️ `.limit()` 을 반드시 준다. supabase-js 기본 상한이 1,000행이라
- *    빼면 부울경 1,465곳 중 465곳이 조용히 사라진다.
+ * ⚠️ **`.limit()` 을 키우는 걸로는 안 된다.** 예전 주석이 「.limit() 을 반드시 준다」였는데
+ *    그건 틀렸다 — 상한은 클라이언트가 아니라 «서버» 에 있다. PostgREST `db-max-rows` 가
+ *    1,000 이라 `.limit(5000)` 을 줘도 1,000행만 온다.
+ *    실측: 부울경 활성 1,464곳인데 화면에 「현장 1,000곳」이 나갔다. 464곳이 조용히 사라졌고
+ *    시군구 칩 건수도 잘린 표본에서 세고 있었다.
+ *    → `fetchAll`(`.range()` 반복)로 받는다. `/blog` 의 `.limit(4000)` 도 같은 원인이었다.
  */
 async function fetchCounts(): Promise<HomeCounts> {
   const empty: HomeCounts = { total: 0, byRegion: [], bySigungu: [] };
   try {
     const sb = getSupabaseAdmin();
-    const { data, error } = await (sb as any)
-      .from('apt_sites')
-      .select('region,sigungu')
-      .eq('is_active', true)
-      .in('region', HOME_REGIONS)
-      .limit(5000);
-    if (error) throw error;
-
-    const rows = (data ?? []) as { region: string | null; sigungu: string | null }[];
+    const rows = (await fetchAll(
+      sb,
+      'apt_sites',
+      'region,sigungu',
+      (q: any) => q.eq('is_active', true).in('region', HOME_REGIONS),
+    )) as { region: string | null; sigungu: string | null }[];
     const regionTally = new Map<string, number>();
     const sigunguTally = new Map<string, { region: string; sigungu: string; n: number }>();
 

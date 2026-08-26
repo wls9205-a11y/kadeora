@@ -5,9 +5,14 @@
 //
 // ⚠️ 홈의 모든 현장 쿼리에 지역 필터가 걸려 있어야 한다. 필터가 없어 경기 현장이
 //    홈 상단에 뜬 전례가 있다(C-5).
-// ⚠️ .limit() 을 반드시 준다. supabase-js 기본 상한이 1,000행이라 빼면 조용히 잘린다.
+// ⚠️ **`.limit()` 을 키우는 걸로는 안 된다.** 상한은 클라이언트가 아니라 «서버» 에 있다 —
+//    PostgREST `db-max-rows` 가 1,000 이라 `.limit(5000)` 을 줘도 1,000행만 온다.
+//    이 표는 부울경 1,464곳이라 464곳이 잘렸고, 그 «잘린 표본» 위에서
+//    deals·redev 정렬과 가짜가격 판정(3곳·3단계 집계)이 돌고 있었다.
+//    → `fetchAll`(`.range()` 반복)로 받는다.
 
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { fetchAll } from '@/lib/db/fetchBatched';
 
 /** 한 섹션이 이 수보다 적으면 섹션 자체를 감춘다 (M5 §B-5). */
 export const MIN_ROWS = 3;
@@ -128,15 +133,14 @@ export async function fetchHomeSections(regions: string[]): Promise<HomeSections
   const empty: HomeSections = { popular: [], deals: [], redev: [] };
   try {
     const sb = getSupabaseAdmin();
-    const { data, error } = await (sb as any)
-      .from('apt_sites')
-      .select(COLS)
-      .eq('is_active', true)
-      .in('region', regions)
-      .limit(5000);
-    if (error) throw error;
+    const all = (await fetchAll(
+      sb,
+      'apt_sites',
+      COLS,
+      (q: any) => q.eq('is_active', true).in('region', regions),
+    )) as Raw[];
 
-    const rows = ((data ?? []) as Raw[]).filter((r) => isRealSite(r.name));
+    const rows = all.filter((r) => isRealSite(r.name));
     const fake = buildFakePriceSet(rows);
     const toRow = (r: Raw, rank?: number): HomeRow => ({
       slug: r.slug, name: r.name, region: r.region, sigungu: r.sigungu,
