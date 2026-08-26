@@ -324,6 +324,14 @@ async function fetchUnifiedData(slug: string) {
   const sigungu = site?.sigungu || sub?.hssply_adres?.split(' ').slice(1, 2).join('') || '';
   // s246 fix: ilike '%X%' 폭발 방지 — 짧은 string은 60만건 전체 스캔 위험 (apt_transactions sigungu='%구%' = 400,262건)
   const sigunguSafe = sigungu && sigungu.length >= 3 ? sigungu : '';
+  /* ⚠️ `apt_sites.name` 과 `apt_transactions.apt_name` 의 «띄어쓰기» 가 다르다.
+   *    실측(부울경 기축 930곳): 정확일치만 쓰면 633곳, 두 표기를 다 보면 714곳 —
+   *    **81곳이 공백 하나 때문에 실거래 이력이 통째로 빈다**(그 안에 가격추이 차트가 있다).
+   *      `e편한세상 송도 더퍼스트비치` ↔ `e편한세상송도더퍼스트비치`  (148건)
+   *      `번영로 하늘채 센트럴파크`   ↔ `번영로하늘채센트럴파크`      (127건)
+   *    PostgREST 필터에서는 `replace()` 를 못 쓰므로 «두 표기를 `in` 으로» 넣는다.
+   *    실측상 이 방식이 DB 쪽 `replace()` 비교와 같은 수를 낸다(둘 다 713곳). */
+  const nameVariants = Array.from(new Set([name, name.replace(/\s+/g, '')].filter(Boolean)));
   const builderName = (sub?.constructor_nm || site?.builder || '').split('(')[0].split('주식')[0].trim();
   const builderSafe = builderName.length >= 3 ? builderName : '';
 
@@ -331,7 +339,7 @@ async function fetchUnifiedData(slug: string) {
   // 8-wide 동시 fetch → 2-wide 4웨이브로 분할해 렌더당 peak 동시 커넥션을 8→2 로 축소.
   // 순차 왕복이 늘어도 각 쿼리가 ms 단위라 지연 영향 미미. 출력은 그대로 유지.
   const [tradesR, blogsR] = await Promise.allSettled([
-    sb.from('apt_transactions').select('id, apt_name, deal_date, deal_amount, exclusive_area, floor, built_year').eq('apt_name', name).order('deal_date', { ascending: false }).limit(30),
+    (region ? sb.from('apt_transactions').select('id, apt_name, deal_date, deal_amount, exclusive_area, floor, built_year').in('apt_name', nameVariants).eq('region_nm', region) : sb.from('apt_transactions').select('id, apt_name, deal_date, deal_amount, exclusive_area, floor, built_year').in('apt_name', nameVariants)).order('deal_date', { ascending: false }).limit(30),
     termBlog ? sb.from('blog_posts').select('slug, title, view_count, published_at').eq('is_published', true).or(`title.ilike.%${termBlog}%,title.ilike.%${rShort} 청약%,title.ilike.%${rShort} 부동산%`).order('view_count', { ascending: false }).limit(5) : Promise.resolve({ data: [] }),
   ]);
   const [postsR, nearbyR] = await Promise.allSettled([
@@ -344,9 +352,13 @@ async function fetchUnifiedData(slug: string) {
     region ? sb.from('apt_sites').select('price_min, price_max').eq('region', region).eq('is_active', true).gt('price_min', 0).gt('price_max', 0).limit(100) : Promise.resolve({ data: [] }),
   ]);
   const [regionTradesR, complexR] = await Promise.allSettled([
-    sigunguSafe ? sb.from('apt_transactions').select('apt_name, deal_date, deal_amount, exclusive_area, floor').ilike('sigungu', `%${sigunguSafe}%`).neq('apt_name', name).order('deal_date', { ascending: false }).limit(10) : Promise.resolve({ data: [] }),
+    // ⚠️ `region_nm` 을 같이 건다. 시군구 이름은 전국에서 유일하지 않다 —
+    //    174개 중 66개가 복수 시도에 걸치고(동구 7 · 서구 6 · 중구 6 · 남구 5 · 북구 5),
+    //    부산 핵심 자치구가 전부 거기 든다. 없으면 부산 남구 옆에 광주 남구 거래가 붙는다.
+    sigunguSafe && region ? sb.from('apt_transactions').select('apt_name, deal_date, deal_amount, exclusive_area, floor').eq('region_nm', region).ilike('sigungu', `%${sigunguSafe}%`).not('apt_name', 'in', `(${nameVariants.map((n) => `"${n}"`).join(',')})`).order('deal_date', { ascending: false }).limit(10) : Promise.resolve({ data: [] }),
     // 단지백과 — 같은 시군구 기존 아파트 시세 (시세비교/전세가율/평당가)
-    sigunguSafe ? (sb as any).from('apt_complex_profiles').select(`apt_name, built_year, latest_sale_price, avg_sale_price_pyeong, latest_jeonse_price, jeonse_ratio, total_households, sale_count_1y, ${PRICE_CHANGE_COLS}`).ilike('sigungu', `%${sigunguSafe}%`).gt('latest_sale_price', 0).order('latest_sale_price', { ascending: false }).limit(10) : Promise.resolve({ data: [] }),
+    // ⚠️ 여기도 `region_nm` 필수 (바로 위 주석과 같은 이유). 이 표가 「변동률」을 보여준다.
+    sigunguSafe && region ? (sb as any).from('apt_complex_profiles').select(`apt_name, built_year, latest_sale_price, avg_sale_price_pyeong, latest_jeonse_price, jeonse_ratio, total_households, sale_count_1y, ${PRICE_CHANGE_COLS}`).eq('region_nm', region).ilike('sigungu', `%${sigunguSafe}%`).gt('latest_sale_price', 0).order('latest_sale_price', { ascending: false }).limit(10) : Promise.resolve({ data: [] }),
   ]);
 
   const trades = tradesR.status === 'fulfilled' ? (tradesR.value as { data: any })?.data || [] : [];
