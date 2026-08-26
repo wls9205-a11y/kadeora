@@ -135,11 +135,11 @@ export default function SmartPushPrompt() {
         {done ? (
           <div style={{ textAlign: 'center', padding: '8px 0' }}>
             <div style={{ fontSize: 24, marginBottom: 4 }}>🎉</div>
-            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--accent-green)' }}>알림 설정 완료!</div>
+            <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--accent-green)' }}>알림 설정 완료!</div>
           </div>
         ) : pushState === 'needs-pwa' ? (
           <>
-            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>
+            <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 6 }}>
               📱 알림을 받으려면 앱 설치가 필요해요
             </div>
             <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: 12 }}>
@@ -149,7 +149,7 @@ export default function SmartPushPrompt() {
               background: 'var(--bg-base)', borderRadius: 'var(--radius-md)', padding: '12px 14px',
               fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.8,
             }}>
-              <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>설치 방법 (10초)</div>
+              <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>설치 방법 (10초)</div>
               <div>1️⃣ 하단 <strong style={{ color: 'var(--brand)' }}>공유 버튼</strong> (⬆️) 탭</div>
               <div>2️⃣ <strong style={{ color: 'var(--brand)' }}>"홈 화면에 추가"</strong> 탭</div>
               <div>3️⃣ 우측 상단 <strong style={{ color: 'var(--brand)' }}>"추가"</strong> 탭</div>
@@ -160,7 +160,7 @@ export default function SmartPushPrompt() {
           </>
         ) : pushState === 'denied' ? (
           <>
-            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>
+            <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 6 }}>
               🔕 알림이 차단되어 있어요
             </div>
             <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
@@ -175,7 +175,7 @@ export default function SmartPushPrompt() {
           </>
         ) : (
           <>
-            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>
+            <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>
               🔔 청약 마감·시세 변동 알림 받기
             </div>
             <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 12, lineHeight: 1.5 }}>
@@ -184,7 +184,7 @@ export default function SmartPushPrompt() {
             <button onClick={subscribe} disabled={subscribing} style={{
               width: '100%', padding: '11px 0', borderRadius: 'var(--radius-md)', border: 'none',
               background: 'var(--brand)', color: '#fff',
-              fontSize: 14, fontWeight: 700, cursor: subscribing ? 'not-allowed' : 'pointer',
+              fontSize: 14, fontWeight: 500, cursor: subscribing ? 'not-allowed' : 'pointer',
               opacity: subscribing ? 0.6 : 1,
             }}>
               {subscribing ? '설정 중...' : '알림 허용하기'}

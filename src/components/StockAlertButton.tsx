@@ -99,7 +99,7 @@ export default function StockAlertButton({ symbol, stockName, currentPrice, curr
             style={{ flex: 1, padding: 'var(--sp-md) var(--card-p)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', outline: 'none' }} />
           <button onClick={addAlert} disabled={saving || !threshold} style={{
             padding: 'var(--sp-md) var(--sp-xl)', borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: 'var(--text-inverse)',
-            fontSize: 'var(--fs-sm)', fontWeight: 700, border: 'none', cursor: 'pointer',
+            fontSize: 'var(--fs-sm)', fontWeight: 500, border: 'none', cursor: 'pointer',
             opacity: saving || !threshold ? 0.5 : 1,
           }}>{saving ? '...' : '추가'}</button>
         </div>

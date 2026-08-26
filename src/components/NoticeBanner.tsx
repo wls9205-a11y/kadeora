@@ -237,12 +237,12 @@ export default function NoticeBanner() {
             {/* 헤더 */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-lg)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)' }}>
-                <span style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>
+                <span style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)' }}>
                   {style.icon} {notice.is_paid ? '전광판 광고' : '공지사항'}
                 </span>
                 {notice.is_paid && (
                   <span style={{
-                    fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 'var(--radius-md)', fontWeight: 700,
+                    fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 'var(--radius-md)', fontWeight: 500,
                     background: tier === 'urgent' ? 'rgba(248,113,113,0.12)' : tier === 'premium' ? 'rgba(251,191,36,0.12)' : 'rgba(52,211,153,0.12)',
                     color: tier === 'urgent' ? 'var(--accent-red)' : tier === 'premium' ? 'var(--accent-yellow)' : 'var(--accent-green)',
                   }}>
@@ -258,7 +258,7 @@ export default function NoticeBanner() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-md)', padding: '12px 16px', background: 'var(--bg-hover)', borderRadius: 'var(--radius-card)', marginBottom: 'var(--sp-lg)' }}>
                 <Avatar src={notice.author.avatar_url} nickname={notice.author.nickname} size={40} />
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>{notice.author.nickname ?? '사용자'}</div>
+                  <div style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)' }}>{notice.author.nickname ?? '사용자'}</div>
                   {notice.author.grade_title && <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginTop: 2 }}>{notice.author.grade_title}</div>}
                 </div>
                 <a href={`/profile/${notice.author.id}`} style={{ fontSize: 'var(--fs-sm)', color: 'var(--brand)', textDecoration: 'none', fontWeight: 600, padding: '6px 12px', border: '1px solid var(--brand)', borderRadius: 'var(--radius-sm)', flexShrink: 0 }}>프로필</a>
@@ -281,15 +281,15 @@ export default function NoticeBanner() {
             {notice.is_paid && (
               <div style={{ display: 'flex', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-lg)' }}>
                 <div style={{ flex: 1, textAlign: 'center', padding: '10px 8px', background: 'var(--bg-hover)', borderRadius: 'var(--radius-md)' }}>
-                  <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)' }}>{notice.impression_count || 0}</div>
+                  <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 700, color: 'var(--text-primary)' }}>{notice.impression_count || 0}</div>
                   <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>노출</div>
                 </div>
                 <div style={{ flex: 1, textAlign: 'center', padding: '10px 8px', background: 'var(--bg-hover)', borderRadius: 'var(--radius-md)' }}>
-                  <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)' }}>{notice.click_count || 0}</div>
+                  <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 700, color: 'var(--text-primary)' }}>{notice.click_count || 0}</div>
                   <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>클릭</div>
                 </div>
                 <div style={{ flex: 1, textAlign: 'center', padding: '10px 8px', background: 'var(--bg-hover)', borderRadius: 'var(--radius-md)' }}>
-                  <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--brand)' }}>
+                  <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 700, color: 'var(--brand)' }}>
                     {notice.impression_count ? ((notice.click_count / notice.impression_count) * 100).toFixed(1) : '0.0'}%
                   </div>
                   <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>클릭률</div>

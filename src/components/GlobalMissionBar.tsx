@@ -60,7 +60,7 @@ export default function GlobalMissionBar() {
         <span style={{ color: 'var(--text-secondary)' }}>📅 오늘 출석하고 <strong style={{ color: 'var(--brand)' }}>+10P</strong> 받기</span>
         <button onClick={handleAttend} disabled={checking} style={{
           padding: '4px 14px', borderRadius: 'var(--radius-sm)', border: 'none',
-          background: 'var(--brand)', color: '#fff', fontSize: 12, fontWeight: 700,
+          background: 'var(--brand)', color: '#fff', fontSize: 12, fontWeight: 500,
           cursor: checking ? 'not-allowed' : 'pointer', opacity: checking ? 0.6 : 1,
         }}>체크!</button>
       </div>

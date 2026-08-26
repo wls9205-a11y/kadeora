@@ -123,7 +123,7 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)' }}>댓글</span>
+          <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)' }}>댓글</span>
           {comments.length > 0 && <span style={{ fontSize: 13, color: 'var(--text-tertiary)' }}>{comments.length}</span>}
         </div>
         {comments.length > 1 && (
@@ -196,7 +196,7 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
           </div>
         ) : (
           <div style={{ textAlign: 'center', padding: '16px', background: 'var(--bg-surface)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border)', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>
-            💬 <a href={`/login?redirect=${encodeURIComponent(pathname)}&source=comment`} style={{ color: 'var(--brand)', textDecoration: 'none', fontWeight: 700 }}>로그인</a>하고 대화에 참여하세요
+            💬 <a href={`/login?redirect=${encodeURIComponent(pathname)}&source=comment`} style={{ color: 'var(--brand)', textDecoration: 'none', fontWeight: 500 }}>로그인</a>하고 대화에 참여하세요
           </div>
         )}
       </div>
@@ -232,13 +232,13 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
                     {comment.profiles?.avatar_url ? (
                       <img src={comment.profiles.avatar_url} alt={nick} style={{ width: avSize, height: avSize, borderRadius: '50%', objectFit: 'cover' }} />
                     ) : (
-                      <div style={{ width: avSize, height: avSize, borderRadius: '50%', background: getAvatarColor(nick), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: isReply ? 10 : 12, fontWeight: 700, color: '#fff' }}>
+                      <div style={{ width: avSize, height: avSize, borderRadius: '50%', background: getAvatarColor(nick), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: isReply ? 10 : 12, fontWeight: 500, color: '#fff' }}>
                         {nick[0].toUpperCase()}
                       </div>
                     )}
                   </Link>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{nick}</span>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{nick}</span>
                     {grade !== null && grade >= 2 && (
                       <span style={{ fontSize: 10, fontWeight: 600, padding: '1px 5px', borderRadius: 4, marginLeft: 6, background: `${gradeColor(grade)}14`, color: gradeColor(grade) }}>
                         {gradeTitle(grade)}

@@ -97,13 +97,13 @@ export default function InstallBanner() {
       }}>
         <div style={{ fontSize: 'var(--fs-2xl)', flexShrink: 0 }}>📲</div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-inverse)', marginBottom: 2 }}>앱처럼 사용하기</div>
+          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-inverse)', marginBottom: 2 }}>앱처럼 사용하기</div>
           <div style={{ fontSize: 'var(--fs-sm)', color: 'rgba(255,255,255,0.9)' }}>홈화면에 추가하면 푸시 알림도 받을 수 있어요!</div>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-xs)', flexShrink: 0 }}>
           <button onClick={() => { hap('light'); handleInstall(); }} style={{
             padding: '8px 14px', background: 'var(--bg-base)', color: 'var(--brand)',
-            border: 'none', borderRadius: 'var(--radius-sm)', fontSize: 'var(--fs-sm)', fontWeight: 800, cursor: 'pointer',
+            border: 'none', borderRadius: 'var(--radius-sm)', fontSize: 'var(--fs-sm)', fontWeight: 500, cursor: 'pointer',
           }}>{isIOS ? '방법 보기' : '📲 설치하기'}</button>
           <button onClick={handleDismiss} style={{
             padding: '3px 0', background: 'transparent',
@@ -120,7 +120,7 @@ export default function InstallBanner() {
             background: 'var(--bg-surface)', borderRadius: '20px 20px 0 0', padding: '20px 24px 40px',
           }}>
             <div style={{ width: 40, height: 4, background: 'var(--border)', borderRadius: 4, margin: '0 auto 16px' }} />
-            <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 'var(--sp-xs)' }}>📲 홈화면에 추가하기</div>
+            <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 'var(--sp-xs)' }}>📲 홈화면에 추가하기</div>
             <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 'var(--sp-xl)' }}>Safari에서 아래 순서로 따라하세요</div>
             {[
               { n: '1', text: 'Safari 하단 가운데 공유 버튼(⬆️) 탭' },
@@ -128,12 +128,12 @@ export default function InstallBanner() {
               { n: '3', text: '오른쪽 상단 "추가" 탭 — 완료!' },
             ].map(s => (
               <div key={s.n} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 0', borderBottom: '1px solid var(--border)' }}>
-                <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--brand)', color: 'var(--text-inverse)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-sm)', fontWeight: 800, flexShrink: 0 }}>{s.n}</div>
+                <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--brand)', color: 'var(--text-inverse)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-sm)', fontWeight: 500, flexShrink: 0 }}>{s.n}</div>
                 <span style={{ fontSize: 'var(--fs-base)', color: 'var(--text-primary)' }}>{s.text}</span>
               </div>
             ))}
             <button onClick={() => { hap('light'); setShowIOSGuide(false); handleDismiss(); logInstall('ios'); setTimeout(requestPush, 1000); }}
-              style={{ marginTop: 'var(--sp-xl)', width: '100%', padding: '14px 0', background: 'var(--brand)', color: 'var(--text-inverse)', border: 'none', borderRadius: 'var(--radius-card)', fontSize: 'var(--fs-md)', fontWeight: 800, cursor: 'pointer' }}>
+              style={{ marginTop: 'var(--sp-xl)', width: '100%', padding: '14px 0', background: 'var(--brand)', color: 'var(--text-inverse)', border: 'none', borderRadius: 'var(--radius-card)', fontSize: 'var(--fs-md)', fontWeight: 500, cursor: 'pointer' }}>
               알겠어요!
             </button>
           </div>

@@ -113,7 +113,7 @@ export default function AptReviewSection({ aptName, region }: { aptName: string;
       {/* 헤더 */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)' }}>
-          <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>주민 리뷰</span>
+          <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>주민 리뷰</span>
           {avgRating > 0 && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)' }}>
               <StarRating rating={Math.round(avgRating)} size={12} />

@@ -14,7 +14,7 @@ export default function FallbackThumb({ name, size = 32 }: { name: string; size?
       alignItems: 'center',
       justifyContent: 'center',
       fontSize: size * 0.35,
-      fontWeight: 800,
+      fontWeight: 600,
       color: `hsl(${hue},60%,70%)`,
     }}>
       {(name && name[0]) || '?'}

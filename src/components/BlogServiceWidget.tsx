@@ -61,7 +61,7 @@ export default function BlogServiceWidget({ category, tags, sourceRef }: Props) 
       background: 'linear-gradient(135deg, rgba(59,123,246,0.04), rgba(16,185,129,0.04))',
       border: '1px solid rgba(59,123,246,0.1)',
     }}>
-      <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 12 }}>
+      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 12 }}>
         📌 관련 서비스
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
@@ -76,11 +76,11 @@ export default function BlogServiceWidget({ category, tags, sourceRef }: Props) 
           >
             <div style={{ fontSize: 14, marginBottom: 4 }}>
               <span>{w.icon}</span>{' '}
-              <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{w.title}</span>
+              <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{w.title}</span>
             </div>
             <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 8, lineHeight: 1.4 }}>{w.desc}</div>
             <div style={{
-              fontSize: 12, fontWeight: 700, color: 'var(--brand)',
+              fontSize: 12, fontWeight: 500, color: 'var(--brand)',
             }}>{w.cta} →</div>
           </Link>
         ))}

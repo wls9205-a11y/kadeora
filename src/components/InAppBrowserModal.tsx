@@ -137,7 +137,7 @@ export default function InAppBrowserModal({ type, onClose, href }: Props) {
         }}
       >
         <div style={{ fontSize: 36, textAlign: 'center', marginBottom: 6 }}>⚠️</div>
-        <div style={{ fontSize: 16, fontWeight: 800, textAlign: 'center', marginBottom: 8, lineHeight: 1.45 }}>
+        <div style={{ fontSize: 16, fontWeight: 600, textAlign: 'center', marginBottom: 8, lineHeight: 1.45 }}>
           {label} 에서는 카카오·구글 로그인이<br />차단되어 있어요
         </div>
         <p style={{ fontSize: 12, color: 'var(--text-secondary)', textAlign: 'center', lineHeight: 1.6, margin: '0 0 18px' }}>
@@ -150,7 +150,7 @@ export default function InAppBrowserModal({ type, onClose, href }: Props) {
           disabled={opening}
           style={{
             width: '100%', padding: '13px 18px', borderRadius: 10, border: 'none',
-            background: '#FEE500', color: '#191919', fontWeight: 800, fontSize: 14,
+            background: '#FEE500', color: '#191919', fontWeight: 500, fontSize: 14,
             cursor: opening ? 'wait' : 'pointer', marginBottom: 8,
           }}
         >
@@ -163,7 +163,7 @@ export default function InAppBrowserModal({ type, onClose, href }: Props) {
             width: '100%', padding: '11px 18px', borderRadius: 10,
             border: '1px solid var(--border)',
             background: 'transparent', color: 'var(--text-primary)',
-            fontWeight: 700, fontSize: 13, cursor: 'pointer',
+            fontWeight: 500, fontSize: 13, cursor: 'pointer',
           }}
         >
           {copied ? '✅ 주소 복사 완료' : '📋 현재 주소 복사하기'}

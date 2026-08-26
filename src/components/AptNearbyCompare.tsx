@@ -16,7 +16,7 @@ export default function AptNearbyCompare({ aptName, sigungu }: { aptName: string
 
   return (
     <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: '14px 16px', marginBottom: 12 }}>
-      <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 10 }}>🏘️ {sigungu} 주변 단지 비교</div>
+      <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 10 }}>🏘️ {sigungu} 주변 단지 비교</div>
       <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12, minWidth: 400 }}>
           <thead>

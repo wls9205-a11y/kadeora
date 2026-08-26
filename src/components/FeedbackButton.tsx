@@ -59,7 +59,7 @@ export default function FeedbackButton() {
             width: '100%', padding: '13px', borderRadius: 'var(--radius-md)', border: 'none',
             background: message.trim() ? 'var(--brand)' : 'var(--bg-hover)',
             color: message.trim() ? '#fff' : 'var(--text-tertiary)',
-            fontSize: 'var(--fs-base)', fontWeight: 700,
+            fontSize: 'var(--fs-base)', fontWeight: 500,
             cursor: message.trim() ? 'pointer' : 'not-allowed',
             opacity: submitting ? 0.5 : 1,
           }}>{submitting ? '전송 중...' : '보내기'}</button>

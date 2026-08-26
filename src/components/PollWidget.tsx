@@ -82,7 +82,7 @@ export default function PollWidget({ postId, isAuthor = false }: Props) {
       {/* 헤더 */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
         <span style={{ fontSize: 13 }}>🗳️</span>
-        <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', flex: 1 }}>
+        <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', flex: 1 }}>
           {poll.question}
         </span>
         {poll.expired && (
@@ -124,7 +124,7 @@ export default function PollWidget({ postId, isAuthor = false }: Props) {
                   borderRadius: 'var(--radius-xs)',
                 }} />
               )}
-              <span style={{ position: 'relative', fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', fontWeight: isMine ? 700 : 400 }}>
+              <span style={{ position: 'relative', fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', fontWeight: isMine ? 600 : 400 }}>
                 {isMine && <span style={{ marginRight: 4 }}>✓</span>}
                 {opt}
               </span>

@@ -40,7 +40,7 @@ export default function Avatar({ src, nickname, size = 32, isAnonymous = false }
       width: size, height: size, borderRadius: '50%',
       background: 'linear-gradient(135deg, var(--brand), var(--info))',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontSize: size * 0.42, fontWeight: 800, color: 'var(--text-inverse)',
+      fontSize: size * 0.42, fontWeight: 500, color: 'var(--text-inverse)',
       flexShrink: 0, userSelect: 'none',
     }}>
       {initial}

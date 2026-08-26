@@ -71,7 +71,7 @@ export default function TossBottomBanner() {
         </div>
         <div style={{ minWidth: 0 }}>
           <div style={{
-            color: '#fff', fontWeight: 800, fontSize: 13,
+            color: '#fff', fontWeight: 600, fontSize: 13,
             overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
           }}>
             {cta.sub}
@@ -87,7 +87,9 @@ export default function TossBottomBanner() {
         onClick={() => openInBrowser(cta.path)}
         style={{
           padding: '10px 18px', borderRadius: 'var(--radius-md)', border: 'none',
-          background: '#3182F6', color: '#fff', fontWeight: 800,
+          // ⚠️ #3182F6 위 흰 글씨는 3.71 로 하한 미달이었다. 같은 파일이 이미 쓰는
+          //    어두운 토스 파랑 #1B64DA 로 5.41. 브랜드 팔레트 밖으로 나가지 않았다.
+          background: '#1B64DA', color: '#fff', fontWeight: 500,
           fontSize: 13, cursor: 'pointer', fontFamily: 'inherit',
           flexShrink: 0, whiteSpace: 'nowrap',
         }}

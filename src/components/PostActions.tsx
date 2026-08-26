@@ -75,7 +75,7 @@ export default function PostActions({ postId, isOwner, isAdmin }: PostActionsPro
       {showReasonModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }} onClick={() => setShowReasonModal(false)}>
           <div style={{ background: 'var(--bg-surface)', borderRadius: 'var(--radius-card)', padding: 24, maxWidth: 400, width: '100%', border: '1px solid var(--border)' }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ fontWeight: 700, fontSize: 16, color: 'var(--text-primary)', marginBottom: 16 }}>🛡️ 관리자 게시글 삭제</div>
+            <div style={{ fontWeight: 600, fontSize: 16, color: 'var(--text-primary)', marginBottom: 16 }}>🛡️ 관리자 게시글 삭제</div>
             <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 12 }}>삭제 사유를 입력해 주세요 (로그에 기록됩니다)</div>
             <select
               value={reason}
@@ -99,7 +99,7 @@ export default function PostActions({ postId, isOwner, isAdmin }: PostActionsPro
             />
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
               <button onClick={() => setShowReasonModal(false)} style={{ padding: '8px 16px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: 13 }}>취소</button>
-              <button onClick={() => { setShowReasonModal(false); handleDelete(finalReason); }} style={{ padding: '8px 16px', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--accent-red)', color: '#fff', cursor: 'pointer', fontWeight: 700, fontSize: 13 }}>삭제</button>
+              <button onClick={() => { setShowReasonModal(false); handleDelete(finalReason); }} style={{ padding: '8px 16px', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--accent-red)', color: '#fff', cursor: 'pointer', fontWeight: 500, fontSize: 13 }}>삭제</button>
             </div>
           </div>
         </div>

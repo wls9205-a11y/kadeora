@@ -212,7 +212,7 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
     <div style={{
       width: size, height: size, borderRadius: '50%', flexShrink: 0,
       background: avc(nick), display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontSize: size * 0.38, fontWeight: 700, color: 'var(--text-inverse)',
+      fontSize: size * 0.38, fontWeight: 500, color: 'var(--text-inverse)',
     }}>{nick[0]}</div>
   );
 
@@ -230,7 +230,7 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
           {renderAvatar(nick, isReply ? 28 : 36)}
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
-              <span style={{ fontWeight: 700, fontSize: 'var(--fs-sm)', color: 'var(--text-primary)' }}>{nick}</span>
+              <span style={{ fontWeight: 600, fontSize: 'var(--fs-sm)', color: 'var(--text-primary)' }}>{nick}</span>
               <span style={{
                 fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '1px 6px', borderRadius: 4,
                 background: 'var(--bg-hover)', color: 'var(--text-tertiary)',
@@ -350,7 +350,7 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
                       disabled={!(replyInputs[c.id] || '').trim()}
                       style={{
                         padding: '6px 12px', borderRadius: 'var(--radius-sm)', border: 'none', fontSize: 'var(--fs-sm)',
-                        fontWeight: 700, cursor: 'pointer', flexShrink: 0,
+                        fontWeight: 500, cursor: 'pointer', flexShrink: 0,
                         background: 'var(--brand)', color: 'var(--text-inverse)',
                         opacity: (replyInputs[c.id] || '').trim() ? 1 : 0.5,
                       }}
@@ -367,7 +367,7 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
 
   return (
     <div>
-      <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 14 }}>
+      <div style={{ fontSize: 'var(--fs-md)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 14 }}>
         💬 {stockName} 한줄평
       </div>
 
@@ -413,7 +413,7 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
                 disabled={sending || !input.trim()}
                 style={{
                   padding: '6px 16px', borderRadius: 'var(--radius-sm)', border: 'none', fontSize: 'var(--fs-sm)',
-                  fontWeight: 700, cursor: 'pointer',
+                  fontWeight: 500, cursor: 'pointer',
                   background: 'var(--brand)', color: 'var(--text-inverse)',
                   opacity: sending || !input.trim() ? 0.5 : 1,
                 }}

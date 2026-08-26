@@ -177,7 +177,7 @@ export function Navigation() {
     display: 'flex' as const,
     alignItems: 'center' as const,
     fontSize: 'var(--fs-base)',
-    fontWeight: active ? 800 : 600,
+    fontWeight: active ? 600 : 500,
     color: active ? 'var(--brand)' : 'var(--nav-text)',
     textDecoration: 'none' as const,
     borderBottom: active ? '2px solid var(--brand)' : '2px solid transparent',
@@ -204,7 +204,7 @@ export function Navigation() {
           {/* 로고 */}
           <Link href="/" style={{ display:'flex', alignItems:'center', gap:6, textDecoration:'none', flexShrink:0, marginRight:2 }}>
             <KadeoraLogo size={26} />
-            <span style={{ fontWeight:800, fontSize:'var(--fs-sm)', color:'var(--brand)', letterSpacing:-0.5 }}>
+            <span style={{ fontWeight:600, fontSize:'var(--fs-sm)', color:'var(--brand)', letterSpacing:-0.5 }}>
               카더라
             </span>
           </Link>
@@ -282,7 +282,7 @@ export function Navigation() {
                       position:'absolute', top:-2, right:-2,
                       width:17, height:17, borderRadius:'50%',
                       background:'var(--brand)', color:'var(--text-inverse)',
-                      fontSize: 'var(--fs-xs)', fontWeight:800,
+                      fontSize: 'var(--fs-xs)', fontWeight:500,
                       display:'flex', alignItems:'center', justifyContent:'center',
                       border:'2px solid var(--nav-bg)',
                     }}>
@@ -309,7 +309,7 @@ export function Navigation() {
                       <span style={{
                         width: 24, height: 24, borderRadius:'50%', background:'var(--brand)',
                         display:'flex', alignItems:'center', justifyContent:'center',
-                        fontSize: 'var(--fs-xs)', fontWeight:800, color:'var(--text-inverse)', flexShrink:0,
+                        fontSize: 'var(--fs-xs)', fontWeight:500, color:'var(--text-inverse)', flexShrink:0,
                       }}>
                         {(profile?.nickname ?? 'U')[0].toUpperCase()}
                       </span>
@@ -317,7 +317,7 @@ export function Navigation() {
                     <span className="hidden md:inline" style={{ fontWeight:600, maxWidth:72, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
                       {profile?.nickname ?? '유저'}
                     </span>
-                    {profile?.isPremium && <span style={{ fontSize: 10, padding: '1px 4px', borderRadius: 4, background: 'linear-gradient(135deg, #FFD700, #FFA500)', color: '#000', fontWeight: 800, lineHeight: 1.2 }}>P</span>}
+                    {profile?.isPremium && <span style={{ fontSize: 10, padding: '1px 4px', borderRadius: 4, background: 'linear-gradient(135deg, #FFD700, #FFA500)', color: '#000', fontWeight: 500, lineHeight: 1.2 }}>P</span>}
                     <span style={{ fontSize: 'var(--fs-xs)', color:'var(--text-tertiary)' }}>▼</span>
                     {/* 모바일 알림 뱃지 (아바타에 통합) */}
                     {unread > 0 && (
@@ -325,7 +325,7 @@ export function Navigation() {
                         position:'absolute', top:-4, right:-4,
                         minWidth:16, height:16, borderRadius: 'var(--radius-sm)',
                         background:'var(--accent-red)', color:'#fff',
-                        fontSize: 10, fontWeight:800,
+                        fontSize: 10, fontWeight:500,
                         display:'flex', alignItems:'center', justifyContent:'center',
                         padding:'0 4px', border:'2px solid var(--nav-bg)',
                       }}>
@@ -354,12 +354,12 @@ export function Navigation() {
                         {profile?.avatarUrl ? (
                           <img src={profile.avatarUrl} alt="" style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
                         ) : (
-                          <span style={{ width:32, height:32, borderRadius:'50%', background:'var(--brand)', display:'flex', alignItems:'center', justifyContent:'center', fontSize: 14, fontWeight:800, color:'var(--text-inverse)', flexShrink:0 }}>
+                          <span style={{ width:32, height:32, borderRadius:'50%', background:'var(--brand)', display:'flex', alignItems:'center', justifyContent:'center', fontSize: 14, fontWeight:500, color:'var(--text-inverse)', flexShrink:0 }}>
                             {(profile?.nickname ?? 'U')[0].toUpperCase()}
                           </span>
                         )}
                         <div style={{ minWidth: 0 }}>
-                          <div style={{ fontSize: 13, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{profile?.nickname ?? '내 프로필'}</div>
+                          <div style={{ fontSize: 13, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{profile?.nickname ?? '내 프로필'}</div>
                           <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>프로필 보기</div>
                         </div>
                       </Link>
@@ -389,7 +389,7 @@ export function Navigation() {
                           {([['small','작게'],['medium','보통'],['large','크게']] as const).map(([val, label]) => (
                             <button key={val} onClick={() => handleFontSize(val)} aria-label={`글씨 크기 ${label}`} aria-pressed={fontSize === val} style={{
                               flex:1, padding:'4px 0', borderRadius: 'var(--radius-xs)', fontSize: val === 'small' ? 12 : val === 'large' ? 16 : 14,
-                              fontWeight: fontSize === val ? 700 : 400, border:'none', cursor:'pointer',
+                              fontWeight: fontSize === val ? 600 : 400, border:'none', cursor:'pointer',
                               background: fontSize === val ? 'var(--brand)' : 'var(--bg-hover)',
                               color: fontSize === val ? 'var(--text-inverse)' : 'var(--text-secondary)',
                             }}>{label}</button>
@@ -438,7 +438,7 @@ export function Navigation() {
                     height:34, padding:'0 16px', borderRadius: 'var(--radius-pill)',
                     background:'var(--brand)', color:'var(--text-inverse)',
                     display:'flex', alignItems:'center',
-                    textDecoration:'none', fontSize:'var(--fs-sm)', fontWeight:700,
+                    textDecoration:'none', fontSize:'var(--fs-sm)', fontWeight:500,
                     letterSpacing:'-0.2px',
                     boxShadow:'0 2px 8px rgba(59,123,246,0.24)',
                     transition:'opacity 0.12s, transform 0.12s',
@@ -452,7 +452,7 @@ export function Navigation() {
                   style={{
                     height:34, padding:'0 14px', borderRadius: 'var(--radius-pill)',
                     border:'1px solid var(--brand)', color:'var(--brand)', background:'transparent',
-                    alignItems:'center', textDecoration:'none', fontSize:'var(--fs-xs)', fontWeight:700,
+                    alignItems:'center', textDecoration:'none', fontSize:'var(--fs-xs)', fontWeight:500,
                     transition:'background 0.12s',
                   }}
                   onMouseEnter={e=>(e.currentTarget.style.background='rgba(59,123,246,0.08)')}
@@ -486,7 +486,7 @@ export function Navigation() {
             }}>
               {active && <span style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:24, height:2.5, borderRadius: 4, background:'var(--brand)' }} />}
               <item.Icon size={18} strokeWidth={active ? 2.5 : 1.8} />
-              <span style={{ fontSize: 10, fontWeight: active ? 700 : 500, lineHeight:1.2 }}>{item.label}</span>
+              <span style={{ fontSize: 10, fontWeight: active ? 600 : 500, lineHeight:1.2 }}>{item.label}</span>
             </Link>
           );
         })}
@@ -505,7 +505,7 @@ export function Navigation() {
         >
           {moreOpen && <span style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:24, height:2.5, borderRadius: 4, background:'var(--brand)' }} />}
           <MoreHorizontal size={18} strokeWidth={moreOpen ? 2.5 : 1.8} />
-          <span style={{ fontSize: 10, fontWeight: moreOpen ? 700 : 500, lineHeight:1.2 }}>더보기</span>
+          <span style={{ fontSize: 10, fontWeight: moreOpen ? 600 : 500, lineHeight:1.2 }}>더보기</span>
         </button>
       </nav>
 
@@ -533,7 +533,7 @@ export function Navigation() {
             maxHeight:'72vh', overflowY:'auto',
           }}>
             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom: 16 }}>
-              <span style={{ fontSize: 15, fontWeight:800, color:'var(--text-primary)', letterSpacing:'-0.3px' }}>더보기</span>
+              <span style={{ fontSize: 15, fontWeight:600, color:'var(--text-primary)', letterSpacing:'-0.3px' }}>더보기</span>
               <button onClick={() => setMoreOpen(false)} aria-label="더보기 닫기" style={{
                 width: 32, height: 32, borderRadius:'50%', background:'var(--bg-hover)', border:'none',
                 color:'var(--text-tertiary)', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center',

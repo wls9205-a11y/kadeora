@@ -50,7 +50,7 @@ export default function ProfileCompletionBar() {
       marginBottom: 12,
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-        <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>프로필 완성도 {pct}%</span>
+        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>프로필 완성도 {pct}%</span>
         <span style={{ fontSize: 11, color: 'var(--accent-green)', fontWeight: 600 }}>자기소개 작성하면 +200P 🎁</span>
       </div>
       <div style={{ height: 6, borderRadius: 4, background: 'var(--bg-hover)', overflow: 'hidden', marginBottom: 8 }}>

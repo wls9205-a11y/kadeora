@@ -38,7 +38,7 @@ export default function NextArticleFloat({ nextSlug, nextTitle, category }: Prop
         flex: 1, textDecoration: 'none', color: 'inherit', minWidth: 0,
       }}>
         <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--brand)', marginBottom: 2 }}>다음 글</div>
-        <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {nextTitle}
         </div>
       </Link>

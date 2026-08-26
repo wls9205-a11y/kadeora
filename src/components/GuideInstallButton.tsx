@@ -89,7 +89,7 @@ export default function GuideInstallButton() {
   if (state === 'installed') return (
     <div style={cardStyle}>
       <div style={{ fontSize: 48, marginBottom: 'var(--sp-md)' }}>✅</div>
-      <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--accent-green)', marginBottom: 'var(--sp-sm)' }}>
+      <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 600, color: 'var(--accent-green)', marginBottom: 'var(--sp-sm)' }}>
         설치 완료!
       </div>
       <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.6 }}>
@@ -102,7 +102,7 @@ export default function GuideInstallButton() {
   if (state === 'can-install') return (
     <div style={cardStyle}>
       <div style={{ fontSize: 48, marginBottom: 'var(--sp-md)' }}>📲</div>
-      <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>
+      <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>
         카더라 앱 설치
       </div>
       <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.6, marginBottom: 'var(--sp-xl)' }}>
@@ -115,7 +115,7 @@ export default function GuideInstallButton() {
         style={{
           padding: '16px 40px', borderRadius: 'var(--radius-lg)', border: 'none',
           background: 'var(--brand)', color: 'white',
-          fontSize: 'var(--fs-base)', fontWeight: 800, cursor: 'pointer',
+          fontSize: 'var(--fs-base)', fontWeight: 500, cursor: 'pointer',
           width: '100%', maxWidth: 320,
           opacity: installing ? 0.6 : 1,
           boxShadow: '0 4px 16px rgba(37,99,235,0.3)',
@@ -129,7 +129,7 @@ export default function GuideInstallButton() {
   if (state === 'ios-safari') return (
     <div style={cardStyle}>
       <div style={{ fontSize: 48, marginBottom: 'var(--sp-md)' }}>📱</div>
-      <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>
+      <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>
         카더라 앱 설치
       </div>
       <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.8, marginBottom: 'var(--sp-xs)' }}>
@@ -153,7 +153,7 @@ export default function GuideInstallButton() {
   return (
     <div style={cardStyle}>
       <div style={{ fontSize: 48, marginBottom: 'var(--sp-md)' }}>💻</div>
-      <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>
+      <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>
         카더라 앱 설치
       </div>
       <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.6, marginBottom: 'var(--sp-lg)' }}>

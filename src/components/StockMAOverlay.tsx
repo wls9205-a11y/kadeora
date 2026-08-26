@@ -62,7 +62,7 @@ export default function StockMAOverlay({ symbol, currency }: { symbol: string; c
   return (
     <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: '12px 14px', marginBottom: 8 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-        <span style={{ fontSize: 13, fontWeight: 700 }}>📊 이동평균선</span>
+        <span style={{ fontSize: 13, fontWeight: 600 }}>📊 이동평균선</span>
         <div style={{ display: 'flex', gap: 6 }}>
           {[{ k: 'ma5' as const, l: 'MA5', c: '#F59E0B' }, { k: 'ma20' as const, l: 'MA20', c: '#10B981' }, { k: 'ma60' as const, l: 'MA60', c: '#EF4444' }].map(m => (
             <button key={m.k} onClick={() => setShow(p => ({ ...p, [m.k]: !p[m.k] }))} style={{

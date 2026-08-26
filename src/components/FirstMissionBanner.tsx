@@ -51,7 +51,7 @@ export default function FirstMissionBanner() {
     }}>
       <button onClick={() => { setDismissed(true); sessionStorage.setItem('kd_mission_dismissed', '1'); }}
         style={{ position: 'absolute', top: 8, right: 10, background: 'none', border: 'none', color: 'var(--text-tertiary)', fontSize: 14, cursor: 'pointer' }}>×</button>
-      <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>
+      <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>
         🎯 첫 미션 ({done}/{total})
       </div>
       <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 10 }}>

@@ -14,7 +14,7 @@ export default function EmptyState({ icon, title, description, action, suggestio
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         margin: '0 auto 18px', fontSize: 36, lineHeight: 1,
       }}>{icon}</div>
-      <h3 style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px', letterSpacing: '-0.3px' }}>{title}</h3>
+      <h3 style={{ fontSize: 'var(--fs-lg)', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 8px', letterSpacing: '-0.3px' }}>{title}</h3>
       {description && <p style={{ fontSize: 'var(--fs-sm)', margin: '0 0 20px', lineHeight: 1.6, color: 'var(--text-tertiary)', maxWidth: 320, marginLeft: 'auto', marginRight: 'auto' }}>{description}</p>}
       {action && (
         <Link href={action.href} className="kd-btn-glow" style={{

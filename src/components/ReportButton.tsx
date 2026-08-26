@@ -113,7 +113,7 @@ export default function ReportButton({ postId, commentId, messageId, style: cust
               margin: '0 16px',
             }}
           >
-            <h3 style={{ margin: '0 0 16px', fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>
+            <h3 style={{ margin: '0 0 16px', fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)' }}>
               신고하기
             </h3>
 

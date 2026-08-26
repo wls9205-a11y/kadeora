@@ -87,12 +87,12 @@ export default function RegulationBadges(props: Props) {
             background: 'var(--bg-surface)', border: '1px solid var(--border)',
           }}>
             <span style={{
-              fontSize: 11, padding: '3px 8px', borderRadius: 'var(--radius-sm)', fontWeight: 700,
+              fontSize: 11, padding: '3px 8px', borderRadius: 'var(--radius-sm)', fontWeight: 500,
               background: s.bg, color: s.color, border: `1px solid ${s.border}`,
             }}>
               {item.label}
             </span>
-            <span style={{ fontSize: 13, fontWeight: 700, color: s.color }}>
+            <span style={{ fontSize: 13, fontWeight: 600, color: s.color }}>
               {item.value}
             </span>
           </div>
@@ -104,7 +104,9 @@ export default function RegulationBadges(props: Props) {
             <span key={i} style={{
               fontSize: 11, padding: '3px 10px', borderRadius: 'var(--radius-sm)', fontWeight: 600,
               background: tag.active ? 'rgba(139,92,246,0.1)' : 'var(--bg-hover)',
-              color: tag.active ? '#8B5CF6' : 'var(--text-tertiary)',
+              // ⚠️ #8B5CF6 은 흰 배경 대비 4.23 으로 하한에 못 미쳤다. 같은 보라 계열
+              //    기존 토큰 --accent-purple(#7C3AED)로 5.70. 새 토큰은 만들지 않았다.
+              color: tag.active ? 'var(--accent-purple)' : 'var(--text-tertiary)',
               border: `1px solid ${tag.active ? 'rgba(139,92,246,0.2)' : 'var(--border)'}`,
             }}>
               {tag.active ? '✓ ' : ''}{tag.label}

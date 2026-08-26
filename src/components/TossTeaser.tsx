@@ -35,7 +35,7 @@ export default function TossTeaser({
         onClick={handleOpen}
         style={{
           background: 'none', border: 'none', cursor: 'pointer',
-          color: 'var(--brand)', fontWeight: 700, fontSize: 13,
+          color: 'var(--brand)', fontWeight: 500, fontSize: 13,
           padding: '4px 0', fontFamily: 'inherit',
           display: 'inline-flex', alignItems: 'center', gap: 4,
         }}
@@ -59,7 +59,7 @@ export default function TossTeaser({
         }}
       >
         <div>
-          <div style={{ color: '#fff', fontWeight: 800, fontSize: 14 }}>카더라</div>
+          <div style={{ color: '#fff', fontWeight: 600, fontSize: 14 }}>카더라</div>
           <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: 11, marginTop: 1 }}>
             {subtitle || '주식·청약·부동산 정보를 더 자세히'}
           </div>
@@ -68,7 +68,7 @@ export default function TossTeaser({
           onClick={handleOpen}
           style={{
             padding: '10px 20px', borderRadius: 999, border: 'none',
-            background: '#fff', color: '#1B64DA', fontWeight: 800,
+            background: '#fff', color: '#1B64DA', fontWeight: 500,
             fontSize: 13, cursor: 'pointer', fontFamily: 'inherit',
             flexShrink: 0, boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
           }}
@@ -88,7 +88,7 @@ export default function TossTeaser({
         borderRadius: 'var(--radius-lg)', margin: '0 -4px',
       }}>
         <div style={{ fontSize: 40, marginBottom: 12 }}>🔒</div>
-        <div style={{ fontWeight: 800, fontSize: 16, color: '#191F28', marginBottom: 6 }}>
+        <div style={{ fontWeight: 600, fontSize: 16, color: '#191F28', marginBottom: 6 }}>
           전체 콘텐츠는 카더라에서
         </div>
         <div style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 16, lineHeight: 1.5 }}>
@@ -99,7 +99,7 @@ export default function TossTeaser({
           style={{
             padding: '14px 32px', borderRadius: 'var(--radius-card)', border: 'none',
             background: 'linear-gradient(135deg, #1B64DA, #3182F6)',
-            color: '#fff', fontWeight: 800, fontSize: 15,
+            color: '#fff', fontWeight: 500, fontSize: 15,
             cursor: 'pointer', fontFamily: 'inherit',
             boxShadow: '0 4px 16px rgba(49,130,246,0.3)',
           }}
@@ -128,7 +128,7 @@ export default function TossTeaser({
       }}
     >
       <div style={{ textAlign: 'left' }}>
-        <div style={{ fontWeight: 800, fontSize: 14, color: '#191F28' }}>
+        <div style={{ fontWeight: 600, fontSize: 14, color: '#191F28' }}>
           {label}
         </div>
         {subtitle && (
@@ -138,7 +138,7 @@ export default function TossTeaser({
       <div style={{
         padding: '8px 16px', borderRadius: 999,
         background: '#3182F6', color: '#fff',
-        fontWeight: 700, fontSize: 12, flexShrink: 0,
+        fontWeight: 500, fontSize: 12, flexShrink: 0,
       }}>
         열기 →
       </div>

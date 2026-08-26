@@ -123,7 +123,7 @@ export default function AptImageGallery({ images, name, region, badges }: {
       }}>
         <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '12px 14px' }}>
           <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-xs)' }}>{region}</div>
-          <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 900, color: 'var(--text-primary)', lineHeight: 1.2, wordBreak: 'keep-all' }}>{name}</div>
+          <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.2, wordBreak: 'keep-all' }}>{name}</div>
         </div>
         {badges}
       </div>

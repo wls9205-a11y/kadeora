@@ -9,7 +9,7 @@ export default function BlogCommentCTA({ commentCount }: { commentCount: number 
       border: '2px dashed rgba(167,139,250,0.2)',
     }}>
       <div style={{ fontSize: 32, marginBottom: 10 }}>💬</div>
-      <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 6 }}>
+      <div style={{ fontSize: 'var(--fs-md)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 6 }}>
         첫 번째 댓글의 주인공이 되어주세요!
       </div>
       <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 14, lineHeight: 1.5 }}>
@@ -22,7 +22,7 @@ export default function BlogCommentCTA({ commentCount }: { commentCount: number 
         background: 'rgba(251,191,36,0.12)', border: '1px solid rgba(251,191,36,0.25)',
       }}>
         <span style={{ fontSize: 'var(--fs-sm)' }}>🎁</span>
-        <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--accent-yellow)' }}>댓글 작성 시 5P 적립</span>
+        <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 500, color: 'var(--accent-yellow)' }}>댓글 작성 시 5P 적립</span>
       </div>
     </div>
   );
