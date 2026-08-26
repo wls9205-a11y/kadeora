@@ -32,6 +32,11 @@ from urllib.parse import quote, unquote
 SITE = "https://kadeora.app"
 ENC = "cp949"                 # 네이버 템플릿 인코딩. UTF-8 로 쓰면 한글이 전부 깨진다
 KW_PER_GROUP = 900            # 네이버 한도 1,000
+# 네이버 키워드 길이 한도. **공백을 제거한 뒤** 25자다.
+# 실측(부울경 2,319건 업로드): '부산진구 시민공원주변재정비촉진2-2구역 재개발 시공사' 가
+# 공백제거 26자라 «혼자 반려»됐다. 등록된 것 중 최장은 25자였다.
+# ⚠️ 원문 길이(공백 포함)로 재면 이 한도를 못 잡는다 — 위 키워드는 원문 29자다.
+MAX_KW_NOSPACE = 25
 ROWS_PER_FILE = 9000          # 네이버 1회 업로드 한도 10,000
 MAX_SINGLE = 5                # 그룹당 단일형 소재 한도
 MAX_RSA = 3                   # 그룹당 반응형 소재 한도
@@ -316,7 +321,9 @@ def build_plan(sites, only=None, skip_existing=True, cats=None, max_alias=4):
                 for suf in sufs:
                     k = (base + " " + suf).strip()
                     kk = k.replace(" ", "")       # 네이버는 공백을 제거해 저장한다
-                    if kk in seen or not (2 <= len(k) <= 50):
+                    # 한도를 넘는 키워드는 «만들지 않는다». 만들어 두면 업로드에서
+                    # 그 한 줄만 반려되고 성공건수가 신청건수와 어긋난다.
+                    if kk in seen or not (2 <= len(k) <= 50) or len(kk) > MAX_KW_NOSPACE:
                         continue
                     seen.add(kk); kws.append(k)
             if not kws:
@@ -351,6 +358,8 @@ def validate(groups):
                 if not (2 <= len(k) <= 50):               bad["길이 범위"] += 1
                 if re.search(r"할인|최저|무료 증정|공짜|특가", k): bad["금지 표현"] += 1
                 kk = k.replace(" ", "")
+                # 생성 단계가 이미 걸렀으므로 여기서 잡히면 그쪽이 새는 것이다.
+                if len(kk) > MAX_KW_NOSPACE:              bad["공백제거 25자 초과"] += 1
                 if kk in seen: bad["중복"] += 1
                 seen.add(kk)
         for t, d in single_ads(g["zone"], g["cat"]):
