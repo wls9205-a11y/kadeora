@@ -16,7 +16,7 @@ function fmtPrice(n: number) {
  *    그래도 같은 «정확한» 이름이 여러 시도·시군구에 있다 — `현대` 는 최근 1년 부산에만
  *    9개 시군구 180건이다. 지역 둘을 다 줘야 한 단지가 된다.
  *    실측: sigungu 를 더해도 매칭이 줄지 않는다(부울경 기축 631곳 → 631곳). */
-export default function AptPriceTrendChart({ aptName, region, sigungu }: { aptName: string; region?: string; sigungu?: string | null }) {
+export default function AptPriceTrendChart({ aptName, region, sigungu, prefix }: { aptName: string; region?: string; sigungu?: string | null; prefix?: boolean }) {
   const [trend, setTrend] = useState<TrendPoint[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -28,6 +28,9 @@ export default function AptPriceTrendChart({ aptName, region, sigungu }: { aptNa
     const params = new URLSearchParams({ name: aptName });
     if (region) params.set('region', region);
     if (sigungu) params.set('sigungu', sigungu);
+    // ⚠️ DB 의 `apt_sites.tx_match_prefix` 를 그대로 전달한다. 여기서 지어내지 않는다 —
+    //    전역 접두 매칭은 부산 「현대」를 59개 단지로 다시 뭉치게 한다.
+    if (prefix) params.set('prefix', '1');
     fetch(`/api/apt/price-trend?${params}`)
       .then(r => r.ok ? r.json() : null)
       .then(d => {
@@ -38,7 +41,7 @@ export default function AptPriceTrendChart({ aptName, region, sigungu }: { aptNa
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [aptName, region, sigungu]);
+  }, [aptName, region, sigungu, prefix]);
 
   if (loading) return <SkeletonChart height={180} />;
   if (!trend.length) return null;

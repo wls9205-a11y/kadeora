@@ -11,6 +11,7 @@ export async function GET(req: NextRequest) {
     const aptName = searchParams.get('name');
     const region = searchParams.get('region');
     const sigungu = searchParams.get('sigungu');
+    const prefix = searchParams.get('prefix') === '1';
 
     if (!aptName) return NextResponse.json({ error: 'name 파라미터 필요' }, { status: 400 });
 
@@ -22,6 +23,7 @@ export async function GET(req: NextRequest) {
       p_apt_name: aptName,
       p_region: region || undefined,
       p_sigungu: sigungu || undefined,
+      p_prefix: prefix,
     });
 
     if (!rpcErr && rpcData?.length) {
@@ -53,8 +55,9 @@ export async function GET(req: NextRequest) {
      *
      * 그래서 정확일치 + 지역으로 맞춘다. 못 찾으면 빈 차트가 맞다 — 틀린 그래프보다 낫다. */
     let q = sb.from('apt_transactions')
-      .select('deal_date, deal_amount, exclusive_area, apt_name, region_nm')
-      .eq('apt_name', aptName);
+      .select('deal_date, deal_amount, exclusive_area, apt_name, region_nm');
+    // 접두 플래그가 켜진 단지만 접두로 본다 (RPC 와 같은 규칙).
+    q = prefix ? q.like('apt_name', `${aptName.replace(/\s+/g, '')}%`) : q.eq('apt_name', aptName);
     if (region) q = q.eq('region_nm', region);
     if (sigungu) q = q.eq('sigungu', sigungu);
     const { data, error } = await q

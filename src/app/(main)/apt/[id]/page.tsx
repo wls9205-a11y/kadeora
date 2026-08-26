@@ -102,7 +102,7 @@ async function resolveParam(rawId: string) {
 
 async function fetchUnifiedData(slug: string) {
   const sb = getSupabaseAdmin();
-  const APT_COLS = 'id,slug,name,display_name,site_type,region,sigungu,dong,address,description,seo_title,seo_description,builder,builder_normalized,developer,total_units,supply_units,complex_units,built_year,move_in_date,status,is_active,content_score,interest_count,page_views,comment_count,images,satellite_image_url,og_image_url,key_features,faq_items,nearby_facilities,nearby_station,school_district,price_min,price_max,price_comparison,search_trend,latitude,longitude,source_ids,created_at,updated_at,og_cards,hero_image_url,hero_image_source,hero_image_credit,hero_license_tier,lifecycle_stage,review_score,review_count,faqs,data_quality_score,remaining_units,general_units,official_url,discount_pct,agent_kakao_url';
+  const APT_COLS = 'id,slug,name,display_name,site_type,region,sigungu,dong,address,description,seo_title,seo_description,builder,builder_normalized,developer,total_units,supply_units,complex_units,built_year,move_in_date,status,is_active,content_score,interest_count,page_views,comment_count,images,satellite_image_url,og_image_url,key_features,faq_items,nearby_facilities,nearby_station,school_district,price_min,price_max,price_comparison,search_trend,latitude,longitude,source_ids,created_at,updated_at,og_cards,hero_image_url,hero_image_source,hero_image_credit,hero_license_tier,lifecycle_stage,review_score,review_count,faqs,data_quality_score,remaining_units,general_units,official_url,discount_pct,agent_kakao_url,tx_match_prefix';
 
   // Phase 1: apt_sites — exact slug → multi-stage fuzzy fallback
   let { data: site } = await (sb as any).from('apt_sites').select(APT_COLS).eq('slug', slug).maybeSingle();
@@ -332,6 +332,19 @@ async function fetchUnifiedData(slug: string) {
    *    PostgREST 필터에서는 `replace()` 를 못 쓰므로 «두 표기를 `in` 으로» 넣는다.
    *    실측상 이 방식이 DB 쪽 `replace()` 비교와 같은 수를 낸다(둘 다 713곳). */
   const nameVariants = Array.from(new Set([name, name.replace(/\s+/g, '')].filter(Boolean)));
+
+  /* H4-4 B — 거래 이름이 «접두» 로만 갈리는 단지. `apt_sites.tx_match_prefix` 가 정본이다.
+   *   레이카운티        → 레이카운티(1단지)…(5단지)
+   *   포레나 부산 덕천  → 포레나부산덕천1차 / 2차 / 3차
+   * 공백 무시로도 안 잡혀서 실거래 이력이 통째로 비었다.
+   *
+   * ⚠️ **규칙으로 만들지 말 것.** 접두 매칭을 모두에게 적용하면 부산 「현대」가
+   *    59개 단지 2,311건으로 다시 뭉친다. 플래그가 켜진 12곳에만 적용된다.
+   * ⚠️ `대연힐스테이트`·`화명롯데캐슬`·`서면롯데캐슬` 은 «일부러» 꺼져 있다 —
+   *    접두가 겹칠 뿐 별개 단지다(…푸르지오 / …카이저 / …스카이·엘루체).
+   *    DB 값을 그대로 쓰고 여기서 true 를 지어내지 않는다. */
+  const txPrefix = (site as any)?.tx_match_prefix === true;
+  const txPrefixKey = name.replace(/\s+/g, '');
   const builderName = (sub?.constructor_nm || site?.builder || '').split('(')[0].split('주식')[0].trim();
   const builderSafe = builderName.length >= 3 ? builderName : '';
 
@@ -339,7 +352,13 @@ async function fetchUnifiedData(slug: string) {
   // 8-wide 동시 fetch → 2-wide 4웨이브로 분할해 렌더당 peak 동시 커넥션을 8→2 로 축소.
   // 순차 왕복이 늘어도 각 쿼리가 ms 단위라 지연 영향 미미. 출력은 그대로 유지.
   const [tradesR, blogsR] = await Promise.allSettled([
-    (region ? sb.from('apt_transactions').select('id, apt_name, deal_date, deal_amount, exclusive_area, floor, built_year').in('apt_name', nameVariants).eq('region_nm', region) : sb.from('apt_transactions').select('id, apt_name, deal_date, deal_amount, exclusive_area, floor, built_year').in('apt_name', nameVariants)).order('deal_date', { ascending: false }).limit(30),
+    (() => {
+      // 플래그가 꺼져 있으면 지금 동작 그대로다 — 두 표기 정확일치.
+      let q = sb.from('apt_transactions').select('id, apt_name, deal_date, deal_amount, exclusive_area, floor, built_year');
+      q = txPrefix ? q.like('apt_name', `${txPrefixKey}%`) : q.in('apt_name', nameVariants);
+      if (region) q = q.eq('region_nm', region);
+      return q.order('deal_date', { ascending: false }).limit(30);
+    })(),
     termBlog ? sb.from('blog_posts').select('slug, title, view_count, published_at').eq('is_published', true).or(`title.ilike.%${termBlog}%,title.ilike.%${rShort} 청약%,title.ilike.%${rShort} 부동산%`).order('view_count', { ascending: false }).limit(5) : Promise.resolve({ data: [] }),
   ]);
   const [postsR, nearbyR] = await Promise.allSettled([
@@ -627,6 +646,10 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
   if (!site && !sub && !unsold && !redev) {
     redirect(`/apt/search?q=${encodeURIComponent(resolved!.slug!.replace(/-/g, ' '))}`);
   }
+  /* 접두 매칭 플래그 — DB(`apt_sites.tx_match_prefix`) 값을 그대로 차트에 넘긴다.
+   * ⚠️ 여기서 true 를 «지어내지 말 것». 전역 접두 매칭은 부산 「현대」를 59개 단지로 다시 뭉친다.
+   *    `fetchUnifiedData` 안의 동명 변수는 그쪽 쿼리용이다 — 스코프가 다르다. */
+  const txPrefix = (site as any)?.tx_match_prefix === true;
   const sType = site?.site_type || (sub ? 'subscription' : unsold ? 'unsold' : redev ? 'redevelopment' : trades.length > 0 ? 'trade' : 'subscription');
   const features = Array.isArray(site?.key_features) ? site.key_features : [];
 
@@ -1694,7 +1717,7 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
               </div>
             );
           })()}
-          <AptPriceTrendChart aptName={name} region={region} sigungu={sigungu} />
+          <AptPriceTrendChart aptName={name} region={region} sigungu={sigungu} prefix={txPrefix} />
           {(() => {
             const tradeAmts = trades.slice(0, 10).map((t: any) => Number(t.deal_amount));
             const tradeMax = Math.max(...tradeAmts.filter((a: number) => a > 0), 1);
