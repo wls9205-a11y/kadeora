@@ -24,6 +24,14 @@ zone: 수도권 · 부울경 · 대경 · 충청 · 호남강원제주
 """
 
 import argparse, base64, csv, hashlib, hmac, io, json, os, re, sys, time
+
+# ⚠️ 윈도우 콘솔 기본 코드페이지가 cp949 라 «—» · «⚠️» 같은 문자에서 UnicodeEncodeError 로
+#    죽는다. 출력만의 문제인데 실행 전체가 멈추므로 여기서 한 번 고정한다.
+try:
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+    sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+except Exception:
+    pass
 from collections import Counter, OrderedDict
 from urllib.parse import quote, unquote
 
@@ -664,6 +672,130 @@ def cmd_rollback(args):
         except Exception as e: print("삭제실패 %s %s" % (name, str(e)[:100]))
 
 
+# ─────────────────────────────────────────────── off (R3-1)
+
+OFF_CSV = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                       "..", "..", "docs", "m6", "R3_광고_중단대상.csv")
+
+
+def _load_off_targets(path):
+    """중단 대상 CSV → [(keyword_id, keyword, adgroup, reason)]
+
+    ⚠️ 이 파일 «안에 있는 키워드 ID 만» 대상이다. 조건을 여기서 다시 계산하지 않는다 —
+       CSV 가 이미 검토를 거친 확정 목록이고, 코드가 조건을 또 만들면 두 판정이 갈린다.
+    """
+    if not os.path.exists(path):
+        sys.exit("중단 대상 CSV 가 없습니다: %s (먼저 export_off.py 로 만드세요)" % path)
+    rows = []
+    # 다운로드 양식과 같은 UTF-8 BOM 이다.
+    with io.open(path, encoding="utf-8-sig", newline="") as f:
+        for r in csv.DictReader(f):
+            kid = (r.get("키워드 ID") or "").strip()
+            if not kid:
+                continue
+            rows.append((kid, (r.get("키워드") or "").strip(),
+                         (r.get("광고그룹 이름") or "").strip(), (r.get("사유") or "").strip()))
+    ids = [x[0] for x in rows]
+    if len(ids) != len(set(ids)):
+        sys.exit("CSV 에 키워드 ID 중복이 있습니다 (%d행 / 고유 %d)" % (len(ids), len(set(ids))))
+    return rows
+
+
+def _keyword_state(ids):
+    """키워드 ID → 현재 상태. SA API 는 ids 를 쉼표로 받는다. URL 길이가 있어 끊는다."""
+    out = {}
+    for i in range(0, len(ids), 50):
+        chunk = ids[i:i + 50]
+        try:
+            for k in call("GET", "/ncc/keywords", params={"ids": ",".join(chunk)}) or []:
+                out[k.get("nccKeywordId")] = k
+        except Exception as e:
+            print("  조회 실패(%d~%d): %s" % (i, i + len(chunk), str(e)[:120]))
+    return out
+
+
+def cmd_off(args):
+    """R3-1 중단 대상 177건을 SA API 로 끈다(userLock=true).
+
+    ── 왜 파일 업로드가 아니라 API 인가 ─────────────────────────────────────
+    대량 «수정» 은 다운로드 양식이 아니라 «작업 유형별 템플릿» 을 요구한다.
+    다운로드 CSV 를 그대로 올리면 「불필요한 항목」으로 반려된다(2026-08-26 실측).
+    양식을 맞추느니 API 로 상태만 바꾸는 편이 안전하다 — 컬럼을 잘못 채워
+    «다른 값까지» 덮어쓸 위험이 없다.
+
+    ── ⛔ 대상 외 키워드는 절대 건드리지 않는다 ────────────────────────────
+    대상은 CSV 에 명시된 키워드 ID 뿐이다. 그룹 단위로 끄거나 조건으로 다시 고르지 않는다.
+    실행 전에 조회해 «CSV 에 있는데 계정에 없는» 것도 걸러 낸다.
+
+    ⚠️ 삭제가 아니라 OFF(userLock)다. 되돌릴 수 있어야 한다 —
+       노출이 붙은 뒤 「중복 40 중 어느 쪽을 남길지」를 다시 판단할 수 있다.
+    """
+    if not API_KEY:
+        sys.exit("NAVER_SA_* 환경변수가 필요합니다.")
+    rows = _load_off_targets(args.csv)
+    print("중단 대상 %d건 — %s" % (len(rows), args.csv))
+    by_reason = {}
+    for _, _, _, why in rows:
+        by_reason[why] = by_reason.get(why, 0) + 1
+    for k in sorted(by_reason, key=lambda x: -by_reason[x]):
+        print("   %-12s %4d" % (k or "(사유없음)", by_reason[k]))
+
+    ids = [r[0] for r in rows]
+    print("")
+    print("계정 상태 조회 중...")
+    state = _keyword_state(ids)
+    missing = [r for r in rows if r[0] not in state]
+    already = [r for r in rows if r[0] in state and state[r[0]].get("userLock") is True]
+    todo = [r for r in rows if r[0] in state and state[r[0]].get("userLock") is not True]
+    print("  계정에 있음 %d · 없음 %d · 이미 OFF %d · 끌 대상 %d"
+          % (len(state), len(missing), len(already), len(todo)))
+    for r in missing[:5]:
+        print("   [!] 계정에 없음: %s (%s)" % (r[1], r[0]))
+
+    if not args.live:
+        print("")
+        print("--live 가 없어 아무것도 바꾸지 않았습니다. 끌 대상:")
+        for kid, kw, grp, why in todo[:40]:
+            print("   %-12s %-24s %s" % (why, grp[:22], kw[:34]))
+        if len(todo) > 40:
+            print("   ... 외 %d건" % (len(todo) - 40))
+        print("")
+        print("실행하려면: python tools/naver-sa/sa.py off --live")
+        return
+
+    ok = fail = 0
+    # ⚠️ PUT /ncc/keywords 는 부분 갱신이다. fields 로 바꿀 필드를 «한정» 해야
+    #    나머지 값(입찰가·연결URL)이 보존된다. 이걸 빼면 통째로 덮인다.
+    for i in range(0, len(todo), 20):
+        chunk = todo[i:i + 20]
+        body = [{"nccKeywordId": kid, "userLock": True} for kid, _, _, _ in chunk]
+        try:
+            call("PUT", "/ncc/keywords", params={"fields": "userLock"}, body=body)
+            ok += len(chunk)
+            print("  OFF %d/%d" % (min(i + len(chunk), len(todo)), len(todo)))
+        except Exception as e:
+            fail += len(chunk)
+            print("  실패 %d~%d: %s" % (i, i + len(chunk), str(e)[:160]))
+        time.sleep(0.3)
+
+    print("")
+    print("요청 완료 — 성공 %d · 실패 %d · 이미 OFF %d · 계정에 없음 %d"
+          % (ok, fail, len(already), len(missing)))
+
+    # ── 실행 후 재조회. 「요청이 200 이었다」가 아니라 「실제로 꺼졌나」를 본다 ──
+    print("")
+    print("재조회 중...")
+    after = _keyword_state(ids)
+    off_now = [r for r in rows if after.get(r[0], {}).get("userLock") is True]
+    on_now = [r for r in rows if r[0] in after and after[r[0]].get("userLock") is not True]
+    print("검증: 대상 %d 중 OFF %d · 아직 ON %d · 조회 안 됨 %d"
+          % (len(rows), len(off_now), len(on_now), len(rows) - len(after)))
+    for kid, kw, grp, why in on_now[:10]:
+        print("   [!] 아직 ON: %-24s %s (%s)" % (grp[:22], kw[:30], kid))
+    if not on_now and len(after) == len(rows):
+        print("전수 OFF 확인.")
+
+
 def main():
     p = argparse.ArgumentParser(description="카더라 파워링크 전국 대량등록")
     s = p.add_subparsers(dest="cmd", required=True)
@@ -679,6 +811,10 @@ def main():
     a = common(s.add_parser("apply")); a.add_argument("--live", action="store_true"); a.set_defaults(fn=cmd_apply)
     s.add_parser("verify").set_defaults(fn=cmd_verify)
     r = s.add_parser("rollback"); r.add_argument("--live", action="store_true"); r.set_defaults(fn=cmd_rollback)
+    o = s.add_parser("off", help="R3-1 중단 대상 CSV 의 키워드를 OFF(userLock) 한다")
+    o.add_argument("--live", action="store_true", help="없으면 대상 목록만 출력하고 아무것도 바꾸지 않는다")
+    o.add_argument("--csv", default=OFF_CSV, help="중단 대상 CSV 경로")
+    o.set_defaults(fn=cmd_off)
     args = p.parse_args(); args.fn(args)
 
 
