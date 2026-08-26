@@ -36,7 +36,7 @@ export default function SigunguChips({
   const base = `/apt?region=${encodeURIComponent(region)}`;
   const style = (active: boolean): React.CSSProperties =>
     active
-      ? { ...CHIP, background: 'var(--brand)', borderColor: 'var(--brand)', color: '#FFFFFF', fontWeight: 700 }
+      ? { ...CHIP, background: 'var(--brand)', borderColor: 'var(--brand)', color: '#FFFFFF', fontWeight: 500 }
       : { ...CHIP, background: 'var(--bg-surface)', color: 'var(--text-secondary)' };
 
   return (

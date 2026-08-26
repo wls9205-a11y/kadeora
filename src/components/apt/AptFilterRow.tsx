@@ -50,7 +50,7 @@ const ACTIVE: React.CSSProperties = {
   background: 'var(--brand)',
   borderColor: 'var(--brand)',
   color: '#FFFFFF',
-  fontWeight: 700,
+  fontWeight: 500,
 };
 
 /** 건수는 칩 크기를 키우지 않게 작게, 위첨자처럼 붙인다. */
@@ -61,8 +61,9 @@ function Count({ n, active }: { n: number; active: boolean }) {
       aria-hidden
       style={{
         fontSize: 'var(--fs-xs)',
-        fontWeight: 700,
-        opacity: active ? 0.85 : 0.75,
+        fontWeight: 500,
+        opacity: active ? 1 : 0.75,   // ⚠️ 활성 0.85 는 흰글씨/--brand 합성 대비 4.19 로 하한 미달이었다(비활성 0.75 는 4.88 통과).
+        //    건수의 종속감은 이미 fs-xs(칩 본문 fs-sm)가 낸다. 1 로 올려 5.17.
         color: active ? '#FFFFFF' : 'var(--accent-red)',
       }}
     >

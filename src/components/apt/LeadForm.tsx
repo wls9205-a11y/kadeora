@@ -276,7 +276,7 @@ const badgeBase: CSSProperties = {
   padding: '1px 6px',
   borderRadius: 'var(--radius-pill)',
   fontSize: 'var(--fs-xs)',
-  fontWeight: 700,
+  fontWeight: 500,
   lineHeight: 1.6,
 };
 
@@ -642,7 +642,7 @@ export default function LeadForm({
           background: 'var(--kd-accent-bg)',
           color: 'var(--kd-accent)',
           fontSize: 'var(--fs-sm)',
-          fontWeight: 700,
+          fontWeight: 500,
           padding: '7px 14px',
           borderBottom: '1px solid var(--kd-accent-border)',
         }}

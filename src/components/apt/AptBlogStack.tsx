@@ -45,8 +45,8 @@ export default async function AptBlogStack({ slug }: Props) {
       style={{ margin: '0 0 12px' }}
     >
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-        <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: 0.5 }}>관련 블로그</span>
-        <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, color: 'var(--text-tertiary)', padding: '2px 8px', borderRadius: 999, background: 'var(--bg-hover)', border: '1px solid var(--border)' }}>
+        <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-primary)', letterSpacing: 0.5 }}>관련 블로그</span>
+        <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 500, color: 'var(--text-tertiary)', padding: '2px 8px', borderRadius: 999, background: 'var(--bg-hover)', border: '1px solid var(--border)' }}>
           7,961 자산
         </span>
       </div>
@@ -62,10 +62,10 @@ export default async function AptBlogStack({ slug }: Props) {
               href={`/blog/${encodeURIComponent(b.blog_slug)}`}
               style={{ flex: '0 0 auto', width: 110, scrollSnapAlign: 'start', textDecoration: 'none', display: 'flex', flexDirection: 'column', gap: 8 }}
             >
-              <div style={{ width: 110, height: 56, borderRadius: 8, background: c.bg, color: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xs)', fontWeight: 800, letterSpacing: -0.5 }}>
+              <div style={{ width: 110, height: 56, borderRadius: 8, background: c.bg, color: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xs)', fontWeight: 500, letterSpacing: 0 }}>
                 {c.label}
               </div>
-              <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+              <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                 {b.title}
               </div>
               {(b.view_count ?? 0) > 0 && (

@@ -53,7 +53,7 @@ const panel: React.CSSProperties = {
 
 const panelTitle: React.CSSProperties = {
   fontSize: 'var(--fs-xs)',
-  fontWeight: 800,
+  fontWeight: 500,
   letterSpacing: '.08em',
   color: 'var(--text-tertiary)',
   margin: '0 0 8px',
@@ -69,7 +69,7 @@ export default function SiteDetailRail({
       {/* ① 리드폼 진입 */}
       {showLeadForm && (
         <div style={{ ...panel, borderColor: 'var(--brand)', background: 'var(--brand-bg)' }}>
-          <p style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 4px', lineHeight: 1.4, wordBreak: 'keep-all' }}>
+          <p style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 4px', lineHeight: 1.4, wordBreak: 'keep-all' }}>
             {siteName} {leadCopy(lifecycleStage).band.replace(' · 무료', '')}
           </p>
           <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', margin: '0 0 10px', lineHeight: 1.5, wordBreak: 'keep-all' }}>
@@ -82,7 +82,7 @@ export default function SiteDetailRail({
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               minHeight: 44, borderRadius: 'var(--radius-sm)',
               background: 'var(--brand)', color: '#FFFFFF',
-              fontSize: 'var(--fs-sm)', fontWeight: 700, textDecoration: 'none',
+              fontSize: 'var(--fs-sm)', fontWeight: 500, textDecoration: 'none',
             }}
           >
             안내 신청하기
@@ -116,7 +116,7 @@ export default function SiteDetailRail({
           </svg>
         </span>
         <span style={{ minWidth: 0 }}>
-          <span style={{ display: 'block', fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.35 }}>
+          <span style={{ display: 'block', fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.35 }}>
             부정공 카톡방
           </span>
           <span style={{ display: 'block', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', lineHeight: 1.45, wordBreak: 'keep-all' }}>

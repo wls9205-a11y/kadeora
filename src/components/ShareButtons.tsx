@@ -249,7 +249,7 @@ export default function ShareButtons({ title, postId, content, compact, category
       <>
         <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setOpen(true); }} aria-label="공유" className="kd-action-btn" style={{ textDecoration: 'none' }}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
-          {' '}공유 <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, opacity: shareCount > 0 ? 1 : 0.5 }}>{shareCount}</span>
+          {' '}공유 <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 500, opacity: shareCount > 0 ? 1 : 0.5 }}>{shareCount}</span>
         </button>
         <BottomSheet open={open} onClose={() => setOpen(false)} title="공유하기" maxWidth={480}>
           <ShareGrid platforms={platforms} share={share} copied={copied} />
@@ -267,11 +267,11 @@ export default function ShareButtons({ title, postId, content, compact, category
         background: 'linear-gradient(135deg, rgba(59,123,246,0.08) 0%, rgba(96,165,250,0.08) 100%)',
         border: '1px solid rgba(59,123,246,0.2)',
         color: 'var(--brand)', cursor: 'pointer',
-        fontSize: 'var(--fs-sm)', fontWeight: 700,
+        fontSize: 'var(--fs-sm)', fontWeight: 500,
         transition: 'all var(--transition-fast)',
       }}>
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
-        공유 <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, opacity: shareCount > 0 ? 1 : 0.5, marginLeft: 2 }}>{shareCount}</span>
+        공유 <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 500, opacity: shareCount > 0 ? 1 : 0.5, marginLeft: 2 }}>{shareCount}</span>
       </button>
       <BottomSheet open={open} onClose={() => setOpen(false)} title="공유하기" maxWidth={480}>
         <ShareGrid platforms={platforms} share={share} copied={copied} />
@@ -286,11 +286,11 @@ function ShareGrid({ platforms, share, copied }: { platforms: Platform[]; share:
     <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 'var(--sp-lg)' }}>
       {platforms.map(p => (
         <button key={p.id} onClick={() => share(p.id)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--sp-sm)', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, minWidth: 56, position: 'relative' }}>
-          <div style={{ width: 52, height: 52, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: p.id === 'copy' && copied ? 'var(--accent-green)' : p.bg, color: p.color, fontSize: p.id === 'naver-blog' || p.id === 'naver-cafe' || p.id === 'daum-cafe' ? 18 : 'var(--fs-lg)', fontWeight: 900, transition: 'transform 0.12s' }}>
+          <div style={{ width: 52, height: 52, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: p.id === 'copy' && copied ? 'var(--accent-green)' : p.bg, color: p.color, fontSize: p.id === 'naver-blog' || p.id === 'naver-cafe' || p.id === 'daum-cafe' ? 18 : 'var(--fs-lg)', fontWeight: 500, transition: 'transform 0.12s' }}>
             {p.id === 'copy' && copied ? '✓' : p.emoji}
           </div>
           <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)' }}>{p.id === 'copy' && copied ? '복사됨!' : p.label}</span>
-          {p.isNew && <span style={{ position: 'absolute', top: -4, right: -4, fontSize: 'var(--fs-xs)', background: 'var(--accent-red)', color: '#fff', padding: '1px 4px', borderRadius: 4, fontWeight: 700 }}>N</span>}
+          {p.isNew && <span style={{ position: 'absolute', top: -4, right: -4, fontSize: 'var(--fs-xs)', background: 'var(--accent-red)', color: '#fff', padding: '1px 4px', borderRadius: 4, fontWeight: 500 }}>N</span>}
         </button>
       ))}
     </div>

@@ -32,7 +32,7 @@ export function statusBadgeStyle(status: SubscriptionStatus): CSSProperties {
     padding: '2px 7px',
     borderRadius: 4,
     fontSize: 11,
-    fontWeight: 700,
+    fontWeight: 500,
     lineHeight: 1.4,
     whiteSpace: 'nowrap',
     fontVariantNumeric: 'tabular-nums',
@@ -74,7 +74,7 @@ export function ddayStyle(dday: number | null): CSSProperties {
   const soon = dday !== null && dday <= 7;
   return {
     fontSize: 11,
-    fontWeight: 700,
+    fontWeight: 500,
     whiteSpace: 'nowrap',
     fontFamily: 'var(--font-mono)',
     fontVariantNumeric: 'tabular-nums',

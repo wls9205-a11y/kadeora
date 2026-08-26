@@ -84,8 +84,8 @@ export default function ListThumb({ src, name, height = SIZE }: ListThumbProps) 
             width: '100%',
             height: '100%',
             fontSize: 17,
-            fontWeight: 800,
-            letterSpacing: '-.04em',
+            fontWeight: 600,
+            letterSpacing: '-.012em',
             color: tone.fg,
           }}
         >

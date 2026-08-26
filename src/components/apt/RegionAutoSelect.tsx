@@ -83,7 +83,7 @@ export default function RegionAutoSelect() {
           background: 'var(--brand)',
           color: '#FFFFFF',
           fontSize: 'var(--fs-xs)',
-          fontWeight: 700,
+          fontWeight: 500,
           textDecoration: 'none',
           whiteSpace: 'nowrap',
         }}

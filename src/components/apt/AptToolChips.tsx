@@ -64,7 +64,7 @@ export default function AptToolChips({ region }: Props = {}) {
               {t.icon}
             </span>
             <span style={{ minWidth: 0 }}>
-              <span style={{ display: 'block', fontSize: 'var(--fs-xs)', fontWeight: 700 }}>{t.label}</span>
+              <span style={{ display: 'block', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>{t.label}</span>
               <span style={{ display: 'block', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 1 }}>
                 {t.desc}
               </span>

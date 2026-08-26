@@ -46,7 +46,7 @@ export default function KakaoDirectShare({ title, description, pagePath }: Props
       display: 'inline-flex', alignItems: 'center', gap: 4,
       padding: '6px 12px', borderRadius: 'var(--radius-sm)',
       background: '#FEE500', color: '#191919', border: 'none',
-      fontSize: 'var(--fs-xs)', fontWeight: 700, whiteSpace: 'nowrap', flexShrink: 0,
+      fontSize: 'var(--fs-xs)', fontWeight: 500, whiteSpace: 'nowrap', flexShrink: 0,
       height: 32, cursor: 'pointer',
     }}>
       💬 카카오톡

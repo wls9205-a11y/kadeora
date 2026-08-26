@@ -166,7 +166,8 @@ export default function SiteHero({ src, name, region, credit, badges, variant = 
             <span
               style={{
                 fontSize: 'clamp(48px, 12vw, 96px)',
-                fontWeight: 800,
+                fontWeight: 600,
+                // 장식 워터마크(opacity .5)다 — 48~96px 디스플레이 자간에 UI 텍스트 기준을 적용하지 않았다.
                 letterSpacing: '-.05em',
                 lineHeight: 1,
                 color: toneOf(name).fg,

@@ -72,8 +72,8 @@ export default function AptCurationCard({ item, today }: { item: AptHubItem; tod
       <Link
         href={aptHref(item)}
         style={{
-          display: 'block', fontSize: 'var(--fs-sm)', fontWeight: 700, lineHeight: 1.35,
-          letterSpacing: '-.02em', color: 'var(--text-primary)', textDecoration: 'none',
+          display: 'block', fontSize: 'var(--fs-sm)', fontWeight: 600, lineHeight: 1.35,
+          letterSpacing: '-.0125em', color: 'var(--text-primary)', textDecoration: 'none',
           wordBreak: 'keep-all', marginBottom: 4,
         }}
       >

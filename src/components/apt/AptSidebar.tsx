@@ -53,7 +53,7 @@ export default async function AptSidebar({ slug, builder, isLoggedIn = false }: 
   const siblings = ((siblingsRes as any)?.data ?? []) as SiblingRow[];
 
   const cardCss: React.CSSProperties = { background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14, margin: '0 0 12px' };
-  const titleCss: React.CSSProperties = { fontSize: 'var(--fs-xs)', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: 0.5, marginBottom: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' };
+  const titleCss: React.CSSProperties = { fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-primary)', letterSpacing: 0.5, marginBottom: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' };
 
   return (
     <aside aria-label="단지 사이드바" className="apt-sidebar">
@@ -71,7 +71,7 @@ export default async function AptSidebar({ slug, builder, isLoggedIn = false }: 
                     <span style={{ color: a.defaultOn ? 'var(--kd-accent)' : 'var(--text-tertiary)', marginRight: 6, fontSize: 'var(--fs-sm)' }}>{a.defaultOn ? '●' : '○'}</span>
                     {a.label}
                   </span>
-                  <span style={{ color: a.defaultOn ? 'var(--kd-accent)' : 'var(--text-tertiary)', fontWeight: 800, fontSize: 'var(--fs-xs)' }}>
+                  <span style={{ color: a.defaultOn ? 'var(--kd-accent)' : 'var(--text-tertiary)', fontWeight: 500, fontSize: 'var(--fs-xs)' }}>
                     {a.defaultOn ? 'ON' : 'OFF'}
                   </span>
                 </div>
@@ -84,7 +84,7 @@ export default async function AptSidebar({ slug, builder, isLoggedIn = false }: 
         ) : (
           <p style={{ margin: 0, fontSize: 'var(--fs-xs)', lineHeight: 1.6, color: 'var(--text-secondary)' }}>
             모델하우스 오픈 · 청약 D-3 · 분양가 변동 알림을 받을 수 있습니다.{' '}
-            <Link href="/login" style={{ color: 'var(--kd-accent)', fontWeight: 700, textDecoration: 'none' }}>로그인 →</Link>
+            <Link href="/login" style={{ color: 'var(--kd-accent)', fontWeight: 500, textDecoration: 'none' }}>로그인 →</Link>
           </p>
         )}
       </section>
@@ -103,7 +103,7 @@ export default async function AptSidebar({ slug, builder, isLoggedIn = false }: 
             {siblings.map(s => (
               <Link key={s.sibling_slug} href={`/apt/${encodeURIComponent(s.sibling_slug)}`} style={{ textDecoration: 'none' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 6 }}>
-                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {s.sibling_name}
                   </span>
                   {s.sibling_sigungu && <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexShrink: 0 }}>{s.sibling_sigungu}</span>}

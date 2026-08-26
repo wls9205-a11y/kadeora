@@ -255,7 +255,7 @@ export default async function AptPage({
               background: 'var(--brand)',
               color: '#FFFFFF',
               fontSize: 'var(--fs-xs)',
-              fontWeight: 700,
+              fontWeight: 500,
               textDecoration: 'none',
               whiteSpace: 'nowrap',
             }}
@@ -371,7 +371,7 @@ export default async function AptPage({
           }}
         >
           <span style={{ minWidth: 0 }}>
-            <span style={{ display: 'block', fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>
+            <span style={{ display: 'block', fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>
               지난 공고 더보기
             </span>
             <span style={{ display: 'block', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 1 }}>

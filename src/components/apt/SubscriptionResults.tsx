@@ -53,7 +53,7 @@ export default function SubscriptionResults({ items }: { items: AptHubItem[] }) 
                 <div
                   style={{
                     fontSize: 'var(--fs-xs)',
-                    fontWeight: 700,
+                    fontWeight: 600,
                     lineHeight: 1.4,
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',

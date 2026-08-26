@@ -128,7 +128,7 @@ export default function SiteHistoryTimeline({ events }: { events: AptSiteEvent[]
               dateTime={e.occurred_at}
               style={{
                 fontSize: 'var(--fs-xs)',
-                fontWeight: 700,
+                fontWeight: 500,
                 lineHeight: 1.5,
                 color: 'var(--text-tertiary)',
                 fontVariantNumeric: 'tabular-nums',
@@ -177,8 +177,8 @@ export default function SiteHistoryTimeline({ events }: { events: AptSiteEvent[]
                 style={{
                   display: 'block',
                   fontSize: 'var(--fs-xs)',
-                  fontWeight: 800,
-                  letterSpacing: '-.02em',
+                  fontWeight: 600,
+                  letterSpacing: 0,   // fs-xs(14px) — 자간 규칙상 14px 이하는 0
                   color: 'var(--text-primary)',
                   lineHeight: 1.45,
                 }}
@@ -214,7 +214,7 @@ export default function SiteHistoryTimeline({ events }: { events: AptSiteEvent[]
                     padding: '1.5px 5px',
                     borderRadius: 3,
                     fontSize: 'var(--fs-xs)',
-                    fontWeight: 800,
+                    fontWeight: 500,
                     lineHeight: 1.4,
                     background: grade.badgeBg,
                     color: grade.badgeFg,

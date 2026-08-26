@@ -76,7 +76,7 @@ export default function SubscriptionAlertButton({ aptName, redirect, compact = f
           padding: compact ? '5px 9px' : '7px 12px',
           borderRadius: 6,
           fontSize: compact ? 11.5 : 12.5,
-          fontWeight: 700,
+          fontWeight: 500,
           cursor: state === 'done' ? 'default' : 'pointer',
           whiteSpace: 'nowrap',
           border: '1px solid',

@@ -102,15 +102,15 @@ const CELL: React.CSSProperties = {
 function Cell({ label, value, note, accent }: { label: string; value: string; note?: string; accent?: boolean }) {
   return (
     <div style={CELL}>
-      <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-tertiary)', marginBottom: 3, letterSpacing: '.02em' }}>
+      <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 500, color: 'var(--text-tertiary)', marginBottom: 3, letterSpacing: '.02em' }}>
         {label}
       </div>
       <div
         style={{
           fontSize: 'var(--fs-sm)',
-          fontWeight: 800,
+          fontWeight: 700,
           lineHeight: 1.25,
-          letterSpacing: '-.03em',
+          letterSpacing: '-.0125em',
           color: accent ? 'var(--brand)' : 'var(--text-primary)',
           fontVariantNumeric: 'tabular-nums',
           overflow: 'hidden',
@@ -160,8 +160,8 @@ export default function AptKeyMetrics({
       <Cell label={unit.label} value={unit.value} note={unit.note} />
       <Cell label="입주" value={move ?? '미정'} note={move ? '예정' : preAnnouncement ? '공고 후 확정' : undefined} />
       <div style={{ ...CELL, borderRight: 0 }}>
-        <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-tertiary)', marginBottom: 3 }}>청약</div>
-        <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, lineHeight: 1.25, letterSpacing: '-.03em', color: dday.value.startsWith('D-') ? 'var(--accent-red)' : 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>
+        <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 500, color: 'var(--text-tertiary)', marginBottom: 3 }}>청약</div>
+        <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, lineHeight: 1.25, letterSpacing: '-.0125em', color: dday.value.startsWith('D-') ? 'var(--accent-red)' : 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>
           {dday.value}
         </div>
         <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>

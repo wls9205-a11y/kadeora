@@ -68,7 +68,7 @@ function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: (id: string) =
         width: 28, height: 28, borderRadius: '50%',
         background: c.icon, color: 'var(--text-inverse)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: 'var(--fs-sm)', fontWeight: 700, flexShrink: 0,
+        fontSize: 'var(--fs-sm)', fontWeight: 500, flexShrink: 0,
       }}>{ICONS[toast.type]}</span>
       <span style={{ color: 'var(--text-primary)', fontSize: 'var(--fs-base)', lineHeight: 1.4, flex: 1 }}>
         {toast.message}

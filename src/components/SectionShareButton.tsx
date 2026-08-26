@@ -132,7 +132,7 @@ export default function SectionShareButton({ section, label, text, pagePath }: P
           display: 'inline-flex', alignItems: 'center', gap: 6,
           padding: '6px 10px', borderRadius: 'var(--radius-md)',
           background: 'var(--kakao-bg)', border: '1px solid rgba(25,25,25,0.1)',
-          color: 'var(--kakao-text)', cursor: 'pointer', fontSize: 'var(--fs-xs)', fontWeight: 700,
+          color: 'var(--kakao-text)', cursor: 'pointer', fontSize: 'var(--fs-xs)', fontWeight: 500,
         }}>
           💬 카카오톡
         </button>
@@ -149,7 +149,7 @@ export default function SectionShareButton({ section, label, text, pagePath }: P
         <div style={{ display: 'flex', gap: 20, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 'var(--sp-lg)' }}>
           {PLATFORMS.map(p => (
             <button key={p.id} onClick={() => sharePlatform(p.id)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--sp-sm)', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, minWidth: 56 }}>
-              <div style={{ width: 52, height: 52, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: p.id === 'copy' && copied ? 'var(--accent-green)' : p.bg, color: p.color, fontSize: 'var(--fs-lg)', fontWeight: 900 }}>
+              <div style={{ width: 52, height: 52, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: p.id === 'copy' && copied ? 'var(--accent-green)' : p.bg, color: p.color, fontSize: 'var(--fs-lg)', fontWeight: 500 }}>
                 {p.id === 'copy' && copied ? '✓' : p.emoji}
               </div>
               <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)' }}>{p.id === 'copy' && copied ? '복사됨!' : p.label}</span>

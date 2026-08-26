@@ -43,7 +43,7 @@ export default function RecentMovesStrip({
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 8, marginBottom: 8 }}>
         <h2
           id="apt-moves-heading"
-          style={{ margin: 0, fontSize: 'var(--fs-sm)', fontWeight: 800, letterSpacing: '-.03em', color: 'var(--text-primary)' }}
+          style={{ margin: 0, fontSize: 'var(--fs-sm)', fontWeight: 600, letterSpacing: '-.0125em', color: 'var(--text-primary)' }}
         >
           이번 주 움직인 현장
         </h2>
@@ -91,22 +91,22 @@ export default function RecentMovesStrip({
                       padding: '1.5px 5px',
                       borderRadius: 3,
                       fontSize: 'var(--fs-xs)',
-                      fontWeight: 800,
+                      fontWeight: 500,
                       background: tone.bg,
                       color: tone.fg,
                     }}
                   >
                     {tone.label}
                   </span>
-                  {when && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-tertiary)' }}>{when}</span>}
+                  {when && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 500, color: 'var(--text-tertiary)' }}>{when}</span>}
                 </span>
 
                 <span
                   style={{
                     display: 'block',
                     fontSize: 'var(--fs-xs)',
-                    fontWeight: 800,
-                    letterSpacing: '-.02em',
+                    fontWeight: 600,
+                    letterSpacing: 0,   // fs-xs(14px) — 자간 규칙상 14px 이하는 0
                     lineHeight: 1.35,
                     color: 'var(--text-primary)',
                     overflow: 'hidden',
@@ -123,7 +123,7 @@ export default function RecentMovesStrip({
                     fontSize: 'var(--fs-xs)',
                     lineHeight: 1.45,
                     color: 'var(--brand)',
-                    fontWeight: 700,
+                    fontWeight: 500,
                     marginTop: 3,
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',

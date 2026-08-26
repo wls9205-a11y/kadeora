@@ -81,7 +81,7 @@ export default function SubscriptionTimeline({
               <div
                 style={{
                   fontSize: 'var(--fs-xs)',
-                  fontWeight: 700,
+                  fontWeight: 600,
                   lineHeight: 1.35,
                   display: '-webkit-box',
                   WebkitLineClamp: 2,

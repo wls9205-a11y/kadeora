@@ -76,7 +76,7 @@ export default function BottomSheet({ open, onClose, children, maxWidth = 520, t
         {/* 제목 + 닫기 */}
         {title && (
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-md)' }}>
-            <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>{title}</h2>
+            <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>{title}</h2>
             <button onClick={onClose} style={{
               background: 'var(--bg-hover)', border: '1px solid var(--border)',
               borderRadius: '50%', width: 32, height: 32,
