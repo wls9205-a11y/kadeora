@@ -4,6 +4,7 @@ import Link from 'next/link';
 // s240 W1: createSupabaseServer (cookies 의존) → getSupabaseAdmin (cookie-free) 전환.
 // 메인 페이지 anonymous SSR — RLS 우회 OK. cache-control public 회복.
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { fetchAll } from '@/lib/db/fetchBatched';
 import EmptyState from '@/components/EmptyState';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
 import SectionShareButton from '@/components/SectionShareButton';
@@ -83,7 +84,7 @@ function subCatsFromView(rows: SubcatRow[], category: string): { key: string; la
   return out.length > 0 ? out : null;
 }
 
-interface PageProps { searchParams: Promise<{ category?: string; sort?: string; q?: string; page?: string; sub?: string }> }
+interface PageProps { searchParams: Promise<{ category?: string; sort?: string; q?: string; page?: string; sub?: string; region?: string }> }
 
 export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
   // [§6] 파셋 판정은 «들어온 파라미터 전부» 를 봐야 한다. 아래 구조분해로 뽑는
@@ -205,10 +206,18 @@ const CAT_COLORS: Record<string, string> = {
   redev: 'var(--accent-orange)', finance: 'var(--accent-purple)', general: 'var(--text-tertiary)',
 };
 
-interface Props { searchParams: Promise<{ category?: string; sort?: string; q?: string; page?: string; sub?: string }> }
+interface Props { searchParams: Promise<{ category?: string; sort?: string; q?: string; page?: string; sub?: string; region?: string }> }
 
 export default async function BlogPage({ searchParams }: Props) {
-  const { category = 'all', sort = 'latest', q = '', page = '1', sub = '' } = await searchParams;
+  const { category = 'all', sort = 'latest', q = '', page = '1', sub = '', region: regionRaw = '' } = await searchParams;
+  /* H4-5 — 지역 세그먼트. `blog_posts` 에 지역 컬럼이 «없어서» 태그로 건다.
+   * 실측(발행글 8,719): 부산 379 · 울산 84 · 경남 189 · 주식 2,866.
+   * ⚠️ 값을 화이트리스트로 «가둔다». 임의 문자열이 그대로 `.contains` 로 들어가면
+   *    파셋 URL 이 무한히 늘고 색인 쓰레기가 된다(facetRobots 가 noindex 는 붙이지만
+   *    크롤 예산은 그대로 나간다). 여기 없는 값은 «없는 것» 으로 친다.
+   * ⚠️ 새 파라미터라 파셋이다 — facetRobots 가 기본 차단이라 자동으로 noindex 다. */
+  const REGION_SEG = ['부산', '울산', '경남'] as const;
+  const region = (REGION_SEG as readonly string[]).includes(regionRaw) ? regionRaw : '';
   const pageNum = Math.max(1, parseInt(page) || 1);
   const perPage = 30;
   const sb = getSupabaseAdmin();
@@ -289,6 +298,8 @@ export default async function BlogPage({ searchParams }: Props) {
   }
   // sub 는 정규화 이름이다. 뷰가 sub_norm 을 직접 주므로 한 줄로 끝난다.
   if (sub) q2 = q2.eq('sub_norm', sub);
+  // 태그 배열 포함 검색. 지역 컬럼이 없어 이게 유일한 경로다(위 주석).
+  if (region) q2 = q2.contains('tags', [region]);
   if (q) { const sq = sanitizeSearchQuery(q, 100); if (sq) q2 = q2.or(`title.ilike.%${sq}%,excerpt.ilike.%${sq}%`); }
   if (sort === 'popular') {
     q2 = q2.order('view_count', { ascending: false });
@@ -332,12 +343,63 @@ export default async function BlogPage({ searchParams }: Props) {
       nq = activeCats.length === 1 ? nq.eq('category', activeCats[0]) : nq.in('category', activeCats);
     }
     if (sub) nq = nq.eq('sub_norm', sub);
+    if (region) nq = nq.contains('tags', [region]);   // 목록과 «같은» 모집단이어야 한다
     if (sort === 'popular') nq = nq.order('view_count', { ascending: false });
     else nq = nq.order('created_at', { ascending: false });
     nq = nq.range(pageNum * perPage, pageNum * perPage + 4);
     const { data: np } = await nq;
     nextPagePosts = np || [];
   } catch {}
+
+  /* H4-5 · 현장별 묶음 — `v_apt_related_blogs`(4,597행)가 있는데 블로그 목록이 안 썼다.
+   * 부동산 글이 «어느 현장 이야기인지» 를 목록에서 알 수 없었다.
+   *
+   * ⚠️ 본체 조회 뭉치에 «합치지 않는다» (Rule #49). 실패하면 이 줄만 사라진다.
+   * ⚠️ `…미분양`·`…재개발` 같은 «집계 유사현장» 은 뺀다. 그건 단지가 아니라 시군구 묶음이라
+   *    「현장별」이라는 말이 거짓이 된다 (홈 §1-1 에서 같은 이유로 걸러냈다).
+   * ⚠️ 2편 미만은 «묶음» 이 아니다. 1편짜리를 줄줄이 내면 목록을 두 번 보여주는 꼴이다.
+   * 실측(2026-08-26): 부울경 339곳이 이 뷰에 있고, 2편 이상은 소수다 —
+   *    상위가 `알티에로 광안` 16편이고 나머지는 2~4편이다. 그래서 6개만 낸다. */
+  type AptGroup = { slug: string; name: string; region: string | null; sigungu: string | null; n: number };
+  let aptGroups: AptGroup[] = [];
+  try {
+    /* ⚠️ `.limit(4000)` 으로는 4,597행을 다 못 받는다 — PostgREST `db-max-rows` 가 1,000 이라
+     *    클라이언트 limit 이 그걸 못 넘는다. 1,000행만 세면 집계가 통째로 틀린다
+     *    (실측: 잘린 상태에서 최다 그룹이 2편으로 보였는데 실제 1위는 16편이다). */
+    const rel = await fetchAll(sb, 'v_apt_related_blogs', 'apt_slug', (qq: any) => qq);
+    const tally = new Map<string, number>();
+    for (const r of (rel ?? []) as { apt_slug: string | null }[]) {
+      const k = (r.apt_slug ?? '').trim();
+      if (k) tally.set(k, (tally.get(k) ?? 0) + 1);
+    }
+    /* ⚠️ 전국 상위 N 을 먼저 자른 뒤 부울경으로 거르면 «거의 안 남는다».
+     *    실측: 전국 상위 40 중 부울경은 «1곳» 뿐이고, 실제 자격자는 36곳이다.
+     *    그래서 자르지 말고 «부울경 슬러그 집합» 과 교집합을 낸다.
+     * ⚠️ `.in()` 에 844개를 넣지 않는다 — URL 이 터진다. 부울경 목록을 페이지로 받아
+     *    (fetchAll = PostgREST 1,000행 상한 우회) JS 에서 교집합한다. */
+    const ge2 = [...tally.entries()].filter(([, n]) => n >= 2);
+    if (ge2.length > 0) {
+      const sites = await fetchAll(
+        sb,
+        'apt_sites',
+        'slug, name, region, sigungu',
+        (qq: any) => qq.eq('is_active', true).in('region', ['부산', '울산', '경남']),
+      );
+      const NOT_A_SITE = /(미분양|재개발|재건축|정비)\s*$/;
+      const bySlug = new Map<string, any>(
+        (sites ?? [])
+          .filter((x: any) => x?.slug && x?.name && !NOT_A_SITE.test(String(x.name)))
+          .map((x: any) => [String(x.slug), x]),
+      );
+      aptGroups = ge2
+        .map(([slug, n]) => { const x = bySlug.get(slug); return x ? { slug, name: x.name, region: x.region, sigungu: x.sigungu, n } : null; })
+        .filter((x): x is AptGroup => !!x)
+        .sort((a, b) => b.n - a.n || a.name.localeCompare(b.name, 'ko'))
+        .slice(0, 6);
+    }
+  } catch (e) {
+    console.error('[blog] apt groups failed:', e);   // 삼키지 않는다 — 조용히 비면 원인을 못 찾는다
+  }
 
   const hasMore = (posts ?? []).length === perPage;
 
@@ -428,6 +490,79 @@ export default async function BlogPage({ searchParams }: Props) {
         }} />
       </form>
 
+      {/* ── H4-5 · 빠른 분류 ──
+           부울경 포커스. `blog_posts` 에 지역 컬럼이 없어 지역은 «태그» 로 건다(위 주석).
+           ⚠️ 「주식」은 지역이 아니라 «카테고리» 다. 한 줄에 두긴 하되 `aria-label` 을
+              「지역」이라 쓰지 않는다 — 스크린리더에 거짓말을 하게 된다.
+           ⚠️ 「인기」 라벨을 쓰지 않는다 — H4-3 계측이 방금 시작됐고 아직 데이터가 없다. */}
+      <nav aria-label="빠른 분류" style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginBottom: 'var(--sp-sm)' }}>
+        {[
+          { k: '', label: '전체', cat: '' },
+          ...REGION_SEG.map((r) => ({ k: r, label: r, cat: '' })),
+          { k: '', label: '주식', cat: 'stock' },
+        ].map(({ k, label, cat }) => {
+          const on = cat ? category === cat : region === k && category !== 'stock';
+          const qs = new URLSearchParams();
+          if (cat) qs.set('category', cat);
+          else if (category !== 'all' && category !== 'stock') qs.set('category', category);
+          if (q) qs.set('q', q);
+          if (k) qs.set('region', k);
+          const href = qs.toString() ? `/blog?${qs}` : '/blog';
+          return (
+            <Link
+              key={label}
+              href={href}
+              scroll={false}
+              style={{
+                padding: '5px 11px',
+                borderRadius: 'var(--radius-pill)',
+                fontSize: 12.5, fontWeight: 500, letterSpacing: 0,
+                background: on ? 'var(--brand)' : 'var(--bg-surface)',
+                border: `1px solid ${on ? 'var(--brand)' : 'var(--border)'}`,
+                color: on ? 'var(--text-inverse)' : 'var(--text-secondary)',
+                textDecoration: 'none',
+              }}
+            >
+              {label}
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* ── H4-5 · 현장별 묶음 ──
+           부동산 글이 «어느 현장 이야기인지» 를 목록에서 알 수 없었다.
+           ⚠️ 0건이면 통째로 미렌더한다. 빈 제목만 남기지 않는다. */}
+      {aptGroups.length > 0 && (
+        <section aria-labelledby="blog-apt-groups" style={{ marginBottom: 'var(--sp-md)' }}>
+          <h2
+            id="blog-apt-groups"
+            style={{ fontSize: 12, fontWeight: 500, letterSpacing: 0, color: 'var(--text-tertiary)', margin: '0 0 6px' }}
+          >
+            현장별로 모아 보기
+          </h2>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+            {aptGroups.map((g) => (
+              <Link
+                key={g.slug}
+                href={`/apt/${encodeURIComponent(g.slug)}`}
+                style={{
+                  padding: '5px 10px',
+                  borderRadius: 'var(--radius-pill)',
+                  fontSize: 12.5, fontWeight: 400, letterSpacing: 0,
+                  background: 'var(--bg-surface)',
+                  border: '1px solid var(--border)',
+                  color: 'var(--text-secondary)',
+                  textDecoration: 'none',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {g.name} <span style={{ fontWeight: 500, color: 'var(--text-primary)' }}>{g.n}</span>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* 카테고리 탭 — 밑줄 스타일 */}
       <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--border)', marginBottom: 'var(--sp-md)', overflowX: 'auto', scrollbarWidth: 'none' }}>
         {CATS.map(c => (
@@ -452,84 +587,6 @@ export default async function BlogPage({ searchParams }: Props) {
           📚 시리즈
         </Link>
       </div>
-
-      {/* 서브카테고리 칩 */}
-      {subChips && (
-        <div style={{ display: 'flex', gap: 6, marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none' }}>
-          <Link href={`/blog?category=${category}${sort !== 'latest' ? `&sort=${sort}` : ''}${q ? `&q=${q}` : ''}`}
-            style={{
-              padding: '4px 12px', borderRadius: 'var(--radius-pill)', fontSize: 'var(--fs-xs)', fontWeight: !sub ? 600 : 500,
-              background: !sub ? 'var(--brand)' : 'var(--bg-hover)',
-              color: !sub ? 'var(--text-inverse)' : 'var(--text-tertiary)',
-              textDecoration: 'none', flexShrink: 0, border: 'none',
-            }}>
-            전체
-          </Link>
-          {subChips.map(sc => (
-            <Link key={sc.key} href={`/blog?category=${category}&sub=${sc.key}${sort !== 'latest' ? `&sort=${sort}` : ''}${q ? `&q=${q}` : ''}`}
-              style={{
-                padding: '4px 12px', borderRadius: 'var(--radius-pill)', fontSize: 'var(--fs-xs)', fontWeight: sub === sc.key ? 600 : 500,
-                background: sub === sc.key ? 'var(--brand)' : 'var(--bg-hover)',
-                color: sub === sc.key ? 'var(--text-inverse)' : 'var(--text-tertiary)',
-                textDecoration: 'none', flexShrink: 0, border: 'none',
-              }}>
-              {sc.label}
-              <span style={{ marginLeft: 4, fontSize: 10, opacity: 0.65 }}>{sc.cnt}</span>
-            </Link>
-          ))}
-        </div>
-      )}
-
-      {/* 정렬 + 인기태그 인라인 */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-        <div style={{ display: 'flex', gap: 'var(--sp-xs)' }}>
-          {[
-            { key: 'latest', label: '최신순' },
-            { key: 'popular', label: '인기순' },
-          ].map(s => (
-            <Link key={s.key} href={`/blog?${category !== 'all' ? `category=${category}&` : ''}sort=${s.key}${q ? `&q=${q}` : ''}`}
-              style={{
-                padding: '4px 10px', borderRadius: 'var(--radius-xs)', fontSize: 11, fontWeight: 600,
-                background: sort === s.key ? 'var(--brand)' : 'transparent',
-                color: sort === s.key ? '#fff' : 'var(--text-tertiary)',
-                textDecoration: 'none', border: sort === s.key ? 'none' : '1px solid var(--border)',
-              }}>
-              {s.label}
-            </Link>
-          ))}
-        </div>
-        {/* v7-D2: 데스크탑에서는 레일의 '태그' 패널이 대신한다 (같은 목록 두 벌 방지). */}
-        {popularTags.length > 0 && (
-          <div className="kd-lg-hide" style={{ display: 'flex', gap: 'var(--sp-xs)', overflow: 'hidden' }}>
-            {popularTags.slice(0, 4).map((t: any) => (
-              <Link key={t.tag} href={`/blog?q=${encodeURIComponent(t.tag)}`}
-                style={{ fontSize: 10, color: 'var(--text-tertiary)', padding: '3px 8px', borderRadius: 'var(--radius-md)', background: 'var(--bg-surface)', border: '1px solid var(--border)', whiteSpace: 'nowrap', textDecoration: 'none' }}>
-                #{t.tag}
-              </Link>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* 인기글 — 컴팩트 한 줄 */}
-      {pageNum === 1 && !q && category === 'all' && (popularPosts ?? []).length > 0 && (
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '10px 12px', marginBottom: 'var(--sp-sm)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-            <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)' }}>🔥 인기 글</span>
-            <Link href="/blog?sort=popular" style={{ fontSize: 10, color: 'var(--text-tertiary)', textDecoration: 'none', fontWeight: 600 }}>전체보기 →</Link>
-          </div>
-          {(popularPosts ?? []).slice(0, 3).map((p: any, i: number) => (
-            <Link key={p.id} href={`/blog/${p.slug}`} className="kd-feed-card" style={{ display: 'flex', alignItems: 'center', gap: 6, textDecoration: 'none', color: 'inherit', padding: '4px 0', borderBottom: i < 2 ? '1px solid var(--border)' : 'none' }}>
-              <span style={{ fontSize: 11, fontWeight: 600, color: i === 0 ? 'var(--brand)' : 'var(--text-tertiary)', width: 16, textAlign: 'center', flexShrink: 0 }}>{i + 1}</span>
-              <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</span>
-              <span style={{ fontSize: 10, color: CAT_COLORS[p.category] || 'var(--text-tertiary)', fontWeight: 500, flexShrink: 0 }}>
-                {POST_CAT_LABEL[p.category] || p.category}
-              </span>
-              <span style={{ fontSize: 10, color: 'var(--text-tertiary)', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>👀{p.view_count}</span>
-            </Link>
-          ))}
-        </div>
-      )}
 
       {/* 검색 결과 안내 */}
       {q && (
@@ -618,6 +675,101 @@ export default async function BlogPage({ searchParams }: Props) {
           })}
         </div>
       )}
+
+      {/* ── H4-5 · 접기 ──
+           8,718편인데 첫 화면에 글이 안 보였다. 서브칩 · 정렬 · 인기태그 · 인기글이
+           목록보다 «위» 에 있었기 때문이다. 세 블록을 목록 아래로 내리고 접었다.
+           ⚠️ 지운 게 아니다. 링크·파라미터·쿼리 전부 그대로다 — 열면 예전 그대로 나온다.
+           ⚠️ 카테고리 탭은 «접지 않는다». 색인된 URL 을 지고 있는 주 내비게이션이다. */}
+      <details style={{ margin: 'var(--sp-md) 0 var(--sp-lg)' }}>
+        <summary
+          style={{
+            cursor: 'pointer', listStyle: 'revert',
+            padding: '8px 2px',
+            fontSize: 13, fontWeight: 500, letterSpacing: 0,
+            color: 'var(--text-secondary)',
+          }}
+        >
+          정렬 · 세부 분류 · 인기 글
+        </summary>
+      {/* 서브카테고리 칩 */}
+      {subChips && (
+        <div style={{ display: 'flex', gap: 6, marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none' }}>
+          <Link href={`/blog?category=${category}${sort !== 'latest' ? `&sort=${sort}` : ''}${q ? `&q=${q}` : ''}`}
+            style={{
+              padding: '4px 12px', borderRadius: 'var(--radius-pill)', fontSize: 'var(--fs-xs)', fontWeight: !sub ? 600 : 500,
+              background: !sub ? 'var(--brand)' : 'var(--bg-hover)',
+              color: !sub ? 'var(--text-inverse)' : 'var(--text-tertiary)',
+              textDecoration: 'none', flexShrink: 0, border: 'none',
+            }}>
+            전체
+          </Link>
+          {subChips.map(sc => (
+            <Link key={sc.key} href={`/blog?category=${category}&sub=${sc.key}${sort !== 'latest' ? `&sort=${sort}` : ''}${q ? `&q=${q}` : ''}`}
+              style={{
+                padding: '4px 12px', borderRadius: 'var(--radius-pill)', fontSize: 'var(--fs-xs)', fontWeight: sub === sc.key ? 600 : 500,
+                background: sub === sc.key ? 'var(--brand)' : 'var(--bg-hover)',
+                color: sub === sc.key ? 'var(--text-inverse)' : 'var(--text-tertiary)',
+                textDecoration: 'none', flexShrink: 0, border: 'none',
+              }}>
+              {sc.label}
+              <span style={{ marginLeft: 4, fontSize: 10, opacity: 0.65 }}>{sc.cnt}</span>
+            </Link>
+          ))}
+        </div>
+      )}
+
+      {/* 정렬 + 인기태그 인라인 */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+        <div style={{ display: 'flex', gap: 'var(--sp-xs)' }}>
+          {[
+            { key: 'latest', label: '최신순' },
+            { key: 'popular', label: '인기순' },
+          ].map(s => (
+            <Link key={s.key} href={`/blog?${category !== 'all' ? `category=${category}&` : ''}sort=${s.key}${q ? `&q=${q}` : ''}`}
+              style={{
+                padding: '4px 10px', borderRadius: 'var(--radius-xs)', fontSize: 11, fontWeight: 600,
+                background: sort === s.key ? 'var(--brand)' : 'transparent',
+                color: sort === s.key ? '#fff' : 'var(--text-tertiary)',
+                textDecoration: 'none', border: sort === s.key ? 'none' : '1px solid var(--border)',
+              }}>
+              {s.label}
+            </Link>
+          ))}
+        </div>
+        {/* v7-D2: 데스크탑에서는 레일의 '태그' 패널이 대신한다 (같은 목록 두 벌 방지). */}
+        {popularTags.length > 0 && (
+          <div className="kd-lg-hide" style={{ display: 'flex', gap: 'var(--sp-xs)', overflow: 'hidden' }}>
+            {popularTags.slice(0, 4).map((t: any) => (
+              <Link key={t.tag} href={`/blog?q=${encodeURIComponent(t.tag)}`}
+                style={{ fontSize: 10, color: 'var(--text-tertiary)', padding: '3px 8px', borderRadius: 'var(--radius-md)', background: 'var(--bg-surface)', border: '1px solid var(--border)', whiteSpace: 'nowrap', textDecoration: 'none' }}>
+                #{t.tag}
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* 인기글 — 컴팩트 한 줄 */}
+      {pageNum === 1 && !q && category === 'all' && (popularPosts ?? []).length > 0 && (
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '10px 12px', marginBottom: 'var(--sp-sm)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+            <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)' }}>🔥 인기 글</span>
+            <Link href="/blog?sort=popular" style={{ fontSize: 10, color: 'var(--text-tertiary)', textDecoration: 'none', fontWeight: 600 }}>전체보기 →</Link>
+          </div>
+          {(popularPosts ?? []).slice(0, 3).map((p: any, i: number) => (
+            <Link key={p.id} href={`/blog/${p.slug}`} className="kd-feed-card" style={{ display: 'flex', alignItems: 'center', gap: 6, textDecoration: 'none', color: 'inherit', padding: '4px 0', borderBottom: i < 2 ? '1px solid var(--border)' : 'none' }}>
+              <span style={{ fontSize: 11, fontWeight: 600, color: i === 0 ? 'var(--brand)' : 'var(--text-tertiary)', width: 16, textAlign: 'center', flexShrink: 0 }}>{i + 1}</span>
+              <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</span>
+              <span style={{ fontSize: 10, color: CAT_COLORS[p.category] || 'var(--text-tertiary)', fontWeight: 500, flexShrink: 0 }}>
+                {POST_CAT_LABEL[p.category] || p.category}
+              </span>
+              <span style={{ fontSize: 10, color: 'var(--text-tertiary)', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>👀{p.view_count}</span>
+            </Link>
+          ))}
+        </div>
+      )}
+      </details>
 
       {/* 인기 시리즈 (SEO 내부링크) */}
       {/* 세션70: 블로그 목록 회원가입 유도 */}
