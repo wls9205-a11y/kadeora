@@ -153,3 +153,30 @@ python tools/naver-sa/import_csv.py <csv> --date 2026-08-20   # 과거 파일
   (region/부산 63 · region/경남 33 · region/경북 29 · redev/부산·경북·경남 각 4).
 - ⚠️ `snapshot_date` 는 **덮어쓰지 않고 쌓인다.** 같은 날 재실행만 upsert 다.
   과거를 남기지 않아서 원인 추적이 막혔던 게 이번 사태다.
+
+### 고아 검출
+
+적재가 끝나면 자동으로 돈다. **랜딩이 가리키는 slug 인데 `apt_sites` 에 그 행이 없는** 경우다.
+
+```sql
+select k.site_slug, count(*) from ad_keywords k
+left join apt_sites s on s.slug = k.site_slug
+where k.site_slug is not null and s.slug is null group by 1;
+```
+
+⚠️ `v_ad_coverage` 는 `apt_sites` 기준 LEFT JOIN 이라 **고아가 뷰에는 안 나타난다.**
+첫 적재에서 `/apt/busan` · `/apt/pipeline` · `/apt/unsold` 21행이 현장으로 들어갔는데
+그래서 조용했다. `APT_HUB_SEGMENTS` 로 막았고, 빠뜨려도 이 검출이 잡는다.
+
+### 비활성 현장을 가리키는 광고
+
+고아는 아니지만 돈이 새는 자리다. `v_ad_coverage` 는 `is_active is not false` 만 보므로
+여기에도 안 나타난다.
+
+```sql
+select k.site_slug, s.name, count(*) from ad_keywords k
+join apt_sites s on s.slug = k.site_slug
+where s.is_active is false group by 1,2;
+```
+
+2026-08-26 실측 1건 — `양산-물금-재건축`(C_정비사업 5키워드).

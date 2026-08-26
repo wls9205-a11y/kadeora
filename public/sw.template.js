@@ -1,5 +1,11 @@
+// ⚠️ 이 파일이 «원본» 이다. 배포되는 것은 빌드가 만드는 public/sw.js 이고 그쪽은 추적하지 않는다.
+//    scripts/inject-sw-version.mjs 가 아래 __CACHE_VERSION__ 을 치환해 public/sw.js 로 «쓴다».
+//
+//    ⛔ public/sw.js 를 직접 고치지 말 것 — 다음 빌드가 덮어쓴다. 여기를 고친다.
+//    ⛔ __CACHE_VERSION__ 자리표시를 지우지 말 것 — 못 찾으면 빌드가 exit 1 로 죽는다.
+//       (예전에는 console.warn 뒤 조용히 skip 했고, 그래서 버전이 안 박힌 채로 배포될 수 있었다.)
 // Kadeora Service Worker v3 — Network First (s200 — stale chunk 근본 fix)
-const CACHE_VERSION = '202608260558';
+const CACHE_VERSION = '__CACHE_VERSION__';
 const CACHE_NAME = 'kadeora-v' + CACHE_VERSION;
 const OFFLINE_FALLBACK = '/offline.html';
 const PRECACHE = ['/offline.html', '/icons/icon-192.png'];

@@ -69,6 +69,25 @@ def resolve_path(p: str) -> str:
     return p
 
 
+# /apt 아래의 «정적 라우트» 이름. 현장 slug 가 될 수 없다.
+#
+# ⚠️ 경로에 `/` 가 있는지만 보면 «부족하다». `/apt/busan` · `/apt/pipeline` ·
+#    `/apt/unsold` 처럼 세그먼트가 하나뿐인 허브가 있다. 첫 적재에서 이 셋이
+#    현장 slug 로 들어가 apt_sites 에 대응 행이 없는 «고아 21행» 이 생겼다
+#    (unsold 9 · busan 6 · pipeline 6). v_ad_coverage 는 apt_sites 기준
+#    LEFT JOIN 이라 그 고아가 화면에 안 나타나 조용했다.
+#
+# 목록은 `src/app/(main)/apt/` 의 «[param] 이 아닌» 디렉터리 이름이다.
+# 라우트를 추가하면 여기도 같이 늘릴 것 — 안 늘리면 또 고아가 생긴다.
+# (적재 끝에 고아 검출을 돌리므로, 빠뜨려도 그 자리에서 잡힌다.)
+APT_HUB_SEGMENTS = {
+    "archive", "area", "big-events", "builder", "busan", "compare", "complex",
+    "data", "diagnose", "feed", "landmark", "map", "pipeline", "popular",
+    "ranking", "redev", "region", "search", "sites", "stage", "theme",
+    "unsold", "unsold-deals",
+}
+
+
 def site_slug_of(pc: str, mobile: str):
     """랜딩 URL → site_slug. 허브·빈 URL 은 None."""
     url = (pc or "").strip() or (mobile or "").strip()
@@ -78,7 +97,11 @@ def site_slug_of(pc: str, mobile: str):
     if not path.startswith("/apt/"):
         return None
     rest = path[len("/apt/"):].strip("/")
-    if not rest or "/" in rest:      # 허브
+    if not rest:
+        return None
+    if "/" in rest:                      # /apt/region/부산 같은 다단 허브
+        return None
+    if rest in APT_HUB_SEGMENTS:         # /apt/busan 같은 «단일 세그먼트» 허브
         return None
     return rest
 
@@ -177,6 +200,27 @@ def main():
             """, recs, page_size=500)
             cur.execute("select count(*) from ad_keywords where snapshot_date = %s", (a.date,))
             print("\n적재 완료. ad_keywords(%s) = %d행" % (a.date, cur.fetchone()[0]))
+
+            # ── 고아 검출 — 상시로 돌린다 ─────────────────────────────
+            # 랜딩이 가리키는 slug 인데 apt_sites 에 그 행이 없는 경우다.
+            # ⚠️ v_ad_coverage 는 apt_sites 기준 LEFT JOIN 이라 «뷰에는 안 나타난다».
+            #    첫 적재 때 단일 세그먼트 허브 3종이 21행 들어갔는데 그래서 조용했다.
+            #    APT_HUB_SEGMENTS 를 빠뜨렸거나 랜딩을 잘못 넣으면 여기서 잡힌다.
+            cur.execute(
+                "select k.site_slug, count(*) from ad_keywords k "
+                "left join apt_sites s on s.slug = k.site_slug "
+                "where k.snapshot_date = %s and k.site_slug is not null and s.slug is null "
+                "group by 1 order by 2 desc",
+                (a.date,))
+            orphans = cur.fetchall()
+            if orphans:
+                print("\n[!] 고아 %d종 %d행 - apt_sites 에 대응 행이 없다:"
+                      % (len(orphans), sum(n for _, n in orphans)))
+                for slug, n in orphans:
+                    print("     %-28s %4d행" % (slug, n))
+                print("    허브면 APT_HUB_SEGMENTS 에 넣고, 오타면 광고 랜딩을 고칠 것.")
+            else:
+                print("고아 0건 - 모든 site_slug 가 apt_sites 에 있다.")
     finally:
         conn.close()
 

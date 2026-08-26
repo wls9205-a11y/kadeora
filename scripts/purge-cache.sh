@@ -13,8 +13,10 @@ else
   echo "NEXT_PUBLIC_CACHE_VERSION=$VERSION" >> "$ENV_FILE"
 fi
 
-# 2) public/sw.js CACHE_VERSION 업데이트
-sed -i "s/const CACHE_VERSION = '[0-9]*';/const CACHE_VERSION = '$VERSION';/" public/sw.js
+# 2) public/sw.js 는 «건드리지 않는다».
+#    빌드 산출물이고 원본은 public/sw.template.js 다. 5)의 npm run build 가
+#    inject-sw-version.mjs 를 돌려 위 1)에서 넣은 NEXT_PUBLIC_CACHE_VERSION 을 박아 준다.
+#    여기서 sed 로 고쳐 봐야 곧바로 덮어써진다.
 
 # 3) public/manifest.json version 업데이트
 if command -v jq &>/dev/null; then

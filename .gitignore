@@ -52,3 +52,6 @@ next-env.d.ts
 
 # Supabase CLI 임시 파일 (functions deploy 시 생성)
 supabase/.temp/
+
+# 빌드 산출물 — 원본은 public/sw.template.js 다 (scripts/inject-sw-version.mjs 가 생성).
+public/sw.js
