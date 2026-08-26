@@ -42,7 +42,7 @@ export default async function RelatedBlogBelt({ symbol, stockName }: Props) {
   return (
     <section style={{ marginBottom: '16px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-        <h2 style={{ fontSize: '15px', fontWeight: 700, margin: 0 }}>
+        <h2 style={{ fontSize: '15px', fontWeight: 600, margin: 0 }}>
           📰 관련 분석 글
         </h2>
         <Link

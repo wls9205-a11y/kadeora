@@ -21,7 +21,7 @@ type Props = {
 function ddayChipStyle(d: number | null): { background: string; color: string; fontWeight: number; label: string } {
   if (d == null) return { background: '#F3F4F6', color: '#4B5563', fontWeight: 600, label: '미정' };
   if (d < 0)     return { background: '#F3F4F6', color: '#4B5563', fontWeight: 600, label: '마감' };
-  if (d <= 3)    return { background: '#DC2626', color: '#FFFFFF', fontWeight: 700, label: `D-${d}` };
+  if (d <= 3)    return { background: '#DC2626', color: '#FFFFFF', fontWeight: 500, label: `D-${d}` };
   if (d <= 7)    return { background: '#FEE2E2', color: '#991B1B', fontWeight: 600, label: `D-${d}` };
   if (d <= 30)   return { background: '#FEF3C7', color: '#92400E', fontWeight: 600, label: `D-${d}` };
   return { background: '#F3F4F6', color: '#4B5563', fontWeight: 600, label: `D-${d}` };

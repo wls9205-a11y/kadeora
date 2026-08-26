@@ -42,7 +42,7 @@ export default async function RelatedStocks({ symbol, sector, market, marketCap 
 
   return (
     <section style={{ marginBottom: '16px' }}>
-      <h2 style={{ fontSize: '15px', fontWeight: 700, marginBottom: '10px' }}>
+      <h2 style={{ fontSize: '15px', fontWeight: 600, marginBottom: '10px' }}>
         🔗 유사 종목
       </h2>
       <div style={{

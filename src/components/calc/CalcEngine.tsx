@@ -7,7 +7,7 @@ import { useAuth } from '@/components/AuthProvider';
 import { SITE_URL } from '@/lib/constants';
 
 const card: React.CSSProperties = { background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20, marginBottom: 14 };
-const label: React.CSSProperties = { fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', display: 'block', marginBottom: 6 };
+const label: React.CSSProperties = { fontSize: 13, fontWeight: 500, color: 'var(--text-secondary)', display: 'block', marginBottom: 6 };
 const hint: React.CSSProperties = { fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 };
 
 function InputField({ input, value, onChange, values }: { input: CalcInput; value: number | string; onChange: (v: number | string) => void; values: Record<string, number | string> }) {
@@ -50,7 +50,7 @@ function InputField({ input, value, onChange, values }: { input: CalcInput; valu
             <input type="range" min={input.min || 0} max={input.max || 100} step={input.step || 1} value={value}
               onChange={e => onChange(Number(e.target.value))}
               style={{ flex: 1, accentColor: 'var(--brand)' }} />
-            <span style={{ fontSize: 16, fontWeight: 800, minWidth: 50, textAlign: 'right', color: 'var(--text-primary)' }}>{value}{input.unit || ''}</span>
+            <span style={{ fontSize: 16, fontWeight: 700, minWidth: 50, textAlign: 'right', color: 'var(--text-primary)' }}>{value}{input.unit || ''}</span>
           </div>
         </div>
       );
@@ -88,7 +88,7 @@ function InputField({ input, value, onChange, values }: { input: CalcInput; valu
             <button onClick={() => onChange(Math.max(input.min || 0, Number(value) - 1))}
               className="touch-target"
               style={{ width: 36, height: 36, borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: 18 }}>−</button>
-            <span style={{ fontSize: 18, fontWeight: 800, minWidth: 30, textAlign: 'center' }}>{value}</span>
+            <span style={{ fontSize: 18, fontWeight: 700, minWidth: 30, textAlign: 'center' }}>{value}</span>
             <button onClick={() => onChange(Math.min(input.max || 99, Number(value) + 1))}
               className="touch-target"
               style={{ width: 36, height: 36, borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: 18 }}>+</button>
@@ -139,7 +139,7 @@ export default function CalcEngine({ calc }: { calc: CalcMeta }) {
       {result && (
         <div style={{ ...card, textAlign: 'center', padding: 24 }}>
           <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 4 }}>{result.main.label}</div>
-          <div style={{ fontSize: 32, fontWeight: 900, color: result.main.color || 'var(--brand)', lineHeight: 1.2, wordBreak: 'break-all' }}>
+          <div style={{ fontSize: 32, fontWeight: 700, color: result.main.color || 'var(--brand)', lineHeight: 1.2, wordBreak: 'break-all' }}>
             {result.main.value}
           </div>
 
@@ -184,7 +184,7 @@ export default function CalcEngine({ calc }: { calc: CalcMeta }) {
                 if (navigator.share) navigator.share({ title: calc.titleShort, text, url }).catch(() => {});
                 else navigator.clipboard.writeText(text + '\n' + url).then(() => alert('복사되었습니다!'));
               }
-            }} style={{ padding: '8px 16px', borderRadius: 'var(--radius-md)', border: 'none', cursor: 'pointer', background: 'var(--brand)', color: '#fff', fontSize: 12, fontWeight: 700 }}>
+            }} style={{ padding: '8px 16px', borderRadius: 'var(--radius-md)', border: 'none', cursor: 'pointer', background: 'var(--brand)', color: '#fff', fontSize: 12, fontWeight: 500 }}>
               🔗 결과 URL 공유
             </button>
             <button onClick={() => {
@@ -206,7 +206,7 @@ export default function CalcEngine({ calc }: { calc: CalcMeta }) {
         }}>
           <div style={{ fontSize: 28, flexShrink: 0 }}>📊</div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 3 }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 3 }}>
               계산 결과를 저장하고 비교해보세요
             </div>
             <div style={{ fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
@@ -215,7 +215,7 @@ export default function CalcEngine({ calc }: { calc: CalcMeta }) {
           </div>
           <Link href={`/login?redirect=/calc/${calc.category}/${calc.slug}&source=calc_engine`} style={{
             padding: '8px 16px', borderRadius: 'var(--radius-md)', background: 'var(--brand)', color: '#fff',
-            fontSize: 12, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0,
+            fontSize: 12, fontWeight: 500, textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0,
           }}>
             3초 가입
           </Link>

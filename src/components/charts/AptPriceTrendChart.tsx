@@ -67,7 +67,7 @@ export default function AptPriceTrendChart({ aptName, region }: { aptName: strin
       {/* 헤더 */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
         <div>
-          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>실거래가 추이</div>
+          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>실거래가 추이</div>
           {stats && (
             <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>
               {stats.count}건 · 최고 {fmtPrice(stats.max)} · 최저 {fmtPrice(stats.min)}

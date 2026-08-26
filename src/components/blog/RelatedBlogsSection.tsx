@@ -72,7 +72,7 @@ export default async function RelatedBlogsSection({ blogId, className }: Props) 
       style={{ margin: '24px 0' }}
     >
       <div style={{ marginBottom: 12 }}>
-        <h2 style={{ fontSize: 18, fontWeight: 800, margin: '0 0 4px', color: 'var(--text-primary)' }}>
+        <h2 style={{ fontSize: 18, fontWeight: 600, margin: '0 0 4px', color: 'var(--text-primary)' }}>
           이어서 읽을 만한 글
         </h2>
         <p style={{ fontSize: 12, color: 'var(--text-tertiary)', margin: 0 }}>
@@ -116,7 +116,7 @@ export default async function RelatedBlogsSection({ blogId, className }: Props) 
                 <span style={{ fontSize: 28, lineHeight: 1, flexShrink: 0 }} aria-hidden>{emoji}</span>
                 {isStrategy && (
                   <span style={{
-                    fontSize: 10, fontWeight: 800,
+                    fontSize: 10, fontWeight: 500,
                     padding: '2px 8px', borderRadius: 999,
                     background: 'var(--warning)', color: '#111',
                   }}>⚡ 전략</span>
@@ -125,7 +125,7 @@ export default async function RelatedBlogsSection({ blogId, className }: Props) 
               <div
                 style={{
                   fontSize: 14,
-                  fontWeight: 700,
+                  fontWeight: 600,
                   color: 'var(--text-primary)',
                   lineHeight: 1.45,
                   display: '-webkit-box',

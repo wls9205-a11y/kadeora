@@ -76,7 +76,7 @@ export default function ResidenceNudgeModal() {
         onClick={(e) => e.stopPropagation()}
       >
         <div style={{ fontSize: 32, marginBottom: 8 }}>📍</div>
-        <h3 style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px' }}>
+        <h3 style={{ fontSize: 18, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 8px' }}>
           거주지를 알려주세요
         </h3>
         <p style={{ fontSize: 14, color: 'var(--text-secondary)', margin: '0 0 20px', lineHeight: 1.5 }}>
@@ -88,7 +88,7 @@ export default function ResidenceNudgeModal() {
           type="button"
           style={{
             width: '100%', padding: '14px', background: 'var(--brand)', color: 'white',
-            border: 'none', borderRadius: 12, fontSize: 15, fontWeight: 800, cursor: 'pointer',
+            border: 'none', borderRadius: 12, fontSize: 15, fontWeight: 500, cursor: 'pointer',
           }}
         >
           거주지 설정하기 →

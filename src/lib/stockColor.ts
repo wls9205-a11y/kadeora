@@ -138,6 +138,22 @@ export function stockChipStyle(tone: StockTone): { background: string; color: st
   }
 }
 
+/**
+ * 칩 «배경 없이» 등락률을 글자로만 쓸 때의 색.
+ *
+ * ⚠️ stockChipStyle() 의 color 를 그냥 가져다 쓰면 안 된다. 그것은 «제 background 와
+ *    한 쌍» 이라 limit_up·limit_down 에서 #FFFFFF 를 돌려준다 — 흰 카드 위에 그대로
+ *    얹으면 대비 1.00, 글자가 사라진다. 실제로 StockCurationCard·StockHubRail 두 곳이
+ *    그렇게 쓰고 있었다(TY1-6c 에서 발견). 상·하한가 종목에서만 드러나 오래 안 보였다.
+ *
+ * limit 계열은 칩의 «배경색» 이 곧 진한 전경색이라 그것을 쓴다 — #DC2626 4.83 · #1D4ED8 6.70.
+ * 나머지는 chip.color 가 이미 진한 값이다.
+ */
+export function stockChipTextColor(tone: StockTone): string {
+  const c = stockChipStyle(tone);
+  return tone === 'limit_up' || tone === 'limit_down' ? c.background : c.color;
+}
+
 export function formatChangePct(pct: number | null | undefined): string {
   if (pct == null || Number.isNaN(pct)) return '0.00%';
   const sign = pct > 0 ? '+' : '';

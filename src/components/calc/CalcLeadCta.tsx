@@ -86,7 +86,7 @@ export default function CalcLeadCta({ category, slug }: Props) {
           background: 'var(--kd-accent)',
           color: 'var(--text-inverse)',
           fontSize: 'var(--fs-xs)',
-          fontWeight: 700,
+          fontWeight: 500,
           textDecoration: 'none',
           whiteSpace: 'nowrap',
         }}

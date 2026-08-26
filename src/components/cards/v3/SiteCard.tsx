@@ -75,7 +75,7 @@ export default function SiteCard({
           style={{
             margin: 0,
             fontSize: 'var(--fs-md)',
-            fontWeight: 700,
+            fontWeight: 600,
             lineHeight: 1.35,
             letterSpacing: '-.015em',
             color: 'var(--text-primary)',

@@ -69,7 +69,7 @@ export function ReportModal({ targetType, targetId, onClose }: ReportModalProps)
         {submitted ? (
           <div style={{ textAlign: 'center', padding: '20px 0' }}>
             <div style={{ fontSize: 40, marginBottom: 'var(--sp-md)' }}>✅</div>
-            <h3 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px' }}>
+            <h3 style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 8px' }}>
               신고가 접수되었습니다
             </h3>
             <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', margin: '0 0 20px', lineHeight: 1.6 }}>
@@ -85,7 +85,7 @@ export function ReportModal({ targetType, targetId, onClose }: ReportModalProps)
           </div>
         ) : (
           <>
-            <h3 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 16px' }}>
+            <h3 style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 16px' }}>
               🚨 콘텐츠 신고
             </h3>
 

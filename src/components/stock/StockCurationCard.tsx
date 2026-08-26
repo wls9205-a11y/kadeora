@@ -9,7 +9,7 @@
 //    원시 수치를 쓰려면 매트뷰에 컬럼 추가가 선행돼야 한다.
 
 import Link from 'next/link';
-import { getStockTone, stockChipStyle, formatChangePct } from '@/lib/stockColor';
+import { getStockTone, stockChipTextColor, formatChangePct } from '@/lib/stockColor';
 import { scoreToDisplay } from '@/lib/issue/calc';
 import { REASON_LABELS, REASON_MIN_VALUE } from '@/lib/issue/labels';
 import WarningLabel from '@/components/issue/WarningLabel';
@@ -17,7 +17,8 @@ import type { StockIssueScore } from '@/lib/issue/types';
 
 export default function StockCurationCard({ data }: { data: StockIssueScore }) {
   const tone = getStockTone(data.change_pct);
-  const chip = stockChipStyle(tone);
+  // 배경 없이 글자로만 쓰므로 chip.color 가 아니라 전경 전용 헬퍼를 쓴다 (흰 글씨 1.00 방지).
+  const chipFg = stockChipTextColor(tone);
   const display = scoreToDisplay(data.score);
 
   const grounds = (Array.isArray(data.reasons) ? data.reasons : [])
@@ -44,7 +45,7 @@ export default function StockCurationCard({ data }: { data: StockIssueScore }) {
       <Link
         href={`/stock/${data.symbol}`}
         style={{
-          display: 'block', fontSize: 14, fontWeight: 700, lineHeight: 1.35,
+          display: 'block', fontSize: 14, fontWeight: 600, lineHeight: 1.35,
           letterSpacing: '-.02em', color: 'var(--text-primary)', textDecoration: 'none', marginBottom: 3,
         }}
       >
@@ -55,7 +56,7 @@ export default function StockCurationCard({ data }: { data: StockIssueScore }) {
         <span style={{ fontSize: 13, fontWeight: 700, fontVariantNumeric: 'tabular-nums', color: 'var(--text-primary)' }}>
           {data.price != null ? Number(data.price).toLocaleString() : '-'}
         </span>
-        <span style={{ fontSize: 11.5, fontWeight: 700, color: chip.color }}>
+        <span style={{ fontSize: 11.5, fontWeight: 700, color: chipFg }}>
           {formatChangePct(data.change_pct)}
         </span>
       </div>
@@ -65,7 +66,7 @@ export default function StockCurationCard({ data }: { data: StockIssueScore }) {
         <ul style={{ margin: 'auto 0 0', padding: 0, listStyle: 'none', display: 'grid', gap: 4 }}>
           {grounds.map(g => (
             <li key={g.tag} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 10.5, color: 'var(--text-tertiary)' }}>
-              <span style={{ flexShrink: 0, width: 34, fontWeight: 700, color: 'var(--text-secondary)' }}>
+              <span style={{ flexShrink: 0, width: 34, fontWeight: 500, color: 'var(--text-secondary)' }}>
                 {REASON_LABELS[g.tag]}
               </span>
               <span style={{ flex: 1, height: 4, borderRadius: 999, background: 'var(--bg-sunken)', overflow: 'hidden' }}>

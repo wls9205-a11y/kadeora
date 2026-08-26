@@ -90,7 +90,7 @@ export default function StockListRow({
         {price != null ? Number(price).toLocaleString() : '-'}
         <span
           style={{
-            display: 'block', marginTop: 1, fontSize: 10.5, fontWeight: 700,
+            display: 'block', marginTop: 1, fontSize: 10.5, fontWeight: 500,
             color: chip.color,
           }}
         >

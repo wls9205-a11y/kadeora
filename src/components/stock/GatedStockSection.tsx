@@ -161,7 +161,7 @@ export default function GatedStockSection({ sectionKey, pageType = 'symbol', chi
       style={{ margin: '20px 0' }}
     >
       {(gate?.display_name || fallbackTitle) && (
-        <h3 style={{ fontSize: 18, fontWeight: 800, margin: '0 0 12px', color: 'var(--text-primary)' }}>
+        <h3 style={{ fontSize: 18, fontWeight: 600, margin: '0 0 12px', color: 'var(--text-primary)' }}>
           {gate?.display_name || fallbackTitle}
         </h3>
       )}
@@ -192,7 +192,7 @@ export default function GatedStockSection({ sectionKey, pageType = 'symbol', chi
         <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 6 }}>
           🔒 {isPremium ? '프리미엄 회원 전용' : '로그인 후 전체 열람'}
         </div>
-        <div style={{ fontSize: 16, fontWeight: 800, marginBottom: 14, color: 'var(--text-primary)', wordBreak: 'keep-all' }}>
+        <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 14, color: 'var(--text-primary)', wordBreak: 'keep-all' }}>
           {gate?.cta_text || '로그인하고 전체 정보 보기'}
         </div>
         <button
@@ -200,7 +200,7 @@ export default function GatedStockSection({ sectionKey, pageType = 'symbol', chi
           style={{
             background: isPremium ? '#EC4899' : '#FEE500',
             color: isPremium ? '#fff' : '#000',
-            fontWeight: 800, fontSize: 15,
+            fontWeight: 500, fontSize: 15,
             padding: '12px 28px', borderRadius: 10, border: 'none', cursor: 'pointer',
             minWidth: 220, boxShadow: '0 6px 14px rgba(0,0,0,0.2)',
           }}

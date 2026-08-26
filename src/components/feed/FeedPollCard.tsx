@@ -92,7 +92,7 @@ export default function FeedPollCard({ post }: { post: PostWithProfile }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
             <span style={{ fontSize: 12, color: 'var(--text-primary)', fontWeight: 600 }}>{nickname}</span>
             <span style={{
-              padding: '1px 5px', borderRadius: 4, fontSize: 9, fontWeight: 700,
+              padding: '1px 5px', borderRadius: 4, fontSize: 9, fontWeight: 500,
               background: 'rgba(34,197,94,0.1)', color: 'var(--accent-green)',
             }}>📊 투표</span>
           </div>
@@ -103,7 +103,7 @@ export default function FeedPollCard({ post }: { post: PostWithProfile }) {
 
       {/* Question */}
       <Link href={`/feed/${post.slug || post.id}`} style={{ textDecoration: 'none' }}>
-        <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)', lineHeight: 1.35 }}>
+        <div style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)', lineHeight: 1.35 }}>
           {post.title}
         </div>
       </Link>

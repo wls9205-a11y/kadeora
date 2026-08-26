@@ -60,7 +60,7 @@ export default function HubHero({
         id={titleId}
         style={{
           fontSize: 'var(--fs-xl)',
-          fontWeight: 800,
+          fontWeight: 600,
           letterSpacing: '-.025em',
           lineHeight: 1.25,
           margin: 0,
@@ -105,7 +105,7 @@ export default function HubHero({
                 style={{
                   margin: '2px 0 0',
                   fontSize: 'var(--fs-md)',
-                  fontWeight: 700,
+                  fontWeight: 600,
                   color: 'var(--text-primary)',
                   fontVariantNumeric: 'tabular-nums',
                 }}

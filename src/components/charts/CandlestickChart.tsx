@@ -81,7 +81,7 @@ export default function CandlestickChart({ data, width = 340, height = 240, show
       }}>
         {d ? (
           <>
-            <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>
+            <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 500, color: 'var(--text-primary)' }}>
               {d.date}
             </span>
             <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>

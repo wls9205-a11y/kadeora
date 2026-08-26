@@ -461,7 +461,7 @@ function FallbackThumb({ name, height, isSeed }: { name: string; height: number;
       <div style={{
         position: 'absolute', inset: 0,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: initialFontSize, fontWeight: 700,
+        fontSize: initialFontSize, fontWeight: 600,
         color: palette.initialColor,
         letterSpacing: '-1px', userSelect: 'none',
       }}>
@@ -581,7 +581,7 @@ function renderStockTop(stocks: any[], sparklines: Record<string, number[]>) {
                   <div style={{
                     width: '100%', height: 32,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 22, fontWeight: 700, color: isUp ? 'rgba(163,45,45,0.25)' : 'rgba(24,95,165,0.25)',
+                    fontSize: 22, fontWeight: 600, color: isUp ? 'rgba(163,45,45,0.25)' : 'rgba(24,95,165,0.25)',
                   }}>
                     {isUp ? '↗' : '↘'}
                   </div>
@@ -697,7 +697,7 @@ function renderStockBottom(stocks: any[]) {
                   ? 'linear-gradient(180deg, rgba(5,150,105,0.08) 0%, transparent 100%)'
                   : 'linear-gradient(180deg, rgba(220,38,38,0.08) 0%, transparent 100%)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 22, fontWeight: 700, color: isUp ? 'rgba(5,150,105,0.2)' : 'rgba(220,38,38,0.2)',
+                fontSize: 22, fontWeight: 600, color: isUp ? 'rgba(5,150,105,0.2)' : 'rgba(220,38,38,0.2)',
               }}>
                 {isUp ? '↗' : '↘'}
               </div>

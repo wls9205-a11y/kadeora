@@ -99,7 +99,7 @@ export default function StockTabCarousel({
               onClick={() => jumpTo(i)}
               style={{
                 padding: '5px 10px', borderRadius: 999,
-                fontSize: 12, fontWeight: isActive ? 700 : 600,
+                fontSize: 12, fontWeight: isActive ? 600 : 500,
                 background: isActive ? '#111827' : '#F3F4F6',
                 color: isActive ? '#FFFFFF' : '#374151',
                 border: 'none', cursor: 'pointer', whiteSpace: 'nowrap',

@@ -77,7 +77,7 @@ export default function PostCard({
                   color: BADGE_TONE[badge.tone].fg,
                   border: `1px solid ${BADGE_TONE[badge.tone].border}`,
                   fontSize: 'var(--fs-xs)',
-                  fontWeight: 700,
+                  fontWeight: 500,
                   lineHeight: 1.4,
                   whiteSpace: 'nowrap',
                 }}
@@ -92,7 +92,7 @@ export default function PostCard({
           style={{
             margin: 0,
             fontSize: 'var(--fs-md)',
-            fontWeight: 700,
+            fontWeight: 600,
             lineHeight: 1.4,
             letterSpacing: '-.015em',
             color: 'var(--text-primary)',

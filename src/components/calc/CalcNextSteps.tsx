@@ -88,7 +88,7 @@ export default function CalcNextSteps({ category }: Props) {
     >
       <h2
         id="calc-next-heading"
-        style={{ fontSize: 14, fontWeight: 700, margin: '0 0 2px', color: 'var(--text-primary)' }}
+        style={{ fontSize: 14, fontWeight: 600, margin: '0 0 2px', color: 'var(--text-primary)' }}
       >
         계산은 끝났고, 다음은
       </h2>
@@ -116,7 +116,7 @@ export default function CalcNextSteps({ category }: Props) {
           >
             <span aria-hidden style={{ fontSize: 18, lineHeight: 1 }}>{s.icon}</span>
             <span style={{ minWidth: 0, flex: 1 }}>
-              <span style={{ display: 'block', fontSize: 12.5, fontWeight: 700 }}>{s.label}</span>
+              <span style={{ display: 'block', fontSize: 12.5, fontWeight: 500 }}>{s.label}</span>
               <span style={{ display: 'block', fontSize: 11, color: 'var(--text-tertiary)', marginTop: 1 }}>
                 {s.desc}
               </span>

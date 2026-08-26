@@ -80,7 +80,7 @@ export default function FeedPredictCard({ post }: { post: PostWithProfile }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
             <span style={{ fontSize: 12, color: 'var(--text-primary)', fontWeight: 600 }}>{nickname}</span>
             <span style={{
-              padding: '1px 5px', borderRadius: 4, fontSize: 9, fontWeight: 700,
+              padding: '1px 5px', borderRadius: 4, fontSize: 9, fontWeight: 500,
               background: 'rgba(168,85,247,0.1)', color: 'var(--accent-purple)',
             }}>🔮 예측</span>
           </div>
@@ -90,7 +90,7 @@ export default function FeedPredictCard({ post }: { post: PostWithProfile }) {
       </div>
 
       <Link href={`/feed/${post.slug || post.id}`} style={{ textDecoration: 'none' }}>
-        <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6, lineHeight: 1.35 }}>
+        <div style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 6, lineHeight: 1.35 }}>
           {post.title}
         </div>
       </Link>
@@ -109,7 +109,7 @@ export default function FeedPredictCard({ post }: { post: PostWithProfile }) {
         <div style={{
           padding: '10px 14px', borderRadius: 'var(--radius-sm)', marginTop: 4,
           background: prediction.result ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)',
-          textAlign: 'center', fontSize: 14, fontWeight: 700,
+          textAlign: 'center', fontSize: 14, fontWeight: 600,
           color: prediction.result ? 'var(--accent-green)' : 'var(--accent-red)',
         }}>
           {prediction.result ? '🎯 적중!' : '❌ 미적중'}
@@ -130,7 +130,7 @@ export default function FeedPredictCard({ post }: { post: PostWithProfile }) {
             }}>
               {o.icon} {o.label}
               {myVote !== null && total > 0 && (
-                <span style={{ fontWeight: 800 }}>{Math.round((o.cnt / total) * 100)}%</span>
+                <span style={{ fontWeight: 700 }}>{Math.round((o.cnt / total) * 100)}%</span>
               )}
             </button>
           ))}

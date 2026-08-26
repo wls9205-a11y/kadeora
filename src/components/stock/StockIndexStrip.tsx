@@ -27,7 +27,7 @@ function Breadth({ label, b }: { label: string; b: MarketBreadth }) {
   const total = b.up + b.down + b.flat;
   return (
     <div style={CELL}>
-      <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-tertiary)', marginBottom: 3 }}>
+      <div style={{ fontSize: 10, fontWeight: 500, color: 'var(--text-tertiary)', marginBottom: 3 }}>
         {label}
       </div>
       {total === 0 ? (
@@ -66,7 +66,7 @@ export default function StockIndexStrip({ data }: { data: StripData }) {
       <Breadth label="코스피 등락" b={data.kospi} />
       <Breadth label="코스닥 등락" b={data.kosdaq} />
       <div style={{ ...CELL, borderRight: 0 }}>
-        <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-tertiary)', marginBottom: 3 }}>
+        <div style={{ fontSize: 10, fontWeight: 500, color: 'var(--text-tertiary)', marginBottom: 3 }}>
           원/달러
         </div>
         <div style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>

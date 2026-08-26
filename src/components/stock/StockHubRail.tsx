@@ -7,7 +7,7 @@
 // 데이터는 페이지가 이미 받은 것만 쓴다 — 새 조회 0건.
 
 import Link from 'next/link';
-import { formatChangePct, getStockTone, stockChipStyle } from '@/lib/stockColor';
+import { formatChangePct, getStockTone, stockChipTextColor } from '@/lib/stockColor';
 import { stockHref, type StockParams } from '@/lib/stock/filters';
 import type { StripData } from '@/components/stock/StockIndexStrip';
 
@@ -17,7 +17,8 @@ function MoverList({ rows }: { rows: MoverRow[] }) {
   return (
     <>
       {rows.map((r) => {
-        const chip = stockChipStyle(getStockTone(r.change_pct));
+        // 배경 없이 글자로만 쓴다 — chip.color 는 limit 계열에서 #FFFFFF 라 쓰면 안 된다.
+        const chipFg = stockChipTextColor(getStockTone(r.change_pct));
         return (
           <Link
             key={r.symbol}
@@ -27,7 +28,7 @@ function MoverList({ rows }: { rows: MoverRow[] }) {
             <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {r.name}
             </span>
-            <span style={{ flexShrink: 0, fontSize: 11.5, fontWeight: 700, color: chip.color, fontVariantNumeric: 'tabular-nums' }}>
+            <span style={{ flexShrink: 0, fontSize: 11.5, fontWeight: 700, color: chipFg, fontVariantNumeric: 'tabular-nums' }}>
               {formatChangePct(r.change_pct)}
             </span>
           </Link>
@@ -116,7 +117,7 @@ export default function StockHubRail({
                   background: params.theme === t ? 'var(--brand)' : 'var(--bg-sunken)',
                   color: params.theme === t ? '#FFFFFF' : 'var(--text-secondary)',
                   fontSize: 11,
-                  fontWeight: params.theme === t ? 700 : 600,
+                  fontWeight: params.theme === t ? 600 : 500,
                   textDecoration: 'none',
                   borderBottom: params.theme === t ? '1px solid var(--brand)' : '1px solid var(--border)',
                 }}

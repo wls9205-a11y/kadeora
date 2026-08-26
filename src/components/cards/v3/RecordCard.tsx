@@ -50,7 +50,7 @@ export default function RecordCard({ href, title, meta, rows, caption }: RecordC
           style={{
             margin: 0,
             fontSize: 'var(--fs-sm)',
-            fontWeight: 700,
+            fontWeight: 600,
             lineHeight: 1.4,
             color: 'var(--text-primary)',
             wordBreak: 'keep-all',

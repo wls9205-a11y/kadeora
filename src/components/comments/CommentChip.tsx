@@ -10,7 +10,7 @@ type Props = {
 export default function CommentChip({ count, hot = false, hideZero = false }: Props) {
   if (hideZero && (!count || count <= 0)) return null;
   const styles = hot
-    ? { background: '#DC2626', color: '#FFFFFF', fontWeight: 700 }
+    ? { background: '#DC2626', color: '#FFFFFF', fontWeight: 500 }
     : { background: '#F3F4F6', color: '#4B5563', fontWeight: 600 };
   return (
     // s274 — 레이아웃은 .kd-chip, 색만 변수로.

@@ -83,7 +83,7 @@ export default function FeedVSCard({ post }: { post: PostWithProfile }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
             <span style={{ fontSize: 12, color: 'var(--text-primary)', fontWeight: 600 }}>{nickname}</span>
             <span style={{
-              padding: '1px 5px', borderRadius: 4, fontSize: 9, fontWeight: 700,
+              padding: '1px 5px', borderRadius: 4, fontSize: 9, fontWeight: 500,
               background: 'rgba(245,158,11,0.1)', color: 'var(--warning)',
             }}>⚔️ VS</span>
           </div>
@@ -107,8 +107,8 @@ export default function FeedVSCard({ post }: { post: PostWithProfile }) {
             border: voted === o.side ? `2px solid ${o.color}` : '1px solid var(--border)',
             cursor: voted ? 'default' : 'pointer', transition: 'all 0.25s',
           }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{o.label}</div>
-            {voted && <div style={{ fontSize: 18, fontWeight: 800, color: o.color, marginTop: 4 }}>{o.pct}%</div>}
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{o.label}</div>
+            {voted && <div style={{ fontSize: 18, fontWeight: 700, color: o.color, marginTop: 4 }}>{o.pct}%</div>}
           </button>
         ))}
       </div>

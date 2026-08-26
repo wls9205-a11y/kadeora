@@ -32,7 +32,7 @@ export function DetailBadge({ label, tone }: DetailBadgeProps) {
         color: c.fg,
         border: `1px solid ${c.border}`,
         fontSize: 'var(--fs-xs)',
-        fontWeight: 700,
+        fontWeight: 600,
         lineHeight: 1.4,
         whiteSpace: 'nowrap',
       }}
@@ -130,7 +130,7 @@ export default function DetailHero({
         id={titleId}
         style={{
           fontSize: 'var(--fs-2xl)',
-          fontWeight: 800,
+          fontWeight: 600,
           letterSpacing: '-.025em',
           lineHeight: 1.25,
           margin: 0,

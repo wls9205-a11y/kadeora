@@ -52,12 +52,12 @@ export default function BlogCurationCard({
       )}
 
       <div style={{ display: 'flex', flexDirection: 'column', flex: 1, padding: '11px 13px 12px' }}>
-        <span style={{ fontSize: 10, fontWeight: 700, color: catColor, marginBottom: 4 }}>{catLabel}</span>
+        <span style={{ fontSize: 10, fontWeight: 500, color: catColor, marginBottom: 4 }}>{catLabel}</span>
 
         <Link
           href={`/blog/${post.slug}`}
           style={{
-            fontSize: 14, fontWeight: 700, lineHeight: 1.4, letterSpacing: '-.02em',
+            fontSize: 14, fontWeight: 600, lineHeight: 1.4, letterSpacing: '-.02em',
             color: 'var(--text-primary)', textDecoration: 'none', wordBreak: 'keep-all',
             marginBottom: 5,
           }}

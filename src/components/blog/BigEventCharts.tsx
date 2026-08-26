@@ -101,7 +101,7 @@ export default async function BigEventCharts({ eventId }: Props) {
     };
     const TITLE: React.CSSProperties = {
       fontSize: 14,
-      fontWeight: 800,
+      fontWeight: 600,
       color: 'var(--text-primary)',
       margin: '0 0 10px',
     };
@@ -181,7 +181,7 @@ export default async function BigEventCharts({ eventId }: Props) {
                   color: fg,
                   textAlign: 'center',
                   fontSize: 11,
-                  fontWeight: active ? 800 : 600,
+                  fontWeight: active ? 600 : 500,
                   border: active ? '2px solid var(--brand)' : '1px solid var(--border)',
                 }}
                 aria-current={active ? 'step' : undefined}

@@ -49,7 +49,7 @@ export default function FAQBlock({ items, emitJsonLd = true }: FAQBlockProps) {
             <dt
               style={{
                 fontSize: 'var(--fs-sm)',
-                fontWeight: 700,
+                fontWeight: 600,
                 color: 'var(--text-primary)',
                 lineHeight: 1.5,
                 wordBreak: 'keep-all',
