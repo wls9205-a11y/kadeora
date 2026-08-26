@@ -3,12 +3,13 @@
 // 블록 순서
 //   1 헤더            (main)/layout 의 Navigation
 //   2 히어로           H1 2줄 + 검색바(hero) + «칩 줄» + 현장 수   ← 여기까지가 첫 화면
-//   3 최근 본 현장      localStorage 칩 3 — 없으면 미렌더
-//   4 지금 계약 가능     미분양·선착순 (실사 1건 승격)
-//   5 최근 움직인 현장   단계 변경·신규 등록 4건
-//   6 재개발·재건축      정비사업 3줄
-//   7 지역별 보기        시도 + 주요 구군, 건수 배지
-//   8 빠른 이동
+//   3 이번 주 실거래     WeeklyTrades — 홈에서 매일 바뀌는 유일한 블록 (H4-2)
+//   4 최근 본 현장      localStorage 칩 3 — 없으면 미렌더
+//   5 지금 계약 가능     미분양·선착순 (실사 1건 승격)
+//   6 최근 움직인 현장   단계 변경·신규 등록 4건
+//   7 재개발·재건축      정비사업 3줄
+//   8 지역별 보기        시도 + 주요 구군, 건수 배지
+//   9 빠른 이동
 //
 // ⚠️ **「많이 보는 현장」 섹션을 걷어냈다 (H4-1 e).** 정렬 근거가 `apt_sites.page_views` 인데
 //    그 컬럼은 실제 조회수가 아니다 — 컬럼 총합 200,655 대 `page_views` 테이블의
@@ -47,6 +48,8 @@ import SiteRows, { MoreLink } from '@/components/home/SiteRows';
 import { fetchHomeSections, MIN_ROWS } from '@/lib/home/sections';
 import { buildHomeChips, CHIP_LIMIT } from '@/lib/home/chips';
 import DealHeroCard, { pickDealHero } from '@/components/home/DealHeroCard';
+import WeeklyTrades from '@/components/home/WeeklyTrades';
+import { fetchWeeklyTrades } from '@/lib/home/weekly-trades';
 import RecentMoves, { type RecentMove } from '@/components/home/RecentMoves';
 import { BUGYEONG_REGIONS } from '@/lib/apt/pipeline';
 
@@ -209,12 +212,21 @@ async function fetchCounts(): Promise<HomeCounts> {
 }
 
 export default async function HomePage() {
+  /* H4-2 — 실거래 조회를 홈 본체 뭉치에 «합치지 않는다» (Rule #49).
+   * /apt/[id] 의 Promise.allSettled 8개 뭉치가 504 를 낸 전례가 있다.
+   * 먼저 띄워 두고 뒤에서 받는다 — 뭉치와 분리돼 있으면서 직렬화되지도 않는다.
+   * fetchWeeklyTrades 는 자체 try/catch 로 절대 reject 하지 않으므로
+   * 이 promise 가 홈의 다른 블록을 무너뜨릴 수 없다. */
+  const weeklyPromise = fetchWeeklyTrades();
+
   const [moves, counts, curatedNames, sections] = await Promise.all([
     fetchRecentMoves(),
     fetchCounts(),
     fetchCuratedNames(),
     fetchHomeSections(HOME_REGIONS),
   ]);
+
+  const weekly = await weeklyPromise;
 
   // H4-1 (c)(d) — 칩과 라벨을 «한 함수»에서 같이 받는다. 갈라지면 라벨이 거짓이 된다.
   // 두 번째 소스는 위에서 이미 받은 moves 를 재사용한다 — 조회가 늘지 않는다.
@@ -272,6 +284,14 @@ export default async function HomePage() {
           단지명 하나로 바로 찾으세요
         </p>
       </section>
+
+      {/* ── 2 이번 주 실거래 (H4-2) ──
+       * 접힌 선 «아래» 첫 블록이다. 첫 화면(H1 + 검색창 + 칩)을 침범하지 않는다 —
+       * H4-1 실측으로 칩 줄 하단이 359px / 뷰포트 844px 다.
+       * ⚠️ 홈에서 «매일 바뀌는 유일한 블록» 이다. 큐레이션 4건과 재개발 목록은
+       *    주 단위로도 잘 안 움직인다. 재방문 이유가 여기서 나온다.
+       * ⚠️ RPC 가 실패하거나 0건이면 fetchWeeklyTrades 가 null 을 내고 여기서 미렌더된다. */}
+      {weekly && <WeeklyTrades data={weekly} />}
 
       {/* ── 3 최근 본 현장 — 없으면 컴포넌트가 null 을 낸다 ── */}
       <RecentlyViewed limit={3} />
