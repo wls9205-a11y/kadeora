@@ -126,10 +126,17 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
     }
 
     // ━━━ Phase 2: apt_sites 좌표 ━━━
+    // ⚠️ 정비사업에서 가져온 주소는 지오코딩하지 않는다.
+    //    redevelopment_projects.address 는 상당수가 «조합 사무실» 이다 —
+    //    `못골번영로 16, 흥원빌딩 3층` · `달맞이길117번나길 194, 1동 지하1층` · `용호로 99, 3층`.
+    //    사업지가 아니라 사무실 자리에 핀이 서므로 «좌표가 없는 것보다 나쁘다».
+    //    R2-2 가 그런 행에 source_ids.address_source='redev' 를 남겨 두었다(실측 93곳).
+    //    ⛔ 이 필터를 빼지 말 것. 빼면 그 93곳에 틀린 좌표가 박힌다.
     const { data: sites } = await sb.from('apt_sites')
       .select('id, name, region, sigungu, address')
       .eq('is_active', true)
       .is('latitude', null)
+      .not('source_ids->>address_source', 'eq', 'redev')
       .order('content_score', { ascending: false })
       .limit(300);
 

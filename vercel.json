@@ -542,7 +542,7 @@
       "maxDuration": 300
     },
     "src/app/api/cron/sync-apt-sites/*.ts": {
-      "maxDuration": 180
+      "maxDuration": 300
     },
     "src/app/api/cron/apt-price-sync/*.ts": {
       "maxDuration": 120

@@ -58,20 +58,47 @@ async function handler(_req: NextRequest) {
     }
   } catch (e: unknown) { errors.push(`sub: ${errMsg(e)}`); }
 
+  let skippedNew = 0;
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // Step 2: 재개발(redevelopment_projects) → apt_sites (배치 최적화)
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   try {
-    const { data: redevs } = await sb.from('redevelopment_projects')
-      .select('id, district_name, region, sigungu, address, total_households, constructor, developer, stage, nearest_station, nearest_school, latitude, longitude')
-      .eq('is_active', true).not('district_name', 'is', null).limit(300);
+    // ⚠️ 예전에는 `.limit(300)` 이었다. 활성 정비사업이 1,224건이라 924건을 «아예 보지
+    //    않았고», 그래서 광고가 걸린 정비사업 현장 101곳이 redev_id 를 못 받아
+    //    content_score −15 를 그대로 안고 있었다(R2 에서 150곳 백필).
+    //    이제 전량을 300씩 끊어 돈다.
+    //
+    // ⚠️ `.order('id')` 가 «필수» 다. 정렬이 없으면 페이지 경계에서 행이 겹치거나 빠진다.
+    //
+    // ⚠️ 처리량이 4배다. `vercel.json` 의 sync-apt-sites maxDuration 을 180 → 300 으로
+    //    함께 올렸다. Rule #18 — vercel.json 이 라우트 파일의 maxDuration 을 «덮는다».
+    //    라우트 파일만 고치면 안 걸린다.
+    const PAGE = 300;
+    const redevAll: any[] = [];
+    for (let from = 0; ; from += PAGE) {
+      const { data: page } = await sb.from('redevelopment_projects')
+        .select('id, district_name, region, sigungu, address, total_households, constructor, developer, stage, nearest_station, nearest_school, latitude, longitude')
+        .eq('is_active', true).not('district_name', 'is', null)
+        .order('id').range(from, from + PAGE - 1);
+      if (!page || page.length === 0) break;
+      redevAll.push(...page);
+      if (page.length < PAGE) break;
+    }
+    const redevs = redevAll;
 
     const validRedevs = (redevs || []).filter(r => r.district_name && r.district_name.trim().length >= 3);
     if (validRedevs.length > 0) {
       const slugs = validRedevs.map(r => makeSlug(r.district_name!));
-      // 한 번에 기존 데이터 조회
-      const { data: existingSites } = await sb.from('apt_sites')
-        .select('id, slug, source_ids').in('slug', slugs);
+      // ⚠️ slug 를 «끊어서» 조회한다. 페이지네이션으로 1,224건을 다 읽게 되면서
+      //    `.in('slug', slugs)` 에 1,224개가 한꺼번에 들어가는데, PostgREST 는 이걸
+      //    URL 쿼리로 보내므로 한글 slug 가 퍼센트 인코딩되면 수십 KB 가 된다.
+      //    길이 한계에 걸리면 «조용히» 빈 결과가 오고, 그러면 전부 신규로 오인된다.
+      const existingSites: any[] = [];
+      for (let i = 0; i < slugs.length; i += 200) {
+        const { data: chunk } = await sb.from('apt_sites')
+          .select('id, slug, source_ids').in('slug', slugs.slice(i, i + 200));
+        if (chunk) existingSites.push(...chunk);
+      }
       const existingMap = new Map((existingSites || []).map(s => [s.slug, s]));
 
       const newRows: any[] = [];
@@ -105,12 +132,14 @@ async function handler(_req: NextRequest) {
         }
       }
 
-      // 배치 삽입 (50건씩)
-      for (let i = 0; i < newRows.length; i += 50) {
-        const { error } = await sb.from('apt_sites').upsert(newRows.slice(i, i + 50), { onConflict: 'slug', ignoreDuplicates: true });
-        if (error) console.error('[sync-apt-sites] insert fail', error.message?.slice(0, 200));
-        else inserted += Math.min(50, newRows.length - i);
-      }
+      // ⛔ 신규 «생성» 은 이번에 열지 않는다.
+      //    한도를 풀면 apt_sites 에 없는 정비사업이 682건 잡히는데, 그중 세대수를 가진
+      //    것은 30건뿐이다. 나머지는 `name 10 + region 10 + redev_id 15 + address 3 ≒ 38`
+      //    이라 **noindex 페이지 650여 개를 새로 만드는 셈** 이고 부울경은 40곳뿐이다.
+      //    D1 중복 정합성 문제도 같이 커진다.
+      //    예전 `.limit(300)` 이 «우연히» 이걸 막고 있었다 — 한도를 풀면서 UPDATE(연결)와
+      //    INSERT(생성)를 갈랐다. 열려면 최소선은 `total_households > 0`(30건)이다.
+      skippedNew += newRows.length;
       // 업데이트는 10건씩 병렬
       for (let i = 0; i < updateOps.length; i += 10) {
         await Promise.allSettled(updateOps.slice(i, i + 10).map(fn => fn()));
@@ -369,6 +398,7 @@ async function handler(_req: NextRequest) {
   return NextResponse.json({
     success: true,
     inserted,
+    redevSkippedNew: skippedNew,   // 신규 생성을 막은 건수. 0 이 아니면 후보가 쌓여 있다는 뜻
     updated,
     scored,
     tradeInserted,
