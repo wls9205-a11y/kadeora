@@ -44,6 +44,8 @@ import { getAptPipeline, normalizePipelineRegion, BUGYEONG, BUGYEONG_REGIONS, PI
 import PipelineCard from '@/components/apt/PipelineCard';
 // V16 E-3 — 이번 주 움직인 현장. 카더라가 남보다 빠르다는 걸 보여주는 자리다.
 import { getAptRecentMoves } from '@/lib/apt/recent-moves';
+import GichukActivity from '@/components/apt/GichukActivity';
+import { fetchGichukActivity } from '@/lib/apt/gichuk-activity';
 import RecentMovesStrip from '@/components/apt/RecentMovesStrip';
 import { SectionLink } from '@/components/apt/SectionHeader';
 
@@ -112,6 +114,12 @@ export default async function AptPage({
   const pipelineRegion = normalizePipelineRegion(
     region === '전국' || (BUGYEONG_REGIONS as readonly string[]).includes(region) ? BUGYEONG : region,
   );
+  /* H4-4 §5 — 기축 실거래는 «따로» 돈다 (Rule #49).
+   * /apt/[id] 의 allSettled 8개 뭉치가 504 를 낸 전례가 있어 여기 뭉치를 늘리지 않는다.
+   * 먼저 띄우고 뒤에서 받는다 — 분리돼 있으면서 직렬화되지도 않는다.
+   * fetchGichukActivity 는 자체 try/catch 로 절대 reject 하지 않는다. */
+  const gichukPromise = fetchGichukActivity(pipelineRegion);
+
   const [hub, pipeline, recentMoves] = await Promise.all([
     getAptHub(region),
     // V17 F-1 게이트는 RPC 안에 있다(gated: true) — 받은 건 그대로 낸다.
@@ -119,6 +127,8 @@ export default async function AptPage({
     // 움직인 현장도 파이프라인과 같은 지역 규칙을 따른다 — 두 섹션이 다른 지역을 말하면 안 된다.
     getAptRecentMoves(pipelineRegion),
   ]);
+
+  const gichuk = await gichukPromise;
 
   // v4-C8: 시군구 칩은 hub.cards 에서 뽑는다 — 조회가 늘지 않고, 목록에 실제로 있는
   //   시군구만 나온다 (부산 16개 구를 전부 내면 C3 에서 고친 문제가 반복된다).
@@ -346,6 +356,40 @@ export default async function AptPage({
           <SectionLink href={`/apt/pipeline?region=${encodeURIComponent(pipeline.region)}`}>
             공고 전 현장 전체 보기
           </SectionLink>
+        </section>
+      )}
+
+      {/* ③-3 · H4-4 §5 기축 실거래.
+           「공고 전 현장」 다음 자리다 — 분양 라인을 다 본 사람이 다음으로 보는 게
+           «이미 지어진 단지가 얼마에 거래되는가» 다. PV 의 61%가 기축인데 /apt 에 자리가 없었다.
+
+           ⚠️ **「시세」 섹션이 아니다.** 단지 «전체» 평균가와 그 변동률을 쓰지 않는다 —
+              평형 구성이 바뀌면 가격 변동으로 위장된다(실측 부호 반전 23.9%).
+              가격은 «최다 거래 평형 하나로 고정했을 때만» 내고, 표본이 모자라면 비운다.
+              실측상 가격이 붙는 건 연결된 기축의 54%뿐이고, 나머지는 그게 정상이다.
+           ⚠️ 데이터가 없으면 섹션을 통째로 렌더하지 않는다. */}
+      {gichuk.length > 0 && (
+        <section style={{ padding: '0 6px' }} aria-labelledby="apt-gichuk-heading">
+          <SectionHeader
+            id="apt-gichuk-heading"
+            eyebrow="GICHUK — 기축 실거래"
+            title="최근 거래된 기축 단지"
+            meta={`${pipeline.region} · 최근 180일 · 거래 많은 순`}
+          />
+          <GichukActivity items={gichuk} />
+          <p
+            style={{
+              margin: 'var(--sp-xs) 2px 0',
+              fontSize: 'var(--fs-xs)',
+              fontWeight: 400,
+              letterSpacing: 0,
+              color: 'var(--text-tertiary)',
+              lineHeight: 1.45,
+            }}
+          >
+            국토부 실거래 신고 기준. 가격은 그 단지에서 «가장 많이 거래된 평형» 하나를 고정해 낸
+            평균입니다. 단지 전체 평균가는 평형 구성이 바뀌면 같이 움직여 시세로 읽을 수 없어 쓰지 않습니다.
+          </p>
         </section>
       )}
 
