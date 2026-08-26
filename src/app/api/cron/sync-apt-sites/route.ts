@@ -137,9 +137,19 @@ async function handler(_req: NextRequest) {
       //    것은 30건뿐이다. 나머지는 `name 10 + region 10 + redev_id 15 + address 3 ≒ 38`
       //    이라 **noindex 페이지 650여 개를 새로 만드는 셈** 이고 부울경은 40곳뿐이다.
       //    D1 중복 정합성 문제도 같이 커진다.
-      //    예전 `.limit(300)` 이 «우연히» 이걸 막고 있었다 — 한도를 풀면서 UPDATE(연결)와
-      //    INSERT(생성)를 갈랐다. 열려면 최소선은 `total_households > 0`(30건)이다.
-      skippedNew += newRows.length;
+      //    R3-4: 그 최소선을 «연다». `total_households > 0` 인 것만 생성한다(실측 30건).
+      //    나머지 652건은 세대수도 설명도 없어 예상 점수 38 — noindex 페이지를 652개
+      //    만드는 짓이다. R2 실행 중 옛 코드가 만든 1건이 정확히 38점으로 나와 증명됐다.
+      //    ⛔ 이 조건을 완화하지 말 것. 부울경은 682건 중 40건뿐이라 열어도 포커스
+      //       지역에 얻는 게 거의 없고, D1 중복 정합성 문제만 커진다.
+      const insertable = newRows.filter(r => (r.total_units ?? 0) > 0);
+      skippedNew += newRows.length - insertable.length;
+      for (let i = 0; i < insertable.length; i += 50) {
+        const { error } = await sb.from('apt_sites')
+          .upsert(insertable.slice(i, i + 50), { onConflict: 'slug', ignoreDuplicates: true });
+        if (error) console.error('[sync-apt-sites] insert fail', error.message?.slice(0, 200));
+        else inserted += Math.min(50, insertable.length - i);
+      }
       // 업데이트는 10건씩 병렬
       for (let i = 0; i < updateOps.length; i += 10) {
         await Promise.allSettled(updateOps.slice(i, i + 10).map(fn => fn()));

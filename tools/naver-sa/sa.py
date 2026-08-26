@@ -241,8 +241,37 @@ def fetch_sites():
 
 # ─────────────────────────────────────────────── 키워드
 
+SLUG_KEYWORD = re.compile(r"[가-힣]-[가-힣]")
+
+
+def reject_slug_keywords(keywords):
+    """slug 형태 키워드를 «생성 단계에서» 걸러 낸다. 뚫려도 나갈 수 없게 하는 마지막 문이다.
+
+    kw_name() 이 이미 한글-한글 하이픈을 지우지만, ALIAS·name_variants 처럼 다른 경로로
+    들어온 값이 있을 수 있다. R3 이전에는 그런 값 132건이 «그대로 업로드돼» 있었다.
+
+    ⚠️ 판정은 한글-한글 경계만이다. 하이픈 전체로 걸면 정상 검색어 297건이 함께 죽는다
+       (`금곡2-1구역재개발` · `에코델타시티16블록중흥S-클래스`).
+    """
+    ok, bad = [], []
+    for k in keywords:
+        (bad if SLUG_KEYWORD.search(k) else ok).append(k)
+    return ok, bad
+
+
 def kw_name(name):
-    n = ALIAS.get(name, name)
+    """검색어로 쓸 이름. ⚠️ slug 를 넣지 말 것 — name 을 넣는다.
+
+    R3: 광고에 `동래-반도-유보라` 같은 «slug 형태» 키워드가 132건 나가 있었다.
+    아무도 하이픈을 넣어 검색하지 않으므로 «노출이 날 수 없는» 키워드다.
+    아래 첫 줄이 한글과 한글 사이의 하이픈을 공백으로 바꿔 그 경로를 끊는다.
+
+    ⚠️ 하이픈을 «전부» 지우면 안 된다. `에코델타시티16블록중흥S-클래스` ·
+       `금곡2-1구역재개발` 처럼 하이픈이 정상인 검색어가 297건 있다.
+       한글-한글 경계만 건드린다.
+    """
+    n = re.sub(r"(?<=[가-힣])-(?=[가-힣])", " ", name or "")
+    n = ALIAS.get(n, n)
     n = re.sub(r"\s*\([^)]*\)\s*", " ", n)            # 괄호 제거
     n = re.sub(r"[^0-9A-Za-z가-힣\s\-]", " ", n)      # 쉼표·중점 등 금지문자 제거
     n = re.sub(r"\s+", " ", n).strip()
@@ -307,6 +336,7 @@ def build_plan(sites, only=None, skip_existing=True, cats=None, max_alias=4):
             continue
         buckets.setdefault((s["zone"], s["cat"]), []).append(s)
 
+    slug_dropped = []
     groups = []
     for (zone, cat), items in buckets.items():
         cur, n, idx = [], 0, 1
@@ -326,6 +356,9 @@ def build_plan(sites, only=None, skip_existing=True, cats=None, max_alias=4):
                     if kk in seen or not (2 <= len(k) <= 50) or len(kk) > MAX_KW_NOSPACE:
                         continue
                     seen.add(kk); kws.append(k)
+            kws, dropped = reject_slug_keywords(kws)
+            if dropped:
+                slug_dropped.extend(dropped)
             if not kws:
                 continue
             if n + len(kws) > KW_PER_GROUP and cur:
@@ -338,6 +371,9 @@ def build_plan(sites, only=None, skip_existing=True, cats=None, max_alias=4):
         if cur:
             nm = "%s_%s" % (zone, cat) if idx == 1 else "%s_%s_%d" % (zone, cat, idx)
             groups.append({"name": nm, "zone": zone, "cat": cat, "sites": cur})
+    if slug_dropped:
+        print("[!] slug 형태 키워드 %d개를 생성에서 제외했습니다: %s"
+              % (len(slug_dropped), ", ".join(slug_dropped[:5])))
     return groups
 
 
