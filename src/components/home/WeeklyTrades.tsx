@@ -70,7 +70,11 @@ export default function WeeklyTrades({ data }: { data: WeeklyTradesData }) {
                 padding: '2px 7px',
                 borderRadius: 'var(--radius-pill)',
                 background: delta >= 0 ? 'var(--accent-red-bg)' : 'var(--accent-blue-bg)',
-                color: delta >= 0 ? 'var(--accent-red)' : 'var(--accent-blue)',
+                // ⚠️ 감소 쪽에 `--accent-blue`(#2563EB)를 쓰면 이 배경에서 대비 **4.49** 다 —
+                //    하한 4.5 에 0.01 모자란다. TY1-2 에서 「분양중」 배지가 똑같이 걸렸고
+                //    기존 토큰 `--brand-dark`(#1E40AF)로 바꿔 7.57 로 올린 전례가 있다.
+                //    새 토큰을 만들지 않는다. 증가 쪽 `--accent-red`(#991B1B)는 7.11 로 통과.
+                color: delta >= 0 ? 'var(--accent-red)' : 'var(--brand-dark)',
                 whiteSpace: 'nowrap',
               }}
             >
