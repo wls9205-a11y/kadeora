@@ -1,6 +1,33 @@
+// 국토부 아파트 매매 실거래 수집 (전국 231개 시군구 × 올해 1월~현재월).
+//
+// ── D5-1 (2026-08-26) — «관측만» 붙였다. 동작은 한 줄도 바꾸지 않았다 ──
+//
+// 왜: 경남·광주·전남·제주가 2026-05-27 부터, 충남·경북이 07-23 부터, 충북이 07-28 부터
+// 아무도 모르게 죽어 있었다. 3개월 동안 크론은 매번 `success` · `failed: 0` 을 기록했다.
+//
+// 그게 가능했던 구조:
+//   1. `res.ok` 를 안 봤다.
+//   2. 공공데이터포털이 «에러 XML» 을 보내도 `<item>` 이 없으므로 파서가 `[]` 를 낸다.
+//   3. `[]` → `rows.length === 0` → insert 건너뜀 → `count += 0` → **정상 반환**.
+//   4. `Promise.allSettled` 는 reject 된 것만 `failed` 에 넣는데 위 경로는 «절대 reject 하지 않는다».
+// → 「이 지역 이번 달 거래 없음」과 「API 가 거부함」을 구분할 수단이 없었다. 이 커밋이 그걸 가른다.
+//
+// ⚠️ 실측으로 확인한 것 (지시서 초안과 다른 부분이 있다):
+//   · 이 API 의 정상 `resultCode` 는 **`000`** 이다. `00` 이 아니다.
+//   · 한도 초과·키 오류는 `<resultCode>` 가 아니라 `OpenAPI_ServiceResponse` 봉투
+//     (`<returnReasonCode>` + `<returnAuthMsg>` + `<errMsg>`)로 올 수 있다. 둘 다 읽는다.
+//   · `apt_transactions` 에는 BEFORE INSERT 트리거 `trg_apt_transactions_skip_duplicates`
+//     가 걸려 있어 중복은 «조용히 건너뛴다»(RETURN NULL). 그래서 `.insert()` 는
+//     UNIQUE 충돌로 실패하지 «않는다». 「한 행 충돌로 배치 전체가 죽는다」는 성립하지 않는다.
+//     대신 `count += rows.length` 가 «시도한» 행을 세므로 records_created 가 과대보고된다
+//     (30일 299만 보고 vs 테이블 전체 72.8만). 그 수를 성공 판정에 쓰지 말 것.
+//
+// ⚠️ 이 커밋 후 데이터는 하나도 안 바뀌어야 한다. 월 범위 · LAWD 코드 · insert · 배치 크기
+//    전부 그대로다. 바뀌었다면 동작을 건드린 것이다.
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { NextRequest, NextResponse } from 'next/server';
 import { withCronLogging } from '@/lib/cron-logger';
+import { readEnvelope } from '@/lib/cron/data-go-kr-envelope';
 
 export const maxDuration = 300; // 5분 (전국 200개 시군구 × 올해 전체 월)
 
@@ -141,14 +168,57 @@ export async function GET(req: NextRequest) {
     const failed: string[] = [];
     const BATCH = 15;
 
+    /* ── D5-1 관측 카운터 ──────────────────────────────────────────
+     * ⚠️ 전부 «세기만» 한다. 어떤 카운터도 흐름을 바꾸지 않는다.
+     *    (실패했다고 건너뛰거나 재시도하지 않는다 — 그건 D5-3 이다.) */
+
+    /** 실제 fetch 횟수. 기존 metadata 의 `entries.length * 2` 는 측정값이 아니라 하드코딩 공식이었다. */
+    let apiCalls = 0;
+    /** 코드별 실패 횟수. 여기에 `22`(한도) 가 쌓이는지 보는 게 D5-2 의 전부다. */
+    const errorCodes: Record<string, number> = {};
+    /** resultCode 는 정상인데 item 이 0개 — «거래 없는 달» 이다. 실패가 아니다. 그래도 센다. */
+    let zeroItemOk = 0;
+    /** 실패한 label (월별 중복 제거). failed 배열은 여기서 만든다. */
+    const failedLabels = new Set<string>();
+
+    /* 콘솔은 상한을 둔다. 1,848 호출이 전부 실패하면 로그가 잘려서 오히려 안 보인다.
+     * 전체 그림은 metadata 의 집계로 보고, 콘솔은 «표본» 으로 쓴다. */
+    const LOG_CAP = 20;
+    let logged = 0;
+    function note(line: string) {
+      if (logged < LOG_CAP) { logged++; console.error(line); }
+      else if (logged === LOG_CAP) { logged++; console.error('[crawl-apt-trade] (이하 생략 — metadata.error_codes 를 볼 것)'); }
+    }
+
     async function fetchOne(label: string, lawdCd: string): Promise<number> {
       const [regionPart, sigunguPart] = label.split(' ');
       let count = 0;
       for (const ym of months) {
         const url = `https://apis.data.go.kr/1613000/RTMSDataSvcAptTradeDev/getRTMSDataSvcAptTradeDev?serviceKey=${encodeURIComponent(apiKey!)}&LAWD_CD=${lawdCd}&DEAL_YMD=${ym}&pageNo=1&numOfRows=1000`;
+        apiCalls++;
         const res = await fetch(url);
         const xml = await res.text();
+
+        /* ── D5-1 — «거절» 과 «거래 없음» 을 여기서 가른다. 이 커밋의 전부다. ──
+         * ⚠️ 판정만 하고 «흐름은 안 바꾼다». 실패해도 아래 파싱·insert 를 그대로 탄다
+         *    (거절 응답이면 item 이 없어 어차피 0행이다). 건너뛰거나 재시도하면
+         *    데이터가 바뀌어 「관측만」이 깨진다. */
+        const env = res.ok ? readEnvelope(xml) : null;
+        if (!res.ok) {
+          const key = `HTTP_${res.status}`;
+          errorCodes[key] = (errorCodes[key] ?? 0) + 1;
+          failedLabels.add(label);
+          note(`[crawl-apt-trade] HTTP ${res.status} ${label} ${ym}`);
+        } else if (env && !env.ok) {
+          errorCodes[env.code] = (errorCodes[env.code] ?? 0) + 1;
+          failedLabels.add(label);
+          note(`[crawl-apt-trade] API ${env.code} ${env.msg} ${label} ${ym}`);
+        }
+
         const items = parseXmlItems(xml);
+        /* 응답은 정상인데 item 0개 = 그 달에 거래가 없었다. **실패가 아니다.**
+         * 이 둘을 못 가르는 것이 경남이 3개월간 조용히 죽어 있던 직접 원인이었다. */
+        if (env?.ok && items.length === 0) zeroItemOk++;
         const rows = items.map(it => ({
           apt_name: it.apt_name, region_nm: regionPart, sigungu: sigunguPart, dong: it.dong,
           exclusive_area: it.exclusive_area, deal_amount: it.deal_amount,
@@ -201,11 +271,29 @@ export async function GET(req: NextRequest) {
       }
     } catch {}
 
+    /* reject 로 잡힌 것(failed)과 응답으로 거절당한 것(failedLabels)을 합친다.
+     * 지금까지 failed 는 «영원히 비어 있었다» — 거절 경로가 reject 를 하지 않기 때문이다. */
+    for (const l of failed) failedLabels.add(l);
+    const failedList = [...failedLabels].sort();
+
     return {
       processed: entries.length,
       created: totalInserted,
-      failed: failed.length,
-      metadata: { api_name: 'data_go_kr', api_calls: entries.length * 2, months, notifications: notifCount, ...(failed.length > 0 ? { failed } : {}) },
+      failed: failedList.length,
+      metadata: {
+        api_name: 'data_go_kr',
+        // D5-1: 실제 호출 수. 정상이면 entries.length * months.length 에 근접해야 한다.
+        api_calls: apiCalls,
+        api_calls_expected: entries.length * months.length,
+        months,
+        notifications: notifCount,
+        // D5-1 관측. error_codes 가 비어 있으면 API 거절은 원인이 아니다.
+        error_codes: errorCodes,
+        zero_item_ok: zeroItemOk,
+        // ⚠️ created 는 «시도한» 행 수다. 트리거가 중복을 조용히 건너뛰므로 실제 적재량이 아니다.
+        created_is_attempted: true,
+        ...(failedList.length > 0 ? { failed: failedList.slice(0, 60), failed_total: failedList.length } : {}),
+      },
     };
   });
 
