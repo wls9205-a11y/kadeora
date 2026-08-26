@@ -23,6 +23,17 @@ export interface HomeRow {
   price: { min: number; max: number } | null;
   /** 「많이 보는 현장」에만 붙는다. */
   rank?: number;
+  /**
+   * H4-1 (f) — 실사 승격 후보. «조감도·시행사 제공분만» 담는다.
+   *
+   * ⚠️ `satellite_image_url` 을 여기 담지 않는다 (2026-08-25 이미지 정책).
+   *    준공 전 현장에 위성을 깔면 아직 없는 건물 자리의 공터가 보인다.
+   * ⚠️ 라이선스 판정은 렌더하는 쪽에서 canUseHeroImage() 로 한다 —
+   *    tier 를 같이 실어 보내는 이유다. 판정을 여기서 미리 하지 않는 건
+   *    화면마다 leadContext 가 다르기 때문이다(홈은 리드폼이 없다).
+   */
+  hero_image_url: string | null;
+  hero_license_tier: string | null;
 }
 
 /**
@@ -90,13 +101,14 @@ export function priceOf(
   return { min: lo, max: hi };
 }
 
-const COLS = 'slug,name,region,sigungu,lifecycle_stage,total_units,price_min,price_max,page_views,content_score';
+const COLS = 'slug,name,region,sigungu,lifecycle_stage,total_units,price_min,price_max,page_views,content_score,hero_image_url,hero_license_tier';
 
 type Raw = {
   slug: string; name: string; region: string | null; sigungu: string | null;
   lifecycle_stage: string | null; total_units: number | null;
   price_min: number | null; price_max: number | null;
   page_views: number | null; content_score: number | null;
+  hero_image_url: string | null; hero_license_tier: string | null;
 };
 
 export interface HomeSections {
@@ -129,9 +141,16 @@ export async function fetchHomeSections(regions: string[]): Promise<HomeSections
     const toRow = (r: Raw, rank?: number): HomeRow => ({
       slug: r.slug, name: r.name, region: r.region, sigungu: r.sigungu,
       lifecycle_stage: r.lifecycle_stage, total_units: r.total_units,
-      price: priceOf(r, fake), ...(rank ? { rank } : {}),
+      price: priceOf(r, fake),
+      hero_image_url: r.hero_image_url ?? null,
+      hero_license_tier: r.hero_license_tier ?? null,
+      ...(rank ? { rank } : {}),
     });
 
+    // ⚠️ H4-1 (e) — popular 는 «홈에서 렌더하지 않는다». page_views 가 합성값이라
+    //    정렬 근거가 없다(컬럼 총합 200,655 대 실조회 1,941). 계산은 남겨 뒀다 —
+    //    다른 소비처가 생길 수 있고, 지우면 이 판정 기록도 같이 사라진다.
+    //    되살리려면 정렬 근거부터 만들어야 한다 (H4-3 계측 → 승격 판정).
     const popular = rows
       .filter((r) => (r.page_views ?? 0) > 0)
       .sort((a, b) => (b.page_views ?? 0) - (a.page_views ?? 0))

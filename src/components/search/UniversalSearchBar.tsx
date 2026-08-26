@@ -149,6 +149,18 @@ export default function UniversalSearchBar({
   /** 모달 추천 칩. 넘겨받은 목록이 있으면 그게 이기고, 없으면 기존 trending 을 쓴다. */
   const chips = suggestions && suggestions.length > 0 ? suggestions : trending;
 
+  /**
+   * H4-1 (b) — hero 의 «모달 밖» 추천 칩.
+   *
+   * 지금까지 추천 칩은 모달 안에만 있었다. 검색창을 눌러야 보이니 사실상 아무도 못 본다.
+   * 홈 첫 화면에 그대로 노출해야 「무엇을 검색하는 곳인지」가 설명 없이 전달된다.
+   *
+   * ⚠️ trending 을 폴백으로 «쓰지 않는다». trending 은 모달을 열어야 채워지는 값이라
+   *    폴백으로 두면 모달을 한 번 연 뒤부터 홈 첫 화면에 칩 줄이 갑자기 생긴다.
+   *    hero 칩은 «넘겨받은 목록» 만 쓴다. 없으면 줄 자체를 렌더하지 않는다.
+   */
+  const heroChips = variant === "hero" ? (suggestions ?? []) : [];
+
   // ⌘K / Ctrl+K 단축키
   useEffect(() => {
     if (!hotkey) return;
@@ -326,9 +338,10 @@ export default function UniversalSearchBar({
           <SearchIcon />
         </button>
       ) : variant === "hero" ? (
-        /* H1-1 홈 검색 히어로.
+        <>
+        {/* H1-1 홈 검색 히어로.
          * ⚠️ placeholder 를 16px 미만으로 내리지 말 것 — iOS 사파리가 입력창을
-         *    자동 확대해 화면이 튄다. 홈 첫 화면이라 그 튐이 가장 잘 보인다. */
+         *    자동 확대해 화면이 튄다. 홈 첫 화면이라 그 튐이 가장 잘 보인다. */}
         <button
           type="button"
           onClick={() => setOpen(true)}
@@ -376,6 +389,63 @@ export default function UniversalSearchBar({
             {heroText}
           </span>
         </button>
+        {/* H4-1 (b) — 검색창 바로 아래 칩 줄. 0개면 줄을 통째로 미렌더한다. */}
+        {heroChips.length > 0 && (
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              alignItems: "center",
+              gap: 5,
+              margin: "8px 2px 0",
+            }}
+          >
+            {/* 칩 라벨 500 — TY1 사다리(라벨·배지·칩). 자간은 14px 이하라 0.
+                ⚠️ `width: "100%"` 로 «줄을 혼자 쓴다». 칩과 같은 줄에 두면 390px 에서
+                   「라벨 + 칩 하나」로 끊겨, 그 칩 하나에만 붙은 설명처럼 읽힌다. */}
+            <span
+              style={{
+                width: "100%",
+                fontSize: 12,
+                fontWeight: 500,
+                letterSpacing: 0,
+                lineHeight: 1.3,
+                color: "var(--text-tertiary)",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {suggestionLabel}
+            </span>
+            {/* ⚠️ 칩 글씨는 줄여도 «검색어는 원문» 을 보낸다.
+                shortSiteName 은 말줄임표를 쓰지 않는다 — 칩에서 '…' 는 눌러야 할지 알 수 없다. */}
+            {heroChips.map((kw) => (
+              <button
+                key={`h-${kw}`}
+                type="button"
+                onClick={() => goToResultsPage(kw)}
+                title={kw}
+                style={{
+                  padding: "5px 10px",
+                  borderRadius: "var(--radius-pill)",
+                  fontSize: 12.5,
+                  fontWeight: 400,
+                  letterSpacing: 0,
+                  lineHeight: 1.2,
+                  background: "var(--brand-bg)",
+                  border: "1px solid var(--brand-border)",
+                  // ⚠️ --brand(#2563EB) 는 이 배경에서 대비 4.65 라 400 굵기로 쓰기엔 얇다.
+                  //    --brand-dark(#1E40AF) 는 7.84. 새 토큰을 만들지 않고 기존 것을 쓴다(TY1-2).
+                  color: "var(--brand-dark)",
+                  whiteSpace: "nowrap",
+                  cursor: "pointer",
+                }}
+              >
+                {shortSiteName(kw)}
+              </button>
+            ))}
+          </div>
+        )}
+        </>
       ) : (
         <button
           type="button"
@@ -470,7 +540,12 @@ export default function UniversalSearchBar({
                   )}
                   {chips.length > 0 && (
                     <div>
-                      <h3 className="mb-2 text-xs font-bold text-gray-500">🔥 {suggestionLabel}</h3>
+                      {/* ⚠️ 라벨이 비면 제목을 «렌더하지 않는다». 홈이 칩 소스에 따라
+                          라벨을 갈아 끼우는데(H4-1 d), 소스가 0건이면 빈 문자열이 온다.
+                          그때 <h3> 를 그대로 두면 빈 제목 줄이 남는다. */}
+                      {suggestionLabel && (
+                        <h3 className="mb-2 text-xs font-bold text-gray-500">{suggestionLabel}</h3>
+                      )}
                       <div className="flex flex-wrap gap-2">
                         {/* ⚠️ 칩 글씨는 줄여도 «검색어는 원문» 을 보낸다.
                             '센트레빌 거제' 로 검색하면 결과가 나오지 않는다. */}
