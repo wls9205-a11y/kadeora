@@ -186,7 +186,7 @@ export default async function ThemePage({ params, searchParams }: Props) {
         <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{t.title}</span>
       </nav>
 
-      <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px' }}>
+      <h1 style={{ fontSize: 20, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 8px' }}>
         {regionLabel}{t.title}
         <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-tertiary)', marginLeft: 8 }}>TOP {items.length}</span>
       </h1>
@@ -212,14 +212,14 @@ export default async function ThemePage({ params, searchParams }: Props) {
           {items.map((p: any, i: number) => (
             <Link key={i} href={`/apt/complex/${encodeURIComponent(p.apt_name)}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', textDecoration: 'none' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
-                <span style={{ fontSize: 12, fontWeight: 800, color: i < 3 ? 'var(--accent-blue)' : 'var(--text-tertiary)', width: 24, flexShrink: 0 }}>{i + 1}</span>
+                <span style={{ fontSize: 12, fontWeight: 600, color: i < 3 ? 'var(--accent-blue)' : 'var(--text-tertiary)', width: 24, flexShrink: 0 }}>{i + 1}</span>
                 <div style={{ minWidth: 0 }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.apt_name}</div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.apt_name}</div>
                   <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{p.region_nm} {p.sigungu || ''} {p.dong || ''} · {p.age_group || ''}</div>
                 </div>
               </div>
               <div style={{ textAlign: 'right', flexShrink: 0, marginLeft: 8 }}>
-                <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-primary)' }}>{p.latest_sale_price ? fmtAmount(p.latest_sale_price) : '-'}</div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{p.latest_sale_price ? fmtAmount(p.latest_sale_price) : '-'}</div>
                 <div style={{ fontSize: 10, color: theme.includes('price-up') ? 'var(--accent-green)' : theme.includes('price-down') ? 'var(--accent-red)' : 'var(--text-tertiary)' }}>{t.formatSub(p)}</div>
               </div>
             </Link>
@@ -229,10 +229,10 @@ export default async function ThemePage({ params, searchParams }: Props) {
 
       {/* FAQ */}
       <section style={{ marginBottom: 20 }}>
-        <h2 style={{ fontSize: 14, fontWeight: 700, margin: '0 0 10px' }}>자주 묻는 질문</h2>
+        <h2 style={{ fontSize: 14, fontWeight: 600, margin: '0 0 10px' }}>자주 묻는 질문</h2>
         {faq.map((f, i) => (
           <details key={i} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '10px 14px', marginBottom: 6 }}>
-            <summary style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', cursor: 'pointer' }}>{f.q}</summary>
+            <summary style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-primary)', cursor: 'pointer' }}>{f.q}</summary>
             <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 8 }}>{f.a}</p>
           </details>
         ))}
@@ -240,10 +240,10 @@ export default async function ThemePage({ params, searchParams }: Props) {
 
       {/* 다른 테마 */}
       <section style={{ marginBottom: 40 }}>
-        <h2 style={{ fontSize: 14, fontWeight: 700, margin: '0 0 10px' }}>다른 테마 분석</h2>
+        <h2 style={{ fontSize: 14, fontWeight: 600, margin: '0 0 10px' }}>다른 테마 분석</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 6 }}>
           {Object.entries(THEMES).filter(([k]) => k !== theme).map(([k, v]) => (
-            <Link key={k} href={`/apt/theme/${k}${selectedRegion ? `?region=${encodeURIComponent(selectedRegion)}` : ''}`} style={{ padding: '10px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', textDecoration: 'none', fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>{v.title}</Link>
+            <Link key={k} href={`/apt/theme/${k}${selectedRegion ? `?region=${encodeURIComponent(selectedRegion)}` : ''}`} style={{ padding: '10px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', textDecoration: 'none', fontSize: 12, fontWeight: 500, color: 'var(--text-primary)' }}>{v.title}</Link>
           ))}
         </div>
       </section>

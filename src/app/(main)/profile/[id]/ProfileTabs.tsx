@@ -193,7 +193,7 @@ export default function ProfileTabs({ profileId, posts, isOwner }: Props) {
                     <div style={{ padding: '12px 0', borderBottom: i < displayedPosts.length-1 ? '1px solid var(--border)' : 'none', display: 'flex', gap: 10, alignItems: 'center', transition: 'opacity 0.15s' }}
                       onMouseEnter={e => (e.currentTarget.style.opacity = '0.8')}
                       onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
-                      <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 7px', borderRadius: 'var(--radius-pill)', fontWeight: 700, flexShrink: 0, background: cat.bg, color: cat.color }}>{cat.label}</span>
+                      <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 7px', borderRadius: 'var(--radius-pill)', fontWeight: 500, flexShrink: 0, background: cat.bg, color: cat.color }}>{cat.label}</span>
                       <span style={{ flex: 1, fontSize: 'var(--fs-base)', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</span>
                       <div style={{ display: 'flex', gap: 'var(--sp-sm)', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexShrink: 0 }}>
                         <span>❤️{post.likes_count}</span><span>💬{post.comments_count}</span>
@@ -258,7 +258,7 @@ export default function ProfileTabs({ profileId, posts, isOwner }: Props) {
                         <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{s.symbol} · {s.market}</div>
                       </div>
                       <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: 'var(--fs-base)' }}>
+                        <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: 'var(--fs-base)' }}>
                           {s.currency === 'KRW' ? `₩${Number(s.price).toLocaleString()}` : `$${Number(s.price).toLocaleString()}`}
                         </div>
                         <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color }}>
@@ -333,7 +333,7 @@ export default function ProfileTabs({ profileId, posts, isOwner }: Props) {
                   <div style={{ padding: '12px 0', borderBottom: i < blogBookmarks.length - 1 ? '1px solid var(--border)' : 'none', display: 'flex', gap: 10, alignItems: 'center', transition: 'opacity 0.15s' }}
                     onMouseEnter={e => (e.currentTarget.style.opacity = '0.8')}
                     onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
-                    <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 7px', borderRadius: 'var(--radius-pill)', fontWeight: 700, flexShrink: 0, background: 'var(--bg-hover)', color: 'var(--text-tertiary)' }}>{post.category}</span>
+                    <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 7px', borderRadius: 'var(--radius-pill)', fontWeight: 500, flexShrink: 0, background: 'var(--bg-hover)', color: 'var(--text-tertiary)' }}>{post.category}</span>
                     <span style={{ flex: 1, fontSize: 'var(--fs-base)', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</span>
                     <div style={{ display: 'flex', gap: 'var(--sp-sm)', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexShrink: 0 }}>
                       <span>👀{post.view_count || 0}</span>
@@ -359,7 +359,7 @@ export default function ProfileTabs({ profileId, posts, isOwner }: Props) {
                     <div style={{ padding: '12px 0', borderBottom: i < bookmarkedPosts.length-1 ? '1px solid var(--border)' : 'none', display: 'flex', gap: 10, alignItems: 'center', transition: 'opacity 0.15s' }}
                       onMouseEnter={e => (e.currentTarget.style.opacity = '0.8')}
                       onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
-                      <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 7px', borderRadius: 'var(--radius-pill)', fontWeight: 700, flexShrink: 0, background: cat.bg, color: cat.color }}>{cat.label}</span>
+                      <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 7px', borderRadius: 'var(--radius-pill)', fontWeight: 500, flexShrink: 0, background: cat.bg, color: cat.color }}>{cat.label}</span>
                       <span style={{ flex: 1, fontSize: 'var(--fs-base)', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</span>
                       <div style={{ display: 'flex', gap: 'var(--sp-sm)', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexShrink: 0 }}>
                         <span>❤️{post.likes_count}</span><span>💬{post.comments_count}</span>

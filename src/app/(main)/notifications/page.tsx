@@ -98,7 +98,7 @@ export default function NotificationsPage() {
     <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-tertiary)' }}>
       <div style={{ fontSize: 40, marginBottom: 'var(--sp-md)' }}>🔔</div>
       <p>로그인이 필요합니다</p>
-      <a href="/login?redirect=/notifications" style={{ color: 'var(--brand)', fontWeight: 700 }}>로그인하기 →</a>
+      <a href="/login?redirect=/notifications" style={{ color: 'var(--brand)', fontWeight: 500 }}>로그인하기 →</a>
     </div>
   );
 
@@ -108,7 +108,7 @@ export default function NotificationsPage() {
       {/* 헤더 */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--sp-lg)' }}>
         <div>
-          <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)' }}>
+          <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 600, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)' }}>
             🔔 알림
             <a href="/notifications/settings" style={{ fontSize: 14, color: 'var(--text-tertiary)', textDecoration: 'none' }} title="알림 설정">⚙️</a>
           </h1>

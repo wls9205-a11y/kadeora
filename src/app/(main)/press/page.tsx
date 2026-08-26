@@ -28,13 +28,13 @@ export default function PressPage() {
         <span> › </span><span>프레스 킷</span>
       </nav>
 
-      <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 900, marginBottom: 4 }}>프레스 킷</h1>
+      <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 600, marginBottom: 4 }}>프레스 킷</h1>
       <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-xl)' }}>
         카더라 서비스 소개 및 미디어 활용 가이드
       </p>
 
       <section style={{ marginBottom: 'var(--sp-xl)' }}>
-        <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, marginBottom: 12 }}>서비스 한줄 소개</h2>
+        <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 600, marginBottom: 12 }}>서비스 한줄 소개</h2>
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 20 }}>
           <p style={{ fontSize: 'var(--fs-base)', color: 'var(--text-primary)', lineHeight: 1.7, margin: 0, fontWeight: 600 }}>
             &ldquo;카더라는 주식 시세, 아파트 청약·실거래가, 무료 계산기, 투자 블로그를 하나의 앱에서 제공하는 대한민국 부동산·주식 데이터 플랫폼입니다.&rdquo;
@@ -43,12 +43,12 @@ export default function PressPage() {
       </section>
 
       <section style={{ marginBottom: 'var(--sp-xl)' }}>
-        <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, marginBottom: 12 }}>핵심 수치</h2>
+        <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 600, marginBottom: 12 }}>핵심 수치</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 8 }}>
           {STATS.map(s => (
             <div key={s.label} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 14, textAlign: 'center' }}>
-              <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 900, color: 'var(--brand)' }}>{s.value}</div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', marginTop: 2 }}>{s.label}</div>
+              <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 700, color: 'var(--brand)' }}>{s.value}</div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', marginTop: 2 }}>{s.label}</div>
               <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>{s.desc}</div>
             </div>
           ))}
@@ -56,7 +56,7 @@ export default function PressPage() {
       </section>
 
       <section style={{ marginBottom: 'var(--sp-xl)' }}>
-        <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, marginBottom: 12 }}>데이터 인용 가이드</h2>
+        <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 600, marginBottom: 12 }}>데이터 인용 가이드</h2>
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 20 }}>
           <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.8, margin: '0 0 12px' }}>
             카더라의 데이터를 기사, 블로그, 유튜브 등에서 인용하실 때 아래 형식을 사용해 주세요.
@@ -72,7 +72,7 @@ export default function PressPage() {
       </section>
 
       <section style={{ marginBottom: 'var(--sp-xl)' }}>
-        <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, marginBottom: 12 }}>데이터 출처</h2>
+        <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 600, marginBottom: 12 }}>데이터 출처</h2>
         <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.8 }}>
           카더라는 국토교통부, 한국부동산원, 청약홈(applyhome.co.kr), 한국거래소, Yahoo Finance 등의 공공·공개 데이터를 수집·분석하여 제공합니다. 
           카더라 자체 분석 데이터(평당가 계산, 전세가율, 가점 시뮬레이션 등)는 카더라의 독자적 산출물입니다.
@@ -80,10 +80,10 @@ export default function PressPage() {
       </section>
 
       <section>
-        <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, marginBottom: 12 }}>문의</h2>
+        <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 600, marginBottom: 12 }}>문의</h2>
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 20 }}>
           <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', margin: '0 0 8px' }}>데이터 제휴, 기사 인용, 인터뷰 요청</p>
-          <a href="mailto:kadeora.app@gmail.com" style={{ color: 'var(--brand)', fontWeight: 700, fontSize: 'var(--fs-base)', textDecoration: 'none' }}>📧 kadeora.app@gmail.com</a>
+          <a href="mailto:kadeora.app@gmail.com" style={{ color: 'var(--brand)', fontWeight: 500, fontSize: 'var(--fs-base)', textDecoration: 'none' }}>📧 kadeora.app@gmail.com</a>
         </div>
       </section>
     </article>

@@ -109,7 +109,7 @@ export default async function BigEventsHubPage({ searchParams }: SearchProps) {
         <span>대형 이벤트</span>
       </nav>
 
-      <h1 style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 6px' }}>
+      <h1 style={{ fontSize: 24, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 6px' }}>
         전국 재건축·재개발 대형 이벤트
       </h1>
       <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: '0 0 18px', lineHeight: 1.7 }}>
@@ -131,7 +131,7 @@ export default async function BigEventsHubPage({ searchParams }: SearchProps) {
                 padding: '7px 14px',
                 borderRadius: 999,
                 fontSize: 12,
-                fontWeight: 700,
+                fontWeight: 500,
                 border: '1px solid var(--border)',
                 background: active ? 'var(--brand)' : 'var(--bg-surface)',
                 color: active ? '#fff' : 'var(--text-secondary)',
@@ -200,7 +200,7 @@ export default async function BigEventsHubPage({ searchParams }: SearchProps) {
             const cardContent = (
               <>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8, flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 4, background: 'var(--brand-bg)', color: 'var(--brand)' }}>
+                  <span style={{ fontSize: 10, fontWeight: 500, padding: '2px 7px', borderRadius: 4, background: 'var(--brand-bg)', color: 'var(--brand)' }}>
                     Stage {e.stage ?? '-'} {STAGE_LABEL[e.stage] ? `· ${STAGE_LABEL[e.stage]}` : ''}
                   </span>
                   {e.constructor_status && e.constructor_status !== 'confirmed' && (
@@ -209,7 +209,7 @@ export default async function BigEventsHubPage({ searchParams }: SearchProps) {
                     </span>
                   )}
                 </div>
-                <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 4 }}>
+                <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>
                   {e.name}
                   {e.new_brand_name ? <span style={{ color: 'var(--text-secondary)', fontWeight: 600, fontSize: 13 }}> · {e.new_brand_name}</span> : null}
                 </div>

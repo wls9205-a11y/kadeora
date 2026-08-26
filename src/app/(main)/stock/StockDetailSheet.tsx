@@ -34,7 +34,7 @@ export default function StockDetailSheet({ stock, onClose, isDomestic, isWatched
         <div style={{ fontSize: 'var(--fs-2xl)', fontWeight: 700, color: 'var(--text-primary)' }}>
           {stock.currency === 'USD' ? `$${stock.price?.toFixed(2)}` : `₩${fmt(stock.price)}`}
         </div>
-        <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 700, color: stockColor(stock.change_pct ?? 0, isDomestic), marginTop: 'var(--sp-xs)' }}>
+        <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 600, color: stockColor(stock.change_pct ?? 0, isDomestic), marginTop: 'var(--sp-xs)' }}>
           {(stock.change_pct ?? 0) > 0 ? '▲' : '▼'} {stock.change_amt ? `${(stock.change_amt > 0 ? '+' : '')}${fmt(Math.abs(stock.change_amt))}` : ''} ({Math.abs(stock.change_pct ?? 0).toFixed(2)}%)
         </div>
       </div>
@@ -47,11 +47,11 @@ export default function StockDetailSheet({ stock, onClose, isDomestic, isWatched
         </div>
         <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '8px 10px', textAlign: 'center' }}>
           <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>거래량</div>
-          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', marginTop: 2 }}>{stock.volume ? fmt(stock.volume) : '-'}</div>
+          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', marginTop: 2 }}>{stock.volume ? fmt(stock.volume) : '-'}</div>
         </div>
         <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '8px 10px', textAlign: 'center' }}>
           <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>전일대비</div>
-          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: stockColor(stock.change_pct ?? 0, isDomestic), marginTop: 2 }}>{stock.change_amt ? `${stock.change_amt > 0 ? '+' : ''}${fmt(stock.change_amt)}` : '-'}</div>
+          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: stockColor(stock.change_pct ?? 0, isDomestic), marginTop: 2 }}>{stock.change_amt ? `${stock.change_amt > 0 ? '+' : ''}${fmt(stock.change_amt)}` : '-'}</div>
         </div>
       </div>
 

@@ -161,19 +161,19 @@ function ChartTab({ priceHistory, currency }: { priceHistory: StockPriceHistory[
           <div style={{ display: 'flex', gap: 'var(--sp-sm)', marginTop: 'var(--sp-md)', flexWrap: 'wrap' }}>
             <div style={{ flex: 1, minWidth: 80, background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '8px 10px', textAlign: 'center' }}>
               <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>기간 변동</div>
-              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: stockColor(isUp ? 1 : -1, currency !== 'USD'), marginTop: 2 }}>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: stockColor(isUp ? 1 : -1, currency !== 'USD'), marginTop: 2 }}>
                 {isUp ? '+' : ''}{changePct.toFixed(2)}%
               </div>
             </div>
             <div style={{ flex: 1, minWidth: 80, background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '8px 10px', textAlign: 'center' }}>
               <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>최고가</div>
-              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: stockUpColor(currency !== 'USD'), marginTop: 2 }}>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: stockUpColor(currency !== 'USD'), marginTop: 2 }}>
                 {currency === 'USD' ? `$${high.toFixed(2)}` : `₩${high.toLocaleString()}`}
               </div>
             </div>
             <div style={{ flex: 1, minWidth: 80, background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '8px 10px', textAlign: 'center' }}>
               <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>최저가</div>
-              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: stockDownColor(currency !== 'USD'), marginTop: 2 }}>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: stockDownColor(currency !== 'USD'), marginTop: 2 }}>
                 {currency === 'USD' ? `$${low.toFixed(2)}` : `₩${low.toLocaleString()}`}
               </div>
             </div>

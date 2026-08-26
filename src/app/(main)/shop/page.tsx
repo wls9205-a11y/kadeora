@@ -58,7 +58,7 @@ const FAQ = [
   { q: '확성기는 프로 전용인가요?', a: '아니요. 확성기는 모든 유저가 구매 가능한 1회성 아이템입니다.' },
 ];
 
-function Check() { return <span style={{ display: 'inline-block', width: 18, height: 18, borderRadius: '50%', background: 'rgba(52,211,153,0.15)', color: 'var(--accent-green)', fontSize: 12, lineHeight: '18px', textAlign: 'center', fontWeight: 700 }}>✓</span>; }
+function Check() { return <span style={{ display: 'inline-block', width: 18, height: 18, borderRadius: '50%', background: 'rgba(52,211,153,0.15)', color: 'var(--accent-green)', fontSize: 12, lineHeight: '18px', textAlign: 'center', fontWeight: 600 }}>✓</span>; }
 function Cross() { return <span style={{ display: 'inline-block', width: 18, height: 18, borderRadius: '50%', background: 'rgba(248,113,113,0.1)', color: 'var(--accent-red)', fontSize: 10, lineHeight: '18px', textAlign: 'center' }}>✕</span>; }
 function fmt(n: number) { return n.toLocaleString(); }
 
@@ -84,7 +84,7 @@ export default function ShopPage() {
           <div style={{ position: 'absolute', inset: 0, opacity: 0.04, backgroundImage: 'repeating-linear-gradient(0deg,#4A9EFF 0,#4A9EFF 1px,transparent 1px,transparent 20px),repeating-linear-gradient(90deg,#4A9EFF 0,#4A9EFF 1px,transparent 1px,transparent 20px)' }} />
           <div style={{ position: 'relative' }}>
             <div style={{ fontSize: 36, marginBottom: 10 }}>⭐</div>
-            <h1 style={{ fontSize: 'clamp(22px, 4vw, 28px)', fontWeight: 900, color: '#E8F2FF', margin: '0 0 6px', letterSpacing: '-0.5px' }}>
+            <h1 style={{ fontSize: 'clamp(22px, 4vw, 28px)', fontWeight: 600, color: '#E8F2FF', margin: '0 0 6px', letterSpacing: '-0.5px' }}>
               프로 멤버십
             </h1>
             <p style={{ fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.6, margin: '0 0 20px' }}>
@@ -97,14 +97,14 @@ export default function ShopPage() {
               {/* 월간 */}
               <div style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius-md)', padding: '14px 12px' }}>
                 <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 6 }}>월간</div>
-                <div style={{ fontSize: 24, fontWeight: 900, color: '#E8F2FF', letterSpacing: '-0.5px' }}>₩{fmt(PRO_PRICING.monthly.price)}</div>
+                <div style={{ fontSize: 24, fontWeight: 700, color: '#E8F2FF', letterSpacing: '-0.5px' }}>₩{fmt(PRO_PRICING.monthly.price)}</div>
                 <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}>/월 · {PRO_PRICING.monthly.perDay}</div>
               </div>
               {/* 연간 */}
               <div style={{ background: 'rgba(59,123,246,0.08)', border: '1px solid rgba(59,123,246,0.3)', borderRadius: 'var(--radius-md)', padding: '14px 12px', position: 'relative' }}>
-                <div style={{ position: 'absolute', top: -8, right: 8, background: 'var(--brand)', color: '#fff', fontSize: 10, fontWeight: 800, padding: '3px 8px', borderRadius: 'var(--radius-md)' }}>추천</div>
+                <div style={{ position: 'absolute', top: -8, right: 8, background: 'var(--brand)', color: '#fff', fontSize: 10, fontWeight: 500, padding: '3px 8px', borderRadius: 'var(--radius-md)' }}>추천</div>
                 <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 6 }}>연간</div>
-                <div style={{ fontSize: 24, fontWeight: 900, color: '#E8F2FF', letterSpacing: '-0.5px' }}>₩{fmt(PRO_PRICING.yearly.price)}</div>
+                <div style={{ fontSize: 24, fontWeight: 700, color: '#E8F2FF', letterSpacing: '-0.5px' }}>₩{fmt(PRO_PRICING.yearly.price)}</div>
                 <div style={{ fontSize: 10, color: 'var(--brand)', marginTop: 2 }}>{PRO_PRICING.yearly.perMonth} · {PRO_PRICING.yearly.discount}</div>
               </div>
             </div>
@@ -116,7 +116,7 @@ export default function ShopPage() {
         </div>
 
         {/* 프로 기능 그리드 */}
-        <h2 style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 10 }}>프로가 되면</h2>
+        <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 10 }}>프로가 되면</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 8, marginBottom: 20 }}>
           {PRO_FEATURES.map(f => (
             <div key={f.title} style={{
@@ -125,19 +125,19 @@ export default function ShopPage() {
               borderRadius: 'var(--radius-md)',
             }}>
               <div style={{ fontSize: 20, marginBottom: 4 }}>{f.icon}</div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 2 }}>{f.title}</div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 2 }}>{f.title}</div>
               <div style={{ fontSize: 10, color: 'var(--text-tertiary)', lineHeight: 1.4 }}>{f.desc}</div>
             </div>
           ))}
         </div>
 
         {/* 무료 vs 프로 비교 */}
-        <h2 style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 10 }}>무료 vs 프로</h2>
+        <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 10 }}>무료 vs 프로</h2>
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', overflow: 'hidden', marginBottom: 20 }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 70px 70px', padding: '10px 12px', background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border)' }}>
-            <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary)' }}>기능</span>
-            <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary)', textAlign: 'center' }}>무료</span>
-            <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--brand)', textAlign: 'center' }}>프로</span>
+            <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-tertiary)' }}>기능</span>
+            <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-tertiary)', textAlign: 'center' }}>무료</span>
+            <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--brand)', textAlign: 'center' }}>프로</span>
           </div>
           {COMPARE.map((r, i) => (
             <div key={r.name} style={{
@@ -156,11 +156,11 @@ export default function ShopPage() {
         </div>
 
         {/* FAQ */}
-        <h2 style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 10 }}>자주 묻는 질문</h2>
+        <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 10 }}>자주 묻는 질문</h2>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 20 }}>
           {FAQ.map(f => (
             <details key={f.q} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
-              <summary style={{ padding: '10px 12px', fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', cursor: 'pointer', listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <summary style={{ padding: '10px 12px', fontSize: 13, fontWeight: 500, color: 'var(--text-primary)', cursor: 'pointer', listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 {f.q} <span style={{ fontSize: 12, color: 'var(--text-tertiary)', flexShrink: 0, marginLeft: 8 }}>+</span>
               </summary>
               <div style={{ padding: '0 12px 10px', fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>{f.a}</div>
@@ -171,7 +171,7 @@ export default function ShopPage() {
 
       {/* ═══════ 섹션 2: 확성기 ═══════ */}
       <section style={{ marginBottom: 32 }}>
-        <h2 style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 4 }}>📢 확성기</h2>
+        <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>📢 확성기</h2>
         <p style={{ fontSize: 12, color: 'var(--text-tertiary)', margin: '0 0 12px' }}>내 글을 공지배너에 올려 전체 유저에게 노출</p>
         <div style={{ display: 'grid', gap: 8 }}>
           {MEGAPHONES.map(m => (
@@ -182,10 +182,10 @@ export default function ShopPage() {
             }}>
               <span style={{ fontSize: 24, flexShrink: 0 }}>{m.icon}</span>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{m.name}</div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{m.name}</div>
                 <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 1 }}>{m.desc}</div>
               </div>
-              <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--brand)', flexShrink: 0 }}>₩{fmt(m.price)}</div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--brand)', flexShrink: 0 }}>₩{fmt(m.price)}</div>
             </Link>
           ))}
         </div>
@@ -193,7 +193,7 @@ export default function ShopPage() {
 
       {/* ═══════ 섹션 3: 유틸리티 ═══════ */}
       <section style={{ marginBottom: 32 }}>
-        <h2 style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 4 }}>🛠 유틸리티</h2>
+        <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>🛠 유틸리티</h2>
         <p style={{ fontSize: 12, color: 'var(--text-tertiary)', margin: '0 0 12px' }}>1회성 아이템</p>
         <div style={{ display: 'grid', gap: 8 }}>
           {UTILITIES.map(u => (
@@ -204,10 +204,10 @@ export default function ShopPage() {
             }}>
               <span style={{ fontSize: 24, flexShrink: 0 }}>{u.icon}</span>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{u.name}</div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{u.name}</div>
                 <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 1 }}>{u.desc}</div>
               </div>
-              <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)', flexShrink: 0 }}>₩{fmt(u.price)}</div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', flexShrink: 0 }}>₩{fmt(u.price)}</div>
             </div>
           ))}
         </div>

@@ -138,7 +138,7 @@ export default async function ComplexPage({ searchParams }: { searchParams: Prom
       </nav>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)' }}>
-          <h1 style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
+          <h1 style={{ fontSize: 'var(--fs-lg)', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
             {selectedRegion ? `${selectedRegion} 단지백과` : '단지백과'}
           </h1>
           <span style={{ fontSize: 12, color: 'var(--text-tertiary)', fontWeight: 600 }}>{displayCount.toLocaleString()}개</span>
@@ -151,7 +151,7 @@ export default async function ComplexPage({ searchParams }: { searchParams: Prom
 
       {/* ═══ 지역별 현황 — 도넛 + 타일 (부동산 메인 스타일) ═══ */}
       <div style={{ marginBottom: 14 }}>
-        <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 6 }}>지역별 현황</div>
+        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>지역별 현황</div>
 
         {/* 도넛 + 범례 */}
         <div style={{
@@ -174,7 +174,7 @@ export default async function ComplexPage({ searchParams }: { searchParams: Prom
               });
             })()}
             <text x={50} y={46} textAnchor="middle" style={{ fontSize: 10, fontWeight: 600, fill: 'var(--text-secondary)' }}>{selectedRegion || '전체'}</text>
-            <text x={50} y={60} textAnchor="middle" style={{ fontSize: 13, fontWeight: 800, fill: 'var(--text-primary)' }}>{displayCount.toLocaleString()}</text>
+            <text x={50} y={60} textAnchor="middle" style={{ fontSize: 13, fontWeight: 700, fill: 'var(--text-primary)' }}>{displayCount.toLocaleString()}</text>
           </svg>
 
           {/* 연차 범례 */}
@@ -211,7 +211,7 @@ export default async function ComplexPage({ searchParams }: { searchParams: Prom
               }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 'var(--sp-xs)' }}>
-                    <span style={{ fontSize: 13, fontWeight: isActive ? 700 : 600, color: isActive ? 'var(--brand)' : 'var(--text-primary)', whiteSpace: 'nowrap' }}>{r.region}</span>
+                    <span style={{ fontSize: 13, fontWeight: isActive ? 600 : 500, color: isActive ? 'var(--brand)' : 'var(--text-primary)', whiteSpace: 'nowrap' }}>{r.region}</span>
                     <span style={{ fontSize: 12, fontWeight: 700, color: isActive ? 'var(--brand)' : 'var(--text-secondary)', fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}>{r.count.toLocaleString()}</span>
                   </div>
                   <div style={{ display: 'flex', width: '100%', height: 3, borderRadius: 4, overflow: 'hidden', marginTop: 2, background: 'var(--bg-hover)' }}>
@@ -236,7 +236,7 @@ export default async function ComplexPage({ searchParams }: { searchParams: Prom
       {/* SEO 허브 링크 — 크롤 심도 + 롱테일 키워드 */}
       <div style={{ marginTop: 20 }}>
         <section style={{ marginBottom: 16 }}>
-          <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px' }}>테마별 분석</h2>
+          <h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 8px' }}>테마별 분석</h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
             {[
               { s: 'price-up', l: '📈 가격 상승' }, { s: 'price-down', l: '📉 가격 하락' },
@@ -248,7 +248,7 @@ export default async function ComplexPage({ searchParams }: { searchParams: Prom
           </div>
         </section>
         <section style={{ marginBottom: 16 }}>
-          <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px' }}>지역별 시세</h2>
+          <h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 8px' }}>지역별 시세</h2>
           <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
             {REGIONS.map(r => (
               <Link key={r} href={`/apt/region/${encodeURIComponent(r)}`} style={{ padding: '4px 10px', borderRadius: 16, fontSize: 11, textDecoration: 'none', fontWeight: 600, background: 'var(--bg-surface)', color: 'var(--text-secondary)', border: '1px solid var(--border)' }}>{r}</Link>

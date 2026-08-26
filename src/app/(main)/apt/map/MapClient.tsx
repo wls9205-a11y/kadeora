@@ -183,11 +183,11 @@ export default function MapClient() {
           styles: [{
             width: '44px', height: '44px', background: 'rgba(37,99,235,0.85)',
             borderRadius: '50%', color: '#fff', textAlign: 'center',
-            lineHeight: '44px', fontSize: '13px', fontWeight: '800',
+            lineHeight: '44px', fontSize: '13px', fontWeight: '600',
           }, {
             width: '54px', height: '54px', background: 'rgba(37,99,235,0.9)',
             borderRadius: '50%', color: '#fff', textAlign: 'center',
-            lineHeight: '54px', fontSize: '14px', fontWeight: '800',
+            lineHeight: '54px', fontSize: '14px', fontWeight: '600',
           }],
           });
           clustererRef.current.addMarkers(newMarkers);
@@ -245,7 +245,7 @@ export default function MapClient() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-md)' }}>
         <div>
           <Link href="/apt" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 부동산</Link>
-          <h1 style={{ margin: '4px 0 0', fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)' }}>🗺️ 부동산 지도</h1>
+          <h1 style={{ margin: '4px 0 0', fontSize: 'var(--fs-lg)', fontWeight: 600, color: 'var(--text-primary)' }}>🗺️ 부동산 지도</h1>
         </div>
       </div>
 
@@ -277,7 +277,7 @@ export default function MapClient() {
             <div style={{ padding: '20px 16px', textAlign: 'center' }}>
               <div style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 10 }}>카카오 지도 SDK를 불러올 수 없습니다 · 아래 목록에서 지역별 현황을 확인하세요</div>
               <div style={{ display: 'flex', gap: 'var(--sp-sm)', justifyContent: 'center' }}>
-                <a href="https://map.kakao.com" target="_blank" rel="noopener noreferrer" style={{ padding: '6px 14px', borderRadius: 'var(--radius-sm)', background: 'rgba(254,229,0,0.1)', border: '1px solid rgba(254,229,0,0.3)', color: '#FEE500', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>카카오맵에서 보기</a>
+                <a href="https://map.kakao.com" target="_blank" rel="noopener noreferrer" style={{ padding: '6px 14px', borderRadius: 'var(--radius-sm)', background: 'rgba(254,229,0,0.1)', border: '1px solid rgba(254,229,0,0.3)', color: 'var(--accent-yellow)'  /* #FEE500 은 제 10% 틴트 위 1.24 였다 */, textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>카카오맵에서 보기</a>
                 <button onClick={() => window.location.reload()} style={{ padding: '6px 14px', borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>새로고침</button>
               </div>
             </div>
@@ -306,7 +306,7 @@ export default function MapClient() {
                     {LAYER_CONF[selectedPin.layer].icon} {LAYER_CONF[selectedPin.layer].label}
                   </span>
                 </div>
-                <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>{selectedPin.name}</div>
+                <div style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)' }}>{selectedPin.name}</div>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>{selectedPin.address}</div>
                 {selectedPin.extra && <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginTop: 'var(--sp-xs)' }}>{selectedPin.extra}</div>}
               </div>

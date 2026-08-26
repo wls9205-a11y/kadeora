@@ -35,8 +35,16 @@ export const metadata: Metadata = {
 };
 
 const STAGE_COLORS: Record<string, string> = {
-  '추진위': '#94A3B8', '정비구역지정': '#6B7280', '조합설립': '#60A5FA',
-  '사업시행인가': '#FBBF24', '관리처분': '#FB923C', '착공': '#34D399', '준공': '#3B82F6',
+  // ⚠️ 이 값들은 «글자색» 으로 쓴다(단계 라벨·건수·진행률). 밝은 Tailwind 300~400 계열이라
+  //    흰 배경 대비가 1.67~3.68 로 일곱 중 여섯이 미달이었다(TY1-7 실측).
+  //    색상(H)은 그대로 두고 기존 토큰의 어두운 값으로 대응시켰다 — 7단계 구분은 유지된다.
+  //      추진위 2.56→7.56 · 조합설립 2.54→8.72 · 사업시행인가 1.67→6.85
+  //      관리처분 2.26→7.31 · 착공 1.92→7.68 · 준공 3.68→5.17
+  //    정비구역지정(#6B7280 4.83)은 통과했지만 --text-secondary 로 함께 옮겼다 —
+  //    추진위가 --text-tertiary 라 그대로 두면 두 회색의 «진하기 순서» 가 뒤집힌다.
+  //    ⛔ 새 토큰은 만들지 않았다. 다시 밝은 값으로 되돌리지 말 것.
+  '추진위': 'var(--text-tertiary)', '정비구역지정': 'var(--text-secondary)', '조합설립': 'var(--brand-dark)',
+  '사업시행인가': 'var(--accent-yellow)', '관리처분': 'var(--accent-orange)', '착공': 'var(--accent-green)', '준공': 'var(--brand)',
 };
 
 export default async function RedevLandingPage() {
@@ -128,7 +136,7 @@ export default async function RedevLandingPage() {
 
       {/* 히어로 */}
       <div style={{ padding: '32px 0 24px', textAlign: 'center' }}>
-        <h1 style={{ fontSize: 24, fontWeight: 900, color: 'var(--text-primary)', margin: '0 0 8px', lineHeight: 1.3 }}>
+        <h1 style={{ fontSize: 24, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 8px', lineHeight: 1.3 }}>
           🏗️ 전국 재개발·재건축 현황
         </h1>
         <p style={{ fontSize: 14, color: 'var(--text-secondary)', margin: 0 }}>
@@ -144,7 +152,7 @@ export default async function RedevLandingPage() {
           const shortLabel: Record<string, string> = { '추진위': '추진위', '정비구역지정': '구역지정', '조합설립': '조합', '사업시행인가': '시행', '관리처분': '관리', '착공': '착공', '준공': '준공' };
           return (
             <div key={stage} style={{ flex: Math.max(pct, 8), textAlign: 'center', padding: '8px 2px', borderRadius: 'var(--radius-sm)', background: `${STAGE_COLORS[stage]}15`, border: `1px solid ${STAGE_COLORS[stage]}30`, minWidth: 0, overflow: 'hidden' }}>
-              <div style={{ fontSize: 15, fontWeight: 800, color: STAGE_COLORS[stage] }}>{count}</div>
+              <div style={{ fontSize: 15, fontWeight: 700, color: STAGE_COLORS[stage] }}>{count}</div>
               <div style={{ fontSize: 9, color: STAGE_COLORS[stage], fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{shortLabel[stage] || stage}</div>
             </div>
           );
@@ -152,7 +160,7 @@ export default async function RedevLandingPage() {
       </div>
 
       {/* 지역별 카드 */}
-      <h2 style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 12 }}>📍 지역별 현황</h2>
+      <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 12 }}>📍 지역별 현황</h2>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 8, marginBottom: 24 }}>
         {regionStats.map(r => (
           <Link key={r.name} href={`/apt/redev/${encodeURIComponent(r.name)}`} style={{
@@ -163,8 +171,8 @@ export default async function RedevLandingPage() {
             {/* 세션 139: 지역별 대표 og 썸네일 */}
             <img src={`/api/og?title=${encodeURIComponent(r.name + ' 재개발·재건축')}&design=2&category=apt&subtitle=${encodeURIComponent(`${r.total}개 구역`)}`} alt={`${r.name} 재개발 현황`} width={280} height={88} loading="lazy" decoding="async" style={{ width: '100%', height: 88, objectFit: 'cover', display: 'block', background: 'var(--bg-hover)' }} />
             <div style={{ padding: '10px' }}>
-            <div style={{ fontSize: 20, fontWeight: 900, color: 'var(--brand)' }}>{r.total}</div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', margin: '2px 0' }}>{r.name}</div>
+            <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--brand)' }}>{r.total}</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', margin: '2px 0' }}>{r.name}</div>
             <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>
               재개발 {r.redev} · 재건축 {r.rebuild}
             </div>
@@ -177,15 +185,15 @@ export default async function RedevLandingPage() {
 
       {/* 최근 단계 변경 */}
       {recentChanges.length > 0 && (<>
-        <h2 style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 12 }}>🔄 최근 단계 변경</h2>
+        <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 12 }}>🔄 최근 단계 변경</h2>
         <div style={{ marginBottom: 24 }}>
           {recentChanges.map((c: any) => (
             <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', marginBottom: 4, borderRadius: 'var(--radius-sm)', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
-              <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', flex: 1 }}>{c.district_name}</span>
+              <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', flex: 1 }}>{c.district_name}</span>
               <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{c.region}</span>
               {c.previous_stage && <span style={{ fontSize: 11, color: 'var(--accent-red)' }}>{c.previous_stage}</span>}
               {c.previous_stage && <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>→</span>}
-              <span style={{ fontSize: 11, fontWeight: 700, color: STAGE_COLORS[c.stage] || '#10B981' }}>{c.stage}</span>
+              <span style={{ fontSize: 11, fontWeight: 500, color: STAGE_COLORS[c.stage] || '#10B981' }}>{c.stage}</span>
             </div>
           ))}
         </div>
@@ -193,7 +201,7 @@ export default async function RedevLandingPage() {
 
       {/* 관련 분석 블로그 */}
       {blogs.length > 0 && (<>
-        <h2 style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 12 }}>📝 인기 분석</h2>
+        <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 12 }}>📝 인기 분석</h2>
         <div style={{ marginBottom: 24 }}>
           {blogs.map((b: any, i: number) => (
             <Link key={b.slug} href={`/blog/${b.slug}`} style={{
@@ -214,7 +222,7 @@ export default async function RedevLandingPage() {
       <div style={{ textAlign: 'center', padding: '16px 0 32px' }}>
         <Link href="/apt?tab=redev" style={{
           display: 'inline-block', padding: '12px 32px', borderRadius: 'var(--radius-xl)',
-          background: 'var(--brand)', color: '#fff', fontSize: 14, fontWeight: 700,
+          background: 'var(--brand)', color: '#fff', fontSize: 14, fontWeight: 500,
           textDecoration: 'none',
         }}>
           전체 {total}개 구역 보기 →
@@ -223,10 +231,10 @@ export default async function RedevLandingPage() {
 
       {/* FAQ 섹션 (SEO) */}
       <div style={{ borderTop: '1px solid var(--border)', padding: '24px 0' }}>
-        <h2 style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 16 }}>❓ 자주 묻는 질문</h2>
+        <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 16 }}>❓ 자주 묻는 질문</h2>
         {(faqLd.mainEntity as any[]).map((q: any, i: number) => (
           <details key={i} style={{ marginBottom: 8, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', overflow: 'hidden' }}>
-            <summary style={{ padding: '10px 14px', fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', cursor: 'pointer', background: 'var(--bg-surface)' }}>{q.name}</summary>
+            <summary style={{ padding: '10px 14px', fontSize: 13, fontWeight: 500, color: 'var(--text-primary)', cursor: 'pointer', background: 'var(--bg-surface)' }}>{q.name}</summary>
             <div style={{ padding: '10px 14px', fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6, background: 'var(--bg-base)' }}>{q.acceptedAnswer.text}</div>
           </details>
         ))}

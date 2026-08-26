@@ -70,7 +70,7 @@ function DailyRegionPicker({ onSelect }: { onSelect: (city: string) => void }) {
   return (
     <div style={{ maxWidth: 480, margin: '0 auto', padding: '40px 16px', textAlign: 'center' }}>
       <div style={{ fontSize: 32, marginBottom: 12 }}>📍</div>
-      <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 6 }}>
+      <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>
         어디에 사세요?
       </div>
       <div style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 24 }}>

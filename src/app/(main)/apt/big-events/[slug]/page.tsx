@@ -55,7 +55,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 function scoreTone(score: number | null | undefined): { color: string; bg: string; label: string } {
   const n = Number(score ?? 0);
   if (n >= 70) return { color: 'var(--accent-green)', bg: 'rgba(34,197,94,0.12)', label: '높음' };
-  if (n >= 50) return { color: '#eab308', bg: 'rgba(234,179,8,0.12)', label: '보통' };
+  // ⚠️ #eab308 은 제 12% 틴트 위에서 1.77 이었다. 위·아래 갈래는 이미 어두운 토큰이다.
+  if (n >= 50) return { color: 'var(--accent-yellow)', bg: 'rgba(234,179,8,0.12)', label: '보통' };
   return { color: 'var(--accent-red)', bg: 'rgba(239,68,68,0.12)', label: '낮음' };
 }
 
@@ -150,7 +151,7 @@ export default async function BigEventDetailPage({ params }: Props) {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 8 }}>
-          <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 999, background: 'var(--brand-bg, rgba(59,123,246,0.18))', color: 'var(--brand)' }}>
+          <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 8px', borderRadius: 999, background: 'var(--brand-bg, rgba(59,123,246,0.18))', color: 'var(--brand)' }}>
             Stage {ev.stage ?? '-'} / 7 · {STAGE_LABEL[ev.stage ?? 1]}
           </span>
           {ev.constructor_status && ev.constructor_status !== 'confirmed' && (
@@ -158,11 +159,11 @@ export default async function BigEventDetailPage({ params }: Props) {
               {ev.constructor_status === 'likely' ? '수주 유력' : '수주 미확정'}
             </span>
           )}
-          <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 4, background: tone.bg, color: tone.color }}>
+          <span style={{ fontSize: 10, fontWeight: 500, padding: '2px 8px', borderRadius: 4, background: tone.bg, color: tone.color }}>
             팩트 신뢰도 {ev.fact_confidence_score ?? 0}점 · {tone.label}
           </span>
         </div>
-        <h1 style={{ margin: 0, fontSize: 24, fontWeight: 800, color: 'var(--text-primary)' }}>
+        <h1 style={{ margin: 0, fontSize: 24, fontWeight: 600, color: 'var(--text-primary)' }}>
           {ev.name}
           {ev.new_brand_name ? <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-secondary)' }}> · {ev.new_brand_name}</span> : null}
         </h1>
@@ -174,7 +175,7 @@ export default async function BigEventDetailPage({ params }: Props) {
 
       {/* 기본 정보 표 */}
       <section style={{ marginBottom: 22 }}>
-        <h2 style={{ fontSize: 15, fontWeight: 700, margin: '0 0 8px', color: 'var(--text-primary)' }}>기본 정보</h2>
+        <h2 style={{ fontSize: 15, fontWeight: 600, margin: '0 0 8px', color: 'var(--text-primary)' }}>기본 정보</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 8 }}>
           <InfoCard label="준공" value={ev.build_year_before ? `${ev.build_year_before}년` : '미상'} />
           <InfoCard label="예상 완공" value={ev.build_year_after_est ? `${ev.build_year_after_est}년` : '미정'} />
@@ -197,13 +198,13 @@ export default async function BigEventDetailPage({ params }: Props) {
       {/* 관련 블로그 */}
       {(pillar || spokes.length > 0) && (
         <section style={{ marginBottom: 22 }}>
-          <h2 style={{ fontSize: 15, fontWeight: 700, margin: '0 0 8px', color: 'var(--text-primary)' }}>관련 분석 글</h2>
+          <h2 style={{ fontSize: 15, fontWeight: 600, margin: '0 0 8px', color: 'var(--text-primary)' }}>관련 분석 글</h2>
           <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
             {pillar && (
               <li>
                 <Link href={`/blog/${pillar.slug}`} style={blogCardStyle}>
                   <span style={pillarBadgeStyle}>Pillar</span>
-                  <span style={{ fontSize: 13, color: 'var(--text-primary)', fontWeight: 700 }}>{pillar.title}</span>
+                  <span style={{ fontSize: 13, color: 'var(--text-primary)', fontWeight: 600 }}>{pillar.title}</span>
                 </Link>
               </li>
             )}
@@ -222,7 +223,7 @@ export default async function BigEventDetailPage({ params }: Props) {
       {/* 이미지 갤러리 (is_verified=true만) */}
       {assets.length > 0 && (
         <section style={{ marginBottom: 22 }}>
-          <h2 style={{ fontSize: 15, fontWeight: 700, margin: '0 0 8px', color: 'var(--text-primary)' }}>이미지 자료</h2>
+          <h2 style={{ fontSize: 15, fontWeight: 600, margin: '0 0 8px', color: 'var(--text-primary)' }}>이미지 자료</h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 8 }}>
             {assets.map((a: any) => (
               <figure key={a.id} style={{ margin: 0 }}>
@@ -245,7 +246,7 @@ export default async function BigEventDetailPage({ params }: Props) {
       {/* 최근 30일 뉴스 */}
       {recentNews.length > 0 && (
         <section style={{ marginBottom: 22 }}>
-          <h2 style={{ fontSize: 15, fontWeight: 700, margin: '0 0 8px', color: 'var(--text-primary)' }}>최근 30일 뉴스 감지 <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-tertiary)' }}>{recentNews.length}건</span></h2>
+          <h2 style={{ fontSize: 15, fontWeight: 600, margin: '0 0 8px', color: 'var(--text-primary)' }}>최근 30일 뉴스 감지 <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-tertiary)' }}>{recentNews.length}건</span></h2>
           <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
             {recentNews.slice(0, 10).map((m: any) => {
               const url = m?.metadata?.url || '';
@@ -254,7 +255,7 @@ export default async function BigEventDetailPage({ params }: Props) {
               return (
                 <li key={m.id} style={{ padding: '8px 10px', border: '1px solid var(--border)', borderRadius: 8, background: 'var(--bg-surface)' }}>
                   <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
-                    {critical ? <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 4, background: 'rgba(239,68,68,0.12)', color: 'var(--accent-red)' }}>중요</span> : null}
+                    {critical ? <span style={{ fontSize: 10, fontWeight: 500, padding: '1px 6px', borderRadius: 4, background: 'rgba(239,68,68,0.12)', color: 'var(--accent-red)' }}>중요</span> : null}
                     <a href={url} rel="nofollow noopener" target="_blank" style={{ fontSize: 12, color: 'var(--text-primary)', textDecoration: 'none' }}>
                       {title}
                     </a>
@@ -270,7 +271,7 @@ export default async function BigEventDetailPage({ params }: Props) {
       {/* 타임라인 */}
       {milestones.length > 0 && (
         <section style={{ marginBottom: 22 }}>
-          <h2 style={{ fontSize: 15, fontWeight: 700, margin: '0 0 8px', color: 'var(--text-primary)' }}>마일스톤 타임라인 <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-tertiary)' }}>{milestones.length}건</span></h2>
+          <h2 style={{ fontSize: 15, fontWeight: 600, margin: '0 0 8px', color: 'var(--text-primary)' }}>마일스톤 타임라인 <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-tertiary)' }}>{milestones.length}건</span></h2>
           <ol style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
             {milestones.slice(0, 20).map((m: any) => (
               <li key={m.id} style={{ padding: '6px 10px', borderLeft: '3px solid var(--brand)', background: 'var(--bg-surface)', fontSize: 12 }}>
@@ -286,12 +287,12 @@ export default async function BigEventDetailPage({ params }: Props) {
       {/* 같은 시도 다른 이벤트 (cross-link) */}
       {related.length > 0 && (
         <section style={{ marginBottom: 22 }}>
-          <h2 style={{ fontSize: 15, fontWeight: 700, margin: '0 0 8px', color: 'var(--text-primary)' }}>{ev.region_sido} 다른 대형 이벤트</h2>
+          <h2 style={{ fontSize: 15, fontWeight: 600, margin: '0 0 8px', color: 'var(--text-primary)' }}>{ev.region_sido} 다른 대형 이벤트</h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 6 }}>
             {related.map((r: any) => (
               <Link key={r.id} href={`/apt/big-events/${encodeURIComponent(r.slug)}`} style={relatedStyle}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--brand)' }}>Stage {r.stage ?? '-'}</div>
-                <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>{r.name}{r.new_brand_name ? <span style={{ color: 'var(--text-secondary)', fontWeight: 500 }}> · {r.new_brand_name}</span> : null}</div>
+                <div style={{ fontSize: 10, fontWeight: 500, color: 'var(--brand)' }}>Stage {r.stage ?? '-'}</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)' }}>{r.name}{r.new_brand_name ? <span style={{ color: 'var(--text-secondary)', fontWeight: 500 }}> · {r.new_brand_name}</span> : null}</div>
                 <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{r.region_sigungu}</div>
               </Link>
             ))}
@@ -310,7 +311,7 @@ function InfoCard({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div style={{ padding: '10px 12px', borderRadius: 8, background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
       <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 2 }}>{label}</div>
-      <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{value}</div>
+      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{value}</div>
     </div>
   );
 }
@@ -328,7 +329,7 @@ const blogCardStyle: React.CSSProperties = {
 
 const pillarBadgeStyle: React.CSSProperties = {
   fontSize: 10,
-  fontWeight: 700,
+  fontWeight: 500,
   padding: '2px 6px',
   borderRadius: 4,
   background: 'rgba(168,85,247,0.15)',
@@ -338,7 +339,7 @@ const pillarBadgeStyle: React.CSSProperties = {
 
 const spokeBadgeStyle: React.CSSProperties = {
   fontSize: 10,
-  fontWeight: 700,
+  fontWeight: 500,
   padding: '2px 6px',
   borderRadius: 4,
   background: 'var(--bg-hover)',

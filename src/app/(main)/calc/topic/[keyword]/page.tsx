@@ -146,7 +146,7 @@ export default async function TopicHubPage({ params }: PageProps) {
         <span style={{ color: 'var(--text-secondary)' }}>토픽: {topic.topic_label}</span>
       </nav>
 
-      <h1 style={{ fontSize: 28, fontWeight: 900, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.5px' }}>
+      <h1 style={{ fontSize: 28, fontWeight: 600, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.5px' }}>
         {topic.topic_label}
       </h1>
       <p style={{ fontSize: 14, color: 'var(--text-secondary)', margin: '8px 0 0' }}>
@@ -161,7 +161,7 @@ export default async function TopicHubPage({ params }: PageProps) {
 
       {/* 계산기 그리드 */}
       <section style={{ marginTop: 28 }}>
-        <h2 style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 12px' }}>
+        <h2 style={{ fontSize: 18, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 12px' }}>
           🧮 무료 계산기 ({calcs.length}종)
         </h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 10 }}>
@@ -172,7 +172,7 @@ export default async function TopicHubPage({ params }: PageProps) {
               transition: 'transform 0.15s, border-color 0.15s',
             }}>
               <div style={{ fontSize: 28, marginBottom: 6 }}>{c.emoji}</div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>{c.titleShort}</div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>{c.titleShort}</div>
               <div style={{ fontSize: 11, color: 'var(--text-tertiary)', lineHeight: 1.4 }}>
                 {c.description.slice(0, 60)}…
               </div>
@@ -184,7 +184,7 @@ export default async function TopicHubPage({ params }: PageProps) {
       {/* 관련 블로그 */}
       {Array.isArray(blogs) && blogs.length > 0 && (
         <section style={{ marginTop: 32 }}>
-          <h2 style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 12px' }}>
+          <h2 style={{ fontSize: 18, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 12px' }}>
             📖 {topic.topic_label} 가이드 ({blogs.length}편)
           </h2>
           {blogs.map((b: any) => (
@@ -199,7 +199,7 @@ export default async function TopicHubPage({ params }: PageProps) {
                 </div>
               )}
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {b.title}
                 </div>
                 {b.excerpt && (
@@ -217,12 +217,12 @@ export default async function TopicHubPage({ params }: PageProps) {
       {/* FAQ */}
       {Array.isArray(topic.faqs) && topic.faqs.length > 0 && (
         <section style={{ marginTop: 32 }}>
-          <h2 style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 12px' }}>
+          <h2 style={{ fontSize: 18, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 12px' }}>
             ❓ 자주 묻는 질문
           </h2>
           {topic.faqs.map((f: any, i: number) => (
             <details key={i} style={{ marginBottom: 8, background: 'var(--bg-surface)', borderRadius: 8, padding: 12 }}>
-              <summary style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', cursor: 'pointer' }}>
+              <summary style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-primary)', cursor: 'pointer' }}>
                 Q. {f.q}
               </summary>
               <div style={{ marginTop: 8, fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
@@ -236,7 +236,7 @@ export default async function TopicHubPage({ params }: PageProps) {
       {/* 관련 키워드 (SEO) */}
       {Array.isArray(topic.related_keywords) && topic.related_keywords.length > 0 && (
         <section style={{ marginTop: 24 }}>
-          <h3 style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', margin: '0 0 8px' }}>관련 키워드</h3>
+          <h3 style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', margin: '0 0 8px' }}>관련 키워드</h3>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
             {topic.related_keywords.map((k: string) => (
               <span key={k} style={{

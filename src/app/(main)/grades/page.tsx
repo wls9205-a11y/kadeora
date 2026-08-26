@@ -78,7 +78,7 @@ export default async function GradesPage() {
         return (
           <div style={{ padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', marginBottom: 'var(--sp-lg)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-sm)' }}>
-              <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{current.emoji} {current.title} (Lv.{current.grade})</span>
+              <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>{current.emoji} {current.title} (Lv.{current.grade})</span>
               <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>{userPoints}P</span>
             </div>
             <div style={{ height: 6, borderRadius: 4, background: 'var(--bg-hover)', overflow: 'hidden', marginBottom: 6 }}>
@@ -86,10 +86,10 @@ export default async function GradesPage() {
             </div>
             {next ? (
               <div style={{ fontSize: 12, color: 'var(--text-tertiary)', textAlign: 'center' }}>
-                다음 등급 {next.emoji} {next.title}까지 <span style={{ fontWeight: 700, color: 'var(--brand)' }}>{remaining}P</span> 남았어요!
+                다음 등급 {next.emoji} {next.title}까지 <span style={{ fontWeight: 600, color: 'var(--brand)' }}>{remaining}P</span> 남았어요!
               </div>
             ) : (
-              <div style={{ fontSize: 12, color: 'var(--accent-green)', textAlign: 'center', fontWeight: 700 }}>🎉 최고 등급 달성!</div>
+              <div style={{ fontSize: 12, color: 'var(--accent-green)', textAlign: 'center', fontWeight: 600 }}>🎉 최고 등급 달성!</div>
             )}
           </div>
         );
@@ -109,7 +109,7 @@ export default async function GradesPage() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                 <span style={{ fontSize: 20 }}>{tier.emoji}</span>
                 <div>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{tier.title}</div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{tier.title}</div>
                   <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{tier.grade}</div>
                 </div>
               </div>

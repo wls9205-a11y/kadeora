@@ -88,7 +88,7 @@ export default async function StockDataPage() {
         ].map(k => (
           <div key={k.label} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 14, textAlign: 'center' }}>
             <div style={{ fontSize: 22, marginBottom: 4 }}>{k.emoji}</div>
-            <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 700, color: 'var(--text-primary)' }}>{k.value}</div>
+            <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 600, color: 'var(--text-primary)' }}>{k.value}</div>
             <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>{k.label}</div>
           </div>
         ))}

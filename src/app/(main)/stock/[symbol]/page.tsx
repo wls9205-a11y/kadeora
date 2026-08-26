@@ -289,7 +289,7 @@ export default async function StockDetailPage({ params }: Props) {
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap', marginBottom: 'var(--sp-xs)' }}>
           <span style={{ fontSize: 'clamp(28px, 8vw, 36px)', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: "-.0125em" }}>{fmtPrice(Number(s.price), s.currency ?? undefined)}</span>
           {!isStale && (
-            <span style={{ fontSize: 16, fontWeight: 700, color: stockColor(changePct, isKR) }}>
+            <span style={{ fontSize: 16, fontWeight: 600, color: stockColor(changePct, isKR) }}>
               {isUp ? '▲' : isDown ? '▼' : '━'} {isUp ? '+' : ''}{Number(s.change_amt).toLocaleString()} ({Math.abs(changePct).toFixed(2)}%)
             </span>
           )}
@@ -344,7 +344,7 @@ export default async function StockDetailPage({ params }: Props) {
               {isUp ? '▲' : isDown ? '▼' : '━'}
             </div>
             <div>
-              <div style={{ fontSize: 16, fontWeight: 700, color: stockColor(changePct, isKR) }}>
+              <div style={{ fontSize: 16, fontWeight: 600, color: stockColor(changePct, isKR) }}>
                 {changePct >= 0 ? '+' : ''}{changePct.toFixed(2)}%
               </div>
               <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{s.change_amt != null ? `${Number(s.change_amt) > 0 ? '+' : ''}${Number(s.change_amt).toLocaleString()}` : ''}</div>
@@ -641,7 +641,7 @@ export default async function StockDetailPage({ params }: Props) {
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
                     <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>{sim.currency === 'USD' ? `$${Number(sim.price).toFixed(2)}` : `₩${Number(sim.price).toLocaleString()}`}</span>
-                    <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, minWidth: 52, textAlign: 'right', color: stockColor(simPct, isKR) }}>
+                    <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, minWidth: 52, textAlign: 'right', color: stockColor(simPct, isKR) }}>
                       {simPct > 0 ? '+' : ''}{simPct.toFixed(2)}%
                     </span>
                     <div style={{ width: 24, height: 4, borderRadius: 4, background: 'var(--bg-hover)', overflow: 'hidden' }}>

@@ -126,7 +126,7 @@ export default function MorePage() {
               id={id}
               style={{
                 fontSize: 'var(--fs-lg)',
-                fontWeight: 700,
+                fontWeight: 600,
                 letterSpacing: '-.02em',
                 margin: '0 0 var(--sp-sm)',
                 color: 'var(--text-primary)',

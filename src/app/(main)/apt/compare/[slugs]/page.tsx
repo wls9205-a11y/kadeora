@@ -99,7 +99,7 @@ export default async function ComparePage({ params }: Props) {
         <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>단지 비교</span>
       </nav>
 
-      <h1 style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 16px', lineHeight: 1.3 }}>
+      <h1 style={{ fontSize: 18, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 16px', lineHeight: 1.3 }}>
         {a.apt_name} <span style={{ color: 'var(--text-tertiary)', fontWeight: 500 }}>vs</span> {b.apt_name}
       </h1>
 
@@ -107,16 +107,16 @@ export default async function ComparePage({ params }: Props) {
       <div style={{ marginBottom: 20, border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', overflow: 'hidden' }}>
         {/* 헤더 */}
         <div style={{ display: 'grid', gridTemplateColumns: '80px 1fr 1fr', background: 'var(--bg-surface)', borderBottom: '1px solid var(--border)' }}>
-          <div style={{ padding: '10px 8px', fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary)' }}>항목</div>
-          <div style={{ padding: '10px 8px', fontSize: 12, fontWeight: 800, color: 'var(--accent-blue)', textAlign: 'center', borderLeft: '1px solid var(--border)' }}>{a.apt_name}</div>
-          <div style={{ padding: '10px 8px', fontSize: 12, fontWeight: 800, color: 'var(--accent-blue)', textAlign: 'center', borderLeft: '1px solid var(--border)' }}>{b.apt_name}</div>
+          <div style={{ padding: '10px 8px', fontSize: 11, fontWeight: 500, color: 'var(--text-tertiary)' }}>항목</div>
+          <div style={{ padding: '10px 8px', fontSize: 12, fontWeight: 500, color: 'var(--accent-blue)', textAlign: 'center', borderLeft: '1px solid var(--border)' }}>{a.apt_name}</div>
+          <div style={{ padding: '10px 8px', fontSize: 12, fontWeight: 500, color: 'var(--accent-blue)', textAlign: 'center', borderLeft: '1px solid var(--border)' }}>{b.apt_name}</div>
         </div>
         {/* 행 */}
         {rows.map((r, i) => (
           <div key={i} style={{ display: 'grid', gridTemplateColumns: '80px 1fr 1fr', borderBottom: i < rows.length - 1 ? '1px solid var(--border)' : 'none', background: r.highlight ? 'rgba(37, 99, 235, 0.05)' : 'transparent' }}>
-            <div style={{ padding: '8px', fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)' }}>{r.label}</div>
-            <div style={{ padding: '8px', fontSize: 12, fontWeight: r.highlight ? 800 : 600, color: 'var(--text-primary)', textAlign: 'center', borderLeft: '1px solid var(--border)' }}>{r.va}</div>
-            <div style={{ padding: '8px', fontSize: 12, fontWeight: r.highlight ? 800 : 600, color: 'var(--text-primary)', textAlign: 'center', borderLeft: '1px solid var(--border)' }}>{r.vb}</div>
+            <div style={{ padding: '8px', fontSize: 11, fontWeight: 500, color: 'var(--text-tertiary)' }}>{r.label}</div>
+            <div style={{ padding: '8px', fontSize: 12, fontWeight: r.highlight ? 700 : 500, color: 'var(--text-primary)', textAlign: 'center', borderLeft: '1px solid var(--border)' }}>{r.va}</div>
+            <div style={{ padding: '8px', fontSize: 12, fontWeight: r.highlight ? 700 : 500, color: 'var(--text-primary)', textAlign: 'center', borderLeft: '1px solid var(--border)' }}>{r.vb}</div>
           </div>
         ))}
       </div>
@@ -134,10 +134,10 @@ export default async function ComparePage({ params }: Props) {
 
       {/* FAQ */}
       <section style={{ marginBottom: 20 }}>
-        <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 10px' }}>자주 묻는 질문</h2>
+        <h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 10px' }}>자주 묻는 질문</h2>
         {faq.map((f, i) => (
           <details key={i} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '10px 14px', marginBottom: 6 }}>
-            <summary style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', cursor: 'pointer' }}>{f.q}</summary>
+            <summary style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-primary)', cursor: 'pointer' }}>{f.q}</summary>
             <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 8, lineHeight: 1.6 }}>{f.a}</p>
           </details>
         ))}
@@ -145,8 +145,8 @@ export default async function ComparePage({ params }: Props) {
 
       {/* 단지별 상세 링크 */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 40 }}>
-        <Link href={`/apt/complex/${encodeURIComponent(a.apt_name)}`} style={{ display: 'block', textAlign: 'center', padding: '14px', borderRadius: 'var(--radius-sm)', background: 'linear-gradient(135deg, #0F1B3E 0%, #2563EB 100%)', textDecoration: 'none', fontSize: 12, fontWeight: 700, color: '#fff' }}>{a.apt_name} 상세 →</Link>
-        <Link href={`/apt/complex/${encodeURIComponent(b.apt_name)}`} style={{ display: 'block', textAlign: 'center', padding: '14px', borderRadius: 'var(--radius-sm)', background: 'linear-gradient(135deg, #0F1B3E 0%, #2563EB 100%)', textDecoration: 'none', fontSize: 12, fontWeight: 700, color: '#fff' }}>{b.apt_name} 상세 →</Link>
+        <Link href={`/apt/complex/${encodeURIComponent(a.apt_name)}`} style={{ display: 'block', textAlign: 'center', padding: '14px', borderRadius: 'var(--radius-sm)', background: 'linear-gradient(135deg, #0F1B3E 0%, #2563EB 100%)', textDecoration: 'none', fontSize: 12, fontWeight: 500, color: '#fff' }}>{a.apt_name} 상세 →</Link>
+        <Link href={`/apt/complex/${encodeURIComponent(b.apt_name)}`} style={{ display: 'block', textAlign: 'center', padding: '14px', borderRadius: 'var(--radius-sm)', background: 'linear-gradient(135deg, #0F1B3E 0%, #2563EB 100%)', textDecoration: 'none', fontSize: 12, fontWeight: 500, color: '#fff' }}>{b.apt_name} 상세 →</Link>
       </div>
 
       <footer style={{ fontSize: 10, color: 'var(--text-tertiary)', textAlign: 'center', paddingBottom: 40 }}>

@@ -95,7 +95,7 @@ const CHIP: React.CSSProperties = {
 };
 const chipStyle = (active: boolean): React.CSSProperties =>
   active
-    ? { ...CHIP, background: 'var(--brand)', borderColor: 'var(--brand)', color: '#FFFFFF', fontWeight: 700 }
+    ? { ...CHIP, background: 'var(--brand)', borderColor: 'var(--brand)', color: '#FFFFFF', fontWeight: 500 }
     : { ...CHIP, background: 'var(--bg-surface)', color: 'var(--text-secondary)' };
 
 const ROW: React.CSSProperties = {
@@ -215,7 +215,7 @@ export default async function AptArchivePage({ searchParams }: { searchParams?: 
               {pageNum} / {data.total_pages}
             </span>
             {pageNum < data.total_pages ? (
-              <Link href={href({ page: pageNum + 1 })} style={{ ...CHIP, background: 'var(--brand)', borderColor: 'var(--brand)', color: '#FFFFFF', fontWeight: 700, minHeight: 40, padding: '0 16px' }}>
+              <Link href={href({ page: pageNum + 1 })} style={{ ...CHIP, background: 'var(--brand)', borderColor: 'var(--brand)', color: '#FFFFFF', fontWeight: 500, minHeight: 40, padding: '0 16px' }}>
                 다음 →
               </Link>
             ) : null}

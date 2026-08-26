@@ -120,7 +120,7 @@ export default async function CalcPage({ params }: { params: Promise<{ category:
           <span>›</span>
           <Link href={`/calc/${category}`} style={{ color: 'var(--text-tertiary)', textDecoration: 'none' }}>{catMeta?.label}</Link>
         </div>
-        <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 900, margin: 0, letterSpacing: '-0.5px' }}>
+        <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 600, margin: 0, letterSpacing: '-0.5px' }}>
           <span style={{ marginRight: 6 }}>{calc.emoji}</span>{calc.title}
         </h1>
         <p style={{ fontSize: 13, color: 'var(--text-tertiary)', margin: '4px 0 0' }}>
@@ -170,7 +170,7 @@ export default async function CalcPage({ params }: { params: Promise<{ category:
       {/* 관련 계산기 */}
       {relatedCalcs.length > 0 && (
         <div style={{ marginTop: 24, marginBottom: 16 }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>관련 계산기</div>
+          <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 8 }}>관련 계산기</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
             {relatedCalcs.map(rc => rc && (
               <Link key={rc.slug} href={`/calc/${rc.category}/${rc.slug}`} style={{

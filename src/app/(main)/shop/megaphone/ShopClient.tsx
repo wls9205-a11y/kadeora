@@ -68,7 +68,7 @@ export default function ShopClient() {
     <PullToRefresh>
     <div style={{ maxWidth: 600, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
       <div style={{ marginBottom: 'var(--sp-2xl)' }}>
-        <h1 style={{ margin: '0 0 4px', fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>커뮤니티 상점</h1>
+        <h1 style={{ margin: '0 0 4px', fontSize: 'var(--fs-xl)', fontWeight: 600, color: 'var(--text-primary)' }}>커뮤니티 상점</h1>
         <p style={{ margin: 0, fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>게시글 홍보 및 프리미엄 기능을 이용하세요</p>
       </div>
 
@@ -97,17 +97,17 @@ export default function ShopClient() {
             transition: 'all var(--transition-fast)', position: 'relative',
           }}>
             <div style={{ fontSize: 36, marginBottom: 'var(--sp-md)' }}>{p.icon ?? '🎁'}</div>
-            <h3 style={{ margin: '0 0 6px', fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)' }}>{p.name}</h3>
+            <h3 style={{ margin: '0 0 6px', fontSize: 'var(--fs-md)', fontWeight: 600, color: 'var(--text-primary)' }}>{p.name}</h3>
             <p style={{ margin: '0 0 16px', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.5 }}>{p.description}</p>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)' }}>
+              <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 600, color: 'var(--text-primary)' }}>
                 {(p.price_krw ?? 0).toLocaleString()}
                 <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 500, color: 'var(--text-secondary)' }}>원</span>
               </div>
               <button onClick={() => setConfirmProduct(p)} style={{
                 padding: '8px 16px', borderRadius: 'var(--radius-sm)', border: 'none',
                 background: 'var(--brand)', color: 'var(--text-inverse)',
-                fontWeight: 700, fontSize: 'var(--fs-sm)', cursor: 'pointer',
+                fontWeight: 500, fontSize: 'var(--fs-sm)', cursor: 'pointer',
                 transition: 'opacity 0.15s',
               }}
                 onMouseEnter={e => (e.currentTarget.style.opacity = '0.85')}

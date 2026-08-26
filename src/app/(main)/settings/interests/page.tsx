@@ -59,7 +59,7 @@ export default function InterestsSettingsPage() {
     return (
       <div style={{ maxWidth: 480, margin: '0 auto', padding: '40px 16px', textAlign: 'center' }}>
         <div style={{ fontSize: 36, marginBottom: 12 }}>💡</div>
-        <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>로그인이 필요합니다</div>
+        <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: 8 }}>로그인이 필요합니다</div>
         <a href="/login?redirect=/settings/interests" style={{ color: 'var(--brand)', fontWeight: 600 }}>로그인하기</a>
       </div>
     );
@@ -71,7 +71,7 @@ export default function InterestsSettingsPage() {
         ← 뒤로
       </button>
 
-      <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 4 }}>💡 관심사 설정</h1>
+      <h1 style={{ fontSize: 20, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>💡 관심사 설정</h1>
       <p style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 24 }}>
         관심사를 선택하면 맞춤 피드와 콘텐츠를 받아볼 수 있어요 (최소 1개)
       </p>
@@ -88,7 +88,7 @@ export default function InterestsSettingsPage() {
             }}>
               <div style={{ fontSize: 15, marginBottom: 4 }}>{item.label}</div>
               <div style={{ fontSize: 11, color: 'var(--text-tertiary)', lineHeight: 1.3 }}>{item.desc}</div>
-              {isSelected && <div style={{ fontSize: 10, color: 'var(--brand)', fontWeight: 700, marginTop: 4 }}>✓ 선택됨</div>}
+              {isSelected && <div style={{ fontSize: 10, color: 'var(--brand)', fontWeight: 500, marginTop: 4 }}>✓ 선택됨</div>}
             </button>
           );
         })}
@@ -98,7 +98,7 @@ export default function InterestsSettingsPage() {
         width: '100%', padding: '14px 0', borderRadius: 'var(--radius-md)',
         background: selected.length > 0 ? 'var(--brand)' : 'var(--bg-hover)',
         color: selected.length > 0 ? '#fff' : 'var(--text-tertiary)',
-        border: 'none', fontSize: 15, fontWeight: 700, cursor: selected.length > 0 ? 'pointer' : 'default',
+        border: 'none', fontSize: 15, fontWeight: 600, cursor: selected.length > 0 ? 'pointer' : 'default',
         opacity: saving ? 0.6 : 1,
       }}>
         {saving ? '저장 중...' : `저장하기 (${selected.length}개 선택)`}

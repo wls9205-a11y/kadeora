@@ -75,7 +75,7 @@ export default function RegionSettingsPage() {
     return (
       <div style={{ maxWidth: 480, margin: '0 auto', padding: '40px 16px', textAlign: 'center' }}>
         <div style={{ fontSize: 36, marginBottom: 12 }}>📍</div>
-        <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>로그인이 필요합니다</div>
+        <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: 8 }}>로그인이 필요합니다</div>
         <a href="/login?redirect=/settings/region" style={{ color: 'var(--brand)', fontWeight: 600 }}>로그인하기</a>
       </div>
     );
@@ -87,7 +87,7 @@ export default function RegionSettingsPage() {
         ← 뒤로
       </button>
 
-      <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 4 }}>📍 우리동네 설정</h1>
+      <h1 style={{ fontSize: 20, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>📍 우리동네 설정</h1>
       <p style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 24 }}>
         같은 동네 이웃들과 부동산·생활 정보를 나눌 수 있어요
       </p>
@@ -100,7 +100,7 @@ export default function RegionSettingsPage() {
         }}>
           <span style={{ fontSize: 16 }}>📍</span>
           <div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>현재 설정: {currentRegion}</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>현재 설정: {currentRegion}</div>
             <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>아래에서 변경할 수 있어요</div>
           </div>
         </div>
@@ -134,7 +134,7 @@ export default function RegionSettingsPage() {
         width: '100%', padding: '14px 0', borderRadius: 'var(--radius-md)',
         background: city && district ? 'var(--brand)' : 'var(--bg-hover)',
         color: city && district ? '#fff' : 'var(--text-tertiary)',
-        border: 'none', fontSize: 15, fontWeight: 700, cursor: city && district ? 'pointer' : 'default',
+        border: 'none', fontSize: 15, fontWeight: 600, cursor: city && district ? 'pointer' : 'default',
         opacity: saving ? 0.6 : 1,
       }}>
         {saving ? '저장 중...' : '설정하기'}

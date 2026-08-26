@@ -89,7 +89,7 @@ export default function AuthorListPage() {
         <span style={{ margin: '0 6px', opacity: 0.5 }}>/</span>
         <span>편집부</span>
       </nav>
-      <h1 style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 6 }}>카더라 편집부</h1>
+      <h1 style={{ fontSize: 24, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 6 }}>카더라 편집부</h1>
       <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 24, lineHeight: 1.7 }}>
         카더라 블로그는 분야별 편집팀이 공공데이터·공시·시장 자료를 기반으로 작성합니다.
         모든 분석 수치는 출처와 수집일을 명시하며, 투자자문이 아닌 정보 제공 목적입니다.
@@ -105,7 +105,7 @@ export default function AuthorListPage() {
               border: '1px solid var(--border)',
             }}
           >
-            <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>{t.name}</div>
+            <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)' }}>{t.name}</div>
             <div style={{ fontSize: 12, color: 'var(--brand)', margin: '4px 0 8px', fontWeight: 600 }}>{t.focus}</div>
             <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
               <strong style={{ color: 'var(--text-tertiary)' }}>데이터 출처:</strong> {t.sources}

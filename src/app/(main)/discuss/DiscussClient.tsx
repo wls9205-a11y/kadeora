@@ -51,10 +51,10 @@ function TopicCard({ topic }: { topic: Topic }) {
         borderRadius: 'var(--radius-card)', marginBottom: 'var(--sp-sm)',
       }}>
         <div style={{ display: 'flex', gap: 6, marginBottom: 'var(--sp-sm)', alignItems: 'center' }}>
-          <span style={{ fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 'var(--radius-pill)', fontWeight: 700, background: cat.bg, color: cat.color }}>{cat.label}</span>
-          {topic.is_hot && <span style={{ fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 'var(--radius-pill)', fontWeight: 700, background: 'var(--error)', color: 'var(--text-inverse)' }}>🔥 HOT</span>}
+          <span style={{ fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 'var(--radius-pill)', fontWeight: 500, background: cat.bg, color: cat.color }}>{cat.label}</span>
+          {topic.is_hot && <span style={{ fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 'var(--radius-pill)', fontWeight: 500, background: 'var(--error)', color: 'var(--text-inverse)' }}>🔥 HOT</span>}
         </div>
-        <h3 style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 12px', lineHeight: 1.4 }}>{topic.title}</h3>
+        <h3 style={{ fontSize: 'var(--fs-md)', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 12px', lineHeight: 1.4 }}>{topic.title}</h3>
         {topic.topic_type === 'poll' && (
           <div style={{ marginBottom: 'var(--sp-md)' }}>
             {[
@@ -168,12 +168,12 @@ export default function DiscussClient() {
     <div style={containerStyle}>
       <div style={{ flexShrink: 0, marginBottom: isChat ? 8 : 16 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--sp-sm)' }}>
-          <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>💬 라운지</h1>
+          <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 600, color: 'var(--text-primary)' }}>💬 라운지</h1>
           <SectionShareButton section="discuss" label="실시간 토론 라운지 — 주식·부동산·경제 이슈" pagePath="/discuss" />
         </div>
         <p style={{ margin: '4px 0 0', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>지금 뜨거운 이야기들
           {activeUsers > 0 && (
-            <span style={{ fontSize: 11, padding: '3px 8px', borderRadius: 'var(--radius-xs)', background: 'rgba(52,211,153,0.1)', color: 'var(--accent-green)', fontWeight: 700, marginLeft: 8 }}>
+            <span style={{ fontSize: 11, padding: '3px 8px', borderRadius: 'var(--radius-xs)', background: 'rgba(52,211,153,0.1)', color: 'var(--accent-green)', fontWeight: 500, marginLeft: 8 }}>
               🟢 {activeUsers}명 참여중
             </span>
           )}
@@ -189,7 +189,7 @@ export default function DiscussClient() {
         {TABS.map(t => (
           <button key={t.key} onClick={() => setTab(t.key)} aria-pressed={tab === t.key} style={{
             padding: '7px 14px', borderRadius: 'var(--radius-sm)', border: 'none', cursor: 'pointer', flexShrink: 0,
-            fontWeight: 700, fontSize: 'var(--fs-sm)',
+            fontWeight: 600, fontSize: 'var(--fs-sm)',
             background: tab === t.key ? 'var(--brand)' : 'transparent',
             color: tab === t.key ? 'var(--text-inverse)' : 'var(--text-secondary)',
           }}>{t.label}</button>
@@ -241,7 +241,7 @@ export default function DiscussClient() {
                   className="kd-input" style={{ flex: 1, fontSize: 'var(--fs-sm)' }} />
               </div>
               <button onClick={handleCreate} disabled={creating} style={{
-                width: '100%', padding: '10px', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--brand)', color: 'var(--text-inverse)', fontSize: 'var(--fs-base)', fontWeight: 700, cursor: creating ? 'not-allowed' : 'pointer', opacity: creating ? 0.6 : 1,
+                width: '100%', padding: '10px', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--brand)', color: 'var(--text-inverse)', fontSize: 'var(--fs-base)', fontWeight: 500, cursor: creating ? 'not-allowed' : 'pointer', opacity: creating ? 0.6 : 1,
               }}>{creating ? '생성 중...' : '토론 시작하기'}</button>
             </div>
           )}
@@ -257,7 +257,7 @@ export default function DiscussClient() {
             <>
               {hotTopics.length > 0 && (
                 <div style={{ marginBottom: 'var(--sp-sm)' }}>
-                  <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>🔥 HOT 토론</div>
+                  <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>🔥 HOT 토론</div>
                   {hotTopics.map(t => <TopicCard key={t.id} topic={t} />)}
                 </div>
               )}

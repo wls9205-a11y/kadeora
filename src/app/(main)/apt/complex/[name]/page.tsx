@@ -459,7 +459,7 @@ export default async function ComplexDetailPage({ params }: Props) {
           </div>
         );
       })()}
-      <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 4px' }}>{decoded}</h1>
+      <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 4px' }}>{decoded}</h1>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
         <time dateTime={new Date().toISOString()} style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{new Date().toLocaleDateString('ko-KR')} 기준</time>
         {profile?.age_group && <span style={{ fontSize: 10, fontWeight: 600, padding: '1px 6px', borderRadius: 4, background: profile.age_group === '신축' ? 'rgba(59,123,246,0.1)' : 'var(--bg-hover)', color: profile.age_group === '신축' ? 'var(--brand)' : 'var(--text-secondary)' }}>{profile.age_group}</span>}
@@ -487,12 +487,12 @@ export default async function ComplexDetailPage({ params }: Props) {
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}>
             <span style={{ fontSize: 18 }}>🏗️</span>
-            <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-primary)' }}>
+            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>
               {bigEvent.new_brand_name
                 ? `${bigEvent.new_brand_name} ${bigEvent.event_type || '재건축'}`
                 : `${bigEvent.event_type || '재건축'} 진행 중`}
             </span>
-            <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 999, background: 'rgba(59,123,246,0.18)', color: 'var(--brand)' }}>
+            <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 8px', borderRadius: 999, background: 'rgba(59,123,246,0.18)', color: 'var(--brand)' }}>
               Stage {bigEvent.stage ?? '-'} / 7
             </span>
             {bigEvent.constructor_status && bigEvent.constructor_status !== 'confirmed' && (
@@ -519,7 +519,7 @@ export default async function ComplexDetailPage({ params }: Props) {
                 background: 'var(--brand)',
                 color: '#fff',
                 fontSize: 12,
-                fontWeight: 700,
+                fontWeight: 500,
                 textDecoration: 'none',
               }}
             >
@@ -589,19 +589,19 @@ export default async function ComplexDetailPage({ params }: Props) {
             {profile.total_households && (
               <div>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>총 세대수</div>
-                <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800 }}>{Number(profile.total_households).toLocaleString()}</div>
+                <div style={{ fontSize: 'var(--fs-md)', fontWeight: 700 }}>{Number(profile.total_households).toLocaleString()}</div>
               </div>
             )}
             {profile.jeonse_ratio && (
               <div>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>전세가율</div>
-                <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800 }}>{Number(profile.jeonse_ratio).toFixed(0)}%</div>
+                <div style={{ fontSize: 'var(--fs-md)', fontWeight: 700 }}>{Number(profile.jeonse_ratio).toFixed(0)}%</div>
               </div>
             )}
             {profile.latest_monthly_rent && (
               <div>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>월세 시세</div>
-                <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800 }}>{Number(profile.latest_monthly_rent).toLocaleString()}만</div>
+                <div style={{ fontSize: 'var(--fs-md)', fontWeight: 700 }}>{Number(profile.latest_monthly_rent).toLocaleString()}만</div>
               </div>
             )}
           </div>
@@ -643,7 +643,7 @@ export default async function ComplexDetailPage({ params }: Props) {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative' }}>
             <div>
               <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', fontWeight: 600, marginBottom: 'var(--sp-xs)' }}>최근 매매가</div>
-              <div style={{ fontSize: 28, fontWeight: 900, color: '#fff', lineHeight: 1.1 }}>{fmtAmount(latestPrice)}</div>
+              <div style={{ fontSize: 28, fontWeight: 700, color: '#fff', lineHeight: 1.1 }}>{fmtAmount(latestPrice)}</div>
               <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginTop: 'var(--sp-xs)' }}>평균 {fmtAmount(avgPrice)} · 최고 {fmtAmount(maxPrice)}</div>
             </div>
             <div style={{ textAlign: 'right' }}>
@@ -651,7 +651,7 @@ export default async function ComplexDetailPage({ params }: Props) {
                 <div style={{
                   background: jeonseRatio > 80 ? 'rgba(239,68,68,0.2)' : jeonseRatio > 60 ? 'rgba(245,158,11,0.2)' : 'rgba(34,197,94,0.2)',
                   color: jeonseRatio > 80 ? '#fca5a5' : jeonseRatio > 60 ? '#fde047' : '#86efac',
-                  padding: '4px 10px', borderRadius: 'var(--radius-sm)', fontSize: 12, fontWeight: 800, display: 'inline-block',
+                  padding: '4px 10px', borderRadius: 'var(--radius-sm)', fontSize: 12, fontWeight: 500, display: 'inline-block',
                 }}>전세가율 {jeonseRatio}%</div>
               )}
               <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginTop: 'var(--sp-xs)' }}>거래 {tradeList.length}건</div>
@@ -666,7 +666,7 @@ export default async function ComplexDetailPage({ params }: Props) {
           borderLeft: '3px solid #3b82f6',
         }}>
           <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 600, marginBottom: 'var(--sp-xs)' }}>💙 전세</div>
-          <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 900, color: 'var(--brand)' }}>
+          <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 600, color: 'var(--brand)' }}>
             {latestJeonse ? fmtAmount(latestJeonse.deposit) : '—'}
           </div>
           {latestJeonse && <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}>{latestJeonse.exclusive_area}㎡ · {latestJeonse.deal_date}</div>}
@@ -679,7 +679,7 @@ export default async function ComplexDetailPage({ params }: Props) {
           borderLeft: '3px solid #f97316',
         }}>
           <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 600, marginBottom: 'var(--sp-xs)' }}>🧡 월세</div>
-          <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 900, color: 'var(--accent-orange)' }}>
+          <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 600, color: 'var(--accent-orange)' }}>
             {latestMonthly ? `${latestMonthly.monthly_rent}만` : '—'}
           </div>
           {latestMonthly && <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}>보증 {fmtAmount(latestMonthly.deposit)}</div>}
@@ -699,10 +699,10 @@ export default async function ComplexDetailPage({ params }: Props) {
               const c = colors[i % colors.length];
               return (
                 <div key={a.area} style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-sm)' }}>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: c, minWidth: 48, textAlign: 'right' }}>{a.area}</span>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: c, minWidth: 48, textAlign: 'right' }}>{a.area}</span>
                   <div style={{ flex: 1, height: 24, borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', overflow: 'hidden', position: 'relative' }}>
                     <div style={{ height: '100%', width: `${pct}%`, borderRadius: 'var(--radius-sm)', background: `linear-gradient(90deg, ${c}, ${c}80)`, boxShadow: `0 2px 6px ${c}30`, transition: 'width 0.6s ease' }} />
-                    {a.avg > 0 && <span style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', fontSize: 11, fontWeight: 800, color: pct > 50 ? '#fff' : 'var(--text-primary)' }}>{fmtAmount(a.avg)}</span>}
+                    {a.avg > 0 && <span style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', fontSize: 11, fontWeight: 700, color: pct > 50 ? '#fff' : 'var(--text-primary)' }}>{fmtAmount(a.avg)}</span>}
                   </div>
                   <span style={{ fontSize: 10, color: 'var(--text-tertiary)', minWidth: 28, textAlign: 'right', fontWeight: 600 }}>{a.count}건</span>
                 </div>
@@ -714,11 +714,11 @@ export default async function ComplexDetailPage({ params }: Props) {
               const c = colors[i % colors.length];
               return (
                 <div key={a.area} style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', borderLeft: `3px solid ${c}` }}>
-                  <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)' }}>{a.area}</div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>{a.area}</div>
                   <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 3 }}>평균 <span style={{ fontWeight: 700, color: c }}>{fmtAmount(a.avg)}</span></div>
                   <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{a.count}건 거래</div>
                   {a.tradeList[0]?.exclusive_area > 0 && a.avg > 0 && (
-                    <div style={{ fontSize: 11, color: 'var(--accent-blue)', fontWeight: 700, marginTop: 3 }}>
+                    <div style={{ fontSize: 11, color: 'var(--accent-blue)', fontWeight: 500, marginTop: 3 }}>
                       평당 {fmtAmount(Math.round(a.avg / (a.tradeList[0].exclusive_area / 3.3058)))}
                     </div>
                   )}
@@ -732,7 +732,7 @@ export default async function ComplexDetailPage({ params }: Props) {
       {/* 📋 매매 거래 이력 — 테이블 스타일 */}
       <div style={{ borderRadius: 'var(--radius-lg)', padding: '18px 20px', marginBottom: 'var(--sp-lg)', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-          <span style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)' }}>📋 매매 거래 이력</span>
+          <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)' }}>📋 매매 거래 이력</span>
           <span style={{ fontSize: 12, color: 'var(--text-tertiary)', fontWeight: 600 }}>{tradeList.length}건</span>
         </div>
         {/* 헤더 */}
@@ -754,7 +754,7 @@ export default async function ComplexDetailPage({ params }: Props) {
                 <span style={{ color: 'var(--text-tertiary)', marginLeft: 4 }}>({Math.round(t.exclusive_area / 3.3058)}평)</span>
                 <span style={{ color: 'var(--text-tertiary)', marginLeft: 4 }}>· {t.floor}층</span>
               </span>
-              <span style={{ fontWeight: 800, color, textAlign: 'right' }}>{fmtAmount(amt)}</span>
+              <span style={{ fontWeight: 700, color, textAlign: 'right' }}>{fmtAmount(amt)}</span>
             </div>
           );
         })}
@@ -769,7 +769,7 @@ export default async function ComplexDetailPage({ params }: Props) {
       {rentTrades.length > 0 && (
         <div style={{ borderRadius: 'var(--radius-lg)', padding: '18px 20px', marginBottom: 'var(--sp-lg)', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-            <span style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)' }}>🏠 전월세 이력</span>
+            <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)' }}>🏠 전월세 이력</span>
             <span style={{ fontSize: 12, color: 'var(--text-tertiary)', fontWeight: 600 }}>{rentTrades.length}건</span>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '90px 1fr auto', gap: 'var(--sp-sm)', padding: '6px 0', borderBottom: '2px solid var(--border)', fontSize: 10, fontWeight: 600, color: 'var(--text-tertiary)' }}>
@@ -789,11 +789,11 @@ export default async function ComplexDetailPage({ params }: Props) {
                 </span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span style={{
-                    padding: '3px 8px', borderRadius: 'var(--radius-xs)', fontSize: 10, fontWeight: 800,
+                    padding: '3px 8px', borderRadius: 'var(--radius-xs)', fontSize: 10, fontWeight: 500,
                     background: isJeonse ? 'rgba(59,130,246,0.1)' : 'rgba(249,115,22,0.1)',
                     color: isJeonse ? 'var(--brand)' : '#f97316',
                   }}>{isJeonse ? '전세' : '월세'}</span>
-                  <span style={{ fontWeight: 800, color: 'var(--text-primary)' }}>
+                  <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
                     {fmtAmount(r.deposit)}{!isJeonse && r.monthly_rent > 0 ? <span style={{ color: 'var(--accent-orange)' }}>/{r.monthly_rent}만</span> : ''}
                   </span>
                 </div>
@@ -827,7 +827,7 @@ export default async function ComplexDetailPage({ params }: Props) {
               transition: 'border-color 0.12s',
             }}>
               <span style={{ fontSize: 'var(--fs-xl)' }}>{l.emoji}</span>
-              <span style={{ fontSize: 12, fontWeight: 700 }}>{l.label}</span>
+              <span style={{ fontSize: 12, fontWeight: 600 }}>{l.label}</span>
             </Tag>
           );
         })}
@@ -843,7 +843,7 @@ export default async function ComplexDetailPage({ params }: Props) {
       {/* CTA */}
       <Link href={siteSlug ? `/apt/${siteSlug}` : `/apt/search?q=${encodeURIComponent(decoded)}`} style={{
         display: 'block', textAlign: 'center', padding: '16px', marginBottom: 40,
-        borderRadius: 'var(--radius-lg)', fontWeight: 800, textDecoration: 'none', fontSize: 14,
+        borderRadius: 'var(--radius-lg)', fontWeight: 500, textDecoration: 'none', fontSize: 14,
         background: 'linear-gradient(135deg, #0F1B3E 0%, #2563EB 100%)',
         color: '#fff', boxShadow: '0 4px 16px rgba(37,99,235,0.3)',
         transition: 'transform 0.15s ease',
@@ -879,9 +879,9 @@ export default async function ComplexDetailPage({ params }: Props) {
               background: 'var(--bg-surface)', border: '1px solid var(--border)',
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-md)' }}>
-                <span style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)' }}>📈 월별 시세 추이</span>
+                <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)' }}>📈 월별 시세 추이</span>
                 <div style={{
-                  fontSize: 12, fontWeight: 800, color,
+                  fontSize: 12, fontWeight: 600, color,
                   background: `${color}15`, padding: '4px 12px', borderRadius: 'var(--radius-sm)',
                   display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)',
                 }}>
@@ -908,7 +908,7 @@ export default async function ComplexDetailPage({ params }: Props) {
                 <span style={{ color: 'var(--text-tertiary)' }}>{data[0].ym}</span>
                 <div style={{ display: 'flex', gap: 'var(--sp-md)' }}>
                   <span style={{ color: 'var(--text-tertiary)' }}>최저 {fmtAmount(minVal)}</span>
-                  <span style={{ fontWeight: 800, color: 'var(--text-primary)' }}>최근 {fmtAmount(lastAvg)}</span>
+                  <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>최근 {fmtAmount(lastAvg)}</span>
                 </div>
                 <span style={{ color: 'var(--text-tertiary)' }}>{data[data.length - 1].ym}</span>
               </div>
@@ -928,7 +928,7 @@ export default async function ComplexDetailPage({ params }: Props) {
         {/* 📰 관련 분석 */}
         {relatedBlogs.length > 0 && (
           <div style={{ borderRadius: 'var(--radius-lg)', padding: '18px 20px', marginBottom: 'var(--sp-lg)', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
-            <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 'var(--sp-md)' }}>📰 관련 분석</div>
+            <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 'var(--sp-md)' }}>📰 관련 분석</div>
             {relatedBlogs.map((b: Record<string, any>) => (
               <Link key={b.slug} href={`/blog/${b.slug}`} style={{
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
@@ -975,7 +975,7 @@ export default async function ComplexDetailPage({ params }: Props) {
                   display: 'block', padding: '10px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)',
                   borderRadius: 'var(--radius-sm)', textDecoration: 'none', transition: 'border-color 0.15s',
                 }}>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{rc.apt_name}</div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{rc.apt_name}</div>
                   <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}>
                     {rc.latest_sale_price ? fmtAmount(rc.latest_sale_price) : '시세 미상'}
                     {rc.built_year ? ` · ${rc.built_year}년` : ''}
@@ -991,7 +991,7 @@ export default async function ComplexDetailPage({ params }: Props) {
         {relatedComplexes.length > 0 && relatedComplexes[0]?.apt_name && (
           <Link href={`/apt/compare/${encodeURIComponent(decoded)}-vs-${encodeURIComponent(relatedComplexes[0].apt_name)}`} style={{
             display: 'block', textAlign: 'center', padding: '12px', marginBottom: 8,
-            borderRadius: 'var(--radius-sm)', fontWeight: 700, textDecoration: 'none', fontSize: 13,
+            borderRadius: 'var(--radius-sm)', fontWeight: 500, textDecoration: 'none', fontSize: 13,
             background: 'var(--bg-surface)', border: '1px solid var(--accent-blue)', color: 'var(--accent-blue)',
           }}>
             ⚖️ {decoded} vs {relatedComplexes[0].apt_name} 비교

@@ -164,7 +164,7 @@ export default async function BusanAptPage({
                     padding: '5px 12px',
                     borderRadius: 999,
                     fontSize: 12,
-                    fontWeight: active ? 700 : 500,
+                    fontWeight: active ? 600 : 500,
                     textDecoration: 'none',
                     border: '1px solid var(--border)',
                     background: active ? 'var(--brand)' : 'var(--bg-surface)',

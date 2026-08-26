@@ -100,7 +100,7 @@ export default async function RegionRankingHub({ params }: Props) {
       </nav>
 
       <header style={{ margin: '0 0 18px' }}>
-        <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: -0.5 }}>
+        <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 600, color: 'var(--text-primary)', letterSpacing: -0.5 }}>
           {region} {cat.label} 인기 단지 TOP {ranking.length}
         </h1>
         <div style={{ marginTop: 8, fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.55 }}>
@@ -113,17 +113,17 @@ export default async function RegionRankingHub({ params }: Props) {
           <li key={r.slug}>
             <Link href={`/apt/${encodeURIComponent(r.slug)}`} style={{ textDecoration: 'none' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 12, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', transition: 'border-color var(--transition-fast)' }}>
-                <div style={{ flexShrink: 0, width: 36, height: 36, borderRadius: 8, background: r.rank <= 3 ? 'var(--brand)' : 'var(--bg-hover)', color: r.rank <= 3 ? 'var(--text-inverse)' : 'var(--text-secondary)', fontSize: 16, fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ flexShrink: 0, width: 36, height: 36, borderRadius: 8, background: r.rank <= 3 ? 'var(--brand)' : 'var(--bg-hover)', color: r.rank <= 3 ? 'var(--text-inverse)' : 'var(--text-secondary)', fontSize: 16, fontWeight: 500, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   {r.rank}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.name}</div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.name}</div>
                   <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>
                     {r.sigungu}{r.review_count > 0 ? ` · 후기 ${r.review_count}` : ''}{r.lifecycle_stage ? ` · ${r.lifecycle_stage}` : ''}
                   </div>
                 </div>
                 {r.popularity_score != null && r.popularity_score !== 100 && (
-                  <div style={{ flexShrink: 0, fontSize: 12, fontWeight: 800, color: 'var(--brand)' }}>★ {r.popularity_score}</div>
+                  <div style={{ flexShrink: 0, fontSize: 12, fontWeight: 600, color: 'var(--brand)' }}>★ {r.popularity_score}</div>
                 )}
               </div>
             </Link>
@@ -132,13 +132,13 @@ export default async function RegionRankingHub({ params }: Props) {
       </ol>
 
       <section aria-label="다른 카테고리" style={{ marginTop: 24, padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)' }}>
-        <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 8 }}>{region} 다른 카테고리 랭킹</div>
+        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 8 }}>{region} 다른 카테고리 랭킹</div>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
           {Object.entries(CATEGORY).filter(([k]) => k !== category).map(([k, c]) => (
             <Link
               key={k}
               href={`/apt/ranking/${encodeURIComponent(region)}/${encodeURIComponent(k)}`}
-              style={{ padding: '6px 12px', borderRadius: 999, fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', background: 'var(--bg-hover)', textDecoration: 'none', border: '1px solid var(--border)' }}
+              style={{ padding: '6px 12px', borderRadius: 999, fontSize: 12, fontWeight: 500, color: 'var(--text-secondary)', background: 'var(--bg-hover)', textDecoration: 'none', border: '1px solid var(--border)' }}
             >
               {c.label}
             </Link>

@@ -70,7 +70,7 @@ export default async function GlossaryPage() {
         })),
       }) }} />
 
-      <h1 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '8px' }}>
+      <h1 style={{ fontSize: '24px', fontWeight: 600, marginBottom: '8px' }}>
         📖 주식 용어사전
       </h1>
       <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '24px' }}>

@@ -75,12 +75,12 @@ export default async function GuidePage({ params }: { params: Promise<Params> })
       />
       <FAQPageSchema faqs={faqs} />
 
-      <h1 style={{ fontSize: 24, fontWeight: 800, marginBottom: 16 }}>{title}</h1>
+      <h1 style={{ fontSize: 24, fontWeight: 600, marginBottom: 16 }}>{title}</h1>
       <p style={{ color: 'var(--text-secondary)', marginBottom: 24 }}>
         {region} 지역의 {keyword} 관련 최신 소식을 한눈에 정리했습니다. 매일 자동 업데이트.
       </p>
       <section style={{ marginBottom: 24 }}>
-        <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 12 }}>핵심 요약</h2>
+        <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 12 }}>핵심 요약</h2>
         <ul style={{ lineHeight: 1.8 }}>
           <li>{region} {keyword} 관련 주요 이슈 및 동향</li>
           <li>최근 분양/거래 사례 및 가격 범위</li>
@@ -88,11 +88,11 @@ export default async function GuidePage({ params }: { params: Promise<Params> })
         </ul>
       </section>
       <section style={{ marginBottom: 24 }}>
-        <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 12 }}>자주 묻는 질문</h2>
+        <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 12 }}>자주 묻는 질문</h2>
         <dl>
           {faqs.map((f, i) => (
             <div key={i} style={{ marginBottom: 12 }}>
-              <dt style={{ fontWeight: 700 }}>Q. {f.q}</dt>
+              <dt style={{ fontWeight: 600 }}>Q. {f.q}</dt>
               <dd style={{ marginLeft: 0, color: 'var(--text-secondary)' }}>A. {f.a}</dd>
             </div>
           ))}

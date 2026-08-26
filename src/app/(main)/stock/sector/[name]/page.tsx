@@ -200,7 +200,7 @@ export default async function SectorPage({ params }: Props) {
           </div>
           <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '10px 12px' }}>
             <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>평균 등락률</div>
-            <div style={{ fontSize: 14, fontWeight: 700, color: stockColor(avgPct, isKR) }}>
+            <div style={{ fontSize: 14, fontWeight: 600, color: stockColor(avgPct, isKR) }}>
               {avgPct >= 0 ? '+' : ''}{avgPct.toFixed(2)}%
             </div>
           </div>
@@ -260,7 +260,7 @@ export default async function SectorPage({ params }: Props) {
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{s.symbol} · {fmtCap(s.market_cap, s.currency ?? undefined)}</div>
               </div>
               <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>
+                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>
                   {fmtPrice(s.price ?? 0, s.currency ?? undefined)}
                 </div>
                 <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: stockColor(pct, isKR) }}>

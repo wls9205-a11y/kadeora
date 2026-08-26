@@ -132,10 +132,10 @@ export default function DiscussDetailClient({ initialTopic, initialComments }: P
               borderRadius: 'var(--radius-card)', transition: 'width 0.3s',
             }} />
             <div style={{ position: 'relative', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: 'var(--fs-base)', fontWeight: myVote === opt.key ? 700 : 500, color: 'var(--text-primary)' }}>
+              <span style={{ fontSize: 'var(--fs-base)', fontWeight: myVote === opt.key ? 600 : 500, color: 'var(--text-primary)' }}>
                 {myVote === opt.key && '✓ '}{opt.label}
               </span>
-              <span style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: opt.winning ? 'var(--brand)' : 'var(--text-tertiary)' }}>
+              <span style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: opt.winning ? 'var(--brand)' : 'var(--text-tertiary)' }}>
                 {opt.pct}% <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 400 }}>({opt.count}명)</span>
               </span>
             </div>
@@ -148,7 +148,7 @@ export default function DiscussDetailClient({ initialTopic, initialComments }: P
 
       {/* Comments */}
       <section style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 20, marginTop: 'var(--sp-lg)' }}>
-        <h2 style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 16px' }}>의견 {comments.length}개</h2>
+        <h2 style={{ fontSize: 'var(--fs-md)', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 16px' }}>의견 {comments.length}개</h2>
 
         {/* Input */}
         <div style={{ display: 'flex', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-lg)' }}>

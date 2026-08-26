@@ -214,7 +214,7 @@ export default function WriteClient() {
           )}
         </div>
         <button onClick={handleSubmit} disabled={!canSubmit} style={{
-          padding: '7px 20px', borderRadius: 'var(--radius-pill)', border: 'none', fontSize: 14, fontWeight: 700, flexShrink: 0,
+          padding: '7px 20px', borderRadius: 'var(--radius-pill)', border: 'none', fontSize: 14, fontWeight: 500, flexShrink: 0,
           background: canSubmit ? 'var(--brand)' : 'var(--bg-hover)',
           color: canSubmit ? 'var(--text-inverse)' : 'var(--text-tertiary)',
           cursor: canSubmit ? 'pointer' : 'not-allowed',
@@ -245,7 +245,7 @@ export default function WriteClient() {
         maxLength={150}
         className="kd-write-title"
         style={{
-          width: '100%', fontSize: 20, fontWeight: 800, padding: '12px 4px',
+          width: '100%', fontSize: 20, fontWeight: 700, padding: '12px 4px',
           border: 'none', borderBottom: '1px solid var(--border)', background: 'transparent',
           color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box',
           transition: 'border-color var(--transition-normal)',

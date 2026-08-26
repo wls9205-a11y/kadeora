@@ -117,7 +117,7 @@ export default async function GlossaryTermPage({ params }: { params: Promise<{ s
         <span>{term.term}</span>
       </nav>
 
-      <h1 style={{ fontSize: '28px', fontWeight: 700, marginBottom: '12px' }}>
+      <h1 style={{ fontSize: '28px', fontWeight: 600, marginBottom: '12px' }}>
         {term.term}
       </h1>
 

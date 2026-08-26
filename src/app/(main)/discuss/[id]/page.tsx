@@ -161,13 +161,13 @@ export default async function DiscussDetailPage({ params }: Props) {
       {/* Topic Header — SSR rendered for crawlers */}
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 16 }}>
         <div style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
-          <span style={{ fontSize: 11, padding: '3px 8px', borderRadius: 4, fontWeight: 700, background: 'var(--bg-hover)', color: 'var(--text-secondary)' }}>
+          <span style={{ fontSize: 11, padding: '3px 8px', borderRadius: 4, fontWeight: 500, background: 'var(--bg-hover)', color: 'var(--text-secondary)' }}>
             {CAT_LABEL[topic.category] || topic.category}
           </span>
-          {topic.is_hot && <span style={{ fontSize: 10, padding: '3px 8px', borderRadius: 4, fontWeight: 700, background: 'var(--error)', color: '#fff' }}>HOT</span>}
+          {topic.is_hot && <span style={{ fontSize: 10, padding: '3px 8px', borderRadius: 4, fontWeight: 500, background: 'var(--error)', color: '#fff' }}>HOT</span>}
         </div>
 
-        <h1 itemProp="headline" style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 6px', lineHeight: 1.35 }}>
+        <h1 itemProp="headline" style={{ fontSize: 'var(--fs-lg)', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 6px', lineHeight: 1.35 }}>
           {topic.title}
         </h1>
         {topic.description && (
@@ -191,10 +191,10 @@ export default async function DiscussDetailPage({ params }: Props) {
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) auto minmax(0,1fr)', gap: 0, marginBottom: 'var(--sp-md)', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: '14px 12px', alignItems: 'center' }}>
           {/* A */}
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 900, color: 'var(--accent-blue)' }}>
+            <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 700, color: 'var(--accent-blue)' }}>
               {total > 0 ? Math.round(((topic.vote_a || 0) / total) * 100) : 50}%
             </div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.3, marginTop: 'var(--sp-xs)' }}>{topic.option_a}</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.3, marginTop: 'var(--sp-xs)' }}>{topic.option_a}</div>
             <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}>{topic.vote_a || 0}표</div>
           </div>
           {/* VS 도넛 */}
@@ -208,7 +208,7 @@ export default async function DiscussDetailPage({ params }: Props) {
                 return (<>
                   <circle cx="30" cy="30" r="22" fill="none" stroke="#60A5FA" strokeWidth="7" strokeDasharray={`${dashA} ${gap - dashA}`} transform="rotate(-90 30 30)" />
                   <circle cx="30" cy="30" r="22" fill="none" stroke="#F87171" strokeWidth="7" strokeDasharray={`${dashB} ${gap - dashB}`} strokeDashoffset={`-${dashA}`} transform="rotate(-90 30 30)" />
-                  <text x="30" y="29" textAnchor="middle" style={{ fontSize: 10, fontWeight: 800, fill: 'var(--text-primary)' }}>VS</text>
+                  <text x="30" y="29" textAnchor="middle" style={{ fontSize: 10, fontWeight: 500, fill: 'var(--text-primary)' }}>VS</text>
                   <text x="30" y="40" textAnchor="middle" style={{ fontSize: 7, fill: 'var(--text-tertiary)' }}>{total}명</text>
                 </>);
               })()}
@@ -216,23 +216,23 @@ export default async function DiscussDetailPage({ params }: Props) {
           </div>
           {/* B */}
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 900, color: 'var(--accent-red)' }}>
+            <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 700, color: 'var(--accent-red)' }}>
               {total > 0 ? Math.round(((topic.vote_b || 0) / total) * 100) : 50}%
             </div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.3, marginTop: 'var(--sp-xs)' }}>{topic.option_b}</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.3, marginTop: 'var(--sp-xs)' }}>{topic.option_b}</div>
             <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}>{topic.vote_b || 0}표</div>
           </div>
         </div>
       )}
 
       {/* Client interactive part (투표 + 댓글) */}
-      <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '12px 0 8px' }}>💬 실시간 투표 & 댓글</h2>
+      <h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: '12px 0 8px' }}>💬 실시간 투표 & 댓글</h2>
       <DiscussDetailClient initialTopic={topic as React.ComponentProps<typeof DiscussDetailClient>['initialTopic']} initialComments={comments as React.ComponentProps<typeof DiscussDetailClient>['initialComments']} />
 
       {/* 관련 블로그 (내부 링크 SEO) */}
       {relatedBlogs.length > 0 && (
         <div style={{ marginTop: 'var(--sp-xl)', marginBottom: 'var(--sp-lg)' }}>
-          <h3 style={{ margin: '0 0 10px', fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>📰 관련 분석 글</h3>
+          <h3 style={{ margin: '0 0 10px', fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)' }}>📰 관련 분석 글</h3>
           {relatedBlogs.map((b: any) => (
             <Link key={b.slug} href={`/blog/${b.slug}`} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none', color: 'inherit', fontSize: 'var(--fs-sm)' }}>
               <span style={{ color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.title}</span>

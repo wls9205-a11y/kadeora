@@ -48,7 +48,7 @@ export default function AttendancePage() {
 
   return (
     <div style={{ maxWidth: 480, margin: '0 auto', padding: '20px 16px' }}>
-      <h1 style={{ fontSize: 20, fontWeight: 800, margin: '0 0 20px', color: 'var(--text-primary)' }}>출석 체크</h1>
+      <h1 style={{ fontSize: 20, fontWeight: 600, margin: '0 0 20px', color: 'var(--text-primary)' }}>출석 체크</h1>
 
       {/* 스트릭 카드 */}
       <div style={{
@@ -56,7 +56,7 @@ export default function AttendancePage() {
         borderRadius: 'var(--radius-lg)', padding: 24, textAlign: 'center', marginBottom: 16,
       }}>
         <div style={{ fontSize: 48, marginBottom: 8 }}>🔥</div>
-        <div style={{ fontSize: 32, fontWeight: 800, color: 'var(--brand)' }}>{data.streak}일</div>
+        <div style={{ fontSize: 32, fontWeight: 700, color: 'var(--brand)' }}>{data.streak}일</div>
         <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 16 }}>연속 출석</div>
 
         <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginBottom: 20 }}>
@@ -75,7 +75,7 @@ export default function AttendancePage() {
           <div style={{
             padding: '14px 0', borderRadius: 'var(--radius-card)',
             background: 'var(--bg-hover)', color: 'var(--text-secondary)',
-            fontSize: 14, fontWeight: 700,
+            fontSize: 14, fontWeight: 600,
           }}>
             ✅ 오늘 출석 완료!
           </div>
@@ -83,7 +83,7 @@ export default function AttendancePage() {
           <button onClick={handleCheck} disabled={checking} style={{
             width: '100%', padding: '14px 0', borderRadius: 'var(--radius-card)',
             border: 'none', background: 'var(--brand)', color: '#fff',
-            fontSize: 15, fontWeight: 800, cursor: checking ? 'not-allowed' : 'pointer',
+            fontSize: 15, fontWeight: 600, cursor: checking ? 'not-allowed' : 'pointer',
             opacity: checking ? 0.6 : 1,
           }}>
             {checking ? '출석 중...' : '출석 체크하기 🌱'}
@@ -105,7 +105,7 @@ export default function AttendancePage() {
         background: 'var(--bg-surface)', border: '1px solid var(--border)',
         borderRadius: 'var(--radius-lg)', padding: 16,
       }}>
-        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>
+        <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 12 }}>
           연속 출석 보너스
         </div>
         {STREAK_REWARDS.map(r => {
@@ -118,7 +118,7 @@ export default function AttendancePage() {
             }}>
               <div style={{
                 width: 28, height: 28, borderRadius: '50%', display: 'flex',
-                alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700,
+                alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 600,
                 background: done ? 'rgba(16,185,129,0.15)' : current ? 'rgba(59,123,246,0.15)' : 'var(--bg-hover)',
                 color: done ? '#10B981' : current ? 'var(--brand)' : 'var(--text-tertiary)',
               }}>
@@ -127,7 +127,7 @@ export default function AttendancePage() {
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 13, fontWeight: 600, color: done ? '#10B981' : 'var(--text-primary)' }}>{r.label}</div>
               </div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: done ? '#10B981' : 'var(--brand)' }}>+{r.bonus}P</div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: done ? '#10B981' : 'var(--brand)' }}>+{r.bonus}P</div>
             </div>
           );
         })}

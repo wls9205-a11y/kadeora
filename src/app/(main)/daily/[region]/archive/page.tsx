@@ -76,10 +76,10 @@ export default async function ArchivePage({ params }: Props) {
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-lg)' }}>
         <div>
-          <h1 style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>📂 카더라 데일리 리포트 아카이브</h1>
+          <h1 style={{ fontSize: 'var(--fs-md)', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>📂 카더라 데일리 리포트 아카이브</h1>
           <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '4px 0 0' }}>{region} · {reports.length}개 리포트</p>
         </div>
-        <Link href={`/daily/${encodeURIComponent(region)}`} style={{ fontSize: 12, fontWeight: 700, color: 'var(--brand)', textDecoration: 'none' }}>오늘 보기 →</Link>
+        <Link href={`/daily/${encodeURIComponent(region)}`} style={{ fontSize: 12, fontWeight: 500, color: 'var(--brand)', textDecoration: 'none' }}>오늘 보기 →</Link>
       </div>
       <div style={{ marginBottom: 12 }}><ShareButtons title={`${region} 데일리 리포트 아카이브 — 카더라`} contentType="page" contentRef={`daily-archive-${region}`} /></div>
 
@@ -94,7 +94,7 @@ export default async function ArchivePage({ params }: Props) {
           const [y, m] = month.split('-');
           return (
             <div key={month} style={{ marginBottom: 'var(--sp-lg)' }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6, padding: '4px 0', borderBottom: '1px solid var(--border)' }}>
+              <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-primary)', marginBottom: 6, padding: '4px 0', borderBottom: '1px solid var(--border)' }}>
                 {y}년 {parseInt(m)}월 <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-tertiary)' }}>({items.length}일)</span>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: 'var(--sp-xs)' }}>
@@ -105,7 +105,7 @@ export default async function ArchivePage({ params }: Props) {
                       padding: '8px 10px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-surface)', border: '1px solid var(--border)',
                       textDecoration: 'none', display: 'block', transition: 'border-color 0.12s',
                     }}>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{d.getDate()}일 ({dayNames[d.getDay()]})</div>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{d.getDate()}일 ({dayNames[d.getDay()]})</div>
                       <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>#{r.issue_no}</div>
                     </Link>
                   );

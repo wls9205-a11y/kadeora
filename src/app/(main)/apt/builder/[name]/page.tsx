@@ -86,7 +86,7 @@ export default async function BuilderPage({ params }: Props) {
         <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{shortName}</span>
       </nav>
 
-      <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px' }}>
+      <h1 style={{ fontSize: 20, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 8px' }}>
         {shortName} 분양 아파트
         <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-tertiary)', marginLeft: 8 }}>{sites.length}개 현장</span>
       </h1>
@@ -100,7 +100,7 @@ export default async function BuilderPage({ params }: Props) {
         ].map((k, i) => (
           <div key={i} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: 10, textAlign: 'center' }}>
             <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{k.l}</div>
-            <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)' }}>{k.v}</div>
+            <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)' }}>{k.v}</div>
           </div>
         ))}
       </div>
@@ -117,7 +117,7 @@ export default async function BuilderPage({ params }: Props) {
       {/* 지역별 분포 */}
       {regionDist.length > 0 && (
         <section style={{ marginBottom: 16 }}>
-          <h2 style={{ fontSize: 14, fontWeight: 700, margin: '0 0 10px' }}>지역별 현장 수</h2>
+          <h2 style={{ fontSize: 14, fontWeight: 600, margin: '0 0 10px' }}>지역별 현장 수</h2>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {regionDist.map(([r, c]) => (
               <Link key={r} href={`/apt/region/${encodeURIComponent(r)}`} style={{ padding: '6px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 20, textDecoration: 'none', fontSize: 12, color: 'var(--text-secondary)' }}>{r} <strong>{c}</strong></Link>
@@ -128,7 +128,7 @@ export default async function BuilderPage({ params }: Props) {
 
       {/* 현장 목록 */}
       <section style={{ marginBottom: 20 }}>
-        <h2 style={{ fontSize: 14, fontWeight: 700, margin: '0 0 10px' }}>{shortName} 분양 현장</h2>
+        <h2 style={{ fontSize: 14, fontWeight: 600, margin: '0 0 10px' }}>{shortName} 분양 현장</h2>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           {sites.map((s, i) => {
             const thumb = Array.isArray((s as any).images) && (s as any).images[0]
@@ -144,11 +144,11 @@ export default async function BuilderPage({ params }: Props) {
                   style={{ width: 56, height: 42, objectFit: 'cover', borderRadius: 'var(--radius-sm)', background: '#162035', flexShrink: 0 }}
                 />
                 <div style={{ minWidth: 0, flex: 1 }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</div>
                   <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{s.region} {s.sigungu || ''} · {tLabel[s.site_type] || ''}{s.total_units ? ` · ${s.total_units}세대` : ''}</div>
                 </div>
                 <div style={{ textAlign: 'right', flexShrink: 0, marginLeft: 8 }}>
-                  {s.price_min ? <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-primary)' }}>{fmtAmount(s.price_min)}~</div> : null}
+                  {s.price_min ? <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{fmtAmount(s.price_min)}~</div> : null}
                   {s.status && <div style={{ fontSize: 10, color: s.status === '분양중' ? 'var(--accent-blue)' : 'var(--text-tertiary)' }}>{s.status}</div>}
                 </div>
               </Link>
@@ -160,16 +160,16 @@ export default async function BuilderPage({ params }: Props) {
 
       {/* FAQ */}
       <section style={{ marginBottom: 20 }}>
-        <h2 style={{ fontSize: 14, fontWeight: 700, margin: '0 0 10px' }}>자주 묻는 질문</h2>
+        <h2 style={{ fontSize: 14, fontWeight: 600, margin: '0 0 10px' }}>자주 묻는 질문</h2>
         {faq.map((f, i) => (
           <details key={i} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '10px 14px', marginBottom: 6 }}>
-            <summary style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', cursor: 'pointer' }}>{f.q}</summary>
+            <summary style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-primary)', cursor: 'pointer' }}>{f.q}</summary>
             <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 8 }}>{f.a}</p>
           </details>
         ))}
       </section>
 
-      <Link href="/apt" style={{ display: 'block', textAlign: 'center', padding: '14px', marginBottom: 40, borderRadius: 'var(--radius-lg)', fontWeight: 800, textDecoration: 'none', fontSize: 13, background: 'linear-gradient(135deg, #0F1B3E 0%, #2563EB 100%)', color: '#fff' }}>🏗️ 전체 분양 정보 보기 →</Link>
+      <Link href="/apt" style={{ display: 'block', textAlign: 'center', padding: '14px', marginBottom: 40, borderRadius: 'var(--radius-lg)', fontWeight: 500, textDecoration: 'none', fontSize: 13, background: 'linear-gradient(135deg, #0F1B3E 0%, #2563EB 100%)', color: '#fff' }}>🏗️ 전체 분양 정보 보기 →</Link>
       <footer style={{ fontSize: 10, color: 'var(--text-tertiary)', textAlign: 'center', paddingBottom: 40 }}>데이터 출처: 국토교통부 · 청약홈 · 카더라</footer>
     </article>
   );

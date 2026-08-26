@@ -137,7 +137,7 @@ export default async function AptMapPage() {
                 padding: 14, borderRadius: 'var(--radius-card)', background: 'var(--bg-surface)', border: '1px solid var(--border)',
                 textDecoration: 'none', color: 'inherit', transition: 'border-color var(--transition-fast)',
               }}>
-                <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>{r}</div>
+                <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>{r}</div>
                 <div style={{ display: 'flex', gap: 'var(--sp-xs)', flexWrap: 'wrap' }}>
                   {sub > 0 && <span style={{ fontSize: 10, padding: '3px 8px', borderRadius: 4, background: 'rgba(52,211,153,0.1)', color: 'var(--accent-green)', fontWeight: 600 }}>청약 {sub}</span>}
                   {unsold > 0 && <span style={{ fontSize: 10, padding: '3px 8px', borderRadius: 4, background: 'rgba(255,107,107,0.1)', color: 'var(--accent-red)', fontWeight: 600 }}>미분양 {unsold}</span>}

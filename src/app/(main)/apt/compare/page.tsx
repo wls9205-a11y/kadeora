@@ -78,7 +78,7 @@ export default async function AptComparePage() {
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '12px 6px 28px' }}>
-      <h1 style={{ fontSize: 19, fontWeight: 700, margin: '0 0 6px' }}>아파트 단지 비교</h1>
+      <h1 style={{ fontSize: 19, fontWeight: 600, margin: '0 0 6px' }}>아파트 단지 비교</h1>
       <p style={{ fontSize: 12.5, color: 'var(--text-secondary)', margin: '0 0 18px', lineHeight: 1.6 }}>
         두 단지의 매매가·전세가율·연차·거래량을 나란히 놓고 봅니다. 아래 인기 조합을 바로 열거나,
         검색에서 단지를 찾아 비교하세요.
@@ -94,7 +94,7 @@ export default async function AptComparePage() {
           background: 'var(--bg-surface)',
           color: 'var(--text-primary)',
           fontSize: 12.5,
-          fontWeight: 700,
+          fontWeight: 500,
           textDecoration: 'none',
           marginBottom: 20,
         }}
@@ -104,7 +104,7 @@ export default async function AptComparePage() {
 
       {pairs.length > 0 ? (
         <>
-          <h2 style={{ fontSize: 14, fontWeight: 700, margin: '0 0 10px' }}>지역별 인기 조합</h2>
+          <h2 style={{ fontSize: 14, fontWeight: 600, margin: '0 0 10px' }}>지역별 인기 조합</h2>
           <div style={{ display: 'grid', gap: 8 }}>
             {pairs.map(({ region, a, b }) => (
               <Link
@@ -121,7 +121,7 @@ export default async function AptComparePage() {
                 }}
               >
                 <div style={{ fontSize: 10.5, color: 'var(--text-tertiary)', marginBottom: 3 }}>{region}</div>
-                <div style={{ fontSize: 13, fontWeight: 700, lineHeight: 1.4, wordBreak: 'keep-all' }}>
+                <div style={{ fontSize: 13, fontWeight: 600, lineHeight: 1.4, wordBreak: 'keep-all' }}>
                   {a.apt_name} <span style={{ color: 'var(--text-tertiary)' }}>vs</span> {b.apt_name}
                 </div>
               </Link>

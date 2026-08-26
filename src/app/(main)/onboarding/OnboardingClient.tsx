@@ -119,7 +119,7 @@ export default function OnboardingClient() {
         {/* 진행 바 */}
         <div style={{ height: 3, borderRadius: 4, background: 'var(--brand)', marginBottom: 24 }} />
 
-        <h1 style={{ fontSize: 20, fontWeight: 800, margin: '0 0 4px', color: 'var(--text-primary)' }}>
+        <h1 style={{ fontSize: 20, fontWeight: 600, margin: '0 0 4px', color: 'var(--text-primary)' }}>
           환영합니다! 🎉
         </h1>
         <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: '0 0 18px', lineHeight: 1.5 }}>
@@ -137,7 +137,7 @@ export default function OnboardingClient() {
                 border: `1.5px solid ${sel ? 'var(--brand)' : 'var(--border)'}`,
                 transition: 'all 0.15s',
               }}>
-                <div style={{ fontSize: 14, fontWeight: 700, color: sel ? 'var(--brand)' : 'var(--text-primary)', marginBottom: 2 }}>{label}</div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: sel ? 'var(--brand)' : 'var(--text-primary)', marginBottom: 2 }}>{label}</div>
                 <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{desc}</div>
               </button>
             );
@@ -146,7 +146,7 @@ export default function OnboardingClient() {
 
         {/* 지역 선택 — 선택사항 강조 */}
         <div style={{ marginBottom: 14 }}>
-          <label style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
+          <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
             📍 거주 지역
             <span style={{
               fontSize: 10, padding: '2px 6px', borderRadius: 10,
@@ -186,7 +186,7 @@ export default function OnboardingClient() {
             borderRadius: 'var(--radius-md)', padding: '12px 14px', marginBottom: 14,
             fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.7,
           }}>
-            <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4, fontSize: 13 }}>
+            <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4, fontSize: 13 }}>
               📱 앱처럼 사용하기
             </div>
             하단 <strong style={{ color: 'var(--brand)' }}>공유(⬆️)</strong> → <strong style={{ color: 'var(--brand)' }}>&quot;홈 화면에 추가&quot;</strong>하면
@@ -196,7 +196,7 @@ export default function OnboardingClient() {
 
         <button onClick={() => handleFinish(false)} disabled={saving}
           style={{
-            width: '100%', padding: 14, borderRadius: 'var(--radius-card)', border: 'none', fontSize: 15, fontWeight: 800,
+            width: '100%', padding: 14, borderRadius: 'var(--radius-card)', border: 'none', fontSize: 15, fontWeight: 500,
             background: 'var(--brand)', color: '#fff',
             cursor: saving ? 'not-allowed' : 'pointer',
             opacity: saving ? 0.7 : 1,
@@ -207,7 +207,7 @@ export default function OnboardingClient() {
         {/* 시작하기 버튼 아래 혜택 요약 */}
         {!saving && (
           <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--text-tertiary)', marginTop: 8, lineHeight: 1.5 }}>
-            가입 즉시 <span style={{ color: 'var(--brand)', fontWeight: 700 }}>{benefitText}</span> 시작
+            가입 즉시 <span style={{ color: 'var(--brand)', fontWeight: 600 }}>{benefitText}</span> 시작
           </div>
         )}
 

@@ -104,7 +104,7 @@ export default function DiagnosePage() {
 
       {/* s224 T1C: 관련 계산기 cross-link */}
       <div style={{ marginTop: 8, marginBottom: 24 }}>
-        <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 6 }}>관련 계산기</div>
+        <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>관련 계산기</div>
         <Link href="/calc/real-estate" style={{
           display: 'inline-block', padding: '6px 12px', borderRadius: 'var(--radius-md)',
           background: 'var(--bg-surface)', color: 'var(--text-secondary)',

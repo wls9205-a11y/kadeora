@@ -72,38 +72,38 @@ export default function GuidePage() {
         ],
       }) }} />
       <div style={{ marginBottom: 'var(--sp-xl)' }}>
-        <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>📖 카더라 가이드</h1>
+        <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 600, color: 'var(--text-primary)' }}>📖 카더라 가이드</h1>
         <p style={{ margin: '6px 0 0', fontSize: 'var(--fs-base)', color: 'var(--text-secondary)' }}>카더라를 100% 활용하는 방법</p>
         <div style={{ marginTop: 8 }}><ShareButtons title="카더라 가이드 — 100% 활용법" contentType="page" contentRef="guide" /></div>
       </div>
 
       {/* 빠른 시작 3단계 */}
       <div style={{ marginBottom: 'var(--sp-xl)', padding: 16, background: 'linear-gradient(135deg, rgba(96,165,250,0.06), rgba(52,211,153,0.06))', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)' }}>
-        <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 'var(--sp-md)' }}>🚀 빠른 시작 3단계</div>
+        <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 'var(--sp-md)' }}>🚀 빠른 시작 3단계</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-md)' }}>
-            <span style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--brand)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 800, flexShrink: 0 }}>1</span>
+            <span style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--brand)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 500, flexShrink: 0 }}>1</span>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>카카오 로그인</div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>카카오 로그인</div>
               <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>3초면 가입 완료, 별도 회원가입 불필요</div>
             </div>
-            <Link href="/login" style={{ fontSize: 11, padding: '4px 10px', borderRadius: 'var(--radius-xs)', background: 'var(--brand)', color: '#fff', textDecoration: 'none', fontWeight: 700, flexShrink: 0 }}>시작 →</Link>
+            <Link href="/login" style={{ fontSize: 11, padding: '4px 10px', borderRadius: 'var(--radius-xs)', background: 'var(--brand)', color: '#fff', textDecoration: 'none', fontWeight: 500, flexShrink: 0 }}>시작 →</Link>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-md)' }}>
-            <span style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--brand)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 800, flexShrink: 0 }}>2</span>
+            <span style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--brand)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 500, flexShrink: 0 }}>2</span>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>관심 종목·지역 등록</div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>관심 종목·지역 등록</div>
               <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>주식 ⭐ 관심종목, 부동산 ❤️ 관심단지</div>
             </div>
-            <Link href="/stock" style={{ fontSize: 11, padding: '4px 10px', borderRadius: 'var(--radius-xs)', background: 'var(--bg-hover)', color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 700, border: '1px solid var(--border)', flexShrink: 0 }}>등록 →</Link>
+            <Link href="/stock" style={{ fontSize: 11, padding: '4px 10px', borderRadius: 'var(--radius-xs)', background: 'var(--bg-hover)', color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500, border: '1px solid var(--border)', flexShrink: 0 }}>등록 →</Link>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-md)' }}>
-            <span style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--brand)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 800, flexShrink: 0 }}>3</span>
+            <span style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--brand)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 500, flexShrink: 0 }}>3</span>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>첫 글 작성</div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>첫 글 작성</div>
               <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>의견을 나누고 포인트도 적립하세요</div>
             </div>
-            <Link href="/write" style={{ fontSize: 11, padding: '4px 10px', borderRadius: 'var(--radius-xs)', background: 'var(--bg-hover)', color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 700, border: '1px solid var(--border)', flexShrink: 0 }}>작성 →</Link>
+            <Link href="/write" style={{ fontSize: 11, padding: '4px 10px', borderRadius: 'var(--radius-xs)', background: 'var(--bg-hover)', color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500, border: '1px solid var(--border)', flexShrink: 0 }}>작성 →</Link>
           </div>
         </div>
       </div>
@@ -115,7 +115,7 @@ export default function GuidePage() {
 
       {/* 주요 기능 소개 */}
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 20, marginBottom: 'var(--sp-lg)' }}>
-        <h2 style={{ margin: '0 0 12px', fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>주요 기능</h2>
+        <h2 style={{ margin: '0 0 12px', fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)' }}>주요 기능</h2>
         {FEATURES.map((f, i) => (
           <div key={f.title} style={{ display: 'flex', gap: 10, padding: '10px 0', borderBottom: i < FEATURES.length - 1 ? '1px solid var(--border)' : 'none', alignItems: 'flex-start' }}>
             <span style={{ fontSize: 'var(--fs-xl)', flexShrink: 0, lineHeight: 1 }}>{f.icon}</span>
@@ -129,7 +129,7 @@ export default function GuidePage() {
 
       {/* 등급 안내 */}
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 20, marginBottom: 'var(--sp-lg)' }}>
-        <h2 style={{ margin: '0 0 4px', fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>🏅 회원 등급 안내</h2>
+        <h2 style={{ margin: '0 0 4px', fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)' }}>🏅 회원 등급 안내</h2>
         <p style={{ margin: '0 0 12px', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>활동 포인트에 따라 등급이 올라갑니다</p>
         {[
           { lv: 1, name: '새싹', pts: '0P', emoji: '🌱' },
@@ -153,7 +153,7 @@ export default function GuidePage() {
 
       {/* 포인트 획득 방법 */}
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 20, marginBottom: 'var(--sp-lg)' }}>
-        <h2 style={{ margin: '0 0 12px', fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>💰 포인트 획득 방법</h2>
+        <h2 style={{ margin: '0 0 12px', fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)' }}>💰 포인트 획득 방법</h2>
         {[
           { action: '출석체크', pts: '+10P', note: '7일 연속 +30P, 30일 연속 +100P' },
           { action: '게시글 작성', pts: '+10P', note: '' },
@@ -164,7 +164,7 @@ export default function GuidePage() {
         ].map((p, i, arr) => (
           <div key={p.action} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none' }}>
             <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', flex: 1 }}>{p.action}</span>
-            <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--brand)' }}>{p.pts}</span>
+            <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--brand)' }}>{p.pts}</span>
             {p.note && <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{p.note}</span>}
           </div>
         ))}
@@ -172,7 +172,7 @@ export default function GuidePage() {
 
       {/* 자주 묻는 질문 */}
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 20, marginBottom: 'var(--sp-lg)' }}>
-        <h2 style={{ margin: '0 0 12px', fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>❓ 자주 묻는 질문</h2>
+        <h2 style={{ margin: '0 0 12px', fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)' }}>❓ 자주 묻는 질문</h2>
         {[
           { q: '카더라는 무료인가요?', a: '네, 모든 기능을 무료로 이용할 수 있습니다. 확성기 등 일부 유료 상품이 있지만, 핵심 기능은 전부 무료입니다.' },
           { q: '회원 탈퇴는 어떻게 하나요?', a: '프로필 → 계정 설정에서 탈퇴할 수 있습니다. 탈퇴 시 작성한 글과 댓글은 익명 처리됩니다.' },
@@ -183,7 +183,7 @@ export default function GuidePage() {
           { q: '오프라인에서도 사용할 수 있나요?', a: 'PWA 설치 후에는 이전에 본 페이지를 오프라인에서도 볼 수 있습니다. 새 데이터는 온라인 연결이 필요합니다.' },
         ].map((faq, i, arr) => (
           <div key={i} style={{ padding: '10px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none' }}>
-            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-xs)' }}>Q. {faq.q}</div>
+            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 'var(--sp-xs)' }}>Q. {faq.q}</div>
             <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.6 }}>A. {faq.a}</div>
           </div>
         ))}
@@ -191,11 +191,11 @@ export default function GuidePage() {
 
       {/* 문의 */}
       <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-card)', padding: 20, textAlign: 'center' }}>
-        <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>💌 문의·건의</div>
+        <div style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 6 }}>💌 문의·건의</div>
         <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 'var(--sp-md)', lineHeight: 1.6 }}>
           버그 신고, 기능 제안, 문의사항이 있으시면 언제든 연락해주세요.
         </div>
-        <a href={`mailto:${CONTACT_EMAIL}`} style={{ display: 'inline-block', padding: 'var(--sp-md) var(--sp-2xl)', borderRadius: 'var(--radius-md)', background: 'var(--brand)', color: 'var(--text-inverse)', fontSize: 'var(--fs-sm)', fontWeight: 700, textDecoration: 'none' }}>
+        <a href={`mailto:${CONTACT_EMAIL}`} style={{ display: 'inline-block', padding: 'var(--sp-md) var(--sp-2xl)', borderRadius: 'var(--radius-md)', background: 'var(--brand)', color: 'var(--text-inverse)', fontSize: 'var(--fs-sm)', fontWeight: 500, textDecoration: 'none' }}>
           📧 {CONTACT_EMAIL}
         </a>
       </div>

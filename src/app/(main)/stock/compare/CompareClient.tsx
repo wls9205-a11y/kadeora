@@ -64,14 +64,14 @@ export default function CompareClient() {
   const CompareRow = ({ label, a, b, highlight }: { label: string; a: string; b: string; highlight?: 'a' | 'b' | null }) => (
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px 1fr', gap: 6, padding: '8px 0', borderBottom: '1px solid var(--border)', alignItems: 'center' }}>
       <div style={{
-        textAlign: 'right', fontSize: 13, fontWeight: highlight === 'a' ? 700 : 500,
+        textAlign: 'right', fontSize: 13, fontWeight: highlight === 'a' ? 600 : 500,
         color: highlight === 'a' ? 'var(--brand)' : 'var(--text-primary)',
         background: highlight === 'a' ? 'rgba(59,123,246,0.06)' : 'transparent',
         padding: highlight === 'a' ? '2px 8px' : 0, borderRadius: 4,
       }}>{a} {highlight === 'a' && <span style={{ fontSize: 10, color: 'var(--brand)' }}>WIN</span>}</div>
       <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 600 }}>{label}</div>
       <div style={{
-        textAlign: 'left', fontSize: 13, fontWeight: highlight === 'b' ? 700 : 500,
+        textAlign: 'left', fontSize: 13, fontWeight: highlight === 'b' ? 600 : 500,
         color: highlight === 'b' ? 'var(--brand)' : 'var(--text-primary)',
         background: highlight === 'b' ? 'rgba(59,123,246,0.06)' : 'transparent',
         padding: highlight === 'b' ? '2px 8px' : 0, borderRadius: 4,

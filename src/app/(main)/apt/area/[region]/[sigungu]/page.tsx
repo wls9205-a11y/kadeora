@@ -146,7 +146,7 @@ export default async function SigunguHubPage({ params }: Props) {
         <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{sigungu}</span>
       </nav>
 
-      <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px', lineHeight: 1.3 }}>{sigungu} 아파트 실거래가·시세<span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-tertiary)', marginLeft: 8 }}>{profiles.length.toLocaleString()}개 단지</span></h1>
+      <h1 style={{ fontSize: 20, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 8px', lineHeight: 1.3 }}>{sigungu} 아파트 실거래가·시세<span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-tertiary)', marginLeft: 8 }}>{profiles.length.toLocaleString()}개 단지</span></h1>
       <ShareButtons title={`${sigungu} 아파트 시세`} contentType="apt-area" contentRef={`${region}-${sigungu}`} />
 
       {/* KPI */}
@@ -154,7 +154,7 @@ export default async function SigunguHubPage({ params }: Props) {
         {[{ l: '평균 매매가', v: fmtAmount(avg), s: `${wp.length}개 단지` }, { l: '평균 전세가율', v: avgJR > 0 ? `${avgJR}%` : '-', s: `${wj.length}개 단지` }, { l: '1년 매매', v: `${totalTrades.toLocaleString()}건`, s: '거래량' }, { l: '1년 전월세', v: `${totalRents.toLocaleString()}건`, s: '거래량' }].map((k, i) => (
           <div key={i} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '12px 14px' }}>
             <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 4 }}>{k.l}</div>
-            <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)' }}>{k.v}</div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>{k.v}</div>
             <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{k.s}</div>
           </div>
         ))}
@@ -175,7 +175,7 @@ export default async function SigunguHubPage({ params }: Props) {
       {/* [COMPLEX-CARD-AREA] 이 지역 재건축·재개발 대형 이벤트 */}
       {bigEvents.length > 0 && (
         <section aria-label={`${sigungu} 재건축·재개발 대형 이벤트`} style={{ marginBottom: 20 }}>
-          <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 10px' }}>
+          <h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 10px' }}>
             🏗️ 이 지역 재건축·재개발 대형 이벤트 <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-tertiary)', marginLeft: 6 }}>{bigEvents.length}건</span>
           </h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 8 }}>
@@ -184,14 +184,14 @@ export default async function SigunguHubPage({ params }: Props) {
               const inner = (
                 <>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6, flexWrap: 'wrap' }}>
-                    <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 6px', borderRadius: 4, background: 'var(--brand-bg, rgba(59,123,246,0.18))', color: 'var(--brand)' }}>Stage {e.stage ?? '-'}</span>
+                    <span style={{ fontSize: 10, fontWeight: 500, padding: '2px 6px', borderRadius: 4, background: 'var(--brand-bg, rgba(59,123,246,0.18))', color: 'var(--brand)' }}>Stage {e.stage ?? '-'}</span>
                     {e.constructor_status && e.constructor_status !== 'confirmed' && (
                       <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 6px', borderRadius: 4, background: 'var(--warning-bg, rgba(234,179,8,0.08))', color: 'var(--text-tertiary)' }}>
                         {e.constructor_status === 'likely' ? '수주 유력' : '수주 미확정'}
                       </span>
                     )}
                   </div>
-                  <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 2 }}>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 2 }}>
                     {e.name}{e.new_brand_name ? <span style={{ color: 'var(--text-secondary)', fontWeight: 600, fontSize: 12 }}> · {e.new_brand_name}</span> : null}
                   </div>
                   <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
@@ -216,30 +216,30 @@ export default async function SigunguHubPage({ params }: Props) {
 
       {/* 연차별 */}
       <section style={{ marginBottom: 20 }}>
-        <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 10px' }}>연차별 분포</h2>
+        <h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 10px' }}>연차별 분포</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))', gap: 6 }}>
-          {ageStats.map(a => (<div key={a.group} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '8px 10px', textAlign: 'center' }}><div style={{ fontSize: 12, fontWeight: 700 }}>{a.group}</div><div style={{ fontSize: 16, fontWeight: 800, color: 'var(--accent-blue)' }}>{a.count}</div><div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{a.avgPrice > 0 ? fmtAmount(a.avgPrice) : '-'}</div></div>))}
+          {ageStats.map(a => (<div key={a.group} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '8px 10px', textAlign: 'center' }}><div style={{ fontSize: 12, fontWeight: 700 }}>{a.group}</div><div style={{ fontSize: 16, fontWeight: 700, color: 'var(--accent-blue)' }}>{a.count}</div><div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{a.avgPrice > 0 ? fmtAmount(a.avgPrice) : '-'}</div></div>))}
         </div>
       </section>
 
       {/* 동별 */}
-      {dongStats.length > 0 && (<section style={{ marginBottom: 20 }}><h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 10px' }}>{sigungu} 행정동별 아파트</h2><div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>{dongStats.slice(0, 15).map(d => (<Link key={d.dong} href={`/apt/area/${encodeURIComponent(region)}/${encodeURIComponent(sigungu)}/${encodeURIComponent(d.dong)}`} style={{ display: 'block', padding: '8px 10px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', textDecoration: 'none', fontSize: 12 }}><div style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{d.dong}</div><div style={{ color: 'var(--text-tertiary)', fontSize: 10 }}>{d.count}개 단지</div></Link>))}</div></section>)}
+      {dongStats.length > 0 && (<section style={{ marginBottom: 20 }}><h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 10px' }}>{sigungu} 행정동별 아파트</h2><div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>{dongStats.slice(0, 15).map(d => (<Link key={d.dong} href={`/apt/area/${encodeURIComponent(region)}/${encodeURIComponent(sigungu)}/${encodeURIComponent(d.dong)}`} style={{ display: 'block', padding: '8px 10px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', textDecoration: 'none', fontSize: 12 }}><div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{d.dong}</div><div style={{ color: 'var(--text-tertiary)', fontSize: 10 }}>{d.count}개 단지</div></Link>))}</div></section>)}
 
       {/* 매매가 TOP 10 */}
-      {priceTop.length > 0 && (<section style={{ marginBottom: 20 }}><h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 10px' }}>매매가 TOP 10</h2><div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>{priceTop.map((p: any, i: number) => (<Link key={i} href={`/apt/complex/${encodeURIComponent(p.apt_name)}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', textDecoration: 'none' }}><div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span style={{ fontSize: 12, fontWeight: 800, color: i < 3 ? 'var(--accent-blue)' : 'var(--text-tertiary)', width: 20 }}>{i + 1}</span><div><div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{p.apt_name}</div><div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{p.dong || ''} {p.built_year ? `${p.built_year}년` : ''}</div></div></div><div style={{ textAlign: 'right' }}><div style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)' }}>{fmtAmount(p.latest_sale_price)}</div>{p.jeonse_ratio > 0 && <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>전세가율 {p.jeonse_ratio}%</div>}</div></Link>))}</div></section>)}
+      {priceTop.length > 0 && (<section style={{ marginBottom: 20 }}><h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 10px' }}>매매가 TOP 10</h2><div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>{priceTop.map((p: any, i: number) => (<Link key={i} href={`/apt/complex/${encodeURIComponent(p.apt_name)}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', textDecoration: 'none' }}><div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span style={{ fontSize: 12, fontWeight: 600, color: i < 3 ? 'var(--accent-blue)' : 'var(--text-tertiary)', width: 20 }}>{i + 1}</span><div><div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{p.apt_name}</div><div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{p.dong || ''} {p.built_year ? `${p.built_year}년` : ''}</div></div></div><div style={{ textAlign: 'right' }}><div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>{fmtAmount(p.latest_sale_price)}</div>{p.jeonse_ratio > 0 && <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>전세가율 {p.jeonse_ratio}%</div>}</div></Link>))}</div></section>)}
 
       {/* 거래량 TOP 10 */}
-      {tradeTop.length > 0 && (<section style={{ marginBottom: 20 }}><h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 10px' }}>거래 활발 단지 TOP 10</h2><div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>{tradeTop.map((p: any, i: number) => (<Link key={i} href={`/apt/complex/${encodeURIComponent(p.apt_name)}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', textDecoration: 'none' }}><div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span style={{ fontSize: 12, fontWeight: 800, color: i < 3 ? 'var(--accent-blue)' : 'var(--text-tertiary)', width: 20 }}>{i + 1}</span><div><div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{p.apt_name}</div><div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{p.dong || ''} {p.latest_sale_price ? fmtAmount(p.latest_sale_price) : ''}</div></div></div><div style={{ textAlign: 'right' }}><div style={{ fontSize: 14, fontWeight: 800, color: 'var(--accent-blue)' }}>{p.sale_count_1y}건</div><div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>매매 거래</div></div></Link>))}</div></section>)}
+      {tradeTop.length > 0 && (<section style={{ marginBottom: 20 }}><h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 10px' }}>거래 활발 단지 TOP 10</h2><div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>{tradeTop.map((p: any, i: number) => (<Link key={i} href={`/apt/complex/${encodeURIComponent(p.apt_name)}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', textDecoration: 'none' }}><div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span style={{ fontSize: 12, fontWeight: 600, color: i < 3 ? 'var(--accent-blue)' : 'var(--text-tertiary)', width: 20 }}>{i + 1}</span><div><div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{p.apt_name}</div><div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{p.dong || ''} {p.latest_sale_price ? fmtAmount(p.latest_sale_price) : ''}</div></div></div><div style={{ textAlign: 'right' }}><div style={{ fontSize: 14, fontWeight: 600, color: 'var(--accent-blue)' }}>{p.sale_count_1y}건</div><div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>매매 거래</div></div></Link>))}</div></section>)}
 
       {/* FAQ */}
-      <section style={{ marginBottom: 20 }}><h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 10px' }}>{sigungu} 자주 묻는 질문</h2><div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>{faq.map((f, i) => (<details key={i} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '10px 14px' }}><summary style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', cursor: 'pointer' }}>{f.q}</summary><p style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 8, lineHeight: 1.6 }}>{f.a}</p></details>))}</div></section>
+      <section style={{ marginBottom: 20 }}><h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 10px' }}>{sigungu} 자주 묻는 질문</h2><div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>{faq.map((f, i) => (<details key={i} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '10px 14px' }}><summary style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', cursor: 'pointer' }}>{f.q}</summary><p style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 8, lineHeight: 1.6 }}>{f.a}</p></details>))}</div></section>
 
       {/* 관련 링크 */}
-      <section style={{ marginBottom: 20 }}><h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 10px' }}>{region} 다른 지역</h2><div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}><Link href={`/apt/region/${encodeURIComponent(region)}`} style={{ padding: '6px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 20, textDecoration: 'none', fontSize: 12, color: 'var(--text-secondary)' }}>{region} 전체</Link></div></section>
+      <section style={{ marginBottom: 20 }}><h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 10px' }}>{region} 다른 지역</h2><div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}><Link href={`/apt/region/${encodeURIComponent(region)}`} style={{ padding: '6px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 20, textDecoration: 'none', fontSize: 12, color: 'var(--text-secondary)' }}>{region} 전체</Link></div></section>
 
       {/* 테마 분석 내부 링크 */}
       <section style={{ marginBottom: 20 }}>
-        <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 10px' }}>테마별 분석</h2>
+        <h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 10px' }}>테마별 분석</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 6 }}>
           {[
             { slug: 'price-up', label: '가격 상승 아파트' },
@@ -257,7 +257,7 @@ export default async function SigunguHubPage({ params }: Props) {
       {/* 인기 비교 — 상위 단지 조합 */}
       {priceTop.length >= 2 && (
         <section style={{ marginBottom: 20 }}>
-          <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 10px' }}>⚖️ 인기 비교</h2>
+          <h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 10px' }}>⚖️ 인기 비교</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             {priceTop.slice(0, 3).flatMap((a: any, i: number) => priceTop.slice(i + 1, i + 2).map((b: any) => (
               <Link key={`${a.apt_name}-${b.apt_name}`} href={`/apt/compare/${encodeURIComponent(a.apt_name)}-vs-${encodeURIComponent(b.apt_name)}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', textDecoration: 'none', fontSize: 12 }}>
@@ -269,7 +269,7 @@ export default async function SigunguHubPage({ params }: Props) {
         </section>
       )}
 
-      <Link href={`/apt/complex?region=${encodeURIComponent(region)}`} style={{ display: 'block', textAlign: 'center', padding: '14px', marginBottom: 40, borderRadius: 'var(--radius-lg)', fontWeight: 800, textDecoration: 'none', fontSize: 13, background: 'linear-gradient(135deg, #0F1B3E 0%, #2563EB 100%)', color: '#fff' }}>📊 {region} 전체 단지백과 보기 →</Link>
+      <Link href={`/apt/complex?region=${encodeURIComponent(region)}`} style={{ display: 'block', textAlign: 'center', padding: '14px', marginBottom: 40, borderRadius: 'var(--radius-lg)', fontWeight: 500, textDecoration: 'none', fontSize: 13, background: 'linear-gradient(135deg, #0F1B3E 0%, #2563EB 100%)', color: '#fff' }}>📊 {region} 전체 단지백과 보기 →</Link>
       <footer style={{ fontSize: 10, color: 'var(--text-tertiary)', textAlign: 'center', paddingBottom: 40, lineHeight: 1.5 }}>데이터 출처: 국토교통부 실거래가 공개시스템 · 한국부동산원 · 카더라 자체 분석<br />본 페이지는 공공데이터 기반이며, 투자 판단의 근거로 사용할 수 없습니다.</footer>
     </article>
   );

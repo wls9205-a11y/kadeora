@@ -75,7 +75,7 @@ export default function AptCategoryTabs({ current, region, sigungu, countByCateg
                 flexShrink: 0,
                 display: 'inline-flex', alignItems: 'center', gap: 5,
                 padding: '8px 14px', borderRadius: 999,
-                fontSize: 12, fontWeight: active ? 600 : 600,
+                fontSize: 12, fontWeight: active ? 600 : 500,
                 background: active ? 'var(--brand)' : 'var(--bg-hover)',
                 color: active ? 'var(--text-inverse)' : 'var(--text-secondary)',
                 border: `1px solid ${active ? 'var(--brand)' : 'var(--border)'}`,

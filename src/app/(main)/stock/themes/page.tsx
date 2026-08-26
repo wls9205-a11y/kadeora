@@ -80,7 +80,7 @@ export default async function ThemesPage() {
                   {theme.description && <p style={{ fontSize: 11, color: 'var(--text-secondary)', margin: '2px 0 0' }}>{theme.description}</p>}
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: stockColor(avgPct, true) }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: stockColor(avgPct, true) }}>
                     {avgPct > 0 ? '+' : ''}{avgPct.toFixed(2)}%
                   </div>
                   <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{stocks.length}종목</div>

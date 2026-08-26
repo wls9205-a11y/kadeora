@@ -134,7 +134,7 @@ export default async function HotPage() {
             ].map(s => (
               <div key={s.label} style={{ flex: 1, padding: '8px 10px', borderRadius: 'var(--radius-md)', background: 'var(--bg-surface)', border: '1px solid var(--border)', flexShrink: 0, textAlign: 'center', minWidth: 60 }}>
                 <div style={{ fontSize: 12, marginBottom: 2 }}>{s.icon}</div>
-                <div style={{ fontSize: 16, fontWeight: 800, color: s.color }}>{s.value.toLocaleString()}{s.unit}</div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: s.color }}>{s.value.toLocaleString()}{s.unit}</div>
                 <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 1 }}>{s.label}</div>
                 <div style={{ height: 3, borderRadius: 4, background: 'var(--bg-hover)', marginTop: 'var(--sp-xs)', overflow: 'hidden' }}>
                   <div style={{ height: '100%', width: `${Math.min((s.value / s.max) * 100, 100)}%`, borderRadius: 4, background: s.color }} />
@@ -150,7 +150,7 @@ export default async function HotPage() {
 
         {/* 커뮤니티 TOP 5 */}
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)' }}>
-          <h2 style={{ margin: '0 0 8px', fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>💬 커뮤니티 TOP</h2>
+          <h2 style={{ margin: '0 0 8px', fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>💬 커뮤니티 TOP</h2>
           {(topPosts ?? []).length === 0 ? (
             <p style={{ color: 'var(--text-tertiary)', textAlign: 'center', padding: 12, fontSize: 12 }}>이번 주 데이터가 아직 없어요</p>
           ) : (
@@ -184,7 +184,7 @@ export default async function HotPage() {
 
         {/* 블로그 HOT 5 */}
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)' }}>
-          <h2 style={{ margin: '0 0 8px', fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>📰 블로그 HOT</h2>
+          <h2 style={{ margin: '0 0 8px', fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>📰 블로그 HOT</h2>
           {(hotBlogs ?? []).length === 0 ? (
             <p style={{ color: 'var(--text-tertiary)', textAlign: 'center', padding: 12, fontSize: 12 }}>블로그 데이터 없음</p>
           ) : (
@@ -213,14 +213,14 @@ export default async function HotPage() {
       {/* ── 지역별 HOT (데이터 있는 지역만, 가로 스크롤) ── */}
       {Object.keys(regionPosts).length > 0 && (
         <div style={{ marginBottom: 14 }}>
-          <h2 style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>📍 지역별 HOT</h2>
+          <h2 style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>📍 지역별 HOT</h2>
           <div className="apt-pill-scroll kd-scroll-row" style={{ display: 'flex', gap: 'var(--sp-sm)', overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 2 }}>
             {REGION_SECTIONS.map(region => {
               const posts = regionPosts[region];
               if (!posts || posts.length === 0) return null;
               return (
                 <div key={region} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '10px 12px', minWidth: 220, flexShrink: 0 }}>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>📍 {region}</div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 6 }}>📍 {region}</div>
                   {posts.map((post: any, i: number) => (
                     <Link key={post.id} href={`/feed/${post.slug || post.id}`} className="kd-feed-card" style={{
                       textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6,
@@ -229,7 +229,7 @@ export default async function HotPage() {
                     }}>
                       <span style={{ fontSize: 12, width: 18, textAlign: 'center', flexShrink: 0 }}>{MEDAL[i + 1]}</span>
                       <div style={{ flex: 1, minWidth: 0, fontSize: 11, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</div>
-                      <span style={{ fontSize: 10, color: 'var(--brand)', fontWeight: 700, flexShrink: 0 }}>❤{post.likes_count ?? 0}</span>
+                      <span style={{ fontSize: 10, color: 'var(--brand)', fontWeight: 500, flexShrink: 0 }}>❤{post.likes_count ?? 0}</span>
                     </Link>
                   ))}
                 </div>

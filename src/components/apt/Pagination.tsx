@@ -36,7 +36,7 @@ export default function Pagination({ basePath, page, totalPages, query }: Props)
     border: '1px solid var(--border)',
     background: active ? 'var(--text-primary)' : 'transparent',
     color: active ? 'var(--bg-base)' : 'var(--text-primary)',
-    fontSize: 12, fontWeight: active ? 600 : 600,
+    fontSize: 12, fontWeight: active ? 600 : 500,
     textDecoration: 'none', textAlign: 'center',
   });
 

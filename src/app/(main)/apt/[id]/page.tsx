@@ -1508,7 +1508,7 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
             </div>
             <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '8px', textAlign: 'center' }}>
               <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>지역 전세가율</div>
-              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: avgJeonseRatio >= 80 ? 'var(--accent-blue)' : 'var(--text-primary)' }}>{avgJeonseRatio > 0 ? `${avgJeonseRatio}%` : '-'}</div>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: avgJeonseRatio >= 80 ? 'var(--accent-blue)' : 'var(--text-primary)' }}>{avgJeonseRatio > 0 ? `${avgJeonseRatio}%` : '-'}</div>
               <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>기존 아파트</div>
             </div>
           </div>
@@ -1631,7 +1631,7 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
                   { label: '최고', value: fmtAmount(mx), color: 'var(--accent-red)', sub: '' },
                 ].map(s => (
                   <div key={s.label} style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-xs)', padding: '5px 6px', textAlign: 'center' }}>
-                    <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: s.color }}>{s.value}{s.sub && <span style={{ marginLeft: 2 }}>{s.sub}</span>}</div>
+                    <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: s.color }}>{s.value}{s.sub && <span style={{ marginLeft: 2 }}>{s.sub}</span>}</div>
                     <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{s.label}</div>
                   </div>
                 ))}
@@ -1912,7 +1912,7 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
               return (
                 <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '10px 12px' }}>
                   <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 3 }}>입주까지</div>
-                  <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: months <= 6 ? 'var(--accent-green)' : months <= 24 ? 'var(--brand)' : 'var(--text-primary)' }}>{timeStr}</div>
+                  <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: months <= 6 ? 'var(--accent-green)' : months <= 24 ? 'var(--brand)' : 'var(--text-primary)' }}>{timeStr}</div>
                   <div style={{ height: 3, borderRadius: 4, background: 'var(--border)', marginTop: 'var(--sp-xs)', overflow: 'hidden' }}>
                     <div style={{ height: '100%', width: `${pct}%`, borderRadius: 4, background: months <= 6 ? 'var(--accent-green)' : months <= 24 ? 'var(--brand)' : 'var(--accent-purple)' }} />
                   </div>
@@ -2215,9 +2215,9 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
                         <td style={{ padding: '6px', fontWeight: 600, color: 'var(--text-primary)' }}>합계</td>
                         <td></td>
                         <td></td>
-                        <td style={{ padding: '6px', textAlign: 'right', fontWeight: 700, color: 'var(--brand)' }}>{totalGen}</td>
-                        <td style={{ padding: '6px', textAlign: 'right', fontWeight: 700, color: 'var(--accent-purple)' }}>{totalSpe}</td>
-                        <td style={{ padding: '6px', textAlign: 'right', fontWeight: 700, color: 'var(--text-primary)' }}>{totalGen + totalSpe}</td>
+                        <td style={{ padding: '6px', textAlign: 'right', fontWeight: 500, color: 'var(--brand)' }}>{totalGen}</td>
+                        <td style={{ padding: '6px', textAlign: 'right', fontWeight: 500, color: 'var(--accent-purple)' }}>{totalSpe}</td>
+                        <td style={{ padding: '6px', textAlign: 'right', fontWeight: 500, color: 'var(--text-primary)' }}>{totalGen + totalSpe}</td>
                         {hasPrice && <td></td>}
                       </tr>
                     </tbody>

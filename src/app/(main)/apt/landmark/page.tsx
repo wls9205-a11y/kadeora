@@ -51,7 +51,7 @@ export default async function AptLandmarkPage({ searchParams }: { searchParams?:
   return (
     <>
       <header style={{ padding: '12px 4px 4px' }}>
-        <h1 style={{ fontSize: 18, fontWeight: 800, margin: 0 }}>🏆 랜드마크 단지</h1>
+        <h1 style={{ fontSize: 18, fontWeight: 600, margin: 0 }}>🏆 랜드마크 단지</h1>
         <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '4px 0 0' }}>
           {region ? `${region} · ` : ''}{total.toLocaleString()}개 단지 · {page}/{totalPages} 페이지
         </p>

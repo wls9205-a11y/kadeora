@@ -92,7 +92,7 @@ export default function LifecycleTimeline({ current }: Props) {
                   boxShadow: isCurrent ? '0 0 0 4px rgba(250,199,117,0.25)' : 'none',
                 }}
               />
-              <span style={{ fontSize: 11, fontWeight: isCurrent ? 600 : 600, color: isCurrent ? 'var(--kd-accent)' : 'var(--text-tertiary)', whiteSpace: 'nowrap' }}>
+              <span style={{ fontSize: 11, fontWeight: isCurrent ? 600 : 500, color: isCurrent ? 'var(--kd-accent)' : 'var(--text-tertiary)', whiteSpace: 'nowrap' }}>
                 {s.label}
               </span>
             </div>
