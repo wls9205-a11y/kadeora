@@ -106,14 +106,22 @@ export default function MapClient() {
 
       if (layers.has('unsold')) {
         const { data } = await sb.from('unsold_apts')
-          .select('id, house_nm, region_nm, tot_unsold_hshld_co, latitude, longitude')
+          .select('id, house_nm, supply_addr, tot_unsold_hshld_co, latitude, longitude')
           .eq('is_active', true).limit(300) as { data: Record<string, any>[] | null };
-        (data || []).forEach((d: Record<string, any>) => allPins.push({
-          id: `u${d.id}`, name: d.house_nm || '', address: d.region_nm || '',
-          layer: 'unsold', extra: `${d.tot_unsold_hshld_co || 0}세대 미분양`,
-          lat: d.latitude ? parseFloat(d.latitude) : undefined,
-          lng: d.longitude ? parseFloat(d.longitude) : undefined,
-        }));
+        /* ⚠️ 주소가 «공급위치» 인 것만 핀으로 만든다.
+         *    예전에는 `address: d.region_nm` 이었다 — 시·도 이름을 지오코딩하면 시청 좌표가
+         *    나오고, 그게 「이 단지가 여기 있다」로 읽힌다. 재개발 레이어를 내린 것과 같은 종류다.
+         *    실측(2026-08-26): 활성 179곳 중 `supply_addr` 보유 «12곳». 나머지 167곳은
+         *    시군구까지밖에 없어 구 중심에 뭉친다 → 그건 안 찍는다.
+         *    `latitude/longitude` 는 이 표에서 «전량 NULL» 이라 폴백 지오코딩이 유일한 경로다. */
+        (data || [])
+          .filter((d: Record<string, any>) => (d.supply_addr || '').trim().length > 0)
+          .forEach((d: Record<string, any>) => allPins.push({
+            id: `u${d.id}`, name: d.house_nm || '', address: String(d.supply_addr).trim(),
+            layer: 'unsold', extra: `${d.tot_unsold_hshld_co || 0}세대 미분양`,
+            lat: d.latitude ? parseFloat(d.latitude) : undefined,
+            lng: d.longitude ? parseFloat(d.longitude) : undefined,
+          }));
       }
     } catch { }
 

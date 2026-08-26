@@ -81,27 +81,15 @@ export async function GET(req: NextRequest) {
         p_query: q,
         p_results_count: result?.total ?? 0,
         p_user_id: userId,
+        p_user_agent: uaHeader,
+        p_bot_type: botType,
       });
       if (typeof logId === "string") searchLogId = logId;
     } catch (e) {
       console.error("[/api/search] log_search failed:", e);
     }
-
-    /* user_agent·bot_type 은 «응답을 기다리지 않고» 채운다.
-     * ⚠️ `log_search` RPC 에 두 인자가 없어서 뒤따라 UPDATE 한다. RPC 를 고치면
-     *    이 블록은 지워도 된다 — 그때까지는 검색 1회당 쓰기 1회가 는다(검색은 저빈도다).
-     * ⚠️ 위 `await` 는 «건드리지 말 것». s260 에서 id 를 받으려고 일부러 await 로 바꾼 자리다.
-     *    fire-and-forget 으로 되돌리면 client 가 _search_log_id 를 못 받아 CTR 이 다시 0이 된다. */
-    if (searchLogId) {
-      void (sb as any)
-        .from("search_logs")
-        .update({ user_agent: uaHeader, bot_type: botType })
-        .eq("id", searchLogId)
-        .then(({ error }: { error: unknown }) => {
-          // ⚠️ 삼키지 않는다. 조용히 실패하면 4주 뒤에야 «빈 집계» 로 알게 된다.
-          if (error) console.error("[/api/search] ua/bot stamp failed:", error);
-        });
-    }
+    /* ⚠️ 위 `await` 를 «건드리지 말 것». s260 에서 id 를 받으려고 일부러 await 로 바꾼 자리다.
+     *    fire-and-forget 으로 되돌리면 client 가 `_search_log_id` 를 못 받아 CTR 이 다시 0이 된다. */
 
     return NextResponse.json(
       { ...result, _search_log_id: searchLogId },

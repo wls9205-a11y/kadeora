@@ -1,6 +1,12 @@
 // s273 — /apt 청약 퍼스트 재설계.
 //
-// 구성: ① SubscriptionTimeline 히어로 ② 도구칩 4종 ③ 청약 카드 리스트
+// 구성 (H4-4 재배치):
+//   1 AptFilterRow + SigunguChips     검색·필터 한 줄
+//   2 [목록 | 지도] 토글               AptViewSwitch — 지도는 목록의 «대체가 아니라 뷰 전환»
+//   3 청약·분양중  4 공고 전 현장  5 기축 실거래
+//   ── 이하 하단 (내린 것이지 지운 것이 아니다) ──
+//   SubscriptionTimeline · RecentMovesStrip · CurationCarousel · AptToolChips
+//   · 청약 결과 · 아카이브 · AptRelatedBlogs
 //       ④ 이번 주 청약 결과 ⑤ 관련 블로그 분석
 //
 // 데이터는 get_apt_subscription_hub 단일 RPC 하나로 끝낸다 (Architecture Rule #49).
@@ -45,6 +51,7 @@ import PipelineCard from '@/components/apt/PipelineCard';
 // V16 E-3 — 이번 주 움직인 현장. 카더라가 남보다 빠르다는 걸 보여주는 자리다.
 import { getAptRecentMoves } from '@/lib/apt/recent-moves';
 import GichukActivity from '@/components/apt/GichukActivity';
+import AptViewSwitch from '@/components/apt/AptViewSwitch';
 import { fetchGichukActivity } from '@/lib/apt/gichuk-activity';
 import RecentMovesStrip from '@/components/apt/RecentMovesStrip';
 import { SectionLink } from '@/components/apt/SectionHeader';
@@ -275,30 +282,12 @@ export default async function AptPage({
         </p>
       ) : null}
 
-      {/* ① 청약 타임라인 히어로 */}
-      <SubscriptionTimeline items={hub.timeline} region={hub.region} />
-
-      {/* ①-2 · V16 E-3 이번 주 움직인 현장.
-           히어로 바로 다음 = 콘텐츠 스택의 맨 위다. 여기가 비면 아무것도 그리지 않는다 —
-           "움직인 현장 없음" 을 내지 않는다. */}
-      <RecentMovesStrip items={recentMoves} region={pipeline.region} now={pipelineNow} />
-
-      {/* ②-2 큐레이션 3건 */}
-      {curated.length > 0 && (
-        <div style={{ padding: '0 6px' }}>
-          <CurationCarousel
-            title={`${hub.region} 지금 주목할 청약`}
-            items={curated.map((it) => (
-              <AptCurationCard key={it.id} item={it} today={hub.today} />
-            ))}
-          />
-        </div>
-      )}
-
-      {/* §I-3 도구 칩. 7개가 첫 화면 절반을 먹어 청약 타임라인·현장 목록보다 위에 있었다.
-           `지금 주목할 청약` 아래로 내린다 — **위치만**. 링크·라우트는 그대로다. */}
-      <AptToolChips region={hub.region} />
-
+      {/* ── H4-4 · [목록 | 지도] 뷰 전환 ──
+           지도는 목록의 «대체» 가 아니다. 서버가 렌더한 목록이 그대로 HTML 에 실리고,
+           크롤러는 토글을 누르지 않으므로 항상 목록을 본다 — `/apt` 색인이 안 깨진다.
+           지도 데이터는 클라이언트가 따로 가져온다 (Rule #49 — 서버 뭉치를 안 늘린다).
+           ⚠️ 재개발 레이어는 올리지 않는다 (fc860ea A안). AVAILABLE_LAYERS 주석 참조. */}
+      <AptViewSwitch>
       {/* ③ 청약 카드 리스트 */}
       <section style={{ padding: '0 6px' }} aria-labelledby="apt-cards-heading">
         <SectionHeader
@@ -393,6 +382,8 @@ export default async function AptPage({
         </section>
       )}
 
+      </AptViewSwitch>
+
       {/* ④ 이번 주 청약 결과 */}
       <SubscriptionResults items={hub.results} />
 
@@ -425,6 +416,33 @@ export default async function AptPage({
           <span aria-hidden style={{ flexShrink: 0, fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>→</span>
         </Link>
       </div>
+
+      {/* ── H4-4 재배치 · 아래 네 블록은 «내린 것이지 지운 것이 아니다» ──
+           첫 화면을 제어 UI 가 다 먹고 현장이 스크롤 3~4번 뒤에 있었다.
+           청약·공고 전·기축을 위로 올리고 이 넷을 그 아래로 옮겼다. 링크·라우트·조회 전부 그대로다. */}
+      {/* ① 청약 타임라인 히어로 */}
+      <SubscriptionTimeline items={hub.timeline} region={hub.region} />
+
+      {/* ①-2 · V16 E-3 이번 주 움직인 현장.
+           히어로 바로 다음 = 콘텐츠 스택의 맨 위다. 여기가 비면 아무것도 그리지 않는다 —
+           "움직인 현장 없음" 을 내지 않는다. */}
+      <RecentMovesStrip items={recentMoves} region={pipeline.region} now={pipelineNow} />
+
+      {/* ②-2 큐레이션 3건 */}
+      {curated.length > 0 && (
+        <div style={{ padding: '0 6px' }}>
+          <CurationCarousel
+            title={`${hub.region} 지금 주목할 청약`}
+            items={curated.map((it) => (
+              <AptCurationCard key={it.id} item={it} today={hub.today} />
+            ))}
+          />
+        </div>
+      )}
+
+      {/* §I-3 도구 칩. 7개가 첫 화면 절반을 먹어 청약 타임라인·현장 목록보다 위에 있었다.
+           `지금 주목할 청약` 아래로 내린다 — **위치만**. 링크·라우트는 그대로다. */}
+      <AptToolChips region={hub.region} />
 
       {/* ⑤ 관련 블로그 분석 */}
       <AptRelatedBlogs posts={relatedBlogs} />
