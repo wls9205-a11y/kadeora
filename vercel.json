@@ -108,7 +108,10 @@
       "path": "/api/cron/stock-flow-crawl",
       "schedule": "45 7 * * 2,4"
     },
-    { "path": "/api/cron/apt-content-fill", "schedule": "40 3 * * *" },
+    {
+      "path": "/api/cron/apt-content-fill",
+      "schedule": "40 3 * * *"
+    },
     {
       "path": "/api/cron/sync-apt-sites",
       "schedule": "0 4 * * *"
@@ -300,10 +303,6 @@
     {
       "path": "/api/cron/email-scheduler",
       "schedule": "0 22 * * *"
-    },
-    {
-      "path": "/api/cron/issue-preempt",
-      "schedule": "11 */2 * * *"
     },
     {
       "path": "/api/cron/blog-quality-score",

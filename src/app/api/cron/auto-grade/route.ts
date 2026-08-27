@@ -64,10 +64,18 @@ export async function GET(req: NextRequest) {
     const supabase = getSupabaseAdmin();
 
     // 모든 활성 유저의 포인트 조회
+    // ⛔ A1(2026-08-27) — 시드 계정 505개를 등급 산정에서 뺀다.
+    //    시드가 글 2,405 · 댓글 3,886 을 갖고 있어 등급 분포가 통째로 왜곡돼 있었다.
+    //
+    // ⚠️ `.eq('is_seed', false)` 로 쓰지 말 것. is_seed 가 null 인 실사용자가
+    //    «통째로 걸러진다» — PostgREST 는 NOT (NULL = false) = NULL 로 평가한다.
+    //    이 저장소가 R2 에서 `.not(col,'eq',v)` 로 273행을 전부 잃은 것과 같은 함정이다.
+    //    `not.is.true` 는 false 와 null 을 «둘 다» 통과시킨다.
     const { data: profiles, error: profileErr } = await supabase
       .from('profiles')
       .select('id, points, grade, grade_title')
-      .or('is_deleted.is.null,is_deleted.eq.false');
+      .or('is_deleted.is.null,is_deleted.eq.false')
+      .not('is_seed', 'is', true);
 
     if (profileErr || !profiles) {
       return { processed: 0, created: 0, failed: 1, metadata: { error: profileErr?.message } };

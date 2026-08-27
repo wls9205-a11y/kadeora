@@ -99,7 +99,10 @@ const CRON_GROUPS = {
     '/api/cron/macro-event-detect',
   ],
   content: [
-    '/api/cron/seed-posts',
+      // ⛔ A1(2026-08-27) — seed-posts · seed-comments · seed-chat 호출을 제거했다.
+      //    시드 계정 505개가 만든 글 2,405 · 댓글 3,886 이 실사용자 지표(171명)를
+      //    덮고 있었다. 30일간 «실사용자 글 0 · 댓글 0» 인데 KPI 는 활발해 보였다.
+      //    라우트 파일은 남긴다 — 되살릴 판단이 남아 있고, 지우면 이력이 사라진다.
     '/api/cron/blog-publish-queue',
     '/api/cron/blog-series-assign',
     '/api/cron/blog-stock-v2',
@@ -154,8 +157,6 @@ const CRON_GROUPS = {
     '/api/cron/blog-upcoming-projects',
     '/api/cron/blog-cleanup-padding',
     '/api/cron/blog-data-update',
-    '/api/cron/seed-chat',
-    '/api/cron/seed-comments',
     // 세션 113 추가 — 주식 마스터플랜
     '/api/cron/stock-hero-refresh',
     '/api/cron/us-premarket-brief',

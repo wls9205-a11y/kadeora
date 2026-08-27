@@ -15,7 +15,10 @@ const CRON_SEQUENCE = [
   { name: 'crawl-nationwide-redev', path: '/api/cron/crawl-nationwide-redev' },
   { name: 'crawl-apt-subscription', path: '/api/cron/crawl-apt-subscription' },
   { name: 'crawl-competition-rate', path: '/api/cron/crawl-competition-rate' },
-  { name: 'seed-posts', path: '/api/cron/seed-posts' },
+  // ⛔ A1(2026-08-27) — seed-posts · seed-comments · seed-chat 호출을 제거했다.
+  //    시드 계정 505개가 만든 글 2,405 · 댓글 3,886 이 실사용자 지표(171명)를
+  //    덮고 있었다. 30일간 «실사용자 글 0 · 댓글 0» 인데 KPI 는 활발해 보였다.
+  //    라우트 파일은 남긴다 — 되살릴 판단이 남아 있고, 지우면 이력이 사라진다.
   { name: 'daily-stats', path: '/api/cron/daily-stats' },
   { name: 'aggregate-trade-stats', path: '/api/cron/aggregate-trade-stats' },
   { name: 'exchange-rate', path: '/api/cron/exchange-rate' },
