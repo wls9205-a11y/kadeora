@@ -3,11 +3,12 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
 import { dbw } from '@/lib/cron-db-log';
 
-// ⚠️ Rule #18 — vercel.json 의 `"src/app/api/**" 캐치올(maxDuration 30)이 이 줄을 «덮는다».
-//    첫 배포에서 실제로 30초에 걸려 504(FUNCTION_INVOCATION_TIMEOUT)가 났다.
-//    vercel.json 의 functions 에 observe 항목(120초)을 «반드시» 같이 둔다 —
-//    여기만 고치면 아무 일도 일어나지 않는다.
+// ⚠️ Rule #18 정정(2026-08-27) — 캐치올은 이 줄을 «덮지 않는다». 이 선언만으로 충분하다.
+//    첫 배포에서 504(FUNCTION_INVOCATION_TIMEOUT)가 났는데, 당시 이 선언은 «60» 이었다.
+//    30초 캐치올에 걸린 것이 아니라 60초를 넘긴 것이다 — 같은 커밋에서 넣은
+//    apt_transactions(region_nm, deal_date) 복합 인덱스가 실제로 고친 변경이다.
 //    실측: get_weekly_trades 가 지역당 4~11초(부산 16구군 4.2s · 울산 10.7s · 경남 5.4s).
+//    ⚠️ functions 항목은 필요 없다. 그 항목은 50개가 스키마 상한이라 함부로 늘리지 않는다(Rule #112).
 //
 // ⛔ 이 주석을 «블록 주석으로 되돌리지 말 것». vercel.json 의 glob 을 그대로 적으면
 //    그 안의 `*` + `/` 가 블록 주석을 «조기 종료» 시켜 빌드가 깨진다(2026-08-27 실제 발생).

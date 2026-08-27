@@ -74,7 +74,7 @@ async function handler(_req: NextRequest) {
     // ⚠️ `.order('id')` 가 «필수» 다. 정렬이 없으면 페이지 경계에서 행이 겹치거나 빠진다.
     //
     // ⚠️ 처리량이 4배다. `vercel.json` 의 sync-apt-sites maxDuration 을 180 → 300 으로
-    //    함께 올렸다. Rule #18 — vercel.json 이 라우트 파일의 maxDuration 을 «덮는다».
+    //    함께 올렸다. ⚠️ 2026-08-27 정정 — vercel.json 은 라우트 maxDuration 을 덮지 «않는다»(Rule #18).
     //    라우트 파일만 고치면 안 걸린다.
     const PAGE = 300;
     const redevAll: any[] = [];

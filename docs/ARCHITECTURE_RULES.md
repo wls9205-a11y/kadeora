@@ -24,18 +24,60 @@
 
 **참고**: 직접 영향 워커 — `app/api/cron/blog-meta-rewrite-poll/route.ts`. 동일 패턴 워커 — `app/api/cron/blog-image-batch-poll/*`, `app/api/cron/apt-ai-batch-poll/*`.
 
-## Rule #18 — vercel.json catch-all maxDuration 은 per-route export 를 override 한다 (s223 신설)
+## Rule #18 — ⚠️ 2026-08-27 정정: 캐치올은 per-route export 를 «덮지 않는다»
 
-**Symptom**: route 안 `export const maxDuration = 60` 을 분명히 적었는데도 실제 배포된 함수는 30s 에서 timeout. cron 이 504 로 죽는데 코드만 보면 원인 안 보임.
+**⚠️ 이 규칙은 2026-05-04(s223)에 세워졌고 2026-08-27 실측에서 «성립하지 않았다». 아래가 현행이다.**
 
-**Cause**: vercel.json `functions` 의 catch-all glob (예: `src/app/api/**/*.ts`) 에 `maxDuration` 이 박혀 있으면 해당 glob 에 매치되는 모든 route 의 per-route export 를 silently override 한다. Vercel 빌드 단계에서 경고도 뜨지 않음.
+### 오늘의 실측 (2026-08-27 · 최근 14일 cron_logs 전수)
 
-**Rule**:
-- vercel.json catch-all 은 짧은 외부 fetch 라우트 한정으로만 사용.
-- cron / 무거운 SSR / OG image 처럼 긴 함수는 vercel.json 에 경로별 명시 override 또는 per-route export 단독 사용. 둘이 충돌하면 vercel.json 이 이긴다.
-- 새 cron 추가 시 vercel.json 의 functions glob 매치 여부 우선 확인.
+캐치올 `src/app/api/**/*.ts → maxDuration 30` 은 «지금도 그대로 있다». 그런데:
 
-**Discovered**: s223 (2026-05-04) — stock-fundamentals-kr / data-quality-fix 504 timeout 추적 중 발견. 둘 다 route export 60 적었으나 catch-all 30 이 이김.
+- **functions 항목이 «없는»** 라우트 **14개** 가 30초를 넘겨 «성공» 했다.
+  전부 라우트에 `export const maxDuration` 만 있다:
+
+  | 라우트 | 최대 실행 | functions | 라우트 export |
+  |---|---|---|---|
+  | issue-draft | 281.2s | 없음 | 300 |
+  | stock-analysis-gen | 218.0s | 없음 | 300 |
+  | issue-image-attach | 151.7s | 없음 | 300 |
+  | apt-enrich-location | 142.8s | 없음 | 300 |
+  | apt-analysis-gen | 128.2s | 없음 | 300 |
+  | batch-cluster-submit | 104.0s | 없음 | 300 |
+
+  `apt-enrich-location` 은 **6일 연속 매일 136~143초로 전부 성공** 했다. 우연이 아니다.
+
+- **functions 도 없고 라우트 export 도 «없는» 채 30초를 넘긴 것: 0개.**
+  즉 둘 다 없을 때 30초가 걸리는 것 자체는 반증되지 않았다.
+
+### 그래서 무엇이 참인가
+
+> **라우트의 `export const maxDuration` 하나로 «충분하다».**
+> 캐치올은 그것을 덮지 않는다.
+
+⚠️ 둘 «다» 있고 값이 다를 때 어느 쪽이 이기는지는 **아직 모른다**. 관측된 실행 중
+   더 작은 값을 넘긴 사례가 없어 가려지지 않았다(blog-quality-score functions 300 /
+   export 120 / 최대 116.9s 등). 모르는 것을 안다고 적지 않는다.
+
+⚠️ s223 당시(stock-fundamentals-kr · data-quality-fix 가 export 60 인데 30초에 죽음)의
+   관측이 틀렸는지, 그 사이 Vercel 동작이 «바뀐» 것인지는 가릴 수 없다. 어느 쪽이든
+   **현행 판단 근거는 오늘의 실측** 이다.
+
+### 운용 지침 (개정)
+
+- 30초를 넘는 라우트는 **라우트에 `export const maxDuration` 을 적는다.** 이것이 1순위다.
+- `functions` 항목은 «라우트가 스스로 선언할 수 없을 때» 만 추가한다.
+  ⚠️ `functions` 는 **50개가 스키마 상한** 이다(Rule #112). 「Rule #18 때문에 항목을 늘 같이
+     넣는다」는 옛 지침이 항목을 51개까지 밀어올려 **배포 3건을 연속으로 죽였다**(2026-08-27).
+     그 지침이 이 규칙의 가장 비싼 부작용이었다.
+- 새 cron 추가 시 라우트 export 를 «반드시» 적고, functions 는 손대지 않는다.
+
+### observe 504 사후 정정 (2026-08-27)
+
+⚠️ `2c0d9a07` 커밋은 observe 504 의 원인을 「캐치올이 덮었다」로 적었다. **그 진단은 틀렸다.**
+observe 는 당시 `export const maxDuration = 60` 이었으므로 한도는 60초였고, 실행이 그것을
+넘긴 것이다. 같은 커밋이 `apt_transactions(region_nm, deal_date)` 복합 인덱스도 함께
+넣었는데 — **고친 것은 그 인덱스다**. functions 항목 추가는 효과가 없었을 가능성이 크다.
+두 변경을 한 커밋에 넣어 원인이 가려졌다.
 
 ## Rule #19 — cron route 삭제 전 3종 검증 (s223 신설)
 

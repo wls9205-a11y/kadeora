@@ -1,3 +1,54 @@
+### ⚠️ Rule #18 정정 — 캐치올은 라우트 maxDuration 을 «덮지 않는다» (2026-08-27)
+
+H6-6 뒤 Rule #18 확인용 감시가 잡은 실행을 대조하다 **규칙 자체가 반증됐다**.
+
+#### 무엇이 걸렸나
+
+`apt-enrich-location` — vercel.json `functions` 항목 **없음**, 라우트에 `maxDuration = 300` 만.
+Rule #18 대로면 30초 캐치올에 걸려야 하는데 **6일 연속 매일 136~143초로 전부 성공**.
+
+#### 전수 대조 (최근 14일 · 30초를 넘겨 성공한 라우트)
+
+- functions 항목이 **없는** 채 30초를 넘긴 것 **14개** — 전부 라우트 export 만 있다
+  (issue-draft 281s/300 · stock-analysis-gen 218s/300 · issue-image-attach 152s/300 ·
+   apt-enrich-location 143s/300 · apt-analysis-gen 128s/300 · batch-cluster-submit 104s/300 …)
+- functions 도 라우트 export 도 **둘 다 없는** 채 30초를 넘긴 것 **0개**
+
+→ **라우트의 `export const maxDuration` 하나로 충분하다.** 캐치올은 그것을 덮지 않는다.
+
+⚠️ 둘 다 있고 값이 다를 때 어느 쪽이 이기는지는 **아직 모른다** — 더 작은 값을 넘긴
+   실행이 관측되지 않아 가려지지 않았다. 모르는 것을 안다고 적지 않는다.
+⚠️ s223(2026-05-04) 관측이 틀렸는지 그 사이 Vercel 이 바뀐 것인지는 가릴 수 없다.
+
+#### observe 504 사후 정정
+
+`2c0d9a07` 이 원인을 「캐치올이 덮었다」로 적었는데 **틀렸다**. observe 는 당시
+`maxDuration = 60` 이었으므로 한도는 60초였고 실행이 그것을 넘긴 것이다.
+같은 커밋의 `apt_transactions(region_nm, deal_date)` 복합 인덱스가 실제로 고친 변경이다.
+⚠️ 두 변경을 한 커밋에 넣어 원인이 가려졌다.
+
+#### 이 오진의 비용
+
+「Rule #18 때문에 functions 항목을 늘 같이 넣는다」는 지침이 항목을 **51개까지** 밀어올려
+**배포 3건을 연속으로 죽였다**(상한 50). 오늘 37개로 줄인 작업이 그 뒷수습이었다.
+
+#### 운용 지침 (개정)
+
+- 30초를 넘는 라우트는 **라우트에 `export const maxDuration`**. 이것이 1순위다.
+- `functions` 항목은 라우트가 스스로 선언할 수 없을 때만. **40개 이하 유지**(Rule #112).
+
+#### 감시 결과 (배포 이후 30초 초과 완주)
+
+| 라우트 | 초 | functions 커버 |
+|---|---|---|
+| apt-enrich-location | 139.9 | **없음** |
+| apt-card-build | 126.0 / 123.3 / 118.1 | `apt-card-build/*.ts` 300 |
+| crawl-apt-rent | 52.3 | **`crawl-*/*.ts` 300** ← 접두 glob 이 실제로 300 을 준다 |
+
+`crawl-*` 는 이번에 `crawl-apt-resale` 중복 항목을 지우고 «덮게 한» 바로 그 glob 이다.
+접두 glob 병합이 작동한다는 직접 증거다.
+
+---
 ### H6-6 상세 레일·히어로 겹침 (2026-08-27)
 
 #### ⚠️ 원인은 지시서가 든 세 후보(음수 마진·100vw·grid-column span) 전부 아니었다

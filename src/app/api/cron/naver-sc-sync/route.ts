@@ -13,8 +13,8 @@ import { logCronStart, logCronEnd } from "@/lib/cron-log";
 //   순차로 돌면 30 초에 절대 못 들어간다. 회전 배치(200) + 5 병렬로 바꾸고 120 초를 준다.
 //
 //   ⚠️ 이 export 만으로는 부족하다. vercel.json 의 캐치올
-//   `src/app/api/**/*.ts → maxDuration 30` 이 라우트 export 를 덮는다(Rule #18).
-//   같은 커밋에서 vercel.json 에 개별 오버라이드를 넣었다.
+//   ⚠️ 2026-08-27 정정 — 캐치올(30)은 라우트 export 를 덮지 «않는다»(Rule #18).
+//   당시 넣은 vercel.json 개별 오버라이드는 없어도 됐던 것으로 보인다.
 export const maxDuration = 120;
 export const dynamic = "force-dynamic";
 

@@ -3,8 +3,8 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
 import { dbw } from '@/lib/cron-db-log';
 
-// ⚠️ Rule #18 — vercel.json 의 `src/app/api` 캐치올(maxDuration 30)이 이 줄을 «덮는다».
-//    functions 에 stage-derive 항목을 «반드시» 같이 둔다. 여기만 고치면 아무 일도 없다.
+// ⚠️ Rule #18 정정(2026-08-27) — 캐치올은 이 줄을 «덮지 않는다». 이 선언만으로 충분하다.
+//    functions 항목은 필요 없다. 그 항목은 50개가 상한이라 함부로 늘리지 않는다(Rule #112).
 export const maxDuration = 120;
 
 /**
