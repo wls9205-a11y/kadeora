@@ -633,7 +633,7 @@ export default function LeadForm({
     <section id={LEAD_FORM_ID} style={shell}>
       <style>{`
         .kd-lead-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
-        @media (max-width: 480px) { .kd-lead-grid { grid-template-columns: minmax(0, 1fr); } }
+        @media (max-width: 479.98px) { .kd-lead-grid { grid-template-columns: minmax(0, 1fr); } }
       `}</style>
 
       {/* 상단 라벨 밴드 */}

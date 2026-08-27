@@ -77,7 +77,7 @@ export default async function AptBlogStack({ slug }: Props) {
       </div>
       <style>{`
         .apt-blog-stack::-webkit-scrollbar { display: none; }
-        @media (max-width: 480px) {
+        @media (max-width: 479.98px) {
           .apt-blog-stack > a { width: 88px !important; }
           .apt-blog-stack > a > div:first-child { width: 88px !important; height: 44px !important; font-size: 10px !important; }
         }

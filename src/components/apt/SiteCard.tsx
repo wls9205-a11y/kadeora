@@ -213,7 +213,7 @@ export default function SiteCard({ site }: { site: CuratedSite }) {
           -webkit-box-orient: vertical;
           overflow: hidden;
         }
-        @media (max-width: 480px) {
+        @media (max-width: 479.98px) {
           .site-card-body { padding: 9px 10px 10px; }
           .site-card-title { -webkit-line-clamp: 3; }
         }

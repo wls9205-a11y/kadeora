@@ -140,7 +140,7 @@ export default async function AptCompareTable({ slug, currentSite }: Props) {
         </tbody>
       </table>
       <style>{`
-        @media (max-width: 768px) {
+        @media (max-width: 767.98px) {
           .apt-compare-table { display: none !important; }
         }
       `}</style>
