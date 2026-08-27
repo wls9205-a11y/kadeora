@@ -1051,7 +1051,11 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
           : '항공 이미지 · 국토교통부 공간정보 오픈플랫폼(VWorld)';
         const lifecycleBadge = stageLabel((site as any)?.lifecycle_stage);
         const badgeEl = (
-          <div style={{ position: 'absolute', top: 10, left: 12, display: 'flex', gap: 'var(--sp-xs)', flexWrap: 'wrap', zIndex: 2 }}>
+          /* ⚠️ H6-3 — 이미지가 없으면 히어로가 «흐름 배치» 네이비 카드다.
+             거기에 absolute 배지를 얹으면 카드 밖으로 튀어나가 레일과 겹친다. */
+          <div style={heroSrc
+            ? { position: 'absolute', top: 10, left: 12, display: 'flex', gap: 'var(--sp-xs)', flexWrap: 'wrap', zIndex: 2 }
+            : { display: 'flex', gap: 'var(--sp-xs)', flexWrap: 'wrap', marginBottom: 10 }}>
             {lifecycleBadge && <span style={{ fontSize: 'var(--fs-xs)', padding: '3px 10px', borderRadius: 'var(--radius-card)', background: 'rgba(9,13,20,.72)', color: '#FFFFFF', fontWeight: 500 }}>{lifecycleBadge}</span>}
             {/* ⚠️ .bg.replace('0.15','0.85') 는 무효였다 — SB 의 bg 는 'var(--accent-*-bg)' 문자열이라
                  바꿀 '0.15' 가 없다. 흰 글씨가 10%% 틴트 위에 얹혀 대비 1.13(접수중)·1.10(접수예정),
@@ -1120,10 +1124,12 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
            ④ 인포그래픽. 그 넷 중 하나라도 조건부로 바뀌면 여기도 같이 고칠 것. */}
       <SiteJumpBar
         items={[
-          { id: 'about-group', label: '이 단지', show: true },
-          { id: 'price-group', label: '얼마',    show: true },
-          { id: 'odds-group',  label: '될까',    show: true },
-          { id: 'more-group',  label: '더보기',  show: true },
+          /* H6-3 — 「이 단지 / 얼마 / 될까」는 구어체 2글자라 리뉴얼 톤과 어긋났다.
+             명사형으로 맞춘다. id 는 그대로 — 앵커 링크가 걸려 있다. */
+          { id: 'about-group', label: '단지',   show: true },
+          { id: 'price-group', label: '분양가', show: true },
+          { id: 'odds-group',  label: '전망',   show: true },
+          { id: 'more-group',  label: '더보기', show: true },
         ]}
       />
 

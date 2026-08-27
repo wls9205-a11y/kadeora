@@ -86,6 +86,27 @@ export default function SiteHero({ src, name, region, credit, badges, variant = 
   const hasImage = !!url && !failed;
   const isCard = variant === 'card';
 
+  /* ══ H6-3 — 이미지 없는 현장은 «네이비 카드» 다 ══════════════════════════
+   *
+   * 예전엔 이미지가 없어도 .kd-hero 가 aspect-ratio(4/3 · 21/9)를 «그대로 잡고»
+   * 이니셜 워터마크를 채운 뒤 캡션을 absolute 로 얹었다. 그래서:
+   *   · 데스크탑에서 전폭 음수 마진 때문에 우측 레일과 «글자가 겹쳤다»
+   *   · 사진이 없는데도 사진 높이만큼 «회색 빈 띠» 가 남았다
+   *   · 캡션 h1 과 아래 본문 배지가 같은 이름을 두 번 보여줬다
+   *
+   * 이제 본문 컬럼 폭 «안에서만» 그린다. 높이는 콘텐츠(최대 260px)다.
+   * 대비(네이비 단색 #0B2A6B): 흰 13.48 · 골드 8.54 — 그라디언트가 아니라 단색이다.
+   * ⚠️ h1 은 children 안에 있다. 폴백이 h1 을 «가진다» — 페이지에 h1 은 하나뿐이다.
+   */
+  if (!hasImage && !isCard) {
+    return (
+      <div className="kd-hero-fallback">
+        {badges}
+        {children}
+      </div>
+    );
+  }
+
   return (
     <>
       <style>{`

@@ -443,6 +443,35 @@
     }
   }
 
+  /* ── H6-3 : 이미지 없는 상세 히어로 ──────────────────────────────────────
+     ⚠️ 전폭 음수 마진을 «쓰지 않는다». 본문 컬럼 폭 안에서만 그린다 —
+        그래야 데스크탑 2단에서 우측 레일과 겹치지 않는다.
+     ⚠️ aspect-ratio 를 «잡지 않는다». 사진이 없는데 사진 높이를 예약하면
+        회색 빈 띠가 남는다. 높이는 콘텐츠가 정한다(최대 260px).
+     대비(네이비 «단색» #0B2A6B, 그라디언트 아님): 흰 13.48 · 골드 8.54 */
+  .kd-hero-fallback {
+    margin: 0 0 14px;
+    max-height: 260px;
+    padding: 16px 18px;
+    border-radius: var(--radius-lg);
+    background: var(--brand-navy);
+    color: var(--text-inverse);
+    overflow: hidden;
+  }
+  /* 캡션(h1 + 보조줄)은 children 으로 들어온다. 폴백이 h1 을 «가진다». */
+  .kd-hero-fallback h1 {
+    margin: 0 0 6px;
+    font-size: var(--fs-title);
+    font-weight: 600;
+    letter-spacing: -0.4px;
+    line-height: 1.25;
+    color: var(--text-inverse);
+    word-break: keep-all;
+  }
+  /* 보조줄(지역 · 시공사 · 세대)은 골드로. 흰 위 골드가 아니라 «네이비 위» 골드다. */
+  .kd-hero-fallback > :not(h1):not(:first-child) { color: var(--brand-gold); }
+  .kd-hero-fallback [data-kd-hero-caption] { color: inherit; }
+
   /* 모션은 둘뿐이고, 줄여 달라고 한 사람에게는 0ms 다. */
   @media (prefers-reduced-motion: reduce) {
     .region-tile { transition: none; }
