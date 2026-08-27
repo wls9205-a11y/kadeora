@@ -43,6 +43,8 @@ export const LIFECYCLE_LABEL: Record<string, string> = {
   model_house_open: '모델하우스',
   special_supply: '특별공급',
   subscription_open: '청약 진행',
+  // H6-1 — 접수 마감 ~ 발표 전. 「청약 진행」으로 두면 «지원할 수 있다» 로 읽힌다.
+  award_pending: '당첨자 발표 대기',
   award_announced: '당첨자 발표',
   contract_signing: '계약',
   contract: '계약',

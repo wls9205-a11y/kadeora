@@ -48,14 +48,19 @@ export const STAGES: Record<StageKey, StageDef> = {
     eyebrow: 'OFFERING — 청약 진행·마감',
     describe: (r, n) => `${r}의 청약 단지 ${n.toLocaleString()}곳입니다. 접수 일정·경쟁률·공급 세대수를 정리했습니다.`,
     source: 'subs',
-    lifecycles: ['award_announced', 'contract_signing', 'model_house_open', 'special_supply', 'subscription_open'],
+    lifecycles: ['award_announced', 'award_pending', 'contract_signing', 'model_house_open', 'special_supply', 'subscription_open'],
   },
   new: {
     label: '신축·입주',
     eyebrow: 'NEW — 입주 예정·미분양',
     describe: (r, n) => `${r}의 입주 예정·신축 단지 ${n.toLocaleString()}곳입니다. 입주장 시세와 미분양 물량을 함께 봅니다.`,
     source: 'sites',
-    lifecycles: ['move_in_ready', 'move_in_started', 'unsold_active'],
+    // ⚠️ H6-1 — 'construction' 을 «넣어야 한다». 단계 유도 백필로 708곳이
+    //    move_in_ready → construction 으로 옮겨 갔는데, construction 은 그때까지
+    //    «어느 버킷에도 없어서» 그 708곳이 /apt/stage/* 에서 통째로 사라졌다.
+    //    공사 중인 분양 단지는 「입주 예정」이 맞다 — 라벨의 뜻과도 어긋나지 않는다.
+    //    (정비사업 착공 32곳도 같이 들어온다. 그쪽도 입주로 가는 길목이라 문제없다.)
+    lifecycles: ['move_in_ready', 'move_in_started', 'construction', 'unsold_active'],
   },
   existing: {
     label: '기축',

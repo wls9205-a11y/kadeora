@@ -29,6 +29,7 @@ const STAGE_LABEL: Record<string, string> = {
   announced: '분양중',
   open: '접수중',
   leftover: '선착순',
+  award_pending: '발표 대기',
   award_announced: '당첨자 발표',
   move_in_ready: '입주 예정',
   post_move_in: '입주 완료',

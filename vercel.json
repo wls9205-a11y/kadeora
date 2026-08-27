@@ -307,6 +307,10 @@
     {
       "path": "/api/cron/batch-poll",
       "schedule": "*/10 * * * *"
+    },
+    {
+      "path": "/api/cron/stage-derive",
+      "schedule": "0 5 * * *"
     }
   ],
   "headers": [
@@ -649,6 +653,9 @@
       "maxDuration": 300
     },
     "src/app/api/cron/observe/*.ts": {
+      "maxDuration": 120
+    },
+    "src/app/api/cron/stage-derive/*.ts": {
       "maxDuration": 120
     }
   }

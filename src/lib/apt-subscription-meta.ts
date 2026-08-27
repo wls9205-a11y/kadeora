@@ -115,6 +115,8 @@ export function calculateDday(date: string | null | undefined): number | null {
 const STAGE_LABEL: Record<string, string> = {
   pre_announcement: '공고 예정',
   subscription_open: '청약 진행중',
+  // H6-1 — 접수 마감 ~ 발표 전. 「청약 진행」으로 두면 «지원할 수 있다» 로 읽힌다.
+  award_pending: '발표 대기',
   subscription_imminent: '청약 임박',
   award_announced: '당첨자 발표',
   contract_period: '계약 기간',

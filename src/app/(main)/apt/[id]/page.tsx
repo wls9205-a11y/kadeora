@@ -381,7 +381,28 @@ async function fetchUnifiedData(slug: string) {
   ]);
   const [postsR, nearbyR] = await Promise.allSettled([
     termPost ? sb.from('posts').select('id, title, created_at, comments_count').eq('is_deleted', false).ilike('title', `%${termPost}%`).order('created_at', { ascending: false }).limit(3) : Promise.resolve({ data: [] }),
-    region ? sb.from('apt_sites').select('slug, name, site_type, region, sigungu, total_units, status').eq('is_active', true).eq('region', region).neq('slug', slug).gte('content_score', 25).order('interest_count', { ascending: false }).limit(4) : Promise.resolve({ data: [] }),
+    /* H6-1 「{구군} 다른 현장」.
+     *
+     * ⛔ interest_count 정렬을 버렸다. page_views 와 같은 계열의 «합성값» 이고,
+     *    그걸로 정렬하면 어느 상세 페이지를 열어도 «같은 4곳» 이 나온다(실제로 그랬다).
+     * ⚠️ 같은 «구군» 을 먼저 본다. 시도 전체에서 뽑으면 부산 서구 현장 페이지에
+     *    기장군 현장이 나온다 — 「다른 현장」이 아니라 「아무 현장」이 된다.
+     * ⚠️ `취소분` 을 뺀다. 8세대 취소분 같은 것이 대표 현장처럼 노출됐다.
+     * ⚠️ 정렬은 total_units desc — 규모는 «실측값» 이다. 순위 신호가 아니다.
+     */
+    (region && sigungu)
+      ? sb.from('apt_sites').select('slug, name, site_type, region, sigungu, total_units, status')
+          .eq('is_active', true).eq('region', region).eq('sigungu', sigungu).neq('slug', slug)
+          .gte('total_units', 100).eq('status', 'active')
+          .not('name', 'ilike', '%취소분%')
+          .order('total_units', { ascending: false }).limit(4)
+      : region
+        ? sb.from('apt_sites').select('slug, name, site_type, region, sigungu, total_units, status')
+            .eq('is_active', true).eq('region', region).neq('slug', slug)
+            .gte('total_units', 100).eq('status', 'active')
+            .not('name', 'ilike', '%취소분%')
+            .order('total_units', { ascending: false }).limit(4)
+        : Promise.resolve({ data: [] }),
   ]);
   const [sameBuilderR, regionPriceR] = await Promise.allSettled([
     // 같은 시공사 다른 현장 (분양가 포함)
@@ -1124,6 +1145,7 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
         moveInDate={site?.move_in_date ?? sub?.mvn_prearnge_ym}
         receiptStart={sub?.rcept_bgnde ?? null}
         receiptEnd={sub?.rcept_endde ?? null}
+        lifecycleStage={site?.lifecycle_stage ?? null}
       />
 
       {/* A6 — 본부장 노트. 히어로 텍스트 블록 «아래» 다. 담당이 직접 본 것이 먼저 읽혀야
@@ -2518,7 +2540,7 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
            하단 탭바(z-100)·글쓰기 FAB(z-99)와의 겹침은 컴포넌트 안에서 처리한다. */}
       <SiteActionBar siteSlug={slug} showLeadForm={showLeadForm} lifecycleStage={lc} />
       {/* Nearby sites (internal linking SEO) */}
-      {nearbySites.length > 0 && <section aria-labelledby="apt-sec-h8" className="apt-card kd-lg-hide"><SectionHeader id="apt-sec-h8" title={`${region} 다른 현장`} /><div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 'var(--sp-sm)' }}>{nearbySites.map((ns: Record<string, any>) => <Link key={ns.slug} href={`/apt/${ns.slug}`} className="kd-card" style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: 10, textDecoration: 'none', color: 'inherit', overflow: 'hidden' }}><div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 2 }}>{ns.name}</div><div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ns.sigungu || ns.region} · {ns.total_units ? `${ns.total_units}세대` : ''} · {tLabel[ns.site_type]}</div></Link>)}</div></section>}
+      {nearbySites.length > 0 && <section aria-labelledby="apt-sec-h8" className="apt-card kd-lg-hide"><SectionHeader id="apt-sec-h8" title={`${sigungu || region} 다른 현장`} /><div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 'var(--sp-sm)' }}>{nearbySites.map((ns: Record<string, any>) => <Link key={ns.slug} href={`/apt/${ns.slug}`} className="kd-card" style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: 10, textDecoration: 'none', color: 'inherit', overflow: 'hidden' }}><div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 2 }}>{ns.name}</div><div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ns.sigungu || ns.region} · {ns.total_units ? `${ns.total_units}세대` : ''} · {tLabel[ns.site_type]}</div></Link>)}</div></section>}
 
       {/* 지역 허브 내부 링크 */}
       {(region || sigungu) && <div className="apt-card kd-lg-hide" style={{ padding: '12px 14px' }}><div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>

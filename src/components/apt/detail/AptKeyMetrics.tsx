@@ -34,6 +34,14 @@ type Props = {
   moveInDate?: string | null;
   /** 접수 마감일 (YYYY-MM-DD). D-day 계산 기준. */
   receiptEnd?: string | null;
+  /**
+   * H6-1 — 청약 칸을 낼지 «단계로» 판정한다.
+   *
+   * ⚠️ 예전엔 단계와 무관하게 접수 종료일만 보고 「마감」을 냈다. 그래서 공사 중인
+   *    현장에 몇 달 전 끝난 청약의 「마감」이 계속 붙어 있었다(기장 이진캐스빌).
+   *    지나간 일정은 정보가 아니라 «잡음» 이고, 옆 칸의 입주 예정과 서로 다른 말을 한다.
+   */
+  lifecycleStage?: string | null;
   /** 접수 시작일 — 아직 시작 전이면 '접수 시작까지' 를 센다. */
   receiptStart?: string | null;
 };
@@ -130,8 +138,14 @@ function Cell({ label, value, note, accent }: { label: string; value: string; no
 }
 
 export default function AptKeyMetrics({
-  priceMin, priceMax, units, moveInDate, receiptEnd, receiptStart, preAnnouncement = false,
+  priceMin, priceMax, units, moveInDate, receiptEnd, receiptStart, preAnnouncement = false, lifecycleStage,
 }: Props) {
+  /* 청약 일정이 «아직 의미 있는» 단계. 이 밖이면 칸을 통째로 내리고 3칸으로 간다. */
+  const SUBSCRIPTION_STAGES = new Set([
+    'pre_announcement', 'model_house_open', 'special_supply',
+    'subscription_open', 'award_pending', 'award_announced', 'contract_signing',
+  ]);
+  const showDday = !lifecycleStage || SUBSCRIPTION_STAGES.has(lifecycleStage);
   const blank = preAnnouncement ? '미정' : '미공개';
   const price = priceText(priceMin, priceMax);
   const unit = unitCell(units);
@@ -143,7 +157,7 @@ export default function AptKeyMetrics({
       aria-label="핵심 지표"
       style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+        gridTemplateColumns: `repeat(${showDday ? 4 : 3}, minmax(0, 1fr))`,
         margin: '0 0 var(--sp-md)',
         border: '1px solid var(--border)',
         borderRadius: 'var(--radius-md)',
@@ -159,6 +173,7 @@ export default function AptKeyMetrics({
       />
       <Cell label={unit.label} value={unit.value} note={unit.note} />
       <Cell label="입주" value={move ?? '미정'} note={move ? '예정' : preAnnouncement ? '공고 후 확정' : undefined} />
+      {showDday && (
       <div style={{ ...CELL, borderRight: 0 }}>
         <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 500, color: 'var(--text-tertiary)', marginBottom: 3 }}>청약</div>
         <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, lineHeight: 1.25, letterSpacing: '-.0125em', color: dday.value.startsWith('D-') ? 'var(--accent-red)' : 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>
@@ -168,6 +183,7 @@ export default function AptKeyMetrics({
           {dday.note}
         </div>
       </div>
+      )}
     </section>
   );
 }

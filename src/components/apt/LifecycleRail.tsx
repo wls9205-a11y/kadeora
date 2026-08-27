@@ -25,6 +25,8 @@ const STAGE_CELL: Record<string, number> = {
   model_house_open: 2,
   special_supply: 3,
   subscription_open: 3,
+  // H6-1 — 접수 마감 ~ 발표 전. 접수와 발표 «사이» 다.
+  award_pending: 3,
   award_announced: 4,
   contract_signing: 5,
   move_in_ready: 6,

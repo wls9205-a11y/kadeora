@@ -26,6 +26,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { SITE_URL } from '@/lib/constants';
 import { facetRobots, aptFacetCanonical } from '@/lib/seo/facet';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { getAptHub } from '@/lib/apt/hub';
 import { getRelatedBlogs } from '@/lib/apt/related-blogs';
 import { buildSubscriptionEvents, buildSubscriptionItemList } from '@/lib/apt/subscription-schema';
@@ -200,7 +201,27 @@ export default async function AptPage({
 
   // 관련 블로그는 지금 노출 중인 단지 기준으로 뽑는다 (metadata.apt_id 매핑, s273 규약)
   const visibleIds = [...cards, ...hub.results].map((it) => it.id);
-  const relatedBlogs = await getRelatedBlogs(visibleIds);
+  /* H6-1 「관련 분석」 — 선택 시도의 글을 먼저 본다.
+   *
+   * ⚠️ 예전엔 지역을 «전혀 보지 않았다». 그래서 부산을 고른 화면의 레일에 서울 글이
+   *    올라왔다. A5 가 blog_posts.apt_region 을 만들어 뒀으므로 한 줄로 걸린다.
+   * ⚠️ 0건이면 전국으로 되돌아간다 — 빈 패널을 만들지 않는다(Rule #97).
+   *    지역 글이 적은 시도(세종 11편)에서 레일이 통째로 비는 것이 더 나쁘다.
+   */
+  const sbClient = getSupabaseAdmin();
+  let relatedBlogs = await getRelatedBlogs(visibleIds);
+  if (!showTiles) {
+    const { data: regionBlogs, error: rbErr } = await (sbClient as any)
+      .from('blog_posts').select('id, slug, title, published_at')
+      .eq('is_published', true).eq('apt_region', region)
+      .order('published_at', { ascending: false }).limit(6);
+    if (rbErr) console.error(`[apt] region blogs ${region}: ${rbErr.message?.slice(0, 160)}`);
+    else if ((regionBlogs?.length ?? 0) > 0) {
+      relatedBlogs = (regionBlogs as any[]).map((b) => ({
+        id: b.id, slug: b.slug, title: b.title, published_at: b.published_at, apt_id: null,
+      }));
+    }
+  }
 
   // NEW 배지(단계 변경 30일 이내) 기준 시각. 행마다 Date.now() 를 부르면
   //   한 렌더 안에서 기준이 갈린다. 한 번 찍어 내려보낸다.
@@ -253,8 +274,14 @@ export default async function AptPage({
     { key: 'leftover', label: '선착순', count: statusCounts.leftover },
     { key: 'redev', label: '재개발', count: redevCount },
   ];
-  // 뒤로가기 행에 붙는 숫자 = 이 시도의 현장 수(타일 건수와 같은 기준).
-  const regionSiteCount = blocks.opened.length + blocks.pipeline.length;
+  /* 뒤로가기 행의 숫자.
+   *
+   * ⚠️ 예전엔 «목록 두 덩어리의 길이 합» 이었다(각 limit 40). 그래서 화면에 「부산 80」이
+   *    떴는데 바로 아래 구군 칩 배지 합은 360을 넘었다 — 같은 화면이 두 숫자를 말했다.
+   *    두 자리가 «한 조회 결과» 를 쓰게 한다: get_apt_region_counts 의 시도 소계.
+   *    그 값이 곧 「전체」 칩 배지이기도 하다.
+   */
+  const regionSiteCount = sggTotals.reduce((s, x) => s + x.count, 0);
 
   const stLabel = activeSt === 'open' ? '접수중' : activeSt === 'soon' ? '임박 D-7' : activeSt === 'leftover' ? '무순위' : '';
   const scopeLabel = [activeSgg || hub.region, stLabel].filter(Boolean).join(' · ');

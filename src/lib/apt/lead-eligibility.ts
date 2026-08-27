@@ -20,6 +20,9 @@ export const LEAD_ELIGIBLE_STAGES = [
   'site_planning',      // 분양예정
   'pre_announcement',   // 모집공고 전
   'subscription_open',  // 청약 접수중
+  // H6-1 — 접수는 마감됐지만 발표 전이다. 관심 등록은 여전히 유효하다
+  //   (예비·미계약 물량이 나온다). 접수중과 같은 취급.
+  'award_pending',
   'award_announced',    // 당첨자 발표
   'unsold_active',      // 미분양·선착순·잔여세대
   // move_in_ready 는 이름과 달리 "계약 체결 기간 종료"일 뿐 입주는 아직 미래다.
