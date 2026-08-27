@@ -23,6 +23,11 @@ function mapItem(item: Record<string, string>) {
     region_nm: item.SUBSCRPT_AREA_CODE_NM || item.subscrptAreaCodeNm || '',
     supply_addr: item.HSSPLY_ADRES || item.hssplyAdres || '',
     tot_supply_hshld_co: totSupply,
+    // T1-3(2026-08-27) — 모집공고일. 청약홈이 주는데 «저장을 안 하고 있었다».
+    //   목록 정렬의 «올바른» 키다. rcept_bgnde(청약 접수 시작일)는 대용품일 뿐이다.
+    //   ⚠️ text 로 둔다('YYYY-MM-DD'). 나머지 날짜 필드와 형식을 맞춘다 —
+    //      여기만 date 로 바꾸면 비교·정렬에서 형식이 갈린다.
+    announcement_date: item.RCRIT_PBLANC_DE || item.rcritPblancDe || null,
     rcept_bgnde: item.RCEPT_BGNDE || item.rceptBgnde || '',
     rcept_endde: item.RCEPT_ENDDE || item.rceptEndde || '',
     spsply_rcept_bgnde: item.SPSPLY_RCEPT_BGNDE || item.spsplyRceptBgnde || null,
@@ -114,17 +119,11 @@ export async function GET(req: NextRequest) {
       .lt('rcept_endde', today)
       .is('status', null);
 
-    // 4. 새 데이터가 있으면 issue-preempt 트리거 (선점 감지)
-    if (totalSynced > 0) {
-      try {
-        const preemptUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app'}/api/cron/issue-preempt`;
-        fetch(preemptUrl, {
-          method: 'GET',
-          headers: { Authorization: `Bearer ${process.env.CRON_SECRET}` },
-          signal: AbortSignal.timeout(5000),
-        }).catch(() => {});
-      } catch {}
-    }
+    // 4. ⛔ issue-preempt 트리거를 제거했다 (T1-3, 2026-08-27).
+    //    A1 이 vercel.json 에서 issue-preempt 를 뺐다(1,167회 감지 → 6건 발행).
+    //    그런데 이 크론이 «코드로» 직접 부르고 있었다. 게다가 이번에 주기를
+    //    하루 1회 → 3시간마다로 올린다. 그대로 뒀으면 A1 이 끈 것이 오히려
+    //    «8배로 늘어난다». 라우트 파일은 남아 있어 수동 호출은 가능하다.
 
     return {
       processed: totalSynced,
