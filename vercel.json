@@ -647,6 +647,9 @@
     },
     "src/app/api/cron/crawl-apt-resale/*.ts": {
       "maxDuration": 300
+    },
+    "src/app/api/cron/observe/*.ts": {
+      "maxDuration": 120
     }
   }
 }
