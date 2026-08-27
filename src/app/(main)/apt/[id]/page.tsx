@@ -2,6 +2,7 @@ import { AptViewTracker } from '@/components/ViewTracker';
 import RecordRecentView from '@/components/apt/RecordRecentView';
 import { InterestRegisterHero } from '@/components/apt/InterestRegisterHero';
 import { buildAptJsonLd } from '@/lib/schema/apt';
+import { siteEntityId } from '@/lib/seo/entity';
 import { sanitizeHtml } from '@/lib/sanitize-html';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
@@ -359,7 +360,20 @@ async function fetchUnifiedData(slug: string) {
       if (region) q = q.eq('region_nm', region);
       return q.order('deal_date', { ascending: false }).limit(30);
     })(),
-    termBlog ? sb.from('blog_posts').select('slug, title, view_count, published_at').eq('is_published', true).or(`title.ilike.%${termBlog}%,title.ilike.%${rShort} 청약%,title.ilike.%${rShort} 부동산%`).order('view_count', { ascending: false }).limit(5) : Promise.resolve({ data: [] }),
+    // A5(2026-08-27) — 관련 블로그를 «제목 ILIKE» 가 아니라 blog_posts.apt_site_id 로 뽑는다.
+    //   ILIKE 는 「롯데캐슬」 한 단어로 남의 단지 글을 끌어왔다. 이제 백필된 엔티티 링크가
+    //   있으므로 정확히 이 현장 글만 나온다.
+    //   ⚠️ 0건이면 «기존 ILIKE 경로로 되돌아간다». 아직 62% 만 링크돼 있어서, 링크가
+    //      없는 현장에서 섹션이 통째로 비면 그건 후퇴다(Rule #97 — 빈 섹션 방지).
+    (async () => {
+      const byEntity = await sb.from('blog_posts')
+        .select('slug, title, view_count, published_at')
+        .eq('is_published', true).eq('apt_site_id', site.id)
+        .order('published_at', { ascending: false }).limit(5);
+      if ((byEntity.data?.length ?? 0) > 0) return byEntity;
+      if (!termBlog) return { data: [] };
+      return sb.from('blog_posts').select('slug, title, view_count, published_at').eq('is_published', true).or(`title.ilike.%${termBlog}%,title.ilike.%${rShort} 청약%,title.ilike.%${rShort} 부동산%`).order('view_count', { ascending: false }).limit(5);
+    })(),
   ]);
   const [postsR, nearbyR] = await Promise.allSettled([
     termPost ? sb.from('posts').select('id, title, created_at, comments_count').eq('is_deleted', false).ilike('title', `%${termPost}%`).order('created_at', { ascending: false }).limit(3) : Promise.resolve({ data: [] }),
@@ -382,6 +396,12 @@ async function fetchUnifiedData(slug: string) {
 
   const trades = tradesR.status === 'fulfilled' ? (tradesR.value as { data: any })?.data || [] : [];
   const relatedBlogs = blogsR.status === 'fulfilled' ? (blogsR.value as { data: any })?.data || [] : [];
+  // A5 — JSON-LD subjectOf 전용. relatedBlogs 에는 ILIKE 폴백이 섞일 수 있어
+  //      그대로 쓰면 «남의 단지 글이 이 현장의 subjectOf 로 선언된다». 엔티티 링크만 뽑는다.
+  const entityBlogsR = await sb.from('blog_posts').select('slug, title')
+    .eq('is_published', true).eq('apt_site_id', site.id)
+    .order('published_at', { ascending: false }).limit(5);
+  const entityBlogs = entityBlogsR.data || [];
   const relatedPosts = postsR.status === 'fulfilled' ? (postsR.value as { data: any })?.data || [] : [];
   const nearbySites = nearbyR.status === 'fulfilled' ? (nearbyR.value as { data: any })?.data || [] : [];
   const sameBuilderSites = sameBuilderR.status === 'fulfilled' ? (sameBuilderR.value as { data: any })?.data || [] : [];
@@ -420,7 +440,7 @@ async function fetchUnifiedData(slug: string) {
     mergedRelatedBlogs = mergedRelatedBlogs.slice(0, 8);
   }
 
-  return { site, sub, unsold, redev, trades, relatedBlogs: mergedRelatedBlogs, relatedPosts, nearbySites, sameBuilderSites, regionBenchmark, regionTrades, complexProfiles, name, displayName, region, sigungu, slug, analysisText, siteEvents };
+  return { site, sub, unsold, redev, trades, entityBlogs, relatedBlogs: mergedRelatedBlogs, relatedPosts, nearbySites, sameBuilderSites, regionBenchmark, regionTrades, complexProfiles, name, displayName, region, sigungu, slug, analysisText, siteEvents };
 }
 
 // generateStaticParams 제거 — 전량 ISR on-demand (revalidate=3600)
@@ -635,7 +655,7 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
     notFound();
   }
   if (!d) notFound();
-  const { site, sub, unsold, redev, trades, relatedBlogs, relatedPosts, nearbySites, sameBuilderSites, regionBenchmark, regionTrades, complexProfiles, name, displayName, region, sigungu, slug, analysisText, siteEvents: siteEventsRaw } = d!;
+  const { site, sub, unsold, redev, trades, entityBlogs, relatedBlogs, relatedPosts, nearbySites, sameBuilderSites, regionBenchmark, regionTrades, complexProfiles, name, displayName, region, sigungu, slug, analysisText, siteEvents: siteEventsRaw } = d!;
 
   // ── V16 C · 아무것도 못 찾았으면 검색으로 보낸다 ──
   //
@@ -841,7 +861,7 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
 
 
       {/* JSON-LD 1: RealEstateListing */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'RealEstateListing', name: displayName, description: site?.description || `${region} ${name}`, url: `${SITE_URL}/apt/${slug}`, address: { '@type': 'PostalAddress', addressRegion: region, addressLocality: site?.sigungu || '', streetAddress: site?.address || sub?.hssply_adres || '', addressCountry: 'KR' }, ...(site?.latitude && site?.longitude ? { geo: { '@type': 'GeoCoordinates', latitude: site.latitude, longitude: site.longitude } } : {}), ...(builderName ? { brand: { '@type': 'Organization', name: builderName } } : {}), ...(site?.price_min || site?.price_max ? { offers: { '@type': 'AggregateOffer', priceCurrency: 'KRW', ...(site?.price_min ? { lowPrice: site.price_min * 10000 } : {}), ...(site?.price_max ? { highPrice: site.price_max * 10000 } : {}), ...(units.supply ? { offerCount: units.supply } : {}) } } : {}) }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'RealEstateListing', '@id': siteEntityId(slug), name: displayName, description: site?.description || `${region} ${name}`, url: `${SITE_URL}/apt/${slug}`, address: { '@type': 'PostalAddress', addressRegion: region, addressLocality: site?.sigungu || '', streetAddress: site?.address || sub?.hssply_adres || '', addressCountry: 'KR' }, ...(site?.latitude && site?.longitude ? { geo: { '@type': 'GeoCoordinates', latitude: site.latitude, longitude: site.longitude } } : {}), ...(builderName ? { brand: { '@type': 'Organization', name: builderName } } : {}), ...(site?.price_min || site?.price_max ? { offers: { '@type': 'AggregateOffer', priceCurrency: 'KRW', ...(site?.price_min ? { lowPrice: site.price_min * 10000 } : {}), ...(site?.price_max ? { highPrice: site.price_max * 10000 } : {}), ...(units.supply ? { offerCount: units.supply } : {}) } } : {}), ...(entityBlogs.length > 0 ? { subjectOf: entityBlogs.map((b: any) => ({ '@type': 'BlogPosting', '@id': `${SITE_URL}/blog/${b.slug}`, headline: b.title, url: `${SITE_URL}/blog/${b.slug}` })) } : {}) }) }} />
 
       {/* JSON-LD 2: FAQ */}
       {faq.length > 0 && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faq.map(f => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) }) }} />}

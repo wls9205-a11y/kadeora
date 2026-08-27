@@ -497,6 +497,47 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
     .eq('id', issue.id).eq('is_processed', false).select('id');
   if (!lockResult || lockResult.length === 0) return { decision: 'race', score: issue.final_score };
 
+  /* ══ A5-6 엔티티 관문 (2026-08-27) — AI 를 «부르기 전에» 막는다 ══════════════
+   *
+   * 부동산 이슈인데 어느 현장 얘긴지 특정이 안 되면 글을 쓰지 않는다.
+   * 지금까지는 그런 이슈도 초안을 만들었고, 그 결과 「부산 아파트 시장 분석」 같은
+   * 주인 없는 글이 쌓였다. 그런 글은 어느 현장 페이지에도 붙지 못하고 리드도 못 만든다.
+   *
+   * ⚠️ 관문을 «AI 호출 앞» 에 둔 것이 핵심이다. 뒤에 두면 토큰을 쓰고 나서 버린다.
+   *
+   * ⛔ 예외는 정책·시황 두 종류뿐이고 «월 10편 상한» 이 있다. 상한이 없으면
+   *    「전부 policy 로 분류해서 통과」라는 우회로가 생긴다.
+   */
+  if (issue.category === 'apt') {
+    const exempt = issue.sub_category === 'policy' || issue.sub_category === 'market';
+    if (exempt) {
+      const monthStart = new Date(); monthStart.setDate(1); monthStart.setHours(0, 0, 0, 0);
+      const { count } = await (sb as any).from('issue_alerts')
+        .select('id', { count: 'exact', head: true })
+        .eq('category', 'apt').in('sub_category', ['policy', 'market'])
+        .not('publish_decision', 'is', null)
+        .gte('processed_at', monthStart.toISOString());
+      if ((count ?? 0) >= 10) {
+        dbw('issue-draft', 'issue_alerts.update@gate_quota', await (sb as any).from('issue_alerts')
+          .update({ publish_decision: 'no_entity', fail_reason: 'no_match', block_reason: `policy_market_monthly_cap:${count}` })
+          .eq('id', issue.id));
+        return { decision: 'no_entity_quota', score: issue.final_score };
+      }
+    } else {
+      const { data: matched } = await (sb as any).rpc('match_apt_site', { p_text: issue.title });
+      if (!matched) {
+        dbw('issue-draft', 'issue_alerts.update@gate_no_entity', await (sb as any).from('issue_alerts')
+          .update({ publish_decision: 'no_entity', fail_reason: 'no_match' })
+          .eq('id', issue.id));
+        return { decision: 'no_entity', score: issue.final_score };
+      }
+      dbw('issue-draft', 'issue_alerts.update@gate_matched', await (sb as any).from('issue_alerts')
+        .update({ apt_site_id: matched })
+        .eq('id', issue.id));
+      issue.apt_site_id = matched;
+    }
+  }
+
   // 중복 체크
   const issueKeywords: string[] = issue.detected_keywords || [];
   const skipReasons: string[] = [];

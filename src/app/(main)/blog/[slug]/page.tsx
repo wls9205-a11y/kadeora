@@ -58,6 +58,7 @@ import YMYLBanner from '@/components/YMYLBanner';
 import BigEventCharts from '@/components/blog/BigEventCharts';
 import InlineTalkBanner from '@/components/banner/InlineTalkBanner';
 import { AdSlot } from '@/components/ads/AdSlot';
+import { siteEntity, siteEntities } from '@/lib/seo/entity';
 // NewsletterSubscribe 삭제 — 카카오 CTA로 통합
 
 // marked heading에 id 자동 부여 (TOC 앵커용)
@@ -246,7 +247,7 @@ export async function generateStaticParams() {
 const getPostBySlug = cache(async (slug: string) => {
   const sb = await createSupabaseServer();
   const { data } = await (sb as any).from('blog_posts')
-    .select('id,title,slug,content,excerpt,category,sub_category,cover_image,image_alt,tags,meta_description,meta_keywords,author_name,author_role,reading_time_min,view_count,comment_count,helpful_count,published_at,created_at,updated_at,series_id,series_order,source_type,source_ref,data_date,rewritten_at,tldr,key_points,gated_sections,has_gated_content,reading_minutes,og_cards,hub_cta_target,hub_apt_slug,keyword_targets')
+    .select('id,title,slug,content,excerpt,category,sub_category,cover_image,image_alt,tags,meta_description,meta_keywords,author_name,author_role,reading_time_min,view_count,comment_count,helpful_count,published_at,created_at,updated_at,series_id,series_order,source_type,source_ref,data_date,rewritten_at,tldr,key_points,gated_sections,has_gated_content,reading_minutes,og_cards,hub_cta_target,hub_apt_slug,keyword_targets,apt_site_id,mentioned_site_ids')
     .eq('slug', slug).eq('is_published', true).maybeSingle();
   return data;
 });
@@ -592,6 +593,7 @@ export default async function BlogDetailPage({ params }: Props) {
       logo: { '@type': 'ImageObject', url: `${SITE}/icons/icon-192.png`, width: 192, height: 192 },
     },
     mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE}/blog/${slug}` },
+
     isPartOf: { '@type': 'WebSite', name: '카더라', url: SITE },
     url: `${SITE}/blog/${slug}`,
     image: [
@@ -798,18 +800,36 @@ export default async function BlogDetailPage({ params }: Props) {
   // v3 커밋6: '이 글이 다루는 현장' 행은 lead 대상 단계가 아니어도 낸다 —
   //   지금까지 블로그에서 현장 페이지로 가는 동선이 아예 없었다.
   let hubSite: { slug: string; name: string; region: string | null } | null = null;
-  if (post.hub_apt_slug) {
+  // A5 — JSON-LD about / mentions. 「이 글이 무엇에 «대한» 글인가」를 선언한다.
+  let aboutEntity: ReturnType<typeof siteEntity> = null;
+  let mentionEntities: NonNullable<ReturnType<typeof siteEntity>>[] = [];
+  // A5(2026-08-27) — apt_site_id 를 «1순위» 로 본다.
+  //   hub_apt_slug 는 발행 글의 80%가 null 이었다. 엔티티 백필로 62% 가 연결됐으므로
+  //   이쪽을 먼저 보면 「이 글이 다루는 현장」 동선이 실제로 붙는 글이 크게 는다.
+  //   hub_apt_slug 는 폴백으로 남긴다 — 수동 지정분을 잃지 않는다.
+  if (post.apt_site_id || post.hub_apt_slug) {
     try {
-      const { data: ls } = await (sb as any)
-        .from('apt_sites')
-        .select('slug, name, region, sigungu, lifecycle_stage')
-        .eq('slug', post.hub_apt_slug)
-        .maybeSingle();
-      if (ls) hubSite = { slug: ls.slug, name: ls.name, region: ls.region ?? null };
+      const baseQ = (sb as any).from('apt_sites').select('id, slug, name, region, sigungu, lifecycle_stage');
+      const { data: ls } = await (post.apt_site_id
+        ? baseQ.eq('id', post.apt_site_id).maybeSingle()
+        : baseQ.eq('slug', post.hub_apt_slug).maybeSingle());
+      if (ls) { hubSite = { slug: ls.slug, name: ls.name, region: ls.region ?? null }; aboutEntity = siteEntity({ id: ls.id, slug: ls.slug, name: ls.name, region: ls.region, sigungu: ls.sigungu }); }
       if (ls && isLeadEligible(ls.lifecycle_stage)) leadSite = { slug: ls.slug, name: ls.name, region: ls.region ?? null, sigungu: ls.sigungu ?? null, lifecycle_stage: ls.lifecycle_stage ?? null };
     } catch {
       /* 조회 실패는 본문 렌더를 막지 않는다 — 폼만 생략한다 */
     }
+  }
+
+  // 요약형 글(「부산 동래구 재개발 총정리」처럼 여러 현장을 한 번에 다루는 글)은
+  // apt_site_id 를 «비워 두고» mentioned_site_ids 에 전부 담는다. 하나를 고르면 틀린다.
+  // 4,714편 중 147편이라 조회가 드물다 — 있을 때만 한 번 더 간다.
+  if (Array.isArray(post.mentioned_site_ids) && post.mentioned_site_ids.length > 1) {
+    try {
+      const { data: ms } = await (sb as any).from('apt_sites')
+        .select('id, slug, name, region, sigungu')
+        .in('id', post.mentioned_site_ids.slice(0, 10));
+      mentionEntities = siteEntities(ms || []);
+    } catch { /* 없으면 mentions 를 생략한다 */ }
   }
 
   // s261: Event schema (청약 일정) — apt 카테고리 + 단지명 매칭 시 청약 이벤트 카드 노출
@@ -884,7 +904,14 @@ export default async function BlogDetailPage({ params }: Props) {
       {(post.tags ?? []).slice(0, 8).map((tag: string) => (
         <meta key={`tag-${tag}`} property="article:tag" content={tag} />
       ))}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      {/* A5 — about/mentions 는 «여기서» 합친다. jsonLd 리터럴은 현장 조회보다
+          위에서 만들어지므로 그 안에 넣으면 항상 null 이 박힌다.
+          현장 노드의 @id 는 /apt/[id] 가 쓰는 것과 같아야 두 페이지가 묶인다. */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        ...jsonLd,
+        ...(aboutEntity ? { about: aboutEntity } : {}),
+        ...(mentionEntities.length > 0 ? { mentions: mentionEntities } : {}),
+      }) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       {howtoSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howtoSchema) }} />}
       {datasetSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(datasetSchema) }} />}
@@ -1335,7 +1362,7 @@ export default async function BlogDetailPage({ params }: Props) {
           hub_apt_slug 가 있는 글에만 낸다 (발행 8,833편 중 1,790편). */}
       {hubSite && (
         <Link
-          href={`/apt/${hubSite.slug}`}
+          href={`/apt/${hubSite.slug}#lead`}
           className="kd-lrow"
           style={{ textDecoration: 'none', color: 'inherit', marginTop: 20, borderTop: '1px solid var(--border)' }}
         >

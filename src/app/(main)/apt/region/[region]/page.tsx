@@ -6,6 +6,7 @@ import ShareButtons from '@/components/ShareButtons';
 import { notFound } from 'next/navigation';
 import SiteThumb from '@/components/apt/SiteThumb';
 import { REGIONS } from '@/lib/regions';
+import { siteEntity } from '@/lib/seo/entity';
 
 async function SigunguLinks({ region }: { region: string }) {
   const sb = getSupabaseAdmin();
@@ -257,12 +258,21 @@ export default async function RegionLandingPage({ params }: Props) {
         '@context': 'https://schema.org', '@type': 'ItemList',
         name: `${decoded} 주요 분양 단지`,
         numberOfItems: Math.min(data.subscriptions.length, 10),
-        itemListElement: data.subscriptions.slice(0, 10).map((s: any, i: number) => ({
-          '@type': 'ListItem', position: i + 1,
-          image: `${SITE_URL}/api/og?title=${encodeURIComponent(s.name || '')}&design=2&category=apt`,
-          url: `${SITE_URL}/apt/${s.id}`,
-          name: s.house_nm,
-        })),
+        // ⚠️ A5(2026-08-27) — 여기 url 이 `/apt/{apt_subscriptions.id}` 였다.
+        //    `/apt/[id]` 는 «slug» 를 받는다. 숫자 id 로는 열리지 않는다 —
+        //    구조화 데이터가 «존재하지 않는 주소» 를 내보내고 있었다.
+        //    siteMeta(이름 → apt_sites)로 실제 slug 를 찾고 @id 를 붙여,
+        //    /apt/[id] · /blog/[slug] 가 말하는 현장과 «같은 노드» 임을 알린다.
+        itemListElement: data.subscriptions.slice(0, 10).map((s: any, i: number) => {
+          const meta = data.siteMeta.get(s.house_nm);
+          const ent = (meta && meta.slug) ? siteEntity({ id: meta.slug, slug: meta.slug, name: meta.name, region: decoded }) : null;
+          return {
+            '@type': 'ListItem', position: i + 1,
+            image: `${SITE_URL}/api/og?title=${encodeURIComponent(s.house_nm || '')}&design=2&category=apt`,
+            name: s.house_nm,
+            ...(ent ? { item: ent } : {}),
+          };
+        }),
       })}} />}
       {/* JSON-LD: FAQ (지역 검색 SERP 아코디언) */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
