@@ -1,3 +1,61 @@
+### 최종 지시서 #0·#8·#9·#10 (2026-08-27) — 연속 진행 완료
+
+| 커밋 | 내용 |
+|---|---|
+| `5c9d3586` | /blog 「인기」 정렬·블록·조회 제거 |
+| `59a41769` A6 | 관측 3종(trade·schedule·stage) + 본부장 노트 |
+| `40f5d482` A3 | 스케줄 정리 — vercel 85→77 · pg_cron 99→91 |
+| `ea82bb54` A4 | /discuss 접기 + /feed 임시 이전 |
+
+#### 📌 예약 — 2026-09-03 (7일 뒤) 소커밋
+
+**시드 글·댓글 비공개 플립.** A4 에서 «의도적으로» 미뤘다. 지금은 색인만 막아 뒀다.
+
+```sql
+-- 실행 전 반드시 건수 기록
+select count(*) from posts p
+ where exists (select 1 from profiles pr where pr.id=p.author_id and pr.is_seed);   -- 2026-08-27 기준 12,665
+update posts set is_published=false
+ where author_id in (select id from profiles where is_seed);
+-- 댓글도 동일
+```
+
+⚠️ GSC 표본 확인은 «불필요» 하다고 판단됨(지시서 변경). noindex 가 이미 걸려 있다.
+
+#### 📌 예약 — 2026-09-03 · Phase B1 판단
+
+A2 로깅 7일 관찰. 0건 근거 8개 크론(apt-summary-gen · blog-enrich-rewrite ·
+blog-generate-images · blog-internal-links · big-event-bootstrap-process · issue-trend ·
+stock-analysis-gen · apt-analysis-gen)이 «진짜 0건인지 조용히 실패 중인지» 를
+`cron_logs.metadata.db_errors` 와 `issue_alerts.fail_reason` 으로 가른다.
+
+#### ⚠️ 지시서 사양과 달랐던 것
+
+1. **`/discuss` 토픽 35건이 전부 `author_id = NULL`** 이다. 「시드 작성자 글이면
+   noindex」는 0건이 걸린다. 「실사용자가 쓴 것이 아니면」으로 넓혔다.
+2. **`us-closing-recap`·`us-premarket-brief` 는 vercel·pg_cron 어디에도 없었다** —
+   이미 사라진 것을 지웠다고 쓰지 않는다.
+3. **`indexnow-urgent`·`indexnow-batch` 는 pg_cron(87·88)에 살아 있다.** 확인하고
+   mass·new-content 를 지웠다. 둘 다 없었으면 indexnow 가 0이 됐다.
+4. **batch-poll 병합은 «팬아웃» 이다.** 폴러 넷의 로직은 합치지 않았다 — 세 테이블에
+   걸친 620줄이라 합치는 것 자체가 새 버그 면이 된다. 스케줄만 하나로 모았다.
+5. **`quality_checked_at < published_at` 증분은 PostgREST 로 표현할 수 없다**
+   (컬럼 대 컬럼 비교 미지원). 기존 조건이 이미 증분이고 주기를 하루 1회로 낮췄다.
+6. **`apt_transactions.id` 는 uuid** 다(bigint 아님) — get_weekly_trades 반환 타입 조정.
+7. **`post_reactions` 재사용에 컬럼 5개 변경이 필요**했다(post_id NOT NULL + FK).
+   행이 3개뿐이라 지금이 가장 쌌다. CHECK 로 「둘 중 정확히 하나」를 강제해
+   불변식을 약화하지 «않았다».
+8. **`/feed` 302 는 Next 가 307 로 낸다**(permanent:false). 둘 다 «임시» 라 동등하다.
+
+#### 확인 필요 (배포 후)
+
+- [ ] 관측 3종 첫 실행 — 게이트 통과율·skipped 사유별 건수
+- [ ] 관측 0건 현장에서 RecentObservations·FieldNote 가 «미렌더» 되는지
+- [ ] batch-poll 팬아웃 4개가 전부 ok 인지(응답 `fanout`)
+- [ ] /feed 307 · /discuss noindex 가 프로덕션에서도 동일한지
+
+---
+
 ### #6 H5-1 홈 히어로 (2026-08-27) · `63d8abb5`
 
 칩 단색 정정 + 큐레이션 상단 고정 반영.
