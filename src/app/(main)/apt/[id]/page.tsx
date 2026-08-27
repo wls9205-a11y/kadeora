@@ -413,9 +413,14 @@ async function fetchUnifiedData(slug: string) {
   const [obsR, noteR] = await Promise.all([
     /* 이 현장 «또는» 이 구군의 관측.
      *
-     * ⚠️ 구군 실거래 요약(trade)은 apt_site_id 가 null 이다 — 「수영구 이번 주 실거래
-     *    17건」은 수영구의 «모든» 현장 페이지에 유효한 사실이다. 현장 매칭만 보면
-     *    12건 전부가 어느 상세 페이지에도 안 나온다(첫 실행 실측).
+     * ⚠️ 범위는 «kind 로» 가른다. apt_site_id 유무로 가르면 안 된다 —
+     *    trade 는 최고가 단지가 우리 현장이면 apt_site_id 가 «채워지는데»,
+     *    그러면 `apt_site_id is null` 조건에서 빠져 그 구군의 «다른 현장에서 사라진다».
+     *    실제로 그렇게 만들었다가 강서구 현장 6곳이 전부 0건이 됐다(실측).
+     *
+     * 구군 범위 : trade — 「수영구 이번 주 실거래 17건」은 수영구 «모든» 현장에 유효하다.
+     * 현장 범위 : stage — 「A현장 조합설립」이 B현장 페이지에 뜨면 안 된다.
+     * ⚠️ Phase B4 에서 digest·unsold 를 추가할 때 «어느 범위인지 여기에 반영» 할 것.
      *
      * ⚠️⚠️ region 을 «반드시» 같이 건다. 남구·중구·서구·동구는 전국에 여럿이라
      *      sigungu 만 맞추면 부산 남구 관측이 울산 남구 현장에 붙는다.
@@ -425,7 +430,7 @@ async function fetchUnifiedData(slug: string) {
       .select('id, kind, title, link_path, observed_at, apt_site_id')
       .or(
         site.sigungu && site.region
-          ? `apt_site_id.eq.${site.id},and(apt_site_id.is.null,region.eq.${site.region},sigungu.eq.${site.sigungu})`
+          ? `apt_site_id.eq.${site.id},and(kind.eq.trade,region.eq.${site.region},sigungu.eq.${site.sigungu})`
           : `apt_site_id.eq.${site.id}`,
       )
       .order('created_at', { ascending: false }).limit(5),
