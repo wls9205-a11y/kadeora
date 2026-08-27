@@ -202,11 +202,23 @@ export async function GET(req: NextRequest) {
     }
 
     /* ── 게이트 → INSERT ─────────────────────────────────────────────────── */
+    /* ⚠️ 상한을 «시급한 순서» 로 나눈다.
+     *
+     * 첫 실행 실측: draft 21건이 전부 trade 였고(부산 16구군 + 울산 5) 하루 12건을
+     * 그대로 다 먹었다. 그대로 두면 「내일 청약 접수 시작」 같은 «시한이 있는» 관측이
+     * 매일 밀린다 — 실거래 요약은 내일 봐도 같지만 내일 시작하는 접수는 내일이면 늦다.
+     *
+     * 그래서 kind 우선순위로 정렬한 «뒤» 상한을 적용한다. 상한값(12)은 그대로다.
+     *   schedule(시한 있음) > stage(하루 안에 일어난 변화) > trade(주 단위 요약)
+     */
+    const KIND_PRIORITY: Record<Draft['kind'], number> = { schedule: 0, stage: 1, trade: 2 };
+    const ordered = [...drafts].sort((a, b) => KIND_PRIORITY[a.kind] - KIND_PRIORITY[b.kind]);
+
     const passed: Draft[] = [];
-    for (const d of drafts) {
+    for (const d of ordered) {
       const why = gate(d);
       if (why) { bump(why); continue; }
-      if (passed.length >= budget) { bump('daily_cap'); continue; }
+      if (passed.length >= budget) { bump(`daily_cap_${d.kind}`); continue; }
       passed.push(d);
     }
 
