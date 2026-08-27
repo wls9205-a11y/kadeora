@@ -15,6 +15,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { getStoredRegion } from '@/lib/region-storage';
 import { isValidKrRegion } from '@/lib/region-detection';
+import { readRegionCookie, writeRegionCookie } from '@/lib/region/cookie';
 
 /**
  * 한글 조사 선택. 시·도 17개가 받침 유무로 갈린다 —
@@ -41,6 +42,14 @@ export default function RegionAutoSelect() {
 
   useEffect(() => {
     if (sp.get('region')) {
+      setSuggested(null);
+      return;
+    }
+    // ⚠️ H5-2 — 쿠키(kd_region)가 있으면 «제안 자체를 하지 않는다».
+    //    서버가 이미 그 지역으로 2단을 열어 놨다. 그 위에 「이전에 부산을 보셨습니다」가
+    //    또 뜨면, 이미 보고 있는 것을 다시 권하는 꼴이다.
+    //    쿠키 > 위치 추정 이라는 우선순위가 화면에서도 그대로 보여야 한다.
+    if (readRegionCookie()) {
       setSuggested(null);
       return;
     }
@@ -73,6 +82,7 @@ export default function RegionAutoSelect() {
       <Link
         href={`/apt?region=${encodeURIComponent(suggested)}`}
         scroll={false}
+        onClick={() => writeRegionCookie(suggested)}
         style={{
           flexShrink: 0,
           display: 'inline-flex',

@@ -3,6 +3,7 @@
    정해지면 레이어 도입의 의미가 사라진다. 반복 선언은 멱등이라 안전하다.
    근거·이름 개명 이유는 globals.css 최상단 주석. */
 @layer reset, tokens, elements, patterns, screens, overrides;
+
 /* ══ screens 레이어 — 「화면 하나에만 쓰이는 규칙」 ═══════════════════════════
  *
  * H5-D3 에서 신설. patterns(공유 컴포넌트) 와 overrides(반응형 보정) 사이에 있다.
@@ -14,15 +15,211 @@
  *
  * ⚠️ 레이어 이름은 globals.css 최상단의 @layer 선언과 «같아야» 한다.
  *    base/components/utilities 는 Tailwind v3.4 가 가로채므로 쓸 수 없다 —
- *    근거는 globals.css 최상단 주석.
+ *    근거는 globals.css 최상단 주석 (Rule #108).
  *
  * ⚠️ 새 컴포넌트는 미디어쿼리 대신 «컨테이너 쿼리» 를 쓴다(H5-D4). 데스크탑 2단에서
  *    같은 카드가 폭이 다른 컬럼에 들어가므로 뷰포트 기준이 맞지 않는다.
+ *
+ * ⛔ `@media`/`@container` «조건부» 에 `var(--bp-*)` 를 쓰지 말 것. CSS 사양상
+ *    해석되지 않고 «에러도 없이 규칙 전체가 죽는다» (Rule #109). 숫자를 직접 적는다.
  *
  * import 는 globals.css 최상단에서 한다 — layout.tsx 를 건드리지 않기 위해서다.
  * 내용이 스스로 @layer 를 선언하므로 import 위치는 우선순위에 영향을 주지 않는다.
  * ════════════════════════════════════════════════════════════════════════════ */
 
 @layer screens {
-  /* H5-1 · H5-2 · H5-3 커밋에서 채운다. */
+  /* ── H5-2 1단 : 시도 타일 ─────────────────────────────────────────────── */
+  .region-grid {
+    container-type: inline-size;   /* 뷰포트가 아니라 «이 블록의 폭» 을 기준으로 */
+    padding: 0 6px var(--sp-md);
+  }
+  .region-grid__h {
+    margin: 0 0 var(--sp-sm);
+    font-size: var(--fs-sm);
+    font-weight: 600;              /* TY1 사다리 — 제목 600 */
+    letter-spacing: 0;             /* 14px 이하는 0 */
+    color: var(--text-secondary);
+  }
+  .region-grid__tiles {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+  }
+  @container (min-width: 560px) {
+    .region-grid__tiles { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  }
+  @container (min-width: 840px) {
+    .region-grid__tiles { grid-template-columns: repeat(8, minmax(0, 1fr)); }
+  }
+  .region-grid__note {
+    margin: var(--sp-sm) 0 0;
+    font-size: var(--fs-xs);
+    color: var(--text-tertiary);
+  }
+  .region-grid__note a { color: var(--text-link); }
+
+  .region-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    /* 터치 타깃 44px 하한. 시각 높이가 아니라 «누를 수 있는 높이» 다. */
+    min-height: 56px;
+    padding: 8px 4px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: background 150ms ease, border-color 150ms ease;
+  }
+  .region-tile__name {
+    font-size: var(--fs-sm);
+    font-weight: 500;              /* 라벨 500 */
+    letter-spacing: 0;
+    line-height: 1.25;
+  }
+  .region-tile__count {
+    font-size: var(--fs-lg);
+    font-weight: 600;              /* 제목·강조 600. 700 은 가격·경쟁률 전용 */
+    letter-spacing: -0.2px;        /* 15~19px 구간 */
+    line-height: 1.25;
+  }
+  /* 선택 = 네이비 채움. ⚠️ 한 화면에 네이비 덩어리는 «하나» 다 —
+     부동산 홈에서는 선택된 타일·칩이 그 하나다. */
+  .region-tile[data-active='true'] {
+    background: var(--brand-navy);
+    border-color: var(--brand-navy);
+    color: var(--text-inverse);
+  }
+  /* 0건은 «숨기지 않고» 회색. 전국 플랫폼이라는 사실이 화면에 남아야 한다. */
+  .region-tile[data-empty='true'] {
+    background: var(--bg-surface);
+    color: var(--text-tertiary);
+  }
+  @media (hover: hover) {
+    .region-tile:hover { background: var(--bg-hover); border-color: var(--brand); }
+    .region-tile[data-active='true']:hover { background: var(--brand-navy-mid); }
+  }
+
+  /* ── H5-2 2단 : 뒤로가기 행 ───────────────────────────────────────────── */
+  .region-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;              /* 히트 영역 하한 */
+    margin: 0 6px;
+    padding: 0 4px;
+    color: var(--text-primary);
+    text-decoration: none;
+    font-size: var(--fs-base);
+    font-weight: 600;
+    letter-spacing: -0.2px;
+  }
+  .region-back__caret { color: var(--text-tertiary); font-weight: 400; }
+  .region-back__count { color: var(--text-tertiary); font-size: var(--fs-sm); font-weight: 400; }
+
+  /* ── H5-2 2단 : 단계 요약 줄 ──────────────────────────────────────────── */
+  .stage-strip {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 2px;
+    padding: 0 10px var(--sp-sm);
+  }
+  .stage-strip__cell { display: inline-flex; align-items: center; }
+  .stage-strip__sep { padding: 0 6px; color: var(--text-tertiary); }
+  .stage-strip__link {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 4px;
+    /* 칩 시각 높이는 낮지만 누를 수 있는 높이는 44px 로 잡는다 */
+    padding: 12px 4px;
+    color: var(--text-secondary);
+    text-decoration: none;
+  }
+  .stage-strip__n {
+    font-size: var(--fs-md);
+    font-weight: 600;
+    letter-spacing: -0.2px;
+    color: var(--text-primary);
+  }
+  .stage-strip__l { font-size: var(--fs-xs); font-weight: 400; letter-spacing: 0; }
+  .stage-strip__link[data-active='true'] .stage-strip__n,
+  .stage-strip__link[data-active='true'] .stage-strip__l { color: var(--brand); }
+
+  /* ── H5-2 2단 : 목록 두 덩어리 ────────────────────────────────────────── */
+  .apt-block { padding: 0 6px; margin-bottom: var(--sp-lg); }
+  .apt-block__more {
+    display: inline-block;
+    margin: var(--sp-sm) 0 0;
+    font-size: var(--fs-sm);
+    color: var(--text-link);
+    text-decoration: none;
+  }
+
+  /* 구군 칩 선택색을 네이비로. 기존 칩은 --brand(파랑)였다 —
+     H5 에서 「선택」은 전 화면 공통으로 네이비다. */
+  .apt-pill-scroll a[aria-current='true'] {
+    background: var(--brand-navy);
+    border-color: var(--brand-navy);
+    color: var(--text-inverse);
+  }
+
+  /* ── H5-2 2단 : 덩어리 제목·승격 카드 ─────────────────────────────────── */
+  .apt-block__h {
+    display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+    margin: 0 0 var(--sp-sm);
+    font-size: var(--fs-base);
+    font-weight: 600;                /* 제목 600 */
+    letter-spacing: -0.2px;
+    line-height: 1.25;
+    color: var(--text-primary);
+  }
+  .apt-block__meta {
+    font-size: var(--fs-xs); font-weight: 400; letter-spacing: 0;
+    color: var(--text-tertiary);
+  }
+  .apt-block__empty {
+    margin: 0; padding: 14px 10px;
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    background: var(--bg-elevated);
+    font-size: var(--fs-sm); color: var(--text-secondary);
+  }
+
+  /* 승격 카드 — 컨테이너 쿼리로 2열. 데스크탑 2단의 좁은 컬럼에서도 맞는다. */
+  .apt-block__cards {
+    container-type: inline-size;
+    display: grid; grid-template-columns: 1fr; gap: 8px;
+    margin-bottom: 8px;
+  }
+  @container (min-width: 520px) {
+    .apt-block__cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+
+  /* ⚠️ 네이비로 칠하지 않는다. 이 화면의 네이비 하나는 «선택된 타일·칩» 이다. */
+  .apt-pcard {
+    display: flex; flex-direction: column;
+    min-height: 56px;
+    border: 1px solid var(--border); border-radius: var(--radius-md);
+    background: var(--bg-surface);
+    color: inherit; text-decoration: none; overflow: hidden;
+  }
+  .apt-pcard__img { display: block; aspect-ratio: 16 / 9; background: var(--bg-elevated); }
+  .apt-pcard__img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .apt-pcard__body { display: flex; flex-direction: column; gap: 3px; padding: 10px 12px; }
+  .apt-pcard__t {
+    font-size: var(--fs-sm); font-weight: 600; letter-spacing: 0; line-height: 1.25;
+    color: var(--text-primary);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .apt-pcard__m { font-size: var(--fs-xs); font-weight: 400; color: var(--text-secondary); line-height: 1.5; }
+  .apt-pcard__d { font-size: var(--fs-xs); font-weight: 500; color: var(--brand); }
+  @media (hover: hover) { .apt-pcard:hover { border-color: var(--brand); } }
+
+  /* 모션은 둘뿐이고, 줄여 달라고 한 사람에게는 0ms 다. */
+  @media (prefers-reduced-motion: reduce) {
+    .region-tile { transition: none; }
+  }
 }

@@ -36,11 +36,14 @@ export default function SigunguChips({
   const base = `/apt?region=${encodeURIComponent(region)}`;
   const style = (active: boolean): React.CSSProperties =>
     active
-      ? { ...CHIP, background: 'var(--brand)', borderColor: 'var(--brand)', color: '#FFFFFF', fontWeight: 500 }
+      // ⚠️ 선택색을 인라인으로 주지 않는다. 인라인 스타일은 «모든 레이어를 이기므로»
+      //    screens.css 의 네이비 규칙이 먹지 않는다. 클래스에 맡긴다.
+      ? { ...CHIP, fontWeight: 500 }
       : { ...CHIP, background: 'var(--bg-surface)', color: 'var(--text-secondary)' };
 
   return (
     <div
+      className="apt-pill-scroll"
       style={{
         display: 'flex',
         gap: 6,
@@ -50,7 +53,7 @@ export default function SigunguChips({
         padding: '0 6px 10px',
       }}
     >
-      <Link href={base} scroll={false} style={style(!current)}>전체</Link>
+      <Link href={base} scroll={false} style={style(!current)} aria-current={!current ? 'true' : undefined}>전체</Link>
       {items.map((it) => (
         <Link
           key={it.name}

@@ -29,7 +29,14 @@ import { facetRobots, aptFacetCanonical } from '@/lib/seo/facet';
 import { getAptHub } from '@/lib/apt/hub';
 import { getRelatedBlogs } from '@/lib/apt/related-blogs';
 import { buildSubscriptionEvents, buildSubscriptionItemList } from '@/lib/apt/subscription-schema';
+import { cookies } from 'next/headers';
 import RegionAutoSelect from '@/components/apt/RegionAutoSelect';
+import RegionTileGrid from '@/components/apt/RegionTileGrid';
+import RegionCookieSync from '@/components/apt/RegionCookieSync';
+import StageSummaryStrip, { type StageItem } from '@/components/apt/StageSummaryStrip';
+import RegionBlockList from '@/components/apt/RegionBlockList';
+import { getRegionBlocks, getRegionTotals, getSigunguTotals } from '@/lib/apt/region-blocks';
+import { REGION_COOKIE, resolveRegion, normalizeSido } from '@/lib/region/cookie';
 import SubscriptionTimeline from '@/components/apt/SubscriptionTimeline';
 import SubscriptionCard from '@/components/apt/SubscriptionCard';
 import SubscriptionResults from '@/components/apt/SubscriptionResults';
@@ -38,7 +45,9 @@ import AptRelatedBlogs from '@/components/apt/AptRelatedBlogs';
 import SectionHeader from '@/components/apt/SectionHeader';
 import CurationCarousel from '@/components/ui/CurationCarousel';
 import SigunguChips from '@/components/apt/SigunguChips';
-import AptFilterRow, { type AptStatusKey } from '@/components/apt/AptFilterRow';
+// ⚠️ H5-2 — AptFilterRow 는 StageSummaryStrip 이 대체한다. «파일은 지우지 않는다» —
+//    되돌릴 판단이 남아 있고, 지우면 그 판단 근거가 같이 사라진다. 타입만 계속 쓴다.
+import { type AptStatusKey } from '@/components/apt/AptFilterRow';
 import AptHubRail from '@/components/apt/AptHubRail';
 import { sigunguCounts, sigunguOf } from '@/lib/apt/sigungu';
 import { pickCuration } from '@/lib/apt/hero-priority';
@@ -109,10 +118,27 @@ export default async function AptPage({
   searchParams?: Promise<{ region?: string; sgg?: string; st?: string }>;
 }) {
   const sp = (await searchParams) || {};
-  const region = sp.region?.trim() || '전국';
+
+  /* ══ H5-2 지역 결정 — 우선순위가 전부다 ══════════════════════════════════
+   *
+   *   ?region=  >  쿠키  >  위치 추정(RegionAutoSelect)  >  부산
+   *
+   * ⚠️ 쿠키를 «서버에서» 읽는다. 클라이언트 리다이렉트로 2단을 열면 첫 페인트에
+   *    1단이 한 번 보였다 사라진다 — 깜빡임이 아니라 «잘못된 화면을 한 번 보여준 것» 이다.
+   *    이 라우트는 이미 searchParams 를 읽어 동적이므로 cookies() 가 캐시를 더 깨지 않는다.
+   *
+   * ⚠️ 쿠키가 위치 추정을 «이긴다». 사용자가 직접 고른 지역이 다음 방문에 말없이
+   *    바뀌면 그건 고장으로 읽힌다.
+   */
+  const cookieRegion = normalizeSido((await cookies()).get(REGION_COOKIE)?.value ?? null);
+  const picked = resolveRegion({ query: sp.region ?? null, cookie: cookieRegion });
+  // 1단(타일)을 보여줄 조건 — 쿼리도 쿠키도 없을 때뿐이다.
+  const showTiles = !normalizeSido(sp.region ?? null) && !cookieRegion;
+  const region = showTiles ? '전국' : picked.region;
   const sgg = sp.sgg?.trim() || '';
   const st = sp.st?.trim() || '';
-  const isAutoRegion = !sp.region;
+  // 위치 추정은 «쿠키가 없을 때만» 돈다.
+  const isAutoRegion = !sp.region && !cookieRegion;
 
   // V13 A-1: 공고 전 현장은 허브와 별개 RPC 다. 두 조회는 서로 기다릴 이유가 없다.
   //   지역 규칙 — 부산·울산·경남 중 하나를 고르면 벨트 전체(부울경)를 묶어서 본다.
@@ -136,6 +162,12 @@ export default async function AptPage({
   ]);
 
   const gichuk = await gichukPromise;
+
+  // H5-2 — 1단이면 타일 건수, 2단이면 목록 두 덩어리. 필요 없는 쪽은 조회하지 않는다.
+  const regionTotals = showTiles ? await getRegionTotals() : [];
+  const [blocks, sggTotals] = showTiles
+    ? [{ opened: [], pipeline: [] }, [] as { name: string; count: number }[]]
+    : await Promise.all([getRegionBlocks(region, sgg || null), getSigunguTotals(region)]);
 
   // v4-C8: 시군구 칩은 hub.cards 에서 뽑는다 — 조회가 늘지 않고, 목록에 실제로 있는
   //   시군구만 나온다 (부산 16개 구를 전부 내면 C3 에서 고친 문제가 반복된다).
@@ -208,6 +240,22 @@ export default async function AptPage({
     .map((r) => ({ region: r.region, live: r.live }))
     .sort((a, b) => a.region.localeCompare(b.region, 'ko'));
 
+  /* ── H5-2 단계 요약 줄 ──
+     ⚠️ 키는 AptFilterRow 의 AptStatusKey «그대로» 다. 두 벌이 되면 링크의 ?st= 와
+        목록 필터가 서로 다른 것을 가리킨다.
+     ⚠️ 재개발 수는 pipeline 덩어리에서 «세는» 것이지 지어내지 않는다. */
+  const redevCount = blocks.pipeline.filter((x) =>
+    ['union_established', 'plan_approved', 'mgmt_approved'].includes(x.lifecycle_stage || ''),
+  ).length;
+  const stageItems: StageItem[] = [
+    { key: 'soon', label: '분양예정', count: statusCounts.soon },
+    { key: 'open', label: '분양중', count: statusCounts.open },
+    { key: 'leftover', label: '선착순', count: statusCounts.leftover },
+    { key: 'redev', label: '재개발', count: redevCount },
+  ];
+  // 뒤로가기 행에 붙는 숫자 = 이 시도의 현장 수(타일 건수와 같은 기준).
+  const regionSiteCount = blocks.opened.length + blocks.pipeline.length;
+
   const stLabel = activeSt === 'open' ? '접수중' : activeSt === 'soon' ? '임박 D-7' : activeSt === 'leftover' ? '무순위' : '';
   const scopeLabel = [activeSgg || hub.region, stLabel].filter(Boolean).join(' · ');
   const cardsMeta = windowLabel
@@ -219,21 +267,32 @@ export default async function AptPage({
       <div className="kd-list-main">
       <h1 className="sr-only">{hub.region} 아파트 청약 일정 · 경쟁률</h1>
 
+      {/* 위치 추정은 쿠키가 없을 때만 돈다 — 쿠키가 있으면 쿠키가 이긴다. */}
       {isAutoRegion && <RegionAutoSelect />}
 
-      {/* §I-2 지역·상태를 한 줄로. 이전에는 헤더 줄 + 지역 줄 + 상태 줄로 세로를 셋이 먹었다. */}
-      <AptFilterRow
-        regions={hub.regions}
-        currentRegion={hub.region}
-        counts={statusCounts}
-        total={sggCards.length}
-        currentStatus={activeSt}
-        baseQuery={baseQuery}
-      />
+      {showTiles ? (
+        /* ══ 1단 — 17 시도 타일 ══
+           ⚠️ 첫 방문에는 «아무 타일도 강조하지 않는다». 강조는 사용자가 고른 뒤에만 붙는다.
+              기본값을 강조하면 「이미 고른 상태」로 보여서 다른 지역을 안 찾는다. */
+        <RegionTileGrid items={regionTotals} />
+      ) : (
+        <>
+          {/* 2단이 열린 «모든» 경로에서 쿠키를 남긴다. 타일 클릭만으로는
+              `?region=…` 링크로 바로 들어온 사용자가 빠진다. */}
+          <RegionCookieSync region={region} />
+          {/* ══ 2단 — 뒤로가기 · 구군 칩 · 단계 요약 ══ */}
+          <Link href="/apt?region=" scroll={false} className="region-back">
+            <span className="region-back__caret" aria-hidden="true">&lsaquo;</span>
+            <span>{region}</span>
+            <span className="region-back__count">{regionSiteCount.toLocaleString()}</span>
+          </Link>
 
-      {/* v4-C8: 시·도 아래 2단. 정렬은 C3 과 같이 가나다 고정. */}
-      {sggItems.length > 0 && (
-        <SigunguChips region={hub.region} items={sggItems} current={activeSgg} />
+          {sggTotals.length > 1 && (
+            <SigunguChips region={region} items={sggTotals} current={sgg} />
+          )}
+
+          <StageSummaryStrip items={stageItems} current={activeSt} baseQuery={baseQuery} />
+        </>
       )}
 
       {/* v4-C6: 지역을 버리고 전국으로 갈아타던 폴백이 없어졌다.
@@ -287,6 +346,30 @@ export default async function AptPage({
            크롤러는 토글을 누르지 않으므로 항상 목록을 본다 — `/apt` 색인이 안 깨진다.
            지도 데이터는 클라이언트가 따로 가져온다 (Rule #49 — 서버 뭉치를 안 늘린다).
            ⚠️ 재개발 레이어는 올리지 않는다 (fc860ea A안). AVAILABLE_LAYERS 주석 참조. */}
+      {/* ══ H5-2 2단 목록 — 두 덩어리 ══
+          ⚠️ 위 덩어리 라벨에 「모집공고」를 쓰지 않는다. 정렬 키가 rcept_bgnde(청약 «접수»
+             시작일)이고 announcement_date 는 T1 에서 이제 막 저장을 시작했다(2,853건 null).
+             백필·검증 뒤 Phase B6 에서 키와 라벨을 «같이» 바꾼다. 지금 라벨만 바꾸면
+             다른 날짜를 모집공고일이라고 말하는 화면이 된다. */}
+      {!showTiles && (
+        <>
+          <RegionBlockList
+            items={blocks.opened}
+            title="청약 접수일 기준 최신"
+            meta={[sgg || region, `${blocks.opened.length}곳`].filter(Boolean).join(' · ')}
+            moreHref="/apt/archive"
+            moreLabel="지난 공고 더 보기"
+            emptyNote={`${sgg || region}에는 최근 공고가 나온 현장이 없습니다.`}
+          />
+          <RegionBlockList
+            items={blocks.pipeline}
+            title="곧 나올 현장"
+            meta={`${blocks.pipeline.length}곳 · 단계 갱신 최신순`}
+            emptyNote={`${sgg || region}에는 공고 전 단계의 현장이 없습니다.`}
+          />
+        </>
+      )}
+
       <AptViewSwitch>
       {/* ③ 청약 카드 리스트 */}
       <section style={{ padding: '0 6px' }} aria-labelledby="apt-cards-heading">
