@@ -52,6 +52,8 @@ import DealHeroCard, { pickDealHero } from '@/components/home/DealHeroCard';
 import WeeklyTrades from '@/components/home/WeeklyTrades';
 import { fetchWeeklyTrades } from '@/lib/home/weekly-trades';
 import RecentMoves, { type RecentMove } from '@/components/home/RecentMoves';
+import HeroSearch from '@/components/home/HeroSearch';
+import type { HomeRow } from '@/lib/home/sections';
 import { BUGYEONG_REGIONS } from '@/lib/apt/pipeline';
 
 export const revalidate = 60;
@@ -60,13 +62,17 @@ export const metadata: Metadata = {
   // absolute — (main)/layout 의 `%s | 카더라` 템플릿이 붙어 브랜드가 중복되는 걸 막는다.
   // ⚠️ 예전 제목은 '오늘의 이슈 종목·청약·블로그' 였다. 그 세 섹션이 홈에서 빠졌으므로
   //    제목만 남겨 두면 검색 결과가 화면과 어긋난다.
-  title: { absolute: '카더라 — 부산·울산·경남 분양·재개발 현장' },
+  // ⛔ H5-1(2026-08-27) — 제목·설명에서 지역명을 뺐다. 전국 플랫폼이고, 「부울경」은
+  //    데이터 필터·크론·어드민 라벨에만 남는다(최종 지시서 §0-2).
+  //    metadata 는 검색 결과와 공유 카드에 그대로 나가는 «사용자 화면 카피» 다 —
+  //    화면만 고치고 여기를 두면 검색 결과가 화면과 어긋난다.
+  title: { absolute: '카더라 — 분양·재개발 현장' },
   description:
-    '모집공고 전부터 보는 부울경 분양. 단지명 하나로 분양가·모델하우스·잔여세대·재개발 구역 진행 단계를 바로 찾습니다.',
+    '모집공고 전부터 보는 분양 소식. 단지명 하나로 분양가·모델하우스·잔여세대·재개발 구역 진행 단계를 바로 찾습니다.',
   alternates: { canonical: SITE },
   openGraph: {
-    title: '카더라 — 부울경 분양·재개발',
-    description: '모집공고 전부터 보는 부울경 분양. 단지명 하나로 바로 찾으세요.',
+    title: '카더라 — 분양·재개발',
+    description: '모집공고 전부터 보는 분양 소식. 단지명 하나로 바로 찾으세요.',
     url: SITE,
     siteName: '카더라',
     images: [{ url: `${SITE}/images/brand/kadeora-wide.png`, width: 1200, height: 630, alt: '카더라' }],
@@ -133,12 +139,18 @@ async function fetchRecentMoves(): Promise<RecentMove[]> {
  *
  * 큐레이션이 0건이면 빈 배열을 낸다. 채우는 판단은 buildHomeChips 가 한다.
  */
-async function fetchCuratedNames(limit = CHIP_LIMIT): Promise<string[]> {
+/**
+ * H5-1 — 이름만 뽑던 것을 «행 전체» 로 넓혔다. 조회는 그대로 한 번이다.
+ *
+ * ⚠️ 큐레이션은 「담당이 손으로 올린 것」이다(is_curated). 순위가 아니다 —
+ *    라벨에 「인기」·「많이 보는」을 쓰지 않는 이유가 그것이고, 여기도 같다.
+ */
+async function fetchCuratedNames(limit = CHIP_LIMIT): Promise<{ names: string[]; rows: HomeRow[] }> {
   try {
     const sb = getSupabaseAdmin();
     const { data, error } = await (sb as any)
       .from('apt_sites')
-      .select('name')
+      .select('slug,name,region,sigungu,lifecycle_stage,total_units,hero_image_url,hero_license_tier')
       .eq('is_active', true)
       .eq('is_curated', true)
       .in('curated_status', DEAL_STATUSES)
@@ -146,10 +158,25 @@ async function fetchCuratedNames(limit = CHIP_LIMIT): Promise<string[]> {
       .order('curated_at', { ascending: false, nullsFirst: false })
       .limit(Math.max(limit * 4, 20));
     if (error) throw error;
-    return ((data ?? []) as { name: string | null }[]).map((r) => r.name ?? '');
+    const raw = (data ?? []) as any[];
+    return {
+      names: raw.map((r) => r.name ?? ''),
+      // ⚠️ price 는 담지 않는다. 가짜 가격 판정(§B-4 ①)이 sections.ts 에 있고,
+      //    그 판정을 거치지 않은 값을 화면에 올리면 안 된다. null 로 둔다.
+      rows: raw.map((r) => ({
+        slug: r.slug, name: r.name, region: r.region, sigungu: r.sigungu,
+        lifecycle_stage: r.lifecycle_stage, total_units: r.total_units,
+        price: null,
+        // ⚠️ 라이선스 판정은 «렌더하는 쪽» 이 canUseHeroImage() 로 한다. 그래서 tier 를
+        //    그대로 실어 보낸다 — 여기서 미리 판정하지 않는 이유는 화면마다
+        //    leadContext 가 다르기 때문이다(홈은 리드폼이 없다).
+        hero_image_url: r.hero_image_url ?? null,
+        hero_license_tier: r.hero_license_tier ?? null,
+      })) as HomeRow[],
+    };
   } catch (e) {
     console.error('[home] curated names failed:', e);
-    return [];   // 실패해도 검색창은 기본 안내문으로 그대로 뜬다
+    return { names: [], rows: [] };   // 실패해도 검색창은 기본 안내문으로 그대로 뜬다
   }
 }
 
@@ -221,7 +248,7 @@ export default async function HomePage() {
    * 이 promise 가 홈의 다른 블록을 무너뜨릴 수 없다. */
   const weeklyPromise = fetchWeeklyTrades();
 
-  const [moves, counts, curatedNames, sections] = await Promise.all([
+  const [moves, counts, curated, sections] = await Promise.all([
     fetchRecentMoves(),
     fetchCounts(),
     fetchCuratedNames(),
@@ -233,7 +260,7 @@ export default async function HomePage() {
   // H4-1 (c)(d) — 칩과 라벨을 «한 함수»에서 같이 받는다. 갈라지면 라벨이 거짓이 된다.
   // 두 번째 소스는 위에서 이미 받은 moves 를 재사용한다 — 조회가 늘지 않는다.
   const chips = buildHomeChips({
-    curated: curatedNames,
+    curated: curated.names,
     moves: moves.map((m) => m.name),
   });
 
@@ -245,47 +272,29 @@ export default async function HomePage() {
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '8px 6px 24px' }}>
-      {/* ── 2 히어로 ──
-       * H4-1 (a): 첫 화면은 H1 + 검색창 + 칩 줄까지다. 아래 섹션과의 여백을 벌려
-       * 「여기서 검색한다」가 먼저 읽히게 한다. */}
-      <section style={{ margin: '6px 3px 34px' }}>
-        <h1
-          style={{
-            fontSize: 22,
-            fontWeight: 600,
-            letterSpacing: -0.4,
-            lineHeight: 1.35,
-            margin: '0 0 12px',
-            color: 'var(--text-primary)',
-          }}
-        >
-          모집공고 전부터 보는
-          <br />
-          부울경 분양
-        </h1>
+      {/* ── 2 히어로 (H5-1) ──
+       * 첫 화면의 55~60%를 네이비 색면이 차지하고 흰 검색창 하나만 뜬다.
+       * ⛔ 카피에 지역명을 넣지 않는다. 전국 플랫폼이고, 「부울경」은 데이터 필터·크론·
+       *    어드민 라벨에만 남는다(최종 지시서 §0-2).
+       * ⚠️ 골드 줄은 히어로 «상단 1/3» 안에 있어야 한다. 아래로 내려가면 배경이 밝아져
+       *    3.27:1 로 떨어진다. 실측은 HeroSearch 주석에 있다. */}
+      <HeroSearch chipNames={chips.names} siteCount={counts.total} />
 
-        {/* ⚠️ hotkey={false} 필수 — 헤더의 bar 인스턴스가 이미 ⌘K 를 소유한다.
-         *    둘 다 true 면 keydown 이 두 번 잡혀 모달이 두 개 열린다.
-         *    (Navigation.tsx 의 icon 인스턴스도 같은 이유로 false 다.) */}
-        {/* H3-2: 회전 문구는 실제 현장명이다. 데이터가 없으면 placeholder 로 조용히 되돌아간다.
-            H3-3: 모달 추천 칩도 같은 목록을 쓴다 — trending_keywords 를 홈에서만 끊는다.
-                  다른 페이지의 검색 모달은 지금처럼 trending 을 쓴다. */}
-        <UniversalSearchBar
-          variant="hero"
-          hotkey={false}
-          placeholder="단지명·지역·재개발 구역"
-          rotatingPlaceholders={chips.names}
-          suggestions={chips.names}
-          suggestionLabel={chips.label}
-        />
-
-        {/* 숫자는 fetchCounts 에서 온다. 0이면 문장에서 통째로 뺀다 —
-            「현장 0곳」은 안 쓰느니만 못하다. */}
-        <p style={{ fontSize: 12.5, color: 'var(--text-tertiary)', margin: '8px 2px 0' }}>
-          {counts.total > 0 ? `현장 ${counts.total.toLocaleString('ko-KR')}곳 · ` : ''}
-          단지명 하나로 바로 찾으세요
-        </p>
-      </section>
+      {/* ── 3 담당이 고른 현장 (H5-1 · 상단 고정) ──
+       * ⚠️ 「인기」·「많이 보는」이 아니다. is_curated 는 «담당이 손으로 올린 것» 이고
+       *    순위 신호가 아니다. 라벨이 소스를 넘어서면 H3-3 에서 trending_keywords 를
+       *    끊어낸 이유가 그대로 재발한다.
+       * ⚠️ 히어로 «바로 아래» 에 고정한다. 조회는 늘지 않았다 — 칩에 쓰던 큐레이션
+       *    조회 하나에서 행까지 같이 받는다.
+       * ⚠️ 0건이면 섹션을 통째로 미렌더한다. 실측 부울경 4건(부산 4 · 울산 0 · 경남 0)이라
+       *    빈 자리가 생길 수 있다 — 없는 자리를 만들지 않는다. */}
+      {curated.rows.length > 0 && (
+        <section style={{ marginBottom: 18 }}>
+          <SectionHeader eyebrow="APT — 큐레이션" title="담당이 고른 현장" id="home-curated" />
+          <SiteRows items={curated.rows.slice(0, MIN_ROWS + 1)} />
+          <MoreLink href="/apt" label="부동산 홈에서 더 보기" />
+        </section>
+      )}
 
       {/* ── 2 이번 주 실거래 (H4-2) ──
        * 접힌 선 «아래» 첫 블록이다. 첫 화면(H1 + 검색창 + 칩)을 침범하지 않는다 —
@@ -322,7 +331,9 @@ export default async function HomePage() {
        * ⚠️ /apt/pipeline 을 쓰지 않는다. 그건 「공고 전 현장 전체 보기」라 성격이 다르다. */}
       {moves.length > 0 && (
         <section style={{ marginBottom: 18 }}>
-          <SectionHeader eyebrow="APT — 부산·울산·경남" title="최근 움직인 현장" id="home-moves" />
+          {/* ⛔ eyebrow 에서 지역명을 뺐다. 데이터 필터(HOME_REGIONS)는 «그대로» 다 —
+                지우면 응대 못 하는 지역 현장이 홈에 뜬다(C-5). 카피만 뺀다. */}
+          <SectionHeader eyebrow="APT — 최근 갱신" title="최근 움직인 현장" id="home-moves" />
           <RecentMoves items={moves} />
           <MoreLink href="/apt" label="부동산 홈에서 더 보기" />
         </section>

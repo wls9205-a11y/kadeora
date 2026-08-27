@@ -260,7 +260,17 @@ export function Navigation() {
                 /search·/apt/search·/stock/search 라우트는 그대로 유지 (직접 진입·색인 대상). */}
             {/* H3-4: 홈에는 바로 아래 hero 검색창이 있어 중복이다 — 무엇을 눌러야 할지 헷갈린다.
                 ⚠️ 다른 페이지에서는 «유일한» 검색 진입점이므로 반드시 남긴다. */}
-            {!isHome && <UniversalSearchBar className="md:hidden" variant="icon" hotkey={false} />}
+            {/* H5-1 — 홈에서도 «마운트한다». 예전엔 홈 히어로에 검색창이 있어서 뺐는데,
+                이제 히어로가 스크롤로 숨는다. 그대로 두면 모바일 홈에서 스크롤 뒤
+                «검색 진입점이 0개» 가 된다.
+                ⚠️ 다만 히어로가 보이는 동안에는 CSS 로 감춘다(kd-nav-search--home).
+                   둘이 동시에 뜨면 Tab 순서가 두 벌이 된다. display:none 이라
+                   포커스에서도 빠진다. */}
+            <UniversalSearchBar
+              className={['md:hidden', isHome ? 'kd-nav-search--home' : ''].filter(Boolean).join(' ')}
+              variant="icon"
+              hotkey={false}
+            />
 
             {userId ? (
               <>

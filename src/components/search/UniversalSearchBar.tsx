@@ -56,6 +56,16 @@ type Props = {
    *    테이블·크론은 그대로 두고 «홈에서 참조만» 끊는 것이다.
    */
   suggestions?: string[];
+  /**
+   * H5-1 — hero 를 «네이비 색면 위» 에 올릴 때의 톤.
+   *
+   * ⚠️ 칩 스타일이 인라인이라 CSS 로는 못 바꾼다(인라인은 모든 @layer 를 이긴다).
+   *    그래서 프롭으로 받는다. 컴포넌트를 다시 만들지 않는다 — 검색 동작·모달·
+   *    회전 문구는 그대로고 «색만» 갈린다.
+   */
+  tone?: 'light' | 'dark';
+  /** 칩 줄 위 제목을 낼지. H5-1 히어로는 라벨 없이 칩만 낸다. */
+  showSuggestionLabel?: boolean;
   /** 추천 칩 제목. suggestions 를 넘길 때 내용에 맞춰 바꾼다. */
   suggestionLabel?: string;
 };
@@ -73,6 +83,8 @@ export default function UniversalSearchBar({
   rotatingPlaceholders,
   suggestions,
   suggestionLabel = "인기 검색어",
+  tone = 'light',
+  showSuggestionLabel = true,
 }: Props) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -346,7 +358,7 @@ export default function UniversalSearchBar({
           type="button"
           onClick={() => setOpen(true)}
           aria-label="검색 열기"
-          className={["kd-hero-search", className].filter(Boolean).join(" ")}
+          className={["kd-hero-search", tone === "dark" ? "kd-hero-search--dark" : "", className].filter(Boolean).join(" ")}
           style={{
             width: "100%",
             height: 56,
@@ -354,12 +366,16 @@ export default function UniversalSearchBar({
             alignItems: "center",
             gap: 10,
             padding: "0 16px",
-            borderRadius: "var(--radius-lg)",
             // H3-1: 첫 화면에서 «여기가 검색창이다» 를 색으로 알린다.
             // ⚠️ hex 를 직접 쓰지 않는다 — 그림자 rgba 만 예외다(토큰에 그림자 색이 없다).
             //    rgba(37,99,235) 는 --brand(#2563EB) 와 같은 값이다. 토큰을 바꾸면 여기도 본다.
-            border: "2px solid var(--brand)",
-            boxShadow: "0 4px 14px rgba(37,99,235,0.16)",
+            // H5-1 — 네이비 색면 위에서는 파란 테두리가 배경에 묻힌다. 흰 면만 남기고
+            //   포커스 링을 골드로 준다(:focus-visible 은 CSS 라 클래스로 건다).
+            border: tone === "dark" ? "0" : "2px solid var(--brand)",
+            borderRadius: tone === "dark" ? 16 : "var(--radius-lg)",
+            boxShadow: tone === "dark"
+              ? "0 6px 20px rgba(0,0,0,0.22)"
+              : "0 4px 14px rgba(37,99,235,0.16)",
             background: "var(--bg-surface)",
             color: "var(--text-secondary)",
             cursor: "pointer",
@@ -403,6 +419,7 @@ export default function UniversalSearchBar({
             {/* 칩 라벨 500 — TY1 사다리(라벨·배지·칩). 자간은 14px 이하라 0.
                 ⚠️ `width: "100%"` 로 «줄을 혼자 쓴다». 칩과 같은 줄에 두면 390px 에서
                    「라벨 + 칩 하나」로 끊겨, 그 칩 하나에만 붙은 설명처럼 읽힌다. */}
+            {showSuggestionLabel && (
             <span
               style={{
                 width: "100%",
@@ -416,6 +433,7 @@ export default function UniversalSearchBar({
             >
               {suggestionLabel}
             </span>
+            )}
             {/* ⚠️ 칩 글씨는 줄여도 «검색어는 원문» 을 보낸다.
                 shortSiteName 은 말줄임표를 쓰지 않는다 — 칩에서 '…' 는 눌러야 할지 알 수 없다. */}
             {heroChips.map((kw) => (
@@ -431,11 +449,18 @@ export default function UniversalSearchBar({
                   fontWeight: 400,
                   letterSpacing: 0,
                   lineHeight: 1.2,
-                  background: "var(--brand-bg)",
-                  border: "1px solid var(--brand-border)",
-                  // ⚠️ --brand(#2563EB) 는 이 배경에서 대비 4.65 라 400 굵기로 쓰기엔 얇다.
+                  // H5-1 «칩 단색» — 반투명(흰 0.14)은 그라디언트 밝은 끝에서 흰 글씨가
+                  //   4.03:1 로 미달했다(실측). 네이비 단색이면 어느 위치에서도 13.48:1 이다.
+                  // ⚠️ 다만 «칩 면 vs 배경» 경계가 1.27~2.61 로 3:1 에 못 미친다 —
+                  //   칩이 배경에 묻혀 「누를 수 있는 것」으로 안 보인다. 흰 테두리로 세운다.
+                  //   0.45 → 2.51 ✗ / 0.55 → 3.27 / 0.6 → 3.6 OK (전 위치 최악값 기준).
+                  background: tone === "dark" ? "var(--brand-navy)" : "var(--brand-bg)",
+                  border: tone === "dark"
+                    ? "1px solid rgba(255,255,255,0.6)"
+                    : "1px solid var(--brand-border)",
+                  // ⚠️ --brand(#2563EB) 는 light 배경에서 대비 4.65 라 400 굵기로 쓰기엔 얇다.
                   //    --brand-dark(#1E40AF) 는 7.84. 새 토큰을 만들지 않고 기존 것을 쓴다(TY1-2).
-                  color: "var(--brand-dark)",
+                  color: tone === "dark" ? "var(--text-inverse)" : "var(--brand-dark)",
                   whiteSpace: "nowrap",
                   cursor: "pointer",
                 }}
