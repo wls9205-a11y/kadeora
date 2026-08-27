@@ -34,13 +34,31 @@ import UniversalSearchBar from '@/components/search/UniversalSearchBar';
 const ROTATION = ['엄궁역', '해운대구 재개발', '분양가', '단지명'];
 const ROTATE_MS = 3500;
 
+/** H6-4 데이터 띠 한 칸. 숫자가 «없으면» 그 칸을 만들지 않는다. */
+export interface HeroStat {
+  /** 숫자 부분만. 라벨과 분리해야 굵기를 다르게 줄 수 있다. */
+  value: string;
+  label: string;
+  href: string;
+}
+
 export default function HeroSearch({
   chipNames,
   siteCount,
+  stats = [],
 }: {
-  /** buildHomeChips 결과. 라벨은 «내지 않는다» — 순위를 주장하는 라벨 금지. */
+  /** buildHomeChips 결과. 라벨은 «내지 않는다» — 순위를 주장하는 라벼 금지. */
   chipNames: string[];
   siteCount: number;
+  /**
+   * H6-4 — 히어로 하단 데이터 띠.
+   *
+   * ⚠️ 이미지·일러스트로 채우지 «않는다». 실사 정책과 대비 규칙 둘 다에 걸린다.
+   *    빈 색면을 데이터로 채우면 그 자체가 사이트가 무엇을 아는지 보여 준다.
+   * ⚠️ 히어로의 «일부» 다 — 별도 네이비 덩어리가 아니다(§1-6).
+   * ⛔ 개인 데이터(최근 본 현장)를 여기 올리지 않는다.
+   */
+  stats?: HeroStat[];
 }) {
   const ref = useRef<HTMLElement | null>(null);
   const [hidden, setHidden] = useState(false);
@@ -117,6 +135,19 @@ export default function HeroSearch({
 
         {siteCount > 0 && (
           <p className="kd-hero__meta">현장 {siteCount.toLocaleString('ko-KR')}곳</p>
+        )}
+
+        {/* 데이터 띠 — 히어로 하단. ⛔ 골드를 쓰지 않는다(그라디언트 끝점 3.27).
+            흰 / --brand-navy-mid 단색은 10.36 이다. */}
+        {stats.length > 0 && (
+          <div className="kd-hero__stats">
+            {stats.map((s) => (
+              <a key={s.label} href={s.href} className="kd-hero__stat">
+                <span className="kd-hero__stat-v">{s.value}</span>
+                <span className="kd-hero__stat-l">{s.label}</span>
+              </a>
+            ))}
+          </div>
         )}
       </div>
     </section>

@@ -52,7 +52,9 @@ import DealHeroCard, { pickDealHero } from '@/components/home/DealHeroCard';
 import WeeklyTrades from '@/components/home/WeeklyTrades';
 import { fetchWeeklyTrades } from '@/lib/home/weekly-trades';
 import RecentMoves, { type RecentMove } from '@/components/home/RecentMoves';
-import HeroSearch from '@/components/home/HeroSearch';
+import HeroSearch, { type HeroStat } from '@/components/home/HeroSearch';
+import { cookies } from 'next/headers';
+import { REGION_COOKIE, normalizeSido, REGION_FALLBACK } from '@/lib/region/cookie';
 import { BUGYEONG_REGIONS } from '@/lib/apt/pipeline';
 
 export const revalidate = 60;
@@ -239,7 +241,60 @@ export default async function HomePage() {
     fetchHomeSections(HOME_REGIONS),
   ]);
 
-  const weekly = await weeklyPromise;
+  const weekly = await weeklyPromise;
+
+  /* ══ H6-4 히어로 데이터 띠 ═══════════════════════════════════════════════
+   *
+   * ⚠️ 히어로 하단이 «빈 네이비» 였다(데스크탑 1080 에서 콘텐츠 260px).
+   *    이미지·일러스트로 채우지 않는다 — 실사 정책과 대비 규칙 둘 다에 걸린다.
+   *    사이트가 «무엇을 아는지» 를 숫자로 보여 준다.
+   * ⚠️ 지역은 부동산 탭과 «같은 쿠키» 다. 없으면 부산.
+   * ⛔ 개인 데이터(최근 본 현장)를 여기 올리지 않는다.
+   * ⚠️ 숫자가 «없는 칸은 만들지 않는다». 「0건」은 정보가 아니다.
+   */
+  const heroRegion = normalizeSido((await cookies()).get(REGION_COOKIE)?.value ?? null) ?? REGION_FALLBACK;
+  const sbHero = getSupabaseAdmin();
+  const [nextSubR, pipelineCountR] = await Promise.all([
+    (sbHero as any).from('apt_subscriptions')
+      .select('house_nm, rcept_bgnde, region_nm')
+      .gte('rcept_bgnde', new Date().toISOString().slice(0, 10))
+      .eq('region_nm', heroRegion)
+      .order('rcept_bgnde', { ascending: true }).limit(1).maybeSingle(),
+    (sbHero as any).from('apt_sites')
+      .select('id', { count: 'exact', head: true })
+      .eq('is_active', true).eq('region', heroRegion)
+      .in('lifecycle_stage', ['pre_announcement', 'site_planning', 'union_established', 'plan_approved', 'mgmt_approved', 'construction']),
+  ]);
+  if (nextSubR?.error) console.error(`[home] next subscription: ${nextSubR.error.message?.slice(0, 160)}`);
+  if (pipelineCountR?.error) console.error(`[home] pipeline count: ${pipelineCountR.error.message?.slice(0, 160)}`);
+
+  const heroStats: HeroStat[] = [];
+  if (weekly && weekly.deals > 0) {
+    heroStats.push({
+      value: `${weekly.deals.toLocaleString('ko-KR')}건`,
+      label: `이번 주 실거래 · ${heroRegion}`,
+      href: `/apt?region=${encodeURIComponent(heroRegion)}`,
+    });
+  }
+  const ns = nextSubR?.data;
+  if (ns?.rcept_bgnde && ns?.house_nm) {
+    const d = Math.ceil((new Date(ns.rcept_bgnde + 'T00:00:00+09:00').getTime() - Date.now()) / 86400000);
+    if (d >= 0) {
+      heroStats.push({
+        value: d === 0 ? '오늘 접수' : `D-${d}`,
+        label: `청약 접수 · ${ns.house_nm}`,
+        href: `/apt?region=${encodeURIComponent(heroRegion)}&st=soon`,
+      });
+    }
+  }
+  const pipelineCount = pipelineCountR?.count ?? 0;
+  if (pipelineCount > 0) {
+    heroStats.push({
+      value: `${pipelineCount.toLocaleString('ko-KR')}곳`,
+      label: `공고 전 현장 · ${heroRegion}`,
+      href: `/apt?region=${encodeURIComponent(heroRegion)}`,
+    });
+  }
 
   // H4-1 (c)(d) — 칩과 라벨을 «한 함수»에서 같이 받는다. 갈라지면 라벨이 거짓이 된다.
   // 두 번째 소스는 위에서 이미 받은 moves 를 재사용한다 — 조회가 늘지 않는다.
@@ -262,7 +317,7 @@ export default async function HomePage() {
        *    어드민 라벨에만 남는다(최종 지시서 §0-2).
        * ⚠️ 골드 줄은 히어로 «상단 1/3» 안에 있어야 한다. 아래로 내려가면 배경이 밝아져
        *    3.27:1 로 떨어진다. 실측은 HeroSearch 주석에 있다. */}
-      <HeroSearch chipNames={chips.names} siteCount={counts.total} />
+      <HeroSearch chipNames={chips.names} siteCount={counts.total} stats={heroStats} />
 
       {/* ── 2 이번 주 실거래 (H4-2) ──
        * 접힌 선 «아래» 첫 블록이다. 첫 화면(H1 + 검색창 + 칩)을 침범하지 않는다 —
@@ -270,7 +325,7 @@ export default async function HomePage() {
        * ⚠️ 홈에서 «매일 바뀌는 유일한 블록» 이다. 큐레이션 4건과 재개발 목록은
        *    주 단위로도 잘 안 움직인다. 재방문 이유가 여기서 나온다.
        * ⚠️ RPC 가 실패하거나 0건이면 fetchWeeklyTrades 가 null 을 내고 여기서 미렌더된다. */}
-      {weekly && <WeeklyTrades data={weekly} />}
+      {weekly && <WeeklyTrades data={weekly} selectedRegion={heroRegion} />}
 
       {/* ── 3 최근 본 현장 — 없으면 컴포넌트가 null 을 낸다 ── */}
       <RecentlyViewed limit={3} />

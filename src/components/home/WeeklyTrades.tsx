@@ -20,8 +20,10 @@ import {
   type WeeklyTrades as WeeklyTradesData,
 } from '@/lib/home/weekly-trades';
 
-export default function WeeklyTrades({ data }: { data: WeeklyTradesData }) {
+export default function WeeklyTrades({ data, selectedRegion }: { data: WeeklyTradesData; selectedRegion?: string | null }) {
   const label = tradeRegionLabel(data.byRegion);
+  // 선택 지역이 이 집계에 «실제로 들어 있나». 없으면 그렇다고 말한다.
+  const covered = !selectedRegion || data.byRegion.some((r) => r.region === selectedRegion);
   const delta = tradeDeltaPct(data.deals, data.prevDeals);
   const latest = shortDate(data.latestDealDate);
   const cut = shortDate(data.cutoff);
@@ -40,8 +42,14 @@ export default function WeeklyTrades({ data }: { data: WeeklyTradesData }) {
         }}
       >
         {/* 라벨 500 — TY1 사다리(라벨·배지·칩). 자간은 14px 이하라 0. */}
-        <div style={{ fontSize: 12, fontWeight: 500, letterSpacing: 0, color: 'var(--text-tertiary)' }}>
-          이번 주 {label} 아파트 실거래
+        {/* ⛔ H6-4 — 「이번 주 부산·울산 아파트 실거래」였다. 수집 범위(HOME_REGIONS)를
+            그대로 제목에 박아 놓아, 사용자가 서울을 고른 화면에서도 부산·울산이라 말했다.
+            ⚠️ 선택 지역이 집계에 «없으면» 그 사실을 정직하게 말한다 —
+               있는 척 지역명만 바꾸면 없는 숫자를 그 지역 것이라 주장하게 된다. */}
+        <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 500, letterSpacing: 0, color: 'var(--text-tertiary)' }}>
+          {selectedRegion && !covered
+            ? `이번 주 실거래 · ${selectedRegion} 집계 준비 중`
+            : `이번 주 실거래 · ${selectedRegion || label}`}
         </div>
 
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 7, marginTop: 4 }}>
