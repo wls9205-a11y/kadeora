@@ -6,6 +6,7 @@ import { enrichAptData, enrichStockData, formatAptDataForPrompt, formatStockData
 import { checkBlogQuality, stripInlineHtml } from '@/lib/blog-quality-gate';
 import { diversifyPrompt } from '@/lib/blog-prompt-diversity';
 import { getFreshnessContext, deriveFreshnessFields } from '@/lib/blog/freshness-context';
+import { dbw } from '@/lib/cron-db-log';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -71,10 +72,10 @@ export async function GET(req: NextRequest) {
           // 인라인 HTML이라도 제거
           const cleaned = stripInlineHtml(post.content);
           if (cleaned !== post.content) {
-            await (admin as any).from('blog_posts').update({
+            dbw('blog-enrich-rewrite', 'blog_posts.update@74', await (admin as any).from('blog_posts').update({
               content: cleaned,
               updated_at: new Date().toISOString(),
-            }).eq('id', post.id);
+            }).eq('id', post.id));
           }
           results.push({ slug: post.slug, score: -1, issues: ['실데이터 없음 — HTML만 정리'] });
           continue;
@@ -136,7 +137,7 @@ ${getFreshnessContext()}`;
         // meta_description 생성
         const clean = newContent.replace(/[#|*\n\r\-\[\]\(\)/]/g, ' ').replace(/\s+/g, ' ').trim();
 
-        await (admin as any).from('blog_posts').update({
+        dbw('blog-enrich-rewrite', 'blog_posts.update@139', await (admin as any).from('blog_posts').update({
           content: newContent,
           meta_description: clean.slice(0, 120) + ' — 카더라',
           excerpt: clean.slice(0, 150),
@@ -145,7 +146,7 @@ ${getFreshnessContext()}`;
           content_length: newContent.length,
           quality_checked_at: null, // 품질 재평가 트리거
           ...deriveFreshnessFields({ isSeasonal: post.category === 'apt' || post.category === 'stock' || post.category === 'unsold', targetYear: new Date().getFullYear() }),
-        }).eq('id', post.id);
+        }).eq('id', post.id));
 
         enriched++;
         console.info(`[blog-enrich-rewrite] ✅ ${post.slug} (${quality.score}점, ${quality.tier})`);

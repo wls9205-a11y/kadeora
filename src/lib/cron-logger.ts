@@ -1,5 +1,6 @@
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { acquireCronLock, releaseCronLock } from '@/lib/cron-redis-lock';
+import { resetDbErrors, takeDbErrors } from '@/lib/cron-db-log';
 
 function getSupabase() {
   return getSupabaseAdmin();
@@ -69,11 +70,15 @@ export async function withCronLogging(
   // id 가 없으면 PATCH 자체를 스킵한다.
   const logId: string | null = (log?.id as string | undefined) ?? null;
 
+  // A2 — 이번 실행에서 발생할 DB 쓰기 오류를 모을 자리를 비운다.
+  resetDbErrors(cronName);
+
   const startTime = Date.now();
 
   try {
     const result = await fn();
     const duration = Date.now() - startTime;
+    const dbErrs = takeDbErrors(cronName);
 
     if (logId) {
       await supabase
@@ -86,7 +91,14 @@ export async function withCronLogging(
           records_created: result.created || 0,
           records_updated: result.updated || 0,
           records_failed: result.failed || 0,
-          metadata: result.metadata || {},
+          // A2 — 「예외 없이 끝났다」와 「DB 쓰기가 조용히 실패했다」를 구분한다.
+          //      status 는 건드리지 않는다(동작 변경 0). error_message 로만 드러낸다.
+          error_message: dbErrs.length
+            ? `db_write_failed x${dbErrs.length}: ${dbErrs[0]}`.slice(0, 1000)
+            : null,
+          metadata: dbErrs.length
+            ? { ...(result.metadata || {}), db_errors: dbErrs }
+            : (result.metadata || {}),
         })
         .eq('id', logId);
     }

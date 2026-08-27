@@ -4,6 +4,7 @@ import { withCronAuth } from '@/lib/cron-auth';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { SITE_URL, AI_MODEL_HAIKU, ANTHROPIC_VERSION } from '@/lib/constants';
 import { extractAptSiteSlugs } from '@/lib/blog-safe-insert';
+import { dbw } from '@/lib/cron-db-log';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -115,7 +116,7 @@ async function doWork() {
         if (named.length > 0) naverContent.html += siteLinkBlock(named);
       }
 
-      await (sb as any).from('naver_syndication').insert({
+      dbw('naver-blog-content', 'naver_syndication.insert@118', await (sb as any).from('naver_syndication').insert({
         blog_post_id: post.id,
         blog_slug: post.slug,
         original_title: post.title,
@@ -132,7 +133,7 @@ async function doWork() {
         target: 'blog',
         blog_status: 'pending',
         cafe_status: 'skipped',
-      });
+      }));
 
       success++;
     } catch (e: any) {

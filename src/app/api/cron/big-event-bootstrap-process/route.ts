@@ -21,6 +21,7 @@ import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { AI_MODEL_HAIKU, AI_MODEL_OPUS, ANTHROPIC_VERSION } from '@/lib/constants';
+import { dbw } from '@/lib/cron-db-log';
 
 export const maxDuration = 300;
 export const runtime = 'nodejs';
@@ -471,7 +472,7 @@ async function insertBlogForEvent(
 
   // blog_posts 에 sub_category 를 별도로 UPDATE (safeBlogInsert 가 지원 안 함)
   try {
-    await sb.from('blog_posts').update({ sub_category: subCatMap[assetType] }).eq('id', id);
+    dbw('big-event-bootstrap-process', 'blog_posts.update@474', await sb.from('blog_posts').update({ sub_category: subCatMap[assetType] }).eq('id', id));
   } catch { /* ignore */ }
 
   return { ok: true, id };
@@ -524,11 +525,11 @@ async function handler(_req: NextRequest) {
 
         const ev = eventMap.get(q.event_id);
         if (!ev) {
-          await (sb as any).from('big_event_bootstrap_queue').update({
+          dbw('big-event-bootstrap-process', 'big_event_bootstrap_queue.update@527', await (sb as any).from('big_event_bootstrap_queue').update({
             status: 'failed',
             last_error: 'event_not_found_or_inactive',
             attempt_count: (q.attempt_count || 0) + 1,
-          }).eq('id', q.id);
+          }).eq('id', q.id));
           stats.failed++;
           continue;
         }
@@ -562,11 +563,11 @@ async function handler(_req: NextRequest) {
             throw new Error(`unknown_asset_type:${at}`);
           }
           if (!gen) {
-            await (sb as any).from('big_event_bootstrap_queue').update({
+            dbw('big-event-bootstrap-process', 'big_event_bootstrap_queue.update@565', await (sb as any).from('big_event_bootstrap_queue').update({
               status: 'failed',
               last_error: 'gen_returned_null',
               attempt_count: (q.attempt_count || 0) + 1,
-            }).eq('id', q.id);
+            }).eq('id', q.id));
             stats.failed++;
             failures.push(`${q.id}:${at}:gen_null`);
             continue;
@@ -574,11 +575,11 @@ async function handler(_req: NextRequest) {
 
           const ins = await insertBlogForEvent(sb, ev, gen, at as any);
           if (!ins.ok || !ins.id) {
-            await (sb as any).from('big_event_bootstrap_queue').update({
+            dbw('big-event-bootstrap-process', 'big_event_bootstrap_queue.update@577', await (sb as any).from('big_event_bootstrap_queue').update({
               status: 'failed',
               last_error: ins.reason || 'insert_failed',
               attempt_count: (q.attempt_count || 0) + 1,
-            }).eq('id', q.id);
+            }).eq('id', q.id));
             stats.failed++;
             failures.push(`${q.id}:${at}:insert:${ins.reason}`);
             continue;
@@ -586,28 +587,28 @@ async function handler(_req: NextRequest) {
 
           // big_event_registry 링크 업데이트
           if (at === 'pillar') {
-            await (sb as any)
+            dbw('big-event-bootstrap-process', 'big_event_registry.update@589', await (sb as any)
               .from('big_event_registry')
               .update({ pillar_blog_post_id: ins.id, updated_at: new Date().toISOString() })
-              .eq('id', ev.id);
+              .eq('id', ev.id));
           } else if (at === 'spoke') {
             const currentSpokes: number[] = Array.isArray(ev.spoke_blog_post_ids) ? ev.spoke_blog_post_ids : [];
             const newSpokes = Array.from(new Set([...currentSpokes, ins.id]));
-            await (sb as any)
+            dbw('big-event-bootstrap-process', 'big_event_registry.update@596', await (sb as any)
               .from('big_event_registry')
               .update({ spoke_blog_post_ids: newSpokes, updated_at: new Date().toISOString() })
-              .eq('id', ev.id);
+              .eq('id', ev.id));
             ev.spoke_blog_post_ids = newSpokes; // in-memory 반영 (같은 event 여러 spoke 처리 시)
           }
 
           // s263 Phase 2.3: status='done' → 'completed' (CHECK 허용 값 매칭).
-          await (sb as any).from('big_event_bootstrap_queue').update({
+          dbw('big-event-bootstrap-process', 'big_event_bootstrap_queue.update@604', await (sb as any).from('big_event_bootstrap_queue').update({
             status: 'completed',
             blog_post_id: ins.id,
             completed_at: new Date().toISOString(),
             last_error: null,
             attempt_count: (q.attempt_count || 0) + 1,
-          }).eq('id', q.id);
+          }).eq('id', q.id));
 
           stats.done++;
           (stats as any)[at] = ((stats as any)[at] || 0) + 1;
@@ -624,11 +625,11 @@ async function handler(_req: NextRequest) {
             });
           }
         } catch (err: any) {
-          await (sb as any).from('big_event_bootstrap_queue').update({
+          dbw('big-event-bootstrap-process', 'big_event_bootstrap_queue.update@627', await (sb as any).from('big_event_bootstrap_queue').update({
             status: 'failed',
             last_error: (err?.message || 'unknown').slice(0, 500),
             attempt_count: (q.attempt_count || 0) + 1,
-          }).eq('id', q.id);
+          }).eq('id', q.id));
           stats.failed++;
           failures.push(`${q.id}:exception:${err?.message || ''}`);
         }

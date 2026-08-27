@@ -18,6 +18,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withCronAuthFlex } from '@/lib/cron-auth';
 import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { dbw } from '@/lib/cron-db-log';
 
 export const maxDuration = 300;
 export const runtime = 'nodejs';
@@ -155,7 +156,7 @@ async function handler(_req: NextRequest) {
         try {
           // draft_content 최소 800자 미만 → 자동 블록 (팩트 검증 의미 없음)
           if (!issue.draft_content || String(issue.draft_content).length < 800) {
-            await (sb as any)
+            dbw('issue-fact-check', 'issue_alerts.update@158', await (sb as any)
               .from('issue_alerts')
               .update({
                 fact_check_passed: false,
@@ -163,7 +164,7 @@ async function handler(_req: NextRequest) {
                 fact_check_details: { issues: ['draft_too_short'], confidence: 0 },
                 fact_check_at: new Date().toISOString(),
               })
-              .eq('id', issue.id);
+              .eq('id', issue.id));
             blocked++;
             failures.push(`${issue.id}:draft_too_short`);
             continue;
@@ -176,7 +177,7 @@ async function handler(_req: NextRequest) {
             continue;
           }
 
-          await (sb as any)
+          dbw('issue-fact-check', 'issue_alerts.update@179', await (sb as any)
             .from('issue_alerts')
             .update({
               fact_check_passed: outcome.passed,
@@ -189,7 +190,7 @@ async function handler(_req: NextRequest) {
               },
               fact_check_at: new Date().toISOString(),
             })
-            .eq('id', issue.id);
+            .eq('id', issue.id));
 
           if (outcome.passed) {
             passed++;

@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronAuth } from '@/lib/cron-auth';
 import { withCronLogging } from '@/lib/cron-logger';
+import { dbw } from '@/lib/cron-db-log';
 
 /**
  * issue-trend 크론 — 네이버 검색 트렌드 모니터링
@@ -187,12 +188,12 @@ async function handler(_req: NextRequest) {
         const newScore = Math.min(Math.round(issue.base_score * newMultiplier), 100);
         const shouldAutoPublish = newScore >= 60;
 
-        await (sb as any).from('issue_alerts').update({
+        dbw('issue-trend', 'issue_alerts.update@190', await (sb as any).from('issue_alerts').update({
           raw_data: { ...rawData, portal_cross_count: portalCross },
           multiplier: Math.round(newMultiplier * 100) / 100,
           final_score: newScore,
           is_auto_publish: shouldAutoPublish,
-        }).eq('id', issue.id);
+        }).eq('id', issue.id));
 
         updated++;
       }

@@ -2,6 +2,7 @@ import { AI_MODEL_HAIKU, ANTHROPIC_VERSION } from '@/lib/constants';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
+import { dbw } from '@/lib/cron-db-log';
 
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
@@ -56,9 +57,9 @@ export async function GET(_req: NextRequest) {
         const text = data.content?.[0]?.text;
         if (!text || text.length < 400) continue;
 
-        await (admin as any).from('stock_quotes')
+        dbw('stock-analysis-gen', 'stock_quotes.update@59', await (admin as any).from('stock_quotes')
           .update({ analysis_text: text, analysis_generated_at: new Date().toISOString() })
-          .eq('symbol', s.symbol);
+          .eq('symbol', s.symbol));
         processed++;
       } catch { /* skip */ }
     }

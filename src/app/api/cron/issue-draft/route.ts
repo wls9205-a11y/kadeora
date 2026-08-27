@@ -13,6 +13,7 @@ import { appendRelatedHubFooter } from '@/lib/internal-link-injector';
 // s239 Phase 0: LLM 사용량 추적 (fire-and-forget, main flow 영향 0)
 import { logAnthropicUsage } from '@/lib/llm/usage-tracker';
 import { getFreshnessContext, deriveFreshnessFields } from '@/lib/blog/freshness-context';
+import { dbw } from '@/lib/cron-db-log';
 
 /**
  * issue-draft v2 — AI 기사 생성 + 자동 발행 + 이미지 + 피드 포스트
@@ -120,9 +121,13 @@ async function fetchBigEventContext(sb: any, issue: any): Promise<string> {
 
 /* ═══════════ AI 기사 생성 (v2: 에러 로깅 + og-infographic 제거) ═══════════ */
 
-async function generateArticle(issue: any, bigEventContext = ''): Promise<{ title: string; content: string; slug: string; keywords: string[]; meta_description: string; infographic_data: Record<string, any> } | null> {
+/** A2 — 실패 사유 5분류. 「왜 못 만들었나」가 로그에 남아야 B1 에서 판단할 수 있다. */
+export type DraftFailReason = 'model_error' | 'parse' | 'token_limit' | 'duplicate' | 'no_match';
+type GenResult = { title: string; content: string; slug: string; keywords: string[]; meta_description: string; infographic_data: Record<string, any> };
+
+async function generateArticle(issue: any, bigEventContext = ''): Promise<{ article: GenResult | null; failReason: DraftFailReason | null }> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) { console.error('[issue-draft] ANTHROPIC_API_KEY missing'); return null; }
+  if (!apiKey) { console.error('[issue-draft] ANTHROPIC_API_KEY missing'); return { article: null, failReason: 'model_error' }; }
 
   const template = selectDraftTemplate(issue.category, issue.issue_type);
   const isPreempt = ['pre_announcement', 'preempt_coverage', 'new_subscription', 'search_spike'].includes(issue.issue_type);
@@ -233,7 +238,7 @@ ${titleHint ? `6. 제목에 다음 토큰 중 최소 2개 포함 (다양성 ↑,
         status: 'error', error_code: String(res.status),
         metadata: { max_tokens: 12000, issue_id: issue?.id ?? null },
       });
-      return null;
+      return { article: null, failReason: 'model_error' };
     }
     const data = await res.json();
     logAnthropicUsage({
@@ -244,7 +249,7 @@ ${titleHint ? `6. 제목에 다음 토큰 중 최소 2개 포함 (다양성 ↑,
       metadata: { max_tokens: 12000, issue_id: issue?.id ?? null, category: issue?.category ?? null },
     });
     const text = data.content?.[0]?.text || '';
-    if (!text) { console.error('[issue-draft] AI returned empty text'); return null; }
+    if (!text) { console.error('[issue-draft] AI returned empty text'); return { article: null, failReason: 'model_error' }; }
 
     // JSON 파싱 (```json 제거)
     const clean = text.replace(/```json|```/g, '').trim();
@@ -253,22 +258,25 @@ ${titleHint ? `6. 제목에 다음 토큰 중 최소 2개 포함 (다양성 ↑,
       parsed = JSON.parse(clean);
     } catch (parseErr) {
       console.error(`[issue-draft] JSON parse failed for issue ${issue.id}: ${(parseErr as Error).message}`, clean.slice(0, 200));
-      return null;
+      // ⚠️ 응답이 max_tokens 에서 «잘려서» 파싱이 깨진 것과 모델이 형식을 어긴 것은 다른 문제다.
+      //    stop_reason 을 봐야 구분된다. 섞어 두면 「파서를 고쳐야 하나 한도를 올려야 하나」를 못 가린다.
+      const truncated = data?.stop_reason === 'max_tokens';
+      return { article: null, failReason: truncated ? 'token_limit' : 'parse' };
     }
 
     if (!parsed.title || !parsed.content) {
       console.error(`[issue-draft] Missing title/content for issue ${issue.id}`);
-      return null;
+      return { article: null, failReason: 'parse' };
     }
 
-    return {
+    return { failReason: null, article: {
       title: parsed.title,
       content: parsed.content,
       slug: parsed.slug || parsed.title.replace(/[^가-힣a-z0-9\s-]/gi, '').replace(/\s+/g, '-').toLowerCase(),
       keywords: parsed.keywords || issue.detected_keywords || [],
       meta_description: parsed.meta_description || '',
       infographic_data: {},
-    };
+    } };
   } catch (e) {
     console.error('[issue-draft] AI generation exception:', (e as Error).message);
     logAnthropicUsage({
@@ -277,7 +285,7 @@ ${titleHint ? `6. 제목에 다음 토큰 중 최소 2개 포함 (다양성 ↑,
       status: 'error', error_code: 'exception',
       metadata: { max_tokens: 12000, issue_id: issue?.id ?? null, error: (e as Error).message?.slice(0, 200) },
     });
-    return null;
+    return { article: null, failReason: 'model_error' };
   }
 }
 
@@ -366,16 +374,16 @@ async function insertImages(content: string, title: string, keywords: string[], 
       image_type: 'stock_photo',
       position: i,
     }));
-    try { await (sb as any).from('blog_post_images').insert(imageInserts); } catch {}
+    try { dbw('issue-draft', 'blog_post_images.insert@369', await (sb as any).from('blog_post_images').insert(imageInserts)); } catch {}
   }
 
   // 커버 이미지 교체 (position 0)
   if (blogPostId && images.length > 0) {
     try {
-      await sb.from('blog_posts').update({
+      dbw('issue-draft', 'blog_posts.update@375', await sb.from('blog_posts').update({
         cover_image: images[0].url,
         image_alt: images[0].alt,
-      }).eq('id', blogPostId);
+      }).eq('id', blogPostId));
     } catch {}
   }
 
@@ -459,12 +467,12 @@ async function createOfficialFeedPost(sb: any, issue: any, blogSlug: string) {
   const entities = (issue.related_entities || []).join(', ');
   const title = issue.title.length > 50 ? issue.title.slice(0, 50) + '...' : issue.title;
   const content = `${prefix} [속보] ${title}\n\n${issue.summary || ''}\n\n상세 분석 👉 ${SITE_URL}/blog/${blogSlug}`;
-  await sb.from('posts').insert({
+  dbw('issue-draft', 'posts.insert@462', await sb.from('posts').insert({
     author_id: systemUser.id, title: `[속보] ${entities || '이슈'} 분석`,
     content: content.slice(0, 500),
     category: issue.category === 'apt' ? 'realestate' : issue.category === 'stock' ? 'stock' : 'finance',
     is_anonymous: false, created_at: new Date().toISOString(),
-  });
+  }));
 }
 
 /* ═══════════ 뻘글 스케줄링 ═══════════ */
@@ -473,10 +481,10 @@ async function scheduleBuzzPosts(sb: any, issueId: string, score: number) {
   const personas = ['curious', 'self_deprecating', 'question', 'calculator', 'sharer', 'realist'];
   const selected = personas.sort(() => Math.random() - 0.5).slice(0, 1);
   const now = Date.now();
-  await (sb as any).from('scheduled_feed_posts').insert(selected.map((persona, i) => ({
+  dbw('issue-draft', 'scheduled_feed_posts.insert@476', await (sb as any).from('scheduled_feed_posts').insert(selected.map((persona, i) => ({
     issue_id: issueId, persona_type: persona,
     scheduled_at: new Date(now + (8 + i * 10) * 60 * 1000).toISOString(), is_published: false,
-  })));
+  }))));
 }
 
 /* ═══════════ 메인: 이슈 1건 처리 ═══════════ */
@@ -514,7 +522,7 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
     }
   }
   if (skipReasons.length > 0) {
-    await (sb as any).from('issue_alerts').update({ publish_decision: 'duplicate_blog', block_reason: skipReasons.join(' | '), is_processed: true }).eq('id', issue.id);
+    dbw('issue-draft', 'issue_alerts.update@517', await (sb as any).from('issue_alerts').update({ publish_decision: 'duplicate_blog', block_reason: skipReasons.join(' | '), is_processed: true, fail_reason: 'duplicate' }).eq('id', issue.id));
     return { decision: 'duplicate', score: issue.final_score };
   }
 
@@ -522,15 +530,15 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
   const bigEventContext = await fetchBigEventContext(sb, issue);
 
   // AI 기사 생성
-  const article = await generateArticle(issue, bigEventContext);
+  const { article, failReason } = await generateArticle(issue, bigEventContext);
   if (!article) {
     // A3: 재시도 로직 — retry_count < 3이면 is_processed=false로 리셋
     const newRetry = retryCount + 1;
     if (newRetry < 3) {
-      await (sb as any).from('issue_alerts').update({ is_processed: false, publish_decision: null, retry_count: newRetry }).eq('id', issue.id);
+      dbw('issue-draft', 'issue_alerts.update@530', await (sb as any).from('issue_alerts').update({ is_processed: false, publish_decision: null, retry_count: newRetry, fail_reason: failReason }).eq('id', issue.id));
       return { decision: `ai_failed_retry_${newRetry}`, score: issue.final_score };
     }
-    await (sb as any).from('issue_alerts').update({ publish_decision: 'ai_failed', retry_count: newRetry }).eq('id', issue.id);
+    dbw('issue-draft', 'issue_alerts.update@533', await (sb as any).from('issue_alerts').update({ publish_decision: 'ai_failed', retry_count: newRetry, fail_reason: failReason }).eq('id', issue.id));
     return { decision: 'ai_failed_final', score: issue.final_score };
   }
 
@@ -662,11 +670,11 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
   // A2: 자동 발행 결정 시 blog_posts 반드시 공개 처리 (is_published 상태 무관)
   if (canAutoPublish && blogPostId) {
     try {
-      await sb.from('blog_posts').update({
+      dbw('issue-draft', 'blog_posts.update@665', await sb.from('blog_posts').update({
         is_published: true,
         published_at: new Date().toISOString(),
         seo_tier: 'A',
-      }).eq('id', blogPostId);
+      }).eq('id', blogPostId));
     } catch (pubErr) {
       console.error(`[issue-draft] force publish failed for ${blogPostId}:`, (pubErr as Error).message);
     }
@@ -705,7 +713,7 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
     }
 
     if (finalContent !== seoEnriched) {
-      await sb.from('blog_posts').update({ content: finalContent }).eq('id', blogPostId);
+      dbw('issue-draft', 'blog_posts.update@708', await sb.from('blog_posts').update({ content: finalContent }).eq('id', blogPostId));
     }
 
     // s195: 최종 이미지 카운트 검증 — DB 에서 다시 읽어 확인. 부족하면 마지막 한 번 더 padding.
@@ -743,7 +751,7 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
   }
 
   const insertFailed = !insertResult.success && !blogPostId;
-  await (sb as any).from('issue_alerts').update({
+  dbw('issue-draft', 'issue_alerts.update@746', await (sb as any).from('issue_alerts').update({
     is_published: (canAutoPublish && !!blogPostId),
     publish_decision: canAutoPublish && !!blogPostId ? 'auto' : canAutoPublish ? 'auto_failed' : !!blogPostId ? 'draft' : 'failed',
     block_reason: insertFailed ? (insertResult.message || insertResult.reason || 'safeBlogInsert failed') : null,
@@ -756,7 +764,7 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
     // s194: 발행 성공 시 retry_count 0 reset — image-attach 단계의 retry<3 가드가
     // 이전 ai_failed 누적 카운트를 들고 가지 않도록.
     retry_count: blogPostId ? 0 : (issue.retry_count || 0),
-  }).eq('id', issue.id);
+  }).eq('id', issue.id));
 
   if (canAutoPublish && blogPostId) {
     await createOfficialFeedPost(sb, issue, article.slug);
@@ -777,9 +785,9 @@ async function handler(_req: NextRequest) {
     const MAX_PER_RUN = 15;
 
     // 25점 미만 자동 스킵 (큐 정리)
-    await (sb as any).from('issue_alerts')
+    dbw('issue-draft', 'issue_alerts.update@780', await (sb as any).from('issue_alerts')
       .update({ is_processed: true, publish_decision: 'below_threshold', processed_at: new Date().toISOString() })
-      .eq('is_processed', false).lt('final_score', 25);
+      .eq('is_processed', false).lt('final_score', 25));
 
     // 미처리 이슈 조회 (최고 점수 우선 + ai_failed 재시도 포함)
     const { data: issues } = await (sb as any).from('issue_alerts')

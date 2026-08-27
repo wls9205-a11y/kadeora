@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
 import { withCronAuth } from '@/lib/cron-auth';
+import { dbw } from '@/lib/cron-db-log';
 
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
@@ -52,9 +53,9 @@ async function handler(_req: NextRequest) {
         const text = data.content?.[0]?.text;
         if (!text || text.length < 500) continue;
 
-        await (admin as any).from('apt_sites')
+        dbw('apt-analysis-gen', 'apt_sites.update@55', await (admin as any).from('apt_sites')
           .update({ analysis_text: text, analysis_generated_at: new Date().toISOString() })
-          .eq('id', site.id);
+          .eq('id', site.id));
         processed++;
       } catch { /* skip */ }
     }

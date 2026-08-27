@@ -27,6 +27,7 @@ import { withCronAuthFlex } from '@/lib/cron-auth';
 import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { SITE_URL } from '@/lib/constants';
+import { dbw } from '@/lib/cron-db-log';
 
 export const maxDuration = 120;
 export const runtime = 'nodejs';
@@ -76,10 +77,10 @@ async function handler(_req: NextRequest) {
           const postId = Number(issue.blog_post_id);
 
           // 1) publish_attempted_at 선 스탬프
-          await (sb as any)
+          dbw('issue-publish', 'issue_alerts.update@79', await (sb as any)
             .from('issue_alerts')
             .update({ publish_attempted_at: new Date().toISOString() })
-            .eq('id', issue.id);
+            .eq('id', issue.id));
 
           // 2) check_publish_gate
           let gate: GateResult = { allowed: true, reasons: [], checks: {} };
@@ -106,13 +107,13 @@ async function handler(_req: NextRequest) {
               const key = r.split(' ')[0];
               gateReasonCounts[key] = (gateReasonCounts[key] || 0) + 1;
             }
-            await (sb as any)
+            dbw('issue-publish', 'issue_alerts.update@109', await (sb as any)
               .from('issue_alerts')
               .update({
                 publish_decision: 'gate_blocked',
                 block_reason: gate.reasons.slice(0, 6).join(' | '),
               })
-              .eq('id', issue.id);
+              .eq('id', issue.id));
             if (samples.length < 5) {
               samples.push({ id: issue.id, post: postId, gate: 'blocked', reasons: gate.reasons.slice(0, 3) });
             }
@@ -180,7 +181,7 @@ async function handler(_req: NextRequest) {
           }
 
           // 4) issue_alerts 발행 표기
-          await (sb as any)
+          dbw('issue-publish', 'issue_alerts.update@183', await (sb as any)
             .from('issue_alerts')
             .update({
               is_published: true,
@@ -188,7 +189,7 @@ async function handler(_req: NextRequest) {
               publish_decision: 'auto_published',
               block_reason: null,
             })
-            .eq('id', issue.id);
+            .eq('id', issue.id));
 
           // 5) advance stage
           try {

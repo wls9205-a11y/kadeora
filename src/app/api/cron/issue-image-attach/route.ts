@@ -21,6 +21,7 @@ import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { runImagePipeline, type PostContext } from '@/lib/image-pipeline';
 import { SITE_URL } from '@/lib/constants';
+import { dbw } from '@/lib/cron-db-log';
 
 export const maxDuration = 300;
 export const runtime = 'nodejs';
@@ -104,10 +105,10 @@ async function handler(_req: NextRequest) {
           // 2) draft_content 보강 (FAQ + 내부링크 필수)
           const enriched = ensureContentHasEssentials(String(issue.draft_content || ''), category);
           if (enriched !== issue.draft_content) {
-            await (sb as any)
+            dbw('issue-image-attach', 'issue_alerts.update@107', await (sb as any)
               .from('issue_alerts')
               .update({ draft_content: enriched })
-              .eq('id', issue.id);
+              .eq('id', issue.id));
             issue.draft_content = enriched;
           }
 
@@ -161,10 +162,10 @@ async function handler(_req: NextRequest) {
               // s194: retry_count 증가 + block_reason 마커 — 3회 후 SELECT 가드에서 자동 제외.
               const newRetry = (issue.retry_count || 0) + 1;
               try {
-                await (sb as any).from('issue_alerts').update({
+                dbw('issue-image-attach', 'issue_alerts.update@164', await (sb as any).from('issue_alerts').update({
                   block_reason: `finalize_blocked: ${reason}`.slice(0, 240),
                   retry_count: newRetry,
-                }).eq('id', issue.id);
+                }).eq('id', issue.id));
               } catch (markErr: any) {
                 console.warn(`[issue-image-attach] retry mark failed ${issue.id}:`, markErr?.message);
               }
@@ -228,17 +229,17 @@ async function handler(_req: NextRequest) {
 
           if (Object.keys(postUpdates).length > 0) {
             try {
-              await sb.from('blog_posts').update(postUpdates).eq('id', blogPostId);
+              dbw('issue-image-attach', 'blog_posts.update@231', await sb.from('blog_posts').update(postUpdates).eq('id', blogPostId));
             } catch { /* UPDATE 는 validate_blog_post 트리거 미동작 */ }
           }
 
           if (inserted > 0) imagesAttached += inserted;
 
           // 8) image_attached_at 스탬프 + stage advance
-          await (sb as any)
+          dbw('issue-image-attach', 'issue_alerts.update@238', await (sb as any)
             .from('issue_alerts')
             .update({ image_attached_at: new Date().toISOString() })
-            .eq('id', issue.id);
+            .eq('id', issue.id));
           try {
             await (sb as any).rpc('advance_issue_stage', {
               p_issue_id: issue.id,

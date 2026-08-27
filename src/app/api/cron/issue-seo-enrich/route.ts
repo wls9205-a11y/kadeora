@@ -19,6 +19,7 @@ import { withCronAuthFlex } from '@/lib/cron-auth';
 import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { SITE_URL } from '@/lib/constants';
+import { dbw } from '@/lib/cron-db-log';
 
 export const maxDuration = 120;
 export const runtime = 'nodejs';
@@ -235,10 +236,10 @@ async function handler(_req: NextRequest) {
             continue;
           }
 
-          await (sb as any)
+          dbw('issue-seo-enrich', 'issue_alerts.update@238', await (sb as any)
             .from('issue_alerts')
             .update({ seo_enriched_at: new Date().toISOString() })
-            .eq('id', issue.id);
+            .eq('id', issue.id));
           try {
             await (sb as any).rpc('advance_issue_stage', {
               p_issue_id: issue.id,

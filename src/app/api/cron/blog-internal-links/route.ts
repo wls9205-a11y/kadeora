@@ -2,6 +2,7 @@ export const maxDuration = 120;
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
+import { dbw } from '@/lib/cron-db-log';
 
 /**
  * 블로그 내부링크 자동 연결 크론 v2
@@ -93,7 +94,7 @@ export async function GET(req: NextRequest) {
             .slice(0, 3)
             .map((c: any) => c.slug);
           if (fallback.length) {
-            await (sb as any).from('blog_posts').update({ related_slugs: fallback }).eq('id', post.id);
+            dbw('blog-internal-links', 'blog_posts.update@96', await (sb as any).from('blog_posts').update({ related_slugs: fallback }).eq('id', post.id));
             updated++;
           }
           continue;

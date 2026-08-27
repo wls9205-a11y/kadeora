@@ -67,3 +67,11 @@ update profiles set age_group=null, gender=null, region_text=null where is_seed;
 --    · blog_with_site_30d 는 «여기서 못 만든다» — blog_posts.apt_site_id 가 A5(#4)에서
 --      생긴다. 없는 컬럼을 참조하는 뷰는 만들 수 없고, 0 을 하드코딩하면 거짓말이 된다.
 --      A5 커밋에서 추가한다.
+
+-- ══ A2 (2026-08-27) — 관찰 ══════════════════════════════════════════════════
+-- ai_failed 1,901건(30일)이 «왜» 실패했는지 기록이 없었다. 5분류를 남긴다.
+alter table issue_alerts add column if not exists fail_reason text;
+comment on column issue_alerts.fail_reason is
+  'A2(2026-08-27) 초안 실패 5분류: model_error·parse·token_limit·duplicate·no_match.';
+-- 관찰 기준선 (30일, 2026-08-27)
+--   ai_failed 1901 · draft 452 · failed 249 · auto_failed 196 · auto 151 · duplicate_blog 84

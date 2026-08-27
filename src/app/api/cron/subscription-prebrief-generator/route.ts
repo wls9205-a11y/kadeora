@@ -20,6 +20,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { sendKakaoAlimtalk } from '@/lib/kakao-alimtalk';
 import { NotificationBellService } from '@/lib/notification-bell';
+import { dbw } from '@/lib/cron-db-log';
 
 export const maxDuration = 240;
 export const runtime = 'nodejs';
@@ -213,10 +214,10 @@ async function handler(_req: NextRequest) {
             .limit(1)
             .maybeSingle();
           if (ev) {
-            await (sb as any)
+            dbw('subscription-prebrief-generator', 'big_event_registry.update@216', await (sb as any)
               .from('big_event_registry')
               .update({ priority_score: Math.min(100, Number(ev.priority_score || 50) + 10), updated_at: new Date().toISOString() })
-              .eq('id', ev.id);
+              .eq('id', ev.id));
             const constructors = Array.isArray(ev.key_constructors) ? ev.key_constructors.join(', ') : (ev.key_constructors || '');
             factBlock = `[절대 팩트 고정] ${ev.name} · ${ev.region_sido || ''} ${ev.region_sigungu || ''} · ${ev.event_type || ''} Stage ${ev.stage} · ${ev.scale_before ?? '?'}→${ev.scale_after ?? '?'}세대 · 시공 ${constructors || '미정'}${ev.new_brand_name ? ` · 브랜드 ${ev.new_brand_name} (${ev.constructor_status || 'unconfirmed'})` : ''}`;
           }

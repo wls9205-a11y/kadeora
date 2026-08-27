@@ -20,6 +20,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyCronAuth } from '@/lib/cron-auth';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { runImagePipeline, type PostContext } from '@/lib/image-pipeline';
+import { dbw } from '@/lib/cron-db-log';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300;
@@ -90,10 +91,10 @@ async function handler(req: NextRequest) {
     }
 
     const queueIds = queueRows.map((r: any) => r.id);
-    await (admin as any)
+    dbw('blog-generate-images', 'blog_image_backfill_queue.update@93', await (admin as any)
       .from('blog_image_backfill_queue')
       .update({ status: 'in_progress', started_at: new Date().toISOString() })
-      .in('id', queueIds);
+      .in('id', queueIds));
 
     // 3) post metadata batch load
     const postIds = queueRows.map((r: any) => r.post_id).filter(Boolean);
@@ -119,23 +120,23 @@ async function handler(req: NextRequest) {
 
     for (const q of queueRows as any[]) {
       if (Date.now() - startedAt > PREEMPT_MS) {
-        await (admin as any)
+        dbw('blog-generate-images', 'blog_image_backfill_queue.update@122', await (admin as any)
           .from('blog_image_backfill_queue')
           .update({ status: 'pending' })
-          .eq('id', q.id);
+          .eq('id', q.id));
         continue;
       }
       stats.processed++;
       const post = postMap.get(q.post_id);
       if (!post) {
-        await (admin as any)
+        dbw('blog-generate-images', 'blog_image_backfill_queue.update@131', await (admin as any)
           .from('blog_image_backfill_queue')
           .update({
             status: 'failed',
             last_error: 'post_not_found',
             attempt_count: (q.attempt_count || 0) + 1,
           })
-          .eq('id', q.id);
+          .eq('id', q.id));
         stats.skipped_no_post++;
         continue;
       }
@@ -168,7 +169,7 @@ async function handler(req: NextRequest) {
         const isSuccess = pipe.storage_real > 0;
         if (isSuccess) {
           stats.completed++;
-          await (admin as any)
+          dbw('blog-generate-images', 'blog_image_backfill_queue.update@171', await (admin as any)
             .from('blog_image_backfill_queue')
             .update({
               status: 'completed',
@@ -177,17 +178,17 @@ async function handler(req: NextRequest) {
               attempt_count: (q.attempt_count || 0) + 1,
               last_error: null,
             })
-            .eq('id', q.id);
+            .eq('id', q.id));
         } else {
           stats.failed++;
-          await (admin as any)
+          dbw('blog-generate-images', 'blog_image_backfill_queue.update@183', await (admin as any)
             .from('blog_image_backfill_queue')
             .update({
               status: 'failed',
               last_error: pipe.failures.slice(0, 3).join(' | ').slice(0, 500) || 'no_images_generated',
               attempt_count: (q.attempt_count || 0) + 1,
             })
-            .eq('id', q.id);
+            .eq('id', q.id));
         }
 
         if (samples.length < 5) {
@@ -203,14 +204,14 @@ async function handler(req: NextRequest) {
       } catch (err: any) {
         stats.failed++;
         allFailures.push(`${post.id}:ex:${err?.message || ''}`.slice(0, 200));
-        await (admin as any)
+        dbw('blog-generate-images', 'blog_image_backfill_queue.update@206', await (admin as any)
           .from('blog_image_backfill_queue')
           .update({
             status: 'failed',
             last_error: (err?.message || 'unknown').slice(0, 500),
             attempt_count: (q.attempt_count || 0) + 1,
           })
-          .eq('id', q.id);
+          .eq('id', q.id));
       }
     }
 
@@ -263,7 +264,7 @@ async function finishCronLog(
 ) {
   if (!logId) return;
   try {
-    await admin
+    dbw('blog-generate-images', 'cron_logs.update@266', await admin
       .from('cron_logs')
       .update({
         status: result.errorMessage ? 'failed' : 'success',
@@ -275,7 +276,7 @@ async function finishCronLog(
         error_message: result.errorMessage || null,
         metadata: result.metadata || {},
       })
-      .eq('id', logId);
+      .eq('id', logId));
   } catch { /* ignore */ }
 }
 
