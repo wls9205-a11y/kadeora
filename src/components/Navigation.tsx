@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { Home, TrendingUp, Building2, Bell, PenSquare, LogOut, FileText, MoreHorizontal, Settings,
-  MessageSquare, MessagesSquare, BarChart3, Flame, Library, Calculator, BellRing, LayoutGrid, MapPin, Lightbulb, CalendarCheck } from 'lucide-react';
+  BarChart3, Flame, Library, Calculator, BellRing, LayoutGrid, MapPin, Lightbulb, CalendarCheck } from 'lucide-react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useAuth } from '@/components/AuthProvider';
 import { haptic } from '@/lib/haptic';
