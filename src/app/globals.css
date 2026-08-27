@@ -275,7 +275,28 @@
     --font-sans: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
     --font-serif: ui-serif, Georgia, serif;
     --font-mono: 'SF Mono', 'Consolas', 'Menlo', monospace;
-  }
+  
+    /* ── H5-D2 : 큰 제목 3단 «유동값» ──────────────────────────────────────
+       기존 --fs-xs~2xl 은 «단계값 + @media 로 갈아끼우기» 다. 큰 제목은 그 방식이
+       특히 잘 깨진다 — 브레이크포인트 사이에서 카피가 컨테이너를 넘치거나 갑자기
+       확 줄어든다. clamp() 로 폭에 따라 «연속» 으로 움직이게 한다.
+
+       그래서 이 셋은 @media(max-width:767.98px) 의 :root 재정의에 «넣지 않는다».
+       clamp 가 이미 뷰포트를 보고 있어서 중복이고, 넣으면 두 기준이 싸운다.
+
+       ⛔ 범위는 «이번 리뉴얼로 새로 쓰거나 고치는 컴포넌트» 뿐이다. 기존 인라인
+          fontSize 2,590곳 일괄 치환 금지 — S4-3 인라인 스케일링 사고 이력.
+          굵기·크기·접근성 규칙이 얽혀 있어 한 번에 손대면 원인을 못 가린다.
+
+       같이 지키는 것 (새 컴포넌트)
+         굵기  400 본문 / 500 라벨·칩 / 600 제목 / 700 희소 수치 / 800+ 금지 (TY1 사다리)
+         자간  20px+ -0.4px · 15~19px -0.2px · 14px 이하 0.  «12~13px 음수 자간 금지»
+         행간  본문 1.5 · 제목 1.25 · 히어로 카피 1.2
+         입력창 16px 하한(iOS 자동확대) · 한글 최소 12px */
+    --fs-display:  clamp(28px, 2.2vw + 20px, 44px);
+    --fs-title:    clamp(22px, 1.4vw + 16px, 30px);
+    --fs-lead:     clamp(17px, 0.6vw + 14px, 20px);
+}
 }
 @layer tokens {
   html.font-small {
@@ -286,7 +307,11 @@
     --fs-lg: 19px;
     --fs-xl: 22px;
     --fs-2xl: 28px;
-  }
+  
+    --fs-display:  clamp(24px, 2.0vw + 17px, 38px);
+    --fs-title:    clamp(19px, 1.2vw + 14px, 26px);
+    --fs-lead:     clamp(15px, 0.5vw + 12px, 17px);
+}
 }
 @layer tokens {
   html.font-medium {
@@ -297,7 +322,11 @@
     --fs-lg: 21px;
     --fs-xl: 24px;
     --fs-2xl: 32px;
-  }
+  
+    --fs-display:  clamp(28px, 2.2vw + 20px, 44px);
+    --fs-title:    clamp(22px, 1.4vw + 16px, 30px);
+    --fs-lead:     clamp(17px, 0.6vw + 14px, 20px);
+}
 }
 @layer tokens {
   html.font-large {
@@ -308,7 +337,11 @@
     --fs-lg: 24px;
     --fs-xl: 28px;
     --fs-2xl: 36px;
-  }
+  
+    --fs-display:  clamp(32px, 2.4vw + 23px, 50px);
+    --fs-title:    clamp(25px, 1.6vw + 18px, 34px);
+    --fs-lead:     clamp(19px, 0.7vw + 16px, 23px);
+}
 }
 @layer elements {
 
@@ -784,7 +817,7 @@
   body {
     background-color: var(--bg-base);
     color: var(--text-primary);
-    font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: var(--font-sans);
     font-size: 1rem;
     /* s6-3: 한글은 받침 때문에 라틴보다 글자 높이가 커서 1.5 면 줄이 붙어 보인다.
        1.7 이상은 높이가 고정된 카드에서 세로 넘침을 만든다.
