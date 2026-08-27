@@ -25,6 +25,10 @@ import AccordionEnhancer from '@/components/apt/detail/AccordionEnhancer';
 import AptKeyMetrics from '@/components/apt/detail/AptKeyMetrics';
 import SiteDetailRail from '@/components/apt/SiteDetailRail';
 import LeadForm from '@/components/apt/LeadForm';
+import RecentObservations from '@/components/apt/RecentObservations';
+import { siteEntity } from '@/lib/seo/entity';
+import FieldNote from '@/components/apt/FieldNote';
+
 import { leadKind } from '@/lib/apt/lead-eligibility';
 import { canUseHeroImage } from '@/lib/apt/hero-license';
 import { canShowPriceChange, pcArea, priceChangeDirection, PRICE_CHANGE_COLS } from '@/lib/apt/price-change';
@@ -402,6 +406,23 @@ async function fetchUnifiedData(slug: string) {
     .eq('is_published', true).eq('apt_site_id', site.id)
     .order('published_at', { ascending: false }).limit(5);
   const entityBlogs = entityBlogsR.data || [];
+
+  /* A6 — 관측 5건 + 본부장 노트 1편. 두 조회 모두 «0건이면 컴포넌트가 미렌더» 한다.
+   * ⚠️ Rule #49 — /apt/[id] 의 8개 뭉치가 504 를 낸 전례가 있어 기존 allSettled 를
+   *    늘리지 않는다. 뒤에 따로 띄우고 둘을 «같이» 기다린다. */
+  const [obsR, noteR] = await Promise.all([
+    (sb as any).from('apt_observations')
+      .select('id, kind, title, link_path, observed_at')
+      .eq('apt_site_id', site.id)
+      .order('created_at', { ascending: false }).limit(5),
+    (sb as any).from('blog_posts')
+      .select('slug, title, excerpt, published_at')
+      .eq('is_published', true).eq('category', 'field_note').eq('apt_site_id', site.id)
+      .order('published_at', { ascending: false }).limit(1).maybeSingle(),
+  ]);
+  if (obsR.error) console.error(`[apt/${slug}] observations: ${obsR.error.message?.slice(0, 160)}`);
+  const observations = obsR.data || [];
+  const fieldNote = noteR.data || null;
   const relatedPosts = postsR.status === 'fulfilled' ? (postsR.value as { data: any })?.data || [] : [];
   const nearbySites = nearbyR.status === 'fulfilled' ? (nearbyR.value as { data: any })?.data || [] : [];
   const sameBuilderSites = sameBuilderR.status === 'fulfilled' ? (sameBuilderR.value as { data: any })?.data || [] : [];
@@ -440,7 +461,7 @@ async function fetchUnifiedData(slug: string) {
     mergedRelatedBlogs = mergedRelatedBlogs.slice(0, 8);
   }
 
-  return { site, sub, unsold, redev, trades, entityBlogs, relatedBlogs: mergedRelatedBlogs, relatedPosts, nearbySites, sameBuilderSites, regionBenchmark, regionTrades, complexProfiles, name, displayName, region, sigungu, slug, analysisText, siteEvents };
+  return { site, sub, unsold, redev, trades, entityBlogs, observations, fieldNote, relatedBlogs: mergedRelatedBlogs, relatedPosts, nearbySites, sameBuilderSites, regionBenchmark, regionTrades, complexProfiles, name, displayName, region, sigungu, slug, analysisText, siteEvents };
 }
 
 // generateStaticParams 제거 — 전량 ISR on-demand (revalidate=3600)
@@ -655,7 +676,7 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
     notFound();
   }
   if (!d) notFound();
-  const { site, sub, unsold, redev, trades, entityBlogs, relatedBlogs, relatedPosts, nearbySites, sameBuilderSites, regionBenchmark, regionTrades, complexProfiles, name, displayName, region, sigungu, slug, analysisText, siteEvents: siteEventsRaw } = d!;
+  const { site, sub, unsold, redev, trades, entityBlogs, observations, fieldNote, relatedBlogs, relatedPosts, nearbySites, sameBuilderSites, regionBenchmark, regionTrades, complexProfiles, name, displayName, region, sigungu, slug, analysisText, siteEvents: siteEventsRaw } = d!;
 
   // ── V16 C · 아무것도 못 찾았으면 검색으로 보낸다 ──
   //
@@ -1086,6 +1107,10 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
         receiptEnd={sub?.rcept_endde ?? null}
       />
 
+      {/* A6 — 본부장 노트. 히어로 텍스트 블록 «아래» 다. 담당이 직접 본 것이 먼저 읽혀야
+           그 아래 자동 생성 정보의 신뢰가 선다. 0건이면 컴포넌트가 null 을 낸다. */}
+      <FieldNote note={fieldNote} />
+
       {/* Header */}
       <div style={{ marginBottom: 'var(--sp-lg)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 6 }}>
@@ -1155,6 +1180,29 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
            히어로(커밋3)로 현장을 먼저 보여준 직후가 그 경로를 여는 자리다.
            leadTypeOptions 는 위(538행 근처)에서 계산되므로 선언 순서 문제 없음.
            ⚠️ InterestRegisterHero(회원 CTA)와 인접시키지 말 것 — s7-3 결정. */}
+      {/* A6 — 관측은 리드폼 «바로 위» 다. 사실을 읽고 바로 신청으로 이어지는 자리다.
+           0건이면 컴포넌트가 스스로 null 을 낸다 — 빈 섹션을 만들지 않는다. */}
+      <RecentObservations items={observations} />
+      {/* A6 — 관측 구조화 데이터. ⛔ Article «최소형» 만 선언한다.
+          NewsArticle·Report 같은 다른 타입을 붙이지 않는다 — 관측은 기사가 아니라
+          「우리가 본 것」이고, 타입을 과하게 주장하면 리치결과가 오히려 깎인다.
+          about 은 /blog/[slug]·/apt/region/* 이 쓰는 것과 «같은 @id» 다. */}
+      {observations.length > 0 && site && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(
+          observations.map((o: any) => ({
+            '@context': 'https://schema.org',
+            '@type': 'Article',
+            headline: o.title,
+            datePublished: o.observed_at,
+            url: `${SITE_URL}${o.link_path}`,
+            author: { '@type': 'Organization', name: '카더라', url: SITE_URL },
+            ...(siteEntity({ id: site.id, slug: site.slug, name: site.name, display_name: site.display_name, region: site.region, sigungu: site.sigungu })
+              ? { about: siteEntity({ id: site.id, slug: site.slug, name: site.name, display_name: site.display_name, region: site.region, sigungu: site.sigungu }) }
+              : {}),
+          })),
+        ) }} />
+      )}
+
       {showLeadForm && site && (
         <LeadForm
           siteSlug={site.slug}

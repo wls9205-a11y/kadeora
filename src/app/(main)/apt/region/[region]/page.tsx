@@ -7,6 +7,7 @@ import { notFound } from 'next/navigation';
 import SiteThumb from '@/components/apt/SiteThumb';
 import { REGIONS } from '@/lib/regions';
 import { siteEntity } from '@/lib/seo/entity';
+import RecentObservations from '@/components/apt/RecentObservations';
 
 async function SigunguLinks({ region }: { region: string }) {
   const sb = getSupabaseAdmin();
@@ -177,7 +178,15 @@ async function fetchRegionData(region: string) {
     highestMax: Math.max(...priceData.map((p: any) => p.price_max)),
   } : null;
 
+  /* A6 — 이 지역 관측 5건. 0건이면 컴포넌트가 미렌더한다. */
+  const obsRes: any = await ((s as any).from('apt_observations')
+    .select('id, kind, title, link_path, observed_at')
+    .eq('region', region)
+    .order('created_at', { ascending: false }).limit(5));
+  if (obsRes?.error) console.error(`[apt/region/${region}] observations: ${obsRes.error.message?.slice(0, 160)}`);
+
   return {
+    observations: obsRes?.data || [],
     subscriptions: subsRes?.data || [],
     transactions: tradesRes?.data || [],
     redevelopments: redevRes?.data || [],
@@ -251,6 +260,9 @@ export default async function RegionLandingPage({ params }: Props) {
     <article style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
       {/* JSON-LD: BreadcrumbList */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"카더라","item":SITE_URL},{"@type":"ListItem","position":2,"name":"부동산","item":SITE_URL+"/apt"},{"@type":"ListItem","position":3,"name":decoded}]}) }} />
+      {/* A6 — 이 지역 관측. 사실 한 줄씩, 0건이면 미렌더. */}
+      <RecentObservations items={data.observations} />
+
       {/* JSON-LD: CollectionPage */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"CollectionPage","name":`${decoded} 부동산 종합 정보`,"description":`${decoded} 지역 청약 ${data.subscriptions.length}건, 실거래 ${data.transactions.length}건, 재개발 ${data.redevelopments.length}건, 미분양 ${data.unsolds.length}건`,"url":`${SITE_URL}/apt/region/${encodeURIComponent(decoded)}`,"isPartOf":{"@type":"WebSite","name":"카더라","url":SITE_URL},"speakable":{"@type":"SpeakableSpecification","cssSelector":["h1",".region-summary"]},"mainEntityOfPage":{"@type":"WebPage","@id":`${SITE_URL}/apt/region/${encodeURIComponent(decoded)}`},"thumbnailUrl":`${SITE_URL}/api/og-square?title=${encodeURIComponent(decoded + ' 부동산')}&category=apt`}) }} />
       {/* JSON-LD: ItemList (주요 단지) */}
