@@ -247,16 +247,18 @@ export default async function BlogPage({ searchParams }: Props) {
   const sb = getSupabaseAdmin();
   // s205-W2: blogHero (HeroCard) 제거 — 효용 0 (클릭 1건/14d).
 
-  // 카테고리 건수 + 인기글 + 인기태그 — 병렬 조회
-  const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString();
-  const [catCountsR, popularR, tagsR, subcatR] = await Promise.allSettled([
+  /* 카테고리 건수 + 인기태그 — 병렬 조회
+   *
+   * ⛔ 「인기 글」 조회를 걷어냈다(2026-08-27).
+   *    근거가 `blog_posts.view_count` 인데 그 값이 합성으로 보인다 — 실측:
+   *    발행 8,705편 중 7,702편이 >0, 평균 56.5 → 합계 약 49만.
+   *    그런데 `page_views` 테이블의 최근 30일 `/blog/` 실조회는 «2,617건» 이다.
+   *    `apt_sites.page_views` 를 「많이 보는 현장」에서 걷어낸 것과 같은 100배 괴리다.
+   *    ⚠️ 컬럼과 `blog_popular_tags` RPC 는 «남긴다». 화면에서만 뺀다 —
+   *       계측이 붙어 값이 실측이 되면 그때 되살린다(라벨만 승격).
+   */
+  const [catCountsR, tagsR, subcatR] = await Promise.allSettled([
     sb.rpc('blog_category_counts'),
-    sb.from('blog_posts')
-      .select('id, slug, title, category, view_count, cover_image')
-      .eq('is_published', true)
-      .gte('created_at', thirtyDaysAgo)
-      .order('view_count', { ascending: false })
-      .limit(5),
     pageNum === 1 && !q ? sb.rpc('blog_popular_tags', { limit_count: 20 }) : Promise.resolve({ data: [] }),
     // v4-C9(2차): 서브칩 원본. 6행짜리 집계 뷰라 가볍다.
     // types/database.ts 는 손대지 않는다(보호 대상) — 새 뷰라 생성 타입에 없어 as any 로 받는다.
@@ -274,7 +276,7 @@ export default async function BlogPage({ searchParams }: Props) {
   (catCountsRaw || []).forEach((c: any) => { countMap[c.category] = Number(c.cnt); countMap.all += Number(c.cnt); });
   const totalCount = countMap.all;
 
-  const popularPosts = popularR.status === 'fulfilled' ? popularR.value?.data : [];
+
 
   // 오늘의 추천 (카테고리별 최신 1편씩)
   let todayPicks: any[] = [];
@@ -326,11 +328,9 @@ export default async function BlogPage({ searchParams }: Props) {
   if (region) q2 = q2.eq('apt_region', region);
   if (sgg) q2 = q2.eq('apt_sigungu', sgg);
   if (q) { const sq = sanitizeSearchQuery(q, 100); if (sq) q2 = q2.or(`title.ilike.%${sq}%,excerpt.ilike.%${sq}%`); }
-  if (sort === 'popular') {
-    q2 = q2.order('view_count', { ascending: false });
-  } else {
-    q2 = q2.order('created_at', { ascending: false });
-  }
+  // ⛔ sort=popular 를 없앴다(위 주석 — view_count 가 합성값이다). 최신순만 남는다.
+  //    ⚠️ 옛 `?sort=popular` 링크가 들어와도 «에러 없이» 최신순으로 떨어진다.
+  q2 = q2.order('created_at', { ascending: false });
   q2 = q2.range((pageNum - 1) * perPage, pageNum * perPage - 1);
   const { data: posts, count: filteredCount } = await q2;
 
@@ -391,8 +391,7 @@ export default async function BlogPage({ searchParams }: Props) {
     // 목록과 «같은» 모집단이어야 한다 — 조건이 갈리면 다음 페이지가 어긋난다.
     if (region) nq = nq.eq('apt_region', region);
     if (sgg) nq = nq.eq('apt_sigungu', sgg);
-    if (sort === 'popular') nq = nq.order('view_count', { ascending: false });
-    else nq = nq.order('created_at', { ascending: false });
+    nq = nq.order('created_at', { ascending: false });   // 목록과 «같은» 정렬
     nq = nq.range(pageNum * perPage, pageNum * perPage + 4);
     const { data: np } = await nq;
     nextPagePosts = np || [];
@@ -497,9 +496,8 @@ export default async function BlogPage({ searchParams }: Props) {
     })),
   } : null;
 
-  // v3 커밋5 · 큐레이션 3건 — 인기글 우선, 없으면 최신 3편.
-  // ⚠️ 여기 올린 3편을 아래 목록에서 빼지 않는다 (중복 허용, 이름 매칭 우회 금지).
-  const curated: any[] = ((popularPosts ?? []).length >= 3 ? (popularPosts ?? []) : (posts ?? [])).slice(0, 3);
+  // ⛔ 「인기글 우선」 이던 큐레이션 선정을 걷어냈다 — 근거 컬럼이 합성값이다(위 주석).
+  //    H5-3 이후 승격은 «목록의 첫 글» 하나뿐이라(promoted) 이 배열은 더 쓰지 않는다.
 
   return (
     <div className="kd-list" style={{ padding: '0 var(--sp-lg) 28px' }}>
@@ -525,7 +523,7 @@ export default async function BlogPage({ searchParams }: Props) {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <SectionShareButton section="blog" label="투자 정보 블로그 7,600편+" pagePath="/blog" />
-          <Link href="/blog?sort=popular" className="touch-target" style={{ width: 32, height: 32, borderRadius: 'var(--radius-sm)', background: 'var(--bg-surface)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', fontSize: 14 }}>🔥</Link>
+
         </div>
       </div>
 
@@ -773,7 +771,7 @@ export default async function BlogPage({ searchParams }: Props) {
             color: 'var(--text-secondary)',
           }}
         >
-          정렬 · 세부 분류 · 인기 글
+          세부 분류
         </summary>
       {/* 서브카테고리 칩 */}
       {subChips && (
@@ -805,9 +803,9 @@ export default async function BlogPage({ searchParams }: Props) {
       {/* 정렬 + 인기태그 인라인 */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
         <div style={{ display: 'flex', gap: 'var(--sp-xs)' }}>
+          {/* ⛔ 「인기순」을 뺐다 — 근거 컬럼이 합성값이다(위 주석). 최신순만 남는다. */}
           {[
             { key: 'latest', label: '최신순' },
-            { key: 'popular', label: '인기순' },
           ].map(s => (
             <Link key={s.key} href={`/blog?${category !== 'all' ? `category=${category}&` : ''}sort=${s.key}${q ? `&q=${q}` : ''}`}
               style={{
@@ -833,25 +831,9 @@ export default async function BlogPage({ searchParams }: Props) {
         )}
       </div>
 
-      {/* 인기글 — 컴팩트 한 줄 */}
-      {pageNum === 1 && !q && category === 'all' && (popularPosts ?? []).length > 0 && (
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '10px 12px', marginBottom: 'var(--sp-sm)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-            <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)' }}>🔥 인기 글</span>
-            <Link href="/blog?sort=popular" style={{ fontSize: 10, color: 'var(--text-tertiary)', textDecoration: 'none', fontWeight: 600 }}>전체보기 →</Link>
-          </div>
-          {(popularPosts ?? []).slice(0, 3).map((p: any, i: number) => (
-            <Link key={p.id} href={`/blog/${p.slug}`} className="kd-feed-card" style={{ display: 'flex', alignItems: 'center', gap: 6, textDecoration: 'none', color: 'inherit', padding: '4px 0', borderBottom: i < 2 ? '1px solid var(--border)' : 'none' }}>
-              <span style={{ fontSize: 11, fontWeight: 600, color: i === 0 ? 'var(--brand)' : 'var(--text-tertiary)', width: 16, textAlign: 'center', flexShrink: 0 }}>{i + 1}</span>
-              <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</span>
-              <span style={{ fontSize: 10, color: CAT_COLORS[p.category] || 'var(--text-tertiary)', fontWeight: 500, flexShrink: 0 }}>
-                {POST_CAT_LABEL[p.category] || p.category}
-              </span>
-              <span style={{ fontSize: 10, color: 'var(--text-tertiary)', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>👀{p.view_count}</span>
-            </Link>
-          ))}
-        </div>
-      )}
+      {/* ⛔ 「🔥 인기 글」 블록을 걷어냈다 — 근거 컬럼이 합성값이다(위 주석).
+           계측이 붙어 실측이 되면 그때 되살린다. */}
+
       </details>
 
       {/* 인기 시리즈 (SEO 내부링크) */}
@@ -951,18 +933,10 @@ export default async function BlogPage({ searchParams }: Props) {
 
       {/* v3 커밋5 · 데스크탑 우측 레일 (≥1024px). '시리즈' 패널은 모바일에서
            카테고리 탭의 시리즈 링크와 중복이라 레일 안에만 둔다. */}
-      {/* v7-D2 · 데스크탑 우측 레일 (≥1024px). ①인기 글 ②시리즈 ③태그 ④서비스.
-           순서를 지시대로 인기 글 먼저로 바꿨다 — 시리즈보다 먼저 눌린다.
+      {/* v7-D2 · 데스크탑 우측 레일 (≥1024px). ①시리즈 ②태그 ③서비스.
+           ⛔ 「인기 글」 패널을 걷어냈다 — 근거 컬럼이 합성값이다(위 주석).
            전부 이미 받은 데이터라 새 조회 0건. */}
       <aside className="kd-list-rail" aria-label="블로그 요약">
-        {(popularPosts ?? []).length > 0 && (
-          <div className="kd-rail-panel">
-            <h2>인기 글</h2>
-            {(popularPosts ?? []).slice(0, 6).map((p: any) => (
-              <Link key={p.id} href={`/blog/${p.slug}`}>{p.title}</Link>
-            ))}
-          </div>
-        )}
         {topSeries.length > 0 && (
           <div className="kd-rail-panel">
             <h2>시리즈</h2>
