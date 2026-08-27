@@ -68,7 +68,11 @@ export default function SiteDetailRail({
     <>
       {/* ① 리드폼 진입 */}
       {showLeadForm && (
-        <div style={{ ...panel, borderColor: 'var(--brand)', background: 'var(--brand-bg)' }}>
+        /* ⚠️ H6-6 — 배경을 «불투명» 으로 둔다. --brand-bg 는 rgba(...,0.08) 이라
+           뒤에 무엇이 깔리느냐에 따라 글자가 읽히기도 안 읽히기도 했다(히어로 위에서
+           실제로 안 읽혔다). 반투명 카드는 어떤 배경 위에 놓일지 보장할 수 없다.
+           brand 색은 «테두리로만» 남긴다 — 정체성은 유지하고 가독성은 배경이 책임진다. */
+        <div style={{ ...panel, borderColor: 'var(--brand)', background: 'var(--bg-surface)' }}>
           <p style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 4px', lineHeight: 1.4, wordBreak: 'keep-all' }}>
             {siteName} {leadCopy(lifecycleStage).band.replace(' · 무료', '')}
           </p>

@@ -105,23 +105,23 @@ export default function HeroSearch({
   return (
     <section
       ref={ref}
-      className="kd-hero"
+      className="kd-home-hero"
       data-hidden={hidden ? 'true' : undefined}
       // inert 는 React 19 에서 boolean 프롭이다. 숨은 동안 포커스·읽기를 통째로 막는다.
       inert={hidden}
       aria-label="현장 검색"
     >
-      <div className="kd-hero__inner">
+      <div className="kd-home-hero__inner">
         {/* 카피 3줄 — 셋째 줄만 골드. 상단 1/3 안에 들어가야 대비가 성립한다. */}
-        <h1 className="kd-hero__copy">
+        <h1 className="kd-home-hero__copy">
           아직 시작 안 한 현장까지
           <br />
           분양 소식을
           <br />
-          <span className="kd-hero__gold">가장 먼저</span>
+          <span className="kd-home-hero__gold">가장 먼저</span>
         </h1>
 
-        <div className="kd-hero__search">
+        <div className="kd-home-hero__search">
           <UniversalSearchBar
             variant="hero"
             tone="dark"
@@ -134,17 +134,17 @@ export default function HeroSearch({
         </div>
 
         {siteCount > 0 && (
-          <p className="kd-hero__meta">현장 {siteCount.toLocaleString('ko-KR')}곳</p>
+          <p className="kd-home-hero__meta">현장 {siteCount.toLocaleString('ko-KR')}곳</p>
         )}
 
         {/* 데이터 띠 — 히어로 하단. ⛔ 골드를 쓰지 않는다(그라디언트 끝점 3.27).
             흰 / --brand-navy-mid 단색은 10.36 이다. */}
         {stats.length > 0 && (
-          <div className="kd-hero__stats">
+          <div className="kd-home-hero__stats">
             {stats.map((s) => (
-              <a key={s.label} href={s.href} className="kd-hero__stat">
-                <span className="kd-hero__stat-v">{s.value}</span>
-                <span className="kd-hero__stat-l">{s.label}</span>
+              <a key={s.label} href={s.href} className="kd-home-hero__stat">
+                <span className="kd-home-hero__stat-v">{s.value}</span>
+                <span className="kd-home-hero__stat-l">{s.label}</span>
               </a>
             ))}
           </div>

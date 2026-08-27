@@ -411,9 +411,16 @@
     .kd-detail-rail {
       display: block;
       min-width: 0;
-      /* 헤더(45) + 점프바(57) + 여유 16 */
-      position: sticky;
-      top: 118px;
+      /* 이 화면의 레일이 멈추는 자리. 헤더 45 + 점프바 57 + 여유 16 = 118.
+         ⚠️ /apt 목록에는 점프바가 «없어» 값이 다르다(61). 그래서 상수를 공유
+            클래스에 박지 않고 각 화면이 «자기 값을» 준다. */
+      --rail-top: 118px;
+      /* ⚠️ H6-6 — sticky 를 «여기서 뺐다». 안쪽 .kd-rail-sticky(screens.css)와
+         이중으로 걸려 있었다. 중첩 sticky 는 안쪽의 top 이 바깥 상자에 갇혀
+         무효가 되는데, 안쪽 max-height 는 자기 top 을 기준으로 계산돼
+         레일 스크롤 상자가 뷰포트 밖으로 삐져나왔다.
+         ⛔ 여기에 position 을 «되돌리지 말 것». 고정은 .kd-rail-sticky 한 곳뿐이다
+            (그 클래스는 /apt 목록에서도 쓴다 — 그래서 그쪽을 남겼다). */
     }
     /* 레일이 대신하는 본문 블록은 2단에서 숨는다 (같은 내용 두 벌 방지) */
     .kd-lg-hide { display: none !important; }
@@ -505,7 +512,9 @@
       gap: 24px;
       align-items: start;
     }
-    .kd-list-rail { display: block; min-width: 0; position: sticky; top: 61px; }
+    /* ⚠️ H6-6 — 여기도 sticky 를 뺐다. 안쪽 .kd-rail-sticky 와 이중이었다.
+       점프바가 없는 화면이라 멈추는 자리는 헤더 45 + 여유 16 = 61 이다. */
+    .kd-list-rail { display: block; min-width: 0; --rail-top: 61px; }
   }
 
   /* 레일 패널. '관련 분석'·'시리즈'·'테마' 는 모바일에서 하단 탭과 중복이라 숨긴다
