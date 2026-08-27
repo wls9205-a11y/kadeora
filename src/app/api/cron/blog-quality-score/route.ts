@@ -120,7 +120,13 @@ export async function GET(req: NextRequest) {
     const sb = getSupabaseAdmin();
     const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString();
 
-    // 평가 대상: 비공개 + (미평가 OR 30일 경과)
+    /* 평가 대상: 비공개 + (미평가 OR 30일 경과)
+     *
+     * ⚠️ A3(2026-08-27) — 지시서는 `quality_checked_at < published_at` 증분을 요구했으나
+     *    PostgREST 는 «컬럼 대 컬럼» 비교를 지원하지 않는다. 표현할 방법이 없다.
+     *    아래 조건이 이미 증분이다(미평가 OR 30일 경과) — 매번 전량을 훑지 않는다.
+     *    주기를 매시 → 하루 1회(0 2 * * *)로 낮춘 것으로 부하 목표는 달성된다.
+     */
     const { data: posts, error } = await (sb as any)
       .from('blog_posts')
       .select('id, title, content, content_length, excerpt, meta_description, cover_image, image_alt, category, tags, related_slugs, seo_tier, seo_score, data_date, rewritten_at, created_at')

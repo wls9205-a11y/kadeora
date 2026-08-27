@@ -53,10 +53,6 @@
       "schedule": "0 7 * * 1-5"
     },
     {
-      "path": "/api/cron/stock-theme-daily",
-      "schedule": "50 6 * * 2,4"
-    },
-    {
       "path": "/api/cron/exchange-rate",
       "schedule": "30 0 * * 1-5"
     },
@@ -101,14 +97,6 @@
       "schedule": "0 3 1 * *"
     },
     {
-      "path": "/api/cron/stock-news-crawl",
-      "schedule": "15 8 * * 1-5"
-    },
-    {
-      "path": "/api/cron/stock-flow-crawl",
-      "schedule": "45 7 * * 2,4"
-    },
-    {
       "path": "/api/cron/apt-content-fill",
       "schedule": "40 3 * * *"
     },
@@ -119,10 +107,6 @@
     {
       "path": "/api/cron/purge-withdrawn-consents",
       "schedule": "30 6 * * *"
-    },
-    {
-      "path": "/api/cron/indexnow-mass",
-      "schedule": "0 */6 * * *"
     },
     {
       "path": "/api/cron/refresh-trending",
@@ -141,10 +125,6 @@
       "schedule": "0 4,12,20 * * *"
     },
     {
-      "path": "/api/cron/batch-rewrite-poll",
-      "schedule": "*/10 * * * *"
-    },
-    {
       "path": "/api/cron/apt-analysis-gen",
       "schedule": "5 */6 * * *"
     },
@@ -157,16 +137,8 @@
       "schedule": "0 4 * * *"
     },
     {
-      "path": "/api/cron/batch-analysis-poll",
-      "schedule": "*/10 * * * *"
-    },
-    {
       "path": "/api/cron/analysis-refresh",
       "schedule": "0 3 * * 0"
-    },
-    {
-      "path": "/api/cron/indexnow-new-content",
-      "schedule": "9 */4 * * *"
     },
     {
       "path": "/api/cron/stock-fundamentals-kr",
@@ -182,11 +154,11 @@
     },
     {
       "path": "/api/cron/collect-site-images",
-      "schedule": "22 * * * *"
+      "schedule": "0 4 * * *"
     },
     {
       "path": "/api/cron/apt-image-crawl",
-      "schedule": "15 * * * *"
+      "schedule": "0 4 * * *"
     },
     {
       "path": "/api/cron/batch-cluster-submit",
@@ -306,7 +278,7 @@
     },
     {
       "path": "/api/cron/blog-quality-score",
-      "schedule": "30 * * * *"
+      "schedule": "0 2 * * *"
     },
     {
       "path": "/api/cron/blog-auto-publish",
@@ -317,10 +289,6 @@
       "schedule": "*/15 0-9 * * 1-5"
     },
     {
-      "path": "/api/cron/stock-flow-signals",
-      "schedule": "30 7 * * 2,4"
-    },
-    {
       "path": "/api/cron/macro-event-detect",
       "schedule": "30 11 * * 0-5"
     },
@@ -329,16 +297,16 @@
       "schedule": "10 * * * *"
     },
     {
-      "path": "/api/cron/naver-blog-content",
-      "schedule": "30 6 * * *"
-    },
-    {
       "path": "/api/cron/apt-card-build",
-      "schedule": "*/10 * * * *"
+      "schedule": "0 * * * *"
     },
     {
       "path": "/api/cron/observe",
       "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/batch-poll",
+      "schedule": "*/10 * * * *"
     }
   ],
   "headers": [

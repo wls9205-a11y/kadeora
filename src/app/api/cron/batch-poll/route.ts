@@ -140,7 +140,44 @@ async function handler(req: NextRequest) {
     summary.push({ batch_id: job.batch_id, applied, failed });
   }
 
-  return NextResponse.json({ ok: true, polled: jobs.length, summary });
+  /* ══ A3 병합 — 폴러 5개를 «한 스케줄» 로 ══════════════════════════════════
+   *
+   * 원래 batch-rewrite-poll · batch-analysis-poll · blog-backfill-poll ·
+   * blog-meta-rewrite-poll · batch-poll 이 각자 스케줄을 갖고 있었다.
+   * 전부 Anthropic Batch 결과를 기다리는 같은 종류의 일인데 스케줄만 5개였다.
+   *
+   * ⚠️ 넷의 «로직을 합치지 않았다». 세 테이블(rewrite_batches · blog_image_batch ·
+   *    blog_batch_jobs)에 걸친 620줄이라, 합치면 그 자체가 새 버그 면이 된다.
+   *    대신 여기서 «불러 준다» — 라우트는 그대로 살아 있고 스케줄만 하나가 된다.
+   *    되돌리려면 이 블록만 걷어내고 스케줄 넷을 되살리면 된다.
+   *
+   * ⚠️ 순차로 부른다. 병렬로 부르면 같은 Anthropic 배치를 넷이 동시에 조회해
+   *    레이트리밋에 걸린다. 각자 ms 단위라 순차로도 충분하다.
+   * ⚠️ 하나가 실패해도 «나머지를 계속» 부른다. 그리고 실패를 삼키지 않는다.
+   */
+  const FANOUT = [
+    'batch-rewrite-poll',
+    'batch-analysis-poll',
+    'blog-backfill-poll',
+    'blog-meta-rewrite-poll',
+  ];
+  const base = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
+  const fanout: Record<string, string> = {};
+  for (const name of FANOUT) {
+    try {
+      const r = await fetch(`${base}/api/cron/${name}`, {
+        headers: { Authorization: `Bearer ${process.env.CRON_SECRET}` },
+        signal: AbortSignal.timeout(45000),
+      });
+      fanout[name] = r.ok ? 'ok' : `http_${r.status}`;
+      if (!r.ok) console.error(`[batch-poll] fanout ${name} → ${r.status}`);
+    } catch (e: any) {
+      fanout[name] = 'error';
+      console.error(`[batch-poll] fanout ${name}: ${String(e?.message ?? e).slice(0, 160)}`);
+    }
+  }
+
+  return NextResponse.json({ ok: true, polled: jobs.length, summary, fanout });
 }
 
 export const GET = handler;
