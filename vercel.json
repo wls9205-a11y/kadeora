@@ -541,29 +541,8 @@
     "src/app/api/cron/dart-*/*.ts": {
       "maxDuration": 120
     },
-    "src/app/api/cron/us-*/*.ts": {
-      "maxDuration": 120
-    },
-    "src/app/api/cron/stock-flow-signals/*.ts": {
-      "maxDuration": 120
-    },
-    "src/app/api/cron/krx-short-selling/*.ts": {
-      "maxDuration": 120
-    },
-    "src/app/api/cron/earnings-krx-realtime/*.ts": {
-      "maxDuration": 120
-    },
     "src/app/api/cron/macro-event-detect/*.ts": {
       "maxDuration": 60
-    },
-    "src/app/api/cron/ipo-daily-update/*.ts": {
-      "maxDuration": 60
-    },
-    "src/app/api/cron/stock-news-crawl/*.ts": {
-      "maxDuration": 120
-    },
-    "src/app/api/cron/stock-desc-gen/*.ts": {
-      "maxDuration": 120
     },
     "src/app/api/cron/apt-content-fill/*.ts": {
       "maxDuration": 120
@@ -580,29 +559,14 @@
     "src/app/api/cron/crawl-*/*.ts": {
       "maxDuration": 300
     },
-    "src/app/api/cron/collect-site-*/*.ts": {
-      "maxDuration": 300
-    },
-    "src/app/api/cron/collect-complex-*/*.ts": {
-      "maxDuration": 300
-    },
     "src/app/api/temp-bulk-img/**/*.ts": {
       "maxDuration": 300
-    },
-    "src/app/api/cron/indexnow-mass/*.ts": {
-      "maxDuration": 120
     },
     "src/app/(main)/**/*.tsx": {
       "maxDuration": 30
     },
     "src/app/admin/**/*.tsx": {
       "maxDuration": 30
-    },
-    "src/app/api/cron/naver-complex-sync/*.ts": {
-      "maxDuration": 120
-    },
-    "src/app/api/cron/naver-blog-content/*.ts": {
-      "maxDuration": 300
     },
     "src/app/api/cron/naver-sc-sync/*.ts": {
       "maxDuration": 120
@@ -613,16 +577,7 @@
     "src/app/api/cron/auto-verify-households/*.ts": {
       "maxDuration": 120
     },
-    "src/app/api/cron/batch-rewrite-submit/*.ts": {
-      "maxDuration": 300
-    },
-    "src/app/api/cron/batch-rewrite-poll/*.ts": {
-      "maxDuration": 300
-    },
     "src/app/api/cron/blog-quality-prune/*.ts": {
-      "maxDuration": 120
-    },
-    "src/app/api/cron/blog-restore-*/*.ts": {
       "maxDuration": 120
     },
     "src/app/api/cron/blog-data-update/*.ts": {
@@ -649,14 +604,17 @@
     "src/app/api/admin/marketing/kakao/send/route.ts": {
       "maxDuration": 60
     },
-    "src/app/api/cron/crawl-apt-resale/*.ts": {
-      "maxDuration": 300
-    },
     "src/app/api/cron/observe/*.ts": {
       "maxDuration": 120
     },
     "src/app/api/cron/stage-derive/*.ts": {
       "maxDuration": 120
+    },
+    "src/app/api/cron/collect-*/*.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/cron/batch-rewrite-*/*.ts": {
+      "maxDuration": 300
     }
   }
 }
