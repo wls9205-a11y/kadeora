@@ -1,277 +1,286 @@
-/* ========================================
-   블로그 상세 레이아웃 — 단일 컬럼
-   ======================================== */
-.blog-detail-layout {
-  max-width: 780px;
-  margin: 0 auto;
-  padding: 0 16px;
-  overflow-x: hidden;
-  word-break: break-word;
-  overflow-wrap: break-word;
-}
-.blog-toc-inline { display: block; }
-
-/* ========================================
-   블로그 본문 마크다운 — 가독성 최적화
-   ======================================== */
-
-/* ── 컨테이너 타이포 ──
-   본문 타이포(font-size·line-height) 정의는 이 파일 한 곳에만 둔다.
-   layout.tsx 가 globals.css → components.css → blog.css 순으로 로드하므로
-   동일 특이도에서는 언제나 이 파일이 이긴다. globals.css 에 같은 선언을 남겨두면
-   "고쳤는데 안 바뀐다" 가 반복된다 (실제로 그래서 본문 색 수정이 세 번 헛돌았다). */
-.blog-content { font-size: 16.5px; line-height: 2.05; letter-spacing: -0.1px; word-break: keep-all; overflow-wrap: break-word; color: var(--text-secondary); }
-
-/* ── 제목 ── */
-.blog-content h1 { font-size: var(--fs-2xl, 22px); font-weight: 900; margin: 28px 0 16px; color: var(--text-primary); word-break: keep-all; letter-spacing: -0.5px; line-height: 1.4; }
-/* 첫 H1은 숨김 (페이지 상단에 이미 제목 표시) */
-.blog-content > h1:first-child { display: none; }
-/* border-top: none — globals.css 가 h2 에 상단 구분선을 따로 넣고 있었다.
-   여기서 하단선을 되살리면 위아래 두 줄이 되므로 상단선을 끄고 하단선 한 벌로 통일한다. */
-.blog-content h2 { font-size: 21px; font-weight: 800; margin: 36px 0 14px; color: var(--text-primary); border-top: none; padding-top: 0; border-bottom: 1px solid var(--border); padding-bottom: 8px; word-break: keep-all; letter-spacing: -0.3px; line-height: 1.45; }
-.blog-content h3 { font-size: 18px; font-weight: 700; margin: 28px 0 10px; color: var(--text-primary); word-break: keep-all; letter-spacing: -0.2px; line-height: 1.45; }
-/* 첫 h2는 상단 margin 축소 */
-.blog-content h2:first-child { margin-top: 0; }
-
-/* ── 본문 텍스트 ── */
-.blog-content p { margin: 16px 0; line-height: 1.9; overflow-wrap: break-word; word-break: break-word; color: var(--text-secondary); font-size: 16px; letter-spacing: -0.1px; }
-.blog-content strong { color: var(--text-primary); font-weight: 700; }
-.blog-content p:empty { display: none; }
-.blog-content > div:empty { display: none; }
-
-/* ── 링크 ── */
-.blog-content a { color: var(--brand); text-decoration: none; font-weight: 600; border-bottom: 1px solid rgba(59,123,246,0.2); transition: border-color 0.15s; }
-.blog-content a:hover { border-color: var(--brand); }
-
-/* ── 리스트 ── */
-.blog-content ul, .blog-content ol { padding-left: 22px; margin: 14px 0; }
-.blog-content li { margin: 8px 0; line-height: 1.85; color: var(--text-secondary); font-size: 15px; }
-.blog-content li::marker { color: var(--brand); }
-
-/* ── 구분선 ── */
-.blog-content hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
-
-/* ── 테이블 — 가독성 강화 ── */
-.blog-content table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: var(--fs-sm, 14px); table-layout: auto; }
-.blog-content thead { background: var(--bg-surface); }
-.blog-content thead th { font-weight: 700; padding: 12px 14px; border: 1px solid var(--border); text-align: left; word-break: keep-all; color: var(--text-primary); font-size: var(--fs-sm, 14px); white-space: nowrap; }
-.blog-content th { font-weight: 700; padding: 12px 14px; border: 1px solid var(--border); text-align: left; word-break: keep-all; }
-.blog-content td { padding: 12px 14px; border: 1px solid var(--border); word-break: break-word; line-height: 1.6; color: var(--text-secondary); }
-.blog-content td:first-child { font-weight: 600; color: var(--text-primary); white-space: nowrap; }
-.blog-content tr:nth-child(even) { background: var(--bg-hover); }
-.blog-content tr:hover { background: rgba(59,123,246,0.03); }
-
-/* ── 인용문 ── */
-.blog-content blockquote { border-left: 4px solid var(--brand); padding: 14px 18px; color: var(--text-secondary); font-size: var(--fs-base, 15px); margin: 24px 0; background: linear-gradient(135deg, var(--bg-hover) 0%, rgba(37,99,235,0.04) 100%); border-radius: 0 var(--radius-md) var(--radius-md) 0; font-style: italic; line-height: 1.8; }
-.blog-content blockquote p { margin: 4px 0; }
-.blog-content blockquote strong { color: var(--text-primary); }
-
-/* ── 코드 블록 ── */
-.blog-content code {
-  background: var(--bg-hover);
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 0.88em;
-  font-family: var(--font-mono);
-  color: var(--accent-purple);
-  border: 1px solid var(--border);
-}
-.blog-content pre {
-  background: var(--bg-sunken);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 16px 20px;
-  overflow-x: auto;
-  margin: 20px 0;
-  -webkit-overflow-scrolling: touch;
-}
-.blog-content pre code {
-  background: none;
-  padding: 0;
-  border: none;
-  font-size: var(--fs-sm);
-  color: var(--text-primary);
-  line-height: 1.6;
-}
-
-/* ── 이미지 + 캡션 ── */
-.blog-content img {
-  max-width: 100%;
-  height: auto;
-  border-radius: var(--radius-md);
-  margin: 20px 0;
-}
-.blog-content img[alt]:not([src]),
-.blog-content img[src=''],
-.blog-content img:not([src]) {
-  display: none;
-}
-.blog-content figure { margin: 24px 0; text-align: center; }
-.blog-content figcaption { font-size: var(--fs-xs); color: var(--text-tertiary); margin-top: 8px; font-style: italic; }
-
-/* ── 취소선 오류 방지 ── */
-.blog-content del { text-decoration: none; }
-
-/* ── FAQ Q&A 스타일 (H3으로 다운그레이드된 Q/A) ── */
-.blog-content h3[id^="q-"],
-.blog-content h3[id^="q."] {
-  border-left: 3px solid var(--accent-blue);
-  background: rgba(59,123,246,0.04);
-  padding: 10px 14px;
-  border-radius: 0 var(--radius-md) var(--radius-md) 0;
-  font-size: var(--fs-base, 15px);
-  margin: 20px 0 8px;
-}
-
-/* ── S1: 라이트 단일 모드 — 색상은 globals.css :root 토큰이 담당 ── */
-
-/* ── 모바일 가독성 ── */
-@media (max-width: 480px) {
-  .blog-content h2 { font-size: 19px; margin: 28px 0 12px; }
-  .blog-content h3 { font-size: 16px; margin: 22px 0 8px; }
-  .blog-content p { font-size: 15px; line-height: 1.85; }
-  .blog-content li { font-size: 14px; }
-  .blog-content th, .blog-content td { padding: 8px 10px; font-size: 13px; }
-}
-
-/* 글로벌 카드 hover 효과 */
-.kd-card-hover { transition: border-color var(--transition-fast), background var(--transition-fast); }
-@media (hover: hover) {
-  .kd-card-hover:hover { border-color: var(--border-strong); background: var(--bg-hover); }
-}
-@media (hover: none) {
-  .kd-card-hover:active { background: var(--bg-hover); }
-}
-
-/* focus-visible 전역 */
-*:focus-visible {
-  outline: 2px solid var(--brand);
-  outline-offset: 2px;
-  border-radius: 4px;
-}
-
-/* 피드 카드 hover */
-.kd-feed-card { transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease; }
-@media (hover: hover) {
-  .kd-feed-card:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,0.12); border-color: var(--brand) !important; }
-}
-@media (hover: none) {
-  .kd-feed-card:active { transform: scale(0.98); opacity: 0.9; }
-}
-
-/* 카드 등장 stagger 애니메이션 */
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.animate-fadeIn { animation: fadeInUp 0.3s ease both; }
-.animate-fadeIn:nth-child(1) { animation-delay: 0s; }
-.animate-fadeIn:nth-child(2) { animation-delay: 0.03s; }
-.animate-fadeIn:nth-child(3) { animation-delay: 0.06s; }
-.animate-fadeIn:nth-child(4) { animation-delay: 0.09s; }
-.animate-fadeIn:nth-child(5) { animation-delay: 0.12s; }
-.animate-fadeIn:nth-child(n+6) { animation-delay: 0.15s; }
-
-/* 좋아요/관심 bounce 애니메이션 */
-@keyframes likeBounce {
-  0% { transform: scale(1); }
-  30% { transform: scale(1.3); }
-  50% { transform: scale(0.9); }
-  70% { transform: scale(1.1); }
-  100% { transform: scale(1); }
-}
-.animate-like { animation: likeBounce 0.4s ease; }
-
-/* 스켈레톤 shimmer */
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-.skeleton-shimmer {
-  background: linear-gradient(90deg, var(--bg-hover) 25%, var(--bg-active) 50%, var(--bg-hover) 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s ease infinite;
-}
-
-
-/* ═══ 카드 리스팅 그리드 (기본 1열) ═══ */
-.listing-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 6px;
-}
-.listing-grid > * {
-  min-width: 0;
-  overflow: hidden;
-}
-/* 주식 전용 2열 그리드 */
-.listing-grid-2col {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 6px;
-}
-.listing-grid-2col > * {
-  min-width: 0;
-  overflow: hidden;
-}
-@media (max-width: 320px) {
-  .listing-grid-2col { grid-template-columns: 1fr; }
-}
-
-/* ── v3 커밋6 · 블로그 상세 데스크탑 2단 ──────────────────────
-   목차를 우측 레일로 빼 본문 폭을 확보한다. 모바일은 <details> 접이식. */
-
-.blog-detail-main { min-width: 0; }
-/* 레일은 모바일에서도 DOM 에 남지만 여기서는 접이식 목차만 보인다 — 아래 참조 */
-.blog-detail-rail { display: none; }
-
-/* 순수 앵커 목차의 착지 위치. Navigation <header> 45 + 여유. */
-.blog-content h2,
-.blog-content h3 { scroll-margin-top: 60px; }
-
-.blog-toc-details {
-  margin: 0 0 var(--sp-lg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  background: var(--bg-surface);
-  padding: 0 12px;
-}
-.blog-toc-details > summary {
-  min-height: 44px;
-  display: flex;
-  align-items: center;
-  font-size: 12.5px;
-  font-weight: 700;
-  color: var(--text-primary);
-  cursor: pointer;
-  list-style: none;
-}
-.blog-toc-details > summary::-webkit-details-marker { display: none; }
-.blog-toc-details > summary::after {
-  content: '▾';
-  margin-left: auto;
-  font-size: 11px;
-  color: var(--text-tertiary);
-}
-.blog-toc-details[open] > summary::after { content: '▴'; }
-.blog-toc-details > nav { padding: 0 0 10px; border-top: 1px solid var(--border); }
-
-@media (min-width: 1024px) {
+/* ⚠️ 레이어 «순서» 선언은 파일마다 반복한다. Next 가 CSS 를 여러 청크로 쪼개고
+   선언문이 든 청크가 «먼저 로드된다는 보장이 없다». 순서가 첫 사용 순으로
+   정해지면 레이어 도입의 의미가 사라진다. 반복 선언은 멱등이라 안전하다.
+   근거·이름 개명 이유는 globals.css 최상단 주석. */
+@layer reset, tokens, elements, patterns, screens, overrides;
+/* H5-D3 — 네이티브 @layer. 레이어 이름 근거는 globals.css 최상단 주석. */
+@layer patterns {
+  /* ========================================
+     블로그 상세 레이아웃 — 단일 컬럼
+     ======================================== */
   .blog-detail-layout {
-    max-width: var(--container-grid);
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 0 16px;
+    overflow-x: hidden;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+  .blog-toc-inline { display: block; }
+
+  /* ========================================
+     블로그 본문 마크다운 — 가독성 최적화
+     ======================================== */
+
+  /* ── 컨테이너 타이포 ──
+     본문 타이포(font-size·line-height) 정의는 이 파일 한 곳에만 둔다.
+     layout.tsx 가 globals.css → components.css → blog.css 순으로 로드하므로
+     동일 특이도에서는 언제나 이 파일이 이긴다. globals.css 에 같은 선언을 남겨두면
+     "고쳤는데 안 바뀐다" 가 반복된다 (실제로 그래서 본문 색 수정이 세 번 헛돌았다). */
+  .blog-content { font-size: 16.5px; line-height: 2.05; letter-spacing: -0.1px; word-break: keep-all; overflow-wrap: break-word; color: var(--text-secondary); }
+
+  /* ── 제목 ── */
+  .blog-content h1 { font-size: var(--fs-2xl, 22px); font-weight: 900; margin: 28px 0 16px; color: var(--text-primary); word-break: keep-all; letter-spacing: -0.5px; line-height: 1.4; }
+  /* 첫 H1은 숨김 (페이지 상단에 이미 제목 표시) */
+  .blog-content > h1:first-child { display: none; }
+  /* border-top: none — globals.css 가 h2 에 상단 구분선을 따로 넣고 있었다.
+     여기서 하단선을 되살리면 위아래 두 줄이 되므로 상단선을 끄고 하단선 한 벌로 통일한다. */
+  .blog-content h2 { font-size: 21px; font-weight: 800; margin: 36px 0 14px; color: var(--text-primary); border-top: none; padding-top: 0; border-bottom: 1px solid var(--border); padding-bottom: 8px; word-break: keep-all; letter-spacing: -0.3px; line-height: 1.45; }
+  .blog-content h3 { font-size: 18px; font-weight: 700; margin: 28px 0 10px; color: var(--text-primary); word-break: keep-all; letter-spacing: -0.2px; line-height: 1.45; }
+  /* 첫 h2는 상단 margin 축소 */
+  .blog-content h2:first-child { margin-top: 0; }
+
+  /* ── 본문 텍스트 ── */
+  .blog-content p { margin: 16px 0; line-height: 1.9; overflow-wrap: break-word; word-break: break-word; color: var(--text-secondary); font-size: 16px; letter-spacing: -0.1px; }
+  .blog-content strong { color: var(--text-primary); font-weight: 700; }
+  .blog-content p:empty { display: none; }
+  .blog-content > div:empty { display: none; }
+
+  /* ── 링크 ── */
+  .blog-content a { color: var(--brand); text-decoration: none; font-weight: 600; border-bottom: 1px solid rgba(59,123,246,0.2); transition: border-color 0.15s; }
+  .blog-content a:hover { border-color: var(--brand); }
+
+  /* ── 리스트 ── */
+  .blog-content ul, .blog-content ol { padding-left: 22px; margin: 14px 0; }
+  .blog-content li { margin: 8px 0; line-height: 1.85; color: var(--text-secondary); font-size: 15px; }
+  .blog-content li::marker { color: var(--brand); }
+
+  /* ── 구분선 ── */
+  .blog-content hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+
+  /* ── 테이블 — 가독성 강화 ── */
+  .blog-content table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: var(--fs-sm, 14px); table-layout: auto; }
+  .blog-content thead { background: var(--bg-surface); }
+  .blog-content thead th { font-weight: 700; padding: 12px 14px; border: 1px solid var(--border); text-align: left; word-break: keep-all; color: var(--text-primary); font-size: var(--fs-sm, 14px); white-space: nowrap; }
+  .blog-content th { font-weight: 700; padding: 12px 14px; border: 1px solid var(--border); text-align: left; word-break: keep-all; }
+  .blog-content td { padding: 12px 14px; border: 1px solid var(--border); word-break: break-word; line-height: 1.6; color: var(--text-secondary); }
+  .blog-content td:first-child { font-weight: 600; color: var(--text-primary); white-space: nowrap; }
+  .blog-content tr:nth-child(even) { background: var(--bg-hover); }
+  .blog-content tr:hover { background: rgba(59,123,246,0.03); }
+
+  /* ── 인용문 ── */
+  .blog-content blockquote { border-left: 4px solid var(--brand); padding: 14px 18px; color: var(--text-secondary); font-size: var(--fs-base, 15px); margin: 24px 0; background: linear-gradient(135deg, var(--bg-hover) 0%, rgba(37,99,235,0.04) 100%); border-radius: 0 var(--radius-md) var(--radius-md) 0; font-style: italic; line-height: 1.8; }
+  .blog-content blockquote p { margin: 4px 0; }
+  .blog-content blockquote strong { color: var(--text-primary); }
+
+  /* ── 코드 블록 ── */
+  .blog-content code {
+    background: var(--bg-hover);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.88em;
+    font-family: var(--font-mono);
+    color: var(--accent-purple);
+    border: 1px solid var(--border);
+  }
+  .blog-content pre {
+    background: var(--bg-sunken);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 16px 20px;
+    overflow-x: auto;
+    margin: 20px 0;
+    -webkit-overflow-scrolling: touch;
+  }
+  .blog-content pre code {
+    background: none;
+    padding: 0;
+    border: none;
+    font-size: var(--fs-sm);
+    color: var(--text-primary);
+    line-height: 1.6;
+  }
+
+  /* ── 이미지 + 캡션 ── */
+  .blog-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--radius-md);
+    margin: 20px 0;
+  }
+  .blog-content img[alt]:not([src]),
+  .blog-content img[src=''],
+  .blog-content img:not([src]) {
+    display: none;
+  }
+  .blog-content figure { margin: 24px 0; text-align: center; }
+  .blog-content figcaption { font-size: var(--fs-xs); color: var(--text-tertiary); margin-top: 8px; font-style: italic; }
+
+  /* ── 취소선 오류 방지 ── */
+  .blog-content del { text-decoration: none; }
+
+  /* ── FAQ Q&A 스타일 (H3으로 다운그레이드된 Q/A) ── */
+  .blog-content h3[id^="q-"],
+  .blog-content h3[id^="q."] {
+    border-left: 3px solid var(--accent-blue);
+    background: rgba(59,123,246,0.04);
+    padding: 10px 14px;
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    font-size: var(--fs-base, 15px);
+    margin: 20px 0 8px;
+  }
+
+  /* ── S1: 라이트 단일 모드 — 색상은 globals.css :root 토큰이 담당 ── */
+
+  /* ── 모바일 가독성 ── */
+  @media (max-width: 480px) {
+    .blog-content h2 { font-size: 19px; margin: 28px 0 12px; }
+    .blog-content h3 { font-size: 16px; margin: 22px 0 8px; }
+    .blog-content p { font-size: 15px; line-height: 1.85; }
+    .blog-content li { font-size: 14px; }
+    .blog-content th, .blog-content td { padding: 8px 10px; font-size: 13px; }
+  }
+
+  /* 글로벌 카드 hover 효과 */
+  .kd-card-hover { transition: border-color var(--transition-fast), background var(--transition-fast); }
+  @media (hover: hover) {
+    .kd-card-hover:hover { border-color: var(--border-strong); background: var(--bg-hover); }
+  }
+  @media (hover: none) {
+    .kd-card-hover:active { background: var(--bg-hover); }
+  }
+
+  /* focus-visible 전역 */
+  *:focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* 피드 카드 hover */
+  .kd-feed-card { transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease; }
+  @media (hover: hover) {
+    .kd-feed-card:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,0.12); border-color: var(--brand) !important; }
+  }
+  @media (hover: none) {
+    .kd-feed-card:active { transform: scale(0.98); opacity: 0.9; }
+  }
+
+  /* 카드 등장 stagger 애니메이션 */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fadeIn { animation: fadeInUp 0.3s ease both; }
+  .animate-fadeIn:nth-child(1) { animation-delay: 0s; }
+  .animate-fadeIn:nth-child(2) { animation-delay: 0.03s; }
+  .animate-fadeIn:nth-child(3) { animation-delay: 0.06s; }
+  .animate-fadeIn:nth-child(4) { animation-delay: 0.09s; }
+  .animate-fadeIn:nth-child(5) { animation-delay: 0.12s; }
+  .animate-fadeIn:nth-child(n+6) { animation-delay: 0.15s; }
+
+  /* 좋아요/관심 bounce 애니메이션 */
+  @keyframes likeBounce {
+    0% { transform: scale(1); }
+    30% { transform: scale(1.3); }
+    50% { transform: scale(0.9); }
+    70% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+  }
+  .animate-like { animation: likeBounce 0.4s ease; }
+
+  /* 스켈레톤 shimmer */
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  .skeleton-shimmer {
+    background: linear-gradient(90deg, var(--bg-hover) 25%, var(--bg-active) 50%, var(--bg-hover) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease infinite;
+  }
+
+
+  /* ═══ 카드 리스팅 그리드 (기본 1열) ═══ */
+  .listing-grid {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 300px;
-    gap: 28px;
-    align-items: start;
+    grid-template-columns: 1fr;
+    gap: 6px;
   }
-  .blog-detail-rail {
-    display: block;
+  .listing-grid > * {
     min-width: 0;
-    position: sticky;
-    top: 61px;
-    max-height: calc(100vh - 80px);
-    overflow-y: auto;
+    overflow: hidden;
   }
-  /* 데스크탑에서는 레일 목차가 대신한다 */
-  .blog-toc-details { display: none; }
+  /* 주식 전용 2열 그리드 */
+  .listing-grid-2col {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+  }
+  .listing-grid-2col > * {
+    min-width: 0;
+    overflow: hidden;
+  }
+  @media (max-width: 320px) {
+    .listing-grid-2col { grid-template-columns: 1fr; }
+  }
+
+  /* ── v3 커밋6 · 블로그 상세 데스크탑 2단 ──────────────────────
+     목차를 우측 레일로 빼 본문 폭을 확보한다. 모바일은 <details> 접이식. */
+
+  .blog-detail-main { min-width: 0; }
+  /* 레일은 모바일에서도 DOM 에 남지만 여기서는 접이식 목차만 보인다 — 아래 참조 */
+  .blog-detail-rail { display: none; }
+
+  /* 순수 앵커 목차의 착지 위치. Navigation <header> 45 + 여유. */
+  .blog-content h2,
+  .blog-content h3 { scroll-margin-top: 60px; }
+
+  .blog-toc-details {
+    margin: 0 0 var(--sp-lg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--bg-surface);
+    padding: 0 12px;
+  }
+  .blog-toc-details > summary {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--text-primary);
+    cursor: pointer;
+    list-style: none;
+  }
+  .blog-toc-details > summary::-webkit-details-marker { display: none; }
+  .blog-toc-details > summary::after {
+    content: '▾';
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--text-tertiary);
+  }
+  .blog-toc-details[open] > summary::after { content: '▴'; }
+  .blog-toc-details > nav { padding: 0 0 10px; border-top: 1px solid var(--border); }
+
+  @media (min-width: 1024px) {
+    .blog-detail-layout {
+      max-width: var(--container-grid);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 300px;
+      gap: 28px;
+      align-items: start;
+    }
+    .blog-detail-rail {
+      display: block;
+      min-width: 0;
+      position: sticky;
+      top: 61px;
+      max-height: calc(100vh - 80px);
+      overflow-y: auto;
+    }
+    /* 데스크탑에서는 레일 목차가 대신한다 */
+    .blog-toc-details { display: none; }
+  }
+
 }

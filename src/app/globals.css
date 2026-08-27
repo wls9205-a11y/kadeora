@@ -1,458 +1,283 @@
-/* s208 apt-tabs: 스코프된 토큰/유틸리티 (--aptr-*) — 기존 카더라 토큰과 충돌 X. s273-cc: tailwind config darkMode cache bust. */
+/* ══ H5-D3 (2026-08-27) — 네이티브 CSS @layer ═════════════════════════════════
+ *
+ * 지금까지 우선순위는 layout.tsx 의 «import 순서» 였다. 그래서 뒤 파일이 앞 파일을
+ * 우연히 덮었고, 그걸 되받으려고 responsive.css 에 !important 71개가 쌓였다.
+ * 레이어로 선언 순서를 «고정» 하면 그 우연이 사라진다.
+ *
+ * ⚠️ 지시서의 이름 base/components/utilities 는 쓸 수 없다. Tailwind v3.4 가 그 셋을
+ *    자기 지시자로 가로챈다(2026-08-27 postcss 실측):
+ *      · @tailwind 있는 파일 → @layer base{} 가 삼켜져 네이티브 레이어가 안 남는다
+ *      · @tailwind 없는 파일 → 「@layer components is used but no matching
+ *        @tailwind components directive is present」로 «빌드가 실패한다»
+ *    그래서 셋만 개명했다.  base→elements · components→patterns · utilities→overrides
+ *
+ * ⚠️⚠️ !important 는 레이어 «순서가 뒤집힌다». 앞 레이어의 important 가 이긴다.
+ *      즉 elements(globals) 의 important 가 overrides(responsive) 의 important 를 이긴다 —
+ *      도입 «전» 과 정반대다. 전수 조사해 실제 충돌 2건을 미리 없앴다.
+ *      목록·근거는 docs/m6/H5_레이어_important.md
+ *
+ * 롤백: 이 선언 한 줄과 각 파일의 @layer 래핑만 걷으면 원상복구. 토큰 값은 안 바뀐다.
+ * ════════════════════════════════════════════════════════════════════════════ */
+@layer reset, tokens, elements, patterns, screens, overrides;
+
+/* screens.css 는 layout.tsx 를 건드리지 않으려고 여기서 가져온다. 내용이 스스로
+   @layer screens 를 선언하므로 «import 위치는 우선순위에 영향을 주지 않는다». */
+@import "./styles/screens.css";
+
+@layer elements {
+  /* s208 apt-tabs: 스코프된 토큰/유틸리티 (--aptr-*) — 기존 카더라 토큰과 충돌 X. s273-cc: tailwind config darkMode cache bust. */
+}
 @import "../styles/apt-tabs.css";
+@layer elements {
 
-/* Pretendard 는 layout.tsx 의 CDN <link> 한 곳에서만 로드한다 (Rule #80).
-   s6: 여기 있던 local() 전용 @font-face 를 삭제했다. CDN CSS 는 unicode-range 로
-   쪼갠 다수의 @font-face 를 정의하는데, 이 선언은 unicode-range 가 없어 전 범위를 덮었다.
-   캐스케이드에서 이쪽이 이기면 Pretendard 미설치 기기가 웹폰트를 받고도
-   시스템 폰트로 떨어진다. */
+  /* Pretendard 는 layout.tsx 의 CDN <link> 한 곳에서만 로드한다 (Rule #80).
+     s6: 여기 있던 local() 전용 @font-face 를 삭제했다. CDN CSS 는 unicode-range 로
+     쪼갠 다수의 @font-face 를 정의하는데, 이 선언은 unicode-range 가 없어 전 범위를 덮었다.
+     캐스케이드에서 이쪽이 이기면 Pretendard 미설치 기기가 웹폰트를 받고도
+     시스템 폰트로 떨어진다. */
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* 사이드바 + 오른쪽 패널 (데스크탑 only) */
-/* 폼 요소 폰트 리셋 — 브라우저 기본 system-ui 방지 */
-button, input, select, textarea { font-family: inherit; }
-/* s5: iOS Safari 는 input 의 font-size 가 16px 미만이면 포커스 시 페이지를 자동 확대한다.
-   PWA·앱인토스 웹뷰도 동일. --fs-sm 은 기본 16px 이라 기본 상태의 값 변화는 없고,
-   font-small(14px)일 때만 16px 로 바닥이 잡힌다. 시각적 축소 없이 확대만 막는다.
-   html.font-large / html.font-small 의 !important override 는 그대로 우선한다. */
-input, textarea, select { font-size: max(16px, var(--fs-sm)); }
-
-
-/* 카드 호버 효과 */
-@media (hover: hover) {
-  .kd-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.25); }
+  /* ⚠️ preflight 를 reset 안에 «가둔다». 레이어 밖에 두면 «레이어 없는 규칙이 모든
+     레이어를 이기므로» preflight 가 우리 규칙을 전부 덮어쓴다(제목·목록·버튼 리셋).
+     corePlugins.preflight 를 끄는 대신 가두는 편이 안전하다 — 리셋은 계속 필요하다. */
 }
-@media (hover: none) {
-  .kd-card:active { transform: scale(0.98); }
+@layer reset { @tailwind base; }
+@layer patterns { @tailwind components; }
+@layer elements {
+  /* 유틸리티 클래스는 «마지막 레이어» 가 맞다. 다만 같은 overrides 안에서 순서는
+     globals → responsive 이므로 responsive 가 이긴다 — 도입 전과 같다. */
 }
+@layer overrides { @tailwind utilities; }
+@layer elements {
 
-/* Feed & Card hover classes */
-@media (hover: hover) {
-  .kd-feed-card:hover { background: var(--bg-hover) !important; }
-  .kd-card-hover:hover {
-    border-color: var(--brand-border, rgba(37,99,235,0.3)) !important;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  /* 사이드바 + 오른쪽 패널 (데스크탑 only) */
+  /* 폼 요소 폰트 리셋 — 브라우저 기본 system-ui 방지 */
+  button, input, select, textarea { font-family: inherit; }
+  /* s5: iOS Safari 는 input 의 font-size 가 16px 미만이면 포커스 시 페이지를 자동 확대한다.
+     PWA·앱인토스 웹뷰도 동일. --fs-sm 은 기본 16px 이라 기본 상태의 값 변화는 없고,
+     font-small(14px)일 때만 16px 로 바닥이 잡힌다. 시각적 축소 없이 확대만 막는다.
+     html.font-large / html.font-small 의 !important override 는 그대로 우선한다. */
+  input, textarea, select { font-size: max(16px, var(--fs-sm)); }
+
+
+  /* 카드 호버 효과 */
+  @media (hover: hover) {
+    .kd-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.25); }
   }
-}
-@media (hover: none) {
-  .kd-feed-card:active { background: var(--bg-hover) !important; }
-  .kd-card-hover:active { transform: scale(0.99); }
-}
+  @media (hover: none) {
+    .kd-card:active { transform: scale(0.98); }
+  }
 
-.kd-action-link {
-  font-size: var(--fs-xs);
-  font-weight: 600;
-  color: var(--text-tertiary);
-  text-decoration: none;
-  padding: 4px 10px;
-  border-radius: 8px;
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
-  transition: all var(--transition-fast);
-}
-@media (hover: hover) {
-  .kd-action-link:hover {
-    color: var(--brand);
+  /* Feed & Card hover classes */
+  @media (hover: hover) {
+    .kd-feed-card:hover { background: var(--bg-hover) !important; }
+    .kd-card-hover:hover {
+      border-color: var(--brand-border, rgba(37,99,235,0.3)) !important;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+  }
+  @media (hover: none) {
+    .kd-feed-card:active { background: var(--bg-hover) !important; }
+    .kd-card-hover:active { transform: scale(0.99); }
+  }
+
+  .kd-action-link {
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    color: var(--text-tertiary);
+    text-decoration: none;
+    padding: 4px 10px;
+    border-radius: 8px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    transition: all var(--transition-fast);
+  }
+  @media (hover: hover) {
+    .kd-action-link:hover {
+      color: var(--brand);
+      border-color: var(--brand);
+    }
+  }
+
+  .kd-search-input {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    outline: none;
+    transition: border-color var(--transition-fast);
+    font-family: inherit;
+  }
+  .kd-search-input:focus {
     border-color: var(--brand);
   }
-}
-
-.kd-search-input {
-  width: 100%;
-  padding: 10px 14px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: var(--bg-surface);
-  color: var(--text-primary);
-  font-size: var(--fs-sm);
-  font-weight: 500;
-  outline: none;
-  transition: border-color var(--transition-fast);
-  font-family: inherit;
-}
-.kd-search-input:focus {
-  border-color: var(--brand);
-}
-.kd-search-input::placeholder {
-  color: var(--text-tertiary);
-}
-
-.kd-feed-card, .kd-card-hover {
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-}
-
-
-
-/* 모바일 반응형 */
-@media (max-width: 767px) {
-  .kd-card { padding: 12px 14px !important; }
-}
-
-/* ========================================
-   글씨 크기 시스템 (CSS 변수 기반)
-   ======================================== */
-
-/* ── 카드 디자인 시스템 강화 ── */
-
-/* 글래스모피즘 카드 — 프리미엄 느낌 */
-.kd-glass {
-  background: rgba(12, 21, 40, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(59, 123, 246, 0.12);
-  border-radius: var(--radius-md);
-}
-
-/* 그라데이션 보더 카드 — 주요 CTA/하이라이트용 */
-.kd-card-glow {
-  position: relative;
-  background: var(--bg-surface);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-}
-.kd-card-glow::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: var(--radius-md);
-  padding: 1px;
-  background: linear-gradient(135deg, rgba(59,123,246,0.3), rgba(46,232,165,0.2), rgba(183,148,255,0.2));
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
-}
-
-/* 브랜드 글로우 버튼 */
-.kd-btn-glow {
-  background: var(--brand);
-  color: #fff;
-  font-weight: 700;
-  border: none;
-  border-radius: var(--radius-sm);
-  padding: 12px 28px;
-  cursor: pointer;
-  position: relative;
-  transition: transform var(--transition-fast), box-shadow var(--transition-normal);
-}
-.kd-btn-glow:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 20px rgba(59, 123, 246, 0.4);
-}
-.kd-btn-glow:active {
-  transform: translateY(0);
-}
-
-/* 숫자 카운터 애니메이션 */
-@keyframes countUp {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.kd-counter {
-  animation: countUp 0.6s ease-out both;
-}
-.kd-counter:nth-child(1) { animation-delay: 0.1s; }
-.kd-counter:nth-child(2) { animation-delay: 0.2s; }
-.kd-counter:nth-child(3) { animation-delay: 0.3s; }
-.kd-counter:nth-child(4) { animation-delay: 0.4s; }
-.kd-counter:nth-child(5) { animation-delay: 0.5s; }
-
-/* 페이드인 애니메이션 */
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.kd-fade-in {
-  animation: fadeInUp 0.5s ease-out both;
-}
-
-/* 섹션 카드 — 호버 시 살짝 떠오르는 효과 */
-@media (hover: hover) {
-  .kd-section-card {
-    transition: transform var(--transition-normal), box-shadow var(--transition-normal), border-color var(--transition-normal);
+  .kd-search-input::placeholder {
+    color: var(--text-tertiary);
   }
-  .kd-section-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
-    border-color: var(--brand-border);
+
+  .kd-feed-card, .kd-card-hover {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
   }
+
+
+
+  /* 모바일 반응형 */
+  /* ⚠️ H5-D3 — 480px 이하 규칙을 responsive.css 에서 «여기로 옮겨 왔다».
+     두 파일에 갈려 있었고 import 순서로만 responsive 가 이기고 있었다.
+     @layer 는 important 순서를 뒤집으므로 그대로 두면 480px 이하에서 패딩이
+     var(--space-md) → 12px 14px 로 «조용히» 바뀐다. 한 파일에 붙여 순서로 결정되게 한다. */
+  @media (max-width: 767px) {
+    .kd-card { padding: 12px 14px !important; }
+  }
+  @media (max-width: 480px) {
+    .kd-card { padding: var(--space-md) !important; }
+  }
+
+  /* ========================================
+     글씨 크기 시스템 (CSS 변수 기반)
+     ======================================== */
+
+  /* ── 카드 디자인 시스템 강화 ── */
+
+  /* 글래스모피즘 카드 — 프리미엄 느낌 */
+  .kd-glass {
+    background: rgba(12, 21, 40, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(59, 123, 246, 0.12);
+    border-radius: var(--radius-md);
+  }
+
+  /* 그라데이션 보더 카드 — 주요 CTA/하이라이트용 */
+  .kd-card-glow {
+    position: relative;
+    background: var(--bg-surface);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+  .kd-card-glow::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-md);
+    padding: 1px;
+    background: linear-gradient(135deg, rgba(59,123,246,0.3), rgba(46,232,165,0.2), rgba(183,148,255,0.2));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  /* 브랜드 글로우 버튼 */
+  .kd-btn-glow {
+    background: var(--brand);
+    color: #fff;
+    font-weight: 700;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 12px 28px;
+    cursor: pointer;
+    position: relative;
+    transition: transform var(--transition-fast), box-shadow var(--transition-normal);
+  }
+  .kd-btn-glow:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 20px rgba(59, 123, 246, 0.4);
+  }
+  .kd-btn-glow:active {
+    transform: translateY(0);
+  }
+
+  /* 숫자 카운터 애니메이션 */
+  @keyframes countUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .kd-counter {
+    animation: countUp 0.6s ease-out both;
+  }
+  .kd-counter:nth-child(1) { animation-delay: 0.1s; }
+  .kd-counter:nth-child(2) { animation-delay: 0.2s; }
+  .kd-counter:nth-child(3) { animation-delay: 0.3s; }
+  .kd-counter:nth-child(4) { animation-delay: 0.4s; }
+  .kd-counter:nth-child(5) { animation-delay: 0.5s; }
+
+  /* 페이드인 애니메이션 */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .kd-fade-in {
+    animation: fadeInUp 0.5s ease-out both;
+  }
+
+  /* 섹션 카드 — 호버 시 살짝 떠오르는 효과 */
+  @media (hover: hover) {
+    .kd-section-card {
+      transition: transform var(--transition-normal), box-shadow var(--transition-normal), border-color var(--transition-normal);
+    }
+    .kd-section-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+      border-color: var(--brand-border);
+    }
+  }
+
+  /* 펄스 도트 — 라이브/실시간 표시 */
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.3); }
+  }
+  .kd-pulse-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent-green);
+    animation: pulse-dot 2s ease-in-out infinite;
+    display: inline-block;
+  }
+
+  /* 시머 로딩 개선 — 더 자연스러운 그라데이션 */
+  @keyframes shimmer-enhanced {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  .kd-shimmer {
+    background: linear-gradient(90deg, var(--bg-surface) 0%, var(--bg-elevated) 40%, var(--bg-surface) 80%);
+    background-size: 200% 100%;
+    animation: shimmer-enhanced 1.8s ease-in-out infinite;
+    border-radius: var(--radius-sm);
+  }
+  /* 가로 스크롤 스크롤바 숨기기 */
+  .apt-pill-scroll::-webkit-scrollbar { display: none; }
+  .apt-pill-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+  /* 반응형 2단 그리드 */
+  @media (max-width: 640px) {
+    .mc-g2 { grid-template-columns: 1fr !important; }
+  }
+  /* 세션70: 기본값 = 기존 "크게" 수준으로 상향 */
 }
-
-/* 펄스 도트 — 라이브/실시간 표시 */
-@keyframes pulse-dot {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(1.3); }
-}
-.kd-pulse-dot {
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--accent-green);
-  animation: pulse-dot 2s ease-in-out infinite;
-  display: inline-block;
-}
-
-/* 시머 로딩 개선 — 더 자연스러운 그라데이션 */
-@keyframes shimmer-enhanced {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-.kd-shimmer {
-  background: linear-gradient(90deg, var(--bg-surface) 0%, var(--bg-elevated) 40%, var(--bg-surface) 80%);
-  background-size: 200% 100%;
-  animation: shimmer-enhanced 1.8s ease-in-out infinite;
-  border-radius: var(--radius-sm);
-}
-/* 가로 스크롤 스크롤바 숨기기 */
-.apt-pill-scroll::-webkit-scrollbar { display: none; }
-.apt-pill-scroll { -ms-overflow-style: none; scrollbar-width: none; }
-/* 반응형 2단 그리드 */
-@media (max-width: 640px) {
-  .mc-g2 { grid-template-columns: 1fr !important; }
-}
-/* 세션70: 기본값 = 기존 "크게" 수준으로 상향 */
-:root {
-  --fs-xs: 14px;
-  --fs-sm: 16px;
-  --fs-base: 18px;
-  --fs-md: 19px;
-  --fs-lg: 21px;
-  --fs-xl: 24px;
-  --fs-2xl: 32px;
-  /* s280: --font-mono 미정의였음 (globals.css 자체 blog-content code 규칙 포함 다수 곳에서 폴백만 타던 상태) */
-  /* s6: apt-tabs.css 가 참조하는데 정의가 없었다 (Rule #105 재발) */
-  --font-sans: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-  --font-serif: ui-serif, Georgia, serif;
-  --font-mono: 'SF Mono', 'Consolas', 'Menlo', monospace;
-}
-
-html.font-small {
-  --fs-xs: 12px;
-  --fs-sm: 14px;
-  --fs-base: 16px;
-  --fs-md: 17px;
-  --fs-lg: 19px;
-  --fs-xl: 22px;
-  --fs-2xl: 28px;
-}
-
-html.font-medium {
-  --fs-xs: 14px;
-  --fs-sm: 16px;
-  --fs-base: 18px;
-  --fs-md: 19px;
-  --fs-lg: 21px;
-  --fs-xl: 24px;
-  --fs-2xl: 32px;
-}
-
-html.font-large {
-  --fs-xs: 15px;
-  --fs-sm: 17px;
-  --fs-base: 20px;
-  --fs-md: 21px;
-  --fs-lg: 24px;
-  --fs-xl: 28px;
-  --fs-2xl: 36px;
-}
-
-/* 세션70+s5: 인라인 font-size 강제 스케일링.
-   실측(.next/server/app/*.html): SSR 직렬화는 공백 없음 — style="font-size:13px".
-   CSSOM 을 거친 뒤(하이드레이션/클라이언트 갱신)에는 공백이 붙는다 — "font-size: 13px".
-   기존 규칙은 공백 있는 표기만 잡아서, 같은 10px 라도 SSR 상태에서는 안 걸리고
-   하이드레이션 뒤에만 걸렸다. 이것이 화면마다·요소마다 크기가 갈리던 직접 원인이다.
-   두 표기를 모두 매칭한다.
-   ※ 이 패치는 증상 억제제다. 근본은 인라인 하드코딩이며 S5-2 에서 토큰으로 흡수한다. */
-
-/* ── ROOT: 작은 인라인 사이즈 끌어올리기 ──
-   s6-3: 하한을 11px → 12px 로. 9/10/11px 원본 1,194건이 1px 씩 올라간다.
-   12px 이상 구간(→14/15/16)은 그대로 둬 레이아웃 충격을 아래쪽에만 가둔다.
-   html.font-large / html.font-small 사다리는 사용자가 고른 설정이라 미변경. */
-[style*="font-size: 9px"],
-[style*="font-size:9px"]  { font-size: 12px !important; }
-[style*="font-size: 10px"],
-[style*="font-size:10px"] { font-size: 13px !important; }
-[style*="font-size: 11px"],
-[style*="font-size:11px"] { font-size: 14px !important; }
-[style*="font-size: 12px"],
-[style*="font-size:12px"] { font-size: 14px !important; }
-[style*="font-size: 13px"],
-[style*="font-size:13px"] { font-size: 15px !important; }
-[style*="font-size: 14px"],
-[style*="font-size:14px"] { font-size: 16px !important; }
-[style*="font-size: 15px"],
-[style*="font-size:15px"] { font-size: 16px !important; }
-
-/* ── font-large: 더 크게 ── */
-html.font-large [style*="font-size: 9px"],
-html.font-large [style*="font-size:9px"]  { font-size: 13px !important; }
-html.font-large [style*="font-size: 10px"],
-html.font-large [style*="font-size:10px"] { font-size: 14px !important; }
-html.font-large [style*="font-size: 11px"],
-html.font-large [style*="font-size:11px"] { font-size: 15px !important; }
-html.font-large [style*="font-size: 12px"],
-html.font-large [style*="font-size:12px"] { font-size: 16px !important; }
-html.font-large [style*="font-size: 13px"],
-html.font-large [style*="font-size:13px"] { font-size: 17px !important; }
-html.font-large [style*="font-size: 14px"],
-html.font-large [style*="font-size:14px"] { font-size: 18px !important; }
-html.font-large [style*="font-size: 15px"],
-html.font-large [style*="font-size:15px"] { font-size: 19px !important; }
-html.font-large [style*="font-size: 16px"],
-html.font-large [style*="font-size:16px"] { font-size: 20px !important; }
-
-/* ── font-small: 축소 ── */
-html.font-small [style*="font-size: 16px"],
-html.font-small [style*="font-size:16px"] { font-size: 14px !important; }
-html.font-small [style*="font-size: 15px"],
-html.font-small [style*="font-size:15px"] { font-size: 13px !important; }
-html.font-small [style*="font-size: 14px"],
-html.font-small [style*="font-size:14px"] { font-size: 12px !important; }
-html.font-small [style*="font-size: 13px"],
-html.font-small [style*="font-size:13px"] { font-size: 12px !important; }
-html.font-small [style*="font-size: 12px"],
-html.font-small [style*="font-size:12px"] { font-size: 11px !important; }
-html.font-small [style*="font-size: 11px"],
-html.font-small [style*="font-size:11px"] { font-size: 10px !important; }
-html.font-small [style*="font-size: 10px"],
-html.font-small [style*="font-size:10px"] { font-size: 10px !important; }
-
-
-/* ── s5: Tailwind 텍스트 클래스 편입 ──
-   text-xs(12px)·text-[Npx] 는 인라인이 아니라 위 [style*=] 규칙에 안 걸린다.
-   같은 크기인데 인라인만 커지던 불일치를 없애기 위해 동일 스케일을 건다.
-   s6-3: 위 ROOT 사다리와 하한을 함께 올린다. 한쪽만 올리면 같은 10px 가
-   인라인 13px / 클래스 12px 로 갈려 S5 에서 없앤 불일치가 되살아난다. */
-.text-\[9px\]    { font-size: 12px !important; }
-.text-\[10px\]   { font-size: 13px !important; }
-.text-\[11px\]   { font-size: 14px !important; }
-.text-\[12px\], .text-\[12\.5px\] { font-size: 14px !important; }
-.text-\[13px\]   { font-size: 15px !important; }
-.text-\[14px\]   { font-size: 16px !important; }
-.text-xs         { font-size: 14px !important; }
-
-html.font-large .text-\[9px\]  { font-size: 13px !important; }
-html.font-large .text-\[10px\] { font-size: 14px !important; }
-html.font-large .text-\[11px\] { font-size: 15px !important; }
-html.font-large .text-\[12px\], html.font-large .text-\[12\.5px\] { font-size: 16px !important; }
-html.font-large .text-\[13px\] { font-size: 17px !important; }
-html.font-large .text-\[14px\] { font-size: 18px !important; }
-html.font-large .text-xs        { font-size: 16px !important; }
-
-html.font-small .text-\[14px\] { font-size: 12px !important; }
-html.font-small .text-\[13px\] { font-size: 12px !important; }
-html.font-small .text-\[12px\], html.font-small .text-\[12\.5px\] { font-size: 11px !important; }
-html.font-small .text-\[11px\] { font-size: 10px !important; }
-html.font-small .text-\[10px\] { font-size: 10px !important; }
-html.font-small .text-xs        { font-size: 12px !important; }
-
-/* font-large/small 레이아웃 보정 */
-html.font-large input, html.font-large textarea, html.font-large select { font-size: 20px !important; }
-html.font-small input, html.font-small textarea, html.font-small select { font-size: 16px !important; }
-
-/* font-large: 버튼 패딩 확대 */
-html.font-large button { min-height: var(--touch-min); }
-
-/* s5-2 (Rule #77): 상호작용 요소의 히트 영역만 44px 로 넓힌다.
-   시각 크기는 그대로 두고 투명 ::after 로 덮는다 — height 를 키우면 헤더·툴바가 밀린다.
-   배지·칩처럼 누를 수 없는 요소에는 붙이지 않는다. */
-.touch-target { position: relative; }
-.touch-target::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 100%;
-  height: 100%;
-  min-width: 44px;
-  min-height: 44px;
-}
-
-html.font-large .kd-tab-btn, html.font-large .kd-sort-btn { padding: 8px 14px !important; }
-
-/* font-large: 그리드 카드 오버플로 방어 */
-html.font-large [style*="gridTemplateColumns"] { gap: 4px !important; }
-html.font-large [style*="gridTemplateColumns"] > * { overflow: hidden; text-overflow: ellipsis; }
-
-/* font-small: 컴팩트 패딩 */
-html.font-small button { min-height: 36px; }
-
-/* ========================================
-   글씨 크기별 레이아웃 간격 CSS 변수
-   글씨가 커지면 간격도 넓어지고, 작아지면 좁아짐
-   ======================================== */
-/* 세션70: 간격도 기존 "크게" 수준으로 상향 */
-:root {
-  --sp-xs: 6px;
-  --sp-sm: 10px;
-  --sp-md: 14px;
-  --sp-lg: 18px;
-  --sp-xl: 22px;
-  --sp-2xl: 28px;
-  --btn-h: 46px;
-  --card-p: 16px;
-  --touch-min: 46px;
-  /* s5-2 (Rule #78): 본문 컨테이너 기준 폭. 어드민(1400)·앱셸(1200)·좁은 폼(480)만 예외 */
-  --container-max: 720px;
-  /* r4-P3: 용도별 컨테이너 폭. --container-max 는 --container-read 로 승계 */
-  --container-read: 720px;   /* 읽는 본문 */
-  --container-grid: 1120px;  /* 카드 그리드 블록 */
-  --container-shell: 1200px; /* 앱셸 */
-}
-
-html.font-small {
-  --sp-xs: 4px;
-  --sp-sm: 8px;
-  --sp-md: 12px;
-  --sp-lg: 16px;
-  --sp-xl: 20px;
-  --sp-2xl: 24px;
-  --btn-h: 40px;
-  --card-p: 14px;
-  --touch-min: 44px;
-}
-
-html.font-large {
-  --sp-xs: 8px;
-  --sp-sm: 12px;
-  --sp-md: 18px;
-  --sp-lg: 22px;
-  --sp-xl: 28px;
-  --sp-2xl: 36px;
-  --btn-h: 52px;
-  --card-p: 20px;
-  --touch-min: 52px;
-}
-
-/* 모바일 + font-large: 간격/글씨 조정 (화면이 좁으니까) */
-@media (max-width: 640px) {
-  html.font-large {
+@layer tokens {
+  :root {
     --fs-xs: 14px;
     --fs-sm: 16px;
-    --fs-base: 19px;
-    --fs-md: 20px;
-    --fs-lg: 22px;
-    --fs-xl: 26px;
-    --fs-2xl: 34px;
-    --sp-md: 16px;
-    --sp-lg: 20px;
-    --sp-xl: 24px;
-    --sp-2xl: 30px;
-    --card-p: 18px;
+    --fs-base: 18px;
+    --fs-md: 19px;
+    --fs-lg: 21px;
+    --fs-xl: 24px;
+    --fs-2xl: 32px;
+    /* s280: --font-mono 미정의였음 (globals.css 자체 blog-content code 규칙 포함 다수 곳에서 폴백만 타던 상태) */
+    /* s6: apt-tabs.css 가 참조하는데 정의가 없었다 (Rule #105 재발) */
+    --font-sans: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    --font-serif: ui-serif, Georgia, serif;
+    --font-mono: 'SF Mono', 'Consolas', 'Menlo', monospace;
   }
-  /* 모바일 font-large: 그리드 카드 텍스트 방어 */
-  html.font-large [style*="gridTemplateColumns"] > * {
-    min-width: 0 !important;
-    word-break: keep-all;
-    overflow-wrap: break-word;
-  }
-  /* 모바일 font-large: 탭/뱃지 줄바꿈 */
-  html.font-large [style*="flexWrap"] { gap: 4px !important; }
+}
+@layer tokens {
   html.font-small {
     --fs-xs: 12px;
     --fs-sm: 14px;
@@ -462,1713 +287,1962 @@ html.font-large {
     --fs-xl: 22px;
     --fs-2xl: 28px;
   }
-  /* 새 기본값 모바일 보정 */
-  :root {
-    --fs-xs: 13px;
-    --fs-sm: 15px;
-    --fs-base: 17px;
-    --fs-md: 18px;
-    --fs-lg: 20px;
-    --fs-xl: 23px;
-    --fs-2xl: 30px;
-    --card-p: 14px;
+}
+@layer tokens {
+  html.font-medium {
+    --fs-xs: 14px;
+    --fs-sm: 16px;
+    --fs-base: 18px;
+    --fs-md: 19px;
+    --fs-lg: 21px;
+    --fs-xl: 24px;
+    --fs-2xl: 32px;
   }
 }
-
-/* 데스크탑 + font-large: 넉넉한 간격 */
-@media (min-width: 1024px) {
+@layer tokens {
   html.font-large {
-    --card-p: 22px;
-    --sp-2xl: 40px;
+    --fs-xs: 15px;
+    --fs-sm: 17px;
+    --fs-base: 20px;
+    --fs-md: 21px;
+    --fs-lg: 24px;
+    --fs-xl: 28px;
+    --fs-2xl: 36px;
   }
+}
+@layer elements {
+
+  /* 세션70+s5: 인라인 font-size 강제 스케일링.
+     실측(.next/server/app/*.html): SSR 직렬화는 공백 없음 — style="font-size:13px".
+     CSSOM 을 거친 뒤(하이드레이션/클라이언트 갱신)에는 공백이 붙는다 — "font-size: 13px".
+     기존 규칙은 공백 있는 표기만 잡아서, 같은 10px 라도 SSR 상태에서는 안 걸리고
+     하이드레이션 뒤에만 걸렸다. 이것이 화면마다·요소마다 크기가 갈리던 직접 원인이다.
+     두 표기를 모두 매칭한다.
+     ※ 이 패치는 증상 억제제다. 근본은 인라인 하드코딩이며 S5-2 에서 토큰으로 흡수한다. */
+
+  /* ── ROOT: 작은 인라인 사이즈 끌어올리기 ──
+     s6-3: 하한을 11px → 12px 로. 9/10/11px 원본 1,194건이 1px 씩 올라간다.
+     12px 이상 구간(→14/15/16)은 그대로 둬 레이아웃 충격을 아래쪽에만 가둔다.
+     html.font-large / html.font-small 사다리는 사용자가 고른 설정이라 미변경. */
+  [style*="font-size: 9px"],
+  [style*="font-size:9px"]  { font-size: 12px !important; }
+  [style*="font-size: 10px"],
+  [style*="font-size:10px"] { font-size: 13px !important; }
+  [style*="font-size: 11px"],
+  [style*="font-size:11px"] { font-size: 14px !important; }
+  [style*="font-size: 12px"],
+  [style*="font-size:12px"] { font-size: 14px !important; }
+  [style*="font-size: 13px"],
+  [style*="font-size:13px"] { font-size: 15px !important; }
+  [style*="font-size: 14px"],
+  [style*="font-size:14px"] { font-size: 16px !important; }
+  [style*="font-size: 15px"],
+  [style*="font-size:15px"] { font-size: 16px !important; }
+
+  /* ── font-large: 더 크게 ── */
+  html.font-large [style*="font-size: 9px"],
+  html.font-large [style*="font-size:9px"]  { font-size: 13px !important; }
+  html.font-large [style*="font-size: 10px"],
+  html.font-large [style*="font-size:10px"] { font-size: 14px !important; }
+  html.font-large [style*="font-size: 11px"],
+  html.font-large [style*="font-size:11px"] { font-size: 15px !important; }
+  html.font-large [style*="font-size: 12px"],
+  html.font-large [style*="font-size:12px"] { font-size: 16px !important; }
+  html.font-large [style*="font-size: 13px"],
+  html.font-large [style*="font-size:13px"] { font-size: 17px !important; }
+  html.font-large [style*="font-size: 14px"],
+  html.font-large [style*="font-size:14px"] { font-size: 18px !important; }
+  html.font-large [style*="font-size: 15px"],
+  html.font-large [style*="font-size:15px"] { font-size: 19px !important; }
+  html.font-large [style*="font-size: 16px"],
+  html.font-large [style*="font-size:16px"] { font-size: 20px !important; }
+
+  /* ── font-small: 축소 ── */
+  html.font-small [style*="font-size: 16px"],
+  html.font-small [style*="font-size:16px"] { font-size: 14px !important; }
+  html.font-small [style*="font-size: 15px"],
+  html.font-small [style*="font-size:15px"] { font-size: 13px !important; }
+  html.font-small [style*="font-size: 14px"],
+  html.font-small [style*="font-size:14px"] { font-size: 12px !important; }
+  html.font-small [style*="font-size: 13px"],
+  html.font-small [style*="font-size:13px"] { font-size: 12px !important; }
+  html.font-small [style*="font-size: 12px"],
+  html.font-small [style*="font-size:12px"] { font-size: 11px !important; }
+  html.font-small [style*="font-size: 11px"],
+  html.font-small [style*="font-size:11px"] { font-size: 10px !important; }
+  html.font-small [style*="font-size: 10px"],
+  html.font-small [style*="font-size:10px"] { font-size: 10px !important; }
+
+
+  /* ── s5: Tailwind 텍스트 클래스 편입 ──
+     text-xs(12px)·text-[Npx] 는 인라인이 아니라 위 [style*=] 규칙에 안 걸린다.
+     같은 크기인데 인라인만 커지던 불일치를 없애기 위해 동일 스케일을 건다.
+     s6-3: 위 ROOT 사다리와 하한을 함께 올린다. 한쪽만 올리면 같은 10px 가
+     인라인 13px / 클래스 12px 로 갈려 S5 에서 없앤 불일치가 되살아난다. */
+  .text-\[9px\]    { font-size: 12px !important; }
+  .text-\[10px\]   { font-size: 13px !important; }
+  .text-\[11px\]   { font-size: 14px !important; }
+  .text-\[12px\], .text-\[12\.5px\] { font-size: 14px !important; }
+  .text-\[13px\]   { font-size: 15px !important; }
+  .text-\[14px\]   { font-size: 16px !important; }
+  .text-xs         { font-size: 14px !important; }
+
+  html.font-large .text-\[9px\]  { font-size: 13px !important; }
+  html.font-large .text-\[10px\] { font-size: 14px !important; }
+  html.font-large .text-\[11px\] { font-size: 15px !important; }
+  html.font-large .text-\[12px\], html.font-large .text-\[12\.5px\] { font-size: 16px !important; }
+  html.font-large .text-\[13px\] { font-size: 17px !important; }
+  html.font-large .text-\[14px\] { font-size: 18px !important; }
+  html.font-large .text-xs        { font-size: 16px !important; }
+
+  html.font-small .text-\[14px\] { font-size: 12px !important; }
+  html.font-small .text-\[13px\] { font-size: 12px !important; }
+  html.font-small .text-\[12px\], html.font-small .text-\[12\.5px\] { font-size: 11px !important; }
+  html.font-small .text-\[11px\] { font-size: 10px !important; }
+  html.font-small .text-\[10px\] { font-size: 10px !important; }
+  html.font-small .text-xs        { font-size: 12px !important; }
+
+  /* font-large/small 레이아웃 보정 */
+  html.font-large input, html.font-large textarea, html.font-large select { font-size: 20px !important; }
+  html.font-small input, html.font-small textarea, html.font-small select { font-size: 16px !important; }
+
+  /* font-large: 버튼 패딩 확대 */
+  html.font-large button { min-height: var(--touch-min); }
+
+  /* s5-2 (Rule #77): 상호작용 요소의 히트 영역만 44px 로 넓힌다.
+     시각 크기는 그대로 두고 투명 ::after 로 덮는다 — height 를 키우면 헤더·툴바가 밀린다.
+     배지·칩처럼 누를 수 없는 요소에는 붙이지 않는다. */
+  .touch-target { position: relative; }
+  .touch-target::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  html.font-large .kd-tab-btn, html.font-large .kd-sort-btn { padding: 8px 14px !important; }
+
+  /* font-large: 그리드 카드 오버플로 방어 */
+  html.font-large [style*="gridTemplateColumns"] { gap: 4px !important; }
+  html.font-large [style*="gridTemplateColumns"] > * { overflow: hidden; text-overflow: ellipsis; }
+
+  /* font-small: 컴팩트 패딩 */
+  html.font-small button { min-height: 36px; }
+
+  /* ========================================
+     글씨 크기별 레이아웃 간격 CSS 변수
+     글씨가 커지면 간격도 넓어지고, 작아지면 좁아짐
+     ======================================== */
+  /* 세션70: 간격도 기존 "크게" 수준으로 상향 */
+}
+@layer tokens {
   :root {
-    --card-p: 18px;
+    --sp-xs: 6px;
+    --sp-sm: 10px;
+    --sp-md: 14px;
+    --sp-lg: 18px;
+    --sp-xl: 22px;
+    --sp-2xl: 28px;
+    --btn-h: 46px;
+    --card-p: 16px;
+    --touch-min: 46px;
+    /* s5-2 (Rule #78): 본문 컨테이너 기준 폭. 어드민(1400)·앱셸(1200)·좁은 폼(480)만 예외 */
+    --container-max: 720px;
+    /* r4-P3: 용도별 컨테이너 폭. --container-max 는 --container-read 로 승계 */
+    --container-read: 720px;   /* 읽는 본문 */
+    --container-grid: 1120px;  /* 카드 그리드 블록 */
+    --container-shell: 1200px; /* 앱셸 */
   }
 }
-
-/* ========================================
-   카더라 — 완전한 다크모드 CSS 변수 시스템
-   슬로건: 대한민국 소리소문 정보 커뮤니티
-   핵심: 배경-카드-인풋 3단계 명도차 + 경계선 + 그림자
-   ======================================== */
-
-/* Dark Mode Only — 딥 네이비 다크모드 (세션70: 가독성 대폭 개선) */
-:root {
-  --bg-base:       #F5F7FA;
-
-  /* ─── 디자인 토큰 ─── */
-  --radius-xs: 4px;
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
-  --radius-xl: 20px;
-  --radius-card: 12px;
-  --radius-pill: 999px;
-  --radius-full: 999px;
-
-  --transition-fast: 0.12s ease;
-  --transition-normal: 0.2s ease;
-  --transition-slow: 0.35s ease;
-
-  /* z-index scale — 체계적 레이어 관리 */
-  --z-base: 0;
-  --z-card: 1;
-  --z-sticky: 10;
-  --z-nav: 50;
-  --z-dropdown: 60;
-  --z-modal-backdrop: 80;
-  --z-modal: 90;
-  --z-toast: 100;
-  --z-tooltip: 110;
-  --z-overlay: 200;
-  --bg-surface:    #FFFFFF;
-  --bg-elevated:   #F0F2F5;
-  --bg-sunken:     #E8ECF0;
-  --bg-hover:      #EEF1F5;
-  --bg-active:     #E2E6EC;
-  /* s273b: sticky/backdrop-blur 바 배경. 정의가 없어 소비처에서 rgba(255,255,255,.92)
-     로 폴백되면서 다크 테마에 흰 배경 + 흰 글씨가 나오던 회귀 (Rule #94). */
-  --bg-surface-translucent: rgba(255, 255, 255, 0.92);
-  --border:        #D4DAE3;
-  --border-strong: #B8C2D0;
-  --border-focus:  #4A8AF7;
-  --text-primary:   #111827;
-  --text-secondary: #374151;  /* s8: 6.74 → 9.19 */
-  --text-tertiary:  #4B5563;  /* s8: 5.69 → 6.74. 회색 계열이 본문색의 2배(2,180건)라
-                                 개별 대비가 통과해도 화면 전체가 흐리게 읽혔다.
-                                 primary #111827 → secondary #374151 → tertiary #4B5563 3단 위계 유지 */
-  --text-disabled:  #C8CDD4;
-  --text-inverse:   #FFFFFF;
-  --text-link:      #2563EB;
-  --brand:          #2563EB;
-  --brand-hover:    #1D4ED8;
-  --brand-light:    #EBF2FF;
-  --brand-bg:       rgba(37,99,235,0.08);
-  --brand-border:   rgba(37,99,235,0.18);
-  --accent-blue-light:  #60A5FA;
-  --accent-orange-light: #F97316;
-  --brand-dark:     #1E40AF;
-  --kakao-bg:       #FEE500;
-  --kakao-text:     #191919;
-  --success:        #065F46;  /* s6: --accent-green 과 동일 값이었고 텍스트로 5곳 쓰인다 */
-  --success-bg:     rgba(5,150,105,0.08);
-  --warning:        #92400E;
-  --warning-bg:     rgba(217,119,6,0.08);
-  --error:          #991B1B;
-  --error-bg:       rgba(220,38,38,0.08);
-  --info:           #2563EB;
-  --info-bg:        rgba(37,99,235,0.08);
-  --font-base:      15px;
-  /* 주식 시세 */
-  --stock-up:       #DC2626;
-  --stock-down:     #2563EB;
-  --stock-flat:     #B8CCDF;
-  /* 시맨틱 액센트 (카테고리/상태별) — 세션70: 밝기 +10% */
-  --accent-green:   #065F46;
-  --accent-green-bg: rgba(5,150,105,0.10);
-  --accent-green-border: rgba(5,150,105,0.20);
-  --accent-purple:  #7C3AED;
-  --accent-purple-bg: rgba(124,58,237,0.10);
-  --accent-orange:  #9A3412;
-  --accent-orange-bg: rgba(234,88,12,0.10);
-  --accent-yellow:  #854D0E;
-  --accent-yellow-bg: rgba(202,138,4,0.10);
-  --accent-red:     #991B1B;
-  --accent-red-bg:  rgba(220,38,38,0.10);
-  --accent-blue:    #2563EB;
-  --accent-blue-bg: rgba(37,99,235,0.10);
-  /* ── H5-D1 : 브랜드 네이비·골드 (2026-08-27, 「토큰 신설 금지」 예외 승인) ──
-     왜 신설했나 — 이 색은 src/lib/og/brand.ts 에만 있었다. OG 썸네일은 satori 가
-     TS 상수로 그리므로 CSS 를 안 탄다. 그래서 «화면 컴포넌트가 브랜드색을 쓸 경로가
-     아예 없었다». 화면과 OG 카드가 같은 색이어야 하므로 값을 옮겨 온다.
-
-     ⚠️ --brand-hero-bg 는 brand.ts 의 BRAND_BG 와 «바이트 단위로 같아야» 한다.
-        한쪽만 고치면 OG 카드와 첫 화면이 갈린다. 고칠 땐 반드시 양쪽.
-
-     ⚠️ 골드는 «네이비 위에서만» 쓴다. 흰 배경 위 골드는 1.58:1 로 글자가 안 보인다.
-        흰 배경에서 노랑 계열이 필요하면 --accent-yellow(#854D0E · 6.85:1).
-
-     ⚠️ 그라디언트 «밝은 끝»(#2563EB)에서는 골드가 3.27:1 로 떨어진다. 히어로 하단에
-        글자를 얹을 땐 스크림을 깔아야 한다 — 자세한 실측은 docs/m6/H5_대비실측.md.  */
-  --brand-navy:      #0B2A6B;
-  --brand-navy-mid:  #123A8F;
-  --brand-gold:      #FFC53D;
-  --brand-hero-bg:   linear-gradient(158deg, #0B2A6B 0%, #123A8F 52%, #2563EB 100%);
-  --brand-hero-glow: radial-gradient(120% 90% at 12% 6%, rgba(255,255,255,0.20) 0%, rgba(255,255,255,0.06) 34%, rgba(255,255,255,0) 62%);
-
-  /* ── H5-D1 : amber — «정의 없이 폴백만으로 칠해지던» 3종을 실체화한다 ──
-     var(--accent-amber) 5곳이 폴백을 타고 있었다. #f59e0b 는 흰 배경 대비
-     2.15:1 로 하한 미달이다. 형제 토큰(--accent-yellow)과 «같은 값» 으로 맞춘다 —
-     새 색을 만드는 게 아니라 이미 검증된 값에 이름을 붙이는 것이다. 6.85:1.  */
-  --accent-amber:        #854D0E;
-  --accent-amber-bg:     rgba(202,138,4,0.10);
-  --accent-amber-border: rgba(202,138,4,0.20);
-  --accent-cyan:    #155E75;
-
-  /* Stock colors — KR (빨강↑ 파랑↓) */
-  --stock-kr-up:        #D32F2F;
-  --stock-kr-up-bg:     rgba(211,47,47,0.08);
-  --stock-kr-up-strong: #C62828;
-  --stock-kr-down:      #1976D2;
-  --stock-kr-down-bg:   rgba(25,118,210,0.08);
-  --stock-kr-down-strong:#1565C0;
-  /* Stock colors — US (초록↑ 빨강↓) */
-  --stock-us-up:        #2E7D32;
-  --stock-us-up-bg:     rgba(46,125,50,0.08);
-  --stock-us-up-strong: #1B5E20;
-  --stock-us-down:      #C62828;
-  --stock-us-down-bg:   rgba(198,40,40,0.08);
-  --stock-us-down-strong:#B71C1C;
-  /* Stock flat */
-  --stock-flat:         #757575;
-  --stock-flat-bg:      rgba(117,117,117,0.06);
-  /* Investor colors */
-  /* ⚠️ #E65100 은 흰 배경 대비 3.79 로 하한 미달이었다 — 이 값은 «본문 글자색» 으로도 쓰인다
-     (StockDetailTabs 340행 범례 · 358행 수급 금액). 형제 둘은 이미 어둡다 —
-     --stock-inst #7B1FA2(8.20) · --stock-retail #00838F(4.52). 이것만 밝았다.
-     색상(H)·채도(S)는 두고 명도만 낮춰 4.82. 새 토큰(-strong)은 만들지 않았다. */
-  --stock-foreign:      #C84700;
-  --stock-foreign-bg:   rgba(230,81,0,0.06);
-  --stock-inst:         #7B1FA2;
-  --stock-inst-bg:      rgba(123,31,162,0.06);
-  --stock-retail:       #00838F;
-  --stock-retail-bg:    rgba(0,131,143,0.06);
-  /* AI signal & sentiment */
-  --stock-bullish:      #2E7D32;
-  --stock-bullish-bg:   rgba(46,125,50,0.06);
-  --stock-bearish:      #C62828;
-  --stock-bearish-bg:   rgba(198,40,40,0.06);
-  --stock-positive:     #2E7D32;
-  --stock-positive-bg:  rgba(46,125,50,0.06);
-  --stock-negative:     #C62828;
-  --stock-negative-bg:  rgba(198,40,40,0.06);
-  --stock-neutral:      #757575;
-  --stock-neutral-bg:   rgba(117,117,117,0.06);
-  /* Market status */
-  --stock-market-open:  #2E7D32;
-  --stock-market-open-bg: rgba(46,125,50,0.06);
-  --stock-market-closed:#757575;
-  --stock-market-closed-bg: rgba(117,117,117,0.06);
-  /* 네비게이션 */
-  --nav-bg:         #FFFFFF;
-  --nav-border:     #D4DAE3;
-  --nav-text:       #111827;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
-  --shadow-md: 0 2px 8px rgba(0,0,0,0.10);
-  --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
-  --shadow-xl: 0 16px 40px rgba(0,0,0,0.15);
-  --shadow-color: rgba(0,0,0,0.15);
-  color-scheme: light;
-
-  /* S1: 잉크(의도적 다크 서피스) 토큰 — 기존 다크값 승계 */
-  --ink-bg:        #0D1730;
-  --ink-bg-deep:   #050A18;
-  --ink-text:      #F2F5FA;
-  --ink-text-dim:  #8BA3C0;
-  --ink-border:    #1E3258;
-
-  /* S1: 청약 상태 토큰 */
-  --status-open:   var(--accent-green);
-  --status-soon:   var(--accent-orange);
-  --status-fcfs:   var(--brand);
-  --status-closed: var(--text-tertiary);
-
-  /* S1: 진행 레일 토큰 */
-  --rail-done:     var(--text-tertiary);
-  --rail-now:      var(--brand);
-  --rail-todo:     var(--border);
-  --rail-h:        4px;
-  --rail-h-lg:     6px;
-}
-
-/* S1: 라이트 단일 테마 — 다크모드 제거됨 */
-
-/* ========================================
-   S1: 라이트 단일 모드 — 라이트 값은 :root로 승격됨
-   ======================================== */
-/* s239 W6: body/html !important 제거 — specificity 충돌 풀면서 component override 가능. input/textarea 는 third-party 호환 위해 keep. */
-
-/* ========================================
-   기본 리셋
-   ======================================== */
-* { box-sizing: border-box; }
-html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
-
-body {
-  background-color: var(--bg-base);
-  color: var(--text-primary);
-  font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  font-size: 1rem;
-  /* s6-3: 한글은 받침 때문에 라틴보다 글자 높이가 커서 1.5 면 줄이 붙어 보인다.
-     1.7 이상은 높이가 고정된 카드에서 세로 넘침을 만든다.
-     1.5 → 1.65 로 올렸다가 실화면에서 밀도가 과해 1.58 로 내렸다.
-     배지·숫자·한 줄 라벨의 인라인 lineHeight 1.4 이하는 의도된 값이라 건드리지 않는다. */
-  line-height: 1.58;
-  -webkit-font-smoothing: antialiased;
-  transition: background-color 0.2s ease, color 0.2s ease;
-  word-break: keep-all;
-  overflow-wrap: break-word;
-}
-
-/* ━━━ 세션51: 진화 강화 ━━━ */
-
-/* 15. 카드 호버 시 좌측 카테고리 컬러 보더 */
-@media (hover: hover) {
-  .kd-feed-card { border-left: 3px solid transparent; transition: border-left-color 0.15s, background 0.15s; }
-  .kd-feed-card:hover { border-left-color: var(--brand) !important; }
-  .kd-feed-card[data-cat="stock"]:hover { border-left-color: #00E5FF !important; }
-  .kd-feed-card[data-cat="apt"]:hover { border-left-color: #00FF87 !important; }
-  .kd-feed-card[data-cat="local"]:hover { border-left-color: #FFD43B !important; }
-  .kd-feed-card[data-cat="free"]:hover { border-left-color: #F472B6 !important; }
-  .kd-card-hover { border-left: 3px solid transparent; transition: border-left-color 0.15s, transform 0.15s; }
-  .kd-card-hover:hover { border-left-color: var(--brand) !important; }
-}
-
-/* 8. 방문한 글 표시 */
-.kd-feed-card.visited { opacity: 0.7; }
-.kd-feed-card.visited .kd-card-title { color: var(--text-tertiary) !important; }
-
-/* 피드 카드 히어로 이미지 — max-height 제한으로 거대 이미지 방지 */
-.kd-hero-img { border-radius: 10px; overflow: hidden; margin-top: 8px; position: relative; aspect-ratio: 16/9; max-height: 280px; }
-.kd-hero-img img { width: 100%; height: 100%; object-fit: cover; }
-/* 피드 상세 본문 내 이미지 제한 */
-.feed-detail-content img { max-width: 100%; max-height: 500px; height: auto; border-radius: var(--radius-sm); object-fit: contain; }
-
-/* ━━━ 블로그 2컬럼 레이아웃 + 가독성 강화 ━━━ */
-.blog-detail-layout { max-width: 720px; margin: 0 auto; padding: 0 var(--sp-lg); }
-.blog-detail-main { min-width: 0; }
-.blog-detail-side { display: none; }
-
-/* 블로그 본문 가독성
-   본문 타이포(.blog-content / p / h2)는 styles/blog.css 로 수렴했다.
-   blog.css 가 뒤에 로드되어 항상 이기므로 여기 남은 중복 정의는 전부 죽은 코드였고,
-   "globals 를 고쳤는데 화면이 안 바뀐다" 의 원인이었다. h3 장식만 남긴다. */
-.blog-content h3 { font-size: 18px; border-left: 3px solid var(--brand); padding-left: 10px; margin-top: 28px; }
-.blog-content table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; }
-.blog-content th { background: var(--bg-surface); padding: 10px 12px; text-align: left; font-weight: 600; font-size: 13px; border-bottom: 1px solid var(--border); }
-.blog-content td { padding: 8px 12px; border-bottom: 1px solid var(--border); }
-.blog-content tr:last-child td { border-bottom: none; }
-.blog-content blockquote { border-left: 3px solid var(--brand); padding: 12px 16px; margin: 16px 0; background: var(--bg-surface); border-radius: 0 var(--radius-md) var(--radius-md) 0; }
-
-/* 블로그 목차 인라인 (모바일용) — 데스크탑에서는 사이드바 사용 */
-.blog-toc-inline { display: block; }
-
-/* 블로그 사이드바 스크롤바 */
-.blog-sidebar::-webkit-scrollbar { width: 3px; }
-.blog-sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-/* 블로그 next-article 플로팅 카드 */
-@keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-.kd-next-article { animation: slideUp 0.3s ease-out; }
-
-/* ━━━ 세션58: 모바일 반응형 전면 강화 ━━━ */
-
-/* 부동산 탭 그리드 — 모바일에서 2열→1열 */
-@media (max-width: 480px) {
-  .mc-g2 { grid-template-columns: 1fr !important; }
-}
-
-/* 부동산 카드 내부 패딩 최적화 */
-.apt-card { padding: 12px 14px; border-radius: 10px; background: var(--bg-surface); border: 1px solid var(--border); margin-bottom: 8px; }
-@media (max-width: 480px) {
-  .apt-card { padding: 10px 12px; }
-}
-
-/* 테이블 오버플로우 — 모바일 가로 스크롤 */
-.apt-card table { width: 100%; font-size: var(--fs-xs); }
-@media (max-width: 480px) {
-  .apt-card table { font-size: 10px; }
-  .apt-card th, .apt-card td { padding: 4px 3px !important; }
-}
-
-/* KPI 3열 그리드 — 좁은 화면에서 간격 축소 */
-@media (max-width: 480px) {
-  .kpi-row { gap: 4px !important; }
-  .kpi-row > div { padding: 6px 4px !important; }
-}
-
-/* 도넛 차트 + 범례 — 모바일 스택 */
-@media (max-width: 480px) {
-  .region-overview-layout { flex-direction: column !important; }
-  .region-overview-layout > div:first-child { max-width: 160px; margin: 0 auto 8px; }
-}
-
-/* B-2 도넛 카드 그리드 — 모바일 최적화 */
-@media (max-width: 480px) {
-  .donut-card-grid { font-size: 0.95em; gap: 2px !important; }
-  .donut-card-grid > div { padding: 4px 3px !important; }
-}
-@media (max-width: 480px) {
-  .donut-card-grid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; gap: 1px !important; }
-  .donut-card-grid > div { padding: 3px 2px !important; }
-}
-
-/* 탭 세그먼트 — 작은 화면에서 폰트 축소 */
-@media (max-width: 480px) {
-  .kd-tab-segment { font-size: 11px !important; }
-  .kd-tab-segment > button { padding: 6px 4px !important; }
-}
-
-/* 공유 버튼 — 모바일에서 간격 조정 */
-@media (max-width: 480px) {
-  .share-buttons { gap: 4px !important; }
-  .share-buttons button { padding: 4px 8px !important; font-size: 11px !important; }
-}
-
-/* 타임라인 단계 — 모바일 텍스트 축소 */
-@media (max-width: 480px) {
-  .tl-step { font-size: 8px !important; }
-}
-
-/* 가로 스크롤 pill — 한줄 스크롤 */
-.kd-scroll-row { display: flex; gap: var(--sp-sm); overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; padding-bottom: 2px; }
-.kd-scroll-row::-webkit-scrollbar { display: none; }
-
-/* 카드 내 flex 줄바꿈 */
-@media (max-width: 480px) {
-  .card-flex-wrap { flex-wrap: wrap !important; }
-}
-
-/* 분양 상세 — 시세 비교 테이블 스크롤 */
-@media (max-width: 480px) {
-  .apt-card .price-compare-table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-}
-
-/* 하단 CTA 버튼 — 모바일 풀너비 */
-@media (max-width: 480px) {
-  .cta-row { flex-direction: column !important; }
-  .cta-row > a, .cta-row > button { width: 100% !important; text-align: center !important; }
-}
-
-/* ═══ 블로그 본문 — 종합 타이포그래피 시스템 ═══
-   .blog-content / .blog-content p / h2 의 타이포·색 정의는 styles/blog.css 로 옮겼다.
-   같은 선언을 두 파일에 두면 뒤에 로드되는 blog.css 가 항상 이겨서 여기 수정이 묻힌다. */
-.blog-content h3 {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin: 36px 0 14px;
-  letter-spacing: -0.3px;
-  line-height: 1.45;
-  padding: 8px 0 8px 14px;
-  border-left: 3px solid var(--brand);
-}
-.blog-content h4 {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin: 28px 0 10px;
-}
-.blog-content strong, .blog-content b {
-  font-weight: 700;
-  color: var(--text-primary);
-}
-.blog-content a {
-  color: var(--brand);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  text-decoration-thickness: 1px;
-}
-.blog-content a:hover { text-decoration-color: var(--brand); text-decoration-thickness: 2px; }
-
-.blog-content ul, .blog-content ol {
-  margin: 0 0 24px;
-  padding-left: 22px;
-}
-.blog-content li {
-  font-size: 16px;
-  line-height: 2.0;
-  margin-bottom: 8px;
-  color: var(--text-secondary);
-}
-.blog-content li::marker { color: var(--brand); }
-
-.blog-content blockquote {
-  margin: 28px 0;
-  padding: 20px 22px 20px 24px;
-  border-left: none;
-  border-radius: 12px;
-  background: rgba(74,138,247,0.04);
-  border: 1px solid rgba(74,138,247,0.08);
-  font-size: 15.5px;
-  font-style: italic;
-  line-height: 1.85;
-  color: var(--text-secondary);
-  position: relative;
-}
-.blog-content blockquote::before {
-  content: '\201C';
-  position: absolute;
-  top: 10px;
-  left: 16px;
-  font-size: 32px;
-  font-family: Georgia, serif;
-  color: var(--brand);
-  opacity: 0.2;
-  line-height: 1;
-}
-.blog-content blockquote p {
-  padding-left: 16px;
-  margin-bottom: 0;
-  color: var(--text-secondary);
-}
-.blog-content blockquote p:last-child { margin-bottom: 0; }
-
-.blog-content table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  margin: 12px 0 28px;
-  font-size: 14px;
-  border: 1px solid rgba(255,255,255,0.05);
-  border-radius: 12px;
-  overflow: hidden;
-}
-.blog-content th {
-  padding: 12px 16px;
-  text-align: left;
-  font-weight: 600;
-  font-size: 11px;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  color: var(--text-tertiary);
-  background: rgba(74,138,247,0.05);
-  border-bottom: 1px solid rgba(255,255,255,0.05);
-}
-.blog-content td {
-  padding: 12px 16px;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
-  line-height: 1.6;
-  color: var(--text-secondary);
-}
-.blog-content td:last-child { font-weight: 500; color: var(--text-primary); }
-.blog-content tr:last-child td { border-bottom: none; }
-.blog-content tr:nth-child(even) td { background: rgba(255,255,255,0.012); }
-
-.blog-content code {
-  font-family: var(--font-mono);
-  font-size: 13px;
-  padding: 2px 7px;
-  border-radius: 5px;
-  background: var(--bg-hover);
-  color: var(--accent-purple);
-  border: 1px solid var(--border);
-}
-.blog-content pre {
-  margin: 20px 0;
-  padding: 16px 18px;
-  border-radius: 12px;
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
-  overflow-x: auto;
-  font-size: 13px;
-  line-height: 1.7;
-}
-.blog-content pre code {
-  padding: 0;
-  border: none;
-  background: none;
-  color: var(--text-primary);
-}
-.blog-content hr {
-  border: none;
-  border-top: 1px solid rgba(255,255,255,0.06);
-  margin: 40px 0;
-}
-.blog-content img {
-  max-width: 100%;
-  height: auto;
-  border-radius: 8px;
-  margin: 20px 0;
-}
-
-.blog-content .highlight-box {
-  padding: 18px 20px;
-  border-radius: 12px;
-  border-left: none;
-  border: 1px solid rgba(52,211,153,0.1);
-  background: rgba(52,211,153,0.04);
-  margin: 28px 0;
-}
-
-/* 모바일 블로그 반응형
-   .blog-content / .blog-content p 의 모바일 타이포도 blog.css 로 수렴했다.
-   미디어쿼리는 특이도를 올리지 않으므로 여기 두면 뒤에 로드되는 blog.css 의
-   기본 규칙(16px)에 그대로 져서 죽은 코드가 된다 — 실제로 그랬다. */
-@media (max-width: 640px) {
-  .blog-content h2 { margin-top: 40px; margin-bottom: 14px; font-size: 20px; }
-  .blog-content h3 { margin-top: 28px; font-size: 16.5px; padding: 6px 0 6px 12px; }
-  .blog-content table { font-size: 12.5px; display: block; overflow-x: auto; }
-  .blog-content th, .blog-content td { padding: 10px 12px; white-space: nowrap; }
-  .blog-content img { margin: 16px 0; border-radius: 8px; }
-  .blog-content li { font-size: 15px; }
-  .blog-content blockquote { padding: 16px 18px 16px 20px; font-size: 14.5px; }
-}
-
-/* ═══ 피드 게시글 본문 ═══ */
-.feed-detail-content {
-  font-size: 15px !important;
-  line-height: 1.82 !important;
-  letter-spacing: -0.2px;
-  word-break: keep-all;
-  color: var(--text-primary);
-}
-@media (max-width: 640px) {
-  .feed-detail-content { font-size: 14.5px !important; line-height: 1.75 !important; }
-}
-
-/* ═══ 댓글 — 가독성 개선 ═══ */
-.kd-comment {
-  padding: 14px 0;
-  border-bottom: 1px solid var(--border);
-}
-.kd-comment:last-child { border-bottom: none; }
-.kd-comment-body {
-  font-size: 14px;
-  line-height: 1.75;
-  color: var(--text-primary);
-  word-break: keep-all;
-  margin: 6px 0 8px;
-  white-space: pre-wrap;
-}
-.kd-comment-meta {
-  font-size: 12px;
-  color: var(--text-tertiary);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.kd-comment-author {
-  font-weight: 600;
-  font-size: 13px;
-  color: var(--text-primary);
-}
-.kd-comment-actions {
-  display: flex;
-  gap: 12px;
-  margin-top: 4px;
-}
-.kd-comment-actions button {
-  font-size: 12px;
-  color: var(--text-tertiary);
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 4px 0;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  transition: color 0.15s;
-}
-.kd-comment-actions button:hover { color: var(--text-secondary); }
-@media (max-width: 640px) {
-  .kd-comment { padding: 12px 0; }
-  .kd-comment-body { font-size: 13.5px; line-height: 1.7; }
-  .kd-comment-author { font-size: 12.5px; }
-}
-
-/* ═══ 버튼 — 통일된 가독성 ═══ */
-.kd-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 8px 16px;
-  border-radius: var(--radius-md, 8px);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s;
-  border: 1px solid var(--border);
-  background: var(--bg-surface);
-  color: var(--text-primary);
-  line-height: 1.4;
-  white-space: nowrap;
-}
-.kd-btn:hover { border-color: var(--border-strong); background: var(--bg-hover); }
-.kd-btn:active { transform: scale(0.97); }
-.kd-btn-primary {
-  background: var(--brand);
-  color: #fff;
-  border-color: var(--brand);
-}
-.kd-btn-primary:hover { opacity: 0.9; }
-.kd-btn-sm { padding: 5px 10px; font-size: 12px; }
-.kd-btn-lg { padding: 10px 20px; font-size: 14px; }
-@media (max-width: 640px) {
-  .kd-btn { padding: 7px 14px; font-size: 12.5px; }
-  .kd-btn-lg { padding: 9px 18px; font-size: 13px; }
-}
-
-/* ═══ 피드 카드 제목/본문 가독성 ═══ */
-.kd-feed-card .kd-feed-title {
-  font-size: 15px;
-  font-weight: 700;
-  line-height: 1.45;
-  color: var(--text-primary);
-  letter-spacing: -0.3px;
-  margin-bottom: 6px;
-  word-break: keep-all;
-}
-.kd-feed-card .kd-feed-body {
-  font-size: 14px;
-  line-height: 1.65;
-  color: var(--text-secondary);
-  word-break: keep-all;
-}
-@media (max-width: 640px) {
-  .kd-feed-card .kd-feed-title { font-size: 14.5px; }
-  .kd-feed-card .kd-feed-body { font-size: 13.5px; }
-}
-
-/* ═══ 글쓰기 에디터 ═══ */
-.kd-write-title {
-  font-size: clamp(18px, 5vw, 22px) !important;
-  font-weight: 800 !important;
-  line-height: 1.4 !important;
-  letter-spacing: -0.5px;
-}
-.kd-write-body {
-  font-size: 15px !important;
-  line-height: 1.8 !important;
-  letter-spacing: -0.2px;
-}
-
-/* ═══════════════════════════════════════════
-   유틸리티 클래스 — 반복 인라인 스타일 대체
-   ═══════════════════════════════════════════ */
-
-/* ── 카드 래퍼 (131곳 반복 패턴) ── */
-.kd-card-base {
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-card);
-  padding: var(--card-p);
-  transition: border-color var(--transition-fast);
-}
-.kd-card-base:hover {
-  border-color: var(--border-strong);
-}
-
-/* ── 뱃지/태그 (반복 패턴 통합) ── */
-.kd-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  padding: 2px 8px;
-  border-radius: var(--radius-xs);
-  font-size: var(--fs-xs);
-  font-weight: 600;
-  line-height: 1.4;
-  white-space: nowrap;
-}
-.kd-badge-brand { background: var(--brand-bg); color: var(--brand); border: 1px solid var(--brand-border); }
-.kd-badge-green { background: var(--accent-green-bg); color: var(--accent-green); border: 1px solid rgba(46,232,165,0.2); }
-.kd-badge-red { background: var(--accent-red-bg); color: var(--accent-red); border: 1px solid rgba(255,107,107,0.2); }
-.kd-badge-purple { background: var(--accent-purple-bg); color: var(--accent-purple); border: 1px solid rgba(183,148,255,0.2); }
-.kd-badge-orange { background: var(--accent-orange-bg); color: var(--accent-orange); border: 1px solid rgba(255,159,67,0.2); }
-.kd-badge-stock { background: rgba(56,189,248,0.08); color: #38BDF8; border: 1px solid rgba(56,189,248,0.25); }
-.kd-badge-apt { background: rgba(52,211,153,0.08); color: #2EE8A5; border: 1px solid rgba(52,211,153,0.25); }
-
-/* ── 인터랙션 버튼 (좋아요/댓글/공유) ── */
-.kd-action-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  padding: 4px 8px;
-  border-radius: var(--radius-sm);
-  background: var(--bg-elevated);
-  border: none;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text-tertiary);
-  cursor: pointer;
-  font-family: inherit;
-  transition: color var(--transition-fast), background var(--transition-fast);
-  -webkit-tap-highlight-color: transparent;
-}
-.kd-action-btn:hover { color: var(--text-secondary); background: var(--bg-active); }
-.kd-action-btn:active { transform: scale(0.96); }
-.kd-action-btn.active { color: var(--accent-red); }
-
-/* ── 탭 버튼 ── */
-.kd-tab-btn {
-  padding: 8px 16px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border);
-  background: var(--bg-surface);
-  color: var(--text-tertiary);
-  font-size: var(--fs-xs);
-  font-weight: 700;
-  cursor: pointer;
-  font-family: inherit;
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  transition: all var(--transition-fast);
-  -webkit-tap-highlight-color: transparent;
-}
-.kd-tab-btn[aria-pressed="true"],
-.kd-tab-btn.active {
-  background: var(--brand);
-  color: #fff;
-  border-color: var(--brand);
-  box-shadow: 0 2px 8px rgba(59,123,246,0.25);
-}
-
-/* ── 필터 pill ── */
-.kd-pill {
-  padding: 6px 12px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: var(--bg-surface);
-  color: var(--text-tertiary);
-  font-size: var(--fs-xs);
-  font-weight: 600;
-  cursor: pointer;
-  font-family: inherit;
-  flex-shrink: 0;
-  transition: all var(--transition-fast);
-  -webkit-tap-highlight-color: transparent;
-}
-.kd-pill.active {
-  background: var(--brand);
-  color: #fff;
-  border-color: var(--brand);
-}
-
-/* ── 정렬 버튼 ── */
-.kd-sort-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 6px 12px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: transparent;
-  color: var(--text-tertiary);
-  font-size: var(--fs-xs);
-  font-weight: 500;
-  cursor: pointer;
-  font-family: inherit;
-  transition: all var(--transition-fast);
-}
-.kd-sort-btn.active {
-  border-color: var(--brand);
-  background: var(--brand-bg);
-  color: var(--brand);
-  font-weight: 700;
-}
-
-/* ── 해시태그 칩 ── */
-.kd-tag {
-  padding: 2px 8px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text-tertiary);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  -webkit-tap-highlight-color: transparent;
-}
-.kd-tag:hover, .kd-tag.active {
-  border-color: var(--brand);
-  color: var(--brand);
-  background: var(--brand-bg);
-}
-
-/* ── 섹션 헤더 ── */
-.kd-section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin: var(--sp-lg) 0 var(--sp-sm);
-}
-.kd-section-header h3 {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: var(--fs-base);
-  font-weight: 800;
-  margin: 0;
-}
-.kd-section-header a {
-  font-size: var(--fs-xs);
-  color: var(--brand);
-  font-weight: 600;
-  text-decoration: none;
-}
-
-/* ── 아바타 ── */
-.kd-avatar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  color: var(--text-inverse);
-  flex-shrink: 0;
-}
-.kd-avatar-sm { width: 28px; height: 28px; border-radius: var(--radius-sm); font-size: 11px; }
-.kd-avatar-md { width: 36px; height: 36px; border-radius: var(--radius-md); font-size: 14px; }
-.kd-avatar-lg { width: 48px; height: 48px; border-radius: var(--radius-lg); font-size: 18px; }
-
-/* ── 인터랙션 바 (카드 하단) ── */
-.kd-interaction-bar {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding-top: 4px;
-  border-top: 1px solid rgba(26,42,74,0.4);
-}
-
-/* ── KPI / 스탯 그리드 ── */
-.kd-stat-grid {
-  display: grid;
-  gap: var(--sp-sm);
-}
-.kd-stat-grid-3 { grid-template-columns: repeat(3, 1fr); }
-.kd-stat-grid-4 { grid-template-columns: repeat(4, 1fr); }
-.kd-stat-item {
-  padding: var(--sp-sm) var(--sp-md);
-  border-radius: var(--radius-md);
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
-}
-.kd-stat-item .label { font-size: 9px; color: var(--text-tertiary); margin-bottom: 2px; }
-.kd-stat-item .value { font-size: var(--fs-sm); font-weight: 700; }
-
-/* ── 탭형 숫자 ── */
-.kd-tabular { font-variant-numeric: tabular-nums; }
-
-/* ── 프로그레스 바 ── */
-.kd-progress { height: 3px; border-radius: 2px; background: var(--bg-elevated); overflow: hidden; margin-top: var(--sp-sm); }
-.kd-progress-bar { height: 100%; border-radius: 2px; }
-
-/* ═══════════════════════════════════════════
-   반응형 그리드 보정 — 모바일 오버플로우 방지
-   ═══════════════════════════════════════════ */
-
-/* 캘린더 7열 — 모바일 글꼴/패딩 축소 */
-@media (max-width: 480px) {
-  .kd-cal-grid { font-size: 10px !important; gap: 1px !important; }
-  .kd-cal-grid > div { padding: 2px !important; }
-}
-
-/* KPI 5열 → 모바일 3+2열 또는 스크롤 */
-.kd-kpi-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--sp-xs); }
-@media (max-width: 480px) {
-  .kd-kpi-5 { grid-template-columns: repeat(3, 1fr); }
-}
-@media (max-width: 480px) {
-  .kd-kpi-5 { grid-template-columns: repeat(2, 1fr); }
-}
-
-/* 지수 KPI 6열 (모바일 3×2, 데스크탑 6열) */
-.kd-index-kpi { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; }
-@media (min-width: 768px) { .kd-index-kpi { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
-
-/* KPI 4열 → 모바일 2열 */
-.kd-grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
-@media (max-width: 480px) {
-  .kd-grid-4 { grid-template-columns: repeat(2, 1fr); }
-}
-
-/* 3열 → 모바일 2열 */
-.kd-grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
-@media (max-width: 480px) {
-  .kd-grid-3 { grid-template-columns: repeat(2, 1fr); }
-}
-
-/* 2열 (1fr+2fr) → 모바일 1열 스택 */
-.kd-grid-1-2 { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,2fr); }
-@media (max-width: 480px) {
-  .kd-grid-1-2 { grid-template-columns: 1fr; }
-}
-
-/* 글로벌 주식 6열 → 모바일 3열 */
-.kd-grid-6 { display: grid; }
-@media (max-width: 480px) {
-  .kd-grid-6 { grid-template-columns: repeat(3, 1fr) !important; }
-}
-@media (max-width: 480px) {
-  .kd-grid-6 { grid-template-columns: repeat(2, 1fr) !important; }
-}
-
-/* 5열 지역 타일 → 모바일 4열 / 극소 3열 */
-@media (max-width: 480px) {
-  .kd-region-grid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
-}
-@media (max-width: 320px) {
-  .kd-region-grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
-}
-
-/* 프로필 통계 4열 → 모바일 2열 */
-@media (max-width: 480px) {
-  .kd-stats-4 { grid-template-columns: repeat(2, 1fr) !important; }
-}
-
-/* ═══ 리스팅 그리드 — 전 페이지 통일 ═══ */
-.listing-grid {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-sm);
-}
-.listing-grid-2col {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--sp-sm);
-}
-@media (max-width: 480px) {
-  .listing-grid-2col { grid-template-columns: 1fr; }
-}
-
-/* ═══ 히어로 카드 시스템 — 부동산 전탭 공통 ═══ */
-.hero-card {
-  display: block;
-  border-radius: var(--radius-card);
-  overflow: hidden;
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
-  text-decoration: none;
-  color: inherit;
-  transition: border-color 0.15s;
-}
-.hero-card:hover { border-color: rgba(59,123,246,0.35); }
-.hero-img {
-  height: 120px;
-  position: relative;
-  overflow: hidden;
-  background: var(--bg-elevated);
-}
-.hero-img::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(10,15,30,0.3) 0%, rgba(10,15,30,0.15) 40%, rgba(10,15,30,0.5) 75%, rgba(10,15,30,0.75) 100%);
-  pointer-events: none;
-  z-index: 1;
-}
-.hero-img img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-.hero-overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 8px 12px;
-  background: linear-gradient(transparent, rgba(0,0,0,0.65));
-  z-index: 2;
-}
-.hero-badges, .hero-chip { z-index: 2; }
-.hero-name {
-  font-size: 16px;
-  font-weight: 800;
-  color: #fff;
-  line-height: 1.3;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.hero-addr {
-  font-size: 12px;
-  color: rgba(255,255,255,0.8);
-  margin-top: 1px;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.hero-badges {
-  position: absolute;
-  top: 8px;
-  left: 10px;
-  display: flex;
-  gap: 5px;
-  flex-wrap: wrap;
-  max-width: 70%;
-}
-.hero-chip {
-  position: absolute;
-  top: 8px;
-  right: 10px;
-}
-.hero-badge {
-  font-size: 11px;
-  font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 6px;
-  line-height: 1.3;
-  white-space: nowrap;
-}
-.hero-dday {
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 700;
-}
-.hero-kpi {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1px;
-  margin: 0 12px 10px;
-  background: var(--border);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  border: 1px solid var(--border);
-}
-.hero-kpi-cell {
-  background: var(--bg-surface);
-  padding: 8px 6px;
-  text-align: center;
-}
-.hero-kpi-label {
-  font-size: 11px;
-  color: var(--text-tertiary);
-  margin-bottom: 3px;
-}
-.hero-kpi-val {
-  font-size: 13px;
-  font-weight: 800;
-  line-height: 1.3;
-}
-.hero-overlay-stat {
-  text-align: center;
-  background: rgba(0,0,0,0.5);
-  padding: 6px 10px;
-  border-radius: 8px;
-  flex-shrink: 0;
-}
-/* 히어로 카드 — 단지백과 2열 */
-.hero-img-sm { height: 90px; }
-@media (max-width: 480px) {
-  .hero-img { height: 100px; }
-  .hero-img-sm { height: 80px; }
-  .hero-name { font-size: 14px; }
-}
-
-/* SignupNudge 팝업 애니메이션 */
-@keyframes kd-fade-in { from { opacity: 0; } to { opacity: 1; } }
-@keyframes kd-slide-up { from { transform: translateY(20px) scale(0.96); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
-
-/* ═══ 글씨 크기별 레이아웃 방어 ═══ */
-
-/* font-large: 버튼/패딩/카드 확대 */
-html.font-large button,
-html.font-large [role="button"],
-html.font-large a[style*="padding"] {
-  min-height: 36px;
-}
-html.font-large .kd-input,
-html.font-large input[style],
-html.font-large select[style] {
-  min-height: 38px;
-  font-size: 16px !important;
-}
-
-/* font-small: 여백 축소로 밀도 높임 */
-html.font-small button,
-html.font-small [role="button"] {
-  min-height: 28px;
-}
-html.font-small .kd-input,
-html.font-small input[style],
-html.font-small select[style] {
-  min-height: 32px;
-}
-
-/* 글씨 크기 변경 시 그리드 오버플로우 방지 */
-html.font-large [style*="gridTemplateColumns"] > * {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* font-large: KPI 그리드 모바일에서 2열로 전환 */
-@media (max-width: 480px) {
-  html.font-large [style*="repeat(4"] {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+@layer tokens {
+  html.font-small {
+    --sp-xs: 4px;
+    --sp-sm: 8px;
+    --sp-md: 12px;
+    --sp-lg: 16px;
+    --sp-xl: 20px;
+    --sp-2xl: 24px;
+    --btn-h: 40px;
+    --card-p: 14px;
+    --touch-min: 44px;
   }
 }
-
-/* 공통: 글씨 크기 변경 시 트랜지션 */
-* {
-  transition: font-size 0.15s ease;
-}
-
-
-
-/* 블로그 테이블 모바일 overflow 글로벌 */
-.blog-content table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-.blog-content table table { display: table; } /* 중첩 테이블은 block 해제 */
-
-/* ═══════════════════════════════════════════════════════════
-   📱 모바일 CSS 종합 수정 (세션 94)
-   - body overflow-x 안전장치
-   - 그리드 반응형 전환
-   - 테이블 가로 스크롤
-   - 텍스트 오버플로우 방지
-   - 터치 타겟 최소 크기
-═══════════════════════════════════════════════════════════ */
-
-/* 전역: body 가로 넘침 방지 */
-html, body { overflow-x: hidden; max-width: 100vw; }
-
-/* 전역: 이미지 가로 넘침 방지 */
-img { max-width: 100%; height: auto; }
-
-/* 전역: pre/code 가로 넘침 방지 */
-pre, code { overflow-x: auto; max-width: 100%; word-break: break-all; }
-
-/* 전역: 테이블 기본 반응형 */
-table { max-width: 100%; }
-
-/* 종목 상세: KPI 4열 → 모바일 2열 */
-@media (max-width: 480px) {
-  [style*="grid-template-columns: repeat(4"] {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+@layer tokens {
+  html.font-large {
+    --sp-xs: 8px;
+    --sp-sm: 12px;
+    --sp-md: 18px;
+    --sp-lg: 22px;
+    --sp-xl: 28px;
+    --sp-2xl: 36px;
+    --btn-h: 52px;
+    --card-p: 20px;
+    --touch-min: 52px;
   }
 }
+@layer elements {
 
-/* 모바일 320px: 3열 그리드도 2열로 */
-@media (max-width: 480px) {
-  [style*="grid-template-columns: repeat(3"] {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  /* 모바일 + font-large: 간격/글씨 조정 (화면이 좁으니까) */
+  @media (max-width: 640px) {
+    html.font-large {
+      --fs-xs: 14px;
+      --fs-sm: 16px;
+      --fs-base: 19px;
+      --fs-md: 20px;
+      --fs-lg: 22px;
+      --fs-xl: 26px;
+      --fs-2xl: 34px;
+      --sp-md: 16px;
+      --sp-lg: 20px;
+      --sp-xl: 24px;
+      --sp-2xl: 30px;
+      --card-p: 18px;
+    }
+    /* 모바일 font-large: 그리드 카드 텍스트 방어 */
+    html.font-large [style*="gridTemplateColumns"] > * {
+      min-width: 0 !important;
+      word-break: keep-all;
+      overflow-wrap: break-word;
+    }
+    /* 모바일 font-large: 탭/뱃지 줄바꿈 */
+    html.font-large [style*="flexWrap"] { gap: 4px !important; }
+    html.font-small {
+      --fs-xs: 12px;
+      --fs-sm: 14px;
+      --fs-base: 16px;
+      --fs-md: 17px;
+      --fs-lg: 19px;
+      --fs-xl: 22px;
+      --fs-2xl: 28px;
+    }
+    /* 새 기본값 모바일 보정 */
+    :root {
+      --fs-xs: 13px;
+      --fs-sm: 15px;
+      --fs-base: 17px;
+      --fs-md: 18px;
+      --fs-lg: 20px;
+      --fs-xl: 23px;
+      --fs-2xl: 30px;
+      --card-p: 14px;
+    }
+  }
+
+  /* 데스크탑 + font-large: 넉넉한 간격 */
+  @media (min-width: 1024px) {
+    html.font-large {
+      --card-p: 22px;
+      --sp-2xl: 40px;
+    }
+    :root {
+      --card-p: 18px;
+    }
+  }
+
+  /* ========================================
+     카더라 — 완전한 다크모드 CSS 변수 시스템
+     슬로건: 대한민국 소리소문 정보 커뮤니티
+     핵심: 배경-카드-인풋 3단계 명도차 + 경계선 + 그림자
+     ======================================== */
+
+  /* Dark Mode Only — 딥 네이비 다크모드 (세션70: 가독성 대폭 개선) */
+}
+@layer tokens {
+  :root {
+    --bg-base:       #F5F7FA;
+
+    /* ─── 디자인 토큰 ─── */
+    --radius-xs: 4px;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --radius-xl: 20px;
+    --radius-card: 12px;
+    --radius-pill: 999px;
+    --radius-full: 999px;
+
+    --transition-fast: 0.12s ease;
+    --transition-normal: 0.2s ease;
+    --transition-slow: 0.35s ease;
+
+    /* z-index scale — 체계적 레이어 관리 */
+    --z-base: 0;
+    --z-card: 1;
+    --z-sticky: 10;
+    --z-nav: 50;
+    --z-dropdown: 60;
+    --z-modal-backdrop: 80;
+    --z-modal: 90;
+    --z-toast: 100;
+    --z-tooltip: 110;
+    --z-overlay: 200;
+    --bg-surface:    #FFFFFF;
+    --bg-elevated:   #F0F2F5;
+    --bg-sunken:     #E8ECF0;
+    --bg-hover:      #EEF1F5;
+    --bg-active:     #E2E6EC;
+    /* s273b: sticky/backdrop-blur 바 배경. 정의가 없어 소비처에서 rgba(255,255,255,.92)
+       로 폴백되면서 다크 테마에 흰 배경 + 흰 글씨가 나오던 회귀 (Rule #94). */
+    --bg-surface-translucent: rgba(255, 255, 255, 0.92);
+    --border:        #D4DAE3;
+    --border-strong: #B8C2D0;
+    --border-focus:  #4A8AF7;
+    --text-primary:   #111827;
+    --text-secondary: #374151;  /* s8: 6.74 → 9.19 */
+    --text-tertiary:  #4B5563;  /* s8: 5.69 → 6.74. 회색 계열이 본문색의 2배(2,180건)라
+                                   개별 대비가 통과해도 화면 전체가 흐리게 읽혔다.
+                                   primary #111827 → secondary #374151 → tertiary #4B5563 3단 위계 유지 */
+    --text-disabled:  #C8CDD4;
+    --text-inverse:   #FFFFFF;
+    --text-link:      #2563EB;
+    --brand:          #2563EB;
+    --brand-hover:    #1D4ED8;
+    --brand-light:    #EBF2FF;
+    --brand-bg:       rgba(37,99,235,0.08);
+    --brand-border:   rgba(37,99,235,0.18);
+    --accent-blue-light:  #60A5FA;
+    --accent-orange-light: #F97316;
+    --brand-dark:     #1E40AF;
+    --kakao-bg:       #FEE500;
+    --kakao-text:     #191919;
+    --success:        #065F46;  /* s6: --accent-green 과 동일 값이었고 텍스트로 5곳 쓰인다 */
+    --success-bg:     rgba(5,150,105,0.08);
+    --warning:        #92400E;
+    --warning-bg:     rgba(217,119,6,0.08);
+    --error:          #991B1B;
+    --error-bg:       rgba(220,38,38,0.08);
+    --info:           #2563EB;
+    --info-bg:        rgba(37,99,235,0.08);
+    --font-base:      15px;
+    /* 주식 시세 */
+    --stock-up:       #DC2626;
+    --stock-down:     #2563EB;
+    --stock-flat:     #B8CCDF;
+    /* 시맨틱 액센트 (카테고리/상태별) — 세션70: 밝기 +10% */
+    --accent-green:   #065F46;
+    --accent-green-bg: rgba(5,150,105,0.10);
+    --accent-green-border: rgba(5,150,105,0.20);
+    --accent-purple:  #7C3AED;
+    --accent-purple-bg: rgba(124,58,237,0.10);
+    --accent-orange:  #9A3412;
+    --accent-orange-bg: rgba(234,88,12,0.10);
+    --accent-yellow:  #854D0E;
+    --accent-yellow-bg: rgba(202,138,4,0.10);
+    --accent-red:     #991B1B;
+    --accent-red-bg:  rgba(220,38,38,0.10);
+    --accent-blue:    #2563EB;
+    --accent-blue-bg: rgba(37,99,235,0.10);
+    /* ── H5-D1 : 브랜드 네이비·골드 (2026-08-27, 「토큰 신설 금지」 예외 승인) ──
+       왜 신설했나 — 이 색은 src/lib/og/brand.ts 에만 있었다. OG 썸네일은 satori 가
+       TS 상수로 그리므로 CSS 를 안 탄다. 그래서 «화면 컴포넌트가 브랜드색을 쓸 경로가
+       아예 없었다». 화면과 OG 카드가 같은 색이어야 하므로 값을 옮겨 온다.
+
+       ⚠️ --brand-hero-bg 는 brand.ts 의 BRAND_BG 와 «바이트 단위로 같아야» 한다.
+          한쪽만 고치면 OG 카드와 첫 화면이 갈린다. 고칠 땐 반드시 양쪽.
+
+       ⚠️ 골드는 «네이비 위에서만» 쓴다. 흰 배경 위 골드는 1.58:1 로 글자가 안 보인다.
+          흰 배경에서 노랑 계열이 필요하면 --accent-yellow(#854D0E · 6.85:1).
+
+       ⚠️ 그라디언트 «밝은 끝»(#2563EB)에서는 골드가 3.27:1 로 떨어진다. 히어로 하단에
+          글자를 얹을 땐 스크림을 깔아야 한다 — 자세한 실측은 docs/m6/H5_대비실측.md.  */
+    --brand-navy:      #0B2A6B;
+    --brand-navy-mid:  #123A8F;
+    --brand-gold:      #FFC53D;
+    --brand-hero-bg:   linear-gradient(158deg, #0B2A6B 0%, #123A8F 52%, #2563EB 100%);
+    --brand-hero-glow: radial-gradient(120% 90% at 12% 6%, rgba(255,255,255,0.20) 0%, rgba(255,255,255,0.06) 34%, rgba(255,255,255,0) 62%);
+
+    /* ── H5-D1 : amber — «정의 없이 폴백만으로 칠해지던» 3종을 실체화한다 ──
+       var(--accent-amber) 5곳이 폴백을 타고 있었다. #f59e0b 는 흰 배경 대비
+       2.15:1 로 하한 미달이다. 형제 토큰(--accent-yellow)과 «같은 값» 으로 맞춘다 —
+       새 색을 만드는 게 아니라 이미 검증된 값에 이름을 붙이는 것이다. 6.85:1.  */
+    --accent-amber:        #854D0E;
+    --accent-amber-bg:     rgba(202,138,4,0.10);
+    --accent-amber-border: rgba(202,138,4,0.20);
+    --accent-cyan:    #155E75;
+
+    /* Stock colors — KR (빨강↑ 파랑↓) */
+    --stock-kr-up:        #D32F2F;
+    --stock-kr-up-bg:     rgba(211,47,47,0.08);
+    --stock-kr-up-strong: #C62828;
+    --stock-kr-down:      #1976D2;
+    --stock-kr-down-bg:   rgba(25,118,210,0.08);
+    --stock-kr-down-strong:#1565C0;
+    /* Stock colors — US (초록↑ 빨강↓) */
+    --stock-us-up:        #2E7D32;
+    --stock-us-up-bg:     rgba(46,125,50,0.08);
+    --stock-us-up-strong: #1B5E20;
+    --stock-us-down:      #C62828;
+    --stock-us-down-bg:   rgba(198,40,40,0.08);
+    --stock-us-down-strong:#B71C1C;
+    /* Stock flat */
+    --stock-flat:         #757575;
+    --stock-flat-bg:      rgba(117,117,117,0.06);
+    /* Investor colors */
+    /* ⚠️ #E65100 은 흰 배경 대비 3.79 로 하한 미달이었다 — 이 값은 «본문 글자색» 으로도 쓰인다
+       (StockDetailTabs 340행 범례 · 358행 수급 금액). 형제 둘은 이미 어둡다 —
+       --stock-inst #7B1FA2(8.20) · --stock-retail #00838F(4.52). 이것만 밝았다.
+       색상(H)·채도(S)는 두고 명도만 낮춰 4.82. 새 토큰(-strong)은 만들지 않았다. */
+    --stock-foreign:      #C84700;
+    --stock-foreign-bg:   rgba(230,81,0,0.06);
+    --stock-inst:         #7B1FA2;
+    --stock-inst-bg:      rgba(123,31,162,0.06);
+    --stock-retail:       #00838F;
+    --stock-retail-bg:    rgba(0,131,143,0.06);
+    /* AI signal & sentiment */
+    --stock-bullish:      #2E7D32;
+    --stock-bullish-bg:   rgba(46,125,50,0.06);
+    --stock-bearish:      #C62828;
+    --stock-bearish-bg:   rgba(198,40,40,0.06);
+    --stock-positive:     #2E7D32;
+    --stock-positive-bg:  rgba(46,125,50,0.06);
+    --stock-negative:     #C62828;
+    --stock-negative-bg:  rgba(198,40,40,0.06);
+    --stock-neutral:      #757575;
+    --stock-neutral-bg:   rgba(117,117,117,0.06);
+    /* Market status */
+    --stock-market-open:  #2E7D32;
+    --stock-market-open-bg: rgba(46,125,50,0.06);
+    --stock-market-closed:#757575;
+    --stock-market-closed-bg: rgba(117,117,117,0.06);
+    /* 네비게이션 */
+    --nav-bg:         #FFFFFF;
+    --nav-border:     #D4DAE3;
+    --nav-text:       #111827;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+    --shadow-md: 0 2px 8px rgba(0,0,0,0.10);
+    --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+    --shadow-xl: 0 16px 40px rgba(0,0,0,0.15);
+    --shadow-color: rgba(0,0,0,0.15);
+    color-scheme: light;
+
+    /* S1: 잉크(의도적 다크 서피스) 토큰 — 기존 다크값 승계 */
+    --ink-bg:        #0D1730;
+    --ink-bg-deep:   #050A18;
+    --ink-text:      #F2F5FA;
+    --ink-text-dim:  #8BA3C0;
+    --ink-border:    #1E3258;
+
+    /* S1: 청약 상태 토큰 */
+    --status-open:   var(--accent-green);
+    --status-soon:   var(--accent-orange);
+    --status-fcfs:   var(--brand);
+    --status-closed: var(--text-tertiary);
+
+    /* S1: 진행 레일 토큰 */
+    --rail-done:     var(--text-tertiary);
+    --rail-now:      var(--brand);
+    --rail-todo:     var(--border);
+    --rail-h:        4px;
+    --rail-h-lg:     6px;
   }
 }
+@layer elements {
 
-/* 종목/부동산 상세: flex 아이템 넘침 방지 */
-@media (max-width: 480px) {
-  article { overflow-x: hidden; }
-}
+  /* S1: 라이트 단일 테마 — 다크모드 제거됨 */
 
-/* FeedStatusBar: 초소형 화면 대응 */
-@media (max-width: 480px) {
-  .feed-status-bar {
-    font-size: 10px !important;
-    gap: 2px !important;
-    padding: 4px !important;
+  /* ========================================
+     S1: 라이트 단일 모드 — 라이트 값은 :root로 승격됨
+     ======================================== */
+  /* s239 W6: body/html !important 제거 — specificity 충돌 풀면서 component override 가능. input/textarea 는 third-party 호환 위해 keep. */
+
+  /* ========================================
+     기본 리셋
+     ======================================== */
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+  body {
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 1rem;
+    /* s6-3: 한글은 받침 때문에 라틴보다 글자 높이가 커서 1.5 면 줄이 붙어 보인다.
+       1.7 이상은 높이가 고정된 카드에서 세로 넘침을 만든다.
+       1.5 → 1.65 로 올렸다가 실화면에서 밀도가 과해 1.58 로 내렸다.
+       배지·숫자·한 줄 라벨의 인라인 lineHeight 1.4 이하는 의도된 값이라 건드리지 않는다. */
+    line-height: 1.58;
+    -webkit-font-smoothing: antialiased;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    word-break: keep-all;
+    overflow-wrap: break-word;
   }
-  .feed-status-bar > div {
-    gap: 1px !important;
+
+  /* ━━━ 세션51: 진화 강화 ━━━ */
+
+  /* 15. 카드 호버 시 좌측 카테고리 컬러 보더 */
+  @media (hover: hover) {
+    .kd-feed-card { border-left: 3px solid transparent; transition: border-left-color 0.15s, background 0.15s; }
+    .kd-feed-card:hover { border-left-color: var(--brand) !important; }
+    .kd-feed-card[data-cat="stock"]:hover { border-left-color: #00E5FF !important; }
+    .kd-feed-card[data-cat="apt"]:hover { border-left-color: #00FF87 !important; }
+    .kd-feed-card[data-cat="local"]:hover { border-left-color: #FFD43B !important; }
+    .kd-feed-card[data-cat="free"]:hover { border-left-color: #F472B6 !important; }
+    .kd-card-hover { border-left: 3px solid transparent; transition: border-left-color 0.15s, transform 0.15s; }
+    .kd-card-hover:hover { border-left-color: var(--brand) !important; }
   }
-}
 
-/* 피드 카드: 투표/VS/예측 카드 패딩 축소 */
-@media (max-width: 480px) {
-  .feed-poll-card, .feed-vs-card, .feed-predict-card {
-    padding: 10px !important;
+  /* 8. 방문한 글 표시 */
+  .kd-feed-card.visited { opacity: 0.7; }
+  .kd-feed-card.visited .kd-card-title { color: var(--text-tertiary) !important; }
+
+  /* 피드 카드 히어로 이미지 — max-height 제한으로 거대 이미지 방지 */
+  .kd-hero-img { border-radius: 10px; overflow: hidden; margin-top: 8px; position: relative; aspect-ratio: 16/9; max-height: 280px; }
+  .kd-hero-img img { width: 100%; height: 100%; object-fit: cover; }
+  /* 피드 상세 본문 내 이미지 제한 */
+  .feed-detail-content img { max-width: 100%; max-height: 500px; height: auto; border-radius: var(--radius-sm); object-fit: contain; }
+
+  /* ━━━ 블로그 2컬럼 레이아웃 + 가독성 강화 ━━━ */
+  .blog-detail-layout { max-width: 720px; margin: 0 auto; padding: 0 var(--sp-lg); }
+  .blog-detail-main { min-width: 0; }
+  .blog-detail-side { display: none; }
+
+  /* 블로그 본문 가독성
+     본문 타이포(.blog-content / p / h2)는 styles/blog.css 로 수렴했다.
+     blog.css 가 뒤에 로드되어 항상 이기므로 여기 남은 중복 정의는 전부 죽은 코드였고,
+     "globals 를 고쳤는데 화면이 안 바뀐다" 의 원인이었다. h3 장식만 남긴다. */
+  .blog-content h3 { font-size: 18px; border-left: 3px solid var(--brand); padding-left: 10px; margin-top: 28px; }
+  .blog-content table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; }
+  .blog-content th { background: var(--bg-surface); padding: 10px 12px; text-align: left; font-weight: 600; font-size: 13px; border-bottom: 1px solid var(--border); }
+  .blog-content td { padding: 8px 12px; border-bottom: 1px solid var(--border); }
+  .blog-content tr:last-child td { border-bottom: none; }
+  .blog-content blockquote { border-left: 3px solid var(--brand); padding: 12px 16px; margin: 16px 0; background: var(--bg-surface); border-radius: 0 var(--radius-md) var(--radius-md) 0; }
+
+  /* 블로그 목차 인라인 (모바일용) — 데스크탑에서는 사이드바 사용 */
+  .blog-toc-inline { display: block; }
+
+  /* 블로그 사이드바 스크롤바 */
+  .blog-sidebar::-webkit-scrollbar { width: 3px; }
+  .blog-sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  /* 블로그 next-article 플로팅 카드 */
+  @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .kd-next-article { animation: slideUp 0.3s ease-out; }
+
+  /* ━━━ 세션58: 모바일 반응형 전면 강화 ━━━ */
+
+  /* 부동산 탭 그리드 — 모바일에서 2열→1열 */
+  @media (max-width: 480px) {
+    .mc-g2 { grid-template-columns: 1fr !important; }
   }
-}
 
-/* 주식 히트맵/트리맵: 가로 넘침 방지 */
-@media (max-width: 640px) {
-  .stock-treemap-container, .stock-heatmap-container {
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch;
+  /* 부동산 카드 내부 패딩 최적화 */
+  .apt-card { padding: 12px 14px; border-radius: 10px; background: var(--bg-surface); border: 1px solid var(--border); margin-bottom: 8px; }
+  @media (max-width: 480px) {
+    .apt-card { padding: 10px 12px; }
   }
-}
 
-/* 프로필/설정 페이지: 그리드 1열 전환 */
-@media (max-width: 480px) {
-  .profile-grid, .settings-grid {
-    grid-template-columns: 1fr !important;
+  /* 테이블 오버플로우 — 모바일 가로 스크롤 */
+  .apt-card table { width: 100%; font-size: var(--fs-xs); }
+  @media (max-width: 480px) {
+    .apt-card table { font-size: 10px; }
+    .apt-card th, .apt-card td { padding: 4px 3px !important; }
   }
-}
 
-/* 네비게이션 하단 바: 아이콘 & 텍스트 크기 */
-@media (max-width: 320px) {
-  .bottom-nav { font-size: 9px !important; }
-  .bottom-nav svg { width: 18px !important; height: 18px !important; }
-}
-
-/* 종목 비교 페이지: 테이블 가로 스크롤 강제 */
-@media (max-width: 640px) {
-  .compare-table-wrap {
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch;
+  /* KPI 3열 그리드 — 좁은 화면에서 간격 축소 */
+  @media (max-width: 480px) {
+    .kpi-row { gap: 4px !important; }
+    .kpi-row > div { padding: 6px 4px !important; }
   }
-}
 
-/* 부동산 카드: KPI 행 초소형 대응 */
-@media (max-width: 320px) {
-  .kpi-row {
-    gap: 2px !important;
-    font-size: 10px !important;
+  /* 도넛 차트 + 범례 — 모바일 스택 */
+  @media (max-width: 480px) {
+    .region-overview-layout { flex-direction: column !important; }
+    .region-overview-layout > div:first-child { max-width: 160px; margin: 0 auto 8px; }
   }
-  .kpi-row > div {
-    padding: 4px 2px !important;
-    min-width: 0 !important;
+
+  /* B-2 도넛 카드 그리드 — 모바일 최적화 */
+  @media (max-width: 480px) {
+    .donut-card-grid { font-size: 0.95em; gap: 2px !important; }
+    .donut-card-grid > div { padding: 4px 3px !important; }
   }
-}
-
-/* 블로그: 제목 줄바꿈 */
-.blog-content h1, .blog-content h2, .blog-content h3 {
-  overflow-wrap: break-word;
-  word-break: keep-all;
-}
-
-/* 블로그: 코드 블록 가로 스크롤 */
-.blog-content pre {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  max-width: 100%;
-}
-
-/* 블로그: 이미지 가로 넘침 방지 */
-.blog-content img {
-  max-width: 100% !important;
-  height: auto !important;
-}
-
-/* 댓글: 긴 텍스트 줄바꿈 */
-.kd-comment-body {
-  overflow-wrap: break-word;
-  word-break: break-word;
-}
-
-/* 공유 버튼: 초소형 화면 */
-@media (max-width: 320px) {
-  .share-buttons {
-    gap: 2px !important;
-    flex-wrap: wrap !important;
+  @media (max-width: 480px) {
+    .donut-card-grid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; gap: 1px !important; }
+    .donut-card-grid > div { padding: 3px 2px !important; }
   }
-  .share-buttons button, .share-buttons a {
-    font-size: 10px !important;
-    padding: 3px 6px !important;
+
+  /* 탭 세그먼트 — 작은 화면에서 폰트 축소 */
+  @media (max-width: 480px) {
+    .kd-tab-segment { font-size: 11px !important; }
+    .kd-tab-segment > button { padding: 6px 4px !important; }
   }
-}
 
-/* 어드민: 모바일 대응 */
-@media (max-width: 480px) {
-  .adm-card { padding: 10px !important; }
-  .adm-btn { padding: 6px 8px !important; font-size: 11px !important; }
-}
+  /* 공유 버튼 — 모바일에서 간격 조정 */
+  @media (max-width: 480px) {
+    .share-buttons { gap: 4px !important; }
+    .share-buttons button { padding: 4px 8px !important; font-size: 11px !important; }
+  }
 
-/* 토론방: 메시지 버블 넘침 방지 */
-.discuss-message {
-  overflow-wrap: break-word;
-  word-break: break-word;
-  max-width: 100%;
-}
+  /* 타임라인 단계 — 모바일 텍스트 축소 */
+  @media (max-width: 480px) {
+    .tl-step { font-size: 8px !important; }
+  }
 
-/* 글로벌: 긴 URL/숫자 줄바꿈 */
-a, span, p, div {
-  overflow-wrap: break-word;
-}
+  /* 가로 스크롤 pill — 한줄 스크롤 */
+  .kd-scroll-row { display: flex; gap: var(--sp-sm); overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; padding-bottom: 2px; }
+  .kd-scroll-row::-webkit-scrollbar { display: none; }
 
-/* 모바일: 카드 내 숫자 텍스트 축소 */
-@media (max-width: 480px) {
-  .kd-counter { font-size: 14px !important; }
-}
+  /* 카드 내 flex 줄바꿈 */
+  @media (max-width: 480px) {
+    .card-flex-wrap { flex-wrap: wrap !important; }
+  }
 
-/* 모바일: 터치 타겟 최소 크기 보장 */
-@media (max-width: 640px) {
-  button, a, [role="button"] {
+  /* 분양 상세 — 시세 비교 테이블 스크롤 */
+  @media (max-width: 480px) {
+    .apt-card .price-compare-table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  }
+
+  /* 하단 CTA 버튼 — 모바일 풀너비 */
+  @media (max-width: 480px) {
+    .cta-row { flex-direction: column !important; }
+    .cta-row > a, .cta-row > button { width: 100% !important; text-align: center !important; }
+  }
+
+  /* ═══ 블로그 본문 — 종합 타이포그래피 시스템 ═══
+     .blog-content / .blog-content p / h2 의 타이포·색 정의는 styles/blog.css 로 옮겼다.
+     같은 선언을 두 파일에 두면 뒤에 로드되는 blog.css 가 항상 이겨서 여기 수정이 묻힌다. */
+  .blog-content h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 36px 0 14px;
+    letter-spacing: -0.3px;
+    line-height: 1.45;
+    padding: 8px 0 8px 14px;
+    border-left: 3px solid var(--brand);
+  }
+  .blog-content h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 28px 0 10px;
+  }
+  .blog-content strong, .blog-content b {
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .blog-content a {
+    color: var(--brand);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+  }
+  .blog-content a:hover { text-decoration-color: var(--brand); text-decoration-thickness: 2px; }
+
+  .blog-content ul, .blog-content ol {
+    margin: 0 0 24px;
+    padding-left: 22px;
+  }
+  .blog-content li {
+    font-size: 16px;
+    line-height: 2.0;
+    margin-bottom: 8px;
+    color: var(--text-secondary);
+  }
+  .blog-content li::marker { color: var(--brand); }
+
+  .blog-content blockquote {
+    margin: 28px 0;
+    padding: 20px 22px 20px 24px;
+    border-left: none;
+    border-radius: 12px;
+    background: rgba(74,138,247,0.04);
+    border: 1px solid rgba(74,138,247,0.08);
+    font-size: 15.5px;
+    font-style: italic;
+    line-height: 1.85;
+    color: var(--text-secondary);
+    position: relative;
+  }
+  .blog-content blockquote::before {
+    content: '\201C';
+    position: absolute;
+    top: 10px;
+    left: 16px;
+    font-size: 32px;
+    font-family: Georgia, serif;
+    color: var(--brand);
+    opacity: 0.2;
+    line-height: 1;
+  }
+  .blog-content blockquote p {
+    padding-left: 16px;
+    margin-bottom: 0;
+    color: var(--text-secondary);
+  }
+  .blog-content blockquote p:last-child { margin-bottom: 0; }
+
+  .blog-content table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 12px 0 28px;
+    font-size: 14px;
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .blog-content th {
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    background: rgba(74,138,247,0.05);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .blog-content td {
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    line-height: 1.6;
+    color: var(--text-secondary);
+  }
+  .blog-content td:last-child { font-weight: 500; color: var(--text-primary); }
+  .blog-content tr:last-child td { border-bottom: none; }
+  .blog-content tr:nth-child(even) td { background: rgba(255,255,255,0.012); }
+
+  .blog-content code {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    padding: 2px 7px;
+    border-radius: 5px;
+    background: var(--bg-hover);
+    color: var(--accent-purple);
+    border: 1px solid var(--border);
+  }
+  .blog-content pre {
+    margin: 20px 0;
+    padding: 16px 18px;
+    border-radius: 12px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    overflow-x: auto;
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .blog-content pre code {
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--text-primary);
+  }
+  .blog-content hr {
+    border: none;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    margin: 40px 0;
+  }
+  .blog-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin: 20px 0;
+  }
+
+  .blog-content .highlight-box {
+    padding: 18px 20px;
+    border-radius: 12px;
+    border-left: none;
+    border: 1px solid rgba(52,211,153,0.1);
+    background: rgba(52,211,153,0.04);
+    margin: 28px 0;
+  }
+
+  /* 모바일 블로그 반응형
+     .blog-content / .blog-content p 의 모바일 타이포도 blog.css 로 수렴했다.
+     미디어쿼리는 특이도를 올리지 않으므로 여기 두면 뒤에 로드되는 blog.css 의
+     기본 규칙(16px)에 그대로 져서 죽은 코드가 된다 — 실제로 그랬다. */
+  @media (max-width: 640px) {
+    .blog-content h2 { margin-top: 40px; margin-bottom: 14px; font-size: 20px; }
+    .blog-content h3 { margin-top: 28px; font-size: 16.5px; padding: 6px 0 6px 12px; }
+    .blog-content table { font-size: 12.5px; display: block; overflow-x: auto; }
+    .blog-content th, .blog-content td { padding: 10px 12px; white-space: nowrap; }
+    .blog-content img { margin: 16px 0; border-radius: 8px; }
+    .blog-content li { font-size: 15px; }
+    .blog-content blockquote { padding: 16px 18px 16px 20px; font-size: 14.5px; }
+  }
+
+  /* ═══ 피드 게시글 본문 ═══ */
+  .feed-detail-content {
+    font-size: 15px !important;
+    line-height: 1.82 !important;
+    letter-spacing: -0.2px;
+    word-break: keep-all;
+    color: var(--text-primary);
+  }
+  /* ⚠️ H5-D3 — 여기 있던 @media(max-width:640px) .feed-detail-content 14.5px/1.75 를 지웠다.
+     responsive.css 가 «같은 미디어쿼리·같은 셀렉터·같은 속성» 을 !important 로 다시 선언해
+     (var(--fs-base)/1.85) 이 규칙은 이미 «한 번도 이긴 적이 없는 죽은 코드» 였다.
+     @layer 는 important 순서를 뒤집으므로 그냥 두면 «갑자기 살아나서» 본문이 작아진다.
+     살아 있는 쪽(responsive.css)만 남긴다. */
+
+  /* ═══ 댓글 — 가독성 개선 ═══ */
+  .kd-comment {
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .kd-comment:last-child { border-bottom: none; }
+  .kd-comment-body {
+    font-size: 14px;
+    line-height: 1.75;
+    color: var(--text-primary);
+    word-break: keep-all;
+    margin: 6px 0 8px;
+    white-space: pre-wrap;
+  }
+  .kd-comment-meta {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .kd-comment-author {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--text-primary);
+  }
+  .kd-comment-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 4px;
+  }
+  .kd-comment-actions button {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 0;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: color 0.15s;
+  }
+  .kd-comment-actions button:hover { color: var(--text-secondary); }
+  @media (max-width: 640px) {
+    .kd-comment { padding: 12px 0; }
+    .kd-comment-body { font-size: 13.5px; line-height: 1.7; }
+    .kd-comment-author { font-size: 12.5px; }
+  }
+
+  /* ═══ 버튼 — 통일된 가독성 ═══ */
+  .kd-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: var(--radius-md, 8px);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 1px solid var(--border);
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    line-height: 1.4;
+    white-space: nowrap;
+  }
+  .kd-btn:hover { border-color: var(--border-strong); background: var(--bg-hover); }
+  .kd-btn:active { transform: scale(0.97); }
+  .kd-btn-primary {
+    background: var(--brand);
+    color: #fff;
+    border-color: var(--brand);
+  }
+  .kd-btn-primary:hover { opacity: 0.9; }
+  .kd-btn-sm { padding: 5px 10px; font-size: 12px; }
+  .kd-btn-lg { padding: 10px 20px; font-size: 14px; }
+  @media (max-width: 640px) {
+    .kd-btn { padding: 7px 14px; font-size: 12.5px; }
+    .kd-btn-lg { padding: 9px 18px; font-size: 13px; }
+  }
+
+  /* ═══ 피드 카드 제목/본문 가독성 ═══ */
+  .kd-feed-card .kd-feed-title {
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.45;
+    color: var(--text-primary);
+    letter-spacing: -0.3px;
+    margin-bottom: 6px;
+    word-break: keep-all;
+  }
+  .kd-feed-card .kd-feed-body {
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--text-secondary);
+    word-break: keep-all;
+  }
+  @media (max-width: 640px) {
+    .kd-feed-card .kd-feed-title { font-size: 14.5px; }
+    .kd-feed-card .kd-feed-body { font-size: 13.5px; }
+  }
+
+  /* ═══ 글쓰기 에디터 ═══ */
+  .kd-write-title {
+    font-size: clamp(18px, 5vw, 22px) !important;
+    font-weight: 800 !important;
+    line-height: 1.4 !important;
+    letter-spacing: -0.5px;
+  }
+  .kd-write-body {
+    font-size: 15px !important;
+    line-height: 1.8 !important;
+    letter-spacing: -0.2px;
+  }
+
+  /* ═══════════════════════════════════════════
+     유틸리티 클래스 — 반복 인라인 스타일 대체
+     ═══════════════════════════════════════════ */
+
+  /* ── 카드 래퍼 (131곳 반복 패턴) ── */
+  .kd-card-base {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    padding: var(--card-p);
+    transition: border-color var(--transition-fast);
+  }
+  .kd-card-base:hover {
+    border-color: var(--border-strong);
+  }
+
+  /* ── 뱃지/태그 (반복 패턴 통합) ── */
+  .kd-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 2px 8px;
+    border-radius: var(--radius-xs);
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    line-height: 1.4;
+    white-space: nowrap;
+  }
+  .kd-badge-brand { background: var(--brand-bg); color: var(--brand); border: 1px solid var(--brand-border); }
+  .kd-badge-green { background: var(--accent-green-bg); color: var(--accent-green); border: 1px solid rgba(46,232,165,0.2); }
+  .kd-badge-red { background: var(--accent-red-bg); color: var(--accent-red); border: 1px solid rgba(255,107,107,0.2); }
+  .kd-badge-purple { background: var(--accent-purple-bg); color: var(--accent-purple); border: 1px solid rgba(183,148,255,0.2); }
+  .kd-badge-orange { background: var(--accent-orange-bg); color: var(--accent-orange); border: 1px solid rgba(255,159,67,0.2); }
+  .kd-badge-stock { background: rgba(56,189,248,0.08); color: #38BDF8; border: 1px solid rgba(56,189,248,0.25); }
+  .kd-badge-apt { background: rgba(52,211,153,0.08); color: #2EE8A5; border: 1px solid rgba(52,211,153,0.25); }
+
+  /* ── 인터랙션 버튼 (좋아요/댓글/공유) ── */
+  .kd-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    background: var(--bg-elevated);
+    border: none;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    font-family: inherit;
+    transition: color var(--transition-fast), background var(--transition-fast);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .kd-action-btn:hover { color: var(--text-secondary); background: var(--bg-active); }
+  .kd-action-btn:active { transform: scale(0.96); }
+  .kd-action-btn.active { color: var(--accent-red); }
+
+  /* ── 탭 버튼 ── */
+  .kd-tab-btn {
+    padding: 8px 16px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    background: var(--bg-surface);
+    color: var(--text-tertiary);
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: all var(--transition-fast);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .kd-tab-btn[aria-pressed="true"],
+  .kd-tab-btn.active {
+    background: var(--brand);
+    color: #fff;
+    border-color: var(--brand);
+    box-shadow: 0 2px 8px rgba(59,123,246,0.25);
+  }
+
+  /* ── 필터 pill ── */
+  .kd-pill {
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--bg-surface);
+    color: var(--text-tertiary);
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    flex-shrink: 0;
+    transition: all var(--transition-fast);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .kd-pill.active {
+    background: var(--brand);
+    color: #fff;
+    border-color: var(--brand);
+  }
+
+  /* ── 정렬 버튼 ── */
+  .kd-sort-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-tertiary);
+    font-size: var(--fs-xs);
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all var(--transition-fast);
+  }
+  .kd-sort-btn.active {
+    border-color: var(--brand);
+    background: var(--brand-bg);
+    color: var(--brand);
+    font-weight: 700;
+  }
+
+  /* ── 해시태그 칩 ── */
+  .kd-tag {
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .kd-tag:hover, .kd-tag.active {
+    border-color: var(--brand);
+    color: var(--brand);
+    background: var(--brand-bg);
+  }
+
+  /* ── 섹션 헤더 ── */
+  .kd-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: var(--sp-lg) 0 var(--sp-sm);
+  }
+  .kd-section-header h3 {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: var(--fs-base);
+    font-weight: 800;
+    margin: 0;
+  }
+  .kd-section-header a {
+    font-size: var(--fs-xs);
+    color: var(--brand);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  /* ── 아바타 ── */
+  .kd-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: var(--text-inverse);
+    flex-shrink: 0;
+  }
+  .kd-avatar-sm { width: 28px; height: 28px; border-radius: var(--radius-sm); font-size: 11px; }
+  .kd-avatar-md { width: 36px; height: 36px; border-radius: var(--radius-md); font-size: 14px; }
+  .kd-avatar-lg { width: 48px; height: 48px; border-radius: var(--radius-lg); font-size: 18px; }
+
+  /* ── 인터랙션 바 (카드 하단) ── */
+  .kd-interaction-bar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding-top: 4px;
+    border-top: 1px solid rgba(26,42,74,0.4);
+  }
+
+  /* ── KPI / 스탯 그리드 ── */
+  .kd-stat-grid {
+    display: grid;
+    gap: var(--sp-sm);
+  }
+  .kd-stat-grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .kd-stat-grid-4 { grid-template-columns: repeat(4, 1fr); }
+  .kd-stat-item {
+    padding: var(--sp-sm) var(--sp-md);
+    border-radius: var(--radius-md);
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+  }
+  .kd-stat-item .label { font-size: 9px; color: var(--text-tertiary); margin-bottom: 2px; }
+  .kd-stat-item .value { font-size: var(--fs-sm); font-weight: 700; }
+
+  /* ── 탭형 숫자 ── */
+  .kd-tabular { font-variant-numeric: tabular-nums; }
+
+  /* ── 프로그레스 바 ── */
+  .kd-progress { height: 3px; border-radius: 2px; background: var(--bg-elevated); overflow: hidden; margin-top: var(--sp-sm); }
+  .kd-progress-bar { height: 100%; border-radius: 2px; }
+
+  /* ═══════════════════════════════════════════
+     반응형 그리드 보정 — 모바일 오버플로우 방지
+     ═══════════════════════════════════════════ */
+
+  /* 캘린더 7열 — 모바일 글꼴/패딩 축소 */
+  @media (max-width: 480px) {
+    .kd-cal-grid { font-size: 10px !important; gap: 1px !important; }
+    .kd-cal-grid > div { padding: 2px !important; }
+  }
+
+  /* KPI 5열 → 모바일 3+2열 또는 스크롤 */
+  .kd-kpi-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--sp-xs); }
+  @media (max-width: 480px) {
+    .kd-kpi-5 { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (max-width: 480px) {
+    .kd-kpi-5 { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* 지수 KPI 6열 (모바일 3×2, 데스크탑 6열) */
+  .kd-index-kpi { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; }
+  @media (min-width: 768px) { .kd-index-kpi { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+
+  /* KPI 4열 → 모바일 2열 */
+  .kd-grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  @media (max-width: 480px) {
+    .kd-grid-4 { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* 3열 → 모바일 2열 */
+  .kd-grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  @media (max-width: 480px) {
+    .kd-grid-3 { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* 2열 (1fr+2fr) → 모바일 1열 스택 */
+  .kd-grid-1-2 { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,2fr); }
+  @media (max-width: 480px) {
+    .kd-grid-1-2 { grid-template-columns: 1fr; }
+  }
+
+  /* 글로벌 주식 6열 → 모바일 3열 */
+  .kd-grid-6 { display: grid; }
+  @media (max-width: 480px) {
+    .kd-grid-6 { grid-template-columns: repeat(3, 1fr) !important; }
+  }
+  @media (max-width: 480px) {
+    .kd-grid-6 { grid-template-columns: repeat(2, 1fr) !important; }
+  }
+
+  /* 5열 지역 타일 → 모바일 4열 / 극소 3열 */
+  @media (max-width: 480px) {
+    .kd-region-grid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+  }
+  @media (max-width: 320px) {
+    .kd-region-grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+  }
+
+  /* 프로필 통계 4열 → 모바일 2열 */
+  @media (max-width: 480px) {
+    .kd-stats-4 { grid-template-columns: repeat(2, 1fr) !important; }
+  }
+
+  /* ═══ 리스팅 그리드 — 전 페이지 통일 ═══ */
+  .listing-grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-sm);
+  }
+  .listing-grid-2col {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--sp-sm);
+  }
+  @media (max-width: 480px) {
+    .listing-grid-2col { grid-template-columns: 1fr; }
+  }
+
+  /* ═══ 히어로 카드 시스템 — 부동산 전탭 공통 ═══ */
+  .hero-card {
+    display: block;
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.15s;
+  }
+  .hero-card:hover { border-color: rgba(59,123,246,0.35); }
+  .hero-img {
+    height: 120px;
+    position: relative;
+    overflow: hidden;
+    background: var(--bg-elevated);
+  }
+  .hero-img::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(10,15,30,0.3) 0%, rgba(10,15,30,0.15) 40%, rgba(10,15,30,0.5) 75%, rgba(10,15,30,0.75) 100%);
+    pointer-events: none;
+    z-index: 1;
+  }
+  .hero-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .hero-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 8px 12px;
+    background: linear-gradient(transparent, rgba(0,0,0,0.65));
+    z-index: 2;
+  }
+  .hero-badges, .hero-chip { z-index: 2; }
+  .hero-name {
+    font-size: 16px;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.3;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .hero-addr {
+    font-size: 12px;
+    color: rgba(255,255,255,0.8);
+    margin-top: 1px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .hero-badges {
+    position: absolute;
+    top: 8px;
+    left: 10px;
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    max-width: 70%;
+  }
+  .hero-chip {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+  }
+  .hero-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 6px;
+    line-height: 1.3;
+    white-space: nowrap;
+  }
+  .hero-dday {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .hero-kpi {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1px;
+    margin: 0 12px 10px;
+    background: var(--border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .hero-kpi-cell {
+    background: var(--bg-surface);
+    padding: 8px 6px;
+    text-align: center;
+  }
+  .hero-kpi-label {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    margin-bottom: 3px;
+  }
+  .hero-kpi-val {
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1.3;
+  }
+  .hero-overlay-stat {
+    text-align: center;
+    background: rgba(0,0,0,0.5);
+    padding: 6px 10px;
+    border-radius: 8px;
+    flex-shrink: 0;
+  }
+  /* 히어로 카드 — 단지백과 2열 */
+  .hero-img-sm { height: 90px; }
+  @media (max-width: 480px) {
+    .hero-img { height: 100px; }
+    .hero-img-sm { height: 80px; }
+    .hero-name { font-size: 14px; }
+  }
+
+  /* SignupNudge 팝업 애니메이션 */
+  @keyframes kd-fade-in { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes kd-slide-up { from { transform: translateY(20px) scale(0.96); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+
+  /* ═══ 글씨 크기별 레이아웃 방어 ═══ */
+
+  /* font-large: 버튼/패딩/카드 확대 */
+  html.font-large button,
+  html.font-large [role="button"],
+  html.font-large a[style*="padding"] {
     min-height: 36px;
   }
-  input, select, textarea {
-    min-height: 40px;
-    font-size: 16px; /* iOS 줌 방지 */
+  html.font-large .kd-input,
+  html.font-large input[style],
+  html.font-large select[style] {
+    min-height: 38px;
+    font-size: 16px !important;
   }
-}
 
-/* 홈페이지: 섹션 카드 가로 스크롤 */
-@media (max-width: 480px) {
-  .kd-section-card {
-    min-width: 130px !important;
+  /* font-small: 여백 축소로 밀도 높임 */
+  html.font-small button,
+  html.font-small [role="button"] {
+    min-height: 28px;
   }
-}
-
-/* QuickPostBar: 모바일 대응 */
-@media (max-width: 480px) {
-  .quick-post-bar input {
-    font-size: 13px !important;
+  html.font-small .kd-input,
+  html.font-small input[style],
+  html.font-small select[style] {
+    min-height: 32px;
   }
-}
 
-/* HotTopicBar: 모바일 pill 크기 */
-@media (max-width: 480px) {
-  .hot-topic-pill {
-    font-size: 11px !important;
-    padding: 4px 8px !important;
+  /* 글씨 크기 변경 시 그리드 오버플로우 방지 */
+  html.font-large [style*="gridTemplateColumns"] > * {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
-}
 
-/* 세그먼트 컨트롤: 초소형 화면 */
-@media (max-width: 320px) {
-  .kd-tab-segment > button {
-    font-size: 10px !important;
-    padding: 5px 3px !important;
-    min-width: 0 !important;
+  /* font-large: KPI 그리드 모바일에서 2열로 전환 */
+  @media (max-width: 480px) {
+    html.font-large [style*="repeat(4"] {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
   }
-}
 
-/* 종목 상세: 가격 헤더 모바일 */
-@media (max-width: 480px) {
-  .stock-price-header {
-    font-size: 28px !important;
+  /* 공통: 글씨 크기 변경 시 트랜지션 */
+  * {
+    transition: font-size 0.15s ease;
   }
-}
 
-/* 부동산 상세: 분양가 테이블 가로 스크롤 */
-@media (max-width: 640px) {
-  .price-table-wrap {
+
+
+  /* 블로그 테이블 모바일 overflow 글로벌 */
+  .blog-content table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .blog-content table table { display: table; } /* 중첩 테이블은 block 해제 */
+
+  /* ═══════════════════════════════════════════════════════════
+     📱 모바일 CSS 종합 수정 (세션 94)
+     - body overflow-x 안전장치
+     - 그리드 반응형 전환
+     - 테이블 가로 스크롤
+     - 텍스트 오버플로우 방지
+     - 터치 타겟 최소 크기
+  ═══════════════════════════════════════════════════════════ */
+
+  /* 전역: body 가로 넘침 방지 */
+  html, body { overflow-x: hidden; max-width: 100vw; }
+
+  /* 전역: 이미지 가로 넘침 방지 */
+  img { max-width: 100%; height: auto; }
+
+  /* 전역: pre/code 가로 넘침 방지 */
+  pre, code { overflow-x: auto; max-width: 100%; word-break: break-all; }
+
+  /* 전역: 테이블 기본 반응형 */
+  table { max-width: 100%; }
+
+  /* 종목 상세: KPI 4열 → 모바일 2열 */
+  @media (max-width: 480px) {
+    [style*="grid-template-columns: repeat(4"] {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+  }
+
+  /* 모바일 320px: 3열 그리드도 2열로 */
+  @media (max-width: 480px) {
+    [style*="grid-template-columns: repeat(3"] {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+  }
+
+  /* 종목/부동산 상세: flex 아이템 넘침 방지 */
+  @media (max-width: 480px) {
+    article { overflow-x: hidden; }
+  }
+
+  /* FeedStatusBar: 초소형 화면 대응 */
+  @media (max-width: 480px) {
+    .feed-status-bar {
+      font-size: 10px !important;
+      gap: 2px !important;
+      padding: 4px !important;
+    }
+    .feed-status-bar > div {
+      gap: 1px !important;
+    }
+  }
+
+  /* 피드 카드: 투표/VS/예측 카드 패딩 축소 */
+  @media (max-width: 480px) {
+    .feed-poll-card, .feed-vs-card, .feed-predict-card {
+      padding: 10px !important;
+    }
+  }
+
+  /* 주식 히트맵/트리맵: 가로 넘침 방지 */
+  @media (max-width: 640px) {
+    .stock-treemap-container, .stock-heatmap-container {
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch;
+    }
+  }
+
+  /* 프로필/설정 페이지: 그리드 1열 전환 */
+  @media (max-width: 480px) {
+    .profile-grid, .settings-grid {
+      grid-template-columns: 1fr !important;
+    }
+  }
+
+  /* 네비게이션 하단 바: 아이콘 & 텍스트 크기 */
+  @media (max-width: 320px) {
+    .bottom-nav { font-size: 9px !important; }
+    .bottom-nav svg { width: 18px !important; height: 18px !important; }
+  }
+
+  /* 종목 비교 페이지: 테이블 가로 스크롤 강제 */
+  @media (max-width: 640px) {
+    .compare-table-wrap {
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch;
+    }
+  }
+
+  /* 부동산 카드: KPI 행 초소형 대응 */
+  @media (max-width: 320px) {
+    .kpi-row {
+      gap: 2px !important;
+      font-size: 10px !important;
+    }
+    .kpi-row > div {
+      padding: 4px 2px !important;
+      min-width: 0 !important;
+    }
+  }
+
+  /* 블로그: 제목 줄바꿈 */
+  .blog-content h1, .blog-content h2, .blog-content h3 {
+    overflow-wrap: break-word;
+    word-break: keep-all;
+  }
+
+  /* 블로그: 코드 블록 가로 스크롤 */
+  .blog-content pre {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    max-width: 100%;
   }
-  .price-table-wrap table {
-    min-width: 400px;
+
+  /* 블로그: 이미지 가로 넘침 방지 */
+  .blog-content img {
+    max-width: 100% !important;
+    height: auto !important;
   }
-}
 
-/* Safe area: 노치/홈바 대응 */
-@supports (padding-bottom: env(safe-area-inset-bottom)) {
-  .bottom-nav {
-    padding-bottom: calc(env(safe-area-inset-bottom) + 4px) !important;
+  /* 댓글: 긴 텍스트 줄바꿈 */
+  .kd-comment-body {
+    overflow-wrap: break-word;
+    word-break: break-word;
   }
-}
 
-/* ── 주식 가격 플래시 애니메이션 ── */
-@keyframes price-up-flash {
-  0%   { background: rgba(255,82,82,0.25); }
-  100% { background: transparent; }
-}
-@keyframes price-dn-flash {
-  0%   { background: rgba(66,165,250,0.25); }
-  100% { background: transparent; }
-}
-@keyframes price-up-flash-us {
-  0%   { background: rgba(102,187,106,0.25); }
-  100% { background: transparent; }
-}
-@keyframes price-dn-flash-us {
-  0%   { background: rgba(239,83,80,0.25); }
-  100% { background: transparent; }
-}
-.price-flash-up    { animation: price-up-flash    0.6s ease-out; }
-.price-flash-dn    { animation: price-dn-flash    0.6s ease-out; }
-.price-flash-up-us { animation: price-up-flash-us 0.6s ease-out; }
-.price-flash-dn-us { animation: price-dn-flash-us 0.6s ease-out; }
-
-/* ──────────────────────────────────
-   s170 — Blog 비주얼 토큰 + h2 액센트 바
-   ────────────────────────────────── */
-:root {
-  --blog-hero-glow: rgba(37,99,235,0.04);
-  --blog-carousel-bg: var(--bg-elevated);
-  --blog-info-box-bg: rgba(37,99,235,0.04);
-  --blog-info-box-border: rgba(37,99,235,0.1);
-  --blog-tag-bg: rgba(37,99,235,0.06);
-  --blog-tag-color: var(--brand);
-  --blog-disclaimer-border: var(--warning);
-}
-
-/* h2 좌측 컬러 액센트 바 */
-.blog-content h2 {
-  border-left: 4px solid var(--blog-tag-color, var(--brand));
-  padding-left: 14px;
-  margin-left: -18px;
-}
-@media (max-width: 640px) {
-  .blog-content h2 {
-    margin-left: -4px;
-    padding-left: 10px;
-    border-left-width: 3px;
+  /* 공유 버튼: 초소형 화면 */
+  @media (max-width: 320px) {
+    .share-buttons {
+      gap: 2px !important;
+      flex-wrap: wrap !important;
+    }
+    .share-buttons button, .share-buttons a {
+      font-size: 10px !important;
+      padding: 3px 6px !important;
+    }
   }
+
+  /* 어드민: 모바일 대응 */
+  @media (max-width: 480px) {
+    .adm-card { padding: 10px !important; }
+    .adm-btn { padding: 6px 8px !important; font-size: 11px !important; }
+  }
+
+  /* 토론방: 메시지 버블 넘침 방지 */
+  .discuss-message {
+    overflow-wrap: break-word;
+    word-break: break-word;
+    max-width: 100%;
+  }
+
+  /* 글로벌: 긴 URL/숫자 줄바꿈 */
+  a, span, p, div {
+    overflow-wrap: break-word;
+  }
+
+  /* 모바일: 카드 내 숫자 텍스트 축소 */
+  @media (max-width: 480px) {
+    .kd-counter { font-size: 14px !important; }
+  }
+
+  /* 모바일: 터치 타겟 최소 크기 보장 */
+  @media (max-width: 640px) {
+    button, a, [role="button"] {
+      min-height: 36px;
+    }
+    input, select, textarea {
+      min-height: 40px;
+      font-size: 16px; /* iOS 줌 방지 */
+    }
+  }
+
+  /* 홈페이지: 섹션 카드 가로 스크롤 */
+  @media (max-width: 480px) {
+    .kd-section-card {
+      min-width: 130px !important;
+    }
+  }
+
+  /* QuickPostBar: 모바일 대응 */
+  @media (max-width: 480px) {
+    .quick-post-bar input {
+      font-size: 13px !important;
+    }
+  }
+
+  /* HotTopicBar: 모바일 pill 크기 */
+  @media (max-width: 480px) {
+    .hot-topic-pill {
+      font-size: 11px !important;
+      padding: 4px 8px !important;
+    }
+  }
+
+  /* 세그먼트 컨트롤: 초소형 화면 */
+  @media (max-width: 320px) {
+    .kd-tab-segment > button {
+      font-size: 10px !important;
+      padding: 5px 3px !important;
+      min-width: 0 !important;
+    }
+  }
+
+  /* 종목 상세: 가격 헤더 모바일 */
+  @media (max-width: 480px) {
+    .stock-price-header {
+      font-size: 28px !important;
+    }
+  }
+
+  /* 부동산 상세: 분양가 테이블 가로 스크롤 */
+  @media (max-width: 640px) {
+    .price-table-wrap {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .price-table-wrap table {
+      min-width: 400px;
+    }
+  }
+
+  /* Safe area: 노치/홈바 대응 */
+  @supports (padding-bottom: env(safe-area-inset-bottom)) {
+    .bottom-nav {
+      padding-bottom: calc(env(safe-area-inset-bottom) + 4px) !important;
+    }
+  }
+
+  /* ── 주식 가격 플래시 애니메이션 ── */
+  @keyframes price-up-flash {
+    0%   { background: rgba(255,82,82,0.25); }
+    100% { background: transparent; }
+  }
+  @keyframes price-dn-flash {
+    0%   { background: rgba(66,165,250,0.25); }
+    100% { background: transparent; }
+  }
+  @keyframes price-up-flash-us {
+    0%   { background: rgba(102,187,106,0.25); }
+    100% { background: transparent; }
+  }
+  @keyframes price-dn-flash-us {
+    0%   { background: rgba(239,83,80,0.25); }
+    100% { background: transparent; }
+  }
+  .price-flash-up    { animation: price-up-flash    0.6s ease-out; }
+  .price-flash-dn    { animation: price-dn-flash    0.6s ease-out; }
+  .price-flash-up-us { animation: price-up-flash-us 0.6s ease-out; }
+  .price-flash-dn-us { animation: price-dn-flash-us 0.6s ease-out; }
+
+  /* ──────────────────────────────────
+     s170 — Blog 비주얼 토큰 + h2 액센트 바
+     ────────────────────────────────── */
 }
-
-/* ──────────────────────────────────
-   Phase 8/9 — Cardera 통합 디자인 토큰 (다크 우선)
-   ────────────────────────────────── */
-:root {
-  /* spacing 4단계 */
-  --kd-gap-xs: 4px;
-  --kd-gap-sm: 8px;
-  --kd-gap-md: 12px;
-  --kd-gap-lg: 16px;
-  --kd-radius-sm: 6px;
-  --kd-radius: 8px;
-  --kd-radius-card: 12px;
-  --kd-radius-lg: 10px;
-
-  /* 텍스트 3단계 */
-  --kd-text-1: #1A1A18;
-  --kd-text-2: #6B6A65;
-  --kd-text-3: #8A8985;
-
-  /* 배경/보더 */
-  --kd-bg-page: #FAFAF7;
-  --kd-bg-card: #FFFFFF;
-  --kd-bg-soft: #F5F5F2;
-  --kd-border: #E5E5E0;
-
-  /* 카더라 시그니처 노랑 (Phase 9: #FFC957) */
-  --kd-accent: #7A4F0A;
-  --kd-accent-soft: #FFF6E5;
-  --kd-accent-border: #F5D88A;
-  --kd-accent-bg: #FFF6E5;
-  --kd-success: #0A5F49;
-  --kd-warning: #7A4F0A;
-  --kd-danger: #6B1F1F;
-  --kd-live: #C92D2D;
-}
-
-@media (max-width: 480px) {
+@layer tokens {
   :root {
-    --kd-gap-md: 10px;
-    --kd-gap-lg: 14px;
+    --blog-hero-glow: rgba(37,99,235,0.04);
+    --blog-carousel-bg: var(--bg-elevated);
+    --blog-info-box-bg: rgba(37,99,235,0.04);
+    --blog-info-box-border: rgba(37,99,235,0.1);
+    --blog-tag-bg: rgba(37,99,235,0.06);
+    --blog-tag-color: var(--brand);
+    --blog-disclaimer-border: var(--warning);
   }
 }
+@layer elements {
 
-@keyframes kd-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
-}
-
-/* s235 W2/W5: apt complex 단지 상세 레이아웃 클래스 */
-.apt-complex-layout { display: flex; flex-direction: column; gap: var(--sp-lg); padding: var(--sp-md); }
-@media (min-width: 1024px) {
-  .apt-complex-layout { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(320px, 1fr); gap: var(--sp-xl); padding: var(--sp-xl) var(--sp-lg); }
-  .apt-complex-side { position: sticky; top: 80px; align-self: start; max-height: calc(100vh - 100px); overflow-y: auto; }
-}
-
-.apt-page-container { max-width: 720px; margin: 0 auto; padding: var(--sp-md); }
-@media (min-width: 1024px) {
-  .apt-page-container { max-width: 900px; padding: var(--sp-lg); }
-}
-.apt-section-title {
-  font-size: var(--fs-md); font-weight: 800; color: var(--text-primary);
-  margin: 0 0 var(--sp-sm); line-height: 1.3; letter-spacing: -0.01em;
-}
-@media (min-width: 768px) { .apt-section-title { font-size: var(--fs-lg); } }
-.apt-card-v2 {
-  background: var(--bg-surface); border: 1px solid var(--border);
-  border-radius: var(--radius-md); padding: var(--sp-md) var(--card-p);
-  margin-bottom: var(--sp-md);
-}
-@media (min-width: 768px) {
-  .apt-card-v2 { padding: var(--sp-lg) var(--card-p); margin-bottom: var(--sp-lg); }
-}
-
-/* s236: 메인 페이지 6 section */
-.apt-home-hero {
-  padding: 20px 18px 16px;
-  border-bottom: 1px solid var(--border);
-}
-.apt-home-imminent {
-  background: var(--accent-amber-bg);
-  border-bottom: 1px solid var(--border);
-  padding: 14px 18px;
-}
-.apt-imminent-carousel {
-  display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px;
-  scroll-snap-type: x mandatory;
-}
-.apt-imminent-card {
-  flex: 0 0 140px; scroll-snap-align: start;
-  background: var(--bg-surface); border: 1px solid var(--border);
-  border-radius: var(--radius-md); overflow: hidden;
-}
-.apt-category-grid {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
-}
-@media (min-width: 768px) {
-  .apt-category-grid { grid-template-columns: repeat(6, 1fr); }
-}
-.apt-category-card {
-  padding: 12px 10px; background: var(--bg-surface);
-  border-radius: var(--radius-md); text-align: center;
-  transition: background 0.15s;
-}
-.apt-category-card:hover { background: var(--bg-hover); }
-
-/* 단지 상세 D-day card */
-.apt-dday-card {
-  background: var(--accent-amber-bg);
-  border: 1px solid var(--accent-amber-border);
-  border-radius: var(--radius-md);
-  padding: 16px 18px; margin: 0 18px 18px;
-}
-.apt-dday-number {
-  font-size: 28px; font-weight: 800; color: var(--accent-amber);
-  letter-spacing: -0.02em; line-height: 1;
-}
-
-/* KPI 2x2 grid */
-.apt-kpi-grid {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0 18px;
-}
-.apt-kpi-card {
-  background: var(--bg-surface); padding: 14px;
-  border-radius: var(--radius-md);
-}
-.apt-kpi-number {
-  font-size: 20px; font-weight: 700; line-height: 1.1; letter-spacing: -0.01em;
-  color: var(--text-primary);
-}
-
-/* Timeline */
-.apt-timeline {
-  position: relative; padding-left: 18px;
-}
-.apt-timeline-line {
-  position: absolute; left: 5px; top: 6px; bottom: 6px;
-  width: 1px; background: var(--border);
-}
-.apt-timeline-step {
-  position: relative; margin-bottom: 12px;
-}
-.apt-timeline-dot {
-  position: absolute; left: -18px; top: 4px;
-  width: 11px; height: 11px; border-radius: 50%;
-}
-.apt-timeline-dot.done { background: var(--accent-green-bg, rgba(34,197,94,0.15)); border: 2px solid var(--accent-green); }
-.apt-timeline-dot.active { background: var(--accent-amber-bg); border: 2px solid var(--accent-amber); }
-.apt-timeline-dot.pending { background: var(--bg-base); border: 1px solid var(--border); }
-
-/* Image gallery 1+4 grid */
-.apt-gallery-desktop-grid { display: none; }
-@media (min-width: 768px) {
-  .apt-gallery-mobile-swipe { display: none; }
-  .apt-gallery-desktop-grid {
-    display: grid; grid-template-columns: 2fr 1fr; gap: 4px;
-    max-height: 480px; border-radius: var(--radius-lg); overflow: hidden;
+  /* h2 좌측 컬러 액센트 바 */
+  .blog-content h2 {
+    border-left: 4px solid var(--blog-tag-color, var(--brand));
+    padding-left: 14px;
+    margin-left: -18px;
   }
-  .apt-gallery-thumbs {
-    display: grid; grid-template-rows: 1fr 1fr; grid-template-columns: 1fr 1fr; gap: 4px;
+  @media (max-width: 640px) {
+    .blog-content h2 {
+      margin-left: -4px;
+      padding-left: 10px;
+      border-left-width: 3px;
+    }
+  }
+
+  /* ──────────────────────────────────
+     Phase 8/9 — Cardera 통합 디자인 토큰 (다크 우선)
+     ────────────────────────────────── */
+}
+@layer tokens {
+  :root {
+    /* spacing 4단계 */
+    --kd-gap-xs: 4px;
+    --kd-gap-sm: 8px;
+    --kd-gap-md: 12px;
+    --kd-gap-lg: 16px;
+    --kd-radius-sm: 6px;
+    --kd-radius: 8px;
+    --kd-radius-card: 12px;
+    --kd-radius-lg: 10px;
+
+    /* 텍스트 3단계 */
+    --kd-text-1: #1A1A18;
+    --kd-text-2: #6B6A65;
+    --kd-text-3: #8A8985;
+
+    /* 배경/보더 */
+    --kd-bg-page: #FAFAF7;
+    --kd-bg-card: #FFFFFF;
+    --kd-bg-soft: #F5F5F2;
+    --kd-border: #E5E5E0;
+
+    /* 카더라 시그니처 노랑 (Phase 9: #FFC957) */
+    --kd-accent: #7A4F0A;
+    --kd-accent-soft: #FFF6E5;
+    --kd-accent-border: #F5D88A;
+    --kd-accent-bg: #FFF6E5;
+    --kd-success: #0A5F49;
+    --kd-warning: #7A4F0A;
+    --kd-danger: #6B1F1F;
+    --kd-live: #C92D2D;
   }
 }
+@layer elements {
 
-/* s239 W7: apt-* 모바일 sizing 보강 (480px 이하) — section title 작게 + 카드 padding 줄임 */
-@media (max-width: 480px) {
-  .apt-section-title { font-size: var(--fs-base); }
-  .apt-card-v2 { padding: 10px 12px; margin-bottom: var(--sp-md); }
-  .apt-imminent-card { flex-basis: 150px; }
-  .apt-category-card { padding: 10px 8px; }
-  .apt-dday-card { padding: 12px 14px; margin: 0 12px var(--sp-md); }
-  .apt-dday-number { font-size: 24px; }
-  .apt-kpi-grid { padding: 0 12px; }
-  .apt-kpi-card { padding: 10px 12px; }
-  .apt-kpi-number { font-size: 18px; }
-}
+  @media (max-width: 480px) {
+    :root {
+      --kd-gap-md: 10px;
+      --kd-gap-lg: 14px;
+    }
+  }
 
-/* ========================================
-   S1: 라이트 단일화 — 구 라이트 전용 오버라이드를 무조건 적용으로 승격
-   (선택자에서 테마 클래스만 제거, 선언값은 그대로. 캐스케이드 유지를 위해 파일 끝에 배치)
-   ======================================== */
-body {
-  background: #F5F7FA;
-  color: #111827;
-}
-input,
-textarea,
-select {
-  background-color: #FFFFFF !important;
-  color: #111827 !important;
-  border-color: #D4DAE3 !important;
-}
-input::placeholder,
-textarea::placeholder { color: #9CA3AF !important; }
-input:focus,
-textarea:focus,
-select:focus {
-  border-color: #2563EB !important;
-  outline: 2px solid rgba(37,99,235,0.3);
-  outline-offset: 1px;
-}
-header {
-  background: rgba(255,255,255,0.92) !important;
-  border-bottom-color: #D4DAE3 !important;
-}
-nav[class*="md:hidden"] {
-  background: rgba(255,255,255,0.95) !important;
-  border-top-color: #D4DAE3 !important;
-}
-.kd-card,
-.kd-feed-card,
-.apt-card {
-  background: #FFFFFF;
-  border-color: #E5E7EB;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-}
-.kd-glass {
-  background: rgba(255,255,255,0.85);
-  border-color: rgba(37,99,235,0.10);
-}
-::-webkit-scrollbar-thumb { background: #C8CDD4; }
-::-webkit-scrollbar-thumb:hover { background: #9CA3AF; }
-/* ⚠️ 아래 .blog-content 규칙들은 실제로 적용되지 않는다.
-   styles/blog.css 가 layout.tsx 에서 뒤에 로드되어 동일 특이도 싸움에서 항상 이긴다.
-   블로그 본문 색을 바꾸려면 여기가 아니라 styles/blog.css 를 고칠 것.
-   (이 착각으로 본문 대비 수정이 세 번 헛돌았다) */
-.blog-content { color: #2d3748; }
-.blog-content p { color: #2d3748; }
-.blog-content li { color: #2d3748; }
-.blog-content li::marker { color: var(--brand); }
-.blog-content strong { color: #1a202c; }
-.blog-content h2 { color: #1a202c; border-bottom: none; }
-.blog-content h3 { color: #2d3748; border-left-color: var(--brand); }
-.blog-content blockquote { background: rgba(37,99,235,0.03); border-color: rgba(37,99,235,0.08); color: #4a5568; }
-.blog-content blockquote::before { color: var(--brand); }
-.blog-content blockquote p { color: #4a5568; }
-.blog-content code { background: var(--bg-hover); color: var(--accent-purple); border-color: var(--border); }
-.blog-content pre { background: var(--bg-surface); border-color: var(--border); }
-.blog-content pre code { color: var(--text-primary); }
-.blog-content th { background: rgba(37,99,235,0.04); color: var(--text-secondary); border-bottom-color: var(--border); }
-.blog-content td { color: #2d3748; }
-.blog-content td:last-child { color: #1a202c; }
-.blog-content tr:nth-child(even) td { background: rgba(0,0,0,0.015); }
-.blog-content table { border-color: rgba(0,0,0,0.06); }
-.blog-content a { color: var(--brand); }
-.blog-content hr { border-top-color: rgba(0,0,0,0.06); }
-.blog-content .highlight-box { background: rgba(5,150,105,0.03); border-color: rgba(5,150,105,0.08); }
-[style*="boxShadow"] { box-shadow: 0 4px 20px rgba(0,0,0,0.08) !important; }
-.kd-feed-card:hover { background: #F3F4F6 !important; }
-.kd-card-hover:hover { border-color: #93C5FD !important; }
-[style*="rgba(0,0,0,0.5)"],
-[style*="rgba(0, 0, 0, 0.5)"] {
-  background-color: rgba(0,0,0,0.25) !important;
-}
-[style*="boxShadow: 0 8px"],
-[style*="box-shadow: 0 8px"] {
-  box-shadow: 0 8px 32px rgba(0,0,0,0.12) !important;
-}
-[style*="box-shadow: 0 8px 32px rgba(0,0,0,0.3)"] {
-  box-shadow: 0 8px 24px rgba(0,0,0,0.12) !important;
-}
-.stock-up { color: #DC2626 !important; }
-.stock-down { color: #2563EB !important; }
-[style*="background: linear-gradient(90deg, #050A18"] {
-  background: linear-gradient(90deg, #FFF8E1 0%, #FFFBF0 50%, #FFF8E1 100%) !important;
-}
-[style*="background: linear-gradient(90deg, #120E16"] {
-  background: linear-gradient(90deg, #FFF0F0 0%, #FFF5F5 50%, #FFF0F0 100%) !important;
-}
-[style*="linear-gradient(to right, #050A18"],
-[style*="linear-gradient(to left, #050A18"] {
-  background: linear-gradient(to right, #FFF8E1, transparent) !important;
-}
-[style*="linear-gradient(to right, #120E16"],
-[style*="linear-gradient(to left, #120E16"] {
-  background: linear-gradient(to right, #FFF0F0, transparent) !important;
-}
-[style*="rgba(251,191,36"] { color: #B45309 !important; }
-[style*="rgba(248,113,113"] { color: #DC2626 !important; }
+  @keyframes kd-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
 
-/* H3-1 — 홈 히어로 검색창.
- * 테두리·그림자는 컴포넌트 인라인 스타일에 있고, 여기에는 «인라인으로 표현할 수 없는»
- * 상태 규칙만 둔다.
- * ⚠️ 포커스가 브랜드 테두리를 이겨야 한다. 인라인 border 가 2px 라 같은 굵기로 색만 바꾼다 —
- *    굵기가 바뀌면 레이아웃이 1px 씩 튄다.
- * ⚠️ 이 클래스는 hero variant 전용이다. 헤더의 bar·icon 에는 붙지 않는다. */
-.kd-hero-search:focus-visible {
-  border-color: var(--border-focus) !important;
-  outline: none;
+  /* s235 W2/W5: apt complex 단지 상세 레이아웃 클래스 */
+  .apt-complex-layout { display: flex; flex-direction: column; gap: var(--sp-lg); padding: var(--sp-md); }
+  @media (min-width: 1024px) {
+    .apt-complex-layout { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(320px, 1fr); gap: var(--sp-xl); padding: var(--sp-xl) var(--sp-lg); }
+    .apt-complex-side { position: sticky; top: 80px; align-self: start; max-height: calc(100vh - 100px); overflow-y: auto; }
+  }
+
+  .apt-page-container { max-width: 720px; margin: 0 auto; padding: var(--sp-md); }
+  @media (min-width: 1024px) {
+    .apt-page-container { max-width: 900px; padding: var(--sp-lg); }
+  }
+  .apt-section-title {
+    font-size: var(--fs-md); font-weight: 800; color: var(--text-primary);
+    margin: 0 0 var(--sp-sm); line-height: 1.3; letter-spacing: -0.01em;
+  }
+  @media (min-width: 768px) { .apt-section-title { font-size: var(--fs-lg); } }
+  .apt-card-v2 {
+    background: var(--bg-surface); border: 1px solid var(--border);
+    border-radius: var(--radius-md); padding: var(--sp-md) var(--card-p);
+    margin-bottom: var(--sp-md);
+  }
+  @media (min-width: 768px) {
+    .apt-card-v2 { padding: var(--sp-lg) var(--card-p); margin-bottom: var(--sp-lg); }
+  }
+
+  /* s236: 메인 페이지 6 section */
+  .apt-home-hero {
+    padding: 20px 18px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .apt-home-imminent {
+    background: var(--accent-amber-bg);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 18px;
+  }
+  .apt-imminent-carousel {
+    display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px;
+    scroll-snap-type: x mandatory;
+  }
+  .apt-imminent-card {
+    flex: 0 0 140px; scroll-snap-align: start;
+    background: var(--bg-surface); border: 1px solid var(--border);
+    border-radius: var(--radius-md); overflow: hidden;
+  }
+  .apt-category-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+  }
+  @media (min-width: 768px) {
+    .apt-category-grid { grid-template-columns: repeat(6, 1fr); }
+  }
+  .apt-category-card {
+    padding: 12px 10px; background: var(--bg-surface);
+    border-radius: var(--radius-md); text-align: center;
+    transition: background 0.15s;
+  }
+  .apt-category-card:hover { background: var(--bg-hover); }
+
+  /* 단지 상세 D-day card */
+  .apt-dday-card {
+    background: var(--accent-amber-bg);
+    border: 1px solid var(--accent-amber-border);
+    border-radius: var(--radius-md);
+    padding: 16px 18px; margin: 0 18px 18px;
+  }
+  .apt-dday-number {
+    font-size: 28px; font-weight: 800; color: var(--accent-amber);
+    letter-spacing: -0.02em; line-height: 1;
+  }
+
+  /* KPI 2x2 grid */
+  .apt-kpi-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0 18px;
+  }
+  .apt-kpi-card {
+    background: var(--bg-surface); padding: 14px;
+    border-radius: var(--radius-md);
+  }
+  .apt-kpi-number {
+    font-size: 20px; font-weight: 700; line-height: 1.1; letter-spacing: -0.01em;
+    color: var(--text-primary);
+  }
+
+  /* Timeline */
+  .apt-timeline {
+    position: relative; padding-left: 18px;
+  }
+  .apt-timeline-line {
+    position: absolute; left: 5px; top: 6px; bottom: 6px;
+    width: 1px; background: var(--border);
+  }
+  .apt-timeline-step {
+    position: relative; margin-bottom: 12px;
+  }
+  .apt-timeline-dot {
+    position: absolute; left: -18px; top: 4px;
+    width: 11px; height: 11px; border-radius: 50%;
+  }
+  .apt-timeline-dot.done { background: var(--accent-green-bg, rgba(34,197,94,0.15)); border: 2px solid var(--accent-green); }
+  .apt-timeline-dot.active { background: var(--accent-amber-bg); border: 2px solid var(--accent-amber); }
+  .apt-timeline-dot.pending { background: var(--bg-base); border: 1px solid var(--border); }
+
+  /* Image gallery 1+4 grid */
+  .apt-gallery-desktop-grid { display: none; }
+  @media (min-width: 768px) {
+    .apt-gallery-mobile-swipe { display: none; }
+    .apt-gallery-desktop-grid {
+      display: grid; grid-template-columns: 2fr 1fr; gap: 4px;
+      max-height: 480px; border-radius: var(--radius-lg); overflow: hidden;
+    }
+    .apt-gallery-thumbs {
+      display: grid; grid-template-rows: 1fr 1fr; grid-template-columns: 1fr 1fr; gap: 4px;
+    }
+  }
+
+  /* s239 W7: apt-* 모바일 sizing 보강 (480px 이하) — section title 작게 + 카드 padding 줄임 */
+  @media (max-width: 480px) {
+    .apt-section-title { font-size: var(--fs-base); }
+    .apt-card-v2 { padding: 10px 12px; margin-bottom: var(--sp-md); }
+    .apt-imminent-card { flex-basis: 150px; }
+    .apt-category-card { padding: 10px 8px; }
+    .apt-dday-card { padding: 12px 14px; margin: 0 12px var(--sp-md); }
+    .apt-dday-number { font-size: 24px; }
+    .apt-kpi-grid { padding: 0 12px; }
+    .apt-kpi-card { padding: 10px 12px; }
+    .apt-kpi-number { font-size: 18px; }
+  }
+
+  /* ========================================
+     S1: 라이트 단일화 — 구 라이트 전용 오버라이드를 무조건 적용으로 승격
+     (선택자에서 테마 클래스만 제거, 선언값은 그대로. 캐스케이드 유지를 위해 파일 끝에 배치)
+     ======================================== */
+  body {
+    background: #F5F7FA;
+    color: #111827;
+  }
+  input,
+  textarea,
+  select {
+    background-color: #FFFFFF !important;
+    color: #111827 !important;
+    border-color: #D4DAE3 !important;
+  }
+  input::placeholder,
+  textarea::placeholder { color: #9CA3AF !important; }
+  input:focus,
+  textarea:focus,
+  select:focus {
+    border-color: #2563EB !important;
+    outline: 2px solid rgba(37,99,235,0.3);
+    outline-offset: 1px;
+  }
+  header {
+    background: rgba(255,255,255,0.92) !important;
+    border-bottom-color: #D4DAE3 !important;
+  }
+  nav[class*="md:hidden"] {
+    background: rgba(255,255,255,0.95) !important;
+    border-top-color: #D4DAE3 !important;
+  }
+  .kd-card,
+  .kd-feed-card,
+  .apt-card {
+    background: #FFFFFF;
+    border-color: #E5E7EB;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .kd-glass {
+    background: rgba(255,255,255,0.85);
+    border-color: rgba(37,99,235,0.10);
+  }
+  ::-webkit-scrollbar-thumb { background: #C8CDD4; }
+  ::-webkit-scrollbar-thumb:hover { background: #9CA3AF; }
+  /* ⚠️ 아래 .blog-content 규칙들은 실제로 적용되지 않는다.
+     styles/blog.css 가 layout.tsx 에서 뒤에 로드되어 동일 특이도 싸움에서 항상 이긴다.
+     블로그 본문 색을 바꾸려면 여기가 아니라 styles/blog.css 를 고칠 것.
+     (이 착각으로 본문 대비 수정이 세 번 헛돌았다) */
+  .blog-content { color: #2d3748; }
+  .blog-content p { color: #2d3748; }
+  .blog-content li { color: #2d3748; }
+  .blog-content li::marker { color: var(--brand); }
+  .blog-content strong { color: #1a202c; }
+  .blog-content h2 { color: #1a202c; border-bottom: none; }
+  .blog-content h3 { color: #2d3748; border-left-color: var(--brand); }
+  .blog-content blockquote { background: rgba(37,99,235,0.03); border-color: rgba(37,99,235,0.08); color: #4a5568; }
+  .blog-content blockquote::before { color: var(--brand); }
+  .blog-content blockquote p { color: #4a5568; }
+  .blog-content code { background: var(--bg-hover); color: var(--accent-purple); border-color: var(--border); }
+  .blog-content pre { background: var(--bg-surface); border-color: var(--border); }
+  .blog-content pre code { color: var(--text-primary); }
+  .blog-content th { background: rgba(37,99,235,0.04); color: var(--text-secondary); border-bottom-color: var(--border); }
+  .blog-content td { color: #2d3748; }
+  .blog-content td:last-child { color: #1a202c; }
+  .blog-content tr:nth-child(even) td { background: rgba(0,0,0,0.015); }
+  .blog-content table { border-color: rgba(0,0,0,0.06); }
+  .blog-content a { color: var(--brand); }
+  .blog-content hr { border-top-color: rgba(0,0,0,0.06); }
+  .blog-content .highlight-box { background: rgba(5,150,105,0.03); border-color: rgba(5,150,105,0.08); }
+  [style*="boxShadow"] { box-shadow: 0 4px 20px rgba(0,0,0,0.08) !important; }
+  .kd-feed-card:hover { background: #F3F4F6 !important; }
+  .kd-card-hover:hover { border-color: #93C5FD !important; }
+  [style*="rgba(0,0,0,0.5)"],
+  [style*="rgba(0, 0, 0, 0.5)"] {
+    background-color: rgba(0,0,0,0.25) !important;
+  }
+  [style*="boxShadow: 0 8px"],
+  [style*="box-shadow: 0 8px"] {
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12) !important;
+  }
+  [style*="box-shadow: 0 8px 32px rgba(0,0,0,0.3)"] {
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12) !important;
+  }
+  .stock-up { color: #DC2626 !important; }
+  .stock-down { color: #2563EB !important; }
+  [style*="background: linear-gradient(90deg, #050A18"] {
+    background: linear-gradient(90deg, #FFF8E1 0%, #FFFBF0 50%, #FFF8E1 100%) !important;
+  }
+  [style*="background: linear-gradient(90deg, #120E16"] {
+    background: linear-gradient(90deg, #FFF0F0 0%, #FFF5F5 50%, #FFF0F0 100%) !important;
+  }
+  [style*="linear-gradient(to right, #050A18"],
+  [style*="linear-gradient(to left, #050A18"] {
+    background: linear-gradient(to right, #FFF8E1, transparent) !important;
+  }
+  [style*="linear-gradient(to right, #120E16"],
+  [style*="linear-gradient(to left, #120E16"] {
+    background: linear-gradient(to right, #FFF0F0, transparent) !important;
+  }
+  [style*="rgba(251,191,36"] { color: #B45309 !important; }
+  [style*="rgba(248,113,113"] { color: #DC2626 !important; }
+
+  /* H3-1 — 홈 히어로 검색창.
+   * 테두리·그림자는 컴포넌트 인라인 스타일에 있고, 여기에는 «인라인으로 표현할 수 없는»
+   * 상태 규칙만 둔다.
+   * ⚠️ 포커스가 브랜드 테두리를 이겨야 한다. 인라인 border 가 2px 라 같은 굵기로 색만 바꾼다 —
+   *    굵기가 바뀌면 레이아웃이 1px 씩 튄다.
+   * ⚠️ 이 클래스는 hero variant 전용이다. 헤더의 bar·icon 에는 붙지 않는다. */
+  .kd-hero-search:focus-visible {
+    border-color: var(--border-focus) !important;
+    outline: none;
+  }
+
 }
