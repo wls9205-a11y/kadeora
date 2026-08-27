@@ -53,7 +53,6 @@ import WeeklyTrades from '@/components/home/WeeklyTrades';
 import { fetchWeeklyTrades } from '@/lib/home/weekly-trades';
 import RecentMoves, { type RecentMove } from '@/components/home/RecentMoves';
 import HeroSearch from '@/components/home/HeroSearch';
-import type { HomeRow } from '@/lib/home/sections';
 import { BUGYEONG_REGIONS } from '@/lib/apt/pipeline';
 
 export const revalidate = 60;
@@ -140,17 +139,17 @@ async function fetchRecentMoves(): Promise<RecentMove[]> {
  * 큐레이션이 0건이면 빈 배열을 낸다. 채우는 판단은 buildHomeChips 가 한다.
  */
 /**
- * H5-1 — 이름만 뽑던 것을 «행 전체» 로 넓혔다. 조회는 그대로 한 번이다.
- *
- * ⚠️ 큐레이션은 「담당이 손으로 올린 것」이다(is_curated). 순위가 아니다 —
- *    라벨에 「인기」·「많이 보는」을 쓰지 않는 이유가 그것이고, 여기도 같다.
+ * ⚠️ 여기서 «칩 이름만» 뽑는다. 한때 행 전체를 받아 홈에 「담당이 고른 현장」 섹션을
+ *    만들었다가 되돌렸다 — 「지금 계약 가능」과 소스가 거의 같은 큐레이션 현장이라
+ *    같은 현장이 두 섹션에 겹쳐 보이고, H4 의 「홈은 승격 1섹션 + 나머지 최소」가
+ *    흔들린다. 큐레이션을 «앞에 세우는» 일은 /apt 2단이 할 일이다(H5-2 pipeline 정렬).
  */
-async function fetchCuratedNames(limit = CHIP_LIMIT): Promise<{ names: string[]; rows: HomeRow[] }> {
+async function fetchCuratedNames(limit = CHIP_LIMIT): Promise<string[]> {
   try {
     const sb = getSupabaseAdmin();
     const { data, error } = await (sb as any)
       .from('apt_sites')
-      .select('slug,name,region,sigungu,lifecycle_stage,total_units,hero_image_url,hero_license_tier')
+      .select('name')
       .eq('is_active', true)
       .eq('is_curated', true)
       .in('curated_status', DEAL_STATUSES)
@@ -158,25 +157,10 @@ async function fetchCuratedNames(limit = CHIP_LIMIT): Promise<{ names: string[];
       .order('curated_at', { ascending: false, nullsFirst: false })
       .limit(Math.max(limit * 4, 20));
     if (error) throw error;
-    const raw = (data ?? []) as any[];
-    return {
-      names: raw.map((r) => r.name ?? ''),
-      // ⚠️ price 는 담지 않는다. 가짜 가격 판정(§B-4 ①)이 sections.ts 에 있고,
-      //    그 판정을 거치지 않은 값을 화면에 올리면 안 된다. null 로 둔다.
-      rows: raw.map((r) => ({
-        slug: r.slug, name: r.name, region: r.region, sigungu: r.sigungu,
-        lifecycle_stage: r.lifecycle_stage, total_units: r.total_units,
-        price: null,
-        // ⚠️ 라이선스 판정은 «렌더하는 쪽» 이 canUseHeroImage() 로 한다. 그래서 tier 를
-        //    그대로 실어 보낸다 — 여기서 미리 판정하지 않는 이유는 화면마다
-        //    leadContext 가 다르기 때문이다(홈은 리드폼이 없다).
-        hero_image_url: r.hero_image_url ?? null,
-        hero_license_tier: r.hero_license_tier ?? null,
-      })) as HomeRow[],
-    };
+    return ((data ?? []) as { name: string | null }[]).map((r) => r.name ?? '');
   } catch (e) {
     console.error('[home] curated names failed:', e);
-    return { names: [], rows: [] };   // 실패해도 검색창은 기본 안내문으로 그대로 뜬다
+    return [];   // 실패해도 검색창은 기본 안내문으로 그대로 뜬다
   }
 }
 
@@ -248,7 +232,7 @@ export default async function HomePage() {
    * 이 promise 가 홈의 다른 블록을 무너뜨릴 수 없다. */
   const weeklyPromise = fetchWeeklyTrades();
 
-  const [moves, counts, curated, sections] = await Promise.all([
+  const [moves, counts, curatedNames, sections] = await Promise.all([
     fetchRecentMoves(),
     fetchCounts(),
     fetchCuratedNames(),
@@ -260,7 +244,7 @@ export default async function HomePage() {
   // H4-1 (c)(d) — 칩과 라벨을 «한 함수»에서 같이 받는다. 갈라지면 라벨이 거짓이 된다.
   // 두 번째 소스는 위에서 이미 받은 moves 를 재사용한다 — 조회가 늘지 않는다.
   const chips = buildHomeChips({
-    curated: curated.names,
+    curated: curatedNames,
     moves: moves.map((m) => m.name),
   });
 
@@ -279,22 +263,6 @@ export default async function HomePage() {
        * ⚠️ 골드 줄은 히어로 «상단 1/3» 안에 있어야 한다. 아래로 내려가면 배경이 밝아져
        *    3.27:1 로 떨어진다. 실측은 HeroSearch 주석에 있다. */}
       <HeroSearch chipNames={chips.names} siteCount={counts.total} />
-
-      {/* ── 3 담당이 고른 현장 (H5-1 · 상단 고정) ──
-       * ⚠️ 「인기」·「많이 보는」이 아니다. is_curated 는 «담당이 손으로 올린 것» 이고
-       *    순위 신호가 아니다. 라벨이 소스를 넘어서면 H3-3 에서 trending_keywords 를
-       *    끊어낸 이유가 그대로 재발한다.
-       * ⚠️ 히어로 «바로 아래» 에 고정한다. 조회는 늘지 않았다 — 칩에 쓰던 큐레이션
-       *    조회 하나에서 행까지 같이 받는다.
-       * ⚠️ 0건이면 섹션을 통째로 미렌더한다. 실측 부울경 4건(부산 4 · 울산 0 · 경남 0)이라
-       *    빈 자리가 생길 수 있다 — 없는 자리를 만들지 않는다. */}
-      {curated.rows.length > 0 && (
-        <section style={{ marginBottom: 18 }}>
-          <SectionHeader eyebrow="APT — 큐레이션" title="담당이 고른 현장" id="home-curated" />
-          <SiteRows items={curated.rows.slice(0, MIN_ROWS + 1)} />
-          <MoreLink href="/apt" label="부동산 홈에서 더 보기" />
-        </section>
-      )}
 
       {/* ── 2 이번 주 실거래 (H4-2) ──
        * 접힌 선 «아래» 첫 블록이다. 첫 화면(H1 + 검색창 + 칩)을 침범하지 않는다 —

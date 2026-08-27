@@ -81,9 +81,18 @@ language sql stable security invoker as $fn$
      --    정작 분양이 임박한 「연제 갤러리 자이」가 290위로 밀려 화면에서 사라진다.
      --    (updated_at 을 섞는 것도 시도했다가 버렸다 — 그건 더 심한 크론 타임스탬프다.)
      --
-     -- 그래서 «단계» 를 1순위로 둔다. 「곧 나올」은 곧 분양이 나온다는 뜻이고,
+     -- 그래서 «단계» 를 우선순위로 둔다. 「곧 나올」은 곧 분양이 나온다는 뜻이고,
      -- 분양에 가까운 단계일수록 그 뜻에 가깝다. 같은 단계 안에서만 최신순을 쓴다.
-     order by case s.lifecycle_stage
+     --
+     -- ⚠️ 그리고 «큐레이션이 그보다 앞» 이다. is_curated 는 담당이 손으로 올린 것이고,
+     --    자동 신호가 못 잡는 것을 사람이 잡아 둔 자리다. 실측: 부산의 「곧 나올 현장」
+     --    후보 308곳 중 큐레이션은 «1곳»(오티에르 해운대) 뿐이다 — 목록을 뒤집는
+     --    규칙이 아니라 사람이 지정한 소수를 앞에 세우는 규칙이다.
+     --    그 현장은 stage_updated_at 이 null 이고 단계가 site_planning 이라 자동 정렬로는
+     --    326위였다. 데이터 결손을 가리는 게 아니라, «사람의 지정» 을 우선하는 것이다.
+     -- ⛔ 라벨은 바뀌지 않는다. 「인기」가 아니다 — 순위 신호가 아니라 담당 지정이다.
+     order by (s.is_curated is true) desc,
+              case s.lifecycle_stage
                 when 'pre_announcement'   then 1
                 when 'construction'       then 2
                 when 'mgmt_approved'      then 3
