@@ -583,7 +583,10 @@ export default async function BlogDetailPage({ params }: Props) {
     timeRequired: `PT${readingTimeMin}M`,
     author: {
       '@type': 'Organization',
-      name: post.author_name || '카더라',
+      // H5-3 — 현장 노트(field_note)는 «담당이 직접 쓴 글» 이다. 자동 생성분과 저자가
+      //   같으면 독자가 구분할 수 없다. 카테고리로 갈라 표기한다.
+      //   ⚠️ 실명을 쓰지 않는다 — 역할만 밝힌다.
+      name: post.category === 'field_note' ? '분양 담당' : (post.author_name || '카더라'),
       description: post.author_role || '부동산·주식 데이터 분석팀',
       url: `${SITE}/about/authors`,
       parentOrganization: { '@type': 'Organization', name: '카더라', url: SITE },
@@ -1235,8 +1238,8 @@ export default async function BlogDetailPage({ params }: Props) {
                 background: 'var(--brand-bg)', color: 'var(--brand)',
                 display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                 fontSize: 11, fontWeight: 500, flexShrink: 0,
-              }}>{(post.author_name || '카더라').charAt(0)}</span>
-              <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{post.author_name || '카더라 부동산팀'}</span>
+              }}>{(post.category === 'field_note' ? '분양 담당' : (post.author_name || '카더라')).charAt(0)}</span>
+              <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{post.category === 'field_note' ? '분양 담당' : (post.author_name || '카더라 부동산팀')}</span>
               {post.author_role && <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>· {post.author_role}</span>}
             </span>
             {/* 카테고리 / 서브카테고리 */}

@@ -18,7 +18,7 @@ export type BlogCurationPost = {
 };
 
 export default function BlogCurationCard({
-  post, img, catLabel, catColor, cover,
+  post, img, catLabel, catColor, cover, tone = 'surface',
 }: {
   post: BlogCurationPost;
   img?: string;
@@ -26,15 +26,28 @@ export default function BlogCurationCard({
   catColor: string;
   /** 표지 이미지 URL. 없으면 이미지 자리를 만들지 않는다 (있는 척 금지). */
   cover?: string | null;
+  /**
+   * H5-3 — 'navy' 는 블로그 목록 «첫 카드» 전용이다.
+   *
+   * ⚠️ 한 화면에 네이비 덩어리는 «하나» 다. 블로그에서 그 하나가 이 카드다 —
+   *    다른 곳에 navy 를 또 쓰면 화면이 무엇을 강조하는지 알 수 없게 된다.
+   * ⚠️ 새 컴포넌트를 만들지 않고 프롭으로 갈랐다. 두 벌이 되면 카드 구조가 조용히 갈린다.
+   *
+   * 대비 실측(네이비 #0B2A6B 위): 제목 흰 13.48 · 골드 라벨 8.54 · 보조 흰0.70 7.31
+   */
+  tone?: 'surface' | 'navy';
 }) {
   const src = cover || img || null;
+  const navy = tone === 'navy';
 
   return (
     <article
       style={{
         display: 'flex', flexDirection: 'column', height: '100%',
         border: '1px solid var(--border)', borderRadius: 'var(--radius-md)',
-        background: 'var(--bg-surface)', overflow: 'hidden',
+        background: navy ? 'var(--brand-navy)' : 'var(--bg-surface)',
+        borderColor: navy ? 'var(--brand-navy)' : undefined,
+        overflow: 'hidden',
       }}
     >
       {src && (
@@ -52,13 +65,14 @@ export default function BlogCurationCard({
       )}
 
       <div style={{ display: 'flex', flexDirection: 'column', flex: 1, padding: '11px 13px 12px' }}>
-        <span style={{ fontSize: 10, fontWeight: 500, color: catColor, marginBottom: 4 }}>{catLabel}</span>
+        {/* ⚠️ 네이비 위에서는 카테고리색이 대부분 대비 미달이다. 골드로 통일한다(8.54). */}
+        <span style={{ fontSize: 10, fontWeight: 500, color: navy ? 'var(--brand-gold)' : catColor, marginBottom: 4 }}>{catLabel}</span>
 
         <Link
           href={`/blog/${post.slug}`}
           style={{
             fontSize: 14, fontWeight: 600, lineHeight: 1.4, letterSpacing: '-.02em',
-            color: 'var(--text-primary)', textDecoration: 'none', wordBreak: 'keep-all',
+            color: navy ? 'var(--text-inverse)' : 'var(--text-primary)', textDecoration: 'none', wordBreak: 'keep-all',
             marginBottom: 5,
           }}
         >
@@ -68,7 +82,8 @@ export default function BlogCurationCard({
         {post.excerpt && (
           <p
             style={{
-              margin: 0, fontSize: 11.5, lineHeight: 1.55, color: 'var(--text-secondary)',
+              margin: 0, fontSize: 11.5, lineHeight: 1.55,
+              color: navy ? 'rgba(255,255,255,0.78)' : 'var(--text-secondary)',
               display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
               overflow: 'hidden', wordBreak: 'keep-all',
             }}
@@ -77,7 +92,7 @@ export default function BlogCurationCard({
           </p>
         )}
 
-        <span style={{ marginTop: 'auto', paddingTop: 8, fontSize: 10, color: 'var(--text-tertiary)' }}>
+        <span style={{ marginTop: 'auto', paddingTop: 8, fontSize: 10, color: navy ? 'rgba(255,255,255,0.70)' : 'var(--text-tertiary)' }}>
           {post.reading_time_min || 3}분 · 👀 {(post.view_count ?? 0).toLocaleString()}
         </span>
       </div>

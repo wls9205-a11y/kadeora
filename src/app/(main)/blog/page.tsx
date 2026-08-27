@@ -13,6 +13,10 @@ import ListThumb from '@/components/ui/ListThumb';
 import { isSafeImage, blogHeroImage } from '@/lib/blog/safe-image';
 import { facetRobots } from '@/lib/seo/facet';
 import BlogCurationCard from '@/components/blog/BlogCurationCard';
+import { cookies } from 'next/headers';
+import { REGION_COOKIE, normalizeSido, SIDO_LIST } from '@/lib/region/cookie';
+import SigunguChips from '@/components/apt/SigunguChips';
+import BlogRegionCookieSync from '@/components/blog/BlogRegionCookieSync';
 // s205-W2: HeroCard "오늘의 블로그" 제거 — 14d /blog 1,176 PV, 카드 클릭 1건. fetchBlogHero / getSupabaseAdmin 도 함께 제거.
 
 function highlightTitle(title: string, query: string): React.ReactNode {
@@ -84,7 +88,7 @@ function subCatsFromView(rows: SubcatRow[], category: string): { key: string; la
   return out.length > 0 ? out : null;
 }
 
-interface PageProps { searchParams: Promise<{ category?: string; sort?: string; q?: string; page?: string; sub?: string; region?: string }> }
+interface PageProps { searchParams: Promise<{ category?: string; sort?: string; q?: string; page?: string; sub?: string; region?: string; sgg?: string }> }
 
 export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
   // [§6] 파셋 판정은 «들어온 파라미터 전부» 를 봐야 한다. 아래 구조분해로 뽑는
@@ -187,6 +191,10 @@ function resolveCategories(category: string): string[] | null {
 /** 행 배지용 — 글 하나의 실제 category 라벨. 탭 라벨과 다르다. */
 const POST_CAT_LABEL: Record<string, string> = {
   stock: '주식', apt: '청약', unsold: '미분양', redev: '재개발', finance: '재테크', general: '생활',
+  // H5-3 — 현장 노트. ⚠️ 목록에서는 «일반 글과 같이» 낸다. 따로 띄우거나 위로 올리지 않는다 —
+  //   담당이 쓴 글이라고 순위를 주면 그건 순위 신호가 아니라 우리 편의다.
+  //   상세에서만 저자를 「분양 담당」으로 밝힌다.
+  field_note: '현장 노트',
 };
 
 /**
@@ -206,18 +214,34 @@ const CAT_COLORS: Record<string, string> = {
   redev: 'var(--accent-orange)', finance: 'var(--accent-purple)', general: 'var(--text-tertiary)',
 };
 
-interface Props { searchParams: Promise<{ category?: string; sort?: string; q?: string; page?: string; sub?: string; region?: string }> }
+interface Props { searchParams: Promise<{ category?: string; sort?: string; q?: string; page?: string; sub?: string; region?: string; sgg?: string }> }
 
 export default async function BlogPage({ searchParams }: Props) {
-  const { category = 'all', sort = 'latest', q = '', page = '1', sub = '', region: regionRaw = '' } = await searchParams;
-  /* H4-5 — 지역 세그먼트. `blog_posts` 에 지역 컬럼이 «없어서» 태그로 건다.
-   * 실측(발행글 8,719): 부산 379 · 울산 84 · 경남 189 · 주식 2,866.
-   * ⚠️ 값을 화이트리스트로 «가둔다». 임의 문자열이 그대로 `.contains` 로 들어가면
-   *    파셋 URL 이 무한히 늘고 색인 쓰레기가 된다(facetRobots 가 noindex 는 붙이지만
-   *    크롤 예산은 그대로 나간다). 여기 없는 값은 «없는 것» 으로 친다.
-   * ⚠️ 새 파라미터라 파셋이다 — facetRobots 가 기본 차단이라 자동으로 noindex 다. */
-  const REGION_SEG = ['부산', '울산', '경남'] as const;
-  const region = (REGION_SEG as readonly string[]).includes(regionRaw) ? regionRaw : '';
+  const { category = 'all', sort = 'latest', q = '', page = '1', sub = '', region: regionRaw = '', sgg: sggRaw = '' } = await searchParams;
+
+  /* ══ H5-3 지역 — «태그» 에서 «엔티티» 로 ═══════════════════════════════════
+   *
+   * 예전엔 `tags` 배열에 지역명이 들어 있는지로 걸렀다. blog_posts 에 지역 컬럼이
+   * 없었기 때문이고, 그래서 3개 지역(부산 379 · 울산 84 · 경남 189)만 걸 수 있었다.
+   *
+   * A5 가 apt_site_id 를 붙이면서 달라졌다. 엔티티 기준이면 «17개 시도 전부» 에 글이 있다:
+   *   서울 592 · 경기 491 · 부산 301 · 경남 244 · 전남 219 · 경북 216 · 충남 184
+   *   울산 119 · 충북 113 · 대전 111 · 인천 108 · 대구 71 · 광주 42 · 강원 42
+   *   전북 37 · 제주 37 · 세종 11        (발행 8,705 중 링크 2,938)
+   *
+   * ⚠️ `apt_region` 은 apt_site_id 에서 «파생» 된 컬럼이다. 트리거가 동기화한다 —
+   *    손으로 채우지 말 것. 정본은 apt_site_id 다.
+   * ⚠️ 값은 여전히 화이트리스트로 가둔다(normalizeSido). 임의 문자열이 쿼리로 들어가면
+   *    파셋 URL 이 무한히 늘고 크롤 예산이 샌다.
+   *
+   * ⚠️ 부동산 탭과 «같은 쿠키» 를 본다. 두 탭이 다른 지역을 말하면 그건 고장으로 읽힌다.
+   *    우선순위는 /apt 와 같다 — ?region= > 쿠키 > (없으면 전체).
+   *    ⛔ 다만 여기서는 「없으면 부산」으로 «떨어뜨리지 않는다». 블로그의 기본은 전체 글이고,
+   *       지역을 고른 적 없는 사람에게 한 지역만 보여줄 이유가 없다.
+   */
+  const cookieRegion = normalizeSido((await cookies()).get(REGION_COOKIE)?.value ?? null);
+  const region = normalizeSido(regionRaw) ?? cookieRegion ?? '';
+  const sgg = region ? (sggRaw || '').trim() : '';
   const pageNum = Math.max(1, parseInt(page) || 1);
   const perPage = 30;
   const sb = getSupabaseAdmin();
@@ -298,8 +322,9 @@ export default async function BlogPage({ searchParams }: Props) {
   }
   // sub 는 정규화 이름이다. 뷰가 sub_norm 을 직접 주므로 한 줄로 끝난다.
   if (sub) q2 = q2.eq('sub_norm', sub);
-  // 태그 배열 포함 검색. 지역 컬럼이 없어 이게 유일한 경로다(위 주석).
-  if (region) q2 = q2.contains('tags', [region]);
+  // H5-3 — 파생 컬럼 한 줄. 조인도 태그도 아니다(위 주석).
+  if (region) q2 = q2.eq('apt_region', region);
+  if (sgg) q2 = q2.eq('apt_sigungu', sgg);
   if (q) { const sq = sanitizeSearchQuery(q, 100); if (sq) q2 = q2.or(`title.ilike.%${sq}%,excerpt.ilike.%${sq}%`); }
   if (sort === 'popular') {
     q2 = q2.order('view_count', { ascending: false });
@@ -308,6 +333,26 @@ export default async function BlogPage({ searchParams }: Props) {
   }
   q2 = q2.range((pageNum - 1) * perPage, pageNum * perPage - 1);
   const { data: posts, count: filteredCount } = await q2;
+
+  /* H5-3 — 첫 카드 승격. 1페이지·검색 아닐 때만. 목록의 머리를 그대로 쓴다. */
+  const canPromote = pageNum === 1 && !q && (posts ?? []).length > 0;
+  const promoted: any = canPromote ? (posts as any[])[0] : null;
+  const listPosts: any[] = canPromote ? (posts as any[]).slice(1) : ((posts ?? []) as any[]);
+
+  /* H5-3 — 구군 칩 건수. ⚠️ 배지는 «현장 수» 다(글 수 아님).
+   *   글 수로 세면 한 현장에 16편이 붙은 구가 실제 현장은 1곳인데 가장 커 보인다
+   *   (실측: 알티에로 광안 16편). 지역을 안 골랐으면 조회하지 않는다. */
+  let sggChips: { name: string; count: number }[] = [];
+  if (region) {
+    try {
+      const { data: sc, error: scErr } = await (sb as any).rpc('get_blog_sigungu_counts', { p_region: region });
+      // ⛔ 조용히 넘기지 않는다 — 빈 칩 줄과 조회 실패가 로그에서 구분돼야 한다.
+      if (scErr) console.error(`[blog] sigungu counts ${region}: ${scErr.message?.slice(0, 160)}`);
+      else sggChips = ((sc ?? []) as any[]).map((r) => ({ name: r.sigungu as string, count: Number(r.site_count) || 0 }));
+    } catch (e: any) {
+      console.error('[blog] sigungu counts caught:', e?.message ?? String(e));
+    }
+  }
 
   // 세션 142 P0: cover_image 없는 글은 blog_post_images 첫 이미지로 fallback
   // 세션 143: cover_image 가 /api/og 제네릭 URL 인 경우도 fallback 대상 (53K posts 제네릭 카드 비율 ↓ 즉시 효과)
@@ -343,7 +388,9 @@ export default async function BlogPage({ searchParams }: Props) {
       nq = activeCats.length === 1 ? nq.eq('category', activeCats[0]) : nq.in('category', activeCats);
     }
     if (sub) nq = nq.eq('sub_norm', sub);
-    if (region) nq = nq.contains('tags', [region]);   // 목록과 «같은» 모집단이어야 한다
+    // 목록과 «같은» 모집단이어야 한다 — 조건이 갈리면 다음 페이지가 어긋난다.
+    if (region) nq = nq.eq('apt_region', region);
+    if (sgg) nq = nq.eq('apt_sigungu', sgg);
     if (sort === 'popular') nq = nq.order('view_count', { ascending: false });
     else nq = nq.order('created_at', { ascending: false });
     nq = nq.range(pageNum * perPage, pageNum * perPage + 4);
@@ -372,18 +419,22 @@ export default async function BlogPage({ searchParams }: Props) {
       const k = (r.apt_slug ?? '').trim();
       if (k) tally.set(k, (tally.get(k) ?? 0) + 1);
     }
-    /* ⚠️ 전국 상위 N 을 먼저 자른 뒤 부울경으로 거르면 «거의 안 남는다».
-     *    실측: 전국 상위 40 중 부울경은 «1곳» 뿐이고, 실제 자격자는 36곳이다.
-     *    그래서 자르지 말고 «부울경 슬러그 집합» 과 교집합을 낸다.
-     * ⚠️ `.in()` 에 844개를 넣지 않는다 — URL 이 터진다. 부울경 목록을 페이지로 받아
-     *    (fetchAll = PostgREST 1,000행 상한 우회) JS 에서 교집합한다. */
+    /* ⚠️ 전국 상위 N 을 먼저 자른 뒤 지역으로 거르면 «거의 안 남는다».
+     *    실측: 전국 상위 40 중 부산·울산·경남은 «1곳» 뿐이고, 실제 자격자는 36곳이다.
+     *    그래서 자르지 말고 «해당 지역 슬러그 집합» 과 교집합을 낸다.
+     * ⚠️ `.in()` 에 844개를 넣지 않는다 — URL 이 터진다. 지역 목록을 페이지로 받아
+     *    (fetchAll = PostgREST 1,000행 상한 우회) JS 에서 교집합한다.
+     * ⚠️ H5-3 — 지역을 «고른 경우 그 지역» 으로 본다. 세그먼트는 서울을 가리키는데
+     *    이 묶음만 부산 현장을 내면 한 화면이 두 지역을 말한다. 안 골랐으면 기존대로. */
     const ge2 = [...tally.entries()].filter(([, n]) => n >= 2);
     if (ge2.length > 0) {
       const sites = await fetchAll(
         sb,
         'apt_sites',
         'slug, name, region, sigungu',
-        (qq: any) => qq.eq('is_active', true).in('region', ['부산', '울산', '경남']),
+        (qq: any) => region
+          ? qq.eq('is_active', true).eq('region', region)
+          : qq.eq('is_active', true).in('region', ['부산', '울산', '경남']),
       );
       const NOT_A_SITE = /(미분양|재개발|재건축|정비)\s*$/;
       const bySlug = new Map<string, any>(
@@ -490,15 +541,20 @@ export default async function BlogPage({ searchParams }: Props) {
         }} />
       </form>
 
-      {/* ── H4-5 · 빠른 분류 ──
-           부울경 포커스. `blog_posts` 에 지역 컬럼이 없어 지역은 «태그» 로 건다(위 주석).
-           ⚠️ 「주식」은 지역이 아니라 «카테고리» 다. 한 줄에 두긴 하되 `aria-label` 을
+      {/* 부동산 탭과 같은 쿠키에 남긴다. 두 탭이 다른 지역을 말하면 고장으로 읽힌다. */}
+      <BlogRegionCookieSync region={region} />
+
+      {/* ── H5-3 · 지역 세그먼트 ──
+           ⛔ 「부울경」이라 쓰지 않는다. 엔티티 기준으로 17개 시도 전부에 글이 있다.
+           ⚠️ 「주식」은 지역이 아니라 «카테고리» 다. 한 줄에 두긴 하되 aria-label 을
               「지역」이라 쓰지 않는다 — 스크린리더에 거짓말을 하게 된다.
-           ⚠️ 「인기」 라벨을 쓰지 않는다 — H4-3 계측이 방금 시작됐고 아직 데이터가 없다. */}
-      <nav aria-label="빠른 분류" style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginBottom: 'var(--sp-sm)' }}>
+           ⚠️ 「인기」 라벨을 쓰지 않는다 — 순위를 만들 신호가 없다.
+           ⚠️ 시도 «타일 그리드» 는 넣지 않는다. 글 수 편중이 그대로 드러난다
+              (서울 592 대 세종 11). 부동산 탭의 타일과 역할이 다르다. */}
+      <nav aria-label="빠른 분류" className="apt-pill-scroll" style={{ display: 'flex', gap: 5, marginBottom: 'var(--sp-sm)', overflowX: 'auto', scrollbarWidth: 'none' }}>
         {[
           { k: '', label: '전체', cat: '' },
-          ...REGION_SEG.map((r) => ({ k: r, label: r, cat: '' })),
+          ...SIDO_LIST.map((r) => ({ k: r, label: r, cat: '' })),
           { k: '', label: '주식', cat: 'stock' },
         ].map(({ k, label, cat }) => {
           const on = cat ? category === cat : region === k && category !== 'stock';
@@ -513,13 +569,17 @@ export default async function BlogPage({ searchParams }: Props) {
               key={label}
               href={href}
               scroll={false}
+              aria-current={on ? 'true' : undefined}
               style={{
+                flexShrink: 0,
                 padding: '5px 11px',
                 borderRadius: 'var(--radius-pill)',
-                fontSize: 12.5, fontWeight: 500, letterSpacing: 0,
-                background: on ? 'var(--brand)' : 'var(--bg-surface)',
-                border: `1px solid ${on ? 'var(--brand)' : 'var(--border)'}`,
-                color: on ? 'var(--text-inverse)' : 'var(--text-secondary)',
+                fontSize: 'var(--fs-xs)', fontWeight: 500, letterSpacing: 0,
+                // ⚠️ 선택색을 인라인으로 주지 않는다 — 인라인은 모든 @layer 를 이겨
+                //    screens.css 의 네이비 규칙이 안 먹는다. 클래스에 맡긴다.
+                background: on ? undefined : 'var(--bg-surface)',
+                border: '1px solid var(--border)',
+                color: on ? undefined : 'var(--text-secondary)',
                 textDecoration: 'none',
               }}
             >
@@ -528,6 +588,26 @@ export default async function BlogPage({ searchParams }: Props) {
           );
         })}
       </nav>
+
+      {/* ── H5-3 · 구군 칩 ──
+           ⚠️ 배지는 «현장 수» 다. 글 수가 아니다 — 한 현장에 16편이 붙은 구가
+              실제 현장은 1곳인데 가장 커 보인다(실측: 알티에로 광안 16편).
+           ⚠️ /apt 와 «같은» SigunguChips 를 쓴다. 두 벌이 되면 선택 표시가 갈린다. */}
+      {region && (
+        <SigunguChips
+          region={region}
+          items={sggChips}
+          current={sgg}
+          hrefFor={(s) => {
+            const p2 = new URLSearchParams();
+            p2.set('region', region);
+            if (s) p2.set('sgg', s);
+            if (q) p2.set('q', q);
+            if (category !== 'all') p2.set('category', category);
+            return `/blog?${p2}`;
+          }}
+        />
+      )}
 
       {/* ── H4-5 · 현장별 묶음 ──
            부동산 글이 «어느 현장 이야기인지» 를 목록에서 알 수 없었다.
@@ -595,22 +675,25 @@ export default async function BlogPage({ searchParams }: Props) {
         </div>
       )}
 
-      {/* v3 커밋5 · 큐레이션 3건 */}
-      {pageNum === 1 && !q && curated.length === 3 && (
-        <CurationCarousel
-          title="이번 주 읽을 글"
-          items={curated.map((p: any) => (
-            <BlogCurationCard
-              key={p.id}
-              post={p}
-              img={postImageMap[p.id]}
-              // 큐레이션은 16:9 큰 슬롯이라 생성 카드가 읽힌다 (목록 64px 과 판단이 다르다).
-              cover={listThumb(p, postImageMap) ?? blogHeroImage(p)}
-              catLabel={POST_CAT_LABEL[p.category] || p.category || '분석'}
-              catColor={CAT_COLORS[p.category] || 'var(--text-tertiary)'}
-            />
-          ))}
-        />
+      {/* ── H5-3 · 첫 카드 «1편» 승격 ──
+           3편 캐러셀을 1편으로 줄였다. 캐러셀은 두 번째·세 번째 카드가 화면 밖이라
+           사실상 1편만 보였고, 그러면서 세로를 카드 높이만큼 먹었다.
+           ⚠️ 선정은 «지금 보고 있는 목록의 첫 글» 이다. 별도 조회를 만들지 않는다 —
+              지역·카테고리·검색을 다 반영한 그 목록의 머리여야 「이 지역 최신」이 맞다.
+           ⚠️ 승격한 글은 아래 목록에서 «뺀다». 같은 글이 카드와 줄로 두 번 나오면
+              한 화면에서 자리 하나를 버리는 셈이다.
+           ⚠️ tone="navy" — 한 화면의 네이비 덩어리는 이 카드 «하나» 다. */}
+      {promoted && (
+        <div style={{ marginBottom: 'var(--sp-md)' }}>
+          <BlogCurationCard
+            post={promoted}
+            img={postImageMap[promoted.id]}
+            cover={listThumb(promoted, postImageMap) ?? blogHeroImage(promoted)}
+            catLabel={POST_CAT_LABEL[promoted.category] || promoted.category || '분석'}
+            catColor={CAT_COLORS[promoted.category] || 'var(--text-tertiary)'}
+            tone="navy"
+          />
+        </div>
       )}
 
       {/* 글 목록 — .kd-lrow */}
@@ -627,7 +710,7 @@ export default async function BlogPage({ searchParams }: Props) {
             <span>제목</span>
             <span>발행</span>
           </div>
-          {(posts ?? []).map((p: any) => {
+          {listPosts.map((p: any) => {
             const catColor = CAT_COLORS[p.category] || 'var(--text-tertiary)';
             const catLabel = POST_CAT_LABEL[p.category] || p.category;
             const readMin = p.reading_time_min || 3;

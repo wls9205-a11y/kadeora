@@ -24,16 +24,25 @@ export default function SigunguChips({
   region,
   items,
   current,
+  hrefFor,
 }: {
   region: string;
   items: { name: string; count: number }[];
   /** 선택된 시군구. 없으면 '전체'. */
   current: string;
+  /**
+   * H5-3 — 링크만 갈아 끼운다. 기본은 /apt.
+   * ⚠️ 블로그용으로 «같은 모양의 컴포넌트를 하나 더 만들지 않는다». 두 벌이 되면
+   *    선택 표시·간격·스크롤 동작이 조용히 갈린다. 다른 건 주소뿐이다.
+   */
+  hrefFor?: (sigungu: string | null) => string;
 }) {
   // 칩이 2개 미만이면 고를 것이 없다 — 자리만 먹는다.
   if (items.length < 2) return null;
 
   const base = `/apt?region=${encodeURIComponent(region)}`;
+  const link = (s: string | null) =>
+    hrefFor ? hrefFor(s) : (s ? `${base}&sgg=${encodeURIComponent(s)}` : base);
   const style = (active: boolean): React.CSSProperties =>
     active
       // ⚠️ 선택색을 인라인으로 주지 않는다. 인라인 스타일은 «모든 레이어를 이기므로»
@@ -53,11 +62,11 @@ export default function SigunguChips({
         padding: '0 6px 10px',
       }}
     >
-      <Link href={base} scroll={false} style={style(!current)} aria-current={!current ? 'true' : undefined}>전체</Link>
+      <Link href={link(null)} scroll={false} style={style(!current)} aria-current={!current ? 'true' : undefined}>전체</Link>
       {items.map((it) => (
         <Link
           key={it.name}
-          href={`${base}&sgg=${encodeURIComponent(it.name)}`}
+          href={link(it.name)}
           scroll={false}
           style={style(current === it.name)}
           aria-current={current === it.name ? 'true' : undefined}
