@@ -577,6 +577,32 @@ html.font-large {
   --accent-red-bg:  rgba(220,38,38,0.10);
   --accent-blue:    #2563EB;
   --accent-blue-bg: rgba(37,99,235,0.10);
+  /* ── H5-D1 : 브랜드 네이비·골드 (2026-08-27, 「토큰 신설 금지」 예외 승인) ──
+     왜 신설했나 — 이 색은 src/lib/og/brand.ts 에만 있었다. OG 썸네일은 satori 가
+     TS 상수로 그리므로 CSS 를 안 탄다. 그래서 «화면 컴포넌트가 브랜드색을 쓸 경로가
+     아예 없었다». 화면과 OG 카드가 같은 색이어야 하므로 값을 옮겨 온다.
+
+     ⚠️ --brand-hero-bg 는 brand.ts 의 BRAND_BG 와 «바이트 단위로 같아야» 한다.
+        한쪽만 고치면 OG 카드와 첫 화면이 갈린다. 고칠 땐 반드시 양쪽.
+
+     ⚠️ 골드는 «네이비 위에서만» 쓴다. 흰 배경 위 골드는 1.58:1 로 글자가 안 보인다.
+        흰 배경에서 노랑 계열이 필요하면 --accent-yellow(#854D0E · 6.85:1).
+
+     ⚠️ 그라디언트 «밝은 끝»(#2563EB)에서는 골드가 3.27:1 로 떨어진다. 히어로 하단에
+        글자를 얹을 땐 스크림을 깔아야 한다 — 자세한 실측은 docs/m6/H5_대비실측.md.  */
+  --brand-navy:      #0B2A6B;
+  --brand-navy-mid:  #123A8F;
+  --brand-gold:      #FFC53D;
+  --brand-hero-bg:   linear-gradient(158deg, #0B2A6B 0%, #123A8F 52%, #2563EB 100%);
+  --brand-hero-glow: radial-gradient(120% 90% at 12% 6%, rgba(255,255,255,0.20) 0%, rgba(255,255,255,0.06) 34%, rgba(255,255,255,0) 62%);
+
+  /* ── H5-D1 : amber — «정의 없이 폴백만으로 칠해지던» 3종을 실체화한다 ──
+     var(--accent-amber) 5곳이 폴백을 타고 있었다. #f59e0b 는 흰 배경 대비
+     2.15:1 로 하한 미달이다. 형제 토큰(--accent-yellow)과 «같은 값» 으로 맞춘다 —
+     새 색을 만드는 게 아니라 이미 검증된 값에 이름을 붙이는 것이다. 6.85:1.  */
+  --accent-amber:        #854D0E;
+  --accent-amber-bg:     rgba(202,138,4,0.10);
+  --accent-amber-border: rgba(202,138,4,0.20);
   --accent-cyan:    #155E75;
 
   /* Stock colors — KR (빨강↑ 파랑↓) */
@@ -1937,7 +1963,7 @@ a, span, p, div {
   border-bottom: 1px solid var(--border);
 }
 .apt-home-imminent {
-  background: var(--accent-amber-bg, rgba(245,158,11,0.08));
+  background: var(--accent-amber-bg);
   border-bottom: 1px solid var(--border);
   padding: 14px 18px;
 }
@@ -1965,13 +1991,13 @@ a, span, p, div {
 
 /* 단지 상세 D-day card */
 .apt-dday-card {
-  background: var(--accent-amber-bg, rgba(245,158,11,0.08));
-  border: 1px solid var(--accent-amber-border, rgba(245,158,11,0.3));
+  background: var(--accent-amber-bg);
+  border: 1px solid var(--accent-amber-border);
   border-radius: var(--radius-md);
   padding: 16px 18px; margin: 0 18px 18px;
 }
 .apt-dday-number {
-  font-size: 28px; font-weight: 800; color: var(--accent-amber, #f59e0b);
+  font-size: 28px; font-weight: 800; color: var(--accent-amber);
   letter-spacing: -0.02em; line-height: 1;
 }
 
@@ -2004,7 +2030,7 @@ a, span, p, div {
   width: 11px; height: 11px; border-radius: 50%;
 }
 .apt-timeline-dot.done { background: var(--accent-green-bg, rgba(34,197,94,0.15)); border: 2px solid var(--accent-green); }
-.apt-timeline-dot.active { background: var(--accent-amber-bg, rgba(245,158,11,0.15)); border: 2px solid var(--accent-amber, #f59e0b); }
+.apt-timeline-dot.active { background: var(--accent-amber-bg); border: 2px solid var(--accent-amber); }
 .apt-timeline-dot.pending { background: var(--bg-base); border: 1px solid var(--border); }
 
 /* Image gallery 1+4 grid */
