@@ -92,7 +92,9 @@ export default function AptHubRail({
         <Link href="/apt/diagnose">청약 가점 계산기</Link>
         <Link href="/apt/ranking">청약 경쟁률 랭킹</Link>
         <Link href="/apt/unsold">미분양 현황</Link>
-        <Link href="/apt/map">분양 지도</Link>
+        {/* ⛔ H6-2 — 「분양 지도」 바로가기 제거. H5-2 에서 [목록|지도] 토글을 내렸는데
+            레일 링크가 남아 「지도가 이 사이트의 기능」이라고 계속 말하고 있었다.
+            /apt/map 라우트는 그대로다(200 + noindex) — 링크만 뺀다. */}
         <Link href="/apt/complex">단지 백과</Link>
       </div>
     </>

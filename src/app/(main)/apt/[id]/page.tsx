@@ -2572,6 +2572,9 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
       {/* v3 커밋4 · 데스크탑 우측 레일 (≥1024px). 모바일에서는 CSS 로 렌더되지 않는다.
            ①리드폼 진입 ②카톡(부가) ③같은 지역 현장 ④바로가기 — 상세의 1순위는 폼이다. */}
       <aside className="kd-detail-rail" aria-label="현장 요약">
+        {/* H6-2 — 레일이 스크롤을 따라온다. 긴 레일이 본문 끝을 넘지 않도록
+            max-height + 자체 스크롤(screens.css .kd-rail-sticky). */}
+        <div className="kd-rail-sticky">
         <SiteDetailRail
           siteSlug={slug}
           siteName={name}
@@ -2582,6 +2585,7 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
           nearby={nearbySites}
           lifecycleStage={lc}
         />
+        </div>
       </aside>
     </article>
   );

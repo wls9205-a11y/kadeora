@@ -36,6 +36,7 @@ import RegionTileGrid from '@/components/apt/RegionTileGrid';
 import RegionCookieSync from '@/components/apt/RegionCookieSync';
 import StageSummaryStrip, { type StageItem } from '@/components/apt/StageSummaryStrip';
 import RegionBlockList from '@/components/apt/RegionBlockList';
+import SubscriptionCarousel from '@/components/apt/SubscriptionCarousel';
 import { getRegionBlocks, getRegionTotals, getSigunguTotals } from '@/lib/apt/region-blocks';
 import { REGION_COOKIE, resolveRegion, normalizeSido } from '@/lib/region/cookie';
 import SubscriptionTimeline from '@/components/apt/SubscriptionTimeline';
@@ -241,6 +242,8 @@ export default async function AptPage({
   //   ('있는 척' 이 되는 건 큰 이미지 자리다 — 목록 64px 칸과 판단 기준이 다르다).
   //   보유분이 3건에 못 미치면 있는 만큼만 낸다 (없는 자리를 만들지 않는다).
   const curated = pickCuration(cards, 3);
+  // 선택 시도 밖은 뺀다. '전국' 이면 그대로 둔다.
+  const curatedInRegion = region === '전국' ? curated : curated.filter((it) => it.region_nm === region);
 
   // v4-C6: 조회 창이 60일보다 넓으면 반드시 밝힌다.
   //   안 밝히면 6개월 전 공고가 오늘 것처럼 보인다.
@@ -322,51 +325,12 @@ export default async function AptPage({
         </>
       )}
 
-      {/* v4-C6: 지역을 버리고 전국으로 갈아타던 폴백이 없어졌다.
-           17개 시·도 중 11곳이 접수중 0건이라 그 폴백은 사실상 상시 발동 중이었고,
-           사용자는 부산을 눌렀는데 전국 목록을 보고 있었다.
-           이제 조회 창을 60 → 180 → 365 로 넓히고, 그래도 없으면 비었다고 말한다. */}
-      {hub.region_empty ? (
-        <p
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            margin: '0 6px 12px',
-            padding: '9px 10px',
-            borderRadius: 6,
-            background: 'var(--bg-elevated)',
-            border: '1px solid var(--border)',
-            fontSize: 'var(--fs-xs)',
-            color: 'var(--text-secondary)',
-          }}
-        >
-          <span style={{ flex: 1, minWidth: 0 }}>
-            {hub.requested_region}에는 최근 1년 청약 공고가 없습니다
-          </span>
-          {/* 자동 전환이 아니라 링크다 — 고른 지역을 말없이 바꾸지 않는다 */}
-          <Link
-            href="/apt"
-            scroll={false}
-            style={{
-              flexShrink: 0,
-              display: 'inline-flex',
-              alignItems: 'center',
-              minHeight: 32,
-              padding: '0 12px',
-              borderRadius: 'var(--radius-pill)',
-              background: 'var(--brand)',
-              color: '#FFFFFF',
-              fontSize: 'var(--fs-xs)',
-              fontWeight: 500,
-              textDecoration: 'none',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            전국 보기
-          </Link>
-        </p>
-      ) : null}
+      {/* ⛔ H6-2 — 「{지역}에는 최근 1년 청약 공고가 없습니다」 문구를 폐지했다.
+           그 판정은 get_apt_subscription_hub 의 «다른 조회» (MIN_CARDS 6 · 접수 예정 기준)에서
+           왔는데, 아래 목록 조회는 다른 기준이라 «8월 접수 현장 위에 「공고가 없습니다」»가
+           떴다. 실측: 부산 365일 31건 · 60일 4건 → 4 < 6 이라 empty 판정.
+           빈 상태는 «목록 조회 결과가 곧 판정» 이다. 두 조회가 서로 다른 말을 하게 두지 않는다.
+           「전국 보기」 링크는 목록 바닥 더보기로 옮겼다. */}
 
       {/* ── H4-4 · [목록 | 지도] 뷰 전환 ──
            지도는 목록의 «대체» 가 아니다. 서버가 렌더한 목록이 그대로 HTML 에 실리고,
@@ -380,13 +344,20 @@ export default async function AptPage({
              다른 날짜를 모집공고일이라고 말하는 화면이 된다. */}
       {!showTiles && (
         <>
+          {/* H6-2 2층 — 위 8건은 캐러셀, 9번째부터 42px 텍스트 줄.
+              ⚠️ 라벨에 「모집공고」를 쓰지 않는다. 정렬 키가 rcept_bgnde 다(B6 에서 교체). */}
+          <SubscriptionCarousel
+            title="최근 청약 공고"
+            meta={[sgg || region, `${blocks.opened.length}곳`, '접수일 기준'].filter(Boolean).join(' · ')}
+            items={blocks.opened.slice(0, 8)}
+          />
           <RegionBlockList
-            items={blocks.opened}
-            title="청약 접수일 기준 최신"
-            meta={[sgg || region, `${blocks.opened.length}곳`].filter(Boolean).join(' · ')}
+            items={blocks.opened.slice(8)}
+            title="그 밖의 공고"
+            meta={blocks.opened.length > 8 ? `${blocks.opened.length - 8}곳` : ''}
             moreHref="/apt/archive"
             moreLabel="지난 공고 더 보기"
-            emptyNote={`${sgg || region}에는 최근 공고가 나온 현장이 없습니다.`}
+            emptyNote=""
           />
           <RegionBlockList
             items={blocks.pipeline}
@@ -538,12 +509,15 @@ export default async function AptPage({
            "움직인 현장 없음" 을 내지 않는다. */}
       <RecentMovesStrip items={recentMoves} region={pipeline.region} now={pipelineNow} />
 
-      {/* ②-2 큐레이션 3건 */}
-      {curated.length > 0 && (
+      {/* ②-2 큐레이션 3건.
+          ⚠️ H6-2 — 선택 시도 밖의 현장은 «내지 않는다». 부산을 고른 화면 최상단에
+             「청약 D-4 · 인천」이 떠 있었다 — 지역을 고른 의미가 사라진다.
+             0건이면 미렌더한다. 전국으로 «바꾸지 않는다». */}
+      {curatedInRegion.length > 0 && (
         <div style={{ padding: '0 6px' }}>
           <CurationCarousel
             title={`${hub.region} 지금 주목할 청약`}
-            items={curated.map((it) => (
+            items={curatedInRegion.map((it) => (
               <AptCurationCard key={it.id} item={it} today={hub.today} />
             ))}
           />
@@ -577,12 +551,14 @@ export default async function AptPage({
            레일은 페이지가 소유한다 (/apt/[id] 의 SiteDetailRail 과 같은 패턴).
            ①마감 임박 ②지역 바로가기 ③관련 분석 ④바로가기. 새 조회 0건. */}
       <aside className="kd-list-rail" aria-label="청약 요약">
+        <div className="kd-rail-sticky">
         <AptHubRail
           region={hub.region}
           imminent={imminent}
           regions={railRegions}
           blogs={relatedBlogs}
         />
+        </div>
       </aside>
     </div>
   );
