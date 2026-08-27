@@ -32,7 +32,8 @@ type MoreItem = { href: string; Icon: React.ComponentType<{ size?: number; style
 const MORE_ITEMS: MoreItem[] = [
   // ⛔ A4 — '/feed'(→/apt 302)·'/discuss'(접음) 항목을 뺐다. 라우트는 살아 있다.
   { href: '/daily',                  Icon: BarChart3,      label: '데일리 리포트', sub: '매일 시장 요약' },
-  { href: '/hot',                    Icon: Flame,          label: '이번주 HOT',    sub: '인기 글' },
+  // ⛔ H6-5 — 「인기」는 순위를 주장하는 라벨이다. 그 순위를 만들 신호가 없다.
+  { href: '/hot',                    Icon: Flame,          label: '많이 본',       sub: '조회 많은 글' },
   { href: '/blog/series',            Icon: Library,        label: '시리즈',        sub: '주제별 연재' },
   { href: '/calc',                   Icon: Calculator,     label: '계산기',        sub: '부동산·세금' },
   { href: '/notifications/settings', Icon: BellRing,       label: '알림 설정',     sub: '푸시·이메일' },
@@ -65,23 +66,14 @@ export function Navigation() {
   const [unread, setUnread]     = useState(0);
   const [fontSize, setFontSize] = useState('medium');
   const [tossMode, setTossModeState] = useState(false);
-  const [trendingKw, setTrendingKw] = useState('');
-
-  // 인기검색어 — 헤더 검색바에 통합 표시
-  useEffect(() => {
-    let kws: string[] = [];
-    let idx = 0;
-    let timer: ReturnType<typeof setInterval>;
-    fetch('/api/search/trending').then(r => r.json()).then(d => {
-      const arr = d?.keywords || d || [];
-      kws = Array.isArray(arr) ? arr.slice(0, 8).map((k: { keyword?: string } | string) => typeof k === 'string' ? k : k.keyword || '') : [];
-      if (kws.length) setTrendingKw(kws[0]);
-      if (kws.length > 1) {
-        timer = setInterval(() => { idx = (idx + 1) % kws.length; setTrendingKw(kws[idx]); }, 3500);
-      }
-    }).catch(() => {});
-    return () => clearInterval(timer);
-  }, []);
+  /* ⛔ H6-5(2026-08-27) — 헤더 플레이스홀더의 「인기 · {키워드}」를 걷어냈다.
+   *
+   * H3-3 에서 trending_keywords 를 «신호가 아니다» 라고 판정하고 홈에서 끊었는데
+   *   (상위 12건이 전부 heat_score 100 · `2026`·`아파트` 혼입 · 경기·서울 혼입),
+   * 헤더에는 그대로 남아 전 페이지에서 「인기 · 창원」을 계속 말하고 있었다.
+   * 조회(`/api/search/trending`)도 같이 없앤다 — 안 쓰는 값을 매 페이지에서 받지 않는다.
+   * 라우트는 남아 있다. 계측이 붙어 실측이 되면 그때 되살린다.
+   */
 
   // 초기화: 토스 모드 + 폰트 사이즈 (1회)
   useEffect(() => {
@@ -211,7 +203,7 @@ export function Navigation() {
           {/* s260: UniversalSearchBar — typeahead + ⌘K 모달. 옛 fake-Link 박스(L232-255) 교체. */}
           <div className="hidden md:flex" style={{ flex:1, maxWidth:360, minWidth:160 }}>
             <UniversalSearchBar
-              placeholder={trendingKw ? `인기 · ${trendingKw}` : '종목, 청약, 블로그 검색...'}
+              placeholder="단지명 · 지역 · 종목 검색"
               hotkey
             />
           </div>
