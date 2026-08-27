@@ -133,7 +133,7 @@
   /* ── S1: 라이트 단일 모드 — 색상은 globals.css :root 토큰이 담당 ── */
 
   /* ── 모바일 가독성 ── */
-  @media (max-width: 480px) {
+  @media (max-width: 479.98px) {
     .blog-content h2 { font-size: 19px; margin: 28px 0 12px; }
     .blog-content h3 { font-size: 16px; margin: 22px 0 8px; }
     .blog-content p { font-size: 15px; line-height: 1.85; }

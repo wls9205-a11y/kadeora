@@ -130,10 +130,10 @@
      두 파일에 갈려 있었고 import 순서로만 responsive 가 이기고 있었다.
      @layer 는 important 순서를 뒤집으므로 그대로 두면 480px 이하에서 패딩이
      var(--space-md) → 12px 14px 로 «조용히» 바뀐다. 한 파일에 붙여 순서로 결정되게 한다. */
-  @media (max-width: 767px) {
+  @media (max-width: 767.98px) {
     .kd-card { padding: 12px 14px !important; }
   }
-  @media (max-width: 480px) {
+  @media (max-width: 479.98px) {
     .kd-card { padding: var(--space-md) !important; }
   }
 
@@ -256,7 +256,7 @@
   .apt-pill-scroll::-webkit-scrollbar { display: none; }
   .apt-pill-scroll { -ms-overflow-style: none; scrollbar-width: none; }
   /* 반응형 2단 그리드 */
-  @media (max-width: 640px) {
+  @media (max-width: 767.98px) {
     .mc-g2 { grid-template-columns: 1fr !important; }
   }
   /* 세션70: 기본값 = 기존 "크게" 수준으로 상향 */
@@ -457,6 +457,31 @@
     --container-read: 720px;   /* 읽는 본문 */
     --container-grid: 1120px;  /* 카드 그리드 블록 */
     --container-shell: 1200px; /* 앱셸 */
+
+    /* ── H5-D4 : 브레이크포인트 4종 ─────────────────────────────────────────
+       7종(320·480·640·767·768·769·1024)이 파일 3개에 흩어져 있었다. 4종으로 모았다.
+
+       ⛔⛔ 이 토큰은 «미디어쿼리 조건에 못 쓴다». CSS 사양상 @media / @container 의
+           «조건부» 에서는 var() 가 해석되지 않는다. @media (max-width: var(--bp-sm))
+           는 «에러도 안 나고 조용히 규칙 전체가 죽는다». 실제 쿼리에는 아래 숫자를
+           그대로 적는다. 이 토큰은 ①단일 출처 문서 ②JS 가 getComputedStyle 로 읽기
+           ③calc()/clamp() 안에서 쓰기 — 세 용도다.
+
+       max 쪽은 .98 을 쓴다. `max-width: 768px` 과 `min-width: 768px` 은 정확히
+       768px 에서 «둘 다» 걸려 뒤엣것이 이긴다. 767.98 로 끊으면 겹치지 않는다.
+
+         --bp-sm  479.98 / 480     소형 폰
+         --bp-md  767.98 / 768     태블릿 세로 · 데스크탑 1단→2단 경계
+         --bp-lg 1023.98 / 1024    데스크탑 2단 본격
+         --bp-xl 1279.98 / 1280    앱셸 최대 (--container-shell 1200px 과 짝)
+
+       320px 6곳은 그대로 둔다 — 폴더블·구형 소형폰 대응이고 수가 적다.
+       새 컴포넌트는 미디어쿼리 대신 «컨테이너 쿼리» 를 쓴다(데스크탑 2단에서 같은
+       카드가 폭 다른 컬럼에 들어가므로 뷰포트 기준이 맞지 않는다). */
+    --bp-sm: 480px;
+    --bp-md: 768px;
+    --bp-lg: 1024px;
+    --bp-xl: 1280px;
   }
 }
 @layer tokens {
@@ -488,7 +513,7 @@
 @layer elements {
 
   /* 모바일 + font-large: 간격/글씨 조정 (화면이 좁으니까) */
-  @media (max-width: 640px) {
+  @media (max-width: 767.98px) {
     html.font-large {
       --fs-xs: 14px;
       --fs-sm: 16px;
@@ -826,59 +851,59 @@
   /* ━━━ 세션58: 모바일 반응형 전면 강화 ━━━ */
 
   /* 부동산 탭 그리드 — 모바일에서 2열→1열 */
-  @media (max-width: 480px) {
+  @media (max-width: 479.98px) {
     .mc-g2 { grid-template-columns: 1fr !important; }
   }
 
   /* 부동산 카드 내부 패딩 최적화 */
   .apt-card { padding: 12px 14px; border-radius: 10px; background: var(--bg-surface); border: 1px solid var(--border); margin-bottom: 8px; }
-  @media (max-width: 480px) {
+  @media (max-width: 479.98px) {
     .apt-card { padding: 10px 12px; }
   }
 
   /* 테이블 오버플로우 — 모바일 가로 스크롤 */
   .apt-card table { width: 100%; font-size: var(--fs-xs); }
-  @media (max-width: 480px) {
+  @media (max-width: 479.98px) {
     .apt-card table { font-size: 10px; }
     .apt-card th, .apt-card td { padding: 4px 3px !important; }
   }
 
   /* KPI 3열 그리드 — 좁은 화면에서 간격 축소 */
-  @media (max-width: 480px) {
+  @media (max-width: 479.98px) {
     .kpi-row { gap: 4px !important; }
     .kpi-row > div { padding: 6px 4px !important; }
   }
 
   /* 도넛 차트 + 범례 — 모바일 스택 */
-  @media (max-width: 480px) {
+  @media (max-width: 479.98px) {
     .region-overview-layout { flex-direction: column !important; }
     .region-overview-layout > div:first-child { max-width: 160px; margin: 0 auto 8px; }
   }
 
   /* B-2 도넛 카드 그리드 — 모바일 최적화 */
-  @media (max-width: 480px) {
+  @media (max-width: 479.98px) {
     .donut-card-grid { font-size: 0.95em; gap: 2px !important; }
     .donut-card-grid > div { padding: 4px 3px !important; }
   }
-  @media (max-width: 480px) {
+  @media (max-width: 479.98px) {
     .donut-card-grid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; gap: 1px !important; }
     .donut-card-grid > div { padding: 3px 2px !important; }
   }
 
   /* 탭 세그먼트 — 작은 화면에서 폰트 축소 */
-  @media (max-width: 480px) {
+  @media (max-width: 479.98px) {
     .kd-tab-segment { font-size: 11px !important; }
     .kd-tab-segment > button { padding: 6px 4px !important; }
   }
 
   /* 공유 버튼 — 모바일에서 간격 조정 */
-  @media (max-width: 480px) {
+  @media (max-width: 479.98px) {
     .share-buttons { gap: 4px !important; }
     .share-buttons button { padding: 4px 8px !important; font-size: 11px !important; }
   }
 
   /* 타임라인 단계 — 모바일 텍스트 축소 */
-  @media (max-width: 480px) {
+  @media (max-width: 479.98px) {
     .tl-step { font-size: 8px !important; }
   }
 
@@ -887,17 +912,17 @@
   .kd-scroll-row::-webkit-scrollbar { display: none; }
 
   /* 카드 내 flex 줄바꿈 */
-  @media (max-width: 480px) {
+  @media (max-width: 479.98px) {
     .card-flex-wrap { flex-wrap: wrap !important; }
   }
 
   /* 분양 상세 — 시세 비교 테이블 스크롤 */
-  @media (max-width: 480px) {
+  @media (max-width: 479.98px) {
     .apt-card .price-compare-table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
   }
 
   /* 하단 CTA 버튼 — 모바일 풀너비 */
-  @media (max-width: 480px) {
+  @media (max-width: 479.98px) {
     .cta-row { flex-direction: column !important; }
     .cta-row > a, .cta-row > button { width: 100% !important; text-align: center !important; }
   }
@@ -1057,7 +1082,7 @@
      .blog-content / .blog-content p 의 모바일 타이포도 blog.css 로 수렴했다.
      미디어쿼리는 특이도를 올리지 않으므로 여기 두면 뒤에 로드되는 blog.css 의
      기본 규칙(16px)에 그대로 져서 죽은 코드가 된다 — 실제로 그랬다. */
-  @media (max-width: 640px) {
+  @media (max-width: 767.98px) {
     .blog-content h2 { margin-top: 40px; margin-bottom: 14px; font-size: 20px; }
     .blog-content h3 { margin-top: 28px; font-size: 16.5px; padding: 6px 0 6px 12px; }
     .blog-content table { font-size: 12.5px; display: block; overflow-x: auto; }
@@ -1075,7 +1100,7 @@
     word-break: keep-all;
     color: var(--text-primary);
   }
-  /* ⚠️ H5-D3 — 여기 있던 @media(max-width:640px) .feed-detail-content 14.5px/1.75 를 지웠다.
+  /* ⚠️ H5-D3 — 여기 있던 @media(max-width: 767.98px) .feed-detail-content 14.5px/1.75 를 지웠다.
      responsive.css 가 «같은 미디어쿼리·같은 셀렉터·같은 속성» 을 !important 로 다시 선언해
      (var(--fs-base)/1.85) 이 규칙은 이미 «한 번도 이긴 적이 없는 죽은 코드» 였다.
      @layer 는 important 순서를 뒤집으므로 그냥 두면 «갑자기 살아나서» 본문이 작아진다.
@@ -1125,7 +1150,7 @@
     transition: color 0.15s;
   }
   .kd-comment-actions button:hover { color: var(--text-secondary); }
-  @media (max-width: 640px) {
+  @media (max-width: 767.98px) {
     .kd-comment { padding: 12px 0; }
     .kd-comment-body { font-size: 13.5px; line-height: 1.7; }
     .kd-comment-author { font-size: 12.5px; }
@@ -1159,7 +1184,7 @@
   .kd-btn-primary:hover { opacity: 0.9; }
   .kd-btn-sm { padding: 5px 10px; font-size: 12px; }
   .kd-btn-lg { padding: 10px 20px; font-size: 14px; }
-  @media (max-width: 640px) {
+  @media (max-width: 767.98px) {
     .kd-btn { padding: 7px 14px; font-size: 12.5px; }
     .kd-btn-lg { padding: 9px 18px; font-size: 13px; }
   }
@@ -1180,7 +1205,7 @@
     color: var(--text-secondary);
     word-break: keep-all;
   }
-  @media (max-width: 640px) {
+  @media (max-width: 767.98px) {
     .kd-feed-card .kd-feed-title { font-size: 14.5px; }
     .kd-feed-card .kd-feed-body { font-size: 13.5px; }
   }
@@ -1415,17 +1440,17 @@
      ═══════════════════════════════════════════ */
 
   /* 캘린더 7열 — 모바일 글꼴/패딩 축소 */
-  @media (max-width: 480px) {
+  @media (max-width: 479.98px) {
     .kd-cal-grid { font-size: 10px !important; gap: 1px !important; }
     .kd-cal-grid > div { padding: 2px !important; }
   }
 
   /* KPI 5열 → 모바일 3+2열 또는 스크롤 */
   .kd-kpi-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--sp-xs); }
-  @media (max-width: 480px) {
+  @media (max-width: 479.98px) {
     .kd-kpi-5 { grid-template-columns: repeat(3, 1fr); }
   }
-  @media (max-width: 480px) {
+  @media (max-width: 479.98px) {
     .kd-kpi-5 { grid-template-columns: repeat(2, 1fr); }
   }
 
@@ -1435,33 +1460,33 @@
 
   /* KPI 4열 → 모바일 2열 */
   .kd-grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  @media (max-width: 480px) {
+  @media (max-width: 479.98px) {
     .kd-grid-4 { grid-template-columns: repeat(2, 1fr); }
   }
 
   /* 3열 → 모바일 2열 */
   .kd-grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  @media (max-width: 480px) {
+  @media (max-width: 479.98px) {
     .kd-grid-3 { grid-template-columns: repeat(2, 1fr); }
   }
 
   /* 2열 (1fr+2fr) → 모바일 1열 스택 */
   .kd-grid-1-2 { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,2fr); }
-  @media (max-width: 480px) {
+  @media (max-width: 479.98px) {
     .kd-grid-1-2 { grid-template-columns: 1fr; }
   }
 
   /* 글로벌 주식 6열 → 모바일 3열 */
   .kd-grid-6 { display: grid; }
-  @media (max-width: 480px) {
+  @media (max-width: 479.98px) {
     .kd-grid-6 { grid-template-columns: repeat(3, 1fr) !important; }
   }
-  @media (max-width: 480px) {
+  @media (max-width: 479.98px) {
     .kd-grid-6 { grid-template-columns: repeat(2, 1fr) !important; }
   }
 
   /* 5열 지역 타일 → 모바일 4열 / 극소 3열 */
-  @media (max-width: 480px) {
+  @media (max-width: 479.98px) {
     .kd-region-grid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
   }
   @media (max-width: 320px) {
@@ -1469,7 +1494,7 @@
   }
 
   /* 프로필 통계 4열 → 모바일 2열 */
-  @media (max-width: 480px) {
+  @media (max-width: 479.98px) {
     .kd-stats-4 { grid-template-columns: repeat(2, 1fr) !important; }
   }
 
@@ -1484,7 +1509,7 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--sp-sm);
   }
-  @media (max-width: 480px) {
+  @media (max-width: 479.98px) {
     .listing-grid-2col { grid-template-columns: 1fr; }
   }
 
@@ -1611,7 +1636,7 @@
   }
   /* 히어로 카드 — 단지백과 2열 */
   .hero-img-sm { height: 90px; }
-  @media (max-width: 480px) {
+  @media (max-width: 479.98px) {
     .hero-img { height: 100px; }
     .hero-img-sm { height: 80px; }
     .hero-name { font-size: 14px; }
@@ -1655,7 +1680,7 @@
   }
 
   /* font-large: KPI 그리드 모바일에서 2열로 전환 */
-  @media (max-width: 480px) {
+  @media (max-width: 479.98px) {
     html.font-large [style*="repeat(4"] {
       grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     }
@@ -1694,26 +1719,26 @@
   table { max-width: 100%; }
 
   /* 종목 상세: KPI 4열 → 모바일 2열 */
-  @media (max-width: 480px) {
+  @media (max-width: 479.98px) {
     [style*="grid-template-columns: repeat(4"] {
       grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     }
   }
 
   /* 모바일 320px: 3열 그리드도 2열로 */
-  @media (max-width: 480px) {
+  @media (max-width: 479.98px) {
     [style*="grid-template-columns: repeat(3"] {
       grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     }
   }
 
   /* 종목/부동산 상세: flex 아이템 넘침 방지 */
-  @media (max-width: 480px) {
+  @media (max-width: 479.98px) {
     article { overflow-x: hidden; }
   }
 
   /* FeedStatusBar: 초소형 화면 대응 */
-  @media (max-width: 480px) {
+  @media (max-width: 479.98px) {
     .feed-status-bar {
       font-size: 10px !important;
       gap: 2px !important;
@@ -1725,14 +1750,14 @@
   }
 
   /* 피드 카드: 투표/VS/예측 카드 패딩 축소 */
-  @media (max-width: 480px) {
+  @media (max-width: 479.98px) {
     .feed-poll-card, .feed-vs-card, .feed-predict-card {
       padding: 10px !important;
     }
   }
 
   /* 주식 히트맵/트리맵: 가로 넘침 방지 */
-  @media (max-width: 640px) {
+  @media (max-width: 767.98px) {
     .stock-treemap-container, .stock-heatmap-container {
       overflow-x: auto !important;
       -webkit-overflow-scrolling: touch;
@@ -1740,7 +1765,7 @@
   }
 
   /* 프로필/설정 페이지: 그리드 1열 전환 */
-  @media (max-width: 480px) {
+  @media (max-width: 479.98px) {
     .profile-grid, .settings-grid {
       grid-template-columns: 1fr !important;
     }
@@ -1753,7 +1778,7 @@
   }
 
   /* 종목 비교 페이지: 테이블 가로 스크롤 강제 */
-  @media (max-width: 640px) {
+  @media (max-width: 767.98px) {
     .compare-table-wrap {
       overflow-x: auto !important;
       -webkit-overflow-scrolling: touch;
@@ -1810,7 +1835,7 @@
   }
 
   /* 어드민: 모바일 대응 */
-  @media (max-width: 480px) {
+  @media (max-width: 479.98px) {
     .adm-card { padding: 10px !important; }
     .adm-btn { padding: 6px 8px !important; font-size: 11px !important; }
   }
@@ -1828,12 +1853,12 @@
   }
 
   /* 모바일: 카드 내 숫자 텍스트 축소 */
-  @media (max-width: 480px) {
+  @media (max-width: 479.98px) {
     .kd-counter { font-size: 14px !important; }
   }
 
   /* 모바일: 터치 타겟 최소 크기 보장 */
-  @media (max-width: 640px) {
+  @media (max-width: 767.98px) {
     button, a, [role="button"] {
       min-height: 36px;
     }
@@ -1844,21 +1869,21 @@
   }
 
   /* 홈페이지: 섹션 카드 가로 스크롤 */
-  @media (max-width: 480px) {
+  @media (max-width: 479.98px) {
     .kd-section-card {
       min-width: 130px !important;
     }
   }
 
   /* QuickPostBar: 모바일 대응 */
-  @media (max-width: 480px) {
+  @media (max-width: 479.98px) {
     .quick-post-bar input {
       font-size: 13px !important;
     }
   }
 
   /* HotTopicBar: 모바일 pill 크기 */
-  @media (max-width: 480px) {
+  @media (max-width: 479.98px) {
     .hot-topic-pill {
       font-size: 11px !important;
       padding: 4px 8px !important;
@@ -1875,14 +1900,14 @@
   }
 
   /* 종목 상세: 가격 헤더 모바일 */
-  @media (max-width: 480px) {
+  @media (max-width: 479.98px) {
     .stock-price-header {
       font-size: 28px !important;
     }
   }
 
   /* 부동산 상세: 분양가 테이블 가로 스크롤 */
-  @media (max-width: 640px) {
+  @media (max-width: 767.98px) {
     .price-table-wrap {
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
@@ -1944,7 +1969,7 @@
     padding-left: 14px;
     margin-left: -18px;
   }
-  @media (max-width: 640px) {
+  @media (max-width: 767.98px) {
     .blog-content h2 {
       margin-left: -4px;
       padding-left: 10px;
@@ -1992,7 +2017,7 @@
 }
 @layer elements {
 
-  @media (max-width: 480px) {
+  @media (max-width: 479.98px) {
     :root {
       --kd-gap-md: 10px;
       --kd-gap-lg: 14px;
@@ -2119,7 +2144,7 @@
   }
 
   /* s239 W7: apt-* 모바일 sizing 보강 (480px 이하) — section title 작게 + 카드 padding 줄임 */
-  @media (max-width: 480px) {
+  @media (max-width: 479.98px) {
     .apt-section-title { font-size: var(--fs-base); }
     .apt-card-v2 { padding: 10px 12px; margin-bottom: var(--sp-md); }
     .apt-imminent-card { flex-basis: 150px; }

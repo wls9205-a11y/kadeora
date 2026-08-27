@@ -9,7 +9,7 @@
      모바일
      ======================================== */
 
-  @media (max-width: 640px) {
+  @media (max-width: 767.98px) {
     body { font-size: 1rem; }
   }
   input, textarea, select {
@@ -46,7 +46,7 @@
     font-size: var(--fs-xs);
     font-weight: 600;
   }
-  @media (max-width: 480px) {
+  @media (max-width: 479.98px) {
     .apt-stages > div {
       font-size: 10px;
       padding: 5px 1px;
@@ -64,7 +64,7 @@
   /* 모바일: 어드민 헤더 */
 
   /* 모바일: 테이블 가로 스크롤 */
-  @media (max-width: 767px) {
+  @media (max-width: 767.98px) {
     table { display: block; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; }
     .blog-content table { font-size: var(--fs-xs); }
     .blog-content th, .blog-content td { padding: 6px 8px; }
@@ -154,7 +154,7 @@
   /* 리스트 아이템 */
   /* 탭 바 */
   /* 모바일: font-large 일 때 탭 글씨 축소 (화면에 5개 들어가야 하니까) */
-  @media (max-width: 640px) {
+  @media (max-width: 767.98px) {
     html.font-large .kd-tab { font-size: var(--fs-xs); padding: var(--sp-xs) 0; }
     html.font-large .kd-pill { font-size: var(--fs-xs); padding: var(--sp-xs) var(--sp-sm); }
   }
@@ -210,7 +210,7 @@
      ======================================== */
 
   /* 모바일: 카드 패딩/간격 최적화 */
-  @media (max-width: 640px) {
+  @media (max-width: 767.98px) {
     .kd-feed-card {
       border-radius: 10px !important;
     }
@@ -218,7 +218,7 @@
   }
 
   /* 모바일: 피드 상세 본문 가독성 */
-  @media (max-width: 640px) {
+  @media (max-width: 767.98px) {
     .feed-detail-content {
       font-size: var(--fs-base) !important;
       line-height: 1.85 !important;
@@ -227,7 +227,7 @@
   }
 
   /* 모바일: 블로그 본문 */
-  @media (max-width: 640px) {
+  @media (max-width: 767.98px) {
     .blog-content {
       font-size: var(--fs-base) !important;
       line-height: 1.9 !important;
@@ -247,7 +247,7 @@
   }
 
   /* 모바일: 버튼 터치 타겟 최소 44px */
-  @media (max-width: 640px) {
+  @media (max-width: 767.98px) {
     button, [role="button"], a[href] {
       min-height: 36px;
     }
@@ -256,7 +256,7 @@
   /* 모바일: 탭 바 스크롤 개선 */
 
   /* 모바일: 입력 폼 터치 최적화 */
-  @media (max-width: 640px) {
+  @media (max-width: 767.98px) {
     .kd-input {
       padding: 12px 14px !important;
       border-radius: 10px !important;
@@ -270,7 +270,7 @@
   /* 모바일: 주식 그리드 2열→1열 */
 
   /* 모바일: 피드 인터랙션 바 풀폭 */
-  @media (max-width: 480px) {
+  @media (max-width: 479.98px) {
     .kd-interaction-bar {
       gap: 2px !important;
     }
@@ -289,7 +289,7 @@
 
   /* 모바일: 롱 텍스트 말줄임 */
   /* 모바일: 이미지 라운드 */
-  @media (max-width: 640px) {
+  @media (max-width: 767.98px) {
     .kd-card img {
       border-radius: 8px !important;
     }
@@ -303,7 +303,7 @@
   }
 
   /* 모바일에서 등급 텍스트 숨김 (이모지만 유지) */
-  @media (max-width: 480px) {
+  @media (max-width: 479.98px) {
     .grade-title-text { display: none; }
   }
 
@@ -312,14 +312,14 @@
   /* 더보기 메뉴 — 5개 아이템 정렬 개선 */
 
   /* 모바일 탭바 — 블로그 탭 active 스타일 보강 */
-  @media (max-width: 767px) {
+  @media (max-width: 767.98px) {
     nav[class*="md:hidden"] a[aria-current="page"] span {
       font-weight: 700 !important;
     }
   }
 
   /* 모바일 카드 내 이미지 — 최소 높이 보장 */
-  @media (max-width: 480px) {
+  @media (max-width: 479.98px) {
     .kd-feed-card img { min-height: 60px; }
   }
 
@@ -329,14 +329,14 @@
 
   /* ═══ iOS 자동 줌 완전 차단 ═══ */
   /* iOS Safari는 font-size < 16px인 input에 포커스하면 자동 줌합니다 */
-  @media screen and (max-width: 767px) {
+  @media screen and (max-width: 767.98px) {
     input, textarea, select, [contenteditable] {
       font-size: 16px !important;
     }
   }
 
   /* ═══ 모바일 테이블 수평 스크롤 ═══ */
-  @media screen and (max-width: 640px) {
+  @media screen and (max-width: 767.98px) {
     .blog-content table {
       display: block;
       overflow-x: auto;
@@ -352,14 +352,14 @@
   }
 
   /* 작은 글씨 모드에서도 모바일 최소 12px 보장 */
-  @media screen and (max-width: 480px) {
+  @media screen and (max-width: 479.98px) {
     html.font-small {
       --fs-xs: 12px;
     }
   }
 
   /* ═══ 모바일 전역 — 가장자리 붙는 콘텐츠 방지 ═══ */
-  @media screen and (max-width: 767px) {
+  @media screen and (max-width: 767.98px) {
   
     /* 모달/바텀시트 좌우 여유 */
     [role="dialog"] {
@@ -370,7 +370,7 @@
   }
 
   /* ═══ 모바일 긴 단어 줄바꿈 ═══ */
-  @media screen and (max-width: 480px) {
+  @media screen and (max-width: 479.98px) {
     h1, h2, h3 {
       word-break: keep-all;
       overflow-wrap: break-word;
@@ -378,7 +378,7 @@
   }
 
   /* ═══ 모바일 버튼 최소 터치 타겟 ═══ */
-  @media screen and (max-width: 767px) {
+  @media screen and (max-width: 767.98px) {
     button, [role="button"], a[href] {
       min-height: 36px;
     }
@@ -389,7 +389,7 @@
   }
 
   /* ═══ 주식 리스트 모바일 — 종목명 잘림 방지 ═══ */
-  @media screen and (max-width: 480px) {
+  @media screen and (max-width: 479.98px) {
     /* 미니 스파크라인 숨김 — 공간 확보 */
     .stock-sparkline { display: none !important; }
     /* 종목코드(005930) 숨김 — 이름 공간 확보 */
@@ -421,7 +421,7 @@
 
   /* ═══ 섹션 간격 ═══ */
   /* ═══ 하단 탭바 여백 보정 ═══ */
-  @media (max-width: 767px) {
+  @media (max-width: 767.98px) {
     main, [role="main"] {
       padding-bottom: 60px !important;
     }
@@ -430,7 +430,7 @@
   /* ═══ 면적 최적화 — 과다 영역 축소 ═══ */
   /* 블로그 카드 높이 축소 */
   /* 미분양/분양 카드 — 즐겨찾기(★) 영역 축소 */
-  @media (max-width: 480px) {
+  @media (max-width: 479.98px) {
     .kd-card { margin-bottom: 10px !important; }
   }
 
@@ -490,7 +490,7 @@
      ══════════════════════════════════════ */
 
   /* 모바일: < 769px */
-  @media (max-width: 767px) {
+  @media (max-width: 767.98px) {
     /* 모바일 상단 바 표시 */
     .admin-mobile-bar { display: flex !important; }
 
@@ -540,14 +540,14 @@
   }
 
   /* 작은 모바일: < 480px */
-  @media (max-width: 480px) {
+  @media (max-width: 479.98px) {
     .mc-g6 { grid-template-columns: repeat(2, 1fr) !important; }
     .mc-g4 { grid-template-columns: repeat(2, 1fr) !important; }
     .admin-main { padding: 56px 8px 20px !important; }
   }
 
   /* 태블릿: 769~1024px */
-  @media (min-width: 769px) and (max-width: 1024px) {
+  @media (min-width: 768px) and (max-width: 1023.98px) {
     .admin-sidebar { width: 170px !important; }
     .mc-g6 { grid-template-columns: repeat(3, 1fr) !important; }
     .mc-g4 { grid-template-columns: repeat(2, 1fr) !important; }
@@ -559,7 +559,7 @@
      ======================================== */
 
   /* 카드 내부 자식에 min-width: 0 — 텍스트 오버플로우 방지 */
-  @media (max-width: 640px) {
+  @media (max-width: 767.98px) {
     .kd-feed-card > div, .apt-card > div, .kd-card > div,
     .kd-feed-card > a, .apt-card > a {
       min-width: 0;
@@ -619,7 +619,7 @@
   }
 
   /* ═══ 글씨 크기별 모바일 방어 ═══ */
-  @media (max-width: 480px) {
+  @media (max-width: 479.98px) {
     /* font-large: 탭바 아이콘/텍스트 안 깨지게 */
     html.font-large nav[style*="fixed"] span {
       font-size: 10px !important;
