@@ -3,11 +3,14 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
 import { dbw } from '@/lib/cron-db-log';
 
-/* ⚠️ Rule #18 — vercel.json 의 `"src/app/api/**/*.ts": { maxDuration: 30 }` 캐치올이
-   이 줄을 «덮는다». 첫 배포에서 실제로 30초에 걸려 504(FUNCTION_INVOCATION_TIMEOUT)가 났다.
-   vercel.json 의 functions 에 `src/app/api/cron/observe/*.ts: 120` 을 «반드시» 같이 둔다.
-   여기만 고치면 아무 일도 일어나지 않는다.
-   실측: get_weekly_trades 가 지역당 4~11초(부산 16구군 4.2s · 울산 10.7s · 경남 5.4s). */
+// ⚠️ Rule #18 — vercel.json 의 `"src/app/api/**" 캐치올(maxDuration 30)이 이 줄을 «덮는다».
+//    첫 배포에서 실제로 30초에 걸려 504(FUNCTION_INVOCATION_TIMEOUT)가 났다.
+//    vercel.json 의 functions 에 observe 항목(120초)을 «반드시» 같이 둔다 —
+//    여기만 고치면 아무 일도 일어나지 않는다.
+//    실측: get_weekly_trades 가 지역당 4~11초(부산 16구군 4.2s · 울산 10.7s · 경남 5.4s).
+//
+// ⛔ 이 주석을 «블록 주석으로 되돌리지 말 것». vercel.json 의 glob 을 그대로 적으면
+//    그 안의 `*` + `/` 가 블록 주석을 «조기 종료» 시켜 빌드가 깨진다(2026-08-27 실제 발생).
 export const maxDuration = 120;
 
 /**
