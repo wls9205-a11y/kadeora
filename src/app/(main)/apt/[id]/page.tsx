@@ -411,9 +411,23 @@ async function fetchUnifiedData(slug: string) {
    * ⚠️ Rule #49 — /apt/[id] 의 8개 뭉치가 504 를 낸 전례가 있어 기존 allSettled 를
    *    늘리지 않는다. 뒤에 따로 띄우고 둘을 «같이» 기다린다. */
   const [obsR, noteR] = await Promise.all([
+    /* 이 현장 «또는» 이 구군의 관측.
+     *
+     * ⚠️ 구군 실거래 요약(trade)은 apt_site_id 가 null 이다 — 「수영구 이번 주 실거래
+     *    17건」은 수영구의 «모든» 현장 페이지에 유효한 사실이다. 현장 매칭만 보면
+     *    12건 전부가 어느 상세 페이지에도 안 나온다(첫 실행 실측).
+     *
+     * ⚠️⚠️ region 을 «반드시» 같이 건다. 남구·중구·서구·동구는 전국에 여럿이라
+     *      sigungu 만 맞추면 부산 남구 관측이 울산 남구 현장에 붙는다.
+     *      T 트랙에서 좌표 687건을 무효화한 것과 «같은 종류» 의 실수다.
+     */
     (sb as any).from('apt_observations')
-      .select('id, kind, title, link_path, observed_at')
-      .eq('apt_site_id', site.id)
+      .select('id, kind, title, link_path, observed_at, apt_site_id')
+      .or(
+        site.sigungu && site.region
+          ? `apt_site_id.eq.${site.id},and(apt_site_id.is.null,region.eq.${site.region},sigungu.eq.${site.sigungu})`
+          : `apt_site_id.eq.${site.id}`,
+      )
       .order('created_at', { ascending: false }).limit(5),
     (sb as any).from('blog_posts')
       .select('slug, title, excerpt, published_at')
@@ -1187,7 +1201,9 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
           NewsArticle·Report 같은 다른 타입을 붙이지 않는다 — 관측은 기사가 아니라
           「우리가 본 것」이고, 타입을 과하게 주장하면 리치결과가 오히려 깎인다.
           about 은 /blog/[slug]·/apt/region/* 이 쓰는 것과 «같은 @id» 다. */}
-      {observations.length > 0 && site && (
+      {observations.length > 0 && site && (() => {
+        const aboutSite = siteEntity({ id: site.id, slug: site.slug, name: site.name, display_name: site.display_name, region: site.region, sigungu: site.sigungu });
+        return (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(
           observations.map((o: any) => ({
             '@context': 'https://schema.org',
@@ -1196,12 +1212,14 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
             datePublished: o.observed_at,
             url: `${SITE_URL}${o.link_path}`,
             author: { '@type': 'Organization', name: '카더라', url: SITE_URL },
-            ...(siteEntity({ id: site.id, slug: site.slug, name: site.name, display_name: site.display_name, region: site.region, sigungu: site.sigungu })
-              ? { about: siteEntity({ id: site.id, slug: site.slug, name: site.name, display_name: site.display_name, region: site.region, sigungu: site.sigungu }) }
-              : {}),
+            // ⚠️ about 은 «그 관측이 이 현장을 가리킬 때만» 붙인다. 구군 실거래 요약은
+            //    apt_site_id 가 null 이라 이 현장에 «대한» 글이 아니다 — 붙이면
+            //    구조화 데이터가 「이 관측은 이 단지 이야기」라고 거짓을 말한다.
+            ...(o.apt_site_id === site.id && aboutSite ? { about: aboutSite } : {}),
           })),
         ) }} />
-      )}
+        );
+      })()}
 
       {showLeadForm && site && (
         <LeadForm

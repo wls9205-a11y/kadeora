@@ -120,8 +120,28 @@ export async function GET(req: NextRequest) {
         const area = r.top_area ? `${Math.round(Number(r.top_area))}㎡` : '';
         const price = won(r.top_amount);
         if (!price) { bump('no_price'); continue; }
+
+        /* 최고가 단지가 우리 현장이면 연결한다.
+         *
+         * ⚠️ 이름만 넘기지 «않는다». `지역 구군 단지명` 을 통째로 넘겨야
+         *    match_apt_sites_all 의 지역 가드가 작동한다 — 이름만 주면 글에 지역
+         *    언급이 없는 것으로 읽혀 가드가 통째로 꺼진다(geo_n = 0 이면 무조건 통과).
+         *    「목포 진주빌라」가 경남 통영 현장에 붙던 것과 같은 실수를 여기서 반복하지 않는다.
+         * ⚠️ match_apt_site 는 «단일 매칭일 때만» uuid 를 준다. 2건 이상이면 null 이다.
+         * ⚠️ 실패해도 관측은 그대로 만든다 — 연결이 안 됐다고 사실이 사라지지 않는다.
+         */
+        let tradeSiteId: string | null = null;
+        if (r.top_apt) {
+          const { data: matched, error: mErr } = await (sb as any).rpc('match_apt_site', {
+            p_text: `${region} ${r.sigungu} ${r.top_apt}`,
+          });
+          if (mErr) console.error(`[observe] match ${r.top_apt}: ${mErr.message?.slice(0, 120)}`);
+          else if (matched) tradeSiteId = matched as string;
+          if (!tradeSiteId) bump('trade_no_site');
+        }
+
         drafts.push({
-          apt_site_id: null,
+          apt_site_id: tradeSiteId,
           region, sigungu: r.sigungu,
           kind: 'trade',
           title: `${r.sigungu} 이번 주 실거래 ${r.deals}건 — ${r.top_apt} ${area} 최고 ${price} (${md(r.top_deal_date)})`,

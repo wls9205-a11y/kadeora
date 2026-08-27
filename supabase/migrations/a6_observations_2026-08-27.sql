@@ -123,3 +123,27 @@ end $$;
 -- 기존 UNIQUE(post_id,user_id) 는 post_id 가 null 이면 무력하다 — 관측용 짝을 따로 건다.
 create unique index if not exists uq_post_reactions_observation
   on post_reactions (observation_id, user_id) where observation_id is not null;
+
+-- ══ A6 후속 (2026-08-27) — trade 관측을 현장에 연결 ═════════════════════════
+--
+-- 첫 실행에서 trade 12건이 «전부 apt_site_id = null» 이었다(구군 단위 요약이라).
+-- 그 결과 어느 /apt/[id] 에도 나타나지 않았다.
+--
+-- ⚠️ 매칭할 때 «이름만» 넘기면 안 된다. `지역 구군 단지명` 을 통째로 넘겨야
+--    match_apt_sites_all 의 지역 가드가 작동한다 — 이름만 주면 글에 지역 언급이
+--    없는 것으로 읽혀 가드가 통째로 꺼진다(geo_n = 0 이면 무조건 통과).
+update apt_observations o
+   set apt_site_id = match_apt_site(o.region || ' ' || o.sigungu || ' ' ||
+         split_part(split_part(o.title, ' — ', 2), ' ', 1))
+ where o.kind = 'trade' and o.apt_site_id is null and o.sigungu is not null
+   and match_apt_site(o.region || ' ' || o.sigungu || ' ' ||
+         split_part(split_part(o.title, ' — ', 2), ' ', 1)) is not null;
+-- 실측 결과 12건 중 6건 연결 · 오매칭 0건
+--   화명롯데캐슬카이저 → 화명롯데캐슬 · 레이카운티(1단지) → 레이카운티
+--   더비치푸르지오써밋 → 더 비치 푸르지오 써밋 · 쌍용…아파트 → 쌍용 더 플래티넘 사직아시아드
+--   더샵명지퍼스트월드2단지 · 사상중흥에스-클래스그랜드센트럴 (완전일치)
+--
+-- ⚠️ 못 붙은 6건은 «거래 이름과 현장 이름이 다른» 경우다. 대표 예:
+--    삼익비치(거래) ↔ 「남천2-3(삼익비치) 재건축」(현장)
+--    매칭은 «토큰이 텍스트에 포함되나» 를 본다. 반대 방향(현장명이 텍스트를 포함)까지
+--    열면 짧은 토큰이 수많은 현장에 걸린다 — 열지 않는다. 못 붙으면 null 로 둔다.
