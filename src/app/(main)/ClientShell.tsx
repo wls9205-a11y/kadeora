@@ -131,8 +131,10 @@ export default function ClientShell({ children, serverLoggedIn }: Props) {
               <a href="/calc" style={{color:'var(--text-secondary)',textDecoration:'none'}}>계산기</a>
               <a href="/daily/전국" style={{color:'var(--text-secondary)',textDecoration:'none'}}>데일리</a>
               <a href="/hot" style={{color:'var(--text-secondary)',textDecoration:'none'}}>인기글</a>
-              <a href="/feed" style={{color:'var(--text-secondary)',textDecoration:'none'}}>커뮤니티</a>
-              <a href="/discuss" style={{color:'var(--text-secondary)',textDecoration:'none'}}>토론</a>
+              {/* ⛔ A4(2026-08-27) — 푸터에서 '/feed'(→/apt 302)·'/discuss'(noindex) 를 뺐다.
+                  ⚠️ 푸터는 «전 페이지에» 실리는 내부 링크다. 여기 남겨 두면 noindex 를
+                     걸어 놓고도 크롤러를 계속 그리로 보내게 된다 — 크롤 예산이 샌다.
+                  라우트는 살아 있다. 직접 주소로는 들어갈 수 있다. */}
               <a href="/premium" style={{color:'var(--text-secondary)',textDecoration:'none'}}>프리미엄</a>
               <a href="/press" style={{color:'var(--text-secondary)',textDecoration:'none'}}>보도자료</a>
               <a href="/about" style={{color:'var(--text-secondary)',textDecoration:'none'}}>소개</a>

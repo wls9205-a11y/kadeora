@@ -6,7 +6,11 @@ import Disclaimer from '@/components/Disclaimer';
 
 export const revalidate = 60;
 
+/* ⛔ A4(2026-08-27) — /discuss 를 접는다. 라우트·컴포넌트는 «지우지 않는다» —
+   되살릴 판단이 남아 있고, 지우면 그 판단 근거가 같이 사라진다.
+   ⚠️ follow 는 살린다. 링크 가치는 계속 흘러야 한다. */
 export const metadata: Metadata = {
+  robots: { index: false, follow: true },
   title: '토론',
   description: '주식, 부동산, 경제 이슈 — 지금 뜨거운 토론과 실시간 라운지. A vs B 투표로 의견을 나누세요.',
   alternates: { canonical: SITE_URL + '/discuss' },

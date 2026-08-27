@@ -176,6 +176,17 @@ const nextConfig: NextConfig = {
 
   async redirects() {
     return [
+      /* ⛔ A4(2026-08-27) — /feed 를 /apt 로 «임시» 이전한다.
+       *
+       * ⚠️ permanent: false «반드시». 302 다.
+       *    Phase B4 에서 /feed 를 «관측 스트림» 으로 되살릴 예정이라 301 을 쓰면 안 된다 —
+       *    301 은 브라우저가 캐시하고 검색엔진이 URL 을 통합해 버려서, 되살려도
+       *    한동안 아무도 도달하지 못한다. 되돌릴 계획이 있으면 302 다.
+       * ⚠️ 하위 경로(/feed/:id)는 «건드리지 않는다». 개별 글은 살아 있고,
+       *    A4 는 목록 진입만 막는다. 시드 글 비공개 플립은 7일 뒤 별도 커밋이다.
+       * ⚠️ /feed.xml 은 다른 것이다 — source 를 정확히 "/feed" 로 한정한다. */
+      { source: "/feed", destination: "/apt", permanent: false },
+
       { source: "/api/stock-debug", destination: "/", permanent: true },
       { source: "/api/stock-debug/:path*", destination: "/", permanent: true },
       { source: "/rss", destination: "/feed.xml", permanent: true },

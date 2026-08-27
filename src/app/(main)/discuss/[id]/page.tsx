@@ -17,10 +17,17 @@ export async function generateMetadata({ params }: Props) {
   const { id } = await params;
   const sb = await createSupabaseServer();
   const { data: topic } = await sb.from('discussion_topics')
-    .select('title, description, category, option_a, option_b, vote_a, vote_b, comment_count, view_count, created_at')
+    .select('title, description, category, option_a, option_b, vote_a, vote_b, comment_count, view_count, created_at, author_id')
     .eq('id', parseInt(id, 10)).maybeSingle();
 
   if (!topic) return { title: '토론을 찾을 수 없습니다' };
+
+  // A4 — 「실사용자가 쓴 것인가」. 없거나 시드면 우리 것이다.
+  let isOurs = !topic.author_id;
+  if (topic.author_id) {
+    const { data: pr } = await sb.from('profiles').select('is_seed').eq('id', topic.author_id).maybeSingle();
+    isOurs = pr?.is_seed === true;
+  }
 
   const total = (topic.vote_a || 0) + (topic.vote_b || 0);
   const catLabel = CAT_SEO[topic.category] || '토론';
@@ -53,7 +60,16 @@ export async function generateMetadata({ params }: Props) {
       'naver:author': '카더라',
       'og:updated_time': topic.created_at || new Date().toISOString(),
     },
-    robots: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' as const },
+    /* ── A4(2026-08-27) — 「우리가 만든 것」은 색인하지 않는다 ──────────────
+     * /discuss 는 접는다. 시드 «글» 비공개 플립은 7일 뒤로 미뤘고, 그 사이에도
+     * 검색엔진이 이 페이지를 새로 가져가면 안 된다.
+     * ⚠️ 지시서는 「시드 작성자 글이면 noindex」였는데, 실측하니 토픽 35건이
+     *    «전부 author_id = NULL» 이다 — 그 조건만으로는 «0건» 이 걸린다.
+     *    「실사용자가 쓴 것이 아니면」으로 넓혔다. 실사용자 토픽은 그대로 색인된다.
+     * ⛔ follow 는 살린다. 링크 가치는 계속 흘러야 한다 — 페이지를 지우는 게 아니다. */
+    robots: isOurs
+      ? { index: false, follow: true }
+      : { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' as const },
   };
 }
 

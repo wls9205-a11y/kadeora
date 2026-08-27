@@ -30,10 +30,9 @@ const MOBILE_TABS = [
 type MoreItem = { href: string; Icon: React.ComponentType<{ size?: number; style?: React.CSSProperties }>; label: string; sub?: string };
 
 const MORE_ITEMS: MoreItem[] = [
-  { href: '/feed',                   Icon: MessageSquare,  label: '피드',          sub: '커뮤니티 글' },
+  // ⛔ A4 — '/feed'(→/apt 302)·'/discuss'(접음) 항목을 뺐다. 라우트는 살아 있다.
   { href: '/daily',                  Icon: BarChart3,      label: '데일리 리포트', sub: '매일 시장 요약' },
   { href: '/hot',                    Icon: Flame,          label: '이번주 HOT',    sub: '인기 글' },
-  { href: '/discuss',                Icon: MessagesSquare, label: '라운지 토론',   sub: 'A vs B 투표' },
   { href: '/blog/series',            Icon: Library,        label: '시리즈',        sub: '주제별 연재' },
   { href: '/calc',                   Icon: Calculator,     label: '계산기',        sub: '부동산·세금' },
   { href: '/notifications/settings', Icon: BellRing,       label: '알림 설정',     sub: '푸시·이메일' },

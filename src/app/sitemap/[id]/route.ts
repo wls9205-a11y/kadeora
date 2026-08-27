@@ -67,7 +67,9 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
     } catch {}
 
     const staticPaths = [
-      '', '/feed', '/hot', '/stock', '/apt', '/discuss', '/blog', '/about',
+      // ⛔ A4 — '/feed'(→/apt 302) 와 '/discuss'(noindex) 를 정적 항목에서 뺐다.
+      //    302·noindex 를 사이트맵에 제출하면 「차단된 URL 제출」 경고가 뜬다.
+      '', '/hot', '/stock', '/apt', '/blog', '/about',
       '/guide', '/search', '/faq', '/terms', '/privacy', '/refund', '/shop',
       // s274: '/apt/map' 과 '/apt/data' 는 robots.txt 에서 Disallow (s235 dead route) 인데
       // 사이트맵에는 남아 있어 "차단된 URL 을 제출" 경고가 뜬다. 사이트맵에서 제외.
