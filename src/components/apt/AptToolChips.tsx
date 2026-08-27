@@ -6,7 +6,10 @@ import Link from 'next/link';
 const TOOLS = [
   { href: '/apt/diagnose', label: '청약 진단', icon: '🏥', desc: '자격·당첨 확률' },
   { href: '/apt/diagnose#score', label: '가점 계산기', icon: '🧮', desc: '청약 가점 계산' },
-  { href: '/apt/map', label: '지도', icon: '🗺️', desc: '위치로 찾기' },
+  /* ⛔ H6-2 후속 — 「지도」 칩 제거. 레일 바로가기와 «같은 이유» 다:
+     H5-2 에서 [목록|지도] 토글을 내렸는데 진입점이 남아 「지도가 이 사이트의 기능」이라고
+     계속 말하고 있었다. 부울경 정비사업 179곳 중 169곳에 주소·동이 없어 지도가 비어 보인다.
+     /apt/map 라우트는 그대로다(200 + noindex). */
   { href: '/apt/compare', label: '단지 비교', icon: '⚖️', desc: '조건 비교' },
   // F1: big-events(청약 캘린더)가 만들어져 있는데 /apt 에서 갈 길이 없었다.
   //     새 화면을 만드는 게 아니라 «이미 있는 것을 잇는» 작업이다.

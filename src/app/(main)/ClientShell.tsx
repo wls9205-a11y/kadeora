@@ -130,7 +130,9 @@ export default function ClientShell({ children, serverLoggedIn }: Props) {
               <a href="/blog" style={{color:'var(--text-secondary)',textDecoration:'none'}}>블로그</a>
               <a href="/calc" style={{color:'var(--text-secondary)',textDecoration:'none'}}>계산기</a>
               <a href="/daily/전국" style={{color:'var(--text-secondary)',textDecoration:'none'}}>데일리</a>
-              <a href="/hot" style={{color:'var(--text-secondary)',textDecoration:'none'}}>인기글</a>
+              {/* ⛔ H6-5 후속 — nav 는 「많이 본」으로 바꿨는데 푸터만 「인기글」이 남아
+                  같은 라우트를 두 이름으로 부르고 있었다. 순위를 주장하는 라벨은 쓰지 않는다. */}
+              <a href="/hot" style={{color:'var(--text-secondary)',textDecoration:'none'}}>많이 본</a>
               {/* ⛔ A4(2026-08-27) — 푸터에서 '/feed'(→/apt 302)·'/discuss'(noindex) 를 뺐다.
                   ⚠️ 푸터는 «전 페이지에» 실리는 내부 링크다. 여기 남겨 두면 noindex 를
                      걸어 놓고도 크롤러를 계속 그리로 보내게 된다 — 크롤 예산이 샌다.
