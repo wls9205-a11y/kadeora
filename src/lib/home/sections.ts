@@ -13,6 +13,7 @@
 
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { fetchAll } from '@/lib/db/fetchBatched';
+import { activeSiteFilter } from '@/lib/apt/active-site';
 
 /** 한 섹션이 이 수보다 적으면 섹션 자체를 감춘다 (M5 §B-5). */
 export const MIN_ROWS = 3;
@@ -137,7 +138,10 @@ export async function fetchHomeSections(regions: string[]): Promise<HomeSections
       sb,
       'apt_sites',
       COLS,
-      (q: any) => q.eq('is_active', true).in('region', regions),
+      // ⚠️ H7-3 — 집계 행(구군 미분양 롤업)을 «여기서» 뺀다. 안 빼면 deals 정렬이
+      //    content_score 라 「부산 기장군 미분양」(점수 100)이 1위를 먹는다.
+      //    ⛔ 조건을 손으로 적지 말 것 — activeSiteFilter 를 쓴다.
+      (q: any) => activeSiteFilter(q).in('region', regions),
     )) as Raw[];
 
     const rows = all.filter((r) => isRealSite(r.name));

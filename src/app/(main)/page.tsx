@@ -325,27 +325,21 @@ export default async function HomePage() {
        * ⚠️ 홈에서 «매일 바뀌는 유일한 블록» 이다. 큐레이션 4건과 재개발 목록은
        *    주 단위로도 잘 안 움직인다. 재방문 이유가 여기서 나온다.
        * ⚠️ RPC 가 실패하거나 0건이면 fetchWeeklyTrades 가 null 을 내고 여기서 미렌더된다. */}
-      {weekly && <WeeklyTrades data={weekly} selectedRegion={heroRegion} />}
-
-      {/* ── 3 최근 본 현장 — 없으면 컴포넌트가 null 을 낸다 ── */}
+      {/* ── 3 최근 본 현장 — 없으면 컴포넌트가 null 을 낸다 ──
+       * H7-3: 실거래 «앞» 으로 올렸다. 이미 본 현장이 먼저 나와야 「돌아온 사람」의
+       *       첫 화면이 자기 맥락으로 시작한다. */}
       <RecentlyViewed limit={3} />
 
-      {/* ── 4 지금 계약 가능한 현장 ──
-       * 카드 4장에서 텍스트 3줄로 바꿨다. 카드는 104px, 줄은 42px —
-       * 같은 자리에 세 배가 들어간다. DealCards 는 지우지 않았다(다른 자리에서 쓸 수 있다).
-       *
-       * H4-1 (f) — 실사(조감도)를 가진 건이 «있을 때만» 최상단 1건을 이미지 카드로 올린다.
-       * 없으면 승격하지 않는다. 브랜드 카드로 자리를 채우지 않는다 (DealHeroCard 주석 참조). */}
-      {sections.deals.length >= MIN_ROWS && (
-        <section style={{ marginBottom: 18 }}>
-          <SectionHeader eyebrow="APT — 미분양·선착순" title="지금 계약 가능" id="home-deals" />
-          {dealHero && <DealHeroCard item={dealHero} />}
-          <SiteRows items={dealRows} />
-          <MoreLink href="/apt/unsold" label="미분양·선착순·잔여세대 전체" />
-        </section>
-      )}
+      {weekly && <WeeklyTrades data={weekly} selectedRegion={heroRegion} />}
 
-      {/* ── 5 최근 움직인 현장 ──
+      {/* ⛔ H7-3 — 「지금 계약 가능」 섹션을 «걷어냈다». 되살리지 말 것.
+       *    그 섹션의 정렬은 content_score 였는데 「부산 기장군 미분양」 같은
+       *    «구군 집계 한 줄» 이 점수 100 으로 1위를 먹고 «현장처럼» 떠 있었다.
+       *    집계 행은 이제 is_aggregate 로 걸러지지만(H7-3), 섹션 자체도 뺀다 —
+       *    미분양 목록은 /apt/unsold 가 이미 맡고 있어 홈에 또 둘 이유가 없다.
+       *    lib/home/sections.ts 의 deals 계산과 DealHeroCard 는 «지우지 않았다».
+       *
+       * ── 4 최근 움직인 현장 ──
        * ⚠️ 「신규 등록」과 「단계 변경」을 라벨로 가른다 — 섞어서 「N곳이 움직였다」로
        *    쓰면 거짓말이 된다(실측: 단계 변경 84 · 신규 등록 345).
        * ⚠️ 더보기는 /apt 로 보낸다. 거기에 같은 섹션(getAptRecentMoves)이 이미 있어
