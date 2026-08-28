@@ -339,17 +339,15 @@ export default async function AptPage({
            지도 데이터는 클라이언트가 따로 가져온다 (Rule #49 — 서버 뭉치를 안 늘린다).
            ⚠️ 재개발 레이어는 올리지 않는다 (fc860ea A안). AVAILABLE_LAYERS 주석 참조. */}
       {/* ══ H5-2 2단 목록 — 두 덩어리 ══
-          ⚠️ 위 덩어리 라벨에 「모집공고」를 쓰지 않는다. 정렬 키가 rcept_bgnde(청약 «접수»
-             시작일)이고 announcement_date 는 T1 에서 이제 막 저장을 시작했다(2,853건 null).
-             백필·검증 뒤 Phase B6 에서 키와 라벨을 «같이» 바꾼다. 지금 라벨만 바꾸면
-             다른 날짜를 모집공고일이라고 말하는 화면이 된다. */}
+          B6(2026-08-28) — 위 덩어리의 「최신」 기준을 «모집공고일» 로 바꿨다.
+          announcement_date 가 2,855/2,855 채워졌고 형식도 전부 YYYY-MM-DD 임을 확인한 뒤
+          «키와 라벨을 같이» 바꿨다. 한쪽만 바꾸면 화면이 거짓말을 한다. */}
       {!showTiles && (
         <>
-          {/* H6-2 2층 — 위 8건은 캐러셀, 9번째부터 42px 텍스트 줄.
-              ⚠️ 라벨에 「모집공고」를 쓰지 않는다. 정렬 키가 rcept_bgnde 다(B6 에서 교체). */}
+          {/* H6-2 2층 — 위 8건은 캐러셀, 9번째부터 42px 텍스트 줄. */}
           <SubscriptionCarousel
             title="최근 청약 공고"
-            meta={[sgg || region, `${blocks.opened.length}곳`, '접수일 기준'].filter(Boolean).join(' · ')}
+            meta={[sgg || region, `${blocks.opened.length}곳`, '모집공고 기준'].filter(Boolean).join(' · ')}
             items={blocks.opened.slice(0, 8)}
           />
           <RegionBlockList

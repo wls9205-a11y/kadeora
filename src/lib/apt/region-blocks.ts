@@ -1,13 +1,15 @@
 /**
  * H5-2 — 부동산 홈 2단의 데이터.
  *
- *   위 덩어리 opened   : 청약 접수일 기준 최신
+ *   위 덩어리 opened   : «모집공고일» 기준 최신 (B6, 2026-08-28)
  *   아래 덩어리 pipeline: 곧 나올 현장 (공고 전)
  *
- * ⚠️ 라벨에 「모집공고」를 쓰지 않는다. 정렬 키가 `rcept_bgnde`(청약 «접수» 시작일)이고
- *    `announcement_date`(모집공고일)는 T1 에서 이제 막 저장을 시작했다 — 2,853건이
- *    아직 null 이다. 백필·검증이 끝난 뒤 Phase B6 에서 키와 라벨을 «같이» 바꾼다.
- *    지금 라벨만 바꾸면 다른 날짜를 모집공고일이라 말하는 화면이 된다.
+ * ⚠️ H5-2 때는 `announcement_date` 가 2,853건 null 이라 접수일(rcept_bgnde)로 두고
+ *    라벨도 「접수일 기준」이라 적었다 — 라벨만 바꾸면 «다른 날짜를 모집공고일이라
+ *    말하는 화면» 이 되기 때문이다. T1 백필이 끝나 2,855/2,855 채워졌고(null 0),
+ *    형식도 전부 YYYY-MM-DD 라 B6 에서 «키와 라벨을 같이» 바꿨다.
+ * ⚠️ 접수일은 버리지 «않는다». 카드 2줄에 「접수 8.10」으로 같이 낸다 — 공고일과
+ *    접수일은 서로 다른 정보이고, 사람이 챙기는 것은 접수일이다.
  */
 
 import { unstable_cache } from 'next/cache';
@@ -28,6 +30,8 @@ export interface RegionBlockItem {
   hero_image_url: string | null;
   rcept_bgnde: string | null;
   rcept_endde: string | null;
+  /** 모집공고일. B6 부터 위 덩어리의 «정렬 기준» 이다. ⚠️ DB 타입이 text 다. */
+  announcement_date: string | null;
   stage_updated_at: string | null;
 }
 

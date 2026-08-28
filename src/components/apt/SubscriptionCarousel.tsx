@@ -108,9 +108,15 @@ export default function SubscriptionCarousel({
                 </span>
                 <span className="sub-card__name">{it.display_name || it.name}</span>
                 <span className="sub-card__sub">
-                  {[it.sigungu, it.total_units ? `${it.total_units.toLocaleString()}세대` : ''].filter(Boolean).join(' · ')}
+                  {/* B6 — 접수일을 «2줄에» 병기한다. 정렬·대표 날짜는 공고일이지만
+                      사람이 달력에 적는 것은 접수일이다. 둘 다 사실이고 서로 다르다. */}
+                  {[
+                    it.sigungu,
+                    it.total_units ? `${it.total_units.toLocaleString()}세대` : '',
+                    it.rcept_bgnde ? `접수 ${md(it.rcept_bgnde)}` : '',
+                  ].filter(Boolean).join(' · ')}
                 </span>
-                {it.rcept_bgnde && <span className="sub-card__date">접수 {md(it.rcept_bgnde)}</span>}
+                {it.announcement_date && <span className="sub-card__date">공고 {md(it.announcement_date)}</span>}
               </span>
             </Link>
           );
