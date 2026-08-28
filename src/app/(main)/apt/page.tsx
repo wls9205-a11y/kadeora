@@ -366,7 +366,14 @@ export default async function AptPage({
             anchorId="apt-more"
             items={blocks.opened.slice(20)}
             title="그 밖의 공고"
-            meta={blocks.opened.length > 20 ? `${blocks.opened.length - 20}곳` : ''}
+            /* ⚠️ 「20곳」이라 적고 있었는데 그 20은 «40(캡) − 20» 이다. 캡에서 나온 숫자를
+                  또 실측인 척 적은 것이다(B7-0 에서 고친 것과 같은 종류).
+                  여기가 목록의 «몇 번째부터 몇 번째인지» 를 말하는 것이 참이다. */
+            meta={
+              blocks.opened.length > 20 && blockTotals
+                ? `21–${Math.min(blocks.opened.length, blockTotals.opened).toLocaleString('ko-KR')} / 전체 ${blockTotals.opened.toLocaleString('ko-KR')}곳`
+                : ''
+            }
             moreHref="/apt/archive"
             moreLabel="지난 공고 더 보기"
             emptyNote=""
