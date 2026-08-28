@@ -60,6 +60,7 @@ const AptPriceTrendChart = dynamic(() => import('@/components/charts/AptPriceTre
 import RelatedContentCard from '@/components/RelatedContentCard';
 import LoginGate from '@/components/LoginGate';
 import AptBookmarkButton from '@/components/AptBookmarkButton';
+import SiteRow from '@/components/apt/SiteRow';
 const RegulationBadges = dynamic(() => import('@/components/RegulationBadges'));
 const CostSimulator = dynamic(() => import('@/components/CostSimulator'));
 // C3: ContentLock 제거
@@ -2546,7 +2547,9 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
            하단 탭바(z-100)·글쓰기 FAB(z-99)와의 겹침은 컴포넌트 안에서 처리한다. */}
       <SiteActionBar siteSlug={slug} showLeadForm={showLeadForm} lifecycleStage={lc} />
       {/* Nearby sites (internal linking SEO) */}
-      {nearbySites.length > 0 && <section aria-labelledby="apt-sec-h8" className="apt-card kd-lg-hide"><SectionHeader id="apt-sec-h8" title={`${sigungu || region} 다른 현장`} /><div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 'var(--sp-sm)' }}>{nearbySites.map((ns: Record<string, any>) => <Link key={ns.slug} href={`/apt/${ns.slug}`} className="kd-card" style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: 10, textDecoration: 'none', color: 'inherit', overflow: 'hidden' }}><div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 2 }}>{ns.name}</div><div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ns.sigungu || ns.region} · {ns.total_units ? `${ns.total_units}세대` : ''} · {tLabel[ns.site_type]}</div></Link>)}</div></section>}
+      {nearbySites.length > 0 && <section aria-labelledby="apt-sec-h8" className="apt-card kd-lg-hide"><SectionHeader id="apt-sec-h8" title={`${sigungu || region} 다른 현장`} /><div className="kd-srows">{/* B7-1 — 2열 카드 격자에서 공용 2줄 행으로. ⚠️ 「· {세대수} · 」 사이에 값이 없으면
+                     구분점만 남던 자리다(세대수 null 현장이 흔하다). SiteRow 는 항목째 지운다. */}
+                {nearbySites.map((ns: Record<string, any>) => <SiteRow key={ns.slug} item={{ slug: ns.slug, name: ns.name, region: ns.region, sigungu: ns.sigungu, lifecycle_stage: ns.lifecycle_stage, total_units: ns.total_units }} />)}</div></section>}
 
       {/* 지역 허브 내부 링크 */}
       {(region || sigungu) && <div className="apt-card kd-lg-hide" style={{ padding: '12px 14px' }}><div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
