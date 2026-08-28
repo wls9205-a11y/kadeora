@@ -397,7 +397,9 @@ export default async function HomePage() {
               {counts.bySigungu.map((s) => (
                 <Link
                   key={`${s.region}-${s.sigungu}`}
-                  href={`/apt/region/${encodeURIComponent(s.region)}/${encodeURIComponent(s.sigungu)}`}
+                  /* ⚠️ /apt/region 은 «1단(시도)» 라우트뿐이다. 2단을 만들면 404 다 —
+                     구군 허브의 실재 경로는 /apt/area/{시도}/{구군} 이다(2026-08-28 스모크가 잡음). */
+                  href={`/apt/area/${encodeURIComponent(s.region)}/${encodeURIComponent(s.sigungu)}`}
                   style={chipStyle}
                 >
                   {s.sigungu} <span style={{ color: 'var(--text-tertiary)' }}>{s.n.toLocaleString('ko-KR')}</span>

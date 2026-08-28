@@ -66,6 +66,7 @@ import AptViewSwitch from '@/components/apt/AptViewSwitch';
 import { fetchGichukActivity } from '@/lib/apt/gichuk-activity';
 import RecentMovesStrip from '@/components/apt/RecentMovesStrip';
 import { SectionLink } from '@/components/apt/SectionHeader';
+import { regionLabel, metaLine } from '@/lib/region/display';
 
 // Next 는 segment config 를 정적 분석하므로 리터럴이어야 한다 (import 식별자 불가).
 // lib/apt/hub.ts 의 APT_HUB_REVALIDATE_SECONDS 와 같은 값으로 유지할 것.
@@ -409,7 +410,7 @@ export default async function AptPage({
             id="apt-pipeline-heading"
             eyebrow="PIPELINE — 공고 전"
             title="공고 전 현장"
-            meta={`${pipeline.region} ${pipeline.total.toLocaleString('ko-KR')}곳 · 진행 단계순`}
+            meta={metaLine(`${regionLabel(pipeline.region)} ${pipeline.total.toLocaleString('ko-KR')}곳`.trim(), '진행 단계순')}
           />
 
           <div>
@@ -444,7 +445,7 @@ export default async function AptPage({
             id="apt-gichuk-heading"
             eyebrow="GICHUK — 기축 실거래"
             title="최근 거래된 기축 단지"
-            meta={`${pipeline.region} · 최근 180일 · 거래 많은 순`}
+            meta={metaLine(regionLabel(pipeline.region), '최근 180일', '거래 많은 순')}
           />
           <GichukActivity items={gichuk} />
           <p

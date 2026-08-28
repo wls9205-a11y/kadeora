@@ -12,7 +12,8 @@
     "test:e2e": "playwright test",
     "build:ait": "cd appintoss-build && npx ait build",
     "gen-types": "npx --yes supabase gen types typescript --project-id tezftxakuwhsclarprlz --schema public > src/types/database.ts.gen && node scripts/merge-types.mjs",
-    "check:bom": "grep -rlIP '\\xEF\\xBB\\xBF' --include='*.json' --include='*.ts' --include='*.tsx' --include='*.js' --include='*.mjs' . | grep -v node_modules && echo 'BOM 검출' && exit 1 || echo 'BOM 없음'"
+    "check:bom": "grep -rlIP '\\xEF\\xBB\\xBF' --include='*.json' --include='*.ts' --include='*.tsx' --include='*.js' --include='*.mjs' . | grep -v node_modules && echo 'BOM 검출' && exit 1 || echo 'BOM 없음'",
+    "smoke": "tsx scripts/smoke.ts"
   },
   "dependencies": {
     "@sentry/nextjs": "^10.48.0",

@@ -124,7 +124,7 @@ export default async function RegionSigunguCategoryHub({ params }: Props) {
       { '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL },
       { '@type': 'ListItem', position: 2, name: '부동산', item: `${SITE_URL}/apt` },
       { '@type': 'ListItem', position: 3, name: region, item: `${SITE_URL}/apt/region/${encodeURIComponent(region)}` },
-      { '@type': 'ListItem', position: 4, name: sigungu, item: `${SITE_URL}/apt/region/${encodeURIComponent(region)}/${encodeURIComponent(sigungu)}` },
+      { '@type': 'ListItem', position: 4, name: sigungu, item: `${SITE_URL}/apt/area/${encodeURIComponent(region)}/${encodeURIComponent(sigungu)}` },
       { '@type': 'ListItem', position: 5, name: cat.label, item: url },
     ],
   };

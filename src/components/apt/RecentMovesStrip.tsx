@@ -10,6 +10,7 @@
 import Link from 'next/link';
 import { lifecycleLabel } from '@/lib/apt/lifecycle-label';
 import type { AptRecentMove } from '@/lib/apt/recent-moves';
+import { regionLabel, metaLine } from '@/lib/region/display';
 
 /** 확정만 브랜드 색. 추정·카더라를 같은 색으로 찍으면 훑고 확정으로 읽는다. */
 const TONE: Record<string, { bg: string; fg: string; label: string }> = {
@@ -48,7 +49,7 @@ export default function RecentMovesStrip({
           이번 주 움직인 현장
         </h2>
         <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', whiteSpace: 'nowrap' }}>
-          {region} · 최근 7일
+          {metaLine(regionLabel(region), '최근 7일')}
         </span>
       </div>
 
