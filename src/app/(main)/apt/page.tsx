@@ -350,17 +350,23 @@ export default async function AptPage({
           «키와 라벨을 같이» 바꿨다. 한쪽만 바꾸면 화면이 거짓말을 한다. */}
       {!showTiles && (
         <>
-          {/* H6-2 2층 — 위 8건은 캐러셀, 9번째부터 42px 텍스트 줄. */}
+          {/* H6-2 2층 — 위 «20건» 은 캐러셀, 21번째부터 42px 텍스트 줄.
+              B7-0 ⚠️ 8장이던 것을 20장으로 늘렸다. 부산만 182곳인데 8장에서 끊기니
+                 「옆으로 더 볼 것」이 애초에 없었다. 조회는 늘지 않는다 —
+                 blocks.opened 는 이미 40건을 들고 있고 렌더만 늘어난다(첫 3장 외 lazy). */}
           <SubscriptionCarousel
             title="최근 청약 공고"
             /* ⛔ 총계를 «못 세면» 개수를 적지 않는다. 캡 값(40)을 적느니 안 적는 편이 참이다. */
             meta={[sgg || region, blockTotals ? `${blockTotals.opened.toLocaleString('ko-KR')}곳` : '', '모집공고 기준'].filter(Boolean).join(' · ')}
-            items={blocks.opened.slice(0, 8)}
+            items={blocks.opened.slice(0, 20)}
+            tailHref="#apt-more"
+            tailLabel={blockTotals ? `전체 ${blockTotals.opened.toLocaleString('ko-KR')}곳 보기` : '전체 보기'}
           />
           <RegionBlockList
-            items={blocks.opened.slice(8)}
+            anchorId="apt-more"
+            items={blocks.opened.slice(20)}
             title="그 밖의 공고"
-            meta={blocks.opened.length > 8 ? `${blocks.opened.length - 8}곳` : ''}
+            meta={blocks.opened.length > 20 ? `${blocks.opened.length - 20}곳` : ''}
             moreHref="/apt/archive"
             moreLabel="지난 공고 더 보기"
             emptyNote=""

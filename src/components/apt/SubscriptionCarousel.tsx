@@ -21,6 +21,7 @@ import Link from 'next/link';
 import { useCallback, useRef, useState } from 'react';
 import type { RegionBlockItem } from '@/lib/apt/region-blocks';
 import SafeImg from '@/components/apt/SafeImg';
+import CarouselArrows from '@/components/ui/CarouselArrows';
 
 const STAGE_LABEL: Record<string, string> = {
   pre_announcement: '분양예정',
@@ -59,10 +60,15 @@ export default function SubscriptionCarousel({
   title,
   meta,
   items,
+  tailHref,
+  tailLabel,
 }: {
   title: string;
   meta?: string;
   items: RegionBlockItem[];
+  /** B7-0 꼬리 카드가 갈 곳(아래 목록 앵커). 없으면 꼬리 카드를 내지 않는다. */
+  tailHref?: string;
+  tailLabel?: string;
 }) {
   const [idx, setIdx] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
@@ -83,11 +89,22 @@ export default function SubscriptionCarousel({
       <div className="sub-car__head">
         <h2 className="sub-car__title">{title}</h2>
         {meta && <span className="sub-car__meta">{meta}</span>}
+        {/* B7-0 — 도트 20개는 과밀이다. 카운터로 바꾼다.
+            ⚠️ aria-hidden 이다. 스크롤 위치는 스크린리더에 읽어 줄 정보가 아니다. */}
+        {total > 1 && (
+          <span className="sub-car__counter" aria-hidden="true">{idx + 1} / {total}</span>
+        )}
       </div>
 
+      {/* ⚠️ 화살표는 트랙을 «감싼 자리» 에 절대배치한다. 트랙 안에 넣으면 같이 스크롤된다. */}
+      <div className="sub-car__viewport">
+      <CarouselArrows trackRef={ref} label={title} />
       <div className="sub-car__track" ref={ref} onScroll={onScroll}>
-        {items.map((it) => {
+        {items.map((it, i) => {
           const img = it.hero_image_url || it.cover_image_url || null;
+          // B7-0 ⚠️ 8장에서 20장으로 늘렸다. 첫 3장만 즉시 받고 나머지는 lazy —
+          //    안 그러면 화면에 안 보이는 17장까지 초기 로드가 늘어난다.
+          const eager = i < 3;
           const stage = it.lifecycle_stage ? STAGE_LABEL[it.lifecycle_stage] : null;
           const dday = ddayOf(it);
           return (
@@ -99,7 +116,7 @@ export default function SubscriptionCarousel({
               {img && (
                 <span className="sub-card__img">
                   {/* H7-3 ③ — 주소가 있어도 «안 열리면» 네이비 폴백으로 떨어진다. */}
-                  <SafeImg src={img} />
+                  <SafeImg src={img} loading={eager ? 'eager' : 'lazy'} />
                 </span>
               )}
               <span className="sub-card__body">
@@ -122,13 +139,17 @@ export default function SubscriptionCarousel({
             </Link>
           );
         })}
+        {/* B7-0 꼬리 카드 — 「여기서 끝이 아니다」를 목록 안에서 말한다.
+            ⚠️ 네이비 폴백 카드와 «같은 모양» 이라 새 시각 요소를 만들지 않는다. */}
+        {tailHref && (
+          <a href={tailHref} className="sub-card sub-card--navy sub-card--tail">
+            <span className="sub-card__body">
+              <span className="sub-card__name">{tailLabel || '전체 보기'}</span>
+              <span className="sub-card__sub">아래 목록으로 이동</span>
+            </span>
+          </a>
+        )}
       </div>
-
-      {/* 진행 점은 모바일에서만 의미가 있다 — 데스크탑은 3장이 한눈에 보인다. */}
-      <div className="sub-car__dots" aria-hidden="true">
-        {items.map((it, i) => (
-          <span key={it.id} className={i === idx ? 'is-on' : undefined} />
-        ))}
       </div>
     </section>
   );

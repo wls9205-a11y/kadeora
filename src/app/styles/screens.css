@@ -412,11 +412,39 @@
     letter-spacing: -0.2px; line-height: 1.25; color: var(--text-primary);
   }
   .sub-car__meta { font-size: var(--fs-xs); font-weight: 400; color: var(--text-tertiary); }
+  /* B7-0 ⚠️ 화살표를 절대배치할 기준. 트랙 «밖» 이라 같이 스크롤되지 않는다. */
+  .sub-car__viewport { position: relative; }
   .sub-car__track {
     display: flex; gap: 10px;
-    overflow-x: auto; scroll-snap-type: x mandatory;
+    /* B7-0 ⚠️ mandatory → proximity. mandatory 는 관성 스크롤을 «장마다 붙잡아»
+       여러 장을 한 번에 넘길 수 없게 만든다(「쭉쭉」이 아니라 「뚝뚝」). */
+    overflow-x: auto; scroll-snap-type: x proximity;
     -webkit-overflow-scrolling: touch; scrollbar-width: none;
     padding-bottom: 4px;
+  }
+
+  /* ── B7-0 좌우 화살표 ────────────────────────────────────────────────
+     ⚠️ 터치 기기에서는 «내지 않는다» — 스와이프가 되는데 버튼까지 얹으면
+        카드 위 손가락 자리를 뺏는다. */
+  .kd-car-arrows { display: contents; }
+  .kd-car-arrow {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    z-index: 2; width: 34px; height: 34px; border-radius: 999px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; line-height: 1; cursor: pointer;
+    background: rgba(255, 255, 255, .86);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 6px rgba(9, 13, 20, .12);
+  }
+  .kd-car-arrow--prev { left: -2px; }
+  .kd-car-arrow--next { right: -2px; }
+  .kd-car-arrow:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+  @media (pointer: coarse) { .kd-car-arrow { display: none; } }
+
+  .sub-car__counter {
+    margin-left: auto; font-size: var(--fs-xs); font-weight: 400;
+    color: var(--text-tertiary); font-variant-numeric: tabular-nums;
   }
   .sub-car__track::-webkit-scrollbar { display: none; }
   .sub-card {
@@ -454,6 +482,9 @@
   }
   .sub-card--navy .sub-card__name { color: var(--text-inverse); }
   .sub-card--navy .sub-card__sub  { color: var(--brand-gold); font-weight: 500; }
+  /* B7-0 꼬리 카드 — 네이비 폴백과 «같은 모양» 이라 새 시각 요소가 아니다. */
+  .sub-card--tail { display: flex; align-items: center; justify-content: center; text-align: center; }
+  .sub-card--tail .sub-card__body { gap: 4px; }
   .sub-card--navy .sub-card__date { color: rgba(255,255,255,0.78); }
   .sub-card--navy .sub-card__stage { background: rgba(255,255,255,0.16); color: var(--text-inverse); }
   .sub-card--navy .sub-card__dday  { color: var(--brand-gold); }

@@ -65,6 +65,7 @@ export default function RegionBlockList({
   moreHref,
   moreLabel,
   emptyNote,
+  anchorId,
 }: {
   items: RegionBlockItem[];
   title: string;
@@ -73,12 +74,14 @@ export default function RegionBlockList({
   moreHref?: string;
   moreLabel?: string;
   emptyNote?: string;
+  /** B7-0 — 캐러셀 꼬리 카드가 여기로 스크롤한다. 한글 제목을 id 로 쓰지 않는다. */
+  anchorId?: string;
 }) {
   const promoted = items.slice(0, 2);
   const rows = items.slice(2);
 
   return (
-    <section className="apt-block" aria-labelledby={`blk-${title}`}>
+    <section className="apt-block" id={anchorId} aria-labelledby={`blk-${title}`}>
       <h2 id={`blk-${title}`} className="apt-block__h">
         {title}
         {meta && <span className="apt-block__meta">{meta}</span>}

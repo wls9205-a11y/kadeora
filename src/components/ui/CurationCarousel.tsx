@@ -10,6 +10,7 @@
 //    이름 문자열 매칭으로 빼는 우회는 쓰지 말 것. get_apt_subscription_hub RPC 수정이 선행돼야 한다.
 
 import { useCallback, useRef, useState } from 'react';
+import CarouselArrows from '@/components/ui/CarouselArrows';
 
 export type CurationCarouselProps = {
   title: string;
@@ -44,10 +45,14 @@ export default function CurationCarousel({ title, items }: CurationCarouselProps
         </span>
       </div>
 
+      {/* B7-0 — 마우스로 넘길 수단. 터치 기기에서는 CSS 가 숨긴다. */}
+      <div className="sub-car__viewport">
+      <CarouselArrows trackRef={scrollRef} label={title} />
       <div ref={scrollRef} onScroll={onScroll} className="kd-cur-track">
         {items.map((it, i) => (
           <div key={i} className="kd-cur-cell">{it}</div>
         ))}
+      </div>
       </div>
 
       {total > 1 && (

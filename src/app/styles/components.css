@@ -461,7 +461,8 @@
     display: flex;
     gap: 8px;
     overflow-x: auto;
-    scroll-snap-type: x mandatory;
+    /* B7-0 ⚠️ mandatory → proximity (SubscriptionCarousel 과 같은 이유). */
+    scroll-snap-type: x proximity;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
   }
