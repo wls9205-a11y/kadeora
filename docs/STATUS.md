@@ -1,3 +1,75 @@
+### PL 승인분 실행 (2026-08-28) — 기장원룸 OFF · 착지 33건 교체
+
+#### ① 기장원룸 OFF ✅
+14일 노출 492,633(전체 76%) · 클릭 241(전체 42%) · 연결 URL 없음 · CTR 0.05%.
+`tools/naver-sa/pl_kw_off.py --live` · **재조회 검증: 꺼짐 1 · 아직 ON 0**.
+⚠️ 삭제가 아니라 OFF(userLock)다 — 되돌릴 수 있다.
+
+#### ② 리드폼 없는 착지 33키워드 → 지역 허브 ✅
+
+| 옮긴 곳 | 키워드 | → |
+|---|---:|---|
+| `/apt/unsold` | 9 | 키워드가 말하는 지역 허브 |
+| `/apt/redev/{부산·울산·경남}` | 12 | 같은 지역 허브 |
+| `/apt/busan` | 6 | `/apt/region/부산` |
+| `/apt/pipeline` | 6 | 키워드가 말하는 지역 허브 |
+
+목적지 분포: 부산 15 · 경남 9 · 울산 9. **재조회 검증 33/33 반영**.
+⛔ `/apt/region/*` 에 이미 착지한 125키워드는 «건드리지 않았다» — 승인 범위 밖.
+⚠️ 지역을 못 읽으면 옮기지 않도록 짰다(실제로는 0건). 틀린 지역으로 보내면 지금보다 나쁘다.
+
+#### ⚠️ 네이버 SA API — 키워드 links 갱신의 실제 형태
+
+세 번 500(code 1005)을 맞고 알아냈다. 다음 사람이 같은 데서 헤매지 않게 남긴다.
+
+```
+PUT /ncc/keywords?fields=links
+body = [ <키워드 «전체 객체»>, ... ]        ← id + links 만 보내면 500
+        links = {pc:{final:URL}, mobile:{final:URL}}   ← {pc:URL} 은 500
+```
+- `fields` 없이 보내면 400 이 «받는 조합» 을 알려준다:
+  `"ids, targetCampaignId, targetAdgroupId, userLock, useBidAmt, useLinks" OR "fields"`
+- ⚠️ 전체 객체를 실어도 `fields=links` 가 적용 대상을 한정한다 —
+  실측 확인: 교체 후 `bidAmt 70` · `userLock false` · `status ELIGIBLE` «그대로».
+
+#### 용호 5종 타임아웃 — 정정
+재현되지 않는다(5종 전부 200 · 0.6~2.0초 · 대조군 동일). PL-0 이 H7-1 배포 직후
+482 URL 을 연달아 친 «ISR 콜드 스타트» 였다. 「착지가 열리지 않는다」는 과한 보고였다.
+남는 사실: 배포 직후 들어온 광고 클릭은 튕길 수 있다. 스모크가 전 URL 을 데우는 구조로 충분.
+
+---
+
+### H7-2 후속 — 확인 2건 (2026-08-28)
+
+#### ① 구 함수가 만진 컬럼 전수 → **`lifecycle_stage` · `updated_at` 둘뿐**
+UPDATE 1문 · INSERT/DELETE 0. `status`·`is_active` 등 부수 효과 «없음».
+→ 스케줄을 내려서 «같이 멈춘 다른 갱신은 없다».
+
+#### ② 자동 갱신에서 빠진 1곳 → 검수 큐 등록 (`apt_stage_review_queue` id 11)
+
+⚠️ 조사해 보니 «잃은 것이 아니라 오유도를 멈춘 것» 이다.
+```
+현장 : 인천 가정2지구 B2블록 우미 린(사전청약)
+회차 : 인천가정2지구 B2블록 공공분양주택(당첨취소자 우선공급)
+```
+같은 블록이지만 **사전청약**과 **당첨취소자 우선공급**은 서로 다른 회차다.
+구 함수는 이 둘을 `source_ids` 로 묶어 «다른 회차의 날짜로» 단계를 유도하고 있었다
+(현재 값 `post_move_in` · `stage_source` 는 null — 즉 정식 유도가 찍은 값이 아니다).
+
+⛔ 확인 없이 자동 연결하지 «않는다». 판단은 둘 중 하나:
+① 같은 물건이면 `name_variants` 를 추가해 이름 조인에 태운다
+② 다른 물건이면 `source_ids` 연결을 끊는다
+
+#### 🆕 Rule #115 — 값이 이상하면 «함수를 고치기 전에» 그 컬럼의 기록자를 전부 나열한다
+
+| 컬럼 | 고치려던 것 | 실제로 덮던 것 |
+|---|---|---|
+| `apt_sites.lifecycle_stage` | `derive_subscription_stage` (05:00) | `fn_refresh_lifecycle_stage` (06:23) |
+| `blog_posts.content` | R1 외부 이미지 제거 | pg_cron `replace_blog_body_og` |
+
+같은 실수가 «두 번째» 다. 절차는 ARCHITECTURE_RULES.md #115 에 SQL 까지 적어 뒀다.
+
+---
 ### PL-0 — 파워링크 성과·착지 실측 (2026-08-28) · **광고 설정 변경 0건**
 
 `tools/naver-sa/pl0_report.py` 신설(조회 전용). ⛔ 쓰기 호출을 이 파일에 추가하지 말 것.

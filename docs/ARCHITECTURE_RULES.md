@@ -24,6 +24,45 @@
 
 **참고**: 직접 영향 워커 — `app/api/cron/blog-meta-rewrite-poll/route.ts`. 동일 패턴 워커 — `app/api/cron/blog-image-batch-poll/*`, `app/api/cron/apt-ai-batch-poll/*`.
 
+## Rule #115 — 값이 이상하면 «함수를 고치기 전에» 그 컬럼의 기록자를 전부 나열한다 (H7-2 신설)
+
+**Symptom**: 어떤 컬럼의 값이 틀렸다. 그 값을 만드는 함수를 찾아 고친다. 그런데 다음 날 또 틀려 있다.
+
+**Cause**: 그 컬럼에 «쓰는 곳이 하나가 아니다». 뒤에 도는 쪽이 앞의 결과를 덮는다.
+고친 함수는 애초에 옳은 값을 내고 있었고, 바꾼 것은 «맞는 로직» 이다.
+
+**실제 사례 2건**
+
+| 컬럼 | 고치려던 것 | 실제로 덮던 것 |
+|---|---|---|
+| `apt_sites.lifecycle_stage` | `derive_subscription_stage` (05:00) | `fn_refresh_lifecycle_stage` (06:23, 전진 전용) |
+| `blog_posts.content` | R1 외부 이미지 제거 | pg_cron `replace_blog_body_og` (OG→실사 역방향) |
+
+**Rule** — 값이 틀렸을 때 «순서»:
+
+1. 그 컬럼에 쓰는 것을 **전부 나열**한다. 코드만 보지 말 것 — 셋 다 본다:
+   ```sql
+   -- ① DB 함수
+   select proname from pg_proc where prosrc ilike '%set <컬럼>%' or prosrc ilike '%update <테이블>%';
+   -- ② 트리거
+   select tgname, pg_get_triggerdef(oid) from pg_trigger where tgrelid='<테이블>'::regclass and not tgisinternal;
+   -- ③ 스케줄
+   select jobname, schedule, active, command from cron.job where active;
+   ```
+   앱 코드는 `grep -rn "<컬럼>" src/ | grep -iE "update|upsert|insert"`.
+
+2. **저장값과 재계산값을 대조**한다. 둘이 다르면 「함수가 틀렸다」가 아니라
+   「누가 덮었다」다. 함수에 «그 값을 낼 경로가 있는지» 부터 본다 —
+   없으면 그 함수는 범인이 아니다.
+
+3. 기록자를 줄일 때는 **끄기 전에 커버리지를 잰다**. 잃는 행이 몇 개인지 모르고
+   끄면 조용한 결손이 된다. 실측 예: 이름 조인 2,758 vs source_ids 조인 2,755 → 1곳.
+
+4. ⛔ **삭제하지 않는다.** 스케줄만 내리고(`cron.alter_job(active := false)`) 함수는 남긴다.
+   주석으로 「되살리지 말 것」과 이유를 박는다.
+
+⚠️ 남는 1곳처럼 «자동에서 빠지는 것» 은 반드시 검수 큐에 올린다. 알고 빠뜨리는 것과
+   모르고 빠뜨리는 것은 다르다.
 ## Rule #18 — ⚠️ 2026-08-27 정정: 캐치올은 per-route export 를 «덮지 않는다»
 
 **⚠️ 이 규칙은 2026-05-04(s223)에 세워졌고 2026-08-27 실측에서 «성립하지 않았다». 아래가 현행이다.**
