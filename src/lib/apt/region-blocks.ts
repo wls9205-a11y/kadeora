@@ -108,6 +108,39 @@ const cachedCounts = unstable_cache(fetchCounts, ['apt-region-counts'], {
  *    현장 116곳」(서울 54 · 부산 41 …)과 「시도 소계 행」이 구분되지 않는다.
  *    이 플래그를 빼면 서울이 788 과 54 로 두 번 나온다.
  */
+/**
+ * 두 덩어리의 «캡 전» 실제 건수.
+ *
+ * ⚠️ 화면이 「부산 40곳」이라 적고 있었는데 그 40은 «limit» 이었다. 실제는 182곳이다
+ *    (경기는 879곳인데도 40이라 적혔다). 숫자가 상한을 말하면서 실측인 척했다.
+ * ⛔ RPC 의 where 절은 get_apt_region_blocks 와 «같아야 한다». 한쪽만 고치면
+ *    화면의 숫자와 목록이 어긋난다 — 마이그레이션 주석에도 박아 뒀다.
+ */
+export async function getRegionBlockTotals(
+  region: string,
+  sigungu: string | null,
+): Promise<{ opened: number; pipeline: number } | null> {
+  try {
+    const sb = getSupabaseAdmin();
+    const { data, error } = await (sb as any).rpc('get_apt_region_block_totals', {
+      p_region: region,
+      p_sigungu: sigungu,
+      p_min_score: 40,
+    });
+    // ⛔ 조용히 0 을 돌려주지 않는다. 0곳이라고 적는 화면이 «세지 못한 것» 보다 나쁘다.
+    if (error) {
+      console.error(`[apt/block-totals] ${region}/${sigungu ?? '전체'} — ${error.message?.slice(0, 160)}`);
+      return null;
+    }
+    const row = Array.isArray(data) ? data[0] : data;
+    if (!row) return null;
+    return { opened: Number(row.opened_total) || 0, pipeline: Number(row.pipeline_total) || 0 };
+  } catch (e) {
+    console.error('[apt/block-totals] failed:', e);
+    return null;
+  }
+}
+
 export async function getRegionTotals(): Promise<{ region: string; count: number }[]> {
   const rows = await cachedCounts();
   return rows

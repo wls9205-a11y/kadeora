@@ -20,6 +20,7 @@
 import Link from 'next/link';
 import { useCallback, useRef, useState } from 'react';
 import type { RegionBlockItem } from '@/lib/apt/region-blocks';
+import SafeImg from '@/components/apt/SafeImg';
 
 const STAGE_LABEL: Record<string, string> = {
   pre_announcement: '분양예정',
@@ -97,8 +98,8 @@ export default function SubscriptionCarousel({
             >
               {img && (
                 <span className="sub-card__img">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={img} alt="" loading="lazy" decoding="async" referrerPolicy="no-referrer" />
+                  {/* H7-3 ③ — 주소가 있어도 «안 열리면» 네이비 폴백으로 떨어진다. */}
+                  <SafeImg src={img} />
                 </span>
               )}
               <span className="sub-card__body">

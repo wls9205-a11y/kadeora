@@ -18,6 +18,7 @@
 
 import Link from 'next/link';
 import type { RegionBlockItem } from '@/lib/apt/region-blocks';
+import SafeImg from '@/components/apt/SafeImg';
 
 const STAGE_LABEL: Record<string, string> = {
   site_planning: '사업 준비',
@@ -94,8 +95,8 @@ export default function RegionBlockList({
                 <Link key={it.id} href={href(it)} className="apt-pcard">
                   {img && (
                     <span className="apt-pcard__img">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={img} alt="" loading="lazy" decoding="async" referrerPolicy="no-referrer" />
+                      {/* H7-3 ③ — 서버 컴포넌트지만 SafeImg 가 클라이언트 경계를 만든다. */}
+                      <SafeImg src={img} />
                     </span>
                   )}
                   <span className="apt-pcard__body">

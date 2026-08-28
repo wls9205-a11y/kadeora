@@ -37,7 +37,7 @@ import RegionCookieSync from '@/components/apt/RegionCookieSync';
 import StageSummaryStrip, { type StageItem } from '@/components/apt/StageSummaryStrip';
 import RegionBlockList from '@/components/apt/RegionBlockList';
 import SubscriptionCarousel from '@/components/apt/SubscriptionCarousel';
-import { getRegionBlocks, getRegionTotals, getSigunguTotals } from '@/lib/apt/region-blocks';
+import { getRegionBlocks, getRegionTotals, getSigunguTotals, getRegionBlockTotals } from '@/lib/apt/region-blocks';
 import { REGION_COOKIE, resolveRegion, normalizeSido } from '@/lib/region/cookie';
 import SubscriptionTimeline from '@/components/apt/SubscriptionTimeline';
 import SubscriptionCard from '@/components/apt/SubscriptionCard';
@@ -168,9 +168,15 @@ export default async function AptPage({
 
   // H5-2 — 1단이면 타일 건수, 2단이면 목록 두 덩어리. 필요 없는 쪽은 조회하지 않는다.
   const regionTotals = showTiles ? await getRegionTotals() : [];
-  const [blocks, sggTotals] = showTiles
-    ? [{ opened: [], pipeline: [] }, [] as { name: string; count: number }[]]
-    : await Promise.all([getRegionBlocks(region, sgg || null), getSigunguTotals(region)]);
+  // H7-3 ⚠️ 「N곳」은 «캡 전» 실제 건수여야 한다. blocks 는 limit 40 이라 그 길이를 적으면
+  //    「부산 40곳」처럼 «상한이 실측인 척» 한다(실제 182곳 · 경기는 879곳인데도 40이었다).
+  const [blocks, sggTotals, blockTotals] = showTiles
+    ? [{ opened: [], pipeline: [] }, [] as { name: string; count: number }[], null]
+    : await Promise.all([
+        getRegionBlocks(region, sgg || null),
+        getSigunguTotals(region),
+        getRegionBlockTotals(region, sgg || null),
+      ]);
 
   // v4-C8: 시군구 칩은 hub.cards 에서 뽑는다 — 조회가 늘지 않고, 목록에 실제로 있는
   //   시군구만 나온다 (부산 16개 구를 전부 내면 C3 에서 고친 문제가 반복된다).
@@ -347,7 +353,8 @@ export default async function AptPage({
           {/* H6-2 2층 — 위 8건은 캐러셀, 9번째부터 42px 텍스트 줄. */}
           <SubscriptionCarousel
             title="최근 청약 공고"
-            meta={[sgg || region, `${blocks.opened.length}곳`, '모집공고 기준'].filter(Boolean).join(' · ')}
+            /* ⛔ 총계를 «못 세면» 개수를 적지 않는다. 캡 값(40)을 적느니 안 적는 편이 참이다. */
+            meta={[sgg || region, blockTotals ? `${blockTotals.opened.toLocaleString('ko-KR')}곳` : '', '모집공고 기준'].filter(Boolean).join(' · ')}
             items={blocks.opened.slice(0, 8)}
           />
           <RegionBlockList
@@ -361,7 +368,7 @@ export default async function AptPage({
           <RegionBlockList
             items={blocks.pipeline}
             title="곧 나올 현장"
-            meta={`${blocks.pipeline.length}곳 · 단계 갱신 최신순`}
+            meta={[blockTotals ? `${blockTotals.pipeline.toLocaleString('ko-KR')}곳` : '', '단계 갱신 최신순'].filter(Boolean).join(' · ')}
             emptyNote={`${sgg || region}에는 공고 전 단계의 현장이 없습니다.`}
           />
         </>
