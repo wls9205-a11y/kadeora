@@ -311,6 +311,10 @@
     {
       "path": "/api/cron/stage-derive",
       "schedule": "0 5 * * *"
+    },
+    {
+      "path": "/api/cron/issue-source-diff",
+      "schedule": "40 22 * * *"
     }
   ],
   "headers": [
