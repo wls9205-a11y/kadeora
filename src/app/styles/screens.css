@@ -520,6 +520,44 @@
     }
   }
 
+  /* ── B7-1 : 전 목록 공용 컴팩트 2줄 행 ─────────────────────────────────
+     ⚠️ 높이 56px 고정이다. 화면마다 줄 높이가 다르면 눈이 익지 않는다.
+     ⚠️ 구분선은 «목록» 이 그린다 — 마지막 줄 아래에 선이 남지 않게. */
+  .kd-srows { display: flex; flex-direction: column; }
+  .kd-srows > .kd-srow + .kd-srow { border-top: 0.5px solid var(--border); }
+
+  .kd-srow {
+    display: flex; flex-direction: column; justify-content: center; gap: 2px;
+    min-height: 56px; padding: 6px 2px;
+    text-decoration: none; color: inherit;
+    /* 숫자가 우측에서 흔들리지 않게. 날짜·세대수·경쟁률이 전부 숫자다. */
+    font-variant-numeric: tabular-nums;
+  }
+  @media (hover: hover) { .kd-srow:hover .kd-srow__name { color: var(--brand); } }
+
+  .kd-srow__l1 { display: flex; align-items: center; gap: 6px; min-width: 0; }
+  .kd-srow__badge {
+    flex-shrink: 0; font-size: var(--fs-xs); font-weight: 500;
+    padding: 2px 7px; border-radius: var(--radius-card);
+    background: var(--bg-hover); color: var(--text-secondary);
+    /* 배지는 텍스트와 «세로 중앙» 정렬한다(baseline 아님) — 한글 배지가 아래로 처진다. */
+    display: inline-flex; align-items: center; line-height: 1.4;
+  }
+  .kd-srow__badge--accent { background: var(--kd-accent-bg); color: var(--kd-accent); }
+  .kd-srow__name {
+    /* 이름만 500. 나머지는 400 — 줄에서 «먼저 읽히는 것» 을 하나로 둔다. */
+    font-size: var(--fs-sm); font-weight: 500; color: var(--text-primary);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;
+  }
+  .kd-srow__date {
+    margin-left: auto; flex-shrink: 0; padding-left: 8px;
+    font-size: var(--fs-xs); font-weight: 400; color: var(--text-tertiary);
+  }
+  .kd-srow__l2 {
+    font-size: var(--fs-xs); font-weight: 400; color: var(--text-secondary);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+
   /* ── H7-3 : 이미지 로드 «실패» 폴백 ─────────────────────────────────────
      ⚠️ 주소가 «있어도» 안 열리는 경우가 있다(OG 생성 실패·스토리지 지연).
         그때 깨진 아이콘을 남기지 않고 3단의 ③(네이비)으로 떨어뜨린다.

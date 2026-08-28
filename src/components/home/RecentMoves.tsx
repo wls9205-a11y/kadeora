@@ -9,9 +9,8 @@
 //    대부분이라 그걸 「움직였다」로 부르면 거짓말이 된다.
 //    → move_kind 를 라벨로 반드시 갈라 쓴다. 아래 moveLabel 이 그 자리다.
 
-import Link from 'next/link';
 import { lifecycleLabel } from '@/lib/apt/lifecycle-label';
-import SiteThumb from '@/components/apt/SiteThumb';
+import SiteRow from '@/components/apt/SiteRow';
 
 export interface RecentMove {
   slug: string;
@@ -67,81 +66,31 @@ function metaLine(m: RecentMove): string {
 export default function RecentMoves({ items }: { items: RecentMove[] }) {
   if (items.length === 0) return null;
 
+  /* B7-1 — 썸네일 칸을 «걷어냈다».
+     ⚠️ 이미지가 있는 현장이 6,033곳 중 hero 174 · 우리 OG 카드 1,666 뿐이라
+        대부분이 생성 카드였다. 그 카드에는 «현장 이름이 이미 그려져» 있어
+        옆의 이름 텍스트와 같은 말을 두 번 하고 있었다(OG 카드 이중 표기).
+     ⚠️ 배지는 단계가 아니라 «이동»(「접수중 → 당첨자 발표」)이다 — 이 섹션의 의미다.
+        SiteRow 의 badge 로 갈아 끼운다. 단계 배지로 덮으면 섹션이 말하려던 것을 잃는다.
+     ⚠️ metaLine 은 «그대로» 쓴다. 세대수 뒤의 「예정」(confidence 미확정)과 시공사가
+        거기 붙어 있고, 표시광고법 때문에 넣은 조건이다. SiteRow 기본 meta 로 바꾸면 빠진다. */
   return (
-    <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-      {items.map((m) => {
-        const isStage = m.move_kind === 'stage';
-        const isSubscription = (m.line_rank ?? 1) === 0;
-        return (
-          <li key={m.slug} style={{ borderBottom: '1px solid var(--border)' }}>
-            <Link
-              href={`/apt/${encodeURIComponent(m.slug)}`}
-              style={{
-                display: 'flex',
-                gap: 10,
-                alignItems: 'center',
-                padding: '10px 3px',
-                textDecoration: 'none',
-                color: 'inherit',
-              }}
-            >
-              {/* ⚠️ thumb_url 을 그대로 <img src> 에 박지 않는다 — 마지막 폴백이
-                  `/api/og-apt?slug=…` 라 한 화면에 satori 렌더가 그 수만큼 돈다.
-                  SiteThumb 이 생성 카드 URL 이면 HTTP 없이 CSS 로 그린다. */}
-              <SiteThumb
-                slug={m.slug}
-                name={m.name}
-                thumbUrl={m.thumb_url}
-                lifecycleStage={m.lifecycle_stage}
-                heroLicenseTier={m.hero_license_tier}
-                size={56}
-              />
-
-              <div style={{ minWidth: 0, flex: 1 }}>
-                <div
-                  style={{
-                    fontSize: 14,
-                    fontWeight: 600,
-                    lineHeight: 1.3,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {m.name}
-                </div>
-                <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginTop: 4 }}>
-                  <span
-                    style={{
-                      fontSize: 11,
-                      fontWeight: 500,
-                      padding: '2px 6px',
-                      borderRadius: 'var(--radius-pill, 999px)',
-                      whiteSpace: 'nowrap',
-                      // 청약 라인은 리드가 나오는 쪽이라 눈에 먼저 들어와야 한다.
-                      background: isStage && isSubscription ? 'var(--kd-accent-bg)' : 'var(--bg-hover)',
-                      color: isStage && isSubscription ? 'var(--kd-accent)' : 'var(--text-secondary)',
-                    }}
-                  >
-                    {moveLabel(m)}
-                  </span>
-                  <span
-                    style={{
-                      fontSize: 11,
-                      color: 'var(--text-tertiary)',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {metaLine(m)}
-                  </span>
-                </div>
-              </div>
-            </Link>
-          </li>
-        );
-      })}
-    </ul>
+    <div className="kd-srows">
+      {items.map((m) => (
+        <SiteRow
+          key={m.slug}
+          item={{
+            slug: m.slug,
+            name: m.name,
+            region: m.region,
+            sigungu: m.sigungu,
+            badge: moveLabel(m),
+            badgeAccent: m.move_kind === 'stage' && (m.line_rank ?? 1) === 0,
+            date: (m.occurred_at || '').slice(0, 10) || null,
+            metaOverride: metaLine(m),
+          }}
+        />
+      ))}
+    </div>
   );
 }

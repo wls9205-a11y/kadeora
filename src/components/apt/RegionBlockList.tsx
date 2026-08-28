@@ -19,6 +19,7 @@
 import Link from 'next/link';
 import type { RegionBlockItem } from '@/lib/apt/region-blocks';
 import SafeImg from '@/components/apt/SafeImg';
+import { SiteRowList } from '@/components/apt/SiteRow';
 
 const STAGE_LABEL: Record<string, string> = {
   site_planning: '사업 준비',
@@ -115,15 +116,19 @@ export default function RegionBlockList({
           </div>
 
           {rows.length > 0 && (
-            <div className="apt-block__rows">
-              {rows.map((it) => (
-                <Link key={it.id} href={href(it)} className="kd-lrow">
-                  <span className="kd-lrow-t">{it.display_name || it.name}</span>
-                  <span className="kd-lrow-m">{sub(it)}</span>
-                  <span className="kd-lrow-r">{fmtDate(it.rcept_bgnde)}</span>
-                </Link>
-              ))}
-            </div>
+            /* B7-1 — 42px 한 줄에서 «56px 2줄» 공용 행으로. 화면마다 다르던 줄을 하나로 모은다. */
+            <SiteRowList
+              items={rows.map((it) => ({
+                slug: it.slug || it.id,
+                name: it.display_name || it.name,
+                region: it.region,
+                sigungu: it.sigungu,
+                lifecycle_stage: it.lifecycle_stage,
+                total_units: it.total_units,
+                // ⚠️ 이 덩어리는 «모집공고 기준» 이라 우측 날짜도 공고일이다(B6).
+                date: it.announcement_date,
+              }))}
+            />
           )}
 
           {moreHref && (
