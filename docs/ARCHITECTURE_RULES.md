@@ -40,16 +40,38 @@
 
 **Rule** — 값이 틀렸을 때 «순서»:
 
-1. 그 컬럼에 쓰는 것을 **전부 나열**한다. 코드만 보지 말 것 — 셋 다 본다:
+1. 그 컬럼에 쓰는 것을 **쿼리로 뽑는다**. «기억으로 나열하지 말 것» —
+   이 규칙을 세운 다음 날 내가 트리거를 빠뜨려 같은 실수를 3회째 냈다.
+   아래 한 문장이 함수·트리거를 «같이» 낸다. 이걸 돌리지 않고 진단을 시작하지 않는다.
+
    ```sql
-   -- ① DB 함수
-   select proname from pg_proc where prosrc ilike '%set <컬럼>%' or prosrc ilike '%update <테이블>%';
-   -- ② 트리거
-   select tgname, pg_get_triggerdef(oid) from pg_trigger where tgrelid='<테이블>'::regclass and not tgisinternal;
-   -- ③ 스케줄
-   select jobname, schedule, active, command from cron.job where active;
+   -- 「이 컬럼에 쓰는 객체」 전수 — 함수 + 트리거(+ 트리거가 부르는 함수)
+   -- 사용법: <표>·<컬럼> 두 곳만 바꾼다.
+   with tgt as (select '<표>'::text tbl, '<컬럼>'::text col)
+   select 'function' kind, p.proname obj, null::text on_table
+     from pg_proc p, tgt
+    where p.pronamespace = 'public'::regnamespace
+      and p.prosrc ~* ('(update\s+' || tgt.tbl || '|set\s+' || tgt.col || '|new\.' || tgt.col || ')')
+   union all
+   select 'trigger', t.tgname, c.relname
+     from pg_trigger t join pg_class c on c.oid = t.tgrelid, tgt
+    where not t.tgisinternal and c.relname = tgt.tbl
+   union all
+   select 'trigger_fn', p.proname, c.relname
+     from pg_trigger t
+     join pg_class c on c.oid = t.tgrelid
+     join pg_proc  p on p.oid = t.tgfoid, tgt
+    where not t.tgisinternal and c.relname = tgt.tbl
+      and p.prosrc ~* ('(new\.' || tgt.col || '|insert into apt_site_events)')
+   order by 1, 2;
    ```
-   앱 코드는 `grep -rn "<컬럼>" src/ | grep -iE "update|upsert|insert"`.
+
+   ⚠️ **트리거를 빼먹지 않게 쿼리에 넣은 이유**: `apt_sites_stage_change` 는
+      함수가 `stage_updated_at` 을 «안 써도» `NEW.stage_updated_at := now()` 로 덮는다.
+      「내 함수는 그 컬럼을 안 쓴다」는 「그 컬럼이 안 바뀐다」가 아니다.
+
+   ② 스케줄: `select jobname, schedule, active, command from cron.job where active;`
+   ③ 앱 코드: `grep -rn "<컬럼>" src/ | grep -iE "update|upsert|insert"`.
 
 2. **저장값과 재계산값을 대조**한다. 둘이 다르면 「함수가 틀렸다」가 아니라
    「누가 덮었다」다. 함수에 «그 값을 낼 경로가 있는지» 부터 본다 —
