@@ -62,8 +62,12 @@ const FORBIDDEN: [string, RegExp][] = [
  *    그래서 상세 글에서는 <article> 안쪽을 잘라내고 검사한다.
  */
 function chrome(html: string, stripArticle: boolean): string {
-  if (!stripArticle) return html;
-  return html.replace(/<article[\s\S]*?<\/article>/gi, '');
+  // ⚠️ <script> 를 «항상» 뺀다. Next 의 플라이트 페이로드(self.__next_f)가 화면 문구를
+  //    통째로 한 번 더 싣기 때문에, 「화면에 몇 번 나오나」를 세면 값이 두 배가 된다.
+  //    「인기 시리즈 하나뿐인가」 판정이 실제로 그것 때문에 어긋났다.
+  let h = html.replace(/<script[\s\S]*?<\/script>/gi, '');
+  if (stripArticle) h = h.replace(/<article[\s\S]*?<\/article>/gi, '');
+  return h;
 }
 
 /**
@@ -77,15 +81,17 @@ async function open(b: Browser, path: string) {
   const page = await b.newPage({ viewport: { width: 1280, height: 1080 } });
   const consoleErrors: string[] = [];
   const internal404: string[] = [];
+  // ⚠️ 메시지 «문자열» 만 보면 못 잡는다. 애드센스가 내는 「Uncaught (in promise) undefined」는
+  //    본문에 도메인이 없고 «스택·발생 위치» 에만 있다. 셋 다 본다.
   page.on('console', (m) => {
     if (m.type() !== 'error') return;
-    const t = m.text();
-    if (THIRD_PARTY.test(t)) return;
-    consoleErrors.push(t.slice(0, 200));
+    const where = (m.location() || {}).url || '';
+    if (THIRD_PARTY.test(m.text()) || THIRD_PARTY.test(where)) return;
+    consoleErrors.push(m.text().slice(0, 200));
   });
   page.on('pageerror', (e) => {
-    const t = String(e);
-    if (!THIRD_PARTY.test(t)) consoleErrors.push(t.slice(0, 200));
+    const t = String(e) + ' ' + ((e as Error).stack || '');
+    if (!THIRD_PARTY.test(t)) consoleErrors.push(String(e).slice(0, 200));
   });
   // ⚠️ 죽은 «내부» 링크는 prefetch 로 드러난다 — 사람이 누르기 전에 잡히는 유일한 신호다.
   page.on('response', (r) => {
@@ -148,7 +154,12 @@ async function imagesLoad(where: string, page: Page) {
       dead.push(`ERR ${s.slice(0, 90)}`);
     }
   }
-  expect(where, dead.length === 0, dead.length ? `깨진 이미지 ${dead.length}/${uniq.length}: ${dead[0]}` : `이미지 ${uniq.length}장 전부 200`);
+  expect(
+    where,
+    dead.length === 0,
+    dead.length ? `깨진 이미지 ${dead.length}/${uniq.length}: ${dead[0]}` : `이미지 ${uniq.length}장 전부 200`,
+    dead.length ? 'H7-3' : undefined,
+  );
 }
 
 /** 죽은 링크·빈 버튼 — H7-6 이 정리할 대상을 상시로 잡는다. */
@@ -360,16 +371,13 @@ async function main() {
 
   const fails = problems.filter((p) => p.level === 'fail');
   const warns = problems.filter((p) => p.level === 'warn');
-  console.log(`
-■ 검사 ${checks} / 실패 ${fails.length} / 예정(경고) ${warns.length}`);
+  console.log(`\n■ 검사 ${checks} / 실패 ${fails.length} / 예정(경고) ${warns.length}`);
   if (fails.length) {
-    console.log('
-  -- 지금 고쳐야 하는 것 --');
+    console.log('\n-- 지금 고쳐야 하는 것 --');
     for (const p of fails) console.log(`   ❌ ${p.where} — ${p.msg}`);
   }
   if (warns.length) {
-    console.log('
-  -- 뒤 커밋이 고칠 예정 (무시 아님. 그 커밋 뒤 다시 fail 로 올린다) --');
+    console.log('\n-- 뒤 커밋이 고칠 예정 (무시 아님. 그 커밋 뒤 다시 fail 로 올린다) --');
     for (const p of warns) console.log(`   ⚠️  ${p.where} — ${p.msg}`);
   }
   if (fails.length) {

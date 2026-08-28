@@ -55,10 +55,28 @@ interface Draft {
   observed_at: string;
 }
 
+/**
+ * 실재하는 라우트 «모양» 만 통과시킨다.
+ *
+ * ⚠️⚠️ 2026-08-28 스모크가 잡았다 — trade 관측 «12건 전부» 가 404 로 링크하고 있었다.
+ *      `/apt/region/{시도}/{구군}` 을 썼는데 그 2단 라우트가 «없다»(1단과 3단만 있다).
+ *      게이트 ②가 「link_path 가 «있다»」만 보고 「«가 닿는다»」를 안 봤기 때문이다.
+ *      주석에 적어 둔 그 게이트의 목적 자체가 「눌러서 갈 곳 없는 줄은 목록만 늘린다」였는데,
+ *      존재 검사만으로는 그 목적을 못 지킨다.
+ * ⛔ 새 link_path 모양을 추가할 때는 «그 라우트가 실제로 200 인지 확인하고» 넣을 것.
+ */
+const ROUTE_SHAPES = [
+  /^\/apt\/[^/?]+$/,                    // 현장 상세
+  /^\/apt\/area\/[^/]+\/[^/?]+$/,        // 구군 허브  (⛔ /apt/region/A/B 는 404 다)
+  /^\/apt\/region\/[^/?]+$/,            // 시도 허브
+  /^\/apt(\?.*)?$/,                     // 목록
+];
+
 /** 게이트. 통과 못 하면 이유를 돌려준다 — 「몇 건 만들었다」만으로는 왜 안 만들어졌는지 모른다. */
 function gate(d: Draft): string | null {
   if (!/\d/.test(d.title)) return 'no_number';
   if (!d.link_path) return 'no_link';
+  if (!ROUTE_SHAPES.some((re) => re.test(decodeURI(d.link_path)))) return 'bad_link_shape';
   if (!d.observed_at) return 'no_date';
   if (!d.source_ref) return 'no_ref';
   if (CHATTER.test(d.title) || (d.body && CHATTER.test(d.body))) return 'chatter';
@@ -147,7 +165,8 @@ export async function GET(req: NextRequest) {
           kind: 'trade',
           title: `${r.sigungu} 이번 주 실거래 ${r.deals}건 — ${r.top_apt} ${area} 최고 ${price} (${md(r.top_deal_date)})`,
           body: null,
-          link_path: `/apt/region/${encodeURIComponent(region)}/${encodeURIComponent(r.sigungu)}`,
+          // ⚠️ /apt/region/{시도}/{구군} 은 «404» 다. 구군 허브의 실재 경로는 /apt/area 다.
+          link_path: `/apt/area/${encodeURIComponent(region)}/${encodeURIComponent(r.sigungu)}`,
           // ⚠️ 구군당 주 1건 — source_ref 에 «주» 를 넣어 같은 주에 두 번 안 쌓이게 한다.
           source_ref: `apt_transactions:${r.top_tx_id}`,
           observed_at: r.top_deal_date,
