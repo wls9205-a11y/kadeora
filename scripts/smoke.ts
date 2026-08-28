@@ -246,11 +246,14 @@ async function main() {
     await common(w, page, res!.status(), consoleErrors, internal404);
     const m = await page.evaluate(() => ({
       cards: document.querySelectorAll('.sub-card').length,
-      rows: document.querySelectorAll('.kd-lrow').length,
+      // ⚠️ B7-1 이 .kd-lrow 를 .kd-srow 로 바꿨다. 둘 «다» 센다 —
+      //    클래스가 바뀌면 검사가 조용히 0을 세고 「회귀」라고 거짓말한다.
+      //    (홈 「최근 움직인」에서 이미 한 번 같은 오탐을 냈다.)
+      rows: document.querySelectorAll('.kd-lrow, .kd-srow').length,
       empty: document.querySelectorAll('.apt-block__empty').length,
       blocks: [...document.querySelectorAll('.apt-block')].map((s) => ({
         h: (s.querySelector('.apt-block__h')?.textContent || '').trim().slice(0, 24),
-        n: s.querySelectorAll('.apt-pcard, .kd-lrow').length,
+        n: s.querySelectorAll('.apt-pcard, .kd-lrow, .kd-srow').length,
       })),
     }));
     expect(w, m.cards >= 3, `캐러셀 카드 ${m.cards}장 (≥3)`);
