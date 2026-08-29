@@ -2,13 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
 import { verifyCronAuth } from '@/lib/cron-auth';
-import { readEnvelope } from '@/lib/cron/data-go-kr-envelope';
 import { normalizeServiceKey } from '@/lib/cron/data-go-kr-key';
 import { BUULGYEONG_REGIONS } from '@/lib/region/buulgyeong';
 import { lawdEntriesForRegions } from '@/lib/region/lawd';
 import {
   PERMIT_TRACKS,
   buildPermitUrl,
+  fetchPermitPage,
   isPermitCandidate,
   parsePermitItems,
   parseTotalCount,
@@ -77,27 +77,15 @@ async function handler(req: NextRequest) {
   for (const track of tracks) {
     for (const [, code] of entries) {
       const url = buildPermitUrl(track, key, { sigunguCd: code, numOfRows: 100 });
-      let xml = '';
-      try {
-        const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
-        apiCalls++;
-        // ⚠️ res.ok 를 «먼저» 본다. 429 는 봉투에 안 나온다 — D5-1 이 그것 때문에 생겼다.
-        if (!res.ok) {
-          errorCodes[`HTTP_${res.status}`] = (errorCodes[`HTTP_${res.status}`] ?? 0) + 1;
-          continue;
-        }
-        xml = await res.text();
-      } catch {
-        apiCalls++;
-        errorCodes.FETCH_FAIL = (errorCodes.FETCH_FAIL ?? 0) + 1;
+      // 간격·재시도·봉투 판독은 fetchPermitPage 한 곳에 있다 — 게이트와 «같은 규칙» 이어야
+      // 게이트 결과가 이 크론을 대변한다.
+      const r = await fetchPermitPage(url);
+      apiCalls += r.calls;
+      if (!r.ok) {
+        errorCodes[r.code] = (errorCodes[r.code] ?? 0) + 1;
         continue;
       }
-
-      const env = readEnvelope(xml);
-      if (!env.ok) {
-        errorCodes[env.code] = (errorCodes[env.code] ?? 0) + 1;
-        continue;
-      }
+      const xml = r.body;
 
       const parsed = parsePermitItems(xml);
       items += parsed.length;
@@ -106,7 +94,7 @@ async function handler(req: NextRequest) {
       const rows = [];
       for (const item of parsed) {
         if (item.sigunguCd && item.sigunguCd !== code) codeMismatch++;
-        if (!isPermitCandidate(item)) continue;
+        if (!isPermitCandidate(track, item)) continue;
         const row = toPermitInsert(track, item, { sigunguCd: code });
         if (row) rows.push(row);
       }
@@ -134,6 +122,7 @@ async function handler(req: NextRequest) {
       tracks,
       codes: entries.length,
       api_calls: apiCalls,
+      // 재시도가 있으므로 실제 호출은 이보다 «클 수 있다». 두 값을 갈라 남긴다.
       api_calls_expected: entries.length * tracks.length,
       items,
       candidates,

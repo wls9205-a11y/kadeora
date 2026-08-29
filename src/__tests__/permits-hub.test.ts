@@ -16,9 +16,13 @@ import {
   toInt,
   toIsoDate,
   toPermitInsert,
+  toYearMonth,
   permitHaystack,
   sampleVerdict,
+  readPermitEnvelope,
+  isRetryableEnvelope,
 } from '@/lib/permits/hub';
+import { readEnvelope } from '@/lib/cron/data-go-kr-envelope';
 
 // 무키 실측(2026-08-29)으로 확정한 오퍼레이션. 바뀌면 「돌았는데 0건」이 된다.
 describe('엔드포인트', () => {
@@ -105,27 +109,44 @@ describe('형 변환 — 모르면 null, 지어내지 않는다', () => {
     expect(toInt(undefined)).toBeNull();
   });
 
-  it('착공예정 → 분양예정시기는 «월 절사» 다', () => {
+  it('⚠️ 6자리 YYYYMM 도 «실재한다» — arch 의 stcnsSchedDay 는 199910 로 온다', () => {
+    expect(toYearMonth('199910')).toBe('1999-10');
+    expect(toYearMonth('20260915')).toBe('2026-09');
+    expect(toYearMonth('202613')).toBeNull();
+    // ⛔ 6자리를 날짜로 만들지 않는다. 없는 «일» 을 1일로 지어내는 셈이 된다.
+    expect(toIsoDate('199910')).toBeNull();
+  });
+
+  it('착공예정 → 분양예정시기는 «월 정밀도» 다 (6·8자리 둘 다)', () => {
     expect(permitToExpectedSalePeriod('20260915')).toBe('2026-09');
-    // ⛔ 일까지 아는 것처럼 쓰지 않는다. 없으면 null(미정)이다.
+    expect(permitToExpectedSalePeriod('202609')).toBe('2026-09');
     expect(permitToExpectedSalePeriod(undefined)).toBeNull();
     expect(permitToExpectedSalePeriod('없음')).toBeNull();
   });
 });
 
-describe('후보 판정', () => {
-  it('30세대 미만은 뺀다', () => {
-    expect(isPermitCandidate({ totHhldCnt: '12' })).toBe(false);
-    expect(isPermitCandidate({ totHhldCnt: '30' })).toBe(true);
+describe('후보 판정 — 트랙마다 «필드 이름이 다르다»', () => {
+  it('house 는 totHhldCnt, arch 는 hhldCnt 를 본다 (실응답 확인)', () => {
+    expect(isPermitCandidate('house', { totHhldCnt: '12' })).toBe(false);
+    expect(isPermitCandidate('house', { totHhldCnt: '30' })).toBe(true);
+    expect(isPermitCandidate('arch', { hhldCnt: '12' })).toBe(false);
+    expect(isPermitCandidate('arch', { hhldCnt: '122' })).toBe(true);
+  });
+
+  it('⚠️ 한 벌로 뭉뚱그리면 arch 가 통째로 샌다 — house 필드로는 arch 를 못 읽는다', () => {
+    // arch 응답에 totHhldCnt 는 «없다». 그걸로 읽으면 0세대 근생도 전부 통과한다.
+    expect(isPermitCandidate('arch', { totHhldCnt: '12' })).toBe(true);
   });
 
   it('⚠️ 세대수를 «모르면» 버리지 않는다 — 모르는 것과 작은 것은 다르다', () => {
-    expect(isPermitCandidate({ bldNm: 'x' })).toBe(true);
+    expect(isPermitCandidate('house', { bldNm: 'x' })).toBe(true);
+    expect(isPermitCandidate('arch', { bldNm: 'x' })).toBe(true);
   });
 
-  it('이미 사용검사가 «난» 건물은 뺀다 (예정일만 있는 것은 남긴다)', () => {
-    expect(isPermitCandidate({ useInsptDay: '20240101' })).toBe(false);
-    expect(isPermitCandidate({ useInsptSchedDay: '20290228' })).toBe(true);
+  it('이미 사용검사·사용승인이 «난» 건물은 뺀다 (예정일만 있는 것은 남긴다)', () => {
+    expect(isPermitCandidate('house', { useInsptDay: '20240101' })).toBe(false);
+    expect(isPermitCandidate('house', { useInsptSchedDay: '20290228' })).toBe(true);
+    expect(isPermitCandidate('arch', { useAprDay: '20240101' })).toBe(false);
   });
 });
 
@@ -159,10 +180,12 @@ describe('정규화', () => {
 
   it('고유키가 없으면 «넣지 않는다» — 재수집이 중복을 만들 길을 열지 않는다', () => {
     expect(toPermitInsert('arch', { bldNm: '키없음' }, { sigunguCd: '26350' })).toBeNull();
+    // ⚠️ 트랙이 틀리면 «고유키를 못 찾아» 통째로 버려진다. arch 행을 house 로 읽으면 0건이 된다.
+    expect(toPermitInsert('house', { mgmPmsrgstPk: 'X1' }, { sigunguCd: '26350' })).toBeNull();
   });
 
   it('모르는 시군구 코드면 지역을 «비운다» — 틀린 지역을 채우지 않는다', () => {
-    const row = toPermitInsert('arch', { mgmBldrgstPk: 'X1', sigunguCd: '99999' }, { sigunguCd: '99999' })!;
+    const row = toPermitInsert('arch', { mgmPmsrgstPk: 'X1', sigunguCd: '99999' }, { sigunguCd: '99999' })!;
     expect(row.sido).toBeNull();
     expect(row.sigungu).toBeNull();
   });
@@ -189,5 +212,47 @@ describe('표본 판정 — 가설을 «필터로 쓰지 않는다»', () => {
 
   it('같은 트랙이 중복돼도 match 다 (지역이 달라 두 번 잡히는 경우)', () => {
     expect(sampleVerdict('arch', ['arch', 'arch'])).toBe('match');
+  });
+});
+
+describe('봉투 — XML 과 JSON 을 «섞어서» 준다 (실측)', () => {
+  it('데이터 없음은 JSON 이고, 그건 «정상» 이다', () => {
+    const e = readPermitEnvelope('{"body":{},"header":{"resultCode":"00","resultMsg":"NORMAL SERVICE"}}');
+    expect(e.ok).toBe(true);
+    expect(e.code).toBe('00');
+  });
+
+  it('⚠️ XML 전용 판독기만 쓰면 이 정상 응답이 «실패» 로 집계된다 — 첫 게이트 42건이 그랬다', () => {
+    expect(readEnvelope('{"header":{"resultCode":"00"}}').code).toBe('NO_CODE');
+    expect(readPermitEnvelope('{"header":{"resultCode":"00"}}').ok).toBe(true);
+  });
+
+  it('데이터 있음은 XML 이다', () => {
+    const e = readPermitEnvelope('<response><header><resultCode>00</resultCode><resultMsg>NORMAL SERVICE</resultMsg></header></response>');
+    expect(e.ok).toBe(true);
+  });
+
+  it('게이트웨이 오류 XML 은 그대로 실패다', () => {
+    const e = readPermitEnvelope('<OpenAPI_ServiceResponse><cmmMsgHeader><returnReasonCode>23</returnReasonCode><returnAuthMsg>초당 서비스 요청제한 횟수 초과 에러</returnAuthMsg></cmmMsgHeader></OpenAPI_ServiceResponse>');
+    expect(e.ok).toBe(false);
+    expect(e.code).toBe('23');
+  });
+
+  it('망가진 JSON 을 «정상으로 세지 않는다»', () => {
+    expect(readPermitEnvelope('{oops').ok).toBe(false);
+  });
+});
+
+describe('재시도 분류 — 한도를 더 태우지 않는다', () => {
+  it('초당 제한·연결실패는 다시 건다', () => {
+    for (const c of ['23', '05', 'HTTP_429', 'HTTP_503', 'FETCH_FAIL']) {
+      expect(isRetryableEnvelope(c)).toBe(true);
+    }
+  });
+
+  it('⛔ 키 미등록(30)·일 한도(22)는 다시 걸지 «않는다» — 같은 답이 오고 한도만 탄다', () => {
+    expect(isRetryableEnvelope('30')).toBe(false);
+    expect(isRetryableEnvelope('22')).toBe(false);
+    expect(isRetryableEnvelope('20')).toBe(false);
   });
 });

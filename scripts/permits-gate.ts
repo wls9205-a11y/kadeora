@@ -17,11 +17,11 @@
  */
 import { config } from 'dotenv';
 import { normalizeServiceKey } from '../src/lib/cron/data-go-kr-key';
-import { readEnvelope } from '../src/lib/cron/data-go-kr-envelope';
 import { BUULGYEONG_REGIONS } from '../src/lib/region/buulgyeong';
 import { lawdEntriesForRegions } from '../src/lib/region/lawd';
 import {
   buildPermitUrl,
+  fetchPermitPage,
   isPermitCandidate,
   parsePermitItems,
   parseTotalCount,
@@ -74,32 +74,26 @@ async function main() {
     arch: { items: 0, candidates: 0, empty: [] },
   };
   let mismatch = 0;
+  let apiCalls = 0;
   let firstBody = '';
 
   for (const track of ['house', 'arch'] as PermitTrack[]) {
     for (const [label, code] of entries) {
       const url = buildPermitUrl(track, key, { sigunguCd: code, numOfRows: 100 });
-      let xml = '';
-      try {
-        const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
-        if (!res.ok) { envelopes[`HTTP_${res.status}`] = (envelopes[`HTTP_${res.status}`] ?? 0) + 1; continue; }
-        xml = await res.text();
-      } catch {
-        envelopes.FETCH_FAIL = (envelopes.FETCH_FAIL ?? 0) + 1; continue;
-      }
-      if (!firstBody) firstBody = xml.slice(0, 700);
+      const r = await fetchPermitPage(url);
+      apiCalls += r.calls;
+      if (!firstBody) firstBody = r.body.slice(0, 700);
+      envelopes[r.ok ? 'OK' : r.code] = (envelopes[r.ok ? 'OK' : r.code] ?? 0) + 1;
+      if (!r.ok) continue;
 
-      const env = readEnvelope(xml);
-      envelopes[env.ok ? 'OK' : env.code] = (envelopes[env.ok ? 'OK' : env.code] ?? 0) + 1;
-      if (!env.ok) continue;
-
+      const xml = r.body;
       const items = parsePermitItems(xml);
       perTrack[track].items += items.length;
       if (items.length === 0 && (parseTotalCount(xml) ?? 0) === 0) perTrack[track].empty.push(`${label}(${code})`);
 
       for (const it of items) {
         if (it.sigunguCd && it.sigunguCd !== code) mismatch++;
-        if (isPermitCandidate(it)) perTrack[track].candidates++;
+        if (isPermitCandidate(track, it)) perTrack[track].candidates++;
         const hay = permitHaystack(it);
         for (const s of SAMPLES) {
           // 가설 트랙으로 «거르지 않는다». 양쪽 다 본다.
