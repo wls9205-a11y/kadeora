@@ -1,3 +1,31 @@
+## 🔖 DS-2 완료 · 중단점 C 리뷰 준비 완료 (2026-08-29 · CC 세션 B)
+
+표준 8종 + `/admin/design` 프리뷰 + 뽀짝 A안 적용까지 끝났다. **리뷰는 중단점 A 통과 이후.**
+
+### 6페이지 × 6폭 확인 (부록 C-2 절차 · `scripts/ds-6x6.ts`)
+`72검사 / 실패 0 · 가로 넘침 0`
+- 폭 390·480·700·768·1024·1280 (마스터∪설계서 합집합 — C-1 안건)
+- 모드 default · **font-small**(부대조건 ②)
+- 경로 `/` `/apt` `/blog` `/stock` `/apt/busan` `/apt/region/부산`
+- 토큰 실측: `--radius-md` **12px** / `--sp-md` **12px**(default) · **8px**(font-small)
+  → 모드별로 다르게 나오는 것까지 확인. 기본 모드만 봤으면 절반만 본 것이다.
+
+### ⚠️ 확인 목록이 드러낸 것 — 토큰이 «안 닿는» 요소들
+| 요소 | 실측 | 원인 |
+|---|---|---|
+| `.site-card` | 10px 고정(전 폭) | `SiteCard.tsx` 안 `<style>` 에 하드코딩 |
+| `.apt-card` | 390px 10px / 768px 12px | 정의가 **세 곳**(globals `@layer elements` 10px · responsive `@layer overrides` 12px · globals 1804행 hex 배경) |
+
+하드코딩 라운드 실측: CSS `border-radius: Npx` **43건** + 인라인 `borderRadius: N` **607건** = **650건**.
+토큰 사용처 786곳과 비교하면 라운드 선언의 **약 45%가 토큰을 안 탄다**.
+→ DS-3 화면별 회수 대상. ⛔ DS-2d 에서 고치지 않았다 — 고치면 값 변경이 섞여
+   「토큰 몇 줄로 786곳이 따라왔다」는 §7 증명이 흐려진다.
+
+### 신설 게이트 3종 (DS 공통)
+`token-snapshot`(6폭×5모드) · `contrast-audit`(합성 대비, smoke owner 규약 이식) ·
+`font-large-guard`(요소 규칙) · `touch-spacing-audit`(인접 터치) · `ds-6x6`(화면 확인)
+
+---
 ## 🔖 DS-1a 완료 — 토큰 단일 출처 (2026-08-29 · CC 세션 B)
 
 다음: **DS-1b** — primitive 계층 실체화(원값 → `--blue-600` 류 재배선) · `@layer elements` 잔여
