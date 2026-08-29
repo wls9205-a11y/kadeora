@@ -28,7 +28,14 @@
 import { chromium } from 'playwright';
 
 const BASE = (process.argv[2] || 'http://localhost:3111').replace(/\/$/, '');
-const PATHS = ['/', '/apt', '/blog', '/apt/%EA%B7%B8%EB%9E%91%EB%9D%BC%ED%81%AC-%EC%97%90%EC%9D%BC%EB%A6%B0%EC%9D%98-%EB%9C%B0'];
+// ⚠️ 상세는 «두 경로» 다. 분양예정이 있는 현장(그랑라크)과 없는 기축(대연 푸르지오)은
+//    조건부 블록이 갈려 상호작용 요소 구성이 다르다 — 한쪽만 재면 다른 쪽을 «한 번도» 안 본다.
+//    ds-6x6 은 이미 둘 다 보고 있었는데 이 자만 하나였다(2026-08-30 실측).
+const PATHS = [
+  '/', '/apt', '/blog',
+  '/apt/%EA%B7%B8%EB%9E%91%EB%9D%BC%ED%81%AC-%EC%97%90%EC%9D%BC%EB%A6%B0%EC%9D%98-%EB%9C%B0',
+  '/apt/%EB%8C%80%EC%97%B0-%ED%91%B8%EB%A5%B4%EC%A7%80%EC%98%A4-%ED%81%B4%EB%9D%BC%EC%84%BC%ED%8A%B8',
+];
 /** 좁은 화면 + 글꼴모드 3종. font-small 이 가장 촘촘하다. */
 const MODES = ['', 'font-small', 'font-large'];
 

@@ -37,7 +37,12 @@ const bad = (w: string, m: string) => { fails++; console.log(`  ❌ ${w} — ${m
     const page = await ctx.newPage();
     for (const path of PATHS) {
       const where = `${width}px ${path}`;
-      await page.goto(BASE + path, { waitUntil: 'networkidle', timeout: 60000 });
+      // ⚠️ 2026-08-30 — 'networkidle' 로 기다리다가 /apt 에서 «자가 죽었다»(60s 초과).
+      //    목록 화면은 지연 이미지·프리페치가 계속 붙어 네트워크가 «영영 안 조용해진다».
+      //    페이지가 깨진 게 아니라 «대기 조건이 틀렸다» — 다른 게이트(ds-6x6)는
+      //    같은 경로를 domcontentloaded 로 멀쩡히 잰다. 자를 그쪽에 맞춘다(§4-3).
+      await page.goto(BASE + path, { waitUntil: 'domcontentloaded', timeout: 60000 });
+      await page.waitForLoadState('load').catch(() => {});
       const r = await page.evaluate(() => {
         document.documentElement.className = 'font-large';
         // ⚠️ 2026-08-29 실측 — CSS 는 [style*="gridTemplateColumns"] 로 겨냥하는데

@@ -257,6 +257,9 @@ const labelStyle: CSSProperties = {
 
 // 스펙의 --text-danger 는 globals.css 에 없는 이름이라 그대로 쓰면 값이 없어
 // 상속색으로 렌더된다 (Rule #94). 실재 토큰은 --error (#DC2626).
+// ⚠️ 2026-08-30 실측 — 에러 «문구» 는 4개 다 떴는데 aria-invalid·role="alert" 는 «0개» 였다.
+//    DS_RULES §2-6 이 「에러는 문장 + aria-invalid + role="alert"」를 요구하는데
+//    규칙만 있고 구현이 안 따라온 자리였다. 색·문구는 보이는 사람에게만 말한다.
 const errorStyle: CSSProperties = {
   fontSize: 'var(--fs-sm)',
   color: 'var(--error)',
@@ -683,9 +686,11 @@ export default function LeadForm({
               }}
               placeholder="홍길동"
               autoComplete="name"
+              aria-invalid={!!errors.name}
+              aria-describedby={errors.name ? 'kd-lead-name-err' : undefined}
               style={fieldStyle}
             />
-            {errors.name && <p style={errorStyle}>{errors.name}</p>}
+            {errors.name && <p id="kd-lead-name-err" role="alert" style={errorStyle}>{errors.name}</p>}
           </div>
 
           <div style={{ marginBottom: 12 }}>
@@ -699,9 +704,11 @@ export default function LeadForm({
               onChange={handlePhoneChange}
               placeholder="010-1234-5678"
               autoComplete="tel"
+              aria-invalid={!!errors.phone}
+              aria-describedby={errors.phone ? 'kd-lead-phone-err' : undefined}
               style={fieldStyle}
             />
-            {errors.phone && <p style={errorStyle}>{errors.phone}</p>}
+            {errors.phone && <p id="kd-lead-phone-err" role="alert" style={errorStyle}>{errors.phone}</p>}
           </div>
 
           {/* C-4 관심 지역 — 홈에서만, 그리고 필수다.
@@ -712,6 +719,8 @@ export default function LeadForm({
               <label htmlFor="kd-lead-region" style={labelStyle}>관심 지역</label>
               <select
                 id="kd-lead-region"
+                aria-invalid={!!errors.homeRegion}
+                aria-describedby={errors.homeRegion ? 'kd-lead-region-err' : undefined}
                 value={homeRegion}
                 onChange={e => {
                   setHomeRegion(e.target.value);
@@ -725,7 +734,7 @@ export default function LeadForm({
                 ))}
               </select>
               {errors.homeRegion
-                ? <p style={errorStyle}>{errors.homeRegion}</p>
+                ? <p id="kd-lead-region-err" role="alert" style={errorStyle}>{errors.homeRegion}</p>
                 : <p style={hintStyle}>담당자가 해당 지역 현장으로 안내해 드립니다</p>}
             </div>
           )}
@@ -747,9 +756,11 @@ export default function LeadForm({
                 placeholder="920502"
                 maxLength={6}
                 autoComplete="bday"
+              aria-invalid={!!errors.birthDate}
+              aria-describedby={errors.birthDate ? 'kd-lead-birth-err' : undefined}
                 style={fieldStyle}
               />
-              {errors.birthDate && <p style={errorStyle}>{errors.birthDate}</p>}
+              {errors.birthDate && <p id="kd-lead-birth-err" role="alert" style={errorStyle}>{errors.birthDate}</p>}
             </div>
 
             <div>
@@ -785,6 +796,8 @@ export default function LeadForm({
               <input
                 type="checkbox"
                 checked={consent}
+                aria-invalid={!!errors.consent}
+                aria-describedby={errors.consent ? 'kd-lead-consent-err' : undefined}
                 onChange={e => {
                   setConsent(e.target.checked);
                   if (errors.consent) setErrors(prev => ({ ...prev, consent: undefined }));
@@ -804,7 +817,7 @@ export default function LeadForm({
                 </a>
               </span>
             </label>
-            {errors.consent && <p style={errorStyle}>{errors.consent}</p>}
+            {errors.consent && <p id="kd-lead-consent-err" role="alert" style={errorStyle}>{errors.consent}</p>}
           </div>
 
           <div style={{ marginBottom: 14 }}>
@@ -838,7 +851,7 @@ export default function LeadForm({
             {sending ? '전송 중…' : '신청하기'}
           </button>
 
-          {sendError && <p style={{ ...errorStyle, marginTop: 8 }}>{sendError}</p>}
+          {sendError && <p role="alert" style={{ ...errorStyle, marginTop: 8 }}>{sendError}</p>}
 
         </form>
       </div>
