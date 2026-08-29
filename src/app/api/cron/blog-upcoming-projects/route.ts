@@ -26,6 +26,11 @@ export async function GET(req: NextRequest) {
 
   // 세션 138: 7일 간 52회 실행 / 0 processed / 평균 41초 (~35분 누적) — upcoming_projects 기글 모두 발행 완료.
   // 재활성: upcoming_projects 에 blog_post_id IS NULL 인 신규 rumor/announced 행이 생기면 이 early-return 제거.
+  //
+  // ⛔ 2026-08-29 — 그 «재활성 경로는 닫혔다». upcoming_projects 는 폐기·읽기전용이다
+  //    (Node 승인). 쓰기 grant 를 뗐으므로 아래 update 두 곳은 이제 «권한 오류로 죽는다».
+  //    vercel.json 크론 등록도 뗐다(79 → 78). 이 early-return 을 지우지 말 것 —
+  //    분양예정 현장의 단일 진실은 apt_sites 이고, 이 표는 4월 수동 시드 부패의 물증으로만 남는다.
   return NextResponse.json({ ok: true, disabled: true, reason: 'session-138: 0 processed in 7d, topics exhausted' });
 
   // eslint-disable-next-line no-unreachable

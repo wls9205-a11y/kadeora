@@ -253,10 +253,6 @@
       "schedule": "42 * * * *"
     },
     {
-      "path": "/api/cron/blog-upcoming-projects",
-      "schedule": "49 */4 * * *"
-    },
-    {
       "path": "/api/cron/blog-data-update",
       "schedule": "0 6 * * 0"
     },
