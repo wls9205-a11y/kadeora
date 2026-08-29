@@ -12,6 +12,7 @@
  *    lifecycle_stage·slug 는 verified 여도 «검수 큐» 로 간다. 이 파일은 그 경계를
  *    `autoApplicable()` 로 못박는다.
  */
+import { acceptAsBuilder, canonicalBuilder, parseUnits } from './builders';
 
 /** D6 어휘 5값 — DB 제약(apt_sites_confidence_chk)과 «같은» 목록이다. */
 export type Confidence = 'rumor' | 'estimated' | 'confirmed' | 'verified' | 'conflicting';
@@ -207,4 +208,111 @@ export function queueStats(sites: QueueSite[], perDay: number) {
       daysToClear: perDay > 0 ? Math.ceil(cum / perDay) : null,
     };
   });
+}
+
+// ── PV-5c 보강 (중단점 B 판정 1·3 · 2026-08-29) ─────────────────────────────
+
+/** 추출기가 주는 원문 주장 — 필드와 «근거 어휘» 를 달고 온다. */
+export interface RawClaim extends Claim {
+  field: string;
+  /** 「선정」·「입찰」 같은 역할 근거. 없으면 unknown 으로 접힌다. */
+  evidence?: string | null;
+}
+
+export interface NormalizeResult {
+  claims: Claim[];
+  /** 버린 이유 — 검수 note 로 나간다. 「그냥 없었다」와 「버렸다」는 다른 사실이다. */
+  dropped: string[];
+}
+
+/**
+ * 판정 «전에» 값을 다듬는다 (중단점 B 판정 1).
+ *   builder     — canonical 치환 후 비교(사명 변경이 충돌로 보이지 않게) ·
+ *                 「입찰·후보」 문맥은 값으로 «쓰지 않는다»
+ *   total_units — 숫자와 「세대」가 결합된 것만
+ * ⚠️ 버린 것을 «세어서 남긴다». 조용히 사라지면 왜 판정이 비었는지 알 수 없다.
+ */
+export function normalizeClaims(field: string, raw: RawClaim[]): NormalizeResult {
+  const out: Claim[] = [];
+  const dropped: string[] = [];
+
+  for (const c of raw) {
+    if (field === 'builder') {
+      if (!acceptAsBuilder(c.evidence)) {
+        dropped.push(`${c.value}: 역할 미확정(${c.evidence ? c.evidence.slice(0, 20) : '근거 없음'})`);
+        continue;
+      }
+      const canon = canonicalBuilder(typeof c.value === 'string' ? c.value : String(c.value ?? ''));
+      if (!canon) { dropped.push(`${c.value}: 빈 값`); continue; }
+      out.push({ ...c, value: canon });
+      continue;
+    }
+    if (field === 'total_units') {
+      const n = parseUnits(c.value);
+      if (n === null) { dropped.push(`${c.value}: 「세대」 결합 없음`); continue; }
+      out.push({ ...c, value: n });
+      continue;
+    }
+    if (c.value === null || String(c.value).trim() === '') { dropped.push('빈 값'); continue; }
+    out.push(c);
+  }
+  return { claims: out, dropped };
+}
+
+/**
+ * 배치 편성 — «쿼터 인터리브» (중단점 B 판정 3, §6 개정).
+ *
+ * ⛔ 순차 큐는 앞 층이 두꺼우면 뒤 층을 굶긴다. 실측에서 분양예정 급건 5곳이
+ *    ad_landing 575 뒤에 서서 «29일» 을 기다렸다 — 분양예정 선점이 이 트랙의
+ *    존재 이유인데 목적이 전도된다.
+ * → pre_ann_urgent 는 «전량 최우선», 잔여 슬롯만 비율로 나눈다.
+ */
+export const BATCH_RATIO: Readonly<Record<QueueTier, number>> = {
+  pre_ann_urgent: 0,   // 비율 밖 — 전량 선취한다
+  ad_landing: 6,
+  pre_ann: 2,
+  lead: 1,
+  curated: 1,
+  rest: 1,
+};
+
+export function planBatch<T>(items: Array<{ item: T; tier: QueueTier }>, limit: number): T[] {
+  const byTier = new Map<QueueTier, T[]>();
+  for (const t of QUEUE_TIERS) byTier.set(t, []);
+  for (const { item, tier } of items) byTier.get(tier)!.push(item);
+
+  // ① 급건 전량 (한도를 넘지 않는 선에서)
+  const urgent = byTier.get('pre_ann_urgent')!;
+  const picked: T[] = urgent.slice(0, limit);
+  let remain = limit - picked.length;
+  if (remain <= 0) return picked;
+
+  // ② 잔여를 비율로 — 최대잔여법으로 정수 배분한다
+  const tiers = QUEUE_TIERS.filter((t) => t !== 'pre_ann_urgent' && BATCH_RATIO[t] > 0);
+  const totalW = tiers.reduce((a, t) => a + BATCH_RATIO[t], 0);
+  const raw = tiers.map((t) => ({ t, exact: (remain * BATCH_RATIO[t]) / totalW }));
+  const quota = new Map<QueueTier, number>(raw.map((r) => [r.t, Math.floor(r.exact)]));
+  let left = remain - [...quota.values()].reduce((a, b) => a + b, 0);
+  for (const r of [...raw].sort((a, b) => (b.exact % 1) - (a.exact % 1))) {
+    if (left <= 0) break;
+    quota.set(r.t, quota.get(r.t)! + 1); left--;
+  }
+
+  // ③ 층별로 뽑고, 모자란 층의 몫은 «남은 층» 이 가져간다 — 슬롯을 비우지 않는다
+  for (const t of tiers) {
+    const take = byTier.get(t)!.slice(0, quota.get(t)!);
+    picked.push(...take);
+    quota.set(t, quota.get(t)! - take.length);
+  }
+  remain = limit - picked.length;
+  if (remain > 0) {
+    for (const t of tiers) {
+      if (remain <= 0) break;
+      const already = picked.length;
+      const pool = byTier.get(t)!.filter((x) => !picked.includes(x));
+      picked.push(...pool.slice(0, remain));
+      remain -= picked.length - already;
+    }
+  }
+  return picked.slice(0, limit);
 }

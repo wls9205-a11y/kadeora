@@ -135,9 +135,34 @@
 - v_seo_daily_snapshot에 5지표 추가: pre_announcement 수 · permit 미매칭 수 · conflicting 수 · 중복 후보 수(이름 유사+동일 법정동) · 단계 정체 수(180일 무변경 정비 레코드). 재현 쿼리를 부록 A 형태로 저장.
 
 ### PV-5: `verify-facts` 크론 (V, 신규 라우트 2/2 — issue-fact-check 확장으로 흡수 가능하면 라우트 0 추가)
-- 큐 우선순위: 파워링크 착지 현장 → 큐레이션 → pre_announcement 전량(seed:web 20건 + source_ids `{}` 1순위) → 리드 발생 현장 → 나머지 순차 일 N건.
+- 큐 우선순위 — **[2026-08-30 개정: 순차 → «쿼터 인터리브»]**
+  ⛔ 원안(파워링크 착지 → 큐레이션 → pre_announcement → 리드 → 나머지 «순차»)은
+     **분양예정 급건을 굶겼다.** 첫 배치 실측: `ad_landing 575` 뒤에 `pre_ann_urgent 5` 가 서서
+     배치 20 기준 **29일** 을 기다렸다. 분양예정 선점이 이 트랙의 존재 이유인데 목적이 전도된다.
+     「실측이 문서와 다르면 문서를 고친다」 규율대로 본문을 고친다.
+  → **매 배치에서 `pre_ann_urgent`(seed:web · `source_ids {}`)를 «전량 최우선» 으로 선취**하고,
+     잔여 슬롯만 아래 비율로 나눈다(최대잔여법 정수 배분 · 모자란 층의 몫은 남은 층이 가져간다):
+
+    | 층 | 비율 |
+    |---|---|
+    | `pre_ann_urgent` | **전량 선취**(비율 밖) |
+    | `ad_landing` | 6 |
+    | `pre_ann` | 2 |
+    | `lead` | 1 |
+    | `curated` | 1 |
+    | `rest` | 1 |
+
+  구현: `src/lib/verify/facts.ts` `BATCH_RATIO` · `planBatch()`. 테스트가 이 수치를 잠근다.
+  ⚠️ 비율은 실측으로 조정하되 **바꾸면 이 표를 함께 고친다** — 두 벌이 되면 한쪽만 늘어난다.
 - 소스: 네이버 뉴스/웹 API(naver-sc-sync 자격 재사용) "{구역명} 시공사/단지명" + builder-site-sync 산출. AI 추출은 기존 인프라 재사용.
 - 판정: 필드별 — 독립 출처 2개 일치 → `verified` 승격 + display_name/variants/builder 자동 반영(D4 경계). 충돌 → `conflicting` + 검수 큐. note에 출처·일자. **'독립 출처'는 매체 수가 아니라 원출처 기준** — 같은 보도자료 받아쓴 기사 n개는 출처 1개다(공시·조합 공고·시공사 발표 vs 언론 재전달을 구분).
+- **추출 보강 [2026-08-30 신설 · 중단점 B 판정 1]** — 첫 배치에서 `conflicting` 4건 중 3건이 «진짜 충돌이 아니었다».
+  ① **시공사 표기 사전**(`src/lib/verify/builders.ts`) — canonical + variants. 1호 등재 `한진중공업 → HJ중공업`(2021 사명 변경).
+     저장 전 canonical 치환하고 **conflicting 판정도 canonical 기준**. ⛔ 문자열 유사도로 합치지 않는다(대우건설 ↔ 대우조선해양).
+  ② **역할 구분** — 「선정·수주·계약」 근거일 때만 builder 후보. 「입찰·참여·후보·경쟁」은 값으로 «쓰지 않는다»(검수 note 행).
+     실측: 「부산 우동1」이 입찰 후보 6곳으로 conflicting 이 됐다 — 경쟁이 치열할수록 판정이 나빠지는 구조였다.
+  ③ **수치 결합 검증** — `total_units` 는 숫자와 「세대」가 결합된 것만. 실측: 양정4 의 「78」은 세대수가 아니었다.
+  ⚠️ 버린 것은 «세어서» 남긴다(`normalize_dropped` · `drop_samples`) — 「그냥 없었다」와 「버렸다」는 다른 사실이다.
 - 쿼터: 네이버 검색 API 일한도를 keyword_rank_daily와 배분해 검증 큐의 일 처리량을 잔여 쿼터 안에서 산정 — 순위 추적을 밀어내지 않는다.
 - 블로그 기존 글: **본문 불변**(규칙). C2 apt_site_id FK + 메타(blog_meta_rewrite 경로)만.
 

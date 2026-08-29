@@ -3,14 +3,18 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
 import { verifyCronAuth } from '@/lib/cron-auth';
 import {
+  BATCH_RATIO,
   autoApplicable,
   judgeField,
+  normalizeClaims,
+  planBatch,
   queueStats,
   queueTier,
-  type Claim,
   type OriginKind,
   type QueueSite,
+  type RawClaim,
 } from '@/lib/verify/facts';
+import { tally } from '@/lib/net/outcome';
 
 export const maxDuration = 300;
 export const runtime = 'nodejs';
@@ -92,7 +96,7 @@ const strip = (s: string) => String(s ?? '').replace(/<[^>]*>/g, '').replace(/&[
  * 판정을 모델에 맡기면 「독립 출처」 규칙이 프롬프트 안에서 조용히 흐려진다.
  */
 /** 추출 단계에서만 쓰는 형태 — 어느 «필드» 에 대한 주장인지를 달고 다닌다. */
-type ExtractedClaim = Claim & { field: string };
+type ExtractedClaim = RawClaim;
 
 async function extractClaims(site: SiteRow, snippets: string[]): Promise<ExtractedClaim[] | null> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -116,8 +120,12 @@ async function extractClaims(site: SiteRow, snippets: string[]): Promise<Extract
 ⚠️ 기사가 「~로 알려졌다」 「업계에 따르면」 이면 press 입니다.
 ⚠️ 확실하지 않으면 그 주장을 «빼세요». 지어내지 마세요.
 
+⚠️ **evidence 는 그 주장이 나온 «근거 어절» 을 원문 그대로** 넣으세요.
+   「시공사로 선정」 「수주 공시」 「입찰 참여」 처럼 짧게. 지어내지 마세요.
+   total_units 는 「849세대」처럼 «단위까지» 원문 그대로 넣으세요 — 숫자만 넣지 마세요.
+
 JSON 배열만 반환:
-[{"field":"builder","value":"삼성물산","kind":"disclosure","originKey":"2021-06 수주공시","publishedAt":"2021-06-15"}]
+[{"field":"builder","value":"삼성물산","kind":"disclosure","originKey":"2021-06 수주공시","publishedAt":"2021-06-15","evidence":"시공사로 선정"}]
 없으면 []`;
 
   const user = `현장: ${site.name}${site.display_name ? ` (${site.display_name})` : ''}
@@ -148,6 +156,7 @@ ${snippets.slice(0, 12).map((s, i) => `[${i + 1}] ${s}`).join('\n')}`;
         kind: x.kind as OriginKind,
         originKey: (x.originKey as string) ?? null,
         publishedAt: (x.publishedAt as string) ?? null,
+        evidence: (x.evidence as string) ?? null,
       }));
   } catch {
     return null;
@@ -200,17 +209,20 @@ async function handler(req: NextRequest) {
     (q) => q.gte('checked_at', new Date(Date.now() - 30 * 86400_000).toISOString()));
   const seen = new Set(done.map((r) => r.site_id));
 
-  const queue = sites
-    .filter((s) => slug || !seen.has(s.id))
-    .map((s) => ({ s, rank: queueTier(toQueueSite(s)) }))
-    .sort((a, b) => {
-      const order = ['ad_landing', 'curated', 'pre_ann_urgent', 'pre_ann', 'lead', 'rest'];
-      return order.indexOf(a.rank) - order.indexOf(b.rank);
-    })
-    .slice(0, limit);
+  // ⛔ 순차 정렬이 아니다 — 쿼터 인터리브(중단점 B 판정 3 · §6 개정).
+  //    급건 전량 최우선 + 잔여를 ad_landing 6 : pre_ann 2 : lead 1 : curated 1 : rest 1 로.
+  //    실측에서 급건 5곳이 ad_landing 575 뒤에 서서 «29일» 을 기다렸다.
+  const picked = planBatch(
+    sites.filter((s) => slug || !seen.has(s.id)).map((s) => ({ item: s, tier: queueTier(toQueueSite(s)) })),
+    limit,
+  );
+  const queue = picked.map((s) => ({ s }));
 
   const FIELDS = ['display_name', 'builder', 'total_units'] as const;
-  let naverCalls = 0, claimsFound = 0, recorded = 0, applied = 0, extractFails = 0;
+  let naverCalls = 0, claimsFound = 0, recorded = 0, applied = 0, extractFails = 0, droppedTotal = 0;
+  const dropSamples: string[] = [];
+  /** ⚠️ 실패를 세 갈래로 «갈라» 센다 — 오늘 네 번 같은 병을 앓고 세운 규율. */
+  const net = tally();
   const verdictCount: Record<string, number> = {};
   const rows: Array<Record<string, unknown>> = [];
   const applyOps: Array<{ id: string; field: string; value: string }> = [];
@@ -235,8 +247,16 @@ async function handler(req: NextRequest) {
     claimsFound += claims.length;
 
     for (const field of FIELDS) {
-      const fieldClaims: Claim[] = claims.filter((c) => c.field === field);
-      if (fieldClaims.length === 0) continue;
+      const rawForField = claims.filter((c) => c.field === field);
+      if (rawForField.length === 0) continue;
+      // ⚠️ 판정 «전에» 다듬는다 — 사명 변경 합치기 · 입찰 후보 버리기 · 세대 결합 검증.
+      const { claims: fieldClaims, dropped } = normalizeClaims(field, rawForField);
+      droppedTotal += dropped.length;
+      if (fieldClaims.length === 0) {
+        // 「그냥 없었다」와 「전부 버렸다」는 다른 사실이다. 버린 이유를 남긴다.
+        if (dropSamples.length < 12) dropSamples.push(`${s.slug}/${field}: ${dropped.slice(0, 3).join(' · ')}`);
+        continue;
+      }
       const v = judgeField(fieldClaims);
       verdictCount[v.confidence] = (verdictCount[v.confidence] ?? 0) + 1;
 
@@ -244,8 +264,8 @@ async function handler(req: NextRequest) {
         site_id: s.id, field, verdict: v.confidence,
         value: v.value === null ? null : String(v.value),
         independent_sources: v.independentSources,
-        note: v.note,
-        claims: fieldClaims,
+        note: dropped.length ? `${v.note} · 제외 ${dropped.length}건(${dropped.slice(0, 2).join(' · ')})` : v.note,
+        claims: rawForField,
       });
 
       // ⛔ D4 경계 — 이름·변형·시공사만, 그것도 verified 일 때만.
@@ -280,6 +300,12 @@ async function handler(req: NextRequest) {
       naver_calls: naverCalls,
       claims_found: claimsFound,
       extract_fails: extractFails,
+      // 「그냥 없었다」와 「버렸다」를 가른다(판정 1). 검수 큐가 오추출로 차는 것을 막은 몫이다.
+      normalize_dropped: droppedTotal,
+      drop_samples: dropSamples,
+      net_outcomes: net.counts,
+      net_samples: net.samples,
+      batch_ratio: BATCH_RATIO,
       verdicts: verdictCount,
       // D4 자동 반영은 «세어서» 남긴다. 조용히 쓰지 않는다.
       auto_applied: dryRun ? 0 : applied,
