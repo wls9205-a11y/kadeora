@@ -315,6 +315,10 @@
     {
       "path": "/api/cron/ad-stats-sync",
       "schedule": "0 21 * * *"
+    },
+    {
+      "path": "/api/cron/permits-sync",
+      "schedule": "25 * * * *"
     }
   ],
   "headers": [
