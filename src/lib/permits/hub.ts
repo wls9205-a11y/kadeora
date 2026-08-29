@@ -243,6 +243,12 @@ export function toPermitInsert(
     //    없는 일을 1일로 지어내지 않는다. 월 정밀도는 expected_sale_period 가 담는다.
     construct_start_expected: toIsoDate(item.stcnsSchedDay),
     use_approval_expected: f.useApprovalSchedDay ? toIsoDate(item[f.useApprovalSchedDay]) : null,
+    // ⛔ «예정» 과 «실제» 는 다른 사실이다. 2026-08-30 실측: 예정일이 지난 것 532건인데
+    //    실제 사용승인은 0건이다. 예정을 실제로 읽으면 532개 현장이 잘못 기축으로 넘어간다.
+    //    useApprovedDay 는 필드 스펙에 «있었는데» 어느 컬럼에도 쓰이지 않고 있었다.
+    use_approval_actual: f.useApprovedDay ? toIsoDate(item[f.useApprovedDay]) : null,
+    // 수명 규칙의 기산점을 예정 대신 «실제 착공» 으로 쓸 수 있게 한다.
+    construct_start_actual: toIsoDate(item.stcnsDay ?? item.realStcnsDay),
   };
 }
 

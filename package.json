@@ -16,7 +16,8 @@
     "smoke": "tsx scripts/smoke.ts",
     "permits:gate": "tsx scripts/permits-gate.ts",
     "bjdong:sync": "tsx scripts/bjdong-sync.ts",
-    "adstats:gate": "tsx scripts/adstats-gate.ts"
+    "adstats:gate": "tsx scripts/adstats-gate.ts",
+    "unittypes:gate": "tsx scripts/unittypes-gate.ts"
   },
   "dependencies": {
     "@sentry/nextjs": "^10.48.0",

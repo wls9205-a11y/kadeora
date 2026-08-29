@@ -45,6 +45,9 @@ export interface AptPermit {
   /** 착공예정일. 수명 규칙(경과 +180일 강등)의 기준이 되는 날짜다. */
   construct_start_expected: string | null;
   use_approval_expected: string | null;
+  /** ⛔ 「예정」과 «다른 사실» 이다 — 예정일이 지났다고 승인이 난 것이 아니다. */
+  use_approval_actual: string | null;
+  construct_start_actual: string | null;
 
   match_status: PermitMatchStatus;
   matched_site_id: string | null;
@@ -66,5 +69,6 @@ export type AptPermitInsert = Pick<AptPermit, 'source' | 'source_key' | 'raw'> &
       | 'address' | 'road_address' | 'project_name' | 'builder' | 'developer'
       | 'total_units' | 'building_count' | 'main_purpose'
       | 'permit_kind' | 'permit_date' | 'construct_start_expected' | 'use_approval_expected'
+      | 'use_approval_actual' | 'construct_start_actual'
     >
   >;
