@@ -177,7 +177,12 @@ async function deadControls(where: string, page: Page) {
     ).length;
     const closed = [...document.querySelectorAll('a[href]')]
       .map((a) => a.getAttribute('href') || '')
-      .filter((h) => /^\/(feed|discuss|write)(\/|$|\?)/.test(h) || /^\/apt\/map(\/|$|\?)/.test(h));
+      // ⚠️ 2026-08-29 — `write` 를 «뺐다». 이 검사는 「닫힌 라우트로 가는 링크」를 찾는 것인데
+      //    /write 는 «닫히지 않았다» — 최근 30일 작성 2,186건 · 작성자 491명(실측).
+      //    살아 있는 라우트를 「닫힌 라우트」라 부르며 경고를 내던 것은 검사의 «전제» 가
+      //    틀린 것이었다. 전제가 틀리면 그 게이트는 매일 거짓말을 한다.
+      //    ⛔ 게이트가 실패하면 먼저 «단언의 전제» 를 의심한다(설계서 §5 테스트 철학).
+      .filter((h) => /^\/(feed|discuss)(\/|$|\?)/.test(h) || /^\/apt\/map(\/|$|\?)/.test(h));
     return { anchorsNoHref, buttonsInert, closed: [...new Set(closed)] };
   });
   expect(where, bad0.anchorsNoHref === 0, `href 없는 <a> ${bad0.anchorsNoHref}개`);
@@ -185,11 +190,10 @@ async function deadControls(where: string, page: Page) {
     where,
     bad0.closed.length === 0,
     bad0.closed.length ? `닫힌 라우트 링크 ${bad0.closed.length}종: ${bad0.closed.join(', ')}` : '닫힌 라우트 링크 0',
-    // ⚠️ 2026-08-29 재배정 — DS-3 홈 차례가 끝났고 «닫힌 라우트 링크는 남는다».
-    //    /write FAB 는 「존치 + DS 스킨 + 44px」까지가 스킨 커밋의 몫이고,
-    //    «FAB 를 걷을 것인가» 는 「/write 를 닫는가」라는 제품 결정이라 별도 안건이다.
-    //    담당이 옮겨갔으므로 owner 도 옮긴다 — 규약이 죽지 않도록.
-    bad0.closed.length ? 'P-write(제품 결정)' : undefined,
+    // ⚠️ P-write 종결(2026-08-29) — /write 전역 유지 확정. 그래서 owner 를 «닫았다».
+    //    남는 경고는 /feed·/discuss 진입점 이슈뿐이고, 그건 그 진입점을 만든 화면의 몫이다.
+    //    ⛔ owner 를 빈 채로 두면 «즉시 실패» 다 — 살아 있는 이슈라는 뜻이고 그게 맞다.
+    bad0.closed.length ? 'U-1(상세 관련글 진입점)' : undefined,
   );
   // ⚠️ 버튼은 React 가 onclick 프로퍼티를 쓰지 않아 오탐이 난다. 경고로만 남긴다.
   if (bad0.buttonsInert > 0) {

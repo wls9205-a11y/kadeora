@@ -100,10 +100,9 @@ export default function StockTabCarousel({
               style={{
                 padding: '5px 10px', borderRadius: 'var(--radius-pill)',
                 fontSize: 'var(--fs-2xs)', fontWeight: isActive ? 600 : 500,
-                // ⚠️ 선택 탭의 «어두운 면» 에 쓸 semantic 토큰이 없다(라이트 단일이라 어두운 surface 가 없다).
-                //    --text-primary 를 배경으로 쓰는 것은 «색은 정확하지만 의미는 어긋난» 흡수다.
-                //    --surface-inverse 신설은 DS-3 전 화면을 본 뒤 판단한다.
-                background: isActive ? 'var(--text-primary)' : 'var(--bg-elevated)',
+                // ✅ DS-3 전 화면 실측 후 --surface-inverse 를 신설해 «의미를 맞췄다»(2026-08-29).
+                //    이전에는 --text-primary 를 배경으로 썼다 — 색은 맞고 의미는 어긋난 흡수였다.
+                background: isActive ? 'var(--surface-inverse)' : 'var(--bg-elevated)',
                 color: isActive ? 'var(--text-inverse)' : 'var(--text-secondary)',
                 border: 'none', cursor: 'pointer', whiteSpace: 'nowrap',
               }}

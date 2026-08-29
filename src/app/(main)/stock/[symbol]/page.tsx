@@ -386,7 +386,7 @@ export default async function StockDetailPage({ params }: Props) {
                 position: 'absolute', top: -3,
                 left: `${pct}%`,
                 width: 14, height: 14, borderRadius: '50%',
-                background: 'var(--text-primary)', border: '3px solid var(--bg-surface)',
+                background: 'var(--surface-inverse)', border: '3px solid var(--bg-surface)',
                 transform: 'translateX(-50%)',
               }} />
             </div>

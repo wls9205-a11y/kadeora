@@ -322,6 +322,19 @@
     --border-strong: #B8C2D0;
     --border-focus:  #4A8AF7;
     --text-primary: var(--c-gray-900);
+    /* ⚠️ 「어두운 면」 — 선택된 탭·필터 칩처럼 «면이 반전되는» 자리.
+       ── 신설 근거 (DS-3 전 화면 실측 · 헌법 2조 적용) ──────────────────────
+       실측: var(--text-primary) 를 «배경» 으로 쓰는 곳 3군데
+             (AptFilterRow 선택 칩 · StockTabCarousel 선택 탭 · stock/[symbol]).
+       1조(재사용 ≥2) 충족. 그리고 2조가 신설을 «요구» 한다 —
+       「어두운 면」과 「가장 진한 글자색」은 오늘 같은 값이지만 «의미 축이 다르다».
+       --text-primary 를 배경으로 계속 쓰면 «글자색을 바꾸는 날 선택된 탭 면이 같이
+       뒤집힌다». --brand 와 --stock-down 을 묶지 않은 것과 «같은 판정» 이다.
+       ⛔ 그래서 --surface-inverse: var(--text-primary) 로 «별칭» 하지 않는다.
+          둘 다 primitive 를 각자 참조한다.
+       ⛔ KakaoBottomSheet(#0C1528) · TossBottomBanner(#191F28)는 흡수하지 «않았다» —
+          각 1곳뿐이라 1조 미달이고, 앞쪽은 주석에 「토큰화 대상 아님」이 명시돼 있다. */
+    --surface-inverse: var(--c-gray-900);
     --text-secondary: #374151;  /* s8: 6.74 → 9.19 */
     --text-tertiary:  #4B5563;  /* s8: 5.69 → 6.74. 회색 계열이 본문색의 2배(2,180건)라
                                    개별 대비가 통과해도 화면 전체가 흐리게 읽혔다.
@@ -664,6 +677,9 @@
     --bg-hover:      #EEEFF1;
     --nav-bg:        #FFFFFF;
     --text-primary:  #191F28;
+    /* 이 스킨의 어두운 면. 토스 팔레트를 따른다 — 안 주면 :root 의 #111827 이 새어
+       들어와 토스 웹뷰에서만 색이 바뀐다(값 무변경을 지키려고 명시한다). */
+    --surface-inverse: #191F28;
     --text-secondary: #4E5968;
     --text-tertiary: #8B95A1;
     --text-inverse:  #FFFFFF;

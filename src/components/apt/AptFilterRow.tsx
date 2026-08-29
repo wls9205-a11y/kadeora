@@ -215,7 +215,7 @@ function RegionChip({
       scroll={false}
       style={
         active
-          ? { ...ACTIVE, background: 'var(--text-primary)', borderColor: 'var(--text-primary)', color: 'var(--bg-base)' }
+          ? { ...ACTIVE, background: 'var(--surface-inverse)', borderColor: 'var(--surface-inverse)', color: 'var(--bg-base)' }
           : { ...CHIP, color: dim ? 'var(--text-tertiary)' : 'var(--text-primary)' }
       }
     >
