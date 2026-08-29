@@ -5,7 +5,8 @@
 //
 // ⚠️ 어휘는 지어내지 않는다 — DB 제약이 원본이다(tone.ts 주석 참조).
 //    rumor · estimated · confirmed · verified · (null)
-// ⛔ `conflicting` 은 확신도가 아니라 «검수 큐» 이름이다. 뱃지로 만들지 않는다.
+// ⚠️ `conflicting`(출처 충돌)은 D6 가 정의한 «확신도 값이 맞다» — DS-2a 의 내 판정이 틀렸다.
+//    구현(DB 제약·코드)에는 아직 0건이지만, 오면 「출처 충돌」로 정직하게 표시한다.
 // ⛔ null 을 확정처럼 칠하지 않는다 — ad-safety.isConfirmed(null) 이 false 인 것과 같은 이유다.
 
 import { Badge } from '@/components/ds/Badge';
@@ -25,7 +26,7 @@ export interface VerifiedBadgeProps {
 }
 
 export default function VerifiedBadge({ confidence, hideWhenUnknown = false, size = 'sm' }: VerifiedBadgeProps) {
-  const known = !!confidence && ['rumor', 'estimated', 'confirmed', 'verified'].includes(confidence);
+  const known = !!confidence && ['rumor', 'estimated', 'conflicting', 'confirmed', 'verified'].includes(confidence);
   if (!known && hideWhenUnknown) return null;
 
   const meta = confidenceMeta(confidence);

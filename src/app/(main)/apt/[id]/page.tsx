@@ -17,6 +17,9 @@ import SectionShareButton from '@/components/SectionShareButton';
 import KakaoDirectShare from '@/components/KakaoDirectShare';
 import Disclaimer from '@/components/Disclaimer';
 import SiteHero from '@/components/apt/SiteHero';
+import VerifiedBadge from '@/components/ds/VerifiedBadge';
+import { salePeriodText } from '@/lib/apt/sale-period';
+import { saleSourceLabel } from '@/lib/apt/sale-source';
 import { displayNameOf, regionedName, regionSuffix, stripDupRegionPrefix, swapLeadingName } from '@/lib/apt/seo-name';
 import SiteJumpBar, { SECTION_SCROLL_MARGIN } from '@/components/apt/SiteJumpBar';
 // V15 B — 접이식 섹션. <details> 라 닫혀 있어도 자식이 DOM 에 남는다(색인 유지).
@@ -108,7 +111,7 @@ async function resolveParam(rawId: string) {
 
 async function fetchUnifiedData(slug: string) {
   const sb = getSupabaseAdmin();
-  const APT_COLS = 'id,slug,name,display_name,site_type,region,sigungu,dong,address,description,seo_title,seo_description,builder,builder_normalized,developer,total_units,supply_units,complex_units,built_year,move_in_date,status,is_active,content_score,interest_count,page_views,comment_count,images,satellite_image_url,og_image_url,key_features,faq_items,nearby_facilities,nearby_station,school_district,price_min,price_max,price_comparison,search_trend,latitude,longitude,source_ids,created_at,updated_at,og_cards,hero_image_url,hero_image_source,hero_image_credit,hero_license_tier,lifecycle_stage,review_score,review_count,faqs,data_quality_score,remaining_units,general_units,official_url,discount_pct,agent_kakao_url,tx_match_prefix';
+  const APT_COLS = 'id,slug,name,display_name,site_type,region,sigungu,dong,address,description,seo_title,seo_description,builder,builder_normalized,developer,total_units,supply_units,complex_units,built_year,move_in_date,status,is_active,content_score,interest_count,page_views,comment_count,images,satellite_image_url,og_image_url,key_features,faq_items,nearby_facilities,nearby_station,school_district,price_min,price_max,price_comparison,search_trend,latitude,longitude,source_ids,created_at,updated_at,og_cards,hero_image_url,hero_image_source,hero_image_credit,hero_license_tier,lifecycle_stage,review_score,review_count,faqs,data_quality_score,remaining_units,general_units,official_url,discount_pct,agent_kakao_url,tx_match_prefix,confidence,expected_sale_period,expected_sale_source';
 
   // Phase 1: apt_sites — exact slug → multi-stage fuzzy fallback
   let { data: site } = await (sb as any).from('apt_sites').select(APT_COLS).eq('slug', slug).maybeSingle();
@@ -1106,6 +1109,26 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
               <h1 style={{ fontSize: 'var(--fs-2xl)', fontWeight: 600, margin: 0, lineHeight: 1.2, letterSpacing: '-.0125em', wordBreak: 'keep-all', overflowWrap: 'break-word', color: 'inherit' }}>{displayName}</h1>
               {heroSub && (
                 <p style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, lineHeight: 1.45, margin: '5px 0 0', opacity: 0.92, wordBreak: 'keep-all', color: 'inherit' }}>{heroSub}</p>
+              )}
+              {/* U-1a §7-1 — 분양예정시기. 「말한 만큼만」 말한다.
+                  ⚠️ 문구는 salePeriodText 가 만든다(정밀도 상향 금지가 거기 테스트로 잠겨 있다).
+                  ⚠️ 한정어(「분양예정」)·출처·기준일·confidence 뱃지가 «함께» 가야 §7-1 이다.
+                     넷 중 하나라도 빠지면 확정 정보처럼 읽힌다.
+                  ⛔ 값이 없으면 줄 자체를 렌더하지 않는다 — 「미정」을 지어내지 않는다. */}
+              {salePeriodText((site as any)?.expected_sale_period) && (
+                <p style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--sp-xs)', fontSize: 'var(--fs-2xs)', fontWeight: 500, lineHeight: 1.45, margin: '6px 0 0', color: 'inherit' }}>
+                  <span>{salePeriodText((site as any)?.expected_sale_period)}</span>
+                  <VerifiedBadge confidence={(site as any)?.confidence} />
+                  {saleSourceLabel((site as any)?.expected_sale_source) && (
+                    <span style={{ opacity: 0.82 }}>출처: {saleSourceLabel((site as any).expected_sale_source)}</span>
+                  )}
+                  {/* ⛔ 「기준일」을 렌더하지 «않았다». §7-1 은 기준일을 요구하지만
+                       apt_sites 에 그 «전용 컬럼이 없다» — 타입 주석이 「근거·기준일은
+                       confidence_note 에」라고 자유 텍스트를 가리킨다.
+                       stage_updated_at 은 «단계가 바뀐 날» 이지 시기의 기준일이 아니다.
+                       그걸 기준일이라 적으면 §7-1 을 지키는 척하며 거짓을 하나 더 만든다.
+                       → 컬럼 신설은 PV 트랙 판단. 중단점 D 안건으로 올린다. */}
+                </p>
               )}
             </SiteHero>
           </>

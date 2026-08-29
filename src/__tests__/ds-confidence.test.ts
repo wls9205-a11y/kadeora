@@ -5,18 +5,20 @@
 //      DB 원본: apt_permits_match_confidence_chk (PV-1 마이그레이션).
 //      어휘가 갈리면 apt-permits.ts 가 경고한 「두 벌을 만들지 않는다」가 깨진다.
 //   2. «모르는 값» 은 전부 「미확인」으로 떨어진다 — 확정처럼 보이지 않는다.
-//      설계서와 구두 지시가 한때 `conflicting` 을 확신도로 적었다. 그런 값이 DB 에서
-//      흘러들어와도 화면이 「확정」이라고 말하면 안 된다.
+//      ⚠️ 단, `conflicting` 은 «모르는 값이 아니다» — D6 이 정의한 확신도다.
+//         DS-2a 에서 그것을 「검수 큐 이름」으로 오판했고 U-1a 에서 정정했다.
 //   3. null 을 확정으로 치지 않는다 — ad-safety.isConfirmed(null)=false 와 같은 선이다.
 
 import { describe, it, expect } from 'vitest';
 import { CONFIDENCE, CONFIDENCE_UNKNOWN, confidenceMeta, TONE } from '@/components/ds/tone';
 
-/** DB 제약과 «같은 목록». 여기를 고치려면 마이그레이션부터 고칠 것. */
-const DB_VOCAB = ['rumor', 'estimated', 'confirmed', 'verified'] as const;
+// ⚠️ 설계(D6)와 구현(DB 제약)이 갈려 있어 «합집합» 을 지원한다 — tone.ts 주석 참조.
+//    D6:  verified · estimated · conflicting · rumor
+//    구현: verified · estimated · confirmed   · rumor
+const DB_VOCAB = ['rumor', 'estimated', 'conflicting', 'confirmed', 'verified'] as const;
 
 describe('D6 확신도 어휘', () => {
-  it('DB 제약과 정확히 같은 4값이다', () => {
+  it('설계(D6) ∪ 구현 의 5값을 전부 안다', () => {
     expect(Object.keys(CONFIDENCE).sort()).toEqual([...DB_VOCAB].sort());
   });
 
@@ -40,13 +42,17 @@ describe('미지값 fallback', () => {
     }
   });
 
-  it('`conflicting` 은 확신도가 아니다 — 「미확인」으로 떨어진다', () => {
-    // 마스터 문서의 「conflicting 큐」는 «검수 큐» 이름이지 확신도 값이 아니다.
-    expect(confidenceMeta('conflicting')).toBe(CONFIDENCE_UNKNOWN);
+  it('`conflicting` 은 «확신도가 맞다» — 「출처 충돌」로 뜬다', () => {
+    // ⚠️ DS-2a 에서 「검수 큐 이름」으로 오판했다. PV_INSTRUCTION §D6 이 확신도로 정의한다.
+    //    값이 없는 게 아니라 «서로 다른 값이 둘 이상» 이라 하나를 고르면 거짓이 된다.
+    const m = confidenceMeta('conflicting');
+    expect(m).not.toBe(CONFIDENCE_UNKNOWN);
+    expect(m.label).toBe('출처 충돌');
+    expect(m.tone).toBe('error');
   });
 
   it('모르는 값은 무엇이든 「미확인」이다 (확정처럼 보이지 않는다)', () => {
-    for (const v of ['CONFIRMED', 'confirmed ', 'pending', 'matched', 'review', 'true', '1']) {
+    for (const v of ['CONFIRMED', 'confirmed ', 'pending', 'matched', 'review', 'no_target', 'true', '1']) {
       expect(confidenceMeta(v)).toBe(CONFIDENCE_UNKNOWN);
     }
   });

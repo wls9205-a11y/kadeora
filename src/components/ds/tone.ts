@@ -44,21 +44,29 @@ export const TONE: Record<Tone, ToneTokens> = {
 /**
  * D6 확신도 → 톤.
  *
- * ⚠️ 어휘는 «DB 제약이 원본» 이다:
- *      apt_permits_match_confidence_chk
+ * ⚠️ 원본이 «둘» 이다 — 그래서 아래가 이 파일에서 가장 중요한 주석이다.
+ *      DB 제약(apt_permits_match_confidence_chk):
  *        check (match_confidence is null
  *               or match_confidence in ('rumor','estimated','confirmed','verified'))
- *    `apt_sites.confidence` 도 같은 어휘를 쓴다(apt-permits.ts 주석 — 「두 벌을 만들지 않는다」).
+ *      설계(PV_INSTRUCTION §D6): verified / estimated / conflicting / rumor
  *
- * ⛔ `conflicting` 은 «확신도가 아니다». 마스터 문서에 「conflicting 큐」로 나오는 것은
- *    검수 큐 이름이고, 코드·DB 어디에도 confidence 값으로 존재하지 않는다(실측 0회).
- *    설계서 §DS-2 와 구두 지시가 그 이름을 확신도로 적었으나 실물과 다르다 — R-3.
+ * ⚠️⚠️ **설계와 구현의 어휘가 갈려 있다** (2026-08-29 U-1a 에서 발견 · 정정)
+ *    설계(PV_INSTRUCTION §D6): verified(독립 출처 2개 일치) · estimated(단일 출처)
+ *                              · **conflicting**(출처 충돌) · rumor
+ *    구현(apt_permits DB 제약 · 코드 리터럴): verified · estimated · **confirmed** · rumor
+ *    → `confirmed` 는 D6 에 «없고», `conflicting` 은 구현에 «0건» 이다.
+ *
+ *    ⛔ 나는 DS-2a 에서 「conflicting 은 검수 큐 이름이지 확신도가 아니다」로 «단정했다».
+ *       마스터의 「conflicting 큐」만 보고 D6 를 안 본 결과다 — 그 판정은 틀렸다.
+ *    → 둘 «다» 렌더한다. 어느 쪽도 「미확인」으로 떨어뜨리지 않는다.
+ *       어휘 통일(제약에 conflicting 추가 / D6 에 confirmed 추가)은 PV 트랙 판단이라
+ *       여기서 정하지 않는다. 화면은 «오는 값을 정직하게 표시» 하는 것까지가 몫이다.
  *
  * ⚠️ `null` 을 «확정» 으로 칠하지 않는다. ad-safety.ts 가 같은 이유로 isConfirmed(null)=false 다:
  *    「등급을 모르는 것과 고시·공시 원문으로 확인한 것은 다르다」.
  *    그래서 5번째 상태(unknown)를 «만들지 않고» null 자체를 상태로 다룬다.
  */
-export type Confidence = 'rumor' | 'estimated' | 'confirmed' | 'verified';
+export type Confidence = 'rumor' | 'estimated' | 'conflicting' | 'confirmed' | 'verified';
 
 export interface ConfidenceMeta {
   label: string;
@@ -68,10 +76,16 @@ export interface ConfidenceMeta {
 }
 
 export const CONFIDENCE: Record<Confidence, ConfidenceMeta> = {
-  verified:  { label: '검증',   tone: 'success', hint: '원문으로 직접 확인했습니다' },
-  confirmed: { label: '확정',   tone: 'info',    hint: '고시·공시로 확정된 내용입니다' },
-  estimated: { label: '추정',   tone: 'warning', hint: '주변 정보로 추정한 값입니다' },
-  rumor:     { label: '카더라', tone: 'neutral', hint: '아직 확인되지 않은 이야기입니다' },
+  verified:  { label: '검증',      tone: 'success', hint: '독립된 출처 두 곳이 같은 값을 말합니다' },
+  confirmed: { label: '확정',      tone: 'info',    hint: '고시·공시로 확정된 내용입니다' },
+  /**
+   * D6 「출처 충돌」. ⚠️ estimated 보다 «약한» 상태다 — 값이 없는 게 아니라
+   * «서로 다른 값이 둘 이상» 이라서, 하나를 골라 보여 주면 그 순간 거짓이 된다.
+   * 그래서 톤도 warning 이 아니라 error 다.
+   */
+  conflicting: { label: '출처 충돌', tone: 'error', hint: '출처마다 값이 달라 확인 중입니다' },
+  estimated: { label: '추정',      tone: 'warning', hint: '단일 출처로 추정한 값입니다' },
+  rumor:     { label: '카더라',    tone: 'neutral', hint: '아직 확인되지 않은 이야기입니다' },
 };
 
 /** 등급을 «모를 때». 확정으로 오해되지 않아야 한다. */
