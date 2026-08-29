@@ -97,7 +97,7 @@ export default function WeeklyTrades({ data, selectedRegion }: { data: WeeklyTra
         {data.byRegion.length > 1 && (
           <nav
             aria-label="시도별 실거래"
-            style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginTop: 9 }}
+            style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--sp-xs)', marginTop: 'var(--sp-sm)' }}
           >
             {data.byRegion.map((r) => (
               <Link

@@ -12,6 +12,11 @@
  * 계산된 gap 이 좁은(≤8px) 컨테이너 중 «상호작용 자식이 둘 이상» 인 것을 찾아,
  * 그 자식들의 실제 크기를 잰다. 44px 미만인 것이 몇 개인지 «숫자로» 남긴다.
  *
+ * ⚠️ 실효 히트 영역을 잰다 — 요소의 자기 상자만 보면 «과다 보고» 한다.
+ *    Rule #77 의 `.touch-target` 은 시각 크기를 그대로 둔 채 ::after 로 히트 영역만
+ *    44px 로 넓히는데, ::after 는 절대배치라 부모 rect 에 잡히지 않는다.
+ *    이 정정 전에는 헤더 크롬(로그인·검색 버튼)을 「44px 미만」으로 세고 있었다 — 거짓이었다.
+ *
  * ⚠️ 이 스크립트는 «합격/불합격을 스스로 정하지 않는다».
  *    breadcrumb 링크가 44px 이 아닌 것은 이 변경이 만든 문제가 아니라 «이미 있던 상태» 다.
  *    그래서 전/후 «숫자를 비교» 하는 용도로 쓴다 — 변경이 상태를 «악화시켰는가» 만 본다.
@@ -60,10 +65,18 @@ const MODES = ['', 'font-small', 'font-large'];
             const b = k.getBoundingClientRect();
             if (b.width === 0) continue;
             pairs++;
-            if (b.height < 44) {
+            // ⚠️ 2026-08-29 정정 — 요소의 «자기 상자» 만 보면 과다 보고한다.
+            //    이 저장소에는 Rule #77 의 `.touch-target` 이 있고, 그것은 시각 크기를
+            //    그대로 둔 채 ::after 로 «히트 영역만» 44px 로 넓힌다.
+            //    ::after 는 절대배치라 부모의 getBoundingClientRect 에 «잡히지 않는다».
+            //    → 실효 히트 높이 = max(자기 높이, ::after 의 min-height)
+            const after = getComputedStyle(k, '::after');
+            const hitMin = after.content !== 'none' ? parseFloat(after.minHeight || '0') || 0 : 0;
+            const effective = Math.max(b.height, hitMin);
+            if (effective < 44) {
               tiny++;
               if (samples.length < 3) {
-                samples.push(`${k.tagName.toLowerCase()}"${(k.textContent || '').trim().slice(0, 14)}" ${Math.round(b.width)}×${Math.round(b.height)} gap${g}`);
+                samples.push(`${k.tagName.toLowerCase()}"${(k.textContent || '').trim().slice(0, 14)}" ${Math.round(b.width)}×${Math.round(b.height)} 실효${Math.round(effective)} gap${g}`);
               }
             }
           }

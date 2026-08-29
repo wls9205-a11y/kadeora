@@ -241,59 +241,112 @@ export default async function HomePage() {
     fetchHomeSections(HOME_REGIONS),
   ]);
 
-  const weekly = await weeklyPromise;
-
-  /* ══ H6-4 히어로 데이터 띠 ═══════════════════════════════════════════════
-   *
-   * ⚠️ 히어로 하단이 «빈 네이비» 였다(데스크탑 1080 에서 콘텐츠 260px).
-   *    이미지·일러스트로 채우지 않는다 — 실사 정책과 대비 규칙 둘 다에 걸린다.
-   *    사이트가 «무엇을 아는지» 를 숫자로 보여 준다.
-   * ⚠️ 지역은 부동산 탭과 «같은 쿠키» 다. 없으면 부산.
-   * ⛔ 개인 데이터(최근 본 현장)를 여기 올리지 않는다.
-   * ⚠️ 숫자가 «없는 칸은 만들지 않는다». 「0건」은 정보가 아니다.
-   */
-  const heroRegion = normalizeSido((await cookies()).get(REGION_COOKIE)?.value ?? null) ?? REGION_FALLBACK;
-  const sbHero = getSupabaseAdmin();
-  const [nextSubR, pipelineCountR] = await Promise.all([
-    (sbHero as any).from('apt_subscriptions')
-      .select('house_nm, rcept_bgnde, region_nm')
-      .gte('rcept_bgnde', new Date().toISOString().slice(0, 10))
-      .eq('region_nm', heroRegion)
-      .order('rcept_bgnde', { ascending: true }).limit(1).maybeSingle(),
-    (sbHero as any).from('apt_sites')
-      .select('id', { count: 'exact', head: true })
-      .eq('is_active', true).eq('region', heroRegion)
-      .in('lifecycle_stage', ['pre_announcement', 'site_planning', 'union_established', 'plan_approved', 'mgmt_approved', 'construction']),
-  ]);
-  if (nextSubR?.error) console.error(`[home] next subscription: ${nextSubR.error.message?.slice(0, 160)}`);
-  if (pipelineCountR?.error) console.error(`[home] pipeline count: ${pipelineCountR.error.message?.slice(0, 160)}`);
-
-  const heroStats: HeroStat[] = [];
-  if (weekly && weekly.deals > 0) {
-    heroStats.push({
-      value: `${weekly.deals.toLocaleString('ko-KR')}건`,
-      label: `이번 주 실거래 · ${heroRegion}`,
-      href: `/apt?region=${encodeURIComponent(heroRegion)}`,
-    });
-  }
-  const ns = nextSubR?.data;
-  if (ns?.rcept_bgnde && ns?.house_nm) {
-    const d = Math.ceil((new Date(ns.rcept_bgnde + 'T00:00:00+09:00').getTime() - Date.now()) / 86400000);
-    if (d >= 0) {
-      heroStats.push({
-        value: d === 0 ? '오늘 접수' : `D-${d}`,
-        label: `청약 접수 · ${ns.house_nm}`,
-        href: `/apt?region=${encodeURIComponent(heroRegion)}&st=soon`,
-      });
-    }
-  }
-  const pipelineCount = pipelineCountR?.count ?? 0;
-  if (pipelineCount > 0) {
-    heroStats.push({
-      value: `${pipelineCount.toLocaleString('ko-KR')}곳`,
-      label: `공고 전 현장 · ${heroRegion}`,
-      href: `/apt?region=${encodeURIComponent(heroRegion)}`,
-    });
+  const weekly = await weeklyPromise;
+
+
+
+  /* ══ H6-4 히어로 데이터 띠 ═══════════════════════════════════════════════
+
+   *
+
+   * ⚠️ 히어로 하단이 «빈 네이비» 였다(데스크탑 1080 에서 콘텐츠 260px).
+
+   *    이미지·일러스트로 채우지 않는다 — 실사 정책과 대비 규칙 둘 다에 걸린다.
+
+   *    사이트가 «무엇을 아는지» 를 숫자로 보여 준다.
+
+   * ⚠️ 지역은 부동산 탭과 «같은 쿠키» 다. 없으면 부산.
+
+   * ⛔ 개인 데이터(최근 본 현장)를 여기 올리지 않는다.
+
+   * ⚠️ 숫자가 «없는 칸은 만들지 않는다». 「0건」은 정보가 아니다.
+
+   */
+
+  const heroRegion = normalizeSido((await cookies()).get(REGION_COOKIE)?.value ?? null) ?? REGION_FALLBACK;
+
+  const sbHero = getSupabaseAdmin();
+
+  const [nextSubR, pipelineCountR] = await Promise.all([
+
+    (sbHero as any).from('apt_subscriptions')
+
+      .select('house_nm, rcept_bgnde, region_nm')
+
+      .gte('rcept_bgnde', new Date().toISOString().slice(0, 10))
+
+      .eq('region_nm', heroRegion)
+
+      .order('rcept_bgnde', { ascending: true }).limit(1).maybeSingle(),
+
+    (sbHero as any).from('apt_sites')
+
+      .select('id', { count: 'exact', head: true })
+
+      .eq('is_active', true).eq('region', heroRegion)
+
+      .in('lifecycle_stage', ['pre_announcement', 'site_planning', 'union_established', 'plan_approved', 'mgmt_approved', 'construction']),
+
+  ]);
+
+  if (nextSubR?.error) console.error(`[home] next subscription: ${nextSubR.error.message?.slice(0, 160)}`);
+
+  if (pipelineCountR?.error) console.error(`[home] pipeline count: ${pipelineCountR.error.message?.slice(0, 160)}`);
+
+
+
+  const heroStats: HeroStat[] = [];
+
+  if (weekly && weekly.deals > 0) {
+
+    heroStats.push({
+
+      value: `${weekly.deals.toLocaleString('ko-KR')}건`,
+
+      label: `이번 주 실거래 · ${heroRegion}`,
+
+      href: `/apt?region=${encodeURIComponent(heroRegion)}`,
+
+    });
+
+  }
+
+  const ns = nextSubR?.data;
+
+  if (ns?.rcept_bgnde && ns?.house_nm) {
+
+    const d = Math.ceil((new Date(ns.rcept_bgnde + 'T00:00:00+09:00').getTime() - Date.now()) / 86400000);
+
+    if (d >= 0) {
+
+      heroStats.push({
+
+        value: d === 0 ? '오늘 접수' : `D-${d}`,
+
+        label: `청약 접수 · ${ns.house_nm}`,
+
+        href: `/apt?region=${encodeURIComponent(heroRegion)}&st=soon`,
+
+      });
+
+    }
+
+  }
+
+  const pipelineCount = pipelineCountR?.count ?? 0;
+
+  if (pipelineCount > 0) {
+
+    heroStats.push({
+
+      value: `${pipelineCount.toLocaleString('ko-KR')}곳`,
+
+      label: `공고 전 현장 · ${heroRegion}`,
+
+      href: `/apt?region=${encodeURIComponent(heroRegion)}`,
+
+    });
+
   }
 
   // H4-1 (c)(d) — 칩과 라벨을 «한 함수»에서 같이 받는다. 갈라지면 라벨이 거짓이 된다.
@@ -372,11 +425,15 @@ export default async function HomePage() {
       {counts.byRegion.length > 0 && (
         <section style={{ marginBottom: 18 }}>
           <SectionHeader eyebrow="REGION — 지역별" title="지역별 보기" id="home-region" />
-          <nav aria-label="시도별 현장" style={{ display: 'flex', flexWrap: 'wrap', gap: 5, padding: '0 3px' }}>
+          <nav aria-label="시도별 현장" style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--sp-xs)', padding: '0 3px' }}>
             {counts.byRegion.map((r) => (
               <Link
                 key={r.region}
                 href={`/apt/region/${encodeURIComponent(r.region)}`}
+                // ⚠️ DS-3-4 — Rule #77 `.touch-target`. 시각 크기는 그대로 두고
+                //    ::after 로 «히트 영역만» 44px 로 넓힌다. 칩 높이를 키우면
+                //    지역 칩이 줄바꿈되며 홈 첫 화면이 밀린다.
+                className="touch-target"
                 style={chipStyle}
               >
                 {r.region} <span style={{ color: 'var(--text-tertiary)' }}>{r.n.toLocaleString('ko-KR')}</span>
@@ -386,7 +443,7 @@ export default async function HomePage() {
           {counts.bySigungu.length > 0 && (
             <nav
               aria-label="주요 구군 현장"
-              style={{ display: 'flex', flexWrap: 'wrap', gap: 5, padding: '0 3px', marginTop: 6 }}
+              style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--sp-xs)', padding: '0 3px', marginTop: 6 }}
             >
               {counts.bySigungu.map((s) => (
                 <Link
@@ -394,6 +451,7 @@ export default async function HomePage() {
                   /* ⚠️ /apt/region 은 «1단(시도)» 라우트뿐이다. 2단을 만들면 404 다 —
                      구군 허브의 실재 경로는 /apt/area/{시도}/{구군} 이다(2026-08-28 스모크가 잡음). */
                   href={`/apt/area/${encodeURIComponent(s.region)}/${encodeURIComponent(s.sigungu)}`}
+                  className="touch-target"
                   style={chipStyle}
                 >
                   {s.sigungu} <span style={{ color: 'var(--text-tertiary)' }}>{s.n.toLocaleString('ko-KR')}</span>
@@ -405,9 +463,9 @@ export default async function HomePage() {
       )}
 
       {/* 빠른 이동 — 내부 링크용. 첫 화면을 밀어내지 않게 최하단에 둔다. */}
-      <nav aria-label="주요 메뉴" style={{ display: 'flex', flexWrap: 'wrap', gap: 5, padding: '0 3px' }}>
+      <nav aria-label="주요 메뉴" style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--sp-xs)', padding: '0 3px' }}>
         {QUICK_LINKS.map((l) => (
-          <Link key={l.href} href={l.href} style={chipStyle}>
+          <Link key={l.href} href={l.href} className="touch-target" style={chipStyle}>
             {l.label}
           </Link>
         ))}
@@ -420,7 +478,7 @@ export default async function HomePage() {
 const chipStyle: React.CSSProperties = {
   padding: '5px 10px',
   borderRadius: 'var(--radius-pill)',
-  fontSize: 12,
+  fontSize: 'var(--fs-2xs)',
   fontWeight: 500,
   background: 'var(--bg-surface)',
   border: '1px solid var(--border)',

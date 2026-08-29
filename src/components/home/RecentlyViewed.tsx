@@ -36,7 +36,7 @@ export default function RecentlyViewed({ limit = 3 }: { limit?: number }) {
       >
         최근 본 현장
       </div>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, padding: '0 3px' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--sp-xs)', padding: '0 3px' }}>
         {items.map((r) => (
           <Link
             key={r.slug}

@@ -185,7 +185,11 @@ async function deadControls(where: string, page: Page) {
     where,
     bad0.closed.length === 0,
     bad0.closed.length ? `닫힌 라우트 링크 ${bad0.closed.length}종: ${bad0.closed.join(', ')}` : '닫힌 라우트 링크 0',
-    bad0.closed.length ? 'DS-3' : undefined,
+    // ⚠️ 2026-08-29 재배정 — DS-3 홈 차례가 끝났고 «닫힌 라우트 링크는 남는다».
+    //    /write FAB 는 「존치 + DS 스킨 + 44px」까지가 스킨 커밋의 몫이고,
+    //    «FAB 를 걷을 것인가» 는 「/write 를 닫는가」라는 제품 결정이라 별도 안건이다.
+    //    담당이 옮겨갔으므로 owner 도 옮긴다 — 규약이 죽지 않도록.
+    bad0.closed.length ? 'P-write(제품 결정)' : undefined,
   );
   // ⚠️ 버튼은 React 가 onclick 프로퍼티를 쓰지 않아 오탐이 난다. 경고로만 남긴다.
   if (bad0.buttonsInert > 0) {

@@ -336,7 +336,10 @@ export default function UniversalSearchBar({
           type="button"
           onClick={() => setOpen(true)}
           aria-label="검색 열기"
-          className={className}
+          // ⚠️ DS-3-4 — 헤더 아이콘 버튼은 36×36 이다. Rule #77 `.touch-target` 으로
+          //    «히트 영역만» 44px 로 넓힌다 — 시각 크기를 키우면 헤더 높이가 밀린다.
+          //    (그 주석이 globals.css 규칙 옆에 이미 적혀 있다. 붙이는 것을 빠뜨렸을 뿐이다.)
+          className={['touch-target', className].filter(Boolean).join(' ')}
           style={{
             width: 36, height: 36, flexShrink: 0,
             display: "flex", alignItems: "center", justifyContent: "center",
@@ -442,10 +445,13 @@ export default function UniversalSearchBar({
                 type="button"
                 onClick={() => goToResultsPage(kw)}
                 title={kw}
+                // ⚠️ DS-3-4 — Rule #77. 히어로 칩은 그라디언트 위에 얹히므로
+                //    높이를 키우면 히어로 구성이 흔들린다. 히트 영역만 넓힌다.
+                className="touch-target"
                 style={{
                   padding: "5px 10px",
                   borderRadius: "var(--radius-pill)",
-                  fontSize: 12.5,
+                  fontSize: "var(--fs-2xs)",
                   fontWeight: 400,
                   letterSpacing: 0,
                   lineHeight: 1.2,
