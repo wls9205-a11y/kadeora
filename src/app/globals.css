@@ -396,61 +396,20 @@
 
 @layer elements {
 
-  /* 모바일 + font-large: 간격/글씨 조정 (화면이 좁으니까) */
+  /* ⚠️ DS-1b-2 — 이 미디어 블록에 «토큰 선언과 요소 규칙이 섞여» 있었다.
+     토큰 선언 30건은 tokens.css 의 tokens 레이어로 옮겼다(레이어 통일).
+     아래 두 규칙은 «요소 규칙» 이라 여기 그대로 남는다 — 레이어도 미디어도 불변.
+     ⛔ 이 둘을 tokens 레이어로 따라 옮기지 말 것. 토큰이 아니다. */
+
   @media (max-width: 767.98px) {
-    html.font-large {
-      --fs-xs: 14px;
-      --fs-sm: 16px;
-      --fs-base: 19px;
-      --fs-md: 20px;
-      --fs-lg: 22px;
-      --fs-xl: 26px;
-      --fs-2xl: 34px;
-      --sp-md: 16px;
-      --sp-lg: 20px;
-      --sp-xl: 24px;
-      --sp-2xl: 30px;
-      --card-p: 18px;
-    }
-    /* 모바일 font-large: 그리드 카드 텍스트 방어 */
+    /* 모바일 font-large: 그리드 카드 텍스트 방어 (인라인 gridTemplateColumns 196곳 대상) */
     html.font-large [style*="gridTemplateColumns"] > * {
       min-width: 0 !important;
       word-break: keep-all;
       overflow-wrap: break-word;
     }
-    /* 모바일 font-large: 탭/뱃지 줄바꿈 */
+    /* 모바일 font-large: 탭/뱃지 줄바꿈 (인라인 flexWrap 175곳 대상) */
     html.font-large [style*="flexWrap"] { gap: 4px !important; }
-    html.font-small {
-      --fs-xs: 12px;
-      --fs-sm: 14px;
-      --fs-base: 16px;
-      --fs-md: 17px;
-      --fs-lg: 19px;
-      --fs-xl: 22px;
-      --fs-2xl: 28px;
-    }
-    /* 새 기본값 모바일 보정 */
-    :root {
-      --fs-xs: 13px;
-      --fs-sm: 15px;
-      --fs-base: 17px;
-      --fs-md: 18px;
-      --fs-lg: 20px;
-      --fs-xl: 23px;
-      --fs-2xl: 30px;
-      --card-p: 14px;
-    }
-  }
-
-  /* 데스크탑 + font-large: 넉넉한 간격 */
-  @media (min-width: 1024px) {
-    html.font-large {
-      --card-p: 22px;
-      --sp-2xl: 40px;
-    }
-    :root {
-      --card-p: 18px;
-    }
   }
 
   /* ========================================

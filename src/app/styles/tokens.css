@@ -485,3 +485,91 @@
     --space-md: 12px;
   }
 }
+
+
+/* ───────────────────────────────────────────────────────────────────────────
+   반응형 · 글꼴모드 오버라이드  (DS-1b-2 · 2026-08-29 이동)
+
+   ⚠️ 원래 이 선언들은 globals.css 의 `@layer elements` 안에 있었다.
+      elements 는 tokens «보다 높은» 레이어라, 명시도와 무관하게 무조건 이겼다.
+      여기로 내리면 승자가 «레이어» 가 아니라 «명시도 → 소스 순서» 로 결정된다.
+
+   ⚠️ 그래서 이 블록은 «파일 맨 끝» 이어야 한다.
+      :root(0,1,0) 끼리 겹치는 선언은 뒤에 오는 쪽이 이긴다. 위로 올리면
+      기본 사다리가 모바일 보정을 덮어 «데스크탑 크기가 폰에 나온다».
+
+   ⚠️ 명시도 관계 (이동 후에도 오늘과 같은 값이 나오는 근거)
+      html.font-large / html.font-small = (0,1,1) > :root = (0,1,0)
+      → 같은 미디어 안에서 모드 지정이 :root 보정을 이긴다 (오늘과 동일).
+      → 같은 선택자끼리는 이 블록이 base 보다 «뒤» 라서 이긴다 (오늘과 동일).
+
+   ⚠️ 한 가지 «승자 규칙» 은 바뀌었다 — 값은 같다.
+      `--card-p` 를 font-small 모바일에서 보면, 예전에는 elements 의 :root 보정(14px)이
+      tokens 의 html.font-small(14px)을 «레이어로» 이겼다. 이제는 명시도가 높은
+      html.font-small 이 이긴다. 둘 다 14px 이라 «오늘 화면은 같다».
+      ⛔ 나중에 base html.font-small 의 --card-p 를 바꾸면 예전과 «다르게» 동작한다.
+         그때는 이 주석을 보고 판단할 것.
+   ─────────────────────────────────────────────────────────────────────────── */
+@layer tokens {
+  /* 모바일 + font-large: 간격/글씨 조정 (화면이 좁으니까) */
+  @media (max-width: 767.98px) {
+    html.font-large {
+      --fs-xs: 14px;
+      --fs-sm: 16px;
+      --fs-base: 19px;
+      --fs-md: 20px;
+      --fs-lg: 22px;
+      --fs-xl: 26px;
+      --fs-2xl: 34px;
+      --sp-md: 16px;
+      --sp-lg: 20px;
+      --sp-xl: 24px;
+      --sp-2xl: 30px;
+      --card-p: 18px;
+    }
+    html.font-small {
+      --fs-xs: 12px;
+      --fs-sm: 14px;
+      --fs-base: 16px;
+      --fs-md: 17px;
+      --fs-lg: 19px;
+      --fs-xl: 22px;
+      --fs-2xl: 28px;
+    }
+    /* 새 기본값 모바일 보정 */
+    :root {
+      --fs-xs: 13px;
+      --fs-sm: 15px;
+      --fs-base: 17px;
+      --fs-md: 18px;
+      --fs-lg: 20px;
+      --fs-xl: 23px;
+      --fs-2xl: 30px;
+      --card-p: 14px;
+    }
+  }
+
+  /* 데스크탑 + font-large: 넉넉한 간격 */
+  @media (min-width: 1024px) {
+    html.font-large {
+      --card-p: 22px;
+      --sp-2xl: 40px;
+    }
+    :root {
+      --card-p: 18px;
+    }
+    /* ⚠️⚠️ 이 한 줄은 «이동 때문에 새로 적어야 했던» 선언이다. 값은 오늘과 같다.
+       예전: 이 :root(18px)가 @layer elements 에 있어 «레이어로» tokens 의
+             html.font-small(14px)을 이겼다 → font-small 데스크탑도 18px.
+       이동 후: 같은 tokens 레이어 안이라 «명시도» 가 이긴다.
+             html.font-small(0,1,1) > :root(0,1,0) → 14px 로 «뒤집힌다».
+       실제로 토큰 스냅샷이 이 2행을 잡았다(1024·1280 × font-small, 18px→14px).
+       → 오늘 값을 그대로 두기 위해 명시적으로 적는다. 리팩터가 화면을 바꾸면 안 된다.
+       ❓ 다만 이게 «의도된 동작인지는 의심스럽다» — 작은 글씨를 고른 사용자가
+          데스크탑에서 기본값과 같은 카드 패딩을 받는다. 레이어 사고의 부작용으로
+          보인다. 바꾸려면 값 변경 커밋으로 «따로» 판단할 것(R-2 · 중단점 C 안건). */
+    html.font-small {
+      --card-p: 18px;
+    }
+  }
+}

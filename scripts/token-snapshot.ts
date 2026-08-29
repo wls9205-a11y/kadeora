@@ -14,7 +14,7 @@
 import { chromium } from 'playwright';
 
 const URL = process.argv[2];
-const WIDTHS = [390, 1280];
+const WIDTHS = [390, 480, 700, 768, 1024, 1280];  // 마스터·설계서 합집합(미합의 — 중단점 C 안건)
 const MODES = ['', 'font-small', 'font-large'];
 
 (async () => {
