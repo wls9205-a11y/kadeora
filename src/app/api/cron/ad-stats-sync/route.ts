@@ -115,18 +115,29 @@ async function handler(req: NextRequest) {
   //    오늘 행을 넣는 것이 이 표의 «설계된» 갱신 방식이다.
   // ⚠️ site_slug·landing_* 은 직전 세대에서 이어받는다 — 광고 API 가 키워드별 랜딩을
   //    주지 않으니, 이어받지 않으면 사람이 붙인 현장 연결이 세대마다 증발한다.
-  let kwInserted = 0, kwCarried = 0;
+  let kwInserted = 0, kwCarried = 0, carrySize = 0;
   if (!dryRun && syncKeywords && kwRows.length > 0) {
     const carry = new Map<string, { site_slug: unknown; landing_pc: unknown; landing_mobile: unknown }>();
-    const { data: prior } = await (sb as any)
-      .from('ad_keywords')
-      .select('keyword_id,site_slug,landing_pc,landing_mobile,snapshot_date')
-      .order('snapshot_date', { ascending: false })
-      .limit(20000);
-    for (const p of (prior ?? []) as Array<Record<string, unknown>>) {
-      const kid = String(p.keyword_id);
-      if (!carry.has(kid)) carry.set(kid, { site_slug: p.site_slug, landing_pc: p.landing_pc, landing_mobile: p.landing_mobile });
+    // ⚠️ `.limit()` 은 PostgREST 의 «서버 캡» 을 넘지 못한다. 기본 1,000행이라
+    //    limit(20000) 을 적어도 1,000개만 온다 — 2026-08-29 에 그걸로 4,273개 현장
+    //    연결이 조용히 증발했다(slug_carried 가 딱 1000 이었다). range 로 «페이지» 를 돈다.
+    //    ⛔ 「limit 을 크게 적었으니 다 왔겠지」는 확인이 아니다.
+    const PAGE = 1000;
+    for (let from = 0; from < 50_000; from += PAGE) {
+      const { data: prior, error } = await (sb as any)
+        .from('ad_keywords')
+        .select('keyword_id,site_slug,landing_pc,landing_mobile,snapshot_date')
+        .order('snapshot_date', { ascending: false })
+        .range(from, from + PAGE - 1);
+      if (error) { errorCodes.CARRY_FAIL = (errorCodes.CARRY_FAIL ?? 0) + 1; break; }
+      const page = (prior ?? []) as Array<Record<string, unknown>>;
+      for (const p of page) {
+        const kid = String(p.keyword_id);
+        if (!carry.has(kid)) carry.set(kid, { site_slug: p.site_slug, landing_pc: p.landing_pc, landing_mobile: p.landing_mobile });
+      }
+      if (page.length < PAGE) break;
     }
+    carrySize = carry.size;
     const today = kstDate();
     const payload = kwRows.map((r) => {
       const c = carry.get(String(r.keyword_id));
@@ -200,7 +211,8 @@ async function handler(req: NextRequest) {
       campaigns,
       adgroups,
       keywords: ids.length,
-      keyword_sync: syncKeywords ? { upserted: kwInserted, slug_carried: kwCarried } : 'skipped',
+      // ⚠️ slug_carried 가 «딱 1000» 이면 페이지네이션이 안 도는 것이다 — 서버 캡의 지문.
+      keyword_sync: syncKeywords ? { upserted: kwInserted, slug_carried: kwCarried, carry_pool: carrySize } : 'skipped',
       dates,
       chunks: chunks.length,
       batches,
