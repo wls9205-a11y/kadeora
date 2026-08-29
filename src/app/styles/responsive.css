@@ -404,18 +404,15 @@
 
   /* ═══ 부동산 지역 그리드 ═══ */
 
-  /* ═══ 간격 시스템 — 전역 통일 ═══ */
-  :root {
-    --space-xs: 4px;
-    --space-sm: 8px;
-    --space-md: 12px;
-    --space-lg: 16px;
-    --space-xl: 20px;
-    --space-2xl: 24px;
-    --space-3xl: 32px;
-    --content-max: 720px;
-    --page-padding: clamp(12px, 3vw, 24px);
-  }
+  /* ═══ 간격 시스템 ═══
+     ⚠️ DS-1a — 이 자리에 «두 번째 간격 사다리» 가 있었다(--space-xs~3xl).
+        실측: --sp-* 1,129곳 사용 / --space-* «2곳». --content-max·--page-padding «0곳».
+        쓰이지 않는 8개를 지웠다. 값을 바꾼 게 아니라 아무도 안 읽던 정의를 지운 것이다.
+     ⚠️ --space-md 하나만 살아 있다 — globals.css 의 ≤479.98px `.kd-card` 패딩이 읽는다.
+        --sp-* 에는 12px 단이 «없다»(base 6/10/14/18/22/28). 그래서 지금 --sp-md 로
+        바꾸면 12px→14px 로 «값이 바뀐다». H5-D3 이 이미 한 번 물린 자리다.
+        → 정의는 tokens.css 컴포넌트 계층으로 옮겼고, 소비처 정리는 DS-3 에서
+          그 화면을 만질 때 «값 변경 판단과 함께» 한다. 여기서 몰래 바꾸지 않는다. */
 
   /* ═══ 어드민 간격 ═══ */
 

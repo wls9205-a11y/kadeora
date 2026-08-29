@@ -124,7 +124,6 @@
   }
 
 
-
   /* 모바일 반응형 */
   /* ⚠️ H5-D3 — 480px 이하 규칙을 responsive.css 에서 «여기로 옮겨 왔다».
      두 파일에 갈려 있었고 import 순서로만 responsive 가 이기고 있었다.
@@ -261,88 +260,8 @@
   }
   /* 세션70: 기본값 = 기존 "크게" 수준으로 상향 */
 }
-@layer tokens {
-  :root {
-    --fs-xs: 14px;
-    --fs-sm: 16px;
-    --fs-base: 18px;
-    --fs-md: 19px;
-    --fs-lg: 21px;
-    --fs-xl: 24px;
-    --fs-2xl: 32px;
-    /* s280: --font-mono 미정의였음 (globals.css 자체 blog-content code 규칙 포함 다수 곳에서 폴백만 타던 상태) */
-    /* s6: apt-tabs.css 가 참조하는데 정의가 없었다 (Rule #105 재발) */
-    --font-sans: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-    --font-serif: ui-serif, Georgia, serif;
-    --font-mono: 'SF Mono', 'Consolas', 'Menlo', monospace;
-  
-    /* ── H5-D2 : 큰 제목 3단 «유동값» ──────────────────────────────────────
-       기존 --fs-xs~2xl 은 «단계값 + @media 로 갈아끼우기» 다. 큰 제목은 그 방식이
-       특히 잘 깨진다 — 브레이크포인트 사이에서 카피가 컨테이너를 넘치거나 갑자기
-       확 줄어든다. clamp() 로 폭에 따라 «연속» 으로 움직이게 한다.
 
-       그래서 이 셋은 @media(max-width:767.98px) 의 :root 재정의에 «넣지 않는다».
-       clamp 가 이미 뷰포트를 보고 있어서 중복이고, 넣으면 두 기준이 싸운다.
 
-       ⛔ 범위는 «이번 리뉴얼로 새로 쓰거나 고치는 컴포넌트» 뿐이다. 기존 인라인
-          fontSize 2,590곳 일괄 치환 금지 — S4-3 인라인 스케일링 사고 이력.
-          굵기·크기·접근성 규칙이 얽혀 있어 한 번에 손대면 원인을 못 가린다.
-
-       같이 지키는 것 (새 컴포넌트)
-         굵기  400 본문 / 500 라벨·칩 / 600 제목 / 700 희소 수치 / 800+ 금지 (TY1 사다리)
-         자간  20px+ -0.4px · 15~19px -0.2px · 14px 이하 0.  «12~13px 음수 자간 금지»
-         행간  본문 1.5 · 제목 1.25 · 히어로 카피 1.2
-         입력창 16px 하한(iOS 자동확대) · 한글 최소 12px */
-    --fs-display:  clamp(28px, 2.2vw + 20px, 44px);
-    --fs-title:    clamp(22px, 1.4vw + 16px, 30px);
-    --fs-lead:     clamp(17px, 0.6vw + 14px, 20px);
-}
-}
-@layer tokens {
-  html.font-small {
-    --fs-xs: 12px;
-    --fs-sm: 14px;
-    --fs-base: 16px;
-    --fs-md: 17px;
-    --fs-lg: 19px;
-    --fs-xl: 22px;
-    --fs-2xl: 28px;
-  
-    --fs-display:  clamp(24px, 2.0vw + 17px, 38px);
-    --fs-title:    clamp(19px, 1.2vw + 14px, 26px);
-    --fs-lead:     clamp(15px, 0.5vw + 12px, 17px);
-}
-}
-@layer tokens {
-  html.font-medium {
-    --fs-xs: 14px;
-    --fs-sm: 16px;
-    --fs-base: 18px;
-    --fs-md: 19px;
-    --fs-lg: 21px;
-    --fs-xl: 24px;
-    --fs-2xl: 32px;
-  
-    --fs-display:  clamp(28px, 2.2vw + 20px, 44px);
-    --fs-title:    clamp(22px, 1.4vw + 16px, 30px);
-    --fs-lead:     clamp(17px, 0.6vw + 14px, 20px);
-}
-}
-@layer tokens {
-  html.font-large {
-    --fs-xs: 15px;
-    --fs-sm: 17px;
-    --fs-base: 20px;
-    --fs-md: 21px;
-    --fs-lg: 24px;
-    --fs-xl: 28px;
-    --fs-2xl: 36px;
-  
-    --fs-display:  clamp(32px, 2.4vw + 23px, 50px);
-    --fs-title:    clamp(25px, 1.6vw + 18px, 34px);
-    --fs-lead:     clamp(19px, 0.7vw + 16px, 23px);
-}
-}
 @layer elements {
 
   /* 세션70+s5: 인라인 font-size 강제 스케일링.
@@ -473,76 +392,8 @@
      ======================================== */
   /* 세션70: 간격도 기존 "크게" 수준으로 상향 */
 }
-@layer tokens {
-  :root {
-    --sp-xs: 6px;
-    --sp-sm: 10px;
-    --sp-md: 14px;
-    --sp-lg: 18px;
-    --sp-xl: 22px;
-    --sp-2xl: 28px;
-    --btn-h: 46px;
-    --card-p: 16px;
-    --touch-min: 46px;
-    /* s5-2 (Rule #78): 본문 컨테이너 기준 폭. 어드민(1400)·앱셸(1200)·좁은 폼(480)만 예외 */
-    --container-max: 720px;
-    /* r4-P3: 용도별 컨테이너 폭. --container-max 는 --container-read 로 승계 */
-    --container-read: 720px;   /* 읽는 본문 */
-    --container-grid: 1120px;  /* 카드 그리드 블록 */
-    --container-shell: 1200px; /* 앱셸 */
 
-    /* ── H5-D4 : 브레이크포인트 4종 ─────────────────────────────────────────
-       7종(320·480·640·767·768·769·1024)이 파일 3개에 흩어져 있었다. 4종으로 모았다.
 
-       ⛔⛔ 이 토큰은 «미디어쿼리 조건에 못 쓴다». CSS 사양상 @media / @container 의
-           «조건부» 에서는 var() 가 해석되지 않는다. @media (max-width: var(--bp-sm))
-           는 «에러도 안 나고 조용히 규칙 전체가 죽는다». 실제 쿼리에는 아래 숫자를
-           그대로 적는다. 이 토큰은 ①단일 출처 문서 ②JS 가 getComputedStyle 로 읽기
-           ③calc()/clamp() 안에서 쓰기 — 세 용도다.
-
-       max 쪽은 .98 을 쓴다. `max-width: 768px` 과 `min-width: 768px` 은 정확히
-       768px 에서 «둘 다» 걸려 뒤엣것이 이긴다. 767.98 로 끊으면 겹치지 않는다.
-
-         --bp-sm  479.98 / 480     소형 폰
-         --bp-md  767.98 / 768     태블릿 세로 · 데스크탑 1단→2단 경계
-         --bp-lg 1023.98 / 1024    데스크탑 2단 본격
-         --bp-xl 1279.98 / 1280    앱셸 최대 (--container-shell 1200px 과 짝)
-
-       320px 6곳은 그대로 둔다 — 폴더블·구형 소형폰 대응이고 수가 적다.
-       새 컴포넌트는 미디어쿼리 대신 «컨테이너 쿼리» 를 쓴다(데스크탑 2단에서 같은
-       카드가 폭 다른 컬럼에 들어가므로 뷰포트 기준이 맞지 않는다). */
-    --bp-sm: 480px;
-    --bp-md: 768px;
-    --bp-lg: 1024px;
-    --bp-xl: 1280px;
-  }
-}
-@layer tokens {
-  html.font-small {
-    --sp-xs: 4px;
-    --sp-sm: 8px;
-    --sp-md: 12px;
-    --sp-lg: 16px;
-    --sp-xl: 20px;
-    --sp-2xl: 24px;
-    --btn-h: 40px;
-    --card-p: 14px;
-    --touch-min: 44px;
-  }
-}
-@layer tokens {
-  html.font-large {
-    --sp-xs: 8px;
-    --sp-sm: 12px;
-    --sp-md: 18px;
-    --sp-lg: 22px;
-    --sp-xl: 28px;
-    --sp-2xl: 36px;
-    --btn-h: 52px;
-    --card-p: 20px;
-    --touch-min: 52px;
-  }
-}
 @layer elements {
 
   /* 모바일 + font-large: 간격/글씨 조정 (화면이 좁으니까) */
@@ -610,195 +461,7 @@
 
   /* Dark Mode Only — 딥 네이비 다크모드 (세션70: 가독성 대폭 개선) */
 }
-@layer tokens {
-  :root {
-    --bg-base:       #F5F7FA;
 
-    /* ─── 디자인 토큰 ─── */
-    --radius-xs: 4px;
-    --radius-sm: 6px;
-    --radius-md: 10px;
-    --radius-lg: 14px;
-    --radius-xl: 20px;
-    --radius-card: 12px;
-    --radius-pill: 999px;
-    --radius-full: 999px;
-
-    --transition-fast: 0.12s ease;
-    --transition-normal: 0.2s ease;
-    --transition-slow: 0.35s ease;
-
-    /* z-index scale — 체계적 레이어 관리 */
-    --z-base: 0;
-    --z-card: 1;
-    --z-sticky: 10;
-    --z-nav: 50;
-    --z-dropdown: 60;
-    --z-modal-backdrop: 80;
-    --z-modal: 90;
-    --z-toast: 100;
-    --z-tooltip: 110;
-    --z-overlay: 200;
-    --bg-surface:    #FFFFFF;
-    --bg-elevated:   #F0F2F5;
-    --bg-sunken:     #E8ECF0;
-    --bg-hover:      #EEF1F5;
-    --bg-active:     #E2E6EC;
-    /* s273b: sticky/backdrop-blur 바 배경. 정의가 없어 소비처에서 rgba(255,255,255,.92)
-       로 폴백되면서 다크 테마에 흰 배경 + 흰 글씨가 나오던 회귀 (Rule #94). */
-    --bg-surface-translucent: rgba(255, 255, 255, 0.92);
-    --border:        #D4DAE3;
-    --border-strong: #B8C2D0;
-    --border-focus:  #4A8AF7;
-    --text-primary:   #111827;
-    --text-secondary: #374151;  /* s8: 6.74 → 9.19 */
-    --text-tertiary:  #4B5563;  /* s8: 5.69 → 6.74. 회색 계열이 본문색의 2배(2,180건)라
-                                   개별 대비가 통과해도 화면 전체가 흐리게 읽혔다.
-                                   primary #111827 → secondary #374151 → tertiary #4B5563 3단 위계 유지 */
-    --text-disabled:  #C8CDD4;
-    --text-inverse:   #FFFFFF;
-    --text-link:      #2563EB;
-    --brand:          #2563EB;
-    --brand-hover:    #1D4ED8;
-    --brand-light:    #EBF2FF;
-    --brand-bg:       rgba(37,99,235,0.08);
-    --brand-border:   rgba(37,99,235,0.18);
-    --accent-blue-light:  #60A5FA;
-    --accent-orange-light: #F97316;
-    --brand-dark:     #1E40AF;
-    --kakao-bg:       #FEE500;
-    --kakao-text:     #191919;
-    --success:        #065F46;  /* s6: --accent-green 과 동일 값이었고 텍스트로 5곳 쓰인다 */
-    --success-bg:     rgba(5,150,105,0.08);
-    --warning:        #92400E;
-    --warning-bg:     rgba(217,119,6,0.08);
-    --error:          #991B1B;
-    --error-bg:       rgba(220,38,38,0.08);
-    --info:           #2563EB;
-    --info-bg:        rgba(37,99,235,0.08);
-    --font-base:      15px;
-    /* 주식 시세 */
-    --stock-up:       #DC2626;
-    --stock-down:     #2563EB;
-    --stock-flat:     #B8CCDF;
-    /* 시맨틱 액센트 (카테고리/상태별) — 세션70: 밝기 +10% */
-    --accent-green:   #065F46;
-    --accent-green-bg: rgba(5,150,105,0.10);
-    --accent-green-border: rgba(5,150,105,0.20);
-    --accent-purple:  #7C3AED;
-    --accent-purple-bg: rgba(124,58,237,0.10);
-    --accent-orange:  #9A3412;
-    --accent-orange-bg: rgba(234,88,12,0.10);
-    --accent-yellow:  #854D0E;
-    --accent-yellow-bg: rgba(202,138,4,0.10);
-    --accent-red:     #991B1B;
-    --accent-red-bg:  rgba(220,38,38,0.10);
-    --accent-blue:    #2563EB;
-    --accent-blue-bg: rgba(37,99,235,0.10);
-    /* ── H5-D1 : 브랜드 네이비·골드 (2026-08-27, 「토큰 신설 금지」 예외 승인) ──
-       왜 신설했나 — 이 색은 src/lib/og/brand.ts 에만 있었다. OG 썸네일은 satori 가
-       TS 상수로 그리므로 CSS 를 안 탄다. 그래서 «화면 컴포넌트가 브랜드색을 쓸 경로가
-       아예 없었다». 화면과 OG 카드가 같은 색이어야 하므로 값을 옮겨 온다.
-
-       ⚠️ --brand-hero-bg 는 brand.ts 의 BRAND_BG 와 «바이트 단위로 같아야» 한다.
-          한쪽만 고치면 OG 카드와 첫 화면이 갈린다. 고칠 땐 반드시 양쪽.
-
-       ⚠️ 골드는 «네이비 위에서만» 쓴다. 흰 배경 위 골드는 1.58:1 로 글자가 안 보인다.
-          흰 배경에서 노랑 계열이 필요하면 --accent-yellow(#854D0E · 6.85:1).
-
-       ⚠️ 그라디언트 «밝은 끝»(#2563EB)에서는 골드가 3.27:1 로 떨어진다. 히어로 하단에
-          글자를 얹을 땐 스크림을 깔아야 한다 — 자세한 실측은 docs/m6/H5_대비실측.md.  */
-    --brand-navy:      #0B2A6B;
-    --brand-navy-mid:  #123A8F;
-    --brand-gold:      #FFC53D;
-    --brand-hero-bg:   linear-gradient(158deg, #0B2A6B 0%, #123A8F 52%, #2563EB 100%);
-    --brand-hero-glow: radial-gradient(120% 90% at 12% 6%, rgba(255,255,255,0.20) 0%, rgba(255,255,255,0.06) 34%, rgba(255,255,255,0) 62%);
-
-    /* ── H5-D1 : amber — «정의 없이 폴백만으로 칠해지던» 3종을 실체화한다 ──
-       var(--accent-amber) 5곳이 폴백을 타고 있었다. #f59e0b 는 흰 배경 대비
-       2.15:1 로 하한 미달이다. 형제 토큰(--accent-yellow)과 «같은 값» 으로 맞춘다 —
-       새 색을 만드는 게 아니라 이미 검증된 값에 이름을 붙이는 것이다. 6.85:1.  */
-    --accent-amber:        #854D0E;
-    --accent-amber-bg:     rgba(202,138,4,0.10);
-    --accent-amber-border: rgba(202,138,4,0.20);
-    --accent-cyan:    #155E75;
-
-    /* Stock colors — KR (빨강↑ 파랑↓) */
-    --stock-kr-up:        #D32F2F;
-    --stock-kr-up-bg:     rgba(211,47,47,0.08);
-    --stock-kr-up-strong: #C62828;
-    --stock-kr-down:      #1976D2;
-    --stock-kr-down-bg:   rgba(25,118,210,0.08);
-    --stock-kr-down-strong:#1565C0;
-    /* Stock colors — US (초록↑ 빨강↓) */
-    --stock-us-up:        #2E7D32;
-    --stock-us-up-bg:     rgba(46,125,50,0.08);
-    --stock-us-up-strong: #1B5E20;
-    --stock-us-down:      #C62828;
-    --stock-us-down-bg:   rgba(198,40,40,0.08);
-    --stock-us-down-strong:#B71C1C;
-    /* Stock flat */
-    --stock-flat:         #757575;
-    --stock-flat-bg:      rgba(117,117,117,0.06);
-    /* Investor colors */
-    /* ⚠️ #E65100 은 흰 배경 대비 3.79 로 하한 미달이었다 — 이 값은 «본문 글자색» 으로도 쓰인다
-       (StockDetailTabs 340행 범례 · 358행 수급 금액). 형제 둘은 이미 어둡다 —
-       --stock-inst #7B1FA2(8.20) · --stock-retail #00838F(4.52). 이것만 밝았다.
-       색상(H)·채도(S)는 두고 명도만 낮춰 4.82. 새 토큰(-strong)은 만들지 않았다. */
-    --stock-foreign:      #C84700;
-    --stock-foreign-bg:   rgba(230,81,0,0.06);
-    --stock-inst:         #7B1FA2;
-    --stock-inst-bg:      rgba(123,31,162,0.06);
-    --stock-retail:       #00838F;
-    --stock-retail-bg:    rgba(0,131,143,0.06);
-    /* AI signal & sentiment */
-    --stock-bullish:      #2E7D32;
-    --stock-bullish-bg:   rgba(46,125,50,0.06);
-    --stock-bearish:      #C62828;
-    --stock-bearish-bg:   rgba(198,40,40,0.06);
-    --stock-positive:     #2E7D32;
-    --stock-positive-bg:  rgba(46,125,50,0.06);
-    --stock-negative:     #C62828;
-    --stock-negative-bg:  rgba(198,40,40,0.06);
-    --stock-neutral:      #757575;
-    --stock-neutral-bg:   rgba(117,117,117,0.06);
-    /* Market status */
-    --stock-market-open:  #2E7D32;
-    --stock-market-open-bg: rgba(46,125,50,0.06);
-    --stock-market-closed:#757575;
-    --stock-market-closed-bg: rgba(117,117,117,0.06);
-    /* 네비게이션 */
-    --nav-bg:         #FFFFFF;
-    --nav-border:     #D4DAE3;
-    --nav-text:       #111827;
-    --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
-    --shadow-md: 0 2px 8px rgba(0,0,0,0.10);
-    --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
-    --shadow-xl: 0 16px 40px rgba(0,0,0,0.15);
-    --shadow-color: rgba(0,0,0,0.15);
-    color-scheme: light;
-
-    /* S1: 잉크(의도적 다크 서피스) 토큰 — 기존 다크값 승계 */
-    --ink-bg:        #0D1730;
-    --ink-bg-deep:   #050A18;
-    --ink-text:      #F2F5FA;
-    --ink-text-dim:  #8BA3C0;
-    --ink-border:    #1E3258;
-
-    /* S1: 청약 상태 토큰 */
-    --status-open:   var(--accent-green);
-    --status-soon:   var(--accent-orange);
-    --status-fcfs:   var(--brand);
-    --status-closed: var(--text-tertiary);
-
-    /* S1: 진행 레일 토큰 */
-    --rail-done:     var(--text-tertiary);
-    --rail-now:      var(--brand);
-    --rail-todo:     var(--border);
-    --rail-h:        4px;
-    --rail-h-lg:     6px;
-  }
-}
 @layer elements {
 
   /* S1: 라이트 단일 테마 — 다크모드 제거됨 */
@@ -1725,7 +1388,6 @@
   }
 
 
-
   /* 블로그 테이블 모바일 overflow 글로벌 */
   .blog-content table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
   .blog-content table table { display: table; } /* 중첩 테이블은 block 해제 */
@@ -1983,17 +1645,7 @@
      s170 — Blog 비주얼 토큰 + h2 액센트 바
      ────────────────────────────────── */
 }
-@layer tokens {
-  :root {
-    --blog-hero-glow: rgba(37,99,235,0.04);
-    --blog-carousel-bg: var(--bg-elevated);
-    --blog-info-box-bg: rgba(37,99,235,0.04);
-    --blog-info-box-border: rgba(37,99,235,0.1);
-    --blog-tag-bg: rgba(37,99,235,0.06);
-    --blog-tag-color: var(--brand);
-    --blog-disclaimer-border: var(--warning);
-  }
-}
+
 @layer elements {
 
   /* h2 좌측 컬러 액센트 바 */
@@ -2014,40 +1666,7 @@
      Phase 8/9 — Cardera 통합 디자인 토큰 (다크 우선)
      ────────────────────────────────── */
 }
-@layer tokens {
-  :root {
-    /* spacing 4단계 */
-    --kd-gap-xs: 4px;
-    --kd-gap-sm: 8px;
-    --kd-gap-md: 12px;
-    --kd-gap-lg: 16px;
-    --kd-radius-sm: 6px;
-    --kd-radius: 8px;
-    --kd-radius-card: 12px;
-    --kd-radius-lg: 10px;
 
-    /* 텍스트 3단계 */
-    --kd-text-1: #1A1A18;
-    --kd-text-2: #6B6A65;
-    --kd-text-3: #8A8985;
-
-    /* 배경/보더 */
-    --kd-bg-page: #FAFAF7;
-    --kd-bg-card: #FFFFFF;
-    --kd-bg-soft: #F5F5F2;
-    --kd-border: #E5E5E0;
-
-    /* 카더라 시그니처 노랑 (Phase 9: #FFC957) */
-    --kd-accent: #7A4F0A;
-    --kd-accent-soft: #FFF6E5;
-    --kd-accent-border: #F5D88A;
-    --kd-accent-bg: #FFF6E5;
-    --kd-success: #0A5F49;
-    --kd-warning: #7A4F0A;
-    --kd-danger: #6B1F1F;
-    --kd-live: #C92D2D;
-  }
-}
 @layer elements {
 
   @media (max-width: 479.98px) {

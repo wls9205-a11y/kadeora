@@ -4,6 +4,8 @@ import { SITE_URL } from '@/lib/constants';
 // 그게 **크로스 도메인 렌더링 차단**이라 FCP 3.5초 · LCP 4.8초의 주범이었다.
 // 번들로 들어오면서 스타일시트 요청 자체가 사라진다.
 import './styles/pretendard.css';
+// DS-1a — 토큰 단일 출처. globals.css «앞» 이어야 tokens 레이어 안의 순서가 유지된다.
+import './styles/tokens.css';
 import './globals.css';
 import './styles/components.css';
 import './styles/blog.css';
